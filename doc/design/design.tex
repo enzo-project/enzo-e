@@ -1,0 +1,47 @@
+%0       1         2         3         4         5         6         7         8
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%=======================================================================
+\documentclass{article}
+%=======================================================================
+
+\include{include}
+
+%=======================================================================
+
+\begin{document}
+
+%=======================================================================
+\TITLE{Software Design Document}{James Bordner}{\textbf{work in progress}}
+%=======================================================================
+
+%=======================================================================
+\section{Introduction} \label{s:intro}
+%=======================================================================
+
+\note{Languages: C++ / C99}
+
+\note{Parallelism: MPI, MPI2, OpenMP, pthreads, UPC}
+
+\note{Hide parallelism and datastructures from physics}
+
+%=======================================================================
+\section{Objects} \label{s:intro}
+%=======================================================================
+
+\begin{description}
+\item[\code{Hierarchy}: ] SAMR grid hierarchy
+\item[\code{Level}: ]     A level in an SAMR grid hierarchy
+\item[\code{Grid}: ]      A grid patch in an SAMR grid hierarchy
+\item[\code{Field}: ]     A data field
+\item[\code{Units}: ]     Data field units
+\item[\code{Array}: ]     A Fortran-style array
+\item[\code{CoArray}: ]   A Co-array Fortran-style co-array
+\item[\code{Particles}: ] A collection of particles
+\item[\code{Scheduler}: ]  Hierarchical parallelism task scheduler
+\item[\code{Dependencies}: ] Dependencies for tasks
+\item[\code{Tasks}: ]     A collection of parallel tasks
+\end{description}
+
+\end{document}
+
+%==================================================================
