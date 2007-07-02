@@ -1,0 +1,211 @@
+% \newcommand{\includepsgrid}{\psgrid}
+\newcommand{\includepsgrid}{}
+
+%=======================================================================
+% Point
+%=======================================================================
+
+   \newcommand{\drawClassPoint}{%
+      \umlClass[umlShadow=false]{Point}{%
+         \hline
+         Point () \\
+         get () \\
+         set () \\
+	 operator () () \\
+         operator <= () \\
+         sort ()%
+   }}
+
+   \newcommand{\umlPoint}{
+   \begin{center}
+   \begin{pspicture}(3,3.5)\includepsgrid
+     \rput[lb](0,0){\rnode{ClassPoint}{\drawClassPoint}}
+   \end{pspicture}
+   \end{center}}
+
+%=======================================================================
+% Grid
+%=======================================================================
+
+   \newcommand{\drawClassGrid}{%
+      \umlClass[umlShadow=false]{Grid}{%
+         \hline
+         Grid () \\
+         \textit{attach} () \\
+         \textit{release} () \\
+         size() \\
+         range() \\
+%         parent() \\
+%         numNeighbors () \\
+%         neighbor () \\
+%         numChildren () \\
+%         child () \\
+         isNeighbor() \\
+         isLocal () \\
+         print () \\
+         geomview ()%
+   }}
+
+   \newcommand{\umlGrid}{
+   \begin{center}
+   \begin{pspicture}(3,5)\includepsgrid
+     \rput[lb](0,0){\rnode{ClassGrid}{\drawClassGrid}}
+   \end{pspicture}
+   \end{center}}
+
+%=======================================================================
+% Level
+%=======================================================================
+
+   \newcommand{\drawClassLevel}{%
+      \umlClass[umlShadow=false]{Level}{%
+         \hline
+         Level () \\
+         \textit{attach} () \\
+         \textit{release} () \\
+         numGrids() \\
+         grid() \\
+         assertNeighbors() \\
+         geomview ()%
+   }}
+
+   \newcommand{\umlLevel}{
+   \begin{center}
+   \begin{pspicture}(4,4)\includepsgrid
+     \rput[lb](0,0){\rnode{ClassLevel}{\drawClassLevel}}
+   \end{pspicture}
+   \end{center}}
+
+%=======================================================================
+% Hierarchy
+%=======================================================================
+
+   \newcommand{\drawClassHierarchy}{%
+      \umlClass[umlShadow=false]{Hierarchy}{%
+         \hline
+         Hierarchy () \\
+         \textit{attach} () \\
+         \textit{release} () \\
+         numLevels() \\
+         level() \\
+         assertParent() \\
+         geomview ()%
+   }}
+
+   \newcommand{\umlHierarchy}{
+   \begin{center}
+   \begin{pspicture}(3,4)\includepsgrid
+     \rput[lb](0,0){\rnode{ClassHierarchy}{\drawClassHierarchy}}
+   \end{pspicture}
+   \end{center}}
+
+%=======================================================================
+% Iterator
+%=======================================================================
+
+   \newcommand{\drawClassIterator}{%
+      \umlClass[umlShadow=false]{\textit{Iterator}}{%
+         \hline
+         Iterator () \\
+         operator ++() \\
+         operator * () \\
+         operator begin () \\
+         operator end () \\
+         operator reset ()%
+   }}
+
+   \newcommand{\drawClassItGrids}{%
+      \umlClass[umlShadow=false]{ItGrids}{%
+   }}
+
+   \newcommand{\drawClassItLevels}{%
+      \umlClass[umlShadow=false]{ItLevels}{%
+   }}
+
+   \newcommand{\drawClassItChildren}{%
+      \umlClass[umlShadow=false]{ItChildren}{%
+   }}
+
+   \newcommand{\drawClassItNeighbors}{%
+      \umlClass[umlShadow=false]{ItNeighbors}{%
+   }}
+
+   \newcommand{\umlIterator}{%
+   \begin{center}
+   \begin{pspicture}(8,3.5)\includepsgrid
+     \rput[lb](0,0){\rnode{ClassIterator}{\drawClassIterator}}
+     \rput[lb](5.5,3){\rnode{ClassItLevels}{\drawClassItLevels}}
+     \rput[lb](5.5,2){\rnode{ClassItGrids}{\drawClassItGrids}}
+     \rput[lb](5.5,1){\rnode{ClassItChildren}{\drawClassItChildren}}
+     \rput[lb](5.5,0){\rnode{ClassItNeighbors}{\drawClassItNeighbors}}
+     \pnode(4,0.5){pnode1}
+   \end{pspicture}
+   \ncEVE[armA=1]{ClassIterator}{ClassItLevels}
+   \ncEVE[armA=1]{ClassIterator}{ClassItGrids}
+   \ncEVE[armA=1]{ClassIterator}{ClassItChildren}
+   \ncEVE[armA=1]{ClassIterator}{ClassItNeighbors}
+   \ncputicon{umlHerit}
+   \end{center}}
+
+
+%=======================================================================
+% Vector
+%=======================================================================
+
+   \newcommand{\drawClassVector}{%
+      \umlClass[umlShadow=false]{Vector}{%
+         \hline
+         Vector () \\
+         size() \\
+         dot() \\
+         zaxpy() \\
+         clear() \\
+         copy() \\
+         refresh()%
+   }}
+
+   \newcommand{\umlVector}{
+   \begin{center}
+   \begin{pspicture}(2,4)\includepsgrid
+     \rput[lb](0,0){\rnode{ClassVector}{\drawClassVector}}
+   \end{pspicture}
+   \end{center}}
+
+%=======================================================================
+% Matrix
+%=======================================================================
+
+   \newcommand{\drawClassMatrix}{%
+      \umlClass[umlShadow=false]{Matrix}{%
+         \hline
+         Matrix () \\
+         size() \\
+         matvec() \\
+         residual()%
+   }}
+
+   \newcommand{\umlMatrix}{
+   \begin{center}
+   \begin{pspicture}(2.5,2.5)\includepsgrid
+     \rput[lb](0,0){\rnode{ClassMatrix}{\drawClassMatrix}}
+   \end{pspicture}
+   \end{center}}
+
+%=======================================================================
+% Solver
+%=======================================================================
+
+   \newcommand{\drawClassSolver}{%
+      \umlClass[umlShadow=false]{Solver}{%
+         \hline
+         Solver () \\
+         apply() \\
+         status()%
+   }}
+
+   \newcommand{\umlSolver}{
+   \begin{center}
+   \begin{pspicture}(2,2)\includepsgrid
+     \rput[lb](0,0){\rnode{ClassSolver}{\drawClassSolver}}
+   \end{pspicture}
+   \end{center}}

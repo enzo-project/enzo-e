@@ -1,0 +1,41 @@
+========================================================================
+README amrSolve/src
+========================================================================
+
+CHANGES             List of changes
+VERSION             Current amrSolve version
+Makefile            main makefile
+
+0C                  Template for .C files
+0H                  Template for .h files
+
+amrSolve.h          Include file for Enzo code calling amrSolve
+ENZO.h              Include file for amrSolve code calling Enzo
+MPI.h               MPI declarations for non-MPI programs (needed?)
+
+lGrid.h             Grid interface class
+
+main.C              Test driver code
+main.h              Test driver include file
+grid.C              Grid class implementation
+grid.h              Grid class interface
+hierarchy.C         Hierarchy class implementation
+hierarchy.h         Hierarchy class interface 
+iterator.C          Iterator class implementation
+iterator.h          Iterator class interface
+vector.C            Vector class implementation
+vector.h            Vector class interface
+matrix.C            Matrix class implementation
+matrix.h            Matrix class interface
+solver.C            Solver class implementation
+solver.h            Solver class interface
+print_hierarchy.C   Function to print an Enzo hierarchy
+
+doxygen.config      doxygen configuration file
+html/               Subdirectary of doxygen html output
+latex/              Subdirectary of doxygen latex output
+
+test/               Directory of test programs
+
+------------------------------------------------------------------------
+James Bordner (jbordner@cosmos.ucsd.edu)

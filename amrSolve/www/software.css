@@ -1,0 +1,178 @@
+/*
+  Copyright (C) 2002
+  Dr. James Bordner
+  University of California, San Diego
+*/
+
+BODY {
+  background: #000;
+  color: #77f;
+   font-family: "Gill sans", sans-serif; 
+/*  font-family: Times; */
+  font-size: 10pt;
+  width: 900px;
+}
+
+BODY.top {
+  width: 1060px;
+}
+
+BODY.menu {
+  width: 130px;
+}
+
+BLOCKQUOTE {
+  color: #006;
+}
+
+BLOCKQUOTE.description {
+  color: #006;
+  font-style: italic;  
+}
+
+BLOCKQUOTE.note {
+  font-style: italic;  
+}
+
+LI.notstarted {
+  color: red;
+}
+LI.started {
+  color: yellow;
+}
+LI.finished {
+  color: green;
+}
+
+UL {
+  color: #003;
+  list-style-type: disk;
+}
+
+H1 {
+/* font: large "Gill sans", sans-serif; */
+ color : #fff;
+ background: #337;
+ padding: 1px 4px 1px 4px;
+
+}
+
+H2 {
+/*  font: medium "Gill sans", sans-serif; */
+ color : #fff;
+ background: #337;
+ padding: 1px 4px 1px 4px;
+}
+ 
+H3 {
+/*  font: small "Gill sans", sans-serif; */
+  color : #00b;
+ background: #eef;
+ border-style: solid;
+ border-width: 2px;
+ padding: 1px 4px 1px 4px;
+}
+
+H4 {
+/*  font: small "Gill sans", sans-serif; */
+  color : #00b;
+ background: #eef;
+ border-style: solid;
+ border-width: 1px;
+ padding: 1px 4px 1px 4px;
+}
+ 
+H1.center {
+ text-align: center;
+}
+
+A:visited {
+ color: #aaa;
+}
+A:link {
+ color: #fff;
+}
+
+A.started:visited {
+ color: #ff7;
+}
+A.started:link {
+ color: #ff0;
+}
+
+A.notstarted:visited {
+ color: #f77;
+}
+A.notstarted:link {
+ color: #f00;
+}
+
+P.notstarted {
+ color: #f00;
+}
+P.started {
+ color: #ff0;
+}
+P.finished {
+ color: #0f0;
+}
+
+TABLE {
+  border-style: solid;
+  background: #eef;
+}
+
+TABLE.parameter {
+  width: 950px;  
+}
+
+TD {
+ border-style: solid;
+ border-width: 1px;
+ padding: 1px 4px 1px 4px;
+ color: #00B;
+}
+
+TD.field {
+ width: 100px;
+}
+
+TD.title {
+  font-style: italic;
+}
+
+TD.right {
+  text-align: right;
+}
+TD.center {
+  text-align: center;
+}
+TD.red {
+  background-color: red;
+}
+
+code {
+  color: #00f;
+}
+
+
+STRONG.title {
+  font-size: 24pt;
+  color: #006;
+}
+
+
+B.external {
+  color: #00f;
+}
+B.internal {
+  color: #007;
+  font-style: italic;
+}
+B.obsolete {
+  color: #f00;
+}
+B.reserved {
+  color: #070;
+}
+

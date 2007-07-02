@@ -1,0 +1,25 @@
+=======================================================================
+Grid
+=======================================================================
+
+    Grid () 
+    Grid (const enzo::grid &)
+    Grid & operator = (const enzo::grid &)
+
+    Grid (const Grid &)
+    Grid & operator = (const Grid &)
+    ~Grid ()
+
+    void numVertices (int &nv0, int &nv1, int &nv2) const
+    void numUnknowns (int &nu0, int &nu1, int &nu2) const
+
+    void unknownRange (FLOAT &u0min, FLOAT &u1min, FLOAT &u2min,
+		       FLOAT &u0max, FLOAT &u1max, FLOAT &u2max) const
+
+    int processor () const
+    int level () const
+
+    const enzo::grid * enzoGrid ()
+
+    bool isNull () const
+

@@ -1,0 +1,642 @@
+%0       1         2         3         4         5         6         7         8
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+\documentclass[11pt]{article}
+
+\include{include}
+
+\usepackage{pst-uml}
+\begin{document}
+
+\include{uml}
+
+%========================================================================
+\TITLE{\amrSolve \\ Software Design Description}{James Bordner}{0.971}
+%========================================================================
+
+%========================================================================
+\section{Modification History}
+%========================================================================
+
+\BeginDESCRIPTION
+\item[0.971 (2004-04-02):] Modified geomview() return
+\item[0.97 (2004-04-01):] Added Grid::isNeighbor()
+\item[0.97 (2004-04-01):] Added Grid::, Level::, Hierarchy::geomview()
+\item[0.96 (2004-03-29):] Revised \class{Grid}/\class{Level}/\class{Hierarchy} design
+\item[0.95 (2004-03-23):] Revised up to \class{Iterator}s
+\item[0.95 (2004-03-23):] Added Modification History section
+\EndDESCRIPTION
+
+%========================================================================
+\section{Introduction}
+%========================================================================
+
+This document serves to specify the design of \amrSolve.  A subset of
+class methods make up the interface \amrLeech, which is used to
+``attach'' to the calling application's datatypes.  Since \amrLeech\
+depends on the internals of the calling application, these functions
+are designed to be implemented by the user.  The top-level view of how
+\amrSolve\ and \amrLeech\ interact with the calling package (assumed
+throughout to be called \enzo) is shown below.
+
+%------------------------------------------------------------------------
+\FIGURE{\amrLeech\ and \amrSolve}{f:uml-amrSolve}{
+\begin{center}
+\epsfig{file=ps/uml-top-level.\GRAPHICSSUFFIX,width=3in}
+\end{center}}
+%------------------------------------------------------------------------
+
+\amrSolve\ classes are described next in \S\ref{s:amrsolve}.
+All \amrLeech\ functions are named \code{attach()} and \code{detach()}, 
+and will be typset in italics.
+
+%========================================================================
+\section{Classes} \label{s:amrsolve}
+%========================================================================
+
+%------------------------------------------------------------------------
+\subsection{\class{Point} Class} \label{s:point}
+%------------------------------------------------------------------------
+
+   A \class{Point} is simply a position in $3$-space.  Units are
+   determined by the calling application.  Coordinates are stored as
+   a ``\code{Scalar}'', which is simply a \code{typedef} to a
+   \code{double} by default.
+
+%**********************************************************************
+   \umlPoint
+%**********************************************************************
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Point} Functions}
+%-----------------------------------------------------------------------
+
+    \functionbf{$+$ void Point::Point ()} \\
+    Constructor for the \class{Point} class.  Initializes to $(0,0,0)$.
+
+    \functionbf{$+$ void Point::get (Scalar \& x1, Scalar \& x2, Scalar \& x3) const} \\
+    Function for getting a \class{Point}'s coordinates.
+
+    \functionbf{$+$ void Point::set (Scalar x1, Scalar x2, Scalar x3)} \\
+    Function for setting a \class{Point}'s coordinates.
+
+    \functionbf{$+$ Scalar operator () (int i) const} \\ Function for reading
+    the \class{Point} position along the given coordinate axis.
+
+    \functionbf{$+$ Scalar \& operator () (int i)} \\ Function for
+    writing the \class{Point} position along the given coordinate
+    axis.
+
+    \functionbf{$+$ friend bool operator $<=$ (const Point \& p1, const Point \& p2)} \\
+    Function for determining whether all coordinates of a \class{Point}
+    are less than or equal to those of another \class{Point}.
+
+    \functionbf{$+$ friend void sort (Point \& p1, Point \& p2)} \\
+    Convenience function for putting the lowest coordinates of two
+    \class{Point}s in the first \class{Point}, and the highest in the
+    second.  On exit, it is guaranteed that \code{p1} $\le$ \code{p2}.
+
+%------------------------------------------------------------------------
+\subsection{\class{Grid} Class} \label{s:grid}
+%------------------------------------------------------------------------
+
+%**********************************************************************
+   \umlGrid
+%**********************************************************************
+
+   The \class{Grid} class is for attaching to an application's grid;
+   it provides a simplified application interface to application
+   grids.
+
+   Note that \amrSolve\ \class{Grid} objects do not have access to
+   grid data, even though application grid objects do.  That is the
+   responsibility of the \class{Vector} class (\S\ref{s:vector}), which
+   uses the \class{Field} class to map \class{Grid}s to their data.
+
+   \class{Grid}s also do not inherently have interconnectivity---only
+   when they are part of a \class{Level} or \class{Hierarchy} are
+   the neighbor and parent/child relationships defined, respectively.
+   These relationships are defined in the \class{Level} and \class{Hierarchy}
+   objects.
+
+   The \class{Grid} class provides grid-related operations, such as returning
+   the size of the grid, and the location of the grid corners.
+
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Grid} Functions}
+%-----------------------------------------------------------------------
+
+    \functionbf{$+$ Grid::Grid ()} \\
+    Constructor for the \class{Grid} class.
+
+    \functionit{$-$ void Grid::attach (const application::grid \&)} \\
+    Function for attaching to an application's grid.  Called by
+    \class{Level} objects.
+
+    \functionit{$-$ void Grid::detach (const application::grid \&)} \\
+    Function for detaching from an application's grid.  Called by
+    \class{Level} objects.
+
+    \functionbf{$+$ void Grid::size (int \&nu0,int \&nu1,int \&nu2) const} \\
+    Return the number of vertices along each axis.
+
+    \functionbf{$+$ void Grid::range (Point \& p1, Point \& p2) const} \\ 
+    Returns the coordinates of ``lowest'' and ``highest'' corner vertices.
+
+    \functionbf{$+$ bool Grid::isNeighbor (const Grid \&g) const} \\ 
+    Returns true iff the \class{Grid} in a neighbor of \class{Grid} $g$.
+    
+    \functionbf{$+$ bool Grid::isLocal () const} \\ Returns \code{true} if
+    this grid is a local-\class{Grid}, or \code{false} if it is a
+    remote \class{Grid}.
+
+    \functionbf{$+$ void Grid::print () const} \\
+    Prints information about this \class{Grid} to \code{stdout} in
+    a human-readable format.
+
+    \functionbf{$+$ void Grid::geomview (const FILE *fpr, bool full =
+    true) const} \\ Writes \class{Grid} data to a file in geomview
+    format.  If \code{bool}$=$\code{true}, only write data, not header
+    and trailer (for use by \code{Level::geomview()} and
+    \code{Hierarchy::geomview()}).
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Grid} Data}
+%-----------------------------------------------------------------------
+
+%    -------------------------------------------------------------------
+
+    \functionbf{$-$ enzo::grid grid\_} \\ A pointer
+    to the \enzo\ \class{grid} that this \class{Grid} class refers to.
+
+    \functionbf{$-$ int n\_[3]} \\ The grid size along
+    each axis.
+
+    \functionbf{$-$ Point lp\_ , hp\_} \\ The low-\class{Point} and
+     high-\class{Point} defining the corner vertices of the \class{Grid}.
+     \code{lp\_} $\le$ \code{hp\_}.
+
+    \functionbf{$-$ Level * plevel\_} \\ The \class{Level}, if
+     known, containing the \class{Grid}.
+
+    \functionbf{$-$ Hierarchy * phierarchy\_} \\ The \class{Hierarchy}, if
+     known, containing the \class{Grid}.
+
+
+%     \functionbf{$-$ Grid * parent\_} \\ The \class{Grid}'s parent, or
+%     \code{NULL} if the \class{Grid} is in the coarsest \class{Level}.
+% 
+%     \functionbf{$-$ std::vector $<$Grid * $>$ neighbors\_} \\ List of
+%     \class{Grid}s neighboring the \class{Grid}.
+% 
+%     \functionbf{$-$ std::vector $<$Grid * $>$ children\_} \\ List of
+%     \class{Grid}s contained in the \class{Grid} in the next-finest
+%     \class{Level}.
+
+
+%    -------------------------------------------------------------------
+ 
+%------------------------------------------------------------------------
+\subsection{\class{Level} Class} \label{s:level}
+%------------------------------------------------------------------------
+
+   The \class{Level} class us used for encapsulating all \class{Grid}s
+   in a level of the hierarchy; that is, all \class{Grid}s of
+   a fixed spacial resolution.
+
+%**********************************************************************
+   \umlLevel
+%**********************************************************************
+
+   \class{Grid}s are \code{friend}s to \class{Level}s, since only
+   a \class{Level} can call a \class{Grid}'s \code{attach()} and
+   \code{detach()} private member functions.
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Level} Functions}
+%-----------------------------------------------------------------------
+
+
+    \functionbf{$+$ Level::Level ()} \\
+    Constructor for the \class{Level} class.
+
+    \functionit{$+$ void Level::attach ([application::Level])} \\
+    Attaches to an application's level.
+
+    \functionit{$+$ void Level::detach ()} \\
+    Detaches the application's level.
+
+    \functionbf{$+$ int Level::numGrids () const} \\
+    Number of \class{Grid}s in the \class{Level}.
+
+    \functionbf{$+$ Grid * Level::grid (int) const} \\ Returns a pointer
+    to \class{Grid} $0 \le i < n_l$ of a \class{Level} $l$, where
+    $n_l$ is the number of \class{Grids} in $l$.  If $i <0 $ or $i \ge
+    n_l$, then the \code{null} pointer is returned.
+
+    \functionbf{$-$ void Level::assertNeighbors (const Grid \& g1, const Grid \& g2) const} \\
+    Make \class{Grid}s \code{g1} and \code{g2} neighbors in the \class{Level}.
+    Called from \code{attach()}.
+
+    \functionbf{$+$ void Level::geomview (const FILE *fpr, bool full =
+    true) const} \\ Writes \class{Grid} data to a file in geomview format.
+    If \code{bool}$=$\code{true}, only write data, not header and
+    trailer (for use by \code{Hierarchy::geomview()}).
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Level} Data}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+
+%    -------------------------------------------------------------------
+    \functionbf{$-$ std::vector $<$Grid * $>$ grids\_} \\
+    Vector of pointers to all \class{Grid}s in the \class{Level}.
+
+    \functionbf{$-$ std::multimap $<$Grid *, Grid *$>$ neighbors\_} \\
+    Multimap of all neighboring \class{Grid}s.  Must be symmetric: if
+    \class{Grid} $g_1$ is a \code{neighbor} of $g_2$, then $g_2$ is a
+    \code{neighbor} of $g_1$.
+
+%------------------------------------------------------------------------
+\subsection{\class{Hierarchy} Class} \label{s:hierarchy}
+%------------------------------------------------------------------------
+
+   The \class{Hierarchy} class attaches to an existing hierarchy in
+   the calling application.  \class{Hierarchy}s include functions that
+   return various characteristics of the hierarchy, such as number of
+   levels, number of grids, and number of grids per level.
+
+   The \class{Hierarchy} class does \textit{not} include iterators for
+   traversing grids in a \class{Hierarchy}---that is the responsibility
+   of the \class{Iterator} class hierarchy.
+
+%**********************************************************************
+   \umlHierarchy
+%**********************************************************************
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Hierarchy} Functions}
+%-----------------------------------------------------------------------
+
+
+
+    \functionbf{$+$ Hierarchy::Hierarchy ()} \\
+    Constructor for the \class{Hierarchy} class.
+
+%    -------------------------------------------------------------------
+    \functionit{$+$ void Hierarchy::attach ([application::Hierarchy])} \\
+    Attaches to an application's hierarchy.
+
+    \functionit{$+$ void Hierarchy::detach ()} \\
+    Detaches the application's hierarchy.
+
+    \functionbf{$+$ int Hierarchy::numLevels () const} \\
+    Number of \class{Level}s in the \class{Hierarchy}.
+
+    \functionbf{$+$ Level * Hierarchy::level (int) const} \\ Returns a pointer
+    to \class{Level} $0 \le i < n_h$ of a \class{Hierarchy} $h$, where
+    $n_h$ is the number of \class{Level}s in $h$.  If $i <0 $ or $i \ge
+    n_h$, then the \code{null} pointer is returned.
+
+    \functionbf{$-$ void Hierarchy::assertParent (const Grid \& g1, const Grid \& g2) const} \\
+    Make \class{Grid} \code{g1} a parent of \code{g2} in the \class{Hierarchy}.
+    Called from \code{attach()}.
+
+    \functionbf{$+$ void Hierarchy::geomview (const FILE *fpr, bool full =
+    true) const} \\ Writes \class{Grid} data to a file in geomview format.
+    If \code{bool}$=$\code{true}, only write data, not header and
+    trailer (for use in animations, etc.)
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Hierarchy} Data}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+
+%    -------------------------------------------------------------------
+    \functionbf{$-$ std::vector $<$Level * $>$ levels\_} \\
+    Vector of pointers to all \class{Level}s in the \class{Hierarchy}.
+
+    \functionbf{$-$ std::map $<$Grid *, Grid *$>$ parents\_} \\
+    Mapping of all parent \class{Grid}s.  Must be ``antisymmetric with 
+    \code{children\_}'': if $g_1$ is a \code{parent} of $g_2$, then $g_2$ is
+    a \code{child} of $g_1$.
+.
+
+    \functionbf{$-$ std::multimap $<$Grid *, Grid *$>$ children\_} \\
+    Mapping of all child \class{Grid}s.    Must be ``antisymmetric with 
+    \code{parent\_}'': if $g_1$ is a \code{child} of $g_2$, then $g_2$ is
+    a \code{parent} of $g_1$.
+
+
+
+%------------------------------------------------------------------------
+\subsection{\class{Iterator} Class} \label{s:iterator}
+%------------------------------------------------------------------------
+
+   \class{Iterator} is the abstract base class for several iterator
+   classes.  These iterator classes are used to traverse \class{Grid}s
+   in a \class{Level} or \class{Hierarchy}, or \class{Level}s in a
+   \class{Hierarchy}, in various ways.  An examples is \class{ItGrids}
+   for traversing \class{Grid}s in a \class{Level}.  \class{Iterator}
+   classes use the linked lists defined by pointers contained in
+   \class{Grid} classes to traverse \class{Grid}s.
+
+%**********************************************************************
+   \umlIterator
+%**********************************************************************
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Iterator} Sub-classes}
+%-----------------------------------------------------------------------
+
+    \functionbf{$+$ ItLevels} \\
+     Traverses all \class{Level}s in a \class{Hierarchy}.
+
+    \functionbf{$+$ ItGrids} \\
+     Traverses all \class{Grid}s in a \class{Level}.
+
+    \functionbf{$+$ ItChildren} \\
+     Traverses all child \class{Grids}s of a given \class{Grid}.
+
+    \functionbf{$+$ ItNeighbors} \\
+     Traverses all adjacent neighboring \class{Grids}s of a given \class{Grid}.
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Iterator} Functions}
+%-----------------------------------------------------------------------
+
+    We describe the \class{Iterator} functions in terms of
+    \class{OBJECT}s in a \class{CONTAINER}.  Depending on the actual
+    \class{Iterator} (\class{ItGrids}, \class{ItLevels}, etc.),
+    \class{OBJECT} may mean \class{Grid} or \class{Level}, and
+    \class{CONTAINER} may mean \class{Grid}, \class{Level}, or
+    \class{Hierarchy}.
+    
+    \functionbf{$+$ OBJECT * Iterator::operator ++ ()} \\
+    Return a pointer to the current \class{OBJECT}, advancing to the next \class{OBJECT}
+
+    \functionbf{$+$ OBJECT * Iterator::operator *()} \\
+    Return a pointer to the current \class{OBJECT}
+
+    \functionbf{$+$ OBJECT * Iterator::begin ()} \\
+    Return the first \class{OBJECT}
+
+    \functionbf{$+$ OBJECT * Iterator::end ()                    } \\
+    Return one past the last \class{OBJECT} (NULL)
+
+    \functionbf{$+$ void Iterator::reset ()} \\
+    Set the current \class{OBJECT} back to the first \class{OBJECT}
+
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Iterator} Data}
+%-----------------------------------------------------------------------
+
+    \functionbf{$-$ CONTAINER * hierarchy\_} \\
+    Pointer to the \class{CONTAINER} that we're traversing..
+
+    \functionbf{$-$ OBJECT * current\_} \\
+    \functionbf{$-$ int current\_} \\
+    Pointer or index identifying the current \class{OBJECT}.
+
+
+%------------------------------------------------------------------------
+\subsection{\class{Vector} Class} \label{s:vector}
+%------------------------------------------------------------------------
+
+   \class{Vector}s represent individual data fields on the
+   application's grid hierarchy.  The \class{Vector} class provides an
+   interface to the application data fields.
+
+   \class{Vector}s can attach to existing data fields--they don't
+   necessarily make separate copies.  In this case, if the application
+   changes values in a data field array, the \class{Vector}'s data
+   changes.  
+
+   And if the application deletes the data field, the \class{Vector}'s
+   data field disappears.  To allow the \class{Vector} class to be
+   aware of possible dangling pointers, \class{Vector}s store
+   references to application's data pointers, not copies of the
+   pointer values.
+
+   \class{Vector}s can also allocate new data fields; for example, for
+   temporary vectors in linear solvers, etc.  Such fields are only
+   accessible through the \class{Vector} class functions.
+
+   \class{Vector} data for a particular \class{Grid} is located on one
+   processor.  Data for different \class{Grid}s can be on different
+   processors.  Different data fields for the same \class{Grid} lie on the
+   same processor.
+
+%**********************************************************************
+   \umlVector
+%**********************************************************************
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{amrLeech::Vector} Functions}
+%-----------------------------------------------------------------------
+
+%    -------------------------------------------------------------------
+    \functionbf{$+$ void Vector::attach ([application::Vector])} \\
+    Attaches to an application's data field.
+
+    \functionbf{$+$ void Vector::detach ()} \\
+    Detaches an application's data field.
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{amrSolve::Vector} Functions}
+%-----------------------------------------------------------------------
+
+    \functionbf{$+$ FLOAT *vertices (Grid)} \\
+    Returns a pointer to the array containing the given grid's data,
+    beginning with the first ghost-zone.
+
+    \functionbf{$+$ FLOAT *unknowns (Grid)} \\
+    Returns a pointer to the first array containing the given grid's
+    data, beginning with the first actual data zone.
+
+    \functionbf{$+$ friend FLOAT dot (Vector,Vector)} \\
+    Compute the inner-product $a \leftarrow X^T Y$ of two vectors.
+
+    \functionbf{$+$ friend FLOAT zaxpy (Vector,FLOAT,Vector,Vector)} \\
+    Compute the vector update $Z \leftarrow a X + Y$. 
+
+    \functionbf{$+$ void clear (FLOAT a)} \\
+    Clear vector values to given scalar $X \leftarrow a$.
+
+    \functionbf{$+$ void copy (Vector)} \\
+    Copy the vector $X \leftarrow Y$.
+
+%    -------------------------------------------------------------------
+    \functionbf{$+$ void refresh ()} \\
+    Refresh vector ghost values
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Vector} Data}
+%-----------------------------------------------------------------------
+
+%    -------------------------------------------------------------------
+    \functionbf{$-$ int field\_} \\
+    Offset of the field in the application's grid.
+
+    \functionbf{$-$ FLOAT *v\_} \\
+    Arrays pointing to ``vertices'' (grids including ghost zones)
+
+    \functionbf{$-$ FLOAT *u\_} \\
+    Arrays pointing to ``unknowns'' (grids excluding ghost zones)
+%    -------------------------------------------------------------------
+
+%------------------------------------------------------------------------
+\subsection{\class{Matrix} Class} \label{s:matrix}
+%------------------------------------------------------------------------
+
+   The \class{Matrix} class is an abstract base class for representing
+   a matrix on the calling application's grid hierarchy.  Specific
+   concrete subclasses include \class{Matrix7c}, \class{Matrix7}, and
+   \class{Matrix19}, described in the next section.
+
+%**********************************************************************
+   \umlMatrix
+%**********************************************************************
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Matrix} Sub-classes}
+%-----------------------------------------------------------------------
+
+    \functionbf{$+$ Matrix7c} \\
+      Matrices based on constant coefficient $7$-point stencils.
+      E.g. the Laplace operator.
+
+    \functionbf{$+$ Matrix7} \\
+      Matrices based on general $7$-point stencils.
+
+    \functionbf{$+$ Matrix19} \\
+      Matrices based on general $19$-point stencils.
+
+  
+%-----------------------------------------------------------------------
+\subsubsection{\class{amrSolve::Matrix} Functions}
+%-----------------------------------------------------------------------
+
+    \functionbf{$+$ friend void matvec (Vector Y, Matrix A, Vector X)
+    const} \\ Compute the matrix-vector product $Y \leftarrow A X$
+
+    \functionbf{$+$ friend void residual (Vector R, Vector B, Matrix A,
+    VectorX) const} \\ Compute the residual $R \leftarrow B - A X$
+%    -------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Matrix} Data}
+%-----------------------------------------------------------------------
+
+%    -------------------------------------------------------------------
+    \functionbf{$-$ Hierarchy * hierarchy\_} \\
+    Pointer to the \class{Hierarchy} class
+
+    \functionbf{$-$ std::vector $<$FLOAT *$>$ a\_} \\
+    List of arrays (or pointers to scalars for \class{Matrix7c}) defining
+    the matrix diagonals.
+
+%------------------------------------------------------------------------
+\subsection{\class{Solver} Class} \label{s:solver}
+%------------------------------------------------------------------------
+
+   The \class{Solver} class is an abstract base class for representing linear
+   solvers.  Specific concrete subclasses include \class{SolverPCG}, for the
+   diagonal-preconditioned CG method, and \class{SolverPBiCGSTAB}, for the
+   diagonal-preconditioned BiCG-STAB method.  Other solvers, including
+   multigrid, may be added in future versions.
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Solver} Sub-classes}
+%-----------------------------------------------------------------------
+
+    \functionbf{$+$ SolverPCG} \\
+     Block-diagonal preconditioned conjugate gradient method.
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Solver} Functions}
+%-----------------------------------------------------------------------
+
+%**********************************************************************
+   \umlSolver
+%**********************************************************************
+
+% -------------------------------------------------------------------
+    \functionbf{$+$ void apply (const Matrix \&A, Vector \&X, const Vector
+    \&B)} \\ Solves the linear system $A X = B$.
+
+    \functionbf{$+$ int status ()} \\
+    Return the status of the latest solve.
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Solver} Data}
+%-----------------------------------------------------------------------
+
+    %-------------------------------------------------------------------
+    \functionbf{$-$ Matrix A\_   } \\
+    Coefficient matrix
+
+    \functionbf{$-$ Vector x\_   } \\
+    Solution vector
+
+    \functionbf{$-$ Vector b\_   } \\
+    Right-hand side vector
+
+    \functionbf{$-$ Vector r\_   } \\
+    Residual vector
+
+    \functionbf{$-$ Vector w\_   } \\
+    Work vector
+
+    \functionbf{$-$ Vector p\_   } \\
+    Direction vector
+
+    \functionbf{$-$ Precon precon\_} \\
+    The preconditioner
+
+    \functionbf{$-$ FLOAT tol\_} \\
+    The stopping-criteria tolerance
+   
+
+%------------------------------------------------------------------------
+\subsection{\class{Precon} Class} \label{s:precon}
+%------------------------------------------------------------------------
+
+   The \class{Precon} class is an abstract base class for preconditioners.
+   The main proposed preconditioner is a block-diagonal
+   preconditioner, where each block corresponds to the coefficient
+   matrix on a single \class{Grid}.
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Precon} Sub-classes}
+%-----------------------------------------------------------------------
+
+    \functionbf{PreconBlockJacobi} \\
+    Block Jacobi preconditioner, where blocks are grids, and each grid
+    problem is solved using a local \class{Grid} solve.
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Precon} Functions}
+%-----------------------------------------------------------------------
+
+    \functionbf{$+$ void apply (const Matrix \&A, Vector \&X, const Vector \&B)} \\
+    Apply the preconditioner to the linear system $AX = B$
+
+%-----------------------------------------------------------------------
+\subsubsection{\class{Precon} Data}
+%-----------------------------------------------------------------------
+
+    \functionbf{$-$ Vector R\_, P\_, W\_, Z\_, \ldots} \\ Temporary
+    \class{Vector}s for storing the residual, direction
+    \class{Vector}, work \class{Vector}, preconditioned residual, etc.
+
+
+%==================================================================
+\end{document}
+%==================================================================
+
+

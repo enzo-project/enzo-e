@@ -1,0 +1,160 @@
+%0       1         2         3         4         5         6         7         8
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+\documentclass[11pt]{article}
+
+\include{include}
+
+\begin{document}
+
+%==================================================================
+\TITLE{\amrSolve \\ Software Requirements Specifications}{James Bordner}{0.94}
+%==================================================================
+
+%========================================================================
+\section{Modification History}
+%========================================================================
+
+\BeginDESCRIPTION
+\item[0.94 (2004-04-01):] Added definition of neighbors
+\item[0.93 (2004-03-18):] Added Fields; revised content
+\item[0.92 (2004-03-17):] Added factor of four to grid resolution
+\item[0.91 (2004-03-16):] Revised content
+\item[0.91 (2004-03-16):] Added Modification History section
+\EndDESCRIPTION
+
+%==================================================================
+\section{Introduction}
+%==================================================================
+
+\amrSolve\ will be a linear solver package for patch-based AMR applications.
+The basic objects involved are 
+%
+\class{Grid}s (\S\ref{ss:grid}), 
+\class{Level}s (\S\ref{ss:level}), 
+\class{Hierarchy}s (\S\ref{ss:hierarchy}), 
+\class{Field}s (\S\ref{ss:field}), 
+\class{Vector}s (\S\ref{ss:vector}), 
+\class{Matrix}es (\S\ref{ss:matrix}), and
+\class{Solver}s (\S\ref{ss:solver}).
+
+%==================================================================
+\section{Object specifications}
+%==================================================================
+
+
+%==================================================================
+\subsection{\class{Grid}s} \label{ss:grid}
+%==================================================================
+
+\class{Grid}s implicitly represent a set of vertices arranged in
+a grid pattern in a $3$D box in space.
+
+\BeginENUMERATE
+\item \class{Grid}s are $3$D, but can be interpreted as $1$D or $2$D if some axis lengths are one.
+\item A \class{Grid} has a position in physical space, determined by any two opposing corners.
+\item A \class{Grid} has a size in computational space, determined by the number of vertices along each axis.
+\item Spacing between vertices along each axis is uniform.
+\item \class{Grid}s do not contain data (see \S\ref{ss:field} on \class{Field}s).
+\item Each \class{Grid} is  classified as either a \textit{local} \class{Grid} or a \textit{remote} \class{Grid}.
+\item Each \class{Grid} is local on exactly one processor.
+\item All non-root level \class{Grid}s have a unique \textit{parent} \class{Grid} in
+    the next-coarser \class{Level}.
+\item A \class{Grid} has a set of adjacent \textit{neighbor} \class{Grid}s.
+  \class{Grid}s are adjacent iff the ghost zone of one \class{Grid} is a real
+    zone in the other \class{Grid}. (This is a symmetric relationship).
+\item A \class{Grid} has a set of \textit{child} \class{Grid}s in
+the next-finer \class{Level}.
+\item Corner vertices of a \class{Grid} must coincide with
+vertices of its parent \class{Grid}.
+\EndENUMERATE
+
+
+%==================================================================
+\subsection{\class{Level}s} \label{ss:level}
+%==================================================================
+
+\class{Level}s encapsulate all grids within a single level of a 
+\class{Hierarchy}.
+
+\BeginENUMERATE
+\item A \class{Level} is an unordered list of \class{Grid}s
+\item \class{Grid}s within a \class{Level} must be disjoint.
+\item \class{Grid}s within a \class{Level} have the same spacing between vertices
+\EndENUMERATE
+
+%==================================================================
+\subsection{\class{Hierarchy}s} \label{ss:hierarchy}
+%==================================================================
+
+A \class{Hierarchy} represents an entire AMR hierarchy.
+
+\BeginENUMERATE
+\item A \class{Hierarchy} is an ordered list of \class{Level}s
+\item \class{Grid}s have at most one parent
+\item Resolution changes by a factor of two or four between \class{Grid} \class{Level}s
+\item Corner vertices of a non-root \class{Grid} are aligned with vertices in the \class{Grid}'s parent
+\item \class{Grid}s in non-successive \class{Level}s cannot be adjacent
+\item The union of \class{Grid}s in the root \class{Level} form a box
+\EndENUMERATE
+
+%==================================================================
+\subsection{Fields} \label{ss:field}
+%==================================================================
+
+The following are assumptions related to fields on a \class{Hierarchy}
+
+\BeginENUMERATE
+\item Fields map \class{Grid}s to arrays or to \texttt{NULL}
+\item An array for a \class{Grid} exists on exactly one processor, depending
+  on if the \class{Grid} is \textit{local} or \textit{remote}.
+\item An array may have a \textit{ghost} layer with a depth of at most $1$.
+\EndENUMERATE
+
+%==================================================================
+\subsection{\class{Vector}s} \label{ss:vector}
+%==================================================================
+
+\BeginENUMERATE
+\item \class{Vector}s can be defined on a single \class{Grid} (\textit{grid}-\class{Vector}), \class{Level} (\textit{level}-\class{Vector}), or on an entire \class{Hierarchy} (\textit{hierarchy}-\class{Vector}).
+\item A \class{Vector} is composed of a \class{Field}, and either a \class{Hierarchy}, \class{Level}, or \class{Grid}.
+\item A \class{Vector}'s elements are associated with either \class{Grid} vertices (\textit{nodal}-\class{Vector}) or \class{Grid} zone centers (\textit{zone}-\class{Vector})
+\item A \class{Vector} may have elements covered by finer-level \class{Grid}s
+\item A \class{Vector} may have a ghost vertex layer of depth between $0$ and $1$ 
+\EndENUMERATE
+
+%==================================================================
+\subsection{\class{Matrix}es}  \label{ss:matrix}
+%==================================================================
+
+A \class{Matrix} represents a linear operator defined on \class{Vector}s in an AMR \class{Hierarchy}.
+
+\BeginENUMERATE
+\item A \class{Matrix} can be applied to a \class{Vector} ($y \leftarrow A x$)
+\item $x$ and $y$ can be both \class{Hierarchy} \class{Vector}s
+\item $x$ and $y$ can be level-\class{Vector}s at most one level apart
+\item $x$ and $y$ can be both nodal-\class{Vector}s, both zone-\class{Vector}s, or one of each
+\item \class{Matrix}es must support $7$-point and $19$-point stencil operators
+\item \class{Matrix}es must support specialized discretizations along \class{Grid} faces, edges, and corners
+\EndENUMERATE
+
+%==================================================================
+\subsection{\class{Solver}s} \label{ss:solver}
+%==================================================================
+
+\class{Solver}s represents linear solvers.
+
+\BeginENUMERATE
+\item  A  \class{Solver} must exist to solve the Poisson equation
+\item  A  \class{Solver} must exist to solve linear equations arising from the FLD method for radiation transport
+\item  A  \class{Solver} must exist to solve linear equations arising from the FTEF method for radiation transport
+\item  A  \class{Solver} must exist to solve linear equations arising from the ``Paschos'' method for radiation transport
+\item Must support periodic, dirichlet, and Neumann boundary conditions
+\EndENUMERATE
+
+
+%==================================================================
+\end{document}
+%==================================================================
+
+

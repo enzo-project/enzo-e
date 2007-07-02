@@ -1,0 +1,250 @@
+%0       1         2         3         4         5         6         7         8
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+\documentclass[11pt]{article}
+
+\include{include}
+
+\begin{document}
+
+%========================================================================
+\TITLE{\amrSolve \\ Software Project Management Plan}{James Bordner}{1.2}
+%========================================================================
+
+%========================================================================
+\section{Modification History}
+%========================================================================
+
+\BeginDESCRIPTION
+\item[1.2 (2004-03-16):] Revised text, leaving content unchanged
+\item[1.2 (2004-03-16):] Added Modification History section
+\EndDESCRIPTION
+
+
+%========================================================================
+\section{Overview}
+%========================================================================
+
+%---------------------------------------------
+\subsection{Purpose, scope, and objectives}
+%---------------------------------------------
+
+\amrSolve\ is designed to be a small, robust, accurate, scalable, and efficient
+parallel elliptic linear solver for use in structured AMR codes in
+general, and \enzo\ in particular.  It should be especially suitable
+for computing gravitational potential fields, and as a linear solver
+for implicit radiation transport methods.
+
+%---------------------------------------------
+\subsubsection{Project Deliverables}
+%---------------------------------------------
+
+This project's lifetime is taken to be 2004-02-12 to 2004-06-30, with
+a delivery date of 2004-07-01.  Below are the deliverables from the
+\amrSolve\ project.
+%
+\BeginDESCRIPTION
+  \item [\Label{D1:} ] \amrSolve\ code integrated with \enzo
+  \item [\Label{D2:} ] Test suite
+  \item [\Label{D3:} ] User guide 
+  \item [\Label{D4:} ] Website 
+  \item [\Label{D5:} ] Paper 
+  \item [\Label{D6:} ] Slides
+\EndDESCRIPTION
+   
+
+%========================================================================
+\section{Project Organization}
+%========================================================================
+
+The IEEE standard for software development will serve as a general
+guideline for developing the \amrSolve\ code.  Since this is a 
+small-scale software project, adherence to the standard will be
+flexible.
+
+%------------------------------------------------------------------------
+\subsection{Documents}
+%------------------------------------------------------------------------
+
+Documents will include five types: internal, reports, external,
+papers, and slides. Most are relatively short, and content in the
+earlier organizational documents will be liberally used in later
+public ones.  The code itself can be considered a sixth document type.
+These five document types are described in
+\S\S\ref{sss:internal}---\ref{sss:slides}
+
+%------------------------------------------------------------------------
+
+\subsubsection{Internal documentation} \label{sss:internal}
+
+Internal documentation is for aiding software development.  The
+\amrSolve\ internal documents include only the core subset of IEEE
+software development standard documents.  Adherence to the standard
+sections will also be flexible.  The intended audience is the software
+developer.  Documents will evolve, so will be versioned.
+
+\BeginENUMERATE
+  \item  \amrSolve\ Project Management Plan (\Label{i-spmp})
+  \item  \amrSolve\ Requirements Specifications (\Label{i-srs})
+  \item  \amrSolve\ Design Description (\Label{i-sdd})
+  \item  \amrSolve\ Test Documentation (\Label{i-std})
+\EndENUMERATE
+
+%------------------------------------------------------------------------
+
+\subsubsection{Technical Reports}
+
+Technical reports will be used primarily for organizing accumulated
+data to be used in research papers.  Emphasis is on data content, not
+presentation.  The intended audience is the software developer, but
+may be made publicly available as LCA technical reports.  Documents
+will evolve, so will be versioned.
+
+\BeginENUMERATE
+  \item  \amrSolve\ Method report      (\Label{r-method})
+  \item  \amrSolve\ Convergence report (\Label{r-convergence})
+  \item  \amrSolve\ Accuracy report    (\Label{r-accuracy})
+  \item  \amrSolve\ Performance report (\Label{r-performance})
+\EndENUMERATE
+
+%------------------------------------------------------------------------
+
+\subsubsection{External Documentation}
+
+External documentation is for communicating with \amrSolve\ users and
+prospective users.  The intended audience is the public.  The user
+guide will evolve, so will be versioned.
+
+\BeginENUMERATE
+  \item  \amrSolve\ User's Guide      (\Label{e-user}) (\Label{D3})
+  \item  \amrSolve\ Website           (\Label{e-www}) (\Label{D4})
+\EndENUMERATE
+
+The website will be at \textsf{http://cosmos.ucsd.edu/amrSolve}.
+
+%------------------------------------------------------------------------
+
+\subsubsection{Research Papers}
+
+Research papers are intended to be published in journals or conference
+proceedings.  Content will be taken mostly from technical reports.
+The intended audience is the public.
+
+\BeginENUMERATE
+  \item  \amrSolve\ Paper    (\Label{p-amrsolve}) (\Label{D5})
+\EndENUMERATE
+
+%------------------------------------------------------------------------
+
+\subsubsection{Slides} \label{sss:slides}
+
+The time-length will be roughly one hour, so that a shorter talk can
+be given using a subset of the slides.  The intended audience for
+slides is the public.
+
+\BeginENUMERATE
+  \item  \amrSolve\ Slides   (\Label{s-amrsolve}) (\Label{D6})
+\EndENUMERATE
+
+%========================================================================
+\section{Tasks and Phases}
+%========================================================================
+
+There are five phases: 1.~Startup, 2.~Poisson Solver, 3.~General
+Solver, 4.~Data Gathering, and 5.~Final Phase.  Active code
+development will be primarily in phases 2 and 3.  Documents will be
+prepared concurrently throughout the lifecycle, beginning with the
+more internal documents, and finishing with the more public documents.
+
+\BeginDESCRIPTION
+  \item [Startup Phase: ] Weeks 1--4
+    \BeginITEMIZE
+      \item Finish initial drafts of internal documentation
+      \item Review Enzo code and datastructures
+      \item Review AMR solver literature
+    \EndITEMIZE 
+  \item [Poisson Solver Phase:] Weeks 5-8
+    \BeginITEMIZE
+      \item Iterate over design, code, integrate, test, debug tasks
+      \item Begin user guide
+      \item Begin website
+      \item Begin test suite
+    \EndITEMIZE
+  \item [General Solver Phase:] Weeks 9--12
+    \BeginITEMIZE
+      \item Iterate over design, code, integrate, test, debug tasks
+      \item Finish user guide
+      \item Finish website
+      \item Finish test suite
+    \EndITEMIZE
+  \item [Data Gathering Phase:] Weeks 13--16
+    \BeginITEMIZE
+      \item Run test suite to get convergence, accuracy, and performance data
+      \item Accumulate data in corresponding ``r-'' reports
+      \item Begin \amrSolve\ paper
+      \item Begin \amrSolve\ slides
+    \EndITEMIZE
+  \item [Final Phase:] Weeks 17--20
+    \BeginITEMIZE
+      \item Finish \amrSolve\ paper
+      \item Finish \amrSolve\ slides
+      \item Tie up loose ends
+    \EndITEMIZE
+\EndDESCRIPTION
+
+
+
+%========================================================================
+\section{Weekly Milestones}
+%========================================================================
+
+\subsection{Startup phase}
+
+\BeginDESCRIPTION
+\item[Week 1 (2/19): ] Project Management Plan Draft
+\item[Week 2 (2/26): ] Requirements Specifications Draft
+\item[Week 3 (3/04): ] Design Description Draft
+\item[Week 4 (3/11): ] Test Documentation Draft
+\EndDESCRIPTION
+
+\subsection{Poisson Solver Phase}
+
+\BeginDESCRIPTION
+\item[Week 5 (3/18): ] 
+\item[Week 6 (3/25): ] \Label{D4} Website draft
+\item[Week 7 (4/01): ]
+\item[Week 8 (4/08): ] \Label{D3} User guide draft
+\EndDESCRIPTION
+
+\subsection{General Solver Phase}
+
+\BeginDESCRIPTION
+\item[Week \, 9 (4/15): ]
+\item[Week 10 (4/22): ] \Label{D2} Test suite draft
+\item[Week 11 (4/29): ]
+\item[Week 12 (5/06): ] \Label{D1} \amrSolve\ code
+\EndDESCRIPTION
+
+\subsection{Data Gathering Phase}
+
+\BeginDESCRIPTION
+\item[Week 13 (5/13): ] Method report
+\item[Week 14 (5/20): ] Convergence report
+\item[Week 15 (5/27): ] Accuracy report
+\item[Week 16 (6/30): ] Performance report
+\EndDESCRIPTION
+
+\subsection{Final Phase}
+
+\BeginDESCRIPTION
+\item[Week 17 (6/10): ] 
+\item[Week 18 (6/17): ] \Label{D5} Research paper
+\item[Week 19 (6/24): ] \Label{D6} Slides
+\item[Week 20 (7/01): ] Public release
+\EndDESCRIPTION
+
+%==================================================================
+\end{document}
+%==================================================================
+
+

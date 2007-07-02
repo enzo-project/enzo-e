@@ -1,0 +1,52 @@
+SHELL = /bin/csh
+
+current:PS
+PAPER = `pwd | awk 'BEGIN{FS="/"}{print $$NF}'`
+
+PS:dvi
+	dvips -o $(PAPER).ps $(PAPER).dvi
+ps2:PS
+	a2ps -2 $(PAPER).ps -o $(PAPER)2.ps
+pdf:dvi
+	dvipdf $(PAPER).dvi $(PAPER).pdf
+pdf2:ps2
+	ps2pdf $(PAPER)2.ps $(PAPER)2.pdf
+bib: mgnet.bib bordner.bib
+	bibtex $(PAPER)
+
+dvi: 
+	-latex $(PAPER)
+index:dvi_index
+	dvips -o $(PAPER).ps $(PAPER).dvi
+dvi_index: dvi
+	makeindex $(PAPER)
+	latex $(PAPER)
+mgnet.bib:
+	-ln -s ~/references/mgnet.bib .
+papers.bib:
+	-ln -s ~/references/papers.bib .
+bordner.bib:
+	-ln -s ~/references/bordner.bib .
+clean:
+	@rm -f `find . -name "*~"`
+	@rm -f `find . -name "*.dvi"`
+	@rm -f `find . -name "*.ind"`
+	@rm -f `find . -name "*.idx"`
+	@rm -f `find . -name "*.ilg"`
+	@rm -f `find . -name "*.aux"`
+	@rm -f `find . -name "*.bbl"`
+	@rm -f `find . -name "*.blg"`
+	@rm -f `find . -name "*.log"`
+	@rm -f `find . -name "*.toc"`
+	@rm -f `find . -name "*.ps"`
+	@rm -f `find . -name "*.pdf"`
+	@rm -f `find . -name "*.glo"`
+tar:
+	make clean; \
+	set dir = $(PAPER); \
+	cd ..; \
+	tar cf $$dir.tar $$dir; \
+	gzip $$dir.tar; \
+	mv $$dir.tar.gz ~/Outgoing
+
+
