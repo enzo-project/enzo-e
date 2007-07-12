@@ -22,7 +22,7 @@
 
 # User-configuration
 
-ENZO_HOME = $(HOME)/enzo/enzo-lca.mine/amr_mpi/src
+ENZO_HOME = $(HOME)/enzo/svn/Enzo-devel/amr_mpi/src
 ENZO_FLAGS = -D p4
 
 OPTIMIZE = -O2
@@ -31,7 +31,7 @@ OPTIMIZE = -O2
 
 # Object files
 
-OBJ_LIB = grid.o
+# OBJ_LIB = grid.o
 
 #----------------------------------------------------------------------
 

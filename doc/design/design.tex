@@ -33,13 +33,21 @@
 \item[\code{Level}: ]     A level in an SAMR grid hierarchy
 \item[\code{Grid}: ]      A grid patch in an SAMR grid hierarchy
 \item[\code{Field}: ]     A data field
+\item[\code{PatchAMR}: ]  Structured-AMR method
+\item[\code{CellAMR}: ]   Continuous-AMR method
 \item[\code{Units}: ]     Data field units
-\item[\code{Array}: ]     A Fortran-style array
+\item[\code{Array}: ]     A Fortran-style array, possibly ``chunked'' or ``padded''
 \item[\code{CoArray}: ]   A Co-array Fortran-style co-array
 \item[\code{Particles}: ] A collection of particles
 \item[\code{Scheduler}: ]  Hierarchical parallelism task scheduler
 \item[\code{Dependencies}: ] Dependencies for tasks
 \item[\code{Tasks}: ]     A collection of parallel tasks
+\item[\code{Bc}: ]        Boundary conditions
+      Schedule (for organizing parallel tasks)
+\item[\code{Box}: ]       Low-level grid (KeLP functionality)
+\item[\code{Balance}: ]    Load-balancing
+\item[\code{Timesteping}: ] Time-stepping
+\item[\code{IO}: ]         Parallel IO
 \end{description}
 
 \end{document}
