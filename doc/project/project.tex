@@ -11,18 +11,235 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Software Project Management Plan}{James Bordner}{\textbf{work in progress}}
+\TITLE{Software Project Management Plan}{James Bordner}{v0.0.1}
 %=======================================================================
 
 %=======================================================================
-\section{Introduction} \label{s:intro}
+\section{Overview} \label{s:overview}
 %=======================================================================
 
-\note{Progressively add physics capability.}
+This do
 
-\note{Progressively add physics algorithms.}
+\subsection{Project summary}
 
-\note{OOP for flexibility}
+The purpose of the \cello\ project is to provide an open source
+software application for high-performance computational astrophysics
+and cosmology.  It will be used both as a testbed for experimenting
+with new software organization, parallelization, distributed
+datastructure, algorithm, and implementation techniques, as well as
+for enabling cutting-edge astrophysics and cosmological science
+simulations on the largest parallel high performance computers
+available.
+
+The scope of physics capabilities are hydrodynamics, self-gravity,
+radiative cooling, star formation, multi-species chemistry,
+magnetohydrodynamics, and radiation hydrodynamics, using algorithms
+based on the \enzo\ application.  These basic physics algorithmic
+components will be implemented within a new framework for distributing
+multi-resolution computations.
+
+Objectives are to reliably provide high-quality numerical solutions,
+computed by distributing the workload efficiently across $100,000$ to
+$1,000,000$ computational floating-point units, while maintaining a
+high level of utilization of available computational resources.
+
+\subsection{Assumptions and constraints}
+
+The source code for \cello\ must be made publicly available for
+other researchers in computational astrophysics and cosmology.
+
+\subsection{Project deliverables}
+
+\subsubsection{Software Documentation}
+\begin{enumerate}
+\item Tutorial
+\item User Guide
+\item Reference Guide
+\item Developer Guide
+\item Project web site
+\item Technical papers
+\end{enumerate}
+
+\subsubsection{Software Source Code}
+\begin{enumerate}
+\item Main application source code
+\item Reusable library of software components
+\end{enumerate}
+
+\subsubsection{Software Tests}
+\begin{enumerate}
+\item Test descriptions
+\item Test source code and input files
+\item Test results
+\end{enumerate}
+
+\subsection{Schedule and budget summary}
+
+
+\begin{description}
+\item [Year 1: ]
+\item [Year 2: ]
+\item [Year 3: ]
+\item [Year 4: ]
+\end{description}
+
+Physics
+Datastructures
+Parallelism
+
+\subsection{Evolution of the SPMP}
+
+The latest versions of this SPMP and other internal software
+documentation will be made available on
+\code{http://nordlys.ucsd.edu/projects/cello}.
+
+
+%=======================================================================
+\section{References} \label{s:references}
+%=======================================================================
+
+Project Management Plan
+Software Requirements Specifications
+Software Design Document
+Software Testing
+User Guide
+Reference Guide
+Developer Guide
+
+%=======================================================================
+\section{Definitions} \label{s:Definitions}
+%=======================================================================
+%=======================================================================
+\section{Project Organization} \label{s:organization}
+%=======================================================================
+%=======================================================================
+\section{Managerial Process Plans} \label{s:managerial}
+%=======================================================================
+%=======================================================================
+\section{Technical Process Plans} \label{s:technical}
+%=======================================================================
+%=======================================================================
+\section{Supporting Process Plans} \label{s:supporting}
+%=======================================================================
+%=======================================================================
+\section{Additional Plans} \label{s:Additional Plans}
+%=======================================================================
+
+
+
+\subsection{Software documents}
+
+
+%=======================================================================
+\section{Project Organization} \label{s:intro}
+%=======================================================================
+
+%-----------------------------------------------------------------------
+\section{Software Engineering Practices}
+%-----------------------------------------------------------------------
+
+
+Tasks
+
+\begin{enumerate}
+\item research
+\item requirements
+\item risk-analysis
+\item design
+\item implementation
+\item testing
+\item debugging
+\item refactoring
+\item maintenance
+\item project management
+\end{enumerate}
+
+Physics capabilities
+
+\begin{enumerate}
+\item Hydrodynamics
+\item radiative cooling
+\item UV background
+\item cosmological expansion
+\item Gravity
+\item MHD
+\item RT
+\end{enumerate}
+
+High-level datastructure capabilities
+
+\begin{enumerate}
+\item Unigrid
+\item SAMR
+\item Particles
+\item CAMR
+\item SAMR/CAMR hybridization
+\end{enumerate}
+
+Low-level  datastructure capabilities
+
+\begin{enumerate}
+\item Simple array
+\item Blocked array
+\item Padded array
+\item Interleaved array
+\end{enumerate}
+
+Parallelism capabilities
+
+\begin{enumerate}
+\item MPI2
+\item OpenMP
+\item UPC
+\end{enumerate}
+
+IO and visualization
+
+\begin{enumerate}
+\item Serial HDF5
+\item Parallel HDF5
+\item IDL visualization
+\item VTK visualization
+\end{enumerate}
+
+Meta-solver capabilities
+
+\begin{enumerate}
+\item Static solver
+\item Self-tuning AMR parameters
+\item Self-tuning array layout parameters
+\item Self-tuning parallelism
+\item Self-tuning IO
+\end{enumerate}
+
+
+%=======================================================================
+\section{Project Management Plan} \label{s:intro}
+%=======================================================================
+
+%-----------------------------------------------------------------------
+\section{Tasks} \label{s:intro}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{Task-1: } \label{s:intro}
+%-----------------------------------------------------------------------
+\subsubsection{Task-1 description} \label{s:intro}
+%-----------------------------------------------------------------------
+\subsubsection{Task-1 deliverables and milestones} \label{s:intro}
+%-----------------------------------------------------------------------
+\subsubsection{Task-1 resources needed} \label{s:intro}
+%-----------------------------------------------------------------------
+\subsubsection{Task-1 dependencies and constraints} \label{s:intro}
+%-----------------------------------------------------------------------
+\subsubsection{Task-1 risks and contingencies} \label{s:intro}
+
+%-----------------------------------------------------------------------
+\section{Assignments} \label{s:intro}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\section{Timetable} \label{s:intro}
+%-----------------------------------------------------------------------
 
 
 \end{document}

@@ -10,11 +10,15 @@
 \newcommand{\code}[1]{\textsf{#1}}
 \newcommand{\note}[1]{\devel{\eighthnote\ \textit{#1} \\}}
 \newcommand{\cello}{\textsf{Cello}}
+\newcommand{\enzo}{\textsf{Enzo}}
+\newcommand{\todo}{\devel{$\circ$}}
+\newcommand{\done}{\devel{$\bullet$}}
+\newcommand{\halfdone}{\devel{\textcolor{gray}{$\bullet$}}}
+
 \newcommand{\PROJECT}{\cello}
 \newcommand{\TITLE}[3]{
 \title{ {\huge \PROJECT: #1}  \\ \vspace{0.1in}
-     {\small Document Version: \number\year-\ifnum\number\month<10 0\else\fi\number\month-\ifnum\number\day<10 0\else\fi\number\day} \\ \vspace{-0.1in}
-     {\small Document Status: \textbf{#3}} \vspace{-0.1in}
+     {\small Document Version: \textbf{#3}} \vspace{-0.1in}
     }
 \author{      #2 \\
         Laboratory for Computational Astrophysics\\

@@ -11,7 +11,7 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Software Design Document}{James Bordner}{\textbf{work in progress}}
+\TITLE{Software Design Document}{James Bordner}{v0.0.1}
 %=======================================================================
 
 %=======================================================================
@@ -23,6 +23,81 @@
 \note{Parallelism: MPI, MPI2, OpenMP, pthreads, UPC}
 
 \note{Hide parallelism and datastructures from physics}
+
+
+%=======================================================================
+\section{Compilation configuration} \label{s:compile}
+%=======================================================================
+
+%=======================================================================
+\section{Command-line options} \label{s:commandline}
+%=======================================================================
+
+%=======================================================================
+\section{Initial run-time input} \label{s:input}
+%=======================================================================
+
+\cello\ is controlled by parameters specified in an input file.
+
+
+
+\subsection{Problem}
+
+Problem parameters specify the problem setup.
+
+  dimensionality
+  domain extents
+  initial conditions (materials, regions, input)
+ boundary conditions (periodic, in-/out-flow, specified, dynamic)
+
+
+\subsection{Physics}
+
+ Specify physics components
+ hydrodynamics
+  cosmological expansion
+ self-gravity
+
+\subsection{Algorithms} 
+
+Specify algorithms and their parameters
+ PPM hydro (dual-energy, etc.)
+ gravity solver (FAC, smoother, levels, etc.)
+
+\subsection{Datastructures} 
+
+Specify datastructures and their parameters
+ PatchAMR (levels, grid size or count, rebuild method, distribution)
+ Field storage (blocked, padded, interleved)
+
+\subsection{Parallelism} 
+
+Specifiy parallelism and parameters
+ MPI (send/recv and type, one-sided and type, what level)
+ OpenMP (num threads, what level)
+ UPC (num threads, what level)
+ pthreads (num threads, what level)
+ cooperative parallelism
+ levels for each if multiple
+
+\subsection{Output} 
+
+Output types and parameters
+ checkpoint (dump all)
+ output (specific fields)
+ movies (type and rate)
+ analysis (type of analysis, rate)
+ level of output (files for timestep, time, etc.)
+
+\subsection{Control} 
+
+Global control
+ fault tolerance methodology
+ adaptivity
+
+\subsection{Performance} 
+
+Performance monitoring
 
 %=======================================================================
 \section{Objects} \label{s:intro}
@@ -50,6 +125,7 @@
 \item[\code{IO}: ]         Parallel IO
 \end{description}
 
-\end{document}
-
 %==================================================================
+\end{document}
+%==================================================================
+
