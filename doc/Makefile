@@ -28,4 +28,14 @@ clean: $(patsubst %,%-clean,$(ALL))
 	-rm -f *~
 
 %-clean:
-	$(MAKE) -C $* clean 
+	$(MAKE) -C $* clean
+
+#-----------------------------------------------------------------------
+
+.PHONY: distclean
+distclean: $(patsubst %,%-distclean,$(ALL))
+	-rm -f *~
+%-distclean:
+	$(MAKE) -C $* clean
+	rm $*/include.tex
+	rm $*/makefile
