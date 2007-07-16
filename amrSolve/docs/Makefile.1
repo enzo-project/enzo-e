@@ -14,7 +14,7 @@ pdf2:ps2
 bib: mgnet.bib bordner.bib
 	bibtex $(PAPER)
 
-dvi: 
+dvi: figs
 	-latex $(PAPER)
 index:dvi_index
 	dvips -o $(PAPER).ps $(PAPER).dvi
@@ -27,6 +27,12 @@ papers.bib:
 	-ln -s ~/references/papers.bib .
 bordner.bib:
 	-ln -s ~/references/bordner.bib .
+
+.PHONY: figs
+figs:
+	ln -s -f ../figs/* .
+
+
 clean:
 	@rm -f `find . -name "*~"`
 	@rm -f `find . -name "*.dvi"`

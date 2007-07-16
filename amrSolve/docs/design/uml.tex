@@ -1,5 +1,5 @@
-% \newcommand{\includepsgrid}{\psgrid}
-\newcommand{\includepsgrid}{}
+%\newcommand{\includepsgrid}{\psgrid}
+% \newcommand{\includepsgrid}{}
 
 %=======================================================================
 % Point
@@ -30,25 +30,29 @@
    \newcommand{\drawClassGrid}{%
       \umlClass[umlShadow=false]{Grid}{%
          \hline
-         Grid () \\
-         \textit{attach} () \\
-         \textit{release} () \\
-         size() \\
-         range() \\
-%         parent() \\
-%         numNeighbors () \\
-%         neighbor () \\
-%         numChildren () \\
-%         child () \\
-         isNeighbor() \\
-         isLocal () \\
-         print () \\
-         geomview ()%
+         + Grid () \\
+         + \textit{attach} () \\
+         + \textit{detach} () \\
+         + size() \\
+         + range() \\
+         + center() \\
+         + isNeighbor() \\
+         + map () \\
+         + invmap () \\
+         + numNeighbors() \\
+         + numChildren() \\
+         + neighbor() \\
+         + child() \\
+         + parent() \\
+         + volume () \\
+         + level () \\
+         + hierarchy () \\
+         + summary () %
    }}
 
    \newcommand{\umlGrid}{
    \begin{center}
-   \begin{pspicture}(3,5)\includepsgrid
+   \begin{pspicture}(4,9)\includepsgrid
      \rput[lb](0,0){\rnode{ClassGrid}{\drawClassGrid}}
    \end{pspicture}
    \end{center}}
@@ -60,18 +64,22 @@
    \newcommand{\drawClassLevel}{%
       \umlClass[umlShadow=false]{Level}{%
          \hline
-         Level () \\
-         \textit{attach} () \\
-         \textit{release} () \\
-         numGrids() \\
-         grid() \\
-         assertNeighbors() \\
-         geomview ()%
+         + Level () \\
+         + \textit{attach} () \\
+         + \textit{detach} () \\
+         + numGrids() \\
+         + grid() \\
+         + volume () \\
+         + covering() \\
+         + finer() \\
+         + coarser() \\
+         + hierarchy() \\
+         - assertNeighbors() %
    }}
 
    \newcommand{\umlLevel}{
    \begin{center}
-   \begin{pspicture}(4,4)\includepsgrid
+   \begin{pspicture}(4,6)\includepsgrid
      \rput[lb](0,0){\rnode{ClassLevel}{\drawClassLevel}}
    \end{pspicture}
    \end{center}}
@@ -83,18 +91,18 @@
    \newcommand{\drawClassHierarchy}{%
       \umlClass[umlShadow=false]{Hierarchy}{%
          \hline
-         Hierarchy () \\
-         \textit{attach} () \\
-         \textit{release} () \\
-         numLevels() \\
-         level() \\
-         assertParent() \\
-         geomview ()%
+         + Hierarchy () \\
+         + \textit{attach} () \\
+         + \textit{detach} () \\
+         + numLevels() \\
+         + numGrids() \\
+         + level() \\
+         - assertParent() %
    }}
 
    \newcommand{\umlHierarchy}{
    \begin{center}
-   \begin{pspicture}(3,4)\includepsgrid
+   \begin{pspicture}(4,4)\includepsgrid
      \rput[lb](0,0){\rnode{ClassHierarchy}{\drawClassHierarchy}}
    \end{pspicture}
    \end{center}}
@@ -152,23 +160,45 @@
 % Vector
 %=======================================================================
 
-   \newcommand{\drawClassVector}{%
-      \umlClass[umlShadow=false]{Vector}{%
+   \newcommand{\drawClassVectorAbc}{%
+      \umlClass[umlShadow=false]{\textit{VectorAbc}}{%
          \hline
-         Vector () \\
-         size() \\
-         dot() \\
-         zaxpy() \\
-         clear() \\
-         copy() \\
-         refresh()%
+         + VectorAbc () \\
+         + \textit{attach}() \\
+         + \textit{detach}() \\
+         + dot() \\
+         + zaxpy() \\
+         + set() \\
+         + scale() \\
+         + copy() \\
+         + refresh()%
+   }}
+
+   \newcommand{\drawClassVectorGrid}{%
+      \umlClass[umlShadow=false]{VectorGrid}{%
+   }}
+
+   \newcommand{\drawClassVectorLevel}{%
+      \umlClass[umlShadow=false]{VectorLevel}{%
+   }}
+
+   \newcommand{\drawClassVectorHierarchy}{%
+      \umlClass[umlShadow=false]{VectorHierarchy}{%
    }}
 
    \newcommand{\umlVector}{
    \begin{center}
-   \begin{pspicture}(2,4)\includepsgrid
-     \rput[lb](0,0){\rnode{ClassVector}{\drawClassVector}}
+   \begin{pspicture}(7.5,4.5)\includepsgrid
+     \rput[lb](0,0){\rnode{ClassVectorAbc}{\drawClassVectorAbc}}
+     \rput[lb](5,3){\rnode{ClassVectorGrid}{\drawClassVectorGrid}}
+     \rput[lb](5,2){\rnode{ClassVectorLevel}{\drawClassVectorLevel}}
+     \rput[lb](5,1){\rnode{ClassVectorHierarchy}{\drawClassVectorHierarchy}}
+     \pnode(4.5,0.5){pnode1}
    \end{pspicture}
+   \ncEVE[armA=1]{ClassVectorAbc}{ClassVectorGrid}
+   \ncEVE[armA=1]{ClassVectorAbc}{ClassVectorLevel}
+   \ncEVE[armA=1]{ClassVectorAbc}{ClassVectorHierarchy}
+   \ncputicon{umlHerit}
    \end{center}}
 
 %=======================================================================
