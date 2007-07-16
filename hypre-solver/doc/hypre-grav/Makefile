@@ -14,6 +14,7 @@ hypre-grav.ps:hypre-grav.dvi $(FIG)
 hypre-grav.dvi:hypre-grav.tex include.tex
 	-latex hypre-grav
 	-latex hypre-grav
+	-latex hypre-grav
 hypre-grav2.ps:hypre-grav.ps
 	a2ps -M Letter -2 hypre-grav.ps -o hypre-grav2.ps
 pdf.hypre-grav:hypre-grav.dvi

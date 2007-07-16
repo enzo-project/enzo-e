@@ -17,6 +17,7 @@
       {in preparation}
 %=======================================================================
 
+\tableofcontents
 %======================================================================
 \section{Scope}
 %======================================================================
@@ -101,20 +102,20 @@ xxxxx\=xxx\=\kill\\
 
 \begin{tabbing}
 xxxxx\=xxx\=\kill\\ 
-\> \done \code{point $<$mass$>$ $<$location$>$} \\
+\> \done \textit{point $<$mass$>$ $<$position$>$} \\
 \>\> \code{Scalar mass} \\
-\>\> \code{Scalar location[3]}
+\>\> \code{Scalar position[3]}
 \end{tabbing}
 
 \begin{tabbing}
 xxxxx\=xxx\=\kill\\ 
-\> \code{grid} $<$id$>$ $<$parent-id$>$ $<$processor$>$ $<$low-node$>$ $<$high-node$>$ $<$node-count$>$ \\
-\> \> \code{int id} $> 0$ \\
-\> \> \code{int parent-id} $>= 0$  \\
+\> \textit{grid} $<$id$>$ $<$parent-id$>$ $<$processor$>$ $<$low-node$>$ $<$high-node$>$ $<$node-count$>$ \\
+\> \> \code{int id} $\ge 0$ \\
+\> \> \code{int parent-id} $\ge 0$  \\
 \> \> \code{int processor} \\
-\> \> \code{Scalar vertex-low}\code{[3]} \\
-\> \> \code{Scalar vertex-high}\code{[3]} \\
-\> \> \code{int zone-count}\code{[3]}
+\> \> \code{Scalar vertex-lower}\code{[3]} \\
+\> \> \code{Scalar vertex-upper}\code{[3]} \\
+\> \> \code{int zones}\code{[3]} \textit{// Not needed? store in level if constant resolution}
 \end{tabbing}
 
 \begin{tabbing}
@@ -228,7 +229,7 @@ xxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxx\=\kill\\
 \end{tabbing}
 
 %=======================================================================
-\section{Discretization} \label{s:discretization}
+\subsection{Discretization} \label{s:discretization}
 %=======================================================================
 
 \newcommand{\indvar}{r}
@@ -437,7 +438,7 @@ Types of matrix elements for a given unknown:
 \end{tabular}
 
 %=======================================================================
-\section{Results} \label{s:results}
+\section{Testing} \label{s:testing}
 %=======================================================================
 
 \EndDOCUMENT
