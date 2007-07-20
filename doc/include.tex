@@ -1,12 +1,33 @@
-%=======================================================================
-\usepackage{wasysym}
 
-% COMMENT BELOW TO EXCLUDE DEVELOPMENT TEXT
+% INCLUDE DEVELOPMENT TEXT
+
 \newcommand{\devel}[1]{#1}
-% COMMENT BELOW TO INCLUDE DEVELOPMENT TEXT
+
+% EXCLUDE DEVELOPMENT TEXT
+
 % \newcommand{\devel}[1]{}
 
+
 %=======================================================================
+% Document layout
+%=======================================================================
+
+\setlength{\topmargin}{0.0in}
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+\setlength{\textwidth}{6.0in}
+\setlength{\textheight}{9.0in}
+
+%=======================================================================
+% Packages
+%=======================================================================
+
+\usepackage{wasysym}
+
+%=======================================================================
+% Commands
+%=======================================================================
+
 \newcommand{\code}[1]{\textsf{#1}}
 \newcommand{\note}[1]{\devel{\eighthnote\ \textit{#1} \\}}
 \newcommand{\cello}{\textsf{Cello}}
@@ -14,7 +35,6 @@
 \newcommand{\todo}{\devel{$\circ$}}
 \newcommand{\done}{\devel{$\bullet$}}
 \newcommand{\halfdone}{\devel{\textcolor{gray}{$\bullet$}}}
-
 \newcommand{\PROJECT}{\cello}
 \newcommand{\TITLE}[3]{
 \title{ {\huge \PROJECT: #1}  \\ \vspace{0.1in}
@@ -24,4 +44,5 @@
         Laboratory for Computational Astrophysics\\
         University of California, San Diego}
 \maketitle}
+
 %=======================================================================

@@ -11,47 +11,197 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Software Requirements Specifications}{James Bordner}{\textbf{v0.0.1}}
+\TITLE{Software Requirements Specifications}{James Bordner}{\textbf{v0.1}}
 %=======================================================================
 
 %=======================================================================
 \section{Introduction} \label{s:intro}
 %=======================================================================
 
-   \cello\ is a high-performance adaptive astrophysics application
-   intended primarily to be run on massively hierarchical parallel
-   supercomputers.  It combines leading edge software engineering
-   techniques, parallel datastructures, parallelism techniques, and
-   computational physics algorithms.
+% Overview
+   \cello\ is intended to be a high-performance multi-resolution
+   astrophysics application, capable of running efficiently on
+   large-scale (\~{\ }$O(10^6)$ cores) parallel supercomputers.
+   Physics capabilities will incude hydrodynamics, representation of
+   dark matter (via particles) and baryonic matter (via fields),
+   cosmological expansion, self-gravity, radiative cooling,
+   multispecies chemistry, magnetohydrodynamics, and radiation
+   transfer.
+
+% AMR
+   Computations will be performed at multiple spacial and temporal
+   resolutions using adaptive mesh refinement techniques (AMR).
+   Resolution of multiple grid patches (structured AMR) or individual
+   zones (cell-based AMR) will be dynamically controlled using a
+   user-specified set of refinement criteria.  This will permit the
+   physics modules to capture the full range of scales of interest,
+   but without over-refining other regions and leading to excessive
+   computation and memory storage.  Algorithms and datastructures will
+   be chosen to maximize scalability in both computation and memory
+   usage.  Multiple implementations will be made available to provide
+   flexibility in optimizing for the target architecture and problem.
+   Characteristics of the AMR hierarchies, e.g.~grid patch
+   characteristics (size, size quantization, shape, etc.) will be
+   flexible to allow for optimization of degree of over-refinement,
+   computational task size, and task computation efficiency.  SAMR and
+   CAMR methods will be available either separately or together.
+   
+% Parallelization: horizontal data movement optimization
+
+   Concurrency will be modularized to improve flexibility in choosing
+   the best method of parallelization for a given problem on a given
+   parallel platform.  MPI, MPI2, OpenMP, UPC, and will include hybrid
+   schemes such as MPI + OpenMP, or MPI + UPC, where possible and if
+   appropriate.  Other schemes such as using shared memory array
+   libraries or pthreads may be considered.  Parallelization methods
+   will be primarily data parallelism, though support for
+   collaberative (functional) parallelism and pipelining will be
+   considered.
+
+%  load balancing
+
+   Parallel tasks will be load balanced using hierarchical dynamic
+   load balancing algorithms.  Load balancing schemes will use
+   performance information gathered by the running application to make
+   load balancing decisions, and will allow flexibility in optimizing
+   the parallel distribution of computation, memory storage, or a
+   combination of both.  Combining flexible hierarchical
+   parallelization schemes with hierarchical load balancing
+   algorithms, together with scalable algorithms and efficient AMR
+   datastructures, are expected to lead to high parallel efficiency
+   and scalability.
+
+% Field data layout: vertical data movement optimization
+
+   The properties of individual grid patches, and details of how
+   scalar and vector fields are stored on grid patches, will be
+   flexible to allow optimization of the use of deep memory/cache
+   hierarchies.  This includes hierarchical blocking of grid data to 
+   maximize reuse of data in caches, padding of arrays to reduce
+   cache thrashing effects for low-associativity caches, and interleaving
+   vector field data or select scalar fields to improve data locality.
+   These capabilities, together with efficient algorithms and 
+   implementation of computations, are expected to lead to high
+   single-thread computational efficiency and data movement through
+   memory/cache hierarchies.
+
+%  Performance monitoring
+
+   Comprehensive performance-related measurements will be continuously
+   collected for simulations.  By ``comprehensive'' we mean parallel
+   communication amount, memory and computational load balance
+   efficiency, memory usage, memory reference and floating point
+   operation counts, and disk usage.
+
+% Input files (small I/O)
+
+   Problems will be specified using an input parameter file.  The set
+   of problem parameters available will be sufficient to set up all
+   known test problems in the literature that can be run given the
+   available physics capabilities.  Parameters will include deep
+   control of the internal physical quantities, units, physics
+   algorithms, and datastructures.
+
+   Information regarding the progress of the simulation will be 
+   output to the user in a format or formats that are both easy
+   to read, and easy to post-process using external programs or
+   utilities.
+   
+%  I/O (big I/O)
+
+   Several options for how data fields and particles are read and
+   written to disk will be implemented, to improve flexibility and
+   allow optimization of I/O for a given problem on a given parallel
+   platform.  Parallel HDF5 will be used to optimize efficiency and
+   portability.  Multiple data layouts within and between files will
+   be implemented to allow optimization of I/O to a particular problem
+   and file system.
+
+%  I/O dumps, inline analysis, visualization
+
+   Support will be available for writing the whole or part of some or
+   all data fields and particles at specified times.  I/O dumps will
+   include targeted support for both check-pointing (for automatic use
+   by the software error recovery) and data dumps (for subsequent user
+   use).  
+   
+%  Error recovery
+
+   Support will be included for error prevention, identification and
+   recovery.  This will include fault-tolerance methods to handle
+   possible hardware faults, and self-monitoring of fields, particles,
+   and other variables against physics quantity invariants
+   (e.g.~positive densities, mass conservation, etc.)
+
+% Self-tuning
+
+   Support will be included for tuning of various components to the
+   running application and hardware platform.  Tuning will be either
+   self-tuning by the running application as it monitors its
+   performance, or by the user monitoring the performance of a running
+   simulation.  Adaptivity will be available for physics, physics
+   algorithms, resolution ranges, AMR datastructures and algorithms,
+   field and particles data-structures, parallelism.
 
 %=======================================================================
 \section{Inputs} \label{s:inputs}
 %=======================================================================
 
-\begin{description}
-\item[Problem: ] Specify problem setup
+%-----------------------------------------------------------------------
+\subsection{Problem parameters}
+%-----------------------------------------------------------------------
+
 \begin{itemize}
 \item  domain extents
 \item  initial conditions (materials, regions, input)
 \item boundary conditions (periodic, in-/out-flow, specified, dynamic)
 \end{itemize}
-\item[Physics: ] Specify physics components
+
+%-----------------------------------------------------------------------
+\subsection{Physics parameters}
+%-----------------------------------------------------------------------
+
+Specify physics components
+
 \begin{itemize}
 \item hydrodynamics
 \item  cosmological expansion
 \item self-gravity
 \end{itemize}
-\item[Algorithms: ] Specify algorithms and their parameters
+
+%-----------------------------------------------------------------------
+\subsection{Physics algorithms}
+%-----------------------------------------------------------------------
+
+Specify algorithms and their parameters
+
 \begin{itemize}
 \item PPM hydro (dual-energy, etc.)
 \item gravity solver (FAC, smoother, levels, etc.)
 \end{itemize}
-\item[Datastructures: ] Specify datastructures and their parameters
+
+%-----------------------------------------------------------------------
+\subsection{Field and particles parameters}
+%-----------------------------------------------------------------------
+
+Field storage (blocked, padded, interleved)
+
+%-----------------------------------------------------------------------
+\subsection{Multi-resolution parameters}
+%-----------------------------------------------------------------------
+
+Specify datastructures and their parameters
+
 \begin{itemize}
 \item PatchAMR (levels, grid size or count, rebuild method, distribution)
-\item Field storage (blocked, padded, interleved)
 \end{itemize}
-\item[Parallelism: ] Specifiy parallelism and parameters
+
+%-----------------------------------------------------------------------
+\subsection{Parallelism parameters}
+%-----------------------------------------------------------------------
+
+Specifiy parallelism and parameters
+
 \begin{itemize}
 \item MPI (send/recv and type, one-sided and type, what level)
 \item OpenMP (num threads, what level)
@@ -60,7 +210,13 @@
 \item cooperative parallelism
 \item levels for each if multiple
 \end{itemize}
-\item[Output: ] Output types and parameters
+
+%-----------------------------------------------------------------------
+\subsection{I/O parameters}
+%-----------------------------------------------------------------------
+
+Output types and parameters
+
 \begin{itemize}
 \item checkpoint (dump all)
 \item output (specific fields)
@@ -68,74 +224,38 @@
 \item analysis (type of analysis, rate)
 \item level of output (files for timestep, time, etc.)
 \end{itemize}
-\item[Control: ] Global control
+
+%-----------------------------------------------------------------------
+\subsection{Control parameters}
+%-----------------------------------------------------------------------
+
+Global simulation control.
+
+%-----------------------------------------------------------------------
+\subsection{Error recovery parameters}
+%-----------------------------------------------------------------------
+
 \begin{itemize}
 \item fault tolerance methodology
 \item adaptivity
 \end{itemize}
-\item[Performance: ] Performance monitoring
-\end{description}
-
-
 
 
 %-----------------------------------------------------------------------
-\subsection{High-level Requirements}
+\subsection{Performance monitoring parameters}
 %-----------------------------------------------------------------------
 
-\begin{itemize}
-\item Configurability
-\item Adaptability
-\item Flexibility
-\item Performance
-\item Scalability
-\end{itemize}
-
-
-%-----------------------------------------------------------------------
-\subsubsection{Configurability}
-
-   Configurability refers to the user-controlled component of
-   mapping software and data-structures to the problem and hardware.
-   It may be compile-time or run-time.
-
-%-----------------------------------------------------------------------
-\subsubsection{Adaptibility}
-
-   Adaptivity refers to the software-controlled component of
-   dynamically mapping data-structures to the problem and
-   hardware.
- 
-
-   Adaptive meshes (SAMR and CAMR), to adapt data-structures to problem
-   features in space.
-
-   Adaptive time stepping, to adapt to varying timestepping
-   requirements of the problem in space and time.
-
-   Adaptive multi-algorithms, to automatically and dynamically choose
-   the best of several algorithms to solve the problem.
-
-   Adaptive data-structures, to automatically and dynamically choose
-   the best of several data-structures to solve the problem.
-
-   Adaptive parallelism, to make most efficient use of available
-   hardware parallelism.
-
-
-
-%-----------------------------------------------------------------------
-\subsubsection{Flexibility}
-
-%-----------------------------------------------------------------------
-\subsubsection{Performance}
-
-%-----------------------------------------------------------------------
-\subsubsection{Scalability}
+%=======================================================================
+\section{Outputs} \label{s:inputs}
+%=======================================================================
 
 %=======================================================================
 \section{Functional Requirements}
 %=======================================================================
+
+%-----------------------------------------------------------------------
+\subsection{Control}
+%-----------------------------------------------------------------------
 
 %-----------------------------------------------------------------------
 \subsection{Physics}
@@ -148,232 +268,255 @@
 \subsubsection{Self-gravity}
 
 %-----------------------------------------------------------------------
+\subsubsection{MHD}
+
+%-----------------------------------------------------------------------
+\subsubsection{RT}
+
+%-----------------------------------------------------------------------
 \subsection{Data-Structures}
 %-----------------------------------------------------------------------
 
 %-----------------------------------------------------------------------
-\subsubsection{Structured Adaptive Mesh Refinement}
-
-%-----------------------------------------------------------------------
-\subsubsection{Continuous Adaptive Mesh Refinement}
+\subsubsection{Fields}
 
 %-----------------------------------------------------------------------
 \subsubsection{Particles}
 
+%-----------------------------------------------------------------------
+\subsubsection{Structured Adaptive Mesh Hierarchies}
 
+%-----------------------------------------------------------------------
+\subsubsection{Continuous Adaptive Mesh Hierarchies}
 
 %-----------------------------------------------------------------------
 \subsection{Parallelism}
 %-----------------------------------------------------------------------
 
-MPI data parallel
-
-MPI-2 One-sided data parallel
-
-Functional parallelism
-
-Task Definement and Scheduling
-
-Multicore pipelining of physics components
+Hardware platform parallelism will be considered to be multilevel,
+including nodes, processors, and cores.  Computational tasks will be
+flexibly organized into hierarchical levels to aid mapping to multiple
+hardware parallelization levels, and task sizes in different levels
+will allow flexibility to help optimize granularity for the different
+given parallelization level components.
 
 
-Multilevel parallelism
-
-Multiple parallelism paradigms (MPI + OpenMP)
 
 Flexible parallelism paradigms: map parallelism to tasks
 
 Automatic code generation (or other) of parallel tasks to implement
 parallelism and optimize performance
 
+%-----------------------------------------------------------------------
+\subsubsection{MPI Send/Recv}
+
+%-----------------------------------------------------------------------
+\subsubsection{MPI2 Get}
+
+%-----------------------------------------------------------------------
+\subsubsection{OpenMP}
+
+%-----------------------------------------------------------------------
+\subsubsection{Collaberative parallelism}
+
+%-----------------------------------------------------------------------
+\subsubsection{Pipelining}
+
+
 
 \appendix
 
 \section{\enzo\ parameter list}
 
-\todo\ \code{AdjustUVBackground} \\
-\todo\ \code{BaryonSelfGravityApproximation} \\
+\small
+\begin{tabular}{lll}
+\todo\ \code{AdjustUVBackground} &
+\todo\ \code{BaryonSelfGravityApproximation} &
 \todo\ \code{BoundaryConditionName} \\
-\todo\ \code{CellFlaggingMethod} \\
-\todo\ \code{ComovingCoordinates} \\
+\todo\ \code{CellFlaggingMethod} &
+\todo\ \code{ComovingCoordinates} &
 \todo\ \code{ComputePotential} \\
-\todo\ \code{ConservativeInterpolation} \\
-\todo\ \code{CoolDataParamfile} \\
+\todo\ \code{ConservativeInterpolation} &
+\todo\ \code{CoolDataParamfile} &
 \todo\ \code{CourantSafetyNumber} \\
-\todo\ \code{CubeDumpEnabled} \\
-\todo\ \code{CubeDump} \\
+\todo\ \code{CubeDumpEnabled} &
+\todo\ \code{CubeDump} &
 \todo\ \code{CycleLastDataDump} \\
-\todo\ \code{CycleLastHistoryDump} \\
-\todo\ \code{CycleLastRestartDump} \\
+\todo\ \code{CycleLastHistoryDump} &
+\todo\ \code{CycleLastRestartDump} &
 \todo\ \code{CycleSkipDataDump} \\
-\todo\ \code{CycleSkipGlobalDataDump} \\
-\todo\ \code{CycleSkipHistoryDump} \\
+\todo\ \code{CycleSkipGlobalDataDump} &
+\todo\ \code{CycleSkipHistoryDump} &
 \todo\ \code{CycleSkipRestartDump} \\
-\todo\ \code{DataDumpDir} \\
-\todo\ \code{DataDumpName} \\
+\todo\ \code{DataDumpDir} &
+\todo\ \code{DataDumpName} &
 \todo\ \code{DataDumpNumber} \\
-\todo\ \code{DataLabel} \\
-\todo\ \code{DataUnits} \\
+\todo\ \code{DataLabel} &
+\todo\ \code{DataUnits} &
 \todo\ \code{DomainLeftEdge} \\
-\todo\ \code{DomainRightEdge} \\
-\todo\ \code{dtDataDump} \\
+\todo\ \code{DomainRightEdge} &
+\todo\ \code{dtDataDump} &
 \todo\ \code{dtHistoryDump} \\
-\todo\ \code{dtMovieDump} \\
-\todo\ \code{dtRestartDump} \\
+\todo\ \code{dtMovieDump} &
+\todo\ \code{dtRestartDump} &
 \todo\ \code{dtTracerParticleDump} \\
-\todo\ \code{DualEnergyFormalismEta1} \\
-\todo\ \code{DualEnergyFormalismEta2} \\
+\todo\ \code{DualEnergyFormalismEta1} &
+\todo\ \code{DualEnergyFormalismEta2} &
 \todo\ \code{DualEnergyFormalism} \\
-\todo\ \code{ExternalBoundaryIO} \\
-\todo\ \code{ExternalBoundaryTypeIO} \\
+\todo\ \code{ExternalBoundaryIO} &
+\todo\ \code{ExternalBoundaryTypeIO} &
 \todo\ \code{ExternalBoundaryValueIO} \\
-\todo\ \code{ExtractFieldsOnly} \\
-\todo\ \code{FluxCorrection} \\
+\todo\ \code{ExtractFieldsOnly} &
+\todo\ \code{FluxCorrection} &
 \todo\ \code{GadgetEquilibriumCooling} \\
-\todo\ \code{Gamma} \\
-\todo\ \code{GlobalDir} \\
+\todo\ \code{Gamma} &
+\todo\ \code{GlobalDir} &
 \todo\ \code{GravitationalConstant} \\
-\todo\ \code{GravityBoundaryFaces} \\
-\todo\ \code{GravityBoundaryName} \\
+\todo\ \code{GravityBoundaryFaces} &
+\todo\ \code{GravityBoundaryName} &
 \todo\ \code{GravityBoundaryRestart} \\
-\todo\ \code{GravityResolution} \\
-\todo\ \code{GreensFunctionMaxNumber} \\
+\todo\ \code{GravityResolution} &
+\todo\ \code{GreensFunctionMaxNumber} &
 \todo\ \code{GreensFunctionMaxSize} \\
-\todo\ \code{GridVelocity} \\
-\todo\ \code{HistoryDumpDir} \\
+\todo\ \code{GridVelocity} &
+\todo\ \code{HistoryDumpDir} &
 \todo\ \code{HistoryDumpName} \\
-\todo\ \code{HistoryDumpNumber} \\
-\todo\ \code{huge\_number} \\
+\todo\ \code{HistoryDumpNumber} &
+\todo\ \code{huge\_number} &
 \todo\ \code{HydroMethod} \\
-\todo\ \code{InitialCPUTime} \\
-\todo\ \code{InitialCycleNumber} \\
+\todo\ \code{InitialCPUTime} &
+\todo\ \code{InitialCycleNumber} &
 \todo\ \code{Initialdt} \\
-\todo\ \code{InitialTime} \\
-\todo\ \code{InterpolationMethod} \\
+\todo\ \code{InitialTime} &
+\todo\ \code{InterpolationMethod} &
 \todo\ \code{LeftFaceBoundaryCondition} \\
-\todo\ \code{LocalDir} \\
-\todo\ \code{MaximumGravityRefinementLevel} \\
+\todo\ \code{LocalDir} &
+\todo\ \code{MaximumGravityRefinementLevel} &
 \todo\ \code{MaximumParticleRefinementLevel} \\
-\todo\ \code{MaximumRefinementLevel} \\
-\todo\ \code{MaximumSubgridSize} \\
+\todo\ \code{MaximumRefinementLevel} &
+\todo\ \code{MaximumSubgridSize} &
 \todo\ \code{MinimumEfficiency} \\
-\todo\ \code{MinimumEnergyRatioForRefinement} \\
-\todo\ \code{MinimumMassForRefinement} \\
+\todo\ \code{MinimumEnergyRatioForRefinement} &
+\todo\ \code{MinimumMassForRefinement} &
 \todo\ \code{MinimumMassForRefinementLevelExponent} \\
-\todo\ \code{MinimumOverDensityForRefinement} \\
-\todo\ \code{MinimumPressureJumpForRefinement} \\
+\todo\ \code{MinimumOverDensityForRefinement} &
+\todo\ \code{MinimumPressureJumpForRefinement} &
 \todo\ \code{MinimumPressureSupportParameter} \\
-\todo\ \code{MinimumShearForRefinement} \\
-\todo\ \code{MinimumSlopeForRefinement} \\
+\todo\ \code{MinimumShearForRefinement} &
+\todo\ \code{MinimumSlopeForRefinement} &
 \todo\ \code{MinimumSubgridEdge} \\
-\todo\ \code{MovieDataField} \\
-\todo\ \code{MovieDumpDir} \\
+\todo\ \code{MovieDataField} &
+\todo\ \code{MovieDumpDir} &
 \todo\ \code{MovieDumpName} \\
-\todo\ \code{MovieDumpNumber} \\
-\todo\ \code{MovieRegionLeftEdge} \\
+\todo\ \code{MovieDumpNumber} &
+\todo\ \code{MovieRegionLeftEdge} &
 \todo\ \code{MovieRegionRightEdge} \\
-\todo\ \code{MovieSkipTimestep} \\
-\todo\ \code{MultiMetals} \\
+\todo\ \code{MovieSkipTimestep} &
+\todo\ \code{MultiMetals} &
 \todo\ \code{MultiSpecies} \\
-\todo\ \code{MustRefineParticlesRefineToLevel} \\
-\todo\ \code{NewMovieDumpNumber} \\
+\todo\ \code{MustRefineParticlesRefineToLevel} &
+\todo\ \code{NewMovieDumpNumber} &
 \todo\ \code{NewMovieLeftEdge} \\
-\todo\ \code{NewMovieName} \\
-\todo\ \code{NewMovieParticleOn} \\
+\todo\ \code{NewMovieName} &
+\todo\ \code{NewMovieParticleOn} &
 \todo\ \code{NewMovieRightEdge} \\
-\todo\ \code{NumberOfBufferZones} \\
-\todo\ \code{NumberOfParticleAttributes} \\
+\todo\ \code{NumberOfBufferZones} &
+\todo\ \code{NumberOfParticleAttributes} &
 \todo\ \code{NumberOfParticles} \\
-\todo\ \code{OutputFirstTimeAtLevel} \\
-\todo\ \code{ParallelParticleIO} \\
+\todo\ \code{OutputFirstTimeAtLevel} &
+\todo\ \code{ParallelParticleIO} &
 \todo\ \code{ParallelRootGridIO} \\
-\todo\ \code{ParticleBoundaryType} \\
-\todo\ \code{ParticleCourantSafetyNumber} \\
+\todo\ \code{ParticleBoundaryType} &
+\todo\ \code{ParticleCourantSafetyNumber} &
 \todo\ \code{ParticleTypeInFile} \\
-\todo\ \code{ParticleTypeInFile} \\
-\todo\ \code{PartitionNestedGrids} \\
+\todo\ \code{ParticleTypeInFile} &
+\todo\ \code{PartitionNestedGrids} &
 \todo\ \code{PointSourceGravityConstant} \\
-\todo\ \code{PointSourceGravityCoreRadius} \\
-\todo\ \code{PointSourceGravity} \\
+\todo\ \code{PointSourceGravityCoreRadius} &
+\todo\ \code{PointSourceGravity} &
 \todo\ \code{PointSourceGravityPosition} \\
-\todo\ \code{PPMDiffusionParameter} \\
-\todo\ \code{PPMFlatteningParameter} \\
+\todo\ \code{PPMDiffusionParameter} &
+\todo\ \code{PPMFlatteningParameter} &
 \todo\ \code{PPMSteepeningParameter} \\
-\todo\ \code{PressureFree} \\
-\todo\ \code{ProblemType} \\
+\todo\ \code{PressureFree} &
+\todo\ \code{ProblemType} &
 \todo\ \code{RadHydroParamfile} \\
-\todo\ \code{RadiationFieldLevelRecompute} \\
-\todo\ \code{RadiationFieldType} \\
+\todo\ \code{RadiationFieldLevelRecompute} &
+\todo\ \code{RadiationFieldType} &
 \todo\ \code{RadiationHydrodynamics} \\
-\todo\ \code{RadiationSpectrumNormalization} \\
-\todo\ \code{RadiationSpectrumSlope} \\
+\todo\ \code{RadiationSpectrumNormalization} &
+\todo\ \code{RadiationSpectrumSlope} &
 \todo\ \code{RadiativeCooling} \\
-\todo\ \code{RandomForcingEdot} \\
-\todo\ \code{RandomForcing} \\
+\todo\ \code{RandomForcingEdot} &
+\todo\ \code{RandomForcing} &
 \todo\ \code{RandomForcingMachNumber} \\
-\todo\ \code{RedshiftDumpDir} \\
-\todo\ \code{RedshiftDumpName} \\
+\todo\ \code{RedshiftDumpDir} &
+\todo\ \code{RedshiftDumpName} &
 \todo\ \code{RefineBy} \\
-\todo\ \code{RefineByJeansLengthSafetyFactor} \\
-\todo\ \code{RefineRegionLeftEdge} \\
+\todo\ \code{RefineByJeansLengthSafetyFactor} &
+\todo\ \code{RefineRegionLeftEdge} &
 \todo\ \code{RefineRegionRightEdge} \\
-\todo\ \code{RestartDumpDir} \\
-\todo\ \code{RestartDumpName} \\
+\todo\ \code{RestartDumpDir} &
+\todo\ \code{RestartDumpName} &
 \todo\ \code{RestartDumpNumber} \\
-\todo\ \code{RightFaceBoundaryCondition} \\
-\todo\ \code{S2ParticleSize} \\
+\todo\ \code{RightFaceBoundaryCondition} &
+\todo\ \code{S2ParticleSize} &
 \todo\ \code{SelfGravity} \\
-\todo\ \code{SetHeIIHeatingScale} \\
-\todo\ \code{SetUVBAmplitude} \\
+\todo\ \code{SetHeIIHeatingScale} &
+\todo\ \code{SetUVBAmplitude} &
 \todo\ \code{SRBprefix} \\
-\todo\ \code{StarEnergyToQuasarUV} \\
-\todo\ \code{StarEnergyToStellarUV} \\
+\todo\ \code{StarEnergyToQuasarUV} &
+\todo\ \code{StarEnergyToStellarUV} &
 \todo\ \code{StarEnergyToThermalFeedback} \\
-\todo\ \code{StarMakerMassEfficiency} \\
-\todo\ \code{StarMakerMinimumDynamicalTime} \\
+\todo\ \code{StarMakerMassEfficiency} &
+\todo\ \code{StarMakerMinimumDynamicalTime} &
 \todo\ \code{StarMakerMinimumMass} \\
-\todo\ \code{StarMakerOverDensityThreshold} \\
-\todo\ \code{StarMassEjectionFraction} \\
+\todo\ \code{StarMakerOverDensityThreshold} &
+\todo\ \code{StarMassEjectionFraction} &
 \todo\ \code{StarMetalYield} \\
-\todo\ \code{StarParticleCreation} \\
-\todo\ \code{StarParticleFeedback} \\
-\todo\ \code{StaticHierarchy} \\
-\todo\ \code{StaticRefineRegionLeftEdge} \\
-\todo\ \code{StaticRefineRegionLevel} \\
+\todo\ \code{StarParticleCreation} &
+\todo\ \code{StarParticleFeedback} &
+\todo\ \code{StaticHierarchy}
+\end{tabular}
+
+\begin{tabular}{lll}
+\todo\ \code{StaticRefineRegionLeftEdge} &
+\todo\ \code{StaticRefineRegionLevel} &
 \todo\ \code{StaticRefineRegionRightEdge} \\
-\todo\ \code{StopCPUTime} \\
-\todo\ \code{StopCycle} \\
+\todo\ \code{StopCPUTime} &
+\todo\ \code{StopCycle} &
 \todo\ \code{StopFirstTimeAtLevel} \\
-\todo\ \code{StopTime} \\
+\todo\ \code{StopTime} &
+\todo\ \code{TimeActionParameter} &
 \todo\ \code{TimeActionParameter} \\
-\todo\ \code{TimeActionParameter} \\
-\todo\ \code{TimeActionRedshift} \\
-\todo\ \code{TimeActionRedshift} \\
+\todo\ \code{TimeActionRedshift} &
+\todo\ \code{TimeActionRedshift} &
 \todo\ \code{TimeActionTime} \\
-\todo\ \code{TimeActionTime} \\
-\todo\ \code{TimeActionType} \\
+\todo\ \code{TimeActionTime} &
+\todo\ \code{TimeActionType} &
 \todo\ \code{TimeLastDataDump} \\
-\todo\ \code{TimeLastHistoryDump} \\
-\todo\ \code{TimeLastMovieDump} \\
+\todo\ \code{TimeLastHistoryDump} &
+\todo\ \code{TimeLastMovieDump} &
 \todo\ \code{TimeLastRestartDump} \\
-\todo\ \code{TimeLastTracerParticleDump} \\
-\todo\ \code{tiny\_number} \\
+\todo\ \code{TimeLastTracerParticleDump} &
+\todo\ \code{tiny\_number} &
 \todo\ \code{TopGridDimensions} \\
-\todo\ \code{TopGridGravityBoundary} \\
-\todo\ \code{TopGridRank} \\
+\todo\ \code{TopGridGravityBoundary} &
+\todo\ \code{TopGridRank} &
 \todo\ \code{TracerParticleDumpDir} \\
-\todo\ \code{TracerParticleDumpName} \\
-\todo\ \code{TracerParticleDumpNumber} \\
+\todo\ \code{TracerParticleDumpName} &
+\todo\ \code{TracerParticleDumpNumber} &
 \todo\ \code{TracerParticleOn} \\
-\todo\ \code{UniformGravityConstant} \\
-\todo\ \code{UniformGravityDirection} \\
+\todo\ \code{UniformGravityConstant} &
+\todo\ \code{UniformGravityDirection} &
 \todo\ \code{UniformGravity} \\
-\todo\ \code{Unigrid} \\
-\todo\ \code{UseMinimumPressureSupport} \\
+\todo\ \code{Unigrid} &
+\todo\ \code{UseMinimumPressureSupport} &
 \todo\ \code{VersionNumber} \\
-\todo\ \code{WritePotential} \\
-\todo\ \code{ZEUSLinearArtificialViscosity} \\
-\todo\ \code{ZEUSQuadraticArtificialViscosity} \\
+\todo\ \code{WritePotential} &
+\todo\ \code{ZEUSLinearArtificialViscosity} &
+\todo\ \code{ZEUSQuadraticArtificialViscosity}
+\end{tabular}
 
 \end{document}
 
