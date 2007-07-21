@@ -11,19 +11,17 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Software Design Document}{James Bordner}{v0.0.1}
+\TITLE{Software Design Document}{James Bordner}{unigrid hydro}
 %=======================================================================
 
+\tableofcontents
 %=======================================================================
 \section{Introduction} \label{s:intro}
 %=======================================================================
 
-\note{Languages: C++ / C99}
-
-\note{Parallelism: MPI, MPI2, OpenMP, pthreads, UPC}
-
-\note{Hide parallelism and datastructures from physics}
-
+Computer languages used will be C++, C99, and source languages of
+incorporated legacy code.  Parallelism will be via MPI2's one-sided
+\code{get()}.
 
 %=======================================================================
 \section{Compilation configuration} \label{s:compile}
@@ -33,53 +31,113 @@
 \section{Command-line options} \label{s:commandline}
 %=======================================================================
 
+Usage: \code{cello} \textit{parameter-file}
+
 %=======================================================================
-\section{Initial run-time input} \label{s:input}
+\section{Input parameters} \label{s:input}
 %=======================================================================
 
-\cello\ is controlled by parameters specified in an input file.
+\cello\ is controlled by parameters specified in an input file.  Parameters
+are organized into the following categories:
 
+\begin{itemize}
+\item Problem
+\item Physics
+\item Algorithms
+\item Data
+\item Concurrency
+\item I/O
+\item Performance
+\end{itemize}
 
+Equivalent \enzo\ parameters
 
-\subsection{Problem}
+\begin{tabular}{ll}
+ControlCourantSafetyFactor        & CourantSafetyNumber \\
+ControlStopCycle           & StopCycle \\
+ControlStopTime            & StopTime \\
+HydroMethod                & HydroMethod \\
+HydroParameter "diffusion"    & PPMDiffusionParameter \\
+HydroParameter "dual-energy"  & DualEnergyFormalism \\
+HydroParameter "eta1"    & DualEnergyFormalismEta1 \\
+HydroParameter "eta2"    & DualEnergyFormalismEta2 \\
+HydroParameter "flattening"   & PPMFlatteningParameter \\
+HydroParameter "pressure free" & PressureFree \\
+HydroParameter "steepening"  & PPMSteepeningParameter \\
+Material1Gamma             & Gamma \\
+OutputUserDt               & dtDataDump \\
+OutputUserDumpName         & DataDumpName \\
+ProblemBcLower             & LeftFaceBoundaryCondition \\
+ProblemBcUpper             & RightFaceBoundaryCondition \\
+ProblemDomainLower         & DomainLeftEdge \\
+ProblemDomainUpper         & DomainRightEdge \\
+ProblemStartCycle          & InitialCycleNumber \\
+ProblemStartTime           & InitialTime \\
+                           & ProblemType \\
+\end{tabular}
 
-Problem parameters specify the problem setup.
+%-----------------------------------------------------------------------
+\subsection{Problem parameters}
+%-----------------------------------------------------------------------
+
+Problem parameters specify the setup of the physical problem,
+including initial conditions of relevant data fields and boundary
+conditions.
 
   dimensionality
   domain extents
   initial conditions (materials, regions, input)
  boundary conditions (periodic, in-/out-flow, specified, dynamic)
 
-\subsection{Physics}
+%-----------------------------------------------------------------------
+\subsection{Physics parameters}
+%-----------------------------------------------------------------------
 
- Specify physics components
+Physics parameters specify physics modules and units.
+
  hydrodynamics
   cosmological expansion
  self-gravity
 
-\subsection{Algorithms} 
+Hydrodynamics
 
-Specify algorithms and their parameters
- PPM hydro (dual-energy, etc.)
- gravity solver (FAC, smoother, levels, etc.)
 
-\subsection{Datastructures} 
+%-----------------------------------------------------------------------
+\subsection{Algorithms parameters} 
+%-----------------------------------------------------------------------
 
-Specify datastructures and their parameters
- PatchAMR (levels, grid size or count, rebuild method, distribution)
- Field storage (blocked, padded, interleved)
+Specify algorithms and their parameters.
 
-\subsection{Parallelism} 
+Hydrodynamics dual-energy
 
-Specifiy parallelism and parameters
- MPI (send/recv and type, one-sided and type, what level)
- OpenMP (num threads, what level)
- UPC (num threads, what level)
- pthreads (num threads, what level)
- cooperative parallelism
- levels for each if multiple
+Hydrodynamics steepening
+Hydrodynamics flattening
+Hydrodynamics diffusion
 
-\subsection{Output} 
+Timestepping
+
+%-----------------------------------------------------------------------
+\subsection{Data parameters}
+%-----------------------------------------------------------------------
+
+Specify low-level datastructures (fields and particles) and their
+parameters.
+
+Use chunked field storage \\
+Field chunk size or range
+
+%-----------------------------------------------------------------------
+\subsection{Concurrency parameters} 
+%-----------------------------------------------------------------------
+
+Specifiy method for controling parallelism
+
+   parallelization method (MPI buffered/blocking, MPI2 Get)
+
+
+%-----------------------------------------------------------------------
+\subsection{I/O parameters} 
+%-----------------------------------------------------------------------
 
 Output types and parameters
  checkpoint (dump all)
@@ -88,43 +146,199 @@ Output types and parameters
  analysis (type of analysis, rate)
  level of output (files for timestep, time, etc.)
 
-\subsection{Control} 
 
-Global control
- fault tolerance methodology
- adaptivity
+%-----------------------------------------------------------------------
+\subsection{Performance parameters} 
+%-----------------------------------------------------------------------
 
-\subsection{Performance} 
-
-Performance monitoring
+Performanec parameters control \lcaperf\ instrumentation.
 
 
 
 %=======================================================================
-\section{Objects} \label{s:intro}
+\section{Classes} \label{s:classes}
 %=======================================================================
 
-\begin{description}
-\item[\code{Hierarchy}: ] SAMR grid hierarchy
-\item[\code{Level}: ]     A level in an SAMR grid hierarchy
-\item[\code{Grid}: ]      A grid patch in an SAMR grid hierarchy
-\item[\code{Field}: ]     A data field
-\item[\code{PatchAMR}: ]  Structured-AMR method
-\item[\code{CellAMR}: ]   Continuous-AMR method
-\item[\code{Units}: ]     Data field units
-\item[\code{Array}: ]     A Fortran-style array, possibly ``chunked'' or ``padded''
-\item[\code{CoArray}: ]   A Co-array Fortran-style co-array
-\item[\code{Particles}: ] A collection of particles
-\item[\code{Scheduler}: ]  Hierarchical parallelism task scheduler
-\item[\code{Dependencies}: ] Dependencies for tasks
-\item[\code{Tasks}: ]     A collection of parallel tasks
-\item[\code{Bc}: ]        Boundary conditions
-      Schedule (for organizing parallel tasks)
-\item[\code{Box}: ]       Low-level grid (KeLP functionality)
-\item[\code{Balance}: ]    Load-balancing
-\item[\code{Timesteping}: ] Time-stepping
-\item[\code{IO}: ]         Parallel IO
-\end{description}
+\begin{itemize}
+\item Parameters
+\item Domain
+\item BC
+\item IC
+\item Problem
+\item Array
+\item Box
+\item Hierarchy
+\item Level
+\item Grid
+\item Tree
+\item Field
+\item Units
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Parameters} class}
+%-----------------------------------------------------------------------
+
+The \code{Parameters} class read in a parameter file or files, and
+provide the application access to parameter values.
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Domain} class}
+%-----------------------------------------------------------------------
+
+The \code{Domain} class defines the problem domain
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{BC} class}
+%-----------------------------------------------------------------------
+
+The \code{BC} class defines boundary conditions on a \code{Domain}.
+
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{IC} class}
+%-----------------------------------------------------------------------
+
+The \code{IC} class defines initial conditions for a set of
+\code{Field}s in a \code{Domain}.
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Problem} class}
+%-----------------------------------------------------------------------
+
+The \code{Problem} class defines the problem to be solved, including
+the domain, boundary conditions, and initial field values.
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Array} class}
+%-----------------------------------------------------------------------
+
+The \code{Array} class defines a Fortran-style array.  \code{Array}s may
+have optional support for storing blocked or chunked arrays, include
+array padding, or store interleaved arrays.
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Box} class}
+%-----------------------------------------------------------------------
+
+The \code{Box} class is for representing a box, and provides KeLP-like functionality.
+Boxes are determined by two points, which may be of any parameterized type
+(e.g.~\code{int} or \code{double}, etc.).
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Hierarchy} class}
+%-----------------------------------------------------------------------
+
+A \code{Hierarchy} class represents a distributed structured AMR grid
+hierarchy.  A \code{Hierarchy} can be considered to be composed of
+\code{Level}s, which are in turn composed of \code{Grid}s; or a \code{Hierarchy}
+can be considered to be composed of a set of \code{Tree}s.
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Level} class}
+%-----------------------------------------------------------------------
+
+A \code{Level} class represents a level in a distributed structured
+AMR grid hierarchy (\code{Hierarchy}, where a level is defined as all
+grid patches (\code{Grid}s) that have the same resolution.  A \code{Level}
+is usually contained in a \code{Hierarchy}.
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Tree} class}
+%-----------------------------------------------------------------------
+
+A \code{Tree} class represents a tree in a distributed structured AMR
+grid hierarchy (\code{Hierarchy}), where a tree is defined as a grid patch
+in a hierarchy, together with all of its descendents, up to a specified
+level.
+
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Grid} class}
+%-----------------------------------------------------------------------
+
+A \code{Grid} class represents a grid patch in a distributed structured
+AMR grid hierarchy (\code{Hierarchy}).  A \code{Grid} is defined by a
+\code{Box}, a \code{ProcessorGroup}, and a size which determines
+the size of \code{Array}s defined on the \code{Grid}.  Each
+\code{Grid} is contained in a \code{Level}.
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Field} class}
+%-----------------------------------------------------------------------
+
+A \code{Field} represents a discrete multiresolution scalar or vector
+field.  A \code{Field} is associated with a \code{Hierarchy}, and is
+composed of \code{Array}'s defined on a subset of \code{Grid}s in the
+\code{Hierarchy}.
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Units} class}
+%-----------------------------------------------------------------------
+
+A \code{Units} class represents the physical units for the data in a
+\code{Field}.
+
+\subsubsection{Attributes}
+
+\subsubsection{Operations}
 
 %==================================================================
 \end{document}
