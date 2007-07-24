@@ -1,6 +1,6 @@
 dimension 3
 
-sphere 5.993985e27 6.378137e8 0.0 0.0 0.0
+sphere 5.993985e27 6.378137e8
 
 #
 # Two nested grids

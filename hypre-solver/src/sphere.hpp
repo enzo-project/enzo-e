@@ -20,7 +20,6 @@ class Sphere
  private:
 
   Scalar     *c_;   // Center
-  Scalar     *v_;   // Velocity
   Scalar      r_;   // Radius
   Scalar      m_;   // Mass
 

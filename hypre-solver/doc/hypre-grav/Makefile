@@ -11,10 +11,11 @@ FIG = fig/discret1.eps fig/discret2.eps fig/discret3.eps \
 ########################################################################
 hypre-grav.ps:hypre-grav.dvi $(FIG)
 	dvips -o hypre-grav.ps hypre-grav.dvi
-hypre-grav.dvi:hypre-grav.tex include.tex
+hypre-grav.dvi:hypre-grav.tex include.tex UML
 	-latex hypre-grav
 	-latex hypre-grav
-	-latex hypre-grav
+UML:
+	make -C uml
 hypre-grav2.ps:hypre-grav.ps
 	a2ps -M Letter -2 hypre-grav.ps -o hypre-grav2.ps
 pdf.hypre-grav:hypre-grav.dvi
@@ -28,6 +29,8 @@ include.tex:
 
 clean:
 	-@rm -f *~ *.dvi *.ind *.idx *.ilg *.aux *.bbl *.blg *.log *.toc *.ps *.pdf *.glo `find . -name "*" -type l`
+	$(MAKE) -C uml clean
+
 
 
 

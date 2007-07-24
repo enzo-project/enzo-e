@@ -12,114 +12,110 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{\hypre\ AMR Self-Gravity Solver}
+\TITLE{\hypre\ SAMR Self-Gravity Solver}
       {James Bordner}
       {in preparation}
 %=======================================================================
 
-\tableofcontents
 %======================================================================
 \section{Scope}
 %======================================================================
 
-   The purpose of this document is to specify the requirements,
-   describe the design and implementation, and present test results
-   for \hypregrav.
+   \hypregrav\ is a test driver for \hypre\ solvers (in particular the
+   FAC solver) for Poisson problems defined on distributed SAMR
+   hierarchies.  The purpose of this document is to specify the
+   requirements, describe the design and implementation, and present
+   test results for \hypregrav.
 
-%======================================================================
-\section{Introduction}
-%======================================================================
-
-\hypregrav\ is a parallel self-gravity problem generator and solver.
-Test problems are defined on distributed SAMR grid hierarchies, and
-solved by calling the \code{SStruct} \hypre\ solver interface.
-
-%=======================================================================
-\section{Requirements} \label{s:requirements}
-%=======================================================================
-
-We break the problem into two phases: problem generation
-(\code{hypre-init}), and problem solving
-(\code{hypre-solve}).  
-
-\code{hypre-init} takes as input ``high-level'' parameters
-describing the problem characteristics, such as bounds on grid sizes,
-number of processors, mass distribution function, etc.  The output is
-a file of ``low-level'' parameters that specify the exact problem to
-solve, such as grid locations, sizes, levels, and processors; point
-mass locations and masses; etc.
-
-This output file is subsequently input by \code{hypre-solve}, together
-with solver-specific parameters.  A linear system is assembled and
-solved using \hypre, and the solution, performance information, and
-solver efficiency information, etc., are output.
+   We break the problem into two phases: problem generation
+   (\code{hypre-init}), and problem solution (\code{hypre-grav}).
+   \code{hypre-init} takes as input parameters describing the problem
+   characteristics in general terms, such as bounds on grid sizes,
+   number of processors, description of how to distribute points, etc.
+   The output is a file of parameters that specify the exact problem
+   to solve, such as grid locations, sizes, levels, and processors;
+   point mass locations and masses; etc.  This file output by
+   \code{hypre-init} is subsequently input by \code{hypre-grav},
+   together with solver-specific parameters.  A distributed linear
+   system is assembled and solved using \hypre, and the solution,
+   performance information, solver efficiency information, etc., are
+   output.
 
 %-----------------------------------------------------------------------
 \subsection{\code{hypre-init}}
 %-----------------------------------------------------------------------
 
-\textbf{Input}
+% \textbf{Input}
+% 
+% \begin{tabbing}
+% xxxxx\=xxx\=\kill\\ 
+% \> \todo \>  Maximum number of point masses \\
+% \> \todo \>  Description of probability distribution of point masses \\
+% \> \todo \>  Number of spheres \\
+% \> \todo \>  Positions of spheres \\
+% \> \todo \>  Masses of spheres \\
+% \> \todo \>  Extents of the domain \\
+%  \\
+% \> \todo \>  Lower bound on grid sizes \\
+% \> \todo \>  Upper bound on grid sizes \\
+% \> \todo \>  Upper bound on number of grids \\
+%  \\
+% \> \todo \>  AMR hierarchy depth \\
+% \> \todo \>  AMR Refinement factor (2,3,4) \\
+% \end{tabbing}
+% 
+% \textbf{Output}
+% 
+%  depth of refinement point layer around point masses
+%  depth of refinement point layer around spheres
 
-\begin{tabbing}
-xxxxx\=xxx\=\kill\\ 
-\> \todo \>  Maximum number of point masses \\
-\> \todo \>  Description of probability distribution of point masses \\
-\> \todo \>  Number of spheres \\
-\> \todo \>  Positions of spheres \\
-\> \todo \>  Masses of spheres \\
-\> \todo \>  Extents of the domain \\
- \\
-\> \todo \>  Lower bound on grid sizes \\
-\> \todo \>  Upper bound on grid sizes \\
-\> \todo \>  Upper bound on number of grids \\
- \\
-\> \todo \>  AMR hierarchy depth \\
-\> \todo \>  AMR Refinement factor (2,3,4) \\
-\end{tabbing}
-
-\textbf{Output}
+\begin{center}
+\epsfig{file=uml/hierarchy.1,width=0.75in}
+\epsfig{file=uml/grid.1,     width=2.00in}
+\epsfig{file=uml/field.1,    width=0.75in}
+%\epsfig{file=uml/level.1,    width=2.65in}
+\end{center}
 
 
 %-----------------------------------------------------------------------
-\subsection{\code{hypre-solve}}
+\subsection{\code{hypre-grav}}
 %-----------------------------------------------------------------------
 
 \textbf{Input}
 
 \begin{tabbing}
-xxxxx\=xxx\=\kill\\ 
-\> \done \textit{dimension $<$dimension$>$} \\
-\> \> \code{int dimension}
+xxxxx\=xxx\=\kill
+\> \done \textbf{dimension $<$dimension$>$} \\
+\> \> \textit{int dimension}
+\end{tabbing}
+\begin{tabbing}
+xxxxx\=xxx\=\kill
+\> \done \textbf{sphere $<$mass$>$ $<$radius$>$ $<$center$>$} \\
+\>\> \textit{Scalar mass} \\
+\>\> \textit{Scalar radius} \\
+\>\> \textit{Scalar center[3]}
 \end{tabbing}
 
 \begin{tabbing}
-xxxxx\=xxx\=\kill\\ 
-\> \done \textit{sphere $<$mass$>$ $<$radius$>$ $<$center$>$} \\
-\>\> \code{Scalar mass} \\
-\>\> \code{Scalar radius} \\
-\>\> \code{Scalar center[3]}
+xxxxx\=xxx\=\kill
+\> \done \code{point $<$mass$>$ $<$location$>$} \\
+\>\> \textit{Scalar mass} \\
+\>\> \textit{Scalar location[3]}
 \end{tabbing}
 
 \begin{tabbing}
-xxxxx\=xxx\=\kill\\ 
-\> \done \textit{point $<$mass$>$ $<$position$>$} \\
-\>\> \code{Scalar mass} \\
-\>\> \code{Scalar position[3]}
+xxxxx\=xxx\=\kill
+\> \code{grid} $<$id$>$ $<$parent-id$>$ $<$processor$>$ $<$low-node$>$ $<$high-node$>$ $<$node-count$>$ \\
+\> \> \textit{int id} $> 0$ \\
+\> \> \textit{int parent-id} $>= 0$  \\
+\> \> \textit{int processor} \\
+\> \> \textit{Scalar vertex-low}\textit{[3]} \\
+\> \> \textit{Scalar vertex-high}\textit{[3]} \\
+\> \> \textit{int zone-count}\textit{[3]}
 \end{tabbing}
 
 \begin{tabbing}
-xxxxx\=xxx\=\kill\\ 
-\> \textit{grid} $<$id$>$ $<$parent-id$>$ $<$processor$>$ $<$low-node$>$ $<$high-node$>$ $<$node-count$>$ \\
-\> \> \code{int id} $\ge 0$ \\
-\> \> \code{int parent-id} $\ge 0$  \\
-\> \> \code{int processor} \\
-\> \> \code{Scalar vertex-lower}\code{[3]} \\
-\> \> \code{Scalar vertex-upper}\code{[3]} \\
-\> \> \code{int zones}\code{[3]} \textit{// Not needed? store in level if constant resolution}
-\end{tabbing}
-
-\begin{tabbing}
-xxxxx\=xxx\=\kill\\ 
+xxxxx\=xxx\=\kill
 \> \todo \>   Type of discretization at AMR boundaries (1st-order, 2nd-order) \\
  \\
 \> \todo \>    Level-0 processor distribution \\
@@ -229,7 +225,7 @@ xxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxx\=\kill\\
 \end{tabbing}
 
 %=======================================================================
-\subsection{Discretization} \label{s:discretization}
+\section{Discretization} \label{s:discretization}
 %=======================================================================
 
 \newcommand{\indvar}{r}
@@ -438,7 +434,7 @@ Types of matrix elements for a given unknown:
 \end{tabular}
 
 %=======================================================================
-\section{Testing} \label{s:testing}
+\section{Results} \label{s:results}
 %=======================================================================
 
 \EndDOCUMENT

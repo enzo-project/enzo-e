@@ -57,10 +57,6 @@ Sphere::Sphere (Scalar mass,
   if (d_ >= 1) c_[0] = c[0];
   if (d_ >= 2) c_[1] = c[1];
   if (d_ >= 3) c_[2] = c[2];
-
-  if (d_ >= 1) v_[0] = v[0];
-  if (d_ >= 2) v_[1] = v[1];
-  if (d_ >= 3) v_[2] = v[2];
 }
 
 //----------------------------------------------------------------------
@@ -85,10 +81,6 @@ Sphere::Sphere (const Sphere & s) throw ()
   if (d_ >= 1) c_[0] = s.c_[0];
   if (d_ >= 2) c_[1] = s.c_[1];
   if (d_ >= 3) c_[2] = s.c_[2];
-
-  if (d_ >= 1) v_[0] = s.v_[0];
-  if (d_ >= 2) v_[1] = s.v_[1];
-  if (d_ >= 3) v_[2] = s.v_[2];
 }
 
 //----------------------------------------------------------------------
@@ -103,9 +95,6 @@ Sphere & Sphere::operator = (const Sphere & s) throw ()
   if (d_ >= 1) c_[0] = s.c_[0];
   if (d_ >= 2) c_[1] = s.c_[1];
   if (d_ >= 3) c_[2] = s.c_[2];
-  if (d_ >= 1) v_[0] = s.v_[0];
-  if (d_ >= 2) v_[1] = s.v_[1];
-  if (d_ >= 3) v_[2] = s.v_[2];
   return *this;
 }
 
@@ -117,12 +106,10 @@ void Sphere::print () throw ()
 	  "   dimension  %d\n"
 	  "   radius     "SCALAR_PRINTF "\n"
 	  "   mass       "SCALAR_PRINTF "\n"
-	  "   position   "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF "\n"
-	  "   velocity   "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF "\n",
+	  "   position   "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF "\n",
 	  d_,
 	  r_,m_,
-	  c_[0],c_[1],c_[2],
-	  v_[0],v_[1],v_[2]);
+	  c_[0],c_[1],c_[2]);
 }
 
 //======================================================================
@@ -133,11 +120,9 @@ void Sphere::write (FILE *fp) throw ()
 
   fprintf (fp,"sphere " 
 	   SCALAR_PRINTF SCALAR_PRINTF 
-	   SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF 
 	   SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF "\n",
 	   m_,r_,
-	   c_[0],c_[1],c_[2],
-	   v_[0],v_[1],v_[2]);
+	   c_[0],c_[1],c_[2]);
 }
 
 //----------------------------------------------------------------------
@@ -146,11 +131,9 @@ void Sphere::read (std::string parms) throw ()
 {
   sscanf (parms.c_str(),
   	  SCALAR_SCANF SCALAR_SCANF 
-  	  SCALAR_SCANF SCALAR_SCANF SCALAR_SCANF
- 	  SCALAR_SCANF SCALAR_SCANF SCALAR_SCANF,
+  	  SCALAR_SCANF SCALAR_SCANF SCALAR_SCANF,
 	  &m_,&r_,
-	  &c_[0],&c_[1],&c_[2],
-	  &v_[0],&v_[1],&v_[2]);
+	  &c_[0],&c_[1],&c_[2]);
 }
 
 //======================================================================
@@ -158,7 +141,6 @@ void Sphere::read (std::string parms) throw ()
 void Sphere::dealloc_ () throw ()
 {
   delete [] c_;  c_ = 0;
-  delete [] v_;  v_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -166,5 +148,4 @@ void Sphere::dealloc_ () throw ()
 void Sphere::alloc_ (int d) throw ()
 {
   c_ = new Scalar [ d ];
-  v_ = new Scalar [ d ];
 }
