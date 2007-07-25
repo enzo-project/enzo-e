@@ -1,7 +1,7 @@
 %0       1         2         3         4         5         6         7         8
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-\documentclass[11pt]{article}
+\documentclass[10pt]{article}
 
 \include{include}
 
@@ -12,38 +12,68 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{\hypre\ SAMR Self-Gravity Solver}
+\TITLE{\hypre\ SAMR Linear Solver}
       {James Bordner}
       {in preparation}
 %=======================================================================
 
+\tableofcontents
 %======================================================================
-\section{Scope}
+\section{Overview}
 %======================================================================
 
-   \hypregrav\ is a test driver for \hypre\ solvers (in particular the
-   FAC solver) for Poisson problems defined on distributed SAMR
+   \hypresolve\ will be used as a testbed for experimenting with the
+   parallel solution of linear systems arising from self-gravity and
+   radiation transfer algorithms defined on distributed SAMR
    hierarchies.  The purpose of this document is to specify the
    requirements, describe the design and implementation, and present
-   test results for \hypregrav.
+   test results for \hypresolve.
 
    We break the problem into two phases: problem generation
-   (\code{hypre-init}), and problem solution (\code{hypre-grav}).
+   (\code{hypre-init}), and problem solution (\code{hypre-solve}).
    \code{hypre-init} takes as input parameters describing the problem
    characteristics in general terms, such as bounds on grid sizes,
-   number of processors, description of how to distribute points, etc.
-   The output is a file of parameters that specify the exact problem
-   to solve, such as grid locations, sizes, levels, and processors;
-   point mass locations and masses; etc.  This file output by
-   \code{hypre-init} is subsequently input by \code{hypre-grav},
-   together with solver-specific parameters.  A distributed linear
-   system is assembled and solved using \hypre, and the solution,
-   performance information, solver efficiency information, etc., are
-   output.
+   number of processors, description of how to distribute point
+   masses, etc.  The output is a file of parameters that specify the
+   exact problem to solve, including grid locations, sizes, levels,
+   point mass locations, etc.  This file output by \code{hypre-init}
+   is subsequently input by \code{hypre-solve}, together with
+   solver-specific parameters.  A distributed linear system is
+   assembled and solved using \hypre, and the solution, performance
+   information, solver efficiency information, etc., are output.
+
+   \note{top-level diagram: problem description $\Rightarrow$
+   \code{hypre-init} $\Rightarrow$ problem specification $\Rightarrow$
+   \code{hypre-solve} $\Rightarrow$ problem results}
+
+%======================================================================
+\section{Components}
+%======================================================================
 
 %-----------------------------------------------------------------------
-\subsection{\code{hypre-init}}
+\subsection{\code{hypre-init}} \label{ss:hypre-init}
 %-----------------------------------------------------------------------
+
+\subsubsection{Input}  \label{sss:hypre-init-input}
+
+\begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \todo\ \code{dimension} \> \code{\textit{int dimension}} \\
+\> \todo\ \code{particle\_position\_clumpiness}  \\
+\> \todo\ \code{particle\_mass\_clumpiness} \\
+\> \todo\ \code{particle\_mass\_average} \\
+\> \todo\ \code{sphere} \> \code{\textit{Scalar mass}, \textit{Scalar radius}, \textit{Scalar 3*center}} \\
+\> \todo\  \code{domain\_extents} \\
+\> \todo\  \code{processor\_grid} \\
+\> \todo\ \code{discret} \> \code{\textit{int type}} \\
+\> \todo\  \code{levels} \\
+\> \todo\ \code{solver} \> \code{\{"fac"\} method}
+\end{tabbing}
+
+\subsubsection{Output} \label{sss:hypre-init-output}
+
+See \S\ref{sss:hypre-solve-input}.
+
 
 % \textbf{Input}
 % 
@@ -69,160 +99,165 @@
 %  depth of refinement point layer around point masses
 %  depth of refinement point layer around spheres
 
-\begin{center}
-\epsfig{file=uml/hierarchy.1,width=0.75in}
-\epsfig{file=uml/grid.1,     width=2.00in}
-\epsfig{file=uml/field.1,    width=0.75in}
-%\epsfig{file=uml/level.1,    width=2.65in}
-\end{center}
-
 
 %-----------------------------------------------------------------------
-\subsection{\code{hypre-grav}}
+\subsection{\code{hypre-solve}}  \label{ss:hypre-solve}
 %-----------------------------------------------------------------------
 
-\textbf{Input}
+\subsubsection{Input} \label{sss:hypre-solve-input}
+
+The following table lists the input parameters to \code{hypre-solve}.
 
 \begin{tabbing}
-xxxxx\=xxx\=\kill
-\> \done \textbf{dimension $<$dimension$>$} \\
-\> \> \textit{int dimension}
-\end{tabbing}
-\begin{tabbing}
-xxxxx\=xxx\=\kill
-\> \done \textbf{sphere $<$mass$>$ $<$radius$>$ $<$center$>$} \\
-\>\> \textit{Scalar mass} \\
-\>\> \textit{Scalar radius} \\
-\>\> \textit{Scalar center[3]}
+xxxxx\=xxxxxxxxxxx\=\kill
+\> \done\ \code{dimension} \> \code{\textit{int dimension}} \\
+\> \done\ \code{sphere} \> \code{\textit{Scalar mass}, \textit{Scalar radius}, \textit{Scalar 3*center}} \\
+\> \done\ \code{point} \> \code{\textit{Scalar mass}, \textit{Scalar 3*location}} \\
+\> \todo\ \code{grid} \> \code{\textit{int id}, \textit{int parent-id}, \textit{int processor}, \textit{Scalar vertex-lower}, \textit{Scalar vertex-upper}, \textit{int 3*zones}} \\
+\> \todo\ \code{discret} \> \code{\textit{int type}} \\
+\> \todo\ \code{solver} \> \code{\{"fac"\} method}
 \end{tabbing}
 
-\begin{tabbing}
-xxxxx\=xxx\=\kill
-\> \done \code{point $<$mass$>$ $<$location$>$} \\
-\>\> \textit{Scalar mass} \\
-\>\> \textit{Scalar location[3]}
-\end{tabbing}
+
+\subsubsection{Output}  \label{sss:hypre-solve-output}
 
 \begin{tabbing}
-xxxxx\=xxx\=\kill
-\> \code{grid} $<$id$>$ $<$parent-id$>$ $<$processor$>$ $<$low-node$>$ $<$high-node$>$ $<$node-count$>$ \\
-\> \> \textit{int id} $> 0$ \\
-\> \> \textit{int parent-id} $>= 0$  \\
-\> \> \textit{int processor} \\
-\> \> \textit{Scalar vertex-low}\textit{[3]} \\
-\> \> \textit{Scalar vertex-high}\textit{[3]} \\
-\> \> \textit{int zone-count}\textit{[3]}
+xxxxx\=xxxxxxxxxxxxxx\=\kill
+\> \todo\ \code{flops-balance} \>    \textit{Load balance efficiency with respect to flops}\\
+\> \todo\ \code{flops-proc-avg} \> \textit{Average flop counts over processors} \\
+\> \todo\ \code{flops-proc-max} \> \textit{Maximum flop counts over processors} \\
+\> \todo\ \code{flops-total} \> \textit{Number of floating point operations} \\
+\> \todo\ \code{mem-balance} \>    \textit{Load balance efficiency with respect to memory}\\
+\> \todo\ \code{mem-proc-avg} \> \textit{Average memory usage over processors} \\
+\> \todo\ \code{mem-proc-max} \>    \textit{Maximum memory usage over processors} \\
+\> \todo\ \code{mem-total} \> \textit{Amount of memory used} \\
+\> \todo\ \code{procs-total} \> \textit{Number of processors} \\
+\> \todo\ \code{time-total} \>  \textit{Time to solution}
 \end{tabbing}
 
-\begin{tabbing}
-xxxxx\=xxx\=\kill
-\> \todo \>   Type of discretization at AMR boundaries (1st-order, 2nd-order) \\
- \\
-\> \todo \>    Level-0 processor distribution \\
- \\
-\> \todo \>    Grid sizes \\
-\> \todo \>    Grid count \\
-\> \todo \>    Grid-to-processor mapping \\
- \\
-\> \todo \>    Linear solver \\
-\end{tabbing}
 
-\textbf{Output}
+%======================================================================
+\section{Using \hypre}
+%======================================================================
 
-\begin{tabbing}
-xxxxx\=xxx\=\kill\\ 
-\> \todo \>    Time to solution \\
-\> \todo \>    Time per timestep \\
-\> \todo \>    Maximum memory usage per node \\
-\> \todo \>    Load balance \\
-\> \todo \>    Parallel scaling \\
-\end{tabbing}
+This section describes the sequence of calls in \hypre\ used for
+setting up a linear system on an AMR hierarchy, and then solving it.
 
 
 %=======================================================================
 \section{Design} \label{s:design}
 %=======================================================================
 
-\code{hypre-grav} reads a parameter file that defines the setup.
-
-\begin{tabbing}
-xxxxx\=xxx\=xxxxxxxx\=\kill\\ 
-\> \todo \> \code{int}  \>   \code{dimension}     \\
-\\
-\> \todo \> \code{float} \>  \code{particle\_position\_clumpiness}  \\
-\> \todo \> \code{float} \>  \code{particle\_mass\_clumpiness} \\
-\> \todo \> \code{float} \>  \code{particle\_mass\_average} \\
-\\
-\> \todo \> \code{float} \>  \code{sphere\_center[3]} \\
-\> \todo \> \code{float} \>  \code{sphere\_radius} \\
-\> \todo \> \code{float} \>  \code{sphere\_mass} \\
-\\
-\> \todo \> \code{float} \>  \code{domain\_extents[3]} \\
-\\
-\> \todo \> \code{int} \>    \code{processor\_count[3]} \\
-\\
-\> \todo \> \code{string} \>  \code{discretization\_type \{"linear", "quadratic"\}} \\
-\\
-\> \todo \> \code{int} \>    \code{grid\_count[3]} \\
-\> \todo \> \code{int} \>    \code{grid\_size[3]} \\
-\\
-\> \todo \> \code{int} \>    \code{amr\_depth} \\
-\> \todo \> \code{int} \>    \code{amr\_grid\_count[N]} \\
-\> \todo \> \code{int} \>    \code{amr\_grid\_size[N]} \\
-\> \todo \> \code{string} \>    \code{amr\_load\_balance \{"none", "size"\}} \\
-\\
-\> \todo \> \code{string} \>  \code{solver \{"cg","fac"\}}
-\end{tabbing}
-
-Outputs
-
-\begin{enumerate}
-\item Time to solution
-\item Time per timestep
-\item Maximum memory usage per node
-\item Load balance
-\item Parallel scaling
-\end{enumerate}
-
 %-----------------------------------------------------------------------
-\subsection{Classes} \label{ss:classes}
+\section{Classes} \label{ss:classes}
 %-----------------------------------------------------------------------
 
 %-----------------------------------------------------------------------
-\subsubsection{\code{Problem} class}
+\subsection{AMR classes}
 
+The AMR hierarchy is represented using the trio of classes
+\code{hierarchy}, \code{Level}, and \code{Grid}.  A \code{Grid} is a
+box in space, and is decomposed into \code{GridLocal} and
+\code{GridRemote} classes (see \S\ref{sss:class-grid}).  Each
+\code{GridLocal} object has some number of \code{Field} objects
+associated with them (see \S\ref{sss:class-field}), though the
+\code{GridLocal} objects themselves do not store field data
+themselves.  A \code{Level} class is also either a ``structured''
+\code{LevelStruct} or an ``unstructured'' \code{LevelUnstruct}.
+Structured levels are composed of a regular array of \code{Grid}s, and
+is typically used for unigrid calculations or the root level of an AMR
+calculation.  Unstructured levels are typically used for non-root
+levels of an AMR calulation.
 
-\begin{tabbing}
-xxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxx\=\kill\\ 
-\>  \code{int} \> \code{dimension}                     \> \textit{Problem dimenion} \\
-\>  \code{std::vector$<$Sphere *$>$} \> \code{spheres} \> \textit{List of sphere masses} \\
-\>  \code{std::vector$<$Sphere *$>$} \> \code{points}  \> \textit{List of point masses} \\
-\>  \code{std::vector$<$Grid *$>$} \> \code{grids}   \> \textit{List of grids defining the hierarchy} \\
-\end{tabbing}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Sphere} class}
-
-\begin{tabbing}
-xxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxx\=\kill\\ 
-\>  \code{static int} \> \code{d\_}    \> \textit{Dimension} \\
-\>  \code{Scalar *} \> \code{x\_}   \> \textit{Position} \\
-\>  \code{Scalar} \> \code{r\_}    \> \textit{Radius} \\
-\>  \code{Scalar} \> \code{m\_}    \> \textit{Mass} \\
-\end{tabbing}
+\begin{center}
+\epsfig{file=uml/hierarchy.1,width=0.75in}
+\end{center}
 
 %-----------------------------------------------------------------------
-\subsubsection{\code{Grid} class}
+\subsubsection{\code{Hierarchy} class} \label{sss:class-hierarchy}
 
-\begin{tabbing}
-xxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxx\=\kill\\ 
-\>  \code{static int} \> \code{d\_}   \> \textit{Spacial dimension} \\
-\>  \code{int} \> \code{p\_}   \> \textit{Processor rank} \\
-\>  \code{int} \> \code{l\_}   \> \textit{Hierarchy level (root==0)} \\
-\>  \code{Scalar *} \> \code{xl\_}  \> \textit{Lower position} \\
-\>  \code{Scalar *} \> \code{xu\_}  \> \textit{Upper position} \\
-\>  \code{int *} \> \code{n\_}   \> \textit{Number of zones (excluding ghosts)} \\
-\end{tabbing}
+\begin{center}
+\epsfig{file=uml/class-hierarchy.1,width=1.5in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Level} class} \label{sss:class-level}
+
+\begin{center}
+\epsfig{file=uml/class-level.1,width=1.5in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Grid} class} \label{sss:class-grid}
+
+\begin{center}
+\epsfig{file=uml/grid.1,     width=2.00in}
+\end{center}
+
+
+\begin{center}
+\epsfig{file=uml/class-grid.1,width=2.5in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsection{Problem classes}
+
+\code{Problem}, \code{Sphere}, and \code{Point}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Problem} class} \label{sss:class-problem}
+
+\begin{center}
+\epsfig{file=uml/class-problem.1,width=2.0in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Sphere} class} \label{sss:class-sphere}
+
+\begin{center}
+\epsfig{file=uml/class-sphere.1,width=1.0in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsection{Discretization classes}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Discret} class} \label{sss:class-discret}
+
+\begin{center}
+\epsfig{file=uml/class-discret.1,width=2.5in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Hypre} class}  \label{sss:class-hypre}
+
+\begin{center}
+\epsfig{file=uml/class-hypre.1,width=2.0in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Mpi} class} \label{sss:class-mpi}
+
+\begin{center}
+\epsfig{file=uml/class-mpi.1,width=1.5in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Point} class} \label{sss:class-point}
+
+\begin{center}
+\epsfig{file=uml/class-point.1,width=1.0in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Field} class} \label{sss:class-field}
+
+\begin{center}
+\epsfig{file=uml/field.1,     width=0.75in}
+\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{Array} class} \label{sss:class-array}
 
 %=======================================================================
 \section{Discretization} \label{s:discretization}
@@ -254,21 +289,27 @@ xxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxx\=\kill\\
  \newcommand{\azph}{a(\indvar+\frac{h_z}{2})}
  \newcommand{\azmh}{a(\indvar-\frac{h_z}{2})}
 
- \newcommand{\alc}{\alpha^{000}}
- \newcommand{\alxp}{\alpha^{100}}
- \newcommand{\alxm}{\alpha^{\bar{1}00}}
- \newcommand{\alyp}{\alpha^{010}}
- \newcommand{\alym}{\alpha^{0\bar{1}0}}
- \newcommand{\alzp}{\alpha^{001}}
- \newcommand{\alzm}{\alpha^{00\bar{1}}}
+ \newcommand{\alc}{\alpha_{0}}
+ \newcommand{\alxp}{\alpha_{x}}
+ \newcommand{\alxm}{\alpha_{\bar{x}}}
+ \newcommand{\alyp}{\alpha_{y}}
+ \newcommand{\alym}{\alpha_{\bar{y}}}
+ \newcommand{\alzp}{\alpha_{z}}
+ \newcommand{\alzm}{\alpha_{\bar{z}}}
 
- \newcommand{\Uc}{U^{000}}
- \newcommand{\Uxp}{U^{100}}
- \newcommand{\Uxm}{U^{\bar{1}00}}
- \newcommand{\Uyp}{U^{010}}
- \newcommand{\Uym}{U^{0\bar{1}0}}
- \newcommand{\Uzp}{U^{001}}
- \newcommand{\Uzm}{U^{00\bar{1}}}
+ \newcommand{\Uc}{U_{0}}
+ \newcommand{\Uxp}{U_{x}}
+ \newcommand{\Uxm}{U_{\bar{x}}}
+ \newcommand{\Uyp}{U_{y}}
+ \newcommand{\Uym}{U_{\bar{y}}}
+ \newcommand{\Uzp}{U_{z}}
+ \newcommand{\Uzm}{U_{\bar{z}}}
+
+%-----------------------------------------------------------------------
+\subsection{Discretization within levels}
+%-----------------------------------------------------------------------
+
+We assume that grid spacing $h_x$, $h_y$, and $h_z$ within a level is uniform.
 
 \begin{center}
 \begin{minipage}{1.5in}
@@ -282,50 +323,55 @@ xxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxx\=\kill\\
  & \approx & \frac{\delta_{h_x}}{h_x} (\ac \frac{\delta_{h_x}}{h_x} \uc) + 
              \frac{\delta_{h_y}}{h_y} (\ac \frac{\delta_{h_y}}{h_y} \uc) + 
              \frac{\delta_{h_z}}{h_z} (\ac \frac{\delta_{h_z}}{h_z} \uc) \\
- & \approx & \frac{1}{h_x^2}\delta_{h_x} (\ac \delta_{h_x} \uc) + 
-             \frac{1}{h_y^2}\delta_{h_y} (\ac \delta_{h_y} \uc) + 
-             \frac{1}{h_z^2}\delta_{h_z} (\ac \delta_{h_z} \uc) \\
- & = & \frac{1}{h_x^2}\delta_{h_x} (\ac (\uxph - \uxmh))\\
- & + & \frac{1}{h_y^2}\delta_{h_y} (\ac (\uyph - \uymh)) \\
- & + & \frac{1}{h_z^2}\delta_{h_z} (\ac (\uzph - \uzmh)) \\
- & = & \frac{1}{h_x^2} (\axph (\uxp - \uc)) - (\axmh (\uc - \uxm)) \\
- & + & \frac{1}{h_y^2} (\ayph (\uyp - \uc)) - (\aymh (\uc - \uym)) \\
- & + & \frac{1}{h_z^2} (\azph (\uzp - \uc)) - (\azmh (\uc - \uzm)) \\
- & = & \frac{1}{h_z^2} \azmh \uzm + \frac{1}{h_y^2} \aymh \uym + \frac{1}{h_x^2} \axmh \uxm \\
- & - & [\frac{1}{h_x^2} \axph  + \frac{1}{h_x^2} \axmh \\
- & &+  \frac{1}{h_y^2} \ayph  + \frac{1}{h_y^2} \aymh \\
- & & +  \frac{1}{h_z^2} \azph  + \frac{1}{h_z^2} \azmh] \uc \\
- & + &  \frac{1}{h_x^2} \axph \uxp + \frac{1}{h_y^2} \ayph \uyp  + \frac{1}{h_z^2} \azph \uzp \\
- & = & \alzm\Uzm +  \alym\Uym +  \alxm\Uxm \\
- & + & \alc\Uc \\
- & + & \alxp\Uxp +  \alyp\Uyp +  \alzp\Uzp 
+% & \approx & \frac{1}{h_x^2}\delta_{h_x} (\ac \delta_{h_x} \uc) + 
+%             \frac{1}{h_y^2}\delta_{h_y} (\ac \delta_{h_y} \uc) + 
+%             \frac{1}{h_z^2}\delta_{h_z} (\ac \delta_{h_z} \uc) \\
+% & = & \frac{1}{h_x^2}\delta_{h_x} (\ac (\uxph - \uxmh))\\
+% & + & \frac{1}{h_y^2}\delta_{h_y} (\ac (\uyph - \uymh)) \\
+% & + & \frac{1}{h_z^2}\delta_{h_z} (\ac (\uzph - \uzmh)) \\
+% & = & \frac{1}{h_x^2} (\axph (\uxp - \uc)) - (\axmh (\uc - \uxm)) \\
+% & + & \frac{1}{h_y^2} (\ayph (\uyp - \uc)) - (\aymh (\uc - \uym)) \\
+% & + & \frac{1}{h_z^2} (\azph (\uzp - \uc)) - (\azmh (\uc - \uzm)) \\
+% & = & \frac{1}{h_z^2} \azmh \uzm + \frac{1}{h_y^2} \aymh \uym + \frac{1}{h_x^2} \axmh \uxm \\
+% & - & [\frac{1}{h_x^2} \axph  + \frac{1}{h_x^2} \axmh \\
+% & &+  \frac{1}{h_y^2} \ayph  + \frac{1}{h_y^2} \aymh \\
+% & & +  \frac{1}{h_z^2} \azph  + \frac{1}{h_z^2} \azmh] \uc \\
+% & + &  \frac{1}{h_x^2} \axph \uxp + \frac{1}{h_y^2} \ayph \uyp  + \frac{1}{h_z^2} \azph \uzp \\
+ & \approx & \alzm\Uzm +  \alym\Uym +  \alxm\Uxm 
+  +  \alc\Uc 
+  +  \alxp\Uxp +  \alyp\Uyp +  \alzp\Uzp,
  \end{eqnarray*}
+where
 
- \begin{eqnarray}
- \alzm & \equiv & \frac{1}{h_z^2} \azmh \\
- \alym & \equiv & \frac{1}{h_y^2} \aymh \\
- \alxm & \equiv & \frac{1}{h_x^2} \axmh \\
- \alc  & \equiv & - [\frac{1}{h_x^2} \axph  + \frac{1}{h_x^2} \axmh \\
- & + & \frac{1}{h_y^2} \ayph  + \frac{1}{h_y^2} \aymh \\
- & + & \frac{1}{h_z^2} \azph  + \frac{1}{h_z^2} \azmh] \\
- \alxp & \equiv & \frac{1}{h_x^2} \axph \\
- \alyp & \equiv & \frac{1}{h_y^2} \ayph \\
- \alzp & \equiv & \frac{1}{h_z^2} \azph \\
- \end{eqnarray}
+\[\alxm  \equiv  \frac{1}{h_x^2} \axmh,
+ \alym  \equiv  \frac{1}{h_y^2} \aymh, 
+ \alzm  \equiv  \frac{1}{h_z^2} \azmh \]
+ \[\alxp  \equiv  \frac{1}{h_x^2} \axph, 
+ \alyp  \equiv  \frac{1}{h_y^2} \ayph,
+ \alzp  \equiv  \frac{1}{h_z^2} \azph \]
+ \[\alc   \equiv  - [\alxm + \alym + \alzm + \alxp + \alyp + \alzp] \]
+
+%-----------------------------------------------------------------------
+\subsection{Discretization between levels}
+%-----------------------------------------------------------------------
+
+We assume that grid spacing ($h^i_x$, $h^i_y$, $h^i_z$) and 
+($h^j_x$, $h^j_y$, $h^j_z$) between levels $i < j$ is such that
+$h^j_* / h^i_*$ is an integer.
+
+
+\subsubsection{$h^j_* / h^i_* = 2$}
+
 
 \begin{center}
-\begin{minipage}{1.5in}
-\epsfig{file=fig/stencil0.eps,width=1.5in}
-\end{minipage}
-\end{center}
-\begin{center}
-\begin{minipage}{1.5in}
-\epsfig{file=fig/stencil1.eps,width=1.5in}
-\end{minipage}
-\end{center}
-\begin{center}
-\begin{minipage}{1.5in}
-\epsfig{file=fig/stencil2.eps,width=1.5in}
+\begin{minipage}{1.25in}
+\epsfig{file=fig/stencil0.eps,width=1.25in}
+\end{minipage} \ \ \ 
+\begin{minipage}{1.25in}
+\epsfig{file=fig/stencil1.eps,width=1.25in}
+\end{minipage} \ \ \ 
+\begin{minipage}{1.25in}
+\epsfig{file=fig/stencil2.eps,width=1.25in}
 \end{minipage}
 \end{center}
 
