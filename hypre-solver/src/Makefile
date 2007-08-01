@@ -3,6 +3,8 @@ SHELL = /bin/csh
 # Define MPCPP
 include Make.machine
 
+FLAGS = -g
+
 INC = -I$(HOME)/include 
 LIBS = -L$(HOME)/lib -lHYPRE_sstruct_ls -lHYPRE_sstruct_mv -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_parcsr_ls -lHYPRE_parcsr_mv -lHYPRE_IJ_mv -lHYPRE_LSI -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_utilities
 OBJS = \
@@ -23,7 +25,7 @@ hypre-grav: $(OBJS)
 
 
 .cpp.o:
-	$(MPCPP) -c -o $*.o $*.cpp $(INC)
+	$(MPCPP) -c -o $*.o $*.cpp $(FLAGS) $(INC)
 
 .PHONY: dep
 dep:

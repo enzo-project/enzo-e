@@ -41,11 +41,14 @@ class Grid
 
  private:
 
-  // data defined at grid creation (in Grid())
 
   int                 id_;         /// Unique id > 0
   int                 id_parent_;  // Parent grid
+
+  // data defined at grid creation (in Grid())
+
   int                 ip_;         // Owning processor
+
   Scalar              xl_[3];      // Position of lowest vertex
   Scalar              xu_[3];      // Position of highest vertex
   int                 n_[3];       // Number of zones
@@ -54,7 +57,6 @@ class Grid
 
   // data computed at hierarchy creation (in read())
 
-  Grid *              parent_;
   std::vector<Grid *> neighbors_;  // Array of neighboring grids in this level
   std::vector<Grid *> children_;   // Array of child grids
   HYPRE_SStructGrid   hypre_grid_; // Struct for hypre grid
@@ -106,14 +108,6 @@ class Grid
   /// Return the grid's parent's id
   int id_parent () throw () 
   { return id_parent_; }; 
-
-  /// Set the given grid to be the parent
-  void set_parent (Grid * parent) throw () 
-  { parent_ = parent; };
-
-  /// Return a pointer (could be null) to the grid's parent
-  Grid * parent () throw () 
-  { return parent_; };
 
   /// Set the grid to be a child.  Should only be called once per child.
   void set_child (Grid & child) throw () 
@@ -202,7 +196,7 @@ class Grid
   /// Return true iff the two grids are next to each other, or are the same grid
   bool is_adjacent (Grid & grid) throw ();
   /// Return true iff the grid belongs to processor ip
-  bool is_on_proc (int ip) throw()
+  bool is_local (int ip) throw()
   { return ip == ip_; };
 
   //--------------------------------------------------------------------

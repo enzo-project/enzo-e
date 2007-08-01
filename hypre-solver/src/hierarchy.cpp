@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <vector>
+#include <map>
 
 #include "HYPRE_sstruct_ls.h"
 
@@ -31,7 +32,7 @@ const int debug = 1;
 //----------------------------------------------------------------------
 
 Hierarchy::Hierarchy () throw ()
-  : d_(0)
+  : dimension_(0)
 {
 }
 	  
@@ -68,9 +69,9 @@ void Hierarchy::init_levels () throw ()
   int i,j,j1,j2,k;
 
   for (i=0; i<num_grids (); i++) {
-    Grid & g = grid(i);
-    Grid * p = (g.id_parent() >= 0) ? & grid(g.id_parent()) : 0;
-    g.set_parent(p);
+    Grid * g = &grid(i);
+    Grid * p = (g->id_parent() >= 0) ? & grid(g->id_parent()) : 0;
+    this->set_parent(g,p);
   }
 
   //------------------------
@@ -81,23 +82,23 @@ void Hierarchy::init_levels () throw ()
   while (! done) {
     done = true;
     for (i=0; i<num_grids (); i++) {
-      Grid & g = grid(i);
-      if (g.level() < 0) { // Haven't determined level yet
-	if (g.parent() == 0) {
+      Grid * g = &grid(i);
+      if (g->level() < 0) { // Haven't determined level yet
+	if (parent(g) == 0) {
 	  // Grids without parents are in level 0
-	  g.set_level(0);
-	  insert_in_level_ (0,g);
-	} else if (g.parent()->level() >= 0) {
+	  g->set_level(0);
+	  insert_in_level_ (0,*g);
+	} else if (parent(g)->level() >= 0) {
 	  // Grids with parents of known level have level = 1 + parent level
-	  int level = g.parent()->level() + 1;
-	  g.set_level(level);
-	  insert_in_level_ (level,g);
+	  int level = parent(g)->level() + 1;
+	  g->set_level(level);
+	  insert_in_level_ (level,*g);
 	} else {
 	  // Otherwise grids have parents of unknown level
 	  done = false;
 	}
       }
-      g.print();
+      g->print();
     }
   }
 
@@ -106,10 +107,10 @@ void Hierarchy::init_levels () throw ()
   //--------------------------
 
   for (i=0; i<num_grids(); i++) {
-    Grid & g = grid(i);
+    Grid * g = & grid(i);
     // If a grid has a parent, then the grid is the parent's child
-    if (g.parent() != 0) {
-      g.parent()->set_child(g);
+    if (parent(g) != 0) {
+      parent(g)->set_child(*g);
     }
   }
 
@@ -120,14 +121,14 @@ void Hierarchy::init_levels () throw ()
   // First level 0: test all pairs
 
   for (i=0; i<level(0).num_grids(); i++) {
-    Grid & g1 = level(0).grid(i);
+    Grid * g1 = & level(0).grid(i);
     for (j=i+1; j<level(0).num_grids(); j++) {
-      Grid & g2 = level(0).grid(j);
-      if (g1.is_adjacent(g2)) {
+      Grid * g2 = & level(0).grid(j);
+      if (g1->is_adjacent(*g2)) {
 	if (debug) printf ("DEBUG grids %d and %d are adjacent\n",
-			   g1.id(),g2.id());
-	g1.set_neighbor (g2);
-	g2.set_neighbor (g1);
+			   g1->id(),g2->id());
+	g1->set_neighbor (*g2);
+	g2->set_neighbor (*g1);
       }
     }
   }
@@ -141,30 +142,27 @@ void Hierarchy::init_levels () throw ()
 
     for (i=0; i<level(k).num_grids(); i++) {
 
-      Grid &g1 = level(k).grid(i);
+      Grid * g1 = & level(k).grid(i);
 
       // Check parents' children
 
-      for (j=0; j<g1.parent()->num_children(); j++) {
-
-	Grid &g2 = g1.parent()->child(j);
-
-	if (g1.is_adjacent(g2) && g1.id() > g2.id()) {
-	  if (debug) printf ("DEBUG grids %d and %d are adjacent siblings\n",
-			     g1.id(),g2.id());
-	  assert_neighbors (g1,g2);
+      for (j=0; j<parent(g1)->num_children(); j++) {
+	Grid * g2 = & parent(g1)->child(j);
+	if (g1->is_adjacent(*g2) && g1->id() > g2->id()) {
+	  assert_neighbors (*g1,*g2);
 	}
       }
+
       // Check parents' neighbors' children
 
-      for (j1=0; j1<g1.parent()->num_neighbors(); j1++) {
-	Grid & gn = g1.parent()->neighbor(j1);
-	for (j2=0; j2<gn.num_children(); j2++) {
-	  Grid & g2 = gn.child(j2);
-	  if (g1.is_adjacent(g2) && g1.id() > g2.id()) {
+      for (j1=0; j1<parent(g1)->num_neighbors(); j1++) {
+	Grid * gn = & parent(g1)->neighbor(j1);
+	for (j2=0; j2<gn->num_children(); j2++) {
+	  Grid * g2 = & gn->child(j2);
+	  if (g1->is_adjacent(*g2) && g1->id() > g2->id()) {
 	    if (debug) printf ("DEBUG grids %d and %d are adjacent cousins\n",
-			       g1.id(),g2.id());
-	    assert_neighbors (g1,g2);
+			       g1->id(),g2->id());
+	    assert_neighbors (*g1,*g2);
 	  }
 	}
       }

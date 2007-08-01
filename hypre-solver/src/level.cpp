@@ -45,7 +45,6 @@ Level::~Level () throw ()
 
 void Level::insert_grid (Grid & grid) throw ()
 {
-  printf ("DEBUG inserting grid into level %d\n",n_);
   grids_.push_back (& grid);
 }
 

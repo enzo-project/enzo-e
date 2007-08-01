@@ -24,11 +24,10 @@ Mpi::Mpi (int *argc, char ***argv)
 {
   MPI_Init (argc,argv);
 
-  MPI_Comm comm;
-  comm = MPI_COMM_WORLD;
+  comm_ = MPI_COMM_WORLD;
 
-  MPI_Comm_size (comm, &np_);
-  MPI_Comm_rank (comm, &ip_);
+  MPI_Comm_size (comm_, &np_);
+  MPI_Comm_rank (comm_, &ip_);
 
   if (debug) printf ("%s:%d  np=%d  ip=%d\n",__FILE__,__LINE__,np_,ip_);
 

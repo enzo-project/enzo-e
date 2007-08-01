@@ -18,6 +18,15 @@ class Problem {
 
   //----------------------------------------------------------------------
 
+
+private:
+
+  std::vector<Sphere *> spheres_;  // List of sphere masses
+  std::vector<Point *>  points_;   // List of point masses
+  Hierarchy hierarchy_;            // AMR mesh hierarchy
+
+  //----------------------------------------------------------------------
+
 public:
 
   Problem () throw ();
@@ -65,11 +74,4 @@ public:
 private:
 
   int readline_ (FILE *, char * buffer, int n) throw ();
-
-private:
-
-  std::vector<Sphere *> spheres_;  // List of sphere masses
-  std::vector<Point *>  points_;   // List of point masses
-  Hierarchy hierarchy_;            // AMR mesh hierarchy
-
 };

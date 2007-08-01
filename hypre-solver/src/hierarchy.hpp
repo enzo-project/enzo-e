@@ -22,9 +22,13 @@ class Hierarchy
 
  private:
 
-  int d_;                           // Dimension
+  int dimension_;                   // Dimension
   std::vector <Level *> levels_;    // List of Levels
   std::vector <Grid *>  grids_;     // List of all grids
+
+  //  typedef std::vector <Grid *> grid_vector_type ;
+  //  std::map<Grid *, grid_vector_type >  parent_; // List of each grid's parent
+  std::map<Grid *, Grid * >  parent_; // List of each grid's parent
 
   //--------------------------------------------------------------------
 
@@ -46,7 +50,7 @@ class Hierarchy
 
   void insert_grid (Grid * grid) throw ();
   void init_levels () throw();
-  void set_dim (int d) throw () { d_ = d; };
+  void set_dim (int d) throw () { dimension_ = d; };
 
   // IO
 
@@ -61,7 +65,7 @@ class Hierarchy
 
   // Data access
 
-  int dimension () throw () { return d_; } ;
+  int dimension () throw () { return dimension_; } ;
 
   Level & level      (int i)            { return * levels_.at(i); };
   int     num_levels ()                 { return   levels_.size(); };
@@ -72,13 +76,19 @@ class Hierarchy
   Grid &  grid       (int level, int j) { return   levels_[level]->grid(j); };
   int     num_grids  (int level)        { return   levels_[level]->num_grids(); };
 
+  void    set_parent (Grid * grid, Grid * parent)  
+  { parent_[grid]=parent; };
+  Grid *  parent     (Grid * grid)      
+  { return   parent_[grid]; };
+
   //--------------------------------------------------------------------
   // PRIVATE MEMBER FUNCTIONS
   //--------------------------------------------------------------------
 
+private:
+
   void insert_in_level_ (int level, Grid & grid) throw ();
 
-private:
 
 
 };

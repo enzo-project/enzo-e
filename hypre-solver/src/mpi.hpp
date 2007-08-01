@@ -20,9 +20,9 @@ public:
   int ip () throw () {return ip_;};
   int np () throw () {return np_;};
     
-public:
+private:
 
-  MPI_Comm comm;
+  MPI_Comm comm_;
   int np_;   // Number of processors
   int ip_;   // Rank of this processor
 };

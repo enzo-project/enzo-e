@@ -143,6 +143,75 @@ xxxxx\=xxxxxxxxxxxxxx\=\kill
 This section describes the sequence of calls in \hypre\ used for
 setting up a linear system on an AMR hierarchy, and then solving it.
 
+\begin{enumerate}
+\item Initialize \hypre\ grids (\S\ref{ss:hypre-grids})
+\item Initialize \hypre\ stencil (\S\ref{ss:hypre-stencil})
+\item Initialize \hypre\ graph (\S\ref{ss:hypre-graph})
+\item Initialize \hypre\ matrix (\S\ref{ss:hypre-matrix})
+\item Initialize \hypre\ vectors (\S\ref{ss:hypre-vectors})
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\subsection{Initialize \hypre\ grids} \label{ss:hypre-grids}
+%-----------------------------------------------------------------------
+
+For each grid patch it owns, each processor creates a \hypre\ grid
+object defining the grid's extents and variables.
+
+\begin{itemize}
+\item \code{HYPRE\_SStructGridCreate()}
+\item \code{HYPRE\_SStructGridSetExtents()}
+\item \code{HYPRE\_SStructGridSetVariables()}
+\item \code{HYPRE\_SStructGridAssemble()}
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Initialize \hypre\ stencil} \label{ss:hypre-stencil}
+%-----------------------------------------------------------------------
+
+  Create the stencil object which defines the matrix nonzeros within each grid.
+
+\begin{itemize}
+\item \code{HYPRE\_SStructStencilCreate()}
+\item \code{HYPRE\_SStructStencilSetEntry()}
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Initialize \hypre\ graph} \label{ss:hypre-graph}
+%-----------------------------------------------------------------------
+
+ Each processor creates a graph containing the nonzero structure of
+ the matrix.
+
+\begin{itemize}
+\item \code{HYPRE\_SStructGraphCreate()}
+\item \code{HYPRE\_SStructGraphSetStencil()}
+\item \code{HYPRE\_SStructGraphAddEntries()}
+\item \code{HYPRE\_SStructGraphAssemble()}
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Initialize \hypre\ matrix} \label{ss:hypre-matrix}
+%-----------------------------------------------------------------------
+
+\begin{itemize}
+\item \code{HYPRE\_SStructMatrixCreate()}
+\item \code{HYPRE\_SStructMatrixInitialize()}
+\item \code{HYPRE\_SStructMatrixSetBoxValues()}
+\item \code{HYPRE\_SStructMatrixSetValues()}
+\item \code{HYPRE\_SStructMatrixAssemble()}
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Initialize \hypre\ vectors} \label{ss:hypre-vectors}
+%-----------------------------------------------------------------------
+
+\begin{itemize}
+\item \code{HYPRE\_SStructVectorCreate()}
+\item \code{HYPRE\_SStructVectorInitialize()}
+\item \code{HYPRE\_SStructVectorSetBoxValues()}
+\item \code{HYPRE\_SStructVectorAssemble()}
+\end{itemize}
 
 %=======================================================================
 \section{Design} \label{s:design}

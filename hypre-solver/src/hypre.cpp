@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "HYPRE_sstruct_ls.h"
 
@@ -60,7 +61,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     Grid & grid = hierarchy.grid(i);
 
-    if (grid.is_on_proc(mpi.ip())) {
+    if (grid.is_local(mpi.ip())) {
 
       if (debug) printf ("DEBUG %s:%d grid %d\n",__FILE__,__LINE__,i);
       // Create the HYPRE grid structure
@@ -91,7 +92,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     Grid & grid = hierarchy.grid(i);
 
-    if (grid.is_on_proc(mpi.ip())) {
+    if (grid.is_local(mpi.ip())) {
 
       // Set HYPRE grid extents
 
@@ -129,7 +130,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     // Set HYPRE grid variables
 
-    if (grid.is_on_proc(mpi.ip())) {
+    if (grid.is_local(mpi.ip())) {
 
       HYPRE_SStructVariable variable_types[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
 
@@ -159,7 +160,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     // Set HYPRE grid neighbors
 
-    if (grid.is_on_proc(mpi.ip())) {
+    if (grid.is_local(mpi.ip())) {
 
       int index_map[] = {0,1,2}; // local coordinate axes same between all grids
 
@@ -241,7 +242,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     Grid & grid = hierarchy.grid(i);
 
-    if (grid.is_on_proc(mpi.ip())) {
+    if (grid.is_local(mpi.ip())) {
 
       // Assemble grid
       if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridAssemble()\n",
@@ -320,7 +321,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
     Grid & grid = hierarchy.grid(i);
 
-    if (grid.is_on_proc(mpi.ip())) {
+    if (grid.is_local(mpi.ip())) {
 
       // Create the hypre graph for the grid
 
