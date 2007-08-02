@@ -37,17 +37,18 @@ const int debug_discret = 1;
 
 //----------------------------------------------------------------------
 
-Hypre::Hypre (Mpi & m)
-  : mpi(m)
+Hypre::Hypre ()
 {
   
 }
 
 //----------------------------------------------------------------------
 
-void Hypre::init_hierarchy (Hierarchy & hierarchy)
+void Hypre::init_hierarchy (Hierarchy & hierarchy, Mpi &mpi)
 // Initialize the grid hierarchy
 {
+
+  Grid::set_mpi (mpi);
 
   //======================================================================
   // CREATE GRIDS
@@ -61,7 +62,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     Grid & grid = hierarchy.grid(i);
 
-    if (grid.is_local(mpi.ip())) {
+    if (grid.is_local()) {
 
       if (debug) printf ("DEBUG %s:%d grid %d\n",__FILE__,__LINE__,i);
       // Create the HYPRE grid structure
@@ -92,7 +93,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     Grid & grid = hierarchy.grid(i);
 
-    if (grid.is_local(mpi.ip())) {
+    if (grid.is_local()) {
 
       // Set HYPRE grid extents
 
@@ -130,7 +131,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     // Set HYPRE grid variables
 
-    if (grid.is_local(mpi.ip())) {
+    if (grid.is_local()) {
 
       HYPRE_SStructVariable variable_types[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
 
@@ -160,7 +161,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     // Set HYPRE grid neighbors
 
-    if (grid.is_local(mpi.ip())) {
+    if (grid.is_local()) {
 
       int index_map[] = {0,1,2}; // local coordinate axes same between all grids
 
@@ -242,7 +243,7 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy)
 
     Grid & grid = hierarchy.grid(i);
 
-    if (grid.is_local(mpi.ip())) {
+    if (grid.is_local()) {
 
       // Assemble grid
       if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridAssemble()\n",
@@ -321,7 +322,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
     Grid & grid = hierarchy.grid(i);
 
-    if (grid.is_local(mpi.ip())) {
+    if (grid.is_local()) {
 
       // Create the hypre graph for the grid
 
@@ -356,8 +357,6 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 			       __FILE__,__LINE__);
       HYPRE_SStructGraphAssemble (grid.hypre_graph());
     }
-    
-				  
   }
 }
 
@@ -367,6 +366,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
 void Hypre::init_matrix (Hierarchy & hierarchy)
 {
+  printf ("Hypre::init_matrix() is not implemented yet\n"); 
 }
 
 // --------------------------------------------------
@@ -375,6 +375,7 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
 
 void Hypre::init_rhs (Hierarchy & hierarchy)
 {
+  printf ("Hypre::init_rhs() is not implemented yet\n"); 
 }
 
 // --------------------------------------------------
@@ -383,6 +384,7 @@ void Hypre::init_rhs (Hierarchy & hierarchy)
 
 void Hypre::init_solver (Hierarchy & hierarchy)
 {
+  printf ("Hypre::init_solver() is not implemented yet\n"); 
 }
 
 // --------------------------------------------------
@@ -391,5 +393,15 @@ void Hypre::init_solver (Hierarchy & hierarchy)
 
 void Hypre::solve (Hierarchy & hierarchy)
 {
+  printf ("Hypre::solve() is not implemented yet\n"); 
+}
+
+// --------------------------------------------------
+// Evaluate the success of the solve
+// --------------------------------------------------
+
+void Hypre::evaluate (Hierarchy & hierarchy)
+{
+  printf ("Hypre::evaluate() is not implemented yet\n"); 
 }
 

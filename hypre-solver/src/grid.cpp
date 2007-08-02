@@ -22,11 +22,14 @@
 
 #include "scalar.hpp"
 #include "discret.hpp"
+#include "mpi.hpp"
 #include "grid.hpp"
 
 //----------------------------------------------------------------------
 
 const int debug = 0;
+
+Mpi Grid::mpi_;
 
 //----------------------------------------------------------------------
 

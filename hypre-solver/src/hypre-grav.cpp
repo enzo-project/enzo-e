@@ -30,10 +30,10 @@
 #include "point.hpp"
 #include "sphere.hpp"
 #include "discret.hpp"
+#include "mpi.hpp"
 #include "grid.hpp"
 #include "level.hpp"
 #include "hierarchy.hpp"
-#include "mpi.hpp"
 #include "problem.hpp"
 #include "hypre.hpp"
 
@@ -81,13 +81,13 @@ int main(int argc, char **argv)
     // Initialize the grid hierarchy
     // --------------------------------------------------
 
-    Hypre hypre (mpi);
+    Hypre hypre;
 
     if (debug) printf ("DEBUG ================================================\n");
     if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
     if (debug) printf ("DEBUG ================================================\n");
 
-    hypre.init_hierarchy (problem.hierarchy());
+    hypre.init_hierarchy (problem.hierarchy(),mpi);
 
     //    int i;
     //    for (i=0; i<Hierarchy.num_grids(); i++) {
@@ -119,17 +119,25 @@ int main(int argc, char **argv)
     // Initialize the matrix A
     // --------------------------------------------------
 
+    hypre.init_matrix (problem.hierarchy());
+
     // --------------------------------------------------
     // Initialize the right-hand-side vector b
     // --------------------------------------------------
+
+    hypre.init_rhs (problem.hierarchy());
 
     // --------------------------------------------------
     // Solve the linear system Ax = b
     // --------------------------------------------------
 
+    hypre.solve (problem.hierarchy());
+
     // --------------------------------------------------
     // Evaluate the solution
     // --------------------------------------------------
+
+    hypre.evaluate (problem.hierarchy());
 
     // --------------------------------------------------
     // MPI Finalize

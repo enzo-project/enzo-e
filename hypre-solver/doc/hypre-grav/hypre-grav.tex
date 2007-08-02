@@ -29,7 +29,7 @@
    requirements, describe the design and implementation, and present
    test results for \hypresolve.
 
-   We break the problem into two phases: problem generation
+   We break the problem into two components: problem generation
    (\code{hypre-init}), and problem solution (\code{hypre-solve}).
    \code{hypre-init} takes as input parameters describing the problem
    characteristics in general terms, such as bounds on grid sizes,
@@ -42,9 +42,21 @@
    assembled and solved using \hypre, and the solution, performance
    information, solver efficiency information, etc., are output.
 
-   \note{top-level diagram: problem description $\Rightarrow$
-   \code{hypre-init} $\Rightarrow$ problem specification $\Rightarrow$
-   \code{hypre-solve} $\Rightarrow$ problem results}
+%    \note{top-level diagram: problem description $\Rightarrow$
+%   \code{hypre-init} $\Rightarrow$ problem specification $\Rightarrow$
+%   \code{hypre-solve} $\Rightarrow$ problem results}
+
+%======================================================================
+\section{Roadmap and Milestones}
+%======================================================================
+
+\begin{enumerate}
+\item \todo\ Unigrid Poisson
+\item \todo\ AMR Poisson with $R=2$
+\item \todo\ AMR Poisson with $R=2^k$
+\item \todo\ AMR Poisson with arbitrary $R$
+\item \todo\ General $7$-point stencil
+\end{enumerate}
 
 %======================================================================
 \section{Components}
@@ -142,13 +154,16 @@ xxxxx\=xxxxxxxxxxxxxx\=\kill
 
 This section describes the sequence of calls in \hypre\ used for
 setting up a linear system on an AMR hierarchy, and then solving it.
+The corresponding call in \hypresolve\ is also included.
 
 \begin{enumerate}
-\item Initialize \hypre\ grids (\S\ref{ss:hypre-grids})
-\item Initialize \hypre\ stencil (\S\ref{ss:hypre-stencil})
-\item Initialize \hypre\ graph (\S\ref{ss:hypre-graph})
-\item Initialize \hypre\ matrix (\S\ref{ss:hypre-matrix})
-\item Initialize \hypre\ vectors (\S\ref{ss:hypre-vectors})
+\item Initialize \hypre\ grids (\S\ref{ss:hypre-grids}) (\code{Hypre::init\_hierarchy()})
+\item Initialize \hypre\ stencil (\S\ref{ss:hypre-stencil}) (\code{Hypre::init\_stencil()})
+\item Initialize \hypre\ graph (\S\ref{ss:hypre-graph}) (\code{Hypre::init\_graph()})
+\item Initialize \hypre\ matrix (\S\ref{ss:hypre-matrix}) (\code{Hypre::init\_matrix()})
+\item Initialize \hypre\ vectors (\S\ref{ss:hypre-vectors}) (\code{Hypre::init\_rhs()})
+\item Initialize \hypre\ solvers (\S\ref{ss:hypre-solvers}) (\code{Hypre::init\_solver()})
+\item Apply \hypre\ solver (\code{Hypre::solve()})
 \end{enumerate}
 
 %-----------------------------------------------------------------------
@@ -156,7 +171,7 @@ setting up a linear system on an AMR hierarchy, and then solving it.
 %-----------------------------------------------------------------------
 
 For each grid patch it owns, each processor creates a \hypre\ grid
-object defining the grid's extents and variables.
+object defining the grid's extents and variables.  
 
 \begin{itemize}
 \item \code{HYPRE\_SStructGridCreate()}
@@ -164,6 +179,13 @@ object defining the grid's extents and variables.
 \item \code{HYPRE\_SStructGridSetVariables()}
 \item \code{HYPRE\_SStructGridAssemble()}
 \end{itemize}
+
+Neighboring grids do not need to be set using \hypre's
+\code{HYPRE\_SStructGridSetNeighborBox()} function, since grids within an AMR
+level are in the same \hypre\ ``part''.  However, since \hypresolve\
+needs to know which zones in a grid are adjacent to neighboring grid
+zones for setting up the inter-level grid elements, \hypresolve\ has
+its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 
 %-----------------------------------------------------------------------
 \subsection{Initialize \hypre\ stencil} \label{ss:hypre-stencil}
@@ -212,6 +234,10 @@ object defining the grid's extents and variables.
 \item \code{HYPRE\_SStructVectorSetBoxValues()}
 \item \code{HYPRE\_SStructVectorAssemble()}
 \end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Initialize \hypre\ solvers} \label{ss:hypre-solvers}
+%-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Design} \label{s:design}

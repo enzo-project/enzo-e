@@ -22,6 +22,7 @@
 
 #include "scalar.hpp"
 #include "discret.hpp"
+#include "mpi.hpp"
 #include "grid.hpp"
 
 //----------------------------------------------------------------------

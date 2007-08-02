@@ -16,6 +16,7 @@ class Mpi {
   
 public:
 
+  Mpi ();
   Mpi (int * argc, char ***argv);
   int ip () throw () {return ip_;};
   int np () throw () {return np_;};

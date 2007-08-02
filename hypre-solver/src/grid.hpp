@@ -196,8 +196,8 @@ class Grid
   /// Return true iff the two grids are next to each other, or are the same grid
   bool is_adjacent (Grid & grid) throw ();
   /// Return true iff the grid belongs to processor ip
-  bool is_local (int ip) throw()
-  { return ip == ip_; };
+  bool is_local () throw()
+  { return mpi_.ip() == ip_; };
 
   //--------------------------------------------------------------------
   // Processing functions
@@ -210,15 +210,14 @@ class Grid
   // STATIC MEMBER DATA
   //--------------------------------------------------------------------
 
-  //  static int   d_;   // Spacial dimension
-  //  static std::vector<Grid *> list_;
+private:
 
-  //  static void init_mesh ();
+  static Mpi  mpi_;
 
-  //  static void set_dim (int d) { d_ = d; }
+public:
 
-  //  static Grid & grid (int i) { assert (list_.at(i) != 0); return * list_.at(i); };
-  //  static int num_grids () { return list_.size(); };
+  static void set_mpi (Mpi &mpi)
+  { mpi_ = mpi; };
 
   //--------------------------------------------------------------------
   // PRIVATE MEMBER FUNCTIONS

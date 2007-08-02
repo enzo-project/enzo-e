@@ -50,7 +50,7 @@ discret.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 discret.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 discret.o: /usr/include/math.h /usr/include/bits/huge_val.h
 discret.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
-discret.o: scalar.hpp discret.hpp grid.hpp
+discret.o: scalar.hpp discret.hpp mpi.hpp grid.hpp
 grid.o: /usr/include/assert.h /usr/include/features.h
 grid.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 grid.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -61,7 +61,7 @@ grid.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 grid.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 grid.o: /usr/include/math.h /usr/include/bits/huge_val.h
 grid.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h scalar.hpp
-grid.o: discret.hpp grid.hpp
+grid.o: discret.hpp mpi.hpp grid.hpp
 hierarchy.o: /usr/include/assert.h /usr/include/features.h
 hierarchy.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hierarchy.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -70,7 +70,7 @@ hierarchy.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 hierarchy.o: /usr/include/_G_config.h /usr/include/wchar.h
 hierarchy.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 hierarchy.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-hierarchy.o: scalar.hpp discret.hpp grid.hpp level.hpp hierarchy.hpp
+hierarchy.o: scalar.hpp discret.hpp mpi.hpp grid.hpp level.hpp hierarchy.hpp
 hypre.o: /usr/include/assert.h /usr/include/features.h
 hypre.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h mpi.hpp
@@ -92,8 +92,8 @@ hypre-grav.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
 hypre-grav.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
 hypre-grav.o: /usr/include/math.h /usr/include/bits/huge_val.h
 hypre-grav.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
-hypre-grav.o: scalar.hpp point.hpp sphere.hpp discret.hpp grid.hpp level.hpp
-hypre-grav.o: hierarchy.hpp mpi.hpp problem.hpp hypre.hpp
+hypre-grav.o: scalar.hpp point.hpp sphere.hpp discret.hpp mpi.hpp grid.hpp
+hypre-grav.o: level.hpp hierarchy.hpp problem.hpp hypre.hpp
 level.o: /usr/include/assert.h /usr/include/features.h
 level.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 level.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -102,7 +102,7 @@ level.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 level.o: /usr/include/_G_config.h /usr/include/wchar.h
 level.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 level.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-level.o: scalar.hpp discret.hpp grid.hpp level.hpp
+level.o: scalar.hpp discret.hpp mpi.hpp grid.hpp level.hpp
 mpi.o: /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h
 mpi.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
 mpi.o: /usr/include/gnu/stubs-32.h /usr/include/bits/types.h
@@ -122,8 +122,8 @@ problem.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 problem.o: /usr/include/_G_config.h /usr/include/wchar.h
 problem.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 problem.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-problem.o: scalar.hpp point.hpp discret.hpp grid.hpp level.hpp hierarchy.hpp
-problem.o: sphere.hpp problem.hpp
+problem.o: scalar.hpp point.hpp discret.hpp mpi.hpp grid.hpp level.hpp
+problem.o: hierarchy.hpp sphere.hpp problem.hpp
 sphere.o: /usr/include/assert.h /usr/include/features.h
 sphere.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 sphere.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h

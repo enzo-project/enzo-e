@@ -24,6 +24,7 @@
 #include "scalar.hpp"
 #include "point.hpp"
 #include "discret.hpp"
+#include "mpi.hpp"
 #include "grid.hpp"
 #include "level.hpp"
 #include "hierarchy.hpp"
