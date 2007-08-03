@@ -74,7 +74,7 @@ xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \> \todo\ \code{particle\_position\_clumpiness}  \\
 \> \todo\ \code{particle\_mass\_clumpiness} \\
 \> \todo\ \code{particle\_mass\_average} \\
-\> \todo\ \code{sphere} \> \code{\textit{Scalar mass}, \textit{Scalar radius}, \textit{Scalar 3*center}} \\
+\> \todo\ \code{sphere} \> \code{\textit{Scalar mass}, \textit{Scalar radius}, \textit{Scalar*3 center}} \\
 \> \todo\  \code{domain\_extents} \\
 \> \todo\  \code{processor\_grid} \\
 \> \todo\ \code{discret} \> \code{\textit{int type}} \\
@@ -123,9 +123,9 @@ The following table lists the input parameters to \code{hypre-solve}.
 \begin{tabbing}
 xxxxx\=xxxxxxxxxxx\=\kill
 \> \done\ \code{dimension} \> \code{\textit{int dimension}} \\
-\> \done\ \code{sphere} \> \code{\textit{Scalar mass}, \textit{Scalar radius}, \textit{Scalar 3*center}} \\
-\> \done\ \code{point} \> \code{\textit{Scalar mass}, \textit{Scalar 3*location}} \\
-\> \todo\ \code{grid} \> \code{\textit{int id}, \textit{int parent-id}, \textit{int processor}, \textit{Scalar vertex-lower}, \textit{Scalar vertex-upper}, \textit{int 3*zones}} \\
+\> \done\ \code{sphere} \> \code{\textit{Scalar mass}, \textit{Scalar radius}, \textit{Scalar*3 center}} \\
+\> \done\ \code{point} \> \code{\textit{Scalar mass}, \textit{Scalar*3 location}} \\
+\> \done\ \code{grid} \> \code{\textit{int id}, \textit{int parent-id}, \textit{int processor}, \textit{Scalar vertex-lower}, \textit{Scalar vertex-upper}, \textit{int*3 zones}} \\
 \> \todo\ \code{discret} \> \code{\textit{int type}} \\
 \> \todo\ \code{solver} \> \code{\{"fac"\} method}
 \end{tabbing}
@@ -154,7 +154,6 @@ xxxxx\=xxxxxxxxxxxxxx\=\kill
 
 This section describes the sequence of calls in \hypre\ used for
 setting up a linear system on an AMR hierarchy, and then solving it.
-The corresponding call in \hypresolve\ is also included.
 
 \begin{enumerate}
 \item Initialize \hypre\ grids (\S\ref{ss:hypre-grids}) (\code{Hypre::init\_hierarchy()})

@@ -1,4 +1,4 @@
-all: hypre-grav.ps
+all: hypre-grav.pdf
 
 hypre-grav:  hypre-grav.ps 
 
@@ -11,6 +11,8 @@ FIG = fig/discret1.eps fig/discret2.eps fig/discret3.eps \
 ########################################################################
 hypre-grav.ps:hypre-grav.dvi $(FIG)
 	dvips -o hypre-grav.ps hypre-grav.dvi
+hypre-grav.pdf:hypre-grav.dvi $(FIG)
+	dvipdf hypre-grav.dvi
 hypre-grav.dvi:hypre-grav.tex include.tex UML
 	-latex hypre-grav
 	-latex hypre-grav
