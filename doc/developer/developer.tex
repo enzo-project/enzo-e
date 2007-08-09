@@ -1,0 +1,533 @@
+%0       1         2         3         4         5         6         7         8
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+%=======================================================================
+\documentclass{article}
+%=======================================================================
+
+\include{include}
+
+%=======================================================================
+
+\begin{document}
+
+%=======================================================================
+\TITLE{Developer's Guide}{James Bordner}{v0.0.1}
+%=======================================================================
+
+\tableofcontents
+
+%=======================================================================
+\section{Introduction} \label{s:intro}
+%=======================================================================
+
+The purpose of this document is to organize the \cello\ development
+team.  Developers will be expected to follow the guidelines and
+procedures listed here as best they can.  This won't always be fun,
+but it's important for the long-term health of \cello.  
+
+This doesn't mean that the guidelines and procedures in this document
+are set in stone.  Suggestions for modifications and improvements are
+always welcome.  It also doesn't mean
+
+Software development is not easy, and software development as a group
+is even harder.  But, fortunately, there are a few general guidelines
+that, if followed, can greatly improve the quality of code and reduce
+the time spent debugging.
+
+Always remember that your contribution to \cello\ will be read by
+others.  You should take pride in creating elegant,
+easy-to-understand, code.
+
+%==================================================================
+\section{General guidelines for software devopment}
+%==================================================================
+
+First, some software development philosophy.  There are two competing
+forces in software: functionality and complexity.  Implementing new
+functionality in a code increases its complexity.  That's
+inevitable---you can't get something for nothing.  However, this
+inevitable complexity can and should be controlled.  Nothing kills a
+software project deader than out-of-control complexity.
+
+There are two ways to control complexity: write new code to be as
+simple as possible, and rewrite existing code to be as simple as
+possible.  And for a large software project to be successful in the
+long-term, both of these are required.
+
+If there is one overriding guideline to writing good code, it is this:
+avoid repeated code.  This is important and bears repeating: avoid
+repeated code.  If you see two pieces of code that are similar, spend
+some time to think about how the similar bits can be factored out.
+This also means that you shouldn't write a new function by copying an
+existing function and changing just a few lines.  Copying code means
+copying bugs, it means any new functionality that involves modifying
+the code will have to be done multiple times, and it means bugs can be
+easily introduced because it is easy to forget to modify all copies
+when modifications are necessary.  Copying code may make it easier to
+write new code in the short-term, but in the long-term the complexity
+of the program as a whole will grow exponentially.  I'll say it again:
+avoid repeated code.
+
+Working together on a software application involves a lot more than
+just writing code.  Successful software development also requires bug
+tracking, continuous refactoring, and rigorous testing.
+
+Developing quality software requires disciplined and rigorous
+thinking.  Don't code when sleepy or otherwise not in top form.  One
+moment's slip-up can lead to hours or days of wasted effort in
+tracking down a bug.  
+
+Spending more time up-front in thinking about (and documenting!) 
+requirements and design will reduce the time spent in coding and
+debugging by an even greater amount, so that the overall time spent
+will generally be less.  Spending more time at the beginning planning
+before writing a single line of code can be a difficult habit to get
+into, but the payoff in both time and reduced frustration can be
+great.
+
+The correct way to develop software is \textit{not} to sit down at a
+terminal and start coding.  Wrong, wrong, wrong.  First you figure out
+precisely \textit{what} you want the new code to do, then you figure
+out \textit{how} the new code will do it.  Then, and only then, do you
+actually start coding.
+
+\begin{enumerate}
+\item \textbf{Requirements}: What should the new code do?
+\item \textbf{Design}: How should the new code be written to satisfy these requirements?
+\item \textbf{Implementation}: Write the code according to the design.
+\item \textbf{Test}: Verify that the implementation satisfies the requirements.
+\end{enumerate}
+
+These steps should not necessarily be done just once.  When working on
+the design, you may realize that some of the requirements should be
+changed somewhat; or you may realize during implementation that
+there's a better approach, and that improving the design may be
+helpful.
+
+However, these steps should always be done in order.  Whenever you
+visit a step, always propogate the changes to all subsequent steps.
+For example, if you decide you need to add a new requirement, update
+the design accordingly, then update the implementation, and then
+retest.
+
+%==================================================================
+\section{Specific suggestions for writing code}
+%==================================================================
+
+   \pargraph{ Design in detail completely on paper before touching the code.
+            Don't just sit down and hack at the code.  }
+
+   \pargraph{ ifdef around new code }
+   \pargraph{ If you're modifying existing code, refactor it }
+
+      \note{This includes comments and documentation}
+      \note{Always test refactored code as thoroughly as new code}
+
+
+   \pargraph{ computing indexes }
+   \pargraph{ access arrays using array notation }
+   \pargraph{ don't use switch() if in if-else() will do }
+   \pargraph{ avoid nested conditionals } 
+   \pargraph{ factor out redundant code that occurs in both ``if'' and ``else'' clauses }
+   
+   \pargraph{ Always use braces for multi-line if and for statements }
+   \pargraph{ Don't test for null before delete; do test for null before dereferencing (e.g. DeleteFluxes.C) }
+   \pargraph{ Implement paired statements at the same time: e.g. new() delete() }
+   \pargraph{ Always set a pointer to zero after delete().  This can help prevent multiple deletes }
+   \pargraph{ Prefer simple code to complex code }
+   \note{ e.g. radiationShield = (RadiationFieldType == 11) ? TRUE : FALSE;}
+   \note{ consistency between variable names in subroutines when they refer to the same thing}
+   \pargraph{ Comment complicated code }
+   \pargraph{ Don't copy functions }
+   \pargraph{ Avoid copying code }
+
+      \note{File level}
+      \note{Function level}
+      \note{Loop level}
+       \note{Clearly mark temporary code so that you remember to remove it later.}
+
+
+    \pargraph{ overriding guidelines: maximize functionality, minimize complexity }
+    \pargraph{ coding procedures }
+    \pargraph{ summarize changes in CHANGES }
+    \pargraph{ detailed description in enzo-devel/changes }
+    \pargraph{ versioning }
+    \pargraph{ formatting }
+    \pargraph{ naming conventions  (bool: isBlah)}
+    \pargraph{ avoid code dependencies (e.g. \code{COMMUNICATION\_SEND}) }
+    \pargraph{ avoid complex logic ( \code{NewOrOld == NEW\_AND\_OLD || NewOrOld == OLD\_ONLY}) }
+    \pargraph{ factor out code--method for reducing redundancy }
+    \pargraph{ macros: how to name them and usage }
+    \pargraph{ use functions: modularization }
+    \pargraph{ remove obsolete code }
+
+   Working on a large-scale multi-developer software requires
+   discipline and attention to detail, and a sequential process:
+\begin{enumerate}
+    \item requirements
+    \item design
+    \item implement
+    \item test
+\end{enumerate}
+
+    \pargraph{ keep requirements documentation, design documentation, and  
+          implementation in-synch.  Perform periodic self-audits to
+          maintain consistency. }
+    \pargraph{ Feel free to check other people's work. }
+    \pargraph{ Write functions for small tasks }
+    \pargraph{ Write a collection of functions for larger tasks }
+    \pargraph{ Design before you code }
+    \pargraph{ Determine specifications before you design }
+    \pargraph{ Feel free to refactor other people's work.  Always test 
+          thoroughly. }
+    \pargraph{ If code is no longer needed, remove it.  If it's needed later,
+           it can be recovered through CVS.  If it is left in, it just
+           clutters up the code, increasing code complexity and
+           reducing readability. }
+    \pargraph{ Eschew global variables. }
+
+    \pargraph{ Use descriptive function and method names }
+     \note{use both upper and lower case}
+     \note{avoid abbreviations}
+     \note{use as many characters as necessary to be adequately descriptive}
+     \note{be consistent in naming conventions}
+
+    \pargraph{ function and method sizes should be minimized }
+      \note{less than 100 lines of code is good}
+      \note{less than 50 lines is preferable.}
+      \note{for C++ keep class methods small, idealy fewer than 50 lines of code}
+
+    \pargraph{ use whitespace }
+      \note{vertically and horizontally}
+      \note{Put spaces around block comments to separate them from code}
+      \note{Indent loops and conditionals consistently}
+
+    \pargraph{ limit line lengths to 70 characters }
+
+    \pargraph{ use only one code statement per line }
+
+    \pargraph{ coding style should be consistent throught a program  }
+     \note{use of brackets}
+     \note{indentations}
+     \note{naming conventions}
+
+    
+    \pargraph{ in adding comments, err on the side of too many rather than too few comments }
+
+    \note{there should be at least as many lines of comments as lines of code.}
+
+
+    \pargraph{ no matter how small, an application should include documentaion of the overall program function and flow  }
+
+    \note{even a few paragraphs is better than nothing}
+
+
+    \pargraph{ Minimize complexity and increase maintainability (C++) }
+
+      \note{avoid too many levels of inheritance in class heirarchies }
+      \note{minimize use of multiple inheritance}
+      \note{minimize use of operator overloading}
+
+
+    \pargraph{For Fortran, use Fortran 77}
+    \pargraph{Don't change names of files, functions, or executables}
+    \pargraph{Avoid duplicate code}
+    \pargraph{If multiple functions/filenames are required that do similar things, keep the name prefix similar and change the suffix.}
+
+\begin{verbatim}
+http://www.softwareqatest.com/qatfaq1.html
+http://wilma.vub.ac.be/~se4/papers/codingconventions.html
+\end{verbatim}
+
+%==================================================================
+\section{\cello\ Software Development Organization}
+%==================================================================
+
+
+\pargraph{Other documentation}
+
+  \note{project management plan: high level organization of \cello\ project}
+
+\pargraph{Subversion}
+
+\pargraph{Bug list}
+
+   \note{BUGS file}
+   \note{currently in subversion with code, but may move}
+   \note{maintained by jbordner}
+
+\pargraph{Make system}
+
+\pargraph{Testing}
+
+   
+%==================================================================
+\section{Procedures for common coding tasks}
+%==================================================================
+
+\note{Include how to document, who to tell, who to consult with}
+
+Software development tasks
+\pargraph{How do I port \cello\ to a new platform?}
+
+Coding tasks
+\pargraph{How do I add a new problem type to \cello?}
+\pargraph{How do I add a new physics step in \code{EvolveLevel()}?}
+\pargraph{How do I make global changes?}
+
+\pargraph{How do I add a new \code{\#ifdef}}
+\pargraph{Adding a new global ifdef (config changes)}
+\pargraph{Adding a new configuration setting}
+\pargraph{Adding a new particle type}
+\pargraph{adding new baryon fields}
+\pargraph{Adding a new source code file}
+\pargraph{adding a new output file}
+\pargraph{adding a new input file}
+\pargraph{adding a new parameter}
+\pargraph{reporting a bug}
+\pargraph{adding new data members to the grid class}
+
+
+
+\subsection{Commiting new code to the repository}
+
+The following checklist should be used when updating the \cello\ CVS repository:
+
+\begin{enumerate}
+   \item ``\verb+cvs update+'' to obtain the latest changes from the repository.
+      CVS will not let you check in changes otherwise.  If there are
+      conflicts (``\verb+cvs update |& grep '^C'+''), you will need to fix
+      them.  Consult with the author of the code conflicting with
+      yours if needed.
+
+   \item Test your updates thoroughly.  Having other people double-check
+      your changes is a very good idea.
+
+   \item Remember to \verb+cvs add+ any new files (or \verb+cvs delete+
+    old files) before updating the repository.  Otherwise your
+   copy may work fine, but other peoples' copies won't.  The command
+   \verb+cvs update | grep '?'+ will tell you what files are in your
+   local copy but aren't in the repository.
+
+   \item Decide on how to increment the version tag
+   \texttt{v}$x$\_$y$\_$z$, which represents version $x$.$y$.$z$.  (The
+   \texttt{v}$x$\_$y$\_$z$ format is used for tags because CVS does not
+   allow ``\texttt{.}'' in tags, and because CVS tags must begin with a letter).
+
+\begin{enumerate}
+      \item increment $x$ if it's a seriously major update (large-scale,
+          widespread modifications affecting the whole code, e.g. 
+          implementing 64-bit integers, or adding MHD).
+      \item increment $y$ if it's a smaller update (mostly localized but 
+          non-trivial mods, e.g. adding a new movie format or problem type).
+      \item increment $z$ for minor bug fixes or minor local modifications.
+\end{enumerate}
+
+   \item Edit the \texttt{VERSION} file to reflect the new version tag.
+
+   \item Edit the \texttt{amr\_mpi/src/version.def} file to reflect the new
+      version.
+
+   \item Update the \texttt{CHANGES} file to document all modifications.
+   It's a good idea to use \texttt{cvs diff} (or \verb+cvs diff --brief+) to remind you of what changes you made.  If changes are
+   major, feel free to add a file to the \texttt{doc/} subdirectory
+   containing a more detailed description of the changes.
+
+   \item Double-check that you've done all of the above steps.  Including
+      this one.
+
+   \item \texttt{cvs commit}.  You will be prompted for a description of the
+      changes--feel free to cut-and-paste what you wrote in the
+      \texttt{CHANGES} file for that.
+
+   \item Tag the CVS repository with the new version using \texttt{cvs tag} \textit{version}, where ``\textit{version}'' is identical to the contents of the \texttt{VERSION} file.
+\end{enumerate}
+
+\pargraph{updating code from CVS}
+\pargraph{resolving conflicts with CVS}
+\pargraph{refactoring}
+\pargraph{Adding an external library}
+\pargraph{Global changes}
+\pargraph{Changing existing code (name of a function, name of a file, etc.)}
+\pargraph{File names}
+\pargraph{Function names}
+\pargraph{Class/struct names}
+\pargraph{variable names}
+\pargraph{\#ifdef names}
+
+\pargraph{Declare all functions, constants, and types that are intended to be
+used outside the file in a header file.}
+
+\pargraph{Declare static functions, file-local constants, and types at the top
+of the file.}
+
+
+\pargraph{Comment all functions}
+
+  Unless the name of the function makes it obvious what the function
+  does (and this should be your goal when choosing a name), you should
+  add a comment describing the use and purpose of the function.
+
+\pargraph{Choose identifier names with care.}
+  Proper identifiers naming is an important way to help readers
+  understand your code.  In particular, except for indices (where
+  generic i, j, etc. may be appropriate) identifiers should rarely
+  have one-letter names.  Very long names can also be a nuisance as
+  they can make programs hard to format.  Name selection is
+  non-trivial. By K\&R convention, variable names start with a
+  lowercase letter, type names with an uppercase letter.
+
+\pargraph{Avoid embedded constants.}
+%
+Except for trivial constants (say 0, 1), it is much better to use
+\#define and set an identifier (all capital letters) equal to the
+constant than to use the constant in code directly (a practice known
+as “wired-in numbers”).  This allows you to aid the reader, as the
+name you choose for the constant should help him/her figure out what
+the constant represents. Also (in many cases) when you need to change
+the constant you can do so by changing its value in one place, rather
+than in many places in the code.  You can use const instead of
+\#define to declare constants (though this is more the custom in C++
+than in C).
+
+\pargraph{Minimize use of global variables.}  
+%
+When you do use one, define it in a .c file, not in a header file,
+since header files are meant to be included in multiple .c files and
+each of them will try to define the variable.  Not good.  You can put
+an extern declaration for it in a header if necessary.  Try to keep to
+static file-global variables, the C equivalent of Java class
+variables, plus local variables.
+
+\pargraph{Avoid long functions (over about 60 lines).}  
+%
+Use helper functions.
+
+\pargraph{Avoid ``cut-and-paste'' coding.}  
+%
+
+The ``cut-and-paste'' method of writing code leads to duplicated code,
+which is a serious coding error.  
+
+\textit{``Number one in the stink parade is duplicated code.''}  --Martin Fowler, ``Refactoring: Improving the Design of Existing Code
+
+    \note{More code to test, maintain and document.}
+    \note{Maintenance efforts require making the same changes at multiple locations.}
+    \note{More bugs, since if the same code is repeated at several locations, changes and fixes at one location may not get propagated to all the other locations.}
+    \note{Larger executable size.}
+
+
+\pargraph{Avoid ``cut-and-paste'' coding.}  
+
+Use functions to 'factor' out the repeated code.
+
+\pargraph{Use consistent indentation.}  
+%
+Poorly indented code is difficult to understand.  Emacs knows how to
+do this.  Avoid using tabs for indenting: use spaces.
+
+\pargraph{No goto's.}
+
+\pargraph{Comment all non-obvious code.}
+%
+  Or better, rewrite the code so that it becomes obvious.  If you run
+  across someone else's complicated code and figure out what it does,
+  add a comment to help the next person.
+
+\pargraph{Use for and while appropriately.}
+%
+  Generally use for when you have an index that changes each
+  iteration.  Use while when you don't.
+
+\pargraph{For complicated conditionals, use switch instead of if-then-else's.}
+
+\pargraph{For simple conditionals, use if-then-else instead of switch}
+
+\pargraph{Use the C++ STL}.  Use the C++ Standard Template Library
+containers (e.g. std::list, std::stack, std::vector) and types
+(e.g. std::string) instead of rolling your own.
+
+
+%==================================================================
+\section{Bad Code Smells}
+%==================================================================
+
+(From  ``\textit{Refactoring: Improving the Design of Existing Code},'' Martin Fowler and Kent Beck.)
+
+\pargraph{Duplicated Code}
+\pargraph{Long Method}
+\pargraph{Large Class}
+\pargraph{Long Parameter List}
+\pargraph{Divergent Change}
+\pargraph{Shotgun Surgery}
+\pargraph{Feature Envy}
+\pargraph{Data Clumps}
+\pargraph{Primitive Obsession}
+\pargraph{Switch Statements}
+\pargraph{Parallel Inheritance Hierarchies}
+\pargraph{Lazy Class}
+\pargraph{Speculative Generality}
+\pargraph{Temporary Field}
+\pargraph{Message Chains}
+\pargraph{Middle Man}
+\pargraph{Inappropriate Intimacy}
+\pargraph{Alternative Classes with Different Interfaces}
+\pargraph{Incomplete Library Class}
+\pargraph{Data Class}
+\pargraph{Refused Bequest}
+\pargraph{Comments}
+
+
+%==================================================================
+\section{Header comment templates}
+%==================================================================
+
+\subsection{File header comment}
+
+\pargraph{Each file should start with a comment which includes your name, the
+date you wrote the file, the name of the file.}
+
+Make it doxygen-readable.
+
+\subsection{Function header comment}
+
+C++
+\begin{verbatim}
+   FILENAME
+   SUMMARY
+   DESCRIPTION
+
+   FUNCTIONS
+   PARAMETERS
+
+   PUBLIC FUNCTIONS
+
+   AUTHOR
+   DATE
+   CHANGES (version/date/who/detail)
+\end{verbatim}
+
+
+%==================================================================
+\section{File naming conventions}
+%==================================================================
+
+\subsection{Prefixes and Suffixes}
+
+\begin{verbatim}
+*.hpp
+*.cpp
+*.hdf4        HDF4      
+*.hdf5        HDF5      
+*.exe         binary executable
+*.text        text file for human consumption
+in.*.cello    Cello input parameter file
+out.*.cello   Cello output files
+\end{verbatim}
+
+
+\end{document}
+
+%==================================================================
+
