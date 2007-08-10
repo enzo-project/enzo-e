@@ -4,15 +4,25 @@ make -C ../src install >& out.make
 
 set BIN = ../bin
 
-echo "             ${BIN}/hypre-grav input_test.111 >& output_test.111"
-                   ${BIN}/hypre-grav input_test.111 >& output_test.111
+set tests = (L2.G16.P1 \
+             L2.G16.P8 \
+              L2.G2.P1 \
+              L2.G8.P4 )
+set procs = (        1 \
+                     8 \
+                     1 \
+                     4)
 
-echo "mpirun -np 8 ${BIN}/hypre-grav input_test.222 >& output_test.222"
-      mpirun -np 8 ${BIN}/hypre-grav input_test.222 >& output_test.222
+set i = 1
+while ($i <= $#tests)
 
-echo "             ${BIN}/hypre-grav input_test.811.p=1 >& output_test.811.p=1"
-                   ${BIN}/hypre-grav input_test.811.p=1 >& output_test.811.p=1
+   set test = $tests[$i]
+   set ip   = $procs[$i]
 
-echo "mpirun -np 8 ${BIN}/hypre-grav input_test.811.p=8 >& output_test.811.p=8"
-      mpirun -np 8 ${BIN}/hypre-grav input_test.811.p=8 >& output_test.811.p=8
+   echo "------------------------------------------------------------------------"
+   echo "mpirun -np ${ip} ${BIN}/hypre-grav input.${test} > output.${test}"
+         mpirun -np ${ip} ${BIN}/hypre-grav input.${test} > output.${test}
+   echo "------------------------------------------------------------------------"
 
+   @ i = $i + 1
+end

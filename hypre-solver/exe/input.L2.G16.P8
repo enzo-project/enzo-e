@@ -2,10 +2,8 @@ dimension 3
 
 sphere 5.993985e27 6.378137e8 0.0 0.0 0.0  0.0 0.0 0.0
 
-point  6.0e8  3.1 4.1 5.9
-
 #
-# 8 slabs within 8 slabs
+# 8 slabs within 8 slabs on 8 processors
 #
 # +++++++++
 # ||+++++||

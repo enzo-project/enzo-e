@@ -2,8 +2,9 @@ dimension 3
 
 sphere 5.993985e27 6.378137e8
 
-point  6.0e8  3.1 4.1 5.9
-
+#
+# Eight nested grids in two levels on 8 processors
+#
 # +---+---+
 # | +-+-+ |
 # +-+-+-+-+
