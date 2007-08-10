@@ -1,16 +1,14 @@
-//======================================================================
-//
-//        File: sphere.cpp
-//
-//     Summary: Sphere class source file
-//
-// Description:
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-03-26
-//
-//======================================================================
+
+/// Sphere class source file
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 #include <assert.h>
 #include <stdio.h>

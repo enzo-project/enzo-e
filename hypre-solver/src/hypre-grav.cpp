@@ -1,17 +1,14 @@
-//======================================================================
-//
-//        File: hypre-grav.C
-//
-//     Summary: Main driver for hypre AMR gravity solver
-//
-// Description:
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-03-26
-//----------------------------------------------------------------------
-//2345678901234567890123456789012345678901234567890123456789012345678901234567890
-//======================================================================
+
+/// Main driver for hypre AMR test solver
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 #include <assert.h>
 #include <stdio.h>

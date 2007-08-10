@@ -1,42 +1,38 @@
-//======================================================================
-//
-//        File: Discret.hpp
-//
-//     Summary: Discretization class header file
-//
-// Description: A Discretization class stores and operates on discretization
-//              aspects of a grid.
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-05-14
-//
-//----------------------------------------------------------------------
-//
-//   Each Grid class has a corresponding Discret class.  The Discret
-//   class is used to set up the matrix elements for the unified 
-//   AMR grid.
-//  
-//   Setting up the matrix elements is done using the following
-//   steps:
-//
-//   1. Define the stencil for all interior grid elements
-//   2. Zero-out matrix elements covered by a refined grid
-//
-//   3. Handle matrix elements connecting neighboring grids
-//   - Handle matrix elements defining the boundary conditions
-//
-//   - Handle coarse unknowns adjacent to fine unknowns in child
-//   - Handle fine unknowns adjacent to coarse unknowns in parent
-//
-//   - Handle coarse unknowns adjacent to fine unknowns in neighbor's child
-//   - Handle fine unknowns adjacent to coarse unknowns in parent's neighbor
-//     
-//   - Handle any remaining connections
-//
-//   Note that the matrix generated is not symmetric.
-//   
-//======================================================================
+
+/// Discret class include file
+
+/**
+ * 
+ * The Discret class stores and operates on discretization aspects of a grid.
+ * 
+ *   Each Grid class has a corresponding Discret class.  The Discret
+ *   class is used to set up the matrix elements for the unified 
+ *   AMR grid.
+ *  
+ *   Setting up the matrix elements is done using the following
+ *   steps:
+ *
+ *   1. Define the stencil for all interior grid elements
+ *
+ *   2. Zero-out matrix elements covered by a refined grid
+ *
+ *   3. Handle matrix elements connecting neighboring grids
+ *   - Handle matrix elements defining the boundary conditions
+ *
+ *   - Handle coarse unknowns adjacent to fine unknowns in child
+ *   - Handle fine unknowns adjacent to coarse unknowns in parent
+ *
+ *   - Handle coarse unknowns adjacent to fine unknowns in neighbor's child
+ *   - Handle fine unknowns adjacent to coarse unknowns in parent's neighbor
+ *     
+ *   - Handle any remaining connections
+ *
+ *   Note that the matrix generated is not symmetric.
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 class Grid;
 

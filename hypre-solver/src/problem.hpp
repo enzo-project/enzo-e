@@ -1,16 +1,15 @@
-//======================================================================
-//
-//        File: Problem.hpp
-//
-//     Summary: Problem class header file
-//
-// Description: Everything required to define the problem to solve
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-04-02
-//
-//======================================================================
+
+/// Problem class include file
+
+/**
+ * 
+ * Everything required to define the problem to solve
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ * @date 2007-04-02
+ *
+ */
 
 #define BUFFER_LENGTH 255
 

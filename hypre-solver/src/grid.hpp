@@ -1,36 +1,37 @@
-//======================================================================
-//
-//        File: Grid.hpp
-//
-//     Summary: Grid class header file
-//
-// Description: A Grid is an orthogonal grid of zones in R^d, 1 <= d <= 3.
-//              Zones are congruent, and each zone contains a single
-//              double value at its center
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-03-26
-//
-//       o---o---o---o---o---X
-//       |   |   |   |   |   |
-//       | * | * | * | * | * |
-//       |   |   |   |   |   |
-//       o---o---o---o---o---o
-//       |   |   |   |   |   |
-//       | * | * | * | * | * |
-//       |   |   |   |   |   |
-//       o---o---o---o---o---o
-//       |   |   |   |   |   |
-//       | * | * | * | * | * |
-//       |   |   |   |   |   |
-//       X---o---o---o---o---o
-//
-// o vertices
-// X extreme vertices xl_ and xu_
-// * unknowns
-//
-//======================================================================
+
+/// Grid class include file
+
+/**
+ * 
+ *
+ * A Grid is an orthogonal grid of zones in \f$ R^d, 1 \le d \le 3 \f$.  Zones
+ * are congruent, and each zone contains a single double value at its
+ * center
+ *
+ * @verbatim
+         o---o---o---o---o---X
+         |   |   |   |   |   |
+         | * | * | * | * | * |
+         |   |   |   |   |   |
+         o---o---o---o---o---o
+         |   |   |   |   |   |
+         | * | * | * | * | * |
+         |   |   |   |   |   |
+         o---o---o---o---o---o
+         |   |   |   |   |   |
+         | * | * | * | * | * |
+         |   |   |   |   |   |
+         X---o---o---o---o---o
+  
+   o vertices
+   X extreme vertices xl_ and xu_
+   * unknowns
+   @endverbatim
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 class Grid
 {
@@ -88,15 +89,17 @@ class Grid
 
   // IO
 
+  /// Write the grid definition to standard out in human-readable format
+
   void print () throw ();
+
+  /// Write the grid to a file in compact format
+
   void write (FILE * fp = 0) throw ();
+
+  /// Read the grid from the given string in compact format
+
   void read (std::string parms) throw ();
-
-  // Checking
-
-  void check () throw () {  
-    assert (0 <= id_);
-  }
 
   //--------------------------------------------------------------------
   // Data access

@@ -1,16 +1,14 @@
-//======================================================================
-//
-//        File: hierarchy.cpp
-//
-//     Summary: Hierarchy class source file
-//
-// Description:
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-05-02
-//
-//======================================================================
+
+/// Hierarchy class source file
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 #include <assert.h>
 #include <stdio.h>
@@ -50,7 +48,7 @@ void Hierarchy::insert_grid (Grid * pgrid) throw ()
   printf ("Hierarchy::insert_grid()\n");
   if (pgrid->id() >= grids_.size()) {
     if (debug) printf ("DEBUG: resizing Hierarchy::grids_ from %d to %d\n",
-		       grids_.size(),pgrid->id());
+		       grids_.size(),pgrid->id() + 1);
     grids_.resize (pgrid->id() + 1);
   }
   grids_[pgrid->id()] = pgrid;

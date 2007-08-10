@@ -1,16 +1,15 @@
-//======================================================================
-//
-//        File: point.hpp
-//
-//     Summary: Representation of a single point mass
-//
-// Description: Representation of a single point mass
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-04-10 
-//
-//======================================================================
+
+/// Point class include file
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ * @date 2007-04-10 
+ *
+ */
 
 class Point 
 {

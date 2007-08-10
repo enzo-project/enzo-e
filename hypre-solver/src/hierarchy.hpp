@@ -1,17 +1,17 @@
-//======================================================================
-//
-//        File: Hierarchy.hpp
-//
-//     Summary: Hierarchy class header file
-//
-// Description: A Hierarchy object represents a structured adaptive mesh
-//              refinement hierarchy.  
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-05-02
-//
-//======================================================================
+
+/// Hierarchy class include file
+
+/**
+ * 
+ * A Hierarchy object represents a structured adaptive mesh refinement
+ * hierarchy.
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ * @date 2007-05-02
+ *
+ */
+
 
 class Hierarchy
 {

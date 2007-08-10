@@ -1,16 +1,14 @@
-//======================================================================
-//
-//        File: 
-//
-//     Summary: 
-//
-// Description:
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 
-//
-//======================================================================
+
+/// Hypre class include file
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 class Hypre {
 
@@ -18,7 +16,6 @@ public:
 
   Hypre ();
 
-  /// Initialize HYPRE's grid hierarchy
   void init_hierarchy (Hierarchy & hierarchy, Mpi & mpi);
   void init_stencil   (Hierarchy & hierarchy);
   void init_graph     (Hierarchy & hierarchy);
@@ -32,5 +29,14 @@ public:
 private:
 
   HYPRE_SStructStencil stencil_;
+
+private:
+
+  void init_hierarchy_create_grid_        (Grid & grid, int dim, int levels);
+  void init_hierarchy_set_grid_extents_   (Grid & grid);
+  void init_hierarchy_set_grid_variables_ (Grid & grid);
+  void init_hierarchy_set_grid_neighbors_ (Grid & grid);
+  void init_hierarchy_assemble_grids_     (Grid & grid);
+  
 
 };

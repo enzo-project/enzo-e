@@ -1,4 +1,4 @@
-SHELL = /bin/csh 
+SHELL = /bin/bash
 
 # Define MPCPP
 include Make.machine
@@ -11,7 +11,7 @@ OBJS = \
        discret.o \
        grid.o \
        hierarchy.o \
-       hypre-grav.o \
+       hypre-solve.o \
        hypre.o \
        level.o \
        mpi.o \
@@ -19,9 +19,15 @@ OBJS = \
        problem.o \
        sphere.o
 
-hypre-grav: dep $(OBJS)
-hypre-grav: $(OBJS)
-	$(MPCPP) -o hypre-grav $(OBJS) $(LIBS)
+hypre-solve: dep $(OBJS)
+hypre-solve: $(OBJS)
+	$(MPCPP) -o hypre-solve $(OBJS) $(LIBS)
+
+BIN = ../bin
+.PHONY: install
+install: hypre-solve
+	(if [ ! -e $(BIN) ]; then mkdir $(BIN); fi)
+	cp hypre-solve $(BIN)
 
 
 .cpp.o:
@@ -33,7 +39,13 @@ dep:
 
 .PHONY: clean
 clean:
-	rm -f *.o hypre-grav *~ \#*
+	rm -f *.o hypre-solve *~ \#*
+
+.PHONY: distclean
+distclean: clean
+	rm -f *.o hypre-solve *~ \#*
+
+.PHONY: doc
 doc:
 	doxygen
 
@@ -133,10 +145,3 @@ sphere.o: /usr/include/_G_config.h /usr/include/wchar.h
 sphere.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 sphere.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 sphere.o: scalar.hpp sphere.hpp
-test.o: /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h
-test.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
-test.o: /usr/include/gnu/stubs-32.h /usr/include/bits/types.h
-test.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-test.o: /usr/include/_G_config.h /usr/include/wchar.h
-test.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-test.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h

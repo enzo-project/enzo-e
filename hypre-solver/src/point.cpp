@@ -1,16 +1,14 @@
-//======================================================================
-//
-//        File: point.cpp
-//
-//     Summary: Representation of a single point
-//
-// Description: Representation of a single point
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-04-10 
-//
-//======================================================================
+
+/// Point class for representing a single point
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 #include <assert.h>
 

@@ -1,16 +1,14 @@
-//======================================================================
-//
-//        File: hypre.cpp
-//
-//     Summary: Interface routines to HYPRE
-//
-// Description:Interface routines to HYPRE
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-04-10
-//
-//======================================================================
+
+/// Interface routines to HYPRE
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 #include <mpi.h>
 #include <assert.h>
@@ -31,237 +29,216 @@
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug = 1;
 const int debug_hypre = 1;
 const int debug_discret = 1;
 
-//----------------------------------------------------------------------
+//======================================================================
+
+/// Hypre constructor
 
 Hypre::Hypre ()
+
 {
   
 }
 
-//----------------------------------------------------------------------
+//======================================================================
 
-void Hypre::init_hierarchy (Hierarchy & hierarchy, Mpi &mpi)
-// Initialize the grid hierarchy
+///Initialize the Grid Hierarchy
+
+void Hypre::init_hierarchy (Hierarchy & H, Mpi &mpi)
+
 {
 
   Grid::set_mpi (mpi);
 
-  //======================================================================
-  // CREATE GRIDS
-  //======================================================================
+  int dim    = H.dimension();
+  int levels = H.num_levels();
 
-  if (debug) printf ("DEBUG ==================\n");
-  if (debug) printf ("DEBUG %s:%d CREATE GRIDS\n",__FILE__,__LINE__);
-  if (debug) printf ("DEBUG ==================\n");
+  for (int i=0; i<H.num_grids(); i++) {
 
-  for (int i=0; i<hierarchy.num_grids(); i++) {
+    if (H.grid(i).is_local()) {
 
-    Grid & grid = hierarchy.grid(i);
+      init_hierarchy_create_grid_(H.grid(i),dim,levels);
 
-    if (grid.is_local()) {
+      // Set Grid extents
 
-      if (debug) printf ("DEBUG %s:%d grid %d\n",__FILE__,__LINE__,i);
-      // Create the HYPRE grid structure
+      init_hierarchy_set_grid_extents_(H.grid(i));
 
-      if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridCreate (\n");
-      if (debug_hypre) printf ("DEBUG_HYPRE      hierarchy.dimension() = %d\n", 
-			       hierarchy.dimension());
-      if (debug_hypre) printf ("DEBUG_HYPRE      hierarchy.num_grids() = %d\n", 
-			       hierarchy.num_grids());
+      // Set the grid variables
 
-      HYPRE_SStructGridCreate (MPI_COMM_WORLD, 
-			       hierarchy.dimension(), 
-			       hierarchy.num_levels()+1, 
-			       &grid.hypre_grid());
-    }
+      init_hierarchy_set_grid_variables_(H.grid(i));
 
-  }
+      // Set the grid's neighbors
 
-  //======================================================================
-  // SET GRID EXTENTS
-  //======================================================================
+      init_hierarchy_set_grid_neighbors_(H.grid(i));
 
-  if (debug) printf ("DEBUG ======================\n");
-  if (debug) printf ("DEBUG %s:%d SET GRID EXTENTS\n",__FILE__,__LINE__);
-  if (debug) printf ("DEBUG ======================\n");
-
-  for (int i=0; i<hierarchy.num_grids(); i++) {
-
-    Grid & grid = hierarchy.grid(i);
-
-    if (grid.is_local()) {
-
-      // Set HYPRE grid extents
-
-      int lower_extents[3] = { 0, 0, 0};
-      int upper_extents[3] = {grid.num_unknowns(0)-1,
-			      grid.num_unknowns(1)-1,
-			      grid.num_unknowns(2)-1};
-
-      if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridSetExtents\n");
-      if (debug_hypre) printf ("DEBUG_HYPRE    grid.id()     = %d\n",grid.id());
-      if (debug_hypre) printf ("DEBUG_HYPRE   lower_extents  = %d %d %d\n",
-			       lower_extents[0],lower_extents[1],lower_extents[2]);
-      if (debug_hypre) printf ("DEBUG_HYPRE    upper_extents = %d %d %d\n",
-			       upper_extents[0],upper_extents[1],upper_extents[2]);
-
-      HYPRE_SStructGridSetExtents(grid.hypre_grid(),
-				  grid.level(),
-				  lower_extents,
-				  upper_extents);
-    }
-
-  }
-
-  //======================================================================
-  // SET GRID VARIABLE TYPE
-  //======================================================================
-
-  if (debug) printf ("DEBUG ============================\n");
-  if (debug) printf ("DEBUG %s:%d SET GRID VARIABLE TYPE\n",__FILE__,__LINE__);
-  if (debug) printf ("DEBUG ============================\n");
-
-  for (int i=0; i<hierarchy.num_grids(); i++) {
-
-    Grid & grid = hierarchy.grid(i);
-
-    // Set HYPRE grid variables
-
-    if (grid.is_local()) {
-
-      HYPRE_SStructVariable variable_types[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
-
-      if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridSetVariables(\n");
-      if (debug_hypre) printf ("DEBUG_HYPRE         grid.id() = %d\n",grid.id());
-      if (debug_hypre) printf ("DEBUG_HYPRE                     1 \n");
-      if (debug_hypre) printf ("DEBUG_HYPRE    variable_types = %d\n",variable_types[0]);
-
-      HYPRE_SStructGridSetVariables(grid.hypre_grid(),
-				    grid.level(),
-				    1,
-				    variable_types);
     }
   }
 
-  //======================================================================
-  // SET GRID NEIGHBORS
-  //======================================================================
+  // All grids must exist before assembling
 
-  if (debug) printf ("DEBUG ========================\n");
-  if (debug) printf ("DEBUG %s:%d SET GRID NEIGHBORS\n",__FILE__,__LINE__);
-  if (debug) printf ("DEBUG ========================\n");
+  mpi.barrier(); // MAY BE UNNECESSARY
 
-  for (int i=0; i<hierarchy.num_grids(); i++) {
+  for (int i=0; i<H.num_grids(); i++) {
 
-    Grid & grid = hierarchy.grid(i);
+    if (H.grid(i).is_local()) {
 
-    // Set HYPRE grid neighbors
+      // Assemble grids
 
-    if (grid.is_local()) {
-
-      int index_map[] = {0,1,2}; // local coordinate axes same between all grids
-
-      for (int j=0; j < grid.num_neighbors(); j++) {
-	Grid & neighbor = grid.neighbor(j);
-	int gl[3],gu[3];
-	int nl[3],nu[3];
-	grid.find_neighbor_indices (neighbor,gl,gu,nl,nu);
-
-// 	if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridSetNeighborBox()\n");
-// 	if (debug_hypre) printf ("DEBUG_HYPRE     grid.id()         = %d\n", grid.id());
-// 	if (debug_hypre) printf ("DEBUG_HYPRE     gl[0],gl[1],gl[2] = %d %d %d\n",
-// 				 gl[0],gl[1],gl[2]);
-// 	if (debug_hypre) printf ("DEBUG_HYPRE     gu[0],gu[1],gu[2] = %d %d %d\n",
-// 				 gu[0],gu[1],gu[2]);
-// 	if (debug_hypre) printf ("DEBUG_HYPRE         neighbor.id() = %d\n",neighbor.id());
-// 	if (debug_hypre) printf ("DEBUG_HYPRE     nl[0],nl[1],nl[2] = %d %d %d\n",
-// 				 nl[0],nl[1],nl[2]);
-// 	if (debug_hypre) printf ("DEBUG_HYPRE     nu[0],nu[1],nu[2] = %d %d %d\n",
-// 				 nu[0],nu[1],nu[2]);
-// 	if (debug_hypre) printf ("DEBUG_HYPRE             index_map = %d %d %d\n",index_map[0],index_map[1],index_map[2]);
-
-	//---------------------------------------
-	// Update grid's Discret's boundary mask
-	//---------------------------------------
-
-	// Find axis and face
-
-	int axis, face;
-	if (gl[0] == -1)                   {axis = 0; face = 0;}
-	if (gl[0] == grid.num_unknowns(0)) {axis = 0; face = 1;}
-	if (gl[1] == -1)                   {axis = 1; face = 0;}
-	if (gl[1] == grid.num_unknowns(1)) {axis = 1; face = 1;}
-	if (gl[2] == -1)                   {axis = 2; face = 0;}
-	if (gl[2] == grid.num_unknowns(2)) {axis = 2; face = 1;}
-
-	// Determine index bounds 
-
-	int in0, in1, jn0, jn1;
-	in0 = gl[(axis+1)%3];
-	in1 = gu[(axis+1)%3];
-	jn0 = gl[(axis+2)%3];
-	jn1 = gu[(axis+2)%3];
-
-	if (debug_discret) printf ("DEBUG_DISCRET axis=%d face=%d [(%d,%d) - (%d,%d)]\n",
-				   axis,face,in0,jn0,in1,jn1);
-      
-	// Set Discret boundary mask
-
-	for (int in=in0; in<=in1; in++) {
-	  for (int jn=jn0; jn<=jn1; jn++) {
-	    grid.discret().neighbor_cell(axis,face,in,jn) = Discret::_same_;
-	  }
-	}
-
-	if (debug_discret) grid.discret().print();
-
-	//---------------------------------------
-	// Update HYPRE grid with neighboring box
-	//---------------------------------------
-
-	//	HYPRE_SStructGridSetNeighborBox(grid.hypre_grid(),
-	//					grid.id(),    gl,gu,
-	//					neighbor.id(),nl,nu,
-	//					index_map);
-      }
+      init_hierarchy_assemble_grids_(H.grid(i));
     }
   }
-
-  //======================================================================
-  // ASSEMBLE GRIDS
-  //======================================================================
-
-  if (debug) printf ("DEBUG ====================\n");
-  if (debug) printf ("DEBUG %s:%d ASSEMBLE GRIDS\n",__FILE__,__LINE__);
-  if (debug) printf ("DEBUG ====================\n");
-
-  for (int i=0; i<hierarchy.num_grids(); i++) {
-
-    Grid & grid = hierarchy.grid(i);
-
-    if (grid.is_local()) {
-
-      // Assemble grid
-      if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridAssemble()\n",
-			       __FILE__,__LINE__);
-      HYPRE_SStructGridAssemble (grid.hypre_grid());
-    }
-  }
-  if (debug) printf ("DEBUG ==================================\n");
-  if (debug) printf ("DEBUG %s:%d EXIT Hypre::init_hierarchy()\n",__FILE__,__LINE__);
-  if (debug) printf ("DEBUG ==================================\n");
+  
 }
 
-// --------------------------------------------------
-// Initialize the stencils
-// --------------------------------------------------
+//------------------------------------------------------------------------
+
+/// Create hypre Grids
+
+void Hypre::init_hierarchy_create_grid_(
+					Grid & grid,
+					int dim,
+					int levels
+					)
+
+{
+
+  // Create the HYPRE grid structure
+
+  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridCreate (\n");
+  if (debug_hypre) printf ("DEBUG_HYPRE      dim    = %d\n", dim);
+  if (debug_hypre) printf ("DEBUG_HYPRE      levels = %d\n", levels);
+
+  HYPRE_SStructGridCreate (MPI_COMM_WORLD, 
+			   dim, 
+			   levels, 
+			   &grid.hypre_grid());
+
+}
+
+//------------------------------------------------------------------------
+
+/// Set hypre Grid extents
+
+void Hypre::init_hierarchy_set_grid_extents_(Grid & grid)
+
+{
+
+  // Set HYPRE grid extents
+
+  int lower_extents[3] = { 0, 0, 0};
+  int upper_extents[3] = {grid.num_unknowns(0)-1,
+			  grid.num_unknowns(1)-1,
+			  grid.num_unknowns(2)-1};
+
+  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridSetExtents\n");
+  if (debug_hypre) printf ("DEBUG_HYPRE    grid.id()     = %d\n",grid.id());
+  if (debug_hypre) printf ("DEBUG_HYPRE   lower_extents  = %d %d %d\n",
+			   lower_extents[0],lower_extents[1],lower_extents[2]);
+  if (debug_hypre) printf ("DEBUG_HYPRE    upper_extents = %d %d %d\n",
+			   upper_extents[0],upper_extents[1],upper_extents[2]);
+
+  HYPRE_SStructGridSetExtents(grid.hypre_grid(),
+			      grid.level(),
+			      lower_extents,
+			      upper_extents);
+}
+
+//------------------------------------------------------------------------
+
+/// Set hypre Grid variable type
+
+void Hypre::init_hierarchy_set_grid_variables_(Grid & grid)
+
+{
+
+  HYPRE_SStructVariable variable_types[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
+
+  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridSetVariables(\n");
+  if (debug_hypre) printf ("DEBUG_HYPRE         grid.id() = %d\n",grid.id());
+  if (debug_hypre) printf ("DEBUG_HYPRE                     1 \n");
+  if (debug_hypre) printf ("DEBUG_HYPRE    variable_types = %d\n",variable_types[0]);
+
+  HYPRE_SStructGridSetVariables(grid.hypre_grid(),
+				grid.level(),
+				1,
+				variable_types);
+}
+
+//------------------------------------------------------------------------
+
+/// Set hypre Grid neighbors
+
+void Hypre::init_hierarchy_set_grid_neighbors_(Grid & grid)
+
+{
+  // Set grid neighbors
+
+  int index_map[] = {0,1,2}; // local coordinate axes same between all grids
+
+  // Update each grid's Discret's boundary mask
+
+  for (int j=0; j < grid.num_neighbors(); j++) {
+    Grid & neighbor = grid.neighbor(j);
+    int gl[3],gu[3];
+    int nl[3],nu[3];
+    grid.find_neighbor_indices (neighbor,gl,gu,nl,nu);
+
+    // find axis and face
+
+    int axis, face;
+    if (gl[0] == -1)                   {axis = 0; face = 0;}
+    if (gl[0] == grid.num_unknowns(0)) {axis = 0; face = 1;}
+    if (gl[1] == -1)                   {axis = 1; face = 0;}
+    if (gl[1] == grid.num_unknowns(1)) {axis = 1; face = 1;}
+    if (gl[2] == -1)                   {axis = 2; face = 0;}
+    if (gl[2] == grid.num_unknowns(2)) {axis = 2; face = 1;}
+
+    // determine index bounds 
+
+    int in0, in1, jn0, jn1;
+    in0 = gl[(axis+1)%3];
+    in1 = gu[(axis+1)%3];
+    jn0 = gl[(axis+2)%3];
+    jn1 = gu[(axis+2)%3];
+
+    if (debug_discret) printf ("DEBUG_DISCRET axis=%d face=%d [(%d,%d) - (%d,%d)]\n",
+			       axis,face,in0,jn0,in1,jn1);
+      
+    // set Discret boundary mask
+
+    for (int in=in0; in<=in1; in++) {
+      for (int jn=jn0; jn<=jn1; jn++) {
+	grid.discret().neighbor_cell(axis,face,in,jn) = Discret::_same_;
+      }
+    }
+
+    if (debug_discret) grid.discret().print();
+
+  }
+}
+
+//------------------------------------------------------------------------
+
+/// Assemble hypre Grid hierarchy
+
+void Hypre::init_hierarchy_assemble_grids_(Grid & grid)
+{
+
+  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridAssemble()\n",
+			   __FILE__,__LINE__);
+
+  HYPRE_SStructGridAssemble (grid.hypre_grid());
+}
+
+
+//======================================================================
+
+/// Initialize the discretization stencils
 
 void Hypre::init_stencil (Hierarchy & hierarchy)
-// Initialize the discretization stencil
+
 {
 
   int dim = hierarchy.dimension();
@@ -310,11 +287,12 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
 
 }
 
-// --------------------------------------------------
-// Initialize the graphs
-// --------------------------------------------------
+//======================================================================
+
+/// Initialize the graphs
 
 void Hypre::init_graph (Hierarchy & hierarchy)
+
 {
   int i;
 
@@ -360,47 +338,52 @@ void Hypre::init_graph (Hierarchy & hierarchy)
   }
 }
 
-// --------------------------------------------------
-// Initialize the matrix A
-// --------------------------------------------------
+//======================================================================
+
+/// Initialize the matrix A
 
 void Hypre::init_matrix (Hierarchy & hierarchy)
+
 {
   printf ("Hypre::init_matrix() is not implemented yet\n"); 
 }
 
-// --------------------------------------------------
-// Initialize the right-hand-side vector b
-// --------------------------------------------------
+//======================================================================
+
+/// Initialize the right-hand-side vector b
 
 void Hypre::init_rhs (Hierarchy & hierarchy)
+
 {
   printf ("Hypre::init_rhs() is not implemented yet\n"); 
 }
 
-// --------------------------------------------------
-// Initialize the linear solver
-// --------------------------------------------------
+//======================================================================
+
+/// Initialize the linear solver
 
 void Hypre::init_solver (Hierarchy & hierarchy)
+
 {
   printf ("Hypre::init_solver() is not implemented yet\n"); 
 }
 
-// --------------------------------------------------
-// Solve the linear system Ax = b
-// --------------------------------------------------
+//======================================================================
+
+/// Solve the linear system Ax = b
 
 void Hypre::solve (Hierarchy & hierarchy)
+
 {
   printf ("Hypre::solve() is not implemented yet\n"); 
 }
 
-// --------------------------------------------------
-// Evaluate the success of the solve
-// --------------------------------------------------
+//======================================================================
+
+/// Evaluate the success of the solve
 
 void Hypre::evaluate (Hierarchy & hierarchy)
+
 {
   printf ("Hypre::evaluate() is not implemented yet\n"); 
 }

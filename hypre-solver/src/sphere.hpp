@@ -1,16 +1,15 @@
-//======================================================================
-//
-//        File: sphere.hpp
-//
-//     Summary: Sphere class header file
-//
-// Description:
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-03-26
-//
-//======================================================================
+
+/// Sphere class include file
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ * @date 2007-03-26
+ *
+ */
 
 class Sphere
 {

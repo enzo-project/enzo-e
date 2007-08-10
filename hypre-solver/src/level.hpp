@@ -1,17 +1,17 @@
-//======================================================================
-//
-//        File: Level.hpp
-//
-//     Summary: Level class header file
-//
-// Description: A Level object represents the set of grids in the same
-//              level within a structured adaptive mesh refinement hierarchy.
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-05-02
-//
-//======================================================================
+
+/// Level class source file
+
+/**
+ * 
+ * A Level object represents the set of grids in the same level within
+ * a structured adaptive mesh refinement hierarchy.
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ * @date 2007-05-02
+ *
+ */
 
 class Level
 {

@@ -1,16 +1,14 @@
-//======================================================================
-//
-//        File: problem.cpp
-//
-//     Summary: Problem class source file
-//
-// Description:
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-04-02
-//
-//======================================================================
+
+/// Problem class source file
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 #include <assert.h>
 #include <stdio.h>

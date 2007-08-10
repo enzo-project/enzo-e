@@ -1,16 +1,14 @@
-//======================================================================
-//
-//        File: mpi.cpp
-//
-//     Summary: Communication routines
-//
-// Description: Basic communication routines and data
-//
-//      Author: James Bordner <jobordner@ucsd.edu>
-//
-//        Date: 2007-04-10
-//
-//======================================================================
+
+/// Mpi class for basic communication routines and data
+
+/**
+ * 
+ * 
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ *
+ */
 
 #include <stdio.h>
 #include <mpi.h>
