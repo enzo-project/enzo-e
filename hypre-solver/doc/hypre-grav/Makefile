@@ -1,4 +1,4 @@
-all: hypre-grav.pdf
+all: hypre-grav.pdf  hypre-grav.ps
 
 hypre-grav:  hypre-grav.ps 
 

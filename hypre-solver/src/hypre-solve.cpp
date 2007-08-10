@@ -43,12 +43,20 @@ const int debug = 1;
 int main(int argc, char **argv)
 {
 
+  // Determine executable name
+
+  std::string exec_name (argv[0]);
+  int size = exec_name.rfind("/");
+  exec_name.replace(0,size+1,"");
+
   int np,ip;
 
   // --------------------------------------------------
   // MPI initialization
   // --------------------------------------------------
-  
+
+  printf ("Begin %s\n",exec_name.c_str());
+
   Mpi mpi (&argc,&argv);
 
   if (argc==2) {
@@ -155,6 +163,8 @@ int main(int argc, char **argv)
   if (debug) printf ("DEBUG ================================================\n");
   if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
   if (debug) printf ("DEBUG ================================================\n");
+
+  printf ("End %s\n",exec_name.c_str());
 
 }
 

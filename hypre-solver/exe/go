@@ -1,17 +1,18 @@
 #!/bin/csh -f
 
+set BIN  = ../bin
+set NAME = hypre-solve
+set EXEC = ${BIN}/${NAME}
+
+rm -f $EXEC
 make -C ../src install >& out.make
 
-set BIN = ../bin
 
-set tests = (L2.G16.P1 \
-             L2.G16.P8 \
-              L2.G2.P1 \
-              L2.G8.P4 )
-set procs = (        1 \
-                     8 \
-                     1 \
-                     4)
+set tests = (L1.G1.P111 L2.G16.P111 L2.G16.P222 L2.G16.P811 L2.G2.P111)
+
+set procs = (1 1 8 8 1)
+
+echo
 
 set i = 1
 while ($i <= $#tests)
@@ -19,10 +20,10 @@ while ($i <= $#tests)
    set test = $tests[$i]
    set ip   = $procs[$i]
 
-   echo "------------------------------------------------------------------------"
-   echo "mpirun -np ${ip} ${BIN}/hypre-grav input.${test} > output.${test}"
-         mpirun -np ${ip} ${BIN}/hypre-grav input.${test} > output.${test}
-   echo "------------------------------------------------------------------------"
+         mpirun -np ${ip} $EXEC in.${test} >& out.${test}
+   printf "in.${test}\n"
+   awk 'BEGIN {c="FAIL"}; /End '"$NAME"'/{c="SUCCESS"}; END{print c}' out.${test}
+   echo
 
    @ i = $i + 1
 end
