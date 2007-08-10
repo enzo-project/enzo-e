@@ -88,24 +88,24 @@ hypre.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h mpi.hpp
 hypre.o: scalar.hpp point.hpp discret.hpp grid.hpp level.hpp hierarchy.hpp
 hypre.o: sphere.hpp problem.hpp hypre.hpp
-hypre-grav.o: /usr/include/assert.h /usr/include/features.h
-hypre-grav.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-hypre-grav.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-hypre-grav.o: /usr/include/stdio.h /usr/include/bits/types.h
-hypre-grav.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-hypre-grav.o: /usr/include/_G_config.h /usr/include/wchar.h
-hypre-grav.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-hypre-grav.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-hypre-grav.o: /usr/include/stdlib.h /usr/include/sys/types.h
-hypre-grav.o: /usr/include/time.h /usr/include/endian.h
-hypre-grav.o: /usr/include/bits/endian.h /usr/include/sys/select.h
-hypre-grav.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
-hypre-grav.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
-hypre-grav.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
-hypre-grav.o: /usr/include/math.h /usr/include/bits/huge_val.h
-hypre-grav.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
-hypre-grav.o: scalar.hpp point.hpp sphere.hpp discret.hpp mpi.hpp grid.hpp
-hypre-grav.o: level.hpp hierarchy.hpp problem.hpp hypre.hpp
+hypre-solve.o: /usr/include/assert.h /usr/include/features.h
+hypre-solve.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+hypre-solve.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+hypre-solve.o: /usr/include/stdio.h /usr/include/bits/types.h
+hypre-solve.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+hypre-solve.o: /usr/include/_G_config.h /usr/include/wchar.h
+hypre-solve.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+hypre-solve.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+hypre-solve.o: /usr/include/stdlib.h /usr/include/sys/types.h
+hypre-solve.o: /usr/include/time.h /usr/include/endian.h
+hypre-solve.o: /usr/include/bits/endian.h /usr/include/sys/select.h
+hypre-solve.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
+hypre-solve.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
+hypre-solve.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
+hypre-solve.o: /usr/include/math.h /usr/include/bits/huge_val.h
+hypre-solve.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
+hypre-solve.o: scalar.hpp point.hpp sphere.hpp discret.hpp mpi.hpp grid.hpp
+hypre-solve.o: level.hpp hierarchy.hpp problem.hpp hypre.hpp
 level.o: /usr/include/assert.h /usr/include/features.h
 level.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 level.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
