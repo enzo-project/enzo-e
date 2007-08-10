@@ -1,0 +1,18 @@
+#!/bin/csh -f
+
+make -C ../src install >& out.make
+
+set BIN = ../bin
+
+echo "             ${BIN}/hypre-grav input_test.111 >& output_test.111"
+                   ${BIN}/hypre-grav input_test.111 >& output_test.111
+
+echo "mpirun -np 8 ${BIN}/hypre-grav input_test.222 >& output_test.222"
+      mpirun -np 8 ${BIN}/hypre-grav input_test.222 >& output_test.222
+
+echo "             ${BIN}/hypre-grav input_test.811.p=1 >& output_test.811.p=1"
+                   ${BIN}/hypre-grav input_test.811.p=1 >& output_test.811.p=1
+
+echo "mpirun -np 8 ${BIN}/hypre-grav input_test.811.p=8 >& output_test.811.p=8"
+      mpirun -np 8 ${BIN}/hypre-grav input_test.811.p=8 >& output_test.811.p=8
+
