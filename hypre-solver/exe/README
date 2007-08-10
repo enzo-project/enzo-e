@@ -1,4 +1,5 @@
-input_test.L2.G2.P1     Two nested grids on 1 processor
-input_test.L2.G2.P8     Two nested grids on 8 processors
-input_test.L2.G16.P1    Eight slabs within 8 slabs on 1 processor
-input_test.811.p=8    Eight slabs within 8 slabs on 8 processors
+input.L1.G1.P1     One grid on one processor
+input.L2.G2.P1     Two nested grids on one processor
+input.L2.G2.P8     Two nested grids on eight processors
+input.L2.G16.P1    Eight slabs within eight slabs on one processor
+input.L2.G8.P8     Eight slabs within eight slabs on eight processors
