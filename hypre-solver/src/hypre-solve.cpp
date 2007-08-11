@@ -88,69 +88,47 @@ int main(int argc, char **argv)
 
     Hypre hypre;
 
-    if (debug) printf ("DEBUG ================================================\n");
-    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
-    if (debug) printf ("DEBUG ================================================\n");
-
     hypre.init_hierarchy (problem.hierarchy(),mpi);
-
-    //    int i;
-    //    for (i=0; i<Hierarchy.num_grids(); i++) {
-    //      printf ("Initializing hypre grid %p\n",&Grid::grid(i));
-    //      hypre.init_grid (Grid::grid(i));
-    //    }
 
     // --------------------------------------------------
     // Initialize the stencils
     // --------------------------------------------------
 
-    if (debug) printf ("DEBUG ================================================\n");
-    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
-    if (debug) printf ("DEBUG ================================================\n");
-
-    hypre.init_stencil (problem.hierarchy());
+    //    hypre.init_stencil (problem.hierarchy());
 
     // --------------------------------------------------
     // Initialize the graph
     // --------------------------------------------------
 
-    if (debug) printf ("DEBUG ================================================\n");
-    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
-    if (debug) printf ("DEBUG ================================================\n");
-
-    hypre.init_graph (problem.hierarchy());
+    //    hypre.init_graph (problem.hierarchy());
 
     // --------------------------------------------------
     // Initialize the matrix A
     // --------------------------------------------------
 
-    hypre.init_matrix (problem.hierarchy());
+    //    hypre.init_matrix (problem.hierarchy());
 
     // --------------------------------------------------
     // Initialize the right-hand-side vector b
     // --------------------------------------------------
 
-    hypre.init_rhs (problem.hierarchy());
+    //    hypre.init_rhs (problem.hierarchy());
 
     // --------------------------------------------------
     // Solve the linear system Ax = b
     // --------------------------------------------------
 
-    hypre.solve (problem.hierarchy());
+    // hypre.solve (problem.hierarchy());
 
     // --------------------------------------------------
     // Evaluate the solution
     // --------------------------------------------------
 
-    hypre.evaluate (problem.hierarchy());
+    //    hypre.evaluate (problem.hierarchy());
 
     // --------------------------------------------------
     // MPI Finalize
     // --------------------------------------------------
-
-    if (debug) printf ("DEBUG ================================================\n");
-    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
-    if (debug) printf ("DEBUG ================================================\n");
 
     MPI_Finalize ();
 

@@ -8,9 +8,13 @@ rm -f $EXEC
 make -C ../src install >& out.make
 
 
-set tests = (L1.G1.P111 L2.G16.P111 L2.G16.P222 L2.G16.P811 L2.G2.P111)
+set tests = (L1.G1.P111 \
+             L1.G2.P211 L1.G2.P121 L1.G2.P112 \
+             L2.G16.P111 L2.G16.P222 L2.G16.P811 L2.G2.P111)
 
-set procs = (1 1 8 8 1)
+set procs = (1 \
+             2 2 2 \
+             1 8 8 1)
 
 echo
 
@@ -20,10 +24,12 @@ while ($i <= $#tests)
    set test = $tests[$i]
    set ip   = $procs[$i]
 
-         mpirun -np ${ip} $EXEC in.${test} >& out.${test}
-   printf "in.${test}\n"
-   awk 'BEGIN {c="FAIL"}; /End '"$NAME"'/{c="SUCCESS"}; END{print c}' out.${test}
-   echo
+   mpirun -np ${ip} $EXEC in.${test} >& out.${test}
+
+   printf "%-20s" "in.${test}"
+   awk 'BEGIN {c="Fail"}; /End '"$NAME"'/{c="Pass"}; END{print c}' out.${test}
 
    @ i = $i + 1
 end
+
+echo

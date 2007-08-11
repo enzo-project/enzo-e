@@ -1,0 +1,17 @@
+dimension 3
+
+sphere 5.993985e27 6.378137e8
+
+#
+# Two neighboring grids along y-axis
+#
+#   +---+
+#   |   |
+#   +---+
+#   |   |
+#   +---+
+#
+
+grid   0 -1 0 -4e9 -4e9 -4e9  4e9 0e9 4e9  32 16 32
+grid   1 -1 1 -4e9  0e9 -4e9  4e9 4e9 4e9  32 16 32
+
