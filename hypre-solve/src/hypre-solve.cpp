@@ -35,6 +35,9 @@
 #include "hypre.hpp"
 
 const int debug = 0;
+const int trace = 0;
+
+#define _TRACE_ if (trace) { printf ("%d %s:%d\n",mpi.ip(),__FILE__,__LINE__); fflush(stdout); }
 
 //======================================================================
 // BEGIN MAIN
@@ -69,7 +72,7 @@ int main(int argc, char **argv)
 
     // create a new problem and read it in
 
-    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
+    _TRACE_;
 
     Problem problem;
 
@@ -79,48 +82,53 @@ int main(int argc, char **argv)
     // Initialize the grid hierarchy
     // --------------------------------------------------
 
-    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
+    _TRACE_;
 
     Hypre hypre;
 
     hypre.init_hierarchy (problem.hierarchy(),mpi);
 
-    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
-
     // --------------------------------------------------
     // Initialize the stencils
     // --------------------------------------------------
 
-    //    hypre.init_stencil (problem.hierarchy());
+    _TRACE_;
+
+    hypre.init_stencil (problem.hierarchy());
 
     // --------------------------------------------------
     // Initialize the graph
     // --------------------------------------------------
 
+    // _TRACE_
     //    hypre.init_graph (problem.hierarchy());
 
     // --------------------------------------------------
     // Initialize the matrix A
     // --------------------------------------------------
 
+    // _TRACE_
     //    hypre.init_matrix (problem.hierarchy());
 
     // --------------------------------------------------
     // Initialize the right-hand-side vector b
     // --------------------------------------------------
 
+    // _TRACE_
     //    hypre.init_rhs (problem.hierarchy());
 
     // --------------------------------------------------
     // Solve the linear system Ax = b
     // --------------------------------------------------
 
+    // _TRACE_
     // hypre.solve (problem.hierarchy());
 
     // --------------------------------------------------
     // Evaluate the solution
     // --------------------------------------------------
 
+    // _TRACE_
     //    hypre.evaluate (problem.hierarchy());
 
     // --------------------------------------------------
