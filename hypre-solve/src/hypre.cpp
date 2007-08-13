@@ -29,8 +29,10 @@
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug_hypre = 1;
-const int debug_discret = 1;
+const int debug_hypre           = 0;
+const int debug_hypre_hierarchy = 0;
+
+const int debug_discret = 0;
 
 //======================================================================
 
@@ -56,29 +58,30 @@ void Hypre::init_hierarchy (Hierarchy & H, Mpi &mpi)
   int levels = H.num_levels();
 
   for (int i=0; i<H.num_grids(); i++) {
-
     if (H.grid(i).is_local()) {
+
+      // Create hypre grids
 
       init_hierarchy_create_grid_(H.grid(i),dim,levels);
 
-      // Set Grid extents
+      // Set hypre grid extents
 
       init_hierarchy_set_grid_extents_(H.grid(i));
 
-      // Set the grid variables
+      // Set the hypre grid variables
 
       init_hierarchy_set_grid_variables_(H.grid(i));
 
-      // Set the grid's neighbors
+      // Set the hypre grid's neighbors
 
       init_hierarchy_set_grid_neighbors_(H.grid(i));
-
     }
   }
 
   // All grids must exist before assembling
 
-  mpi.barrier(); // MAY BE UNNECESSARY
+  mpi.barrier(); // MAY BE UNNECESSARY?
+
 
   for (int i=0; i<H.num_grids(); i++) {
 

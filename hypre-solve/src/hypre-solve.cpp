@@ -34,7 +34,7 @@
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug = 1;
+const int debug = 0;
 
 //======================================================================
 // BEGIN MAIN
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
   // MPI initialization
   // --------------------------------------------------
 
-  printf ("Begin %s\n",exec_name.c_str());
+  if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
 
   Mpi mpi (&argc,&argv);
 
@@ -69,26 +69,23 @@ int main(int argc, char **argv)
 
     // create a new problem and read it in
 
+    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
+
     Problem problem;
 
     problem.read  (filename);
-
-    // Test printing, writing, and dumping problem to a file
-
-    problem.print ();
-    problem.write ();
-
-    FILE *fp = fopen ("problem.out","w");
-    problem.write (fp);
-    fclose(fp);
 
     // --------------------------------------------------
     // Initialize the grid hierarchy
     // --------------------------------------------------
 
+    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
+
     Hypre hypre;
 
     hypre.init_hierarchy (problem.hierarchy(),mpi);
+
+    if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
 
     // --------------------------------------------------
     // Initialize the stencils
@@ -130,6 +127,11 @@ int main(int argc, char **argv)
     // MPI Finalize
     // --------------------------------------------------
 
+    mpi.barrier();
+
+    if (mpi.ip() == 0) { printf ("End %s\n",exec_name.c_str()); fflush(stdout); }
+
+
     MPI_Finalize ();
 
   } else {
@@ -138,11 +140,6 @@ int main(int argc, char **argv)
 
   }
 
-  if (debug) printf ("DEBUG ================================================\n");
-  if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
-  if (debug) printf ("DEBUG ================================================\n");
-
-  printf ("End %s\n",exec_name.c_str());
 
 }
 

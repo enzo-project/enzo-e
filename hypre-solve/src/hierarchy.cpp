@@ -45,7 +45,7 @@ Hierarchy::~Hierarchy () throw ()
 
 void Hierarchy::insert_grid (Grid * pgrid) throw ()
 {
-  printf ("Hierarchy::insert_grid()\n");
+  if (debug) printf ("Hierarchy::insert_grid()\n");
   if (pgrid->id() >= grids_.size()) {
     if (debug) printf ("DEBUG: resizing Hierarchy::grids_ from %d to %d\n",
 		       grids_.size(),pgrid->id() + 1);
@@ -59,7 +59,7 @@ void Hierarchy::insert_grid (Grid * pgrid) throw ()
 
 void Hierarchy::init_levels () throw ()
 {
-  printf ("Hierarchy::init_levels()\n");
+  if (debug) printf ("Hierarchy::init_levels()\n");
 
   //-------------------------
   //  Initialize grid parents
@@ -97,7 +97,7 @@ void Hierarchy::init_levels () throw ()
 	  done = false;
 	}
       }
-      g->print();
+      if (debug) g->print();
     }
   }
 
@@ -118,6 +118,8 @@ void Hierarchy::init_levels () throw ()
   //---------------------------
 
   // First level 0: test all pairs
+
+  int ip; MPI_Comm_rank (MPI_COMM_WORLD,&ip); // TEMPORARY
 
   for (i=0; i<level(0).num_grids(); i++) {
     Grid * g1 = & level(0).grid(i);
@@ -167,8 +169,6 @@ void Hierarchy::init_levels () throw ()
       }
     }
   }
-  //   printf ("%s:%d Grid::init_mesh()\n",__FILE__,__LINE__);
-
 }
 
 //======================================================================
