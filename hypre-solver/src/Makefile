@@ -43,7 +43,7 @@ clean:
 
 .PHONY: distclean
 distclean: clean
-	rm -f *.o hypre-solve *~ \#*
+	rm -rf html latex
 
 .PHONY: doc
 doc:
