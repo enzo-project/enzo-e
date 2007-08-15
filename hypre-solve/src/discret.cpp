@@ -27,6 +27,9 @@
 
 const int debug = 0;
 
+const int Discret::_unknown_  = -1000;
+const int Discret::_boundary_ = -2000;
+
 //----------------------------------------------------------------------
 
 Discret::Discret (int n[3]) throw ()
@@ -47,7 +50,6 @@ Discret::~Discret () throw ()
 
 void Discret::print() throw()
 {
-  return;
    printf ("Discret::debug()\n");
    printf ("   n1_ = (%d,%d,%d)\n",n1_[0],n1_[1],n1_[2]);
    printf ("   n2_ = (%d,%d,%d)\n",n2_[0],n2_[1],n2_[2]);
@@ -58,13 +60,11 @@ void Discret::print() throw()
        printf ("   Axis %d   Face %d\n",axis,face);
        for (i=0; i<n1_[axis]; i++) {
 	 for (j=0; j<n2_[axis]; j++) {
-	   char c;
 	   int index = i+n1_[axis]*j;
-	   if (neighbor_cell_[axis][face][index]==_same_)    c='=';
-	   if (neighbor_cell_[axis][face][index]==_coarse_)  c='>';
-	   if (neighbor_cell_[axis][face][index]==_fine_)    c='<';
-	   if (neighbor_cell_[axis][face][index]==_unknown_) c='?';
-	   printf ("%c ",c);
+	   int cell = neighbor_cell_[axis][face][index];
+	   if (cell == _unknown_)       printf ("??");
+	   else if (cell == _boundary_) printf ("BB");
+	   else printf ("%2d",cell);
 	 }
 	 printf ("\n");
        }
@@ -94,10 +94,11 @@ void Discret::alloc_ (int n[3]) throw ()
     n_ [axis] = N / n[axis];
     if (debug) printf ("DEBUG %s:%d axis %d n1=%d n2=%d n=%d\n",
 		       __FILE__,__LINE__,axis,n1_[axis],n2_[axis],n_[axis]);
+
+    // Allocate and initialize boundary faces
+
     for (int face=0; face<2; face++) {
-      // Allocate boundary face
-      neighbor_cell_[axis][face] = new enum_neighbor_cell [n_[axis]];
-      // Clear boundary face
+      neighbor_cell_[axis][face] = new int [n_[axis]];
       for (i=0; i<n_[axis]; i++) neighbor_cell_[axis][face][i] = _unknown_;
     }
   }

@@ -175,16 +175,6 @@ class Grid
     return u_[i0 + n_[0]*(i1 + n_[1]*i2)];
   }
 
-  /// Return the boundary condition bc(axis,i,j)
-  //  Scalar & bc(axis, i0,i1)
-  //  {
-  //    int index;
-  //    if (axis==_xm_ || axis==_xp_) index = i + j*n_[1];
-  //    if (axis==_ym_ || axis==_yp_) index = i + j*n_[2];
-  //    if (axis==_zm_ || axis==_zp_) index = i + j*n_[0];
-  //    return bc_[axis][index];
-  //  }
-
   Discret & discret() throw()
   { return *discret_; }
 
@@ -207,7 +197,8 @@ class Grid
   //--------------------------------------------------------------------
 
   /// Return index limits of ghost zones in the neighboring grid. Required by HYPRE.
-  bool find_neighbor_indices (Grid & neighbor, int *gl, int *gu, int *nl, int *nu);
+
+  bool find_neighbor_indices (Grid & neighbor, int *gl, int *gu);
 
   //--------------------------------------------------------------------
   // STATIC MEMBER DATA

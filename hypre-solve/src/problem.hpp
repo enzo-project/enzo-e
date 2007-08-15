@@ -23,6 +23,7 @@ private:
   std::vector<Sphere *> spheres_;  // List of sphere masses
   std::vector<Point *>  points_;   // List of point masses
   Hierarchy hierarchy_;            // AMR mesh hierarchy
+  Domain domain_;                  // Problem domain
 
   //----------------------------------------------------------------------
 
@@ -48,6 +49,8 @@ public:
 
   Hierarchy & hierarchy ()   // Return the hierarchy
   { return hierarchy_; } 
+  Domain & domain ()         // Return the domain
+  { return domain_; } 
   Sphere & sphere (int i)   // Return a pointer to the ith Sphere
   { return * spheres_[i]; };
   int num_spheres ()        // Return the number of Spheres

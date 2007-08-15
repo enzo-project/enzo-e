@@ -31,11 +31,12 @@
 #include "grid.hpp"
 #include "level.hpp"
 #include "hierarchy.hpp"
+#include "domain.hpp"
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug = 0;
-const int trace = 0;
+const int debug = 1;
+const int trace = 1;
 
 #define _TRACE_ if (trace) { printf ("%d %s:%d\n",mpi.ip(),__FILE__,__LINE__); fflush(stdout); }
 
@@ -77,7 +78,20 @@ int main(int argc, char **argv)
     Problem problem;
 
     problem.read  (filename);
+    if (debug) problem.print ();
 
+    
+    Hierarchy & hierarchy = problem.hierarchy();
+
+    // determine interconnections between grids
+
+    hierarchy.init_grids();
+
+    // categorize grid boundary zones according to levels of adjacent
+    // or containing grids
+
+    hierarchy.init_discret();
+  
     // --------------------------------------------------
     // Initialize the grid hierarchy
     // --------------------------------------------------
@@ -86,50 +100,50 @@ int main(int argc, char **argv)
 
     Hypre hypre;
 
-    hypre.init_hierarchy (problem.hierarchy(),mpi);
+    hypre.init_hierarchy (hierarchy,mpi);
 
     // --------------------------------------------------
     // Initialize the stencils
     // --------------------------------------------------
-
+    
     _TRACE_;
 
-    hypre.init_stencil (problem.hierarchy());
+    hypre.init_stencil (hierarchy);
 
     // --------------------------------------------------
     // Initialize the graph
     // --------------------------------------------------
 
-    // _TRACE_
-    //    hypre.init_graph (problem.hierarchy());
+    //    _TRACE_;
+    //    hypre.init_graph (hierarchy);
 
     // --------------------------------------------------
     // Initialize the matrix A
     // --------------------------------------------------
 
-    // _TRACE_
-    //    hypre.init_matrix (problem.hierarchy());
+    //    _TRACE_;
+    //    hypre.init_matrix (hierarchy);
 
     // --------------------------------------------------
     // Initialize the right-hand-side vector b
     // --------------------------------------------------
 
-    // _TRACE_
-    //    hypre.init_rhs (problem.hierarchy());
+    //    _TRACE_;
+    //    hypre.init_rhs (hierarchy);
 
     // --------------------------------------------------
     // Solve the linear system Ax = b
     // --------------------------------------------------
 
-    // _TRACE_
-    // hypre.solve (problem.hierarchy());
+    //    _TRACE_;
+    //    hypre.solve (hierarchy);
 
     // --------------------------------------------------
     // Evaluate the solution
     // --------------------------------------------------
 
-    // _TRACE_
-    //    hypre.evaluate (problem.hierarchy());
+    _TRACE_;
+    hypre.evaluate (hierarchy);
 
     // --------------------------------------------------
     // MPI Finalize

@@ -26,11 +26,14 @@
 #include "level.hpp"
 #include "hierarchy.hpp"
 #include "sphere.hpp"
+#include "domain.hpp"
 #include "problem.hpp"
 #include "hypre.hpp"
 
 const int debug_hypre           = 0;
+
 const int debug_hypre_hierarchy = 0;
+const int debug_hypre_graph     = 0;
 
 const int debug_discret = 0;
 
@@ -46,7 +49,9 @@ Hypre::Hypre ()
 
 //======================================================================
 
-///Initialize the Grid Hierarchy
+/// Initialize the Grid Hierarchy
+
+/** Creates a hierarchy of hypre grids for an AMR problem.  */
 
 void Hypre::init_hierarchy (Hierarchy & H, Mpi &mpi)
 
@@ -72,16 +77,12 @@ void Hypre::init_hierarchy (Hierarchy & H, Mpi &mpi)
 
       init_hierarchy_set_grid_variables_(H.grid(i));
 
-      // Set the hypre grid's neighbors
-
-      init_hierarchy_set_grid_neighbors_(H.grid(i));
     }
   }
 
   // All grids must exist before assembling
 
   mpi.barrier(); // MAY BE UNNECESSARY?
-
 
   for (int i=0; i<H.num_grids(); i++) {
 
@@ -97,7 +98,7 @@ void Hypre::init_hierarchy (Hierarchy & H, Mpi &mpi)
 
 //------------------------------------------------------------------------
 
-/// Create hypre Grids
+/// Create hypre Grids.
 
 void Hypre::init_hierarchy_create_grid_(
 					Grid & grid,
@@ -109,9 +110,11 @@ void Hypre::init_hierarchy_create_grid_(
 
   // Create the HYPRE grid structure
 
-  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridCreate (\n");
-  if (debug_hypre) printf ("DEBUG_HYPRE      dim    = %d\n", dim);
-  if (debug_hypre) printf ("DEBUG_HYPRE      levels = %d\n", levels);
+  if (debug_hypre_hierarchy) {
+    printf ("DEBUG_HYPRE_HIERARCHY HYPRE_SStructGridCreate (\n");
+    printf ("DEBUG_HYPRE_HIERARCHY      dim    = %d\n", dim);
+    printf ("DEBUG_HYPRE_HIERARCHY      levels = %d\n", levels);
+  }
 
   HYPRE_SStructGridCreate (MPI_COMM_WORLD, 
 			   dim, 
@@ -134,16 +137,19 @@ void Hypre::init_hierarchy_set_grid_extents_(Grid & grid)
   int upper_extents[3] = {grid.num_unknowns(0)-1,
 			  grid.num_unknowns(1)-1,
 			  grid.num_unknowns(2)-1};
+  int part = grid.level();
 
-  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridSetExtents\n");
-  if (debug_hypre) printf ("DEBUG_HYPRE    grid.id()     = %d\n",grid.id());
-  if (debug_hypre) printf ("DEBUG_HYPRE   lower_extents  = %d %d %d\n",
-			   lower_extents[0],lower_extents[1],lower_extents[2]);
-  if (debug_hypre) printf ("DEBUG_HYPRE    upper_extents = %d %d %d\n",
-			   upper_extents[0],upper_extents[1],upper_extents[2]);
+  if (debug_hypre_hierarchy) {
+    printf ("DEBUG_HYPRE_HIERARCHY HYPRE_SStructGridSetExtents\n");
+    printf ("DEBUG_HYPRE_HIERARCHY          part = %d\n",part);
+    printf ("DEBUG_HYPRE_HIERARCHY lower_extents = %d %d %d\n",
+	    lower_extents[0],lower_extents[1],lower_extents[2]);
+    printf ("DEBUG_HYPRE_HIERARCHY upper_extents = %d %d %d\n",
+	    upper_extents[0],upper_extents[1],upper_extents[2]);
+  }
 
   HYPRE_SStructGridSetExtents(grid.hypre_grid(),
-			      grid.level(),
+			      part,
 			      lower_extents,
 			      upper_extents);
 }
@@ -158,10 +164,12 @@ void Hypre::init_hierarchy_set_grid_variables_(Grid & grid)
 
   HYPRE_SStructVariable variable_types[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
 
-  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridSetVariables(\n");
-  if (debug_hypre) printf ("DEBUG_HYPRE         grid.id() = %d\n",grid.id());
-  if (debug_hypre) printf ("DEBUG_HYPRE                     1 \n");
-  if (debug_hypre) printf ("DEBUG_HYPRE    variable_types = %d\n",variable_types[0]);
+  if (debug_hypre_hierarchy) {
+    printf ("DEBUG_HYPRE_HIERARCHY HYPRE_SStructGridSetVariables(\n");
+    printf ("DEBUG_HYPRE_HIERARCHY         grid.id() = %d\n",grid.id());
+    printf ("DEBUG_HYPRE_HIERARCHY                     1 \n");
+    printf ("DEBUG_HYPRE_HIERARCHY    variable_types = %d\n",variable_types[0]);
+  }
 
   HYPRE_SStructGridSetVariables(grid.hypre_grid(),
 				grid.level(),
@@ -171,66 +179,15 @@ void Hypre::init_hierarchy_set_grid_variables_(Grid & grid)
 
 //------------------------------------------------------------------------
 
-/// Set hypre Grid neighbors
-
-void Hypre::init_hierarchy_set_grid_neighbors_(Grid & grid)
-
-{
-  // Set grid neighbors
-
-  int index_map[] = {0,1,2}; // local coordinate axes same between all grids
-
-  // Update each grid's Discret's boundary mask
-
-  for (int j=0; j < grid.num_neighbors(); j++) {
-    Grid & neighbor = grid.neighbor(j);
-    int gl[3],gu[3];
-    int nl[3],nu[3];
-    grid.find_neighbor_indices (neighbor,gl,gu,nl,nu);
-
-    // find axis and face
-
-    int axis, face;
-    if (gl[0] == -1)                   {axis = 0; face = 0;}
-    if (gl[0] == grid.num_unknowns(0)) {axis = 0; face = 1;}
-    if (gl[1] == -1)                   {axis = 1; face = 0;}
-    if (gl[1] == grid.num_unknowns(1)) {axis = 1; face = 1;}
-    if (gl[2] == -1)                   {axis = 2; face = 0;}
-    if (gl[2] == grid.num_unknowns(2)) {axis = 2; face = 1;}
-
-    // determine index bounds 
-
-    int in0, in1, jn0, jn1;
-    in0 = gl[(axis+1)%3];
-    in1 = gu[(axis+1)%3];
-    jn0 = gl[(axis+2)%3];
-    jn1 = gu[(axis+2)%3];
-
-    if (debug_discret) printf ("DEBUG_DISCRET axis=%d face=%d [(%d,%d) - (%d,%d)]\n",
-			       axis,face,in0,jn0,in1,jn1);
-      
-    // set Discret boundary mask
-
-    for (int in=in0; in<=in1; in++) {
-      for (int jn=jn0; jn<=jn1; jn++) {
-	grid.discret().neighbor_cell(axis,face,in,jn) = Discret::_same_;
-      }
-    }
-
-    if (debug_discret) grid.discret().print();
-
-  }
-}
-
-//------------------------------------------------------------------------
-
-/// Assemble hypre Grid hierarchy
+/// Assemble the hypre Grid hierarchy.
 
 void Hypre::init_hierarchy_assemble_grids_(Grid & grid)
 {
 
-  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGridAssemble()\n",
-			   __FILE__,__LINE__);
+  if (debug_hypre_hierarchy) {
+    printf ("DEBUG_HYPRE_HIERARCHY HYPRE_SStructGridAssemble()\n",
+	    __FILE__,__LINE__);
+  }
 
   HYPRE_SStructGridAssemble (grid.hypre_grid());
 }
@@ -238,7 +195,10 @@ void Hypre::init_hierarchy_assemble_grids_(Grid & grid)
 
 //======================================================================
 
-/// Initialize the discretization stencils
+/// Initialize the discretization stencils.  
+
+/** Creates a stencil object and initializes entries.  Supports 1, 2, 
+    or 3 dimensions. */
 
 void Hypre::init_stencil (Hierarchy & hierarchy)
 
@@ -246,58 +206,65 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
 
   int dim = hierarchy.dimension();
 
-  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructStencilCreate()\n",
-			   __FILE__,__LINE__);
   HYPRE_SStructStencilCreate (dim,dim*2+1,&stencil_);
 
-  int x0[] = { 0,0,0 };
-  if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructStencilSetEntry()\n",
-			   __FILE__,__LINE__);
-  HYPRE_SStructStencilSetEntry (stencil_, 0, x0, 0);
+  int entries[][3] = { {  0, 0, 0 },
+		       {  1, 0, 0 },
+		       { -1, 0, 0 },
+		       {  0, 1, 0 },
+		       {  0,-1, 0 },
+		       {  0, 0, 1 },
+		       {  0, 0,-1 } };
 
-  if (dim >= 1) {
-    int xp[] = {  1,0,0 };
-    int xm[] = { -1,0,0 };
-    if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructStencilSetEntry()\n",
-			     __FILE__,__LINE__);
-    HYPRE_SStructStencilSetEntry (stencil_, 1, xp, 0);
-    if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructStencilSetEntry()\n",
-			     __FILE__,__LINE__);
-    HYPRE_SStructStencilSetEntry (stencil_, 2, xm, 0);
-  }
+  HYPRE_SStructStencilSetEntry (stencil_, 0, entries[0], 0);
 
-  if (dim >= 2) {
-    int yp[] = { 0, 1,0 };
-    int ym[] = { 0,-1,0 };
-    if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructStencilSetEntry()\n",
-			     __FILE__,__LINE__);
-    HYPRE_SStructStencilSetEntry (stencil_, 3, yp, 0);
-    if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructStencilSetEntry()\n",
-			     __FILE__,__LINE__);
-    HYPRE_SStructStencilSetEntry (stencil_, 4, ym, 0);
-  }
-
-  if (dim >= 3) {
-    int zp[] = { 0,0, 1 };
-    int zm[] = { 0,0,-1 };
-    if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructStencilSetEntry()\n",
-			     __FILE__,__LINE__);
-    HYPRE_SStructStencilSetEntry (stencil_, 5, zp, 0);
-    if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructStencilSetEntry()\n",
-			     __FILE__,__LINE__);
-    HYPRE_SStructStencilSetEntry (stencil_, 6, zm, 0);
-  }
+  if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 1, entries[1], 0);
+  if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 2, entries[2], 0);
+  if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 3, entries[3], 0);
+  if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 4, entries[4], 0);
+  if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 5, entries[5], 0);
+  if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 6, entries[6], 0);
 
 }
 
 //======================================================================
 
-/// Initialize the graphs
+/// Initialize the graph.
+
+/** Creates a graph containing the matrix non-zero structure.  Graph
+    edges include both those for non-zeros from the stencil within
+    each part (AMR hierarchy level), and for graph entries connecting
+    linked parts.  
+
+    Setting up the matrix elements is done using the following
+    steps:
+
+    1. Define the stencil for all interior grid elements
+
+    2. Zero-out matrix elements covered by a refined grid
+
+    3. Handle matrix elements connecting neighboring grids
+
+     - Handle matrix elements defining the boundary conditions
+
+     - Handle coarse unknowns adjacent to fine unknowns in child
+     - Handle fine unknowns adjacent to coarse unknowns in parent
+
+     - Handle coarse unknowns adjacent to fine unknowns in neighbor's child
+     - Handle fine unknowns adjacent to coarse unknowns in parent's neighbor
+     
+     - Handle any remaining connections
+
+    Note that the matrix generated is not symmetric.
+
+*/
 
 void Hypre::init_graph (Hierarchy & hierarchy)
 
 {
   int i;
+
+  const int variable = 0;
 
   for (i=0; i<hierarchy.num_grids(); i++) {
 
@@ -307,16 +274,18 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
       // Create the hypre graph for the grid
 
-      if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGraphCreate()\n",
+      if (debug_hypre_graph) printf ("DEBUG_HYPRE_GRAPH HYPRE_SStructGraphCreate()\n",
 			       __FILE__,__LINE__);
+
       HYPRE_SStructGraphCreate (MPI_COMM_WORLD, 
 				grid.hypre_grid(), 
 				&grid.hypre_graph());
 
       // Set the stencil for the grid
 
-      if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGraphSetStencil()\n",
+      if (debug_hypre_graph) printf ("DEBUG_HYPRE_GRAPH HYPRE_SStructGraphSetStencil()\n",
 			       __FILE__,__LINE__);
+
       HYPRE_SStructGraphSetStencil (grid.hypre_graph(),
 				    grid.id(),
 				    0,
@@ -326,15 +295,20 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
       if (grid.level() > 0) {
 
-      
-	//      HYPRE_SStructGraphAddEntries (grid.hypre_graph(),
-	//				    grid.id());
+	//  Loop over boundary zones
+	//    Based on boundary zones types
+	//	HYPRE_SStructGraphAddEntries (grid.hypre_graph(),
+	//				      grid.level(),
+	//				      grid.INDEX
+	//				      neighbor.level(),
+	//				      neighbor.INDEX,
+	//				      variable);
 
       }
 
       // Assemble the graph
 
-      if (debug_hypre) printf ("DEBUG_HYPRE HYPRE_SStructGraphAssemble()\n",
+      if (debug_hypre_graph) printf ("DEBUG_HYPRE_GRAPH HYPRE_SStructGraphAssemble()\n",
 			       __FILE__,__LINE__);
       HYPRE_SStructGraphAssemble (grid.hypre_graph());
     }

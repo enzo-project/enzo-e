@@ -9,10 +9,11 @@ INC = -I$(HOME)/include
 LIBS = -L$(HOME)/lib -lHYPRE_sstruct_ls -lHYPRE_sstruct_mv -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_parcsr_ls -lHYPRE_parcsr_mv -lHYPRE_IJ_mv -lHYPRE_LSI -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_utilities
 OBJS = \
        discret.o \
+       domain.o \
        grid.o \
        hierarchy.o \
-       hypre-solve.o \
        hypre.o \
+       hypre-solve.o \
        level.o \
        mpi.o \
        point.o \
@@ -63,6 +64,10 @@ discret.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 discret.o: /usr/include/math.h /usr/include/bits/huge_val.h
 discret.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
 discret.o: scalar.hpp discret.hpp mpi.hpp grid.hpp
+domain.o: /usr/include/assert.h /usr/include/features.h
+domain.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+domain.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h scalar.hpp
+domain.o: domain.hpp
 grid.o: /usr/include/assert.h /usr/include/features.h
 grid.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 grid.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -87,7 +92,7 @@ hypre.o: /usr/include/assert.h /usr/include/features.h
 hypre.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h mpi.hpp
 hypre.o: scalar.hpp point.hpp discret.hpp grid.hpp level.hpp hierarchy.hpp
-hypre.o: sphere.hpp problem.hpp hypre.hpp
+hypre.o: sphere.hpp domain.hpp problem.hpp hypre.hpp
 hypre-solve.o: /usr/include/assert.h /usr/include/features.h
 hypre-solve.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre-solve.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -105,7 +110,7 @@ hypre-solve.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
 hypre-solve.o: /usr/include/math.h /usr/include/bits/huge_val.h
 hypre-solve.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
 hypre-solve.o: scalar.hpp point.hpp sphere.hpp discret.hpp mpi.hpp grid.hpp
-hypre-solve.o: level.hpp hierarchy.hpp problem.hpp hypre.hpp
+hypre-solve.o: level.hpp hierarchy.hpp domain.hpp problem.hpp hypre.hpp
 level.o: /usr/include/assert.h /usr/include/features.h
 level.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 level.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -135,7 +140,7 @@ problem.o: /usr/include/_G_config.h /usr/include/wchar.h
 problem.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 problem.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 problem.o: scalar.hpp point.hpp discret.hpp mpi.hpp grid.hpp level.hpp
-problem.o: hierarchy.hpp sphere.hpp problem.hpp
+problem.o: domain.hpp hierarchy.hpp sphere.hpp problem.hpp
 sphere.o: /usr/include/assert.h /usr/include/features.h
 sphere.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 sphere.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h

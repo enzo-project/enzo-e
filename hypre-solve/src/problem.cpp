@@ -25,6 +25,7 @@
 #include "mpi.hpp"
 #include "grid.hpp"
 #include "level.hpp"
+#include "domain.hpp"
 #include "hierarchy.hpp"
 #include "sphere.hpp"
 #include "problem.hpp"
@@ -47,6 +48,7 @@ Problem::~Problem () throw ()
 
 Problem::Problem (const Problem & p) throw ()
 {
+  domain_    = p.domain_;
   spheres_   = p.spheres_;
   points_    = p.points_;
   hierarchy_ = p.hierarchy_;
@@ -56,6 +58,7 @@ Problem::Problem (const Problem & p) throw ()
 
 Problem & Problem::operator = (const Problem & p) throw ()
 {
+  domain_    = p.domain_;
   spheres_   = p.spheres_;
   points_    = p.points_;
   hierarchy_ = p.hierarchy_;
@@ -83,10 +86,17 @@ void Problem::read (std::string filename) throw ()
     // dimension <dim>
 
     if (strcmp(obj,"dimension")==0) {
+
       int d = atoi(args);
       hierarchy_.set_dim(d);
       Point::set_dim(d);
       Sphere::set_dim(d);
+
+    // Domain
+
+    } else if (strcmp(obj,"domain")==0) {
+
+      domain_.read (args);
 
     // Grid ...
 
@@ -111,11 +121,6 @@ void Problem::read (std::string filename) throw ()
     // Clear the buffer
     for (i=0; i<BUFFER_LENGTH; i++) buffer[i]=0;
   }
-
-  // All grids are inserted into the hierarchy: call hierarchy.init_levels()
-
-  hierarchy_.init_levels();
-
 }
 
 //----------------------------------------------------------------------
@@ -123,7 +128,8 @@ void Problem::read (std::string filename) throw ()
 void Problem::print () throw ()
 {
   int i;
-  hierarchy().print();
+  domain_.print();
+  hierarchy_.print();
   for (i=0; i<num_spheres(); i++) sphere(i).print();
   for (i=0; i<num_points(); i++)  point(i).print();
 }
@@ -134,7 +140,8 @@ void Problem::write (FILE *fp) throw ()
 {
   if (fp == 0) fp = stdout;
   int i;
-  hierarchy().write(fp);
+  domain_.write(fp);
+  hierarchy_.write(fp);
   for (i=0; i<num_spheres(); i++) sphere(i).write(fp);
   for (i=0; i<num_points(); i++)  point(i).write(fp);
 }

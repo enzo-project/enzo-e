@@ -49,7 +49,17 @@ class Hierarchy
   // Initialization
 
   void insert_grid (Grid * grid) throw ();
-  void init_levels () throw();
+
+  void init_grids () throw();
+private:
+  void init_grid_parents_() throw();
+  void init_grid_levels_() throw();
+  void init_grid_children_() throw();
+  void init_grid_neighbors_() throw();
+public:
+
+  void init_discret () throw();
+
   void set_dim (int d) throw () { dimension_ = d; };
 
   // IO

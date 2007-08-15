@@ -132,15 +132,19 @@ Scalar min (Scalar a, Scalar b) { return a < b ? a : b; };
 
 //======================================================================
 
+/// Return indices of zones adjacent to neighboring grid.
+
+/** Return lower and upper coordinates of cells adjacent to the input
+    neighboring grid.  If the input grid is not a neighbor, return
+    false. */
+
 bool Grid::find_neighbor_indices (Grid & neighbor, 
-				  int *gl, int *gu, 
-				  int *nl, int *nu)
+				  int *gl, int *gu)
 {
   //  +------+
   //  |......|
   //  |......+---+    Return coordinates of unknowns X in grid G's local
-  //  |..N..X|...|    coordinates (gl[] and gu[]) and neighbor N's local
-  //  |......|...|    coordinates (nl[] and nu[]).  Return false if
+  //  |..N..X|...|    coordinates (gl[] and gu[]).  Return false if
   //  |.....X|.G.|    there are none (e.g. if grids are not neighbors, 
   //  +------+...|    or only adjacent at corners or edges not faces.
   //         |...| 
@@ -204,25 +208,17 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
   for (i=0; i<3; i++) {
     if (face[i] == -1) {
       gl[i] = gu[i] = -1;
-      nl[i] = nu[i] = g2.num_unknowns(i)-1;
     } else if (face[i] == 0) {
       gl[i] = int ( (lower[i] - g1.lower_vertex(i)) / h1[i] );
-      nl[i] = int ( (lower[i] - g2.lower_vertex(i)) / h2[i] );
       gu[i] = int ( (upper[i] - g1.lower_vertex(i)) / h1[i] - 1);
-      nu[i] = int ( (upper[i] - g2.lower_vertex(i)) / h2[i] - 1);
     } else if (face[i] == 1) {
       gl[i] = gu[i] = g1.num_unknowns(i);
-      nl[i] = nu[i] = 0;
     }
   }
   if (debug)  printf ("DEBUG %s:%d gl[] = (%d %d %d)\n",
 		      __FILE__,__LINE__,gl[0],gl[1],gl[2]);
   if (debug)  printf ("DEBUG %s:%d gu[] = (%d %d %d)\n",
 		      __FILE__,__LINE__,gu[0],gu[1],gu[2]);
-  if (debug)  printf ("DEBUG %s:%d nl[] = (%d %d %d)\n",
-		      __FILE__,__LINE__,nl[0],nl[1],nl[2]);
-  if (debug)  printf ("DEBUG %s:%d nu[] = (%d %d %d)\n",
-		      __FILE__,__LINE__,nu[0],nu[1],nu[2]);
 
   return true;
 }

@@ -26,9 +26,13 @@
 
 //----------------------------------------------------------------------
 
-const int debug = 0;
+const int debug = 1;
 
 //----------------------------------------------------------------------
+
+/// Hierarchy class constructor.
+
+/** Currently does nothing */
 
 Hierarchy::Hierarchy () throw ()
   : dimension_(0)
@@ -38,10 +42,19 @@ Hierarchy::Hierarchy () throw ()
 //----------------------------------------------------------------------
 
 Hierarchy::~Hierarchy () throw ()
+
+/// Hierarchy class descructor.
+
+/** Currently does nothing */
+
 {
 }
 
 //======================================================================
+
+/// Insert a grid into the hierarchy.
+
+/** Appends the grid's pointer to the grids_ vector */
 
 void Hierarchy::insert_grid (Grid * pgrid) throw ()
 {
@@ -55,16 +68,31 @@ void Hierarchy::insert_grid (Grid * pgrid) throw ()
 
 }
 
-//----------------------------------------------------------------------
+//======================================================================
 
-void Hierarchy::init_levels () throw ()
+/// Initialize grid inter-connections.
+
+/** After all grids are inserted into the hierarchy, this function
+    determines each grid's parent, containing level, children, and
+    neighbors. */
+
+void Hierarchy::init_grids () throw ()
 {
   if (debug) printf ("Hierarchy::init_levels()\n");
 
-  //-------------------------
-  //  Initialize grid parents
-  //-------------------------
+  init_grid_parents_();
+  init_grid_levels_();
+  init_grid_children_();
+  init_grid_neighbors_();
 
+}
+
+//------------------------------------------------------------------------
+
+/// Determines the parent grid of all grids in the hierarchy.
+
+void Hierarchy::init_grid_parents_ () throw ()
+{
   int i,j,j1,j2,k;
 
   for (i=0; i<num_grids (); i++) {
@@ -72,39 +100,55 @@ void Hierarchy::init_levels () throw ()
     Grid * p = (g->id_parent() >= 0) ? & grid(g->id_parent()) : 0;
     this->set_parent(g,p);
   }
+}
 
-  //------------------------
-  //  Initialize grid levels
-  //------------------------
+//------------------------------------------------------------------------
 
+/// Determines the level of each grid in the hierarchy.
+
+void Hierarchy::init_grid_levels_ () throw ()
+{
   bool done = false;
   while (! done) {
     done = true;
+    int i;
     for (i=0; i<num_grids (); i++) {
       Grid * g = &grid(i);
-      if (g->level() < 0) { // Haven't determined level yet
+      // If grid's level < 0, then we haven't determined its level yet
+      if (g->level() < 0) { 
+
+	// Grids without parents are in level 0 ...
+
 	if (parent(g) == 0) {
-	  // Grids without parents are in level 0
 	  g->set_level(0);
 	  insert_in_level_ (0,*g);
-	} else if (parent(g)->level() >= 0) {
-	  // Grids with parents of known level have level = 1 + parent level
+	}
+	
+	// ... grids with parents of known level have level = 1 + parent level ...
+
+	else if (parent(g)->level() >= 0) {
 	  int level = parent(g)->level() + 1;
 	  g->set_level(level);
 	  insert_in_level_ (level,*g);
-	} else {
-	  // Otherwise grids have parents of unknown level
+	} 
+	
+	// ... otherwise a grid's parents is in an unknown level, so we're not done yet
+
+	else {
 	  done = false;
 	}
       }
-      if (debug) g->print();
     }
   }
+}
 
-  //--------------------------
-  //  Initialize grid children
-  //--------------------------
+//------------------------------------------------------------------------
 
+///  Initialize grid children.
+
+void Hierarchy::init_grid_children_ () throw ()
+{
+  int i;
   for (i=0; i<num_grids(); i++) {
     Grid * g = & grid(i);
     // If a grid has a parent, then the grid is the parent's child
@@ -112,19 +156,34 @@ void Hierarchy::init_levels () throw ()
       parent(g)->set_child(*g);
     }
   }
+}
 
-  //---------------------------
-  //  Initialize grid neighbors
-  //---------------------------
 
-  // First level 0: test all pairs
+//------------------------------------------------------------------------
 
-  int ip; MPI_Comm_rank (MPI_COMM_WORLD,&ip); // TEMPORARY
+///  Find each grid's neighbors.
+
+/**  If a grid is in level 0, then find its neighbors by comparing
+     with all other grids in the level.  Otherwise, if a grid is in a
+     level > 0, then we can save time by only testing grids that are
+     children of the parent, and children of all the parents
+     neighbors. */
+
+void Hierarchy::init_grid_neighbors_ () throw ()
+{
+
+  int i,j;
+
+  // For level == 0, test all pairs
 
   for (i=0; i<level(0).num_grids(); i++) {
+
     Grid * g1 = & level(0).grid(i);
+
     for (j=i+1; j<level(0).num_grids(); j++) {
+
       Grid * g2 = & level(0).grid(j);
+
       if (g1->is_adjacent(*g2)) {
 	if (debug) printf ("DEBUG grids %d and %d are adjacent\n",
 			   g1->id(),g2->id());
@@ -134,10 +193,11 @@ void Hierarchy::init_levels () throw ()
     }
   }
 
-  // Next levels > 0: for each grid, only test against
-  // parents' children, and parents' neighbors' children,
-  // since if two grids' parents are not adjacent, then
-  // they necessarily cannot be neighbors
+  // For levels > 0, only test parents' children, and parents'
+  // neighbors' children.  If two grids' parents are not the same or
+  // not neighbors, then they necessarily cannot be neighbors.
+
+  int k,j1,j2;
 
   for (k=1; k<num_levels(); k++) {
 
@@ -165,6 +225,84 @@ void Hierarchy::init_levels () throw ()
 			       g1->id(),g2->id());
 	    assert_neighbors (*g1,*g2);
 	  }
+	}
+      }
+    }
+  }
+}
+
+//------------------------------------------------------------------------
+
+/// Initialize discretization
+
+/** After all grid inter-connections are determined, this function
+    determines the neighbor structure for each individual zone along
+    the boundary. Only performed for local grids. */
+
+void Hierarchy::init_discret () throw ()
+
+{
+  int k,i;
+
+  // For level == 0, check neighbors and boundary
+
+  // For level >= 1, check parent, parents neighbors neighbors and boundary
+
+  for (k=0; k<num_levels(); k++) {
+
+    for (i=0; i<level(k).num_grids(); i++) {
+
+      Grid & grid = level(k).grid(i);
+
+      if (grid.is_local()) {
+
+	// Update each grid's Discret's boundary mask
+
+	for (int j=0; j < grid.num_neighbors(); j++) {
+
+	  Grid & neighbor = grid.neighbor(j);
+	  int gl[3],gu[3];
+
+	  grid.find_neighbor_indices (neighbor,gl,gu);
+
+	  if (debug) 
+	    printf ("DEBUG %s:%d  Neighbor indices of %d = (%d,%d,%d) : (%d,%d,%d)\n",
+		    __FILE__,__LINE__,grid.id(),gl[0],gl[1],gl[2],gu[0],gu[1],gu[2]);
+
+	  // find axis and face
+
+	  int axis = -1, face = -1;
+
+	  if (gl[0] == -1)                   {axis = 0; face = 0;}
+	  if (gl[0] == grid.num_unknowns(0)) {axis = 0; face = 1;}
+	  if (gl[1] == -1)                   {axis = 1; face = 0;}
+	  if (gl[1] == grid.num_unknowns(1)) {axis = 1; face = 1;}
+	  if (gl[2] == -1)                   {axis = 2; face = 0;}
+	  if (gl[2] == grid.num_unknowns(2)) {axis = 2; face = 1;}
+
+	  assert (axis >= 0);
+	  assert (face >= 0);
+
+	  // determine index bounds 
+
+	  int in0, in1, jn0, jn1;
+	  in0 = gl[(axis+1)%3];
+	  in1 = gu[(axis+1)%3];
+	  jn0 = gl[(axis+2)%3];
+	  jn1 = gu[(axis+2)%3];
+
+	  if (debug) printf ("DEBUG_DISCRET axis=%d face=%d [(%d,%d) - (%d,%d)]\n",
+			     axis,face,in0,jn0,in1,jn1);
+      
+	  // set Discret boundary mask
+
+	  for (int in=in0; in<=in1; in++) {
+	    for (int jn=jn0; jn<=jn1; jn++) {
+	      grid.discret().neighbor_cell(axis,face,in,jn) = 0;
+	    }
+	  }
+
+	  if (debug) grid.discret().print();
 	}
       }
     }
