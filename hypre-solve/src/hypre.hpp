@@ -38,5 +38,14 @@ private:
   void init_hierarchy_set_grid_neighbors_ (Grid & grid);
   void init_hierarchy_assemble_grids_     (Grid & grid);
   
+  void init_graph_stencil                 (Grid & grid);
+  void init_graph_zero_covered            (Grid & grid);
+  void init_graph_neighbors               (Grid & grid);
+  void init_graph_boundary                (Grid & grid);
+  void init_graph_children                (Grid & grid);
+  void init_graph_parent                  (Grid & grid);
+  void init_graph_neighbors_children      (Grid & grid);
+  void init_graph_parents_neighbor        (Grid & grid);
+  void init_graph_check                   (Grid & grid);
 
 };

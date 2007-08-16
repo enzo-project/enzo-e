@@ -1,13 +1,13 @@
 
-/// Discret class include file
+/// Faces class include file
 
 /**
  * 
- * The Discret class stores and operates on discretization aspects of a grid.
+ * The Faces class stores and operates on discretization aspects of a grid.
  * 
- *   Each Grid class has a corresponding Discret class.  The Discret
- *   class is used to help set up the matrix elements for the unified 
- *   AMR grid.
+ * Each Grid class has a corresponding Faces class.  The Faces class
+ * is used to help set up the matrix elements for the unified AMR
+ * grid.
  *  
  * @file
  * @author James Bordner <jobordner@ucsd.edu>
@@ -16,7 +16,7 @@
 
 class Grid;
 
-class Discret
+class Faces
 {
 
   //--------------------------------------------------------------------
@@ -47,10 +47,10 @@ class Discret
   // CONSTUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
-  /// Create a discretization for a grid
-  Discret (int *n) throw ();
+  /// Create a Faces clas for a grid
+  Faces (int *n) throw ();
 
-  ~Discret () throw ();
+  ~Faces () throw ();
 
   //--------------------------------------------------------------------
   // PUBLIC MEMBER FUNCTIONS

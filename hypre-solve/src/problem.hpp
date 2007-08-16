@@ -40,40 +40,94 @@ public:
   //--------------------------------------------------
 
   void print () throw ();
+
   void write (FILE *fp = 0) throw ();
-  /// Read in a problem file two
+
+  /// Read in a problem file
+
   void read (std::string filename) throw ();
 
-  int dimension ()          // Return the dimension
-  { return hierarchy_.dimension(); } 
+  /// Return the dimension
 
-  Hierarchy & hierarchy ()   // Return the hierarchy
-  { return hierarchy_; } 
-  Domain & domain ()         // Return the domain
-  { return domain_; } 
-  Sphere & sphere (int i)   // Return a pointer to the ith Sphere
-  { return * spheres_[i]; };
-  int num_spheres ()        // Return the number of Spheres
-  { return spheres_.size(); };
+  int dimension ()          
+  { 
+    return hierarchy_.dimension(); 
+  }
 
-  Point & point (int i)     // Return a pointer to the ith Point
-  { return * points_[i]; };
-  int num_points ()         // Return the number of Points
-  { return points_.size(); };
+  /// Return the hierarchy
+  
+  Hierarchy & hierarchy ()  
+  { 
+    return hierarchy_; 
+  }
 
-  Grid & grid (int i)       // Return a pointer to the ith Grid
-  { return hierarchy_.grid(i); };
-  int num_grids ()          // Return the number of Grids
-  { return hierarchy_.num_grids(); };
+  /// Return the domain
+  
+  Domain & domain ()        
+  { 
+    return domain_; 
+  }
 
-  Level & level (int i)       // Return a pointer to the ith Level
-  { return hierarchy_.level(i); };
-  int num_levels ()           // Return the number of Levels
-  { return hierarchy_.num_levels(); };
+  /// Return a pointer to the ith Sphere
+  
+  Sphere & sphere (int i)   
+  { 
+    return * spheres_[i]; 
+  }
+
+  /// Return the number of Spheres
+  
+  int num_spheres ()        
+  { 
+    return spheres_.size(); 
+  }
+
+  /// Return a pointer to the ith Point
+  
+  Point & point (int i)     
+  { 
+    return * points_[i]; 
+  }
+
+  /// Return the number of Points
+  
+  int num_points ()         
+  { 
+    return points_.size(); 
+  }
+
+  /// Return a pointer to the ith Grid
+  
+  Grid & grid (int i)       
+  { 
+    return hierarchy_.grid(i); 
+  }
+
+  /// Return the number of Grids
+  
+  int num_grids ()          
+  { 
+    return hierarchy_.num_grids(); 
+  }
+
+  /// Return a pointer to the ith Level
+  
+  Level & level (int i)     
+  { 
+    return hierarchy_.level(i); 
+  }
+
+  /// Return the number of Levels
+  
+  int num_levels ()         
+  { 
+    return hierarchy_.num_levels(); 
+  }
 
   //----------------------------------------------------------------------
 
 private:
 
   int readline_ (FILE *, char * buffer, int n) throw ();
+
 };

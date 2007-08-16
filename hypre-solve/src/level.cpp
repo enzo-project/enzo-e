@@ -32,6 +32,7 @@ const int debug = 1;
 Level::Level (int n) throw ()
   : n_ (n)
 {
+  grids0_.push_back (0);
 }
 	  
 //----------------------------------------------------------------------
@@ -44,7 +45,8 @@ Level::~Level () throw ()
 
 void Level::insert_grid (Grid & grid) throw ()
 {
-  grids_.push_back (& grid);
+  grids0_[grids0_.size()-1] = & grid;
+  grids0_.push_back (0);
 }
 
 //======================================================================

@@ -19,7 +19,7 @@
 #include "HYPRE_sstruct_ls.h"
 
 #include "scalar.hpp"
-#include "discret.hpp"
+#include "faces.hpp"
 #include "mpi.hpp"
 #include "grid.hpp"
 
@@ -39,7 +39,7 @@ Grid::Grid (std::string parms) throw ()
 
   read (parms);
 
-  discret_ = new Discret(n_);
+  faces_ = new Faces(n_);
 }
 	  
 //======================================================================

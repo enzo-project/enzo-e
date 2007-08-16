@@ -54,7 +54,7 @@ class Grid
   Scalar              xu_[3];      // Position of highest vertex
   int                 n_[3];       // Number of zones
 
-  Discret *           discret_;    // Discretization class associated with grid
+  Faces *             faces_;      // Faces class associated with grid
 
   // data computed at hierarchy creation (in read())
 
@@ -161,13 +161,13 @@ class Grid
   int num_unknowns(int i) throw ()
   { return n_[i]; };
 
-  /// Return the coordinates of the upper grid vertex.  No error checking on i.
-  Scalar & upper_vertex(int i) throw ()
-  { return xu_[i]; };
-
   /// Return the coordinates of the lower grid vertex.  No error checking on i.
   Scalar & lower_vertex(int i) throw ()
   { return xl_[i]; };
+
+  /// Return the coordinates of the upper grid vertex.  No error checking on i.
+  Scalar & upper_vertex(int i) throw ()
+  { return xu_[i]; };
 
   /// Return the unknown u(i,j,k)
   Scalar & unknown(int i0, int i1, int i2) throw()
@@ -175,8 +175,8 @@ class Grid
     return u_[i0 + n_[0]*(i1 + n_[1]*i2)];
   }
 
-  Discret & discret() throw()
-  { return *discret_; }
+  Faces & faces() throw()
+  { return *faces_; }
 
   /// Processor owner
   int ip () throw () 

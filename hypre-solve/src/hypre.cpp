@@ -38,6 +38,8 @@ const int debug_hypre_graph     = 0;
 const int debug_discret = 0;
 
 //======================================================================
+// PUBLIC MEMBER FUNCTIONS
+//======================================================================
 
 /// Hypre constructor
 
@@ -47,7 +49,7 @@ Hypre::Hypre ()
   
 }
 
-//======================================================================
+//----------------------------------------------------------------------
 
 /// Initialize the Grid Hierarchy
 
@@ -96,7 +98,206 @@ void Hypre::init_hierarchy (Hierarchy & H, Mpi &mpi)
   
 }
 
-//------------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+/// Initialize the discretization stencils.  
+
+/** Creates a stencil object and initializes entries.  Supports 1, 2, 
+    or 3 dimensional stencils. */
+
+void Hypre::init_stencil (Hierarchy & hierarchy)
+
+{
+
+  int dim = hierarchy.dimension();
+
+  HYPRE_SStructStencilCreate (dim,dim*2+1,&stencil_);
+
+  int entries[][3] = { {  0, 0, 0 },
+		       {  1, 0, 0 },
+		       { -1, 0, 0 },
+		       {  0, 1, 0 },
+		       {  0,-1, 0 },
+		       {  0, 0, 1 },
+		       {  0, 0,-1 } };
+
+  HYPRE_SStructStencilSetEntry (stencil_, 0, entries[0], 0);
+
+  if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 1, entries[1], 0);
+  if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 2, entries[2], 0);
+  if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 3, entries[3], 0);
+  if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 4, entries[4], 0);
+  if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 5, entries[5], 0);
+  if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 6, entries[6], 0);
+
+}
+
+//----------------------------------------------------------------------
+
+/// Initialize the graph.
+
+/** Creates a graph containing the matrix non-zero structure.  Graph
+    edges include both those for non-zeros from the stencil within
+    each part (AMR hierarchy level), and for graph entries connecting
+    linked parts.  
+
+    Setting up the matrix elements is done using the following
+    steps:
+
+    1. Define the stencil for all interior grid elements
+
+    2. Zero-out matrix elements covered by a refined grid
+
+    3. Handle matrix elements connecting neighboring grids
+
+     - Handle matrix elements defining the boundary conditions
+
+     - Handle coarse unknowns adjacent to fine unknowns in child
+     - Handle fine unknowns adjacent to coarse unknowns in parent
+
+     - Handle coarse unknowns adjacent to fine unknowns in neighbor's child
+     - Handle fine unknowns adjacent to coarse unknowns in parent's neighbor
+     
+     - Handle any remaining connections
+
+    Note that the matrix generated is not symmetric.
+
+*/
+
+void Hypre::init_graph (Hierarchy & hierarchy)
+
+{
+  int i;
+
+  const int variable = 0;
+
+  //    1. Define the stencil for all interior grid elements
+  //  init_graph_stencil();
+  //
+  //    2. Zero-out matrix elements covered by a refined grid
+  //  init_graph_zero_covered();
+  //
+  //    3. Handle matrix elements connecting neighboring grids
+  //  init_graph_neighbors();
+  //
+  //     - Handle matrix elements defining the boundary conditions
+  //  init_graph_boundary();
+  //
+  //     - Handle coarse unknowns adjacent to fine unknowns in child
+  //  init_graph_children();
+  //     - Handle fine unknowns adjacent to coarse unknowns in parent
+  //  init_graph_parent();
+  //
+  //     - Handle coarse unknowns adjacent to fine unknowns in neighbor's child
+  //  init_graph_neighbors_children();
+  //     - Handle fine unknowns adjacent to coarse unknowns in parent's neighbor
+  //  init_graph_parents_neighbor();
+  //     
+  //     - Handle any remaining connections
+  //  init_graph_check();
+
+  for (i=0; i<hierarchy.num_grids(); i++) {
+
+    Grid & grid = hierarchy.grid(i);
+
+    if (grid.is_local()) {
+
+      // Create the hypre graph for the grid
+
+      if (debug_hypre_graph) printf ("DEBUG_HYPRE_GRAPH HYPRE_SStructGraphCreate()\n",
+			       __FILE__,__LINE__);
+
+      HYPRE_SStructGraphCreate (MPI_COMM_WORLD, 
+				grid.hypre_grid(), 
+				&grid.hypre_graph());
+
+      // Set the stencil for the grid
+
+      if (debug_hypre_graph) printf ("DEBUG_HYPRE_GRAPH HYPRE_SStructGraphSetStencil()\n",
+			       __FILE__,__LINE__);
+
+      HYPRE_SStructGraphSetStencil (grid.hypre_graph(),
+				    grid.id(),
+				    0,
+				    stencil_);
+
+      // Set any additional entries between grid and parent
+
+      if (grid.level() > 0) {
+
+	//  Loop over boundary zones
+	//    Based on boundary zones types
+	//	HYPRE_SStructGraphAddEntries (grid.hypre_graph(),
+	//				      grid.level(),
+	//				      grid.INDEX
+	//				      neighbor.level(),
+	//				      neighbor.INDEX,
+	//				      variable);
+
+      }
+
+      // Assemble the graph
+
+      if (debug_hypre_graph) printf ("DEBUG_HYPRE_GRAPH HYPRE_SStructGraphAssemble()\n",
+			       __FILE__,__LINE__);
+      HYPRE_SStructGraphAssemble (grid.hypre_graph());
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+/// Initialize the matrix A
+
+void Hypre::init_matrix (Hierarchy & hierarchy)
+
+{
+  printf ("Hypre::init_matrix() is not implemented yet\n"); 
+}
+
+//----------------------------------------------------------------------
+
+/// Initialize the right-hand-side vector b
+
+void Hypre::init_rhs (Hierarchy & hierarchy)
+
+{
+  printf ("Hypre::init_rhs() is not implemented yet\n"); 
+}
+
+//----------------------------------------------------------------------
+
+/// Initialize the linear solver
+
+void Hypre::init_solver (Hierarchy & hierarchy)
+
+{
+  printf ("Hypre::init_solver() is not implemented yet\n"); 
+}
+
+//----------------------------------------------------------------------
+
+/// Solve the linear system Ax = b
+
+void Hypre::solve (Hierarchy & hierarchy)
+
+{
+  printf ("Hypre::solve() is not implemented yet\n"); 
+}
+
+//----------------------------------------------------------------------
+
+/// Evaluate the success of the solve
+
+void Hypre::evaluate (Hierarchy & hierarchy)
+
+{
+  printf ("Hypre::evaluate() is not implemented yet\n"); 
+}
+
+//======================================================================
+// PRIVATE MEMBER FUNCTIONS
+//======================================================================
 
 /// Create hypre Grids.
 
@@ -193,175 +394,83 @@ void Hypre::init_hierarchy_assemble_grids_(Grid & grid)
 }
 
 
-//======================================================================
+//------------------------------------------------------------------------
 
-/// Initialize the discretization stencils.  
+/// Define the stencil for all interior grid elements
 
-/** Creates a stencil object and initializes entries.  Supports 1, 2, 
-    or 3 dimensions. */
-
-void Hypre::init_stencil (Hierarchy & hierarchy)
+void Hypre::init_graph_stencil (Grid & grid)
 
 {
-
-  int dim = hierarchy.dimension();
-
-  HYPRE_SStructStencilCreate (dim,dim*2+1,&stencil_);
-
-  int entries[][3] = { {  0, 0, 0 },
-		       {  1, 0, 0 },
-		       { -1, 0, 0 },
-		       {  0, 1, 0 },
-		       {  0,-1, 0 },
-		       {  0, 0, 1 },
-		       {  0, 0,-1 } };
-
-  HYPRE_SStructStencilSetEntry (stencil_, 0, entries[0], 0);
-
-  if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 1, entries[1], 0);
-  if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 2, entries[2], 0);
-  if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 3, entries[3], 0);
-  if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 4, entries[4], 0);
-  if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 5, entries[5], 0);
-  if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 6, entries[6], 0);
-
 }
 
-//======================================================================
+//------------------------------------------------------------------------
 
-/// Initialize the graph.
+/// Zero-out matrix elements covered by a refined grid
 
-/** Creates a graph containing the matrix non-zero structure.  Graph
-    edges include both those for non-zeros from the stencil within
-    each part (AMR hierarchy level), and for graph entries connecting
-    linked parts.  
-
-    Setting up the matrix elements is done using the following
-    steps:
-
-    1. Define the stencil for all interior grid elements
-
-    2. Zero-out matrix elements covered by a refined grid
-
-    3. Handle matrix elements connecting neighboring grids
-
-     - Handle matrix elements defining the boundary conditions
-
-     - Handle coarse unknowns adjacent to fine unknowns in child
-     - Handle fine unknowns adjacent to coarse unknowns in parent
-
-     - Handle coarse unknowns adjacent to fine unknowns in neighbor's child
-     - Handle fine unknowns adjacent to coarse unknowns in parent's neighbor
-     
-     - Handle any remaining connections
-
-    Note that the matrix generated is not symmetric.
-
-*/
-
-void Hypre::init_graph (Hierarchy & hierarchy)
+void Hypre:: init_graph_zero_covered (Grid & grid)
 
 {
-  int i;
-
-  const int variable = 0;
-
-  for (i=0; i<hierarchy.num_grids(); i++) {
-
-    Grid & grid = hierarchy.grid(i);
-
-    if (grid.is_local()) {
-
-      // Create the hypre graph for the grid
-
-      if (debug_hypre_graph) printf ("DEBUG_HYPRE_GRAPH HYPRE_SStructGraphCreate()\n",
-			       __FILE__,__LINE__);
-
-      HYPRE_SStructGraphCreate (MPI_COMM_WORLD, 
-				grid.hypre_grid(), 
-				&grid.hypre_graph());
-
-      // Set the stencil for the grid
-
-      if (debug_hypre_graph) printf ("DEBUG_HYPRE_GRAPH HYPRE_SStructGraphSetStencil()\n",
-			       __FILE__,__LINE__);
-
-      HYPRE_SStructGraphSetStencil (grid.hypre_graph(),
-				    grid.id(),
-				    0,
-				    stencil_);
-
-      // Set any additional entries between grid and parent
-
-      if (grid.level() > 0) {
-
-	//  Loop over boundary zones
-	//    Based on boundary zones types
-	//	HYPRE_SStructGraphAddEntries (grid.hypre_graph(),
-	//				      grid.level(),
-	//				      grid.INDEX
-	//				      neighbor.level(),
-	//				      neighbor.INDEX,
-	//				      variable);
-
-      }
-
-      // Assemble the graph
-
-      if (debug_hypre_graph) printf ("DEBUG_HYPRE_GRAPH HYPRE_SStructGraphAssemble()\n",
-			       __FILE__,__LINE__);
-      HYPRE_SStructGraphAssemble (grid.hypre_graph());
-    }
-  }
 }
 
-//======================================================================
+//------------------------------------------------------------------------
 
-/// Initialize the matrix A
+/// Handle matrix elements connecting neighboring grids
 
-void Hypre::init_matrix (Hierarchy & hierarchy)
+void Hypre:: init_graph_neighbors (Grid & grid)
 
 {
-  printf ("Hypre::init_matrix() is not implemented yet\n"); 
 }
 
-//======================================================================
+//------------------------------------------------------------------------
 
-/// Initialize the right-hand-side vector b
+/// Handle matrix elements defining the boundary conditions
 
-void Hypre::init_rhs (Hierarchy & hierarchy)
+void Hypre:: init_graph_boundary (Grid & grid)
 
 {
-  printf ("Hypre::init_rhs() is not implemented yet\n"); 
 }
 
-//======================================================================
+//------------------------------------------------------------------------
 
-/// Initialize the linear solver
+/// Handle coarse unknowns adjacent to fine unknowns in child
 
-void Hypre::init_solver (Hierarchy & hierarchy)
+void Hypre:: init_graph_children (Grid & grid)
 
 {
-  printf ("Hypre::init_solver() is not implemented yet\n"); 
 }
 
-//======================================================================
+//------------------------------------------------------------------------
 
-/// Solve the linear system Ax = b
+/// Handle fine unknowns adjacent to coarse unknowns in parent
 
-void Hypre::solve (Hierarchy & hierarchy)
+void Hypre:: init_graph_parent (Grid & grid)
 
 {
-  printf ("Hypre::solve() is not implemented yet\n"); 
 }
 
-//======================================================================
+//------------------------------------------------------------------------
 
-/// Evaluate the success of the solve
+/// Handle coarse unknowns adjacent to fine unknowns in neighbor's child
 
-void Hypre::evaluate (Hierarchy & hierarchy)
+  void Hypre:: init_graph_neighbors_children (Grid & grid)
 
 {
-  printf ("Hypre::evaluate() is not implemented yet\n"); 
 }
 
+//------------------------------------------------------------------------
+
+/// Handle fine unknowns adjacent to coarse unknowns in parent's neighbor
+
+void Hypre:: init_graph_parents_neighbor (Grid & grid)
+
+{
+}
+
+//------------------------------------------------------------------------
+
+/// Check for any remaining connections
+
+void Hypre:: init_graph_check (Grid & grid)
+
+{
+}

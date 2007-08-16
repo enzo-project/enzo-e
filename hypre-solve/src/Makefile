@@ -8,8 +8,8 @@ FLAGS = -g
 INC = -I$(HOME)/include 
 LIBS = -L$(HOME)/lib -lHYPRE_sstruct_ls -lHYPRE_sstruct_mv -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_parcsr_ls -lHYPRE_parcsr_mv -lHYPRE_IJ_mv -lHYPRE_LSI -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_utilities
 OBJS = \
-       discret.o \
        domain.o \
+       faces.o \
        grid.o \
        hierarchy.o \
        hypre.o \

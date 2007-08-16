@@ -18,7 +18,7 @@
 #include "HYPRE_sstruct_ls.h"
 
 #include "scalar.hpp"
-#include "discret.hpp"
+#include "faces.hpp"
 #include "mpi.hpp"
 #include "grid.hpp"
 #include "level.hpp"
@@ -37,6 +37,7 @@ const int debug = 1;
 Hierarchy::Hierarchy () throw ()
   : dimension_(0)
 {
+  grids0_.push_back(0);
 }
 	  
 //----------------------------------------------------------------------
@@ -54,17 +55,17 @@ Hierarchy::~Hierarchy () throw ()
 
 /// Insert a grid into the hierarchy.
 
-/** Appends the grid's pointer to the grids_ vector */
+/** Inserts the grid's pointer into the grids0_ vector, at the
+  * position given by the grid's id(), and always maintaining a 0
+  * sentinel at the end of grids0_ */
 
 void Hierarchy::insert_grid (Grid * pgrid) throw ()
 {
-  if (debug) printf ("Hierarchy::insert_grid()\n");
-  if (pgrid->id() >= grids_.size()) {
-    if (debug) printf ("DEBUG: resizing Hierarchy::grids_ from %d to %d\n",
-		       grids_.size(),pgrid->id() + 1);
-    grids_.resize (pgrid->id() + 1);
+  if (pgrid->id() >= grids0_.size() - 1) {
+    grids0_.resize (pgrid->id() + 2);
+    grids0_[grids0_.size() - 1] = 0;
   }
-  grids_[pgrid->id()] = pgrid;
+  grids0_[pgrid->id()] = pgrid;
 
 }
 
@@ -95,8 +96,8 @@ void Hierarchy::init_grid_parents_ () throw ()
 {
   int i,j,j1,j2,k;
 
-  for (i=0; i<num_grids (); i++) {
-    Grid * g = &grid(i);
+  ItHierarchyAllGrids itg (*this);
+  while (Grid * g = itg++) {
     Grid * p = (g->id_parent() >= 0) ? & grid(g->id_parent()) : 0;
     this->set_parent(g,p);
   }
@@ -110,14 +111,19 @@ void Hierarchy::init_grid_levels_ () throw ()
 {
   bool done = false;
   while (! done) {
+
     done = true;
-    int i;
-    for (i=0; i<num_grids (); i++) {
-      Grid * g = &grid(i);
+
+    // Loop through grids, and try to determine their level if unknown
+
+    ItHierarchyAllGrids itg (*this);
+    while (Grid * g = itg++) {
+
       // If grid's level < 0, then we haven't determined its level yet
+
       if (g->level() < 0) { 
 
-	// Grids without parents are in level 0 ...
+	// Grids without parents must be in level 0 ...
 
 	if (parent(g) == 0) {
 	  g->set_level(0);
@@ -148,9 +154,8 @@ void Hierarchy::init_grid_levels_ () throw ()
 
 void Hierarchy::init_grid_children_ () throw ()
 {
-  int i;
-  for (i=0; i<num_grids(); i++) {
-    Grid * g = & grid(i);
+  ItHierarchyAllGrids itg (*this);
+  while (Grid * g = itg++) {
     // If a grid has a parent, then the grid is the parent's child
     if (parent(g) != 0) {
       parent(g)->set_child(*g);
@@ -239,7 +244,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
     determines the neighbor structure for each individual zone along
     the boundary. Only performed for local grids. */
 
-void Hierarchy::init_discret () throw ()
+void Hierarchy::init_faces () throw ()
 
 {
   int k,i;
@@ -250,60 +255,57 @@ void Hierarchy::init_discret () throw ()
 
   for (k=0; k<num_levels(); k++) {
 
-    for (i=0; i<level(k).num_grids(); i++) {
+    ItLevelLocalGrids itg (level(k));
 
-      Grid & grid = level(k).grid(i);
+    while (Grid * grid = itg++) {
 
-      if (grid.is_local()) {
+      // Update each grid's Faces's boundary mask
 
-	// Update each grid's Discret's boundary mask
+      for (int j=0; j < grid->num_neighbors(); j++) {
 
-	for (int j=0; j < grid.num_neighbors(); j++) {
+	Grid & neighbor = grid->neighbor(j);
+	int gl[3],gu[3];
 
-	  Grid & neighbor = grid.neighbor(j);
-	  int gl[3],gu[3];
+	grid->find_neighbor_indices (neighbor,gl,gu);
 
-	  grid.find_neighbor_indices (neighbor,gl,gu);
+	if (debug) 
+	  printf ("DEBUG %s:%d  Neighbor indices of %d = (%d,%d,%d) : (%d,%d,%d)\n",
+		  __FILE__,__LINE__,grid->id(),gl[0],gl[1],gl[2],gu[0],gu[1],gu[2]);
 
-	  if (debug) 
-	    printf ("DEBUG %s:%d  Neighbor indices of %d = (%d,%d,%d) : (%d,%d,%d)\n",
-		    __FILE__,__LINE__,grid.id(),gl[0],gl[1],gl[2],gu[0],gu[1],gu[2]);
+	// find axis and face
 
-	  // find axis and face
+	int axis = -1, face = -1;
 
-	  int axis = -1, face = -1;
+	if (gl[0] == -1)                   {axis = 0; face = 0;}
+	if (gl[0] == grid->num_unknowns(0)){axis = 0; face = 1;}
+	if (gl[1] == -1)                   {axis = 1; face = 0;}
+	if (gl[1] == grid->num_unknowns(1)){axis = 1; face = 1;}
+	if (gl[2] == -1)                   {axis = 2; face = 0;}
+	if (gl[2] == grid->num_unknowns(2)){axis = 2; face = 1;}
 
-	  if (gl[0] == -1)                   {axis = 0; face = 0;}
-	  if (gl[0] == grid.num_unknowns(0)) {axis = 0; face = 1;}
-	  if (gl[1] == -1)                   {axis = 1; face = 0;}
-	  if (gl[1] == grid.num_unknowns(1)) {axis = 1; face = 1;}
-	  if (gl[2] == -1)                   {axis = 2; face = 0;}
-	  if (gl[2] == grid.num_unknowns(2)) {axis = 2; face = 1;}
+	assert (axis >= 0);
+	assert (face >= 0);
 
-	  assert (axis >= 0);
-	  assert (face >= 0);
+	// determine index bounds 
 
-	  // determine index bounds 
+	int in0, in1, jn0, jn1;
+	in0 = gl[(axis+1)%3];
+	in1 = gu[(axis+1)%3];
+	jn0 = gl[(axis+2)%3];
+	jn1 = gu[(axis+2)%3];
 
-	  int in0, in1, jn0, jn1;
-	  in0 = gl[(axis+1)%3];
-	  in1 = gu[(axis+1)%3];
-	  jn0 = gl[(axis+2)%3];
-	  jn1 = gu[(axis+2)%3];
-
-	  if (debug) printf ("DEBUG_DISCRET axis=%d face=%d [(%d,%d) - (%d,%d)]\n",
-			     axis,face,in0,jn0,in1,jn1);
+	if (debug) printf ("DEBUG_FACES axis=%d face=%d [(%d,%d) - (%d,%d)]\n",
+			   axis,face,in0,jn0,in1,jn1);
       
-	  // set Discret boundary mask
+	// set Faces boundary mask
 
-	  for (int in=in0; in<=in1; in++) {
-	    for (int jn=jn0; jn<=jn1; jn++) {
-	      grid.discret().neighbor_cell(axis,face,in,jn) = 0;
-	    }
+	for (int in=in0; in<=in1; in++) {
+	  for (int jn=jn0; jn<=jn1; jn++) {
+	    grid->faces().neighbor_cell(axis,face,in,jn) = 0;
 	  }
-
-	  if (debug) grid.discret().print();
 	}
+
+	if (debug) grid->faces().print();
       }
     }
   }

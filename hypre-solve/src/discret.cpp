@@ -1,5 +1,5 @@
 
-/// Discret class source file
+/// Faces class source file
 
 /**
  * 
@@ -19,7 +19,7 @@
 #include "HYPRE_sstruct_ls.h"
 
 #include "scalar.hpp"
-#include "discret.hpp"
+#include "faces.hpp"
 #include "mpi.hpp"
 #include "grid.hpp"
 
@@ -27,19 +27,19 @@
 
 const int debug = 0;
 
-const int Discret::_unknown_  = -1000;
-const int Discret::_boundary_ = -2000;
+const int Faces::_unknown_  = -1000;
+const int Faces::_boundary_ = -2000;
 
 //----------------------------------------------------------------------
 
-Discret::Discret (int n[3]) throw ()
+Faces::Faces (int n[3]) throw ()
 {
   alloc_(n);   // NOTE: inefficient for dimension < 3
 }
 	  
 //----------------------------------------------------------------------
 
-Discret::~Discret () throw ()
+Faces::~Faces () throw ()
 {
   dealloc_();
 }
@@ -48,9 +48,9 @@ Discret::~Discret () throw ()
 // PUBLIC MEMBER FUNCTIONS
 //--------------------------------------------------------------------
 
-void Discret::print() throw()
+void Faces::print() throw()
 {
-   printf ("Discret::debug()\n");
+   printf ("Faces::debug()\n");
    printf ("   n1_ = (%d,%d,%d)\n",n1_[0],n1_[1],n1_[2]);
    printf ("   n2_ = (%d,%d,%d)\n",n2_[0],n2_[1],n2_[2]);
    printf ("    n_  = (%d,%d,%d)\n",n_[0],n_[1],n_[2]);
@@ -78,7 +78,7 @@ void Discret::print() throw()
 // PRIVATE MEMBER FUNCTIONS
 //======================================================================
 
-void Discret::alloc_ (int n[3]) throw ()
+void Faces::alloc_ (int n[3]) throw ()
 //
 // Allocate and initialize storage for neighbor_cell_[][]
 //
@@ -106,7 +106,7 @@ void Discret::alloc_ (int n[3]) throw ()
 
 //----------------------------------------------------------------------
 
-void Discret::dealloc_ () throw ()
+void Faces::dealloc_ () throw ()
 {
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
