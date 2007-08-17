@@ -18,6 +18,7 @@ class Hierarchy
 
   friend class ItHierarchyLocalGrids;
   friend class ItHierarchyAllGrids;
+  friend class ItHierarchyLevels;
 
   //--------------------------------------------------------------------
   // PRIVATE MEMBER DATA
@@ -27,10 +28,11 @@ private:
 
   /// Dimension
   int                        dimension_;
-  /// List of Levels
-  std::vector <Level *>      levels_;
   /// List of each grid's parent
-  std::map<Grid *, Grid * >  parent_;
+  std::map<Grid *, Grid * >         grid_parent_;
+
+  HYPRE_SStructGrid   hypre_grid_;  // Struct for hypre grid
+  HYPRE_SStructGraph  hypre_graph_; // Struct for hypre graph
 
   //--------------------------------------------------------------------
   // PROTECTED MEMBER DATA
@@ -40,6 +42,9 @@ protected:
 
   /// List of all grids, with extra sentinal 0-pointer at the end
   std::vector <Grid *>       grids0_;
+
+  /// List of Levels,  with extra sentinal 0-pointer at the end
+  std::vector <Level *>      levels0_;
 
 
   //--------------------------------------------------------------------
@@ -79,23 +84,42 @@ public:
     printf ("Hierarchy::check() is not implemented yet\n");
   }
 
-  // Data access
+  /// Set a Grid's parent
+  void    set_parent (Grid * grid, Grid * parent) { grid_parent_[grid]=parent; };
 
+  // -----------
+  // Data access
+  // -----------
+
+  /// Return the dimension of the Hierarchy
   int dimension () throw () { return dimension_; } ;
 
-  Level & level      (int i)            { return * levels_.at(i); };
-  int     num_levels ()                 { return   levels_.size(); };
+  /// Return the ith Level of the Hierarchy.   No error checking.
+  Level & level      (int i)            { return * levels0_.at(i); };
 
-  Grid &  grid       (int i)            { return * grids0_.at(i); };
+  /// Return the number of levels in the Hierarchy
+  int     num_levels ()                 { return   levels0_.size() - 1; };
+
+  /// Return the jth Grid.   No error checking.
+  Grid &  grid       (int j)            { return * grids0_.at(j); };
+
+  /// Return the number of grids
   int     num_grids  ()                 { return   grids0_.size() - 1; };
 
-  Grid &  grid       (int level, int j) { return   levels_[level]->grid(j); };
-  int     num_grids  (int level)        { return   levels_[level]->num_grids(); };
+  /// Return the jth Grid in the ith Level of the Hierarchy.   No error checking.
+  Grid &  grid       (int i, int j)     { return   levels0_[i]->grid(j); };
 
-  void    set_parent (Grid * grid, Grid * parent)  
-  { parent_[grid]=parent; };
-  Grid *  parent     (Grid * grid)      
-  { return   parent_[grid]; };
+  /// Return the number of grids in the ith level.   No error checking.
+  int     num_grids  (int i)            { return   levels0_[i]->num_grids(); };
+
+  /// Return the Grid's parent Grid
+  Grid *  parent     (Grid * grid)      { return   grid_parent_[grid]; };
+
+  /// Return the HYPRE structure for the Hierarchy's hypre grid
+  HYPRE_SStructGrid & hypre_grid ()     { return hypre_grid_; };
+
+  /// Return the HYPRE structure for the Hierarchy's hypre graph
+  HYPRE_SStructGraph & hypre_graph ()   { return hypre_graph_; };
 
   //--------------------------------------------------------------------
   // PRIVATE MEMBER FUNCTIONS
@@ -119,8 +143,8 @@ private:
 
 /**
  * 
- * An ItHierarchyLocalGrids object allows iterating through all local
- * grids in a Hierarchy.
+ * An ItHierarchyLocalGrids object iterates through all local grids in
+ * a Hierarchy.
  * 
  * @file
  * @author James Bordner <jobordner@ucsd.edu>
@@ -168,8 +192,8 @@ public:
 
 /**
  * 
- * An ItHierarchyAllGrids object allows iterating through all grids in
- * a Hierarchy, including non-local ones.
+ * An ItHierarchyAllGrids object iterates through all grids in a
+ * Hierarchy, including non-local ones.
  * 
  * @file
  * @author James Bordner <jobordner@ucsd.edu>
@@ -208,6 +232,54 @@ public:
     if (curr_ == hierarchy_->grids0_.size()) curr_ = 0;
     curr_ ++;
     return hierarchy_->grids0_[curr_-1];
+  }
+
+};
+
+/// ItHierarchyLevels class
+
+/**
+ * 
+ * An ItHierarchyLevels object iterates through each Level of the
+ * Hierarchy in turn.
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ * @date 2007-05-02
+ *
+ */
+
+class ItHierarchyLevels
+{
+
+  //--------------------------------------------------------------------
+  // PRIVATE MEMBER DATA
+  //--------------------------------------------------------------------
+
+private:
+
+
+  const Hierarchy * hierarchy_;
+  int               curr_;
+
+public:
+
+  //--------------------------------------------------------------------
+  // CONSTUCTORS AND DESTRUCTORS
+  //--------------------------------------------------------------------
+
+  ItHierarchyLevels (Hierarchy & hierarchy) throw ()
+    : curr_(0), hierarchy_(&hierarchy)
+  { }
+
+  ~ItHierarchyLevels () throw () {};
+  
+  /// Iterate through all Levels in the Hierarchy.
+  Level * operator++ (int) { 
+
+    if (curr_ == hierarchy_->levels0_.size()) curr_ = 0;
+    curr_ ++;
+    return hierarchy_->levels0_[curr_-1];
   }
 
 };

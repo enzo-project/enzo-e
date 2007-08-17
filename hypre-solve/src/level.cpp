@@ -18,7 +18,7 @@
 #include "HYPRE_sstruct_ls.h"
 
 #include "scalar.hpp"
-#include "discret.hpp"
+#include "faces.hpp"
 #include "mpi.hpp"
 #include "grid.hpp"
 #include "level.hpp"

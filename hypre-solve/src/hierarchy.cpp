@@ -38,6 +38,7 @@ Hierarchy::Hierarchy () throw ()
   : dimension_(0)
 {
   grids0_.push_back(0);
+  levels0_.push_back(0);
 }
 	  
 //----------------------------------------------------------------------
@@ -61,7 +62,7 @@ Hierarchy::~Hierarchy () throw ()
 
 void Hierarchy::insert_grid (Grid * pgrid) throw ()
 {
-  if (pgrid->id() >= grids0_.size() - 1) {
+  if (pgrid->id() + 1 >= grids0_.size()) {
     grids0_.resize (pgrid->id() + 2);
     grids0_[grids0_.size() - 1] = 0;
   }
@@ -339,15 +340,14 @@ void Hierarchy::write (FILE *fp) throw ()
 
 void Hierarchy::insert_in_level_ (int level, Grid & grid) throw ()
 {
-  // Resize levels_[] if needed
-  if (level >= levels_.size()) {
-    if (debug) printf ("DEBUG: resizing Hierarchy::levels_ from %d to %d\n",
-		       levels_.size(),level + 1);
-    levels_.resize (level + 1);
+  // Resize levels0_[] if needed
+  if (level + 1 >= levels0_.size()) {
+    levels0_.resize (level + 2);
+    levels0_[levels0_.size() - 1] = 0;
   }
-  if (levels_.at(level) == 0) {
+  if (levels0_.at(level) == 0) {
     if (debug) printf ("DEBUG: creating new Level at %d\n",level);
-    levels_[level] = new Level(level);
+    levels0_[level] = new Level(level);
   }
-  levels_[level]->insert_grid (grid);
+  levels0_[level]->insert_grid (grid);
 }

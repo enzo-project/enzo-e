@@ -52,6 +52,7 @@ class Grid
 
   Scalar              xl_[3];      // Position of lowest vertex
   Scalar              xu_[3];      // Position of highest vertex
+  int                 il_[3];      // Global index of lowest vertex
   int                 n_[3];       // Number of zones
 
   Faces *             faces_;      // Faces class associated with grid
@@ -60,8 +61,6 @@ class Grid
 
   std::vector<Grid *> neighbors_;  // Array of neighboring grids in this level
   std::vector<Grid *> children_;   // Array of child grids
-  HYPRE_SStructGrid   hypre_grid_; // Struct for hypre grid
-  HYPRE_SStructGraph  hypre_graph_; // Struct for hypre graph
   int                 level_;      // Containing Level number (0 = root)
 
   // data for unknowns (in allocate())
@@ -141,14 +140,6 @@ class Grid
   { g1.set_neighbor(g2); 
     g2.set_neighbor(g1); };
 
-  /// Return the HYPRE structure for this grid
-  HYPRE_SStructGrid & hypre_grid () 
-  { return hypre_grid_; };
-
-  /// Return the HYPRE structure for this graph
-  HYPRE_SStructGraph & hypre_graph () 
-  { return hypre_graph_; };
-
   /// Set level for this grid.  0 = root
   void set_level (int level) throw () 
   { level_ = level; };
@@ -157,17 +148,29 @@ class Grid
   int level () throw () 
   { return level_; };
 
+  /// Return the global lower index of the lower grid unknown.  No error checking on i.
+  void set_lower(int i0, int i1, int i2) throw ()
+  { il_[0]=i0; il_[1]=i1; il_[2]=i2; };
+
   /// Return the number of unknowns along the ith coordinate.  No error checking on i.
   int num_unknowns(int i) throw ()
   { return n_[i]; };
 
   /// Return the coordinates of the lower grid vertex.  No error checking on i.
-  Scalar & lower_vertex(int i) throw ()
+  Scalar x_lower(int i) throw ()
   { return xl_[i]; };
 
   /// Return the coordinates of the upper grid vertex.  No error checking on i.
-  Scalar & upper_vertex(int i) throw ()
+  Scalar x_upper(int i) throw ()
   { return xu_[i]; };
+
+  /// Return the global lower index of the lower grid unknown.  No error checking on i.
+  int i_lower(int i) throw ()
+  { return il_[i]; };
+
+  /// Return the global upper index of the upper grid unknown.  No error checking on i.
+  int i_upper(int i) throw ()
+  { return il_[i] + n_[i] - 1; };
 
   /// Return the unknown u(i,j,k)
   Scalar & unknown(int i0, int i1, int i2) throw()

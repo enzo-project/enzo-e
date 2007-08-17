@@ -35,11 +35,11 @@ public:
     xu_[2] = xu_2; };
 
   /// Return the coordinates of the lower grid vertex.  No error checking on i.
-  Scalar & lower_vertex(int i) throw ()
+  Scalar & x_lower(int i) throw ()
   { return xl_[i]; };
   
   /// Return the coordinates of the upper grid vertex.  No error checking on i.
-  Scalar & upper_vertex(int i) throw ()
+  Scalar & x_upper(int i) throw ()
   { return xu_[i]; };
 
 

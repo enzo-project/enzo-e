@@ -16,7 +16,8 @@ public:
 
   Hypre ();
 
-  void init_hierarchy (Hierarchy & hierarchy, Mpi & mpi);
+  void init_hierarchy (Hierarchy & hierarchy, 
+		       Mpi       & mpi);
   void init_stencil   (Hierarchy & hierarchy);
   void init_graph     (Hierarchy & hierarchy);
   void init_matrix    (Hierarchy & hierarchy);
@@ -32,20 +33,13 @@ private:
 
 private:
 
-  void init_hierarchy_create_grid_        (Grid & grid, int dim, int levels);
-  void init_hierarchy_set_grid_extents_   (Grid & grid);
-  void init_hierarchy_set_grid_variables_ (Grid & grid);
-  void init_hierarchy_set_grid_neighbors_ (Grid & grid);
-  void init_hierarchy_assemble_grids_     (Grid & grid);
-  
-  void init_graph_stencil                 (Grid & grid);
-  void init_graph_zero_covered            (Grid & grid);
-  void init_graph_neighbors               (Grid & grid);
-  void init_graph_boundary                (Grid & grid);
-  void init_graph_children                (Grid & grid);
-  void init_graph_parent                  (Grid & grid);
-  void init_graph_neighbors_children      (Grid & grid);
-  void init_graph_parents_neighbor        (Grid & grid);
-  void init_graph_check                   (Grid & grid);
+  void init_graph_zero_covered_           (Grid & grid);
+  void init_graph_neighbors_              (Grid & grid);
+  void init_graph_boundary_               (Grid & grid);
+  void init_graph_children_               (Grid & grid);
+  void init_graph_parent_                 (Grid & grid);
+  void init_graph_neighbors_children_     (Grid & grid);
+  void init_graph_parents_neighbor_       (Grid & grid);
+  void init_graph_check_                  (Grid & grid);
 
 };

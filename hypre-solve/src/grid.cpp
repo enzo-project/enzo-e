@@ -58,11 +58,13 @@ void Grid::print () throw ()
 	  "   processor      %d\n"
 	  "   lower position "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF"\n"
 	  "   upper position "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF"\n"
+	  "   lower index    %d %d %d\n"
 	  "   zones          %d %d %d\n"
 	  "   level          %d\n",
 	  id_,id_parent_,ip_,
 	  xl_[0],xl_[1],xl_[2],
 	  xu_[0],xu_[1],xu_[2],
+	  il_[0],il_[1],il_[2],
 	  n_ [0],n_ [1],n_ [2],
 	  level_);
 }
@@ -77,10 +79,12 @@ void Grid::write (FILE *fp) throw ()
 	   "%d %d %d "
 	   SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF
 	   SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF
+	   "%d %d %d\n"
 	   "%d %d %d\n",
 	   id_,id_parent_,ip_,
 	   xl_[0],xl_[1],xl_[2],
 	   xu_[0],xu_[1],xu_[2],
+	   il_[0],il_[1],il_[2],
 	   n_ [0],n_ [1],n_ [2]);
 }
 
@@ -93,10 +97,12 @@ void Grid::read (std::string parms) throw ()
 	  "%d%d%d" 
 	  SCALAR_SCANF SCALAR_SCANF SCALAR_SCANF
 	  SCALAR_SCANF SCALAR_SCANF SCALAR_SCANF
+	  "%d%d%d"
 	  "%d%d%d",
 	  &id_, &id_parent_, &ip_,
 	  &xl_[0],&xl_[1],&xl_[2],
 	  &xu_[0],&xu_[1],&xu_[2],
+	  &il_[0],&il_[1],&il_[2],
 	  &n_[0],&n_[1],&n_[2]);
 
 }
@@ -158,8 +164,8 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
   int i;
   Scalar h1[3],h2[3];
   for (i=0; i<3; i++) {
-    h1[i] = ( g1.upper_vertex(i) - g1.lower_vertex(i) ) / g1.num_unknowns(i);
-    h2[i] = ( g2.upper_vertex(i) - g2.lower_vertex(i) ) / g2.num_unknowns(i);
+    h1[i] = ( g1.x_upper(i) - g1.x_lower(i) ) / g1.num_unknowns(i);
+    h2[i] = ( g2.x_upper(i) - g2.x_lower(i) ) / g2.num_unknowns(i);
     // Check that mesh sizes are close.  Can fail on bad input
     if (debug) printf ("DEBUG %s:%d h1[%d] = %g  h2 = %g\n",
 		       __FILE__,__LINE__,i,h1[i],h2[i]);
@@ -174,8 +180,8 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
 
   for (i=0; i<3; i++) {
     face[i] = 0;  // Assume not close
-    if (fabs(g1.lower_vertex(i) - g2.upper_vertex(i)) < 0.5*h1[i]) face[i] = -1;
-    if (fabs(g1.upper_vertex(i) - g2.lower_vertex(i)) < 0.5*h1[i]) face[i] =  1;
+    if (fabs(g1.x_lower(i) - g2.x_upper(i)) < 0.5*h1[i]) face[i] = -1;
+    if (fabs(g1.x_upper(i) - g2.x_lower(i)) < 0.5*h1[i]) face[i] =  1;
     if (debug) printf ("DEBUG %s:%d face[%d] = %d\n",
 		       __FILE__,__LINE__,i,face[i]);
   }
@@ -191,8 +197,8 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
   Scalar lower[3],upper[3];
 
   for (i=0; i<3; i++) {
-    lower[i] = max (g1.lower_vertex(i),g2.lower_vertex(i));
-    upper[i] = min (g1.upper_vertex(i),g2.upper_vertex(i));
+    lower[i] = max (g1.x_lower(i),g2.x_lower(i));
+    upper[i] = min (g1.x_upper(i),g2.x_upper(i));
     if (debug) printf ("DEBUG %s:%d lower[%d] = %g  upper = %g\n",
 		       __FILE__,__LINE__,i,lower[i],upper[i]);
   }
@@ -209,8 +215,8 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
     if (face[i] == -1) {
       gl[i] = gu[i] = -1;
     } else if (face[i] == 0) {
-      gl[i] = int ( (lower[i] - g1.lower_vertex(i)) / h1[i] );
-      gu[i] = int ( (upper[i] - g1.lower_vertex(i)) / h1[i] - 1);
+      gl[i] = int ( (lower[i] - g1.x_lower(i)) / h1[i] );
+      gu[i] = int ( (upper[i] - g1.x_lower(i)) / h1[i] - 1);
     } else if (face[i] == 1) {
       gl[i] = gu[i] = g1.num_unknowns(i);
     }

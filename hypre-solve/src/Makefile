@@ -53,21 +53,21 @@ doc:
 
 # DO NOT DELETE
 
-discret.o: /usr/include/assert.h /usr/include/features.h
-discret.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-discret.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-discret.o: /usr/include/stdio.h /usr/include/bits/types.h
-discret.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-discret.o: /usr/include/_G_config.h /usr/include/wchar.h
-discret.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-discret.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-discret.o: /usr/include/math.h /usr/include/bits/huge_val.h
-discret.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
-discret.o: scalar.hpp discret.hpp mpi.hpp grid.hpp
 domain.o: /usr/include/assert.h /usr/include/features.h
 domain.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 domain.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h scalar.hpp
 domain.o: domain.hpp
+faces.o: /usr/include/assert.h /usr/include/features.h
+faces.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+faces.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+faces.o: /usr/include/stdio.h /usr/include/bits/types.h
+faces.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+faces.o: /usr/include/_G_config.h /usr/include/wchar.h
+faces.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+faces.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+faces.o: /usr/include/math.h /usr/include/bits/huge_val.h
+faces.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h scalar.hpp
+faces.o: faces.hpp mpi.hpp grid.hpp
 grid.o: /usr/include/assert.h /usr/include/features.h
 grid.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 grid.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -78,7 +78,7 @@ grid.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 grid.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 grid.o: /usr/include/math.h /usr/include/bits/huge_val.h
 grid.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h scalar.hpp
-grid.o: discret.hpp mpi.hpp grid.hpp
+grid.o: faces.hpp mpi.hpp grid.hpp
 hierarchy.o: /usr/include/assert.h /usr/include/features.h
 hierarchy.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hierarchy.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -87,11 +87,11 @@ hierarchy.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 hierarchy.o: /usr/include/_G_config.h /usr/include/wchar.h
 hierarchy.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 hierarchy.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-hierarchy.o: scalar.hpp discret.hpp mpi.hpp grid.hpp level.hpp hierarchy.hpp
+hierarchy.o: scalar.hpp faces.hpp mpi.hpp grid.hpp level.hpp hierarchy.hpp
 hypre.o: /usr/include/assert.h /usr/include/features.h
 hypre.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h mpi.hpp
-hypre.o: scalar.hpp point.hpp discret.hpp grid.hpp level.hpp hierarchy.hpp
+hypre.o: scalar.hpp point.hpp faces.hpp grid.hpp level.hpp hierarchy.hpp
 hypre.o: sphere.hpp domain.hpp problem.hpp hypre.hpp
 hypre-solve.o: /usr/include/assert.h /usr/include/features.h
 hypre-solve.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
@@ -109,7 +109,7 @@ hypre-solve.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
 hypre-solve.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
 hypre-solve.o: /usr/include/math.h /usr/include/bits/huge_val.h
 hypre-solve.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
-hypre-solve.o: scalar.hpp point.hpp sphere.hpp discret.hpp mpi.hpp grid.hpp
+hypre-solve.o: scalar.hpp point.hpp sphere.hpp faces.hpp mpi.hpp grid.hpp
 hypre-solve.o: level.hpp hierarchy.hpp domain.hpp problem.hpp hypre.hpp
 level.o: /usr/include/assert.h /usr/include/features.h
 level.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
@@ -119,7 +119,7 @@ level.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 level.o: /usr/include/_G_config.h /usr/include/wchar.h
 level.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 level.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-level.o: scalar.hpp discret.hpp mpi.hpp grid.hpp level.hpp
+level.o: scalar.hpp faces.hpp mpi.hpp grid.hpp level.hpp
 mpi.o: /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h
 mpi.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
 mpi.o: /usr/include/gnu/stubs-32.h /usr/include/bits/types.h
@@ -139,7 +139,7 @@ problem.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 problem.o: /usr/include/_G_config.h /usr/include/wchar.h
 problem.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 problem.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-problem.o: scalar.hpp point.hpp discret.hpp mpi.hpp grid.hpp level.hpp
+problem.o: scalar.hpp point.hpp faces.hpp mpi.hpp grid.hpp level.hpp
 problem.o: domain.hpp hierarchy.hpp sphere.hpp problem.hpp
 sphere.o: /usr/include/assert.h /usr/include/features.h
 sphere.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h

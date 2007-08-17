@@ -26,7 +26,7 @@
 #include "scalar.hpp"
 #include "point.hpp"
 #include "sphere.hpp"
-#include "discret.hpp"
+#include "faces.hpp"
 #include "mpi.hpp"
 #include "grid.hpp"
 #include "level.hpp"
@@ -82,6 +82,7 @@ int main(int argc, char **argv)
 
     
     Hierarchy & hierarchy = problem.hierarchy();
+    Domain    & domain    = problem.domain();
 
     // determine interconnections between grids
 
@@ -90,7 +91,7 @@ int main(int argc, char **argv)
     // categorize grid boundary zones according to levels of adjacent
     // or containing grids
 
-    hierarchy.init_discret();
+    hierarchy.init_faces();
   
     // --------------------------------------------------
     // Initialize the grid hierarchy

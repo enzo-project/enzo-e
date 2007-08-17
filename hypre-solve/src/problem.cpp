@@ -21,7 +21,7 @@
 
 #include "scalar.hpp"
 #include "point.hpp"
-#include "discret.hpp"
+#include "faces.hpp"
 #include "mpi.hpp"
 #include "grid.hpp"
 #include "level.hpp"

@@ -122,13 +122,23 @@ The following table lists the input parameters to \code{hypre-solve}.
 
 \begin{tabbing}
 xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{dimension} \> \code{\textit{int dimension}} \\
-\> \todo\ \code{domain} \> \code{\textit{Scalar*3 vertex-lower}}, \code{\textit{Scalar*3 vertex-upper}} \\
-\> \done\ \code{sphere} \> \code{\textit{Scalar mass}, \textit{Scalar radius}, \textit{Scalar*3 center}} \\
-\> \done\ \code{point} \> \code{\textit{Scalar mass}, \textit{Scalar*3 location}} \\
-\> \done\ \code{grid} \> \code{\textit{int id}, \textit{int parent-id}, \textit{int processor}, \textit{Scalar vertex-lower}, \textit{Scalar vertex-upper}, \textit{int*3 zones}} \\
-\> \todo\ \code{discret} \> \code{\textit{int type}} \\
-\> \todo\ \code{solver} \> \code{\{"fac"\} method}
+\> \done\ \code{dimension} \> \code{int} \icode{dimension} \\
+\> \todo\ \code{domain} \> \code{Scalar*3} \icode{vertex-lower} \\
+\> \> \code{Scalar*3} \icode{vertex-upper} \\
+\> \done\ \code{sphere} \> \code{Scalar} \icode{mass} \\
+\> \> \code{Scalar} \icode{radius} \\
+\> \> \code{Scalar*3} \icode{center} \\
+\> \done\ \code{point} \> \code{Scalar} \icode{mass} \\
+\> \> \code{Scalar*3} \icode{location} \\
+\> \done\ \code{grid} \> \code{int} \icode{id} \\
+\> \> \code{int} \icode{parent-id} \\
+\> \> \code{int} \icode{processor} \\
+\> \> \code{Scalar} \icode{vertex-lower} \\
+\> \> \code{Scalar} \icode{vertex-upper} \\
+\> \> \code{int*3} \icode{index-lower} \\
+\> \> \code{int*3} \icode{zone-count} \\
+\> \todo\ \code{discret} \> \code{\icode{int} \icode{type}} \\
+\> \todo\ \code{solver} \> \code{\{"fac"\}} \icode{method}
 \end{tabbing}
 
 
