@@ -14,8 +14,6 @@
  *
  */
 
-class Grid;
-
 class Faces
 {
 

@@ -410,16 +410,26 @@ levels of an AMR calulation.
  \newcommand{\Uzp}{U_{z}}
  \newcommand{\Uzm}{U_{\bar{z}}}
 
+We wish to discretize $\nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
+on a structured AMR hierarchy with arbitrary refinement factor $r$
+between successive levels.  We consider discretizing within levels in
+\S\ref{ss:discret-within-levels}, and between
+levels in \S\ref{ss:discret-between-levels}.
+
 %-----------------------------------------------------------------------
-\subsection{Discretization within levels}
+\subsection{Discretization within levels} \label{ss:discret-within-levels}
 %-----------------------------------------------------------------------
 
-We assume that grid spacing $h_x$, $h_y$, and $h_z$ within a level is uniform.
+We wish to discretize $\nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
+within a uniform $3$D grid level.  We assume that grid spacing $h_x$,
+$h_y$, and $h_z$ within a level is uniform.  The unknown $u(r)$, ``$\Box$,'' is
+located at cell centers, and the known coefficient $a(r)$, ``$\circ$,'' is evaluated
+at cell faces.  For the Poisson equation, $a(r)\equiv 1$.
 
 \begin{center}
 \begin{minipage}{1.5in}
 \epsfig{file=fig/stencil.eps,width=1.5in}
-\end{minipage} \[ \nabla\cdot(\ac \nabla \uc) = \bar{\rho} \]
+\end{minipage} 
 \end{center}
 
 
@@ -457,7 +467,7 @@ where
  \[\alc   \equiv  - [\alxm + \alym + \alzm + \alxp + \alyp + \alzp] \]
 
 %-----------------------------------------------------------------------
-\subsection{Discretization between levels}
+\subsection{Discretization between levels} \label{ss:discret-between-levels}
 %-----------------------------------------------------------------------
 
 We assume that grid spacing ($h^i_x$, $h^i_y$, $h^i_z$) and 

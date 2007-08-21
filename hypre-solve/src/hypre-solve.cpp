@@ -23,6 +23,8 @@
 
 #include "HYPRE_sstruct_ls.h"
 
+#include "hypre-solve.hpp"
+
 #include "scalar.hpp"
 #include "point.hpp"
 #include "sphere.hpp"
@@ -37,8 +39,6 @@
 
 const int debug = 1;
 const int trace = 1;
-
-#define _TRACE_ if (trace) { printf ("%d %s:%d\n",mpi.ip(),__FILE__,__LINE__); fflush(stdout); }
 
 //======================================================================
 // BEGIN MAIN
@@ -115,8 +115,8 @@ int main(int argc, char **argv)
     // Initialize the graph
     // --------------------------------------------------
 
-    //    _TRACE_;
-    //    hypre.init_graph (hierarchy);
+    _TRACE_;
+    hypre.init_graph (hierarchy);
 
     // --------------------------------------------------
     // Initialize the matrix A

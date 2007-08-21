@@ -14,6 +14,12 @@
 class Domain 
 {
 
+private:
+
+  int d_;
+  Scalar xl_[3];
+  Scalar xu_[3];
+
 public:
 
   Domain () throw ();
@@ -42,12 +48,6 @@ public:
   Scalar & x_upper(int i) throw ()
   { return xu_[i]; };
 
-
-private:
-
-  int d_;
-  Scalar xl_[3];
-  Scalar xu_[3];
 
 };
 

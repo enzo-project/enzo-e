@@ -90,9 +90,9 @@ hierarchy.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 hierarchy.o: scalar.hpp faces.hpp mpi.hpp grid.hpp level.hpp hierarchy.hpp
 hypre.o: /usr/include/assert.h /usr/include/features.h
 hypre.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h mpi.hpp
-hypre.o: scalar.hpp point.hpp faces.hpp grid.hpp level.hpp hierarchy.hpp
-hypre.o: sphere.hpp domain.hpp problem.hpp hypre.hpp
+hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h hypre-solve.hpp
+hypre.o: mpi.hpp scalar.hpp point.hpp faces.hpp grid.hpp level.hpp
+hypre.o: hierarchy.hpp sphere.hpp domain.hpp problem.hpp hypre.hpp
 hypre-solve.o: /usr/include/assert.h /usr/include/features.h
 hypre-solve.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre-solve.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -109,8 +109,9 @@ hypre-solve.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
 hypre-solve.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
 hypre-solve.o: /usr/include/math.h /usr/include/bits/huge_val.h
 hypre-solve.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
-hypre-solve.o: scalar.hpp point.hpp sphere.hpp faces.hpp mpi.hpp grid.hpp
-hypre-solve.o: level.hpp hierarchy.hpp domain.hpp problem.hpp hypre.hpp
+hypre-solve.o: hypre-solve.hpp scalar.hpp point.hpp sphere.hpp faces.hpp
+hypre-solve.o: mpi.hpp grid.hpp level.hpp hierarchy.hpp domain.hpp
+hypre-solve.o: problem.hpp hypre.hpp
 level.o: /usr/include/assert.h /usr/include/features.h
 level.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 level.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
