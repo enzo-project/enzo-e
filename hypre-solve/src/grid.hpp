@@ -43,8 +43,8 @@ class Grid
  private:
 
 
-  int                 id_;         /// Unique id > 0
-  int                 id_parent_;  // Parent grid
+  unsigned            id_;         /// Unique id > 0
+  unsigned            id_parent_;  // Parent grid
 
   // data defined at grid creation (in Grid())
 
@@ -105,10 +105,11 @@ class Grid
   //--------------------------------------------------------------------
 
   /// Return the grid's integer id
-  int id () throw () { return id_; }; 
+  unsigned int id () throw () 
+  { return id_; }; 
 
   /// Return the grid's parent's id
-  int id_parent () throw () 
+  unsigned int id_parent () throw () 
   { return id_parent_; }; 
 
   /// Set the grid to be a child.  Should only be called once per child.

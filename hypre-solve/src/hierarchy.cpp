@@ -95,8 +95,6 @@ void Hierarchy::init_grids () throw ()
 
 void Hierarchy::init_grid_parents_ () throw ()
 {
-  int i,j,j1,j2,k;
-
   ItHierarchyAllGrids itg (*this);
   while (Grid * g = itg++) {
     Grid * p = (g->id_parent() >= 0) ? & grid(g->id_parent()) : 0;
@@ -248,7 +246,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 void Hierarchy::init_faces () throw ()
 
 {
-  int k,i;
+  int k;
 
   // For level == 0, check neighbors and boundary
 
@@ -341,7 +339,7 @@ void Hierarchy::write (FILE *fp) throw ()
 void Hierarchy::insert_in_level_ (int level, Grid & grid) throw ()
 {
   // Resize levels0_[] if needed
-  if (level + 1 >= levels0_.size()) {
+  if ((unsigned int) level + 1 >= levels0_.size()) {
     levels0_.resize (level + 2);
     levels0_[levels0_.size() - 1] = 0;
   }

@@ -19,8 +19,8 @@ class Sphere
  private:
 
   Scalar     *c_;   // Center
-  Scalar      r_;   // Radius
   Scalar      m_;   // Mass
+  Scalar      r_;   // Radius
 
   static int  d_;   // Dimension
 

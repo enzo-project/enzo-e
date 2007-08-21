@@ -238,10 +238,6 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
 void Hypre::init_graph (Hierarchy & hierarchy)
 
 {
-  int i;
-
-  const int variable = 0;
-
   // Create the hypre graph object
 
   HYPRE_SStructGraphCreate (MPI_COMM_WORLD, 

@@ -53,8 +53,8 @@ Grid::~Grid () throw ()
 void Grid::print () throw ()
 {
   printf ("Grid\n"
-	  "   id             %d\n"
-	  "   parent id      %d\n"
+	  "   id             %ud\n"
+	  "   parent id      %ud\n"
 	  "   processor      %d\n"
 	  "   lower position "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF"\n"
 	  "   upper position "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF"\n"

@@ -53,8 +53,6 @@ int main(int argc, char **argv)
   int size = exec_name.rfind("/");
   exec_name.replace(0,size+1,"");
 
-  int np,ip;
-
   // --------------------------------------------------
   // MPI initialization
   // --------------------------------------------------
@@ -82,7 +80,6 @@ int main(int argc, char **argv)
 
     
     Hierarchy & hierarchy = problem.hierarchy();
-    Domain    & domain    = problem.domain();
 
     // determine interconnections between grids
 

@@ -161,9 +161,8 @@ class ItHierarchyLocalGrids
 
 private:
 
-
+  unsigned          curr_;
   const Hierarchy * hierarchy_;
-  int           curr_;
 
 public:
 
@@ -210,9 +209,8 @@ class ItHierarchyAllGrids
 
 private:
 
-
+  unsigned          curr_;
   const Hierarchy * hierarchy_;
-  int               curr_;
 
 public:
 
@@ -258,9 +256,8 @@ class ItHierarchyLevels
 
 private:
 
-
+  unsigned int      curr_;
   const Hierarchy * hierarchy_;
-  int               curr_;
 
 public:
 

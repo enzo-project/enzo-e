@@ -97,8 +97,8 @@ class ItLevelLocalGrids
 private:
 
 
+  unsigned int  curr_;
   const Level * level_;
-  int           curr_;
 
 public:
 
@@ -146,9 +146,8 @@ class ItLevelAllGrids
 
 private:
 
-
+  unsigned int curr_;
   const Level * level_;
-  int           curr_;
 
 public:
 

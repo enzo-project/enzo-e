@@ -32,7 +32,7 @@ const int Faces::_boundary_ = -2000;
 
 //----------------------------------------------------------------------
 
-Faces::Faces (int n[3]) throw ()
+Faces::Faces (int *n) throw ()
 {
   alloc_(n);   // NOTE: inefficient for dimension < 3
 }
@@ -78,7 +78,7 @@ void Faces::print() throw()
 // PRIVATE MEMBER FUNCTIONS
 //======================================================================
 
-void Faces::alloc_ (int n[3]) throw ()
+void Faces::alloc_ (int *n) throw ()
 //
 // Allocate and initialize storage for neighbor_cell_[][]
 //
