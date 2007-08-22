@@ -25,7 +25,8 @@
 
 //======================================================================
 
-const int debug = 0;
+const int debug       = 0;
+const int debug_input = 0;
 
 Mpi Grid::mpi_;
 
@@ -35,6 +36,11 @@ Grid::Grid (std::string parms) throw ()
   : level_ (-1)
 
 {
+  // Initialize 0-sentinels in arrays
+
+  neighbors0_.push_back (0);
+  children0_.push_back (0);
+
   // Define a grid given text parameters, typically from a file
 
   read (parms);
@@ -53,8 +59,8 @@ Grid::~Grid () throw ()
 void Grid::print () throw ()
 {
   printf ("Grid\n"
-	  "   id             %ud\n"
-	  "   parent id      %ud\n"
+	  "   id             %d\n"
+	  "   parent id      %d\n"
 	  "   processor      %d\n"
 	  "   lower position "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF"\n"
 	  "   upper position "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF"\n"
@@ -104,6 +110,7 @@ void Grid::read (std::string parms) throw ()
 	  &xu_[0],&xu_[1],&xu_[2],
 	  &il_[0],&il_[1],&il_[2],
 	  &n_[0],&n_[1],&n_[2]);
+  if (debug_input) print();
 
 }
 

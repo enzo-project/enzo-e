@@ -17,6 +17,8 @@
 
 #include "HYPRE_sstruct_ls.h"
 
+#include "hypre-solve.hpp"
+
 #include "scalar.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
@@ -24,9 +26,11 @@
 #include "level.hpp"
 #include "hierarchy.hpp"
 
+const int trace = 0;
+
 //----------------------------------------------------------------------
 
-const int debug = 1;
+const int debug = 0;
 
 //----------------------------------------------------------------------
 
@@ -124,15 +128,15 @@ void Hierarchy::init_grid_levels_ () throw ()
 
 	// Grids without parents must be in level 0 ...
 
-	if (parent(g) == 0) {
+	if (parent(*g) == 0) {
 	  g->set_level(0);
 	  insert_in_level_ (0,*g);
 	}
 	
 	// ... grids with parents of known level have level = 1 + parent level ...
 
-	else if (parent(g)->level() >= 0) {
-	  int level = parent(g)->level() + 1;
+	else if (parent(*g)->level() >= 0) {
+	  int level = parent(*g)->level() + 1;
 	  g->set_level(level);
 	  insert_in_level_ (level,*g);
 	} 
@@ -156,8 +160,8 @@ void Hierarchy::init_grid_children_ () throw ()
   ItHierarchyAllGrids itg (*this);
   while (Grid * g = itg++) {
     // If a grid has a parent, then the grid is the parent's child
-    if (parent(g) != 0) {
-      parent(g)->set_child(*g);
+    if (parent(*g) != 0) {
+      parent(*g)->set_child(*g);
     }
   }
 }
@@ -211,8 +215,8 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
       // Check parents' children
 
-      for (j=0; j<parent(g1)->num_children(); j++) {
-	Grid * g2 = & parent(g1)->child(j);
+      for (j=0; j<parent(*g1)->num_children(); j++) {
+	Grid * g2 = & parent(*g1)->child(j);
 	if (g1->is_adjacent(*g2) && g1->id() > g2->id()) {
 	  assert_neighbors (*g1,*g2);
 	}
@@ -220,8 +224,8 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
       // Check parents' neighbors' children
 
-      for (j1=0; j1<parent(g1)->num_neighbors(); j1++) {
-	Grid * gn = & parent(g1)->neighbor(j1);
+      for (j1=0; j1<parent(*g1)->num_neighbors(); j1++) {
+	Grid * gn = & parent(*g1)->neighbor(j1);
 	for (j2=0; j2<gn->num_children(); j2++) {
 	  Grid * g2 = & gn->child(j2);
 	  if (g1->is_adjacent(*g2) && g1->id() > g2->id()) {
@@ -339,7 +343,7 @@ void Hierarchy::write (FILE *fp) throw ()
 void Hierarchy::insert_in_level_ (int level, Grid & grid) throw ()
 {
   // Resize levels0_[] if needed
-  if ((unsigned int) level + 1 >= levels0_.size()) {
+  if (level + 1 >= levels0_.size()) {
     levels0_.resize (level + 2);
     levels0_[levels0_.size() - 1] = 0;
   }

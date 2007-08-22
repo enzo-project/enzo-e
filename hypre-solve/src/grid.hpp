@@ -42,34 +42,55 @@ class Grid
 
  private:
 
-
-  unsigned            id_;         /// Unique id > 0
-  unsigned            id_parent_;  // Parent grid
+  /// Unique id > 0
+  int                 id_;
+  /// Parent grid
+  int                 id_parent_;
 
   // data defined at grid creation (in Grid())
 
-  int                 ip_;         // Owning processor
-
-  Scalar              xl_[3];      // Position of lowest vertex
-  Scalar              xu_[3];      // Position of highest vertex
-  int                 il_[3];      // Global index of lowest vertex
-  int                 n_[3];       // Number of zones
-
-  Faces *             faces_;      // Faces class associated with grid
+  /// Owning processor
+  int                 ip_;
+  /// Position of lowest vertex
+  Scalar              xl_[3];
+  /// Position of highest vertex
+  Scalar              xu_[3];
+  /// Global index of lowest vertex
+  int                 il_[3];
+  /// Number of zones
+  int                 n_[3];
+  /// Faces class associated with grid
+  Faces *             faces_;
 
   // data computed at hierarchy creation (in read())
 
-  std::vector<Grid *> neighbors_;  // Array of neighboring grids in this level
-  std::vector<Grid *> children_;   // Array of child grids
-  int                 level_;      // Containing Level number (0 = root)
+  /// Containing Level number (0 = root)
+  int                 level_;      
 
-  // data for unknowns (in allocate())
-
-  Scalar *            u_;          // Unknowns (single cell-centered variable)
-  ;                                // Stored as 3D fortran-style array
-  ;                                // with ordering x-y-z
+  /// Unknowns (single cell-centered variable) Stored as 3D
+  /// fortran-style array
+  Scalar *            u_;          
 
   //--------------------------------------------------------------------
+  // STATIC MEMBER DATA
+  //--------------------------------------------------------------------
+
+  static Mpi  mpi_;
+
+  //--------------------------------------------------------------------
+  // PROTECTED MEMBER DATA
+  //--------------------------------------------------------------------
+
+protected:
+
+  friend class ItGridNeighbors;
+  friend class ItGridChildren;
+
+  /// Vector of neighboring Grids, with extra sentinal 0-pointer at the end
+  std::vector<Grid *> neighbors0_; 
+  /// Vector of child Grids
+  std::vector<Grid *> children0_;   
+
 
  public:
 
@@ -105,36 +126,42 @@ class Grid
   //--------------------------------------------------------------------
 
   /// Return the grid's integer id
-  unsigned int id () throw () 
+  int id () throw () 
   { return id_; }; 
 
   /// Return the grid's parent's id
-  unsigned int id_parent () throw () 
+  int id_parent () throw () 
   { return id_parent_; }; 
 
   /// Set the grid to be a child.  Should only be called once per child.
   void set_child (Grid & child) throw () 
-  { children_.push_back (&child); } ;
+  { 
+    children0_[children0_.size()-1] = & child;
+    children0_.push_back (0); 
+  } ;
 
   /// Return the ith child.
   Grid & child (int i) 
-  { return * children_.at(i); };
+  { return * children0_.at(i); };
 
   /// Return the number of child grids
   int num_children () 
-  { return children_.size(); };
+  { return children0_.size() - 1; };
 
   /// Set the grid to be a neighbor.  Should only be called once per neighbor.
   void set_neighbor (Grid & neighbor) throw () 
-  { neighbors_.push_back (&neighbor); } ;
+  { 
+    neighbors0_[neighbors0_.size()-1] = & neighbor;
+    neighbors0_.push_back (0); 
+  } ;
 
   /// Return the ith neighbor
   Grid & neighbor (int i) 
-  { return * neighbors_.at(i); };
+  { return * neighbors0_.at(i); };
 
   /// Return the number of neighbors
-  int num_neighbors () 
-  { return neighbors_.size(); };
+  int num_neighbors () const
+  { return neighbors0_.size() - 1; };
 
   /// Make g1 and g2 neighbors.  Should only be called once per pair of neighbors
   friend void assert_neighbors (Grid & g1, Grid & g2) throw ()
@@ -205,26 +232,106 @@ class Grid
   bool find_neighbor_indices (Grid & neighbor, int *gl, int *gu);
 
   //--------------------------------------------------------------------
-  // STATIC MEMBER DATA
+  // STATIC MEMBER FUNCTIONS
   //--------------------------------------------------------------------
-
-private:
-
-  static Mpi  mpi_;
-
-public:
 
   static void set_mpi (Mpi &mpi)
   { mpi_ = mpi; };
 
+};
+
+
+/// ItGridNeighbors class
+
+/**
+ * 
+ * An ItGridNeighbors object allows iterating through all grids in a
+ * Level, even non-local ones.
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ * @date 2007-05-02
+ *
+ */
+
+class ItGridNeighbors
+{
+
   //--------------------------------------------------------------------
-  // PRIVATE MEMBER FUNCTIONS
+  // PRIVATE MEMBER DATA
   //--------------------------------------------------------------------
 
 private:
 
+  int          curr_;
+  const Grid * grid_;
+
+public:
+
   //--------------------------------------------------------------------
- 
+  // CONSTUCTORS AND DESTRUCTORS
+  //--------------------------------------------------------------------
+
+  ItGridNeighbors (Grid & grid) throw ()
+    : curr_(0), grid_(&grid)
+  { }
+
+  ~ItGridNeighbors () throw () {};
+  
+  /// Iterate through all Grids in the Grid.
+  Grid * operator++ (int) { 
+
+    if (curr_ == grid_->neighbors0_.size()) curr_ = 0;
+    curr_ ++;
+    return grid_->neighbors0_[curr_-1];
+  }
+
+};
+
+/// ItGridChildren class
+
+/**
+ * 
+ * An ItGridChildren object allows iterating through all grids in a
+ * Level, even non-local ones.
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ * @date 2007-05-02
+ *
+ */
+
+class ItGridChildren
+{
+
+  //--------------------------------------------------------------------
+  // PRIVATE MEMBER DATA
+  //--------------------------------------------------------------------
+
+private:
+
+  int          curr_;
+  const Grid * grid_;
+
+public:
+
+  //--------------------------------------------------------------------
+  // CONSTUCTORS AND DESTRUCTORS
+  //--------------------------------------------------------------------
+
+  ItGridChildren (Grid & grid) throw ()
+    : curr_(0), grid_(&grid)
+  { }
+
+  ~ItGridChildren () throw () {};
+  
+  /// Iterate through all Grids in the Grid.
+  Grid * operator++ (int) { 
+
+    if (curr_ == grid_->children0_.size()) curr_ = 0;
+    curr_ ++;
+    return grid_->children0_[curr_-1];
+  }
 
 };
 

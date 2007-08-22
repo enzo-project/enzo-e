@@ -19,6 +19,8 @@
 
 #include "HYPRE_sstruct_ls.h"
 
+#include "hypre-solve.hpp"
+
 #include "scalar.hpp"
 #include "point.hpp"
 #include "faces.hpp"
@@ -29,6 +31,8 @@
 #include "hierarchy.hpp"
 #include "sphere.hpp"
 #include "problem.hpp"
+
+const int trace = 0;
 
 //======================================================================
 

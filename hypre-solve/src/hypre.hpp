@@ -33,13 +33,10 @@ private:
 
 private:
 
-  void init_graph_zero_covered_           (Grid & grid);
-  void init_graph_neighbors_              (Grid & grid);
-  void init_graph_boundary_               (Grid & grid);
   void init_graph_children_               (Grid & grid);
-  void init_graph_parent_                 (Grid & grid);
+  void init_graph_parent_                 (Hierarchy & hierarchy,
+					   Grid & grid);
   void init_graph_neighbors_children_     (Grid & grid);
   void init_graph_parents_neighbor_       (Grid & grid);
-  void init_graph_check_                  (Grid & grid);
 
 };

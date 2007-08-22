@@ -68,8 +68,13 @@ public:
 
   // List access
 
-  Grid & grid (int i) { return * grids0_.at(i); };
-  int num_grids () const   { return grids0_.size() - 1; };
+  /// Return the ith Grid in the Level
+  Grid & grid (int i) 
+  { return * grids0_.at(i); };
+
+  /// Return the number of Grid's in the Level
+  int num_grids () const   
+  { return grids0_.size() - 1; };
 
 };
 
@@ -96,8 +101,7 @@ class ItLevelLocalGrids
 
 private:
 
-
-  unsigned int  curr_;
+  int           curr_;
   const Level * level_;
 
 public:
@@ -146,7 +150,7 @@ class ItLevelAllGrids
 
 private:
 
-  unsigned int curr_;
+  int           curr_;
   const Level * level_;
 
 public:

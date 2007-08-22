@@ -87,7 +87,8 @@ hierarchy.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 hierarchy.o: /usr/include/_G_config.h /usr/include/wchar.h
 hierarchy.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 hierarchy.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-hierarchy.o: scalar.hpp faces.hpp mpi.hpp grid.hpp level.hpp hierarchy.hpp
+hierarchy.o: hypre-solve.hpp scalar.hpp faces.hpp mpi.hpp grid.hpp level.hpp
+hierarchy.o: hierarchy.hpp
 hypre.o: /usr/include/assert.h /usr/include/features.h
 hypre.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h hypre-solve.hpp
@@ -140,8 +141,8 @@ problem.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 problem.o: /usr/include/_G_config.h /usr/include/wchar.h
 problem.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 problem.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-problem.o: scalar.hpp point.hpp faces.hpp mpi.hpp grid.hpp level.hpp
-problem.o: domain.hpp hierarchy.hpp sphere.hpp problem.hpp
+problem.o: hypre-solve.hpp scalar.hpp point.hpp faces.hpp mpi.hpp grid.hpp
+problem.o: level.hpp domain.hpp hierarchy.hpp sphere.hpp problem.hpp
 sphere.o: /usr/include/assert.h /usr/include/features.h
 sphere.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 sphere.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h

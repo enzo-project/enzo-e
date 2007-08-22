@@ -29,7 +29,7 @@ private:
   /// Dimension
   int                        dimension_;
   /// List of each grid's parent
-  std::map<Grid *, Grid * >         grid_parent_;
+  std::map<Grid *, Grid * >  grid_parent_;
 
   HYPRE_SStructGrid   hypre_grid_;  // Struct for hypre grid
   HYPRE_SStructGraph  hypre_graph_; // Struct for hypre graph
@@ -113,7 +113,7 @@ public:
   int     num_grids  (int i)            { return   levels0_[i]->num_grids(); };
 
   /// Return the Grid's parent Grid
-  Grid *  parent     (Grid * grid)      { return   grid_parent_[grid]; };
+  Grid *  parent     (Grid & grid)      { return   grid_parent_[&grid]; };
 
   /// Return the HYPRE structure for the Hierarchy's hypre grid
   HYPRE_SStructGrid & hypre_grid ()     { return hypre_grid_; };
@@ -161,7 +161,7 @@ class ItHierarchyLocalGrids
 
 private:
 
-  unsigned          curr_;
+  int               curr_;
   const Hierarchy * hierarchy_;
 
 public:
@@ -209,7 +209,7 @@ class ItHierarchyAllGrids
 
 private:
 
-  unsigned          curr_;
+  int               curr_;
   const Hierarchy * hierarchy_;
 
 public:
@@ -256,7 +256,7 @@ class ItHierarchyLevels
 
 private:
 
-  unsigned int      curr_;
+  int               curr_;
   const Hierarchy * hierarchy_;
 
 public:
