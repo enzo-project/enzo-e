@@ -7,6 +7,8 @@ sphere 5.993985e27 6.378137e8
 #
 # Two nested grids on one processor
 #
+# [-16:16) x [-16:16) x [-16:16)
+#
 #   +---+
 #   |+-+|
 #   || ||
