@@ -12,6 +12,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+
 #include <vector>
 #include <map>
 
@@ -66,12 +67,13 @@ Hierarchy::~Hierarchy () throw ()
 
 void Hierarchy::insert_grid (Grid * pgrid) throw ()
 {
+  // Insert grid into the list of all grids in the Hierarchy
+
   if (pgrid->id() + 1 >= grids0_.size()) {
     grids0_.resize (pgrid->id() + 2);
     grids0_[grids0_.size() - 1] = 0;
   }
   grids0_[pgrid->id()] = pgrid;
-
 }
 
 //======================================================================

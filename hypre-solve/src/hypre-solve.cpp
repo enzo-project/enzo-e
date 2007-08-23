@@ -37,7 +37,7 @@
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug = 0;
+const int debug = 1;
 const int trace = 0;
 
 //======================================================================
@@ -79,8 +79,6 @@ int main(int argc, char **argv)
     problem.read  (filename);
 
     _TRACE_;
-    if (debug) problem.print ();
-
     
     _TRACE_;
     Hierarchy & hierarchy = problem.hierarchy();
@@ -94,6 +92,8 @@ int main(int argc, char **argv)
 
     hierarchy.init_faces();
   
+    if (debug) problem.print ();
+
     // --------------------------------------------------
     // Initialize the grid hierarchy
     // --------------------------------------------------

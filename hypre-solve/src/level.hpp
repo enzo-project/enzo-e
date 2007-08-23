@@ -25,7 +25,12 @@ class Level
 
 private:
 
+  /// Level index, with root-level == 0
   int n_;
+  /// Global index of lowest grid zone in the Level
+  int il_[3];
+  /// Global index of highest grid zone in the Level
+  int iu_[3];
 
   //--------------------------------------------------------------------
   // PROTECTED MEMBER DATA
@@ -65,6 +70,9 @@ public:
   void check () throw () {  
     printf ("Level::check() is not implemented yet\n");
   }
+
+  /// Return the number of zones extended by all Grids in the Level
+  int zones (int i) throw () { return iu_[i]-il_[i] + 1; };
 
   // List access
 

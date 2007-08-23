@@ -31,9 +31,9 @@
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug_hypre           = 0;
+const int debug_hypre = 1;
 
-const int trace                 = 0;
+const int trace       = 0;
 
 //======================================================================
 // PUBLIC MEMBER FUNCTIONS
@@ -108,10 +108,10 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy,
       
     }
 
+    // Create a single cell-centered variable for each grid part (level)
+
     HYPRE_SStructVariable variable_types[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
     const int numvars = 1;
-
-    // Create a single cell-centered variable for each grid part (level)
 
     if (debug_hypre) printf ("HYPRE_SStructGridSetVariables(%p,%d,%d,(%d))\n",
 			     hierarchy.hypre_grid(), part, numvars, 
@@ -124,20 +124,33 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy,
 				  variable_types);
     // *******************************************************************
 
+    // Set grid part to be periodic, with periodicity determined by the root
+    // level size, current level, and refinement factor (assumed to be 2)
+
+    const int r = 2;
+    int periodicity[3];
+
+    // Determine periodicity of root Level
+
+    for (int i=0; i<3; i++) {
+      // periodicity of root level
+      periodicity[i] = hierarchy.level(0).zones(i);
+      // adjust for periodicity of given level
+      for (int k=0; k < part; k++) {
+	periodicity[i] *= r;
+      }
+    }
+
+    if (debug_hypre) printf ("HYPRE_SStructGridSetPeriodic (%p, %d, (%d,%d,%d))\n",
+			     hierarchy.hypre_grid(), 0, 
+			     periodicity[0], periodicity[1], periodicity[2]);
+
+    // *******************************************************************
+    HYPRE_SStructGridSetPeriodic (hierarchy.hypre_grid(), 0, periodicity);
+    // *******************************************************************
+
     ++ part;
   }
-
-  // Set root-level grid part to be periodic 
-
-  int periodicity[3] = {1,1,1};
-
-  if (debug_hypre) printf ("HYPRE_SStructGridSetPeriodic (%p, %d, (%d,%d,%d))\n",
-			   hierarchy.hypre_grid(), 0, 
-			   periodicity[0], periodicity[1], periodicity[2]);
-
-  // *******************************************************************
-  HYPRE_SStructGridSetPeriodic (hierarchy.hypre_grid(), 0, periodicity);
-  // *******************************************************************
 
   // When finished, assemble the hypre grid
 

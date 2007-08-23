@@ -121,7 +121,7 @@ level.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 level.o: /usr/include/_G_config.h /usr/include/wchar.h
 level.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 level.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-level.o: scalar.hpp faces.hpp mpi.hpp grid.hpp level.hpp
+level.o: hypre-solve.hpp scalar.hpp faces.hpp mpi.hpp grid.hpp level.hpp
 mpi.o: /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h
 mpi.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
 mpi.o: /usr/include/gnu/stubs-32.h /usr/include/bits/types.h
