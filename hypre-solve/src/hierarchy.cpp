@@ -101,7 +101,7 @@ void Hierarchy::init_grids () throw ()
 
 void Hierarchy::init_grid_parents_ () throw ()
 {
-  ItHierarchyAllGrids itg (*this);
+  ItHierarchyGridsAll itg (*this);
   while (Grid * g = itg++) {
     Grid * p = (g->id_parent() >= 0) ? & grid(g->id_parent()) : 0;
     this->set_parent(g,p);
@@ -121,7 +121,7 @@ void Hierarchy::init_grid_levels_ () throw ()
 
     // Loop through grids, and try to determine their level if unknown
 
-    ItHierarchyAllGrids itg (*this);
+    ItHierarchyGridsAll itg (*this);
     while (Grid * g = itg++) {
 
       // If grid's level < 0, then we haven't determined its level yet
@@ -159,7 +159,7 @@ void Hierarchy::init_grid_levels_ () throw ()
 
 void Hierarchy::init_grid_children_ () throw ()
 {
-  ItHierarchyAllGrids itg (*this);
+  ItHierarchyGridsAll itg (*this);
   while (Grid * g = itg++) {
     // If a grid has a parent, then the grid is the parent's child
     if (parent(*g) != 0) {
@@ -260,7 +260,7 @@ void Hierarchy::init_faces () throw ()
 
   for (k=0; k<num_levels(); k++) {
 
-    ItLevelLocalGrids itg (level(k));
+    ItLevelGridsLocal itg (level(k));
 
     while (Grid * grid = itg++) {
 

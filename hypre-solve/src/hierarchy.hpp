@@ -16,8 +16,8 @@
 class Hierarchy
 {
 
-  friend class ItHierarchyLocalGrids;
-  friend class ItHierarchyAllGrids;
+  friend class ItHierarchyGridsLocal;
+  friend class ItHierarchyGridsAll;
   friend class ItHierarchyLevels;
 
   //--------------------------------------------------------------------
@@ -31,8 +31,9 @@ private:
   /// List of each grid's parent
   std::map<Grid *, Grid * >  grid_parent_;
 
-  HYPRE_SStructGrid   hypre_grid_;  // Struct for hypre grid
-  HYPRE_SStructGraph  hypre_graph_; // Struct for hypre graph
+  HYPRE_SStructGrid   hypre_grid_;   // Struct for hypre grid
+  HYPRE_SStructGraph  hypre_graph_;  // Struct for hypre graph
+  HYPRE_SStructMatrix hypre_matrix_; // Struct for hypre matrix
 
   //--------------------------------------------------------------------
   // PROTECTED MEMBER DATA
@@ -121,6 +122,9 @@ public:
   /// Return the HYPRE structure for the Hierarchy's hypre graph
   HYPRE_SStructGraph & hypre_graph ()   { return hypre_graph_; };
 
+  /// Return the HYPRE structure for the Hierarchy's hypre matrix
+  HYPRE_SStructMatrix & hypre_matrix ()   { return hypre_matrix_; };
+
   //--------------------------------------------------------------------
   // PRIVATE MEMBER FUNCTIONS
   //--------------------------------------------------------------------
@@ -139,11 +143,11 @@ private:
 };
 
 
-/// ItHierarchyLocalGrids class
+/// ItHierarchyGridsLocal class
 
 /**
  * 
- * An ItHierarchyLocalGrids object iterates through all local grids in
+ * An ItHierarchyGridsLocal object iterates through all local grids in
  * a Hierarchy.
  * 
  * @file
@@ -152,7 +156,7 @@ private:
  *
  */
 
-class ItHierarchyLocalGrids
+class ItHierarchyGridsLocal
 {
 
   //--------------------------------------------------------------------
@@ -170,11 +174,11 @@ public:
   // CONSTUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
-  ItHierarchyLocalGrids (Hierarchy & hierarchy) throw ()
+  ItHierarchyGridsLocal (Hierarchy & hierarchy) throw ()
     : curr_(0), hierarchy_(&hierarchy)
   { }
 
-  ~ItHierarchyLocalGrids () throw () {};
+  ~ItHierarchyGridsLocal () throw () {};
   
   /// Iterate through local Grids in the Hierarchy.
   Grid * operator++ (int) { 
@@ -187,11 +191,11 @@ public:
 
 };
 
-/// ItHierarchyAllGrids class
+/// ItHierarchyGridsAll class
 
 /**
  * 
- * An ItHierarchyAllGrids object iterates through all grids in a
+ * An ItHierarchyGridsAll object iterates through all grids in a
  * Hierarchy, including non-local ones.
  * 
  * @file
@@ -200,7 +204,7 @@ public:
  *
  */
 
-class ItHierarchyAllGrids
+class ItHierarchyGridsAll
 {
 
   //--------------------------------------------------------------------
@@ -218,11 +222,11 @@ public:
   // CONSTUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
-  ItHierarchyAllGrids (Hierarchy & hierarchy) throw ()
+  ItHierarchyGridsAll (Hierarchy & hierarchy) throw ()
     : curr_(0), hierarchy_(&hierarchy)
   { }
 
-  ~ItHierarchyAllGrids () throw () {};
+  ~ItHierarchyGridsAll () throw () {};
   
   /// Iterate through all Grids in the Hierarchy.
   Grid * operator++ (int) { 

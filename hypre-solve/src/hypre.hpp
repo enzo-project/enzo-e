@@ -33,10 +33,23 @@ private:
 
 private:
 
+  // init_graph() functions
+
   void init_graph_children_               (Grid & grid);
   void init_graph_parent_                 (Hierarchy & hierarchy,
 					   Grid & grid);
   void init_graph_neighbors_children_     (Grid & grid);
   void init_graph_parents_neighbor_       (Grid & grid);
+
+  // init_matrix() functions
+
+  void init_matrix_stencil_               (Grid & grid);
+  void init_matrix_clear_                 (Grid & grid,
+					   Grid & child);
+  void init_matrix_children_              (Grid & grid);
+  void init_matrix_parent_                (Hierarchy & hierarchy,
+					   Grid & grid);
+  void init_matrix_neighbors_children_    (Grid & grid);
+  void init_matrix_parents_neighbor_      (Grid & grid);
 
 };

@@ -16,8 +16,8 @@
 class Level
 {
 
-  friend class ItLevelLocalGrids;
-  friend class ItLevelAllGrids;
+  friend class ItLevelGridsLocal;
+  friend class ItLevelGridsAll;
 
   //--------------------------------------------------------------------
   // PRIVATE MEMBER DATA
@@ -87,11 +87,11 @@ public:
 };
 
 
-/// ItLevelLocalGrids class
+/// ItLevelGridsLocal class
 
 /**
  * 
- * An ItLevelLocalGrids object allows iterating through all local
+ * An ItLevelGridsLocal object allows iterating through all local
  * grids in a Level.
  * 
  * @file
@@ -100,7 +100,7 @@ public:
  *
  */
 
-class ItLevelLocalGrids
+class ItLevelGridsLocal
 {
 
   //--------------------------------------------------------------------
@@ -118,11 +118,11 @@ public:
   // CONSTUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
-  ItLevelLocalGrids (Level & level) throw ()
+  ItLevelGridsLocal (Level & level) throw ()
     : curr_(0), level_(&level)
   { }
 
-  ~ItLevelLocalGrids () throw () {};
+  ~ItLevelGridsLocal () throw () {};
   
   /// Iterate through local Grids in the Level.
   Grid * operator++ (int) { 
@@ -136,11 +136,11 @@ public:
 };
 
 
-/// ItLevelAllGrids class
+/// ItLevelGridsAll class
 
 /**
  * 
- * An ItLevelAllGrids object allows iterating through all grids in a
+ * An ItLevelGridsAll object allows iterating through all grids in a
  * Level, even non-local ones.
  * 
  * @file
@@ -149,7 +149,7 @@ public:
  *
  */
 
-class ItLevelAllGrids
+class ItLevelGridsAll
 {
 
   //--------------------------------------------------------------------
@@ -167,11 +167,11 @@ public:
   // CONSTUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
-  ItLevelAllGrids (Level & level) throw ()
+  ItLevelGridsAll (Level & level) throw ()
     : curr_(0), level_(&level)
   { }
 
-  ~ItLevelAllGrids () throw () {};
+  ~ItLevelGridsAll () throw () {};
   
   /// Iterate through all Grids in the Level.
   Grid * operator++ (int) { 

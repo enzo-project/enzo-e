@@ -123,8 +123,8 @@ int main(int argc, char **argv)
     // Initialize the matrix A
     // --------------------------------------------------
 
-    //    _TRACE_;
-    //    hypre.init_matrix (hierarchy);
+    _TRACE_;
+    hypre.init_matrix (hierarchy);
 
     // --------------------------------------------------
     // Initialize the right-hand-side vector b
