@@ -184,6 +184,10 @@ protected:
   int num_unknowns(int i) throw ()
   { return n_[i]; };
 
+  /// Return the total number of unknowns.
+  int num_unknowns() throw ()
+  { return n_[0]*n_[1]*n_[2]; };
+
   /// Return the coordinates of the lower grid vertex.  No error checking on i.
   Scalar x_lower(int i) throw ()
   { return xl_[i]; };
