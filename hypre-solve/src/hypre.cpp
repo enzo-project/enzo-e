@@ -31,8 +31,9 @@
 #include "problem.hpp"
 #include "hypre.hpp"
 
+const int debug        = 1;
 const int debug_hypre  = 1;
-const int debug_matrix = 1;
+const int debug_matrix = 0;
 
 const int trace        = 0;
 
@@ -71,13 +72,13 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy,
   
   if (debug_hypre) 
     printf ("HYPRE_SStructGridCreate (MPI_COMM_WORLD, %d, %d, %p)\n",
-	    dim,levels,  &hierarchy.hypre_grid());
+	    dim,levels,  &grid_);
 
   // *******************************************************************
   HYPRE_SStructGridCreate (MPI_COMM_WORLD, 
 			   dim, 
 			   levels, 
-			   &hierarchy.hypre_grid());
+			   &grid_);
   // *******************************************************************
 
   ItHierarchyLevels itl (hierarchy);
@@ -97,12 +98,12 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy,
 
       if (debug_hypre) printf ("HYPRE_SStructGridSetExtents "
 			       "(%p, %d, (%d,%d,%d), (%d,%d,%d)\n",
-			       hierarchy.hypre_grid(),  part,
+			       grid_,  part,
 			       lower[0],lower[1],lower[2],
 			       upper[0],upper[1],upper[2]);
 
       // *******************************************************************
-      HYPRE_SStructGridSetExtents(hierarchy.hypre_grid(),
+      HYPRE_SStructGridSetExtents(grid_,
 				  part,
 				  lower,
 				  upper);
@@ -116,11 +117,11 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy,
     const int numvars = 1;
 
     if (debug_hypre) printf ("HYPRE_SStructGridSetVariables(%p,%d,%d,(%d))\n",
-			     hierarchy.hypre_grid(), part, numvars, 
+			     grid_, part, numvars, 
 			     variable_types[0]);
 
     // *******************************************************************
-    HYPRE_SStructGridSetVariables(hierarchy.hypre_grid(),
+    HYPRE_SStructGridSetVariables(grid_,
 				  part,
 				  numvars,
 				  variable_types);
@@ -145,11 +146,11 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy,
 
     if (debug_hypre) 
       printf ("HYPRE_SStructGridSetPeriodic (%p, %d, (%d,%d,%d))\n",
-	      hierarchy.hypre_grid(), 0, 
+	      grid_, 0, 
 	      periodicity[0], periodicity[1], periodicity[2]);
 
     // *******************************************************************
-    HYPRE_SStructGridSetPeriodic (hierarchy.hypre_grid(), 0, periodicity);
+    HYPRE_SStructGridSetPeriodic (grid_, 0, periodicity);
     // *******************************************************************
 
     ++ part;
@@ -158,10 +159,10 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy,
   // When finished, assemble the hypre grid
 
   if (debug_hypre) printf ("HYPRE_SStructGridAssemble (%p)\n",
-			   hierarchy.hypre_grid());
+			   grid_);
 
   // *******************************************************************
-  HYPRE_SStructGridAssemble (hierarchy.hypre_grid());
+  HYPRE_SStructGridAssemble (grid_);
   // *******************************************************************
   
 }
@@ -295,13 +296,13 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 {
   // Create the hypre graph object
 
-  if (debug_hypre) printf ("HYPRE_SStructGraphCreate (MPI_COMM_WORLD,%p,%p\n",
-			   &hierarchy.hypre_grid(), &hierarchy.hypre_graph());
+  if (debug_hypre) printf ("HYPRE_SStructGraphCreate (MPI_COMM_WORLD,%p,%p)\n",
+			   &grid_, &graph_);
 
   // *******************************************************************
   HYPRE_SStructGraphCreate (MPI_COMM_WORLD, 
-			    hierarchy.hypre_grid(), 
-			    &hierarchy.hypre_graph());
+			    grid_, 
+			    &graph_);
   // *******************************************************************
 
   ItHierarchyLevels itl (hierarchy);
@@ -313,10 +314,10 @@ void Hypre::init_graph (Hierarchy & hierarchy)
     // Define stencil connections within each part
 
     if (debug_hypre) printf ("HYPRE_SStructGraphSetStencil (%p,%d,%d,%p)\n",
-			     hierarchy.hypre_graph(), part, 0, &stencil_);
+			     graph_, part, 0, &stencil_);
 
     // *******************************************************************
-    HYPRE_SStructGraphSetStencil (hierarchy.hypre_graph(),
+    HYPRE_SStructGraphSetStencil (graph_,
 				  part,
 				  0,
 				  stencil_);
@@ -350,10 +351,10 @@ void Hypre::init_graph (Hierarchy & hierarchy)
   // Assemble the graph
 
   if (debug_hypre) printf ("HYPRE_SStructGraphAssemble (%p);\n",
-			   &hierarchy.hypre_graph());
+			   &graph_);
 
   // *******************************************************************
-  HYPRE_SStructGraphAssemble (hierarchy.hypre_graph());
+  HYPRE_SStructGraphAssemble (graph_);
   // *******************************************************************
 
 }
@@ -386,13 +387,22 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
 {
   // Create the hypre matrix object
 
-  if (debug_hypre) printf ("HYPRE_SStructMatrixCreate (MPI_COMM_WORLD,%p,%p\n",
-			   &hierarchy.hypre_graph(), &hierarchy.hypre_matrix());
+  if (debug_hypre) printf ("HYPRE_SStructMatrixCreate (MPI_COMM_WORLD,%p,%p)\n",
+			   &graph_, &matrix_);
 
   // *******************************************************************
   HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, 
-			     hierarchy.hypre_graph(), 
-			     &hierarchy.hypre_matrix());
+			     graph_, 
+			     &matrix_);
+  // *******************************************************************
+
+  // Initialize the hypre matrix object
+
+  if (debug_hypre) printf ("HYPRE_SStructMatrixInitialize (%p)\n",
+			   &matrix_);
+
+  // *******************************************************************
+  HYPRE_SStructMatrixInitialize (matrix_);
   // *******************************************************************
 
   ItHierarchyLevels itl (hierarchy);
@@ -404,7 +414,7 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
     // Define stencil connections within each part
 
     if (debug_hypre) printf ("HYPRE_SStructMatrixSetStencil (%p,%d,%d,%p)\n",
-			     hierarchy.hypre_matrix(), part, 0, &stencil_);
+			     matrix_, part, 0, &stencil_);
 
     ItLevelGridsLocal itg (*level);
 
@@ -412,7 +422,7 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
 
       // Set matrix stencil values for each grid
 
-      init_matrix_stencil_(hierarchy, *grid);
+      init_matrix_stencil_(*grid);
 
       // Clear matrix stencil values under child grids
 
@@ -442,10 +452,10 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
   // Assemble the matrix
 
   if (debug_hypre) printf ("HYPRE_SStructMatrixAssemble (%p);\n",
-			   &hierarchy.hypre_matrix());
+			   &matrix_);
 
   // *******************************************************************
-  HYPRE_SStructMatrixAssemble (hierarchy.hypre_matrix());
+  HYPRE_SStructMatrixAssemble (matrix_);
   // *******************************************************************
 
   // Write the matrix to a file for debugging
@@ -453,10 +463,10 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
   if (debug_matrix) {
 
     if (debug_hypre) printf ("HYPRE_SStructMatrixAssemble (%p);\n",
-			     &hierarchy.hypre_matrix());
+			     &matrix_);
 
     // *******************************************************************
-    HYPRE_SStructMatrixPrint ("matrix",hierarchy.hypre_matrix(),1);
+    HYPRE_SStructMatrixPrint ("matrix",matrix_,1);
     // *******************************************************************
 
   }
@@ -587,8 +597,7 @@ void Hypre::init_graph_parents_neighbor_ (Grid & grid)
 
 /// Set matrix stencil values for the grid
 
-void Hypre::init_matrix_stencil_ (Hierarchy & hierarchy,
-				  Grid & grid)
+void Hypre::init_matrix_stencil_ (Grid & grid)
 
 {
   _TRACE_;
@@ -598,37 +607,39 @@ void Hypre::init_matrix_stencil_ (Hierarchy & hierarchy,
   int upper[3]     = { grid.i_upper(0), grid.i_upper(1), grid.i_upper(2) };
   int var          = 0;
   int count        = grid.num_unknowns();
+  int entries[7]   = { 0,1,2,3,4,5,6 };
 
-  double * values  = new double [count];
+  double * values  = new double [7*count];
 
-  for (int i=0; i<count; i++) {
-    values[i]  = -1;
+  for (int i=0; i<7*count; i++) {
+    values[i]  = (i%7==0) ? 6 : -1;
   }
 
-  for (int entry = 0; entry < 6; entry++) {
-    if (debug_hypre) 
-      printf("HYPRE_SStructMatrixSetBoxValues (%p,%d,(%d,%d,%d),(%d,%d,%d),"
-	     "%d,%d,%d,(%g,%g,%g,...,%g,%g,%g))\n",
-	     &hierarchy.hypre_matrix(),
-	     part,
-	     lower[0],lower[1],lower[2],
-	     upper[0],upper[1],upper[2],
-	     var,
-	     1,
-	     entry,
-	     values[0],values[1],values[2],
-	     values[count-3],values[count-2],values[count-1]);
-    // *******************************************************************
-    HYPRE_SStructMatrixSetBoxValues (hierarchy.hypre_matrix(),
-				     part,
-				     lower,
-				     upper,
-				     var,
-				     1,
-				     &entry,
-				     values);
-    // *******************************************************************
-  }
+  if (debug) printf ("count = %d\n",count);
+
+  if (debug_hypre) 
+    printf("HYPRE_SStructMatrixSetBoxValues (%p,%d,(%d,%d,%d),(%d,%d,%d),"
+	   "%d,%d,(%d,...%d),(%g,%g,%g,...,%g,%g,%g))\n",
+	   &matrix_,
+	   part,
+	   lower[0],lower[1],lower[2],
+	   upper[0],upper[1],upper[2],
+	   var,
+	   7,
+	   entries[0],entries[6],
+	   values[0],values[1],values[2],
+	   values[7*count-3],values[7*count-2],values[7*count-1]);
+  // *******************************************************************
+  HYPRE_SStructMatrixSetBoxValues (matrix_,
+				   part,
+				   lower,
+				   upper,
+				   var,
+				   7,
+				   entries,
+				   values);
+  // *******************************************************************
+
  delete [] values;
 
 }

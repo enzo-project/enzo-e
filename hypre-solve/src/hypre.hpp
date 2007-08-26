@@ -29,6 +29,9 @@ public:
 
 private:
 
+  HYPRE_SStructGrid    grid_;   // Struct for hypre grid
+  HYPRE_SStructGraph   graph_;  // Struct for hypre graph
+  HYPRE_SStructMatrix  matrix_; // Struct for hypre matrix
   HYPRE_SStructStencil stencil_;
 
 private:
@@ -43,8 +46,7 @@ private:
 
   // init_matrix() functions
 
-  void init_matrix_stencil_               (Hierarchy & hierarchy,
-					   Grid & grid);
+  void init_matrix_stencil_               (Grid & grid);
   void init_matrix_clear_                 (Grid & grid);
   void init_matrix_children_              (Grid & grid);
   void init_matrix_parent_                (Hierarchy & hierarchy,

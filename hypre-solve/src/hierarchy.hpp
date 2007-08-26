@@ -31,9 +31,6 @@ private:
   /// List of each grid's parent
   std::map<Grid *, Grid * >  grid_parent_;
 
-  HYPRE_SStructGrid   hypre_grid_;   // Struct for hypre grid
-  HYPRE_SStructGraph  hypre_graph_;  // Struct for hypre graph
-  HYPRE_SStructMatrix hypre_matrix_; // Struct for hypre matrix
 
   //--------------------------------------------------------------------
   // PROTECTED MEMBER DATA
@@ -115,15 +112,6 @@ public:
 
   /// Return the Grid's parent Grid
   Grid *  parent     (Grid & grid)      { return   grid_parent_[&grid]; };
-
-  /// Return the HYPRE structure for the Hierarchy's hypre grid
-  HYPRE_SStructGrid & hypre_grid ()     { return hypre_grid_; };
-
-  /// Return the HYPRE structure for the Hierarchy's hypre graph
-  HYPRE_SStructGraph & hypre_graph ()   { return hypre_graph_; };
-
-  /// Return the HYPRE structure for the Hierarchy's hypre matrix
-  HYPRE_SStructMatrix & hypre_matrix ()   { return hypre_matrix_; };
 
   //--------------------------------------------------------------------
   // PRIVATE MEMBER FUNCTIONS
