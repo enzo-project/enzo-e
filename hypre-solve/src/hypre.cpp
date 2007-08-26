@@ -599,39 +599,37 @@ void Hypre::init_matrix_stencil_ (Hierarchy & hierarchy,
   int var          = 0;
   int count        = grid.num_unknowns();
 
-  int    * indices = new    int [count*7];
-  double * values  = new double [count*7];
+  double * values  = new double [count];
 
-  for (int i=0; i<count*7; i++) {
-    indices[i] = i % 7;
+  for (int i=0; i<count; i++) {
     values[i]  = -1;
   }
-  for (int i=0; i<count*7; i+=7) {
-    values[i]  = 6;
-  }
 
-  if (debug_hypre) 
-    printf("HYPRE_SStructMatrixSetBoxValues (%p,%d,(%d,%d,%d),(%d,%d,%d),%d,%d,(%d,%d,%d,...),(%g,%g,%g,...))\n",
-	   &hierarchy.hypre_matrix(),
-	   part,
-	   lower[0],lower[1],lower[2],
-	   upper[0],upper[1],upper[2],
-	   var,
-	   count,
-	   indices[0],indices[1],indices[2],
-	   values[0],values[1],values[2]);
-  // *******************************************************************
-  HYPRE_SStructMatrixSetBoxValues (hierarchy.hypre_matrix(),
-				   part,
-				   lower,
-				   upper,
-				   var,
-				   count,
-				   indices,
-				   values);
-  // *******************************************************************
+  for (int entry = 0; entry < 6; entry++) {
+    if (debug_hypre) 
+      printf("HYPRE_SStructMatrixSetBoxValues (%p,%d,(%d,%d,%d),(%d,%d,%d),"
+	     "%d,%d,%d,(%g,%g,%g,...,%g,%g,%g))\n",
+	     &hierarchy.hypre_matrix(),
+	     part,
+	     lower[0],lower[1],lower[2],
+	     upper[0],upper[1],upper[2],
+	     var,
+	     1,
+	     entry,
+	     values[0],values[1],values[2],
+	     values[count-3],values[count-2],values[count-1]);
+    // *******************************************************************
+    HYPRE_SStructMatrixSetBoxValues (hierarchy.hypre_matrix(),
+				     part,
+				     lower,
+				     upper,
+				     var,
+				     1,
+				     &entry,
+				     values);
+    // *******************************************************************
+  }
  delete [] values;
- delete [] indices;
 
 }
 
