@@ -21,6 +21,7 @@
 #include "hypre-solve.hpp"
 
 #include "scalar.hpp"
+#include "point.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
 #include "grid.hpp"
@@ -243,7 +244,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
 //------------------------------------------------------------------------
 
-/// Initialize discretization
+/// Initialize Face data
 
 /** After all grid inter-connections are determined, this function
     determines the neighbor structure for each individual zone along

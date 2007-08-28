@@ -127,18 +127,18 @@ int main(int argc, char **argv)
     hypre.init_matrix (hierarchy);
 
     // --------------------------------------------------
-    // Initialize the right-hand-side vector b
+    // Initialize the right-hand-side and solution vectors
     // --------------------------------------------------
 
-    //    _TRACE_;
-    //    hypre.init_rhs (hierarchy);
+    _TRACE_;
+    hypre.init_vectors (hierarchy,problem.points(),problem.spheres());
 
     // --------------------------------------------------
     // Solve the linear system Ax = b
     // --------------------------------------------------
 
-    //    _TRACE_;
-    //    hypre.solve (hierarchy);
+    _TRACE_;
+    hypre.solve (hierarchy);
 
     // --------------------------------------------------
     // Evaluate the solution

@@ -87,13 +87,13 @@ hierarchy.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 hierarchy.o: /usr/include/_G_config.h /usr/include/wchar.h
 hierarchy.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 hierarchy.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-hierarchy.o: hypre-solve.hpp scalar.hpp faces.hpp mpi.hpp grid.hpp level.hpp
-hierarchy.o: hierarchy.hpp
+hierarchy.o: hypre-solve.hpp scalar.hpp point.hpp faces.hpp mpi.hpp grid.hpp
+hierarchy.o: level.hpp hierarchy.hpp
 hypre.o: /usr/include/assert.h /usr/include/features.h
 hypre.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h hypre-solve.hpp
-hypre.o: mpi.hpp scalar.hpp point.hpp faces.hpp grid.hpp level.hpp
-hypre.o: hierarchy.hpp sphere.hpp domain.hpp problem.hpp hypre.hpp
+hypre.o: mpi.hpp scalar.hpp constants.hpp point.hpp faces.hpp grid.hpp
+hypre.o: level.hpp hierarchy.hpp sphere.hpp domain.hpp problem.hpp hypre.hpp
 hypre-solve.o: /usr/include/assert.h /usr/include/features.h
 hypre-solve.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre-solve.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h

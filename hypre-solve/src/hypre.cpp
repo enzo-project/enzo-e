@@ -21,6 +21,7 @@
 
 #include "mpi.hpp"
 #include "scalar.hpp"
+#include "constants.hpp"
 #include "point.hpp"
 #include "faces.hpp"
 #include "grid.hpp"
@@ -31,11 +32,13 @@
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug        = 1;
-const int debug_hypre  = 1;
-const int debug_matrix = 0;
+const int debug       = 1;
+const int debug_hypre = 1;
 
-const int trace        = 0;
+const int dump_matrix = 1;
+const int dump_vector = 1;
+
+const int trace       = 0;
 
 //======================================================================
 // PUBLIC MEMBER FUNCTIONS
@@ -44,7 +47,13 @@ const int trace        = 0;
 /// Hypre constructor
 
 Hypre::Hypre ()
-
+  : grid_(0),
+    graph_(0),
+    stencil_(0),
+    A_(0),
+    B_(0),
+    X_(0),
+    solver_(0)
 {
   
 }
@@ -148,6 +157,10 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy,
       printf ("HYPRE_SStructGridSetPeriodic (%p, %d, (%d,%d,%d))\n",
 	      grid_, 0, 
 	      periodicity[0], periodicity[1], periodicity[2]);
+    _TEMPORARY_;
+    periodicity[0] = 0;
+    periodicity[1] = 0;
+    periodicity[2] = 0;
 
     // *******************************************************************
     HYPRE_SStructGridSetPeriodic (grid_, 0, periodicity);
@@ -388,21 +401,30 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
   // Create the hypre matrix object
 
   if (debug_hypre) printf ("HYPRE_SStructMatrixCreate (MPI_COMM_WORLD,%p,%p)\n",
-			   &graph_, &matrix_);
+			   &graph_, &A_);
 
   // *******************************************************************
   HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, 
 			     graph_, 
-			     &matrix_);
+			     &A_);
+  // *******************************************************************
+
+  // Set the matrix type
+
+  if (debug_hypre) printf ("HYPRE_SStructMatrixSetObjectType (%p,%d)\n",
+			   &A_,HYPRE_SSTRUCT);
+
+  // *******************************************************************
+  HYPRE_SStructMatrixSetObjectType (A_,HYPRE_SSTRUCT);
   // *******************************************************************
 
   // Initialize the hypre matrix object
 
   if (debug_hypre) printf ("HYPRE_SStructMatrixInitialize (%p)\n",
-			   &matrix_);
+			   &A_);
 
   // *******************************************************************
-  HYPRE_SStructMatrixInitialize (matrix_);
+  HYPRE_SStructMatrixInitialize (A_);
   // *******************************************************************
 
   ItHierarchyLevels itl (hierarchy);
@@ -410,11 +432,6 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
   int part = 0;
 
   while (Level * level = itl++) {
-
-    // Define stencil connections within each part
-
-    if (debug_hypre) printf ("HYPRE_SStructMatrixSetStencil (%p,%d,%d,%p)\n",
-			     matrix_, part, 0, &stencil_);
 
     ItLevelGridsLocal itg (*level);
 
@@ -452,21 +469,21 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
   // Assemble the matrix
 
   if (debug_hypre) printf ("HYPRE_SStructMatrixAssemble (%p);\n",
-			   &matrix_);
+			   &A_);
 
   // *******************************************************************
-  HYPRE_SStructMatrixAssemble (matrix_);
+  HYPRE_SStructMatrixAssemble (A_);
   // *******************************************************************
 
   // Write the matrix to a file for debugging
 
-  if (debug_matrix) {
+  if (dump_matrix) {
 
     if (debug_hypre) printf ("HYPRE_SStructMatrixAssemble (%p);\n",
-			     &matrix_);
+			     &A_);
 
     // *******************************************************************
-    HYPRE_SStructMatrixPrint ("matrix",matrix_,1);
+    HYPRE_SStructMatrixPrint ("A",A_,1);
     // *******************************************************************
 
   }
@@ -477,30 +494,160 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
 
 /// Initialize the right-hand-side vector b
 
-void Hypre::init_rhs (Hierarchy & hierarchy)
+void Hypre::init_vectors (Hierarchy & hierarchy,
+			  std::vector<Point *> points,
+			  std::vector<Sphere *> spheres)
 
 {
-  printf ("Hypre::init_rhs() is not implemented yet\n"); 
+  // Create the hypre solution x and right-hand side b vector object
+
+  if (debug_hypre) printf ("HYPRE_SStructVectorCreate (MPI_COMM_WORLD,%p,%p)\n",
+			   &graph_, &B_);
+
+  // *******************************************************************
+  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, 
+			     grid_, 
+			     &B_);
+  // *******************************************************************
+
+  if (debug_hypre) printf ("HYPRE_SStructVectorCreate (MPI_COMM_WORLD,%p,%p)\n",
+			   &graph_, &X_);
+
+  // *******************************************************************
+  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, 
+			     grid_, 
+			     &X_);
+  // *******************************************************************
+
+  // Initialize the hypre vector objects
+
+  if (debug_hypre) printf ("HYPRE_SStructVectorInitialize (%p)\n",
+			   &B_);
+
+  // *******************************************************************
+  HYPRE_SStructVectorInitialize (B_);
+  // *******************************************************************
+
+  if (debug_hypre) printf ("HYPRE_SStructVectorInitialize (%p)\n",
+			   &X_);
+
+  // *******************************************************************
+  HYPRE_SStructVectorInitialize (X_);
+  // *******************************************************************
+
+
+  // Clear vectors
+
+  if (debug) printf ("%s:%d Clear hypre vectors here: assumed done at initialization\n",
+		     __FILE__,__LINE__);
+
+  // Initialize B_ according to density
+
+  //    scaling0 = scaling factor for root-level, assuming matrix
+  //    coefficients [-1,-1,-1,6,-1,-1,-1]
+
+
+  Scalar G  = Constants::G();
+  Scalar pi = Constants::pi();
+  Scalar scaling0 = -4.0*G*pi;
+
+  ItHierarchyLevels itl (hierarchy);
+
+  for (int i=0; i<points.size(); i++) {
+    Point & point      = *points[i];
+    Grid & grid        = hierarchy.grid(point.igrid());
+    Scalar cell_volume = grid.h(0) * grid.h(1) * grid.h(2);
+    Scalar density     = point.mass() / cell_volume;
+    Scalar value       = scaling0 * density;
+
+    // Add contribution of the point to the right-hand side vector
+
+    if (debug_hypre) printf ("HYPRE_SStructVectorAddToValues (%p);\n",
+			     &B_);
+
+    int index[3];
+    for (int k=0; k<3; k++) {
+      Scalar ap = point.x(k)      - grid.x_lower(k);
+      Scalar ag = grid.x_upper(k) - grid.x_lower(k);
+      int    ig = grid.num_unknowns(k);
+      int    i0 = grid.i_lower(k);
+      index[k] = int (ap/ag*ig) + i0;
+     
+    }
+    if (debug) {
+      
+      point.print();
+      grid.print();
+      printf ("Index of point in grid (%d,%d,%d)\n",index[0],index[1],index[2]);
+    }
+
+    int part = grid.level();
+    int var = 0;
+    
+    // *******************************************************************
+    HYPRE_SStructVectorAddToValues (B_, part, index, var, &value);
+    // *******************************************************************
+
+   
+  }
+
+  if (spheres.size() > 0) {  
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    NOT_IMPLEMENTED("Contribution of sphere mass to right-hand side");
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  }
+  
+  // Assemble the vectors
+
+  if (debug_hypre) printf ("HYPRE_SStructVectorAssemble (%p);\n",
+			   &B_);
+
+  // *******************************************************************
+  HYPRE_SStructVectorAssemble (B_);
+  // *******************************************************************
+
+  if (debug_hypre) printf ("HYPRE_SStructVectorAssemble (%p);\n",
+			   &X_);
+
+  // *******************************************************************
+  HYPRE_SStructVectorAssemble (X_);
+  // *******************************************************************
+
+  // Write the vector to a file for debugging
+
+  if (dump_vector) {
+
+    if (debug_hypre) printf ("HYPRE_SStructVectorAssemble (%p);\n",
+			     &B_);
+
+    // *******************************************************************
+    HYPRE_SStructVectorPrint ("B",B_,1);
+    // *******************************************************************
+
+  }
 }
 
 //----------------------------------------------------------------------
 
-/// Initialize the linear solver
-
-void Hypre::init_solver (Hierarchy & hierarchy)
-
-{
-  printf ("Hypre::init_solver() is not implemented yet\n"); 
-}
-
-//----------------------------------------------------------------------
-
-/// Solve the linear system Ax = b
+/// Initialize and solve the linear solver
 
 void Hypre::solve (Hierarchy & hierarchy)
 
 {
-  printf ("Hypre::solve() is not implemented yet\n"); 
+  if (hierarchy.num_levels() > 1) {
+    solve_fac_(hierarchy);
+  } else {
+    solve_pfmg_(hierarchy);
+  }
+  if (dump_vector) {
+    if (debug_hypre) printf ("HYPRE_SStructVectorAssemble (%p);\n",
+			     &X_);
+
+    // *******************************************************************
+    HYPRE_SStructVectorPrint ("X",X_,1);
+    // *******************************************************************
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -510,7 +657,9 @@ void Hypre::solve (Hierarchy & hierarchy)
 void Hypre::evaluate (Hierarchy & hierarchy)
 
 {
-  printf ("Hypre::evaluate() is not implemented yet\n"); 
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::evaluate()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 }
 
 //======================================================================
@@ -522,6 +671,11 @@ void Hypre::evaluate (Hierarchy & hierarchy)
 void Hypre::init_graph_children_ (Grid & grid)
 
 {
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("init_graph_children_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
   ItGridChildren itchild (grid);
   while (Grid * child = itchild++) {
     _TRACE_;
@@ -534,7 +688,6 @@ void Hypre::init_graph_children_ (Grid & grid)
     //				      variable);
     // *******************************************************************
   }
-  printf ("Hypre::init_graph_children_ () not implemented\n");
 }
 
 //------------------------------------------------------------------------
@@ -544,7 +697,11 @@ void Hypre::init_graph_children_ (Grid & grid)
 void Hypre::init_graph_parent_ (Hierarchy & hierarchy, Grid & grid)
 
 {
-  printf ("Hypre::init_graph_parent_ () not implemented\n");
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::init_graph_parent_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
   Grid * parent = hierarchy.parent(grid);
   _TRACE_;
   // *******************************************************************
@@ -564,7 +721,10 @@ void Hypre::init_graph_parent_ (Hierarchy & hierarchy, Grid & grid)
 void Hypre::init_graph_neighbors_children_ (Grid & grid)
 
 {
-  printf ("Hypre::init_graph_neighbors_children_ () not implemented\n");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::init_graph_neighbors_children_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
   // *******************************************************************
   //	HYPRE_SStructGraphAddEntries (grid->hypre_graph(),
   //				      grid->level(),
@@ -582,7 +742,10 @@ void Hypre::init_graph_neighbors_children_ (Grid & grid)
 void Hypre::init_graph_parents_neighbor_ (Grid & grid)
 
 {
-  printf ("Hypre::init_graph_parents_neighbor_ () not implemented\n");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::init_graph_parents_neighbor_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
   // *******************************************************************
   //	HYPRE_SStructGraphAddEntries (grid->hypre_graph(),
   //				      grid->level(),
@@ -609,38 +772,63 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   int count        = grid.num_unknowns();
   int entries[7]   = { 0,1,2,3,4,5,6 };
 
-  double * values  = new double [7*count];
+  double * values0  = new double [count];
+  double * values1  = new double [count];
 
-  for (int i=0; i<7*count; i++) {
-    values[i]  = (i%7==0) ? 6 : -1;
+  for (int i=0; i<count; i++) {
+    values0[i] = 6;
+    values1[i] = -1;
   }
-
-  if (debug) printf ("count = %d\n",count);
 
   if (debug_hypre) 
     printf("HYPRE_SStructMatrixSetBoxValues (%p,%d,(%d,%d,%d),(%d,%d,%d),"
-	   "%d,%d,(%d,...%d),(%g,%g,%g,...,%g,%g,%g))\n",
-	   &matrix_,
+	   "%d,%d,(%d),(%g,%g,%g,...,%g,%g,%g))\n",
+	   &A_,
 	   part,
 	   lower[0],lower[1],lower[2],
 	   upper[0],upper[1],upper[2],
 	   var,
-	   7,
-	   entries[0],entries[6],
-	   values[0],values[1],values[2],
-	   values[7*count-3],values[7*count-2],values[7*count-1]);
+	   1,
+	   entries[0],
+	   values0[0],values0[1],values0[2],
+	   values0[count-3],values0[count-2],values0[count-1]);
   // *******************************************************************
-  HYPRE_SStructMatrixSetBoxValues (matrix_,
+  HYPRE_SStructMatrixSetBoxValues (A_,
 				   part,
 				   lower,
 				   upper,
 				   var,
-				   7,
-				   entries,
-				   values);
+				   1,
+				   &entries[0],
+				   values0);
   // *******************************************************************
+  for (int stencil = 1; stencil < 7; stencil ++) {
+    if (debug_hypre) 
+      printf("HYPRE_SStructMatrixSetBoxValues (%p,%d,(%d,%d,%d),(%d,%d,%d),"
+	     "%d,%d,(%d),(%g,%g,%g,...,%g,%g,%g))\n",
+	     &A_,
+	     part,
+	     lower[0],lower[1],lower[2],
+	     upper[0],upper[1],upper[2],
+	     var,
+	     1,
+	     entries[stencil],
+	     values1[0],values1[1],values1[2],
+	     values1[count-3],values1[count-2],values1[count-1]);
+    // *******************************************************************
+    HYPRE_SStructMatrixSetBoxValues (A_,
+				     part,
+				     lower,
+				     upper,
+				     var,
+				     1,
+				     &entries[stencil],
+				     values1);
+    // *******************************************************************
+  }
 
- delete [] values;
+ delete [] values1;
+ delete [] values0;
 
 }
 
@@ -651,6 +839,10 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 void Hypre::init_matrix_clear_ (Grid & grid)
 
 {
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::init_matrix_clear_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
   ItGridChildren itchildren (grid);
   
   while (Grid * child = itchildren++) {
@@ -666,7 +858,6 @@ void Hypre::init_matrix_clear_ (Grid & grid)
   //				      variable);
   // *******************************************************************
 
-  printf ("Hypre::init_matrix_clear_ () not implemented\n");
 }
 
 //------------------------------------------------------------------------
@@ -676,6 +867,11 @@ void Hypre::init_matrix_clear_ (Grid & grid)
 void Hypre::init_matrix_children_ (Grid & grid)
 
 {
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::init_matrix_children_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
   ItGridChildren itchild (grid);
   while (Grid * child = itchild++) {
 
@@ -691,7 +887,6 @@ void Hypre::init_matrix_children_ (Grid & grid)
     // *******************************************************************
 
   }
-  printf ("Hypre::init_matrix_children_ () not implemented\n");
 }
 
 //------------------------------------------------------------------------
@@ -701,7 +896,11 @@ void Hypre::init_matrix_children_ (Grid & grid)
 void Hypre::init_matrix_parent_ (Hierarchy & hierarchy, Grid & grid)
 
 {
-  printf ("Hypre::init_matrix_parent_ () not implemented\n");
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::init_matrix_parent_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
   Grid * parent = hierarchy.parent(grid);
   _TRACE_;
   // *******************************************************************
@@ -721,7 +920,11 @@ void Hypre::init_matrix_parent_ (Hierarchy & hierarchy, Grid & grid)
 void Hypre::init_matrix_neighbors_children_ (Grid & grid)
 
 {
-  printf ("Hypre::init_matrix_neighbors_children_ () not implemented\n");
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::init_matrix_neighbors_children_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
   // *******************************************************************
   //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
   //				      grid->level(),
@@ -740,7 +943,11 @@ void Hypre::init_matrix_neighbors_children_ (Grid & grid)
 void Hypre::init_matrix_parents_neighbor_ (Grid & grid)
 
 {
-  printf ("Hypre::init_matrix_parents_neighbor_ () not implemented\n");
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::init_matrix_parents_neighbor_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
   // *******************************************************************
   //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
   //				      grid->level(),
@@ -749,5 +956,42 @@ void Hypre::init_matrix_parents_neighbor_ (Grid & grid)
   //				      neighbor.INDEX,
   //				      variable);
   // *******************************************************************
+}
+
+//------------------------------------------------------------------------
+
+/// Initialize the PFMG hypre solver
+
+void Hypre::solve_pfmg_ (Hierarchy & hierarchy)
+
+{
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::solve_pfmg_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  HYPRE_SStructSysPFMGCreate (MPI_COMM_WORLD, &solver_);
+  HYPRE_SStructSysPFMGSetLogging(solver_, 1);
+  HYPRE_SStructSysPFMGSetup (solver_,A_,B_,X_);
+  HYPRE_SStructSysPFMGSolve (solver_,A_,B_,X_);
+
+  int num_iterations;
+  HYPRE_SStructSysPFMGGetNumIterations (solver_,&num_iterations);
+  if (debug) printf ("HYPRE_SStructSysPFMGSolve num iterations: %d\n",num_iterations);
+
+  double residual;
+  HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm (solver_,&residual);
+  if (debug) printf ("HYPRE_SStructSysPFMGSolve final residual norm: %g\n",residual);
+}
+
+//------------------------------------------------------------------------
+
+/// Initialize the FAC hypre solver
+
+void Hypre::solve_fac_ (Hierarchy & hierarchy)
+
+{
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Hypre::init_solver_fac_()");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 }
 

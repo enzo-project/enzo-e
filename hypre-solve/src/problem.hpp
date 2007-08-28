@@ -75,6 +75,13 @@ public:
     return * spheres_[i]; 
   }
 
+  /// Return vector of spheres
+  
+  std::vector<Sphere *> spheres ()     
+  { 
+    return spheres_; 
+  }
+
   /// Return the number of Spheres
   
   int num_spheres ()        
@@ -87,6 +94,13 @@ public:
   Point & point (int i)     
   { 
     return * points_[i]; 
+  }
+
+  /// Return vector of points
+  
+  std::vector<Point *> points ()     
+  { 
+    return points_; 
   }
 
   /// Return the number of Points

@@ -210,8 +210,13 @@ protected:
     return u_[i0 + n_[0]*(i1 + n_[1]*i2)];
   }
 
+  /// Return the Faces object for this Grid
   Faces & faces() throw()
   { return *faces_; }
+
+  /// Return the mesh width along the given axis
+  Scalar h(int i) throw ()
+  { return (x_upper(i)-x_lower(i)) / num_unknowns(i); };
 
   /// Processor owner
   int ip () throw () 

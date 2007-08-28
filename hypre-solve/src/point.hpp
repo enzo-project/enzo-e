@@ -11,8 +11,20 @@
  *
  */
 
+class Grid;
+
 class Point 
 {
+
+private:
+
+  // Point attributes known when created
+
+  static int d_;
+
+  int igrid_;
+  Scalar *x_;
+  Scalar m_;
 
 public:
 
@@ -24,17 +36,26 @@ public:
   void write (FILE *fp = 0) throw ();
   void read (std::string parms) throw ();
 
-  static void set_dim (int d) { d_ = d; }
+  /// Set the dimension of the space that the Point is contained in
+  static void set_dim (int d) 
+  { d_ = d; }
+
+  /// Return the id of the containing Grid
+  int igrid () 
+  {return igrid_; } ;
+
+  /// Return the mass of the point
+  Scalar mass () 
+  {return m_; } ;
+
+  /// Return the ith coordinate of the point.  No error checking.
+  Scalar x (int i) 
+  {return x_[i]; } ;
 
 private:
+
   void alloc_ () throw ();
   void dealloc_ () throw ();
-private:
-  
-  static int d_;
-
-  Scalar *x_;
-  Scalar m_;
 
 };
 

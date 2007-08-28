@@ -68,7 +68,7 @@ public:
   // Checking
 
   void check () throw () {  
-    printf ("Level::check() is not implemented yet\n");
+    NOT_IMPLEMENTED("Level::check()");
   }
 
   /// Return the number of zones extended by all Grids in the Level
