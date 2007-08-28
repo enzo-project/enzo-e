@@ -1,16 +1,34 @@
 #!/bin/csh -f
 
-set BIN  = ../bin
+set HYPRESOLVE_HOME = $HOME/cello/hypre-solve
+
+set BIN  = $HYPRESOLVE_HOME/bin
+set SRC  = $HYPRESOLVE_HOME/src
+set EXE  = $HYPRESOLVE_HOME/exe
+
 set NAME = hypre-solve
 set EXEC = ${BIN}/${NAME}
 
 rm -f $EXEC
-make -C ../src install >& out.make
+make -C $SRC install >& out.make
 
 
-set tests = (L1.G1.P111 \
-             L1.G2.P211 L1.G2.P121 L1.G2.P112 \
-             L2.G16.P111 L2.G16.P222 L2.G16.P811 L2.G2.P111)
+# Small serial and parallel unigrid
+
+# set tests = (L1.G1.P111.small L1.G2.P211.small  )
+
+# Serial scaling 
+
+set tests = (L1.G1.P111.N8 \
+             L1.G1.P111.N16 \
+             L1.G1.P111.N32 \
+             L1.G1.P111.N64 \
+             L1.G1.P111.N128 \
+             L1.G1.P111.N256 )
+
+# set tests = (L1.G1.P111 L1.G2.P211  )
+#             L1.G2.P121 L1.G2.P112
+#             L2.G16.P111 L2.G16.P222 L2.G16.P811 L2.G2.P111)
 
 set procs = (1 \
              2 2 2 \
@@ -24,7 +42,12 @@ while ($i <= $#tests)
    set test = $tests[$i]
    set ip   = $procs[$i]
 
-   mpirun -np ${ip} $EXEC in.${test} >& out.${test}
+   set TEST = $EXE/$test
+   rm -rf $TEST
+   mkdir $TEST
+   cd $TEST
+
+   mpirun -np ${ip} $EXEC $EXE/in.${test} >& $TEST/out.${test}
 
    printf "%-20s" "in.${test}"
    awk 'BEGIN {c="Fail"}; /End '"$NAME"'/{c="Pass"}; END{print c}' out.${test}
