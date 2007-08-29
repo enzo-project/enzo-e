@@ -7,19 +7,18 @@ if ($1 != "" || $3 != "") then
    exit 1
 endif
 
-set problem_dirs = ( \
-                L1.G1.P111.N8 \
-                L1.G1.P111.N16 \
-                L1.G1.P111.N32 \
-                L1.G1.P111.N64 \
-                L1.G1.P111.N128 \
-                )
+set problem_sizes = (8 16 32 64 128)
 
 set regions = (0-total 1-problem 2-grids 3-faces 4-hypre-init 5-hypre-solve)
 
 set top_dir = `pwd`
 
-foreach problem_dir ($problem_dirs)
+set time_total_file = $top_dir/time-total.data
+rm -f $time_total_file
+
+foreach N ($problem_sizes)
+
+   set problem_dir = L1.G1.P111.N${N}
 
    cd $top_dir
 
@@ -44,25 +43,31 @@ foreach problem_dir ($problem_dirs)
       echo "ERROR: Parallel runs not implemented yet"
       exit 1
    endif
+
+   if ($#jbperf_files == 1) then
    
-   # basic time-real-start
-   # basic time-real-stop
-   # basic time-real-incl
-   # 
-   # basic MPI-time
-   # 
-   # basic jbmem-bytes-curr
-   # basic jbmem-bytes-high
+      # basic time-real-start
+      # basic time-real-stop
+      # basic time-real-incl
+      # 
+      # basic MPI-time
+      # 
+      # basic jbmem-bytes-curr
+      # basic jbmem-bytes-high
+      
+      # Make plot of total times per run
    
-   # Make plot of time per region
-   set outfile = $top_dir/$problem_dir/time-region.data
-   foreach jbperf_file ($jbperf_files)
-      rm -f $outfile
-      foreach region ($regions)
-         jb-region $region < $jbperf_file | \
-         jb-columns time-real-incl >> $outfile
+      set region = 0-total
+      set outfile = $time_total_file
+   
+      foreach infile ($jbperf_files)
+         jb-global problem-size $N < $infile | jb-convert g2a problem-size > tmpfile
+         
+         cat tmpfile \
+         | jb-region $region \
+         | jb-columns problem-size time-real-incl >> $outfile
       end
-   end
+   endif
 end
 
    
