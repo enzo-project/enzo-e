@@ -21,11 +21,13 @@
 #include <string>
 #include <vector>
 
+
 #include "HYPRE_sstruct_ls.h"
 
 #include "hypre-solve.hpp"
 
 #include "scalar.hpp"
+#include "performance.hpp"
 #include "point.hpp"
 #include "sphere.hpp"
 #include "faces.hpp"
@@ -61,6 +63,16 @@ int main(int argc, char **argv)
 
   Mpi mpi (&argc,&argv);
 
+  // --------------------------------------------------
+  // JBPERF initialization
+  // --------------------------------------------------
+
+
+  // ***************
+  JBPERF_BEGIN("HS");
+  JBPERF_START("0-total");
+  // ***************
+
   if (argc==2) {
 
     std::string filename (argv[1]);
@@ -71,81 +83,111 @@ int main(int argc, char **argv)
 
     // create a new problem and read it in
 
-    _TRACE_;
-
     Problem problem;
-    _TRACE_;
+
+  // ***************
+    JBPERF_START("1-problem");
+  // ***************
 
     problem.read  (filename);
 
-    _TRACE_;
-    
-    _TRACE_;
+  // ***************
+    JBPERF_STOP("1-problem");
+  // ***************
+
+    // --------------------------------------------------
+    // Initialize the hierarchy
+    // --------------------------------------------------
+
     Hierarchy & hierarchy = problem.hierarchy();
 
     // determine interconnections between grids
 
+  // ***************
+    JBPERF_START("2-grids");
+  // ***************
+
     hierarchy.init_grids();
+
+  // ***************
+    JBPERF_STOP("2-grids");
+  // ***************
 
     // categorize grid boundary zones according to levels of adjacent
     // or containing grids
 
+  // ***************
+    JBPERF_START("3-faces");
+  // ***************
+
     hierarchy.init_faces();
   
+  // ***************
+    JBPERF_STOP("3-faces");
+  // ***************
+
     if (debug) problem.print ();
 
     // --------------------------------------------------
-    // Initialize the grid hierarchy
+    // Initialize hypre
     // --------------------------------------------------
-
-    _TRACE_;
 
     Hypre hypre;
 
+  // ***************
+    JBPERF_START("4-hypre-init");
+  // ***************
+
     hypre.init_hierarchy (hierarchy,mpi);
 
-    // --------------------------------------------------
     // Initialize the stencils
-    // --------------------------------------------------
     
-    _TRACE_;
-
     hypre.init_stencil (hierarchy);
 
-    // --------------------------------------------------
     // Initialize the graph
-    // --------------------------------------------------
 
-    _TRACE_;
     hypre.init_graph (hierarchy);
 
-    // --------------------------------------------------
     // Initialize the matrix A
-    // --------------------------------------------------
 
-    _TRACE_;
     hypre.init_matrix (hierarchy);
 
-    // --------------------------------------------------
     // Initialize the right-hand-side and solution vectors
-    // --------------------------------------------------
 
-    _TRACE_;
     hypre.init_vectors (hierarchy,problem.points(),problem.spheres());
+
+  // ***************
+    JBPERF_STOP("4-hypre-init");
+  // ***************
 
     // --------------------------------------------------
     // Solve the linear system Ax = b
     // --------------------------------------------------
 
-    _TRACE_;
+  // ***************
+    JBPERF_START("5-hypre-solve");
+  // ***************
+
     hypre.solve (hierarchy);
+
+  // ***************
+    JBPERF_STOP("5-hypre-solve");
+  // ***************
 
     // --------------------------------------------------
     // Evaluate the solution
     // --------------------------------------------------
 
-    _TRACE_;
     hypre.evaluate (hierarchy);
+
+    // --------------------------------------------------
+    // jbPerf Finalize
+    // --------------------------------------------------
+
+    // ****************
+    JBPERF_STOP("0-total");
+    JBPERF_END("HS");
+    // ***************
 
     // --------------------------------------------------
     // MPI Finalize

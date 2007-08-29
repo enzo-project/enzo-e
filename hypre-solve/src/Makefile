@@ -5,8 +5,17 @@ include Make.machine
 
 FLAGS = -g
 
+# JBPERF
+
+JBLIB = -ljbperf
+JBDEF = -DUSE_JBPERF
+
+# Assemble defines, includes, and libs
+DEF = $(JBDEF)
 INC = -I$(HOME)/include 
-LIBS = -L$(HOME)/lib -lHYPRE_sstruct_ls -lHYPRE_sstruct_mv -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_parcsr_ls -lHYPRE_parcsr_mv -lHYPRE_IJ_mv -lHYPRE_LSI -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_utilities
+LIBS = -L$(HOME)/lib -lHYPRE_sstruct_ls -lHYPRE_sstruct_mv -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_parcsr_ls -lHYPRE_parcsr_mv -lHYPRE_IJ_mv -lHYPRE_LSI -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_utilities $(JBLIB)
+
+# Set object files
 OBJS = \
        domain.o \
        faces.o \
@@ -32,7 +41,7 @@ install: hypre-solve
 
 
 .cpp.o:
-	$(MPCPP) -c -o $*.o $*.cpp $(FLAGS) $(INC)
+	$(MPCPP) -c -o $*.o $*.cpp $(FLAGS) $(INC) $(DEF)
 
 .PHONY: dep
 dep:
@@ -110,9 +119,9 @@ hypre-solve.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
 hypre-solve.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
 hypre-solve.o: /usr/include/math.h /usr/include/bits/huge_val.h
 hypre-solve.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
-hypre-solve.o: hypre-solve.hpp scalar.hpp point.hpp sphere.hpp faces.hpp
-hypre-solve.o: mpi.hpp grid.hpp level.hpp hierarchy.hpp domain.hpp
-hypre-solve.o: problem.hpp hypre.hpp
+hypre-solve.o: hypre-solve.hpp scalar.hpp performance.hpp point.hpp
+hypre-solve.o: sphere.hpp faces.hpp mpi.hpp grid.hpp level.hpp hierarchy.hpp
+hypre-solve.o: domain.hpp problem.hpp hypre.hpp
 level.o: /usr/include/assert.h /usr/include/features.h
 level.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 level.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
