@@ -13,46 +13,42 @@ rm -f $EXEC
 make -C $SRC install >& out.make
 
 
-# Small serial and parallel unigrid
-
-# set tests = (L1.G1.P111.small L1.G2.P211.small  )
-
 # Serial scaling 
 
-set tests = (L1.G1.P111.N8 \
-             L1.G1.P111.N16 \
-             L1.G1.P111.N32 \
-             L1.G1.P111.N64 \
-             L1.G1.P111.N128 \
-             L1.G1.P111.N256 )
+set test_procs = (L1.G1.P111.N8    1 \
+                  L1.G1.P111.N16   1 \
+                  L1.G1.P111.N32   1 \
+                  L1.G1.P111.N64   1 \
+                  L1.G1.P111.N128  1 \
+             )
+#             L1.G1.P111.N256 \
 
 # set tests = (L1.G1.P111 L1.G2.P211  )
 #             L1.G2.P121 L1.G2.P112
 #             L2.G16.P111 L2.G16.P222 L2.G16.P811 L2.G2.P111)
 
-set procs = (1 \
-             2 2 2 \
-             1 8 8 1)
 
 echo
 
 set i = 1
-while ($i <= $#tests)
+while ($i <= $#test_procs)
 
-   set test = $tests[$i]
-   set ip   = $procs[$i]
+   set test = $test_procs[$i]
+   @ i = $i + 1
+   set ip   = $test_procs[$i]
+   @ i = $i + 1
 
    set TEST = $EXE/$test
    rm -rf $TEST
    mkdir $TEST
    cd $TEST
 
+   printf "%-20s" "in.${test}"
+
    mpirun -np ${ip} $EXEC $EXE/in.${test} >& $TEST/out.${test}
 
-   printf "%-20s" "in.${test}"
    awk 'BEGIN {c="Fail"}; /End '"$NAME"'/{c="Pass"}; END{print c}' out.${test}
 
-   @ i = $i + 1
 end
 
 echo

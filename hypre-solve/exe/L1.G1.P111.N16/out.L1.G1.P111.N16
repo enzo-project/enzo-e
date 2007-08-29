@@ -1,0 +1,56 @@
+jbMem ARRAYS_ONLY = False
+DEBUG hypre-solve.cpp:62
+Domain
+   dimension      3
+   lower position -4.000000e+09 -4.000000e+09 -4.000000e+09 
+   upper position 4.000000e+09 4.000000e+09 4.000000e+09 
+Hierarchy
+Level 0
+   i_lower = (-8,-8,-8)
+   i_upper = (7,7,7)
+Grid
+   id             0
+   parent id      -1
+   processor      0
+   lower position -4.000000e+09 -4.000000e+09 -4.000000e+09 
+   upper position 4.000000e+09 4.000000e+09 4.000000e+09 
+   lower index    -8 -8 -8
+   zones          16 16 16
+   level          0
+Sphere
+   dimension  3
+   radius     6.378137e+08 
+   mass       5.993985e+27 
+   position   0.000000e+00 0.000000e+00 0.000000e+00 
+Point
+   position   1.000000e+06 1.000000e+06 1.000000e+06 
+   mass       1.000000e+02 
+   grid        0
+hypre.cpp:536 WARNING: init_graph_children_() is not implemented yet
+hypre.cpp:562 WARNING: Hypre::init_graph_parent_() is not implemented yet
+hypre.cpp:585 WARNING: Hypre::init_graph_neighbors_children_() is not implemented yet
+hypre.cpp:606 WARNING: Hypre::init_graph_parents_neighbor_() is not implemented yet
+hypre.cpp:667 WARNING: Hypre::init_matrix_clear_() is not implemented yet
+hypre.cpp:696 WARNING: Hypre::init_matrix_children_() is not implemented yet
+hypre.cpp:725 WARNING: Hypre::init_matrix_parent_() is not implemented yet
+hypre.cpp:749 WARNING: Hypre::init_matrix_neighbors_children_() is not implemented yet
+hypre.cpp:772 WARNING: Hypre::init_matrix_parents_neighbor_() is not implemented yet
+hypre.cpp:471 WARNING: Contribution of sphere mass to right-hand side is not implemented yet
+hypre.cpp:793 WARNING: Hypre::solve_pfmg_() is not implemented yet
+sys_pfmg_solve.c:184 HYPRE: dumping residual norm to resid.data
+hypre.cpp:521 WARNING: Hypre::evaluate() is not implemented yet
+jbPerf:              Total:       1262  2.35%
+End hypre-solve
+jbPerf:    new_attribute():          0  0.00%
+jbPerf:      new_counter():          0  0.00%
+jbPerf: delete_attribute():          0  0.00%
+jbPerf:   delete_counter():          0  0.00%
+jbPerf:            begin():        855  1.59%
+jbPerf:              end():        234  0.43%
+jbPerf:            start():         76  0.14%
+jbPerf:             stop():        136  0.25%
+jbPerf:        increment():          0  0.00%
+jbPerf:           assign():          0  0.00%
+jbPerf:        attribute():          0  0.00%
+jbPerf:          counter():          0  0.00%
+jbPerf:              Total:       1262  2.34%

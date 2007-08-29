@@ -1,0 +1,68 @@
+#!/bin/csh -f
+
+# Error check input parameters
+
+if ($1 != "" || $3 != "") then
+   echo "Usage: $0:h"
+   exit 1
+endif
+
+set problem_dirs = ( \
+                L1.G1.P111.N8 \
+                L1.G1.P111.N16 \
+                L1.G1.P111.N32 \
+                L1.G1.P111.N64 \
+                L1.G1.P111.N128 \
+                )
+
+set regions = (0-total 1-problem 2-grids 3-faces 4-hypre-init 5-hypre-solve)
+
+set top_dir = `pwd`
+
+foreach problem_dir ($problem_dirs)
+
+   cd $top_dir
+
+   # Find the newest JBPERF directory $jbperf_dir
+   
+   cd $problem_dir
+   
+   set jbperf_dir = (JBPERF.*)
+   
+   if ($#jbperf_dir > 1) then
+      set jbperf_dir = $jbperf_dir[$#jbperf_dir]
+      echo "WARNING: More than one JBPERF.??? directory--using the newest ($jbperf_dir)"
+   endif
+   
+   cd $jbperf_dir
+
+   # Find the datafiles
+   
+   set jbperf_files = (?/?/?/?/?.HS)
+   
+   if ($#jbperf_files > 1) then
+      echo "ERROR: Parallel runs not implemented yet"
+      exit 1
+   endif
+   
+   # basic time-real-start
+   # basic time-real-stop
+   # basic time-real-incl
+   # 
+   # basic MPI-time
+   # 
+   # basic jbmem-bytes-curr
+   # basic jbmem-bytes-high
+   
+   # Make plot of time per region
+   set outfile = $top_dir/$problem_dir/time-region.data
+   foreach jbperf_file ($jbperf_files)
+      rm -f $outfile
+      foreach region ($regions)
+         jb-region $region < $jbperf_file | \
+         jb-columns time-real-incl >> $outfile
+      end
+   end
+end
+
+   
