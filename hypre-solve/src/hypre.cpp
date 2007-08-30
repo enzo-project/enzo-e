@@ -40,7 +40,7 @@ const int dump_solution = 0;
 
 const int trace         = 0;
 
-const int DIRICHLET     = 1;
+const int DIRICHLET     = 0;
 
 //======================================================================
 // PUBLIC MEMBER FUNCTIONS
@@ -429,9 +429,10 @@ void Hypre::init_vectors (Hierarchy & hierarchy,
   Scalar pi = Constants::pi();
   Scalar scaling0 = -4.0*G*pi;
 
-  ItHierarchyLevels itl (hierarchy);
+  Scalar shift_b_sum = 0.0;
 
-  for (int i=0; i<points.size(); i++) {
+  int i;
+  for (i=0; i<points.size(); i++) {
     Point & point      = *points[i];
     Grid & grid        = hierarchy.grid(point.igrid());
     Scalar cell_volume = grid.h(0) * grid.h(1) * grid.h(2);
@@ -459,6 +460,8 @@ void Hypre::init_vectors (Hierarchy & hierarchy,
     int part = grid.level();
     int var = 0;
     
+    shift_b_sum += value;
+
     // *******************************************************************
     HYPRE_SStructVectorAddToValues (B_, part, index, var, &value);
     // *******************************************************************
@@ -471,7 +474,44 @@ void Hypre::init_vectors (Hierarchy & hierarchy,
     NOT_IMPLEMENTED("Contribution of sphere mass to right-hand side");
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   }
+
+  // Shift B to zero out the null space if problem is periodic
+
+  if (! DIRICHLET) {
+
+    // Compute the shift
+
+    int part = 0;
+    long long shift_b_count = 0;
+    ItHierarchyLevels itl (hierarchy);
+    while (Level * level = itl++) {
+      ItLevelGridsAll itg (*level);
+      while (Grid * grid = itg++) {
+	shift_b_count += grid->num_unknowns();
+      }
+    }
+
+    Scalar shift_b_amount = - shift_b_sum / shift_b_count;
+
+    // Perform the shift
+    
+    part = 0;
+    while (Level * level = itl++) {
+      ItLevelGridsLocal itg (*level);
+      while (Grid * grid = itg++) {
+	int lower[3] = { grid->i_lower(0), grid->i_lower(1), grid->i_lower(2) };
+	int upper[3] = { grid->i_upper(0), grid->i_upper(1), grid->i_upper(2) };
+	Scalar * values = new Scalar[grid->num_unknowns()];
+	for (i=0; i<grid->num_unknowns(); i++) values[i] = shift_b_amount;
+	HYPRE_SStructVectorAddToBoxValues (B_,part,lower,upper,0,values);
+	delete [] values;
+      }
+      ++part;
+    }
+    if (debug) printf ("%s:%d shift (count,sum,amount) = (%lld,%g,%g)\n",
+		       __FILE__,__LINE__,shift_b_count,shift_b_sum,shift_b_amount);
   
+  }
   // Assemble the vectors
 
   // *******************************************************************
