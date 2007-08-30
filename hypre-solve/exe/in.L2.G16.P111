@@ -1,8 +1,4 @@
-dimension 3
-
-domain  3 -4e9 -4e9 -4e9  4e9 4e9 4e9
-
-sphere 5.993985e27 6.378137e8 0.0 0.0 0.0  0.0 0.0 0.0
+include in.problem
 
 #
 # 8 slabs within 8 slabs on one processor
