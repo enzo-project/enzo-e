@@ -4,6 +4,8 @@ domain  3 -4e9 -4e9 -4e9  4e9 4e9 4e9
 
 sphere 5.993985e27 6.378137e8 0.0 0.0 0.0  0.0 0.0 0.0
 
+point 100.0   1e6 1e6 1e6   0
+
 #
 # Two neighboring grids along z-axis 
 #
