@@ -31,7 +31,6 @@ OBJS = \
        sphere.o
 
 hypre-solve: dep $(OBJS)
-hypre-solve: $(OBJS)
 	$(MPCPP) -o hypre-solve $(OBJS) $(LIBS)
 
 BIN = ../bin
