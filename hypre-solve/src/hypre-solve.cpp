@@ -64,6 +64,8 @@ int main(int argc, char **argv)
 
   Mpi mpi (&argc,&argv);
 
+  if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
+
   // --------------------------------------------------
   // JBPERF initialization
   // --------------------------------------------------

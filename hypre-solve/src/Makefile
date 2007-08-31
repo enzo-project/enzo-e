@@ -46,7 +46,9 @@ install: hypre-solve
 
 .PHONY: dep
 dep:
-	-@(makedepend *.cpp *.hpp) >& /dev/null
+	-@(makedepend -fDEPEND *.cpp *.hpp) >& /dev/null
+
+include DEPEND
 
 .PHONY: clean
 clean:
@@ -61,115 +63,3 @@ doc:
 	doxygen
 
 
-# DO NOT DELETE
-
-domain.o: /usr/include/assert.h /usr/include/features.h
-domain.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-domain.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h scalar.hpp
-domain.o: domain.hpp
-faces.o: /usr/include/assert.h /usr/include/features.h
-faces.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-faces.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-faces.o: /usr/include/stdio.h /usr/include/bits/types.h
-faces.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-faces.o: /usr/include/_G_config.h /usr/include/wchar.h
-faces.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-faces.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-faces.o: /usr/include/math.h /usr/include/bits/huge_val.h
-faces.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h scalar.hpp
-faces.o: faces.hpp mpi.hpp grid.hpp
-grid.o: /usr/include/assert.h /usr/include/features.h
-grid.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-grid.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-grid.o: /usr/include/stdio.h /usr/include/bits/types.h
-grid.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-grid.o: /usr/include/_G_config.h /usr/include/wchar.h
-grid.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-grid.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-grid.o: /usr/include/math.h /usr/include/bits/huge_val.h
-grid.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h scalar.hpp
-grid.o: faces.hpp mpi.hpp grid.hpp
-hierarchy.o: /usr/include/assert.h /usr/include/features.h
-hierarchy.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-hierarchy.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-hierarchy.o: /usr/include/stdio.h /usr/include/bits/types.h
-hierarchy.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-hierarchy.o: /usr/include/_G_config.h /usr/include/wchar.h
-hierarchy.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-hierarchy.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-hierarchy.o: hypre-solve.hpp scalar.hpp point.hpp faces.hpp mpi.hpp grid.hpp
-hierarchy.o: level.hpp hierarchy.hpp
-hypre.o: /usr/include/assert.h /usr/include/features.h
-hypre.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h hypre-solve.hpp
-hypre.o: mpi.hpp scalar.hpp constants.hpp point.hpp faces.hpp grid.hpp
-hypre.o: level.hpp hierarchy.hpp sphere.hpp domain.hpp parameters.hpp
-hypre.o: problem.hpp hypre.hpp
-hypre-solve.o: /usr/include/assert.h /usr/include/features.h
-hypre-solve.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-hypre-solve.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-hypre-solve.o: /usr/include/stdio.h /usr/include/bits/types.h
-hypre-solve.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-hypre-solve.o: /usr/include/_G_config.h /usr/include/wchar.h
-hypre-solve.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-hypre-solve.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-hypre-solve.o: /usr/include/stdlib.h /usr/include/sys/types.h
-hypre-solve.o: /usr/include/time.h /usr/include/endian.h
-hypre-solve.o: /usr/include/bits/endian.h /usr/include/sys/select.h
-hypre-solve.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
-hypre-solve.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
-hypre-solve.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
-hypre-solve.o: /usr/include/math.h /usr/include/bits/huge_val.h
-hypre-solve.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
-hypre-solve.o: hypre-solve.hpp scalar.hpp performance.hpp point.hpp
-hypre-solve.o: sphere.hpp faces.hpp mpi.hpp grid.hpp level.hpp hierarchy.hpp
-hypre-solve.o: domain.hpp parameters.hpp problem.hpp hypre.hpp
-level.o: /usr/include/assert.h /usr/include/features.h
-level.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-level.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-level.o: /usr/include/stdio.h /usr/include/bits/types.h
-level.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-level.o: /usr/include/_G_config.h /usr/include/wchar.h
-level.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-level.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-level.o: hypre-solve.hpp scalar.hpp faces.hpp mpi.hpp grid.hpp level.hpp
-mpi.o: /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h
-mpi.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
-mpi.o: /usr/include/gnu/stubs-32.h /usr/include/bits/types.h
-mpi.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-mpi.o: /usr/include/_G_config.h /usr/include/wchar.h
-mpi.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-mpi.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h mpi.hpp
-parameters.o: /usr/include/assert.h /usr/include/features.h
-parameters.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-parameters.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-parameters.o: /usr/include/stdio.h /usr/include/bits/types.h
-parameters.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-parameters.o: /usr/include/_G_config.h /usr/include/wchar.h
-parameters.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-parameters.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-parameters.o: hypre-solve.hpp parameters.hpp
-point.o: /usr/include/assert.h /usr/include/features.h
-point.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-point.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h scalar.hpp
-point.o: point.hpp
-problem.o: /usr/include/assert.h /usr/include/features.h
-problem.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-problem.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-problem.o: /usr/include/stdio.h /usr/include/bits/types.h
-problem.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-problem.o: /usr/include/_G_config.h /usr/include/wchar.h
-problem.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-problem.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-problem.o: hypre-solve.hpp scalar.hpp parameters.hpp point.hpp faces.hpp
-problem.o: mpi.hpp grid.hpp level.hpp domain.hpp hierarchy.hpp sphere.hpp
-problem.o: problem.hpp
-sphere.o: /usr/include/assert.h /usr/include/features.h
-sphere.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
-sphere.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
-sphere.o: /usr/include/stdio.h /usr/include/bits/types.h
-sphere.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-sphere.o: /usr/include/_G_config.h /usr/include/wchar.h
-sphere.o: /usr/include/bits/wchar.h /usr/include/gconv.h
-sphere.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-sphere.o: scalar.hpp sphere.hpp
