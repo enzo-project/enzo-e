@@ -1,0 +1,60 @@
+#!/bin/csh -f
+
+if ( $1 == "" || $2 != "") then
+   echo "Usage: $0:t <type>"
+else
+   set type = $1
+endif
+
+# Include file defining "test_procs" array
+
+source include.$type
+
+set HYPRESOLVE_HOME = $HOME/cello/hypre-solve
+
+set BIN  = $HYPRESOLVE_HOME/bin
+set SRC  = $HYPRESOLVE_HOME/src
+set EXE  = $HYPRESOLVE_HOME/exe
+
+set NAME = hypre-solve
+set EXEC = ${BIN}/${NAME}
+
+rm -f $EXEC
+make -C $SRC install >& out.make
+
+
+#             L1.G1.P111.N256 \
+
+# set tests = (L1.G1.P111 L1.G2.P211  )
+#             L1.G2.P121 L1.G2.P112
+#             L2.G16.P111 L2.G16.P222 L2.G16.P811 L2.G2.P111)
+
+
+echo
+
+set i = 1
+while ($i <= $#test_procs)
+
+   set test = $test_procs[$i]
+   @ i = $i + 1
+   set ip   = $test_procs[$i]
+   @ i = $i + 1
+
+   set TEST = $EXE/$test
+   rm -rf $TEST
+   mkdir $TEST
+   cd $TEST
+
+   printf "%-20s" "in.${test}"
+
+   cp $EXE/in.${test} $TEST
+   cp $EXE/in.problem $TEST
+
+   mpirun -np ${ip} $EXEC $EXE/in.${test} >& $TEST/out.${test}
+
+   awk 'BEGIN {c="Fail"}; /End '"$NAME"'/{c="Pass"}; END{print c}' out.${test}
+
+end
+
+cd $EXEC
+source go.perf

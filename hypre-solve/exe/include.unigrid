@@ -1,0 +1,11 @@
+# Serial scaling 
+
+set test_procs = (L1.G1.P111.N32   1 \
+                  L1.G2.P211.N32   2 \
+                  L1.G2.P121.N32   2 \
+                  L1.G2.P112.N32   2 \
+                  L1.G2.P221.N32   4 \
+                  L1.G2.P212.N32   4 \
+                  L1.G2.P122.N32   4 \
+                  L1.G2.P222.N32   8 \
+                  )
