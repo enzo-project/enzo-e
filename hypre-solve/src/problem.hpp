@@ -20,10 +20,11 @@ class Problem {
 
 private:
 
-  std::vector<Sphere *> spheres_;  // List of sphere masses
-  std::vector<Point *>  points_;   // List of point masses
-  Hierarchy hierarchy_;            // AMR mesh hierarchy
-  Domain domain_;                  // Problem domain
+  Parameters            parameters_; // Raw input parameters
+  std::vector<Sphere *> spheres_;    // List of sphere masses
+  std::vector<Point *>  points_;     // List of point masses
+  Hierarchy             hierarchy_;  // AMR mesh hierarchy
+  Domain                domain_;     // Problem domain
 
   //----------------------------------------------------------------------
 
@@ -138,10 +139,11 @@ public:
     return hierarchy_.num_levels(); 
   }
 
-  //----------------------------------------------------------------------
-
-private:
-
-  int readline_ (FILE *, char * buffer, int n) throw ();
+  /// Return the Parameters object
+  
+  Parameters & parameters ()     
+  { 
+    return parameters_; 
+  }
 
 };

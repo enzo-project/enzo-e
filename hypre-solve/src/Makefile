@@ -25,6 +25,7 @@ OBJS = \
        hypre-solve.o \
        level.o \
        mpi.o \
+       parameters.o \
        point.o \
        problem.o \
        sphere.o
@@ -102,7 +103,8 @@ hypre.o: /usr/include/assert.h /usr/include/features.h
 hypre.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h hypre-solve.hpp
 hypre.o: mpi.hpp scalar.hpp constants.hpp point.hpp faces.hpp grid.hpp
-hypre.o: level.hpp hierarchy.hpp sphere.hpp domain.hpp problem.hpp hypre.hpp
+hypre.o: level.hpp hierarchy.hpp sphere.hpp domain.hpp parameters.hpp
+hypre.o: problem.hpp hypre.hpp
 hypre-solve.o: /usr/include/assert.h /usr/include/features.h
 hypre-solve.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 hypre-solve.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -121,7 +123,7 @@ hypre-solve.o: /usr/include/math.h /usr/include/bits/huge_val.h
 hypre-solve.o: /usr/include/bits/mathdef.h /usr/include/bits/mathcalls.h
 hypre-solve.o: hypre-solve.hpp scalar.hpp performance.hpp point.hpp
 hypre-solve.o: sphere.hpp faces.hpp mpi.hpp grid.hpp level.hpp hierarchy.hpp
-hypre-solve.o: domain.hpp problem.hpp hypre.hpp
+hypre-solve.o: domain.hpp parameters.hpp problem.hpp hypre.hpp
 level.o: /usr/include/assert.h /usr/include/features.h
 level.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 level.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
@@ -138,6 +140,15 @@ mpi.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 mpi.o: /usr/include/_G_config.h /usr/include/wchar.h
 mpi.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 mpi.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h mpi.hpp
+parameters.o: /usr/include/assert.h /usr/include/features.h
+parameters.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+parameters.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h
+parameters.o: /usr/include/stdio.h /usr/include/bits/types.h
+parameters.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+parameters.o: /usr/include/_G_config.h /usr/include/wchar.h
+parameters.o: /usr/include/bits/wchar.h /usr/include/gconv.h
+parameters.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+parameters.o: hypre-solve.hpp parameters.hpp
 point.o: /usr/include/assert.h /usr/include/features.h
 point.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 point.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h scalar.hpp
@@ -150,8 +161,9 @@ problem.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 problem.o: /usr/include/_G_config.h /usr/include/wchar.h
 problem.o: /usr/include/bits/wchar.h /usr/include/gconv.h
 problem.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-problem.o: hypre-solve.hpp scalar.hpp point.hpp faces.hpp mpi.hpp grid.hpp
-problem.o: level.hpp domain.hpp hierarchy.hpp sphere.hpp problem.hpp
+problem.o: hypre-solve.hpp scalar.hpp parameters.hpp point.hpp faces.hpp
+problem.o: mpi.hpp grid.hpp level.hpp domain.hpp hierarchy.hpp sphere.hpp
+problem.o: problem.hpp
 sphere.o: /usr/include/assert.h /usr/include/features.h
 sphere.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 sphere.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h

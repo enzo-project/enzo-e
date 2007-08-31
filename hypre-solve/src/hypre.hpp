@@ -26,13 +26,15 @@ public:
 
   Hypre ();
 
-  void init_hierarchy (Hierarchy & hierarchy, 
-		       Mpi       & mpi);
+  void init_hierarchy (Parameters & parameters,
+		       Hierarchy  & hierarchy, 
+		       Mpi        & mpi);
   void init_stencil   (Hierarchy & hierarchy);
   void init_graph     (Hierarchy & hierarchy);
   void init_matrix    (Hierarchy & hierarchy);
-  void init_vectors   (Hierarchy & hierarchy,
-		       std::vector<Point *> points,
+  void init_vectors   (Parameters          & parameters,
+		       Hierarchy           & hierarchy,
+		       std::vector<Point *>  points,
 		       std::vector<Sphere *> spheres);
   void solve          (Hierarchy & hierarchy);
   void evaluate       (Hierarchy & hierarchy);

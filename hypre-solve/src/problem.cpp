@@ -22,6 +22,7 @@
 #include "hypre-solve.hpp"
 
 #include "scalar.hpp"
+#include "parameters.hpp"
 #include "point.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
@@ -73,57 +74,58 @@ Problem & Problem::operator = (const Problem & p) throw ()
 
 void Problem::read (std::string filename) throw ()
 {
-  FILE *fp = fopen(filename.c_str(),"r");
-  char buffer[BUFFER_LENGTH];
-  int i;
 
-  // Clear the buffer
-  for (i=0; i<BUFFER_LENGTH; i++) buffer[i]=0;
+  bool boundary_defined = false;
 
-  while (readline_ (fp,buffer,BUFFER_LENGTH)) {
+  parameters_.read(filename);
+  ItParameters itp (parameters_);
 
-    char obj[BUFFER_LENGTH];
-    for (i=0; i<BUFFER_LENGTH; i++) obj[i]=0;
-    sscanf(buffer,"%s",obj);
-    const char * args = buffer + strlen(obj) + 1;
+  while (itp++) {
 
-    // dimension <dim>
+    std::string key   = itp.key();
+    std::string value = itp.value();
 
-    if (strcmp(obj,"dimension")==0) {
 
-      int d = atoi(args);
+    if (key == "dimension") {
+
+      int d = atoi(value.c_str());
       hierarchy_.set_dim(d);
       Point::set_dim(d);
       Sphere::set_dim(d);
 
-    // Domain
+      // Domain
 
-    } else if (strcmp(obj,"domain")==0) {
+    } else if (key == "domain") {
 
-      domain_.read (args);
+      domain_.read (value);
 
-    // Grid ...
+      // Grid ...
 
-    } else if (strcmp(obj,"grid")==0) {
+    } else if (key == "grid") {
 
-      hierarchy_.insert_grid(new Grid(args));
+      hierarchy_.insert_grid(new Grid(value));
 
-    // Sphere ...
+      // Sphere ...
 
-    } else if (strcmp(obj,"sphere")==0) {
+    } else if (key == "sphere") {
 
-      spheres_.push_back(new Sphere(args));      
+      spheres_.push_back(new Sphere(value));      
 
-    // Point ...
+      // Point ...
 
-    } else if (strcmp(obj,"point")==0) {
+    } else if (key == "point") {
 
-      points_.push_back(new Point(args));      
+      points_.push_back(new Point(value));      
 
+    } else if (key == "boundary") {
+      boundary_defined = true;
     }
+  }
 
-    // Clear the buffer
-    for (i=0; i<BUFFER_LENGTH; i++) buffer[i]=0;
+  if (! boundary_defined ) {
+    fprintf (stderr,"Input parameter 'boundary' must be defined\n");
+    MPI_Finalize();
+    exit(1);
   }
 }
 
@@ -149,23 +151,3 @@ void Problem::write (FILE *fp) throw ()
   for (i=0; i<num_spheres(); i++) sphere(i).write(fp);
   for (i=0; i<num_points(); i++)  point(i).write(fp);
 }
-
-//======================================================================
-
-int Problem::readline_ (FILE* fp, char * buffer, int n) throw()
-{
-  int i=0;
-  int c;
-  buffer[i] = c = fgetc(fp);
-  while (c != EOF && c != '\n' && i < n-1) {
-    ++i;
-    buffer[i] = c = fgetc(fp);
-  }
-  if (buffer[i] == '\n') buffer[i] = '\0';
-  if (i == n-1) {
-    fprintf (stderr,"Line too long: %s\n",buffer);
-    exit(1);
-  }
-  return (c != EOF);
-}
-

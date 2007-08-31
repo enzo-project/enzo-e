@@ -29,6 +29,7 @@
 #include "hierarchy.hpp"
 #include "sphere.hpp"
 #include "domain.hpp"
+#include "parameters.hpp"
 #include "problem.hpp"
 #include "hypre.hpp"
 
@@ -39,8 +40,6 @@ const int dump_vector   = 0;
 const int dump_solution = 0;
 
 const int trace         = 0;
-
-const int DIRICHLET     = 0;
 
 //======================================================================
 // PUBLIC MEMBER FUNCTIONS
@@ -68,8 +67,9 @@ Hypre::Hypre ()
     patch object, for an AMR problem.  Sets grid box extents, grid
     part variables, and periodicity of the root-level grid part. */
 
-void Hypre::init_hierarchy (Hierarchy & hierarchy, 
-			    Mpi       & mpi)
+void Hypre::init_hierarchy (Parameters & parameters,
+			    Hierarchy  & hierarchy, 
+			    Mpi        & mpi)
 
 {
 
@@ -131,11 +131,14 @@ void Hypre::init_hierarchy (Hierarchy & hierarchy,
       }
     }
 
-    if (DIRICHLET) {
+    printf ("boundary = %s\n",parameters.value("boundary").c_str());
+    if (strcmp(parameters.value("boundary").c_str(),"dirichlet")==0) {
+      printf ("Turning off periodicity\n");
       periodicity[0] = 0;
       periodicity[1] = 0;
       periodicity[2] = 0;
     }
+    printf ("periodicity = (%d %d %d)\n",periodicity[0],periodicity[1],periodicity[2]);
 
     if (debug) printf ("%s:%d Periodicity = (%d,%d,%d)\n",__FILE__,__LINE__,
 		       periodicity[0],periodicity[1],periodicity[2]);
@@ -388,8 +391,9 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
 
 /// Initialize the right-hand-side vector b
 
-void Hypre::init_vectors (Hierarchy & hierarchy,
-			  std::vector<Point *> points,
+void Hypre::init_vectors (Parameters          & parameters,
+			  Hierarchy           & hierarchy,
+			  std::vector<Point *>  points,
 			  std::vector<Sphere *> spheres)
 
 {
@@ -477,7 +481,7 @@ void Hypre::init_vectors (Hierarchy & hierarchy,
 
   // Shift B to zero out the null space if problem is periodic
 
-  if (! DIRICHLET) {
+  if ( parameters.value("boundary") == "periodic" ) {
 
     // Compute the shift
 

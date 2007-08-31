@@ -36,6 +36,7 @@
 #include "level.hpp"
 #include "hierarchy.hpp"
 #include "domain.hpp"
+#include "parameters.hpp"
 #include "problem.hpp"
 #include "hypre.hpp"
 
@@ -138,7 +139,7 @@ int main(int argc, char **argv)
     JBPERF_START("4-hypre-init");
   // ***************
 
-    hypre.init_hierarchy (hierarchy,mpi);
+    hypre.init_hierarchy (problem.parameters(),hierarchy,mpi);
 
     // Initialize the stencils
     
@@ -154,7 +155,7 @@ int main(int argc, char **argv)
 
     // Initialize the right-hand-side and solution vectors
 
-    hypre.init_vectors (hierarchy,problem.points(),problem.spheres());
+    hypre.init_vectors (problem.parameters(),hierarchy,problem.points(),problem.spheres());
 
   // ***************
     JBPERF_STOP("4-hypre-init");
