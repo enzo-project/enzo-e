@@ -67,7 +67,7 @@ public:
 
   void init_grids () throw();
 
-  void init_faces () throw();
+  void init_faces (Domain & domain) throw();
 
   void set_dim (int d) throw () { dimension_ = d; };
 

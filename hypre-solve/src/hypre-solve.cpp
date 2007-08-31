@@ -34,8 +34,8 @@
 #include "mpi.hpp"
 #include "grid.hpp"
 #include "level.hpp"
-#include "hierarchy.hpp"
 #include "domain.hpp"
+#include "hierarchy.hpp"
 #include "parameters.hpp"
 #include "problem.hpp"
 #include "hypre.hpp"
@@ -123,7 +123,7 @@ int main(int argc, char **argv)
     JBPERF_START("3-faces");
   // ***************
 
-    hierarchy.init_faces();
+    hierarchy.init_faces(problem.domain());
   
   // ***************
     JBPERF_STOP("3-faces");
@@ -151,13 +151,12 @@ int main(int argc, char **argv)
 
     hypre.init_graph (hierarchy);
 
-    // Initialize the matrix A
+    // Initialize the linear system
 
-    hypre.init_matrix (hierarchy);
-
-    // Initialize the right-hand-side and solution vectors
-
-    hypre.init_vectors (problem.parameters(),hierarchy,problem.points(),problem.spheres());
+    hypre.init_linear (problem.parameters(),
+		       hierarchy,
+		       problem.points(),
+		       problem.spheres());
 
   // ***************
     JBPERF_STOP("4-hypre-init");

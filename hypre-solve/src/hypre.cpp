@@ -26,20 +26,20 @@
 #include "faces.hpp"
 #include "grid.hpp"
 #include "level.hpp"
+#include "domain.hpp"
 #include "hierarchy.hpp"
 #include "sphere.hpp"
-#include "domain.hpp"
 #include "parameters.hpp"
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug         = 0;
+const int debug  = 0;
 
-const int dump_matrix   = 0;
-const int dump_vector   = 0;
-const int dump_solution = 0;
+const int dump_a = 0;
+const int dump_x = 0;
+const int dump_b = 0;
 
-const int trace         = 0;
+const int trace  = 0;
 
 //======================================================================
 // PUBLIC MEMBER FUNCTIONS
@@ -75,13 +75,13 @@ void Hypre::init_hierarchy (Parameters & parameters,
 
   Grid::set_mpi (mpi);
   
-  int dim    = hierarchy.dimension();
-  int levels = hierarchy.num_levels();
+  int dim       = hierarchy.dimension();
+  int num_parts = hierarchy.num_levels();
 
   // Create the hypre grid
   
   // *******************************************************************
-  HYPRE_SStructGridCreate (MPI_COMM_WORLD, dim, levels, &grid_);
+  HYPRE_SStructGridCreate (MPI_COMM_WORLD, dim, num_parts, &grid_);
   // *******************************************************************
 
   ItHierarchyLevels itl (hierarchy);
@@ -120,31 +120,25 @@ void Hypre::init_hierarchy (Parameters & parameters,
     const int r = 2;
     int periodicity[3];
 
-    // Determine periodicity of root Level
+    // Determine periodicity of Level
 
     for (int i=0; i<3; i++) {
-      // periodicity of root level
       periodicity[i] = hierarchy.level(0).zones(i);
-      // adjust for periodicity of given level
-      for (int k=0; k < part; k++) {
-	periodicity[i] *= r;
-      }
+      for (int k=0; k < part; k++) periodicity[i] *= r;
     }
 
-    printf ("boundary = %s\n",parameters.value("boundary").c_str());
-    if (strcmp(parameters.value("boundary").c_str(),"dirichlet")==0) {
-      printf ("Turning off periodicity\n");
+    if (parameters.value("boundary") == "dirichlet") {
       periodicity[0] = 0;
       periodicity[1] = 0;
       periodicity[2] = 0;
     }
-    printf ("periodicity = (%d %d %d)\n",periodicity[0],periodicity[1],periodicity[2]);
 
-    if (debug) printf ("%s:%d Periodicity = (%d,%d,%d)\n",__FILE__,__LINE__,
+    if (debug) printf ("%s:%d  Level = %d Periodicity = (%d,%d,%d)\n",
+		       __FILE__,__LINE__, part,
 		       periodicity[0],periodicity[1],periodicity[2]);
 
     // *******************************************************************
-    HYPRE_SStructGridSetPeriodic (grid_, 0, periodicity);
+    HYPRE_SStructGridSetPeriodic (grid_, part, periodicity);
     // *******************************************************************
 
     ++ part;
@@ -286,9 +280,10 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
 }
 
+
 //----------------------------------------------------------------------
 
-/// Initialize the matrix A
+/// Initialize the right-hand-side vector b
 
 /** Creates a matrix with a given non-zero structure, and sets nonzero
     values.
@@ -309,13 +304,18 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
 */
 
-void Hypre::init_matrix (Hierarchy & hierarchy)
+void Hypre::init_linear (Parameters          & parameters,
+			 Hierarchy           & hierarchy,
+			 std::vector<Point *>  points,
+			 std::vector<Sphere *> spheres)
 
 {
-  // Create the hypre matrix object
+  // Create the hypre matrix A_, solution X_, and right-hand side B_ objects
 
   // *******************************************************************
   HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, graph_, &A_);
+  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid_, &X_);
+  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid_, &B_);
   // *******************************************************************
 
   // Set the matrix type
@@ -324,12 +324,14 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
   HYPRE_SStructMatrixSetObjectType (A_,HYPRE_SSTRUCT);
   // *******************************************************************
 
-  // Initialize the hypre matrix object
+  // Initialize the hypre matrix and vector objects
 
   // *******************************************************************
   HYPRE_SStructMatrixInitialize (A_);
+  HYPRE_SStructVectorInitialize (X_);
+  HYPRE_SStructVectorInitialize (B_);
   // *******************************************************************
-
+ 
   ItHierarchyLevels itl (hierarchy);
 
   int part = 0;
@@ -369,115 +371,16 @@ void Hypre::init_matrix (Hierarchy & hierarchy)
     ++ part;
   }
 
-  // Assemble the matrix
-
-  // *******************************************************************
-  HYPRE_SStructMatrixAssemble (A_);
-  // *******************************************************************
-
-  // Write the matrix to a file for debugging
-
-  if (dump_matrix) {
-
-    // *******************************************************************
-    HYPRE_SStructMatrixPrint ("A",A_,1);
-    // *******************************************************************
-
-  }
-
-}
-
-//----------------------------------------------------------------------
-
-/// Initialize the right-hand-side vector b
-
-void Hypre::init_vectors (Parameters          & parameters,
-			  Hierarchy           & hierarchy,
-			  std::vector<Point *>  points,
-			  std::vector<Sphere *> spheres)
-
-{
-  // Create the hypre solution x and right-hand side b vector object
-
-  // *******************************************************************
-  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid_, &B_);
-  // *******************************************************************
-
-  // *******************************************************************
-  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid_, &X_);
-  // *******************************************************************
-
-  // Initialize the hypre vector objects
-
-  // *******************************************************************
-  HYPRE_SStructVectorInitialize (B_);
-  // *******************************************************************
-
-  // *******************************************************************
-  HYPRE_SStructVectorInitialize (X_);
-  // *******************************************************************
-
-
-  // Clear vectors
-
-  if (debug) printf ("%s:%d Clear hypre vectors here: assumed done at initialization\n",
-		     __FILE__,__LINE__);
-
   // Initialize B_ according to density
 
   //    scaling0 = scaling factor for root-level, assuming matrix
   //    coefficients [-1,-1,-1,6,-1,-1,-1]
 
 
-  Scalar G  = Constants::G();
-  Scalar pi = Constants::pi();
-  Scalar scaling0 = -4.0*G*pi;
-
   Scalar shift_b_sum = 0.0;
 
-  int i;
-  for (i=0; i<points.size(); i++) {
-    Point & point      = *points[i];
-    Grid & grid        = hierarchy.grid(point.igrid());
-    Scalar cell_volume = grid.h(0) * grid.h(1) * grid.h(2);
-    Scalar density     = point.mass() / cell_volume;
-    Scalar value       = scaling0 * density;
-
-    // Add contribution of the point to the right-hand side vector
-
-    int index[3];
-    for (int k=0; k<3; k++) {
-      Scalar ap = point.x(k)      - grid.x_lower(k);
-      Scalar ag = grid.x_upper(k) - grid.x_lower(k);
-      int    ig = grid.num_unknowns(k);
-      int    i0 = grid.i_lower(k);
-      index[k] = int (ap/ag*ig) + i0;
-     
-    }
-    if (debug) {
-      
-      point.print();
-      grid.print();
-      printf ("Index of point in grid (%d,%d,%d)\n",index[0],index[1],index[2]);
-    }
-
-    int part = grid.level();
-    int var = 0;
-    
-    shift_b_sum += value;
-
-    // *******************************************************************
-    HYPRE_SStructVectorAddToValues (B_, part, index, var, &value);
-    // *******************************************************************
-
-   
-  }
-
-  if (spheres.size() > 0) {  
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    NOT_IMPLEMENTED("Contribution of sphere mass to right-hand side");
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  }
+  shift_b_sum += init_vector_points_  (hierarchy,points);
+  shift_b_sum += init_vector_spheres_ (hierarchy,spheres);
 
   // Shift B to zero out the null space if problem is periodic
 
@@ -506,7 +409,7 @@ void Hypre::init_vectors (Parameters          & parameters,
 	int lower[3] = { grid->i_lower(0), grid->i_lower(1), grid->i_lower(2) };
 	int upper[3] = { grid->i_upper(0), grid->i_upper(1), grid->i_upper(2) };
 	Scalar * values = new Scalar[grid->num_unknowns()];
-	for (i=0; i<grid->num_unknowns(); i++) values[i] = shift_b_amount;
+	for (int i=0; i<grid->num_unknowns(); i++) values[i] = shift_b_amount;
 	HYPRE_SStructVectorAddToBoxValues (B_,part,lower,upper,0,values);
 	delete [] values;
       }
@@ -516,22 +419,22 @@ void Hypre::init_vectors (Parameters          & parameters,
 		       __FILE__,__LINE__,shift_b_count,shift_b_sum,shift_b_amount);
   
   }
-  // Assemble the vectors
+
+  // Assemble the matrix vectors
 
   // *******************************************************************
+  HYPRE_SStructMatrixAssemble (A_);
   HYPRE_SStructVectorAssemble (B_);
   HYPRE_SStructVectorAssemble (X_);
   // *******************************************************************
 
   // Write the vector to a file for debugging
 
-  if (dump_vector) {
+  // *******************************************************************
+  if (dump_a) HYPRE_SStructMatrixPrint ("A",A_,1);
+  if (dump_b) HYPRE_SStructVectorPrint ("B",B_,1);  
+  // *******************************************************************
 
-    // *******************************************************************
-    HYPRE_SStructVectorPrint ("B",B_,1);
-    // *******************************************************************
-
-  }
 }
 
 //----------------------------------------------------------------------
@@ -546,11 +449,10 @@ void Hypre::solve (Hierarchy & hierarchy)
   } else {
     solve_pfmg_(hierarchy);
   }
-  if (dump_vector || dump_solution) {
-    // *******************************************************************
-    HYPRE_SStructVectorPrint ("X",X_,1);
-    // *******************************************************************
-  }
+  
+  // *******************************************************************
+  if (dump_x) HYPRE_SStructVectorPrint ("X",X_,1);
+  // *******************************************************************
 
 }
 
@@ -828,14 +730,80 @@ void Hypre::init_matrix_parents_neighbor_ (Grid & grid)
 
 //------------------------------------------------------------------------
 
+/// Add contributions from point sources to right-hand side B
+
+Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
+				 std::vector<Point *> & points)
+
+{
+
+  Scalar scaling0 = -4.0*Constants::G()*Constants::pi();
+
+  Scalar shift_b_sum = 0.0;
+
+  int i;
+  for (i=0; i<points.size(); i++) {
+    Point & point      = *points[i];
+    Grid & grid        = hierarchy.grid(point.igrid());
+    Scalar cell_volume = grid.h(0) * grid.h(1) * grid.h(2);
+    Scalar density     = point.mass() / cell_volume;
+    Scalar value       = scaling0 * density;
+
+    // Add contribution of the point to the right-hand side vector
+
+    int index[3];
+    for (int k=0; k<3; k++) {
+      Scalar ap = point.x(k)      - grid.x_lower(k);
+      Scalar ag = grid.x_upper(k) - grid.x_lower(k);
+      int    ig = grid.num_unknowns(k);
+      int    i0 = grid.i_lower(k);
+      index[k] = int (ap/ag*ig) + i0;
+     
+    }
+    if (debug) {
+      
+      point.print();
+      grid.print();
+      printf ("Index of point in grid (%d,%d,%d)\n",index[0],index[1],index[2]);
+    }
+
+    int part = grid.level();
+    int var = 0;
+    
+    shift_b_sum += value;
+
+    // *******************************************************************
+    HYPRE_SStructVectorAddToValues (B_, part, index, var, &value);
+    // *******************************************************************
+  }
+  return shift_b_sum;
+}
+
+//------------------------------------------------------------------------
+
+/// Add contributions from sphere sources to right-hand side B
+
+Scalar Hypre::init_vector_spheres_ (Hierarchy             & hierarchy,
+				    std::vector<Sphere *> & spheres)
+
+{
+
+  if (spheres.size() > 0) {  
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    NOT_IMPLEMENTED("Contribution of sphere mass to right-hand side");
+    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  }
+
+  return 0.0;
+}
+
+//------------------------------------------------------------------------
+
 /// Initialize the PFMG hypre solver
 
 void Hypre::solve_pfmg_ (Hierarchy & hierarchy)
 
 {
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::solve_pfmg_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   HYPRE_SStructSysPFMGCreate    (MPI_COMM_WORLD, &solver_);
   HYPRE_SStructSysPFMGSetLogging(solver_, 1);

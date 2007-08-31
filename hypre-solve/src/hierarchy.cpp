@@ -22,6 +22,7 @@
 
 #include "scalar.hpp"
 #include "point.hpp"
+#include "domain.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
 #include "grid.hpp"
@@ -250,7 +251,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
     determines the neighbor structure for each individual zone along
     the boundary. Only performed for local grids. */
 
-void Hierarchy::init_faces () throw ()
+void Hierarchy::init_faces (Domain & domain) throw ()
 
 {
   int k;
@@ -259,20 +260,23 @@ void Hierarchy::init_faces () throw ()
 
   // For level >= 1, check parent, parents neighbors neighbors and boundary
 
-  for (k=0; k<num_levels(); k++) {
+  ItHierarchyLevels itl(*this);
 
-    ItLevelGridsLocal itg (level(k));
+  while (Level * level = itl++) {
+
+    ItLevelGridsLocal itg (*level);
 
     while (Grid * grid = itg++) {
 
-      // Update each grid's Faces's boundary mask
+      ItGridNeighbors itn (*grid);
 
-      for (int j=0; j < grid->num_neighbors(); j++) {
+      while (Grid * neighbor = itn++) {
 
-	Grid & neighbor = grid->neighbor(j);
+	// Update each grid's Faces's boundary mask
+
 	int gl[3],gu[3];
-
-	grid->find_neighbor_indices (neighbor,gl,gu);
+	
+	grid->find_neighbor_indices (*neighbor,gl,gu);
 
 	if (debug) 
 	  printf ("DEBUG %s:%d  Neighbor indices of %d = (%d,%d,%d) : (%d,%d,%d)\n",

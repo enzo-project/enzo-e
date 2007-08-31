@@ -31,8 +31,7 @@ public:
 		       Mpi        & mpi);
   void init_stencil   (Hierarchy & hierarchy);
   void init_graph     (Hierarchy & hierarchy);
-  void init_matrix    (Hierarchy & hierarchy);
-  void init_vectors   (Parameters          & parameters,
+  void init_linear    (Parameters          & parameters,
 		       Hierarchy           & hierarchy,
 		       std::vector<Point *>  points,
 		       std::vector<Sphere *> spheres);
@@ -59,6 +58,13 @@ private:
                                         Grid & grid);
   void init_matrix_neighbors_children_ (Grid & grid);
   void init_matrix_parents_neighbor_   (Grid & grid);
+
+  // init_vector() functions
+
+  Scalar init_vector_points_             (Hierarchy            & hierarchy,
+					  std::vector<Point *> & points);
+  Scalar init_vector_spheres_            (Hierarchy             & hierarchy,
+					  std::vector<Sphere *> & spheres);		
 
   // solve() functions
 
