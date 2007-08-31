@@ -1,0 +1,48 @@
+%0       1         2         3         4         5         6         7         8
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+\documentclass[10pt]{article}
+
+\include{include}
+
+%==================================================================
+% Margins and spacing
+%==================================================================
+
+\begin{document}
+
+%=======================================================================
+\TITLE{Petascale Hydrodynamics}
+      {James Bordner}
+      {in preparation}
+%=======================================================================
+
+\tableofcontents
+%======================================================================
+\section{Introduction}
+%======================================================================
+
+Parallelization strategies:
+
+\begin{enumerate}
+\item MPI blocking
+\item MPI nonblocking
+\item MPI-2 one-sided
+\item UPC
+\item CAF \\
+\item MPI blocking    + OpenMP
+\item MPI nonblocking + OpenMP
+\item MPI-2 one-sided + OpenMP \\
+\item MPI blocking    + UPC
+\item MPI nonblocking + UPC
+\item MPI-2 one-sided + UPC \\
+\item MPI blocking    + CAF
+\item MPI nonblocking + CAF
+\item MPI-2 one-sided + CAF
+\end{enumerate}
+
+\EndDOCUMENT
+
+\end{document}
+%==================================================================
+
