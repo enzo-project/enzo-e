@@ -49,7 +49,10 @@ while ($i <= $#test_procs)
 
    printf "%-20s" "in.${test}"
 
-   mpirun -np ${ip} $EXEC $EXE/in.${test} >& $TEST/out.${test}
+   cp $EXE/in.${test} $TEST
+   cp $EXE/in.problem $TEST
+
+   mpirun -np ${ip} $EXEC in.${test} >& $TEST/out.${test}
 
    awk 'BEGIN {c="Fail"}; /End '"$NAME"'/{c="Pass"}; END{print c}' out.${test}
 
