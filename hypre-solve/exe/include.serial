@@ -23,5 +23,5 @@ set LGPS = ( \
 #                  L1.G1.P111.N128 1 \
 #                  )
 
-set plot_types = (total-time total-mem)
+set plot_types = (size-time)
 

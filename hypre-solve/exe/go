@@ -73,34 +73,54 @@ while ($i <= $#LGPS)
 
    foreach plot_type ($plot_types)
 
-      if ($plot_type == "total-time") then
-
-         set lcaperf_dir = (JBPERF.*)
-         if ($#lcaperf_dir > 1) then
-            set lcaperf_dir = $lcaperf_dir[$#lcaperf_dir]
-            echo "WARNING: More than one JBPERF.??? directory--using newest"
-         endif
+      set lcaperf_dir = (JBPERF.*)
+      if ($#lcaperf_dir > 1) then
+         set lcaperf_dir = $lcaperf_dir[$#lcaperf_dir]
+         echo "WARNING: More than one JBPERF.??? directory--using newest"
+      endif
    
-         cd $lcaperf_dir
+      cd $lcaperf_dir
 
-         # Accumulate total-time data
+      set lcaperf_files = ($TEST/JBPERF.???/?/?/?/?/?.HS)
+               # Find the datafiles
+   
+      set np = $#lcaperf_files
+
+      if ($#lcaperf_files > 1) then
+         echo "Found $#lcaperf_files lcaperf files: using rank 0"
+         set lcaperf_files = $lcaperf_files[1]
+      endif
+
+      if ($plot_type == "size-time") then
+
+         # Accumulate size-time data
    
          set region = 0-total
-         set outdata = $EXE/total-time.data
+         set outdata = $EXE/size-time.data
 
          if ($first_problem) then
            rm $outdata
            set first_problem = 0
          endif
 
-         set lcaperf_files = ($TEST/JBPERF.???/?/?/?/?/?.HS)
-                  # Find the datafiles
-   
-         set np = $#lcaperf_files
+         foreach infile ($lcaperf_files)
+            jb-global problem-size $size < $infile | jb-convert g2a problem-size > tmpfile
+         
+            cat tmpfile \
+            | jb-region $region \
+            | jb-columns problem-size time-real-incl >> $outdata
+         end
 
-         if ($#lcaperf_files > 1) then
-            echo "Found $#lcaperf_files lcaperf files: using rank 0"
-            set lcaperf_files = $lcaperf_files[1]
+      else if ($plot_type == "procs-time") then
+
+         # Accumulate procs-time data
+   
+         set region = 0-total
+         set outdata = $EXE/size-time.data
+
+         if ($first_problem) then
+           rm $outdata
+           set first_problem = 0
          endif
 
          foreach infile ($lcaperf_files)
@@ -121,11 +141,11 @@ while ($i <= $#LGPS)
 end
 
 #----------------------------------------------------------------------
-# Plot total-time
+# Plot size-time
 #----------------------------------------------------------------------
 
-set outdata = $EXE/total-time.data
-set outpng  = $EXE/total-time.png
+set outdata = $EXE/size-time.data
+set outpng  = $EXE/size-time.png
 gnuplot <<EOF
 set output '$outpng'
 set terminal png large size 800,600
