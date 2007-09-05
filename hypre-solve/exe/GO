@@ -1,0 +1,13 @@
+#!/bin/csh -f
+
+set problems = ( \
+     serial-unigrid \
+     parallel-unigrid \
+     )
+
+foreach problem ($problems)
+   echo
+   echo "$problem"
+   echo
+   go $problem
+end
