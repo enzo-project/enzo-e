@@ -9,3 +9,6 @@ set test_procs = (L1.G1.P111.N32   1 \
                   L1.G2.P122.N32   4 \
                   L1.G2.P222.N32   8 \
                   )
+
+set plot_types = (total-time total-mem)
+

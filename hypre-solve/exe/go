@@ -6,7 +6,7 @@ else
    set type = $1
 endif
 
-# Include file defining "test_procs" array
+# Include file defining "$LGPS" (level grids procs size) and "$plot_types" arrays
 
 source include.$type
 
@@ -20,41 +20,119 @@ set NAME = hypre-solve
 set EXEC = ${BIN}/${NAME}
 
 rm -f $EXEC
+printf "Compiling..."
 make -C $SRC install >& out.make
-
-
-#             L1.G1.P111.N256 \
-
-# set tests = (L1.G1.P111 L1.G2.P211  )
-#             L1.G2.P121 L1.G2.P112
-#             L2.G16.P111 L2.G16.P222 L2.G16.P811 L2.G2.P111)
-
-
 echo
 
-set i = 1
-while ($i <= $#test_procs)
 
-   set test = $test_procs[$i]
+#================================================================
+# RUN TESTS FROM include.$type
+#================================================================
+
+set first_problem = 1
+set i = 1
+while ($i <= $#LGPS)
+
+   set levels = $LGPS[$i]
    @ i = $i + 1
-   set ip   = $test_procs[$i]
+   set grids   = $LGPS[$i]
    @ i = $i + 1
+   set np0   = $LGPS[$i]
+   @ i = $i + 1
+   set np1   = $LGPS[$i]
+   @ i = $i + 1
+   set np2   = $LGPS[$i]
+   @ i = $i + 1
+   set size   = $LGPS[$i]
+   @ i = $i + 1
+
+
+   @ np = $np0 * $np1 * $np2
+   set test = L${levels}.G${grids}.P${np0}${np1}${np2}.N${size}
 
    set TEST = $EXE/$test
    rm -rf $TEST
    mkdir $TEST
+
+   #----------------------------------------------------------------------
+   # Execute the test
+
    cd $TEST
 
-   printf "%-20s" "in.${test}"
+   printf "%-20s" "${test}"
 
    cp $EXE/in.${test} $TEST
    cp $EXE/in.problem $TEST
 
-   mpirun -np ${ip} $EXEC $EXE/in.${test} >& $TEST/out.${test}
+   mpirun -np ${np} $EXEC $EXE/in.${test} >& $TEST/out.${test}
 
    awk 'BEGIN {c="Fail"}; /End '"$NAME"'/{c="Pass"}; END{print c}' out.${test}
 
+   #----------------------------------------------------------------------
+   # Generate plots
+
+   foreach plot_type ($plot_types)
+
+      if ($plot_type == "total-time") then
+
+         set lcaperf_dir = (JBPERF.*)
+         if ($#lcaperf_dir > 1) then
+            set lcaperf_dir = $lcaperf_dir[$#lcaperf_dir]
+            echo "WARNING: More than one JBPERF.??? directory--using newest"
+         endif
+   
+         cd $lcaperf_dir
+
+         # Accumulate total-time data
+   
+         set region = 0-total
+         set outdata = $EXE/total-time.data
+
+         if ($first_problem) then
+           rm $outdata
+           set first_problem = 0
+         endif
+
+         set lcaperf_files = ($TEST/JBPERF.???/?/?/?/?/?.HS)
+                  # Find the datafiles
+   
+         set np = $#lcaperf_files
+
+         if ($#lcaperf_files > 1) then
+            echo "Found $#lcaperf_files lcaperf files: using rank 0"
+            set lcaperf_files = $lcaperf_files[1]
+         endif
+
+         foreach infile ($lcaperf_files)
+            jb-global problem-size $size < $infile | jb-convert g2a problem-size > tmpfile
+         
+            cat tmpfile \
+            | jb-region $region \
+            | jb-columns problem-size time-real-incl >> $outdata
+         end
+
+      else if ($plot_type == "total-mem") then
+         echo "Unimplemented plot type $plot_type"
+      else
+         echo "Unknown plot type "'"'"$plot_type"'"'
+      endif
+   end
+
 end
 
-cd $EXEC
-source go.perf
+#----------------------------------------------------------------------
+# Plot total-time
+#----------------------------------------------------------------------
+
+set outdata = $EXE/total-time.data
+set outpng  = $EXE/total-time.png
+gnuplot <<EOF
+set output '$outpng'
+set terminal png large size 800,600
+set title 'Serial unigrid time per zone'
+set xlabel 'N^{1/3}'
+set ylabel 'ms per zone'
+plot '$outdata' using (\$1):(\$2/\$1/\$1/\$1) title 'run' w lp
+EOF
+
+
