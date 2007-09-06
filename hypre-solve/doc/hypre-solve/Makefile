@@ -1,6 +1,6 @@
-all: hypre-grav.pdf  hypre-grav.ps
+all: hypre-solve.pdf  hypre-solve.ps
 
-hypre-grav:  hypre-grav.ps 
+hypre-solve:  hypre-solve.ps 
 
 FIG = fig/discret1.eps fig/discret2.eps fig/discret3.eps \
       fig/discret4.eps fig/discret5.eps fig/discret6.eps \
@@ -9,21 +9,21 @@ FIG = fig/discret1.eps fig/discret2.eps fig/discret3.eps \
 
 
 ########################################################################
-hypre-grav.ps:hypre-grav.dvi $(FIG)
-	dvips -o hypre-grav.ps hypre-grav.dvi
-hypre-grav.pdf:hypre-grav.dvi $(FIG)
-	dvipdf hypre-grav.dvi
-hypre-grav.dvi:hypre-grav.tex include.tex UML
-	-latex hypre-grav
-	-latex hypre-grav
+hypre-solve.ps:hypre-solve.dvi $(FIG)
+	dvips -o hypre-solve.ps hypre-solve.dvi
+hypre-solve.pdf:hypre-solve.dvi $(FIG)
+	dvipdf hypre-solve.dvi
+hypre-solve.dvi:hypre-solve.tex include.tex UML
+	-latex hypre-solve
+	-latex hypre-solve
 UML:
 	make -C uml
-hypre-grav2.ps:hypre-grav.ps
-	a2ps -M Letter -2 hypre-grav.ps -o hypre-grav2.ps
-pdf.hypre-grav:hypre-grav.dvi
-	dvipdf hypre-grav.dvi hypre-grav.pdf
-hypre-grav2.pdf:hypre-grav2.ps
-	ps2pdf hypre-grav2.ps hypre-grav2.pdf
+hypre-solve2.ps:hypre-solve.ps
+	a2ps -M Letter -2 hypre-solve.ps -o hypre-solve2.ps
+pdf.hypre-solve:hypre-solve.dvi
+	dvipdf hypre-solve.dvi hypre-solve.pdf
+hypre-solve2.pdf:hypre-solve2.ps
+	ps2pdf hypre-solve2.ps hypre-solve2.pdf
 
 include.tex:
 	ln -sf ~/latex/include-common.tex include.tex

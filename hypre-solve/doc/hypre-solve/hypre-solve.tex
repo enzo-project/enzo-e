@@ -595,8 +595,27 @@ Types of matrix elements for a given unknown:
 \end{tabular}
 
 %=======================================================================
-\section{Results} \label{s:results}
+\section{Test Results} \label{s:results}
 %=======================================================================
+
+\begin{description}
+\item [$N_0$: ] Root-grid size per processor
+\item [$N_P$: ] Number of processors
+\item [$N_G$: ] Number of grids
+\item [$N_L$: ] Number of levels
+\item [$N_Z$: ] Number of zones
+\end{description}
+
+\begin{tabular}{l|ccccc} \\
+Problem & $N_0$ & $N_P$ & $N_G$ & $N_L$ & $N_Z$ \\ \hline
+serial-unigrid       & $8^3:\sqrt{2}:128^3$ & & & \\
+parallel-unigrid     & $16^3:2\ldots 128^3$ & & & \\
+Simple serial AMR    & $32^3\ldots 128^3$ & & & \\
+Simple parallel AMR  & $32^3\ldots 128^3$ & & & \\
+General serial AMR   & $32^3\ldots 128^3$ & & & \\
+General parallel AMR & $32^3\ldots 128^3$ & & & \\
+Large AMR            & $32^3\ldots 128^3$ & & & \\
+\end{tabular}
 
 \EndDOCUMENT
 
