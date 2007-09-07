@@ -34,11 +34,6 @@
 #include "hypre.hpp"
 
 const int debug  = 0;
-
-const int dump_a = 0;
-const int dump_x = 0;
-const int dump_b = 0;
-
 const int trace  = 0;
 
 //======================================================================
@@ -377,10 +372,17 @@ void Hypre::init_linear (Parameters          & parameters,
   //    coefficients [-1,-1,-1,6,-1,-1,-1]
 
 
+  Scalar local_shift_b_sum = 0.0;
+
+  local_shift_b_sum += init_vector_points_  (hierarchy,points);
+  local_shift_b_sum += init_vector_spheres_ (hierarchy,spheres);
+
   Scalar shift_b_sum = 0.0;
 
-  shift_b_sum += init_vector_points_  (hierarchy,points);
-  shift_b_sum += init_vector_spheres_ (hierarchy,spheres);
+  MPI_Allreduce (&local_shift_b_sum, &shift_b_sum, 1, MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
+
+  if (debug) printf ("b_sum (local,global) = (%g,%g)\n",local_shift_b_sum,shift_b_sum);
+
 
   // Shift B to zero out the null space if problem is periodic
 
@@ -399,6 +401,7 @@ void Hypre::init_linear (Parameters          & parameters,
     }
 
     Scalar shift_b_amount = - shift_b_sum / shift_b_count;
+    if (debug) printf ("Periodic shift = %g\n",shift_b_amount);
 
     // Perform the shift
     
@@ -431,8 +434,8 @@ void Hypre::init_linear (Parameters          & parameters,
   // Write the vector to a file for debugging
 
   // *******************************************************************
-  if (dump_a) HYPRE_SStructMatrixPrint ("A",A_,1);
-  if (dump_b) HYPRE_SStructVectorPrint ("B",B_,1);  
+  if (parameters.value("dump_a") == "true") HYPRE_SStructMatrixPrint ("A",A_,1);
+  if (parameters.value("dump_b") == "true") HYPRE_SStructVectorPrint ("B",B_,1);  
   // *******************************************************************
 
 }
@@ -441,7 +444,8 @@ void Hypre::init_linear (Parameters          & parameters,
 
 /// Initialize and solve the linear solver
 
-void Hypre::solve (Hierarchy & hierarchy)
+void Hypre::solve (Parameters & parameters,
+		   Hierarchy & hierarchy)
 
 {
   if (hierarchy.num_levels() > 1) {
@@ -451,7 +455,7 @@ void Hypre::solve (Hierarchy & hierarchy)
   }
   
   // *******************************************************************
-  if (dump_x) HYPRE_SStructVectorPrint ("X",X_,1);
+  if (parameters.value("dump_x") == "true") HYPRE_SStructVectorPrint ("X",X_,1);
   // *******************************************************************
 
 }
@@ -745,36 +749,42 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
   for (i=0; i<points.size(); i++) {
     Point & point      = *points[i];
     Grid & grid        = hierarchy.grid(point.igrid());
-    Scalar cell_volume = grid.h(0) * grid.h(1) * grid.h(2);
-    Scalar density     = point.mass() / cell_volume;
-    Scalar value       = scaling0 * density;
+    if (grid.is_local()) {
 
-    // Add contribution of the point to the right-hand side vector
+      Scalar cell_volume = grid.h(0) * grid.h(1) * grid.h(2);
+      Scalar density     = point.mass() / cell_volume;
+      Scalar value       = scaling0 * density;
 
-    int index[3];
-    for (int k=0; k<3; k++) {
-      Scalar ap = point.x(k)      - grid.x_lower(k);
-      Scalar ag = grid.x_upper(k) - grid.x_lower(k);
-      int    ig = grid.num_unknowns(k);
-      int    i0 = grid.i_lower(k);
-      index[k] = int (ap/ag*ig) + i0;
+      // Add contribution of the point to the right-hand side vector
+
+      int index[3];
+      for (int k=0; k<3; k++) {
+	Scalar ap = point.x(k)      - grid.x_lower(k);
+	Scalar ag = grid.x_upper(k) - grid.x_lower(k);
+	int    ig = grid.num_unknowns(k);
+	int    i0 = grid.i_lower(k);
+	index[k] = int (ap/ag*ig) + i0;
      
-    }
-    if (debug) {
-      
-      point.print();
-      grid.print();
-      printf ("Index of point in grid (%d,%d,%d)\n",index[0],index[1],index[2]);
-    }
+      }
+      if (debug) {
+	point.print();
+	grid.print();
+	printf ("Point index  = %d %d %d)\n",index[0],index[1],index[2]);
+	printf ("Cell size    = %g %g %g\n",grid.h(0),grid.h(1),grid.h(2));
+	printf ("Cell volume  = %g\n",cell_volume);
+	printf ("Cell density = %g\n",density);
+	printf ("RHS contribution = %g\n",value);
+      }
 
-    int part = grid.level();
-    int var = 0;
+      int part = grid.level();
+      int var = 0;
     
-    shift_b_sum += value;
+      shift_b_sum += value;
 
-    // *******************************************************************
-    HYPRE_SStructVectorAddToValues (B_, part, index, var, &value);
-    // *******************************************************************
+      // *******************************************************************
+      HYPRE_SStructVectorAddToValues (B_, part, index, var, &value);
+      // *******************************************************************
+    }
   }
   return shift_b_sum;
 }

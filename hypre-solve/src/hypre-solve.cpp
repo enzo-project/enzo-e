@@ -170,7 +170,7 @@ int main(int argc, char **argv)
     JBPERF_START("5-hypre-solve");
   // ***************
 
-    hypre.solve (hierarchy);
+    hypre.solve (problem.parameters(),hierarchy);
 
   // ***************
     JBPERF_STOP("5-hypre-solve");

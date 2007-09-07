@@ -35,7 +35,8 @@ public:
 		       Hierarchy           & hierarchy,
 		       std::vector<Point *>  points,
 		       std::vector<Sphere *> spheres);
-  void solve          (Hierarchy & hierarchy);
+  void solve          (Parameters & parameters,
+		       Hierarchy & hierarchy);
   void evaluate       (Hierarchy & hierarchy);
 
 

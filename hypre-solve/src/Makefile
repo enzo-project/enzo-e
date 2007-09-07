@@ -13,7 +13,7 @@ JBDEF = -DUSE_JBPERF
 # Assemble defines, includes, and libs
 DEF = $(JBDEF)
 INC = -I$(HOME)/include 
-LIBS = -L$(HOME)/lib -lHYPRE_sstruct_ls -lHYPRE_sstruct_mv -lHYPRE_struct_ls -lHYPRE_struct_mv -lHYPRE_parcsr_ls -lHYPRE_parcsr_mv -lHYPRE_IJ_mv -lHYPRE_LSI -lHYPRE_MatrixMatrix -lHYPRE_DistributedMatrix -lHYPRE_utilities $(JBLIB)
+LIBS = -L$(HOME)/lib -lHYPRE $(JBLIB)
 
 # Set object files
 OBJS = \
