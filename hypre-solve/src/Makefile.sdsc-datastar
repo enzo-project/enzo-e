@@ -1,1 +1,2 @@
+include Make.include
 MPCPP = mpCC

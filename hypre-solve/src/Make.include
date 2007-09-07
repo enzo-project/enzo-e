@@ -1,7 +1,6 @@
 SHELL = /bin/bash
 
 # Define MPCPP
-include Make.machine
 
 FLAGS = -g
 
