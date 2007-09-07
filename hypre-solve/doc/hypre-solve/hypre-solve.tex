@@ -598,13 +598,15 @@ Types of matrix elements for a given unknown:
 \section{Test Results} \label{s:results}
 %=======================================================================
 
-\begin{description}
-\item [$N_0$: ] Root-grid size per processor
-\item [$N_P$: ] Number of processors
-\item [$N_G$: ] Number of grids
-\item [$N_L$: ] Number of levels
-\item [$N_Z$: ] Number of zones
-\end{description}
+\begin{tabular}{l|l} \\
+\textbf{Term} & \textbf{Term description} \\ \hline
+$N_0$ & Root-grid zones per processor \\
+$n_0$ & Root-grid zones-per-axis  per processor \\
+$N_P$ & Number of processors \\
+$N_G$ & Number of grids \\
+$N_L$ & Number of levels \\
+$N_Z$ & Number of zones \\
+\end{tabular}
 
 \begin{tabular}{l|ccccc} \\
 Problem & $N_0$ & $N_P$ & $N_G$ & $N_L$ & $N_Z$ \\ \hline
@@ -615,6 +617,18 @@ Simple parallel AMR  & $32^3\ldots 128^3$ & & & \\
 General serial AMR   & $32^3\ldots 128^3$ & & & \\
 General parallel AMR & $32^3\ldots 128^3$ & & & \\
 Large AMR            & $32^3\ldots 128^3$ & & & \\
+\end{tabular}
+
+\begin{tabular}{l|l} \\
+\textbf{Plot name} & \textbf{Plot description} \\ \hline
+\code{procs-mem} & Processor count versus memory (bytes) \\
+\code{procs-mem-zone} & Processor count versus memory per zone (bytes) \\
+\code{procs-time} & Processor count versus time (seconds) \\
+\code{procs-time-zone} & Processor count versus time per zone (seconds) \\
+\code{size-mem-zone} &  Problem size (number of zones) versus memory per zone (bytes) \\
+\code{size-mem-zone} &  Problem size ($n$) versus memory (bytes) \\
+\code{size-time-zone} &  Problem size (number of zones) versus time per zone (seconds) \\
+\code{size-time-zone} &  Problem size ($n$) versus time (seconds) \\
 \end{tabular}
 
 \EndDOCUMENT
