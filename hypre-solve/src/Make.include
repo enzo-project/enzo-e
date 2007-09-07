@@ -61,6 +61,7 @@ distclean: clean
 doc:
 	doxygen
 	cp doxygen.css html
+	cd latex; latex refman.tex; latex refman.tex; dvips -o refman.ps refman.dvi; mv refman.ps hypre-solve-ref.ps
 .PHONY: clean-doc
 clean-doc:
 	rm -rf html latex
