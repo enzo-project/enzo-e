@@ -44,21 +44,17 @@ private:
 
   // init_graph() functions
 
-  void init_graph_children_            (Grid & grid);
-  void init_graph_parent_              (Hierarchy & hierarchy,
-				        Grid & grid);
-  void init_graph_neighbors_children_  (Grid & grid);
-  void init_graph_parents_neighbor_    (Grid & grid);
+  void init_graph_fine_      (Grid & grid);
+  void init_graph_coarse_    (Hierarchy & hierarchy,
+			      Grid & grid);
 
   // init_matrix() functions
 
-  void init_matrix_stencil_            (Grid & grid);
-  void init_matrix_clear_              (Grid & grid);
-  void init_matrix_children_           (Grid & grid);
-  void init_matrix_parent_             (Hierarchy & hierarchy,
-                                        Grid & grid);
-  void init_matrix_neighbors_children_ (Grid & grid);
-  void init_matrix_parents_neighbor_   (Grid & grid);
+  void init_matrix_stencil_  (Grid & grid);
+  void init_matrix_clear_    (Grid & grid);
+  void init_matrix_fine_     (Grid & grid);
+  void init_matrix_coarse_   (Hierarchy & hierarchy,
+                              Grid & grid);
 
   // init_vector() functions
 

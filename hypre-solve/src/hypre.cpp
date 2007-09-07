@@ -206,18 +206,17 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
     each part (level), and non-zeros for graph entries connecting
     linked parts.
 
-    Setting up the matrix nonzero structure is done with the following
-    steps:
+    Setting up the matrix nonzero structure is performed using the
+    following steps:
 
-     - Define the stencil for all interior grid elements
+     1. Define stencil connections within each level
 
-     - Handle coarse unknowns adjacent to fine unknowns in child
-     - Handle fine unknowns adjacent to coarse unknowns in parent
+     2. Define connections for unknowns adjacent to coarse unknowns
 
-     - Handle coarse unknowns adjacent to fine unknowns in neighbor's child
-     - Handle fine unknowns adjacent to coarse unknowns in parent's neighbor
-     
-    The matrix nonzero structure is generally nonsymmetric.
+     3. Define connections for unknowns adjacent to fine unknowns 
+
+    The matrix nonzero structure is generally nonsymmetric.  Only step
+    1 is required for unigrid problems.
 
 */
 
@@ -236,7 +235,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
   while (Level * level = itl++) {
 
-    // Define stencil connections within each part
+    // 1. Define stencil connections within each level
 
     // *******************************************************************
     HYPRE_SStructGraphSetStencil (graph_, part, 0, stencil_);
@@ -246,22 +245,13 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
     while (Grid * grid = itg++) {
 
-      // Define connections for unknowns adjacent to fine unknowns in children
+      // 2. Define connections for unknowns adjacent to coarse unknowns in parent
 
-      init_graph_children_(*grid);
+      init_graph_coarse_(hierarchy,*grid);
 
-      // Define connections for unknowns adjacent to coarse unknowns in parent
+      // 3. Define connections for unknowns adjacent to fine unknowns in children
 
-      init_graph_parent_(hierarchy,*grid);
-
-      // Define connections for unknowns adjacent to fine unknowns in neighbor's child
-
-      init_graph_neighbors_children_(*grid);
-
-      // Define connections for unknowns adjacent to coarse unknowns
-      // in parent's neighbor
-
-      init_graph_parents_neighbor_(*grid);
+      init_graph_fine_(*grid);
 
     }
     ++ part;
@@ -286,16 +276,16 @@ void Hypre::init_graph (Hierarchy & hierarchy)
     Setting up the matrix elements is done with the following
     steps:
 
-     - Set stencil values
-     - Clear stencil values in overlapped grids
+     1. Set stencil values
 
-     - Set coarse unknowns adjacent to fine unknowns in child
-     - Set fine unknowns adjacent to coarse unknowns in parent
+     2. Clear stencil values in overlapped grids
 
-     - Set coarse unknowns adjacent to fine unknowns in neighbor's child
-     - Set fine unknowns adjacent to coarse unknowns in parent's neighbor
-     
-    The matrix is generally nonsymmetric.
+     3. Set values for unknowns adjacent to coarse unknowns
+
+     4. Set values for unknowns adjacent to fine unknowns
+
+    The matrix is generally nonsymmetric.  Only step 1 is required for
+    unigrid problems.
 
 */
 
@@ -337,30 +327,21 @@ void Hypre::init_linear (Parameters          & parameters,
 
     while (Grid * grid = itg++) {
 
-      // Set matrix stencil values for each grid
+      // 1. Set stencil values
 
       init_matrix_stencil_(*grid);
 
-      // Clear matrix stencil values under child grids
+      // 2. Clear stencil values in overlapped grids
 
       init_matrix_clear_(*grid);
 
-      // Set matrix values for unknowns adjacent to fine unknowns in children
+      // 3. Set values for unknowns adjacent to coarse unknowns
 
-      init_matrix_children_(*grid);
+      init_matrix_coarse_(hierarchy,*grid);
 
-      // Set matrix values for unknowns adjacent to coarse unknowns in parent
+      // 4. Set values for unknowns adjacent to fine unknowns
 
-      init_matrix_parent_(hierarchy,*grid);
-
-      // Set matrix values for unknowns adjacent to fine unknowns in neighbor's child
-
-      init_matrix_neighbors_children_(*grid);
-
-      // Set matrix values for unknowns adjacent to coarse unknowns in
-      // parent's neighbor
-
-      init_matrix_parents_neighbor_(*grid);
+      init_matrix_fine_(*grid);
 
     }
     ++ part;
@@ -478,12 +459,12 @@ void Hypre::evaluate (Hierarchy & hierarchy)
 
 /// Handle coarse unknowns adjacent to fine unknowns in child
 
-void Hypre::init_graph_children_ (Grid & grid)
+void Hypre::init_graph_fine_ (Grid & grid)
 
 {
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("init_graph_children_()");
+  NOT_IMPLEMENTED("init_graph_fine_()");
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   ItGridChildren itchild (grid);
@@ -504,58 +485,16 @@ void Hypre::init_graph_children_ (Grid & grid)
 
 /// Handle fine unknowns adjacent to coarse unknowns in parent
 
-void Hypre::init_graph_parent_ (Hierarchy & hierarchy, Grid & grid)
+void Hypre::init_graph_coarse_ (Hierarchy & hierarchy, Grid & grid)
 
 {
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_graph_parent_()");
+  NOT_IMPLEMENTED("Hypre::init_graph_coarse_()");
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   Grid * parent = hierarchy.parent(grid);
   _TRACE_;
-  // *******************************************************************
-  //	HYPRE_SStructGraphAddEntries (grid->hypre_graph(),
-  //				      grid->level(),
-  //				      grid->INDEX
-  //				      neighbor.level(),
-  //				      neighbor.INDEX,
-  //				      variable);
-  // *******************************************************************
-}
-
-//------------------------------------------------------------------------
-
-/// Handle coarse unknowns adjacent to fine unknowns in neighbor's child
-
-void Hypre::init_graph_neighbors_children_ (Grid & grid)
-
-{
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_graph_neighbors_children_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-  // *******************************************************************
-  //	HYPRE_SStructGraphAddEntries (grid->hypre_graph(),
-  //				      grid->level(),
-  //				      grid->INDEX
-  //				      neighbor.level(),
-  //				      neighbor.INDEX,
-  //				      variable);
-  // *******************************************************************
-}
-
-//------------------------------------------------------------------------
-
-/// Handle fine unknowns adjacent to coarse unknowns in parent's neighbor
-
-void Hypre::init_graph_parents_neighbor_ (Grid & grid)
-
-{
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_graph_parents_neighbor_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
   // *******************************************************************
   //	HYPRE_SStructGraphAddEntries (grid->hypre_graph(),
   //				      grid->level(),
@@ -636,14 +575,14 @@ void Hypre::init_matrix_clear_ (Grid & grid)
 
 //------------------------------------------------------------------------
 
-/// Define connections for unknowns adjacent to fine unknowns in children
+/// Define connections for unknowns adjacent to fine unknowns
 
-void Hypre::init_matrix_children_ (Grid & grid)
+void Hypre::init_matrix_fine_ (Grid & grid)
 
 {
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_matrix_children_()");
+  NOT_IMPLEMENTED("Hypre::init_matrix_fine_()");
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   ItGridChildren itchild (grid);
@@ -665,63 +604,18 @@ void Hypre::init_matrix_children_ (Grid & grid)
 
 //------------------------------------------------------------------------
 
-/// Set matrix values for unknowns adjacent to coarse unknowns in parent
+/// Set matrix values for unknowns adjacent to coarse unknowns
 
-void Hypre::init_matrix_parent_ (Hierarchy & hierarchy, Grid & grid)
+void Hypre::init_matrix_coarse_ (Hierarchy & hierarchy, Grid & grid)
 
 {
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_matrix_parent_()");
+  NOT_IMPLEMENTED("Hypre::init_matrix_coarse_()");
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   Grid * parent = hierarchy.parent(grid);
   _TRACE_;
-  // *******************************************************************
-  //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
-  //				      grid->level(),
-  //				      grid->INDEX
-  //				      neighbor.level(),
-  //				      neighbor.INDEX,
-  //				      variable);
-  // *******************************************************************
-}
-
-//------------------------------------------------------------------------
-
-/// Set matrix values for unknowns adjacent to fine unknowns in neighbor's child
-
-void Hypre::init_matrix_neighbors_children_ (Grid & grid)
-
-{
-
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_matrix_neighbors_children_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-  // *******************************************************************
-  //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
-  //				      grid->level(),
-  //				      grid->INDEX
-  //				      neighbor.level(),
-  //				      neighbor.INDEX,
-  //				      variable);
-  // *******************************************************************
-}
-
-//------------------------------------------------------------------------
-
-/// Set matrix values for unknowns adjacent to coarse unknowns in
-/// parent's neighbor
-
-void Hypre::init_matrix_parents_neighbor_ (Grid & grid)
-
-{
-
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_matrix_parents_neighbor_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
   // *******************************************************************
   //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
   //				      grid->level(),

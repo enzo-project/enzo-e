@@ -60,5 +60,9 @@ distclean: clean
 .PHONY: doc
 doc:
 	doxygen
+	cp doxygen.css html
+.PHONY: clean-doc
+clean-doc:
+	rm -rf html latex
 
 
