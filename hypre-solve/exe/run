@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/tcsh -f
 
 #-----------------------------------------------------------------------
 # Generate an input file for hypre-solve
@@ -7,7 +7,7 @@
 #
 #   Unigrid of global size N0**3 distributed along <np0,np1,np2> processor grid
 #
-#      generate_input unigrid N0 np0 np1 np2
+#      run unigrid N0 np0 np1 np2
 #
 #-----------------------------------------------------------------------
 
@@ -128,6 +128,11 @@ if ($type == "unigrid") then
    echo "sphere    5.993985e27 6.378137e8 0.0 0.0 0.0  0.0 0.0 0.0" >> $infile
    echo "point     100.0   1e3 1e3 1e3   $iPoint"                >> $infile
 
-   mpirun -np $np hypre-solve $infile >& outfile
+   if ($HOST == "ds100") then
+      @ nodes = ($np - 1) / 8 + 1
+      poe hypre-solve $infile -nodes 1 -tasks_per_node 8 -rmpool 1
+   else
+      mpirun -np $np hypre-solve $infile >& outfile
+   endif
 
 endif
