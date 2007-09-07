@@ -17,6 +17,7 @@ LIBS = -L$(HOME)/lib -lHYPRE $(JBLIB)
 
 # Set object files
 OBJS = \
+       constants.o \
        domain.o \
        faces.o \
        grid.o \
