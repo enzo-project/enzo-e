@@ -44,24 +44,20 @@ private:
 
   // init_graph() functions
 
-  void init_graph_fine_      (Grid & grid);
-  void init_graph_coarse_    (Hierarchy & hierarchy,
-			      Grid & grid);
+  void init_graph_nonstencil_ (Grid & grid);
 
   // init_matrix() functions
 
-  void init_matrix_stencil_  (Grid & grid);
-  void init_matrix_clear_    (Grid & grid);
-  void init_matrix_fine_     (Grid & grid);
-  void init_matrix_coarse_   (Hierarchy & hierarchy,
-                              Grid & grid);
+  void init_matrix_stencil_    (Grid & grid);
+  void init_matrix_clear_      (Level & level);
+  void init_matrix_nonstencil_ (Grid & grid);
 
   // init_vector() functions
 
-  Scalar init_vector_points_             (Hierarchy            & hierarchy,
-					  std::vector<Point *> & points);
-  Scalar init_vector_spheres_            (Hierarchy             & hierarchy,
-					  std::vector<Sphere *> & spheres);		
+  Scalar init_vector_points_  (Hierarchy            & hierarchy,
+			       std::vector<Point *> & points);
+  Scalar init_vector_spheres_ (Hierarchy             & hierarchy,
+			       std::vector<Sphere *> & spheres);		
 
   // solve() functions
 

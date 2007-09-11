@@ -17,6 +17,7 @@ public:
 
   Mpi ();
   Mpi (int * argc, char ***argv);
+  bool is_root () throw () {return ip_ == 0;};
   int ip () throw () {return ip_;};
   int np () throw () {return np_;};
   void barrier () throw () { MPI_Barrier (comm_); };

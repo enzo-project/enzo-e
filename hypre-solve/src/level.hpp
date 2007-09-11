@@ -56,25 +56,33 @@ public:
   // PUBLIC MEMBER FUNCTIONS
   //--------------------------------------------------------------------
 
+  //--------------------------------------------------------------------
   // Initialization
+  //--------------------------------------------------------------------
 
   void insert_grid (Grid & grid) throw ();
 
+  //--------------------------------------------------------------------
   // IO
+  //--------------------------------------------------------------------
 
   void print () throw ();
   void write (FILE * fp = 0) throw ();
 
+  //--------------------------------------------------------------------
   // Checking
+  //--------------------------------------------------------------------
 
   void check () throw () {  
     NOT_IMPLEMENTED("Level::check()");
   }
 
+  //--------------------------------------------------------------------
+  // Data access
+  //--------------------------------------------------------------------
+
   /// Return the number of zones extended by all Grids in the Level
   int zones (int i) throw () { return iu_[i]-il_[i] + 1; };
-
-  // List access
 
   /// Return the ith Grid in the Level
   Grid & grid (int i) 
@@ -83,6 +91,10 @@ public:
   /// Return the number of Grid's in the Level
   int num_grids () const   
   { return grids0_.size() - 1; };
+
+  /// Return which Level this is in the Hierarchy
+  int index () const
+  { return n_; };
 
 };
 

@@ -241,17 +241,23 @@ void Hypre::init_graph (Hierarchy & hierarchy)
     HYPRE_SStructGraphSetStencil (graph_, part, 0, stencil_);
     // *******************************************************************
 
-    ItLevelGridsLocal itg (*level);
+    // WARNING: POSSIBLE SCALING ISSUE.
+    //
+    // Below we loop over all grids; however, we only need
+    // too loop over parent-child pairs such either child or parent is
+    // local to this MPI process.  Could be done with two loops,
+    // looping over local parents, then local children, but need to be
+    // careful not to add the same entries twice.  Could process local
+    // parents first since they're unique, and only process local
+    // children if their parent is remote.
 
-    while (Grid * grid = itg++) {
+    ItLevelGridsAll itag (*level);
 
-      // 2. Define connections for unknowns adjacent to coarse unknowns in parent
+    while (Grid * grid = itag++) {
 
-      init_graph_coarse_(hierarchy,*grid);
+      // 2. Define connections between grid patches in adjacent parts
 
-      // 3. Define connections for unknowns adjacent to fine unknowns in children
-
-      init_graph_fine_(*grid);
+      init_graph_nonstencil_(*grid);
 
     }
     ++ part;
@@ -278,11 +284,9 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
      1. Set stencil values
 
-     2. Clear stencil values in overlapped grids
+     2. Clean up stencil connections between parts and under overlapped grids
 
-     3. Set values for unknowns adjacent to coarse unknowns
-
-     4. Set values for unknowns adjacent to fine unknowns
+     3. Set values for unknowns between parent and children
 
     The matrix is generally nonsymmetric.  Only step 1 is required for
     unigrid problems.
@@ -319,29 +323,41 @@ void Hypre::init_linear (Parameters          & parameters,
  
   ItHierarchyLevels itl (hierarchy);
 
-  int part = 0;
+  int num_parts = hierarchy.num_levels();
 
+  int part = 0;
   while (Level * level = itl++) {
 
-    ItLevelGridsLocal itg (*level);
+    ItLevelGridsLocal itlg (*level);
 
-    while (Grid * grid = itg++) {
+    while (Grid * grid = itlg++) {
 
       // 1. Set stencil values
 
       init_matrix_stencil_(*grid);
+    }
 
-      // 2. Clear stencil values in overlapped grids
+    // 2. Clean up stencil connections between parts
 
-      init_matrix_clear_(*grid);
+    init_matrix_clear_(*level);
 
-      // 3. Set values for unknowns adjacent to coarse unknowns
+    // WARNING: POSSIBLE SCALING ISSUE.
+    //
+    // Below we loop over all grids; however, we only need
+    // too loop over parent-child pairs such either child or parent is
+    // local to this MPI process.  Could be done with two loops,
+    // looping over local parents, then local children, but need to be
+    // careful not to add the same entries twice.  Could process local
+    // parents first since they're unique, and only process local
+    // children if their parent is remote.
+ 
+    ItLevelGridsAll itag (*level);
 
-      init_matrix_coarse_(hierarchy,*grid);
+    while (Grid * grid = itag++) {
 
-      // 4. Set values for unknowns adjacent to fine unknowns
+      // 3. Set values for unknowns between parent and children
 
-      init_matrix_fine_(*grid);
+      init_matrix_nonstencil_(*grid);
 
     }
     ++ part;
@@ -457,52 +473,31 @@ void Hypre::evaluate (Hierarchy & hierarchy)
 // PRIVATE MEMBER FUNCTIONS
 //======================================================================
 
-/// Handle coarse unknowns adjacent to fine unknowns in child
+/// Add nonzeros connecting parent and children grid patches
 
-void Hypre::init_graph_fine_ (Grid & grid)
-
-{
-
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("init_graph_fine_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-  ItGridChildren itchild (grid);
-  while (Grid * child = itchild++) {
-    _TRACE_;
-    // *******************************************************************
-    //	HYPRE_SStructGraphAddEntries (grid->hypre_graph(),
-    //				      grid->level(),
-    //				      grid->INDEX
-    //				      neighbor.level(),
-    //				      neighbor.INDEX,
-    //				      variable);
-    // *******************************************************************
-  }
-}
-
-//------------------------------------------------------------------------
-
-/// Handle fine unknowns adjacent to coarse unknowns in parent
-
-void Hypre::init_graph_coarse_ (Hierarchy & hierarchy, Grid & grid)
+void Hypre::init_graph_nonstencil_ (Grid & parent)
 
 {
 
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   NOT_IMPLEMENTED("Hypre::init_graph_coarse_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-  Grid * parent = hierarchy.parent(grid);
-  _TRACE_;
-  // *******************************************************************
-  //	HYPRE_SStructGraphAddEntries (grid->hypre_graph(),
-  //				      grid->level(),
-  //				      grid->INDEX
-  //				      neighbor.level(),
-  //				      neighbor.INDEX,
-  //				      variable);
-  // *******************************************************************
+  ItGridChildren itchild (parent);
+  while (Grid * child = itchild++) {
+
+    // Add the matrix entries between fine and coarse grids iff
+    // one of the grids is MPI-local
+
+    if (parent.is_local() || child->is_local()) {
+      // *******************************************************************
+      //      HYPRE_SStructGraphAddEntries (graph_,
+      //				    grid->level(),
+      //				    grid->INDEX
+      //				    neighbor.level(),
+      //				    neighbor.INDEX,
+      //				    0);
+      // *******************************************************************
+    }
+  }
 }
 
 //------------------------------------------------------------------------
@@ -547,37 +542,34 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 
 //------------------------------------------------------------------------
 
-/// Clear matrix stencil values under child grids
+/// Clean up stencil connections between parts
 
-void Hypre::init_matrix_clear_ (Grid & grid)
-
+void Hypre::init_matrix_clear_ (Level & level)
 {
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_matrix_clear_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // WARNING: hard-coding refinement factor of 2
+  int r_factors[3] = {2,2,2}; 
+  int part = level.index();
+  if (part > 0) {
 
-  ItGridChildren itchildren (grid);
-  
-  while (Grid * child = itchildren++) {
-    _TRACE_;
+    // Clear stencil values from coarse to fine part
+
+    HYPRE_SStructFACZeroCFSten (A_,grid_, part, r_factors);
+
+    // Clear stencil values from fine to coarse part
+
+    HYPRE_SStructFACZeroFCSten (A_,grid_, part);
+
+    // Set overlapped areas of part with identity
+
+    HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
   }
-
-  // *******************************************************************
-  //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
-  //				      grid->level(),
-  //				      grid->INDEX
-  //				      neighbor.level(),
-  //				      neighbor.INDEX,
-  //				      variable);
-  // *******************************************************************
-
 }
 
 //------------------------------------------------------------------------
 
-/// Define connections for unknowns adjacent to fine unknowns
+/// Define matrix elements connecting parent and children grid patches
 
-void Hypre::init_matrix_fine_ (Grid & grid)
+void Hypre::init_matrix_nonstencil_ (Grid & grid)
 
 {
 
@@ -600,30 +592,6 @@ void Hypre::init_matrix_fine_ (Grid & grid)
     // *******************************************************************
 
   }
-}
-
-//------------------------------------------------------------------------
-
-/// Set matrix values for unknowns adjacent to coarse unknowns
-
-void Hypre::init_matrix_coarse_ (Hierarchy & hierarchy, Grid & grid)
-
-{
-
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_matrix_coarse_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-  Grid * parent = hierarchy.parent(grid);
-  _TRACE_;
-  // *******************************************************************
-  //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
-  //				      grid->level(),
-  //				      grid->INDEX
-  //				      neighbor.level(),
-  //				      neighbor.INDEX,
-  //				      variable);
-  // *******************************************************************
 }
 
 //------------------------------------------------------------------------

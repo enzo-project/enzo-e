@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 
   Mpi mpi (&argc,&argv);
 
-  if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
+  if (debug) printf ("DEBUG %s:%d mpi.np() = %d\n",__FILE__,__LINE__,mpi.np());
 
   // --------------------------------------------------
   // JBPERF initialization
@@ -88,15 +88,15 @@ int main(int argc, char **argv)
 
     Problem problem;
 
-  // ***************
+    // ***************
     JBPERF_START("1-problem");
-  // ***************
+    // ***************
 
     problem.read  (filename);
 
-  // ***************
+    // ***************
     JBPERF_STOP("1-problem");
-  // ***************
+    // ***************
 
     // --------------------------------------------------
     // Initialize the hierarchy
@@ -106,30 +106,61 @@ int main(int argc, char **argv)
 
     // determine interconnections between grids
 
-  // ***************
+    // ***************
     JBPERF_START("2-grids");
-  // ***************
+    // ***************
 
     hierarchy.init_grids();
 
-  // ***************
+    // ***************
     JBPERF_STOP("2-grids");
-  // ***************
+    // ***************
 
     // categorize grid boundary zones according to levels of adjacent
     // or containing grids
 
-  // ***************
+    // ***************
     JBPERF_START("3-faces");
-  // ***************
+    // ***************
 
     hierarchy.init_faces(problem.domain());
   
-  // ***************
+    // ***************
     JBPERF_STOP("3-faces");
-  // ***************
+    // ***************
 
     if (debug) problem.print ();
+
+    // Determine problem size the hard way
+
+    ItHierarchyGridsAll itg (problem.hierarchy());
+
+    int lower[3],upper[3];
+    int i;
+    for (i=0; i<3; i++) {
+      lower[i] = INT_MAX;
+      upper[i] = INT_MIN;
+    }
+    while (Grid *grid = itg++) {
+      grid->print();
+      if (grid->level() == 0) {
+	for (i=0; i<3; i++) {
+	  printf ("Lower %d %d\n",grid->i_lower(i),lower[i]);
+	  printf ("Upper %d %d\n",grid->i_upper(i),upper[i]);
+	  lower[i] = MIN(grid->i_lower(i),lower[i]);
+	  upper[i] = MAX(grid->i_upper(i),upper[i]);
+	}
+      
+      }
+    }
+
+    // Assume problem is a square box, otherwise exit
+
+    assert (upper[0] - lower[0] + 1 == upper[1] - lower[1] + 1);
+    assert (upper[0] - lower[0] + 1 == upper[2] - lower[2] + 1);
+
+    
+    JBPERF_GLOBAL("problem-size",upper[0] - lower[0] + 1);
 
     // --------------------------------------------------
     // Initialize hypre
