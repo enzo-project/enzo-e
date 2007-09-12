@@ -18,6 +18,8 @@
 
 #include "HYPRE_sstruct_ls.h"
 
+#include "hypre-solve.hpp"
+
 #include "scalar.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
@@ -140,11 +142,6 @@ bool Grid::is_adjacent (Grid & g2) throw ()
 
 //======================================================================
 
-Scalar max (Scalar a, Scalar b) { return a > b ? a : b; };
-Scalar min (Scalar a, Scalar b) { return a < b ? a : b; };
-
-//======================================================================
-
 /// Return indices of zones adjacent to neighboring grid.
 
 /** Return lower and upper coordinates of cells adjacent to the input
@@ -204,8 +201,8 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
   Scalar lower[3],upper[3];
 
   for (i=0; i<3; i++) {
-    lower[i] = max (g1.x_lower(i),g2.x_lower(i));
-    upper[i] = min (g1.x_upper(i),g2.x_upper(i));
+    lower[i] = MAX(g1.x_lower(i),g2.x_lower(i));
+    upper[i] = MIN(g1.x_upper(i),g2.x_upper(i));
     if (debug) printf ("DEBUG %s:%d lower[%d] = %g  upper = %g\n",
 		       __FILE__,__LINE__,i,lower[i],upper[i]);
   }
