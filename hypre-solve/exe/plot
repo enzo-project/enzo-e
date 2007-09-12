@@ -132,7 +132,7 @@ if ($plot_type == "procs-time") then
    set output '$outpng'
    set terminal png large size 800,600
    set title 'Processor count versus unigrid time per zone'
-   set xlabel 'N^{1/3}'
+   set xlabel 'processors'
    set ylabel 'ms per zone'
    plot [][0:] '$outdata' using (\$1):(\$2/\$1/\$1/\$1) title 'run' w lp
 EOF
