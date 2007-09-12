@@ -22,8 +22,8 @@
    \cello\ is intended to be a high-performance multi-resolution
    astrophysics application, capable of running efficiently on
    large-scale (\~{\ }$O(10^6)$ cores) parallel supercomputers.
-   Physics capabilities will incude hydrodynamics, representation of
-   dark matter (via particles) and baryonic matter (via fields),
+   Physics capabilities will include hydrodynamics, representations of
+   both dark matter (via particles) and baryonic matter (via fields),
    cosmological expansion, self-gravity, radiative cooling,
    multispecies chemistry, magnetohydrodynamics, and radiation
    transfer.
@@ -36,7 +36,7 @@
    user-specified set of refinement criteria.  This will permit the
    physics modules to capture the full range of scales of interest,
    but without over-refining other regions and leading to excessive
-   computation and memory storage.  Algorithms and datastructures will
+   computation and memory storage.  Algorithms and data-structures will
    be chosen to maximize scalability in both computation and memory
    usage.  Multiple implementations will be made available to provide
    flexibility in optimizing for the target architecture and problem.
@@ -68,7 +68,7 @@
    combination of both.  Combining flexible hierarchical
    parallelization schemes with hierarchical load balancing
    algorithms, together with scalable algorithms and efficient AMR
-   datastructures, are expected to lead to high parallel efficiency
+   data-structures, are expected to lead to high parallel efficiency
    and scalability.
 
 % Field data layout: vertical data movement optimization
@@ -100,7 +100,7 @@
    known test problems in the literature that can be run given the
    available physics capabilities.  Parameters will include deep
    control of the internal physical quantities, units, physics
-   algorithms, and datastructures.
+   algorithms, and data-structures.
 
    Information regarding the progress of the simulation will be 
    output to the user in a format or formats that are both easy
@@ -140,38 +140,193 @@
    self-tuning by the running application as it monitors its
    performance, or by the user monitoring the performance of a running
    simulation.  Adaptivity will be available for physics, physics
-   algorithms, resolution ranges, AMR datastructures and algorithms,
+   algorithms, resolution ranges, AMR data-structures and algorithms,
    field and particles data-structures, parallelism.
 
 %=======================================================================
-\chapter{Inputs} \label{s:inputs}
+\chapter{Input} \label{s:inputs}
 %=======================================================================
 
-%-----------------------------------------------------------------------
-\section{Problem parameters}
-%-----------------------------------------------------------------------
+   This chapter specifies the input format for \cello.  Input is from
+   a user file containing parameters.  The input file may optionally
+   include other input files.
+
+   Parameters are organized into functional groups, which are described
+   in more detail in following sections.
 
 \begin{description}
-\item [Domain: ] Specify properties of the domain, such as extents.
-\item [Boundary conditions: ]  Including periodic, in- and out-flow, specified, and dynamic,
-         each on separate faces or portions of faces, and different for different fields.
-\item [Regions: ] Specify partitions of the domain into regions.  Each region contains different materials with different properties.  Example partitions may be half-planes, spheres, boxes, or specified using a file containing  a zone bit mask.  Default is region 0, first region is region 1, etc.  Use  solid modeling representations?
-\item [Materials: ] Material properties, such as gas constant, etc.  [Merge with Fields?]
-\item [Fields: ] Scalar and vector fields for each material, such as density, energy, 
-         velocity, etc.  [Merge with Materials?]  Specify values, or input from files.
-\item [Units: ] Specify units and optional scalings for individual fields.  [Merge units with Simulation?] [Merge scaling with Fields?] [Dynamic scaling, e.g.~to keep average of all fields near one.]
-\item [Physics: ] Specify physics modules and physics parameters, including hydrodynamics, self-gravity, gravitational constant, imposed gravity, chemistry, cosmological expansion, star formation, etc.  Physics is in the problem domain.
-\item [Algorithms: ] Specify the algorithms and algorithm parameters to use for each physics component.  Each physics component has a default; some components may have only one available (e.g.~cosmological expansion).  Algorithms is in the solution domain.
-\item [Data structures: ] Specify data structures and data structure parameters, such as number of mesh levels, AMR method, grid patch properties, rebuild algorithm, dynamic load balancing, refinement criteria, grid patch sub-block size for cache reuse, etc.
-\item [Simulation: ] Given Physics,  Algorithms, and Data structures, specify the top-level sequencing and properties of the simulation.  For example, ordering of physics modules, whether to do hierarchical time-stepping, up to what level, whether to sub-cycle some physics, etc. [Is this a useful category?]
-\item [Restrictions: ] Examples of restrictions would be user-defined floors or limits
- on field values. [Merge with Algorithms?] [Merge with Physics?]  [Merge with Simulation?]
-\item [Parallelism: ] Specify parallelism type and parameters.  For example, non-blocking MPI, MPI-2, hybrid MPI/UPC, performance-related parameters such as buffer size, etc.
+
+ \item [Domain (\S\ref{s:domain}): ] Specify properties of the domain, such as extents.
+
+ \item [Boundary conditions (\S\ref{s:boundary}): ] Including periodic, in- and out-flow,
+ specified, and dynamic, each on separate faces or portions of faces,
+ and different for different fields.
+
+ \item [Regions (\S\ref{s:region}): ] Specify partitions of the domain into regions.
+ Each region contains different materials with different properties.
+ Example partitions may be half-planes, spheres, boxes, or specified
+ using a file containing a zone bit mask.  Default is region 0, first
+ region is region 1, etc.  Use solid modeling representations?
+
+ \item [Materials (\S\ref{s:material}): ] Material properties, such as gas constant, etc.
+ [Merge with Fields?]
+
+ \item [Fields (\S\ref{s:field}): ] Scalar and vector fields for each material, such as
+ density, energy, velocity, etc.  [Merge with Materials?]  Specify
+ values, or input from files.
+
+ \item [Units (\S\ref{s:units}): ] Specify units and optional scalings for individual
+ fields.  [Merge units with Simulation?] [Merge scaling with Fields?] 
+ [Dynamic scaling, e.g.~to keep average of all fields near one.]
+
+ \item [Physics (\S\ref{s:physics}): ] Specify physics modules and physics parameters,
+ including hydrodynamics, self-gravity, gravitational constant,
+ imposed gravity, chemistry, cosmological expansion, star formation,
+ etc.  Physics is in the problem domain.
+
+ \item [Algorithms (\S\ref{s:algorithm}): ] Specify the algorithms and algorithm parameters
+ to use for each physics component.  Each physics component has a
+ default; some components may have only one available
+ (e.g.~cosmological expansion).  Algorithms is in the solution domain.
+
+ \item [Data structures (\S\ref{s:data}): ] Specify data structures and data structure
+ parameters, such as number of mesh levels, AMR method, grid patch
+ properties, rebuild algorithm, dynamic load balancing, refinement
+ criteria, grid patch sub-block size for cache reuse, etc.
+
+ \item [Simulation (\S\ref{s:simulation}): ] Given Physics, Algorithms, and Data structures,
+ specify the top-level sequencing and properties of the simulation.
+ For example, ordering of physics modules, whether to do hierarchical
+ time-stepping, up to what level, whether to sub-cycle some physics,
+ etc. [Is this a useful category?]  Also include things like floors
+ and limits(?), and IO dumps
+
+ \item [Parallelism (\S\ref{s:parallel}): ] Specify parallelism type and parameters.  For
+ example, non-blocking MPI, MPI-2, hybrid MPI/UPC, performance-related
+ parameters such as buffer size, etc.
+
+ \item [Error recovery (\S\ref{s:error}): ] Fault tolerance and adaptivity parameters
+
+ \item [Performance monitoring (\S\ref{s:performance}): ] Performance monitoring and
+ optimization(?) parameters
 \end{description}
 
+
+%=======================================================================
+\section{Domain parameters} \label{s:domain}
+%=======================================================================
+
+Specify properties of the domain.
+
+Domains are boxes aligned with the computational coordinate system, and are uniquely
+determined by the spacial dimension, and the lowest and highest points in the domain.
+
 %-----------------------------------------------------------------------
-\section{Physics parameters}
+\subsection{Parameters}
 %-----------------------------------------------------------------------
+
+\begin{enumerate}
+\item \code{Domain:dimension} $([3])$
+\item \code{Domain:lower\_point} \textit{Position} ([0])
+\item \code{Domain:upper\_point} \textit{Position} ([1])
+\end{enumerate}
+
+Positions are described as $n$-tuples delimited by square brackets.
+The default dimension is $3$, and the default extents are from
+$[0,0,0]$ (or $[0,0]$ / $[0]$) to $[1,1,1]$ (or $[1,1]$ / $[1]$).
+Lower and upper points are given in units given by spacial Units
+parameters, described in \S\ref{s:units}.
+
+%-----------------------------------------------------------------------
+\subsection{Examples}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+
+   // Specify the domain
+
+   Domain:dimension      3
+   Domain:lower_point    [-3e9,-3e9,-3e9]
+   Domain:upper_point    [ 3e9, 3e9, 3e9]
+
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
+\begin{enumerate}
+\item Each coordinate of the lower point must be strictly greater than the corresponding coordinate of the upper point.
+\item The number of coordinates in both lower and upper points must equal the dimension.
+\item If the dimension is not specified, a value of $3$ is assumed.
+\item The dimension must be 1, 2, or 3.
+\end{enumerate}
+
+%=======================================================================
+\section{Boundary condition parameters} \label{s:boundary}
+%=======================================================================
+
+Different types of boundary conditions are supported, including
+periodic, in- and out-flow, specified, and dynamic.  Different
+boundary conditions can be specified for the entire domain,
+on separate faces, on subregions of faces, or on specific zones.
+Different boundary conditions can be specified for different fields.
+
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Examples}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
+
+%=======================================================================
+\section{Region parameters} \label{s:region}
+%=======================================================================
+
+Specify partitions of the domain into regions.  Each region contains
+different materials with different properties.  Example partitions may
+be half-planes, spheres, boxes, or specified using a file containing a
+zone bit mask.  Default is region 0, first region is region 1, etc.
+Use solid modeling representations?
+
+%=======================================================================
+\section{Material parameters} \label{s:material}
+%=======================================================================
+
+ Material properties, such as gas constant, etc.
+ [Merge with Fields?]
+
+%=======================================================================
+\section{Field parameters} \label{s:field}
+%=======================================================================
+
+Scalar and vector fields for each material, such as
+ density, energy, velocity, etc.  [Merge with Materials?]  Specify
+ values, or input from files.
+
+%=======================================================================
+\section{Units parameters} \label{s:units}
+%=======================================================================
+
+ Specify units and optional scalings for individual
+ fields.  [Merge units with Simulation?] [Merge scaling with Fields?] 
+ [Dynamic scaling, e.g.~to keep average of all fields near one.]
+
+%=======================================================================
+\section{Physics parameters} \label{s:physics}
+%=======================================================================
+
+Specify physics modules and physics parameters, including
+hydrodynamics, self-gravity, gravitational constant, imposed gravity,
+chemistry, cosmological expansion, star formation, etc.  Physics is in
+the problem domain.
 
 Specify physics components
 
@@ -180,37 +335,64 @@ Specify physics components
 \item  cosmological expansion
 \item self-gravity
 \end{itemize}
+%=======================================================================
+\section{Algorithm parameters} \label{s:algorithm}
+%=======================================================================
 
-%-----------------------------------------------------------------------
-\section{Physics algorithms}
-%-----------------------------------------------------------------------
-
-Specify algorithms and their parameters
+ Specify the algorithms and algorithm parameters
+ to use for each physics component.  Each physics component has a
+ default; some components may have only one available
+ (e.g.~cosmological expansion).  Algorithms is in the solution domain.
 
 \begin{itemize}
 \item PPM hydro (dual-energy, etc.)
 \item gravity solver (FAC, smoother, levels, etc.)
 \end{itemize}
+%=======================================================================
+\section{Data structure parameters} \label{s:data}
+%=======================================================================
 
-%-----------------------------------------------------------------------
-\section{Field and particles parameters}
-%-----------------------------------------------------------------------
+Specify data structures and data structure parameters, such as number
+of mesh levels, AMR method, grid patch properties, rebuild algorithm,
+dynamic load balancing, refinement criteria, grid patch sub-block size
+for cache reuse, etc.
 
 Field storage (blocked, padded, interleved)
-
-%-----------------------------------------------------------------------
-\section{Multi-resolution parameters}
-%-----------------------------------------------------------------------
-
-Specify datastructures and their parameters
 
 \begin{itemize}
 \item PatchAMR (levels, grid size or count, rebuild method, distribution)
 \end{itemize}
 
-%-----------------------------------------------------------------------
-\section{Parallelism parameters}
-%-----------------------------------------------------------------------
+%=======================================================================
+\section{Simulation parameters} \label{s:simulation}
+%=======================================================================
+
+Given Physics, Algorithms, and Data structures, specify the top-level
+sequencing and properties of the simulation.  For example, ordering of
+physics modules, whether to do hierarchical time-stepping, up to what
+level, whether to sub-cycle some physics, etc. [Is this a useful
+category?]  Also include things like floors and limits(?), and IO
+dumps
+
+Global simulation control.
+
+Output types and parameters
+
+\begin{itemize}
+\item checkpoint (dump all)
+\item output (specific fields)
+\item movies (type and rate)
+\item analysis (type of analysis, rate)
+\item level of output (files for timestep, time, etc.)
+\end{itemize}
+
+%=======================================================================
+\section{Parallelism parameters} \label{s:parallel}
+%=======================================================================
+
+Specify parallelism type and parameters.  For example, non-blocking
+MPI, MPI-2, hybrid MPI/UPC, performance-related parameters such as
+buffer size, etc.
 
 Specifiy parallelism and parameters
 
@@ -223,39 +405,22 @@ Specifiy parallelism and parameters
 \item levels for each if multiple
 \end{itemize}
 
-%-----------------------------------------------------------------------
-\section{I/O parameters}
-%-----------------------------------------------------------------------
+%=======================================================================
+\section{Error recovery parameters} \label{s:error}
+%=======================================================================
 
-Output types and parameters
-
-\begin{itemize}
-\item checkpoint (dump all)
-\item output (specific fields)
-\item movies (type and rate)
-\item analysis (type of analysis, rate)
-\item level of output (files for timestep, time, etc.)
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\section{Control parameters}
-%-----------------------------------------------------------------------
-
-Global simulation control.
-
-%-----------------------------------------------------------------------
-\section{Error recovery parameters}
-%-----------------------------------------------------------------------
+Fault tolerance and adaptivity parameters
 
 \begin{itemize}
 \item fault tolerance methodology
 \item adaptivity
 \end{itemize}
 
+%=======================================================================
+\section{Performance monitoring parameters} \label{s:performance}
+%=======================================================================
 
-%-----------------------------------------------------------------------
-\section{Performance monitoring parameters}
-%-----------------------------------------------------------------------
+Performance monitoring and optimization(?) parameters
 
 %=======================================================================
 \chapter{Outputs} \label{s:inputs}
@@ -265,45 +430,45 @@ Global simulation control.
 \chapter{Functional Requirements}
 %=======================================================================
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \section{Control}
-%-----------------------------------------------------------------------
+%=======================================================================
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \section{Physics}
-%-----------------------------------------------------------------------
+%=======================================================================
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{Hydrodynamics}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{Self-gravity}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{MHD}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{RT}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \section{Data-Structures}
-%-----------------------------------------------------------------------
+%=======================================================================
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{Fields}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{Particles}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{Structured Adaptive Mesh Hierarchies}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{Continuous Adaptive Mesh Hierarchies}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \section{Parallelism}
-%-----------------------------------------------------------------------
+%=======================================================================
 
 Hardware platform parallelism will be considered to be multilevel,
 including nodes, processors, and cores.  Computational tasks will be
@@ -319,19 +484,19 @@ Flexible parallelism paradigms: map parallelism to tasks
 Automatic code generation (or other) of parallel tasks to implement
 parallelism and optimize performance
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{MPI Send/Recv}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{MPI2 Get}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{OpenMP}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{Collaberative parallelism}
 
-%-----------------------------------------------------------------------
+%=======================================================================
 \subsection{Pipelining}
 
 
