@@ -470,9 +470,91 @@ where
 \subsection{Discretization between levels} \label{ss:discret-between-levels}
 %-----------------------------------------------------------------------
 
-We assume that grid spacing ($h^i_x$, $h^i_y$, $h^i_z$) and 
-($h^j_x$, $h^j_y$, $h^j_z$) between levels $i < j$ is such that
-$h^j_* / h^i_*$ is an integer.
+All inter-level discretizations involve zones along a patch boundary;
+however, not all zones along a patch boundary are involved in
+inter-level discretization.  Since we will be discussing zones along a
+patch boundary, we define a zone to be a ``\textit{face-zone}'' if it
+lies along the external boundary of its containing grid patch.
+
+\begin{center}
+\begin{minipage}{4in}
+\epsfig{file=fig/neighbor.eps,width=4in}
+\end{minipage}
+\end{center}
+
+\begin{description}
+\item[boundary: ] The face-zone is adjacent to the domain boundary
+\item[neighbor: ] The face-zone is adjacent to a zone in a neighboring patch.  The neighboring patch and containing patch may not necessarily have the same parent.
+\item[coarse: ] The face-zone is adjacent to a zone in the containing patch's parent, or
+a zone in a neighbor of the containing patch's parent.
+\item[fine: ] The face-zone is adjacent to zones in a child of a neighbor of the containing patch's parent.
+\item[covered: ] The face-zone is covered by face zones in a finer level.
+\end{description}
+
+By ``neighbor'' above, we imply ``in the same refinement level''.
+
+Assumptions we make include the following:
+
+\begin{itemize}
+\item Adjacent zones must be at
+most one level apart
+\item Boundary face-zones are only
+in the coarsest grid level
+\item if one
+face-zone along a particular face is a boundary face-zone, then
+all face-zones in that particular face are boundary face-zones
+\end{itemize}
+
+We order categorization as follows:
+
+\begin{enumerate}
+\item boundary
+\item covered (children)
+\item fine (neighbor children not covered)
+\item neighbor (neighbors not covered not fine)
+\item coarse (not neighbor and not covered)
+\end{enumerate}
+
+
+
+
+Categorizing face-zones is done using the following algorithm:
+
+\begin{tabbing}
+xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
+\> \textbf{for} \code{level} in \code{hierarchy} \textit{// (finest first)}\\
+\>\> \textbf{for} \code{grid} in \code{level} \\
+\\
+\>\>\> \textit{// *** Find boundary face-zones ***} \\
+\\
+\>\>\> \textbf{for} \code{face} in \code{grid} \\
+\>\>\>\>   \textbf{if} \code{face} is along \code{domain boundary} \\
+\>\>\>\>\>   \textbf{for} \code{face-zone} in \code{face} \\
+\>\>\>\>\>\>     \code{label (face-zone,boundary)} \\
+\\
+\>\>\> \textit{// *** Find covered face-zones ***} \\
+\\
+\>\>\> \textbf{for} \code{child} of \code{grid} \\
+\>\>\>\> \code{sub-face = intersection(child-face,grid-face)} \\
+\>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
+\>\>\>\>\>     \code{label (face-zone,covered)} \\
+\\
+\>\>\> \textit{// *** Find fine face-zones ***} \\
+\\
+\>\>\> \textit{// *** Find neighbor face-zones ***} \\
+\\
+\>\>\> \textbf{for} \code{neighbor} of \code{grid} \textit {// (include non-siblings)}\\
+\>\>\>\> \code{sub-face = intersection(neighbor-face,grid-face)} \\
+\>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
+\>\>\>\>\>     \code{label face-zone as boundary} \\
+\\
+\>\>\> \textit{// *** Find coarse face-zones ***} \\
+\end{tabbing}
+
+
+We assume that grid spacing ($h^i_x$, $h^i_y$, $h^i_z$) and ($h^j_x$,
+$h^j_y$, $h^j_z$) between levels $i < j$ is such that $h^j_* / h^i_*$
+is an integer.
 
 
 \subsubsection{$h^j_* / h^i_* = 2$}
