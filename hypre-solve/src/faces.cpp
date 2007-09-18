@@ -29,6 +29,7 @@ const int debug = 0;
 
 const int Faces::_unknown_  = -1000;
 const int Faces::_boundary_ = -2000;
+const int Faces::_covered_  = -3000;
 const int Faces::_coarse_   = -1;
 const int Faces::_fine_     =  1;
 const int Faces::_neighbor_ =  0;

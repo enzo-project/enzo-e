@@ -45,6 +45,7 @@ class Faces
   const static int _coarse_;
   const static int _fine_;
   const static int _neighbor_;
+  const static int _covered_;
 
   //--------------------------------------------------------------------
   // CONSTUCTORS AND DESTRUCTORS
