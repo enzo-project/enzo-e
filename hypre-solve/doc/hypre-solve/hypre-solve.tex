@@ -421,10 +421,14 @@ levels in \S\ref{ss:discret-between-levels}.
 %-----------------------------------------------------------------------
 
 We wish to discretize $\nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
-within a uniform $3$D grid level.  We assume that grid spacing $h_x$,
-$h_y$, and $h_z$ within a level is uniform.  The unknown $u(r)$, ``$\Box$,'' is
-located at cell centers, and the known coefficient $a(r)$, ``$\circ$,'' is evaluated
-at cell faces.  For the Poisson equation, $a(r)\equiv 1$.
+within a uniform $3$D grid level.  We assume that grid spacing
+$h_{x}$, $h_{y}$, and $h_{z}$ within a level is uniform.  The unknowns
+$u(r)$, (``$\Box$'' in the figure) are located at cell centers, and
+the known coefficients $a(r)$ (``$\circ$'' in the figure) are
+evaluated at cell faces.  The black unknown depends on grey unknowns
+and grey coefficients.  To simplify visualization, the figure
+represents the $2$D analog of the $3$D problem.  For the special case
+of the Poisson equation, $a(r)\equiv 1$.
 
 \begin{center}
 \begin{minipage}{1.5in}
@@ -464,7 +468,19 @@ where
  \[\alxp  \equiv  \frac{1}{h_x^2} \axph, 
  \alyp  \equiv  \frac{1}{h_y^2} \ayph,
  \alzp  \equiv  \frac{1}{h_z^2} \azph \]
- \[\alc   \equiv  - [\alxm + \alym + \alzm + \alxp + \alyp + \alzp] \]
+ \[\alc   \equiv  - [\alxm + \alym + \alzm + \alxp + \alyp + \alzp]. \]
+
+If we assume 1) $a(x)\equiv 1$, 2) $h\equiv h_x = h_y = h_z$, and 3) we scale
+$\nabla\cdot(\ac \nabla \uc) = \bar{\rho}$ by multiplying each side
+by $C_h \equiv (-h^2)$, then we have
+
+\[\alxm  \equiv  -1,
+ \alym  \equiv  -1,
+ \alzm  \equiv  -1,
+ \alxp  \equiv  -1,
+ \alyp  \equiv  -1,
+ \alzp  \equiv  -1,
+ \alc   \equiv  6 \]
 
 %-----------------------------------------------------------------------
 \subsection{Discretization between levels} \label{ss:discret-between-levels}
@@ -496,68 +512,161 @@ By ``neighbor'' above, we imply ``in the same refinement level''.
 Assumptions we make include the following:
 
 \begin{itemize}
-\item Adjacent zones must be at
-most one level apart
-\item Boundary face-zones are only
-in the coarsest grid level
-\item if one
-face-zone along a particular face is a boundary face-zone, then
+\item Adjacent zones must not span more than one level
+\item Boundary face-zones are in the coarsest grid level
+\item if one face-zone along a particular face is a boundary face-zone, then
 all face-zones in that particular face are boundary face-zones
 \end{itemize}
 
-We order categorization as follows:
+\subsubsection{categorization of face-zones}
 
-\begin{enumerate}
-\item boundary
-\item covered (children)
-\item fine (neighbor children not covered)
-\item neighbor (neighbors not covered not fine)
-\item coarse (not neighbor and not covered)
-\end{enumerate}
+Defining characteristics of face-zone categories include the following:
 
+\begin{description}
+\item [boundary: ] the face-zone is adjacent to the domain boundary
+\item [covered: ] the grid containing the face-zone has a child grid that covers the zone
+\item [fine: ] the face-zone is not covered, the containing grid has a neighboring grid adjacent to the face-zone, and the paired face-zone in the neigboring grid is covered
+\item [neighbor: ] the face-zone is not covered, the containing grid has a neighboring grid adjacent to the face-zone, and the paired face-zone in the neighboring grid is not covered
+\item [coarse: ] the face-zone is not covered, and the containing grid does not have a neighboring grid adjacent to the face-zone
+\end{description}
+\begin{tabular}{l|cccc}
+category & boundary & covered & adjacent grid & covered neighbor \\ \hline
+boundary & true &  \\
+covered  &        & true \\
+fine     & false & false & true & true \\
+neighbor & false & false  & true& false \\
+coarse   & false & false  & false \\
+\end{tabular}
 
+Categorizing requires four processes:
 
-
-Categorizing face-zones is done using the following algorithm:
-
+\begin{itemize}
+\item[1.] Label boundary face-zones
 \begin{tabbing}
 xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
-\> \textbf{for} \code{level} in \code{hierarchy} \textit{// (finest first)}\\
-\>\> \textbf{for} \code{grid} in \code{level} \\
-\\
-\>\>\> \textit{// *** Find boundary face-zones ***} \\
-\\
-\>\>\> \textbf{for} \code{face} in \code{grid} \\
-\>\>\>\>   \textbf{if} \code{face} is along \code{domain boundary} \\
-\>\>\>\>\>   \textbf{for} \code{face-zone} in \code{face} \\
-\>\>\>\>\>\>     \code{label (face-zone,boundary)} \\
-\\
-\>\>\> \textit{// *** Find covered face-zones ***} \\
-\\
-\>\>\> \textbf{for} \code{child} of \code{grid} \\
-\>\>\>\> \code{sub-face = intersection(child-face,grid-face)} \\
-\>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
-\>\>\>\>\>     \code{label (face-zone,covered)} \\
-\\
-\>\>\> \textit{// *** Find fine face-zones ***} \\
-\\
-\>\>\> \textit{// *** Find neighbor face-zones ***} \\
-\\
-\>\>\> \textbf{for} \code{neighbor} of \code{grid} \textit {// (include non-siblings)}\\
-\>\>\>\> \code{sub-face = intersection(neighbor-face,grid-face)} \\
-\>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
-\>\>\>\>\>     \code{label face-zone as boundary} \\
-\\
-\>\>\> \textit{// *** Find coarse face-zones ***} \\
+\> \textbf{for} \code{grid} in \code{level-0} \\
+\>\> \textbf{for} \code{face} in \code{grid} \\
+\>\>\> \textbf{if} \code{face} along boundary \\
+\>\>\>\> \textbf{for} \code{face-zone} in \code{face} \\
+\>\>\>\>\> \code{label (face-zone,boundary)}
 \end{tabbing}
+\item[2.] Label covered face-zones
+\begin{tabbing}
+xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
+\> \textbf{for} \code{level} in \code{hierarchy} (finest first) \\
+\>\> \textbf{for} \code{grid} in \code{level} \\
+\>\>\> \code{sub-face = intersection(grid-face,parent(grid)-face)} \\
+\>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} of \code{parent(grid)}\\
+\>\>\>\>\>     \code{label (face-zone,covered)} \\
+\>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} of \code{adjacent(parent(grid))}\\
+\>\>\>\>\>     \textbf{if} \code{face-zone not covered} \\
+\>\>\>\>\>\> \code{label (face-zone,adjacent-covered)}
+\end{tabbing}
+\item[3-4.] Label fine and neighbor face-zones
+\begin{tabbing}
+xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
+\> \textbf{for} \code{level} in \code{hierarchy} (finest first) \\
+\>\> \textbf{for} \code{grid} in \code{level} \\
+\>\>\> \code{sub-face = intersection(grid-face,parent(grid)-face)} \\
+\>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} of \code{parent(grid)}\\
+\>\>\>\>\> \textbf{if} \code{face-zone is adjacent-covered} \\
+\>\>\>\>\>\> \code{label (face-zone,fine)} \\
+\>\>\>\>\> \textbf{else} \\
+\>\>\>\>\>\> \code{label (face-zone,neighbor)} \\
+\end{tabbing}
+\item[5.] Label coarse face-zones
+\begin{tabbing}
+xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
+\> \textbf{for} \code{face-zone} in \code{hierarchy} \\
+\>\> \textbf{if} \code{face-zone} not labeled \\
+\>\>\>        \code{label (face-zone,coarse)}
+\end{tabbing}
+\end{itemize}
+
+% \begin{tabbing}
+% xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
+% \> \textbf{for} \code{level} in \code{hierarchy} \textit{// (finest first)}\\
+% \>\> \textbf{for} \code{grid} in \code{level} \\
+% \\
+% \>\>\> \textit{// *** Find boundary face-zones ***} \\
+% \\
+% \>\>\> \textbf{for} \code{face} in \code{grid} \\
+% \>\>\>\>   \textbf{if} \code{face} is along \code{domain boundary} \\
+% \>\>\>\>\>   \textbf{for} \code{face-zone} in \code{face} \\
+% \>\>\>\>\>\>     \code{label (face-zone,boundary)} \\
+% \\
+% \>\>\> \textit{// *** Find covered face-zones ***} \\
+% \\
+% \>\>\> \textbf{for} \code{child} of \code{grid} \\
+% \>\>\>\> \code{sub-face = intersection(child-face,grid-face)} \\
+% \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
+% \>\>\>\>\>     \code{label (face-zone,covered)} \\
+% \\
+% \>\>\> \textit{// *** Find fine face-zones ***} \\
+% \\
+% \>\>\> \textit{// *** Find neighbor face-zones ***} \\
+% \\
+% \>\>\> \textbf{for} \code{neighbor} of \code{grid} \textit {// (include non-siblings)}\\
+% \>\>\>\> \code{sub-face = intersection(neighbor-face,grid-face)} \\
+% \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
+% \>\>\>\>\>     \code{label face-zone as boundary} \\
+% \\
+% \>\>\> \textit{// *** Find coarse face-zones ***} \\
+% \end{tabbing}
 
 
-We assume that grid spacing ($h^i_x$, $h^i_y$, $h^i_z$) and ($h^j_x$,
-$h^j_y$, $h^j_z$) between levels $i < j$ is such that $h^j_* / h^i_*$
-is an integer.
+
+% \begin{tabbing}
+% xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
+% \> \textbf{for} \code{level} in \code{hierarchy} \textit{// (finest first)}\\
+% \>\> \textbf{for} \code{grid} in \code{level} \\
+% \\
+% \>\>\> \textit{// *** Find boundary face-zones ***} \\
+% \\
+% \>\>\> \textbf{for} \code{face} in \code{grid} \\
+% \>\>\>\>   \textbf{if} \code{face} is along \code{domain boundary} \\
+% \>\>\>\>\>   \textbf{for} \code{face-zone} in \code{face} \\
+% \>\>\>\>\>\>     \code{label (face-zone,boundary)} \\
+% \\
+% \>\>\> \textit{// *** Find covered face-zones ***} \\
+% \\
+% \>\>\> \textbf{for} \code{child} of \code{grid} \\
+% \>\>\>\> \code{sub-face = intersection(child-face,grid-face)} \\
+% \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
+% \>\>\>\>\>     \code{label (face-zone,covered)} \\
+% \\
+% \>\>\> \textit{// *** Find fine face-zones ***} \\
+% \\
+% \>\>\> \textit{// *** Find neighbor face-zones ***} \\
+% \\
+% \>\>\> \textbf{for} \code{neighbor} of \code{grid} \textit {// (include non-siblings)}\\
+% \>\>\>\> \code{sub-face = intersection(neighbor-face,grid-face)} \\
+% \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
+% \>\>\>\>\>     \code{label face-zone as boundary} \\
+% \\
+% \>\>\> \textit{// *** Find coarse face-zones ***} \\
+% \end{tabbing}
+
+\subsubsection{discretization along face-zones}
+
+By default, zone connections are defined using stencil connections defined
+using \hypre\ stencil values, which we derive in \S\ref{ss:discret-within-levels}.
+Below, we derive modifications for each category of face-zone.
+
+\textbf{boundary face-zones}.
 
 
-\subsubsection{$h^j_* / h^i_* = 2$}
+
+\textbf{covered face-zones}.
+
+
+\textbf{fine face-zones}.
+
+\textbf{neighbor face-zones}.  Neighbor face-zones are handled by \hypre\ stencil
+
+
+\textbf{coarse face-zones}.
+
 
 
 \begin{center}

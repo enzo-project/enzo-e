@@ -1,9 +1,9 @@
 %!PS-Adobe-2.0 EPSF-2.0
 %%Title: neighbor.fig
 %%Creator: fig2dev Version 3.2 Patchlevel 5
-%%CreationDate: Mon Sep 17 15:47:14 2007
+%%CreationDate: Tue Sep 18 11:26:07 2007
 %%For: bordner@localhost.localdomain (James Bordner)
-%%BoundingBox: 0 0 362 327
+%%BoundingBox: 0 0 560 327
 %Magnification: 1.0000
 %%EndComments
 /$F2psDict 200 dict def
@@ -42,10 +42,11 @@ $F2psDict /mtrx matrix put
 /col29 {1.000 0.750 0.750 srgb} bind def
 /col30 {1.000 0.880 0.880 srgb} bind def
 /col31 {1.000 0.840 0.000 srgb} bind def
+/col32 {0.498 0.498 0.498 srgb} bind def
 
 end
 save
-newpath 0 327 moveto 0 0 lineto 362 0 lineto 362 327 lineto closepath clip newpath
+newpath 0 327 moveto 0 0 lineto 560 0 lineto 560 327 lineto closepath clip newpath
 -53.3 378.7 translate
 1 -1 scale
 
@@ -98,22 +99,29 @@ $F2psBegin
 7.500 slw
 n 5400 3900 m
  5400 6300 l gs col0 s gr 
+/Times-Roman ff 216.67 scf sf
+5550 5325 m
+gs 1 -1 sc (fine) col0 sh gr
 % Polyline
 0.000 slw
 n 2400 900 m 3300 900 l 3300 3300 l 2400 3300 l
  cp gs col7 0.75 shd ef gr 
+% Polyline
+7.500 slw
+n 8700 2550 m
+ 8700 4950 l gs col0 s gr 
 /Times-Roman ff 216.67 scf sf
 2550 5325 m
 gs 1 -1 sc (coarse) col0 sh gr
-/Times-Roman ff 216.67 scf sf
-5550 5325 m
-gs 1 -1 sc (fine) col0 sh gr
 /Times-Roman ff 216.67 scf sf
 5550 2325 m
 gs 1 -1 sc (neighbor) col0 sh gr
 /Times-Roman ff 216.67 scf sf
 2475 2325 m
 gs 1 -1 sc (boundary) col0 sh gr
+/Times-Roman ff 216.67 scf sf
+8850 3975 m
+gs 1 -1 sc (covered) col0 sh gr
 % here ends figure;
 % 
 % here starts figure with depth 50
@@ -133,6 +141,21 @@ n 5400 1950 m 5550 1950 l 5550 2100 l 5400 2100 l
 n 5250 1950 m 5400 1950 l 5400 2100 l 5250 2100 l
  cp gs col7 0.00 shd ef gr gs col0 s gr 
 % Polyline
+n 5400 4200 m 6600 4200 l 6600 6000 l 5400 6000 l
+ cp gs col0 s gr 
+% Polyline
+n 5400 4950 m 5550 4950 l 5550 5100 l 5400 5100 l
+ cp gs col7 0.50 shd ef gr gs col0 s gr 
+% Polyline
+n 4200 3900 m 6900 3900 l 6900 6300 l 4200 6300 l
+ cp gs col0 s gr 
+% Polyline
+n 5100 4800 m 5400 4800 l 5400 5100 l 5100 5100 l
+ cp gs col7 0.00 shd ef gr gs col0 s gr 
+% Polyline
+n 5400 4800 m 5550 4800 l 5550 4950 l 5400 4950 l
+ cp gs col7 0.50 shd ef gr gs col0 s gr 
+% Polyline
 n 1200 1200 m 2400 1200 l 2400 3000 l 1200 3000 l
  cp gs col0 s gr 
 % Polyline
@@ -147,12 +170,6 @@ n 2250 1950 m 2400 1950 l 2400 2100 l 2250 2100 l
 n 2250 4950 m 2400 4950 l 2400 5100 l 2250 5100 l
  cp gs col7 0.00 shd ef gr gs col0 s gr 
 % Polyline
-n 5400 4200 m 6600 4200 l 6600 6000 l 5400 6000 l
- cp gs col0 s gr 
-% Polyline
-n 5400 4950 m 5550 4950 l 5550 5100 l 5400 5100 l
- cp gs col7 0.50 shd ef gr gs col0 s gr 
-% Polyline
 n 900 3900 m 3600 3900 l 3600 6300 l 900 6300 l
  cp gs col0 s gr 
 % Polyline
@@ -162,14 +179,20 @@ n 1200 4200 m 2400 4200 l 2400 6000 l 1200 6000 l
 n 2400 4800 m 2700 4800 l 2700 5100 l 2400 5100 l
  cp gs col7 0.50 shd ef gr gs col0 s gr 
 % Polyline
-n 4200 3900 m 6900 3900 l 6900 6300 l 4200 6300 l
+n 7500 2550 m 10200 2550 l 10200 4950 l 7500 4950 l
  cp gs col0 s gr 
 % Polyline
-n 5100 4800 m 5400 4800 l 5400 5100 l 5100 5100 l
+n 8400 3450 m 8700 3450 l 8700 3750 l 8400 3750 l
  cp gs col7 0.00 shd ef gr gs col0 s gr 
 % Polyline
-n 5400 4800 m 5550 4800 l 5550 4950 l 5400 4950 l
- cp gs col7 0.50 shd ef gr gs col0 s gr 
+n 7500 2850 m 8700 2850 l 8700 4650 l 7500 4650 l
+ cp gs col0 s gr 
+% Polyline
+n 8550 3450 m
+ 8550 3750 l gs col32 s gr 
+% Polyline
+n 8400 3600 m
+ 8700 3600 l gs col32 s gr 
 % here ends figure;
 $F2psEnd
 rs
