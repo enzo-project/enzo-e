@@ -473,21 +473,40 @@ void Hypre::evaluate (Hierarchy & hierarchy)
 // PRIVATE MEMBER FUNCTIONS
 //======================================================================
 
-/// Add nonzeros connecting parent and children grid patches
+/// Add nonzeros connecting grid with all children grid patches
 
-void Hypre::init_graph_nonstencil_ (Grid & parent)
+void Hypre::init_graph_nonstencil_ (Grid & grid)
 
 {
 
   NOT_IMPLEMENTED("Hypre::init_graph_coarse_()");
 
-  ItGridChildren itchild (parent);
+  ItGridChildren itchild (grid);
+
+  int ilower_grid[3];
+
+  grid.i_lower(ilower_grid);
+  
+  printf ("DEBUG %s:%d  grid i_lower (%d %d %d)\n",
+	  __FILE__,__LINE__,
+	  ilower_grid[0],ilower_grid[1],ilower_grid[2]);
+
   while (Grid * child = itchild++) {
 
-    // Add the matrix entries between fine and coarse grids iff
-    // one of the grids is MPI-local
+    _TRACE_;
 
-    if (parent.is_local() || child->is_local()) {
+    if (grid.is_local() || child->is_local()) {
+      int ilower_child[3];
+
+      child->i_lower(ilower_child);
+
+      printf ("DEBUG %s:%d  child i_lower (%d %d %d)\n",
+	      __FILE__,__LINE__,
+	      ilower_child[0],ilower_child[1],ilower_child[2]);
+
+      // Add the matrix entries between fine and coarse grids iff
+      // one of the grids is MPI-local
+
       // *******************************************************************
       //      HYPRE_SStructGraphAddEntries (graph_,
       //				    grid->level(),
@@ -562,6 +581,8 @@ void Hypre::init_matrix_clear_ (Level & level)
     // Set overlapped areas of part with identity
 
     HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
+    // Need to clear under rhs also
+    //   HYPRE_SStructFACZeroAMRVectorData(b, plevels, prefinements);
   }
 }
 
@@ -578,19 +599,37 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   ItGridChildren itchild (grid);
+
+  int ilower_grid[3];
+
+  grid.i_lower(ilower_grid);
+  
+  printf ("DEBUG %s:%d  grid i_lower (%d %d %d)\n",
+	  __FILE__,__LINE__,
+	  ilower_grid[0],ilower_grid[1],ilower_grid[2]);
+
   while (Grid * child = itchild++) {
 
     _TRACE_;
 
-    // *******************************************************************
-    //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
-    //				      grid->level(),
-    //				      grid->INDEX
-    //				      neighbor.level(),
-    //				      neighbor.INDEX,
-    //				      variable);
-    // *******************************************************************
+    if (grid.is_local() || child->is_local()) {
 
+      int ilower_child[3];
+
+      child->i_lower(ilower_child);
+
+      printf ("DEBUG %s:%d  child i_lower (%d %d %d)\n",
+	      __FILE__,__LINE__,
+	      ilower_child[0],ilower_child[1],ilower_child[2]);
+      // *******************************************************************
+      //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
+      //				      grid->level(),
+      //				      grid->INDEX
+      //				      neighbor.level(),
+      //				      neighbor.INDEX,
+      //				      variable);
+      // *******************************************************************
+    }
   }
 }
 
@@ -599,7 +638,7 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
 /// Add contributions from point sources to right-hand side B
 
 Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
-				 std::vector<Point *> & points)
+				   std::vector<Point *> & points)
 
 {
 
@@ -677,10 +716,17 @@ void Hypre::solve_pfmg_ (Hierarchy & hierarchy)
 
 {
 
+  // Create and initialize the solver
+
   HYPRE_SStructSysPFMGCreate    (MPI_COMM_WORLD, &solver_);
   HYPRE_SStructSysPFMGSetLogging(solver_, 1);
   HYPRE_SStructSysPFMGSetup     (solver_,A_,B_,X_);
+
+  // Solve the linear system
+
   HYPRE_SStructSysPFMGSolve     (solver_,A_,B_,X_);
+
+  // Write out some diagnostic info about the solve
 
   int num_iterations;
   HYPRE_SStructSysPFMGGetNumIterations (solver_,&num_iterations);
@@ -690,7 +736,12 @@ void Hypre::solve_pfmg_ (Hierarchy & hierarchy)
   HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm (solver_,&residual);
   if (debug) printf ("HYPRE_SStructSysPFMGSolve final relative residual norm: %g\n",residual);
 
+  // Delete the solver
+
   HYPRE_SStructSysPFMGDestroy (solver_);
+  solver_ = 0;
+
+  
 }
 
 //------------------------------------------------------------------------
@@ -700,8 +751,81 @@ void Hypre::solve_pfmg_ (Hierarchy & hierarchy)
 void Hypre::solve_fac_ (Hierarchy & hierarchy)
 
 {
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_solver_fac_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  int i;
+
+  // Create the solver
+
+  HYPRE_SStructFACCreate(MPI_COMM_WORLD, &solver_);
+
+  // Initialize parts
+
+  int num_parts = hierarchy.num_levels();
+  int *parts  = new int [num_parts];
+  for (i=0; i<num_parts; i++) parts[i] = i;
+
+  HYPRE_SStructFACSetMaxLevels(solver_,  num_parts);
+  HYPRE_SStructFACSetPLevels(solver_, num_parts, parts);
+
+  // Initialize refinement factors
+
+  typedef int int3[3];
+  int3 *refinements = new int3 [num_parts];
+  
+  for (i=0; i<num_parts; i++) {
+    refinements[i][0] = 2;
+    refinements[i][1] = 2;
+    refinements[i][2] = 2;
+  }
+
+  HYPRE_SStructFACSetPRefinements(solver_, num_parts, refinements);
+
+  // solver parameters
+
+  int npre   = 2;
+  int npost  = 2;
+  int csolve = 2;
+  int relax  = 2;
+
+  HYPRE_SStructFACSetNumPreRelax(solver_,      npre);
+  HYPRE_SStructFACSetNumPostRelax(solver_,     npost);
+  HYPRE_SStructFACSetCoarseSolverType(solver_, csolve);
+  HYPRE_SStructFACSetRelaxType(solver_,        relax);
+
+  // stopping criteria
+
+  int itmax   = 20;
+  double rtol = 1e-6;
+
+  HYPRE_SStructFACSetRelChange(solver_, 0);
+  HYPRE_SStructFACSetMaxIter(solver_,    itmax);
+  HYPRE_SStructFACSetTol(solver_,        rtol);
+
+  // output amount
+
+  HYPRE_SStructFACSetLogging(solver_, 1);
+
+  // prepare for solve
+
+  HYPRE_SStructFACSetup2(solver_, A_, B_, X_);
+
+  // Solve the linear system
+
+  HYPRE_SStructFACSolve3(solver_, A_, B_, X_);
+
+  // Write out some diagnostic info about the solve
+
+  int num_iterations;
+  HYPRE_SStructFACGetNumIterations(solver_, &num_iterations);
+  double residual;
+  HYPRE_SStructFACGetFinalRelativeResidualNorm(solver_, &residual);
+
+  // Delete the solver
+
+  HYPRE_SStructFACDestroy2(solver_);
+  solver_ = 0;
+
+  // Delete local dynamic storage
+  delete [] parts;
+  delete [] refinements;
 }
 

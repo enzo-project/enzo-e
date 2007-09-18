@@ -27,10 +27,7 @@ class Faces
 
   /// Boolean arrays for faces; values are relative level offsets
 
-  const static int _unknown_;
-  const static int _boundary_;
-
-  int * neighbor_cell_[3][2];
+  int * face_zone_[3][2];
 
   /// Leading dimension of arrays
   int  n1_[3]; 
@@ -40,6 +37,14 @@ class Faces
   //--------------------------------------------------------------------
 
  public:
+
+  /// Categorization of face zones
+
+  const static int _unknown_;
+  const static int _boundary_;
+  const static int _coarse_;
+  const static int _fine_;
+  const static int _neighbor_;
 
   //--------------------------------------------------------------------
   // CONSTUCTORS AND DESTRUCTORS
@@ -56,10 +61,10 @@ class Faces
 
   // Data access
 
-  /// Relative offset of neighboring cell outside the grid on the given axis and face
+  /// Relative offset of neighboring cell outside the grid on the given axis and face.  No error checking on axis, face, i or j.
 
-  int &neighbor_cell (int axis, int face, int i, int j) throw ()
-  { return neighbor_cell_[axis][face][i+n1_[axis]*j]; };
+  int &face_zone (int axis, int face, int i, int j) throw ()
+  { return face_zone_[axis][face][i+n1_[axis]*j]; };
 
   void print() throw();
 

@@ -47,7 +47,11 @@ Grid::Grid (std::string parms) throw ()
 
   read (parms);
 
-  faces_ = new Faces(n_);
+  if (Grid::mpi_.ip() == ip_) {
+    faces_ = new Faces(n_);
+  } else {
+    faces_ = 0;
+  }
 }
 	  
 //======================================================================

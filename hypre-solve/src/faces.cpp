@@ -29,6 +29,10 @@ const int debug = 0;
 
 const int Faces::_unknown_  = -1000;
 const int Faces::_boundary_ = -2000;
+const int Faces::_coarse_   = -1;
+const int Faces::_fine_     =  1;
+const int Faces::_neighbor_ =  0;
+
 
 //----------------------------------------------------------------------
 
@@ -61,7 +65,7 @@ void Faces::print() throw()
        for (i=0; i<n1_[axis]; i++) {
 	 for (j=0; j<n2_[axis]; j++) {
 	   int index = i+n1_[axis]*j;
-	   int cell = neighbor_cell_[axis][face][index];
+	   int cell = face_zone_[axis][face][index];
 	   if (cell == _unknown_)       printf ("??");
 	   else if (cell == _boundary_) printf ("BB");
 	   else printf ("%2d",cell);
@@ -80,7 +84,7 @@ void Faces::print() throw()
 
 void Faces::alloc_ (int *n) throw ()
 //
-// Allocate and initialize storage for neighbor_cell_[][]
+// Allocate and initialize storage for face_zone_[][]
 //
 {
   int i;
@@ -88,18 +92,20 @@ void Faces::alloc_ (int *n) throw ()
   int N = n[0]*n[1]*n[2];
   
   for (int axis=0; axis<3; axis++) {
-    // Determine boundary face sizes
+
+    // Determine face zone sizes
+
     n1_[axis] = n[(axis+1)%3];
     n2_[axis] = n[(axis+2)%3];
     n_ [axis] = N / n[axis];
     if (debug) printf ("DEBUG %s:%d axis %d n1=%d n2=%d n=%d\n",
 		       __FILE__,__LINE__,axis,n1_[axis],n2_[axis],n_[axis]);
 
-    // Allocate and initialize boundary faces
+    // Allocate and initialize face zone categories
 
     for (int face=0; face<2; face++) {
-      neighbor_cell_[axis][face] = new int [n_[axis]];
-      for (i=0; i<n_[axis]; i++) neighbor_cell_[axis][face][i] = _unknown_;
+      face_zone_[axis][face] = new int [n_[axis]];
+      for (i=0; i<n_[axis]; i++) face_zone_[axis][face][i] = _unknown_;
     }
   }
 }
@@ -110,8 +116,8 @@ void Faces::dealloc_ () throw ()
 {
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
-      delete [] neighbor_cell_[axis][face];
-      neighbor_cell_[axis][face] = 0;
+      delete [] face_zone_[axis][face];
+      face_zone_[axis][face] = 0;
       
     }
   }

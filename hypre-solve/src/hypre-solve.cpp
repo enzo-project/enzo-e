@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 
     // Determine problem size the hard way
 
-    ItHierarchyGridsAll itg (problem.hierarchy());
+    ItLevelGridsAll itg (problem.hierarchy().level(0));
 
     int lower[3],upper[3];
     int i;
@@ -143,14 +143,9 @@ int main(int argc, char **argv)
     }
     while (Grid *grid = itg++) {
       grid->print();
-      if (grid->level() == 0) {
-	for (i=0; i<3; i++) {
-	  printf ("Lower %d %d\n",grid->i_lower(i),lower[i]);
-	  printf ("Upper %d %d\n",grid->i_upper(i),upper[i]);
-	  lower[i] = MIN(grid->i_lower(i),lower[i]);
-	  upper[i] = MAX(grid->i_upper(i),upper[i]);
-	}
-      
+      for (i=0; i<3; i++) {
+	lower[i] = MIN(grid->i_lower(i),lower[i]);
+	upper[i] = MAX(grid->i_upper(i),upper[i]);
       }
     }
 

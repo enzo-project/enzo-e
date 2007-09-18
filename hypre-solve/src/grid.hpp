@@ -200,9 +200,25 @@ protected:
   int i_lower(int i) throw ()
   { return il_[i]; };
 
+  /// Return the global lower indices of the lower grid unknown.  No error checking on il.
+  void i_lower(int *il) throw ()
+  { 
+    il[0] = il_[0];
+    il[1] = il_[1];
+    il[2] = il_[2];
+  };
+
   /// Return the global upper index of the upper grid unknown.  No error checking on i.
   int i_upper(int i) throw ()
   { return il_[i] + n_[i] - 1; };
+
+  /// Return the global upper indices of the upper grid unknown.  No error checking on iu.
+  void i_upper(int *iu) throw ()
+  { 
+    iu[0] = il_[0] + n_[0] - 1;
+    iu[1] = il_[1] + n_[1] - 1;
+    iu[2] = il_[2] + n_[2] - 1;
+  };
 
   /// Return the unknown u(i,j,k)
   Scalar & unknown(int i0, int i1, int i2) throw()

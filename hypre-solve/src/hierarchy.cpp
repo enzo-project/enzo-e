@@ -33,7 +33,7 @@ const int trace = 0;
 
 //----------------------------------------------------------------------
 
-const int debug = 0;
+const int debug = 1;
 
 //----------------------------------------------------------------------
 
@@ -258,15 +258,15 @@ void Hierarchy::init_faces (Domain & domain) throw ()
 
   // For level == 0, check neighbors and boundary
 
-  // For level >= 1, check parent, parents neighbors neighbors and boundary
+  // For level  > 0, check parent, parents children, and parent's neighbors children
 
   ItHierarchyLevels itl(*this);
 
   while (Level * level = itl++) {
 
-    ItLevelGridsLocal itg (*level);
+    ItLevelGridsLocal itgl (*level);
 
-    while (Grid * grid = itg++) {
+    while (Grid * grid = itgl++) {
 
       ItGridNeighbors itn (*grid);
 
@@ -311,7 +311,7 @@ void Hierarchy::init_faces (Domain & domain) throw ()
 
 	for (int in=in0; in<=in1; in++) {
 	  for (int jn=jn0; jn<=jn1; jn++) {
-	    grid->faces().neighbor_cell(axis,face,in,jn) = 0;
+	    grid->faces().face_zone(axis,face,in,jn) = Faces::_neighbor_;
 	  }
 	}
 
