@@ -17,6 +17,27 @@
 class Faces
 {
 
+public:
+
+  /// Types of face-zones
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Label[] ENTRIES SHOULD MATCH LabelName VALUES IN faces.cpp
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  enum Label {
+    _first_,
+    _unknown_ = _first_,
+    _boundary_,
+    _coarse_,
+    _fine_,
+    _neighbor_,
+    _covered_,
+    _last_ =  _covered_
+  };
+
+  static const char * LabelName[];
+
   //--------------------------------------------------------------------
   // PRIVATE MEMBER DATA
   //--------------------------------------------------------------------
@@ -27,7 +48,7 @@ class Faces
 
   /// Boolean arrays for faces; values are relative level offsets
 
-  int * face_zone_[3][2];
+  Label * label_[3][2];
 
   /// Leading dimension of arrays
   int  n1_[3]; 
@@ -39,13 +60,6 @@ class Faces
  public:
 
   /// Categorization of face zones
-
-  const static int _unknown_;
-  const static int _boundary_;
-  const static int _coarse_;
-  const static int _fine_;
-  const static int _neighbor_;
-  const static int _covered_;
 
   //--------------------------------------------------------------------
   // CONSTUCTORS AND DESTRUCTORS
@@ -62,10 +76,14 @@ class Faces
 
   // Data access
 
-  /// Relative offset of neighboring cell outside the grid on the given axis and face.  No error checking on axis, face, i or j.
+  /// Relative offset of neighboring cell outside the grid on the
+  /// given axis and face.  No error checking on axis, face, i or j.
 
-  int &face_zone (int axis, int face, int i, int j) throw ()
-  { return face_zone_[axis][face][i+n1_[axis]*j]; };
+  Label &label (int axis, int face, int i, int j) throw ()
+  { return label_[axis][face][i+n1_[axis]*j]; };
+
+  int n1 (int axis) { return n1_[axis]; };
+  int n2 (int axis) { return n2_[axis]; };
 
   void print() throw();
 

@@ -17,6 +17,7 @@ public:
 
   Mpi ();
   Mpi (int * argc, char ***argv);
+  ~Mpi ();
   bool is_root () throw () {return ip_ == 0;};
   int ip () throw () {return ip_;};
   int np () throw () {return np_;};
@@ -28,5 +29,6 @@ private:
   int np_;   // Number of processors
   int ip_;   // Rank of this processor
 };
+
 
 

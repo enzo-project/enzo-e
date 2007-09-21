@@ -117,6 +117,14 @@ protected:
 
   void write (FILE * fp = 0) throw ();
 
+  /// Write the grid outline to a geomview file 
+
+  void geomview_grid (FILE *fpr, bool full=true) throw ();
+
+  /// Write the grid's face data to a geomview file
+
+  void geomview_face (FILE *fpr, bool full=true) throw ();
+
   /// Read the grid from the given string in compact format
 
   void read (std::string parms) throw ();
@@ -234,6 +242,13 @@ protected:
   Scalar h(int i) throw ()
   { return (x_upper(i)-x_lower(i)) / num_unknowns(i); };
 
+  /// Return the center of the given zone
+  void zone (int i0, int i1, int i2, Scalar &x0, Scalar &x1, Scalar &x2) throw ()
+  { 
+    x0 = xl_[0] + ((xu_[0] - xl_[0]) / n_[0]) * (i0 + 0.5); 
+    x1 = xl_[1] + ((xu_[1] - xl_[1]) / n_[1]) * (i1 + 0.5); 
+    x2 = xl_[2] + ((xu_[2] - xl_[2]) / n_[2]) * (i2 + 0.5); 
+  };
   /// Processor owner
   int ip () throw () 
   { return ip_; };

@@ -79,6 +79,45 @@ void Level::print () throw ()
 
 //----------------------------------------------------------------------
 
+void Level::geomview_grid (FILE *fpr, bool full) throw ()
+{
+  int n = num_grids();
+
+  // Write Level header
+  if (full) {
+    fprintf (fpr,"VECT\n");
+    fprintf (fpr,"%d %d 1\n",4*n, 16*n);
+    for (int i=0; i<n; i++) fprintf (fpr,"8 3 3 2 "); fprintf (fpr,"\n");
+    fprintf (fpr,"1 0 0 0 ");
+    for (int i=1; i<n; i++) fprintf (fpr,"0 0 0 0 "); fprintf (fpr,"\n");
+  }
+
+  // Write grids
+  ItLevelGridsAll itg (*this);
+  while (Grid * g = itg++) {
+    g->geomview_grid (fpr,0);
+  }
+
+  // Write trailer
+  if (full) {
+    fprintf (fpr,"1 1 1 0\n");
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Level::geomview_face (FILE *fpr, bool full) throw ()
+{
+  if (full) fprintf (fpr,"CQUAD\n");
+
+  ItLevelGridsAll itga (*this);
+  while (Grid * grid = itga++) {
+    grid->geomview_face(fpr,false);
+  }
+}
+
+//----------------------------------------------------------------------
+
 void Level::write (FILE *fp) throw ()
 {
   if (fp == 0) fp = stdout;

@@ -18,6 +18,8 @@
 
 #include "HYPRE_sstruct_ls.h"
 
+#include "hypre-solve.hpp"
+
 #include "scalar.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
@@ -25,15 +27,21 @@
 
 //----------------------------------------------------------------------
 
-const int debug = 0;
+const int debug = 1;
 
-const int Faces::_unknown_  = -1000;
-const int Faces::_boundary_ = -2000;
-const int Faces::_covered_  = -3000;
-const int Faces::_coarse_   = -1;
-const int Faces::_fine_     =  1;
-const int Faces::_neighbor_ =  0;
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// LabelName[] VALUES SHOULD MATCH Label enum ENTRIES IN faces.hpp
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+const char * Faces::LabelName[] = {
+    "unknown",
+    "boundary",
+    "coarse",
+    "fine",
+    "neighbor",
+    "covered",
+    "last"
+  };
 
 //----------------------------------------------------------------------
 
@@ -66,7 +74,7 @@ void Faces::print() throw()
        for (i=0; i<n1_[axis]; i++) {
 	 for (j=0; j<n2_[axis]; j++) {
 	   int index = i+n1_[axis]*j;
-	   int cell = face_zone_[axis][face][index];
+	   Label cell = label_[axis][face][index];
 	   if (cell == _unknown_)       printf ("??");
 	   else if (cell == _boundary_) printf ("BB");
 	   else printf ("%2d",cell);
@@ -75,18 +83,14 @@ void Faces::print() throw()
        }
      }
    }
-
-
 }
 
 //======================================================================
 // PRIVATE MEMBER FUNCTIONS
 //======================================================================
 
+/// Allocate and initialize storage for label_[][]
 void Faces::alloc_ (int *n) throw ()
-//
-// Allocate and initialize storage for face_zone_[][]
-//
 {
   int i;
 
@@ -105,8 +109,8 @@ void Faces::alloc_ (int *n) throw ()
     // Allocate and initialize face zone categories
 
     for (int face=0; face<2; face++) {
-      face_zone_[axis][face] = new int [n_[axis]];
-      for (i=0; i<n_[axis]; i++) face_zone_[axis][face][i] = _unknown_;
+      label_[axis][face] = new Label [n_[axis]];
+      for (i=0; i<n_[axis]; i++) label_[axis][face][i] = _unknown_;
     }
   }
 }
@@ -117,8 +121,8 @@ void Faces::dealloc_ () throw ()
 {
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
-      delete [] face_zone_[axis][face];
-      face_zone_[axis][face] = 0;
+      delete [] label_[axis][face];
+      label_[axis][face] = NULL;
       
     }
   }

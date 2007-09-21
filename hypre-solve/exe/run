@@ -59,7 +59,7 @@ set dir = "$type.L1.G${np}.P${np0}${np1}${np2}.N${N0}.L${L}"
 set infile  = "in.$dir"
 set outfile = "out.$dir"
 
-echo "Running $dir"
+printf "Running ${dir}: "
 
 # Blow away directory if it exists; create new directory, and change to it
 
@@ -165,5 +165,13 @@ if ($HOST == "ds100") then
    poe hypre-solve $infile -nodes 1 -tasks_per_node 8 -rmpool 1
 else
    mpirun -np $np hypre-solve $infile >& outfile
+endif
+
+set success = `grep "End hypre-solve" outfile | wc`
+set success = $success[1]
+if ($success == 1) then
+   echo "Pass"
+else
+   echo "Fail"
 endif
 

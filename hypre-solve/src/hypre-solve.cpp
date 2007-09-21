@@ -40,8 +40,9 @@
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug = 1;
-const int trace = 0;
+const int debug    = 0;
+const int trace    = 0;
+const int geomview = 0;
 
 //======================================================================
 // BEGIN MAIN
@@ -92,6 +93,9 @@ int main(int argc, char **argv)
     JBPERF_START("1-problem");
     // ***************
 
+    _BARRIER_;
+    _TRACE_;
+
     problem.read  (filename);
 
     // ***************
@@ -102,6 +106,9 @@ int main(int argc, char **argv)
     // Initialize the hierarchy
     // --------------------------------------------------
 
+    _TRACE_;
+    _BARRIER_;
+
     Hierarchy & hierarchy = problem.hierarchy();
 
     // determine interconnections between grids
@@ -110,28 +117,28 @@ int main(int argc, char **argv)
     JBPERF_START("2-grids");
     // ***************
 
-    hierarchy.init_grids();
+    _TRACE_;
+    _BARRIER_;
+    hierarchy.init_grids(problem.domain(), mpi);
+    _TRACE_;
+    _BARRIER_;
+
+    if (geomview) {
+      FILE * fp = fopen ("hierarchy.vect","w");
+      hierarchy.geomview_grid (fp);
+      fclose (fp);
+    }
 
     // ***************
     JBPERF_STOP("2-grids");
     // ***************
 
-    // categorize grid boundary zones according to levels of adjacent
-    // or containing grids
-
-    // ***************
-    JBPERF_START("3-faces");
-    // ***************
-
-    hierarchy.init_faces(problem.domain());
-  
-    // ***************
-    JBPERF_STOP("3-faces");
-    // ***************
-
     if (debug) problem.print ();
 
     // Determine problem size the hard way
+
+    _TRACE_;
+    _BARRIER_;
 
     ItLevelGridsAll itg (problem.hierarchy().level(0));
 
@@ -154,6 +161,8 @@ int main(int argc, char **argv)
     assert (upper[0] - lower[0] + 1 == upper[1] - lower[1] + 1);
     assert (upper[0] - lower[0] + 1 == upper[2] - lower[2] + 1);
 
+    _TRACE_;
+    _BARRIER_;
     
     JBPERF_GLOBAL("problem-size",upper[0] - lower[0] + 1);
 
@@ -161,28 +170,48 @@ int main(int argc, char **argv)
     // Initialize hypre
     // --------------------------------------------------
 
+    _TRACE_;
+    _BARRIER_;
     Hypre hypre;
+    _TRACE_;
+    _BARRIER_;
 
   // ***************
     JBPERF_START("4-hypre-init");
   // ***************
 
+    _TRACE_;
+    _BARRIER_;
     hypre.init_hierarchy (problem.parameters(),hierarchy,mpi);
+    _TRACE_;
+    _BARRIER_;
 
     // Initialize the stencils
     
+    _TRACE_;
+    _BARRIER_;
     hypre.init_stencil (hierarchy);
+    _TRACE_;
+    _BARRIER_;
 
     // Initialize the graph
 
+    _TRACE_;
+    _BARRIER_;
     hypre.init_graph (hierarchy);
+    _TRACE_;
+    _BARRIER_;
 
     // Initialize the linear system
 
+    _TRACE_;
+    _BARRIER_;
     hypre.init_linear (problem.parameters(),
 		       hierarchy,
 		       problem.points(),
 		       problem.spheres());
+    _TRACE_;
+    _BARRIER_;
 
   // ***************
     JBPERF_STOP("4-hypre-init");
@@ -196,7 +225,11 @@ int main(int argc, char **argv)
     JBPERF_START("5-hypre-solve");
   // ***************
 
+    _TRACE_;
+    _BARRIER_;
     hypre.solve (problem.parameters(),hierarchy);
+    _TRACE_;
+    _BARRIER_;
 
   // ***************
     JBPERF_STOP("5-hypre-solve");
@@ -206,7 +239,11 @@ int main(int argc, char **argv)
     // Evaluate the solution
     // --------------------------------------------------
 
+    _TRACE_;
+    _BARRIER_;
     hypre.evaluate (hierarchy);
+    _TRACE_;
+    _BARRIER_;
 
     // --------------------------------------------------
     // jbPerf Finalize
@@ -223,10 +260,14 @@ int main(int argc, char **argv)
 
     mpi.barrier();
 
+    _TRACE_;
+    _BARRIER_;
+
     if (mpi.ip() == 0) { printf ("End %s\n",exec_name.c_str()); fflush(stdout); }
 
-
     MPI_Finalize ();
+
+    // MPI_Finalize() called by Mpi destructor
 
   } else {
 

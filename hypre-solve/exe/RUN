@@ -1,17 +1,17 @@
 #!/bin/csh -f
 
 set problems = ( \
-#     "unigrid 16 1 1 1" \
-#     "unigrid 24 1 1 1" \
-#     "unigrid 32 1 1 1" \
-#     "unigrid 48 1 1 1" \
-#     "unigrid 64 1 1 1" \
-#     "unigrid 96 1 1 1" \
-#     "unigrid 128 1 1 1" \
-#     "unigrid 32 2 1 1" \
-#     "unigrid 32 1 2 1" \
-#     "unigrid 32 1 1 2" \
-#     "unigrid 32 2 2 2" \
+     "unigrid 16 1 1 1" \
+     "unigrid 24 1 1 1" \
+     "unigrid 32 1 1 1" \
+     "unigrid 48 1 1 1" \
+     "unigrid 64 1 1 1" \
+     "unigrid 96 1 1 1" \
+     "unigrid 128 1 1 1" \
+     "unigrid 32 2 1 1" \
+     "unigrid 32 1 2 1" \
+     "unigrid 32 1 1 2" \
+     "unigrid 32 2 2 2" \
      "nested 16 1 1 1 2" \
      "nested 32 1 1 1 2" \
      "nested 64 1 1 1 2" \

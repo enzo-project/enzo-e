@@ -19,6 +19,7 @@ class Hierarchy
   friend class ItHierarchyGridsLocal;
   friend class ItHierarchyGridsAll;
   friend class ItHierarchyLevels;
+  friend class ItHierarchyLevelsReverse;
 
   //--------------------------------------------------------------------
   // PRIVATE MEMBER DATA
@@ -65,16 +66,20 @@ public:
 
   void insert_grid (Grid * grid) throw ();
 
-  void init_grids () throw();
-
-  void init_faces (Domain & domain) throw();
+  void init_grids (Domain & domain, Mpi & mpi) throw();
 
   void set_dim (int d) throw () { dimension_ = d; };
 
   // IO
 
+  /// Write the hierarchy Levels and Grids to stdout
   void print () throw ();
-  void write (FILE * fp = 0) throw ();
+
+  /// Write the Hierarchy to the given file.
+  void write (FILE * fp = stdout) throw ();
+
+  /// Write the Hierarchy grids to the given open file in geomview format
+  void geomview_grid (FILE *fpr, bool full=true) throw ();
 
   // Checking
 
@@ -123,6 +128,7 @@ private:
   void init_grid_levels_() throw();
   void init_grid_children_() throw();
   void init_grid_neighbors_() throw();
+  void init_grid_faces_ (Domain & domain, Mpi & mpi) throw();
 
   void insert_in_level_ (int level, Grid & grid) throw ();
 
@@ -231,7 +237,7 @@ public:
 /**
  * 
  * An ItHierarchyLevels object iterates through each Level of the
- * Hierarchy in turn.
+ * Hierarchy in turn, from coarsest to finest.
  * 
  * @file
  * @author James Bordner <jobordner@ucsd.edu>
@@ -269,6 +275,53 @@ public:
     if (curr_ == hierarchy_->levels0_.size()) curr_ = 0;
     curr_ ++;
     return hierarchy_->levels0_[curr_-1];
+  }
+
+};
+
+/// ItHierarchyLevelsReverse class
+
+/**
+ * 
+ * An ItHierarchyLevelsReverse object iterates through each Level of the
+ * Hierarchy in turn, from finest to coarsest.
+ * 
+ * @file
+ * @author James Bordner <jobordner@ucsd.edu>
+ * @date 2007-05-02
+ *
+ */
+
+class ItHierarchyLevelsReverse
+{
+
+  //--------------------------------------------------------------------
+  // PRIVATE MEMBER DATA
+  //--------------------------------------------------------------------
+
+private:
+
+  int               curr_;
+  const Hierarchy * hierarchy_;
+
+public:
+
+  //--------------------------------------------------------------------
+  // CONSTUCTORS AND DESTRUCTORS
+  //--------------------------------------------------------------------
+
+  ItHierarchyLevelsReverse (Hierarchy & hierarchy) throw ()
+    : curr_(0), hierarchy_(&hierarchy)
+  { }
+
+  ~ItHierarchyLevelsReverse () throw () {};
+  
+  /// Iterate through all Levels in the Hierarchy from finest to coarsest
+  Level * operator-- (int) { 
+
+    if (curr_ == -1) curr_ = hierarchy_->levels0_.size()-1;
+    curr_ --;
+    return hierarchy_->levels0_[curr_+1];
   }
 
 };

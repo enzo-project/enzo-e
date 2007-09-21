@@ -29,11 +29,12 @@
 #include "level.hpp"
 #include "hierarchy.hpp"
 
-const int trace = 0;
 
 //----------------------------------------------------------------------
 
-const int debug = 1;
+const int trace    = 0;
+const int debug    = 0;
+const int geomview = 0;
 
 //----------------------------------------------------------------------
 
@@ -86,7 +87,8 @@ void Hierarchy::insert_grid (Grid * pgrid) throw ()
     determines each grid's parent, containing level, children, and
     neighbors. */
 
-void Hierarchy::init_grids () throw ()
+void Hierarchy::init_grids (Domain & domain,
+			    Mpi    & mpi) throw ()
 {
   if (debug) printf ("Hierarchy::init_levels()\n");
 
@@ -94,7 +96,7 @@ void Hierarchy::init_grids () throw ()
   init_grid_levels_();
   init_grid_children_();
   init_grid_neighbors_();
-
+  init_grid_faces_(domain, mpi);
 }
 
 //------------------------------------------------------------------------
@@ -245,80 +247,124 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
 //------------------------------------------------------------------------
 
-/// Initialize Face data
+///  Find each grid's face categories.
 
 /** After all grid inter-connections are determined, this function
-    determines the neighbor structure for each individual zone along
-    the boundary. Only performed for local grids. */
+    determines the neighbor structure for each face-zone. Only
+    performed for local grids, and grids neighboring local grids. 
+    Allocates Faces for grids that haven't had them allocated yet. */
 
-void Hierarchy::init_faces (Domain & domain) throw ()
+void Hierarchy::init_grid_faces_ (Domain & domain,
+				  Mpi    & mpi) throw ()
 
 {
   int k;
 
-  // For level == 0, check neighbors and boundary
+  _TRACE_;
 
-  // For level  > 0, check parent, parents children, and parent's neighbors children
+  // ------------------------------------------------------------
+  // Label boundary face-zones
+  // ------------------------------------------------------------
 
-  ItHierarchyLevels itl(*this);
+  ItLevelGridsLocal itgl (level(0));
 
-  while (Level * level = itl++) {
+  Scalar dl[3],du[3];
+  domain.lower(dl[0],dl[1],dl[2]);
+  domain.upper(du[0],du[1],du[2]);
 
-    ItLevelGridsLocal itgl (*level);
+  if (debug) printf ("DEBUG %s:%d domain (%g,%g,%g) (%g,%g,%g)\n",__FILE__,__LINE__,
+		     dl[0],dl[1],dl[2],
+		     du[0],du[1],du[2]);
 
-    while (Grid * grid = itgl++) {
+  while (Grid * grid = itgl++) {
+    if (debug) printf ("DEBUG %s:%d labeling boundary\n",__FILE__,__LINE__);
+    Scalar gl[3];
+    Scalar gu[3];
+    grid->print();
 
-      ItGridNeighbors itn (*grid);
-
-      while (Grid * neighbor = itn++) {
-
-	// Update each grid's Faces's boundary mask
-
-	int gl[3],gu[3];
-	
-	grid->find_neighbor_indices (*neighbor,gl,gu);
-
-	if (debug) 
-	  printf ("DEBUG %s:%d  Neighbor indices of %d = (%d,%d,%d) : (%d,%d,%d)\n",
-		  __FILE__,__LINE__,grid->id(),gl[0],gl[1],gl[2],gu[0],gu[1],gu[2]);
-
-	// find axis and face
-
-	int axis = -1, face = -1;
-
-	if (gl[0] == -1)                   {axis = 0; face = 0;}
-	if (gl[0] == grid->num_unknowns(0)){axis = 0; face = 1;}
-	if (gl[1] == -1)                   {axis = 1; face = 0;}
-	if (gl[1] == grid->num_unknowns(1)){axis = 1; face = 1;}
-	if (gl[2] == -1)                   {axis = 2; face = 0;}
-	if (gl[2] == grid->num_unknowns(2)){axis = 2; face = 1;}
-
-	assert (axis >= 0);
-	assert (face >= 0);
-
-	// determine index bounds 
-
-	int in0, in1, jn0, jn1;
-	in0 = gl[(axis+1)%3];
-	in1 = gu[(axis+1)%3];
-	jn0 = gl[(axis+2)%3];
-	jn1 = gu[(axis+2)%3];
-
-	if (debug) printf ("DEBUG_FACES axis=%d face=%d [(%d,%d) - (%d,%d)]\n",
-			   axis,face,in0,jn0,in1,jn1);
-      
-	// set Faces boundary mask
-
-	for (int in=in0; in<=in1; in++) {
-	  for (int jn=jn0; jn<=jn1; jn++) {
-	    grid->faces().face_zone(axis,face,in,jn) = Faces::_neighbor_;
-	  }
-	}
-
-	if (debug) grid->faces().print();
-      }
-    }
   }
+
+  if (geomview) {
+    char filename[20];
+    int ip = mpi.ip();
+    sprintf (filename,"level0-p%d.quad",ip);
+    FILE * fp = fopen (filename,"w");
+    level(0).geomview_face(fp);
+    fclose(fp);
+  }
+
+  // ------------------------------------------------------------
+  // Label covered face-zones
+  // ------------------------------------------------------------
+
+  // ------------------------------------------------------------
+  // Label fine and neighbor face-zones
+  // ------------------------------------------------------------
+
+  // ------------------------------------------------------------
+  // Label coarse face-zones
+  // ------------------------------------------------------------
+
+  
+//   ItHierarchyLevelsReverse itlr(*this);
+
+//   while (Level * level = itlr--) {
+
+//     ItLevelGridsLocal itgl (*level);
+
+//     while (Grid * grid = itgl++) {
+
+//       ItGridNeighbors itn (*grid);
+
+//       while (Grid * neighbor = itn++) {
+
+// 	// Update each grid's Faces's boundary mask
+
+// 	int gl[3],gu[3];
+	
+// 	grid->find_neighbor_indices (*neighbor,gl,gu);
+
+// 	if (debug) 
+// 	  printf ("DEBUG %s:%d  Neighbor indices of %d = (%d,%d,%d) : (%d,%d,%d)\n",
+// 		  __FILE__,__LINE__,grid->id(),gl[0],gl[1],gl[2],gu[0],gu[1],gu[2]);
+
+// 	// find axis and face
+
+// 	int axis = -1, face = -1;
+
+// 	if (gl[0] == -1)                   {axis = 0; face = 0;}
+// 	if (gl[0] == grid->num_unknowns(0)){axis = 0; face = 1;}
+// 	if (gl[1] == -1)                   {axis = 1; face = 0;}
+// 	if (gl[1] == grid->num_unknowns(1)){axis = 1; face = 1;}
+// 	if (gl[2] == -1)                   {axis = 2; face = 0;}
+// 	if (gl[2] == grid->num_unknowns(2)){axis = 2; face = 1;}
+
+// 	assert (axis >= 0);
+// 	assert (face >= 0);
+
+// 	// determine index bounds 
+
+// 	int in0, in1, jn0, jn1;
+// 	in0 = gl[(axis+1)%3];
+// 	in1 = gu[(axis+1)%3];
+// 	jn0 = gl[(axis+2)%3];
+// 	jn1 = gu[(axis+2)%3];
+
+// 	if (debug) printf ("DEBUG_FACES axis=%d face=%d [(%d,%d) - (%d,%d)]\n",
+// 			   axis,face,in0,jn0,in1,jn1);
+      
+// 	// set Faces boundary mask
+
+// 	for (int in=in0; in<=in1; in++) {
+// 	  for (int jn=jn0; jn<=jn1; jn++) {
+// 	    grid->faces().label(axis,face,in,jn) = Faces::_neighbor_;
+// 	  }
+// 	}
+
+// 	if (debug) grid->faces().print();
+//       }
+//     }
+//   }
 }
 
 //======================================================================
@@ -333,10 +379,67 @@ void Hierarchy::print () throw ()
 
 //----------------------------------------------------------------------
 
+void Hierarchy::geomview_grid (FILE *fpr, bool full) throw ()
+{
+
+  // Color mapping for levels
+
+  int bcolor[] = {1, 1, 0, 0, 0, 1, 1};
+  int rcolor[] = {1, 0, 1, 0, 1, 0, 0};
+  int gcolor[] = {1, 0, 0, 1, 1, 1, 1};
+
+  int ng = num_grids();
+  int nl = num_levels();
+
+  // Write header
+
+  if (full) {
+
+    // Print first two lines of geomview *.vect file
+    fprintf (fpr,"VECT\n");
+    fprintf (fpr,"%d %d %d\n",4*ng, 16*ng, nl);
+
+    //
+    for (int i=0; i<ng; i++) fprintf (fpr,"8 3 3 2 "); fprintf (fpr,"\n");
+
+    ItHierarchyLevels itl(*this);
+    while (Level *level = itl++) {
+      fprintf (fpr,"1 0 0 0 ");
+      for (int i=1; i<level->num_grids(); i++) {
+	fprintf (fpr,"0 0 0 0 "); 
+      }
+      fprintf (fpr,"\n");
+    }
+  }
+
+  // For each level, print out all grids in the level
+
+  ItHierarchyLevels itl(*this);
+
+  while (Level * level = itl++) {
+
+    ItLevelGridsAll itg (*level);
+
+    while (Grid * grid = itg++) {
+
+      grid->geomview_grid(fpr,0);
+
+    }
+
+  }
+
+  if (full) {
+    for (int i=0; i<nl; i++) {
+      int j=i%7;  // 7 is length of [rgb]color[] arrays
+      fprintf (fpr,"%d %d %d 0\n",rcolor[j],gcolor[j],bcolor[j]);
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void Hierarchy::write (FILE *fp) throw ()
 {
-  if (fp == 0) fp = stdout;
-
   fprintf (fp,"Hierarchy\n");
   for (int i=0; i<num_levels(); i++) {
     level(i).write();
