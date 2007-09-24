@@ -32,15 +32,15 @@
 #include "sphere.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
+#include "domain.hpp"
 #include "grid.hpp"
 #include "level.hpp"
-#include "domain.hpp"
 #include "hierarchy.hpp"
 #include "parameters.hpp"
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug    = 0;
+const int debug    = 1;
 const int trace    = 0;
 const int geomview = 0;
 
@@ -65,7 +65,10 @@ int main(int argc, char **argv)
 
   Mpi mpi (&argc,&argv);
 
-  if (debug) printf ("DEBUG %s:%d mpi.np() = %d\n",__FILE__,__LINE__,mpi.np());
+  if (debug) printf ("DEBUG %s:%d mpi (ip,np) = (%d,%d)\n",
+		     __FILE__,__LINE__,mpi.ip(),mpi.np());
+
+  Grid::set_mpi (mpi);
 
   // --------------------------------------------------
   // JBPERF initialization
@@ -110,6 +113,8 @@ int main(int argc, char **argv)
     _BARRIER_;
 
     Hierarchy & hierarchy = problem.hierarchy();
+    Grid::set_domain (problem.domain());
+    Level::set_domain (problem.domain());
 
     // determine interconnections between grids
 

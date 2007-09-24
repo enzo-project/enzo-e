@@ -75,7 +75,8 @@ class Grid
   // STATIC MEMBER DATA
   //--------------------------------------------------------------------
 
-  static Mpi  mpi_;
+  static Mpi    mpi_;
+  static Domain domain_; // Only used by geomview stuff
 
   //--------------------------------------------------------------------
   // PROTECTED MEMBER DATA
@@ -197,12 +198,20 @@ protected:
   { return n_[0]*n_[1]*n_[2]; };
 
   /// Return the coordinates of the lower grid vertex.  No error checking on i.
-  Scalar x_lower(int i) throw ()
-  { return xl_[i]; };
+  void x_lower(Scalar &xl0, Scalar &xl1, Scalar &xl2) throw ()
+  { 
+    xl0 = xl_[0]; 
+    xl1 = xl_[1]; 
+    xl2 = xl_[2]; 
+  };
 
   /// Return the coordinates of the upper grid vertex.  No error checking on i.
-  Scalar x_upper(int i) throw ()
-  { return xu_[i]; };
+  void x_upper(Scalar &xu0, Scalar &xu1, Scalar &xu2) throw ()
+  { 
+    xu0 = xu_[0]; 
+    xu1 = xu_[1]; 
+    xu2 = xu_[2]; 
+  };
 
   /// Return the global lower index of the lower grid unknown.  No error checking on i.
   int i_lower(int i) throw ()
@@ -240,7 +249,15 @@ protected:
 
   /// Return the mesh width along the given axis
   Scalar h(int i) throw ()
-  { return (x_upper(i)-x_lower(i)) / num_unknowns(i); };
+  { return (xu_[i] - xl_[i]) / n_[i]; };
+
+  /// Return the mesh width along the given axis
+  void h(Scalar &h0, Scalar &h1, Scalar &h2) throw ()
+  { 
+    h0 = (xu_[0] - xl_[0]) / n_[0];
+    h1 = (xu_[1] - xl_[1]) / n_[1];
+    h2 = (xu_[2] - xl_[2]) / n_[2];
+  };    
 
   /// Return the center of the given zone
   void zone (int i0, int i1, int i2, Scalar &x0, Scalar &x1, Scalar &x2) throw ()
@@ -275,8 +292,13 @@ protected:
   // STATIC MEMBER FUNCTIONS
   //--------------------------------------------------------------------
 
+  /// Initialize static Mpi object
   static void set_mpi (Mpi &mpi)
   { mpi_ = mpi; };
+
+  /// Set static Domain object
+  static void set_domain (Domain &domain)
+  { domain_ = domain; };
 
 };
 

@@ -22,12 +22,17 @@
 #include "scalar.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
+#include "domain.hpp"
 #include "grid.hpp"
 #include "level.hpp"
 
 //----------------------------------------------------------------------
 
 const int debug = 1;
+
+//----------------------------------------------------------------------
+
+Domain Level::domain_;
 
 //----------------------------------------------------------------------
 
@@ -108,10 +113,36 @@ void Level::geomview_grid (FILE *fpr, bool full) throw ()
 
 void Level::geomview_face (FILE *fpr, bool full) throw ()
 {
-  if (full) fprintf (fpr,"CQUAD\n");
+  if (full) {
+    fprintf (fpr,"CQUAD\n");
+    // Print points at domain boundaries to provide geomview with bounding box
+
+    Scalar dl[3],du[3];
+    Level::domain_.lower(dl[0],dl[1],dl[2]);
+    Level::domain_.upper(du[0],du[1],du[2]);
+    fprintf (fpr,
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1\n",
+	     dl[0],dl[1],dl[2],
+	     dl[0],dl[1],dl[2],
+	     dl[0],dl[1],dl[2],
+	     dl[0],dl[1],dl[2]);
+    fprintf (fpr,
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1\n",
+	     du[0],du[1],du[2],
+	     du[0],du[1],du[2],
+	     du[0],du[1],du[2],
+	     du[0],du[1],du[2]);
+  }
 
   ItLevelGridsAll itga (*this);
   while (Grid * grid = itga++) {
+    if (debug) printf ("DEBUG %s:%d grid id = %d\n",__FILE__,__LINE__,grid->id());
     grid->geomview_face(fpr,false);
   }
 }

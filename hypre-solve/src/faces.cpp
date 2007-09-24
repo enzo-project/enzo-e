@@ -23,6 +23,7 @@
 #include "scalar.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
+#include "domain.hpp"
 #include "grid.hpp"
 
 //----------------------------------------------------------------------

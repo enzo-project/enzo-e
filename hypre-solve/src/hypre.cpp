@@ -24,9 +24,9 @@
 #include "constants.hpp"
 #include "point.hpp"
 #include "faces.hpp"
+#include "domain.hpp"
 #include "grid.hpp"
 #include "level.hpp"
-#include "domain.hpp"
 #include "hierarchy.hpp"
 #include "sphere.hpp"
 #include "parameters.hpp"
@@ -68,8 +68,6 @@ void Hypre::init_hierarchy (Parameters & parameters,
 
 {
 
-  Grid::set_mpi (mpi);
-  
   int dim       = hierarchy.dimension();
   int num_parts = hierarchy.num_levels();
 
@@ -659,9 +657,12 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
       // Add contribution of the point to the right-hand side vector
 
       int index[3];
+      Scalar lower[3],upper[3];
+      grid.x_lower(lower[0],lower[1],lower[2]);
+      grid.x_upper(upper[0],upper[1],upper[2]);
       for (int k=0; k<3; k++) {
-	Scalar ap = point.x(k)      - grid.x_lower(k);
-	Scalar ag = grid.x_upper(k) - grid.x_lower(k);
+	Scalar ap = point.x(k)      - lower[k];
+	Scalar ag = upper[k] - lower[k];
 	int    ig = grid.num_unknowns(k);
 	int    i0 = grid.i_lower(k);
 	index[k] = int (ap/ag*ig) + i0;

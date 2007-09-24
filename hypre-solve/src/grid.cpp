@@ -23,6 +23,7 @@
 #include "scalar.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
+#include "domain.hpp"
 #include "grid.hpp"
 
 //======================================================================
@@ -32,7 +33,8 @@ const int debug_input = 0;
 
 const int trace = 1;
 
-Mpi Grid::mpi_;
+Mpi    Grid::mpi_;
+Domain Grid::domain_;
 
 //======================================================================
 
@@ -111,9 +113,18 @@ void Grid::geomview_grid (FILE *fpr, bool full) throw ()
 
   if (full) {
     fprintf (fpr,"VECT\n");
-    fprintf (fpr,"4 16 1\n");
-    fprintf (fpr,"8 3 3 2\n");
-    fprintf (fpr,"1 0 0 0\n");
+    fprintf (fpr,"6 18 2\n");
+    fprintf (fpr,"1 1 8 3 3 2\n");
+    fprintf (fpr,"1 0 1 0 0 0\n");
+
+    // Print points at domain boundaries to provide geomview with bounding box
+
+    Scalar dl[3],du[3];
+    Grid::domain_.lower(dl[0],dl[1],dl[2]);
+    Grid::domain_.upper(du[0],du[1],du[2]);
+    fprintf (fpr,"%g %g %g\n",dl[0],dl[1],dl[2]);
+    fprintf (fpr,"%g %g %g\n",du[0],du[1],du[2]);
+
   }
   fprintf (fpr,"%g %g %g\n",xl_[0],xl_[1],xl_[2]);
   fprintf (fpr,"%g %g %g\n",xu_[0],xl_[1],xl_[2]);
@@ -133,6 +144,7 @@ void Grid::geomview_grid (FILE *fpr, bool full) throw ()
   fprintf (fpr,"%g %g %g\n",xu_[0],xu_[1],xu_[2]);
 
   if (full) {
+    fprintf (fpr,"1 1 1 1\n");
     fprintf (fpr,"1 1 1 0\n");
   }
 }
@@ -142,6 +154,13 @@ void Grid::geomview_grid (FILE *fpr, bool full) throw ()
 void Grid::geomview_face (FILE *fpr, bool full) throw ()
 {
 
+  if (debug) printf ("DEBUG %s:%d grid ip = %d mpi ip = %d grid id = %d\n",
+		     __FILE__,__LINE__,ip(),mpi_.ip(),id());
+  if (debug) {
+    int ip;
+    MPI_Comm_rank(MPI_COMM_WORLD,&ip);
+    printf ("DEBUG %s:%d mpi rank = %d\n",__FILE__,__LINE__,ip);
+  }
   if (! is_local()) return;
 
   float bcolor[] = {1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0};
@@ -151,7 +170,32 @@ void Grid::geomview_face (FILE *fpr, bool full) throw ()
 
   if (full) {
     fprintf (fpr,"CQUAD\n");
+    // Print points at domain boundaries to provide geomview with bounding box
+
+    Scalar dl[3],du[3];
+    Grid::domain_.lower(dl[0],dl[1],dl[2]);
+    Grid::domain_.upper(du[0],du[1],du[2]);
+    fprintf (fpr,
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1\n",
+	     dl[0],dl[1],dl[2],
+	     dl[0],dl[1],dl[2],
+	     dl[0],dl[1],dl[2],
+	     dl[0],dl[1],dl[2]);
+    fprintf (fpr,
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1\n",
+	     du[0],du[1],du[2],
+	     du[0],du[1],du[2],
+	     du[0],du[1],du[2],
+	     du[0],du[1],du[2]);
   }
+
+  if (debug) printf ("DEBUG %s:%d grid id = %d\n",__FILE__,__LINE__,id());
 
   int axis,face,i1,i2;
   int j0,j1,j2;
@@ -225,14 +269,6 @@ void Grid::geomview_face (FILE *fpr, bool full) throw ()
 
 	  int label = faces().label(axis,face,i1,i2);
 
-	  if (debug) printf ("vc[][] = %g %g %g\n"
-			     "         %g %g %g\n"
-			     "         %g %g %g\n"
-			     "         %g %g %g\n",
-			     vc[0][0],vc[0][1],vc[0][2],
-			     vc[1][0],vc[1][1],vc[1][2],
-			     vc[2][0],vc[2][1],vc[2][2],
-			     vc[3][0],vc[3][1],vc[3][2]);
 	  for (i=0; i<4; i++) {
 	    fprintf (fpr,"%g %g %g  %f %f %f %f  ",
 		     zc[0]+vc[i][0], zc[1]+vc[i][1], zc[2]+vc[i][2],
@@ -339,8 +375,8 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
   int i;
   Scalar h1[3],h2[3];
   for (i=0; i<3; i++) {
-    h1[i] = ( g1.x_upper(i) - g1.x_lower(i) ) / g1.num_unknowns(i);
-    h2[i] = ( g2.x_upper(i) - g2.x_lower(i) ) / g2.num_unknowns(i);
+    h1[i] = ( g1.xu_[i] - g1.xl_[i] ) / g1.num_unknowns(i);
+    h2[i] = ( g2.xu_[i] - g2.xl_[i] ) / g2.num_unknowns(i);
     // Check that mesh sizes are close.  Can fail on bad input
     if (debug) printf ("DEBUG %s:%d h1[%d] = %g  h2 = %g\n",
 		       __FILE__,__LINE__,i,h1[i],h2[i]);
@@ -355,8 +391,8 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
 
   for (i=0; i<3; i++) {
     face[i] = 0;  // Assume not close
-    if (fabs(g1.x_lower(i) - g2.x_upper(i)) < 0.5*h1[i]) face[i] = -1;
-    if (fabs(g1.x_upper(i) - g2.x_lower(i)) < 0.5*h1[i]) face[i] =  1;
+    if (fabs(g1.xl_[i] - g2.xu_[i]) < 0.5*h1[i]) face[i] = -1;
+    if (fabs(g1.xu_[i] - g2.xl_[i]) < 0.5*h1[i]) face[i] =  1;
     if (debug) printf ("DEBUG %s:%d face[%d] = %d\n",
 		       __FILE__,__LINE__,i,face[i]);
   }
@@ -372,8 +408,8 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
   Scalar lower[3],upper[3];
 
   for (i=0; i<3; i++) {
-    lower[i] = MAX(g1.x_lower(i),g2.x_lower(i));
-    upper[i] = MIN(g1.x_upper(i),g2.x_upper(i));
+    lower[i] = MAX(g1.xl_[i],g2.xl_[i]);
+    upper[i] = MIN(g1.xu_[i],g2.xu_[i]);
     if (debug) printf ("DEBUG %s:%d lower[%d] = %g  upper = %g\n",
 		       __FILE__,__LINE__,i,lower[i],upper[i]);
   }
@@ -390,8 +426,8 @@ bool Grid::find_neighbor_indices (Grid & neighbor,
     if (face[i] == -1) {
       gl[i] = gu[i] = -1;
     } else if (face[i] == 0) {
-      gl[i] = int ( (lower[i] - g1.x_lower(i)) / h1[i] );
-      gu[i] = int ( (upper[i] - g1.x_lower(i)) / h1[i] - 1);
+      gl[i] = int ( (lower[i] - g1.xl_[i]) / h1[i] );
+      gu[i] = int ( (upper[i] - g1.xl_[i]) / h1[i] - 1);
     } else if (face[i] == 1) {
       gl[i] = gu[i] = g1.num_unknowns(i);
     }

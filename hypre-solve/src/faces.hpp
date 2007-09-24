@@ -82,6 +82,15 @@ public:
   Label &label (int axis, int face, int i, int j) throw ()
   { return label_[axis][face][i+n1_[axis]*j]; };
 
+  void label (int axis, int face, Label label) throw ()
+  { 
+    for (int i1=0; i1<n1_[axis]; i1++) {
+      for (int i2=0; i2<n2_[axis]; i2++) {
+	label_[axis][face][i1+n1_[axis]*i2] = label; 
+      }
+    }
+  };
+
   int n1 (int axis) { return n1_[axis]; };
   int n2 (int axis) { return n2_[axis]; };
 

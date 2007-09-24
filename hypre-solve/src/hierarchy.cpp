@@ -12,6 +12,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <math.h>
 
 #include <vector>
 #include <map>
@@ -34,7 +35,7 @@
 
 const int trace    = 0;
 const int debug    = 0;
-const int geomview = 0;
+const int geomview = 1;
 
 //----------------------------------------------------------------------
 
@@ -266,36 +267,67 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // Label boundary face-zones
   // ------------------------------------------------------------
 
+  Scalar db[3][2]; // Domain extents
+  Scalar gb[3][2]; // Grid extents
+  Scalar h[3];     // Zone size
+
+  // Get Domain extents
+
+  domain.lower(db[0][0],db[1][0],db[2][0]);
+  domain.upper(db[0][1],db[1][1],db[2][1]);
+
+  // Loop over grids in the root level
+
   ItLevelGridsLocal itgl (level(0));
-
-  Scalar dl[3],du[3];
-  domain.lower(dl[0],dl[1],dl[2]);
-  domain.upper(du[0],du[1],du[2]);
-
-  if (debug) printf ("DEBUG %s:%d domain (%g,%g,%g) (%g,%g,%g)\n",__FILE__,__LINE__,
-		     dl[0],dl[1],dl[2],
-		     du[0],du[1],du[2]);
-
   while (Grid * grid = itgl++) {
-    if (debug) printf ("DEBUG %s:%d labeling boundary\n",__FILE__,__LINE__);
-    Scalar gl[3];
-    Scalar gu[3];
-    grid->print();
 
-  }
+    // Get grid extents
 
-  if (geomview) {
-    char filename[20];
-    int ip = mpi.ip();
-    sprintf (filename,"level0-p%d.quad",ip);
-    FILE * fp = fopen (filename,"w");
-    level(0).geomview_face(fp);
-    fclose(fp);
+    grid->x_lower(gb[0][0],gb[1][0],gb[2][0]);
+    grid->x_upper(gb[0][1],gb[1][1],gb[2][1]);
+
+    // Get zone size
+
+    grid->h(h[0],h[1],h[2]);
+
+    // Label zones in grid faces adjacent to domain faces
+    for (int axis=0; axis<3; axis++) {
+      for (int face=0; face<2; face++) {
+	if (fabs(gb[axis][face]-db[axis][face]) < h[axis]) {
+	  grid->faces().label(axis,face,Faces::_boundary_);
+	}
+      }
+    }
   }
 
   // ------------------------------------------------------------
   // Label covered face-zones
   // ------------------------------------------------------------
+
+  
+  // Loop over levels in the hierarchy, finest first
+
+  ItHierarchyLevelsReverse itl(*this);
+
+  while (Level * level = itl--) {
+
+    // Loop over grids in the level
+
+    ItLevelGridsAll itg (*level);
+
+    while (Grid * grid = itg++) {
+      
+      // Get the grid's parent
+
+      Grid * parent = this->parent(*grid);
+
+      // 
+
+      
+    }
+
+    
+  }
 
   // ------------------------------------------------------------
   // Label fine and neighbor face-zones
@@ -306,6 +338,15 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // ------------------------------------------------------------
 
   
+  if (geomview) {
+    char filename[20];
+    int ip = mpi.ip();
+    sprintf (filename,"level0-p%d.quad",ip);
+    FILE * fp = fopen (filename,"w");
+    level(0).geomview_face(fp);
+    fclose(fp);
+  }
+
 //   ItHierarchyLevelsReverse itlr(*this);
 
 //   while (Level * level = itlr--) {

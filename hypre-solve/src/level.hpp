@@ -33,6 +33,12 @@ private:
   int iu_[3];
 
   //--------------------------------------------------------------------
+  // STATIC MEMBER DATA
+  //--------------------------------------------------------------------
+
+  static Domain domain_; // Only used by geomview stuff
+
+  //--------------------------------------------------------------------
   // PROTECTED MEMBER DATA
   //--------------------------------------------------------------------
 
@@ -102,6 +108,14 @@ public:
   /// Return which Level this is in the Hierarchy
   int index () const
   { return n_; };
+
+  //--------------------------------------------------------------------
+  // STATIC MEMBER FUNCTIONS
+  //--------------------------------------------------------------------
+
+  /// Set static Domain object
+  static void set_domain (Domain &domain)
+  { domain_ = domain; };
 
 };
 
