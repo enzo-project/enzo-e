@@ -33,8 +33,8 @@
 
 //----------------------------------------------------------------------
 
-const int trace    = 0;
-const int debug    = 0;
+const int trace    = 1;
+const int debug    = 1;
 const int geomview = 1;
 
 //----------------------------------------------------------------------
@@ -82,13 +82,13 @@ void Hierarchy::insert_grid (Grid * pgrid) throw ()
 
 //======================================================================
 
-/// Initialize grid inter-connections.
+/// Initialize the hierarchy after all grids have been inserted
 
 /** After all grids are inserted into the hierarchy, this function
-    determines each grid's parent, containing level, children, and
-    neighbors. */
+    determines each grid's parent, containing level, children, 
+    neighbors, face-zone categories, and global indices. */
 
-void Hierarchy::init_grids (Domain & domain,
+void Hierarchy::initialize (Domain & domain,
 			    Mpi    & mpi) throw ()
 {
   if (debug) printf ("Hierarchy::init_levels()\n");
@@ -97,6 +97,9 @@ void Hierarchy::init_grids (Domain & domain,
   init_grid_levels_();
   init_grid_children_();
   init_grid_neighbors_();
+
+  init_indices_();
+
   init_grid_faces_(domain, mpi);
 }
 
@@ -260,40 +263,34 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 {
   int k;
-
-  _TRACE_;
+  int axis, face;
 
   // ------------------------------------------------------------
   // Label boundary face-zones
   // ------------------------------------------------------------
 
-  Scalar db[3][2]; // Domain extents
-  Scalar gb[3][2]; // Grid extents
-  Scalar h[3];     // Zone size
+  // Get hierarchy root-grid index extents
 
-  // Get Domain extents
-
-  domain.lower(db[0][0],db[1][0],db[2][0]);
-  domain.upper(db[0][1],db[1][1],db[2][1]);
+  int ih0[3][2];
+  i_lower0(ih0[0][0],ih0[1][0],ih0[2][0]);
+  i_upper0(ih0[0][1],ih0[1][1],ih0[2][1]);
 
   // Loop over grids in the root level
 
   ItLevelGridsLocal itgl (level(0));
   while (Grid * grid = itgl++) {
 
-    // Get grid extents
+    // Get grid index extents
 
-    grid->x_lower(gb[0][0],gb[1][0],gb[2][0]);
-    grid->x_upper(gb[0][1],gb[1][1],gb[2][1]);
-
-    // Get zone size
-
-    grid->h(h[0],h[1],h[2]);
+    int ig[3][2];
+    grid->i_lower(ig[0][0],ig[1][0],ig[2][0]);
+    grid->i_upper(ig[0][1],ig[1][1],ig[2][1]);
 
     // Label zones in grid faces adjacent to domain faces
-    for (int axis=0; axis<3; axis++) {
-      for (int face=0; face<2; face++) {
-	if (fabs(gb[axis][face]-db[axis][face]) < h[axis]) {
+
+    for (axis = 0; axis < 3; axis++) {
+      for (face = 0; face < 2; face++) {
+	if (ih0[axis][face] == ig[axis][face]) {
 	  grid->faces().label(axis,face,Faces::_boundary_);
 	}
       }
@@ -304,29 +301,68 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // Label covered face-zones
   // ------------------------------------------------------------
 
-  
-  // Loop over levels in the hierarchy, finest first
+  // Loop over non-root levels in the hierarchy, finest to coarsest
 
-  ItHierarchyLevelsReverse itl(*this);
+  //  ItHierarchyLevelsReverse itl(*this);
 
-  while (Level * level = itl--) {
+  for (int ilevel = num_levels()-1; ilevel>0; ilevel--) {
+
+    Level *level = &this->level(ilevel);
 
     // Loop over grids in the level
 
     ItLevelGridsAll itg (*level);
 
     while (Grid * grid = itg++) {
-      
+
+      // Get grid's index extents
+
+      int ig[3][2];
+      grid->i_lower(ig[0][0],ig[1][0],ig[2][0]);
+      grid->i_upper(ig[0][1],ig[1][1],ig[2][1]);
+
+      ig[0][1]++;
+      ig[1][1]++;
+      ig[2][1]++;
+
       // Get the grid's parent
 
       Grid * parent = this->parent(*grid);
 
-      // 
+      // Get parent's index extents
 
-      
+      int ip[3][2];
+      parent->i_lower(ip[0][0],ip[1][0],ip[2][0]);
+      parent->i_upper(ip[0][1],ip[1][1],ip[2][1]);
+
+      ip[0][1]++;
+      ip[1][1]++;
+      ip[2][1]++;
+
+      // Find grid faces that intersect parent's
+
+      for (axis = 0; axis < 3; axis++) {
+	for (face = 0; face < 2; face++) {
+
+	  bool is_aligned = ig[axis][face] == 2*ip[axis][face];
+
+	  int i1=(axis+1) % 3;
+	  int i2=(axis+2) % 3;
+	  bool is_enclosed_1 = 2*ip[i1][0] <= ig[i1][0] && ig[i1][1] <= 2*ip[i1][1];
+	  bool is_enclosed_2 = 2*ip[i2][0] <= ig[i2][0] && ig[i2][1] <= 2*ip[i2][1];
+
+	  // grid face intersects parent face iff  faces are in the same
+	  // plane and the grid face is enclosed by the parent face
+
+	  if (is_aligned && is_enclosed_1 && is_enclosed_2) {
+	    if (debug) printf ("%s:%d Grid %d and parent %d are aligned\n",
+			       __FILE__,__LINE__,grid->id(),parent->id());
+	    // Loop over grid face, marking covered parent face zones as 
+	    //	    int i
+	  }
+	}
+      }
     }
-
-    
   }
 
   // ------------------------------------------------------------
@@ -341,10 +377,12 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   if (geomview) {
     char filename[20];
     int ip = mpi.ip();
-    sprintf (filename,"level0-p%d.quad",ip);
-    FILE * fp = fopen (filename,"w");
-    level(0).geomview_face(fp);
-    fclose(fp);
+    for (int ilevel=0; ilevel<this->num_levels(); ilevel++) {
+      sprintf (filename,"level%d-p%d.quad",ilevel,ip);
+      FILE * fp = fopen (filename,"w");
+      level(ilevel).geomview_face(fp);
+      fclose(fp);
+    }
   }
 
 //   ItHierarchyLevelsReverse itlr(*this);
@@ -406,6 +444,34 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 //       }
 //     }
 //   }
+}
+
+void Hierarchy::init_indices_ () throw()
+{
+  _TRACE_;
+  // Determine problem size the hard way
+
+  ItLevelGridsAll itg (level(0));
+
+  int i,lower[3],upper[3];
+
+  for (i=0; i<3; i++) {
+    lower[i] = INT_MAX;
+    upper[i] = INT_MIN;
+  }
+
+  while (Grid *grid = itg++) {
+    for (i=0; i<3; i++) {
+      lower[i] = MIN(grid->i_lower(i),lower[i]);
+      upper[i] = MAX(grid->i_upper(i),upper[i]);
+    }
+  }
+
+  for (i=0; i<3; i++) {
+    il0_[i] = lower[i];
+    n0_[i] = upper[i] - lower[i] + 1;
+  }
+  _TRACE_;
 }
 
 //======================================================================

@@ -483,7 +483,7 @@ void Hypre::init_graph_nonstencil_ (Grid & grid)
 
   int ilower_grid[3];
 
-  grid.i_lower(ilower_grid);
+  grid.i_lower(ilower_grid[0],ilower_grid[1],ilower_grid[2]);
   
   printf ("DEBUG %s:%d  grid i_lower (%d %d %d)\n",
 	  __FILE__,__LINE__,
@@ -496,7 +496,7 @@ void Hypre::init_graph_nonstencil_ (Grid & grid)
     if (grid.is_local() || child->is_local()) {
       int ilower_child[3];
 
-      child->i_lower(ilower_child);
+      child->i_lower(ilower_child[0],ilower_child[1],ilower_child[2]);
 
       printf ("DEBUG %s:%d  child i_lower (%d %d %d)\n",
 	      __FILE__,__LINE__,
@@ -600,7 +600,7 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
 
   int ilower_grid[3];
 
-  grid.i_lower(ilower_grid);
+  grid.i_lower(ilower_grid[0],ilower_grid[1],ilower_grid[2]);
   
   printf ("DEBUG %s:%d  grid i_lower (%d %d %d)\n",
 	  __FILE__,__LINE__,
@@ -614,7 +614,7 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
 
       int ilower_child[3];
 
-      child->i_lower(ilower_child);
+      child->i_lower(ilower_child[0],ilower_child[1],ilower_child[2]);
 
       printf ("DEBUG %s:%d  child i_lower (%d %d %d)\n",
 	      __FILE__,__LINE__,

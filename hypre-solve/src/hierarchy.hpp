@@ -31,6 +31,10 @@ private:
   int                        dimension_;
   /// List of each grid's parent
   std::map<Grid *, Grid * >  grid_parent_;
+  /// Global index of lowest vertex in globalo root grid
+  int                 il0_[3];
+  /// Number of zones in global root grid
+  int                 n0_[3];
 
 
   //--------------------------------------------------------------------
@@ -66,7 +70,7 @@ public:
 
   void insert_grid (Grid * grid) throw ();
 
-  void init_grids (Domain & domain, Mpi & mpi) throw();
+  void initialize (Domain & domain, Mpi & mpi) throw();
 
   void set_dim (int d) throw () { dimension_ = d; };
 
@@ -118,6 +122,41 @@ public:
   /// Return the Grid's parent Grid
   Grid *  parent     (Grid & grid)      { return   grid_parent_[&grid]; };
 
+  /// Return the lower index of the global root-grid.  No error checking on i.
+  int i_lower0(int i) throw ()
+  { return il0_[i]; };
+
+  /// Return the lower indices of the global root-grid.
+  void i_lower0(int &il0, int &il1, int &il2) throw ()
+  { 
+    il0 = il0_[0];
+    il1 = il0_[1];
+    il2 = il0_[2];
+  };
+
+  /// Return the upper index of the global root-grid.  No error checking on i.
+  int i_upper0(int i) throw ()
+  { return il0_[i] + n0_[i] - 1; };
+
+  /// Return the upper indices of the global root-grid.
+  void i_upper0(int &iu0, int &iu1, int &iu2) throw ()
+  { 
+    iu0 = il0_[0] + n0_[0] - 1;
+    iu1 = il0_[1] + n0_[1] - 1;
+    iu2 = il0_[2] + n0_[2] - 1;
+  };
+
+  /// Return the number of unknowns along the ith coordinate of the root grid.  No error checking on i.
+  int num_unknowns0(int i) throw ()
+  { return n0_[i]; };
+
+
+  /// Return the total number of unknowns in the root grid.
+  int num_unknowns0() throw ()
+  { return n0_[0]*n0_[1]*n0_[2]; };
+
+
+
   //--------------------------------------------------------------------
   // PRIVATE MEMBER FUNCTIONS
   //--------------------------------------------------------------------
@@ -130,9 +169,10 @@ private:
   void init_grid_neighbors_() throw();
   void init_grid_faces_ (Domain & domain, Mpi & mpi) throw();
 
+  /// Initialize il0_[] and n0_[]
+  void init_indices_ () throw();
+
   void insert_in_level_ (int level, Grid & grid) throw ();
-
-
 
 };
 
@@ -311,14 +351,16 @@ public:
   //--------------------------------------------------------------------
 
   ItHierarchyLevelsReverse (Hierarchy & hierarchy) throw ()
-    : curr_(0), hierarchy_(&hierarchy)
+    : curr_(hierarchy_->levels0_.size()-1), hierarchy_(&hierarchy)
   { }
 
   ~ItHierarchyLevelsReverse () throw () {};
   
   /// Iterate through all Levels in the Hierarchy from finest to coarsest
   Level * operator-- (int) { 
-
+    printf ("DEBUG %s:%d levels0_.size()=%d\n",__FILE__,__LINE__,hierarchy_->levels0_.size());
+    printf ("DEBUG %s:%d levels0_ = %p\n",__FILE__,__LINE__,
+	    hierarchy_->levels0_[0]);
     if (curr_ == -1) curr_ = hierarchy_->levels0_.size()-1;
     curr_ --;
     return hierarchy_->levels0_[curr_+1];

@@ -41,7 +41,7 @@
 #include "hypre.hpp"
 
 const int debug    = 1;
-const int trace    = 0;
+const int trace    = 1;
 const int geomview = 0;
 
 //======================================================================
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 
     _TRACE_;
     _BARRIER_;
-    hierarchy.init_grids(problem.domain(), mpi);
+    hierarchy.initialize(problem.domain(), mpi);
     _TRACE_;
     _BARRIER_;
 
@@ -140,36 +140,9 @@ int main(int argc, char **argv)
 
     if (debug) problem.print ();
 
-    // Determine problem size the hard way
+    // WARNING: problem-size returns the size of the root-grid, not the entire hierarchy
 
-    _TRACE_;
-    _BARRIER_;
-
-    ItLevelGridsAll itg (problem.hierarchy().level(0));
-
-    int lower[3],upper[3];
-    int i;
-    for (i=0; i<3; i++) {
-      lower[i] = INT_MAX;
-      upper[i] = INT_MIN;
-    }
-    while (Grid *grid = itg++) {
-      grid->print();
-      for (i=0; i<3; i++) {
-	lower[i] = MIN(grid->i_lower(i),lower[i]);
-	upper[i] = MAX(grid->i_upper(i),upper[i]);
-      }
-    }
-
-    // Assume problem is a square box, otherwise exit
-
-    assert (upper[0] - lower[0] + 1 == upper[1] - lower[1] + 1);
-    assert (upper[0] - lower[0] + 1 == upper[2] - lower[2] + 1);
-
-    _TRACE_;
-    _BARRIER_;
-    
-    JBPERF_GLOBAL("problem-size",upper[0] - lower[0] + 1);
+    JBPERF_GLOBAL("problem-size",problem.hierarchy().num_unknowns0());
 
     // --------------------------------------------------
     // Initialize hypre
