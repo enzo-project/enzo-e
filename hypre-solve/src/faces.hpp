@@ -14,6 +14,9 @@
  *
  */
 
+class Grid;
+typedef Grid * pGrid;
+
 class Faces
 {
 
@@ -46,9 +49,13 @@ public:
 
   // data defined at grid creation
 
-  /// Boolean arrays for faces; values are relative level offsets
+  /// Arrays for face-zone types
 
   Label * label_[3][2];
+
+  /// Arrays for zone neighbors
+
+  pGrid * neighbor_[3][2];
 
   /// Leading dimension of arrays
   int  n1_[3]; 
@@ -76,17 +83,44 @@ public:
 
   // Data access
 
-  /// Relative offset of neighboring cell outside the grid on the
-  /// given axis and face.  No error checking on axis, face, i or j.
+  /// Set or get the face-zone type of the i,jth zone on the given
+  /// axis (0 to 2) and face (0 to 1).  No error checking is performed
+  /// on axis, face, i or j.
 
   Label &label (int axis, int face, int i, int j) throw ()
   { return label_[axis][face][i+n1_[axis]*j]; };
+
+
+  /// Set the face-zone type of all zones on the given axis (0
+  /// to 2) and face (0 to 1).  No error checking is performed on
+  /// axis or face.
 
   void label (int axis, int face, Label label) throw ()
   { 
     for (int i1=0; i1<n1_[axis]; i1++) {
       for (int i2=0; i2<n2_[axis]; i2++) {
 	label_[axis][face][i1+n1_[axis]*i2] = label; 
+      }
+    }
+  };
+
+  /// Set or get the facing grid neighbor of the i,jth zone on the given
+  /// axis (0 to 2) and face (0 to 1).  No error checking is performed
+  /// on axis, face, i or j.
+
+  pGrid & neighbor (int axis, int face, int i, int j) throw ()
+  { return neighbor_[axis][face][i+n1_[axis]*j]; };
+
+
+  /// Set the facing grid neighbor of all zones on the given axis (0
+  /// to 2) and face (0 to 1).  No error checking is performed on
+  /// axis or face.
+
+  void neighbor (int axis, int face, pGrid neighbor) throw ()
+  { 
+    for (int i1=0; i1<n1_[axis]; i1++) {
+      for (int i2=0; i2<n2_[axis]; i2++) {
+	neighbor_[axis][face][i1+n1_[axis]*i2] = neighbor; 
       }
     }
   };

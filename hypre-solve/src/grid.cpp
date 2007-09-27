@@ -51,13 +51,9 @@ Grid::Grid (std::string parms) throw ()
 
   read (parms);
 
-  if (is_local()) {
-    faces_ = new Faces(n_);
-  } else {
-    // Note: faces_ may be needed for grids adjacent to local grids
-    //       these will be allocated as needed
-    faces_ = 0;
-  }
+  // Allocate Faces was here.  Moved to allocate-as-needed.
+
+  faces_ = new Faces(n_);
 }
 
 //======================================================================
@@ -199,12 +195,10 @@ void Grid::geomview_face (FILE *fpr, bool full) throw ()
 
   int axis,face,i1,i2;
   int j0,j1,j2;
-  Scalar d0,d1,d2;
   int i;
 
   Scalar zc[3];   // zc = zone center
   Scalar fz[3];  // fz = offset of face center from zone center
-  Scalar fc[3];  // fc = face centers
   Scalar vf[3];  // vf = offset of face vertices from face center
   Scalar vc[4][3]; // vf = offset of face vertices from zone center
 
@@ -349,97 +343,65 @@ bool Grid::is_adjacent (Grid & g2) throw ()
 
 //======================================================================
 
-/// Return indices of zones adjacent to neighboring grid.
+/// Determine the axis, face, and range of indices of zones adjacent 
+/// to the neighboring grid.  Returns false if the neighbor is not
+/// actually a neighbor.  Assumes grids are in the same level.
 
-/** Return lower and upper coordinates of cells adjacent to the input
-    neighboring grid.  If the input grid is not a neighbor, return
-    false. */
-
-bool Grid::find_neighbor_indices (Grid & neighbor,
-				  int *gl, int *gu)
+bool Grid::shared_face (Grid & neighbor, int & axis, int & face, 
+		int & il0, int & il1, int & iu0, int & iu1) throw ()
 {
-  //  +------+
-  //  |......|
-  //  |......+---+    Return coordinates of unknowns X in grid G's local
-  //  |..N..X|...|    coordinates (gl[] and gu[]).  Return false if
-  //  |.....X|.G.|    there are none (e.g. if grids are not neighbors,
-  //  +------+...|    or only adjacent at corners or edges not faces.
-  //         |...|
-  //         +---+
 
-  Grid & g1 = *this;
-  Grid & g2 = neighbor;
+  Grid & grid = *this;
 
-  // Check grid spacing
+  int gl[3],gu[3];
+  grid.i_lower(gl[0],gl[1],gl[2]);
+  grid.i_upper(gu[0],gu[1],gu[2]);
 
+  int nl[3],nu[3];
+  neighbor.i_lower(nl[0],nl[1],nl[2]);
+  neighbor.i_upper(nu[0],nu[1],nu[2]);
+
+  axis = -1;
   int i;
-  Scalar h1[3],h2[3];
   for (i=0; i<3; i++) {
-    h1[i] = ( g1.xu_[i] - g1.xl_[i] ) / g1.num_unknowns(i);
-    h2[i] = ( g2.xu_[i] - g2.xl_[i] ) / g2.num_unknowns(i);
-    // Check that mesh sizes are close.  Can fail on bad input
-    if (debug) printf ("DEBUG %s:%d h1[%d] = %g  h2 = %g\n",
-		       __FILE__,__LINE__,i,h1[i],h2[i]);
-    assert (fabs(h1[i] - h2[i])/h1[i] < 0.01);
+    if (gl[i] == nu[i] + 1) { face = 0; axis = i; }
+    if (nl[i] == gu[i] + 1) { face = 1; axis = i; }
   }
 
-  // Find which grid planes are close
-
-  int face[3];   // -1 g1.lower adjacent to g2.upper
-                 //  0 not adjacent along face
-                 // +1 g1.upper adjacent to g2.lower
-
-  for (i=0; i<3; i++) {
-    face[i] = 0;  // Assume not close
-    if (fabs(g1.xl_[i] - g2.xu_[i]) < 0.5*h1[i]) face[i] = -1;
-    if (fabs(g1.xu_[i] - g2.xl_[i]) < 0.5*h1[i]) face[i] =  1;
-    if (debug) printf ("DEBUG %s:%d face[%d] = %d\n",
-		       __FILE__,__LINE__,i,face[i]);
+  // Exit if no grid faces lie in the same plane
+  if (axis == -1) {
+    printf ("%s:%d  Grid::shared_face() grid=%d neighbor=%d no shared faces\n",
+	    __FILE__,__LINE__,grid.id(),neighbor.id());
+    return false;
   }
 
-  // Return if grids are not adjacent along a single face
-  // (then must be adjacent along an edge, a corner, or not neighbors)
+  // face axes
 
-  int face_count = abs(face[0]) + abs(face[1]) + abs(face[2]);
-  if (face_count != 1 ) return false;
+  int j0=(axis+1)%3;
+  int j1=(axis+2)%3;
 
-  // Find extent of 'intersecting grid'
+  // Compute local indices intersection from global indices of each grid
 
-  Scalar lower[3],upper[3];
+  il0 = MAX(gl[j0],nl[j0]) - gl[j0];
+  iu0 = MIN(gu[j0],nu[j0]) - gl[j0];
 
-  for (i=0; i<3; i++) {
-    lower[i] = MAX(g1.xl_[i],g2.xl_[i]);
-    upper[i] = MIN(g1.xu_[i],g2.xu_[i]);
-    if (debug) printf ("DEBUG %s:%d lower[%d] = %g  upper = %g\n",
-		       __FILE__,__LINE__,i,lower[i],upper[i]);
+  il1 = MAX(gl[j1],nl[j1]) - gl[j1];
+  iu1 = MIN(gu[j1],nu[j1]) - gl[j1];
+
+  if (il0 > iu0 || il1 > iu1) {
+    printf ("%s:%d  Grid::shared_face() grid=%d neighbor=%d no shared faces\n",
+	    __FILE__,__LINE__,grid.id(),neighbor.id());
+    return false;
   }
 
-  if (debug) printf ("g1.num_unknowns = (%d %d %d)\n",
-		     g1.num_unknowns(0),
-		     g1.num_unknowns(1),
-		     g1.num_unknowns(2));
-  if (debug) printf ("g2.num_unknowns = (%d %d %d)\n",
-		     g2.num_unknowns(0),
-		     g2.num_unknowns(1),
-		     g2.num_unknowns(2));
-  for (i=0; i<3; i++) {
-    if (face[i] == -1) {
-      gl[i] = gu[i] = -1;
-    } else if (face[i] == 0) {
-      gl[i] = int ( (lower[i] - g1.xl_[i]) / h1[i] );
-      gu[i] = int ( (upper[i] - g1.xl_[i]) / h1[i] - 1);
-    } else if (face[i] == 1) {
-      gl[i] = gu[i] = g1.num_unknowns(i);
-    }
-  }
-  if (debug)  printf ("DEBUG %s:%d gl[] = (%d %d %d)\n",
-		      __FILE__,__LINE__,gl[0],gl[1],gl[2]);
-  if (debug)  printf ("DEBUG %s:%d gu[] = (%d %d %d)\n",
-		      __FILE__,__LINE__,gu[0],gu[1],gu[2]);
+  NOT_IMPLEMENTED("Grid::shared_face");
+  if (debug) printf ("%s:%d  Grid::shared_face() grid=%d neighbor=%d face=%d axis=%d\n",
+		     __FILE__,__LINE__,grid.id(),neighbor.id(),face,axis);
+  if (debug) printf ("%s:%d  Grid::shared_face() il0=%d il1=%d iu0=%d iu1=%d\n",
+		     __FILE__,__LINE__,il0,il1,iu0,iu1);
+  if (axis == -1) printf (" find_neighbor_indices () %d and %d not neighbors\n",
+ 			   grid.id(),neighbor.id());
+
 
   return true;
 }
-//======================================================================
-// PRIVATE MEMBER FUNCTIONS
-//======================================================================
-

@@ -164,6 +164,13 @@ protected:
     neighbors0_.push_back (0); 
   } ;
 
+  /// Determine the axis, face, and range of indices of zones adjacent 
+  /// to a neighboring grid.  Returns false if the neighbor is not
+  /// actually a neighbor.
+
+  bool shared_face (Grid & neighbor, int & axis, int & face, 
+		  int & il0, int & il1, int & iu0, int & iu1) throw () ;
+
   /// Return the ith neighbor
   Grid & neighbor (int i) 
   { return * neighbors0_.at(i); };
@@ -243,9 +250,11 @@ protected:
     return u_[i0 + n_[0]*(i1 + n_[1]*i2)];
   }
 
-  /// Return the Faces object for this Grid
+  /// Return the Faces object for this Grid.  If not allocated yet,
+  /// create a new Faces object.
+
   Faces & faces() throw()
-  { return *faces_; }
+  { return *(faces_ ? faces_ : faces_=new Faces(n_)); }
 
   /// Return the mesh width along the given axis
   Scalar h(int i) throw ()
@@ -286,7 +295,7 @@ protected:
 
   /// Return index limits of ghost zones in the neighboring grid. Required by HYPRE.
 
-  bool find_neighbor_indices (Grid & neighbor, int *gl, int *gu);
+  //  bool find_neighbor_indices (Grid & neighbor, int *gl, int *gu);
 
   //--------------------------------------------------------------------
   // STATIC MEMBER FUNCTIONS
@@ -325,7 +334,7 @@ class ItGridNeighbors
 
 private:
 
-  int          curr_;
+  unsigned int curr_;
   const Grid * grid_;
 
 public:
@@ -372,7 +381,7 @@ class ItGridChildren
 
 private:
 
-  int          curr_;
+  unsigned int curr_;
   const Grid * grid_;
 
 public:
@@ -385,8 +394,18 @@ public:
     : curr_(0), grid_(&grid)
   { }
 
+  ItGridChildren (const ItGridChildren & it)
+    : curr_(it.curr_), grid_(it.grid_)
+  {}
+  void operator=(const ItGridChildren & it)
+  { curr_ = it.curr_;  grid_ = it.grid_; }
+
   ~ItGridChildren () throw () {};
   
+  //--------------------------------------------------------------------
+  // PUBLIC MEMBER FUNCTIONS
+  //--------------------------------------------------------------------
+
   /// Iterate through all Grids in the Grid.
   Grid * operator++ (int) { 
 

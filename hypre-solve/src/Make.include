@@ -2,7 +2,8 @@ SHELL = /bin/bash
 
 # Define MPCPP
 
-FLAGS = -g
+# FLAGS = -g -Wall
+FLAGS = -g -Wall 
 
 # JBPERF
 

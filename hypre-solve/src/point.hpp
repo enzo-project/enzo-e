@@ -22,9 +22,9 @@ private:
 
   static int d_;
 
-  int igrid_;
-  Scalar *x_;
   Scalar m_;
+  Scalar *x_;
+  int igrid_;
 
 public:
 

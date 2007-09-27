@@ -199,21 +199,31 @@ class ItHierarchyGridsLocal
 
 private:
 
-  int               curr_;
+  unsigned int      curr_;
   const Hierarchy * hierarchy_;
 
 public:
 
   //--------------------------------------------------------------------
-  // CONSTUCTORS AND DESTRUCTORS
+  // CONSTRUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
   ItHierarchyGridsLocal (Hierarchy & hierarchy) throw ()
     : curr_(0), hierarchy_(&hierarchy)
   { }
 
+  ItHierarchyGridsLocal (const ItHierarchyGridsLocal & it)
+    : curr_(it.curr_), hierarchy_(it.hierarchy_)
+  {}
+  void operator=(const ItHierarchyGridsLocal & it)
+  { curr_ = it.curr_;  hierarchy_ = it.hierarchy_; }
+
   ~ItHierarchyGridsLocal () throw () {};
   
+  //--------------------------------------------------------------------
+  // PUBLIC MEMBER FUNCTIONS
+  //--------------------------------------------------------------------
+
   /// Iterate through local Grids in the Hierarchy.
   Grid * operator++ (int) { 
 
@@ -247,21 +257,31 @@ class ItHierarchyGridsAll
 
 private:
 
-  int               curr_;
+  unsigned int      curr_;
   const Hierarchy * hierarchy_;
 
 public:
 
   //--------------------------------------------------------------------
-  // CONSTUCTORS AND DESTRUCTORS
+  // CONSTRUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
   ItHierarchyGridsAll (Hierarchy & hierarchy) throw ()
     : curr_(0), hierarchy_(&hierarchy)
   { }
 
+  ItHierarchyGridsAll (const ItHierarchyGridsAll & it)
+    : curr_(it.curr_), hierarchy_(it.hierarchy_)
+  {}
+  void operator=(const ItHierarchyGridsAll & it)
+  { curr_ = it.curr_;  hierarchy_ = it.hierarchy_; }
+
   ~ItHierarchyGridsAll () throw () {};
   
+  //--------------------------------------------------------------------
+  // PUBLIC MEMBER FUNCTIONS
+  //--------------------------------------------------------------------
+
   /// Iterate through all Grids in the Hierarchy.
   Grid * operator++ (int) { 
 
@@ -294,21 +314,32 @@ class ItHierarchyLevels
 
 private:
 
-  int               curr_;
+  unsigned int      curr_;
   const Hierarchy * hierarchy_;
 
 public:
 
   //--------------------------------------------------------------------
-  // CONSTUCTORS AND DESTRUCTORS
+  // CONSTRUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
   ItHierarchyLevels (Hierarchy & hierarchy) throw ()
     : curr_(0), hierarchy_(&hierarchy)
   { }
 
+  ItHierarchyLevels (const ItHierarchyLevels & it)
+    : curr_(it.curr_), hierarchy_(it.hierarchy_)
+  {}
+
+  void operator=(const ItHierarchyLevels & it)
+  { curr_ = it.curr_;  hierarchy_ = it.hierarchy_; }
+
   ~ItHierarchyLevels () throw () {};
   
+  //--------------------------------------------------------------------
+  // PUBLIC MEMBER FUNCTIONS
+  //--------------------------------------------------------------------
+
   /// Iterate through all Levels in the Hierarchy.
   Level * operator++ (int) { 
 
@@ -341,29 +372,39 @@ class ItHierarchyLevelsReverse
 
 private:
 
-  int               curr_;
+  unsigned          curr_;
   const Hierarchy * hierarchy_;
 
 public:
 
   //--------------------------------------------------------------------
-  // CONSTUCTORS AND DESTRUCTORS
+  // CONSTRUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
   ItHierarchyLevelsReverse (Hierarchy & hierarchy) throw ()
     : curr_(hierarchy_->levels0_.size()-1), hierarchy_(&hierarchy)
   { }
 
+  ItHierarchyLevelsReverse (const ItHierarchyLevelsReverse & it)
+    : curr_(it.curr_), hierarchy_(it.hierarchy_)
+  {}
+  void operator=(const ItHierarchyLevelsReverse & it)
+  { curr_ = it.curr_;  hierarchy_ = it.hierarchy_; }
+
   ~ItHierarchyLevelsReverse () throw () {};
   
+  //--------------------------------------------------------------------
+  // PUBLIC MEMBER FUNCTIONS
+  //--------------------------------------------------------------------
+
   /// Iterate through all Levels in the Hierarchy from finest to coarsest
   Level * operator-- (int) { 
     printf ("DEBUG %s:%d levels0_.size()=%d\n",__FILE__,__LINE__,hierarchy_->levels0_.size());
     printf ("DEBUG %s:%d levels0_ = %p\n",__FILE__,__LINE__,
 	    hierarchy_->levels0_[0]);
-    if (curr_ == -1) curr_ = hierarchy_->levels0_.size()-1;
-    curr_ --;
-    return hierarchy_->levels0_[curr_+1];
+//     if (curr_ == -1) curr_ = hierarchy_->levels0_.size()-1;
+//     curr_ --;
+     return hierarchy_->levels0_[curr_+1];
   }
 
 };

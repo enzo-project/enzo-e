@@ -73,9 +73,9 @@ class ItParameters
 
 private:
 
+  Parameters * pparameters_;
   std::multimap<std::string, std::string>::iterator curr_;
   std::multimap<std::string, std::string>::iterator next_;
-  Parameters * pparameters_;
 
 public:
 
@@ -85,8 +85,8 @@ public:
 
   ItParameters (Parameters & parameters) throw ()
     : pparameters_(& parameters),
-      next_(parameters.values_.begin()),
-      curr_()
+      curr_(),
+      next_(parameters.values_.begin())
   { }
 
   ~ItParameters () throw () {};

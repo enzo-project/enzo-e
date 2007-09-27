@@ -90,28 +90,34 @@ void Faces::print() throw()
 // PRIVATE MEMBER FUNCTIONS
 //======================================================================
 
-/// Allocate and initialize storage for label_[][]
+/// Allocate and initialize storage for label_[][] and neighbor_[][]
 void Faces::alloc_ (int *n) throw ()
 {
-  int i;
-
   int N = n[0]*n[1]*n[2];
   
   for (int axis=0; axis<3; axis++) {
+
+    int i;
 
     // Determine face zone sizes
 
     n1_[axis] = n[(axis+1)%3];
     n2_[axis] = n[(axis+2)%3];
     n_ [axis] = N / n[axis];
-    if (debug) printf ("DEBUG %s:%d axis %d n1=%d n2=%d n=%d\n",
-		       __FILE__,__LINE__,axis,n1_[axis],n2_[axis],n_[axis]);
 
-    // Allocate and initialize face zone categories
+    // Allocate and clear face zone labels and grid neighbors
 
     for (int face=0; face<2; face++) {
+
+      // allocate and clear face zone labels
+
       label_[axis][face] = new Label [n_[axis]];
       for (i=0; i<n_[axis]; i++) label_[axis][face][i] = _unknown_;
+
+      // allocate and clear grid neighbors
+
+      neighbor_[axis][face] = new pGrid [n_[axis]];
+      for (i=0; i<n_[axis]; i++) neighbor_[axis][face][i] = NULL;
     }
   }
 }
@@ -122,8 +128,16 @@ void Faces::dealloc_ () throw ()
 {
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
+
+      // deallocate and clear face zone labels
+
       delete [] label_[axis][face];
       label_[axis][face] = NULL;
+
+      // deallocate and clear grid neighbors
+
+      delete [] neighbor_[axis][face];
+      neighbor_[axis][face] = NULL;
       
     }
   }

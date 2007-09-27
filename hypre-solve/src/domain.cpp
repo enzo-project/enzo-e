@@ -27,7 +27,9 @@ Domain::Domain () throw ()
 
 //----------------------------------------------------------------------
 
+
 Domain::Domain (std::string parms) throw ()
+  : d_(0)
 {
   // Define a domain given text parameters, typically from an input file
 

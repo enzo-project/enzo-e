@@ -73,7 +73,7 @@ void Hierarchy::insert_grid (Grid * pgrid) throw ()
 {
   // Insert grid into the list of all grids in the Hierarchy
 
-  if (pgrid->id() + 1 >= grids0_.size()) {
+  if (unsigned(pgrid->id()) + 1 >= grids0_.size()) {
     grids0_.resize (pgrid->id() + 2);
     grids0_[grids0_.size() - 1] = 0;
   }
@@ -97,10 +97,8 @@ void Hierarchy::initialize (Domain & domain,
   init_grid_levels_();
   init_grid_children_();
   init_grid_neighbors_();
-
-  init_indices_();
-
-  init_grid_faces_(domain, mpi);
+  init_indices_();                // DEPENDENCY: Requires init_grid_levels_()
+  init_grid_faces_(domain, mpi);  // DEPENDENCY: Requires init_indices_()
 }
 
 //------------------------------------------------------------------------
@@ -262,8 +260,48 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 				  Mpi    & mpi) throw ()
 
 {
-  int k;
   int axis, face;
+
+  // ------------------------------------------------------------
+  // First determine grid neighbors for each face-zone
+  // ------------------------------------------------------------
+
+  ItHierarchyLevels itl (*this);
+  while (Level * level = itl++) {
+
+    ItLevelGridsAll itg (*level);
+
+    while (Grid * grid = itg++) {
+
+      int ig[3][2];
+      grid->i_lower(ig[0][0],ig[1][0],ig[2][0]);
+      grid->i_upper(ig[0][1],ig[1][1],ig[2][1]);
+
+      ItGridNeighbors itn (*grid);
+
+      while (Grid * neighbor = itn++) {
+
+	int in[3][2];
+	neighbor->i_lower(in[0][0],in[1][0],in[2][0]);
+	neighbor->i_upper(in[0][1],in[1][1],in[2][1]);
+
+	if (grid->is_local() || neighbor->is_local()) {
+	  
+	  int axis,face;
+	  int i0,il0,iu0;
+	  int i1,il1,iu1;
+	  // Determine index bounds of face intersection
+	  if (grid->shared_face(*neighbor,axis,face,il0,il1,iu0,iu1)) {
+	    for (i0=il0; i0<iu0; i0++) {
+	      for (i1=il1; i1<iu1; i1++) {
+		grid->faces().neighbor(axis,face,i0,i1) = neighbor;
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
 
   // ------------------------------------------------------------
   // Label boundary face-zones
@@ -277,7 +315,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
   // Loop over grids in the root level
 
-  ItLevelGridsLocal itgl (level(0));
+  ItLevelGridsLocal itgl (this->level(0));
   while (Grid * grid = itgl++) {
 
     // Get grid index extents
@@ -380,73 +418,13 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
     for (int ilevel=0; ilevel<this->num_levels(); ilevel++) {
       sprintf (filename,"level%d-p%d.quad",ilevel,ip);
       FILE * fp = fopen (filename,"w");
-      level(ilevel).geomview_face(fp);
+      this->level(ilevel).geomview_face(fp);
       fclose(fp);
     }
   }
+  }
 
-//   ItHierarchyLevelsReverse itlr(*this);
-
-//   while (Level * level = itlr--) {
-
-//     ItLevelGridsLocal itgl (*level);
-
-//     while (Grid * grid = itgl++) {
-
-//       ItGridNeighbors itn (*grid);
-
-//       while (Grid * neighbor = itn++) {
-
-// 	// Update each grid's Faces's boundary mask
-
-// 	int gl[3],gu[3];
-	
-// 	grid->find_neighbor_indices (*neighbor,gl,gu);
-
-// 	if (debug) 
-// 	  printf ("DEBUG %s:%d  Neighbor indices of %d = (%d,%d,%d) : (%d,%d,%d)\n",
-// 		  __FILE__,__LINE__,grid->id(),gl[0],gl[1],gl[2],gu[0],gu[1],gu[2]);
-
-// 	// find axis and face
-
-// 	int axis = -1, face = -1;
-
-// 	if (gl[0] == -1)                   {axis = 0; face = 0;}
-// 	if (gl[0] == grid->num_unknowns(0)){axis = 0; face = 1;}
-// 	if (gl[1] == -1)                   {axis = 1; face = 0;}
-// 	if (gl[1] == grid->num_unknowns(1)){axis = 1; face = 1;}
-// 	if (gl[2] == -1)                   {axis = 2; face = 0;}
-// 	if (gl[2] == grid->num_unknowns(2)){axis = 2; face = 1;}
-
-// 	assert (axis >= 0);
-// 	assert (face >= 0);
-
-// 	// determine index bounds 
-
-// 	int in0, in1, jn0, jn1;
-// 	in0 = gl[(axis+1)%3];
-// 	in1 = gu[(axis+1)%3];
-// 	jn0 = gl[(axis+2)%3];
-// 	jn1 = gu[(axis+2)%3];
-
-// 	if (debug) printf ("DEBUG_FACES axis=%d face=%d [(%d,%d) - (%d,%d)]\n",
-// 			   axis,face,in0,jn0,in1,jn1);
-      
-// 	// set Faces boundary mask
-
-// 	for (int in=in0; in<=in1; in++) {
-// 	  for (int jn=jn0; jn<=jn1; jn++) {
-// 	    grid->faces().label(axis,face,in,jn) = Faces::_neighbor_;
-// 	  }
-// 	}
-
-// 	if (debug) grid->faces().print();
-//       }
-//     }
-//   }
-}
-
-void Hierarchy::init_indices_ () throw()
+  void Hierarchy::init_indices_ () throw()
 {
   _TRACE_;
   // Determine problem size the hard way
@@ -560,7 +538,7 @@ void Hierarchy::write (FILE *fp) throw ()
 void Hierarchy::insert_in_level_ (int level, Grid & grid) throw ()
 {
   // Resize levels0_[] if needed
-  if (level + 1 >= levels0_.size()) {
+  if (unsigned(level + 1) >= levels0_.size()) {
     levels0_.resize (level + 2);
     levels0_[levels0_.size() - 1] = 0;
   }

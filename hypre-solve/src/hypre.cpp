@@ -321,8 +321,6 @@ void Hypre::init_linear (Parameters          & parameters,
  
   ItHierarchyLevels itl (hierarchy);
 
-  int num_parts = hierarchy.num_levels();
-
   int part = 0;
   while (Level * level = itl++) {
 
@@ -645,7 +643,7 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
   Scalar shift_b_sum = 0.0;
 
   int i;
-  for (i=0; i<points.size(); i++) {
+  for (i=0; i<int(points.size()); i++) {
     Point & point      = *points[i];
     Grid & grid        = hierarchy.grid(point.igrid());
     if (grid.is_local()) {

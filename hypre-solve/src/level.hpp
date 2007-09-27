@@ -52,7 +52,7 @@ protected:
 public:
 
   //--------------------------------------------------------------------
-  // CONSTUCTORS AND DESTRUCTORS
+  // CONSTRUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
   Level (int level) throw ();
@@ -142,13 +142,13 @@ class ItLevelGridsLocal
 
 private:
 
-  int           curr_;
+  unsigned int  curr_;
   const Level * level_;
 
 public:
 
   //--------------------------------------------------------------------
-  // CONSTUCTORS AND DESTRUCTORS
+  // CONSTRUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
   ItLevelGridsLocal (Level & level) throw ()
@@ -157,6 +157,16 @@ public:
 
   ~ItLevelGridsLocal () throw () {};
   
+  ItLevelGridsLocal (const ItLevelGridsLocal & it)
+    : curr_(it.curr_), level_(it.level_)
+  {}
+  void operator=(const ItLevelGridsLocal & it)
+  { curr_ = it.curr_;  level_ = it.level_; }
+
+  //--------------------------------------------------------------------
+  // PUBLIC MEMBER FUNCTIONS
+  //--------------------------------------------------------------------
+
   /// Iterate through local Grids in the Level.
   Grid * operator++ (int) { 
 
@@ -191,21 +201,31 @@ class ItLevelGridsAll
 
 private:
 
-  int           curr_;
+  unsigned      curr_;
   const Level * level_;
 
 public:
 
   //--------------------------------------------------------------------
-  // CONSTUCTORS AND DESTRUCTORS
+  // CONSTRUCTORS AND DESTRUCTORS
   //--------------------------------------------------------------------
 
   ItLevelGridsAll (Level & level) throw ()
     : curr_(0), level_(&level)
   { }
 
+  ItLevelGridsAll (const ItLevelGridsAll & it)
+    : curr_(it.curr_), level_(it.level_)
+  {}
+  void operator=(const ItLevelGridsAll & it)
+  { curr_ = it.curr_;  level_ = it.level_; }
+
   ~ItLevelGridsAll () throw () {};
   
+  //--------------------------------------------------------------------
+  // PUBLIC MEMBER FUNCTIONS
+  //--------------------------------------------------------------------
+
   /// Iterate through all Grids in the Level.
   Grid * operator++ (int) { 
 
