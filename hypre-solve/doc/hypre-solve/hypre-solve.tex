@@ -553,7 +553,7 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 \item[2.] Label covered face-zones
 \begin{tabbing}
 xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
-\> \textbf{for} \code{level} in \code{hierarchy} (finest first) \\
+\> \textbf{for} \code{level} in \code{hierarchy} (fine to coarse) \\
 \>\> \textbf{for} \code{grid} in \code{level} \\
 \>\>\> \code{sub-face = intersection(grid-face,parent(grid)-face)} \\
 \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} of \code{parent(grid)}\\
@@ -565,7 +565,7 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 \item[3-4.] Label fine and neighbor face-zones
 \begin{tabbing}
 xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
-\> \textbf{for} \code{level} in \code{hierarchy} (finest first) \\
+\> \textbf{for} \code{level} in \code{hierarchy} (fine to coarse) \\
 \>\> \textbf{for} \code{grid} in \code{level} \\
 \>\>\> \code{sub-face = intersection(grid-face,parent(grid)-face)} \\
 \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} of \code{parent(grid)}\\
