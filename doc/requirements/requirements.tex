@@ -211,44 +211,72 @@
  optimization(?) parameters
 \end{description}
 
+%=======================================================================
+\section{Input file format}
+%=======================================================================
+
+Functions are of the form \code{foo \{ \textit{parameter declarations} \} }.
+
+Parameters for a function are ordered.  Parameters may have default
+values associated with them.  Parameters have names, which may be
+included or not included.  Parameters can appear one on each line, or
+multiple parameters per line separated by commas.
+
+\textit{Strings} are enclosed in double-quotes `\code{"}'.  Example: \code{"density"}
+
+\textit{Scalars} are represented as C floating-point numbers.  Example: 3.0e-19.
+
+\textit{Vectors} are enclosed in angle-brackets `\code{$<$}' and `\code{$>$}'.  Example: \code{$<$3e9,3e9,3e9$>$}.
+
+\textit{Arrays} are enclosed in square-brackets `\code{[}' and `\code{]}'.  Example: \code{[3e9,$<$3,4,5$>$, "density"]}.
+
+Input files can include other files using \code{\#include "}\textit{filename}\code{"}
+
+Repeated text can be assigned to a macro using \code{\#declare "}\textit{macro}\code{ = }\textit{function}
 
 %=======================================================================
 \section{Domain parameters} \label{s:domain}
 %=======================================================================
 
-Specify properties of the domain.
-
-Domains are boxes aligned with the computational coordinate system, and are uniquely
-determined by the spacial dimension, and the lowest and highest points in the domain.
+The \code{domain} function is used to specify properties of the
+domain.  Domains are boxes aligned with the axes of the computational
+coordinate system, and are uniquely determined by the spacial
+dimension, and the lowest and highest points in the domain.
 
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
 
+ \todo\ \textit{Decide: allow defaults?  allow optional parameters?  Special
+ \code{OPT\_} prefix for optional parameters?  Write out explicit copy
+ of input file?}
+
+The \code{domain} function has three parameters
 \begin{enumerate}
-\item \code{Domain:dimension} $([3])$
-\item \code{Domain:lower\_point} \textit{Position} ([0])
-\item \code{Domain:upper\_point} \textit{Position} ([1])
+\item \textit{Scalar} \code{dimension}
+\item \textit{Vector} \code{lower}
+\item \textit{Vector} \code{upper}
 \end{enumerate}
 
-Positions are described as $n$-tuples delimited by square brackets.
-The default dimension is $3$, and the default extents are from
-$[0,0,0]$ (or $[0,0]$ / $[0]$) to $[1,1,1]$ (or $[1,1]$ / $[1]$).
-Lower and upper points are given in units given by spacial Units
-parameters, described in \S\ref{s:units}.
+Lower and upper points are given in units given by \code{units},
+described in \S\ref{s:units}.
 
 %-----------------------------------------------------------------------
-\subsection{Examples}
+\subsection{Use Cases}
 %-----------------------------------------------------------------------
 
+A terse example
 \begin{verbatim}
+   domain { 3, <-3e9,-3e9,-3e9>, <3e9,3e9,3e9> }
+\end{verbatim}
 
-   // Specify the domain
-
-   Domain:dimension      3
-   Domain:lower_point    [-3e9,-3e9,-3e9]
-   Domain:upper_point    [ 3e9, 3e9, 3e9]
-
+A longer example:
+\begin{verbatim}
+   domain { 
+      dimension 3
+      lower <-3e9,-3e9,-3e9>
+      upper <3e9,3e9,3e9>
+   }
 \end{verbatim}
 
 %-----------------------------------------------------------------------
@@ -256,10 +284,9 @@ parameters, described in \S\ref{s:units}.
 %-----------------------------------------------------------------------
 
 \begin{enumerate}
-\item Each coordinate of the lower point must be strictly greater than the corresponding coordinate of the upper point.
-\item The number of coordinates in both lower and upper points must equal the dimension.
-\item If the dimension is not specified, a value of $3$ is assumed.
 \item The dimension must be 1, 2, or 3.
+\item The number of coordinates in both lower and upper points must equal the dimension.
+\item Each coordinate of the lower point must be strictly greater than the corresponding coordinate of the upper point.
 \end{enumerate}
 
 %=======================================================================
@@ -271,13 +298,20 @@ periodic, in- and out-flow, specified, and dynamic.  Different
 boundary conditions can be specified for the entire domain,
 on separate faces, on subregions of faces, or on specific zones.
 Different boundary conditions can be specified for different fields.
-
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{Examples}
+\subsection{Use Cases}
 %-----------------------------------------------------------------------
+
+\begin{verbatim}
+domain {
+  reflecting
+  upper-x inflow
+  lower-x outflow
+\end{verbatim}
+
 %-----------------------------------------------------------------------
 \subsection{Assumptions}
 %-----------------------------------------------------------------------
