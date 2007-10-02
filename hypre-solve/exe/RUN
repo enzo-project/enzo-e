@@ -23,30 +23,18 @@ if ($nested == 1 && $serial == 1) then
 endif
 if ($nested == 1 && $parallel == 1) then
      set problems_nested_parallel = ( \
-#     "nested 16 1 1 2 2" \
-#     "nested 16 1 1 2 3" \
-#     "nested 16 1 2 1 2" \
-#     "nested 16 1 2 1 3" \
-#     "nested 16 2 1 1 2" \
-#     "nested 16 2 1 1 3" \
+     "nested 16 1 1 2 2" \
+     "nested 16 1 1 2 3" \
+     "nested 16 1 1 4 2" \
+     "nested 16 1 1 4 3" \
+     "nested 16 1 2 1 2" \
+     "nested 16 1 2 1 3" \
+     "nested 16 1 4 1 2" \
+     "nested 16 1 4 1 3" \
+     "nested 16 2 1 1 2" \
+     "nested 16 2 1 1 3" \
      "nested 16 4 1 1 2" \
-#     "nested 16 4 1 1 3" \
-#     "nested 16 1 4 1 2" \
-#     "nested 16 1 4 1 3" \
-#     "nested 16 1 1 4 2" \
-#     "nested 16 1 1 4 3" \
-#     "nested 32 1 1 2 2" \
-#     "nested 32 1 1 2 3" \
-#     "nested 32 1 2 1 2" \
-#     "nested 32 1 2 1 3" \
-#     "nested 32 2 1 1 2" \
-#     "nested 32 2 1 1 3" \
-#     "nested 64 1 1 2 2" \
-#     "nested 64 1 1 2 3" \
-#     "nested 64 1 2 1 2" \
-#     "nested 64 1 2 1 3" \
-#     "nested 64 1 2 1 3" \
-#     "nested 64 2 1 1 2" \
+     "nested 16 4 1 1 3" \
      )
 endif
 if ($unigrid == 1 && $serial == 1) then

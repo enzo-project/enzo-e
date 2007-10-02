@@ -1,0 +1,64 @@
+#!/bin/tcsh
+
+#-----------------------------------------------------------------------
+# Generate an input file via hypre-init, and run hypre-solve
+#
+# Usage: arguments are passed directly to hypre-init.  See hypre-init
+#        for usage
+#-----------------------------------------------------------------------
+
+set PATH = `pwd`
+set bin = "$PATH/../bin"
+
+#----------------------------------------------------------------------
+# INITIALIZE PROBLEM
+#----------------------------------------------------------------------
+
+if ($1 == "unigrid") then
+   set problem = "$1.P$3$4$5.N$2.L1"
+else
+   set problem = "$1.P$3$4$5.N$2.L$6"
+endif
+
+set input = in.$problem
+
+#----------------------------------------------------------------------
+# CLEAN UP PREVIOUS RUN IF ANY
+#----------------------------------------------------------------------
+
+if (-e $problem) then
+   rm -rf "$problem"
+endif
+
+#----------------------------------------------------------------------
+# GENERATE THE INPUT FILE
+#----------------------------------------------------------------------
+
+$bin/hypre-init $1 $2 $3 $4 $5 $6 $7
+mv $input $problem
+cd $problem
+
+#----------------------------------------------------------------------
+# RUN THE PROBLEM
+#----------------------------------------------------------------------
+
+@ np = $3 * $4 * $5 
+
+if ($HOST == "ds100") then
+   @ nodes = ($np - 1) / 8 + 1
+   poe $bin/hypre-solve $input -nodes 1 -tasks_per_node 8 -rmpool 1
+else
+   mpirun -np $np $bin/hypre-solve $input >& outfile
+endif
+
+#----------------------------------------------------------------------
+# DISPLAY RESULT
+#----------------------------------------------------------------------
+
+set success = `grep "End hypre-solve" outfile | wc`
+set success = $success[1]
+if ($success == 1) then
+   echo "Pass"
+else
+   echo "Fail"
+endif
