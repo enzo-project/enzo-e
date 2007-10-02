@@ -87,8 +87,8 @@ public:
   /// axis (0 to 2) and face (0 to 1).  No error checking is performed
   /// on axis, face, i or j.
 
-  Label &label (int axis, int face, int i, int j) throw ()
-  { return label_[axis][face][i+n1_[axis]*j]; };
+  Label &label (int axis, int face, int i0, int i1) throw ()
+  { return label_[axis][face][i0+n1_[axis]*i1]; };
 
 
   /// Set the face-zone type of all zones on the given axis (0

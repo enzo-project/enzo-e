@@ -168,8 +168,18 @@ protected:
   /// to a neighboring grid.  Returns false if the neighbor is not
   /// actually a neighbor.
 
-  bool shared_face (Grid & neighbor, int & axis, int & face, 
-		  int & il0, int & il1, int & iu0, int & iu1) throw () ;
+  bool neighbor_shared_face (Grid & neighbor, int & axis, int & face, 
+			     int & il0, int & il1, int & iu0, int & iu1) throw () ;
+
+  /// Determine the "count"th axis (indexing from 0), face and
+  /// corresponding range of coarse-grid indices of zones adjacent to
+  /// the containing parent grid, and increment "count".  Returns true
+  /// if the returned values are valid, or false if there is no
+  /// "count"th face.
+
+  bool parent_shared_face (Grid & parent, int & axis, int & face, 
+			   int & il0, int & il1, int & iu0, int & iu1,
+			   int & count) throw () ;
 
   /// Return the ith neighbor
   Grid & neighbor (int i) 
@@ -242,6 +252,17 @@ protected:
     iu0 = il_[0] + n_[0] - 1;
     iu1 = il_[1] + n_[1] - 1;
     iu2 = il_[2] + n_[2] - 1;
+  };
+
+  /// Return lower and upper global indices.  Upper indices are incremented by one.
+  void indices(int ind[3][2]) throw ()
+  { 
+    ind[0][0] = il_[0];
+    ind[1][0] = il_[1];
+    ind[2][0] = il_[2];
+    ind[0][1] = il_[0] + n_[0];
+    ind[1][1] = il_[1] + n_[1];
+    ind[2][1] = il_[2] + n_[2];
   };
 
   /// Return the unknown u(i,j,k)

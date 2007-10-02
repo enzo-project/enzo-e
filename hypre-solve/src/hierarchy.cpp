@@ -201,10 +201,10 @@ void Hierarchy::init_grid_neighbors_ () throw ()
       Grid * g2 = & level(0).grid(j);
 
       if (g1->is_adjacent(*g2)) {
-	if (debug) printf ("DEBUG grids %d and %d are adjacent\n",
-			   g1->id(),g2->id());
 	g1->set_neighbor (*g2);
 	g2->set_neighbor (*g1);
+	if (debug) printf ("DEBUG grids %d and %d are adjacent\n",
+			   g1->id(),g2->id());
       }
     }
   }
@@ -261,6 +261,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 {
   int axis, face;
+  int i0,il0,iu0;
+  int i1,il1,iu1;
 
   // ------------------------------------------------------------
   // First determine grid neighbors for each face-zone
@@ -273,25 +275,17 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     while (Grid * grid = itg++) {
 
-      int ig[3][2];
-      grid->i_lower(ig[0][0],ig[1][0],ig[2][0]);
-      grid->i_upper(ig[0][1],ig[1][1],ig[2][1]);
-
       ItGridNeighbors itn (*grid);
 
       while (Grid * neighbor = itn++) {
 
-	int in[3][2];
-	neighbor->i_lower(in[0][0],in[1][0],in[2][0]);
-	neighbor->i_upper(in[0][1],in[1][1],in[2][1]);
-
 	if (grid->is_local() || neighbor->is_local()) {
 	  
 	  int axis,face;
-	  int i0,il0,iu0;
-	  int i1,il1,iu1;
+
 	  // Determine index bounds of face intersection
-	  if (grid->shared_face(*neighbor,axis,face,il0,il1,iu0,iu1)) {
+
+	  if (grid->neighbor_shared_face(*neighbor,axis,face,il0,il1,iu0,iu1)) {
 	    for (i0=il0; i0<iu0; i0++) {
 	      for (i1=il1; i1<iu1; i1++) {
 		grid->faces().neighbor(axis,face,i0,i1) = neighbor;
@@ -310,8 +304,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // Get hierarchy root-grid index extents
 
   int ih0[3][2];
-  i_lower0(ih0[0][0],ih0[1][0],ih0[2][0]);
-  i_upper0(ih0[0][1],ih0[1][1],ih0[2][1]);
+  this->indices0(ih0);
 
   // Loop over grids in the root level
 
@@ -321,14 +314,20 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
     // Get grid index extents
 
     int ig[3][2];
-    grid->i_lower(ig[0][0],ig[1][0],ig[2][0]);
-    grid->i_upper(ig[0][1],ig[1][1],ig[2][1]);
+    grid->indices(ig);
 
     // Label zones in grid faces adjacent to domain faces
 
     for (axis = 0; axis < 3; axis++) {
       for (face = 0; face < 2; face++) {
 	if (ih0[axis][face] == ig[axis][face]) {
+	  if (debug) printf ("DEBUG %s:%d "
+			     "labeling grid %d "
+			     "axis %d face %d "
+			     "zones [*,*] as _boundary_\n",
+			     __FILE__,__LINE__,
+			     grid->id(),axis,face);
+			     
 	  grid->faces().label(axis,face,Faces::_boundary_);
 	}
       }
@@ -353,51 +352,40 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     while (Grid * grid = itg++) {
 
-      // Get grid's index extents
-
-      int ig[3][2];
-      grid->i_lower(ig[0][0],ig[1][0],ig[2][0]);
-      grid->i_upper(ig[0][1],ig[1][1],ig[2][1]);
-
-      ig[0][1]++;
-      ig[1][1]++;
-      ig[2][1]++;
-
-      // Get the grid's parent
-
       Grid * parent = this->parent(*grid);
 
-      // Get parent's index extents
+      // Only label zones if grid or parent are local
 
-      int ip[3][2];
-      parent->i_lower(ip[0][0],ip[1][0],ip[2][0]);
-      parent->i_upper(ip[0][1],ip[1][1],ip[2][1]);
+      if (grid->is_local() || parent->is_local()) {
 
-      ip[0][1]++;
-      ip[1][1]++;
-      ip[2][1]++;
+	int num = 0;
+	int axis,face;
 
-      // Find grid faces that intersect parent's
+	// Loop over each covered zone and label it as "covered"
 
-      for (axis = 0; axis < 3; axis++) {
-	for (face = 0; face < 2; face++) {
+	while (grid->parent_shared_face 
+	       (*parent, axis, face, il0,il1,iu0,iu1,num)) {
+	
+	  if (debug) printf ("DEBUG %s:%d "
+			     "labeling grid %d "
+			     "axis %d face %d "
+			     "zones [%d:%d,%d:%d] as _covered_\n",
+			     __FILE__,__LINE__,
+			     grid->id(),axis,face,
+			     il0,iu0,il1,iu1);
 
-	  bool is_aligned = ig[axis][face] == 2*ip[axis][face];
-
-	  int i1=(axis+1) % 3;
-	  int i2=(axis+2) % 3;
-	  bool is_enclosed_1 = 2*ip[i1][0] <= ig[i1][0] && ig[i1][1] <= 2*ip[i1][1];
-	  bool is_enclosed_2 = 2*ip[i2][0] <= ig[i2][0] && ig[i2][1] <= 2*ip[i2][1];
-
-	  // grid face intersects parent face iff  faces are in the same
-	  // plane and the grid face is enclosed by the parent face
-
-	  if (is_aligned && is_enclosed_1 && is_enclosed_2) {
-	    if (debug) printf ("%s:%d Grid %d and parent %d are aligned\n",
-			       __FILE__,__LINE__,grid->id(),parent->id());
-	    // Loop over grid face, marking covered parent face zones as 
-	    //	    int i
+	  for (i0=il0; i0<=iu0; i0++) {
+	    for (i1=il1; i1<=iu1; i1++) {
+	      parent->faces().label(axis,face,i0,i1) = Faces::_covered_;
+	    }
 	  }
+	    
+	
+	  if (debug) printf ("DEBUG %s:%d  parent_shared_face "
+			     "grid=%d  parent=%d  axis=%d face=%d\n",
+			     __FILE__,__LINE__,grid->id(),parent->id(),axis,face);
+	  if (debug) printf ("DEBUG %s:%d  il0=%d,il1=%d,iu0=%d,iu1=%d,num=%d\n",
+			     __FILE__,__LINE__,il0,il1,iu0,iu1,num);
 	}
       }
     }
@@ -414,15 +402,14 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   
   if (geomview) {
     char filename[20];
-    int ip = mpi.ip();
     for (int ilevel=0; ilevel<this->num_levels(); ilevel++) {
-      sprintf (filename,"level%d-p%d.quad",ilevel,ip);
+      sprintf (filename,"facezones-L%d-P%d.quad",ilevel,mpi.ip());
       FILE * fp = fopen (filename,"w");
       this->level(ilevel).geomview_face(fp);
       fclose(fp);
     }
   }
-  }
+}
 
   void Hierarchy::init_indices_ () throw()
 {
@@ -464,14 +451,10 @@ void Hierarchy::print () throw ()
 
 //----------------------------------------------------------------------
 
+/// Write the Hierarchy grids to the given open file in geomview format
+
 void Hierarchy::geomview_grid (FILE *fpr, bool full) throw ()
 {
-
-  // Color mapping for levels
-
-  int bcolor[] = {1, 1, 0, 0, 0, 1, 1};
-  int rcolor[] = {1, 0, 1, 0, 1, 0, 0};
-  int gcolor[] = {1, 0, 0, 1, 1, 1, 1};
 
   int ng = num_grids();
   int nl = num_levels();
@@ -512,6 +495,12 @@ void Hierarchy::geomview_grid (FILE *fpr, bool full) throw ()
     }
 
   }
+
+  // Color mapping for levels
+
+  int bcolor[] = {1, 1, 0, 0, 0, 1, 1};
+  int rcolor[] = {1, 0, 1, 0, 1, 0, 0};
+  int gcolor[] = {1, 0, 0, 1, 1, 1, 1};
 
   if (full) {
     for (int i=0; i<nl; i++) {

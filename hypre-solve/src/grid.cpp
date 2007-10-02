@@ -202,9 +202,9 @@ void Grid::geomview_face (FILE *fpr, bool full) throw ()
   Scalar vf[3];  // vf = offset of face vertices from face center
   Scalar vc[4][3]; // vf = offset of face vertices from zone center
 
-  const Scalar svf = 0.4;  // svf = scaling of offset of vertices from face center
+  const Scalar svf = 0.2;  // svf = scaling of offset of vertices from face center
   //                            (0.5 = full side)
-  Scalar sfz       = 0.0;  // sfz = scaling of offset of face center from zone center
+  Scalar sfz;              // sfz = scaling of offset of face center from zone center
   //                            (0.5 = actual face location; set dynamically belew)
 
   for (axis=0; axis<3; axis++) {
@@ -347,30 +347,43 @@ bool Grid::is_adjacent (Grid & g2) throw ()
 /// to the neighboring grid.  Returns false if the neighbor is not
 /// actually a neighbor.  Assumes grids are in the same level.
 
-bool Grid::shared_face (Grid & neighbor, int & axis, int & face, 
-		int & il0, int & il1, int & iu0, int & iu1) throw ()
+bool Grid::neighbor_shared_face (Grid & neighbor, int & axis, int & face, 
+				 int & il0, int & il1, int & iu0, int & iu1) throw ()
 {
 
   Grid & grid = *this;
 
-  int gl[3],gu[3];
-  grid.i_lower(gl[0],gl[1],gl[2]);
-  grid.i_upper(gu[0],gu[1],gu[2]);
+  // Get grid index bounds
 
-  int nl[3],nu[3];
-  neighbor.i_lower(nl[0],nl[1],nl[2]);
-  neighbor.i_upper(nu[0],nu[1],nu[2]);
+  int ig[3][2];
+  grid.indices(ig);
+
+  // Get neighbor index bounds
+
+  int in[3][2];
+  neighbor.indices(in);
 
   axis = -1;
-  int i;
-  for (i=0; i<3; i++) {
-    if (gl[i] == nu[i] + 1) { face = 0; axis = i; }
-    if (nl[i] == gu[i] + 1) { face = 1; axis = i; }
+
+  // Find matching face, if any
+  bool found_face = false;
+  int iaxis=-1,iface=-1;
+  for (axis=0; axis<3; axis++) {
+    for (face=0; face<2; face++) {
+      if (ig[axis][face] == in[axis][1-face]) {
+	found_face = true;
+	iaxis=axis;
+	iface=face;
+      }
+    }
   }
 
+  axis=iaxis;
+  face=iface;
+  printf ("DEBUG found_face = %d axis=%d face=%d\n",found_face,axis,face);
   // Exit if no grid faces lie in the same plane
-  if (axis == -1) {
-    printf ("%s:%d  Grid::shared_face() grid=%d neighbor=%d no shared faces\n",
+  if (! found_face) {
+    printf ("%s:%d  Grid::neighbor_shared_face() grid=%d neighbor=%d no shared faces\n",
 	    __FILE__,__LINE__,grid.id(),neighbor.id());
     return false;
   }
@@ -382,25 +395,123 @@ bool Grid::shared_face (Grid & neighbor, int & axis, int & face,
 
   // Compute local indices intersection from global indices of each grid
 
-  il0 = MAX(gl[j0],nl[j0]) - gl[j0];
-  iu0 = MIN(gu[j0],nu[j0]) - gl[j0];
+  il0 = MAX(ig[j0][0],in[j0][0]) - ig[j0][0];
+  iu0 = MIN(ig[j0][1],in[j0][1]) - ig[j0][0];
 
-  il1 = MAX(gl[j1],nl[j1]) - gl[j1];
-  iu1 = MIN(gu[j1],nu[j1]) - gl[j1];
+  il1 = MAX(ig[j1][0],in[j1][0]) - ig[j1][0];
+  iu1 = MIN(ig[j1][1],in[j1][1]) - ig[j1][0];
+
+  iu0--;
+  iu1--;
 
   if (il0 > iu0 || il1 > iu1) {
-    printf ("%s:%d  Grid::shared_face() grid=%d neighbor=%d no shared faces\n",
+    printf ("%s:%d  Grid::neighbor_shared_face() grid=%d neighbor=%d no shared faces\n",
 	    __FILE__,__LINE__,grid.id(),neighbor.id());
     return false;
   }
 
-  NOT_IMPLEMENTED("Grid::shared_face");
-  if (debug) printf ("%s:%d  Grid::shared_face() grid=%d neighbor=%d face=%d axis=%d\n",
+  if (debug) printf ("%s:%d  Grid::neighbor_shared_face() grid=%d neighbor=%d face=%d axis=%d\n",
 		     __FILE__,__LINE__,grid.id(),neighbor.id(),face,axis);
-  if (debug) printf ("%s:%d  Grid::shared_face() il0=%d il1=%d iu0=%d iu1=%d\n",
+  if (debug) printf ("%s:%d  Grid::neighbor_shared_face() il0=%d il1=%d iu0=%d iu1=%d\n",
 		     __FILE__,__LINE__,il0,il1,iu0,iu1);
   if (axis == -1) printf (" find_neighbor_indices () %d and %d not neighbors\n",
  			   grid.id(),neighbor.id());
+
+
+  return true;
+}
+
+//======================================================================
+
+/// Determine the "count"th axis (indexing from 0), face and
+/// corresponding range of coarse-grid indices of zones adjacent to
+/// the containing parent grid, and increment "count".  Returns true
+/// if the returned values are valid, or false if there is no
+/// "count"th face.
+
+bool Grid::parent_shared_face (Grid & parent, int & axis, int & face, 
+			      int & il0, int & il1, int & iu0, int & iu1,
+			      int & count) throw ()
+{
+
+  Grid & grid = *this;
+
+  // Get grid index bounds
+  int ig[3][2];
+  grid.indices(ig);
+
+  // Get parent index bounds
+  int ip[3][2];
+  parent.indices(ip);
+
+  if (debug) printf ("%s:%d parent_shared_face ( grid {%d} parent {%d} \n",
+		     __FILE__,__LINE__,this->id(),parent.id());
+
+  if (debug) printf ("%s:%d parent_shared_face ( grid   indices %d %d %d  %d %d %d\n",
+		     __FILE__,__LINE__,
+		     ig[0][0],ig[1][0],ig[2][0],
+		     ig[0][1],ig[1][1],ig[2][1]);
+  if (debug) printf ("%s:%d parent_shared_face ( parent indices %d %d %d  %d %d %d\n",
+		     __FILE__,__LINE__,
+		     ip[0][0],ip[1][0],ip[2][0],
+		     ip[0][1],ip[1][1],ip[2][1]);
+  // Find count'th matching face, if there is one
+  int num=0;
+  bool found_face=false;
+  int iaxis=-1,iface=-1;
+  for (axis = 0; axis < 3; axis++) {
+    for (face = 0; face < 2; face++) {
+      if (ig[axis][face] == 2*ip[axis][face]) {
+	if (num == count) {
+	  found_face = true;
+	  iaxis = axis;
+	  iface = face;
+	  count++;
+	} else {
+	  num++;
+	}
+      }
+    }
+  }
+  axis = iaxis;
+  face = iface;
+
+  // Exit if no grid faces lie in the same plane
+  if (!found_face) {
+    printf ("%s:%d  Grid::parent_shared_face() grid=%d parent=%d no shared faces\n",
+	    __FILE__,__LINE__,grid.id(),parent.id());
+    return false;
+  }
+
+  // face axes
+
+  int j0=(axis+1)%3;
+  int j1=(axis+2)%3;
+
+  // Compute local indices intersection from global indices of each grid
+  // Divide by two so that indices correspond to coarse grid
+
+  il0 = MAX(ig[j0][0]/2,ip[j0][0]) - ip[j0][0];
+  iu0 = MIN(ig[j0][1]/2,ip[j0][1]) - ip[j0][0];
+
+  il1 = MAX(ig[j1][0]/2,2*ip[j1][0]) - ip[j1][0];
+  iu1 = MIN(ig[j1][1]/2,2*ip[j1][1]) - ip[j1][0];
+
+  iu0--;
+  iu1--;
+
+  if (il0 > iu0 || il1 > iu1) {
+    printf ("%s:%d  Grid::parent_shared_face() grid=%d parent=%d no shared faces\n",
+	    __FILE__,__LINE__,grid.id(),parent.id());
+    return false;
+  }
+
+  if (debug) printf ("%s:%d  Grid::parent_shared_face() grid=%d parent=%d axis=%d face=%d\n",
+		     __FILE__,__LINE__,grid.id(),parent.id(),axis,face);
+  if (debug) printf ("%s:%d  Grid::parent_shared_face() il0=%d il1=%d iu0=%d iu1=%d\n",
+		     __FILE__,__LINE__,il0,il1,iu0,iu1);
+  if (axis == -1) printf (" find_parent_indices () %d and %d not parents\n",
+ 			   grid.id(),parent.id());
 
 
   return true;

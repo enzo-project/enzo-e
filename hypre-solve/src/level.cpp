@@ -84,21 +84,90 @@ void Level::print () throw ()
 
 //----------------------------------------------------------------------
 
+/// Write the Level grids to the given open file in geomview format
+
 void Level::geomview_grid (FILE *fpr, bool full) throw ()
 {
   int n = num_grids();
 
+  if (debug) printf ("DEBUG %s:%d  geomview_grid n = %d\n",__FILE__,__LINE__,n);
   // Write Level header
   if (full) {
     fprintf (fpr,"VECT\n");
-    fprintf (fpr,"%d %d 1\n",4*n, 16*n);
-    for (int i=0; i<n; i++) fprintf (fpr,"8 3 3 2 "); fprintf (fpr,"\n");
-    fprintf (fpr,"1 0 0 0 ");
-    for (int i=1; i<n; i++) fprintf (fpr,"0 0 0 0 "); fprintf (fpr,"\n");
+    fprintf (fpr,"%d %d 1\n",2+4*n, 2+16*n);
+
+    // Write vertices per polygon
+    fprintf (fpr,"1 1 ");
+    for (int i=0; i<n; i++) {
+      fprintf (fpr,"8 3 3 2 ");
+    }
+    fprintf (fpr,"\n");
+
+    // Write colors changes
+    fprintf (fpr,"1 0 ");
+    for (int i=0; i<n; i++) fprintf (fpr,"0 0 0 0 "); fprintf (fpr,"\n");
+
+    // Print points at domain boundaries to provide geomview with bounding box
+
+    Scalar dl[3],du[3];
+    Level::domain_.lower(dl[0],dl[1],dl[2]);
+    Level::domain_.upper(du[0],du[1],du[2]);
+    fprintf (fpr,"%g %g %g\n",dl[0],dl[1],dl[2]);
+    fprintf (fpr,"%g %g %g\n",du[0],du[1],du[2]);
+
   }
 
   // Write grids
   ItLevelGridsAll itg (*this);
+  while (Grid * g = itg++) {
+    g->geomview_grid (fpr,0);
+  }
+
+  // Write trailer
+  if (full) {
+    fprintf (fpr,"1 1 1 0\n");
+  }
+}
+
+//----------------------------------------------------------------------
+
+/// Write the local Level grids to the given open file in geomview format
+
+void Level::geomview_grid_local (FILE *fpr, bool full) throw ()
+{
+  // Count local grids
+  int n=0;
+  ItLevelGridsLocal itg (*this);
+  while (itg++) n++;
+
+  if (debug) printf ("DEBUG %s:%d  geomview_grid_local n = %d\n",__FILE__,__LINE__,n);
+
+  // Write Level header
+  if (full) {
+    fprintf (fpr,"VECT\n");
+    fprintf (fpr,"%d %d 1\n",2+4*n, 2+16*n);
+
+    // Write vertices per polygon
+    fprintf (fpr,"1 1 ");
+    for (int i=0; i<n; i++) {
+      fprintf (fpr,"8 3 3 2 ");
+    }
+    fprintf (fpr,"\n");
+
+    // Write colors changes
+    fprintf (fpr,"1 0 ");
+    for (int i=0; i<n; i++) fprintf (fpr,"0 0 0 0 "); fprintf (fpr,"\n");
+
+    // Print points at domain boundaries to provide geomview with bounding box
+
+    Scalar dl[3],du[3];
+    Level::domain_.lower(dl[0],dl[1],dl[2]);
+    Level::domain_.upper(du[0],du[1],du[2]);
+    fprintf (fpr,"%g %g %g\n",dl[0],dl[1],dl[2]);
+    fprintf (fpr,"%g %g %g\n",du[0],du[1],du[2]);
+  }
+
+  // Write grids
   while (Grid * g = itg++) {
     g->geomview_grid (fpr,0);
   }

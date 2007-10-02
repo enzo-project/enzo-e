@@ -77,6 +77,9 @@ public:
   /// Write the Level grids to the given open file in geomview format
   void geomview_grid (FILE *fpr, bool full=true) throw ();
 
+  /// Write the local Level grids to the given open file in geomview format
+  void geomview_grid_local (FILE *fpr, bool full=true) throw ();
+
   /// Write the Level grid faces to the given open file in geomview format
   void geomview_face (FILE *fpr, bool full=true) throw ();
 

@@ -3,7 +3,7 @@ SHELL = /bin/bash
 # Define MPCPP
 
 # FLAGS = -g -Wall
-FLAGS = -g -Wall 
+FLAGS = -g
 
 # JBPERF
 
@@ -31,14 +31,19 @@ OBJS = \
        problem.o \
        sphere.o
 
+OBJS_INIT = hypre-init.cpp
+
 hypre-solve: dep $(OBJS)
 	$(MPCPP) -o hypre-solve $(OBJS) $(LIBS)
+hypre-init: dep $(OBJS_INIT)
+	$(CPP) -o hypre-init $(OBJS_INIT) $(LIBS)
 
 BIN = ../bin
 .PHONY: install
-install: hypre-solve
+install: hypre-solve hypre-init
 	(if [ ! -e $(BIN) ]; then mkdir $(BIN); fi)
 	cp hypre-solve $(BIN)
+	cp hypre-init  $(BIN)
 
 
 .cpp.o:

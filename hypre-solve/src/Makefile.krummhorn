@@ -1,2 +1,4 @@
 include Make.include
 MPCPP = mpiCC
+CPP = g++
+

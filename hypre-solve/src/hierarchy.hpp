@@ -146,6 +146,20 @@ public:
     iu2 = il0_[2] + n0_[2] - 1;
   };
 
+  /// Return lower and upper global indices of the root-grid.  Upper
+  /// indices are incremented by one.
+
+  void indices0(int ind[3][2]) throw ()
+  { 
+    ind[0][0] = il0_[0];
+    ind[1][0] = il0_[1];
+    ind[2][0] = il0_[2];
+    ind[0][1] = il0_[0] + n0_[0];
+    ind[1][1] = il0_[1] + n0_[1];
+    ind[2][1] = il0_[2] + n0_[2];
+  };
+
+
   /// Return the number of unknowns along the ith coordinate of the root grid.  No error checking on i.
   int num_unknowns0(int i) throw ()
   { return n0_[i]; };

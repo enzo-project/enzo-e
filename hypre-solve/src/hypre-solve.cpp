@@ -42,7 +42,7 @@
 
 const int debug    = 1;
 const int trace    = 1;
-const int geomview = 0;
+const int geomview = 1;
 
 //======================================================================
 // BEGIN MAIN
@@ -129,9 +129,22 @@ int main(int argc, char **argv)
     _BARRIER_;
 
     if (geomview) {
-      FILE * fp = fopen ("hierarchy.vect","w");
-      hierarchy.geomview_grid (fp);
-      fclose (fp);
+      ItHierarchyLevels itl (hierarchy);
+      while (Level * level = itl++) {
+	char filename[20];
+
+	sprintf (filename,"grid-L%d-P%d.vect",level->index(),mpi.ip());
+	FILE * fp = fopen (filename,"w");
+	level->geomview_grid_local (fp);
+	fclose (fp);
+
+	if (mpi.is_root()) {
+	  sprintf (filename,"grid-L%d.vect",level->index());
+	  FILE * fp = fopen (filename,"w");
+	  sprintf (filename,"grid-L%d.vect",level->index());
+	  level->geomview_grid (fp);
+	}
+      }
     }
 
     // ***************
