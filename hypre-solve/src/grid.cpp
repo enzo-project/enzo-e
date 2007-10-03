@@ -159,10 +159,10 @@ void Grid::geomview_face (FILE *fpr, bool full) throw ()
   }
   if (! is_local()) return;
 
-  float bcolor[] = {1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0};
-  float rcolor[] = {1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0};
-  float gcolor[] = {1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0};
-  float acolor[] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
+  float bcolor[] = {0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0};
+  float rcolor[] = {0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
+  float gcolor[] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0};
+  float acolor[] = {0.7, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
 
   if (full) {
     fprintf (fpr,"CQUAD\n");

@@ -36,8 +36,13 @@ public:
     _fine_,
     _neighbor_,
     _covered_,
-    _last_ =  _covered_
+    _adjacent_covered_,
+    _last_ =  _adjacent_covered_
   };
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Label[] ENTRIES SHOULD MATCH LabelName VALUES IN faces.cpp
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   static const char * LabelName[];
 

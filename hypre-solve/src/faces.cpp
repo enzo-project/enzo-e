@@ -41,6 +41,7 @@ const char * Faces::LabelName[] = {
     "fine",
     "neighbor",
     "covered",
+    "adjacent-covered",
     "last"
   };
 

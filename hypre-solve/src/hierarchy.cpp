@@ -33,9 +33,10 @@
 
 //----------------------------------------------------------------------
 
-const int trace    = 1;
-const int debug    = 1;
-const int geomview = 1;
+const int trace          = 1;
+const int debug          = 1;
+const int debug_detailed = 0;
+const int geomview       = 1;
 
 //----------------------------------------------------------------------
 
@@ -261,8 +262,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 {
   int axis, face;
-  int i0,il0,iu0;
-  int i1,il1,iu1;
+  int ig0,in0,il0,iu0;
+  int ig1,in1,il1,iu1;
 
   // ------------------------------------------------------------
   // First determine grid neighbors for each face-zone
@@ -285,10 +286,11 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 	  // Determine index bounds of face intersection
 
-	  if (grid->neighbor_shared_face(*neighbor,axis,face,il0,il1,iu0,iu1)) {
-	    for (i0=il0; i0<iu0; i0++) {
-	      for (i1=il1; i1<iu1; i1++) {
-		grid->faces().neighbor(axis,face,i0,i1) = neighbor;
+	  if (grid->neighbor_shared_face
+	      (*neighbor,axis,face,il0,il1,iu0,iu1)) {
+	    for (ig0=il0; ig0<iu0; ig0++) {
+	      for (ig1=il1; ig1<iu1; ig1++) {
+		grid->faces().neighbor(axis,face,ig0,ig1) = neighbor;
 	      }
 	    }
 	  }
@@ -327,7 +329,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 			     "zones [*,*] as _boundary_\n",
 			     __FILE__,__LINE__,
 			     grid->id(),axis,face);
-			     
+	  // Label boundary face-zones
 	  grid->faces().label(axis,face,Faces::_boundary_);
 	}
       }
@@ -339,8 +341,6 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // ------------------------------------------------------------
 
   // Loop over non-root levels in the hierarchy, finest to coarsest
-
-  //  ItHierarchyLevelsReverse itl(*this);
 
   for (int ilevel = num_levels()-1; ilevel>0; ilevel--) {
 
@@ -374,9 +374,44 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 			     grid->id(),axis,face,
 			     il0,iu0,il1,iu1);
 
-	  for (i0=il0; i0<=iu0; i0++) {
-	    for (i1=il1; i1<=iu1; i1++) {
-	      parent->faces().label(axis,face,i0,i1) = Faces::_covered_;
+	  int ig3[3][2];
+	  grid->indices(ig3);
+	  
+	  for (ig0=il0; ig0<=iu0; ig0++) {
+	    for (ig1=il1; ig1<=iu1; ig1++) {
+
+	      // Label covered zones
+
+	      parent->faces().label(axis,face,ig0,ig1) = Faces::_covered_;
+
+	      // Label adjacent-covered zones
+
+	      Grid * neighbor = parent->faces().neighbor(axis,face,ig0,ig1);
+	      if (neighbor != NULL) {
+		int in3[3][2];
+		neighbor->indices(in3);
+
+		if (axis==0) {
+		  in0 = ig0 + in3[1][0] - ig3[1][0];
+		  in1 = ig1 + in3[2][0] - ig3[2][0];
+		} else if (axis==1) {
+		  in0 = ig0 + in3[2][0] - ig3[2][0];
+		  in1 = ig1 + in3[0][0] - ig3[0][0];
+		} else if (axis==2) {
+		  in0 = ig0 + in3[3][0] - ig3[3][0];
+		  in1 = ig1 + in3[1][0] - ig3[1][0];
+		}
+		if (debug_detailed) 
+		  printf ("DEBUG %s:%d "
+			  "labeling grid %d "
+			  "axis %d face %d "
+			  "zone [%d,%d] as _adjacent_covered_\n",
+			  __FILE__,__LINE__,
+			  grid->id(),axis,1-face,
+			  in0,in1);
+		neighbor->faces().label(axis,1-face,in0,in1) 
+		  = Faces::_adjacent_covered_;
+	      }
 	    }
 	  }
 	    
@@ -395,8 +430,108 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // Label fine and neighbor face-zones
   // ------------------------------------------------------------
 
+  // Loop over non-root levels in the hierarchy, finest to coarsest
+
+  for (int ilevel = num_levels()-1; ilevel>0; ilevel--) {
+
+    Level *level = &this->level(ilevel);
+
+    // Loop over grids in the level
+
+    ItLevelGridsAll itg (*level);
+
+    while (Grid * grid = itg++) {
+
+      Grid * parent = this->parent(*grid);
+
+      // Only label zones if grid or parent are local
+
+      if (grid->is_local() || parent->is_local()) {
+
+	int num = 0;
+	int axis,face;
+
+	// Loop over each covered zone and label it as "covered"
+
+	while (grid->parent_shared_face 
+	       (*parent, axis, face, il0,il1,iu0,iu1,num)) {
+
+
+	  int ig3[3][2];
+	  grid->indices(ig3);
+	  
+	  for (ig0=il0; ig0<=iu0; ig0++) {
+	    for (ig1=il1; ig1<=iu1; ig1++) {
+
+	      // Label fine and neighbor zones
+
+	      if (parent->faces().label(axis,face,ig0,ig1) == Faces::_adjacent_covered_) {
+		parent->faces().label(axis,face,ig0,ig1) = Faces::_fine_;
+	      } else {
+		parent->faces().label(axis,face,ig0,ig1) = Faces::_neighbor_;
+	      }
+
+	    }
+	  }
+	    
+	
+	  if (debug) printf ("DEBUG %s:%d  parent_shared_face "
+			     "grid=%d  parent=%d  axis=%d face=%d\n",
+			     __FILE__,__LINE__,grid->id(),parent->id(),axis,face);
+	  if (debug) printf ("DEBUG %s:%d  il0=%d,il1=%d,iu0=%d,iu1=%d,num=%d\n",
+			     __FILE__,__LINE__,il0,il1,iu0,iu1,num);
+	}
+      }
+    }
+  }
+
   // ------------------------------------------------------------
   // Label coarse face-zones
+  // ------------------------------------------------------------
+
+
+  while (Level * level = itl++) {
+    ItLevelGridsAll itga(*level);
+
+    while (Grid * grid = itga++) {
+      int ig3[3][2];
+      grid->indices(ig3);
+      // X-faces
+      if (debug) printf ("DEBUG Labeling coarse for grid %d  [%d:%d] [%d:%d] [%d:%d]\n",grid->id(),
+			 ig3[0][0],ig3[0][1],
+			 ig3[1][0],ig3[1][1],
+			 ig3[2][0],ig3[2][1]);
+
+      for (ig0=0; ig0<ig3[1][1]-ig3[1][0]; ig0++) {
+	for (ig1=0; ig1<ig3[2][1]-ig3[2][0]; ig1++) {
+	  Faces::Label & fxm = grid->faces().label(0,0,ig0,ig1);
+	  Faces::Label & fxp = grid->faces().label(0,1,ig0,ig1);
+	  if (fxm==Faces::_unknown_) fxm = Faces::_coarse_;
+	  if (fxp==Faces::_unknown_) fxp = Faces::_coarse_;
+	}
+      }
+      // Y-faces
+      for (ig0=0; ig0<ig3[2][1]-ig3[2][0]; ig0++) {
+	for (ig1=0; ig1<ig3[0][1]-ig3[0][0]; ig1++) {
+	  Faces::Label & fym = grid->faces().label(1,0,ig0,ig1);
+	  Faces::Label & fyp = grid->faces().label(1,1,ig0,ig1);
+	  if (fym==Faces::_unknown_) fym = Faces::_coarse_;
+	  if (fyp==Faces::_unknown_) fyp = Faces::_coarse_;
+	}
+      }
+      // Z-faces
+      for (ig0=0; ig0<ig3[0][1]-ig3[0][0]; ig0++) {
+	for (ig1=0; ig1<ig3[1][1]-ig3[1][0]; ig1++) {
+	  Faces::Label & fzm = grid->faces().label(2,0,ig0,ig1);
+	  Faces::Label & fzp = grid->faces().label(2,1,ig0,ig1);
+	  if (fzm==Faces::_unknown_) fzm = Faces::_coarse_;
+	  if (fzp==Faces::_unknown_) fzp = Faces::_coarse_;
+	}
+      }
+    }
+  }
+  // ------------------------------------------------------------
+  // Dump out any requested geomview files
   // ------------------------------------------------------------
 
   
@@ -499,8 +634,8 @@ void Hierarchy::geomview_grid (FILE *fpr, bool full) throw ()
   // Color mapping for levels
 
   int bcolor[] = {1, 1, 0, 0, 0, 1, 1};
-  int rcolor[] = {1, 0, 1, 0, 1, 0, 0};
-  int gcolor[] = {1, 0, 0, 1, 1, 1, 1};
+  int rcolor[] = {1, 0, 1, 0, 1, 0, 1};
+  int gcolor[] = {1, 0, 0, 1, 1, 1, 0};
 
   if (full) {
     for (int i=0; i<nl; i++) {
