@@ -83,6 +83,12 @@ public:
   /// Write the Level grid faces to the given open file in geomview format
   void geomview_face (FILE *fpr, bool full=true) throw ();
 
+  /// Write the Level grid faces of the given type to the given open file in geomview format
+  void geomview_face_types (FILE         * fpr, 
+			    Faces::Label * types, 
+			    int            num_types,
+			    bool full=true) throw ();
+
   void write (FILE * fp = 0) throw ();
 
   //--------------------------------------------------------------------

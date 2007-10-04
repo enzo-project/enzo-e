@@ -28,10 +28,11 @@
 
 //======================================================================
 
-const int debug       = 1;
+const int debug       = 0;
 const int debug_input = 0;
+const int trace       = 0;
 
-const int trace = 1;
+//======================================================================
 
 Mpi    Grid::mpi_;
 Domain Grid::domain_;
@@ -147,7 +148,21 @@ void Grid::geomview_grid (FILE *fpr, bool full) throw ()
 
 //======================================================================
 
-void Grid::geomview_face (FILE *fpr, bool full) throw ()
+void Grid::geomview_face (FILE         *fpr, 
+			  bool          full) throw ()
+{
+  int num_types = Faces::_last_ - Faces::_first_ + 1;
+  Faces::Label * types = new Faces::Label [num_types];
+  for (int i=0; i<num_types; i++) types[i] = Faces::Label(i);
+  geomview_face_type (fpr,types,num_types,full);
+}
+
+//======================================================================
+
+void Grid::geomview_face_type (FILE         *fpr, 
+			       Faces::Label *types, 
+			       int           num_types, 
+			       bool          full) throw ()
 {
 
   if (debug) printf ("DEBUG %s:%d grid ip = %d mpi ip = %d grid id = %d\n",
@@ -159,10 +174,16 @@ void Grid::geomview_face (FILE *fpr, bool full) throw ()
   }
   if (! is_local()) return;
 
+  // Default acolor = 0.0 to make them invisible
+
   float bcolor[] = {0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0};
   float rcolor[] = {0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
   float gcolor[] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0};
-  float acolor[] = {0.7, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5};
+  float acolor[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+  // Make requested types visible
+  int i;
+  for (i=0; i<num_types; i++) acolor[types[i]] = 1.0;
 
   if (full) {
     fprintf (fpr,"CQUAD\n");
@@ -195,7 +216,6 @@ void Grid::geomview_face (FILE *fpr, bool full) throw ()
 
   int axis,face,i1,i2;
   int j0,j1,j2;
-  int i;
 
   Scalar zc[3];   // zc = zone center
   Scalar fz[3];  // fz = offset of face center from zone center
@@ -380,11 +400,8 @@ bool Grid::neighbor_shared_face (Grid & neighbor, int & axis, int & face,
 
   axis=iaxis;
   face=iface;
-  printf ("DEBUG found_face = %d axis=%d face=%d\n",found_face,axis,face);
   // Exit if no grid faces lie in the same plane
   if (! found_face) {
-    printf ("%s:%d  Grid::neighbor_shared_face() grid=%d neighbor=%d no shared faces\n",
-	    __FILE__,__LINE__,grid.id(),neighbor.id());
     return false;
   }
 
@@ -405,18 +422,8 @@ bool Grid::neighbor_shared_face (Grid & neighbor, int & axis, int & face,
   iu1--;
 
   if (il0 > iu0 || il1 > iu1) {
-    printf ("%s:%d  Grid::neighbor_shared_face() grid=%d neighbor=%d no shared faces\n",
-	    __FILE__,__LINE__,grid.id(),neighbor.id());
     return false;
   }
-
-  if (debug) printf ("%s:%d  Grid::neighbor_shared_face() grid=%d neighbor=%d face=%d axis=%d\n",
-		     __FILE__,__LINE__,grid.id(),neighbor.id(),face,axis);
-  if (debug) printf ("%s:%d  Grid::neighbor_shared_face() il0=%d il1=%d iu0=%d iu1=%d\n",
-		     __FILE__,__LINE__,il0,il1,iu0,iu1);
-  if (axis == -1) printf (" find_neighbor_indices () %d and %d not neighbors\n",
- 			   grid.id(),neighbor.id());
-
 
   return true;
 }
@@ -444,17 +451,6 @@ bool Grid::parent_shared_face (Grid & parent, int & axis, int & face,
   int ip[3][2];
   parent.indices(ip);
 
-  if (debug) printf ("%s:%d parent_shared_face ( grid {%d} parent {%d} \n",
-		     __FILE__,__LINE__,this->id(),parent.id());
-
-  if (debug) printf ("%s:%d parent_shared_face ( grid   indices %d %d %d  %d %d %d\n",
-		     __FILE__,__LINE__,
-		     ig[0][0],ig[1][0],ig[2][0],
-		     ig[0][1],ig[1][1],ig[2][1]);
-  if (debug) printf ("%s:%d parent_shared_face ( parent indices %d %d %d  %d %d %d\n",
-		     __FILE__,__LINE__,
-		     ip[0][0],ip[1][0],ip[2][0],
-		     ip[0][1],ip[1][1],ip[2][1]);
   // Find count'th matching face, if there is one
   int num=0;
   bool found_face=false;
@@ -478,8 +474,6 @@ bool Grid::parent_shared_face (Grid & parent, int & axis, int & face,
 
   // Exit if no grid faces lie in the same plane
   if (!found_face) {
-    printf ("%s:%d  Grid::parent_shared_face() grid=%d parent=%d no shared faces\n",
-	    __FILE__,__LINE__,grid.id(),parent.id());
     return false;
   }
 
@@ -501,18 +495,8 @@ bool Grid::parent_shared_face (Grid & parent, int & axis, int & face,
   iu1--;
 
   if (il0 > iu0 || il1 > iu1) {
-    printf ("%s:%d  Grid::parent_shared_face() grid=%d parent=%d no shared faces\n",
-	    __FILE__,__LINE__,grid.id(),parent.id());
     return false;
   }
-
-  if (debug) printf ("%s:%d  Grid::parent_shared_face() grid=%d parent=%d axis=%d face=%d\n",
-		     __FILE__,__LINE__,grid.id(),parent.id(),axis,face);
-  if (debug) printf ("%s:%d  Grid::parent_shared_face() il0=%d il1=%d iu0=%d iu1=%d\n",
-		     __FILE__,__LINE__,il0,il1,iu0,iu1);
-  if (axis == -1) printf (" find_parent_indices () %d and %d not parents\n",
- 			   grid.id(),parent.id());
-
 
   return true;
 }

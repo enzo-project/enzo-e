@@ -40,8 +40,8 @@
 #include "problem.hpp"
 #include "hypre.hpp"
 
-const int debug    = 1;
-const int trace    = 1;
+const int debug    = 0;
+const int trace    = 0;
 const int geomview = 1;
 
 //======================================================================

@@ -126,6 +126,13 @@ protected:
 
   void geomview_face (FILE *fpr, bool full=true) throw ();
 
+  /// Write the grid's face data of specified types to a geomview file
+
+  void geomview_face_type (FILE         * fpr, 
+			   Faces::Label * types, 
+			   int            num_types, 
+			   bool           full=true) throw ();
+
   /// Read the grid from the given string in compact format
 
   void read (std::string parms) throw ();

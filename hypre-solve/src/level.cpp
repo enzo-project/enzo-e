@@ -218,6 +218,47 @@ void Level::geomview_face (FILE *fpr, bool full) throw ()
 
 //----------------------------------------------------------------------
 
+void Level::geomview_face_types (FILE         * fpr, 
+				 Faces::Label * types, 
+				 int            num_types,
+				 bool           full) throw ()
+{
+  if (full) {
+    fprintf (fpr,"CQUAD\n");
+    // Print points at domain boundaries to provide geomview with bounding box
+
+    Scalar dl[3],du[3];
+    Level::domain_.lower(dl[0],dl[1],dl[2]);
+    Level::domain_.upper(du[0],du[1],du[2]);
+    fprintf (fpr,
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1\n",
+	     dl[0],dl[1],dl[2],
+	     dl[0],dl[1],dl[2],
+	     dl[0],dl[1],dl[2],
+	     dl[0],dl[1],dl[2]);
+    fprintf (fpr,
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1 "
+	     "%g %g %g 0 0 0 1\n",
+	     du[0],du[1],du[2],
+	     du[0],du[1],du[2],
+	     du[0],du[1],du[2],
+	     du[0],du[1],du[2]);
+  }
+
+  ItLevelGridsAll itga (*this);
+  while (Grid * grid = itga++) {
+    if (debug) printf ("DEBUG %s:%d grid id = %d\n",__FILE__,__LINE__,grid->id());
+    grid->geomview_face_type(fpr,types,num_types,false);
+  }
+}
+
+//----------------------------------------------------------------------
+
 void Level::write (FILE *fp) throw ()
 {
   if (fp == 0) fp = stdout;
