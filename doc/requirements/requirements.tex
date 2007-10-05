@@ -533,11 +533,12 @@ parallelism and optimize performance
 %=======================================================================
 \subsection{Pipelining}
 
-
-
 \appendix
+\newcommand{\parametersize}{\scriptsize}
 
-\chapter{\enzo\ parameter list}
+%=======================================================================
+\chapter{\enzo\ parameters list}
+%=======================================================================
 
 \small
 \begin{tabular}{lll}
@@ -713,7 +714,7 @@ parallelism and optimize performance
 \todo\ \code{tiny\_number} &
 \todo\ \code{TopGridDimensions} \\
 \todo\ \code{TopGridGravityBoundary} &
-\todo\ \code{TopGridRank} &
+\done\ \code{TopGridRank} &
 \todo\ \code{TracerParticleDumpDir} \\
 \todo\ \code{TracerParticleDumpName} &
 \todo\ \code{TracerParticleDumpNumber} &
@@ -728,6 +729,1131 @@ parallelism and optimize performance
 \todo\ \code{ZEUSLinearArtificialViscosity} &
 \todo\ \code{ZEUSQuadraticArtificialViscosity}
 \end{tabular}
+
+%=======================================================================
+\chapter{\enzo\ versus \cello\ parameter files}
+%=======================================================================
+
+%-----------------------------------------------------------------------
+\section{AdiabaticExpansion} \label{s:AdiabaticExpansion}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> AdiabaticExpansionInitialTemperature \> 1000  \\
+\> AdiabaticExpansionInitialVelocity    \> 100   \\
+\> ComovingCoordinates        \> 1        \\
+\> CosmologyComovingBoxSize   \> 64.0     \\
+\> CosmologyHubbleConstantNow \> 0.5 \\
+\> CosmologyInitialRedshift   \> 20       \\
+\> CosmologyMaxExpansionRate  \> 0.01     \\
+\> CourantSafetyNumber    \> 0.5 \\
+\> dtDataDump             \> 80.0 \\
+\> DualEnergyFormalism    \> 1       \\
+\> Gamma                  \> 1.6667 \\
+\> GravitationalConstant      \> 1       \\
+\> LeftFaceBoundaryCondition  \> 3        \\
+\> PPMDiffusionParameter  \> 0        \\
+\> ProblemType                \> 22       \\
+\> RightFaceBoundaryCondition \> 3 \\
+\> SelfGravity                \> 0        \\
+\> StaticHierarchy           \> 1     \\
+\> TopGridDimensions          \> 8 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 1
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{AMRCosmologySimulation} \label{s:AMRCosmologySimulation}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 2     \\
+\> ComovingCoordinates        \> 1        \\
+\> CosmologyComovingBoxSize   \> 64.0     \\
+\> CosmologyFinalRedshift     \> 0        \\
+\> CosmologyHubbleConstantNow \> 0.5      \\
+\> CosmologyInitialRedshift   \> 30       \\
+\> CosmologyMaxExpansionRate  \> 0.015    \\
+\> CosmologyOmegaLambdaNow    \> 0.0 \\
+\> CosmologyOmegaMatterNow    \> 1.0 \\
+\> CosmologyOutputRedshift[0] \> 10 \\
+\> CosmologyOutputRedshift[1] \> 8 \\
+\> CosmologyOutputRedshift[2] \> 6 \\
+\> CosmologyOutputRedshift[3] \> 4 \\
+\> CosmologyOutputRedshift[4] \> 3 \\
+\> CosmologyOutputRedshift[5] \> 2 \\
+\> CosmologyOutputRedshift[6] \> 1 \\
+\> CosmologyOutputRedshift[7] \> 0 \\
+\> CosmologySimulationDensityName          \> GridDensity \\
+\> CosmologySimulationOmegaBaryonNow       \> 0.06 \\
+\> CosmologySimulationOmegaCDMNow          \> 0.94 \\
+\> CosmologySimulationParticlePositionName \> ParticlePositions \\
+\> CosmologySimulationParticleVelocityName \> ParticleVelocities \\
+\> CosmologySimulationVelocity1Name        \> GridVelocities \\
+\> CosmologySimulationVelocity2Name        \> GridVelocities \\
+\> CosmologySimulationVelocity3Name        \> GridVelocities \\
+\> CourantSafetyNumber    \> 0.5 \\
+\> DataDumpName           \> output\_ \\
+\> dtDataDump             \> 10.0          \\
+\> DualEnergyFormalism    \> 1        \\
+\> Gamma                  \> 1.6667 \\
+\> GravitationalConstant      \> 1        \\
+\> InterpolationMethod    \> 1      \\
+\> LeftFaceBoundaryCondition  \> 3 3 3    \\
+\> MaximumRefinementLevel    \> 0     \\
+\> MinimumEfficiency         \> 0.4   \\
+\> MinimumEnergyRatioForRefinement \> 0.4  \\
+\> MinimumMassForRefinementLevelExponent \> -0.3 \\
+\> MinimumOverDensityForRefinement \> 4.0  \\
+\> MultiSpecies                \> 0 \\
+\> ParallelRootGridIO     \> 1 \\
+\> ParticleCourantSafetyNumber \> 0.8 \\
+\> PPMDiffusionParameter  \> 0        \\
+\> ProblemType                \> 30       \\
+\> RadiativeCooling            \> 0 \\
+\> RefineBy                  \> 2     \\
+\> RightFaceBoundaryCondition \> 3 3 3 \\
+\> SelfGravity                \> 1        \\
+\> StaticHierarchy           \> 0     \\
+\> StopCycle              \> 1000           \\
+\> TopGridDimensions          \> 16 16 16 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 3
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{AMRShockPool2D} \label{s:AMRShockPool2D}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 3     \\
+\> CourantSafetyNumber    \> 0.5 \\
+\> FluxCorrection         \> 1 \\
+\> Gamma                  \> 1.4 \\
+\> HydroMethod                \> 0 \\
+\> MaximumRefinementLevel    \> 1     \\
+\> MinimumEfficiency         \> 0.8   \\
+\> PPMDiffusionParameter  \> 0        \\
+\> PPMFlatteningParameter \> 0        \\
+\> PPMSteepeningParameter \> 0        \\
+\> ProblemType               \> 3         \\
+\> RefineBy                  \> 3     \\
+\> RightFaceBoundaryCondition \> 1 1   \\
+\> ShockPoolAngle          \> 45.0     \\
+\> ShockPoolMachNumber     \> 2.0  \\
+\> StaticHierarchy           \> 0     \\
+\> StopTime               \> 0.2 \\
+\> tiny\_number               \> 1.0e-6   \\
+\> TopGridDimensions          \> 75 75 \\
+\> TopGridRank                \> 2
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{AMRShockTube} \label{s:AMRShockTube}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 1 \\
+\> CourantSafetyNumber    \> 0.8 \\
+\> dtDataDump             \> 0.4 \\
+\> Gamma                  \> 1.4 \\
+\> HydroMethod            \> 0 \\
+\> MaximumRefinementLevel    \> 1     \\
+\> MinimumEfficiency      \> 0.8      \\
+\> MinimumSlopeForRefinement \> 0.1   \\
+\> PPMDiffusionParameter  \> 0        \\
+\> ProblemType            \> 1        \\
+\> RefineBy                  \> 3     \\
+\> StaticHierarchy           \> 0     \\
+\> StopTime               \> 0.251 \\
+\> tiny\_number            \> 1.0e-3   \\
+\> TopGridDimensions      \> 100 \\
+\> TopGridRank            \> 1
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{AMRZeldovichPancake} \label{s:AMRZeldovichPancake}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 2 3     \\
+\> ComovingCoordinates        \> 1        \\
+\> ConservativeInterpolation \> 0 \\
+\> CosmologyComovingBoxSize   \> 64.0     \\
+\> CosmologyHubbleConstantNow \> 0.5 \\
+\> CosmologyInitialRedshift   \> 20       \\
+\> CosmologyMaxExpansionRate  \> 0.01     \\
+\> CourantSafetyNumber    \> 0.5 \\
+\> dtDataDump             \> 10.0 \\
+\> DualEnergyFormalism    \> 1        \\
+\> FluxCorrection            \> 1 \\
+\> Gamma                  \> 1.6667 \\
+\> GravitationalConstant      \> 1        \\
+\> InterpolationMethod       \> 1 \\
+\> LeftFaceBoundaryCondition  \> 3        \\
+\> MaximumRefinementLevel    \> 2     \\
+\> MinimumEfficiency      \> 0.4      \\
+\> MinimumOverDensityForRefinement  \> 1.5   \\
+\> PPMDiffusionParameter  \> 0        \\
+\> ProblemType                \> 20       \\
+\> RefineBy                  \> 4     \\
+\> RightFaceBoundaryCondition \> 3 \\
+\> SelfGravity                \> 1        \\
+\> StaticHierarchy           \> 0     \\
+\> TopGridDimensions          \> 16 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 1 \\
+\> ZeldovichPancakeCentralOffset    \> 0 \\
+\> ZeldovichPancakeCollapseRedshift \> 1
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{CollapseTest} \label{s:CollapseTest}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> BaryonSelfGravityApproximation \> 0 \\
+\> CellFlaggingMethod        \> 2     \\
+\> CollapseTestNumberOfSpheres \> 1 \\
+\> CollapseTestRefineAtStart   \> 1 \\
+\> CollapseTestSphereCoreRadius[0] \> 0.05 \\
+\> CollapseTestSphereDensity[0]    \> 5 \\
+\> CollapseTestSpherePosition[0]   \> 0.25 0.25 0.25 \\
+\> CollapseTestSphereRadius[0]     \> 0.2 \\
+\> CollapseTestSphereType[0]       \> 1        \\
+\> CollapseTestUniformVelocity     \> 0.6 0.6 0.6 \\
+\> CollapseTestUseParticles    \> 1 \\
+\> ComovingCoordinates        \> 1        \\
+\> ConservativeInterpolation   \> 0 \\
+\> CosmologyComovingBoxSize   \> 1.0      \\
+\> CosmologyFinalRedshift     \> 0.3        \\
+\> CosmologyHubbleConstantNow \> 0.5      \\
+\> CosmologyInitialRedshift   \> 10       \\
+\> CosmologyMaxExpansionRate  \> 0.015    \\
+\> CosmologyOmegaLambdaNow    \> 0.0 \\
+\> CosmologyOmegaMatterNow    \> 1.0 \\
+\> CourantSafetyNumber         \> 0.5 \\
+\> DataDumpName           \> moving7\_ \\
+\> dtDataDump             \> 0.1 \\
+\> DualEnergyFormalism         \> 0        \\
+\> FluxCorrection              \> 1 \\
+\> Gamma                       \> 1.6667 \\
+\> GravitationalConstant      \> 1        \\
+\> HydroMethod                 \> 2 \\
+\> Initialdt                   \> 0.003 \\
+\> InterpolationMethod         \> 4        \\
+\> LeftFaceBoundaryCondition  \> 3 3 3    \\
+\> MaximumRefinementLevel    \> 9     \\
+\> MinimumEfficiency         \> 0.3   \\
+\> MinimumEnergyRatioForRefinement \> 0.4  \\
+\> MinimumMassForRefinementLevelExponent \> -0.1 \\
+\> MinimumOverDensityForRefinement \> 0.2  \\
+\> MultiSpecies                \> 0 \\
+\> PointSourceGravity         \> 0 \\
+\> PointSourceGravityConstant \> 0.02 \\
+\> PointSourceGravityPosition \> 0.5 0.5 0.5 \\
+\> PPMDiffusionParameter       \> 0        \\
+\> ProblemType                \> 27       \\
+\> RadiativeCooling            \> 1 \\
+\> RefineBy                  \> 2     \\
+\> RefineRegionLeftEdge            \> 0.2 0.2 0.2 \\
+\> RefineRegionRightEdge           \> 0.9 0.9 0.9 \\
+\> RightFaceBoundaryCondition \> 3 3 3 \\
+\> SelfGravity                \> 1        \\
+\> StaticHierarchy           \> 0     \\
+\> TopGridDimensions          \> 16 16 16 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 3 \\
+\> ZEUSQuadraticArtificialViscosity \> 2.0
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{CollideTest} \label{s:CollideTest}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 2     \\
+\> CollapseTestInitialTemperature   \> 0.3   \\
+\> CollapseTestNumberOfSpheres \> 2 \\
+\> CollapseTestRefineAtStart   \> 1 \\
+\> CollapseTestSphereCoreRadius[0]  \> 0.05 \\
+\> CollapseTestSphereCoreRadius[1]  \> 0.05 \\
+\> CollapseTestSphereDensity[0]     \> 1.0 \\
+\> CollapseTestSphereDensity[1]     \> 1.0 \\
+\> CollapseTestSpherePosition[0]    \> 0.25 0.5 0.5 \\
+\> CollapseTestSpherePosition[1]    \> 0.75 0.5 0.5 \\
+\> CollapseTestSphereRadius[0]      \> 0.2 \\
+\> CollapseTestSphereRadius[1]      \> 0.2 \\
+\> CollapseTestSphereTemperature[0] \> 0.1508 \\
+\> CollapseTestSphereTemperature[1] \> 0.1508 \\
+\> CollapseTestSphereType[0]        \> 2        \\
+\> CollapseTestSphereType[1]        \> 2        \\
+\> CollapseTestSphereVelocity[0]    \> 0.5 0.0 0.0 \\
+\> CollapseTestSphereVelocity[1]    \> -0.5 0.0 0.0 \\
+\> CollapseTestUseColour       \> 1 \\
+\> CollapseTestUseParticles    \> 0 \\
+\> ConservativeInterpolation   \> 0 \\
+\> CourantSafetyNumber         \> 0.5 \\
+\> DataDumpName           \> collide \\
+\> dtDataDump             \> 0.1 \\
+\> DualEnergyFormalism         \> 0        \\
+\> FluxCorrection              \> 1 \\
+\> Gamma                       \> 1.6667 \\
+\> HydroMethod                 \> 0 \\
+\> InterpolationMethod         \> 1        \\
+\> LeftFaceBoundaryCondition  \> 3 3 3    \\
+\> MaximumRefinementLevel    \> 5     \\
+\> MinimumEfficiency         \> 0.3   \\
+\> MinimumEnergyRatioForRefinement \> 0.4  \\
+\> MinimumMassForRefinementLevelExponent \> 0.0 \\
+\> MinimumOverDensityForRefinement \> 3.0  \\
+\> MultiSpecies                \> 0 \\
+\> PPMDiffusionParameter       \> 0        \\
+\> ProblemType                \> 27       \\
+\> RadiativeCooling            \> 0 \\
+\> RefineBy                  \> 2     \\
+\> RightFaceBoundaryCondition \> 3 3 3 \\
+\> SelfGravity                \> 1        \\
+\> StaticHierarchy           \> 0     \\
+\> StopTime               \> 2.0 \\
+\> TopGridDimensions          \> 16 16 16 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 3 
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{DoubleMachReflection} \label{s:DoubleMachReflection}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CourantSafetyNumber    \> 0.8      \\
+\> DataDumpName           \> doubleMach\_ \\
+\> DomainRightEdge        \> 4.0 1.0 \\
+\> dtDataDump             \> 0.1 \\
+\> Gamma                  \> 1.4      \\
+\> HydroMethod            \> 0 \\
+\> MaximumRefinementLevel    \> 0 \\
+\> PPMDiffusionParameter  \> 1        \\
+\> PPMFlatteningParameter \> 3        \\
+\> PPMSteepeningParameter \> 1        \\
+\> ProblemType            \> 4         \\
+\> StaticHierarchy           \> 0     \\
+\> StopTime               \> 0.205 \\
+\> tiny\_number            \> 1.0e-6   \\
+\> TopGridDimensions      \> 480 120   \\
+\> TopGridRank            \> 2
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{ExtremeAdvectionTest} \label{s:ExtremeAdvectionTest}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> BaryonSelfGravityApproximation \> 0 \\
+\> CellFlaggingMethod        \> 2     \\
+\> CollapseTestNumberOfSpheres \> 1 \\
+\> CollapseTestRefineAtStart   \> 0 \\
+\> CollapseTestSphereCoreRadius[0] \> 0.05 \\
+\> CollapseTestSphereDensity[0]    \> 500000 \\
+\> CollapseTestSpherePosition[0]   \> 0.15625 0.46875 0.46875 \\
+\> CollapseTestSphereRadius[0]     \> 0.05 \\
+\> CollapseTestSphereType[0]       \> 1 \\
+\> CollapseTestUniformVelocity     \> 1.0 0 0 \\
+\> CollapseTestUseParticles    \> 0 \\
+\> ComovingCoordinates        \> 1        \\
+\> ConservativeInterpolation   \> 0 \\
+\> CosmologyComovingBoxSize   \> 1.0      \\
+\> CosmologyFinalRedshift     \> 5        \\
+\> CosmologyHubbleConstantNow \> 0.5      \\
+\> CosmologyInitialRedshift   \> 10       \\
+\> CosmologyMaxExpansionRate  \> 0.015    \\
+\> CosmologyOmegaLambdaNow    \> 0.0 \\
+\> CosmologyOmegaMatterNow    \> 1.0 \\
+\> CourantSafetyNumber         \> 0.4 \\
+\> CycleSkipDataDump      \> 100 \\
+\> DataDumpName           \> moving7\_ \\
+\> dtDataDump             \> 0.5 \\
+\> DualEnergyFormalism         \> 0        \\
+\> FluxCorrection              \> 1 \\
+\> Gamma                       \> 1.6667 \\
+\> GravitationalConstant      \> 1        \\
+\> HydroMethod                 \> 2 \\
+\> Initialdt                   \> 0.003 \\
+\> InterpolationMethod         \> 4        \\
+\> LeftFaceBoundaryCondition  \> 3 3 3    \\
+\> MaximumRefinementLevel    \> 0     \\
+\> MinimumEfficiency         \> 0.3   \\
+\> MinimumEnergyRatioForRefinement \> 0.4  \\
+\> MinimumMassForRefinementLevelExponent \> -0.1 \\
+\> MinimumOverDensityForRefinement \> 0.2  \\
+\> MultiSpecies                \> 0 \\
+\> PointSourceGravity         \> 0 \\
+\> PointSourceGravityConstant \> 0.02 \\
+\> PointSourceGravityPosition \> 0.5 0.5 0.5 \\
+\> PPMDiffusionParameter       \> 0        \\
+\> PressureFree \> 0 \\
+\> ProblemType                \> 27       \\
+\> RadiativeCooling            \> 1 \\
+\> RefineBy                  \> 2     \\
+\> RightFaceBoundaryCondition \> 3 3 3 \\
+\> SelfGravity                \> 1        \\
+\> StaticHierarchy           \> 0     \\
+\> TopGridDimensions          \> 16 16 16 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 3 \\
+\> ZEUSQuadraticArtificialViscosity \> 4.0
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{GravityStripTest} \label{s:GravityStripTest}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 2     \\
+\> CollapseTestInitialTemperature   \> 0.1508   \\
+\> CollapseTestNumberOfSpheres \> 1 \\
+\> CollapseTestRefineAtStart   \> 1 \\
+\> CollapseTestSphereCoreRadius[0]  \> 0.05 \\
+\> CollapseTestSphereDensity[0]     \> 2.0 \\
+\> CollapseTestSpherePosition[0]    \> 0.125 0.5 0.5 \\
+\> CollapseTestSphereRadius[0]      \> 0.1 \\
+\> CollapseTestSphereTemperature[0] \> 0.0754 \\
+\> CollapseTestSphereType[0]        \> 2        \\
+\> CollapseTestSphereVelocity[0]    \> 0.501 0.0 0.0 \\
+\> CollapseTestUseColour       \> 1 \\
+\> CollapseTestUseParticles    \> 0 \\
+\> ConservativeInterpolation   \> 0 \\
+\> CourantSafetyNumber         \> 0.5 \\
+\> DataDumpName           \> gravstrip \\
+\> dtDataDump             \> 0.1 \\
+\> DualEnergyFormalism         \> 0        \\
+\> FluxCorrection              \> 1 \\
+\> Gamma                       \> 1.6667 \\
+\> HydroMethod                \> 0 \\
+\> InterpolationMethod         \> 1        \\
+\> LeftFaceBoundaryCondition  \> 3 3 3    \\
+\> MaximumRefinementLevel    \> 3     \\
+\> MinimumEfficiency         \> 0.3   \\
+\> MinimumEnergyRatioForRefinement \> 0.4  \\
+\> MinimumMassForRefinementLevelExponent \> 0.0 \\
+\> MinimumOverDensityForRefinement \> 1.5  \\
+\> MultiSpecies                \> 0 \\
+\> PPMDiffusionParameter       \> 0        \\
+\> ProblemType                \> 27       \\
+\> RadiativeCooling            \> 0 \\
+\> RefineBy                  \> 2     \\
+\> RightFaceBoundaryCondition \> 3 3 3 \\
+\> SelfGravity                \> 1        \\
+\> StaticHierarchy           \> 0     \\
+\> StopTime               \> 2.0 \\
+\> TopGridDimensions          \> 32 32 32 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 3
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{GravityTest} \label{s:GravityTest}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod       \> 0 \\
+\> CourantSafetyNumber    \> 0.5      \\
+\> dtDataDump             \> 0.0 \\
+\> GravityResolution      \> 1.0 \\
+\> MaximumRefinementLevel    \> 1     \\
+\> PPMDiffusionParameter  \> 0        \\
+\> PressureFree           \> 1        \\
+\> ProblemType            \> 23       \\
+\> RefineBy                  \> 2     \\
+\> S2ParticleSize         \> 3.4 \\
+\> SelfGravity            \> 1        \\
+\> StaticHierarchy           \> 0     \\
+\> StopTime               \> 0.001 \\
+\> TestGravityNumberOfParticles \> 5000 \\
+\> TestGravitySubgridLeft       \> 0.4375    \\
+\> TestGravitySubgridRight      \> 0.5625    \\
+\> tiny\_number            \> 1.0e-10  \\
+\> TopGridDimensions      \> 32 32 32 \\
+\> TopGridGravityBoundary \> 0        \\
+\> TopGridRank            \> 3
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{GravityTestSphere} \label{s:GravityTestSphere}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod              \> 2 \\
+\> ConservativeInterpolation       \> 0 \\
+\> CourantSafetyNumber    \> 0.5      \\
+\> dtDataDump             \> 0.01 \\
+\> FluxCorrection                  \> 0 \\
+\> HydroMethod            \> 2 \\
+\> MaximumGravityRefinementLevel   \> 6 \\
+\> MaximumRefinementLevel          \> 6     \\
+\> MinimumOverDensityForRefinement \> 0.1 \\
+\> PPMDiffusionParameter  \> 0        \\
+\> ProblemType            \> 25       \\
+\> RefineBy                        \> 2     \\
+\> SelfGravity            \> 1        \\
+\> StaticHierarchy                 \> 0     \\
+\> StopTime               \> 0.00001 \\
+\> TestGravitySphereCenter            \> 0.49 0.5 0.5 \\
+\> TestGravitySphereExteriorDensity   \> 0.01 \\
+\> TestGravitySphereInteriorDensity   \> 100000.0 \\
+\> TestGravitySphereRadius            \> 0.01 \\
+\> TestGravitySphereRefineAtStart     \> 1 \\
+\> TestGravitySphereType              \> 0 \\
+\> TestGravitySphereUseBaryons        \> 1 \\
+\> tiny\_number            \> 1.0e-10  \\
+\> TopGridDimensions      \> 32 32 32 \\
+\> TopGridGravityBoundary \> 0        \\
+\> TopGridRank            \> 3 
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{ImplosionAMR} \label{s:ImplosionAMR}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 1        \\
+\> CourantSafetyNumber       \> 0.8      \\
+\> DataDumpName              \> implosion\_L3x2\_ \\
+\> DomainRightEdge           \> 0.3 0.3 \\
+\> Gamma                     \> 1.4 \\
+\> HydroMethod               \> 0        \\
+\> ImplosionSubgridRight     \> 0.16     \\
+\> MaximumRefinementLevel    \> 3        \\
+\> MinimumEfficiency         \> 0.9      \\
+\> MinimumSlopeForRefinement \> 0.03 \\
+\> PPMDiffusionParameter     \> 1 \\
+\> PPMFlatteningParameter    \> 3 \\
+\> PPMSteepeningParameter    \> 1 \\
+\> ProblemType               \> 6        \\
+\> RefineBy                  \> 2 \\
+\> StaticHierarchy           \> 0        \\
+\> StopTime                  \> 2.5 \\
+\> tiny\_number               \> 1.0e-6 \\
+\> TopGridDimensions         \> 50 50 \\
+\> TopGridRank               \> 2
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{Implosion} \label{s:Implosion}
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CourantSafetyNumber       \> 0.8      \\
+\> DataDumpName              \> implosion\_ \\
+\> DomainRightEdge           \> 0.3 0.3 \\
+\> Gamma                     \> 1.4 \\
+\> HydroMethod               \> 0        \\
+\> MaximumRefinementLevel    \> 0        \\
+\> PPMDiffusionParameter     \> 1 \\
+\> PPMFlatteningParameter    \> 3 \\
+\> PPMSteepeningParameter    \> 1 \\
+\> ProblemType               \> 6        \\
+\> StaticHierarchy           \> 0        \\
+\> StopCycle                 \> 20000 \\
+\> StopTime                  \> 2.5 \\
+\> tiny\_number               \> 1.0e-6   \\
+\> TopGridDimensions         \> 400 400 \\
+\> TopGridRank               \> 2
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{PressurelessCollapse} \label{s:PressurelessCollapse}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CourantSafetyNumber    \> 0.05     \\
+\> dtDataDump             \> 0.4 \\
+\> Gamma                  \> 1.4 \\
+\> LeftFaceBoundaryCondition  \> 1     \\
+\> MaximumRefinementLevel    \> 1     \\
+\> MinimumEfficiency      \> 0.4      \\
+\> MinimumSlopeForRefinement \> 0.2   \\
+\> PPMDiffusionParameter  \> 0        \\
+\> PressureFree           \> 1        \\
+\> ProblemType            \> 21       \\
+\> RefineBy                  \> 4     \\
+\> RightFaceBoundaryCondition \> 1     \\
+\> SelfGravity            \> 1        \\
+\> StaticHierarchy           \> 1     \\
+\> StopTime               \> 0.37 \\
+\> SubcycleSafetyFactor   \> 2        \\
+\> tiny\_number            \> 1.0e-10  \\
+\> TopGridDimensions      \> 100 \\
+\> TopGridGravityBoundary \> 1        \\
+\> TopGridRank            \> 1
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{ProtostellarCollapse} \label{s:ProtostellarCollapse}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 6 \\
+\> CourantSafetyNumber       \> 0.5 \\
+\> DataDumpName              \> pc\_amr\_ \\
+\> dtDataDump                \> 0.0001 \\
+\> FluxCorrection            \> 1 \\
+\> Gamma                     \> 1.001 \\
+\> GravitationalConstant      \> 1142.0 \\
+\> GravityBoundaryFaces      \> 1 1 1    // isolating in all directions \\
+\> GravityBoundaryName       \> potbdry  // default boundary restart file \\
+\> GravityBoundaryRestart     \> 0       // read boundary restart if possible \\
+\> GreensFunctionMaxNumber   \> 10   // \# of greens function at any one time \\
+\> HydroMethod               \> 0 \\
+\> LeftFaceBoundaryCondition  \>  3 3 3   // periodic \\
+\> MaximumRefinementLevel    \> 0 \\
+\> MinimumEfficiency         \> 0.3  // fraction efficiency \\
+\> PPMDiffusionParameter     \> 1 \\
+\> PPMFlatteningParameter    \> 3 \\
+\> PPMSteepeningParameter    \> 0 \\
+\> ProblemType                \>  61 \\
+\> ProtostellarCollapseCoreRadius      \> 0.05 \\
+\> ProtostellarCollapseSubgridLeft     \> 0.44 \\
+\> ProtostellarCollapseSubgridRight    \> 0.56 \\
+\> RefineBy                  \> 4    // refinement factor \\
+\> RefineByJeansLengthSafetyFactor \> 16.0 \\
+\> RightFaceBoundaryCondition \>  3 3 3 \\
+\> SelfGravity                \> 1 \\
+\> StaticHierarchy           \> 0    // dynamic hierarchy \\
+\> StopTime                  \> 0.01 \\
+\> TopGridDimensions          \>  32 32 32 \\
+\> TopGridGravityBoundary     \> 0       // periodic solver (FFT) \\
+\> TopGridRank                \>  3 \\
+\> WritePotential             \> 0
+\end{tabbing}}
+
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{SedovBlastAMR} \label{s:SedovBlastAMR}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 1 3      \\
+\> CourantSafetyNumber       \> 0.8      \\
+\> DataDumpName              \> sb\_L2x2\_ \\
+\> dtDataDump                \> 0.01 \\
+\> FluxCorrection            \> 1 \\
+\> Gamma                     \>  1.4 \\
+\> HydroMethod               \> 0        \\
+\> MaximumRefinementLevel    \> 2 \\
+\> MinimumEfficiency         \> 0.9      \\
+\> MinimumSlopeForRefinement \> 0.4 \\
+\> NumberOfBufferZones       \> 2 \\
+\> PPMDiffusionParameter     \> 1        \\
+\> PPMFlatteningParameter    \> 3 \\
+\> PPMSteepeningParameter    \> 1 \\
+\> ProblemType               \>  7        \\
+\> RefineBy                  \> 2 \\
+\> SedovBlastEnergy          \>  1.0 \\
+\> SedovBlastSubgridLeft     \> 0.4 \\
+\> SedovBlastSubgridRight    \> 0.6 \\
+\> StaticHierarchy           \> 0        \\
+\> StopCycle                 \> 10000 \\
+\> StopTime                  \> 0.3 \\
+\> tiny\_number               \> 1.0e-6 \\
+\> TopGridDimensions         \> 100 100 \\
+\> TopGridRank               \> 2
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{SedovBlast} \label{s:SedovBlast}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CourantSafetyNumber       \> 0.8      \\
+\> DataDumpName              \> sb\_ \\
+\> dtDataDump                \> 0.01 \\
+\> Gamma                     \>  1.4 \\
+\> HydroMethod               \> 0        \\
+\> MaximumRefinementLevel    \> 0        \\
+\> PPMDiffusionParameter     \> 1 \\
+\> PPMFlatteningParameter    \> 3 \\
+\> PPMSteepeningParameter    \> 1 \\
+\> ProblemType               \>  7        \\
+\> SedovBlastEnergy          \> 1.0 \\
+\> StaticHierarchy           \> 0        \\
+\> StopCycle                 \> 100000 \\
+\> StopTime                  \> 0.26 \\
+\> tiny\_number               \> 1.0e-7 \\
+\> TopGridDimensions         \> 400 400 \\
+\> TopGridRank               \> 2
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{ShockPool2D} \label{s:ShockPool2D}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 1 \\
+\> CourantSafetyNumber    \> 0.5 \\
+\> dtDataDump             \> 0.05 \\
+\> Gamma                  \> 1.4 \\
+\> HydroMethod            \> 0 \\
+\> MaximumRefinementLevel    \> 1 \\
+\> MinimumEfficiency         \> 0.4 \\
+\> PPMDiffusionParameter  \> 0        \\
+\> PPMFlatteningParameter \> 0        \\
+\> PPMSteepeningParameter \> 0        \\
+\> ProblemType            \> 3         \\
+\> RefineBy                  \> 4     \\
+\> RightFaceBoundaryCondition \> 1 1   \\
+\> ShockPoolAngle          \> 30.0     \\
+\> ShockPoolMachNumber     \> 2.0  \\
+\> StaticHierarchy           \> 0     \\
+\> StopTime               \> 0.4 \\
+\> tiny\_number            \> 1.0e-6   \\
+\> TopGridDimensions      \> 50 50 \\
+\> TopGridRank            \> 2
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{ShockPool3D} \label{s:ShockPool3D}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 1 \\
+\> CourantSafetyNumber    \> 0.5 \\
+\> Gamma                  \> 1.4 \\
+\> HydroMethod            \> 0 \\
+\> MaximumRefinementLevel    \> 1 \\
+\> MinimumEfficiency         \> 0.5 \\
+\> PPMDiffusionParameter  \> 0        \\
+\> PPMFlatteningParameter \> 0        \\
+\> PPMSteepeningParameter \> 0        \\
+\> ProblemType            \> 3         \\
+\> RefineBy                  \> 4     \\
+\> RightFaceBoundaryCondition \> 1 1 1   \\
+\> ShockPoolAngle          \> 30.0     \\
+\> ShockPoolMachNumber     \> 2.0  \\
+\> StaticHierarchy           \> 0     \\
+\> StopTime               \> 0.4 \\
+\> tiny\_number            \> 1.0e-6   \\
+\> TopGridDimensions      \> 50 50 50 \\
+\> TopGridRank            \> 3
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{ShockTube} \label{s:ShockTube}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CourantSafetyNumber    \> 0.8 \\
+\> dtDataDump             \> 0.4 \\
+\> Gamma                  \> 1.4 \\
+\> HydroMethod            \> 0 \\
+\> MaximumRefinementLevel    \> 1     \\
+\> MinimumEfficiency      \> 0.4      \\
+\> MinimumSlopeForRefinement \> 0.2   \\
+\> PPMDiffusionParameter  \> 0        \\
+\> ProblemType            \> 1        \\
+\> RefineBy                  \> 4     \\
+\> StaticHierarchy           \> 1     \\
+\> StopTime               \> 0.251 \\
+\> tiny\_number            \> 1.0e-6   \\
+\> TopGridDimensions      \> 100 \\
+\> TopGridRank            \> 1
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{SphericalInfall} \label{s:SphericalInfall}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod              \> 2     \\
+\> ComovingCoordinates        \> 1        \\
+\> CosmologyComovingBoxSize   \> 25.0     \\
+\> CosmologyFinalRedshift     \> 0        \\
+\> CosmologyHubbleConstantNow \> 0.5      \\
+\> CosmologyInitialRedshift   \> 49999   \\
+\> CosmologyMaxExpansionRate  \> 0.02     \\
+\> CourantSafetyNumber    \> 0.5      \\
+\> DataDumpName           \> infall32r3d\_ \\
+\> dtDataDump             \> 1000 \\
+\> DualEnergyFormalism    \> 1        \\
+\> Gamma                  \> 1.66667 \\
+\> GravitationalConstant      \> 1.0      \\
+\> GreensFunctionMaxNumber   \> 10 \\
+\> InterpolationMethod    \> 1        \\
+\> LeftFaceBoundaryCondition  \> 3 3 3    \\
+\> MaximumRefinementLevel          \> 3     \\
+\> MinimumEfficiency               \> 0.3   \\
+\> MinimumOverDensityForRefinement \> 2.0   \\
+\> PPMDiffusionParameter  \> 0        \\
+\> ProblemType                \> 24       \\
+\> RefineBy                        \> 3     \\
+\> RefineRegionLeftEdge            \> 0.2 0.2 0.2  \\
+\> RefineRegionRightEdge           \> 0.8 0.8 0.8  \\
+\> RightFaceBoundaryCondition \> 3 3 3 \\
+\> SelfGravity                \> 1        \\
+\> SphericalInfallInitialPerturbation \> 0.5 \\
+\> SphericalInfallNumberOfParticles   \> 0 \\
+\> SphericalInfallUseBaryons          \> 1 \\
+\> StaticHierarchy                 \> 0     \\
+\> TopGridDimensions          \> 16 16 16 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 3
+\end{tabbing}}
+
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{StripTest} \label{s:StripTest}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> CellFlaggingMethod        \> 2     \\
+\> CollapseTestInitialTemperature   \> 4.0   \\
+\> CollapseTestNumberOfSpheres \> 1 \\
+\> CollapseTestRefineAtStart   \> 1 \\
+\> CollapseTestSphereCoreRadius[0]  \> 0.05 \\
+\> CollapseTestSphereDensity[0]     \> 10.0 \\
+\> CollapseTestSpherePosition[0]    \> 0.125 0.5 0.5 \\
+\> CollapseTestSphereRadius[0]      \> 0.1 \\
+\> CollapseTestSphereTemperature[0] \> 0.4 \\
+\> CollapseTestSphereType[0]        \> 1        \\
+\> CollapseTestSphereVelocity[0]    \> 1.0 0.0 0.0 \\
+\> CollapseTestUseParticles    \> 0 \\
+\> ComovingCoordinates        \> 0        \\
+\> ConservativeInterpolation   \> 0 \\
+\> CosmologyComovingBoxSize   \> 1.0      \\
+\> CosmologyFinalRedshift     \> 0        \\
+\> CosmologyHubbleConstantNow \> 0.5      \\
+\> CosmologyInitialRedshift   \> 10       \\
+\> CosmologyMaxExpansionRate  \> 0.015    \\
+\> CosmologyOmegaLambdaNow    \> 0.0 \\
+\> CosmologyOmegaMatterNow    \> 1.0 \\
+\> CourantSafetyNumber         \> 0.5 \\
+\> DataDumpName           \> strip1 \\
+\> dtDataDump             \> 0.2 \\
+\> DualEnergyFormalism         \> 0        \\
+\> FluxCorrection              \> 1 \\
+\> Gamma                       \> 1.6667 \\
+\> GravitationalConstant      \> 1        \\
+\> HydroMethod                 \> 0 \\
+\> InterpolationMethod         \> 1        \\
+\> LeftFaceBoundaryCondition  \> 3 3 3    \\
+\> MaximumRefinementLevel    \> 1     \\
+\> MinimumEfficiency         \> 0.3   \\
+\> MinimumEnergyRatioForRefinement \> 0.4  \\
+\> MinimumMassForRefinementLevelExponent \> 0.0 \\
+\> MinimumOverDensityForRefinement \> 4.0  \\
+\> MultiSpecies                \> 0 \\
+\> PPMDiffusionParameter       \> 0        \\
+\> ProblemType                \> 27       \\
+\> RadiativeCooling            \> 0 \\
+\> RefineBy                  \> 2     \\
+\> RightFaceBoundaryCondition \> 3 3 3 \\
+\> SelfGravity                \> 0        \\
+\> StaticHierarchy           \> 0     \\
+\> StopTime               \> 1.6 \\
+\> TopGridDimensions          \> 16 16 16 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 3
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{WavePool} \label{s:WavePool}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> dtDataDump             \> 0.1 \\
+\> Gamma                  \> 1.4 \\
+\> HydroMethod            \> 0 \\
+\> PPMDiffusionParameter  \> 0        \\
+\> ProblemType            \> 2        \\
+\> RefineBy                  \> 4     \\
+\> StaticHierarchy           \> 1     \\
+\> StopTime               \> 1.0 \\
+\> tiny\_number            \> 1.0e-6   \\
+\> TopGridDimensions      \> 100 \\
+\> TopGridRank            \> 1 \\
+\> WavePoolAmplitude      \> 0.01     \\
+\> WavePoolNumberOfWaves  \> 1 \\
+\> WavePoolSubgridLeft    \> 0.5      \\
+\> WavePoolSubgridRight   \> 0.75     \\
+\> WavePoolWavelength     \> 0.1     
+\end{tabbing}}
+
+%-----------------------------------------------------------------------
+\subsection{\cello}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\section{ZeldovichPancake} \label{s:ZeldovichPancake}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{\enzo}
+%-----------------------------------------------------------------------
+
+{\parametersize
+\begin{tabbing}
+xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> ComovingCoordinates        \> 1        \\
+\> CosmologyComovingBoxSize   \> 64.0     \\
+\> CosmologyHubbleConstantNow \> 0.5 \\
+\> CosmologyInitialRedshift   \> 20       \\
+\> CosmologyMaxExpansionRate  \> 0.01     \\
+\> CourantSafetyNumber    \> 0.5 \\
+\> dtDataDump             \> 10.0     \\
+\> DualEnergyFormalism    \> 1        \\
+\> Gamma                  \> 1.6667 \\
+\> GravitationalConstant      \> 1        \\
+\> LeftFaceBoundaryCondition  \> 3        \\
+\> PPMDiffusionParameter  \> 0        \\
+\> ProblemType                \> 20       \\
+\> RefineBy                  \> 2 \\
+\> RightFaceBoundaryCondition \> 3 \\
+\> SelfGravity                \> 1        \\
+\> StaticHierarchy           \> 1     \\
+\> TopGridDimensions          \> 256 \\
+\> TopGridGravityBoundary     \> 0        \\
+\> TopGridRank                \> 1 \\
+\> ZeldovichPancakeCentralOffset    \> 0 \\
+\> ZeldovichPancakeCollapseRedshift \> 1
+\end{tabbing}}
+
+\appendix
+
 
 \end{document}
 
