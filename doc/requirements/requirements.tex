@@ -731,6 +731,150 @@ parallelism and optimize performance
 \end{tabular}
 
 %=======================================================================
+\chapter{\cello\ parameters list}
+%=======================================================================
+
+\small
+\begin{tabular}{lll}
+\todo\ \code{simulation:stop:time}  \\
+\todo\ \code{simulation:stop:cycle} \\
+\todo\ \code{simulation:stop:level} \\
+\todo\ \code{simulation:stop:time:cpu} \\
+\todo\ \code{simulation:stop:time:wall} \\
+\todo\ \code{simulation:dimension} \\
+\todo\ \code{simulation:type} \\
+\todo\ \code{discretize:root:size} \\
+\todo\ \code{domain:lower} \\
+\todo\ \code{domain:upper} \\
+\todo\ \code{BC:type:[x$|$y$|$z]\_[lower$|$upper]} \\
+\todo\ \code{BC:value:[x$|$y$|$z]\_[lower$|$upper]} \\
+\todo\ \code{IC:start:time} \\
+\todo\ \code{IC:start:cycle} \\
+\todo\ \code{output:time:period} \\
+\todo\ \code{output:time:name} \\
+\todo\ \code{output:time:value} \\
+\todo\ \code{output:time:fields} \\
+\todo\ \code{output:cycle:period} \\
+\todo\ \code{output:cycle:name} \\
+\todo\ \code{output:cycle:value} \\
+\todo\ \code{output:cycle:fields} \\
+\todo\ \code{output:type}\\
+\todo\ \code{output:xray:lower} \\
+\todo\ \code{output:xray:upper} \\
+\todo\ \code{output:xray:range} \\
+\todo\ \code{output:region}  \\
+\todo\ \code{output:lower}  \\
+\todo\ \code{output:upper}  \\
+\todo\ \code{output:levels} \\
+\todo\ \code{output:start:level} \\
+\todo\ \code{monitor}\\
+\todo\ \code{datastructure:type} \\
+\todo\ \code{datastructure:type:samr:levels} \\
+\todo\ \code{datastructure:type:samr:static} \\
+\todo\ \code{datastructure:type:samr:dynamic} \\
+\todo\ \code{refinement:factor} \\
+\todo\ \code{refinement:criteria}
+\todo\ \code{refinement:criteria:slope} \\
+\todo\ \code{refinement:criteria:matter-baryon} \\
+\todo\ \code{refinement:criteria:matter-dark} \\
+\todo\ \code{refinement:criteria:shock} \\
+\todo\ \code{refinement:criteria:Jeans} \\
+\todo\ \code{refinement:criteria:cool} \\
+\todo\ \code{refinement:region} \\
+\todo\ \code{field:name} \\
+\todo\ \code{field:type} \\
+\todo\ \code{field:where} \\
+\todo\ \code{method:hydro} \\
+\todo\ \code{method:hydro:ppm} \\
+\todo\ \code{method:hydro:ppm:dual-energy} \\
+\todo\ \code{method:hydro:ppm:pressure-free} \\
+\todo\ \code{method:hydro:ppm:flattening} \\
+\todo\ \code{method:hydro:ppm:diffusion} \\
+\todo\ \code{method:gravity} \\
+\todo\ \code{method:flux-correct} \\
+\todo\ \code{method:interpolate} \\
+\todo\ \code{timestep:start:level} \\
+\todo\ \code{timestep:cfl} \\
+\todo\ \code{timestep:cfl:particles} \\
+\todo\ \code{units:time} \\
+\todo\ \code{units:distance} \\
+\todo\ \code{cosmology:omega-lambda-now} \\
+\todo\ \code{cosmology:hubble-lambda-now} \\
+\todo\ \code{numerics:integer} \\
+\todo\ \code{numerics:real} \\
+\todo\ \code{particles:type} \\
+\todo\ \code{particles:attribute-count} \\
+\todo\ \code{particles:attribute-names} \\
+\todo\ \code{parallel:grids} \\
+\todo\ \code{parallel:subgrids} \\
+\todo\ \code{physics:gravity:source} \\
+\todo\ \code{physics:gravity} \\
+\todo\ \code{physics:radiative-cooling} \\
+\todo\ \code{physics:star-formation} \\
+\todo\ \code{physics:radiation} \\
+\todo\ \code{physics:magnetism} \\
+\end{tabular}
+
+
+\section{Types}
+
+integer,real,string,vector,list,range,boolean
+
+\section{Functions}
+
+\code{abs()},
+\code{min()},
+\code{max()},
+\code{sqrt()},
+\code{exp()},
+\code{avg()},
+\code{log()}
+
+\section{Variables and constants}
+
+\code{x y z},
+\code{t}
+
+\code{PI}
+
+\section{Operations}
+
+\subsection{scalar operations}
+$x + y$,
+$x - y$,
+$x * y$,
+$x / y$
+
+\subsection{logical operations}
+
+$x < y$
+$x <= y$
+$x > y$
+$x >= y$
+$A \&\& B$
+$A || B$
+$A == B$
+$A != B$
+
+\subsection{region operations}
+
+$R + S$
+$R - S$
+$-S$
+
+\subsection{discrete field operations}
+
+$E$, $I$, $D$, $_i$
+
+\subsection{list operations}
+
+* (cross-product)
+
+\section{parameter restrictions}
+
+\todo \textit{list constraints on parameters}
+
+%=======================================================================
 \chapter{\enzo\ versus \cello\ parameter files}
 %=======================================================================
 
