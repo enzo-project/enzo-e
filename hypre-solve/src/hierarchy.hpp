@@ -82,8 +82,8 @@ public:
   /// Write the Hierarchy to the given file.
   void write (FILE * fp = stdout) throw ();
 
-  /// Write the Hierarchy grids to the given open file in geomview format
-  void geomview_grid (FILE *fpr, bool full=true) throw ();
+  /// Write the Hierarchy grids to in geomview format
+  void geomview_grids (Mpi & mpi) throw ();
 
   // Checking
 
@@ -182,6 +182,7 @@ private:
   void init_grid_children_() throw();
   void init_grid_neighbors_() throw();
   void init_grid_faces_ (Domain & domain, Mpi & mpi) throw();
+  void geomview_grid_ (FILE *fpr, bool full=true) throw ();
 
   /// Initialize il0_[] and n0_[]
   void init_indices_ () throw();

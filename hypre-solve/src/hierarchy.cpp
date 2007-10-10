@@ -100,11 +100,14 @@ void Hierarchy::initialize (Domain & domain,
   init_grid_neighbors_();
   init_indices_();                // DEPENDENCY: Requires init_grid_levels_()
   init_grid_faces_(domain, mpi);  // DEPENDENCY: Requires init_indices_()
+
+  geomview_grids(mpi);
+
 }
 
 //------------------------------------------------------------------------
 
-/// Determines the parent grid of all grids in the hierarchy.
+/// Determines the parent grid of each grid in the hierarchy.
 
 void Hierarchy::init_grid_parents_ () throw ()
 {
@@ -142,7 +145,8 @@ void Hierarchy::init_grid_levels_ () throw ()
 	  insert_in_level_ (0,*g);
 	}
 	
-	// ... grids with parents of known level have level = 1 + parent level ...
+	// ... grids with parents of known level have level = 1 +
+	// parent level ...
 
 	else if (parent(*g)->level() >= 0) {
 	  int level = parent(*g)->level() + 1;
@@ -150,7 +154,8 @@ void Hierarchy::init_grid_levels_ () throw ()
 	  insert_in_level_ (level,*g);
 	} 
 	
-	// ... otherwise a grid's parents is in an unknown level, so we're not done yet
+	// ... otherwise a grid's parents is in an unknown level, so
+	// we're not done yet
 
 	else {
 	  done = false;
@@ -378,8 +383,6 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
     }
   }
 
-  //  _WARNING_("Temporary early geomview dump and return from init_grid_faces");
-
   // ------------------------------------------------------------
   // Label coarse face-zones
   // ------------------------------------------------------------
@@ -390,11 +393,13 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
       int ig3[3][2];
       grid->indices(ig3);
       for (axis=0; axis<3; axis++) {
+	int j0 = (axis+1)%3;
+	int j1 = (axis+2)%3;
+	int n0 = ig3[j0][1]-ig3[j0][0];
+	int n1 = ig3[j1][1]-ig3[j1][0];
 	for (face=0; face<2; face++) {
-	  int j0=(axis+1)%3;
-	  int j1=(axis+2)%3;
-	  for (ig0=0; ig0<ig3[j0][1]-ig3[j0][0]; ig0++) {
-	    for (ig1=0; ig1<ig3[j1][1]-ig3[j1][0]; ig1++) {
+	  for (ig0=0; ig0<n0; ig0++) {
+	    for (ig1=0; ig1<n1; ig1++) {
 	      Faces::Label & fz = grid->faces().label(axis,face,ig0,ig1);
 	      if (fz==Faces::_unknown_) fz = Faces::_coarse_;
 	    }
@@ -404,26 +409,10 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
     }
   }
 
-  if (geomview) {
-    char filename[80];
-    for (int ilevel=0; ilevel<this->num_levels(); ilevel++) {
-      for (Faces::Label type=Faces::_first_; 
-	   type<=Faces::_last_; 
-	   type = Faces::Label(type+1)) {
-	sprintf (filename,"facezones-L%d-P%d-%s.quad",
-		 ilevel,mpi.ip(),Faces::LabelName[type]);
-	FILE * fp = fopen (filename,"w");
-	this->level(ilevel).geomview_face_types(fp,&type,1);
-	fclose(fp);
-      }
-    }
-  }
-
   // ------------------------------------------------------------
   // Dump out any requested geomview files
   // ------------------------------------------------------------
 
-  
   if (geomview) {
     char filename[80];
     for (int ilevel=0; ilevel<this->num_levels(); ilevel++) {
@@ -439,6 +428,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
     }
   }
 }
+
+//======================================================================
 
 void Hierarchy::init_indices_ () throw()
 {
@@ -470,6 +461,33 @@ void Hierarchy::init_indices_ () throw()
 
 //======================================================================
 
+/// Write hierarchy grids to geomview files grid-L<level>-P<processor>.vect 
+
+void Hierarchy::geomview_grids (Mpi & mpi) throw ()
+{
+
+  if (geomview) {
+    ItHierarchyLevels itl (*this);
+    while (Level * level = itl++) {
+      char filename[20];
+
+      sprintf (filename,"grid-L%d-P%d.vect",level->index(),mpi.ip());
+      FILE * fp = fopen (filename,"w");
+      level->geomview_grid_local (fp);
+      fclose (fp);
+
+      //      if (mpi.is_root()) {
+      //	sprintf (filename,"grid-L%d.vect",level->index());
+      //	FILE * fp = fopen (filename,"w");
+      //	sprintf (filename,"grid-L%d.vect",level->index());
+      //	level->geomview_grid (fp);
+      //      }
+    }
+  }
+}
+
+//======================================================================
+
 void Hierarchy::print () throw ()
 {
   printf ("Hierarchy\n");
@@ -482,62 +500,62 @@ void Hierarchy::print () throw ()
 
 /// Write the Hierarchy grids to the given open file in geomview format
 
-void Hierarchy::geomview_grid (FILE *fpr, bool full) throw ()
-{
+// void Hierarchy::geomview_grid_ (FILE *fpr, bool full) throw ()
+// {
 
-  int ng = num_grids();
-  int nl = num_levels();
+//   int ng = num_grids();
+//   int nl = num_levels();
 
-  // Write header
+//   // Write header
 
-  if (full) {
+//   if (full) {
 
-    // Print first two lines of geomview *.vect file
-    fprintf (fpr,"VECT\n");
-    fprintf (fpr,"%d %d %d\n",4*ng, 16*ng, nl);
+//     // Print first two lines of geomview *.vect file
+//     fprintf (fpr,"VECT\n");
+//     fprintf (fpr,"%d %d %d\n",4*ng, 16*ng, nl);
 
-    //
-    for (int i=0; i<ng; i++) fprintf (fpr,"8 3 3 2 "); fprintf (fpr,"\n");
+//     //
+//     for (int i=0; i<ng; i++) fprintf (fpr,"8 3 3 2 "); fprintf (fpr,"\n");
 
-    ItHierarchyLevels itl(*this);
-    while (Level *level = itl++) {
-      fprintf (fpr,"1 0 0 0 ");
-      for (int i=1; i<level->num_grids(); i++) {
-	fprintf (fpr,"0 0 0 0 "); 
-      }
-      fprintf (fpr,"\n");
-    }
-  }
+//     ItHierarchyLevels itl(*this);
+//     while (Level *level = itl++) {
+//       fprintf (fpr,"1 0 0 0 ");
+//       for (int i=1; i<level->num_grids(); i++) {
+// 	fprintf (fpr,"0 0 0 0 "); 
+//       }
+//       fprintf (fpr,"\n");
+//     }
+//   }
 
-  // For each level, print out all grids in the level
+//   // For each level, print out all grids in the level
 
-  ItHierarchyLevels itl(*this);
+//   ItHierarchyLevels itl(*this);
 
-  while (Level * level = itl++) {
+//   while (Level * level = itl++) {
 
-    ItLevelGridsAll itg (*level);
+//     ItLevelGridsAll itg (*level);
 
-    while (Grid * grid = itg++) {
+//     while (Grid * grid = itg++) {
 
-      grid->geomview_grid(fpr,0);
+//       grid->geomview_grid(fpr,0);
 
-    }
+//     }
 
-  }
+//   }
 
-  // Color mapping for levels
+//   // Color mapping for levels
 
-  int bcolor[] = {1, 1, 0, 0, 0, 1, 1};
-  int rcolor[] = {1, 0, 1, 0, 1, 0, 1};
-  int gcolor[] = {1, 0, 0, 1, 1, 1, 0};
+//   int bcolor[] = {1, 1, 0, 0, 0, 1, 1};
+//   int rcolor[] = {1, 0, 1, 0, 1, 0, 1};
+//   int gcolor[] = {1, 0, 0, 1, 1, 1, 0};
 
-  if (full) {
-    for (int i=0; i<nl; i++) {
-      int j=i%7;  // 7 is length of [rgb]color[] arrays
-      fprintf (fpr,"%d %d %d 0\n",rcolor[j],gcolor[j],bcolor[j]);
-    }
-  }
-}
+//   if (full) {
+//     for (int i=0; i<nl; i++) {
+//       int j=i%7;  // 7 is length of [rgb]color[] arrays
+//       fprintf (fpr,"%d %d %d 0\n",rcolor[j],gcolor[j],bcolor[j]);
+//     }
+//   }
+// }
 
 //----------------------------------------------------------------------
 

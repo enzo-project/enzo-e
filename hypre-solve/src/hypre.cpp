@@ -65,7 +65,6 @@ Hypre::Hypre ()
 void Hypre::init_hierarchy (Parameters & parameters,
 			    Hierarchy  & hierarchy, 
 			    Mpi        & mpi)
-
 {
 
   int dim       = hierarchy.dimension();
@@ -239,21 +238,12 @@ void Hypre::init_graph (Hierarchy & hierarchy)
     HYPRE_SStructGraphSetStencil (graph_, part, 0, stencil_);
     // *******************************************************************
 
-    // WARNING: POSSIBLE SCALING ISSUE.
-    //
-    // Below we loop over all grids; however, we only need
-    // too loop over parent-child pairs such either child or parent is
-    // local to this MPI process.  Could be done with two loops,
-    // looping over local parents, then local children, but need to be
-    // careful not to add the same entries twice.  Could process local
-    // parents first since they're unique, and only process local
-    // children if their parent is remote.
-
     ItLevelGridsAll itag (*level);
 
     while (Grid * grid = itag++) {
 
-      // 2. Define connections between grid patches in adjacent parts
+      // 2. Define matrix nonzeros between grid patch and neighboring
+      //    patches.
 
       init_graph_nonstencil_(*grid);
 
@@ -339,8 +329,8 @@ void Hypre::init_linear (Parameters          & parameters,
 
     // WARNING: POSSIBLE SCALING ISSUE.
     //
-    // Below we loop over all grids; however, we only need
-    // too loop over parent-child pairs such either child or parent is
+    // Below we loop over all grids; however, we only need too loop
+    // over parent-child pairs such that either child or parent is
     // local to this MPI process.  Could be done with two loops,
     // looping over local parents, then local children, but need to be
     // careful not to add the same entries twice.  Could process local
@@ -372,7 +362,8 @@ void Hypre::init_linear (Parameters          & parameters,
 
   Scalar shift_b_sum = 0.0;
 
-  MPI_Allreduce (&local_shift_b_sum, &shift_b_sum, 1, MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce (&local_shift_b_sum, &shift_b_sum, 1, 
+		 MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
 
   if (debug) printf ("b_sum (local,global) = (%g,%g)\n",local_shift_b_sum,shift_b_sum);
 
@@ -469,48 +460,99 @@ void Hypre::evaluate (Hierarchy & hierarchy)
 // PRIVATE MEMBER FUNCTIONS
 //======================================================================
 
-/// Add nonzeros connecting grid with all children grid patches
+/// Define matrix nonzeros between grid patch and neighboring patches.
 
 void Hypre::init_graph_nonstencil_ (Grid & grid)
 
 {
 
-  NOT_IMPLEMENTED("Hypre::init_graph_coarse_()");
+  int face,axis,ig0,ig1;
 
-  ItGridChildren itchild (grid);
-
-  int ilower_grid[3];
-
-  grid.i_lower(ilower_grid[0],ilower_grid[1],ilower_grid[2]);
+  int ig3[3][2];
+  grid.indices(ig3);
   
-  printf ("DEBUG %s:%d  grid i_lower (%d %d %d)\n",
-	  __FILE__,__LINE__,
-	  ilower_grid[0],ilower_grid[1],ilower_grid[2]);
+  // Loop over each face zone in the grid, adding non-stencil
+  // matrix elements where needed
 
-  while (Grid * child = itchild++) {
+  for (axis=0; axis<3; axis++) {
 
-    _TRACE_;
+    int j0 = (axis+1)%3;
+    int j1 = (axis+2)%3;
+    int n0 = ig3[j0][1]-ig3[j0][0];
+    int n1 = ig3[j1][1]-ig3[j1][0];
 
-    if (grid.is_local() || child->is_local()) {
-      int ilower_child[3];
+    for (face=0; face<2; face++) {
 
-      child->i_lower(ilower_child[0],ilower_child[1],ilower_child[2]);
+      for (ig0=0; ig0<n0; ig0++) {
+	for (ig1=0; ig1<n1; ig1++) {
 
-      printf ("DEBUG %s:%d  child i_lower (%d %d %d)\n",
-	      __FILE__,__LINE__,
-	      ilower_child[0],ilower_child[1],ilower_child[2]);
+	  Grid * neighbor   = grid.faces().neighbor(axis,face,ig0,ig1);
 
-      // Add the matrix entries between fine and coarse grids iff
-      // one of the grids is MPI-local
+	  Faces::Label & fz = grid.faces().label(axis,face,ig0,ig1);
 
-      // *******************************************************************
-      //      HYPRE_SStructGraphAddEntries (graph_,
-      //				    grid->level(),
-      //				    grid->INDEX
-      //				    neighbor.level(),
-      //				    neighbor.INDEX,
-      //				    0);
-      // *******************************************************************
+	  // Add matrix element if either grid or neighbor is local
+	  // (making sure to test if neighbor exists), and if neighbor
+	  // (if it exists) is in the next level up or the next level
+	  // down.  Not that short-circuit logic prevents the neighbor
+	  // pointer from being dereferenced if NULL.
+
+	  bool is_local = 
+	    (neighbor != NULL && neighbor->is_local()) || grid.is_local();
+	  bool is_element = 
+	    (fz == Faces::_coarse_ || fz == Faces::_fine_);
+
+	  if (is_local && is_element) {
+
+	    // Get grid zone index
+
+	    int igg3[3]; // global grid indices
+
+	    igg3[axis]       = ig3[axis][0];
+	    igg3[(axis+1)%3] = ig3[(axis+1)%3][0] + ig0;
+	    igg3[(axis+2)%3] = ig3[(axis+2)%3][0] + ig1;
+
+	    // Get neighbor zone index
+
+	    int ign3[3]; // global neighbor 
+
+	    ign3[axis]       = (igg3[axis] + (face*2-1));
+	    ign3[(axis+1)%3] = (igg3[(axis+1)%3]);
+	    ign3[(axis+2)%3] = (igg3[(axis+2)%3]);
+
+	    // Add non-stencil non-zero from grid to coarse neighbor
+
+	    if (fz == Faces::_coarse_) {
+
+	      ign3[0] /= 2;
+	      ign3[1] /= 2;
+	      ign3[2] /= 2;
+
+	      // *********************************************
+	      HYPRE_SStructGraphAddEntries (graph_,
+					    grid.level(),      igg3, 0,
+					    neighbor->level(), ign3, 0);
+	      // *********************************************
+	      
+	    }
+
+	    // Add non-stencil non-zero from grid to fine neighbor
+
+	    if (fz == Faces::_fine_) {
+
+	      ign3[0] *= 2;
+	      ign3[1] *= 2;
+	      ign3[2] *= 2;
+
+	      // *********************************************
+	      HYPRE_SStructGraphAddEntries (graph_,
+					    grid.level(),      igg3, 0,
+					    neighbor->level(), ign3, 0);
+	      // *********************************************
+
+	    }
+	  }
+	}
+      }
     }
   }
 }
@@ -531,33 +573,33 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   int count        = grid.num_unknowns();
   int entries[7]   = { 0,1,2,3,4,5,6 };
 
-  double * values0  = new double [count];
-  double * values1  = new double [count];
+  double * v0  = new double [count];
+  double * v1  = new double [count];
 
   for (int i=0; i<count; i++) {
-    values0[i] = 6;
-    values1[i] = -1;
+    v0[i] = 6;
+    v1[i] = -1;
   }
 
   // *******************************************************************
-  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,
-				   var,1,&entries[0],values0);
-  // *******************************************************************
-  for (int stencil = 1; stencil < 7; stencil ++) {
-    // *******************************************************************
-    HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,
-				     var, 1, &entries[stencil], values1);
-    // *******************************************************************
-  }
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,var,1,&entries[0],v0);
 
- delete [] values1;
- delete [] values0;
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,var,1,&entries[1],v1);
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,var,1,&entries[2],v1);
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,var,1,&entries[3],v1);
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,var,1,&entries[4],v1);
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,var,1,&entries[5],v1);
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,var,1,&entries[6],v1);
+  // *******************************************************************
+
+ delete [] v1;
+ delete [] v0;
 
 }
 
 //------------------------------------------------------------------------
 
-/// Clean up stencil connections between parts
+/// Clean up stencil connections between parts for FAC solver
 
 void Hypre::init_matrix_clear_ (Level & level)
 {
@@ -590,42 +632,108 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
 
 {
 
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::init_matrix_fine_()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  int face,axis,ig0,ig1;
 
-  ItGridChildren itchild (grid);
-
-  int ilower_grid[3];
-
-  grid.i_lower(ilower_grid[0],ilower_grid[1],ilower_grid[2]);
+  int ig3[3][2];
+  grid.indices(ig3);
   
-  printf ("DEBUG %s:%d  grid i_lower (%d %d %d)\n",
-	  __FILE__,__LINE__,
-	  ilower_grid[0],ilower_grid[1],ilower_grid[2]);
+  // Loop over each face zone in the grid, adding non-stencil
+  // matrix elements where needed
 
-  while (Grid * child = itchild++) {
+  for (axis=0; axis<3; axis++) {
 
-    _TRACE_;
+    int j0 = (axis+1)%3;
+    int j1 = (axis+2)%3;
+    int n0 = ig3[j0][1]-ig3[j0][0];
+    int n1 = ig3[j1][1]-ig3[j1][0];
 
-    if (grid.is_local() || child->is_local()) {
+    for (face=0; face<2; face++) {
 
-      int ilower_child[3];
+      for (ig0=0; ig0<n0; ig0++) {
+	for (ig1=0; ig1<n1; ig1++) {
 
-      child->i_lower(ilower_child[0],ilower_child[1],ilower_child[2]);
+	  Grid * neighbor   = grid.faces().neighbor(axis,face,ig0,ig1);
 
-      printf ("DEBUG %s:%d  child i_lower (%d %d %d)\n",
-	      __FILE__,__LINE__,
-	      ilower_child[0],ilower_child[1],ilower_child[2]);
-      // *******************************************************************
-      //	HYPRE_SStructMatrixAddEntries (grid->hypre_matrix(),
-      //				      grid->level(),
-      //				      grid->INDEX
-      //				      neighbor.level(),
-      //				      neighbor.INDEX,
-      //				      variable);
-      // *******************************************************************
-    }
+	  Faces::Label & fz = grid.faces().label(axis,face,ig0,ig1);
+
+	  // Add matrix element if either grid or neighbor is local
+	  // (making sure to test if neighbor exists), and if neighbor
+	  // (if it exists) is in the next level up or the next level
+	  // down.  Not that short-circuit logic prevents the neighbor
+	  // pointer from being dereferenced if NULL.
+
+	  bool is_local = 
+	    (neighbor != NULL && neighbor->is_local()) || grid.is_local();
+	  bool is_element = 
+	    (fz == Faces::_coarse_ || fz == Faces::_fine_);
+
+	  if (is_local && is_element) {
+
+	    // Get grid zone index
+
+	    int igg3[3]; // global grid indices
+
+	    igg3[axis]       = ig3[axis][0];
+	    igg3[(axis+1)%3] = ig3[(axis+1)%3][0] + ig0;
+	    igg3[(axis+2)%3] = ig3[(axis+2)%3][0] + ig1;
+
+	    // Get neighbor zone index
+
+	    int ign3[3]; // global neighbor 
+
+	    ign3[axis]       = (igg3[axis] + (face*2-1));
+	    ign3[(axis+1)%3] = (igg3[(axis+1)%3]);
+	    ign3[(axis+2)%3] = (igg3[(axis+2)%3]);
+
+	    // Add non-stencil non-zero from grid to coarse neighbor
+
+	    if (fz == Faces::_coarse_) {
+
+	      ign3[0] /= 2;
+	      ign3[1] /= 2;
+	      ign3[2] /= 2;
+
+	      assert (0);
+
+	      // WRONG
+	      int nentries  = 1;
+	      int entries[] = {7};
+	      double values[] = {3.0/4.0};
+
+	      // *********************************************
+	      HYPRE_SStructMatrixAddToValues (A_,
+					      grid.level(), igg3, 0,
+					      nentries,     entries, values);
+	      // *********************************************
+	      
+	    }
+
+	    // Add non-stencil non-zero from grid to fine neighbor
+
+	    if (fz == Faces::_fine_) {
+
+	      ign3[0] *= 2;
+	      ign3[1] *= 2;
+	      ign3[2] *= 2;
+
+	      assert (0);
+
+	      // WRONG
+	      int nentries = 4;
+	      int entries[] = {7,8,9,10};
+	      double values[] = {0.125,0.125,0.125,0.125,0.125,0.125,0.125,0.125};
+
+	      // *********************************************
+	      HYPRE_SStructMatrixAddToValues (A_,
+					      grid.level(),igg3, 0,
+					      nentries,    entries, values);
+	      // *********************************************
+
+	    }
+	  }
+	}
+      }    
+}
   }
 }
 
