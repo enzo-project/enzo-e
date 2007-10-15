@@ -20,13 +20,13 @@
 
 % Overview
    \cello\ is intended to be a high-performance multi-resolution
-   astrophysics application, capable of running efficiently on
-   large-scale (\~{\ }$O(10^6)$ cores) parallel supercomputers.
-   Physics capabilities will include hydrodynamics, representations of
-   both dark matter (via particles) and baryonic matter (via fields),
-   cosmological expansion, self-gravity, radiative cooling,
-   multispecies chemistry, magnetohydrodynamics, and radiation
-   transfer.
+   astrophysics and cosmology application, capable of running
+   efficiently on large-scale (\~{\ }$O(10^6)$ cores) parallel
+   supercomputers.  Physics capabilities will include hydrodynamics,
+   representations of both dark matter (via particles) and baryonic
+   matter (via fields), cosmological expansion, self-gravity,
+   radiative cooling, multispecies chemistry, magnetohydrodynamics,
+   and radiation transfer.
 
 % AMR
    Computations will be performed at multiple spacial and temporal
@@ -36,7 +36,7 @@
    user-specified set of refinement criteria.  This will permit the
    physics modules to capture the full range of scales of interest,
    but without over-refining other regions and leading to excessive
-   computation and memory storage.  Algorithms and data-structures will
+   computation and memory storage.  Methods and data-structures will
    be chosen to maximize scalability in both computation and memory
    usage.  Multiple implementations will be made available to provide
    flexibility in optimizing for the target architecture and problem.
@@ -67,7 +67,7 @@
    the parallel distribution of computation, memory storage, or a
    combination of both.  Combining flexible hierarchical
    parallelization schemes with hierarchical load balancing
-   algorithms, together with scalable algorithms and efficient AMR
+   algorithms, together with scalable methods and efficient AMR
    data-structures, are expected to lead to high parallel efficiency
    and scalability.
 
@@ -80,7 +80,7 @@
    maximize reuse of data in caches, padding of arrays to reduce
    cache thrashing effects for low-associativity caches, and interleaving
    vector field data or select scalar fields to improve data locality.
-   These capabilities, together with efficient algorithms and 
+   These capabilities, together with efficient methods and 
    implementation of computations, are expected to lead to high
    single-thread computational efficiency and data movement through
    memory/cache hierarchies.
@@ -100,7 +100,7 @@
    known test problems in the literature that can be run given the
    available physics capabilities.  Parameters will include deep
    control of the internal physical quantities, units, physics
-   algorithms, and data-structures.
+   methods, and data-structures.
 
    Information regarding the progress of the simulation will be 
    output to the user in a format or formats that are both easy
@@ -140,7 +140,7 @@
    self-tuning by the running application as it monitors its
    performance, or by the user monitoring the performance of a running
    simulation.  Adaptivity will be available for physics, physics
-   algorithms, resolution ranges, AMR data-structures and algorithms,
+   methods, resolution ranges, AMR data-structures and algorithms,
    field and particles data-structures, parallelism.
 
 %=======================================================================
@@ -158,57 +158,69 @@
 
  \item [Domain (\S\ref{s:domain}): ] Specify properties of the domain, such as extents.
 
- \item [Boundary conditions (\S\ref{s:boundary}): ] Including periodic, in- and out-flow,
- specified, and dynamic, each on separate faces or portions of faces,
- and different for different fields.
+ \item [Boundary (\S\ref{s:boundary}): ] Specify boundary conditions.
+ Including periodic, in- and out-flow, specified, and dynamic, each on
+ separate faces or portions of faces, and different for different
+ fields.
 
- \item [Regions (\S\ref{s:region}): ] Specify partitions of the domain into regions.
- Each region contains different materials with different properties.
- Example partitions may be half-planes, spheres, boxes, or specified
- using a file containing a zone bit mask.  Default is region 0, first
- region is region 1, etc.  Use solid modeling representations?
+ \item [Regions (\S\ref{s:region}): ] Specify partitions of the domain
+ into regions.  Each region contains different materials with
+ different properties.  Example partitions may be half-planes,
+ spheres, boxes, or specified using a file containing a zone bit mask.
+ Default is region 0, first region is region 1, etc.  Use solid
+ modeling representations?
 
- \item [Materials (\S\ref{s:material}): ] Material properties, such as gas constant, etc.
- [Merge with Fields?]
+ \item [Materials (\S\ref{s:material}): ] Material properties, such as
+ gas constant, etc.  [Merge with Fields?]
 
- \item [Fields (\S\ref{s:field}): ] Scalar and vector fields for each material, such as
- density, energy, velocity, etc.  [Merge with Materials?]  Specify
- values, or input from files.
+ \item [Field (\S\ref{s:field}): ] Scalar and vector fields for each
+ material, such as density, energy, velocity, etc.  [Merge with
+ Materials?  Create ``Initial'' component?]  Specify values, or input
+ from files.
 
- \item [Units (\S\ref{s:units}): ] Specify units and optional scalings for individual
- fields.  [Merge units with Simulation?] [Merge scaling with Fields?] 
- [Dynamic scaling, e.g.~to keep average of all fields near one.]
+ \item [Units (\S\ref{s:units}): ] Specify units and optional scalings
+ for individual fields.  [Merge units with Control?] [Merge scaling
+ with Fields?] [Dynamic scaling, e.g.~to keep average of all fields
+ near one.]
 
- \item [Physics (\S\ref{s:physics}): ] Specify physics modules and physics parameters,
- including hydrodynamics, self-gravity, gravitational constant,
- imposed gravity, chemistry, cosmological expansion, star formation,
- etc.  Physics is in the problem domain.
+ \item [Physics (\S\ref{s:physics}): ] Specify physics modules and
+ physics parameters, including hydrodynamics, self-gravity,
+ gravitational constant, imposed gravity, chemistry, cosmological
+ expansion, star formation, etc.  Physics is in the problem domain.
 
- \item [Algorithms (\S\ref{s:algorithm}): ] Specify the algorithms and algorithm parameters
- to use for each physics component.  Each physics component has a
- default; some components may have only one available
- (e.g.~cosmological expansion).  Algorithms is in the solution domain.
+ \item [Method (\S\ref{s:algorithm}): ] Specify the method and
+ method parameters to use for each physics component.  Each physics
+ component has a default; some components may have only one available
+ (e.g.~cosmological expansion).  Method is in the solution domain.
 
- \item [Data structures (\S\ref{s:data}): ] Specify data structures and data structure
+ \item [Datastructures (\S\ref{s:data}): ] Specify data structures and data structure
  parameters, such as number of mesh levels, AMR method, grid patch
  properties, rebuild algorithm, dynamic load balancing, refinement
  criteria, grid patch sub-block size for cache reuse, etc.
 
- \item [Simulation (\S\ref{s:simulation}): ] Given Physics, Algorithms, and Data structures,
- specify the top-level sequencing and properties of the simulation.
- For example, ordering of physics modules, whether to do hierarchical
- time-stepping, up to what level, whether to sub-cycle some physics,
- etc. [Is this a useful category?]  Also include things like floors
- and limits(?), and IO dumps
+ \item [Control (\S\ref{s:control}): ] Given Physics,
+ Algorithms, and Data structures, specify the top-level sequencing and
+ properties of the simulation.  For example, ordering of physics
+ modules, whether to do hierarchical time-stepping, up to what level,
+ whether to sub-cycle some physics, etc. [Is this a useful category?]
+ Also include things like floors and limits(?)
 
- \item [Parallelism (\S\ref{s:parallel}): ] Specify parallelism type and parameters.  For
- example, non-blocking MPI, MPI-2, hybrid MPI/UPC, performance-related
- parameters such as buffer size, etc.
+ \item [Parallelism (\S\ref{s:parallel}): ] Specify parallelism type
+ and parameters.  For example, non-blocking MPI, MPI-2, hybrid
+ MPI/UPC, performance-related parameters such as buffer size, etc.
 
- \item [Error recovery (\S\ref{s:error}): ] Fault tolerance and adaptivity parameters
+ \item [Recovery (\S\ref{s:error}): ] Error recovery, fault tolerance
+ and adaptivity parameters.  [What to include here?]
 
- \item [Performance monitoring (\S\ref{s:performance}): ] Performance monitoring and
- optimization(?) parameters
+ \item [Performance (\S\ref{s:performance}): ] Performance monitoring
+ and optimization(?) parameters.
+
+ \item [Output (\S\ref{s:output}): ] Output of large-scale data.
+
+ \item [Monitor (\S\ref{s:output}): ] Output of summary information
+ about the running application.
+  
+
 \end{description}
 
 %=======================================================================
@@ -244,24 +256,6 @@ coordinate system, and are uniquely determined by the spacial
 dimension, and the lowest and highest points in the domain.
 
 %-----------------------------------------------------------------------
-\subsection{Parameters}
-%-----------------------------------------------------------------------
-
- \todo\ \textit{Decide: allow defaults?  allow optional parameters?  Special
- \code{OPT\_} prefix for optional parameters?  Write out explicit copy
- of input file?}
-
-The \code{domain} function has three parameters
-\begin{enumerate}
-\item \textit{Scalar} \code{dimension}
-\item \textit{Vector} \code{lower}
-\item \textit{Vector} \code{upper}
-\end{enumerate}
-
-Lower and upper points are given in units given by \code{units},
-described in \S\ref{s:units}.
-
-%-----------------------------------------------------------------------
 \subsection{Use Cases}
 %-----------------------------------------------------------------------
 
@@ -278,6 +272,24 @@ A longer example:
       upper <3e9,3e9,3e9>
    }
 \end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+
+ \todo\ \textit{Decide: allow defaults?  allow optional parameters?  Special
+ \code{OPT\_} prefix for optional parameters?  Write out explicit copy
+ of input file?}
+
+The \code{domain} function has three parameters
+\begin{enumerate}
+\item \textit{Scalar} \code{dimension}
+\item \textit{Vector} \code{lower}
+\item \textit{Vector} \code{upper}
+\end{enumerate}
+
+Lower and upper points are given in units given by \code{units},
+described in \S\ref{s:units}.
 
 %-----------------------------------------------------------------------
 \subsection{Restrictions}
@@ -299,19 +311,21 @@ boundary conditions can be specified for the entire domain,
 on separate faces, on subregions of faces, or on specific zones.
 Different boundary conditions can be specified for different fields.
 %-----------------------------------------------------------------------
-\subsection{Parameters}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
 \subsection{Use Cases}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
-domain {
-  reflecting
-  upper-x inflow
-  lower-x outflow
+   boundary {
+     x lower { reflecting }
+     x upper { type = reflecting }
+     y       { type = periodic }
+     z       { type = inflow,  value = 1.0 }
+     z       { outflow, 1.0 }
+   }
 \end{verbatim}
-
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
 \subsection{Assumptions}
 %-----------------------------------------------------------------------
@@ -330,12 +344,38 @@ be half-planes, spheres, boxes, or specified using a file containing a
 zone bit mask.  Default is region 0, first region is region 1, etc.
 Use solid modeling representations?
 
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
 %=======================================================================
 \section{Material parameters} \label{s:material}
 %=======================================================================
 
  Material properties, such as gas constant, etc.
  [Merge with Fields?]
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Field parameters} \label{s:field}
@@ -345,13 +385,63 @@ Scalar and vector fields for each material, such as
  density, energy, velocity, etc.  [Merge with Materials?]  Specify
  values, or input from files.
 
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+\begin{verbatim}
+   field {
+      name     = "density"
+      name     = "rho"
+      type     = scalar
+      location = center
+   }
+   field {
+      name     = "velocity"
+      type     = "u"
+      location = center
+   }
+   field {
+      name     = "temperature"
+      name     = "T"
+      type     = scalar
+      location = center
+   }
+   field {
+      name     = "B"
+      type     = computed
+      location = face
+   }
+\end{verbatim}
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
 %=======================================================================
 \section{Units parameters} \label{s:units}
 %=======================================================================
 
  Specify units and optional scalings for individual
- fields.  [Merge units with Simulation?] [Merge scaling with Fields?] 
+ fields.  [Merge units with Control?] [Merge scaling with Fields?] 
  [Dynamic scaling, e.g.~to keep average of all fields near one.]
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Physics parameters} \label{s:physics}
@@ -369,6 +459,20 @@ Specify physics components
 \item  cosmological expansion
 \item self-gravity
 \end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
 %=======================================================================
 \section{Algorithm parameters} \label{s:algorithm}
 %=======================================================================
@@ -382,6 +486,20 @@ Specify physics components
 \item PPM hydro (dual-energy, etc.)
 \item gravity solver (FAC, smoother, levels, etc.)
 \end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
 %=======================================================================
 \section{Data structure parameters} \label{s:data}
 %=======================================================================
@@ -397,8 +515,21 @@ Field storage (blocked, padded, interleved)
 \item PatchAMR (levels, grid size or count, rebuild method, distribution)
 \end{itemize}
 
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
 %=======================================================================
-\section{Simulation parameters} \label{s:simulation}
+\section{Control parameters} \label{s:control}
 %=======================================================================
 
 Given Physics, Algorithms, and Data structures, specify the top-level
@@ -420,6 +551,19 @@ Output types and parameters
 \item level of output (files for timestep, time, etc.)
 \end{itemize}
 
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
 %=======================================================================
 \section{Parallelism parameters} \label{s:parallel}
 %=======================================================================
@@ -439,6 +583,19 @@ Specifiy parallelism and parameters
 \item levels for each if multiple
 \end{itemize}
 
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
 %=======================================================================
 \section{Error recovery parameters} \label{s:error}
 %=======================================================================
@@ -450,14 +607,123 @@ Fault tolerance and adaptivity parameters
 \item adaptivity
 \end{itemize}
 
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
 %=======================================================================
 \section{Performance monitoring parameters} \label{s:performance}
 %=======================================================================
 
 Performance monitoring and optimization(?) parameters
 
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
+
 %=======================================================================
-\chapter{Outputs} \label{s:inputs}
+\section{Output parameters} \label{s:output}
+%=======================================================================
+
+Output parameters.
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+output { 
+   name = "data"
+   format = hdf5
+   type   = [data, input]
+   fields = ["density", "velocity", "temperature"]
+   file = ["data-%6s" cycle_number]
+   cycle = 0:10:90
+   cycle = 100:100:900
+   cycle = 1000
+}
+\end{verbatim}
+
+\begin{verbatim}
+output { 
+   name      = "restart"
+   format    = hdf5
+   type      = [data, input]
+   fields    = all
+   file      = ["restart-%6s" cycle_number]
+   time_cpu  = 0.5 # CPU hours
+   overwrite = true
+   copies    = 2
+}
+\end{verbatim}
+
+\begin{verbatim}
+output { 
+   name      = "movie"
+   file      = ["movie-%6s" cycle_number]
+   time      = :10:
+   extract   = x == 12
+}
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
+%=======================================================================
+\section{Monitor parameters} \label{s:performance}
+%=======================================================================
+
+High-level monitoring of the run at a summary level, such as current
+timestep, problem time, wall time, cpu time, etc.
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+\begin{verbatim}
+   monitor {
+     type   = html
+     amount = verbose
+   }
+\end{verbatim}
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Assumptions}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Restrictions}
+%-----------------------------------------------------------------------
+
+
+%=======================================================================
+\chapter{Outputs} \label{c:outputs}
 %=======================================================================
 
 %=======================================================================
@@ -507,11 +773,10 @@ Performance monitoring and optimization(?) parameters
 Hardware platform parallelism will be considered to be multilevel,
 including nodes, processors, and cores.  Computational tasks will be
 flexibly organized into hierarchical levels to aid mapping to multiple
-hardware parallelization levels, and task sizes in different levels
+hardware parallelization levels, including grid patches, grid patch
+subblocks, and multiple simulations.  Task sizes in different levels
 will allow flexibility to help optimize granularity for the different
 given parallelization level components.
-
-
 
 Flexible parallelism paradigms: map parallelism to tasks
 
