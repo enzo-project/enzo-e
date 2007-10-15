@@ -351,10 +351,6 @@ void Hypre::init_linear (Parameters          & parameters,
 
   // Initialize B_ according to density
 
-  //    scaling0 = scaling factor for root-level, assuming matrix
-  //    coefficients [-1,-1,-1,6,-1,-1,-1]
-
-
   Scalar local_shift_b_sum = 0.0;
 
   local_shift_b_sum += init_vector_points_  (hierarchy,points);
@@ -576,6 +572,11 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   double * v0  = new double [count];
   double * v1  = new double [count];
 
+  //    scaling0 = scaling factor for root-level, assuming matrix
+  //    coefficients [-1,-1,-1,6,-1,-1,-1]
+
+  // stencil coefficients [-1,-1,-1,6,-1,-1,-1] * level
+
   for (int i=0; i<count; i++) {
     v0[i] = 6;
     v1[i] = -1;
@@ -695,7 +696,7 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
 
 	      assert (0);
 
-	      // WRONG
+	      // UNFINISHED
 	      int nentries  = 1;
 	      int entries[] = {7};
 	      double values[] = {3.0/4.0};
@@ -718,7 +719,7 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
 
 	      assert (0);
 
-	      // WRONG
+	      // UNFINISHED
 	      int nentries = 4;
 	      int entries[] = {7,8,9,10};
 	      double values[] = {0.125,0.125,0.125,0.125,0.125,0.125,0.125,0.125};
@@ -746,7 +747,7 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
 
 {
 
-  Scalar scaling0 = -4.0*Constants::G()*Constants::pi();
+  const Scalar scaling0 = -4.0*Constants::G()*Constants::pi();
 
   Scalar shift_b_sum = 0.0;
 
