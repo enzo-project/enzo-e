@@ -410,7 +410,7 @@ levels of an AMR calulation.
  \newcommand{\Uzp}{U_{z}}
  \newcommand{\Uzm}{U_{\bar{z}}}
 
-We wish to discretize $\nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
+We wish to discretize $- \nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
 on a structured AMR hierarchy with arbitrary refinement factor $r$
 between successive levels.  We consider discretizing within levels in
 \S\ref{ss:discret-within-levels}, and between
@@ -420,7 +420,7 @@ levels in \S\ref{ss:discret-between-levels}.
 \subsection{Discretization within levels} \label{ss:discret-within-levels}
 %-----------------------------------------------------------------------
 
-We wish to discretize $\nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
+We wish to discretize $- \nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
 within a uniform $3$D grid level.  We assume that grid spacing
 $h_{x}$, $h_{y}$, and $h_{z}$ within a level is uniform.  The unknowns
 $u(r)$, (``$\Box$'' in the figure) are located at cell centers, and
@@ -442,20 +442,6 @@ of the Poisson equation, $a(r)\equiv 1$.
  & \approx & \frac{\delta_{h_x}}{h_x} (\ac \frac{\delta_{h_x}}{h_x} \uc) + 
              \frac{\delta_{h_y}}{h_y} (\ac \frac{\delta_{h_y}}{h_y} \uc) + 
              \frac{\delta_{h_z}}{h_z} (\ac \frac{\delta_{h_z}}{h_z} \uc) \\
-% & \approx & \frac{1}{h_x^2}\delta_{h_x} (\ac \delta_{h_x} \uc) + 
-%             \frac{1}{h_y^2}\delta_{h_y} (\ac \delta_{h_y} \uc) + 
-%             \frac{1}{h_z^2}\delta_{h_z} (\ac \delta_{h_z} \uc) \\
-% & = & \frac{1}{h_x^2}\delta_{h_x} (\ac (\uxph - \uxmh))\\
-% & + & \frac{1}{h_y^2}\delta_{h_y} (\ac (\uyph - \uymh)) \\
-% & + & \frac{1}{h_z^2}\delta_{h_z} (\ac (\uzph - \uzmh)) \\
-% & = & \frac{1}{h_x^2} (\axph (\uxp - \uc)) - (\axmh (\uc - \uxm)) \\
-% & + & \frac{1}{h_y^2} (\ayph (\uyp - \uc)) - (\aymh (\uc - \uym)) \\
-% & + & \frac{1}{h_z^2} (\azph (\uzp - \uc)) - (\azmh (\uc - \uzm)) \\
-% & = & \frac{1}{h_z^2} \azmh \uzm + \frac{1}{h_y^2} \aymh \uym + \frac{1}{h_x^2} \axmh \uxm \\
-% & - & [\frac{1}{h_x^2} \axph  + \frac{1}{h_x^2} \axmh \\
-% & &+  \frac{1}{h_y^2} \ayph  + \frac{1}{h_y^2} \aymh \\
-% & & +  \frac{1}{h_z^2} \azph  + \frac{1}{h_z^2} \azmh] \uc \\
-% & + &  \frac{1}{h_x^2} \axph \uxp + \frac{1}{h_y^2} \ayph \uyp  + \frac{1}{h_z^2} \azph \uzp \\
  & \approx & \alzm\Uzm +  \alym\Uym +  \alxm\Uxm 
   +  \alc\Uc 
   +  \alxp\Uxp +  \alyp\Uyp +  \alzp\Uzp,
@@ -470,9 +456,9 @@ where
  \alzp  \equiv  \frac{1}{h_z^2} \azph \]
  \[\alc   \equiv  - [\alxm + \alym + \alzm + \alxp + \alyp + \alzp]. \]
 
-If we assume 1) $a(x)\equiv 1$, 2) $h\equiv h_x = h_y = h_z$, and 3) we scale
-$\nabla\cdot(\ac \nabla \uc) = \bar{\rho}$ by multiplying each side
-by $C_h \equiv (-h^2)$, then we have
+If we assume 1) $a(x)\equiv 1$, 2) $h\equiv h_x = h_y = h_z$, and 3)
+we scale $\nabla\cdot(\ac \nabla \uc) = \bar{\rho}$ by multiplying
+each side by $C_h \equiv (-h^2)$, then we have
 
 \[\alxm  \equiv  -1,
  \alym  \equiv  -1,
