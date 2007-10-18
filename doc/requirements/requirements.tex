@@ -188,7 +188,7 @@
  different types of matter used in the simulation, such as gas
  constant, dark matter, etc.
 
- \item [Method (\S\ref{s:algorithm}): ] Method parameters specify the
+ \item [Method (\S\ref{s:method}): ] Method parameters specify the
  method to use for each physics component, and any associated
  method-specific parameters.
 
@@ -208,7 +208,7 @@
  \item [Performance (\S\ref{s:performance}): ] Performance monitoring
  and optimization parameters.
 
- \item [Monitor (\S\ref{s:output}): ] Monitor parameters control what
+ \item [Monitor (\S\ref{s:monitor}): ] Monitor parameters control what
  and when to output user-readable summary information about the
  running application, such as status, progress, warnings, errors, and
  performance summary.
@@ -218,7 +218,7 @@
 
 
 
- \item [Recovery (\S\ref{s:error}): ] Error recovery, fault tolerance
+ \item [Recovery (\S\ref{s:recovery}): ] Error recovery, fault tolerance
  and computational adaptivity parameters.
 
 
@@ -230,9 +230,6 @@
 \subsection{Input file format}
 %-----------------------------------------------------------------------
 
-
-@@@ ORDER SECTIONS ACCORDING TO LIST ABOVE
-
 Functions are of the form \code{foo \{ \textit{parameter declarations} \} }.
 
 Parameters for a function are ordered.  Parameters may have default
@@ -240,72 +237,106 @@ values associated with them.  Parameters have names, which may be
 included or not included.  Parameters can appear one on each line, or
 multiple parameters per line separated by commas.
 
-\textit{Strings} are enclosed in double-quotes `\code{"}'.  Example: \code{"density"}
-
-\textit{Scalars} are represented as C floating-point numbers.  Example: 3.0e-19.
-
-\textit{Vectors} are enclosed in angle-brackets `\code{$<$}' and `\code{$>$}'.  Example: \code{$<$3e9,3e9,3e9$>$}.
-
-\textit{Arrays} are enclosed in square-brackets `\code{[}' and `\code{]}'.  Example: \code{[3e9,$<$3,4,5$>$, "density"]}.
-
 Input files can include other files using \code{\#include "}\textit{filename}\code{"}
 
 Repeated text can be assigned to a macro using \code{\#declare "}\textit{macro}\code{ = }\textit{function}
 
+\subsubsection{Strings}
+
+Strings are enclosed in double-quotes `\code{"}'.  Example: \code{"density"}
+
+\subsubsection{Scalars}
+
+Scalars are represented as C floating-point numbers.  Example: 3.0e-19.
+
+\subsubsection{Vectors} 
+
+Vectors are enclosed in angle-brackets `\code{$<$}' and `\code{$>$}'.  Example: \code{$<$3e9,3e9,3e9$>$}.
+
+\subsubsection{Arrays} 
+
+Arrays are enclosed in square-brackets `\code{[}' and `\code{]}'.  Example: \code{[3e9,$<$3,4,5$>$, "density"]}.
+
+\subsubsection{Variables} 
+
+There are some variables defined that can be accessed in the input file.
+\begin{tabbing}
+xxx\=xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \code{x},\code{y},\code{z} \> Coordinates in problem distance units. \\
+\> \code{t} \> Time in problem time units. \\
+\> \code{X},\code{Y},\code{Z} \> Coordinates in computational units. \\
+\> \code{T} \> Time in computational units. \\
+\> \code{PI} \> $\pi$ \\
+\end{tabbing}
+
 %=======================================================================
-\section{Domain parameters} \label{s:domain}
+\section{Control parameters} \label{s:control}
 %=======================================================================
 
-The \code{domain} function is used to specify properties of the
-domain.  Domains are boxes aligned with the axes of the computational
-coordinate system, and are uniquely determined by the spacial
-dimension, and the lowest and highest points in the domain.
+Given Physics, Algorithms, and Data structures, specify the top-level
+sequencing and properties of the simulation.  For example, ordering of
+physics modules, whether to do hierarchical time-stepping, up to what
+level, whether to sub-cycle some physics, etc. [Is this a useful
+category?]  Also include things like floors and limits(?), and IO
+dumps
+
+Global simulation control.
+
+Output types and parameters
+
+\begin{itemize}
+\item checkpoint (dump all)
+\item output (specific fields)
+\item movies (type and rate)
+\item analysis (type of analysis, rate)
+\item level of output (files for timestep, time, etc.)
+\end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Use Cases}
 %-----------------------------------------------------------------------
-
-A terse example
-\begin{verbatim}
-   domain { 3, <-3e9,-3e9,-3e9>, <3e9,3e9,3e9> }
-\end{verbatim}
-
-A longer example:
-\begin{verbatim}
-   domain { 
-      dimension 3
-      lower <-3e9,-3e9,-3e9>
-      upper <3e9,3e9,3e9>
-   }
-\end{verbatim}
-
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
 
- \todo\ \textit{Decide: allow defaults?  allow optional parameters?  Special
- \code{OPT\_} prefix for optional parameters?  Write out explicit copy
- of input file?}
+%=======================================================================
+\section{Physics parameters} \label{s:physics}
+%=======================================================================
 
-The \code{domain} function has three parameters
-\begin{enumerate}
-\item \textit{Scalar} \code{dimension}
-\item \textit{Vector} \code{lower}
-\item \textit{Vector} \code{upper}
-\end{enumerate}
+Specify physics modules and physics parameters, including
+hydrodynamics, self-gravity, gravitational constant, imposed gravity,
+chemistry, cosmological expansion, star formation, etc.  Physics is in
+the problem domain.
 
-Lower and upper points are given in units given by \code{units},
-described in \S\ref{s:units}.
+Specify physics components
+
+\begin{itemize}
+\item hydrodynamics
+\item  cosmological expansion
+\item self-gravity
+\end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Restrictions}
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
 %-----------------------------------------------------------------------
 
-\begin{enumerate}
-\item The dimension must be 1, 2, or 3.
-\item The number of coordinates in both lower and upper points must equal the dimension.
-\item Each coordinate of the lower point must be strictly greater than the corresponding coordinate of the upper point.
-\end{enumerate}
+%=======================================================================
+\section{Units parameters} \label{s:units}
+%=======================================================================
+
+ Specify units and optional scalings for individual
+ fields.  [Merge units with Control?] [Merge scaling with Fields?] 
+ [Dynamic scaling, e.g.~to keep average of all fields near one.]
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Problem parameters} \label{s:problem}
@@ -325,23 +356,100 @@ Different boundary conditions can be specified for different fields.
 \begin{verbatim}
    problem {
       boundary {
-         x lower { reflecting }
-         x upper { type = reflecting }
-         y       { type = periodic }
-         z       { type = inflow,  value = 1.0 }
-         z       { outflow, 1.0 }
+         x:lower = reflecting
+         x:upper = { type = reflecting }
+         y       = { type = periodic }
+         z       = { type = inflow,  value = 1.0 }
+         z       = { outflow, 1.0 }
       }
    }
 \end{verbatim}
+
+\begin{verbatim}
+   XM = boundary { x = domain:lower[0] }
+   XP = boundary { x = domain:upper[0] }
+   YM = boundary { y = domain:lower[1] }
+   YP = boundary { y = domain:upper[1] }
+   ZM = boundary { z = domain:lower[2] }
+   ZP = boundary { z = domain:upper[2] }
+   field {
+      name = "density"
+      value(XM) = 0
+      value(XP) = 0
+      value(YM) = value (YP)
+      value(ZM) = +t
+      value(ZM) = -t
+   }
+\end{verbatim}
+
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
+
+%=======================================================================
+\section{Domain parameters} \label{s:domain}
+%=======================================================================
+
+The \code{domain} function is used to specify properties of the
+domain.  Domains are boxes aligned with the axes of the computational
+coordinate system, and are uniquely determined by the spacial
+dimension, and the lowest and highest points in the domain.
+
 %-----------------------------------------------------------------------
-\subsection{Assumptions}
+\subsection{Use Cases}
 %-----------------------------------------------------------------------
+
+\begin{verbatim}
+   domain { 
+      dimension = 3
+      lower     = <-3e9,-3e9,-3e9>
+      upper     = <3e9,3e9,3e9>
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   domain { 3, <-3e9,-3e9,-3e9>, <3e9,3e9,3e9> }  // Implicit ordering
+\end{verbatim}
+
+\begin{verbatim}
+   domain { 
+      dimension = 3
+      upper     = 3e9        // expand scalar to vector
+      lower     = -upper     // parameters can be accessed as values
+   }
+\end{verbatim}
+
+Include errors.
+
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+
+ \todo\ \textit{Decide: allow defaults?  allow optional parameters?  Special
+ \code{OPT\_} prefix for optional parameters?  Write out explicit copy
+ of input file?}
+
+The \code{domain} function has three parameters
+
+\begin{tabular}{lll} \\
+Name & Type & Restrictions \\ \hline
+\code{dimension} & Scalar & $1-3$ \\
+\code{lower}     & Vector & length = \code{dimension} \\
+\code{upper}     & Vector & length = \code{dimension}, \code{upper} > \code{lower}
+\end{tabular}
+
+Lower and upper points are given in units given by \code{units},
+described in \S\ref{s:units}.
+
 %-----------------------------------------------------------------------
 \subsection{Restrictions}
 %-----------------------------------------------------------------------
+
+\begin{enumerate}
+\item The dimension must be 1, 2, or 3.
+\item The number of coordinates in both lower and upper points must equal the dimension.
+\item Each coordinate of the lower point must be strictly greater than the corresponding coordinate of the upper point.
+\end{enumerate}
 
 
 %=======================================================================
@@ -357,35 +465,36 @@ Use solid modeling representations?
 %-----------------------------------------------------------------------
 \subsection{Use Cases}
 %-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Parameters}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
 
-%=======================================================================
-\section{Matter parameters} \label{s:matter}
-%=======================================================================
+\begin{verbatim}
+   region {
+      x + y + z < 0.5
+   }
+\end{verbatim}
 
- Matter defines properties of matter, such as the matter type (baryonic
- or dark matter), and gas constants.
+\begin{verbatim}
+   BOX = region {
+      intersect {
+         x > 0
+         x < 1
+         y > 0, y < 1
+         z > 0, z < 1
+      }
+   }
+\end{verbatim}
 
+\begin{verbatim}
+   region {
+      union {
+         region {BOX, translate = 0.0*x, scale = 0.1}
+         region {BOX, translate = 0.1*x, scale = <0.1,0.1,0.1>}
+         region {BOX, translate = 0.2*x, scale = 0.1}
+      }
+   }
+\end{verbatim}
 %-----------------------------------------------------------------------
-\subsection{Use Cases}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Parameters}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
+\subsection{Parameters}%
+-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Field parameters} \label{s:field}
@@ -425,20 +534,13 @@ Scalar and vector fields for each material, such as
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
 
 %=======================================================================
-\section{Units parameters} \label{s:units}
+\section{Matter parameters} \label{s:matter}
 %=======================================================================
 
- Specify units and optional scalings for individual
- fields.  [Merge units with Control?] [Merge scaling with Fields?] 
- [Dynamic scaling, e.g.~to keep average of all fields near one.]
+ Matter defines properties of matter, such as the matter type (baryonic
+ or dark matter), and gas constants.
 
 %-----------------------------------------------------------------------
 \subsection{Use Cases}
@@ -446,45 +548,9 @@ Scalar and vector fields for each material, such as
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
 
 %=======================================================================
-\section{Physics parameters} \label{s:physics}
-%=======================================================================
-
-Specify physics modules and physics parameters, including
-hydrodynamics, self-gravity, gravitational constant, imposed gravity,
-chemistry, cosmological expansion, star formation, etc.  Physics is in
-the problem domain.
-
-Specify physics components
-
-\begin{itemize}
-\item hydrodynamics
-\item  cosmological expansion
-\item self-gravity
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\subsection{Use Cases}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Parameters}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
-
-%=======================================================================
-\section{Algorithm parameters} \label{s:algorithm}
+\section{Method parameters} \label{s:method}
 %=======================================================================
 
  Specify the algorithms and algorithm parameters
@@ -503,15 +569,9 @@ Specify physics components
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
 
 %=======================================================================
-\section{Data structure parameters} \label{s:data}
+\section{Datastructure parameters} \label{s:data}
 %=======================================================================
 
 Specify data structures and data structure parameters, such as number
@@ -531,51 +591,9 @@ Field storage (blocked, padded, interleved)
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
 
 %=======================================================================
-\section{Control parameters} \label{s:control}
-%=======================================================================
-
-Given Physics, Algorithms, and Data structures, specify the top-level
-sequencing and properties of the simulation.  For example, ordering of
-physics modules, whether to do hierarchical time-stepping, up to what
-level, whether to sub-cycle some physics, etc. [Is this a useful
-category?]  Also include things like floors and limits(?), and IO
-dumps
-
-Global simulation control.
-
-Output types and parameters
-
-\begin{itemize}
-\item checkpoint (dump all)
-\item output (specific fields)
-\item movies (type and rate)
-\item analysis (type of analysis, rate)
-\item level of output (files for timestep, time, etc.)
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\subsection{Use Cases}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Parameters}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
-
-%=======================================================================
-\section{Parallelism parameters} \label{s:parallel}
+\section{Parallel parameters} \label{s:parallel}
 %=======================================================================
 
 Specify parallelism type and parameters.  For example, non-blocking
@@ -599,39 +617,8 @@ Specifiy parallelism and parameters
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
-
 %=======================================================================
-\section{Error recovery parameters} \label{s:error}
-%=======================================================================
-
-Fault tolerance and adaptivity parameters
-
-\begin{itemize}
-\item fault tolerance methodology
-\item adaptivity
-\end{itemize}
-
-%-----------------------------------------------------------------------
-\subsection{Use Cases}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Parameters}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
-
-%=======================================================================
-\section{Performance monitoring parameters} \label{s:performance}
+\section{Performance parameters} \label{s:performance}
 %=======================================================================
 
 Performance monitoring and optimization(?) parameters
@@ -642,13 +629,26 @@ Performance monitoring and optimization(?) parameters
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
 
+%=======================================================================
+\section{Monitor parameters} \label{s:monitor}
+%=======================================================================
+
+High-level monitoring of the run at a summary level, such as current
+timestep, problem time, wall time, cpu time, etc.
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+\begin{verbatim}
+   monitor {
+     type   = html
+     amount = verbose
+   }
+\end{verbatim}
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Output parameters} \label{s:output}
@@ -695,42 +695,28 @@ output {
 }
 \end{verbatim}
 
+
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
 
 %=======================================================================
-\section{Monitor parameters} \label{s:performance}
+\section{Recovery parameters} \label{s:recovery}
 %=======================================================================
 
-High-level monitoring of the run at a summary level, such as current
-timestep, problem time, wall time, cpu time, etc.
+Fault tolerance and adaptivity parameters
+
+\begin{itemize}
+\item fault tolerance methodology
+\item adaptivity
+\end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Use Cases}
 %-----------------------------------------------------------------------
-\begin{verbatim}
-   monitor {
-     type   = html
-     amount = verbose
-   }
-\end{verbatim}
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Assumptions}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Restrictions}
-%-----------------------------------------------------------------------
-
 
 %=======================================================================
 \chapter{Outputs} \label{c:outputs}
