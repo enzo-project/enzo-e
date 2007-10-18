@@ -638,8 +638,17 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
   int ig3[3][2];
   grid.indices(ig3);
   
+  // Initialize face zone counters to 7 (stencil zones are 0 to 6)
+
+  for (axis=0; axis<3; axis++) {
+    for (face=0; face<2; face++) {
+      grid.faces().entry(axis,face,7); 
+    }
+  }
+
   // Loop over each face zone in the grid, adding non-stencil
   // matrix elements where needed
+
 
   for (axis=0; axis<3; axis++) {
 
@@ -698,14 +707,15 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
 
 	      // UNFINISHED
 	      int nentries  = 1;
-	      int entries[] = {7};
-	      double values[] = {3.0/4.0};
+	      int & entry = grid.faces().entry(axis,face,ig0,ig1);
+	      double value = 3.0/4.0;
 
 	      // *********************************************
 	      HYPRE_SStructMatrixAddToValues (A_,
 					      grid.level(), igg3, 0,
-					      nentries,     entries, values);
+					      nentries, &entry, &value);
 	      // *********************************************
+	      entry += nentries;
 	      
 	    }
 
@@ -720,8 +730,10 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
 	      assert (0);
 
 	      // UNFINISHED
-	      int nentries = 4;
-	      int entries[] = {7,8,9,10};
+	      int nentries = 8;
+	      int & entry = grid.faces().entry(axis,face,ig0,ig1);
+	      int entries[] = {0,1,2,3,4,5,6,7,8};
+	      for (int i=0; i<nentries; i++) entries[i] += entry;
 	      double values[] = {0.125,0.125,0.125,0.125,0.125,0.125,0.125,0.125};
 
 	      // *********************************************
@@ -729,6 +741,9 @@ void Hypre::init_matrix_nonstencil_ (Grid & grid)
 					      grid.level(),igg3, 0,
 					      nentries,    entries, values);
 	      // *********************************************
+
+	      // Update entry count for the zone
+	      entry += nentries;
 
 	    }
 	  }

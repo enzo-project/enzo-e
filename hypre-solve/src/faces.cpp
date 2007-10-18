@@ -65,6 +65,42 @@ Faces::~Faces () throw ()
 // PUBLIC MEMBER FUNCTIONS
 //--------------------------------------------------------------------
 
+int & Faces::entry (int axis, int face, int i, int j) throw ()
+{
+  // Remap axis to minimal one if face zone lies on edge or corner
+  if (axis==1) {
+    if (j==0 || j==n_[0]-1) {
+      // Axis 1 to axis 0
+      int face0=face;
+      int i0=i;
+      axis = 0;
+      face = (j==0) ? 0 : 1;
+      i = (face0==0) ? 0 : (n_[1]-1);
+      j = i0;
+    }
+  } else if (axis==2) {
+    if (i==0 || i==n_[0]-1) {
+      // Axis 2 to axis 0
+      int face0=face;
+      axis = 0;
+      face = (i==0) ? 0 : 1;
+      i = j;
+      j = (face0==0) ? 0 : (n_[2]-1);
+    } else if (j==0 || j==n_[1]-1) {
+      // Axis 2 to axis 1
+      int face0=face;
+      int i0=i;
+      axis = 1;
+      face = (j==0) ? 0 : 1;
+      i = (face0==0) ? 0 : (n_[2]-1);
+      j = i0;
+    }
+  }
+  return entry_[axis][face][i+n1_[axis]*j];
+}
+
+//----------------------------------------------------------------------
+
 void Faces::print() throw()
 {
    printf ("Faces::debug()\n");
@@ -118,6 +154,11 @@ void Faces::alloc_ (int *n) throw ()
       for (i=0; i<n_[axis]; i++) label_[axis][face][i] = _unknown_;
 
       // allocate and clear grid neighbors
+
+      neighbor_[axis][face] = new pGrid [n_[axis]];
+      for (i=0; i<n_[axis]; i++) neighbor_[axis][face][i] = NULL;
+
+      // allocate and clear face zone nonzero entries
 
       neighbor_[axis][face] = new pGrid [n_[axis]];
       for (i=0; i<n_[axis]; i++) neighbor_[axis][face][i] = NULL;

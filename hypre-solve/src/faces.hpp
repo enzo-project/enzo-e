@@ -16,6 +16,14 @@
 
 class Grid;
 typedef Grid * pGrid;
+//typedef int[12] pEntries;
+
+
+// Maximum number of nonstencil nonzero elements in any row
+// limiting case: coarse zone in corner bounded 
+// by fine grid patches on three faces
+
+const int MAX_NONZERO = 12; 
 
 class Faces
 {
@@ -64,6 +72,12 @@ public:
 
   pGrid * neighbor_[3][2];
 
+  /// Counters for nonstencil element indices required by
+  /// HYPRE_SStructMatrixAddToValues() in "entries".  Initialized
+  /// to be the number of stencil entries.
+
+  int * entry_[3][2];    
+
   /// Leading dimension of arrays
   int  n1_[3]; 
   int  n2_[3]; 
@@ -94,8 +108,8 @@ public:
   /// axis (0 to 2) and face (0 to 1).  No error checking is performed
   /// on axis, face, i or j.
 
-  Label &label (int axis, int face, int i0, int i1) throw ()
-  { return label_[axis][face][i0+n1_[axis]*i1]; };
+  Label &label (int axis, int face, int i, int j) throw ()
+  { return label_[axis][face][i+n1_[axis]*j]; };
 
 
   /// Set the face-zone type of all zones on the given axis (0
@@ -104,9 +118,9 @@ public:
 
   void label (int axis, int face, Label label) throw ()
   { 
-    for (int i1=0; i1<n1_[axis]; i1++) {
-      for (int i2=0; i2<n2_[axis]; i2++) {
-	label_[axis][face][i1+n1_[axis]*i2] = label; 
+    for (int i=0; i<n1_[axis]; i++) {
+      for (int j=0; j<n2_[axis]; j++) {
+	label_[axis][face][i+n1_[axis]*j] = label; 
       }
     }
   };
@@ -125,9 +139,29 @@ public:
 
   void neighbor (int axis, int face, pGrid neighbor) throw ()
   { 
-    for (int i1=0; i1<n1_[axis]; i1++) {
-      for (int i2=0; i2<n2_[axis]; i2++) {
-	neighbor_[axis][face][i1+n1_[axis]*i2] = neighbor; 
+    for (int i=0; i<n1_[axis]; i++) {
+      for (int j=0; j<n2_[axis]; j++) {
+	neighbor_[axis][face][i+n1_[axis]*j] = neighbor; 
+      }
+    }
+  };
+
+  /// Set or get the current entry index of the facing grid neighbor
+  /// of the i,jth zone on the given axis (0 to 2) and face (0 to 1).
+  /// No error checking is performed on axis, face, i or j.
+
+  int & entry (int axis, int face, int i, int j) throw ();
+
+
+  /// Set the facing grid neighbor of all zones on the given axis (0
+  /// to 2) and face (0 to 1).  No error checking is performed on
+  /// axis or face.
+
+  void entry (int axis, int face, int value) throw ()
+  { 
+    for (int i=0; i<n1_[axis]; i++) {
+      for (int j=0; j<n2_[axis]; j++) {
+	entry_[axis][face][i+n1_[axis]*j] = value; 
       }
     }
   };
