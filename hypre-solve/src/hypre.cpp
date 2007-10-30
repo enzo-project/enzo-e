@@ -623,7 +623,7 @@ void Hypre::init_matrix_clear_ (Level & level)
 
     HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
     // Need to clear under rhs also
-    //   HYPRE_SStructFACZeroAMRVectorData(b, plevels, prefinements);
+    //   HYPRE_SStructFACZeroAMRVectorData(B_, plevels, prefinements);
   }
 }
 
