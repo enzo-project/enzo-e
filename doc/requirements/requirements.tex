@@ -93,7 +93,7 @@
    efficiency, memory usage, memory reference and floating point
    operation counts, and disk usage.
 
-% Input files (small I/O)
+% Control
 
    Problems will be specified using an input parameter file.  The set
    of problem parameters available will be sufficient to set up all
@@ -107,7 +107,7 @@
    to read, and easy to post-process using external programs or
    utilities.
    
-%  I/O (big I/O)
+%  I/O
 
    Several options for how data fields and particles are read and
    written to disk will be implemented, to improve flexibility and
@@ -156,12 +156,12 @@
 
 \begin{description}
 
- \item [Control (\S\ref{s:control}): ] Given Physics, Methods, and
- Datastructures, Parallel, Control parameters specify the high-level
- parameters, as well as controling interactions between these
- components.  For example, sequence of physics modules(?), parallel
- dynamic load-balancing, refinement criteria, numerical floors and
- limits, dynamic refinement in subregions, etc.
+ \item [Control (\S\ref{s:control}): ] Control parameters specify the
+ high-level parameters, as well as controling interactions between
+ other components such as Parallel, Method, and Datastructure.  May
+ include sequence and interaction of physics modules, parallel dynamic
+ load-balancing, refinement criteria, numerical floors and limits,
+ dynamic refinement in subregions, etc.
 
  \item [Physics (\S\ref{s:physics}): ] Physics parameters define which
  physics is enabled, and parameters associated with the physics of the
@@ -182,7 +182,8 @@
 
  \item [Field (\S\ref{s:field}): ] Field parameters define all fields
  used in the computation, including their names, and whether they are
- scalar or vector fields
+ scalar or vector fields.  Associates name, subregion, and
+ datastructure.
 
  \item [Matter (\S\ref{s:matter}): ] Matter defines properties of
  different types of matter used in the simulation, such as gas
@@ -474,12 +475,10 @@ Use solid modeling representations?
 
 \begin{verbatim}
    BOX = region {
-      intersect {
-         x > 0
-         x < 1
-         y > 0, y < 1
-         z > 0, z < 1
-      }
+      (x > 0) &&
+      (x < 1) &&
+      (y > 0) && (y < 1) &&
+      (z > 0) && (z < 1)
    }
 \end{verbatim}
 
@@ -492,6 +491,26 @@ Use solid modeling representations?
       }
    }
 \end{verbatim}
+
+\begin{verbatim}
+   region {
+      x = domain:lower[0]
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      x*x + y*y + z*z < 1
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      bitmask = "filename.hdf5"
+   }
+\end{verbatim}
+
+
 %-----------------------------------------------------------------------
 \subsection{Parameters}%
 -----------------------------------------------------------------------
@@ -545,6 +564,20 @@ Scalar and vector fields for each material, such as
 %-----------------------------------------------------------------------
 \subsection{Use Cases}
 %-----------------------------------------------------------------------
+
+\begin{verbatim}
+   Matter {
+      type = dark
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   Matter {
+      type  = gas_ideal
+      gamma = 1.4
+      region { (x < 0) || (x > 1) }
+   }
+\end{verbatim}
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
