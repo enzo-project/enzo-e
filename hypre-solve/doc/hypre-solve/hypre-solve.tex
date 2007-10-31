@@ -36,27 +36,39 @@
    number of processors, description of how to distribute point
    masses, etc.  The output is a file of parameters that specify the
    exact problem to solve, including grid locations, sizes, levels,
-   point mass locations, etc.  This file output by \code{hypre-init}
-   is subsequently input by \code{hypre-solve}, together with
-   solver-specific parameters.  A distributed linear system is
-   assembled and solved using \hypre, and the solution, performance
+   point mass locations, etc.  The file output by \code{hypre-init}
+   can be subsequently input by \code{hypre-solve}.
+   \code{hypre-solve} calls \hypre\ to assemble and solve a
+   distributed linear system, and the solution, performance
    information, solver efficiency information, etc., are output.
-
-%    \note{top-level diagram: problem description $\Rightarrow$
-%   \code{hypre-init} $\Rightarrow$ problem specification $\Rightarrow$
-%   \code{hypre-solve} $\Rightarrow$ problem results}
 
 %======================================================================
 \section{Roadmap and Milestones}
 %======================================================================
 
-\begin{enumerate}
-\item \todo\ Unigrid Poisson
-\item \todo\ AMR Poisson with $R=2$
-\item \todo\ AMR Poisson with $R=2^k$
-\item \todo\ AMR Poisson with arbitrary $R$
-\item \todo\ General $7$-point stencil
-\end{enumerate}
+
+\begin{description}
+\item[Driver: ] \code{hypre-solve} (H), \enzo\ (E)
+\item[Equation: ] Poisson (P), diffusion equation (D)
+\item[Datastructure: ] Unigrid (U), AMR (A)
+\item[AMR refinement: ] $R=2$ (2), $R=2^k$ (2k), arbitrary $R$ (*)
+\item[AMR discretization: ] piecewise constant (C), linear (L), quadratic (Q)
+\end{description}
+
+\begin{tabular}{cl|cc|cc|cc|ccc|ccc}
+Done & \multicolumn{1}{c}{Description} & H&E & P&D & U&A & 2&[2k]&[*] & C&[L]&[Q] \\ \hline
+\done & Unigrid Poisson equation & \done&\todo & \done&\todo & \done&\todo & \done&\todo&\todo & \done&\todo&\todo \\
+\todo &AMR Poisson equation  & \done&\todo & \done&\todo & \todo&\done & \done&\todo&\todo & \done&\todo&\todo \\ \hline
+\todo &Unigrid Diffusion equation& \done&\todo & \todo&\done& \done&\todo & \done&\todo&\todo & \done&\todo&\todo  \\
+\todo  &AMR Diffusion equation& \done&\todo & \todo&\done& \todo&\done & \done&\todo&\todo & \done&\todo&\todo \\  \hline
+\todo  &piecewise linear Poisson & \done&\todo & \done&\todo & \todo&\done & \done&\todo&\todo & \todo&\done&\todo \\
+\todo  &  piecewise linear Diffusion & \done&\todo & \todo&\done& \todo&\done & \done&\todo&\todo & \todo&\done&\todo \\  
+\todo &piecewise quadratic Poisson & \done&\todo & \done&\todo& \todo&\done & \done&\todo&\todo & \todo&\todo&\done \\  
+\todo &piecewise quadratic Diffusion & \done&\todo & \todo&\done& \todo&\done & \done&\todo&\todo & \todo&\todo&\done \\  \hline
+\todo &$2^k$ refinement factors  & \done&\todo & \todo&\done& \todo&\done & \todo&\done&\todo & \done&\todo&\todo\\
+\todo & arbitrary refinement factors & \done&\todo & \todo&\done& \todo&\done & \todo&\todo&\done & \done&\todo&\todo \\  \hline
+\todo &port to \enzo & \todo&\done & \fade&\fade& \fade&\fade & \fade&\fade&\fade & \fade&\fade&\fade
+\end{tabular}
 
 %======================================================================
 \section{Components}
@@ -65,8 +77,6 @@
 %-----------------------------------------------------------------------
 \subsection{\code{hypre-init}} \label{ss:hypre-init}
 %-----------------------------------------------------------------------
-
-\subsubsection{Input}  \label{sss:hypre-init-input}
 
 \begin{tabbing}
 xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
@@ -82,41 +92,11 @@ xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \> \todo\ \code{solver} \> \code{\{"fac"\} method}
 \end{tabbing}
 
-\subsubsection{Output} \label{sss:hypre-init-output}
-
-See \S\ref{sss:hypre-solve-input}.
-
-
-% \textbf{Input}
-% 
-% \begin{tabbing}
-% xxxxx\=xxx\=\kill\\ 
-% \> \todo \>  Maximum number of point masses \\
-% \> \todo \>  Description of probability distribution of point masses \\
-% \> \todo \>  Number of spheres \\
-% \> \todo \>  Positions of spheres \\
-% \> \todo \>  Masses of spheres \\
-% \> \todo \>  Extents of the domain \\
-%  \\
-% \> \todo \>  Lower bound on grid sizes \\
-% \> \todo \>  Upper bound on grid sizes \\
-% \> \todo \>  Upper bound on number of grids \\
-%  \\
-% \> \todo \>  AMR hierarchy depth \\
-% \> \todo \>  AMR Refinement factor (2,3,4) \\
-% \end{tabbing}
-% 
-% \textbf{Output}
-% 
-%  depth of refinement point layer around point masses
-%  depth of refinement point layer around spheres
 
 
 %-----------------------------------------------------------------------
 \subsection{\code{hypre-solve}}  \label{ss:hypre-solve}
 %-----------------------------------------------------------------------
-
-\subsubsection{Input} \label{sss:hypre-solve-input}
 
 The following table lists the input parameters to \code{hypre-solve}.
 
@@ -142,7 +122,7 @@ xxxxx\=xxxxxxxxxxx\=\kill
 \end{tabbing}
 
 
-\subsubsection{Output}  \label{sss:hypre-solve-output}
+The output of \code{hypre-solve} is a file containing the following:
 
 \begin{tabbing}
 xxxxx\=xxxxxxxxxxxxxx\=\kill
@@ -160,24 +140,89 @@ xxxxx\=xxxxxxxxxxxxxx\=\kill
 
 
 %======================================================================
-\section{Using \hypre}
+\section{\code{hypre-solve} Design} \label{s:design}
 %======================================================================
+
+%-----------------------------------------------------------------------
+\subsection{Top-level design} \label{ss:design}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{hypre-solve.cpp}}
+
+%-----------------------------------------------------------------------
+\subsubsection{\code{hypre.cpp}}
+
+%-----------------------------------------------------------------------
+\subsection{Classes} \label{ss:classes}
+%-----------------------------------------------------------------------
+
+
+%-----------------------------------------------------------------------
+\subsubsection{AMR classes}
+
+
+%\begin{center}
+%\epsfig{file=uml/hierarchy.1,width=0.75in}
+%\end{center}
+%\begin{center}
+%\epsfig{file=uml/class-hierarchy.1,width=1.5in}
+%\end{center}
+%\begin{center}
+%\epsfig{file=uml/class-level.1,width=1.5in}
+%\end{center}
+%\begin{center}
+%\epsfig{file=uml/grid.1,     width=2.00in}
+%\end{center}
+%\begin{center}
+%\epsfig{file=uml/class-grid.1,width=2.5in}
+%\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{Problem classes}
+
+\code{Problem}, \code{Sphere}, and \code{Point}
+
+%\begin{center}
+%\epsfig{file=uml/class-problem.1,width=2.0in}
+%\end{center}
+%\begin{center}
+%\epsfig{file=uml/class-sphere.1,width=1.0in}
+%\end{center}
+%\begin{center}
+%\epsfig{file=uml/class-point.1,width=1.0in}
+%\end{center}
+
+%-----------------------------------------------------------------------
+\subsubsection{Discretization classes}
+
+
+%\begin{center}
+%\epsfig{file=uml/class-discret.1,width=2.5in}
+%\end{center}
+%\begin{center}
+%\epsfig{file=uml/class-hypre.1,width=2.0in}
+%\end{center}
+
+%-----------------------------------------------------------------------
+\subsection{\hypre\ interface}
+%-----------------------------------------------------------------------
 
 This section describes the sequence of calls in \hypre\ used for
 setting up a linear system on an AMR hierarchy, and then solving it.
 
 \begin{enumerate}
-\item Initialize \hypre\ grids (\S\ref{ss:hypre-grids}) (\code{Hypre::init\_hierarchy()})
-\item Initialize \hypre\ stencil (\S\ref{ss:hypre-stencil}) (\code{Hypre::init\_stencil()})
-\item Initialize \hypre\ graph (\S\ref{ss:hypre-graph}) (\code{Hypre::init\_graph()})
-\item Initialize \hypre\ matrix (\S\ref{ss:hypre-matrix}) (\code{Hypre::init\_matrix()})
-\item Initialize \hypre\ vectors (\S\ref{ss:hypre-vectors}) (\code{Hypre::init\_rhs()})
-\item Initialize \hypre\ solvers (\S\ref{ss:hypre-solvers}) (\code{Hypre::init\_solver()})
+\item Initialize \hypre\ grids (\S\ref{sss:hypre-grids}) (\code{Hypre::init\_hierarchy()})
+\item Initialize \hypre\ stencil (\S\ref{sss:hypre-stencil}) (\code{Hypre::init\_stencil()})
+\item Initialize \hypre\ graph (\S\ref{sss:hypre-graph}) (\code{Hypre::init\_graph()})
+\item Initialize \hypre\ matrix (\S\ref{sss:hypre-matrix}) (\code{Hypre::init\_matrix()})
+\item Initialize \hypre\ vectors (\S\ref{sss:hypre-vectors}) (\code{Hypre::init\_rhs()})
+\item Initialize \hypre\ solvers (\S\ref{sss:hypre-solvers}) (\code{Hypre::init\_solver()})
 \item Apply \hypre\ solver (\code{Hypre::solve()})
 \end{enumerate}
 
 %-----------------------------------------------------------------------
-\subsection{Initialize \hypre\ grids} \label{ss:hypre-grids}
+\subsubsection{Initialize \hypre\ grids} \label{sss:hypre-grids}
 %-----------------------------------------------------------------------
 
 For each grid patch it owns, each processor creates a \hypre\ grid
@@ -198,7 +243,7 @@ zones for setting up the inter-level grid elements, \hypresolve\ has
 its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 
 %-----------------------------------------------------------------------
-\subsection{Initialize \hypre\ stencil} \label{ss:hypre-stencil}
+\subsubsection{Initialize \hypre\ stencil} \label{sss:hypre-stencil}
 %-----------------------------------------------------------------------
 
   Create the stencil object which defines the matrix nonzeros within each grid.
@@ -209,7 +254,7 @@ its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Initialize \hypre\ graph} \label{ss:hypre-graph}
+\subsubsection{Initialize \hypre\ graph} \label{sss:hypre-graph}
 %-----------------------------------------------------------------------
 
  Each processor creates a graph containing the nonzero structure of
@@ -223,7 +268,7 @@ its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Initialize \hypre\ matrix} \label{ss:hypre-matrix}
+\subsubsection{Initialize \hypre\ matrix} \label{sss:hypre-matrix}
 %-----------------------------------------------------------------------
 
 \begin{itemize}
@@ -235,7 +280,7 @@ its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Initialize \hypre\ vectors} \label{ss:hypre-vectors}
+\subsubsection{Initialize \hypre\ vectors} \label{sss:hypre-vectors}
 %-----------------------------------------------------------------------
 
 \begin{itemize}
@@ -246,126 +291,11 @@ its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsection{Initialize \hypre\ solvers} \label{ss:hypre-solvers}
+\subsubsection{Initialize \hypre\ solvers} \label{sss:hypre-solvers}
 %-----------------------------------------------------------------------
 
 %=======================================================================
-\section{Design} \label{s:design}
-%=======================================================================
-
-%-----------------------------------------------------------------------
-\section{Classes} \label{ss:classes}
-%-----------------------------------------------------------------------
-
-%-----------------------------------------------------------------------
-\subsection{AMR classes}
-
-The AMR hierarchy is represented using the trio of classes
-\code{hierarchy}, \code{Level}, and \code{Grid}.  A \code{Grid} is a
-box in space, and is decomposed into \code{GridLocal} and
-\code{GridRemote} classes (see \S\ref{sss:class-grid}).  Each
-\code{GridLocal} object has some number of \code{Field} objects
-associated with them (see \S\ref{sss:class-field}), though the
-\code{GridLocal} objects themselves do not store field data
-themselves.  A \code{Level} class is also either a ``structured''
-\code{LevelStruct} or an ``unstructured'' \code{LevelUnstruct}.
-Structured levels are composed of a regular array of \code{Grid}s, and
-is typically used for unigrid calculations or the root level of an AMR
-calculation.  Unstructured levels are typically used for non-root
-levels of an AMR calulation.
-
-\begin{center}
-\epsfig{file=uml/hierarchy.1,width=0.75in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Hierarchy} class} \label{sss:class-hierarchy}
-
-\begin{center}
-\epsfig{file=uml/class-hierarchy.1,width=1.5in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Level} class} \label{sss:class-level}
-
-\begin{center}
-\epsfig{file=uml/class-level.1,width=1.5in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Grid} class} \label{sss:class-grid}
-
-\begin{center}
-\epsfig{file=uml/grid.1,     width=2.00in}
-\end{center}
-
-
-\begin{center}
-\epsfig{file=uml/class-grid.1,width=2.5in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsection{Problem classes}
-
-\code{Problem}, \code{Sphere}, and \code{Point}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Problem} class} \label{sss:class-problem}
-
-\begin{center}
-\epsfig{file=uml/class-problem.1,width=2.0in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Sphere} class} \label{sss:class-sphere}
-
-\begin{center}
-\epsfig{file=uml/class-sphere.1,width=1.0in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsection{Discretization classes}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Discret} class} \label{sss:class-discret}
-
-\begin{center}
-\epsfig{file=uml/class-discret.1,width=2.5in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Hypre} class}  \label{sss:class-hypre}
-
-\begin{center}
-\epsfig{file=uml/class-hypre.1,width=2.0in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Mpi} class} \label{sss:class-mpi}
-
-\begin{center}
-\epsfig{file=uml/class-mpi.1,width=1.5in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Point} class} \label{sss:class-point}
-
-\begin{center}
-\epsfig{file=uml/class-point.1,width=1.0in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Field} class} \label{sss:class-field}
-
-\begin{center}
-\epsfig{file=uml/field.1,     width=0.75in}
-\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{\code{Array} class} \label{sss:class-array}
-
-%=======================================================================
-\section{Discretization} \label{s:discretization}
+\subsection{Problem discretization} \label{ss:discretization}
 %=======================================================================
 
 \newcommand{\indvar}{r}
@@ -413,11 +343,11 @@ levels of an AMR calulation.
 We wish to discretize $- \nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
 on a structured AMR hierarchy with arbitrary refinement factor $r$
 between successive levels.  We consider discretizing within levels in
-\S\ref{ss:discret-within-levels}, and between
-levels in \S\ref{ss:discret-between-levels}.
+\S\ref{sss:discret-unigrid}, and between
+levels in \S\ref{sss:discret-amr}.
 
 %-----------------------------------------------------------------------
-\subsection{Discretization within levels} \label{ss:discret-within-levels}
+\subsubsection{Unigrid Discretization} \label{sss:discret-unigrid}
 %-----------------------------------------------------------------------
 
 We wish to discretize $- \nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
@@ -469,7 +399,7 @@ each side by $C_h \equiv (-h^2)$, then we have
  \alc   \equiv  6 \]
 
 %-----------------------------------------------------------------------
-\subsection{Discretization between levels} \label{ss:discret-between-levels}
+\subsubsection{AMR Discretization} \label{sss:discret-amr}
 %-----------------------------------------------------------------------
 
 All inter-level discretizations involve zones along a patch boundary;
@@ -636,12 +566,10 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 \subsubsection{discretization along face-zones}
 
 By default, zone connections are defined using stencil connections defined
-using \hypre\ stencil values, which we derive in \S\ref{ss:discret-within-levels}.
+using \hypre\ stencil values, which we derive in \S\ref{sss:discret-unigrid}.
 Below, we derive modifications for each category of face-zone.
 
 \textbf{boundary face-zones}.
-
-
 
 \textbf{covered face-zones}.
 
@@ -657,13 +585,16 @@ Below, we derive modifications for each category of face-zone.
 
 \begin{center}
 \begin{minipage}{1.25in}
-\epsfig{file=fig/stencil0.eps,width=1.25in}
+\epsfig{file=fig/stencil0.eps,width=1.25in} \\
+\centerline{Piecewise constant}
 \end{minipage} \ \ \ 
 \begin{minipage}{1.25in}
-\epsfig{file=fig/stencil1.eps,width=1.25in}
+\epsfig{file=fig/stencil1.eps,width=1.25in} \\
+\centerline{Piecewise linear}
 \end{minipage} \ \ \ 
 \begin{minipage}{1.25in}
-\epsfig{file=fig/stencil2.eps,width=1.25in}
+\epsfig{file=fig/stencil2.eps,width=1.25in} \\
+\centerline{Piecewise quadratic}
 \end{minipage}
 \end{center}
 
@@ -699,65 +630,6 @@ Below, we derive modifications for each category of face-zone.
 \end{minipage}
 \end{center}
 
-Grid patches are controlled using
-\begin{itemize}
-\item \code{HYPRE\_SStructGridCreate()}
-\item \code{HYPRE\_SStructGridSetExtents()}
-\item \code{HYPRE\_SStructGridSetVariables()}
-\item \code{HYPRE\_SStructGridSetNeighborBox()}
-\item \code{HYPRE\_SStructGridAssemble()}
-\item \code{HYPRE\_SStructGridSetNumGhost()}
-\item \code{HYPRE\_SStructGridDestroy()}
-\end{itemize}
-
-Stencils are controlled using
-\begin{itemize}
-\item \code{HYPRE\_SStructStencilCreate()}
-\item \code{HYPRE\_SStructStencilSetEntry()}
-\item \code{HYPRE\_SStructStencilDestroy()}
-\end{itemize}
-
-Graphs are controlled using
-\begin{itemize}
-\item \code{HYPRE\_SStructGraphCreate()}
-\item \code{HYPRE\_SStructGraphSetStencil()}
-\item \code{HYPRE\_SStructGraphAddEntry()}
-\item \code{HYPRE\_SStructGraphSetObjectType()}
-\item \code{HYPRE\_SStructGraphAssemble()}
-\item \code{HYPRE\_SStructGraphDestroy()}
-\end{itemize}
-
-Matrices are controlled using
-\begin{itemize}
-\item \code{HYPRE\_SStructMatrixCreate()}
-\item \code{HYPRE\_SStructMatrixInitialize()}
-\item \code{HYPRE\_SStructMatrixGetObject()}
-\item \code{HYPRE\_SStructMatrixSetObjectType()}
-\item \code{HYPRE\_SStructMatrixSetValues()}
-\item \code{HYPRE\_SStructMatrixAddToValues()}
-\item \code{HYPRE\_SStructMatrixSetBoxValues()}
-\item \code{HYPRE\_SStructMatrixAddToBoxValues()}
-\item \code{HYPRE\_SStructMatrixDestroy()}
-\item \code{HYPRE\_SStructMatrixPrint()}
-\end{itemize}
-
-Vectors are controlled using:
-\begin{itemize}
-\item \code{HYPRE\_SStructVectorCreate()}
-\item \code{HYPRE\_SStructVectorInitialize()}
-\item \code{HYPRE\_SStructVectorGetObject()}
-\item \code{HYPRE\_SStructVectorSetObjectType()}
-\item \code{HYPRE\_SStructVectorSetValues()}
-\item \code{HYPRE\_SStructVectorAddToValues()}
-\item \code{HYPRE\_SStructVectorSetBoxValues()}
-\item \code{HYPRE\_SStructVectorAddToBoxValues()}
-\item \code{HYPRE\_SStructVectorDestroy()}
-\item \code{HYPRE\_SStructVectorPrint()}
-\end{itemize}
-
-
-
-
 Types of matrix elements for a given unknown:
 
 \begin{tabular}{ll}
@@ -771,9 +643,22 @@ Types of matrix elements for a given unknown:
 \textcolor{yellow}{coarse-fine neighbor--child} & \code{HYPRE\_SStructGraphAddEntries()}\\
 \end{tabular}
 
+
+%-----------------------------------------------------------------------
+\subsection{Porting to \enzo}
+%-----------------------------------------------------------------------
+
 %=======================================================================
 \section{Test Results} \label{s:results}
 %=======================================================================
+
+\begin{itemize}
+\item Accuracy
+\item Performance
+\item Scaling
+\item Robustness
+\end{itemize}
+
 
 \begin{tabular}{l|l} \\
 \textbf{Term} & \textbf{Term description} \\ \hline
