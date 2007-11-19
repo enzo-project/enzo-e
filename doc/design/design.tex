@@ -11,7 +11,7 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Software Design Document}{James Bordner}{unigrid hydro}
+\TITLE{Software Design Description}{James Bordner}{unigrid hydro}
 %=======================================================================
 
 \tableofcontents
@@ -284,6 +284,20 @@ AMR grid hierarchy (\code{Hierarchy}, where a level is defined as all
 grid patches (\code{Grid}s) that have the same resolution.  A \code{Level}
 is usually contained in a \code{Hierarchy}.
 
+% The AMR hierarchy is represented using the trio of classes
+% \code{Hierarchy}, \code{Level}, and \code{Grid}.
+%   A \code{Grid} is a
+% box in space, and is decomposed into \code{GridLocal} and
+% \code{GridRemote} classes (see \S\ref{sss:class-grid}).  Each
+% \code{GridLocal} object has some number of \code{Field} objects
+% associated with them (see \S\ref{sss:class-field}), though the
+% \code{GridLocal} objects themselves do not store field data
+% themselves.  A \code{Level} class is also either a ``structured''
+% \code{LevelStruct} or an ``unstructured'' \code{LevelUnstruct}.
+% Structured levels are composed of a regular array of \code{Grid}s, and
+% is typically used for unigrid calculations or the root level of an AMR
+% calculation.  Unstructured levels are typically used for non-root
+% levels of an AMR calulation.
 
 \subsubsection{Attributes}
 
