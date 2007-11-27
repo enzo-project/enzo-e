@@ -398,7 +398,7 @@ public:
   //--------------------------------------------------------------------
 
   ItHierarchyLevelsReverse (Hierarchy & hierarchy) throw ()
-    : curr_(hierarchy_->levels0_.size()-1), hierarchy_(&hierarchy)
+    : curr_(hierarchy.levels0_.size()-1), hierarchy_(&hierarchy)
   { }
 
   ItHierarchyLevelsReverse (const ItHierarchyLevelsReverse & it)
