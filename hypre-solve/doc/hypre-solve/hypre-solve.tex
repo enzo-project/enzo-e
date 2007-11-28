@@ -146,86 +146,40 @@ xxxxx\=xxxxxxxxxxxxxx\=\kill
 %======================================================================
 
 %-----------------------------------------------------------------------
-\subsection{Top-level design} \label{ss:design}
+\subsection{Functions} \label{ss:design}
 %-----------------------------------------------------------------------
 
-%-----------------------------------------------------------------------
-\subsubsection{\code{hypre-solve.cpp}}
+The \code{main()} function is in \code{hypre-solve.cpp}.  The main
+function begins by reading in the input file, and initializing its
+representation of the AMR hierarchy.  Next it calls \hypre\
+to have it generate its internal representation of 
+the hierarchy, stencil, graph, and linear system.  Then it
+calls \hypre\ to solve the linear system, and finally it calls
+a function to evaluate evaluate the solution and output 
+information about the success of the solve.  Classes \code{problem},
+\code{hierarchy}, and \code{hypre} are used to organize the functions.
+The high-level  calling code structure is shown below.
+
+\begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxx\=\kill
+\code{\textbf{main()}} \\
+\textit{// Initialization} \\
+\> \code{problem.read()} \> \textit{// Problem initialization} \\
+\> \code{hierarchy.initialize()} \> \textit{// Initialize the hierarchy} \\
+\textit{// \hypre\ setup} \\
+\> \code{hypre.init\_hierarchy()} \> \textit{// Initialize \hypre} \\
+\> \code{hypre.init\_stencil()} \> \textit{// Initialize \hypre's stencils} \\
+\> \code{hypre.init\_graph()} \> \textit{// Initialize \hypre's graph} \\
+\> \code{hypre.init\_linear()} \> \textit{// Initialize \hypre's linear system} \\
+\textit{// \hypre\ solve} \\
+\> \code{hypre.solve()} \> \textit{// Call \hypre\ to solve the linear system} \\
+\textit{// Evaluate} \\
+\> \code{hypre.evaluate()} \> \textit{// Evaluate and report on the solve} \\
+\end{tabbing}
 
 %-----------------------------------------------------------------------
-\subsubsection{\code{hypre.cpp}}
+\subsubsection{\code{hypre.init\_hierarchy()}}
 
-%-----------------------------------------------------------------------
-\subsection{Classes} \label{ss:classes}
-%-----------------------------------------------------------------------
-
-
-%-----------------------------------------------------------------------
-\subsubsection{AMR classes}
-
-
-%\begin{center}
-%\epsfig{file=uml/hierarchy.1,width=0.75in}
-%\end{center}
-%\begin{center}
-%\epsfig{file=uml/class-hierarchy.1,width=1.5in}
-%\end{center}
-%\begin{center}
-%\epsfig{file=uml/class-level.1,width=1.5in}
-%\end{center}
-%\begin{center}
-%\epsfig{file=uml/grid.1,     width=2.00in}
-%\end{center}
-%\begin{center}
-%\epsfig{file=uml/class-grid.1,width=2.5in}
-%\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{Problem classes}
-
-\code{Problem}, \code{Sphere}, and \code{Point}
-
-%\begin{center}
-%\epsfig{file=uml/class-problem.1,width=2.0in}
-%\end{center}
-%\begin{center}
-%\epsfig{file=uml/class-sphere.1,width=1.0in}
-%\end{center}
-%\begin{center}
-%\epsfig{file=uml/class-point.1,width=1.0in}
-%\end{center}
-
-%-----------------------------------------------------------------------
-\subsubsection{Discretization classes}
-
-
-%\begin{center}
-%\epsfig{file=uml/class-discret.1,width=2.5in}
-%\end{center}
-%\begin{center}
-%\epsfig{file=uml/class-hypre.1,width=2.0in}
-%\end{center}
-
-%-----------------------------------------------------------------------
-\subsection{\hypre\ interface}
-%-----------------------------------------------------------------------
-
-This section describes the sequence of calls in \hypre\ used for
-setting up a linear system on an AMR hierarchy, and then solving it.
-
-\begin{enumerate}
-\item Initialize \hypre\ grids (\S\ref{sss:hypre-grids}) (\code{Hypre::init\_hierarchy()})
-\item Initialize \hypre\ stencil (\S\ref{sss:hypre-stencil}) (\code{Hypre::init\_stencil()})
-\item Initialize \hypre\ graph (\S\ref{sss:hypre-graph}) (\code{Hypre::init\_graph()})
-\item Initialize \hypre\ matrix (\S\ref{sss:hypre-matrix}) (\code{Hypre::init\_matrix()})
-\item Initialize \hypre\ vectors (\S\ref{sss:hypre-vectors}) (\code{Hypre::init\_rhs()})
-\item Initialize \hypre\ solvers (\S\ref{sss:hypre-solvers}) (\code{Hypre::init\_solver()})
-\item Apply \hypre\ solver (\code{Hypre::solve()})
-\end{enumerate}
-
-%-----------------------------------------------------------------------
-\subsubsection{Initialize \hypre\ grids} \label{sss:hypre-grids}
-%-----------------------------------------------------------------------
 
 For each grid patch it owns, each processor creates a \hypre\ grid
 object defining the grid's extents and variables.  
@@ -234,6 +188,7 @@ object defining the grid's extents and variables.
 \item \code{HYPRE\_SStructGridCreate()}
 \item \code{HYPRE\_SStructGridSetExtents()}
 \item \code{HYPRE\_SStructGridSetVariables()}
+\item \code{HYPRE\_SStructGridSetPeriodic()}
 \item \code{HYPRE\_SStructGridAssemble()}
 \end{itemize}
 
@@ -245,8 +200,8 @@ zones for setting up the inter-level grid elements, \hypresolve\ has
 its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 
 %-----------------------------------------------------------------------
-\subsubsection{Initialize \hypre\ stencil} \label{sss:hypre-stencil}
-%-----------------------------------------------------------------------
+\subsubsection{\code{hypre.init\_stencil()}}
+
 
   Create the stencil object which defines the matrix nonzeros within each grid.
 
@@ -256,8 +211,8 @@ its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsubsection{Initialize \hypre\ graph} \label{sss:hypre-graph}
-%-----------------------------------------------------------------------
+\subsubsection{\code{hypre.init\_graph()}}
+
 
  Each processor creates a graph containing the nonzero structure of
  the matrix.
@@ -270,31 +225,90 @@ its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 \end{itemize}
 
 %-----------------------------------------------------------------------
-\subsubsection{Initialize \hypre\ matrix} \label{sss:hypre-matrix}
-%-----------------------------------------------------------------------
+\subsubsection{\code{hypre.init\_linear()}}
+
+First \hypre\ initialization routines are called to create
+a new matrix $A$ and vectors $B$ and $X$.
 
 \begin{itemize}
 \item \code{HYPRE\_SStructMatrixCreate()}
-\item \code{HYPRE\_SStructMatrixInitialize()}
-\item \code{HYPRE\_SStructMatrixSetBoxValues()}
-\item \code{HYPRE\_SStructMatrixSetValues()}
-\item \code{HYPRE\_SStructMatrixAssemble()}
+\item \code{HYPRE\_SStructVectorCreate()}
 \end{itemize}
 
-%-----------------------------------------------------------------------
-\subsubsection{Initialize \hypre\ vectors} \label{sss:hypre-vectors}
-%-----------------------------------------------------------------------
+Next, the matrix type is set.
 
 \begin{itemize}
-\item \code{HYPRE\_SStructVectorCreate()}
+\item \code{HYPRE\_SStructMatrixSetObjectType()}
+\end{itemize}
+
+Then the \hypre\ matrix and vector objects are initialized.
+
+\begin{itemize}
+\item \code{HYPRE\_SStructMatrixInitialize()}
 \item \code{HYPRE\_SStructVectorInitialize()}
-\item \code{HYPRE\_SStructVectorSetBoxValues()}
+\end{itemize}
+
+Matrix stencil values are set first, grid-by-grid.
+
+      init\_matrix\_stencil\_(*grid);
+
+\begin{itemize}
+\item \code{HYPRE\_SStructMatrixSetBoxValues ()}
+\end{itemize}
+
+For AMR problems, stencil connections between levels (parts) are then
+cleared level-by-level.
+
+    init\_matrix\_clear\_(*level);
+
+\begin{itemize}
+\item \code{HYPRE\_SStructFACZeroCFSten()}
+\item \code{HYPRE\_SStructFACZeroFCSten()}
+\item \code{HYPRE\_SStructFACZeroAMRMatrixData()}
+\end{itemize}
+
+Non-stencil matrix values are then set, on grid face-by-face.
+
+      init\_matrix\_nonstencil\_(*grid);
+
+\begin{itemize}
+\item \code{HYPRE\_SStructMatrixAddToValues()}
+\end{itemize}
+
+The right-hand-side vector $B$ is initialized.
+
+\begin{itemize}
+\item \code{HYPRE\_SStructVectorAddToBoxValues()}
+\end{itemize}
+
+And lastly, the matrix and vectors are assembled to finalize their
+initialization.
+
+\begin{itemize}
+\item \code{HYPRE\_SStructMatrixAssemble()}
 \item \code{HYPRE\_SStructVectorAssemble()}
 \end{itemize}
 
+
 %-----------------------------------------------------------------------
-\subsubsection{Initialize \hypre\ solvers} \label{sss:hypre-solvers}
+\subsubsection{\code{hypre.solve()}}
+
 %-----------------------------------------------------------------------
+\subsubsection{\code{hypre.evaluate()}}
+
+%-----------------------------------------------------------------------
+\subsection{Classes} \label{ss:classes}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsubsection{Problem classes}
+
+\code{Problem}, \code{Sphere}, and \code{Point}
+
+%-----------------------------------------------------------------------
+\subsubsection{Hierarchy classes}
+
+\code{Hierarchy}, \code{Level}, and \code{Grid}
 
 %=======================================================================
 \section{Discretization} \label{s:discretization}
@@ -344,12 +358,16 @@ its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 
 We wish to discretize $\nabla\cdot(\ac \nabla \uc) = \bar{\rho}$
 on a structured AMR hierarchy with arbitrary refinement factor $r$
-between successive levels.  We consider discretizing within levels in
-\S\ref{sss:discret-unigrid}, and between
-levels in \S\ref{sss:discret-amr}.
+between successive levels.  This task can be broken down into
+discretizing within a uniform grid level, between grid patches in
+adjacent hierarchy levels, and at the domain boundary.  
+We consider discretizing within levels in
+\S\ref{ss:discret-unigrid}, between
+levels in \S\ref{ss:discret-amr}, and at the domain boundary in
+\S\ref{ss:discret-boundary}.
 
 %-----------------------------------------------------------------------
-\subsection{Unigrid Discretization} \label{sss:discret-unigrid}
+\subsection{Unigrid Discretization} \label{ss:discret-unigrid}
 %-----------------------------------------------------------------------
 
 We wish to discretize the diffusion equation $\nabla\cdot(\ac \nabla
@@ -402,7 +420,7 @@ side by $C_h \equiv (-h^2)$, then we have
  \alc   \equiv  6 \]
 
 %-----------------------------------------------------------------------
-\subsection{AMR Discretization} \label{sss:discret-amr}
+\subsection{AMR Discretization} \label{ss:discret-amr}
 %-----------------------------------------------------------------------
 
 All inter-level discretizations involve zones along a patch boundary;
@@ -608,7 +626,7 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 %-----------------------------------------------------------------------
 
 By default, zone connections are defined using stencil connections defined
-using \hypre\ stencil values, which we derive in \S\ref{sss:discret-unigrid}.
+using \hypre\ stencil values, which we derive in \S\ref{ss:discret-unigrid}.
 Below, we derive modifications for each category of face-zone.
 
 \textbf{boundary face-zones}.
@@ -685,6 +703,9 @@ Types of matrix elements for a given unknown:
 \textcolor{yellow}{coarse-fine neighbor--child} & \code{HYPRE\_SStructGraphAddEntries()}\\
 \end{tabular}
 
+%-----------------------------------------------------------------------
+\subsection{Boundary Discretization} \label{ss:discret-boundary}
+%-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Porting to \enzo}
