@@ -1,4 +1,11 @@
-ALL = project requirements design testing manual-devel manual-user algorithms
+ALL = project \
+      requirements \
+      design \
+      testing \
+      manual-devel \
+      manual-user \
+      manual-reference \
+      algorithms
 
 .PHONY: all
 all: $(ALL)
