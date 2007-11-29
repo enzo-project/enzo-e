@@ -1,4 +1,4 @@
-ALL = project requirements design testing developer user algorithms
+ALL = project requirements design testing guide-devel guide-user algorithms
 
 .PHONY: all
 all: $(ALL)
@@ -20,12 +20,12 @@ testing:
 algorithms: 
 	cd algorithms; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C algorithms
-developer: 
-	cd developer; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C developer
-user: 
-	cd user; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C user
+guide-devel: 
+	cd guide-devel; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C guide-devel
+guide-user: 
+	cd guide-user; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C guide-user
 
 #-----------------------------------------------------------------------
 
