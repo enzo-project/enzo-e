@@ -177,8 +177,9 @@
  and dimensionality.
 
  \item [Region (\S\ref{s:region}): ] A region is a subset of the
- domain.  Regions are used whenever problem characteristics or
- computation varries between different regions.
+ domain.  Regions are used whenever problem characteristics,
+ datastructure behavior, or physics computations vary between
+ different spacial regions.
 
  \item [Field (\S\ref{s:field}): ] Field parameters define all fields
  used in the computation, including their names, and whether they are
@@ -187,13 +188,13 @@
 
  \item [Matter (\S\ref{s:matter}): ] Matter defines properties of
  different types of matter used in the simulation, such as gas
- constant, dark matter, etc.
+ constants, dark matter, etc.
 
  \item [Method (\S\ref{s:method}): ] Method parameters specify the
  method to use for each physics component, and any associated
  method-specific parameters.
 
- \item [Datastructure (\S\ref{s:data}): ] Datastructure parameters
+ \item [Datastructure (\S\ref{s:data}): ] Data structure parameters
  include listing which data structures to use (unigrid, SAMR,
  particles, subblocks, etc.), as well as all associated parameters
  (unigrid resolution, SAMR mesh levels, particle attributes, subblock
@@ -604,18 +605,46 @@ Scalar and vector fields for each material, such as
 %-----------------------------------------------------------------------
 
 %=======================================================================
-\section{Datastructure parameters} \label{s:data}
+\section{AMR data structure parameters} \label{s:amr}
 %=======================================================================
 
-Specify data structures and data structure parameters, such as number
-of mesh levels, AMR method, grid patch properties, rebuild algorithm,
-dynamic load balancing, refinement criteria, grid patch sub-block size
-for cache reuse, etc.
-
-Field storage (blocked, padded, interleved)
+Specify data structures and data structure parameters for distributed
+AMR hierarchies, such as number of mesh levels, grid patch properties,
+rebuild algorithm, dynamic load balancing, refinement criteria, etc.
 
 \begin{itemize}
-\item PatchAMR (levels, grid size or count, rebuild method, distribution)
+\item hierarchy
+\begin{item}
+\item min\_levels 
+\item max\_levels 
+\end{item}
+\item level
+\item grid
+\begin{itemize}
+\item min\_size
+\item max\_size
+\item max\_aspect
+\item quantum
+\end{itemize}
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+
+%=======================================================================
+\section{Particle parameters} \label{s:data}
+%=======================================================================
+
+Specifies data structures and data structure parameters related
+to distributed particles.  
+
+\begin{itemize}
+\item min\_group\_size
+\item max\_group\_size
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -784,6 +813,9 @@ Fault tolerance and adaptivity parameters
 %=======================================================================
 
 %=======================================================================
+\subsection{Arrays}
+
+%=======================================================================
 \subsection{Fields}
 
 %=======================================================================
@@ -793,7 +825,7 @@ Fault tolerance and adaptivity parameters
 \subsection{Structured Adaptive Mesh Hierarchies}
 
 %=======================================================================
-\subsection{Continuous Adaptive Mesh Hierarchies}
+\subsection{Octree}
 
 %=======================================================================
 \section{Parallelism}
