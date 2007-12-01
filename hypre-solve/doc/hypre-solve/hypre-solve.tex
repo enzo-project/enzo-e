@@ -92,7 +92,6 @@ xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \> \todo\ \code{sphere} \> \code{\textit{Scalar mass}, \textit{Scalar radius}, \textit{Scalar*3 center}} \\
 \> \todo\  \code{domain\_extents} \\
 \> \todo\  \code{processor\_grid} \\
-\> \todo\ \code{discret} \> \code{\textit{int type}} \\
 \> \todo\  \code{levels} \\
 \> \todo\ \code{solver} \> \code{\{"fac"\} method}
 \end{tabbing}
@@ -110,24 +109,50 @@ xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 The following table lists the input parameters to \code{hypre-solve}.
 
 \begin{tabbing}
-xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{dimension} \> \code{int} \icode{dimension} \\
-\> \todo\ \code{domain} \> \code{Scalar*3} \icode{vertex-lower} \\
-\> \> \code{Scalar*3} \icode{vertex-upper} \\
-\> \done\ \code{sphere} \> \code{Scalar} \icode{mass} \\
-\> \> \code{Scalar} \icode{radius} \\
-\> \> \code{Scalar*3} \icode{center} \\
-\> \done\ \code{point} \> \code{Scalar} \icode{mass} \\
-\> \> \code{Scalar*3} \icode{location} \\
-\> \done\ \code{grid} \> \code{int} \icode{id} \\
-\> \> \code{int} \icode{parent-id} \\
-\> \> \code{int} \icode{processor} \\
-\> \> \code{Scalar} \icode{vertex-lower} \\
-\> \> \code{Scalar} \icode{vertex-upper} \\
-\> \> \code{int*3} \icode{index-lower} \\
-\> \> \code{int*3} \icode{zone-count} \\
-\> \todo\ \code{discret} \> \code{\icode{int} \icode{type}} \\
-\> \todo\ \code{solver} \> \code{\{"fac"\}} \icode{method}
+xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
+\> \done\ \code{dimension} \icode{dimension} \\
+\>\> \icode{dimension}:    \> \code{int}, $1 \le $ \icode{dimension} $\le 3$
+\end{tabbing}
+\begin{tabbing}
+xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
+\> \done\ \code{domain} \icode{dimension} \icode{vertex-lower} \icode{vertex-upper} \\
+\>\> \icode{dimension}:    \> \code{int}, $1 \le $ \icode{dimension} $\le 3$ \\
+\>\> \icode{vertex-lower}: \> \code{Scalar*3}  \\
+\>\> \icode{vertex-upper}: \> \code{Scalar*3}
+\end{tabbing}
+\begin{tabbing}
+xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
+\> \todo\ \code{sphere} \icode{mass} \icode{radius} \icode{center} \\
+\> \> \icode{mass}:        \> \code{Scalar}  \\
+\> \> \icode{radius}:      \> \code{Scalar}  \\
+\> \> \icode{center}       \> \code{Scalar*3}
+\end{tabbing}
+\begin{tabbing}
+xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
+\> \done\ \code{point} \icode{mass} \icode{position} \\
+\> \> \icode{mass}:        \> \code{Scalar}  \\
+\> \> \icode{position}     \> \code{Scalar*3}
+\end{tabbing}
+\begin{tabbing}
+xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
+\> \done\ \code{grid} \icode{id} \icode{parent-id} \icode{processor} \icode{vertex-lower} \icode{vertex-upper} \icode{index-lower} \icode{zone-count}\\
+\> \> \icode{id}:          \> \code{int}  \\
+\> \> \icode{parent-id}:   \> \code{int}  \\
+\> \> \icode{processor}:   \> \code{int}  \\
+\> \> \icode{vertex-lower}:\> \code{Scalar}  \\
+\> \> \icode{vertex-upper}:\> \code{Scalar}  \\
+\> \> \icode{index-lower}: \> \code{int*3}  \\
+\> \> \icode{zone-count}:  \> \code{int*3}
+\end{tabbing}
+\begin{tabbing}
+xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
+\> \todo\ \code{discret} \icode{discret} \\
+\> \> \icode{discret}:     \> \code{int}, $0 \le $ \icode{discret} $\le 2$
+\end{tabbing}
+\begin{tabbing}
+xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
+\> \todo\ \code{solver}  \icode{solver} \\
+\> \> \icode{solver}:     \> \code{string} $\in$ \{ ``\code{fac}'', ``\code{pfmg}'' \}
 \end{tabbing}
 
 
@@ -171,18 +196,27 @@ The high-level  calling code structure is shown below.
 \begin{tabbing}
 xxxxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 \code{\textbf{main()}} \\
-\textit{// Initialization} \\
+\{ \\
+\> \textit{// Initialization} \\
+\\
 \> \code{problem.read()} \> \textit{// Problem initialization} \\
 \> \code{hierarchy.initialize()} \> \textit{// Initialize the hierarchy} \\
-\textit{// \hypre\ setup} \\
+\\
+\> \textit{// \hypre\ setup} \\
+\\
 \> \code{hypre.init\_hierarchy()} \> \textit{// Initialize \hypre} \\
 \> \code{hypre.init\_stencil()} \> \textit{// Initialize \hypre's stencils} \\
 \> \code{hypre.init\_graph()} \> \textit{// Initialize \hypre's graph} \\
 \> \code{hypre.init\_linear()} \> \textit{// Initialize \hypre's linear system} \\
-\textit{// \hypre\ solve} \\
+\\
+\> \textit{// \hypre\ solve} \\
+\\
 \> \code{hypre.solve()} \> \textit{// Call \hypre\ to solve the linear system} \\
-\textit{// Evaluate} \\
+\\
+\> \textit{// Evaluate} \\
+\\
 \> \code{hypre.evaluate()} \> \textit{// Evaluate and report on the solve} \\
+\}
 \end{tabbing}
 
 %-----------------------------------------------------------------------
@@ -496,8 +530,8 @@ the paired face-zone in the neighboring grid is not covered.
 A \textbf{coarse face-zone} is adjacent to a zone in the containing
 patch's parent, or a zone in a neighbor of the containing patch's
 parent.  Each coars face-zone is not covered, and the containing grid
-does not have a neighboring grid adjacent to the face-zone.
-We assume that all adjacent zones must not span more than one level.
+does not have a neighboring grid adjacent to the face-zone.  We assume
+that all adjacent zones must not be more than one level apart.
 \end{minipage}
 
 
