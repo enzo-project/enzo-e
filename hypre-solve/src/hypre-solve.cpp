@@ -132,7 +132,7 @@ int main(int argc, char **argv)
     // Initialize hypre
     // --------------------------------------------------
 
-    Hypre hypre;
+    Hypre hypre (problem.parameters());
 
     // ***************
     JBPERF_START("4-hypre-init");

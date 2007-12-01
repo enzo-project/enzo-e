@@ -66,7 +66,15 @@ Faces::~Faces () throw ()
 // PUBLIC MEMBER FUNCTIONS
 //--------------------------------------------------------------------
 
-int & Faces::entry (int axis, int face, int i, int j) throw ()
+int & Faces::entry_coarse (int axis, int face, int i, int j)  throw ()
+{
+  return entry_(axis,face,i,j,entry_coarse_);
+}
+int & Faces::entry_fine (int axis, int face, int i, int j) throw ()
+{
+  return entry_(axis,face,i,j,entry_fine_);
+}
+int & Faces::entry_ (int axis, int face, int i, int j, int * entry[3][2]) throw ()
 {
   // Remap axis to minimal one if face zone lies on edge or corner
   if (axis==1) {
@@ -97,7 +105,7 @@ int & Faces::entry (int axis, int face, int i, int j) throw ()
       j = i0;
     }
   }
-  return entry_[axis][face][i+n1_[axis]*j];
+  return entry[axis][face][i+n1_[axis]*j];
 }
 
 //----------------------------------------------------------------------

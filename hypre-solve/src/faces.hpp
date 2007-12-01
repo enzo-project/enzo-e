@@ -77,7 +77,8 @@ public:
   /// HYPRE_SStructMatrixAddToValues() in "entries".  Initialized
   /// to be the number of stencil entries.
 
-  int * entry_[3][2];    
+  int * entry_coarse_[3][2];    
+  int * entry_fine_[3][2];    
 
   /// Leading dimension of arrays
   int  n1_[3]; 
@@ -151,18 +152,26 @@ public:
   /// of the i,jth zone on the given axis (0 to 2) and face (0 to 1).
   /// No error checking is performed on axis, face, i or j.
 
-  int & entry (int axis, int face, int i, int j) throw ();
-
+  int & entry_fine (int axis, int face, int i, int j) throw ();
+  int & entry_coarse (int axis, int face, int i, int j) throw ();
 
   /// Set the facing grid neighbor of all zones on the given axis (0
   /// to 2) and face (0 to 1).  No error checking is performed on
   /// axis or face.
 
-  void entry (int axis, int face, int value) throw ()
+  void entry_coarse (int axis, int face, int value) throw ()
   { 
     for (int i=0; i<n1_[axis]; i++) {
       for (int j=0; j<n2_[axis]; j++) {
-	entry_[axis][face][i+n1_[axis]*j] = value; 
+	entry_coarse_[axis][face][i+n1_[axis]*j] = value; 
+      }
+    }
+  };
+  void entry_fine (int axis, int face, int value) throw ()
+  { 
+    for (int i=0; i<n1_[axis]; i++) {
+      for (int j=0; j<n2_[axis]; j++) {
+	entry_fine_[axis][face][i+n1_[axis]*j] = value; 
       }
     }
   };
@@ -176,6 +185,7 @@ private:
 
   void alloc_ (int *n) throw ();
   void dealloc_ () throw ();
+  int & entry_ (int axis, int face, int i, int j, int * entry [3][2]) throw ();
 
   //--------------------------------------------------------------------
 

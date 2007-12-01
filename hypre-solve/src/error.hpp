@@ -11,4 +11,16 @@
  *
  */
 
-#define WARNING(MESSAGE) { int _ip_; MPI_Comm_rank (MPI_COMM_WORLD, &_ip_); printf ("TRACE %d %s:%d\n",_ip_,__FILE__,__LINE__); fflush(stdout); }
+#define WARNING(MESSAGE) { \
+   int _ip_; \
+   MPI_Comm_rank (MPI_COMM_WORLD, &_ip_); \
+   printf ("WARNING %d %s:%d\n",_ip_,__FILE__,__LINE__); \
+  fflush(stdout); \
+}
+
+#define ERROR(MESSAGE) { \
+   int _ip_; \
+   MPI_Comm_rank (MPI_COMM_WORLD, &_ip_); \
+   printf ("ERROR %d %s:%d\n",_ip_,__FILE__,__LINE__); \
+  fflush(stdout); \
+}

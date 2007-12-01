@@ -115,7 +115,7 @@ public:
   int num_grids () const   
   { return grids0_.size() - 1; };
 
-  /// Return which Level this is in the Hierarchy
+  /// Return which Level this is in the Hierarchy.  Root is 0.
   int index () const
   { return n_; };
 

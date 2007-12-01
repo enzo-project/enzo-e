@@ -23,9 +23,11 @@ private:
   HYPRE_SStructVector  X_;       // Struct for hypre vector solution
   HYPRE_SStructSolver  solver_;  // Struct for hypre solver
 
+  Parameters           parameters_; 
+
 public:
 
-  Hypre ();
+  Hypre (Parameters & parameters);
 
   void init_hierarchy (Parameters & parameters,
 		       Hierarchy  & hierarchy, 
