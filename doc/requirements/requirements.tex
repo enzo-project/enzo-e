@@ -18,6 +18,10 @@
 \chapter{Introduction} \label{s:intro}
 %=======================================================================
 
+% Useability
+% Extendability
+% Flexibility
+
 % Overview
    \cello\ is intended to be a high-performance multi-resolution
    astrophysics and cosmology application, capable of running
@@ -142,6 +146,7 @@
    simulation.  Adaptivity will be available for physics, physics
    methods, resolution ranges, AMR data-structures and algorithms,
    field and particles data-structures, parallelism.
+
 
 %=======================================================================
 \chapter{Input} \label{s:inputs}
@@ -536,7 +541,8 @@ Scalar and vector fields for each material, such as
    }
    field {
       name     = "velocity"
-      type     = "u"
+      name     = "u"
+      type     = vector
       location = center
    }
    field {

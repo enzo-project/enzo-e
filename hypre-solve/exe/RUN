@@ -1,10 +1,10 @@
 #!/bin/csh -f
 
-set nested   = 1
-set unigrid  = 0
+set nested   = 0
+set unigrid  = 1
 
-set parallel = 1
-set serial   = 0
+set parallel = 0
+set serial   = 1
 
 set problems_nested_serial    = ()
 set problems_nested_parallel  = ()
