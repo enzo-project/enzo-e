@@ -394,6 +394,8 @@ initialization.
  \newcommand{\azph}{a(\indvar+h_z/2)}
  \newcommand{\azmh}{a(\indvar-h_z/2)}
 
+ \newcommand{\axpH}{a(\indvar+H_x/2)}
+
  \newcommand{\alc}{\alpha_{0}}
  \newcommand{\alxp}{\alpha_{x}}
  \newcommand{\alxm}{\alpha_{\bar{x}}}
@@ -421,6 +423,9 @@ initialization.
  \newcommand{\sideym}{\partial\Omega_h^{-y}}
  \newcommand{\sidezp}{\partial\Omega_h^{+z}}
  \newcommand{\sidezm}{\partial\Omega_h^{-z}}
+
+ \newcommand{\sideXP}{\partial\Omega_H^{+x}}
+
 
 We wish to discretize $\nabla\cdot(\ac \nabla \uc) = f$
 on a structured AMR hierarchy with arbitrary refinement factor $r$
@@ -460,6 +465,16 @@ centered at $r$, and apply the divergence rule:
  \nabla\cdot(\ac \nabla \uc) & = & \fc \\
  \int_\vol \nabla\cdot(\av \nabla \uv)\, d\volel & = & \int_\vol \fv\, d\volel \\
  \oint_{\surf} \as \nabla \us\cdot \norm \, d\surfel & = & \int_\vol \fv\, d\volel
+ \end{eqnarray*}
+
+Next we break up the surface integral over the cell surface $\surf$
+into separate integrals over each of the six cell faces
+$\sidexp,\sidexm,\sideyp,\sideym,\sidezp$ and $\sidezm$:
+
+ \begin{eqnarray*}
+ \oint_{\sidexp} \as \nabla \us\cdot \norm \, d\surfel +  \oint_{\sidexm} \as \nabla \us\cdot \norm \, d\surfel & + & \\
+ \oint_{\sideyp} \as \nabla \us\cdot \norm \, d\surfel +  \oint_{\sideym} \as \nabla \us\cdot \norm \, d\surfel & + & \\
+ \oint_{\sidezp} \as \nabla \us\cdot \norm \, d\surfel +  \oint_{\sidezm} \as \nabla \us\cdot \norm \, d\surfel & = & \int_\vol \fv\, d\volel
  \end{eqnarray*}
 
 Next we approximate the surface and volume integrals using the
@@ -505,9 +520,9 @@ where
  \alzp  \equiv  \frac{h_xh_y}{h_z} \azph \]
  \[F = h_xh_yh_z f(r). \]
 
-If we assume $a(x)\equiv 1$, $h\equiv h_x = h_y = h_z$, and if we
-scale $\nabla\cdot(\ac \nabla \uc) = f$ by multiplying each
-side by $C_h \equiv 1/h$, then we have
+If we assume $a(x)\equiv 1$ (Poisson equation), $h\equiv h_x = h_y =
+h_z$, and if we scale $\nabla\cdot(\ac \nabla \uc) = f$ by multiplying
+each side by $C_h \equiv 1/h$, then we have
 
 \[ \Uxp + \Uyp + \Uzp - 6\Uc + \Uxm + \Uym + \Uzm = h^2 \fc \]
 
@@ -619,7 +634,7 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 \item[2.] Categorize covered face-zones
 \begin{tabbing}
 xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
-\> \textbf{for} \code{level} in \code{hierarchy} (fine to coarse) \\
+\> \textbf{for} \code{level} in \code{hierarchy} (fine to next-coarsest) \\
 \>\> \textbf{for} \code{grid} in \code{level} \\
 \>\>\> \code{sub-face = intersection (grid.face , parent(grid).face)} \\
 \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} of \code{parent(grid)}\\
@@ -633,12 +648,13 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 \> \textbf{for} \code{level} in \code{hierarchy} (fine to coarse) \\
 \>\> \textbf{for} \code{grid} in \code{level} \\
-\>\>\> \code{sub-face = intersection (grid.face , parent(grid).face)} \\
-\>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} of \code{parent(grid)}\\
+\>\>\> \textbf{for} \code{neighbor} of \code{grid} \\
+\>\>\>\> \code{sub-face = intersection (grid.face , neighbor.face)} \\
+\>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} of \code{grid}\\
 \>\>\>\>\> \textbf{if} \code{face-zone is adjacent-covered} \\
 \>\>\>\>\>\> \code{categorize (face-zone , FINE)} \\
-\>\>\>\>\> \textbf{else} \\
-\>\>\>\>\>\> \code{categorize (face-zone , NEIGHBOR)} \\
+\>\>\>\>\> \textbf{else if} \code{face-zone is not covered} \\
+\>\>\>\>\>\> \code{categorize (face-zone , NEIGHBOR)}
 \end{tabbing}
 \item[4.] Categorize coarse face-zones
 \begin{tabbing}
@@ -649,69 +665,6 @@ xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 \end{tabbing}
 \end{itemize}
 
-% \begin{tabbing}
-% xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
-% \> \textbf{for} \code{level} in \code{hierarchy} \textit{// (finest first)}\\
-% \>\> \textbf{for} \code{grid} in \code{level} \\
-% \\
-% \>\>\> \textit{// *** Find boundary face-zones ***} \\
-% \\
-% \>\>\> \textbf{for} \code{face} in \code{grid} \\
-% \>\>\>\>   \textbf{if} \code{face} is along \code{domain boundary} \\
-% \>\>\>\>\>   \textbf{for} \code{face-zone} in \code{face} \\
-% \>\>\>\>\>\>     \code{label (face-zone,boundary)} \\
-% \\
-% \>\>\> \textit{// *** Find covered face-zones ***} \\
-% \\
-% \>\>\> \textbf{for} \code{child} of \code{grid} \\
-% \>\>\>\> \code{sub-face = intersection(child-face,grid-face)} \\
-% \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
-% \>\>\>\>\>     \code{label (face-zone,covered)} \\
-% \\
-% \>\>\> \textit{// *** Find fine face-zones ***} \\
-% \\
-% \>\>\> \textit{// *** Find neighbor face-zones ***} \\
-% \\
-% \>\>\> \textbf{for} \code{neighbor} of \code{grid} \textit {// (include non-siblings)}\\
-% \>\>\>\> \code{sub-face = intersection(neighbor-face,grid-face)} \\
-% \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
-% \>\>\>\>\>     \code{label face-zone as boundary} \\
-% \\
-% \>\>\> \textit{// *** Find coarse face-zones ***} \\
-% \end{tabbing}
-
-
-
-% \begin{tabbing}
-% xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxx\=\kill
-% \> \textbf{for} \code{level} in \code{hierarchy} \textit{// (finest first)}\\
-% \>\> \textbf{for} \code{grid} in \code{level} \\
-% \\
-% \>\>\> \textit{// *** Find boundary face-zones ***} \\
-% \\
-% \>\>\> \textbf{for} \code{face} in \code{grid} \\
-% \>\>\>\>   \textbf{if} \code{face} is along \code{domain boundary} \\
-% \>\>\>\>\>   \textbf{for} \code{face-zone} in \code{face} \\
-% \>\>\>\>\>\>     \code{label (face-zone,boundary)} \\
-% \\
-% \>\>\> \textit{// *** Find covered face-zones ***} \\
-% \\
-% \>\>\> \textbf{for} \code{child} of \code{grid} \\
-% \>\>\>\> \code{sub-face = intersection(child-face,grid-face)} \\
-% \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
-% \>\>\>\>\>     \code{label (face-zone,covered)} \\
-% \\
-% \>\>\> \textit{// *** Find fine face-zones ***} \\
-% \\
-% \>\>\> \textit{// *** Find neighbor face-zones ***} \\
-% \\
-% \>\>\> \textbf{for} \code{neighbor} of \code{grid} \textit {// (include non-siblings)}\\
-% \>\>\>\> \code{sub-face = intersection(neighbor-face,grid-face)} \\
-% \>\>\>\> \textbf{for} \code{face-zone} in \code{sub-face} \\
-% \>\>\>\>\>     \code{label face-zone as boundary} \\
-% \\
-% \>\>\> \textit{// *** Find coarse face-zones ***} \\
-% \end{tabbing}
 
 %-----------------------------------------------------------------------
 \subsubsection{Face-zone discretization}
@@ -721,79 +674,94 @@ By default, zone connections are defined using stencil connections defined
 using \hypre\ stencil values, which we derive in \S\ref{ss:discret-unigrid}.
 Below, we derive modifications for each category of face-zone.
 
-\textbf{boundary face-zones}.
 
-\textbf{covered face-zones}.
-
-
-\textbf{fine face-zones}.
-
-\textbf{neighbor face-zones}.  Neighbor face-zones are handled by \hypre\ stencil
-
-
-\textbf{coarse face-zones}.
-
-
-
-\begin{center}
-\begin{minipage}{1.25in}
-\epsfig{file=fig/stencil0.eps,width=1.25in} \\
-\centerline{Piecewise constant}
-\end{minipage} \ \ \ 
-\begin{minipage}{1.25in}
-\epsfig{file=fig/stencil1.eps,width=1.25in} \\
-\centerline{Piecewise linear}
-\end{minipage} \ \ \ 
-\begin{minipage}{1.25in}
-\epsfig{file=fig/stencil2.eps,width=1.25in} \\
-\centerline{Piecewise quadratic}
+\begin{minipage}{1.75in}
+\epsfig{file=fig/discret-coarse-4.eps,width=1.5in}
+\end{minipage} \ \ \ \ 
+\begin{minipage}{4.00in}
+\begin{eqnarray*}
+ \oint_{\sideXP} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sideXP| \axpH \frac{v - U_0}{\frac{3}{4}H_x} \\
+& = & \frac{H_yH_z}{H_x} \axpH \frac{4}{3} (\frac{1}{4} \sum_{k=1}^4 u_k - U_0)   \\
+\end{eqnarray*}
 \end{minipage}
-\end{center}
 
 
-
-\begin{center}
-\begin{minipage}{2in}
-\epsfig{file=fig/discret6.eps,width=2.0in}
-\end{minipage}$\Rightarrow$
-\begin{minipage}{2in}
-\epsfig{file=fig/discret5.eps,width=2.0in}
-\end{minipage}$\Rightarrow$
-\begin{minipage}{2in}
-\epsfig{file=fig/discret4.eps,width=2.0in}
-\end{minipage} \\
-\begin{minipage}{4.5in}
-\hfill $\Downarrow$
-\end{minipage} \\
-\begin{minipage}{2in}
-\epsfig{file=fig/discret3.eps,width=2.0in}
-\end{minipage}$\Rightarrow$
-\begin{minipage}{2in}
-\epsfig{file=fig/discret2.eps,width=2.0in}
-\end{minipage}$\Rightarrow$
-\begin{minipage}{2in}
-\epsfig{file=fig/discret1.eps,width=2.0in}
+\begin{minipage}{1.75in}
+\epsfig{file=fig/discret-coarse-8.eps,width=1.75in}
+\end{minipage} \ \ \ \ 
+\begin{minipage}{4.00in}
+\begin{eqnarray*}
+ \oint_{\sideXP} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sideXP| \axpH \frac{v - U_0}{H_x} \\
+& = & \frac{H_yH_z}{H_x}  \axpH (\frac{1}{8} \sum_{k=1}^8 u_k - U_0)   \\
+\end{eqnarray*}
 \end{minipage}
-\end{center}
 
-\begin{center}
-\begin{minipage}{6.0in}
-\epsfig{file=fig/discret-step-1.eps,width=6.0in}
+\begin{minipage}{1.75in}
+\epsfig{file=fig/discret-fine-1.eps,width=1.36in}
+\end{minipage} \ \ \ \ 
+\begin{minipage}{4.00in}
+\begin{eqnarray*}
+ \oint_{\sidexp} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
+& = & \frac{h_yh_z}{h_x}  \axph \frac{2}{3} (U_1 - u_0)   \\
+\end{eqnarray*}
 \end{minipage}
-\end{center}
 
-Types of matrix elements for a given unknown:
+\begin{minipage}{1.75in}
+\epsfig{file=fig/discret-fine-3.eps,width=1.75in}
+\end{minipage} \ \ \ \ 
+\begin{minipage}{4.00in}
+\begin{eqnarray*}
+ \oint_{\sidexp} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
+& = & \frac{h_yh_z}{h_x}  \axph \frac{2}{3} (\frac{1}{2}U_1 + \frac{1}{4}U_2 + \frac{1}{4}U_3 - u_0)   \\
+\end{eqnarray*}
+\end{minipage}
 
-\begin{tabular}{ll}
-\textcolor{green}{internal} & \code{HYPRE\_SStructStencilSetEntry()} \\
-\textcolor{green}{overlapped internal} & \code{HYPRE\_SStructStencil} \\
-\textcolor{red}{neighbor} & \code{HYPRE\_SStructGridSetNeighborBox()}\\
-\textcolor{blue}{boundary} & \code{HYPRE\_SStructGraphAddEntries()}\\
-\textcolor{magenta}{fine-coarse parent} & \code{HYPRE\_SStructGraphAddEntries()}\\
-\textcolor{cyan}{coarse-fine child} & \code{HYPRE\_SStructGraphAddEntries()}\\
-\textcolor{brown}{fine-coarse parent--neighbor} & \code{HYPRE\_SStructGraphAddEntries()}\\
-\textcolor{yellow}{coarse-fine neighbor--child} & \code{HYPRE\_SStructGraphAddEntries()}\\
-\end{tabular}
+
+\begin{minipage}{1.75in}
+\epsfig{file=fig/discret-fine-4.eps,width=1.75in}
+\end{minipage} \ \ \ \ 
+\begin{minipage}{4.00in}
+\begin{eqnarray*}
+ \oint_{\sidexp} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
+& = & \frac{h_yh_z}{h_x}  \axph \frac{2}{3} (\frac{9}{16} U_1 + \frac{3}{16} U_2 + \frac{3}{16} U_3 + \frac{1}{16}U_4 - u_0)   \\
+\end{eqnarray*}
+\end{minipage}
+
+
+%\begin{center}
+%\begin{minipage}{1.25in}
+%\epsfig{file=fig/stencil0.eps,width=1.25in} \\
+%\centerline{Piecewise constant}
+%\end{minipage} \ \ \ 
+%\begin{minipage}{1.25in}
+%\epsfig{file=fig/stencil1.eps,width=1.25in} \\
+%\centerline{Piecewise linear}
+%\end{minipage} \ \ \ 
+%\begin{minipage}{1.25in}
+%\epsfig{file=fig/stencil2.eps,width=1.25in} \\
+%\centerline{Piecewise quadratic}
+%\end{minipage}
+%\end{center}
+
+
+% \begin{center}
+% \begin{minipage}{6.0in}
+% \epsfig{file=fig/discret-step-1.eps,width=6.0in}
+% \end{minipage}
+% \end{center}
+
+% Types of matrix elements for a given unknown:
+% 
+% \begin{tabular}{ll}
+% \textcolor{green}{internal} & \code{HYPRE\_SStructStencilSetEntry()} \\
+% \textcolor{green}{overlapped internal} & \code{HYPRE\_SStructStencil} \\
+% \textcolor{red}{neighbor} & \code{HYPRE\_SStructGridSetNeighborBox()}\\
+% \textcolor{blue}{boundary} & \code{HYPRE\_SStructGraphAddEntries()}\\
+% \textcolor{magenta}{fine-coarse parent} & \code{HYPRE\_SStructGraphAddEntries()}\\
+% \textcolor{cyan}{coarse-fine child} & \code{HYPRE\_SStructGraphAddEntries()}\\
+% \textcolor{brown}{fine-coarse parent--neighbor} & \code{HYPRE\_SStructGraphAddEntries()}\\
+% \textcolor{yellow}{coarse-fine neighbor--child} & \code{HYPRE\_SStructGraphAddEntries()}\\
+% \end{tabular}
 
 %-----------------------------------------------------------------------
 \subsection{Boundary Discretization} \label{ss:discret-boundary}
