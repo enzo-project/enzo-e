@@ -23,6 +23,7 @@
 
 #include "mpi.hpp"
 #include "scalar.hpp"
+#include "error.hpp"
 #include "constants.hpp"
 #include "point.hpp"
 #include "faces.hpp"
@@ -252,7 +253,12 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
       while (Grid * grid = itag++) {
 
+	// Define nonstencil entries for the grid
 	init_graph_nonstencil_(*grid);
+
+	// Clear the nonstencil entry counter for subsequent matrix nonstencil entries
+	int dim = hierarchy.dimension();
+	grid->init_counter(dim*2+1);
 
       }
     }
@@ -458,13 +464,21 @@ void Hypre::evaluate (Hierarchy & hierarchy)
 // PRIVATE MEMBER FUNCTIONS
 //======================================================================
 
-/// Define matrix nonzero structure connecting grid patch and containing patch
+/// Phase 1: init_graph_nonstencil_: define matrix graph connecting
+/// grid with coarse levels 
+/// Phase 2: init_matrix_nonstencil: define matrix nonzero structure
+/// connecting grid with coarse levels
 
-void Hypre::init_graph_nonstencil_ (Grid & grid)
-
+void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 {
-
   _TRACE_;
+
+  if (phase != "graph" && phase != "matrix") {
+    ERROR("init_matrix_nonstencil_ called with phase = " + phase);
+  }
+
+  const int r = 2; // WARNING: hard-coded refinement factor r = 2
+
   int face,axis,ig0,ig1;
 
   int ig3[3][2];
@@ -478,13 +492,15 @@ void Hypre::init_graph_nonstencil_ (Grid & grid)
 
     int j0 = (axis+1)%3;
     int j1 = (axis+2)%3;
+
     int n0 = ig3[j0][1]-ig3[j0][0];
     int n1 = ig3[j1][1]-ig3[j1][0];
 
     for (face=0; face<2; face++) {
 
-      for (ig0=0; ig0<n0; ig0++) {
-	for (ig1=0; ig1<n1; ig1++) {
+      // Loop over every r face zones
+      for (ig0=0; ig0<n0; ig0 += r) {
+	for (ig1=0; ig1<n1; ig1 += r) {
 
 	  Grid * neighbor   = grid.faces().neighbor(axis,face,ig0,ig1);
 
@@ -497,7 +513,7 @@ void Hypre::init_graph_nonstencil_ (Grid & grid)
 	  // pointer from being dereferenced if NULL.
 
 	  bool is_local = 
-	    (neighbor != NULL && neighbor->is_local()) || grid.is_local();
+	    (neighbor != NULL) &&  (neighbor->is_local() || grid.is_local());
 
 	  if (is_local && fz == Faces::_coarse_) {
 
@@ -517,51 +533,132 @@ void Hypre::init_graph_nonstencil_ (Grid & grid)
 	    ign3[(axis+1)%3] = (igg3[(axis+1)%3])        / 2;
 	    ign3[(axis+2)%3] = (igg3[(axis+2)%3])        / 2;
 
-	    // Add graph entry from grid to coarse 
+	    int nentries;
 
-	    // +---+
-	    // |   |
-	    // | O +-+
-	    // |   |o|  <--
-	    // +---+-+
+	    //--------------------------------------------------
+	    // GRAPH ENTRY: FINE-TO-COARSE 
+	    //--------------------------------------------------
 
-	    if (parameters_.value("discret") == "0") {
+	    neighbor->print();
+	    int & entry_coarse = neighbor->counter(ign3);
+
+	    if (parameters_.value("discret") == "constant") {
+	      //
+	      // (*) CONSTANT
+	      //     Scale        = 2/3
+	      //     Coefficients = 1
+	      //
+	      if (phase == "graph") {
+		// *********************************************
+		HYPRE_SStructGraphAddEntries 
+		  (graph_,
+		   grid.level(),      igg3, 0,
+		   neighbor->level(), ign3, 0);
+		// *********************************************
+	      } else if (phase == "matrix") {
+		nentries = 1;
+		double value = 3.0/4.0;
+
+		// *********************************************
+		HYPRE_SStructMatrixAddToValues 
+		  (A_,
+		   grid.level(), igg3, 0,
+		   nentries, &entry_coarse, &value);
+		// *********************************************
+	      }
+	    } else if (parameters_.value("discret") == "linear") {
+
+	      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	      NOT_IMPLEMENTED ("descret==linear");
+	      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+	      //
+	      // ( ) LINEAR
+	      //     Scale        = 2/3
+	      //     Coefficients = 0.5 0.25 0.25
+	      // 
+	      //     1/4
+	      //    *1/2*  1/4
+	      //
 	      // *********************************************
-	      HYPRE_SStructGraphAddEntries (graph_,
-					    grid.level(),      igg3, 0,
-					    neighbor->level(), ign3, 0);
-	      // *********************************************
+	    } else if (parameters_.value("discret") == "bilinear") {
+
+	      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	      NOT_IMPLEMENTED ("descret==bilinear");
+	      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+	      //
+	      // ( ) BILINEAR
+	      //     Scale        = 2/3
+	      //     Coefficients = 9/16 3/16 3/16 1/16
+	      // 
+	      //     3/16  1/16
+	      //    *9/16* 3/16
+	      //
+	    } else if (parameters_.value("discret") == "quadratic") {
+
+	      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	      NOT_IMPLEMENTED ("parameter descret==quadratic");
+	      //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+	      //
+	      // QUADRATIC
+	      //     Scale        = 2/3
+	      //     Coefficients = 30/32 3/32 3/32 2/32 -3/32 -3/32
+	      //
+	      //             3/32  2/32
+	      //     -3/32 *30/32*  3/32
+	      //            -3/32
 	    } else {
-	      ERROR("Unknown parameter discret = " + parameters_.value("discret"))
+	      ERROR("Unknown parameter discret = " 
+		    + parameters_.value("discret"));
 	    }
+
+	    entry_coarse += nentries;
 	      
-	    // Add graph entry from coarse to grid
+	    //--------------------------------------------------
+	    // GRAPH ENTRY: COARSE-TO-FINE
+	    //--------------------------------------------------
 
-	    // +---+
-	    // |   |
-	    // | O +-+
-	    // |   |o|  -->
-	    // +---+-+
-
-	    ign3[0] *= 2;
-	    ign3[1] *= 2;
-	    ign3[2] *= 2;
+	    int & entry_fine = grid.counter(igg3);
 
 	    if (parameters_.value("discret") == "0") {
-	      // *********************************************
-	      HYPRE_SStructGraphAddEntries (graph_,
-					    grid.level(),      igg3, 0,
-					    neighbor->level(), ign3, 0);
-	      // *********************************************
+	      if (phase == "graph") {
+		// *********************************************
+		HYPRE_SStructGraphAddEntries 
+		  (graph_,
+		   grid.level(),      igg3, 0,
+		   neighbor->level(), ign3, 0);
+		// *********************************************
+	      } else if (phase == "matrix") {
+		nentries = 8;
+		int entries[] = {0,1,2,3,4,5,6,7};
+		for (int i=0; i<nentries; i++) entries[i] += entry_fine;
+		double o8 = 0.125;
+		double values[] = {o8,o8,o8,o8,o8,o8,o8,o8};
+
+		// *********************************************
+		HYPRE_SStructMatrixAddToValues 
+		  (A_,
+		   grid.level(),igg3, 0,
+		   nentries,    entries, values);
+		// *********************************************
+	      }
 	    } else {
-	      ERROR("Unknown parameter discret = " + parameters_.value("discret"))
+	      ERROR("Unknown parameter discret = " 
+		    + parameters_.value("discret"));
 	    }
+
+	    // Update entry count for the zone
+	    entry_fine += nentries;
+
 
 	  }
 	}
       }
     }
   }
+  _TRACE_;
 }
 
 //------------------------------------------------------------------------
@@ -629,147 +726,6 @@ void Hypre::init_matrix_clear_ (Level & level)
     HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
     // Need to clear under rhs also
     //   HYPRE_SStructFACZeroAMRVectorData(B_, plevels, prefinements);
-  }
-}
-
-//------------------------------------------------------------------------
-
-/// Define matrix elements connecting parent and children grid patches
-
-void Hypre::init_matrix_nonstencil_ (Grid & grid)
-
-{
-
-  _TRACE_;
-  int face,axis,ig0,ig1;
-
-  int ig3[3][2];
-  grid.indices(ig3);
-  
-  // Initialize face zone counters to 7 (stencil zones are 0 to 6)
-
-  for (axis=0; axis<3; axis++) {
-    for (face=0; face<2; face++) {
-      grid.faces().entry_coarse(axis,face,7); 
-      grid.faces().entry_fine  (axis,face,7); 
-    }
-  }
-
-  // Loop over each face zone in the grid, adding non-stencil matrix
-  // elements wherever a zone is adjacent to a coarse zone.  Both
-  // fine-to-coarse and coarse-to-fine entries are added.
-
-  for (axis=0; axis<3; axis++) {
-
-    int j0 = (axis+1)%3;
-    int j1 = (axis+2)%3;
-    int n0 = ig3[j0][1]-ig3[j0][0];
-    int n1 = ig3[j1][1]-ig3[j1][0];
-
-    for (face=0; face<2; face++) {
-
-      for (ig0=0; ig0<n0; ig0++) {
-	for (ig1=0; ig1<n1; ig1++) {
-
-	  Grid * neighbor   = grid.faces().neighbor(axis,face,ig0,ig1);
-
-	  Faces::Label & fz = grid.faces().label(axis,face,ig0,ig1);
-
-	  // Add matrix nonzeros if either grid or neighbor is local
-	  // (making sure to test if neighbor exists), and if neighbor
-	  // (if it exists) is in the next level up or the next level
-	  // down.  Not that short-circuit logic prevents the neighbor
-	  // pointer from being dereferenced if NULL.
-
-	  bool is_local = 
-	    (neighbor != NULL && neighbor->is_local()) || grid.is_local();
-
-	  if (is_local && fz == Faces::_coarse_) {
-
-	    // Get grid zone index
-
-	    int igg3[3]; // global grid indices
-
-	    igg3[axis]       = ig3[axis][0];
-	    igg3[(axis+1)%3] = ig3[(axis+1)%3][0] + ig0;
-	    igg3[(axis+2)%3] = ig3[(axis+2)%3][0] + ig1;
-
-	    // Get neighbor zone index
-
-	    int ign3[3]; // global neighbor 
-
-	    ign3[axis]       = (igg3[axis] + (face*2-1)) / 2;
-	    ign3[(axis+1)%3] = (igg3[(axis+1)%3])        / 2;
-	    ign3[(axis+2)%3] = (igg3[(axis+2)%3])        / 2;
-
-	    int nentries;
-
-	    // Add matrix nonzero from grid to coarse 
-
-	    // +---+
-	    // |   |
-	    // | O +-+
-	    // |   |o|  <--
-	    // +---+-+
-
-	    // UNFINISHED!!!
-
-	    assert (0);
-
-	    int & entry_coarse = grid.faces().entry_coarse(axis,face,ig0,ig1);
-	    if (parameters_.value("discret") == "0") {
-
-	      nentries = 1;
-	      double value = 3.0/4.0;
-
-	      // *********************************************
-	      HYPRE_SStructMatrixAddToValues (A_,
-					      grid.level(), igg3, 0,
-					      nentries, &entry_coarse, &value);
-	      // *********************************************
-	    } else {
-	      ERROR("Unknown parameter discret = " + parameters_.value("discret"))
-	    }
-	    entry_coarse += nentries;
-	      
-
-	    // Add matrix nonzero from coarse to grid
-
-	    // +---+
-	    // |   |
-	    // | O +-+
-	    // |   |o|  -->
-	    // +---+-+
-
-	    // UNFINISHED
-
-	    assert (0);
-
-	    int & entry_fine = grid.faces().entry_fine(axis,face,ig0,ig1);
-
-	    if (parameters_.value("discret") == "0") {
-	      nentries = 8;
-	      int entries[] = {0,1,2,3,4,5,6,7};
-	      for (int i=0; i<nentries; i++) entries[i] += entry_fine;
-	      double o8 = 0.125;
-	      double values[] = {o8,o8,o8,o8,o8,o8,o8,o8};
-
-	      // *********************************************
-	      HYPRE_SStructMatrixAddToValues (A_,
-					      grid.level(),igg3, 0,
-					      nentries,    entries, values);
-	      // *********************************************
-	    } else {
-	      ERROR("Unknown parameter discret = " + parameters_.value("discret"))
-	    }
-
-	    // Update entry count for the zone
-	    entry_fine += nentries;
-
-	  }
-	}
-      }    
-    }
   }
 }
 

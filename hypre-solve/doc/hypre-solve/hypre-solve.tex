@@ -52,7 +52,7 @@
 \item[Equation: ] Poisson (P), diffusion equation (D)
 \item[Datastructure: ] Unigrid (U), AMR (A)
 \item[AMR refinement: ] $R=2$ (2), $R=2^k$ (2k), arbitrary $R$ (*)
-\item[AMR discretization: ] piecewise constant (C), linear (L), quadratic (Q)
+\item[AMR discretization: ] $D=1$, $D=3$, $D=4$, $D=6$
 \end{description}
 
 \begin{tabular}{cl|cc|cc|cc|ccc|ccc}
@@ -147,7 +147,7 @@ xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
 \begin{tabbing}
 xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
 \> \todo\ \code{discret} \icode{discret} \\
-\> \> \icode{discret}:     \> \code{int}, $0 \le $ \icode{discret} $\le 2$
+\> \> \icode{discret}:     \> \code{int} $\in \{\code{"constant"},\code{"linear"},\code{"bilinear"},\code{"quadratic"}\}$
 \end{tabbing}
 \begin{tabbing}
 xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
@@ -676,64 +676,70 @@ Below, we derive modifications for each category of face-zone.
 
 
 \begin{minipage}{1.75in}
-\epsfig{file=fig/discret-coarse-4.eps,width=1.5in}
+\epsfig{file=fig/discret-coarse-4.eps,width=1.5in} % width 2in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
 \begin{eqnarray*}
- \oint_{\sideXP} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sideXP| \axpH \frac{v - U_0}{\frac{3}{4}H_x} \\
+& \oint_{\sideXP}  \!\!\! & \as \nabla \us\cdot \norm \, d\surfel  \\
+& \approx & |\sideXP| \axpH \frac{v - U_0}{\frac{3}{4}H_x} \\
 & = & \frac{H_yH_z}{H_x} \axpH \frac{4}{3} (\frac{1}{4} \sum_{k=1}^4 u_k - U_0)   \\
 \end{eqnarray*}
 \end{minipage}
 
 
 \begin{minipage}{1.75in}
-\epsfig{file=fig/discret-coarse-8.eps,width=1.75in}
+\epsfig{file=fig/discret-coarse-8.eps,width=1.875in} % width 2.5in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
 \begin{eqnarray*}
- \oint_{\sideXP} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sideXP| \axpH \frac{v - U_0}{H_x} \\
+& \oint_{\sideXP} \!\!\! & \as \nabla \us\cdot \norm \, d\surfel  \\
+& \approx & |\sideXP| \axpH \frac{v - U_0}{H_x} \\
 & = & \frac{H_yH_z}{H_x}  \axpH (\frac{1}{8} \sum_{k=1}^8 u_k - U_0)   \\
 \end{eqnarray*}
 \end{minipage}
 
 \begin{minipage}{1.75in}
-\epsfig{file=fig/discret-fine-1.eps,width=1.36in}
+\epsfig{file=fig/discret-fine-1.eps,width=1.3125in}  % width 1.75in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
 \begin{eqnarray*}
- \oint_{\sidexp} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
+& \oint_{\sidexp} \!\!\! & \as \nabla \us\cdot \norm \, d\surfel  \\
+& \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
 & = & \frac{h_yh_z}{h_x}  \axph \frac{2}{3} (U_1 - u_0)   \\
 \end{eqnarray*}
 \end{minipage}
 
 \begin{minipage}{1.75in}
-\epsfig{file=fig/discret-fine-3.eps,width=1.75in}
+\epsfig{file=fig/discret-fine-3.eps,width=1.6875in}   % width 2.25in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
 \begin{eqnarray*}
- \oint_{\sidexp} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
+& \oint_{\sidexp}  \!\!\! & \as \nabla \us\cdot \norm \, d\surfel  \\
+& \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
 & = & \frac{h_yh_z}{h_x}  \axph \frac{2}{3} (\frac{1}{2}U_1 + \frac{1}{4}U_2 + \frac{1}{4}U_3 - u_0)   \\
 \end{eqnarray*}
 \end{minipage}
 
 
 \begin{minipage}{1.75in}
-\epsfig{file=fig/discret-fine-4.eps,width=1.75in}
+\epsfig{file=fig/discret-fine-4.eps,width=1.6875in}   % width 2.25in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
 \begin{eqnarray*}
- \oint_{\sidexp} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
+& \oint_{\sidexp}  \!\!\! & \as \nabla \us\cdot \norm \, d\surfel \\
+& \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
 & = & \frac{h_yh_z}{h_x}  \axph \frac{2}{3} (\frac{9}{16} U_1 + \frac{3}{16} U_2 + \frac{3}{16} U_3 + \frac{1}{16}U_4 - u_0)   \\
 \end{eqnarray*}
 \end{minipage}
 
 
 \begin{minipage}{1.75in}
-\epsfig{file=fig/discret-fine-6.eps,width=2.25in}
+\epsfig{file=fig/discret-fine-6.eps,width=1.875in}    % width 2.50in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
 \begin{eqnarray*}
- \oint_{\sidexp} \as \nabla \us\cdot \norm \, d\surfel & \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
+ & \oint_{\sidexp} \!\!\! & \as \nabla \us\cdot \norm \, d\surfel  \\
+ & \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
 & = & \frac{h_yh_z}{h_x}  \axph \frac{2}{3} (\frac{30}{32} U_1 + \frac{3}{32} U_2 + \frac{3}{32} U_3 + \frac{2}{32}U_4 - \frac{3}{32}U_5 - \frac{3}{32}U_6 - u_0)   \\
 \end{eqnarray*}
 \end{minipage}

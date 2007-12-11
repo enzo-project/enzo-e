@@ -28,6 +28,7 @@
 #include "hypre-solve.hpp"
 
 #include "scalar.hpp"
+#include "error.hpp"
 #include "performance.hpp"
 #include "point.hpp"
 #include "sphere.hpp"

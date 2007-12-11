@@ -47,14 +47,18 @@ private:
 
   // init_graph() functions
 
-  void init_graph_nonstencil_ (Grid & grid);
+  void init_graph_nonstencil_ (Grid & grid)
+  { init_nonstencil_ (grid, "graph"); };
 
   // init_matrix() functions
 
   void init_matrix_stencil_    (Grid & grid);
   void init_matrix_clear_      (Level & level);
-  void init_matrix_nonstencil_ (Grid & grid);
+  void init_matrix_nonstencil_ (Grid & grid)
+  { init_nonstencil_ (grid, "matrix"); };
 
+  void init_nonstencil_ (Grid & grid, std::string phase);
+  
   // init_vector() functions
 
   Scalar init_vector_points_  (Hierarchy            & hierarchy,

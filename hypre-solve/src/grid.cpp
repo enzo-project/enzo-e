@@ -41,7 +41,8 @@ Domain Grid::domain_;
 //======================================================================
 
 Grid::Grid (std::string parms) throw ()
-  : level_ (-1)
+  : level_ (-1),
+    counters_ (0)
 
 {
   // Initialize 0-sentinels in arrays
@@ -53,15 +54,22 @@ Grid::Grid (std::string parms) throw ()
 
   read (parms);
 
-  // Allocate Faces was here.  Moved to allocate-as-needed.
+  // Allocate Faces was here.
 
   faces_ = new Faces(n_);
+
+  // Allocate counters_ here.
+
+  counters_ = new int [n_[0]*n_[1]*n_[2]];
+
 }
 
 //======================================================================
 
 Grid::~Grid () throw ()
 {
+  delete faces_;
+  delete [] counters_;
 }
 
 //======================================================================
@@ -156,6 +164,7 @@ void Grid::geomview_face (FILE         *fpr,
   Faces::Label * types = new Faces::Label [num_types];
   for (int i=0; i<num_types; i++) types[i] = Faces::Label(i);
   geomview_face_type (fpr,types,num_types,full);
+  delete [] types;
 }
 
 //======================================================================

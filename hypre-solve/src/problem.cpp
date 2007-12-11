@@ -23,6 +23,7 @@
 #include "hypre-solve.hpp"
 
 #include "scalar.hpp"
+#include "error.hpp"
 #include "parameters.hpp"
 #include "point.hpp"
 #include "faces.hpp"

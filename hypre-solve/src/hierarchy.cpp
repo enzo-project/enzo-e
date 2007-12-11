@@ -23,6 +23,7 @@
 #include "hypre-solve.hpp"
 
 #include "scalar.hpp"
+#include "error.hpp"
 #include "point.hpp"
 #include "domain.hpp"
 #include "faces.hpp"
@@ -273,7 +274,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   int j0,j1;            // face axes
 
   // ------------------------------------------------------------
-  // Determine grid neighbors for each face-zone
+  // Determine pointers to neighboring grid for each face-zone
   // ------------------------------------------------------------
 
   ItHierarchyLevels itl (*this);
@@ -297,7 +298,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   }
 
   // ------------------------------------------------------------
-  // Label boundary face-zones
+  // 1. Categorize boundary face-zones
   // ------------------------------------------------------------
 
   int ih0[3][2];
@@ -316,7 +317,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   }
 
   // ------------------------------------------------------------
-  // Label covered and adjacent-covered face-zones
+  // 2. Categorize covered (and temporary adjacent-covered) face-zones
   // ------------------------------------------------------------
 
   for (int ilevel = num_levels()-1; ilevel>0; ilevel--) {
@@ -356,7 +357,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   }
 
   // ------------------------------------------------------------
-  // Label fine and neighbor face-zones
+  // 3. Categorize fine and neighbor face-zones
   // ------------------------------------------------------------
 
   for (int ilevel = 0; ilevel<num_levels(); ilevel++) {
@@ -385,7 +386,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   }
 
   // ------------------------------------------------------------
-  // Label coarse face-zones
+  // 4. Categorize coarse face-zones
   // ------------------------------------------------------------
 
   while (Level * level = itl++) {

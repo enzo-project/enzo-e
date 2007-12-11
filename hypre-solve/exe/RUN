@@ -1,7 +1,7 @@
 #!/bin/csh -f
 
-set nested   = 0
-set unigrid  = 1
+set nested   = 1
+set unigrid  = 0
 
 set parallel = 0
 set serial   = 1
@@ -14,11 +14,11 @@ set problems_unigrid_parallel = ()
 if ($nested == 1 && $serial == 1) then
      set problems_nested_serial = ( \
      "nested 16 1 1 1 2" \
-     "nested 32 1 1 1 2" \
-     "nested 64 1 1 1 2" \
+#     "nested 32 1 1 1 2" \
+#     "nested 64 1 1 1 2" \
      "nested 16 1 1 1 3" \
-     "nested 32 1 1 1 3" \
-     "nested 64 1 1 1 3" \
+#     "nested 32 1 1 1 3" \
+#     "nested 64 1 1 1 3" \
      )
 endif
 if ($nested == 1 && $parallel == 1) then

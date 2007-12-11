@@ -70,7 +70,11 @@ class Grid
 
   /// Unknowns (single cell-centered variable) Stored as 3D
   /// fortran-style array
-  Scalar *            u_;          
+  //  Scalar *            u_;          
+
+  /// Counters for nonstencil entries.  Required by
+  /// hypre to maintain state between nonstencil and matrix initialization.
+  int * counters_;
 
   //--------------------------------------------------------------------
   // STATIC MEMBER DATA
@@ -274,10 +278,10 @@ protected:
   };
 
   /// Return the unknown u(i,j,k)
-  Scalar & unknown(int i0, int i1, int i2) throw()
-  { assert (u_);
-    return u_[i0 + n_[0]*(i1 + n_[1]*i2)];
-  }
+  //  Scalar & unknown(int i0, int i1, int i2) throw()
+  //  { assert (u_);
+  //    return u_[i0 + n_[0]*(i1 + n_[1]*i2)];
+  //  }
 
   /// Return the Faces object for this Grid.  If not allocated yet,
   /// create a new Faces object.
@@ -317,6 +321,33 @@ protected:
   /// Return true iff the grid belongs to processor ip
   bool is_local () throw()
   { return mpi_.ip() == ip_; };
+
+  
+  //--------------------------------------------------------------------
+  // Nonstencil / Matrix initialization functions
+  //--------------------------------------------------------------------
+
+  /// Return alias to the (i3[0],i3[1],i3[2])th counter
+  int & counter (int i3[3])
+  { 
+    int i0=i3[0]-il_[0];
+    int i1=i3[1]-il_[1];
+    int i2=i3[2]-il_[2];
+    assert (counters_);
+    return counters_[i0 + n_[0]*(i1 + n_[1]*i2)];
+  }
+
+  /// Initialize the counters_ array to given value
+  void init_counter (int value)
+  {
+    for (int i0=0; i0<n_[0]; i0++) {
+      for (int i1=0; i1<n_[1]; i1++) {
+	for (int i2=0; i2<n_[2]; i2++) {
+	  counters_[i0 + n_[0]*(i1 + n_[1]*i2)] = value;
+	}
+      }
+    }
+  }
 
   //--------------------------------------------------------------------
   // Processing functions
