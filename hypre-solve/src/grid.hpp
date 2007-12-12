@@ -301,6 +301,14 @@ protected:
     h2 = (xu_[2] - xl_[2]) / n_[2];
   };    
 
+  /// Return the grid size along the given axis
+  int n(int i) throw ()
+  { return n_[i]; };
+
+  /// Return the grid size
+  int n() throw ()
+  {  return n_[0]*n_[1]*n_[2]; };    
+
   /// Return the center of the given zone
   void zone (int i0, int i1, int i2, Scalar &x0, Scalar &x1, Scalar &x2) throw ()
   { 

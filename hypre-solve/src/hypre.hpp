@@ -15,13 +15,13 @@ class Hypre {
 
 private:
 
-  HYPRE_SStructGrid    grid_;    // Struct for hypre grid
-  HYPRE_SStructGraph   graph_;   // Struct for hypre graph
-  HYPRE_SStructStencil stencil_; // Struct for hypre stencil
-  HYPRE_SStructMatrix  A_;       // Struct for hypre matrix
-  HYPRE_SStructVector  B_;       // Struct for hypre vector right-hand side
-  HYPRE_SStructVector  X_;       // Struct for hypre vector solution
-  HYPRE_SStructSolver  solver_;  // Struct for hypre solver
+  HYPRE_SStructGrid    grid_;    // hypre grid
+  HYPRE_SStructGraph   graph_;   // hypre graph
+  HYPRE_SStructStencil stencil_; // hypre stencil
+  HYPRE_SStructMatrix  A_;       // hypre matrix
+  HYPRE_SStructVector  B_;       // hypre vector right-hand side
+  HYPRE_SStructVector  X_;       // hypre vector solution
+  HYPRE_SStructSolver  solver_;  // hypre solver
 
   Parameters           parameters_; 
 

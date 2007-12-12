@@ -10,6 +10,12 @@
 set PATH = `pwd`
 set bin = "$PATH/../bin"
 
+echo $2
+set extra = ""
+if ($2 <= 32) then
+   set extra = "dump_a true\ndump_b true"
+endif
+
 #----------------------------------------------------------------------
 # INITIALIZE PROBLEM
 #----------------------------------------------------------------------
@@ -35,6 +41,7 @@ endif
 #----------------------------------------------------------------------
 
 $bin/hypre-init $1 $2 $3 $4 $5 $6 $7
+echo "$extra" >> $input
 mv $input $problem
 cd $problem
 
