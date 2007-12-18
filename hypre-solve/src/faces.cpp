@@ -133,7 +133,7 @@ void Faces::print() throw()
 // PRIVATE MEMBER FUNCTIONS
 //======================================================================
 
-/// Allocate and initialize storage for label_[][] and neighbor_[][]
+/// Allocate and initialize storage for label_[][] and adjacent_[][]
 void Faces::alloc_ (int *n) throw ()
 {
   int N = n[0]*n[1]*n[2];
@@ -157,15 +157,10 @@ void Faces::alloc_ (int *n) throw ()
       label_[axis][face] = new Label [n_[axis]];
       for (i=0; i<n_[axis]; i++) label_[axis][face][i] = _unknown_;
 
-      // allocate and clear grid neighbors
-
-      neighbor_[axis][face] = new pGrid [n_[axis]];
-      for (i=0; i<n_[axis]; i++) neighbor_[axis][face][i] = NULL;
-
       // allocate and clear face zone nonzero entries
 
-      neighbor_[axis][face] = new pGrid [n_[axis]];
-      for (i=0; i<n_[axis]; i++) neighbor_[axis][face][i] = NULL;
+      adjacent_[axis][face] = new pGrid [n_[axis]];
+      for (i=0; i<n_[axis]; i++) adjacent_[axis][face][i] = NULL;
     }
   }
 }
@@ -184,8 +179,8 @@ void Faces::dealloc_ () throw ()
 
       // deallocate and clear grid neighbors
 
-      delete [] neighbor_[axis][face];
-      neighbor_[axis][face] = NULL;
+      delete [] adjacent_[axis][face];
+      adjacent_[axis][face] = NULL;
       
     }
   }

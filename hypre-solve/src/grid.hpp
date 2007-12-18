@@ -178,16 +178,24 @@ protected:
 
   /// Determine the axis, face, and range of indices of zones adjacent 
   /// to a neighboring grid.  Returns false if the neighbor is not
-  /// actually a neighbor.
+  /// actually a neighbor.  Indices are relative to the grid.
 
   bool neighbor_shared_face (Grid & neighbor, int & axis, int & face, 
 			     int & il0, int & il1, int & iu0, int & iu1) throw () ;
+
+  /// Determine the axis, face, and range of indices of zones adjacent 
+  /// to a grid in the next-coarser level.  Returns false if
+  /// the grid is not actually adjacent.  Assumes the adjacent grid is
+  /// in the next-coarser level.   Indices are relative to the grid.
+
+  bool coarse_shared_face (Grid & coarse, int & axis, int & face, 
+			   int & il0, int & il1, int & iu0, int & iu1) throw () ;
 
   /// Determine the "count"th axis (indexing from 0), face and
   /// corresponding range of coarse-grid indices of zones adjacent to
   /// the containing parent grid, and increment "count".  Returns true
   /// if the returned values are valid, or false if there is no
-  /// "count"th face.
+  /// "count"th face.   Indices are relative to the parent.
 
   bool parent_shared_face (Grid & parent, int & axis, int & face, 
 			   int & il0, int & il1, int & iu0, int & iu1,

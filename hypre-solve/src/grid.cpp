@@ -31,7 +31,7 @@
 
 const int debug       = 0;
 const int debug_input = 0;
-const int trace       = 0;
+const int trace       = 1;
 
 //======================================================================
 
@@ -347,7 +347,7 @@ void Grid::read (std::string parms) throw ()
 
 }
 
-//======================================================================
+//----------------------------------------------------------------------
 
 bool Grid::is_adjacent (Grid & g2) throw ()
 {
@@ -371,15 +371,19 @@ bool Grid::is_adjacent (Grid & g2) throw ()
   return ! far;
 }
 
-//======================================================================
+//----------------------------------------------------------------------
 
 /// Determine the axis, face, and range of indices of zones adjacent 
 /// to the neighboring grid.  Returns false if the neighbor is not
 /// actually a neighbor.  Assumes grids are in the same level.
 
-bool Grid::neighbor_shared_face (Grid & neighbor, int & axis, int & face, 
-				 int & il0, int & il1, int & iu0, int & iu1) throw ()
+bool Grid::neighbor_shared_face (Grid & neighbor, 
+				 int & axis, int & face, 
+				 int & il0, int & il1, 
+				 int & iu0, int & iu1) throw ()
 {
+
+  _TRACE_;
 
   Grid & grid = *this;
 
@@ -396,8 +400,11 @@ bool Grid::neighbor_shared_face (Grid & neighbor, int & axis, int & face,
   axis = -1;
 
   // Find matching face, if any
+
   bool found_face = false;
-  int iaxis=-1,iface=-1;
+  int  iaxis      = -1;
+  int  iface      = -1;
+
   for (axis=0; axis<3; axis++) {
     for (face=0; face<2; face++) {
       if (ig[axis][face] == in[axis][1-face]) {
@@ -410,10 +417,12 @@ bool Grid::neighbor_shared_face (Grid & neighbor, int & axis, int & face,
 
   axis=iaxis;
   face=iface;
-  // Exit if no grid faces lie in the same plane
-  if (! found_face) {
-    return false;
-  }
+
+  // Exit if face isn't found
+
+  _TRACE_;
+  if (! found_face) return false;
+  _TRACE_;
 
   // face axes
 
@@ -431,14 +440,93 @@ bool Grid::neighbor_shared_face (Grid & neighbor, int & axis, int & face,
   iu0--;
   iu1--;
 
-  if (il0 > iu0 || il1 > iu1) {
-    return false;
-  }
+  _TRACE_;
+
+  if (il0 > iu0 || il1 > iu1) return false;
+
+  _TRACE_;
 
   return true;
 }
 
-//======================================================================
+//----------------------------------------------------------------------
+
+/// Determine the axis, face, and range of indices of zones adjacent 
+/// to the adjacent grid in the next-coarser level.  Returns false if
+/// the grid is not actually adjacent.  Assumes the adjacent grid is
+/// in the next-coarser level, and is not the parent grid.
+
+bool Grid::coarse_shared_face (Grid & coarse, 
+			       int & axis, int & face, 
+			       int & il0, int & il1, 
+			       int & iu0, int & iu1) throw ()
+{
+
+  _TRACE_;
+
+  const int r = 2; // WARNING: assuming fixed refinement factor r = 2
+
+  Grid & grid = *this;
+
+  // Get grid index bounds
+
+  int ig[3][2];
+  grid.indices(ig);
+
+  // Get coarse index bounds
+
+  int ic[3][2];
+  coarse.indices(ic);
+
+  // Find matching face, if any
+
+  bool found_face = false;
+  int  iaxis      = -1;
+  int  iface      = -1;
+
+  for (axis=0; axis<3; axis++) {
+    for (face=0; face<2; face++) {
+      if (ig[axis][face] == r*ic[axis][1-face]) {
+	found_face = true;
+	iaxis=axis;
+	iface=face;
+      }
+    }
+  }
+
+  axis=iaxis;
+  face=iface;
+
+  // Exit if face isn't found
+
+  _TRACE_;
+  if (! found_face) return false;
+  _TRACE_;
+
+  // face axes
+
+  int j0=(axis+1)%3;
+  int j1=(axis+2)%3;
+
+  // Compute local indices intersection from global indices of each grid
+
+  il0 = MAX(ig[j0][0],r*ic[j0][0]) - ig[j0][0];
+  iu0 = MIN(ig[j0][1],r*ic[j0][1]) - ig[j0][0];
+
+  il1 = MAX(ig[j1][0],r*ic[j1][0]) - ig[j1][0];
+  iu1 = MIN(ig[j1][1],r*ic[j1][1]) - ig[j1][0];
+
+  iu0--;
+  iu1--;
+
+  _TRACE_;
+  if (il0 > iu0 || il1 > iu1) return false;
+  _TRACE_;
+
+  return true;
+}
+
+//----------------------------------------------------------------------
 
 /// Determine the "count"th axis (indexing from 0), face and
 /// corresponding range of coarse-grid indices of zones adjacent to
@@ -446,28 +534,39 @@ bool Grid::neighbor_shared_face (Grid & neighbor, int & axis, int & face,
 /// if the returned values are valid, or false if there is no
 /// "count"th face.
 
-bool Grid::parent_shared_face (Grid & parent, int & axis, int & face, 
-			      int & il0, int & il1, int & iu0, int & iu1,
-			      int & count) throw ()
+bool Grid::parent_shared_face (Grid & parent, int & axis, 
+			       int & face, 
+			       int & il0, int & il1, 
+			       int & iu0, int & iu1,
+			       int & count) throw ()
 {
+
+  _TRACE_;
+
+  const int r = 2; // WARNING: assuming fixed refinement factor r = 2
 
   Grid & grid = *this;
 
   // Get grid index bounds
+
   int ig[3][2];
   grid.indices(ig);
 
   // Get parent index bounds
+
   int ip[3][2];
   parent.indices(ip);
 
   // Find count'th matching face, if there is one
-  int num=0;
-  bool found_face=false;
-  int iaxis=-1,iface=-1;
+
+  bool found_face = false;
+  int  iaxis      = -1;
+  int  iface      = -1;
+  int  num        = 0;
+
   for (axis = 0; axis < 3; axis++) {
     for (face = 0; face < 2; face++) {
-      if (ig[axis][face] == 2*ip[axis][face]) {
+      if (ig[axis][face] == r*ip[axis][face]) {
 	if (num == count) {
 	  found_face = true;
 	  iaxis = axis;
@@ -479,13 +578,15 @@ bool Grid::parent_shared_face (Grid & parent, int & axis, int & face,
       }
     }
   }
+
   axis = iaxis;
   face = iface;
 
-  // Exit if no grid faces lie in the same plane
-  if (!found_face) {
-    return false;
-  }
+  // Exit if face isn't found
+
+  _TRACE_;
+  if (!found_face) return false;
+  _TRACE_;
 
   // face axes
 
@@ -493,20 +594,27 @@ bool Grid::parent_shared_face (Grid & parent, int & axis, int & face,
   int j1=(axis+2)%3;
 
   // Compute local indices intersection from global indices of each grid
-  // Divide by two so that indices correspond to coarse grid
+  // Divide by r so that indices correspond to coarse grid
 
-  il0 = MAX(ig[j0][0]/2,ip[j0][0]) - ip[j0][0];
-  iu0 = MIN(ig[j0][1]/2,ip[j0][1]) - ip[j0][0];
+  il0 = MAX(ig[j0][0]/r,ip[j0][0]) - ip[j0][0];
+  iu0 = MIN(ig[j0][1]/r,ip[j0][1]) - ip[j0][0];
 
-  il1 = MAX(ig[j1][0]/2,2*ip[j1][0]) - ip[j1][0];
-  iu1 = MIN(ig[j1][1]/2,2*ip[j1][1]) - ip[j1][0];
+  // WARNING: was bug here,2*ip not ip in first ip in each line--bug
+  // wasn't caught earlier, why not?
+
+  il1 = MAX(ig[j1][0]/r,ip[j1][0]) - ip[j1][0];
+  iu1 = MIN(ig[j1][1]/r,ip[j1][1]) - ip[j1][0];
 
   iu0--;
   iu1--;
 
-  if (il0 > iu0 || il1 > iu1) {
-    return false;
-  }
+  _TRACE_;
+  if (il0 > iu0 || il1 > iu1) return false;
+  _TRACE_;
 
   return true;
 }
+
+//----------------------------------------------------------------------
+
+

@@ -69,9 +69,9 @@ public:
 
   Label * label_[3][2];
 
-  /// Arrays for zone neighbors
+  /// Arrays for adjacent grids (including those in coarser level)
 
-  pGrid * neighbor_[3][2];
+  pGrid * adjacent_[3][2];
 
   /// Leading dimension of arrays
   int  n1_[3]; 
@@ -124,19 +124,19 @@ public:
   /// axis (0 to 2) and face (0 to 1).  No error checking is performed
   /// on axis, face, i or j.
 
-  pGrid & neighbor (int axis, int face, int i, int j) throw ()
-  { return neighbor_[axis][face][i+n1_[axis]*j]; };
+  pGrid & adjacent (int axis, int face, int i, int j) throw ()
+  { return adjacent_[axis][face][i+n1_[axis]*j]; };
 
 
-  /// Set the facing grid neighbor of all zones on the given axis (0
-  /// to 2) and face (0 to 1).  No error checking is performed on
-  /// axis or face.
+  /// Set the facing grid adjacent to all zones on the given axis (0
+  /// to 2) and face (0 to 1).  No error checking is performed on axis
+  /// or face.
 
-  void neighbor (int axis, int face, pGrid neighbor) throw ()
+  void adjacent (int axis, int face, pGrid adjacent) throw ()
   { 
     for (int i=0; i<n1_[axis]; i++) {
       for (int j=0; j<n2_[axis]; j++) {
-	neighbor_[axis][face][i+n1_[axis]*j] = neighbor; 
+	adjacent_[axis][face][i+n1_[axis]*j] = adjacent; 
       }
     }
   };

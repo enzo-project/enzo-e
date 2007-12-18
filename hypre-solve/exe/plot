@@ -12,7 +12,7 @@
 #-----------------------------------------------------------------------
 
 if ( $2 == "") then
-   echo "Usage: $0:t <plot type> <problem directories>"
+   echo "Usage: $0:t [size-time|procs-time|total-mem] <problem directories>"
 else
    set plot_type = $argv[1]
    shift argv

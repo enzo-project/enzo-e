@@ -35,7 +35,7 @@
 
 //----------------------------------------------------------------------
 
-const int trace          = 0;
+const int trace          = 1;
 const int debug          = 0;
 const int debug_detailed = 0;
 const int geomview       = 1;
@@ -278,21 +278,70 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // ------------------------------------------------------------
 
   ItHierarchyLevels itl (*this);
+
   while (Level * level = itl++) {
     ItLevelGridsAll itg (*level);
+
     while (Grid * grid = itg++) {
       ItGridNeighbors itn (*grid);
-      while (Grid * neighbor = itn++) {
-	if (grid->is_local() || neighbor->is_local()) {
+
+      // Set "adjacent" pointers for adjacent grids in same level
+
+      Grid * adjacent;
+
+      while (adjacent = itn++) {
+	if (grid->is_local() || adjacent->is_local()) {
 	  if (grid->neighbor_shared_face
-	      (*neighbor,axis,face,il0,il1,iu0,iu1)) {
+	      (*adjacent,axis,face,il0,il1,iu0,iu1)) {
 	    for (ig0=il0; ig0<iu0; ig0++) {
 	      for (ig1=il1; ig1<iu1; ig1++) {
-		grid->faces().neighbor(axis,face,ig0,ig1) = neighbor;
+		grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
 	      }
 	    }
 	  }
 	}
+      }
+
+      // Set "adjacent" pointers for adjacent non-parent coarse grids
+
+      if (parent (*grid)) {
+
+	ItGridNeighbors itpn (*parent(*grid));
+
+	while (adjacent = itpn++) {
+	  _TRACE_;
+	  if (grid->is_local() || adjacent->is_local()) {
+	    if (grid->coarse_shared_face
+		(*adjacent,axis,face,il0,il1,iu0,iu1)) {
+	      _TRACE_;
+	      printf ("%d %d  %d %d\n",il0,iu0,il1,iu1);
+	      for (ig0=il0; ig0<iu0; ig0++) {
+		for (ig1=il1; ig1<iu1; ig1++) {
+		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
+		}
+	      }
+	    }
+	  }
+	}
+
+	// Set remaining "adjacent" pointers to parent grid
+
+	printf ("%s:%d ERROR: BUG HERE!!!\n",__FILE__,__LINE__);
+	int ig3[3][2];
+ 	grid->indices(ig3);
+ 	for (axis=0; axis<3; axis++) {
+	  int j0 = (axis+1)%3;
+ 	  int j1 = (axis+2)%3;
+ 	  for (face=0; face<2; face++) {
+ 	    for (ig0=ig3[j0][0]; ig0<ig3[j0][1]; ig0++) {
+ 	      for (ig1=ig3[j1][0]; ig1<ig3[j1][1]; ig1++) {
+ 		if (grid->faces().adjacent(axis,face,ig0,ig1) == NULL) {
+ 		  grid->faces().adjacent(axis,face,ig0,ig1) = parent (*grid);
+ 		}
+ 	      }
+ 	    }
+ 	  }
+ 	}
       }
     }
   }
@@ -336,8 +385,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	      // Label covered
 	      parent->faces().label(axis,face,ig0,ig1) = Faces::_covered_;
 	      // Label adjacent-covered
-	      Grid * neighbor = parent->faces().neighbor(axis,face,ig0,ig1);
-	      if (neighbor != NULL) {
+	      Grid * neighbor = parent->faces().adjacent(axis,face,ig0,ig1);
+	      if (neighbor != NULL && neighbor->level() == grid->level()) {
 		int in3[3][2];
 		neighbor->indices(in3);
 		j0 = (axis+1)%3;
@@ -364,8 +413,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
     Level *level = &this->level(ilevel);
     ItLevelGridsAll itg (*level);
     while (Grid * grid = itg++) {
-      int ig3[3][2];
-      grid->indices(ig3);
+      //      int ig3[3][2];
+      //      grid->indices(ig3);
       ItGridNeighbors itn (*grid);
       while (Grid * neighbor = itn++) {
 	if (grid->neighbor_shared_face 
