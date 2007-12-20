@@ -314,7 +314,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	    if (grid->coarse_shared_face
 		(*adjacent,axis,face,il0,il1,iu0,iu1)) {
 	      _TRACE_;
-	      printf ("%d %d  %d %d\n",il0,iu0,il1,iu1);
+	      printf ("%s:%d %d %d  %d %d\n",__FILE__,__LINE__,il0,iu0,il1,iu1);
 	      for (ig0=il0; ig0<iu0; ig0++) {
 		for (ig1=il1; ig1<iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -326,22 +326,25 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 	// Set remaining "adjacent" pointers to parent grid
 
-	printf ("%s:%d ERROR: BUG HERE!!!\n",__FILE__,__LINE__);
 	int ig3[3][2];
- 	grid->indices(ig3);
- 	for (axis=0; axis<3; axis++) {
+	grid->indices(ig3);
+	for (axis=0; axis<3; axis++) {
 	  int j0 = (axis+1)%3;
- 	  int j1 = (axis+2)%3;
- 	  for (face=0; face<2; face++) {
- 	    for (ig0=ig3[j0][0]; ig0<ig3[j0][1]; ig0++) {
- 	      for (ig1=ig3[j1][0]; ig1<ig3[j1][1]; ig1++) {
- 		if (grid->faces().adjacent(axis,face,ig0,ig1) == NULL) {
- 		  grid->faces().adjacent(axis,face,ig0,ig1) = parent (*grid);
- 		}
- 	      }
- 	    }
- 	  }
- 	}
+	  int j1 = (axis+2)%3;
+	  int n0 = ig3[j0][1] - ig3[j0][0];
+	  int n1 = ig3[j1][1] - ig3[j1][0];
+	  for (face=0; face<2; face++) {
+	    printf ("%s:%d %d %d  %d %d\n",
+		    __FILE__,__LINE__,ig3[j0][0],ig3[j0][1],ig3[j1][0],ig3[j1][1]);
+	    for (ig0=0; ig0<n0; ig0++) {
+	      for (ig1=0; ig1<n1; ig1++) {
+		if (grid->faces().adjacent(axis,face,ig0,ig1) == NULL) {
+		  grid->faces().adjacent(axis,face,ig0,ig1) = parent (*grid);
+		}
+	      }
+	    }
+	  }
+	}
       }
     }
   }

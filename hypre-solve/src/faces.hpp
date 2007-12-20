@@ -46,7 +46,8 @@ public:
     _neighbor_,
     _covered_,
     _adjacent_covered_,
-    _last_ =  _adjacent_covered_
+    _last_ =  _adjacent_covered_,
+    _error_
   };
 
   static const int _num_types_;

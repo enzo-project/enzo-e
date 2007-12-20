@@ -186,10 +186,19 @@ void Grid::geomview_face_type (FILE         *fpr,
 
   // Default acolor = 0.0 to make them invisible
 
-  float bcolor[] = {0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0};
-  float rcolor[] = {0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-  float gcolor[] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0};
-  float acolor[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  // unknown            000
+  // boundary           100
+  // coarse             010 
+  // fine               001
+  // neighbor           011 
+  // covered            101
+  // adjacent_covered   110
+  // error              111 
+
+  float bcolor[] = {0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
+  float rcolor[] = {0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0};
+  float gcolor[] = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0};
+  float acolor[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Make requested types visible
   int i;
@@ -292,6 +301,9 @@ void Grid::geomview_face_type (FILE         *fpr,
 	  zone(j0,j1,j2,zc[0],zc[1],zc[2]);
 
 	  int label = faces().label(axis,face,i1,i2);
+	  if (label < Faces::_first_ || label > Faces::_last_) {
+	    label = Faces::_error_;
+	  }
 
 	  for (i=0; i<4; i++) {
 	    fprintf (fpr,"%g %g %g  %f %f %f %f  ",

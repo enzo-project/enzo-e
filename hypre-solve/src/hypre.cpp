@@ -202,6 +202,8 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
   HYPRE_SStructGraphCreate (MPI_COMM_WORLD, grid_, &graph_);
 
+  HYPRE_SStructGraphSetObjectType (graph_, HYPRE_SSTRUCT);
+
   ItHierarchyLevels itl (hierarchy);
 
   int part = 0;
@@ -223,16 +225,21 @@ void Hypre::init_graph (Hierarchy & hierarchy)
       while (Grid * grid = itag++) {
 
 	// Define nonstencil entries for the grid
-	_TRACE_;
+
 	init_graph_nonstencil_(*grid);
 
-	// Clear the nonstencil entry counter for subsequent matrix
-	// nonstencil entries
-
-	int dim = hierarchy.dimension();
-	grid->init_counter(dim*2+1);
-
       }
+    }
+
+    ItLevelGridsAll itag (*level);
+
+    while (Grid * grid = itag++) {
+
+      // Clear the nonstencil entry counter for subsequent matrix
+      // nonstencil entries
+
+      int dim = hierarchy.dimension();
+      grid->init_counter(dim*2+1);
     }
   }
 
@@ -285,6 +292,8 @@ void Hypre::init_linear (Parameters          & parameters,
   HYPRE_SStructMatrixInitialize (A_);
   HYPRE_SStructVectorInitialize (X_);
   HYPRE_SStructVectorInitialize (B_);
+
+    
  
   ItHierarchyLevels itl (hierarchy);
 
@@ -429,10 +438,12 @@ void Hypre::evaluate (Hierarchy & hierarchy)
 
 void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 {
-  _TRACE_;
 
   if (phase != "graph" && phase != "matrix") {
-    ERROR("init_matrix_nonstencil_ called with phase = " + phase);
+    char error_message[80];
+    strcpy (error_message,"init_matrix_nonstencil_ called with phase = ");
+    strcat (error_message,phase.c_str());
+    ERROR(error_message);
   }
 
   const int r = 2; // WARNING: hard-coded refinement factor r = 2
@@ -477,8 +488,6 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	  bool is_local = 
 	    (adjacent != NULL) &&  (adjacent->is_local() || grid.is_local());
 
-	  printf ("init_nonstencil_ %s (%d,%d) (adjacent,grid) = (%d,%d)\n",
-		  phase.c_str(),n1,n1,(adjacent != NULL),grid.is_local());
 	  if (is_local && fz == Faces::_coarse_) {
 
 	    // (fine) grid global indices
@@ -544,8 +553,6 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		  double val   = val_h * val_s * val_a;
 		  HYPRE_SStructMatrixAddToValues 
 		    (A_, grid.level(), igg3, 0, 1, &entry, &val);
-		  printf ("fine-- %d %d %d  %d  %g\n",
-			  igg3[0],igg3[1],igg3[2],entry,val);
 		  val_diag -= val;
 		  ++ igg3[j1];
 		}
@@ -609,8 +616,10 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	      // QUADRATIC (2/3: 30/32 3/32 3/32 2/32 -3/32 -3/32)
 
 	    } else {
-	      ERROR("Unknown parameter discret = " 
-		    + parameters_.value("discret"));
+	      char error_message[80];
+	      strcpy (error_message,"Unknown parameter discret = ");
+	      strcat (error_message,parameters_.value("discret").c_str());
+	      ERROR(error_message);
 	    }
 
 	    //--------------------------------------------------
@@ -619,7 +628,30 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
 	    if (phase == "graph") {
  	      HYPRE_SStructGraphAddEntries 
- 		(graph_, grid.level(), igg3, 0, adjacent->level(), ign3, 0);
+ 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+	      ++ igg3[0];
+ 	      HYPRE_SStructGraphAddEntries 
+ 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+	      ++ igg3[1];
+ 	      HYPRE_SStructGraphAddEntries 
+ 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+	      -- igg3[0];
+ 	      HYPRE_SStructGraphAddEntries 
+ 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+	      ++ igg3[2];
+ 	      HYPRE_SStructGraphAddEntries 
+ 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+	      ++ igg3[0];
+ 	      HYPRE_SStructGraphAddEntries 
+ 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+	      -- igg3[1];
+ 	      HYPRE_SStructGraphAddEntries 
+ 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+	      -- igg3[0];
+ 	      HYPRE_SStructGraphAddEntries 
+ 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+	      -- igg3[2];
+
  	    } else if (phase == "matrix") {
 	      const double o8 = 1. / 8.;
  	      double val_h = (adjacent->h(j1)*adjacent->h(j2))/adjacent->h(j0);
@@ -630,6 +662,10 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
  	      int entries[8];
  	      double values[8];
  	      for (int i=0; i<8; i++) {
+		if (counter< 7) {
+		  _TRACE_;
+		  printf ("i,counter=%d,%d\n",i,counter);
+		}
  		entries[i] = counter++;
  		values[i]  = o8 * val;
  	      }
@@ -637,7 +673,21 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	      // coarse->fine off-diagonal
 
  	      HYPRE_SStructMatrixAddToValues 
- 		(A_, adjacent->level(),ign3, 0, 8, entries, values);
+ 		(A_, adjacent->level(),ign3, 0, 1, &entries[0], &values[0]);
+	      HYPRE_SStructMatrixAddToValues 
+ 		(A_, adjacent->level(),ign3, 0, 1, &entries[1], &values[1]);
+ 	      HYPRE_SStructMatrixAddToValues 
+ 		(A_, adjacent->level(),ign3, 0, 1, &entries[2], &values[2]);
+ 	      HYPRE_SStructMatrixAddToValues 
+ 		(A_, adjacent->level(),ign3, 0, 1, &entries[3], &values[3]);
+ 	      HYPRE_SStructMatrixAddToValues 
+ 		(A_, adjacent->level(),ign3, 0, 1, &entries[4], &values[4]);
+ 	      HYPRE_SStructMatrixAddToValues 
+ 		(A_, adjacent->level(),ign3, 0, 1, &entries[5], &values[5]);
+ 	      HYPRE_SStructMatrixAddToValues 
+ 		(A_, adjacent->level(),ign3, 0, 1, &entries[6], &values[6]);
+ 	      HYPRE_SStructMatrixAddToValues 
+ 		(A_, adjacent->level(),ign3, 0, 1, &entries[7], &values[7]);
 
 	      // coarse->coarse diagonal
 
@@ -653,7 +703,6 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
       }
     }
   }
-  _TRACE_;
 }
 
 //------------------------------------------------------------------------
@@ -663,8 +712,6 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 void Hypre::init_matrix_stencil_ (Grid & grid)
 
 {
-  _TRACE_;
-
   int part        = grid.level();
   int lower[3]    = { grid.i_lower(0), grid.i_lower(1), grid.i_lower(2) };
   int upper[3]    = { grid.i_upper(0), grid.i_upper(1), grid.i_upper(2) };
@@ -747,7 +794,6 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 
 void Hypre::init_matrix_clear_ (Level & level)
 {
-  _TRACE_;
   // WARNING: hard-coding refinement factor of 2
   int r_factors[3] = {2,2,2}; 
   int part = level.index();
@@ -778,7 +824,6 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
 
 {
 
-  _TRACE_;
   const Scalar scaling0 = -4.0*Constants::G()*Constants::pi();
 
   Scalar shift_b_sum = 0.0;
@@ -838,7 +883,6 @@ Scalar Hypre::init_vector_spheres_ (Hierarchy             & hierarchy,
 
 {
 
-  _TRACE_;
   if (spheres.size() > 0) {  
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     NOT_IMPLEMENTED("Contribution of sphere mass to right-hand side");
@@ -856,7 +900,6 @@ void Hypre::solve_pfmg_ (Hierarchy & hierarchy)
 
 {
 
-  _TRACE_;
   // Create and initialize the solver
 
   HYPRE_SStructSysPFMGCreate    (MPI_COMM_WORLD, &solver_);
@@ -894,7 +937,6 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy)
 {
   int i;
 
-  _TRACE_;
   // Create the solver
 
   HYPRE_SStructFACCreate(MPI_COMM_WORLD, &solver_);

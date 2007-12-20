@@ -43,7 +43,7 @@ const char * Faces::LabelName[] = {
     "neighbor",
     "covered",
     "adjacent_covered",
-    "last"
+    "error"
   };
 
 const int _num_types_(Faces::_last_ - Faces::_first_ + 1);
