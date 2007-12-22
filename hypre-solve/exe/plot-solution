@@ -1,0 +1,43 @@
+#!/bin/tcsh -f
+
+set size = "size 480,300"
+
+set x0 = '(0'
+set y0 = ', 0,'
+set z0 = ', 0;'
+
+set files = (X.0?.00.00000)
+set n = $#files
+echo $n
+
+
+foreach X (X.0?.00.00000)
+
+  grep "$x0" < $X | awk '{print $3,$4,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > xz-$X
+  grep "$y0" < $X | awk '{print $4,$2,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > zx-$X
+  grep "$z0" < $X | awk '{print $2,$3,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > xy-$X
+
+  grep "$y0" < $X | grep "$z0" | awk '{print $2,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > x-$X
+  grep "$z0" < $X | grep "$x0" | awk '{print $3,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > y-$X
+  grep "$x0" < $X | grep "$y0" | awk '{print $4,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > z-$X
+end
+
+if ($n == 1) then
+echo "set terminal png $size; set output 'x.png'; set log y; plot 'x-X.00.00.00000' title 'level 0' w lp" | gnuplot  
+echo "set terminal png $size; set output 'y.png'; set log y; plot 'y-X.00.00.00000' title 'level 0' w lp" | gnuplot  
+echo "set terminal png $size; set output 'z.png'; set log y; plot 'z-X.00.00.00000' title 'level 0' w lp" | gnuplot  
+else if ($n == 2) then
+echo "set terminal png $size; set output 'x.png'; set log y; plot 'x-X.00.00.00000' using ("'$'"1*2):("'$'"2) title 'level 0' w lp, 'x-X.01.00.00000' title 'level 1' w lp" | gnuplot  
+echo "set terminal png $size; set output 'y.png'; set log y; plot 'y-X.00.00.00000' using ("'$'"1*2):("'$'"2) title 'level 0' w lp, 'y-X.01.00.00000' title 'level 1' w lp" | gnuplot  
+echo "set terminal png $size; set output 'z.png'; set log y; plot 'z-X.00.00.00000' using ("'$'"1*2):("'$'"2) title 'level 0' w lp, 'z-X.01.00.00000' title 'level 1'  w lp" | gnuplot  
+else if ($n == 3) then
+echo "set terminal png $size; set output 'x.png'; set log y; plot 'x-X.00.00.00000' using ("'$'"1*4):("'$'"2) title 'level 0' w lp, 'x-X.01.00.00000' using ("'$'"1*2):("'$'"2) title 'level 1' w lp, 'z-X.02.00.00000' title 'level 2'  w lp" | gnuplot  
+echo "set terminal png $size; set output 'y.png'; set log y; plot 'y-X.00.00.00000' using ("'$'"1*4):("'$'"2) title 'level 0' w lp, 'y-X.01.00.00000' using ("'$'"1*2):("'$'"2) title 'level 1' w lp, 'z-X.02.00.00000' title 'level 2'  w lp" | gnuplot  
+echo "set terminal png $size; set output 'z.png'; set log y; plot 'z-X.00.00.00000' using ("'$'"1*4):("'$'"2) title 'level 0' w lp, 'z-X.01.00.00000' using ("'$'"1*2):("'$'"2) title 'level 1'  w lp, 'z-X.02.00.00000' title 'level 2'  w lp" | gnuplot  
+endif
+
+
+echo "<html><img src="x.png"></img></br/><img src="y.png"></img></br/><img src="z.png"></img></br/></html>" > index.html
+
+
+
