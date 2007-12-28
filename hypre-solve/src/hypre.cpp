@@ -78,9 +78,7 @@ void Hypre::init_hierarchy (Parameters & parameters,
 
   // Create the hypre grid
   
-  _TRACE_HYPRE_;
   HYPRE_SStructGridCreate (MPI_COMM_WORLD, dim, num_parts, &grid_);
-  _TRACE_HYPRE_;
 
   ItHierarchyLevels itl (hierarchy);
 
@@ -97,9 +95,7 @@ void Hypre::init_hierarchy (Parameters & parameters,
 
       // Set extents for boxes that comprise the hypre grid
 
-  _TRACE_HYPRE_;
       HYPRE_SStructGridSetExtents(grid_, part, lower, upper);
-  _TRACE_HYPRE_;
       
     }
 
@@ -108,9 +104,7 @@ void Hypre::init_hierarchy (Parameters & parameters,
     HYPRE_SStructVariable variable_types[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
     const int numvars = 1;
 
-  _TRACE_HYPRE_;
     HYPRE_SStructGridSetVariables(grid_, part, numvars, variable_types);
-  _TRACE_HYPRE_;
 
     // Set grid part to be periodic, with periodicity determined by the root
     // level size, current level, and refinement factor (ASSUMED TO BE 2)
@@ -135,18 +129,14 @@ void Hypre::init_hierarchy (Parameters & parameters,
 		       __FILE__,__LINE__, part,
 		       periodicity[0],periodicity[1],periodicity[2]);
 
-  _TRACE_HYPRE_;
     HYPRE_SStructGridSetPeriodic (grid_, part, periodicity);
-  _TRACE_HYPRE_;
 
     ++ part;
   }
 
   // When finished, assemble the hypre grid
 
-  _TRACE_HYPRE_;
   HYPRE_SStructGridAssemble (grid_);
-  _TRACE_HYPRE_;
   
 }
 
@@ -163,9 +153,7 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
 
   int dim = hierarchy.dimension();
 
-  _TRACE_HYPRE_;
   HYPRE_SStructStencilCreate (dim,dim*2+1,&stencil_);
-  _TRACE_HYPRE_;
 
   int entries[][3] = { {  0, 0, 0 },     // center
 		       {  1, 0, 0 },     // X+
@@ -175,21 +163,13 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
 		       {  0, 0, 1 },     // Z+
 		       {  0, 0,-1 } };   // Z-
 
-  _TRACE_HYPRE_;
   if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 0, entries[0], 0);
-  _TRACE_HYPRE_;
   if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 1, entries[1], 0);
-  _TRACE_HYPRE_;
   if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 2, entries[2], 0);
-  _TRACE_HYPRE_;
   if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 3, entries[3], 0);
-  _TRACE_HYPRE_;
   if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 4, entries[4], 0);
-  _TRACE_HYPRE_;
   if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 5, entries[5], 0);
-  _TRACE_HYPRE_;
   if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 6, entries[6], 0);
-  _TRACE_HYPRE_;
 
 }
 
@@ -221,13 +201,9 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 {
   // Create the hypre graph object
 
-  _TRACE_HYPRE_;
   HYPRE_SStructGraphCreate (MPI_COMM_WORLD, grid_, &graph_);
-  _TRACE_HYPRE_;
 
-  _TRACE_HYPRE_;
   HYPRE_SStructGraphSetObjectType (graph_, HYPRE_SSTRUCT);
-  _TRACE_HYPRE_;
 
   ItHierarchyLevels itl (hierarchy);
 
@@ -237,9 +213,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
     // 1. Define stencil connections within each level
 
-  _TRACE_HYPRE_;
     HYPRE_SStructGraphSetStencil (graph_, part, 0, stencil_);
-  _TRACE_HYPRE_;
 
     ++ part;
 
@@ -272,9 +246,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
   // Assemble the graph
 
-  _TRACE_HYPRE_;
   HYPRE_SStructGraphAssemble (graph_);
-  _TRACE_HYPRE_;
 
 }
 
@@ -308,33 +280,21 @@ void Hypre::init_linear (Parameters          & parameters,
 {
   // Create the hypre matrix A_, solution X_, and right-hand side B_ objects
 
-  _TRACE_HYPRE_;
   HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, graph_, &A_);
-  _TRACE_HYPRE_;
   HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid_,  &X_);
-  _TRACE_HYPRE_;
   HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid_,  &B_);
-  _TRACE_HYPRE_;
 
   // Set the object types
 
-  _TRACE_HYPRE_;
   HYPRE_SStructMatrixSetObjectType (A_,HYPRE_SSTRUCT);
-  _TRACE_HYPRE_;
   HYPRE_SStructVectorSetObjectType (X_,HYPRE_SSTRUCT);
-  _TRACE_HYPRE_;
   HYPRE_SStructVectorSetObjectType (B_,HYPRE_SSTRUCT);
-  _TRACE_HYPRE_;
 
   // Initialize the hypre matrix and vector objects
 
-  _TRACE_HYPRE_;
   HYPRE_SStructMatrixInitialize (A_);
-  _TRACE_HYPRE_;
   HYPRE_SStructVectorInitialize (X_);
-  _TRACE_HYPRE_;
   HYPRE_SStructVectorInitialize (B_);
-  _TRACE_HYPRE_;
 
   //--------------------------------------------------
   // Initialize the matrix A_
@@ -418,9 +378,7 @@ void Hypre::init_linear (Parameters          & parameters,
 	int upper[3] = { grid->i_upper(0), grid->i_upper(1), grid->i_upper(2) };
 	Scalar * values = new Scalar[grid->num_unknowns()];
 	for (int i=0; i<grid->num_unknowns(); i++) values[i] = shift_b_amount;
-  _TRACE_HYPRE_;
 	HYPRE_SStructVectorAddToBoxValues (B_,part,lower,upper,0,values);
-  _TRACE_HYPRE_;
 
 	delete [] values;
       }
@@ -433,47 +391,17 @@ void Hypre::init_linear (Parameters          & parameters,
 		       shift_b_amount);
   }
 
-  // Initialize initial guess X_
-
-  //  printf ("%s:%d WARNING!!! TEMPORARY CODE!!!\n",__FILE__,__LINE__);
-
-  //  int part = 0;
-  //  while (Level * level = itl++) {
-  //    ItLevelGridsLocal itg (*level);
-  //    while (Grid * grid = itg++) {
-  //      int lower[3] = { grid->i_lower(0), grid->i_lower(1), grid->i_lower(2) };
-  //      int upper[3] = { grid->i_upper(0), grid->i_upper(1), grid->i_upper(2) };
-  //      Scalar * values = new Scalar[grid->num_unknowns()];
-  //      for (int i=0; i<grid->num_unknowns(); i++) values[i] = 3.14+part;
-  //      _TRACE_HYPRE_;
-  //      HYPRE_SStructVectorSetBoxValues (X_,part,lower,upper,0,values);
-  //      _TRACE_HYPRE_;
-
-  //      delete [] values;
-  //    }
-
-
-  //    ++part;
-  //  }
   // Assemble the matrix and vectors
 
-  _TRACE_HYPRE_;
   HYPRE_SStructMatrixAssemble (A_);
-  _TRACE_HYPRE_;
   HYPRE_SStructVectorAssemble (B_);
-  _TRACE_HYPRE_;
   HYPRE_SStructVectorAssemble (X_);
-  _TRACE_HYPRE_;
 
   // Write the vector to a file for debugging
 
-  _TRACE_HYPRE_;
   if (parameters.value("dump_a") == "true") HYPRE_SStructMatrixPrint ("A",A_,1);
-  _TRACE_HYPRE_;
   if (parameters.value("dump_b") == "true") HYPRE_SStructVectorPrint ("B",B_,1);
-  _TRACE_HYPRE_;
   if (parameters.value("dump_x") == "true") HYPRE_SStructVectorPrint ("X0",X_,1);
-  _TRACE_HYPRE_;
 
 }
 
@@ -491,11 +419,7 @@ void Hypre::solve (Parameters & parameters,
     solve_pfmg_(hierarchy);
   }
   
-  // *******************************************************************
-  _TRACE_HYPRE_;
   if (parameters.value("dump_x") == "true") HYPRE_SStructVectorPrint ("X",X_,1);
-  _TRACE_HYPRE_;
-  // *******************************************************************
 
 }
 
@@ -613,28 +537,20 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
 	      if (phase == "graph") {
 
-  _TRACE_HYPRE_;
 		HYPRE_SStructGraphAddEntries 
 		  (graph_, grid.level(), igg3, 0, adjacent->level(), ign3, 0);
-  _TRACE_HYPRE_;
 		++ igg3[j1];
 
-  _TRACE_HYPRE_;
 		HYPRE_SStructGraphAddEntries 
 		  (graph_, grid.level(), igg3, 0, adjacent->level(), ign3, 0);
-  _TRACE_HYPRE_;
 		++ igg3[j2];
 
-  _TRACE_HYPRE_;
 		HYPRE_SStructGraphAddEntries 
 		  (graph_, grid.level(), igg3, 0, adjacent->level(), ign3, 0);
-  _TRACE_HYPRE_;
 		-- igg3[j1];
 
-  _TRACE_HYPRE_;
 		HYPRE_SStructGraphAddEntries 
 		  (graph_, grid.level(), igg3, 0, adjacent->level(), ign3, 0);
-  _TRACE_HYPRE_;
 		-- igg3[j2];
 
 	      } else if (phase == "matrix") {
@@ -655,12 +571,10 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
 		val   = val_h * val_s * val_a;
 
-  _TRACE_HYPRE_;
 		printf ("level = %d igg3()=(%d,%d,%d) entry=%d value=%g\n",
 			grid.level(), igg3[0], igg3[1], igg3[2], entry, val);
 		HYPRE_SStructMatrixAddToValues 
 		  (A_, grid.level(), igg3, 0, 1, &entry, &val);
-  _TRACE_HYPRE_;
 
 		val_diag -= val;
 		++ igg3[j1];
@@ -669,12 +583,10 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		entry = grid.counter(igg3)++;
 		val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
 		val   = val_h * val_s * val_a;
-  _TRACE_HYPRE_;
 		printf ("level = %d igg3()=(%d,%d,%d) entry=%d value=%g\n",
 			grid.level(), igg3[0], igg3[1], igg3[2], entry, val);
 		HYPRE_SStructMatrixAddToValues 
 		  (A_, grid.level(), igg3, 0, 1, &entry, &val);
-  _TRACE_HYPRE_;
 		val_diag -= val;
 		++ igg3[j2];
 
@@ -682,12 +594,10 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		entry = grid.counter(igg3)++;
 		val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
 		val   = val_h * val_s * val_a;
-  _TRACE_HYPRE_;
 		printf ("level = %d igg3()=(%d,%d,%d) entry=%d value=%g\n",
 			grid.level(), igg3[0], igg3[1], igg3[2], entry, val);
 		HYPRE_SStructMatrixAddToValues 
 		  (A_, grid.level(), igg3, 0, 1, &entry, &val);
-  _TRACE_HYPRE_;
 		val_diag -= val;
 		-- igg3[j1];
 
@@ -696,22 +606,16 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
 		val   = val_h * val_s * val_a;
 		// ERROR HERE:
-		_TRACE_HYPRE_;
-		_TRACE_;
 		printf ("level = %d igg3()=(%d,%d,%d) entry=%d value=%g\n",
 			grid.level(), igg3[0], igg3[1], igg3[2], entry, val);
 		HYPRE_SStructMatrixAddToValues 
 		  (A_, grid.level(), igg3, 0, 1, &entry, &val);
-		_TRACE_;
-  _TRACE_HYPRE_;
 		val_diag -= val;
 		-- igg3[j2];
 		// fine->fine diagonal
 		entry = 0;
-  _TRACE_HYPRE_;
 		HYPRE_SStructMatrixAddToValues 
 		  (A_, grid.level(), igg3, 0, 1, &entry, &val_diag);
-  _TRACE_HYPRE_;
 	      }
 
 	    } else {
@@ -727,45 +631,29 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
 	    if (phase == "graph") {
 
-  _TRACE_HYPRE_;
 	      HYPRE_SStructGraphAddEntries 
 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
-  _TRACE_HYPRE_;
 	      ++ igg3[0];
-  _TRACE_HYPRE_;
 	      HYPRE_SStructGraphAddEntries 
 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
-  _TRACE_HYPRE_;
 	      ++ igg3[1];
-  _TRACE_HYPRE_;
 	      HYPRE_SStructGraphAddEntries 
 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
-  _TRACE_HYPRE_;
 	      -- igg3[0];
-  _TRACE_HYPRE_;
 	      HYPRE_SStructGraphAddEntries 
 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
-  _TRACE_HYPRE_;
 	      ++ igg3[2];
-  _TRACE_HYPRE_;
 	      HYPRE_SStructGraphAddEntries 
 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
-  _TRACE_HYPRE_;
 	      ++ igg3[0];
-  _TRACE_HYPRE_;
 	      HYPRE_SStructGraphAddEntries 
 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
-  _TRACE_HYPRE_;
 	      -- igg3[1];
-  _TRACE_HYPRE_;
 	      HYPRE_SStructGraphAddEntries 
 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
-  _TRACE_HYPRE_;
 	      -- igg3[0];
-  _TRACE_HYPRE_;
 	      HYPRE_SStructGraphAddEntries 
 		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
-  _TRACE_HYPRE_;
 	      -- igg3[2];
 
  	    } else if (phase == "matrix") {
@@ -784,40 +672,29 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
 	      // coarse->fine off-diagonal
 
-  _TRACE_HYPRE_;
  	      HYPRE_SStructMatrixAddToValues 
  		(A_, adjacent->level(),ign3, 0, 1, &entries[0], &values[0]);
-  _TRACE_HYPRE_;
  	      HYPRE_SStructMatrixAddToValues 
  		(A_, adjacent->level(),ign3, 0, 1, &entries[1], &values[1]);
-  _TRACE_HYPRE_;
  	      HYPRE_SStructMatrixAddToValues 
  		(A_, adjacent->level(),ign3, 0, 1, &entries[2], &values[2]);
-  _TRACE_HYPRE_;
  	      HYPRE_SStructMatrixAddToValues 
  		(A_, adjacent->level(),ign3, 0, 1, &entries[3], &values[3]);
-  _TRACE_HYPRE_;
  	      HYPRE_SStructMatrixAddToValues 
  		(A_, adjacent->level(),ign3, 0, 1, &entries[4], &values[4]);
-  _TRACE_HYPRE_;
  	      HYPRE_SStructMatrixAddToValues 
  		(A_, adjacent->level(),ign3, 0, 1, &entries[5], &values[5]);
-  _TRACE_HYPRE_;
  	      HYPRE_SStructMatrixAddToValues 
  		(A_, adjacent->level(),ign3, 0, 1, &entries[6], &values[6]);
-  _TRACE_HYPRE_;
  	      HYPRE_SStructMatrixAddToValues 
  		(A_, adjacent->level(),ign3, 0, 1, &entries[7], &values[7]);
-  _TRACE_HYPRE_;
 
 	      // coarse->coarse diagonal
 
 	      double val_diag = -val;
 	      int    entry    = 0;
-  _TRACE_HYPRE_;
 	      HYPRE_SStructMatrixAddToValues 
 		(A_, adjacent->level(), ign3, 0, 1, &entry, &val_diag);
-  _TRACE_HYPRE_;
 
 	    }
 	  }
@@ -837,7 +714,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   int part        = grid.level();
   int lower[3]    = { grid.i_lower(0), grid.i_lower(1), grid.i_lower(2) };
   int upper[3]    = { grid.i_upper(0), grid.i_upper(1), grid.i_upper(2) };
-  int count       = grid.num_unknowns();
+  int n           = grid.num_unknowns();
   int entries[7]  = { 0,1,2,3,4,5,6 };
   double h3[3]    = {grid.h(0),grid.h(1),grid.h(2)};
   int    n3[3]    = {grid.n(0),grid.n(1),grid.n(2)};
@@ -846,75 +723,68 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   double h201 = h3[2]*h3[0] / h3[1];
   double h012 = h3[0]*h3[1] / h3[2];
 
-  double * v0  = new double [count];
-  double * vxp  = new double [count];
-  double * vxm  = new double [count];
-  double * vyp  = new double [count];
-  double * vym  = new double [count];
-  double * vzp  = new double [count];
-  double * vzm  = new double [count];
+  double * v0  = new double [n];
+  double * vxp  = new double [n];
+  double * vxm  = new double [n];
+  double * vyp  = new double [n];
+  double * vym  = new double [n];
+  double * vzp  = new double [n];
+  double * vzm  = new double [n];
 
   int i=0;
-  for (int i0=0; i0<grid.num_unknowns(0); i0++) {
+
+  for (int i2 = 0; i2 < n3[2]; i2++) {
 
     // DIFFUSION COEFFICIENTS HERE
 
-    double axp = i0 < n3[0]-1 ? 1.0 : 0.0;
-    double axm = i0 >       0 ? 1.0 : 0.0;
+    double azp = i2 < n3[2]-1 ? 1.0 : 0.0;
+    double azm = i2 >       0 ? 1.0 : 0.0;
 
-    for (int i1=0; i1<grid.num_unknowns(1); i1++) {
+    for (int i1 = 0; i1 < n3[1]; i1++) {
 
       // DIFFUSION COEFFICIENTS HERE
 
       double ayp = i1 < n3[1]-1 ? 1.0 : 0.0;
       double aym = i1 >       0 ? 1.0 : 0.0;
 
-      for (int i2=0; i2<grid.num_unknowns(2); i2++) {
+      for (int i0 = 0; i0 < n3[0]; i0++) {
 
 	// DIFFUSION COEFFICIENTS HERE
 
-	double azp = i2 < n3[2]-1 ? 1.0 : 0.0;
-	double azm = i2 >       0 ? 1.0 : 0.0;
+	double axp = i0 < n3[0]-1 ? 1.0 : 0.0;
+	double axm = i0 >       0 ? 1.0 : 0.0;
+
+	int i = i0 + n3[0]*(i1 + n3[1]*i2);
+	assert (i >= 0 && i < n);
 
 	vxp[i] = h120 * axp;
-	vyp[i] = h201 * ayp;
-	vzp[i] = h012 * azp;
 	vxm[i] = h120 * axm;
+	vyp[i] = h201 * ayp;
 	vym[i] = h201 * aym;
+	vzp[i] = h012 * azp;
 	vzm[i] = h012 * azm;
 
 	v0[i] = -(vxp[i]+vxm[i]+vyp[i]+vym[i]+vzp[i]+vzm[i]);
 
-	++i;
       }
     }
   }
 
-  // *******************************************************************
-  _TRACE_HYPRE_;
   HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[0],v0);
-  _TRACE_HYPRE_;
-  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[1],vxp);
-  _TRACE_HYPRE_;
-  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[2],vxm);
-  _TRACE_HYPRE_;
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[1],vzp);
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[2],vzm);
   HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[3],vyp);
-  _TRACE_HYPRE_;
   HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[4],vym);
-  _TRACE_HYPRE_;
-  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[5],vzp);
-  _TRACE_HYPRE_;
-  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[6],vzm);
-  _TRACE_HYPRE_;
-  // *******************************************************************
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[5],vxp);
+  HYPRE_SStructMatrixSetBoxValues (A_,part,lower,upper,0,1,&entries[6],vxm);
 
- delete [] vzp;
- delete [] vzm;
- delete [] vyp;
- delete [] vym;
- delete [] vxp;
- delete [] vxm;
- delete [] v0;
+  delete [] vzp;
+  delete [] vzm;
+  delete [] vyp;
+  delete [] vym;
+  delete [] vxp;
+  delete [] vxm;
+  delete [] v0;
 
 }
 
@@ -931,19 +801,15 @@ void Hypre::init_matrix_clear_ (Level & level)
 
     // Clear stencil values from coarse to fine part
 
-  _TRACE_HYPRE_;
     HYPRE_SStructFACZeroCFSten (A_,grid_, part, r_factors);
-  _TRACE_HYPRE_;
 
     // Clear stencil values from fine to coarse part
 
     HYPRE_SStructFACZeroFCSten (A_,grid_, part);
-  _TRACE_HYPRE_;
 
     // Set overlapped areas of part with identity
 
     HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
-  _TRACE_HYPRE_;
 
     // Need to clear under rhs also
     //   HYPRE_SStructFACZeroAMRVectorData(B_, plevels, prefinements);
@@ -1000,11 +866,7 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
     
       shift_b_sum += value;
 
-      // *******************************************************************
-  _TRACE_HYPRE_;
       HYPRE_SStructVectorAddToValues (B_, part, index, 0, &value);
-  _TRACE_HYPRE_;
-      // *******************************************************************
     }
   }
   return shift_b_sum;
@@ -1073,12 +935,9 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy)
 {
   int i;
 
-  _TRACE_;
   // Create the solver
 
-  _TRACE_HYPRE_;
   HYPRE_SStructFACCreate(MPI_COMM_WORLD, &solver_);
-  _TRACE_HYPRE_;
 
   // Initialize parts
 
