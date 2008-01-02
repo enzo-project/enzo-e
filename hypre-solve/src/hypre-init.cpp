@@ -205,7 +205,7 @@ main(int argc, char **argv)
   fprintf (fp, "domain    3 -4e9 -4e9 -4e9  4e9 4e9 4e9\n");
   fprintf (fp, "boundary  " BOUNDARY "\n");
   fprintf (fp, "sphere    5.993985e27 6.378137e8 0.0 0.0 0.0\n");
-  fprintf (fp, "point     100.0   1e3 1e3 1e3   %d\n",id_point);
+  fprintf (fp, "point     1e44   1e3 1e3 1e3   %d\n",id_point);
   fprintf (fp, "discret constant\n");
 
   //========================================================================
