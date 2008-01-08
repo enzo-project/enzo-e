@@ -329,7 +329,7 @@ void Hypre::init_linear (Parameters          & parameters,
 
       while (Grid * grid = itag++) {
 
-	init_matrix_nonstencil_(*grid);
+ 	init_matrix_nonstencil_(*grid);
 
       }
     }
@@ -467,6 +467,9 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
   // entries wherever a zone is adjacent to a coarse zone.  Both
   // fine-to-coarse and coarse-to-fine entries are added.
 
+  int level_fine   = grid.level();
+  int level_coarse = grid.level() - 1;
+
   for (axis=0; axis<3; axis++) {
 
     // j0:    axis normal to face
@@ -486,6 +489,10 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
     double h0 = grid.h(j0);
     double h1 = grid.h(j1);
     double h2 = grid.h(j2);
+
+    double H0 = r*grid.h(j0);
+    double H1 = r*grid.h(j1);
+    double H2 = r*grid.h(j2);
 
     // ig3[][] should be divisible by 2**level.  Just test 2 here.
 
@@ -527,10 +534,6 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    ign3[j1] = (igg3[j1]) / 2;
 	    ign3[j2] = (igg3[j2]) / 2;
 
-// 	    printf ("DEBUG %s:%d axis=%d face=%d (ig1,ig2)=(%d,%d) "
-// 		    "igg3=(%d,%d,%d)  ign3=(%d,%d,%d)\n",
-// 		    __FILE__,__LINE__,axis,face,ig1,ig2,
-// 		    igg3[0],igg3[1],igg3[2],ign3[0],ign3[1],ign3[2]);
 	    //--------------------------------------------------
 	    // GRAPH ENTRY: FINE-TO-COARSE 
 	    //--------------------------------------------------
@@ -543,97 +546,87 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	      //     Coefficients = 1
 	      //--------------------------------------------------
 
+	      igg3[j0] += face*(r-1);
+
 	      if (phase == "graph") {
 
-		igg3[j0] += face*(r-1);
-
 		HYPRE_SStructGraphAddEntries 
-		  (graph_, grid.level(), igg3, 0, adjacent->level(), ign3, 0);
+		  (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
 		++ igg3[j1];
 
 		HYPRE_SStructGraphAddEntries 
-		  (graph_, grid.level(), igg3, 0, adjacent->level(), ign3, 0);
+		  (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
 		++ igg3[j2];
 
 		HYPRE_SStructGraphAddEntries 
-		  (graph_, grid.level(), igg3, 0, adjacent->level(), ign3, 0);
+		  (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
 		-- igg3[j1];
 
 		HYPRE_SStructGraphAddEntries 
-		  (graph_, grid.level(), igg3, 0, adjacent->level(), ign3, 0);
+		  (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
 		-- igg3[j2];
-
-		igg3[j0] -= face*(r-1);
 
 	      } else if (phase == "matrix") {
 
-		igg3[j0] += face*(r-1);
-
-		// Compute fine to coarse matrix element values
+		// fine->coarse off-diagonal
 
 		double val_h = h1*h2/h0;
 		double val_s = 2. / 3.;
-
-		double val_diag = 0.0;
 
 		int entry;
 		double val_a;
 		double val;
 
-		// fine->coarse --
-		entry = grid.counter(igg3)++;
 		val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
 		val   = val_h * val_s * val_a;
-
-		printf ("level = %d igg3()=(%d,%d,%d) entry=%d value=%g\n",
-			grid.level(), igg3[0], igg3[1], igg3[2], entry, val);
+		entry = grid.counter(igg3)++;
+ 		HYPRE_SStructMatrixAddToValues 
+ 		  (A_, level_fine, igg3, 0, 1, &entry, &val);
+		entry = 0;
+		val = -val;
 		HYPRE_SStructMatrixAddToValues 
-		  (A_, grid.level(), igg3, 0, 1, &entry, &val);
-
-		val_diag -= val;
+		  (A_, level_fine, igg3, 0, 1, &entry, &val);
 		++ igg3[j1];
 
-		// fine->coarse +-
-		entry = grid.counter(igg3)++;
 		val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
 		val   = val_h * val_s * val_a;
-		printf ("level = %d igg3()=(%d,%d,%d) entry=%d value=%g\n",
-			grid.level(), igg3[0], igg3[1], igg3[2], entry, val);
+		entry = grid.counter(igg3)++;
 		HYPRE_SStructMatrixAddToValues 
-		  (A_, grid.level(), igg3, 0, 1, &entry, &val);
-		val_diag -= val;
+ 		  (A_, level_fine, igg3, 0, 1, &entry, &val);
+		entry = 0;
+		val = -val;
+		HYPRE_SStructMatrixAddToValues 
+		  (A_, level_fine, igg3, 0, 1, &entry, &val);
+
 		++ igg3[j2];
 
-		// fine->coarse ++
-		entry = grid.counter(igg3)++;
 		val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
 		val   = val_h * val_s * val_a;
-		printf ("level = %d igg3()=(%d,%d,%d) entry=%d value=%g\n",
-			grid.level(), igg3[0], igg3[1], igg3[2], entry, val);
+		entry = grid.counter(igg3)++;
+ 		HYPRE_SStructMatrixAddToValues 
+ 		  (A_, level_fine, igg3, 0, 1, &entry, &val);
+		entry = 0;
+		val = -val;
 		HYPRE_SStructMatrixAddToValues 
-		  (A_, grid.level(), igg3, 0, 1, &entry, &val);
-		val_diag -= val;
+		  (A_, level_fine, igg3, 0, 1, &entry, &val);
+
 		-- igg3[j1];
 
-		// fine->coarse - +
-		entry = grid.counter(igg3)++;
 		val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
 		val   = val_h * val_s * val_a;
-		// ERROR HERE:
-		printf ("level = %d igg3()=(%d,%d,%d) entry=%d value=%g\n",
-			grid.level(), igg3[0], igg3[1], igg3[2], entry, val);
-		HYPRE_SStructMatrixAddToValues 
-		  (A_, grid.level(), igg3, 0, 1, &entry, &val);
-		val_diag -= val;
-		-- igg3[j2];
-		// fine->fine diagonal
+		entry = grid.counter(igg3)++;
+ 		HYPRE_SStructMatrixAddToValues 
+ 		  (A_, level_fine, igg3, 0, 1, &entry, &val);
 		entry = 0;
+		val = -val;
 		HYPRE_SStructMatrixAddToValues 
-		  (A_, grid.level(), igg3, 0, 1, &entry, &val_diag);
+		  (A_, level_fine, igg3, 0, 1, &entry, &val);
 
-		igg3[j0] -= face*(r-1);
+		-- igg3[j2];
+
 	      }
 
+	      igg3[j0] -= face*(r-1);
 
 	    } else {
 	      char error_message[80];
@@ -649,36 +642,35 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    if (phase == "graph") {
 
 	      HYPRE_SStructGraphAddEntries 
-		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+		(graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 	      ++ igg3[0];
 	      HYPRE_SStructGraphAddEntries 
-		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+		(graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 	      ++ igg3[1];
 	      HYPRE_SStructGraphAddEntries 
-		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+		(graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 	      -- igg3[0];
 	      HYPRE_SStructGraphAddEntries 
-		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+		(graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 	      ++ igg3[2];
 	      HYPRE_SStructGraphAddEntries 
-		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+		(graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 	      ++ igg3[0];
 	      HYPRE_SStructGraphAddEntries 
-		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+		(graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 	      -- igg3[1];
 	      HYPRE_SStructGraphAddEntries 
-		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+		(graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 	      -- igg3[0];
 	      HYPRE_SStructGraphAddEntries 
-		(graph_, adjacent->level(), ign3, 0, grid.level(), igg3, 0);
+		(graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 	      -- igg3[2];
 
  	    } else if (phase == "matrix") {
 
 	      const double o8 = 1. / 8.;
- 	      double val_h = (adjacent->h(j1)*adjacent->h(j2))/adjacent->h(j0);
+ 	      double val_h = H1*H2/H0;
 	      double val_s = 1.;
-	      // 	      double val_s = 2.;
  	      double val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
  	      double val   = val_h * val_s * val_a;
  	      int entries[8];
@@ -691,28 +683,29 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	      // coarse->fine off-diagonal
 
  	      HYPRE_SStructMatrixAddToValues 
- 		(A_, adjacent->level(),ign3, 0, 1, &entries[0], &values[0]);
+ 		(A_, level_coarse,ign3, 0, 1, &entries[0], &values[0]);
  	      HYPRE_SStructMatrixAddToValues 
- 		(A_, adjacent->level(),ign3, 0, 1, &entries[1], &values[1]);
+ 		(A_, level_coarse,ign3, 0, 1, &entries[1], &values[1]);
  	      HYPRE_SStructMatrixAddToValues 
- 		(A_, adjacent->level(),ign3, 0, 1, &entries[2], &values[2]);
+ 		(A_, level_coarse,ign3, 0, 1, &entries[2], &values[2]);
  	      HYPRE_SStructMatrixAddToValues 
- 		(A_, adjacent->level(),ign3, 0, 1, &entries[3], &values[3]);
+ 		(A_, level_coarse,ign3, 0, 1, &entries[3], &values[3]);
  	      HYPRE_SStructMatrixAddToValues 
- 		(A_, adjacent->level(),ign3, 0, 1, &entries[4], &values[4]);
+ 		(A_, level_coarse,ign3, 0, 1, &entries[4], &values[4]);
  	      HYPRE_SStructMatrixAddToValues 
- 		(A_, adjacent->level(),ign3, 0, 1, &entries[5], &values[5]);
+ 		(A_, level_coarse,ign3, 0, 1, &entries[5], &values[5]);
  	      HYPRE_SStructMatrixAddToValues 
- 		(A_, adjacent->level(),ign3, 0, 1, &entries[6], &values[6]);
+ 		(A_, level_coarse,ign3, 0, 1, &entries[6], &values[6]);
  	      HYPRE_SStructMatrixAddToValues 
- 		(A_, adjacent->level(),ign3, 0, 1, &entries[7], &values[7]);
+ 		(A_, level_coarse,ign3, 0, 1, &entries[7], &values[7]);
 
 	      // coarse->coarse diagonal
 
 	      double val_diag = -val;
 	      int    entry    = 0;
+
 	      HYPRE_SStructMatrixAddToValues 
-		(A_, adjacent->level(), ign3, 0, 1, &entry, &val_diag);
+		(A_, level_coarse, ign3, 0, 1, &entry, &val_diag);
 
 	    }
 	  }
@@ -755,28 +748,31 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 
     // DIFFUSION COEFFICIENTS HERE
 
-    double azp = level==0 || i2 < n3[2]-1 ? 1.0 : 0.0;
-    double azm = level==0 || i2 >       0 ? 1.0 : 0.0;
-//     double dzp = 1.0;
-//     double dzm = 1.0;
+    double azp = (level==0) || (i2 < n3[2]-1) ? 1.0 : 0.0;
+    double azm = (level==0) || (i2 >       0) ? 1.0 : 0.0;
+
+    // double azp = 1.0;
+    // double azm = 1.0;
 
     for (int i1 = 0; i1 < n3[1]; i1++) {
 
       // DIFFUSION COEFFICIENTS HERE
 
-      double ayp = level==0 || i1 < n3[1]-1 ? 1.0 : 0.0;
-      double aym = level==0 || i1 >       0 ? 1.0 : 0.0;
-//       double dyp = 1.0;
-//       double dym = 1.0;
+      double ayp = (level==0) || (i1 < n3[1]-1) ? 1.0 : 0.0;
+      double aym = (level==0) || (i1 >       0) ? 1.0 : 0.0;
+
+      // double ayp = 1.0;
+      // double aym = 1.0;
 
       for (int i0 = 0; i0 < n3[0]; i0++) {
 
 	// DIFFUSION COEFFICIENTS HERE
 
-	double axp = level==0 || i0 < n3[0]-1 ? 1.0 : 0.0;
-	double axm = level==0 || i0 >       0 ? 1.0 : 0.0;
-// 	double dxp = 1.0;
-// 	double dxm = 1.0;
+	double axp = (level==0) || (i0 < n3[0]-1) ? 1.0 : 0.0;
+	double axm = (level==0) || (i0 >       0) ? 1.0 : 0.0;
+
+	// double axp = 1.0;
+	// double axm = 1.0;
 
 	int i = i0 + n3[0]*(i1 + n3[1]*i2);
 	assert (i >= 0 && i < n);
@@ -788,16 +784,13 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 	vzp[i] = h012 * azp;
 	vzm[i] = h012 * azm;
 
+
 	//	v0[i] = -(h120*(dxp+dxm) + h201*(dyp+dym) + h012*(dzp+dzm));
 	v0[i] = -(vxp[i]+vxm[i]+vyp[i]+vym[i]+vzp[i]+vzm[i]);
 
       }
     }
   }
-  printf ("DEBUG %s:%d  ilower=(%d,%d,%d) iupper=(%d,%d,%d) diag0=%g diag1=%g\n",
-	  __FILE__,__LINE__,
-	  lower[0],lower[1],lower[2],
-	  upper[0],upper[1],upper[2],v0[0],v0[1 + n3[0]*(1 + n3[1]*1)]);
 
   HYPRE_SStructMatrixSetBoxValues (A_,level,lower,upper,0,1,&entries[0],v0);
   HYPRE_SStructMatrixSetBoxValues (A_,level,lower,upper,0,1,&entries[1],vxp);
