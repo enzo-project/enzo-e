@@ -12,8 +12,8 @@ JBDEF = -DUSE_JBPERF
 
 # Assemble defines, includes, and libs
 DEF = $(JBDEF)
-INC = -I$(HOME)/include 
-LIBS = -L$(HOME)/lib -lHYPRE $(JBLIB)
+INC = -I$(HOME)/include
+LIBS =  -lm -L$(HOME)/lib -lHYPRE $(JBLIB)
 
 # Set object files
 OBJS = \
@@ -33,10 +33,14 @@ OBJS = \
 
 OBJS_INIT = hypre-init.cpp
 
+all: hypre-solve hypre-init debug-matrix
+
 hypre-solve: dep $(OBJS)
 	$(MPCPP) -o hypre-solve $(OBJS) $(LIBS)
 hypre-init: dep $(OBJS_INIT)
 	$(CPP) -o hypre-init $(OBJS_INIT) $(LIBS)
+debug-matrix: debug-matrix.o
+	$(CPP) -o debug-matrix debug-matrix.o
 
 BIN = ../bin
 .PHONY: install
