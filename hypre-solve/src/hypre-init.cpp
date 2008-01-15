@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -75,6 +76,8 @@ main(int argc, char **argv)
     usage(argv);
   }
 
+  int np = np3[0]*np3[1]*np3[2];
+
   //-----------------------------------------------------------------------
   // Generate input file
   //-----------------------------------------------------------------------
@@ -119,11 +122,6 @@ main(int argc, char **argv)
 	       N0,i,np3[i]);
       exit(1);
     }
-//    if (2*(np3[i]/2) != np3[i]) {
-//      fprintf (stderr,"Processor count np3[%d] = %d not divisible by 2\n",
-//	       i,np3[i]);
-//      exit(1);
-//    }
   }
 
   // Loop though processors, generating a grid per processor in each level
@@ -131,7 +129,8 @@ main(int argc, char **argv)
   int ip3[3];
   double lp3[3],up3[3];
   int li3[3];
-  int id_point;
+  int id_point[8];
+  double point_pos[8][3];
   int level;
   int jp3[3]; // for determining parent id 
 
@@ -164,7 +163,7 @@ main(int argc, char **argv)
 
 	  int ip = ip3[0] + np3[0]*(ip3[1] + np3[1]*ip3[2]);
 
-	  int id = ip + np3[0]*np3[1]*np3[2]*level;
+	  int id = ip + np*level;
 
 	  int id_parent;
 	  if (level == 0) {
@@ -188,13 +187,24 @@ main(int argc, char **argv)
 
 	  // Store id for point.  Requires coarse-to-finer level loop
 
-	  if (lp3[0] <= 0 && 0 < up3[0] &&
-	      lp3[1] <= 0 && 0 < up3[1] &&
-	      lp3[2] <= 0 && 0 < up3[2]) {
-	    id_point = id;
+	  for (int k0=0; k0<2; k0++) {
+	    double p0 = (k0-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5;
+	    for (int k1=0; k1<2; k1++) {
+	      double p1 = (k1-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5;
+	      for (int k2=0; k2<2; k2++) {
+		double p2 = (k2-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5;
+		int k = k0 + 2*(k1 + 2*k2);
+		if (lp3[0] < p0 && p0 < up3[0] &&
+		    lp3[1] < p1 && p1 < up3[1] &&
+		    lp3[2] < p2 && p2 < up3[2]) {
+		  id_point[k] = id;
+		  point_pos[k][0] = p0;
+		  point_pos[k][1] = p1;
+		  point_pos[k][2] = p2;
+		}
+	      }
+	    }
 	  }
-
-
 	}
       }
     }
@@ -205,7 +215,10 @@ main(int argc, char **argv)
   fprintf (fp, "domain    3 -4e9 -4e9 -4e9  4e9 4e9 4e9\n");
   fprintf (fp, "boundary  " BOUNDARY "\n");
   fprintf (fp, "sphere    5.993985e27 6.378137e8 0.0 0.0 0.0\n");
-  fprintf (fp, "point     1e44   1e3 1e3 1e3   %d\n",id_point);
+  for (int k=0; k<8; k++) {
+    fprintf (fp, "point     1e43   %g %g %g   %d\n",
+	     point_pos[k][0],point_pos[k][1],point_pos[k][2],id_point[k]);
+  }
   fprintf (fp, "discret constant\n");
 
   //========================================================================
