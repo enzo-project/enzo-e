@@ -1,6 +1,14 @@
 #!/bin/tcsh -f
 
 set size = "size 480,300"
+# set yrange = "[0.1:100]"
+#
+set yrange = "[10:1000000]"
+ set yrange = "[]"
+
+set xrange = "[]"
+
+set ptype = "w p"
 
 set x0 = '(0'
 set y0 = ', 0,'
@@ -26,23 +34,33 @@ end
 
 set head = "set terminal png $size; set log y"
 
+#------------------------------------------------------------------------
 if ($levels == 1) then
+#------------------------------------------------------------------------
    foreach axis (x y z)
-      echo "$head; set output '$axis.png'; plot '$axis-X.00.00.00000' title 'level 0' w l" | gnuplot  
+      echo "$head; set output '$axis.png'; plot $xrange$yrange '$axis-X.00.00.00000' title 'level 0' $ptype" | gnuplot  
    end
-   echo "$head; set output 'x-y-z.png'; plot 'x-X.00.00.00000' title 'x level 0' w l, 'y-X.00.00.00000' title 'y level 0' w l, 'z-X.00.00.00000' title 'z level 0' w l" | gnuplot  
+#   echo "$head; set output 'x-y-z.png'; plot $xrange$yrange 'x-X.00.00.00000' title 'x level 0' $ptype, 'y-X.00.00.00000' title 'y level 0' $ptype, 'z-X.00.00.00000' title 'z level 0' $ptype" | gnuplot  
+#------------------------------------------------------------------------
 else if ($levels == 2) then
+#------------------------------------------------------------------------
    foreach axis (x y z)
-     echo "$head; set output '$axis.png'; plot '$axis-X.00.00.00000' using ("'$'"1*2):("'$'"2) title 'level 0' w l, '$axis-X.01.00.00000' title 'level 1' w l" | gnuplot  
+     echo "$head; set output '$axis.png'; plot $xrange$yrange '$axis-X.00.00.00000' using ("'$'"1*2+0.5):("'$'"2) title 'level 0' $ptype, '$axis-X.01.00.00000' title 'level 1' $ptype" | gnuplot  
    end
+#------------------------------------------------------------------------
 else if ($levels == 3) then
+#------------------------------------------------------------------------
    foreach axis (x y z)
-      echo "$head; set output '$axis.png'; plot 'x-X.00.00.00000' using ("'$'"1*4):("'$'"2) title 'level 0' w l, 'x-X.01.00.00000' using ("'$'"1*2):("'$'"2) title 'level 1' w l, 'z-X.02.00.00000' title 'level 2'  w l" | gnuplot  
+      echo "$head; set output '$axis.png'; plot $xrange$yrange 'x-X.00.00.00000' using ("'$'"1*4+1):("'$'"2) title 'level 0' $ptype, 'x-X.01.00.00000' using ("'$'"1*2+0.5):("'$'"2) title 'level 1' $ptype, 'z-X.02.00.00000' title 'level 2'  $ptype" | gnuplot  
    end
 endif
 
 
-echo "<html><img src="x.png"></img></br/><img src="y.png"></img></br/><img src="z.png"></img></br/><img src="x-y-z.png"></img></br/></html>" > index.html
+echo "<html><img src="x.png"></img></br/>" > index.html
+echo "      <img src="y.png"></img></br/>" >> index.html
+echo "      <img src="z.png"></img></br/>" >> index.html
+#echo "      <img src="x-y-z.png"></img></br/></html>" >> index.html
+
 
 
 

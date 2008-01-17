@@ -10,11 +10,12 @@
 set PATH = `pwd`
 set bin = "$PATH/../bin"
 
-set extra = ""
+set extra = "dump_x true\n"
 if ($2 <= 32) then
    echo "Turning on matrix and vector dumps"
-   set extra = "dump_a true\ndump_x true\ndump_b true"
+   set extra = "${extra}dump_a true\ndump_b true"
 endif
+
 
 #----------------------------------------------------------------------
 # INITIALIZE PROBLEM
