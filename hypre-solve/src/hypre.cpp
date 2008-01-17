@@ -41,6 +41,9 @@ const int debug  = 1;
 const int trace  = 1;
 const int trace_hypre  = 0;
 
+const Scalar matrix_scale = 1.0;  // 1.0:  1 1 1 -6 1 1 1
+const Scalar matrix_diag = 0e0;  // + cu 
+
 //======================================================================
 // PUBLIC MEMBER FUNCTIONS
 //======================================================================
@@ -414,7 +417,9 @@ void Hypre::solve (Parameters & parameters,
 
 {
   if (hierarchy.num_levels() > 1) {
+    _TEMPORARY_;
     solve_fac_(hierarchy);
+    // solve_bicgstab_(hierarchy);
   } else {
     solve_pfmg_(hierarchy);
   }
@@ -592,7 +597,7 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		  // Update off-diagonal
 
 		  entry = grid.counter(igg3)++;
-		  val   = val_h * val_s * val_a;
+		  val   = matrix_scale * val_h * val_s * val_a;
 		  HYPRE_SStructMatrixAddToValues 
 		    (A_, level_fine, igg3, 0, 1, &entry, &val);
 
@@ -644,7 +649,7 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
  	      double val_h = H1*H2/H0;
 	      double val_s = 1.;
  	      double val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
- 	      double val   = val_h * val_s * val_a;
+ 	      double val   = matrix_scale * val_h * val_s * val_a;
 	      int    entry;
  	      double value;
 
@@ -664,8 +669,8 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
 	      //	      _TEMPORARY_;
 	      //	      val_diag*=0.00;
-	      HYPRE_SStructMatrixAddToValues 
-		(A_, level_coarse, ign3, 0, 1, &entry, &val_diag);
+	      // HYPRE_SStructMatrixAddToValues 
+	      // (A_, level_coarse, ign3, 0, 1, &entry, &val_diag);
 
 	    }
 	  }
@@ -692,6 +697,8 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   double h120 = h3[1]*h3[2] / h3[0];
   double h201 = h3[2]*h3[0] / h3[1];
   double h012 = h3[0]*h3[1] / h3[2];
+
+  double hhh = h3[0]*h3[1]*h3[2];
 
   double * v0  = new double [n];
   double * vxp  = new double [n];
@@ -727,15 +734,16 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 
 	int i = i0 + n3[0]*(i1 + n3[1]*i2);
 
-	vxp[i] = h120 * axp;
-	vxm[i] = h120 * axm;
-	vyp[i] = h201 * ayp;
-	vym[i] = h201 * aym;
-	vzp[i] = h012 * azp;
-	vzm[i] = h012 * azm;
+	vxp[i] = matrix_scale * h120 * axp;
+	vxm[i] = matrix_scale * h120 * axm;
+	vyp[i] = matrix_scale * h201 * ayp;
+	vym[i] = matrix_scale * h201 * aym;
+	vzp[i] = matrix_scale * h012 * azp;
+	vzm[i] = matrix_scale * h012 * azm;
 
 
-	v0[i] = -( vxp[i] + vxm[i] + vyp[i] + vym[i] + vzp[i] + vzm[i] );
+	v0[i] = -( vxp[i] + vxm[i] + vyp[i] + vym[i] + vzp[i] + vzm[i] 
+		   + hhh*matrix_diag );
 
       }
     }
@@ -916,7 +924,6 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy)
   int num_parts = hierarchy.num_levels();
   int *parts  = new int [num_parts];
   for (i=0; i<num_parts; i++) parts[i] = i;
-
   HYPRE_SStructFACSetMaxLevels(solver_,  num_parts);
   HYPRE_SStructFACSetPLevels(solver_, num_parts, parts);
 
@@ -937,18 +944,18 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy)
 
   int npre   = 2;
   int npost  = 2;
-  int csolve = 2;
+  int csolve = 1;
   int relax  = 2;
 
-  HYPRE_SStructFACSetNumPreRelax(solver_,      npre);
-  HYPRE_SStructFACSetNumPostRelax(solver_,     npost);
-  HYPRE_SStructFACSetCoarseSolverType(solver_, csolve);
-  HYPRE_SStructFACSetRelaxType(solver_,        relax);
+   HYPRE_SStructFACSetNumPreRelax(solver_,      npre);
+   HYPRE_SStructFACSetNumPostRelax(solver_,     npost);
+   HYPRE_SStructFACSetCoarseSolverType(solver_, csolve);
+   HYPRE_SStructFACSetRelaxType(solver_,        relax);
 
   // stopping criteria
 
-  int itmax   = 20;
-  double rtol = 0.0;
+  int itmax   = 10;
+  double rtol = 1e-10;
 
   HYPRE_SStructFACSetRelChange(solver_, 0);
   HYPRE_SStructFACSetMaxIter(solver_,    itmax);
@@ -986,5 +993,60 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy)
   // Delete local dynamic storage
   delete [] parts;
   delete [] refinements;
+}
+
+//------------------------------------------------------------------------
+
+/// Initialize the BICGSTAB hypre solver
+
+void Hypre::solve_bicgstab_ (Hierarchy & hierarchy)
+
+{
+  _TRACE_;
+
+  // Create the solver
+
+  HYPRE_SStructBiCGSTABCreate(MPI_COMM_WORLD, &solver_);
+
+  _TRACE_;
+
+//   // stopping criteria
+
+   int itmax   = 40;
+   double rtol = 0.0;
+
+//   HYPRE_SStructBiCGSTABSetRelChange(solver_, 0);
+   HYPRE_SStructBiCGSTABSetMaxIter(solver_,    itmax);
+   HYPRE_SStructBiCGSTABSetTol(solver_,        rtol);
+
+  // output amount
+
+  HYPRE_SStructBiCGSTABSetLogging(solver_, 1);
+
+  // Initialize the solver
+
+  HYPRE_SStructBiCGSTABSetup(solver_, A_, B_, X_);
+
+  // Solve the linear system
+
+  HYPRE_SStructBiCGSTABSolve(solver_, A_, B_, X_);
+
+  // Write out some diagnostic info about the solve
+
+  int num_iterations;
+  HYPRE_SStructBiCGSTABGetNumIterations(solver_, &num_iterations);
+  double residual;
+  HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(solver_, &residual);
+
+  if (debug) printf ("HYPRE_SStructBiCGSTABSolve3 num iterations: %d\n",num_iterations);
+
+  if (debug) printf ("HYPRE_SStructBiCGSTABSolve3 final relative residual norm: %g\n",residual);
+
+
+  // Delete the solver
+
+  HYPRE_SStructBiCGSTABDestroy(solver_);
+  solver_ = 0;
+
 }
 

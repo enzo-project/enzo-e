@@ -68,7 +68,8 @@ private:
 
   // solve() functions
 
-  void solve_fac_                      (Hierarchy & hierarchy);
-  void solve_pfmg_                     (Hierarchy & hierarchy);
+  void solve_fac_      (Hierarchy & hierarchy);
+  void solve_bicgstab_ (Hierarchy & hierarchy);
+  void solve_pfmg_     (Hierarchy & hierarchy);
 
 };
