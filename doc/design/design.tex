@@ -239,14 +239,36 @@ the domain, boundary conditions, and initial field values.
 \subsection{\code{Array} class}
 %-----------------------------------------------------------------------
 
-The \code{Array} class defines a Fortran-style array.  \code{Array}s may
-have optional support for storing blocked or chunked arrays, include
-array padding, or store interleaved arrays.
+The \code{Array} class encapsulates Fortran-style arrays with
+convenience operations.  \code{Array}s may have optional support for
+storing blocked or chunked arrays, include array padding, or store
+interleaved arrays.
+
+\textbf{Array shape.}
+
+\textbf{Array blocking.}
+
+\textbf{Array padding.}
+
+\textbf{Array interleaving.}
 
 
 \subsubsection{Attributes}
 
 \subsubsection{Operations}
+
+
+\begin{tabbing}
+xxxx\=xx\=xxxxxxxxxxxxxxxxxxxxxxxx\= \kill
+\> \todo \> \code{Array()} \> \textit{Create an uninitialized array} \\
+\> \todo \> \code{allocate()} \> \textit{Allocate storage for an array.} \\
+\> \todo \> \code{deallocate()} \> \textit{Deallocate storage for an array} \\
+\> \todo \> \code{set\_shape (int d, int * size)}  \> \textit{Set the shape of an array to the given size} \\
+\> \todo \> \code{set\_blocking (int d, int * size)}  \> \textit{Set subblocks to given size} \\
+\> \todo \> \code{set\_padding (int d, int * size)}  \> \textit{Set array padding} \\
+\> \todo \> \code{interleave (int num, Array * arrays)}  \> \textit{Interleave multiple arrays} \\
+\end{tabbing}
+
 
 %-----------------------------------------------------------------------
 \subsection{\code{Box} class}
