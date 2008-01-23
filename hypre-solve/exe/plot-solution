@@ -10,10 +10,6 @@ set xrange = "[]"
 
 set ptype = "w p"
 
-set x0 = '(0'
-set y0 = ', 0,'
-set z0 = ', 0;'
-
 set files = (X.0?.00.00000)
 set levels = $#files
 echo $levels
@@ -22,6 +18,31 @@ echo $levels
 # Get x-* y-* z-* yz-* zx-* and xy-* data files
 
 foreach X (X.0?.00.00000)
+
+   # Find mid-point
+
+   set nx0 = `awk '/\(/{print $2}' < $X | head -1 | sed 's/(//g' | sed 's/,//g' | sed 's/)//g'`
+   set ny0 = `awk '/\(/{print $3}' < $X | head -1 | sed 's/(//g' | sed 's/,//g' | sed 's/)//g'`
+   set nz0 = `awk '/\(/{print $4}' < $X | head -1 | sed 's/(//g' | sed 's/,//g' | sed 's/)//g'`
+   set nx1 = `awk '/\(/{print $6}' < $X | head -1 | sed 's/(//g' | sed 's/,//g' | sed 's/)//g'`
+   set ny1 = `awk '/\(/{print $7}' < $X | head -1 | sed 's/(//g' | sed 's/,//g' | sed 's/)//g'`
+   set nz1 = `awk '/\(/{print $8}' < $X | head -1 | sed 's/(//g' | sed 's/,//g' | sed 's/)//g'`
+
+   # (WARNING: @ evaluating ( $nx1 - $nx0 + 1 ) results in ( $nx1 - $nx0 - 1 ).
+   #  Go figure.
+
+   echo "DEBUG $nx0 $ny0 $nz0 $nx1 $ny1 $nz1"
+   @ nx =  $nx0 + ( 1 + $nx1 - $nx0 ) / 2
+   @ ny =  $ny0 + ( 1 + $ny1 - $ny0 ) / 2
+   @ nz =  $nz0 + ( 1 + $nz1 - $nz0 ) / 2
+
+
+   echo "DEBUG $nx $ny $nz"
+
+   set x0 = '('"$nx"
+   set y0 = ', '"$ny"','
+   set z0 = ', '"$nz"';'
+  
 
   grep "$x0" < $X | awk '{print $3,$4,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > yz-$X
   grep "$y0" < $X | awk '{print $4,$2,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > zx-$X
@@ -45,7 +66,7 @@ if ($levels == 1) then
 else if ($levels == 2) then
 #------------------------------------------------------------------------
    foreach axis (x y z)
-     echo "$head; set output '$axis.png'; plot $xrange$yrange '$axis-X.00.00.00000' using ("'$'"1*2+0.5):("'$'"2) title 'level 0' $ptype, '$axis-X.01.00.00000' title 'level 1' $ptype" | gnuplot  
+     echo "$head; set output '$axis.png'; plot $xrange$yrange '$axis-X.00.00.00000' using ("'$'"1*2+0.5):("'$'"2) title 'level 0' $ptype, '$axis-X.01.00.00000' using ("'$'"1):("'$'"2) title 'level 1' $ptype" | gnuplot  
    end
 #------------------------------------------------------------------------
 else if ($levels == 3) then
