@@ -220,6 +220,7 @@ main(int argc, char **argv)
 	     point_pos[k][0],point_pos[k][1],point_pos[k][2],id_point[k]);
   }
   fprintf (fp, "discret constant\n");
+  fprintf (fp, "solver fac\n");
 
   //========================================================================
 

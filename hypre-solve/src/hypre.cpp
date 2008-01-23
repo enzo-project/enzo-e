@@ -40,6 +40,7 @@
 const int debug  = 1;
 const int trace  = 1;
 const int trace_hypre  = 0;
+const int trace_graph  = 1;
 
 const Scalar matrix_scale = 1.0;  // 1.0:  1 1 1 -6 1 1 1
 const Scalar matrix_diag = 0e0;  // + cu 
@@ -416,12 +417,28 @@ void Hypre::solve (Parameters & parameters,
 		   Hierarchy & hierarchy)
 
 {
-  if (hierarchy.num_levels() > 1) {
-    _TEMPORARY_;
-    solve_fac_(hierarchy);
-    // solve_bicgstab_(hierarchy);
+  std::string solver = parameters.value("solver");
+  int         levels = hierarchy.num_levels();
+
+  int    itmax  = 0;
+  double restol = 0.0;
+  
+  std::string sitmax  = parameters.value("solver_itmax");
+  std::string srestol = parameters.value("solver_restol");
+  if (sitmax != "")  itmax  = atoi(sitmax.c_str());
+  if (srestol != "") restol = atof(srestol.c_str());
+
+  if        (solver == "fac"  && levels > 1) {
+    solve_fac_(hierarchy,itmax,restol);
+  } else if (solver == "bicgstab") {
+    solve_bicgstab_(hierarchy,itmax,restol);
+  } else if (solver == "pfmg" && levels == 1) {
+    solve_pfmg_(hierarchy,itmax,restol);
   } else {
-    solve_pfmg_(hierarchy);
+    char error_message[100];
+    sprintf (error_message, "Hypre::solve called with illegal combination of "
+	     "solver %s on %d levels", solver.c_str(),levels);
+    ERROR(error_message);
   }
   
   if (parameters.value("dump_x") == "true") HYPRE_SStructVectorPrint ("X",X_,1);
@@ -566,8 +583,14 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		igg3[j1]+=diggs[k][1];
 		igg3[j2]+=diggs[k][2];
 		for (int k=1; k<5; k++) {
+		  if (trace_graph) {
+		    printf ("TRACE GRAPH (%d %d %d; %d) : (%d %d %d; %d)\n",
+			    igg3[0],igg3[1],igg3[2], level_fine,  
+			    ign3[0],ign3[1],ign3[2], level_coarse);
+		  }
 		  HYPRE_SStructGraphAddEntries 
 		    (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
+		  _TRACE_;
 		  igg3[j0]+=diggs[k][0];
 		  igg3[j1]+=diggs[k][1];
 		  igg3[j2]+=diggs[k][2];
@@ -639,6 +662,11 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	      for (int k=0; k<8; k++) {
 		HYPRE_SStructGraphAddEntries 
 		  (graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
+		  if (trace_graph) {
+		    printf ("TRACE GRAPH (%d %d %d; %d) : (%d %d %d; %d)\n",
+			    ign3[0],ign3[1],ign3[2], level_coarse,  
+			    igg3[0],igg3[1],igg3[2], level_fine);
+		  }
 		igg3[0] += diggs[k][0];
 		igg3[1] += diggs[k][1];
 		igg3[2] += diggs[k][2];
@@ -872,13 +900,19 @@ Scalar Hypre::init_vector_spheres_ (Hierarchy             & hierarchy,
 
 /// Initialize the PFMG hypre solver
 
-void Hypre::solve_pfmg_ (Hierarchy & hierarchy)
+void Hypre::solve_pfmg_ (Hierarchy & hierarchy, int itmax, double restol)
 
 {
 
   // Create and initialize the solver
 
   HYPRE_SStructSysPFMGCreate    (MPI_COMM_WORLD, &solver_);
+
+  // stopping criteria
+
+  if (itmax != 0 )   HYPRE_SStructSysPFMGSetMaxIter(solver_,itmax);
+  if (restol != 0.0) HYPRE_SStructSysPFMGSetTol(solver_,    restol);
+
   HYPRE_SStructSysPFMGSetLogging(solver_, 1);
   HYPRE_SStructSysPFMGSetup     (solver_,A_,B_,X_);
 
@@ -908,7 +942,7 @@ void Hypre::solve_pfmg_ (Hierarchy & hierarchy)
 
 /// Initialize the FAC hypre solver
 
-void Hypre::solve_fac_ (Hierarchy & hierarchy)
+void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
 
 {
   int i;
@@ -954,12 +988,8 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy)
 
   // stopping criteria
 
-  int itmax   = 10;
-  double rtol = 1e-10;
-
-  HYPRE_SStructFACSetRelChange(solver_, 0);
-  HYPRE_SStructFACSetMaxIter(solver_,    itmax);
-  HYPRE_SStructFACSetTol(solver_,        rtol);
+  if (itmax != 0 )   HYPRE_SStructFACSetMaxIter(solver_,itmax);
+  if (restol != 0.0) HYPRE_SStructFACSetTol(solver_,    restol);
 
   // output amount
 
@@ -999,7 +1029,7 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy)
 
 /// Initialize the BICGSTAB hypre solver
 
-void Hypre::solve_bicgstab_ (Hierarchy & hierarchy)
+void Hypre::solve_bicgstab_ (Hierarchy & hierarchy, int itmax, double restol)
 
 {
   _TRACE_;
@@ -1010,14 +1040,10 @@ void Hypre::solve_bicgstab_ (Hierarchy & hierarchy)
 
   _TRACE_;
 
-//   // stopping criteria
+  // stopping criteria
 
-   int itmax   = 40;
-   double rtol = 0.0;
-
-//   HYPRE_SStructBiCGSTABSetRelChange(solver_, 0);
-   HYPRE_SStructBiCGSTABSetMaxIter(solver_,    itmax);
-   HYPRE_SStructBiCGSTABSetTol(solver_,        rtol);
+  if (itmax != 0 )   HYPRE_SStructBiCGSTABSetMaxIter(solver_,itmax);
+  if (restol != 0.0) HYPRE_SStructBiCGSTABSetTol(solver_,    restol);
 
   // output amount
 
