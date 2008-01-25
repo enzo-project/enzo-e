@@ -1,0 +1,49 @@
+#!/bin/tcsh -f
+#-----------------------------------------------------------------------
+# Usage: enzo2hypresolve <enzo-filename>
+#-----------------------------------------------------------------------
+# dimension 3
+# bounday periodic
+# discret constant
+# solver fac
+# dump_x true
+#
+# domain <xmin> <xmax>
+#
+# grid <id> <parent> <proc> <xmin*3> <xmax*3> <imin*3> <isize*3>
+#
+# point <mass> <pos*3> <grid>
+#------------------------------------------------------------------------
+
+set infile  = "$1"
+set outfile = in.hypre-solve
+
+rm -f $outfile
+
+echo " dimension 3"           >> $outfile
+echo " bounday periodic"      >> $outfile
+echo " discret constant"      >> $outfile
+echo " solver fac"            >> $outfile
+echo " dump_x true"           >> $outfile
+
+
+#------------------------------------------------------------------------
+# Output domain
+#------------------------------------------------------------------------
+
+set xmin = `awk '/DomainLeftEdge/{print $3,$4,$5}' < $infile`
+set xmax = `awk '/DomainRightEdge/{print $3,$4,$5}' < $infile`
+
+echo " domain $xmin $xmax"    >> $outfile
+
+#------------------------------------------------------------------------
+# Output grids
+#------------------------------------------------------------------------
+
+# grid <id> <parent> <proc> <xmin*3> <xmax*3> <imin*3> <isize*3>
+
+#------------------------------------------------------------------------
+# Output particles
+#------------------------------------------------------------------------
+
+# point <mass> <pos*3> <grid>
