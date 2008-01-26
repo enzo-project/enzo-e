@@ -36,14 +36,68 @@ set xmax = `awk '/DomainRightEdge/{print $3,$4,$5}' < $infile`
 
 echo " domain $xmin $xmax"    >> $outfile
 
-#------------------------------------------------------------------------
+
+set hierarchy = $infile.hierarchy
+set procmap   = $infile.procmap
+
+#---------------
 # Output grids
-#------------------------------------------------------------------------
+#---------------
+
+set id     = `awk '{if ($1 == "Grid") print $3}' < $hierarchy`
+set parent = "???"
+
+set proclist   = `awk '{print substr($2,length($2)-3,4)}' < $procmap`
+set gridlist   = `awk '{print substr($3,length($3)-7,8)}' < $procmap`
+
+# Set $procs[] = (0 0 0 0 0 ... 0)
+set procs = ()
+set i = 1
+while ($i <= $#proclist)
+   set procs = ($procs 0)
+   @ i = $i + 1
+end
+# Set $procs[i] = proc for grid i
+set i = 1
+while ($i <= $#proclist)
+   set g = `echo $gridlist[$i] | bc`
+   set p = `echo $proclist[$i] | bc`
+   echo "$i $g $p"
+   set procs[$g] = $p
+   @ i = $i + 1
+end
+
+set xmin1 = `awk '{if ($1 == "GridLeftEdge") print $3}' < $hierarchy`
+set xmin2 = `awk '{if ($1 == "GridLeftEdge") print $4}' < $hierarchy`
+set xmin3 = `awk '{if ($1 == "GridLeftEdge") print $5}' < $hierarchy`
+
+set xmax1 = `awk '{if ($1 == "GridRightEdge") print $3}' < $hierarchy`
+set xmax2 = `awk '{if ($1 == "GridRightEdge") print $4}' < $hierarchy`
+set xmax3 = `awk '{if ($1 == "GridRightEdge") print $5}' < $hierarchy`
+
+set imin1 = "???"
+set imin2 = "???"
+set imin3 = "???"
+
+set isize1 = `awk '{if ($1 == "GridDimension") print $3}' < $hierarchy`
+set isize2 = `awk '{if ($1 == "GridDimension") print $4}' < $hierarchy`
+set isize3 = `awk '{if ($1 == "GridDimension") print $5}' < $hierarchy`
+
+set i = 1
+while ($i <= $#proclist)
+   echo "grid $id[$i] parent[$i] $proc[$i] " \
+        "$xmin1[$i] $xmin2[$i] $xmin3[$i]" \
+        "$xmax1[$i] $xmax2[$i] $xmax3[$i]" \
+        "imin1[$i] imin2[$i] imin3[$i]" \
+        "$isize1[$i] $isize2[$i] $isize3[$i]" >> $outfile
+
+   @ i = $i + 1
+end
 
 # grid <id> <parent> <proc> <xmin*3> <xmax*3> <imin*3> <isize*3>
 
-#------------------------------------------------------------------------
+#--------------------
 # Output particles
-#------------------------------------------------------------------------
+#--------------------
 
 # point <mass> <pos*3> <grid>
