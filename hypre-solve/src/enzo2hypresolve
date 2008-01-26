@@ -85,7 +85,7 @@ set isize3 = `awk '{if ($1 == "GridDimension") print $5}' < $hierarchy`
 
 set i = 1
 while ($i <= $#proclist)
-   echo "grid $id[$i] parent[$i] $proc[$i] " \
+   echo "grid $id[$i] parent[$i] $procs[$i] " \
         "$xmin1[$i] $xmin2[$i] $xmin3[$i]" \
         "$xmax1[$i] $xmax2[$i] $xmax3[$i]" \
         "imin1[$i] imin2[$i] imin3[$i]" \
