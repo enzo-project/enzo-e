@@ -36,7 +36,6 @@ set xmax = `awk '/DomainRightEdge/{print $3,$4,$5}' < $infile`
 
 echo " domain $xmin $xmax"    >> $outfile
 
-
 set hierarchy = $infile.hierarchy
 set procmap   = $infile.procmap
 
@@ -47,22 +46,25 @@ set procmap   = $infile.procmap
 set id     = `awk '{if ($1 == "Grid") print $3}' < $hierarchy`
 set parent = "???"
 
+set numgrids = $#id
+
+# WARNING: file is twice as long as it should be O_o
+
 set proclist   = `awk '{print substr($2,length($2)-3,4)}' < $procmap`
 set gridlist   = `awk '{print substr($3,length($3)-7,8)}' < $procmap`
 
 # Set $procs[] = (0 0 0 0 0 ... 0)
 set procs = ()
 set i = 1
-while ($i <= $#proclist)
+while ($i <= $numgrids)
    set procs = ($procs 0)
    @ i = $i + 1
 end
 # Set $procs[i] = proc for grid i
 set i = 1
-while ($i <= $#proclist)
+while ($i <= $numgrids)
    set g = `echo $gridlist[$i] | bc`
    set p = `echo $proclist[$i] | bc`
-   echo "$i $g $p"
    set procs[$g] = $p
    @ i = $i + 1
 end
@@ -83,8 +85,14 @@ set isize1 = `awk '{if ($1 == "GridDimension") print $3}' < $hierarchy`
 set isize2 = `awk '{if ($1 == "GridDimension") print $4}' < $hierarchy`
 set isize3 = `awk '{if ($1 == "GridDimension") print $5}' < $hierarchy`
 
+echo "grid $#id[$i] parent[$i] $#procs[$i] " \
+        "$#xmin1[$i] $#xmin2[$i] $#xmin3[$i]" \
+        "$#xmax1[$i] $#xmax2[$i] $#xmax3[$i]" \
+        "imin1[$i] imin2[$i] imin3[$i]" \
+        "$#isize1[$i] $#isize2[$i] $#isize3[$i]"
+
 set i = 1
-while ($i <= $#proclist)
+while ($i <= $numgrids)
    echo "grid $id[$i] parent[$i] $procs[$i] " \
         "$xmin1[$i] $xmin2[$i] $xmin3[$i]" \
         "$xmax1[$i] $xmax2[$i] $xmax3[$i]" \
