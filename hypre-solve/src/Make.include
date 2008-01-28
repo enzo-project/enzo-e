@@ -33,7 +33,7 @@ OBJS = \
 
 OBJS_INIT = hypre-init.cpp
 
-all: hypre-solve hypre-init debug-matrix
+all: hypre-solve hypre-init debug-matrix enzo2hypre
 
 hypre-solve: dep $(OBJS)
 	$(MPCPP) -o hypre-solve $(OBJS) $(LIBS)
@@ -41,6 +41,8 @@ hypre-init: dep $(OBJS_INIT)
 	$(CPP) -o hypre-init $(OBJS_INIT) $(LIBS)
 debug-matrix: debug-matrix.o
 	$(CPP) -o debug-matrix debug-matrix.o
+enzo2hypre: enzo2hypre.o
+	$(CPP) -o enzo2hypre enzo2hypre.o
 
 BIN = ../bin
 .PHONY: install

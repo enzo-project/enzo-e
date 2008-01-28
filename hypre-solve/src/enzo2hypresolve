@@ -44,7 +44,8 @@ set procmap   = $infile.procmap
 #---------------
 
 set id     = `awk '{if ($1 == "Grid") print $3}' < $hierarchy`
-set parent = "???"
+set parent = 0
+set level  = 0
 
 set numgrids = $#id
 

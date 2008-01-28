@@ -1,2 +1,3 @@
 include Make.include
 MPCPP = mpCC
+CPP   = xlC
