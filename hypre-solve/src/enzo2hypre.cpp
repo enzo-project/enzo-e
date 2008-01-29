@@ -31,6 +31,7 @@ main(int argc, char ** argv)
   fprintf (fpout," bounday periodic\n");
   fprintf (fpout," discret constant\n");
   fprintf (fpout," solver fac\n");
+  fprintf (fpout," boundary dirichlet\n");
   fprintf (fpout," dump_x true\n");
 
   //----------------------------------------------------------------------
