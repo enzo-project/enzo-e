@@ -395,8 +395,6 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 				 int & iu0, int & iu1) throw ()
 {
 
-  _TRACE_;
-
   Grid & grid = *this;
 
   // Get grid index bounds
@@ -432,9 +430,7 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 
   // Exit if face isn't found
 
-  _TRACE_;
   if (! found_face) return false;
-  _TRACE_;
 
   // face axes
 
@@ -452,11 +448,7 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
   iu0--;
   iu1--;
 
-  _TRACE_;
-
   if (il0 > iu0 || il1 > iu1) return false;
-
-  _TRACE_;
 
   return true;
 }
@@ -473,8 +465,6 @@ bool Grid::coarse_shared_face (Grid & coarse,
 			       int & il0, int & il1, 
 			       int & iu0, int & iu1) throw ()
 {
-
-  _TRACE_;
 
   const int r = 2; // WARNING: assuming fixed refinement factor r = 2
 
@@ -511,9 +501,7 @@ bool Grid::coarse_shared_face (Grid & coarse,
 
   // Exit if face isn't found
 
-  _TRACE_;
   if (! found_face) return false;
-  _TRACE_;
 
   // face axes
 
@@ -531,9 +519,7 @@ bool Grid::coarse_shared_face (Grid & coarse,
   iu0--;
   iu1--;
 
-  _TRACE_;
   if (il0 > iu0 || il1 > iu1) return false;
-  _TRACE_;
 
   return true;
 }
@@ -552,8 +538,6 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
 			       int & iu0, int & iu1,
 			       int & count) throw ()
 {
-
-  _TRACE_;
 
   const int r = 2; // WARNING: assuming fixed refinement factor r = 2
 
@@ -596,9 +580,7 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
 
   // Exit if face isn't found
 
-  _TRACE_;
   if (!found_face) return false;
-  _TRACE_;
 
   // face axes
 
@@ -620,9 +602,7 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
   iu0--;
   iu1--;
 
-  _TRACE_;
   if (il0 > iu0 || il1 > iu1) return false;
-  _TRACE_;
 
   return true;
 }

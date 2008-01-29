@@ -356,7 +356,6 @@ protected:
   /// Initialize the counters_ array to given value
   void init_counter (int value)
   {
-    printf ("Init counter %p %d\n",this,value);
     for (int i0=0; i0<n_[0]; i0++) {
       for (int i1=0; i1<n_[1]; i1++) {
 	for (int i2=0; i2<n_[2]; i2++) {
