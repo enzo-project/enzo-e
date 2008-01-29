@@ -3,7 +3,11 @@
 
 #include <string>
 
+#include "hdf5.h"
+
 #define max(a,b) ((a)>(b) ? (a) : (b))
+
+void print_particles (std::string,FILE*fpout);
 
 main(int argc, char ** argv)
 {
@@ -41,6 +45,8 @@ main(int argc, char ** argv)
   //-----------------------------------------------------------------------
   // Allocate arrays
   //-----------------------------------------------------------------------
+
+  // grid arrays
 
   int * processor = new int [num_grids+1];
   int * parent    = new int [num_grids+1];
@@ -143,36 +149,80 @@ main(int argc, char ** argv)
   fpin  = fopen (procmap_file.c_str(), "r");
   int iproc;
   char sgrid[20], sproc[100],dummy[20];
+  int np = 0;
   while (fgets(line,100,fpin) != NULL) {
     sscanf (line,"%s %s %s",sgrid,sproc,dummy);
     sscanf (sgrid,"%d",&igrid);
     sscanf (strstr(sproc,"cpu")+3,"%d",&iproc);
     processor[igrid] = iproc;
+    np = max(np,iproc);
   }
+  np++;
+  printf ("np = %d\n",np);
+  // Close procmap file
+  fclose(fpin);
+
+  //-----------------------------------------------------------------------
+  // Read restart file to get domain extents
+  //-----------------------------------------------------------------------
+
+  std::string restart_file = std::string(argv[1]);
+  fpin  = fopen (restart_file.c_str(), "r");
+  double dmin0,dmin1,dmin2;
+  double dmax0,dmax1,dmax2;
+  while (fgets(line,100,fpin) != NULL) {
+    sscanf (line,"DomainLeftEdge         = %lg %lg %lg",&dmin0,&dmin1,&dmin2);
+    sscanf (line,"DomainRightEdge        = %lg %lg %lg",&dmax0,&dmax1,&dmax2);
+  }
+
+  // Close restart file
+  fclose(fpin);
 
   //-----------------------------------------------------------------------
   // Compute imin given xmin, level, and grid size
   //-----------------------------------------------------------------------
 
-  @@@
+  int levelpow[30];
+  levelpow[0] = 1;
+  for (i=1; i<30; i++) {
+    levelpow[i] = levelpow[i-1]*2;
+  }
+  
+  for (i=1; i<=num_grids; i++) {
+    int levelfactor = levelpow[level[i]];
+    imin0[i] = int((xmax0[i] - dmin0) / (dmax0-dmin0) * isize0[i] * levelfactor);
+    imin1[i] = int((xmax1[i] - dmin1) / (dmax1-dmin1) * isize1[i] * levelfactor);
+    imin2[i] = int((xmax2[i] - dmin2) / (dmax2-dmin2) * isize2[i] * levelfactor);
+  }
 
   //-----------------------------------------------------------------------
-  // Print the arrays
+  // Output grids
   //-----------------------------------------------------------------------
 
   for (i=1; i<=num_grids; i++) {
-    printf ("grid");
-    printf (" %d",i);
-    printf (" %d",parent[i]);
-    printf (" %d",processor[i]); 
-    printf (" %g %g %g",xmin0[i],xmin1[i],xmin2[i]);
-    printf (" %g %g %g",xmax0[i],xmax1[i],xmax2[i]);
-    printf (" %d %d %d",imin0[i],imin1[i],imin2[i]);
-    printf (" %d %d %d",isize0[i],isize1[i],isize2[i]);
-    printf ("\n");
+    fprintf (fpout,"grid");
+    fprintf (fpout," %d",i);
+    fprintf (fpout," %d",parent[i]);
+    fprintf (fpout," %d",processor[i]); 
+    fprintf (fpout," %g %g %g",xmin0[i],xmin1[i],xmin2[i]);
+    fprintf (fpout," %g %g %g",xmax0[i],xmax1[i],xmax2[i]);
+    fprintf (fpout," %d %d %d",imin0[i],imin1[i],imin2[i]);
+    fprintf (fpout," %d %d %d",isize0[i],isize1[i],isize2[i]);
+    fprintf (fpout,"\n");
   }
 
-  printf ("%d\n",num_grids);
+  //-----------------------------------------------------------------------
+  // Output particles/points
+  //-----------------------------------------------------------------------
+
+  // particle arrays
+
+  for (int ip = 0; ip < np; ip++) {
+    char cpufile[40];
+    sprintf (cpufile,"%s.cpu%04d",std::string(argv[1]).c_str(),ip);
+    print_particles (cpufile,fpout);
+  }
+  //  for (
 
   // Deallocate arrays
 
@@ -194,4 +244,109 @@ main(int argc, char ** argv)
 
   // Close output file
   fclose (fpout);
+}
+
+void print_particles (std::string file_name, FILE * fpout)
+{
+
+  int i0,i1,i2;
+   
+  hid_t       file_id;
+
+  // Open the file
+
+  file_id = H5Fopen(file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+
+  hid_t group_id;
+
+  // Open the group
+
+  group_id = H5Gopen (file_id, "/");
+
+  hsize_t num_groups;
+  H5Gget_num_objs(group_id,&num_groups);
+
+  herr_t  status;
+
+  for (int igroup = 0; igroup < num_groups; igroup ++) {
+
+    char group_name[20];
+    H5Gget_objname_by_idx(group_id,igroup,group_name,20);
+
+    std::string grid_group = group_name;
+    // Open the particle datasets
+
+    hid_t pmset_id;
+    hid_t ppxset_id,ppyset_id,ppzset_id;
+    hid_t pvxset_id,pvyset_id,pvzset_id;
+
+    pmset_id = H5Dopen(group_id, (grid_group + "/particle_mass").c_str());
+    ppxset_id = H5Dopen(group_id, (grid_group + "/particle_position_x").c_str());
+    ppyset_id = H5Dopen(group_id, (grid_group + "/particle_position_y").c_str());
+    ppzset_id = H5Dopen(group_id, (grid_group + "/particle_position_z").c_str());
+
+    // Get the dataset size
+
+    hid_t pmspace_id;
+    hid_t ppxspace_id,ppyspace_id,ppzspace_id;
+
+    hsize_t num_particles = 0;
+    pmspace_id  = H5Dget_space (pmset_id);
+    ppxspace_id = H5Dget_space (ppxset_id);
+    ppyspace_id = H5Dget_space (ppyset_id);
+    ppzspace_id = H5Dget_space (ppzset_id);
+
+    // Get rank (should be same for all particle datasets)
+
+    H5Sget_simple_extent_dims(ppxspace_id, &num_particles, NULL);
+
+    double * pmass = new double [num_particles];
+    double * ppos0 = new double [num_particles];
+    double * ppos1 = new double [num_particles];
+    double * ppos2 = new double [num_particles];
+
+    printf ("Grid group = %s\n",grid_group.c_str());
+    
+    int igrid = atoi(grid_group.c_str()+4);
+    printf ("igrid = %d\n",igrid);
+    // Read the dataset
+
+    status = H5Dread(pmset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
+		     H5P_DEFAULT, pmass);
+    status = H5Dread(ppxset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
+		     H5P_DEFAULT, ppos0);
+    status = H5Dread(ppyset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
+		     H5P_DEFAULT, ppos1);
+    status = H5Dread(ppzset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
+		     H5P_DEFAULT, ppos2);
+
+    for (int i=0; i<num_particles; i++) {
+      fprintf (fpout, "particle");
+      fprintf (fpout, " %g",pmass[i]);
+      fprintf (fpout, " %g %g %g",ppos0[i],ppos1[i],ppos2[i]);
+      fprintf (fpout, " %d",igrid);
+      fprintf (fpout,"\n");
+    }
+
+    // Deallocate arrays 
+
+    delete [] pmass;
+    delete [] ppos0;
+    delete [] ppos1;
+    delete [] ppos2;
+
+    // Close the dataset
+
+    status = H5Dclose(pmset_id);
+    status = H5Dclose(ppxset_id);
+    status = H5Dclose(ppyset_id);
+    status = H5Dclose(ppzset_id);
+
+  }
+
+  // Close the group
+  status = H5Gclose(group_id);
+
+  // Close the file
+  status = H5Fclose(file_id);
 }
