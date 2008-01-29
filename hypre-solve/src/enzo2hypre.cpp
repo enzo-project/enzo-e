@@ -24,6 +24,16 @@ main(int argc, char ** argv)
   FILE *fpout = fopen (outfile.c_str(),"w");
 
   //----------------------------------------------------------------------
+  // Write contsant header
+  //----------------------------------------------------------------------
+  
+  fprintf (fpout," dimension 3\n");
+  fprintf (fpout," bounday periodic\n");
+  fprintf (fpout," discret constant\n");
+  fprintf (fpout," solver fac\n");
+  fprintf (fpout," dump_x true\n");
+
+  //----------------------------------------------------------------------
   // Open hierarchy_file to get number of grids "num_grids"
   //----------------------------------------------------------------------
 
@@ -87,8 +97,6 @@ main(int argc, char ** argv)
   //-----------------------------------------------------------------------
 
   fpin  = fopen (hierarchy_file.c_str(), "r");
-
-  printf ("Grids = %d\n",num_grids);
 
   char s [ 100 ];
   // Read input Enzo hierarchy file
@@ -158,7 +166,7 @@ main(int argc, char ** argv)
     np = max(np,iproc);
   }
   np++;
-  printf ("np = %d\n",np);
+
   // Close procmap file
   fclose(fpin);
 
@@ -174,6 +182,8 @@ main(int argc, char ** argv)
     sscanf (line,"DomainLeftEdge         = %lg %lg %lg",&dmin0,&dmin1,&dmin2);
     sscanf (line,"DomainRightEdge        = %lg %lg %lg",&dmax0,&dmax1,&dmax2);
   }
+
+  fprintf (fpout, " domain %g %g %g  %g %g %g\n",dmin0,dmin1,dmin2,dmax0,dmax1,dmax2);
 
   // Close restart file
   fclose(fpin);
@@ -304,11 +314,9 @@ void print_particles (std::string file_name, FILE * fpout)
     double * ppos0 = new double [num_particles];
     double * ppos1 = new double [num_particles];
     double * ppos2 = new double [num_particles];
-
-    printf ("Grid group = %s\n",grid_group.c_str());
     
     int igrid = atoi(grid_group.c_str()+4);
-    printf ("igrid = %d\n",igrid);
+
     // Read the dataset
 
     status = H5Dread(pmset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
