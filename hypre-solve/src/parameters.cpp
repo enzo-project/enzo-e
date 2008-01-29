@@ -122,7 +122,6 @@ void Parameters::add_parameter (std::string key, std::string val) throw ()
   // Do nothing if key is empty or a comment ("#" or "//")
   if (key=="" || key=="#" || key=="//") return;
   values_.insert( std::pair<std::string,std::string>(key,val) );
-  printf ("DEBUG add_parameter (%s,%s)\n",key.c_str(),val.c_str());
 }
 
 //----------------------------------------------------------------------

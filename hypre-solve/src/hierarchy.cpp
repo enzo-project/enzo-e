@@ -35,7 +35,7 @@
 
 //----------------------------------------------------------------------
 
-const int trace          = 1;
+const int trace          = 0;
 const int debug          = 0;
 const int debug_detailed = 0;
 const int geomview       = 1;
@@ -334,8 +334,6 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	  int n0 = ig3[j0][1] - ig3[j0][0];
 	  int n1 = ig3[j1][1] - ig3[j1][0];
 	  for (face=0; face<2; face++) {
-	    printf ("%s:%d %d %d  %d %d\n",
-		    __FILE__,__LINE__,ig3[j0][0],ig3[j0][1],ig3[j1][0],ig3[j1][1]);
 	    for (ig0=0; ig0<n0; ig0++) {
 	      for (ig1=0; ig1<n1; ig1++) {
 		if (grid->faces().adjacent(axis,face,ig0,ig1) == NULL) {

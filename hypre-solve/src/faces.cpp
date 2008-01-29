@@ -29,7 +29,7 @@
 
 //----------------------------------------------------------------------
 
-const int debug = 1;
+const int debug = 0;
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // LabelName[] VALUES SHOULD MATCH Label enum ENTRIES IN faces.hpp
