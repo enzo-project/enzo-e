@@ -314,7 +314,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	    if (grid->coarse_shared_face
 		(*adjacent,axis,face,il0,il1,iu0,iu1)) {
 	      _TRACE_;
-	      printf ("%s:%d %d %d  %d %d\n",__FILE__,__LINE__,il0,iu0,il1,iu1);
+	      if (debug) printf ("%s:%d %d %d  %d %d\n",__FILE__,__LINE__,il0,iu0,il1,iu1);
 	      for (ig0=il0; ig0<iu0; ig0++) {
 		for (ig1=il1; ig1<iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;

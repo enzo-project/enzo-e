@@ -172,16 +172,18 @@ main(int argc, char ** argv)
   fclose(fpin);
 
   //-----------------------------------------------------------------------
-  // Read restart file to get domain extents
+  // Read restart file to get domain extents and top grid dimensions
   //-----------------------------------------------------------------------
 
   std::string restart_file = std::string(argv[1]);
   fpin  = fopen (restart_file.c_str(), "r");
   double dmin0,dmin1,dmin2;
   double dmax0,dmax1,dmax2;
+  int n0,n1,n2;
   while (fgets(line,100,fpin) != NULL) {
     sscanf (line,"DomainLeftEdge         = %lg %lg %lg",&dmin0,&dmin1,&dmin2);
     sscanf (line,"DomainRightEdge        = %lg %lg %lg",&dmax0,&dmax1,&dmax2);
+    sscanf (line,"TopGridDimensions   = %d %d %d",&n0,&n1,&n2);
   }
 
   fprintf (fpout, " domain %g %g %g  %g %g %g\n",
@@ -213,9 +215,9 @@ main(int argc, char ** argv)
   
   for (i=1; i<=num_grids; i++) {
     int levelfactor = levelpow[level[i]];
-    imin0[i] = int((xmax0[i] - dmin0) / (dmax0-dmin0) * isize0[i] * levelfactor);
-    imin1[i] = int((xmax1[i] - dmin1) / (dmax1-dmin1) * isize1[i] * levelfactor);
-    imin2[i] = int((xmax2[i] - dmin2) / (dmax2-dmin2) * isize2[i] * levelfactor);
+    imin0[i] = int((xmin0[i] - dmin0) / (dmax0-dmin0) * n0 * levelfactor);
+    imin1[i] = int((xmin1[i] - dmin1) / (dmax1-dmin1) * n1 * levelfactor);
+    imin2[i] = int((xmin2[i] - dmin2) / (dmax2-dmin2) * n2 * levelfactor);
   }
 
   //-----------------------------------------------------------------------
@@ -224,8 +226,8 @@ main(int argc, char ** argv)
 
   for (i=1; i<=num_grids; i++) {
     fprintf (fpout,"grid");
-    fprintf (fpout," %d",i-i);
-    fprintf (fpout," %d",parent[i]-i);
+    fprintf (fpout," %d",i-1);
+    fprintf (fpout," %d",parent[i]-1);
     fprintf (fpout," %d",processor[i]); 
     fprintf (fpout," %g %g %g",xmin0[i],xmin1[i],xmin2[i]);
     fprintf (fpout," %g %g %g",xmax0[i],xmax1[i],xmax2[i]);
@@ -345,7 +347,7 @@ void print_particles (std::string file_name, FILE * fpout)
       fprintf (fpout, "particle");
       fprintf (fpout, " %g",pmass[i]);
       fprintf (fpout, " %g %g %g",ppos0[i],ppos1[i],ppos2[i]);
-      fprintf (fpout, " %d",igrid);
+      fprintf (fpout, " %d",igrid-1);
       fprintf (fpout,"\n");
     }
 

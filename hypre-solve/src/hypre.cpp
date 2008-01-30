@@ -520,9 +520,9 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
     // ig3[][] should be divisible by r**level.  Just test r here.
 
-    if ((ig3[j1][0]/r)*r != ig3[j1][0]) printf ("ig3[%d][0] = %d)\n",j1,ig3[%d][0]);
+    if ((ig3[j1][0]/r)*r != ig3[j1][0]) printf ("ig3[%d][0] = %d\n",j1,ig3[j1][0]);
     assert ((ig3[j1][0]/r)*r == ig3[j1][0]);
-    if ((ig3[j1][1]/r)*r != ig3[j1][1]) printf ("ig3[%d][1] = %d)\n",j1,ig3[%d][1]);
+    if ((ig3[j1][1]/r)*r != ig3[j1][1]) printf ("ig3[%d][1] = %d\n",j1,ig3[j1][1]);
     assert ((ig3[j1][1]/r)*r == ig3[j1][1]);
 
     for (face=0; face<2; face++) {
@@ -860,7 +860,14 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
 	int    ig = grid.num_unknowns(k);
 	int    i0 = grid.i_lower(k);
 	index[k] = int (ap/ag*ig) + i0;
-     
+      }
+      if (index[0] < grid.i_lower(0) || index[0] > grid.i_upper(0) ||
+	  index[1] < grid.i_lower(1) || index[1] > grid.i_upper(1) ||
+	  index[2] < grid.i_lower(2) || index[2] > grid.i_upper(2)) {
+	printf ("WARNING: Point apparently not in grid: \n");
+	printf ("WARNING:    Point: (%g,%g,%g)\n",point.x(0),point.x(1),point.x(2));
+	printf ("WARNING:    Grid:  (%g,%g,%g) - (%g,%g,%g)\n",
+		lower[0],lower[1],lower[2],upper[0],upper[1],upper[2]);
       }
       if (debug) {
 	point.print();
