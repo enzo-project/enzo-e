@@ -41,8 +41,8 @@ hypre-init: dep $(OBJS_INIT)
 	$(CPP) -o hypre-init $(OBJS_INIT) $(LIBS)
 debug-matrix: debug-matrix.o
 	$(CPP) -o debug-matrix debug-matrix.o
-enzo2hypre: enzo2hypre.o
-	$(CPP) -o enzo2hypre enzo2hypre.o -I$(HDF5_PATH)/include -L$(HDF5_PATH)/lib -lhdf5
+enzo2hypre: enzo2hypre.cpp
+	$(CPP) -o enzo2hypre enzo2hypre.cpp -I$(HDF5_PATH)/include -L$(HDF5_PATH)/lib -lhdf5 $(HDF5_LIBS)
 
 BIN = ../bin
 .PHONY: install
