@@ -1,3 +1,4 @@
 include Make.include
 MPCPP = mpCC
 CPP   = xlC
+HDF5_PATH = /usr/local/apps64/hdf5
