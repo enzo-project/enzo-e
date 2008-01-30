@@ -13,7 +13,7 @@ set bin = "$PATH/../bin"
 set extra = "dump_x true\n"
 if ($2 <= 32) then
    echo "Turning on matrix and vector dumps"
-   set extra = "${extra}dump_a true\ndump_b true"
+   set extra = "${extra}dump_a true\ndump_b true\n"
 endif
 
 
@@ -42,7 +42,7 @@ endif
 #----------------------------------------------------------------------
 
 $bin/hypre-init $1 $2 $3 $4 $5 $6 $7
-echo "$extra" >> $input
+printf "$extra" >> $input
 mv $input $problem
 cd $problem
 
@@ -54,7 +54,12 @@ cd $problem
 
 if ($HOST == "ds100") then
    @ nodes = ($np - 1) / 8 + 1
-   poe $bin/hypre-solve $input -nodes 1 -tasks_per_node 8 -rmpool 1
+   if ($np < 8) then
+      set procs = $np
+   else
+      set procs = 8
+   endif
+   (poe $bin/hypre-solve $input -nodes $nodes -tasks_per_node $procs -rmpool 1) >& outfile
 else
    mpirun -np $np $bin/hypre-solve $input >& outfile
 endif
