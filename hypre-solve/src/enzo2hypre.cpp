@@ -184,7 +184,9 @@ main(int argc, char ** argv)
     sscanf (line,"DomainRightEdge        = %lg %lg %lg",&dmax0,&dmax1,&dmax2);
   }
 
-  fprintf (fpout, " domain %g %g %g  %g %g %g\n",dmin0,dmin1,dmin2,dmax0,dmax1,dmax2);
+  fprintf (fpout, " domain %g %g %g  %g %g %g\n",
+	   dmin0,dmin1,dmin2,
+	   dmax0,dmax1,dmax2);
 
   // Close restart file
   fclose(fpin);
@@ -212,8 +214,8 @@ main(int argc, char ** argv)
 
   for (i=1; i<=num_grids; i++) {
     fprintf (fpout,"grid");
-    fprintf (fpout," %d",i);
-    fprintf (fpout," %d",parent[i]);
+    fprintf (fpout," %d",i-i);
+    fprintf (fpout," %d",parent[i]-i);
     fprintf (fpout," %d",processor[i]); 
     fprintf (fpout," %g %g %g",xmin0[i],xmin1[i],xmin2[i]);
     fprintf (fpout," %g %g %g",xmax0[i],xmax1[i],xmax2[i]);
