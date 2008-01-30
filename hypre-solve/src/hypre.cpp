@@ -520,7 +520,9 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
     // ig3[][] should be divisible by r**level.  Just test r here.
 
+    if ((ig3[j1][0]/r)*r != ig3[j1][0]) printf ("ig3[%d][0] = %d)\n",j1,ig3[%d][0]);
     assert ((ig3[j1][0]/r)*r == ig3[j1][0]);
+    if ((ig3[j1][1]/r)*r != ig3[j1][1]) printf ("ig3[%d][1] = %d)\n",j1,ig3[%d][1]);
     assert ((ig3[j1][1]/r)*r == ig3[j1][1]);
 
     for (face=0; face<2; face++) {
