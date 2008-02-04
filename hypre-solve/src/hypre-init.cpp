@@ -1,11 +1,11 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
-
 ///-----------------------------------------------------------------------
 /// Generate an input file for hypre-solve
 ///
 /// Usage: 
 ///
-///   Unigrid of global size N0**3 distributed along <np0,np1,np2> processor grid
+///   Unigrid of global size N0**3 distributed along <np0,np1,np2>
+///   processor grid
 ///
 ///       run unigrid N0 np0 np1 np2
 ///
@@ -27,11 +27,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
 #define BOUNDARY "dirichlet"
 #define DIR_MODE 0755
 #define STRLEN   80
 #define BOXSIZE 8e9
+
+#define IS_OFFSET 1
 
 //----------------------------------------------------------------------
 void usage (char ** argv)
@@ -139,25 +140,28 @@ main(int argc, char **argv)
 
     for (ip3[2] = 0; ip3[2] < np3[2]; ip3[2]++) {
 
-      lp3[2] = r*(-0.5*BOXSIZE + ip3[2] * BOXSIZE / np3[2]);
-      up3[2] = r*(-0.5*BOXSIZE + (ip3[2]+1) * BOXSIZE / np3[2]);
-      li3[2] = -N0/2 + ip3[2] * n3[2];
+      lp3[2] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + ip3[2] * BOXSIZE / np3[2]);
+      up3[2] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + (ip3[2]+1) * BOXSIZE / np3[2]);
+      up3[2] += r*IS_OFFSET*BOXSIZE/np3[2];
+      li3[2] = (1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[2] * n3[2];
       jp3[2] = (ip3[2])/2 + np3[2]/4;
       if (np3[2] == 2) jp3[2] = ip3[2];
    
       for (ip3[1] = 0; ip3[1] < np3[1]; ip3[1]++) {
 
-	lp3[1] = r*(-0.5*BOXSIZE + ip3[1] * BOXSIZE / np3[1]);
-	up3[1] = r*(-0.5*BOXSIZE + (ip3[1]+1) * BOXSIZE / np3[1]);
-	li3[1] = -N0/2 + ip3[1] * n3[1];
+	lp3[1] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + ip3[1] * BOXSIZE / np3[1]);
+	up3[1] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + (ip3[1]+1) * BOXSIZE / np3[1]);
+	up3[1] += r*IS_OFFSET*BOXSIZE/np3[1];
+	li3[1] = (1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[1] * n3[1];
 	jp3[1] = (ip3[1])/2 + np3[1]/4;
 	if (np3[1] == 2) jp3[1] = ip3[1];
 
 	for (ip3[0] = 0; ip3[0] < np3[0]; ip3[0]++) {
 
-	  lp3[0] = r*(-0.5*BOXSIZE + ip3[0] * BOXSIZE / np3[0]);
-	  up3[0] = r*(-0.5*BOXSIZE + (ip3[0]+1) * BOXSIZE / np3[0]);
-	  li3[0] = -N0/2 + ip3[0] * n3[0];
+	  lp3[0] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + ip3[0] * BOXSIZE / np3[0]);
+	  up3[0] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + (ip3[0]+1) * BOXSIZE / np3[0]);
+	  up3[0] += r*IS_OFFSET*BOXSIZE/np3[0];
+	  li3[0] = (1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[0] * n3[0];
 	  jp3[0] = (ip3[0])/2 + np3[0]/4;
 	  if (np3[0] == 2) jp3[0] = ip3[0];
 
@@ -188,11 +192,14 @@ main(int argc, char **argv)
 	  // Store id for point.  Requires coarse-to-finer level loop
 
 	  for (int k0=0; k0<2; k0++) {
-	    double p0 = (k0-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5;
+	    double p0 = (k0-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5 
+	      + 0.25*IS_OFFSET*BOXSIZE;
 	    for (int k1=0; k1<2; k1++) {
-	      double p1 = (k1-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5;
+	      double p1 = (k1-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5  
+		+ 0.25*IS_OFFSET*BOXSIZE;
 	      for (int k2=0; k2<2; k2++) {
-		double p2 = (k2-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5;
+		double p2 = (k2-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5  
+		  + 0.25*IS_OFFSET*BOXSIZE;
 		int k = k0 + 2*(k1 + 2*k2);
 		if (lp3[0] < p0 && p0 < up3[0] &&
 		    lp3[1] < p1 && p1 < up3[1] &&

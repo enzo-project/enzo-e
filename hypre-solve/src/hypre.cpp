@@ -40,7 +40,7 @@
 const int debug  = 0;
 const int trace  = 0;
 const int trace_hypre  = 0;
-const int trace_graph  = 0;
+const int trace_graph  = 1;
 
 const Scalar matrix_scale = 1.0;  // 1.0:  1 1 1 -6 1 1 1
 const Scalar matrix_diag = 0e0;  // + cu 
