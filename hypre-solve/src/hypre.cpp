@@ -38,12 +38,11 @@
 #include "error.hpp"
 
 const int debug  = 0;
-const int trace  = 0;
+const int trace  = 1;
 const int trace_hypre  = 0;
-const int trace_graph  = 1;
+const int trace_graph  = 0;
 
 const Scalar matrix_scale = 1.0;  // 1.0:  1 1 1 -6 1 1 1
-const Scalar matrix_diag = 0e0;  // + cu 
 
 //======================================================================
 // PUBLIC MEMBER FUNCTIONS
@@ -717,12 +716,12 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 void Hypre::init_matrix_stencil_ (Grid & grid)
 
 {
-  int lower[3]    = { grid.i_lower(0), grid.i_lower(1), grid.i_lower(2) };
-  int upper[3]    = { grid.i_upper(0), grid.i_upper(1), grid.i_upper(2) };
-  int n           = grid.num_unknowns();
-  int entries[7]  = { 0,1,2,3,4,5,6 };
-  double h3[3]    = {grid.h(0),grid.h(1),grid.h(2)};
-  int    n3[3]    = {grid.n(0),grid.n(1),grid.n(2)};
+  int low[3]     = { grid.i_lower(0), grid.i_lower(1), grid.i_lower(2) };
+  int up[3]      = { grid.i_upper(0), grid.i_upper(1), grid.i_upper(2) };
+  int n          = grid.num_unknowns();
+  int entries[7] = { 0,1,2,3,4,5,6 };
+  double h3[3]   = {grid.h(0),grid.h(1),grid.h(2)};
+  int    n3[3]   = {grid.n(0),grid.n(1),grid.n(2)};
 
   double h120 = h3[1]*h3[2] / h3[0];
   double h201 = h3[2]*h3[0] / h3[1];
@@ -730,70 +729,156 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 
   double hhh = h3[0]*h3[1]*h3[2];
 
-  double * v0  = new double [n];
-  double * vxp  = new double [n];
-  double * vxm  = new double [n];
-  double * vyp  = new double [n];
-  double * vym  = new double [n];
-  double * vzp  = new double [n];
-  double * vzm  = new double [n];
+  double * v0;         // Diagonal elements
+  double * v1[3][2];   // Off-diagonal elements
 
-  int i=0;
-  int level = grid.level();
+  // Allocate storage
+
+  v0 = new double [n];
+  for (int axis=0; axis<3; axis++) {
+    for (int face=0; face<2; face++) {
+      v1[axis][face] = new double [n];
+    }
+  }
+
+  //-----------------------------------------------------------
+  // Set stencil for all unknowns, ignoring boundary conditions
+  //-----------------------------------------------------------
 
   for (int i2 = 0; i2 < n3[2]; i2++) {
 
     // DIFFUSION COEFFICIENTS HERE
 
-    double azp = (level==0) || (i2 < n3[2]-1) ? 1.0 : 0.0;
-    double azm = (level==0) || (i2 >       0) ? 1.0 : 0.0;
+    double azp = 1.0;
+    double azm = 1.0;
 
     for (int i1 = 0; i1 < n3[1]; i1++) {
 
       // DIFFUSION COEFFICIENTS HERE
 
-      double ayp = (level==0) || (i1 < n3[1]-1) ? 1.0 : 0.0;
-      double aym = (level==0) || (i1 >       0) ? 1.0 : 0.0;
+      double ayp = 1.0;
+      double aym = 1.0;
 
       for (int i0 = 0; i0 < n3[0]; i0++) {
 
 	// DIFFUSION COEFFICIENTS HERE
 
-	double axp = (level==0) || (i0 < n3[0]-1) ? 1.0 : 0.0;
-	double axm = (level==0) || (i0 >       0) ? 1.0 : 0.0;
+	double axp = 1.0;
+	double axm = 1.0;
 
 	int i = i0 + n3[0]*(i1 + n3[1]*i2);
 
-	vxp[i] = matrix_scale * h120 * axp;
-	vxm[i] = matrix_scale * h120 * axm;
-	vyp[i] = matrix_scale * h201 * ayp;
-	vym[i] = matrix_scale * h201 * aym;
-	vzp[i] = matrix_scale * h012 * azp;
-	vzm[i] = matrix_scale * h012 * azm;
+	v1[0][1][i] = matrix_scale * h120 * axp;
+	v1[0][0][i] = matrix_scale * h120 * axm;
+	v1[1][1][i] = matrix_scale * h201 * ayp;
+	v1[1][0][i] = matrix_scale * h201 * aym;
+	v1[2][1][i] = matrix_scale * h012 * azp;
+	v1[2][0][i] = matrix_scale * h012 * azm;
 
-
-	v0[i] = -( vxp[i] + vxm[i] + vyp[i] + vym[i] + vzp[i] + vzm[i] 
-		   + hhh*matrix_diag );
+	v0[i] = -( v1[0][1][i] + v1[0][0][i] +
+		   v1[1][1][i] + v1[1][0][i] + 
+		   v1[2][1][i] + v1[2][0][i] );
 
       }
     }
   }
 
-  HYPRE_SStructMatrixSetBoxValues (A_,level,lower,upper,0,1,&entries[0],v0);
-  HYPRE_SStructMatrixSetBoxValues (A_,level,lower,upper,0,1,&entries[1],vxp);
-  HYPRE_SStructMatrixSetBoxValues (A_,level,lower,upper,0,1,&entries[2],vxm);
-  HYPRE_SStructMatrixSetBoxValues (A_,level,lower,upper,0,1,&entries[3],vyp);
-  HYPRE_SStructMatrixSetBoxValues (A_,level,lower,upper,0,1,&entries[4],vym);
-  HYPRE_SStructMatrixSetBoxValues (A_,level,lower,upper,0,1,&entries[5],vzp);
-  HYPRE_SStructMatrixSetBoxValues (A_,level,lower,upper,0,1,&entries[6],vzm);
+  //-----------------------------------------------------------
+  // Adjust stencil at grid boundaries
+  //-----------------------------------------------------------
 
-  delete [] vzm;
-  delete [] vzp;
-  delete [] vym;
-  delete [] vyp;
-  delete [] vxm;
-  delete [] vxp;
+  Faces & faces = grid.faces();
+
+  int i,i0,i1,i2;
+  int axis,face;
+
+  int level = grid.level();
+  // X faces
+  axis = 0;
+  for (i1=0; i1<n3[1]; i1++) {
+    for (i2=0; i2<n3[2]; i2++) {
+      i0 = 0;
+      face = 0;
+      i = i0 + n3[0]*(i1 + n3[1]*i2);
+      // DIFFUSION COEFFICIENTS HERE
+      double axm = 1.0;
+      if (faces.label (axis,face,i1,i2) != Faces::_boundary_) {
+	v1[axis][face][i] -= matrix_scale * h120 * axm;
+	v0[i]             += matrix_scale * h120 * axm;
+      }
+      i0 = n3[0]-1;
+      face = 1;
+      i = i0 + n3[0]*(i1 + n3[1]*i2);
+      // DIFFUSION COEFFICIENTS HERE
+      double axp = 1.0;
+      if (faces.label (axis,face,i1,i2) != Faces::_boundary_) {
+	v1[axis][face][i] -= matrix_scale * h120 * axp;
+	v0[i]             += matrix_scale * h120 * axp;
+      }
+    }
+  }
+  // Y faces
+  axis = 1;
+  for (i2=0; i2<n3[2]; i2++) {
+    for (i0=0; i0<n3[0]; i0++) {
+      i1 = 0;
+      face = 0;
+      i = i0 + n3[0]*(i1 + n3[1]*i2);
+      // DIFFUSION COEFFICIENTS HERE
+      double aym = 1.0;
+      if (faces.label (axis,face,i2,i0) != Faces::_boundary_) {
+	v1[axis][face][i] -= matrix_scale * h201 * aym;
+	v0[i]             += matrix_scale * h201 * aym;
+      }
+      i1 = n3[1]-1;
+      face = 1;
+      i = i0 + n3[0]*(i1 + n3[1]*i2);
+      // DIFFUSION COEFFICIENTS HERE
+      double ayp = 1.0;
+      if (faces.label (axis,face,i2,i0) != Faces::_boundary_) {
+	v1[axis][face][i] -= matrix_scale * h201 * ayp;
+	v0[i]             += matrix_scale * h201 * ayp;
+      }
+    }
+  }
+  // Z faces
+  axis = 2;
+  for (i0=0; i0<n3[0]; i0++) {
+    for (i1=0; i1<n3[1]; i1++) {
+      i2 = 0;
+      face = 0;
+      i = i0 + n3[0]*(i1 + n3[1]*i2);
+      // DIFFUSION COEFFICIENTS HERE
+      double azm = 1.0;
+      if (faces.label (axis,face,i0,i1) != Faces::_boundary_) {
+	v1[axis][face][i] -= matrix_scale * h012 * azm;
+	v0[i]             += matrix_scale * h012 * azm;
+      }
+      i2 = n3[2]-1;
+      face = 1;
+      i = i0 + n3[0]*(i1 + n3[1]*i2);
+      // DIFFUSION COEFFICIENTS HERE
+      double azp = 1.0;
+      if (faces.label (axis,face,i0,i1) != Faces::_boundary_) {
+	v1[axis][face][i] -= matrix_scale * h012 * azp;
+	v0[i]             += matrix_scale * h012 * azp;
+      }
+    }
+  }
+
+  HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[0],v0);
+  HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[1],v1[0][1]);
+  HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[2],v1[0][0]);
+  HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[3],v1[1][1]);
+  HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[4],v1[1][0]);
+  HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[5],v1[2][1]);
+  HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[6],v1[2][0]);
   delete [] v0;
+  for (int axis=0; axis<3; axis++) {
+    for (int face=0; face<2; face++) {
+      delete [] v1[axis][face];
+    }
+  }
 
 }
 

@@ -278,8 +278,9 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // ------------------------------------------------------------
 
   ItHierarchyLevels itl (*this);
+  Level * level;
 
-  while (Level * level = itl++) {
+  while (level = itl++) {
     ItLevelGridsAll itg (*level);
 
     while (Grid * grid = itg++) {
@@ -309,12 +310,9 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	ItGridNeighbors itpn (*parent(*grid));
 
 	while (adjacent = itpn++) {
-	  _TRACE_;
 	  if (grid->is_local() || adjacent->is_local()) {
 	    if (grid->coarse_shared_face
 		(*adjacent,axis,face,il0,il1,iu0,iu1)) {
-	      _TRACE_;
-	      if (debug) printf ("%s:%d %d %d  %d %d\n",__FILE__,__LINE__,il0,iu0,il1,iu1);
 	      for (ig0=il0; ig0<iu0; ig0++) {
 		for (ig1=il1; ig1<iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -351,16 +349,33 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // 1. Categorize boundary face-zones
   // ------------------------------------------------------------
 
+  // Domain boundary
+  double db3[3][2]; 
+  domain.lower(db3[0][0],db3[1][0],db3[2][0]);
+  domain.upper(db3[0][1],db3[1][1],db3[2][1]);
+
   int ih0[3][2];
   this->indices0(ih0);
-  ItLevelGridsLocal itgl (this->level(0));
-  while (Grid * grid = itgl++) {
-    int ig[3][2];
-    grid->indices(ig);
-    for (axis = 0; axis < 3; axis++) {
-      for (face = 0; face < 2; face++) {
-	if (ih0[axis][face] == ig[axis][face]) {
-	  grid->faces().label(axis,face,Faces::_boundary_);
+  while (level = itl++) {
+    ItLevelGridsLocal itgl (*level);
+    while (Grid * grid = itgl++) {
+
+      // Grid boundary
+      double gb3[3][2];
+      grid->x_lower(gb3[0][0],gb3[1][0],gb3[2][0]);
+      grid->x_upper(gb3[0][1],gb3[1][1],gb3[2][2]);
+
+      // Grid spacing (should be level-independent)
+      double h3[3];
+      grid->h(h3[0],h3[1],h3[2]);
+
+      for (axis = 0; axis < 3; axis++) {
+	for (face = 0; face < 2; face++) {
+	  if (level->index() == 0) printf ("DEBUG %g %g %g\n",
+					   gb3[axis][face],db3[axis][face],h3[axis]);
+	  if ( fabs(gb3[axis][face] - db3[axis][face]) < 0.5*h3[axis]) {
+	    grid->faces().label(axis,face,Faces::_boundary_);
+	  }
 	}
       }
     }

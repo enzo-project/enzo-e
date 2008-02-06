@@ -13,7 +13,10 @@
 
 main(int argc, char **argv)
 {
-  if (argc != 4) exit(1);
+  if (argc != 4) {
+    fprintf (stderr,"Usage: %s N <1|2|3> <xyz|ij|none>\n",argv[0]);
+    exit(1);
+  }
 
   // Usage: N mask type
   //   N = 4 (e.g.)

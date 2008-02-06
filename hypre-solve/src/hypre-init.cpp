@@ -219,7 +219,11 @@ main(int argc, char **argv)
   // Create problem
 
   fprintf (fp, "dimension 3\n");
-  fprintf (fp, "domain    3 -4e9 -4e9 -4e9  4e9 4e9 4e9\n");
+  if (IS_OFFSET) {
+    fprintf (fp, "domain    3 0e9 0e9 0e9  8e9 8e9 8e9\n");
+  } else {
+    fprintf (fp, "domain    3 -4e9 -4e9 -4e9  4e9 4e9 4e9\n");
+  }
   fprintf (fp, "boundary  " BOUNDARY "\n");
   fprintf (fp, "sphere    5.993985e27 6.378137e8 0.0 0.0 0.0\n");
   for (int k=0; k<8; k++) {
