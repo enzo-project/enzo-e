@@ -363,7 +363,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
       // Grid boundary
       double gb3[3][2];
       grid->x_lower(gb3[0][0],gb3[1][0],gb3[2][0]);
-      grid->x_upper(gb3[0][1],gb3[1][1],gb3[2][2]);
+      grid->x_upper(gb3[0][1],gb3[1][1],gb3[2][1]);
 
       // Grid spacing (should be level-independent)
       double h3[3];
