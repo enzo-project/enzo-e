@@ -1,5 +1,7 @@
 #!/bin/tcsh -f
 
+set offset = 1
+
 set size = "size 480,300"
 # set yrange = "[0.1:100]"
 #
@@ -17,6 +19,9 @@ echo $levels
 
 # Get x-* y-* z-* yz-* zx-* and xy-* data files
 
+set level = 0
+set mid = 8
+
 foreach X (X.0?.00.00000)
 
    # Find mid-point
@@ -32,9 +37,9 @@ foreach X (X.0?.00.00000)
    #  Go figure.
 
    echo "DEBUG $nx0 $ny0 $nz0 $nx1 $ny1 $nz1"
-   @ nx =  $nx0 + ( 1 + $nx1 - $nx0 ) / 2
-   @ ny =  $ny0 + ( 1 + $ny1 - $ny0 ) / 2
-   @ nz =  $nz0 + ( 1 + $nz1 - $nz0 ) / 2
+   @ nx =  $nx0 + ( 1 + $nx1 - $nx0 ) / $mid
+   @ ny =  $ny0 + ( 1 + $ny1 - $ny0 ) / $mid
+   @ nz =  $nz0 + ( 1 + $nz1 - $nz0 ) / $mid
 
 
    echo "DEBUG $nx $ny $nz"
@@ -51,6 +56,10 @@ foreach X (X.0?.00.00000)
   grep "$y0" < $X | grep "$z0" | awk '{print $2,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > x-$X
   grep "$z0" < $X | grep "$x0" | awk '{print $3,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > y-$X
   grep "$x0" < $X | grep "$y0" | awk '{print $4,$6}' | sed 's/(//g' | sed 's/,//g' | sed 's/;//g' > z-$X
+
+  @ level = $level + 1
+  @ mid = $mid / 2
+
 end
 
 set head = "set terminal png $size; set log y"
@@ -59,20 +68,52 @@ set head = "set terminal png $size; set log y"
 if ($levels == 1) then
 #------------------------------------------------------------------------
    foreach axis (x y z)
-      echo "$head; set output '$axis.png'; plot $xrange$yrange '$axis-X.00.00.00000' title 'level 0' $ptype" | gnuplot  
+      echo "$head; set output '$axis.png';" \
+           "plot $xrange$yrange '$axis-X.00.00.00000' title 'level 0' $ptype" \
+           | gnuplot  
    end
 #   echo "$head; set output 'x-y-z.png'; plot $xrange$yrange 'x-X.00.00.00000' title 'x level 0' $ptype, 'y-X.00.00.00000' title 'y level 0' $ptype, 'z-X.00.00.00000' title 'z level 0' $ptype" | gnuplot  
 #------------------------------------------------------------------------
 else if ($levels == 2) then
 #------------------------------------------------------------------------
    foreach axis (x y z)
-     echo "$head; set output '$axis.png'; plot $xrange$yrange '$axis-X.00.00.00000' using ("'$'"1*2+0.5):("'$'"2) title 'level 0' $ptype, '$axis-X.01.00.00000' using ("'$'"1):("'$'"2) title 'level 1' $ptype" | gnuplot  
+     echo "$head; set output '$axis.png';" \
+          "plot $xrange$yrange " \
+            "'$axis-X.00.00.00000' " \
+             "using ("'$'"1*2+0.5):("'$'"2) title 'level 0' $ptype," \
+            "'$axis-X.01.00.00000' " \
+             "using ("'$'"1):("'$'"2) title 'level 1' $ptype" \
+            | gnuplot  
    end
 #------------------------------------------------------------------------
 else if ($levels == 3) then
 #------------------------------------------------------------------------
    foreach axis (x y z)
-      echo "$head; set output '$axis.png'; plot $xrange$yrange 'x-X.00.00.00000' using ("'$'"1*4+1):("'$'"2) title 'level 0' $ptype, 'x-X.01.00.00000' using ("'$'"1*2+0.5):("'$'"2) title 'level 1' $ptype, 'z-X.02.00.00000' title 'level 2'  $ptype" | gnuplot  
+     echo "$head; set output '$axis.png';" \
+          "plot $xrange$yrange " \
+            "'$axis-X.00.00.00000' " \
+             "using ("'$'"1*4+0.25):("'$'"2) title 'level 0' $ptype," \
+            "'$axis-X.01.00.00000' " \
+             "using ("'$'"1*2+0.5):("'$'"2) title 'level 1' $ptype," \
+            "'$axis-X.02.00.00000' " \
+             "using ("'$'"1*1):("'$'"2) title 'level 2' $ptype" \
+            | gnuplot  
+   end
+#------------------------------------------------------------------------
+else if ($levels == 4) then
+#------------------------------------------------------------------------
+   foreach axis (x y z)
+     echo "$head; set output '$axis.png';" \
+          "plot $xrange$yrange " \
+            "'$axis-X.00.00.00000' " \
+             "using ("'$'"1*8+0.125):("'$'"2) title 'level 0' $ptype," \
+            "'$axis-X.01.00.00000' " \
+             "using ("'$'"1*4+0.25):("'$'"2) title 'level 1' $ptype," \
+            "'$axis-X.02.00.00000' " \
+             "using ("'$'"1*2+0.5):("'$'"2) title 'level 2' $ptype," \
+            "'$axis-X.03.00.00000' " \
+             "using ("'$'"1*1):("'$'"2) title 'level 2' $ptype" \
+            | gnuplot  
    end
 endif
 
