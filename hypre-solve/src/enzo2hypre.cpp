@@ -28,7 +28,6 @@ main(int argc, char ** argv)
   //----------------------------------------------------------------------
   
   fprintf (fpout," dimension 3\n");
-  fprintf (fpout," bounday periodic\n");
   fprintf (fpout," discret constant\n");
   fprintf (fpout," solver fac\n");
   fprintf (fpout," boundary dirichlet\n");
@@ -344,7 +343,7 @@ void print_particles (std::string file_name, FILE * fpout)
 		     H5P_DEFAULT, ppos2);
 
     for (int i=0; i<num_particles; i++) {
-      fprintf (fpout, "particle");
+      fprintf (fpout, "point");
       fprintf (fpout, " %g",pmass[i]);
       fprintf (fpout, " %g %g %g",ppos0[i],ppos1[i],ppos2[i]);
       fprintf (fpout, " %d",igrid-1);
