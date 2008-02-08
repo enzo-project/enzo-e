@@ -185,7 +185,7 @@ main(int argc, char ** argv)
     sscanf (line,"TopGridDimensions   = %d %d %d",&n0,&n1,&n2);
   }
 
-  fprintf (fpout, " domain %g %g %g  %g %g %g\n",
+  fprintf (fpout, " domain 3 %g %g %g  %g %g %g\n",
 	   dmin0,dmin1,dmin2,
 	   dmax0,dmax1,dmax2);
 
