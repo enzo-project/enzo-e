@@ -143,7 +143,7 @@ main(int argc, char **argv)
       lp3[2] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + ip3[2] * BOXSIZE / np3[2]);
       up3[2] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + (ip3[2]+1) * BOXSIZE / np3[2]);
       up3[2] += r*IS_OFFSET*BOXSIZE/np3[2];
-      li3[2] = (1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[2] * n3[2];
+      li3[2] = int((1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[2] * n3[2]);
       jp3[2] = (ip3[2])/2 + np3[2]/4;
       if (np3[2] == 2) jp3[2] = ip3[2];
    
@@ -152,7 +152,7 @@ main(int argc, char **argv)
 	lp3[1] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + ip3[1] * BOXSIZE / np3[1]);
 	up3[1] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + (ip3[1]+1) * BOXSIZE / np3[1]);
 	up3[1] += r*IS_OFFSET*BOXSIZE/np3[1];
-	li3[1] = (1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[1] * n3[1];
+	li3[1] = int((1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[1] * n3[1]);
 	jp3[1] = (ip3[1])/2 + np3[1]/4;
 	if (np3[1] == 2) jp3[1] = ip3[1];
 
@@ -161,7 +161,7 @@ main(int argc, char **argv)
 	  lp3[0] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + ip3[0] * BOXSIZE / np3[0]);
 	  up3[0] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + (ip3[0]+1) * BOXSIZE / np3[0]);
 	  up3[0] += r*IS_OFFSET*BOXSIZE/np3[0];
-	  li3[0] = (1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[0] * n3[0];
+	  li3[0] = int((1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[0] * n3[0]);
 	  jp3[0] = (ip3[0])/2 + np3[0]/4;
 	  if (np3[0] == 2) jp3[0] = ip3[0];
 

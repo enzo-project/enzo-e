@@ -1,19 +1,30 @@
 SHELL = /bin/bash
 
-# Define MPCPP
-
 # FLAGS = -g -Wall
-FLAGS = -g
+CPPFLAGS = -g
 
 # JBPERF
 
-JBLIB = -ljbperf
 JBDEF = -DUSE_JBPERF
+JBINC = -I$(HOME)/include 
+JBLIB = -L$(HOME)/lib -ljbperf
+
+# HYPRE
+
+HYPREDEF = 
+HYPREINC = -I$(HOME)/hypre/src/hypre/include
+HYPRELIB = -L$(HOME)/hypre/src/hypre/lib -lHYPRE 
+
+# HDF5
+
+HDF5DEF = 
+HDF5INC = -I/usr/local/hdf5/include
+HDF5LIB = -L/usr/local/hdf5/lib -lhdf5
 
 # Assemble defines, includes, and libs
-DEF = $(JBDEF)
-INC = -I$(HOME)/include
-LIBS =  -lm -L$(HOME)/lib -lHYPRE $(JBLIB)
+DEF =      $(JBDEF) $(HYPREDEF) $(HDF5DEF)
+INC =      $(JBINC) $(HYPREINC) $(HDF5INC)
+LIB =  -lm $(JBLIB) $(HYPRELIB) $(HDF5LIB)
 
 # Set object files
 OBJS = \
@@ -36,13 +47,13 @@ OBJS_INIT = hypre-init.cpp
 all: hypre-solve hypre-init debug-matrix enzo2hypre
 
 hypre-solve: dep $(OBJS)
-	$(MPCPP) -o hypre-solve $(OBJS) $(LIBS)
+	$(MPCPP) -o hypre-solve $(OBJS) $(LIB)
 hypre-init: dep $(OBJS_INIT)
-	$(CPP) -o hypre-init $(OBJS_INIT) $(LIBS)
+	$(CPP) -o hypre-init $(OBJS_INIT) $(LIB)
 debug-matrix: debug-matrix.o
 	$(CPP) -o debug-matrix debug-matrix.o
 enzo2hypre: enzo2hypre.cpp
-	$(CPP) -o enzo2hypre enzo2hypre.cpp -I$(HDF5_PATH)/include -L$(HDF5_PATH)/lib -lhdf5 $(HDF5_LIBS)
+	$(CPP) -o enzo2hypre enzo2hypre.cpp $(INC) $(LIB)
 
 BIN = ../bin
 .PHONY: install
@@ -53,7 +64,7 @@ install: hypre-solve hypre-init
 
 
 .cpp.o:
-	$(MPCPP) -c -o $*.o $*.cpp $(FLAGS) $(INC) $(DEF)
+	$(MPCPP) -c -o $*.o $*.cpp $(CPPFLAGS) $(INC) $(DEF)
 
 .PHONY: dep
 dep:
