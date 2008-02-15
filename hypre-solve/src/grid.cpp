@@ -516,6 +516,8 @@ bool Grid::coarse_shared_face (Grid & coarse,
   il1 = MAX(ig[j1][0],r*ic[j1][0]) - ig[j1][0];
   iu1 = MIN(ig[j1][1],r*ic[j1][1]) - ig[j1][0];
 
+  // decrement upper limit, so loops using indices should be [il0,iu0]
+
   iu0--;
   iu1--;
 
@@ -562,7 +564,7 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
 
   for (axis = 0; axis < 3; axis++) {
     for (face = 0; face < 2; face++) {
-      if (ig[axis][face] == r*ip[axis][face]) {
+      if (ig[axis][face] == r*ip[axis][face] && !found_face) {
 	if (num == count) {
 	  found_face = true;
 	  iaxis = axis;
@@ -598,6 +600,8 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
 
   il1 = MAX(ig[j1][0]/r,ip[j1][0]) - ip[j1][0];
   iu1 = MIN(ig[j1][1]/r,ip[j1][1]) - ip[j1][0];
+
+  // decrement upper limit, so loops using indices should be [il0,iu0]
 
   iu0--;
   iu1--;
