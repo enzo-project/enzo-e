@@ -294,8 +294,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	if (grid->is_local() || adjacent->is_local()) {
 	  if (grid->neighbor_shared_face
 	      (*adjacent,axis,face,il0,il1,iu0,iu1)) {
-	    for (ig0=il0; ig0<iu0; ig0++) {
-	      for (ig1=il1; ig1<iu1; ig1++) {
+	    for (ig0=il0; ig0<=iu0; ig0++) {
+	      for (ig1=il1; ig1<=iu1; ig1++) {
 		grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
 	      }
 	    }
@@ -313,8 +313,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	  if (grid->is_local() || adjacent->is_local()) {
 	    if (grid->coarse_shared_face
 		(*adjacent,axis,face,il0,il1,iu0,iu1)) {
-	      for (ig0=il0; ig0<iu0; ig0++) {
-		for (ig1=il1; ig1<iu1; ig1++) {
+	      for (ig0=il0; ig0<=iu0; ig0++) {
+		for (ig1=il1; ig1<=iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
 		}
 	      }
@@ -371,8 +371,6 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
       for (axis = 0; axis < 3; axis++) {
 	for (face = 0; face < 2; face++) {
-	  if (level->index() == 0) printf ("DEBUG %g %g %g\n",
-					   gb3[axis][face],db3[axis][face],h3[axis]);
 	  if ( fabs(gb3[axis][face] - db3[axis][face]) < 0.5*h3[axis]) {
 	    grid->faces().label(axis,face,Faces::_boundary_);
 	  }
