@@ -8,6 +8,9 @@ CPPFLAGS = -g
 JBDEF = -DUSE_JBPERF
 JBINC = -I$(HOME)/include 
 JBLIB = -L$(HOME)/lib -ljbperf
+JBDEF = 
+JBINC = 
+JBLIB = 
 
 # HYPRE
 
