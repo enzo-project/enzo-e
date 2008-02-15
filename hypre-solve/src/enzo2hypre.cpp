@@ -9,6 +9,9 @@
 
 void print_particles (std::string,FILE*fpout);
 
+const int refinement_factor = 2;
+const int max_levels = 30;
+
 main(int argc, char ** argv)
 {
   if (argc != 2) {
@@ -30,7 +33,7 @@ main(int argc, char ** argv)
   fprintf (fpout," dimension 3\n");
   fprintf (fpout," discret constant\n");
   fprintf (fpout," solver fac\n");
-  fprintf (fpout," boundary dirichlet\n");
+  fprintf (fpout," boundary periodic\n");
   fprintf (fpout," dump_x true\n");
 
   //----------------------------------------------------------------------
@@ -206,10 +209,10 @@ main(int argc, char ** argv)
   // Compute imin given xmin, level, and grid size
   //-----------------------------------------------------------------------
 
-  int levelpow[30];
+  int levelpow[max_levels];
   levelpow[0] = 1;
-  for (i=1; i<30; i++) {
-    levelpow[i] = levelpow[i-1]*2;
+  for (i=1; i<max_levels; i++) {
+    levelpow[i] = levelpow[i-1]*refinement_factor;
   }
   
   for (i=1; i<=num_grids; i++) {
