@@ -38,9 +38,8 @@
 #include "error.hpp"
 
 const int debug  = 0;
-const int trace  = 1;
+const int trace  = 0;
 const int trace_hypre  = 0;
-const int trace_graph  = 0;
 
 const Scalar matrix_scale = 1.0;  // 1.0:  1 1 1 -6 1 1 1
 
@@ -491,6 +490,8 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
   int level_fine   = grid.level();
   int level_coarse = grid.level() - 1;
 
+  bool discret_const = parameters_.value("discret") == "constant";
+
   assert (level_coarse >= 0);
 
   for (axis=0; axis<3; axis++) {
@@ -563,7 +564,7 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    // GRAPH ENTRY: FINE-TO-COARSE 
 	    //--------------------------------------------------
 
-	    if (parameters_.value("discret") == "constant") {
+	    if (discret_const) {
 
 	      //--------------------------------------------------
 	      // (*) CONSTANT
@@ -584,14 +585,8 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		igg3[j1]+=diggs[k][1];
 		igg3[j2]+=diggs[k][2];
 		for (int k=1; k<5; k++) {
-		  if (trace_graph) {
-		    printf ("TRACE GRAPH (%d %d %d; %d) : (%d %d %d; %d)\n",
-			    igg3[0],igg3[1],igg3[2], level_fine,  
-			    ign3[0],ign3[1],ign3[2], level_coarse);
-		  }
 		  HYPRE_SStructGraphAddEntries 
 		    (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
-		  _TRACE_;
 		  igg3[j0]+=diggs[k][0];
 		  igg3[j1]+=diggs[k][1];
 		  igg3[j2]+=diggs[k][2];
@@ -663,11 +658,6 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	      for (int k=0; k<8; k++) {
 		HYPRE_SStructGraphAddEntries 
 		  (graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
-		  if (trace_graph) {
-		    printf ("TRACE GRAPH (%d %d %d; %d) : (%d %d %d; %d)\n",
-			    ign3[0],ign3[1],ign3[2], level_coarse,  
-			    igg3[0],igg3[1],igg3[2], level_fine);
-		  }
 		igg3[0] += diggs[k][0];
 		igg3[1] += diggs[k][1];
 		igg3[2] += diggs[k][2];
