@@ -1,0 +1,10 @@
+CPP = g++
+
+OBJS = test_array.o array.o
+
+test_array: $(OBJS)
+	$(CPP) -o test_array $(OBJS)
+
+.PHONY: clean
+clean:
+	rm -f *.o test_array *~
