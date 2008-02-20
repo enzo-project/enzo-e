@@ -12,8 +12,12 @@ pdf2:ps2
 2up: ps
 	a2ps -M Letter -2 -o $(PAPER)2.ps $(PAPER).ps
 
-dvi: include.tex
+dvi: include.tex uml
+	make -C uml
 	-latex $(PAPER)
+
+uml:
+	ln -s ../uml .
 
 include.tex:
 	ln -s ../include.tex .
