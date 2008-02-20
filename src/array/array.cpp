@@ -3,7 +3,7 @@
  * @file
  * @brief Member functions for the Array class
  * @author James Bordner 
- * @version $Rev$
+ * @version 1.0
  *
  * Attributes: see array.hpp
  * Operations: see array.hpp
