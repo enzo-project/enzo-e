@@ -35,13 +35,14 @@
  *
  */
 // $Log$
- 
-//----------------------------------------------------------------------
 
-/// Create a new Array object
- 
+/// Represents a Fortran-style multidimensional array with convenience functions
+
 /**
- */
+Parallelism is controlled by a Parallel object.
+IO is controlled by an IO object.
+*/
+
  
 class Array {
 
@@ -65,7 +66,9 @@ private:
 
 public:
 
+  /// Create a new uninitialized Array object
   Array();
+  /// Create a new initialized Array object
   Array(int  n0, int  n1=1, int  n2=1, int n3=1);
   ~Array();
   void copy (const Array &);
