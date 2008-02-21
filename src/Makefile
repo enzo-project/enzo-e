@@ -14,14 +14,12 @@
 #
 # Directories
 #
-# (*) array
-# (*) test
-# (*) float
+# (*) data
 # (*) io
 #
 #-----------------------------------------------------------------------
 
-DIR = array test float io
+DIR = data io
 
 all:   $(patsubst %,%-all,$(DIR))
 clean: $(patsubst %,%-clean,$(DIR))

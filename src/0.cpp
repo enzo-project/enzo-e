@@ -1,32 +1,33 @@
-// $Id$
-/**
- * @file
- * @brief Write description of source file
- * @brief here for dOxygen.
- * @author Me
- * @version 1.69
- */
-// $Log$
- 
-///  Single line comment for dOxygen.
- 
-/**
-   Write description of function here.
-   The function should follow these
-   comments.
-  
-   The function arguments listed with "param" will be compared 
-   to the declaration and verified.
-
-   @param argOne Description of first function argument.
-   @param argTwo Description of second function argument.
-   @return Description of returned value.
+/** 
+ *********************************************************************
+ *
+ * @file      foo.hpp
+ * @brief     Brief description of the file
+ * @author    Bart Simpson
+ * @date      Thu Feb 21 12:45:56 PST 2008
+ * @bug       Example bug description 
+ * @note      Modified by Alfred E. Newman, Thu Feb 21 12:49:16 PST 2008
+ *            fixed bug
+ * @note      Modified by Alfred E. Newman, Thu Feb 21 12:49:16 PST 2008
+ *            fixed bug
+ *
+ * Detailed description of the file
+ *
+ *********************************************************************
  */
  
-int
-class::function(arg1, arg2)
+void 
+Foo::Foo(Foo & foo)
+/**
+ *********************************************************************
+ *
+ * @param foo Description of argument foo
+ * @return There is no return value
+ *
+ * Detailed description of the function
+ *
+ *********************************************************************
+ */
 {
- 
-    /// Single line comment for dOxygen.
 }
     

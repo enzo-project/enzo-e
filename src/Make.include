@@ -1,1 +1,1 @@
-INC = -I../float -I../test
+INC = -I../include
