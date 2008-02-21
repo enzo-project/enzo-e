@@ -1,10 +1,14 @@
-#ifndef CLASS_ARRAY
-#define CLASS_ARRAY 
+//345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+#ifndef ARRAY_HPP
+#define ARRAY_HPP
+
 // $Id$
 /**
- * @file
- * @brief Header file for the Array class
- * @author James Bordner 
+ * @file    array.hpp
+ * @brief   Represents a Fortran-style multidimensional array with 
+ * @brief   convenience functions
+ * @author  James Bordner 
  * @version 1.0
  *
  * Attributes
@@ -35,8 +39,6 @@
  *
  */
 // $Log$
-
-/// Represents a Fortran-style multidimensional array with convenience functions
 
 /**
 Parallelism is controlled by a Parallel object.

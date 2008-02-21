@@ -1,8 +1,8 @@
 // $Id$
 /**
- * @file
- * @brief Member functions for the Array class
- * @author James Bordner 
+ * @file    array.cpp
+ * @brief   Member functions for the Array class
+ * @author  James Bordner 
  * @version 1.0
  *
  * Attributes: see array.hpp

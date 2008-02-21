@@ -1,7 +1,28 @@
+//345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+#ifndef UNIT_HPP
+#define UNIT_HPP
+
+// $Id$
+/**
+ * @file    unit.hpp
+ * @brief   Unit testing functions
+ * @author  James Bordner 
+ * @version 1.0
+ *
+ * Defines
+ *
+ * ( ) UNIT_ASSERT(RESULT)
+ * ( ) UNIT_CLASS (char * class)
+ * ( ) UNIT_FUNC (char * func)
+ *
+ */
+// $Log$
+
 #include <string.h>
 
 #define UNIT_ASSERT(RESULT)		\
-  printf ("%s %s:%d  %s::%s() %d\n",	\
+  printf ("%s %s:%3d  %s::%s() %d\n",	\
 	  (RESULT)?"pass":"FAIL",__FILE__,__LINE__,class_name,func_name,test_num++);
 
 
@@ -22,3 +43,4 @@ void UNIT_FUNC (char * f)
   strncpy (func_name,f,UNIT_MAX_NAME_LEN);
 };
 
+#endif
