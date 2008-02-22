@@ -1,19 +1,18 @@
-// $Id$
-/**
- * @file    array.cpp
- * @brief   Member functions for the Array class
- * @author  James Bordner 
- * @version 1.0
+/** 
+ *********************************************************************
  *
- * Attributes: see array.hpp
- * Operations: see array.hpp
+ * @file      array.cpp
+ * @brief     Declarations of Array member functions
+ * @author    James Bordner
+ * @date      Thu Feb 21 16:02:08 PST 2008
  *
+ *********************************************************************
  */
-// $Log$
  
 #include <stdio.h>
 #include <assert.h>
 
+#include "string.h"
 #include "scalar.hpp"
 #include "error.hpp"
 #include "array.hpp" 
@@ -144,7 +143,8 @@ void Array::allocate_(int n0, int n1, int n2, int n3)
 
   N_ = n0*n1*n2*n3;
 
-  if (a_) WARNING("Array::allocate_() reallocating without deallocating");
+  strcpy (warning_message,"Reallocating without deallocating");
+  if (a_) WARNING("Array::allocate_");
 
   a_ = new Scalar [N_];
 }

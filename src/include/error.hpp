@@ -21,17 +21,27 @@
 
 /// Handle a (non-lethal) warning message
 
-#define WARNING(MESSAGE) { \
-   printf ("WARNING %s:%d %s\n",__FILE__,__LINE__,MESSAGE);	\
+static char warning_message[80];
+
+#define WARNING(FUNCTION) {		\
+    printf ("WARNING File:     %s:%d\n" \
+            "WARNING Function: %s()\n" \
+            "WARNING Message:  %s\n", \
+	    __FILE__,__LINE__,FUNCTION,warning_message); \
   fflush(stdout); \
 }
 
 /// Handle a (lethal) error message
 
-#define ERROR(MESSAGE) { \
-   printf ("ERROR %s:%d %s\n",__FILE__,__LINE__,MESSAGE); \
+static char error_message[80];
+
+#define ERROR(FUNCTION) { \
+    printf ("ERROR File:     %s:%d\n" \
+            "ERROR Function: %s()\n" \
+            "ERROR Message:  %s\n", \
+	    __FILE__,__LINE__,FUNCTION,error_message);			\
   fflush(stdout); \
-  exit(1); // Need more graceful shutdown, maybe via Control::exit() \
+  exit(1); \
 }
 
 /// Placeholder for functions that are not implemented yet

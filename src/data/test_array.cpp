@@ -1,3 +1,14 @@
+/** 
+ *********************************************************************
+ *
+ * @file      test_array.cpp
+ * @brief     Program implementing unit tests for the Array class
+ * @author    James Bordner
+ * @date      Thu Feb 21 16:04:03 PST 2008
+ *
+ *********************************************************************
+ */
+ 
 #include <stdio.h>
 
 #include "scalar.hpp"
@@ -13,7 +24,7 @@ main()
   //----------------------------------------------------------------------
 
   {
-    Array a();
+    Array a;
  
     int n0=10,n1=15,n2=20;
     a.resize(n0,n1,n2);
@@ -115,7 +126,7 @@ main()
     UNIT_ASSERT(passed);
 
     // Multiple arrays: copy
-    Array b();
+    Array b;
     b.copy(a);
 
     Scalar * bv = b.values();

@@ -11,6 +11,7 @@
 # (*) clean
 # (*) test
 # (*) doc
+# ( ) dep
 #
 # Directories
 #
@@ -24,6 +25,9 @@ DIR = data io
 all:   $(patsubst %,%-all,$(DIR))
 clean: $(patsubst %,%-clean,$(DIR))
 test:  $(patsubst %,%-test,$(DIR))
+dep:   $(patsubst %,%-dep,$(DIR))
+doc:
+	doxygen
 
 %-all: 
 	$(MAKE) -C $*
@@ -33,6 +37,6 @@ test:  $(patsubst %,%-test,$(DIR))
 	$(MAKE) -C $* clean
 %-test: 
 	$(MAKE) -C $* test
-doc:
-	doxygen
+%-dep: 
+	$(MAKE) -C $* dep
 

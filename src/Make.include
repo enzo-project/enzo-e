@@ -1,1 +1,17 @@
+#----------------------------------------------------------------------
+
+# CPP:  The c++ compiler
+
+CPP = g++
+
+# INC: The include directories common to all components
+
 INC = -I../include
+
+# OPT:  optimization/debug compiler flags
+
+OPT = -O -g
+
+#----------------------------------------------------------------------
+
+CPPFLAGS = $(INC) $(INC_LOCAL) $(OPT)

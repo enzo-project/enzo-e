@@ -23,7 +23,7 @@
 
 #define UNIT_ASSERT(RESULT)		\
   printf ("%s %s:%3d  %s::%s() %d\n",	\
-	  (RESULT)?"pass":"FAIL",__FILE__,__LINE__,class_name,func_name,test_num++);
+	  (RESULT)?" PASS ":" FAIL ",__FILE__,__LINE__,class_name,func_name,test_num++);
 
 
 #define UNIT_MAX_NAME_LEN 40

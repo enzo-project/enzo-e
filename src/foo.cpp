@@ -1,15 +1,13 @@
 /** 
  *********************************************************************
  *
- * @file      foo.hpp
+ * @file      foo.cpp
  * @brief     Brief description of the file
  * @author    Bart Simpson
  * @date      Thu Feb 21 12:45:56 PST 2008
  * @bug       Example bug description 
  * @note      Modified by Alfred E. Newman, Thu Feb 21 12:49:16 PST 2008
- *            fixed bug
- * @note      Modified by Alfred E. Newman, Thu Feb 21 12:49:16 PST 2008
- *            fixed bug
+ *            description of modification
  *
  * Detailed description of the file
  *
