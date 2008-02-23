@@ -1,7 +1,7 @@
 /** 
  *********************************************************************
  *
- * @file      foo.cpp
+ * @file      TEMPLATE.cpp
  * @brief     Brief description of the file
  * @author    Bart Simpson
  * @date      Thu Feb 21 12:45:56 PST 2008
