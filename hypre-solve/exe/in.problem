@@ -1,7 +1,0 @@
-dimension 3
-domain    3 -4e9 -4e9 -4e9  4e9 4e9 4e9
-boundary  periodic
-sphere    5.993985e27 6.378137e8 0.0 0.0 0.0  0.0 0.0 0.0
-point     100.0   -1e3 -1e3 -1e3   0
-dump_a    true
-

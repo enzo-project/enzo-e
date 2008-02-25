@@ -37,7 +37,7 @@
 #include "hypre.hpp"
 #include "error.hpp"
 
-const int debug  = 0;
+const int debug  = 1;
 const int trace  = 0;
 const int trace_hypre  = 0;
 
@@ -1008,11 +1008,11 @@ void Hypre::solve_pfmg_ (Hierarchy & hierarchy, int itmax, double restol)
 
   int num_iterations;
   HYPRE_SStructSysPFMGGetNumIterations (solver_,&num_iterations);
-  if (debug) printf ("HYPRE_SStructSysPFMGSolve num iterations: %d\n",num_iterations);
+  printf ("HYPRE_SStructSysPFMGSolve num iterations: %d\n",num_iterations);
 
   double residual;
   HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm (solver_,&residual);
-  if (debug) printf ("HYPRE_SStructSysPFMGSolve final relative residual norm: %g\n",residual);
+  printf ("HYPRE_SStructSysPFMGSolve final relative residual norm: %g\n",residual);
 
   // Delete the solver
 
@@ -1094,10 +1094,9 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
   double residual;
   HYPRE_SStructFACGetFinalRelativeResidualNorm(solver_, &residual);
 
-  if (debug) printf ("HYPRE_SStructFACSolve3 num iterations: %d\n",num_iterations);
+  printf ("HYPRE_SStructFACSolve3 num iterations: %d\n",num_iterations);
 
-  if (debug) printf ("HYPRE_SStructFACSolve3 final relative residual norm: %g\n",residual);
-
+  printf ("HYPRE_SStructFACSolve3 final relative residual norm: %g\n",residual);
 
   // Delete the solver
 

@@ -32,17 +32,13 @@
 #define STRLEN   80
 #define BOXSIZE 8e9
 
-#define IS_OFFSET 0
-
 //----------------------------------------------------------------------
 void usage (char ** argv)
 {
   // Print usage and exit abnormally
 
   printf ("\n"
-	  "Usage: %s unigrid N0 np0 np1 np2\n"
-	  "   or\n"
-	  "       %s nested  N0 np0 np1 np2 L\n",argv[0],argv[0]);
+	  "Usage: %s N0 np0 np1 np2 num_levels offset\n",argv[0]);
   exit(1);
 }
 
@@ -55,27 +51,19 @@ main(int argc, char **argv)
 // Parse command-line arguments
 //-----------------------------------------------------------------------
 
-  if (argc < 6 || argc > 7) {
-    printf ("Number of arguments %d not between 5 and 6\n",argc-1);
+  if (argc != 7) {
+    printf ("Number of arguments %d is not 6\n",argc-1);
     usage(argv);
   }
 
-  char type[STRLEN];
-  strcpy (type,argv[1]);
-  int N0, np3[3],L;
+  int N0, np3[3],num_levels,is_offset;
 
-  N0  = atoi(argv[2]);
-  np3[0] = atoi(argv[3]);
-  np3[1] = atoi(argv[4]);
-  np3[2] = atoi(argv[5]);
-
-  if (strcmp(type,"unigrid") == 0) 
-    L   = 1;
-  else if (strcmp(type,"nested") == 0)  
-    L   = atoi(argv[6]);
-  else {
-    usage(argv);
-  }
+  N0         = atoi(argv[1]);
+  np3[0]     = atoi(argv[2]);
+  np3[1]     = atoi(argv[3]);
+  np3[2]     = atoi(argv[4]);
+  num_levels = atoi(argv[5]);
+  is_offset  = atoi(argv[6]);
 
   int np = np3[0]*np3[1]*np3[2];
 
@@ -86,7 +74,7 @@ main(int argc, char **argv)
   // Get input, output, and directory names
 
   char dir[STRLEN],infile[STRLEN],outfile[STRLEN];
-  sprintf (dir,    "%s.P%d%d%d.N%d.L%d",type,np3[0],np3[1],np3[2],N0,L);
+  sprintf (dir,    "N%d.P%d%d%d.L%d.O%d",N0,np3[0],np3[1],np3[2],num_levels,is_offset);
   sprintf (infile,"in.%s",dir);
   FILE * fp = fopen (infile,"w");
 
@@ -135,20 +123,20 @@ main(int argc, char **argv)
   int level;
   int jp3[3]; // for determining parent id 
 
-  double r = 1.0;
-  for (level = 0; level < L; level++, r *= 0.5) {
+  int r = 1;
+  for (level = 0; level < num_levels; level++, r *= 2) {
 
     for (ip3[2] = 0; ip3[2] < np3[2]; ip3[2]++) {
 
       // Centered box
-      lp3[2] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE +  ip3[2]    * BOXSIZE / np3[2]);
-      up3[2] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + (ip3[2]+1) * BOXSIZE / np3[2]);
+      lp3[2] = (1-is_offset)*(-BOXSIZE/2 +  ip3[2]   *BOXSIZE / np3[2])/r;
+      up3[2] = (1-is_offset)*(-BOXSIZE/2 + (ip3[2]+1)*BOXSIZE / np3[2])/r;
 
       // Offset box
-      lp3[2] += r*IS_OFFSET*BOXSIZE* ip3[2]   /np3[2];
-      up3[2] += r*IS_OFFSET*BOXSIZE*(ip3[2]+1)/np3[2];
+      lp3[2] += is_offset*BOXSIZE* ip3[2]   /r/np3[2];
+      up3[2] += is_offset*BOXSIZE*(ip3[2]+1)/r/np3[2];
 
-      li3[2] = int((1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[2] * n3[2]);
+      li3[2] = (1-is_offset)*N0*(r-1)/2 + ip3[2]*n3[2];
 
       jp3[2] = (ip3[2])/2 + np3[2]/4;
 
@@ -157,14 +145,14 @@ main(int argc, char **argv)
       for (ip3[1] = 0; ip3[1] < np3[1]; ip3[1]++) {
 
 	// Centered box
-	lp3[1] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + ip3[1] * BOXSIZE / np3[1]);
-	up3[1] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + (ip3[1]+1) * BOXSIZE / np3[1]);
+	lp3[1] = (1-is_offset)*(-BOXSIZE/2 +  ip3[1]   *BOXSIZE / np3[1])/r;
+	up3[1] = (1-is_offset)*(-BOXSIZE/2 + (ip3[1]+1)*BOXSIZE / np3[1])/r;
 
 	// Offset box
-	lp3[1] += r*IS_OFFSET*BOXSIZE* ip3[1]   /np3[1];
-	up3[1] += r*IS_OFFSET*BOXSIZE*(ip3[1]+1)/np3[1];
+	lp3[1] += is_offset*BOXSIZE* ip3[1]   /r/np3[1];
+	up3[1] += is_offset*BOXSIZE*(ip3[1]+1)/r/np3[1];
 
-	li3[1] = int((1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[1] * n3[1]);
+	li3[1] = (1-is_offset)*N0*(r-1)/2 + ip3[1]*n3[1];
 	jp3[1] = (ip3[1])/2 + np3[1]/4;
 
 	if (np3[1] == 2) jp3[1] = ip3[1];
@@ -172,13 +160,13 @@ main(int argc, char **argv)
 	for (ip3[0] = 0; ip3[0] < np3[0]; ip3[0]++) {
 
 	  // Centered box
-	  lp3[0] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + ip3[0] * BOXSIZE / np3[0]);
-	  up3[0] = (1-IS_OFFSET)*r*(-0.5*BOXSIZE + (ip3[0]+1) * BOXSIZE / np3[0]);
+	  lp3[0] = (1-is_offset)*(-BOXSIZE/2 +  ip3[0]   *BOXSIZE / np3[0])/r;
+	  up3[0] = (1-is_offset)*(-BOXSIZE/2 + (ip3[0]+1)*BOXSIZE / np3[0])/r;
 	  // Offset box
-	  lp3[0] += r*IS_OFFSET*BOXSIZE* ip3[0]   /np3[0];
-	  up3[0] += r*IS_OFFSET*BOXSIZE*(ip3[0]+1)/np3[0];
+	  lp3[0] += is_offset*BOXSIZE* ip3[0]   /r/np3[0];
+	  up3[0] += is_offset*BOXSIZE*(ip3[0]+1)/r/np3[0];
 
-	  li3[0] = int((1-IS_OFFSET)*0.5*N0*(1./r-1.) + ip3[0] * n3[0]);
+	  li3[0] = (1-is_offset)*N0*(r-1)/2 + ip3[0]*n3[0];
 	  jp3[0] = (ip3[0])/2 + np3[0]/4;
 
 	  if (np3[0] == 2) jp3[0] = ip3[0];
@@ -191,13 +179,13 @@ main(int argc, char **argv)
 	  if (level == 0) {
 	    id_parent = -1;
 	  } else {
-	    // 1  0                 0
-	    // 2  01                01
-	    // 4  0123              1122
-	    // 8  01234567          22334455
-	    // 16 0123456789012345  4455667788990011
-	    
-	    id_parent = jp3[0] + np3[0]*(jp3[1] + np3[1]*(jp3[2] + np3[2]*(level-1)));
+	    printf ("DEBUG %s:%d %d (%d %d %d) (%d %d %d)\n",__FILE__,__LINE__,
+		    r,ip3[0],ip3[1],ip3[2],
+		    np3[0],np3[1],np3[2]);
+	    id_parent = ip3[0]/r + np3[0]*(ip3[1]/r + np3[1]*ip3[2]/r);
+	    printf ("%d = %d/%d + %d*(%d/%d + %d*%d/%d\n",
+		    id_parent,ip3[0],r,np3[0],ip3[1],r,np3[1],ip3[2],r);
+	    //	    id_parent = jp3[0] + np3[0]*(jp3[1] + np3[1]*(jp3[2] + np3[2]*(level-1)));
 	  }
 
 	  fprintf (fp, "grid %d %d %d "
@@ -211,13 +199,13 @@ main(int argc, char **argv)
 
 	  for (int k0=0; k0<2; k0++) {
 	    double p0 = (k0-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5 
-	      + 0.25*IS_OFFSET*BOXSIZE;
+	      + 0.25*is_offset*BOXSIZE;
 	    for (int k1=0; k1<2; k1++) {
 	      double p1 = (k1-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5  
-		+ 0.25*IS_OFFSET*BOXSIZE;
+		+ 0.25*is_offset*BOXSIZE;
 	      for (int k2=0; k2<2; k2++) {
 		double p2 = (k2-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5  
-		  + 0.25*IS_OFFSET*BOXSIZE;
+		  + 0.25*is_offset*BOXSIZE;
 		int k = k0 + 2*(k1 + 2*k2);
 		if (lp3[0] < p0 && p0 < up3[0] &&
 		    lp3[1] < p1 && p1 < up3[1] &&
@@ -237,7 +225,7 @@ main(int argc, char **argv)
   // Create problem
 
   fprintf (fp, "dimension 3\n");
-  if (IS_OFFSET) {
+  if (is_offset) {
     fprintf (fp, "domain    3 0e9 0e9 0e9  8e9 8e9 8e9\n");
   } else {
     fprintf (fp, "domain    3 -4e9 -4e9 -4e9  4e9 4e9 4e9\n");
