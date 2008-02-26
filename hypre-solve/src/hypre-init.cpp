@@ -167,9 +167,9 @@ main(int argc, char **argv)
 	    id_parent = -1;
 	  } else {
 	    int offset = np*(level-1);
-	    int i0 = (r0*np3[0] + 4*ip3[0])/(4*r0);
-	    int i1 = (r0*np3[1] + 4*ip3[1])/(4*r0);
-	    int i2 = (r0*np3[2] + 4*ip3[2])/(4*r0);
+	    int i0 = ((1-is_offset)*r0*np3[0] + 4*ip3[0])/(4*r0);
+	    int i1 = ((1-is_offset)*r0*np3[1] + 4*ip3[1])/(4*r0);
+	    int i2 = ((1-is_offset)*r0*np3[2] + 4*ip3[2])/(4*r0);
 	    id_parent = offset + i0 + np3[0]*(i1 + np3[1]*i2);
 	    //	    printf ("offset = %d  ip=(%d,%d,%d), np=(%d,%d,%d) i=(%d,%d,%d) level = %d  parent=%d\n",
 	    //		    offset,ip3[0],ip3[1],ip3[2],np3[0],np3[1],np3[2],i0,i1,i2,level,id_parent);
