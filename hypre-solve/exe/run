@@ -12,7 +12,6 @@ set bin = "$PATH/../bin"
 
 set extra = "dump_x true\n"
 if ($2 <= 32) then
-   echo "Turning on matrix and vector dumps"
    set extra = "${extra}dump_a true\ndump_b true\n"
 endif
 
@@ -37,7 +36,7 @@ endif
 # GENERATE THE INPUT FILE
 #----------------------------------------------------------------------
 
-$bin/hypre-init $1 $2 $3 $4 $5 $6 $7 $8 $9
+$bin/hypre-init $1 $2 $3 $4 $5 $6 
 printf "$extra" >> $input
 mv $input $problem
 cd $problem
@@ -46,7 +45,7 @@ cd $problem
 # RUN THE PROBLEM
 #----------------------------------------------------------------------
 
-@ np = $3 * $4 * $5 
+@ np = $2 * $3 * $4 
 
 if ($HOST == "ds100") then
    @ nodes = ($np - 1) / 8 + 1
@@ -58,6 +57,7 @@ if ($HOST == "ds100") then
    (poe $bin/hypre-solve $input -nodes $nodes -tasks_per_node $procs -rmpool 1) >& outfile
 else
    mpirun -np $np $bin/hypre-solve $input >& outfile
+   killall -q hypre-solve
 endif
 
 #----------------------------------------------------------------------
@@ -67,7 +67,8 @@ endif
 set success = `grep "End hypre-solve" outfile | wc`
 set success = $success[1]
 if ($success == 1) then
-   echo "Pass"
+   echo "Pass: $problem"
 else
-   echo "Fail"
+   echo "Fail: $problem"
 endif
+

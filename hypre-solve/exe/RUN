@@ -1,90 +1,57 @@
 #!/bin/csh -f
 
-set nested   = 1
-set unigrid  = 1
+set n = 16
 
-set parallel = 0
-set serial   = 1
+#----------------------------------------------------------------------
+# Centered serial
 
-set problems_nested_serial    = ()
-set problems_nested_parallel  = ()
-set problems_unigrid_serial   = ()
-set problems_unigrid_parallel = ()
+run $n 1 1 1 1 0
+run $n 1 1 1 2 0
+run $n 1 1 1 3 0
+run $n 1 1 1 4 0
 
-if ($nested == 1 && $serial == 1) then
-     set problems_nested_serial = ( \
-     "nested 16 1 1 1 2" \
-     "nested 32 1 1 1 2" \
-     "nested 64 1 1 1 2" \
-     "nested 16 1 1 1 3" \
-     "nested 32 1 1 1 3" \
-     "nested 64 1 1 1 3" \
-     )
-endif
-if ($nested == 1 && $parallel == 1) then
-     set problems_nested_parallel = ( \
-     "nested 16 1 1 2 2" \
-     "nested 16 1 1 2 3" \
-     "nested 16 1 1 4 2" \
-     "nested 16 1 1 4 3" \
-     "nested 16 1 2 1 2" \
-     "nested 16 1 2 1 3" \
-     "nested 16 1 4 1 2" \
-     "nested 16 1 4 1 3" \
-     "nested 16 2 1 1 2" \
-     "nested 16 2 1 1 3" \
-     "nested 16 4 1 1 2" \
-     "nested 16 4 1 1 3" \
-     )
-endif
-if ($unigrid == 1 && $serial == 1) then
-     set problems_unigrid_serial = ( \
-     "unigrid 16 1 1 1" \
-     "unigrid 24 1 1 1" \
-     "unigrid 32 1 1 1" \
-     "unigrid 48 1 1 1" \
-     "unigrid 64 1 1 1" \
-     "unigrid 96 1 1 1" \
-     "unigrid 128 1 1 1" \
-     )
-endif
-if ($unigrid == 1 && $parallel == 1) then
-     set problems_unigrid_parallel = ( \
-     "unigrid 32 2 1 1" \
-     "unigrid 32 1 2 1" \
-     "unigrid 32 1 1 2" \
-     "unigrid 32 2 2 2" \
-     )
-endif
+#----------------------------------------------------------------------
+# Centered parallel
 
-set n = $#problems_unigrid_serial
-set i = 1
-while ($i <= $n)
-   set problem = "$problems_unigrid_serial[$i]"
-   run $problem
-   @ i = $i + 1
-end
+# x-axis
+run $n 2 1 1 1 0
+run $n 2 1 1 2 0
+run $n 2 1 1 3 0
+run $n 2 1 1 4 0
 
-set n = $#problems_unigrid_parallel
-set i = 1
-while ($i <= $n)
-   set problem = "$problems_unigrid_parallel[$i]"
-   run $problem
-   @ i = $i + 1
-end
+# y-axis
+run $n 1 2 1 1 0
+run $n 1 2 1 2 0
+run $n 1 2 1 3 0
+run $n 1 2 1 4 0
 
-set n = $#problems_nested_serial
-set i = 1
-while ($i <= $n)
-   set problem = "$problems_nested_serial[$i]"
-   run $problem
-   @ i = $i + 1
-end
+# z-axis
+run $n 1 1 2 1 0
+run $n 1 1 2 2 0
+run $n 1 1 2 3 0
+run $n 1 1 2 4 0
 
-set n = $#problems_nested_parallel
-set i = 1
-while ($i <= $n)
-   set problem = "$problems_nested_parallel[$i]"
-   run $problem
-   @ i = $i + 1
-end
+#----------------------------------------------------------------------
+# Offset serial
+
+run $n 1 1 1 2 1
+run $n 1 1 1 3 1
+run $n 1 1 1 4 1
+
+#----------------------------------------------------------------------
+# Offset parallel
+
+# x-axis
+run $n 2 1 1 2 1
+run $n 2 1 1 3 1
+run $n 2 1 1 4 1
+
+# y-axis
+run $n 1 2 1 2 1
+run $n 1 2 1 3 1
+run $n 1 2 1 4 1
+
+# z-axis
+run $n 1 1 2 2 1
+run $n 1 1 2 3 1
+run $n 1 1 2 4 1
