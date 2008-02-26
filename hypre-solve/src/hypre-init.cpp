@@ -78,8 +78,6 @@ main(int argc, char **argv)
   sprintf (infile,"in.%s",dir);
   FILE * fp = fopen (infile,"w");
 
-  printf ("Running %s: ",dir);
-
   // Create new directory...
 
   if (mkdir (dir,DIR_MODE) != 0) {
@@ -121,10 +119,10 @@ main(int argc, char **argv)
   int id_point[8];
   double point_pos[8][3];
   int level;
-  int jp3[3]; // for determining parent id 
 
-  int r = 1;
-  for (level = 0; level < num_levels; level++, r *= 2) {
+  int r0 = 2;  // refinement factor
+  int r = 1;   // r^level
+  for (level = 0; level < num_levels; level++, r *= r0) {
 
     for (ip3[2] = 0; ip3[2] < np3[2]; ip3[2]++) {
 
@@ -138,10 +136,6 @@ main(int argc, char **argv)
 
       li3[2] = (1-is_offset)*N0*(r-1)/2 + ip3[2]*n3[2];
 
-      jp3[2] = (ip3[2])/2 + np3[2]/4;
-
-      if (np3[2] == 2) jp3[2] = ip3[2];
-   
       for (ip3[1] = 0; ip3[1] < np3[1]; ip3[1]++) {
 
 	// Centered box
@@ -153,10 +147,6 @@ main(int argc, char **argv)
 	up3[1] += is_offset*BOXSIZE*(ip3[1]+1)/r/np3[1];
 
 	li3[1] = (1-is_offset)*N0*(r-1)/2 + ip3[1]*n3[1];
-	jp3[1] = (ip3[1])/2 + np3[1]/4;
-
-	if (np3[1] == 2) jp3[1] = ip3[1];
-
 	for (ip3[0] = 0; ip3[0] < np3[0]; ip3[0]++) {
 
 	  // Centered box
@@ -167,9 +157,6 @@ main(int argc, char **argv)
 	  up3[0] += is_offset*BOXSIZE*(ip3[0]+1)/r/np3[0];
 
 	  li3[0] = (1-is_offset)*N0*(r-1)/2 + ip3[0]*n3[0];
-	  jp3[0] = (ip3[0])/2 + np3[0]/4;
-
-	  if (np3[0] == 2) jp3[0] = ip3[0];
 
 	  int ip = ip3[0] + np3[0]*(ip3[1] + np3[1]*ip3[2]);
 
@@ -179,13 +166,13 @@ main(int argc, char **argv)
 	  if (level == 0) {
 	    id_parent = -1;
 	  } else {
-	    printf ("DEBUG %s:%d %d (%d %d %d) (%d %d %d)\n",__FILE__,__LINE__,
-		    r,ip3[0],ip3[1],ip3[2],
-		    np3[0],np3[1],np3[2]);
-	    id_parent = ip3[0]/r + np3[0]*(ip3[1]/r + np3[1]*ip3[2]/r);
-	    printf ("%d = %d/%d + %d*(%d/%d + %d*%d/%d\n",
-		    id_parent,ip3[0],r,np3[0],ip3[1],r,np3[1],ip3[2],r);
-	    //	    id_parent = jp3[0] + np3[0]*(jp3[1] + np3[1]*(jp3[2] + np3[2]*(level-1)));
+	    int offset = np*(level-1);
+	    int i0 = (r0*np3[0] + 4*ip3[0])/(4*r0);
+	    int i1 = (r0*np3[1] + 4*ip3[1])/(4*r0);
+	    int i2 = (r0*np3[2] + 4*ip3[2])/(4*r0);
+	    id_parent = offset + i0 + np3[0]*(i1 + np3[1]*i2);
+	    //	    printf ("offset = %d  ip=(%d,%d,%d), np=(%d,%d,%d) i=(%d,%d,%d) level = %d  parent=%d\n",
+	    //		    offset,ip3[0],ip3[1],ip3[2],np3[0],np3[1],np3[2],i0,i1,i2,level,id_parent);
 	  }
 
 	  fprintf (fp, "grid %d %d %d "
@@ -237,7 +224,7 @@ main(int argc, char **argv)
 	     point_pos[k][0],point_pos[k][1],point_pos[k][2],id_point[k]);
   }
   fprintf (fp, "discret constant\n");
-  fprintf (fp, "solver fac\n");
+  fprintf (fp, "solver %s\n",((num_levels==1) ? "pfmg" : "fac") );
 
   //========================================================================
 
