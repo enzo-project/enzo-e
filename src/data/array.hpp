@@ -19,7 +19,7 @@ class Array {
  *********************************************************************
  *
  * @class     Array
- * @brief     Encapsulate a fortran-style array
+ * @brief     Encapsulate a fortran-style 1D,2D, or 3D array
  * @ingroup   Data
  *
  * Parallelism will be controlled by an object in the Parallel module.
@@ -34,11 +34,11 @@ private:
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
-  /// Length of array: N_ == n_[0]*n_[1]*n_[2]*n_[3]
+  /// Length of array: N_ == n_[0]*n_[1]*n_[2]
   int     N_;
 
   /// Shape of array, right-padded with 1's
-  int     n_[4];
+  int     n_[3];
 
   /// Array values stored in column-major ordering
   Scalar *a_;
@@ -52,21 +52,21 @@ public:
   /// Create a new uninitialized Array object
   Array();
   /// Create a new initialized Array object
-  Array(int  n0, int  n1=1, int  n2=1, int n3=1);
+  Array(int  n0, int  n1=1, int n2=1);
   /// Deallocate the array
   ~Array();
   /// Copy an array into this one, deallocating any existing data
   void copy (const Array &);
   /// Resize the array, deallocating any existing data unless shape is identical
-  void resize (int   n0, int   n1=1, int   n2=1, int   n3=1);
+  void resize (int n0, int n1=1, int n2=1);
   /// Return the size of the array
-  void size (int * n0, int * n1=0, int * n2=0, int * n3=0) const;
+  void size (int * n0, int * n1=0, int * n2=0) const;
   /// Return the total length of the array
   int  length() const;
   /// Return a pointer to the array values
   Scalar * values () const;
   /// Return the given array element; slower than using values()
-  Scalar & operator() (int  i0, int  i1=0, int  i2=0, int i3=0);
+  Scalar & operator() (int  i0, int  i1=0, int  i2=0);
 
   //-------------------------------------------------------------------
   // PRIVATE OPERATIONS
@@ -75,7 +75,7 @@ public:
 private:
 
   /// Allocate array values
-  void allocate_ (int n0, int n1=1, int n2=1, int n3=1);
+  void allocate_ (int n0, int n1=1, int n2=1);
 
   /// Deallocate array values
   void deallocate_();

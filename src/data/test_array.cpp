@@ -17,7 +17,9 @@
 
 main()
 {
-  UNIT_CLASS ("Array");
+  unit_class ("Array");
+  unit_open();
+  unit_class_size(Array);
 
   //----------------------------------------------------------------------
   // test single array with resize: length, size, and values, and element access
@@ -25,20 +27,19 @@ main()
 
   {
     Array a;
- 
+
     int n0=10,n1=15,n2=20;
     a.resize(n0,n1,n2);
     int n = n0*n1*n2;
-    int m0,m1,m2,m3;
-    a.size(&m0,&m1,&m2,&m3);
+    int m0,m1,m2;
+    a.size(&m0,&m1,&m2);
     int m = a.length();
-    UNIT_FUNC("length");
-    UNIT_ASSERT(n == m);
-    UNIT_FUNC("size");
-    UNIT_ASSERT(m0==n0);
-    UNIT_ASSERT(m1==n1);
-    UNIT_ASSERT(m2==n2);
-    UNIT_ASSERT(m3==1);
+    unit_func("length");
+    unit_assert(n == m);
+    unit_func("size");
+    unit_assert(m0==n0);
+    unit_assert(m1==n1);
+    unit_assert(m2==n2);
 
     Scalar * av = a.values();
 
@@ -68,8 +69,8 @@ main()
 	}
       }
     }    
-    UNIT_FUNC("operator()");
-    UNIT_ASSERT(passed);
+    unit_func("operator()");
+    unit_assert(passed);
 
   }
   //----------------------------------------------------------------------
@@ -83,16 +84,15 @@ main()
     Array a(n0,n1,n2);
  
     int n = n0*n1*n2;
-    int m0,m1,m2,m3;
-    a.size(&m0,&m1,&m2,&m3);
+    int m0,m1,m2;
+    a.size(&m0,&m1,&m2);
     int m = a.length();
-    UNIT_FUNC("length");
-    UNIT_ASSERT(n == m);
-    UNIT_FUNC("size");
-    UNIT_ASSERT(m0==n0);
-    UNIT_ASSERT(m1==n1);
-    UNIT_ASSERT(m2==n2);
-    UNIT_ASSERT(m3==1);
+    unit_func("length");
+    unit_assert(n == m);
+    unit_func("size");
+    unit_assert(m0==n0);
+    unit_assert(m1==n1);
+    unit_assert(m2==n2);
 
     Scalar * av = a.values();
 
@@ -122,8 +122,8 @@ main()
 	}
       }
     }    
-    UNIT_FUNC("operator()");
-    UNIT_ASSERT(passed);
+    unit_func("operator()");
+    unit_assert(passed);
 
     // Multiple arrays: copy
     Array b;
@@ -145,8 +145,9 @@ main()
 	}
       }
     }    
-    UNIT_FUNC("copy");
-    UNIT_ASSERT(passed);
+    unit_func("copy");
+    unit_assert(passed);
   }
+  unit_close();
 
 }

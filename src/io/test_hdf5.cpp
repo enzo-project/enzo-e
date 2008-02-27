@@ -34,9 +34,10 @@ main()
     }
   }
 
-  UNIT_CLASS ("Hdf5");
+  unit_class ("Hdf5");
+  unit_open();
 
-  UNIT_FUNC("file_open");
+  unit_func("file_open");
 
   Hdf5 hdf5;
 
@@ -65,11 +66,8 @@ main()
     }
   }
 
-  UNIT_FUNC("read,write");
-  UNIT_ASSERT(passed);
+  unit_func("read,write");
+  unit_assert(passed);
 
-      
-  int m0,m1;
-  B.size(&m0,&m1);
-
+  unit_close();
 }
