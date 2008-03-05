@@ -37,3 +37,8 @@
    printf ("%s:%d WARNING: " X " is not implemented yet\n",__FILE__,__LINE__); \
    fflush(stdout); \
 }
+
+#define TEMPORARY(X) { \
+   printf ("%s:%d TEMPORARY: " X " is temporary code that should be removed\n",__FILE__,__LINE__); \
+   fflush(stdout); \
+}
