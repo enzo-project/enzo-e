@@ -578,61 +578,64 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 				{0,-1,0},
 				{-face*(r-1),0,-1}};
 
-	      if (phase == "graph") {
-		int k=0;
+	      if (grid.is_local()) {
 
-		igg3[j0]+=diggs[k][0];
-		igg3[j1]+=diggs[k][1];
-		igg3[j2]+=diggs[k][2];
-		for (int k=1; k<5; k++) {
-		  HYPRE_SStructGraphAddEntries 
-		    (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
-		  igg3[j0]+=diggs[k][0];
-		  igg3[j1]+=diggs[k][1];
-		  igg3[j2]+=diggs[k][2];
-		}
+		if (phase == "graph") {
 
-	      } else if (phase == "matrix") {
-
-		// fine->coarse off-diagonal
-
-		double val_h = h1*h2/h0;
-		double val_s = 2. / 3.;
-
-		int entry;
-		double val_a;
-		double val;
-
-		int k=0;
-
-		igg3[j0]+=diggs[k][0];
-		igg3[j1]+=diggs[k][1];
-		igg3[j2]+=diggs[k][2];
-
-		for (int k=1; k<5; k++) {
-
-		  val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
-
-		  // Update off-diagonal
-
-		  entry = grid.counter(igg3)++;
-		  val   = matrix_scale * val_h * val_s * val_a;
-		  HYPRE_SStructMatrixAddToValues 
-		    (A_, level_fine, igg3, 0, 1, &entry, &val);
-
-		  // Update diagonal
-
-		  entry = 0;
-		  val = -val;
-		  HYPRE_SStructMatrixAddToValues 
-		    (A_, level_fine, igg3, 0, 1, &entry, &val);
+		  int k=0;
 
 		  igg3[j0]+=diggs[k][0];
 		  igg3[j1]+=diggs[k][1];
 		  igg3[j2]+=diggs[k][2];
+		  for (int k=1; k<5; k++) {
+		    HYPRE_SStructGraphAddEntries 
+		      (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
+		    igg3[j0]+=diggs[k][0];
+		    igg3[j1]+=diggs[k][1];
+		    igg3[j2]+=diggs[k][2];
+		  }
+
+		} else if (phase == "matrix") {
+
+		  // fine->coarse off-diagonal
+
+		  double val_h = h1*h2/h0;
+		  double val_s = 2. / 3.;
+
+		  int entry;
+		  double val_a;
+		  double val;
+
+		  int k=0;
+
+		  igg3[j0]+=diggs[k][0];
+		  igg3[j1]+=diggs[k][1];
+		  igg3[j2]+=diggs[k][2];
+
+		  for (int k=1; k<5; k++) {
+
+		    val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
+
+		    // Update off-diagonal
+
+		    entry = grid.counter(igg3)++;
+		    val   = matrix_scale * val_h * val_s * val_a;
+		    HYPRE_SStructMatrixAddToValues 
+		      (A_, level_fine, igg3, 0, 1, &entry, &val);
+
+		    // Update diagonal
+
+		    entry = 0;
+		    val = -val;
+		    HYPRE_SStructMatrixAddToValues 
+		      (A_, level_fine, igg3, 0, 1, &entry, &val);
+
+		    igg3[j0]+=diggs[k][0];
+		    igg3[j1]+=diggs[k][1];
+		    igg3[j2]+=diggs[k][2];
+		  }
 		}
 	      }
-
 	    } else {
 	      char error_message[80];
 	      strcpy (error_message,"Unknown parameter discret = ");
@@ -644,53 +647,55 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    // GRAPH ENTRY: COARSE-TO-FINE
 	    //--------------------------------------------------
 
-	    if (phase == "graph") {
+	    if (adjacent->is_local()) {
+	      if (phase == "graph") {
 
-	      int diggs[][3] = {{1,0,0},
-				{0,1,0},
-				{-1,0,0},
-				{0,0,1},
-				{1,0,0},
-				{0,-1,0},
-				{-1,0,0},
-				{0,0,-1}};
+		int diggs[][3] = {{1,0,0},
+				  {0,1,0},
+				  {-1,0,0},
+				  {0,0,1},
+				  {1,0,0},
+				  {0,-1,0},
+				  {-1,0,0},
+				  {0,0,-1}};
 
-	      for (int k=0; k<8; k++) {
-		HYPRE_SStructGraphAddEntries 
-		  (graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
-		igg3[0] += diggs[k][0];
-		igg3[1] += diggs[k][1];
-		igg3[2] += diggs[k][2];
+		for (int k=0; k<8; k++) {
+		  HYPRE_SStructGraphAddEntries 
+		    (graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
+		  igg3[0] += diggs[k][0];
+		  igg3[1] += diggs[k][1];
+		  igg3[2] += diggs[k][2];
+		}
+
+	      } else if (phase == "matrix") {
+
+		double val_h = H1*H2/H0;
+		double val_s = 1.;
+		double val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
+		double val   = matrix_scale * val_h * val_s * val_a;
+		int    entry;
+		double value;
+
+		// coarse->fine off-diagonal
+
+		for (int i=0; i<8; i++) {
+		  entry = adjacent->counter(ign3)++;
+		  value = (1./8.) * val;
+		  HYPRE_SStructMatrixAddToValues 
+		    (A_, level_coarse,ign3, 0, 1, &entry, &value);
+		}
+
+		// coarse->coarse diagonal
+
+		double val_diag = -val;
+		entry = 0;
+
+		//	      _TEMPORARY_;
+		//	      val_diag*=0.00;
+		// HYPRE_SStructMatrixAddToValues 
+		// (A_, level_coarse, ign3, 0, 1, &entry, &val_diag);
+
 	      }
-
- 	    } else if (phase == "matrix") {
-
- 	      double val_h = H1*H2/H0;
-	      double val_s = 1.;
- 	      double val_a = 1.0; // DIFFUSION COEFFICIENT GOES HERE
- 	      double val   = matrix_scale * val_h * val_s * val_a;
-	      int    entry;
- 	      double value;
-
-	      // coarse->fine off-diagonal
-
- 	      for (int i=0; i<8; i++) {
- 		entry = adjacent->counter(ign3)++;
- 		value = (1./8.) * val;
-		HYPRE_SStructMatrixAddToValues 
-		  (A_, level_coarse,ign3, 0, 1, &entry, &value);
- 	      }
-
-	      // coarse->coarse diagonal
-
-	      double val_diag = -val;
-	      entry = 0;
-
-	      //	      _TEMPORARY_;
-	      //	      val_diag*=0.00;
-	      // HYPRE_SStructMatrixAddToValues 
-	      // (A_, level_coarse, ign3, 0, 1, &entry, &val_diag);
-
 	    }
 	  }
 	}
