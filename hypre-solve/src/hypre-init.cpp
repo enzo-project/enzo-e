@@ -183,28 +183,31 @@ main(int argc, char **argv)
 		   li3[0],li3[1],li3[2],  n3[0], n3[1], n3[2]);
 
 	  // Store id for point.  Requires coarse-to-finer level loop
+	  // since it overwrites values.
 
-	  for (int k0=0; k0<2; k0++) {
-	    double p0 = (k0-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5 
-	      + 0.25*is_offset*BOXSIZE;
-	    for (int k1=0; k1<2; k1++) {
-	      double p1 = (k1-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5  
-		+ 0.25*is_offset*BOXSIZE;
-	      for (int k2=0; k2<2; k2++) {
-		double p2 = (k2-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5  
-		  + 0.25*is_offset*BOXSIZE;
-		int k = k0 + 2*(k1 + 2*k2);
-		if (lp3[0] < p0 && p0 < up3[0] &&
-		    lp3[1] < p1 && p1 < up3[1] &&
-		    lp3[2] < p2 && p2 < up3[2]) {
-		  id_point[k] = id;
-		  point_pos[k][0] = p0;
-		  point_pos[k][1] = p1;
-		  point_pos[k][2] = p2;
+	  //	  if (level == num_levels-1) {
+	    for (int k0=0; k0<2; k0++) {
+	      double p0 = (k0-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5 
+		+ is_offset*BOXSIZE*pow(0.5,num_levels);
+	      for (int k1=0; k1<2; k1++) {
+		double p1 = (k1-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5  
+		  + is_offset*BOXSIZE*pow(0.5,num_levels);
+		for (int k2=0; k2<2; k2++) {
+		  double p2 = (k2-0.5)*BOXSIZE/(N0*pow(2.0,level-1))*0.5  
+		    + is_offset*BOXSIZE*pow(0.5,num_levels);
+		  int k = k0 + 2*(k1 + 2*k2);
+		  if (lp3[0] < p0 && p0 < up3[0] &&
+		      lp3[1] < p1 && p1 < up3[1] &&
+		      lp3[2] < p2 && p2 < up3[2]) {
+		    id_point[k] = id;
+		    point_pos[k][0] = p0;
+		    point_pos[k][1] = p1;
+		    point_pos[k][2] = p2;
+		  }
 		}
 	      }
-	    }
-	  }
+	      //	    }
+	}
 	}
       }
     }
