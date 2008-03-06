@@ -13,27 +13,28 @@
 
 main(int argc, char **argv)
 {
-  if (argc != 4) {
-    fprintf (stderr,"Usage: %s N <1|2|3> <xyz|ij|none>\n",argv[0]);
+  if (argc != 5) {
+    fprintf (stderr,"Usage: %s N L <xyz|ij|none> offset\n",argv[0]);
     exit(1);
   }
 
-  // Usage: N mask type
+  // Usage: N levels type
   //   N = 4 (e.g.)
-  //   mask = 1  coarse
-  //          2  fine
-  //          3  fine + coarse
+  //   levels = 1,2,3, etc.
   //   type = xyz   i0 i1 i2  j0 j1 j2  value
   //          ij    i j                 value
   //          none
 
-  int N = atoi(argv[1]);
+  int iarg = 1;
+  int N          = atoi(argv[iarg++]);
+  int num_levels = atoi(argv[iarg++]);
+  char * type    =      argv[iarg++];
+  int is_offset  = atoi(argv[iarg++]);
+
   int N2 = N + 2;
   int N23 = N2*N2*N2;
-  int mask = atoi(argv[2]);
   int Asize = N23*2*7;
   double * A = new double [Asize]; // 
-  char * type = argv[3];
   bool is_xyz   = strcmp(type,"xyz")==0;
   bool is_ij    = strcmp(type,"ij")==0;
   bool is_none  = strcmp(type,"none")==0;
@@ -42,7 +43,7 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  printf ("size = %d  mask = %d  type = %s\n",N,mask,type);
+  printf ("size = %d  type = %s\n",N,type);
 
   FILE *fp;
   int i0,i1,i2;
@@ -50,14 +51,19 @@ main(int argc, char **argv)
   int i,j,k;
   double value;
 
-  if (mask & 1 ) {
-    fp = fopen ("A.00.00.00.00000","r");
+  for (int level=0; level<num_levels; level++) {
 
+    char filename[40];
+    sprintf (filename,"A.%02d.00.00.00000",level);
+    fp = fopen (filename,"r");
+
+    int linenum = 0;
     while (fscanf (fp,"%d %d %d %d %lf",&i0,&i1,&i2,&k,&value) != EOF) {
+      linenum++;
 
-      i0 += N/2+1;
-      i1 += N/2+1;
-      i2 += N/2+1;
+      i0 ++;
+      i1 ++;
+      i2 ++;
 
       j0 = i0;
       j1 = i1;
@@ -70,52 +76,34 @@ main(int argc, char **argv)
       if (k==5) ++j2;
       if (k==6) --j2;
 
-      i = INDEX(i0,i1,i2,0,N2);
-      j = INDEX(j0,j1,j2,0,N2);
+      i = INDEX(i0,i1,i2,level,N2);
+      j = INDEX(j0,j1,j2,level,N2);
 
       if (value != 0) {
+	if (! (0 <= i && i < Asize)) {
+	  printf ("linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
+		  linenum,i,Asize,i0,i1,i2,k,level,N2);
+	}
+	if (! (0 <= j && j < Asize)) {
+	  printf ("linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
+		  linenum,i,Asize,i0,i1,i2,k,level,N2);
+	}
+	if (! (AINDEX(i0,i1,i2,k,level,N2) >= 0)) {
+	  printf ("linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
+		  linenum,i,Asize,i0,i1,i2,k,level,N2);
+	}
+	if (! (AINDEX(i0,i1,i2,k,level,N2) < Asize)) {
+	  printf ("linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
+		  linenum, i,Asize,i0,i1,i2,k,level,N2);
+	}
 	assert (0 <= i && i < Asize);
 	assert (0 <= j && j < Asize);
+	assert (AINDEX(i0,i1,i2,k,level,N2) >= 0);
+	assert (AINDEX(i0,i1,i2,k,level,N2) < Asize);
 	A[AINDEX(i0,i1,i2,k,0,N2)] = value;
-	if (is_ij)  printf ("0  %d %d %g\n",i+1,j+1,value);
-	if (is_xyz) printf ("0  %d %d %d  %d %d %d  %g\n",
-			    i0,i1,i2,j0,j1,j2,value);
-      }
-
-    }
-    fclose(fp);
-  }
-  
-  if (mask & 2 ) {
-    fp = fopen ("A.01.00.00.00000","r");
-    while (fscanf (fp,"%d %d %d %d %lf",&i0,&i1,&i2,&k,&value) != EOF) {
-
-
-      i0 += N/2+1;
-      i1 += N/2+1;
-      i2 += N/2+1;
-
-      j0 = i0;
-      j1 = i1;
-      j2 = i2;
-      
-      if (k==1) ++j0;
-      if (k==2) --j0;
-      if (k==3) ++j1;
-      if (k==4) --j1;
-      if (k==5) ++j2;
-      if (k==6) --j2;
-
-      i = INDEX(i0,i1,i2,1,N2);
-      j = INDEX(j0,j1,j2,1,N2);
-
-      if (value != 0) {
-	assert (0 <= i && i < Asize);
-	assert (0 <= j && j < Asize);
-	A[AINDEX(i0,i1,i2,k,1,N2)] = value;
-	if (is_ij)  printf ("1  %d %d %g\n",i+1,j+1,value);
-	if (is_xyz) printf ("1  %d %d %d  %d %d %d  %g\n",
-			    i0,i1,i2,j0,j1,j2,value);
+	if (is_ij)  printf ("%d  %d %d %g\n",level,i+1,j+1,value);
+	if (is_xyz) printf ("%d  %d %d %d  %d %d %d  %g\n",
+			    level,i0,i1,i2,j0,j1,j2,value);
       }
 
     }
@@ -125,50 +113,47 @@ main(int argc, char **argv)
   typedef std::pair<const int,int> IJ_type;
   std::map<IJ_type,double> Agraph;
 
-  if (mask & 4 ) {
-    fp = fopen ("A.UMatrix.00000","r");
-    fscanf (fp,"%d %d %d %d",&i0,&i1,&i2,&k); // throw out matrix size
-    while (fscanf (fp,"%d %d %lf",&i,&j,&value) != EOF) {
+  fp = fopen ("A.UMatrix.00000","r");
+  while (fscanf (fp,"%d %d %lf",&i,&j,&value) != EOF) {
 
-      int ii=i;
-      int jj=j;
+    int ii=i;
+    int jj=j;
 
-      i0 = ii % N2;
-      ii /= N2;
-      i1 = ii % N2;
-      ii /= N2;
-      i2 = ii % N2;
+    i0 = ii % N2;
+    ii /= N2;
+    i1 = ii % N2;
+    ii /= N2;
+    i2 = ii % N2;
 
-      j0 = jj % N2;
-      jj /= N2;
-      j1 = jj % N2;
-      jj /= N2;
-      j2 = jj % N2;
+    j0 = jj % N2;
+    jj /= N2;
+    j1 = jj % N2;
+    jj /= N2;
+    j2 = jj % N2;
       
-      if (value != 0) {
-	assert (0 <= i && i < Asize);
-	assert (0 <= j && j < Asize);
-	IJ_type p(i,j);
-	Agraph[p] = value;
-	if (is_ij)  printf ("12  %d %d %g\n",i+1,j+1,value);
-	if (is_xyz) printf ("12  %d %d %d  %d %d %d  %g\n",
-			    i0,i1,i2,j0,j1,j2,value);
-      }
+    if (value != 0) {
+      assert (0 <= i && i < Asize);
+      assert (0 <= j && j < Asize);
+      IJ_type p(i,j);
+      Agraph[p] = value;
+      if (is_ij)  printf ("12  %d %d %g\n",i+1,j+1,value);
+      if (is_xyz) printf ("12  %d %d %d  %d %d %d  %g\n",
+			  i0,i1,i2,j0,j1,j2,value);
     }
-    fclose(fp);
   }
+  fclose(fp);
 
   printf ("Testing Stencil symmetry\n");
 
   // Check problem x-y-z symmetry for stencil values
 
-  for (int grid=0; grid<2; grid++) {
+  for (int level=0; level<num_levels; level++) {
     for (i0=0; i0<N2; i0++) {
       for (i1=0; i1<N2; i1++) {
 	for (i2=0; i2<N2; i2++) {
 	  for (int k=0; k<7; k++) {
 
-	    int a1 = AINDEX(i0,i1,i2,k,grid,N2);
+	    int a1 = AINDEX(i0,i1,i2,k,level,N2);
 	    int a2;
 
 	    // Check diagonal
@@ -179,11 +164,12 @@ main(int argc, char **argv)
 		    j0=(1-k0)*i0 + k0*(N2-i0-1);
 		    j1=(1-k1)*i1 + k1*(N2-i1-1);
 		    j2=(1-k2)*i2 + k2*(N2-i2-1);
-		    a2 = AINDEX(j0,j1,j2,k,grid,N2);
-		    if (A[a1] != A[a2]) {
-		      fprintf (stderr,"OOPS! grid %d diagonal "
+		    a2 = AINDEX(j0,j1,j2,k,level,N2);
+		    if (A[a1] != A[a2] && 
+			(!is_offset || k0+k1+k2==0)) {
+		      fprintf (stderr,"OOPS! level %d diagonal "
 			       "(%d %d %d; %d) = %g  (%d %d %d; %d) = %g\n",
-			       grid,
+			       level,
 			       i0,i1,i2,k,A[a1],
 			       j0,j1,j2,k,A[a2]);
 		    }
@@ -196,11 +182,11 @@ main(int argc, char **argv)
 	      j0=N2-i0-1;
 	      j1=i1;
 	      j2=i2;
-	      a2 = AINDEX(j0,j1,j2,3-k,grid,N2);
-	      if (A[a1] != A[a2]) {
-		fprintf (stderr,"OOPS! grid %d X "
+	      a2 = AINDEX(j0,j1,j2,3-k,level,N2);
+	      if (A[a1] != A[a2] && !is_offset) {
+		fprintf (stderr,"OOPS! level %d X "
 			 "(%d %d %d; %d) = %g  (%d %d %d; %d) = %g\n",
-			 grid,
+			 level,
 			 i0,i1,i2,k,A[a1],
 			 j0,j1,j2,3-k,A[a2]);
 	      }
@@ -209,11 +195,11 @@ main(int argc, char **argv)
 	      j0=i0;
 	      j1=N2-i1-1;
 	      j2=i2;
-	      a2 = AINDEX(j0,j1,j2,7-k,grid,N2);
-	      if (A[a1] != A[a2]) {
-		fprintf (stderr,"OOPS! grid %d Y "
+	      a2 = AINDEX(j0,j1,j2,7-k,level,N2);
+	      if (A[a1] != A[a2] && !is_offset) {
+		fprintf (stderr,"OOPS! level %d Y "
 			 "(%d %d %d; %d) = %g  (%d %d %d; %d) = %g\n",
-			 grid,
+			 level,
 			 i0,i1,i2,k,A[a1],
 			 j0,j1,j2,7-k,A[a2]);
 	      }
@@ -222,11 +208,11 @@ main(int argc, char **argv)
 	      j0=i0;
 	      j1=i1;
 	      j2=N2-i2-1;
-	      a2 = AINDEX(j0,j1,j2,11-k,grid,N2);
-	      if (A[a1] != A[a2]) {
-		fprintf (stderr,"OOPS! grid %d Z "
+	      a2 = AINDEX(j0,j1,j2,11-k,level,N2);
+	      if (A[a1] != A[a2] && !is_offset) {
+		fprintf (stderr,"OOPS! level %d Z "
 			 "(%d %d %d; %d) = %g  (%d %d %d; %d) = %g\n",
-			 grid,
+			 level,
 			 i0,i1,i2,k,A[a1],
 			 j0,j1,j2,11-k,A[a2]);
 	      }
