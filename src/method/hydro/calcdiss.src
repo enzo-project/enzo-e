@@ -1,4 +1,4 @@
-*****************************************************************************
+b*****************************************************************************
 *                                                                           *
 * Copyright 2004 Greg Bryan                                                 *
 * Copyright 2004 Laboratory for Computational Astrophysics                  *
@@ -154,6 +154,7 @@ c=======================================================================
 c
 c  Compute number of active zones in transverse direction
 c
+
       nyz = j2 - j1 + 1
 c
 c  Precompute logical masks for k loop bounds
