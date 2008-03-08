@@ -5,7 +5,11 @@
 # dep          Generate dependencies
 # 
 
-include ../../Make.include
+TOP = ../..
+
+include $(TOP)/Make.include
+
+INC_LOCAL  = -I$(TOP)/data
 
 OBJS = \
 	calcdiss.o \
@@ -37,6 +41,8 @@ OBJS = \
 	yeuler_sweep.o \
 	zeuler_sweep.o
 
+FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS
+CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS
 
 test_hydro: $(OBJS)
 	$(CPP) -o test_hydro $(OBJS) $(INC)
