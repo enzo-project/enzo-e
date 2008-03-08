@@ -22,12 +22,13 @@
 // DEFINES
 //======================================================================
 
+
 #define unit_assert(RESULT)		\
   printf ("%s %s:%3d  %s::%s() %d\n",	\
-	  (RESULT)?" PASS ":" FAIL ", \
+	  (RESULT)? unit::pass_string : unit::fail_string,			\
 	  __FILE__,__LINE__,unit::class_name,unit::func_name,unit::test_num++); \
   fprintf (unit::fp,"%s %s:%3d  %s::%s() %d\n",				\
-	  (RESULT)?" PASS ":" FAIL ", \
+	  (RESULT)? unit::pass_string : unit::fail_string,			\
 	  __FILE__,__LINE__,unit::class_name,unit::func_name,unit::test_num++); \
 
 //----------------------------------------------------------------------
@@ -51,6 +52,10 @@ namespace unit {
   FILE *fp;
 
   int test_num = 1;
+
+  const char * pass_string = "\033[01;32mPass\033[00m";
+  const char * fail_string = "\033[01;38mFail\033[00m";
+
 }
 
 //======================================================================

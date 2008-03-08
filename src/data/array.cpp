@@ -19,6 +19,8 @@
 
 //----------------------------------------------------------------------
 
+/// Create a new uninitialized Array object
+
 /**
  */
 
@@ -33,6 +35,8 @@ Array::Array()
 
 //----------------------------------------------------------------------
 
+/// Create a new initialized Array object
+
 /**
  */
 
@@ -45,6 +49,8 @@ Array::Array(int  n0, int  n1, int  n2)
 
 //----------------------------------------------------------------------
 
+/// Deallocate the array
+
 /**
  */
 
@@ -54,6 +60,8 @@ Array::~Array()
 }
 
 //----------------------------------------------------------------------
+
+/// Copy an array into this one, deallocating any existing data
 
 /**
  */
@@ -66,6 +74,8 @@ void Array::copy (const Array &array)
 }
 
 //----------------------------------------------------------------------
+
+/// Resize the array, deallocating any existing data
 
 /**
  */
@@ -83,6 +93,8 @@ void Array::resize (int n0, int n1, int n2)
 
 //----------------------------------------------------------------------
 
+/// Return the size of the array
+
 /**
  */
 
@@ -96,6 +108,8 @@ void Array::size (int * n0, int * n1, int * n2) const
 
 //----------------------------------------------------------------------
 
+/// Return the total length of the array
+
 /**
  */
 
@@ -107,15 +121,20 @@ int Array::length () const
 
 //----------------------------------------------------------------------
 
+Scalar * Array::values () const
+
+/// Return a pointer to the array values
+
 /**
  */
 
-Scalar * Array::values () const
 {
   return a_;
 }
 
 //----------------------------------------------------------------------
+
+/// Return the given array element
 
 /**
  */
@@ -126,7 +145,6 @@ Scalar & Array::operator () (int i0, int i1, int i2)
 }
 
 //======================================================================
-
 
 /**
  */
@@ -147,6 +165,9 @@ void Array::allocate_(int n0, int n1, int n2)
 
 //----------------------------------------------------------------------
 
+/**
+ */
+
 void Array::deallocate_()
 {
   delete [] a_;
@@ -154,6 +175,9 @@ void Array::deallocate_()
 }
 
 //----------------------------------------------------------------------
+
+/**
+ */
 
 void Array::copy_(Scalar * a)
 {

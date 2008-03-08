@@ -34,7 +34,7 @@ private:
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
-  /// Length of array: N_ == n_[0]*n_[1]*n_[2]
+  /// Length of array
   int     N_;
 
   /// Shape of array, right-padded with 1's
@@ -57,7 +57,7 @@ public:
   ~Array();
   /// Copy an array into this one, deallocating any existing data
   void copy (const Array &);
-  /// Resize the array, deallocating any existing data unless shape is identical
+  /// Resize the array, deallocating any existing data
   void resize (int n0, int n1=1, int n2=1);
   /// Return the size of the array
   void size (int * n0, int * n1=0, int * n2=0) const;
@@ -65,7 +65,7 @@ public:
   int  length() const;
   /// Return a pointer to the array values
   Scalar * values () const;
-  /// Return the given array element; slower than using values()
+  /// Return the given array element
   Scalar & operator() (int  i0, int  i1=0, int  i2=0);
 
   //-------------------------------------------------------------------
