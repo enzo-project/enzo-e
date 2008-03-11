@@ -11,7 +11,7 @@ run $n 1 1 1 3 0
 run $n 1 1 1 4 0
 
 #----------------------------------------------------------------------
-# Centered parallel
+# Centered parallel NP = 2
 
 # x-axis
 run $n 2 1 1 1 0
@@ -32,6 +32,48 @@ run $n 1 1 2 3 0
 run $n 1 1 2 4 0
 
 #----------------------------------------------------------------------
+# Centered parallel NP = 4
+
+# x-axis
+run $n 4 1 1 1 0
+run $n 4 1 1 2 0
+run $n 4 1 1 3 0
+run $n 4 1 1 4 0
+
+# y-axis
+run $n 1 4 1 1 0
+run $n 1 4 1 2 0
+run $n 1 4 1 3 0
+run $n 1 4 1 4 0
+
+# z-axis
+run $n 1 1 4 1 0
+run $n 1 1 4 2 0
+run $n 1 1 4 3 0
+run $n 1 1 4 4 0
+
+#----------------------------------------------------------------------
+# Centered parallel NP = 2 2 1
+
+# yz-axis
+run $n 1 2 2 1 0
+run $n 1 2 2 2 0
+run $n 1 2 2 3 0
+run $n 1 2 2 4 0
+
+# zx-axis
+run $n 2 1 2 1 0
+run $n 2 1 2 2 0
+run $n 2 1 2 3 0
+run $n 2 1 2 4 0
+
+# xy-axis
+run $n 2 2 1 1 0
+run $n 2 2 1 2 0
+run $n 2 2 1 3 0
+run $n 2 2 1 4 0
+
+#----------------------------------------------------------------------
 # Offset serial
 
 run $n 1 1 1 2 1
@@ -39,7 +81,7 @@ run $n 1 1 1 3 1
 run $n 1 1 1 4 1
 
 #----------------------------------------------------------------------
-# Offset parallel
+# Offset parallel NP = 2
 
 # x-axis
 run $n 2 1 1 2 1
@@ -55,3 +97,39 @@ run $n 1 2 1 4 1
 run $n 1 1 2 2 1
 run $n 1 1 2 3 1
 run $n 1 1 2 4 1
+
+#----------------------------------------------------------------------
+# Offset parallel NP = 4
+
+# x-axis
+run $n 4 1 1 2 1
+run $n 4 1 1 3 1
+run $n 4 1 1 4 1
+
+# y-axis
+run $n 1 4 1 2 1
+run $n 1 4 1 3 1
+run $n 1 4 1 4 1
+
+# z-axis
+run $n 1 1 4 2 1
+run $n 1 1 4 3 1
+run $n 1 1 4 4 1
+
+#----------------------------------------------------------------------
+# Offset parallel NP = 4
+
+# yz-axis
+run $n 1 2 2 2 1
+run $n 1 2 2 3 1
+run $n 1 2 2 4 1
+
+# zx-axis
+run $n 2 1 2 2 1
+run $n 2 1 2 3 1
+run $n 2 1 2 4 1
+
+# xy-axis
+run $n 2 2 1 2 1
+run $n 2 2 1 3 1
+run $n 2 2 1 4 1
