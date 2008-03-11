@@ -64,12 +64,12 @@ int main(int argc, char **argv)
 
   if (debug) printf ("DEBUG %s:%d\n",__FILE__,__LINE__);
 
-  Mpi mpi (&argc,&argv);
+  pmpi = new Mpi (&argc,&argv);
 
   if (debug) printf ("DEBUG %s:%d mpi (ip,np) = (%d,%d)\n",
-		     __FILE__,__LINE__,mpi.ip(),mpi.np());
+		     __FILE__,__LINE__,pmpi->ip(),pmpi->np());
 
-  Grid::set_mpi (mpi);
+  Grid::set_mpi (*pmpi);
 
   // --------------------------------------------------
   // JBPERF initialization
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
     JBPERF_START("2-grids");
     // ***************
 
-    hierarchy.initialize(problem.domain(), mpi);
+    hierarchy.initialize(problem.domain(), *pmpi);
 
     // ***************
     JBPERF_STOP("2-grids");
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     JBPERF_START("4-hypre-init");
     // ***************
 
-    hypre.init_hierarchy (problem.parameters(),hierarchy,mpi);
+    hypre.init_hierarchy (problem.parameters(),hierarchy,*pmpi);
 
     // Initialize the stencils
     
@@ -193,14 +193,14 @@ int main(int argc, char **argv)
     // MPI Finalize
     // --------------------------------------------------
 
-    mpi.barrier();
+    pmpi->barrier();
 
 
-    if (mpi.ip() == 0) { printf ("End %s\n",exec_name.c_str()); fflush(stdout); }
-
-    MPI_Finalize ();
-
-    // MPI_Finalize() called by Mpi destructor
+    if (pmpi->is_root()) { 
+      printf ("End %s\n",exec_name.c_str()); fflush(stdout); 
+    }
+    
+    delete pmpi;
 
   } else {
 

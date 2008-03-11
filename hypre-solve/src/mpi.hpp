@@ -16,9 +16,27 @@ class Mpi {
   
 public:
 
-  Mpi ();
-  Mpi (int * argc, char ***argv);
-  ~Mpi ();
+  Mpi ()
+    : comm_(0),
+      np_(1),
+      ip_(0)
+  {
+  }
+
+  Mpi (int * argc, char ***argv)
+    : comm_(MPI_COMM_WORLD)
+  {
+    MPI_Init (argc,argv);
+
+    MPI_Comm_size (comm_, &np_);
+    MPI_Comm_rank (comm_, &ip_);
+  }
+
+  ~Mpi ()
+  {
+    //    MPI_Finalize (); // MPI_Finalize() seems to be called at program exit
+    //                        complains if included
+  };
   bool is_root () throw () {return ip_ == 0;};
   int ip () throw () {return ip_;};
   int np () throw () {return np_;};
@@ -31,5 +49,8 @@ private:
   int ip_;   // Rank of this processor
 };
 
+
+
+extern Mpi * pmpi;
 
 
