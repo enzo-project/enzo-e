@@ -37,11 +37,15 @@
 #include "hypre.hpp"
 #include "error.hpp"
 
-const int debug  = 1;
+const int debug  = 0;
 const int trace  = 0;
-const int trace_hypre  = 0;
+const int trace_hypre  = 1;
 
 const Scalar matrix_scale = 1.0;  // 1.0:  1 1 1 -6 1 1 1
+
+FILE *mpi_fp;
+char mpi_file[20];
+
 
 //======================================================================
 // PUBLIC MEMBER FUNCTIONS
@@ -59,6 +63,10 @@ Hypre::Hypre (Parameters & parameters)
     solver_(0),
     parameters_(parameters)
 {
+  if (trace_hypre) {
+    sprintf (mpi_file,"hypre-solve.out.%d",pmpi->ip());
+    mpi_fp = fopen (mpi_file,"w");
+  }
   
 }
 
@@ -66,9 +74,9 @@ Hypre::Hypre (Parameters & parameters)
 
 /// Initialize the Grid Hierarchy
 
-/** Creates a hypre grid, with one part per level and one box per Grid
-    patch object, for an AMR problem.  Sets grid box extents, grid
-    part variables, and periodicity of the root-level grid part. */
+	     /** Creates a hypre grid, with one part per level and one box per Grid
+		 patch object, for an AMR problem.  Sets grid box extents, grid
+		 part variables, and periodicity of the root-level grid part. */
 
 void Hypre::init_hierarchy (Parameters & parameters,
 			    Hierarchy  & hierarchy, 
@@ -80,7 +88,14 @@ void Hypre::init_hierarchy (Parameters & parameters,
 
   // Create the hypre grid
   
+  
   HYPRE_SStructGridCreate (MPI_COMM_WORLD, dim, num_parts, &grid_);
+  if (trace_hypre) {
+    fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGridCreate (MPI_COMM_WORLD, %d, %d, %p)\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    dim, num_parts, &grid_);
+    fflush(mpi_fp);
+  }
 
   ItHierarchyLevels itl (hierarchy);
 
@@ -89,6 +104,8 @@ void Hypre::init_hierarchy (Parameters & parameters,
   while (Level * level = itl++) {
 
     ItLevelGridsLocal itg (*level);
+    //  ItLevelGridsAll itg (*level);
+    //  _TEMPORARY_("GridSetExtents on all processors");
 
     while (Grid * grid = itg++) {
 
@@ -98,6 +115,14 @@ void Hypre::init_hierarchy (Parameters & parameters,
       // Set extents for boxes that comprise the hypre grid
 
       HYPRE_SStructGridSetExtents(grid_, part, lower, upper);
+      if (trace_hypre) {fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGridSetExtents(%p,%d, %d %d %d, %d %d %d);\n",
+				__FILE__,__LINE__,pmpi->ip(),
+				&grid_, part, 
+				lower[0], lower[1], lower[2], 
+				upper[0], upper[1], upper[2]
+				);
+	fflush(mpi_fp);
+      }
       
     }
 
@@ -107,6 +132,13 @@ void Hypre::init_hierarchy (Parameters & parameters,
     const int numvars = 1;
 
     HYPRE_SStructGridSetVariables(grid_, part, numvars, variable_types);
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGridSetVariables(%p,%d,%d,%d);\n",
+	      __FILE__,__LINE__,pmpi->ip(),
+	      &grid_, part, numvars, variable_types[0]
+	      );
+      fflush(mpi_fp);
+    }
 
     // Set grid part to be periodic, with periodicity determined by the root
     // level size, current level, and refinement factor (ASSUMED TO BE 2)
@@ -132,6 +164,13 @@ void Hypre::init_hierarchy (Parameters & parameters,
 		       periodicity[0],periodicity[1],periodicity[2]);
 
     HYPRE_SStructGridSetPeriodic (grid_, part, periodicity);
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGridSetPeriodic (%p,%d,%d %d %d);\n",
+	      __FILE__,__LINE__,pmpi->ip(),
+	      &grid_, part, periodicity[0], periodicity[1], periodicity[2]
+	      );
+      fflush(mpi_fp);
+    }
 
     ++ part;
   }
@@ -139,6 +178,13 @@ void Hypre::init_hierarchy (Parameters & parameters,
   // When finished, assemble the hypre grid
 
   HYPRE_SStructGridAssemble (grid_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGridAssemble (%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &grid_
+	    );
+    fflush(mpi_fp);
+  }
   
 }
 
@@ -156,6 +202,13 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
   int dim = hierarchy.dimension();
 
   HYPRE_SStructStencilCreate (dim,dim*2+1,&stencil_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilCreate (%d,%d,%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    dim,dim*2+1,&stencil_
+	    );
+    fflush(mpi_fp);
+  }
 
   int entries[][3] = { {  0, 0, 0 },     // center
 		       {  1, 0, 0 },     // X+
@@ -172,6 +225,55 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
   if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 4, entries[4], 0);
   if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 5, entries[5], 0);
   if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 6, entries[6], 0);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilSetEntry (%p,%d,%d %d %d,0)\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &stencil_, 0, entries[0][0], entries[0][1], entries[0][2]
+	    );
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilSetEntry (%p,%d,%d %d %d,0)\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &stencil_, 1, entries[1][0], entries[1][1], entries[1][2]
+	    );
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilSetEntry (%p,%d,%d %d %d,0)\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &stencil_, 2, entries[2][0],entries[2][1],entries[2][2]
+	    );
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilSetEntry (%p,%d,%d %d %d,0)\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &stencil_, 3, entries[3][0],entries[3][1],entries[3][2]
+	    );
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilSetEntry (%p,%d,%d %d %d,0)\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &stencil_, 4, entries[4][0],entries[4][1],entries[4][2]
+	    );
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilSetEntry (%p,%d,%d %d %d,0)\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &stencil_, 5, entries[5][0],entries[5][1],entries[5][2]
+	    );
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilSetEntry (%p,%d,%d %d %d,6)\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &stencil_, 6, entries[6][0],entries[6][1],entries[6][2]
+	    );
+    fflush(mpi_fp);
+  }
 
 }
 
@@ -187,11 +289,11 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
     Setting up the matrix nonzero structure is performed using the
     following steps:
 
-     1. Define stencil connections within each level
+    1. Define stencil connections within each level
 
-     2. Define connections for unknowns adjacent to coarse unknowns
+    2. Define connections for unknowns adjacent to coarse unknowns
 
-     3. Define connections for unknowns adjacent to fine unknowns 
+    3. Define connections for unknowns adjacent to fine unknowns 
 
     The matrix nonzero structure is generally nonsymmetric.  Only step
     1 is required for unigrid problems.
@@ -204,8 +306,22 @@ void Hypre::init_graph (Hierarchy & hierarchy)
   // Create the hypre graph object
 
   HYPRE_SStructGraphCreate (MPI_COMM_WORLD, grid_, &graph_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphCreate (MPI_COMM_WORLD, %p,%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &grid_, &graph_
+	    );
+    fflush(mpi_fp);
+  }
 
-  HYPRE_SStructGraphSetObjectType (graph_, HYPRE_SSTRUCT);
+  //  HYPRE_SStructGraphSetObjectType (graph_, HYPRE_SSTRUCT);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphSetObjectType (%p,%d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &graph_, HYPRE_SSTRUCT
+	    );
+    fflush(mpi_fp);
+  }
 
   ItHierarchyLevels itl (hierarchy);
 
@@ -216,6 +332,13 @@ void Hypre::init_graph (Hierarchy & hierarchy)
     // 1. Define stencil connections within each level
 
     HYPRE_SStructGraphSetStencil (graph_, part, 0, stencil_);
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphSetStencil (%p,%d,0,%p);\n",
+	      __FILE__,__LINE__,pmpi->ip(),
+	      &graph_, part, &stencil_
+	      );
+      fflush(mpi_fp);
+    }
 
     ++ part;
 
@@ -249,6 +372,12 @@ void Hypre::init_graph (Hierarchy & hierarchy)
   // Assemble the graph
 
   HYPRE_SStructGraphAssemble (graph_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAssemble (%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),&graph_
+	    );
+    fflush(mpi_fp);
+  }
 
 }
 
@@ -263,11 +392,11 @@ void Hypre::init_graph (Hierarchy & hierarchy)
     Setting up the matrix elements is done with the following
     steps:
 
-     1. Set stencil values
+    1. Set stencil values
 
-     2. Clean up stencil connections between parts and under overlapped grids
+    2. Clean up stencil connections between parts and under overlapped grids
 
-     3. Set values for unknowns between parent and children
+    3. Set values for unknowns between parent and children
 
     The matrix is generally nonsymmetric.  Only step 1 is required for
     unigrid problems.
@@ -283,20 +412,80 @@ void Hypre::init_linear (Parameters          & parameters,
   // Create the hypre matrix A_, solution X_, and right-hand side B_ objects
 
   HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, graph_, &A_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixCreate (%p,%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &graph_, &A_
+	    );
+    fflush(mpi_fp);
+  }
   HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid_,  &X_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorCreate (%p,%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &grid_,  &X_
+	    );
+    fflush(mpi_fp);
+  }
   HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid_,  &B_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorCreate (%p,%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &grid_,  &B_
+	    );
+    fflush(mpi_fp);
+  }
 
   // Set the object types
 
   HYPRE_SStructMatrixSetObjectType (A_,HYPRE_SSTRUCT);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixSetObjectType (%p,%d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &A_,HYPRE_SSTRUCT
+	    );
+    fflush(mpi_fp);
+  }
   HYPRE_SStructVectorSetObjectType (X_,HYPRE_SSTRUCT);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorSetObjectType (%p,%d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &X_,HYPRE_SSTRUCT
+	    );
+    fflush(mpi_fp);
+  }
   HYPRE_SStructVectorSetObjectType (B_,HYPRE_SSTRUCT);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorSetObjectType (%p,%d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &B_,HYPRE_SSTRUCT
+	    );
+    fflush(mpi_fp);
+  }
 
   // Initialize the hypre matrix and vector objects
 
   HYPRE_SStructMatrixInitialize (A_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixInitialize (%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),&A_
+	    );
+    fflush(mpi_fp);
+  }
   HYPRE_SStructVectorInitialize (X_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorInitialize (%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),&X_
+	    );
+    fflush(mpi_fp);
+  }
   HYPRE_SStructVectorInitialize (B_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorInitialize (%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),&B_
+	    );
+    fflush(mpi_fp);
+  }
 
   //--------------------------------------------------
   // Initialize the matrix A_
@@ -381,6 +570,15 @@ void Hypre::init_linear (Parameters          & parameters,
 	Scalar * values = new Scalar[grid->num_unknowns()];
 	for (int i=0; i<grid->num_unknowns(); i++) values[i] = shift_b_amount;
 	HYPRE_SStructVectorAddToBoxValues (B_,part,lower,upper,0,values);
+	if (trace_hypre) {
+	  fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorAddToBoxValues (%p,%d, %d %d %d, %d %d %d, 0, %g...);\n",
+		  __FILE__,__LINE__,pmpi->ip(),
+		  &B_,part,
+		  lower[0],lower[1],lower[2],
+		  upper[0],upper[1],upper[2],0,values[0]
+		  );
+	  fflush(mpi_fp);
+	}
 
 	delete [] values;
       }
@@ -396,8 +594,27 @@ void Hypre::init_linear (Parameters          & parameters,
   // Assemble the matrix and vectors
 
   HYPRE_SStructMatrixAssemble (A_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixAssemble (%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &A_
+	    );
+    fflush(mpi_fp);
+  }
   HYPRE_SStructVectorAssemble (B_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorAssemble (%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),&B_
+	    );
+    fflush(mpi_fp);
+  }
   HYPRE_SStructVectorAssemble (X_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorAssemble (%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),&X_
+	    );
+    fflush(mpi_fp);
+  }
 
   // Write the vector to a file for debugging
 
@@ -590,6 +807,17 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		  for (int k=1; k<5; k++) {
 		    HYPRE_SStructGraphAddEntries 
 		      (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
+		    if (trace_hypre) {
+		      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAddEntries (%p,%d, 0, %d, 0);\n",
+			      __FILE__,__LINE__,pmpi->ip(),
+			      &graph_, 
+			      level_fine, 
+			       //			      igg3[0], igg3[1], igg3[2],
+			      level_coarse
+			       //			      ign3[0], ign3[1], ign3[2]
+			      );
+		      fflush(mpi_fp);
+		    }
 		    igg3[j0]+=diggs[k][0];
 		    igg3[j1]+=diggs[k][1];
 		    igg3[j2]+=diggs[k][2];
@@ -622,6 +850,16 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		    val   = matrix_scale * val_h * val_s * val_a;
 		    HYPRE_SStructMatrixAddToValues 
 		      (A_, level_fine, igg3, 0, 1, &entry, &val);
+		    if (trace_hypre) {
+		      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixAddToValues (%p, %d, 0, 1, %d, %g);\n",
+			      __FILE__,__LINE__,pmpi->ip(),
+			      &A_, 
+			      level_fine,
+			       //			      igg3[0], igg3[1], igg3[2],
+			      entry, val
+			      );
+		      fflush(mpi_fp);
+		    }
 
 		    // Update diagonal
 
@@ -629,6 +867,16 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		    val = -val;
 		    HYPRE_SStructMatrixAddToValues 
 		      (A_, level_fine, igg3, 0, 1, &entry, &val);
+		    if (trace_hypre) {
+		      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixAddToValues (%p, %d, 0, 1, %d, %g\n",
+			      __FILE__,__LINE__,pmpi->ip(),
+			      &A_, 
+			      level_fine, 
+			       //			      igg3[0], igg3[1], igg3[2],
+			      entry, val
+			      );
+		      fflush(mpi_fp);
+		    }
 
 		    igg3[j0]+=diggs[k][0];
 		    igg3[j1]+=diggs[k][1];
@@ -662,6 +910,15 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		for (int k=0; k<8; k++) {
 		  HYPRE_SStructGraphAddEntries 
 		    (graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
+		  if (trace_hypre) {
+		    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAddEntries (%p,%d, 0, %d, 0);\n",
+			    __FILE__,__LINE__,pmpi->ip(),
+			    &graph_,
+			    level_coarse, 
+			    level_fine
+			    );
+		    fflush(mpi_fp);
+		  }
 		  igg3[0] += diggs[k][0];
 		  igg3[1] += diggs[k][1];
 		  igg3[2] += diggs[k][2];
@@ -683,6 +940,15 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		  value = (1./8.) * val;
 		  HYPRE_SStructMatrixAddToValues 
 		    (A_, level_coarse,ign3, 0, 1, &entry, &value);
+		  if (trace_hypre) {
+		    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixAddToValues (%p,%d, 0, 1, %d %g);\n",
+			    __FILE__,__LINE__,pmpi->ip(),
+			    &A_, level_coarse,
+			     //			    ign3[0],ign3[1],ign3[2], 
+			     entry, value
+			    );
+		    fflush(mpi_fp);
+		  }
 		}
 
 		// coarse->coarse diagonal
@@ -868,6 +1134,62 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[4],v1[1][0]);
   HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[5],v1[2][1]);
   HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[6],v1[2][0]);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixSetBoxValues (%p,%d,%d %d %d, %d %d %d, 0,1,%d,%g);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &A_,level,
+	    low[0], low[1], low[2],
+	    up[0],up[1],up[2],entries[0],v0);
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixSetBoxValues (%p,%d,%d %d %d, %d %d %d, 0,1,%d,%g);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &A_,level,
+	    low[0], low[1], low[2],
+	    up[0],up[1],up[2],entries[1],v1[0][1]);
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixSetBoxValues (%p,%d,%d %d %d, %d %d %d, 0,1,%d,%g);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &A_,level,
+	    low[0], low[1], low[2],
+	    up[0],up[1],up[2],entries[2],v1[0][0]);
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixSetBoxValues (%p,%d,%d %d %d, %d %d %d, 0,1,%d,%g);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &A_,level,
+	    low[0], low[1], low[2],
+	    up[0],up[1],up[2],entries[3],v1[1][1]);
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixSetBoxValues (%p,%d,%d %d %d, %d %d %d, 0,1,%d,%g);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &A_,level,
+	    low[0], low[1], low[2],
+	    up[0],up[1],up[2],entries[4],v1[1][0]);
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixSetBoxValues (%p,%d,%d %d %d, %d %d %d, 0,1,%d,%g);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &A_,level,
+	    low[0], low[1], low[2],
+	    up[0],up[1],up[2],entries[5],v1[2][1]);
+    fflush(mpi_fp);
+  }
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixSetBoxValues (%p,%d,%d %d %d, %d %d %d, 0,1,%d,%g);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &A_,level,
+	    low[0], low[1], low[2],
+	    up[0],up[1],up[2],entries[6],v1[2][0]);
+    fflush(mpi_fp);
+  }
   delete [] v0;
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
@@ -891,14 +1213,35 @@ void Hypre::init_matrix_clear_ (Level & level)
     // Clear stencil values from coarse to fine part
 
     HYPRE_SStructFACZeroCFSten (A_,grid_, part, r_factors);
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroCFSten (%p,%p,%d,%d %d %d);\n",
+	      __FILE__,__LINE__,pmpi->ip(),
+	      &A_,&grid_, part, r_factors[0],r_factors[1],r_factors[2]
+	      );
+      fflush(mpi_fp);
+    }
 
     // Clear stencil values from fine to coarse part
 
     HYPRE_SStructFACZeroFCSten (A_,grid_, part);
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroFCSten (%p,%p,%d);\n",
+	      __FILE__,__LINE__,pmpi->ip(),
+	      &A_,&grid_, part
+	      );
+      fflush(mpi_fp);
+    }
 
     // Set overlapped areas of part with identity
 
     HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroAMRMatrixData (%p,%d,%d %d %d);\n",
+	      __FILE__,__LINE__,pmpi->ip(),
+	      &A_, part-1, r_factors[0], r_factors[1], r_factors[2]
+	      );
+      fflush(mpi_fp);
+    }
 
     // Need to clear under rhs also
     //   HYPRE_SStructFACZeroAMRVectorData(B_, plevels, prefinements);
@@ -962,6 +1305,13 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
       shift_b_sum += value;
 
       HYPRE_SStructVectorAddToValues (B_, grid.level(), index, 0, &value);
+      if (trace_hypre) {
+	fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorAddToValues (%p,%d, %d %d %d, 0, %g);\n",
+		__FILE__,__LINE__,pmpi->ip(),
+		&B_, grid.level(), index[0],index[1],index[2],value
+		);
+	fflush(mpi_fp);
+      }
     }
   }
   return shift_b_sum;
@@ -1041,6 +1391,12 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
   // Create the solver
 
   HYPRE_SStructFACCreate(MPI_COMM_WORLD, &solver_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACCreate(MPI_COMM_WORLD, %p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),&solver_
+	    );
+    fflush(mpi_fp);
+  }
 
   // Initialize parts
 
@@ -1048,7 +1404,21 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
   int *parts  = new int [num_parts];
   for (i=0; i<num_parts; i++) parts[i] = i;
   HYPRE_SStructFACSetMaxLevels(solver_,  num_parts);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetMaxLevels(%p,%d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_,  num_parts
+	    );
+    fflush(mpi_fp);
+  }
   HYPRE_SStructFACSetPLevels(solver_, num_parts, parts);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetPLevels(%p,%d, %d %d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_, num_parts, parts[0],parts[1]
+	    );
+    fflush(mpi_fp);
+  }
 
   // Initialize refinement factors
 
@@ -1062,6 +1432,20 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
   }
 
   HYPRE_SStructFACSetPRefinements(solver_, num_parts, refinements);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetPRefinements(%p,%d,[%d %d %d],[%d %d %d]);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_, num_parts, 
+	     refinements[0][0], 
+	     refinements[0][1], 
+	     refinements[0][2],
+	     refinements[1][0], 
+	     refinements[1][1], 
+	     refinements[1][2]
+	    );
+    fflush(mpi_fp);
+  }
+
 
   // solver parameters
 
@@ -1070,28 +1454,95 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
   int csolve = 1;
   int relax  = 2;
 
-   HYPRE_SStructFACSetNumPreRelax(solver_,      npre);
-   HYPRE_SStructFACSetNumPostRelax(solver_,     npost);
-   HYPRE_SStructFACSetCoarseSolverType(solver_, csolve);
-   HYPRE_SStructFACSetRelaxType(solver_,        relax);
+  HYPRE_SStructFACSetNumPreRelax(solver_,      npre);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetNumPreRelax(%p,%d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_,npre
+	    );
+    fflush(mpi_fp);
+  }
+  HYPRE_SStructFACSetNumPostRelax(solver_,     npost);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetNumPostRelax(%p,%d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_,     npost
+	    );
+    fflush(mpi_fp);
+  }
+  HYPRE_SStructFACSetCoarseSolverType(solver_, csolve);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetCoarseSolverType(%p,%d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_, csolve
+	    );
+    fflush(mpi_fp);
+  }
+  HYPRE_SStructFACSetRelaxType(solver_,        relax);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetRelaxType(%p,%d);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_,        relax
+	    );
+    fflush(mpi_fp);
+  }
 
   // stopping criteria
 
-  if (itmax != 0 )   HYPRE_SStructFACSetMaxIter(solver_,itmax);
-  if (restol != 0.0) HYPRE_SStructFACSetTol(solver_,    restol);
+  if (itmax != 0 ) {
+    HYPRE_SStructFACSetMaxIter(solver_,itmax);
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetMaxIter(%p,%d);\n",
+	      __FILE__,__LINE__,pmpi->ip(),
+	      &solver_,itmax
+	      );
+      fflush(mpi_fp);
+    }
+  }
+  if (restol != 0.0) {
+    HYPRE_SStructFACSetTol(solver_,    restol);
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetTol(%p,%g);\n",
+	      __FILE__,__LINE__,pmpi->ip(),
+	      &solver_,    restol
+	      );
+      fflush(mpi_fp);
+    }
+  }
 
   // output amount
 
   HYPRE_SStructFACSetLogging(solver_, 1);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetLogging(%p,1);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_
+	    );
+    fflush(mpi_fp);
+  }
 
   // prepare for solve
 
+  // DIES HERE 2008-03-07
   HYPRE_SStructFACSetup2(solver_, A_, B_, X_);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetup2(%p,%p,%p,%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_, &A_, &B_, &X_
+	    );
+    fflush(mpi_fp);
+  }
 
   // Solve the linear system
 
   HYPRE_SStructFACSolve3(solver_, A_, B_, X_);
-
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSolve3(%p,%p,%p,%p);\n",
+	    __FILE__,__LINE__,pmpi->ip(),
+	    &solver_, &A_, &B_, &X_
+	    );
+    fflush(mpi_fp);
+  }
   // Write out some diagnostic info about the solve
 
   int num_iterations;
