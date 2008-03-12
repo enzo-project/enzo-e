@@ -44,6 +44,7 @@
 
 const int debug    = 0;
 const int trace    = 0;
+const int barrier  = 0;
 
 //======================================================================
 // BEGIN MAIN
@@ -139,18 +140,22 @@ int main(int argc, char **argv)
     JBPERF_START("4-hypre-init");
     // ***************
 
+    if (barrier) pmpi->barrier();
     hypre.init_hierarchy (problem.parameters(),hierarchy,*pmpi);
 
     // Initialize the stencils
     
+    if (barrier) pmpi->barrier();
     hypre.init_stencil (hierarchy);
 
     // Initialize the graph
 
+    if (barrier) pmpi->barrier();
     hypre.init_graph (hierarchy);
 
     // Initialize the linear system
 
+    if (barrier) pmpi->barrier();
     hypre.init_linear (problem.parameters(),
 		       hierarchy,
 		       problem.points(),
@@ -168,6 +173,7 @@ int main(int argc, char **argv)
     JBPERF_START("5-hypre-solve");
     // ***************
 
+    if (barrier) pmpi->barrier();
     hypre.solve (problem.parameters(),hierarchy);
 
     // ***************
@@ -178,8 +184,10 @@ int main(int argc, char **argv)
     // Evaluate the solution
     // --------------------------------------------------
 
+    if (barrier) pmpi->barrier();
     hypre.evaluate (hierarchy);
 
+    _TRACE_;
     // --------------------------------------------------
     // jbPerf Finalize
     // --------------------------------------------------
@@ -189,17 +197,21 @@ int main(int argc, char **argv)
     JBPERF_END("HS");
     // ***************
 
+    _TRACE_;
+
     // --------------------------------------------------
     // MPI Finalize
     // --------------------------------------------------
 
-    pmpi->barrier();
+    //    pmpi->barrier();
 
+    if (barrier) pmpi->barrier();
 
     if (pmpi->is_root()) { 
       printf ("End %s\n",exec_name.c_str()); fflush(stdout); 
     }
-    
+
+    MPI_Finalize();
     delete pmpi;
 
   } else {
