@@ -208,7 +208,23 @@ int main(int argc, char **argv)
     if (barrier) pmpi->barrier();
 
     if (pmpi->is_root()) { 
-      printf ("End %s\n",exec_name.c_str()); fflush(stdout); 
+      bool success = true;
+      // Residual too high
+      int itmax     = atoi(problem.parameters().value("solver_itmax").c_str());
+      double restol = atof(problem.parameters().value("solver_restol").c_str());
+      if (hypre.residual() > restol) {
+	printf ("Diverged %s\n",exec_name.c_str()); fflush(stdout); 
+	success = false;
+      }
+      // Iterations reached limit
+      if (hypre.iterations() >= itmax) {
+	printf ("Stalled %s\n",exec_name.c_str()); fflush(stdout); 
+	success = false;
+      }
+      // Appears to have completed successfully
+      if (success) {
+	printf ("Success %s\n",exec_name.c_str()); fflush(stdout); 
+      }
     }
 
     MPI_Finalize();

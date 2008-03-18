@@ -38,7 +38,7 @@ void usage (char ** argv)
   // Print usage and exit abnormally
 
   printf ("\n"
-	  "Usage: %s N0 np0 np1 np2 num_levels offset\n",argv[0]);
+	  "Usage: %s N0 np0 np1 np2 num_levels offset serial\n",argv[0]);
   exit(1);
 }
 
@@ -51,12 +51,12 @@ main(int argc, char **argv)
 // Parse command-line arguments
 //-----------------------------------------------------------------------
 
-  if (argc != 7) {
-    printf ("Number of arguments %d is not 6\n",argc-1);
+  if (argc != 7 && argc != 8) {
+    printf ("Number of arguments %d is not 6 or 7\n",argc-1);
     usage(argv);
   }
 
-  int N0, np3[3],num_levels,is_offset;
+  int N0, np3[3],num_levels,is_offset,is_serial;
 
   N0         = atoi(argv[1]);
   np3[0]     = atoi(argv[2]);
@@ -64,6 +64,7 @@ main(int argc, char **argv)
   np3[2]     = atoi(argv[4]);
   num_levels = atoi(argv[5]);
   is_offset  = atoi(argv[6]);
+  is_serial  = (argc == 8) ? atoi(argv[7]) : 0;
 
   int np = np3[0]*np3[1]*np3[2];
 
@@ -74,7 +75,7 @@ main(int argc, char **argv)
   // Get input, output, and directory names
 
   char dir[STRLEN],infile[STRLEN],outfile[STRLEN];
-  sprintf (dir,    "N%d.P%d%d%d.L%d.O%d",N0,np3[0],np3[1],np3[2],num_levels,is_offset);
+  sprintf (dir,    "N%d.P%d%d%d.L%d.O%d.S%d",N0,np3[0],np3[1],np3[2],num_levels,is_offset,is_serial);
   sprintf (infile,"in.%s",dir);
   FILE * fp = fopen (infile,"w");
 
@@ -178,7 +179,7 @@ main(int argc, char **argv)
 	  fprintf (fp, "grid %d %d %d "
 		   "%g %g %g  %g %g %g  "
 		   "%d %d %d  %d %d %d\n",
-		   id,id_parent,ip,
+		   id,id_parent,(is_serial) ?  0 : ip,
 		   lp3[0],lp3[1],lp3[2], up3[0],up3[1],up3[2],
 		   li3[0],li3[1],li3[2],  n3[0], n3[1], n3[2]);
 

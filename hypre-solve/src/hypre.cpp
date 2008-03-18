@@ -61,12 +61,16 @@ Hypre::Hypre (Parameters & parameters)
     B_(0),
     X_(0),
     solver_(0),
-    parameters_(parameters)
+    parameters_(parameters),
+    resid_(-1.0),
+    iter_(-1)
 {
   if (trace_hypre) {
     sprintf (mpi_file,"hypre-solve.out.%d",pmpi->ip());
     mpi_fp = fopen (mpi_file,"w");
   }
+
+  
   
 }
 
@@ -637,12 +641,19 @@ void Hypre::solve (Parameters & parameters,
 
   int    itmax  = 0;
   double restol = 0.0;
-  
+
+  // Check solver parameters
   std::string sitmax  = parameters.value("solver_itmax");
   std::string srestol = parameters.value("solver_restol");
-  if (sitmax != "")  itmax  = atoi(sitmax.c_str());
-  if (srestol != "") restol = atof(srestol.c_str());
 
+  // If not defined, then define them
+  if (sitmax == "")  parameters.add_parameter ("solver_itmax","200");
+  if (srestol == "") parameters.add_parameter ("solver_restol","1e-6");
+
+  // Set local variables
+  itmax  = atoi(sitmax.c_str());
+  restol = atof(srestol.c_str());
+  
   if        (solver == "fac"  && levels > 1) {
     solve_fac_(hierarchy,itmax,restol);
   } else if (solver == "bicgstab") {
@@ -776,6 +787,9 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    ign3[j0] = (igg3[j0]) / r  + (face*r-1);
 	    ign3[j1] = (igg3[j1]) / r;
 	    ign3[j2] = (igg3[j2]) / r;
+	    fprintf (mpi_fp,"igg3 %d %d %d\n",igg3[0],igg3[1],igg3[2]);
+	    fprintf (mpi_fp,"ign3 %d %d %d\n",ign3[0],ign3[1],ign3[2]);
+	    fflush(mpi_fp);
 
 	    //--------------------------------------------------
 	    // GRAPH ENTRY: FINE-TO-COARSE 
@@ -808,13 +822,13 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		    HYPRE_SStructGraphAddEntries 
 		      (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
 		    if (trace_hypre) {
-		      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAddEntries (%p,%d, 0, %d, 0);\n",
+		      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAddEntries (%p,%d, [%d,%d,%d] 0, %d, [%d,%d,%d],0);\n",
 			      __FILE__,__LINE__,pmpi->ip(),
 			      &graph_, 
-			      level_fine, 
-			       //			      igg3[0], igg3[1], igg3[2],
-			      level_coarse
-			       //			      ign3[0], ign3[1], ign3[2]
+			       level_fine, 
+			       igg3[0], igg3[1], igg3[2],
+			       level_coarse,
+			       ign3[0], ign3[1], ign3[2]
 			      );
 		      fflush(mpi_fp);
 		    }
@@ -911,11 +925,13 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		  HYPRE_SStructGraphAddEntries 
 		    (graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 		  if (trace_hypre) {
-		    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAddEntries (%p,%d, 0, %d, 0);\n",
+		    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAddEntries (%p,%d, [%d,%d,%d] 0, %d, [%d,%d,%d] 0);\n",
 			    __FILE__,__LINE__,pmpi->ip(),
 			    &graph_,
 			    level_coarse, 
-			    level_fine
+			     ign3[0], ign3[1], ign3[2],
+			     level_fine,
+			       igg3[0], igg3[1], igg3[2]
 			    );
 		    fflush(mpi_fp);
 		  }
@@ -1361,13 +1377,11 @@ void Hypre::solve_pfmg_ (Hierarchy & hierarchy, int itmax, double restol)
 
   // Write out some diagnostic info about the solve
 
-  int num_iterations;
-  HYPRE_SStructSysPFMGGetNumIterations (solver_,&num_iterations);
-  printf ("HYPRE_SStructSysPFMGSolve num iterations: %d\n",num_iterations);
+  HYPRE_SStructSysPFMGGetNumIterations (solver_,&iter_);
+  HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm (solver_,&resid_);
 
-  double residual;
-  HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm (solver_,&residual);
-  printf ("HYPRE_SStructSysPFMGSolve final relative residual norm: %g\n",residual);
+  printf ("HYPRE_SStructSysPFMGSolve num iterations: %d\n",iter_);
+  printf ("HYPRE_SStructSysPFMGSolve final relative residual norm: %g\n",resid_);
 
   // Delete the solver
 
@@ -1545,14 +1559,12 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
   }
   // Write out some diagnostic info about the solve
 
-  int num_iterations;
-  HYPRE_SStructFACGetNumIterations(solver_, &num_iterations);
-  double residual;
-  HYPRE_SStructFACGetFinalRelativeResidualNorm(solver_, &residual);
 
-  printf ("HYPRE_SStructFACSolve3 num iterations: %d\n",num_iterations);
+  HYPRE_SStructFACGetNumIterations(solver_, &iter_);
+  HYPRE_SStructFACGetFinalRelativeResidualNorm(solver_, &resid_);
 
-  printf ("HYPRE_SStructFACSolve3 final relative residual norm: %g\n",residual);
+  printf ("HYPRE_SStructFACSolve3 num iterations: %d\n",iter_);
+  printf ("HYPRE_SStructFACSolve3 final relative residual norm: %g\n",resid_);
 
   // Delete the solver
 
@@ -1598,14 +1610,11 @@ void Hypre::solve_bicgstab_ (Hierarchy & hierarchy, int itmax, double restol)
 
   // Write out some diagnostic info about the solve
 
-  int num_iterations;
-  HYPRE_SStructBiCGSTABGetNumIterations(solver_, &num_iterations);
-  double residual;
-  HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(solver_, &residual);
+  HYPRE_SStructBiCGSTABGetNumIterations(solver_, &iter_);
+  HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(solver_, &resid_);
 
-  if (debug) printf ("HYPRE_SStructBiCGSTABSolve3 num iterations: %d\n",num_iterations);
-
-  if (debug) printf ("HYPRE_SStructBiCGSTABSolve3 final relative residual norm: %g\n",residual);
+  if (debug) printf ("HYPRE_SStructBiCGSTABSolve3 num iterations: %d\n",iter_);
+  if (debug) printf ("HYPRE_SStructBiCGSTABSolve3 final relative residual norm: %g\n",resid_);
 
 
   // Delete the solver

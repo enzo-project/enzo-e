@@ -13,8 +13,8 @@
 
 main(int argc, char **argv)
 {
-  if (argc != 5) {
-    fprintf (stderr,"Usage: %s N L <xyz|ij|none> offset\n",argv[0]);
+  if (argc != 8) {
+    fprintf (stderr,"Usage: %s N L offset procs dp0 dp1 dp2\n",argv[0]);
     exit(1);
   }
 
@@ -28,24 +28,22 @@ main(int argc, char **argv)
   int iarg = 1;
   int N          = atoi(argv[iarg++]);
   int num_levels = atoi(argv[iarg++]);
-  char * type    =      argv[iarg++];
   int is_offset  = atoi(argv[iarg++]);
+  int np         = atoi(argv[iarg++]);
+  int dp0        = atoi(argv[iarg++]);
+  int dp1        = atoi(argv[iarg++]);
+  int dp2        = atoi(argv[iarg++]);
 
   int N2 = N + 2;
   int N23 = N2*N2*N2;
   int Asize = N23*2*7;
   double * A = new double [Asize]; // 
-  bool is_xyz   = strcmp(type,"xyz")==0;
-  bool is_ij    = strcmp(type,"ij")==0;
-  bool is_none  = strcmp(type,"none")==0;
-  if (! is_xyz && ! is_ij & ! is_none) {
-    printf ("type = %s  != [xyz|ij|none]\n");
-    exit(1);
-  }
 
-  printf ("size = %d  type = %s\n",N,type);
+  printf ("N = %d  L = %d  O = %d  P = %d\n",
+	  N,num_levels,is_offset,np);
 
   FILE *fp;
+  int ip;
   int i0,i1,i2;
   int j0,j1,j2;
   int i,j,k;
@@ -58,12 +56,16 @@ main(int argc, char **argv)
     fp = fopen (filename,"r");
 
     int linenum = 0;
-    while (fscanf (fp,"%d %d %d %d %lf",&i0,&i1,&i2,&k,&value) != EOF) {
+    while (fscanf (fp,"%d %d %d %d %d %lf",&ip,&i0,&i1,&i2,&k,&value) != EOF) {
       linenum++;
 
       i0 ++;
       i1 ++;
       i2 ++;
+
+      i0 += dp0;
+      i1 += dp1;
+      i2 += dp2;
 
       j0 = i0;
       j1 = i1;
@@ -101,9 +103,7 @@ main(int argc, char **argv)
 	assert (AINDEX(i0,i1,i2,k,level,N2) >= 0);
 	assert (AINDEX(i0,i1,i2,k,level,N2) < Asize);
 	A[AINDEX(i0,i1,i2,k,0,N2)] = value;
-	if (is_ij)  printf ("%d  %d %d %g\n",level,i+1,j+1,value);
-	if (is_xyz) printf ("%d  %d %d %d  %d %d %d  %g\n",
-			    level,i0,i1,i2,j0,j1,j2,value);
+	printf ("%d  %d %d %g\n",level,i+1,j+1,value);
       }
 
     }
@@ -136,9 +136,7 @@ main(int argc, char **argv)
       assert (0 <= j && j < Asize);
       IJ_type p(i,j);
       Agraph[p] = value;
-      if (is_ij)  printf ("12  %d %d %g\n",i+1,j+1,value);
-      if (is_xyz) printf ("12  %d %d %d  %d %d %d  %g\n",
-			  i0,i1,i2,j0,j1,j2,value);
+      printf ("12  %d %d %g\n",i+1,j+1,value);
     }
   }
   fclose(fp);

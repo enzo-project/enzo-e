@@ -25,6 +25,9 @@ private:
 
   Parameters           parameters_; 
 
+  double               resid_;   // Solver residual
+  int                  iter_;    // Solver iterations
+
 public:
 
   Hypre (Parameters & parameters);
@@ -42,6 +45,9 @@ public:
 		       Hierarchy & hierarchy);
   void evaluate       (Hierarchy & hierarchy);
 
+
+  int    iterations () { return iter_; };
+  double residual () { return resid_; };
 
 private:
 
