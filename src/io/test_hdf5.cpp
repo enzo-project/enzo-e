@@ -14,9 +14,9 @@
 
 #include "hdf5.h"
 
-#include "unit.hpp"
-#include "scalar.hpp"
-#include "array.hpp"
+#include "test_unit_.hpp"
+#include "data_scalar_.hpp"
+#include "data_array_.hpp"
 #include "hdf5.hpp"
 
 main()

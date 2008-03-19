@@ -14,7 +14,7 @@
 
 #include "string.h"
 #include "scalar.hpp"
-#include "error.hpp"
+#include "io_error_.hpp"
 #include "array.hpp" 
 
 //----------------------------------------------------------------------

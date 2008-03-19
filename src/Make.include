@@ -1,17 +1,31 @@
 #----------------------------------------------------------------------
 
-# CPP:  The c++ compiler
+# Compilers
 
 CPP = g++
+FC  = g95
+
 
 # INC: The include directories common to all components
 
-INC = -I../include
+INC = -I$(TOP)/include
 
 # OPT:  optimization/debug compiler flags
 
 OPT = -O -g
 
+
 #----------------------------------------------------------------------
 
-CPPFLAGS = $(INC) $(INC_LOCAL) $(OPT)
+CPPFLAGS = $(DEFINES)
+
+CXXFLAGS = $(INC) $(INC_LOCAL) $(CXXFLAGS_LOCAL) $(OPT)
+CFLAGS   = $(INC) $(INC_LOCAL) $(CFLAGS_LOCAL)   $(OPT)
+FFLAGS   = $(INC) $(INC_LOCAL) $(FFLAGS_LOCAL)   $(OPT)
+
+LDFLAGS  = 
+
+#-----------------------------------------------------------------------
+.PHONY: dep
+dep:
+	-@(makedepend -fDEPEND $(INC) -- -- *.?pp) >& out.make.dep

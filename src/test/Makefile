@@ -1,57 +1,42 @@
-#
-# (x) test:         Run unit tests
-# (x) test_array:   Compile the unit tests
-# (x) libdata.a:
-# (x) clean:        Clean directory
-# (^) dep:          Update dependencies
-# (X) install:      Install lib, include, and bin files
+# (X) install:         Install lib, include, and bin files
+# (X) install-install: Install lib, include, and bin files
 # 
 
 TOP = ../..
 SRC = ..
-
-TEST_OBJS = test_array.o 
-OBJS = array.o
 
 #=======================================================================
 # TARGETS
 #=======================================================================
 
 .PHONY: test
-test: test_array
-	test_array
+test:
 
 #-----------------------------------------------------------------------
 
-test_array: $(TEST_OBJS) libdata.a
-	$(CPP) -o test_array $(TEST_OBJS) $(INC) -L. -larray
+test_test:
 
 #-----------------------------------------------------------------------
 
-libdata.a: $(OBJS)
-	ar rv $*.a $(OBJS)
+libtest.a:
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-rm *.o test_array *~ out.make.dep Makefile.bak lib*.a *.unit
 
 #-----------------------------------------------------------------------
 
 .PHONY: install
-install: test_array libdata.a install-include
-	cp ./test_array $(TOP)/bin
-	ar rv $(TOP)/lib/libcello libdata.a   
+install:
 
 #-----------------------------------------------------------------------
 
 .PHONY: install-include
 
 install-include:
-	ln -sf `pwd`/data.hpp   $(TOP)/include
-	ln -sf `pwd`/array.hpp  $(TOP)/include/data_array_.hpp
-	ln -sf `pwd`/scalar.hpp $(TOP)/include/data_scalar_.hpp
+	ln -sf `pwd`/test.hpp   $(TOP)
+	ln -sf `pwd`/unit.hpp   $(TOP)/include/test_unit_.hpp
 
 #=======================================================================
 # INCLUDES 
@@ -59,4 +44,3 @@ install-include:
 
 include DEPEND
 include $(SRC)/Make.include
-

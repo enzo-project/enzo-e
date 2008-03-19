@@ -11,7 +11,9 @@
 # (*) clean
 # (*) test
 # (*) doc
-# ( ) dep
+# (*) dep
+# (*) install
+# (*) install-include
 #
 # Directories
 #
@@ -20,23 +22,63 @@
 #
 #-----------------------------------------------------------------------
 
-DIR = data io
+DIR = data io test
 
-all:   $(patsubst %,%-all,$(DIR))
-clean: $(patsubst %,%-clean,$(DIR))
-test:  $(patsubst %,%-test,$(DIR))
-dep:   $(patsubst %,%-dep,$(DIR))
-doc:
-	doxygen
+#=======================================================================
+# TARGETS
+#=======================================================================
 
-%-all: 
+.PHONY: all %-all
+all:       $(patsubst %,%-all,$(DIR))
+%-all:  %-DEP
 	$(MAKE) -C $*
-%-clean: 
+
+#-----------------------------------------------------------------------
+
+.PHONY: clean %-clean
+clean:     $(patsubst %,%-clean,$(DIR))
+%-clean:  %-DEP
 	-rm -f *~
 	-rm -rf html latex
 	$(MAKE) -C $* clean
-%-test: 
+
+#-----------------------------------------------------------------------
+
+.PHONY: test %-test
+test:      $(patsubst %,%-test,$(DIR))
+%-test: %-DEP
 	$(MAKE) -C $* test
-%-dep: 
+
+#-----------------------------------------------------------------------
+
+.PHONY: dep %-dep
+dep:       $(patsubst %,%-dep,$(DIR))
+%-dep: %-DEP
 	$(MAKE) -C $* dep
+.PHONY: %-DEP
+%-DEP:
+	touch $*/DEPEND
+
+#-----------------------------------------------------------------------
+
+.PHONY: install %-install
+install:   $(patsubst %,%-install,$(DIR))
+%-install: %-DEP
+	$(MAKE) -C $* install
+
+#-----------------------------------------------------------------------
+
+.PHONY: install-include %-install-include
+install-include:   $(patsubst %,%-install-include,$(DIR))
+%-install-include: %-DEP
+	$(MAKE) -C $* install-include
+
+#-----------------------------------------------------------------------
+
+.PHONY: doc
+doc:
+	doxygen
+
+#-----------------------------------------------------------------------
+
 
