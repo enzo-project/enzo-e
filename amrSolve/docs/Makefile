@@ -19,7 +19,7 @@ links: project requirements design testing
 	cd requirements; rm -f include.tex; ln -sf ../include.tex
 	cd design;       rm -f include.tex; ln -sf ../include.tex
 	cd testing;      rm -f include.tex; ln -sf ../include.tex
-clean:
+clean: links
 	-@rm -f *~ *.ps
 	make -C project clean
 	make -C requirements clean
