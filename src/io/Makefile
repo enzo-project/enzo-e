@@ -51,7 +51,7 @@ clean:
 .PHONY: install
 install: test_hdf5 libio.a
 	cp ./test_hdf5 $(TOP)/bin
-	ar rv $(TOP)/lib/libcello libio.a
+	ar rv $(TOP)/lib/libcello.a libio.a
 
 #-----------------------------------------------------------------------
 

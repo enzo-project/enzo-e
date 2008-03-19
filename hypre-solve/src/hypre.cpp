@@ -19,6 +19,11 @@
 
 #include "HYPRE_sstruct_ls.h"
 
+namespace cello {
+#include "data.hpp"
+#include "io.hpp"
+}
+
 #include "hypre-solve.hpp"
 
 #include "mpi.hpp"
@@ -678,9 +683,54 @@ void Hypre::solve (Parameters & parameters,
 void Hypre::evaluate (Hierarchy & hierarchy)
 
 {
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Hypre::evaluate()");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  char filename[80];
+
+  ItHierarchyGridsLocal itg(hierarchy);
+  while (Grid * grid = itg++) {
+    int level = grid->level();
+    int igg3[3][2];
+    double * entries = new Scalar[grid->n()];
+    grid->indices(igg3);
+    int lower[3],upper[3];
+    lower[0] = igg3[0][0];
+    lower[1] = igg3[1][0];
+    lower[2] = igg3[2][0];
+    upper[0] = igg3[0][1] - 1;
+    upper[1] = igg3[1][1] - 1;
+    upper[2] = igg3[2][1] - 1;
+
+    HYPRE_SStructVectorGetBoxValues (X_,level,lower,upper,0,entries);  
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorGetBoxValues (%p,%d, [%d,%d,%d], [%d,%d,%d],0,%g...%g);\n",
+	       __FILE__,__LINE__,pmpi->ip(),
+	       X_,level,
+	       lower[0],lower[1],lower[2],
+	       upper[0],upper[1],upper[2],0,
+	       entries[0],entries[grid->n()-1]
+	       );
+      fflush(mpi_fp);
+    }
+    
+    fopen ("X.%d","w");
+    
+    
+    for (int i=0; i
+
+    HYPRE_SStructVectorGetBoxValues (B_,level,lower,upper,0,entries);  
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorGetBoxValues (%p,%d, [%d,%d,%d], [%d,%d,%d],0,%g...%g);\n",
+	       __FILE__,__LINE__,pmpi->ip(),
+	       B_,level,
+	       lower[0],lower[1],lower[2],
+	       upper[0],upper[1],upper[2],0,
+	       entries[0],entries[grid->n()-1]
+	       );
+      fflush(mpi_fp);
+    }
+
+    delete [] entries;
+  }
 }
 
 //======================================================================

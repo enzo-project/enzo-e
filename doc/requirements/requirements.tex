@@ -24,15 +24,15 @@
 
 % Overview
 
-   \textbf{Overview.}
+   \devel{Overview.}
+
    \cello\ is to be a high-performance multi-resolution astrophysics
    and cosmology application, capable of running efficiently on
    large-scale (\~{\ }$O(10^6)$ cores) parallel supercomputers.
    Physics capabilities will include hydrodynamics, representations of
-   both dark matter (via particles) and baryonic matter (via fields),
-   cosmological expansion, self-gravity, radiative cooling,
-   multispecies chemistry, star-formation, magnetohydrodynamics, and radiation
-   transfer.
+   dark matter and baryonic matter, cosmological expansion,
+   self-gravity, radiative cooling, multispecies chemistry,
+   star-formation, magnetohydrodynamics, and radiation transfer.
 
 \begin{itemize}
 \item[\todo] hydrodynamics
@@ -48,7 +48,7 @@
 \end{itemize}
 
 % AMR
-   \textbf{AMR.}
+   \devel{AMR.}
    Computations will be performed at multiple spacial and temporal
    resolutions using structured adaptive mesh refinement (SAMR).  This
    will permit the physics modules to capture the full range of scales
@@ -62,7 +62,7 @@
    
 % Parallelization: horizontal data movement optimization
 
-   \textbf{Parallelization levels.}  To take advantage of the
+   \devel{Parallelization levels.}  To take advantage of the
    hierarchical parallel nature of modern supercomputers, the
    application will support multiple levels of parallelization in its
    methods and datastructures.  This will include the ability to run
@@ -71,7 +71,7 @@
    concurrently across a distributed memory subsystem, and evolve
    
 
-   \textbf{Parallelization types.}
+   \devel{Parallelization types.}
    This parallelization will be modularized (as much as technologically
    feasible) to improve flexibility in choosing the best method(s) of
    parallelization for a given problem on a given parallel platform.
@@ -86,7 +86,7 @@
 
 %  load balancing
 
-   \textbf{Dynamic load balancing.}  Multiple levels of parallel tasks
+   \devel{Dynamic load balancing.}  Multiple levels of parallel tasks
    will be load balanced using hierarchical dynamic load balancing
    algorithms.  Load balancing schemes will use dynamically measured
    performance data gathered by the running simulation to make load
@@ -100,7 +100,7 @@
 
 % Field data layout: vertical data movement optimization
 
-   \textbf{Deep memory hierarchies.}
+   \devel{Deep memory hierarchies.}
    The properties of individual grid patches, and details of how
    scalar and vector fields are stored on grid patches, will be
    flexible to allow optimization of the use of deep memory/cache
@@ -115,7 +115,7 @@
 
 %  Performance monitoring
 
-   \textbf{Performance monitoring.}
+   \devel{Performance monitoring.}
    Global performance-related measurements will be continuously
    collected for simulations.  This will include parallel
    communication amount, rates, and time; memory and computational
@@ -125,7 +125,7 @@
 
 % Control
 
-   \textbf{User interface: input.}  
+   \devel{User interface: input.}  
    Problems will be specified using an input parameter file.  The set
    of problem parameters available will be sufficient to set up all
    known test problems in the literature that can be run given the
@@ -133,13 +133,13 @@
    and deep control of the internal physical quantities, units,
    physics methods, and data-structures.
 
-   \textbf{User interface: output.}
+   \devel{User interface: output.}
    Information regarding the progress of the simulation will be 
    output to the user in a format or formats that are both easy
    to read, and easy to post-process using external programs or
    utilities.
    
-   \textbf{User interface: portal.}
+   \devel{User interface: portal.}
    The application will include a means for external applications to
    ``attach'' to the application (in a read-only sense) to access
    the data as it is being computed.  The purpose is to enable 
@@ -149,7 +149,7 @@
 
 %  I/O
 
-   \textbf{Output.}
+   \devel{Output.}
    Several options for how data fields and particles are read and
    stored to disk will be implemented, to improve flexibility and
    allow optimization of I/O for a given problem on a given parallel
@@ -188,6 +188,16 @@
    methods, resolution ranges, AMR data-structures and algorithms,
    field and particles data-structures, and parallelism.
 
+\begin{itemize}
+\item Extreme scalability
+\item Extreme efficiency
+\item Easy for user to compile and run
+\item Easy to developer to modify and maintain
+\item Powerful problem definition
+\item Flexibile algorithms and parallel datastructures
+\item Rigorous testing of accuracy, performance and scalability
+\end{itemize}
+
 %=======================================================================
 \chapter{Input} \label{s:inputs}
 %=======================================================================
@@ -197,7 +207,7 @@
    file may optionally include other input files.
 
    Parameters are organized into functional groups, which are described
-   in more detail in following sections.
+   in more detail in subsequent sections.
 
 \begin{description}
 
@@ -208,15 +218,22 @@
  load-balancing, refinement criteria, numerical floors and limits,
  dynamic refinement in subregions, etc.
 
- \item [Physics (\S\ref{s:physics}): ] Physics parameters define which
- physics is enabled, and parameters associated with the physics of the
- problem being solved, such as cosmological parameters, etc.
-
- \item [Units (\S\ref{s:units}): ] Units parameters define the problem
- units, as well as scalings for computation if different.
+ \item [Physics (\S\ref{s:physics}): ] Physics parameters are used to
+ define which physics is enabled---such as self-gravity,
+ hydrodynamics, cosmological expansion, etc.  They also define any
+ parameters associated with the physics of the problem being solved,
+ such as cosmological parameters and the gravitational constant.
+ Physics parameters define what physics to simulate in the
+ computational universe.
 
  \item [Problem (\S\ref{s:problem}): ] Problem parameters include
- boundary and initial conditions.
+ the domain extents, boundary and initial conditions.
+
+ \item [Units (\S\ref{s:units}): ] Units parameters define the problem
+ units, as well as scalings for computation if different.  Allows for
+ ``variable'' scaling (e.g.~to keep values near unity to avoid under-
+ or overflow) and quantization of scaling factors (e.g.~scale by $2^k$
+ to avoid loss of precision).
 
  \item [Domain (\S\ref{s:domain}): ] Domain parmeters include extents
  and dimensionality.
@@ -224,12 +241,13 @@
  \item [Region (\S\ref{s:region}): ] A region is a subset of the
  domain.  Regions are used whenever problem characteristics,
  datastructure behavior, or physics computations vary between
- different spacial regions.
+ different spacial regions.  A region may include the entire
+ domain.
 
  \item [Field (\S\ref{s:field}): ] Field parameters define all fields
  used in the computation, including their names, and whether they are
- scalar or vector fields.  Associates name, subregion, and
- datastructure.
+ scalar or vector fields.  Field parameters associate the name,
+ datastructure, and units.
 
  \item [Matter (\S\ref{s:matter}): ] Matter defines properties of
  different types of matter used in the simulation, such as gas
@@ -237,40 +255,45 @@
 
  \item [Method (\S\ref{s:method}): ] Method parameters specify the
  method to use for each physics component, and any associated
- method-specific parameters.
+ method-specific parameters.  This also includes how methods are to be
+ coupled together.  Method parameters define how to simulate the
+ physics in the computational universe.
 
- \item [Datastructure (\S\ref{s:data}): ] Data structure parameters
- include listing which data structures to use (unigrid, SAMR,
- particles, subblocks, etc.), as well as all associated parameters
- (unigrid resolution, SAMR mesh levels, particle attributes, subblock
- size control, etc.)
+ \item [Data (\S\ref{s:data}): ] Data parameters include listing which
+ data structures to use (unigrid, SAMR, particles, subblocks, etc.),
+ as well as all associated parameters (unigrid resolution, SAMR mesh
+ levels, particle attributes, array subblock size control, ghost zone
+ width and longevity, etc.)  Datastructure parameters define how to
+ represent the continuous (infinite dimensional) problem and physics
+ as a computationally solveable (finite dimensional) discrete problem.
+ Some parameters, such as subblock size, may affect performance but
+ not the solution.  Data parameters include Hierarchy, Particle,
+ Array, and Patch parameters.
 
  \item [Parallel (\S\ref{s:parallel}): ] Parallelism parameters
- specify which levels to parallelize (simulations, patches,
+ specify which levels to parallelize (simulations, patches, and
  subblocks), how to parallelize each level (MPI-1 2-sided, MPI-2
  1-sided, OpenMP, UPC), and lower-level parameters (buffering,
  blocking or nonblocking, patch-to-processor mapping,
  subblock-to-thread mapping, etc.)
 
- \item [Performance (\S\ref{s:performance}): ] Performance monitoring
- and optimization parameters.
+ \item [Performance (\S\ref{s:performance}): ] Performance
+ self-monitoring and optimization parameters.
 
  \item [Monitor (\S\ref{s:monitor}): ] Monitor parameters control what
  and when to output user-readable summary information about the
- running application, such as status, progress, warnings, errors, and
- performance summary.
+ running application, such as status summary, progress, warnings,
+ errors, and performance information.
 
  \item [Output (\S\ref{s:output}): ] Output parameters control
-  what and when to output large-scale data.
+  what, when, and how to output large-scale data, primarily data fields.
 
- \item [Portal (\S\ref{s:output}): ] Output parameters control
+ \item [Portal (\S\ref{s:output}): ] Portal parameters control
+  how to interface with external applications.
 
-
- \item [Recovery (\S\ref{s:recovery}): ] Error recovery, fault tolerance
- and computational adaptivity parameters.
-
-
-  
+ \item [Recovery (\S\ref{s:recovery}): ] Revovery parameters
+  control how to detect errors, and how to proceed if errors
+  are detected.
 
 \end{description}
 
@@ -559,8 +582,8 @@ Use solid modeling representations?
 
 
 %-----------------------------------------------------------------------
-\subsection{Parameters}%
------------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Field parameters} \label{s:field}
@@ -813,7 +836,16 @@ output {
 \section{Recovery parameters} \label{s:recovery}
 %=======================================================================
 
-Fault tolerance and adaptivity parameters
+Fault tolerance and adaptivity parameters.
+
+\begin{itemize}
+\item Power outage
+\item Network connectivity dropouts
+\item Corrupt RAM
+\item Crashed hard drive
+\item Moth in relay switch
+\item Crashed node
+\end{itemize}
 
 \begin{itemize}
 \item fault tolerance methodology

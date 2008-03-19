@@ -541,12 +541,6 @@ void Hierarchy::geomview_grids (Mpi & mpi) throw ()
       level->geomview_grid_local (fp);
       fclose (fp);
 
-      //      if (mpi.is_root()) {
-      //	sprintf (filename,"grid-L%d.vect",level->index());
-      //	FILE * fp = fopen (filename,"w");
-      //	sprintf (filename,"grid-L%d.vect",level->index());
-      //	level->geomview_grid (fp);
-      //      }
     }
   }
 }
@@ -560,67 +554,6 @@ void Hierarchy::print () throw ()
     level(i).print();
   }
 }
-
-//----------------------------------------------------------------------
-
-/// Write the Hierarchy grids to the given open file in geomview format
-
-// void Hierarchy::geomview_grid_ (FILE *fpr, bool full) throw ()
-// {
-
-//   int ng = num_grids();
-//   int nl = num_levels();
-
-//   // Write header
-
-//   if (full) {
-
-//     // Print first two lines of geomview *.vect file
-//     fprintf (fpr,"VECT\n");
-//     fprintf (fpr,"%d %d %d\n",4*ng, 16*ng, nl);
-
-//     //
-//     for (int i=0; i<ng; i++) fprintf (fpr,"8 3 3 2 "); fprintf (fpr,"\n");
-
-//     ItHierarchyLevels itl(*this);
-//     while (Level *level = itl++) {
-//       fprintf (fpr,"1 0 0 0 ");
-//       for (int i=1; i<level->num_grids(); i++) {
-// 	fprintf (fpr,"0 0 0 0 "); 
-//       }
-//       fprintf (fpr,"\n");
-//     }
-//   }
-
-//   // For each level, print out all grids in the level
-
-//   ItHierarchyLevels itl(*this);
-
-//   while (Level * level = itl++) {
-
-//     ItLevelGridsAll itg (*level);
-
-//     while (Grid * grid = itg++) {
-
-//       grid->geomview_grid(fpr,0);
-
-//     }
-
-//   }
-
-//   // Color mapping for levels
-
-//   int bcolor[] = {1, 1, 0, 0, 0, 1, 1};
-//   int rcolor[] = {1, 0, 1, 0, 1, 0, 1};
-//   int gcolor[] = {1, 0, 0, 1, 1, 1, 0};
-
-//   if (full) {
-//     for (int i=0; i<nl; i++) {
-//       int j=i%7;  // 7 is length of [rgb]color[] arrays
-//       fprintf (fpr,"%d %d %d 0\n",rcolor[j],gcolor[j],bcolor[j]);
-//     }
-//   }
-// }
 
 //----------------------------------------------------------------------
 

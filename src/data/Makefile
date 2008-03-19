@@ -24,7 +24,7 @@ test: test_array
 #-----------------------------------------------------------------------
 
 test_array: $(TEST_OBJS) libdata.a
-	$(CPP) -o test_array $(TEST_OBJS) $(INC) -L. -larray
+	$(CPP) -o test_array $(TEST_OBJS) $(INC) -L. -ldata
 
 #-----------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ clean:
 .PHONY: install
 install: test_array libdata.a install-include
 	cp ./test_array $(TOP)/bin
-	ar rv $(TOP)/lib/libcello libdata.a   
+	ar rv $(TOP)/lib/libcello.a libdata.a   
 
 #-----------------------------------------------------------------------
 

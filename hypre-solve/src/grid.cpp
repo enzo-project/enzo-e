@@ -186,14 +186,14 @@ void Grid::geomview_face_type (FILE         *fpr,
 
   // Default acolor = 0.0 to make them invisible
 
-  // unknown            000
-  // boundary           100
-  // coarse             010 
-  // fine               001
-  // neighbor           011 
-  // covered            101
-  // adjacent_covered   110
-  // error              111 
+  // unknown            000   black
+  // boundary           100   red
+  // coarse             010   green
+  // fine               001   blue
+  // neighbor           011   cyan
+  // covered            101   magenta
+  // adjacent_covered   110   yellow
+  // error              111   white
 
   float bcolor[] = {0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
   float rcolor[] = {0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0};

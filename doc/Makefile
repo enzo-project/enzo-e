@@ -4,8 +4,7 @@ ALL = project \
       testing \
       manual-devel \
       manual-user \
-      manual-reference \
-      algorithms
+      manual-reference
 
 .PHONY: all
 all: $(ALL)
@@ -24,9 +23,6 @@ design:
 testing: 
 	cd testing; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C testing
-algorithms: 
-	cd algorithms; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C algorithms
 manual-devel: 
 	cd manual-devel; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C manual-devel

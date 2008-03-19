@@ -24,10 +24,17 @@ HDF5DEF =
 HDF5INC = -I/usr/local/hdf5/include
 HDF5LIB = -L/usr/local/hdf5/lib -lhdf5
 
+# CELLO
+
+CELLOTOP = ../..
+CELLOOBJ = $(CELLOTOP)
+CELLOINC = -I$(CELLOTOP)/include
+CELLOLIB = -L$(CELLOTOP) -ldata -lio
+
 # Assemble defines, includes, and libs
-DEF =      $(JBDEF) $(HYPREDEF) $(HDF5DEF)
-INC =      $(JBINC) $(HYPREINC) $(HDF5INC)
-LIB =  -lm $(JBLIB) $(HYPRELIB) $(HDF5LIB)
+DEF =      $(JBDEF) $(HYPREDEF) $(HDF5DEF) $(CELLODEF)
+INC =      $(JBINC) $(HYPREINC) $(HDF5INC) $(CELLOINC)
+LIB =  -lm $(JBLIB) $(HYPRELIB) $(HDF5LIB) $(CELLOLIB)
 
 # Set object files
 OBJS = \

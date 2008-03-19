@@ -3,19 +3,18 @@ beginfig(1)
   Class.A("Array")
 	(
          "N_ int",
-	 "n_ int [4]",
+	 "n_ int [3]",
          "a_ Scalar *"
 	)
 	(
 	"Array()",
-	"Array(n0,n1,n2,n3)",
 	"~Array()",
-        "void copy(Array&)",
-	"void resize(n0,n1,n2,n3)",
-	"void size(n0,n1,n2,n3)",
+        "void copy()",
+	"void resize()",
+	"void size()",
 	"int length()",
 	"Scalar * values()",
-	"Scalar & operator () (i0,i1,i2,i3)",
+	"Scalar & operator () ()",
 	);
   drawObject(A);
 endfig;
