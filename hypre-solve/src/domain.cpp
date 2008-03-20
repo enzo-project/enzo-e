@@ -34,7 +34,7 @@ Domain::Domain (std::string parms) throw ()
 {
   // Define a domain given text parameters, typically from an input file
 
-  read (parms);
+  input (parms);
   assert (1 <= d_ && d_ <= 3);
 }
 //----------------------------------------------------------------------
@@ -74,7 +74,7 @@ void Domain::write (FILE *fp) throw ()
 
 //----------------------------------------------------------------------
 
-void Domain::read (std::string parms) throw ()
+void Domain::input (std::string parms) throw ()
 {
   sscanf (parms.c_str(),
 	  "%d"

@@ -17,10 +17,20 @@
 
 #include <vector>
 #include <map>
+#include <string>
 
 #include "HYPRE_sstruct_ls.h"
 
 #include "hypre-solve.hpp"
+
+//----------------------------------------------------------------------
+
+const int trace          = 0;
+const int debug          = 0;
+const int debug_detailed = 0;
+const int geomview       = 1;
+
+//----------------------------------------------------------------------
 
 #include "scalar.hpp"
 #include "error.hpp"
@@ -32,13 +42,6 @@
 #include "level.hpp"
 #include "hierarchy.hpp"
 
-
-//----------------------------------------------------------------------
-
-const int trace          = 0;
-const int debug          = 0;
-const int debug_detailed = 0;
-const int geomview       = 1;
 
 //----------------------------------------------------------------------
 

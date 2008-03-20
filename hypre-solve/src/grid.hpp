@@ -63,14 +63,14 @@ class Grid
   /// Faces class associated with grid
   Faces *             faces_;
 
-  // data computed at hierarchy creation (in read())
+  // data computed at hierarchy creation (in input())
 
   /// Containing Level number (0 = root)
   int                 level_;      
 
   /// Unknowns (single cell-centered variable) Stored as 3D
   /// fortran-style array
-  //  Scalar *            u_;          
+  Scalar *            u_;          
 
   /// Counters for nonstencil entries.  Required by
   /// hypre to maintain state between nonstencil and matrix initialization.
@@ -121,7 +121,23 @@ protected:
 
   /// Write the grid to a file in compact format
 
+  void write (std::string name) throw ()
+  { FILE *fp = fopen (name.c_str(),"w"); this->write(fp); fclose(fp); };
+
+  /// Write the grid to a file in compact format
+
   void write (FILE * fp = 0) throw ();
+
+  /// Read the grid from a file written using write()
+
+  void read (std::string name) throw ()
+  { if (debug) printf ("%s:%d %s\n",__FILE__,__LINE__,name.c_str());
+    FILE *fp = fopen (name.c_str(),"r"); this->read(fp); fclose(fp); 
+  };
+
+  /// Read the grid from a file written using write()
+
+  void read (FILE * fp = 0) throw ();
 
   /// Write the grid outline to a geomview file 
 
@@ -138,9 +154,22 @@ protected:
 			   int            num_types, 
 			   bool           full=true) throw ();
 
-  /// Read the grid from the given string in compact format
+  /// Return a pointer to the array of values associated with the grid
+  /// Allocate if not allocated
 
-  void read (std::string parms) throw ();
+  Scalar * values () throw ();
+
+  /// Deallocate storage for the array of values associated with the grid
+
+  void deallocate () throw ();
+
+  /// Allocate storage for the array of values associated with the grid
+
+  void allocate () throw ();
+
+  /// Input the grid from the given string in compact format
+
+  void input (std::string parms) throw ();
 
   //--------------------------------------------------------------------
   // Data access

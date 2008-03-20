@@ -22,6 +22,13 @@
 
 #include "hypre-solve.hpp"
 
+
+//----------------------------------------------------------------------
+
+const int debug = 0;
+
+//----------------------------------------------------------------------
+
 #include "scalar.hpp"
 #include "error.hpp"
 #include "parameters.hpp"
@@ -99,7 +106,7 @@ void Problem::read (std::string filename) throw ()
 
     } else if (key == "domain") {
 
-      domain_.read (value);
+      domain_.input (value);
 
       // Grid ...
 

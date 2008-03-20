@@ -18,6 +18,10 @@
 
 #include "HYPRE_sstruct_ls.h"
 
+//----------------------------------------------------------------------
+
+const int debug = 0;
+
 #include "hypre-solve.hpp"
 
 #include "scalar.hpp"
@@ -27,10 +31,6 @@
 #include "domain.hpp"
 #include "grid.hpp"
 #include "level.hpp"
-
-//----------------------------------------------------------------------
-
-const int debug = 0;
 
 //----------------------------------------------------------------------
 

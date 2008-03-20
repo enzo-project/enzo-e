@@ -52,7 +52,7 @@ class Sphere
   void check () throw () {assert (1 <= d_ && d_ <= 3);}
   void write (FILE *fp = 0) throw ();
   void print () throw ();
-  void read (std::string parms) throw ();
+  void input (std::string parms) throw ();
 
   //--------------------------------------------------------------------
   // PRIVATE MEMBER FUNCTIONS

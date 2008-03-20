@@ -35,7 +35,7 @@ public:
 
   void print () throw ();
   void write (FILE *fp = 0) throw ();
-  void read (std::string parms) throw ();
+  void input (std::string parms) throw ();
 
   /// Set the dimension of the space that the Point is contained in
   static void set_dim (int d) 

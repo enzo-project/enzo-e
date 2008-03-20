@@ -44,7 +44,7 @@ Point::Point (std::string parms) throw ()
   alloc_();
 
   assert (d_ >= 3);
-  read (parms);
+  input (parms);
 }
 //----------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ void Point::write (FILE *fp) throw ()
 
 //----------------------------------------------------------------------
 
-void Point::read (std::string parms) throw ()
+void Point::input (std::string parms) throw ()
 {
   assert (d_ == 3);
   sscanf (parms.c_str(),

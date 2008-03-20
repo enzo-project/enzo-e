@@ -27,6 +27,14 @@
 
 #include "hypre-solve.hpp"
 
+//----------------------------------------------------------------------
+
+const int debug    = 0;
+const int trace    = 0;
+const int barrier  = 0;
+
+//----------------------------------------------------------------------
+
 #include "scalar.hpp"
 #include "error.hpp"
 #include "performance.hpp"
@@ -41,10 +49,6 @@
 #include "parameters.hpp"
 #include "problem.hpp"
 #include "hypre.hpp"
-
-const int debug    = 0;
-const int trace    = 0;
-const int barrier  = 0;
 
 //======================================================================
 // BEGIN MAIN

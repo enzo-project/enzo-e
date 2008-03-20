@@ -19,6 +19,8 @@
 
 #include "HYPRE_sstruct_ls.h"
 
+const int debug = 0;
+
 #include "hypre-solve.hpp"
 
 #include "scalar.hpp"
@@ -28,8 +30,6 @@
 #include "grid.hpp"
 
 //----------------------------------------------------------------------
-
-const int debug = 0;
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // LabelName[] VALUES SHOULD MATCH Label enum ENTRIES IN faces.hpp

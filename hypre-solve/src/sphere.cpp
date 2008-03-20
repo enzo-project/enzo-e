@@ -39,7 +39,7 @@ Sphere::Sphere (std::string parms) throw ()
 
   alloc_();   // NOTE: inefficient for dimension < 3
 
-  read (parms);
+  input (parms);
 }
 	  
 //----------------------------------------------------------------------
@@ -126,7 +126,7 @@ void Sphere::write (FILE *fp) throw ()
 
 //----------------------------------------------------------------------
 
-void Sphere::read (std::string parms) throw ()
+void Sphere::input (std::string parms) throw ()
 {
   sscanf (parms.c_str(),
   	  SCALAR_SCANF SCALAR_SCANF 

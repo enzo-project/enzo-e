@@ -21,17 +21,20 @@
 
 #include "hypre-solve.hpp"
 
+//======================================================================
+
+const int debug       = 1;
+const int debug_input = 0;
+const int trace       = 1;
+
+//======================================================================
+
+#include "error.hpp"
 #include "scalar.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
 #include "domain.hpp"
 #include "grid.hpp"
-
-//======================================================================
-
-const int debug       = 0;
-const int debug_input = 0;
-const int trace       = 1;
 
 //======================================================================
 
@@ -42,7 +45,8 @@ Domain Grid::domain_;
 
 Grid::Grid (std::string parms) throw ()
   : level_ (-1),
-    counters_ (0)
+    counters_ (0),
+    u_(0)
 
 {
   // Initialize 0-sentinels in arrays
@@ -52,7 +56,7 @@ Grid::Grid (std::string parms) throw ()
 
   // Define a grid given text parameters, typically from a file
 
-  read (parms);
+  input (parms);
 
   // Allocate Faces was here.
 
@@ -68,6 +72,7 @@ Grid::Grid (std::string parms) throw ()
 
 Grid::~Grid () throw ()
 {
+  if (u_) delete [] u_;
   delete faces_;
   delete [] counters_;
 }
@@ -76,7 +81,15 @@ Grid::~Grid () throw ()
 
 void Grid::print () throw ()
 {
-  printf ("Grid\n"
+  this->write(stdout);
+}
+
+//======================================================================
+
+void Grid::write (FILE *fp) throw ()
+{
+  if (fp == 0) fp = stdout;
+  fprintf (fp,"Grid\n"
 	  "   id             %d\n"
 	  "   parent id      %d\n"
 	  "   processor      %d\n"
@@ -89,27 +102,76 @@ void Grid::print () throw ()
 	  xl_[0],xl_[1],xl_[2],
 	  xu_[0],xu_[1],xu_[2],
 	  il_[0],il_[1],il_[2],
-	  n_ [0],n_ [1],n_ [2],
-	  level_);
+	   n_ [0],n_ [1],n_ [2],
+	   level_);
+  if (u_) {
+    for (int i0=0; i0<n_[0]; i0++) {
+      for (int i1=0; i1<n_[1]; i1++) {
+	for (int i2=0; i2<n_[2]; i2++) {
+	  int i = i0 + n_[0]*(i1 + n_[1]*(i2));
+	  fprintf (fp,"%d %d %d %g\n",i0,i1,i2,u_[i]);
+	}
+      }
+    }
+  }
 }
 
 //======================================================================
 
-void Grid::write (FILE *fp) throw ()
+void Grid::read (FILE *fp) throw ()
 {
-  if (fp == 0) fp = stdout;
+  if (fp == 0) fp = stdin;
+  fscanf (fp,"Grid");
+  fscanf (fp,"   id             %d",&id_);
+  if (debug) {printf ("DEBUG %s:%d %d\n",__FILE__,__LINE__,id_); fflush(stdout); }
+  fscanf (fp,"   parent id      %d",&id_parent_);
+  if (debug) {printf ("DEBUG %s:%d %d\n",__FILE__,__LINE__,id_parent_); fflush(stdout); }
+  fscanf (fp,"   processor      %d",&ip_);
+  if (debug) {printf ("DEBUG %s:%d %d\n",__FILE__,__LINE__,ip_); fflush(stdout); }
+  fscanf (fp,"   lower position "SCALAR_SCANF SCALAR_SCANF SCALAR_SCANF,
+	  &xl_[0],&xl_[1],&xl_[2]);
+  if (debug) {printf ("DEBUG %s:%d %g %g %g\n",__FILE__,__LINE__,xl_[0],xl_[1],xl_[2]); fflush(stdout); }
+  fscanf (fp,"   upper position "SCALAR_SCANF SCALAR_SCANF SCALAR_SCANF,
+	  &xu_[0],&xu_[1],&xu_[2]);
+  fscanf (fp,"   lower index    %d %d %d",
+	  &il_[0],&il_[1],&il_[2]);
+  fscanf (fp,"   zones          %d %d %d",
+	  &n_ [0],&n_ [1],&n_ [2]);
+  fscanf (fp,"   level          %d",	 &level_);
 
-  fprintf (fp,"grid "
-	   "%d %d %d "
-	   SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF
-	   SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF
-	   "%d %d %d\n"
-	   "%d %d %d\n",
-	   id_,id_parent_,ip_,
-	   xl_[0],xl_[1],xl_[2],
-	   xu_[0],xu_[1],xu_[2],
-	   il_[0],il_[1],il_[2],
-	   n_ [0],n_ [1],n_ [2]);
+  this->allocate();
+  if (u_) {
+    int i0,i1,i2;
+    Scalar u;
+    while (fscanf(fp,"%d%d%d"SCALAR_SCANF, &i0,&i1,&i2,&u) != EOF) {
+      int i = i0 + n_[0]*(i1 + n_[1]*(i2));
+      u_[i] = u;
+    }
+  }
+}
+
+//======================================================================
+
+Scalar * Grid::values () throw ()
+{
+  assert (u_);
+  return u_;
+}
+
+//======================================================================
+
+void Grid::allocate () throw ()
+{
+  if (u_) deallocate();
+  u_ = new Scalar [n_[0]*n_[1]*n_[2]];
+}
+
+//======================================================================
+
+void Grid::deallocate () throw ()
+{
+  delete [] u_;
+  u_ = 0;
 }
 
 //======================================================================
@@ -341,7 +403,7 @@ void Grid::geomview_face_type (FILE         *fpr,
 
 //======================================================================
 
-void Grid::read (std::string parms) throw ()
+void Grid::input (std::string parms) throw ()
 {
 
   sscanf (parms.c_str(),

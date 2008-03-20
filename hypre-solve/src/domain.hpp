@@ -29,7 +29,7 @@ public:
 
   void print () throw ();
   void write (FILE *fp = 0) throw ();
-  void read (std::string parms) throw ();
+  void input (std::string parms) throw ();
 
   void set_lower (Scalar xl_0, Scalar xl_1, Scalar xl_2) 
   { xl_[0] = xl_0;
