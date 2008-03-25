@@ -1,0 +1,203 @@
+%0       1         2         3         4         5         6         7         8
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%=======================================================================
+\documentclass{article}
+%=======================================================================
+
+\include{include}
+
+%=======================================================================
+
+\begin{document}
+
+%=======================================================================
+\TITLE{Notes}{James Bordner}{}
+%=======================================================================
+
+%=======================================================================
+\section{\enzo\ performance and scaling issues}
+%=======================================================================
+
+\newcommand{\REF}[1]{\texttt{#1} (\ref{#1})}
+\begin{itemize}
+\item AMR distributed datastructure \REF{issue:amr}
+\item Sibling search \REF{issue:amr-neighbors}
+\item Dynamic load balancing \REF{issue:amr-balance}
+\item Rebuild hierarchy \REF{issue:amr-rebuild}
+\item Boundary update \REF{issue:amr-ghost-update}
+\item Particle movement \REF{issue:particle-movement}
+\item Particle location \REF{issue:particle-location}
+\item External libraries \REF{issue:libraries}
+\item Memory fragmentation \REF{issue:memory-fragment}
+\item Hierarchical memory utilization \REF{issue:memory-hierarchy-use}
+\item Gravity solver \REF{issue:method-gravity}
+\item Fault detection \REF{issue:fault-detect}
+\item Fault recovery \REF{issue:fault-recover}
+\item I/O performance and reliability \REF{issue:data-io}
+\item Data analysis \REF{issue:data-analyse}
+\item Data archiving \REF{issue:data-archive}
+\item Vector utilization \REF{issue:code-vectorize}
+\item Evaluating modifications \REF{issue:performance-measure}
+\item Test problems \REF{issue:performance-tests}
+\end{itemize}
+
+\subsection{AMR distributed datastructure} \label{issue:amr}
+\subsection{Sibling search}\label{issue:amr-neighbors}
+\subsection{Dynamic load balancing} \label{issue:amr-balance}
+\subsection{Rebuild hierarchy} \label{issue:amr-rebuild}
+\subsection{Boundary update} \label{issue:amr-ghost-update}
+\subsection{Particle movement} \label{issue:particle-movement}
+\subsection{Particle location} \label{issue:particle-location}
+\subsection{External libraries} \label{issue:libraries}
+\subsection{Memory fragmentation} \label{issue:memory-fragment}
+   problem at C++ - Fortran interface 
+\subsection{Hierarchical memory utilization} \label{issue:memory-hierarchy-use}
+\subsection{Gravity solver} \label{issue:method-gravity}
+\subsection{Fault detection} \label{issue:fault-detect}
+\subsection{Fault recovery} \label{issue:fault-recover}
+\subsection{I/O performance and reliability} \label{issue:data-io}
+   I/O speed and capacity will lag
+\subsection{Data analysis} \label{issue:data-analyse}
+   Off-site data movement
+\subsection{Data archiving}\label{issue:data-archive}
+\subsection{Vector utilization} \label{issue:code-vectorize}
+\subsection{Evaluating modifications}\label{issue:performance-measure}
+\subsection{Test problems} \label{issue:performance-tests}
+
+
+%=======================================================================
+\section{\enzo\ performance and scaling solutions}
+%=======================================================================
+
+Solutions
+\begin{itemize}
+\item Grid class refactoring \REF{solution:amr-grid-refactor}
+\item Cached AMR datastructure  \REF{solution:amr-cache}
+\item Favor larger grids  \REF{solution:amr-large-grids}
+\item Dynamic ghost zones  \REF{solution:amr-dynamic-ghosts}
+\item Octree  \REF{solution:amr-octree}
+\item Recursive Binary Box Tree (RBBT)  \REF{solution:amr-boxtree}
+\item Quantized grid patch sizes  \REF{solution:amr-grid-quantized}
+\item Load balance trees not patches  \REF{solution:amr-balance-trees}
+\item Load balance using performance measurements  \REF{solution:amr-balance-performance}
+\item Hierarchical load balancing  \REF{solution:amr-balance-hierarchical}
+\item Traverse local grids only  \REF{solution:amr-traversal-local}
+\item Reuse existing grid classes  \REF{solution:amr-grid-reuse}
+\item Inter-level refinement  \REF{solution:amr-balance-split}
+
+\item Particle groups  \REF{solution:particles-group}
+
+\item Hybrid parallelism \REF{solution:parallel-hybrid}
+\item PGAS distributed AMR hierarchy  \REF{solution:parallel-pgas}
+\item MPI-2 one-sided not MPI-1 two-sided  \REF{solution:parallel-onesided}
+\item Dynamic process creation / deletion  \REF{solution:parallel-dynamic-procs}
+\item Dynamic task allocation  \REF{solution:parallel-dynamic-tasks}
+\item Weakly-coupled parallel data analysis  \REF{solution:parallel-data-analysis}
+\item Grid patch subblocks  \REF{solution:parallel-subblocks}
+
+\item HYPRE FAC solver  \REF{solution:method-hypre-fac}
+
+\item \lcaperf\ performance monitoring  \REF{solution:performance-lcaperf}
+
+\item Asynchronous I/O  \REF{solution:data-io-asynch}
+
+\item Large mallocs  \REF{solution:memory-management}
+
+\end{itemize}
+
+\subsection{Grid class refactoring} \label{solution:amr-grid-refactor}
+\subsection{Cached AMR datastructure}  \label{solution:amr-cache}
+\subsection{Favor larger grids}\label{solution:amr-large-grids}
+   Reduces size of hierarchy datastructure
+   Reduces ghost zone overhead: reduced memory and communication
+   Improves computation / datastructure manipulation ratio
+   Reduced frequency of hierarchy rebuilding
+\subsection{Dynamic ghost zones} \label{solution:amr-dynamic-ghosts}
+\subsection{Octree} \label{solution:amr-octree}
+\subsection{Recursive Binary Box Tree (RBBT)}  \label{solution:amr-boxtree}
+\subsection{Quantized grid patch sizes} \label{solution:amr-grid-quantized}
+\subsection{Load balance trees not patches} \label{solution:amr-balance-trees}
+\subsection{Load balance using performance measurements}  \label{solution:amr-balance-performance}
+\subsection{Hierarchical load balancing}\label{solution:amr-balance-hierarchical}
+   Explicitely rebalance between nodes and within nodes 
+   Rebalance based on actual measured performance data, not estimates
+\subsection{Traverse local grids only}\label{solution:amr-traversal-local}
+\subsection{Reuse existing grid classes} \label{solution:amr-grid-reuse}
+\subsection{Inter-level refinement} \label{solution:amr-balance-split}
+When load balancing two nested grids, instead of
+sending child grid to another processor, split grids
+in ``half'' to maintain parent-child locality.
+\subsection{Particle groups} \label{solution:particles-group}
+\subsection{Hybrid parallelism}\label{solution:parallel-hybrid}
+   ``basic hybrid will make stack replication worse''
+   HYPRE can use OpenMP
+\subsection{PGAS distributed AMR hierarchy} \label{solution:parallel-pgas}
+   replace explicit messaging with UPC or CAF
+   can still have redundancy in representation to reduce communication
+   See cached
+\subsection{MPI-2 one-sided not MPI-1 two-sided}  \label{solution:parallel-onesided}
+   Use ``get''
+\subsection{Dynamic process creation / deletion} \label{solution:parallel-dynamic-procs}
+   For error fault tolerance
+\subsection{Dynamic task allocation} \label{solution:parallel-dynamic-tasks}
+\subsection{Weakly-coupled parallel data analysis}\label{solution:parallel-data-analysis}
+\subsection{Grid patch subblocks} \label{solution:parallel-subblocks}
+\subsection{HYPRE FAC solver}  \label{solution:method-hypre-fac}
+\subsection{\lcaperf\ performance monitoring} \label{solution:performance-lcaperf}
+\subsection{Asynchronous I/O} \label{solution:data-io-asynch}
+\subsection{Large mallocs} \label{solution:memory-management}
+
+
+
+
+\begin{verbatim}
+Enzo scaling issues
+Many opportunities for improving scaling, though one stands out above others.
+  Main: AMR hierarchy representation
+     grid refactoring: reduce the hierarchy storage
+        Cite Fowler ``Refactoring'': ``Extract Hierarchy'' refactorization.
+        grid a ``swiss army knife'' class
+        grid -> grid\_local grid_remote
+     MPI + OpenMP hybrid: reduce the number of copies of the hierarchy
+        OpenMP can by dynamically threaded
+        Enzo was originally thread parallel (SGI)
+     UPC for distributing storage of hierarchy representation as well as data
+    store required neighbor information (local and adjacent grids only)
+    update less frequently (rebuild less often, and expense of larger grids)
+  load balancing
+     hierarchical parallelism: balance between nodes as well as within nodes
+
+  Performance evaluation     
+     evaluate using lcaperf
+       monitors MPI communication via PMPI
+       monitors computation (floating point and memory accesses) via PAPI
+       monitors HDF5 I/O through user-defined metrics
+       monitors dynamic memory allocation by overloading new/delete: current,
+         and high-water marks
+       Flexible quantization of performance data: currently can accumulate global
+          metrics, or metrics per component, per timestep, and per
+          hierarchy level
+
+  External libraries
+     HDF5
+     HYPRE
+     lcaperf: side project to Enzo, optional, will require modifications
+       to support OpenMP, and it writes one file per MPI process
+    
+  particle movement
+  rebuild hierarchy
+  boundary update
+  allocate field data in chunks
+  memory fragmentation
+     separate allocation of field data and grid classes
+     many small grid classes, but uniform size
+  
+
+HYPRE 
+   scalability
+\end{verbatim}
+
+%==================================================================
+\end{document}
+%=======================================================================
+
