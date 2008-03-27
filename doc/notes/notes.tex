@@ -11,64 +11,101 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Notes}{James Bordner}{}
+\title{ {\huge \enzo\ performance issues and solutions}  \\ \vspace{0.1in}
+     \vspace{-0.1in}    }
+\author{ James Bordner \\
+        Laboratory for Computational Astrophysics\\
+        University of California, San Diego}
+\maketitle
 %=======================================================================
 
 %=======================================================================
-\section{\enzo\ performance and scaling issues}
+\section{Introduction}
 %=======================================================================
 
-Compared to those available today, high performance computers in the
-upcoming generation are expected to be significantly broader and
-deeper.  ``Broader'' in the sense of increased computational
-parallelism, with the number of simultaneous floating-point operations
-approaching a million @@@; and ``deeper'' in the sense that
-parallelism will be organized into more layers (in particular with the
-addition of a ``core'' layer) and deeper memory hierarchies.
+The purpose of this document is to assemble a list of issues of, and a
+corresponding list of solutions to, \enzo's performance.  While
+parallel scalability is the main performance issue, we will include
+issues and solutions related to all aspects of serial and parallel
+performance.  The goal is to provide a single reference for
+performance issues related to \enzo, to help with the analysis and
+prioritization of issues, and to aid the design and implementation of
+solutions.  This will be used both for modifying the current \enzo\
+application, as well as in the design and implementation of the
+follow-on \cello\ application currently being developed.
+
+%=======================================================================
+\section{Application Performance}
+%=======================================================================
+
+Compared to those available today, upcoming generations of high
+performance computing platforms are expected to be progressively
+broader and deeper.  ``Broader'' in the sense of increased
+computational parallelism, with the number of simultaneous
+floating-point operations measured in the millions and more; and
+``deeper'' in the sense that parallelism will be organized into ever
+more layers (supernode, node, chip, core, FPU) and data will be
+organized into deep memory hierarchies (archive, disk, main memory,
+cache, registers) with ever increasing performance penalties between
+levels.
 
 For a scientific application to be truly efficient on high performance
 computers, it must take the fullest advantage of both the machine's
 breadth and depth.  Memory access patterns must make efficient use of
-the memory hierarchy by maximizing data reuse and hiding latency;
-communication within each parallel hierarchy level must be efficiently
-managed; parallel computations must be evenly load-balanced within
-each parallel hierarchy level; parallel efficiency must be maintained
-at all levels, from nodes to floating-point units; global
-synchronization points must be kept to a bare minimum or eliminated
-entirely; all software algorithms' computation, memory usage, and
-communication must all be scalable with both problem size and machine
-size; software must be designed to efficiently map the software
-datastructures---even when they are dynamically adapting to changes in
-the underlying scientific problem being solved---to the available
-hardware resources; and the software may need to adapt to changing
-hardware resources, due to increased fault rates from increased
-hardware complexity and size.  All of this and more are required for
-scientific applications, in addition to solving the target scientific
-problem.
+the memory hierarchy by maximizing data reuse in low levels by
+increasing data locality, and hiding access latency in the higher
+levels.  Communication within each parallel hierarchy level must be
+efficiently managed.  Parallel computations must be evenly
+load-balanced within each parallel hierarchy level.  High parallel
+efficiency must be maintained at all levels, from nodes and supernodes
+to cores and FPU's.  Global synchronization points must be minimized.
+All software algorithms' computation, memory usage, and communication
+must all be scalable with both problem size and machine size.
+Software must be designed to efficiently map the software data
+structures---even when they are dynamically adapting to changes in the
+underlying scientific problem being solved---to the available hardware
+resources.  And the software may need to adapt to changing hardware
+resources, due to increased fault rates from increased hardware
+complexity and size.  All of these and more are required
+simultaneously of a parallel scientific application for it to be truly
+efficient.
 
-Fortuntely, both new and improved tools are available for high
-performance scientific computing applications to take advantage of the
-increasingly complex hardware resources.  Improved compiler
-parallelizing and optimization technology, new and improved
-application software algorithms and datastructures, better performance
-and optimization software tools and techniques, new libraries and
-languages for supporting parallelization, parallel debugging tools,
-and software engineering practices that help control the ever-growing
-software complexity, and help increase reliability, flexibility, and
-adaptability.
+Fortuntely, new and improved tools are available for developers of
+high performance scientific computing applications to take advantage
+of the increasingly complex and growing hardware resources.  Improved
+compiler parallelizing and optimization technology; new and improved
+parallel algorithms and distributed data structures; better tools,
+libraries and techniques for performance measurment and optimization;
+new and improved libraries and languages for developing parallel
+applications; continually improving parallel debugging tools; and
+improved software engineering practices that help control the
+ever-growing software complexity, and help developers write software
+that is more reliable, flexible, reusable, modifyable, and
+maintainable.
 
+%=======================================================================
+\section{\enzo\ performance issues}
+%=======================================================================
 
 \newcommand{\REF}[1]{\ref{#1}}
 \newcommand{\TAG}[1]{\texttt{#1}}
+\newcommand{\numgrids}{n}
+\newcommand{\numprocs}{p}
+\newcommand{\sizefield}{|F|}
+\newcommand{\sizefields}{\sum_i^n |F_i|}
+\newcommand{\sizegrid}{|G|}
+\newcommand{\sizegridlocal}{|G_l|}
+\newcommand{\sizegridremote}{|G_r|}
+
 
 \begin{tabular}{c|l|l}
-\REF{issue:amr} & \TAG{issue:amr} & AMR distributed datastructure \\
+\REF{issue:amr-distribute} & \TAG{issue:amr-distribute} & AMR distributed data structure \\
 \REF{issue:amr-neighbors} & \TAG{issue:amr-neighbors} & Sibling search \\
 \REF{issue:amr-balance} & \TAG{issue:amr-balance} & Dynamic load balancing \\
 \REF{issue:amr-rebuild} & \TAG{issue:amr-rebuild} & Rebuild hierarchy \\
 \REF{issue:amr-ghost-update} & \TAG{issue:amr-ghost-update} & Boundary update \\
 \REF{issue:particle-movement} & \TAG{issue:particle-movement} & Particle movement \\
-\REF{issue:particle-location} & \TAG{issue:particle-location} & Particle location \\
+\REF{issue:particle-distribution} & \TAG{issue:particle-distribution} & Particle distribution \\
 \REF{issue:libraries} & \TAG{issue:libraries} & External libraries \\
 \REF{issue:memory-fragment} & \TAG{issue:memory-fragment} & Memory fragmentation \\
 \REF{issue:memory-hierarchy-use} & \TAG{issue:memory-hierarchy-use} & Hierarchical memory utilization \\
@@ -79,6 +116,7 @@ adaptability.
 \REF{issue:fault-recover} & \TAG{issue:fault-recover} & Fault recovery \\
 \REF{issue:data-io} & \TAG{issue:data-io} & I/O performance and reliability \\
 \REF{issue:data-analyse} & \TAG{issue:data-analyse} & Data analysis \\
+\REF{issue:data-relocate} & \TAG{issue:data-relocate} & Data relocation \\
 \REF{issue:data-archive} & \TAG{issue:data-archive} & Data archiving \\
 \REF{issue:code-vectorize} & \TAG{issue:code-vectorize} & Vector utilization \\
 \REF{issue:performance-measure} & \TAG{issue:performance-measure} & Evaluating modifications \\
@@ -86,69 +124,237 @@ adaptability.
 \end{tabular}
 
 %-----------------------------------------------------------------------
-\subsection{AMR distributed datastructure} \label{issue:amr}
+\subsection{AMR distributed data structure} \label{issue:amr-distribute}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+
+ One scaling issue that we have determined must be addressed is how
+ the AMR hierarchy data structure is stored.  Currently, the AMR
+ hierarchy is represented using C++ \code{grid} objects, which are
+ assigned to MPI processes.  Each \code{grid} may be conceptually
+ either ``local'' or ``remote'', depending on whether the \code{grid}
+ object is assigned to the local MPI process or not.
+
+ Even though only ``local'' \code{grid} objects have storage allocated
+ for data fields, each MPI process stores both local and remote
+ \code{grid}s.  The total storage is thus \[ \numgrids (\numprocs |G|
+ + |F|)\] where $\numgrids$ is the number of grids, $\numprocs$ is the
+ number of MPI processes, $|G|$ is the size in bytes of a \code{grid}
+ object excluding data fields, and $|F|$ is the size in bytes of the
+ data fields in a \code{grid} object.  Currently, $|G|$ is $2248$.
+
+ Since $|F| \gg |G|$, for moderate sized runs the memory requirement
+ behaves as $\numgrids |F|$.  However, for large enough runs
+ ($\numgrids$ and $\numprocs$ large), the memory for each processor
+ storing all \code{grid}s begins to dominate the memory for data
+ fields.  The overhead per processor is roughly $\numgrids |G|$.  This
+ is independent of the number of processors used, so the maximum
+ simulation size is currently limited by the amount of memory
+ available for each processor, not the total number of processors
+ available.
+
+The main datastructure in \enzo-1.0.0 is a hierarchy of grids.  Each
+grid is represented using a C++ \code{grid} object, and may be either
+``local'' or ``remote'', depending on whether the
+\code{grid} object is assigned to the processor or not (that is, if
+\verb+gp->ProcessorNumber == MyProcessorNumber+, where
+\code{gp} is a pointer to a \code{grid} object, \code{ProcessorNumber}
+is the \code{grid} data member storing the MPI rank of the processor to
+which the \code{grid} object is assigned, and \code{MyProcessorNumber}
+is the MPI rank of the executing processor).
+
+Even though only ``local'' \code{grid} objects have storage allocated
+for data fields, all processors must store the member data for all
+\code{grid} objects.  The total storage is thus 
+\[ \numgrids (\numprocs |G| + |F|)\]
+where $\numgrids$ is the number of grids, $\numprocs$ is the number of
+processors, $|G|$ is the size in bytes of a
+\code{grid} object~\footnote{\code{sizeof(grid)} = $129i + 16F + 3f +
+133p$, where $i = $\code{sizeof(int)}, $F = $\code{sizeof(FLOAT)}, $f
+= $\code{sizeof(float)}, and $p = $\code{sizeof(void *)}.  For 64-bit
+everythings, this is 2248 bytes.}  excluding data fields, and $|F|$ is
+the size in bytes of the data fields in a \code{grid} object.
+
+
+Since $|F| \gg |G|$, for small runs the memory requirement behaves as
+$n |F|$.  However, for large enough runs ($n$ and $p$ large), the
+memory for each processor storing all \code{grid}s can begin to
+dominate the memory for data fields.  The overhead per processor is
+roughly $\numgrids |G|$, where $|G|$ is roughly $2K$ bytes.  This is
+independent of the number of processors used, so the maximum
+simulation size is limited by the amount of memory available for each
+processor, not the total number of processors available.
+
 %-----------------------------------------------------------------------
 \subsection{Sibling search}\label{issue:amr-neighbors}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+
+Grid patches contain ghost zones which must be refreshed periodically
+from neighboring grid patches.  This requires that each grid patch know
+who its neighbors are.  Currently, this is done in \enzo\ using a
+chaining mesh approach, which localizes the mesh and reduces the
+number of grid-grid overlap checks.
+
+
 %-----------------------------------------------------------------------
 \subsection{Dynamic load balancing} \label{issue:amr-balance}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+
+As the AMR grid hierarchy adapts to evolving features in a simulation,
+the workload can become unbalanced across processors.  This can limit
+the parallel efficiency of \enzo, since less-heavily loaded processors
+will be idle, while waiting for more heavily-loaded processors to
+complete their computing tasks.
+
+\devel{load balancing---current \enzo\ approach and limitations}
+%
+To even out the distribution of computation among processes, \enzo\
+performs a simple dynamic load balancing step.  Currently, the
+algorithm used is very simple: it relocates grid patches from heavily
+loaded processors to lightly loaded processors, using a grid's memory
+usage as an indicator of its computational load.  The algorithm has
+many known disadvantages.  First, it does not take locality and
+communication costs into accout, and second, the metric it uses for
+estimating computational load can be inaccurate.
+
+Want to improve by taking into account
+\begin{itemize}
+\item parent-child grid locality
+\item sibling grid locality
+\item costs of rebalancing 
+\item communication versus computation tradeoff
+\item adaptivity to hardware / software datastructure / physics evolution
+\end{itemize}
+
 %-----------------------------------------------------------------------
 \subsection{Rebuild hierarchy} \label{issue:amr-rebuild}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+
+
+
 %-----------------------------------------------------------------------
 \subsection{Boundary update} \label{issue:amr-ghost-update}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Particle movement} \label{issue:particle-movement}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
-\subsection{Particle location} \label{issue:particle-location}
+\subsection{Particle distribution} \label{issue:particle-distribution}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{External libraries} \label{issue:libraries}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Memory fragmentation} \label{issue:memory-fragment}
 %-----------------------------------------------------------------------
-   problem at C++ - Fortran interface 
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Hierarchical memory utilization} \label{issue:memory-hierarchy-use}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Gravity solver} \label{issue:method-gravity}
 %-----------------------------------------------------------------------
 
-  Enzo often needs to efficiently solve Poisson's equation over the
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+
+  \enzo\ often needs to efficiently solve Poisson's equation over the
   grid hierarchy, most notably to compute the gravitational
   acceleration at each point.  It does this using a combination FFT
-  and multi-grid approach, where an FFT is used on the root grid (to
-  easily allow for periodic boundary conditions), and multi-grid is
+  and multigrid approach, where an FFT is used on the root grid (to
+  easily allow for periodic boundary conditions), and multigrid is
   used in each patch, with boundary conditions interpolated from
   parent to child.  This approach is quite fast (anecdotal evidence
   places it at least several times faster than the FLASH AMR code),
   but has two problems.  The first is that it produces a relatively
   noisy solution, which is generally fine for cosmological
   simulations, but more accurate results are required for the other
-  applications that Enzo is now being used for.  The second problem is
+  applications that \enzo\  is now being used for.  The second problem is
   that the acceleration predicted in the ghost zones of a patch can be
   inconsistent with the solution derived in the sibling patch.  The
   solution across sibling grids can be matched with an iterative
-  approach, but at the cost of more communication between patches.  We
-  intend to switch gravity solvers and use the approach described in
-  \cite{hg00}.  This is quite similar to our current approach but adds
-  a correction cycle that uses the fine grid solution to improve the
-  coarse grid result, which is then re-interpolated to the child grid.
-  This technique both dramatically decreases the size of the remaining
-  error, and restores consistency between patches.  This will allow us
-  to drop the current sibling iteration step and so reduce the amount
-  of communication required.
+  approach, but at the cost of more communication between patches. 
+
+  We intend to switch gravity solvers and use the approach described
+  in \cite{hg00}.  This is quite similar to our current approach but
+  adds a correction cycle that uses the fine grid solution to improve
+  the coarse grid result, which is then re-interpolated to the child
+  grid.  This technique both dramatically decreases the size of the
+  remaining error, and restores consistency between patches.  This
+  will allow us to drop the current sibling iteration step and so
+  reduce the amount of communication required.
 
 
 %-----------------------------------------------------------------------
 \subsection{Global timesteps} \label{issue:method-timestep-global}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
 
   Timesteps are determined globally: all grids on all processors
   within a level of the AMR hierarchy are advanced at the same
@@ -169,6 +375,10 @@ adaptability.
 \subsection{Sliver timesteps} \label{issue:method-timestep-sliver}
 %-----------------------------------------------------------------------
 
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
   ``Sliver'' timesteps arise from global timestepping on successive
   levels of the hierarchy not being integral factors of one another.
   If the timestep on one level is $k$, and the timestep on the
@@ -185,38 +395,105 @@ adaptability.
 %-----------------------------------------------------------------------
 \subsection{Fault detection} \label{issue:fault-detect}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Fault recovery} \label{issue:fault-recover}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{I/O performance and reliability} \label{issue:data-io}
 %-----------------------------------------------------------------------
-   I/O speed and capacity will lag
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+
+``I/O speed and capacity will lag''
+
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Data analysis} \label{issue:data-analyse}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
    Off-site data movement
+
+\vspace{2in}
+
+%-----------------------------------------------------------------------
+\subsection{Data relocation}\label{issue:data-relocate}
+%-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Data archiving}\label{issue:data-archive}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Vector utilization} \label{issue:code-vectorize}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Evaluating modifications}\label{issue:performance-measure}
 %-----------------------------------------------------------------------
+
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Test problems} \label{issue:performance-tests}
 %-----------------------------------------------------------------------
 
+\devel{Description of the issue}
+\devel{Current implementation}
+\devel{Current limitations}
+\devel{Desired features}
+\vspace{2in}
 
 %=======================================================================
-\section{\enzo\ performance and scaling solutions}
+\section{\enzo\ performance solutions}
 %=======================================================================
 
 \begin{tabular}{c|l|l}
 \REF{solution:amr-grid-refactor} & \TAG{solution:amr-grid-refactor} & Grid class refactoring \\
-\REF{solution:amr-cache} & \TAG{solution:amr-cache} & Cached AMR datastructure  \\
+\REF{solution:amr-cache} & \TAG{solution:amr-cache} & Cached AMR data structure  \\
 \REF{solution:amr-large-grids} & \TAG{solution:amr-large-grids} & Favor larger grids  \\
 \REF{solution:amr-dynamic-ghosts} & \TAG{solution:amr-dynamic-ghosts} & Dynamic ghost zones  \\
 \REF{solution:amr-octree} & \TAG{solution:amr-octree} & Octree  \\
@@ -248,7 +525,7 @@ adaptability.
 \subsection{Grid class refactoring} \label{solution:amr-grid-refactor}
 %-----------------------------------------------------------------------
 
-For moderate numbers of processors, the current datastructure used for
+For moderate numbers of processors, the current data structure used for
 storing the AMR grid hierarchy is adequate.  Even though the hierarchy
 topology (i.e. metadata) is stored redundantly on each processor, the
 extra memory overhead involved is insignificant because the data
@@ -260,23 +537,14 @@ to the point where we would be memory rather than cpu limited.
 Thus, for \enzo\ to scale to the petascale level, the memory overhead for
 storing the AMR hierarchy must be reduced.
 
-\newcommand{\numgrids}{n}
-\newcommand{\numprocs}{p}
-\newcommand{\sizegrid}{|G|}
-\newcommand{\sizegridlocal}{|G_l|}
-\newcommand{\sizegridremote}{|G_r|}
-\newcommand{\sizefield}{|F|}
-\newcommand{\sizefields}{\sum_i^n |F_i|}
-
 The memory required for storing \enzo's current AMR
-datastructure can be approximated as $\sizefield + \numgrids \numprocs
+data structure can be approximated as $\sizefield + \numgrids \numprocs
 \sizegrid$, where the first term $\sizefield$ is the field
 variable data, and the second term $\numgrids \numprocs \sizegrid$ is
 the overhead for storing the grid hierarchy data structure.  Here
 $\numgrids$ is the number of grid patches, $\numprocs$
 is the number of processors, and $\sizegrid$ is the storage required
 by a C++ \code{grid} object.
-
 
 One approach to reducing the size of the overhead term would be
 to split the \code{grid} class into two subclasses \code{grid\_local}
@@ -292,21 +560,39 @@ of the \code{grid\_local} class.  The advantage of doing this is that the
 the variables in the \code{grid} class are only required for local
 grids.  Also, a vast majority of the grid classes are these much
 smaller \code{grid\_remote} objects.  Thus the memory savings for this
-modification would be quite large---a factor of roughly $15$ over the
+modification would be quite large---a factor of $15$-$20$ over the
 current approach.
 
+ We have several plans for addressing this issue.  The first is to
+ split the \code{grid} class into \code{grid\_local} and
+ \code{grid\_remote} subclasses, and remove the unnecessary member
+ data from the \code{grid\_remote} class.  Since most \code{grid}s (on
+ average $(\numprocs-1)/\numprocs$) are \code{grid\_remote} grids, and
+ since the bulk of the member data is only required for
+ \code{grid\_local} grids, the memory savings for this modification
+ will be very high: about a factor of $15$ to $20$.
+
 %-----------------------------------------------------------------------
-\subsection{Cached AMR datastructure}  \label{solution:amr-cache}
+\subsection{Cached AMR data structure}  \label{solution:amr-cache}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
 \subsection{Favor larger grids}\label{solution:amr-large-grids}
 %-----------------------------------------------------------------------
 
+ A second improvement we are investigating is to modify the AMR
+ hierarchy gridding algorithm to favor larger grid patches, and
+ assigning multiple ($2$ to $8$) threads to each grid patch.  This
+ would have several advantages.  First, it would increase scalability
+ by allowing larger number of parallel tasks for a given AMR problem
+ size.  Second, in would increase the volume-to-surface area ratio,
+ decreasing inter-grid communication relative to computation, and
+ reducing the ratio of ghost zones to computational zones.  Thirdly,
+ the hierarchy would be smaller for a given problem size, which would
+ reduce the AMR hierarchy management tasks, such as hierarchy
+ rebuilding and load balancing.  Lastly, it could help reduce the
+ frequency of hierarchy rebuilding, since larger grid patches would
+ not need to be regridded as frequently as smaller ones.
 
-   Reduces size of hierarchy datastructure
-   Reduces ghost zone overhead: reduced memory and communication
-   Improves computation / datastructure manipulation ratio
-   Reduced frequency of hierarchy rebuilding
 %-----------------------------------------------------------------------
 \subsection{Dynamic ghost zones} \label{solution:amr-dynamic-ghosts}
 %-----------------------------------------------------------------------
@@ -344,19 +630,51 @@ current approach.
 %-----------------------------------------------------------------------
 \subsection{Octree} \label{solution:amr-octree}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
+
+
 %-----------------------------------------------------------------------
 \subsection{Recursive Binary Box Tree (RBBT)}  \label{solution:amr-boxtree}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
+
+
 %-----------------------------------------------------------------------
 \subsection{Quantized grid patch sizes} \label{solution:amr-grid-quantized}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
+
+
 %-----------------------------------------------------------------------
 \subsection{Load balance trees not patches} \label{solution:amr-balance-trees}
 %-----------------------------------------------------------------------
 
+For example, subtrees of grids can be relocated instead of individual
+grids, which would help maintain locality between nested grids.
+
 %-----------------------------------------------------------------------
 \subsection{Load balance using performance measurements}  \label{solution:amr-balance-performance}
 %-----------------------------------------------------------------------
+
+First, the estimate of computational load can be
+greatly improved by using actual measured performance data from
+\lcaperf\ instead of the current crude estimates.  This would be
+particularly helpful in simulations where the cost of physics
+algorithms are highly non-uniform, such as in the chemistry module,
+which performs variable subcycling, or the hydrodynamics module in the
+presence of strong isolated shocks.  
+
+MPI + OpenMP model, tasks within a node could be balanced by assigning
+grids to threads dynamically instead of statically when the grid patch
+is created.  We also plan to incorporate ideas from the cutting-edge
+dynamic load balancing research by Zhiling Lan, who has used \enzo\ to
+develop load balancing algorithms that take into account heterogeneous
+and fluctuating network performance, heterogeneous processors, and AMR
+hierarchy features unique to cosmological simulations~\cite{LaTa06}.
+
 
 %-----------------------------------------------------------------------
 \subsection{Load balance using space-filling curves}  \label{solution:amr-balance-hilbert}
@@ -372,12 +690,17 @@ load balance and maintain maximal sibling locality.  This technique
 has been used successfully in other SAMR applications
 \cite{WHH03,LWBH07}.
 
+And
+space-filling (e.g.~Hilbert or Morton) curves can be used to help
+preserve locality between sibling grids.  For the flat MPI model,
+space filling curves would also help reduce inter-node communication
+by keeping more tightly-coupled grids on the same node.
 
 %-----------------------------------------------------------------------
 \subsection{Hierarchical load balancing}\label{solution:amr-balance-hierarchical}
 %-----------------------------------------------------------------------
 
-Finally, Enzo's current load balancer does not address deep-memory
+Finally, \enzo\ 's current load balancer does not address deep-memory
 hierarchies, multi-core architectures and heterogeneous/hybrid design
 that are common in the emerging HPC systems. On multi-core based
 systems, the communication cost across nodes may be several orders of
@@ -393,7 +716,7 @@ approach to the new hybrid architecture.
 \subsection{Traverse local grids only}\label{solution:amr-traversal-local}
 %-----------------------------------------------------------------------
 
-  \enzo's datastructures are currently implemented such that a
+  \enzo's data structures are currently implemented such that a
   processor traverses a linked list of all grids in a level, tests
   each grid to see whether it is assigned to the given processor, and
   only perform computations on the grid data if the grid is assigned
@@ -411,18 +734,27 @@ approach to the new hybrid architecture.
 %-----------------------------------------------------------------------
 \subsection{Reuse existing grid classes} \label{solution:amr-grid-reuse}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Inter-level refinement} \label{solution:amr-balance-split}
 %-----------------------------------------------------------------------
+
 When load balancing two nested grids, instead of
 sending child grid to another processor, split grids
 in ``half'' to maintain parent-child locality.
+
 %-----------------------------------------------------------------------
 \subsection{Particle groups} \label{solution:particles-group}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Hybrid parallelism}\label{solution:parallel-hybrid}
 %-----------------------------------------------------------------------
+
    ``basic hybrid will make stack replication worse''
    HYPRE can use OpenMP
 
@@ -446,7 +778,7 @@ in ``half'' to maintain parent-child locality.
   could easily be implemented with one of the hybrid parallel models
   described in the next section.
 
-   While the above modifications to the AMR datastructure should allow
+   While the above modifications to the AMR data structure should allow
    \enzo\ to run on machines with on the order of $10^4$ to $10^5$
    processors, extending to $10^6$ processors may require reducing the
    overhead even further.  The ultimate improvement memory-wise would
@@ -463,7 +795,7 @@ in ``half'' to maintain parent-child locality.
   architectures is largely unsettled, it is widely accepted that there
   are two common ways for parallel programming in multicore systems.
   One is \emph{the flat MPI model}, adopted by the current version of
-  Enzo, in which separate single-threaded MPI processes are executed
+  \enzo, in which separate single-threaded MPI processes are executed
   on each processing core. The other is called \emph{hybrid
   programming model}, where one MPI process is used per node and a
   multi-threaded, shared memory approach is exploited in the multiple
@@ -472,12 +804,37 @@ in ``half'' to maintain parent-child locality.
   model with hierarchical architectures is that it involves
   unnecessary overhead to copy data within a node.
 
+  An additional factor of $8$ to $16$, depending on the number of
+  computational elements used per shared memory node, can be gained by
+  going to hybrid MPI + OpenMP parallel model.  Hybrid parallelism is
+  known to be less efficient in general compared to using MPI alone,
+  due to thread management overhead, cache coherence, etc.; however,
+  we expect that the reduction in memory overhead for storing the AMR
+  hierarchy will help performance as well as scalability, which will
+  help counteract this probable loss of performance.  Furthermore,
+  task assignment can easily be performed dynamically, so that the
+  load balancing problem will only need to explicitly be done between
+  nodes and not between each processing element.  Furthermore, since
+  \enzo\ actually began as a shared memory parallel application before
+  it was modified to use MPI, we do not expect adding OpenMP support
+  to be too difficult a task. % Is this true?
+
 %-----------------------------------------------------------------------
 \subsection{PGAS distributed AMR hierarchy} \label{solution:parallel-pgas}
 %-----------------------------------------------------------------------
-   replace explicit messaging with UPC or CAF
-   can still have redundancy in representation to reduce communication
-   See cached
+
+ If the combined factor of $100$ to $300$ improvement that the above
+ two modifications would provide is still insufficient to run large \enzo\
+ AMR problems efficiently on $200K$ cores, we are also investigating
+ additional ways to improve the AMR hierarchy data structure overhead.
+ One modification we are evaluating is using UPC to store a single
+ distributed copy of the AMR hierarchy topology rather than multiple
+ redundant copies.  This would not just reduce the size of the
+ overhead, but would indeed minimize it.  It would introduce some
+ additional communication, but this could be managed by caching the
+ portions of the hierarchy topology that are repeatedly accessed by
+ the local MPI process.  
+
 %-----------------------------------------------------------------------
 \subsection{MPI-2 one-sided not MPI-1 two-sided}  \label{solution:parallel-onesided}
 %-----------------------------------------------------------------------
@@ -498,20 +855,33 @@ in ``half'' to maintain parent-child locality.
 %-----------------------------------------------------------------------
 \subsection{Dynamic task allocation} \label{solution:parallel-dynamic-tasks}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Weakly-coupled parallel data analysis}\label{solution:parallel-data-analysis}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{Grid patch subblocks} \label{solution:parallel-subblocks}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{P3DFFT for unigrid gravity} \label{solution:method-p3dfft}
 %-----------------------------------------------------------------------
 
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{HYPRE FAC for AMR gravity and radiation}  \label{solution:method-hypre-fac}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
+
 %-----------------------------------------------------------------------
 \subsection{\lcaperf\ performance monitoring} \label{solution:performance-lcaperf}
 %-----------------------------------------------------------------------
@@ -521,7 +891,7 @@ in ``half'' to maintain parent-child locality.
  including performance counter hardware data (via PAPI~\cite{BrDo00}),
  MPI communication (via MPI's profiling interface), dynamic memory
  allocation (via overloaded C++ \code{new} and \code{delete}
- operators), and software datastructure-related metrics, e.g.~number
+ operators), and software data structure-related metrics, e.g.~number
  of grids, number of grid zones, or number of timesteps per level (via
  user-defined counters), all for multiple user-defined code sections.
  \lcaperf's very flexible post-processing utilities in turn can
@@ -555,103 +925,56 @@ in ``half'' to maintain parent-child locality.
   parallel communication technology: processors in node share memory;
   cores within processors share memory bandwidth}
 
+ To effectively improve \enzo's scalability, all aspects of its
+ parallel performance must be measured, analysed, and evaluated.  To
+ enable this, our group has written the \lcaperf\ performance toolkit
+ specifically with \enzo's complex and dynamic data structures in
+ mind.  \lcaperf\ can measure the full range of how \enzo\ uses a
+ parallel platform.  This includes utilization of processors in terms
+ of floating point operations and memory accesses (via
+ PAPI~\cite{BrDo00}), utilization of the parallel interconnect in
+ terms of MPI message counts and sizes (via MPI's PMPI profiling
+ interface), dynamic memory usage in terms of current and high-water
+ heap memory allocated (via overloaded C++ \code{new} and
+ \code{delete} operators), and disk usage in terms of the amount of
+ data read from and written to disk (via user-defined metrics
+ associated with calls to HDF5).  
+
+ All of these metrics are collected for each root-level cycle of the
+ simulation, each processing phase within the cycle, each level of the
+ AMR hierarchy, and each MPI process.  Additionally, information about
+ dynamic data structures are recorded, including number of AMR grids
+ assigned to each MPI process, the total number of grid zones on each
+ MPI process, the number of timesteps in each AMR level, and (soon and
+ trivially) the number of particles assigned to each MPI process.
+ Lastly, \lcaperf's very flexible post-processing utilities can
+ compute almost arbitrary derived metrics, by applying arithmetic,
+ finite-difference, quadrature, interpolation, and reduction
+ operations to the collected performance counters.  
+
+ Since derived metrics can be defined in terms of multiple runs of the
+ application, derived quantaties trivially encompass such metrics as
+ load balance efficiency histories, parallel efficiency histories, and
+ direct comparisons of all metrics between two code variations applied
+ to the same problem.  Visualization is simple but effective:
+ \lcaperf\ can plot any metric, recorded or derived, versus any other
+ metric, via the open source \code{gnuplot} package.  \lcaperf\ is
+ thus ideally suited to providing direct quantitative feedback about
+ comprehensive parallel performance of \enzo\ as we implement our
+ scaling improvements to bring \enzo\ AMR from the Terascale to the
+ Petascale.
+
 %-----------------------------------------------------------------------
 \subsection{Asynchronous I/O} \label{solution:data-io-asynch}
 %-----------------------------------------------------------------------
+
+\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Large mallocs} \label{solution:memory-management}
 %-----------------------------------------------------------------------
 
-
-\begin{verbatim}
-Enzo scaling issues
-Many opportunities for improving scaling, though one stands out above others.
-  Main: AMR hierarchy representation
-     grid refactoring: reduce the hierarchy storage
-        Cite Fowler ``Refactoring'': ``Extract Hierarchy'' refactorization.
-        grid a ``swiss army knife'' class
-        grid -> grid\_local grid_remote
-     MPI + OpenMP hybrid: reduce the number of copies of the hierarchy
-        OpenMP can by dynamically threaded
-        Enzo was originally thread parallel (SGI)
-     UPC for distributing storage of hierarchy representation as well as data
-    store required neighbor information (local and adjacent grids only)
-    update less frequently (rebuild less often, and expense of larger grids)
-  load balancing
-     hierarchical parallelism: balance between nodes as well as within nodes
-
-  Performance evaluation     
-     evaluate using lcaperf
-       monitors MPI communication via PMPI
-       monitors computation (floating point and memory accesses) via PAPI
-       monitors HDF5 I/O through user-defined metrics
-       monitors dynamic memory allocation by overloading new/delete: current,
-         and high-water marks
-       Flexible quantization of performance data: currently can accumulate global
-          metrics, or metrics per component, per timestep, and per
-          hierarchy level
-
-  External libraries
-     HDF5
-     HYPRE
-     lcaperf: side project to Enzo, optional, will require modifications
-       to support OpenMP, and it writes one file per MPI process
-    
-  particle movement
-  rebuild hierarchy
-  boundary update
-  allocate field data in chunks
-  memory fragmentation
-     separate allocation of field data and grid classes
-     many small grid classes, but uniform size
-  
-
-HYPRE 
-   scalability
-
-
-Collins:
-
-\enzo\  has allowed us to maximize the resources currently available in
-high performance computing.  We are confident that the improvements
-outlined above, namely reducing the hierarchy overhead and hybrid
-MPI/OpenMP, will carry us into Peta Scale computing quite well.
-However, we feel that it is important to begin anticipating problems
-we might encounter as we reach towards 200,000 cores, as well as ways
-to most efficiently utilize the machinery not yet available to us.
-
-They physics modules in \enzo\  scale extremely well up to all measurable
-processor counts, so the last remaining roadblocks all entail grid
-accounting and manipulation mechanisms. The first is the load
-balancing.  While \enzo's load balancing has worked well through the
-Tera Scale Computing era, the advent of hierarchical parallelism as
-will be seen in Blue Waters offers a new advantage, in that shorter
-communication times within a node/super node can be better taken
-advantage of for grid patches that require a relatively high
-communication traffic between them.  To this end, we will be making
-the load balancing aware of the communication cost of distribution, as
-well as the computation and memory costs.  We will also be utilizing
-the dynamic analysis capability of lcaPerf to monitor the simulation's
-needs, and adapt the load balancing accordingly.
-
-We anticipate that the next area of improvement needs (because lets
-face it, a code like this will always have improvements to be made)
-will be in the routines that examine and rebuild \enzo's dynamic
-hierarchy of subgrids.  There are two parts that rely heavily on
-communication that, depending on how UPC and MPI2 work in combination
-with the extant machinery, may be bottle necks to performance.  The
-first is the broadcasts of new grids that are generated at every
-timestep, and the second is the copy of data from old grids to new.
-While these will of course be improved by the refactoring of the
-hierarchy and the introduction of hybrid MPI/OpenMP, if they prove to
-still be problematic, we are working on tools to avoid these problems
-now, so if they do become a problem our performance isn't stalled very
-long.  These include altering the rebuild schedule, while anticipating
-and mitigating the loss of accuracy that may come from not rebuilding
-every timestep, and creating new processor/grid relational mappings to
-reduce the amount of work needed to determine communication needs.
-\end{verbatim}
+\vspace{2in}
 
 %==================================================================
 \end{document}
