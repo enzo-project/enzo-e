@@ -1,4 +1,4 @@
-ALL = notes \
+ALL = performance \
       project \
       requirements \
       design \
@@ -10,13 +10,13 @@ ALL = notes \
 .PHONY: all
 all: $(ALL)
 
-.PHONY: notes
+.PHONY: performance
 
 .PHONY: $(ALL)
 
-notes:
-	cd notes; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C notes
+performance:
+	cd performance; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C performance
 project:
 	cd project; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C project
