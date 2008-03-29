@@ -107,6 +107,10 @@ protected:
   /// Create a grid given the string "<id> <id_parent> <ip> <xl>[3] <xu>[3], <n>[3]
   Grid (std::string parms) throw ();
 
+  /// Create a grid given a grid file as written by write()
+
+  Grid (FILE *) throw ();
+
   ~Grid () throw ();
 
   //--------------------------------------------------------------------
@@ -126,7 +130,7 @@ protected:
 
   /// Write the grid to a file in compact format
 
-  void write (FILE * fp = 0) throw ();
+  void write (FILE * fp = 0, bool brief=0) throw ();
 
   /// Read the grid from a file written using write()
 
@@ -137,7 +141,7 @@ protected:
 
   /// Read the grid from a file written using write()
 
-  void read (FILE * fp = 0) throw ();
+  void read (FILE * fp = 0, bool brief=0) throw ();
 
   /// Write the grid outline to a geomview file 
 
