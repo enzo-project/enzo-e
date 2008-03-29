@@ -93,6 +93,7 @@ int main(int argc, char **argv)
     // --------------------------------------------------
     // Problem initialization
     // --------------------------------------------------
+    _TRACE_;
 
     // create a new problem and read it in
 
@@ -111,6 +112,7 @@ int main(int argc, char **argv)
     // --------------------------------------------------
     // Initialize the hierarchy
     // --------------------------------------------------
+    _TRACE_;
 
     Hierarchy & hierarchy = problem.hierarchy();
     Grid::set_domain (problem.domain());
@@ -137,6 +139,7 @@ int main(int argc, char **argv)
     // --------------------------------------------------
     // Initialize hypre
     // --------------------------------------------------
+    _TRACE_;
 
     Hypre hypre (problem.parameters());
 
@@ -172,6 +175,7 @@ int main(int argc, char **argv)
     // --------------------------------------------------
     // Solve the linear system Ax = b
     // --------------------------------------------------
+    _TRACE_;
 
     // ***************
     JBPERF_START("5-hypre-solve");
@@ -187,25 +191,25 @@ int main(int argc, char **argv)
     // --------------------------------------------------
     // Evaluate the solution
     // --------------------------------------------------
+    _TRACE_;
 
     if (barrier) pmpi->barrier();
     hypre.evaluate (hierarchy);
 
-    _TRACE_;
     // --------------------------------------------------
     // jbPerf Finalize
     // --------------------------------------------------
+    _TRACE_;
 
     // ****************
     JBPERF_STOP("0-total");
     JBPERF_END("HS");
     // ***************
 
-    _TRACE_;
-
     // --------------------------------------------------
     // MPI Finalize
     // --------------------------------------------------
+    _TRACE_;
 
     //    pmpi->barrier();
 
