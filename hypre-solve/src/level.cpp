@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "HYPRE_sstruct_ls.h"
+#include <mpi.h>
 
 //----------------------------------------------------------------------
 
