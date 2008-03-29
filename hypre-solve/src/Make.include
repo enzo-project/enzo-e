@@ -5,12 +5,21 @@ CPPFLAGS = -g
 
 # JBPERF
 
+#--------------------------------
 JBDEF = -DUSE_JBPERF
 JBINC = -I$(HOME)/include 
 JBLIB = -L$(HOME)/lib -ljbperf
+#--------------------------------
 JBDEF = 
 JBINC = 
 JBLIB = 
+#--------------------------------
+
+# LIBPNG
+
+PNGDEF = -DNO_FREETYPE
+PNGINC = 
+PNGLIB = -lpng
 
 # HYPRE
 
@@ -32,19 +41,18 @@ CELLOINC = -I$(CELLOTOP)/include
 CELLOLIB = -L$(CELLOTOP)/lib -lcello
 
 # Assemble defines, includes, and libs
-DEF =      $(JBDEF) $(HYPREDEF) $(HDF5DEF) $(CELLODEF)
-INC =      $(JBINC) $(HYPREINC) $(HDF5INC) $(CELLOINC)
-LIB =  -lm $(JBLIB) $(HYPRELIB) $(HDF5LIB) $(CELLOLIB)
+DEF =      $(JBDEF) $(PNGDEF) $(HYPREDEF) $(HDF5DEF) $(CELLODEF)
+INC =      $(JBINC) $(PNGINC) $(HYPREINC) $(HDF5INC) $(CELLOINC)
+LIB =  -lm $(JBLIB) $(PNGLIB) $(HYPRELIB) $(HDF5LIB) $(CELLOLIB)
 
 # Set object files
-OBJS = \
+OBJS_ALL = \
        constants.o \
        domain.o \
        faces.o \
        grid.o \
        hierarchy.o \
        hypre.o \
-       hypre-solve.o \
        level.o \
        mpi.o \
        parameters.o \
@@ -52,14 +60,18 @@ OBJS = \
        problem.o \
        sphere.o
 
-OBJS_INIT = hypre-init.cpp
+OBJS_INIT  = hypre-init.o
+OBJS_SOLVE = hypre-solve.o $(OBJS_ALL)
+OBJS_PNG  = hypre-png.o grid.o mpi.o domain.o faces.o pngwriter.o
 
-all: hypre-solve hypre-init debug-matrix enzo2hypre
+all: hypre-solve hypre-init hypre-png debug-matrix enzo2hypre
 
-hypre-solve: dep $(OBJS)
-	$(MPCPP) -o hypre-solve $(OBJS) $(LIB)
-hypre-init: dep $(OBJS_INIT)
+hypre-init: $(OBJS_INIT)
 	$(CPP) -o hypre-init $(OBJS_INIT) $(LIB)
+hypre-solve: $(OBJS_SOLVE)
+	$(MPCPP) -o hypre-solve $(OBJS_SOLVE) $(LIB)
+hypre-png: $(OBJS_PNG)
+	$(MPCPP) -o hypre-png $(OBJS_PNG) $(LIB)
 debug-matrix: debug-matrix.o
 	$(CPP) -o debug-matrix debug-matrix.o
 enzo2hypre: enzo2hypre.cpp
@@ -67,10 +79,11 @@ enzo2hypre: enzo2hypre.cpp
 
 BIN = ../bin
 .PHONY: install
-install: hypre-solve hypre-init
+install: hypre-solve hypre-init hypre-png
 	(if [ ! -e $(BIN) ]; then mkdir $(BIN); fi)
 	cp hypre-solve $(BIN)
 	cp hypre-init  $(BIN)
+	cp hypre-png   $(BIN)
 
 
 .cpp.o:
