@@ -16,16 +16,17 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include <mpi.h>
 
-#include "HYPRE_sstruct_ls.h"
+// #include "HYPRE_sstruct_ls.h"
 
 #include "hypre-solve.hpp"
 
 //======================================================================
 
-const int debug       = 1;
+const int debug       = 0;
 const int debug_input = 0;
-const int trace       = 1;
+const int trace       = 0;
 
 //======================================================================
 
@@ -70,6 +71,19 @@ Grid::Grid (std::string parms) throw ()
 
 //======================================================================
 
+Grid::Grid (FILE *fp) throw ()
+  : id_(-1),
+    id_parent_(-1),
+    ip_(-1),
+    faces_(0),
+    level_(-1),
+    u_(0),
+    counters_(0)
+{
+  this->read(fp);
+}
+//======================================================================
+
 Grid::~Grid () throw ()
 {
   if (u_) delete [] u_;
@@ -81,12 +95,12 @@ Grid::~Grid () throw ()
 
 void Grid::print () throw ()
 {
-  this->write(stdout);
+  this->write(stdout,true);
 }
 
 //======================================================================
 
-void Grid::write (FILE *fp) throw ()
+void Grid::write (FILE *fp, bool brief) throw ()
 {
   if (fp == 0) fp = stdout;
   fprintf (fp,"Grid\n"
@@ -104,7 +118,7 @@ void Grid::write (FILE *fp) throw ()
 	  il_[0],il_[1],il_[2],
 	   n_ [0],n_ [1],n_ [2],
 	   level_);
-  if (u_) {
+  if (u_ && ! brief) {
     for (int i0=0; i0<n_[0]; i0++) {
       for (int i1=0; i1<n_[1]; i1++) {
 	for (int i2=0; i2<n_[2]; i2++) {
@@ -118,7 +132,7 @@ void Grid::write (FILE *fp) throw ()
 
 //======================================================================
 
-void Grid::read (FILE *fp) throw ()
+void Grid::read (FILE *fp, bool brief) throw ()
 {
   if (fp == 0) fp = stdin;
   fscanf (fp,"Grid");
@@ -140,7 +154,7 @@ void Grid::read (FILE *fp) throw ()
   fscanf (fp,"   level          %d",	 &level_);
 
   this->allocate();
-  if (u_) {
+  if (u_ && ! brief) {
     int i0,i1,i2;
     Scalar u;
     while (fscanf(fp,"%d%d%d"SCALAR_SCANF, &i0,&i1,&i2,&u) != EOF) {
