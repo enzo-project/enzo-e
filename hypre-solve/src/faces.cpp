@@ -16,8 +16,9 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include <mpi.h>
 
-#include "HYPRE_sstruct_ls.h"
+// #include "HYPRE_sstruct_ls.h"
 
 const int debug = 0;
 

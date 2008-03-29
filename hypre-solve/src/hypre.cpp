@@ -741,14 +741,6 @@ void Hypre::evaluate (Hierarchy & hierarchy)
     sprintf (filename,"B.%d",grid->id());
     grid->write(filename);
 
-    // Reread
-    grid->deallocate();
-    grid->read(filename);
-    grid->write(stdout);
-
-    // Rewrite
-    sprintf (filename,"B2.%d",grid->id());
-    grid->write(filename);
   }
 }
 
