@@ -38,7 +38,7 @@ void usage (char ** argv)
   // Print usage and exit abnormally
 
   printf ("\n"
-	  "Usage: %s N0 np0 np1 np2 num_levels offset serial\n",argv[0]);
+	  "Usage: %s N0 np0 np1 np2 num_levels offset serial [cg|mg]\n",argv[0]);
   exit(1);
 }
 
@@ -51,12 +51,13 @@ main(int argc, char **argv)
 // Parse command-line arguments
 //-----------------------------------------------------------------------
 
-  if (argc != 7 && argc != 8) {
-    printf ("Number of arguments %d is not 6 or 7\n",argc-1);
+  if (argc != 9) {
+    printf ("Number of arguments %d is not 8\n",argc-1);
     usage(argv);
   }
 
   int N0, np3[3],num_levels,is_offset,is_serial;
+  char * solver;
 
   N0         = atoi(argv[1]);
   np3[0]     = atoi(argv[2]);
@@ -64,7 +65,8 @@ main(int argc, char **argv)
   np3[2]     = atoi(argv[4]);
   num_levels = atoi(argv[5]);
   is_offset  = atoi(argv[6]);
-  is_serial  = (argc == 8) ? atoi(argv[7]) : 0;
+  is_serial  = atoi(argv[7]);
+  solver     = argv[8];
 
   int np = np3[0]*np3[1]*np3[2];
 
@@ -228,7 +230,13 @@ main(int argc, char **argv)
 	     point_pos[k][0],point_pos[k][1],point_pos[k][2],id_point[k]);
   }
   fprintf (fp, "discret constant\n");
-  fprintf (fp, "solver %s\n",((num_levels==1) ? "pfmg" : "fac") );
+  if (strcmp(solver,"mg")==0) {
+    fprintf (fp, "solver %s\n",((num_levels==1) ? "pfmg" : "fac") );
+  } else   if (strcmp(solver,"cg")==0) {
+    fprintf (fp, "solver bicgstab\n");
+  } else {
+    usage(argv);
+  }
 
   //========================================================================
 

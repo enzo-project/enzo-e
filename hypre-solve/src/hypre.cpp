@@ -1132,74 +1132,48 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 
   int level = grid.level();
   // X faces
-  axis = 0;
-  for (i1=0; i1<n3[1]; i1++) {
-    for (i2=0; i2<n3[2]; i2++) {
-      i0 = 0;
-      face = 0;
-      i = i0 + n3[0]*(i1 + n3[1]*i2);
-      // DIFFUSION COEFFICIENTS HERE
-      double axm = 1.0;
-      if (faces.label (axis,face,i1,i2) != Faces::_boundary_) {
-	v1[axis][face][i] -= matrix_scale * h120 * axm;
-	v0[i]             += matrix_scale * h120 * axm;
-      }
-      i0 = n3[0]-1;
-      face = 1;
-      i = i0 + n3[0]*(i1 + n3[1]*i2);
-      // DIFFUSION COEFFICIENTS HERE
-      double axp = 1.0;
-      if (faces.label (axis,face,i1,i2) != Faces::_boundary_) {
-	v1[axis][face][i] -= matrix_scale * h120 * axp;
-	v0[i]             += matrix_scale * h120 * axp;
-      }
-    }
-  }
-  // Y faces
-  axis = 1;
-  for (i2=0; i2<n3[2]; i2++) {
-    for (i0=0; i0<n3[0]; i0++) {
-      i1 = 0;
-      face = 0;
-      i = i0 + n3[0]*(i1 + n3[1]*i2);
-      // DIFFUSION COEFFICIENTS HERE
-      double aym = 1.0;
-      if (faces.label (axis,face,i2,i0) != Faces::_boundary_) {
-	v1[axis][face][i] -= matrix_scale * h201 * aym;
-	v0[i]             += matrix_scale * h201 * aym;
-      }
-      i1 = n3[1]-1;
-      face = 1;
-      i = i0 + n3[0]*(i1 + n3[1]*i2);
-      // DIFFUSION COEFFICIENTS HERE
-      double ayp = 1.0;
-      if (faces.label (axis,face,i2,i0) != Faces::_boundary_) {
-	v1[axis][face][i] -= matrix_scale * h201 * ayp;
-	v0[i]             += matrix_scale * h201 * ayp;
-      }
-    }
-  }
-  // Z faces
-  axis = 2;
-  for (i0=0; i0<n3[0]; i0++) {
+  for (face=0; face<2; face++) {
+    axis = 0;
     for (i1=0; i1<n3[1]; i1++) {
-      i2 = 0;
-      face = 0;
-      i = i0 + n3[0]*(i1 + n3[1]*i2);
-      // DIFFUSION COEFFICIENTS HERE
-      double azm = 1.0;
-      if (faces.label (axis,face,i0,i1) != Faces::_boundary_) {
-	v1[axis][face][i] -= matrix_scale * h012 * azm;
-	v0[i]             += matrix_scale * h012 * azm;
+      for (i2=0; i2<n3[2]; i2++) {
+	i0 = (face==0) ? 0 : n3[0]-1;
+	i = i0 + n3[0]*(i1 + n3[1]*i2);
+	// DIFFUSION COEFFICIENTS HERE
+	double acoef = 1.0;
+	int f = faces.label (axis,face,i1,i2);
+	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
+	  v1[axis][face][i] -= matrix_scale * h120 * acoef;
+	  v0[i]             += matrix_scale * h120 * acoef;
+	}
       }
-      i2 = n3[2]-1;
-      face = 1;
-      i = i0 + n3[0]*(i1 + n3[1]*i2);
-      // DIFFUSION COEFFICIENTS HERE
-      double azp = 1.0;
-      if (faces.label (axis,face,i0,i1) != Faces::_boundary_) {
-	v1[axis][face][i] -= matrix_scale * h012 * azp;
-	v0[i]             += matrix_scale * h012 * azp;
+    }
+    axis = 1;
+    for (i2=0; i2<n3[2]; i2++) {
+      for (i0=0; i0<n3[0]; i0++) {
+	i1 = (face==0) ? 0 : n3[1]-1;
+	i  = i0 + n3[0]*(i1 + n3[1]*i2);
+	// DIFFUSION COEFFICIENTS HERE
+	double acoef = 1.0;
+	int f = faces.label (axis,face,i1,i2);
+	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
+	  v1[axis][face][i] -= matrix_scale * h201 * acoef;
+	  v0[i]             += matrix_scale * h201 * acoef;
+	}
+      }
+    }
+    // Z faces
+    axis = 2;
+    for (i0=0; i0<n3[0]; i0++) {
+      for (i1=0; i1<n3[1]; i1++) {
+	i2 = (face==0) ? 0 : n3[2]-1;
+	i = i0 + n3[0]*(i1 + n3[1]*i2);
+	// DIFFUSION COEFFICIENTS HERE
+	double acoef = 1.0;
+	int f = faces.label (axis,face,i1,i2);
+	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
+	  v1[axis][face][i] -= matrix_scale * h012 * acoef;
+	  v0[i]             += matrix_scale * h012 * acoef;
+	}
       }
     }
   }
