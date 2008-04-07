@@ -6,13 +6,13 @@ CPPFLAGS = -g
 # JBPERF
 
 #--------------------------------
-JBDEF = -DUSE_JBPERF
-JBINC = -I$(HOME)/include 
-JBLIB = -L$(HOME)/lib -ljbperf
-#--------------------------------
 JBDEF = 
 JBINC = 
 JBLIB = 
+#--------------------------------
+JBDEF = -DUSE_JBPERF
+JBINC = -I$(HOME)/include 
+JBLIB = -L$(HOME)/lib -ljbperf
 #--------------------------------
 
 # LIBPNG
