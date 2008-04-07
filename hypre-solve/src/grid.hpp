@@ -383,7 +383,7 @@ protected:
     int i1=i3[1]-il_[1];
     int i2=i3[2]-il_[2];
     assert (counters_);
-    return counters_[i0 + n_[0]*(i1 + n_[1]*i2)];
+    return counters_[index(i0,i1,i2,n_[0],n_[1],n_[2])];
   }
 
   /// Initialize the counters_ array to given value
@@ -392,7 +392,7 @@ protected:
     for (int i0=0; i0<n_[0]; i0++) {
       for (int i1=0; i1<n_[1]; i1++) {
 	for (int i2=0; i2<n_[2]; i2++) {
-	  counters_[i0 + n_[0]*(i1 + n_[1]*i2)] = value;
+	  counters_[index(i0,i1,i2,n_[0],n_[1],n_[2])] = value;
 	}
       }
     }
@@ -417,6 +417,9 @@ protected:
   /// Set static Domain object
   static void set_domain (Domain &domain)
   { domain_ = domain; };
+
+  static int index(int i0,int i1,int i2,int n0,int n1,int n2) 
+  { return i0 + n0*(i1+n1*i2); }
 
 };
 

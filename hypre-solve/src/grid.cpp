@@ -122,7 +122,7 @@ void Grid::write (FILE *fp, bool brief) throw ()
     for (int i0=0; i0<n_[0]; i0++) {
       for (int i1=0; i1<n_[1]; i1++) {
 	for (int i2=0; i2<n_[2]; i2++) {
-	  int i = i0 + n_[0]*(i1 + n_[1]*(i2));
+	  int i = index(i0,i1,i2,n_[0],n_[1],n_[2]);
 	  fprintf (fp,"%d %d %d %g\n",i0,i1,i2,u_[i]);
 	}
       }
@@ -158,7 +158,7 @@ void Grid::read (FILE *fp, bool brief) throw ()
     int i0,i1,i2;
     Scalar u;
     while (fscanf(fp,"%d%d%d"SCALAR_SCANF, &i0,&i1,&i2,&u) != EOF) {
-      int i = i0 + n_[0]*(i1 + n_[1]*(i2));
+      int i = index(i0,i1,i2,n_[0],n_[1],n_[2]);
       u_[i] = u;
     }
   }
@@ -337,10 +337,10 @@ void Grid::geomview_face_type (FILE         *fpr,
 	    if (face==1) j0 = n_[0] - 1;
 	    j1 = i1;
 	    j2 = i2;
-	    vc[0][0] = + sfz*h(0);  vc[0][1] = + svf*h(1);  vc[0][2] = + svf*h(2);
-	    vc[1][0] = + sfz*h(0);  vc[1][1] = + svf*h(1);  vc[1][2] = - svf*h(2);
-	    vc[2][0] = + sfz*h(0);  vc[2][1] = - svf*h(1);  vc[2][2] = - svf*h(2);
-	    vc[3][0] = + sfz*h(0);  vc[3][1] = - svf*h(1);  vc[3][2] = + svf*h(2);
+	    vc[0][0] = +sfz*h(0); vc[0][1] = +svf*h(1); vc[0][2] = +svf*h(2);
+	    vc[1][0] = +sfz*h(0); vc[1][1] = +svf*h(1); vc[1][2] = -svf*h(2);
+	    vc[2][0] = +sfz*h(0); vc[2][1] = -svf*h(1); vc[2][2] = -svf*h(2);
+	    vc[3][0] = +sfz*h(0); vc[3][1] = -svf*h(1); vc[3][2] = +svf*h(2);
 	  } else if (axis==1) {
 	    if (face==0) j1 = 0;
 	    if (face==1) j1 = n_[1] - 1;
@@ -352,10 +352,10 @@ void Grid::geomview_face_type (FILE         *fpr,
 	    fz[0] = 0;
 	    fz[1] = h(1);
 	    fz[2] = 0;
-	    vc[0][0] = + svf*h(0);  vc[0][1] = + sfz*h(1);  vc[0][2] = + svf*h(2);
-	    vc[1][0] = + svf*h(0);  vc[1][1] = + sfz*h(1);  vc[1][2] = - svf*h(2);
-	    vc[2][0] = - svf*h(0);  vc[2][1] = + sfz*h(1);  vc[2][2] = - svf*h(2);
-	    vc[3][0] = - svf*h(0);  vc[3][1] = + sfz*h(1);  vc[3][2] = + svf*h(2);
+	    vc[0][0] = +svf*h(0); vc[0][1] = +sfz*h(1); vc[0][2] = +svf*h(2);
+	    vc[1][0] = +svf*h(0); vc[1][1] = +sfz*h(1); vc[1][2] = -svf*h(2);
+	    vc[2][0] = -svf*h(0); vc[2][1] = +sfz*h(1); vc[2][2] = -svf*h(2);
+	    vc[3][0] = -svf*h(0); vc[3][1] = +sfz*h(1); vc[3][2] = +svf*h(2);
 	  } else if (axis==2) {
 	    if (face==0) j2 = 0;
 	    if (face==1) j2 = n_[2] - 1;
@@ -367,10 +367,10 @@ void Grid::geomview_face_type (FILE         *fpr,
 	    fz[0] = 0;
 	    fz[1] = 0;
 	    fz[2] = h(2);
-	    vc[0][0] = + svf*h(0);  vc[0][1] = + svf*h(1);  vc[0][2] = + sfz*h(2);
-	    vc[1][0] = - svf*h(0);  vc[1][1] = + svf*h(1);  vc[1][2] = + sfz*h(2);
-	    vc[2][0] = - svf*h(0);  vc[2][1] = - svf*h(1);  vc[2][2] = + sfz*h(2);
-	    vc[3][0] = + svf*h(0);  vc[3][1] = - svf*h(1);  vc[3][2] = + sfz*h(2);
+	    vc[0][0] = +svf*h(0); vc[0][1] = +svf*h(1); vc[0][2] = +sfz*h(2);
+	    vc[1][0] = -svf*h(0); vc[1][1] = +svf*h(1); vc[1][2] = +sfz*h(2);
+	    vc[2][0] = -svf*h(0); vc[2][1] = -svf*h(1); vc[2][2] = +sfz*h(2);
+	    vc[3][0] = +svf*h(0); vc[3][1] = -svf*h(1); vc[3][2] = +sfz*h(2);
 	  }
 
 	  // Determine cell center
