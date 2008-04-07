@@ -30,9 +30,9 @@ namespace cello {
 
 //----------------------------------------------------------------------
 
-const int debug  = 1;
+const int debug  = 0;
 const int trace  = 0;
-const int trace_hypre  = 1;
+const int trace_hypre  = 0;
 
 //----------------------------------------------------------------------
 
@@ -57,7 +57,26 @@ const Scalar matrix_scale = 1.0;  // 1.0:  1 1 1 -6 1 1 1
 FILE *mpi_fp;
 char mpi_file[20];
 
+//======================================================================
 
+void debug_print(Grid * grid)
+{
+  const int index = 2;
+  if (debug) {
+    int n0=grid->n(0);
+    int n1=grid->n(1);
+    int n2=grid->n(2);
+    int i,i0,i1,i2;
+    i0=0; i1=index; i2=index; i=Grid::index(i0,i1,i2,n0,n1,n2);
+    printf ("X(0,%d,%d) = %g\n",index,index,(grid->values())[i]);
+    i0=index; i1=0; i2=index; i=Grid::index(i0,i1,i2,n0,n1,n2);
+    printf ("X(%d,0,%d) = %g\n",index,index,(grid->values())[i]);
+    i0=index; i1=index; i2=0; i=Grid::index(i0,i1,i2,n0,n1,n2);
+    printf ("X(%d,%d,0) = %g\n",index,index,(grid->values())[i]);
+  }
+  return;
+}
+						     
 //======================================================================
 // PUBLIC MEMBER FUNCTIONS
 //======================================================================
@@ -89,9 +108,9 @@ Hypre::Hypre (Parameters & parameters)
 
 /// Initialize the Grid Hierarchy
 
-	     /** Creates a hypre grid, with one part per level and one box per Grid
-		 patch object, for an AMR problem.  Sets grid box extents, grid
-		 part variables, and periodicity of the root-level grid part. */
+/** Creates a hypre grid, with one part per level and one box per Grid
+    patch object, for an AMR problem.  Sets grid box extents, grid
+    part variables, and periodicity of the root-level grid part. */
 
 void Hypre::init_hierarchy (Parameters & parameters,
 			    Hierarchy  & hierarchy, 
@@ -723,6 +742,7 @@ void Hypre::evaluate (Hierarchy & hierarchy)
       fflush(mpi_fp);
     }
 
+    debug_print(grid);
     sprintf (filename,"X.%d",grid->id());
     grid->write(filename);
     
@@ -848,9 +868,6 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    ign3[j0] = (igg3[j0]) / r  + (face*r-1);
 	    ign3[j1] = (igg3[j1]) / r;
 	    ign3[j2] = (igg3[j2]) / r;
-	    fprintf (mpi_fp,"igg3 %d %d %d\n",igg3[0],igg3[1],igg3[2]);
-	    fprintf (mpi_fp,"ign3 %d %d %d\n",ign3[0],ign3[1],ign3[2]);
-	    fflush(mpi_fp);
 
 	    //--------------------------------------------------
 	    // GRAPH ENTRY: FINE-TO-COARSE 
@@ -983,6 +1000,7 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 				  {0,0,-1}};
 
 		for (int k=0; k<8; k++) {
+		  // DIES HERE FOR e.g. N16.P211.L2.O1.S0.cg
 		  HYPRE_SStructGraphAddEntries 
 		    (graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 		  if (trace_hypre) {
@@ -1083,96 +1101,139 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   // Set stencil for all unknowns, ignoring boundary conditions
   //-----------------------------------------------------------
 
-  for (int i2 = 0; i2 < n3[2]; i2++) {
+  int i0,i1,i2,i;
+  for (i2 = 0; i2 < n3[2]; i2++) {
 
     // DIFFUSION COEFFICIENTS HERE
 
     double azp = 1.0;
     double azm = 1.0;
 
-    for (int i1 = 0; i1 < n3[1]; i1++) {
+    for (i1 = 0; i1 < n3[1]; i1++) {
 
       // DIFFUSION COEFFICIENTS HERE
 
       double ayp = 1.0;
       double aym = 1.0;
 
-      for (int i0 = 0; i0 < n3[0]; i0++) {
+      for (i0 = 0; i0 < n3[0]; i0++) {
 
 	// DIFFUSION COEFFICIENTS HERE
 
 	double axp = 1.0;
 	double axm = 1.0;
 
-	int i = i0 + n3[0]*(i1 + n3[1]*i2);
+	i = Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
 
-	v1[0][1][i] = matrix_scale * h120 * axp;
 	v1[0][0][i] = matrix_scale * h120 * axm;
-	v1[1][1][i] = matrix_scale * h201 * ayp;
+	v1[0][1][i] = matrix_scale * h120 * axp;
 	v1[1][0][i] = matrix_scale * h201 * aym;
-	v1[2][1][i] = matrix_scale * h012 * azp;
+	v1[1][1][i] = matrix_scale * h201 * ayp;
 	v1[2][0][i] = matrix_scale * h012 * azm;
+	v1[2][1][i] = matrix_scale * h012 * azp;
 
-	v0[i] = -( v1[0][1][i] + v1[0][0][i] +
-		   v1[1][1][i] + v1[1][0][i] + 
-		   v1[2][1][i] + v1[2][0][i] );
+	v0[i] = -( v1[0][0][i] + v1[0][1][i] +
+		   v1[1][0][i] + v1[1][1][i] + 
+		   v1[2][0][i] + v1[2][1][i] );
 
       }
     }
   }
 
+  if (debug) {
+    Scalar sum3[3];
+    i0=0;
+    sum3[0]=0.0;
+    for (i1=0; i1<n3[1]; i1++) {
+      for (i2=0; i2<n3[2]; i2++) {
+	i=Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
+	sum3[0] += v1[0][0][i];
+      }
+    }
+    i1=0;
+    sum3[1]=0.0;
+    for (i0=0; i0<n3[0]; i0++) {
+      for (i2=0; i2<n3[2]; i2++) {
+	i=Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
+	sum3[1] += v1[1][0][i];
+      }
+    }
+    i2=0;
+    sum3[2]=0.0;
+    for (i0=0; i0<n3[0]; i0++) {
+      for (i1=0; i1<n3[1]; i1++) {
+	i=Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
+	sum3[2] += v1[2][0][i];
+      }
+    }
+  }
   //-----------------------------------------------------------
   // Adjust stencil at grid boundaries
   //-----------------------------------------------------------
 
   Faces & faces = grid.faces();
 
-  int i,i0,i1,i2;
   int axis,face;
 
   int level = grid.level();
+  int debug3[3];
+  debug3[0]=0;
+  debug3[1]=0;
+  debug3[2]=0;
   // X faces
   for (face=0; face<2; face++) {
     axis = 0;
+    i0 = (face==0) ? 0 : n3[0]-1;
     for (i1=0; i1<n3[1]; i1++) {
       for (i2=0; i2<n3[2]; i2++) {
-	i0 = (face==0) ? 0 : n3[0]-1;
-	i = i0 + n3[0]*(i1 + n3[1]*i2);
-	// DIFFUSION COEFFICIENTS HERE
-	double acoef = 1.0;
 	int f = faces.label (axis,face,i1,i2);
 	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
-	  v1[axis][face][i] -= matrix_scale * h120 * acoef;
-	  v0[i]             += matrix_scale * h120 * acoef;
+	  // Clear off-diagonal element
+	  // DIFFUSION COEFFICIENTS HERE
+	  double axp = 1.0;
+	  double axm = 1.0;
+	  double ax = (face==0) ? axm : axp;
+	  i = Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
+	  Scalar a = matrix_scale * h120 * ax;
+	  v1[axis][face][i] -= a;
+	  v0[i]             += a;
 	}
       }
     }
     axis = 1;
+    i1 = (face==0) ? 0 : n3[1]-1;
     for (i2=0; i2<n3[2]; i2++) {
       for (i0=0; i0<n3[0]; i0++) {
-	i1 = (face==0) ? 0 : n3[1]-1;
-	i  = i0 + n3[0]*(i1 + n3[1]*i2);
-	// DIFFUSION COEFFICIENTS HERE
-	double acoef = 1.0;
-	int f = faces.label (axis,face,i1,i2);
+	int f = faces.label (axis,face,i2,i0);
+	// Clear off-diagonal element
 	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
-	  v1[axis][face][i] -= matrix_scale * h201 * acoef;
-	  v0[i]             += matrix_scale * h201 * acoef;
+	  i  = Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
+	  // DIFFUSION COEFFICIENTS HERE
+	  double ayp = 1.0;
+	  double aym = 1.0;
+	  double ay = (face==0) ? aym : ayp;
+	  Scalar a = matrix_scale * h201 * ay;
+	  v1[axis][face][i] -= a;
+	  v0[i]             += a;
 	}
       }
     }
     // Z faces
     axis = 2;
+    i2 = (face==0) ? 0 : n3[2]-1;
     for (i0=0; i0<n3[0]; i0++) {
       for (i1=0; i1<n3[1]; i1++) {
-	i2 = (face==0) ? 0 : n3[2]-1;
-	i = i0 + n3[0]*(i1 + n3[1]*i2);
-	// DIFFUSION COEFFICIENTS HERE
-	double acoef = 1.0;
-	int f = faces.label (axis,face,i1,i2);
+	int f = faces.label (axis,face,i0,i1);
 	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
-	  v1[axis][face][i] -= matrix_scale * h012 * acoef;
-	  v0[i]             += matrix_scale * h012 * acoef;
+	  // Clear off-diagonal element
+	  // DIFFUSION COEFFICIENTS HERE
+	  double azp = 1.0;
+	  double azm = 1.0;
+	  double az = (face==0) ? azm : azp;
+	  Scalar a = matrix_scale * h012 * az;
+	  i = Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
+	  v1[axis][face][i] -= a;
+	  v0[i]             += a;
 	}
       }
     }
@@ -1242,8 +1303,8 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
     fflush(mpi_fp);
   }
   delete [] v0;
-  for (int axis=0; axis<3; axis++) {
-    for (int face=0; face<2; face++) {
+  for (axis=0; axis<3; axis++) {
+    for (face=0; face<2; face++) {
       delete [] v1[axis][face];
     }
   }
