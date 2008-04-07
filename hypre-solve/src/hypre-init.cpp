@@ -77,7 +77,7 @@ main(int argc, char **argv)
   // Get input, output, and directory names
 
   char dir[STRLEN],infile[STRLEN],outfile[STRLEN];
-  sprintf (dir,    "N%d.P%d%d%d.L%d.O%d.S%d",N0,np3[0],np3[1],np3[2],num_levels,is_offset,is_serial);
+  sprintf (dir,    "N%d.P%d%d%d.L%d.O%d.S%d.%s",N0,np3[0],np3[1],np3[2],num_levels,is_offset,is_serial,solver);
   sprintf (infile,"in.%s",dir);
   FILE * fp = fopen (infile,"w");
 
