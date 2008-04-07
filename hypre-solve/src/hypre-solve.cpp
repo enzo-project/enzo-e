@@ -135,6 +135,7 @@ int main(int argc, char **argv)
     // WARNING: problem-size returns the size of the root-grid, not the entire hierarchy
 
     JBPERF_GLOBAL("problem-size",problem.hierarchy().num_unknowns0());
+    JBPERF_GLOBAL("problem-levels",problem.hierarchy().num_levels());
 
     // --------------------------------------------------
     // Initialize hypre
