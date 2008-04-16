@@ -60,6 +60,13 @@ void images_generate (int     ni3[3],
 
 int main(int argc, char **argv)
 {
+  if (argc <= 3) {
+    printf ("Usage: %s <colormap-id> <scaling> <grid-file-1> [<grid-file-2> ...]\n",
+	    argv[0]);
+	  
+    exit (1);
+  }
+
   pmpi = new Mpi;
 
   MPI_Init(&argc,&argv);
