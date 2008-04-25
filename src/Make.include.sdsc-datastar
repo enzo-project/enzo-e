@@ -2,7 +2,7 @@
 
 # Compilers
 
-CPP = g++
+CXX = xlC
 
 # INC: The include directories common to all components
 
@@ -12,8 +12,8 @@ INC = -I$(TOP)/include
 
 OPT = -O -g
 
-LIB_HDF5 = /usr/lib/libhdf5.a
-INC_HDF5 = -I/usr/include
+LIB_HDF5 = /usr/local/apps64/hdf5/lib/libhdf5.a /usr/local/apps64/hdf4/lib/libsz.a /usr/local/apps64/hdf4/lib/libz.a
+INC_HDF5 = -I/usr/local/apps64/hdf5/include
 
 #----------------------------------------------------------------------
 

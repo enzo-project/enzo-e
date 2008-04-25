@@ -45,7 +45,7 @@ FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS
 CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS
 
 test_hydro: $(OBJS)
-	$(CPP) -o test_hydro $(OBJS) $(INC)
+	$(CXX) -o test_hydro $(OBJS) $(INC)
 
 test: test_hydro
 	test_hydro

@@ -23,7 +23,7 @@ test: test_array
 #-----------------------------------------------------------------------
 
 test_array: $(TEST_OBJS) $(OBJS)
-	$(CPP) -o test_array $(TEST_OBJS) $(OBJS) $(INC)
+	$(CXX) -o test_array $(TEST_OBJS) $(OBJS) $(INC)
 
 #-----------------------------------------------------------------------
 

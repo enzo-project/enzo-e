@@ -59,7 +59,7 @@ main()
 
     timer.stop();
     int num_flops = count*k*k*k*13;
-    printf ("%d %20.12f %20.12f \n",k,timer.value()/count, 10e-6*num_flops/timer.value()); 
+    printf ("%d %20.12f %20.12f \n",k,timer.value()/count, 1e-6*num_flops/timer.value()); 
     fflush(stdout);
     timer.clear();
     } else {

@@ -33,7 +33,7 @@ test: test_hdf5
 #-----------------------------------------------------------------------
 
 test_hdf5: $(TEST_OBJS) $(OBJS)
-	$(CPP) -o test_hdf5 $(TEST_OBJS) $(OBJS) $(INC) $(INC_IO) -lhdf5
+	$(CXX) -o test_hdf5 $(TEST_OBJS) $(OBJS) $(INC) $(LIB_HDF5)
 
 #-----------------------------------------------------------------------
 
