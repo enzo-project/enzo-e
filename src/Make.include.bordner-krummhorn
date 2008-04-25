@@ -12,8 +12,8 @@ INC = -I$(TOP)/include
 
 OPT = -O -g
 
-LIB_HDF5 = /usr/lib/libhdf5.a
-INC_HDF5 = -I/usr/include
+LIB_HDF5 = -lhdf5
+INC_HDF5 = 
 
 #----------------------------------------------------------------------
 
