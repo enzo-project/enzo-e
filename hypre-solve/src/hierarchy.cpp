@@ -214,7 +214,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
       if (g1->is_adjacent(*g2)) {
 	g1->set_neighbor (*g2);
 	g2->set_neighbor (*g1);
-	if (debug) printf ("DEBUG grids %d and %d are adjacent\n",
+	if (debug) printf ("DEBUG 1 grids %d and %d are neighbors\n",
 			   g1->id(),g2->id());
       }
     }
@@ -237,6 +237,8 @@ void Hierarchy::init_grid_neighbors_ () throw ()
       for (j=0; j<parent(*g1)->num_children(); j++) {
 	Grid * g2 = & parent(*g1)->child(j);
 	if (g1->is_adjacent(*g2) && g1->id() > g2->id()) {
+	  if (debug) printf ("DEBUG 2 grids %d and %d are neighbors\n",
+			     g1->id(),g2->id());
 	  assert_neighbors (*g1,*g2);
 	}
       }
@@ -248,7 +250,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 	for (j2=0; j2<gn->num_children(); j2++) {
 	  Grid * g2 = & gn->child(j2);
 	  if (g1->is_adjacent(*g2) && g1->id() > g2->id()) {
-	    if (debug) printf ("DEBUG grids %d and %d are adjacent cousins\n",
+	    if (debug) printf ("DEBUG 3 grids %d and %d are neighbors\n",
 			       g1->id(),g2->id());
 	    assert_neighbors (*g1,*g2);
 	  }
@@ -284,9 +286,10 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   Level * level;
 
   while (level = itl++) {
-    ItLevelGridsAll itg (*level);
-
+    ItLevelGridsLocal itg (*level);
+    if (debug) printf ("Level %d\n",level->index());
     while (Grid * grid = itg++) {
+      if (debug) grid->print();
       ItGridNeighbors itn (*grid);
 
       // Set "adjacent" pointers for adjacent grids in same level
@@ -345,6 +348,30 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	  }
 	}
       }
+
+      if (debug_detailed) {
+	int ig3[3][2];
+	grid->indices(ig3);
+	for (axis=0; axis<3; axis++) {
+	  int j0 = (axis+1)%3;
+	  int j1 = (axis+2)%3;
+	  int n0 = ig3[j0][1] - ig3[j0][0];
+	  int n1 = ig3[j1][1] - ig3[j1][0];
+	  for (face=0; face<2; face++) {
+	    for (ig0=0; ig0<n0; ig0++) {
+	      for (ig1=0; ig1<n1; ig1++) {
+		Grid * neighbor = grid->faces().adjacent(axis,face,ig0,ig1);
+		printf ("ip=%d grid=%d neighbor=%d (axis=%d face=%d) [%d,%d]\n",
+			pmpi->ip(),grid->id(),neighbor?neighbor->id():-1,
+			axis,face,ig0,ig1);
+	      }
+	    }
+	  }
+	}
+	fflush(stdout);
+      }
+      
+      
     }
   }
 

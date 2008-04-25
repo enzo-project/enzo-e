@@ -30,8 +30,8 @@ namespace cello {
 
 //----------------------------------------------------------------------
 
-const int debug  = 0;
-const int trace  = 0;
+const int debug        = 0;
+const int trace        = 0;
 const int trace_hypre  = 0;
 
 //----------------------------------------------------------------------
@@ -99,9 +99,6 @@ Hypre::Hypre (Parameters & parameters)
     sprintf (mpi_file,"hypre-solve.out.%d",pmpi->ip());
     mpi_fp = fopen (mpi_file,"w");
   }
-
-  
-  
 }
 
 //----------------------------------------------------------------------
@@ -776,6 +773,11 @@ void Hypre::evaluate (Hierarchy & hierarchy)
 void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 {
 
+  int id = grid.id();
+  char filename[10];
+  sprintf (filename,"grid.%03d",id);
+  grid.write(filename);
+
   if (phase != "graph" && phase != "matrix") {
     char error_message[80];
     strcpy (error_message,"init_matrix_nonstencil_ called with phase = ");
@@ -829,10 +831,13 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
     // ig3[][] should be divisible by r**level.  Just test r here.
 
-    if ((ig3[j1][0]/r)*r != ig3[j1][0]) printf ("ig3[%d][0] = %d\n",j1,ig3[j1][0]);
-    assert ((ig3[j1][0]/r)*r == ig3[j1][0]);
-    if ((ig3[j1][1]/r)*r != ig3[j1][1]) printf ("ig3[%d][1] = %d\n",j1,ig3[j1][1]);
-    assert ((ig3[j1][1]/r)*r == ig3[j1][1]);
+    bool l0 = (ig3[j1][0]/r)*r == ig3[j1][0];
+    bool l1 = (ig3[j1][1]/r)*r == ig3[j1][1];
+
+    if (!l0) printf ("ig3[%d][0] = %d\n",j1,ig3[j1][0]);
+    assert (l0);
+    if (!l1) printf ("ig3[%d][1] = %d\n",j1,ig3[j1][1]);
+    assert (l1);
 
     for (face=0; face<2; face++) {
 
@@ -888,7 +893,12 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 				{-face*(r-1),0,-1}};
 
 	      if (grid.is_local()) {
+		//	      if (1) {
 
+		if (debug) {
+		  printf ("ip=%d %s:%d fine-coarse %d - %d\n",
+			  pmpi->ip(),__FILE__,__LINE__,grid.id(),adjacent->id());
+		}
 		if (phase == "graph") {
 
 		  int k=0;
@@ -988,6 +998,7 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    //--------------------------------------------------
 
 	    if (adjacent->is_local()) {
+	      //	    if (1) {
 	      if (phase == "graph") {
 
 		int diggs[][3] = {{1,0,0},
@@ -1000,7 +1011,20 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 				  {0,0,-1}};
 
 		for (int k=0; k<8; k++) {
-		  // DIES HERE FOR e.g. N16.P211.L2.O1.S0.cg
+		  // DIES HERE IN r266 FOR e.g. N16.P211.L2.O1.S0.cg
+		  if (trace_hypre) {
+		    fprintf (mpi_fp, "grid=%d  adjacent=%d\n",grid.id(),adjacent->id());
+		    fprintf (mpi_fp, "k=%d j=(%d %d %d)\n",k,j0,j1,j2);
+		    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAddEntries (%p,%d, [%d,%d,%d] 0, %d, [%d,%d,%d] 0);\n",
+			     __FILE__,__LINE__,pmpi->ip(),
+			    &graph_,
+			    level_coarse, 
+			     ign3[0], ign3[1], ign3[2],
+			     level_fine,
+			       igg3[0], igg3[1], igg3[2]
+			    );
+		    fflush(mpi_fp);
+		  }
 		  HYPRE_SStructGraphAddEntries 
 		    (graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
 		  if (trace_hypre) {

@@ -24,7 +24,7 @@
 
 //======================================================================
 
-const int debug       = 0;
+const int debug       = 1;
 const int debug_input = 0;
 const int trace       = 0;
 
@@ -524,6 +524,11 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
   iu0--;
   iu1--;
 
+  if (debug) {
+    printf ("%s:%d neighbor_shared_face Grids (%d %d)  (axis=%d face=%d) il (%d %d) iu (%d %d)\n",
+	    __FILE__,__LINE__,this->id(),neighbor.id(),
+	    axis,face,il0,il1,iu0,iu1);
+  }
   if (il0 > iu0 || il1 > iu1) return false;
 
   return true;
@@ -597,6 +602,11 @@ bool Grid::coarse_shared_face (Grid & coarse,
   iu0--;
   iu1--;
 
+  if (debug) {
+    printf ("%s:%d coarse_shared_face Grids (%d %d)  (axis=%d face=%d) il (%d %d) iu (%d %d)\n",
+	    __FILE__,__LINE__,this->id(),coarse.id(),
+	    axis,face,il0,il1,iu0,iu1);
+  }
   if (il0 > iu0 || il1 > iu1) return false;
 
   return true;
