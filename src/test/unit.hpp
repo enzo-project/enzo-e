@@ -26,10 +26,11 @@
 #define unit_assert(RESULT)		\
   printf ("%s %s:%3d  %s::%s() %d\n",	\
 	  (RESULT)? unit::pass_string : unit::fail_string,			\
-	  __FILE__,__LINE__,unit::class_name,unit::func_name,unit::test_num++); \
+	  __FILE__,__LINE__,unit::class_name,unit::func_name,unit::test_num); \
   fprintf (unit::fp,"%s %s:%3d  %s::%s() %d\n",				\
 	  (RESULT)? unit::pass_string : unit::fail_string,			\
-	  __FILE__,__LINE__,unit::class_name,unit::func_name,unit::test_num++); \
+	  __FILE__,__LINE__,unit::class_name,unit::func_name,unit::test_num); \
+  unit::test_num++;
 
 //----------------------------------------------------------------------
 
