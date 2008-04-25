@@ -39,7 +39,7 @@ main()
     if (a0 && axp && axm && ayp && aym && azp && azm) {
     timer.start();
 
-    int count = 10000000/k/k/k+1;
+    int count = 1000000/k/k/k+1;
     for (j=0; j<count; j++) {
     for (i0=1; i0<k+1; i0++) {
       for (i1=1; i1<k+1; i1++) {
