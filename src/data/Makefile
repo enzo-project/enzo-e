@@ -1,7 +1,6 @@
 #
 # (x) test:         Run unit tests
 # (x) test_array:   Compile the unit tests
-# (x) libdata.a:
 # (x) clean:        Clean directory
 # (^) dep:          Update dependencies
 # (X) install:      Install lib, include, and bin files
@@ -23,26 +22,21 @@ test: test_array
 
 #-----------------------------------------------------------------------
 
-test_array: $(TEST_OBJS) libdata.a
-	$(CPP) -o test_array $(TEST_OBJS) $(INC) -L. -ldata
-
-#-----------------------------------------------------------------------
-
-libdata.a: $(OBJS)
-	ar rv $*.a $(OBJS)
+test_array: $(TEST_OBJS) $(OBJS)
+	$(CPP) -o test_array $(TEST_OBJS) $(OBJS) $(INC)
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-rm *.o test_array *~ out.make.dep Makefile.bak lib*.a *.unit
+	-rm *.o test_array *~ out.make.dep Makefile.bak *.unit
 
 #-----------------------------------------------------------------------
 
 .PHONY: install
-install: test_array libdata.a install-include
+install: install-include test_array $(OBJS)
 	cp ./test_array $(TOP)/bin
-	ar rv $(TOP)/lib/libcello.a libdata.a   
+	ar rcu $(TOP)/lib/libcello.a $(OBJS)   
 
 #-----------------------------------------------------------------------
 

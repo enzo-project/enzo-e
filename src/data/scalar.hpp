@@ -22,5 +22,8 @@
 /// Define Scalar to be double.  Should be more flexible and easy to change.
 
 #define Scalar double
+#define SCALAR_SCANF "%lf"
+#define SCALAR_PRINTF "%le "
+#define MPI_SCALAR MPI_DOUBLE
 
 #endif

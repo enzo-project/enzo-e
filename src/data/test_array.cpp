@@ -23,7 +23,7 @@ main()
   unit_class_size(Array);
 
   //----------------------------------------------------------------------
-  // test single array with resize: length, size, and values, and element access
+  // test single array WITH resize: length, size, clear, values, access
   //----------------------------------------------------------------------
 
   {
@@ -73,9 +73,27 @@ main()
     unit_func("operator()");
     unit_assert(passed);
 
+    // clear() to 0
+
+    a.clear();
+    passed = true;
+    for (i0=0; i0<n0; i0++) {
+      for (i1=0; i1<n1; i1++) {
+	for (i2=0; i2<n2; i2++) {
+	  int i = i0 + n0*(i1 + n1*i2);
+	  if (av[i]!=0.0 && passed) {
+	    passed = false;
+	    printf ("av[%d] = %g\n",i,av[i]);
+	  }
+	}
+      }
+    }    
+    unit_func("clear");
+    unit_assert(passed);
+
   }
   //----------------------------------------------------------------------
-  // test single array with resize: length, size, and values, and element access
+  // test single array WITHOUT resize: length, size, clear, values, access
   //----------------------------------------------------------------------
 
   {
@@ -148,6 +166,25 @@ main()
     }    
     unit_func("copy");
     unit_assert(passed);
+
+    // clear() to non-0
+
+    a.clear(1.5);
+    passed = true;
+    for (i0=0; i0<n0; i0++) {
+      for (i1=0; i1<n1; i1++) {
+	for (i2=0; i2<n2; i2++) {
+	  int i = i0 + n0*(i1 + n1*i2);
+	  if (av[i]!=1.5 && passed) {
+	    passed = false;
+	    printf ("av[%d] = %g\n",i,av[i]);
+	  }
+	}
+      }
+    }    
+    unit_func("clear");
+    unit_assert(passed);
+
   }
   unit_close();
 

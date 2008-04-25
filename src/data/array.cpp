@@ -144,6 +144,19 @@ Scalar & Array::operator () (int i0, int i1, int i2)
   return a_[i0 + n_[0]*(i1 + n_[1]*i2)];
 }
 
+//----------------------------------------------------------------------
+
+/// Set all values to 0, or to the given value if supplied
+
+/**
+ */
+
+void Array::clear(Scalar value)
+{
+  int i;
+  for (i=0; i<N_; i++) a_[i] = value;
+}
+
 //======================================================================
 
 /**
@@ -158,7 +171,7 @@ void Array::allocate_(int n0, int n1, int n2)
   N_ = n0*n1*n2;
 
   strcpy (warning_message,"Reallocating without deallocating");
-  if (a_) WARNING("Array::allocate_");
+  if (a_) WARNING_MESSAGE("Array::allocate_");
 
   a_ = new Scalar [N_];
 }

@@ -67,6 +67,8 @@ public:
   Scalar * values () const;
   /// Return the given array element
   Scalar & operator() (int  i0, int  i1=0, int  i2=0);
+  /// Set all values to 0, or to the given value if supplied
+  void clear(Scalar value = 0.0);
 
   //-------------------------------------------------------------------
   // PRIVATE OPERATIONS
