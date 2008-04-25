@@ -32,26 +32,21 @@ test: test_hdf5
 
 #-----------------------------------------------------------------------
 
-test_hdf5: $(TEST_OBJS) libio.a
-	$(CPP) -o test_hdf5 $(TEST_OBJS) $(INC) $(INC_IO) -lhdf5 -L. -lio
-
-#-----------------------------------------------------------------------
-
-libio.a: $(OBJS)
-	ar rv $*.a $(OBJS)
+test_hdf5: $(TEST_OBJS) $(OBJS)
+	$(CPP) -o test_hdf5 $(TEST_OBJS) $(OBJS) $(INC) $(INC_IO) -lhdf5
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-rm *.o test_*hdf5 *~ out.make.dep Makefile.bak lib*.a *.unit
+	-rm *.o test_*hdf5 *~ out.make.dep Makefile.bak lib*.a *.unit *.hdf5
 
 #-----------------------------------------------------------------------
 
 .PHONY: install
-install: test_hdf5 libio.a
+install: install-include test_hdf5 $(OBJS)
 	cp ./test_hdf5 $(TOP)/bin
-	ar rv $(TOP)/lib/libcello.a libio.a
+	ar rcu $(TOP)/lib/libcello.a $(OBJS)
 
 #-----------------------------------------------------------------------
 

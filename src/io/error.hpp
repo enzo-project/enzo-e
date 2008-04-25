@@ -23,7 +23,7 @@
 
 static char warning_message[80];
 
-#define WARNING(FUNCTION) {		\
+#define WARNING_MESSAGE(FUNCTION) {		\
     printf ("WARNING File:     %s:%d\n" \
             "WARNING Function: %s()\n" \
             "WARNING Message:  %s\n", \
@@ -35,7 +35,7 @@ static char warning_message[80];
 
 static char error_message[80];
 
-#define ERROR(FUNCTION) { \
+#define ERROR_MESSAGE(FUNCTION) { \
     printf ("ERROR File:     %s:%d\n" \
             "ERROR Function: %s()\n" \
             "ERROR Message:  %s\n", \
@@ -46,7 +46,7 @@ static char error_message[80];
 
 /// Placeholder for functions that are not implemented yet
 
-#define NOT_IMPLEMENTED(X) { \
+#define NOT_IMPLEMENTED_MESSAGE(X) { \
    printf ("%s:%d WARNING: " X " is not implemented yet\n",__FILE__,__LINE__); \
    fflush(stdout); \
 }

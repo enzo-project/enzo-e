@@ -49,7 +49,7 @@ int Hdf5::file_open  (std::string name, std::string mode)
   if (is_file_open_) {
 
     sprintf (warning_message,"Attempting to open an open file %s",name.c_str());
-    WARNING("Hdf5::file_open");
+    WARNING_MESSAGE("Hdf5::file_open");
 
   } else {
 
@@ -62,7 +62,7 @@ int Hdf5::file_open  (std::string name, std::string mode)
       file_ = H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     } else {
       sprintf (error_message,"Unrecognized mode: %s",mode.c_str());
-      ERROR("Hdf5::file_open");
+      ERROR_MESSAGE("Hdf5::file_open");
     }
 
     if (file_ >= 0) {
@@ -71,7 +71,7 @@ int Hdf5::file_open  (std::string name, std::string mode)
       sprintf (warning_message,
 	       "Return value %d opening file %s",
 	       file_,file_name_.c_str());
-      WARNING("Hdf5::file_open");
+      WARNING_MESSAGE("Hdf5::file_open");
     }
   }
 
@@ -89,7 +89,7 @@ void Hdf5::file_close ()
     sprintf (warning_message,
 	     "Attempting to close a closed file %s",
 	     this->file_name_.c_str());
-    WARNING("Hdf5::file_close");
+    WARNING_MESSAGE("Hdf5::file_close");
   } else {
     int retval = H5Fclose (file_);
     if (retval >= 0) {
@@ -98,7 +98,7 @@ void Hdf5::file_close ()
       sprintf (warning_message,
 	       "Return value %d closing file %s",
 	       retval,file_name_.c_str());
-      WARNING("Hdf5::file_close");
+      WARNING_MESSAGE("Hdf5::file_close");
     }
   }
 }
@@ -136,7 +136,7 @@ void Hdf5::dataset_open (std::string name, Array & array)
     d = H5Sget_simple_extent_ndims(dataspace_);
     if (d > 3) {
       sprintf (error_message, "Dataset has too many dimensions %d\n",d);
-      ERROR("Hdf5::dataset_open");
+      ERROR_MESSAGE("Hdf5::dataset_open");
     }
     H5Sget_simple_extent_dims(dataspace_,n,0);
     // Set the array size accordingly
@@ -172,7 +172,7 @@ void Hdf5::dataset_open (std::string name, Array & array)
     sprintf (warning_message,
 	     "Return value %d opening dataset %s",
 	     dataset_,name.c_str());
-    WARNING("Hdf5::dataset_open");
+    WARNING_MESSAGE("Hdf5::dataset_open");
   }
 }
 
