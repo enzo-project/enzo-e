@@ -62,7 +62,7 @@ else
            -tasks_per_node $procs \
            -rmpool         1) >& outfile
    else
-      /usr/local/sbin/cleanipcs
+#      /usr/local/sbin/cleanipcs
       mpirun -np $np $bin/hypre-solve $input >& outfile
       killall -q hypre-solve
    endif
@@ -72,7 +72,7 @@ endif
 # GENERATE PLOTS
 #----------------------------------------------------------------------
 
-$bin/hypre-png 3 4 X.?
+$bin/hypre-png 3 4 X.? >& out.hypre-png
 mv project-0.png X0.png
 mv project-1.png X1.png
 mv project-2.png X2.png
