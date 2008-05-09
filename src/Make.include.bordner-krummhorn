@@ -1,5 +1,7 @@
 #----------------------------------------------------------------------
 
+SHELL = /bin/bash
+
 # Compilers
 
 CPP = g++
@@ -10,7 +12,7 @@ INC = -I$(TOP)/include
 
 # OPT:  optimization/debug compiler flags
 
-OPT = -O -g
+OPT = -O2 -pipe -fomit-frame-pointer
 
 LIB_HDF5 = -lhdf5
 INC_HDF5 = 
