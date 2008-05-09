@@ -24,8 +24,8 @@ PNGLIB = -lpng
 # HYPRE
 
 HYPREDEF = 
-HYPREINC = -I$(HOME)/hypre/src/hypre/include
-HYPRELIB = -L$(HOME)/hypre/src/hypre/lib -lHYPRE 
+HYPREINC = -I$(HOME)/hypre/hypre-2.0.0/src/hypre/include
+HYPRELIB = -L$(HOME)/hypre/hypre-2.0.0/src/hypre/lib -lHYPRE 
 
 # HDF5
 
@@ -61,13 +61,16 @@ OBJS_ALL = \
        sphere.o
 
 OBJS_INIT  = hypre-init.o
+OBJS_TEST  = hypre-test.o
 OBJS_SOLVE = hypre-solve.o $(OBJS_ALL)
 OBJS_PNG  = hypre-png.o grid.o mpi.o domain.o faces.o pngwriter.o
 
-all: hypre-solve hypre-init hypre-png debug-matrix enzo2hypre
+all: hypre-solve hypre-init hypre-test hypre-png debug-matrix enzo2hypre
 
 hypre-init: $(OBJS_INIT)
 	$(CPP) -o hypre-init $(OBJS_INIT) $(LIB)
+hypre-test: $(OBJS_TEST)
+	$(CPP) -o hypre-test $(OBJS_TEST) $(LIB)
 hypre-solve: $(OBJS_SOLVE)
 	$(MPCPP) -o hypre-solve $(OBJS_SOLVE) $(LIB)
 hypre-png: $(OBJS_PNG)
@@ -79,10 +82,11 @@ enzo2hypre: enzo2hypre.cpp
 
 BIN = ../bin
 .PHONY: install
-install: hypre-solve hypre-init hypre-png
+install: hypre-solve hypre-init hypre-test hypre-png
 	(if [ ! -e $(BIN) ]; then mkdir $(BIN); fi)
 	cp hypre-solve $(BIN)
 	cp hypre-init  $(BIN)
+	cp hypre-test  $(BIN)
 	cp hypre-png   $(BIN)
 
 
