@@ -11,8 +11,8 @@ JBINC =
 JBLIB = 
 #--------------------------------
 JBDEF = -DUSE_JBPERF
-JBINC = -I$(HOME)/include 
-JBLIB = -L$(HOME)/lib -ljbperf
+JBINC = -I$(HOME)/lcaperf/include 
+JBLIB = -L$(HOME)/lcaperf/lib -ljbperf
 #--------------------------------
 
 # LIBPNG

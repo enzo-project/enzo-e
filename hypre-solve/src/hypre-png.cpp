@@ -192,6 +192,12 @@ void images_allocate(double *images3[3],
     rgb33[axis][0] = new double [n1*n2]; // red
     rgb33[axis][1] = new double [n1*n2]; // green
     rgb33[axis][2] = new double [n1*n2]; // blue
+    for (int i=0; i<n1*n2; i++) {
+      images3[axis][i] = 0;
+      rgb33[axis][0][i] = 0;
+      rgb33[axis][1][i] = 0;
+      rgb33[axis][2][i] = 0;
+    }
   }
 }
 

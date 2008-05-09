@@ -346,13 +346,13 @@ void Hypre::init_graph (Hierarchy & hierarchy)
   }
 
   //  HYPRE_SStructGraphSetObjectType (graph_, HYPRE_SSTRUCT);
-  if (trace_hypre) {
-    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphSetObjectType (%p,%d);\n",
-	    __FILE__,__LINE__,pmpi->ip(),
-	    &graph_, HYPRE_SSTRUCT
-	    );
-    fflush(mpi_fp);
-  }
+  //  if (trace_hypre) {
+  //    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphSetObjectType (%p,%d);\n",
+  //	    __FILE__,__LINE__,pmpi->ip(),
+  //	    &graph_, HYPRE_SSTRUCT
+  //	    );
+  //    fflush(mpi_fp);
+  //  }
 
   ItHierarchyLevels itl (hierarchy);
 
@@ -1060,10 +1060,10 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		  HYPRE_SStructMatrixAddToValues 
 		    (A_, level_coarse,ign3, 0, 1, &entry, &value);
 		  if (trace_hypre) {
-		    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixAddToValues (%p,%d, 0, 1, %d %g);\n",
+		    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixAddToValues (%p,%d, [%d %d %d], 0, 1, %d %g);\n",
 			    __FILE__,__LINE__,pmpi->ip(),
 			    &A_, level_coarse,
-			     //			    ign3[0],ign3[1],ign3[2], 
+			     ign3[0],ign3[1],ign3[2], 
 			     entry, value
 			    );
 		    fflush(mpi_fp);
@@ -1442,7 +1442,7 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
 
       HYPRE_SStructVectorAddToValues (B_, grid.level(), index, 0, &value);
       if (trace_hypre) {
-	fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorAddToValues (%p,%d, %d %d %d, 0, %g);\n",
+	fprintf (mpi_fp, "%s:%d %d HYPRE_SStructVectorAddToValues (%p,%d, [%d %d %d], 0, %g);\n",
 		__FILE__,__LINE__,pmpi->ip(),
 		&B_, grid.level(), index[0],index[1],index[2],value
 		);
