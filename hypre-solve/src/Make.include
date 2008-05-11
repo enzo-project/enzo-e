@@ -70,7 +70,7 @@ all: hypre-solve hypre-init hypre-test hypre-png debug-matrix enzo2hypre
 hypre-init: $(OBJS_INIT)
 	$(CPP) -o hypre-init $(OBJS_INIT) $(LIB)
 hypre-test: $(OBJS_TEST)
-	$(CPP) -o hypre-test $(OBJS_TEST) $(LIB)
+	$(MPCPP) -o hypre-test $(OBJS_TEST) $(LIB)
 hypre-solve: $(OBJS_SOLVE)
 	$(MPCPP) -o hypre-solve $(OBJS_SOLVE) $(LIB)
 hypre-png: $(OBJS_PNG)

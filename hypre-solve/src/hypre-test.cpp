@@ -20,14 +20,6 @@ const bool debug = true;
 main(int argc, char * argv[])
 {
 
-  int N;
-  if (argc == 2) {
-    N = atoi(argv[1]);
-  } else {
-    fprintf (stderr, "Usage: %s <size>\n",argv[0]);
-    exit(1);
-  }
-
   //------------------------------------------------------------
   // Initialize MPI
   //------------------------------------------------------------
@@ -38,6 +30,19 @@ main(int argc, char * argv[])
   MPI_Comm_size (MPI_COMM_WORLD, &np);
   MPI_Comm_rank (MPI_COMM_WORLD, &ip);
 
+
+  //------------------------------------------------------------
+  // Parse command-line arguments
+  //------------------------------------------------------------
+
+  int N;
+  if (argc == 2) {
+    N = atoi(argv[1]);
+  } else {
+    if (ip==0) fprintf (stderr, "Usage: %s <size>\n",argv[0]);
+    MPI_Finalize();
+    exit(1);
+  }
 
   //------------------------------------------------------------
   // Initialize hypre grid
@@ -124,8 +129,8 @@ main(int argc, char * argv[])
   // Initialize nonstencil part
 
   
-  HYPRE_SStructGraphAddEntries 
-    (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
+  //  HYPRE_SStructGraphAddEntries 
+  //    (graph, level_fine, igg3, 0, level_coarse, ign3, 0);
   //  HYPRE_SStructGraphAssemble (graph_);
 
   //------------------------------------------------------------
