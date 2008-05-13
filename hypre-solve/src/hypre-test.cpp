@@ -15,6 +15,11 @@
 #include <mpi.h>
 #include "HYPRE_sstruct_ls.h"
 
+const double PI = 3.14159265358979323;
+const double G  = 6.67428e-8;
+const double MASS = 1e43;
+const double BOX = 8e9;
+
 const bool debug = true;
 
 main(int argc, char * argv[])
@@ -57,14 +62,13 @@ main(int argc, char * argv[])
 
   // Initialize grid part extents
 
-  int fine_lower[3]   = {0,0,0};
-  int fine_upper[3]   = {N-1,N-1,N-1};
-  int coarse_lower[3] = {N/4,N/4,N/4};
-  int coarse_upper[3] = {3*N/4-1,3*N/4-1,3*N/4-1};
+  int coarse_lower[3]   = {0,0,0};
+  int coarse_upper[3]   = {N-1,N-1,N-1};
+  int fine_lower[3] = {N/2,N/2,N/2};
+  int fine_upper[3] = {3*N/2-1,3*N/2-1,3*N/2-1};
 
-  HYPRE_SStructGridSetExtents(grid, 0, fine_lower,   fine_upper);
-
-  HYPRE_SStructGridSetExtents(grid, 1, coarse_lower, coarse_upper);
+  HYPRE_SStructGridSetExtents(grid, 1, fine_lower,   fine_upper);
+  HYPRE_SStructGridSetExtents(grid, 0, coarse_lower, coarse_upper);
 
   if (debug) {
     printf ("Fine grid extents:   (%d %d %d) to (%d %d %d)\n",
@@ -85,7 +89,6 @@ main(int argc, char * argv[])
   // Assemble the grid
   
   HYPRE_SStructGridAssemble (grid);
-
 
   //------------------------------------------------------------
   // Create hypre stencil
@@ -128,29 +131,123 @@ main(int argc, char * argv[])
 
   // Initialize nonstencil part
 
-  
-  //  HYPRE_SStructGraphAddEntries 
-  //    (graph, level_fine, igg3, 0, level_coarse, ign3, 0);
-  //  HYPRE_SStructGraphAssemble (graph_);
+  int axis,face; // axis = 0:2;  face = 0:1
+  int ic0,ic1;     // 
+  int ifg3[3]; // fine grid indices
+  int icg3[3]; // coarse grid indices
+
+  for (axis=0; axis<3; axis++) {
+
+    int j0 = axis;
+    int j1 = (axis+1)%3;
+    int j2 = (axis+2)%3;
+
+    for (face=0; face<2; face++) {
+
+      // loop over coarse face zones
+
+      for (ic0=0; ic0<N/2; ic0++) {
+	for (ic1=0; ic1<N/2; ic1++) {
+
+	  // coarse zone index
+
+	  icg3[j0] = (1-face) * (N/4-1) + (face) * (3*N/4);
+	  icg3[j1] = N/4 + ic0;
+	  icg3[j2] = N/4 + ic1;
+
+	  // fine zone index 00
+
+	  ifg3[j0] = 2 * (icg3[j0] + (1-face)*1 + face * (-1));
+	  ifg3[j1] = 2 * icg3[j1];
+	  ifg3[j2] = 2 * icg3[j2];
+
+	  // fine-to-coarse
+
+	  HYPRE_SStructGraphAddEntries (graph, 1, ifg3, 0, 0, icg3, 0);
+	  ++ ifg3[j1]; 	  // fine zone index 010
+	  HYPRE_SStructGraphAddEntries (graph, 1, ifg3, 0, 0, icg3, 0);
+	  ++ ifg3[j2];	  // fine zone index 011
+	  HYPRE_SStructGraphAddEntries (graph, 1, ifg3, 0, 0, icg3, 0);
+	  -- ifg3[j1];	  // fine zone index 001
+	  HYPRE_SStructGraphAddEntries (graph, 1, ifg3, 0, 0, icg3, 0);
+	  -- ifg3[j2];	  // fine zone index 000
+
+	  // coarse-to-fine
+
+	  HYPRE_SStructGraphAddEntries (graph, 0, icg3, 0, 1, ifg3, 0);
+	  ++ ifg3[j0]; 	  // fine zone index 100
+	  HYPRE_SStructGraphAddEntries (graph, 0, icg3, 0, 1, ifg3, 0);
+	  ++ ifg3[j1];	  // fine zone index 110
+	  HYPRE_SStructGraphAddEntries (graph, 0, icg3, 0, 1, ifg3, 0);
+	  -- ifg3[j0];	  // fine zone index 010
+	  HYPRE_SStructGraphAddEntries (graph, 0, icg3, 0, 1, ifg3, 0);
+	  ++ ifg3[j2];	  // fine zone index 011
+	  HYPRE_SStructGraphAddEntries (graph, 0, icg3, 0, 1, ifg3, 0);
+	  ++ ifg3[j0]; 	  // fine zone index 111
+	  HYPRE_SStructGraphAddEntries (graph, 0, icg3, 0, 1, ifg3, 0);
+	  -- ifg3[j1];	  // fine zone index 101
+	  HYPRE_SStructGraphAddEntries (graph, 0, icg3, 0, 1, ifg3, 0);
+	  -- ifg3[j0];	  // fine zone index 001
+	  HYPRE_SStructGraphAddEntries (graph, 0, icg3, 0, 1, ifg3, 0);
+	  -- ifg3[j2];	  // fine zone index 000
+
+	}
+      }
+      
+    }
+  }
+
+  HYPRE_SStructGraphAssemble (graph);
 
   //------------------------------------------------------------
   // Create hypre matrix and vectors
   //------------------------------------------------------------
 
-  //  HYPRE_SStructMatrix  A_;       // hypre matrix
-  //  HYPRE_SStructVector  B_;       // hypre vector right-hand side
-  //  HYPRE_SStructVector  X_;       // hypre vector solution
+  HYPRE_SStructMatrix  A;       // hypre matrix
+  HYPRE_SStructVector  X;       // hypre vector solution
+  HYPRE_SStructVector  B;       // hypre vector right-hand side
 
-  //  HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, graph_, &A_);
-  //  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid_,  &X_);
-  //  HYPRE_SStructMatrixSetObjectType (A_,HYPRE_SSTRUCT);
-  //  HYPRE_SStructVectorSetObjectType (X_,HYPRE_SSTRUCT);
-  //  HYPRE_SStructMatrixInitialize (A_);
-  //  HYPRE_SStructVectorInitialize (X_);
-  //	HYPRE_SStructVectorAddToBoxValues (B_,part,lower,upper,0,values);
-  //  HYPRE_SStructMatrixAssemble (A_);
-  //  HYPRE_SStructVectorAssemble (B_);
-  //		    HYPRE_SStructMatrixAddToValues 
+  HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, graph, &A);
+  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid,  &B);
+  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid,  &X);
+
+  HYPRE_SStructMatrixSetObjectType (A,HYPRE_SSTRUCT);
+  HYPRE_SStructVectorSetObjectType (X,HYPRE_SSTRUCT);
+  HYPRE_SStructVectorSetObjectType (B,HYPRE_SSTRUCT);
+
+  HYPRE_SStructMatrixInitialize (A);
+  HYPRE_SStructVectorInitialize (X);
+  HYPRE_SStructVectorInitialize (B);
+
+  HYPRE_SStructMatrixAssemble (A);
+  HYPRE_SStructVectorAssemble (B);
+
+  // Initialize B
+
+  int ind3[3] = {N-1, N-1, N-1};
+  double h1 = 2 * BOX / N;
+  double bval = -4.0 * G * PI * MASS / (h1*h1*h1);
+
+  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
+  ++ ind3[0]; 	  // fine zone index 100
+  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
+  ++ ind3[1];	  // fine zone index 110
+  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
+  -- ind3[0];	  // fine zone index 010
+  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
+  ++ ind3[2];	  // fine zone index 011
+  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
+  ++ ind3[0]; 	  // fine zone index 111
+  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
+  -- ind3[1];	  // fine zone index 101
+  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
+  -- ind3[0];	  // fine zone index 001
+  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
+  -- ind3[2];	  // fine zone index 000
+
+  // Initialize A
+
+  //  HYPRE_SStructMatrixAddToValues 
   //		      (A_, level_fine, igg3, 0, 1, &entry, &val);
   //  HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[0],v0);
 

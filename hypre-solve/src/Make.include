@@ -24,8 +24,8 @@ PNGLIB = -lpng
 # HYPRE
 
 HYPREDEF = 
-HYPREINC = -I$(HOME)/hypre/hypre-2.0.0/src/hypre/include
-HYPRELIB = -L$(HOME)/hypre/hypre-2.0.0/src/hypre/lib -lHYPRE 
+HYPREINC = -I$(HOME)/hypre/src/hypre/include
+HYPRELIB = -L$(HOME)/hypre/src/hypre/lib -lHYPRE 
 
 # HDF5
 
