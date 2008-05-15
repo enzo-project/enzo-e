@@ -33,10 +33,10 @@ test: test_timer
 #-----------------------------------------------------------------------
 
 test_timer: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_timer $(TEST_OBJS) $(OBJS) $(INC)
+	$(CXX) -o test_timer $(TEST_OBJS) $(OBJS) $(OPT) $(INC)
 
 time_matvec:  time_matvec.o $(OBJS)
-	$(CXX) -o time_matvec  time_matvec.o $(OBJS) $(INC)
+	$(CXX) -o time_matvec $(PERF_FLAGS) time_matvec.o $(OBJS) $(OPT) $(INC)
 
 
 #-----------------------------------------------------------------------

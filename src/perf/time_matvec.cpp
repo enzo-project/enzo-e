@@ -18,7 +18,7 @@
 #include "data_array_.hpp"
 #include "timer.hpp"
 
-main()
+main(int argc, char ** argv)
 {
   Timer timer_const;
   Timer overhead;
@@ -29,7 +29,21 @@ main()
   const int CACHE_SIZE = 4096;
   char cache[CACHE_SIZE];
 
-  for (k=8; k<=192; k++) {
+  int kbegin,kend;
+
+  if (argc >= 1) {
+    kbegin = 8;
+    kend   = 192;
+  }
+  if (argc >= 2) {
+    kbegin = atoi(argv[1]);
+    kend   = atoi(argv[1]);
+  }
+  if (argc >= 3) {
+    kend   = atoi(argv[2]);
+  }
+
+  for (k=kbegin; k<=kend; k++) {
 
     int k2  = k + 2;
     int k22 = k2*k2;
@@ -66,6 +80,7 @@ main()
 	      }
 	    }
 	  }
+
 	  timer_const.stop();
 
 	  for (i=0; i<CACHE_SIZE; i++) {

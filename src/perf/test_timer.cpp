@@ -34,12 +34,15 @@ main()
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 
+  unit_assert((timer.value() - 1.0) < 0.01);
+
   timer.start();
   system("sleep 1");
   timer.stop();
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 
-  unit_assert(true);
+  unit_assert((timer.value() - 2.0) < 0.01);
+
   unit_close();
 }

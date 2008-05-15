@@ -12,7 +12,15 @@ INC = -I$(TOP)/include
 
 # OPT:  optimization/debug compiler flags
 
-OPT = -O2 -pipe -fomit-frame-pointer
+PROF = $(PROF_OFF)
+
+PROF_GPROF = -pg
+PROF_GCOV  = -fprofile-arcs -ftest-coverage
+PROF_OFF   = -fomit-frame-pointer
+PROF_GEN   = -fprofile-generate
+PROF_USE   = -fprofile-use
+
+OPT = -O3 -pipe $(PROF)
 
 LIB_HDF5 = -lhdf5
 INC_HDF5 = 
