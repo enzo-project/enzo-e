@@ -24,6 +24,9 @@ OBJS = $(OBJ) $(OBJ_EXTERN)
 # TARGETS
 #=======================================================================
 
+.PHONY: all
+all: test_timer time_matvec
+
 #-----------------------------------------------------------------------
 
 .PHONY: test
@@ -35,15 +38,35 @@ test: test_timer
 test_timer: $(TEST_OBJS) $(OBJS)
 	$(CXX) -o test_timer $(TEST_OBJS) $(OBJS) $(OPT) $(INC)
 
-time_matvec:  time_matvec.o $(OBJS)
-	$(CXX) -o time_matvec $(PERF_FLAGS) time_matvec.o $(OBJS) $(OPT) $(INC)
+PERF_FLAGS = 
+time_matvec:
+	$(CXX) -o time_matvec.o time_matvec.cpp $(PERF_FLAGS) -O $(INC) -c
+	$(CXX) -o $@            time_matvec.o   $(PERF_FLAGS) -O $(INC)
+time_matvec-O0: 
+	$(CXX) -o time_matvec.o time_matvec.cpp $(PERF_FLAGS) -O0 $(INC) -c
+	$(CXX) -o $@            time_matvec.o   $(PERF_FLAGS) -O0 $(INC)
+time_matvec-O1:   
+	$(CXX) -o time_matvec.o time_matvec.cpp $(PERF_FLAGS) -O1 $(INC) -c
+	$(CXX) -o $@            time_matvec.o   $(PERF_FLAGS) -O1 $(INC)
+time_matvec-O2:   
+	$(CXX) -o time_matvec.o time_matvec.cpp $(PERF_FLAGS) -O2 $(INC) -c
+	$(CXX) -o $@            time_matvec.o   $(PERF_FLAGS) -O2 $(INC)
+time_matvec-O3:   
+	$(CXX) -o time_matvec.o time_matvec.cpp $(PERF_FLAGS) -O3 $(INC) -c
+	$(CXX) -o $@            time_matvec.o   $(PERF_FLAGS) -O3 $(INC)
+time_matvec-O4:   
+	$(CXX) -o time_matvec.o time_matvec.cpp $(PERF_FLAGS) -O4 $(INC) -c
+	$(CXX) -o $@            time_matvec.o   $(PERF_FLAGS) -O4 $(INC)
+time_matvec-O5:   
+	$(CXX) -o time_matvec.o time_matvec.cpp $(PERF_FLAGS) -O5 $(INC) -c
+	$(CXX) -o $@            time_matvec.o   $(PERF_FLAGS) -O5 $(INC)
 
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-rm *.o *~ test_timer time_matvec out.make.dep Makefile.bak lib*.a *.unit
+	-rm *.o *~ test_timer time_matvec time_matvec-O? out.make.dep Makefile.bak lib*.a *.unit
 
 #-----------------------------------------------------------------------
 

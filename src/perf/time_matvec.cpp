@@ -13,20 +13,21 @@
 #include <stdlib.h>
 #include <string>
 
-#include "test_unit_.hpp"
-#include "data_scalar_.hpp"
-#include "data_array_.hpp"
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#define Scalar double
+
 #include "timer.hpp"
 
 main(int argc, char ** argv)
 {
-  Timer timer_const;
-  Timer overhead;
-  Timer timer_symm;
-  Timer timer_full;
-  int i,j,k,i0,i1,i2;
+  Timer time_overhead;
+  Timer time_const;
+  Timer time_symm;
+  Timer time_full;
+  Timer time_block;
+  int i,j,k,i0,i1,i2,ii2;
 
-  const int CACHE_SIZE = 4096;
+  const int CACHE_SIZE = 65536;
   char cache[CACHE_SIZE];
 
   int kbegin,kend;
@@ -43,28 +44,33 @@ main(int argc, char ** argv)
     kend   = atoi(argv[2]);
   }
 
+  Scalar * array = new Scalar [(kend+2)*(kend+2)*(kend+2)*9];
+
   for (k=kbegin; k<=kend; k++) {
 
     int k2  = k + 2;
     int k22 = k2*k2;
+    int n   = k2*k2*k2;
 
-    int count = 1000000/k/k/k+1;
+    int count = 1000000/k/k/k + 1;
+
+    int ind = 0;
+    Scalar   * x = &array[ind]; ind += n;
+    Scalar    *b = &array[ind]; ind += n;
+    Scalar * azm = &array[ind]; ind += n;
+    Scalar * aym = &array[ind]; ind += n;
+    Scalar * axm = &array[ind]; ind += n;
+    Scalar  * a0 = &array[ind]; ind += n;
+    Scalar * axp = &array[ind]; ind += n;
+    Scalar * ayp = &array[ind]; ind += n;
+    Scalar * azp = &array[ind]; ind += n;
+
     {
-      Array A0(k2,k2,k2);  Scalar  * a0 = A0.values();
-      Array AXP(k2,k2,k2); Scalar * axp = AXP.values();
-      Array AXM(k2,k2,k2); Scalar * axm = AXM.values();
-      Array AYP(k2,k2,k2); Scalar * ayp = AYP.values();
-      Array AYM(k2,k2,k2); Scalar * aym = AYM.values();
-      Array AZP(k2,k2,k2); Scalar * azp = AZP.values();
-      Array AZM(k2,k2,k2); Scalar * azm = AZM.values();
-      Array   X(k2,k2,k2); Scalar   * x =   X.values();
-      Array   B(k2,k2,k2); Scalar    *b =   B.values();
-
       if (a0 && axp && axm && ayp && aym && azp && azm) {
 
 	for (j=0; j<count; j++) {
 
-	  timer_const.start();
+	  time_const.start();
 
 	  for (i0=1; i0<k+1; i0++) {
 	    for (i1=1; i1<k+1; i1++) {
@@ -81,7 +87,7 @@ main(int argc, char ** argv)
 	    }
 	  }
 
-	  timer_const.stop();
+	  time_const.stop();
 
 	  for (i=0; i<CACHE_SIZE; i++) {
 	    cache[i] = 1;
@@ -89,8 +95,8 @@ main(int argc, char ** argv)
 	}
 
 	for (j=0; j<count; j++) {
-	  overhead.start();
-	  overhead.stop();
+	  time_overhead.start();
+	  time_overhead.stop();
 	  for (i=0; i<CACHE_SIZE; i++) {
 	    cache[i] = 1;
 	  }
@@ -99,21 +105,12 @@ main(int argc, char ** argv)
     }
 
     {
-      Array A0(k2,k2,k2);  Scalar  * a0 = A0.values();
-      Array AXP(k2,k2,k2); Scalar * axp = AXP.values();
-      Array AXM(k2,k2,k2); Scalar * axm = AXM.values();
-      Array AYP(k2,k2,k2); Scalar * ayp = AYP.values();
-      Array AYM(k2,k2,k2); Scalar * aym = AYM.values();
-      Array AZP(k2,k2,k2); Scalar * azp = AZP.values();
-      Array AZM(k2,k2,k2); Scalar * azm = AZM.values();
-      Array   X(k2,k2,k2); Scalar   * x =   X.values();
-      Array   B(k2,k2,k2); Scalar    *b =   B.values();
     
       if (a0 && axp && axm && ayp && aym && azp && azm) {
 
 
 	for (j=0; j<count; j++) {
-	  timer_symm.start();
+	  time_symm.start();
 	  for (i0=1; i0<k+1; i0++) {
 	    for (i1=1; i1<k+1; i1++) {
 	      for (i2=1; i2<k+1; i2++) {
@@ -128,7 +125,7 @@ main(int argc, char ** argv)
 	      }
 	    }
 	  }
-	  timer_symm.stop();
+	  time_symm.stop();
 	  for (i=0; i<CACHE_SIZE; i++) {
 	    cache[i] = 1;
 	  }
@@ -137,20 +134,11 @@ main(int argc, char ** argv)
     }
 
     {
-      Array A0(k2,k2,k2);  Scalar  * a0 = A0.values();
-      Array AXP(k2,k2,k2); Scalar * axp = AXP.values();
-      Array AXM(k2,k2,k2); Scalar * axm = AXM.values();
-      Array AYP(k2,k2,k2); Scalar * ayp = AYP.values();
-      Array AYM(k2,k2,k2); Scalar * aym = AYM.values();
-      Array AZP(k2,k2,k2); Scalar * azp = AZP.values();
-      Array AZM(k2,k2,k2); Scalar * azm = AZM.values();
-      Array   X(k2,k2,k2); Scalar   * x =   X.values();
-      Array   B(k2,k2,k2); Scalar    *b =   B.values();
     
       if (a0 && axp && axm && ayp && aym && azp && azm) {
 
 	for (j=0; j<count; j++) {
-	timer_full.start();
+	  time_full.start();
 	  for (i0=1; i0<k+1; i0++) {
 	    for (i1=1; i1<k+1; i1++) {
 	      for (i2=1; i2<k+1; i2++) {
@@ -165,7 +153,48 @@ main(int argc, char ** argv)
 	      }
 	    }
 	  }
-	  timer_full.stop();
+	  time_full.stop();
+	  for (i=0; i<CACHE_SIZE; i++) {
+	    cache[i] = 1;
+	  }
+	}
+      }
+    }
+
+    {
+      if (a0 && axp && axm && ayp && aym && azp && azm) {
+
+	for (j=0; j<count; j++) {
+
+	  time_block.start();
+
+	  for (ii2=1; ii2<k+1; ii2+=4) {
+	    for (i0=1; i0<k+1; i0++) {
+	      for (i1=1; i1<k+1; i1++) {
+		for (i2=ii2; i2<MIN(k+1,ii2+4); i2++) {
+		  i = i0 + k2*(i1 + k2*i2);
+		  b[i] = azm[0]*x[i-k22]
+		    +    aym[0]*x[i-k2]
+		    +    axm[0]*x[i-1]
+		    +     a0[0]*x[i]
+		    +    axp[0]*x[i+1]
+		    +    ayp[0]*x[i+k2]
+		    +    azp[0]*x[i+k22];
+		}
+	      }
+	    }
+	  }
+
+	  time_block.stop();
+
+	  for (i=0; i<CACHE_SIZE; i++) {
+	    cache[i] = 1;
+	  }
+	}
+
+	for (j=0; j<count; j++) {
+	  time_overhead.start();
+	  time_overhead.stop();
 	  for (i=0; i<CACHE_SIZE; i++) {
 	    cache[i] = 1;
 	  }
@@ -175,18 +204,20 @@ main(int argc, char ** argv)
 
 
     int num_flops = count*k*k*k*13;
-    printf ("%d %20.12f %20.12f %20.12f \n",
+    printf ("%d %20.12f %20.12f %20.12f %20.12f\n",
 	    k,
-	    1e-6*num_flops/(timer_const.value()-overhead.value()),
-	    1e-6*num_flops/(timer_symm.value()-overhead.value()),
-	    1e-6*num_flops/(timer_full.value()-overhead.value())
+	    1e-6*num_flops/(time_const.value()-time_overhead.value()),
+	    1e-6*num_flops/(time_symm.value()-time_overhead.value()),
+	    1e-6*num_flops/(time_full.value()-time_overhead.value()),
+	    1e-6*num_flops/(time_block.value()-time_overhead.value())
 	    ); 
     fflush(stdout);
 
-    timer_const.clear();
-    timer_symm.clear();
-    timer_full.clear();
-    overhead.clear();
+    time_const.clear();
+    time_symm.clear();
+    time_full.clear();
+    time_block.clear();
+    time_overhead.clear();
 
   } // for
 }
