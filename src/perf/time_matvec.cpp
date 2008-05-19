@@ -75,7 +75,7 @@ main(int argc, char ** argv)
 	  for (i0=1; i0<k+1; i0++) {
 	    for (i1=1; i1<k+1; i1++) {
 	      for (i2=1; i2<k+1; i2++) {
-		i = i0 + k2*(i1 + k2*i2);
+		i = i2 + k2*(i1 + k2*i0);
 		b[i] = azm[0]*x[i-k22]
 		  +    aym[0]*x[i-k2]
 		  +    axm[0]*x[i-1]
@@ -114,14 +114,14 @@ main(int argc, char ** argv)
 	  for (i0=1; i0<k+1; i0++) {
 	    for (i1=1; i1<k+1; i1++) {
 	      for (i2=1; i2<k+1; i2++) {
-		i = i0 + k2*(i1 + k2*i2);
-		b[i] = azp[i]*x[i-k22]
-		  +    ayp[i]   *x[i-k2]
-		  +    axp[i]    *x[i-1]
+		i = i2 + k2*(i1 + k2*i0);
+		b[i] = azp[i-k22]*x[i-k22]
+		  +    ayp[i-k2] *x[i-k2]
+		  +    axp[i-1]  *x[i-1]
 		  +     a0[i]      *x[i]
-		  +    axp[i+1]    *x[i+1]
-		  +    ayp[i+k2]   *x[i+k2]
-		  +    azp[i+k22]*x[i+k22];
+		  +    axp[i]    *x[i+1]
+		  +    ayp[i]   *x[i+k2]
+		  +    azp[i]*x[i+k22];
 	      }
 	    }
 	  }
@@ -142,14 +142,14 @@ main(int argc, char ** argv)
 	  for (i0=1; i0<k+1; i0++) {
 	    for (i1=1; i1<k+1; i1++) {
 	      for (i2=1; i2<k+1; i2++) {
-		i = i0 + k2*(i1 + k2*i2);
-		b[i] = azm[i-k22]*x[i-k22]
-		  +    aym[i-k2]   *x[i-k2]
-		  +    axm[i-1]    *x[i-1]
-		  +     a0[i]      *x[i]
-		  +    axp[i+1]    *x[i+1]
-		  +    ayp[i+k2]   *x[i+k2]
-		  +    azp[i+k22]*x[i+k22];
+		i = i2 + k2*(i1 + k2*i0);
+		b[i] = azm[i]*x[i-k22]
+		  +    aym[i]*x[i-k2]
+		  +    axm[i]*x[i-1]
+		  +     a0[i]*x[i]
+		  +    axp[i]*x[i+1]
+		  +    ayp[i]*x[i+k2]
+		  +    azp[i]*x[i+k22];
 	      }
 	    }
 	  }
@@ -172,7 +172,7 @@ main(int argc, char ** argv)
 	    for (i0=1; i0<k+1; i0++) {
 	      for (i1=1; i1<k+1; i1++) {
 		for (i2=ii2; i2<MIN(k+1,ii2+4); i2++) {
-		  i = i0 + k2*(i1 + k2*i2);
+		  i = i2 + k2*(i1 + k2*i0);
 		  b[i] = azm[0]*x[i-k22]
 		    +    aym[0]*x[i-k2]
 		    +    axm[0]*x[i-1]
