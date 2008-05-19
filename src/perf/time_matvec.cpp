@@ -164,23 +164,27 @@ main(int argc, char ** argv)
     {
       if (a0 && axp && axm && ayp && aym && azp && azm) {
 
+	if ((((k+2) / 8 ) * 8) == k+2) {
+	  b = b + 7*sizeof(Scalar);
+	  k2 = k2 + 1;
+	  k22 = k2*k2;
+	}
+
 	for (j=0; j<count; j++) {
 
 	  time_block.start();
 
-	  for (ii2=1; ii2<k+1; ii2+=4) {
-	    for (i0=1; i0<k+1; i0++) {
-	      for (i1=1; i1<k+1; i1++) {
-		for (i2=ii2; i2<MIN(k+1,ii2+4); i2++) {
-		  i = i2 + k2*(i1 + k2*i0);
-		  b[i] = azm[0]*x[i-k22]
-		    +    aym[0]*x[i-k2]
-		    +    axm[0]*x[i-1]
-		    +     a0[0]*x[i]
-		    +    axp[0]*x[i+1]
-		    +    ayp[0]*x[i+k2]
-		    +    azp[0]*x[i+k22];
-		}
+	  for (i0=1; i0<k+1; i0++) {
+	    for (i1=1; i1<k+1; i1++) {
+	      for (i2=1; i2<k+1; i2++) {
+		i = i2 + k2*(i1 + k2*i0);
+		b[i] = azm[0]*x[i-k22]
+		  +    aym[0]*x[i-k2]
+		  +    axm[0]*x[i-1]
+		  +     a0[0]*x[i]
+		  +    axp[0]*x[i+1]
+		  +    ayp[0]*x[i+k2]
+		  +    azp[0]*x[i+k22];
 	      }
 	    }
 	  }
