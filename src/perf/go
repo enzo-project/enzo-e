@@ -1,6 +1,8 @@
 #!/bin/tcsh
 
-set OBJ = (O0 O1 O2 O3)
+set MACH = datastar
+
+set OBJ = (O0 O2 O3 O4 O5)
 
 make clean
 foreach obj ($OBJ)
@@ -8,7 +10,7 @@ foreach obj ($OBJ)
 end
 foreach k (1 2)
 foreach obj ($OBJ)
-   echo "time_matvec-$obj >& time_matvec-$obj-$k.data"
-   time_matvec-$obj >& time_matvec-$obj-$k.data
+   echo "time_matvec-$obj >& matvec-$MACH-$obj-$k.data"
+   time_matvec-$obj >& matvec-$MACH-$obj-$k.data
 end
 end
