@@ -1,30 +1,28 @@
-#----------------------------------------------------------------------
+#========================================================================
+# CXX 
+# OPT 
+# LIB_HDF5 
+# INC_HDF5 
+#========================================================================
 
+#------------------------------------------------------------------------
 # Compilers
+#------------------------------------------------------------------------
 
 CXX = xlC
 
-# INC: The include directories common to all components
-
-INC = -I$(TOP)/include
-
+#------------------------------------------------------------------------
 # OPT:  optimization/debug compiler flags
+#------------------------------------------------------------------------
 
 OPT = -O -g
 
-LIB_HDF5 = /usr/local/apps64/hdf5/lib/libhdf5.a /usr/local/apps64/hdf4/lib/libsz.a /usr/local/apps64/hdf4/lib/libz.a
+#------------------------------------------------------------------------
+# HDF Library and includes
+#------------------------------------------------------------------------
+
+LIB_HDF5 = /usr/local/apps64/hdf5/lib/libhdf5.a \
+           /usr/local/apps64/hdf4/lib/libsz.a \
+           /usr/local/apps64/hdf4/lib/libz.a
+
 INC_HDF5 = -I/usr/local/apps64/hdf5/include
-
-#----------------------------------------------------------------------
-
-CPPFLAGS = $(DEFINES)
-
-CXXFLAGS = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CXXFLAGS_LOCAL) $(OPT)
-CFLAGS   = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CFLAGS_LOCAL)   $(OPT)
-
-LDFLAGS  = 
-
-#-----------------------------------------------------------------------
-.PHONY: dep
-dep:
-	-@(makedepend -fDEPEND $(INC) -- -- *.?pp) >& out.make.dep

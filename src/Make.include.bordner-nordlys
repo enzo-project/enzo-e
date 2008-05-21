@@ -1,0 +1,24 @@
+#========================================================================
+# CPP 
+# OPT 
+# LIB_HDF5 
+# INC_HDF5 
+#========================================================================
+
+#----------------------------------------------------------------------
+
+# Compilers
+
+CPP = g++
+
+# INC: The include directories common to all components
+
+INC = -I$(TOP)/include
+
+# OPT:  optimization/debug compiler flags
+
+OPT = -O -g
+
+LIB_HDF5 = -lhdf5
+INC_HDF5 = 
+
