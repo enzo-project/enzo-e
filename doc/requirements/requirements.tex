@@ -26,7 +26,7 @@
 
    \devel{Overview.}
 
-   \cello\ is to be a high-performance multi-resolution astrophysics
+   \cello\ is to be a high-performance parallel multilevel astrophysics
    and cosmology application, capable of running efficiently on
    large-scale (\~{\ }$O(10^6)$ cores) parallel supercomputers.
    Physics capabilities will include hydrodynamics, representations of
@@ -48,41 +48,42 @@
 \end{itemize}
 
 % AMR
-   \devel{AMR.}
-   Computations will be performed at multiple spacial and temporal
-   resolutions using structured adaptive mesh refinement (SAMR).  This
-   will permit the physics modules to capture the full range of scales
-   of interest, but without excessive computation and memory storage.
-   Methods and data-structures will be chosen to maximize scalability
-   in both computation and memory usage.  Characteristics of the AMR
-   hierarchies, e.g.~grid patch characteristics (size, size
+   \devel{AMR.}  Computations will be performed at multiple spacial
+   and temporal resolutions using adaptive mesh refinement (AMR).
+   This will permit the physics modules to capture the full range of
+   scales of interest, but without excessive computation and memory
+   storage.  Methods and data-structures will be designed to maximize
+   scalability in both computation and memory usage.  Characteristics
+   of the AMR hierarchies, e.g.~grid patch characteristics (size, size
    quantization, shape, etc.) will be flexible to allow for
-   optimization of refinement efficiency, parallel task sizes,
-   and task computation efficiency.
+   optimization of refinement efficiency, parallel task sizes, and
+   task computation efficiency.
    
 % Parallelization: horizontal data movement optimization
 
    \devel{Parallelization levels.}  To take advantage of the
-   hierarchical parallel nature of modern supercomputers, the
-   application will support multiple levels of parallelization in its
-   methods and datastructures.  This will include the ability to run
-   multiple simulations in an ensemble in parallel, evolve multiple
-   regions of the domain (grid patches or particle groups) of a simulation
-   concurrently across a distributed memory subsystem, and evolve
-   
+   hierarchical parallel nature of modern supercomputers, \cello\ will
+   support multiple levels of parallelization in its methods and
+   datastructures.  This will include the coarse-grain parallelism to
+   concurrently run simulations in an ensemble at the node or
+   supernode level, medium-grain parallelism to evolve grid patches or
+   particle groups of a simulation concurrently across a distributed
+   memory subsystem at the node or socket level, and fine-grain parallelism to
+   evolve grid cells within grid patches or particles within a group
+   using shared-memory parallelism at the socket or core level.
 
-   \devel{Parallelization types.}
-   This parallelization will be modularized (as much as technologically
-   feasible) to improve flexibility in choosing the best method(s) of
-   parallelization for a given problem on a given parallel platform.
-   MPI, MPI2, OpenMP, and UPC support will be included, as well as
-   flexibility in choosing hybrid schemes such as MPI + OpenMP, or MPI
-   + UPC.  Other schemes based on shared memory array libraries or
-   POSIX pthreads may also be considered.  Parallelization methods
-   will be primarily data parallelism, supporting both distributed
-   memory and shared memory in isolation or combination.  Support for
-   collaberative (functional) parallelism and pipelining will also be
-   considered.
+   \devel{Parallelization types.}  This parallelization will be
+   modularized (as much as technologically feasible) to improve
+   flexibility in choosing the best method(s) of parallelization for a
+   given problem on a given parallel platform.  MPI (two-sided), MPI2
+   (one-sided), OpenMP, and possibly UPC support will be included, as
+   well as flexibility in choosing hybrid schemes such as MPI +
+   OpenMP, or MPI + UPC.  Other schemes based on shared memory array
+   libraries or POSIX pthreads may also be considered.
+   Parallelization methods will be primarily data parallelism,
+   supporting both distributed memory and shared memory in isolation
+   or combination.  Support for collaberative (functional) parallelism
+   and pipelining will also be considered.
 
 %  load balancing
 
@@ -100,30 +101,34 @@
 
 % Field data layout: vertical data movement optimization
 
-   \devel{Deep memory hierarchies.}
+   \devel{Deep memory hierarchies.}  
+%
    The properties of individual grid patches, and details of how
-   scalar and vector fields are stored on grid patches, will be
-   flexible to allow optimization of the use of deep memory/cache
-   hierarchies.  This includes hierarchical blocking of grid data to 
-   maximize reuse of data in caches, padding of arrays to reduce
-   cache thrashing effects for low-associativity caches, and interleaving
+   scalar and vector fields are stored within grid patches, will be
+   flexible to permit optimizing the use of deep memory/cache
+   hierarchies.  This includes hierarchical blocking of grid data to
+   maximize reuse of data in caches, padding of arrays to reduce cache
+   thrashing effects for low-associativity caches, and interleaving
    vector field data or select scalar fields to improve data locality.
-   These capabilities, together with efficient methods and 
+   These capabilities, together with efficient methods and
    implementation of computations, are expected to lead to high
    single-thread computational efficiency and data movement through
    memory/cache hierarchies.
 
 %  Performance monitoring
 
-   \devel{Performance monitoring.}
+   \devel{Performance monitoring.}  
+%
    Global performance-related measurements will be continuously
    collected for simulations.  This will include parallel
    communication amount, rates, and time; memory and computational
-   load balance efficiency; memory usage and reference rates;
-   floating point operation counts and rates; disk storage rates and amounts,
+   load balance efficiency; memory usage and reference rates; floating
+   point operation counts and rates; disk storage rates and amounts,
    and time.
 
 % Control
+
+@@@@@@@@@@@@
 
    \devel{User interface: input.}  
    Problems will be specified using an input parameter file.  The set
