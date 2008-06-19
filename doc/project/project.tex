@@ -27,19 +27,95 @@ with new software organization, parallelization, distributed
 datastructure, algorithm, and implementation techniques, as well as
 for enabling cutting-edge astrophysics and cosmological science
 simulations on the largest parallel high performance computers
-available.
+available.  Objectives are to reliably provide high-quality numerical
+solutions, computed by distributing the workload efficiently across
+$100,000$ to $1,000,000$ computational floating-point units, while
+maintaining a high level of utilization of available computational
+resources.
 
-The scope of physics capabilities are hydrodynamics, self-gravity,
-radiative cooling, star formation, multi-species chemistry,
-magnetohydrodynamics, and radiation hydrodynamics, using algorithms
-based on the \enzo\ application.  These basic physics algorithmic
-components will be implemented within a new framework for distributing
-multi-resolution computations.
+\devel{Physics.}
+The scope of physics capabilities are representations of baryonic and
+dark matter, hydrodynamics, self-gravity, radiative cooling,
+cosmological expansion, star formation, radiative cooling,
+multi-species chemistry, magnetohydrodynamics, and radiation transfer.
+diation transfer.
 
-Objectives are to reliably provide high-quality numerical solutions,
-computed by distributing the workload efficiently across $100,000$ to
-$1,000,000$ computational floating-point units, while maintaining a
-high level of utilization of available computational resources.
+\devel{AMR.}  Computations will be performed at multiple spacial
+   and temporal resolutions using adaptive mesh refinement (AMR).
+   This will permit the physics modules to capture the full range of
+   scales of interest, but without excessive computation and memory
+   storage.  Methods and data-structures will be designed to maximize
+   scalability in both computation and memory usage.  Characteristics
+   of the AMR hierarchies, e.g.~grid patch characteristics (size, size
+   quantization, shape, etc.) will be flexible to allow for
+   optimization of refinement efficiency, parallel task sizes, and
+   task computation efficiency.
+
+   \devel{Parallelization levels.}  To take advantage of the
+   hierarchical parallel nature of modern supercomputers, \cello\ will
+   support multiple levels of parallelization in its methods and
+   datastructures.  This will include the coarse-grain parallelism to
+   concurrently run simulations in an ensemble at the node or
+   supernode level, medium-grain parallelism to evolve grid patches or
+   particle groups of a simulation concurrently across a distributed
+   memory subsystem at the node or socket level, and fine-grain parallelism to
+   evolve grid cells within grid patches or particles within a group
+   using shared-memory parallelism at the socket or core level.
+
+   \devel{Parallelization types.}  This parallelization will be
+   modularized (as much as technologically feasible) to improve
+   flexibility in choosing the best method(s) of parallelization for a
+   given problem on a given parallel platform.  MPI (two-sided), MPI2
+   (one-sided), OpenMP, and possibly UPC support will be included, as
+   well as flexibility in choosing hybrid schemes such as MPI +
+   OpenMP, or MPI + UPC.  Other schemes based on shared memory array
+   libraries or POSIX pthreads may also be considered.
+   Parallelization methods will be primarily data parallelism,
+   supporting both distributed memory and shared memory in isolation
+   or combination.  Support for collaberative (functional) parallelism
+   and pipelining will also be considered.
+
+%  load balancing
+
+   \devel{Dynamic load balancing.}  Multiple levels of parallel tasks
+   will be load balanced using hierarchical dynamic load balancing
+   algorithms.  Load balancing schemes will use dynamically measured
+   performance data gathered by the running simulation to make load
+   balancing decisions, and will allow flexibility in optimizing the
+   parallel distribution of computation, memory storage, or a
+   combination of both.  Combining flexible hierarchical
+   parallelization schemes with hierarchical load balancing
+   algorithms, together with scalable methods and efficient AMR
+   data-structures, are expected to lead to high parallel efficiency
+   and scalability.
+
+% Field data layout: vertical data movement optimization
+
+   \devel{Deep memory hierarchies.}  
+%
+   The properties of individual grid patches, and details of how
+   scalar and vector fields are stored within grid patches, will be
+   flexible to permit optimizing the use of deep memory/cache
+   hierarchies.  This includes hierarchical blocking of grid data to
+   maximize reuse of data in caches, padding of arrays to reduce cache
+   thrashing effects for low-associativity caches, and interleaving
+   vector field data or select scalar fields to improve data locality.
+   These capabilities, together with efficient methods and
+   implementation of computations, are expected to lead to high
+   single-thread computational efficiency and data movement through
+   memory/cache hierarchies.
+
+%  Performance monitoring
+
+   \devel{Performance monitoring.}  
+%
+   Global performance-related measurements will be continuously
+   collected for simulations.  This will include parallel
+   communication amount, rates, and time; memory and computational
+   load balance efficiency; memory usage and reference rates; floating
+   point operation counts and rates; disk storage rates and amounts,
+   and time.
+
 
 \subsection{Assumptions and constraints}
 
