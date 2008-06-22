@@ -1,28 +1,32 @@
 #========================================================================
-# CXX 
-# OPT 
-# LIB_HDF5 
-# INC_HDF5 
+#
+# VARIABLES
+#
+#    CXX          C++ compiler
+#    OPT          Compiler options
+#    LIB_HDF5     HDF5 libraries
+#    INC_HDF5     HDF5 includes
+#
 #========================================================================
 
 #------------------------------------------------------------------------
 # Compilers
 #------------------------------------------------------------------------
 
-CXX = xlC
+  CXX = xlC
 
 #------------------------------------------------------------------------
 # OPT:  optimization/debug compiler flags
 #------------------------------------------------------------------------
 
-OPT = -O -g
+  OPT = -O -g
 
 #------------------------------------------------------------------------
 # HDF Library and includes
 #------------------------------------------------------------------------
 
-LIB_HDF5 = /usr/local/apps64/hdf5/lib/libhdf5.a \
-           /usr/local/apps64/hdf4/lib/libsz.a \
-           /usr/local/apps64/hdf4/lib/libz.a
+  LIB_HDF5 = /usr/local/apps64/hdf5/lib/libhdf5.a \
+             /usr/local/apps64/hdf4/lib/libsz.a \
+             /usr/local/apps64/hdf4/lib/libz.a
 
-INC_HDF5 = -I/usr/local/apps64/hdf5/include
+  INC_HDF5 = -I/usr/local/apps64/hdf5/include

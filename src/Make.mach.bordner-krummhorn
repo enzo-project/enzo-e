@@ -1,28 +1,40 @@
 #========================================================================
-# CPP 
-# OPT 
-# LIB_HDF5 
-# INC_HDF5 
+#
+# VARIABLES
+#
+#    CXX          C++ compiler
+#    OPT          Compiler options
+#    LIB_HDF5     HDF5 libraries
+#    INC_HDF5     HDF5 includes
+#
 #========================================================================
 
-SHELL = /bin/bash
+  SHELL = /bin/bash
 
+#------------------------------------------------------------------------
 # Compilers
+#------------------------------------------------------------------------
 
-CPP = g++
+  CPP = g++
 
+#------------------------------------------------------------------------
 # OPT:  optimization/debug compiler flags
+#------------------------------------------------------------------------
 
-PROF = $(PROF_OFF)
+  PROF = $(PROF_OFF)
 
-PROF_GPROF = -pg
-PROF_GCOV  = -fprofile-arcs -ftest-coverage
-PROF_OFF   = -fomit-frame-pointer
-PROF_GEN   = -fprofile-generate
-PROF_USE   = -fprofile-use
+  PROF_GPROF = -pg
+  PROF_GCOV  = -fprofile-arcs -ftest-coverage
+  PROF_OFF   = -fomit-frame-pointer
+  PROF_GEN   = -fprofile-generate
+  PROF_USE   = -fprofile-use
 
-OPT = -O3 -pipe $(PROF)
+  OPT = -O3 -pipe $(PROF)
 
-LIB_HDF5 = -lhdf5
-INC_HDF5 = 
+#------------------------------------------------------------------------
+# HDF Library and includes
+#------------------------------------------------------------------------
+
+  LIB_HDF5 = -lhdf5
+  INC_HDF5 = 
 
