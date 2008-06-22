@@ -73,6 +73,8 @@ foreach X (X.0?.00.00000)
 
 end
 
+# Get octave solution if available
+
 set head = "set terminal png $size; set log y"
 
 #------------------------------------------------------------------------
@@ -96,6 +98,10 @@ else if ($levels == 2) then
              "using ("'$'"1):("'$'"2) title 'level 1' $ptype" \
             | gnuplot  
    end
+
+   if (-e solution) then
+   endif
+
 #------------------------------------------------------------------------
 else if ($levels == 3) then
 #------------------------------------------------------------------------
