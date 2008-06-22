@@ -9,7 +9,25 @@
  * @note      Modified by Alfred E. Newman, Thu Feb 21 12:49:16 PST 2008
  *            description of modification
  *
- * Detailed description of the file
+ * DESCRIPTION 
+ * 
+ *    Description of the file.
+ *
+ * PACKAGES
+ *
+ *    List of packages accessed.
+ * 
+ * INCLUDES
+ *  
+ *    List of files included.
+ *
+ * PUBLIC FUNCTIONS
+ *  
+ *    List of public functions
+ *
+ * PRIVATE FUCTIONS
+ *  
+ *    List of private functions
  *
  *********************************************************************
  */
@@ -19,8 +37,8 @@ Foo::Foo(Foo & foo)
 /**
  *********************************************************************
  *
- * @param foo Description of argument foo
- * @return There is no return value
+ * @param  foo    Description of argument foo
+ * @return        There is no return value
  *
  * Detailed description of the function
  *
