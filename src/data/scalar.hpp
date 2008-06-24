@@ -5,7 +5,6 @@
 
 /// Defines Scalar
 
-// $Id$
 /**
  * @file    scalar.hpp
  * @brief   Header file for the Array class
@@ -16,6 +15,8 @@
  *
  * (*) Scalar
  *
+ * $Id$
+ * 
  */
 // $Log$
 

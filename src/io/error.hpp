@@ -3,8 +3,8 @@
 #ifndef ERROR_HPP
 #define ERROR_HPP
 
-// $Id$
-/**
+/*********************************************************************
+ *
  * @file    error.hpp
  * @brief   Error and warning definitions
  * @author  James Bordner 
@@ -16,8 +16,9 @@
  * (*) ERROR(MESSAGE)
  * (*) NOT_IMPLEMENTED(X)
  *
+ * $Id$
+ *
  */
-// $Log$
 
 /// Handle a (non-lethal) warning message
 

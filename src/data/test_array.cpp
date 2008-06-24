@@ -5,7 +5,9 @@
  * @brief     Program implementing unit tests for the Array class
  * @author    James Bordner
  * @date      Thu Feb 21 16:04:03 PST 2008
- *
+ * 
+ * $Id$
+ * 
  *********************************************************************
  */
  
