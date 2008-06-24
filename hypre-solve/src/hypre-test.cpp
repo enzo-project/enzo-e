@@ -325,32 +325,43 @@ main(int argc, char * argv[])
 	  ifg3[j1] = 2 * icg3[j1];
 	  ifg3[j2] = 2 * icg3[j2];
 
+	  printf ("coarse: %d %d %d   fine:%d %d %d\n",
+		  icg3[0],icg3[1],icg3[2],
+		  ifg3[0],ifg3[1],ifg3[2]);
 	  // fine-to-coarse
 	  
-	  int * coarse_count = new[N*N*N];
-	  int * fine_count = new[N*N*N];
+	  int * coarse_count = new int [N*N*N];
+	  int * fine_count = new int [N*N*N];
 
 	  for (i=0; i<N*N*N; i++) {
 	    coarse_count[i] = 0;
 	    fine_count[i] = 7;
 	  }
 
+	  int    entry;
+	  double val;
+
+	  
 	  val = fine_h;
 	  i = ifg3[0] + N*(ifg3[1] + N*(ifg3[2]));
+	  entry = fine_count[i]++;
 	  HYPRE_SStructMatrixAddToValues 
-	    (A, FINE, ifg3, 0, COARSE, &fine_count[i]++, &val);
+	    (A, FINE, ifg3, 0, COARSE, &entry, &val);
 	  ++ ifg3[j1]; 	  // fine zone index 010
 	  i = ifg3[0] + N*(ifg3[1] + N*(ifg3[2]));
+	  entry = fine_count[i]++;
 	  HYPRE_SStructMatrixAddToValues 
-	    (A, FINE, ifg3, 0, COARSE, &fine_count[i]++, &val);
+	    (A, FINE, ifg3, 0, COARSE, &entry, &val);
 	  ++ ifg3[j2];	  // fine zone index 011
 	  i = ifg3[0] + N*(ifg3[1] + N*(ifg3[2]));
+	  entry = fine_count[i]++;
 	  HYPRE_SStructMatrixAddToValues 
-	    (A, FINE, ifg3, 0, COARSE, &fine_count[i]++, &val);
+	    (A, FINE, ifg3, 0, COARSE, &entry, &val);
 	  -- ifg3[j1];	  // fine zone index 001
 	  i = ifg3[0] + N*(ifg3[1] + N*(ifg3[2]));
+	  entry = fine_count[i]++;
 	  HYPRE_SStructMatrixAddToValues 
-	    (A, FINE, ifg3, 0, COARSE, &fine_count[i]++, &val);
+	    (A, FINE, ifg3, 0, COARSE, &entry, &val);
 	  -- ifg3[j2];	  // fine zone index 000
 
 	  // coarse-to-fine
