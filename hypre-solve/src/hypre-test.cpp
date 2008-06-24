@@ -4,7 +4,7 @@
 
 /**
  * 
- * 
+ * $Id$
  * 
  * @file
  * @author James Bordner <jobordner@ucsd.edu>
@@ -305,6 +305,22 @@ main(int argc, char * argv[])
     int j0 = axis;
     int j1 = (axis+1)%3;
     int j2 = (axis+2)%3;
+
+    //
+    //
+    //  +-+-+-+-+-+-+-+-+
+    //  | | | | | | | | |
+    //  +-+-+-+-+-+-+-+-+
+    //  |
+    //  |
+    //  |
+    //
+    //
+    //
+    //
+    //
+    //
+    //
 
     for (face=0; face<2; face++) {
 
