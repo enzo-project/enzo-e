@@ -4,7 +4,11 @@
 
 /**
  * 
- * $Id$
+ * Previous modification:
+ *
+ *   Date:     $LastChangedDate$
+ *   Revision: $LastChangedRevision$
+ *   User:     $LastChangedBy$
  * 
  * @file
  * @author James Bordner <jobordner@ucsd.edu>
