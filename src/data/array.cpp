@@ -13,8 +13,8 @@
  
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 
-#include "string.h"
 #include "scalar.hpp"
 #include "io_error_.hpp"
 #include "array.hpp" 
