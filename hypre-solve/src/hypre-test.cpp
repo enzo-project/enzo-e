@@ -7,9 +7,8 @@
  * @file
  * @author James Bordner <jobordner@ucsd.edu>
  *
- *     $LastChangedDate$
- * $LastChangedRevision$
- *       $LastChangedBy$
+ * $Id$
+ *
  */
 
 #include <stdio.h>
