@@ -1,0 +1,2 @@
+include $(TOP)/src/MAKE/Make.mach
+include $(TOP)/src/MAKE/Make.common

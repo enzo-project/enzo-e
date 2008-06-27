@@ -1,2 +1,0 @@
-include $(TOP)/src/Make.mach
-include $(TOP)/src/Make.common

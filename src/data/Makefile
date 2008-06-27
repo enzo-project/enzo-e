@@ -52,6 +52,6 @@ install-include:
 #=======================================================================
 
 include DEPEND
-include $(SRC)/Make.include
+include $(SRC)/MAKE/Make.include
 
 # DO NOT DELETE
