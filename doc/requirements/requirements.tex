@@ -5,10 +5,11 @@
 %=======================================================================
 
 \newcommand{\req}[3]{
-ID: \textbf{R#1} \\
-Status: \textsf{#2} \\
-Acceptance Criteria: \textit{#3} \\
-\\
+\begin{tabular}{rl}
+ID & \textbf{R#1} \\
+Status & \textsf{#2} \\
+Acceptance & \textit{#3}
+\end{tabular}
 }
 
 \include{include}
@@ -46,102 +47,501 @@ Acceptance Criteria: \textit{#3} \\
 %=======================================================================
 \section{System}
 %=======================================================================
-\req{}{Proposed}{All software in the system shall be open source}
-\req{}{Proposed}{}
 
-\req{}{Proposed}{The system should support multiple as well as single simulations [quantitative limit?]}
-\req{}{Proposed}{The simulation initial and boundary conditions should be explicitly specified by the user}
-\req{}{Proposed}{The simulation initial and boundary condition specification should be sufficiently powerful to set up all
-   known test problems in the literature that can be run given the
-   supported physics capabilities.}
-\req{}{Proposed}{The simulation input shall include ``deep'' parameter control of all supported physics and parallel datastructures}
-\req{}{Proposed}{All standard test problems should be directly supported.  @@@ list specific test problems}
-\req{}{Proposed}{User input shall include a single text file for problem specification @@@ glossary: problem specification: }
-\req{}{Proposed}{User input may include a graphical user interface (GUI) @@@ glossary: graphical user interface: for problem specification}
-\req{}{Proposed}{The system shall support simulations in $1$D, $2$D, and $3$D}
-\req{}{Proposed}{The system shall output text information to the user regarding the current state of the simulation}
-\req{}{Proposed}{The system should output visual information to the user regarding the current state of the simulation}
-\req{}{Proposed}{The system shall enable external modification of physics and data-structure parameters of a running simulation}
-\req{}{Proposed}{The system shall attempt to recover from numerical errors (NaN, Inf)}
-\req{}{Proposed}{The system shall support outputing data for restart dumps}
-\req{}{Proposed}{The system shall support restarting a computation that has not completed with at most $10\%$ loss of total simulation time}
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {All software in the system shall be open source}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {}
+
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system should support multiple as well as single simulations
+  [quantitative limit?]}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The simulation initial and boundary conditions should be explicitly
+  specified by the user}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The simulation initial and boundary condition specification should
+  be sufficiently powerful to set up all known test problems in the
+  literature that can be run given the supported physics
+  capabilities.}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The simulation input shall include ``deep'' parameter control of
+  all supported physics and parallel datastructures}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {All standard test problems should be directly supported.  @@@ list
+  specific test problems}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {User input shall include a single text file for problem
+  specification @@@ glossary: problem specification: }
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {User input may include a graphical user interface (GUI) @@@
+  glossary: graphical user interface: for problem specification}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support simulations in $1$D, $2$D, and $3$D}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall output text information to the user regarding the
+  current state of the simulation}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system should output visual information to the user regarding
+  the current state of the simulation}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall enable external modification of physics and
+  data-structure parameters of a running simulation}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+  {The system shall attempt to recover from numerical errors (NaN, Inf)}
+
+%-----------------------------------------------------------------------
+\req
+  {} {Proposed}
+%
+  {The system shall support outputing data for restart dumps}
+
+%-----------------------------------------------------------------------
+\req
+  {} {Proposed}
+%
+  {The system shall support restarting a computation that has not
+  completed with at most $10\%$ loss of total simulation time}
 
 %=======================================================================
 \section{Problem definition}
 %=======================================================================
 
-\req{}{Proposed}{Problems shall be fully defined using an input text file, called the ``problem definition file''}
-\req{}{Proposed}{Problems may input HDF5 files as part of the problem definition}
-\req{}{Proposed}{No assumptions shall be made on field variable names in the source code}
-\req{}{Proposed}{Problem definition files shall be sufficiently powerful to define all standard test problems. [quantify: explicitly list]}
-\req{}{Proposed}{Problem definition files shall support defining simple regions in space, including half-spaces, spheres, ellipsoids}
-\req{}{Proposed}{Problem definition files shall support constructing composite regions using intersection, union, and set difference on simple regions}
-\req{}{Proposed}{Composite regions shall not have any imposed restriction on number of constituent simple regions}
-\req{}{Proposed}{Problem definition files shall support defining field properties within a regions}
-\req{}{Proposed}{Field properties may vary between regions}
-\req{}{Proposed}{Numerical values in problem definition files may include arithmetic operations}
-\req{}{Proposed}{Numerical values in problem definition files may include the functions \code{log}, \code{exp}, \code{sin}, \code{cos}, \code{min}, \code{max}.}
-\req{}{Proposed}{Numerical values in problem definition files may include \code{x}, \code{y}, \code{z}, and \code{t} to represent spacial and temporal coodinates.}
+
+\req
+  {}
+  {Proposed}
+%
+  {Problems shall be fully defined using an input text file, called
+  the ``problem definition file''}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Problems may input HDF5 files as part of the problem definition}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {No assumptions shall be made on field variable names in the source
+  code}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Problem definition files shall be sufficiently powerful to define
+  all standard test problems. [quantify: explicitly list]}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Problem definition files shall support defining simple regions in
+  space, including half-spaces, spheres, ellipsoids}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Problem definition files shall support constructing composite
+  regions using intersection, union, and set difference on simple
+  regions}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Composite regions shall not have any imposed restriction on number
+  of constituent simple regions}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Problem definition files shall support defining field properties
+  within a regions}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Field properties may vary between regions}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Numerical values in problem definition files may include arithmetic
+  operations}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Numerical values in problem definition files may include the
+  functions \code{log}, \code{exp}, \code{sin}, \code{cos},
+  \code{min}, \code{max}.}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Numerical values in problem definition files may include \code{x},
+  \code{y}, \code{z}, and \code{t} to represent spacial and temporal
+  coodinates.}
 
 %=======================================================================
 \section{Methods}
 %=======================================================================
 
 \subsection{Hydrodynamics}
-\req{}{Proposed}{The system shall perform hydrodynamics computations with at least 2nd order in both space and time ``almost everywhere''}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall perform hydrodynamics computations with at least
+  2nd order in both space and time ``almost everywhere''}
 \subsection{Self-gravity}
-\req{}{Proposed}{The system shall perform self-gravity computations with at least 2nd order accuracy in both space and time ``almost everywhere''}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall perform self-gravity computations with at least
+  2nd order accuracy in both space and time ``almost everywhere''}
 \subsection{Cosmological expansion}
-\req{}{Proposed}{The system shall support cosmological expansion as an option}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support cosmological expansion as an option}
 
 \subsection{Radiative cooling}
-\req{}{Proposed}{The system shall perform radiative cooling computations}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall perform radiative cooling computations}
 \subsection{Multi-species chemistry}
-\req{}{Proposed}{The system shall perform multispecies chemistry computations}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall perform multispecies chemistry computations}
 \subsection{Star formation}
-\req{}{Proposed}{The system shall perform star-formation computations}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall perform star-formation computations}
 \subsection{Magnetohydrodynamics}
-\req{}{Proposed}{The system shall perform magnetohydrodynamic computations}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall perform magnetohydrodynamic computations}
 \subsection{Radiation transfer}
-\req{}{Proposed}{The system shall perform radiative transfer computations}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall perform radiative transfer computations}
 
 %=======================================================================
 \section{Fields}
 %=======================================================================
 
-\req{}{Proposed}{The system shall be able to represent ideal gas density, velocity, and @@@energy}
-\req{}{Proposed}{The system shall be able to represent dark matter density and velocity}
-\req{}{Proposed}{The system should support multiple ideal gases}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall be able to represent ideal gas density, velocity,
+  and @@@energy}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall be able to represent dark matter density and
+  velocity}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system should support multiple ideal gases}
 
 %
 %-----------------------------------------------------------------------
 \subsection{Accuracy}
 %-----------------------------------------------------------------------
-\req{}{Proposed}{Simulation dynamic resolution range @@@ glossary: dynamic resolution range: shall be at least $2^64$, e.g.~$1024^3$ @@@glossary: root grid: with $27$ additional levels of refinement by $4$)}
-\req{}{Proposed}{Simulation resolution range should be at least $2^128$}
-\req{}{Proposed}{Simulation size shall be virtually unbounded (run on largest parallel computer available)}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Simulation dynamic resolution range @@@ glossary: dynamic
+  resolution range: shall be at least $2^64$, e.g.~$1024^3$
+  @@@glossary: root grid: with $27$ additional levels of refinement by
+  $4$)}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Simulation resolution range should be at least $2^128$}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {Simulation size shall be virtually unbounded (run on largest
+  parallel computer available)}
 
 %=======================================================================
 \section{Performance}
 %=======================================================================
-\req{}{Proposed}{The system shall support multiple levels of parallelism}
-\req{}{Proposed}{The system shall support a data-parallel model using point-to-point @@@glossary MPI-1 communication}
-\req{}{Proposed}{The system may support a data-parallel model using one-sided @@@glossary MPI-2 communication} 
-\req{}{Proposed}{The system shall support multiple levels of parallelism}
-\req{}{Proposed}{The system shall support OpenMP shared memory parallelism with parallel efficiency at least $80\%$ of maximum based on flops and memory relative to single-core up to $100$ cores}
-\req{}{Proposed}{The system shall support uniform resolution problems with at least $10\%$ average core flop rate on largest platform sizes available.}
-\req{}{Proposed}{The system shall support moderately non-uniform resolution problems (dynamic resolution range of $2^32$) with at least $3\%$ average core flop rate on largest platform sizes available.}
-\req{}{Proposed}{The system shall support highly non-uniform resolution problems (dynamic resolution range of $2^48$) with $1\%$ average core flop rate and $50\%$ parallel efficiency on largest platform sizes available.}
-\req{}{Proposed}{The system shall support highly non-uniform resolution problems on the largest platform sizes available that have at least $1GB$ memory per computational element.}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support multiple levels of parallelism}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support a data-parallel model using point-to-point
+  @@@glossary MPI-1 communication}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system may support a data-parallel model using one-sided
+  @@@glossary MPI-2 communication}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support multiple levels of parallelism}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support OpenMP shared memory parallelism with
+  parallel efficiency at least $80\%$ of maximum based on flops and
+  memory relative to single-core up to $100$ cores}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support uniform resolution problems with at least
+  $10\%$ average core flop rate on largest platform sizes available.}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support moderately non-uniform resolution problems
+  (dynamic resolution range of $2^32$) with at least $3\%$ average
+  core flop rate on largest platform sizes available.}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support highly non-uniform resolution problems
+  (dynamic resolution range of $2^48$) with $1\%$ average core flop
+  rate and $50\%$ parallel efficiency on largest platform sizes
+  available.}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {The system shall support highly non-uniform resolution problems on
+  the largest platform sizes available that have at least $1GB$ memory
+  per computational element.}
 
 %=======================================================================
 \section{Input}
 %=======================================================================
 
+
+\begin{itemize}
+\item Problem
+\item Physics
+\item Algorithms
+\item Data
+\item Parallel
+\item I/O
+\item Performance
+\end{itemize}
+
+Equivalent \enzo\ parameters
+
+\begin{tabular}{ll}
+ControlCourantSafetyFactor        & CourantSafetyNumber \\
+ControlStopCycle           & StopCycle \\
+ControlStopTime            & StopTime \\
+HydroMethod                & HydroMethod \\
+HydroParameter "diffusion"    & PPMDiffusionParameter \\
+HydroParameter "dual-energy"  & DualEnergyFormalism \\
+HydroParameter "eta1"    & DualEnergyFormalismEta1 \\
+HydroParameter "eta2"    & DualEnergyFormalismEta2 \\
+HydroParameter "flattening"   & PPMFlatteningParameter \\
+HydroParameter "pressure free" & PressureFree \\
+HydroParameter "steepening"  & PPMSteepeningParameter \\
+Material1Gamma             & Gamma \\
+OutputUserDt               & dtDataDump \\
+OutputUserDumpName         & DataDumpName \\
+ProblemBcLower             & LeftFaceBoundaryCondition \\
+ProblemBcUpper             & RightFaceBoundaryCondition \\
+ProblemDomainLower         & DomainLeftEdge \\
+ProblemDomainUpper         & DomainRightEdge \\
+ProblemStartCycle          & InitialCycleNumber \\
+ProblemStartTime           & InitialTime \\
+                           & ProblemType \\
+\end{tabular}
+
+There are some variables defined that can be accessed in the input file.
+\begin{tabbing}
+xxx\=xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \code{x},\code{y},\code{z} \> Coordinates in problem distance units. \\
+\> \code{t} \> Time in problem time units. \\
+\> \code{X},\code{Y},\code{Z} \> Coordinates in computational units. \\
+\> \code{T} \> Time in computational units. \\
+\> \code{PI} \> $\pi$ \\
+\end{tabbing}
+
 %=======================================================================
 \section{Output}
 %=======================================================================
-\req{}{Proposed}{}
+
+%-----------------------------------------------------------------------
+\req
+  {}
+  {Proposed}
+%
+  {}
 
 \appendix
 
