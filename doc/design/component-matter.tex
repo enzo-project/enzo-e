@@ -1,0 +1,28 @@
+
+%=======================================================================
+\section{Matter parameters} \label{s:matter}
+%=======================================================================
+
+ Matter defines properties of matter, such as the matter type (baryonic
+ or dark matter), and gas constants.
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+   Matter {
+      type = dark
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   Matter {
+      type  = gas_ideal
+      gamma = 1.4
+      region { (x < 0) || (x > 1) }
+   }
+\end{verbatim}
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------

@@ -1,0 +1,63 @@
+
+%=======================================================================
+\section{Region parameters} \label{s:region}
+%=======================================================================
+
+Specify partitions of the domain into regions.  Each region contains
+different materials with different properties.  Example partitions may
+be half-planes, spheres, boxes, or specified using a file containing a
+zone bit mask.  Default is region 0, first region is region 1, etc.
+Use solid modeling representations?
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+   region {
+      x + y + z < 0.5
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   BOX = region {
+      (x > 0) &&
+      (x < 1) &&
+      (y > 0) && (y < 1) &&
+      (z > 0) && (z < 1)
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      union {
+         region {BOX, translate = 0.0*x, scale = 0.1}
+         region {BOX, translate = 0.1*x, scale = <0.1,0.1,0.1>}
+         region {BOX, translate = 0.2*x, scale = 0.1}
+      }
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      x = domain:lower[0]
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      x*x + y*y + z*z < 1
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      bitmask = "filename.hdf5"
+   }
+\end{verbatim}
+
+
+%-----------------------------------------------------------------------
+\subsection{Parameters}%
+-----------------------------------------------------------------------
+

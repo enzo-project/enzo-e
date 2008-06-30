@@ -1,0 +1,47 @@
+%=======================================================================
+\section{Problem parameters} \label{s:problem}
+%=======================================================================
+
+Problem parameters include initial conditions and boundary conditions.
+
+Different types of boundary conditions are supported, including
+periodic, in- and out-flow, specified, and dynamic.  Different
+boundary conditions can be specified for the entire domain, on
+separate faces, on subregions of faces, or on specific zones.
+Different boundary conditions can be specified for different fields.
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+   problem {
+      boundary {
+         x:lower = reflecting
+         x:upper = { type = reflecting }
+         y       = { type = periodic }
+         z       = { type = inflow,  value = 1.0 }
+         z       = { outflow, 1.0 }
+      }
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   XM = boundary { x = domain:lower[0] }
+   XP = boundary { x = domain:upper[0] }
+   YM = boundary { y = domain:lower[1] }
+   YP = boundary { y = domain:upper[1] }
+   ZM = boundary { z = domain:lower[2] }
+   ZP = boundary { z = domain:upper[2] }
+   field {
+      name = "density"
+      value(XM) = 0
+      value(XP) = 0
+      value(YM) = value (YP)
+      value(ZM) = +t
+      value(ZM) = -t
+   }
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------

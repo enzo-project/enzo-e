@@ -1,0 +1,39 @@
+%=======================================================================
+\section{Field parameters} \label{s:field}
+%=======================================================================
+
+Scalar and vector fields for each material, such as
+ density, energy, velocity, etc.  [Merge with Materials?]  Specify
+ values, or input from files.
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+\begin{verbatim}
+   field {
+      name     = "density"
+      name     = "rho"
+      type     = scalar
+      location = center
+   }
+   field {
+      name     = "velocity"
+      name     = "u"
+      type     = vector
+      location = center
+   }
+   field {
+      name     = "temperature"
+      name     = "T"
+      type     = scalar
+      location = center
+   }
+   field {
+      name     = "B"
+      type     = computed
+      location = face
+   }
+\end{verbatim}
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------

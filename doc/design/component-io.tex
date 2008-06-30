@@ -1,0 +1,50 @@
+%=======================================================================
+\section{Output parameters} \label{s:output}
+%=======================================================================
+
+Output parameters.
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+output { 
+   name = "data"
+   format = hdf5
+   type   = [data, input]
+   fields = ["density", "velocity", "temperature"]
+   file = ["data-%6s" cycle_number]
+   cycle = 0:10:90
+   cycle = 100:100:900
+   cycle = 1000
+}
+\end{verbatim}
+
+\begin{verbatim}
+output { 
+   name      = "restart"
+   format    = hdf5
+   type      = [data, input]
+   fields    = all
+   file      = ["restart-%6s" cycle_number]
+   time_cpu  = 0.5 # CPU hours
+   overwrite = true
+   copies    = 2
+}
+\end{verbatim}
+
+\begin{verbatim}
+output { 
+   name      = "movie"
+   file      = ["movie-%6s" cycle_number]
+   time      = :10:
+   extract   = x == 12
+}
+\end{verbatim}
+
+
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+

@@ -1,0 +1,334 @@
+%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+\chapter{Components} \label{s:components}
+%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+\centerline{\includegraphics{uml/core-packages.1}}
+
+Core components
+
+\begin{itemize}
+\item Control
+\item Problem
+\item Method
+\item Data
+\item IO
+\end{itemize}
+
+\begin{itemize}
+\item Parallel
+\item Parallel:MPI
+\item Parallel:OMP
+\end{itemize}
+
+
+   This chapter describes the design of \cello\ at the component
+   level.  Each package is described, including the package interface and dependencies on other components.  Class-level design of each component is described in \S\ref{c:classes}.
+
+
+Input is in the form of a text file that specifies
+   parameter values.  The input file may optionally include other
+   input files.
+
+   Parameters are organized into functional groups, which are described
+   in more detail in subsequent sections.
+
+\begin{description}
+
+ \item [Control (\S\ref{s:control}): ] Control parameters specify the
+ high-level parameters, as well as controling interactions between
+ other components such as Parallel, Method, and Datastructure.  May
+ include sequence and interaction of physics modules, parallel dynamic
+ load-balancing, refinement criteria, numerical floors and limits,
+ dynamic refinement in subregions, etc.
+
+ \item [Physics (\S\ref{s:physics}): ] Physics parameters are used to
+ define which physics is enabled---such as self-gravity,
+ hydrodynamics, cosmological expansion, etc.  They also define any
+ parameters associated with the physics of the problem being solved,
+ such as cosmological parameters and the gravitational constant.
+ Physics parameters define what physics to simulate in the
+ computational universe.
+
+ \item [Problem (\S\ref{s:problem}): ] Problem parameters include
+ the domain extents, boundary and initial conditions.
+
+ \item [Units (\S\ref{s:units}): ] Units parameters define the problem
+ units, as well as scalings for computation if different.  Allows for
+ ``variable'' scaling (e.g.~to keep values near unity to avoid under-
+ or overflow) and quantization of scaling factors (e.g.~scale by $2^k$
+ to avoid loss of precision).
+
+ \item [Domain (\S\ref{s:domain}): ] Domain parmeters include extents
+ and dimensionality.
+
+ \item [Region (\S\ref{s:region}): ] A region is a subset of the
+ domain.  Regions are used whenever problem characteristics,
+ datastructure behavior, or physics computations vary between
+ different spacial regions.  A region may include the entire
+ domain.
+
+ \item [Field (\S\ref{s:field}): ] Field parameters define all fields
+ used in the computation, including their names, and whether they are
+ scalar or vector fields.  Field parameters associate the name,
+ datastructure, and units.
+
+ \item [Matter (\S\ref{s:matter}): ] Matter defines properties of
+ different types of matter used in the simulation, such as gas
+ constants, dark matter, etc.
+
+ \item [Method (\S\ref{s:method}): ] Method parameters specify the
+ method to use for each physics component, and any associated
+ method-specific parameters.  This also includes how methods are to be
+ coupled together.  Method parameters define how to simulate the
+ physics in the computational universe.
+
+ \item [Data (\S\ref{s:data}): ] Data parameters include listing which
+ data structures to use (unigrid, SAMR, particles, subblocks, etc.),
+ as well as all associated parameters (unigrid resolution, SAMR mesh
+ levels, particle attributes, array subblock size control, ghost zone
+ width and longevity, etc.)  Datastructure parameters define how to
+ represent the continuous (infinite dimensional) problem and physics
+ as a computationally solveable (finite dimensional) discrete problem.
+ Some parameters, such as subblock size, may affect performance but
+ not the solution.  Data parameters include Hierarchy, Particle,
+ Array, and Patch parameters.
+
+ \item [Parallel (\S\ref{s:parallel}): ] Parallelism parameters
+ specify which levels to parallelize (simulations, patches, and
+ subblocks), how to parallelize each level (MPI-1 2-sided, MPI-2
+ 1-sided, OpenMP, UPC), and lower-level parameters (buffering,
+ blocking or nonblocking, patch-to-processor mapping,
+ subblock-to-thread mapping, etc.)
+
+ \item [Performance (\S\ref{s:performance}): ] Performance
+ self-monitoring and optimization parameters.
+
+ \item [Monitor (\S\ref{s:monitor}): ] Monitor parameters control what
+ and when to output user-readable summary information about the
+ running application, such as status summary, progress, warnings,
+ errors, and performance information.
+
+ \item [IO (\S\ref{s:output}): ] Output parameters control
+  what, when, and how to output large-scale data, primarily data fields.
+
+ \item [Portal (\S\ref{s:output}): ] Portal parameters control
+  how to interface with external applications.
+
+ \item [Recovery (\S\ref{s:recovery}): ] Revovery parameters
+  control how to detect errors, and how to proceed if errors
+  are detected.
+
+\end{description}
+
+\begin{tabbing}
+xxx\=xxx\=xxx\=xxx\=xxxxxxxx\= \kill
+ \>      \code{Control}     \>\>\>\> \textit{Manages everything}  \\
+ \>\>    \code{Parameters}    \>\>\> \textit{Reading and accessing all parametrs} \\
+ \>\>    \code{Parallel}      \>\>\> \textit{Manages multiple parallelization levels and technologies} \\
+ \>\>    \code{Recovery}      \>\>\> \textit{Detects, evaluates, and recovers from hardware or software errors} \\
+ \>\>    \code{Portal}        \>\>\> \textit{Controls access to internal state and data by external entities} \\
+ \>\>    \code{Performance}   \>\>\> \textit{Measures and allows other components to access performance data} \\
+ \>\>    \code{Monitor}       \>\>\> \textit{Enables users to monitor the state and progress of the simulations} \\
+ \>      \code{Simulation}  \>\>\>\> \textit{Description of a single astrophysics simulation} \\
+ \>\>    \code{Problem}       \>\>\> \textit{Declaration of what to simulation} \\
+ \>\>\>  \code{Domain}          \>\> \textit{The problem domain} \\
+ \>\>\>  \code{Field}           \>\> \textit{A scalar or vector field} \\
+ \>\>\>  \code{Boundary}        \>\> \textit{Boundary conditions} \\
+ \>\>\>  \code{Initial}         \>\> \textit{Initial conditions} \\
+ \>\>\>\>\code{Region}            \> \textit{A subset of the domain} \\
+ \>\>    \code{Physics}       \>\>\> \textit{A physical law or process and associated parameters} \\
+ \>\>\>  \code{Units}           \>\> \textit{Units used for user and computational fields} \\
+ \>\>\>  \code{Material}        \>\> \textit{Type of matter, e.g.~gas, H+, e-, dark matter} \\
+ \>\>    \code{Method}        \>\>\> \textit{Numerical method for evolving a physical law or laws} \\
+ \>\>    \code{Analysis}      \>\>\> \textit{Numerical method for post-processing data} \\
+ \>\>    \code{Data}          \>\>\> \textit{Numerical representation of data fields} \\
+ \>\>\>  \code{Hierarchy}       \>\> \textit{AMR hierarchy} \\
+ \>\>\>  \code{Level}           \>\> \textit{Uniform resolution component of an AMR hierarchy} \\
+ \>\>\>  \code{Patch}           \>\> \textit{Rectangular grid of cells of uniform resolution in a hierarchy} \\
+ \>\>\>\>\code{Box}               \> \textit{Rectangular box with position and size} \\
+ \>\>\>\>\code{Array}             \> \textit{Array of floating-point values} \\
+ \>\>\code{Output}            \>\>\> \textit{Description of what data to output, how, and when}
+\end{tabbing}
+
+%-----------------------------------------------------------------------
+
+\input{component-control}
+
+\input{component-physics}
+
+\input{component-units}
+
+\input{component-problem}
+
+\input{component-domain}
+\input{component-region}
+\input{component-field}
+\input{component-matter}
+\input{component-amr}
+\input{component-particles}
+\input{component-parallel}
+\input{component-performance}
+\input{component-monitor}
+\input{component-io}
+\input{component-recovery}
+
+%=======================================================================
+\chapter{IO Component} \label{c:IO}
+%=======================================================================
+
+%=======================================================================
+\section{Control Component}
+%=======================================================================
+
+%=======================================================================
+\section{Method Component}
+%=======================================================================
+
+%=======================================================================
+\subsection{Methods:Hydro subcomponent}
+
+%=======================================================================
+\subsection{Methods:Gravity subcomponent}
+
+%=======================================================================
+\subsection{Methods:Cooling subcomponent}
+
+%=======================================================================
+\subsection{Methods:Chemistry subcomponent}
+
+%=======================================================================
+\subsection{Methods:MHD subcomponent}
+
+%=======================================================================
+\subsection{Methods:RT subcomponent}
+
+%=======================================================================
+\section{Data Component}
+%=======================================================================
+
+%=======================================================================
+\subsection{Arrays}
+
+%=======================================================================
+\subsection{Fields}
+
+%=======================================================================
+\subsection{Particles}
+
+%=======================================================================
+\subsection{Structured Adaptive Mesh Hierarchies}
+
+%=======================================================================
+\subsection{Octree}
+
+%=======================================================================
+\section{Parallel Component}
+%=======================================================================
+
+Hardware platform parallelism will be considered to be multilevel,
+including nodes, processors, and cores.  Computational tasks will be
+flexibly organized into hierarchical levels to aid mapping to multiple
+hardware parallelization levels, including grid patches, grid patch
+subblocks, and multiple simulations.  Task sizes in different levels
+will allow flexibility to help optimize granularity for the different
+given parallelization level components.
+
+Flexible parallelism paradigms: map parallelism to tasks
+
+Automatic code generation (or other) of parallel tasks to implement
+parallelism and optimize performance
+
+%=======================================================================
+\subsection{MPI Send/Recv}
+
+%=======================================================================
+\subsection{MPI2 Get}
+
+%=======================================================================
+\subsection{OpenMP}
+
+%=======================================================================
+\subsection{Collaberative parallelism}
+
+%=======================================================================
+\subsection{Pipelining}
+
+
+
+
+%=======================================================================
+\section{Problem Component}
+%=======================================================================
+
+Problem parameters specify the setup of the physical problem,
+including initial conditions of relevant data fields and boundary
+conditions.
+
+  dimensionality
+  domain extents
+  initial conditions (materials, regions, input)
+ boundary conditions (periodic, in-/out-flow, specified, dynamic)
+
+%=======================================================================
+\section{Physics Component}
+%=======================================================================
+
+Physics parameters specify physics modules and units.
+
+ hydrodynamics
+  cosmological expansion
+ self-gravity
+
+Hydrodynamics
+
+
+%=======================================================================
+\section{Method Component} 
+%=======================================================================
+
+Specify algorithms and their parameters.
+
+Hydrodynamics dual-energy
+
+Hydrodynamics steepening
+Hydrodynamics flattening
+Hydrodynamics diffusion
+
+Timestepping
+
+%=======================================================================
+\section{Data Component}
+%=======================================================================
+
+Specify low-level datastructures (fields and particles) and their
+parameters.
+
+Use chunked field storage \\
+Field chunk size or range
+
+%=======================================================================
+\section{Parallel Component}  \label{s:component-parallel}
+%=======================================================================
+
+Specifiy method for controling parallelism
+
+   parallelization method (MPI buffered/blocking, MPI2 Get)
+
+
+%=======================================================================
+\section{IO Component} 
+%=======================================================================
+
+Output types and parameters
+ checkpoint (dump all)
+ output (specific fields)
+ movies (type and rate)
+ analysis (type of analysis, rate)
+ level of output (files for timestep, time, etc.)
+
+
+%=======================================================================
+\section{Performance Component} 
+%=======================================================================
+
+Performance parameters control \lcaperf\ instrumentation.
