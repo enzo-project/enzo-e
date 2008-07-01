@@ -1,0 +1,32 @@
+
+%======================================================================@
+\chapter{Compiling \cello} \label{c:compile}
+%======================================================================@
+
+Required external packages are HDF5.  Optional external packages include
+the following:
+
+\begin{tabular}{|lll|} \hline
+\textbf{Package} & \textbf{ifdef} & \textbf{description} \\ \hline
+\code{lcaperf} & 
+\code{USE\_LCAPERF} & 
+performance toolkit  \\
+\code{PAPI} & 
+\code{USE\_PAPI} & 
+performance API  \\
+\code{hypre} & 
+\code{USE\_HYPRE} & 
+scalable linear solvers  \\
+\code{P3DFFT} & 
+\code{USE\_P3DFFT} & 
+parallel 3D FFT \\
+\code{arprec} & 
+\code{USE\_ARPREC} & 
+arbitrary precision package \\ \hline
+\end{tabular}
+
+\url{http://mngrid.ucsd.edu/packages/lcaperf/}
+\url{http://icl.cs.utk.edu/papi/}
+\url{http://www.llnl.gov/CASC/hypre/}
+\url{http://www.sdsc.edu/us/resources/p3dfft_download.html}
+\url{http://crd.lbl.gov/~dhbailey/mpdist/}

@@ -1,0 +1,504 @@
+%=======================================================================
+\section{Parameter List} \label{s:params}
+%=======================================================================
+
+Parameters are organized into sections.  Sections are listed below,
+and parameters in each section are listed in subsequent subsections.
+
+\begin{tabular}{|ll|} \hline
+\textbf{Section} & \textbf{Description} \\ \hline
+\code{Ensemble}   & Parameters defining an ensemble of simulations \\
+\code{Simulation} & Parameters defining a single simulation \\
+\code{Control}    & Parameters defining high-level control \\
+\code{Physics}    & Parameters defining physics \\
+\code{Units}      & Parameters defining units \\
+\code{Problem}    & Parameters defining the problem setup \\
+\code{Domain}    & Parameters defining the problem domain \\
+\code{Region}    & Parameters defining a subregion of the domain \\
+\code{Boundary}    & Parameters defining and initializing boundary conditions \\
+\code{Field}       & Parameters defining and initializing a numerical field \\
+\code{Matter}      & Parameters defining matter properties \\
+\code{Method}      & Parameters controlling a specific numerical method \\
+\code{Grid}        & Parameters controlling the AMR grid \\
+\code{Particles}   & Parameters controlling particles\\
+\code{Parallel}    & Parameters controlling parallelism \\
+\code{Output}      & Parameters controlling field data output \\
+\code{Monitor}     & Parameters controlling user-monitoring information \\
+\code{Performance} & Parameters controlling performance monitoring \\
+\code{Error}       & Parameters controlling fault-tolerance and error recovery \\
+\hline
+\end{tabular}
+
+%-----------------------------------------------------------------------
+\subsection{Ensemble parameters}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Simulation parameters}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{Control parameters} \label{ss:params-control}
+%-----------------------------------------------------------------------
+
+Given Physics, Algorithms, and Data structures, specify the top-level
+sequencing and properties of the simulation.  For example, ordering of
+physics modules, whether to do hierarchical time-stepping, up to what
+level, whether to sub-cycle some physics, etc. [Is this a useful
+category?]  Also include things like floors and limits(?), and IO
+dumps
+
+Global simulation control.
+
+Output types and parameters
+
+\begin{itemize}
+\item checkpoint (dump all)
+\item output (specific fields)
+\item movies (type and rate)
+\item analysis (type of analysis, rate)
+\item level of output (files for timestep, time, etc.)
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Physics parameters} \label{ss:params-physics}
+%-----------------------------------------------------------------------
+
+Specify physics modules and physics parameters, including
+hydrodynamics, self-gravity, gravitational constant, imposed gravity,
+chemistry, cosmological expansion, star formation, etc.  Physics is in
+the problem domain.
+
+Specify physics components
+
+\begin{itemize}
+\item hydrodynamics
+\item  cosmological expansion
+\item self-gravity
+\end{itemize}
+
+
+%-----------------------------------------------------------------------
+\subsection{Units parameters} \label{ss:params-units}
+%-----------------------------------------------------------------------
+
+
+ Specify units and optional scalings for individual
+ fields.  [Merge units with Control?] [Merge scaling with Fields?] 
+ [Dynamic scaling, e.g.~to keep average of all fields near one.]
+
+%-----------------------------------------------------------------------
+\subsection{Problem parameters} \label{ss:parms-problem}
+%-----------------------------------------------------------------------
+
+Problem parameters include initial conditions and boundary conditions.
+
+Different types of boundary conditions are supported, including
+periodic, in- and out-flow, specified, and dynamic.  Different
+boundary conditions can be specified for the entire domain, on
+separate faces, on subregions of faces, or on specific zones.
+Different boundary conditions can be specified for different fields.
+
+\subsubsection{Use Cases}
+
+\begin{verbatim}
+   problem {
+      boundary {
+         x:lower = reflecting
+         x:upper = { type = reflecting }
+         y       = { type = periodic }
+         z       = { type = inflow,  value = 1.0 }
+         z       = { outflow, 1.0 }
+      }
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   XM = boundary { x = domain:lower[0] }
+   XP = boundary { x = domain:upper[0] }
+   YM = boundary { y = domain:lower[1] }
+   YP = boundary { y = domain:upper[1] }
+   ZM = boundary { z = domain:lower[2] }
+   ZP = boundary { z = domain:upper[2] }
+   field {
+      name = "density"
+      value(XM) = 0
+      value(XP) = 0
+      value(YM) = value (YP)
+      value(ZM) = +t
+      value(ZM) = -t
+   }
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Domain parameters} \label{ss:parms-domain}
+%-----------------------------------------------------------------------
+
+The \code{domain} function is used to specify properties of the
+domain.  Domains are boxes aligned with the axes of the computational
+coordinate system, and are uniquely determined by the spacial
+dimension, and the lowest and highest points in the domain.
+
+\begin{verbatim}
+   domain { 
+      dimension = 3
+      lower     = <-3e9,-3e9,-3e9>
+      upper     = <3e9,3e9,3e9>
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   domain { 3, <-3e9,-3e9,-3e9>, <3e9,3e9,3e9> }  // Implicit ordering
+\end{verbatim}
+
+\begin{verbatim}
+   domain { 
+      dimension = 3
+      upper     = 3e9        // expand scalar to vector
+      lower     = -upper     // parameters can be accessed as values
+   }
+\end{verbatim}
+
+Include errors.
+
+%-----------------------------------------------------------------------
+\subsubsection{Parameters}
+%-----------------------------------------------------------------------
+
+ \todo\ \textit{Decide: allow defaults?  allow optional parameters?  Special
+ \code{OPT\_} prefix for optional parameters?  Write out explicit copy
+ of input file?}
+
+The \code{domain} function has three parameters
+
+\begin{tabular}{lll} \\
+Name & Type & Restrictions \\ \hline
+\code{dimension} & Scalar & $1-3$ \\
+\code{lower}     & Vector & length = \code{dimension} \\
+\code{upper}     & Vector & length = \code{dimension}, \code{upper} $>$ \code{lower}
+\end{tabular}
+
+Lower and upper points are given in units given by \code{units},
+described in \S\ref{s:units}.
+
+%-----------------------------------------------------------------------
+\subsubsection{Restrictions}
+%-----------------------------------------------------------------------
+
+\begin{enumerate}
+\item The dimension must be 1, 2, or 3.
+\item The number of coordinates in both lower and upper points must equal the dimension.
+\item Each coordinate of the lower point must be strictly greater than the corresponding coordinate of the upper point.
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\subsection{Region parameters} \label{s:region}
+%-----------------------------------------------------------------------
+
+
+Specify partitions of the domain into regions.  Each region contains
+different materials with different properties.  Example partitions may
+be half-planes, spheres, boxes, or specified using a file containing a
+zone bit mask.  Default is region 0, first region is region 1, etc.
+Use solid modeling representations?
+
+\subsubsection{Use Cases}
+
+\begin{verbatim}
+   region {
+      x + y + z < 0.5
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   BOX = region {
+      (x > 0) &&
+      (x < 1) &&
+      (y > 0) && (y < 1) &&
+      (z > 0) && (z < 1)
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      union {
+         region {BOX, translate = 0.0*x, scale = 0.1}
+         region {BOX, translate = 0.1*x, scale = <0.1,0.1,0.1>}
+         region {BOX, translate = 0.2*x, scale = 0.1}
+      }
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      x = domain:lower[0]
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      x*x + y*y + z*z < 1
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   region {
+      bitmask = "filename.hdf5"
+   }
+\end{verbatim}
+
+
+%-----------------------------------------------------------------------
+\subsection{Boundary parameters}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{Field parameters}
+%-----------------------------------------------------------------------
+
+Scalar and vector fields for each material, such as
+ density, energy, velocity, etc.  [Merge with Materials?]  Specify
+ values, or input from files.
+
+\begin{verbatim}
+   field {
+      name     = "density"
+      name     = "rho"
+      type     = scalar
+      location = center
+   }
+   field {
+      name     = "velocity"
+      name     = "u"
+      type     = vector
+      location = center
+   }
+   field {
+      name     = "temperature"
+      name     = "T"
+      type     = scalar
+      location = center
+   }
+   field {
+      name     = "B"
+      type     = computed
+      location = face
+   }
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Matter parameters} \label{s:params-matter}
+%-----------------------------------------------------------------------
+
+ Matter defines properties of matter, such as the matter type (baryonic
+ or dark matter), and gas constants.
+
+\subsubsection{Use Cases}
+
+\begin{verbatim}
+   Matter {
+      type = dark
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   Matter {
+      type  = gas_ideal
+      gamma = 1.4
+      region { (x < 0) || (x > 1) }
+   }
+\end{verbatim}
+
+\subsubsection{Parameters}
+
+%-----------------------------------------------------------------------
+\subsection{Method parameters}
+%-----------------------------------------------------------------------
+
+ Specify the algorithms and algorithm parameters
+ to use for each physics component.  Each physics component has a
+ default; some components may have only one available
+ (e.g.~cosmological expansion).  Algorithms is in the solution domain.
+
+\begin{itemize}
+\item PPM hydro (dual-energy, etc.)
+\item gravity solver (FAC, smoother, levels, etc.)
+\end{itemize}
+
+\subsubsection{Use Cases}
+\subsubsection{Parameters}
+
+%-----------------------------------------------------------------------
+\subsection{Grid parameters} \label{ss:params-grid}
+%-----------------------------------------------------------------------
+
+
+Specify data structures and data structure parameters for distributed
+AMR hierarchies, such as number of mesh levels, grid patch properties,
+rebuild algorithm, dynamic load balancing, refinement criteria, etc.
+
+\begin{itemize}
+\item grid
+\begin{item}
+\item min\_levels 
+\item max\_levels 
+\end{item}
+\item level
+\item grid
+\begin{itemize}
+\item min\_size
+\item max\_size
+\item max\_aspect
+\item quantum
+\end{itemize}
+\end{itemize}
+
+
+\subsubsection{Use Cases}
+\subsubsection{Parameters}
+
+
+%-----------------------------------------------------------------------
+\subsection{Particle parameters} \label{ss:params-particles}
+%-----------------------------------------------------------------------
+
+Specifies data structures and data structure parameters related
+to distributed particles.  
+
+\begin{itemize}
+\item min\_group\_size
+\item max\_group\_size
+\end{itemize}
+
+
+\subsubsection{Use Cases}
+\subsubsection{Parameters}
+
+
+%-----------------------------------------------------------------------
+\subsection{Parallel parameters} \label{ss:params-parallel}
+%-----------------------------------------------------------------------
+
+Specify parallelism type and parameters.  For example, non-blocking
+MPI, MPI-2, hybrid MPI/UPC, performance-related parameters such as
+buffer size, etc.
+
+Specifiy parallelism and parameters
+
+\begin{itemize}
+\item MPI (send/recv and type, one-sided and type, what level)
+\item OpenMP (num threads, what level)
+\item UPC (num threads, what level)
+\item pthreads (num threads, what level)
+\item cooperative parallelism
+\item levels for each if multiple
+\end{itemize}
+
+
+\subsubsection{Use Cases}
+\subsubsection{Parameters}
+
+
+%-----------------------------------------------------------------------
+\subsection{Output parameters} \label{ss:params-output}
+%-----------------------------------------------------------------------
+
+Output parameters.
+
+
+\subsubsection{Use Cases}
+
+
+\begin{verbatim}
+output { 
+   name = "data"
+   format = hdf5
+   type   = [data, input]
+   fields = ["density", "velocity", "temperature"]
+   file = ["data-%6s" cycle_number]
+   cycle = 0:10:90
+   cycle = 100:100:900
+   cycle = 1000
+}
+\end{verbatim}
+
+\begin{verbatim}
+output { 
+   name      = "restart"
+   format    = hdf5
+   type      = [data, input]
+   fields    = all
+   file      = ["restart-%6s" cycle_number]
+   time_cpu  = 0.5 # CPU hours
+   overwrite = true
+   copies    = 2
+}
+\end{verbatim}
+
+\begin{verbatim}
+output { 
+   name      = "movie"
+   file      = ["movie-%6s" cycle_number]
+   time      = :10:
+   extract   = x == 12
+}
+\end{verbatim}
+
+
+\subsubsection{Parameters}
+
+
+%-----------------------------------------------------------------------
+\subsection{Monitor parameters} \label{ss:params-monitor}
+%-----------------------------------------------------------------------
+
+High-level monitoring of the run at a summary level, such as current
+timestep, problem time, wall time, cpu time, etc.
+
+
+\subsubsection{Use Cases}
+
+\begin{verbatim}
+   monitor {
+     type   = html
+     amount = verbose
+   }
+\end{verbatim}
+
+\subsubsection{Parameters}
+
+
+%-----------------------------------------------------------------------
+\subsection{Performance parameters} \label{ss:parames-performance}
+%-----------------------------------------------------------------------
+
+Performance monitoring and optimization(?) parameters
+
+%-----------------------------------------------------------------------
+\subsubsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsubsection{Parameters}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{Error parameters} \label{ss:params-error}
+%-----------------------------------------------------------------------
+
+Fault tolerance and adaptivity parameters.
+
+\begin{itemize}
+\item Power outage
+\item Network connectivity dropouts
+\item Corrupt RAM
+\item Crashed hard drive
+\item Moth in relay switch
+\item Crashed node
+\end{itemize}
+
+\begin{itemize}
+\item fault tolerance methodology
+\item adaptivity
+\end{itemize}
+
+\subsubsection{Use Cases}
+\subsubsection{Parameters}
