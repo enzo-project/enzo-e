@@ -12,7 +12,7 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Developer Manual}{James Bordner}{v0.0.1}
+\TITLE{Developer Manual}{James Bordner}{}
 %=======================================================================
 
 \tableofcontents
@@ -21,23 +21,16 @@
 \section{Introduction} \label{s:intro}
 %=======================================================================
 
-The purpose of this document is to organize the \cello\ development
-team.  Developers will be expected to follow the guidelines and
-procedures listed here as best they can.  This won't always be fun,
-but it's important for the long-term health of \cello.  
-
-This doesn't mean that the guidelines and procedures in this document
-are set in stone.  Suggestions for modifications and improvements are
-always welcome.  It also doesn't mean
+The purpose of this document is to specify guidelines and procedures
+for software development in the \cello\ project.  Guidelines and
+procedures in this document should not be considered to be fixed:
+suggestions for modifications and improvements are always welcome.
+But they should be followed.
 
 Software development is not easy, and software development as a group
 is even harder.  But, fortunately, there are a few general guidelines
 that, if followed, can greatly improve the quality of code and reduce
-the time spent debugging.
-
-Always remember that your contribution to \cello\ will be read by
-others.  You should take pride in creating elegant,
-easy-to-understand, code.
+the time spent writing, debugging, and maintaining code.
 
 %==================================================================
 \section{General guidelines for software devopment}
@@ -52,22 +45,24 @@ software project deader than out-of-control complexity.
 
 There are two ways to control complexity: write new code to be as
 simple as possible, and rewrite existing code to be as simple as
-possible.  And for a large software project to be successful in the
-long-term, both of these are required.
+possible (this is called \textit{refactoring}).  And for a large
+software project to be successful in the long-term, both of these are
+required.
 
-If there is one overriding guideline to writing good code, it is this:
-avoid repeated code.  This is important and bears repeating: avoid
-repeated code.  If you see two pieces of code that are similar, spend
-some time to think about how the similar bits can be factored out.
-This also means that you shouldn't write a new function by copying an
-existing function and changing just a few lines.  Copying code means
-copying bugs, it means any new functionality that involves modifying
-the code will have to be done multiple times, and it means bugs can be
-easily introduced because it is easy to forget to modify all copies
-when modifications are necessary.  Copying code may make it easier to
-write new code in the short-term, but in the long-term the complexity
-of the program as a whole will grow exponentially.  I'll say it again:
-avoid repeated code.
+One overriding guideline to writing good code that is very helpful is
+\textit{avoid repeated code}.  This is important and bears repeating:
+\textit{avoid repeated code}.  If you write or find two pieces of
+code that are similar, spend some time to think about how the similar
+bits can be factored out.  
+
+A direct corrollary to this is \textit{don't write a new function by
+copying an existing function and changing just a few lines}.  Copying
+code means copying bugs, it means any new functionality that involves
+modifying the code will have to be done multiple times, and it makes
+it easy to forget to modify all copies when bug fixes or modifications
+are necessary.  Copying code may make it easier to write new code in
+the short-term, but in the long-term the complexity of the program as
+a whole will grow unbounded.
 
 Working together on a software application involves a lot more than
 just writing code.  Successful software development also requires bug
@@ -103,20 +98,18 @@ These steps should not necessarily be done just once.  When working on
 the design, you may realize that some of the requirements should be
 changed somewhat; or you may realize during implementation that
 there's a better approach, and that improving the design may be
-helpful.
+helpful.  Software development works best as an iterative process.
 
 However, these steps should always be done in order.  Whenever you
 visit a step, always propogate the changes to all subsequent steps.
-For example, if you decide you need to add a new requirement, update
-the design accordingly, then update the implementation, and then
-retest.
+For example, if you decide you need to add a new requirement, you
+should also update the design accordingly, then update the
+implementation, and then retest.
 
 %==================================================================
-\section{Specific suggestions for writing code}
+\section{Coding standards}
 %==================================================================
 
-   \pargraph{ Design in detail completely on paper before touching the code.
-            Don't just sit down and hack at the code.  }
 
    \pargraph{ ifdef around new code }
    \pargraph{ If you're modifying existing code, refactor it }
@@ -125,109 +118,64 @@ retest.
       \note{Always test refactored code as thoroughly as new code}
 
 
-   \pargraph{ computing indexes }
-   \pargraph{ access arrays using array notation }
-   \pargraph{ don't use switch() if in if-else() will do }
+\pargraph{ computing indexes }
+   \pargraph{ access arrays using array notation, not pointer notation}
+\pargraph{ don't use \code{switch()} if an \code{if-else} construct will do}
+
    \pargraph{ avoid nested conditionals } 
    \pargraph{ factor out redundant code that occurs in both ``if'' and ``else'' clauses }
    
    \pargraph{ Always use braces for multi-line if and for statements }
    \pargraph{ Don't test for null before delete; do test for null before dereferencing (e.g. DeleteFluxes.C) }
-   \pargraph{ Implement paired statements at the same time: e.g. new() delete() }
-   \pargraph{ Always set a pointer to zero after delete().  This can help prevent multiple deletes }
-   \pargraph{ Prefer simple code to complex code }
-   \note{ e.g. radiationShield = (RadiationFieldType == 11) ? TRUE : FALSE;}
-   \note{ consistency between variable names in subroutines when they refer to the same thing}
-   \pargraph{ Comment complicated code }
-   \pargraph{ Don't copy functions }
-   \pargraph{ Avoid copying code }
+   \pargraph{Write paired statements at the same time: e.g. \code{new()} and \code{delete()}; \code{open()} and \code{close()}, etc. }
+   \pargraph{Use \code{memory:new()} and \code{memory:delete()}, not \code{new()} or \code{delete()}.}
+   \pargraph{Prefer simple code to complex code}
+   \pargraph{Comment complicated code }
+   \pargraph{Avoid ``magic constants''}
+   \pargraph{Use src/TEMPLATE/* files}
+    \pargraph{Commit changes to code repository frequently}
+    \pargraph{Avoid committing lots of independent code changes all at once}
+    \pargraph{Be descriptive and complete in repository commit log messages}
+    \pargraph{Versioning is based on iterations through the requirements/design/implement/test/debug cycle}
+    \pargraph{Name boolean variables \code{isBlah}}
+    \pargraph{Avoid communicating between functions using side-effects, such as global variables}
+    \pargraph{Simplify complex logic ( \code{NewOrOld == NEW\_AND\_OLD || NewOrOld == OLD\_ONLY}). }
+    \pargraph{remove obsolete code }
+    \pargraph{Use macros only when necessary; prefer inline functions}
+    \pargraph{Functions should not be too long}
 
-      \note{File level}
-      \note{Function level}
-      \note{Loop level}
-       \note{Clearly mark temporary code so that you remember to remove it later.}
 
-
-    \pargraph{ overriding guidelines: maximize functionality, minimize complexity }
-    \pargraph{ coding procedures }
-    \pargraph{ summarize changes in CHANGES }
-    \pargraph{ detailed description in enzo-devel/changes }
-    \pargraph{ versioning }
-    \pargraph{ formatting }
-    \pargraph{ naming conventions  (bool: isBlah)}
-    \pargraph{ avoid code dependencies (e.g. \code{COMMUNICATION\_SEND}) }
-    \pargraph{ avoid complex logic ( \code{NewOrOld == NEW\_AND\_OLD || NewOrOld == OLD\_ONLY}) }
-    \pargraph{ factor out code--method for reducing redundancy }
-    \pargraph{ macros: how to name them and usage }
-    \pargraph{ use functions: modularization }
-    \pargraph{ remove obsolete code }
-
-   Working on a large-scale multi-developer software requires
-   discipline and attention to detail, and a sequential process:
-\begin{enumerate}
-    \item requirements
-    \item design
-    \item implement
-    \item test
-\end{enumerate}
-
-    \pargraph{ keep requirements documentation, design documentation, and  
-          implementation in-synch.  Perform periodic self-audits to
-          maintain consistency. }
-    \pargraph{ Feel free to check other people's work. }
+    \pargraph{ Check other people's code. }
+    \pargraph{ Encourage others to check your code. }
     \pargraph{ Write functions for small tasks }
-    \pargraph{ Write a collection of functions for larger tasks }
-    \pargraph{ Design before you code }
-    \pargraph{ Determine specifications before you design }
-    \pargraph{ Feel free to refactor other people's work.  Always test 
-          thoroughly. }
-    \pargraph{ If code is no longer needed, remove it.  If it's needed later,
-           it can be recovered through CVS.  If it is left in, it just
-           clutters up the code, increasing code complexity and
-           reducing readability. }
+    \pargraph{ Write a collection of functions for larger tasks, and group them in a class }
+    \pargraph{ Figure out exactly what you're going to code before you code it }
+    \pargraph{ Feel free to refactor other people's code.  Always test thoroughly. }
+    \pargraph{ Encourage others to refactor your code.}
     \pargraph{ Eschew global variables. }
 
-    \pargraph{ Use descriptive function and method names }
-     \note{use both upper and lower case}
-     \note{avoid abbreviations}
-     \note{use as many characters as necessary to be adequately descriptive}
-     \note{be consistent in naming conventions}
+    \pargraph{ Use descriptive but short function and method names }
+    \pargraph{ Name classes beginning with an upper-case letter; e.g.~\code{Grid}, \code{Patch}, \code{File}}
 
-    \pargraph{ function and method sizes should be minimized }
-      \note{less than 100 lines of code is good}
-      \note{less than 50 lines is preferable.}
-      \note{for C++ keep class methods small, idealy fewer than 50 lines of code}
+     \pargraph{Avoid non-obvious abbreviations, e.g. OOC (out-of-core), }
 
-    \pargraph{ use whitespace }
-      \note{vertically and horizontally}
-      \note{Put spaces around block comments to separate them from code}
-      \note{Indent loops and conditionals consistently}
+    \pargraph{Use whitespace freely for readability}
 
-    \pargraph{ limit line lengths to 70 characters }
+    \pargraph{Indent loops and conditionals consistently}
 
-    \pargraph{ use only one code statement per line }
+    \pargraph{Limit line lengths to 80 characters }
 
-    \pargraph{ coding style should be consistent throught a program  }
-     \note{use of brackets}
-     \note{indentations}
-     \note{naming conventions}
+    \pargraph{Use only one code statement per line }
+    \pargraph{Split up complicated statements into multiple simpler statements if appropriate}
 
     
-    \pargraph{ in adding comments, err on the side of too many rather than too few comments }
+    \pargraph{All files should have a full header comment }
 
-    \note{there should be at least as many lines of comments as lines of code.}
+    \pargraph{avoid too many levels of inheritance in class heirarchies }
+    \pargraph{Prefer class composition to class inheritence}
 
-
-    \pargraph{ no matter how small, an application should include documentaion of the overall program function and flow  }
-
-    \note{even a few paragraphs is better than nothing}
-
-
-    \pargraph{ Minimize complexity and increase maintainability (C++) }
-
-      \note{avoid too many levels of inheritance in class heirarchies }
-      \note{minimize use of multiple inheritance}
-      \note{minimize use of operator overloading}
+    \pargraph{Use multiple inheritance sparingly}
+    \pargraph{Avoid operator overloading for large data structures}
 
 
     \pargraph{For Fortran, use Fortran 77}

@@ -1,13 +1,30 @@
 
 %=======================================================================
-\section{Parallel parameters} \label{s:parallel}
+\section{Parallel Component} \label{s:component-parallel}
 %=======================================================================
+
+Hardware platform parallelism will be considered to be multilevel,
+including nodes, processors, and cores.  Computational tasks will be
+flexibly organized into hierarchical levels to aid mapping to multiple
+hardware parallelization levels, including grid patches, grid patch
+subblocks, and multiple simulations.  Task sizes in different levels
+will allow flexibility to help optimize granularity for the different
+given parallelization level components.
+
+Flexible parallelism paradigms: map parallelism to tasks
+
+Automatic code generation (or other) of parallel tasks to implement
+parallelism and optimize performance
 
 Specify parallelism type and parameters.  For example, non-blocking
 MPI, MPI-2, hybrid MPI/UPC, performance-related parameters such as
 buffer size, etc.
 
 Specifiy parallelism and parameters
+
+Specifiy method for controling parallelism
+
+   parallelization method (MPI buffered/blocking, MPI2 Get)
 
 \begin{itemize}
 \item MPI (send/recv and type, one-sided and type, what level)
@@ -24,3 +41,20 @@ Specifiy parallelism and parameters
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
+
+%=======================================================================
+\subsection{MPI Send/Recv}
+
+%=======================================================================
+\subsection{MPI2 Get}
+
+%=======================================================================
+\subsection{OpenMP}
+
+%=======================================================================
+\subsection{Collaberative parallelism}
+
+%=======================================================================
+\subsection{Pipelining}
+
+

@@ -4,6 +4,8 @@
 
 Parameters are organized into sections.  Sections are listed below,
 and parameters in each section are listed in subsequent subsections.
+Sections are closely associated with \cello\ components, described
+in \S\ref{c:components}.
 
 \begin{tabular}{|ll|} \hline
 \textbf{Section} & \textbf{Description} \\ \hline
@@ -13,14 +15,14 @@ and parameters in each section are listed in subsequent subsections.
 \code{Physics}    & Parameters defining physics \\
 \code{Units}      & Parameters defining units \\
 \code{Problem}    & Parameters defining the problem setup \\
-\code{Domain}    & Parameters defining the problem domain \\
-\code{Region}    & Parameters defining a subregion of the domain \\
+\code{Domain}     & Parameters defining the problem domain \\
+\code{Region}     & Parameters defining a subregion of the domain \\
 \code{Boundary}    & Parameters defining and initializing boundary conditions \\
 \code{Field}       & Parameters defining and initializing a numerical field \\
 \code{Matter}      & Parameters defining matter properties \\
 \code{Method}      & Parameters controlling a specific numerical method \\
 \code{Grid}        & Parameters controlling the AMR grid \\
-\code{Particles}   & Parameters controlling particles\\
+\code{Particle}    & Parameters controlling particles\\
 \code{Parallel}    & Parameters controlling parallelism \\
 \code{Output}      & Parameters controlling field data output \\
 \code{Monitor}     & Parameters controlling user-monitoring information \\
@@ -28,6 +30,7 @@ and parameters in each section are listed in subsequent subsections.
 \code{Error}       & Parameters controlling fault-tolerance and error recovery \\
 \hline
 \end{tabular}
+
 
 %-----------------------------------------------------------------------
 \subsection{Ensemble parameters}

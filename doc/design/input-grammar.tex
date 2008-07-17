@@ -18,29 +18,29 @@ Input files can include other files using \code{\#include "}\textit{filename}\co
 Repeated text can be assigned to a macro using \code{\#declare "}\textit{macro}\code{ = }\textit{function}
 
 
+
 \begin{tabular}{|l|l|}\hline
 \textbf{Type} & \textbf{Example} \\ \hline
-section     & \code{Region \{ \ldots \} } \\
-string      & \code{"a string"} \\
-scalar      & \code{"1.6e42"} \\
-list        & \code{["a list",X,1,2]} \\
-constant    & \code{X},\code{Y},\code{Z}, etc. \\
+groups     & \code{Region \{ \ldots \} } \\
+parameters   & \code{Hydro:method} \\
+scalars     & \code{"1.6e42"} \\
+logicals    & \code{"X < Y"} \\
+strings     & \code{"a string"} \\
+sets        & \code{R = r1 + r2$\setminus$r3} \\
+lists       & \code{["a list",X,1,2]} \\
+constants    & \code{X},\code{Y},\code{Z}, etc. \\
 function    & \code{sin(2*x)} \\
-expression  & \code{X + Y * sin(2*X / PI)} \\
-parameter   & \code{Hydro:method} \\
-assignment  & \code{t := T + Y} \\
-inequality  & \code{X + Y $<$ 0.5} \\
-sets        & \code{R = r1 + r2$\setminus$r3} \\ \hline
+assignment  & \code{t := T + Y} \\ \hline
 \end{tabular}
 
 %-----------------------------------------------------------------------
-\subsubsection{Sections}
+\subsubsection{Groups}
 %-----------------------------------------------------------------------
 
-A \textit{section} is a named region enclosed by braces, e.g.
+A group \textit{GROUP} is a named region enclosed by braces, e.g.
 
 \begin{verbatim}
-Region { 
+GROUP := FOO { 
    \textit{parameter declarations} 
 }
 \end{verbatim}
@@ -51,14 +51,64 @@ them.  Parameters can appear one on each line, or multiple parameters
 per line separated by semicolons.
 
 %-----------------------------------------------------------------------
-\subsubsection{Strings}
-
-Strings are enclosed in double-quotes `\code{"}'.  Example: \code{"density"}
+\subsubsection{Parameters} 
 
 %-----------------------------------------------------------------------
 \subsubsection{Scalars}
 
-Scalars are represented as C floating-point numbers.  Example: 3.0e-19.
+Scalars \textit{S} are represented as C floating-point numbers.  Example: 3.0e-19.
+
+Scalar expressions \textit{S-EXP} are defined as the following:
+
+\begin{tabular}{|l|} \hline
+$\textit{S-EXP} := S$  \\
+$\textit{S-EXP} := (\textit{S-EXP})$ \\
+$\textit{S-EXP} := \verb. - . \textit{S-EXP}$ \\
+$\textit{S-EXP} := \textit{S-EXP} \verb. + . \textit{S-EXP}$ \\
+$\textit{S-EXP} := \textit{S-EXP} \verb. - . \textit{S-EXP}$ \\
+$\textit{S-EXP} := \textit{S-EXP} \verb. * . \textit{S-EXP}$ \\
+$\textit{S-EXP} := \textit{S-EXP} \verb. / . \textit{S-EXP}$ \\ \hline
+\end{tabular}
+
+%-----------------------------------------------------------------------
+\subsubsection{Logicals}
+
+
+\begin{tabular}{|l|} \hline
+$\textit{L-EXP} := \textit{S-EXP} \verb+ < + \textit{S-EXP}$  \\
+$\textit{L-EXP} := \textit{S-EXP} \verb+ <= + \textit{S-EXP}$  \\
+$\textit{L-EXP} := \textit{S-EXP} \verb+ > + \textit{S-EXP}$  \\
+$\textit{L-EXP} := \textit{S-EXP} \verb+ >= + \textit{S-EXP}$  \\
+$\textit{L-EXP} := \textit{S-EXP} \verb+ && + \textit{S-EXP}$  \\
+$\textit{L-EXP} := \textit{S-EXP} \verb+ || + \textit{S-EXP}$  \\
+$\textit{L-EXP} := \textit{S-EXP} \verb+ == + \textit{S-EXP}$  \\
+$\textit{L-EXP} := \textit{S-EXP} \verb+ != + \textit{S-EXP}$  \\ \hline
+\end{tabular}
+
+
+
+%-----------------------------------------------------------------------
+\subsubsection{Strings}
+
+A string \textit{STR}
+
+A string expression \textit{STR-EXP}
+
+
+Strings are enclosed in double-quotes `\code{"}'.  Example: \code{"density"}
+
+%-----------------------------------------------------------------------
+\subsubsection{Sets}
+
+A set \textit{SET}
+
+A set expression \textit{SET-EXP}
+
+$SET * SET$
+$SET + SET$
+$SET - SET$
+$-SET$
+
 
 %-----------------------------------------------------------------------
 \subsubsection{Lists} 
@@ -72,58 +122,37 @@ There are constants defined that can be accessed in the input file.  They
 may not actually be ``constant'', such as the x-axis coordinate
 in problem units ``\code{x}''.
 
-\begin{tabbing}
-xxx\=xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
-\> \code{x},\code{y},\code{z} \> Coordinates in problem distance units. \\
-\> \code{t} \> Time in problem time units. \\
-\> \code{X},\code{Y},\code{Z} \> Coordinates in computational units. \\
-\> \code{T} \> Time in computational units. \\
-\> \code{PI} \> $\pi$ \\
-\end{tabbing}
+\devel{\todo\ How to specify overridable constants, e.g.~cosmological parameters?}
+
+\devel{\todo\ How to specify units for constants, e.g.~
+          $G = 6.674 \times 10^{-8} \mbox{cm}^3 \mbox{g}^{-1}\mbox{s}^{-2} = $
+              $6.674 \times 10^{-3} \mbox{pc}\, \mbox{M}_{\odot}^{-1}(\mbox{km}/\mbox{s})^2$}
+
+\begin{tabular}{|cl|} \hline
+\code{x},\code{y},\code{z}  &  Coordinates in problem distance units \\
+\code{t}  &  Time in problem time units \\
+\code{X},\code{Y},\code{Z}  &  Coordinates in computational distance units \\
+\code{T}  &  Time in computational time units \\
+\code{pi}  &  $\pi$ \\
+\code{e}  &  $e$ \\ \hline
+\end{tabular}
 
 
 %-----------------------------------------------------------------------
-\subsubsection{Function} 
+\subsubsection{Functions} 
 
-\code{abs()},
-\code{min()},
-\code{max()},
-\code{sqrt()},
-\code{exp()},
-\code{avg()},
-\code{log()}
+\begin{tabular}{|l|} \hline
+$\textit{S-EXP} := \code{abs}(\textit{S-EXP})$  \\
+$\textit{S-EXP} := \code{min(\textit{S-EXP},\textit{S-EXP})}$ \\
+$\textit{S-EXP} := \code{max(\textit{S-EXP},\textit{S-EXP})}$ \\
+$\textit{S-EXP} := \code{sqrt(\textit{S-EXP})}$ \\
+$\textit{S-EXP} := \code{exp(\textit{S-EXP},\textit{S-EXP})}$ \\
+$\textit{S-EXP} := \code{log(\textit{S-EXP})}$ \\ \hline
+\end{tabular}
 
 
-%-----------------------------------------------------------------------
-\subsubsection{Expressions} 
-
-$x + y$,
-$x - y$,
-$x * y$,
-$x / y$
 
 %-----------------------------------------------------------------------
-\subsubsection{Parameters} 
-%-----------------------------------------------------------------------
-\subsubsection{Assignment} 
-%-----------------------------------------------------------------------
-\subsubsection{Inequality} 
-
-$x < y$
-$x <= y$
-$x > y$
-$x >= y$
-$A \&\& B$
-$A || B$
-$A == B$
-$A != B$
-
-\subsubsection{Sets}
-
-$R * S$
-$R + S$
-$R - S$
-$-S$
-
+\subsubsection{Assignments} 
 
 
