@@ -26,22 +26,24 @@ const int num_parts   = 2; // Number of hypre "parts"
 const int part_coarse = 0; // Hypre "part" id's
 const int part_fine   = 1;
 
-const int r = 2;           // refinement factor
+const int r = 2;           // refinement factor TESTED FOR 2 ONLY
 
-const int min (int i, int j) {return i<j?i:j;};
+int min (int i, int j) { return i<j ? i : j;};
+int index(int i0, int i1, int i2, int N) {
+  return i0 + N*(i1 + N*i2);
+}
 
 const bool debug = true;
 
 #define TRACE { printf ("%s:%d TRACE\n",__FILE__,__LINE__); fflush(stdout); }
 #define PTRACE { printf ("%d %s:%d TRACE\n",ip_this,__FILE__,__LINE__); fflush(stdout); }
-#define INDEX(i0,i1,i2) ((i0) + N*((i1) + N*(i2)));
 
 main(int argc, char * argv[])
 {
 
   //------------------------------------------------------------
   // Action: Initialize MPI
-  //    Out: np_this (processor count)
+  //    Out: np (processor count)
   //    Out: ip_this (processor rank)
   //------------------------------------------------------------
 
@@ -90,10 +92,10 @@ main(int argc, char * argv[])
 
   // Initialize grid part extents
 
-  int lower_coarse[3]   = {0,0,0};
-  int upper_coarse[3]   = {N-1,N-1,N-1};
-  int lower_fine[3] = {N/2,N/2,N/2};
-  int upper_fine[3] = {3*N/2-1,3*N/2-1,3*N/2-1};
+  int lower_coarse[3] = {    0,      0,      0};
+  int upper_coarse[3] = {  N-1,    N-1,    N-1};
+  int lower_fine[3]   = {  N/r,    N/r,    N/r};
+  int upper_fine[3]   = {3*N/r-1,3*N/r-1,3*N/r-1};
 
   HYPRE_SStructGridSetExtents(grid, part_coarse, lower_coarse, upper_coarse);
   HYPRE_SStructGridSetExtents(grid, part_fine,   lower_fine,   upper_fine);
@@ -165,9 +167,9 @@ main(int argc, char * argv[])
 
   // Initialize nonstencil part
 
-  int axis,face; // axis = 0:2;  face = 0:1
-  int ic0,ic1;     // 
-  int ind_fine[3]; // fine grid indices
+  int axis,face;     // 0 <= axis <= 2;  0 <= face <= 1
+  int ic0,ic1;       // coarse face indices
+  int ind_fine[3];   // fine grid indices
   int ind_coarse[3]; // coarse grid indices
 
   for (axis=0; axis<3; axis++) {
@@ -180,18 +182,18 @@ main(int argc, char * argv[])
 
       // loop over coarse face zones
 
-      for (ic0=0; ic0<N/2; ic0++) {
-	for (ic1=0; ic1<N/2; ic1++) {
+      for (ic0=0; ic0<N/r; ic0++) {
+	for (ic1=0; ic1<N/r; ic1++) {
 
 	  // coarse zone index
 
-	  ind_coarse[j0] = (1-face) * (N/4-1) + (face) * (3*N/4);
+	  ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
 	  ind_coarse[j1] = N/4 + ic0;
 	  ind_coarse[j2] = N/4 + ic1;
 
 	  // fine zone index 000
 
-	  ind_fine[j0]   = (1-face) * (N/2)   + (face) * (3*N/2-r);
+	  ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
 	  ind_fine[j1]   = r*ind_coarse[j1];
 	  ind_fine[j2]   = r*ind_coarse[j2];
 
@@ -275,7 +277,6 @@ main(int argc, char * argv[])
 
 	}
       }
-      
     }
   }
 
@@ -305,8 +306,8 @@ main(int argc, char * argv[])
 
   // Initialize B
 
-  double coarse_h =       BOX / N;
-  double fine_h   = 0.5 * BOX / N;
+  double coarse_h =       BOX / N;  // Coarse mesh width
+  double fine_h   = 0.5 * BOX / N;  // Fine mesh width
 
   int ind3[3] = {N-1, N-1, N-1};
   double bval = -4.0 * G * PI * MASS / (fine_h*fine_h*fine_h);
@@ -340,7 +341,7 @@ main(int argc, char * argv[])
   int i;
   for (i=0; i<N*N*N; i++) {
     v0[i] = -6*coarse_h;
-    v1[i] = coarse_h;
+    v1[i] =  1*coarse_h;
   }
 
   HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
@@ -360,7 +361,7 @@ main(int argc, char * argv[])
 
   for (i=0; i<N*N*N; i++) {
     v0[i] = -6*fine_h;
-    v1[i] = fine_h;
+    v1[i] =  1*fine_h;
   }
 
   HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
@@ -378,12 +379,14 @@ main(int argc, char * argv[])
   HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				   0,1,&nums[6],v1);
 
+  delete [] v0;
+  delete [] v1;
 
   PTRACE;
 
   // Declare counts for zones
   int * count_coarse = new int [N*N*N];
-  int * count_fine = new int [N*N*N];
+  int * count_fine   = new int [N*N*N];
 
   PTRACE;
   printf ("DEBUG count_coarse = %p\n",count_coarse);
@@ -405,18 +408,18 @@ main(int argc, char * argv[])
 
       // loop over coarse face zones
 
-      for (ic0=0; ic0<N/2; ic0++) {
-	for (ic1=0; ic1<N/2; ic1++) {
+      for (ic0=0; ic0<N/r; ic0++) {
+	for (ic1=0; ic1<N/r; ic1++) {
 
 	  // coarse zone index
 
-	  ind_coarse[j0] = (1-face) * (N/4-1) + (face) * (3*N/4);
+	  ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
 	  ind_coarse[j1] = N/4 + ic0;
 	  ind_coarse[j2] = N/4 + ic1;
 
 	  // fine zone index 000
 
-	  ind_fine[j0]   = (1-face) * (N/2)   + (face) * (3*N/2-r);
+	  ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
 	  ind_fine[j1]   = r*ind_coarse[j1];
 	  ind_fine[j2]   = r*ind_coarse[j2];
 
@@ -428,9 +431,10 @@ main(int argc, char * argv[])
 	  val = fine_h;
 	  int icount;
 	  
-	  icount = INDEX(ind_fine[0],ind_fine[1],ind_fine[2]);
-	  icount -= INDEX(N/2,N/2,N/2);
+	  icount = index(ind_fine[0],ind_fine[1],ind_fine[2],N);
+	  icount -= index(N/r,N/r,N/r,N);
 	  if (icount < 0 || icount > N*N*N) {
+	    // Display error if icount out of range
 	    PTRACE;
 	    printf ("%d %d %d  %d\n",
 		    ind_fine[0],ind_fine[1],ind_fine[2],
@@ -444,9 +448,10 @@ main(int argc, char * argv[])
 	  ++ ind_fine[j1]; 	  
 
 	  // fine zone index 010
-	  icount = INDEX(ind_fine[0],ind_fine[1],ind_fine[2]);
-	  icount -= INDEX(N/2,N/2,N/2);
+	  icount = index(ind_fine[0],ind_fine[1],ind_fine[2],N);
+	  icount -= index(N/r,N/r,N/r,N);
 	  if (icount < 0 || icount > N*N*N) {
+	    // Display error if icount out of range
 	    PTRACE;
 	    printf ("%d %d %d  %d\n",
 		    ind_fine[0],ind_fine[1],ind_fine[2],
@@ -460,9 +465,10 @@ main(int argc, char * argv[])
 	  ++ ind_fine[j2];	  
 
 	  // fine zone index 011
-	  icount = INDEX(ind_fine[0],ind_fine[1],ind_fine[2]);
-	  icount -= INDEX(N/2,N/2,N/2);
+	  icount = index(ind_fine[0],ind_fine[1],ind_fine[2],N);
+	  icount -= index(N/r,N/r,N/r,N);
 	  if (icount < 0 || icount > N*N*N) {
+	    // Display error if icount out of range
 	    PTRACE;
 	    printf ("%d %d %d  %d\n",
 		    ind_fine[0],ind_fine[1],ind_fine[2],
@@ -476,9 +482,10 @@ main(int argc, char * argv[])
 	  -- ind_fine[j1];	  
 
 	  // fine zone index 001
-	  icount = INDEX(ind_fine[0],ind_fine[1],ind_fine[2]);
-	  icount -= INDEX(N/2,N/2,N/2);
+	  icount = index(ind_fine[0],ind_fine[1],ind_fine[2],N);
+	  icount -= index(N/r,N/r,N/r,N);
 	  if (icount < 0 || icount > N*N*N) {
+	    // Display error if icount out of range
 	    PTRACE;
 	    printf ("%d %d %d  %d\n",
 		    ind_fine[0],ind_fine[1],ind_fine[2],
@@ -553,6 +560,7 @@ main(int argc, char * argv[])
 
   printf ("DEBUG count_coarse = %p\n",count_coarse);
   delete [] count_coarse;
+  delete [] count_fine;
 
   PTRACE;
 
