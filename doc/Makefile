@@ -1,4 +1,5 @@
-ALL = performance \
+ALL = vision \
+      performance \
       project \
       requirements \
       design \
@@ -10,10 +11,11 @@ ALL = performance \
 .PHONY: all
 all: $(ALL)
 
-.PHONY: performance
-
 .PHONY: $(ALL)
 
+vision:
+	cd vision; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C vision
 performance:
 	cd performance; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C performance
