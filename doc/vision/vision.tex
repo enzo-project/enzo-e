@@ -26,6 +26,49 @@
     address it, and the way that the decision to begin this project
     was reached.}
 
+    The \cello\ Project is designed to be \enzo: The Next Generation.
+    \enzo\ was initially conceived in the early 1990's by Michael
+    L.~Norman and Greg Bryan to be a structured (patch-based) adaptive
+    mesh refinement (SAMR) cosmological application.  It incorporated
+    a modified high-order Piecewise Parabolic Method (PPM) solver for
+    hydrodynamics, and a Particle-Mesh (PM) method for dark matter
+    dynamics.
+
+    Greg Bryan began coding \enzo\ in the Fall of 1994.  He
+    implemented it in C++ and Fortran 77, using primarily a structured
+    programming paradigm.  Initially he targeted shared memory
+    machines such as the SGI Origin, and later added support for
+    distributed memory machines via the Message Passing Interface
+    (MPI).  Beginning around 2000, other developers began to modify
+    \enzo\ in earnest, especially Robert Harkness, who added support
+    for 64-bit integers, packed AMR output, [\ldots].
+
+    \enzo\ was developed without any supporting documents, such as
+    requirement specifications, design description, or test document.
+    It was also written without any explicit coding standard, though
+    the original author closely followed implicit coding guidelines,
+    such as including uniform file header comment blocks, and using
+    descriptive variable and function names.  The original author also
+    implemented many application tests to help ensure the accuracy
+    of the computed solutions.
+
+    A fundamental flaw of \enzo\ is that it is continually modified,
+    yet not designed to be modified.  It was written primarily using
+    the structured programming paradigm, which is known to be
+    effective for designing and implementing large-scale applications,
+    but is not ideal for subsequent redesign and modification.  As
+    \enzo\ has been repeatedly modified by successive researchers and
+    students, its complexity has increased steadily and without bound.
+
+    Yet \enzo\ is an application that must be modified continually,
+    for at least two reasons.  First, because rapidly evolving
+    supercomputer platforms put ever-increasing demands on application
+    scalability and efficiency; and second, because a primary usage
+    model is physics researchers and graduate students who want to
+    solve new physics problems, which necessarily requires adding new
+    computational physics capabilities.
+    
+
 \subsection{Stakeholders}
 
     \textit{This is a bulleted list of the stakeholders. Each stakeholder may
