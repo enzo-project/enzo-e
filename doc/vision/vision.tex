@@ -17,81 +17,129 @@
 \section{Problem Statement}
 \subsection{Project background}
 
-    \textit{This section contains a summary of the problem that the project
-    will solve. It should provide a brief history of the problem and
-    an explanation of how the organization justified the decision to
-    build software to address it. This section should cover the
-    reasons why the problem exists, the organization's history with
-    this problem, any previous projects that were undertaken to try to
-    address it, and the way that the decision to begin this project
-    was reached.}
 
     The \cello\ Project is designed to be \enzo: The Next Generation.
     \enzo\ was initially conceived in the early 1990's by Michael
-    L.~Norman and Greg Bryan to be a structured (patch-based) adaptive
-    mesh refinement (SAMR) cosmological application.  It incorporated
-    a modified high-order Piecewise Parabolic Method (PPM) solver for
+    L.~Norman and Greg Bryan to be a multi-resolution astrophysics and
+    cosmology application, implemented using structured (patch-based)
+    adaptive mesh refinement (SAMR).  It incorporated a modified
+    high-order Piecewise Parabolic Method (PPM) solver for
     hydrodynamics, and a Particle-Mesh (PM) method for dark matter
     dynamics.
 
     Greg Bryan began coding \enzo\ in the Fall of 1994.  He
-    implemented it in C++ and Fortran 77, using primarily a structured
-    programming paradigm.  Initially he targeted shared memory
-    machines such as the SGI Origin, and later added support for
-    distributed memory machines via the Message Passing Interface
+    implemented it in C++ and Fortran 77, using primarily a procedural
+    (structured) programming paradigm.  Initially he targeted shared
+    memory machines such as the SGI Origin, and later added support
+    for distributed memory machines via the Message Passing Interface
     (MPI).  Beginning around 2000, other developers began to modify
     \enzo\ in earnest, especially Robert Harkness, who added support
-    for 64-bit integers, packed AMR output, [\ldots].
+    for 64-bit integers, packed AMR output, and greatly improved
+    the scalability of \enzo\ to TeraScale machines.
 
     \enzo\ was developed without any supporting documents, such as
     requirement specifications, design description, or test document.
     It was also written without any explicit coding standard, though
     the original author closely followed implicit coding guidelines,
-    such as including uniform file header comment blocks, and using
+    such as including uniform file header comment blocks and using
     descriptive variable and function names.  The original author also
     implemented many application tests to help ensure the accuracy
     of the computed solutions.
 
-    A fundamental flaw of \enzo\ is that it is continually modified,
-    yet not designed to be modified.  It was written primarily using
-    the structured programming paradigm, which is known to be
-    effective for designing and implementing large-scale applications,
-    but is not ideal for subsequent redesign and modification.  As
-    \enzo\ has been repeatedly modified by successive researchers and
-    students, its complexity has increased steadily and without bound.
-
-    Yet \enzo\ is an application that must be modified continually,
-    for at least two reasons.  First, because rapidly evolving
-    supercomputer platforms put ever-increasing demands on application
-    scalability and efficiency; and second, because a primary usage
-    model is physics researchers and graduate students who want to
-    solve new physics problems, which necessarily requires adding new
-    computational physics capabilities.
-    
-
 \subsection{Stakeholders}
 
-    \textit{This is a bulleted list of the stakeholders. Each stakeholder may
-    be referred to by name, title, or role ("support group manager,"
-    "CTO," "senior manager"). The needs of each stakeholder are
-    described in a few sentences.}
+To clarify roles among stakeholders, we assign ``effective'' titles.
+
+\begin{itemize}
+%
+ \item  Prof.~Michael L.~Norman, effective \textit{Chief Executive Officer}
+%
+ \item Prof.~Greg Bryan, effective \textit{Chief Science Officer}.
+ Since \cello\ is intended to be the successor to \enzo, it is
+ important that \cello\ maintains the same high scientific standards
+ set by the original application developed by Greg.
+%
+ \item Dr.~Robert Harkness, effective \textit{Chief Technology
+ Officer}.  Robert is the most knowledgeable of the latest enhancements to
+ \enzo, and he has the deepest understanding of how best to take advantage of
+ PetaScale platforms
+%
+\item The Development Team:
+\begin{itemize}
+\item Dr.~James Bordner (Team Leader, OOP design, documentation)
+\item Dr.~Robert Harkness (low-level design, scalability, performance)
+\item Rick Wagner (unit testing and analysis specialist)
+\item Dr.~Alexei Kritsuk (hydrodynamics and turbulence specialist)
+\item David Collins (MHD specialist)
+\item Dr.~Dan Reynolds (RHD specialist)
+\item Prof.~Brian O'Shea (star formation specialist)
+\item Dr.~Paschal Paschos (chemistry and cooling specialist)
+\item Stephen Skory (quality assurance and application testing)
+\end{itemize}
+\end{itemize}
+    
 
 \subsection{Users}
 
-    \textit{This is a bulleted list of the users. As with the stakeholders,
-    each user can either be referred to by name or role ("support
-    rep," "call quality auditor," "home web site user")however, if
-    there are many users, it is usually inefficient to try to name
-    each one. The needs of each user are described.}
 
+    Users can be grouped into several categories: core developers,
+    collaborrators, and community users.
+
+    \textbf{Core users} are the scientists and graduate students in
+    the Laboratory for Computational Astrophysics.  Most core users
+    will also participate in development of \cello, and virtually all
+    developers (except the \cello\ team leader Bordner) will be core
+    users.  Core users include Norman, Kritsuk, Padoan, Harkness,
+    Collins, Paschos, Wagner, and Skory.
+
+    \textbf{Collaborative users} include all scientists not currently
+    in the Laboratory for Computational Astrophysics, but who will use
+    \cello\ and coauthors papers with current LCA members.
+    Collaborative users may include Tom Abel, John Hayes, Bryan
+    O'Shea, David Tytler, Dan Reynolds.
+
+    \textbf{Community users} are all users not in the previous two
+    groups.  We expect that \cello\ functionality will be driven
+    primarily by the needs of the core and collaborative users, since
+    they are fairly representative of general community users.
+    However, \cello\ will be designed specifically to be a community
+    code, so must meet the needs of community users as a whole.
+    
 \subsection{Risks}
 
-    \textit{This section lists any potential risks to the project. It should
-    be generated by a project team's brainstorming session. It could
-    include external factors that may impact the project, or issues or
-    problems that could potentially cause project delays or raise
-    issues. (The process for assessing and mitigating risk below can
-    be used to generate the risks for this section.)}
+Uncertain future of development team members (especially graduate students nearing graduation)
+
+Uneven capabilities of development team members (especially software development methodology)
+
+Uncertain future parallel platform characteristics
+
+Future platforms may have difficult to program accelerator cards
+
+Future platforms may have limited memory per shared memory node
+
+May become platform dependent: IBM Blue Waters
+
+Political pressure to use CHARM++
+
+Political pressure to use UPC
+
+Discontinued or uncertain future development of dependent libraries
+
+\code{lcaperf}
+\code{PAPI}
+\code{hypre}
+\code{P3DFFT}
+\code{SPRNG}
+\code{VisIt}
+\code{arprec}
+
+Uncertain future usability of parallel languages
+
+\code{MPI}
+\code{OpenMP}
+\code{UPC}
+   
+
 
 \subsection{Assumptions}
 
@@ -121,6 +169,61 @@
     talking to the stakeholders and users and writing down their
     needs; by this time, a concrete understanding of the project
     should be starting to jell.}
+
+    \textbf{Efficient on PetaScale platforms.}
+
+    \textbf{Easily Enhanceable.}
+
+    \textbf{Instructive.}  
+
+    \textbf{Powerful.}
+
+    \textbf{Not overly dependent on external libraries.}
+
+    % Enzo not OOP % Enzo overly complex % A fundamental flaw of
+    \enzo\ is that it is continually modified, yet not designed to be
+    modified.  It was written primarily using the structured
+    programming paradigm, which is known to be effective for designing
+    and implementing large-scale applications, but is not ideal for
+    subsequent redesign and modification.  As \enzo\ has been
+    repeatedly modified by successive researchers and students, its
+    complexity has increased rapidly, in particular much faster than
+    the inherent complexity of the underlying functionality being
+    implemented.
+%
+    \enzo\ code is tightly coupled, has much repetition, is difficult
+    to read and understand.
+
+    % Enzo must be modified continually
+    % 1. Evolving supercomputers
+    % 2. Progress in science
+    Yet \enzo\ is an application that must be modified continually,
+    for at least two reasons.  First, because rapidly evolving
+    supercomputer platforms put ever-increasing demands on application
+    scalability and efficiency; and second, because a primary usage
+    model is physics researchers and graduate students who want to
+    solve new physics problems, which necessarily requires adding new
+    computational physics capabilities.  Such capabilities include
+    radiative transfer, magnetohydrodynamics, and turbulence modeling.
+
+    % Enzo input files
+    % flat list
+    % limited expressibility
+    % inherently limits power of application
+% 
+    \enzo\ currently uses a large ``flat'' list of input parameters.
+    Because they are not organized explicitly into sections, it can be
+    difficult for users to learn and write parameter files.
+%
+    Also, parameters have limited expressibility---each parameter is
+    typically an integer with a small number of valid values.
+%
+    The limited input file grammar inherently limits the power of
+    \enzo\ itself.  For example, input control is not sufficiently
+    powerful to define a new test problem that is not already
+    implemented explicitly in code.  Running a new test problem
+    requires enhancing the \enzo\ codebase.
+
 
 \subsection{List of features}
 
