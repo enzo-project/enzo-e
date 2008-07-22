@@ -25,6 +25,9 @@ const double BOX = 8e9;
 const int num_parts   = 2; // Number of hypre "parts"
 const int part_coarse = 0; // Hypre "part" id's
 const int part_fine   = 1;
+const int itmax       = 50;
+const double restol   = 1e-6;
+const bool use_fac_solver = true;
 
 const int r = 2;           // refinement factor TESTED FOR 2 ONLY
 
@@ -33,7 +36,7 @@ int index(int i0, int i1, int i2, int N) {
   return i0 + N*(i1 + N*i2);
 }
 
-const bool debug = true;
+const bool debug  = true;
 
 #define TRACE { printf ("%s:%d TRACE\n",__FILE__,__LINE__); fflush(stdout); }
 #define PTRACE { printf ("%d %s:%d TRACE\n",ip_this,__FILE__,__LINE__); fflush(stdout); }
@@ -580,18 +583,61 @@ main(int argc, char * argv[])
   // Solve the linear system
   //------------------------------------------------------------
 
-  //  HYPRE_SStructSolver  solver_;  // hypre solver
+  HYPRE_SStructSolver  solver;  // hypre solver
+  int iter;
+  double resid;
 
-  //  HYPRE_SStructSysPFMGCreate    (MPI_COMM_WORLD, &solver_);
-  //  HYPRE_SStructSysPFMGSetLogging(solver_, 1);
-  //  HYPRE_SStructSysPFMGSetup     (solver_,A_,B_,X_);
-  //  HYPRE_SStructSysPFMGSolve     (solver_,A_,B_,X_);
-  //  HYPRE_SStructSysPFMGGetNumIterations (solver_,&iter_);
-  //  HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm (solver_,&resid_);
+  if (use_fac_solver) {
+    
+    HYPRE_SStructFACCreate(MPI_COMM_WORLD, &solver);
 
-  //  printf ("HYPRE_SStructSysPFMGSolve num iterations: %d\n",iter_);
-  //  printf ("HYPRE_SStructSysPFMGSolve final relative residual norm: %g\n",resid_);
-  //  HYPRE_SStructSysPFMGDestroy (solver_);
+    int num_parts = 2;
+    HYPRE_SStructFACSetMaxLevels(solver,  num_parts);
+
+    int parts[2] = {0,1};
+    HYPRE_SStructFACSetPLevels(solver, num_parts, parts);
+
+    int refinements[2][3] = {{2,2,2},{2,2,2}};
+    HYPRE_SStructFACSetPRefinements(solver, num_parts, refinements);
+
+    // solver parameters
+
+    HYPRE_SStructFACSetNumPreRelax(solver,      2);
+    HYPRE_SStructFACSetNumPostRelax(solver,     2);
+    HYPRE_SStructFACSetCoarseSolverType(solver, 1);
+    HYPRE_SStructFACSetRelaxType(solver,        2);
+
+    HYPRE_SStructFACSetMaxIter(solver,itmax);
+    HYPRE_SStructFACSetTol(solver,    restol);
+
+    HYPRE_SStructFACSetLogging(solver, 1);
+
+    HYPRE_SStructFACSetup2(solver, A, B, X);
+
+    // SOLVE
+    HYPRE_SStructFACSolve3(solver, A, B, X);
+
+    HYPRE_SStructFACGetNumIterations(solver, &iter);
+    HYPRE_SStructFACGetFinalRelativeResidualNorm(solver, &resid);
+
+  } else {
+    HYPRE_SStructBiCGSTABCreate(MPI_COMM_WORLD, &solver);
+    HYPRE_SStructBiCGSTABSetLogging(solver, 1);
+    HYPRE_SStructBiCGSTABSetup(solver, A, B, X);
+    // SOLVE
+    HYPRE_SStructBiCGSTABSolve(solver, A, B, X);
+    HYPRE_SStructBiCGSTABGetNumIterations(solver, &iter);
+    HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(solver, &resid);
+  }
+
+  printf ("HYPRE_SStructSysPFMGSolve num iterations:               %d\n",iter);
+  printf ("HYPRE_SStructSysPFMGSolve final relative residual norm: %g\n",resid);
+
+  if (use_fac_solver) {
+    HYPRE_SStructFACDestroy2(solver);
+  } else {
+    HYPRE_SStructBiCGSTABDestroy(solver);
+  }
 
   //------------------------------------------------------------
   // Exit
@@ -600,3 +646,31 @@ main(int argc, char * argv[])
   printf ("Finished!\n");
   MPI_Finalize();
 }
+
+// Write Grid
+//  if (fp == 0) fp = stdout;
+//  fprintf (fp,"Grid\n"
+//	  "   id             %d\n"
+//	  "   parent id      %d\n"
+//	  "   processor      %d\n"
+//	  "   lower position "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF"\n"
+//	  "   upper position "SCALAR_PRINTF SCALAR_PRINTF SCALAR_PRINTF"\n"
+//	  "   lower index    %d %d %d\n"
+//	  "   zones          %d %d %d\n"
+//	  "   level          %d\n",
+//	  id_,id_parent_,ip_,
+//	  xl_[0],xl_[1],xl_[2],
+//	  xu_[0],xu_[1],xu_[2],
+//	  il_[0],il_[1],il_[2],
+//	   n_ [0],n_ [1],n_ [2],
+//	   level_);
+//  if (u_ && ! brief) {
+//    for (int i0=0; i0<n_[0]; i0++) {
+//      for (int i1=0; i1<n_[1]; i1++) {
+//	for (int i2=0; i2<n_[2]; i2++) {
+//	  int i = index(i0,i1,i2,n_[0],n_[1],n_[2]);
+//	  fprintf (fp,"%d %d %d %g\n",i0,i1,i2,u_[i]);
+//	}
+//      }
+//    }
+//  }

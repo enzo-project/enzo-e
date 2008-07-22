@@ -1535,8 +1535,6 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
   // Initialize parts
 
   int num_parts = hierarchy.num_levels();
-  int *parts  = new int [num_parts];
-  for (i=0; i<num_parts; i++) parts[i] = i;
   HYPRE_SStructFACSetMaxLevels(solver_,  num_parts);
   if (trace_hypre) {
     fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetMaxLevels(%p,%d);\n",
@@ -1545,6 +1543,8 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
 	    );
     fflush(mpi_fp);
   }
+  int *parts  = new int [num_parts];
+  for (i=0; i<num_parts; i++) parts[i] = i;
   HYPRE_SStructFACSetPLevels(solver_, num_parts, parts);
   if (trace_hypre) {
     fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetPLevels(%p,%d, %d %d);\n",
