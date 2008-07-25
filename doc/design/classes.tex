@@ -217,18 +217,26 @@ Boxes are determined by two points, which may be of any parameterized type
 \subsection{Operations}
 
 %=======================================================================
-\section{\code{Array} class}
+\section{\code{Array} classes}
 %=======================================================================
 
-The \code{Array} class encapsulates Fortran-style arrays with
-convenient operations.  \code{Array}s may have optional support for
-storing blocked or chunked arrays, include array padding, or store
-interleaved arrays.  Arrays may be parallelized according to an
-associated (static?) \code{Parallel} object (\S\ref{ss:parallel}).
+The \code{Array} classes encapsulate Fortran-style arrays with
+convenient operations and optional special features.  
 
-% \centerline{\includegraphics{uml/arrays.1}}
+Optional features include storing as a blocked array to improve cache
+use, array padding to avoid cache thrashing on large power-of-two
+arrays with low-associativity caches.  Arrays also may be parallelized
+according to \code{Parallel} objects (\S\ref{ss:parallel}) such as
+\code{Parallel::Mpi} for MPI-parallel distributed arrays, or
+\code{Parallel::Omp} for OpenMP-parallel threaded arrays (or both).
 
-% \centerline{\includegraphics{uml/arrayabc.1}}
+To manage the various optional features, Array classes use the
+Decorator design pattern for dynamically adding special features at
+run time:
+
+ \centerline{\includegraphics{uml/arrays.1}}
+
+\subsection{\code{Array}}
 
 \centerline{\includegraphics{uml/array.1}}
 

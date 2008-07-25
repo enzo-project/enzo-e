@@ -11,7 +11,7 @@ Core components
 \item Problem
 \item Method
 \item Data
-\item IO
+\item Storage
 \end{itemize}
 
 \begin{itemize}
@@ -108,15 +108,16 @@ Input is in the form of a text file that specifies
  running application, such as status summary, progress, warnings,
  errors, and performance information.
 
- \item [IO (\S\ref{s:component-IO}): ] The IO component controls
-  what, when, and how to output large-scale data, primarily data fields.
+ \item [Storage (\S\ref{s:component-storage}): ] The \code{Storage}
+ component controls what, when, and how to input and output
+ large-scale data, primarily data fields.
 
  \item [Portal (\S\ref{s:component-portal}): ] Portal parameters control
   how to interface with external applications.
 
- \item [Recovery (\S\ref{s:component-recovery}): ] Revovery parameters
-  control how to detect errors, and how to proceed if errors
-  are detected.
+ \item [Recover (\S\ref{s:component-recover}): ] The \code{Recover}
+ package controls how to detect errors, and what to do if errors are
+ detected.
 
 \end{description}
 
@@ -125,7 +126,7 @@ xxx\=xxx\=xxx\=xxx\=xxxxxxxx\= \kill
 \ref{s:component-control} \>      \code{Control}     \>\>\>\> \textit{Manages everything}  \\
 \ref{s:component-parameters} \>\>    \code{Parameters}    \>\>\> \textit{Reading and accessing all parametrs} \\
 \ref{s:component-parallel}  \>\>    \code{Parallel}      \>\>\> \textit{Manages multiple parallelization levels and technologies} \\
-\ref{s:component-recovery}  \>\>    \code{Recovery}      \>\>\> \textit{Detects, evaluates, and recovers from hardware or software errors} \\
+\ref{s:component-recover}  \>\>    \code{Recover}      \>\>\> \textit{Detects, evaluates, and recovers from hardware or software errors} \\
 \ref{s:component-portal}  \>\>    \code{Portal}        \>\>\> \textit{Controls access to internal state and data by external entities} \\
 \ref{s:component-performance}  \>\>    \code{Performance}   \>\>\> \textit{Measures and allows other components to access performance data} \\
 \ref{s:component-monitor}  \>\>    \code{Monitor}       \>\>\> \textit{Enables users to monitor the state and progress of the simulations} \\
@@ -168,5 +169,5 @@ xxx\=xxx\=xxx\=xxx\=xxxxxxxx\= \kill
 \input{component-performance}
 \input{component-monitor}
 \input{component-io}
-\input{component-recovery}
+\input{component-recover}
 
