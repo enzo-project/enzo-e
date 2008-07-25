@@ -36,7 +36,7 @@ Input is in the form of a text file that specifies
 
  \item [Control (\S\ref{s:component-control}): ] Control parameters specify the
  high-level parameters, as well as controling interactions between
- other components such as Parallel, Method, and Datastructure.  May
+ other components such as Parallel, Method, and Data.  May
  include sequence and interaction of physics modules, parallel dynamic
  load-balancing, refinement criteria, numerical floors and limits,
  dynamic refinement in subregions, etc.
@@ -63,14 +63,14 @@ Input is in the form of a text file that specifies
 
  \item [Region (\S\ref{s:component-region}): ] A region is a subset of the
  domain.  Regions are used whenever problem characteristics,
- datastructure behavior, or physics computations vary between
+ data structure behavior, or physics computations vary between
  different spacial regions.  A region may include the entire
  domain.
 
  \item [Field (\S\ref{s:component-field}): ] Field parameters define all fields
  used in the computation, including their names, and whether they are
  scalar or vector fields.  Field parameters associate the name,
- datastructure, and units.
+ data structure, and units.
 
  \item [Matter (\S\ref{s:component-matter}): ] Matter defines properties of
  different types of matter used in the simulation, such as gas
@@ -86,7 +86,7 @@ Input is in the form of a text file that specifies
  data structures to use (unigrid, SAMR, particles, subblocks, etc.),
  as well as all associated parameters (unigrid resolution, SAMR mesh
  levels, particle attributes, array subblock size control, ghost zone
- width and longevity, etc.)  Datastructure parameters define how to
+ width and longevity, etc.)  Data structure parameters define how to
  represent the continuous (infinite dimensional) problem and physics
  as a computationally solveable (finite dimensional) discrete problem.
  Some parameters, such as subblock size, may affect performance but
@@ -148,7 +148,7 @@ xxx\=xxx\=xxx\=xxx\=xxxxxxxx\= \kill
 \ref{s:component-patch}  \>\>\>  \code{Patch}           \>\> \textit{Rectangular grid of cells of uniform resolution in a hierarchy} \\
 \ref{s:component-box}  \>\>\>\>\code{Box}               \> \textit{Rectangular box with position and size} \\
 \ref{s:component-array}  \>\>\>\>\code{Array}             \> \textit{Array of floating-point values} \\
-\ref{s:component-IO}  \>\>\code{IO}            \>\>\> \textit{Description of what data to output, how, and when}
+\ref{s:component-storage}  \>\>\code{Storage}            \>\>\> \textit{Description of what data to output, how, and when}
 \end{tabbing}
 
 %-----------------------------------------------------------------------
@@ -168,6 +168,6 @@ xxx\=xxx\=xxx\=xxx\=xxxxxxxx\= \kill
 \input{component-parallel}
 \input{component-performance}
 \input{component-monitor}
-\input{component-io}
+\input{component-storage}
 \input{component-recover}
 
