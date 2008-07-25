@@ -1,4 +1,4 @@
-FIGS = array amr core-components
+FIGS = array arrays amr core-components
 OBJS = $(patsubst %,%.1, $(FIGS))
 SRC  = $(patsubst %,%.mp,$(FIGS))
 
