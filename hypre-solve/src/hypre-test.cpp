@@ -13,58 +13,96 @@
 
 #include <stdio.h>
 #include <mpi.h>
+#include <math.h>
 #include <assert.h>
 
 #include "HYPRE_sstruct_ls.h"
 
-const double PI = 3.14159265358979323;
-const double G  = 6.67428e-8;
-const double MASS = 1e43;
-const double BOX = 8e9;
+//----------------------------------------------------------------------
+// PARAMETERS
+//----------------------------------------------------------------------
 
-const int num_parts   = 2; // Number of hypre "parts"
-const int part_coarse = 0; // Hypre "part" id's
-const int part_fine   = 1;
-const int itmax       = 50;
-const double restol   = 1e-6;
-const bool use_fac_solver = true;
+const double MASS           = 1e43;
+const double BOX            = 8e9;
+const int    itmax          = 50;
+const double restol         = 1e-6;
+const bool   use_fac_solver = false;
+const bool   debug          = true;
 
-const int r = 2;           // refinement factor TESTED FOR 2 ONLY
+//----------------------------------------------------------------------
+// CONSTANTS
+//----------------------------------------------------------------------
+
+const double PI             = M_PI;
+const double G              = 6.67428e-8;
+const int    num_parts      = 2; // Number of hypre "parts"
+const int    part_coarse    = 0; // Coarse part id
+const int    part_fine      = 1; // Fine part id
+const int    r              = 2; // refinement factor TESTED FOR 2 ONLY
+
+//----------------------------------------------------------------------
+// FUNCTIONS
+//----------------------------------------------------------------------
 
 int min (int i, int j) { return i<j ? i : j;};
 int index(int i0, int i1, int i2, int N) {
   return i0 + N*(i1 + N*i2);
 }
 
-const bool debug  = true;
+//----------------------------------------------------------------------
+// MACROS
+//----------------------------------------------------------------------
 
-#define TRACE { printf ("%s:%d TRACE\n",__FILE__,__LINE__); fflush(stdout); }
-#define PTRACE { printf ("%d %s:%d TRACE\n",ip_this,__FILE__,__LINE__); fflush(stdout); }
+#define TRACE \
+  { \
+    printf ("%s:%d TRACE\n",__FILE__,__LINE__); fflush(stdout); \
+    fflush(stdout); \
+  }
 
-main(int argc, char * argv[])
+#define PTRACE \
+  { \
+    printf ("%d %s:%d TRACE\n",mpi_rank,__FILE__,__LINE__); \
+    fflush(stdout); \
+  }
+
+//======================================================================
+// MAIN
+//======================================================================
+
+int main(int argc, char * argv[])
 {
 
   //------------------------------------------------------------
-  // Action: Initialize MPI
-  //    Out: np (processor count)
-  //    Out: ip_this (processor rank)
+  // INITIALIZE MPI
+  //    Out: mpi_size      (number of MPI processors)
+  //    Out: mpi_rank      (rank of this MPI process)
+  //    Out: is_mpi_coarse (whether MPI process owns coarse grid)
+  //    Out: is_mpi_fine   (whether MPI process owns fine grid)
   //------------------------------------------------------------
 
   TRACE;
 
-  int ip_this,np;
+  int mpi_rank,mpi_size;
 
   MPI_Init (&argc, &argv);
-  MPI_Comm_size (MPI_COMM_WORLD, &np);
-  MPI_Comm_rank (MPI_COMM_WORLD, &ip_this);
+  MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
+  MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
 
-  int ip_coarse   = 0;            // MPI rank for grids
-  int ip_fine     = min(1,np-1); // either (0,0) (serial) or (0,1) (parallel)
+  // MPI rank for grids
 
-  assert (ip_fine == 0 || ip_fine == 1);
+  const int mpi_rank_coarse   = 0;            
+  const int mpi_rank_fine     = min(1,mpi_size-1);
+  assert (mpi_rank_fine == 0 || mpi_rank_fine == 1);
+
+  // Boolean variables for whether MPI process owns coarse or fine grids
+
+  const bool is_mpi_coarse = (mpi_rank == mpi_rank_coarse);
+  const bool is_mpi_fine   = (mpi_rank == mpi_rank_fine);
+
+  printf ("%d %d %d\n",mpi_rank, is_mpi_coarse, is_mpi_fine);
 
   //------------------------------------------------------------
-  // Action: Parse arguments and exit with message on error
+  // PARSE AND CHECK ARGUMENTS
   //    Out: N  (problem size)
   //------------------------------------------------------------
 
@@ -74,13 +112,13 @@ main(int argc, char * argv[])
   if (argc == 2) {
     N = atoi(argv[1]);
   } else {
-    if (ip_this==0) fprintf (stderr, "Usage: %s <size>\n",argv[0]);
+    if (mpi_rank==0) fprintf (stderr, "Usage: %s <size>\n",argv[0]);
     MPI_Finalize();
     exit(1);
   }
 
   //------------------------------------------------------------
-  // Action: create and initialize hypre 'grid'
+  // CREATE AND INITIALIZE HYPRE 'GRID'
   //    Out: grid  (a two-level hypre grid)
   //------------------------------------------------------------
 
@@ -88,43 +126,55 @@ main(int argc, char * argv[])
 
   HYPRE_SStructGrid grid;
 
-
   // Create the grid
 
   HYPRE_SStructGridCreate (MPI_COMM_WORLD, 3, num_parts, &grid);
 
-  // Initialize grid part extents
+  // Initialize coarse grid extents on coarse grid MPI process
+
+  HYPRE_SStructVariable variable_type[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
 
   int lower_coarse[3] = {    0,      0,      0};
   int upper_coarse[3] = {  N-1,    N-1,    N-1};
+
+  if (is_mpi_coarse) {
+
+    HYPRE_SStructGridSetExtents(grid, part_coarse, lower_coarse, upper_coarse);
+
+    if (debug) {
+      printf ("Coarse grid extents: (%d %d %d) to (%d %d %d)\n",
+	      lower_coarse[0],lower_coarse[1],lower_coarse[2],
+	      upper_coarse[0],upper_coarse[1],upper_coarse[2]);
+    }
+
+    HYPRE_SStructGridSetVariables(grid, part_fine,   1, variable_type);
+
+  }
+
+  // Initialize fine grid extents on fine grid MPI process
+
   int lower_fine[3]   = {  N/r,    N/r,    N/r};
   int upper_fine[3]   = {3*N/r-1,3*N/r-1,3*N/r-1};
 
-  HYPRE_SStructGridSetExtents(grid, part_coarse, lower_coarse, upper_coarse);
-  HYPRE_SStructGridSetExtents(grid, part_fine,   lower_fine,   upper_fine);
+  if (is_mpi_fine) {
 
-  if (debug) {
-    printf ("Fine grid extents:   (%d %d %d) to (%d %d %d)\n",
-	    lower_fine[0],lower_fine[1],lower_fine[2],
-	    upper_fine[0],upper_fine[1],upper_fine[2]);
+    HYPRE_SStructGridSetExtents(grid, part_fine,   lower_fine,   upper_fine);
 
-    printf ("Coarse grid extents: (%d %d %d) to (%d %d %d)\n",
-	    lower_coarse[0],lower_coarse[1],lower_coarse[2],
-	    upper_coarse[0],upper_coarse[1],upper_coarse[2]);
+    if (debug) {
+      printf ("Fine grid extents:   (%d %d %d) to (%d %d %d)\n",
+	      lower_fine[0],lower_fine[1],lower_fine[2],
+	      upper_fine[0],upper_fine[1],upper_fine[2]);
+    }
+
+    HYPRE_SStructGridSetVariables(grid, part_coarse, 1, variable_type);
   }
-
-  // Set grid variables
-
-  HYPRE_SStructVariable variable_type[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
-  HYPRE_SStructGridSetVariables(grid, part_coarse, 1, variable_type);
-  HYPRE_SStructGridSetVariables(grid, part_fine,   1, variable_type);
 
   // Assemble the grid
   
   HYPRE_SStructGridAssemble (grid);
 
   //------------------------------------------------------------
-  // Action: create hypre stencil
+  // CREATE HYPRE STENCIL
   //    Out: stencil  (structured connections)
   //------------------------------------------------------------
 
@@ -151,7 +201,7 @@ main(int argc, char * argv[])
   HYPRE_SStructStencilSetEntry (stencil, 6, entries[6], 0);
 
   //------------------------------------------------------------
-  // Action: create hypre graph
+  // CREATE HYPRE GRAPH
   //    Out: graph  (unstructured connections)
   //------------------------------------------------------------
 
@@ -165,8 +215,12 @@ main(int argc, char * argv[])
 
   // Initialize stencil part
   
-  HYPRE_SStructGraphSetStencil (graph, part_coarse, 0, stencil);
-  HYPRE_SStructGraphSetStencil (graph, part_fine,   0, stencil);
+  if (is_mpi_coarse) {
+    HYPRE_SStructGraphSetStencil (graph, part_coarse, 0, stencil);
+  }
+  if (is_mpi_fine) {
+    HYPRE_SStructGraphSetStencil (graph, part_fine,   0, stencil);
+  }
 
   // Initialize nonstencil part
 
@@ -174,6 +228,10 @@ main(int argc, char * argv[])
   int ic0,ic1;       // coarse face indices
   int ind_fine[3];   // fine grid indices
   int ind_coarse[3]; // coarse grid indices
+
+  //----------------------------------------
+  // GRAPH ENTRIES: FINE-TO-COARSE
+  //----------------------------------------
 
   for (axis=0; axis<3; axis++) {
 
@@ -200,8 +258,6 @@ main(int argc, char * argv[])
 	  ind_fine[j1]   = r*ind_coarse[j1];
 	  ind_fine[j2]   = r*ind_coarse[j2];
 
-	  // FINE-TO-COARSE
-
 	  // fine zone index 000
 	  HYPRE_SStructGraphAddEntries (graph, 
 					part_fine,   ind_fine, 0, 
@@ -227,8 +283,39 @@ main(int argc, char * argv[])
 	  -- ind_fine[j2];	  
 
 	  // fine zone index 000
+	}
+      }
+    }
+  }
 
-	  // COARSE-TO-FINE
+  //----------------------------------------
+  // GRAPH ENTRIES: COARSE-TO-FINE
+  //----------------------------------------
+
+  for (axis=0; axis<3; axis++) {
+
+    int j0 = axis;
+    int j1 = (axis+1)%3;
+    int j2 = (axis+2)%3;
+
+    for (face=0; face<2; face++) {
+
+      // loop over coarse face zones
+
+      for (ic0=0; ic0<N/r; ic0++) {
+	for (ic1=0; ic1<N/r; ic1++) {
+
+	  // coarse zone index
+
+	  ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
+	  ind_coarse[j1] = N/4 + ic0;
+	  ind_coarse[j2] = N/4 + ic1;
+
+	  // fine zone index 000
+
+	  ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
+	  ind_fine[j1]   = r*ind_coarse[j1];
+	  ind_fine[j2]   = r*ind_coarse[j2];
 
 	  HYPRE_SStructGraphAddEntries (graph, 
 					part_coarse, ind_coarse, 0, 
@@ -291,46 +378,45 @@ main(int argc, char * argv[])
 
   PTRACE;
 
-  HYPRE_SStructMatrix  A;       // hypre matrix
-  HYPRE_SStructVector  X;       // hypre vector solution
-  HYPRE_SStructVector  B;       // hypre vector right-hand side
+  // Create the hypre vector right-hand side B
 
-  HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, graph, &A);
+  HYPRE_SStructVector  B;       
   HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid,  &B);
-  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid,  &X);
-
-  HYPRE_SStructMatrixSetObjectType (A,HYPRE_SSTRUCT);
-  HYPRE_SStructVectorSetObjectType (X,HYPRE_SSTRUCT);
   HYPRE_SStructVectorSetObjectType (B,HYPRE_SSTRUCT);
-
-  HYPRE_SStructMatrixInitialize (A);
-  HYPRE_SStructVectorInitialize (X);
   HYPRE_SStructVectorInitialize (B);
-
-  // Initialize B
 
   double coarse_h =       BOX / N;  // Coarse mesh width
   double fine_h   = 0.5 * BOX / N;  // Fine mesh width
 
-  int ind3[3] = {N-1, N-1, N-1};
+  int ind3[8][3] = {
+    {N-1, N-1, N-1},
+    {N-1, N-1, N},
+    {N-1, N,   N-1},
+    {N-1, N,   N},
+    {N,   N-1, N-1},
+    {N,   N-1, N},
+    {N,   N,   N-1},
+    {N,   N,   N}};
+
   double bval = -4.0 * G * PI * MASS / (fine_h*fine_h*fine_h);
 
-  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
-  ++ ind3[0];	  // fine zone index 100
-  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
-  ++ ind3[1];	  // fine zone index 110
-  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
-  -- ind3[0];	  // fine zone index 010
-  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
-  ++ ind3[2];	  // fine zone index 011
-  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
-  ++ ind3[0]; 	  // fine zone index 111
-  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
-  -- ind3[1];	  // fine zone index 101
-  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
-  -- ind3[0];	  // fine zone index 001
-  HYPRE_SStructVectorAddToValues (B, 1, ind3, 0, &bval);
-  -- ind3[2];	  // fine zone index 000
+  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[0], 0, &bval);
+  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[1], 0, &bval);
+  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[2], 0, &bval);
+  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[3], 0, &bval);
+  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[4], 0, &bval);
+  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[5], 0, &bval);
+  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[6], 0, &bval);
+  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[7], 0, &bval);
+
+  HYPRE_SStructVectorAssemble (B);
+
+  // Create the hypre matrix A
+
+  HYPRE_SStructMatrix  A;
+  HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, graph, &A);
+  HYPRE_SStructMatrixSetObjectType (A,HYPRE_SSTRUCT);
+  HYPRE_SStructMatrixInitialize (A);
 
   // Initialize A
 
@@ -399,7 +485,9 @@ main(int argc, char * argv[])
     count_fine[i] = 7;
   }
 
-  // Matrix graph entries
+  //--------------------------------------------------
+  // MATRIX A FINE-TO-CORSE ENTRIES
+  //--------------------------------------------------
 
   for (axis=0; axis<3; axis++) {
 
@@ -426,8 +514,7 @@ main(int argc, char * argv[])
 	  ind_fine[j1]   = r*ind_coarse[j1];
 	  ind_fine[j2]   = r*ind_coarse[j2];
 
-	  // FINE-TO-COARSE
-	  
+  
 	  int    entry;
 	  double val;
 	  
@@ -503,6 +590,41 @@ main(int argc, char * argv[])
 
 	  // fine zone index [000]
 
+	}
+      }
+    }
+  }
+
+  //--------------------------------------------------
+  // MATRIX A COARSE-TO-FINE ENTRIES
+  //--------------------------------------------------
+
+  for (axis=0; axis<3; axis++) {
+
+    int j0 = axis;
+    int j1 = (axis+1)%3;
+    int j2 = (axis+2)%3;
+
+    for (face=0; face<2; face++) {
+
+      // loop over coarse face zones
+
+      for (ic0=0; ic0<N/r; ic0++) {
+	for (ic1=0; ic1<N/r; ic1++) {
+
+	  // coarse zone index
+
+	  ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
+	  ind_coarse[j1] = N/4 + ic0;
+	  ind_coarse[j2] = N/4 + ic1;
+
+	  // fine zone index 000
+
+	  ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
+	  ind_fine[j1]   = r*ind_coarse[j1];
+	  ind_fine[j2]   = r*ind_coarse[j2];
+
+  
 	  // COARSE-TO-FINE
 
 	  HYPRE_SStructGraphAddEntries (graph, 
@@ -555,7 +677,6 @@ main(int argc, char * argv[])
 
 	}
       }
-      
     }
   }
 
@@ -567,11 +688,18 @@ main(int argc, char * argv[])
 
   PTRACE;
 
+  HYPRE_SStructMatrixAssemble (A);
+
+  // Create the hypre vector solution X
+
+  HYPRE_SStructVector  X;
+  HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid,  &X);
+  HYPRE_SStructVectorSetObjectType (X,HYPRE_SSTRUCT);
+  HYPRE_SStructVectorInitialize (X);
+  HYPRE_SStructVectorAssemble (X);
+
   // Assemble the matrix and vectors
 
-  HYPRE_SStructMatrixAssemble (A);
-  HYPRE_SStructVectorAssemble (X);
-  HYPRE_SStructVectorAssemble (B);
 
   //  HYPRE_SStructMatrixAddToValues 
   //		      (A_, level_fine, igg3, 0, 1, &entry, &val);

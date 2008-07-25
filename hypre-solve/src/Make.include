@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
-# FLAGS = -g -Wall
-CPPFLAGS = -g
+CPPFLAGS = -g -Wall
+# CPPFLAGS = -g
 
 # JBPERF
 
