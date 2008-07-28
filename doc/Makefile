@@ -1,4 +1,6 @@
-ALL = vision \
+ALL = \
+      notes \
+      vision \
       performance \
       project \
       requirements \
@@ -13,6 +15,9 @@ all: $(ALL)
 
 .PHONY: $(ALL)
 
+notes:
+	cd notes; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C notes
 vision:
 	cd vision; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C vision
