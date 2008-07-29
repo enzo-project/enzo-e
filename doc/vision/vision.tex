@@ -14,8 +14,13 @@
 \TITLE{Vision and Scope Document}{James Bordner}{$Rev$}
 %=======================================================================
 
+%=======================================================================
 \section{Problem Statement}
+%=======================================================================
+
+%-----------------------------------------------------------------------
 \subsection{Project background}
+%-----------------------------------------------------------------------
 
 
     The \cello\ Project is designed to be \enzo: The Next Generation.
@@ -46,7 +51,9 @@
     implemented many application tests to help ensure the accuracy
     of the computed solutions.
 
+%-----------------------------------------------------------------------
 \subsection{Stakeholders}
+%-----------------------------------------------------------------------
 
 To clarify roles among stakeholders, we assign ``effective'' titles.
 
@@ -79,11 +86,14 @@ To clarify roles among stakeholders, we assign ``effective'' titles.
 \end{itemize}
     
 
+%-----------------------------------------------------------------------
 \subsection{Users}
+%-----------------------------------------------------------------------
 
 
-    Users can be grouped into several categories: core developers,
-    collaborrators, and community users.
+    There are several partitions of users into groups.  One
+    partitioning of users is into core developers, collaborrators, and
+    community users.
 
     \textbf{Core users} are the scientists and graduate students in
     the Laboratory for Computational Astrophysics.  Most core users
@@ -104,44 +114,74 @@ To clarify roles among stakeholders, we assign ``effective'' titles.
     they are fairly representative of general community users.
     However, \cello\ will be designed specifically to be a community
     code, so must meet the needs of community users as a whole.
-    
+
+    Another partitioning is users that will run \cello\ as provided,
+    and users that will modify the code for their own particular
+    needs.  For example, the latter group may want to add new physics
+    support to \cello, or may want to use \cello\ to help develop
+    their own numerical methods.
+
+    Yet another partitioning of users is into scientists and students.
+    Some users will be using \cello\ to perform computational
+    experiments that will increase the global scientific knowledgebase,
+    whereas other users will be using \cello\ in a more educational
+    or learning capacity.
+
+    Each partitioning of users leads to specific requirements of the
+    \cello\ design and implementation.
+
+%-----------------------------------------------------------------------
 \subsection{Risks}
+%-----------------------------------------------------------------------
 
-Uncertain future of development team members (especially graduate students nearing graduation)
+    \begin{itemize} 
+%
+    \item Uncertain future of development team members (especially
+    graduate students nearing graduation)
+%
+    \item Uneven capabilities of development team members (especially
+    software development methodology)
+%
+    \item Uncertain future parallel platform characteristics
+%
+    \item Future platforms may have difficult to program accelerator cards
+%
+    \item Future platforms may have limited memory per shared memory node
+%
+    \item May become platform dependent: IBM Blue Waters
+%
+    \item Political pressure to use CHARM++
+%
+    \item Political pressure to use UPC
+%
+    \item Discontinued or uncertain future development of dependent libraries
+%
+    \begin{itemize}
+        \item \code{lcaperf}
+        \item \code{PAPI}
+        \item \code{hypre}
+        \item \code{P3DFFT}
+        \item \code{SPRNG}
+        \item \code{VisIt}
+        \item \code{arprec}
+    \end{itemize}
+%
+    \item Uncertain future usability of parallel languages
+%
+    \begin{itemize}
+        \item \code{MPI}
+        \item \code{OpenMP}
+        \item \code{UPC}
+    \end{itemize}
+%
+\end{itemize}
 
-Uneven capabilities of development team members (especially software development methodology)
-
-Uncertain future parallel platform characteristics
-
-Future platforms may have difficult to program accelerator cards
-
-Future platforms may have limited memory per shared memory node
-
-May become platform dependent: IBM Blue Waters
-
-Political pressure to use CHARM++
-
-Political pressure to use UPC
-
-Discontinued or uncertain future development of dependent libraries
-
-\code{lcaperf}
-\code{PAPI}
-\code{hypre}
-\code{P3DFFT}
-\code{SPRNG}
-\code{VisIt}
-\code{arprec}
-
-Uncertain future usability of parallel languages
-
-\code{MPI}
-\code{OpenMP}
-\code{UPC}
    
 
 
+%-----------------------------------------------------------------------
 \subsection{Assumptions}
+%-----------------------------------------------------------------------
 
     \textit{This is the list of assumptions that the stakeholders, users, or
     project team have made. Often, these assumptions are generated
@@ -157,9 +197,13 @@ Uncertain future usability of parallel languages
     results will still contain a record of these assumptions, but they
     are not useful for this particular audience.)}
 
+%=======================================================================
 \section{Vision of the Solution}
+%=======================================================================
 
+%-----------------------------------------------------------------------
 \subsection{Vision statement}
+%-----------------------------------------------------------------------
 
     \textit{The goal of the vision statement is to describe what the project
     is expected to accomplish. It should explain what the purpose of
@@ -170,101 +214,29 @@ Uncertain future usability of parallel languages
     needs; by this time, a concrete understanding of the project
     should be starting to jell.}
 
-The purpose of the \cello\ project is to provide an open source
-software application for high-performance computational astrophysics
-and cosmology.  It will be used both as a testbed for experimenting
-with new software organization, parallelization, distributed
-datastructure, algorithm, and implementation techniques, as well as
-for enabling cutting-edge astrophysics and cosmological science
-simulations on the largest parallel high performance computers
-available.  Objectives are to reliably provide high-quality numerical
-solutions, computed by distributing the workload efficiently across
-$100,000$ to $1,000,000$ computational floating-point units, while
-maintaining a high level of utilization of available computational
-resources.
+    The purpose of the \cello\ project is to produce the next
+    generation of the open source software application \enzo\ for
+    high-performance computational astrophysics and cosmology.  It
+    will be used both as a testbed for experimenting with new software
+    organization, parallelization, distributed datastructure,
+    algorithm, and implementation techniques, as well as for enabling
+    cutting-edge astrophysics and cosmological science simulations on
+    the largest parallel high performance computers available.
+    Objectives are to reliably provide high-quality numerical
+    solutions, computed by distributing the workload efficiently
+    across $10^5$ to $10^6$ computational cores, while maintaining a
+    high level of utilization of available computational resources.
 
-\devel{Physics.}
-The scope of physics capabilities are representations of baryonic and
-dark matter, hydrodynamics, self-gravity, radiative cooling,
-cosmological expansion, star formation, radiative cooling,
-multi-species chemistry, magnetohydrodynamics, and radiation transfer.
-diation transfer.
+    The primary goal of \cello\ is to increase scientists' ability to
+    perform numerical experiments of high scientific worth.  This
+    includes increased scope of problems, increased scale of problem
+    size, improved numerical methods, improved ease of use, and
+    improved code enhancability.
 
-\devel{AMR.}  Computations will be performed at multiple spacial
-   and temporal resolutions using adaptive mesh refinement (AMR).
-   This will permit the physics modules to capture the full range of
-   scales of interest, but without excessive computation and memory
-   storage.  Methods and data-structures will be designed to maximize
-   scalability in both computation and memory usage.  Characteristics
-   of the AMR hierarchies, e.g.~grid patch characteristics (size, size
-   quantization, shape, etc.) will be flexible to allow for
-   optimization of refinement efficiency, parallel task sizes, and
-   task computation efficiency.
-
-   \devel{Parallelization levels.}  To take advantage of the
-   hierarchical parallel nature of modern supercomputers, \cello\ will
-   support multiple levels of parallelization in its methods and
-   datastructures.  This will include the coarse-grain parallelism to
-   concurrently run simulations in an ensemble at the node or
-   supernode level, medium-grain parallelism to evolve grid patches or
-   particle groups of a simulation concurrently across a distributed
-   memory subsystem at the node or socket level, and fine-grain parallelism to
-   evolve grid cells within grid patches or particles within a group
-   using shared-memory parallelism at the socket or core level.
-
-   \devel{Parallelization types.}  This parallelization will be
-   modularized (as much as technologically feasible) to improve
-   flexibility in choosing the best method(s) of parallelization for a
-   given problem on a given parallel platform.  MPI (two-sided), MPI2
-   (one-sided), OpenMP, and possibly UPC support will be included, as
-   well as flexibility in choosing hybrid schemes such as MPI +
-   OpenMP, or MPI + UPC.  Other schemes based on shared memory array
-   libraries or POSIX pthreads may also be considered.
-   Parallelization methods will be primarily data parallelism,
-   supporting both distributed memory and shared memory in isolation
-   or combination.  Support for collaberative (functional) parallelism
-   and pipelining will also be considered.
-
-%  load balancing
-
-   \devel{Dynamic load balancing.}  Multiple levels of parallel tasks
-   will be load balanced using hierarchical dynamic load balancing
-   algorithms.  Load balancing schemes will use dynamically measured
-   performance data gathered by the running simulation to make load
-   balancing decisions, and will allow flexibility in optimizing the
-   parallel distribution of computation, memory storage, or a
-   combination of both.  Combining flexible hierarchical
-   parallelization schemes with hierarchical load balancing
-   algorithms, together with scalable methods and efficient AMR
-   data-structures, are expected to lead to high parallel efficiency
-   and scalability.
-
-% Field data layout: vertical data movement optimization
-
-   \devel{Deep memory hierarchies.}  
-%
-   The properties of individual grid patches, and details of how
-   scalar and vector fields are stored within grid patches, will be
-   flexible to permit optimizing the use of deep memory/cache
-   hierarchies.  This includes hierarchical blocking of grid data to
-   maximize reuse of data in caches, padding of arrays to reduce cache
-   thrashing effects for low-associativity caches, and interleaving
-   vector field data or select scalar fields to improve data locality.
-   These capabilities, together with efficient methods and
-   implementation of computations, are expected to lead to high
-   single-thread computational efficiency and data movement through
-   memory/cache hierarchies.
-
-%  Performance monitoring
-
-   \devel{Performance monitoring.}  
-%
-   Global performance-related measurements will be continuously
-   collected for simulations.  This will include parallel
-   communication amount, rates, and time; memory and computational
-   load balance efficiency; memory usage and reference rates; floating
-   point operation counts and rates; disk storage rates and amounts,
-   and time.
+    A secondary, but nontheless important, goal is to help
+    physics students learn about astrophysics and cosmology, and
+    about numerical methods for solving problems in these
+    domains.
 
     \textbf{Efficient on PetaScale platforms.}
 
@@ -275,6 +247,39 @@ diation transfer.
     \textbf{Powerful.}
 
     \textbf{Not overly dependent on external libraries.}
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Physics capabilities}
+
+    The initial scope of physics capabilities of \cello\ will be the
+    same as \enzo: representations of baryonic and dark matter,
+    hydrodynamics, self-gravity, multi-species chemistry, radiative
+    cooling, cosmological expansion, star formation,
+    magnetohydrodynamics, and radiation transfer.
+
+    Additional physics capabilities are expected to be implemented
+    during \cello's lifetime.  [more]
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Numerical methods}
+
+    Numerical methods will be a combination of existing numerical
+    methods taken from \enzo, and new and improved methods that
+    have been developed more recently.
+
+    \begin{description}
+% 
+    \item[Hydrodynamics: ] Modified Piecewise Parabolic Method (PPM)
+    solvers, including both the existing method in \enzo, a
+    non-operator split variation, and a reduced stencil version.
+%
+    \item[Dark matter dynamics: ] a Particle-Mesh (PM) method
+%
+    \item[Self-gravity: ]  
+    \end{description}
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Software design}
 
     % Enzo not OOP % Enzo overly complex % A fundamental flaw of
     \enzo\ is that it is continually modified, yet not designed to be
@@ -302,6 +307,124 @@ diation transfer.
     computational physics capabilities.  Such capabilities include
     radiative transfer, magnetohydrodynamics, and turbulence modeling.
 
+    %-----------------------------------------------------------------------
+    \subsubsection{Multi-level discretization}
+
+    As with \enzo, computations will be performed at multiple spacial
+    and temporal resolutions using adaptive mesh refinement (AMR).
+    This will permit the physics modules to capture the full range of
+    scales of interest, but without excessive computation and memory
+    storage.  
+
+    However, the AMR approach and data-structures will be totally
+    redesigned and reimplemented.  Compared to \enzo, the new design
+    will include the following features:
+
+    \begin{itemize}
+    \item Improved load balancing
+    \item Improved data locality
+    \item Reduced memory usage and improved memory scaling
+    \item Control of task sizes at different parallelization levels
+    \item Improved cache usage through array blocking and padding techniques
+    \item Support for hierarchical parallelism, e.g.~MPI + OpenMP
+    \item Object-oriented design to reduce overall code complexity and 
+          increase flexibility and modifyability
+    \end{itemize}
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Hierarchical parallelism} 
+
+    To take advantage of the hierarchical parallel nature of modern
+    supercomputers, \cello\ will support multiple levels of
+    parallelization in its methods and datastructures.  This will
+    include the coarse-grain parallelism to concurrently run
+    simulations in an ensemble at the node or supernode level,
+    medium-grain parallelism to evolve grid patches or particle groups
+    of a simulation concurrently across a distributed memory subsystem
+    at the node or socket level, and fine-grain parallelism to evolve
+    grid cells within grid patches or particles within a group using
+    shared-memory parallelism at the socket or core level.
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Parallelization types}  
+
+    This parallelization will be modularized (as much as
+    technologically feasible) to improve flexibility in choosing the
+    best method(s) of parallelization for a given problem on a given
+    parallel platform.  MPI (two-sided), MPI2 (one-sided), OpenMP, and
+    possibly UPC support will be included, as well as flexibility in
+    choosing hybrid schemes such as MPI + OpenMP, or MPI + UPC.  Other
+    schemes based on shared memory array libraries or POSIX pthreads
+    may also be considered.  Parallelization methods will be primarily
+    data parallelism, supporting both distributed memory and shared
+    memory in isolation or combination.  Support for collaberative
+    (functional) parallelism and pipelining will also be considered.
+
+%  load balancing
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Dynamic load balancing}  
+
+    Multiple levels of parallel tasks will be load balanced using
+    hierarchical dynamic load balancing algorithms.  Load balancing
+    schemes will use dynamically measured performance data gathered by
+    the running simulation to make load balancing decisions, and will
+    allow flexibility in optimizing the parallel distribution of
+    computation, memory storage, or a combination of both.  Combining
+    flexible hierarchical parallelization schemes with hierarchical
+    load balancing algorithms, together with scalable methods and
+    efficient AMR data-structures, are expected to lead to high
+    parallel efficiency and scalability.
+
+% Field data layout: vertical data movement optimization
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Deep memory hierarchies}  
+%
+    The properties of individual grid patches, and details of how
+    scalar and vector fields are stored within grid patches, will be
+    flexible to permit optimizing the use of deep memory/cache
+    hierarchies.  This includes hierarchical blocking of grid data to
+    maximize reuse of data in caches, padding of arrays to reduce
+    cache thrashing effects for low-associativity caches, and
+    interleaving vector field data or select scalar fields to improve
+    data locality.  These capabilities, together with efficient
+    methods and implementation of computations, are expected to lead
+    to high single-thread computational efficiency and data movement
+    through memory/cache hierarchies.
+
+%  Performance monitoring
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Performance monitoring}  
+%
+    Global performance-related measurements will be continuously
+    collected for simulations.  This will include parallel
+    communication amount, rates, and time; memory and computational
+    load balance efficiency; memory usage and reference rates;
+    floating point operation counts and rates; disk storage rates and
+    amounts, and time.
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Powerful control}  
+
+    Input files will support a much more powerful grammar to allow for
+    much greater control of \cello.  \enzo\ uses a flat list of
+    parameters of simple type, which has limited scalability in terms
+    of expressive range.
+
+    \cello\ will use a hierarchical list of parameters, and will
+    permit more complex types, such as mathematical expressions and
+    composite spacial/temporal subregions.  While extra code will be
+    required to parse and interpret the input files, code in \enzo\
+    for implementing specific problem types will not be required, since
+    the input file grammar will be sufficiently powerful to
+    implement them without problem-specific code.  Overall, this may
+    even result in less code, while supporting a much greater
+    scope of problem setup without requiring modifying the code.
+    
+
+
     % Enzo input files
     % flat list
     % limited expressibility
@@ -321,7 +444,9 @@ diation transfer.
     requires enhancing the \enzo\ codebase.
 
 
+%-----------------------------------------------------------------------
 \subsection{List of features}
+%-----------------------------------------------------------------------
 
     \textit{This section contains a list of features. A feature is as a
     cohesive area of the software that fulfills a specific need by
@@ -349,7 +474,9 @@ diation transfer.
     6), as long as it is written in such a way that all of the
     stakeholders can read and understand it.}
 
+%-----------------------------------------------------------------------
 \subsection{Scope of phased release (optional)}
+%-----------------------------------------------------------------------
 
     \textit{Sometimes software projects are released in phases: a version of
     the software with some subset of the features is released first,
@@ -377,7 +504,10 @@ diation transfer.
     generated (see below). This will ensure that the phased release is
     feasible and compatible with the organization's priorities.}
 
+%-----------------------------------------------------------------------
 \subsection{Features that will not be developed}
+%-----------------------------------------------------------------------
+
 
     \textit{Features are often left out of a project on purpose. When a
     feature is explicitly left out of the software, it should be added
