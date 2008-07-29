@@ -72,6 +72,8 @@ int index(int i0, int i1, int i2, int N) {
 int main(int argc, char * argv[])
 {
 
+  int i;
+
   //------------------------------------------------------------
   // INITIALIZE MPI
   //    Out: mpi_size      (number of MPI processors)
@@ -147,7 +149,7 @@ int main(int argc, char * argv[])
 	      upper_coarse[0],upper_coarse[1],upper_coarse[2]);
     }
 
-    HYPRE_SStructGridSetVariables(grid, part_fine,   1, variable_type);
+    HYPRE_SStructGridSetVariables(grid, part_coarse, 1, variable_type);
 
   }
 
@@ -166,7 +168,7 @@ int main(int argc, char * argv[])
 	      upper_fine[0],upper_fine[1],upper_fine[2]);
     }
 
-    HYPRE_SStructGridSetVariables(grid, part_coarse, 1, variable_type);
+    HYPRE_SStructGridSetVariables(grid, part_fine,   1, variable_type);
   }
 
   // Assemble the grid
@@ -214,13 +216,17 @@ int main(int argc, char * argv[])
   HYPRE_SStructGraphCreate (MPI_COMM_WORLD, grid, &graph);
 
   // Initialize stencil part
-  
+
+  // SOMETHING WRONG BEFORE HERE
+
+  PTRACE;
   if (is_mpi_coarse) {
     HYPRE_SStructGraphSetStencil (graph, part_coarse, 0, stencil);
   }
   if (is_mpi_fine) {
     HYPRE_SStructGraphSetStencil (graph, part_fine,   0, stencil);
   }
+  PTRACE;
 
   // Initialize nonstencil part
 
@@ -372,20 +378,21 @@ int main(int argc, char * argv[])
 
   HYPRE_SStructGraphAssemble (graph);
 
-  //------------------------------------------------------------
-  // Create hypre matrix and vectors
-  //------------------------------------------------------------
+  //============================================================
+  // CREATE HYPRE MATRIX A AND VECTORS X,B
+  //============================================================
 
   PTRACE;
 
+  //--------------------------------------------------
   // Create the hypre vector right-hand side B
+  //--------------------------------------------------
 
   HYPRE_SStructVector  B;       
   HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid,  &B);
   HYPRE_SStructVectorSetObjectType (B,HYPRE_SSTRUCT);
   HYPRE_SStructVectorInitialize (B);
 
-  double coarse_h =       BOX / N;  // Coarse mesh width
   double fine_h   = 0.5 * BOX / N;  // Fine mesh width
 
   int ind3[8][3] = {
@@ -398,16 +405,19 @@ int main(int argc, char * argv[])
     {N,   N,   N-1},
     {N,   N,   N}};
 
-  double bval = -4.0 * G * PI * MASS / (fine_h*fine_h*fine_h);
+  if (is_mpi_fine) {
 
-  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[0], 0, &bval);
-  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[1], 0, &bval);
-  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[2], 0, &bval);
-  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[3], 0, &bval);
-  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[4], 0, &bval);
-  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[5], 0, &bval);
-  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[6], 0, &bval);
-  HYPRE_SStructVectorAddToValues (B, part_fine, ind3[7], 0, &bval);
+    double bval = -4.0 * G * PI * MASS / (fine_h*fine_h*fine_h);
+
+    HYPRE_SStructVectorAddToValues (B, part_fine, ind3[0], 0, &bval);
+    HYPRE_SStructVectorAddToValues (B, part_fine, ind3[1], 0, &bval);
+    HYPRE_SStructVectorAddToValues (B, part_fine, ind3[2], 0, &bval);
+    HYPRE_SStructVectorAddToValues (B, part_fine, ind3[3], 0, &bval);
+    HYPRE_SStructVectorAddToValues (B, part_fine, ind3[4], 0, &bval);
+    HYPRE_SStructVectorAddToValues (B, part_fine, ind3[5], 0, &bval);
+    HYPRE_SStructVectorAddToValues (B, part_fine, ind3[6], 0, &bval);
+    HYPRE_SStructVectorAddToValues (B, part_fine, ind3[7], 0, &bval);
+  }
 
   HYPRE_SStructVectorAssemble (B);
 
@@ -427,51 +437,60 @@ int main(int argc, char * argv[])
   double * v0 = new double [N*N*N];
   double * v1 = new double [N*N*N];
 
-  int i;
-  for (i=0; i<N*N*N; i++) {
-    v0[i] = -6*coarse_h;
-    v1[i] =  1*coarse_h;
+  double coarse_h =       BOX / N;  // Coarse mesh width
+
+  if (is_mpi_coarse) {
+
+    for (i=0; i<N*N*N; i++) {
+      v0[i] = -6*coarse_h;
+      v1[i] =  1*coarse_h;
+    }
+
+    HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
+				     0,1,&nums[0],v0);
+    HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
+				     0,1,&nums[1],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
+				     0,1,&nums[2],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
+				     0,1,&nums[3],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
+				     0,1,&nums[4],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
+				     0,1,&nums[5],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
+				     0,1,&nums[6],v1);
   }
 
-  HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
-				   0,1,&nums[0],v0);
-  HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
-				   0,1,&nums[1],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
-				   0,1,&nums[2],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
-				   0,1,&nums[3],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
-				   0,1,&nums[4],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
-				   0,1,&nums[5],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
-				   0,1,&nums[6],v1);
+  if (is_mpi_fine) {
 
-  for (i=0; i<N*N*N; i++) {
-    v0[i] = -6*fine_h;
-    v1[i] =  1*fine_h;
+    for (i=0; i<N*N*N; i++) {
+      v0[i] = -6*fine_h;
+      v1[i] =  1*fine_h;
+    }
+
+    HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
+				     0,1,&nums[0],v0);
+    HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
+				     0,1,&nums[1],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
+				     0,1,&nums[2],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
+				     0,1,&nums[3],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
+				     0,1,&nums[4],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
+				     0,1,&nums[5],v1);
+    HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
+				     0,1,&nums[6],v1);
   }
-
-  HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
-				   0,1,&nums[0],v0);
-  HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
-				   0,1,&nums[1],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
-				   0,1,&nums[2],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
-				   0,1,&nums[3],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
-				   0,1,&nums[4],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
-				   0,1,&nums[5],v1);
-  HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
-				   0,1,&nums[6],v1);
 
   delete [] v0;
   delete [] v1;
 
   PTRACE;
+
+  // MATRIX ENTRIES
 
   // Declare counts for zones
   int * count_coarse = new int [N*N*N];
@@ -480,6 +499,7 @@ int main(int argc, char * argv[])
   PTRACE;
   printf ("DEBUG count_coarse = %p\n",count_coarse);
   printf ("DEBUG count_fine   = %p\n",count_fine);
+
   for (i=0; i<N*N*N; i++) {
     count_coarse[i] = 0;
     count_fine[i] = 7;
