@@ -56,8 +56,10 @@ namespace unit {
 
   int test_num = 1;
 
-  const char * pass_string = "\033[01;32mPass\033[00m";
-  const char * fail_string = "\033[01;38mFail\033[00m";
+  //  const char * pass_string = "\033[01;32mPass\033[00m";
+  //  const char * fail_string = "\033[01;38mFail\033[00m";
+  const char * pass_string = " [ Pass ]";
+  const char * fail_string = " [ FAIL ]";
 
 }
 
