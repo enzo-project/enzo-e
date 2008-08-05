@@ -507,32 +507,18 @@ int main(int argc, char * argv[])
 
     for (i0=0; i0<N; i0++) {
       for (i1=0; i1<N; i1++) {
-	double o3 = 1.0 / 3.0;
-	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-	//
-	// ADDING o3 FACTOR MATCHES hypre-solve
-	//
-	// WHERE IS THIS FACTOR IN hypre-solve?
-	//
-	// PRINTING OUT v0,vxp,etc. VALUES RIGHT BEFORE HYPRE
-	// CALL INDICATE NO FACTOR OF 1/3
-	//
-	// BUT A.01.* MATRIX OUTPUT BY HYPRE INDICATES THE FACTOR OF 1/3
-	// AND SOLUTION LOOKS GOOD WITH IT BUT BAD WITHOUT
-	// 
-	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-	vxp[index(N-1,i0,i1,N)] -= o3*fine_h;
-	v0 [index(N-1,i0,i1,N)] += o3*fine_h;
-	vxm[index(  0,i0,i1,N)] -= o3*fine_h;
-	v0 [index(  0,i0,i1,N)] += o3*fine_h;
-	vyp[index(i0,N-1,i1,N)] -= o3*fine_h;
-	v0 [index(i0,N-1,i1,N)] += o3*fine_h;
-	vym[index(i0,  0,i1,N)] -= o3*fine_h;
-	v0 [index(i0,  0,i1,N)] += o3*fine_h;
-	vzp[index(i0,i1,N-1,N)] -= o3*fine_h;
-	v0 [index(i0,i1,N-1,N)] += o3*fine_h;
-	vzm[index(i0,i1,  0,N)] -= o3*fine_h;
-	v0 [index(i0,i1,  0,N)] += o3*fine_h;
+	vxp[index(N-1,i0,i1,N)] -= fine_h;
+	v0 [index(N-1,i0,i1,N)] += fine_h;
+	vxm[index(  0,i0,i1,N)] -= fine_h;
+	v0 [index(  0,i0,i1,N)] += fine_h;
+	vyp[index(i0,N-1,i1,N)] -= fine_h;
+	v0 [index(i0,N-1,i1,N)] += fine_h;
+	vym[index(i0,  0,i1,N)] -= fine_h;
+	v0 [index(i0,  0,i1,N)] += fine_h;
+	vzp[index(i0,i1,N-1,N)] -= fine_h;
+	v0 [index(i0,i1,N-1,N)] += fine_h;
+	vzm[index(i0,i1,  0,N)] -= fine_h;
+	v0 [index(i0,i1,  0,N)] += fine_h;
       }
     }
 
@@ -647,32 +633,56 @@ int main(int argc, char * argv[])
 	  // 000 ---------------------------------------------
 	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
 	  ASSERT_BOUND(0,icount,N*N*N);
+	  // diagonal
 	  entry = count_fine[icount]++;
 	  value = a * fine_h;
+	  HYPRE_SStructMatrixAddToValues 
+	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	  // off-diagonal
+	  entry = 0;
+	  value = -value;
 	  HYPRE_SStructMatrixAddToValues 
 	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
 	  ++ ind_fine[j1]; 	  
 	  // 010 ---------------------------------------------
 	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
 	  ASSERT_BOUND(0,icount,N*N*N);
+	  // diagonal
 	  entry = count_fine[icount]++;
 	  value = a * fine_h;
+	  HYPRE_SStructMatrixAddToValues 
+	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	  // off-diagonal
+	  entry = 0;
+	  value = -value;
 	  HYPRE_SStructMatrixAddToValues 
 	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
 	  ++ ind_fine[j2];	  
 	  // 011 ---------------------------------------------
 	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
 	  ASSERT_BOUND(0,icount,N*N*N);
+	  // diagonal
 	  entry = count_fine[icount]++;
 	  value = a * fine_h;
+	  HYPRE_SStructMatrixAddToValues 
+	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	  // off-diagonal
+	  entry = 0;
+	  value = -value;
 	  HYPRE_SStructMatrixAddToValues 
 	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
 	  -- ind_fine[j1];	  
 	  // 001 ---------------------------------------------
 	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
 	  ASSERT_BOUND(0,icount,N*N*N);
+	  // diagonal
 	  entry = count_fine[icount]++;
 	  value = a * fine_h;
+	  HYPRE_SStructMatrixAddToValues 
+	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	  // off-diagonal
+	  entry = 0;
+	  value = -value;
 	  HYPRE_SStructMatrixAddToValues 
 	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
 	  -- ind_fine[j2];	  
