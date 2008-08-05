@@ -273,6 +273,9 @@ int main(int argc, char * argv[])
 	  ind_fine[j1]   = r*ind_coarse[j1];
 	  ind_fine[j2]   = r*ind_coarse[j2];
 
+	   // ind_fine computed above corresponds to coarse zone
+	  if (face == 1)  ++ ind_fine[j0];
+
 	  // 000 ---------------------------------------------
 	  HYPRE_SStructGraphAddEntries 
 	    (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
@@ -451,16 +454,16 @@ int main(int argc, char * argv[])
     // MATRIX STENCIL VALUES: GRID BOUNDARY
     //--------------------------------------------------
 
-    for (i0=0; i0<N; i0++) {
-      for (i1=0; i1<N; i1++) {
- 	vxp[index(N-1,i0,i1,N)] = 0.0;
- 	vxm[index(  0,i0,i1,N)] = 0.0;
- 	vyp[index(i0,N-1,i1,N)] = 0.0;
- 	vym[index(i0,  0,i1,N)] = 0.0;
- 	vzp[index(i0,i1,N-1,N)] = 0.0;
- 	vzm[index(i0,i1,  0,N)] = 0.0;
-      }
-    }
+//     for (i0=0; i0<N; i0++) {
+//       for (i1=0; i1<N; i1++) {
+//  	vxp[index(N-1,i0,i1,N)] = 0.0;
+//  	vxm[index(  0,i0,i1,N)] = 0.0;
+//  	vyp[index(i0,N-1,i1,N)] = 0.0;
+//  	vym[index(i0,  0,i1,N)] = 0.0;
+//  	vzp[index(i0,i1,N-1,N)] = 0.0;
+//  	vzm[index(i0,i1,  0,N)] = 0.0;
+//       }
+//     }
 
     //--------------------------------------------------
     // SET HYPRE MATRIX STENCIL VALUES
@@ -504,12 +507,32 @@ int main(int argc, char * argv[])
 
     for (i0=0; i0<N; i0++) {
       for (i1=0; i1<N; i1++) {
-	vxp[index(N-1,i0,i1,N)] = 0.0;
-	vxm[index(  0,i0,i1,N)] = 0.0;
-	vyp[index(i0,N-1,i1,N)] = 0.0;
-	vym[index(i0,  0,i1,N)] = 0.0;
-	vzp[index(i0,i1,N-1,N)] = 0.0;
-	vzm[index(i0,i1,  0,N)] = 0.0;
+	double o3 = 1.0 / 3.0;
+	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	//
+	// ADDING o3 FACTOR MATCHES hypre-solve
+	//
+	// WHERE IS THIS FACTOR IN hypre-solve?
+	//
+	// PRINTING OUT v0,vxp,etc. VALUES RIGHT BEFORE HYPRE
+	// CALL INDICATE NO FACTOR OF 1/3
+	//
+	// BUT A.01.* MATRIX OUTPUT BY HYPRE INDICATES THE FACTOR OF 1/3
+	// AND SOLUTION LOOKS GOOD WITH IT BUT BAD WITHOUT
+	// 
+	// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+	vxp[index(N-1,i0,i1,N)] -= o3*fine_h;
+	v0 [index(N-1,i0,i1,N)] += o3*fine_h;
+	vxm[index(  0,i0,i1,N)] -= o3*fine_h;
+	v0 [index(  0,i0,i1,N)] += o3*fine_h;
+	vyp[index(i0,N-1,i1,N)] -= o3*fine_h;
+	v0 [index(i0,N-1,i1,N)] += o3*fine_h;
+	vym[index(i0,  0,i1,N)] -= o3*fine_h;
+	v0 [index(i0,  0,i1,N)] += o3*fine_h;
+	vzp[index(i0,i1,N-1,N)] -= o3*fine_h;
+	v0 [index(i0,i1,N-1,N)] += o3*fine_h;
+	vzm[index(i0,i1,  0,N)] -= o3*fine_h;
+	v0 [index(i0,i1,  0,N)] += o3*fine_h;
       }
     }
 
@@ -531,6 +554,26 @@ int main(int argc, char * argv[])
 				     0,1,&nums[5],vzp);
     HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				     0,1,&nums[6],vzm);
+
+    //--------------------------------------------------
+    // MATRIX CLEAR STENCIL OVERLAP
+    //--------------------------------------------------
+
+    if (is_mpi_fine) {
+      int refinements[3] = {2,2,2};
+
+      HYPRE_SStructFACZeroCFSten (A,grid, part_fine, refinements);
+
+      // This seems to do nothing:
+
+      HYPRE_SStructFACZeroFCSten (A,grid, part_fine);
+
+      // @@@ THIS SEEMS TO BREAK, BUT SEEMS TO BE IN hypre-solve @@@
+
+      HYPRE_SStructFACZeroAMRMatrixData (A, part_coarse, refinements);
+      
+    }
+
   }
 
   delete [] v0;
@@ -588,13 +631,16 @@ int main(int argc, char * argv[])
 	  ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
 	  ind_fine[j1]   = r*ind_coarse[j1];
 	  ind_fine[j2]   = r*ind_coarse[j2];
-
   
+	   // ind_fine computed above corresponds to coarse zone
+	  if (face == 1)  ++ ind_fine[j0];
+
 	  int    entry;
 	  double value;
 
 	  int icount;
 	  int ishift = -index(N/r,N/r,N/r,N);
+	  int num_entries = 1;
 	  
 	  double a = 2.0/3.0;
 
@@ -604,7 +650,7 @@ int main(int argc, char * argv[])
 	  entry = count_fine[icount]++;
 	  value = a * fine_h;
 	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, part_coarse, &entry, &value);
+	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
 	  ++ ind_fine[j1]; 	  
 	  // 010 ---------------------------------------------
 	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
@@ -612,7 +658,7 @@ int main(int argc, char * argv[])
 	  entry = count_fine[icount]++;
 	  value = a * fine_h;
 	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, part_coarse, &entry, &value);
+	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
 	  ++ ind_fine[j2];	  
 	  // 011 ---------------------------------------------
 	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
@@ -620,7 +666,7 @@ int main(int argc, char * argv[])
 	  entry = count_fine[icount]++;
 	  value = a * fine_h;
 	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, part_coarse, &entry, &value);
+	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
 	  -- ind_fine[j1];	  
 	  // 001 ---------------------------------------------
 	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
@@ -628,7 +674,7 @@ int main(int argc, char * argv[])
 	  entry = count_fine[icount]++;
 	  value = a * fine_h;
 	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, part_coarse, &entry, &value);
+	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
 	  -- ind_fine[j2];	  
 	  // 000 ---------------------------------------------
 
@@ -670,14 +716,15 @@ int main(int argc, char * argv[])
 	  double value;
 
 	  int icount = index(ind_coarse[0],ind_coarse[1],ind_coarse[2],N);
-	  
-	  for (int k=0; k<8; k++) {
-	    ASSERT_BOUND(0,icount,N*N*N);
-	    entry = count_coarse[icount]++;
-	    value = coarse_h;
-	    HYPRE_SStructMatrixAddToValues 
-	      (A, part_coarse, ind_coarse, 0, part_fine, &entry, &value);
-	  }
+	  int num_entries = 1;
+
+ 	  for (int k=0; k<8; k++) {
+ 	    ASSERT_BOUND(0,icount,N*N*N);
+ 	    entry = count_coarse[icount]++;
+ 	    value = (1./8.) * coarse_h;
+ 	    HYPRE_SStructMatrixAddToValues 
+ 	      (A, part_coarse, ind_coarse, 0, num_entries, &entry, &value);
+ 	  }
 	}
       }
     }
@@ -778,6 +825,12 @@ int main(int argc, char * argv[])
   } else {
     HYPRE_SStructBiCGSTABDestroy(solver);
   }
+
+  //------------------------------------------------------------
+  // WRITE MATRIX
+  //------------------------------------------------------------
+
+  HYPRE_SStructMatrixPrint ("A",A,1);
 
   //------------------------------------------------------------
   // WRITE SOLUTION
