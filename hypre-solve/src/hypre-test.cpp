@@ -22,12 +22,13 @@
 // PARAMETERS
 //----------------------------------------------------------------------
 
-const double MASS           = 1e43;
-const double BOX            = 8e9;
-const int    itmax          = 50;
-const double restol         = 1e-6;
-const bool   use_fac_solver = false;
-const bool   debug          = true;
+const double MASS    = 1e43;
+const double BOX     = 8e9;
+const int    itmax   = 50;
+const double restol  = 1e-6;
+const bool   use_fac = false;
+const bool   debug   = false;
+const bool   trace   = true;
 
 //----------------------------------------------------------------------
 // CONSTANTS
@@ -54,13 +55,13 @@ int index(int i0, int i1, int i2, int N) {
 //----------------------------------------------------------------------
 
 #define TRACE \
-  { \
+  if (trace) {							\
     printf ("%s:%d TRACE\n",__FILE__,__LINE__); fflush(stdout); \
     fflush(stdout); \
   }
 
 #define PTRACE \
-  { \
+  if (trace) {						    \
     printf ("%d %s:%d TRACE\n",mpi_rank,__FILE__,__LINE__); \
     fflush(stdout); \
   }
@@ -110,7 +111,8 @@ int main(int argc, char * argv[])
   const bool is_mpi_coarse = (mpi_rank == mpi_rank_coarse);
   const bool is_mpi_fine   = (mpi_rank == mpi_rank_fine);
 
-  printf ("%d %d %d\n",mpi_rank, is_mpi_coarse, is_mpi_fine);
+  if (debug) printf ("mpi_rank=%d  is_mpi_coarse=%d is_mpi_fine=%d\n",
+		     mpi_rank, is_mpi_coarse, is_mpi_fine);
 
   //------------------------------------------------------------
   // PARSE AND CHECK ARGUMENTS
@@ -226,8 +228,6 @@ int main(int argc, char * argv[])
 
   // Initialize stencil part
 
-  // SOMETHING WRONG BEFORE HERE
-
   PTRACE;
   if (is_mpi_coarse) {
     HYPRE_SStructGraphSetStencil (graph, part_coarse, 0, stencil);
@@ -247,6 +247,10 @@ int main(int argc, char * argv[])
   //----------------------------------------
   // GRAPH ENTRIES: FINE-TO-COARSE
   //----------------------------------------
+
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // @@@@@ THIS LOOP CRASHES IN PARALLEL @@@@@
+  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   for (axis=0; axis<3; axis++) {
 
@@ -297,6 +301,8 @@ int main(int argc, char * argv[])
       }
     }
   }
+
+  PTRACE;
 
   //----------------------------------------
   // GRAPH ENTRIES: COARSE-TO-FINE
@@ -365,6 +371,8 @@ int main(int argc, char * argv[])
       }
     }
   }
+
+  PTRACE;
 
   HYPRE_SStructGraphAssemble (graph);
 
@@ -581,8 +589,10 @@ int main(int argc, char * argv[])
   int * count_fine   = new int [N*N*N];
 
   PTRACE;
-  printf ("DEBUG count_coarse = %p\n",count_coarse);
-  printf ("DEBUG count_fine   = %p\n",count_fine);
+  if (debug) {
+    printf ("DEBUG count_coarse = %p\n",count_coarse);
+    printf ("DEBUG count_fine   = %p\n",count_fine);
+  }
 
   for (i=0; i<N*N*N; i++) {
     count_coarse[i] = 7;
@@ -742,7 +752,7 @@ int main(int argc, char * argv[])
 
   PTRACE;
 
-  printf ("DEBUG count_coarse = %p\n",count_coarse);
+  if (debug) printf ("DEBUG count_coarse = %p\n",count_coarse);
   delete [] count_coarse;
   delete [] count_fine;
 
@@ -775,7 +785,7 @@ int main(int argc, char * argv[])
   int iter;
   double resid;
 
-  if (use_fac_solver) {
+  if (use_fac) {
     
     //--------------------------------------------------
     // FAC SOLVER
@@ -794,8 +804,8 @@ int main(int argc, char * argv[])
 
     // solver parameters
 
-    HYPRE_SStructFACSetNumPreRelax(solver,      2);
-    HYPRE_SStructFACSetNumPostRelax(solver,     2);
+    HYPRE_SStructFACSetNumPreRelax(solver,      4);
+    HYPRE_SStructFACSetNumPostRelax(solver,     4);
     HYPRE_SStructFACSetCoarseSolverType(solver, 1);
     HYPRE_SStructFACSetRelaxType(solver,        2);
 
@@ -827,10 +837,11 @@ int main(int argc, char * argv[])
     HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(solver, &resid);
   }
 
-  printf ("HYPRE_SStructSysPFMGSolve num iterations:               %d\n",iter);
-  printf ("HYPRE_SStructSysPFMGSolve final relative residual norm: %g\n",resid);
+  printf ("solver:     %s\n", use_fac ? "FAC" : "BiCGSTAB");
+  printf ("iterations: %d\n",iter);
+  printf ("residual:   %g\n",resid);
 
-  if (use_fac_solver) {
+  if (use_fac) {
     HYPRE_SStructFACDestroy2(solver);
   } else {
     HYPRE_SStructBiCGSTABDestroy(solver);
