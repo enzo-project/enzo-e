@@ -72,7 +72,7 @@ endif
 # GENERATE PLOTS
 #----------------------------------------------------------------------
 
-$bin/hypre-png 3 4 X.? >& out.hypre-png
+$bin/hypre-png 3 4 X.? X.?? >& out.hypre-png
 mv project-0.png X0.png
 mv project-1.png X1.png
 mv project-2.png X2.png
