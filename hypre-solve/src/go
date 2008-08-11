@@ -1,17 +1,95 @@
 #!/bin/tcsh -f
 
 make
-set N = 16
-foreach solver ("cg" "mg")
-   foreach P (1 2)
-      set outfile = out.size-$N.solver-$solver.procs-${P}
-      mpirun -np $P hypre-test $N $solver >& $outfile
-      set count_finished = `grep Finished $outfile| wc`
-      set count_finished = $count_finished[1]
-      if ($count_finished == 0) set result = "FAIL"
-      if ($count_finished == 1) set result = "Pass"
-      echo "[ $result ] N = $N   P = $P   solver = $solver"
+
+# Problem parameters
+
+set sizes     = (16)
+set procs     = (1 2)
+set solvers   = ("cg" "mg")
+
+# Plotting parameters
+
+set png_size  = 128
+set png_color = 1
+
+#-----------------------------------------------------------------------
+# RUN hypre-test
+#-----------------------------------------------------------------------
+
+foreach N ($sizes)
+   foreach solver ($solvers)
+      foreach P ($procs)
+
+         rm -f X.?
+
+         set identifier = hypre-test.N=$N.P=$P.$solver
+         # Run hypre-test
+
+         set outfile = out.$identifier
+
+         mpirun -np $P hypre-test $N $solver >& $outfile
+
+         # Evaluate result
+
+         set run_status = `grep Finished $outfile| wc`
+         set run_status = $run_status[1]
+         if ($run_status == 0) set result = "FAIL"
+         if ($run_status == 1) set result = "Pass"
+
+         # Display run_status
+
+         echo "hypre-test  [ $result ] N = $N   P = $P   solver = $solver"
+
+         # Generate projections
+
+         @ png_scale = $png_size / $N
+         @ png_scale = $png_scale / 2
+         echo "png_scale = $png_scale"
+         hypre-png 0 $png_scale X.?
+         mv project-0.png $identifier-0.png
+         mv project-1.png $identifier-1.png
+         mv project-2.png $identifier-2.png
+      end
    end
 end
 
+#-----------------------------------------------------------------------
+# RUN hypre-solve
+#-----------------------------------------------------------------------
 
+foreach N ($sizes)
+   foreach solver ($solvers)
+      foreach P ($procs)
+
+         set identifier = hypre-solve.N=$N.P=$P.$solver
+
+         # Run hypre-solve
+
+         set infile  =  in.$identifier
+         set outfile = out.$identifier
+
+         mpirun -np $P hypre-solve $infile >& $outfile
+
+         # Evaluate result
+
+         set run_status = `grep Success $outfile| wc`
+         set run_status = $run_status[1]
+         if ($run_status == 0) set result = "FAIL"
+         if ($run_status == 1) set result = "Pass"
+
+         # Display run_status
+
+         echo "hypre-solve  [ $result ] N = $N   P = $P   solver = $solver"
+
+         # Generate projections
+
+         @ png_scale = $png_size / $N
+         @ png_scale = $png_scale / 2
+         hypre-png 0 $png_scale X.?
+         mv project-0.png $identifier-0.png
+         mv project-1.png $identifier-1.png
+         mv project-2.png $identifier-2.png
+      end
+   end
+end

@@ -1263,7 +1263,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
     }
   }
 
-  if (level==1) {
+  if (debug && level==1) {
     i = Grid::index(0,0,0,n3[0],n3[1],n3[2]);
     printf ("DEBUG %s:%d 000 %g %g %g  %g  %g %g %g\n",
 			__FILE__,__LINE__,

@@ -24,7 +24,7 @@
 
 //======================================================================
 
-const int debug       = 1;
+const int debug       = 0;
 const int debug_input = 0;
 const int trace       = 0;
 
