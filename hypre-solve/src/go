@@ -1,0 +1,17 @@
+#!/bin/tcsh -f
+
+make
+set N = 16
+foreach solver ("cg" "mg")
+   foreach P (1 2)
+      set outfile = out.size-$N.solver-$solver.procs-${P}
+      mpirun -np $P hypre-test $N $solver >& $outfile
+      set count_finished = `grep Finished $outfile| wc`
+      set count_finished = $count_finished[1]
+      if ($count_finished == 0) set result = "FAIL"
+      if ($count_finished == 1) set result = "Pass"
+      echo "[ $result ] N = $N   P = $P   solver = $solver"
+   end
+end
+
+

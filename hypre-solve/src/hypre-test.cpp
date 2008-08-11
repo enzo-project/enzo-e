@@ -26,7 +26,6 @@ const double MASS    = 1e43;
 const double BOX     = 8e9;
 const int    itmax   = 50;
 const double restol  = 1e-6;
-const bool   use_fac = false;
 const bool   debug   = false;
 const bool   trace   = true;
 
@@ -48,6 +47,14 @@ const int    r              = 2; // refinement factor TESTED FOR 2 ONLY
 int min (int i, int j) { return i<j ? i : j;};
 int index(int i0, int i1, int i2, int N) {
   return i0 + N*(i1 + N*i2);
+}
+void usage(int mpi_rank,char ** argv) {
+  if (mpi_rank==0) {
+    fprintf (stderr, "Usage: %s <int size> [\"cg\"|\"mg\"]\n",argv[0]);
+  }
+  MPI_Finalize();
+
+  exit(1);
 }
 
 //----------------------------------------------------------------------
@@ -116,18 +123,27 @@ int main(int argc, char * argv[])
 
   //------------------------------------------------------------
   // PARSE AND CHECK ARGUMENTS
-  //    Out: N  (problem size)
+  //    Out: int N        (problem size)
+  //    Out: int use_fac  (use FAC solver?)
   //------------------------------------------------------------
 
   PTRACE;
 
   int N;
-  if (argc == 2) {
-    N = atoi(argv[1]);
+  char * arg_solver;
+  int use_fac = 0;
+  if (argc == 3) {
+    N       = atoi (argv[1]);
+    arg_solver = argv[2];
+    if (strcmp(arg_solver,"cg") == 0) {
+      use_fac = 0;
+    } else if (strcmp(arg_solver,"mg") == 0) {
+      use_fac = 1;
+    } else {
+      usage(mpi_rank,argv);
+    }
   } else {
-    if (mpi_rank==0) fprintf (stderr, "Usage: %s <size>\n",argv[0]);
-    MPI_Finalize();
-    exit(1);
+    usage(mpi_rank,argv);
   }
 
   //------------------------------------------------------------
@@ -923,10 +939,15 @@ int main(int argc, char * argv[])
   fclose(fp);
 
   //------------------------------------------------------------
-  // EXIT
+  // EXIT SUCCESSFULLY
   //------------------------------------------------------------
 
-  printf ("Finished!\n");
+  if (mpi_rank==0) {
+    printf ("Finished!\n");
+  }
   MPI_Finalize();
+
+  exit (0);
+
 }
 
