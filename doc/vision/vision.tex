@@ -1,7 +1,7 @@
 %0       1         2         3         4         5         6         7         8
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %=======================================================================
-\documentclass{article}
+\documentclass[11pt]{article}
 %=======================================================================
 
 \include{include}
@@ -11,8 +11,8 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Vision and Scope Document \\
-      \textit{\large{\enzo: The Next Generation}}}{James Bordner}{$Rev$}
+\TITLE{\cello\ Vision and Scope Document \\
+      \Large{\enzo: The Next Generation}}{James Bordner}{$Rev$}
 %=======================================================================
 
 %=======================================================================
@@ -44,18 +44,18 @@
     Greg Bryan began implementing \enzo\ in 1994.  He wrote it in C++
     with Fortran 77 computational kernels for speed, using primarily a
     procedural (structured) programming paradigm.  Initially he
-    targeted shared memory platforms such as the SGI Origin, and later
-    added support for distributed memory platforms via the Message
-    Passing Interface (MPI).
+    targeted shared memory platforms such as the SGI Origin, which was
+    later modified to support distributed memory platforms via the
+    Message Passing Interface (MPI).
 
     Beginning around 2000, other developers began to modify \enzo\ in
     earnest: David Collins added MHD physics, Dan Reynolds added
     RHD physics, Greg Bryan himself modified AMR algorithms to improve
     performance, and Robert Harkness continually made innumerable
     modifications to greatly improve performance and scaling, and
-    almost single-handedly brought \enzo\ into the TeraScale era.
+    almost single-handedly brought \enzo\ into the Terascale Era.
 
-
+    The software development strategy used has been very informal.
     \enzo\ was developed without any supporting documents, such as
     requirement specifications, design description, or test document.
     It was also written without any explicit coding standard, though
@@ -65,38 +65,47 @@
     author also implemented many application tests to help ensure the
     accuracy of the computed solutions.  
 
+% Enzo is getting harder to develop
     The relaxed software development strategy used with \enzo,
     combined with the shift from single-person to multi-person
-    development, combined with \enzo\ being implemented using the
-    modification-resistant structured programming paradigm, has
-    resulted in a rapid increase in \enzo's complexity.  This
-    increased software complexity translates directly into increased
-    difficulty in modifying and maintaining the code.
+    development, have resulted in a rapid increase in \enzo's
+    complexity.  This increased software complexity translates
+    directly into increased difficulty in modifying and maintaining
+    the code.  Furthermore, \enzo's ``modification-resistant''
+    structured programming paradigm is a further hinderance to
+    its continued development.
+    
+% pargraph: Enzo requires further development
 
-    This motivates the \cello\ Project.  While \enzo's development is
-    still progressing vigorously, its complexity is making development
-    increasingly slow and difficult.  Yet modifications are still
-    needed, both to increase the physics capabilities required by
-    users, and to improve the performance and scaling to bring \enzo\
-    from the TeraScale era into the PetaScale era.  By redeveloping
-    \enzo's functionality for the same user base, but with an updated
-    software development strategy, using the modification-friendly
-    object oriented programming paradigm, and with more flexible and
-    scalable datastructures, we can directly target the hierarchical
-    and massive parallelism and deep memory hierarchies of petascale
-    platforms from the beginning.
+% pargraph: Above two points motivate cello
 
-    We believe that \enzo\ is the ideal solution in the short term,
-    whereas \cello\ is the ideal solution in the long term.  To use a
+    These two issues motivate the \cello\ Project.  While \enzo's
+    developmont is still progressing vigorously, its software
+    complexity and structure are making development increasingly slow
+    and difficult.  Yet modifications are still needed, both to
+    increase the physics capabilities required by users, and to
+    improve the performance and scaling to bring \enzo\ from the
+    Terascale Era into the Petascale Era.  By redeveloping \enzo's
+    functionality for the same user base with 1) a more structured
+    software development strategy, 2) using the modification-friendly
+    object oriented programming paradigm, and 3) with more flexible
+    and scalable datastructures, we can specifically target the
+    hierarchical and massive parallelism and deep memory hierarchies
+    of Petascale platforms \textit{a priori}.
+
+% Future relationship between Enzo and Cello
+
+    We believe that \enzo\ is the best solution in the short term,
+    whereas \cello\ is the best solution in the long term.  To use a
     computational analogy, \enzo\ is like a short but relatively slow
     vector operation, whereas \cello\ is like a long but relatively
     fast vector operation.  \cello\ will require some time before it
     will start producing scientific results, but once it is
     operational, \cello's improved modifyability and scalability will
-    result in \cello\ users producing scientific results more
-    frequently than \enzo\ users.  To optimize scientific results in
-    both the short and long term, we believe it makes sense to
-    continue development with \enzo\ while simultaneously begining
+    eventually result in \cello\ users producing scientific results
+    more frequently than \enzo\ users.  To optimize scientific results
+    in both the short and long term, we believe it makes sense to
+    continue development with \enzo\ while concurrently begining
     development on \cello.
   
 %-----------------------------------------------------------------------
@@ -104,8 +113,10 @@
 %-----------------------------------------------------------------------
 
 To clarify roles among stakeholders---and for fun if not profit---we
-assign ``effective'' titles
+assign ``effective'' titles.
 
+\ \\ 
+\textbf{Executives}
 \begin{itemize}
 %
  \item  Prof.~Michael L.~Norman, effective \textit{Chief Executive Officer}
@@ -117,12 +128,14 @@ assign ``effective'' titles
 %
  \item Dr.~Robert Harkness, effective \textit{Chief Technology
  Officer}.  Robert is the most knowledgeable of the latest enhancements to
- \enzo, and he has the deepest understanding of how best to take advantage of
- PetaScale platforms
-%
-\item The Development Team:
+ \enzo, and has the most detailed understanding of how best to take advantage of
+ Petascale platforms
+\end{itemize}
+
+\ \\
+\textbf{Developers}
 \begin{itemize}
-\item Dr.~James Bordner (Team Leader, OOP design, documentation)
+\item Dr.~James Bordner (Development Leader, OOP design, documentation)
 \item Dr.~Robert Harkness (low-level design, scalability, performance)
 \item Rick Wagner (unit testing and analysis specialist)
 \item Dr.~Alexei Kritsuk (hydrodynamics and turbulence specialist)
@@ -131,7 +144,6 @@ assign ``effective'' titles
 \item Prof.~Brian O'Shea (star formation specialist)
 \item Dr.~Paschal Paschos (chemistry and cooling specialist)
 \item Stephen Skory (quality assurance and application testing)
-\end{itemize}
 \end{itemize}
     
 
@@ -287,7 +299,7 @@ assign ``effective'' titles
     about numerical methods for solving problems in these
     domains.
 
-    \textbf{Efficient on PetaScale platforms.}
+    \textbf{Efficient on Petascale platforms.}
 
     \textbf{Easily Enhanceable.}
 
