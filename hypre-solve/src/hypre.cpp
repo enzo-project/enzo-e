@@ -32,7 +32,7 @@ namespace cello {
 
 const int debug        = 0;
 const int trace        = 0;
-const int trace_hypre  = 0;
+const int trace_hypre  = 1;
 
 //----------------------------------------------------------------------
 
@@ -134,11 +134,11 @@ void Hypre::init_hierarchy (Parameters & parameters,
 
   while (Level * level = itl++) {
 
-    ItLevelGridsLocal itg (*level);
+    ItLevelGridsLocal itgl (*level);
     //  ItLevelGridsAll itg (*level);
     //  _TEMPORARY_("GridSetExtents on all processors");
 
-    while (Grid * grid = itg++) {
+    while (Grid * grid = itgl++) {
 
       int lower[3] = {grid->i_lower(0),grid->i_lower(1),grid->i_lower(2)};
       int upper[3] = {grid->i_upper(0),grid->i_upper(1),grid->i_upper(2)};
@@ -299,7 +299,7 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
     fflush(mpi_fp);
   }
   if (trace_hypre) {
-    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilSetEntry (%p,%d,%d %d %d,6)\n",
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructStencilSetEntry (%p,%d,%d %d %d,0)\n",
 	    __FILE__,__LINE__,pmpi->ip(),
 	    &stencil_, 6, entries[6][0],entries[6][1],entries[6][2]
 	    );

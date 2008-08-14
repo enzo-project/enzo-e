@@ -112,40 +112,38 @@
 \subsection{Stakeholders}
 %-----------------------------------------------------------------------
 
-To clarify roles among stakeholders---and for fun if not profit---we
-assign ``effective'' titles.
 
-\ \\ 
+    To clarify roles among stakeholders---and for fun if not
+    profit---we assign ``effective'' titles
+
 \textbf{Executives}
 \begin{itemize}
 %
- \item  Prof.~Michael L.~Norman, effective \textit{Chief Executive Officer}
+    \item  Prof.~Michael L.~Norman, effective \textit{Chief Executive Officer}
 %
- \item Prof.~Greg Bryan, effective \textit{Chief Science Officer}.
- Since \cello\ is intended to be the successor to \enzo, it is
- important that \cello\ maintains the same high scientific standards
- set by the original application developed by Greg.
+    \item Prof.~Greg Bryan, effective \textit{Chief Science Officer}.
+    Since \cello\ is intended to be the successor to \enzo, it is
+    important that \cello\ maintains the same high scientific
+    standards set by the original application developed by Greg.
 %
- \item Dr.~Robert Harkness, effective \textit{Chief Technology
- Officer}.  Robert is the most knowledgeable of the latest enhancements to
- \enzo, and has the most detailed understanding of how best to take advantage of
- Petascale platforms
-\end{itemize}
-
-\ \\
-\textbf{Developers}
-\begin{itemize}
-\item Dr.~James Bordner (Development Leader, OOP design, documentation)
-\item Dr.~Robert Harkness (low-level design, scalability, performance)
-\item Rick Wagner (unit testing and analysis specialist)
-\item Dr.~Alexei Kritsuk (hydrodynamics and turbulence specialist)
-\item David Collins (MHD specialist)
-\item Dr.~Dan Reynolds (RHD specialist)
-\item Prof.~Brian O'Shea (star formation specialist)
-\item Dr.~Paschal Paschos (chemistry and cooling specialist)
-\item Stephen Skory (quality assurance and application testing)
-\end{itemize}
-    
+    \item Dr.~Robert Harkness, effective \textit{Chief Technology
+    Officer}.  Robert is the most knowledgeable of the latest
+    enhancements to \enzo, and he has the deepest understanding of how
+    best to take advantage of PetaScale platforms
+%
+    \item The Development Team:
+    \begin{itemize}
+    \item Dr.~James Bordner (Team Leader, OOP design, documentation)
+    \item Dr.~Robert Harkness (low-level design, scalability, performance)
+    \item Rick Wagner (unit testing and analysis specialist)
+    \item Dr.~Alexei Kritsuk (hydrodynamics and turbulence specialist)
+    \item David Collins (MHD specialist)
+    \item Dr.~Dan Reynolds (RHD specialist)
+    \item Prof.~Brian O'Shea (star formation specialist)
+    \item Dr.~Paschal Paschos (chemistry and cooling specialist)
+    \item Stephen Skory (quality assurance and application testing)
+    \end{itemize}
+    \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Users}
@@ -201,7 +199,8 @@ assign ``effective'' titles.
     graduate students nearing graduation)
 %
     \item Uneven capabilities of development team members (especially
-    software development methodology)
+    software development methodology and object oriented programming)
+    % solution: 1. training;  2. isolating
 %
     \item Uncertain future parallel platform characteristics
 %
@@ -211,9 +210,12 @@ assign ``effective'' titles.
 %
     \item May become platform dependent: IBM Blue Waters
 %
-    \item Political pressure to use software languages, frameworks, or libraries, e.g.~CHARM++ or UPC, even if they may not be in the project's best interest
+    \item Political pressure to use software languages, frameworks, or
+    libraries, e.g.~CHARM++ or UPC, even if they may not be in the
+    project's best interest
 %
-    \item Personal resistance to use software languages, frameworks, or libraries, even if they may be in the project's best interest
+    \item Personal resistance to use software languages, frameworks,
+    or libraries, even if they may be in the project's best interest
 %
     \item Discontinued or uncertain future development of dependent libraries
 %
@@ -244,19 +246,19 @@ assign ``effective'' titles.
 \subsection{Assumptions}
 %-----------------------------------------------------------------------
 
-    \textit{This is the list of assumptions that the stakeholders, users, or
-    project team have made. Often, these assumptions are generated
-    during a Wideband Delphi estimation session (see Chapter 3). If
-    Wideband Delphi is being used, the rest of the vision and scope
-    document should be ready before the Delphi meeting and used as the
-    basis for estimation. The assumptions generated during the
-    estimation kickoff meeting should then be reviewed, and any
-    nontechnical assumptions should be copied into this
-    section. (Technical assumptions---meaning assumptions that affect
-    the design and development but not the scope of the
-    project---should not be included in this document. The estimate
-    results will still contain a record of these assumptions, but they
-    are not useful for this particular audience.)}
+    % This is the list of assumptions that the stakeholders, users, or
+    % project team have made. Often, these assumptions are generated
+    % during a Wideband Delphi estimation session (see Chapter 3). If
+    % Wideband Delphi is being used, the rest of the vision and scope
+    % document should be ready before the Delphi meeting and used as the
+    % basis for estimation. The assumptions generated during the
+    % estimation kickoff meeting should then be reviewed, and any
+    % nontechnical assumptions should be copied into this
+    % section. (Technical assumptions---meaning assumptions that affect
+    % the design and development but not the scope of the
+    % project---should not be included in this document. The estimate
+    % results will still contain a record of these assumptions, but they
+    % are not useful for this particular audience.)
 
 %=======================================================================
 \section{Vision of the Solution}
@@ -266,14 +268,16 @@ assign ``effective'' titles.
 \subsection{Vision statement}
 %-----------------------------------------------------------------------
 
-    \textit{The goal of the vision statement is to describe what the project
-    is expected to accomplish. It should explain what the purpose of
-    the project is. This should be a compelling reason, a solid
-    justification for spending time, money, and resources on the
-    project. The best time to write the vision statement is after
-    talking to the stakeholders and users and writing down their
-    needs; by this time, a concrete understanding of the project
-    should be starting to jell.}
+    % The goal of the vision statement is to describe what the project
+    % is expected to accomplish. It should explain what the purpose of
+    % the project is. This should be a compelling reason, a solid
+    % justification for spending time, money, and resources on the
+    % project. The best time to write the vision statement is after
+    % talking to the stakeholders and users and writing down their
+    % needs; by this time, a concrete understanding of the project
+    % should be starting to jell.
+
+%   Cello is the next generation of Enzo
 
     The purpose of the \cello\ project is to produce the next
     generation of the open source software application \enzo\ for
@@ -288,26 +292,162 @@ assign ``effective'' titles.
     across $10^5$ to $10^6$ computational cores, while maintaining a
     high level of utilization of available computational resources.
 
+%   Primary goal
+
     The primary goal of \cello\ is to increase scientists' ability to
-    perform numerical experiments of high scientific worth.  This
-    includes increased scope of problems, increased scale of problem
-    size, improved numerical methods, improved ease of use, and
-    improved code enhancability.
+    perform numerical experiments of high scientific worth.  
+
+
+%   Characteristics supporting the primary goal
+
+    To support the primary goal if improved science, we recognize that
+    \cello\ must improve on a range of characteristics.  Compared to
+    \enzo, \cello\ should be more highly scalable, modifyable,
+    useable, controlable, and robust.
+
+%   Scalable
+
+    \textbf{Scalable.}
+
+    \textbf{Efficient on PetaScale platforms.}
+
+%   Modifyable
+
+    \textbf{Modifyable.}
+
+    \enzo\ code is tightly coupled, repetitious, and difficult to read
+    and understand.  Yet \enzo\ is an application that must be
+    modified continually.  One reason is because rapidly evolving
+    supercomputer platforms put ever-increasing demands on application
+    scalability and efficiency.  A second reason is because scientific
+    progress requires computational physics researchers and graduate
+    students to solve new physics problems, which requires adding new
+    computational physics capabilities.  Examples of capabilities
+    currently being implemented in \enzo\ are radiative transfer,
+    magnetohydrodynamics, and turbulence modeling.
+
+    \enzo\ must be continually modified, yet is not specificially
+    designed to be modified.  It was written primarily using the
+    structured programming paradigm, which is known to be effective
+    for designing and implementing large-scale applications, but is
+    not ideal for subsequent redesign and modification.  As \enzo\ has
+    been repeatedly modified by successive researchers and students,
+    its complexity has increased rapidly, in particular much faster
+    than the inherent complexity of the underlying functionality being
+    implemented.
+
+    To maintain control over how effectively \cello\ can be modified
+    and enhanced to keep up with rapidly changing supercomputer
+    platform characteristics and new physics capabilities, we also
+    wish to keep \cello\ not overly-dependent on external libraries.
+    Some libraries, such as HDF5 and MPI, are of course indispensible.
+    But using some other libraries, frameworks, or languages, may lead to 
+    \cello\ being a ``slave'' to another software group.
+
+
+%   Usable
+
+    \textbf{Ueable.}
 
     A secondary, but nontheless important, goal is to help
     physics students learn about astrophysics and cosmology, and
     about numerical methods for solving problems in these
-    domains.
+    domains.  Keeping the use focused on the physics issues requires
+    \cello\ to not be required to focus excessively on technical
+    issues.
 
-    \textbf{Efficient on Petascale platforms.}
-
-    \textbf{Easily Enhanceable.}
+    Useablility will also be enhanced by \cello\
+    Global performance-related measurements will be continuously
+    collected for simulations.  This will include parallel
+    communication amount, rates, and time; memory and computational
+    load balance efficiency; memory usage and reference rates;
+    floating point operation counts and rates; disk storage rates and
+    amounts, and time.
 
     \textbf{Instructive.}  
 
+%   Controlable
+
     \textbf{Powerful.}
 
-    \textbf{Not overly dependent on external libraries.}
+    Input files will support a much more powerful grammar to allow for
+    much greater control of \cello.  \enzo\ uses a flat list of
+    parameters of simple type, which has limited scalability in terms
+    of expressive range.
+
+    \cello\ will use a hierarchical list of parameters, and will
+    permit more complex types, such as mathematical expressions and
+    composite spacial/temporal subregions.  While extra code will be
+    required to parse and interpret the input files, the code in
+    \enzo\ used for defining and initializing specific problem types
+    will not be required, since the input file grammar will be
+    sufficiently powerful to implement them without problem-specific
+    code.  Overall, this may even result in less code, while
+    supporting a much greater scope of problem setup without requiring
+    modifying the code.
+    
+%   Robust
+
+
+%
+
+%  Performance monitoring
+
+    %-----------------------------------------------------------------------
+    \subsubsection{Performance monitoring}  
+%
+
+
+
+
+    % Enzo input files
+    % flat list
+    % limited expressibility
+    % inherently limits power of application
+% 
+    \enzo\ currently uses a large ``flat'' list of input parameters.
+    Because they are not organized explicitly into sections, it can be
+    difficult for users to learn and write parameter files.
+%
+    Also, parameters have limited expressibility---each parameter is
+    typically an integer with a small number of valid values.
+%
+    The limited input file grammar inherently limits the power of
+    \enzo\ itself.  For example, input control is not sufficiently
+    powerful to define a new test problem that is not already
+    implemented explicitly in code.  Running a new test problem
+    requires enhancing the \enzo\ codebase.
+
+
+%-----------------------------------------------------------------------
+\subsection{List of features}
+%-----------------------------------------------------------------------
+
+    % This section contains a list of features. A feature is as a
+    % cohesive area of the software that fulfills a specific need by
+    % providing a set of services or capabilities. Any software
+    % package---in fact, any engineered product---can be broken down
+    % into features. The project manager can choose the number of
+    % features in the vision and scope document by changing the level of
+    % detail or granularity of each feature, and by combining multiple
+    % features into a single one. Sometimes those features are small
+    % ("screw-top cap," "holds one liter of liquid"); sometimes they are
+    % big ("four-wheel drive," "seats seven passengers"). It is useful
+    % to describe a product in about 10 features in the vision and scope
+    % document , because this usually yields a level of complexity that
+    % most people reading it are comfortable with. Adding too many
+    % features will overwhelm most readers.
+
+    % Each feature should be listed in a separate paragraph or bullet
+    % point. It should be given a name, followed by a description of the
+    % functionality that it provides. This description does not need to
+    % be detailed; it can simply be a few sentences that give a general
+    % explanation of the feature. However, if there is more information
+    % that a stakeholder or project team member feels should be
+    % included, it is important to include that information. For
+    % example, it is sometimes useful to include a use case (see Chapter
+    % 6), as long as it is written in such a way that all of the
+    % stakeholders can read and understand it.
 
     %-----------------------------------------------------------------------
     \subsubsection{Physics capabilities}
@@ -340,60 +480,9 @@ assign ``effective'' titles.
     \end{description}
 
     %-----------------------------------------------------------------------
-    \subsubsection{Software design}
+    \subsubsection{Parallelism} 
 
-    % Enzo not OOP % Enzo overly complex % A fundamental flaw of
-    \enzo\ is that it is continually modified, yet not designed to be
-    modified.  It was written primarily using the structured
-    programming paradigm, which is known to be effective for designing
-    and implementing large-scale applications, but is not ideal for
-    subsequent redesign and modification.  As \enzo\ has been
-    repeatedly modified by successive researchers and students, its
-    complexity has increased rapidly, in particular much faster than
-    the inherent complexity of the underlying functionality being
-    implemented.
-%
-    \enzo\ code is tightly coupled, has much repetition, is difficult
-    to read and understand.
-
-    % Enzo must be modified continually
-    % 1. Evolving supercomputers
-    % 2. Progress in science
-    Yet \enzo\ is an application that must be modified continually,
-    for at least two reasons.  First, because rapidly evolving
-    supercomputer platforms put ever-increasing demands on application
-    scalability and efficiency; and second, because a primary usage
-    model is physics researchers and graduate students who want to
-    solve new physics problems, which necessarily requires adding new
-    computational physics capabilities.  Such capabilities include
-    radiative transfer, magnetohydrodynamics, and turbulence modeling.
-
-    %-----------------------------------------------------------------------
-    \subsubsection{Multi-level discretization}
-
-    As with \enzo, computations will be performed at multiple spacial
-    and temporal resolutions using adaptive mesh refinement (AMR).
-    This will permit the physics modules to capture the full range of
-    scales of interest, but without excessive computation and memory
-    storage.  
-
-    However, the AMR approach and data-structures will be totally
-    redesigned and reimplemented.  Compared to \enzo, the new design
-    will include the following features:
-
-    \begin{itemize}
-    \item Improved load balancing
-    \item Improved data locality
-    \item Reduced memory usage and improved memory scaling
-    \item Control of task sizes at different parallelization levels
-    \item Improved cache usage through array blocking and padding techniques
-    \item Support for hierarchical parallelism, e.g.~MPI + OpenMP
-    \item Object-oriented design to reduce overall code complexity and 
-          increase flexibility and modifyability
-    \end{itemize}
-
-    %-----------------------------------------------------------------------
-    \subsubsection{Hierarchical parallelism} 
+% Hierarchical parallel tasks
 
     To take advantage of the hierarchical parallel nature of modern
     supercomputers, \cello\ will support multiple levels of
@@ -406,8 +495,7 @@ assign ``effective'' titles.
     grid cells within grid patches or particles within a group using
     shared-memory parallelism at the socket or core level.
 
-    %-----------------------------------------------------------------------
-    \subsubsection{Parallelization types}  
+% Hierarchical parallel technologies
 
     This parallelization will be modularized (as much as
     technologically feasible) to improve flexibility in choosing the
@@ -421,10 +509,7 @@ assign ``effective'' titles.
     memory in isolation or combination.  Support for collaberative
     (functional) parallelism and pipelining will also be considered.
 
-%  load balancing
-
-    %-----------------------------------------------------------------------
-    \subsubsection{Dynamic load balancing}  
+%  Load balancing
 
     Multiple levels of parallel tasks will be load balanced using
     hierarchical dynamic load balancing algorithms.  Load balancing
@@ -437,151 +522,105 @@ assign ``effective'' titles.
     efficient AMR data-structures, are expected to lead to high
     parallel efficiency and scalability.
 
-% Field data layout: vertical data movement optimization
+%   Task scheduling (reduced synchronization)
 
     %-----------------------------------------------------------------------
-    \subsubsection{Deep memory hierarchies}  
-%
+    \subsubsection{Datastructures}
+
+    
+    As with \enzo, computations will be performed at multiple spacial
+    and temporal resolutions using adaptive mesh refinement (AMR).
+    This will permit the physics modules to capture the full range of
+    scales of interest, but without excessive computation and memory
+    storage.  However, the AMR approach and data-structures will be
+    totally redesigned and reimplemented.  Compared to \enzo, the new
+    design will include the following features:
+
+    \begin{itemize}
+    \item Improved load balancing
+    \item Improved data locality
+    \item Reduced memory usage and improved memory scaling
+    \item Control of task sizes at different parallelization levels
+    \item Improved cache usage through array blocking and padding techniques
+    \item Support for hierarchical parallelism, e.g.~MPI + OpenMP
+    \item Object-oriented design to reduce overall code complexity and 
+          increase flexibility and modifyability
+    \end{itemize}
+
+    % Octree to improve load balancing and datastructure complexity
+    % patches to maintain efficiency
+    % variable patch size to reduce octree overhead
+    %   (this is new)
+
+    % patches may be distributed (MPI), threaded (OMP), and blocked (cache)
+
     The properties of individual grid patches, and details of how
     scalar and vector fields are stored within grid patches, will be
-    flexible to permit optimizing the use of deep memory/cache
-    hierarchies.  This includes hierarchical blocking of grid data to
-    maximize reuse of data in caches, padding of arrays to reduce
-    cache thrashing effects for low-associativity caches, and
-    interleaving vector field data or select scalar fields to improve
-    data locality.  These capabilities, together with efficient
-    methods and implementation of computations, are expected to lead
-    to high single-thread computational efficiency and data movement
-    through memory/cache hierarchies.
-
-%  Performance monitoring
-
-    %-----------------------------------------------------------------------
-    \subsubsection{Performance monitoring}  
-%
-    Global performance-related measurements will be continuously
-    collected for simulations.  This will include parallel
-    communication amount, rates, and time; memory and computational
-    load balance efficiency; memory usage and reference rates;
-    floating point operation counts and rates; disk storage rates and
-    amounts, and time.
-
-    %-----------------------------------------------------------------------
-    \subsubsection{Powerful control}  
-
-    Input files will support a much more powerful grammar to allow for
-    much greater control of \cello.  \enzo\ uses a flat list of
-    parameters of simple type, which has limited scalability in terms
-    of expressive range.
-
-    \cello\ will use a hierarchical list of parameters, and will
-    permit more complex types, such as mathematical expressions and
-    composite spacial/temporal subregions.  While extra code will be
-    required to parse and interpret the input files, code in \enzo\
-    for implementing specific problem types will not be required, since
-    the input file grammar will be sufficiently powerful to
-    implement them without problem-specific code.  Overall, this may
-    even result in less code, while supporting a much greater
-    scope of problem setup without requiring modifying the code.
-    
+    flexible to permit optimizing the use of node and processor/core
+    parallelism, as well as deep memory/cache hierarchies.  This
+    includes hierarchical subblocking of grid patch arrays to optimize
+    MPI task size, OMP task size, and cache block size and
+    configuration.  Additionally, arrays may be padded to reduce cache
+    thrashing effects for low-associativity caches, and may be
+    interleaved to improve data locality (or to ease use of existing
+    computational kernels that use interleaved array data).  These
+    capabilities, together with efficient methods and implementation
+    of computations, are expected to lead to high single-thread
+    computational efficiency and data movement through memory/cache
+    hierarchies.  Implementation of the \code{Array} class is expected
+    to use the object-oriented ``decorator pattern''.
 
 
-    % Enzo input files
-    % flat list
-    % limited expressibility
-    % inherently limits power of application
-% 
-    \enzo\ currently uses a large ``flat'' list of input parameters.
-    Because they are not organized explicitly into sections, it can be
-    difficult for users to learn and write parameter files.
-%
-    Also, parameters have limited expressibility---each parameter is
-    typically an integer with a small number of valid values.
-%
-    The limited input file grammar inherently limits the power of
-    \enzo\ itself.  For example, input control is not sufficiently
-    powerful to define a new test problem that is not already
-    implemented explicitly in code.  Running a new test problem
-    requires enhancing the \enzo\ codebase.
+    % Particles
 
-
-%-----------------------------------------------------------------------
-\subsection{List of features}
-%-----------------------------------------------------------------------
-
-    \textit{This section contains a list of features. A feature is as a
-    cohesive area of the software that fulfills a specific need by
-    providing a set of services or capabilities. Any software
-    package---in fact, any engineered product---can be broken down
-    into features. The project manager can choose the number of
-    features in the vision and scope document by changing the level of
-    detail or granularity of each feature, and by combining multiple
-    features into a single one. Sometimes those features are small
-    ("screw-top cap," "holds one liter of liquid"); sometimes they are
-    big ("four-wheel drive," "seats seven passengers"). It is useful
-    to describe a product in about 10 features in the vision and scope
-    document , because this usually yields a level of complexity that
-    most people reading it are comfortable with. Adding too many
-    features will overwhelm most readers.}
-
-    \textit{Each feature should be listed in a separate paragraph or bullet
-    point. It should be given a name, followed by a description of the
-    functionality that it provides. This description does not need to
-    be detailed; it can simply be a few sentences that give a general
-    explanation of the feature. However, if there is more information
-    that a stakeholder or project team member feels should be
-    included, it is important to include that information. For
-    example, it is sometimes useful to include a use case (see Chapter
-    6), as long as it is written in such a way that all of the
-    stakeholders can read and understand it.}
 
 %-----------------------------------------------------------------------
 \subsection{Scope of phased release (optional)}
 %-----------------------------------------------------------------------
 
-    \textit{Sometimes software projects are released in phases: a version of
-    the software with some subset of the features is released first,
-    and a newer, more complete version is released later. This section
-    describes the plan for a phased release, if that approach is to be
-    taken.}
+    % Sometimes software projects are released in phases: a version of
+    % the software with some subset of the features is released first,
+    % and a newer, more complete version is released later. This section
+    % describes the plan for a phased release, if that approach is to be
+    % taken.
 
-    \textit{This is useful when there is an important deadline for the
-    software, but developing the entire software project by that
-    deadline would be unrealistic. The most common way to compromise
-    on this release date is to divide the features into two or more
-    releases. In that case, this section should identify specifically
-    when those versions will be released, and which features will be
-    included in each version. It's reasonable to divide one feature up
-    between two releases, as long as it is made clear exactly how that
-    will happen.}
+    % This is useful when there is an important deadline for the
+    % software, but developing the entire software project by that
+    % deadline would be unrealistic. The most common way to compromise
+    % on this release date is to divide the features into two or more
+    % releases. In that case, this section should identify specifically
+    % when those versions will be released, and which features will be
+    % included in each version. It's reasonable to divide one feature up
+    % between two releases, as long as it is made clear exactly how that
+    % will happen.
 
-    \textit{If a project manager needs to release a project in phases, it is
-    critical that the project team be consulted. Some features are
-    much more difficult to divide than others, and the engineers might
-    see dependencies between features that are not clear to the
-    stakeholders and project manager. After the phased release plan is
-    written down and agreed upon, the project team should always be
-    asked to re-estimate the effort and a new project plan should be
-    generated (see below). This will ensure that the phased release is
-    feasible and compatible with the organization's priorities.}
+    % If a project manager needs to release a project in phases, it is
+    % critical that the project team be consulted. Some features are
+    % much more difficult to divide than others, and the engineers might
+    % see dependencies between features that are not clear to the
+    % stakeholders and project manager. After the phased release plan is
+    % written down and agreed upon, the project team should always be
+    % asked to re-estimate the effort and a new project plan should be
+    % generated (see below). This will ensure that the phased release is
+    % feasible and compatible with the organization's priorities.
 
 %-----------------------------------------------------------------------
 \subsection{Features that will not be developed}
 %-----------------------------------------------------------------------
 
 
-    \textit{Features are often left out of a project on purpose. When a
-    feature is explicitly left out of the software, it should be added
-    to this section to tell the reader that a decision was made to
-    exclude it. For example, one way to handle an unrealistic deadline
-    is by removing one or more features from the software, in which
-    case the removed features should be moved into this section. The
-    reason these features should be moved rather than deleted from the
-    document is that otherwise, readers might assume that they were
-    overlooked and bring them up in a review. This is especially
-    important during the review of the document because it allows
-    everyone to agree on the exclusion of the feature (or object to
-    it).}
+    % Features are often left out of a project on purpose. When a
+    % feature is explicitly left out of the software, it should be added
+    % to this section to tell the reader that a decision was made to
+    % exclude it. For example, one way to handle an unrealistic deadline
+    % is by removing one or more features from the software, in which
+    % case the removed features should be moved into this section. The
+    % reason these features should be moved rather than deleted from the
+    % document is that otherwise, readers might assume that they were
+    % overlooked and bring them up in a review. This is especially
+    % important during the review of the document because it allows
+    % everyone to agree on the exclusion of the feature (or object to
+    % it).
 
 \end{document}
 

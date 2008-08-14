@@ -157,7 +157,8 @@ void Grid::read (FILE *fp, bool brief) throw ()
   if (u_ && ! brief) {
     int i0,i1,i2;
     Scalar u;
-    while (fscanf(fp,"%d%d%d"SCALAR_SCANF, &i0,&i1,&i2,&u) != EOF) {
+    int status;
+    while ((status = fscanf(fp,"%d%d%d"SCALAR_SCANF, &i0,&i1,&i2,&u)) != EOF) {
       int i = index(i0,i1,i2,n_[0],n_[1],n_[2]);
       u_[i] = u;
     }

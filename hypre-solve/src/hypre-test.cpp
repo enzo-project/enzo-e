@@ -22,12 +22,13 @@
 // PARAMETERS
 //----------------------------------------------------------------------
 
-const double MASS    = 1e43;
-const double BOX     = 8e9;
-const int    itmax   = 50;
-const double restol  = 1e-6;
-const bool   debug   = false;
-const bool   trace   = true;
+const double MASS        = 1e43;
+const double BOX         = 8e9;
+const int    itmax       = 50;
+const double restol      = 1e-6;
+const bool   debug       = false;
+const bool   trace       = true;
+const bool   trace_hypre = true;
 
 //----------------------------------------------------------------------
 // CONSTANTS
@@ -81,6 +82,13 @@ void usage(int mpi_rank,char ** argv) {
       assert (0); \
     } \
   }
+
+//======================================================================
+// GLOBALS!
+//======================================================================
+
+FILE *mpi_fp;
+char mpi_file[20];
 
 //======================================================================
 // MAIN
@@ -176,8 +184,6 @@ int main(int argc, char * argv[])
 	      upper_coarse[0],upper_coarse[1],upper_coarse[2]);
     }
 
-    HYPRE_SStructGridSetVariables(grid, part_coarse, 1, variable_type);
-
   }
 
   // Initialize fine grid extents on fine grid MPI process
@@ -195,8 +201,10 @@ int main(int argc, char * argv[])
 	      upper_fine[0],upper_fine[1],upper_fine[2]);
     }
 
-    HYPRE_SStructGridSetVariables(grid, part_fine,   1, variable_type);
   }
+
+  HYPRE_SStructGridSetVariables(grid, part_fine,   1, variable_type);
+  HYPRE_SStructGridSetVariables(grid, part_coarse, 1, variable_type);
 
   // Assemble the grid
   
@@ -245,12 +253,12 @@ int main(int argc, char * argv[])
   // Initialize stencil part
 
   PTRACE;
-  if (is_mpi_coarse) {
+  //  if (is_mpi_coarse) {
     HYPRE_SStructGraphSetStencil (graph, part_coarse, 0, stencil);
-  }
-  if (is_mpi_fine) {
+//   }
+//   if (is_mpi_fine) {
     HYPRE_SStructGraphSetStencil (graph, part_fine,   0, stencil);
-  }
+    //  }
   PTRACE;
 
   // Initialize nonstencil part
@@ -268,6 +276,7 @@ int main(int argc, char * argv[])
   // @@@@@ THIS LOOP CRASHES IN PARALLEL Rev. 374 @@@@@
   // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+  if (is_mpi_fine) {
   for (axis=0; axis<3; axis++) {
 
     int j0 = axis;
@@ -317,6 +326,7 @@ int main(int argc, char * argv[])
       }
     }
   }
+  }
 
   PTRACE;
 
@@ -324,6 +334,7 @@ int main(int argc, char * argv[])
   // GRAPH ENTRIES: COARSE-TO-FINE
   //----------------------------------------
 
+  if (is_mpi_coarse) {
   for (axis=0; axis<3; axis++) {
 
     int j0 = axis;
@@ -387,7 +398,7 @@ int main(int argc, char * argv[])
       }
     }
   }
-
+  }
   PTRACE;
 
   HYPRE_SStructGraphAssemble (graph);
@@ -619,6 +630,7 @@ int main(int argc, char * argv[])
   // MATRIX ENTRIES: FINE-TO-CORSE 
   //--------------------------------------------------
 
+  if (is_mpi_fine) {
   for (axis=0; axis<3; axis++) {
 
     int j0 = axis;
@@ -718,11 +730,13 @@ int main(int argc, char * argv[])
       }
     }
   }
+  }
 
   //--------------------------------------------------
   // MATRIX ENTRIES: COARSE-TO-FINE
   //--------------------------------------------------
 
+  if (is_mpi_coarse) {
   for (axis=0; axis<3; axis++) {
 
     int j0 = axis;
@@ -765,6 +779,7 @@ int main(int argc, char * argv[])
       }
     }
   }
+  }
 
   PTRACE;
 
@@ -783,13 +798,6 @@ int main(int argc, char * argv[])
   HYPRE_SStructVectorSetObjectType (X,HYPRE_SSTRUCT);
   HYPRE_SStructVectorInitialize (X);
   HYPRE_SStructVectorAssemble (X);
-
-  // Assemble the matrix and vectors
-
-
-  //  HYPRE_SStructMatrixAddToValues 
-  //		      (A_, level_fine, igg3, 0, 1, &entry, &value);
-
 
   PTRACE;
 
@@ -820,8 +828,8 @@ int main(int argc, char * argv[])
 
     // solver parameters
 
-    HYPRE_SStructFACSetNumPreRelax(solver,      4);
-    HYPRE_SStructFACSetNumPostRelax(solver,     4);
+    HYPRE_SStructFACSetNumPreRelax(solver,      2);
+    HYPRE_SStructFACSetNumPostRelax(solver,     2);
     HYPRE_SStructFACSetCoarseSolverType(solver, 1);
     HYPRE_SStructFACSetRelaxType(solver,        2);
 
