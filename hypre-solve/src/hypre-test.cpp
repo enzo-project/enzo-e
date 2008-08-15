@@ -26,9 +26,6 @@ const double MASS        = 1e43;
 const double BOX         = 8e9;
 const int    itmax       = 50;
 const double restol      = 1e-6;
-const bool   debug       = false;
-const bool   trace       = true;
-const bool   trace_hypre = true;
 
 //----------------------------------------------------------------------
 // CONSTANTS
@@ -61,18 +58,6 @@ void usage(int mpi_rank,char ** argv) {
 //----------------------------------------------------------------------
 // MACROS
 //----------------------------------------------------------------------
-
-#define TRACE \
-  if (trace) {							\
-    printf ("%s:%d TRACE\n",__FILE__,__LINE__); fflush(stdout); \
-    fflush(stdout); \
-  }
-
-#define PTRACE \
-  if (trace) {						    \
-    printf ("%d %s:%d TRACE\n",mpi_rank,__FILE__,__LINE__); \
-    fflush(stdout); \
-  }
 
 #define ASSERT_BOUND(A,B,C) \
   { \
@@ -107,8 +92,6 @@ int main(int argc, char * argv[])
   //    Out: is_mpi_fine   (whether MPI process owns fine grid)
   //------------------------------------------------------------
 
-  TRACE;
-
   int mpi_rank,mpi_size;
 
   MPI_Init (&argc, &argv);
@@ -126,35 +109,17 @@ int main(int argc, char * argv[])
   const bool is_mpi_coarse = (mpi_rank == mpi_rank_coarse);
   const bool is_mpi_fine   = (mpi_rank == mpi_rank_fine);
 
-  if (debug) printf ("mpi_rank=%d  is_mpi_coarse=%d is_mpi_fine=%d\n",
-		     mpi_rank, is_mpi_coarse, is_mpi_fine);
-
   //------------------------------------------------------------
   // PARSE AND CHECK ARGUMENTS
   //    Out: int N        (problem size)
   //    Out: int use_fac  (use FAC solver?)
   //------------------------------------------------------------
 
-  PTRACE;
-
   int N;
   char * arg_solver;
   int use_fac = 0;
 
-  int graph_logic_type;
-
-  // graph_logic_type
-  //
-  //   0 fine-to-coarse and coarse-to-fine always called
-  //   1 fine-to-coarse on fine only
-  //   2 fine-to-coarse on coarse only
-  //   3 all on fine only
-  //   4 all on coarse only
-  //   5 fine-to-coarse on fine  coarse-to-fine on all
-  //   6 fine-to-coarse on all   coarse-to-fine on coarse
-
-
-  if (argc == 4) {
+  if (argc == 3) {
 
     // Argument 1
 
@@ -171,20 +136,16 @@ int main(int argc, char * argv[])
       usage(mpi_rank,argv);
     }
 
-    // Argument 3
-
-    graph_logic_type = atoi(argv[3]);
-    
   } else {
+
     usage(mpi_rank,argv);
+
   }
 
   //------------------------------------------------------------
   // CREATE AND INITIALIZE HYPRE 'GRID'
   //    Out: grid  (a two-level hypre grid)
   //------------------------------------------------------------
-
-  PTRACE;
 
   HYPRE_SStructGrid grid;
 
@@ -203,12 +164,6 @@ int main(int argc, char * argv[])
 
     HYPRE_SStructGridSetExtents(grid, part_coarse, lower_coarse, upper_coarse);
 
-    if (debug) {
-      printf ("Coarse grid extents: (%d %d %d) to (%d %d %d)\n",
-	      lower_coarse[0],lower_coarse[1],lower_coarse[2],
-	      upper_coarse[0],upper_coarse[1],upper_coarse[2]);
-    }
-
   }
 
   // Initialize fine grid extents on fine grid MPI process
@@ -219,12 +174,6 @@ int main(int argc, char * argv[])
   if (is_mpi_fine) {
 
     HYPRE_SStructGridSetExtents(grid, part_fine,   lower_fine,   upper_fine);
-
-    if (debug) {
-      printf ("Fine grid extents:   (%d %d %d) to (%d %d %d)\n",
-	      lower_fine[0],lower_fine[1],lower_fine[2],
-	      upper_fine[0],upper_fine[1],upper_fine[2]);
-    }
 
   }
 
@@ -239,8 +188,6 @@ int main(int argc, char * argv[])
   // CREATE HYPRE STENCIL
   //    Out: stencil  (structured connections)
   //------------------------------------------------------------
-
-  PTRACE;
 
   HYPRE_SStructStencil stencil;
   
@@ -267,8 +214,6 @@ int main(int argc, char * argv[])
   //    Out: graph  (unstructured connections)
   //------------------------------------------------------------
 
-  PTRACE;
-
   HYPRE_SStructGraph   graph;
 
   // Create the graph
@@ -277,14 +222,8 @@ int main(int argc, char * argv[])
 
   // Initialize stencil part
 
-  PTRACE;
-  //  if (is_mpi_coarse) {
-    HYPRE_SStructGraphSetStencil (graph, part_coarse, 0, stencil);
-//   }
-//   if (is_mpi_fine) {
-    HYPRE_SStructGraphSetStencil (graph, part_fine,   0, stencil);
-    //  }
-  PTRACE;
+  HYPRE_SStructGraphSetStencil (graph, part_coarse, 0, stencil);
+  HYPRE_SStructGraphSetStencil (graph, part_fine,   0, stencil);
 
   // Initialize nonstencil part
 
@@ -293,33 +232,11 @@ int main(int argc, char * argv[])
   int ind_fine[3];   // fine grid indices
   int ind_coarse[3]; // coarse grid indices
 
-  // Parallel logic for nonstencil connections
-
-  bool fine_to_coarse;
-
-  if (graph_logic_type == 0) fine_to_coarse = true;
-  if (graph_logic_type == 1) fine_to_coarse = is_mpi_fine;
-  if (graph_logic_type == 2) fine_to_coarse = is_mpi_coarse;
-  if (graph_logic_type == 3) fine_to_coarse = is_mpi_fine;
-  if (graph_logic_type == 4) fine_to_coarse = is_mpi_coarse;
-  if (graph_logic_type == 5) fine_to_coarse = is_mpi_fine;
-  if (graph_logic_type == 6) fine_to_coarse = true;
-
-  bool coarse_to_fine;
-
-  if (graph_logic_type == 0) coarse_to_fine = true;
-  if (graph_logic_type == 1) coarse_to_fine = is_mpi_coarse;
-  if (graph_logic_type == 2) coarse_to_fine = is_mpi_fine;
-  if (graph_logic_type == 3) coarse_to_fine = is_mpi_fine;
-  if (graph_logic_type == 4) coarse_to_fine = is_mpi_coarse;
-  if (graph_logic_type == 5) coarse_to_fine = true;
-  if (graph_logic_type == 6) coarse_to_fine = is_mpi_coarse;
-
   //----------------------------------------
   // GRAPH ENTRIES: FINE-TO-COARSE
   //----------------------------------------
 
-  if (fine_to_coarse) {
+  if (is_mpi_fine) {
 
     for (axis=0; axis<3; axis++) {
 
@@ -372,13 +289,11 @@ int main(int argc, char * argv[])
     }
   }
 
-  PTRACE;
-
   //----------------------------------------
   // GRAPH ENTRIES: COARSE-TO-FINE
   //----------------------------------------
 
-  if (coarse_to_fine) {
+  if (is_mpi_coarse) {
 
     for (axis=0; axis<3; axis++) {
 
@@ -445,15 +360,11 @@ int main(int argc, char * argv[])
     }
   }
 
-  PTRACE;
-
   HYPRE_SStructGraphAssemble (graph);
 
   //============================================================
   // CREATE HYPRE MATRIX A AND VECTORS X,B
   //============================================================
-
-  PTRACE;
 
   //--------------------------------------------------
   // Create the hypre vector right-hand side B
@@ -628,15 +539,13 @@ int main(int argc, char * argv[])
 
   }
 
-//   delete [] v0;
-//   delete [] vxp;
-//   delete [] vxm;
-//   delete [] vyp;
-//   delete [] vym;
-//   delete [] vzp;
-//   delete [] vzm;
-
-  PTRACE;
+  delete [] v0;
+  delete [] vxp;
+  delete [] vxm;
+  delete [] vyp;
+  delete [] vym;
+  delete [] vzp;
+  delete [] vzm;
 
   //--------------------------------------------------
   // MATRIX NONSTENCIL ENTRIES
@@ -645,12 +554,6 @@ int main(int argc, char * argv[])
   // Declare counts for zones
   int * count_coarse = new int [N*N*N];
   int * count_fine   = new int [N*N*N];
-
-  PTRACE;
-  if (debug) {
-    printf ("DEBUG count_coarse = %p\n",count_coarse);
-    printf ("DEBUG count_fine   = %p\n",count_fine);
-  }
 
   for (i=0; i<N*N*N; i++) {
     count_coarse[i] = 7;
@@ -661,7 +564,7 @@ int main(int argc, char * argv[])
   // MATRIX ENTRIES: FINE-TO-CORSE 
   //--------------------------------------------------
 
-  if (fine_to_coarse) {
+  if (is_mpi_fine) {
 
     for (axis=0; axis<3; axis++) {
 
@@ -768,7 +671,7 @@ int main(int argc, char * argv[])
   // MATRIX ENTRIES: COARSE-TO-FINE
   //--------------------------------------------------
 
-  if (coarse_to_fine) {
+  if (is_mpi_coarse) {
 
     for (axis=0; axis<3; axis++) {
 
@@ -814,13 +717,8 @@ int main(int argc, char * argv[])
     }
   }
 
-  PTRACE;
-
-  if (debug) printf ("DEBUG count_coarse = %p\n",count_coarse);
   delete [] count_coarse;
   delete [] count_fine;
-
-  PTRACE;
 
   HYPRE_SStructMatrixAssemble (A);
 
@@ -831,8 +729,6 @@ int main(int argc, char * argv[])
   HYPRE_SStructVectorSetObjectType (X,HYPRE_SSTRUCT);
   HYPRE_SStructVectorInitialize (X);
   HYPRE_SStructVectorAssemble (X);
-
-  PTRACE;
 
   //------------------------------------------------------------
   // Solve the linear system
@@ -991,13 +887,6 @@ int main(int argc, char * argv[])
   // EXIT SUCCESSFULLY
   //------------------------------------------------------------
 
-  delete [] v0;
-  delete [] vxp;
-  delete [] vxm;
-  delete [] vyp;
-  delete [] vym;
-  delete [] vzp;
-  delete [] vzm;
 
   if (mpi_rank==0) {
     printf ("Finished!\n");
