@@ -740,7 +740,7 @@ void Hypre::evaluate (Hierarchy & hierarchy)
     }
 
     debug_print(grid);
-    sprintf (filename,"X.%d",grid->id());
+    if (grid->is_local()) sprintf (filename,"X.%d",grid->id());
     grid->write(filename);
     
     HYPRE_SStructVectorGetBoxValues (B_,level,lower,upper,0,grid->values());  

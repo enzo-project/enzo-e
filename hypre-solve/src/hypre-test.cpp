@@ -140,8 +140,28 @@ int main(int argc, char * argv[])
   int N;
   char * arg_solver;
   int use_fac = 0;
-  if (argc == 3) {
+
+  int graph_logic_type;
+
+  // graph_logic_type
+  //
+  //   0 fine-to-coarse and coarse-to-fine always called
+  //   1 fine-to-coarse on fine only
+  //   2 fine-to-coarse on coarse only
+  //   3 all on fine only
+  //   4 all on coarse only
+  //   5 fine-to-coarse on fine  coarse-to-fine on all
+  //   6 fine-to-coarse on all   coarse-to-fine on coarse
+
+
+  if (argc == 4) {
+
+    // Argument 1
+
     N       = atoi (argv[1]);
+
+    // Argument 2
+
     arg_solver = argv[2];
     if (strcmp(arg_solver,"cg") == 0) {
       use_fac = 0;
@@ -150,6 +170,11 @@ int main(int argc, char * argv[])
     } else {
       usage(mpi_rank,argv);
     }
+
+    // Argument 3
+
+    graph_logic_type = atoi(argv[3]);
+    
   } else {
     usage(mpi_rank,argv);
   }
@@ -268,64 +293,83 @@ int main(int argc, char * argv[])
   int ind_fine[3];   // fine grid indices
   int ind_coarse[3]; // coarse grid indices
 
+  // Parallel logic for nonstencil connections
+
+  bool fine_to_coarse;
+
+  if (graph_logic_type == 0) fine_to_coarse = true;
+  if (graph_logic_type == 1) fine_to_coarse = is_mpi_fine;
+  if (graph_logic_type == 2) fine_to_coarse = is_mpi_coarse;
+  if (graph_logic_type == 3) fine_to_coarse = is_mpi_fine;
+  if (graph_logic_type == 4) fine_to_coarse = is_mpi_coarse;
+  if (graph_logic_type == 5) fine_to_coarse = is_mpi_fine;
+  if (graph_logic_type == 6) fine_to_coarse = true;
+
+  bool coarse_to_fine;
+
+  if (graph_logic_type == 0) coarse_to_fine = true;
+  if (graph_logic_type == 1) coarse_to_fine = is_mpi_coarse;
+  if (graph_logic_type == 2) coarse_to_fine = is_mpi_fine;
+  if (graph_logic_type == 3) coarse_to_fine = is_mpi_fine;
+  if (graph_logic_type == 4) coarse_to_fine = is_mpi_coarse;
+  if (graph_logic_type == 5) coarse_to_fine = true;
+  if (graph_logic_type == 6) coarse_to_fine = is_mpi_coarse;
+
   //----------------------------------------
   // GRAPH ENTRIES: FINE-TO-COARSE
   //----------------------------------------
 
-  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  // @@@@@ THIS LOOP CRASHES IN PARALLEL Rev. 374 @@@@@
-  // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  if (fine_to_coarse) {
 
-  if (is_mpi_fine) {
-  for (axis=0; axis<3; axis++) {
+    for (axis=0; axis<3; axis++) {
 
-    int j0 = axis;
-    int j1 = (axis+1)%3;
-    int j2 = (axis+2)%3;
+      int j0 = axis;
+      int j1 = (axis+1)%3;
+      int j2 = (axis+2)%3;
 
-    for (face=0; face<2; face++) {
+      for (face=0; face<2; face++) {
 
-      // loop over coarse face zones
+	// loop over coarse face zones
 
-      for (ic0=0; ic0<N/r; ic0++) {
-	for (ic1=0; ic1<N/r; ic1++) {
+	for (ic0=0; ic0<N/r; ic0++) {
+	  for (ic1=0; ic1<N/r; ic1++) {
 
-	  // coarse zone index
+	    // coarse zone index
 
-	  ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
-	  ind_coarse[j1] = N/4 + ic0;
-	  ind_coarse[j2] = N/4 + ic1;
+	    ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
+	    ind_coarse[j1] = N/4 + ic0;
+	    ind_coarse[j2] = N/4 + ic1;
 
-	  // fine zone index 000
+	    // fine zone index 000
 
-	  ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
-	  ind_fine[j1]   = r*ind_coarse[j1];
-	  ind_fine[j2]   = r*ind_coarse[j2];
+	    ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
+	    ind_fine[j1]   = r*ind_coarse[j1];
+	    ind_fine[j2]   = r*ind_coarse[j2];
 
-	   // ind_fine computed above corresponds to coarse zone
-	  if (face == 1)  ++ ind_fine[j0];
+	    // ind_fine computed above corresponds to coarse zone
+	    if (face == 1)  ++ ind_fine[j0];
 
-	  // 000 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries 
-	    (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
-	  ++ ind_fine[j1]; 	  
-	  // 010 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries
-	    (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
-	  ++ ind_fine[j2];	  
-	  // 011 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries
-	    (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
-	  -- ind_fine[j1];	  
-	  // 001 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries
-	    (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
-	  -- ind_fine[j2];	  
-	  // 000 ---------------------------------------------
+	    // 000 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries 
+	      (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
+	    ++ ind_fine[j1]; 	  
+	    // 010 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries
+	      (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
+	    ++ ind_fine[j2];	  
+	    // 011 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries
+	      (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
+	    -- ind_fine[j1];	  
+	    // 001 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries
+	      (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
+	    -- ind_fine[j2];	  
+	    // 000 ---------------------------------------------
+	  }
 	}
       }
     }
-  }
   }
 
   PTRACE;
@@ -334,71 +378,73 @@ int main(int argc, char * argv[])
   // GRAPH ENTRIES: COARSE-TO-FINE
   //----------------------------------------
 
-  if (is_mpi_coarse) {
-  for (axis=0; axis<3; axis++) {
+  if (coarse_to_fine) {
 
-    int j0 = axis;
-    int j1 = (axis+1)%3;
-    int j2 = (axis+2)%3;
+    for (axis=0; axis<3; axis++) {
 
-    for (face=0; face<2; face++) {
+      int j0 = axis;
+      int j1 = (axis+1)%3;
+      int j2 = (axis+2)%3;
 
-      // loop over coarse face zones
+      for (face=0; face<2; face++) {
 
-      for (ic0=0; ic0<N/r; ic0++) {
-	for (ic1=0; ic1<N/r; ic1++) {
+	// loop over coarse face zones
 
-	  // coarse zone index
+	for (ic0=0; ic0<N/r; ic0++) {
+	  for (ic1=0; ic1<N/r; ic1++) {
 
-	  ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
-	  ind_coarse[j1] = N/4 + ic0;
-	  ind_coarse[j2] = N/4 + ic1;
+	    // coarse zone index
 
-	  // fine zone index 000
+	    ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
+	    ind_coarse[j1] = N/4 + ic0;
+	    ind_coarse[j2] = N/4 + ic1;
 
-	  ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
-	  ind_fine[j1]   = r*ind_coarse[j1];
-	  ind_fine[j2]   = r*ind_coarse[j2];
+	    // fine zone index 000
 
-	  HYPRE_SStructGraphAddEntries (graph, 
-					part_coarse, ind_coarse, 0, 
-					part_fine, ind_fine, 0);
-	  ++ ind_fine[j0]; 	  
+	    ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
+	    ind_fine[j1]   = r*ind_coarse[j1];
+	    ind_fine[j2]   = r*ind_coarse[j2];
 
-	  // 100 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries 
-	    (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
-	  ++ ind_fine[j1];	  
-	  // 110 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries 
-	    (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
-	  -- ind_fine[j0];	  
-	  // 010 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries 
-	    (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
-	  ++ ind_fine[j2];	  
-	  // 011 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries 
-	    (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
-	  ++ ind_fine[j0]; 	  
-	  // 111 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries 
-	    (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
-	  -- ind_fine[j1];	  
-	  // 101 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries 
-	    (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
-	  -- ind_fine[j0];	  
-	  // 001 ---------------------------------------------
-	  HYPRE_SStructGraphAddEntries 
-	    (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
-	  -- ind_fine[j2];	  
-	  // 000 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries (graph, 
+					  part_coarse, ind_coarse, 0, 
+					  part_fine, ind_fine, 0);
+	    ++ ind_fine[j0]; 	  
+
+	    // 100 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries 
+	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+	    ++ ind_fine[j1];	  
+	    // 110 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries 
+	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+	    -- ind_fine[j0];	  
+	    // 010 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries 
+	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+	    ++ ind_fine[j2];	  
+	    // 011 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries 
+	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+	    ++ ind_fine[j0]; 	  
+	    // 111 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries 
+	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+	    -- ind_fine[j1];	  
+	    // 101 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries 
+	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+	    -- ind_fine[j0];	  
+	    // 001 ---------------------------------------------
+	    HYPRE_SStructGraphAddEntries 
+	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+	    -- ind_fine[j2];	  
+	    // 000 ---------------------------------------------
+	  }
 	}
       }
     }
   }
-  }
+
   PTRACE;
 
   HYPRE_SStructGraphAssemble (graph);
@@ -484,21 +530,6 @@ int main(int argc, char * argv[])
       vzp[i] =  1*coarse_h;
       vzm[i] =  1*coarse_h;
     }
-
-    //--------------------------------------------------
-    // MATRIX STENCIL VALUES: GRID BOUNDARY
-    //--------------------------------------------------
-
-//     for (i0=0; i0<N; i0++) {
-//       for (i1=0; i1<N; i1++) {
-//  	vxp[index(N-1,i0,i1,N)] = 0.0;
-//  	vxm[index(  0,i0,i1,N)] = 0.0;
-//  	vyp[index(i0,N-1,i1,N)] = 0.0;
-//  	vym[index(i0,  0,i1,N)] = 0.0;
-//  	vzp[index(i0,i1,N-1,N)] = 0.0;
-//  	vzm[index(i0,i1,  0,N)] = 0.0;
-//       }
-//     }
 
     //--------------------------------------------------
     // SET HYPRE MATRIX STENCIL VALUES
@@ -597,13 +628,13 @@ int main(int argc, char * argv[])
 
   }
 
-  delete [] v0;
-  delete [] vxp;
-  delete [] vxm;
-  delete [] vyp;
-  delete [] vym;
-  delete [] vzp;
-  delete [] vzm;
+//   delete [] v0;
+//   delete [] vxp;
+//   delete [] vxm;
+//   delete [] vyp;
+//   delete [] vym;
+//   delete [] vzp;
+//   delete [] vzm;
 
   PTRACE;
 
@@ -630,155 +661,157 @@ int main(int argc, char * argv[])
   // MATRIX ENTRIES: FINE-TO-CORSE 
   //--------------------------------------------------
 
-  if (is_mpi_fine) {
-  for (axis=0; axis<3; axis++) {
+  if (fine_to_coarse) {
 
-    int j0 = axis;
-    int j1 = (axis+1)%3;
-    int j2 = (axis+2)%3;
+    for (axis=0; axis<3; axis++) {
 
-    for (face=0; face<2; face++) {
+      int j0 = axis;
+      int j1 = (axis+1)%3;
+      int j2 = (axis+2)%3;
 
-      // loop over coarse face zones
+      for (face=0; face<2; face++) {
 
-      for (ic0=0; ic0<N/r; ic0++) {
-	for (ic1=0; ic1<N/r; ic1++) {
+	// loop over coarse face zones
 
-	  // coarse zone index
+	for (ic0=0; ic0<N/r; ic0++) {
+	  for (ic1=0; ic1<N/r; ic1++) {
 
-	  ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
-	  ind_coarse[j1] = N/4 + ic0;
-	  ind_coarse[j2] = N/4 + ic1;
+	    // coarse zone index
 
-	  // fine zone index 000
+	    ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
+	    ind_coarse[j1] = N/4 + ic0;
+	    ind_coarse[j2] = N/4 + ic1;
 
-	  ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
-	  ind_fine[j1]   = r*ind_coarse[j1];
-	  ind_fine[j2]   = r*ind_coarse[j2];
+	    // fine zone index 000
+
+	    ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
+	    ind_fine[j1]   = r*ind_coarse[j1];
+	    ind_fine[j2]   = r*ind_coarse[j2];
   
-	   // ind_fine computed above corresponds to coarse zone
-	  if (face == 1)  ++ ind_fine[j0];
+	    // ind_fine computed above corresponds to coarse zone
+	    if (face == 1)  ++ ind_fine[j0];
 
-	  int    entry;
-	  double value;
+	    int    entry;
+	    double value;
 
-	  int icount;
-	  int ishift = -index(N/r,N/r,N/r,N);
-	  int num_entries = 1;
+	    int icount;
+	    int ishift = -index(N/r,N/r,N/r,N);
+	    int num_entries = 1;
 	  
-	  double a = 2.0/3.0;
+	    double a = 2.0/3.0;
 
-	  // 000 ---------------------------------------------
-	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
-	  ASSERT_BOUND(0,icount,N*N*N);
-	  // diagonal
-	  entry = count_fine[icount]++;
-	  value = a * fine_h;
-	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	  // off-diagonal
-	  entry = 0;
-	  value = -value;
-	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	  ++ ind_fine[j1]; 	  
-	  // 010 ---------------------------------------------
-	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
-	  ASSERT_BOUND(0,icount,N*N*N);
-	  // diagonal
-	  entry = count_fine[icount]++;
-	  value = a * fine_h;
-	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	  // off-diagonal
-	  entry = 0;
-	  value = -value;
-	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	  ++ ind_fine[j2];	  
-	  // 011 ---------------------------------------------
-	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
-	  ASSERT_BOUND(0,icount,N*N*N);
-	  // diagonal
-	  entry = count_fine[icount]++;
-	  value = a * fine_h;
-	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	  // off-diagonal
-	  entry = 0;
-	  value = -value;
-	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	  -- ind_fine[j1];	  
-	  // 001 ---------------------------------------------
-	  icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
-	  ASSERT_BOUND(0,icount,N*N*N);
-	  // diagonal
-	  entry = count_fine[icount]++;
-	  value = a * fine_h;
-	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	  // off-diagonal
-	  entry = 0;
-	  value = -value;
-	  HYPRE_SStructMatrixAddToValues 
-	    (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	  -- ind_fine[j2];	  
-	  // 000 ---------------------------------------------
+	    // 000 ---------------------------------------------
+	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
+	    ASSERT_BOUND(0,icount,N*N*N);
+	    // diagonal
+	    entry = count_fine[icount]++;
+	    value = a * fine_h;
+	    HYPRE_SStructMatrixAddToValues 
+	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	    // off-diagonal
+	    entry = 0;
+	    value = -value;
+	    HYPRE_SStructMatrixAddToValues 
+	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	    ++ ind_fine[j1]; 	  
+	    // 010 ---------------------------------------------
+	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
+	    ASSERT_BOUND(0,icount,N*N*N);
+	    // diagonal
+	    entry = count_fine[icount]++;
+	    value = a * fine_h;
+	    HYPRE_SStructMatrixAddToValues 
+	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	    // off-diagonal
+	    entry = 0;
+	    value = -value;
+	    HYPRE_SStructMatrixAddToValues 
+	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	    ++ ind_fine[j2];	  
+	    // 011 ---------------------------------------------
+	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
+	    ASSERT_BOUND(0,icount,N*N*N);
+	    // diagonal
+	    entry = count_fine[icount]++;
+	    value = a * fine_h;
+	    HYPRE_SStructMatrixAddToValues 
+	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	    // off-diagonal
+	    entry = 0;
+	    value = -value;
+	    HYPRE_SStructMatrixAddToValues 
+	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	    -- ind_fine[j1];	  
+	    // 001 ---------------------------------------------
+	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
+	    ASSERT_BOUND(0,icount,N*N*N);
+	    // diagonal
+	    entry = count_fine[icount]++;
+	    value = a * fine_h;
+	    HYPRE_SStructMatrixAddToValues 
+	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	    // off-diagonal
+	    entry = 0;
+	    value = -value;
+	    HYPRE_SStructMatrixAddToValues 
+	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+	    -- ind_fine[j2];	  
+	    // 000 ---------------------------------------------
 
+	  }
 	}
       }
     }
-  }
   }
 
   //--------------------------------------------------
   // MATRIX ENTRIES: COARSE-TO-FINE
   //--------------------------------------------------
 
-  if (is_mpi_coarse) {
-  for (axis=0; axis<3; axis++) {
+  if (coarse_to_fine) {
 
-    int j0 = axis;
-    int j1 = (axis+1)%3;
-    int j2 = (axis+2)%3;
+    for (axis=0; axis<3; axis++) {
 
-    for (face=0; face<2; face++) {
+      int j0 = axis;
+      int j1 = (axis+1)%3;
+      int j2 = (axis+2)%3;
 
-      // loop over coarse face zones
+      for (face=0; face<2; face++) {
 
-      for (ic0=0; ic0<N/r; ic0++) {
-	for (ic1=0; ic1<N/r; ic1++) {
+	// loop over coarse face zones
 
-	  // coarse zone index
+	for (ic0=0; ic0<N/r; ic0++) {
+	  for (ic1=0; ic1<N/r; ic1++) {
 
-	  ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
-	  ind_coarse[j1] = N/4 + ic0;
-	  ind_coarse[j2] = N/4 + ic1;
+	    // coarse zone index
 
-	  // fine zone index 000
+	    ind_coarse[j0] =    (1-face) * (N/4-1) + (face) * (3*N/4);
+	    ind_coarse[j1] = N/4 + ic0;
+	    ind_coarse[j2] = N/4 + ic1;
 
-	  ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
-	  ind_fine[j1]   = r*ind_coarse[j1];
-	  ind_fine[j2]   = r*ind_coarse[j2];
+	    // fine zone index 000
 
-	  int    entry;
-	  double value;
+	    ind_fine[j0]   = r*((1-face) * (N/4)   + (face) * (3*N/4-1));
+	    ind_fine[j1]   = r*ind_coarse[j1];
+	    ind_fine[j2]   = r*ind_coarse[j2];
 
-	  int icount = index(ind_coarse[0],ind_coarse[1],ind_coarse[2],N);
-	  int num_entries = 1;
+	    int    entry;
+	    double value;
 
- 	  for (int k=0; k<8; k++) {
- 	    ASSERT_BOUND(0,icount,N*N*N);
- 	    entry = count_coarse[icount]++;
- 	    value = (1./8.) * coarse_h;
- 	    HYPRE_SStructMatrixAddToValues 
- 	      (A, part_coarse, ind_coarse, 0, num_entries, &entry, &value);
- 	  }
+	    int icount = index(ind_coarse[0],ind_coarse[1],ind_coarse[2],N);
+	    int num_entries = 1;
+
+	    for (int k=0; k<8; k++) {
+	      ASSERT_BOUND(0,icount,N*N*N);
+	      entry = count_coarse[icount]++;
+	      value = (1./8.) * coarse_h;
+	      HYPRE_SStructMatrixAddToValues 
+		(A, part_coarse, ind_coarse, 0, num_entries, &entry, &value);
+	    }
+	  }
 	}
       }
     }
-  }
   }
 
   PTRACE;
@@ -887,68 +920,84 @@ int main(int argc, char * argv[])
   // WRITE COARSE GRID
   //-------------------------------------------------------------
 
-  fp = fopen("X.0","w");
-  fprintf (fp,"Grid\n");
-  fprintf (fp,"   id             0\n");
-  fprintf (fp,"   parent id      -1\n");
-  fprintf (fp,"   processor      %d\n",mpi_rank);
-  fprintf (fp,"   lower position %d %d %d\n",
-	   lower_coarse[0],lower_coarse[1],lower_coarse[2]);
-  fprintf (fp,"   upper position %d %d %d\n",
-	   upper_coarse[0],upper_coarse[1],upper_coarse[2]);
-  fprintf (fp,"   lower index    0 0 0\n");
-  fprintf (fp,"   zones          %d %d %d\n",N,N,N);
-  fprintf (fp,"   level          0\n");
+  if (is_mpi_coarse) {
 
-  double * x_coarse = new double [N*N*N];
-  HYPRE_SStructVectorGetBoxValues (X,part_coarse,lower_coarse,upper_coarse,0,x_coarse);  
-  for (i0=0; i0<N; i0++) {
-    for (i1=0; i1<N; i1++) {
-      for (i2=0; i2<N; i2++) {
-	i = i0 + N*(i1 + N*i2);
-	fprintf (fp,"%d %d %d %g\n",i0,i1,i2,x_coarse[i]);
+    fp = fopen("X.0","w");
+    fprintf (fp,"Grid\n");
+    fprintf (fp,"   id             0\n");
+    fprintf (fp,"   parent id      -1\n");
+    fprintf (fp,"   processor      %d\n",mpi_rank);
+    fprintf (fp,"   lower position %d %d %d\n",
+	     lower_coarse[0],lower_coarse[1],lower_coarse[2]);
+    fprintf (fp,"   upper position %d %d %d\n",
+	     upper_coarse[0],upper_coarse[1],upper_coarse[2]);
+    fprintf (fp,"   lower index    0 0 0\n");
+    fprintf (fp,"   zones          %d %d %d\n",N,N,N);
+    fprintf (fp,"   level          0\n");
+
+    double * x_coarse = new double [N*N*N];
+    HYPRE_SStructVectorGetBoxValues (X,part_coarse,lower_coarse,upper_coarse,0,x_coarse);  
+    for (i0=0; i0<N; i0++) {
+      for (i1=0; i1<N; i1++) {
+	for (i2=0; i2<N; i2++) {
+	  i = i0 + N*(i1 + N*i2);
+	  fprintf (fp,"%d %d %d %g\n",i0,i1,i2,x_coarse[i]);
+	}
       }
     }
-  }
-  delete [] x_coarse;
+    delete [] x_coarse;
 
-  fclose(fp);
+    fclose(fp);
+
+  }
 
   //-------------------------------------------------------------
   // WRITE FINE GRID
   //-------------------------------------------------------------
 
-  fp = fopen("X.1","w");
-  fprintf (fp,"Grid\n");
-  fprintf (fp,"   id             1\n");
-  fprintf (fp,"   parent id      0\n");
-  fprintf (fp,"   processor      %d\n",mpi_rank);
-  fprintf (fp,"   lower position %d %d %d\n",
-	   lower_fine[0],lower_fine[1],lower_fine[2]);
-  fprintf (fp,"   upper position %d %d %d\n",
-	   upper_fine[0],upper_fine[1],upper_fine[2]);
-  fprintf (fp,"   lower index    %d %d %d\n",
-	   lower_fine[0],lower_fine[1],lower_fine[2]);
-  fprintf (fp,"   zones          %d %d %d\n",N,N,N);
-  fprintf (fp,"   level          1\n");
+  if (is_mpi_fine) {
 
-  double * x_fine = new double [N*N*N];
-  HYPRE_SStructVectorGetBoxValues (X,part_fine,lower_fine,upper_fine,0,x_fine);  
-  for (int i0=0; i0<N; i0++) {
-    for (int i1=0; i1<N; i1++) {
-      for (int i2=0; i2<N; i2++) {
-	i = i0 + N*(i1 + N*i2);
-	fprintf (fp,"%d %d %d %g\n",i0,i1,i2,x_fine[i]);
+    fp = fopen("X.1","w");
+    fprintf (fp,"Grid\n");
+    fprintf (fp,"   id             1\n");
+    fprintf (fp,"   parent id      0\n");
+    fprintf (fp,"   processor      %d\n",mpi_rank);
+    fprintf (fp,"   lower position %d %d %d\n",
+	     lower_fine[0],lower_fine[1],lower_fine[2]);
+    fprintf (fp,"   upper position %d %d %d\n",
+	     upper_fine[0],upper_fine[1],upper_fine[2]);
+    fprintf (fp,"   lower index    %d %d %d\n",
+	     lower_fine[0],lower_fine[1],lower_fine[2]);
+    fprintf (fp,"   zones          %d %d %d\n",N,N,N);
+    fprintf (fp,"   level          1\n");
+
+    double * x_fine = new double [N*N*N];
+    HYPRE_SStructVectorGetBoxValues (X,part_fine,lower_fine,upper_fine,0,x_fine);  
+    for (int i0=0; i0<N; i0++) {
+      for (int i1=0; i1<N; i1++) {
+	for (int i2=0; i2<N; i2++) {
+	  i = i0 + N*(i1 + N*i2);
+	  fprintf (fp,"%d %d %d %g\n",i0,i1,i2,x_fine[i]);
+	}
       }
     }
-  }
-  delete [] x_fine;
+    delete [] x_fine;
 
-  fclose(fp);
+    fclose(fp);
+
+  }
 
   //------------------------------------------------------------
   // EXIT SUCCESSFULLY
   //------------------------------------------------------------
+
+  delete [] v0;
+  delete [] vxp;
+  delete [] vxm;
+  delete [] vyp;
+  delete [] vym;
+  delete [] vzp;
+  delete [] vzm;
 
   if (mpi_rank==0) {
     printf ("Finished!\n");
