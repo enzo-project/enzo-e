@@ -23,7 +23,10 @@
 main()
 {
   Timer timer;
+  const double time_tolerance = 0.05;
+
   // Timer tests
+
   unit_class ("Timer");
   unit_open();
   unit_class_size(Timer);
@@ -36,7 +39,7 @@ main()
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 
-  unit_assert((timer.value() - 1.0) < 0.01);
+  unit_assert((timer.value() - 1.0) < time_tolerance);
 
   timer.start();
   system("sleep 1");
@@ -44,7 +47,7 @@ main()
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 
-  unit_assert((timer.value() - 2.0) < 0.01);
+  unit_assert((timer.value() - 2.0) < time_tolerance);
 
   unit_close();
 }
