@@ -523,15 +523,18 @@ int main(int argc, char * argv[])
     //--------------------------------------------------
 
     if (is_mpi_fine) {
+
       int refinements[3] = {2,2,2};
+
+      // removing breaks MG
 
       HYPRE_SStructFACZeroCFSten (A,grid, part_fine, refinements);
 
-      // This seems to do nothing:
+      // removing apparently does nothing
 
       HYPRE_SStructFACZeroFCSten (A,grid, part_fine);
 
-      // @@@ THIS SEEMS TO BREAK, BUT SEEMS TO BE IN hypre-solve @@@
+      // removing breaks CG
 
       HYPRE_SStructFACZeroAMRMatrixData (A, part_coarse, refinements);
       
