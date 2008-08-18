@@ -1,5 +1,7 @@
 SHELL = /bin/bash
 
+EXES = hypre-solve hypre-init hypre-test hypre-png debug-matrix enzo2hypre
+
 CPPFLAGS = -g -Wall
 # CPPFLAGS = -g
 
@@ -65,7 +67,7 @@ OBJS_TEST  = hypre-test.o
 OBJS_SOLVE = hypre-solve.o $(OBJS_ALL)
 OBJS_PNG  = hypre-png.o grid.o mpi.o domain.o faces.o pngwriter.o
 
-all: hypre-solve hypre-init hypre-test hypre-png debug-matrix enzo2hypre
+all: $(EXES)
 
 hypre-init: $(OBJS_INIT)
 	$(CPP) -o hypre-init $(OBJS_INIT) $(LIB)
@@ -82,12 +84,14 @@ enzo2hypre: enzo2hypre.cpp
 
 BIN = ../bin
 .PHONY: install
-install: hypre-solve hypre-init hypre-test hypre-png
+install: $(EXES)
 	(if [ ! -e $(BIN) ]; then mkdir $(BIN); fi)
-	cp hypre-solve $(BIN)
-	cp hypre-init  $(BIN)
-	cp hypre-test  $(BIN)
-	cp hypre-png   $(BIN)
+	cp hypre-solve  $(BIN)
+	cp hypre-init   $(BIN)
+	cp hypre-test   $(BIN)
+	cp hypre-png    $(BIN)
+	cp debug-matrix $(BIN)
+	cp enzo2hypre   $(BIN)
 
 
 .cpp.o:
@@ -101,7 +105,7 @@ include DEPEND
 
 .PHONY: clean
 clean:
-	rm -f *.o hypre-solve *~ \#*
+	rm -f *.o $(EXES) *~ \#*
 	rm -rf html latex
 
 .PHONY: doc
