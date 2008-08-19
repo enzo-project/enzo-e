@@ -1,7 +1,7 @@
 /** 
  *********************************************************************
  *
- * @file      test_perf.cpp
+ * @file      test_performance.cpp
  * @brief     Program implementing unit tests for performance classes
  * @author    James Bordner
  * @date      Wed Apr 23 12:25:18 PDT 2008

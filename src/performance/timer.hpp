@@ -27,7 +27,7 @@ class Timer {
  *
  * @class     Timer
  * @brief     A high resolution timer
- * @ingroup   Perf
+ * @ingroup   Performance
  *
  * A Timer is used for timing pieces of code
  *
