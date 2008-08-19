@@ -66,7 +66,7 @@ time_matvec-O5:    time_matvec.cpp
 
 .PHONY: clean
 clean:
-	-rm *.o *~ test_timer time_matvec time_matvec-O? out.make.dep Makefile.bak lib*.a *.unit
+	-rm *.o *~ test_timer time_matvec time_matvec-O? out.make.dep Makefile.bak lib*.a *.unit *.png *.eps
 
 #-----------------------------------------------------------------------
 
