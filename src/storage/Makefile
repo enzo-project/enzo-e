@@ -11,7 +11,7 @@ TOP = ../..
 SRC = ..
 
 TEST_OBJS = test_hdf5.o 
-OBJ        = hdf5.o
+OBJ       = hdf5.o
 
 #=======================================================================
 INC_LOCAL  = -I$(SRC)/data
@@ -53,9 +53,9 @@ install: install-include test_hdf5 $(OBJS)
 .PHONY: install-include
 
 install-include:
-	ln -sf `pwd`/io.hpp    $(TOP)/include
-	ln -sf `pwd`/hdf5.hpp  $(TOP)/include/io_hdf5_.hpp
-	ln -sf `pwd`/error.hpp $(TOP)/include/io_error_.hpp
+	ln -sf `pwd`/storage.hpp  $(TOP)/include
+	ln -sf `pwd`/hdf5.hpp     $(TOP)/include/storage_hdf5_.hpp
+	ln -sf `pwd`/error.hpp    $(TOP)/include/storage_error_.hpp
 
 #=======================================================================
 # INCLUDES 

@@ -21,7 +21,7 @@ class Hdf5 {
  *
  * @class     Hdf5
  * @brief     Class for writing and reading HDF5 files
- * @ingroup   IO
+ * @ingroup   Storage
  *
  * An Hdf5 object currently corresponds to a single HDF5 file / group
  * / dataset.
