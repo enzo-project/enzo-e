@@ -18,13 +18,13 @@
 # Directories
 #
 # (*) data
-# (*) io
+# (*) storage
 # (*) test
 # ( ) performance
 #
 #-----------------------------------------------------------------------
 
-DIR = data io test performance
+DIR = data storage test performance
 
 #=======================================================================
 # TARGETS
