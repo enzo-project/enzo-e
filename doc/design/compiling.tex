@@ -3,32 +3,43 @@
 \chapter{Compiling \cello} \label{c:compile}
 %======================================================================@
 
-Required external packages are HDF5.  Optional external packages include
-the following:
+\section{Installation}
+%------------------------------------------------------------------------
+
+How to install \cello\ given a 
+%=======================================================================
+\section{Configuration}
+%=======================================================================
+
+\code{./configure} from the top-level directory, with optional flags
+described below:
+
+%-----------------------------------------------------------------------
+\subsection{Required libraries}
+%-----------------------------------------------------------------------
 
 \begin{tabular}{|lll|} \hline
 \textbf{Package} & \textbf{ifdef} & \textbf{description} \\ \hline
-\code{lcaperf} & 
-\code{USE\_LCAPERF} & 
-performance toolkit  \\
-\code{PAPI} & 
-\code{USE\_PAPI} & 
-performance API  \\
-\code{hypre} & 
-\code{USE\_HYPRE} & 
-scalable linear solvers  \\
-\code{P3DFFT} & 
-\code{USE\_P3DFFT} & 
-parallel 3D FFT \\
-\code{SPRNG} & 
-\code{USE\_SPRNG} & 
-scalable parallel random number generator\\
-\code{VisIt} & 
-\code{USE\_VISIT} & 
-parallel visualization tool\\
-\code{arprec} & 
-\code{USE\_ARPREC} & 
-arbitrary precision package \\ \hline
+\code{HDF5}   & \code{USE\_HDF5} & hierarchical data format \\
+\end{tabular}
+
+%-----------------------------------------------------------------------
+\subsection{Optional libraries}
+%-----------------------------------------------------------------------
+
+% @REF@ External libraries referenced in compiling.tex
+
+\begin{tabular}{|lll|} \hline
+\textbf{Package} & \textbf{ifdef} & \textbf{description} \\ \hline
+\code{lcaperf}   & \code{USE\_LCAPERF} & performance toolkit  \\
+\code{PAPI}      & \code{USE\_PAPI}    & performance API  \\
+\code{hypre}     & \code{USE\_HYPRE}   & scalable linear solvers  \\
+\code{P3DFFT}    & \code{USE\_P3DFFT}  & parallel 3D FFT \\
+\code{SPRNG}     & \code{USE\_SPRNG}   & scalable parallel random number generator\\
+\code{S2PLOT}    & \code{USE\_S2PLOT}  & visualization tool\\
+\code{arprec}    & \code{USE\_ARPREC}  & arbitrary precision package \\
+\code{MPI}       & \code{USE\_MPI}     & message passing library \\
+\code{OpenMP}    & \code{USE\_OMP}     & shared memory parallel library \\ \hline
 \end{tabular}
 
 \url{http://mngrid.ucsd.edu/packages/lcaperf/} \\
@@ -36,7 +47,6 @@ arbitrary precision package \\ \hline
 \url{http://www.llnl.gov/CASC/hypre/} \\
 \url{http://www.sdsc.edu/us/resources/p3dfft_download.html} \\
 \url{http://crd.lbl.gov/~dhbailey/mpdist/} \\
-\url{https://wci.llnl.gov/codes/visit/home.html} \\
 \url{http://sprng.cs.fsu.edu/} \\
 
 \begin{tabular}{|lll|} \hline
@@ -44,3 +54,18 @@ arbitrary precision package \\ \hline
 \code{cello\_configure} &  & Configure \cello\ for compiling \\
 \code{cello\_compile} &  & Compile \cello \\ \hline
 \end{tabular}
+
+%=======================================================================
+\section{Compilation}
+%=======================================================================
+
+
+
+%=======================================================================
+\section{Information}
+%=======================================================================
+
+
+% @REF@ ``make show-version'' referenced in manual-user
+
+\code{make show-version} 
