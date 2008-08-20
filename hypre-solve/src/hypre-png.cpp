@@ -322,6 +322,9 @@ void images_colormap (double *images3[3],
     if (rmax3[axis] > rmin3[axis]) {
       for (int i=0; i<n1*n2; i++) {
 	index = int(255*(images3[axis][i]-rmin3[axis])/(rmax3[axis]-rmin3[axis]));
+	index = MAX(index,0);
+	index = MIN(index,255);
+
 	rgb33[axis][0][i] = rgbmap[0][index] / 255.0;
 	rgb33[axis][1][i] = rgbmap[1][index] / 255.0;
 	rgb33[axis][2][i] = rgbmap[2][index] / 255.0;
