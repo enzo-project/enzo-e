@@ -14,7 +14,7 @@ TEST_OBJS = test_hdf5.o
 OBJ       = hdf5.o
 
 #=======================================================================
-INC_LOCAL  = -I$(SRC)/data
+INC_LOCAL  = -I$(SRC)/data -I$(SRC)/error
 OBJ_EXTERN = $(SRC)/data/array.o
 
 OBJS = $(OBJ) $(OBJ_EXTERN)
@@ -55,7 +55,6 @@ install: install-include test_hdf5 $(OBJS)
 install-include:
 	ln -sf `pwd`/storage.hpp  $(TOP)/include
 	ln -sf `pwd`/hdf5.hpp     $(TOP)/include/storage_hdf5_.hpp
-	ln -sf `pwd`/error.hpp    $(TOP)/include/storage_error_.hpp
 
 #=======================================================================
 # INCLUDES 

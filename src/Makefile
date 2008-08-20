@@ -21,10 +21,11 @@
 # (*) storage
 # (*) test
 # ( ) performance
+# ( ) error
 #
 #-----------------------------------------------------------------------
 
-DIR = data storage test performance
+DIR = data storage test performance error
 
 #=======================================================================
 # TARGETS
