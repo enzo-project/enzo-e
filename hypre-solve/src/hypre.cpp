@@ -21,11 +21,6 @@
 
 #include "hdf5.h"
 
-namespace cello {
-#include "data.hpp"
-#include "io.hpp"
-}
-
 #include "hypre-solve.hpp"
 
 //----------------------------------------------------------------------
@@ -37,7 +32,7 @@ const int trace_hypre  = 1;
 //----------------------------------------------------------------------
 
 #include "mpi.hpp"
-// #include "scalar.hpp"
+#include "scalar.hpp"
 #include "error.hpp"
 #include "constants.hpp"
 #include "point.hpp"
