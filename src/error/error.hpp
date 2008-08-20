@@ -12,43 +12,62 @@
  *
  * Definitions
  *
- * (*) WARNING(MESSAGE)
- * (*) ERROR(MESSAGE)
- * (*) NOT_IMPLEMENTED(X)
+ * (*) WARNING(FUNCTION)
+ * (*) ERROR(FUNCTION)
+ * (*) INCOMPLETE(FUNCTION)
  *
  * $Id$
  *
- */
+ *********************************************************************/
 
+#define ERROR_MESSAGE_LENGTH 80
+
+//-----------------------------------------------------------------------
 /// Handle a (non-lethal) warning message
+//-----------------------------------------------------------------------
 
-static char warning_message[80];
+static char warning_message[ERROR_MESSAGE_LENGTH+1];
 
 #define WARNING_MESSAGE(FUNCTION) {		\
-    printf ("WARNING File:     %s:%d\n" \
-            "WARNING Function: %s()\n" \
-            "WARNING Message:  %s\n", \
+    printf ("\n" \
+            "     WARNING File:     %s:%d\n" \
+            "     WARNING Function: %s()\n" \
+            "     WARNING Message:  %s\n" \
+            "\n", \
 	    __FILE__,__LINE__,FUNCTION,warning_message); \
   fflush(stdout); \
 }
 
+//-----------------------------------------------------------------------
 /// Handle a (lethal) error message
+//-----------------------------------------------------------------------
 
-static char error_message[80];
+static char error_message[ERROR_MESSAGE_LENGTH+1];
 
 #define ERROR_MESSAGE(FUNCTION) { \
-    printf ("ERROR File:     %s:%d\n" \
-            "ERROR Function: %s()\n" \
-            "ERROR Message:  %s\n", \
+    printf ("\n" \
+            "     ERROR File:     %s:%d\n" \
+            "     ERROR Function: %s()\n" \
+            "     ERROR Message:  %s\n" \
+            "\n", \
 	    __FILE__,__LINE__,FUNCTION,error_message);			\
   fflush(stdout); \
   exit(1); \
 }
 
-/// Placeholder for functions that are not implemented yet
+//-----------------------------------------------------------------------
+/// Placeholder for code that is incomplete
+//-----------------------------------------------------------------------
 
-#define NOT_IMPLEMENTED_MESSAGE(X) { \
-   printf ("%s:%d WARNING: " X " is not implemented yet\n",__FILE__,__LINE__); \
+static char incomplete_message[ERROR_MESSAGE_LENGTH+1];
+
+#define INCOMPLETE_MESSAGE(FUNCTION) { \
+    printf ("\n" \
+            "     INCOMPLETE File:     %s:%d\n" \
+            "     INCOMPLETE Function: %s()\n" \
+            "     INCOMPLETE Message:  %s\n" \
+            "\n", \
+	    __FILE__,__LINE__,FUNCTION,incomplete_message);			\
    fflush(stdout); \
 }
 

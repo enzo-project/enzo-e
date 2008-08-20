@@ -15,39 +15,40 @@
 #include <stdlib.h>
 #include <string>
 
+#include "error.hpp"
 #include "test_unit_.hpp"
-#include "data_scalar_.hpp"
-#include "data_array_.hpp"
-#include "timer.hpp"
 
 main()
 {
-  Timer timer;
-  const double time_tolerance = 0.05;
 
-  // Timer tests
-
-  unit_class ("Timer");
+  unit_class ("Error");
   unit_open();
-  unit_class_size(Timer);
 
-  printf ("Initial timer value = %24.16f\n",timer.value());
+  //----------------------------------------------------------------------
+  printf ("Warning message:\n");
 
-  timer.start();
-  system("sleep 1");
-  timer.stop();
+  sprintf (warning_message,"Warning message test");
+  WARNING_MESSAGE("main");
 
-  printf ("Initial timer value = %24.16f\n",timer.value());
+  unit_assert (true);
 
-  unit_assert((timer.value() - 1.0) < time_tolerance);
+  //----------------------------------------------------------------------
+  printf ("Incomplete message:\n");
 
-  timer.start();
-  system("sleep 1");
-  timer.stop();
+  sprintf (incomplete_message,"Incomplete message test");
+  INCOMPLETE_MESSAGE("main");
 
-  printf ("Initial timer value = %24.16f\n",timer.value());
+  unit_assert (true);
 
-  unit_assert((timer.value() - 2.0) < time_tolerance);
+  //----------------------------------------------------------------------
+  printf ("Error message:\n");
+
+  sprintf (error_message,"Error message test");
+  ERROR_MESSAGE("main");
+  
+  // Errors should abort, so all following linse should not be executed
+  unit_assert (false); 
+  //----------------------------------------------------------------------
 
   unit_close();
 }
