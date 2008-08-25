@@ -12,12 +12,12 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{\hypre\ SAMR Linear Solver}
+\TITLE{The \hypre-solve\ AMR Linear Solver Interface for Enzo and hypre}
       {James Bordner}
       {in preparation}
 %=======================================================================
 
-\tableofcontents
+% \tableofcontents
 %======================================================================
 \section{Overview}
 %======================================================================
@@ -28,52 +28,54 @@
    equation) defined on distributed SAMR hierarchies.  The purpose of
    this document is to specify the requirements, describe the design
    and implementation, and present test results for \hypresolve.
+   \hypresolve\ will also be the primary interface code linking the
+   \enzo\ datastructures with the \hypre\ linear solver package.
 
-   We decompose the problem into two components: problem generation
-   (\code{hypre-init}), and problem solution (\code{hypre-solve}).
-   \code{hypre-init} takes as input parameters describing the problem
-   characteristics in general terms, such as bounds on grid sizes,
-   number of processors, description of how to distribute point
-   masses, etc.  The output is a file of parameters that specify the
-   exact problem to solve, including grid locations, sizes, levels,
-   point mass locations, etc.  The file output by \code{hypre-init}
-   can be subsequently read by \code{hypre-solve}.  \code{hypre-solve}
-   calls \hypre\ to generate and solve a distributed linear system,
-   and the solution, performance information, solver efficiency
-   information, etc., are output.
+   We decompose the standalone solver into two components: problem
+   generation (\code{hypre-init}), and problem solution
+   (\code{hypre-solve}).  \code{hypre-init} takes as input parameters
+   describing the problem characteristics in general terms, such as
+   bounds on grid sizes, number of processors, description of how to
+   distribute point masses, etc.  The output is a file of parameters
+   that specify the exact problem to solve, including grid locations,
+   sizes, levels, point mass locations, etc.  The file output by
+   \code{hypre-init} can be subsequently read by \code{hypre-solve}.
+   \code{hypre-solve} calls \hypre\ to generate and solve a
+   distributed linear system, and the solution, performance
+   information, solver efficiency information, etc., are output.
 
-%======================================================================
-\section{Roadmap and Milestones}
-%======================================================================
-
-
-\begin{description}
-\item[Driver: ] \code{hypre-solve} (H), \enzo\ (E)
-\item[Equation: ] Poisson (P), diffusion equation (D)
-\item[Datastructure: ] Unigrid (U), AMR (A)
-\item[AMR refinement: ] $R=2$ (2), $R=2^k$ (2k), arbitrary $R$ (*)
-\item[AMR discretization: ] $D=1$, $D=3$, $D=4$, $D=6$
-\end{description}
-
-\begin{tabular}{cl|cc|cc|cc|ccc|ccc}
-Done & \multicolumn{1}{c}{Description} & H&E & P&D & U&A & 2&[2k]&[*] & C&[L]&[Q] \\ \hline
-\multicolumn{2}{l|}{Basic Poisson} &&&&&&&&& \\
-\done & Unigrid Poisson equation & \done&\todo & \done&\todo & \done&\todo & \done&\todo&\todo & \done&\todo&\todo \\
-\todo &AMR Poisson equation  & \done&\todo & \done&\todo & \todo&\done & \done&\todo&\todo & \done&\todo&\todo \\ \hline
-\multicolumn{2}{l|}{Basic diffusion} &&&&&&&&& \\
-\todo &Unigrid Diffusion equation& \done&\todo & \todo&\done& \done&\todo & \done&\todo&\todo & \done&\todo&\todo  \\
-\todo  &AMR Diffusion equation& \done&\todo & \todo&\done& \todo&\done & \done&\todo&\todo & \done&\todo&\todo \\  \hline
-\multicolumn{2}{l|}{higher-order discretizations} &&&&&&&&& \\
-\todo  &piecewise linear Poisson & \done&\todo & \done&\todo & \todo&\done & \done&\todo&\todo & \todo&\done&\todo \\
-\todo  &  piecewise linear Diffusion & \done&\todo & \todo&\done& \todo&\done & \done&\todo&\todo & \todo&\done&\todo \\  
-\todo &piecewise quadratic Poisson & \done&\todo & \done&\todo& \todo&\done & \done&\todo&\todo & \todo&\todo&\done \\  
-\todo &piecewise quadratic Diffusion & \done&\todo & \todo&\done& \todo&\done & \done&\todo&\todo & \todo&\todo&\done \\  \hline
-\multicolumn{2}{l|}{more general refinement factors} &&&&&&&&& \\
-\todo &$2^k$ refinement factors  & \done&\todo & \todo&\done& \todo&\done & \todo&\done&\todo & \done&\todo&\todo\\
-\todo & arbitrary refinement factors & \done&\todo & \todo&\done& \todo&\done & \todo&\todo&\done & \done&\todo&\todo \\  \hline
-\multicolumn{2}{l|}{\enzo\ port} &&&&&&&&& \\
-\todo &port to \enzo & \todo&\done & \fade&\fade& \fade&\fade & \fade&\fade&\fade & \fade&\fade&\fade
-\end{tabular}
+% %======================================================================
+% \section{Roadmap and Milestones}
+% %======================================================================
+% 
+% 
+% \begin{description}
+% \item[Driver: ] \code{hypre-solve} (H), \enzo\ (E)
+% \item[Equation: ] Poisson (P), diffusion equation (D)
+% \item[Datastructure: ] Unigrid (U), AMR (A)
+% \item[AMR refinement: ] $R=2$ (2), $R=2^k$ (2k), arbitrary $R$ (*)
+% \item[AMR discretization: ] $D=1$, $D=3$, $D=4$, $D=6$
+% \end{description}
+% 
+% \begin{tabular}{cl|cc|cc|cc|ccc|ccc}
+% Done & \multicolumn{1}{c}{Description} & H&E & P&D & U&A & 2&[2k]&[*] & C&[L]&[Q] \\ \hline
+% \multicolumn{2}{l|}{Basic Poisson} &&&&&&&&& \\
+% \done & Unigrid Poisson equation & \done&\todo & \done&\todo & \done&\todo & \done&\todo&\todo & \done&\todo&\todo \\
+% \todo &AMR Poisson equation  & \done&\todo & \done&\todo & \todo&\done & \done&\todo&\todo & \done&\todo&\todo \\ \hline
+% \multicolumn{2}{l|}{Basic diffusion} &&&&&&&&& \\
+% \todo &Unigrid Diffusion equation& \done&\todo & \todo&\done& \done&\todo & \done&\todo&\todo & \done&\todo&\todo  \\
+% \todo  &AMR Diffusion equation& \done&\todo & \todo&\done& \todo&\done & \done&\todo&\todo & \done&\todo&\todo \\  \hline
+% \multicolumn{2}{l|}{higher-order discretizations} &&&&&&&&& \\
+% \todo  &piecewise linear Poisson & \done&\todo & \done&\todo & \todo&\done & \done&\todo&\todo & \todo&\done&\todo \\
+% \todo  &  piecewise linear Diffusion & \done&\todo & \todo&\done& \todo&\done & \done&\todo&\todo & \todo&\done&\todo \\  
+% \todo &piecewise quadratic Poisson & \done&\todo & \done&\todo& \todo&\done & \done&\todo&\todo & \todo&\todo&\done \\  
+% \todo &piecewise quadratic Diffusion & \done&\todo & \todo&\done& \todo&\done & \done&\todo&\todo & \todo&\todo&\done \\  \hline
+% \multicolumn{2}{l|}{more general refinement factors} &&&&&&&&& \\
+% \todo &$2^k$ refinement factors  & \done&\todo & \todo&\done& \todo&\done & \todo&\done&\todo & \done&\todo&\todo\\
+% \todo & arbitrary refinement factors & \done&\todo & \todo&\done& \todo&\done & \todo&\todo&\done & \done&\todo&\todo \\  \hline
+% \multicolumn{2}{l|}{\enzo\ port} &&&&&&&&& \\
+% \todo &port to \enzo & \todo&\done & \fade&\fade& \fade&\fade & \fade&\fade&\fade & \fade&\fade&\fade
+% \end{tabular}
 
 %======================================================================
 \section{\code{hypre-init}} \label{ss:hypre-init}
