@@ -81,6 +81,11 @@
 \section{\code{hypre-init}} \label{ss:hypre-init}
 %======================================================================
 
+\code{hypre-init} is used to generate \code{hypre-solve} input files
+given a problem decription.  This is useful since \code{hypre-solve}
+input for large problems (many AMR grid patches or many point sources)
+are large, and would be virtually impossible to generate by hand.
+
 %----------------------------------------------------------------------
 \subsection{Input}
 %----------------------------------------------------------------------
@@ -235,13 +240,19 @@ xxxxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 For each grid patch it owns, each processor creates a \hypre\ grid
 object defining the grid's extents and variables.  
 
-\begin{itemize}
-\item \code{HYPRE\_SStructGridCreate()}
-\item \code{HYPRE\_SStructGridSetExtents()}
-\item \code{HYPRE\_SStructGridSetVariables()}
-\item \code{HYPRE\_SStructGridSetPeriodic()}
-\item \code{HYPRE\_SStructGridAssemble()}
-\end{itemize}
+\begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \done\ \code{HYPRE\_SStructGridCreate()} 
+   \> \textit{Creates the \hypre\ grid hierarchy datastructure} \\
+\>  \done\ \code{HYPRE\_SStructGridSetExtents()}
+   \> \textit{Sets the extents for each processor-local patch} \\
+\> \done\ \code{HYPRE\_SStructGridSetVariables()}
+   \> \textit{Sets variables to be cell-centered for each level} \\
+\> \done\ \code{HYPRE\_SStructGridSetPeriodic()}
+   \> \textit{Set problem periodicity} \\
+\> \done\ \code{HYPRE\_SStructGridAssemble()}
+   \> \textit{Finalize the \hypre\ grid hierarchy datastructure}
+\end{tabbing}
 
 Neighboring grids do not need to be set using \hypre's
 \code{HYPRE\_SStructGridSetNeighborBox()} function, since grids within an AMR
@@ -256,112 +267,237 @@ its own version of \code{HYPRE\_SStructGridSetNeighborBox()}.
 
   Create the stencil object which defines the matrix nonzeros within each grid.
 
-\begin{itemize}
-\item \code{HYPRE\_SStructStencilCreate()}
-\item \code{HYPRE\_SStructStencilSetEntry()}
-\end{itemize}
+\begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \done\ \code{HYPRE\_SStructStencilCreate()}
+   \> \textit{Creates the \hypre\ grid stencil} \\
+\> \done\ \code{HYPRE\_SStructStencilSetEntry()}
+   \> \textit{Defines the seven stencil zones}
+\end{tabbing}
 
 %-----------------------------------------------------------------------
 \subsubsection{\code{hypre.init\_graph()}}
 
 
- Each processor creates a graph containing the nonzero structure of
+ Each processor creates a graph containing the non-zero structure of
  the matrix.
 
-\begin{itemize}
-\item \code{HYPRE\_SStructGraphCreate()}
-\item \code{HYPRE\_SStructGraphSetStencil()}
-\item \code{HYPRE\_SStructGraphAddEntries()}
-\item \code{HYPRE\_SStructGraphAssemble()}
-\end{itemize}
+\begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \done\ \code{HYPRE\_SStructGraphCreate()}
+   \> \textit{Creates the \hypre\ graph} \\
+\> \done\ \code{HYPRE\_SStructGraphSetStencil()}
+   \> \textit{Define the stencil for each part (level) of the grid} \\
+\> \done\ \code{HYPRE\_SStructGraphAddEntries()}
+   \> \textit{Add non-stencil entries for each inter-part connection in the grid} \\
+\> \done\ \code{HYPRE\_SStructGraphAssemble()}
+   \> \textit{Finalize the \hypre\ graph}
+\end{tabbing}
 
 %-----------------------------------------------------------------------
 \subsubsection{\code{hypre.init\_linear()}}
 
-First \hypre\ initialization routines are called to create
-a new matrix $A$ and vectors $B$ and $X$.
 
-\begin{itemize}
-\item \code{HYPRE\_SStructMatrixCreate()}
-\item \code{HYPRE\_SStructVectorCreate()}
-\end{itemize}
+\hypre\ subroutines are called to create
+a new matrix $A$ and vectors $B$ and $X$.  Vectors are
+created and initialized using the following \hypre\ functions:
 
-Next, the matrix type is set.
+\begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \done\ \code{HYPRE\_SStructVectorCreate()}
+   \> \textit{Creates the \hypre\ vector} \\
+\> \done\ \code{HYPRE\_SStructVectorInitialize()}
+   \> \textit{Initializes the \hypre\ vector datastructure} \\
+\> \done\ \code{HYPRE\_SStructVectorAddToBoxValues()}
+   \> \textit{Initialize the \hypre\ vector elements} \\
+\> \done\ \code{HYPRE\_SStructVectorAssemble()}
+   \> \textit{Assemble the \hypre\ vector}
+\end{tabbing}
 
-\begin{itemize}
-\item \code{HYPRE\_SStructMatrixSetObjectType()}
-\end{itemize}
+The \hypre\ matrix $A$ is created and initialized
+using the following functions:
 
-Then the \hypre\ matrix and vector objects are initialized.
-
-\begin{itemize}
-\item \code{HYPRE\_SStructMatrixInitialize()}
-\item \code{HYPRE\_SStructVectorInitialize()}
-\end{itemize}
-
-Matrix stencil values are set first, grid-by-grid.
-
-      init\_matrix\_stencil\_(*grid);
-
-\begin{itemize}
-\item \code{HYPRE\_SStructMatrixSetBoxValues ()}
-\end{itemize}
-
-For AMR problems, stencil connections between levels (parts) are then
-cleared level-by-level.
-
-    init\_matrix\_clear\_(*level);
-
-\begin{itemize}
-\item \code{HYPRE\_SStructFACZeroCFSten()}
-\item \code{HYPRE\_SStructFACZeroFCSten()}
-\item \code{HYPRE\_SStructFACZeroAMRMatrixData()}
-\end{itemize}
-
-Non-stencil matrix values are then set, on grid face-by-face.
-
-      init\_matrix\_nonstencil\_(*grid);
-
-\begin{itemize}
-\item \code{HYPRE\_SStructMatrixAddToValues()}
-\end{itemize}
-
-The right-hand-side vector $B$ is initialized.
-
-\begin{itemize}
-\item \code{HYPRE\_SStructVectorAddToBoxValues()}
-\end{itemize}
-
-And lastly, the matrix and vectors are assembled to finalize their
-initialization.
-
-\begin{itemize}
-\item \code{HYPRE\_SStructMatrixAssemble()}
-\item \code{HYPRE\_SStructVectorAssemble()}
-\end{itemize}
+\begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \done\ \code{HYPRE\_SStructMatrixCreate()}
+   \> \textit{Creates the \hypre\ matrix} \\
+\> \done\ \code{HYPRE\_SStructMatrixSetObjectType()}
+   \> \textit{Set the \hypre\ matrix type to be semi-structured} \\
+\> \done\ \code{HYPRE\_SStructMatrixInitialize()}
+   \> \textit{Initialize the  \hypre\ matrix} \\
+\> \done\ \code{HYPRE\_SStructMatrixSetBoxValues ()}
+   \> \textit{Set the \hypre\ matrix stencil values} \\
+\> \done\ \code{HYPRE\_SStructFACZeroCFSten()}
+   \> \textit{Clear the coarse-to-fine stencil connections} \\
+\> \done\ \code{HYPRE\_SStructFACZeroFCSten()}
+   \> \textit{Clear the fine-to-coarse stencil connections} \\
+\> \done\ \code{HYPRE\_SStructFACZeroAMRMatrixData()}
+   \> \textit{Clear matrix elements underneath fine-grid patches} \\
+\> \done\ \code{HYPRE\_SStructMatrixAddToValues()}
+   \> \textit{Initialize matrix values between parts/levels} \\
+\> \done\ \code{HYPRE\_SStructMatrixAssemble()}
+   \> \textit{Finalize the \hypre\ matrix}
+\end{tabbing}
 
 
 %-----------------------------------------------------------------------
 \subsubsection{\code{hypre.solve()}}
 
+
+Three \hypre\ solvers are implemented in \code{hypre-solve}:
+pre-conditioned full multigrid (PFMG) which is applicable to
+single-level grid ``hierarchies'' only; full-adaptive composite
+multigrid method (FAC), which is applicable to multi-level grid
+hierarchies only, and BiCGSTAB, a non-symmetric generalization of the
+conjugate gradient method, which is applicable to either single- or
+multi-level grid hierarchies.
+
+The \hypre\ functions used when solving the linear system using
+the PFMG solver are listed below:
+
+\begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \done\ \code{HYPRE\_SStructSysPFMGCreate}
+   \> \textit{Creates the \hypre\ PFMG solver} \\
+\> \done\ \code{HYPRE\_SStructSysPFMGSetMaxIter}
+   \> \textit{Sets the maximum number of iterations} \\
+\> \done\ \code{HYPRE\_SStructSysPFMGSetTol}
+   \> \textit{Sets the tolerance for the stopping criteria} \\
+\> \done\ \code{HYPRE\_SStructSysPFMGSetLogging}
+   \> \textit{Set solver to log information} \\
+\> \done\ \code{HYPRE\_SStructSysPFMGSetup}
+   \> \textit{Prepare the solver to be used} \\
+\> \done\ \code{HYPRE\_SStructSysPFMGSolve}
+   \> \textit{Apply the solver to the linear system} \\
+\> \done\ \code{HYPRE\_SStructSysPFMGGetNumIterations}
+   \> \textit{Obtain the number of iterations used} \\
+\> \done\ \code{HYPRE\_SStructSysPFMGGetFinalRelativeResidualNorm}
+   \> \textit{Obtain the final residual norm} \\
+\> \done\ \code{HYPRE\_SStructSysPFMGDestroy}
+   \> \textit{Delete the solver when finished}
+\end{tabbing}
+
+The \hypre\ functions used when solving the linear system using
+the FAC solver are listed below:
+
+ \begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \done\ \code{HYPRE\_SStructFACCreate}
+   \> \textit{Creates the \hypre\ FAC solver} \\
+\> \done\ \code{HYPRE\_SStructFACSetMaxLevels}
+   \> \textit{Set the maximum number of grid levels} \\
+\> \done\ \code{HYPRE\_SStructFACSetPLevels}
+   \> \textit{Set the mapping between parts and levels} \\
+\> \done\ \code{HYPRE\_SStructFACSetPRefinements}
+   \> \textit{Set the refinement factors} \\
+\> \done\ \code{HYPRE\_SStructFACSetNumPreRelax}
+   \> \textit{Set the number of pre-relaxation sweeps} \\
+\> \done\ \code{HYPRE\_SStructFACSetNumPostRelax}
+   \> \textit{Set the number of post-relaxation sweeps} \\
+\> \done\ \code{HYPRE\_SStructFACSetCoarseSolverType}
+   \> \textit{Set the coarse solver} \\
+\> \done\ \code{HYPRE\_SStructFACSetRelaxType}
+   \> \textit{Set the relaxation sweep type} \\
+\> \done\ \code{HYPRE\_SStructFACSetMaxIter}
+   \> \textit{Set the maximum number of iterations} \\
+\> \done\ \code{HYPRE\_SStructFACSetTol}
+   \> \textit{Set the tolerance for the stopping criteria} \\
+\> \done\ \code{HYPRE\_SStructFACSetLogging}
+   \> \textit{Set to log information} \\
+\> \done\ \code{HYPRE\_SStructFACSetup2}
+   \> \textit{Prepare the solver to be used} \\
+\> \done\ \code{HYPRE\_SStructFACSolve3}
+   \> \textit{Apply the solver to the linear system} \\
+\> \done\ \code{HYPRE\_SStructFACGetNumIterations}
+   \> \textit{Obtain the number of iterations used} \\
+\> \done\ \code{HYPRE\_SStructFACGetFinalRelativeResidualNorm}
+   \> \textit{Obtain the final residual norm} \\
+\> \done\ \code{HYPRE\_SStructFACDestroy2}
+   \> \textit{Delete the solver when finished}
+\end{tabbing}
+
+The \hypre\ functions used when solving the linear system using
+the BiCGSTAB solver are listed below:
+
+ \begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \done\ \code{HYPRE\_SStructBiCGSTABCreate}
+   \> \textit{Creates the \hypre\ BiCGSTAB solver} \\
+\> \done\ \code{HYPRE\_SStructBiCGSTABSetMaxIter}
+   \> \textit{Set the maximum number of iterations} \\
+\> \done\ \code{HYPRE\_SStructBiCGSTABSetTol}
+   \> \textit{Set the stopping criteria tolerance} \\
+\> \done\ \code{HYPRE\_SStructBiCGSTABSetLogging}
+   \> \textit{Set to log information} \\
+\> \done\ \code{HYPRE\_SStructBiCGSTABSetup}
+   \> \textit{Prepare the solver to be used} \\
+\> \done\ \code{HYPRE\_SStructBiCGSTABSolve}
+   \> \textit{Apply the solver to the linear system} \\
+\> \done\ \code{HYPRE\_SStructBiCGSTABGetNumIterations}
+   \> \textit{Obtain the number of iterations used} \\
+\> \done\ \code{HYPRE\_SStructBiCGSTABGetFinalRelativeResidualNorm}
+   \> \textit{Obtain the final residual norm} \\
+\> \done\ \code{HYPRE\_SStructBiCGSTABDestroy}
+   \> \textit{Delete the solver when finished}
+\end{tabbing}
+
 %-----------------------------------------------------------------------
-\subsubsection{\code{hypre.evaluate()}}
+%\subsubsection{\code{hypre.evaluate()}}
 
 %-----------------------------------------------------------------------
 \subsection{Classes} \label{ss:classes}
 %-----------------------------------------------------------------------
 
-%-----------------------------------------------------------------------
-\subsubsection{Problem classes}
+C++ classes used are listed below:
 
-\code{Problem}, \code{Sphere}, and \code{Point}
 
-%-----------------------------------------------------------------------
-\subsubsection{Hierarchy classes}
+ \begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \done\ \code{Constants	}
+  \> \textit{Class for storing physical constants} \\
+\> \done\ \code{Domain	}
+  \> \textit{Class for representing the problem domain} \\
+\> \done\ \code{Faces	}
+  \> \textit{Class for storing grid face zone types and neighbors} \\
+\> \done\ \code{Grid	}
+  \> \textit{Class for storing physical constants} \\
+\> \done\ \code{Hierarchy	}
+  \> \textit{Class for representing a grid patch} \\
+\> \done\ \code{Hypre	}
+  \> \textit{Class for encapsulating the interface to \hypre} \\
+\> \done\ \code{ItGridChildren	}
+  \> \textit{Class for iterating over child grids of a grid} \\
+\> \done\ \code{ItGridNeighbors	}
+  \> \textit{Class for iterating over neighboring grids of a grid} \\
+\> \done\ \code{ItHierarchyGridsAll	}
+  \> \textit{Class for iterating over all grids in the hierarchy} \\
+\> \done\ \code{ItHierarchyGridsLocal	}
+  \> \textit{Class for iterating over all processor-local grids in the hierarchy} \\
+\> \done\ \code{ItHierarchyLevels	}
+  \> \textit{Class for iterating over all levels in the hierarchy (coarsest first)} \\
+\> \done\ \code{ItHierarchyLevelsReverse	}
+  \> \textit{Class for iterating over levels in the hierarchy (finest first)} \\
+\> \done\ \code{ItLevelGridsAll	}
+  \> \textit{Class for iterating over all grids in a level} \\
+\> \done\ \code{ItLevelGridsLocal	}
+  \> \textit{Class for iterating over all processor-local grids in a level} \\
+\> \done\ \code{ItParameters	}
+  \> \textit{Class for iterating over all input parameters} \\
+\> \done\ \code{Level	}
+  \> \textit{Class for encapsulating a single hierarchy level} \\
+\> \done\ \code{Mpi	}
+  \> \textit{Class for encapsulating the interface to MPI} \\
+\> \done\ \code{Parameters	}
+  \> \textit{Class for storing input parameters} \\
+\> \done\ \code{Point	}
+  \> \textit{Class for storing a physical point mass} \\
+\> \done\ \code{Problem	}
+  \> \textit{Class for representing the problem to solve} \\
+\> \done\ \code{Sphere	}
+  \> \textit{Class for representing a physical sphere}
+\end{tabbing}
 
-\code{Hierarchy}, \code{Level}, and \code{Grid}
 
-\newpage
 %=======================================================================
 \section{Discretization} \label{s:discretization}
 %=======================================================================
@@ -789,9 +925,6 @@ Below, we derive modifications for each category of face-zone.
 % \textcolor{yellow}{coarse-fine neighbor--child} & \code{HYPRE\_SStructGraphAddEntries()}\\
 % \end{tabular}
 
-%-----------------------------------------------------------------------
-\subsection{Boundary Discretization} \label{ss:discret-boundary}
-%-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Porting to \enzo}
@@ -801,28 +934,27 @@ Below, we derive modifications for each category of face-zone.
 \section{Test Results} \label{s:results}
 %=======================================================================
 
-\begin{itemize}
-\item Accuracy
-\item Performance
-\item Scaling
-\item Robustness
-\end{itemize}
+Tests are designed to evaluate the discretization accuracy, solver
+performance, solver scaling, and solver robustness.  Below we define
+notation that we will be used:
 
+\begin{tabbing}
+xxxxx\=xxxxx\=\kill
+\> $N_0$ \> Root-grid zones per processor \\
+\> $n_0$ \> Root-grid zones-per-axis  per processor \\
+\> $N_P$ \> Number of processors \\
+\> $N_G$ \> Number of grids \\
+\> $N_L$ \> Number of levels \\
+\> $N_Z$ \> Number of zones
+\end{tabbing}
 
-\begin{tabular}{l|l} \\
-\textbf{Term} & \textbf{Term description} \\ \hline
-$N_0$ & Root-grid zones per processor \\
-$n_0$ & Root-grid zones-per-axis  per processor \\
-$N_P$ & Number of processors \\
-$N_G$ & Number of grids \\
-$N_L$ & Number of levels \\
-$N_Z$ & Number of zones \\
-\end{tabular}
+We include both serial and parallel problems, and unigrid and AMR problems with
+the following range of sizes:
 
 \begin{tabular}{l|ccccc} \\
 Problem & $N_0$ & $N_P$ & $N_G$ & $N_L$ & $N_Z$ \\ \hline
-serial-unigrid       & $8^3:\sqrt{2}:128^3$ & & & \\
-parallel-unigrid     & $16^3:2\ldots 128^3$ & & & \\
+serial-unigrid       & $8^3\ldots 128^3$ & & & \\
+parallel-unigrid     & $16^3\ldots 128^3$ & & & \\
 Simple serial AMR    & $32^3\ldots 128^3$ & & & \\
 Simple parallel AMR  & $32^3\ldots 128^3$ & & & \\
 General serial AMR   & $32^3\ldots 128^3$ & & & \\
@@ -830,17 +962,19 @@ General parallel AMR & $32^3\ldots 128^3$ & & & \\
 Large AMR            & $32^3\ldots 128^3$ & & & \\
 \end{tabular}
 
-\begin{tabular}{l|l} \\
-\textbf{Plot name} & \textbf{Plot description} \\ \hline
-\code{procs-mem} & Processor count versus memory (bytes) \\
-\code{procs-mem-zone} & Processor count versus memory per zone (bytes) \\
-\code{procs-time} & Processor count versus time (seconds) \\
-\code{procs-time-zone} & Processor count versus time per zone (seconds) \\
-\code{size-mem-zone} &  Problem size (number of zones) versus memory per zone (bytes) \\
-\code{size-mem-zone} &  Problem size ($n$) versus memory (bytes) \\
-\code{size-time-zone} &  Problem size (number of zones) versus time per zone (seconds) \\
-\code{size-time-zone} &  Problem size ($n$) versus time (seconds) \\
-\end{tabular}
+The following plots will be generated:
+
+\begin{tabbing}
+xxxxx\=xxxxxxxxxxxxxxx\=\kill
+\>  \code{procs-mem} \> Processor count versus memory (bytes) \\
+\>\code{procs-mem-zone} \> Processor count versus memory per zone (bytes) \\
+\>\code{procs-time} \> Processor count versus time (seconds) \\
+\>\code{procs-time-zone} \> Processor count versus time per zone (seconds) \\
+\>\code{size-mem-zone} \>  Problem size (number of zones) versus memory per zone (bytes) \\
+\>\code{size-mem-zone} \>  Problem size ($n$) versus memory (bytes) \\
+\>\code{size-time-zone} \>  Problem size (number of zones) versus time per zone (seconds) \\
+\>\code{size-time-zone} \>  Problem size ($n$) versus time (seconds)
+\end{tabbing}
 
 \EndDOCUMENT
 
