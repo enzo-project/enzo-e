@@ -12,9 +12,8 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{The \hypre-solve\ AMR Linear Solver Interface for Enzo and hypre}
-      {James Bordner}
-      {in preparation}
+\TITLE{The \hypre-solve\ Linear Solver Interface}
+      {James Bordner}{$Rev$}
 %=======================================================================
 
 % \tableofcontents
@@ -25,11 +24,12 @@
    \hypresolve\ will be used as a testbed for experimenting with the
    parallel solution of linear systems arising from self-gravity
    (Poisson equation) and radiation transfer algorithms (diffusion
-   equation) defined on distributed SAMR hierarchies.  The purpose of
-   this document is to specify the requirements, describe the design
-   and implementation, and present test results for \hypresolve.
-   \hypresolve\ will also be the primary interface code linking the
-   \enzo\ datastructures with the \hypre\ linear solver package.
+   equation) defined on distributed SAMR hierarchies.  \hypresolve\
+   will also be the primary interface code linking the \enzo\
+   datastructures with the \hypre\ linear solver package.  The purpose
+   of this document is to specify the requirements, describe the
+   design and implementation, and present test results for
+   \hypresolve.
 
    We decompose the standalone solver into two components: problem
    generation (\code{hypre-init}), and problem solution
