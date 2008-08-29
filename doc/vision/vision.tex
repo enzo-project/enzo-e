@@ -31,7 +31,7 @@
     ``enzo''.  Analogously, the \cello\ code will be derived from
     \enzo's code by rearranging it, modifying it, and, uh, sticking an
     ``o'' on the end.}  is designed to be the successor to
-    \enzo~\cite{@@@}.  \enzo\ was conceived in the early 1990's by
+    \enzo.  \enzo\ was conceived in the early 1990's by
     Michael L.~Norman and Greg Bryan to be a multi-resolution
     astrophysics and cosmology application, implemented using
     structured (patch-based) adaptive mesh refinement (SAMR).  It
@@ -77,7 +77,7 @@
     directly into increased difficulty in modifying and maintaining
     the code.  Furthermore, \enzo's relatively
     ``modification-resistant'' structured programming
-    paradigm~\cite{@@@} is a further hinderance to its continued
+    paradigm is a further hinderance to its continued
     development.
     
 % pargraph: Enzo requires further development
@@ -94,7 +94,7 @@
     redeveloping \enzo's functionality for the same user base with 1)
     a more structured software development strategy, 2) using the
     relatively ``modification-friendly'' object oriented programming
-    paradigm~\cite{@@@}, and 3) with more flexible and scalable
+    paradigm, and 3) with more flexible and scalable
     parallel data structures, we can specifically target the hierarchical and
     massive parallelism and deep memory hierarchies of Petascale
     platforms \textit{a priori}.
@@ -330,55 +330,51 @@
 %
     improved parallel scalability,
     improved modifyability, 
-    improved ease of use, 
-    improved user control,
-    and an improved user interface.
+    and improved ease of use.
 
 %   Scalable
 
-    \textbf{Scalable.} \cello\ must be able to run efficiently on Petascale
-    architectures.  This means being able to solve the largest
-    problems that can possibly fit in available Petascale
+    \textbf{Scalable.} \cello\ must be able to run efficiently on
+    Petascale architectures.  This means being able to solve the
+    largest problems that can possibly fit in available Petascale
     architectures.  Although \enzo's ``unigrid'' (uniform resolution)
-    mode of operation has shown high scalability, its multi-resolution
-    mode has not.  The existing adaptive mesh refinement method and
-    implementation has limitations related to load balancing and
-    non-scalable memory requirements.  While independent but
-    coordinated efforts are currently underway to improve the scaling
-    of \enzo---in particular Robert Harkness is adding support for
-    hybrid MPI / OpenMP, and James Bordner is refactoring the AMR
-    data structure to reduce its memory requirement---these improvements
-    are still limited by the use of the structured adaptive mesh
-    refinement approach.
+    mode of operation has shown high scalability, its ``AMR''
+    (multi-resolution) mode has not.  The existing adaptive mesh
+    refinement method and implementation has limitations related to
+    load balancing and non-scalable memory requirements.  While
+    independent but coordinated efforts are currently underway to
+    improve the scaling of \enzo---in particular Robert Harkness is
+    adding support for hybrid MPI / OpenMP, and James Bordner is
+    refactoring the AMR data structure to reduce its memory
+    requirement---these improvements are still limited by the use of
+    the structured adaptive mesh refinement approach.
 
 %   Modifyable
-
-@@@@
 
     \textbf{Modifyable.} \enzo\ code is tightly coupled, repetitious,
     and difficult to read and understand.  Yet \enzo\ is an
     application that must be modified continually, both to be able to
     run effectively on rapidly evolving supercomputer platforms, and
     to implement improved numerical methods that are continually being
-    developed.  When multiple developers continually modify an application
-    designed using the structured programming paradigm, code complexity
-    inevitably grows.  There are two ways to deal with this---ignore it
-    until the code is unmodifyable by anybody, spend resources
-    to improve the code structure, and redesign the code  in an
-    object-oriented programming paradigm which has improved modularity
-    and modifyability.
+    developed.  When multiple developers continually modify an
+    application designed using the structured programming paradigm,
+    code complexity inevitably grows.  The design of \cello\ will
+    improve this by using an object-oriented design and a less relaxed
+    software development approach.  \cello's complexity will be able
+    to be kept much smaller than \enzo's for the same functionality
+    (said another way, \cello\ will be able to have greater
+    functionality for the same amount of software complexity), and the
+    code will be easier to maintain, modify, and enhance.
 
-@@@@    
-
-    Although \enzo\ must be continually modified, it is not specificially
-    designed to be modified.  It was written primarily using the
-    structured programming paradigm, which is known to be effective
-    for designing and implementing large-scale applications, but is
-    not ideal for subsequent redesign and modification.  As \enzo\ has
-    been repeatedly modified by successive researchers and students,
-    its complexity has increased rapidly, in particular much faster
-    than the inherent complexity of the underlying functionality being
-    implemented.
+%     Although \enzo\ must be continually modified, it is not specificially
+%     designed to be modified.  It was written primarily using the
+%     structured programming paradigm, which is known to be effective
+%     for designing and implementing large-scale applications, but is
+%     not ideal for subsequent redesign and modification.  As \enzo\ has
+%     been repeatedly modified by successive researchers and students,
+%     its complexity has increased rapidly, in particular much faster
+%     than the inherent complexity of the underlying functionality being
+%     implemented.
 
 %     To maintain control over how effectively \cello\ can be modified
 %     and enhanced to keep up with rapidly changing supercomputer
@@ -392,51 +388,46 @@
 %   Usable
 
 
-    \textbf{Useable.}  \enzo\ currently uses a large ``flat'' list of
-    input parameters.  Because they are not organized explicitly into
-    sections, it can be difficult for users to learn and write
-    parameter files.
+    \textbf{Useable.}  The user interface, both input and output, will
+    be improved in \cello.  For input, \enzo\ currently uses a large
+    ``flat'' list of input parameters.  Because they are not organized
+    explicitly into sections, it can be difficult for users to read,
+    write, and understand parameter files.
 %
-    Also, parameters have limited expressibility---each parameter is
-    typically an integer with a small number of valid values.
+    Also, \enzo\ parameters have limited expressibility---each
+    parameter is typically an integer with a small number of valid
+    values.
 %
     The limited input file grammar inherently limits the power of
     \enzo\ itself.  For example, input control is not sufficiently
     powerful to define a new test problem that is not already
-    implemented explicitly in code.  Running a new test problem
-    requires enhancing the \enzo\ codebase.
+    implemented explicitly in code: running a new test problem in
+    \enzo\ requires enhancing the \enzo\ codebase.  \cello\ will thus
+    be much easier to use, both due to improved organization of input
+    parameters, and due to increased power of expression of the input
+    files.  For output, \cello\ will also be more ``user-friendly''.
+    It will include automatic generation of web pages to serve as both
+    a way to monitor a running simulation, and to easily share
+    information about simulations with collaborators.  Data collected
+    will include information related to the progress of the
+    simulation, performance measurements, and inline analysis and
+    visualization.
 
-    Output of \\cello\ will also be more ``user-friendly'', including
-    automatic generation of web pages to serve as both a way to
-    monitor a running simulation, and to easily share information about 
-    simulations with collaborators.  Data collected will include
-    information related to the progress of the simulation, 
-    performance measurements, and inline analysis and visualization.
-% 
-%   Controlable
+%     Input files will support a much more powerful grammar to allow for
+%     much greater control of \cello.  \enzo\ uses a flat list of input
+%     parameters of simple type, which has limited scalability in terms
+%     of expressive range.
 
-    \subsubsection{Powerful control}
-
-    Input files will support a much more powerful grammar to allow for
-    much greater control of \cello.  \enzo\ uses a flat list of input
-    parameters of simple type, which has limited scalability in terms
-    of expressive range.
-
-    \cello\ will use a hierarchical list of parameters, and will
-    permit more complex types, such as mathematical expressions and
-    composite spacial/temporal subregions.  While extra code will be
-    required to parse and interpret the input files, the code in
-    \enzo\ used for defining and initializing specific problem types
-    will not be required, since the input file grammar will be
-    sufficiently powerful to implement them without problem-specific
-    code.  Overall, this may even result in less code, while
-    supporting a much greater scope of problem setup without requiring
-    modifying the code.
-    
-%   Robust
-
-    \subsubsection{Numerically Robust}
-
+%     \cello\ will use a hierarchical list of parameters, and will
+%     permit more complex types, such as mathematical expressions and
+%     composite spacial/temporal subregions.  While extra code will be
+%     required to parse and interpret the input files, the code in
+%     \enzo\ used for defining and initializing specific problem types
+%     will not be required, since the input file grammar will be
+%     sufficiently powerful to implement them without problem-specific
+%     code.  Overall, this may even result in less code, while
+%     supporting a much greater scope of problem setup without requiring
+%     modifying the code.
 
 
 %-----------------------------------------------------------------------
@@ -487,25 +478,26 @@
     magnetohydrodynamics, and radiation transfer.
 
     Additional physics capabilities are expected to be implemented
-    during \cello's lifetime.  [more]
+    during \cello's lifetime.
 
     %-----------------------------------------------------------------------
     \subsubsection{Numerical methods}
 
     Numerical methods will be a combination of existing numerical
-    methods taken from \enzo, and new and improved methods that
-    have been developed more recently.
-
-    \begin{description}
-% 
-    \item[Hydrodynamics: ] Modified Piecewise Parabolic Method (PPM)
-    solvers, including both the existing method in \enzo, a
-    non-operator split variation, and a reduced stencil version.
-%
-    \item[Dark matter dynamics: ] a Particle-Mesh (PM) method
-%
-    \item[Self-gravity: ]  
-    \end{description}
+    methods taken from \enzo, and new and improved methods that have
+    been developed more recently.  For hydrodynamics, both the
+    modified Piecewise Parabolic Method (PPM) solver in \enzo\ will be
+    implemented, as well as a new non-operator split variation to
+    improve asymmetry effects.  For Dark matter dynamics, \enzo's
+    Particle-Mesh (PM) method will be used.  For self-gravity, linear
+    solvers will be used on the entire mesh hierarchy.  Unigrid
+    self-gravity can be computed efficiently in parallel using 3D
+    FFT's for periodic boundary conditions, or parallel multigrid
+    methods for non-periodic boundary conditions.  For AMR, initially
+    a FAC-type method will be used, though a method of local
+    corrections (MLC) method may be implemented as well, which may
+    have better parallel efficiency due to reduced communication
+    requirements.
 
     %-----------------------------------------------------------------------
     \subsubsection{Parallelism} 
@@ -562,23 +554,16 @@
     scales of interest, but without excessive computation and memory
     storage.  However, the AMR approach and data structures will be
     totally redesigned and reimplemented.  Compared to \enzo, the new
-    design will include the following features:
+    design will include improved load balancing, improved data
+    locality, reduced memory usage, improved memory scaling, support
+    for hierarchical parallelism (e.g.~MPI + OpenMP), control of task
+    sizes at different parallelization levels, and improved cache
+    usage through array blocking and padding techniques.
+    Additionally, the software's object-oriented design will reduce
+    overall code complexity and increase the flexibility and
+    modifyability of the implementations of the parallel distributed
+    data structures.
 
-    \begin{itemize}
-    \item Improved load balancing
-    \item Improved data locality
-    \item Reduced memory usage and improved memory scaling
-    \item Control of task sizes at different parallelization levels
-    \item Improved cache usage through array blocking and padding techniques
-    \item Support for hierarchical parallelism, e.g.~MPI + OpenMP
-    \item Object-oriented design to reduce overall code complexity and 
-          increase flexibility and modifyability
-    \end{itemize}
-
-    % Octree to improve load balancing and data structure complexity
-    % patches to maintain efficiency
-    % variable patch size to reduce octree overhead
-    %   (this is new)
 
     % patches may be distributed (MPI), threaded (OMP), and blocked (cache)
 
@@ -587,16 +572,23 @@
     flexible to permit optimizing the use of node and processor/core
     parallelism, as well as deep memory/cache hierarchies.  This
     includes hierarchical subblocking of grid patch arrays to optimize
-    MPI task size, OMP task size, and cache block size and
+    MPI task size, OMP thread task size, and cache block size and
     configuration.  Additionally, arrays may be padded to reduce cache
     thrashing effects for low-associativity caches, and may be
     interleaved to improve data locality (or to ease use of existing
-    computational kernels that use interleaved array data).  These
-    capabilities, together with efficient methods and implementation
-    of computations, are expected to lead to high single-thread
-    computational efficiency and data movement through memory/cache
-    hierarchies.  Implementation of the \code{Array} class is expected
-    to use the object-oriented ``decorator pattern''.
+    computational kernels that use interleaved array data, e.g.~the
+    PPML MHD solver).  These capabilities, together with efficient
+    methods and implementation of computations, are expected to lead
+    to high single-thread computational efficiency and data movement
+    through memory/cache hierarchies.  Implementation of the
+    \code{Array} class is expected to use the object-oriented
+    ``decorator pattern''.
+
+
+    % Octree to improve load balancing and data structure complexity
+    % patches to maintain efficiency
+    % variable patch size to reduce octree overhead
+    %   (this is new)
 
 
     % Particles
