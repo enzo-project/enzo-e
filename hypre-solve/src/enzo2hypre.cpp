@@ -27,7 +27,7 @@ main(int argc, char ** argv)
   FILE *fpout = fopen (outfile.c_str(),"w");
 
   //----------------------------------------------------------------------
-  // Write contsant header
+  // Write constant header
   //----------------------------------------------------------------------
   
   fprintf (fpout," dimension 3\n");

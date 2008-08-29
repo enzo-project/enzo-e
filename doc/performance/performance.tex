@@ -259,7 +259,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Particle movement} \label{issue:particle-movement}
@@ -269,7 +268,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Particle distribution} \label{issue:particle-distribution}
@@ -279,7 +277,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{External libraries} \label{issue:libraries}
@@ -289,7 +286,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Memory fragmentation} \label{issue:memory-fragment}
@@ -299,7 +295,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Hierarchical memory utilization} \label{issue:memory-hierarchy-use}
@@ -309,7 +304,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Gravity solver} \label{issue:method-gravity}
@@ -400,7 +394,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Fault recovery} \label{issue:fault-recover}
@@ -410,7 +403,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{I/O performance and reliability} \label{issue:data-io}
@@ -423,7 +415,6 @@ Want to improve by taking into account
 
 ``I/O speed and capacity will lag''
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Data analysis} \label{issue:data-analyse}
@@ -435,7 +426,6 @@ Want to improve by taking into account
 \devel{Desired features}
    Off-site data movement
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Data relocation}\label{issue:data-relocate}
@@ -445,7 +435,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Data archiving}\label{issue:data-archive}
@@ -455,7 +444,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Vector utilization} \label{issue:code-vectorize}
@@ -465,7 +453,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Evaluating modifications}\label{issue:performance-measure}
@@ -475,7 +462,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Test problems} \label{issue:performance-tests}
@@ -485,7 +471,6 @@ Want to improve by taking into account
 \devel{Current implementation}
 \devel{Current limitations}
 \devel{Desired features}
-\vspace{2in}
 
 %=======================================================================
 \section{\enzo\ performance solutions}
@@ -631,21 +616,18 @@ current approach.
 \subsection{Octree} \label{solution:amr-octree}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 
 %-----------------------------------------------------------------------
 \subsection{Recursive Binary Box Tree (RBBT)}  \label{solution:amr-boxtree}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 
 %-----------------------------------------------------------------------
 \subsection{Quantized grid patch sizes} \label{solution:amr-grid-quantized}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 
 %-----------------------------------------------------------------------
@@ -690,8 +672,7 @@ load balance and maintain maximal sibling locality.  This technique
 has been used successfully in other SAMR applications
 \cite{WHH03,LWBH07}.
 
-And
-space-filling (e.g.~Hilbert or Morton) curves can be used to help
+And space-filling (e.g.~Hilbert or Morton) curves can be used to help
 preserve locality between sibling grids.  For the flat MPI model,
 space filling curves would also help reduce inter-node communication
 by keeping more tightly-coupled grids on the same node.
@@ -735,7 +716,6 @@ approach to the new hybrid architecture.
 \subsection{Reuse existing grid classes} \label{solution:amr-grid-reuse}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Inter-level refinement} \label{solution:amr-balance-split}
@@ -749,7 +729,6 @@ in ``half'' to maintain parent-child locality.
 \subsection{Particle groups} \label{solution:particles-group}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Hybrid parallelism}\label{solution:parallel-hybrid}
@@ -856,31 +835,26 @@ in ``half'' to maintain parent-child locality.
 \subsection{Dynamic task allocation} \label{solution:parallel-dynamic-tasks}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Weakly-coupled parallel data analysis}\label{solution:parallel-data-analysis}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Grid patch subblocks} \label{solution:parallel-subblocks}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{P3DFFT for unigrid gravity} \label{solution:method-p3dfft}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{HYPRE FAC for AMR gravity and radiation}  \label{solution:method-hypre-fac}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{\lcaperf\ performance monitoring} \label{solution:performance-lcaperf}
@@ -968,13 +942,11 @@ in ``half'' to maintain parent-child locality.
 \subsection{Asynchronous I/O} \label{solution:data-io-asynch}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 %-----------------------------------------------------------------------
 \subsection{Large mallocs} \label{solution:memory-management}
 %-----------------------------------------------------------------------
 
-\vspace{2in}
 
 %==================================================================
 \end{document}
