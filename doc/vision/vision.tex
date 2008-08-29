@@ -30,30 +30,34 @@
     of the computational term ``zone'', which in turn is an anagram of
     ``enzo''.  Analogously, the \cello\ code will be derived from
     \enzo's code by rearranging it, modifying it, and, uh, sticking an
-    ``o'' on the end.}  is designed to be the successor to \enzo.
-    \enzo\ was conceived in the early 1990's by Michael L.~Norman and
-    Greg Bryan to be a multi-resolution astrophysics and cosmology
-    application, implemented using structured (patch-based) adaptive
-    mesh refinement (SAMR).  It incorporated a modified high-order
-    Piecewise Parabolic Method (PPM) solver for hydrodynamics, and a
-    Particle-Mesh (PM) method for dark matter dynamics.  So far in its
-    14 year lifetime, \enzo\ simulations have led to important
-    scientific contributions to the fields of astrophysics, cosmology,
-    and turbulence.
+    ``o'' on the end.}  is designed to be the successor to
+    \enzo~\cite{@@@}.  \enzo\ was conceived in the early 1990's by
+    Michael L.~Norman and Greg Bryan to be a multi-resolution
+    astrophysics and cosmology application, implemented using
+    structured (patch-based) adaptive mesh refinement (SAMR).  It
+    incorporated a modified high-order Piecewise Parabolic Method
+    (PPM) solver for hydrodynamics, and a Particle-Mesh (PM) method
+    for dark matter dynamics.  So far in its 14 year lifetime, \enzo\
+    simulations have led to important scientific contributions to the
+    fields of astrophysics, cosmology, and turbulence.
 
     Greg Bryan began implementing \enzo\ in 1994.  He wrote it in C++
     with Fortran 77 computational kernels for speed, using primarily a
     procedural (structured) programming paradigm.  Initially he
-    targeted shared memory platforms such as the SGI Origin, which was
-    later modified to support distributed memory platforms via the
-    Message Passing Interface (MPI).
+    targeted shared memory platforms, and later switched to
+    distributed memory platforms via the Message Passing Interface
+    (MPI).
 
     Beginning around 2000, other developers began to modify \enzo\ in
-    earnest: David Collins added MHD physics, Dan Reynolds added
-    RHD physics, Greg Bryan himself modified AMR algorithms to improve
-    performance, and Robert Harkness continually made innumerable
-    modifications to greatly improve performance and scaling, and
-    almost single-handedly brought \enzo\ into the Terascale Era.
+    earnest. As an oversimplification, David Collins added MHD
+    physics, Dan Reynolds added RHD physics, Alexei Kritsuk added
+    turbulence-related modifications, Brian O'Shea updated star
+    formation algorithms, Greg Bryan himself modified AMR algorithms
+    to improve performance, and Robert Harkness continually made
+    innumerable modifications related to data structures and disk IO.
+    Robert in particular has greatly improved performance and scaling,
+    and has almost single-handedly brought \enzo\ into the Terascale
+    era.
 
     The software development strategy used has been very informal.
     \enzo\ was developed without any supporting documents, such as
@@ -62,8 +66,8 @@
     the original author closely followed implicit coding guidelines,
     such as including uniform file header comment blocks, and using
     descriptive variable, function, and file names.  The original
-    author also implemented many application tests to help ensure the
-    accuracy of the computed solutions.  
+    author also implemented many application tests to help ensure
+    code correctness and solution accuracy.  
 
 % Enzo is getting harder to develop
     The relaxed software development strategy used with \enzo,
@@ -71,9 +75,10 @@
     development, have resulted in a rapid increase in \enzo's
     complexity.  This increased software complexity translates
     directly into increased difficulty in modifying and maintaining
-    the code.  Furthermore, \enzo's ``modification-resistant''
-    structured programming paradigm is a further hinderance to
-    its continued development.
+    the code.  Furthermore, \enzo's relatively
+    ``modification-resistant'' structured programming
+    paradigm~\cite{@@@} is a further hinderance to its continued
+    development.
     
 % pargraph: Enzo requires further development
 
@@ -82,16 +87,17 @@
     These two issues motivate the \cello\ Project.  While \enzo's
     developmont is still progressing vigorously, its software
     complexity and structure are making development increasingly slow
-    and difficult.  Yet modifications are still needed, both to
-    increase the physics capabilities required by users, and to
-    improve the performance and scaling to bring \enzo\ from the
-    Terascale Era into the Petascale Era.  By redeveloping \enzo's
-    functionality for the same user base with 1) a more structured
-    software development strategy, 2) using the modification-friendly
-    object oriented programming paradigm, and 3) with more flexible
-    and scalable datastructures, we can specifically target the
-    hierarchical and massive parallelism and deep memory hierarchies
-    of Petascale platforms \textit{a priori}.
+    and difficult.  Yet large-scale and pervasive modifications are
+    still needed, both to increase the physics capabilities required
+    by its users, and to improve the performance and scaling to bring
+    \enzo\ from the Terascale Era into the Petascale Era.  By
+    redeveloping \enzo's functionality for the same user base with 1)
+    a more structured software development strategy, 2) using the
+    relatively ``modification-friendly'' object oriented programming
+    paradigm~\cite{@@@}, and 3) with more flexible and scalable
+    parallel data structures, we can specifically target the hierarchical and
+    massive parallelism and deep memory hierarchies of Petascale
+    platforms \textit{a priori}.
 
 % Future relationship between Enzo and Cello
 
@@ -99,147 +105,166 @@
     whereas \cello\ is the best solution in the long term.  To use a
     computational analogy, \enzo\ is like a short but relatively slow
     vector operation, whereas \cello\ is like a long but relatively
-    fast vector operation.  \cello\ will require some time before it
-    will start producing scientific results, but once it is
-    operational, \cello's improved modifyability and scalability will
-    eventually result in \cello\ users producing scientific results
-    more frequently than \enzo\ users.  To optimize scientific results
-    in both the short and long term, we believe it makes sense to
-    continue development with \enzo\ while concurrently begining
-    development on \cello.
+    fast vector operation.  Like filling a long vector pipeline,
+    \cello\ will require some time before it will start producing
+    scientific results; but once it is operational, \cello's improved
+    modifyability and scalability will eventually result in \cello\
+    users producing scientific results more frequently than \enzo\
+    users.  To optimize scientific results in both the short and long
+    term, we believe it makes sense to continue development with
+    \enzo\ while concurrently begining development on \cello.
   
 %-----------------------------------------------------------------------
 \subsection{Stakeholders}
 %-----------------------------------------------------------------------
 
+\subsubsection{Executives}
 
-    To clarify roles among stakeholders---and for fun if not
-    profit---we assign ``effective'' titles
+    To clarify roles among stakeholders---and for fun, if not
+    profit---we assign ``effective'' titles to executives:
 
-\textbf{Executives}
+\begin{description}
+%
+    \item[CEO:]   Prof.~Michael L.~Norman, founder of the Laboratory for
+    Computational Astrophysics, will be the effective \textit{Chief Executive Officer}.
+%
+    \item[CSO: ] Prof.~Greg Bryan, original author of \enzo, will be the
+    effective \textit{Chief Science Officer}.
+%
+    \item[CTO: ] Dr.~Robert Harkness, expert in both \enzo\ and supercomputer
+    technology, will be the effective \textit{Chief Technology
+    Officer}.
+%
+\end{description}
+
+   Their roles include identifying any potential roadblocks that may
+   arise, and keep the general direction of the project focused and on
+   track.
+
+\subsubsection{Developers}
+
+   Due to the nature of academic software development, the development
+   team is expected to change throughout the course of the project as
+   students graduate and leave the development team and new students
+   join.  Below is the initial list of developers and their main roles:
+
 \begin{itemize}
-%
-    \item  Prof.~Michael L.~Norman, effective \textit{Chief Executive Officer}
-%
-    \item Prof.~Greg Bryan, effective \textit{Chief Science Officer}.
-    Since \cello\ is intended to be the successor to \enzo, it is
-    important that \cello\ maintains the same high scientific
-    standards set by the original application developed by Greg.
-%
-    \item Dr.~Robert Harkness, effective \textit{Chief Technology
-    Officer}.  Robert is the most knowledgeable of the latest
-    enhancements to \enzo, and he has the deepest understanding of how
-    best to take advantage of PetaScale platforms
-%
-    \item The Development Team:
-    \begin{itemize}
-    \item Dr.~James Bordner (Team Leader, OOP design, documentation)
-    \item Dr.~Robert Harkness (low-level design, performance, scaling)
-    \item Rick Wagner (unit testing, user-interface, analysis specialist)
+    \item Dr.~James Bordner (\cello\ Development Leader, high-level design, data structures, documentation)
+    \item Dr.~Robert Harkness (low-level design, performance and scaling specialist)
+    \item Rick Wagner (unit testing and analysis specialist)
     \item Dr.~Alexei Kritsuk (hydrodynamics and turbulence specialist)
     \item David Collins (MHD specialist)
     \item Dr.~Dan Reynolds (RHD specialist)
     \item Prof.~Brian O'Shea (star formation specialist)
-    \item Dr.~Paschal Paschos (chemistry and cooling specialist)
+    \item Dr.~Paschal Paschos (RHD, chemistry and cooling specialist)
     \item Stephen Skory (quality assurance and application testing)
-    \end{itemize}
-    \end{itemize}
+\end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Users}
 %-----------------------------------------------------------------------
 
 
-    There are several partitions of users into groups.  One
-    partitioning of users is into core developers, collaborrators, and
-    community users.
+    There are several ways of partitioning users into groups, each of
+    which exposes specific requirements of the \cello\ design and
+    implementation.
 
-    \textbf{Core users} are the scientists and graduate students in
+
+    One partitioning of users is into core developers,
+    collaborators, and community users.
+%
+    \textit{Core users} are the scientists and graduate students in
     the Laboratory for Computational Astrophysics.  Most core users
-    will also participate in development of \cello, and virtually all
-    developers (except the \cello\ team leader Bordner) will be core
-    users.  Core users include Norman, Kritsuk, Padoan, Harkness,
-    Collins, Paschos, Wagner, and Skory.
-
-    \textbf{Collaborative users} include all scientists not currently
+    will also participate in development of \cello, and most
+    developers will be core users.  Core users include Norman,
+    Kritsuk, Padoan, Harkness, Collins, Paschos, Wagner, and Skory.
+%
+    \textit{Collaborative users} include all scientists not currently
     in the Laboratory for Computational Astrophysics, but who will use
-    \cello\ and coauthors papers with current LCA members.
+    \cello\ and coauthor papers with current LCA members.
     Collaborative users may include Tom Abel, John Hayes, Bryan
-    O'Shea, David Tytler, Dan Reynolds.
-
-    \textbf{Community users} are all users not in the previous two
-    groups.  We expect that \cello\ functionality will be driven
-    primarily by the needs of the core and collaborative users, since
-    they are fairly representative of general community users.
-    However, \cello\ will be designed specifically to be a community
-    code, so must meet the needs of community users as a whole.
+    O'Shea, Dan Reynolds, and Dan Whalen.
+%
+    \textit{Community users} are all remaining users.  We expect that
+    \cello\ functionality will be driven primarily by the needs of the
+    core and collaborative users, since they are fairly representative
+    of general community users.  However, \cello\ will be designed
+    specifically to be a community code, so must meet the needs of
+    community users as a whole.
 
     Another partitioning is users that will run \cello\ as provided,
-    and users that will modify the code for their own particular
-    needs.  For example, the latter group may want to add new physics
-    support to \cello, or may want to use \cello\ to help develop
-    their own numerical methods.
+    and users that will modify \cello\ for their own particular needs.
+    For example, the latter group may want to add new physics support
+    to \cello, or may want to use \cello\ to help develop their own
+    numerical methods.  The existence of this second group will have
+    an important bearing on the design of \cello.  Specifically,
+    \cello\ should be modular and easy to modify by the non-core
+    developers as well as core developers.  In particular, it should
+    be straightforward to add new physics capabilities, and to add new
+    algorithms for existing methods.  This includes making it easy to
+    add new input parameters for controlling new or modified numerical
+    methods or data structures in \cello.
 
     Yet another partitioning of users is into scientists and students.
-    Some users will be using \cello\ to perform computational
-    experiments that will increase the global scientific knowledgebase,
-    whereas other users will be using \cello\ in a more educational
-    or learning capacity.
-
-    Each partitioning of users leads to specific requirements of the
-    \cello\ design and implementation.
+    Scientists will typically use \cello\ to perform large-scale
+    computational experiments that will increase the global scientific
+    knowledge base, and students will be using \cello\ to both learn
+    about computational astrophysics and cosmology and advance their
+    own research.  Scientists are likely to prefer deep control of the
+    methods, physics, parallel data structures, and large-scale
+    detailed analysis and visualization, with power and flexibility
+    taking precidence over ease of use.  Students on the other hand
+    are likely to prefer to be able to concentrate on the science,
+    with ease-of-use taking precidence over having to worry about
+    detailed computational technology issues that only serve to
+    confuse and complicate the learning process.  \cello\ should
+    therefore support both deep and flexible control over physics,
+    algorithms, and analysis, while simultaneously be easy to set up
+    problems, and easy to run, analyse, and visualize the results.
+    
 
 %-----------------------------------------------------------------------
 \subsection{Risks}
 %-----------------------------------------------------------------------
 
+   All software development projects have risks.  Things can and will
+   happen that lead to deviations from the original plan, so it is
+   important to identify potential risks early, evaluate their
+   probabilities and effects on the project, and have contingency
+   plans.  Below is a list of some possible risks:
+
     \begin{itemize} 
 %
-    \item Uncertain future of development team members (especially
-    graduate students nearing graduation)
+    \item Uncertain future of development team membership,
+    e.g.~graduate students graduating and new students joining
 %
-    \item Uneven capabilities of development team members (especially
-    software development methodology and object oriented programming)
-    % solution: 1. training;  2. isolating
+    \item Uneven capabilities of development team members, including
+    software development, parallel programming, and numerical methods
 %
-    \item Uncertain future parallel platform characteristics
+    \item Uncertain future parallel platform characteristics,
+    including GPU's, many-core processors, shared/distributed memory
+    configurations, vector processing, and overall architecture
+    variability and complexity.
 %
-    \item Future platforms may have difficult to program accelerator cards
+    \item Overdependency on a single platform, e.g.~IBM Blue Waters
 %
-    \item Future platforms may have limited memory per shared memory node
-%
-    \item May become platform dependent: IBM Blue Waters
-%
-    \item Political pressure to use software languages, frameworks, or
+    \item Political pressure to use specific software languages, frameworks, or
     libraries, e.g.~CHARM++ or UPC, even if they may not be in the
     project's best interest
 %
-    \item Personal resistance to use software languages, frameworks,
+    \item Resistance among developers to use software languages, frameworks,
     or libraries, even if they may be in the project's best interest
 %
-    \item Discontinued or uncertain future development of dependent libraries
+    \item Discontinued or uncertain future development of dependent software
+    languages, frameworks, or libraries that are used.
 %
-    \begin{itemize}
-        \item \code{lcaperf}
-        \item \code{PAPI}
-        \item \code{hypre}
-        \item \code{P3DFFT}
-        \item \code{SPRNG}
-        \item \code{VisIt}
-        \item \code{arprec}
-    \end{itemize}
+    \item Uncertain future usability of parallel programming
+    infrastructures, e.g.~MPI or OpenMP.
 %
-    \item Uncertain future usability of parallel languages
-%
-    \begin{itemize}
-        \item \code{MPI}
-        \item \code{OpenMP}
-        \item \code{UPC}
-    \end{itemize}
-%
+    \item Unforseen new parallel programming developments, e.g.~a new
+    widely-accepted parallel language, or a new parallel programming
+    paradigm.
 \end{itemize}
-
-   
 
 
 %-----------------------------------------------------------------------
@@ -283,50 +308,69 @@
     generation of the open source software application \enzo\ for
     high-performance computational astrophysics and cosmology.  It
     will be used both as a testbed for experimenting with new software
-    organization, parallelization, distributed datastructure,
+    organization, parallelization, distributed data structure,
     algorithm, and implementation techniques, as well as for enabling
     cutting-edge astrophysics and cosmological science simulations on
     the largest parallel high performance computers available.
-    Objectives are to reliably provide high-quality numerical
-    solutions, computed by distributing the workload efficiently
-    across $10^5$ to $10^6$ computational cores, while maintaining a
-    high level of utilization of available computational resources.
+    Objectives are to reliably provide high-quality multi-resolution
+    numerical solutions, computed by distributing the workload
+    efficiently across $10^5$ to $10^6$ computational units, while
+    maintaining a high level of utilization of available computational
+    resources.
 
 %   Primary goal
 
-    The primary goal of \cello\ is to increase scientists' ability to
-    perform numerical experiments of high scientific worth.  
-
-
+    But the primary goal of \cello\ is to increase the ability of
+    scientists and students
+    to perform numerical experiments of high scientific worth.
 %   Characteristics supporting the primary goal
-
-    To support the primary goal if improved science, we recognize that
-    \cello\ must improve on a range of characteristics.  Compared to
-    \enzo, \cello\ should be more highly scalable, modifyable,
-    useable, controlable, and robust.
+    To support the primary goal of improved science, we recognize that
+    \cello\ must improve on a range of characteristics compared to
+    \enzo, including 
+%
+    improved parallel scalability,
+    improved modifyability, 
+    improved ease of use, 
+    improved user control,
+    and an improved user interface.
 
 %   Scalable
 
-    \textbf{Scalable.}
-
-    \textbf{Efficient on PetaScale platforms.}
+    \textbf{Scalable.} \cello\ must be able to run efficiently on Petascale
+    architectures.  This means being able to solve the largest
+    problems that can possibly fit in available Petascale
+    architectures.  Although \enzo's ``unigrid'' (uniform resolution)
+    mode of operation has shown high scalability, its multi-resolution
+    mode has not.  The existing adaptive mesh refinement method and
+    implementation has limitations related to load balancing and
+    non-scalable memory requirements.  While independent but
+    coordinated efforts are currently underway to improve the scaling
+    of \enzo---in particular Robert Harkness is adding support for
+    hybrid MPI / OpenMP, and James Bordner is refactoring the AMR
+    data structure to reduce its memory requirement---these improvements
+    are still limited by the use of the structured adaptive mesh
+    refinement approach.
 
 %   Modifyable
 
-    \textbf{Modifyable.}
+@@@@
 
-    \enzo\ code is tightly coupled, repetitious, and difficult to read
-    and understand.  Yet \enzo\ is an application that must be
-    modified continually.  One reason is because rapidly evolving
-    supercomputer platforms put ever-increasing demands on application
-    scalability and efficiency.  A second reason is because scientific
-    progress requires computational physics researchers and graduate
-    students to solve new physics problems, which requires adding new
-    computational physics capabilities.  Examples of capabilities
-    currently being implemented in \enzo\ are radiative transfer,
-    magnetohydrodynamics, and turbulence modeling.
+    \textbf{Modifyable.} \enzo\ code is tightly coupled, repetitious,
+    and difficult to read and understand.  Yet \enzo\ is an
+    application that must be modified continually, both to be able to
+    run effectively on rapidly evolving supercomputer platforms, and
+    to implement improved numerical methods that are continually being
+    developed.  When multiple developers continually modify an application
+    designed using the structured programming paradigm, code complexity
+    inevitably grows.  There are two ways to deal with this---ignore it
+    until the code is unmodifyable by anybody, spend resources
+    to improve the code structure, and redesign the code  in an
+    object-oriented programming paradigm which has improved modularity
+    and modifyability.
 
-    \enzo\ must be continually modified, yet is not specificially
+@@@@    
+
+    Although \enzo\ must be continually modified, it is not specificially
     designed to be modified.  It was written primarily using the
     structured programming paradigm, which is known to be effective
     for designing and implementing large-scale applications, but is
@@ -336,42 +380,45 @@
     than the inherent complexity of the underlying functionality being
     implemented.
 
-    To maintain control over how effectively \cello\ can be modified
-    and enhanced to keep up with rapidly changing supercomputer
-    platform characteristics and new physics capabilities, we also
-    wish to keep \cello\ not overly-dependent on external libraries.
-    Some libraries, such as HDF5 and MPI, are of course indispensible.
-    But using some other libraries, frameworks, or languages, may lead to 
-    \cello\ being a ``slave'' to another software group.
+%     To maintain control over how effectively \cello\ can be modified
+%     and enhanced to keep up with rapidly changing supercomputer
+%     platform characteristics and new physics capabilities, we also
+%     wish to keep \cello\ not overly-dependent on external libraries.
+%     Some libraries, such as HDF5 and MPI, are of course indispensible.
+%     But using some other libraries, frameworks, or languages, may lead to 
+%     \cello\ being a ``slave'' to another software group.
 
 
 %   Usable
 
-    \textbf{Ueable.}
 
-    A secondary, but nontheless important, goal is to help
-    physics students learn about astrophysics and cosmology, and
-    about numerical methods for solving problems in these
-    domains.  Keeping the use focused on the physics issues requires
-    \cello\ to not be required to focus excessively on technical
-    issues.
+    \textbf{Useable.}  \enzo\ currently uses a large ``flat'' list of
+    input parameters.  Because they are not organized explicitly into
+    sections, it can be difficult for users to learn and write
+    parameter files.
+%
+    Also, parameters have limited expressibility---each parameter is
+    typically an integer with a small number of valid values.
+%
+    The limited input file grammar inherently limits the power of
+    \enzo\ itself.  For example, input control is not sufficiently
+    powerful to define a new test problem that is not already
+    implemented explicitly in code.  Running a new test problem
+    requires enhancing the \enzo\ codebase.
 
-    Useablility will also be enhanced by \cello\
-    Global performance-related measurements will be continuously
-    collected for simulations.  This will include parallel
-    communication amount, rates, and time; memory and computational
-    load balance efficiency; memory usage and reference rates;
-    floating point operation counts and rates; disk storage rates and
-    amounts, and time.
-
-    \textbf{Instructive.}  
-
+    Output of \\cello\ will also be more ``user-friendly'', including
+    automatic generation of web pages to serve as both a way to
+    monitor a running simulation, and to easily share information about 
+    simulations with collaborators.  Data collected will include
+    information related to the progress of the simulation, 
+    performance measurements, and inline analysis and visualization.
+% 
 %   Controlable
 
-    \textbf{Powerful.}
+    \subsubsection{Powerful control}
 
     Input files will support a much more powerful grammar to allow for
-    much greater control of \cello.  \enzo\ uses a flat list of
+    much greater control of \cello.  \enzo\ uses a flat list of input
     parameters of simple type, which has limited scalability in terms
     of expressive range.
 
@@ -388,35 +435,8 @@
     
 %   Robust
 
+    \subsubsection{Numerically Robust}
 
-%
-
-%  Performance monitoring
-
-    %-----------------------------------------------------------------------
-    \subsubsection{Performance monitoring}  
-%
-
-
-
-
-    % Enzo input files
-    % flat list
-    % limited expressibility
-    % inherently limits power of application
-% 
-    \enzo\ currently uses a large ``flat'' list of input parameters.
-    Because they are not organized explicitly into sections, it can be
-    difficult for users to learn and write parameter files.
-%
-    Also, parameters have limited expressibility---each parameter is
-    typically an integer with a small number of valid values.
-%
-    The limited input file grammar inherently limits the power of
-    \enzo\ itself.  For example, input control is not sufficiently
-    powerful to define a new test problem that is not already
-    implemented explicitly in code.  Running a new test problem
-    requires enhancing the \enzo\ codebase.
 
 
 %-----------------------------------------------------------------------
@@ -449,6 +469,14 @@
     % 6), as long as it is written in such a way that all of the
     % stakeholders can read and understand it.
 
+%
+%   Physics
+%   Methods
+%   Analysis and visualization
+%   User interface
+%   Parallelism
+%   Data structures
+%
     %-----------------------------------------------------------------------
     \subsubsection{Physics capabilities}
 
@@ -486,7 +514,7 @@
 
     To take advantage of the hierarchical parallel nature of modern
     supercomputers, \cello\ will support multiple levels of
-    parallelization in its methods and datastructures.  This will
+    parallelization in its methods and data structures.  This will
     include the coarse-grain parallelism to concurrently run
     simulations in an ensemble at the node or supernode level,
     medium-grain parallelism to evolve grid patches or particle groups
@@ -519,20 +547,20 @@
     computation, memory storage, or a combination of both.  Combining
     flexible hierarchical parallelization schemes with hierarchical
     load balancing algorithms, together with scalable methods and
-    efficient AMR data-structures, are expected to lead to high
+    efficient AMR data structures, are expected to lead to high
     parallel efficiency and scalability.
 
 %   Task scheduling (reduced synchronization)
 
     %-----------------------------------------------------------------------
-    \subsubsection{Datastructures}
+    \subsubsection{Data structures}
 
     
     As with \enzo, computations will be performed at multiple spacial
     and temporal resolutions using adaptive mesh refinement (AMR).
     This will permit the physics modules to capture the full range of
     scales of interest, but without excessive computation and memory
-    storage.  However, the AMR approach and data-structures will be
+    storage.  However, the AMR approach and data structures will be
     totally redesigned and reimplemented.  Compared to \enzo, the new
     design will include the following features:
 
@@ -547,7 +575,7 @@
           increase flexibility and modifyability
     \end{itemize}
 
-    % Octree to improve load balancing and datastructure complexity
+    % Octree to improve load balancing and data structure complexity
     % patches to maintain efficiency
     % variable patch size to reduce octree overhead
     %   (this is new)
@@ -575,7 +603,7 @@
 
 
 %-----------------------------------------------------------------------
-\subsection{Scope of phased release (optional)}
+\subsection{Scope of phased release}
 %-----------------------------------------------------------------------
 
     % Sometimes software projects are released in phases: a version of
@@ -604,6 +632,18 @@
     % generated (see below). This will ensure that the phased release is
     % feasible and compatible with the organization's priorities.
 
+\begin{description}
+\item[Year 1: ]\
+\begin{itemize}
+\item Data structures: unigrid
+\item Physics: hydrodynamics, MHD, self-gravity
+\item Methods: PPM, PPML, 3DFFT
+\end{itemize}
+
+\item[Year 2: ] 
+
+\item[Year 3: ]
+\end{description}
 %-----------------------------------------------------------------------
 \subsection{Features that will not be developed}
 %-----------------------------------------------------------------------
