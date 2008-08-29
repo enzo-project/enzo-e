@@ -197,7 +197,7 @@ A \code{Patch} class represents a grid patch in a distributed structured
 AMR grid hierarchy (\code{Hierarchy}).  A \code{Patch} is defined by a
 \code{Box}, and a set of \code{Array}s defined on the \code{Patch}.  Each
 \code{Patch} is contained within a \code{Level}, and may be distributed
-according to a \code{Parallel} object \S\ref{ss:parallel}.
+according to a \code{Parallel} object.
 
 \subsection{Attributes}
 
@@ -226,7 +226,7 @@ convenient operations and optional special features.
 Optional features include storing as a blocked array to improve cache
 use, array padding to avoid cache thrashing on large power-of-two
 arrays with low-associativity caches.  Arrays also may be parallelized
-according to \code{Parallel} objects (\S\ref{ss:parallel}) such as
+according to \code{Parallel} objects such as
 \code{Parallel::Mpi} for MPI-parallel distributed arrays, or
 \code{Parallel::Omp} for OpenMP-parallel threaded arrays (or both).
 
