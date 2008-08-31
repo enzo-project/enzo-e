@@ -33,7 +33,7 @@ all: test
 .PHONY: test
 
 test: test_error
-	test_error
+	./test_error
 
 #-----------------------------------------------------------------------
 

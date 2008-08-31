@@ -31,7 +31,7 @@ all: test time_matvec
 
 .PHONY: test
 test: test_timer
-	test_timer
+	./test_timer
 
 #-----------------------------------------------------------------------
 

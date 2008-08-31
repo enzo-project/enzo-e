@@ -23,7 +23,7 @@ OBJS = $(OBJ) $(OBJ_EXTERN)
 
 .PHONY: test
 test: test_array
-	test_array
+	./test_array
 
 #-----------------------------------------------------------------------
 

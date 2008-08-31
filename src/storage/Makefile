@@ -28,7 +28,7 @@ OBJS = $(OBJ) $(OBJ_EXTERN)
 
 .PHONY: test
 test: test_hdf5
-	test_hdf5
+	./test_hdf5
 
 #-----------------------------------------------------------------------
 
