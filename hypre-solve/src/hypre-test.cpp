@@ -559,8 +559,8 @@ int main(int argc, char * argv[])
   int * count_fine   = new int [N*N*N];
 
   for (i=0; i<N*N*N; i++) {
-    count_coarse[i] = 7;
-    count_fine[i]   = 7; // stencils
+    count_coarse[i] = 7; // skip the stencil elements:
+    count_fine[i]   = 7; // graph entries start at 7
   }
 
   //--------------------------------------------------
@@ -609,12 +609,12 @@ int main(int argc, char * argv[])
 	    // 000 ---------------------------------------------
 	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
 	    ASSERT_BOUND(0,icount,N*N*N);
-	    // diagonal
+	    // update diagonal
 	    entry = count_fine[icount]++;
 	    value = a * fine_h;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	    // off-diagonal
+	    // update off-diagonal
 	    entry = 0;
 	    value = -value;
 	    HYPRE_SStructMatrixAddToValues 
@@ -623,12 +623,12 @@ int main(int argc, char * argv[])
 	    // 010 ---------------------------------------------
 	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
 	    ASSERT_BOUND(0,icount,N*N*N);
-	    // diagonal
+	    // update diagonal
 	    entry = count_fine[icount]++;
 	    value = a * fine_h;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	    // off-diagonal
+	    // update off-diagonal
 	    entry = 0;
 	    value = -value;
 	    HYPRE_SStructMatrixAddToValues 
@@ -637,12 +637,12 @@ int main(int argc, char * argv[])
 	    // 011 ---------------------------------------------
 	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
 	    ASSERT_BOUND(0,icount,N*N*N);
-	    // diagonal
+	    // update diagonal
 	    entry = count_fine[icount]++;
 	    value = a * fine_h;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	    // off-diagonal
+	    // update off-diagonal
 	    entry = 0;
 	    value = -value;
 	    HYPRE_SStructMatrixAddToValues 
@@ -651,12 +651,12 @@ int main(int argc, char * argv[])
 	    // 001 ---------------------------------------------
 	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
 	    ASSERT_BOUND(0,icount,N*N*N);
-	    // diagonal
+	    // update diagonal
 	    entry = count_fine[icount]++;
 	    value = a * fine_h;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
-	    // off-diagonal
+	    // update off-diagonal
 	    entry = 0;
 	    value = -value;
 	    HYPRE_SStructMatrixAddToValues 
@@ -807,11 +807,14 @@ int main(int argc, char * argv[])
   // WRITE MATRIX
   //------------------------------------------------------------
 
-  HYPRE_SStructMatrixPrint ("A",A,1);
+  HYPRE_SStructMatrixPrint ("A",A,0);
 
   //------------------------------------------------------------
   // WRITE SOLUTION
   //------------------------------------------------------------
+
+  HYPRE_SStructVectorPrint ("X",X,0);
+  HYPRE_SStructVectorPrint ("B",B,0);
 
   FILE *fp;
 

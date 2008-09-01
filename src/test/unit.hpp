@@ -67,14 +67,14 @@ namespace unit {
 // FUNCTIONS
 //======================================================================
 
-void unit_class (char * c)
+void unit_class (const char * c)
 {
   strncpy (unit::class_name,c,UNIT_MAX_NAME_LEN);
 }
 
 //----------------------------------------------------------------------
 
-void unit_func (char * f)
+void unit_func (const char * f)
 {
   strncpy (unit::func_name,f,UNIT_MAX_NAME_LEN);
 }

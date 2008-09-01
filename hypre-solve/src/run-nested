@@ -6,7 +6,7 @@ rm *.png
 
 # Problem parameters
 
-set sizes     = (16)
+set sizes     = (32)
 set procs     = (1 2)
 set solvers   = ("cg" "mg")
 
@@ -60,38 +60,38 @@ end
 # RUN hypre-solve
 #-----------------------------------------------------------------------
 
-foreach N ($sizes)
-   foreach solver ($solvers)
-      foreach P ($procs)
-
-         set identifier = hypre-solve.N=$N.P=$P.$solver
-
-         # Run hypre-solve
-
-         set infile  =  in.$identifier
-         set outfile = out.$identifier
-
-         mpirun -np $P hypre-solve $infile >& $outfile
-
-         # Evaluate result
-
-         set run_status = `grep Success $outfile| wc`
-         set run_status = $run_status[1]
-         if ($run_status == 0) set result = "FAIL"
-         if ($run_status == 1) set result = "Pass"
-
-         # Display run_status
-
-         echo "hypre-solve  [ $result ] N = $N   P = $P   solver = $solver"
-
-         # Generate projections
-
-         @ png_scale = $png_size / $N
-         @ png_scale = $png_scale / 2
-         hypre-png $png_color $png_scale X.?
-         mv project-0.png $identifier-0.png
-         mv project-1.png $identifier-1.png
-         mv project-2.png $identifier-2.png
-      end
-   end
-end
+# foreach N ($sizes)
+#    foreach solver ($solvers)
+#       foreach P ($procs)
+# 
+#          set identifier = hypre-solve.N=$N.P=$P.$solver
+# 
+#          # Run hypre-solve
+# 
+#          set infile  =  in.$identifier
+#          set outfile = out.$identifier
+# 
+#          mpirun -np $P hypre-solve $infile >& $outfile
+# 
+#          # Evaluate result
+# 
+#          set run_status = `grep Success $outfile| wc`
+#          set run_status = $run_status[1]
+#          if ($run_status == 0) set result = "FAIL"
+#          if ($run_status == 1) set result = "Pass"
+# 
+#          # Display run_status
+# 
+#          echo "hypre-solve  [ $result ] N = $N   P = $P   solver = $solver"
+# 
+#          # Generate projections
+# 
+#          @ png_scale = $png_size / $N
+#          @ png_scale = $png_scale / 2
+#          hypre-png $png_color $png_scale X.?
+#          mv project-0.png $identifier-0.png
+#          mv project-1.png $identifier-1.png
+#          mv project-2.png $identifier-2.png
+#       end
+#    end
+# end
