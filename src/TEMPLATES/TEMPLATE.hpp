@@ -60,7 +60,7 @@ private:
 public:
 
   /// A public operation
-  void Foo(Foo &);
+  Foo(const Foo &);
 
   //-------------------------------------------------------------------
   // PRIVATE OPERATIONS
