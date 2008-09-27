@@ -1,0 +1,43 @@
+%=======================================================================
+\section{User Component} \label{s:component-user}
+%=======================================================================
+
+\begin{tabbing}
+xxx\=xxxxx\=xxxxx\=\kill
+\> \code{Parameters} \\
+\> \code{Monitor} \\
+\>\> \code{Performance}
+\end{tabbing}
+
+%=======================================================================
+\subsection{Parameters Component} \label{ss:component-parameters}
+%=======================================================================
+
+The \code{Parameters} component reads in a parameter file or files, and
+provides the application access to parameter values.
+
+        Stores user parameters, and provides functions to access
+        parameter values.
+
+%=======================================================================
+\subsection{Monitor Component} \label{ss:component-monitor}
+%=======================================================================
+
+High-level monitoring of the run at a summary level, such as current
+timestep, problem time, wall time, cpu time, etc.
+
+\begin{verbatim}
+   monitor {
+     type   = html
+     amount = verbose
+   }
+\end{verbatim}
+
+%=======================================================================
+\subsubsection{Performance Component} \label{ss:component-performance}
+%=======================================================================
+
+Performance parameters control \lcaperf\ instrumentation.
+
+Performance monitoring and optimization(?) parameters
+

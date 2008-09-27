@@ -1,0 +1,58 @@
+%=======================================================================
+\section{\code{Simulation} Component} \label{s:component-simulation}
+%=======================================================================
+
+Given \code{Physics}, \code{Methods}, and \code{Amr} or
+\code{Particles} data structures, specifies and implements the
+top-level sequencing and properties of the \code{Problem} (or
+\code{Problems} in the case of an ensemble) to run.
+
+\begin{itemize}
+\item \code{Simulation}
+\item \code{Ensemble}
+\item \code{Control}
+\item \code{Problem}
+\item \code{Physics}
+\item \code{Method}
+\item \code{IO}
+\end{itemize}
+
+\subsection{Attributes.}
+
+\subsection{Operations}
+
+%=======================================================================
+\subsection{\code{Ensemble} Component} \label{s:component-ensemble}
+%=======================================================================
+
+The \code{Ensemble} class is used to define a ensemble of simulations.  
+
+\subsection{Attributes.}
+
+\subsection{Operations}
+
+
+%=======================================================================
+\subsection{Control Component} \label{ss:component-control}
+%=======================================================================
+
+
+Global simulation control.
+
+Output types and parameters
+
+\begin{itemize}
+\item checkpoint (dump all)
+\item output (specific fields)
+\item movies (type and rate)
+\item analysis (type of analysis, rate)
+\item level of output (files for timestep, time, etc.)
+\end{itemize}
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Parameters}
+%-----------------------------------------------------------------------
+

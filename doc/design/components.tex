@@ -4,176 +4,154 @@
 
 % \centerline{\includegraphics{uml/core-components.1}}
 
+
+\centerline{\includegraphics[totalheight=3in]{components.eps}}
+
    This chapter describes the design of \cello\ at the component
    level.  Each component is described, including the component
-   interface and dependencies on other components.  Class-level design
-   of each component is described in \S\ref{c:classes}.
-
-\begin{tabbing}
-xxx\=xxx\=xxx\=xxx\=xxxxxxxx\= \kill
-\ref{s:component-control} \>      \code{Control}     \>\>\>\> \textit{Manages everything}  \\
-\ref{s:component-parameters} \>      \code{Parameters}     \>\>\>\> \textit{Stores user parameters, and provides functions to access parameter values}  \\
-\ref{s:component-physics}  \>\>    \code{Physics}       \>\>\> \textit{A physical law or process and associated parameters} \\
-\ref{s:component-problem}  \>\>    \code{Problem}       \>\>\> \textit{Declaration of what to simulation} \\
-\ref{s:component-units}  \>\>\>  \code{Units}           \>\> \textit{Units used for user and computational fields} \\
-\ref{s:component-domain}  \>\>\>  \code{Domain}          \>\> \textit{The problem domain} \\
-\ref{s:component-region}  \>\>\>\>\code{Region}            \> \textit{A subset of the domain} \\
-\ref{s:component-field}  \>\>\>  \code{Field}           \>\> \textit{A scalar or vector field} \\
-\ref{s:component-matter}  \>\>\>  \code{Material}        \>\> \textit{Type of matter, e.g.~gas, H+, e-, dark matter} \\
-\ref{s:component-method}  \>\>    \code{Method}        \>\>\> \textit{Numerical method for evolving a physical law or laws} \\
-\ref{s:component-analysis}  \>\>    \code{Analysis}      \>\>\> \textit{Numerical method for post-processing data} \\
-\ref{s:component-data}  \>\>    \code{Data}          \>\>\> \textit{Parent component of Amr and Particles, and includes interfacing between the two.} \\
-\ref{s:component-amr}  \>\>\>    \code{Amr}          \>\> \textit{Data as continuous fields} \\
-\ref{s:component-particles}  \>\>\>    \code{Particles}          \>\> \textit{Data as discrete points} \\
-\ref{s:component-parallel}  \>\>    \code{Parallel}      \>\>\> \textit{Manages multiple parallelization levels and technologies} \\
-\ref{s:component-performance}  \>\>    \code{Performance}   \>\>\> \textit{Measures and allows other components to access performance data} \\
-\ref{s:component-monitor}  \>\>    \code{Monitor}       \>\>\> \textit{Enables users to monitor the state and progress of the simulations} \\
-\ref{s:component-storage}  \>\>\code{Storage}            \>\>\> \textit{Description of what data to output, how, and when} \\
-\ref{s:component-portal}  \>\>    \code{Portal}        \>\>\> \textit{Controls access to internal state and data by external entities} \\
-\ref{s:component-recover}  \>\>    \code{Recover}      \>\>\> \textit{Detects, evaluates, and recovers from hardware or software errors} \\
-@@@@@ \\
-
-  \>      \code{Simulation}  \>\>\>\> \textit{Description of a single astrophysics simulation} \\
-  \>\>\>  \code{Boundary}        \>\> \textit{Boundary conditions} \\
-  \>\>\>  \code{Initial}         \>\> \textit{Initial conditions} \\
-  \>\>\>  \code{Hierarchy}       \>\> \textit{AMR hierarchy} \\
-  \>\>\>  \code{Level}           \>\> \textit{Uniform resolution component of an AMR hierarchy} \\
-  \>\>\>  \code{Patch}           \>\> \textit{Rectangular grid of cells of uniform resolution in a hierarchy} \\
-  \>\>\>\>\code{Box}               \> \textit{Rectangular box with position and size} \\
-  \>\>\>\>\code{Array}             \> \textit{Array of floating-point values} \\
-\end{tabbing}
-
+   interdependencies, interface, and classes.
 
 \begin{description}
-
- \item [Control (\S\ref{s:component-control}): ] Control parameters specify the
- high-level parameters, as well as controling interactions between
- other components such as Parallel, Method, and Data.  May
- include sequence and interaction of physics modules, parallel dynamic
- load-balancing, refinement criteria, numerical floors and limits,
- dynamic refinement in subregions, etc.
-
- \item [Parameters (\S\ref{s:component-parameters}): ] Stores user parameters, and provides functions to access parameter values.
-
- \item [Physics (\S\ref{s:component-physics}): ] Physics parameters are used to
- define which physics is enabled---such as self-gravity,
- hydrodynamics, cosmological expansion, etc.  They also define any
- parameters associated with the physics of the problem being solved,
- such as cosmological parameters and the gravitational constant.
- Physics parameters define what physics to simulate in the
- computational universe.
-
- \item [Problem (\S\ref{s:component-problem}): ] Problem parameters include
- the domain extents, boundary and initial conditions.
-
-% \item [Problem::Boundary (\S\ref{s:component-boundary}): ] Boundary conditions.
-
-% \item [Problem::Initial (\S\ref{s:component-initial}): ] Initial conditions.
-
- \item [Units (\S\ref{s:component-units}): ] Units parameters define the problem
- units, as well as scalings for computation if different.  Allows for
- ``variable'' scaling (e.g.~to keep values near unity to avoid under-
- or overflow) and quantization of scaling factors (e.g.~scale by $2^k$
- to avoid loss of precision).
-
- \item [Domain (\S\ref{s:component-domain}): ] Domain parmeters include extents
- and dimensionality.
-
- \item [Region (\S\ref{s:component-region}): ] A region is a subset of the
- domain.  Regions are used whenever problem characteristics,
- data structure behavior, or physics computations vary between
- different spacial regions.  A region may include the entire
- domain.
-
- \item [Field (\S\ref{s:component-field}): ] Field parameters define all fields
- used in the computation, including their names, and whether they are
- scalar or vector fields.  Field parameters associate the name,
- data structure, and units.
-
- \item [Matter (\S\ref{s:component-matter}): ] Matter defines properties of
- different types of matter used in the simulation, such as gas
- constants, dark matter, etc.
-
- \item [Method (\S\ref{s:component-method}): ] Method parameters specify the
- method to use for each physics component, and any associated
- method-specific parameters.  This also includes how methods are to be
- coupled together.  Method parameters define how to simulate the
- physics in the computational universe.
-
- \item [Analysis (\S\ref{s:component-analysis}): ]  Similar to Method, but
- does not modify simulation data.  Includes both analysis and visualization
- algorithms.
-
- \item [Data (\S\ref{s:component-data}): ] Data parameters include listing which
- data structures to use (unigrid, SAMR, particles, subblocks, etc.),
- as well as all associated parameters (unigrid resolution, SAMR mesh
- levels, particle attributes, array subblock size control, ghost zone
- width and longevity, etc.)  Data structure parameters define how to
- represent the continuous (infinite dimensional) problem and physics
- as a computationally solveable (finite dimensional) discrete problem.
- Some parameters, such as subblock size, may affect performance but
- not the solution.  Data parameters include Hierarchy, Particle,
- Array, and Patch parameters.
-
- \item [Amr (\S\ref{s:component-amr}): ] The AMR component includes
- classes for representing multi-resolution data on a hierarchy of grid
- patches of varying spacial and temporal resolutions.  The AMR data
- structures can have multiple levels of data distribution and
- parallelism.  Uses the Parallel component for controlling the
- parallel communication and synchronization.
-
- \item [Particles (\S\ref{s:component-particles}): ]  The Particles component
-  serves to represent multi-level parallel distribution of sets of various
-  types of particle data.   Uses the Parallel component for controlling the
-  parallel communication and synchronization.
-
- \item [Parallel (\S\ref{s:component-parallel}): ] Parallelism parameters
- specify which levels to parallelize (simulations, patches, and
- subblocks), how to parallelize each level (MPI-1 2-sided, MPI-2
- 1-sided, OpenMP, UPC), and lower-level parameters (buffering,
- blocking or nonblocking, patch-to-processor mapping,
- subblock-to-thread mapping, etc.)
-
- \item [Performance (\S\ref{s:component-performance}): ] Performance
- self-monitoring and optimization parameters.
-
- \item [Monitor (\S\ref{s:component-monitor}): ] Monitor parameters control what
- and when to output user-readable summary information about the
- running application, such as status summary, progress, warnings,
- errors, and performance information.
-
- \item [Storage (\S\ref{s:component-storage}): ] The \code{Storage}
- component controls what, when, and how to input and output
- large-scale data, primarily data fields.
-
- \item [Portal (\S\ref{s:component-portal}): ] Portal parameters control
-  how to interface with external applications.
-
- \item [Recover (\S\ref{s:component-recover}): ] The \code{Recover}
- package controls how to detect errors, and what to do if errors are
- detected.
-
+%
+ \item [Simulation (\S\ref{s:component-simulation}): ]
+%
+        Description and management of computational astrophysics
+        problem or ensemble of problems.  Controls sequencing of and
+        interactions between other components such as \code{Parallel},
+        \code{Method}, and \code{Field}.
+%
+ \item [Problem (\S\ref{s:component-problem}): ]
+%
+        The problem refers to the initial setup of the problem,
+        including the domain, boundary and initial conditions.
+%
+ \item [Region (\S\ref{s:component-region}): ]
+%
+        A \code{Region} is a portion of space and time.
+        \code{Region}s are used whenever problem characteristics, data
+        structure behavior, or physics computations vary between
+        different spacial or temporal \code{Region}s.  A \code{Region}
+        is used to define the entire domain.  \code{Region}s may vary
+        in time, for example they may grow, shrink, appear, or
+        disappear.
+%
+ \item [Timestep (\S\ref{s:component-timestep}): ]
+%
+        \code{Timestep} handles the timestepping of methods to advance
+        the problem forward in time.
+%
+ \item [Method (\S\ref{s:component-method}): ]
+%
+        Defines how to simulate the physics in the computational
+        universe.  A \code{Method} specifies the numerical method to
+        use, which \code{Field}s are involved, and any associated
+        method-specific parameters.  Sequencing and coupling of
+        \code{Method}s is defined in \code{Problem} and implemented in
+        \code{Control}.  Analysis and visualization are considered
+        \code{Method}s as well.
+%
+ \item [Physics (\S\ref{s:component-physics}): ]
+%
+        Defines what physics to simulate in the computational
+        universe.  Used to define which physics processes are enabled,
+        such as self-gravity, hydrodynamics, cosmological expansion,
+        etc.  Also defines any parameters associated with the physics
+        of the problem being solved, such as cosmological parameters
+        and the gravitational constant.
+%
+ \item [Field (\S\ref{s:component-field}): ]
+%
+        A \code{Field} is used to represent a specific continuous
+        scalar or vector field.  The actual \code{Field} is
+        represented either using adaptive mesh refinement via
+        \code{Amr}, or as a collection of particles using
+        \code{Particles}.  Includes \code{Units} to define the problem
+        units, as well as scaling amount to improve numerics, and
+        scaling quantization to avoid precision loss.
+%
+ \item [Amr (\S\ref{s:component-amr}): ]
+%
+        The \code{Amr} component includes classes for representing
+        multi-resolution data on a hierarchy of grid patches of
+        varying spacial and temporal resolutions.  The \code{AMR} data
+        structures can have multiple levels of data distribution and
+        parallelism.  Uses the \code{Parallel} component for
+        controlling the parallel communication, synchronization, and
+        load-balancing.
+%
+ \item [Particles (\S\ref{s:component-particles}): ]
+%
+        The \code{Particles} component serves to represent multi-level
+        parallel distribution of sets of various types of particle
+        data.  Uses the \code{Parallel} component for controlling the
+        parallel communication, synchronization, distribution, and
+        load-balancing of \code{Particles}.
+%
+ \item [Parallel (\S\ref{s:component-parallel}): ]
+%
+        The \code{Parallel} component is used to specify and control
+        the levels of parallelizion (simulations, patches, and
+        subblocks), type of parallelization (shared- or
+        distributed-memory), and mechanism for controling the
+        parallelism (MPI-1 2-sided, MPI-2 1-sided, OpenMP, UPC).
+        Lower-level parameters provide detailed control of buffering,
+        blocking or nonblocking, patch-to-processor mapping,
+        subblock-to-thread mapping, etc.
+%
+ \item [Storage (\S\ref{s:component-storage}): ]
+%
+        The \code{Storage} component controls what, when, and how to
+        input and output large-scale data, primarily \code{Fields}.
+%
+ \item [Recover (\S\ref{s:component-recover}): ]
+%
+        The \code{Recover} package is used to detect errors, evaluate
+        them, and decide what to do about them.  This includes
+        maintaining restart data dumps, and may involve shutting down
+        a processor or node and rebalancing the data, etc.
+%
+ \item [User (\S\ref{s:component-user}): ]
+%
+        THe \code{User} component includes the \code{Parameters} and
+        \code{Monitor} components.  The \code{Parameters} component
+        reads in a parameter file or files, and provides the
+        application access to parameter values.  The \code{Monitor}
+        component controls what and when to output user-readable
+        summary information about the running application, such as
+        status summary, progress, warnings, errors, and performance
+        information.
+%
+ \item [Portal (\S\ref{s:component-portal}): ]
+%
+        The \code{Portal} component controls the interaction of the
+        application with external applications, for both obtaining
+        information about a running simulation, and controling it.
 \end{description}
 
 %-----------------------------------------------------------------------
 
-\input{component-control}
-\input{component-parameters}
-\input{component-physics}
+\input{component-simulation}
 \input{component-problem}
-\input{component-units}
-\input{component-domain}
 \input{component-region}
-\input{component-field}
-\input{component-matter}
+\input{component-timestep}
 \input{component-method}
-\input{component-analysis}
-\input{component-data}
+\input{component-physics}
+\input{component-field}
 \input{component-amr}
 \input{component-particles}
 \input{component-parallel}
-\input{component-performance}
-\input{component-monitor}
 \input{component-storage}
-\input{component-portal}
 \input{component-recover}
+\input{component-user}
+\input{component-portal}
+
+% \input{component-control}
+% \input{component-parameters}
+% \input{      component-units}
+% \input{      component-domain}
+% \input{      component-boundary}
+% \input{      component-initial}
+% \input{      component-matter}
+% \input{   component-analysis}
+% \input{   component-data}
+% \input{   component-performance}

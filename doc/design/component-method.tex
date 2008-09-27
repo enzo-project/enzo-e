@@ -2,18 +2,28 @@
 \section{Method Component} \label{s:component-method}
 %=======================================================================
 
- Specify the algorithms and algorithm parameters
- to use for each physics component.  Each physics component has a
- default; some components may have only one available
- (e.g.~cosmological expansion).  Algorithms is in the solution domain.
+  Defines how to simulate the physics in the computational universe.
+  A \code{Method} specifies the numerical method to use, which
+  \code{Field}s are involved, and any associated method-specific
+  parameters.  Sequencing and coupling of \code{Method}s is defined in
+  \code{Problem} and implemented in \code{Control}.  Analysis and
+  visualization are considered \code{Method}s as well.
+
+\begin{itemize}
+\item HD
+\item MHD
+\item RHD
+\item cooling
+\item gravity
+\end{itemize}
 
 Specify algorithms and their parameters.
 
-Hydrodynamics dual-energy
+HD dual-energy
 
-Hydrodynamics steepening
-Hydrodynamics flattening
-Hydrodynamics diffusion
+HD steepening
+HD flattening
+HD diffusion
 
 Timestepping
 
@@ -47,4 +57,15 @@ Timestepping
 
 %=======================================================================
 \subsection{Method:RT subcomponent}
+
+%=======================================================================
+\subsection{Analysis subcomponent} \label{ss:component-analysis}
+%=======================================================================
+
+ Specify the algorithms and algorithm parameters to use for analysis
+ and visualization.
+
+%=======================================================================
+\subsection{Visualization subcomponent} \label{ss:component-visualization}
+%=======================================================================
 

@@ -3,9 +3,15 @@
 \section{Physics Component} \label{s:component-physics}
 %=======================================================================
 
+   Defines what physics to simulate in the computational universe.
+   Used to define which physics processes are enabled, such as
+   self-gravity, hydrodynamics, cosmological expansion, etc.  Also
+   defines any parameters associated with the physics of the problem
+   being solved, such as cosmological parameters and the gravitational
+   constant.
 
-Physics parameters specify physics modules and units.
 
+ matter
  hydrodynamics
   cosmological expansion
  self-gravity
@@ -32,3 +38,28 @@ Specify physics components
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
+
+%=======================================================================
+\subsection{Matter Component} \label{ss:component-matter}
+%=======================================================================
+
+ Matter defines properties of matter, such as the matter type (baryonic
+ or dark matter), and gas constants.
+
+%-----------------------------------------------------------------------
+\subsection{Use Cases}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+   Matter {
+      type = dark
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   Matter {
+      type  = gas_ideal
+      gamma = 1.4
+      region { (x < 0) || (x > 1) }
+   }
+\end{verbatim}
