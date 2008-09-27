@@ -66,6 +66,7 @@ main(int argc, char ** argv)
     Scalar * axp = &array[ind]; ind += n;
     Scalar * ayp = &array[ind]; ind += n;
     Scalar * azp = &array[ind]; ind += n;
+    Scalar ac[7] = {1,1,1,1,1,1,1};
 
     {
       if (a0 && axp && axm && ayp && aym && azp && azm) {
@@ -78,13 +79,13 @@ main(int argc, char ** argv)
 	    for (i1=1; i1<k+1; i1++) {
 	      for (i2=1; i2<k+1; i2++) {
 		i = i2 + k2*(i1 + k2*i0);
-		b[i] = azm[0]*x[i-k22]
-		  +    aym[0]*x[i-k2]
-		  +    axm[0]*x[i-1]
-		  +     a0[0]*x[i]
-		  +    axp[0]*x[i+1]
-		  +    ayp[0]*x[i+k2]
-		  +    azp[0]*x[i+k22];
+		b[i] = ac[0]*x[i-k22]
+		  +    ac[1]*x[i-k2]
+		  +    ac[2]*x[i-1]
+		  +    ac[3]*x[i]
+		  +    ac[4]*x[i+1]
+		  +    ac[5]*x[i+k2]
+		  +    ac[6]*x[i+k22];
 	      }
 	    }
 	  }
@@ -166,11 +167,15 @@ main(int argc, char ** argv)
     {
       if (a0 && axp && axm && ayp && aym && azp && azm) {
 
-	if ((((k+2) / 8 ) * 8) == k+2) {
-	  b = b + 7*sizeof(Scalar);
-	  k2 = k2 + 1;
-	  k22 = k2*k2;
-	}
+	// Shift b to improve inter-array cache effects
+	// Force k2 to be odd to improve intra-array cache effects.
+
+	int adjust = (1 - k2%2);
+
+	b   = b  + adjust*((k2+1)*(k2+1)*(k2+1) - (k2*k2*k2));
+	k2  = k2 + adjust;
+	k22 = k2*k2;
+
 
 	for (j=0; j<count; j++) {
 
@@ -180,13 +185,13 @@ main(int argc, char ** argv)
 	    for (i1=1; i1<k+1; i1++) {
 	      for (i2=1; i2<k+1; i2++) {
 		i = i2 + k2*(i1 + k2*i0);
-		b[i] = azm[0]*x[i-k22]
-		  +    aym[0]*x[i-k2]
-		  +    axm[0]*x[i-1]
-		  +     a0[0]*x[i]
-		  +    axp[0]*x[i+1]
-		  +    ayp[0]*x[i+k2]
-		  +    azp[0]*x[i+k22];
+		b[i] = ac[0]*x[i-k22]
+		  +    ac[1]*x[i-k2]
+		  +    ac[2]*x[i-1]
+		  +    ac[3]*x[i]
+		  +    ac[4]*x[i+1]
+		  +    ac[5]*x[i+k2]
+		  +    ac[6]*x[i+k22];
 	      }
 	    }
 	  }
@@ -210,12 +215,14 @@ main(int argc, char ** argv)
 
 
     int num_flops = count*k*k*k*13;
-    printf ("%d %20.12f %20.12f %20.12f %20.12f\n",
+    printf ("%d %20.12f %20.12f %20.12f %20.12f %20.12f\n",
 	    k,
 	    1e-6*num_flops/(time_const.value()-time_overhead.value()),
 	    1e-6*num_flops/(time_symm.value()-time_overhead.value()),
 	    1e-6*num_flops/(time_full.value()-time_overhead.value()),
-	    1e-6*num_flops/(time_block.value()-time_overhead.value())
+	    1e-6*num_flops/(time_block.value()-time_overhead.value()),
+	    1e-6*num_flops/(time_block.value()-time_overhead.value()) -
+	    1e-6*num_flops/(time_const.value()-time_overhead.value())
 	    ); 
     fflush(stdout);
 
