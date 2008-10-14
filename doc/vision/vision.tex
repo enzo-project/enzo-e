@@ -170,8 +170,8 @@
     implementation.
 
 
-    One partitioning of users is into core developers,
-    collaborators, and community users.
+    One partitioning of users is into core users, collaborators, and
+    community users.
 %
     \textit{Core users} are the scientists and graduate students in
     the Laboratory for Computational Astrophysics.  Most core users
@@ -192,35 +192,36 @@
     specifically to be a community code, so must meet the needs of
     community users as a whole.
 
-    Another partitioning is users that will run \cello\ as provided,
-    and users that will modify \cello\ for their own particular needs.
-    For example, the latter group may want to add new physics support
-    to \cello, or may want to use \cello\ to help develop their own
-    numerical methods.  The existence of this second group will have
-    an important bearing on the design of \cello.  Specifically,
-    \cello\ should be modular and easy to modify by the non-core
-    developers as well as core developers.  In particular, it should
-    be straightforward to add new physics capabilities, and to add new
-    algorithms for existing methods.  This includes making it easy to
-    add new input parameters for controlling new or modified numerical
-    methods or data structures in \cello.
+    Another way to partition users is into users that will run \cello\
+    as provided, and users that will modify \cello\ for their own
+    particular needs.  For example, the latter group may want to add
+    new physics support to \cello, or may want to use \cello\ to help
+    develop their own numerical methods.  The existence of this second
+    group will have an important bearing on the design of \cello.
+    Specifically, \cello\ should be modular and easy to modify by the
+    non-core developers as well as core developers.  In particular, it
+    should be straightforward to add new physics capabilities, and to
+    add new algorithms for existing methods.  This includes making it
+    easy to add new input parameters for controlling new or modified
+    numerical methods or data structures in \cello.
 
-    Yet another partitioning of users is into scientists and students.
-    Scientists will typically use \cello\ to perform large-scale
-    computational experiments that will increase the global scientific
-    knowledge base, and students will be using \cello\ to both learn
-    about computational astrophysics and cosmology and advance their
-    own research.  Scientists are likely to prefer deep control of the
-    methods, physics, parallel data structures, and large-scale
-    detailed analysis and visualization, with power and flexibility
-    taking precidence over ease of use.  Students on the other hand
-    are likely to prefer to be able to concentrate on the science,
-    with ease-of-use taking precidence over having to worry about
-    detailed computational technology issues that only serve to
-    confuse and complicate the learning process.  \cello\ should
-    therefore support both deep and flexible control over physics,
-    algorithms, and analysis, while simultaneously be easy to set up
-    problems, and easy to run, analyse, and visualize the results.
+    Yet another partitioning of users is into research scientists and
+    graduate students.  Scientists will typically use \cello\ to
+    perform large-scale computational experiments that will increase
+    the global scientific knowledge base, whereas students may be
+    using \cello\ at least partially to learn about computational
+    astrophysics and cosmology, and to advance their own research.
+    Scientists are likely to prefer deep control of the methods,
+    physics, parallel data structures, and large-scale detailed
+    analysis and visualization, with power and flexibility taking
+    precidence over ease of use.  Students on the other hand are
+    likely to prefer to be able to concentrate on the science, with
+    ease-of-use taking precidence over having to worry about detailed
+    computational technology issues that only serve to complicate and
+    interfere with the learning process.  \cello\ should therefore
+    support both deep and flexible control over physics, algorithms,
+    and analysis, while simultaneously be easy to set up problems, and
+    easy to run, analyse, and visualize the results.
     
 
 %-----------------------------------------------------------------------
@@ -230,40 +231,44 @@
    All software development projects have risks.  Things can and will
    happen that lead to deviations from the original plan, so it is
    important to identify potential risks early, evaluate their
-   probabilities and effects on the project, and have contingency
-   plans.  Below is a list of some possible risks:
+   probabilities and potential effects on the project, and formulate
+   contingency plans ahead of time.  Below is a list of some possible
+   risks:
 
     \begin{itemize} 
 %
     \item Uncertain future of development team membership,
-    e.g.~graduate students graduating and new students joining
+    e.g.~graduate students graduating and new students joining.
 %
     \item Uneven capabilities of development team members, including
-    software development, parallel programming, and numerical methods
+    software development processes, computer languages, parallel
+    programming, and numerical methods.
 %
     \item Uncertain future parallel platform characteristics,
     including GPU's, many-core processors, shared/distributed memory
     configurations, vector processing, and overall architecture
     variability and complexity.
 %
-    \item Overdependency on a single platform, e.g.~IBM Blue Waters
+    \item Overdependency on a single platform, e.g.~IBM Blue Waters.
 %
     \item Political pressure to use specific software languages, frameworks, or
     libraries, e.g.~CHARM++ or UPC, even if they may not be in the
-    project's best interest
+    project's best interest.
 %
-    \item Resistance among developers to use software languages, frameworks,
-    or libraries, even if they may be in the project's best interest
+    \item Resistance among \cello\ developers to use specific software
+    languages, frameworks, or libraries, even if they may be in the
+    project's best interest.
 %
     \item Discontinued or uncertain future development of dependent software
     languages, frameworks, or libraries that are used.
 %
-    \item Uncertain future usability of parallel programming
-    infrastructures, e.g.~MPI or OpenMP.
-%
     \item Unforseen new parallel programming developments, e.g.~a new
     widely-accepted parallel language, or a new parallel programming
     paradigm.
+%
+    \item Uncertain future usability and support of parallel
+    programming infrastructures, e.g.~MPI or OpenMP.
+%
 \end{itemize}
 
 
@@ -347,24 +352,30 @@
     adding support for hybrid MPI / OpenMP, and James Bordner is
     refactoring the AMR data structure to reduce its memory
     requirement---these improvements are still limited by the use of
-    the structured adaptive mesh refinement approach.
+    the structured adaptive mesh refinement approach.  While details
+    of \cello\ data structures are beyond the scope of this document,
+    the planned AMR methodology will be reengineered, and even the
+    unigrid implementation will be much improved in terms of both
+    parallel scaling and computational efficiency.
 
 %   Modifyable
 
     \textbf{Modifyable.} \enzo\ code is tightly coupled, repetitious,
-    and difficult to read and understand.  Yet \enzo\ is an
-    application that must be modified continually, both to be able to
-    run effectively on rapidly evolving supercomputer platforms, and
-    to implement improved numerical methods that are continually being
-    developed.  When multiple developers continually modify an
-    application designed using the structured programming paradigm,
-    code complexity inevitably grows.  The design of \cello\ will
-    improve this by using an object-oriented design and a less relaxed
-    software development approach.  \cello's complexity will be able
-    to be kept much smaller than \enzo's for the same functionality
-    (said another way, \cello\ will be able to have greater
-    functionality for the same amount of software complexity), and the
-    code will be easier to maintain, modify, and enhance.
+    complicated, difficult to read, difficult to understand, and
+    difficult to modify.  Yet \enzo\ is an application that must be
+    modified continually, both to be able to run effectively on
+    rapidly evolving supercomputer platforms, and also to implement
+    newly developed and improved numerical methods.  When multiple
+    developers continually modify a software application designed
+    using the structured programming paradigm, code complexity
+    inevitably grows.  The design of \cello\ will improve this by
+    using an object-oriented design and a less casual software
+    development approach.  \cello's complexity will be able to be kept
+    much smaller than \enzo's for the same functionality.
+    Equivalently, \cello\ will be able to have much greater
+    functionality for the same amount of software complexity.  Both
+    the improved software development techniques and object-oriented design
+    approach, \cello\ will be much easier to maintain, modify, and enhance.
 
 %     Although \enzo\ must be continually modified, it is not specificially
 %     designed to be modified.  It was written primarily using the
@@ -475,10 +486,9 @@
     same as \enzo: representations of baryonic and dark matter,
     hydrodynamics, self-gravity, multi-species chemistry, radiative
     cooling, cosmological expansion, star formation,
-    magnetohydrodynamics, and radiation transfer.
-
-    Additional physics capabilities are expected to be implemented
-    during \cello's lifetime.
+    magnetohydrodynamics, and radiation transfer.  Additional physics
+    capabilities are expected to be implemented during \cello's
+    lifetime.
 
     %-----------------------------------------------------------------------
     \subsubsection{Numerical methods}
@@ -488,15 +498,16 @@
     been developed more recently.  For hydrodynamics, both the
     modified Piecewise Parabolic Method (PPM) solver in \enzo\ will be
     implemented, as well as a new non-operator split variation to
-    improve asymmetry effects.  For Dark matter dynamics, \enzo's
-    Particle-Mesh (PM) method will be used.  For self-gravity, linear
-    solvers will be used on the entire mesh hierarchy.  Unigrid
+    improve asymmetry effects, and PPML for MHD.  For Dark matter
+    dynamics, \enzo's Particle-Mesh (PM) method will be used.  For
+    self-gravity, linear solvers will be used on the entire mesh
+    hierarchy to solve the Poisson equation self-consistenty.  Unigrid
     self-gravity can be computed efficiently in parallel using 3D
     FFT's for periodic boundary conditions, or parallel multigrid
     methods for non-periodic boundary conditions.  For AMR, initially
     a FAC-type method will be used, though a method of local
-    corrections (MLC) method may be implemented as well, which may
-    have better parallel efficiency due to reduced communication
+    corrections (MLC) method may additionally be implemented, which
+    may have better parallel efficiency due to reduced communication
     requirements.
 
     %-----------------------------------------------------------------------
@@ -505,7 +516,7 @@
 % Hierarchical parallel tasks
 
     To take advantage of the hierarchical parallel nature of modern
-    supercomputers, \cello\ will support multiple levels of
+    supercomputers, \cello\ will directly support multiple levels of
     parallelization in its methods and data structures.  This will
     include the coarse-grain parallelism to concurrently run
     simulations in an ensemble at the node or supernode level,
@@ -517,17 +528,19 @@
 
 % Hierarchical parallel technologies
 
-    This parallelization will be modularized (as much as
-    technologically feasible) to improve flexibility in choosing the
-    best method(s) of parallelization for a given problem on a given
-    parallel platform.  MPI (two-sided), MPI2 (one-sided), OpenMP, and
-    possibly UPC support will be included, as well as flexibility in
-    choosing hybrid schemes such as MPI + OpenMP, or MPI + UPC.  Other
-    schemes based on shared memory array libraries or POSIX pthreads
-    may also be considered.  Parallelization methods will be primarily
-    data parallelism, supporting both distributed memory and shared
-    memory in isolation or combination.  Support for collaberative
-    (functional) parallelism and pipelining will also be considered.
+    This parallelization will be modularized (as much as feasible
+    using object-oriented approach) to improve flexibility in choosing
+    the best method(s) of parallelization for a given problem on a
+    given parallel platform.  MPI-1 (two-sided), MPI-2 (one-sided),
+    OpenMP, and possibly UPC support will be included, as well as
+    flexibility in choosing hybrid schemes such as MPI + OpenMP, or
+    MPI + UPC.  Other schemes based on shared memory array libraries
+    or POSIX pthreads may also be considered.  Parallelization methods
+    will be primarily data parallelism, supporting both distributed
+    memory and shared memory in isolation or combination.  Support for
+    collaberative (functional) parallelism and pipelining will also be
+    considered, as will be GPU-based vector programming, depending
+    on how hardware platforms and middleware evolves.
 
 %  Load balancing
 
@@ -537,33 +550,33 @@
     the running simulation to make load balancing decisions, and will
     allow flexibility in optimizing the parallel distribution of
     computation, memory storage, or a combination of both.  Combining
-    flexible hierarchical parallelization schemes with hierarchical
-    load balancing algorithms, together with scalable methods and
-    efficient AMR data structures, are expected to lead to high
-    parallel efficiency and scalability.
+    1) scalable methods, 2) scalable and efficient AMR data
+    structures, 3) hierarchical parallelization schemes, and 4)
+    hierarchical load balancing algorithms, are expected to lead to an
+    application with overall high parallel efficiency and scalability
+    on platforms with a large amount of parallelism organized into
+    several hierarchical groups.
 
 %   Task scheduling (reduced synchronization)
 
     %-----------------------------------------------------------------------
     \subsubsection{Data structures}
 
-    
     As with \enzo, computations will be performed at multiple spacial
-    and temporal resolutions using adaptive mesh refinement (AMR).
-    This will permit the physics modules to capture the full range of
-    scales of interest, but without excessive computation and memory
-    storage.  However, the AMR approach and data structures will be
-    totally redesigned and reimplemented.  Compared to \enzo, the new
-    design will include improved load balancing, improved data
-    locality, reduced memory usage, improved memory scaling, support
-    for hierarchical parallelism (e.g.~MPI + OpenMP), control of task
-    sizes at different parallelization levels, and improved cache
-    usage through array blocking and padding techniques.
-    Additionally, the software's object-oriented design will reduce
-    overall code complexity and increase the flexibility and
-    modifyability of the implementations of the parallel distributed
-    data structures.
-
+    and temporal resolutions using some form of adaptive mesh
+    refinement (AMR).  This will permit the physics modules to capture
+    the full range of scales of interest, but without excessive
+    computation and memory storage.  However, the AMR approach and
+    data structures will be totally redesigned and reimplemented.
+    Compared to \enzo, the new design will include improved load
+    balancing, improved data locality, reduced memory usage, improved
+    memory scaling, support for hierarchical parallelism (e.g.~MPI +
+    OpenMP), control of task sizes at different parallelization
+    levels, and more efficient use of the memory hierarchy through
+    array blocking and padding techniques.  Additionally, the
+    software's object-oriented design will reduce overall code
+    complexity and increase the flexibility and modifyability of the
+    parallel distributed data structure implementations.
 
     % patches may be distributed (MPI), threaded (OMP), and blocked (cache)
 
@@ -575,15 +588,13 @@
     MPI task size, OMP thread task size, and cache block size and
     configuration.  Additionally, arrays may be padded to reduce cache
     thrashing effects for low-associativity caches, and may be
-    interleaved to improve data locality (or to ease use of existing
-    computational kernels that use interleaved array data, e.g.~the
-    PPML MHD solver).  These capabilities, together with efficient
-    methods and implementation of computations, are expected to lead
-    to high single-thread computational efficiency and data movement
-    through memory/cache hierarchies.  Implementation of the
-    \code{Array} class is expected to use the object-oriented
-    ``decorator pattern''.
-
+    interleaved to improve data locality (or to make it easier to
+    interface with existing computational kernels that use interleaved
+    array data, e.g.~the PPML MHD solver implementation).  These
+    capabilities, together with efficient methods and implementation
+    of computations, are expected to lead to high single-thread
+    computational efficiency and data movement through memory/cache
+    hierarchies.
 
     % Octree to improve load balancing and data structure complexity
     % patches to maintain efficiency
@@ -627,14 +638,24 @@
 \begin{description}
 \item[Year 1: ]\
 \begin{itemize}
-\item Data structures: unigrid
+\item Data structures: unigrid + particles
 \item Physics: hydrodynamics, MHD, self-gravity
 \item Methods: PPM, PPML, 3DFFT
 \end{itemize}
 
 \item[Year 2: ] 
+\begin{itemize}
+\item Data structures: AMR + particles
+\item Physics: ???
+\item Methods: FAC
+\end{itemize}
 
 \item[Year 3: ]
+\begin{itemize}
+\item Data structures: unigrid
+\item Physics: ???
+\item Methods: MLC
+\end{itemize}
 \end{description}
 %-----------------------------------------------------------------------
 \subsection{Features that will not be developed}
