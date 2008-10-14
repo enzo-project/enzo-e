@@ -1,17 +1,18 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
-    <title>Matvec Performance</title>
+    <title>Matrix-vector Multiply Performance</title>
   </head>
 
   <body>
-    <h1>Matvec Performance</h1>
+    <h1 align=center>Matrix-vector Multiply Performance</h1>
 
-    
+    <center>y <-- A * x, where A has 7-non-zero diagonals</center>
+<p>    
     <table>
 	<tr>
-	  <th>Optimization levels</th>
-	  <th>Matrix formats</th>
+	  <th>IBM POWER4: Optimization levels</th>
+	  <th>IBM POWER4: Matrix formats</th>
 	</tr>
 	<tr>
 	  <td>
@@ -21,6 +22,12 @@
 	    <img src="plot-format-datastar.png"></img>
 	  </td>
 	</tr>
+    </table>
+    <table>
+	<tr>
+	  <th>AMD Opteron (quad core): Optimization levels</th>
+	  <th>AMD Opteron (quad core): Matrix formats</th>
+	</tr>
 	<tr>
 	  <td>
 	    <img src="plot-opt-kraken.png"></img>
@@ -28,6 +35,12 @@
 	  <td>
 	    <img src="plot-format-kraken.png"></img>
 	  </td>
+	</tr>
+    </table>
+    <table>
+	<tr>
+	  <th>AMD Opteron: Optimization levels</th>
+	  <th>AMD Opteron: Matrix formats</th>
 	</tr>
 	<tr>
 	  <td>
@@ -37,6 +50,12 @@
 	    <img src="plot-format-padoan.png"></img>
 	  </td>
 	<tr>
+    </table>
+    <table>
+	<tr>
+	  <th>Intel Core 2 Duo: Optimization levels</th>
+	  <th>Intel Core 2 Duo: Matrix formats</th>
+	</tr>
 	  <td>
 	    <img src="plot-opt-krummhorn.png"></img>
 	  </td>
@@ -44,7 +63,13 @@
 	    <img src="plot-format-krummhorn.png"></img>
 	  </td>
 	<tr>
-
+    </table>
+    <table>
+	<tr>
+	  <th>Intel Core 2 Quad: Optimization levels</th>
+	  <th>Intel Core 2 Quad: Matrix formats</th>
+	</tr>
+	<tr>
 	  <td>
 	    <img src="plot-opt-stingmeyer.png"></img>
 	  </td>
@@ -57,7 +82,7 @@
     <address><a href="mailto:bordner@stingmeyer">James Bordner</a></address>
 <!-- Created: Tue Aug 19 12:55:28 PDT 2008 -->
 <!-- hhmts start -->
-Last modified: Wed Sep 24 12:57:53 PDT 2008
+Last modified: Wed Sep 24 16:23:46 PDT 2008
 <!-- hhmts end -->
   </body>
 </html>
