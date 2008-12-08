@@ -1,4 +1,4 @@
-current:ps
+current:ps html
 PAPER = `pwd | awk 'BEGIN{FS="/"}{print $$NF}'`
 
 ps:dvi
@@ -11,6 +11,8 @@ pdf2:ps2
 	ps2pdf $(PAPER)2.ps $(PAPER)2.pdf
 2up: ps
 	a2ps -M Letter -2 -o $(PAPER)2.ps $(PAPER).ps
+html:
+	tth $(PAPER).tex > $(PAPER).html
 
 dvi: include.tex uml
 	make -C uml
