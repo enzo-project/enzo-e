@@ -518,29 +518,26 @@ int main(int argc, char * argv[])
     HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				     0,1,&nums[6],vzm);
 
-    //--------------------------------------------------
-    // MATRIX CLEAR STENCIL OVERLAP
-    //--------------------------------------------------
-
-    if (is_mpi_fine) {
-
-      int refinements[3] = {2,2,2};
-
-      // removing breaks MG
-
-      HYPRE_SStructFACZeroCFSten (A,grid, part_fine, refinements);
-
-      // removing apparently does nothing
-
-      HYPRE_SStructFACZeroFCSten (A,grid, part_fine);
-
-      // removing breaks CG
-
-      HYPRE_SStructFACZeroAMRMatrixData (A, part_coarse, refinements);
-      
-    }
-
   }
+
+  //--------------------------------------------------
+  // MATRIX CLEAR STENCIL OVERLAP
+  //--------------------------------------------------
+
+  int refinements[3] = {2,2,2};
+
+  // removing breaks MG
+
+  HYPRE_SStructFACZeroCFSten (A,grid, part_fine, refinements);
+
+  // removing apparently does nothing
+
+  HYPRE_SStructFACZeroFCSten (A,grid, part_fine);
+
+  // removing breaks CG
+
+  HYPRE_SStructFACZeroAMRMatrixData (A, part_coarse, refinements);
+      
 
   delete [] v0;
   delete [] vxp;

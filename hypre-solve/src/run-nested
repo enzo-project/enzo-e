@@ -48,10 +48,12 @@ foreach N ($sizes)
          @ png_scale = $png_size / $N
          @ png_scale = $png_scale / 2
          echo "png_scale = $png_scale"
-         hypre-png $png_color $png_scale X.?
-         mv project-0.png $identifier-0.png
-         mv project-1.png $identifier-1.png
-         mv project-2.png $identifier-2.png
+         if (-e X.0) then
+            hypre-png $png_color $png_scale X.?
+            mv project-0.png $identifier-0.png
+            mv project-1.png $identifier-1.png
+            mv project-2.png $identifier-2.png
+         endif
       end
    end
 end
