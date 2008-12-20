@@ -34,12 +34,13 @@ Scalar and vector fields for each material, such as
       location = face
    }
 \end{verbatim}
+
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
 
 %=======================================================================
-\subsection{\code{Units} Component} \label{s:component-units}
+\subsection{\code{Units} Component} \label{ss:component-units}
 %=======================================================================
 
  Specify units and optional scalings for individual
@@ -47,8 +48,38 @@ Scalar and vector fields for each material, such as
  \note{Dynamic scaling, e.g.~to keep average of all fields near one.}
 
 %-----------------------------------------------------------------------
-\subsection{Use Cases}
+\subsubsection{Use Cases}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{Parameters}
+\subsubsection{Parameters}
 %-----------------------------------------------------------------------
+
+%=======================================================================
+\subsection{\code{Matter} Component} \label{ss:component-matter}
+%=======================================================================
+
+ Specify units and optional scalings for individual
+ fields.  
+ \note{Dynamic scaling, e.g.~to keep average of all fields near one.}
+
+%-----------------------------------------------------------------------
+\subsubsection{Use Cases}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsubsection{Parameters}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+   Matter {
+      type = dark
+   }
+\end{verbatim}
+
+\begin{verbatim}
+   Matter {
+      type  = gas_ideal
+      gamma = 1.4
+      region { (x < 0) || (x > 1) }
+   }
+\end{verbatim}

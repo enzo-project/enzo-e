@@ -87,6 +87,14 @@
         parallel communication, synchronization, distribution, and
         load-balancing of \code{Particles}.
 %
+ \item [Array (\S\ref{s:component-array}): ]
+%
+        The \code{Array} component is used for representing a single
+        array of up to $3$ dimensions.  The \code{Array} may include
+        options for MPI-, OMP-, UPC-, or GPU-based parallelism, as
+        well as options for controlling memory layout to improve cache
+        performance.
+%
  \item [Parallel (\S\ref{s:component-parallel}): ]
 %
         The \code{Parallel} component is used to specify and control
@@ -98,10 +106,18 @@
         blocking or nonblocking, patch-to-processor mapping,
         subblock-to-thread mapping, etc.
 %
- \item [Storage (\S\ref{s:component-storage}): ]
+ \item [Disk (\S\ref{s:component-disk}): ]
 %
-        The \code{Storage} component controls what, when, and how to
-        input and output large-scale data, primarily \code{Fields}.
+        The \code{Disk} component controls what, when, and how to
+        input and output large-scale data to long-term permanent
+        storage, primarily \code{Fields} (represented as
+        \code{Particles} or \code{Arrays}).
+%
+ \item [Memory (\S\ref{s:component-memory}): ]
+%
+        The \code{Memory} component controls dynamic memory
+        allocation, and includes features for monitoring memory usage,
+        improving performance, and verifying correctness.
 %
  \item [Recover (\S\ref{s:component-recover}): ]
 %
@@ -110,16 +126,26 @@
         maintaining restart data dumps, and may involve shutting down
         a processor or node and rebalancing the data, etc.
 %
- \item [User (\S\ref{s:component-user}): ]
+ \item [Parameters (\S\ref{s:component-parameters}): ]
 %
-        THe \code{User} component includes the \code{Parameters} and
-        \code{Monitor} components.  The \code{Parameters} component
+        The \code{Parameters} component
         reads in a parameter file or files, and provides the
-        application access to parameter values.  The \code{Monitor}
-        component controls what and when to output user-readable
-        summary information about the running application, such as
-        status summary, progress, warnings, errors, and performance
-        information.
+        application access to parameter values.
+%
+%
+ \item [Performance (\S\ref{s:component-performance}): ]
+%
+        The \code{Performance} component monitors performance such as
+        memory usage, computation amount, parallel communication,
+        parallel load balancing, disk storage, etc., and provides
+        access functions to be called from other components.
+%
+ \item [Monitor (\S\ref{s:component-monitor}): ]
+%
+        The \code{Monitor} component controls what and when to output
+        user-readable summary information about the running
+        application, such as status summary, progress, warnings,
+        errors, and performance information.
 %
  \item [Portal (\S\ref{s:component-portal}): ]
 %
@@ -139,10 +165,14 @@
 \input{component-field}
 \input{component-amr}
 \input{component-particles}
+\input{component-array}
 \input{component-parallel}
-\input{component-storage}
+\input{component-disk}
+\input{component-memory}
 \input{component-recover}
-\input{component-user}
+\input{component-parameters}
+\input{component-performance}
+\input{component-monitor}
 \input{component-portal}
 
 % \input{component-control}
