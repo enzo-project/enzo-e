@@ -1,0 +1,16 @@
+design             Cello Software Design Description
+FILES              File and subdirectory descriptions
+include.tex        Latex include file for subdirectories
+Makefile           Makefile for generating documents
+Makefile.1         Makefile for subdirectories
+manual-devel       Cello Developer Manual
+manual-reference   Cello Reference Manual
+manual-user        Cello User Manual
+notes              Cello Notes
+performance        Enzo Performance Issues and Proposed Solutions
+project            Cello Software Project Management Plan
+requirements       Cello Software Requirements Specification
+testing            Cello Software Test Document
+uml                directory of uml diagrams
+vision             Cello Vision and Scope Document
+

@@ -140,9 +140,9 @@ maintainable.
  either ``local'' or ``remote'', depending on whether the \code{grid}
  object is assigned to the local MPI process or not.
 
- Even though only ``local'' \code{grid} objects have storage allocated
+ Even though only ``local'' \code{grid} objects have memory allocated
  for data fields, each MPI process stores both local and remote
- \code{grid}s.  The total storage is thus \[ \numgrids (\numprocs |G|
+ \code{grid}s.  The total memory is thus \[ \numgrids (\numprocs |G|
  + |F|)\] where $\numgrids$ is the number of grids, $\numprocs$ is the
  number of MPI processes, $|G|$ is the size in bytes of a \code{grid}
  object excluding data fields, and $|F|$ is the size in bytes of the
@@ -168,9 +168,9 @@ is the \code{grid} data member storing the MPI rank of the processor to
 which the \code{grid} object is assigned, and \code{MyProcessorNumber}
 is the MPI rank of the executing processor).
 
-Even though only ``local'' \code{grid} objects have storage allocated
+Even though only ``local'' \code{grid} objects have memory allocated
 for data fields, all processors must store the member data for all
-\code{grid} objects.  The total storage is thus 
+\code{grid} objects.  The total memory is thus 
 \[ \numgrids (\numprocs |G| + |F|)\]
 where $\numgrids$ is the number of grids, $\numprocs$ is the number of
 processors, $|G|$ is the size in bytes of a
@@ -518,7 +518,7 @@ extra memory overhead involved is insignificant because the data
 fields are vastly larger than \enzo's individual C++ \code{grid} objects.
 However, as the number of processors increases, this memory overhead
 increases as well.  For the processor counts required for
-petascale-level computing, the storage overhead would dominate,
+petascale-level computing, the memory overhead would dominate,
 to the point where we would be memory rather than cpu limited.
 Thus, for \enzo\ to scale to the petascale level, the memory overhead for
 storing the AMR hierarchy must be reduced.
@@ -529,7 +529,7 @@ data structure can be approximated as $\sizefield + \numgrids \numprocs
 variable data, and the second term $\numgrids \numprocs \sizegrid$ is
 the overhead for storing the grid hierarchy data structure.  Here
 $\numgrids$ is the number of grid patches, $\numprocs$
-is the number of processors, and $\sizegrid$ is the storage required
+is the number of processors, and $\sizegrid$ is the memory required
 by a C++ \code{grid} object.
 
 One approach to reducing the size of the overhead term would be
@@ -537,7 +537,7 @@ to split the \code{grid} class into two subclasses \code{grid\_local}
 and \code{grid\_remote}, and use  \code{grid\_local} objects for local grids
 that contain field data, and \code{grid\_remote} objects for grid
 patches whose data fields reside on another processor.
-This modification would change the overhead storage term from
+This modification would change the overhead memory term from
 $\numgrids \numprocs \sizegrid$ to $\numgrids ((\numprocs-1)
 \sizegridremote + \sizegridlocal$), where $\sizegridremote$ is the
 size of the \code{grid\_remote} class and $\sizegridlocal$ is the size
@@ -588,7 +588,7 @@ current approach.
   grids, which may lie on different processors.  The memory overhead
   required for storing these ghost zones can be very high, especially
   when the grid is small.  The ``half-efficiency'' point in terms of
-  memory storage for cubical grid patch is $23^3$, meaning that a grid
+  memory for cubical grid patch is $23^3$, meaning that a grid
   of that size has roughly the same number of active zones as ghost
   zones, and is higher for non-cubical grids.
 
@@ -608,7 +608,7 @@ current approach.
   Currently, with all ghost zones in all grids being refreshed
   together, this latency is hidden.
 
-  However, it would be possible to optimize storage use versus hiding
+  However, it would be possible to optimize memory use versus hiding
   communication latency by partitioning grids into some small number
   of groups, and allocating ghost zones only a group at a time.  We
   propose to try this.
@@ -753,10 +753,10 @@ in ``half'' to maintain parent-child locality.
 
   Another improvement would be to distribute the entire grid hierarchy
   on each processor.  The easiest approach would be to store one copy
-  per shared memory node, which would decrease the memory storage
-  further by a factor equal to the number of processors per node. This
-  could easily be implemented with one of the hybrid parallel models
-  described in the next section.
+  per shared memory node, which would decrease the memory further by a
+  factor equal to the number of processors per node. This could easily
+  be implemented with one of the hybrid parallel models described in
+  the next section.
 
    While the above modifications to the AMR data structure should allow
    \enzo\ to run on machines with on the order of $10^4$ to $10^5$
