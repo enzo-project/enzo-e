@@ -32,3 +32,9 @@ clean:
         $(PAPER).pdf \
         $(PAPER).html \
         $(PAPER).toc
+distclean: clean
+	-@rm uml include.tex
+	-@rm makefile # Must be last!
+
+
+	

@@ -1,4 +1,4 @@
-ALL = \
+DOCS = \
       notes \
       vision \
       performance \
@@ -11,10 +11,13 @@ ALL = \
       manual-user \
       manual-reference
 
-.PHONY: all
-all: $(ALL)
+DIRS = $(DOCS) uml
+ 
 
-.PHONY: $(ALL)
+.PHONY: all
+all: $(DOCS)
+
+.PHONY: $(DOCS)
 
 notes:
 	cd notes; ln -sf ../Makefile.1 makefile
@@ -53,7 +56,7 @@ manual-reference:
 #-----------------------------------------------------------------------
 
 .PHONY: clean
-clean: $(patsubst %,%-clean,$(ALL))
+clean: $(patsubst %,%-clean,$(DIRS))
 	-rm -f *~
 
 %-clean:
@@ -62,8 +65,8 @@ clean: $(patsubst %,%-clean,$(ALL))
 #-----------------------------------------------------------------------
 
 .PHONY: distclean
-distclean: $(patsubst %,%-distclean,$(ALL))
-	-rm -f *~
+distclean: $(patsubst %,%-distclean,$(DIRS))
+	-@rm -f *~
 %-distclean:
 	$(MAKE) -C $* clean
 	rm $*/include.tex

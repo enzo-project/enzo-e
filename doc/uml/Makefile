@@ -11,5 +11,8 @@ all: $(OBJS)
 
 .PHONY: clean
 clean:
-	rm -rf *.1 *.log *~
+	-@rm -rf *.log *~
+distclean: clean
+	-@rm -rf *.1 
+
 
