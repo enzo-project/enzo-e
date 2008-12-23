@@ -68,6 +68,5 @@ clean: $(patsubst %,%-clean,$(DIRS))
 distclean: $(patsubst %,%-distclean,$(DIRS))
 	-@rm -f *~
 %-distclean:
-	$(MAKE) -C $* clean
-	rm $*/include.tex
-	rm $*/makefile
+	$(MAKE) -C $* distclean
+
