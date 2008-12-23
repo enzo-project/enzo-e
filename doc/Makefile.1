@@ -25,4 +25,10 @@ include.tex:
 	ln -s ../include.tex .
 
 clean:
-	-@rm -f *~ $(PAPER).dvi *.aux $(PAPER).log $(PAPER).ps $(PAPER).pdf
+	-@rm -f *~ *.aux \
+        $(PAPER).dvi \
+        $(PAPER).log \
+        $(PAPER).ps \
+        $(PAPER).pdf \
+        $(PAPER).html \
+        $(PAPER).toc
