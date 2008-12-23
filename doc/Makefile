@@ -5,6 +5,7 @@ ALL = \
       project \
       requirements \
       design \
+      devel-uml \
       testing \
       manual-devel \
       manual-user \
@@ -33,6 +34,9 @@ requirements:
 design: 
 	cd design; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C design
+devel-uml: 
+	cd devel-uml; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C devel-uml
 testing: 
 	cd testing; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C testing
