@@ -1,6 +1,7 @@
 $Id$
 
 design             Cello Software Design Description
+devel-uml          Cello UML Diagrams
 FILES              File and subdirectory descriptions
 include.tex        Latex include file for subdirectories
 Makefile           Makefile for generating documents
