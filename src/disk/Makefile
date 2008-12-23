@@ -53,8 +53,8 @@ install: install-include test_hdf5 $(OBJS)
 .PHONY: install-include
 
 install-include:
-	ln -sf `pwd`/storage.hpp  $(TOP)/include
-	ln -sf `pwd`/hdf5.hpp     $(TOP)/include/storage_hdf5_.hpp
+	ln -sf `pwd`/disk.hpp  $(TOP)/include
+	ln -sf `pwd`/hdf5.hpp  $(TOP)/include/disk_hdf5_.hpp
 
 #=======================================================================
 # INCLUDES 

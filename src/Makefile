@@ -18,14 +18,14 @@
 # Directories
 #
 # (*) data
-# (*) storage
+# (*) disk
 # (*) test
 # ( ) performance
 # ( ) error
 #
 #-----------------------------------------------------------------------
 
-DIR = data storage test performance error
+DIR = data disk test performance error
 
 #=======================================================================
 # TARGETS
