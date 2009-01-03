@@ -532,9 +532,9 @@ void Hypre::init_linear (Parameters          & parameters,
 
     if (level->index() > 0) {
 
-      // 2. Clean up stencil connections between levels
+      //      // 2. Clean up stencil connections between levels
 
-      init_matrix_clear_(*level);
+      //      init_matrix_clear_(level->index());
 
       // 3. Set matrix values between levels
 
@@ -551,6 +551,13 @@ void Hypre::init_linear (Parameters          & parameters,
       }
     }
   }
+
+   for (int part = 1; part < hierarchy.num_levels(); part++) {
+
+       // 2. Clean up stencil connections between levels
+
+       init_matrix_clear_(part);
+   }
 
   //--------------------------------------------------
   // Initialize B_ according to density
@@ -1352,16 +1359,17 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 
 /// Clean up stencil connections between parts for FAC solver
 
-void Hypre::init_matrix_clear_ (Level & level)
+void Hypre::init_matrix_clear_ (int part)
 {
   // WARNING: hard-coding refinement factor of 2
   int r_factors[3] = {2,2,2}; 
-  int part = level.index();
-  if (part > 0) {
+  //  if (part > 0) {
 
     // Clear stencil values from coarse to fine part
 
-    HYPRE_SStructFACZeroCFSten (A_,grid_, part, r_factors);
+  
+  printf ("HYPRE_SStructFACZeroCFSten\n");
+  HYPRE_SStructFACZeroCFSten (A_,grid_, part, r_factors);
     if (trace_hypre) {
       fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroCFSten (%p,%p,%d,%d %d %d);\n",
 	      __FILE__,__LINE__,pmpi->ip(),
@@ -1372,6 +1380,7 @@ void Hypre::init_matrix_clear_ (Level & level)
 
     // Clear stencil values from fine to coarse part
 
+    printf ("HYPRE_SStructFACZeroFCSten\n");
     HYPRE_SStructFACZeroFCSten (A_,grid_, part);
     if (trace_hypre) {
       fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroFCSten (%p,%p,%d);\n",
@@ -1383,7 +1392,10 @@ void Hypre::init_matrix_clear_ (Level & level)
 
     // Set overlapped areas of part with identity
 
-    HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
+    if (part > 0) {
+
+      printf ("HYPRE_SStructFACZeroAMRMatrixData\n");
+      HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
     if (trace_hypre) {
       fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroAMRMatrixData (%p,%d,%d %d %d);\n",
 	      __FILE__,__LINE__,pmpi->ip(),
@@ -1391,10 +1403,11 @@ void Hypre::init_matrix_clear_ (Level & level)
 	      );
       fflush(mpi_fp);
     }
+    }  
 
     // Need to clear under rhs also
     //   HYPRE_SStructFACZeroAMRVectorData(B_, plevels, prefinements);
-  }
+    //  }
 }
 
 //------------------------------------------------------------------------
