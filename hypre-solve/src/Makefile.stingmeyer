@@ -1,0 +1,11 @@
+include Make.include
+
+MPCPP = mpiCC
+CPP = g++
+
+# HYPRE
+
+HYPREDEF = 
+HYPREINC = -I$(HOME)/hypre/include
+HYPRELIB = -L$(HOME)/hypre/lib -lHYPRE 
+

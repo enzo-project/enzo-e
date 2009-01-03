@@ -1,12 +1,10 @@
 include Make.include
 MPCPP = mpiCC
 CPP = g++
-HDF5_PATH = /usr
 
 # HYPRE
 
 HYPREDEF = 
 HYPREINC = -I$(HOME)/hypre/src/hypre/include
 HYPRELIB = -L$(HOME)/hypre/src/hypre/lib -lHYPRE 
-
 

@@ -23,12 +23,6 @@ PNGDEF = -DNO_FREETYPE
 PNGINC = 
 PNGLIB = -lpng
 
-# HYPRE
-
-HYPREDEF = 
-HYPREINC = -I$(HOME)/hypre/src/hypre/include
-HYPRELIB = -L$(HOME)/hypre/src/hypre/lib -lHYPRE 
-
 # HDF5
 
 HDF5DEF = 
