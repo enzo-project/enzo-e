@@ -68,6 +68,11 @@ void usage(int mpi_rank,char ** argv) {
     } \
   }
 
+#define TEMPORARY(X) { \
+   printf ("%s:%d TEMPORARY: " X " is temporary code that should be removed\n",__FILE__,__LINE__); \
+   fflush(stdout); \
+}
+
 //======================================================================
 // GLOBALS!
 //======================================================================
