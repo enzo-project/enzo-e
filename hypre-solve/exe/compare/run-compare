@@ -1,0 +1,45 @@
+#/bin/tcsh -f
+#-----------------------------------------------------------------------
+#
+# run hypre-test and hypre-solve on the same nested-grid problem
+#
+# input files:
+#
+#   in.cg   hypre-solve input file
+#
+# output files:
+#
+#   h[ts]/project-[0-2].png
+#
+#-----------------------------------------------------------------------
+
+set BIN = /home/bordner/cello/hypre-solve/bin
+set enlarge = 8  # hypre-png enlargement factor
+
+# Run hypre-test test problem
+# Save projections in project-ht[0-2].png
+
+if (! -e ht) then
+   mkdir ht
+endif
+
+cd ht
+  rm -f X.?
+  mpirun -np 2 $BIN/hypre-test 16 cg >& out.hypre-test
+  $BIN/hypre-png 0 $enlarge X.?
+cd ..
+
+#-----------------------------------------------------------------------
+
+# Run hypre-solve test problem in hs subdirectory
+
+if (! -e hs) then
+   mkdir hs
+endif
+
+cd hs
+  rm -f X.?
+  cp ../in.cg .
+  mpirun -np 2 $BIN/hypre-solve in.cg >& out.hypre-solve
+  $BIN/hypre-png 0 $enlarge X.?
+cd ..
