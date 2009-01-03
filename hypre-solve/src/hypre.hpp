@@ -59,7 +59,7 @@ private:
   // init_matrix() functions
 
   void init_matrix_stencil_    (Grid & grid);
-  void init_matrix_clear_      (Level & level);
+  void init_matrix_clear_      (int part);
   void init_matrix_nonstencil_ (Grid & grid)
   { init_nonstencil_ (grid, "matrix"); };
 
