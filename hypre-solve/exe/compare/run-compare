@@ -14,7 +14,10 @@
 #-----------------------------------------------------------------------
 
 set bin     = /home/bordner/cello/hypre-solve/bin
+
 set enlarge = 8  # hypre-png enlargement factor
+set color   = 3  # hypre-png color map
+set size    = 32 # problem grid size
 
 foreach p (1 2)
 
@@ -27,8 +30,8 @@ foreach p (1 2)
 
    cd ht$p
      rm -f X.?
-     mpirun -np $p $bin/hypre-test 16 cg >& out.hypre-test
-     $bin/hypre-png 0 $enlarge X.?
+     mpirun -np $p $bin/hypre-test $size cg >& out.hypre-test
+     $bin/hypre-png $color $enlarge X.?
    cd ..
 
    #-----------------------------------------------------------------------
@@ -42,7 +45,7 @@ foreach p (1 2)
    cd hs$p
      rm -f X.?
      cp ../in.cg.$p .
-     mpirun -np $p $bin/hypre-solve in.cg.$p >& out.hypre-solve
-     $bin/hypre-png 0 $enlarge X.?
+     mpirun -np $p $bin/hypre-solve in.cg.$size.$p >& out.hypre-solve
+     $bin/hypre-png $color $enlarge X.?
    cd ..
 end
