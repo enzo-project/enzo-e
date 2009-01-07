@@ -30,7 +30,7 @@ foreach N ($sizes)
 
          rm -f X.?
 
-         mpirun -np $P hypre-test $N $solver >& $outfile 
+         mpirun -np $P ./hypre-test $N $solver >& $outfile 
 
          # Evaluate result
 
@@ -49,7 +49,7 @@ foreach N ($sizes)
          @ png_scale = $png_scale / 2
          echo "png_scale = $png_scale"
          if (-e X.0) then
-            hypre-png $png_color $png_scale X.?
+            ./hypre-png $png_color $png_scale X.?
             mv project-0.png $identifier-0.png
             mv project-1.png $identifier-1.png
             mv project-2.png $identifier-2.png
