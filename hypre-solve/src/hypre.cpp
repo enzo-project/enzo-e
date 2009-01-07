@@ -841,6 +841,8 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
     if (!l1) printf ("ig3[%d][1] = %d\n",j1,ig3[j1][1]);
     assert (l1);
 
+    TEMPORARY("Removing is_local and is_adjacent_local for nonstencil entries");
+
     for (face=0; face<2; face++) {
 
       // Loop over face zones that are aligned with coarse zones (hence "+= r")
@@ -894,8 +896,9 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 				{0,-1,0},
 				{-face*(r-1),0,-1}};
 
-	      if (grid.is_local()) {
-		//	      if (1) {
+	      // @@@ TEMPORARY @@@
+	      //	      if (grid.is_local()) {
+	      if (1) {
 
 		if (debug) {
 		  printf ("ip=%d %s:%d fine-coarse %d - %d\n",
@@ -999,8 +1002,9 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    // GRAPH ENTRY: COARSE-TO-FINE
 	    //--------------------------------------------------
 
-	    if (adjacent->is_local()) {
-	      //	    if (1) {
+	    // TEMPORARY 
+	    //	    if (adjacent->is_local()) {
+	    if (1) {
 	      if (phase == "graph") {
 
 		int diggs[][3] = {{1,0,0},
