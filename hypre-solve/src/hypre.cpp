@@ -651,9 +651,9 @@ void Hypre::init_linear (Parameters          & parameters,
 
   // Write the vector to a file for debugging
 
-  if (parameters.value("dump_a") == "true") HYPRE_SStructMatrixPrint ("A",A_,1);
-  if (parameters.value("dump_b") == "true") HYPRE_SStructVectorPrint ("B",B_,1);
-  if (parameters.value("dump_x") == "true") HYPRE_SStructVectorPrint ("X0",X_,1);
+  if (parameters.value("dump_a") == "true") HYPRE_SStructMatrixPrint ("A",A_,0);
+  if (parameters.value("dump_b") == "true") HYPRE_SStructVectorPrint ("B",B_,0);
+  if (parameters.value("dump_x") == "true") HYPRE_SStructVectorPrint ("X0",X_,0);
 
 }
 
