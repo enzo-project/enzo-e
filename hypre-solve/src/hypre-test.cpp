@@ -174,7 +174,7 @@ int main(int argc, char * argv[])
   HYPRE_SStructGridCreate (MPI_COMM_WORLD, 3, num_parts, &grid);
   if (trace_hypre) {
     fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGridCreate ()\n",
-	    __FILE__,__LINE__,mpi_rank,
+	     __FILE__,__LINE__,mpi_rank);
     fflush(mpi_fp);
   } // trace_hypre
 
@@ -189,6 +189,11 @@ int main(int argc, char * argv[])
   if (is_mpi_coarse) {
 
     HYPRE_SStructGridSetExtents(grid, part_coarse, lower_coarse, upper_coarse);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGridSetExtents()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   }
 
@@ -201,14 +206,35 @@ int main(int argc, char * argv[])
 
     HYPRE_SStructGridSetExtents(grid, part_fine,   lower_fine,   upper_fine);
 
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGridSetExtents()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
+
   }
 
   HYPRE_SStructGridSetVariables(grid, part_fine,   1, variable_type);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGridSetVariables()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructGridSetVariables(grid, part_coarse, 1, variable_type);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGridSetVariables()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   // Assemble the grid
   
   HYPRE_SStructGridAssemble (grid);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGridAssemble()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   //------------------------------------------------------------
   // CREATE HYPRE STENCIL
@@ -226,14 +252,54 @@ int main(int argc, char * argv[])
 		       {  0, 0,-1 } };
 
   HYPRE_SStructStencilCreate (3,7,&stencil);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructStencilCreate()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   HYPRE_SStructStencilSetEntry (stencil, 0, entries[0], 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructStencilSetEntry()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructStencilSetEntry (stencil, 1, entries[1], 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructStencilSetEntry()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructStencilSetEntry (stencil, 2, entries[2], 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructStencilSetEntry()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructStencilSetEntry (stencil, 3, entries[3], 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructStencilSetEntry()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructStencilSetEntry (stencil, 4, entries[4], 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructStencilSetEntry()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructStencilSetEntry (stencil, 5, entries[5], 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructStencilSetEntry()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructStencilSetEntry (stencil, 6, entries[6], 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructStencilSetEntry()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   //------------------------------------------------------------
   // CREATE HYPRE GRAPH
@@ -245,11 +311,26 @@ int main(int argc, char * argv[])
   // Create the graph
 
   HYPRE_SStructGraphCreate (MPI_COMM_WORLD, grid, &graph);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphCreate()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   // Initialize stencil part
 
   HYPRE_SStructGraphSetStencil (graph, part_coarse, 0, stencil);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphSetStencil()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructGraphSetStencil (graph, part_fine,   0, stencil);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphSetStencil()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   // Initialize nonstencil part
 
@@ -295,18 +376,38 @@ int main(int argc, char * argv[])
 	    // 000 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries 
 	      (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    ++ ind_fine[j1]; 	  
 	    // 010 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries
 	      (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    ++ ind_fine[j2];	  
 	    // 011 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries
 	      (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    -- ind_fine[j1];	  
 	    // 001 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries
 	      (graph, part_fine, ind_fine, 0, part_coarse, ind_coarse, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    -- ind_fine[j2];	  
 	    // 000 ---------------------------------------------
 	  }
@@ -349,35 +450,75 @@ int main(int argc, char * argv[])
 	    HYPRE_SStructGraphAddEntries (graph, 
 					  part_coarse, ind_coarse, 0, 
 					  part_fine, ind_fine, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    ++ ind_fine[j0]; 	  
 
 	    // 100 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries 
 	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    ++ ind_fine[j1];	  
 	    // 110 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries 
 	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    -- ind_fine[j0];	  
 	    // 010 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries 
 	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    ++ ind_fine[j2];	  
 	    // 011 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries 
 	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    ++ ind_fine[j0]; 	  
 	    // 111 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries 
 	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    -- ind_fine[j1];	  
 	    // 101 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries 
 	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    -- ind_fine[j0];	  
 	    // 001 ---------------------------------------------
 	    HYPRE_SStructGraphAddEntries 
 	      (graph, part_coarse, ind_coarse, 0, part_fine, ind_fine, 0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAddEntries()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    -- ind_fine[j2];	  
 	    // 000 ---------------------------------------------
 	  }
@@ -387,6 +528,11 @@ int main(int argc, char * argv[])
   }
 
   HYPRE_SStructGraphAssemble (graph);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGraphAssemble()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   //============================================================
   // CREATE HYPRE MATRIX A AND VECTORS X,B
@@ -398,8 +544,23 @@ int main(int argc, char * argv[])
 
   HYPRE_SStructVector  B;       
   HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid,  &B);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorCreate()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructVectorSetObjectType (B,HYPRE_SSTRUCT);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SSTRUCT()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructVectorInitialize (B);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorInitialize()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   double fine_h   = 0.5 * BOX / N;  // Fine mesh width
 
@@ -418,23 +579,83 @@ int main(int argc, char * argv[])
     double bval = -4.0 * G * PI * MASS / (fine_h*fine_h*fine_h);
 
     HYPRE_SStructVectorAddToValues (B, part_fine, ind3[0], 0, &bval);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructVectorAddToValues (B, part_fine, ind3[1], 0, &bval);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructVectorAddToValues (B, part_fine, ind3[2], 0, &bval);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructVectorAddToValues (B, part_fine, ind3[3], 0, &bval);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructVectorAddToValues (B, part_fine, ind3[4], 0, &bval);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructVectorAddToValues (B, part_fine, ind3[5], 0, &bval);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructVectorAddToValues (B, part_fine, ind3[6], 0, &bval);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructVectorAddToValues (B, part_fine, ind3[7], 0, &bval);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   }
 
   HYPRE_SStructVectorAssemble (B);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAssemble()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   // Create the hypre matrix A
 
   HYPRE_SStructMatrix  A;
   HYPRE_SStructMatrixCreate (MPI_COMM_WORLD, graph, &A);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixCreate()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructMatrixSetObjectType (A,HYPRE_SSTRUCT);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SSTRUCT()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructMatrixInitialize (A);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixInitialize()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   // Initialize A
 
@@ -474,18 +695,53 @@ int main(int argc, char * argv[])
 
     HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
 				     0,1,&nums[0],v0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
 				     0,1,&nums[1],vxp);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
 				     0,1,&nums[2],vxm);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
 				     0,1,&nums[3],vyp);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
 				     0,1,&nums[4],vym);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
 				     0,1,&nums[5],vzp);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_coarse,lower_coarse,upper_coarse,
 				     0,1,&nums[6],vzm);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   }
 
   if (is_mpi_fine) {
@@ -531,18 +787,53 @@ int main(int argc, char * argv[])
 
     HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				     0,1,&nums[0],v0);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				     0,1,&nums[1],vxp);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				     0,1,&nums[2],vxm);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				     0,1,&nums[3],vyp);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				     0,1,&nums[4],vym);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				     0,1,&nums[5],vzp);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructMatrixSetBoxValues (A,part_fine,lower_fine,upper_fine,
 				     0,1,&nums[6],vzm);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixSetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   }
 
@@ -555,14 +846,29 @@ int main(int argc, char * argv[])
   // removing breaks MG
 
   HYPRE_SStructFACZeroCFSten (A,grid, part_fine, refinements);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACZeroCFSten()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   // removing apparently does nothing
 
   HYPRE_SStructFACZeroFCSten (A,grid, part_fine);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACZeroFCSten()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   // removing breaks CG
 
   HYPRE_SStructFACZeroAMRMatrixData (A, part_coarse, refinements);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACZeroAMRMatrixData()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
       
 
   delete [] v0;
@@ -637,11 +943,21 @@ int main(int argc, char * argv[])
 	    value = a * fine_h;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    // update off-diagonal
 	    entry = 0;
 	    value = -value;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    ++ ind_fine[j1]; 	  
 	    // 010 ---------------------------------------------
 	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
@@ -651,11 +967,21 @@ int main(int argc, char * argv[])
 	    value = a * fine_h;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    // update off-diagonal
 	    entry = 0;
 	    value = -value;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    ++ ind_fine[j2];	  
 	    // 011 ---------------------------------------------
 	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
@@ -665,11 +991,21 @@ int main(int argc, char * argv[])
 	    value = a * fine_h;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    // update off-diagonal
 	    entry = 0;
 	    value = -value;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    -- ind_fine[j1];	  
 	    // 001 ---------------------------------------------
 	    icount = ishift + index(ind_fine[0],ind_fine[1],ind_fine[2],N);
@@ -679,11 +1015,21 @@ int main(int argc, char * argv[])
 	    value = a * fine_h;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    // update off-diagonal
 	    entry = 0;
 	    value = -value;
 	    HYPRE_SStructMatrixAddToValues 
 	      (A, part_fine, ind_fine, 0, num_entries, &entry, &value);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    -- ind_fine[j2];	  
 	    // 000 ---------------------------------------------
 
@@ -736,6 +1082,11 @@ int main(int argc, char * argv[])
 	      value = (1./8.) * coarse_h;
 	      HYPRE_SStructMatrixAddToValues 
 		(A, part_coarse, ind_coarse, 0, num_entries, &entry, &value);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAddToValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 	    }
 	  }
 	}
@@ -747,14 +1098,39 @@ int main(int argc, char * argv[])
   delete [] count_fine;
 
   HYPRE_SStructMatrixAssemble (A);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructMatrixAssemble()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   // Create the hypre vector solution X
 
   HYPRE_SStructVector  X;
   HYPRE_SStructVectorCreate (MPI_COMM_WORLD, grid,  &X);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorCreate()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructVectorSetObjectType (X,HYPRE_SSTRUCT);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SSTRUCT()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructVectorInitialize (X);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorInitialize()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   HYPRE_SStructVectorAssemble (X);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorAssemble()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   //------------------------------------------------------------
   // Solve the linear system
@@ -771,35 +1147,110 @@ int main(int argc, char * argv[])
     //--------------------------------------------------
 
     HYPRE_SStructFACCreate(MPI_COMM_WORLD, &solver);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACCreate()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
     int num_parts = 2;
     HYPRE_SStructFACSetMaxLevels(solver,  num_parts);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetMaxLevels()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
     int parts[2] = {0,1};
     HYPRE_SStructFACSetPLevels(solver, num_parts, parts);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetPLevels()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
     int refinements[2][3] = {{2,2,2},{2,2,2}};
     HYPRE_SStructFACSetPRefinements(solver, num_parts, refinements);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetPRefinements()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
     // solver parameters
 
     HYPRE_SStructFACSetNumPreRelax(solver,      2);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetNumPreRelax()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructFACSetNumPostRelax(solver,     2);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetNumPostRelax()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructFACSetCoarseSolverType(solver, 1);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetCoarseSolverType()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructFACSetRelaxType(solver,        2);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetRelaxType()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
     HYPRE_SStructFACSetMaxIter(solver,itmax);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetMaxIter()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructFACSetTol(solver,    restol);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetTol()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
     HYPRE_SStructFACSetLogging(solver, 1);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetLogging()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
     HYPRE_SStructFACSetup2(solver, A, B, X);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetup2()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
     // SOLVE
     HYPRE_SStructFACSolve3(solver, A, B, X);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSolve3()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
     HYPRE_SStructFACGetNumIterations(solver, &iter);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACGetNumIterations()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructFACGetFinalRelativeResidualNorm(solver, &resid);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACGetFinalRelativeResidualNorm()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
 
   } else {
 
@@ -808,12 +1259,42 @@ int main(int argc, char * argv[])
     //--------------------------------------------------
 
     HYPRE_SStructBiCGSTABCreate(MPI_COMM_WORLD, &solver);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructBiCGSTABCreate()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructBiCGSTABSetLogging(solver, 1);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructBiCGSTABSetLogging()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructBiCGSTABSetup(solver, A, B, X);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructBiCGSTABSetup()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     // SOLVE
     HYPRE_SStructBiCGSTABSolve(solver, A, B, X);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructBiCGSTABSolve()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructBiCGSTABGetNumIterations(solver, &iter);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructBiCGSTABGetNumIterations()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(solver, &resid);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   }
 
   printf ("solver:     %s\n", use_fac ? "FAC" : "BiCGSTAB");
@@ -822,8 +1303,18 @@ int main(int argc, char * argv[])
 
   if (use_fac) {
     HYPRE_SStructFACDestroy2(solver);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACDestroy2()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   } else {
     HYPRE_SStructBiCGSTABDestroy(solver);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructBiCGSTABDestroy()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
   }
 
   //------------------------------------------------------------
@@ -862,6 +1353,11 @@ int main(int argc, char * argv[])
 
     double * x_coarse = new double [N*N*N];
     HYPRE_SStructVectorGetBoxValues (X,part_coarse,lower_coarse,upper_coarse,0,x_coarse);  
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorGetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     for (i0=0; i0<N; i0++) {
       for (i1=0; i1<N; i1++) {
 	for (i2=0; i2<N; i2++) {
@@ -898,6 +1394,11 @@ int main(int argc, char * argv[])
 
     double * x_fine = new double [N*N*N];
     HYPRE_SStructVectorGetBoxValues (X,part_fine,lower_fine,upper_fine,0,x_fine);  
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructVectorGetBoxValues()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
     for (int i0=0; i0<N; i0++) {
       for (int i1=0; i1<N; i1++) {
 	for (int i2=0; i2<N; i2++) {
