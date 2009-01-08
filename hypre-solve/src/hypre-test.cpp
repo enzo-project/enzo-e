@@ -19,6 +19,12 @@
 #include "HYPRE_sstruct_ls.h"
 
 //----------------------------------------------------------------------
+// DEBUG
+//----------------------------------------------------------------------
+
+const int    trace_hypre = 1;
+
+//----------------------------------------------------------------------
 // PARAMETERS
 //----------------------------------------------------------------------
 
@@ -148,6 +154,15 @@ int main(int argc, char * argv[])
   }
 
   //------------------------------------------------------------
+  // OPEN HYPRE TRACE OUTPUT FILE
+  //------------------------------------------------------------
+
+  if (trace_hypre) {
+    sprintf (mpi_file,"hypre-test.out.%d",mpi_rank);
+    mpi_fp = fopen (mpi_file,"w");
+  } // trace_hypre
+
+  //------------------------------------------------------------
   // CREATE AND INITIALIZE HYPRE 'GRID'
   //    Out: grid  (a two-level hypre grid)
   //------------------------------------------------------------
@@ -157,6 +172,12 @@ int main(int argc, char * argv[])
   // Create the grid
 
   HYPRE_SStructGridCreate (MPI_COMM_WORLD, 3, num_parts, &grid);
+  if (trace_hypre) {
+    fprintf (mpi_fp,"%s:%d %d HYPRE_SStructGridCreate ()\n",
+	    __FILE__,__LINE__,mpi_rank,
+    fflush(mpi_fp);
+  } // trace_hypre
+
 
   // Initialize coarse grid extents on coarse grid MPI process
 
