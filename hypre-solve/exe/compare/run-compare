@@ -15,22 +15,26 @@
 
 set bin     = /home/bordner/cello/hypre-solve/bin
 
-set enlarge = 8  # hypre-png enlargement factor
-set color   = 3  # hypre-png color map
+set color   = 0  # hypre-png color map
 set size    = 32 # problem grid size
+set enlarge = 4 # hypre-png enlargement factor
 
-foreach p (1 2)
+foreach procs (1 2)
+
+ foreach solver (cg mg)
 
    # Run hypre-test test problem
    # Save projections in project-ht[0-2].png
 
-   if (! -e ht$p) then
-      mkdir ht$p
+   set dir = ht$procs$solver
+
+   if (! -e $dir) then
+      mkdir $dir
    endif
 
-   cd ht$p
+   cd $dir
      rm -f X.?
-     mpirun -np $p $bin/hypre-test $size cg >& out.hypre-test
+     mpirun -np $procs $bin/hypre-test $size $solver >& out.hypre-test
      $bin/hypre-png $color $enlarge X.?
    cd ..
 
@@ -38,14 +42,17 @@ foreach p (1 2)
 
    # Run hypre-solve test problem in hs subdirectory
 
-   if (! -e hs$p) then
-      mkdir hs$p
+   set dir = hs$procs$solver
+
+   if (! -e $dir) then
+      mkdir $dir
    endif
 
-   cd hs$p
+   cd $dir
      rm -f X.?
-     cp ../in.cg.$p .
-     mpirun -np $p $bin/hypre-solve in.cg.$size.$p >& out.hypre-solve
+     cp ../in.$solver.$size.$procs .
+     mpirun -np $procs $bin/hypre-solve in.$solver.$size.$procs >& out.hypre-solve
      $bin/hypre-png $color $enlarge X.?
    cd ..
-end
+ end # solver
+end # procs
