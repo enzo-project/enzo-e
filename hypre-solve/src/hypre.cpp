@@ -781,6 +781,7 @@ void Hypre::evaluate (Hierarchy & hierarchy)
 
 void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 {
+  _TRACE_;
 
   int id = grid.id();
   char filename[10];
