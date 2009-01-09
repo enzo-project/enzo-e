@@ -26,7 +26,7 @@
 //----------------------------------------------------------------------
 
 const int debug        = 0;
-const int trace        = 0;
+const int trace        = 1;
 const int trace_hypre  = 1;
 
 //----------------------------------------------------------------------
@@ -1007,7 +1007,9 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    // GRAPH ENTRY: COARSE-TO-FINE
 	    //--------------------------------------------------
 
+	    _TRACE_;
 	    if (adjacent->is_local()) {
+	      _TRACE_;
 	      if (phase == "graph") {
 
 		int diggs[][3] = {{1,0,0},
