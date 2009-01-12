@@ -4,9 +4,6 @@
 
 /**
  * 
- * @bug Need to modify init_grid_faces_() to include non-local grids with
- * local parents
- * 
  * @file
  * @author James Bordner <jobordner@ucsd.edu>
  *
@@ -288,16 +285,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
   while (level = itl++) {
 
-    // --------------------------------------------------
-    // BUG FIX TEST
-    //
-    // OLD (WITH BUG):
-    //    ItLevelGridsLocal itg (*level);
-    //
-    // NEW (WITHOUT BUG):
     ItLevelGridsAll itg (*level);
-    // --------------------------------------------------
-
 
     if (debug) printf ("Level %d\n",level->index());
     while (Grid * grid = itg++) {
