@@ -22,7 +22,12 @@
 // DEBUG
 //----------------------------------------------------------------------
 
+const int    trace       = 1;
 const int    trace_hypre = 1;
+
+#define TRACE \
+  if (trace) printf ("TRACE %d %s:%d\n",mpi_rank,__FILE__,__LINE__); \
+  fflush(stdout);
 
 //----------------------------------------------------------------------
 // PARAMETERS
@@ -1161,6 +1166,25 @@ int main(int argc, char * argv[])
       fflush(mpi_fp);
     } // trace_hypre
 
+    TEMPORARY("itmax forced to 20");
+    //    HYPRE_SStructFACSetMaxIter(solver,itmax);
+    HYPRE_SStructFACSetMaxIter(solver,20);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetMaxIter()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
+
+    TEMPORARY("rtol forced to 1e-6");
+    //    HYPRE_SStructFACSetTol(solver,    restol);
+    HYPRE_SStructFACSetTol(solver,    1e-6);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetTol()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
+
+
     int parts[2] = {0,1};
     HYPRE_SStructFACSetPLevels(solver, num_parts, parts);
     if (trace_hypre) {
@@ -1169,7 +1193,7 @@ int main(int argc, char * argv[])
       fflush(mpi_fp);
     } // trace_hypre
 
-    int refinements[2][3] = {{2,2,2},{2,2,2}};
+    int refinements[2][3] = {{1,1,1},{2,2,2}};
     HYPRE_SStructFACSetPRefinements(solver, num_parts, refinements);
     if (trace_hypre) {
       fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetPRefinements()\n",
@@ -1177,26 +1201,9 @@ int main(int argc, char * argv[])
       fflush(mpi_fp);
     } // trace_hypre
 
-    // solver parameters
+    TEMPORARY("Adding SStructFACSetRelChange");
+    HYPRE_SStructFACSetRelChange(solver,0);
 
-    HYPRE_SStructFACSetNumPreRelax(solver,      2);
-    if (trace_hypre) {
-      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetNumPreRelax()\n",
-	       __FILE__,__LINE__,mpi_rank);
-      fflush(mpi_fp);
-    } // trace_hypre
-    HYPRE_SStructFACSetNumPostRelax(solver,     2);
-    if (trace_hypre) {
-      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetNumPostRelax()\n",
-	       __FILE__,__LINE__,mpi_rank);
-      fflush(mpi_fp);
-    } // trace_hypre
-    HYPRE_SStructFACSetCoarseSolverType(solver, 1);
-    if (trace_hypre) {
-      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetCoarseSolverType()\n",
-	       __FILE__,__LINE__,mpi_rank);
-      fflush(mpi_fp);
-    } // trace_hypre
     HYPRE_SStructFACSetRelaxType(solver,        2);
     if (trace_hypre) {
       fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetRelaxType()\n",
@@ -1204,15 +1211,22 @@ int main(int argc, char * argv[])
       fflush(mpi_fp);
     } // trace_hypre
 
-    HYPRE_SStructFACSetMaxIter(solver,itmax);
+    HYPRE_SStructFACSetNumPreRelax(solver,      1);
     if (trace_hypre) {
-      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetMaxIter()\n",
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetNumPreRelax()\n",
 	       __FILE__,__LINE__,mpi_rank);
       fflush(mpi_fp);
     } // trace_hypre
-    HYPRE_SStructFACSetTol(solver,    restol);
+    HYPRE_SStructFACSetNumPostRelax(solver,     1);
     if (trace_hypre) {
-      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetTol()\n",
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetNumPostRelax()\n",
+	       __FILE__,__LINE__,mpi_rank);
+      fflush(mpi_fp);
+    } // trace_hypre
+
+    HYPRE_SStructFACSetCoarseSolverType(solver, 2);
+    if (trace_hypre) {
+      fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetCoarseSolverType()\n",
 	       __FILE__,__LINE__,mpi_rank);
       fflush(mpi_fp);
     } // trace_hypre
@@ -1224,12 +1238,14 @@ int main(int argc, char * argv[])
       fflush(mpi_fp);
     } // trace_hypre
 
+    TRACE;
     HYPRE_SStructFACSetup2(solver, A, B, X);
     if (trace_hypre) {
       fprintf (mpi_fp,"%s:%d %d HYPRE_SStructFACSetup2()\n",
 	       __FILE__,__LINE__,mpi_rank);
       fflush(mpi_fp);
     } // trace_hypre
+    TRACE;
 
     // SOLVE
     HYPRE_SStructFACSolve3(solver, A, B, X);
