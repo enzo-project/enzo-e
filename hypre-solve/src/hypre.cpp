@@ -1024,6 +1024,29 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
 		for (int k=0; k<8; k++) {
 		  // DIES HERE IN r266 FOR e.g. N16.P211.L2.O1.S0.cg
+		  // grid=3  adjacent=0
+		  //  k=0 j=(0 1 2)
+		  //  hypre.cpp:1031 0 HYPRE_SStructGraphAddEntries (0x7fff7354db68,0, [8,0,0] 0, 1, [14,0,0] 0);
+		  // Corresponds to coarse zone on processor 0 connecting
+		  // to fine zone on processor 1 where fine grid parent
+		  // is adjacent to coarse grid
+		  //
+		  //   zones        grids      procs
+		  // +-------+   +-------+   +-------+   
+		  // |   |   |   | 0 | 1 |   | 0 | 1 |
+		  // +---+   |   +---+   |   +---+   |
+		  // | |X|X  |   |2|3|   |   |2|3|   |
+		  // +---+---+   +---+---+   +---+---+
+		  // 
+		  // Problem is in hierarchy.cpp.  If either grid 3 or grid 1
+		  // were on processor 0, then it would work.  Neither are,
+		  // so grid 3 sets face cells that are neither flagged as
+		  // neighbors or coarse neighbors as parent.  Since parent 0
+		  // is on processor 0, adjacent->is_local() is true,
+		  // but grid 3 and "adjacent" (mislabled as parent 0)
+		  // are not really neighbors, and adding graph entries
+		  // goes out-of-bounds for parent grid.
+
 		  if (trace_hypre) {
 		    fprintf (mpi_fp, "grid=%d  adjacent=%d\n",grid.id(),adjacent->id());
 		    fprintf (mpi_fp, "k=%d j=(%d %d %d)\n",k,j0,j1,j2);
@@ -1035,6 +1058,7 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 			     level_fine,
 			       igg3[0], igg3[1], igg3[2]
 			    );
+		    fprintf (mpi_fp, "axis=%d face=%d\n",axis,face);
 		    fflush(mpi_fp);
 		  } // trace_hypre
 		  HYPRE_SStructGraphAddEntries 

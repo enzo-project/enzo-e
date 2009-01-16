@@ -26,7 +26,7 @@
 
 const int debug       = 0;
 const int debug_input = 0;
-const int trace       = 0;
+const int trace       = 1;
 
 //======================================================================
 
@@ -46,8 +46,8 @@ Domain Grid::domain_;
 
 Grid::Grid (std::string parms) throw ()
   : level_ (-1),
-    counters_ (0),
-    u_(0)
+    u_(0),
+    counters_ (0)
 
 {
   // Initialize 0-sentinels in arrays
@@ -603,11 +603,6 @@ bool Grid::coarse_shared_face (Grid & coarse,
   iu0--;
   iu1--;
 
-  if (debug) {
-    printf ("%s:%d coarse_shared_face Grids (%d %d)  (axis=%d face=%d) il (%d %d) iu (%d %d)\n",
-	    __FILE__,__LINE__,this->id(),coarse.id(),
-	    axis,face,il0,il1,iu0,iu1);
-  }
   if (il0 > iu0 || il1 > iu1) return false;
 
   return true;
@@ -679,14 +674,107 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
   // Compute local indices intersection from global indices of each grid
   // Divide by r so that indices correspond to coarse grid
 
+  // NOTE: SHOULD ALWAYS BE FULL FACE?
+
   il0 = MAX(ig[j0][0]/r,ip[j0][0]) - ip[j0][0];
   iu0 = MIN(ig[j0][1]/r,ip[j0][1]) - ip[j0][0];
 
-  // WARNING: was bug here,2*ip not ip in first ip in each line--bug
-  // wasn't caught earlier, why not?
-
   il1 = MAX(ig[j1][0]/r,ip[j1][0]) - ip[j1][0];
   iu1 = MIN(ig[j1][1]/r,ip[j1][1]) - ip[j1][0];
+
+  // decrement upper limit, so loops using indices should be [il0,iu0]
+
+  iu0--;
+  iu1--;
+
+  if (il0 > iu0 || il1 > iu1) return false;
+
+  return true;
+}
+
+//----------------------------------------------------------------------
+
+/// Determine the "count"th axis (indexing from 0), face and
+/// corresponding range of coarse-grid indices of zones adjacent to
+/// the interior of the parent grid, and increment "count".  Returns true
+/// if the returned values are valid, or false if there is no
+/// "count"th face.   Indices are relative to the grid.
+
+bool Grid::parent_interior_face (Grid & parent, 
+				 int & axis, int & face, 
+				 int & il0, int & il1, 
+				 int & iu0, int & iu1,
+				 int & count) throw ()
+{
+
+  _TRACE_;
+
+  const int r = 2; // WARNING: assuming fixed refinement factor r = 2
+
+  _TRACE_;
+
+  Grid & grid = *this;
+
+  _TRACE_;
+
+  // Get grid index bounds
+
+  int ig[3][2];
+  grid.indices(ig);
+
+  _TRACE_;
+
+  // Get parent index bounds
+
+  printf ("DEBUG parent = %p\n",&parent);
+  int ip[3][2];
+  parent.indices(ip);
+
+  _TRACE_;
+
+  // Find count'th matching face, if there is one
+
+  bool found_face = false;
+  int  iaxis      = -1;
+  int  iface      = -1;
+  int  num        = 0;
+
+  for (axis = 0; axis < 3; axis++) {
+    for (face = 0; face < 2; face++) {
+      if (ig[axis][face] != r*ip[axis][face] && !found_face) {
+	if (num == count) {
+	  found_face = true;
+	  iaxis = axis;
+	  iface = face;
+	  count++;
+	} else {
+	  num++;
+	}
+      }
+    }
+  }
+
+  axis = iaxis;
+  face = iface;
+
+  // Exit if face isn't found
+
+  if (!found_face) return false;
+
+  // face axes
+
+  int j0=(axis+1)%3;
+  int j1=(axis+2)%3;
+
+  // Compute local indices intersection from global indices of each grid
+
+  // NOTE: SHOULD ALWAYS BE FULL FACE?
+
+  il0 = MAX(ig[j0][0],r*ip[j0][0]) - ig[j0][0];
+  iu0 = MIN(ig[j0][1],r*ip[j0][1]) - ig[j0][0];
+
+  il1 = MAX(ig[j1][0],r*ip[j1][0]) - ig[j1][0];
+  iu1 = MIN(ig[j1][1],r*ip[j1][1]) - ig[j1][0];
 
   // decrement upper limit, so loops using indices should be [il0,iu0]
 

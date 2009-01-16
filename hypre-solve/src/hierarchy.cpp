@@ -311,14 +311,14 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
       // Set "adjacent" pointers for adjacent non-parent coarse grids
 
-      if (parent (*grid)) {
+      if (parent (*grid) != NULL) {
 
 	ItGridNeighbors itpn (*parent(*grid));
 
 	while (adjacent = itpn++) {
 	  if (grid->is_local() || adjacent->is_local()) {
 	    if (grid->coarse_shared_face
-		(*adjacent,axis,face,il0,il1,iu0,iu1)) {
+		(*parent(*grid),axis,face,il0,il1,iu0,iu1)) {
 	      for (ig0=il0; ig0<=iu0; ig0++) {
 		for (ig1=il1; ig1<=iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -330,16 +330,13 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 	// Set remaining "adjacent" pointers to parent grid
 
-	int ig3[3][2];
-	grid->indices(ig3);
-	for (axis=0; axis<3; axis++) {
-	  int j0 = (axis+1)%3;
-	  int j1 = (axis+2)%3;
-	  int n0 = ig3[j0][1] - ig3[j0][0];
-	  int n1 = ig3[j1][1] - ig3[j1][0];
-	  for (face=0; face<2; face++) {
-	    for (ig0=0; ig0<n0; ig0++) {
-	      for (ig1=0; ig1<n1; ig1++) {
+	if (grid->is_local() || parent(*grid)->is_local()) {
+	  int num=0;
+
+	  while (grid->parent_interior_face
+		 (*parent(*grid),axis,face,il0,il1,iu0,iu1,num)) {
+	    for (ig0=il0; ig0<=iu0; ig0++) {
+	      for (ig1=il1; ig1<=iu1; ig1++) {
 		if (grid->faces().adjacent(axis,face,ig0,ig1) == NULL) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = parent (*grid);
 		}
