@@ -318,7 +318,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	while (adjacent = itpn++) {
 	  if (grid->is_local() || adjacent->is_local()) {
 	    if (grid->coarse_shared_face
-		(*parent(*grid),axis,face,il0,il1,iu0,iu1)) {
+		(*adjacent,axis,face,il0,il1,iu0,iu1)) {
 	      for (ig0=il0; ig0<=iu0; ig0++) {
 		for (ig1=il1; ig1<=iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
