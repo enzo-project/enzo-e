@@ -2,9 +2,9 @@ input metauml;
 
 beginfig(1);
 
-   ClassName.level("Level");
-   ClassName.levelstructured("LevelStructured");
-   ClassName.levelunstructured("LevelUnstructured");
+   Class.level("Level")()();
+   Class.levelstructured("LevelStructured")()();
+   Class.levelunstructured("LevelUnstructured")()();
 
    centered_align_top(levelstructured, levelunstructured)(30, below(level.s, 30));
 

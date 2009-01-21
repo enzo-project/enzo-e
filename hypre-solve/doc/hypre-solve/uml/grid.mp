@@ -2,9 +2,9 @@ input metauml;
 
 beginfig(1);
 
-   ClassName.grid("Grid");
-   ClassName.gridlocal("GridLocal");
-   ClassName.gridremote("GridRemote");
+   Class.grid("Grid")()();
+   Class.gridlocal("GridLocal")()();
+   Class.gridremote("GridRemote")()();
 
    centered_align_top(gridlocal, gridremote)(30, below(grid.s, 30));
 

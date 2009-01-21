@@ -2,9 +2,9 @@ input metauml;
 
 beginfig(1);
 
-   ClassName.hierarchy("Hierarchy");
-   ClassName.level("Level");
-   ClassName.grid("Grid");
+   Class.hierarchy("Hierarchy")()();
+   Class.level("Level")()();
+   Class.grid("Grid")()();
 
    topToBottom(30)(hierarchy,level,grid);
 

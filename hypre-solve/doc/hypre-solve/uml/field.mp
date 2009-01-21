@@ -2,9 +2,9 @@ input metauml;
 
 beginfig(1);
 
-   ClassName.gridlocal("GridLocal");
-   ClassName.field("Field");
-   ClassName.array("Array");
+   Class.gridlocal("GridLocal")()();
+   Class.field("Field")()();
+   Class.array("Array")()();
 
    topToBottom(30)(gridlocal,field,array);
 
