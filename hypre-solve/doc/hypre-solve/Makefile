@@ -17,7 +17,7 @@ hypre-solve.dvi:hypre-solve.tex include.tex UML
 	-latex hypre-solve
 	-latex hypre-solve
 UML:
-	make -C uml
+#		make -C uml
 hypre-solve2.ps:hypre-solve.ps
 	a2ps -M Letter -2 hypre-solve.ps -o hypre-solve2.ps
 pdf.hypre-solve:hypre-solve.dvi
