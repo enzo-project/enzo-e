@@ -1,5 +1,61 @@
 %0       1         2         3         4         5         6         7         8
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%
+% Overview
+% Problem definition
+%   Multilevel Poisson solver
+%   Multilevel diffusion solver
+% Linear solvers
+%   CG / BiCGStab
+%   FAC
+%   [smoothing]
+%   [MLC]
+%   hypre package
+%
+% Current Enzo Poisson Solver
+%   method
+%     Overlapping Schwarz
+%       fft on coarse (periodic only)
+%       mg on non-coarse
+%   issues
+%     global accuracy
+%     accuracy at grid boundaries
+%     adaptive timestepping
+%   implementation
+%     files
+%     functions
+%     pseudocode
+%
+% Proposed Enzo Poisson Solver
+%
+% Solver development
+%   overview
+%      uml of solver: Enzo + hypre-solve + hypre
+%      1. develop external solver module ``hypre-solve''
+%         rationale: controlled testing, sanity, etc.
+%      2. integrate with Enzo
+%   hypre-solve module
+%     overview
+%     issues
+%     requirements
+%       list of capabilities
+%       list of current limitations
+%     design
+%     implementation
+%        files
+%        classes
+%        interface
+%     
+%   Enzo integration
+%     issues
+%       adjacent grid in nonadjacent levels
+%     implementation
+%        hypre-solve interface
+%        files
+%        classes
+%       
+%     
+
 
 \documentclass[10pt]{article}
 
@@ -12,7 +68,7 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{The \hypre-solve\ Linear Solver Interface}
+\TITLE{Multilevel Linear Solvers in \enzo \\ New (radiation) and Improved (self-gravity)}
       {James Bordner}{$Rev$}
 %=======================================================================
 
