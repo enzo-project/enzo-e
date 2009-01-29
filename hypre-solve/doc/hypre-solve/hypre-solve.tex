@@ -72,7 +72,7 @@
       {James Bordner}{$Rev$}
 %=======================================================================
 
-% \tableofcontents
+\tableofcontents
 
 %======================================================================
 \section{Overview}
@@ -82,26 +82,213 @@
 \subsection{Problem statement}
 %----------------------------------------------------------------------
 
-%----------------------------------------------------------------------
-\subsection{Possible approaches}
-%----------------------------------------------------------------------
+multilevel Poisson solver
 
-%----------------------------------------------------------------------
-\subsection{Proposed approach}
-%----------------------------------------------------------------------
+multilevel diffusion solver
 
 %======================================================================
-\section{Existing \enzo\ Solver}
+\section{Existing \enzo\ Poisson Solver}
 %======================================================================
+
+\note{testing deferred to end to compare with new solver}
+
+%----------------------------------------------------------------------
+\subsection{Method}
+%----------------------------------------------------------------------
+  \pargraph{overlapping schwarz}
+  \pargraph{FFT on coarse (periodic only)}
+  \pargraph{MG on non-coarse patches}
+%----------------------------------------------------------------------
+\subsection{Implementation}
+%----------------------------------------------------------------------
+
+\code{PrepareDensityField()}
+\code{grid::SolveForPotential()}
+\code{ComputeAccelerationFieldExternal()}
+
+\code{SetAccelerationBoundary()}
+
+\code{DeleteAccelerationField()}
+
+\code{GRAVITY\_SECOND\_ORDER\_CORRECTION} in \code{euler.src}
+
+\question{\code{euler.src}:592---why turned is GRAVITY\_SECOND\_ORDER\_CORRECTION in  turned off}
+
+\question{\code{EvolveLevelRoutinesOptimized.C:74---why is the communication ordering send first then receive?}}
+
+  \pargraph{pseudo-code}
+
+\begin{tabbing}
+xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\> \codebf{EvolveLevel (LEVEL)} \\
+\\
+\> \code{SetBoundaryConditions()}   \>\>\>\>  \textit{Update ghost zones} \\
+\> \code{GRID.ClearBoundayFluxes()} \>\>\>\>  \textit{Clear boundary fluxes} \\
+\> \textit{while} \code{(dtThisLevelSoFar $<$ dtLevelAbove)} \\
+\\
+\>\>  \code{GRID.ComputeTimeStep()} \\
+\>\>  \code{GRID.SetTimeStop()} \\
+\>\>  \code{PrepareDensityField(t+0.5*dt)} \\
+\>\>  \code{ComputeRandomForcingNormalization()} \\
+\\
+\>\>  \textit{for} \code{GRID in LEVEL} \\
+\\
+\>\>\>  \textit{problem-specific analysis} \\
+\>\>\>  \code{GRID.SolveForPotential()} \>\>    \textit{self gravity} \\\\
+\>\>\>  \code{GRID.ComputeAccelerations()} \\
+\>\>\>  \code{GRID.ComputeAccelerationFieldExternal()} \>\> \textit{external gravity} \\
+\\
+\>          save copy of baryon fields \\
+\>          \code{GRID.CopyBaryonFieldToOldBaryonField()} \\
+\>          random forcing \\
+\>          \code{GRID.AddRandomForcing()} \\
+\>          hydrodynamics \\
+\>          \code{GRID.SolveHydroEquations()} \\
+\>          cooling and multispecies \\
+\>             \code{GRID.SolveRateAndCoolEquations()} \\
+\>             \code{GRID.SolveRateEquations()} \\
+\>             \code{GRID.SolveRadiativeCooling()} \\
+\>  \\
+\>          update particle positions \\
+\>          \code{UpdateParticlePositions(GRID)} \\
+\>           \\
+\>          include star particle creation and feedback \\
+\>             \code{GRID.ZeroSolutionUnderSubgrid()} \\
+\>             \code{GRID.StarParticleHandler()} \\
+\>  \\
+\>          delete acceleration field \\
+\>             \code{GRID.DeleteAccelerationField()} \\
+\>             \code{GRID.DeleteParticleAcceleration()} \\
+\>          update time \\
+\>             \code{GRID.SetTimeNextTimestep()} \\
+\>          incorporate cosmological expansion terms \\
+\>             \code{GRID.ComovingExpansionTerms()} \\
+\>       \textit{end} \code{GRID} \\
+\>  \\
+\>       refresh grid ghost zones \\
+\>        \\
+\>       \code{SetBoundaryConditions()} \\
+\>  \\
+\>       update star particle counters \\
+\>       \code{CommunicationUpdateStarParticleCount()} \\
+\>  \\
+\>       movie output \\
+\>       \code{WriteMovieData()} \\
+\>  \\
+\>       tracer particle output \\
+\>       \code{WriteTracerParticleData()} \\
+\>  \\
+\>       recompute gravity for output \\
+\>          \code{PrepareDensityField(t+0*dt)} \\
+\>          \code{GRID.SolveForPotential()} \\
+\>          \code{GRID.CopyPotentialToBaryonField()} \\
+\>  \\
+\>       output for new level \\
+\>          \code{Group\_WriteAllData()} \\
+\>          \code{WriteAllData()} \\
+\>       output if "outputNow" file exists \\
+\>          \code{Group\_WriteAllData()} \\
+\>          \code{WriteAllData()} \\
+\>       output interpolated data \\
+\>          \code{Group\_WriteAllData()} \\
+\>          \code{WriteAllData()} \\
+\>       output and end if "stopNow" file exists \\
+\>          \code{Group\_WriteAllData()} \\
+\>          \code{WriteAllData()} \\
+\>  \\
+\>       stop on request \\
+\>          \code{GenerateGridArray()} \\
+\>          \code{WriteStreamData()} \\
+\>          exit \\
+\>  \\
+\>       \code{GRID.DeleteGravitatingMassFieldParticles()} \\
+\>  \\
+\>       \code{EvolveLevel(LEVEL+1)} \\
+\>  \\
+\>       output streaming movie \\
+\>          \code{WriteStreamData()} \\
+\>  \\
+\>       flux correction \\
+\>          \code{CreateSUBlingList()} \\
+\>          \code{UpdateFromFinerGrids()} \\
+\>          \code{DeleteSUBlingList()} \\
+\>  \\
+\>       add saved fluxes to subgrid exterior fluxes \\
+\>          \code{GRID.AddToBoundaryFluxes()} \\
+\>          \code{DeleteFluxes(GRID,SUBGRID)} \\
+\>  \\
+\>       \code{RadiationFieldUpdate()} \\
+\>  \\
+\>       \code{RebuildHierarchy()} \\
+\>  \\
+\>       \code{GRID.CollectGridInformation()} \\
+\>  \\
+\>    \textit{end while} \\
+\>  \\
+\>    \code{reportMemoryUsage()} \\
+\end{tabbing}
+
+\begin{tabbing}
+xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
+\codebf{PrepareDensityField()} \\
+\> \\
+\> \code{GenerateGridArray()} \\
+\> \code{DepositParticleMassfield()} \textit{send + recv} \\
+\> \code{PrepareGravitatingMassField()} \textit{send + recv} \\
+\> \code{CheckForOverlap()} \textit{send + recv} \\
+\> \code{if (level $==$ 0)} \\
+\>\> \code{ComputePotentialFieldLevelZero()} \\
+\> \code{else} \\
+\>\> \code{SolveForPotential()} \\
+\>\> \code{CheckForOverlap()} \\
+\> \code{if (level $>$ max)} \\
+\>\>   \code{SolveForPotential()} \\
+\>\>   \code{CopyPotentialToBaryonField()} \\
+\>\>   \code{ComputeAccelerationField()} \\
+\> \code{if (! CopyGravPotential)} \\
+\>\>   \code{InterpolateAccelerations()} \\
+\end{tabbing}
+
+  \pargraph{Files}
+  \pargraph{functions}
+%----------------------------------------------------------------------
+\subsection{Issues}
+%----------------------------------------------------------------------
+   \pargraph{global accuracy: coarse-to-fine data movement only}
+   \pargraph{gradient jumps on grid-patch boundaries}
+   \pargraph{subcycling}
+   \pargraph{interfacing hyperbolic with elliptic}
 
 %======================================================================
 \section{New \enzo\ Solver}
 %======================================================================
 
 %----------------------------------------------------------------------
-\subsection{Proposed approach}
+\subsection{Possible approaches}
 %----------------------------------------------------------------------
 
+   \pargraph{implement solver directly}
+     \note{a lot of work}
+     \note{solver technology active research area}
+     \note{best to call library}
+   \pargraph{have \enzo\ call \hypre\ directly}
+     \note{\hypre\ supports AMR and is designed to be highly scalable}
+     \note{having \enzo\ call \hypre\ directly would be difficult}
+     \note{code complexity, interfacing datastructures, code layout of \enzo, testing}
+     \note{want interface code that calls \hypre, provides high-level
+           API to \enzo, and can be tested independently}
+   \pargraph{have \enzo\ call \hypre\ through intermediate code}
+     \note{Create ``hypre-solve''}
+     \note{initially developed independent of \enzo}
+     \note{Provides high-level functions: ``attach to'' and ``detach from'' \enzo's datastructures, level and hierarchy solves}
+     \note{independently testable}
+     \note{\hypresolve, described next}
+
+%----------------------------------------------------------------------
+\subsection{\hypresolve\ \enzo-\hypre interface}
+%----------------------------------------------------------------------
+
+   \pargraph{uml of \enzo\ + \hypresolve\ + \hypre}
 
    \hypresolve\ will be used as a testbed for experimenting with the
    parallel solution of linear systems arising from self-gravity
@@ -125,6 +312,15 @@
    \code{hypre-solve} calls \hypre\ to generate and solve a
    distributed linear system, and the solution, performance
    information, solver efficiency information, etc., are output.
+
+%----------------------------------------------------------------------
+\subsection{\hypresolve\ development}
+%----------------------------------------------------------------------
+
+%----------------------------------------------------------------------
+\subsection{\hypresolve\ interface}
+%----------------------------------------------------------------------
+
 
 % %======================================================================
 % \section{Roadmap and Milestones}
