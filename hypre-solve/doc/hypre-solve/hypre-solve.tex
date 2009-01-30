@@ -128,7 +128,7 @@ xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \\
 \>\>  \code{GRID.ComputeTimeStep()} \\
 \>\>  \code{GRID.SetTimeStop()} \\
-\>\>  \code{PrepareDensityField(t+0.5*dt)} \\
+\>\>  \code{PrepareDensityField()} \\
 \>\>  \code{ComputeRandomForcingNormalization()} \\
 \\
 \>\>  \textit{for} \code{GRID in LEVEL} \\
@@ -179,7 +179,7 @@ xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \>       \code{WriteTracerParticleData()} \\
 \>  \\
 \>       recompute gravity for output \\
-\>          \code{PrepareDensityField(t+0*dt)} \\
+\>          \code{PrepareDensityField()} \\
 \>          \code{GRID.SolveForPotential()} \\
 \>          \code{GRID.CopyPotentialToBaryonField()} \\
 \>  \\
