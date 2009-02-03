@@ -80,8 +80,8 @@ void debug_print(Grid * grid)
 
 Hypre::Hypre (Parameters & parameters)
   : grid_(0),
-    stencil_(0),
     graph_(0),
+    stencil_(0),
     A_(0),
     B_(0),
     X_(0),
@@ -610,7 +610,7 @@ void Hypre::init_linear (Parameters          & parameters,
 		  __FILE__,__LINE__,pmpi->ip(),
 		  &B_,part,
 		  lower[0],lower[1],lower[2],
-		  upper[0],upper[1],upper[2],0,values[0]
+		  upper[0],upper[1],upper[2],values[0]
 		  );
 	  fflush(mpi_fp);
 	} // trace_hypre
@@ -1112,7 +1112,6 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
 		// coarse->coarse diagonal
 
-		double val_diag = -val;
 		entry = 0;
 
 		//	      _TEMPORARY_;
@@ -1146,8 +1145,6 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   double h120 = h3[1]*h3[2] / h3[0];
   double h201 = h3[2]*h3[0] / h3[1];
   double h012 = h3[0]*h3[1] / h3[2];
-
-  double hhh = h3[0]*h3[1]*h3[2];
 
   double * v0;         // Diagonal elements
   double * v1[3][2];   // Off-diagonal elements
@@ -1333,7 +1330,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 	    __FILE__,__LINE__,pmpi->ip(),
 	    &A_,level,
 	    low[0], low[1], low[2],
-	    up[0],up[1],up[2],entries[0],v0);
+	    up[0],up[1],up[2],entries[0],v0[0]);
     fflush(mpi_fp);
   } // trace_hypre
   if (trace_hypre) {
@@ -1341,7 +1338,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 	    __FILE__,__LINE__,pmpi->ip(),
 	    &A_,level,
 	    low[0], low[1], low[2],
-	    up[0],up[1],up[2],entries[1],v1[0][1]);
+	    up[0],up[1],up[2],entries[1],v1[0][1][0]);
     fflush(mpi_fp);
   } // trace_hypre
   if (trace_hypre) {
@@ -1349,7 +1346,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 	    __FILE__,__LINE__,pmpi->ip(),
 	    &A_,level,
 	    low[0], low[1], low[2],
-	    up[0],up[1],up[2],entries[2],v1[0][0]);
+	    up[0],up[1],up[2],entries[2],v1[0][0][0]);
     fflush(mpi_fp);
   } // trace_hypre
   if (trace_hypre) {
@@ -1357,7 +1354,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 	    __FILE__,__LINE__,pmpi->ip(),
 	    &A_,level,
 	    low[0], low[1], low[2],
-	    up[0],up[1],up[2],entries[3],v1[1][1]);
+	    up[0],up[1],up[2],entries[3],v1[1][1][0]);
     fflush(mpi_fp);
   } // trace_hypre
   if (trace_hypre) {
@@ -1365,7 +1362,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 	    __FILE__,__LINE__,pmpi->ip(),
 	    &A_,level,
 	    low[0], low[1], low[2],
-	    up[0],up[1],up[2],entries[4],v1[1][0]);
+	    up[0],up[1],up[2],entries[4],v1[1][0][0]);
     fflush(mpi_fp);
   } // trace_hypre
   if (trace_hypre) {
@@ -1373,7 +1370,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 	    __FILE__,__LINE__,pmpi->ip(),
 	    &A_,level,
 	    low[0], low[1], low[2],
-	    up[0],up[1],up[2],entries[5],v1[2][1]);
+	    up[0],up[1],up[2],entries[5],v1[2][1][0]);
     fflush(mpi_fp);
   } // trace_hypre
   if (trace_hypre) {
@@ -1381,7 +1378,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 	    __FILE__,__LINE__,pmpi->ip(),
 	    &A_,level,
 	    low[0], low[1], low[2],
-	    up[0],up[1],up[2],entries[6],v1[2][0]);
+	    up[0],up[1],up[2],entries[6],v1[2][0][0]);
     fflush(mpi_fp);
   } // trace_hypre
   delete [] v0;

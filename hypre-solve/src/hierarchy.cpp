@@ -283,7 +283,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   ItHierarchyLevels itl (*this);
   Level * level;
 
-  while (level = itl++) {
+  while ((level = itl++)) {
 
     ItLevelGridsAll itg (*level);
 
@@ -296,7 +296,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
       Grid * adjacent;
 
-      while (adjacent = itn++) {
+      while ((adjacent = itn++)) {
 	if (grid->is_local() || adjacent->is_local()) {
 	  if (grid->neighbor_shared_face
 	      (*adjacent,axis,face,il0,il1,iu0,iu1)) {
@@ -315,7 +315,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 	ItGridNeighbors itpn (*parent(*grid));
 
-	while (adjacent = itpn++) {
+	while ((adjacent = itpn++)) {
 	  if (grid->is_local() || adjacent->is_local()) {
 	    if (grid->coarse_shared_face
 		(*adjacent,axis,face,il0,il1,iu0,iu1)) {
@@ -383,7 +383,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
   int ih0[3][2];
   this->indices0(ih0);
-  while (level = itl++) {
+  while ((level = itl++)) {
     ItLevelGridsLocal itgl (*level);
     while (Grid * grid = itgl++) {
 

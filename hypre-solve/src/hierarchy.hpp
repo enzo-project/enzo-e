@@ -415,7 +415,7 @@ public:
 
   /// Iterate through all Levels in the Hierarchy from finest to coarsest
   Level * operator-- (int) { 
-    printf ("DEBUG %s:%d levels0_.size()=%d\n",__FILE__,__LINE__,hierarchy_->levels0_.size());
+    printf ("DEBUG %s:%d levels0_.size()=%d\n",__FILE__,__LINE__,int(hierarchy_->levels0_.size()));
     printf ("DEBUG %s:%d levels0_ = %p\n",__FILE__,__LINE__,
 	    hierarchy_->levels0_[0]);
 //     if (curr_ == -1) curr_ = hierarchy_->levels0_.size()-1;

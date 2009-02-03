@@ -107,7 +107,8 @@ int main(int argc, char **argv)
     fclose(fp);
   }
 
-  int l,i,j;
+  int l,i;
+  unsigned j;
 
   // Determine top_level
 
@@ -306,7 +307,7 @@ void images_colormap (double *images3[3],
 		      int     rgbmap[3][256],
 		      double *rgb33[3][3])
 {
-  int axis,i;
+  int axis;
   double rmin3[3],rmax3[3];
   // Determine min and max for each image
   for (axis=0; axis<3; axis++) {

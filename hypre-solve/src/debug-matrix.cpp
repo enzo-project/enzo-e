@@ -11,7 +11,7 @@
 
       
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
   if (argc != 8) {
     fprintf (stderr,"Usage: %s N L offset procs dp0 dp1 dp2\n",argv[0]);
@@ -278,5 +278,5 @@ main(int argc, char **argv)
       }
     }
   }
-
+  exit(0);
 }

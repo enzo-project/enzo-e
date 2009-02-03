@@ -44,7 +44,7 @@ void usage (char ** argv)
 
 //----------------------------------------------------------------------
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 
 //-----------------------------------------------------------------------
@@ -76,7 +76,7 @@ main(int argc, char **argv)
 
   // Get input, output, and directory names
 
-  char dir[STRLEN],infile[STRLEN],outfile[STRLEN];
+  char dir[STRLEN],infile[STRLEN];
   sprintf (dir,    "N%d.P%d%d%d.L%d.O%d.S%d.%s",N0,np3[0],np3[1],np3[2],num_levels,is_offset,is_serial,solver);
   sprintf (infile,"in.%s",dir);
   FILE * fp = fopen (infile,"w");
@@ -103,7 +103,7 @@ main(int argc, char **argv)
   // Compute local grid sizes
   // WARNING: assumes # processors along each dimension evenly divides problem size
 
-  int i,n3[3],m3[3];
+  int i,n3[3];
 
   for (i=0; i<3; i++) {
     n3[i] = N0 / np3[i];  
