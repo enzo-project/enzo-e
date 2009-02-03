@@ -22,8 +22,8 @@
 // DEBUG
 //----------------------------------------------------------------------
 
-const int    trace       = 1;
-const int    trace_hypre = 1;
+const int    trace       = 0;
+const int    trace_hypre = 0;
 
 #define TRACE \
   if (trace) printf ("TRACE %d %s:%d\n",mpi_rank,__FILE__,__LINE__); \

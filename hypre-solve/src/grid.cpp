@@ -26,7 +26,7 @@
 
 const int debug       = 0;
 const int debug_input = 0;
-const int trace       = 1;
+const int trace       = 0;
 
 //======================================================================
 
@@ -726,7 +726,6 @@ bool Grid::parent_interior_face (Grid & parent,
 
   // Get parent index bounds
 
-  printf ("DEBUG parent = %p\n",&parent);
   int ip[3][2];
   parent.indices(ip);
 
