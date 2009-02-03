@@ -566,6 +566,9 @@ void Hypre::init_linear (Parameters          & parameters,
 
   local_shift_b_sum += init_vector_points_  (hierarchy,points);
   local_shift_b_sum += init_vector_spheres_ (hierarchy,spheres);
+  if (parameters_.value("density") == "true") {
+    local_shift_b_sum += init_vector_density_ (hierarchy);
+  }
 
   Scalar shift_b_sum = 0.0;
 
@@ -1528,6 +1531,20 @@ Scalar Hypre::init_vector_spheres_ (Hierarchy             & hierarchy,
     NOT_IMPLEMENTED("Contribution of sphere mass to right-hand side");
     //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   }
+
+  return 0.0;
+} // Hypre::init_vector_spheres_()
+
+//------------------------------------------------------------------------
+
+/// Add contributions from Density in enzo HDF5 files to right-hand side B
+
+Scalar Hypre::init_vector_density_ (Hierarchy             & hierarchy)
+
+{
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  NOT_IMPLEMENTED("Contribution of enzo baryonic density to right-hand side");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   return 0.0;
 } // Hypre::init_vector_spheres_()

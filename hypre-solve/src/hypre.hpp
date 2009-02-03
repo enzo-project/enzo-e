@@ -71,6 +71,7 @@ private:
 			       std::vector<Point *> & points);
   Scalar init_vector_spheres_ (Hierarchy             & hierarchy,
 			       std::vector<Sphere *> & spheres);		
+  Scalar init_vector_density_ (Hierarchy             & hierarchy);		
 
   // solve() functions
 
