@@ -73,8 +73,8 @@ hypre-png: $(OBJS_PNG)
 	$(MPCPP) -o hypre-png $(OBJS_PNG) $(LIB)
 debug-matrix: debug-matrix.o
 	$(CPP) -o debug-matrix debug-matrix.o
-enzo2hypre: enzo2hypre.cpp
-	$(CPP) -o enzo2hypre enzo2hypre.cpp $(INC) $(LIB)
+enzo2hypre: enzo2hypre.o
+	$(CPP) -o enzo2hypre enzo2hypre.o $(INC) $(LIB)
 
 BIN = ../bin
 .PHONY: install

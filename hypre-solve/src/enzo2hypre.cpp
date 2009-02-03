@@ -5,14 +5,38 @@
 
 #include "hdf5.h"
 
-#define max(a,b) ((a)>(b) ? (a) : (b))
+
+//----------------------------------------------------------------------
+// FUNCTIONS
+//----------------------------------------------------------------------
 
 void print_particles (std::string,FILE*fpout);
 
-const int refinement_factor = 2;
-const int max_levels = 30;
+//----------------------------------------------------------------------
+// MACROS
+//----------------------------------------------------------------------
 
-main(int argc, char ** argv)
+#define HDF_ERROR(MESSAGE) \
+  { \
+    fprintf (stderr,"%s:%d HDF5 ERROR: %s\n",__FILE__,__LINE__,MESSAGE); \
+    exit(1); \
+  }
+
+#define max(a,b) ((a)>(b) ? (a) : (b))
+
+//----------------------------------------------------------------------
+// CONSTANTS
+//----------------------------------------------------------------------
+
+const int refinement_factor = 2;
+const int max_levels        = 30;
+const int max_line_length   = 100;
+
+//----------------------------------------------------------------------
+// MAIN
+//----------------------------------------------------------------------
+
+int main(int argc, char ** argv)
 {
   if (argc != 2) {
     fprintf (stderr,"Usage: %s <enzo-file>\n",argv[0]);
@@ -37,23 +61,23 @@ main(int argc, char ** argv)
   fprintf (fpout," dump_x true\n");
 
   //----------------------------------------------------------------------
-  // Open hierarchy_file to get number of grids "num_grids"
+  // Open hierarchy file to get number of grids "num_grids"
   //----------------------------------------------------------------------
 
   std::string hierarchy_file = std::string(argv[1]) + ".hierarchy";
+
   FILE *fpin  = fopen (hierarchy_file.c_str(), "r");
 
-  char line[100];
+  char line[max_line_length];
 
-  // Read input Enzo file to find number of grids "num_grids"
+  int igrid,jgrid;
+  int num_grids=0;
 
-  int igrid,jgrid,num_grids=0;
-  while (fgets(line,100,fpin) != NULL) {
+  while (fgets(line,max_line_length,fpin) != NULL) {
     if (sscanf (line,"Grid = %d\n",&igrid)) num_grids = max(igrid,num_grids);
   }
 
-  // Close hierarchy file
-  fclose(fpin);
+  fclose(fpin);   // Close hierarchy file
 
   //-----------------------------------------------------------------------
   // Allocate arrays
@@ -101,32 +125,31 @@ main(int argc, char ** argv)
 
   fpin  = fopen (hierarchy_file.c_str(), "r");
 
-  char s [ 100 ];
+  char s [ max_line_length ];
   // Read input Enzo hierarchy file
 
-  while (fgets(line,100,fpin) != NULL) {
+  while (fgets(line,max_line_length,fpin) != NULL) {
 
-    // Process grid number
+    // Get grid number
 
     sscanf (line,"Grid = %d",&igrid); // get the current grid number
 
-    // Process grid extent
+    // Get grid extent
 
     sscanf (line,"GridLeftEdge      = %lg %lg %lg",
 	    &xmin0[igrid],&xmin1[igrid],&xmin2[igrid]);
     sscanf (line,"GridRightEdge      = %lg %lg %lg",
 	    &xmax0[igrid],&xmax1[igrid],&xmax2[igrid]);
 
-    // Process grid size
+    // Get grid size
 
     sscanf (line,"GridDimension     = %d %d %d",
 	    &isize0[igrid],&isize1[igrid],&isize2[igrid]);
 
-    // Process pointer
-
     if (sscanf (line,"%s",s) && strcmp (s,"Pointer:")==0) {
 
-      // Sibling grid
+      // Get sibling grid pointer
+
       if (sscanf (line+9,"Grid[%d]->NextGridThisLevel = %d",
 		  &igrid,&jgrid)) {
 	if (strstr (line,"NextGridThisLevel")) {
@@ -136,7 +159,9 @@ main(int argc, char ** argv)
 	  }
 	}
       }
-      // Child grid
+
+      // Get child grid pointer
+
       if (sscanf (line+9,"Grid[%d]->NextGridNextLevel = %d",
 		  &igrid,&jgrid)) {
 	if (strstr (line,"NextGridNextLevel")) {
@@ -149,29 +174,47 @@ main(int argc, char ** argv)
     }
   }
 
-  // Close hierarchy file
-  fclose(fpin);
+  fclose(fpin);   // Close hierarchy file
 
   //-----------------------------------------------------------------------
   // Read processor map file to get processor-to-grid mapping
   //-----------------------------------------------------------------------
 
   std::string procmap_file = std::string(argv[1]) + ".procmap";
-  fpin  = fopen (procmap_file.c_str(), "r");
-  int iproc;
-  char sgrid[20], sproc[100],dummy[20];
-  int np = 0;
-  while (fgets(line,100,fpin) != NULL) {
-    sscanf (line,"%s %s %s",sgrid,sproc,dummy);
-    sscanf (sgrid,"%d",&igrid);
-    sscanf (strstr(sproc,"cpu")+3,"%d",&iproc);
-    processor[igrid] = iproc;
-    np = max(np,iproc);
-  }
-  np++;
 
-  // Close procmap file
-  fclose(fpin);
+  fpin  = fopen (procmap_file.c_str(), "r");
+
+  int np = 0;
+
+  bool have_procmap = (fpin != NULL);
+
+  if (have_procmap) {
+
+    // If *.procmap file exists, set processor id's accordingly
+
+    int iproc;
+    char sgrid[20], sproc[100],dummy[20];
+    while (fgets(line,max_line_length,fpin) != NULL) {
+      sscanf (line,"%s %s %s",sgrid,sproc,dummy);
+      sscanf (sgrid,"%d",&igrid);
+      sscanf (strstr(sproc,"cpu")+3,"%d",&iproc);
+      processor[igrid] = iproc;
+      np = max(np,iproc);
+    }
+    np++;
+
+    fclose(fpin);  // Close procmap file
+
+  } else {
+
+    // If *.procmap file does not exist, set all processor id's to 0
+
+    np = 1;
+    for (igrid = 1; igrid <= num_grids; igrid++) {
+      processor[igrid] = 0;
+    }
+
+  }
 
   //-----------------------------------------------------------------------
   // Read restart file to get domain extents and top grid dimensions
@@ -182,7 +225,7 @@ main(int argc, char ** argv)
   double dmin0,dmin1,dmin2;
   double dmax0,dmax1,dmax2;
   int n0,n1,n2;
-  while (fgets(line,100,fpin) != NULL) {
+  while (fgets(line,max_line_length,fpin) != NULL) {
     sscanf (line,"DomainLeftEdge         = %lg %lg %lg",&dmin0,&dmin1,&dmin2);
     sscanf (line,"DomainRightEdge        = %lg %lg %lg",&dmax0,&dmax1,&dmax2);
     sscanf (line,"TopGridDimensions   = %d %d %d",&n0,&n1,&n2);
@@ -192,8 +235,7 @@ main(int argc, char ** argv)
 	   dmin0,dmin1,dmin2,
 	   dmax0,dmax1,dmax2);
 
-  // Close restart file
-  fclose(fpin);
+  fclose(fpin);  // Close restart file
 
   //-----------------------------------------------------------------------
   // Remove ghost zone contributions to size
@@ -244,10 +286,24 @@ main(int argc, char ** argv)
 
   // particle arrays
 
-  for (int ip = 0; ip < np; ip++) {
-    char cpufile[40];
-    sprintf (cpufile,"%s.cpu%04d",std::string(argv[1]).c_str(),ip);
-    print_particles (cpufile,fpout);
+  if (have_procmap) {
+
+    // Loop over *.cpu* files
+
+    for (int ip = 0; ip < np; ip++) {
+      char cpufile[40];
+      sprintf (cpufile,"%s.cpu%04d",std::string(argv[1]).c_str(),ip);
+      print_particles (cpufile,fpout);
+    }
+  } else {
+
+    // Loop over *.grid* files
+
+    for (int igrid = 1; igrid <= num_grids; igrid++) {
+      char gridfile[40];
+      sprintf (gridfile,"%s.grid%04d",std::string(argv[1]).c_str(),igrid);
+      print_particles (gridfile,fpout);
+    }
   }
   //  for (
 
@@ -269,45 +325,48 @@ main(int argc, char ** argv)
   delete [] isize1;
   delete [] isize2;
 
-  // Close output file
-  fclose (fpout);
+  fclose (fpout);  // Close output file
+
+  exit (0);
 }
 
 void print_particles (std::string file_name, FILE * fpout)
 {
 
-  int i0,i1,i2;
-   
   hid_t       file_id;
 
   // Open the file
 
   file_id = H5Fopen(file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
+  if (file_id < 0) HDF_ERROR (file_name.c_str());
+
   hid_t group_id;
 
   // Open the group
 
   group_id = H5Gopen (file_id, "/");
+  if (group_id < 0) HDF_ERROR ("H5Gopen");
 
   hsize_t num_groups;
   H5Gget_num_objs(group_id,&num_groups);
 
   herr_t  status;
 
-  for (int igroup = 0; igroup < num_groups; igroup ++) {
+  for (hsize_t igroup = 0; igroup < num_groups; igroup ++) {
 
     char group_name[20];
     H5Gget_objname_by_idx(group_id,igroup,group_name,20);
 
     std::string grid_group = group_name;
-    // Open the particle datasets
+
+    // Open the particle datasets if any
 
     hid_t pmset_id;
     hid_t ppxset_id,ppyset_id,ppzset_id;
-    hid_t pvxset_id,pvyset_id,pvzset_id;
 
     pmset_id = H5Dopen(group_id, (grid_group + "/particle_mass").c_str());
+    if (pmset_id < 0) break; // exit loop if no particles
     ppxset_id = H5Dopen(group_id, (grid_group + "/particle_position_x").c_str());
     ppyset_id = H5Dopen(group_id, (grid_group + "/particle_position_y").c_str());
     ppzset_id = H5Dopen(group_id, (grid_group + "/particle_position_z").c_str());
@@ -319,9 +378,13 @@ void print_particles (std::string file_name, FILE * fpout)
 
     hsize_t num_particles = 0;
     pmspace_id  = H5Dget_space (pmset_id);
+    if (pmspace_id < 0) HDF_ERROR ("H5Dopen");
     ppxspace_id = H5Dget_space (ppxset_id);
+    if (ppxspace_id < 0) HDF_ERROR ("H5Dopen");
     ppyspace_id = H5Dget_space (ppyset_id);
+    if (ppyspace_id < 0) HDF_ERROR ("H5Dopen");
     ppzspace_id = H5Dget_space (ppzset_id);
+    if (ppzspace_id < 0) HDF_ERROR ("H5Dopen");
 
     // Get rank (should be same for all particle datasets)
 
@@ -338,14 +401,18 @@ void print_particles (std::string file_name, FILE * fpout)
 
     status = H5Dread(pmset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
 		     H5P_DEFAULT, pmass);
+    if (status < 0) HDF_ERROR ("H5Dread");
     status = H5Dread(ppxset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
 		     H5P_DEFAULT, ppos0);
+    if (status < 0) HDF_ERROR ("H5Dread");
     status = H5Dread(ppyset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
 		     H5P_DEFAULT, ppos1);
+    if (status < 0) HDF_ERROR ("H5Dread");
     status = H5Dread(ppzset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
 		     H5P_DEFAULT, ppos2);
+    if (status < 0) HDF_ERROR ("H5Dread");
 
-    for (int i=0; i<num_particles; i++) {
+    for (hsize_t  i=0; i<num_particles; i++) {
       fprintf (fpout, "point");
       fprintf (fpout, " %g",pmass[i]);
       fprintf (fpout, " %g %g %g",ppos0[i],ppos1[i],ppos2[i]);
@@ -363,15 +430,17 @@ void print_particles (std::string file_name, FILE * fpout)
     // Close the dataset
 
     status = H5Dclose(pmset_id);
+    if (status < 0) HDF_ERROR ("H5Dclose");
     status = H5Dclose(ppxset_id);
+    if (status < 0) HDF_ERROR ("H5Dclose");
     status = H5Dclose(ppyset_id);
+    if (status < 0) HDF_ERROR ("H5Dclose");
     status = H5Dclose(ppzset_id);
+    if (status < 0) HDF_ERROR ("H5Dclose");
 
   }
 
-  // Close the group
-  status = H5Gclose(group_id);
+  status = H5Gclose(group_id);  // Close the group
 
-  // Close the file
-  status = H5Fclose(file_id);
+  status = H5Fclose(file_id);   // Close the file
 }
