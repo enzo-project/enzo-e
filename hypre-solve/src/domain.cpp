@@ -4,11 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      domain.cpp
+ * @brief     Implementation of the Domain class
+ * @author    James Bordner
+ * @bug       none
  *
+ * $Id$
  */
 
 #include <assert.h>

@@ -4,10 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      parameters.cpp
+ * @brief     Implementation of the Parameters class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

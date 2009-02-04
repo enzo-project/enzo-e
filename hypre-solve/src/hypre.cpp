@@ -4,11 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      hypre.cpp
+ * @brief     Implementation of the Hypre class
+ * @author    James Bordner
+ * @bug       none
  *
+ * $Id$
  */
 
 #include <mpi.h>

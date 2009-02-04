@@ -2,13 +2,17 @@
 
 /// Scalar type definitions
 
-/**
- * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ /**
+ *********************************************************************
  *
+ * @file      scalar.hpp
+ * @brief     Scalar related defines
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
+ *
+ *********************************************************************
  */
 
 typedef double Scalar ;

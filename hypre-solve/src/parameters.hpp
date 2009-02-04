@@ -3,12 +3,13 @@
 /// Parameters class include file
 
 /**
- * The Parameters class is used for storing key-value pairs of strings, where
- * the value may not necessarily be unique.
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- * @date 2007-08-30 
+ *
+ * @file      parameters.hpp
+ * @brief     Declaration of the Parameters class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 
@@ -59,7 +60,6 @@ private:
  * An ItParameters object allows iterating through all key-value pairs in
  * a Parameters object.
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  * @date 2007-08-30
  *

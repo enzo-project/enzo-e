@@ -4,10 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      point.cpp
+ * @brief     Implementation of the Point class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

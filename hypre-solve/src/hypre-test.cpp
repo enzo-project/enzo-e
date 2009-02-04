@@ -4,8 +4,10 @@
 
 /**
  * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      hypre-test.cpp
+ * @brief     Simplified nested-grid test problem driver
+ * @author    James Bordner
+ * @bug       none
  *
  * $Id$
  *

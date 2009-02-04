@@ -4,11 +4,12 @@
 
 /**
  * 
- * Basic communication routines and data
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- * @date 2007-04-10
+ * @file      mpi.hpp
+ * @brief     Declaration of the Mpi class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

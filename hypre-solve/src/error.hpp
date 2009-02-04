@@ -4,10 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      error.hpp
+ * @brief     Macros related to error and warning messages
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

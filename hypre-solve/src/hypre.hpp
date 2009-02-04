@@ -4,11 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      hypre.hpp
+ * @brief     Declaration of the Hypre class
+ * @author    James Bordner
+ * @bug       none
  *
+ * $Id$
  */
 
 class Hypre {

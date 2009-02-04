@@ -3,12 +3,12 @@
 /// Faces class source file
 
 /**
- * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      faces.cpp
+ * @brief     Implementation of the Faces class
+ * @author    James Bordner
+ * @bug       none
  *
+ * $Id$
  */
 
 #include <assert.h>

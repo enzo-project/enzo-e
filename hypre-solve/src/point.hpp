@@ -4,11 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- * @date 2007-04-10 
+ * @file      point.hpp
+ * @brief     Declaration of the Point class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

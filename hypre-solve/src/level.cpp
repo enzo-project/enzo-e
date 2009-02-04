@@ -4,10 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      level.cpp
+ * @brief     Implementation of the Level class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

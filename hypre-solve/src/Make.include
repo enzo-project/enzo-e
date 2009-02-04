@@ -100,18 +100,12 @@ include DEPEND
 .PHONY: clean
 clean:
 	rm -f *.o $(EXES) *~ \#*
-	rm -rf html latex
+	rm -rf html
 
 .PHONY: doc
 doc:
 	doxygen
 	cp doxygen.css html
-	cd latex; \
-        latex refman.tex; \
-        latex refman.tex; \
-        dvipdf refman.dvi; \
-        mv refman.pdf hypre-solve-ref.pdf; \
-        dvips -o hypre-solve-ref.ps refman.dvi
 
 .PHONY: clean-doc
 clean-doc:

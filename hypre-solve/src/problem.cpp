@@ -4,10 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      problem.cpp
+ * @brief     Implementation of the Problem class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

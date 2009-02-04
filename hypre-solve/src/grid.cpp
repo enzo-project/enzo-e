@@ -3,12 +3,12 @@
 /// Grid class source file
 
 /**
+ * @file      grid.cpp
+ * @brief     Implemtation of the Grid class
+ * @author    James Bordner
+ * @bug       none
  *
- *
- *
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- *
+ * $Id$
  */
 
 #include <assert.h>

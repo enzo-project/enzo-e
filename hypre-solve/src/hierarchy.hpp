@@ -4,12 +4,12 @@
 
 /**
  * 
- * A Hierarchy object represents a structured adaptive mesh refinement
- * hierarchy.
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- * @date 2007-05-02
+ * @file      hierarchy.hpp
+ * @brief     Declaration of the Hierarchy class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 
@@ -200,7 +200,6 @@ private:
  * An ItHierarchyGridsLocal object iterates through all local grids in
  * a Hierarchy.
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  * @date 2007-05-02
  *
@@ -258,7 +257,6 @@ public:
  * An ItHierarchyGridsAll object iterates through all grids in a
  * Hierarchy, including non-local ones.
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  * @date 2007-05-02
  *
@@ -315,7 +313,6 @@ public:
  * An ItHierarchyLevels object iterates through each Level of the
  * Hierarchy in turn, from coarsest to finest.
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  * @date 2007-05-02
  *
@@ -373,7 +370,6 @@ public:
  * An ItHierarchyLevelsReverse object iterates through each Level of the
  * Hierarchy in turn, from finest to coarsest.
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  * @date 2007-05-02
  *

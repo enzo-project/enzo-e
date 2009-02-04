@@ -4,12 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- * @date 2007-08-14 
+ * @file      domain.hpp
+ * @brief     Declaration of the Domain class
+ * @author    James Bordner
+ * @bug       none
  *
+ * $Id$
  */
 
 class Domain 

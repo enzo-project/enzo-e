@@ -4,11 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- * @date 2007-04-10 
+ * @file      constants.hpp
+ * @brief     Declaration and implementation of the Constants class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

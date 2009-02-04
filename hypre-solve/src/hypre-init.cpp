@@ -1,4 +1,14 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+/*
+ * @file      hypre-init.cpp
+ * @brief     Creates a hypre-solve input file
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
+ */
+
 ///-----------------------------------------------------------------------
 /// Generate an input file for hypre-solve
 ///

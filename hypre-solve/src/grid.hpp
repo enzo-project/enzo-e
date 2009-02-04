@@ -3,6 +3,15 @@
 /// Grid class include file
 
 /**
+ * @file      grid.hpp
+ * @brief     Declaration of the Grid class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
+ */
+
+/**
  * 
  *
  * A Grid is an orthogonal grid of zones in \f$ R^d, 1 \le d \le 3 \f$.  Zones
@@ -29,7 +38,6 @@
    * unknowns
    @endverbatim
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  *
  */
@@ -441,7 +449,6 @@ protected:
  * An ItGridNeighbors object allows iterating through all grids in a
  * Level, even non-local ones.
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  * @date 2007-05-02
  *
@@ -488,7 +495,6 @@ public:
  * An ItGridChildren object allows iterating through all grids in a
  * Level, even non-local ones.
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  * @date 2007-05-02
  *

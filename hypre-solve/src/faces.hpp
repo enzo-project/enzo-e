@@ -3,6 +3,15 @@
 /// Faces class include file
 
 /**
+ * @file      faces.hpp
+ * @brief     Declaration of the Faces class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
+ */
+
+/**
  * 
  * The Faces class stores and operates on discretization aspects of a grid.
  * 
@@ -10,9 +19,6 @@
  * is used to help set up the matrix elements for the unified AMR
  * grid.
  *  
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- *
  */
 
 class Grid;

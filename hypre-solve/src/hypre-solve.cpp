@@ -3,12 +3,12 @@
 /// Main driver for hypre AMR test solver
 
 /**
- * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      hypre-solve.cpp
+ * @brief     General test problem driver
+ * @author    James Bordner
+ * @bug       none
  *
+ * $Id$
  */
 
 #include <assert.h>

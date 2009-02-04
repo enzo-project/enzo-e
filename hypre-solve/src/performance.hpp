@@ -4,10 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      performance.hpp
+ * @brief     lcaperf-related defines
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

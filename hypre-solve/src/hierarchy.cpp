@@ -4,8 +4,12 @@
 
 /**
  * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      hierarchy.cpp
+ * @brief     Implementation of the Hierarchy class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

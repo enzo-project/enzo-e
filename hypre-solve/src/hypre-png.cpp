@@ -4,10 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      hypre-png.cpp
+ * @brief     Create png projections of a collection of hypre-solve grid files
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

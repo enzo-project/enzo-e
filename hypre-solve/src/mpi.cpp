@@ -4,10 +4,12 @@
 
 /**
  * 
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
+ * @file      mpi.cpp
+ * @brief     Implementation of the Mpi class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

@@ -5,6 +5,14 @@
 
 #include "hdf5.h"
 
+/**
+ * @file      enzo2hypre.cpp
+ * @brief     Create a hypre-solve input file given an Enzo data dump
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
+ */
 
 //----------------------------------------------------------------------
 // FUNCTIONS

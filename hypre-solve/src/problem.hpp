@@ -4,11 +4,12 @@
 
 /**
  * 
- * Everything required to define the problem to solve
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- * @date 2007-04-02
+ * @file      problem.hpp
+ * @brief     Declaration of the Problem class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 

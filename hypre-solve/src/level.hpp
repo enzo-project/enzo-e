@@ -4,13 +4,12 @@
 
 /**
  * 
- * A Level object represents the set of grids in the same level within
- * a structured adaptive mesh refinement hierarchy.
- * 
- * 
- * @file
- * @author James Bordner <jobordner@ucsd.edu>
- * @date 2007-05-02
+ * @file      level.hpp
+ * @brief     Declaration of the Level class
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
  *
  */
 
@@ -137,7 +136,6 @@ public:
  * An ItLevelGridsLocal object allows iterating through all local
  * grids in a Level.
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  * @date 2007-05-02
  *
@@ -196,7 +194,6 @@ public:
  * An ItLevelGridsAll object allows iterating through all grids in a
  * Level, even non-local ones.
  * 
- * @file
  * @author James Bordner <jobordner@ucsd.edu>
  * @date 2007-05-02
  *

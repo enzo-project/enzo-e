@@ -1,10 +1,17 @@
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-
 #include <map>
+
+/**
+ * @file      debug-matrix.cpp
+ * @brief     Test program for debugging hypre matrices
+ * @author    James Bordner
+ * @bug       none
+ *
+ * $Id$
+ */
 
 #define INDEX(i0,i1,i2,grid,N2)             ((i0)+(N2)*((i1)+(N2)*((i2)+(N2)*(grid))))
 #define AINDEX(i0,i1,i2,k,grid,N2) ((k) + 7*((i0)+(N2)*((i1)+(N2)*((i2)+(N2)*(grid)))))
