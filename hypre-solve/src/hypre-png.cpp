@@ -187,7 +187,9 @@ int main(int argc, char **argv)
     for (j=0; j<levels[l].size(); j++) {
 
       Grid * grid = levels[l][j];
-      
+
+      // Overlay grid data in image
+
       images_grid_add(grid,images3,n3,ni3,nl3,nu3,top_level,scale);
 
     }
@@ -304,6 +306,8 @@ void images_grid_add(Grid   * grid,
   }
 }
 
+//----------------------------------------------------------------------
+
 void images_colormap (double *images3[3],
 		      int     ni3[3],
 		      int     rgbmap[3][256],
@@ -343,6 +347,8 @@ void images_colormap (double *images3[3],
   }
 }
 
+//----------------------------------------------------------------------
+
 void images_generate (int     ni3[3],
 		      double  *rgb33[3][3])
 {
@@ -357,6 +363,35 @@ void images_generate (int     ni3[3],
     for (int i1=0; i1 < n1; i1++) {
       for (int i2=0; i2 < n2; i2++) {
 	int i = i1 + n1*i2;
+	png.plot(i1+1,i2+1,
+		 rgb33[axis][0][i],
+		 rgb33[axis][1][i],
+		 rgb33[axis][2][i]);
+      }
+    }
+    png.close();
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void images_generate_shift (int     ni3[3],
+			    double  *rgb33[3][3])
+{
+
+  char filename[40];
+
+  for (int axis=0; axis<3; axis++) {
+    sprintf (filename,"project-shift-%d.png",axis);
+    int n1 = ni3[(axis+1)%3];
+    int n2 = ni3[(axis+2)%3];
+    pngwriter png (n1,n2,0,filename);
+    for (int i1=0; i1 < n1; i1++) {
+      int k1 = (i1 + n1/2) % n1;
+      for (int i2=0; i2 < n2; i2++) {
+	int k2 = (i2 + n2/2) % n2;
+	int i = k1 + n1*k2;
 	png.plot(i1+1,i2+1,
 		 rgb33[axis][0][i],
 		 rgb33[axis][1][i],
