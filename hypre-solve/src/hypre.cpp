@@ -173,16 +173,20 @@ void Hypre::init_hierarchy (Parameters & parameters,
 
     // Determine periodicity of Level
 
-    for (int i=0; i<3; i++) {
-      periodicity[i] = hierarchy.level(0).zones(i);
-      for (int k=0; k < part; k++) periodicity[i] *= r;
-    }
-
     if (parameters.value("boundary") == "dirichlet") {
       periodicity[0] = 0;
       periodicity[1] = 0;
       periodicity[2] = 0;
-    } 
+    } else if (parameters.value("boundary") == "periodic") {
+      for (int i=0; i<3; i++) {
+	periodicity[i] = hierarchy.level(0).zones(i);
+	for (int k=0; k < part; k++) periodicity[i] *= r;
+      }
+    } else {
+      char error_message[100];
+      sprintf (error_message, "Illegal parameter boundary = %s", parameters.value("boundary").c_str());
+      ERROR(error_message);
+    }
 
     if (debug) printf ("%s:%d  Level = %d Periodicity = (%d,%d,%d)\n",
 		       __FILE__,__LINE__, part,
