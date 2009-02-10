@@ -119,9 +119,9 @@ void Hierarchy::initialize (Domain & domain,
 void Hierarchy::init_grid_parents_ () throw ()
 {
   ItHierarchyGridsAll itg (*this);
-  while (Grid * g = itg++) {
-    Grid * p = (g->id_parent() >= 0) ? & grid(g->id_parent()) : 0;
-    this->set_parent(g,p);
+  while (Grid * grid = itg++) {
+    Grid * parent = (grid->id_parent() >= 0) ? & grid(grid->id_parent()) : 0;
+    this->set_parent(grid,parent);
   }
 }
 
