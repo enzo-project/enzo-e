@@ -23,7 +23,6 @@ class Problem {
 private:
 
   Parameters            parameters_; // Raw input parameters
-  std::vector<Sphere *> spheres_;    // List of sphere masses
   std::vector<Point *>  points_;     // List of point masses
   Hierarchy             hierarchy_;  // AMR mesh hierarchy
   Domain                domain_;     // Problem domain
@@ -69,27 +68,6 @@ public:
   Domain & domain ()        
   { 
     return domain_; 
-  }
-
-  /// Return a pointer to the ith Sphere
-  
-  Sphere & sphere (int i)   
-  { 
-    return * spheres_[i]; 
-  }
-
-  /// Return vector of spheres
-  
-  std::vector<Sphere *> spheres ()     
-  { 
-    return spheres_; 
-  }
-
-  /// Return the number of Spheres
-  
-  int num_spheres ()        
-  { 
-    return spheres_.size(); 
   }
 
   /// Return a pointer to the ith Point

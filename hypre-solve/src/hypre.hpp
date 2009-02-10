@@ -40,8 +40,7 @@ public:
   void init_graph     (Hierarchy & hierarchy);
   void init_linear    (Parameters          & parameters,
 		       Hierarchy           & hierarchy,
-		       std::vector<Point *>  points,
-		       std::vector<Sphere *> spheres);
+		       std::vector<Point *>  points);
   void solve          (Parameters & parameters,
 		       Hierarchy & hierarchy);
   void evaluate       (Hierarchy & hierarchy);
@@ -70,9 +69,9 @@ private:
 
   Scalar init_vector_points_  (Hierarchy            & hierarchy,
 			       std::vector<Point *> & points);
-  Scalar init_vector_spheres_ (Hierarchy             & hierarchy,
-			       std::vector<Sphere *> & spheres);		
-  Scalar init_vector_density_ (Hierarchy             & hierarchy);		
+  Scalar init_vector_density_ (Hierarchy             & hierarchy,
+			       std::string             file_prefix,
+			       bool                    is_packed);		
 
   // solve() functions
 
