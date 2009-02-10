@@ -23,26 +23,26 @@
 
 #include "HYPRE_sstruct_ls.h"
 
-#include "hypre-solve.hpp"
+#include "newgrav-hypre-solve.h"
 
 //----------------------------------------------------------------------
 
 const int trace          = 0;
 const int debug          = 0;
 const int debug_detailed = 0;
-const int geomview       = 1;
+const int geomview       = 0;
 
 //----------------------------------------------------------------------
 
-#include "scalar.hpp"
-#include "error.hpp"
-#include "point.hpp"
-#include "domain.hpp"
-#include "faces.hpp"
-#include "mpi.hpp"
-#include "grid.hpp"
-#include "level.hpp"
-#include "hierarchy.hpp"
+#include "newgrav-scalar.h"
+#include "newgrav-error.h"
+#include "newgrav-point.h"
+#include "newgrav-domain.h"
+#include "newgrav-faces.h"
+#include "newgrav-mpi.h"
+#include "newgrav-grid.h"
+#include "newgrav-level.h"
+#include "newgrav-hierarchy.h"
 
 
 //----------------------------------------------------------------------

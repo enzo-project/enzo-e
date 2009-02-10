@@ -16,8 +16,8 @@
 
 #include <string>
 
-#include "scalar.hpp"
-#include "domain.hpp"
+#include "newgrav-scalar.h"
+#include "newgrav-domain.h"
 
 //----------------------------------------------------------------------
 

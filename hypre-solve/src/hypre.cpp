@@ -22,7 +22,7 @@
 
 #include "hdf5.h"
 
-#include "hypre-solve.hpp"
+#include "newgrav-hypre-solve.h"
 
 //----------------------------------------------------------------------
 
@@ -32,21 +32,20 @@ const int trace_hypre  = 0;
 
 //----------------------------------------------------------------------
 
-#include "mpi.hpp"
-#include "scalar.hpp"
-#include "error.hpp"
-#include "constants.hpp"
-#include "point.hpp"
-#include "faces.hpp"
-#include "domain.hpp"
-#include "grid.hpp"
-#include "level.hpp"
-#include "hierarchy.hpp"
-#include "sphere.hpp"
-#include "parameters.hpp"
-#include "problem.hpp"
-#include "hypre.hpp"
-#include "error.hpp"
+#include "newgrav-mpi.h"
+#include "newgrav-scalar.h"
+#include "newgrav-error.h"
+#include "newgrav-constants.h"
+#include "newgrav-point.h"
+#include "newgrav-faces.h"
+#include "newgrav-domain.h"
+#include "newgrav-grid.h"
+#include "newgrav-level.h"
+#include "newgrav-hierarchy.h"
+#include "newgrav-parameters.h"
+#include "newgrav-problem.h"
+#include "newgrav-hypre.h"
+#include "newgrav-error.h"
 
 const Scalar matrix_scale = 1.0;  // 1.0:  1 1 1 -6 1 1 1
 
@@ -192,6 +191,7 @@ void Hypre::init_hierarchy (Parameters & parameters,
 		       __FILE__,__LINE__, part,
 		       periodicity[0],periodicity[1],periodicity[2]);
 
+    printf ("%s:%d periodicity(%d) = (%d %d %d)\n",__FILE__,__LINE__,part,periodicity[0],periodicity[1],periodicity[2]);
     HYPRE_SStructGridSetPeriodic (grid_, part, periodicity);
     if (trace_hypre) {
       fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGridSetPeriodic (%p,%d,%d %d %d);\n",
@@ -434,8 +434,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
 void Hypre::init_linear (Parameters          & parameters,
 			 Hierarchy           & hierarchy,
-			 std::vector<Point *>  points,
-			 std::vector<Sphere *> spheres)
+			 std::vector<Point *>  points)
 
 {
   // Create the hypre matrix A_, solution X_, and right-hand side B_ objects
@@ -569,10 +568,21 @@ void Hypre::init_linear (Parameters          & parameters,
 
   Scalar local_shift_b_sum = 0.0;
 
-  local_shift_b_sum += init_vector_points_  (hierarchy,points);
-  local_shift_b_sum += init_vector_spheres_ (hierarchy,spheres);
-  if (parameters_.value("density") == "true") {
-    local_shift_b_sum += init_vector_density_ (hierarchy);
+  bool enzo_density = parameters_.value("enzo_density") == "true";
+  if (enzo_density) {
+
+    // Either set density according to Enzo grid files...
+
+    bool        enzo_packed = parameters_.value("enzo_packed") == "true";
+    std::string enzo_prefix = parameters_.value("enzo_prefix");
+    local_shift_b_sum += init_vector_density_ 
+      (hierarchy,enzo_prefix,enzo_packed);
+  } else {
+
+    // ...or set density according to point masses
+
+    local_shift_b_sum += init_vector_points_  (hierarchy,points);
+
   }
 
   Scalar shift_b_sum = 0.0;
@@ -597,7 +607,7 @@ void Hypre::init_linear (Parameters          & parameters,
     } // while level = itl++
 
     Scalar shift_b_amount = - shift_b_sum / shift_b_count;
-    if (debug) printf ("Periodic shift = %g\n",shift_b_amount);
+    printf ("Periodic shift = %g\n",shift_b_amount);
 
     // Perform the shift
     
@@ -1521,35 +1531,94 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
 
 //------------------------------------------------------------------------
 
-/// Add contributions from sphere sources to right-hand side B
+/// Add contributions from Density in enzo HDF5 files to right-hand side B
 
-Scalar Hypre::init_vector_spheres_ (Hierarchy             & hierarchy,
-				    std::vector<Sphere *> & spheres)
+Scalar Hypre::init_vector_density_ (Hierarchy             & hierarchy,
+				    std::string             file_prefix,
+				    bool                    is_packed)
 
 {
+  ItHierarchyGridsLocal itg (hierarchy);
+  char error_message[80];
 
-  if (spheres.size() > 0) {  
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-    NOT_IMPLEMENTED("Contribution of sphere mass to right-hand side");
-    //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  herr_t status;
+  hid_t  file_id;
+  hid_t  dataset_id;
+
+  while (Grid * grid = itg++) {
+
+    // Open the HDF5 grid file
+
+    char grid_num_str[10];
+    sprintf (grid_num_str,"%04d",grid->id() + 1);
+    std::string file_name = file_prefix + ".grid" + grid_num_str;
+    file_id = H5Fopen(file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (file_id < 0) {
+      strcpy (error_message,"H5Fopen cannot open file ");
+      strcat (error_message,file_name.c_str());
+      ERROR(error_message);
+    } else {
+      printf ("DEBUG %s:%d %s opened successfully\n",
+	      __FILE__,__LINE__,file_name.c_str());
+    }
+
+    // Open the dataset Density
+
+    dataset_id = H5Dopen(file_id, "Density");
+    if (dataset_id < 0) {
+      strcpy (error_message,"H5Dopen cannot open dataset Density");
+      ERROR(error_message);
+    } else {
+      printf ("DEBUG %s:%d Density opened successfully\n",
+	      __FILE__,__LINE__);
+    }
+
+    // Read the dataset
+
+    double       *values = new double [grid->n()];
+
+    status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
+		     H5P_DEFAULT, values);
+
+    if (status < 0) {
+      strcpy (error_message,"H5Dread exited with status ");
+      char status_str[10];
+      sprintf (status_str,"%d",status);
+      strcat (error_message,status_str);
+      ERROR(error_message);
+    } else {
+      printf ("DEBUG %s:%d Density read successfully\n",
+	      __FILE__,__LINE__);
+      printf ("%d %d %d  %d  [%g %g]\n",
+	      grid->n(0),grid->n(1),grid->n(2),grid->n(),
+	      values[0],values[grid->n()-1]);
+    }
+
+    // Copy the values to the hypre vector
+
+    int part = grid->level();
+    int lower[3] = { grid->i_lower(0), grid->i_lower(1), grid->i_lower(2) };
+    int upper[3] = { grid->i_upper(0), grid->i_upper(1), grid->i_upper(2) };
+    HYPRE_SStructVectorAddToBoxValues (B_,part,lower,upper,0,values);
+
+    delete [] values;
+
+    // Close the HDF5 grid file
+
+    status = H5Fclose(file_id);
+
+    if (status < 0) {
+      strcpy (error_message,"H5Fclose exited with status ");
+      char status_str[10];
+      sprintf (status_str,"%d",status);
+      strcat (error_message,status_str);
+      ERROR(error_message);
+    }
+    
   }
 
   return 0.0;
-} // Hypre::init_vector_spheres_()
-
-//------------------------------------------------------------------------
-
-/// Add contributions from Density in enzo HDF5 files to right-hand side B
-
-Scalar Hypre::init_vector_density_ (Hierarchy             & hierarchy)
-
-{
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  NOT_IMPLEMENTED("Contribution of enzo baryonic density to right-hand side");
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-  return 0.0;
-} // Hypre::init_vector_spheres_()
+}
 
 //------------------------------------------------------------------------
 

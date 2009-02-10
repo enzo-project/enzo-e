@@ -1,7 +1,7 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-#include "scalar.hpp"
-#include "constants.hpp"
+#include "newgrav-scalar.h"
+#include "newgrav-constants.h"
 
 /**
  * @file      constants.cpp

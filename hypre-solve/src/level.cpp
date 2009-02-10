@@ -24,15 +24,15 @@
 
 const int debug = 0;
 
-#include "hypre-solve.hpp"
+#include "newgrav-hypre-solve.h"
 
-#include "scalar.hpp"
-#include "error.hpp"
-#include "faces.hpp"
-#include "mpi.hpp"
-#include "domain.hpp"
-#include "grid.hpp"
-#include "level.hpp"
+#include "newgrav-scalar.h"
+#include "newgrav-error.h"
+#include "newgrav-faces.h"
+#include "newgrav-mpi.h"
+#include "newgrav-domain.h"
+#include "newgrav-grid.h"
+#include "newgrav-level.h"
 
 //----------------------------------------------------------------------
 

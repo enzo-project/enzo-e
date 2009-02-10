@@ -15,17 +15,10 @@
 /// Usage: 
 ///
 ///   Unigrid of global size N0**3 distributed along <np0,np1,np2>
-///   processor grid
+///   processor grid, with L levels, offset switch, serial run switch,
+///   cg or mg solver, and periodic or dirichlet boundary conditions:
 ///
-///       run unigrid N0 np0 np1 np2
-///
-///   Simple nested grids in L levels with global root-grid size N0**3
-///   distributed along <np0,np1,np2> processor grid
-///
-///       run nested  N0 np0 np1 np2 L
-///
-///   (note that "run nested  N0 np0 np1 np2 0" is the same as
-///              "run unigrid N0 np0 np1 np2")
+///   hypre-init N0 np0 np1 np2 L offset serial [cg|mg] [periodic|dirichlet]
 ///
 ///-----------------------------------------------------------------------
 
@@ -37,7 +30,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define BOUNDARY "dirichlet"
 #define DIR_MODE 0755
 #define STRLEN   80
 #define BOXSIZE 8e9
@@ -61,13 +53,13 @@ int main(int argc, char **argv)
 // Parse command-line arguments
 //-----------------------------------------------------------------------
 
-  if (argc != 9) {
+  if (argc != 10) {
     printf ("Number of arguments %d is not 8\n",argc-1);
     usage(argv);
   }
 
   int N0, np3[3],num_levels,is_offset,is_serial;
-  char * solver;
+  char * solver, *boundary;
 
   N0         = atoi(argv[1]);
   np3[0]     = atoi(argv[2]);
@@ -77,6 +69,7 @@ int main(int argc, char **argv)
   is_offset  = atoi(argv[6]);
   is_serial  = atoi(argv[7]);
   solver     = argv[8];
+  boundary   = argv[9];
 
   int np = np3[0]*np3[1]*np3[2];
 
@@ -87,7 +80,7 @@ int main(int argc, char **argv)
   // Get input, output, and directory names
 
   char dir[STRLEN],infile[STRLEN];
-  sprintf (dir,    "N%d.P%d%d%d.L%d.O%d.S%d.%s",N0,np3[0],np3[1],np3[2],num_levels,is_offset,is_serial,solver);
+  sprintf (dir,    "N%d.P%d%d%d.L%d.O%d.S%d.%s.%s",N0,np3[0],np3[1],np3[2],num_levels,is_offset,is_serial,solver,boundary);
   sprintf (infile,"in.%s",dir);
   FILE * fp = fopen (infile,"w");
 
@@ -233,8 +226,7 @@ int main(int argc, char **argv)
   } else {
     fprintf (fp, "domain    3 -4e9 -4e9 -4e9  4e9 4e9 4e9\n");
   }
-  fprintf (fp, "boundary  " BOUNDARY "\n");
-  fprintf (fp, "sphere    5.993985e27 6.378137e8 0.0 0.0 0.0\n");
+  fprintf (fp, "boundary  %s\n", boundary);
   for (int k=0; k<8; k++) {
     fprintf (fp, "point     1e43   %g %g %g   %d\n",
 	     point_pos[k][0],point_pos[k][1],point_pos[k][2],id_point[k]);

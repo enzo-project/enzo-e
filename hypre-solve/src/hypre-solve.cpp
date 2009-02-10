@@ -39,7 +39,6 @@ const int barrier  = 0;
 #include "error.hpp"
 #include "performance.hpp"
 #include "point.hpp"
-#include "sphere.hpp"
 #include "faces.hpp"
 #include "mpi.hpp"
 #include "domain.hpp"
@@ -166,8 +165,7 @@ int main(int argc, char **argv)
     if (barrier) pmpi->barrier();
     hypre.init_linear (problem.parameters(),
 		       hierarchy,
-		       problem.points(),
-		       problem.spheres());
+		       problem.points());
 
     // ***************
     JBPERF_STOP("4-hypre-init");
@@ -222,12 +220,14 @@ int main(int argc, char **argv)
       int itmax     = atoi(problem.parameters().value("solver_itmax").c_str());
       double restol = atof(problem.parameters().value("solver_restol").c_str());
       if (hypre.residual() > restol) {
-	printf ("Diverged %s\n",exec_name.c_str()); fflush(stdout); 
+	printf ("Diverged %s: %g > %g\n",exec_name.c_str(),
+		hypre.residual(),restol); fflush(stdout); 
 	success = false;
       }
       // Iterations reached limit
       if (hypre.iterations() >= itmax) {
-	printf ("Stalled %s\n",exec_name.c_str()); fflush(stdout); 
+	printf ("Stalled %s: %d >= %d\n",exec_name.c_str(),
+		hypre.iterations(),itmax); fflush(stdout); 
 	success = false;
       }
       // Appears to have completed successfully

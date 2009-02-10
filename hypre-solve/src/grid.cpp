@@ -20,7 +20,7 @@
 
 // #include "HYPRE_sstruct_ls.h"
 
-#include "hypre-solve.hpp"
+#include "newgrav-hypre-solve.h"
 
 //======================================================================
 
@@ -30,12 +30,12 @@ const int trace       = 0;
 
 //======================================================================
 
-#include "error.hpp"
-#include "scalar.hpp"
-#include "faces.hpp"
-#include "mpi.hpp"
-#include "domain.hpp"
-#include "grid.hpp"
+#include "newgrav-error.h"
+#include "newgrav-scalar.h"
+#include "newgrav-faces.h"
+#include "newgrav-mpi.h"
+#include "newgrav-domain.h"
+#include "newgrav-grid.h"
 
 //======================================================================
 

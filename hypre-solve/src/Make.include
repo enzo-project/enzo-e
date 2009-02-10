@@ -53,8 +53,7 @@ OBJS_ALL = \
        mpi.o \
        parameters.o \
        point.o \
-       problem.o \
-       sphere.o
+       problem.o
 
 OBJS_INIT  = hypre-init.o
 OBJS_TEST  = hypre-test.o

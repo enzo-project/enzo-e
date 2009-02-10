@@ -22,7 +22,7 @@
 
 #include "HYPRE_sstruct_ls.h"
 
-#include "hypre-solve.hpp"
+#include "newgrav-hypre-solve.h"
 
 
 //----------------------------------------------------------------------
@@ -31,18 +31,17 @@ const int debug = 0;
 
 //----------------------------------------------------------------------
 
-#include "scalar.hpp"
-#include "error.hpp"
-#include "parameters.hpp"
-#include "point.hpp"
-#include "faces.hpp"
-#include "mpi.hpp"
-#include "domain.hpp"
-#include "grid.hpp"
-#include "level.hpp"
-#include "hierarchy.hpp"
-#include "sphere.hpp"
-#include "problem.hpp"
+#include "newgrav-scalar.h"
+#include "newgrav-error.h"
+#include "newgrav-parameters.h"
+#include "newgrav-point.h"
+#include "newgrav-faces.h"
+#include "newgrav-mpi.h"
+#include "newgrav-domain.h"
+#include "newgrav-grid.h"
+#include "newgrav-level.h"
+#include "newgrav-hierarchy.h"
+#include "newgrav-problem.h"
 
 const int trace = 0;
 
@@ -65,7 +64,6 @@ Problem::~Problem () throw ()
 Problem::Problem (const Problem & p) throw ()
 {
   domain_    = p.domain_;
-  spheres_   = p.spheres_;
   points_    = p.points_;
   hierarchy_ = p.hierarchy_;
 }
@@ -75,7 +73,6 @@ Problem::Problem (const Problem & p) throw ()
 Problem & Problem::operator = (const Problem & p) throw ()
 {
   domain_    = p.domain_;
-  spheres_   = p.spheres_;
   points_    = p.points_;
   hierarchy_ = p.hierarchy_;
   return *this;
@@ -102,7 +99,6 @@ void Problem::read (std::string filename) throw ()
       int d = atoi(value.c_str());
       hierarchy_.set_dim(d);
       Point::set_dim(d);
-      Sphere::set_dim(d);
 
       // Domain
 
@@ -115,14 +111,6 @@ void Problem::read (std::string filename) throw ()
     } else if (key == "grid") {
 
       hierarchy_.insert_grid(new Grid(value));
-
-      // Sphere ...
-
-    } else if (key == "sphere") {
-
-      spheres_.push_back(new Sphere(value));      
-
-      // Point ...
 
     } else if (key == "point") {
 
@@ -147,7 +135,6 @@ void Problem::print () throw ()
   int i;
   domain_.print();
   hierarchy_.print();
-  for (i=0; i<num_spheres(); i++) sphere(i).print();
   for (i=0; i<num_points(); i++)  point(i).print();
 }
 
@@ -159,6 +146,5 @@ void Problem::write (FILE *fp) throw ()
   int i;
   domain_.write(fp);
   hierarchy_.write(fp);
-  for (i=0; i<num_spheres(); i++) sphere(i).write(fp);
   for (i=0; i<num_points(); i++)  point(i).write(fp);
 }

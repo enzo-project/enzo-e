@@ -55,6 +55,8 @@ void images_colormap (double *images3[3],
 		      double *rgb33[3][3]);
 void images_generate (int     ni3[3],
 		      double *rgb33[3][3]);
+void images_generate_shift (int     ni3[3],
+			    double *rgb33[3][3]);
 
 
 //======================================================================
@@ -202,6 +204,10 @@ int main(int argc, char **argv)
   TRACE;
 
   images_generate (ni3,rgb33);
+
+  TRACE;
+
+  images_generate_shift (ni3,rgb33);
 
   TRACE;
 }

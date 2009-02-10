@@ -105,9 +105,12 @@ int main(int argc, char ** argv)
   int * imin0     = new int [num_grids+1];
   int * imin1     = new int [num_grids+1];
   int * imin2     = new int [num_grids+1];
-  int * isize0     = new int [num_grids+1];
-  int * isize1     = new int [num_grids+1];
-  int * isize2     = new int [num_grids+1];
+  int * ibegin0     = new int [num_grids+1];
+  int * ibegin1     = new int [num_grids+1];
+  int * ibegin2     = new int [num_grids+1];
+  int * iend0     = new int [num_grids+1];
+  int * iend1     = new int [num_grids+1];
+  int * iend2     = new int [num_grids+1];
   int i;
   for (i=0; i<num_grids+1; i++) {
     processor[i] = 0;
@@ -122,9 +125,12 @@ int main(int argc, char ** argv)
     imin0[i] = 0;
     imin1[i] = 0;
     imin2[i] = 0;
-    isize0[i] = 0;
-    isize1[i] = 0;
-    isize2[i] = 0;
+    ibegin0[i] = 0;
+    ibegin1[i] = 0;
+    ibegin2[i] = 0;
+    iend0[i] = 0;
+    iend1[i] = 0;
+    iend2[i] = 0;
   }
 
   //-----------------------------------------------------------------------
@@ -151,8 +157,13 @@ int main(int argc, char ** argv)
 
     // Get grid size
 
-    sscanf (line,"GridDimension     = %d %d %d",
-	    &isize0[igrid],&isize1[igrid],&isize2[igrid]);
+    // (note: GridDimension is not portable since different Enzo versions
+    //  note: may be using different ghost zone counts)
+
+    sscanf (line,"GridStartIndex    = %d %d %d",
+	    &ibegin0[igrid],&ibegin1[igrid],&ibegin2[igrid]);
+    sscanf (line,"GridEndIndex      = %d %d %d",
+	    &iend0[igrid],&iend1[igrid],&iend2[igrid]);
 
     if (sscanf (line,"%s",s) && strcmp (s,"Pointer:")==0) {
 
@@ -195,6 +206,10 @@ int main(int argc, char ** argv)
   int np = 0;
 
   bool have_procmap = (fpin != NULL);
+
+  fprintf (fpout," enzo_density true\n");
+  fprintf (fpout," enzo_procmap %s\n",have_procmap ? "true" : "false");
+  fprintf (fpout," enzo_prefix  %s\n",argv[1]);
 
   if (have_procmap) {
 
@@ -246,16 +261,6 @@ int main(int argc, char ** argv)
   fclose(fpin);  // Close restart file
 
   //-----------------------------------------------------------------------
-  // Remove ghost zone contributions to size
-  //-----------------------------------------------------------------------
-
-  for (i=1; i<=num_grids; i++) {
-    isize0[i] -= 6;
-    isize1[i] -= 6;
-    isize2[i] -= 6;
-  }
-
-  //-----------------------------------------------------------------------
   // Compute imin given xmin, level, and grid size
   //-----------------------------------------------------------------------
 
@@ -284,7 +289,11 @@ int main(int argc, char ** argv)
     fprintf (fpout," %g %g %g",xmin0[i],xmin1[i],xmin2[i]);
     fprintf (fpout," %g %g %g",xmax0[i],xmax1[i],xmax2[i]);
     fprintf (fpout," %d %d %d",imin0[i],imin1[i],imin2[i]);
-    fprintf (fpout," %d %d %d",isize0[i],isize1[i],isize2[i]);
+    fprintf (fpout," %d %d %d",
+	     iend0[i]-ibegin0[i]+1,
+	     iend1[i]-ibegin1[i]+1,
+	     iend2[i]-ibegin2[i]+1);
+
     fprintf (fpout,"\n");
   }
 
@@ -329,9 +338,12 @@ int main(int argc, char ** argv)
   delete [] imin0;
   delete [] imin1;
   delete [] imin2;
-  delete [] isize0;
-  delete [] isize1;
-  delete [] isize2;
+  delete [] ibegin0;
+  delete [] ibegin1;
+  delete [] ibegin2;
+  delete [] iend0;
+  delete [] iend1;
+  delete [] iend2;
 
   fclose (fpout);  // Close output file
 

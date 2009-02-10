@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 #include <mpi.h>
-#include "mpi.hpp"
+#include "newgrav-mpi.h"
 
 const int debug = 0;
 

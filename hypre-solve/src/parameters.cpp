@@ -20,8 +20,8 @@
 #include <string>
 #include <map>
 
-#include "hypre-solve.hpp"
-#include "parameters.hpp"
+#include "newgrav-hypre-solve.h"
+#include "newgrav-parameters.h"
 
 const int trace = 0;
 

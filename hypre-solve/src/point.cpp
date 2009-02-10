@@ -17,8 +17,8 @@
 
 #include <string>
 
-#include "scalar.hpp"
-#include "point.hpp"
+#include "newgrav-scalar.h"
+#include "newgrav-point.h"
 
 //----------------------------------------------------------------------
 
