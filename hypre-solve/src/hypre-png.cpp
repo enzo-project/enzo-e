@@ -23,12 +23,13 @@
 const int debug = 0;
 const int trace = 0;
 
-#include "scalar.hpp"
-#include "mpi.hpp"
-#include "faces.hpp"
-#include "domain.hpp"
-#include "grid.hpp"
-#include "hypre-solve.hpp"
+#include "newgrav-scalar.h"
+#include "newgrav-mpi.h"
+#include "newgrav-faces.h"
+#include "newgrav-domain.h"
+#include "newgrav-grid.h"
+#include "newgrav-hypre-solve.h"
+
 #include "pngwriter.h"
 #include "colormap.h"
 

@@ -25,7 +25,7 @@
 
 #include "HYPRE_sstruct_ls.h"
 
-#include "hypre-solve.hpp"
+#include "newgrav-hypre-solve.h"
 
 //----------------------------------------------------------------------
 
@@ -35,19 +35,19 @@ const int barrier  = 0;
 
 //----------------------------------------------------------------------
 
-#include "scalar.hpp"
-#include "error.hpp"
-#include "performance.hpp"
-#include "point.hpp"
-#include "faces.hpp"
-#include "mpi.hpp"
-#include "domain.hpp"
-#include "grid.hpp"
-#include "level.hpp"
-#include "hierarchy.hpp"
-#include "parameters.hpp"
-#include "problem.hpp"
-#include "hypre.hpp"
+#include "newgrav-scalar.h"
+#include "newgrav-error.h"
+#include "newgrav-performance.h"
+#include "newgrav-point.h"
+#include "newgrav-faces.h"
+#include "newgrav-mpi.h"
+#include "newgrav-domain.h"
+#include "newgrav-grid.h"
+#include "newgrav-level.h"
+#include "newgrav-hierarchy.h"
+#include "newgrav-parameters.h"
+#include "newgrav-problem.h"
+#include "newgrav-hypre.h"
 
 //======================================================================
 // BEGIN MAIN
