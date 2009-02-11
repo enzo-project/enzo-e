@@ -143,7 +143,7 @@ protected:
   /// Read the grid from a file written using write()
 
   void read (std::string name) throw ()
-  { if (debug) printf ("%s:%d %s\n",__FILE__,__LINE__,name.c_str());
+  {
     FILE *fp = fopen (name.c_str(),"r"); this->read(fp); fclose(fp); 
   };
 
