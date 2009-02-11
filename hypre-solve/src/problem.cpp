@@ -80,6 +80,13 @@ Problem & Problem::operator = (const Problem & p) throw ()
 
 //----------------------------------------------------------------------
 
+void Problem::import_enzo () throw ()
+{
+  TEMPORARY("Problem::import_enzo()");
+}
+
+//----------------------------------------------------------------------
+
 void Problem::read (std::string filename) throw ()
 {
 
