@@ -44,6 +44,25 @@ void usage (char ** argv)
   exit(1);
 }
 
+void find_limit(int lp3[3], // OUT: Lower point defining grid patch
+		int up3[3], // OUT: Upper point defining grid patch
+		int li3[3], // OUT: Lower index of grid
+		int ip3[3], //  IN: rank in MPI grid topology
+		int np3[3], //  IN: size of MPI grid topology
+		int r       //  IN: r0 ^ level
+		)
+{
+
+  for (int i=0; i<3; i++) {
+     lp3[i] =  (1-is_offset)*( ip3[i]   *BOXSIZE / np3[i])/r 
+       +           is_offset*BOXSIZE* ip3[i]   /r/np3[i];
+     up3[i] =  (1-is_offset)*((ip3[i]+1)*BOXSIZE / np3[i])/r 
+       +           is_offset*BOXSIZE*(ip3[i]+1)/r/np3[i];
+
+     li3[i] = (1-is_offset)*N0*(r-1)/2 + ip3[i]*n3[i];
+  }
+}
+
 //----------------------------------------------------------------------
 
 int main(int argc, char **argv)
@@ -127,38 +146,20 @@ int main(int argc, char **argv)
   int level;
 
   int r0 = 2;  // refinement factor
-  int r = 1;   // r^level
+  int r = 1;   // r0^level
+
+  // Loop over levels
+
   for (level = 0; level < num_levels; level++, r *= r0) {
 
+    // Loop over processors
+
     for (ip3[2] = 0; ip3[2] < np3[2]; ip3[2]++) {
-
-      // Centered box
-               
-#define LP(id) (1-is_offset)*(-BOXSIZE/2 +  ip3[id]   *BOXSIZE / np3[id])/r + \
-                  is_offset*BOXSIZE* ip3[id]   /r/np3[id];
-#define UP(id) (1-is_offset)*(-BOXSIZE/2 + (ip3[id]+1)*BOXSIZE / np3[id])/r + \
-                  is_offset*BOXSIZE*(ip3[id]+1)/r/np3[id];
-
-      lp3[2] = LP(2);
-      up3[2] = UP(2);
-
-      li3[2] = (1-is_offset)*N0*(r-1)/2 + ip3[2]*n3[2];
-
       for (ip3[1] = 0; ip3[1] < np3[1]; ip3[1]++) {
-
-	lp3[1] = LP(1);
-	up3[1] = UP(1);
-
-
-	li3[1] = (1-is_offset)*N0*(r-1)/2 + ip3[1]*n3[1];
-
 	for (ip3[0] = 0; ip3[0] < np3[0]; ip3[0]++) {
 
-	  lp3[0] = LP(0);
-	  up3[0] = UP(0);
-
-	  li3[0] = (1-is_offset)*N0*(r-1)/2 + ip3[0]*n3[0];
-
+	  find_limit(lp3,up3,li3,ip3,np3,r);
+               
 	  int ip = ip3[0] + np3[0]*(ip3[1] + np3[1]*ip3[2]);
 
 	  int id = ip + np*level;
