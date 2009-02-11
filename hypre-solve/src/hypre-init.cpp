@@ -133,34 +133,29 @@ int main(int argc, char **argv)
     for (ip3[2] = 0; ip3[2] < np3[2]; ip3[2]++) {
 
       // Centered box
-      lp3[2] = (1-is_offset)*(-BOXSIZE/2 +  ip3[2]   *BOXSIZE / np3[2])/r;
-      up3[2] = (1-is_offset)*(-BOXSIZE/2 + (ip3[2]+1)*BOXSIZE / np3[2])/r;
+               
+#define LP(id) (1-is_offset)*(-BOXSIZE/2 +  ip3[id]   *BOXSIZE / np3[id])/r + \
+                  is_offset*BOXSIZE* ip3[id]   /r/np3[id];
+#define UP(id) (1-is_offset)*(-BOXSIZE/2 + (ip3[id]+1)*BOXSIZE / np3[id])/r + \
+                  is_offset*BOXSIZE*(ip3[id]+1)/r/np3[id];
 
-      // Offset box
-      lp3[2] += is_offset*BOXSIZE* ip3[2]   /r/np3[2];
-      up3[2] += is_offset*BOXSIZE*(ip3[2]+1)/r/np3[2];
+      lp3[2] = LP(2);
+      up3[2] = UP(2);
 
       li3[2] = (1-is_offset)*N0*(r-1)/2 + ip3[2]*n3[2];
 
       for (ip3[1] = 0; ip3[1] < np3[1]; ip3[1]++) {
 
-	// Centered box
-	lp3[1] = (1-is_offset)*(-BOXSIZE/2 +  ip3[1]   *BOXSIZE / np3[1])/r;
-	up3[1] = (1-is_offset)*(-BOXSIZE/2 + (ip3[1]+1)*BOXSIZE / np3[1])/r;
+	lp3[1] = LP(1);
+	up3[1] = UP(1);
 
-	// Offset box
-	lp3[1] += is_offset*BOXSIZE* ip3[1]   /r/np3[1];
-	up3[1] += is_offset*BOXSIZE*(ip3[1]+1)/r/np3[1];
 
 	li3[1] = (1-is_offset)*N0*(r-1)/2 + ip3[1]*n3[1];
+
 	for (ip3[0] = 0; ip3[0] < np3[0]; ip3[0]++) {
 
-	  // Centered box
-	  lp3[0] = (1-is_offset)*(-BOXSIZE/2 +  ip3[0]   *BOXSIZE / np3[0])/r;
-	  up3[0] = (1-is_offset)*(-BOXSIZE/2 + (ip3[0]+1)*BOXSIZE / np3[0])/r;
-	  // Offset box
-	  lp3[0] += is_offset*BOXSIZE* ip3[0]   /r/np3[0];
-	  up3[0] += is_offset*BOXSIZE*(ip3[0]+1)/r/np3[0];
+	  lp3[0] = LP(0);
+	  up3[0] = UP(0);
 
 	  li3[0] = (1-is_offset)*N0*(r-1)/2 + ip3[0]*n3[0];
 
@@ -177,8 +172,6 @@ int main(int argc, char **argv)
 	    int i1 = ((1-is_offset)*r0*np3[1] + 4*ip3[1])/(4*r0);
 	    int i2 = ((1-is_offset)*r0*np3[2] + 4*ip3[2])/(4*r0);
 	    id_parent = offset + i0 + np3[0]*(i1 + np3[1]*i2);
-	    //	    printf ("offset = %d  ip=(%d,%d,%d), np=(%d,%d,%d) i=(%d,%d,%d) level = %d  parent=%d\n",
-	    //		    offset,ip3[0],ip3[1],ip3[2],np3[0],np3[1],np3[2],i0,i1,i2,level,id_parent);
 	  }
 
 	  fprintf (fp, "grid %d %d %d "
