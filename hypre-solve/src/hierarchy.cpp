@@ -71,6 +71,37 @@ Hierarchy::~Hierarchy () throw ()
 
 //======================================================================
 
+void Hierarchy::enzo_attach () throw ()
+{
+  TEMPORARY("Hierarchy::enzo_attach()");
+  set_dim(3);
+  // For each grid...
+  //
+  //  create "value" string consisting of the following:
+  //
+  //	 id:                Unique id, starting from 0 and counting up
+  //     id_parent:         id of the parent
+  //     ip                 MPI processor rank
+  //     xl[0] xl[1] xl[2]  Lower position defining the grid extent
+  //     xu[0] xu[1] xu[2]  Upper position defining the grid extent
+  //     il[0] il[1] il[2]  Coordinate defining the lower grid index
+  //     n[0] n[1] n[2]     Size of the grid
+  //
+  //  insert the grid into the hierarchy:
+  //
+  //     hierarchy_.insert_grid(new Grid(value));
+  
+}
+
+//----------------------------------------------------------------------
+
+void Hierarchy::enzo_detach () throw ()
+{
+  TEMPORARY("Hierarchy::enzo_detach()");
+}
+
+//======================================================================
+
 /// Insert a grid into the hierarchy.
 
 /** Inserts the grid's pointer into the grids0_ vector, at the
@@ -132,6 +163,7 @@ void Hierarchy::init_grid_parents_ () throw ()
 void Hierarchy::init_grid_levels_ () throw ()
 {
   bool done = false;
+
   while (! done) {
 
     done = true;
@@ -214,8 +246,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
       Grid * g2 = & level(0).grid(j);
 
       if (g1->is_adjacent(*g2)) {
-	g1->set_neighbor (*g2);
-	g2->set_neighbor (*g1);
+	assert_neighbors(*g1,*g2);
 	if (debug) printf ("DEBUG 1 grids %d and %d are neighbors\n",
 			   g1->id(),g2->id());
       }

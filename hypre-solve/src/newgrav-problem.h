@@ -49,10 +49,6 @@ public:
 
   void read (std::string filename) throw ();
 
-  /// Import a problem from Enzo
-
-  void import_enzo () throw ();
-
   /// Return the dimension
 
   int dimension ()          

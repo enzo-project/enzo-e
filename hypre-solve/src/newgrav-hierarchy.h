@@ -67,6 +67,16 @@ public:
   // PUBLIC MEMBER FUNCTIONS
   //--------------------------------------------------------------------
 
+  // ENZO INTERFACE
+
+  /// Attach to the Enzo hierarchy
+
+  void enzo_attach () throw ();
+
+  /// Detach from the Enzo hierarchy
+
+  void enzo_detach () throw ();
+
   // Initialization
 
   void insert_grid (Grid * grid) throw ();
