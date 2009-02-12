@@ -247,7 +247,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
       Grid * g2 = & level(0).grid(j);
 
-      if (g1->is_adjacent(*g2)) {
+      if (g1->is_adjacent(*g2,period_)) {
 	assert_neighbors(*g1,*g2);
 	if (debug) printf ("DEBUG 1 grids %d and %d are neighbors\n",
 			   g1->id(),g2->id());
@@ -271,7 +271,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
       for (j=0; j<parent(*g1)->num_children(); j++) {
 	Grid * g2 = & parent(*g1)->child(j);
-	if (g1->is_adjacent(*g2) && g1->id() > g2->id()) {
+	if (g1->is_adjacent(*g2,period_) && g1->id() > g2->id()) {
 	  if (debug) printf ("DEBUG 2 grids %d and %d are neighbors\n",
 			     g1->id(),g2->id());
 	  assert_neighbors (*g1,*g2);
@@ -284,7 +284,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 	Grid * gn = & parent(*g1)->neighbor(j1);
 	for (j2=0; j2<gn->num_children(); j2++) {
 	  Grid * g2 = & gn->child(j2);
-	  if (g1->is_adjacent(*g2) && g1->id() > g2->id()) {
+	  if (g1->is_adjacent(*g2,period_) && g1->id() > g2->id()) {
 	    if (debug) printf ("DEBUG 3 grids %d and %d are neighbors\n",
 			       g1->id(),g2->id());
 	    assert_neighbors (*g1,*g2);

@@ -384,7 +384,7 @@ protected:
   //--------------------------------------------------------------------
 
   /// Return true iff the two grids are next to each other, or are the same grid
-  bool is_adjacent (Grid & grid) throw ();
+  bool is_adjacent (Grid & grid, Scalar period[3]) throw ();
   /// Return true iff the grid belongs to processor ip
   bool is_local () throw()
   { return mpi_.ip() == ip_; };

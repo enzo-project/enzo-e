@@ -438,7 +438,7 @@ void Grid::input (std::string parms) throw ()
 
 //----------------------------------------------------------------------
 
-bool Grid::is_adjacent (Grid & g2) throw ()
+bool Grid::is_adjacent (Grid & g2, Scalar period[3]) throw ()
 {
   Grid & g1 = *this;
 
@@ -456,13 +456,33 @@ bool Grid::is_adjacent (Grid & g2) throw ()
 
     double hh = 0.5 * (g1.xu_[i]-g1.xl_[i])/g1.n_[i];
 
-    // If g1's upper edge is strictly below g2's lower edge, then they are far
+    if (period[i] == 0) {
 
-    far = far || (g1.xu_[i] < (g2.xl_[i] - hh));
+      // If not periodic ...
 
-    // If g1's upper edge is strictly below g2's lower edge, then they are far
+      // If g1's upper edge is strictly below g2's lower edge, then they are far
 
-    far = far || (g2.xu_[i] < (g1.xl_[i] - hh));
+      far = far || (g1.xu_[i] < (g2.xl_[i] - hh));
+
+      // If g1's upper edge is strictly below g2's lower edge, then they are far
+
+      far = far || (g2.xu_[i] < (g1.xl_[i] - hh));
+
+    } else {
+
+      // If periodic ...
+
+      // If g1's upper edge is strictly below g2's lower edge, then they are far
+
+      far = far || ( (g1.xu_[i] < (g2.xl_[i] - hh)) &&
+		     (g2.xu_[i] < (g1.xl_[i] - hh + period[i])));
+
+      // If g1's upper edge is strictly below g2's lower edge, then they are far
+
+      far = far || ( (g2.xu_[i] < (g1.xl_[i] - hh)) &&
+		     (g1.xu_[i] < (g2.xl_[i] - hh + period[i])));
+
+    }
   }
 
   // If g1 and g2 are not far, then they are adjacent

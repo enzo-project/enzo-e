@@ -44,22 +44,43 @@ void usage (char ** argv)
   exit(1);
 }
 
-void find_limit(int lp3[3], // OUT: Lower point defining grid patch
-		int up3[3], // OUT: Upper point defining grid patch
-		int li3[3], // OUT: Lower index of grid
-		int ip3[3], //  IN: rank in MPI grid topology
-		int np3[3], //  IN: size of MPI grid topology
-		int r       //  IN: r0 ^ level
-		)
+void find_limit_centered(
+			 double lp3[3], // OUT: Lower point defining grid patch
+			 double up3[3], // OUT: Upper point defining grid patch
+			 int li3[3], // OUT: Lower index of grid
+			 int     N0, //  IN: Global grid size
+			 int  n3[3], //  IN: Local grid size
+			 int ip3[3], //  IN: rank in MPI grid topology
+			 int np3[3], //  IN: size of MPI grid topology
+			 int r       //  IN: r0 ^ level
+			 )
 {
 
-  for (int i=0; i<3; i++) {
-     lp3[i] =  (1-is_offset)*( ip3[i]   *BOXSIZE / np3[i])/r 
-       +           is_offset*BOXSIZE* ip3[i]   /r/np3[i];
-     up3[i] =  (1-is_offset)*((ip3[i]+1)*BOXSIZE / np3[i])/r 
-       +           is_offset*BOXSIZE*(ip3[i]+1)/r/np3[i];
 
-     li3[i] = (1-is_offset)*N0*(r-1)/2 + ip3[i]*n3[i];
+
+  for (int i=0; i<3; i++) {
+    lp3[i] = (-BOXSIZE/2 +  ip3[i]   *BOXSIZE / np3[i])/r;
+    up3[i] = (-BOXSIZE/2 + (ip3[i]+1)*BOXSIZE / np3[i])/r;
+    li3[i] = N0*(r-1)/2 + ip3[i]*n3[i];
+  }
+}
+//----------------------------------------------------------------------
+
+void find_limit_offset(
+		       double lp3[3], // OUT: Lower point defining grid patch
+		       double up3[3], // OUT: Upper point defining grid patch
+		       int li3[3], // OUT: Lower index of grid
+		       int     N0, //  IN: Global grid size
+		       int  n3[3], //  IN: Local grid size
+		       int ip3[3], //  IN: rank in MPI grid topology
+		       int np3[3], //  IN: size of MPI grid topology
+		       int r       //  IN: r0 ^ level
+		       )
+{
+  for (int i=0; i<3; i++) {
+    lp3[i] = BOXSIZE* ip3[i]   /r/np3[i];
+    up3[i] = BOXSIZE*(ip3[i]+1)/r/np3[i];
+    li3[i] = ip3[i]*n3[i];
   }
 }
 
@@ -158,7 +179,11 @@ int main(int argc, char **argv)
       for (ip3[1] = 0; ip3[1] < np3[1]; ip3[1]++) {
 	for (ip3[0] = 0; ip3[0] < np3[0]; ip3[0]++) {
 
-	  find_limit(lp3,up3,li3,ip3,np3,r);
+	  if (is_offset == false) {
+	    find_limit_centered(lp3,up3,li3,N0,n3,ip3,np3,r);
+	  } else {
+	    find_limit_offset(lp3,up3,li3,N0,n3,ip3,np3,r);
+	  }
                
 	  int ip = ip3[0] + np3[0]*(ip3[1] + np3[1]*ip3[2]);
 
