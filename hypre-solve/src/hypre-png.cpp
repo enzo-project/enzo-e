@@ -23,6 +23,8 @@
 const int debug = 0;
 const int trace = 0;
 
+const double SHIFT = (0.75);  // Must be >= 0
+
 #include "newgrav-scalar.h"
 #include "newgrav-mpi.h"
 #include "newgrav-faces.h"
@@ -395,9 +397,9 @@ void images_generate_shift (int     ni3[3],
     int n2 = ni3[(axis+2)%3];
     pngwriter png (n1,n2,0,filename);
     for (int i1=0; i1 < n1; i1++) {
-      int k1 = (i1 + n1/2) % n1;
+      int k1 = int(i1 + SHIFT*n1) % n1;
       for (int i2=0; i2 < n2; i2++) {
-	int k2 = (i2 + n2/2) % n2;
+	int k2 = int(i2 + SHIFT*n2) % n2;
 	int i = k1 + n1*k2;
 	png.plot(i1+1,i2+1,
 		 rgb33[axis][0][i],
