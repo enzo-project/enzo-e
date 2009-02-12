@@ -191,7 +191,6 @@ void Hypre::init_hierarchy (Parameters & parameters,
 		       __FILE__,__LINE__, part,
 		       periodicity[0],periodicity[1],periodicity[2]);
 
-    printf ("%s:%d periodicity(%d) = (%d %d %d)\n",__FILE__,__LINE__,part,periodicity[0],periodicity[1],periodicity[2]);
     HYPRE_SStructGridSetPeriodic (grid_, part, periodicity);
     if (trace_hypre) {
       fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGridSetPeriodic (%p,%d,%d %d %d);\n",

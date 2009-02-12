@@ -308,6 +308,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 				  Mpi    & mpi) throw ()
 
 {
+  const int r = 2;
+
   int axis, face;
   int ig0,in0,il0,iu0;
   int ig1,in1,il1,iu1;
@@ -326,10 +328,15 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     // Determine level periodicity
 
-    int period[3];
-    for (int i=0; i<3; i++) {
-      period[i] = period_[i]==0 ? 0 : level->zones(i);
+    int i,period[3];
+    for (i=0; i<3; i++) {
+      period[i] = (period_[i]==0 || level->index()==0) ? 0 : level->zones(0);
+      for (int j=0; j<level->index(); j++) {
+	period[i] *= r;
+      }
     }
+    //    printf ("%s:%d level=%d period=(%d %d %d)\n",__FILE__,__LINE__,level->index(),
+    //	    period[0],period[1],period[2]);
 
     if (debug) printf ("Level %d\n",level->index());
     while (Grid * grid = itg++) {
@@ -503,8 +510,13 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     int period[3];
     for (int i=0; i<3; i++) {
-      period[i] = period_[i]==0 ? 0 : level->zones(i);
+      period[i] = (period_[i]==0 || level->index()==0) ? 0 : level->zones(i);
+      for (int j=0; j<level->index(); j++) {
+	period[i] *= r;
+      }
     }
+    //    printf ("%s:%d level=%d period=(%d %d %d)\n",__FILE__,__LINE__,level->index(),
+    //	    period[0],period[1],period[2]);
 
     ItLevelGridsAll itg (*level);
     while (Grid * grid = itg++) {

@@ -528,9 +528,9 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 
       bool b1 = ig[axis][face] == in[axis][1-face];
       bool b2 = 
-	(ig[axis][face]   + (1-face)*iperiod[axis]) == 
-	(in[axis][1-face] +     face*iperiod[axis]);
-
+      	(ig[axis][face]   + (1-face)*iperiod[axis]) == 
+      	(in[axis][1-face] +     face*iperiod[axis]);
+      //      assert (b1==b2);
       if (b1 || b2 ) {
 	found_face = true;
 	iaxis=axis;
@@ -566,7 +566,7 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
     printf ("%s:%d neighbor_shared_face Grids (%d %d)  (axis=%d face=%d) il (%d %d) iu (%d %d)\n",
 	    __FILE__,__LINE__,this->id(),neighbor.id(),
 	    axis,face,il0,il1,iu0,iu1);
-  }
+    }
   if (il0 > iu0 || il1 > iu1) return false;
 
   return true;
