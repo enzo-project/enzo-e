@@ -328,7 +328,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     int period[3];
     for (int i=0; i<3; i++) {
-      period[i] = period_[level->index()]==0 ? 0 : level->zones(i);
+      period[i] = period_[i]==0 ? 0 : level->zones(i);
     }
 
     if (debug) printf ("Level %d\n",level->index());
@@ -503,7 +503,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     int period[3];
     for (int i=0; i<3; i++) {
-      period[i] = period_[level->index()]==0 ? 0 : level->zones(i);
+      period[i] = period_[i]==0 ? 0 : level->zones(i);
     }
 
     ItLevelGridsAll itg (*level);
@@ -641,10 +641,6 @@ void Hierarchy::init_extents_ (bool is_periodic) throw()
   for (i=0; i<3; i++) {
     period_[i] = is_periodic ? xu_[i] - xl_[i] : 0.0;
   }
-
-  printf ("%s:%d hierarchy extents: (%g %g %g) (%g %g %g)  period: (%g %g %g)\n",
-	  __FILE__,__LINE__,xl_[0],xl_[1],xl_[2],xu_[0],xu_[1],xu_[2],
-	  period_[0],period_[1],period_[2]);
 
   _TRACE_;
 }

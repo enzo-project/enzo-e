@@ -525,9 +525,13 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 
   for (axis=0; axis<3; axis++) {
     for (face=0; face<2; face++) {
-      if (ig[axis][face] == in[axis][1-face] ||
-	  ig[axis][face]   + (1-face)*iperiod[axis] == 
-	  in[axis][1-face] +     face*iperiod[axis]) {
+
+      bool b1 = ig[axis][face] == in[axis][1-face];
+      bool b2 = 
+	(ig[axis][face]   + (1-face)*iperiod[axis]) == 
+	(in[axis][1-face] +     face*iperiod[axis]);
+
+      if (b1 || b2 ) {
 	found_face = true;
 	iaxis=axis;
 	iface=face;
@@ -605,9 +609,11 @@ bool Grid::coarse_shared_face (Grid & coarse,
   for (axis=0; axis<3; axis++) {
     for (face=0; face<2; face++) {
 
-      if (ig[axis][face] == r*ic[axis][1-face] ||
-	  ig[axis][face]     + (1-face)*iperiod[axis] == 
-	  r*ic[axis][1-face] +     face*iperiod[axis]) {
+      bool b1 = ig[axis][face] == r*ic[axis][1-face];
+      bool b2 = ig[axis][face]     + (1-face)*iperiod[axis] == 
+	r*ic[axis][1-face] +     face*iperiod[axis];
+
+      if (b1 || b2 ) {
 	found_face = true;
 	iaxis=axis;
 	iface=face;
