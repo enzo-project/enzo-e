@@ -324,6 +324,13 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     ItLevelGridsAll itg (*level);
 
+    // Determine level periodicity
+
+    int period[3];
+    for (int i=0; i<3; i++) {
+      period[i] = period_[level->index()]==0 ? 0 : level->zones(i);
+    }
+
     if (debug) printf ("Level %d\n",level->index());
     while (Grid * grid = itg++) {
       if (debug) grid->print();
@@ -336,7 +343,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
       while ((adjacent = itn++)) {
 	if (grid->is_local() || adjacent->is_local()) {
 	  if (grid->neighbor_shared_face
-	      (*adjacent,axis,face,il0,il1,iu0,iu1)) {
+	      (*adjacent,axis,face,il0,il1,iu0,iu1,period)) {
 	    for (ig0=il0; ig0<=iu0; ig0++) {
 	      for (ig1=il1; ig1<=iu1; ig1++) {
 		grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -355,7 +362,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	while ((adjacent = itpn++)) {
 	  if (grid->is_local() || adjacent->is_local()) {
 	    if (grid->coarse_shared_face
-		(*adjacent,axis,face,il0,il1,iu0,iu1)) {
+		(*adjacent,axis,face,il0,il1,iu0,iu1,period)) {
 	      for (ig0=il0; ig0<=iu0; ig0++) {
 		for (ig1=il1; ig1<=iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -448,7 +455,9 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
   // ------------------------------------------------------------
 
   for (int ilevel = num_levels()-1; ilevel>0; ilevel--) {
+
     Level *level = &this->level(ilevel);
+
     ItLevelGridsAll itg (*level);
     while (Grid * grid = itg++) {
       Grid * parent = this->parent(*grid);
@@ -489,6 +498,14 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
   for (int ilevel = 0; ilevel<num_levels(); ilevel++) {
     Level *level = &this->level(ilevel);
+
+    // Determine level periodicity
+
+    int period[3];
+    for (int i=0; i<3; i++) {
+      period[i] = period_[level->index()]==0 ? 0 : level->zones(i);
+    }
+
     ItLevelGridsAll itg (*level);
     while (Grid * grid = itg++) {
       //      int ig3[3][2];
@@ -496,7 +513,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
       ItGridNeighbors itn (*grid);
       while (Grid * neighbor = itn++) {
 	if (grid->neighbor_shared_face 
-	    (*neighbor, axis, face, il0,il1,iu0,iu1)) {
+	    (*neighbor, axis, face, il0,il1,iu0,iu1,period)) {
 	  for (ig0=il0; ig0<=iu0; ig0++) {
 	    for (ig1=il1; ig1<=iu1; ig1++) {
 	      Faces::Label & fz = grid->faces().label(axis,face,ig0,ig1);

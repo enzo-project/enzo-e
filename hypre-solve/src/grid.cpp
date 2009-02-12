@@ -500,7 +500,7 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 				 int & axis, int & face, 
 				 int & il0, int & il1, 
 				 int & iu0, int & iu1,
-				 Scalar period[3]) throw ()
+				 int iperiod[3]) throw ()
 {
 
   Grid & grid = *this;
@@ -525,7 +525,9 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 
   for (axis=0; axis<3; axis++) {
     for (face=0; face<2; face++) {
-      if (ig[axis][face] == in[axis][1-face]) {
+      if (ig[axis][face] == in[axis][1-face] ||
+	  ig[axis][face]   + (1-face)*iperiod[axis] == 
+	  in[axis][1-face] +     face*iperiod[axis]) {
 	found_face = true;
 	iaxis=axis;
 	iface=face;
@@ -577,7 +579,7 @@ bool Grid::coarse_shared_face (Grid & coarse,
 			       int & axis, int & face, 
 			       int & il0, int & il1, 
 			       int & iu0, int & iu1,
-			       Scalar period[3]) throw ()
+			       int iperiod[3]) throw ()
 {
 
   const int r = 2; // WARNING: assuming fixed refinement factor r = 2
@@ -602,7 +604,10 @@ bool Grid::coarse_shared_face (Grid & coarse,
 
   for (axis=0; axis<3; axis++) {
     for (face=0; face<2; face++) {
-      if (ig[axis][face] == r*ic[axis][1-face]) {
+
+      if (ig[axis][face] == r*ic[axis][1-face] ||
+	  ig[axis][face]     + (1-face)*iperiod[axis] == 
+	  r*ic[axis][1-face] +     face*iperiod[axis]) {
 	found_face = true;
 	iaxis=axis;
 	iface=face;
@@ -652,8 +657,7 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
 			       int & face, 
 			       int & il0, int & il1, 
 			       int & iu0, int & iu1,
-			       int & count,
-			       Scalar period[3]) throw ()
+			       int & count) throw ()
 {
 
   const int r = 2; // WARNING: assuming fixed refinement factor r = 2
@@ -737,8 +741,7 @@ bool Grid::parent_interior_face (Grid & parent,
 				 int & axis, int & face, 
 				 int & il0, int & il1, 
 				 int & iu0, int & iu1,
-				 int & count,
-				 Scalar period[3]) throw ()
+				 int & count) throw ()
 {
 
   _TRACE_;
