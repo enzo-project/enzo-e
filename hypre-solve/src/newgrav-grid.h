@@ -222,7 +222,8 @@ protected:
   /// actually a neighbor.  Indices are relative to the grid.
 
   bool neighbor_shared_face (Grid & neighbor, int & axis, int & face, 
-			     int & il0, int & il1, int & iu0, int & iu1) throw () ;
+			     int & il0, int & il1, int & iu0, int & iu1,
+			     Scalar period[3]) throw () ;
 
   /// Determine the axis, face, and range of indices of zones adjacent 
   /// to a grid in the next-coarser level.  Returns false if
@@ -230,7 +231,8 @@ protected:
   /// in the next-coarser level.   Indices are relative to the grid.
 
   bool coarse_shared_face (Grid & coarse, int & axis, int & face, 
-			   int & il0, int & il1, int & iu0, int & iu1) throw () ;
+			   int & il0, int & il1, int & iu0, int & iu1,
+			   Scalar period[3]) throw () ;
 
   /// Determine the "count"th axis (indexing from 0), face and
   /// corresponding range of coarse-grid indices of zones adjacent to
@@ -240,7 +242,8 @@ protected:
 
   bool parent_shared_face (Grid & parent, int & axis, int & face, 
 			   int & il0, int & il1, int & iu0, int & iu1,
-			   int & count) throw () ;
+			   int & count,
+			   Scalar period[3]) throw () ;
 
   /// Determine the "count"th axis (indexing from 0), face and
   /// corresponding range of coarse-grid indices of zones adjacent to
@@ -250,7 +253,8 @@ protected:
 
   bool parent_interior_face (Grid & parent, int & axis, int & face, 
 			     int & il0, int & il1, int & iu0, int & iu1,
-			     int & count) throw () ;
+			     int & count,
+			     Scalar period[3]) throw () ;
 
   /// Return the ith neighbor
   Grid & neighbor (int i) 

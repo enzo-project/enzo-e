@@ -499,7 +499,8 @@ bool Grid::is_adjacent (Grid & g2, Scalar period[3]) throw ()
 bool Grid::neighbor_shared_face (Grid & neighbor, 
 				 int & axis, int & face, 
 				 int & il0, int & il1, 
-				 int & iu0, int & iu1) throw ()
+				 int & iu0, int & iu1,
+				 Scalar period[3]) throw ()
 {
 
   Grid & grid = *this;
@@ -575,7 +576,8 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 bool Grid::coarse_shared_face (Grid & coarse, 
 			       int & axis, int & face, 
 			       int & il0, int & il1, 
-			       int & iu0, int & iu1) throw ()
+			       int & iu0, int & iu1,
+			       Scalar period[3]) throw ()
 {
 
   const int r = 2; // WARNING: assuming fixed refinement factor r = 2
@@ -650,7 +652,8 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
 			       int & face, 
 			       int & il0, int & il1, 
 			       int & iu0, int & iu1,
-			       int & count) throw ()
+			       int & count,
+			       Scalar period[3]) throw ()
 {
 
   const int r = 2; // WARNING: assuming fixed refinement factor r = 2
@@ -734,7 +737,8 @@ bool Grid::parent_interior_face (Grid & parent,
 				 int & axis, int & face, 
 				 int & il0, int & il1, 
 				 int & iu0, int & iu1,
-				 int & count) throw ()
+				 int & count,
+				 Scalar period[3]) throw ()
 {
 
   _TRACE_;
