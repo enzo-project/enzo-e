@@ -446,17 +446,27 @@ bool Grid::is_adjacent (Grid & g2) throw ()
 
   if (g1.level_ != g2.level_) return false;
 
-  // hh is a tolerance to avoid problems with
-  // comparing floating point numbers.  It is
-  // taken to be 1/2 the mesh width.
-  double hh;
-  // Assume they are adjacent
+  // Assume g1 and g2 are adjacent
+
   bool far = false;
+
   for (int i=0; i<3; i++) {
-    hh = 0.5 * (g1.xu_[i]-g1.xl_[i])/g1.n_[i]; // hh should be same for g2
+
+    // Define tolerance hh to be 0.5 * cell width
+
+    double hh = 0.5 * (g1.xu_[i]-g1.xl_[i])/g1.n_[i];
+
+    // If g1's upper edge is strictly below g2's lower edge, then they are far
+
     far = far || (g1.xu_[i] < (g2.xl_[i] - hh));
+
+    // If g1's upper edge is strictly below g2's lower edge, then they are far
+
     far = far || (g2.xu_[i] < (g1.xl_[i] - hh));
   }
+
+  // If g1 and g2 are not far, then they are adjacent
+
   return ! far;
 }
 

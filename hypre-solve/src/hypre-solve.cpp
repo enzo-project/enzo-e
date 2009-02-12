@@ -123,7 +123,8 @@ int main(int argc, char **argv)
     JBPERF_START("2-grids");
     // ***************
 
-    hierarchy.initialize(problem.domain(), *pmpi);
+    bool is_periodic = problem.parameters().value("boundary") == "periodic";
+    hierarchy.initialize(problem.domain(), *pmpi,is_periodic);
 
     // ***************
     JBPERF_STOP("2-grids");

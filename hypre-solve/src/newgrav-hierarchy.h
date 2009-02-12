@@ -37,6 +37,13 @@ private:
   /// Number of zones in global root grid
   int                 n0_[3];
 
+  /// Position of lowest vertex
+  Scalar              xl_[3];
+  /// Position of highest vertex
+  Scalar              xu_[3];
+  /// Periodicity, or 0 if not periodic
+  double              period_[3];
+
 
   //--------------------------------------------------------------------
   // PROTECTED MEMBER DATA
@@ -81,7 +88,7 @@ public:
 
   void insert_grid (Grid * grid) throw ();
 
-  void initialize (Domain & domain, Mpi & mpi) throw();
+  void initialize (Domain & domain, Mpi & mpi, bool is_periodic) throw();
 
   void set_dim (int d) throw () { dimension_ = d; };
 
@@ -197,6 +204,9 @@ private:
 
   /// Initialize il0_[] and n0_[]
   void init_indices_ () throw();
+
+  /// Initialize xl_[] and xu_[]
+  void init_extents_ (bool is_periodic) throw();
 
   void insert_in_level_ (int level, Grid & grid) throw ();
 

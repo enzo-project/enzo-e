@@ -128,7 +128,8 @@ void Hierarchy::insert_grid (Grid * pgrid) throw ()
     neighbors, face-zone categories, and global indices. */
 
 void Hierarchy::initialize (Domain & domain,
-			    Mpi    & mpi) throw ()
+			    Mpi    & mpi,
+			    bool   is_periodic) throw ()
 {
   if (debug) printf ("Hierarchy::init_levels()\n");
 
@@ -137,6 +138,7 @@ void Hierarchy::initialize (Domain & domain,
   init_grid_children_();
   init_grid_neighbors_();
   init_indices_();                // DEPENDENCY: Requires init_grid_levels_()
+  init_extents_(is_periodic);     // DEPENDENCY: Requires init_grid_levels_()
   init_grid_faces_(domain, mpi);  // DEPENDENCY: Requires init_indices_()
 
   geomview_grids(mpi);
@@ -583,6 +585,50 @@ void Hierarchy::init_indices_ () throw()
     il0_[i] = lower[i];
     n0_[i] = upper[i] - lower[i] + 1;
   }
+  _TRACE_;
+}
+
+//======================================================================
+
+void Hierarchy::init_extents_ (bool is_periodic) throw()
+{
+  _TRACE_;
+
+  // Determine hierarchy extents from grid extents
+
+  ItLevelGridsAll itg (level(0));
+
+  int i;
+
+  for (i=0; i<3; i++) {
+    xl_[i] = SCALAR_MAX;
+    xu_[i] = -SCALAR_MAX;
+  }
+
+  while (Grid *grid = itg++) {
+
+    // Get grid extents
+
+    Scalar gl[3],gu[3];
+    grid->x_lower(gl[0],gl[1],gl[2]);
+    grid->x_upper(gu[0],gu[1],gu[2]);
+
+    // Adjust hierarchy extents
+
+    for (i=0; i<3; i++) {
+      xl_[i] = MIN(xl_[i],gl[i]);
+      xu_[i] = MAX(xu_[i],gu[i]);
+    }
+  }
+
+  for (i=0; i<3; i++) {
+    period_[i] = is_periodic ? xu_[i] - xl_[i] : 0.0;
+  }
+
+  printf ("%s:%d hierarchy extents: (%g %g %g) (%g %g %g)  period: (%g %g %g)\n",
+	  __FILE__,__LINE__,xl_[0],xl_[1],xl_[2],xu_[0],xu_[1],xu_[2],
+	  period_[0],period_[1],period_[2]);
+
   _TRACE_;
 }
 
