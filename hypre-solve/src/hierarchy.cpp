@@ -27,7 +27,7 @@
 
 //----------------------------------------------------------------------
 
-const int trace          = 0;
+const int trace          = 1;
 const int debug          = 0;
 const int debug_detailed = 0;
 const int geomview       = 0;
@@ -239,6 +239,8 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
   // For level == 0, test all pairs
 
+  
+  _TRACE_;
   for (i=0; i<level(0).num_grids(); i++) {
 
     Grid * g1 = & level(0).grid(i);
@@ -269,6 +271,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
       // Check parents' children
 
+      _TRACE_;
       for (j=0; j<parent(*g1)->num_children(); j++) {
 	Grid * g2 = & parent(*g1)->child(j);
 	if (g1->is_adjacent(*g2,period_) && g1->id() > g2->id()) {
@@ -280,6 +283,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
       // Check parents' neighbors' children
 
+      _TRACE_;
       for (j1=0; j1<parent(*g1)->num_neighbors(); j1++) {
 	Grid * gn = & parent(*g1)->neighbor(j1);
 	for (j2=0; j2<gn->num_children(); j2++) {
@@ -349,8 +353,9 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
       while ((adjacent = itn++)) {
 	if (grid->is_local() || adjacent->is_local()) {
-	  if (grid->neighbor_shared_face
-	      (*adjacent,axis,face,il0,il1,iu0,iu1,period)) {
+	  int count = 0;
+	  while (grid->neighbor_shared_face
+		 (*adjacent,axis,face,il0,il1,iu0,iu1,period,count)) {
 	    for (ig0=il0; ig0<=iu0; ig0++) {
 	      for (ig1=il1; ig1<=iu1; ig1++) {
 		grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -368,8 +373,9 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 	while ((adjacent = itpn++)) {
 	  if (grid->is_local() || adjacent->is_local()) {
-	    if (grid->coarse_shared_face
-		(*adjacent,axis,face,il0,il1,iu0,iu1,period)) {
+	    int count=0;
+	    while (grid->coarse_shared_face
+		   (*adjacent,axis,face,il0,il1,iu0,iu1,period,count)) {
 	      for (ig0=il0; ig0<=iu0; ig0++) {
 		for (ig1=il1; ig1<=iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -382,10 +388,10 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	// Set remaining "adjacent" pointers to parent grid
 
 	if (grid->is_local() || parent(*grid)->is_local()) {
-	  int num=0;
+	  int count = 0;
 
 	  while (grid->parent_interior_face
-		 (*parent(*grid),axis,face,il0,il1,iu0,iu1,num)) {
+		 (*parent(*grid),axis,face,il0,il1,iu0,iu1,count)) {
 	    for (ig0=il0; ig0<=iu0; ig0++) {
 	      for (ig1=il1; ig1<=iu1; ig1++) {
 		if (grid->faces().adjacent(axis,face,ig0,ig1) == NULL) {
@@ -469,9 +475,9 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
     while (Grid * grid = itg++) {
       Grid * parent = this->parent(*grid);
       if (grid->is_local() || parent->is_local()) {
-	int num = 0;
+	int count = 0;
 	while (grid->parent_shared_face 
-	       (*parent, axis, face, il0,il1,iu0,iu1,num)) {
+	       (*parent, axis, face, il0,il1,iu0,iu1,count)) {
 	  int ig3[3][2];
 	  grid->indices(ig3);
 	  for (ig0=il0; ig0<=iu0; ig0++) {
@@ -524,8 +530,9 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
       //      grid->indices(ig3);
       ItGridNeighbors itn (*grid);
       while (Grid * neighbor = itn++) {
-	if (grid->neighbor_shared_face 
-	    (*neighbor, axis, face, il0,il1,iu0,iu1,period)) {
+	int count = 0;
+	while (grid->neighbor_shared_face 
+	       (*neighbor, axis, face, il0,il1,iu0,iu1,period,count)) {
 	  for (ig0=il0; ig0<=iu0; ig0++) {
 	    for (ig1=il1; ig1<=iu1; ig1++) {
 	      Faces::Label & fz = grid->faces().label(axis,face,ig0,ig1);

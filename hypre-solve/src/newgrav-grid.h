@@ -223,7 +223,7 @@ protected:
 
   bool neighbor_shared_face (Grid & neighbor, int & axis, int & face, 
 			     int & il0, int & il1, int & iu0, int & iu1,
-			     int iperiod[3]) throw () ;
+			     int iperiod[3], int &count) throw () ;
 
   /// Determine the axis, face, and range of indices of zones adjacent 
   /// to a grid in the next-coarser level.  Returns false if
@@ -232,7 +232,7 @@ protected:
 
   bool coarse_shared_face (Grid & coarse, int & axis, int & face, 
 			   int & il0, int & il1, int & iu0, int & iu1,
-			   int iperiod[3]) throw () ;
+			   int iperiod[3],int & count) throw () ;
 
   /// Determine the "count"th axis (indexing from 0), face and
   /// corresponding range of coarse-grid indices of zones adjacent to

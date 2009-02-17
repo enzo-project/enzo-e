@@ -123,7 +123,7 @@ void Grid::write (FILE *fp, bool brief) throw ()
       for (int i1=0; i1<n_[1]; i1++) {
 	for (int i2=0; i2<n_[2]; i2++) {
 	  int i = index(i0,i1,i2,n_[0],n_[1],n_[2]);
-	  fprintf (fp,"%d %d %d %g\n",i0,i1,i2,u_[i]);
+	  fprintf (fp,"%d %d %d %22.15e\n",i0,i1,i2,u_[i]);
 	}
       }
     }
@@ -487,6 +487,9 @@ bool Grid::is_adjacent (Grid & g2, Scalar period[3]) throw ()
 
   // If g1 and g2 are not far, then they are adjacent
 
+  //  if (! far) printf ("%s:%d grids %d and %d are adjacent\n",
+  //		     __FILE__,__LINE__,g1.id(),g2.id());
+
   return ! far;
 }
 
@@ -500,7 +503,8 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 				 int & axis, int & face, 
 				 int & il0, int & il1, 
 				 int & iu0, int & iu1,
-				 int iperiod[3]) throw ()
+				 int iperiod[3],
+				 int & count) throw ()
 {
 
   Grid & grid = *this;
@@ -522,6 +526,7 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
   bool found_face = false;
   int  iaxis      = -1;
   int  iface      = -1;
+  int  num        = 0;
 
   for (axis=0; axis<3; axis++) {
     for (face=0; face<2; face++) {
@@ -530,11 +535,19 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
       bool b2 = 
       	(ig[axis][face]   + (1-face)*iperiod[axis]) == 
       	(in[axis][1-face] +     face*iperiod[axis]);
-      //      assert (b1==b2);
-      if (b1 || b2 ) {
-	found_face = true;
-	iaxis=axis;
-	iface=face;
+
+      //      printf ("%s:%d neighbor_shared_face grids %d %d  axis=%d face=%d b1=%d b2=%d\n",
+      //	      __FILE__,__LINE__,grid.id(),neighbor.id(),axis,face,b1,b2);
+
+      if ((b1 || b2) && ! found_face) {
+	if (num == count) {
+	  found_face = true;
+	  iaxis=axis;
+	  iface=face;
+	  count++;
+	} else {
+	  num++;
+	}
       }
     }
   }
@@ -554,22 +567,16 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
   // Compute local indices intersection from global indices of each grid
 
   il0 = MAX(ig[j0][0],in[j0][0]) - ig[j0][0];
-  iu0 = MIN(ig[j0][1],in[j0][1]) - ig[j0][0];
+  iu0 = MIN(ig[j0][1],in[j0][1]) - ig[j0][0] - 1;
 
   il1 = MAX(ig[j1][0],in[j1][0]) - ig[j1][0];
-  iu1 = MIN(ig[j1][1],in[j1][1]) - ig[j1][0];
+  iu1 = MIN(ig[j1][1],in[j1][1]) - ig[j1][0] - 1;
 
-  iu0--;
-  iu1--;
-
-  if (debug) {
-    printf ("%s:%d neighbor_shared_face Grids (%d %d)  (axis=%d face=%d) il (%d %d) iu (%d %d)\n",
-	    __FILE__,__LINE__,this->id(),neighbor.id(),
-	    axis,face,il0,il1,iu0,iu1);
-    }
-  if (il0 > iu0 || il1 > iu1) return false;
-
+  //  printf ("neighbor_shared_face (%d,%d) (face=%d axis=%d il(%d %d) iu(%d %d) count=%d\n",
+  //	  grid.id(),neighbor.id(),face,axis,il0,il1,iu0,iu1,count);
   return true;
+  return (il0 <= iu0 && il1 <= iu1);
+
 }
 
 //----------------------------------------------------------------------
@@ -583,7 +590,8 @@ bool Grid::coarse_shared_face (Grid & coarse,
 			       int & axis, int & face, 
 			       int & il0, int & il1, 
 			       int & iu0, int & iu1,
-			       int iperiod[3]) throw ()
+			       int iperiod[3],
+			       int & count) throw ()
 {
 
   const int r = 2; // WARNING: assuming fixed refinement factor r = 2
@@ -600,23 +608,33 @@ bool Grid::coarse_shared_face (Grid & coarse,
   int ic[3][2];
   coarse.indices(ic);
 
-  // Find matching face, if any
+  // Find count'th matching face, if there is one
 
   bool found_face = false;
   int  iaxis      = -1;
   int  iface      = -1;
+  int  num        = 0;
 
   for (axis=0; axis<3; axis++) {
     for (face=0; face<2; face++) {
 
       bool b1 = ig[axis][face] == r*ic[axis][1-face];
-      bool b2 = ig[axis][face]     + (1-face)*iperiod[axis] == 
-	r*ic[axis][1-face] +     face*iperiod[axis];
+      bool b2 = 
+	(  ig[axis][face]   + (1-face)*iperiod[axis]) == 
+	(r*ic[axis][1-face] +     face*iperiod[axis]);
 
-      if (b1 || b2 ) {
-	found_face = true;
-	iaxis=axis;
-	iface=face;
+      //      printf ("%s:%d coarse_shared_face grids %d %d  axis=%d face=%d b1=%d b2=%d\n",
+      //	      __FILE__,__LINE__,grid.id(),coarse.id(),axis,face,b1,b2);
+
+      if ((b1 || b2) && ! found_face) {
+	if (num == count) {
+	  found_face = true;
+	  iaxis=axis;
+	  iface=face;
+	  count++;
+	} else {
+	  num++;
+	}
       }
     }
   }
@@ -636,19 +654,16 @@ bool Grid::coarse_shared_face (Grid & coarse,
   // Compute local indices intersection from global indices of each grid
 
   il0 = MAX(ig[j0][0],r*ic[j0][0]) - ig[j0][0];
-  iu0 = MIN(ig[j0][1],r*ic[j0][1]) - ig[j0][0];
+  iu0 = MIN(ig[j0][1],r*ic[j0][1]) - ig[j0][0] - 1;
 
   il1 = MAX(ig[j1][0],r*ic[j1][0]) - ig[j1][0];
-  iu1 = MIN(ig[j1][1],r*ic[j1][1]) - ig[j1][0];
+  iu1 = MIN(ig[j1][1],r*ic[j1][1]) - ig[j1][0] - 1;
 
-  // decrement upper limit, so loops using indices should be [il0,iu0]
-
-  iu0--;
-  iu1--;
-
-  if (il0 > iu0 || il1 > iu1) return false;
+  //  printf ("coarse_shared_face (%d,%d) (face=%d axis=%d il(%d %d) iu(%d %d) count=%d\n",
+  //	  grid.id(),coarse.id(),face,axis,il0,il1,iu0,iu1,count);
 
   return true;
+  return (il0 <= iu0 && il1 <= iu1);
 }
 
 //----------------------------------------------------------------------
@@ -707,7 +722,7 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
 
   // Exit if face isn't found
 
-  if (!found_face) return false;
+  if (! found_face) return false;
 
   // face axes
 
@@ -717,22 +732,17 @@ bool Grid::parent_shared_face (Grid & parent, int & axis,
   // Compute local indices intersection from global indices of each grid
   // Divide by r so that indices correspond to coarse grid
 
-  // NOTE: SHOULD ALWAYS BE FULL FACE?
-
   il0 = MAX(ig[j0][0]/r,ip[j0][0]) - ip[j0][0];
-  iu0 = MIN(ig[j0][1]/r,ip[j0][1]) - ip[j0][0];
+  iu0 = MIN(ig[j0][1]/r,ip[j0][1]) - ip[j0][0] - 1;
 
   il1 = MAX(ig[j1][0]/r,ip[j1][0]) - ip[j1][0];
-  iu1 = MIN(ig[j1][1]/r,ip[j1][1]) - ip[j1][0];
+  iu1 = MIN(ig[j1][1]/r,ip[j1][1]) - ip[j1][0] - 1;
 
-  // decrement upper limit, so loops using indices should be [il0,iu0]
-
-  iu0--;
-  iu1--;
-
-  if (il0 > iu0 || il1 > iu1) return false;
+  //  printf ("parent_shared_face (%d,%d) (face=%d axis=%d il(%d %d) iu(%d %d) count=%d\n",
+  //	  grid.id(),parent.id(),face,axis,il0,il1,iu0,iu1,count);
 
   return true;
+  return (il0 <= iu0 && il1 <= iu1);
 }
 
 //----------------------------------------------------------------------

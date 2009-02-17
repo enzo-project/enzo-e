@@ -28,7 +28,7 @@
 
 const int debug        = 0;
 const int trace        = 0;
-const int trace_hypre  = 0;
+const int trace_hypre  = 1;
 
 //----------------------------------------------------------------------
 
@@ -586,9 +586,12 @@ void Hypre::init_linear (Parameters          & parameters,
 
   Scalar shift_b_sum = 0.0;
 
+  printf ("local_shift_b_sum = %22.15e\n",local_shift_b_sum);
+
   MPI_Allreduce (&local_shift_b_sum, &shift_b_sum, 1, 
 		 MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
 
+  printf ("shift_b_sum = %22.15e\n",shift_b_sum);
   // Shift B to zero out the null space if problem is periodic
 
   if ( parameters.value("boundary") == "periodic" ) {
@@ -606,7 +609,9 @@ void Hypre::init_linear (Parameters          & parameters,
     } // while level = itl++
 
     Scalar shift_b_amount = - shift_b_sum / shift_b_count;
-    printf ("Periodic shift = %g\n",shift_b_amount);
+    
+    printf ("Periodic shift = %22.15e = - %22.15e / %22.15e\n",
+	    shift_b_amount, shift_b_sum , Scalar(shift_b_count)  );
 
     // Perform the shift
     
@@ -933,8 +938,6 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		  igg3[j1]+=diggs[k][1];
 		  igg3[j2]+=diggs[k][2];
 		  for (int k=1; k<5; k++) {
-		    HYPRE_SStructGraphAddEntries 
-		      (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
 		    if (trace_hypre) {
 		      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAddEntries (%p,%d, [%d,%d,%d] 0, %d, [%d,%d,%d],0);\n",
 			      __FILE__,__LINE__,pmpi->ip(),
@@ -946,6 +949,8 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 			      );
 		      fflush(mpi_fp);
 		    } // trace_hypre
+		    HYPRE_SStructGraphAddEntries 
+		      (graph_, level_fine, igg3, 0, level_coarse, ign3, 0);
 		    igg3[j0]+=diggs[k][0];
 		    igg3[j1]+=diggs[k][1];
 		    igg3[j2]+=diggs[k][2];
@@ -1080,17 +1085,11 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		  } // trace_hypre
 		  HYPRE_SStructGraphAddEntries 
 		    (graph_, level_coarse, ign3, 0, level_fine, igg3, 0);
+
 		  if (trace_hypre) {
-		    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGraphAddEntries (%p,%d, [%d,%d,%d] 0, %d, [%d,%d,%d] 0);\n",
-			    __FILE__,__LINE__,pmpi->ip(),
-			    &graph_,
-			    level_coarse, 
-			     ign3[0], ign3[1], ign3[2],
-			     level_fine,
-			       igg3[0], igg3[1], igg3[2]
-			    );
+		    fprintf(mpi_fp,"%s:%d\n",__FILE__,__LINE__);
 		    fflush(mpi_fp);
-		  } // trace_hypre
+		  }
 		  igg3[0] += diggs[k][0];
 		  igg3[1] += diggs[k][1];
 		  igg3[2] += diggs[k][2];
@@ -1514,6 +1513,7 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
       } // if debug
     
       shift_b_sum += value;
+      printf ("%s:%d shift_b_sum = %22.15e = %22.15e + %22.15e\n",__FILE__,__LINE__,shift_b_sum,value,shift_b_sum-value);
 
       HYPRE_SStructVectorAddToValues (B_, grid.level(), index, 0, &value);
       if (trace_hypre) {
