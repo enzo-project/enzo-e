@@ -78,7 +78,8 @@ void debug_print(Grid * grid)
 
 /// Hypre constructor
 
-Hypre::Hypre (Parameters & parameters)
+Hypre::Hypre (Hierarchy  & hierarchy,
+	      Parameters & parameters)
   : grid_(0),
     graph_(0),
     stencil_(0),
@@ -86,7 +87,8 @@ Hypre::Hypre (Parameters & parameters)
     B_(0),
     X_(0),
     solver_(0),
-    parameters_(parameters),
+    parameters_(&parameters),
+    hierarchy_(&hierarchy),
     resid_(-1.0),
     iter_(-1)
 {
@@ -104,13 +106,11 @@ Hypre::Hypre (Parameters & parameters)
     patch object, for an AMR problem.  Sets grid box extents, grid
     part variables, and periodicity of the root-level grid part. */
 
-void Hypre::init_hierarchy (Parameters & parameters,
-			    Hierarchy  & hierarchy, 
-			    Mpi        & mpi)
+void Hypre::init_hierarchy (Mpi        & mpi)
 {
 
-  int dim       = hierarchy.dimension();
-  int num_parts = hierarchy.num_levels();
+  int dim       = hierarchy_->dimension();
+  int num_parts = hierarchy_->num_levels();
 
   // Create the hypre grid
   
@@ -123,7 +123,7 @@ void Hypre::init_hierarchy (Parameters & parameters,
     fflush(mpi_fp);
   } // trace_hypre
 
-  ItHierarchyLevels itl (hierarchy);
+  ItHierarchyLevels itl (*hierarchy_);
 
   int part = 0;
 
@@ -167,35 +167,22 @@ void Hypre::init_hierarchy (Parameters & parameters,
     // Set grid part to be periodic, with periodicity determined by the root
     // level size, current level, and refinement factor (ASSUMED TO BE 2)
 
-    const int r = 2;
-    int periodicity[3];
+    int period[3] = { hierarchy_->iperiod(0,part),
+		      hierarchy_->iperiod(1,part),
+		      hierarchy_->iperiod(2,part) };
 
     // Determine periodicity of Level
 
-    if (parameters.value("boundary") == "dirichlet") {
-      periodicity[0] = 0;
-      periodicity[1] = 0;
-      periodicity[2] = 0;
-    } else if (parameters.value("boundary") == "periodic") {
-      for (int i=0; i<3; i++) {
-	periodicity[i] = hierarchy.level(0).zones(i);
-	for (int k=0; k < part; k++) periodicity[i] *= r;
-      }
-    } else {
-      char error_message[100];
-      sprintf (error_message, "Illegal parameter boundary = %s", parameters.value("boundary").c_str());
-      ERROR(error_message);
-    }
-
     if (debug) printf ("%s:%d  Level = %d Periodicity = (%d,%d,%d)\n",
 		       __FILE__,__LINE__, part,
-		       periodicity[0],periodicity[1],periodicity[2]);
+		       period[0],period[1],period[2]);
 
-    HYPRE_SStructGridSetPeriodic (grid_, part, periodicity);
+    HYPRE_SStructGridSetPeriodic (grid_, part, period);
+
     if (trace_hypre) {
       fprintf (mpi_fp, "%s:%d %d HYPRE_SStructGridSetPeriodic (%p,%d,%d %d %d);\n",
 	      __FILE__,__LINE__,pmpi->ip(),
-	      &grid_, part, periodicity[0], periodicity[1], periodicity[2]
+	      &grid_, part, period[0], period[1], period[2]
 	      );
       fflush(mpi_fp);
     } // trace_hypre
@@ -223,11 +210,11 @@ void Hypre::init_hierarchy (Parameters & parameters,
 /** Creates and initializes a stencil object.  Supports 1, 2, or 3
     dimensional stencils. */
 
-void Hypre::init_stencil (Hierarchy & hierarchy)
+void Hypre::init_stencil ()
 
 {
 
-  int dim = hierarchy.dimension();
+  int dim = hierarchy_->dimension();
 
   HYPRE_SStructStencilCreate (dim,dim*2+1,&stencil_);
   if (trace_hypre) {
@@ -328,7 +315,7 @@ void Hypre::init_stencil (Hierarchy & hierarchy)
 
 */
 
-void Hypre::init_graph (Hierarchy & hierarchy)
+void Hypre::init_graph ()
 
 {
   // Create the hypre graph object
@@ -351,7 +338,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
   //    fflush(mpi_fp);
   //  }  // trace_hypre
 
-  ItHierarchyLevels itl (hierarchy);
+  ItHierarchyLevels itl (*hierarchy_);
 
   int part = 0;
 
@@ -392,7 +379,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
       // Clear the nonstencil entry counter for subsequent matrix
       // nonstencil entries
 
-      int dim = hierarchy.dimension();
+      int dim = hierarchy_->dimension();
       grid->init_counter(dim*2+1);
     } // while grid = itag++
   } // while level = itl++
@@ -431,9 +418,7 @@ void Hypre::init_graph (Hierarchy & hierarchy)
 
 */
 
-void Hypre::init_linear (Parameters          & parameters,
-			 Hierarchy           & hierarchy,
-			 std::vector<Point *>  points)
+void Hypre::init_linear (std::vector<Point *>  points)
 
 {
   // Create the hypre matrix A_, solution X_, and right-hand side B_ objects
@@ -518,7 +503,7 @@ void Hypre::init_linear (Parameters          & parameters,
   // Initialize the matrix A_
   //--------------------------------------------------
 
-  ItHierarchyLevels itl (hierarchy);
+  ItHierarchyLevels itl (*hierarchy_);
 
   while (Level * level = itl++) {
 
@@ -553,7 +538,7 @@ void Hypre::init_linear (Parameters          & parameters,
     } // while level > 0
   } // while level = itl++
   
-  for (int part = 1; part < hierarchy.num_levels(); part++) {
+  for (int part = 1; part < hierarchy_->num_levels(); part++) {
 
     // 2. Clean up stencil connections between levels
 
@@ -567,20 +552,19 @@ void Hypre::init_linear (Parameters          & parameters,
 
   Scalar local_shift_b_sum = 0.0;
 
-  bool enzo_density = parameters_.value("enzo_density") == "true";
+  bool enzo_density = parameters_->value("enzo_density") == "true";
   if (enzo_density) {
 
     // Either set density according to Enzo grid files...
 
-    bool        enzo_packed = parameters_.value("enzo_packed") == "true";
-    std::string enzo_prefix = parameters_.value("enzo_prefix");
-    local_shift_b_sum += init_vector_density_ 
-      (hierarchy,enzo_prefix,enzo_packed);
+    bool        enzo_packed = parameters_->value("enzo_packed") == "true";
+    std::string enzo_prefix = parameters_->value("enzo_prefix");
+    local_shift_b_sum += init_vector_density_ (enzo_prefix,enzo_packed);
   } else {
 
     // ...or set density according to point masses
 
-    local_shift_b_sum += init_vector_points_  (hierarchy,points);
+    local_shift_b_sum += init_vector_points_  (points);
 
   }
 
@@ -594,13 +578,13 @@ void Hypre::init_linear (Parameters          & parameters,
   printf ("shift_b_sum = %22.15e\n",shift_b_sum);
   // Shift B to zero out the null space if problem is periodic
 
-  if ( parameters.value("boundary") == "periodic" ) {
+  if ( parameters_->value("boundary") == "periodic" ) {
 
     // Compute the shift
 
     int part = 0;
     long long shift_b_count = 0;
-    ItHierarchyLevels itl (hierarchy);
+    ItHierarchyLevels itl (*hierarchy_);
     while (Level * level = itl++) {
       ItLevelGridsAll itg (*level);
       while (Grid * grid = itg++) {
@@ -610,9 +594,6 @@ void Hypre::init_linear (Parameters          & parameters,
 
     Scalar shift_b_amount = - shift_b_sum / shift_b_count;
     
-    printf ("Periodic shift = %22.15e = - %22.15e / %22.15e\n",
-	    shift_b_amount, shift_b_sum , Scalar(shift_b_count)  );
-
     // Perform the shift
     
     part = 0;
@@ -673,9 +654,9 @@ void Hypre::init_linear (Parameters          & parameters,
 
   // Write the vector to a file for debugging
 
-  if (parameters.value("dump_a") == "true") HYPRE_SStructMatrixPrint ("A",A_,0);
-  if (parameters.value("dump_b") == "true") HYPRE_SStructVectorPrint ("B",B_,0);
-  if (parameters.value("dump_x") == "true") HYPRE_SStructVectorPrint ("X0",X_,0);
+  if (parameters_->value("dump_a") == "true") HYPRE_SStructMatrixPrint ("A",A_,0);
+  if (parameters_->value("dump_b") == "true") HYPRE_SStructVectorPrint ("B",B_,0);
+  if (parameters_->value("dump_x") == "true") HYPRE_SStructVectorPrint ("X0",X_,0);
 
 } // Hypre::init_linear()
 
@@ -683,23 +664,22 @@ void Hypre::init_linear (Parameters          & parameters,
 
 /// Initialize and solve the linear solver
 
-void Hypre::solve (Parameters & parameters,
-		   Hierarchy & hierarchy)
+void Hypre::solve ()
 
 {
-  std::string solver = parameters.value("solver");
-  int         levels = hierarchy.num_levels();
+  std::string solver = parameters_->value("solver");
+  int         levels = hierarchy_->num_levels();
 
   int    itmax  = 0;
   double restol = 0.0;
 
   // Check solver parameters
-  std::string sitmax  = parameters.value("solver_itmax");
-  std::string srestol = parameters.value("solver_restol");
+  std::string sitmax  = parameters_->value("solver_itmax");
+  std::string srestol = parameters_->value("solver_restol");
 
   // If not defined, then define them
-  if (sitmax == "")  parameters.add_parameter ("solver_itmax","200");
-  if (srestol == "") parameters.add_parameter ("solver_restol","1e-6");
+  if (sitmax == "")  parameters_->add_parameter ("solver_itmax","200");
+  if (srestol == "") parameters_->add_parameter ("solver_restol","1e-6");
 
   // Set local variables
   itmax  = atoi(sitmax.c_str());
@@ -707,15 +687,15 @@ void Hypre::solve (Parameters & parameters,
 
   if        (solver == "fac"  && levels > 1) {
 
-    solve_fac_(hierarchy,itmax,restol);
+    solve_fac_(itmax,restol);
 
   } else if (solver == "bicgstab") {
 
-    solve_bicgstab_(hierarchy,itmax,restol);
+    solve_bicgstab_(itmax,restol);
 
   } else if (solver == "pfmg" && levels == 1) {
 
-    solve_pfmg_(hierarchy,itmax,restol);
+    solve_pfmg_(itmax,restol);
 
   } else {
     char error_message[100];
@@ -724,7 +704,7 @@ void Hypre::solve (Parameters & parameters,
     ERROR(error_message);
   }
   
-  if (parameters.value("dump_x") == "true") HYPRE_SStructVectorPrint ("X",X_,1);
+  if (parameters_->value("dump_x") == "true") HYPRE_SStructVectorPrint ("X",X_,1);
 
 } // Hypre::solve()
 
@@ -732,13 +712,13 @@ void Hypre::solve (Parameters & parameters,
 
 /// Evaluate the success of the solve
 
-void Hypre::evaluate (Hierarchy & hierarchy)
+void Hypre::evaluate ()
 
 {
 
   char filename[80];
 
-  ItHierarchyGridsLocal itg(hierarchy);
+  ItHierarchyGridsLocal itg(*hierarchy_);
   while (Grid * grid = itg++) {
     int level = grid->level();
     int igg3[3][2];
@@ -833,7 +813,7 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
   int level_fine   = grid.level();
   int level_coarse = grid.level() - 1;
 
-  bool discret_const = parameters_.value("discret") == "constant";
+  bool discret_const = parameters_->value("discret") == "constant";
 
   assert (level_coarse >= 0);
 
@@ -885,10 +865,12 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	  // Add graph entries iff grid or adjacent grid is local, and if
 	  // adjacent grid (if it exists) is in the next-coarser level
 
-	  bool is_local = 
+	  bool is_local =
 	    (adjacent != NULL) &&  (adjacent->is_local() || grid.is_local());
 
-	  if (is_local && fz == Faces::_coarse_) {
+	  bool is_coarse = fz == Faces::_coarse_;
+
+	  if (is_local && is_coarse) {
 
 	    // (fine) grid global indices
 
@@ -905,6 +887,19 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    ign3[j0] = (igg3[j0]) / r  + (face*r-1);
 	    ign3[j1] = (igg3[j1]) / r;
 	    ign3[j2] = (igg3[j2]) / r;
+
+	    // adjust for periodicity
+ 	    if (hierarchy_->is_periodic(j0)) {
+	      int period = hierarchy_->iperiod(j0,level_coarse);
+ 	      if (ign3[j0] != (ign3[j0] + period) % period) {
+ 		printf ("%s:%d Adjusting ign3[%d] from %d to %d.  Period = %d Level = %d\n",
+ 			__FILE__,__LINE__,j0,ign3[j0],
+ 			(ign3[j0] + period )% period,
+ 			period,level_coarse);
+ 		fflush(stdout);
+ 	      }
+ 	      ign3[j0] = (ign3[j0] + period) % period;
+ 	    }
 
 	    //--------------------------------------------------
 	    // GRAPH ENTRY: FINE-TO-COARSE 
@@ -1022,7 +1017,7 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    else {
 	      char error_message[80];
 	      strcpy (error_message,"Unknown parameter discret = ");
-	      strcat (error_message,parameters_.value("discret").c_str());
+	      strcat (error_message,parameters_->value("discret").c_str());
 	      ERROR(error_message);
 	    } // if discret unexpected
 
@@ -1462,8 +1457,7 @@ void Hypre::init_matrix_clear_ (int part)
 
 /// Add contributions from point sources to right-hand side B
 
-Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
-				   std::vector<Point *> & points)
+Scalar Hypre::init_vector_points_ (std::vector<Point *> & points)
 
 {
 
@@ -1474,7 +1468,7 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
   int i;
   for (i=0; i<int(points.size()); i++) {
     Point & point      = *points[i];
-    Grid & grid        = hierarchy.grid(point.igrid());
+    Grid & grid        = hierarchy_->grid(point.igrid());
     if (grid.is_local()) {
 
       Scalar cell_volume = grid.h(0) * grid.h(1) * grid.h(2);
@@ -1513,7 +1507,6 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
       } // if debug
     
       shift_b_sum += value;
-      printf ("%s:%d shift_b_sum = %22.15e = %22.15e + %22.15e\n",__FILE__,__LINE__,shift_b_sum,value,shift_b_sum-value);
 
       HYPRE_SStructVectorAddToValues (B_, grid.level(), index, 0, &value);
       if (trace_hypre) {
@@ -1532,12 +1525,11 @@ Scalar Hypre::init_vector_points_ (Hierarchy            & hierarchy,
 
 /// Add contributions from Density in enzo HDF5 files to right-hand side B
 
-Scalar Hypre::init_vector_density_ (Hierarchy             & hierarchy,
-				    std::string             file_prefix,
-				    bool                    is_packed)
+Scalar Hypre::init_vector_density_ (std::string             file_prefix,
+				    bool                    enzo_packed)
 
 {
-  ItHierarchyGridsLocal itg (hierarchy);
+  ItHierarchyGridsLocal itg (*hierarchy_);
   char error_message[80];
 
   herr_t status;
@@ -1623,7 +1615,7 @@ Scalar Hypre::init_vector_density_ (Hierarchy             & hierarchy,
 
 /// Initialize the PFMG hypre solver
 
-void Hypre::solve_pfmg_ (Hierarchy & hierarchy, int itmax, double restol)
+void Hypre::solve_pfmg_ (int itmax, double restol)
 
 {
 
@@ -1662,7 +1654,7 @@ void Hypre::solve_pfmg_ (Hierarchy & hierarchy, int itmax, double restol)
 
 /// Initialize the FAC hypre solver
 
-void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
+void Hypre::solve_fac_ (int itmax, double restol)
 
 {
   int i;
@@ -1681,7 +1673,7 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
 
   // Initialize parts
 
-  int num_parts = hierarchy.num_levels();
+  int num_parts = hierarchy_->num_levels();
   HYPRE_SStructFACSetMaxLevels(solver_,  num_parts);
   if (trace_hypre) {
     fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACSetMaxLevels(%p,%d);\n",
@@ -1726,7 +1718,6 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
 	    );
     fflush(mpi_fp);
   } // trace_hypre
-
 
   // solver parameters
 
@@ -1847,7 +1838,7 @@ void Hypre::solve_fac_ (Hierarchy & hierarchy, int itmax, double restol)
 
 /// Initialize the BICGSTAB hypre solver
 
-void Hypre::solve_bicgstab_ (Hierarchy & hierarchy, int itmax, double restol)
+void Hypre::solve_bicgstab_ (int itmax, double restol)
 
 {
   _TRACE_;

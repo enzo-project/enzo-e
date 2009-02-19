@@ -27,7 +27,7 @@
 
 //----------------------------------------------------------------------
 
-const int trace          = 1;
+const int trace          = 0;
 const int debug          = 0;
 const int debug_detailed = 0;
 const int geomview       = 0;
@@ -137,9 +137,11 @@ void Hierarchy::initialize (Domain & domain,
   init_grid_levels_();
   init_grid_children_();
   init_grid_neighbors_();
-  init_indices_();                // DEPENDENCY: Requires init_grid_levels_()
+  init_indices_(is_periodic);     // DEPENDENCY: Requires init_grid_levels_()
   init_extents_(is_periodic);     // DEPENDENCY: Requires init_grid_levels_()
+  _TRACE_;
   init_grid_faces_(domain, mpi);  // DEPENDENCY: Requires init_indices_()
+  _TRACE_;
 
   geomview_grids(mpi);
 
@@ -596,7 +598,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 //======================================================================
 
-void Hierarchy::init_indices_ () throw()
+void Hierarchy::init_indices_ (bool is_periodic) throw()
 {
   _TRACE_;
   // Determine problem size the hard way
@@ -621,6 +623,11 @@ void Hierarchy::init_indices_ () throw()
     il0_[i] = lower[i];
     n0_[i] = upper[i] - lower[i] + 1;
   }
+
+  for (i=0; i<3; i++) {
+    iperiod_[i] = is_periodic ? n0_[i] : 0.0;
+  }
+
   _TRACE_;
 }
 

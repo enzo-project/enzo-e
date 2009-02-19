@@ -24,26 +24,23 @@ private:
   HYPRE_SStructVector  X_;       // hypre vector solution
   HYPRE_SStructSolver  solver_;  // hypre solver
 
-  Parameters           parameters_; 
+  Parameters           *parameters_; // Pointer to parameters
+  Hierarchy            *hierarchy_;  // Pointer to the hierarchy
 
   double               resid_;   // Solver residual
   int                  iter_;    // Solver iterations
 
 public:
 
-  Hypre (Parameters & parameters);
+  Hypre (Hierarchy  & hierarchy,
+	 Parameters & parameters);
 
-  void init_hierarchy (Parameters & parameters,
-		       Hierarchy  & hierarchy, 
-		       Mpi        & mpi);
-  void init_stencil   (Hierarchy & hierarchy);
-  void init_graph     (Hierarchy & hierarchy);
-  void init_linear    (Parameters          & parameters,
-		       Hierarchy           & hierarchy,
-		       std::vector<Point *>  points);
-  void solve          (Parameters & parameters,
-		       Hierarchy & hierarchy);
-  void evaluate       (Hierarchy & hierarchy);
+  void init_hierarchy (Mpi        & mpi);
+  void init_stencil   ();
+  void init_graph     ();
+  void init_linear    (std::vector<Point *>  points);
+  void solve          ();
+  void evaluate       ();
 
 
   int    iterations () { return iter_; };
@@ -67,16 +64,13 @@ private:
   
   // init_vector() functions
 
-  Scalar init_vector_points_  (Hierarchy            & hierarchy,
-			       std::vector<Point *> & points);
-  Scalar init_vector_density_ (Hierarchy             & hierarchy,
-			       std::string             file_prefix,
-			       bool                    is_packed);		
+  Scalar init_vector_points_  (std::vector<Point *> & points);
+  Scalar init_vector_density_ (std::string             file_prefix);
 
   // solve() functions
 
-  void solve_fac_      (Hierarchy & hierarchy, int itmax, double restol);
-  void solve_bicgstab_ (Hierarchy & hierarchy, int itmax, double restol);
-  void solve_pfmg_     (Hierarchy & hierarchy, int itmax, double restol);
+  void solve_fac_      (int itmax, double restol);
+  void solve_bicgstab_ (int itmax, double restol);
+  void solve_pfmg_     (int itmax, double restol);
 
 };

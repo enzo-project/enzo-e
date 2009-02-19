@@ -142,31 +142,29 @@ int main(int argc, char **argv)
     // --------------------------------------------------
     _TRACE_;
 
-    Hypre hypre (problem.parameters());
+    Hypre hypre (hierarchy,problem.parameters());
 
     // ***************
     JBPERF_START("4-hypre-init");
     // ***************
 
     if (barrier) pmpi->barrier();
-    hypre.init_hierarchy (problem.parameters(),hierarchy,*pmpi);
+    hypre.init_hierarchy (*pmpi);
 
     // Initialize the stencils
     
     if (barrier) pmpi->barrier();
-    hypre.init_stencil (hierarchy);
+    hypre.init_stencil ();
 
     // Initialize the graph
 
     if (barrier) pmpi->barrier();
-    hypre.init_graph (hierarchy);
+    hypre.init_graph ();
 
     // Initialize the linear system
 
     if (barrier) pmpi->barrier();
-    hypre.init_linear (problem.parameters(),
-		       hierarchy,
-		       problem.points());
+    hypre.init_linear (problem.points());
 
     // ***************
     JBPERF_STOP("4-hypre-init");
@@ -182,7 +180,7 @@ int main(int argc, char **argv)
     // ***************
 
     if (barrier) pmpi->barrier();
-    hypre.solve (problem.parameters(),hierarchy);
+    hypre.solve ();
 
     // ***************
     JBPERF_STOP("5-hypre-solve");
@@ -194,7 +192,7 @@ int main(int argc, char **argv)
     _TRACE_;
 
     if (barrier) pmpi->barrier();
-    hypre.evaluate (hierarchy);
+    hypre.evaluate ();
 
     // --------------------------------------------------
     // jbPerf Finalize

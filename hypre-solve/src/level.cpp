@@ -48,6 +48,7 @@ Level::Level (int n) throw ()
     il_[i] = INT_MAX;
     iu_[i] = INT_MIN;
   }
+  // Initialize grid list with 0 sentinal
   grids0_.push_back (0);
 }
 	  

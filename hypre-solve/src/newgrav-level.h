@@ -27,10 +27,15 @@ private:
 
   /// Level index, with root-level == 0
   int n_;
+
   /// Global index of lowest grid zone in the Level
   int il_[3];
+
   /// Global index of highest grid zone in the Level
   int iu_[3];
+
+  /// Periodicity, or 0 if not periodic
+  int period_[3];
 
   //--------------------------------------------------------------------
   // STATIC MEMBER DATA
@@ -152,6 +157,7 @@ private:
 
   unsigned int  curr_;
   const Level * level_;
+
 
 public:
 
