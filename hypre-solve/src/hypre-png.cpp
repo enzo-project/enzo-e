@@ -94,6 +94,7 @@ int main(int argc, char **argv)
   // Argument 2. scaling
 
   int scale = atoi(argv[iarg++]);
+  if (scale < 1) scale = 1;
 
   // Read in grids, and store them in vectors, one vector per level
 
