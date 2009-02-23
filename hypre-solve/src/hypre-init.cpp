@@ -40,7 +40,7 @@ void usage (char ** argv)
   // Print usage and exit abnormally
 
   printf ("\n"
-	  "Usage: %s N0 np0 np1 np2 num_levels offset serial [cg|mg]\n",argv[0]);
+	  "Usage: %s N0 np0 np1 np2 num_levels offset serial [cg|mg] [periodic|dirichlet]\n",argv[0]);
   exit(1);
 }
 
@@ -93,8 +93,9 @@ int main(int argc, char **argv)
 // Parse command-line arguments
 //-----------------------------------------------------------------------
 
-  if (argc != 10) {
-    printf ("Number of arguments %d is not 8\n",argc-1);
+  const int expected_args = 9;
+  if (argc != expected_args + 1) {
+    printf ("Number of arguments %d is not %d\n",argc-1,expected_args);
     usage(argv);
   }
 

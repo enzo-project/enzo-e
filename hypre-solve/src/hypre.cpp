@@ -29,6 +29,7 @@
 const int debug        = 0;
 const int trace        = 0;
 const int trace_hypre  = 1;
+const int temp_debug   = 0;
 
 //----------------------------------------------------------------------
 
@@ -92,11 +93,22 @@ Hypre::Hypre (Hierarchy  & hierarchy,
     resid_(-1.0),
     iter_(-1)
 {
-  if (trace_hypre) {
+  if (trace_hypre || temp_debug) {
     sprintf (mpi_file,"hypre-solve.out.%d",pmpi->ip());
     mpi_fp = fopen (mpi_file,"w");
   } // trace_hypre
 } // Hypre::Hypre
+
+//----------------------------------------------------------------------
+
+/// Hypre destructor
+
+Hypre::~Hypre ()
+{
+  if (trace_hypre || temp_debug) {
+    fclose (mpi_fp);
+  } // trace_hypre
+}
 
 //----------------------------------------------------------------------
 
@@ -870,6 +882,11 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 
 	  bool is_coarse = fz == Faces::_coarse_;
 
+	  if (trace_hypre) {
+	    fprintf (mpi_fp,"%s:%d grid=%d adjacent=%d is_local=%d is_coarse=%d\n",
+		     __FILE__,__LINE__,grid.id(),adjacent==NULL?0:adjacent->id(),is_local,is_coarse);
+	  }
+
 	  if (is_local && is_coarse) {
 
 	    // (fine) grid global indices
@@ -889,14 +906,20 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 	    ign3[j2] = (igg3[j2]) / r;
 
 	    // adjust for periodicity
- 	    if (hierarchy_->is_periodic(j0)) {
+	    if (trace_hypre) {
+	      fprintf (mpi_fp,"%s:%d is_periodic=%d period=%d ign3[%d]=%d\n",
+		       __FILE__,__LINE__,hierarchy_->is_periodic(j0),hierarchy_->iperiod(j0,level_coarse),j0,ign3[j0]);
+	    }
+
+	    if (hierarchy_->is_periodic(j0)) {
 	      int period = hierarchy_->iperiod(j0,level_coarse);
  	      if (ign3[j0] != (ign3[j0] + period) % period) {
- 		printf ("%s:%d Adjusting ign3[%d] from %d to %d.  Period = %d Level = %d\n",
- 			__FILE__,__LINE__,j0,ign3[j0],
- 			(ign3[j0] + period )% period,
- 			period,level_coarse);
- 		fflush(stdout);
+		if (trace_hypre) {
+		  fprintf (mpi_fp,"%s:%d Adjusting ign3[%d] from %d to %d.  Period = %d Level = %d\n",
+			   __FILE__,__LINE__,j0,ign3[j0],
+			   (ign3[j0] + period )% period,
+			   period,level_coarse);
+		}
  	      }
  	      ign3[j0] = (ign3[j0] + period) % period;
  	    }
@@ -982,10 +1005,7 @@ void Hypre::init_nonstencil_ (Grid & grid, std::string phase)
 		    if (trace_hypre) {
 		      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructMatrixAddToValues (%p, %d, 0, 1, %d, %g);\n",
 			      __FILE__,__LINE__,pmpi->ip(),
-			      &A_, 
-			      level_fine,
-			       //			      igg3[0], igg3[1], igg3[2],
-			      entry, val
+			      &A_, level_fine,  entry, val
 			      );
 		      fflush(mpi_fp);
 		    } // trace_hypre
@@ -1257,6 +1277,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
       for (i2=0; i2<n3[2]; i2++) {
 	int f = faces.label (axis,face,i1,i2);
 	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
+	  fprintf (mpi_fp,"%d %d %d %d\n",grid.id(),i0,i1,i2);
 	  // Clear off-diagonal element
 	  // DIFFUSION COEFFICIENTS HERE
 	  double axp = 1.0;
@@ -1276,6 +1297,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 	int f = faces.label (axis,face,i2,i0);
 	// Clear off-diagonal element
 	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
+	  fprintf (mpi_fp,"%d %d %d %d\n",grid.id(),i0,i1,i2);
 	  i  = Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
 	  // DIFFUSION COEFFICIENTS HERE
 	  double ayp = 1.0;
@@ -1294,6 +1316,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
       for (i1=0; i1<n3[1]; i1++) {
 	int f = faces.label (axis,face,i0,i1);
 	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
+	  fprintf (mpi_fp,"%d %d %d %d\n",grid.id(),i0,i1,i2);
 	  // Clear off-diagonal element
 	  // DIFFUSION COEFFICIENTS HERE
 	  double azp = 1.0;
@@ -1881,4 +1904,3 @@ void Hypre::solve_bicgstab_ (int itmax, double restol)
   solver_ = 0;
 
 } // Hypre::solve_bicgstab_()
-

@@ -35,6 +35,8 @@ public:
   Hypre (Hierarchy  & hierarchy,
 	 Parameters & parameters);
 
+  ~Hypre ();
+
   void init_hierarchy (Mpi        & mpi);
   void init_stencil   ();
   void init_graph     ();
@@ -65,7 +67,8 @@ private:
   // init_vector() functions
 
   Scalar init_vector_points_  (std::vector<Point *> & points);
-  Scalar init_vector_density_ (std::string             file_prefix);
+  Scalar init_vector_density_ (std::string             file_prefix,
+			       bool is_packed);
 
   // solve() functions
 

@@ -90,20 +90,20 @@ int main(int argc, char **argv)
 
       if (value != 0) {
 	if (! (0 <= i && i < Asize)) {
-	  printf ("linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
-		  linenum,i,Asize,i0,i1,i2,k,level,N2);
+	  printf ("%s:%d linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
+		  __FILE__,__LINE__,linenum,i,Asize,i0,i1,i2,k,level,N2);
 	}
 	if (! (0 <= j && j < Asize)) {
-	  printf ("linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
-		  linenum,i,Asize,i0,i1,i2,k,level,N2);
+	  printf ("%s:%d linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
+		  __FILE__,__LINE__,linenum,i,Asize,i0,i1,i2,k,level,N2);
 	}
 	if (! (AINDEX(i0,i1,i2,k,level,N2) >= 0)) {
-	  printf ("linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
-		  linenum,i,Asize,i0,i1,i2,k,level,N2);
+	  printf ("%s:%d linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
+		  __FILE__,__LINE__,linenum,i,Asize,i0,i1,i2,k,level,N2);
 	}
 	if (! (AINDEX(i0,i1,i2,k,level,N2) < Asize)) {
-	  printf ("linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
-		  linenum, i,Asize,i0,i1,i2,k,level,N2);
+	  printf ("%s:%d linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
+		  __FILE__,__LINE__,linenum, i,Asize,i0,i1,i2,k,level,N2);
 	}
 	assert (0 <= i && i < Asize);
 	assert (0 <= j && j < Asize);

@@ -30,7 +30,7 @@
 const int trace          = 0;
 const int debug          = 0;
 const int debug_detailed = 0;
-const int geomview       = 0;
+const int geomview       = 1;
 
 //----------------------------------------------------------------------
 
@@ -135,10 +135,10 @@ void Hierarchy::initialize (Domain & domain,
 
   init_grid_parents_();
   init_grid_levels_();
-  init_grid_children_();
-  init_grid_neighbors_();
   init_indices_(is_periodic);     // DEPENDENCY: Requires init_grid_levels_()
   init_extents_(is_periodic);     // DEPENDENCY: Requires init_grid_levels_()
+  init_grid_children_();
+  init_grid_neighbors_();
   _TRACE_;
   init_grid_faces_(domain, mpi);  // DEPENDENCY: Requires init_indices_()
   _TRACE_;
@@ -241,20 +241,19 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
   // For level == 0, test all pairs
 
-  
-  _TRACE_;
   for (i=0; i<level(0).num_grids(); i++) {
 
     Grid * g1 = & level(0).grid(i);
 
-    for (j=i+1; j<level(0).num_grids(); j++) {
+    // Starting index of loop was i+1, but need to include possibility
+    // of a grid being a neighbor with itself for periodic problems
+
+    for (j=i; j<level(0).num_grids(); j++) {
 
       Grid * g2 = & level(0).grid(j);
 
       if (g1->is_adjacent(*g2,period_)) {
 	assert_neighbors(*g1,*g2);
-	if (debug) printf ("DEBUG 1 grids %d and %d are neighbors\n",
-			   g1->id(),g2->id());
       }
     }
   }
@@ -277,8 +276,6 @@ void Hierarchy::init_grid_neighbors_ () throw ()
       for (j=0; j<parent(*g1)->num_children(); j++) {
 	Grid * g2 = & parent(*g1)->child(j);
 	if (g1->is_adjacent(*g2,period_) && g1->id() > g2->id()) {
-	  if (debug) printf ("DEBUG 2 grids %d and %d are neighbors\n",
-			     g1->id(),g2->id());
 	  assert_neighbors (*g1,*g2);
 	}
       }
@@ -314,8 +311,6 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 				  Mpi    & mpi) throw ()
 
 {
-  const int r = 2;
-
   int axis, face;
   int ig0,in0,il0,iu0;
   int ig1,in1,il1,iu1;
@@ -334,18 +329,13 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     // Determine level periodicity
 
-    int i,period[3];
-    for (i=0; i<3; i++) {
-      period[i] = (period_[i]==0 || level->index()==0) ? 0 : level->zones(0);
-      for (int j=0; j<level->index(); j++) {
-	period[i] *= r;
-      }
-    }
-    //    printf ("%s:%d level=%d period=(%d %d %d)\n",__FILE__,__LINE__,level->index(),
-    //	    period[0],period[1],period[2]);
+    int period[3] = {
+      iperiod(0,level->index()),
+      iperiod(1,level->index()),
+      iperiod(2,level->index()) };
 
-    if (debug) printf ("Level %d\n",level->index());
     while (Grid * grid = itg++) {
+
       if (debug) grid->print();
       ItGridNeighbors itn (*grid);
 
@@ -378,6 +368,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	    int count=0;
 	    while (grid->coarse_shared_face
 		   (*adjacent,axis,face,il0,il1,iu0,iu1,period,count)) {
+	      printf ("coarse_shared_face(%d %d)\n",grid->id(),adjacent->id());
 	      for (ig0=il0; ig0<=iu0; ig0++) {
 		for (ig1=il1; ig1<=iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -457,8 +448,12 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
       for (axis = 0; axis < 3; axis++) {
 	for (face = 0; face < 2; face++) {
-	  if ( fabs(gb3[axis][face] - db3[axis][face]) < 0.5*h3[axis]) {
-	    grid->faces().label(axis,face,Faces::_boundary_);
+
+	  // Label as boundary if on domain boundary AND not periodic
+	  if (iperiod_[axis] == 0) {
+	    if ( fabs(gb3[axis][face] - db3[axis][face]) < 0.5*h3[axis]) {
+	      grid->faces().label(axis,face,Faces::_boundary_);
+	    }
 	  }
 	}
       }
@@ -516,15 +511,10 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     // Determine level periodicity
 
-    int period[3];
-    for (int i=0; i<3; i++) {
-      period[i] = (period_[i]==0 || level->index()==0) ? 0 : level->zones(i);
-      for (int j=0; j<level->index(); j++) {
-	period[i] *= r;
-      }
-    }
-    //    printf ("%s:%d level=%d period=(%d %d %d)\n",__FILE__,__LINE__,level->index(),
-    //	    period[0],period[1],period[2]);
+    int period[3] = {
+      iperiod(0,level->index()),
+      iperiod(1,level->index()),
+      iperiod(2,level->index()) };
 
     ItLevelGridsAll itg (*level);
     while (Grid * grid = itg++) {

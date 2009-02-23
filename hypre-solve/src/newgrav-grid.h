@@ -385,7 +385,8 @@ protected:
   // Query functions
   //--------------------------------------------------------------------
 
-  /// Return true iff the two grids are next to each other, or are the same grid
+  /// Return true iff the two grids are next to each other, or are the same
+  /// grid.  Assumes the grids are in the same level.
   bool is_adjacent (Grid & grid, Scalar period[3]) throw ();
   /// Return true iff the grid belongs to processor ip
   bool is_local () throw()

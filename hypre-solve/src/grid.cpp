@@ -446,53 +446,74 @@ bool Grid::is_adjacent (Grid & g2, Scalar period[3]) throw ()
 
   if (g1.level_ != g2.level_) return false;
 
+  // Precompute tolerance as 0.5 * cell size 
+  
+  double hh[3];
+  for (int i=0; i<3; i++) {
+    hh[i] = 0.5 * (g1.xu_[i]-g1.xl_[i])/g1.n_[i];
+  }
+
   // Assume g1 and g2 are adjacent
 
   bool far = false;
 
-  for (int i=0; i<3; i++) {
+  // Handle the case where we're testing the grid against itself
+  // (can be adjacent if domain is periodic)
 
-    // Define tolerance hh to be 0.5 * cell width
+  // If grids g1 and g2 are the same grid...
 
-    double hh = 0.5 * (g1.xu_[i]-g1.xl_[i])/g1.n_[i];
-
-    if (period[i] == 0) {
-
-      // If not periodic ...
-
-      // If g1's upper edge is strictly below g2's lower edge, then they are far
-
-      far = far || (g1.xu_[i] < (g2.xl_[i] - hh));
-
-      // If g1's upper edge is strictly below g2's lower edge, then they are far
-
-      far = far || (g2.xu_[i] < (g1.xl_[i] - hh));
-
-    } else {
-
-      // If periodic ...
-
-      // If g1's upper edge is strictly below g2's lower edge, then they are far
-
-      far = far || ( (g1.xu_[i] < (g2.xl_[i] - hh)) &&
-		     (g2.xu_[i] < (g1.xl_[i] - hh + period[i])));
-
-      // If g1's upper edge is strictly below g2's lower edge, then they are far
-
-      far = far || ( (g2.xu_[i] < (g1.xl_[i] - hh)) &&
-		     (g1.xu_[i] < (g2.xl_[i] - hh + period[i])));
-
+  if (g1.id() == g2.id()) {
+    
+    for (int i=0; i<3; i++) {
+      if (fabs(g1.xl_[i] + period[i] - g1.xu_[i]) < hh[i]) {
+	return true;
+      }
     }
+    return false;
+  } else {
+
+    for (int i=0; i<3; i++) {
+
+      // Define tolerance hh to be 0.5 * cell width
+
+      if (period[i] == 0) {
+
+	// If not periodic ...
+
+	// If g1's upper edge is below g2's lower edge, then they are far
+
+	far = far || (g1.xu_[i] < g2.xl_[i] - hh[i]);
+
+	// If g2's upper edge is below g1's lower edge, then they are far
+
+	far = far || (g2.xu_[i] < g1.xl_[i] - hh[i]);
+
+      } else {
+
+	// If periodic ...
+
+	// If g1's upper edge is below g2's lower edge, then they are far
+
+	far = far || ( (g1.xu_[i] < g2.xl_[i] - hh[i]) &&
+		       (g2.xu_[i] < g1.xl_[i] - hh[i] + period[i]));
+
+	// If g2's upper edge is below g1's lower edge, then they are far
+
+	far = far || ( (g2.xu_[i] < g1.xl_[i] - hh[i]) &&
+		       (g1.xu_[i] < g2.xl_[i] - hh[i] + period[i]));
+
+      }
+    }
+
+    // If g1 and g2 are not far, then they are adjacent
+
+    //  if (! far) printf ("%s:%d grids %d and %d are adjacent\n",
+    //		     __FILE__,__LINE__,g1.id(),g2.id());
+
+    return ! far;
   }
 
-  // If g1 and g2 are not far, then they are adjacent
-
-  //  if (! far) printf ("%s:%d grids %d and %d are adjacent\n",
-  //		     __FILE__,__LINE__,g1.id(),g2.id());
-
-  return ! far;
 }
-
 //----------------------------------------------------------------------
 
 /// Determine the axis, face, and range of indices of zones adjacent 
@@ -833,9 +854,8 @@ bool Grid::parent_interior_face (Grid & parent,
   iu0--;
   iu1--;
 
-  if (il0 > iu0 || il1 > iu1) return false;
-
   return true;
+  if (il0 > iu0 || il1 > iu1) return false;
 }
 
 //----------------------------------------------------------------------
