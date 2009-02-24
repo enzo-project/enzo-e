@@ -417,8 +417,6 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	}
 	fflush(stdout);
       }
-      
-      
     }
   }
 
@@ -450,10 +448,14 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	for (face = 0; face < 2; face++) {
 
 	  // Label as boundary if on domain boundary AND not periodic
-	  if (iperiod_[axis] == 0) {
-	    if ( fabs(gb3[axis][face] - db3[axis][face]) < 0.5*h3[axis]) {
+
+	  bool is_periodic = iperiod_[axis] != 0;
+
+	  bool is_boundary = 
+	    fabs(gb3[axis][face] - db3[axis][face]) < 0.5*h3[axis];
+
+	  if ( ! is_periodic && is_boundary) {
 	      grid->faces().label(axis,face,Faces::_boundary_);
-	    }
 	  }
 	}
       }
