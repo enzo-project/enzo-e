@@ -1265,10 +1265,6 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   int axis,face;
 
   int level = grid.level();
-  int debug3[3];
-  debug3[0]=0;
-  debug3[1]=0;
-  debug3[2]=0;
   // X faces
   for (face=0; face<2; face++) {
     axis = 0;
@@ -1277,14 +1273,13 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
       for (i2=0; i2<n3[2]; i2++) {
 	int f = faces.label (axis,face,i1,i2);
 	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
-	  fprintf (mpi_fp,"%d %d %d %d\n",grid.id(),i0,i1,i2);
 	  // Clear off-diagonal element
 	  // DIFFUSION COEFFICIENTS HERE
 	  double axp = 1.0;
 	  double axm = 1.0;
 	  double ax = (face==0) ? axm : axp;
-	  i = Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
 	  Scalar a = matrix_scale * h120 * ax;
+	  i = Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
 	  v1[axis][face][i] -= a;
 	  v0[i]             += a;
 	} // if f neither boundary nor neighbor
@@ -1295,15 +1290,14 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
     for (i2=0; i2<n3[2]; i2++) {
       for (i0=0; i0<n3[0]; i0++) {
 	int f = faces.label (axis,face,i2,i0);
-	// Clear off-diagonal element
 	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
-	  fprintf (mpi_fp,"%d %d %d %d\n",grid.id(),i0,i1,i2);
-	  i  = Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
+	  // Clear off-diagonal element
 	  // DIFFUSION COEFFICIENTS HERE
 	  double ayp = 1.0;
 	  double aym = 1.0;
 	  double ay = (face==0) ? aym : ayp;
 	  Scalar a = matrix_scale * h201 * ay;
+	  i = Grid::index(i0,i1,i2,n3[0],n3[1],n3[2]);
 	  v1[axis][face][i] -= a;
 	  v0[i]             += a;
 	} // if f neither boundary nor neighbor
@@ -1316,7 +1310,6 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
       for (i1=0; i1<n3[1]; i1++) {
 	int f = faces.label (axis,face,i0,i1);
 	if (f != Faces::_boundary_ && f != Faces::_neighbor_) {
-	  fprintf (mpi_fp,"%d %d %d %d\n",grid.id(),i0,i1,i2);
 	  // Clear off-diagonal element
 	  // DIFFUSION COEFFICIENTS HERE
 	  double azp = 1.0;
@@ -1434,7 +1427,6 @@ void Hypre::init_matrix_clear_ (int part)
     // Clear stencil values from coarse to fine part
 
   
-  printf ("HYPRE_SStructFACZeroCFSten\n");
   HYPRE_SStructFACZeroCFSten (A_,grid_, part, r_factors);
     if (trace_hypre) {
       fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroCFSten (%p,%p,%d,%d %d %d);\n",
@@ -1446,7 +1438,6 @@ void Hypre::init_matrix_clear_ (int part)
 
     // Clear stencil values from fine to coarse part
 
-    printf ("HYPRE_SStructFACZeroFCSten\n");
     HYPRE_SStructFACZeroFCSten (A_,grid_, part);
     if (trace_hypre) {
       fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroFCSten (%p,%p,%d);\n",
@@ -1460,15 +1451,14 @@ void Hypre::init_matrix_clear_ (int part)
 
     if (part > 0) {
 
-      printf ("HYPRE_SStructFACZeroAMRMatrixData\n");
       HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
-    if (trace_hypre) {
-      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroAMRMatrixData (%p,%d,%d %d %d);\n",
-	      __FILE__,__LINE__,pmpi->ip(),
-	      &A_, part-1, r_factors[0], r_factors[1], r_factors[2]
-	      );
-      fflush(mpi_fp);
-    } // trace_hypre
+      if (trace_hypre) {
+	fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroAMRMatrixData (%p,%d,%d %d %d);\n",
+		 __FILE__,__LINE__,pmpi->ip(),
+		 &A_, part-1, r_factors[0], r_factors[1], r_factors[2]
+		 );
+	fflush(mpi_fp);
+      } // trace_hypre
     } // part > 0
 
     // Need to clear under rhs also
