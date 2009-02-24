@@ -89,28 +89,29 @@ int main(int argc, char **argv)
       j = INDEX(j0,j1,j2,level,N2);
 
       if (value != 0) {
+	bool err = false;
 	if (! (0 <= i && i < Asize)) {
+	  err = true;
 	  printf ("%s:%d linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
 		  __FILE__,__LINE__,linenum,i,Asize,i0,i1,i2,k,level,N2);
 	}
 	if (! (0 <= j && j < Asize)) {
+	  err = true;
 	  printf ("%s:%d linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
 		  __FILE__,__LINE__,linenum,i,Asize,i0,i1,i2,k,level,N2);
 	}
 	if (! (AINDEX(i0,i1,i2,k,level,N2) >= 0)) {
+	  err = true;
 	  printf ("%s:%d linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
 		  __FILE__,__LINE__,linenum,i,Asize,i0,i1,i2,k,level,N2);
 	}
 	if (! (AINDEX(i0,i1,i2,k,level,N2) < Asize)) {
+	  err = true;
 	  printf ("%s:%d linenum=%d i=%d Asize=%d i0,i1,i2=%d,%d,%d k=%d level=%d N2=%d\n",
 		  __FILE__,__LINE__,linenum, i,Asize,i0,i1,i2,k,level,N2);
 	}
-	assert (0 <= i && i < Asize);
-	assert (0 <= j && j < Asize);
-	assert (AINDEX(i0,i1,i2,k,level,N2) >= 0);
-	assert (AINDEX(i0,i1,i2,k,level,N2) < Asize);
-	A[AINDEX(i0,i1,i2,k,0,N2)] = value;
-	printf ("%d  %d %d %g\n",level,i+1,j+1,value);
+	printf ("%d%s %d %d %g\n",level,err?"X":" ",i+1,j+1,value);
+	if (! err) A[AINDEX(i0,i1,i2,k,0,N2)] = value;
       }
 
     }
