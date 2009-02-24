@@ -540,8 +540,6 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
   int in[3][2];
   neighbor.indices(in);
 
-  axis = -1;
-
   // Find matching face, if any
 
   bool found_face = false;
@@ -556,9 +554,6 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
       bool b2 = 
       	(ig[axis][face]   + (1-face)*iperiod[axis]) == 
       	(in[axis][1-face] +     face*iperiod[axis]);
-
-      //      printf ("%s:%d neighbor_shared_face grids %d %d  axis=%d face=%d b1=%d b2=%d\n",
-      //	      __FILE__,__LINE__,grid.id(),neighbor.id(),axis,face,b1,b2);
 
       if ((b1 || b2) && ! found_face) {
 	if (num == count) {
@@ -593,10 +588,7 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
   il1 = MAX(ig[j1][0],in[j1][0]) - ig[j1][0];
   iu1 = MIN(ig[j1][1],in[j1][1]) - ig[j1][0] - 1;
 
-  //  printf ("neighbor_shared_face (%d,%d) (face=%d axis=%d il(%d %d) iu(%d %d) count=%d\n",
-  //	  grid.id(),neighbor.id(),face,axis,il0,il1,iu0,iu1,count);
   return true;
-  return (il0 <= iu0 && il1 <= iu1);
 
 }
 
@@ -644,9 +636,6 @@ bool Grid::coarse_shared_face (Grid & coarse,
 	(  ig[axis][face]   + (1-face)*iperiod[axis]) == 
 	(r*ic[axis][1-face] +     face*iperiod[axis]);
 
-      //      printf ("%s:%d coarse_shared_face grids %d %d  axis=%d face=%d b1=%d b2=%d\n",
-      //	      __FILE__,__LINE__,grid.id(),coarse.id(),axis,face,b1,b2);
-
       if ((b1 || b2) && ! found_face) {
 	if (num == count) {
 	  found_face = true;
@@ -680,11 +669,7 @@ bool Grid::coarse_shared_face (Grid & coarse,
   il1 = MAX(ig[j1][0],r*ic[j1][0]) - ig[j1][0];
   iu1 = MIN(ig[j1][1],r*ic[j1][1]) - ig[j1][0] - 1;
 
-  //  printf ("coarse_shared_face (%d,%d) (face=%d axis=%d il(%d %d) iu(%d %d) count=%d\n",
-  //	  grid.id(),coarse.id(),face,axis,il0,il1,iu0,iu1,count);
-
   return true;
-  return (il0 <= iu0 && il1 <= iu1);
 }
 
 //----------------------------------------------------------------------
