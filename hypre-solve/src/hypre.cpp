@@ -14,6 +14,7 @@
 
 #include <mpi.h>
 #include <assert.h>
+#include <math.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -28,7 +29,7 @@
 
 const int debug        = 0;
 const int trace        = 0;
-const int trace_hypre  = 1;
+const int trace_hypre  = 0;
 const int temp_debug   = 0;
 
 //----------------------------------------------------------------------
@@ -782,6 +783,49 @@ void Hypre::evaluate ()
 
   } // grid = itg++
 
+
+  // --------------------------------------------------
+  // Evaluate ||X|| and display result
+  // --------------------------------------------------
+
+  Scalar x2sum_local = 0.0;
+
+  while (Grid * grid = itg++) {
+    int level = grid->level();
+    int igg3[3][2];
+    grid->indices(igg3);
+    int lower[3],upper[3];
+    lower[0] = igg3[0][0];
+    lower[1] = igg3[1][0];
+    lower[2] = igg3[2][0];
+    upper[0] = igg3[0][1] - 1;
+    upper[1] = igg3[1][1] - 1;
+    upper[2] = igg3[2][1] - 1;
+    int n3[3];
+    n3[0] = grid->n(0);
+    n3[1] = grid->n(1);
+    n3[2] = grid->n(2);
+    grid->allocate();
+
+    HYPRE_SStructVectorGetBoxValues (X_,level,lower,upper,0,grid->values());  
+    Scalar * x = grid->values();
+
+    for (int i2=0; i2<n3[2]; i2++) {
+      for (int i1=0; i1<n3[1]; i1++) {
+	for (int i0=0; i0<n3[0]; i0++) {
+	  Scalar xval = x[grid->index(i0,i1,i2,n3[0],n3[1],n3[2])];
+	  x2sum_local += xval*xval;
+	}
+      }
+    }
+  }
+
+  Scalar x2sum = 0.0;
+  MPI_Allreduce (&x2sum_local, &x2sum, 1, 
+		 MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
+
+  if (pmpi->is_root()) printf ("norm(X) = %g\n",sqrt(x2sum));
+
 } // Hypre::evaluate()
 
 //======================================================================
@@ -1265,6 +1309,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   int axis,face;
 
   int level = grid.level();
+
   // X faces
   for (face=0; face<2; face++) {
     axis = 0;
@@ -1323,7 +1368,6 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
       } // for i1
     } // for i0
   } // for face
-
   if (debug && level==1) {
     i = Grid::index(0,0,0,n3[0],n3[1],n3[2]);
     printf ("DEBUG %s:%d 000 %g %g %g  %g  %g %g %g\n",
@@ -1342,6 +1386,7 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 			v1[2][1][i],v1[2][0][i]);
 
   } // if debug && level == 1
+
   HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[0],v0);
   HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[1],v1[0][1]);
   HYPRE_SStructMatrixSetBoxValues (A_,level,low,up,0,1,&entries[2],v1[0][0]);
@@ -1424,42 +1469,41 @@ void Hypre::init_matrix_clear_ (int part)
   int r_factors[3] = {2,2,2}; 
   //  if (part > 0) {
 
-    // Clear stencil values from coarse to fine part
+  // Clear stencil values from coarse to fine part
 
-  
   HYPRE_SStructFACZeroCFSten (A_,grid_, part, r_factors);
-    if (trace_hypre) {
-      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroCFSten (%p,%p,%d,%d %d %d);\n",
-	      __FILE__,__LINE__,pmpi->ip(),
-	      &A_,&grid_, part, r_factors[0],r_factors[1],r_factors[2]
-	      );
-      fflush(mpi_fp);
-    } // trace_hypre
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroCFSten (%p,%p,%d,%d %d %d);\n",
+	     __FILE__,__LINE__,pmpi->ip(),
+	     &A_,&grid_, part, r_factors[0],r_factors[1],r_factors[2]
+	     );
+    fflush(mpi_fp);
+  } // trace_hypre
 
     // Clear stencil values from fine to coarse part
 
-    HYPRE_SStructFACZeroFCSten (A_,grid_, part);
-    if (trace_hypre) {
-      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroFCSten (%p,%p,%d);\n",
-	      __FILE__,__LINE__,pmpi->ip(),
-	      &A_,&grid_, part
-	      );
-      fflush(mpi_fp);
-    } // trace_hypre
+  HYPRE_SStructFACZeroFCSten (A_,grid_, part);
+  if (trace_hypre) {
+    fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroFCSten (%p,%p,%d);\n",
+	     __FILE__,__LINE__,pmpi->ip(),
+	     &A_,&grid_, part
+	     );
+    fflush(mpi_fp);
+  } // trace_hypre
 
     // Set overlapped areas of part with identity
 
-    if (part > 0) {
+  if (part > 0) {
 
-      HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
-      if (trace_hypre) {
-	fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroAMRMatrixData (%p,%d,%d %d %d);\n",
-		 __FILE__,__LINE__,pmpi->ip(),
-		 &A_, part-1, r_factors[0], r_factors[1], r_factors[2]
-		 );
-	fflush(mpi_fp);
-      } // trace_hypre
-    } // part > 0
+    HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
+    if (trace_hypre) {
+      fprintf (mpi_fp, "%s:%d %d HYPRE_SStructFACZeroAMRMatrixData (%p,%d,%d %d %d);\n",
+	       __FILE__,__LINE__,pmpi->ip(),
+	       &A_, part-1, r_factors[0], r_factors[1], r_factors[2]
+	       );
+      fflush(mpi_fp);
+    } // trace_hypre
+  } // part > 0
 
     // Need to clear under rhs also
     //   HYPRE_SStructFACZeroAMRVectorData(B_, plevels, prefinements);
