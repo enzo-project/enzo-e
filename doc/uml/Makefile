@@ -1,18 +1,22 @@
 FIGS = array arrays amr core-components
+PS   = $(patsubst %,%.ps, $(FIGS))
 OBJS = $(patsubst %,%.1, $(FIGS))
 SRC  = $(patsubst %,%.mp,$(FIGS))
 
 
-all: $(OBJS)
+all: $(PS)
+
+.1.ps:
+	mv $*.1 $*.ps
 .mp.1:
 	mpost $*.mp
 
-.SUFFIXES: .mp .1
+.SUFFIXES: .ps .mp .1
 
 .PHONY: clean
 clean:
 	-@rm -rf *.log *~
 distclean: clean
-	-@rm -rf *.1 
+	-@rm -rf *.1  *.ps *.png
 
 

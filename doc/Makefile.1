@@ -12,7 +12,7 @@ pdf2:ps2
 2up: ps
 	a2ps -M Letter -2 -o $(PAPER)2.ps $(PAPER).ps
 html:
-	tth $(PAPER).tex > $(PAPER).html
+	tth -e2 $(PAPER).tex > $(PAPER).html
 
 dvi: include.tex uml
 	make -C uml
@@ -25,7 +25,7 @@ include.tex:
 	ln -s ../include.tex .
 
 clean:
-	-@rm -f *~ *.aux \
+	-@rm -f *~ *.aux *.png \
         $(PAPER).dvi \
         $(PAPER).log \
         $(PAPER).ps \
