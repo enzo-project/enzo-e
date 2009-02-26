@@ -1,3 +1,4 @@
+prologues := 2
 input metauml;
 beginfig(1)
   Interface.ABC("ArrayABC")();
