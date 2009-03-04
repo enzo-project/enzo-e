@@ -17,7 +17,7 @@
 #
 # Directories
 #
-# (*) data
+# (*) Data
 # (*) disk
 # (*) test
 # ( ) performance
@@ -25,7 +25,7 @@
 #
 #-----------------------------------------------------------------------
 
-DIR = data disk test performance error
+DIR = Data disk test performance error
 
 #=======================================================================
 # TARGETS

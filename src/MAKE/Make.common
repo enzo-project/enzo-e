@@ -26,4 +26,4 @@ LDFLAGS  = $(LIB_HDF5)
 #-----------------------------------------------------------------------
 .PHONY: dep
 dep:
-	-@(makedepend -fDEPEND $(INC) -- -- *.?pp) >& out.make.dep
+	-@(makedepend -fDEPEND $(INC) -- -- *.?pp)

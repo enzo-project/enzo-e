@@ -38,7 +38,6 @@ main()
 
   unit_class ("Hdf5");
   unit_open();
-  unit_class_size(Hdf5);
 
   unit_func("file_open");
 

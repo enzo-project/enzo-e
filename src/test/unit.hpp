@@ -36,11 +36,6 @@
 
 //----------------------------------------------------------------------
 
-#define unit_class_size(CLASS) \
-  printf ("          sizeof(%s) = %d\n",unit::class_name,sizeof(CLASS)); \
-  fprintf (unit::fp,"          sizeof(%s) = %d\n",unit::class_name,sizeof(CLASS));
-
-
 #define UNIT_MAX_NAME_LEN 40
 
 //======================================================================

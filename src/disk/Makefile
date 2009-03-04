@@ -14,8 +14,8 @@ TEST_OBJS = test_hdf5.o
 OBJ       = hdf5.o
 
 #=======================================================================
-INC_LOCAL  = -I$(SRC)/data -I$(SRC)/error
-OBJ_EXTERN = $(SRC)/data/array.o
+INC_LOCAL  = -I$(SRC)/Data -I$(SRC)/error
+OBJ_EXTERN = $(SRC)/Data/array.o
 
 OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================

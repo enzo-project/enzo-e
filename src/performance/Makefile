@@ -14,8 +14,8 @@ TEST_OBJS = test_timer.o
 OBJ       = 
 
 #=======================================================================
-INC_LOCAL  = -I$(SRC)/data
-OBJ_EXTERN = $(SRC)/data/array.o
+INC_LOCAL  = -I$(SRC)/Data
+OBJ_EXTERN = $(SRC)/Data/array.o
 
 OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================

@@ -29,7 +29,6 @@ main()
 
   unit_class ("Timer");
   unit_open();
-  unit_class_size(Timer);
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 

@@ -22,7 +22,6 @@ main()
 {
   unit_class ("Array");
   unit_open();
-  unit_class_size(Array);
 
   //----------------------------------------------------------------------
   // test single array WITH resize: length, size, clear, values, access
