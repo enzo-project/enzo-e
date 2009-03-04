@@ -42,9 +42,9 @@ private:
   /// Position of highest vertex
   Scalar              xu_[3];
   /// Domain periodicity, or 0 if not periodic
-  double              period_[3];
+  double              period_domain_[3];
   /// Grid periodicity, or 0 if not periodic
-  int                 iperiod_[3];
+  int                 period_index_[3];
 
 
   //--------------------------------------------------------------------
@@ -189,10 +189,10 @@ public:
   int num_unknowns0() throw ()
   { return n0_[0]*n0_[1]*n0_[2]; };
 
-  /// Return periodicity of the given level.
-  int iperiod(int axis, int level=0) throw ()
+  /// Return periodicity of indices of the given level.
+  int period_index(int axis, int level=0) throw ()
   { 
-    int p=iperiod_[axis];
+    int p=period_index_[axis];
     for (int i=0; i<level; i++) {
       const int r = 2;   // WARNING: assuming fixed refinement factor r = 2
       p *= r;
@@ -203,7 +203,7 @@ public:
   /// Return whether axis is periodic or not
   bool is_periodic(int axis) throw ()
   {
-    return iperiod_[axis] > 0;
+    return period_index_[axis] > 0;
   }
 
   //--------------------------------------------------------------------
@@ -219,10 +219,10 @@ private:
   void init_grid_faces_ (Domain & domain, Mpi & mpi) throw();
   void geomview_grid_ (FILE *fpr, bool full=true) throw ();
 
-  /// Initialize il0_[], n0_[], and iperiod[]
+  /// Initialize il0_[], n0_[], and period_index[]
   void init_indices_ (bool is_periodic) throw();
 
-  /// Initialize xl_[], xu_[], and period
+  /// Initialize xl_[], xu_[], and period_domain[]
   void init_extents_ (bool is_periodic) throw();
 
   void insert_in_level_ (int level, Grid & grid) throw ();

@@ -266,7 +266,7 @@ void images_grid_add(Grid   * grid,
 
   double *u = grid->values();
   int gl3[3];
-  grid->i_lower(gl3[0],gl3[1],gl3[2]);
+  grid->index_lower(gl3[0],gl3[1],gl3[2]);
 
   printf ("grid lower (%d %d %d)\n",gl3[0],gl3[1],gl3[2]);
   printf ("image lower (%d %d %d)\n",nl3[0],nl3[1],nl3[2]);

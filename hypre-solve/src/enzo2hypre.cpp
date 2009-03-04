@@ -66,7 +66,7 @@ int main(int argc, char ** argv)
   fprintf (fpout," discret constant\n");
   fprintf (fpout," solver fac\n");
   fprintf (fpout," boundary periodic\n");
-  fprintf (fpout," dump_x true\n");
+  fprintf (fpout," dump_hypre true\n");
 
   //----------------------------------------------------------------------
   // Open hierarchy file to get number of grids "num_grids"

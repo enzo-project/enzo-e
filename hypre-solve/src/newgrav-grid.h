@@ -304,11 +304,11 @@ protected:
   };
 
   /// Return the global lower index of the lower grid unknown.  No error checking on i.
-  int i_lower(int i) throw ()
+  int index_lower(int i) throw ()
   { return il_[i]; };
 
   /// Return the global lower indices of the lower grid unknown.  No error checking on il.
-  void i_lower(int &il0, int &il1, int &il2) throw ()
+  void index_lower(int &il0, int &il1, int &il2) throw ()
   { 
     il0 = il_[0];
     il1 = il_[1];
@@ -316,11 +316,11 @@ protected:
   };
 
   /// Return the global upper index of the upper grid unknown.  No error checking on i.
-  int i_upper(int i) throw ()
+  int index_upper(int i) throw ()
   { return il_[i] + n_[i] - 1; };
 
   /// Return the global upper indices of the upper grid unknown.  No error checking on iu.
-  void i_upper(int &iu0, int &iu1, int &iu2) throw ()
+  void index_upper(int &iu0, int &iu1, int &iu2) throw ()
   { 
     iu0 = il_[0] + n_[0] - 1;
     iu1 = il_[1] + n_[1] - 1;
@@ -338,11 +338,24 @@ protected:
     ind[2][1] = il_[2] + n_[2];
   };
 
-  /// Return the unknown u(i,j,k)
-  //  Scalar & unknown(int i0, int i1, int i2) throw()
-  //  { assert (u_);
-  //    return u_[i0 + n_[0]*(i1 + n_[1]*i2)];
-  //  }
+  /// Return lower and upper global indices.  Upper indices are not incremented by one.  Used primarily before Hypre calls
+  void get_limits(int lower[3], int upper[3]) throw ()
+  { 
+    lower[0] = il_[0];
+    lower[1] = il_[1];
+    lower[2] = il_[2];
+    upper[0] = il_[0] + n_[0] - 1;
+    upper[1] = il_[1] + n_[1] - 1;
+    upper[2] = il_[2] + n_[2] - 1;
+  };
+
+  /// Return the grid size.  Used primarily before Hypre calls
+  void get_size(int size[3]) throw()
+  {
+    size[0] = n_[0];
+    size[1] = n_[1];
+    size[2] = n_[2];
+  }
 
   /// Return the Faces object for this Grid.  If not allocated yet,
   /// create a new Faces object.

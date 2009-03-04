@@ -252,7 +252,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
       Grid * g2 = & level(0).grid(j);
 
-      if (g1->is_adjacent(*g2,period_)) {
+      if (g1->is_adjacent(*g2,period_domain_)) {
 	assert_neighbors(*g1,*g2);
       }
     }
@@ -275,7 +275,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
       _TRACE_;
       for (j=0; j<parent(*g1)->num_children(); j++) {
 	Grid * g2 = & parent(*g1)->child(j);
-	if (g1->is_adjacent(*g2,period_) && g1->id() > g2->id()) {
+	if (g1->is_adjacent(*g2,period_domain_) && g1->id() > g2->id()) {
 	  assert_neighbors (*g1,*g2);
 	}
       }
@@ -287,7 +287,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 	Grid * gn = & parent(*g1)->neighbor(j1);
 	for (j2=0; j2<gn->num_children(); j2++) {
 	  Grid * g2 = & gn->child(j2);
-	  if (g1->is_adjacent(*g2,period_) && g1->id() > g2->id()) {
+	  if (g1->is_adjacent(*g2,period_domain_) && g1->id() > g2->id()) {
 	    if (debug) printf ("DEBUG 3 grids %d and %d are neighbors\n",
 			       g1->id(),g2->id());
 	    assert_neighbors (*g1,*g2);
@@ -329,10 +329,10 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     // Determine level periodicity
 
-    int period[3] = {
-      iperiod(0,level->index()),
-      iperiod(1,level->index()),
-      iperiod(2,level->index()) };
+    int period3[3] = {
+      period_index (0,level->index()),
+      period_index (1,level->index()),
+      period_index (2,level->index()) };
 
     while (Grid * grid = itg++) {
 
@@ -347,7 +347,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	if (grid->is_local() || adjacent->is_local()) {
 	  int count = 0;
 	  while (grid->neighbor_shared_face
-		 (*adjacent,axis,face,il0,il1,iu0,iu1,period,count)) {
+		 (*adjacent,axis,face,il0,il1,iu0,iu1,period3,count)) {
 	    for (ig0=il0; ig0<=iu0; ig0++) {
 	      for (ig1=il1; ig1<=iu1; ig1++) {
 		grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -367,8 +367,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 	  if (grid->is_local() || adjacent->is_local()) {
 	    int count=0;
 	    while (grid->coarse_shared_face
-		   (*adjacent,axis,face,il0,il1,iu0,iu1,period,count)) {
-	      printf ("coarse_shared_face(%d %d)\n",grid->id(),adjacent->id());
+		   (*adjacent,axis,face,il0,il1,iu0,iu1,period3,count)) {
 	      for (ig0=il0; ig0<=iu0; ig0++) {
 		for (ig1=il1; ig1<=iu1; ig1++) {
 		  grid->faces().adjacent(axis,face,ig0,ig1) = adjacent;
@@ -449,12 +448,10 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
 	  // Label as boundary if on domain boundary AND not periodic
 
-	  bool is_periodic = iperiod_[axis] != 0;
-
 	  bool is_boundary = 
 	    fabs(gb3[axis][face] - db3[axis][face]) < 0.5*h3[axis];
 
-	  if ( ! is_periodic && is_boundary) {
+	  if ( ! is_periodic(axis) && is_boundary) {
 	      grid->faces().label(axis,face,Faces::_boundary_);
 	  }
 	}
@@ -513,10 +510,10 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     // Determine level periodicity
 
-    int period[3] = {
-      iperiod(0,level->index()),
-      iperiod(1,level->index()),
-      iperiod(2,level->index()) };
+    int period3[3] = {
+      period_index(0,level->index()),
+      period_index(1,level->index()),
+      period_index(2,level->index()) };
 
     ItLevelGridsAll itg (*level);
     while (Grid * grid = itg++) {
@@ -526,7 +523,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
       while (Grid * neighbor = itn++) {
 	int count = 0;
 	while (grid->neighbor_shared_face 
-	       (*neighbor, axis, face, il0,il1,iu0,iu1,period,count)) {
+	       (*neighbor, axis, face, il0,il1,iu0,iu1,period3,count)) {
 	  for (ig0=il0; ig0<=iu0; ig0++) {
 	    for (ig1=il1; ig1<=iu1; ig1++) {
 	      Faces::Label & fz = grid->faces().label(axis,face,ig0,ig1);
@@ -606,8 +603,8 @@ void Hierarchy::init_indices_ (bool is_periodic) throw()
 
   while (Grid *grid = itg++) {
     for (i=0; i<3; i++) {
-      lower[i] = MIN(grid->i_lower(i),lower[i]);
-      upper[i] = MAX(grid->i_upper(i),upper[i]);
+      lower[i] = MIN(grid->index_lower(i),lower[i]);
+      upper[i] = MAX(grid->index_upper(i),upper[i]);
     }
   }
 
@@ -617,7 +614,7 @@ void Hierarchy::init_indices_ (bool is_periodic) throw()
   }
 
   for (i=0; i<3; i++) {
-    iperiod_[i] = is_periodic ? n0_[i] : 0.0;
+    period_index_[i] = is_periodic ? n0_[i] : 0.0;
   }
 
   _TRACE_;
@@ -657,7 +654,7 @@ void Hierarchy::init_extents_ (bool is_periodic) throw()
   }
 
   for (i=0; i<3; i++) {
-    period_[i] = is_periodic ? xu_[i] - xl_[i] : 0.0;
+    period_domain_[i] = is_periodic ? xu_[i] - xl_[i] : 0.0;
   }
 
   _TRACE_;

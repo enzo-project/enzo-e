@@ -30,6 +30,9 @@ private:
   double               resid_;   // Solver residual
   int                  iter_;    // Solver iterations
 
+  int                  r_factor_;
+  Scalar               matrix_scale_;  // 1.0:  1 1 1 -6 1 1 1
+
 public:
 
   Hypre (Hierarchy  & hierarchy,
@@ -50,19 +53,24 @@ public:
 
 private:
 
+  enum phase_enum  {phase_unknown,phase_graph,phase_matrix};
+
   // init_graph() functions
 
   void init_graph_nonstencil_ (Grid & grid)
-  { init_nonstencil_ (grid, "graph"); };
+  { init_nonstencil_ (grid, phase_graph); };
 
-  // init_matrix() functions
+  // init_linear() functions
+
+  void init_matrix_elements_   ();
+  void init_rhs_elements_      (std::vector<Point *> & points);
 
   void init_matrix_stencil_    (Grid & grid);
   void init_matrix_clear_      (int part);
   void init_matrix_nonstencil_ (Grid & grid)
-  { init_nonstencil_ (grid, "matrix"); };
+  { init_nonstencil_ (grid, phase_matrix); };
 
-  void init_nonstencil_ (Grid & grid, std::string phase);
+  void init_nonstencil_ (Grid & grid, phase_enum phase);
   
   // init_vector() functions
 
@@ -76,4 +84,27 @@ private:
   void solve_bicgstab_ (int itmax, double restol);
   void solve_pfmg_     (int itmax, double restol);
 
+  // matrix graph update functions
+
+  void matrix_update_fc_const_(int face, 
+			       Grid & grid, 
+			       int axis0, 
+			       int axis1, 
+			       int axis2, 
+			       phase_enum phase,
+			       int level_fine, 
+			       int level_coarse,
+			       int igg3[3], 
+			       int ign3[3]);
+
+  void matrix_update_cf_const_(int face, 
+			       Grid & grid, 
+			       int axis0, 
+			       int axis1, 
+			       int axis2, 
+			       phase_enum phase,
+			       int level_fine, 
+			       int level_coarse,
+			       int igg3[3], 
+			       int ign3[3]);
 };

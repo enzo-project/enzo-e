@@ -70,8 +70,8 @@ void Level::insert_grid (Grid & grid) throw ()
   // Update Level extents given Grid indices
 
   for (int i=0; i<3; i++) {
-    il_[i] = MIN(il_[i],grid.i_lower(i));
-    iu_[i] = MAX(iu_[i],grid.i_upper(i));
+    il_[i] = MIN(il_[i],grid.index_lower(i));
+    iu_[i] = MAX(iu_[i],grid.index_upper(i));
   }
 }
 
@@ -80,8 +80,8 @@ void Level::insert_grid (Grid & grid) throw ()
 void Level::print () throw ()
 {
   printf ("Level %d\n",n_);
-  printf ("   i_lower = (%d,%d,%d)\n",il_[0],il_[1],il_[2]);
-  printf ("   i_upper = (%d,%d,%d)\n",iu_[0],iu_[1],iu_[2]);
+  printf ("   index_lower = (%d,%d,%d)\n",il_[0],il_[1],il_[2]);
+  printf ("   index_upper = (%d,%d,%d)\n",iu_[0],iu_[1],iu_[2]);
   for (int i=0; i<num_grids(); i++) {
     grid(i).print();
   }
