@@ -255,7 +255,7 @@ void Hypre::init_graph ()
     values.
 */
 
-void Hypre::init_linear (std::vector<Point *>  points)
+void Hypre::init_elements (std::vector<Point *>  points)
 
 {
   // Create the hypre matrix A_, solution X_, and right-hand side B_ objects
@@ -280,13 +280,13 @@ void Hypre::init_linear (std::vector<Point *>  points)
   // Initialize the matrix A_ elements
   //--------------------------------------------------
 
-  init_matrix_elements_ ();
+  init_elements_matrix_ ();
 
   //--------------------------------------------------
   // Initialize B_ elements 
   //--------------------------------------------------
 
-  init_rhs_elements_ (points);
+  init_elements_rhs_ (points);
 
   // Assemble the matrix and vectors
 
@@ -302,7 +302,7 @@ void Hypre::init_linear (std::vector<Point *>  points)
     HYPRE_SStructVectorPrint ("X0",X_,0);
   }
 
-} // Hypre::init_linear()
+} // Hypre::init_elements()
 
 //----------------------------------------------------------------------
 
@@ -550,7 +550,7 @@ void Hypre::init_nonstencil_ (Grid & grid, phase_enum phase)
 
 	    if (discret_type == discret_type_const) {
 
-	      matrix_update_fc_const_(face,grid,axis0,axis1,axis2,phase,
+	      update_matrix_fc_const_(face,grid,axis0,axis1,axis2,phase,
 				      level_fine,level_coarse,
 				      index_fine,index_coarse);
 
@@ -560,7 +560,7 @@ void Hypre::init_nonstencil_ (Grid & grid, phase_enum phase)
 	      
 	      if (adjacent->is_local()) {
 
-		matrix_update_cf_const_(face,*adjacent,axis0,axis1,axis2,phase,
+		update_matrix_cf_const_(face,*adjacent,axis0,axis1,axis2,phase,
 					level_fine,level_coarse,
 					index_fine,index_coarse);
 
@@ -583,7 +583,7 @@ void Hypre::init_nonstencil_ (Grid & grid, phase_enum phase)
 
 /// Initialize matrix stencil and graph entries
 
-void Hypre::init_matrix_elements_ ()
+void Hypre::init_elements_matrix_ ()
 
 {
 
@@ -633,13 +633,13 @@ void Hypre::init_matrix_elements_ ()
   } // for part
 
 
-} // init_matrix_elements_()
+} // init_elements_matrix_()
 
 //------------------------------------------------------------------------
 
 /// Set right-hand-side elements
 
-void Hypre::init_rhs_elements_ (std::vector<Point *>  & points)
+void Hypre::init_elements_rhs_ (std::vector<Point *>  & points)
 {
 
   Scalar local_shift_b_sum = 0.0;
@@ -716,7 +716,7 @@ void Hypre::init_rhs_elements_ (std::vector<Point *>  & points)
 		       shift_b_amount);
   } // if periodic
 
-} // init_rhs_elements_()
+} // init_elements_rhs_()
 
 //------------------------------------------------------------------------
 
@@ -1278,9 +1278,12 @@ void Hypre::solve_bicgstab_ (int itmax, double restol)
 
 /// Update the matrix at a coarse face zone adjacent to fine face
 /// zones using a simple piecewise-constant finite volume
-/// discretization
+/// discretization.  Called in two phases, with phase == phase_graph
+/// (via init_graph_nonstencil_()) for the nonzero structure, and with
+/// phase == phase_matrix (via init_matrix_nonstencil_()) for the
+/// matrix nonzeros.
 
-void Hypre::matrix_update_fc_const_
+void Hypre::update_matrix_fc_const_
 (   int        face, 
     Grid &     grid, 
     int        axis0, 
@@ -1377,9 +1380,12 @@ void Hypre::matrix_update_fc_const_
 
 /// Update the matrix at a coarse face zone adjacent to fine face
 /// zones using a simple piecewise-constant finite volume
-/// discretization
+/// discretization.  Called in two phases, with phase == phase_graph
+/// (via init_graph_nonstencil_()) for the nonzero structure, and with
+/// phase == phase_matrix (via init_matrix_nonstencil_()) for the
+/// matrix nonzeros.
 
-void Hypre::matrix_update_cf_const_
+void Hypre::update_matrix_cf_const_
 (   int        face, 
     Grid &     grid_coarse, 
     int        axis0, 

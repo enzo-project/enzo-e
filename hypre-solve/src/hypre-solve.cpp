@@ -161,17 +161,17 @@ int main(int argc, char **argv)
     if (barrier) pmpi->barrier();
     hypre.init_graph ();
 
-    // Initialize the linear system
+    // Initialize the elements of matrix A and vector B
 
     if (barrier) pmpi->barrier();
-    hypre.init_linear (problem.points());
+    hypre.init_elements (problem.points());
 
     // ***************
     JBPERF_STOP("4-hypre-init");
     // ***************
 
     // --------------------------------------------------
-    // Solve the linear system Ax = b
+    // Solve the linear system A X = B
     // --------------------------------------------------
     _TRACE_;
 

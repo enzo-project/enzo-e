@@ -43,7 +43,7 @@ public:
   void init_hierarchy (Mpi        & mpi);
   void init_stencil   ();
   void init_graph     ();
-  void init_linear    (std::vector<Point *>  points);
+  void init_elements  (std::vector<Point *>  points);
   void solve          ();
   void evaluate       ();
 
@@ -60,10 +60,10 @@ private:
   void init_graph_nonstencil_ (Grid & grid)
   { init_nonstencil_ (grid, phase_graph); };
 
-  // init_linear() functions
+  // init_elements() functions
 
-  void init_matrix_elements_   ();
-  void init_rhs_elements_      (std::vector<Point *> & points);
+  void init_elements_matrix_   ();
+  void init_elements_rhs_      (std::vector<Point *> & points);
 
   void init_matrix_stencil_    (Grid & grid);
   void init_matrix_clear_      (int part);
@@ -86,7 +86,7 @@ private:
 
   // matrix graph update functions
 
-  void matrix_update_fc_const_(int face, 
+  void update_matrix_fc_const_(int face, 
 			       Grid & grid, 
 			       int axis0, 
 			       int axis1, 
@@ -97,7 +97,7 @@ private:
 			       int igg3[3], 
 			       int ign3[3]);
 
-  void matrix_update_cf_const_(int face, 
+  void update_matrix_cf_const_(int face, 
 			       Grid & grid, 
 			       int axis0, 
 			       int axis1, 
