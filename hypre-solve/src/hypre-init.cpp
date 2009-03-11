@@ -16,9 +16,9 @@
 ///
 ///   Unigrid of global size N0**3 distributed along <np0,np1,np2>
 ///   processor grid, with L levels, offset switch, serial run switch,
-///   cg or mg solver, and periodic or dirichlet boundary conditions:
+///   cg, mg, gmres, or pcg solver, and periodic or dirichlet boundary conditions:
 ///
-///   hypre-init N0 np0 np1 np2 L offset serial [cg|mg] [periodic|dirichlet]
+///   hypre-init N0 np0 np1 np2 L offset serial [cg|mg|gmres|pcg] [periodic|dirichlet]
 ///
 ///-----------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ void usage (char ** argv)
   // Print usage and exit abnormally
 
   printf ("\n"
-	  "Usage: %s N0 np0 np1 np2 num_levels offset serial [cg|mg] [periodic|dirichlet]\n",argv[0]);
+	  "Usage: %s N0 np0 np1 np2 num_levels offset serial [cg|mg|gmres|pcg] [periodic|dirichlet]\n",argv[0]);
   exit(1);
 }
 
@@ -254,8 +254,16 @@ int main(int argc, char **argv)
   fprintf (fp, "discret constant\n");
   if (strcmp(solver,"mg")==0) {
     fprintf (fp, "solver %s\n",((num_levels==1) ? "pfmg" : "fac") );
+    //    fprintf (fp, "solver_itmax 10\n");
   } else   if (strcmp(solver,"cg")==0) {
     fprintf (fp, "solver bicgstab\n");
+    //    fprintf (fp, "solver_itmax 100\n");
+  } else   if (strcmp(solver,"gmres")==0) {
+    fprintf (fp, "solver gmres\n");
+    //    fprintf (fp, "solver_itmax 100\n");
+  } else   if (strcmp(solver,"pcg")==0) {
+    fprintf (fp, "solver bicgstab-boomer\n");
+    //    fprintf (fp, "solver_itmax 100\n");
   } else {
     usage(argv);
   }

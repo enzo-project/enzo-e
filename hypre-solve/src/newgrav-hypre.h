@@ -82,29 +82,27 @@ private:
 
   void solve_fac_      (int itmax, double restol);
   void solve_bicgstab_ (int itmax, double restol);
+  void solve_bicgstab_boomer_ (int itmax, double restol);
+  void solve_gmres_ (int itmax, double restol);
   void solve_pfmg_     (int itmax, double restol);
 
   // matrix graph update functions
 
-  void update_matrix_fc_const_(int face, 
-			       Grid & grid, 
-			       int axis0, 
-			       int axis1, 
-			       int axis2, 
-			       phase_enum phase,
-			       int level_fine, 
-			       int level_coarse,
-			       int igg3[3], 
-			       int ign3[3]);
+  void update_fine_coarse_const_(int face, 
+				 Grid & grid, 
+				 int axis0, 
+				 phase_enum phase,
+				 int level_fine, 
+				 int level_coarse,
+				 int igg3[3], 
+				 int ign3[3]);
 
-  void update_matrix_cf_const_(int face, 
-			       Grid & grid, 
-			       int axis0, 
-			       int axis1, 
-			       int axis2, 
-			       phase_enum phase,
-			       int level_fine, 
-			       int level_coarse,
-			       int igg3[3], 
-			       int ign3[3]);
+  void update_coarse_fine_const_(int face, 
+				 Grid & grid, 
+				 int axis0, 
+				 phase_enum phase,
+				 int level_fine, 
+				 int level_coarse,
+				 int igg3[3], 
+				 int ign3[3]);
 };

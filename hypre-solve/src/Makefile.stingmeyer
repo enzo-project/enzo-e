@@ -5,7 +5,12 @@ CPP = g++
 
 # HYPRE
 
+# hypre-2.0.0
+HYPRE_PATH = $(HOME)/hypre
+#hypre-2.4.0b
+# HYPRE_PATH = /$(HOME)/packages/hypre-2.4.0b/src/hypre
+
 HYPREDEF = 
-HYPREINC = -I$(HOME)/hypre/include
-HYPRELIB = -L$(HOME)/hypre/lib -lHYPRE 
+HYPREINC = -I$(HYPRE_PATH)/include
+HYPRELIB = -L$(HYPRE_PATH)/lib -lHYPRE 
 
