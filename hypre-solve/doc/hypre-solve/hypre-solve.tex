@@ -68,7 +68,7 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Multilevel Linear Solvers in \enzo \\ New (radiation) and Improved (self-gravity)}
+\TITLE{Multilevel Linear Solvers in \enzo \\ \large new (radiation) and improved (self-gravity)}
       {James Bordner}{$Rev$}
 %=======================================================================
 
@@ -118,6 +118,7 @@ multilevel diffusion solver
 
   \pargraph{pseudo-code}
 
+\newpage
 \begin{tabbing}
 xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \> \codebf{EvolveLevel (LEVEL)} \\
@@ -474,40 +475,47 @@ xxxxx\=xxxxxxxxxxxxxx\=\kill
 \subsection{Functions} \label{ss:design}
 %-----------------------------------------------------------------------
 
-The \code{main()} function is in \code{hypre-solve.cpp}.  The main
-function begins by reading in the input file, and initializing its
-representation of the AMR hierarchy.  Next it calls \hypre\
-to have it generate its internal representation of 
-the hierarchy, stencil, graph, and linear system.  Then it
-calls \hypre\ to solve the linear system, and finally it calls
-a function to evaluate evaluate the solution and output 
-information about the success of the solve.  Classes \code{problem},
-\code{hierarchy}, and \code{hypre} are used to organize the functions.
-The high-level  calling code structure is shown below.
+The \code{main()} function is in \code{hypre-solve.cpp}.  Functions
+are roughly grouped into four phases: 1) read the problem input file,
+2) create the hierarchy data-structure; 3) call \hypre\ to create its
+linear system data-structures; and 4) call \hypre\ to solve the linear
+system.
 
 \begin{tabbing}
-xxxxx\=xxxxxxxxxxxxxxxxxxx\=\kill
+xxxxx\=xxxxx\=xxxxxxxxxxxxxxxxxxx\=\kill
+\textit{\underline{hypre-solve.cpp}} \\
+\\
 \code{\textbf{main()}} \\
 \{ \\
-\> \textit{// Initialization} \\
+\> \comment{Initialize the problem} \\
 \\
-\> \code{problem.read()} \> \textit{// Problem initialization} \\
-\> \code{hierarchy.initialize()} \> \textit{// Initialize the hierarchy} \\
+\> \code{problem.read()} \\
+\>\> \code{hierarchy.insert\_grid()} \> \comment{Add a grid to the list of grids}\\
 \\
-\> \textit{// \hypre\ setup} \\
+\> \comment{Initialize the hierarchy} \\
 \\
-\> \code{hypre.init\_hierarchy()} \> \textit{// Initialize \hypre} \\
-\> \code{hypre.init\_stencil()} \> \textit{// Initialize \hypre's stencils} \\
-\> \code{hypre.init\_graph()} \> \textit{// Initialize \hypre's graph} \\
-\> \code{hypre.init\_linear()} \> \textit{// Initialize \hypre's linear system} \\
+\> \code{hierarchy.initialize()} \\
+\>\>  \code{init\_grid\_parents\_()} \> \comment{Set parent pointers}\\
+\>\>  \code{init\_grid\_levels\_()}  \> \comment{Determine grid levels from parent info} \\
+\>\>  \code{init\_grid\_children\_()} \> \comment{Find grid children from parent info} \\
+\>\>  \code{init\_grid\_neighbors\_()} \> \comment{Find grid neighbors} \\
+\>\>  \code{init\_indices\_()} \> \comment{Determine the problem size the hard way} \\
+\>\>  \code{init\_grid\_faces\_()} \> \comment{Categorize grid face zones for local grids and neighbors} \\
 \\
-\> \textit{// \hypre\ solve} \\
+\> \comment{\hypre\ setup} \\
 \\
-\> \code{hypre.solve()} \> \textit{// Call \hypre\ to solve the linear system} \\
+\> \code{hypre.init\_hierarchy()} \>\> \comment{Initialize \hypre\ Grid} \\
+\> \code{hypre.init\_stencil()} \>\> \comment{Initialize \hypre's Stencils} \\
+\> \code{hypre.init\_graph()} \>\> \comment{Initialize \hypre's Graph} \\
+\> \code{hypre.init\_linear()} \>\> \comment{Initialize \hypre's matrix and vectors} \\
 \\
-\> \textit{// Evaluate} \\
+\> \comment{Call \hypre\ to solve the linear system} \\
 \\
-\> \code{hypre.evaluate()} \> \textit{// Evaluate and report on the solve} \\
+\> \code{hypre.solve()} \\
+\\
+\> \comment{Evaluate and report on the solve} \\
+\\
+\> \code{hypre.evaluate()} \\
 \}
 \end{tabbing}
 
