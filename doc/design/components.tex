@@ -13,63 +13,7 @@
 
 \begin{description}
 %
- \item [Simulation (\S\ref{s:component-simulation}): ]
-%
-        Description and management of computational astrophysics
-        problem or ensemble of problems.  Controls sequencing of and
-        interactions between other components such as \code{Parallel},
-        \code{Method}, and \code{Field}.
-%
- \item [Problem (\S\ref{s:component-problem}): ]
-%
-        The problem refers to the initial setup of the problem,
-        including the domain, boundary and initial conditions.
-%
- \item [Region (\S\ref{s:component-region}): ]
-%
-        A \code{Region} is a portion of space and time.
-        \code{Region}s are used whenever problem characteristics, data
-        structure behavior, or physics computations vary between
-        different spacial or temporal \code{Region}s.  A \code{Region}
-        is used to define the entire domain.  \code{Region}s may vary
-        in time, for example they may grow, shrink, appear, or
-        disappear.
-%
- \item [Timestep (\S\ref{s:component-timestep}): ]
-%
-        \code{Timestep} handles the timestepping of methods to advance
-        the problem forward in time.
-%
- \item [Method (\S\ref{s:component-method}): ]
-%
-        Defines how to simulate the physics in the computational
-        universe.  A \code{Method} specifies the numerical method to
-        use, which \code{Field}s are involved, and any associated
-        method-specific parameters.  Sequencing and coupling of
-        \code{Method}s is defined in \code{Problem} and implemented in
-        \code{Control}.  Analysis and visualization are considered
-        \code{Method}s as well.
-%
- \item [Physics (\S\ref{s:component-physics}): ]
-%
-        Defines what physics to simulate in the computational
-        universe.  Used to define which physics processes are enabled,
-        such as self-gravity, hydrodynamics, cosmological expansion,
-        etc.  Also defines any parameters associated with the physics
-        of the problem being solved, such as cosmological parameters
-        and the gravitational constant.
-%
- \item [Field (\S\ref{s:component-field}): ]
-%
-        A \code{Field} is used to represent a specific continuous
-        scalar or vector field.  The actual \code{Field} is
-        represented either using adaptive mesh refinement via
-        \code{Amr}, or as a collection of particles using
-        \code{Particles}.  Includes \code{Units} to define the problem
-        units, as well as scaling amount to improve numerics, and
-        scaling quantization to avoid precision loss.
-%
- \item [Amr (\S\ref{s:component-amr}): ]
+ \item [\todo Amr (\S\ref{s:component-amr}): ]
 %
         The \code{Amr} component includes classes for representing
         multi-resolution data on a hierarchy of grid patches of
@@ -79,15 +23,7 @@
         controlling the parallel communication, synchronization, and
         load-balancing.
 %
- \item [Particles (\S\ref{s:component-particles}): ]
-%
-        The \code{Particles} component serves to represent multi-level
-        parallel distribution of sets of various types of particle
-        data.  Uses the \code{Parallel} component for controlling the
-        parallel communication, synchronization, distribution, and
-        load-balancing of \code{Particles}.
-%
- \item [Array (\S\ref{s:component-array}): ]
+ \item [\todo Array (\S\ref{s:component-array}): ]
 %
         The \code{Array} component is used for representing a single
         array of up to $3$ dimensions.  The \code{Array} may include
@@ -95,7 +31,54 @@
         well as options for controlling memory layout to improve cache
         performance.
 %
- \item [Parallel (\S\ref{s:component-parallel}): ]
+ \item [\todo Disk (\S\ref{s:component-disk}): ]
+%
+        The \code{Disk} component controls what, when, and how to
+        input and output large-scale data to long-term permanent
+        storage, primarily \code{Fields} (represented as
+        \code{Particles} or \code{Arrays}).
+%
+ \item [\todo Error (\S\ref{s:component-error}): ]
+%
+        The \code{Error} package is used to detect errors, evaluate
+        them, and decide what to do about them.  This includes
+        maintaining restart data dumps, and may involve shutting down
+        a processor or node and rebalancing the data, etc.
+%
+ \item [\todo Field (\S\ref{s:component-field}): ]
+%
+        A \code{Field} is used to represent a specific continuous
+        scalar or vector field.  The actual \code{Field} is
+        represented either using adaptive mesh refinement via
+        \code{Amr}, or as a collection of particles using
+        \code{Particles}.  Includes \code{Units} to define the problem
+        units, as well as scaling amount to improve numerics, and
+        scaling quantization to avoid precision loss.
+%
+ \item [\todo Memory (\S\ref{s:component-memory}): ]
+%
+        The \code{Memory} component controls dynamic memory
+        allocation, and includes features for monitoring memory usage,
+        improving performance, and verifying correctness.
+%
+ \item [\todo Method (\S\ref{s:component-method}): ]
+%
+        Defines how to simulate the physics in the computational
+        universe.  A \code{Method} specifies the numerical method to
+        use, which \code{Field}s are involved, and any associated
+        method-specific parameters.  Sequencing and coupling of
+        \code{Method}s is defined in \code{Problem} and implemented in
+        \code{Control}.  Analysis and visualization are considered
+        \code{Method}s as well.
+%
+ \item [\todo Monitor (\S\ref{s:component-monitor}): ]
+%
+        The \code{Monitor} component controls what and when to output
+        user-readable summary information about the running
+        application, such as status summary, progress, warnings,
+        errors, and performance information.
+%
+ \item [\todo Parallel (\S\ref{s:component-parallel}): ]
 %
         The \code{Parallel} component is used to specify and control
         the levels of parallelizion (simulations, patches, and
@@ -106,74 +89,97 @@
         blocking or nonblocking, patch-to-processor mapping,
         subblock-to-thread mapping, etc.
 %
- \item [Disk (\S\ref{s:component-disk}): ]
-%
-        The \code{Disk} component controls what, when, and how to
-        input and output large-scale data to long-term permanent
-        storage, primarily \code{Fields} (represented as
-        \code{Particles} or \code{Arrays}).
-%
- \item [Memory (\S\ref{s:component-memory}): ]
-%
-        The \code{Memory} component controls dynamic memory
-        allocation, and includes features for monitoring memory usage,
-        improving performance, and verifying correctness.
-%
- \item [Error (\S\ref{s:component-error}): ]
-%
-        The \code{Error} package is used to detect errors, evaluate
-        them, and decide what to do about them.  This includes
-        maintaining restart data dumps, and may involve shutting down
-        a processor or node and rebalancing the data, etc.
-%
- \item [Parameters (\S\ref{s:component-parameters}): ]
+ \item [\todo Parameters (\S\ref{s:component-parameters}): ]
 %
         The \code{Parameters} component
         reads in a parameter file or files, and provides the
         application access to parameter values.
 %
+ \item [\todo Particles (\S\ref{s:component-particles}): ]
 %
- \item [Performance (\S\ref{s:component-performance}): ]
+        The \code{Particles} component serves to represent multi-level
+        parallel distribution of sets of various types of particle
+        data.  Uses the \code{Parallel} component for controlling the
+        parallel communication, synchronization, distribution, and
+        load-balancing of \code{Particles}.
+%
+ \item [\todo Performance (\S\ref{s:component-performance}): ]
 %
         The \code{Performance} component monitors performance such as
         memory usage, computation amount, parallel communication,
         parallel load balancing, disk storage, etc., and provides
         access functions to be called from other components.
 %
- \item [Monitor (\S\ref{s:component-monitor}): ]
+ \item [\todo Physics (\S\ref{s:component-physics}): ]
 %
-        The \code{Monitor} component controls what and when to output
-        user-readable summary information about the running
-        application, such as status summary, progress, warnings,
-        errors, and performance information.
+        Defines what physics to simulate in the computational
+        universe.  Used to define which physics processes are enabled,
+        such as self-gravity, hydrodynamics, cosmological expansion,
+        etc.  Also defines any parameters associated with the physics
+        of the problem being solved, such as cosmological parameters
+        and the gravitational constant.
 %
- \item [Portal (\S\ref{s:component-portal}): ]
+ \item [\todo Portal (\S\ref{s:component-portal}): ]
 %
         The \code{Portal} component controls the interaction of the
         application with external applications, for both obtaining
         information about a running simulation, and controling it.
+%
+ \item [\done Problem (\S\ref{s:component-problem}): ]
+%
+   A \code{Problem} defines and manages an astrophysics problem,
+   including defining \code{Physics} parameters, the domain and
+   initial conditions (with the domain and subregions of the domain
+   defined using the \code{Region} component), and boundary condition
+   type.
+%
+ \item [\done Region (\S\ref{s:component-region}): ]
+%
+   A \code{Region} is a parameterized subset of space (\code{x},\code{y},\code{z}) and
+   time (\code{t}).  \code{Region}s are used whenever problem characteristics,
+   data structure behavior, or physics computations vary between
+   different spacial or temporal regions.  A \code{Region} is used to
+   define the entire domain, and may be used to define initial
+   conditions.  Complex \code{Region}s can be defined using set operations
+   (e.g. union $A + B$, intersection $A * B$ , complement $- A$, and set
+   difference $A \backslash B$) on predefined elemental \code{Region}s
+   (e.g. half-spaces, spheres, ellipses, and cubes).
+%
+ \item [\done Simulation (\S\ref{s:component-simulation}): ]
+%
+   A \code{Simulation} defines and manages a computational
+   astrophysics \code{Problem} or an ensemble of related
+   \code{Problem}s. Invokes \code{Timestep} to advance the
+   \code{Problem}(s), and may call the \code{Parallel} component to
+   manage the high-level parallelization of multiple \code{Problem}s
+   in an ensemble.
+%
+ \item [\todo Timestep (\S\ref{s:component-timestep}): ]
+%
+        \code{Timestep} handles the timestepping of methods to advance
+        the problem forward in time.
 \end{description}
 
 %-----------------------------------------------------------------------
 
-\input{component-simulation}
+\input{component-amr}
+\input{component-array}
+\input{component-disk}
+\input{component-error}
+\input{component-field}
+\input{component-memory}
+\input{component-method}
+\input{component-monitor}
+\input{component-parallel}
+\input{component-parameters}
+\input{component-particles}
+\input{component-performance}
+\input{component-physics}
+\input{component-portal}
 \input{component-problem}
 \input{component-region}
+\input{component-simulation}
 \input{component-timestep}
-\input{component-method}
-\input{component-physics}
-\input{component-field}
-\input{component-amr}
-\input{component-particles}
-\input{component-array}
-\input{component-parallel}
-\input{component-disk}
-\input{component-memory}
-\input{component-error}
-\input{component-parameters}
-\input{component-performance}
-\input{component-monitor}
-\input{component-portal}
 
 % \input{component-control}
 % \input{component-parameters}
