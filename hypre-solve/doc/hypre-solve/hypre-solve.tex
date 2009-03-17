@@ -246,6 +246,7 @@ The following table lists the input parameters to \code{hypre-solve}.
 \newcommand{\parmentry}[3]{
 \codebf{#1} \textit{#2} \\ \mbox{\ \ \ \ }#3. \\}
 
+
 \parmentry{dimension}{dimension}
    {Define the problem dimension}
 \parmentry{domain}{dimension vertex-lower vertex-upper}
@@ -265,6 +266,13 @@ The following table lists the input parameters to \code{hypre-solve}.
 \parmentry{solver\_restol}{tolerance}
    {Optionally set the stopping tolerance of the relative residual for the solver}
 
+
+\begin{tabbing}
+xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
+\> \done\ \code{enzo\_density}  \> \code{string} $\in$ \{ ``\code{true}'', ``\code{false}''\} \\
+\> \done\ \code{enzo\_packed}  \> \code{string} $\in$ \{ ``\code{true}'', ``\code{false}''\} \\
+\> \done\ \code{enzo\_prefix} \> \icode{prefix}
+\end{tabbing}
 
 The output of \code{hypre-solve} is a file containing the following:
 
@@ -609,8 +617,6 @@ xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
   \> \textit{Class for storing a physical point mass} \\
 \> \done\ \code{Problem	}
   \> \textit{Class for representing the problem to solve} \\
-\> \done\ \code{Sphere	}
-  \> \textit{Class for representing a physical sphere}
 \end{tabbing}
 
 
