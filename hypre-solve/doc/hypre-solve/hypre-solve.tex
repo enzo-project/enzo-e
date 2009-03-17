@@ -87,7 +87,7 @@ multilevel Poisson solver
 multilevel diffusion solver
 
 %======================================================================
-\section{Existing \enzo\ Poisson Solver}
+\section{Current \enzo\ Poisson Solver}
 %======================================================================
 
 \note{testing deferred to end to compare with new solver}
@@ -118,116 +118,6 @@ multilevel diffusion solver
 
   \pargraph{pseudo-code}
 
-\newpage
-\begin{tabbing}
-xxx\=xxx\=xxx\=xxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
-\> \codebf{EvolveLevel (LEVEL)} \\
-\\
-\> \code{SetBoundaryConditions()}   \>\>\>\>  \textit{Update ghost zones} \\
-\> \code{GRID.ClearBoundayFluxes()} \>\>\>\>  \textit{Clear boundary fluxes} \\
-\> \textit{while} \code{(dtThisLevelSoFar $<$ dtLevelAbove)} \\
-\\
-\>\>  \code{GRID.ComputeTimeStep()} \\
-\>\>  \code{GRID.SetTimeStop()} \\
-\>\>  \code{PrepareDensityField()} \\
-\>\>  \code{ComputeRandomForcingNormalization()} \\
-\\
-\>\>  \textit{for} \code{GRID in LEVEL} \\
-\\
-\>\>\>  \textit{problem-specific analysis} \\
-\>\>\>  \code{GRID.SolveForPotential()} \>\>    \textit{self gravity} \\\\
-\>\>\>  \code{GRID.ComputeAccelerations()} \\
-\>\>\>  \code{GRID.ComputeAccelerationFieldExternal()} \>\> \textit{external gravity} \\
-\\
-\>          save copy of baryon fields \\
-\>          \code{GRID.CopyBaryonFieldToOldBaryonField()} \\
-\>          random forcing \\
-\>          \code{GRID.AddRandomForcing()} \\
-\>          hydrodynamics \\
-\>          \code{GRID.SolveHydroEquations()} \\
-\>          cooling and multispecies \\
-\>             \code{GRID.SolveRateAndCoolEquations()} \\
-\>             \code{GRID.SolveRateEquations()} \\
-\>             \code{GRID.SolveRadiativeCooling()} \\
-\>  \\
-\>          update particle positions \\
-\>          \code{UpdateParticlePositions(GRID)} \\
-\>           \\
-\>          include star particle creation and feedback \\
-\>             \code{GRID.ZeroSolutionUnderSubgrid()} \\
-\>             \code{GRID.StarParticleHandler()} \\
-\>  \\
-\>          delete acceleration field \\
-\>             \code{GRID.DeleteAccelerationField()} \\
-\>             \code{GRID.DeleteParticleAcceleration()} \\
-\>          update time \\
-\>             \code{GRID.SetTimeNextTimestep()} \\
-\>          incorporate cosmological expansion terms \\
-\>             \code{GRID.ComovingExpansionTerms()} \\
-\>       \textit{end} \code{GRID} \\
-\>  \\
-\>       refresh grid ghost zones \\
-\>        \\
-\>       \code{SetBoundaryConditions()} \\
-\>  \\
-\>       update star particle counters \\
-\>       \code{CommunicationUpdateStarParticleCount()} \\
-\>  \\
-\>       movie output \\
-\>       \code{WriteMovieData()} \\
-\>  \\
-\>       tracer particle output \\
-\>       \code{WriteTracerParticleData()} \\
-\>  \\
-\>       recompute gravity for output \\
-\>          \code{PrepareDensityField()} \\
-\>          \code{GRID.SolveForPotential()} \\
-\>          \code{GRID.CopyPotentialToBaryonField()} \\
-\>  \\
-\>       output for new level \\
-\>          \code{Group\_WriteAllData()} \\
-\>          \code{WriteAllData()} \\
-\>       output if "outputNow" file exists \\
-\>          \code{Group\_WriteAllData()} \\
-\>          \code{WriteAllData()} \\
-\>       output interpolated data \\
-\>          \code{Group\_WriteAllData()} \\
-\>          \code{WriteAllData()} \\
-\>       output and end if "stopNow" file exists \\
-\>          \code{Group\_WriteAllData()} \\
-\>          \code{WriteAllData()} \\
-\>  \\
-\>       stop on request \\
-\>          \code{GenerateGridArray()} \\
-\>          \code{WriteStreamData()} \\
-\>          exit \\
-\>  \\
-\>       \code{GRID.DeleteGravitatingMassFieldParticles()} \\
-\>  \\
-\>       \code{EvolveLevel(LEVEL+1)} \\
-\>  \\
-\>       output streaming movie \\
-\>          \code{WriteStreamData()} \\
-\>  \\
-\>       flux correction \\
-\>          \code{CreateSUBlingList()} \\
-\>          \code{UpdateFromFinerGrids()} \\
-\>          \code{DeleteSUBlingList()} \\
-\>  \\
-\>       add saved fluxes to subgrid exterior fluxes \\
-\>          \code{GRID.AddToBoundaryFluxes()} \\
-\>          \code{DeleteFluxes(GRID,SUBGRID)} \\
-\>  \\
-\>       \code{RadiationFieldUpdate()} \\
-\>  \\
-\>       \code{RebuildHierarchy()} \\
-\>  \\
-\>       \code{GRID.CollectGridInformation()} \\
-\>  \\
-\>    \textit{end while} \\
-\>  \\
-\>    \code{reportMemoryUsage()} \\
-\end{tabbing}
 
 \begin{tabbing}
 xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
@@ -261,12 +151,10 @@ xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
    \pargraph{interfacing hyperbolic with elliptic}
 
 %======================================================================
-\section{New \enzo\ Solver}
+\section{New \enzo\ Solver: \hypresolve}
 %======================================================================
 
-%----------------------------------------------------------------------
-\subsection{Possible approaches}
-%----------------------------------------------------------------------
+\note{Approaches}
 
    \pargraph{implement solver directly}
      \note{a lot of work}
@@ -284,43 +172,6 @@ xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
      \note{Provides high-level functions: ``attach to'' and ``detach from'' \enzo's datastructures, level and hierarchy solves}
      \note{independently testable}
      \note{\hypresolve, described next}
-
-%----------------------------------------------------------------------
-\subsection{\hypresolve\ \enzo-\hypre interface}
-%----------------------------------------------------------------------
-
-   \pargraph{uml of \enzo\ + \hypresolve\ + \hypre}
-
-   \hypresolve\ will be used as a testbed for experimenting with the
-   parallel solution of linear systems arising from self-gravity
-   (Poisson equation) and radiation transfer algorithms (diffusion
-   equation) defined on distributed SAMR hierarchies.  \hypresolve\
-   will also be the primary interface code linking the \enzo\
-   datastructures with the \hypre\ linear solver package.  The purpose
-   of this document is to specify the requirements, describe the
-   design and implementation, and present test results for
-   \hypresolve.
-
-   We decompose the standalone solver into two components: problem
-   generation (\code{hypre-init}), and problem solution
-   (\code{hypre-solve}).  \code{hypre-init} takes as input parameters
-   describing the problem characteristics in general terms, such as
-   bounds on grid sizes, number of processors, description of how to
-   distribute point masses, etc.  The output is a file of parameters
-   that specify the exact problem to solve, including grid locations,
-   sizes, levels, point mass locations, etc.  The file output by
-   \code{hypre-init} can be subsequently read by \code{hypre-solve}.
-   \code{hypre-solve} calls \hypre\ to generate and solve a
-   distributed linear system, and the solution, performance
-   information, solver efficiency information, etc., are output.
-
-%----------------------------------------------------------------------
-\subsection{\hypresolve\ development}
-%----------------------------------------------------------------------
-
-%----------------------------------------------------------------------
-\subsection{\hypresolve\ interface}
-%----------------------------------------------------------------------
 
 
 % %======================================================================
@@ -356,102 +207,64 @@ xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 % \todo &port to \enzo & \todo&\done & \fade&\fade& \fade&\fade & \fade&\fade&\fade & \fade&\fade&\fade
 % \end{tabular}
 
-%======================================================================
-\section{\code{hypre-init}} \label{ss:hypre-init}
-%======================================================================
-
-\code{hypre-init} is used to generate \code{hypre-solve} input files
-given a problem decription.  This is useful since \code{hypre-solve}
-input for large problems (many AMR grid patches or many point sources)
-are large, and would be virtually impossible to generate by hand.
-
-%----------------------------------------------------------------------
-\subsection{Input}
-%----------------------------------------------------------------------
-
-\begin{tabbing}
-xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
-\> \todo\ \code{dimension} \> \code{\textit{int dimension}} \\
-\> \todo\ \code{particle\_position\_clumpiness}  \\
-\> \todo\ \code{particle\_mass\_clumpiness} \\
-\> \todo\ \code{particle\_mass\_average} \\
-\> \todo\ \code{sphere} \> \code{\textit{Scalar mass}, \textit{Scalar radius}, \textit{Scalar*3 center}} \\
-\> \todo\  \code{domain\_extents} \\
-\> \todo\  \code{processor\_grid} \\
-\> \todo\  \code{levels} \\
-\end{tabbing}
 
 
+%-----------------------------------------------------------------------
+\subsection{The \code{hypre-solve} \enzo---\hypre\ interface}  \label{ss:hypre-solve}
+%-----------------------------------------------------------------------
 
-%=======================================================================
-\section{\code{hypre-solve}}  \label{ss:hypre-solve}
-%=======================================================================
+   \hypresolve\ will be used as a testbed for experimenting with the
+   parallel solution of linear systems arising from self-gravity
+   (Poisson equation) and radiation transfer algorithms (diffusion
+   equation) defined on distributed SAMR hierarchies.  \hypresolve\
+   will also be the primary interface code linking the \enzo\
+   datastructures with the \hypre\ linear solver package.  The purpose
+   of this document is to specify the requirements, describe the
+   design and implementation, and present test results for
+   \hypresolve.
 
-%----------------------------------------------------------------------
-\subsection{Input}
-%----------------------------------------------------------------------
-
-The following table lists the input parameters to \code{hypre-solve}.
-
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{dimension} \icode{dimension} \\
-\>\> \icode{dimension}:    \> \code{int}, $1 \le $ \icode{dimension} $\le 3$
-\end{tabbing}
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{domain} \icode{dimension} \icode{vertex-lower} \icode{vertex-upper} \\
-\>\> \icode{dimension}:    \> \code{int}, $1 \le $ \icode{dimension} $\le 3$ \\
-\>\> \icode{vertex-lower}: \> \code{Scalar*3}  \\
-\>\> \icode{vertex-upper}: \> \code{Scalar*3}
-\end{tabbing}
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \todo\ \code{sphere} \icode{mass} \icode{radius} \icode{center} \\
-\> \> \icode{mass}:        \> \code{Scalar}  \\
-\> \> \icode{radius}:      \> \code{Scalar}  \\
-\> \> \icode{center}       \> \code{Scalar*3}
-\end{tabbing}
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{point} \icode{mass} \icode{position} \\
-\> \> \icode{mass}:        \> \code{Scalar}  \\
-\> \> \icode{position}     \> \code{Scalar*3}
-\end{tabbing}
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{grid} \icode{id} \icode{parent-id} \icode{processor} \icode{vertex-lower} \icode{vertex-upper} \icode{index-lower} \icode{zone-count}\\
-\> \> \icode{id}:          \> \code{int}  \\
-\> \> \icode{parent-id}:   \> \code{int}  \\
-\> \> \icode{processor}:   \> \code{int}  \\
-\> \> \icode{vertex-lower}:\> \code{Scalar}  \\
-\> \> \icode{vertex-upper}:\> \code{Scalar}  \\
-\> \> \icode{index-lower}: \> \code{int*3}  \\
-\> \> \icode{zone-count}:  \> \code{int*3}
-\end{tabbing}
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \todo\ \code{discret} \icode{discret} \\
-\> \> \icode{discret}:     \> \code{int} $\in \{\code{"constant"},\code{"linear"},\code{"bilinear"},\code{"quadratic"}\}$
-\end{tabbing}
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{solver}  \icode{solver} \\
-\> \> \icode{solver}:     \> \code{string} $\in$ \{ ``\code{fac}'', ``\code{pfmg}'', ``\code{bicgstab}'' \}
-\end{tabbing}
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{solver\_maxit}  \icode{iterations}
-\end{tabbing}
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{solver\_restol}  \icode{tolerance}
-\end{tabbing}
+   We decompose the standalone solver into two components: problem
+   generation (\code{hypre-init}), and problem solution
+   (\code{hypre-solve}).  \code{hypre-init} takes as input parameters
+   describing the problem characteristics in general terms, such as
+   bounds on grid sizes, number of processors, description of how to
+   distribute point masses, etc.  The output is a file of parameters
+   that specify the exact problem to solve, including grid locations,
+   sizes, levels, point mass locations, etc.  The file output by
+   \code{hypre-init} can be subsequently read by \code{hypre-solve}.
+   \code{hypre-solve} calls \hypre\ to generate and solve a
+   distributed linear system, and the solution, performance
+   information, solver efficiency information, etc., are output.
 
 
-%----------------------------------------------------------------------
-\subsection{Output}
-%----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{Using \hypresolve\ outside of \enzo}
+%-----------------------------------------------------------------------
+
+The following table lists the input parameters to \code{hypre-solve}.  
+
+\newcommand{\parmentry}[3]{
+\codebf{#1} \textit{#2} \\ \mbox{\ \ \ \ }#3. \\}
+
+\parmentry{dimension}{dimension}
+   {Define the problem dimension}
+\parmentry{domain}{dimension vertex-lower vertex-upper}
+   {Specify the problem domain}
+\parmentry{boundary}{\{\code{dirichlet} $|$ \code{periodic}\}}
+   {Specify the boundary conditions}
+\parmentry{point}{mass position}
+   {Create a point-mass in the domain}
+\parmentry{grid}{id parent-id processor vertex-lower vertex-upper index-lower zone-count}
+   {Define a grid patch}
+\parmentry{discret}{\{\code{constant} $|$ \code{linear} $|$ \code{bilinear} $|$ \code{quadratic}\}}
+   {Select which discretization method to use (currently only ``constant'' is implemented)}
+\parmentry{solver}{\{\code{fac} $|$ \code{pfmg} $|$ \code{bicgstab}\}}
+   {Select which \hypre\ solver to use}
+\parmentry{solver\_itmax}{iterations}
+   {Optionally set the number of solver iterations}
+\parmentry{solver\_restol}{tolerance}
+   {Optionally set the stopping tolerance of the relative residual for the solver}
+
 
 The output of \code{hypre-solve} is a file containing the following:
 
@@ -469,10 +282,22 @@ xxxxx\=xxxxxxxxxxxxxx\=\kill
 \> \todo\ \code{time-total} \>  \textit{Time to solution}
 \end{tabbing}
 
+The solution, and optionally matrix and right-hand side, are output in both
+\hypresolve\ format and \hypre\ format.
 
+% hypre-init and enzo2hypre
+
+For testing \hypresolve, two utilities were created, \hypreinit\ and
+\enzotohypre.  The first, \hypreinit, creates a \hypresolve\ input file defining
+a problem with a single point source, either centered or offset.
+Parameters to \hypreinit\ include the coarse-grid problem size, number
+of processors, number of levels, whether to run as serial or parallel,
+boundary conditions, and which \hypre\ solver to call.  The second,
+\enzotohypre, reads the \code{Density} field of an \enzo\ dump
+directory and generates a corresponding \hypresolve\ input file.
 
 %-----------------------------------------------------------------------
-\subsection{Functions} \label{ss:design}
+\subsection{\hypresolve\ design} \label{sss:design}
 %-----------------------------------------------------------------------
 
 The \code{main()} function is in \code{hypre-solve.cpp}.  Functions
@@ -519,7 +344,7 @@ xxxxx\=xxxxx\=xxxxxxxxxxxxxxxxxxx\=\kill
 \}
 \end{tabbing}
 
-%-----------------------------------------------------------------------
+
 \subsubsection{\code{hypre.init\_hierarchy()}}
 
 
@@ -585,46 +410,51 @@ xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 
 
 \hypre\ subroutines are called to create
-a new matrix $A$ and vectors $B$ and $X$.  Vectors are
+a new matrix $A$ and vectors $B$ and $X$.  \hypre\ vectors are
 created and initialized using the following \hypre\ functions:
 
 \begin{tabbing}
 xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \> \done\ \code{HYPRE\_SStructVectorCreate()}
-   \> \textit{Creates the \hypre\ vector} \\
+   \> \textit{Create the \hypre\ vector} \\
+\> \done\ \code{HYPRE\_SStructVectorSetObjectType()}
+   \> \textit{Set the \hypre\ vector storage type} \\
 \> \done\ \code{HYPRE\_SStructVectorInitialize()}
    \> \textit{Initializes the \hypre\ vector datastructure} \\
+\> \done\ \code{HYPRE\_SStructVectorGetBoxValues()}
+   \> \textit{Read a subset of the \hypre\ vector elements} \\
 \> \done\ \code{HYPRE\_SStructVectorAddToBoxValues()}
-   \> \textit{Initialize the \hypre\ vector elements} \\
+   \> \textit{Increment a subset of the \hypre\ vector elements} \\
 \> \done\ \code{HYPRE\_SStructVectorAssemble()}
-   \> \textit{Assemble the \hypre\ vector}
+   \> \textit{Assemble the \hypre\ vector} \\
+\> \done\ \code{HYPRE\_SStructVectorPrint()}
+   \> \textit{Write the vector to a file}
 \end{tabbing}
 
 The \hypre\ matrix $A$ is created and initialized
-using the following functions:
+using the following \hypre\ functions:
 
 \begin{tabbing}
 xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \> \done\ \code{HYPRE\_SStructMatrixCreate()}
-   \> \textit{Creates the \hypre\ matrix} \\
+   \> \textit{Create the \hypre\ matrix} \\
 \> \done\ \code{HYPRE\_SStructMatrixSetObjectType()}
-   \> \textit{Set the \hypre\ matrix type to be semi-structured} \\
+   \> \textit{Set the \hypre\ matrix storage type} \\
 \> \done\ \code{HYPRE\_SStructMatrixInitialize()}
    \> \textit{Initialize the  \hypre\ matrix} \\
 \> \done\ \code{HYPRE\_SStructMatrixSetBoxValues ()}
-   \> \textit{Set the \hypre\ matrix stencil values} \\
-\> \done\ \code{HYPRE\_SStructFACZeroCFSten()}
-   \> \textit{Clear the coarse-to-fine stencil connections} \\
-\> \done\ \code{HYPRE\_SStructFACZeroFCSten()}
-   \> \textit{Clear the fine-to-coarse stencil connections} \\
-\> \done\ \code{HYPRE\_SStructFACZeroAMRMatrixData()}
-   \> \textit{Clear matrix elements underneath fine-grid patches} \\
+   \> \textit{Set the \hypre\ matrix stencil element values} \\
 \> \done\ \code{HYPRE\_SStructMatrixAddToValues()}
-   \> \textit{Initialize matrix values between parts/levels} \\
+   \> \textit{Increment matrix non-stencil element values} \\
 \> \done\ \code{HYPRE\_SStructMatrixAssemble()}
-   \> \textit{Finalize the \hypre\ matrix}
+   \> \textit{Finalize the \hypre\ matrix} \\
+\> \done\ \code{HYPRE\_SStructMatrixPrint()}
+   \> \textit{Write the matrix to a file} \\
+\> \done\ \code{HYPRE\_SStructFACZeroAMRMatrixData()}
+   \> \textit{Clear matrix elements underneath fine-grid patches}
 \end{tabbing}
 
+Details of defining the matrix elements are deferred to \S\ref{ss:discretization}.
 
 %-----------------------------------------------------------------------
 \subsubsection{\code{hypre.solve()}}
@@ -784,9 +614,9 @@ xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \end{tabbing}
 
 
-%=======================================================================
-\section{Discretization} \label{s:discretization}
-%=======================================================================
+%-----------------------------------------------------------------------
+\subsection{Discretization} \label{ss:discretization}
+%-----------------------------------------------------------------------
 
 \newcommand{\indvar}{r}
  \newcommand{\uc}{u(\indvar)}
@@ -1175,6 +1005,10 @@ Below, we derive modifications for each category of face-zone.
 \end{eqnarray*}
 \end{minipage}
 
+
+%-----------------------------------------------------------------------
+\subsection{Discretization at the domain boundary} \label{ss:discret-boundary}
+%-----------------------------------------------------------------------
 
 %\begin{center}
 %\begin{minipage}{1.25in}
