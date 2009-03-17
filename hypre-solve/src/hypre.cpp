@@ -655,7 +655,6 @@ void Hypre::init_elements_matrix_ ()
 
   } // for part
 
-
 } // init_elements_matrix_()
 
 //------------------------------------------------------------------------
@@ -912,11 +911,9 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 void Hypre::init_matrix_clear_ (int part)
 {
 
-  int r_factors[3] = {r_factor_,r_factor_,r_factor_}; 
-
   if (part > 0) {
 
-    // Set overlapped matrix stencils with identity
+    int r_factors[3] = {r_factor_,r_factor_,r_factor_}; 
 
     HYPRE_SStructFACZeroAMRMatrixData (A_, part-1, r_factors);
 

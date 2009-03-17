@@ -15,6 +15,8 @@
 
 #define BUFFER_LENGTH 255
 
+/// Parameters class
+
 class Parameters 
 {
 
