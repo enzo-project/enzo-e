@@ -412,9 +412,10 @@ void Hypre::evaluate ()
 
 
   // --------------------------------------------------
-  // Evaluate ||X|| and display result
+  // Evaluate ||X|| and sum(X) / ||X|| and display result
   // --------------------------------------------------
 
+  Scalar xsum_local  = 0.0;
   Scalar x2sum_local = 0.0;
 
   while (Grid * grid = itg++) {
@@ -439,17 +440,24 @@ void Hypre::evaluate ()
       for (int i1=0; i1<n3[1]; i1++) {
 	for (int i0=0; i0<n3[0]; i0++) {
 	  Scalar xval = x[grid->index(i0,i1,i2,n3[0],n3[1],n3[2])];
+	  xsum_local  += xval;
 	  x2sum_local += xval*xval;
 	}
       }
     }
   }
 
+  Scalar xsum = 0.0;
+  MPI_Allreduce (&xsum_local, &xsum, 1, 
+		 MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
+
   Scalar x2sum = 0.0;
   MPI_Allreduce (&x2sum_local, &x2sum, 1, 
 		 MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
 
-  if (pmpi->is_root()) printf ("norm(X) = %g\n",sqrt(x2sum));
+
+  if (pmpi->is_root()) printf ("norm(X)        = %g\n",sqrt(x2sum));
+  if (pmpi->is_root()) printf ("sum(X)/norm(X) = %g\n",xsum/sqrt(x2sum));
 
 } // Hypre::evaluate()
 
