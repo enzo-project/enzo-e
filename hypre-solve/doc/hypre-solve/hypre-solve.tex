@@ -943,6 +943,7 @@ Below, we derive modifications for each category of face-zone.
 
 
 \begin{minipage}{1.75in}
+\mbox{Coarse-to-fine, constant interpolation, $r=2$} \\
 \epsfig{file=fig/discret-coarse-4.eps,width=1.5in} % width 2in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
@@ -955,6 +956,7 @@ Below, we derive modifications for each category of face-zone.
 
 
 \begin{minipage}{1.75in}
+\mbox{Coarse-to-fine, linear interpolation, $r=2$} \\
 \epsfig{file=fig/discret-coarse-8.eps,width=1.875in} % width 2.5in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
@@ -966,6 +968,7 @@ Below, we derive modifications for each category of face-zone.
 \end{minipage}
 
 \begin{minipage}{1.75in}
+\mbox{Fine-to-coarse, constant interpolation, $r=2$} \\
 \epsfig{file=fig/discret-fine-1.eps,width=1.3125in}  % width 1.75in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
@@ -977,6 +980,7 @@ Below, we derive modifications for each category of face-zone.
 \end{minipage}
 
 \begin{minipage}{1.75in}
+\mbox{Fine-to-coarse, linear interpolation, $r=2$} \\
 \epsfig{file=fig/discret-fine-3.eps,width=1.6875in}   % width 2.25in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
@@ -989,6 +993,7 @@ Below, we derive modifications for each category of face-zone.
 
 
 \begin{minipage}{1.75in}
+\mbox{Fine-to-coarse, bilinear interpolation, $r=2$} \\
 \epsfig{file=fig/discret-fine-4.eps,width=1.6875in}   % width 2.25in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
@@ -1001,6 +1006,7 @@ Below, we derive modifications for each category of face-zone.
 
 
 \begin{minipage}{1.75in}
+\mbox{Fine-to-coarse, quadratic interpolation, $r=2$} \\
 \epsfig{file=fig/discret-fine-6.eps,width=1.875in}    % width 2.50in
 \end{minipage} \ \ \ \ 
 \begin{minipage}{4.00in}
@@ -1011,6 +1017,33 @@ Below, we derive modifications for each category of face-zone.
 \end{eqnarray*}
 \end{minipage}
 
+@@@@@@@@
+
+\begin{minipage}{1.75in}
+\mbox{Coarse-to-fine, linear interpolation, $r=4$} \\
+\epsfig{file=fig/discret-coarse-8-r4.eps,width=1.5in} % width 2in
+\end{minipage} \ \ \ \ 
+\begin{minipage}{4.00in}
+\begin{eqnarray*}
+& \oint_{\sideXP}  \!\!\! & \as \nabla \us\cdot \norm \, d\surfel  \\
+& \approx & |\sideXP| \axpH \frac{v - U_0}{\frac{3}{4}H_x} \\
+& = & \frac{H_yH_z}{H_x} \axpH \frac{4}{3} (\frac{1}{4} \sum_{k=1}^4 u_k - U_0)   \\
+\end{eqnarray*}
+\end{minipage}
+
+\begin{minipage}{1.75in}
+\mbox{Fine-to-coarse, constant interpolation, $r=4$} \\
+\epsfig{file=fig/discret-fine-1-r4.eps,width=1.3125in}  % width 1.75in
+\end{minipage} \ \ \ \ 
+\begin{minipage}{4.00in}
+\begin{eqnarray*}
+& \oint_{\sidexp} \!\!\! & \as \nabla \us\cdot \norm \, d\surfel  \\
+& \approx & |\sidexp| \axph \frac{V - u_0}{\frac{3}{2}h_x} \\
+& = & \frac{h_yh_z}{h_x}  \axph \frac{2}{3} (U_1 - u_0)   \\
+\end{eqnarray*}
+\end{minipage}
+
+@@@@@@@@
 
 %-----------------------------------------------------------------------
 \subsection{Discretization at the domain boundary} \label{ss:discret-boundary}
