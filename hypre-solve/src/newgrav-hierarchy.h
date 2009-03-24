@@ -46,6 +46,8 @@ private:
   /// Grid periodicity, or 0 if not periodic
   int                 period_index_[3];
 
+  /// Refinement factor
+  const int r_factor_;
 
   //--------------------------------------------------------------------
   // PROTECTED MEMBER DATA
@@ -190,14 +192,25 @@ public:
   { return n0_[0]*n0_[1]*n0_[2]; };
 
   /// Return periodicity of indices of the given level.
-  int period_index(int axis, int level=0) throw ()
+  int period_index(int axis, int level) throw ()
   { 
     int p=period_index_[axis];
     for (int i=0; i<level; i++) {
-      const int r = 2;   // WARNING: assuming fixed refinement factor r = 2
-      p *= r;
+      p *= r_factor_;
     }
     return p;
+  }
+
+  /// Return periodicity of indices of the given level.
+  void period_index(int period3[3], int level) throw ()
+  { 
+    for (int i=0; i<3; i++) {
+      period3[i] = period_index_[i];
+      for (int l=0; l<level; l++) {
+	period3[i] *= r_factor_;
+      }
+    }
+    return;
   }
 
   /// Return whether axis is periodic or not

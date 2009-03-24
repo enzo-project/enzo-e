@@ -30,7 +30,7 @@ private:
   double               resid_;   // Solver residual
   int                  iter_;    // Solver iterations
 
-  int                  r_factor_;
+  const int                  r_factor_;
   Scalar               matrix_scale_;  // 1.0:  1 1 1 -6 1 1 1
 
 public:

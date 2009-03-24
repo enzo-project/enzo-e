@@ -30,7 +30,7 @@
 const int trace          = 0;
 const int debug          = 0;
 const int debug_detailed = 0;
-const int geomview       = 0;
+const int geomview       = 1;
 
 //----------------------------------------------------------------------
 
@@ -52,7 +52,8 @@ const int geomview       = 0;
 /** Currently does nothing */
 
 Hierarchy::Hierarchy () throw ()
-  : dimension_(0)
+  : dimension_(0),
+    r_factor_(2)
 {
   grids0_.push_back(0);
   levels0_.push_back(0);
@@ -329,10 +330,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     // Determine level periodicity
 
-    int period3[3] = {
-      period_index (0,level->index()),
-      period_index (1,level->index()),
-      period_index (2,level->index()) };
+    int period3[3];
+    period_index (period3,level->index());
 
     while (Grid * grid = itg++) {
 
@@ -510,10 +509,8 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     // Determine level periodicity
 
-    int period3[3] = {
-      period_index(0,level->index()),
-      period_index(1,level->index()),
-      period_index(2,level->index()) };
+    int period3[3];
+    period_index (period3,level->index());
 
     ItLevelGridsAll itg (*level);
     while (Grid * grid = itg++) {
