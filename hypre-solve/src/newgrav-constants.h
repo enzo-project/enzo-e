@@ -31,5 +31,5 @@ public:
 
 };
 
-
+static const int r_factor_ = 2;
 

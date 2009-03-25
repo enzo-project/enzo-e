@@ -32,6 +32,7 @@ const int trace       = 0;
 
 #include "newgrav-error.h"
 #include "newgrav-scalar.h"
+#include "newgrav-constants.h"
 #include "newgrav-faces.h"
 #include "newgrav-mpi.h"
 #include "newgrav-domain.h"
@@ -47,8 +48,7 @@ Domain Grid::domain_;
 Grid::Grid (std::string parms) throw ()
   : level_ (-1),
     u_(0),
-    counters_ (0),
-    r_factor_(2)
+    counters_ (0)
 
 {
   // Initialize 0-sentinels in arrays
@@ -61,6 +61,8 @@ Grid::Grid (std::string parms) throw ()
   input (parms);
 
   // Allocate Faces was here.
+
+  printf ("%s:%d n_ = %d %d %d\n",__FILE__,__LINE__,n_[0],n_[1],n_[2]);
 
   faces_ = new Faces(n_);
 
@@ -79,8 +81,7 @@ Grid::Grid (FILE *fp) throw ()
     faces_(0),
     level_(-1),
     u_(0),
-    counters_(0),
-    r_factor_(2)
+    counters_(0)
 
 {
   this->read(fp);
@@ -540,8 +541,8 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 
   // Get neighbor index bounds
 
-  int in[3][2];
-  neighbor.indices(in);
+  int index_neighbor[3][2];
+  neighbor.indices(index_neighbor);
 
   // Find matching face, if any
 
@@ -553,10 +554,10 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
   for (axis=0; axis<3; axis++) {
     for (face=0; face<2; face++) {
 
-      bool b1 = index_grid[axis][face] == in[axis][1-face];
+      bool b1 = index_grid[axis][face] == index_neighbor[axis][1-face];
       bool b2 = 
       	(index_grid[axis][face]   + (1-face)*iperiod[axis]) == 
-      	(in[axis][1-face] +     face*iperiod[axis]);
+      	(index_neighbor[axis][1-face] +     face*iperiod[axis]);
 
       if ((b1 || b2) && ! found_face) {
 	if (num == count) {
@@ -585,11 +586,11 @@ bool Grid::neighbor_shared_face (Grid & neighbor,
 
   // Compute local indices intersection from global indices of each grid
 
-  il0 = MAX(index_grid[j0][0],in[j0][0]) - index_grid[j0][0];
-  iu0 = MIN(index_grid[j0][1],in[j0][1]) - index_grid[j0][0] - 1;
+  il0 = MAX(index_grid[j0][0],index_neighbor[j0][0]) - index_grid[j0][0];
+  iu0 = MIN(index_grid[j0][1],index_neighbor[j0][1]) - index_grid[j0][0] - 1;
 
-  il1 = MAX(index_grid[j1][0],in[j1][0]) - index_grid[j1][0];
-  iu1 = MIN(index_grid[j1][1],in[j1][1]) - index_grid[j1][0] - 1;
+  il1 = MAX(index_grid[j1][0],index_neighbor[j1][0]) - index_grid[j1][0];
+  iu1 = MIN(index_grid[j1][1],index_neighbor[j1][1]) - index_grid[j1][0] - 1;
 
   return true;
 
@@ -619,8 +620,16 @@ bool Grid::coarse_shared_face (Grid & coarse,
 
   // Get coarse index bounds
 
-  int ic[3][2];
-  coarse.indices(ic);
+  int index_coarse[3][2];
+  coarse.indices(index_coarse);
+
+  // Multiply index_coarse by r_factor_ to match index_grid
+
+  for (axis=0; axis<3; axis++) {
+    for (face=0; face<2; face++) {
+      index_coarse[axis][face] *= r_factor_;
+    }
+  }
 
   // Find count'th matching face, if there is one
 
@@ -632,10 +641,10 @@ bool Grid::coarse_shared_face (Grid & coarse,
   for (axis=0; axis<3; axis++) {
     for (face=0; face<2; face++) {
 
-      bool b1 = index_grid[axis][face] == r_factor_*ic[axis][1-face];
+      bool b1 = index_grid[axis][face] == index_coarse[axis][1-face];
       bool b2 = 
 	(  index_grid[axis][face]   + (1-face)*iperiod[axis]) == 
-	(r_factor_*ic[axis][1-face] +     face*iperiod[axis]);
+	(index_coarse[axis][1-face] +     face*iperiod[axis]);
 
       if ((b1 || b2) && ! found_face) {
 	if (num == count) {
@@ -664,11 +673,11 @@ bool Grid::coarse_shared_face (Grid & coarse,
 
   // Compute local indices intersection from global indices of each grid
 
-  il0 = MAX(index_grid[j0][0],r_factor_*ic[j0][0]) - index_grid[j0][0];
-  iu0 = MIN(index_grid[j0][1],r_factor_*ic[j0][1]) - index_grid[j0][0] - 1;
+  il0 = MAX(index_grid[j0][0],index_coarse[j0][0]) - index_grid[j0][0];
+  iu0 = MIN(index_grid[j0][1],index_coarse[j0][1]) - index_grid[j0][0] - 1;
 
-  il1 = MAX(index_grid[j1][0],r_factor_*ic[j1][0]) - index_grid[j1][0];
-  iu1 = MIN(index_grid[j1][1],r_factor_*ic[j1][1]) - index_grid[j1][0] - 1;
+  il1 = MAX(index_grid[j1][0],index_coarse[j1][0]) - index_grid[j1][0];
+  iu1 = MIN(index_grid[j1][1],index_coarse[j1][1]) - index_grid[j1][0] - 1;
 
   return true;
 }
@@ -700,6 +709,14 @@ bool Grid::parent_shared_face (Grid & parent,
   int index_parent[3][2];
   parent.indices(index_parent);
 
+  // Divide index_grid by r_factor_ to match index_parent
+
+  for (axis=0; axis<3; axis++) {
+    for (face=0; face<2; face++) {
+      index_grid[axis][face] /= r_factor_;
+    }
+  }
+
   // Find count'th matching face, if there is one
 
   bool found_face = false;
@@ -709,7 +726,7 @@ bool Grid::parent_shared_face (Grid & parent,
 
   for (axis = 0; axis < 3; axis++) {
     for (face = 0; face < 2; face++) {
-      if (index_grid[axis][face] == r_factor_*index_parent[axis][face] && !found_face) {
+      if (index_grid[axis][face] == index_parent[axis][face] && !found_face) {
 	if (num == count) {
 	  found_face = true;
 	  iaxis = axis;
@@ -737,11 +754,11 @@ bool Grid::parent_shared_face (Grid & parent,
   // Compute local indices intersection from global indices of each grid
   // Divide by r so that indices correspond to coarse grid
 
-  il0 = MAX(index_grid[j0][0]/r_factor_,index_parent[j0][0]) - index_parent[j0][0];
-  iu0 = MIN(index_grid[j0][1]/r_factor_,index_parent[j0][1]) - index_parent[j0][0] - 1;
+  il0 = MAX(index_grid[j0][0],index_parent[j0][0]) - index_parent[j0][0];
+  iu0 = MIN(index_grid[j0][1],index_parent[j0][1]) - index_parent[j0][0] - 1;
 
-  il1 = MAX(index_grid[j1][0]/r_factor_,index_parent[j1][0]) - index_parent[j1][0];
-  iu1 = MIN(index_grid[j1][1]/r_factor_,index_parent[j1][1]) - index_parent[j1][0] - 1;
+  il1 = MAX(index_grid[j1][0],index_parent[j1][0]) - index_parent[j1][0];
+  iu1 = MIN(index_grid[j1][1],index_parent[j1][1]) - index_parent[j1][0] - 1;
 
   return true;
 
@@ -762,8 +779,6 @@ bool Grid::parent_interior_face (Grid & parent,
 				 int & count) throw ()
 {
 
-  const int r = 2; // WARNING: assuming fixed refinement factor r = 2
-
   Grid & grid = *this;
 
   // Get grid index bounds
@@ -776,6 +791,14 @@ bool Grid::parent_interior_face (Grid & parent,
   int index_parent[3][2];
   parent.indices(index_parent);
 
+  // Multiply index_parent by r_factor_ to match index_grid
+
+  for (axis=0; axis<3; axis++) {
+    for (face=0; face<2; face++) {
+      index_parent[axis][face] *= r_factor_;
+    }
+  }
+
   // Find count'th matching face, if there is one
 
   bool found_face = false;
@@ -785,7 +808,7 @@ bool Grid::parent_interior_face (Grid & parent,
 
   for (axis = 0; axis < 3; axis++) {
     for (face = 0; face < 2; face++) {
-      if (index_grid[axis][face] != r*index_parent[axis][face] && !found_face) {
+      if (index_grid[axis][face] != index_parent[axis][face] && !found_face) {
 	if (num == count) {
 	  found_face = true;
 	  iaxis = axis;
@@ -812,11 +835,11 @@ bool Grid::parent_interior_face (Grid & parent,
 
   // Compute local indices intersection from global indices of each grid
 
-  il0 = MAX(index_grid[j0][0],r_factor_*index_parent[j0][0]) - index_grid[j0][0];
-  iu0 = MIN(index_grid[j0][1],r_factor_*index_parent[j0][1]) - index_grid[j0][0] - 1;
+  il0 = MAX(index_grid[j0][0],index_parent[j0][0]) - index_grid[j0][0];
+  iu0 = MIN(index_grid[j0][1],index_parent[j0][1]) - index_grid[j0][0] - 1;
 
-  il1 = MAX(index_grid[j1][0],r_factor_*index_parent[j1][0]) - index_grid[j1][0];
-  iu1 = MIN(index_grid[j1][1],r_factor_*index_parent[j1][1]) - index_grid[j1][0] - 1;
+  il1 = MAX(index_grid[j1][0],index_parent[j1][0]) - index_grid[j1][0];
+  iu1 = MIN(index_grid[j1][1],index_parent[j1][1]) - index_grid[j1][0] - 1;
 
   return true;
 

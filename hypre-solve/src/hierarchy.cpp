@@ -30,11 +30,12 @@
 const int trace          = 0;
 const int debug          = 0;
 const int debug_detailed = 0;
-const int geomview       = 1;
+const int geomview       = 0;
 
 //----------------------------------------------------------------------
 
 #include "newgrav-scalar.h"
+#include "newgrav-constants.h"
 #include "newgrav-error.h"
 #include "newgrav-point.h"
 #include "newgrav-domain.h"
@@ -52,8 +53,7 @@ const int geomview       = 1;
 /** Currently does nothing */
 
 Hierarchy::Hierarchy () throw ()
-  : dimension_(0),
-    r_factor_(2)
+  : dimension_(0)
 {
   grids0_.push_back(0);
   levels0_.push_back(0);

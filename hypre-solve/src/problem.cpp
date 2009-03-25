@@ -32,6 +32,7 @@ const int debug = 0;
 //----------------------------------------------------------------------
 
 #include "newgrav-scalar.h"
+#include "newgrav-constants.h"
 #include "newgrav-error.h"
 #include "newgrav-parameters.h"
 #include "newgrav-point.h"

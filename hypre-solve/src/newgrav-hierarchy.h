@@ -46,9 +46,6 @@ private:
   /// Grid periodicity, or 0 if not periodic
   int                 period_index_[3];
 
-  /// Refinement factor
-  const int r_factor_;
-
   //--------------------------------------------------------------------
   // PROTECTED MEMBER DATA
   //--------------------------------------------------------------------

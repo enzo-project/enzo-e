@@ -84,9 +84,6 @@ class Grid
   /// hypre to maintain state between nonstencil and matrix initialization.
   int * counters_;
 
-  /// Refinement factor
-  const int r_factor_;
-
   //--------------------------------------------------------------------
   // STATIC MEMBER DATA
   //--------------------------------------------------------------------
