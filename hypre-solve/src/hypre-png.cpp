@@ -98,20 +98,14 @@ int main(int argc, char **argv)
 
   // Read in grids, and store them in vectors, one vector per level
 
-  TRACE;
-
   typedef std::vector<Grid *> gridlist;
   gridlist levels[MAX_LEVELS];
   for (; iarg<argc; iarg++) {
     printf ("Reading %s\n",argv[iarg]);
     FILE * fp = fopen(argv[iarg],"r");
-  TRACE;
     Grid * grid = new Grid(fp);
-  TRACE;
     int level = grid->level();
-  TRACE;
     if (level < MAX_LEVELS) levels[level].push_back(grid);
-  TRACE;
     fclose(fp);
   }
 
@@ -119,8 +113,6 @@ int main(int argc, char **argv)
   unsigned j;
 
   // Determine top_level
-
-  TRACE;
 
   int top_level=0;
   for (l=MAX_LEVELS-1; l>=0; l--) {
@@ -131,8 +123,6 @@ int main(int argc, char **argv)
   }
 
   // Determine png array sizes
-
-  TRACE;
 
   int nl3[3],nu3[3],n3[3];  // Index ranges and size
   bool is_first = true;
@@ -164,15 +154,11 @@ int main(int argc, char **argv)
   }
   // Determine n3[]
 
-  TRACE;
-
   for (i=0; i<3; i++) {
     n3[i] = nu3[i] - nl3[i];
   }
 
   // Allocate images
-
-  TRACE;
 
   double *images3[3];
 
@@ -181,8 +167,6 @@ int main(int argc, char **argv)
   images_allocate(images3,n3,ni3,rgb33,top_level,scale);
   
   // Assemble images
-
-  TRACE;
 
   // Loop over levels, coarse to fine
 
@@ -201,19 +185,12 @@ int main(int argc, char **argv)
     }
   }
 
-  TRACE;
-
   images_colormap (images3,ni3,rgbmap,rgb33);
-
-  TRACE;
 
   images_generate (ni3,rgb33);
 
-  TRACE;
-
   images_generate_shift (ni3,rgb33);
 
-  TRACE;
 }
 
 //----------------------------------------------------------------------

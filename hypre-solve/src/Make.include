@@ -1,6 +1,7 @@
 SHELL = /bin/bash
 
-EXES = hypre-solve hypre-init hypre-test hypre-png debug-matrix enzo2hypre
+# EXES = enzo-reduce hypre-solve hypre-init hypre-test hypre-png debug-matrix enzo2hypre
+EXES = enzo-reduce
 
 CPPFLAGS = -g -Wall
 # CPPFLAGS = -g
@@ -74,6 +75,8 @@ debug-matrix: debug-matrix.o
 	$(CPP) -o debug-matrix debug-matrix.o
 enzo2hypre: enzo2hypre.o
 	$(CPP) -o enzo2hypre enzo2hypre.o $(INC) $(LIB)
+enzo-reduce: enzo-reduce.o
+	$(CPP) -o enzo-reduce enzo-reduce.o -lhdf5
 
 BIN = ../bin
 .PHONY: install
