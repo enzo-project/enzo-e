@@ -82,13 +82,7 @@ BIN = ../bin
 .PHONY: install
 install: $(EXES)
 	(if [ ! -e $(BIN) ]; then mkdir $(BIN); fi)
-	cp hypre-solve  $(BIN)
-	cp hypre-init   $(BIN)
-	cp hypre-test   $(BIN)
-	cp hypre-png    $(BIN)
-	cp debug-matrix $(BIN)
-	cp enzo2hypre   $(BIN)
-
+	cp $(EXES)  $(BIN)
 
 .cpp.o:
 	$(MPCPP) -c -o $*.o $*.cpp $(CPPFLAGS) $(INC) $(DEF)
