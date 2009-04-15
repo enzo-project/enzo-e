@@ -27,6 +27,7 @@
 //----------------------------------------------------------------------
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <getopt.h>
 #include <sys/stat.h>
@@ -46,13 +47,25 @@
 
 enum enum_amr_type { amr_type_unknown, amr_type_packed, amr_type_unpacked };
 
+struct argument_struct {
+  std::string reduce_axis;
+  std::string field_name;
+  std::string grid_file;
+  std::string hierarchy_dir;
+  std::string slice_axis;
+  std::string operation;
+};
+
+
 //----------------------------------------------------------------------
 // FUNCTION PROTOTYPES
 //----------------------------------------------------------------------
 
-void read_enzo_grid   (std::string file_name);
-int get_num_grids     (std::string arg_hierarchy_dir);
+void          read_enzo_grid   (std::string file_name);
+int           get_num_grids     (std::string arg_hierarchy_dir);
 enum_amr_type get_amr_type (std::string arg_hierarchy_dir);
+bool          check_args (argument_struct *);
+void          print_usage(char ** argv);
 
 //----------------------------------------------------------------------
 // CPP MACROS
@@ -102,13 +115,6 @@ int main(int argc, char **argv)
   // PARSE COMMAND LINE
   //====================================================================
 
-  std::string arg_reduce_axis   = "";
-  std::string arg_field_name    = "";
-  std::string arg_grid_file     = "";
-  std::string arg_hierarchy_dir = "";
-  std::string arg_slice_axis    = "";
-  std::string arg_operation     = "";
-
   const struct option long_options[] =
     {
       {"along",     required_argument, 0, 'a'},
@@ -124,6 +130,8 @@ int main(int argc, char **argv)
   // Parse arguments
   //--------------------------------------------------
 
+  argument_struct arg;
+
   int c;
   int option;
   while ((c = getopt_long(argc, argv, "a:f:g:h:ps:", long_options, &option)) != -1) {
@@ -131,15 +139,15 @@ int main(int argc, char **argv)
     case 0:
       // argument set in getopt_long()
       break;
-    case 'a': arg_reduce_axis   = optarg; break;
-    case 'f': arg_field_name    = optarg; break;
-    case 'g': arg_grid_file     = optarg; break;
-    case 'h': arg_hierarchy_dir = optarg; break;
-    case 'p': arg_operation = "project";  break;
-    case 's': arg_operation = "slice";	
-      arg_slice_axis = optarg;
+    case 'a': arg.reduce_axis   = optarg; break;
+    case 'f': arg.field_name    = optarg; break;
+    case 'g': arg.grid_file     = optarg; break;
+    case 'h': arg.hierarchy_dir = optarg; break;
+    case 'p': arg.operation = "project";  break;
+    case 's': arg.operation = "slice";	
+      arg.slice_axis = optarg;
       break;
-    case '?':	printf ("Hmmm...\n");     break;
+    case '?': print_usage(argv); break;
     default:
       fprintf (stderr,"%s:%d Unknown command-line parse error: exiting\n",
 	       __FILE__,__LINE__);
@@ -154,29 +162,20 @@ int main(int argc, char **argv)
   // Verify arguments
   //--------------------------------------------------
 
-  if (arg_reduce_axis == "") {
+  if (check_args(&arg)) { 
 
-    printf ("\n\nUsage: %s [options]\n",argv[0]);
-    
     printf ("\n");
-    printf ("    --along (-a)     {x|y|z}             Axis along which to reduce\n");
-    printf ("    --field (-f)     <field-name>        Name of the field\n");
-    printf ("    --grid (-g)      <grid file>         Specify an Enzo grid file\n");
-    printf ("    --hierarchy (-h) <hierarchy dir>     Specify an Enzo hierarchy directory\n");
-    printf ("    --project (-p)                       Project values\n");
-    printf ("    --slice (-s)     [0:1]               Slice domain at the given point\n\n");
-    exit(1);
+    printf ("  Reduction axis      = %s\n", arg.reduce_axis.c_str());
+    printf ("  Field name          = %s\n", arg.field_name.c_str());
+    printf ("  Grid file           = %s\n", arg.grid_file.c_str());
+    printf ("  Hierarchy directory = %s\n", arg.hierarchy_dir.c_str());
+    printf ("  Slice axis          = %s\n", arg.slice_axis.c_str());
+    printf ("  Operation           = %s\n", arg.operation.c_str() );
+    printf ("\n");
 
   } else {
 
-    printf ("\n");
-    printf ("  Reduction axis      = %s\n", arg_reduce_axis.c_str());
-    printf ("  Field name          = %s\n", arg_field_name.c_str());
-    printf ("  Grid file           = %s\n", arg_grid_file.c_str());
-    printf ("  Hierarchy directory = %s\n", arg_hierarchy_dir.c_str());
-    printf ("  Slice axis          = %s\n", arg_slice_axis.c_str());
-    printf ("  Operation           = %s\n", arg_operation.c_str() );
-    printf ("\n");
+    print_usage(argv);
 
   }
 
@@ -184,36 +183,29 @@ int main(int argc, char **argv)
   // DETERMINE LIST OF INPUT FILES
   //====================================================================
 
-  bool      grid_specified = ! arg_grid_file.empty() ;
-  bool hierarchy_specified = ! arg_hierarchy_dir.empty();
+  bool      grid_specified = ! arg.grid_file.empty() ;
+  bool hierarchy_specified = ! arg.hierarchy_dir.empty();
   
-  
+
   std::vector <std::string> grid_file_list;
 
-  if ( ( ! grid_specified && ! hierarchy_specified) ||
-       (   grid_specified &&   hierarchy_specified) ) {
+  if ((grid_specified)) {
 
-    ERROR("Exactly one of --grid (-g) and --hierarchy (-h) "
-	  "must be specified");
-    
-  } else if ((grid_specified)) {
-
-    grid_file_list.push_back(arg_grid_file);
+    grid_file_list.push_back(arg.grid_file);
 
   } else if ((hierarchy_specified)) {
 
-
-    chdir (arg_hierarchy_dir.c_str());
+    chdir (arg.hierarchy_dir.c_str());
     // ERROR CHECK HERE
 
-    int num_grids = get_num_grids(arg_hierarchy_dir);
+    int num_grids = get_num_grids(arg.hierarchy_dir);
 
 
     // Read hierarchy file
 
     char file_name [MAX_FILE_STRING_LENGTH];
 
-    enum_amr_type amr_type = get_amr_type (arg_hierarchy_dir);
+    enum_amr_type amr_type = get_amr_type (arg.hierarchy_dir);
 
     // Loop through files and add them to the list of files
 
@@ -222,9 +214,9 @@ int main(int argc, char **argv)
     for (int i = mpi_rank; true; i += mpi_size) {
 
       if (amr_type == amr_type_unpacked) {
-	sprintf (file_name, "%s.grid%04d",arg_hierarchy_dir.c_str(),i+1);
+	sprintf (file_name, "%s.grid%04d",arg.hierarchy_dir.c_str(),i+1);
       } else if (amr_type == amr_type_packed) {
-	sprintf (file_name, "%s.cpu%04d",arg_hierarchy_dir.c_str(),i);
+	sprintf (file_name, "%s.cpu%04d",arg.hierarchy_dir.c_str(),i);
       }
 
       // Check if file exists, and append to list of files if it does
@@ -355,12 +347,12 @@ void read_enzo_grid
 
 // Open the hierarchy file and determine the maximum grid number
 
-int get_num_grids (std::string arg_hierarchy_dir)
+int get_num_grids (std::string hierarchy_dir)
 {
 
   // Determine number of grids 'num_grids'
 
-  std::string hierarchy_file = arg_hierarchy_dir + ".hierarchy";
+  std::string hierarchy_file = hierarchy_dir + ".hierarchy";
 
   FILE *fp_hierarchy  = fopen (hierarchy_file.c_str(), "r");
 
@@ -386,7 +378,7 @@ int get_num_grids (std::string arg_hierarchy_dir)
 
 // Determine whether the amr data is packed or unpacked
 
-enum_amr_type get_amr_type (std::string arg_hierarchy_dir)
+enum_amr_type get_amr_type (std::string hierarchy_dir)
 {
 
   enum_amr_type amr_type;
@@ -396,12 +388,12 @@ enum_amr_type get_amr_type (std::string arg_hierarchy_dir)
 
   amr_type = amr_type_unknown;
 
-  sprintf (file_name, "%s.grid0001",arg_hierarchy_dir.c_str());
+  sprintf (file_name, "%s.grid0001",hierarchy_dir.c_str());
   if (stat(file_name,&stFileInfo) == 0) {
     amr_type = amr_type_unpacked;
   }
 
-  sprintf (file_name, "%s.cpu0000",arg_hierarchy_dir.c_str());
+  sprintf (file_name, "%s.cpu0000",hierarchy_dir.c_str());
   if (stat(file_name,&stFileInfo) == 0) {
     amr_type = amr_type_packed;
   }
@@ -413,3 +405,60 @@ enum_amr_type get_amr_type (std::string arg_hierarchy_dir)
   }
   return amr_type;
 }
+
+//--------------------------------------------------------------------
+// check_args()
+//--------------------------------------------------------------------
+
+bool check_args(argument_struct *arg_p)
+{
+  TRACE;
+  bool args_ok = true;
+  if (arg_p->reduce_axis == "") {
+    printf ("argument '-a' required\n");
+    args_ok = false;
+  }
+
+  if (arg_p->field_name  == "") {
+    printf ("argument '-f' required\n");
+    args_ok = false;
+  }
+	
+  if ( (arg_p->grid_file == "" && arg_p->hierarchy_dir == "") ||
+       (arg_p->grid_file != "" && arg_p->hierarchy_dir != "")) {
+    printf ("argument '-g' or '-h' required\n");
+    args_ok = false;
+  }
+
+  if ( arg_p->operation == "" ) {
+    printf ("argument '-p' or '-s' required\n");
+    args_ok = false;
+  }
+
+  return args_ok;
+
+}
+
+//--------------------------------------------------------------------
+// print_usage()
+//--------------------------------------------------------------------
+
+void print_usage(char ** argv)
+{
+    printf ("\n\nUsage: %s [options]\n",argv[0]);
+    
+    printf ("\n");
+    printf ("   -a (--along)      {x|y|z}             Axis along which to reduce\n");
+    printf ("   -f (--field)      <field-name>        Name of the field\n");
+    printf ("   -g (--grid)       <grid file>         Specify an Enzo grid file\n");
+    printf ("   -h (--hierarchy)  <hierarchy dir>     Specify an Enzo hierarchy directory\n");
+    printf ("   -p (--project)                        Project values\n");
+    printf ("   -s (--slice)      [0:1]               Slice domain at the given point\n\n");
+    printf ("\n");
+    printf ("Required options: af[g|h][p|s]\n");
+    printf ("\n");
+
+    exit (1);
+
+}
+
