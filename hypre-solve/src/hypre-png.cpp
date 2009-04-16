@@ -1,6 +1,6 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/// Generate a PNG projections of a set of grid files
+/// Generate a PNG projection of a set of grid files from hypre
 
 /**
  * 

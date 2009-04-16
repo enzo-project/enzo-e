@@ -107,6 +107,7 @@ int main(int argc, char **argv)
   int mpi_size = 1, mpi_rank = 0;
 
 #ifdef USE_MPI
+  MPI_Init (&argc,&argv);
   MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
   MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
 #endif
@@ -240,8 +241,12 @@ int main(int argc, char **argv)
   }
 
   for (unsigned int i=0; i < grid_file_list.size(); i++) {
-    printf ("%s\n",grid_file_list[i].c_str());
+    printf ("%d %s\n",mpi_rank,grid_file_list[i].c_str());
   }
+
+  //====================================================================
+  // ACCUMULATE PROCESSOR-LOCAL REDUCTION
+  //====================================================================
 
   //====================================================================
   // ACCUMULATE PROCESSOR-LOCAL REDUCTION
@@ -257,6 +262,13 @@ int main(int argc, char **argv)
   // OUTPUT RESULT FROM ROOT
   //====================================================================
 
+  //====================================================================
+  // EXIT
+  //====================================================================
+
+#ifdef USE_MPI
+  MPI_Finalize ();
+#endif
   
   return 0;
 }

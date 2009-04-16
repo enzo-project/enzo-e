@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
-# EXES = enzo-reduce hypre-solve hypre-init hypre-test hypre-png debug-matrix enzo2hypre
-EXES = enzo-reduce
+EXES = enzo-reduce hypre-solve hypre-init hypre-test hypre-png debug-matrix enzo2hypre
+#EXES = enzo-reduce
 
 CPPFLAGS = -g -Wall
 # CPPFLAGS = -g
@@ -38,7 +38,7 @@ CELLOINC = -I$(CELLOTOP)/include
 CELLOLIB = -L$(CELLOTOP)/lib -lcello
 
 # Assemble defines, includes, and libs
-DEF =      $(JBDEF) $(PNGDEF) $(HYPREDEF) $(HDF5DEF) $(CELLODEF)
+DEF =      $(JBDEF) $(PNGDEF) $(HYPREDEF) $(HDF5DEF) $(CELLODEF) -DUSE_MPI
 INC =      $(JBINC) $(PNGINC) $(HYPREINC) $(HDF5INC) $(CELLOINC)
 LIB =  -lm $(JBLIB) $(PNGLIB) $(HYPRELIB) $(HDF5LIB) $(CELLOLIB)
 
@@ -76,7 +76,7 @@ debug-matrix: debug-matrix.o
 enzo2hypre: enzo2hypre.o
 	$(CPP) -o enzo2hypre enzo2hypre.o $(INC) $(LIB)
 enzo-reduce: enzo-reduce.o
-	$(CPP) -o enzo-reduce enzo-reduce.o -lhdf5
+	$(MPCPP) -o enzo-reduce enzo-reduce.o $(LIB)
 
 BIN = ../bin
 .PHONY: install

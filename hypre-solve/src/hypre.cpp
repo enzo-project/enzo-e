@@ -12,6 +12,7 @@
  * $Id$
  */
 
+#include <stdlib.h>
 #include <mpi.h>
 #include <assert.h>
 #include <math.h>

@@ -20,6 +20,7 @@
 
 void print_particles (std::string,FILE*fpout);
 
+
 //----------------------------------------------------------------------
 // MACROS
 //----------------------------------------------------------------------
@@ -31,6 +32,8 @@ void print_particles (std::string,FILE*fpout);
   }
 
 #define max(a,b) ((a)>(b) ? (a) : (b))
+
+#define TRACE { printf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout); }
 
 //----------------------------------------------------------------------
 // CONSTANTS
@@ -46,6 +49,8 @@ const int max_line_length   = 100;
 
 int main(int argc, char ** argv)
 {
+
+  TRACE;
   if (argc != 2) {
     fprintf (stderr,"Usage: %s <enzo-file>\n",argv[0]);
     exit(1);
@@ -84,7 +89,7 @@ int main(int argc, char ** argv)
   while (fgets(line,max_line_length,fpin) != NULL) {
     if (sscanf (line,"Grid = %d\n",&igrid)) num_grids = max(igrid,num_grids);
   }
-
+  printf ("num_grids=%d\n",num_grids);
   fclose(fpin);   // Close hierarchy file
 
   //-----------------------------------------------------------------------
@@ -93,26 +98,26 @@ int main(int argc, char ** argv)
 
   // grid arrays
 
-  int * processor = new int [num_grids+1];
-  int * parent    = new int [num_grids+1];
-  int * level     = new int [num_grids+1];
-  double * xmin0  = new double [num_grids+1];
-  double * xmin1  = new double [num_grids+1];
-  double * xmin2  = new double [num_grids+1];
-  double * xmax0  = new double [num_grids+1];
-  double * xmax1  = new double [num_grids+1];
-  double * xmax2  = new double [num_grids+1];
-  int * imin0     = new int [num_grids+1];
-  int * imin1     = new int [num_grids+1];
-  int * imin2     = new int [num_grids+1];
-  int * ibegin0     = new int [num_grids+1];
-  int * ibegin1     = new int [num_grids+1];
-  int * ibegin2     = new int [num_grids+1];
-  int * iend0     = new int [num_grids+1];
-  int * iend1     = new int [num_grids+1];
-  int * iend2     = new int [num_grids+1];
+  int * processor = new int [num_grids+2];
+  int * parent    = new int [num_grids+2];
+  int * level     = new int [num_grids+2];
+  double * xmin0  = new double [num_grids+2];
+  double * xmin1  = new double [num_grids+2];
+  double * xmin2  = new double [num_grids+2];
+  double * xmax0  = new double [num_grids+2];
+  double * xmax1  = new double [num_grids+2];
+  double * xmax2  = new double [num_grids+2];
+  int * imin0     = new int [num_grids+2];
+  int * imin1     = new int [num_grids+2];
+  int * imin2     = new int [num_grids+2];
+  int * ibegin0     = new int [num_grids+2];
+  int * ibegin1     = new int [num_grids+2];
+  int * ibegin2     = new int [num_grids+2];
+  int * iend0     = new int [num_grids+2];
+  int * iend1     = new int [num_grids+2];
+  int * iend2     = new int [num_grids+2];
   int i;
-  for (i=0; i<num_grids+1; i++) {
+  for (i=0; i<num_grids+2; i++) {
     processor[i] = 0;
     parent[i] = 0;
     level[i] = 0;
@@ -191,6 +196,7 @@ int main(int argc, char ** argv)
 	}
       }
     }
+    
   }
 
   fclose(fpin);   // Close hierarchy file
@@ -295,6 +301,7 @@ int main(int argc, char ** argv)
 	     iend2[i]-ibegin2[i]+1);
 
     fprintf (fpout,"\n");
+    fflush (fpout);
   }
 
   //-----------------------------------------------------------------------
@@ -357,6 +364,7 @@ void print_particles (std::string file_name, FILE * fpout)
 
   // Open the file
 
+  TRACE;
   file_id = H5Fopen(file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   if (file_id < 0) HDF_ERROR (file_name.c_str());
@@ -365,10 +373,12 @@ void print_particles (std::string file_name, FILE * fpout)
 
   // Open the group
 
+  TRACE;
   group_id = H5Gopen (file_id, "/");
   if (group_id < 0) HDF_ERROR ("H5Gopen");
 
   hsize_t num_groups;
+  TRACE;
   H5Gget_num_objs(group_id,&num_groups);
 
   herr_t  status;
@@ -376,6 +386,7 @@ void print_particles (std::string file_name, FILE * fpout)
   for (hsize_t igroup = 0; igroup < num_groups; igroup ++) {
 
     char group_name[20];
+  TRACE;
     H5Gget_objname_by_idx(group_id,igroup,group_name,20);
 
     std::string grid_group = group_name;
@@ -385,10 +396,14 @@ void print_particles (std::string file_name, FILE * fpout)
     hid_t pmset_id;
     hid_t ppxset_id,ppyset_id,ppzset_id;
 
+  TRACE;
     pmset_id = H5Dopen(group_id, (grid_group + "/particle_mass").c_str());
     if (pmset_id < 0) break; // exit loop if no particles
+  TRACE;
     ppxset_id = H5Dopen(group_id, (grid_group + "/particle_position_x").c_str());
+  TRACE;
     ppyset_id = H5Dopen(group_id, (grid_group + "/particle_position_y").c_str());
+  TRACE;
     ppzset_id = H5Dopen(group_id, (grid_group + "/particle_position_z").c_str());
 
     // Get the dataset size
@@ -397,17 +412,25 @@ void print_particles (std::string file_name, FILE * fpout)
     hid_t ppxspace_id,ppyspace_id,ppzspace_id;
 
     hsize_t num_particles = 0;
+  TRACE;
     pmspace_id  = H5Dget_space (pmset_id);
+  TRACE;
     if (pmspace_id < 0) HDF_ERROR ("H5Dopen");
+  TRACE;
     ppxspace_id = H5Dget_space (ppxset_id);
+  TRACE;
     if (ppxspace_id < 0) HDF_ERROR ("H5Dopen");
+  TRACE;
     ppyspace_id = H5Dget_space (ppyset_id);
+  TRACE;
     if (ppyspace_id < 0) HDF_ERROR ("H5Dopen");
+  TRACE;
     ppzspace_id = H5Dget_space (ppzset_id);
     if (ppzspace_id < 0) HDF_ERROR ("H5Dopen");
 
     // Get rank (should be same for all particle datasets)
 
+  TRACE;
     H5Sget_simple_extent_dims(ppxspace_id, &num_particles, NULL);
 
     double * pmass = new double [num_particles];
@@ -419,15 +442,20 @@ void print_particles (std::string file_name, FILE * fpout)
 
     // Read the dataset
 
+  TRACE;
     status = H5Dread(pmset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
 		     H5P_DEFAULT, pmass);
     if (status < 0) HDF_ERROR ("H5Dread");
+  TRACE;
     status = H5Dread(ppxset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
 		     H5P_DEFAULT, ppos0);
     if (status < 0) HDF_ERROR ("H5Dread");
+  TRACE;
+
     status = H5Dread(ppyset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
 		     H5P_DEFAULT, ppos1);
     if (status < 0) HDF_ERROR ("H5Dread");
+  TRACE;
     status = H5Dread(ppzset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
 		     H5P_DEFAULT, ppos2);
     if (status < 0) HDF_ERROR ("H5Dread");
@@ -449,18 +477,24 @@ void print_particles (std::string file_name, FILE * fpout)
 
     // Close the dataset
 
+  TRACE;
     status = H5Dclose(pmset_id);
     if (status < 0) HDF_ERROR ("H5Dclose");
+  TRACE;
     status = H5Dclose(ppxset_id);
     if (status < 0) HDF_ERROR ("H5Dclose");
+  TRACE;
     status = H5Dclose(ppyset_id);
     if (status < 0) HDF_ERROR ("H5Dclose");
+  TRACE;
     status = H5Dclose(ppzset_id);
     if (status < 0) HDF_ERROR ("H5Dclose");
 
   }
 
+  TRACE;
   status = H5Gclose(group_id);  // Close the group
 
+  TRACE;
   status = H5Fclose(file_id);   // Close the file
 }

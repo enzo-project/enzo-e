@@ -82,7 +82,6 @@ Grid::Grid (FILE *fp) throw ()
     level_(-1),
     u_(0),
     counters_(0)
-
 {
   this->read(fp);
 }
