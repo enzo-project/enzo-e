@@ -38,9 +38,9 @@ CELLOINC = -I$(CELLOTOP)/include
 CELLOLIB = -L$(CELLOTOP)/lib -lcello
 
 # Assemble defines, includes, and libs
-DEF =      $(JBDEF) $(PNGDEF) $(HDF5DEF) $(CELLODEF) -DUSE_MPI
-INC =      $(JBINC) $(PNGINC) $(HDF5INC) $(CELLOINC)
-LIB =  -lm $(JBLIB) $(PNGLIB) $(HDF5LIB) $(CELLOLIB)
+DEF =         $(JBDEF) $(PNGDEF) $(HDF5DEF) $(CELLODEF) -DUSE_MPI
+INC =         $(JBINC) $(PNGINC) $(HDF5INC) $(CELLOINC)
+LIB =  $(CPPFLAGS) -lm $(JBLIB) $(PNGLIB) $(HDF5LIB) $(CELLOLIB)
 
 HYPREALL = $(HYPREDEF) $(HYPREINC) $(HYPRELIB)
 

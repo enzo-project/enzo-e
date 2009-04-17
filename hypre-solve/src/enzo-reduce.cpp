@@ -53,23 +53,25 @@ struct argument_struct {
   std::string field_name;
   std::string grid_file;
   std::string hierarchy_dir;
-  std::string slice_axis;
+  std::string slice_point;
   std::string operation;
 };
 
 struct grid_info_struct {
-  int     index;
-  int     level;
-  double  left_edge[3];
-  double  right_edge[3];
-  int     start_index[3];
-  int     stop_index[3];
+  int         index;
+  std::string file_name;
+  std::string group_name;
+  int         level;
+  double      left_edge[3];
+  double      right_edge[3];
+  int         start_index[3];
+  int         stop_index[3];
 };
 
 struct hierarchy_info_struct {
+  int     max_level;
   double  left_edge[3];
   double  right_edge[3];
-  int     num_levels;
   int     start_index[3];
   int     stop_index[3];
 };
@@ -79,7 +81,9 @@ struct hierarchy_info_struct {
 // FUNCTION PROTOTYPES
 //----------------------------------------------------------------------
 
-void          read_enzo_grid   (std::string file_name);
+void          read_enzo_grid   (double          ** grid_array,
+				grid_info_struct * grid_info,
+				std::string        field_name);
 
 enum_amr_type get_amr_type (std::string arg_hierarchy_dir);
 
@@ -87,17 +91,25 @@ bool          check_args (argument_struct *);
 
 void          print_usage(char ** argv);
 
-int           read_grid_info(std::string        hierarchy_name, 
-			     grid_info_struct * grid_info);
+void          read_grid_info(std::string        hierarchy_name, 
+			     grid_info_struct * grid_info,
+			     int                num_grids_local);
 
 void          get_hierarchy_info(hierarchy_info_struct * hierarchy_info,
 				 grid_info_struct      * grid_info, 
-				 int                     num_local_grids);
+				 int                     num_grids_local);
+
+int           get_num_grids (std::string hierarchy_name);
+void          print_hierarchy_info(hierarchy_info_struct * hierarchy_info);
+void          print_grid_info(grid_info_struct * grid_info);
 
 
 //----------------------------------------------------------------------
 // CPP MACROS
 //----------------------------------------------------------------------
+
+#define BIG_INT    2147483647
+#define BIG_DOUBLE 1e30
 
 #define MIN(a,b) ((a)<(b) ? (a) : (b))
 #define MAX(a,b) ((a)>(b) ? (a) : (b))
@@ -177,7 +189,7 @@ int main(int argc, char **argv)
     case 'h': arg.hierarchy_dir = optarg; break;
     case 'p': arg.operation = "project";  break;
     case 's': arg.operation = "slice";	
-      arg.slice_axis = optarg;
+      arg.slice_point = optarg;
       break;
     case '?': print_usage(argv); break;
     default:
@@ -194,18 +206,7 @@ int main(int argc, char **argv)
   // Verify arguments
   //--------------------------------------------------
 
-  if (check_args(&arg)) { 
-
-    printf ("\n");
-    printf ("  Reduction axis      = %s\n", arg.reduce_axis.c_str());
-    printf ("  Field name          = %s\n", arg.field_name.c_str());
-    printf ("  Grid file           = %s\n", arg.grid_file.c_str());
-    printf ("  Hierarchy directory = %s\n", arg.hierarchy_dir.c_str());
-    printf ("  Slice axis          = %s\n", arg.slice_axis.c_str());
-    printf ("  Operation           = %s\n", arg.operation.c_str() );
-    printf ("\n");
-
-  } else {
+  if ( ! check_args(&arg) ) { 
 
     print_usage(argv);
 
@@ -220,6 +221,7 @@ int main(int argc, char **argv)
   
 
   std::vector <std::string> grid_file_list;
+  enum_amr_type amr_type = amr_type_unknown;
 
   if ((grid_specified)) {
 
@@ -235,84 +237,143 @@ int main(int argc, char **argv)
 
     char file_name [MAX_FILE_STRING_LENGTH];
 
-    enum_amr_type amr_type = get_amr_type (arg.hierarchy_dir);
+    amr_type = get_amr_type (arg.hierarchy_dir);
 
     // Loop through files and add them to the list of files
 
-    for (int i = mpi_rank; true; i += mpi_size) {
+    if (amr_type == amr_type_unpacked) {
 
-      if (amr_type == amr_type_unpacked) {
+      for (int i = mpi_rank; true; i += mpi_size) {
+
 	sprintf (file_name, "%s.grid%04d",arg.hierarchy_dir.c_str(),i+1);
-      } else if (amr_type == amr_type_packed) {
-	sprintf (file_name, "%s.cpu%04d",arg.hierarchy_dir.c_str(),i);
+	
+	// Check if file exists, and append to list of files if it does
+
+	struct stat stFileInfo; 
+
+	if (stat(file_name,&stFileInfo) == 0) {
+
+	  grid_file_list.push_back(file_name);
+
+	} else {
+
+	  break;
+
+	}
+
       }
 
-      // Check if file exists, and append to list of files if it does
+    } else if (amr_type == amr_type_packed) {
 
-      struct stat stFileInfo; 
-
-      if (stat(file_name,&stFileInfo) == 0) {
-
-	grid_file_list.push_back(file_name);
-
-      } else {
-
-	break;
-
-      }
-
+	sprintf (file_name, "%s.cpu%04d",arg.hierarchy_dir.c_str(),mpi_rank);
     }
-
     // ERROR CHECK ! read_successful
     
   }
 
   // Display list of files
 
-  //  for (unsigned int i=0; i < grid_file_list.size(); i++) {
-  //    printf ("%d %s\n",mpi_rank,grid_file_list[i].c_str());
-  //  }
-
   // READ GRID INFO AND DETERMINE DOMAIN EXTENTS [left|right]_edge_global
 
-  grid_info_struct *grid_info = new grid_info_struct[grid_file_list.size()];
+  int num_grids_local = get_num_grids (arg.hierarchy_dir);
+  grid_info_struct *grid_info = new grid_info_struct[num_grids_local];
 
-  int num_local_grids = read_grid_info
-    (arg.hierarchy_dir,grid_info);
+  read_grid_info (arg.hierarchy_dir,grid_info,num_grids_local);
+
+  // DEBUG
+    for (int i=0; i<num_grids_local; i++) {
+      print_grid_info(&grid_info[i]);
+    }
+
+
+  printf ("%d num_grids_local = %d\n",mpi_rank,num_grids_local);
 
   hierarchy_info_struct hierarchy_info;
 
-  get_hierarchy_info(&hierarchy_info,grid_info,num_local_grids);
+  get_hierarchy_info(&hierarchy_info,grid_info,num_grids_local);
+
+  // DEBUG
+  print_hierarchy_info(&hierarchy_info);
 
   //====================================================================
   // ACCUMULATE PROCESSOR-LOCAL REDUCTION
   //====================================================================
 
+  // determine value array size
+
+  int scale = 1;
+  for (int i=0; i<hierarchy_info.max_level; i++) scale *= 2;
+
+  int n3[3]; // Dimensions of the grid hierarchy at the finest level
+  n3[0] = scale*(hierarchy_info.stop_index[0] - hierarchy_info.start_index[0]);
+  n3[1] = scale*(hierarchy_info.stop_index[1] - hierarchy_info.start_index[1]);
+  n3[2] = scale*(hierarchy_info.stop_index[2] - hierarchy_info.start_index[2]);
+
+  int axis;
+  int axis_char = (arg.reduce_axis.c_str())[0];
+  switch (axis_char) {
+  case 'x':  case 'X':  case '0':    axis = 0;    break;
+  case 'y':  case 'Y':  case '1':    axis = 1;    break;
+  case 'z':  case 'Z':  case '2':    axis = 2;    break;
+  default:
+    fprintf (stderr,"%s:%d Illegal reduce axis '%s'\n",
+	     __FILE__,__LINE__,arg.reduce_axis.c_str());
+    exit(1);
+    break;
+  }
+
+  int ix = (axis + 1) % 3;
+  int iy = (axis + 2) % 3;
+
+  int n = n3[ix]*n3[iy];
+
+  printf ("Full size = %d %d  %d\n",n3[ix],n3[iy],n);
   
-  //====================================================================
-  // ACCUMULATE PROCESSOR-LOCAL REDUCTION
-  //====================================================================
 
-  // First loop through files to get size
+  double * array_local = new double [n];
 
-  //====================================================================
-  // REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
-  //====================================================================
+  double * grid_array = NULL;
 
-  //====================================================================
-  // OUTPUT RESULT FROM ROOT
-  //====================================================================
+  if (amr_type == amr_type_unpacked) {
+    for (int i=0; i<num_grids_local; i++) {
+      read_enzo_grid (& grid_array, 
+		      &grid_info[i],
+		      arg.field_name);
+    }
+  } else if (amr_type == amr_type_packed) {
+    assert (0);
+  } else {
+    assert (0);
+  }
+  
+    //====================================================================
+    // ACCUMULATE PROCESSOR-LOCAL REDUCTION
+    //====================================================================
 
-  //====================================================================
-  // EXIT
-  //====================================================================
+    // First loop through files to get size
+
+    //====================================================================
+    // REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
+    //====================================================================
+
+    //====================================================================
+    // OUTPUT RESULT FROM ROOT
+    //====================================================================
+
+    //====================================================================
+    // EXIT
+    //====================================================================
+
+    delete [] grid_info;
+    delete [] array_local;
+  
 
 #ifdef USE_MPI
-  MPI_Finalize ();
+    MPI_Finalize ();
 #endif
   
-  return 0;
-}
+    return 0;
+  }
 
 //====================================================================
 // END main ()
@@ -328,9 +389,9 @@ int main(int argc, char **argv)
 
 void read_enzo_grid 
 (
- double   ** array, 
- std::string file_name, 
- std::string dataset_name
+ double          ** array, 
+ grid_info_struct * grid_info,
+ std::string        dataset_name
 )
 
 {
@@ -343,8 +404,8 @@ void read_enzo_grid
   //--------------------------------------------------
   // Open the file
   //--------------------------------------------------
- 
-  file_id = H5Fopen(file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+
+  file_id = H5Fopen(grid_info->file_name.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
 
   //--------------------------------------------------
   // Open the dataset
@@ -365,6 +426,9 @@ void read_enzo_grid
   assert (n[0]!=0);
   assert (n[1]!=0);
   assert (n[2]!=0);
+
+  printf ("%d %d %d\n",int(n[0]),int(n[1]),int(n[2]));
+  exit(1);
 
   //--------------------------------------------------
   // (Re)allocate storage for the dataset
@@ -392,27 +456,6 @@ void read_enzo_grid
 
   status = H5Fclose(file_id);
 
-}
-
-int get_num_grids (std::string hierarchy_file)
-{
-
-  FILE *fp_hierarchy  = fopen (hierarchy_file.c_str(), "r");
-
-  char line[MAX_FILE_STRING_LENGTH+1];
-
-  int ind_grid;
-  int num_grids=0;
-
-  while (fgets(line, MAX_FILE_STRING_LENGTH,fp_hierarchy) != NULL) {
-    if (sscanf (line,"Grid = %d\n",&ind_grid)) {
-      num_grids = MAX(ind_grid,num_grids);
-    }
-  }
-
-  fclose(fp_hierarchy);
-
-  return num_grids;
 }
 
 //--------------------------------------------------------------------
@@ -488,19 +531,23 @@ bool check_args(argument_struct *arg_p)
 
 void print_usage(char ** argv)
 {
-  printf ("\n\nUsage: %s [options]\n",argv[0]);
+  if (mpi_rank == 0) {
+    printf ("\n\nUsage: %s [options]\n",argv[0]);
     
-  printf ("\n");
-  printf ("   -a (--along)      {x|y|z}             Axis along which to reduce\n");
-  printf ("   -f (--field)      <field-name>        Name of the field\n");
-  printf ("   -g (--grid)       <grid file>         Specify an Enzo grid file\n");
-  printf ("   -h (--hierarchy)  <hierarchy dir>     Specify an Enzo hierarchy directory\n");
-  printf ("   -p (--project)                        Project values\n");
-  printf ("   -s (--slice)      [0:1]               Slice domain at the given point\n\n");
-  printf ("\n");
-  printf ("Required options: af[g|h][p|s]\n");
-  printf ("\n");
-
+    printf ("\n");
+    printf ("   -a (--along)      {x|y|z}             Axis along which to reduce\n");
+    printf ("   -f (--field)      <field-name>        Name of the field\n");
+    printf ("   -g (--grid)       <grid file>         Specify an Enzo grid file\n");
+    printf ("   -h (--hierarchy)  <hierarchy dir>     Specify an Enzo hierarchy directory\n");
+    printf ("   -p (--project)                        Project values\n");
+    printf ("   -s (--slice)      [0:1]               Slice domain at the given point\n\n");
+    printf ("\n");
+    printf ("Required options: af[g|h][p|s]\n");
+    printf ("\n");
+  }
+#ifdef USE_MPI
+  MPI_Barrier(MPI_COMM_WORLD);
+#endif
   exit (1);
 
 }
@@ -510,10 +557,10 @@ void print_usage(char ** argv)
 // Read hierarchy file 
 //-----------------------------------------------------------------------
 
-int read_grid_info(std::string        hierarchy_name, 
-		   grid_info_struct * grid_info)
+void read_grid_info(std::string        hierarchy_name, 
+		    grid_info_struct * grid_info,
+		    int                num_grids_local)
 {
-  TRACE;
   std::string hierarchy_file = hierarchy_name + ".hierarchy";
 
   FILE *fp_hierarchy  = fopen (hierarchy_file.c_str(), "r");
@@ -524,7 +571,7 @@ int read_grid_info(std::string        hierarchy_name,
 
   int grid_index = 1;
 
-  int index;
+  int index = 0;
 
   while (fgets(line,MAX_FILE_STRING_LENGTH, fp_hierarchy) != NULL) {
 
@@ -534,7 +581,13 @@ int read_grid_info(std::string        hierarchy_name,
 
     if (INDEX_TO_PROC(grid_index-1) == mpi_rank) {
 
-      int index = (grid_index - 1) / mpi_size;  // Update index
+      // Update grid array index
+
+      index = (grid_index - 1) / mpi_size;
+
+      // Get grid index
+
+      grid_info[index].index = grid_index;
 
       // Get grid extent
 
@@ -568,59 +621,190 @@ int read_grid_info(std::string        hierarchy_name,
 
   fclose(fp_hierarchy);   // Close hierarchy file
 
-  int num_local_grids = index;
-
-  // Determine grid levels
+  // Determine grid levels using mesh widths
+  // ASSUMES AT LEAST ONE GRID AND THAT IT IS A ROOT-LEVEL GRID
 
   double root_cell_width = 
     (grid_info[0].right_edge[0] - grid_info[0].left_edge[0]) / 
     (grid_info[0].stop_index[0] - grid_info[0].start_index[0] + 1) ;
 
-  for (int i = 0; i < num_local_grids; i++) {
+//   // Read Procmap file if needed
+
+//   if (amr_type == amr_type_packed) {
+
+//     std::string procmap_file = hierarchy_name + ".procmap";
+//     fpin  = fopen (procmap_file.c_str(), "r");
+
+//     // If *.procmap file exists, set processor id's accordingly
+
+//     int iproc;
+//     char sgrid[20], sproc[100],dummy[20];
+//     while (fgets(line,max_line_length,fpin) != NULL) {
+//       sscanf (line,"%s %s %s",sgrid,sproc,dummy);
+//       sscanf (sgrid,"%d",&igrid);
+//       sscanf (strstr(sproc,"cpu")+3,"%d",&iproc);
+//       processor[igrid] = iproc;
+//     }
+
+//     fclose(fpin);  // Close procmap file
+
+//   }
+
+  char file_name[MAX_FILE_STRING_LENGTH];
+
+  for (int i = 0; i < num_grids_local; i++) {
 
     double this_cell_width = 
       (grid_info[i].right_edge[0] - grid_info[i].left_edge[0]) /
       (grid_info[i].stop_index[0] - grid_info[i].start_index[0] + 1);
 
+    // Determine level
     grid_info[i].level = log (root_cell_width / this_cell_width) / log(2.0);
 
+
+    // Determine filenme
+
+    sprintf (file_name,"%s.grid%04d",hierarchy_name.c_str(), i*mpi_size+mpi_rank+1);
+    grid_info[i].file_name = file_name;
+
+
   }
-  return index;
+
 }
+
+//-----------------------------------------------------------------------
 
 void get_hierarchy_info (hierarchy_info_struct * hierarchy_info,
 			 grid_info_struct      * grid_info, 
-			 int                     num_local_grids)
+			 int                     num_grids_local)
 {
-  double left_edge_local[3]  = {1e30,1e30,1e30};
-  double right_edge_local[3] = {-1e30,-1e30,-1e30};
+  double left_edge_local[3]  = {BIG_DOUBLE,BIG_DOUBLE,BIG_DOUBLE};
+  double right_edge_local[3] = {-BIG_DOUBLE,-BIG_DOUBLE,-BIG_DOUBLE};
+  int    start_index_local[3] = {BIG_INT,BIG_INT,BIG_INT};
+  int    stop_index_local[3] = {-BIG_INT,-BIG_INT,-BIG_INT};
 
-  for (int index=0; index<num_local_grids; index++) {
+  for (int index=0; index<num_grids_local; index++) {
     
     // Update left_edge_local[] and right_edge_local[]
-    
-    left_edge_local[0]  = MIN( left_edge_local[0],grid_info[index].left_edge[0]);
-    left_edge_local[1]  = MIN( left_edge_local[1],grid_info[index].left_edge[1]);
-    left_edge_local[2]  = MIN( left_edge_local[2],grid_info[index].left_edge[2]);
-    right_edge_local[0] = MAX(right_edge_local[0],grid_info[index].right_edge[0]);
-    right_edge_local[1] = MAX(right_edge_local[1],grid_info[index].right_edge[1]);
-    right_edge_local[2] = MAX(right_edge_local[2],grid_info[index].right_edge[2]);
+
+    for (int i=0; i<3; i++) {
+      left_edge_local[i]  = 
+	MIN(left_edge_local[i],grid_info[index].left_edge[i]);
+      right_edge_local[i] = 
+	MAX(right_edge_local[i],grid_info[index].right_edge[i]);
+      start_index_local[i] = 
+	MIN(start_index_local[i],grid_info[index].start_index[i]);
+      stop_index_local[i] = 
+	MAX(stop_index_local[i],grid_info[index].stop_index[i]);
+    }
+
   }
 
   // Ensure that it works without USE_MPI, or with USE_MPI but not called with mpirun
 
-  hierarchy_info->left_edge[0] = left_edge_local[0];
-  hierarchy_info->left_edge[1] = left_edge_local[1];
-  hierarchy_info->left_edge[2] = left_edge_local[2];
-  hierarchy_info->right_edge[0] = right_edge_local[0];
-  hierarchy_info->right_edge[1] = right_edge_local[1];
-  hierarchy_info->right_edge[2] = right_edge_local[2];
+  for (int i=0; i<3; i++) {
+    hierarchy_info->left_edge[i] = left_edge_local[i];
+    hierarchy_info->right_edge[i] = right_edge_local[i];
+    hierarchy_info->start_index[i] = start_index_local[i];
+    hierarchy_info->stop_index[i] = stop_index_local[i];
+  }
 
 #ifdef USE_MPI  
-  MPI_Allreduce (left_edge_local,hierarchy_info->left_edge,3,
-		 MPI_DOUBLE,MPI_MIN,MPI_COMM_WORLD);
-  MPI_Allreduce (right_edge_local,hierarchy_info->right_edge,3,
-		 MPI_DOUBLE,MPI_MAX,MPI_COMM_WORLD);
+  if (mpi_size > 1) {
+    MPI_Allreduce (left_edge_local,hierarchy_info->left_edge,3,
+		   MPI_DOUBLE,MPI_MIN,MPI_COMM_WORLD);
+    MPI_Allreduce (right_edge_local,hierarchy_info->right_edge,3,
+		   MPI_DOUBLE,MPI_MAX,MPI_COMM_WORLD);
+    MPI_Allreduce (start_index_local,hierarchy_info->start_index,3,
+		   MPI_INT,MPI_MIN,MPI_COMM_WORLD);
+    MPI_Allreduce (stop_index_local,hierarchy_info->stop_index,3,
+		   MPI_INT,MPI_MAX,MPI_COMM_WORLD);
+  }
 #endif
 
+  // Determine maximum level in hierarchy
+
+  hierarchy_info->max_level = 0;
+
+  for (int i = 0; i < num_grids_local; i++) {
+
+    hierarchy_info->max_level = MAX(hierarchy_info->max_level,grid_info[i].level);
+
+  }
+
 }
+
+
+//-----------------------------------------------------------------------
+
+int get_num_grids (std::string hierarchy_name)
+{
+  std::string hierarchy_file = hierarchy_name + ".hierarchy";
+  FILE *fp_hierarchy  = fopen (hierarchy_file.c_str(), "r");
+  
+  char line [ MAX_FILE_STRING_LENGTH ];
+
+  // Read input Enzo hierarchy file
+
+  int grid_index = 1;
+
+  int num_local_grids = 0;
+
+  while (fgets(line,MAX_FILE_STRING_LENGTH, fp_hierarchy) != NULL) {
+    sscanf (line,"Grid = %d", &grid_index);
+    if (INDEX_TO_PROC(grid_index-1) == mpi_rank) {
+      num_local_grids = MAX(num_local_grids,(grid_index-1)/mpi_size+1);
+    }
+  }
+
+  fclose(fp_hierarchy);   // Close hierarchy file
+
+  return num_local_grids;
+}
+
+//-----------------------------------------------------------------------
+
+void print_hierarchy_info (hierarchy_info_struct * hierarchy_info)
+{
+  printf ("%d Hierarchy info\n",mpi_rank);
+  printf ("%d  max_level   = %d\n",
+	  mpi_rank,hierarchy_info->max_level);
+  printf ("%d  left_edge   = %g %g %g\n",
+	  mpi_rank,
+	  hierarchy_info->left_edge[0],
+	  hierarchy_info->left_edge[1],
+	  hierarchy_info->left_edge[2]);
+  printf ("%d  right_edge  = %g %g %g\n",
+	  mpi_rank,
+	  hierarchy_info->right_edge[0],
+	  hierarchy_info->right_edge[1],
+	  hierarchy_info->right_edge[2]);
+  printf ("%d  start_index = %d %d %d\n",
+	  mpi_rank,
+	  hierarchy_info->start_index[0],
+	  hierarchy_info->start_index[1],
+	  hierarchy_info->start_index[2]);
+  printf ("%d  stop_index  = %d %d %d\n",
+	  mpi_rank,
+	  hierarchy_info->stop_index[0],
+	  hierarchy_info->stop_index[1],
+	  hierarchy_info->stop_index[2]);
+
+  printf ("\n");
+}
+
+//-----------------------------------------------------------------------
+
+void print_grid_info (grid_info_struct * grid_info)
+{
+  printf ("%d  index       = %d\n",mpi_rank, grid_info->index);
+  printf ("%d  filename    = %s\n",mpi_rank, grid_info->file_name.c_str());
+  printf ("%d  group_name  = %s\n",mpi_rank, grid_info->group_name.c_str());
+  printf ("%d  level       = %d\n",mpi_rank, grid_info->level);
+  printf ("%d  left_edge   = %g %g %g\n",mpi_rank, grid_info->left_edge[0],grid_info->left_edge[1],grid_info->left_edge[2]);
+  printf ("%d  right_edge  = %g %g %g\n",mpi_rank, grid_info->right_edge[0],grid_info->right_edge[1],grid_info->right_edge[2]);
+  printf ("%d  start_index = %d %d %d\n",mpi_rank, grid_info->start_index[0],grid_info->start_index[1],grid_info->start_index[2]);
+  printf ("%d  stop_index  = %d %d %d\n",mpi_rank, grid_info->stop_index[0],grid_info->stop_index[1],grid_info->stop_index[2]);
+  printf ("\n");
+}
+
