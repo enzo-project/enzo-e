@@ -440,7 +440,7 @@ int main(int argc, char **argv)
 
 	  for (if3[ir] = 0; if3[ir] <= index_stop[ir] - index_start[ir]; if3[ir]++) {
 
-	    i3[ir] = (if3[ir] - index_start[ir]) / num_subcells;
+	    i3[ir] = if3[ir] / num_subcells;
 
 	    index_grid  =  i3[0] + grid_size[0] * (i3[1] + grid_size[1]*i3[2]);
 
