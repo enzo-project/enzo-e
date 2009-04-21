@@ -444,6 +444,10 @@ int main(int argc, char **argv)
 
 	    index_grid  =  i3[0] + grid_size[0] * (i3[1] + grid_size[1]*i3[2]);
 
+	    // Accumulate value in grid along reduction axis
+
+	    value += grid_array [index_grid];
+
 	    if ( ! (0 <= index_grid) ||
 		 ! (index_grid < grid_size[0]*grid_size[1]*grid_size[2])) {
 	      fprintf (stderr,"%s:%d %d index_grid out of bounds: exiting\n",
@@ -461,6 +465,9 @@ int main(int argc, char **argv)
 	  }
 
 	  index_array =  if3[ix] + nx * if3[iy];
+
+	  // Update the array with the grid reduction value
+	  array_local [index_array] += value;
 
 	  if ( ! (0 <= index_array) ||
 	       ! (index_array < n) ) {
@@ -480,23 +487,24 @@ int main(int argc, char **argv)
 	} else if ( operation_type == operation_type_slice ) {
 	  assert(0);
 	}
-	// Loop over finest-grid cells (ixf,iyf,izf) covered by (i3[0],i3[1],i3[2]) 
-
-
-	// Have cell center (x,y,z), now map to array_local index
-
-		
-	// Compute lower corner of grid cell
-
-
-	// Update for finest grid level
-
-
       }
     }
   }
 
-//====================================================================
+
+  // DEBUG: write array_local to text files
+
+  char file_name [MAX_FILE_STRING_LENGTH];
+  sprintf (file_name,"enzo-reduce.out.%d-%d",mpi_rank,mpi_size);
+  FILE *fp = fopen (file_name,"w");
+  for (int ix=0; ix<nx; ix++) {
+    for (int ix=0; ix<nx; ix++) {
+      fprintf (fp,"%d %d %g\n",ix,iy,array_local[ix+nx*iy]);
+    }
+  }
+
+
+  //====================================================================
   // REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
   //====================================================================
 
