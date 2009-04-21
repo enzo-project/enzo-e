@@ -62,6 +62,7 @@ struct grid_info_struct {
   std::string file_name;
   std::string group_name;
   int         level;
+  double      cell_width;
   double      left_edge[3];
   double      right_edge[3];
   int         start_index[3];
@@ -69,7 +70,9 @@ struct grid_info_struct {
 };
 
 struct hierarchy_info_struct {
+  int     num_grids_local;
   int     max_level;
+  double  fine_cell_width;
   double  left_edge[3];
   double  right_edge[3];
   int     start_index[3];
@@ -171,10 +174,18 @@ int main(int argc, char **argv)
     };
 
   //--------------------------------------------------
-  // Parse arguments
+  // Initialize default arguments
   //--------------------------------------------------
 
   argument_struct arg;
+
+  arg.reduce_axis = "x";
+  arg.operation   = "project";
+  arg.field_name  = "Density";
+
+  //--------------------------------------------------
+  // Parse arguments
+  //--------------------------------------------------
 
   int c;
   int option;
@@ -334,46 +345,110 @@ int main(int argc, char **argv)
 
   double * grid_array = NULL;
 
-  if (amr_type == amr_type_unpacked) {
-    for (int i=0; i<num_grids_local; i++) {
-      read_enzo_grid (& grid_array, 
-		      &grid_info[i],
-		      arg.field_name);
-    }
-  } else if (amr_type == amr_type_packed) {
-    assert (0);
-  } else {
-    assert (0);
+  if (amr_type == amr_type_packed) {
+    fprintf (stderr,"%s:%d amr_type == amr_type_packed is not supported yet\n",
+	     __FILE__,__LINE__);
+    exit(1);
   }
-  
-    //====================================================================
-    // ACCUMULATE PROCESSOR-LOCAL REDUCTION
-    //====================================================================
 
-    // First loop through files to get size
+  assert (amr_type == amr_type_unpacked);
 
-    //====================================================================
-    // REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
-    //====================================================================
+  //====================================================================
+  // ACCUMULATE PROCESSOR-LOCAL REDUCTION
+  //====================================================================
 
-    //====================================================================
-    // OUTPUT RESULT FROM ROOT
-    //====================================================================
+  for (int i=0; i<num_grids_local; i++) {
 
-    //====================================================================
-    // EXIT
-    //====================================================================
+    // Read each local grid
 
-    delete [] grid_info;
-    delete [] array_local;
+    read_enzo_grid (& grid_array, 
+		    &grid_info[i],
+		    arg.field_name);
+
+    // Accumulate values in array_local[]
+
+
+    int num_subcells = 1; 
+    for (int j=hierarchy_info.max_level; j>grid_info[i].level; j--) 
+      num_subcells*=2;;
+
+    printf ("%d grid %d of %d\n",
+	    mpi_rank,i,hierarchy_info.num_grids_local);
+
+    // Loop over grid cells (ix,iy,iz)
+
+    int ix,iy,iz;    // current index of grid
+    double xg,yg,zg; // lower point of grid cell (ix,iy,iz)
+
+    int ixf,iyf,izf; // subcell index of grid cell 0 <= (ixf,iyf,izf) < num_subcells
+    double x,y,z;    // center of finest grid cell (ixf,iyf,izf)
+
+
+    for (iz =  grid_info[i].start_index[2]; 
+	 iz <= grid_info[i].stop_index[2]; 
+	 iz++) {
+
+      zg = grid_info[i].left_edge[2] + iz * grid_info[i].cell_width;
+
+      for (iy =  grid_info[i].start_index[1]; 
+	   iy <= grid_info[i].stop_index[1]; 
+	   iy++) {
+
+	yg = grid_info[i].left_edge[1] + iy * grid_info[i].cell_width;
+
+	for (ix =  grid_info[i].start_index[0]; 
+	     ix <= grid_info[i].stop_index[0]; 
+	     ix++) {
+
+	  xg = grid_info[i].left_edge[0] + ix * grid_info[i].cell_width;
+
+	  // Loop over finest-grid cells (ixf,iyf,izf) covered by (ix,iy,iz) 
+
+
+	  for (izf=0; izf<num_subcells; izf++) {
+	    z += (izf + 0.5)*hierarchy_info.fine_cell_width;
+	    for (iyf=0; iyf<num_subcells; iyf++) {
+	      y += (iyf + 0.5)*hierarchy_info.fine_cell_width;
+	      for (ixf=0; ixf<num_subcells; ixf++) {
+
+		// Compute lower corner of grid cell
+
+
+		// Update for finest grid level
+
+		x += (ixf + 0.5)*hierarchy_info.fine_cell_width;
+
+	      }
+	    }
+	  }
+
+	}
+      }
+    }
+  }  
+
+  //====================================================================
+  // REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
+  //====================================================================
+
+  //====================================================================
+  // OUTPUT RESULT FROM ROOT
+  //====================================================================
+
+  //====================================================================
+  // EXIT
+  //====================================================================
+
+  delete [] grid_info;
+  delete [] array_local;
   
 
 #ifdef USE_MPI
-    MPI_Finalize ();
+  MPI_Finalize ();
 #endif
   
-    return 0;
-  }
+  return 0;
+}
 
 //====================================================================
 // END main ()
@@ -428,7 +503,6 @@ void read_enzo_grid
   assert (n[2]!=0);
 
   printf ("%d %d %d\n",int(n[0]),int(n[1]),int(n[2]));
-  exit(1);
 
   //--------------------------------------------------
   // (Re)allocate storage for the dataset
@@ -535,11 +609,11 @@ void print_usage(char ** argv)
     printf ("\n\nUsage: %s [options]\n",argv[0]);
     
     printf ("\n");
-    printf ("   -a (--along)      {x|y|z}             Axis along which to reduce\n");
-    printf ("   -f (--field)      <field-name>        Name of the field\n");
+    printf ("   -a (--along)      {x|y|z}             Axis along which to reduce [default -a x]\n");
+    printf ("   -f (--field)      <field-name>        Name of the field [default Density]\n");
     printf ("   -g (--grid)       <grid file>         Specify an Enzo grid file\n");
     printf ("   -h (--hierarchy)  <hierarchy dir>     Specify an Enzo hierarchy directory\n");
-    printf ("   -p (--project)                        Project values\n");
+    printf ("   -p (--project)                        Project values [default]\n");
     printf ("   -s (--slice)      [0:1]               Slice domain at the given point\n\n");
     printf ("\n");
     printf ("Required options: af[g|h][p|s]\n");
@@ -628,38 +702,21 @@ void read_grid_info(std::string        hierarchy_name,
     (grid_info[0].right_edge[0] - grid_info[0].left_edge[0]) / 
     (grid_info[0].stop_index[0] - grid_info[0].start_index[0] + 1) ;
 
-//   // Read Procmap file if needed
-
-//   if (amr_type == amr_type_packed) {
-
-//     std::string procmap_file = hierarchy_name + ".procmap";
-//     fpin  = fopen (procmap_file.c_str(), "r");
-
-//     // If *.procmap file exists, set processor id's accordingly
-
-//     int iproc;
-//     char sgrid[20], sproc[100],dummy[20];
-//     while (fgets(line,max_line_length,fpin) != NULL) {
-//       sscanf (line,"%s %s %s",sgrid,sproc,dummy);
-//       sscanf (sgrid,"%d",&igrid);
-//       sscanf (strstr(sproc,"cpu")+3,"%d",&iproc);
-//       processor[igrid] = iproc;
-//     }
-
-//     fclose(fpin);  // Close procmap file
-
-//   }
-
   char file_name[MAX_FILE_STRING_LENGTH];
 
   for (int i = 0; i < num_grids_local; i++) {
 
-    double this_cell_width = 
+    double local_cell_width = 
       (grid_info[i].right_edge[0] - grid_info[i].left_edge[0]) /
       (grid_info[i].stop_index[0] - grid_info[i].start_index[0] + 1);
 
+    // Determine cell width
+
+    grid_info[i].cell_width = local_cell_width;
+
     // Determine level
-    grid_info[i].level = log (root_cell_width / this_cell_width) / log(2.0);
+
+    grid_info[i].level = log (root_cell_width / grid_info[i].cell_width) / log(2.0);
 
 
     // Determine filenme
@@ -682,6 +739,8 @@ void get_hierarchy_info (hierarchy_info_struct * hierarchy_info,
   double right_edge_local[3] = {-BIG_DOUBLE,-BIG_DOUBLE,-BIG_DOUBLE};
   int    start_index_local[3] = {BIG_INT,BIG_INT,BIG_INT};
   int    stop_index_local[3] = {-BIG_INT,-BIG_INT,-BIG_INT};
+
+  hierarchy_info->num_grids_local = num_grids_local;
 
   for (int index=0; index<num_grids_local; index++) {
     
@@ -732,6 +791,18 @@ void get_hierarchy_info (hierarchy_info_struct * hierarchy_info,
 
   }
 
+  // Determine finest mesh width
+
+  double fine_to_coarse_ratio = 1;
+
+  //    first get ratio between coarsest mesh width and finest mesh width
+
+  for (int i=0; i<hierarchy_info->max_level; i++) fine_to_coarse_ratio *= 0.5;
+
+  //    then, assuming first grid is coarse, compute finest mesh width
+
+  hierarchy_info->fine_cell_width = fine_to_coarse_ratio * grid_info[0].cell_width;
+
 }
 
 
@@ -767,24 +838,28 @@ int get_num_grids (std::string hierarchy_name)
 void print_hierarchy_info (hierarchy_info_struct * hierarchy_info)
 {
   printf ("%d Hierarchy info\n",mpi_rank);
-  printf ("%d  max_level   = %d\n",
+  printf ("%d  num_grids_local = %d\n",
+	  mpi_rank,hierarchy_info->num_grids_local);
+  printf ("%d  max_level       = %d\n",
 	  mpi_rank,hierarchy_info->max_level);
-  printf ("%d  left_edge   = %g %g %g\n",
+  printf ("%d  fine_cell_width = %g\n",
+	  mpi_rank,hierarchy_info->fine_cell_width);
+  printf ("%d  left_edge       = %g %g %g\n",
 	  mpi_rank,
 	  hierarchy_info->left_edge[0],
 	  hierarchy_info->left_edge[1],
 	  hierarchy_info->left_edge[2]);
-  printf ("%d  right_edge  = %g %g %g\n",
+  printf ("%d  right_edge      = %g %g %g\n",
 	  mpi_rank,
 	  hierarchy_info->right_edge[0],
 	  hierarchy_info->right_edge[1],
 	  hierarchy_info->right_edge[2]);
-  printf ("%d  start_index = %d %d %d\n",
+  printf ("%d  start_index     = %d %d %d\n",
 	  mpi_rank,
 	  hierarchy_info->start_index[0],
 	  hierarchy_info->start_index[1],
 	  hierarchy_info->start_index[2]);
-  printf ("%d  stop_index  = %d %d %d\n",
+  printf ("%d  stop_index      = %d %d %d\n",
 	  mpi_rank,
 	  hierarchy_info->stop_index[0],
 	  hierarchy_info->stop_index[1],
@@ -801,6 +876,7 @@ void print_grid_info (grid_info_struct * grid_info)
   printf ("%d  filename    = %s\n",mpi_rank, grid_info->file_name.c_str());
   printf ("%d  group_name  = %s\n",mpi_rank, grid_info->group_name.c_str());
   printf ("%d  level       = %d\n",mpi_rank, grid_info->level);
+  printf ("%d  cell_width  = %g\n",mpi_rank, grid_info->cell_width);
   printf ("%d  left_edge   = %g %g %g\n",mpi_rank, grid_info->left_edge[0],grid_info->left_edge[1],grid_info->left_edge[2]);
   printf ("%d  right_edge  = %g %g %g\n",mpi_rank, grid_info->right_edge[0],grid_info->right_edge[1],grid_info->right_edge[2]);
   printf ("%d  start_index = %d %d %d\n",mpi_rank, grid_info->start_index[0],grid_info->start_index[1],grid_info->start_index[2]);
