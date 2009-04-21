@@ -67,6 +67,9 @@ struct grid_info_struct {
   double      right_edge[3];
   int         start_index[3];
   int         stop_index[3];
+  int         start_index_fine[3];
+  int         stop_index_fine[3];
+  int         ratio_to_fine;
 };
 
 struct hierarchy_info_struct {
@@ -94,13 +97,13 @@ bool          check_args (argument_struct *);
 
 void          print_usage(char ** argv);
 
-void          read_grid_info(std::string        hierarchy_name, 
-			     grid_info_struct * grid_info,
-			     int                num_grids_local);
+void          read_grids (std::string        hierarchy_name, 
+			  grid_info_struct * grid_info,
+			  int                num_grids_local);
 
-void          get_hierarchy_info(hierarchy_info_struct * hierarchy_info,
-				 grid_info_struct      * grid_info, 
-				 int                     num_grids_local);
+void          init_hierarchy (hierarchy_info_struct * hierarchy_info,
+			      grid_info_struct      * grid_info, 
+			      int                     num_grids_local);
 
 int           get_num_grids (std::string hierarchy_name);
 void          print_hierarchy_info(hierarchy_info_struct * hierarchy_info);
@@ -288,23 +291,21 @@ int main(int argc, char **argv)
 
   int num_grids_local = get_num_grids (arg.hierarchy_dir);
   grid_info_struct *grid_info = new grid_info_struct[num_grids_local];
-
-  read_grid_info (arg.hierarchy_dir,grid_info,num_grids_local);
-
-  // DEBUG
-    for (int i=0; i<num_grids_local; i++) {
-      print_grid_info(&grid_info[i]);
-    }
-
-
-  printf ("%d num_grids_local = %d\n",mpi_rank,num_grids_local);
-
   hierarchy_info_struct hierarchy_info;
 
-  get_hierarchy_info(&hierarchy_info,grid_info,num_grids_local);
+  read_grids (arg.hierarchy_dir,grid_info,num_grids_local);
+
+  init_hierarchy (&hierarchy_info,grid_info,num_grids_local);
+
 
   // DEBUG
   print_hierarchy_info(&hierarchy_info);
+
+  // DEBUG
+  for (int i=0; i<num_grids_local; i++) {
+    print_grid_info(&grid_info[i]);
+  }
+
 
   //====================================================================
   // ACCUMULATE PROCESSOR-LOCAL REDUCTION
@@ -316,9 +317,9 @@ int main(int argc, char **argv)
   for (int i=0; i<hierarchy_info.max_level; i++) scale *= 2;
 
   int n3[3]; // Dimensions of the grid hierarchy at the finest level
-  n3[0] = scale*(hierarchy_info.stop_index[0] - hierarchy_info.start_index[0]);
-  n3[1] = scale*(hierarchy_info.stop_index[1] - hierarchy_info.start_index[1]);
-  n3[2] = scale*(hierarchy_info.stop_index[2] - hierarchy_info.start_index[2]);
+  n3[0] =(hierarchy_info.stop_index[0] - hierarchy_info.start_index[0] + 1);
+  n3[1] =(hierarchy_info.stop_index[1] - hierarchy_info.start_index[1] + 1);
+  n3[2] =(hierarchy_info.stop_index[2] - hierarchy_info.start_index[2] + 1);
 
   int axis;
   int axis_char = (arg.reduce_axis.c_str())[0];
@@ -336,9 +337,12 @@ int main(int argc, char **argv)
   int ix = (axis + 1) % 3;
   int iy = (axis + 2) % 3;
 
-  int n = n3[ix]*n3[iy];
+  int nx = n3[ix];
+  int ny = n3[iy];
 
-  printf ("Full size = %d %d  %d\n",n3[ix],n3[iy],n);
+  int n = nx*ny;
+
+  printf ("Full size = %d %d  %d\n",nx,ny,n);
   
 
   double * array_local = new double [n];
@@ -372,62 +376,100 @@ int main(int argc, char **argv)
     for (int j=hierarchy_info.max_level; j>grid_info[i].level; j--) 
       num_subcells*=2;;
 
-    printf ("%d grid %d of %d\n",
-	    mpi_rank,i,hierarchy_info.num_grids_local);
+    // Loop over grid cells
+    
+    int    i3[3]; // current index of grid cell on grid level
+    int    if3[3];  // current index of grid cell on finest level
 
-    // Loop over grid cells (ix,iy,iz)
+    int index_array, index_grid;
 
-    int ix,iy,iz;    // current index of grid
-    double xg,yg,zg; // lower point of grid cell (ix,iy,iz)
+    // first index of the grid on the fine level
 
-    int ixf,iyf,izf; // subcell index of grid cell 0 <= (ixf,iyf,izf) < num_subcells
-    double x,y,z;    // center of finest grid cell (ixf,iyf,izf)
+    int index_start[3] = {
+      grid_info[i].start_index_fine[0],
+      grid_info[i].start_index_fine[1],
+      grid_info[i].start_index_fine[2] 
+    };
+
+    // last index of the grid on the fine level
+
+    int index_stop[3] = {
+      grid_info[i].stop_index_fine[0],
+      grid_info[i].stop_index_fine[1],
+      grid_info[i].stop_index_fine[2] 
+    };
+
+    int grid_size[3] = {
+
+      grid_info[i].stop_index[0] - grid_info[i].start_index[0] + 1,
+      grid_info[i].stop_index[1] - grid_info[i].start_index[1] + 1,
+      grid_info[i].stop_index[2] - grid_info[i].start_index[2] + 1
+
+    };
+
+    printf ("%d grid %d of %d   %d:%d %d:%d %d:%d \n",
+	    mpi_rank,i,hierarchy_info.num_grids_local,
+	    index_start[0],index_stop[0],
+	    index_start[0],index_stop[1],
+	    index_start[0],index_stop[2] );
+
+    for (if3[2] = index_start[2]; if3[2] <= index_stop[2]; if3[2]++) {
+
+      i3[2] = (if3[2] - index_start[2]) / num_subcells;
+
+      for (if3[1] =  index_start[1]; if3[1] <= index_stop[1]; if3[1]++) {
+
+	i3[1] = (if3[1] - index_start[1])  / num_subcells;
 
 
-    for (iz =  grid_info[i].start_index[2]; 
-	 iz <= grid_info[i].stop_index[2]; 
-	 iz++) {
+	for (if3[0] =  index_start[0]; if3[0] <= index_stop[0]; if3[0]++) {
 
-      zg = grid_info[i].left_edge[2] + iz * grid_info[i].cell_width;
+	  i3[0] = (if3[0] - index_start[0]) / num_subcells;
 
-      for (iy =  grid_info[i].start_index[1]; 
-	   iy <= grid_info[i].stop_index[1]; 
-	   iy++) {
+	  
+	  index_array =  if3[ix] + nx * if3[iy];
 
-	yg = grid_info[i].left_edge[1] + iy * grid_info[i].cell_width;
+	  index_grid  =  i3[0] + grid_size[0] * (i3[1] + grid_size[1]*i3[2]);
 
-	for (ix =  grid_info[i].start_index[0]; 
-	     ix <= grid_info[i].stop_index[0]; 
-	     ix++) {
+	  if ( ! (0 <= index_array) ||
+	       ! (index_array < n) ||
+	       ! (0 <= index_grid) ||
+	       ! (index_grid < grid_size[0]*grid_size[1]*grid_size[2])) {
+	    
+	    fprintf (stderr,"%s:%d %d index out of bounds: exiting\n",
+		     __FILE__,__LINE__,mpi_rank);
+	    fprintf (stderr,"index_grid = %d  i3 = (%d %d %d) grid_size=(%d %d %d)\n",
+		     index_array,i3[0],i3[1],i3[2],
+		     grid_size[0],grid_size[1],grid_size[2]);
+	    fprintf (stderr,"index_array = %d  if3 = (%d %d %d)  n = %d\n",
+		     index_array,if3[0],if3[1],if3[2],n);
 
-	  xg = grid_info[i].left_edge[0] + ix * grid_info[i].cell_width;
-
-	  // Loop over finest-grid cells (ixf,iyf,izf) covered by (ix,iy,iz) 
-
-
-	  for (izf=0; izf<num_subcells; izf++) {
-	    z += (izf + 0.5)*hierarchy_info.fine_cell_width;
-	    for (iyf=0; iyf<num_subcells; iyf++) {
-	      y += (iyf + 0.5)*hierarchy_info.fine_cell_width;
-	      for (ixf=0; ixf<num_subcells; ixf++) {
-
-		// Compute lower corner of grid cell
+	    print_hierarchy_info(&hierarchy_info);
+	    print_grid_info(&grid_info[i]);
 
 
-		// Update for finest grid level
-
-		x += (ixf + 0.5)*hierarchy_info.fine_cell_width;
-
-	      }
-	    }
+	    exit(1);
 	  }
+
+	  // Loop over finest-grid cells (ixf,iyf,izf) covered by (i3[0],i3[1],i3[2]) 
+
+
+	  // Have cell center (x,y,z), now map to array_local index
+
+		
+	  // Compute lower corner of grid cell
+
+
+	  // Update for finest grid level
+
 
 	}
       }
     }
-  }  
 
-  //====================================================================
+  }
+
+//====================================================================
   // REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
   //====================================================================
 
@@ -631,9 +673,9 @@ void print_usage(char ** argv)
 // Read hierarchy file 
 //-----------------------------------------------------------------------
 
-void read_grid_info(std::string        hierarchy_name, 
-		    grid_info_struct * grid_info,
-		    int                num_grids_local)
+void read_grids (std::string        hierarchy_name, 
+		 grid_info_struct * grid_info,
+		 int                num_grids_local)
 {
   std::string hierarchy_file = hierarchy_name + ".hierarchy";
 
@@ -718,12 +760,10 @@ void read_grid_info(std::string        hierarchy_name,
 
     grid_info[i].level = log (root_cell_width / grid_info[i].cell_width) / log(2.0);
 
-
     // Determine filenme
 
     sprintf (file_name,"%s.grid%04d",hierarchy_name.c_str(), i*mpi_size+mpi_rank+1);
     grid_info[i].file_name = file_name;
-
 
   }
 
@@ -731,14 +771,12 @@ void read_grid_info(std::string        hierarchy_name,
 
 //-----------------------------------------------------------------------
 
-void get_hierarchy_info (hierarchy_info_struct * hierarchy_info,
-			 grid_info_struct      * grid_info, 
-			 int                     num_grids_local)
+void init_hierarchy (hierarchy_info_struct * hierarchy_info,
+		     grid_info_struct      * grid_info, 
+		     int                     num_grids_local)
 {
   double left_edge_local[3]  = {BIG_DOUBLE,BIG_DOUBLE,BIG_DOUBLE};
   double right_edge_local[3] = {-BIG_DOUBLE,-BIG_DOUBLE,-BIG_DOUBLE};
-  int    start_index_local[3] = {BIG_INT,BIG_INT,BIG_INT};
-  int    stop_index_local[3] = {-BIG_INT,-BIG_INT,-BIG_INT};
 
   hierarchy_info->num_grids_local = num_grids_local;
 
@@ -747,14 +785,8 @@ void get_hierarchy_info (hierarchy_info_struct * hierarchy_info,
     // Update left_edge_local[] and right_edge_local[]
 
     for (int i=0; i<3; i++) {
-      left_edge_local[i]  = 
-	MIN(left_edge_local[i],grid_info[index].left_edge[i]);
-      right_edge_local[i] = 
-	MAX(right_edge_local[i],grid_info[index].right_edge[i]);
-      start_index_local[i] = 
-	MIN(start_index_local[i],grid_info[index].start_index[i]);
-      stop_index_local[i] = 
-	MAX(stop_index_local[i],grid_info[index].stop_index[i]);
+      left_edge_local[i]  = MIN(left_edge_local[i], grid_info[index].left_edge[i]);
+      right_edge_local[i] = MAX(right_edge_local[i],grid_info[index].right_edge[i]);
     }
 
   }
@@ -764,8 +796,6 @@ void get_hierarchy_info (hierarchy_info_struct * hierarchy_info,
   for (int i=0; i<3; i++) {
     hierarchy_info->left_edge[i] = left_edge_local[i];
     hierarchy_info->right_edge[i] = right_edge_local[i];
-    hierarchy_info->start_index[i] = start_index_local[i];
-    hierarchy_info->stop_index[i] = stop_index_local[i];
   }
 
 #ifdef USE_MPI  
@@ -774,10 +804,6 @@ void get_hierarchy_info (hierarchy_info_struct * hierarchy_info,
 		   MPI_DOUBLE,MPI_MIN,MPI_COMM_WORLD);
     MPI_Allreduce (right_edge_local,hierarchy_info->right_edge,3,
 		   MPI_DOUBLE,MPI_MAX,MPI_COMM_WORLD);
-    MPI_Allreduce (start_index_local,hierarchy_info->start_index,3,
-		   MPI_INT,MPI_MIN,MPI_COMM_WORLD);
-    MPI_Allreduce (stop_index_local,hierarchy_info->stop_index,3,
-		   MPI_INT,MPI_MAX,MPI_COMM_WORLD);
   }
 #endif
 
@@ -791,20 +817,67 @@ void get_hierarchy_info (hierarchy_info_struct * hierarchy_info,
 
   }
 
-  // Determine finest mesh width
+  // Determine finest mesh width (assumes first grid is coarse)
 
   double fine_to_coarse_ratio = 1;
-
-  //    first get ratio between coarsest mesh width and finest mesh width
-
   for (int i=0; i<hierarchy_info->max_level; i++) fine_to_coarse_ratio *= 0.5;
-
-  //    then, assuming first grid is coarse, compute finest mesh width
-
   hierarchy_info->fine_cell_width = fine_to_coarse_ratio * grid_info[0].cell_width;
 
-}
+  // grid.ratio_to_fine
+  // grid.start_index_fine
+  // grid.stop_index_fine
 
+  for (int i=0; i<num_grids_local; i++) {
+
+    // Determine ratio_to_fine grid cell ratio between level and finest
+
+    grid_info[i].ratio_to_fine = 1;
+    for (int j=grid_info[i].level; j<hierarchy_info->max_level; j++) {
+      grid_info[i].ratio_to_fine *= 2;
+    }
+
+    // Compute start_index_fine and stop_index_fine
+
+    for (int j=0; j<3; j++) {
+    grid_info[i].start_index_fine[j] 
+      = ((grid_info[i].left_edge[j] - hierarchy_info->left_edge[j]) 
+	    / hierarchy_info->fine_cell_width);
+    grid_info[i].stop_index_fine[j] 
+      = ((grid_info[i].right_edge[j] - hierarchy_info->left_edge[j]) 
+	    / hierarchy_info->fine_cell_width - 1);
+    }
+  }
+
+  // hierarchy.start_index
+  // hierarchy.stop_index
+
+  int    start_index_local[3] = {BIG_INT,BIG_INT,BIG_INT};
+  int    stop_index_local[3] = {-BIG_INT,-BIG_INT,-BIG_INT};
+
+  for (int index=0; index<num_grids_local; index++) {
+    for (int i=0; i<3; i++) {
+      start_index_local[i] = 
+	MIN(start_index_local[i],grid_info[index].start_index_fine[i]);
+      stop_index_local[i] = 
+	MAX(stop_index_local[i],grid_info[index].stop_index_fine[i]);
+    }
+  }
+
+  for (int i=0; i<3; i++) {
+    hierarchy_info->start_index[i] = start_index_local[i];
+    hierarchy_info->stop_index[i] = stop_index_local[i];
+  }
+
+#ifdef USE_MPI  
+  if (mpi_size > 1) {
+    MPI_Allreduce (start_index_local,hierarchy_info->start_index,3,
+		   MPI_INT,MPI_MIN,MPI_COMM_WORLD);
+    MPI_Allreduce (stop_index_local,hierarchy_info->stop_index,3,
+		   MPI_INT,MPI_MAX,MPI_COMM_WORLD);
+  }
+#endif
+
+}
 
 //-----------------------------------------------------------------------
 
@@ -838,28 +911,28 @@ int get_num_grids (std::string hierarchy_name)
 void print_hierarchy_info (hierarchy_info_struct * hierarchy_info)
 {
   printf ("%d Hierarchy info\n",mpi_rank);
-  printf ("%d  num_grids_local = %d\n",
+  printf ("%d  num_grids_local  = %d\n",
 	  mpi_rank,hierarchy_info->num_grids_local);
-  printf ("%d  max_level       = %d\n",
+  printf ("%d  max_level        = %d\n",
 	  mpi_rank,hierarchy_info->max_level);
-  printf ("%d  fine_cell_width = %g\n",
+  printf ("%d  fine_cell_width  = %g\n",
 	  mpi_rank,hierarchy_info->fine_cell_width);
-  printf ("%d  left_edge       = %g %g %g\n",
+  printf ("%d  left_edge        = %g %g %g\n",
 	  mpi_rank,
 	  hierarchy_info->left_edge[0],
 	  hierarchy_info->left_edge[1],
 	  hierarchy_info->left_edge[2]);
-  printf ("%d  right_edge      = %g %g %g\n",
+  printf ("%d  right_edge       = %g %g %g\n",
 	  mpi_rank,
 	  hierarchy_info->right_edge[0],
 	  hierarchy_info->right_edge[1],
 	  hierarchy_info->right_edge[2]);
-  printf ("%d  start_index     = %d %d %d\n",
+  printf ("%d  start_index      = %d %d %d\n",
 	  mpi_rank,
 	  hierarchy_info->start_index[0],
 	  hierarchy_info->start_index[1],
 	  hierarchy_info->start_index[2]);
-  printf ("%d  stop_index      = %d %d %d\n",
+  printf ("%d  stop_index       = %d %d %d\n",
 	  mpi_rank,
 	  hierarchy_info->stop_index[0],
 	  hierarchy_info->stop_index[1],
@@ -872,15 +945,27 @@ void print_hierarchy_info (hierarchy_info_struct * hierarchy_info)
 
 void print_grid_info (grid_info_struct * grid_info)
 {
-  printf ("%d  index       = %d\n",mpi_rank, grid_info->index);
-  printf ("%d  filename    = %s\n",mpi_rank, grid_info->file_name.c_str());
-  printf ("%d  group_name  = %s\n",mpi_rank, grid_info->group_name.c_str());
-  printf ("%d  level       = %d\n",mpi_rank, grid_info->level);
-  printf ("%d  cell_width  = %g\n",mpi_rank, grid_info->cell_width);
-  printf ("%d  left_edge   = %g %g %g\n",mpi_rank, grid_info->left_edge[0],grid_info->left_edge[1],grid_info->left_edge[2]);
-  printf ("%d  right_edge  = %g %g %g\n",mpi_rank, grid_info->right_edge[0],grid_info->right_edge[1],grid_info->right_edge[2]);
-  printf ("%d  start_index = %d %d %d\n",mpi_rank, grid_info->start_index[0],grid_info->start_index[1],grid_info->start_index[2]);
-  printf ("%d  stop_index  = %d %d %d\n",mpi_rank, grid_info->stop_index[0],grid_info->stop_index[1],grid_info->stop_index[2]);
+  printf ("%d  index         = %d\n",mpi_rank, grid_info->index);
+  printf ("%d  filename      = %s\n",mpi_rank, grid_info->file_name.c_str());
+  printf ("%d  group_name    = %s\n",mpi_rank, grid_info->group_name.c_str());
+  printf ("%d  level         = %d\n",mpi_rank, grid_info->level);
+  printf ("%d  cell_width    = %g\n",mpi_rank, grid_info->cell_width);
+  printf ("%d  left_edge     = %g %g %g\n",mpi_rank, grid_info->left_edge[0],grid_info->left_edge[1],grid_info->left_edge[2]);
+  printf ("%d  right_edge    = %g %g %g\n",mpi_rank, grid_info->right_edge[0],grid_info->right_edge[1],grid_info->right_edge[2]);
+  printf ("%d  start_index   = %d %d %d\n",mpi_rank, grid_info->start_index[0],grid_info->start_index[1],grid_info->start_index[2]);
+  printf ("%d  stop_index    = %d %d %d\n",mpi_rank, grid_info->stop_index[0],grid_info->stop_index[1],grid_info->stop_index[2]);
+  printf ("%d  start_index_fine = %d %d %d\n",
+	  mpi_rank,
+	  grid_info->start_index_fine[0],
+	  grid_info->start_index_fine[1],
+	  grid_info->start_index_fine[2]);
+  printf ("%d  stop_index_fine = %d %d %d\n",
+	  mpi_rank,
+	  grid_info->stop_index_fine[0],
+	  grid_info->stop_index_fine[1],
+	  grid_info->stop_index_fine[2]);
+  printf ("%d  ratio_to_fine = %d\n",	  mpi_rank,  grid_info->ratio_to_fine);
+	  
   printf ("\n");
 }
 
