@@ -48,6 +48,10 @@
 
 enum enum_amr_type { amr_type_unknown, amr_type_packed, amr_type_unpacked };
 
+enum enum_operation_type { operation_type_unknown, 
+			   operation_type_project, 
+			   operation_type_slice };
+
 struct argument_struct {
   std::string reduce_axis;
   std::string field_name;
@@ -334,8 +338,9 @@ int main(int argc, char **argv)
     break;
   }
 
-  int ix = (axis + 1) % 3;
-  int iy = (axis + 2) % 3;
+  int ir = axis;           // reduction axis
+  int ix = (axis + 1) % 3; // x-axis of array
+  int iy = (axis + 2) % 3; // y-axis of array
 
   int nx = n3[ix];
   int ny = n3[iy];
@@ -360,6 +365,10 @@ int main(int argc, char **argv)
   //====================================================================
   // ACCUMULATE PROCESSOR-LOCAL REDUCTION
   //====================================================================
+
+  enum_operation_type operation_type;
+  if (arg.operation == "project") operation_type = operation_type_project;
+  if (arg.operation == "slice")   operation_type = operation_type_slice;
 
   for (int i=0; i<num_grids_local; i++) {
 
@@ -410,37 +419,54 @@ int main(int argc, char **argv)
     printf ("%d grid %d of %d   %d:%d %d:%d %d:%d \n",
 	    mpi_rank,i,hierarchy_info.num_grids_local,
 	    index_start[0],index_stop[0],
-	    index_start[0],index_stop[1],
-	    index_start[0],index_stop[2] );
+	    index_start[1],index_stop[1],
+	    index_start[2],index_stop[2] );
 
-    for (if3[2] = index_start[2]; if3[2] <= index_stop[2]; if3[2]++) {
+    // Loop over fine grid cells on array covered by coarse grid
 
-      i3[2] = (if3[2] - index_start[2]) / num_subcells;
+    for (if3[iy] = index_start[iy]; if3[iy] <= index_stop[iy]; if3[iy]++) {
 
-      for (if3[1] =  index_start[1]; if3[1] <= index_stop[1]; if3[1]++) {
+      i3[iy] = (if3[iy] - index_start[iy]) / num_subcells;
 
-	i3[1] = (if3[1] - index_start[1])  / num_subcells;
+      for (if3[ix] =  index_start[ix]; if3[ix] <= index_stop[ix]; if3[ix]++) {
+
+	i3[ix] = (if3[ix] - index_start[ix])  / num_subcells;
+
+	// Accumulate value
+
+	double value = 0;
+
+	if ( operation_type == operation_type_project ) {
+
+	  for (if3[ir] = 0; if3[ir] <= index_stop[ir] - index_start[ir]; if3[ir]++) {
+
+	    i3[ir] = (if3[ir] - index_start[ir]) / num_subcells;
+
+	    index_grid  =  i3[0] + grid_size[0] * (i3[1] + grid_size[1]*i3[2]);
+
+	    if ( ! (0 <= index_grid) ||
+		 ! (index_grid < grid_size[0]*grid_size[1]*grid_size[2])) {
+	      fprintf (stderr,"%s:%d %d index_grid out of bounds: exiting\n",
+		       __FILE__,__LINE__,mpi_rank);
+	      fprintf (stderr,"index_grid = %d  i3 = (%d %d %d) grid_size=(%d %d %d)\n",
+		       index_array,i3[0],i3[1],i3[2],
+		       grid_size[0],grid_size[1],grid_size[2]);
+
+	      print_hierarchy_info(&hierarchy_info);
+	      print_grid_info(&grid_info[i]);
 
 
-	for (if3[0] =  index_start[0]; if3[0] <= index_stop[0]; if3[0]++) {
+	      exit(1);
+	    }
+	  }
 
-	  i3[0] = (if3[0] - index_start[0]) / num_subcells;
-
-	  
 	  index_array =  if3[ix] + nx * if3[iy];
 
-	  index_grid  =  i3[0] + grid_size[0] * (i3[1] + grid_size[1]*i3[2]);
-
 	  if ( ! (0 <= index_array) ||
-	       ! (index_array < n) ||
-	       ! (0 <= index_grid) ||
-	       ! (index_grid < grid_size[0]*grid_size[1]*grid_size[2])) {
+	       ! (index_array < n) ) {
 	    
-	    fprintf (stderr,"%s:%d %d index out of bounds: exiting\n",
+	    fprintf (stderr,"%s:%d %d index_array out of bounds: exiting\n",
 		     __FILE__,__LINE__,mpi_rank);
-	    fprintf (stderr,"index_grid = %d  i3 = (%d %d %d) grid_size=(%d %d %d)\n",
-		     index_array,i3[0],i3[1],i3[2],
-		     grid_size[0],grid_size[1],grid_size[2]);
 	    fprintf (stderr,"index_array = %d  if3 = (%d %d %d)  n = %d\n",
 		     index_array,if3[0],if3[1],if3[2],n);
 
@@ -451,22 +477,23 @@ int main(int argc, char **argv)
 	    exit(1);
 	  }
 
-	  // Loop over finest-grid cells (ixf,iyf,izf) covered by (i3[0],i3[1],i3[2]) 
+	} else if ( operation_type == operation_type_slice ) {
+	  assert(0);
+	}
+	// Loop over finest-grid cells (ixf,iyf,izf) covered by (i3[0],i3[1],i3[2]) 
 
 
-	  // Have cell center (x,y,z), now map to array_local index
+	// Have cell center (x,y,z), now map to array_local index
 
 		
-	  // Compute lower corner of grid cell
+	// Compute lower corner of grid cell
 
 
-	  // Update for finest grid level
+	// Update for finest grid level
 
 
-	}
       }
     }
-
   }
 
 //====================================================================
