@@ -91,27 +91,40 @@ struct hierarchy_info_struct {
 // FUNCTION PROTOTYPES
 //----------------------------------------------------------------------
 
-void          read_enzo_grid   (double          ** grid_array,
-				grid_info_struct * grid_info,
-				std::string        field_name);
+void read_enzo_grid   
+(    double          ** grid_array,
+     grid_info_struct * grid_info,
+     std::string        field_name  );
 
-enum_amr_type get_amr_type (std::string arg_hierarchy_dir);
+enum_amr_type get_amr_type 
+(    std::string        arg_hierarchy_dir );
 
-bool          check_args (argument_struct *);
+bool check_args (argument_struct *);
 
-void          print_usage(char ** argv);
+void print_usage(char ** argv);
 
-void          read_grids (std::string        hierarchy_name, 
-			  grid_info_struct * grid_info,
-			  int                num_grids_local);
+void read_grids 
+(    std::string        hierarchy_name, 
+     grid_info_struct * grid_info,
+     int                num_grids_local );
 
-void          init_hierarchy (hierarchy_info_struct * hierarchy_info,
-			      grid_info_struct      * grid_info, 
-			      int                     num_grids_local);
+void init_hierarchy 
+(    hierarchy_info_struct * hierarchy_info,
+     grid_info_struct      * grid_info, 
+     int                     num_grids_local );
 
-int           get_num_grids (std::string hierarchy_name);
-void          print_hierarchy_info(hierarchy_info_struct * hierarchy_info);
-void          print_grid_info(grid_info_struct * grid_info);
+int get_num_grids (std::string hierarchy_name);
+
+void print_hierarchy_info(hierarchy_info_struct * hierarchy_info);
+
+void print_grid_info(grid_info_struct * grid_info);
+
+void write_array 
+(    std::string        file_name,
+     std::string        dataset_name,
+     double           * array,
+     int                nx,
+     int                ny );
 
 
 //----------------------------------------------------------------------
@@ -446,7 +459,7 @@ int main(int argc, char **argv)
 
 	    // Accumulate value in grid along reduction axis
 
-	    value += grid_array [index_grid];
+	    value += 1;
 
 	    if ( ! (0 <= index_grid) ||
 		 ! (index_grid < grid_size[0]*grid_size[1]*grid_size[2])) {
@@ -467,7 +480,7 @@ int main(int argc, char **argv)
 	  index_array =  if3[ix] + nx * if3[iy];
 
 	  // Update the array with the grid reduction value
-	  array_local [index_array] += value;
+	  array_local [index_array] += log(value);
 
 	  if ( ! (0 <= index_array) ||
 	       ! (index_array < n) ) {
@@ -495,13 +508,17 @@ int main(int argc, char **argv)
   // DEBUG: write array_local to text files
 
   char file_name [MAX_FILE_STRING_LENGTH];
-  sprintf (file_name,"enzo-reduce.out.%d-%d",mpi_rank,mpi_size);
-  FILE *fp = fopen (file_name,"w");
-  for (int ix=0; ix<nx; ix++) {
-    for (int ix=0; ix<nx; ix++) {
-      fprintf (fp,"%d %d %g\n",ix,iy,array_local[ix+nx*iy]);
-    }
-  }
+
+  sprintf (file_name,"enzo-reduce.out.%d.h5",mpi_rank);
+  write_array (file_name,arg.field_name,array_local,nx,ny);
+
+//   sprintf (file_name,"enzo-reduce.out.%d-%d",mpi_rank,mpi_size);
+//   FILE *fp = fopen (file_name,"w");
+//   for (int ix=0; ix<nx; ix++) {
+//     for (int ix=0; ix<nx; ix++) {
+//       fprintf (fp,"%d %d %g\n",ix,iy,array_local[ix+nx*iy]);
+//     }
+//   }
 
 
   //====================================================================
@@ -600,6 +617,76 @@ void read_enzo_grid
   //--------------------------------------------------
 
   status = H5Dclose(dataset_id);
+
+  //--------------------------------------------------
+  // Close the file
+  //--------------------------------------------------
+
+  status = H5Fclose(file_id);
+
+}
+
+//--------------------------------------------------------------------
+// write_array ()
+//--------------------------------------------------------------------
+
+void write_array
+(
+ std::string        file_name,
+ std::string        dataset_name,
+ double           * array,
+ int                nx,
+ int                ny
+ )
+
+{
+
+  herr_t      status;
+
+  //--------------------------------------------------
+  // Create the file
+  //--------------------------------------------------
+
+  hid_t file_id = H5Fcreate ( file_name.c_str(), 
+			      H5F_ACC_TRUNC, 
+			      H5P_DEFAULT, 
+			      H5P_DEFAULT );
+
+  if (file_id < 0) {
+    fprintf (stderr,"%s:%d %d Error creating file %s\n",
+	     __FILE__,__LINE__,mpi_rank,file_name.c_str());
+    exit(1);
+  }
+
+  //--------------------------------------------------
+  // Create the dataspace
+  //--------------------------------------------------
+
+  int d = 2;
+  hsize_t n2[2] = {nx,ny};
+  hid_t space_id = H5Screate_simple(d, n2, 0);
+
+  //--------------------------------------------------
+  // Create the dataset
+  //--------------------------------------------------
+
+  std::string name = "/" + dataset_name;
+
+  hid_t type_id = H5T_NATIVE_DOUBLE;
+  
+  hid_t dataset_id = H5Dcreate(file_id, name.c_str(), type_id, space_id, H5P_DEFAULT);
+
+  if (dataset_id < 0) {
+    fprintf (stderr,"%s:%d %d Error creating dataset %s in file %s\n",
+	     __FILE__,__LINE__,mpi_rank,name.c_str(),file_name.c_str());
+    exit(1);
+  }
+
+  //--------------------------------------------------
+  // Write array to the dataset
+  //--------------------------------------------------
+
+  status = H5Dwrite (dataset_id,type_id,space_id,H5S_ALL,H5P_DEFAULT,array);
 
   //--------------------------------------------------
   // Close the file
