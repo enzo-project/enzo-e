@@ -362,8 +362,13 @@ int main(int argc, char **argv)
 
   printf ("Full size = %d %d  %d\n",nx,ny,n);
   
+  // Allocate array_local[level][index]
 
-  double * array_local = new double [n];
+  double ** array_local = new double * [hierarchy_info.max_level+1];
+  for (int i=0; i<=hierarchy_info.max_level; i++) {
+    array_local[i] = new double [n];
+    for (int k=0; k<n; k++) array_local[i][k] = 0.0;
+  }
 
   double * grid_array = NULL;
 
@@ -391,7 +396,7 @@ int main(int argc, char **argv)
 		    &grid_info[i],
 		    arg.field_name);
 
-    // Accumulate values in array_local[]
+    // Accumulate values in level arrays array_local[i]
 
 
     int num_subcells = 1; 
@@ -459,7 +464,7 @@ int main(int argc, char **argv)
 
 	    // Accumulate value in grid along reduction axis
 
-	    value += 1;
+	    value +=  grid_array [index_grid];
 
 	    if ( ! (0 <= index_grid) ||
 		 ! (index_grid < grid_size[0]*grid_size[1]*grid_size[2])) {
@@ -480,7 +485,7 @@ int main(int argc, char **argv)
 	  index_array =  if3[ix] + nx * if3[iy];
 
 	  // Update the array with the grid reduction value
-	  array_local [index_array] += log(value);
+	  array_local[grid_info[i].level][index_array] += (value);
 
 	  if ( ! (0 <= index_array) ||
 	       ! (index_array < n) ) {
@@ -505,20 +510,30 @@ int main(int argc, char **argv)
   }
 
 
+  // Copy values from highest level to lowest
+  
+  for (int level=hierarchy_info.max_level; level > 0 ; level -- ) {
+    for (int i=0; i<n; i++) {
+      if (array_local[level][i] != 0) {
+	array_local[level-1][i] = array_local[level][i];
+      }
+    }
+  }
+
   // DEBUG: write array_local to text files
 
   char file_name [MAX_FILE_STRING_LENGTH];
 
   sprintf (file_name,"enzo-reduce.out.%d.h5",mpi_rank);
-  write_array (file_name,arg.field_name,array_local,nx,ny);
+  write_array (file_name,arg.field_name,array_local[0],nx,ny);
 
-//   sprintf (file_name,"enzo-reduce.out.%d-%d",mpi_rank,mpi_size);
-//   FILE *fp = fopen (file_name,"w");
-//   for (int ix=0; ix<nx; ix++) {
-//     for (int ix=0; ix<nx; ix++) {
-//       fprintf (fp,"%d %d %g\n",ix,iy,array_local[ix+nx*iy]);
-//     }
-//   }
+  //   sprintf (file_name,"enzo-reduce.out.%d-%d",mpi_rank,mpi_size);
+  //   FILE *fp = fopen (file_name,"w");
+  //   for (int ix=0; ix<nx; ix++) {
+  //     for (int ix=0; ix<nx; ix++) {
+  //       fprintf (fp,"%d %d %g\n",ix,iy,array_local[ix+nx*iy]);
+  //     }
+  //   }
 
 
   //====================================================================
@@ -534,6 +549,9 @@ int main(int argc, char **argv)
   //====================================================================
 
   delete [] grid_info;
+  for (int i=0; i<=hierarchy_info.max_level; i++) {
+    delete [] array_local[i];
+  }
   delete [] array_local;
   
 
@@ -561,7 +579,7 @@ void read_enzo_grid
  double          ** array, 
  grid_info_struct * grid_info,
  std::string        dataset_name
-)
+ )
 
 {
 
