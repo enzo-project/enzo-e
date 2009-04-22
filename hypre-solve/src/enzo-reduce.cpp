@@ -384,7 +384,8 @@ int main(int argc, char **argv)
   if (arg.operation == "project") operation_type = operation_type_project;
   if (arg.operation == "slice")   operation_type = operation_type_slice;
 
-  for (int level = 0; level <= hierarchy_info.max_level; level++) {
+  //  for (int level = 0; level <= hierarchy_info.max_level; level++) {
+  for (int level = 0; level <= 0; level++) {
 
     for (int i=0; i<num_grids_local; i++) {
 
@@ -485,7 +486,7 @@ int main(int argc, char **argv)
 	      index_array =  if3[ix] + nx * if3[iy];
 
 	      // Update the array with the grid reduction value
-	      array_local[index_array] += value;
+	      array_local[index_array] += log(value);
 
 	      if ( ! (0 <= index_array) ||
 		   ! (index_array < n) ) {
