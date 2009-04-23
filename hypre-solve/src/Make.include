@@ -78,7 +78,7 @@ debug-matrix: debug-matrix.o
 enzo2hypre: enzo2hypre.o
 	$(CPP) -o enzo2hypre enzo2hypre.o $(HYPREALL) $(INC) $(LIB)
 enzo-reduce: enzo-reduce.o
-	$(MPCPP) -o enzo-reduce enzo-reduce.o $(LIB)
+	$(MPCPP) -o enzo-reduce enzo-reduce.o $(CPPFLAGS) -lm $(HDF5LIB)
 
 BIN = ../bin
 .PHONY: install
