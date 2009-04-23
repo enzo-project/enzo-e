@@ -384,155 +384,116 @@ int main(int argc, char **argv)
   if (arg.operation == "project") operation_type = operation_type_project;
   if (arg.operation == "slice")   operation_type = operation_type_slice;
 
-  //  for (int level = 0; level <= hierarchy_info.max_level; level++) {
-  for (int level = 0; level <= 0; level++) {
+  for (int i=0; i<num_grids_local; i++) {
 
-    for (int i=0; i<num_grids_local; i++) {
+    // Read each local grid
 
-      if (grid_info[i].level == level) {
+    read_enzo_grid (& grid_array, 
+		    &grid_info[i],
+		    arg.field_name);
 
-	// Read each local grid
-
-	read_enzo_grid (& grid_array, 
-			&grid_info[i],
-			arg.field_name);
-
-	// Accumulate values in level arrays array_local[i]
+    // Accumulate values in level arrays array_local[i]
 
 
-	int num_subcells = 1; 
-	for (int j=hierarchy_info.max_level; j>grid_info[i].level; j--) 
-	  num_subcells*=2;;
+    int num_subcells = 1; 
+    for (int j=hierarchy_info.max_level; j>grid_info[i].level; j--) 
+      num_subcells*=2;;
 
-	// Loop over grid cells
+    // Loop over grid cells
     
-	int    i3[3]; // current index of grid cell on grid level
-	int    if3[3];  // current index of grid cell on finest level
+    int    i3[3]; // current index of grid cell on grid level
+    int    if3[3];  // current index of grid cell on finest level
 
-	int index_array, index_grid;
+    int index_array, index_grid;
 
-	// first index of the grid on the fine level
+    // first index of the grid on the fine level
 
-	int index_start[3] = {
-	  grid_info[i].start_index_fine[0],
-	  grid_info[i].start_index_fine[1],
-	  grid_info[i].start_index_fine[2] 
-	};
+    int index_start[3] = {
+      grid_info[i].start_index_fine[0],
+      grid_info[i].start_index_fine[1],
+      grid_info[i].start_index_fine[2] 
+    };
 
-	// last index of the grid on the fine level
+    // last index of the grid on the fine level
 
-	int index_stop[3] = {
-	  grid_info[i].stop_index_fine[0],
-	  grid_info[i].stop_index_fine[1],
-	  grid_info[i].stop_index_fine[2] 
-	};
+    int index_stop[3] = {
+      grid_info[i].stop_index_fine[0],
+      grid_info[i].stop_index_fine[1],
+      grid_info[i].stop_index_fine[2] 
+    };
 
-	int grid_size[3] = {
+    int grid_size[3] = {
 
-	  grid_info[i].stop_index[0] - grid_info[i].start_index[0] + 1,
-	  grid_info[i].stop_index[1] - grid_info[i].start_index[1] + 1,
-	  grid_info[i].stop_index[2] - grid_info[i].start_index[2] + 1
+      grid_info[i].stop_index[0] - grid_info[i].start_index[0] + 1,
+      grid_info[i].stop_index[1] - grid_info[i].start_index[1] + 1,
+      grid_info[i].stop_index[2] - grid_info[i].start_index[2] + 1
 
-	};
+    };
 
-	printf ("%d grid %d of %d   %d:%d %d:%d %d:%d \n",
-		mpi_rank,i,hierarchy_info.num_grids_local,
-		index_start[0],index_stop[0],
-		index_start[1],index_stop[1],
-		index_start[2],index_stop[2] );
+    printf ("%d grid %d of %d   %d:%d %d:%d %d:%d \n",
+	    mpi_rank,i,hierarchy_info.num_grids_local,
+	    index_start[0],index_stop[0],
+	    index_start[1],index_stop[1],
+	    index_start[2],index_stop[2] );
 
-	// Loop over fine grid cells on array covered by coarse grid
+    // Loop over fine grid cells on array covered by coarse grid
 
-	for (if3[iy] = index_start[iy]; if3[iy] <= index_stop[iy]; if3[iy]++) {
+    for (if3[iy] = index_start[iy]; if3[iy] <= index_stop[iy]; if3[iy]++) {
 
-	  i3[iy] = (if3[iy] - index_start[iy]) / num_subcells;
+      i3[iy] = (if3[iy] - index_start[iy]) / num_subcells;
 
-	  for (if3[ix] =  index_start[ix]; if3[ix] <= index_stop[ix]; if3[ix]++) {
+      for (if3[ix] =  index_start[ix]; if3[ix] <= index_stop[ix]; if3[ix]++) {
 
-	    i3[ix] = (if3[ix] - index_start[ix])  / num_subcells;
+	i3[ix] = (if3[ix] - index_start[ix])  / num_subcells;
 
-	    // Accumulate value
+	// Accumulate value
 
-	    double value = 0;
+	double value = 0;
 
-	    if ( operation_type == operation_type_project ) {
+	if ( operation_type == operation_type_project ) {
 
-	      for (if3[ir] = 0; if3[ir] <= index_stop[ir] - index_start[ir]; if3[ir]++) {
+	  for (if3[ir] = 0; if3[ir] <= index_stop[ir] - index_start[ir]; if3[ir]++) {
 
-		i3[ir] = if3[ir] / num_subcells;
+	    i3[ir] = if3[ir] / num_subcells;
 
-		index_grid  =  i3[0] + grid_size[0] * (i3[1] + grid_size[1]*i3[2]);
+	    index_grid  =  i3[0] + grid_size[0] * (i3[1] + grid_size[1]*i3[2]);
 
-		// Accumulate value in grid along reduction axis
+	    // Accumulate value in grid along reduction axis
 
-		value +=  grid_array [index_grid];
+	    value +=  grid_array [index_grid];
 
-		if ( ! (0 <= index_grid) ||
-		     ! (index_grid < grid_size[0]*grid_size[1]*grid_size[2])) {
-		  fprintf (stderr,"%s:%d %d index_grid out of bounds: exiting\n",
-			   __FILE__,__LINE__,mpi_rank);
-		  fprintf (stderr,"index_grid = %d  i3 = (%d %d %d) grid_size=(%d %d %d)\n",
-			   index_array,i3[0],i3[1],i3[2],
-			   grid_size[0],grid_size[1],grid_size[2]);
-
-		  print_hierarchy_info(&hierarchy_info);
-		  print_grid_info(&grid_info[i]);
-
-
-		  exit(1);
-		}
-	      }
-
-	      index_array =  if3[ix] + nx * if3[iy];
-
-	      // Update the array with the grid reduction value
-	      array_local[index_array] += log(value);
-
-	      if ( ! (0 <= index_array) ||
-		   ! (index_array < n) ) {
-	    
-		fprintf (stderr,"%s:%d %d index_array out of bounds: exiting\n",
-			 __FILE__,__LINE__,mpi_rank);
-		fprintf (stderr,"index_array = %d  if3 = (%d %d %d)  n = %d\n",
-			 index_array,if3[0],if3[1],if3[2],n);
-
-		print_hierarchy_info(&hierarchy_info);
-		print_grid_info(&grid_info[i]);
-
-
-		exit(1);
-	      }
-
-	    } else if ( operation_type == operation_type_slice ) {
-	      assert(0);
-	    }
 	  }
+
+	  index_array =  if3[ix] + nx * if3[iy];
+
+	  // Update the array with the grid reduction value
+	  array_local[index_array] += value;
+
+	} else if ( operation_type == operation_type_slice ) {
+	  assert(0);
 	}
       }
     }
   }
 
+//====================================================================
+// REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
+//====================================================================
+
+//====================================================================
+// POST-PROCESS 
+//====================================================================
+
+  for (int i=0; i<n; i++) array_local[i] = log(array_local[i]);
+
+//====================================================================
+// OUTPUT RESULT FROM ROOT
+//====================================================================
+
   char file_name [MAX_FILE_STRING_LENGTH];
 
   sprintf (file_name,"enzo-reduce.out.%d.h5",mpi_rank);
   write_array (file_name,arg.field_name,array_local,nx,ny);
-
-  //   sprintf (file_name,"enzo-reduce.out.%d-%d",mpi_rank,mpi_size);
-  //   FILE *fp = fopen (file_name,"w");
-  //   for (int ix=0; ix<nx; ix++) {
-  //     for (int ix=0; ix<nx; ix++) {
-  //       fprintf (fp,"%d %d %g\n",ix,iy,array_local[ix+nx*iy]);
-  //     }
-  //   }
-
-
-  //====================================================================
-  // REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
-  //====================================================================
-
-  //====================================================================
-  // OUTPUT RESULT FROM ROOT
-  //====================================================================
 
   //====================================================================
   // EXIT
