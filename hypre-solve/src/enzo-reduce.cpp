@@ -17,6 +17,7 @@
 // (*)  -f  --field     <field-name>        Name of the field
 // (*)  -g  --grid      <grid file>         Specify an Enzo grid file
 // (*)  -h  --hierarchy <hierarchy dir>     Specify an Enzo hierarchy directory
+// ( )  -l  --level     <finest level>      Specify finest grid level
 // (*)  -p  --project                       Project values
 // (*)  -s  --slice     [0:1]               Slice domain at the given point 
 //
@@ -74,6 +75,7 @@ struct grid_info_struct {
   int         start_index_fine[3];
   int         stop_index_fine[3];
   int         ratio_to_fine;
+  int         parent;
 };
 
 struct hierarchy_info_struct {
@@ -126,6 +128,9 @@ void write_array
      int                nx,
      int                ny );
 
+bool is_contained_in (grid_info_struct * grid_info,
+		      int grid_1,
+		      int grid_2);
 
 //----------------------------------------------------------------------
 // CPP MACROS
@@ -154,6 +159,8 @@ void write_array
       exit(1);
 
 #define INDEX_TO_PROC(index) ((index) % mpi_size)
+
+#define INDEX(ix,iy,iz,nx,ny) ((ix) + (nx)*((iy) + (ny)*(iz)))
 
 //====================================================================
 // BEGIN main ()
@@ -367,6 +374,7 @@ int main(int argc, char **argv)
   double * array_local = new double [n];
 
   double * grid_array = NULL;
+  double * parent_array = NULL;
 
   if (amr_type == amr_type_packed) {
     fprintf (stderr,"%s:%d amr_type == amr_type_packed is not supported yet\n",
@@ -386,87 +394,136 @@ int main(int argc, char **argv)
 
   for (int i=0; i<num_grids_local; i++) {
 
-    // Read each local grid
-
     read_enzo_grid (& grid_array, 
 		    &grid_info[i],
 		    arg.field_name);
 
-    // Accumulate values in level arrays array_local[i]
+    // And the grid's parent if it has one
 
+    bool has_parent = grid_info[i].level > 0;
 
-    int num_subcells = 1; 
-    for (int j=hierarchy_info.max_level; j>grid_info[i].level; j--) 
-      num_subcells*=2;;
+    if (has_parent) {
+      read_enzo_grid (& parent_array, 
+		      &grid_info[grid_info[i].parent],
+		      arg.field_name);
+    }
 
     // Loop over grid cells
     
-    int    i3[3]; // current index of grid cell on grid level
+    int    i3[3];   // current index of grid cell on grid level
     int    if3[3];  // current index of grid cell on finest level
+    int    ip3[3];  // current index of parent cell on finest level
 
-    int index_array, index_grid;
+    int index_array, index_grid, index_parent;
 
-    // first index of the grid on the fine level
+    // first and last indices of the grid on the fine level
 
-    int index_start[3] = {
-      grid_info[i].start_index_fine[0],
-      grid_info[i].start_index_fine[1],
-      grid_info[i].start_index_fine[2] 
-    };
+    int grid_index_start[3], grid_index_stop[3];
 
-    // last index of the grid on the fine level
+      grid_index_start[0] = grid_info[i].start_index_fine[0];
+      grid_index_start[1] = grid_info[i].start_index_fine[1];
+      grid_index_start[2] = grid_info[i].start_index_fine[2];
+      grid_index_stop[0]  = grid_info[i].stop_index_fine[0];
+      grid_index_stop[1]  = grid_info[i].stop_index_fine[1];
+      grid_index_stop[2]  = grid_info[i].stop_index_fine[2];
 
-    int index_stop[3] = {
-      grid_info[i].stop_index_fine[0],
-      grid_info[i].stop_index_fine[1],
-      grid_info[i].stop_index_fine[2] 
-    };
+    int ip = grid_info[i].parent;
+
+    // first and last indices of the parent on the fine level
+
+
+
+    int parent_index_start[3],parent_index_stop[3];
+
+    if (has_parent) {
+      parent_index_start[0] = grid_info[ip].start_index_fine[0];
+      parent_index_start[1] = grid_info[ip].start_index_fine[1];
+      parent_index_start[2] = grid_info[ip].start_index_fine[2];
+      parent_index_stop[0]  = grid_info[ip].stop_index_fine[0];
+      parent_index_stop[1]  = grid_info[ip].stop_index_fine[1];
+      parent_index_stop[2]  = grid_info[ip].stop_index_fine[2];
+    }
+
+    // Determine ratio between grid level and finest level cell sizes
+
+    int grid_subcells = 1; 
+    for (int j=hierarchy_info.max_level; j>grid_info[i].level; j--) {
+      grid_subcells*=2;
+    }
+
+    // Determine ratio between parent level and finest level cell sizes
+
+    int parent_subcells = 1;
+    if (has_parent) {
+      for (int j=hierarchy_info.max_level; j>grid_info[ip].level; j--) {
+	parent_subcells*=2;
+      }
+    }
 
     int grid_size[3] = {
-
       grid_info[i].stop_index[0] - grid_info[i].start_index[0] + 1,
       grid_info[i].stop_index[1] - grid_info[i].start_index[1] + 1,
       grid_info[i].stop_index[2] - grid_info[i].start_index[2] + 1
-
+    };
+    int parent_size[3] = {
+      grid_info[ip].stop_index[0] - grid_info[ip].start_index[0] + 1,
+      grid_info[ip].stop_index[1] - grid_info[ip].start_index[1] + 1,
+      grid_info[ip].stop_index[2] - grid_info[ip].start_index[2] + 1
     };
 
-    printf ("%d grid %d of %d   %d:%d %d:%d %d:%d \n",
+
+    printf ("%d grid %d of %d   %4d:%4d %4d:%4d %4d:%4d \n",
 	    mpi_rank,i,hierarchy_info.num_grids_local,
-	    index_start[0],index_stop[0],
-	    index_start[1],index_stop[1],
-	    index_start[2],index_stop[2] );
+	    grid_index_start[0],grid_index_stop[0],
+	    grid_index_start[1],grid_index_stop[1],
+	    grid_index_start[2],grid_index_stop[2] );
 
-    // Loop over fine grid cells on array covered by coarse grid
+    // Loop over fine grid cells on array covered by the grid
 
-    for (if3[iy] = index_start[iy]; if3[iy] <= index_stop[iy]; if3[iy]++) {
+    for (if3[iy] =  grid_index_start[iy]; 
+	 if3[iy] <= grid_index_stop[iy];
+	 if3[iy]++) {
 
-      i3[iy] = (if3[iy] - index_start[iy]) / num_subcells;
+      i3[iy]  = (if3[iy] - grid_index_start[iy])   / grid_subcells;
+      ip3[iy] = (if3[iy] - parent_index_start[iy]) / parent_subcells;
 
-      for (if3[ix] =  index_start[ix]; if3[ix] <= index_stop[ix]; if3[ix]++) {
+      for (if3[ix] = grid_index_start[ix]; 
+	   if3[ix] <= grid_index_stop[ix]; 
+	   if3[ix]++) {
 
-	i3[ix] = (if3[ix] - index_start[ix])  / num_subcells;
-
-	// Accumulate value
+	i3[ix]  = (if3[ix] - grid_index_start[ix])  / grid_subcells;
+	ip3[ix] = (if3[ix] - parent_index_start[ix]) / parent_subcells;
 
 	double value = 0;
 
 	if ( operation_type == operation_type_project ) {
 
-	  for (if3[ir] = 0; if3[ir] <= index_stop[ir] - index_start[ir]; if3[ir]++) {
+	  for (if3[ir] = grid_index_start[ir]; 
+	       if3[ir] <= grid_index_stop[ir];
+	       if3[ir]++) {
 
-	    i3[ir] = if3[ir] / num_subcells;
+	    i3[ir]  = (if3[ir] - grid_index_start[ir] ) / grid_subcells;
+	    ip3[ir] = (if3[ir] - parent_index_start[ir]) / parent_subcells;
 
-	    index_grid  =  i3[0] + grid_size[0] * (i3[1] + grid_size[1]*i3[2]);
+	    // Add value for grid along reduction axis
 
-	    // Accumulate value in grid along reduction axis
-
+	    index_grid = INDEX(i3[0],i3[1],i3[2],grid_size[0],grid_size[1]);
 	    value +=  grid_array [index_grid];
+
+	    // Subtract value for parent along reduction axis
+ 
+	    if (has_parent) {
+	      index_parent = INDEX(ip3[0],ip3[1],ip3[2],parent_size[0],parent_size[1]);
+	      value -=  parent_array [index_parent];
+	    }
 
 	  }
 
-	  index_array =  if3[ix] + nx * if3[iy];
-
 	  // Update the array with the grid reduction value
+
+	  index_array = if3[ix] + nx*if3[iy];
+	  assert (0 <= index_array && 
+		  (index_array  < nx*ny));
 	  array_local[index_array] += value;
 
 	} else if ( operation_type == operation_type_slice ) {
@@ -476,19 +533,27 @@ int main(int argc, char **argv)
     }
   }
 
-//====================================================================
-// REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
-//====================================================================
+  //====================================================================
+  // REDUCE LOCAL REDUCTION TO GLOBAL ON ROOT
+  //====================================================================
 
-//====================================================================
-// POST-PROCESS 
-//====================================================================
 
-  for (int i=0; i<n; i++) array_local[i] = log(array_local[i]);
 
-//====================================================================
-// OUTPUT RESULT FROM ROOT
-//====================================================================
+  //====================================================================
+  // POST-PROCESS 
+  //====================================================================
+
+  for (int i=0; i<n; i++) {
+    if (array_local[i] > 0) {
+      array_local[i] = log(array_local[i]);
+    }	else {
+      array_local[i] = 0;
+    }
+  };
+
+  //====================================================================
+  // OUTPUT RESULT FROM ROOT
+  //====================================================================
 
   char file_name [MAX_FILE_STRING_LENGTH];
 
@@ -561,8 +626,6 @@ void read_enzo_grid
   assert (n[0]!=0);
   assert (n[1]!=0);
   assert (n[2]!=0);
-
-  printf ("%d %d %d\n",int(n[0]),int(n[1]),int(n[2]));
 
   //--------------------------------------------------
   // (Re)allocate storage for the dataset
@@ -844,9 +907,9 @@ void read_grids (std::string        hierarchy_name,
 
     grid_info[i].cell_width = local_cell_width;
 
-    // Determine level
+    // Determine level (0.5 required since conversion from float to int truncates)
 
-    grid_info[i].level = log (root_cell_width / grid_info[i].cell_width) / log(2.0);
+    grid_info[i].level = 0.5+log(root_cell_width/grid_info[i].cell_width)/log(2.0);
 
     // Determine filenme
 
@@ -965,6 +1028,42 @@ void init_hierarchy (hierarchy_info_struct * hierarchy_info,
   }
 #endif
 
+//   // determine parents 
+
+  if (mpi_size != 1) {
+    fprintf (stderr,"%s:%d Parent determination is not parallelized\n",
+	     __FILE__,__LINE__);
+    exit(1);
+  }
+
+  for (int grid_1=0; grid_1 < num_grids_local; grid_1++) {
+    // find parent of grid_1 
+    grid_info[grid_1].parent = -1;
+    int level_parent = -1;
+    for (int grid_2=0; grid_2 < num_grids_local; grid_2++) {
+      if (grid_info[grid_1].level >= grid_info[grid_2].level + 1 &&
+	  is_contained_in (grid_info,grid_1,grid_2) ) {
+	if (grid_info[grid_2].level > level_parent) {
+	  level_parent = grid_info[grid_2].level;
+	  grid_info[grid_1].parent = grid_2;
+	  printf ("grid %d parent %d\n",grid_1+1,grid_2+1);
+	}
+      }
+    }
+  }
+
+  bool err = false;
+  for (int grid_1=0; grid_1 < num_grids_local; grid_1++) {
+    if ((grid_info[grid_1].level == 0 && grid_info[grid_1].parent != -1) ||
+	(grid_info[grid_1].level != 0 && grid_info[grid_1].parent == -1) ) {
+      err = true;
+      printf ("Grid %d parent is incorrect\n",grid_1+1);
+    }
+  }
+
+  if (err) exit(1);
+  
+
 }
 
 //-----------------------------------------------------------------------
@@ -1034,7 +1133,7 @@ void print_hierarchy_info (hierarchy_info_struct * hierarchy_info)
 void print_grid_info (grid_info_struct * grid_info)
 {
   printf ("%d  index         = %d\n",mpi_rank, grid_info->index);
-  printf ("%d  filename      = %s\n",mpi_rank, grid_info->file_name.c_str());
+  printf ("%d  file_name     = %s\n",mpi_rank, grid_info->file_name.c_str());
   printf ("%d  group_name    = %s\n",mpi_rank, grid_info->group_name.c_str());
   printf ("%d  level         = %d\n",mpi_rank, grid_info->level);
   printf ("%d  cell_width    = %g\n",mpi_rank, grid_info->cell_width);
@@ -1053,7 +1152,21 @@ void print_grid_info (grid_info_struct * grid_info)
 	  grid_info->stop_index_fine[1],
 	  grid_info->stop_index_fine[2]);
   printf ("%d  ratio_to_fine = %d\n",	  mpi_rank,  grid_info->ratio_to_fine);
+  printf ("%d  parent        = %d\n",	  mpi_rank,  grid_info->parent);
 	  
   printf ("\n");
 }
 
+bool is_contained_in (grid_info_struct * grid_info,
+		      int grid_1,
+		      int grid_2)
+// Return true if grid 1 is contained in grid 2
+{
+  return (grid_info[grid_2].left_edge[0]  <= grid_info[grid_1].left_edge[0] &&
+	  grid_info[grid_2].left_edge[1]  <= grid_info[grid_1].left_edge[1] &&
+	  grid_info[grid_2].left_edge[2]  <= grid_info[grid_1].left_edge[2] &&
+	  grid_info[grid_1].right_edge[0] <= grid_info[grid_2].right_edge[0] &&
+	  grid_info[grid_1].right_edge[1] <= grid_info[grid_2].right_edge[1] &&
+	  grid_info[grid_1].right_edge[2] <= grid_info[grid_2].right_edge[2]);
+      
+}
