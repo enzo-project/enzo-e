@@ -271,9 +271,11 @@ int main(int argc, char **argv)
 
   } else if ((hierarchy_specified)) {
 
-    chdir (arg.hierarchy_dir.c_str());
-    // ERROR CHECK HERE
-
+    if (chdir (arg.hierarchy_dir.c_str()) != 0) {
+      fprintf (stderr, "%s:%d Error changing to directory %s: exiting\n",
+	       __FILE__,__LINE__,arg.hierarchy_dir.c_str());
+      exit(1);
+    }
 
     // Read hierarchy file
 
