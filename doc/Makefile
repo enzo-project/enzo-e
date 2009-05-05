@@ -9,7 +9,8 @@ DOCS = \
       testing \
       manual-devel \
       manual-user \
-      manual-reference
+      manual-reference \
+      talk-intro \
 
 DIRS = $(DOCS) uml
  
@@ -52,6 +53,9 @@ manual-user:
 manual-reference: 
 	cd manual-reference; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C manual-reference
+talk-intro: 
+	cd talk-intro; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C talk-intro
 
 #-----------------------------------------------------------------------
 

@@ -2,9 +2,22 @@
 \section{AMR Component} \label{s:component-amr}
 %=======================================================================
 
-Specify data structures and data structure parameters for distributed
-AMR hierarchies, such as number of mesh levels, grid patch properties,
-rebuild algorithm, dynamic load balancing, refinement criteria, etc.
+The \code{Amr} component defines the data structures and data
+structure parameters for the ``inter-resolution'' aspect of
+distributed AMR hierarchies.  (The ``intra-resolution'' aspects are
+defined using the \code{Array} component).  Both patch-based AMR, ala
+\enzo, and octree-based AMR datastructures are supported.
+
+Operations
+
+The \code{Amr} component accesses the \code{Array} component to define
+the ``intra-resolution'' aspect of field data on an AMR hierarchy, and
+the
+\code{Particles} component to define particles on the AMR
+
+to, such as number of mesh
+levels, grid patch properties, rebuild algorithm, dynamic load
+balancing, refinement criteria, etc.
 
 Hierarchy
 Array
