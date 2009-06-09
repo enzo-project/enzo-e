@@ -259,20 +259,19 @@ The following table lists the input parameters to \code{hypre-solve}.
    {Define a grid patch}
 \parmentry{discret}{\{\code{constant} $|$ \code{linear} $|$ \code{bilinear} $|$ \code{quadratic}\}}
    {Select which discretization method to use (currently only ``constant'' is implemented)}
-\parmentry{solver}{\{\code{fac} $|$ \code{pfmg} $|$ \code{bicgstab}\}}
+\parmentry{solver}{\{\code{fac} $|$ \code{pfmg} $|$ \code{bicgstab} $|$ \code{gmres}\}}
    {Select which \hypre\ solver to use}
 \parmentry{solver\_itmax}{iterations}
    {Optionally set the number of solver iterations}
 \parmentry{solver\_restol}{tolerance}
    {Optionally set the stopping tolerance of the relative residual for the solver}
+\parmentry{enzo\_density}{\{\code{true} $|$ \code{false}\}}
+   {Whether to initialize the density field with an \enzo\ data dump}
+\parmentry{enzo\_packed}{\{\code{true} $|$ \code{false}\}}
+   {Whether \enzo\ data dump is in packed format or not}
+\parmentry{enzo\_prefix}{prefix}
+   {Prefix for the \enzo\ data dump}
 
-
-\begin{tabbing}
-xxxxx\=xxxxx\=xxxxxxxxxxx\=\kill
-\> \done\ \code{enzo\_density}  \> \code{string} $\in$ \{ ``\code{true}'', ``\code{false}''\} \\
-\> \done\ \code{enzo\_packed}  \> \code{string} $\in$ \{ ``\code{true}'', ``\code{false}''\} \\
-\> \done\ \code{enzo\_prefix} \> \icode{prefix}
-\end{tabbing}
 
 The output of \code{hypre-solve} is a file containing the following:
 
