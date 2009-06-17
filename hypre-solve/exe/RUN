@@ -2,20 +2,23 @@
 
 set n      = 16
 
-foreach solver (cg mg)
-   foreach offset (0 1)
-      foreach serial (0 1)
-         foreach level (1 2 3 4)
-
-            run $n 1 1 1 $level $offset $serial $solver
-            run $n 2 1 1 $level $offset $serial $solver
-            run $n 1 2 1 $level $offset $serial $solver
-            run $n 1 1 2 $level $offset $serial $solver
-            run $n 1 2 2 $level $offset $serial $solver
-            run $n 2 1 2 $level $offset $serial $solver
-            run $n 2 2 1 $level $offset $serial $solver
-
+foreach boundary (periodic dirichlet)
+   foreach solver (cg mg)
+      foreach offset (0 1)
+         foreach serial (0 1)
+            foreach level (1 2 3 4)
+   
+               run $n 1 1 1 $level $offset $serial $solver $boundary
+               run $n 2 1 1 $level $offset $serial $solver $boundary
+               run $n 1 2 1 $level $offset $serial $solver $boundary
+               run $n 1 1 2 $level $offset $serial $solver $boundary
+               run $n 1 2 2 $level $offset $serial $solver $boundary
+               run $n 2 1 2 $level $offset $serial $solver $boundary
+               run $n 2 2 1 $level $offset $serial $solver $boundary
+   
+            end
          end
       end
    end
 end
+

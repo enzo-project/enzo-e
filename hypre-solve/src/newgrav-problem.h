@@ -93,9 +93,9 @@ public:
 
   /// Return a pointer to the ith Grid
   
-  Grid & grid (int i)       
+  Grid & return_grid (int i)       
   { 
-    return hierarchy_.grid(i); 
+    return hierarchy_.return_grid(i); 
   }
 
   /// Return the number of Grids

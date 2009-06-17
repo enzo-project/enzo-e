@@ -14,6 +14,9 @@
  */
 
 
+#ifdef HYPRE_GRAV
+struct LevelHierarchyEntry;
+#endif
 class Hierarchy
 {
 
@@ -61,7 +64,7 @@ protected:
 
   //--------------------------------------------------------------------
 
-public:
+ public:
 
   //--------------------------------------------------------------------
   // CONSTUCTORS AND DESTRUCTORS
@@ -75,15 +78,18 @@ public:
   // PUBLIC MEMBER FUNCTIONS
   //--------------------------------------------------------------------
 
+#ifdef HYPRE_GRAV
+
   // ENZO INTERFACE
 
-  /// Attach to the Enzo hierarchy
+  // Attach to the Enzo hierarchy
 
-  void enzo_attach () throw ();
+  void enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ();
 
-  /// Detach from the Enzo hierarchy
+  // Detach from the Enzo hierarchy
 
   void enzo_detach () throw ();
+#endif
 
   // Initialization
 
@@ -127,13 +133,13 @@ public:
   int     num_levels ()                 { return   levels0_.size() - 1; };
 
   /// Return the jth Grid.   No error checking.
-  Grid &  grid       (int j)            { return * grids0_.at(j); };
+  Grid &  return_grid       (int j)            { return * grids0_.at(j); };
 
   /// Return the number of grids
   int     num_grids  ()                 { return   grids0_.size() - 1; };
 
   /// Return the jth Grid in the ith Level of the Hierarchy.   No error checking.
-  Grid &  grid       (int i, int j)     { return   levels0_[i]->grid(j); };
+  Grid &  return_grid       (int i, int j)     { return   levels0_[i]->return_grid(j); };
 
   /// Return the number of grids in the ith level.   No error checking.
   int     num_grids  (int i)            { return   levels0_[i]->num_grids(); };

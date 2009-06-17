@@ -24,12 +24,10 @@
 
 #include "HYPRE_sstruct_ls.h"
 
-#include "newgrav-hypre-solve.h"
-
 //----------------------------------------------------------------------
 
 const int trace          = 0;
-const int debug          = 0;
+//const int debug          = 0;
 const int debug_detailed = 0;
 const int geomview       = 0;
 
@@ -45,7 +43,11 @@ const int geomview       = 0;
 #include "newgrav-grid.h"
 #include "newgrav-level.h"
 #include "newgrav-hierarchy.h"
+#include "newgrav-hypre-solve.h"
 
+#ifdef HYPRE_GRAV
+#include "newgrav-enzo.h"
+#endif
 
 //----------------------------------------------------------------------
 
@@ -73,34 +75,78 @@ Hierarchy::~Hierarchy () throw ()
 
 //======================================================================
 
-void Hierarchy::enzo_attach () throw ()
+#ifdef HYPRE_GRAV
+
+void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
 {
   TEMPORARY("Hierarchy::enzo_attach()");
   set_dim(3);
-  // For each grid...
-  //
-  //  create "value" string consisting of the following:
-  //
-  //	 id:                Unique id, starting from 0 and counting up
-  //     id_parent:         id of the parent
-  //     ip                 MPI processor rank
-  //     xl[0] xl[1] xl[2]  Lower position defining the grid extent
-  //     xu[0] xu[1] xu[2]  Upper position defining the grid extent
-  //     il[0] il[1] il[2]  Coordinate defining the lower grid index
-  //     n[0] n[1] n[2]     Size of the grid
-  //
-  //  insert the grid into the hierarchy:
-  //
-  //     hierarchy_.insert_grid(new Grid(value));
-  
+  // Determine Grid ID's
+
+  // Count grids
+
+  int id = 0;
+
+  // Traverse levels in enzo hierarchy
+  std::map<grid *,int> enzo_id;
+
+  int levelfactor = 1;
+
+  for (int lev=0; LevelArray[lev] != NULL; lev++,id++,levelfactor*=RefineBy) {
+
+    // Traverse grids in enzo level
+    for (LevelHierarchyEntry * itEnzoLevelGrid = LevelArray[lev];
+	 itEnzoLevelGrid != NULL;
+	 itEnzoLevelGrid = itEnzoLevelGrid->NextGridThisLevel) {
+
+      grid * enzo_grid = itEnzoLevelGrid->GridData;
+
+      // Save grid id's to determine parents
+      enzo_id[enzo_grid] = id;
+
+      // Collect required enzo grid data
+
+      int id_parent;
+      if (lev == 0) {
+	id_parent = -1;
+      } else {
+	grid * enzo_parent = itEnzoLevelGrid->GridHierarchyEntry->ParentGrid->GridData;
+	id_parent =  enzo_id[enzo_parent];
+      }
+
+      int ip = enzo_grid -> ProcessorNumber;
+
+      Scalar xl[3],xu[3];
+      int il[3],n[3];
+      for (int dim=0; dim<3; dim++) {
+	xl[dim] = enzo_grid->GridLeftEdge[dim];
+	xu[dim] = enzo_grid->GridRightEdge[dim];
+	n[dim]  = enzo_grid->GridEndIndex[dim] - enzo_grid->GridStartIndex[dim] + 1;
+	il[dim] = int((xl[dim] - DomainLeftEdge[dim]) 
+		       / (DomainRightEdge-DomainLeftEdge) * n[dim] * levelfactor);
+	il[dim] = enzo_grid->GridStartIndex[dim];
+      }
+
+      // Create a new hypre-solve grid
+
+      Grid * grid = new Grid (id,id_parent,ip,xl,xu,il,n);
+      
+      insert_grid(grid);
+    }
+
+  }
+
 }
+#endif
 
 //----------------------------------------------------------------------
 
+#ifdef HYPRE_GRAV
 void Hierarchy::enzo_detach () throw ()
 {
   TEMPORARY("Hierarchy::enzo_detach()");
 }
+#endif
 
 //======================================================================
 
@@ -157,7 +203,7 @@ void Hierarchy::init_grid_parents_ () throw ()
 {
   ItHierarchyGridsAll itg (*this);
   while (Grid * g = itg++) {
-    Grid * p = (g->id_parent() >= 0) ? & grid(g->id_parent()) : 0;
+    Grid * p = (g->id_parent() >= 0) ? & return_grid(g->id_parent()) : 0;
     this->set_parent(g,p);
   }
 }
@@ -245,14 +291,14 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
   for (i=0; i<level(0).num_grids(); i++) {
 
-    Grid * g1 = & level(0).grid(i);
+    Grid * g1 = & level(0).return_grid(i);
 
     // Starting index of loop was i+1, but need to include possibility
     // of a grid being a neighbor with itself for periodic problems
 
     for (j=i; j<level(0).num_grids(); j++) {
 
-      Grid * g2 = & level(0).grid(j);
+      Grid * g2 = & level(0).return_grid(j);
 
       if (g1->is_adjacent(*g2,period_domain_)) {
 	assert_neighbors(*g1,*g2);
@@ -270,7 +316,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 
     for (i=0; i<level(k).num_grids(); i++) {
 
-      Grid * g1 = & level(k).grid(i);
+      Grid * g1 = & level(k).return_grid(i);
 
       // Check parents' children
 

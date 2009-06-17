@@ -115,6 +115,15 @@ protected:
   /// Create a grid given the string "<id> <id_parent> <ip> <xl>[3] <xu>[3], <n>[3]
   Grid (std::string parms) throw ();
 
+  /// Create a grid given the string "<id> <id_parent> <ip> <xl>[3] <xu>[3], <n>[3]
+  Grid (int     id, 
+	int     ip_parent, 
+	int     ip, 
+	Scalar *xl,
+	Scalar *xu,
+	int    *il,
+	int     *n) throw ();
+
   /// Create a grid given a grid file as written by write()
 
   Grid (FILE *) throw ();
@@ -182,6 +191,14 @@ protected:
   /// Input the grid from the given string in compact format
 
   void input (std::string parms) throw ();
+
+  void input (int     id, 
+	      int     id_parent, 
+	      int     ip, 
+	      Scalar *xl,
+	      Scalar *xu,
+	      int    *il,
+	      int    *n) throw ();
 
   //--------------------------------------------------------------------
   // Data access
@@ -404,7 +421,8 @@ protected:
   /// Return true iff the grid belongs to processor ip
   bool is_local () throw()
   { return mpi_.ip() == ip_; };
-
+  /// Return true iff the grid contains the other grid (i.e. is an ancestor)
+  bool contains (Grid * grid) throw ();
   
   //--------------------------------------------------------------------
   // Nonstencil / Matrix initialization functions

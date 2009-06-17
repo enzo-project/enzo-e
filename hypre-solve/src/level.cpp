@@ -84,7 +84,7 @@ void Level::print () throw ()
   printf ("   index_lower = (%d,%d,%d)\n",il_[0],il_[1],il_[2]);
   printf ("   index_upper = (%d,%d,%d)\n",iu_[0],iu_[1],iu_[2]);
   for (int i=0; i<num_grids(); i++) {
-    grid(i).print();
+    return_grid(i).print();
   }
 }
 
@@ -271,7 +271,7 @@ void Level::write (FILE *fp) throw ()
 
   for (int i=0; i<num_grids(); i++) {
     fprintf (fp,"Level %d\n",n_);
-    grid(i).write(fp);
+    return_grid(i).write(fp);
   }
 }
 

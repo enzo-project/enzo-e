@@ -80,7 +80,7 @@ public:
   void print () throw ();
 
   /// Write the Level grids to the given open file in geomview format
-  void geomview_grid (FILE *fpr, bool full=true) throw ();
+  void geomview_grid  (FILE *fpr, bool full=true) throw ();
 
   /// Write the local Level grids to the given open file in geomview format
   void geomview_grid_local (FILE *fpr, bool full=true) throw ();
@@ -112,7 +112,7 @@ public:
   int zones (int i) throw () { return iu_[i]-il_[i] + 1; };
 
   /// Return the ith Grid in the Level
-  Grid & grid (int i) 
+  Grid & return_grid (int i) 
   { return * grids0_.at(i); };
 
   /// Return the number of Grid's in the Level

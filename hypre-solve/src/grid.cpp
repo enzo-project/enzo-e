@@ -74,6 +74,37 @@ Grid::Grid (std::string parms) throw ()
 
 //======================================================================
 
+Grid::Grid (int     id, 
+	    int     id_parent, 
+	    int     ip, 
+	    Scalar *xl,
+	    Scalar *xu,
+	    int    *il,
+	    int    *n) throw ()
+{
+ // Initialize 0-sentinels in arrays
+
+  neighbors0_.push_back (0);
+  children0_.push_back (0);
+
+  // Define a grid given text parameters, typically from a file
+
+  input (id,id_parent,ip,xl,xu,il,n);
+
+  // Allocate Faces was here.
+
+  printf ("%s:%d n_ = %d %d %d\n",__FILE__,__LINE__,n_[0],n_[1],n_[2]);
+
+  faces_ = new Faces(n_);
+
+  // Allocate counters_ here.
+
+  counters_ = new int [n_[0]*n_[1]*n_[2]];
+
+}
+
+//======================================================================
+
 Grid::Grid (FILE *fp) throw ()
   : id_(-1),
     id_parent_(-1),
@@ -439,6 +470,35 @@ void Grid::input (std::string parms) throw ()
 
 }
 
+//======================================================================
+
+void Grid::input (int     id, 
+		  int     id_parent, 
+		  int     ip, 
+		  Scalar *xl,
+		  Scalar *xu,
+		  int    *il,
+		  int    *n) throw ()
+{
+
+  id_        = id;
+  id_parent_ = id_parent;
+  ip_        = ip;
+  xl_[0]     = xl[0];
+  xl_[1]     = xl[1];
+  xl_[2]     = xl[2];
+  xu_[0]     = xu[0];
+  xu_[1]     = xu[1];
+  xu_[2]     = xu[2];
+  il_[0]     = il[0];
+  il_[1]     = il[1];
+  il_[2]     = il[2];
+  n_[0]      = n[0];
+  n_[1]      = n[1];
+  n_[2]      = n[2];
+
+}
+
 //----------------------------------------------------------------------
 
 bool Grid::is_adjacent (Grid & g2, Scalar period[3]) throw ()
@@ -517,6 +577,32 @@ bool Grid::is_adjacent (Grid & g2, Scalar period[3]) throw ()
   }
 
 }
+
+//----------------------------------------------------------------------
+
+bool Grid::contains (Grid * grid) throw ()
+{
+  // Assume initially that the other grid is contained in this one
+  bool is_inside = true;
+
+  // The other grid is not contained in this grid if it is in a coarser level
+  if (grid->level() < this->level()) is_inside = false;
+
+  double hh[3];
+  for (int i=0; i<3; i++) {
+    hh[i] = 0.5 * (grid->xu_[i]-grid->xl_[i])/grid->n_[i];
+  }
+
+  // grid is contained in (*this) if its projection along each axis is contained in this's
+  for (int i=0; i<3; i++) {
+    // Lower point is greater
+    is_inside = is_inside && ((this->xl_[i]) < (grid->xl_[i] + hh[i]));
+    // Upper point is less
+    is_inside = is_inside && ((grid->xu_[i]) < (this->xu_[i] + hh[i]));
+  }
+  return is_inside;
+}
+
 //----------------------------------------------------------------------
 
 /// Determine the axis, face, and range of indices of zones adjacent 

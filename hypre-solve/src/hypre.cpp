@@ -946,7 +946,7 @@ Scalar Hypre::init_vector_points_ (std::vector<Point *> & points)
   for (i=0; i<int(points.size()); i++) {
 
     Point & point      = *points[i];
-    Grid & grid        = hierarchy_->grid(point.igrid());
+    Grid & grid        = hierarchy_->return_grid(point.igrid());
     if (grid.is_local()) {
 
       Scalar cell_volume = grid.h(0) * grid.h(1) * grid.h(2);
