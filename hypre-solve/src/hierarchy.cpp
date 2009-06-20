@@ -79,7 +79,6 @@ Hierarchy::~Hierarchy () throw ()
 
 void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
 {
-  TEMPORARY("Hierarchy::enzo_attach()");
   set_dim(3);
   // Determine Grid ID's
 
@@ -144,7 +143,10 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
 #ifdef HYPRE_GRAV
 void Hierarchy::enzo_detach () throw ()
 {
-  TEMPORARY("Hierarchy::enzo_detach()");
+  ItHierarchyGridsAll itg (*this);
+  while (Grid * g = itg++) {
+    delete g;
+  }
 }
 #endif
 
