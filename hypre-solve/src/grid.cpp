@@ -109,10 +109,10 @@ Grid::Grid (FILE *fp) throw ()
   : id_(-1),
     id_parent_(-1),
     ip_(-1),
-    faces_(0),
+    faces_(NULL),
     level_(-1),
-    u_(0),
-    counters_(0)
+    u_(NULL),
+    counters_(NULL)
 {
   this->read(fp);
 }
@@ -120,7 +120,7 @@ Grid::Grid (FILE *fp) throw ()
 
 Grid::~Grid () throw ()
 {
-  if (u_) delete [] u_;
+  delete [] u_;
   delete faces_;
   delete [] counters_;
 }

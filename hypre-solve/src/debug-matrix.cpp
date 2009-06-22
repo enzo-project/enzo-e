@@ -228,6 +228,7 @@ int main(int argc, char **argv)
       }
     }
   }
+  delete [] A;  A = NULL;
   printf ("Testing Graph symmetry\n");
 
   
