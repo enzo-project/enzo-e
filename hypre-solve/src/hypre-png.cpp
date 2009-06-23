@@ -20,6 +20,9 @@
 #include <string>
 #include <vector>
 
+#define VMIN 0.1
+#define VMAX 1.0
+
 const int debug = 0;
 const int trace = 0;
 
@@ -302,16 +305,41 @@ void images_colormap (double *images3[3],
 {
   int axis;
   double rmin3[3],rmax3[3];
+  // Post-process values
+//   for (axis=0; axis<3; axis++) {
+//     int n1 = ni3[(axis+1)%3];
+//     int n2 = ni3[(axis+2)%3];
+//     for (int i=0; i<n1*n2; i++) {
+//       if (images3[axis][i] > 0) {
+// 	images3[axis][i] = log(images3[axis][i]);
+//       } else if (images3[axis][i] < 0) {
+// 	images3[axis][i] = log(-images3[axis][i]);
+//       }	
+//     }
+//   }
   // Determine min and max for each image
   for (axis=0; axis<3; axis++) {
     rmin3[axis] = images3[axis][0];
     rmax3[axis] = images3[axis][0];
     int n1 = ni3[(axis+1)%3];
     int n2 = ni3[(axis+2)%3];
+    // Determine min and max
     for (int i=0; i<n1*n2; i++) {
       rmin3[axis] = MIN(rmin3[axis],images3[axis][i]);
       rmax3[axis] = MAX(rmax3[axis],images3[axis][i]);
     }
+    printf ("Axis %d Min = %g Max = %g\n",axis,rmin3[axis],rmax3[axis]);
+    // Scale to VMIN : VMAX
+    double rmin = 1e10, rmax=-1e10;
+    for (int i=0; i<n1*n2; i++) {
+      double a = (images3[axis][i]-rmin3[axis]) / (rmax3[axis] - rmin3[axis]);
+      images3[axis][i] = (1.0-a)*VMIN + a*VMAX;
+      rmin = MIN(rmin,images3[axis][i]);
+      rmax = MAX(rmax,images3[axis][i]);
+    }
+    rmin3[axis] = rmin;
+    rmax3[axis] = rmax;
+    printf ("Axis %d Min = %g Max = %g\n",axis,rmin3[axis],rmax3[axis]);
     int index;
     if (rmax3[axis] > rmin3[axis]) {
       for (int i=0; i<n1*n2; i++) {
