@@ -1080,9 +1080,18 @@ Scalar Hypre::init_vector_density_ (std::string             file_prefix,
     } else {
       printf ("DEBUG %s:%d Density read successfully\n",
 	      __FILE__,__LINE__);
-      printf ("%d %d %d  %d  [%g %g]\n",
+      printf ("%s:%d %d %d %d  %d  [%g %g]\n",
+	      __FILE__,__LINE__,
 	      grid->n(0),grid->n(1),grid->n(2),grid->n(),
 	      values[0],values[grid->n()-1]);
+    }
+
+    //
+
+    TEMPORARY("Scaling density by grid size");
+    for (int i=0; i<grid->n(); i++) {
+      values[i] *= grid->n();
+      values[i] *= grid->h(0)*grid->h(0);
     }
 
     // Copy the values to the hypre vector
