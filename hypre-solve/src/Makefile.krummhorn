@@ -6,7 +6,7 @@ HDF5_PATH = /usr
 # HYPRE
 
 HYPREDEF = 
-HYPREINC = -I$(HOME)/hypre/src/hypre/include
-HYPRELIB = -L$(HOME)/hypre/src/hypre/lib -lHYPRE 
+HYPREINC = -I$(HOME)/hypre/include
+HYPRELIB = -L$(HOME)/hypre/lib -lHYPRE 
 
 
