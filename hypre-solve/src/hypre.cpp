@@ -457,6 +457,33 @@ void Hypre::evaluate ()
 		 MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
 
 
+  if (pmpi->is_root()) { 
+
+    bool success = true;
+
+    // Residual too high
+
+    double restol = atof(parameters_->value("solver_restol").c_str());
+
+    if (resid_ > restol) {
+      printf ("Diverged: %g > %g\n", resid_,restol);
+      success = false;
+    }
+
+    // Iterations reached limit
+
+    int itmax     = atoi(parameters_->value("solver_itmax").c_str());
+    if (iterations() >= itmax) {
+      printf ("Stalled: %d >= %d\n", iterations(),itmax);
+      success = false;
+    }
+
+    // Appears to have completed successfully
+
+    if (success) {
+      printf ("Success!\n"); fflush(stdout); 
+    }
+  }
   if (pmpi->is_root()) printf ("norm(X)        = %g\n",sqrt(x2sum));
   if (pmpi->is_root()) printf ("sum(X)/norm(X) = %g\n",xsum/sqrt(x2sum));
 
