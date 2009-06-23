@@ -33,7 +33,8 @@ void print_particles (std::string,FILE*fpout);
 
 #define max(a,b) ((a)>(b) ? (a) : (b))
 
-#define TRACE { printf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout); }
+//#define TRACE { printf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout); }
+#define TRACE /* nothing */
 
 //----------------------------------------------------------------------
 // CONSTANTS
