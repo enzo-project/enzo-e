@@ -3,8 +3,8 @@ SHELL = /bin/bash
 EXES = enzo-reduce hypre-solve hypre-init hypre-test hypre-png debug-matrix enzo2hypre
 #EXES = enzo-reduce
 
-CPPFLAGS = -O3 -Wall
-# CPPFLAGS = -g
+# CPPFLAGS = -O3
+CPPFLAGS = -g -Wall
 
 # JBPERF
 
