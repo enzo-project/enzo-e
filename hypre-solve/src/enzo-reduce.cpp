@@ -16,8 +16,9 @@
 // (*)  -a  --axis      {x|y|z}             Axis along which to reduce
 // (*)  -f  --field     <field-name>        Name of the field
 // (*)  -g  --grid      <grid file>         Specify an Enzo grid file
-// (*)  -h  --hierarchy <hierarchy dir>     Specify an Enzo hierarchy directory
+// (*)  -h  --hierarchy <hierarchy file>    Specify an Enzo hierarchy file
 // ( )  -l  --level     <finest level>      Specify finest grid level
+// (*)  -L  --log                           Plot log(values)
 // (*)  -p  --project                       Project values
 // (*)  -s  --slice     [0:1]               Slice domain at the given point 
 //
@@ -44,6 +45,51 @@
 #endif
 
 //----------------------------------------------------------------------
+// CPP MACROS
+//----------------------------------------------------------------------
+
+#define Scalar     float
+#define MPI_SCALAR MPI_FLOAT
+#define SCAN_SCALAR_FORMAT "%f"
+#define PRINT_SCALAR_FORMAT "%g"
+
+#define BIG_INT    2147483647
+#define BIG_SCALAR 1e30
+
+#define MIN(a,b) ((a)<(b) ? (a) : (b))
+#define MAX(a,b) ((a)>(b) ? (a) : (b))
+
+#define MAX_FILE_STRING_LENGTH 80
+
+#define TRACE \
+    printf ("%s:%d TRACE\n",__FILE__,__LINE__); fflush(stdout);
+
+#define NOT_DONE \
+    printf ("%s:%d Code not implemented: exiting\n",__FILE__,__LINE__); \
+    fflush(stdout); \
+    exit(1)();
+
+#define ERROR(message) \
+      fprintf (stderr, \
+	       "%s:%d %s\n", \
+	       __FILE__,__LINE__,message); \
+      exit(1);
+
+#define INDEX_TO_PROC(index) 
+
+#define INDEX(ix,iy,iz,nx,ny) ((ix) + (nx)*((iy) + (ny)*(iz)))
+
+// H5T_NATIVE_DOUBLE
+#define H5_TYPE H5T_NATIVE_FLOAT
+//#define H5_TYPE H5T_IEEE_F32BE
+
+#define DEBUG true
+
+#define DO_SCALE 0
+#define VMAX 1.0
+#define VMIN 0.1
+
+//----------------------------------------------------------------------
 // USER DATATYPES
 //----------------------------------------------------------------------
 
@@ -57,8 +103,9 @@ struct argument_struct {
   std::string reduce_axis;
   std::string field_name;
   std::string grid_file;
-  std::string hierarchy_dir;
+  std::string hierarchy_file;
   std::string slice_point;
+  std::string use_log;
   std::string finest_level;
   std::string operation;
 };
@@ -69,9 +116,9 @@ struct grid_info_struct {
   std::string file_name;
   std::string group_name;
   int         level;
-  double      cell_width;
-  double      left_edge[3];
-  double      right_edge[3];
+  Scalar      cell_width;
+  Scalar      left_edge[3];
+  Scalar      right_edge[3];
   int         start_index[3];
   int         stop_index[3];
   int         start_index_fine[3];
@@ -83,9 +130,9 @@ struct grid_info_struct {
 struct hierarchy_info_struct {
   int     num_grids;
   int     max_level;
-  double  fine_cell_width;
-  double  left_edge[3];
-  double  right_edge[3];
+  Scalar  fine_cell_width;
+  Scalar  left_edge[3];
+  Scalar  right_edge[3];
   int     start_index[3];
   int     stop_index[3];
 };
@@ -96,12 +143,12 @@ struct hierarchy_info_struct {
 //----------------------------------------------------------------------
 
 void read_enzo_grid   
-(    double          ** grid_array,
+(    Scalar          ** grid_array,
      grid_info_struct * grid_info,
      std::string        field_name  );
 
 enum_amr_type get_amr_type 
-(    std::string        arg_hierarchy_dir );
+(    std::string        arg_hierarchy_file );
 
 bool check_args (argument_struct *);
 
@@ -126,43 +173,13 @@ void print_grid_info(grid_info_struct * grid_info);
 void write_array 
 (    std::string        file_name,
      std::string        dataset_name,
-     double           * array,
+     Scalar           * array,
      int                nx,
      int                ny );
 
 bool is_contained_in (grid_info_struct * grid_info,
 		      int grid_1,
 		      int grid_2);
-
-//----------------------------------------------------------------------
-// CPP MACROS
-//----------------------------------------------------------------------
-
-#define BIG_INT    2147483647
-#define BIG_DOUBLE 1e30
-
-#define MIN(a,b) ((a)<(b) ? (a) : (b))
-#define MAX(a,b) ((a)>(b) ? (a) : (b))
-
-#define MAX_FILE_STRING_LENGTH 80
-
-#define TRACE \
-    printf ("%s:%d TRACE\n",__FILE__,__LINE__); fflush(stdout);
-
-#define NOT_DONE \
-    printf ("%s:%d Code not implemented: exiting\n",__FILE__,__LINE__); \
-    fflush(stdout); \
-    exit(1)();
-
-#define ERROR(message) \
-      fprintf (stderr, \
-	       "%s:%d %s\n", \
-	       __FILE__,__LINE__,message); \
-      exit(1);
-
-#define INDEX_TO_PROC(index) 
-
-#define INDEX(ix,iy,iz,nx,ny) ((ix) + (nx)*((iy) + (ny)*(iz)))
 
 //====================================================================
 // BEGIN main ()
@@ -197,6 +214,7 @@ int main(int argc, char **argv)
       {"field",     required_argument, 0, 'f'},
       {"grid",      required_argument, 0, 'g'},
       {"level",     required_argument, 0, 'l'},
+      {"log",       no_argument,       0, 'L'},
       {"hierarchy", required_argument, 0, 'h'},
       {"project",   no_argument,       0, 'p'},
       {"slice",     required_argument, 0, 's'},
@@ -212,6 +230,7 @@ int main(int argc, char **argv)
   arg.reduce_axis = "x";
   arg.operation   = "project";
   arg.field_name  = "Density";
+  arg.use_log     = "false";
 
   //--------------------------------------------------
   // Parse arguments
@@ -219,20 +238,20 @@ int main(int argc, char **argv)
 
   int c;
   int option;
-  while ((c = getopt_long(argc, argv, "a:f:g:h:l:ps:", long_options, &option)) != -1) {
+  while ((c = getopt_long(argc, argv, "a:f:g:h:l:ps:L", long_options, &option)) != -1) {
     switch (c) {
     case 0:
       // argument set in getopt_long()
       break;
-    case 'a': arg.reduce_axis   = optarg; break;
-    case 'f': arg.field_name    = optarg; break;
-    case 'g': arg.grid_file     = optarg; break;
-    case 'h': arg.hierarchy_dir = optarg; break;
-    case 'l': arg.finest_level  = optarg; break;
-    case 'p': arg.operation = "project";  break;
-    case 's': arg.operation = "slice";	
-      arg.slice_point = optarg;
-      break;
+    case 'a': arg.reduce_axis    = optarg; break;
+    case 'f': arg.field_name     = optarg; break;
+    case 'g': arg.grid_file      = optarg; break;
+    case 'h': arg.hierarchy_file = optarg; break;
+    case 'l': arg.finest_level   = optarg; break;
+    case 'L': arg.use_log        = "true"; break;
+    case 'p': arg.operation      = "project";  break;
+    case 's': arg.operation      = "slice";	
+              arg.slice_point    = optarg; break;
     case '?': print_usage(argv); break;
     default:
       fprintf (stderr,"%s:%d Unknown command-line parse error: exiting\n",
@@ -258,8 +277,8 @@ int main(int argc, char **argv)
   // DETERMINE LIST OF INPUT FILES
   //====================================================================
 
-  bool      grid_specified = ! arg.grid_file.empty() ;
-  bool hierarchy_specified = ! arg.hierarchy_dir.empty();
+  bool      grid_specified = (! arg.grid_file.empty());
+  bool hierarchy_specified = (! arg.hierarchy_file.empty());
   
 
   std::vector <std::string> grid_file_list;
@@ -271,17 +290,11 @@ int main(int argc, char **argv)
 
   } else if ((hierarchy_specified)) {
 
-    if (chdir (arg.hierarchy_dir.c_str()) != 0) {
-      fprintf (stderr, "%s:%d Error changing to directory %s: exiting\n",
-	       __FILE__,__LINE__,arg.hierarchy_dir.c_str());
-      exit(1);
-    }
-
     // Read hierarchy file
 
     char file_name [MAX_FILE_STRING_LENGTH];
 
-    amr_type = get_amr_type (arg.hierarchy_dir);
+    amr_type = get_amr_type (arg.hierarchy_file);
 
     // Loop through files and add them to the list of files
 
@@ -289,7 +302,7 @@ int main(int argc, char **argv)
 
       for (int i = mpi_rank; true; i += mpi_size) {
 
-	sprintf (file_name, "%s.grid%04d",arg.hierarchy_dir.c_str(),i+1);
+	sprintf (file_name, "%s.grid%04d",arg.hierarchy_file.c_str(),i+1);
 	
 	// Check if file exists, and append to list of files if it does
 
@@ -309,7 +322,7 @@ int main(int argc, char **argv)
 
     } else if (amr_type == amr_type_packed) {
 
-	sprintf (file_name, "%s.cpu%04d",arg.hierarchy_dir.c_str(),mpi_rank);
+	sprintf (file_name, "%s.cpu%04d",arg.hierarchy_file.c_str(),mpi_rank);
     }
     // ERROR CHECK ! read_successful
     
@@ -319,23 +332,13 @@ int main(int argc, char **argv)
 
   // READ GRID INFO AND DETERMINE DOMAIN EXTENTS [left|right]_edge_global
 
-  int num_grids = get_num_grids (arg.hierarchy_dir);
+  int num_grids = get_num_grids (arg.hierarchy_file);
   grid_info_struct *grid_info = new grid_info_struct[num_grids];
   hierarchy_info_struct hierarchy_info;
 
-  read_grids (arg.hierarchy_dir,grid_info,num_grids);
+  read_grids (arg.hierarchy_file,grid_info,num_grids);
 
   init_hierarchy (&hierarchy_info,grid_info,num_grids);
-
-
-  // DEBUG
-//   print_hierarchy_info(&hierarchy_info);
-
-  // DEBUG
-//   for (int i=0; i<num_grids; i++) {
-//     print_grid_info(&grid_info[i]);
-//   }
-
 
   //====================================================================
   // ACCUMULATE PROCESSOR-LOCAL REDUCTION
@@ -377,10 +380,10 @@ int main(int argc, char **argv)
   
   // Allocate array_local[index]
 
-  double * array_local = new double [n];
+  Scalar * array_local = new Scalar [n];
 
-  double * grid_array = NULL;
-  double * parent_array = NULL;
+  Scalar * grid_array = NULL;
+  Scalar * parent_array = NULL;
 
   if (amr_type == amr_type_packed) {
     fprintf (stderr,"%s:%d amr_type == amr_type_packed is not supported yet\n",
@@ -500,7 +503,7 @@ int main(int argc, char **argv)
 	i3[ix]  = (if3[ix] - grid_index_start[ix])  / grid_subcells;
 	ip3[ix] = (if3[ix] - parent_index_start[ix]) / parent_subcells;
 
-	double value = 0;
+	Scalar value = 0;
 
 	if ( operation_type == operation_type_project ) {
 
@@ -549,13 +552,35 @@ int main(int argc, char **argv)
   // POST-PROCESS 
   //====================================================================
 
-  for (int i=0; i<n; i++) {
-    if (array_local[i] > 0) {
-      array_local[i] = log(array_local[i]);
-    }	else {
-      array_local[i] = 0;
+  if (arg.use_log == "true") {
+    printf ("%s:%d Plotting log\n",__FILE__,__LINE__);
+    for (int i=0; i<n; i++) {
+      if (array_local[i] > 0) {
+	array_local[i] = log(array_local[i]);
+      }	else {
+	array_local[i] = 0;
+      }
     }
-  };
+  }
+
+  Scalar av=0.0,mn=1e30,mx=-1e30;
+  for (int i=0; i<n; i++) {
+    av += array_local[i];
+    if (mn > array_local[i]) mn = array_local[i];
+    if (mx < array_local[i]) mx = array_local[i];
+  }
+  Scalar av2=0.0,mn2=1e30,mx2=-1e30;
+  if (DO_SCALE) {
+    for (int i=0; i<n; i++) {
+      Scalar a = (array_local[i]-mn) / (mx - mn);
+      array_local[i] = (1.0 - a)*VMIN + a*VMAX;
+      av2 += array_local[i];
+      if (mn2 > array_local[i]) mn2 = array_local[i];
+      if (mx2 < array_local[i]) mx2 = array_local[i];
+    }
+  }
+  printf ("Min = "PRINT_SCALAR_FORMAT"  Avg = "PRINT_SCALAR_FORMAT"  Max = "PRINT_SCALAR_FORMAT"\n",mn,av/n,mx);
+  printf ("Min = "PRINT_SCALAR_FORMAT"  Avg = "PRINT_SCALAR_FORMAT"  Max = "PRINT_SCALAR_FORMAT"\n",mn2,av2/n,mx2);
 
   //====================================================================
   // OUTPUT RESULT FROM ROOT
@@ -597,7 +622,7 @@ int main(int argc, char **argv)
 
 void read_enzo_grid 
 (
- double          ** array, 
+ Scalar          ** array, 
  grid_info_struct * grid_info,
  std::string        dataset_name
  )
@@ -631,6 +656,7 @@ void read_enzo_grid
 
   H5Sget_simple_extent_dims(dataspace_id, n, NULL);
 
+  printf ("grid %d  %d %d %d\n",grid_info->index,int(n[0]),int(n[1]),int(n[2]));
   assert (n[0]!=0);
   assert (n[1]!=0);
   assert (n[2]!=0);
@@ -640,14 +666,18 @@ void read_enzo_grid
   //--------------------------------------------------
 
   if (*array != NULL) delete [] *array;
-  *array = new double [n[0]*n[1]*n[2]];
+  *array = new Scalar [n[0]*n[1]*n[2]];
 
   //--------------------------------------------------
   // Read the dataset
   //--------------------------------------------------
 
-  status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, 
+  status = H5Dread(dataset_id, H5_TYPE, H5S_ALL, H5S_ALL, 
 		   H5P_DEFAULT, *array);
+
+  if (DEBUG) {
+    printf ("grid[0] = "PRINT_SCALAR_FORMAT"\n",(*array)[0]);
+  }
     
   //--------------------------------------------------
   // Close the dataset
@@ -671,7 +701,7 @@ void write_array
 (
  std::string        file_name,
  std::string        dataset_name,
- double           * array,
+ Scalar           * array,
  int                nx,
  int                ny
  )
@@ -709,7 +739,7 @@ void write_array
 
   std::string name = "/" + dataset_name;
 
-  hid_t type_id = H5T_NATIVE_DOUBLE;
+  hid_t type_id = H5_TYPE;
   
   hid_t dataset_id = H5Dcreate(file_id, name.c_str(), type_id, space_id, H5P_DEFAULT);
 
@@ -739,7 +769,7 @@ void write_array
 
 // Determine whether the amr data is packed or unpacked
 
-enum_amr_type get_amr_type (std::string hierarchy_dir)
+enum_amr_type get_amr_type (std::string hierarchy_file)
 {
 
   enum_amr_type amr_type;
@@ -749,12 +779,14 @@ enum_amr_type get_amr_type (std::string hierarchy_dir)
 
   amr_type = amr_type_unknown;
 
-  sprintf (file_name, "%s.grid0001",hierarchy_dir.c_str());
+  sprintf (file_name, "%s.grid0001",hierarchy_file.c_str());
+  printf ("Testing %s\n",file_name);
   if (stat(file_name,&stFileInfo) == 0) {
     amr_type = amr_type_unpacked;
   }
 
-  sprintf (file_name, "%s.cpu0000",hierarchy_dir.c_str());
+  sprintf (file_name, "%s.cpu0000",hierarchy_file.c_str());
+  printf ("Testing %s\n",file_name);
   if (stat(file_name,&stFileInfo) == 0) {
     amr_type = amr_type_packed;
   }
@@ -784,8 +816,8 @@ bool check_args(argument_struct *arg_p)
     args_ok = false;
   }
 	
-  if ( (arg_p->grid_file == "" && arg_p->hierarchy_dir == "") ||
-       (arg_p->grid_file != "" && arg_p->hierarchy_dir != "")) {
+  if ( (arg_p->grid_file == "" && arg_p->hierarchy_file == "") ||
+       (arg_p->grid_file != "" && arg_p->hierarchy_file != "")) {
     printf ("argument '-g' or '-h' required\n");
     args_ok = false;
   }
@@ -868,12 +900,12 @@ void read_grids (std::string        hierarchy_name,
 
     // Get grid extent
 
-    sscanf (line,"GridLeftEdge      = %lg %lg %lg",
+    sscanf (line,"GridLeftEdge      = "SCAN_SCALAR_FORMAT" "SCAN_SCALAR_FORMAT" "SCAN_SCALAR_FORMAT"",
 	    &grid_info[index].left_edge[0],
 	    &grid_info[index].left_edge[1],
 	    &grid_info[index].left_edge[2]);
 	    
-    sscanf (line,"GridRightEdge      = %lg %lg %lg",
+    sscanf (line,"GridRightEdge      = "SCAN_SCALAR_FORMAT" "SCAN_SCALAR_FORMAT" "SCAN_SCALAR_FORMAT"",
 	    &grid_info[index].right_edge[0],
 	    &grid_info[index].right_edge[1],
 	    &grid_info[index].right_edge[2]);
@@ -900,7 +932,7 @@ void read_grids (std::string        hierarchy_name,
   // Determine grid levels using mesh widths
   // ASSUMES AT LEAST ONE GRID AND THAT IT IS A ROOT-LEVEL GRID
 
-  double root_cell_width = 
+  Scalar root_cell_width = 
     (grid_info[0].right_edge[0] - grid_info[0].left_edge[0]) / 
     (grid_info[0].stop_index[0] - grid_info[0].start_index[0] + 1) ;
 
@@ -908,7 +940,7 @@ void read_grids (std::string        hierarchy_name,
 
   for (int i = 0; i < num_grids; i++) {
 
-    double local_cell_width = 
+    Scalar local_cell_width = 
       (grid_info[i].right_edge[0] - grid_info[i].left_edge[0]) /
       (grid_info[i].stop_index[0] - grid_info[i].start_index[0] + 1);
 
@@ -935,8 +967,8 @@ void init_hierarchy (hierarchy_info_struct * hierarchy_info,
 		     grid_info_struct      * grid_info, 
 		     int                     num_grids)
 {
-  double left_edge_local[3]  = {BIG_DOUBLE,BIG_DOUBLE,BIG_DOUBLE};
-  double right_edge_local[3] = {-BIG_DOUBLE,-BIG_DOUBLE,-BIG_DOUBLE};
+  Scalar left_edge_local[3]  = {BIG_SCALAR,BIG_SCALAR,BIG_SCALAR};
+  Scalar right_edge_local[3] = {-BIG_SCALAR,-BIG_SCALAR,-BIG_SCALAR};
 
   hierarchy_info->num_grids = num_grids;
 
@@ -961,9 +993,9 @@ void init_hierarchy (hierarchy_info_struct * hierarchy_info,
 #ifdef USE_MPI  
   if (mpi_size > 1) {
     MPI_Allreduce (left_edge_local,hierarchy_info->left_edge,3,
-		   MPI_DOUBLE,MPI_MIN,MPI_COMM_WORLD);
+		   MPI_SCALAR,MPI_MIN,MPI_COMM_WORLD);
     MPI_Allreduce (right_edge_local,hierarchy_info->right_edge,3,
-		   MPI_DOUBLE,MPI_MAX,MPI_COMM_WORLD);
+		   MPI_SCALAR,MPI_MAX,MPI_COMM_WORLD);
   }
 #endif
 
@@ -979,7 +1011,7 @@ void init_hierarchy (hierarchy_info_struct * hierarchy_info,
 
   // Determine finest mesh width (assumes first grid is coarse)
 
-  double fine_to_coarse_ratio = 1;
+  Scalar fine_to_coarse_ratio = 1;
   for (int i=0; i<hierarchy_info->max_level; i++) fine_to_coarse_ratio *= 0.5;
   hierarchy_info->fine_cell_width = fine_to_coarse_ratio * grid_info[0].cell_width;
 
@@ -1107,14 +1139,14 @@ void print_hierarchy_info (hierarchy_info_struct * hierarchy_info)
 	  mpi_rank,hierarchy_info->num_grids);
   printf ("%d  max_level        = %d\n",
 	  mpi_rank,hierarchy_info->max_level);
-  printf ("%d  fine_cell_width  = %g\n",
+  printf ("%d  fine_cell_width  = "PRINT_SCALAR_FORMAT"\n",
 	  mpi_rank,hierarchy_info->fine_cell_width);
-  printf ("%d  left_edge        = %g %g %g\n",
+  printf ("%d  left_edge        = "PRINT_SCALAR_FORMAT" "PRINT_SCALAR_FORMAT" "PRINT_SCALAR_FORMAT"\n",
 	  mpi_rank,
 	  hierarchy_info->left_edge[0],
 	  hierarchy_info->left_edge[1],
 	  hierarchy_info->left_edge[2]);
-  printf ("%d  right_edge       = %g %g %g\n",
+  printf ("%d  right_edge       = "PRINT_SCALAR_FORMAT" "PRINT_SCALAR_FORMAT" "PRINT_SCALAR_FORMAT"\n",
 	  mpi_rank,
 	  hierarchy_info->right_edge[0],
 	  hierarchy_info->right_edge[1],
@@ -1142,9 +1174,9 @@ void print_grid_info (grid_info_struct * grid_info)
   printf ("%d  file_name     = %s\n",mpi_rank, grid_info->file_name.c_str());
   printf ("%d  group_name    = %s\n",mpi_rank, grid_info->group_name.c_str());
   printf ("%d  level         = %d\n",mpi_rank, grid_info->level);
-  printf ("%d  cell_width    = %g\n",mpi_rank, grid_info->cell_width);
-  printf ("%d  left_edge     = %g %g %g\n",mpi_rank, grid_info->left_edge[0],grid_info->left_edge[1],grid_info->left_edge[2]);
-  printf ("%d  right_edge    = %g %g %g\n",mpi_rank, grid_info->right_edge[0],grid_info->right_edge[1],grid_info->right_edge[2]);
+  printf ("%d  cell_width    = "PRINT_SCALAR_FORMAT"\n",mpi_rank, grid_info->cell_width);
+  printf ("%d  left_edge     = "PRINT_SCALAR_FORMAT" "PRINT_SCALAR_FORMAT" "PRINT_SCALAR_FORMAT"\n",mpi_rank, grid_info->left_edge[0],grid_info->left_edge[1],grid_info->left_edge[2]);
+  printf ("%d  right_edge    = "PRINT_SCALAR_FORMAT" "PRINT_SCALAR_FORMAT" "PRINT_SCALAR_FORMAT"\n",mpi_rank, grid_info->right_edge[0],grid_info->right_edge[1],grid_info->right_edge[2]);
   printf ("%d  start_index   = %d %d %d\n",mpi_rank, grid_info->start_index[0],grid_info->start_index[1],grid_info->start_index[2]);
   printf ("%d  stop_index    = %d %d %d\n",mpi_rank, grid_info->stop_index[0],grid_info->stop_index[1],grid_info->stop_index[2]);
   printf ("%d  start_index_fine = %d %d %d\n",
