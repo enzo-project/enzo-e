@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Laboratory for Computational Astrophysics"
+AuthUserFile /etc/httpd/passwd/passwords
+Require user lca

@@ -1,6 +1,7 @@
 all: hypre-solve.pdf  hypre-solve.ps
 
-hypre-solve:  hypre-solve.ps 
+PAPER = hypre-solve
+hypre-solve:  $(PAPER).ps 
 
 FIG = fig/discret1.eps fig/discret2.eps fig/discret3.eps \
       fig/discret4.eps fig/discret5.eps fig/discret6.eps \
@@ -9,21 +10,23 @@ FIG = fig/discret1.eps fig/discret2.eps fig/discret3.eps \
 
 
 ########################################################################
-hypre-solve.ps:hypre-solve.dvi $(FIG)
-	dvips -o hypre-solve.ps hypre-solve.dvi
-hypre-solve.pdf:hypre-solve.dvi $(FIG)
-	dvipdf hypre-solve.dvi
-hypre-solve.dvi:hypre-solve.tex include.tex UML
-	-latex hypre-solve
-	-latex hypre-solve
+$(PAPER).ps:$(PAPER).dvi $(FIG)
+	dvips -o $(PAPER).ps $(PAPER).dvi
+$(PAPER).pdf:$(PAPER).dvi $(FIG)
+	dvipdf $(PAPER).dvi
+$(PAPER).dvi:$(PAPER).tex include.tex UML
+	-latex $(PAPER)
+	-latex $(PAPER)
 UML:
 #		make -C uml
-hypre-solve2.ps:hypre-solve.ps
-	a2ps -M Letter -2 hypre-solve.ps -o hypre-solve2.ps
-pdf.hypre-solve:hypre-solve.dvi
-	dvipdf hypre-solve.dvi hypre-solve.pdf
-hypre-solve2.pdf:hypre-solve2.ps
-	ps2pdf hypre-solve2.ps hypre-solve2.pdf
+html: $(PAPER).tex
+	tth -e2 $(PAPER).tex > $(PAPER).html
+$(PAPER)2.ps:$(PAPER).ps
+	a2ps -M Letter -2 $(PAPER).ps -o $(PAPER)2.ps
+pdf.$(PAPER):$(PAPER).dvi
+	dvipdf $(PAPER).dvi $(PAPER).pdf
+$(PAPER)2.pdf:$(PAPER)2.ps
+	ps2pdf $(PAPER)2.ps $(PAPER)2.pdf
 
 include.tex:
 	ln -sf ~/latex/include-common.tex include.tex
