@@ -22,16 +22,23 @@ public:
       np_(1),
       ip_(0)
   {
-  }
+  };
+
+  Mpi (MPI_Comm comm)
+    {
+      comm_ = comm;
+      MPI_Comm_size (comm_, &np_);
+      MPI_Comm_rank (comm_, &ip_);
+    }
 
   Mpi (int * argc, char ***argv)
     : comm_(MPI_COMM_WORLD)
-  {
-    MPI_Init (argc,argv);
+    {
+      MPI_Init (argc,argv);
 
-    MPI_Comm_size (comm_, &np_);
-    MPI_Comm_rank (comm_, &ip_);
-  }
+      MPI_Comm_size (comm_, &np_);
+      MPI_Comm_rank (comm_, &ip_);
+    }
 
   ~Mpi ()
   {

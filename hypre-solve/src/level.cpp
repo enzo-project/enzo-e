@@ -57,6 +57,10 @@ Level::Level (int n) throw ()
 
 Level::~Level () throw ()
 {
+  // Grid objects deleted in hierarchy
+  // Assumes all grids in all levels are in a unique hierarchy
+  grids0_.resize (0);
+  grids0_.push_back (0);
 }
 
 //======================================================================

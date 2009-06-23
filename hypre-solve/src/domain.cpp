@@ -38,6 +38,20 @@ Domain::Domain (std::string parms) throw ()
   input (parms);
   assert (1 <= d_ && d_ <= 3);
 }
+
+//----------------------------------------------------------------------
+
+
+Domain::Domain (int d, Scalar xl[3], Scalar xu[3]) throw ()
+  : d_(d)
+{
+  assert (1 <= d_ && d_ <= 3);
+  for (int i=0; i<d; i++) {
+    xl_[i] = xl[i];
+    xu_[i] = xu[i];
+  }
+}
+
 //----------------------------------------------------------------------
 
 Domain::~Domain () throw ()

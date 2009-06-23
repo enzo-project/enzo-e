@@ -25,6 +25,7 @@ public:
 
   Domain () throw ();
   Domain (std::string parms) throw ();
+  Domain (int d, Scalar xl[3], Scalar xu[3]) throw ();
   ~Domain () throw ();
 
   void print () throw ();

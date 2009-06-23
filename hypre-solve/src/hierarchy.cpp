@@ -26,7 +26,7 @@
 
 //----------------------------------------------------------------------
 
-const int trace          = 0;
+const int trace          = false;
 //const int debug          = 0;
 const int debug_detailed = 0;
 const int geomview       = 0;
@@ -71,6 +71,27 @@ Hierarchy::~Hierarchy () throw ()
 /** Currently does nothing */
 
 {
+  // Delete levels
+  for (int i=0; i<levels0_.size(); i++) {
+    if (levels0_[i] != NULL) {
+      // Level objects deleted here
+      delete levels0_[i];
+      levels0_[i] = 0;
+    }
+  }
+  levels0_.resize(0);
+  levels0_.push_back(0);
+
+  // Delete grids list
+  for (int i=0; i<grids0_.size(); i++) {
+    if (grids0_[i] != NULL) {
+      // Grid objects deleted here or in enzo_detach
+      delete grids0_[i];
+      grids0_[i] = 0;
+    }
+  }
+  grids0_.resize(0);
+  grids0_.push_back(0);
 }
 
 //======================================================================
@@ -79,6 +100,7 @@ Hierarchy::~Hierarchy () throw ()
 
 void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
 {
+  _TRACE_;
   set_dim(3);
   // Determine Grid ID's
 
@@ -135,6 +157,7 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
 
   }
 
+  _TRACE_;
 }
 #endif
 
@@ -143,10 +166,12 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
 #ifdef HYPRE_GRAV
 void Hierarchy::enzo_detach () throw ()
 {
+  _TRACE_;
   ItHierarchyGridsAll itg (*this);
   while (Grid * g = itg++) {
     delete g;
   }
+  _TRACE_;
 }
 #endif
 
@@ -638,8 +663,6 @@ void Hierarchy::init_indices_ (bool is_periodic) throw()
   _TRACE_;
   // Determine problem size the hard way
 
-  ItLevelGridsAll itg (level(0));
-
   int i,lower[3],upper[3];
 
   for (i=0; i<3; i++) {
@@ -647,17 +670,27 @@ void Hierarchy::init_indices_ (bool is_periodic) throw()
     upper[i] = INT_MIN;
   }
 
+  _TRACE_;
+
+  ItLevelGridsAll itg (level(0));
+
   while (Grid *grid = itg++) {
+    _TRACE_;
     for (i=0; i<3; i++) {
       lower[i] = MIN(grid->index_lower(i),lower[i]);
       upper[i] = MAX(grid->index_upper(i),upper[i]);
     }
+    _TRACE_;
   }
+
+  _TRACE_;
 
   for (i=0; i<3; i++) {
     il0_[i] = lower[i];
     n0_[i] = upper[i] - lower[i] + 1;
   }
+
+  _TRACE_;
 
   for (i=0; i<3; i++) {
     period_index_[i] = is_periodic ? n0_[i] : 0.0;

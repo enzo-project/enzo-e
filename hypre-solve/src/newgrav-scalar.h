@@ -16,6 +16,7 @@
  */
 
 typedef double Scalar ;
+
 #define SCALAR_MAX 1e38;
 #define SCALAR_SCANF "%lf"
 #define SCALAR_PRINTF "%le "

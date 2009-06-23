@@ -24,9 +24,9 @@
 
 //======================================================================
 
-const int debug       = 0;
-const int debug_input = 0;
-const int trace       = 0;
+const int  debug       = 0;
+const int  debug_input = 0;
+const bool trace       = true;
 
 //======================================================================
 
@@ -47,9 +47,9 @@ Domain Grid::domain_;
 
 Grid::Grid (std::string parms) throw ()
   : level_ (-1),
-    u_(0),
-    counters_ (0)
-
+    u_(NULL),
+    faces_(NULL),
+    counters_ (NULL)
 {
   // Initialize 0-sentinels in arrays
 
@@ -81,6 +81,10 @@ Grid::Grid (int     id,
 	    Scalar *xu,
 	    int    *il,
 	    int    *n) throw ()
+  : level_ (-1),
+    u_(NULL),
+    faces_(NULL),
+    counters_ (NULL)
 {
  // Initialize 0-sentinels in arrays
 
@@ -120,9 +124,21 @@ Grid::Grid (FILE *fp) throw ()
 
 Grid::~Grid () throw ()
 {
-  delete [] u_;
-  delete faces_;
-  delete [] counters_;
+  _TRACE_;
+  printf ("~Grid(%p)\n",this);
+  if (u_        != NULL) 
+    delete [] u_;        
+  u_        = NULL;
+  if (faces_    != NULL) 
+    delete    faces_;    
+  faces_    = NULL;
+  if (counters_ != NULL) 
+    delete [] counters_; 
+  counters_ = NULL;
+  _TRACE_;
+  neighbors0_.resize(0);
+  _TRACE_;
+  children0_.resize(0);
 }
 
 //======================================================================
@@ -220,7 +236,7 @@ void Grid::allocate () throw ()
 void Grid::deallocate () throw ()
 {
   delete [] u_;
-  u_ = 0;
+  u_ = NULL;
 }
 
 //======================================================================
@@ -276,6 +292,7 @@ void Grid::geomview_face (FILE         *fpr,
   for (int i=0; i<num_types; i++) types[i] = Faces::Label(i);
   geomview_face_type (fpr,types,num_types,full);
   delete [] types;
+  types = NULL;
 }
 
 //======================================================================
