@@ -227,7 +227,7 @@ Scalar * Grid::values () throw ()
 
 void Grid::allocate () throw ()
 {
-  if (u_) deallocate();
+  deallocate();
   u_ = new Scalar [n_[0]*n_[1]*n_[2]];
 }
 
@@ -235,7 +235,8 @@ void Grid::allocate () throw ()
 
 void Grid::deallocate () throw ()
 {
-  delete [] u_;
+  if (u_ != NULL) 
+    delete [] u_;
   u_ = NULL;
 }
 
@@ -287,11 +288,18 @@ void Grid::geomview_grid (FILE *fpr, bool full) throw ()
 void Grid::geomview_face (FILE         *fpr, 
 			  bool          full) throw ()
 {
-  int num_types = Faces::_last_ - Faces::_first_ + 1;
+  int num_types = (Faces::_last_ - Faces::_first_ + 1);
+
   Faces::Label * types = new Faces::Label [num_types];
-  for (int i=0; i<num_types; i++) types[i] = Faces::Label(i);
+
+  for (int i=0; i<num_types; i++) {
+    types[i] = Faces::Label(i);
+  }
+
   geomview_face_type (fpr,types,num_types,full);
+
   delete [] types;
+
   types = NULL;
 }
 

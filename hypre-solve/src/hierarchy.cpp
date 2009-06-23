@@ -71,27 +71,7 @@ Hierarchy::~Hierarchy () throw ()
 /** Currently does nothing */
 
 {
-  // Delete levels
-  for (int i=0; i<levels0_.size(); i++) {
-    if (levels0_[i] != NULL) {
-      // Level objects deleted here
-      delete levels0_[i];
-      levels0_[i] = 0;
-    }
-  }
-  levels0_.resize(0);
-  levels0_.push_back(0);
-
-  // Delete grids list
-  for (int i=0; i<grids0_.size(); i++) {
-    if (grids0_[i] != NULL) {
-      // Grid objects deleted here or in enzo_detach
-      delete grids0_[i];
-      grids0_[i] = 0;
-    }
-  }
-  grids0_.resize(0);
-  grids0_.push_back(0);
+  deallocate_ ();
 }
 
 //======================================================================
@@ -167,10 +147,7 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
 void Hierarchy::enzo_detach () throw ()
 {
   _TRACE_;
-  ItHierarchyGridsAll itg (*this);
-  while (Grid * g = itg++) {
-    delete g;
-  }
+  deallocate_();
   _TRACE_;
 }
 #endif
@@ -223,6 +200,51 @@ void Hierarchy::initialize (Domain & domain,
 }
 
 //------------------------------------------------------------------------
+
+//======================================================================
+
+/// Write hierarchy grids to geomview files grid-L<level>-P<processor>.vect 
+
+void Hierarchy::geomview_grids (Mpi & mpi) throw ()
+{
+
+  if (geomview) {
+    ItHierarchyLevels itl (*this);
+    while (Level * level = itl++) {
+      char filename[20];
+
+      sprintf (filename,"grid-L%d-P%d.vect",level->index(),mpi.ip());
+      FILE * fp = fopen (filename,"w");
+      level->geomview_grid_local (fp);
+      fclose (fp);
+
+    }
+  }
+}
+
+//======================================================================
+
+void Hierarchy::print () throw ()
+{
+  printf ("Hierarchy\n");
+  for (int i=0; i<num_levels(); i++) {
+    level(i).print();
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Hierarchy::write (FILE *fp) throw ()
+{
+  fprintf (fp,"Hierarchy\n");
+  for (int i=0; i<num_levels(); i++) {
+    level(i).write();
+  }
+}
+
+//======================================================================
+// PRIVATE MEMBER FUNCTIONS
+//======================================================================
 
 /// Determines the parent grid of each grid in the hierarchy.
 
@@ -739,50 +761,7 @@ void Hierarchy::init_extents_ (bool is_periodic) throw()
   _TRACE_;
 }
 
-//======================================================================
-
-/// Write hierarchy grids to geomview files grid-L<level>-P<processor>.vect 
-
-void Hierarchy::geomview_grids (Mpi & mpi) throw ()
-{
-
-  if (geomview) {
-    ItHierarchyLevels itl (*this);
-    while (Level * level = itl++) {
-      char filename[20];
-
-      sprintf (filename,"grid-L%d-P%d.vect",level->index(),mpi.ip());
-      FILE * fp = fopen (filename,"w");
-      level->geomview_grid_local (fp);
-      fclose (fp);
-
-    }
-  }
-}
-
-//======================================================================
-
-void Hierarchy::print () throw ()
-{
-  printf ("Hierarchy\n");
-  for (int i=0; i<num_levels(); i++) {
-    level(i).print();
-  }
-}
-
 //----------------------------------------------------------------------
-
-void Hierarchy::write (FILE *fp) throw ()
-{
-  fprintf (fp,"Hierarchy\n");
-  for (int i=0; i<num_levels(); i++) {
-    level(i).write();
-  }
-}
-
-//======================================================================
-// PRIVATE MEMBER FUNCTIONS
-//======================================================================
 
 void Hierarchy::insert_in_level_ (int level, Grid & grid) throw ()
 {
@@ -796,4 +775,33 @@ void Hierarchy::insert_in_level_ (int level, Grid & grid) throw ()
     levels0_[level] = new Level(level);
   }
   levels0_[level]->insert_grid (grid);
+}
+
+//----------------------------------------------------------------------
+
+void Hierarchy::deallocate_ () throw ()
+{
+  // Delete levels
+  for (int i=0; i<levels0_.size(); i++) {
+    if (levels0_[i] != NULL) {
+      // Level objects deleted here
+      // Grid objects are deleted below
+      // Level objects do not delete containing Grid objects
+      delete levels0_[i];
+      levels0_[i] = 0;
+    }
+  }
+  levels0_.resize(0);
+  levels0_.push_back(0);
+
+  // Delete grids list
+  for (int i=0; i<grids0_.size(); i++) {
+    if (grids0_[i] != NULL) {
+      // Grid objects deleted here
+      delete grids0_[i];
+      grids0_[i] = 0;
+    }
+  }
+  grids0_.resize(0);
+  grids0_.push_back(0);
 }

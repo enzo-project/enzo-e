@@ -573,6 +573,8 @@ int main(int argc, char **argv)
   delete [] grid_info;
   delete [] array_local;
   
+  delete [] grid_array;
+  delete [] parent_array;
 
 #ifdef USE_MPI
   MPI_Finalize ();

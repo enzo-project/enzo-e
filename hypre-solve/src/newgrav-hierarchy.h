@@ -243,6 +243,8 @@ private:
 
   void insert_in_level_ (int level, Grid & grid) throw ();
 
+  void deallocate_() throw();
+
 };
 
 

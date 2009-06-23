@@ -138,7 +138,7 @@ void Faces::print() throw()
 void Faces::alloc_ (int *n) throw ()
 {
   int N = n[0]*n[1]*n[2];
-  printf ("%s:%d %p:alloc_()\n",__FILE__,__LINE__,this);
+  printf ("%s:%d %p Faces::alloc_()\n",__FILE__,__LINE__,this);
   for (int axis=0; axis<3; axis++) {
 
     int i;
@@ -170,19 +170,20 @@ void Faces::alloc_ (int *n) throw ()
 
 void Faces::dealloc_ () throw ()
 {
-  
-  printf ("%s:%d %p:dealloc_()\n",__FILE__,__LINE__,this);
+  printf ("%s:%d %p Faces::dealloc_()\n",__FILE__,__LINE__,this);
   for (int axis=0; axis<3; axis++) {
     for (int face=0; face<2; face++) {
 
       // deallocate and clear face zone labels
-
-      delete [] label_[axis][face];
+      
+      if (label_[axis][face] != NULL) 
+	delete [] label_[axis][face];
       label_[axis][face] = NULL;
 
       // deallocate and clear grid neighbors
 
-      delete [] adjacent_[axis][face];
+      if (adjacent_[axis][face] != NULL) 
+	delete [] adjacent_[axis][face];
       adjacent_[axis][face] = NULL;
       
     }
