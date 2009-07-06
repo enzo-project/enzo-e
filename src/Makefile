@@ -20,12 +20,14 @@
 # (*) Array
 # (*) Disk
 # (*) Error
-# ( ) Performance
+# ( ) Method
+# (*) Performance
 # (*) Test
 #
 #-----------------------------------------------------------------------
 
 DIR = Array Disk Test Performance Error
+# Method
 
 #=======================================================================
 # TARGETS
