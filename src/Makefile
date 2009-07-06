@@ -19,13 +19,13 @@
 #
 # (*) Array
 # (*) Disk
+# (*) Error
 # (*) test
 # ( ) performance
-# ( ) error
 #
 #-----------------------------------------------------------------------
 
-DIR = Array Disk test performance error
+DIR = Array Disk test performance Error
 
 #=======================================================================
 # TARGETS
