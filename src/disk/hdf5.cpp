@@ -11,6 +11,9 @@
  *********************************************************************
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <string>
 
 #include "hdf5.h"
@@ -145,6 +148,7 @@ void Hdf5::dataset_open (std::string name, Array & array)
     if (d == 1) array.resize(n[0]);
     if (d == 2) array.resize(n[0],n[1]);
     if (d == 3) array.resize(n[0],n[1],n[2]);
+
   } else if (file_mode_ == "w") {
 
     int m[3];
