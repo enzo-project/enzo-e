@@ -34,7 +34,7 @@ test_array: $(TEST_OBJS) $(OBJS)
 
 .PHONY: clean
 clean:
-	-rm *.o test_array *~ out.make.dep Makefile.bak *.unit
+	@rm *.o test_array *~ out.make.dep Makefile.bak *.unit
 
 #-----------------------------------------------------------------------
 
@@ -48,9 +48,9 @@ install: install-include test_array $(OBJS)
 .PHONY: install-include
 
 install-include:
-	ln -sf `pwd`/data.hpp   $(TOP)/include
-	ln -sf `pwd`/array.hpp  $(TOP)/include/data_array_.hpp
-	ln -sf `pwd`/scalar.hpp $(TOP)/include/data_scalar_.hpp
+	ln -sf `pwd`/array.hpp         $(TOP)/include
+	ln -sf `pwd`/array_array_.hpp  $(TOP)/include
+	ln -sf `pwd`/array_scalar_.hpp $(TOP)/include
 
 #=======================================================================
 # INCLUDES 

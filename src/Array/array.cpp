@@ -15,7 +15,6 @@
 #include <assert.h>
 #include <string.h>
 
-#include "scalar.hpp"
 #include "error.hpp"
 #include "array.hpp" 
 

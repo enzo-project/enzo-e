@@ -6,7 +6,7 @@
 /// Defines Scalar
 
 /**
- * @file    scalar.hpp
+ * @file    scalar_.hpp
  * @brief   Header file for the Array class
  * @author  James Bordner 
  * @version 1.0
