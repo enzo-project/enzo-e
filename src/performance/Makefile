@@ -14,8 +14,8 @@ TEST_OBJS = test_timer.o
 OBJ       = 
 
 #=======================================================================
-INC_LOCAL  = -I$(SRC)/Data
-OBJ_EXTERN = $(SRC)/Data/array.o
+INC_LOCAL  = -I$(SRC)/Array
+OBJ_EXTERN = $(SRC)/Array/array.o
 
 OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================
@@ -79,8 +79,11 @@ install: install-include test_timer $(OBJS)
 
 .PHONY: install-include
 
+INCLUDE =$(TOP)/include
+
 install-include:
-	ln -sf `pwd`/timer.hpp  $(TOP)/include/performance_timer_.hpp
+	ln -sf `pwd`/performance.hpp        $(INCLUDE)
+	ln -sf `pwd`/performance_timer_.hpp $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 

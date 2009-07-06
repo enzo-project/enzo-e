@@ -15,10 +15,9 @@
 #include <stdlib.h>
 #include <string>
 
-#include "test_unit_.hpp"
-#include "data_scalar_.hpp"
-#include "data_array_.hpp"
-#include "timer.hpp"
+#include "test.hpp"
+#include "array.hpp"
+#include "performance.hpp"
 
 main()
 {

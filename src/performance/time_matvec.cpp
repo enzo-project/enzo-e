@@ -18,7 +18,7 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #define Scalar double
 
-#include "timer.hpp"
+#include "performance.hpp"
 
 main(int argc, char ** argv)
 {

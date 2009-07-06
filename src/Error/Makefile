@@ -49,6 +49,7 @@ clean:
 #-----------------------------------------------------------------------
 
 .PHONY: install
+
 install: install-include test_error $(OBJS)
 	cp ./test_error $(TOP)/bin
 	ar rcu $(TOP)/lib/libcello.a $(OBJS)
@@ -57,7 +58,7 @@ install: install-include test_error $(OBJS)
 
 .PHONY: install-include
 
-INSTALL = $(TOP)/include
+INCLUDE = $(TOP)/include
 
 install-include:
 	ln -sf `pwd`/error.hpp  $(INCLUDE)

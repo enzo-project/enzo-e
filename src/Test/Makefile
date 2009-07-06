@@ -38,7 +38,7 @@ INCLUDE = $(TOP)/include
 
 install-include:
 	ln -sf `pwd`/test.hpp   $(INCLUDE)
-	ln -sf `pwd`/unit.hpp   $(INCLUDE)
+	ln -sf `pwd`/test_unit_.hpp   $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 
