@@ -57,8 +57,10 @@ install: install-include test_error $(OBJS)
 
 .PHONY: install-include
 
+INSTALL = $(TOP)/include
+
 install-include:
-	ln -sf `pwd`/error.hpp  $(TOP)/include
+	ln -sf `pwd`/error.hpp  $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 
