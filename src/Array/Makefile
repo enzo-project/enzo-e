@@ -34,7 +34,7 @@ test_array: $(TEST_OBJS) $(OBJS)
 
 .PHONY: clean
 clean:
-	@rm *.o test_array *~ out.make.dep Makefile.bak *.unit
+	-@rm *.o test_array *~ out.make.dep Makefile.bak *.unit
 
 #-----------------------------------------------------------------------
 

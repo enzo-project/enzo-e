@@ -35,7 +35,7 @@ class Array {
  *
  * @class     Array
  * @brief     Encapsulate a fortran-style 1D,2D, or 3D array
- * @ingroup   Data
+ * @ingroup   Array
  *
  * Parallelism will be controlled by an object in the Parallel module.
  * IO is controlled by a function in the IO module.

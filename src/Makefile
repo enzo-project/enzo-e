@@ -18,14 +18,14 @@
 # Directories
 #
 # (*) Array
-# (*) disk
+# (*) Disk
 # (*) test
 # ( ) performance
 # ( ) error
 #
 #-----------------------------------------------------------------------
 
-DIR = Array disk test performance error
+DIR = Array Disk test performance error
 
 #=======================================================================
 # TARGETS
@@ -41,8 +41,8 @@ all:       $(patsubst %,%-all,$(DIR))
 .PHONY: clean %-clean
 clean:     $(patsubst %,%-clean,$(DIR))
 %-clean:  %-DEP
-	-rm -f *~
-	-rm -rf html latex
+	-@rm -f *~
+	-@rm -rf html latex
 	$(MAKE) -C $* clean
 
 #-----------------------------------------------------------------------

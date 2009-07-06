@@ -13,10 +13,9 @@
  
 #include <stdio.h>
 
+#include "test.hpp"
 #include "error.hpp"
-#include "scalar.hpp"
 #include "array.hpp"
-#include "test_unit_.hpp"
 
 main()
 {

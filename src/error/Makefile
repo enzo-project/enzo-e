@@ -44,7 +44,7 @@ test_error: $(TEST_OBJS) $(OBJS)
 
 .PHONY: clean
 clean:
-	-rm *.o *~ test_error lib*.a *.unit
+	-@rm *.o *~ test_error lib*.a *.unit
 
 #-----------------------------------------------------------------------
 

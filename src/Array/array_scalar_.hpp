@@ -1,12 +1,12 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-#ifndef SCALAR_HPP
-#define SCALAR_HPP
+#ifndef ARRAY_SCALAR_HPP
+#define ARRAY_SCALAR_HPP
 
 /// Defines Scalar
 
 /**
- * @file    scalar_.hpp
+ * @file    array_scalar_.hpp
  * @brief   Header file for the Array class
  * @author  James Bordner 
  * @version 1.0

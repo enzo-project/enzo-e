@@ -34,9 +34,11 @@ install:
 
 .PHONY: install-include
 
+INCLUDE = $(TOP)/include
+
 install-include:
-	ln -sf `pwd`/test.hpp   $(TOP)
-	ln -sf `pwd`/unit.hpp   $(TOP)/include/test_unit_.hpp
+	ln -sf `pwd`/test.hpp   $(INCLUDE)
+	ln -sf `pwd`/unit.hpp   $(INCLUDE)/test_unit_.hpp
 
 #=======================================================================
 # INCLUDES 
