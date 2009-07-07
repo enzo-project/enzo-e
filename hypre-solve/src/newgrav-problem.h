@@ -121,9 +121,10 @@ public:
 
   /// Return the Parameters object
   
-  Parameters & parameters ()     
+  Parameters & parameters () 
   { 
     return parameters_; 
   }
 
+  void deallocate_() throw ();
 };

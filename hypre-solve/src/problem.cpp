@@ -58,6 +58,7 @@ Problem::Problem () throw ()
 
 Problem::~Problem () throw ()
 {
+  deallocate_ ();
   //
 }
 
@@ -149,4 +150,15 @@ void Problem::write (FILE *fp) throw ()
   domain_.write(fp);
   hierarchy_.write(fp);
   for (i=0; i<num_points(); i++)  point(i).write(fp);
+}
+
+//----------------------------------------------------------------------
+
+void Problem::deallocate_ () throw ()
+{
+  for (unsigned i=0; i<points_.size(); i++) {
+    delete points_[i];
+    points_[i] = 0;
+  }
+  points_.resize(0);
 }
