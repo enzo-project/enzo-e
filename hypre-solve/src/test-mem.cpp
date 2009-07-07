@@ -212,7 +212,6 @@ void test_hierarchy()
 void print_result (std::string class_name, int bytes_begin, int bytes_end)
 {
 
-  printf ("%d %d\n",bytes_begin,bytes_end);
   // memory test passes if bytes allocated are same before and after
   bool pass = bytes_begin == bytes_end;
 

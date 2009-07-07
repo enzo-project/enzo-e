@@ -62,8 +62,6 @@ Grid::Grid (std::string parms) throw ()
 
   // Allocate Faces was here.
 
-  printf ("%s:%d n_ = %d %d %d\n",__FILE__,__LINE__,n_[0],n_[1],n_[2]);
-
   faces_ = new Faces(n_);
 
   // Allocate counters_ here.
