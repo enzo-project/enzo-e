@@ -25,6 +25,7 @@
 #include "HYPRE_sstruct_ls.h"
 
 #include "newgrav-hypre-solve.h"
+#include "jbMem.h"
 
 //----------------------------------------------------------------------
 
@@ -49,6 +50,17 @@ const int trace    = 0;
 #include "newgrav-hypre.h"
 
 //======================================================================
+
+#define PRINT_MEM \
+  printf ("%s:%d jbMem bytes = %lld\n", \
+  __FILE__,__LINE__,jbMem::bytes_);
+
+//======================================================================
+
+const char * pass_string = " [ Pass ]";
+const char * fail_string = " [ FAIL ]";
+
+//======================================================================
 // BEGIN MAIN
 //======================================================================
 
@@ -62,8 +74,6 @@ int main(int argc, char **argv)
   pmpi = new Mpi (&argc,&argv);
 
   const int num_grids = 10;
-  jbPerf.new_attribute ("count",JB_INT);
-  jbPerf.begin("test-mem");
   int     id = 0;
   int     id_parent = -1;
   int     ip = 0; 
@@ -71,25 +81,26 @@ int main(int argc, char **argv)
   Scalar xu[3] = {1.0, 1.0, 1.0};
   int    il[3] = {0,0,0};
   int    n[3] = {32,32,32};
+  int bytes_begin = jbMem::bytes_;
   for (int i=0; i<num_grids; i++) {
 
-    jbPerf.attribute ("count",&i,JB_INT);
-
-    jbPerf.start("grid-before");
-    jbPerf.stop("grid-before");
-  
     Grid * grid = new Grid (id, id_parent, ip, xl, xu, il, n);
-
-    jbPerf.start("grid-during");
-    jbPerf.stop("grid-during");
 
     delete grid;
 
-    jbPerf.start("grid-after");
-    jbPerf.stop("grid-after");
   }
+  int bytes_end = jbMem::bytes_;
 
-  jbPerf.end("test-mem");
+  // grid memory test passes if bytes allocated are same before and after
+  bool grid_pass = bytes_begin == bytes_end;
+
+  // Set grid result string to be pass or fail
+  std::string grid_result = grid_pass ? pass_string : fail_string;
+  
+  // Print grid resultA
+  printf ("Grid memory: %s\n",grid_result.c_str());
+    
+
 }
 
 

@@ -782,7 +782,7 @@ void Hierarchy::insert_in_level_ (int level, Grid & grid) throw ()
 void Hierarchy::deallocate_ () throw ()
 {
   // Delete levels
-  for (int i=0; i<levels0_.size(); i++) {
+  for (unsigned i=0; i<levels0_.size(); i++) {
     if (levels0_[i] != NULL) {
       // Level objects deleted here
       // Grid objects are deleted below
@@ -795,7 +795,7 @@ void Hierarchy::deallocate_ () throw ()
   levels0_.push_back(0);
 
   // Delete grids list
-  for (int i=0; i<grids0_.size(); i++) {
+  for (unsigned i=0; i<grids0_.size(); i++) {
     if (grids0_[i] != NULL) {
       // Grid objects deleted here
       delete grids0_[i];

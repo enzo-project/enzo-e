@@ -26,7 +26,7 @@
 
 const int  debug       = 0;
 const int  debug_input = 0;
-const bool trace       = true;
+const bool trace       = false;
 
 //======================================================================
 
@@ -97,8 +97,6 @@ Grid::Grid (int     id,
 
   // Allocate Faces was here.
 
-  printf ("%s:%d n_ = %d %d %d\n",__FILE__,__LINE__,n_[0],n_[1],n_[2]);
-
   faces_ = new Faces(n_);
 
   // Allocate counters_ here.
@@ -125,7 +123,6 @@ Grid::Grid (FILE *fp) throw ()
 Grid::~Grid () throw ()
 {
   _TRACE_;
-  printf ("~Grid(%p)\n",this);
   if (u_        != NULL) 
     delete [] u_;        
   u_        = NULL;
