@@ -46,9 +46,9 @@ Domain Grid::domain_;
 //======================================================================
 
 Grid::Grid (std::string parms) throw ()
-  : level_ (-1),
+  : faces_(NULL),
+    level_ (-1),
     u_(NULL),
-    faces_(NULL),
     counters_ (NULL)
 {
   // Initialize 0-sentinels in arrays
@@ -81,9 +81,9 @@ Grid::Grid (int     id,
 	    Scalar *xu,
 	    int    *il,
 	    int    *n) throw ()
-  : level_ (-1),
+  : faces_(NULL),
+    level_ (-1),
     u_(NULL),
-    faces_(NULL),
     counters_ (NULL)
 {
  // Initialize 0-sentinels in arrays

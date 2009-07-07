@@ -27,7 +27,7 @@
 //----------------------------------------------------------------------
 
 const int trace          = false;
-//const int debug          = 0;
+const int debug          = 0;
 const int debug_detailed = 0;
 const int geomview       = 0;
 
