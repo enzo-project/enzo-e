@@ -18,6 +18,7 @@
 
 #include "cello.def"
 
-#include "array_array_.hpp"
+#include "array_array.hpp"        /* Array abstract base class */
+#include "array_array_serial.hpp" /* Serial Array */
 
 #endif /* ARRAY_HPP */

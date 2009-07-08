@@ -19,11 +19,12 @@
 /** 
  *********************************************************************
  *
- * @file      array.hpp
- * @brief     Declaration of the Array class
+ * @file      array_array_.hpp
+ * @brief     Declaration of the Array abstract base class
  * @author    James Bordner
- * @date      Thu Feb 21 13:54:19 PST 2008
+ * @date      Wed Jul  8 16:01:10 PDT 2009
  * @bug       none
+ * @note      Adding Array base class, and renaming old Array to ArraySerial
  *
  * $Id$
  * 
@@ -36,29 +37,18 @@ class Array {
  *********************************************************************
  *
  * @class     Array
- * @brief     Encapsulate a fortran-style 1D,2D, or 3D array
+ * @brief     Define the interface for a 1D,2D, or 3D array
  * @ingroup   Array
  *
- * Parallelism will be controlled by an object in the Parallel module.
- * IO is controlled by a function in the IO module.
+ * DEPENDENCIES
+ *
+ * Parallel: For controlling parallelism in distributed or threaded Arrays
+ * Disk:     For I/O
  *
  *********************************************************************
  */
 
 private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-  /// Length of array
-  int     N_;
-
-  /// Shape of array, right-padded with 1's
-  int     n_[3];
-
-  /// Array values stored in column-major ordering
-  Scalar *a_;
 
   //-------------------------------------------------------------------
   // PUBLIC OPERATIONS
@@ -67,40 +57,25 @@ private:
 public:
 
   /// Create a new uninitialized Array object
-  Array();
-  /// Create a new initialized Array object
-  Array(int  n0, int  n1=1, int n2=1);
+  Array() throw() {};
   /// Deallocate the array
-  ~Array();
+  ~Array() throw() {};
   /// Copy an array into this one, deallocating any existing data
-  void copy (const Array &);
+  Array(const Array &) throw() {};
+  /// Copy an array into this one, deallocating any existing data
+  Array & operator = (const Array &) throw() {};
   /// Resize the array, deallocating any existing data
-  void resize (int n0, int n1=1, int n2=1);
+  virtual void resize (int n0, int n1=1, int n2=1) throw() = 0 ;
   /// Return the size of the array
-  void size (int * n0, int * n1=0, int * n2=0) const;
+  virtual void size (int * n0, int * n1=0, int * n2=0) const throw() = 0;
   /// Return the total length of the array
-  int  length() const;
+  virtual int  length() const throw() = 0;
   /// Return a pointer to the array values
-  Scalar * values () const;
+  virtual Scalar * values () const throw() = 0;
   /// Return the given array element
-  Scalar & operator() (int  i0, int  i1=0, int  i2=0);
+  virtual Scalar & operator() (int  i0, int  i1=0, int  i2=0) throw() = 0;
   /// Set all values to 0, or to the given value if supplied
-  void clear(Scalar value = 0.0);
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-private:
-
-  /// Allocate array values
-  void allocate_ (int n0, int n1=1, int n2=1);
-
-  /// Deallocate array values
-  void deallocate_();
-
-  /// Copy array values a[0:N-1] to Array
-  void copy_ (Scalar * a);
+  virtual void clear(Scalar value = 0.0) throw() = 0;
 
 };
 

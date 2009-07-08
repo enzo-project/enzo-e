@@ -10,7 +10,7 @@ TOP = ../..
 SRC = ..
 
 TEST_OBJS = test_array.o 
-OBJ       = array.o
+OBJ       = array_array_serial.o
 
 #=======================================================================
 INC_LOCAL  = -I$(SRC)/error
@@ -49,9 +49,9 @@ INCLUDE = $(TOP)/include
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/array.hpp         $(INCLUDE)
-	ln -sf `pwd`/array_array_.hpp  $(INCLUDE)
-	ln -sf `pwd`/array_scalar_.hpp $(INCLUDE)
+	ln -sf `pwd`/array.hpp        $(INCLUDE)
+	ln -sf `pwd`/array_array.hpp  $(INCLUDE)
+	ln -sf `pwd`/array_scalar.hpp $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 
