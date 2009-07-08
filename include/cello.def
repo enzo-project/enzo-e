@@ -1,3 +1,8 @@
+#ifndef CELLO_DEF
+#define CELLO_DEF
+
 #define CONFIG_PRECISION_DOUBLE
 
 #include "scalar.def"
+
+#endif /* CELLO_DEF */

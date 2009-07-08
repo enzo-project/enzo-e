@@ -18,7 +18,6 @@
 
 #include "cello.def"
 
-#include "array_scalar_.hpp"
 #include "array_array_.hpp"
 
 #endif /* ARRAY_HPP */

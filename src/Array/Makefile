@@ -45,7 +45,7 @@ install: install-include test_array $(OBJS)
 
 #-----------------------------------------------------------------------
 
-INSTALL = $(TOP)/include
+INCLUDE = $(TOP)/include
 
 .PHONY: install-include
 install-include:

@@ -28,3 +28,5 @@
 #   define SCALAR_PRINTF "%le "
 #   define SCALAR_MPI    MPI_DOUBLE
 #endif
+
+#endif /* SCALAR_DEF */
