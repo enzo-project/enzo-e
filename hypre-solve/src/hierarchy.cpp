@@ -27,7 +27,7 @@
 //----------------------------------------------------------------------
 
 const int trace          = false;
-const int debug          = 0;
+const int debug_hierarchy = 0;
 const int debug_detailed = 0;
 const int geomview       = 0;
 
@@ -93,7 +93,7 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
 
   int levelfactor = 1;
 
-  for (int lev=0; LevelArray[lev] != NULL; lev++,id++,levelfactor*=RefineBy) {
+  for (int lev=0; LevelArray[lev] != NULL; lev++,levelfactor*=RefineBy) {
 
     // Traverse grids in enzo level
     for (LevelHierarchyEntry * itEnzoLevelGrid = LevelArray[lev];
@@ -133,6 +133,8 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
       Grid * grid = new Grid (id,id_parent,ip,xl,xu,il,n);
       
       insert_grid(grid);
+
+      id++;
     }
 
   }
@@ -183,7 +185,7 @@ void Hierarchy::initialize (Domain & domain,
 			    Mpi    & mpi,
 			    bool   is_periodic) throw ()
 {
-  if (debug) printf ("Hierarchy::init_levels()\n");
+  if (debug_hierarchy) printf ("Hierarchy::init_levels()\n");
 
   init_grid_parents_();
   init_grid_levels_();
@@ -385,7 +387,7 @@ void Hierarchy::init_grid_neighbors_ () throw ()
 	for (j2=0; j2<gn->num_children(); j2++) {
 	  Grid * g2 = & gn->child(j2);
 	  if (g1->is_adjacent(*g2,period_domain_) && g1->id() > g2->id()) {
-	    if (debug) printf ("DEBUG 3 grids %d and %d are neighbors\n",
+	    if (debug_hierarchy) printf ("DEBUG 3 grids %d and %d are neighbors\n",
 			       g1->id(),g2->id());
 	    assert_neighbors (*g1,*g2);
 	  }
@@ -431,7 +433,7 @@ void Hierarchy::init_grid_faces_ (Domain & domain,
 
     while (Grid * grid = itg++) {
 
-      if (debug) grid->print();
+      if (debug_hierarchy) grid->print();
       ItGridNeighbors itn (*grid);
 
       // Set "adjacent" pointers for adjacent grids in same level
@@ -771,7 +773,7 @@ void Hierarchy::insert_in_level_ (int level, Grid & grid) throw ()
     levels0_[levels0_.size() - 1] = 0;
   }
   if (levels0_.at(level) == 0) {
-    if (debug) printf ("DEBUG: creating new Level at %d\n",level);
+    if (debug_hierarchy) printf ("DEBUG: creating new Level at %d\n",level);
     levels0_[level] = new Level(level);
   }
   levels0_[level]->insert_grid (grid);
