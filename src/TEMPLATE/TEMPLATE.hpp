@@ -1,3 +1,8 @@
+#ifndef FOO_HPP
+#define FOO_HPP
+
+//345678901234567890123456789012345678901234567890123456789012345678901234567890
+
 /*
  * ENZO: THE NEXT GENERATION
  *
@@ -10,8 +15,7 @@
  * See CELLO_LICENSE in the main directory for full license agreement
  *
  */
-#ifndef FOO_HPP
-#define FOO_HPP
+
 /** 
  *********************************************************************
  *
@@ -73,4 +77,5 @@ private:
 
 };
 
-#endif
+#endif /* FOO_HPP */
+

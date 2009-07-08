@@ -1,3 +1,8 @@
+#ifndef ARRAY_ARRAY_HPP
+#define ARRAY_ARRAY_HPP
+
+//345678901234567890123456789012345678901234567890123456789012345678901234567890
+
 /*
  * ENZO: THE NEXT GENERATION
  *
@@ -10,9 +15,6 @@
  * See CELLO_LICENSE in the main directory for full license agreement
  *
  */
-
-#ifndef ARRAY_HPP
-#define ARRAY_HPP
 
 /** 
  *********************************************************************
@@ -102,4 +104,4 @@ private:
 
 };
 
-#endif
+#endif /* ARRAY_ARRAY_HPP */

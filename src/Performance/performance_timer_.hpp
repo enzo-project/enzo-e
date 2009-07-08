@@ -1,5 +1,21 @@
-#ifndef TIMER_HPP
-#define TIMER_HPP
+#ifndef PERFORMANCE_TIMER_HPP
+#define PERFORMANCE_TIMER_HPP
+
+//345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+/*
+ * ENZO: THE NEXT GENERATION
+ *
+ * A parallel astrophysics and cosmology application
+ *
+ * Copyright (C) 2008 James Bordner
+ * Copyright (C) 2008 Laboratory for Computational Astrophysics
+ * Copyright (C) 2008 Regents of the University of California
+ *
+ * See CELLO_LICENSE in the main directory for full license agreement
+ *
+ */
+
 /** 
  *********************************************************************
  *
@@ -115,4 +131,6 @@ inline double Timer::value() const
     return time_;
   }
 }
-#endif
+
+#endif /* PERFORMANCE_TIMER_HPP */
+

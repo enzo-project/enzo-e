@@ -1,7 +1,20 @@
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
-
 #ifndef ERROR_HPP
 #define ERROR_HPP
+
+//345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+/*
+ * ENZO: THE NEXT GENERATION
+ *
+ * A parallel astrophysics and cosmology application
+ *
+ * Copyright (C) 2008 James Bordner
+ * Copyright (C) 2008 Laboratory for Computational Astrophysics
+ * Copyright (C) 2008 Regents of the University of California
+ *
+ * See CELLO_LICENSE in the main directory for full license agreement
+ *
+ */
 
 /*********************************************************************
  *
@@ -19,6 +32,8 @@
  * $Id$
  *
  *********************************************************************/
+
+#include "cello.def"
 
 #define ERROR_MESSAGE_LENGTH 80
 
@@ -71,4 +86,5 @@ static char incomplete_message[ERROR_MESSAGE_LENGTH+1];
    fflush(stdout); \
 }
 
-#endif
+#endif /* ERROR_HPP */
+

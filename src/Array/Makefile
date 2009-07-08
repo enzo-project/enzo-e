@@ -45,12 +45,13 @@ install: install-include test_array $(OBJS)
 
 #-----------------------------------------------------------------------
 
-.PHONY: install-include
+INSTALL = $(TOP)/include
 
+.PHONY: install-include
 install-include:
-	ln -sf `pwd`/array.hpp         $(TOP)/include
-	ln -sf `pwd`/array_array_.hpp  $(TOP)/include
-	ln -sf `pwd`/array_scalar_.hpp $(TOP)/include
+	ln -sf `pwd`/array.hpp         $(INCLUDE)
+	ln -sf `pwd`/array_array_.hpp  $(INCLUDE)
+	ln -sf `pwd`/array_scalar_.hpp $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 
