@@ -49,9 +49,9 @@ INCLUDE = $(TOP)/include
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/array.hpp        $(INCLUDE)
-	ln -sf `pwd`/array_array.hpp  $(INCLUDE)
-	ln -sf `pwd`/array_scalar.hpp $(INCLUDE)
+	ln -sf `pwd`/array.hpp               $(INCLUDE)
+	ln -sf `pwd`/array_array.hpp         $(INCLUDE)
+	ln -sf `pwd`/array_array_serial.hpp  $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 
