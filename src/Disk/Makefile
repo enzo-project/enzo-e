@@ -14,7 +14,7 @@ TEST_OBJS = test_hdf5.o
 OBJ       = hdf5.o
 
 #=======================================================================
-OBJ_EXTERN = $(SRC)/Array/array.o
+OBJ_EXTERN = $(SRC)/Array/array_array_serial.o
 
 OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================
@@ -54,7 +54,7 @@ INCLUDE = $(TOP)/include
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/disk.hpp       $(INCLUDE)
-	ln -sf `pwd`/disk_hdf5_.hpp $(INCLUDE)
+	ln -sf `pwd`/disk_hdf5.hpp $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 

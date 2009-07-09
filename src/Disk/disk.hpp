@@ -18,6 +18,6 @@
 
 #include "cello.def"
 
-#include "disk_hdf5_.hpp"
+#include "disk_hdf5.hpp"
 
 #endif /* DISK_HPP */

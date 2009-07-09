@@ -37,7 +37,8 @@
 
 main()
 {
-  Array A (100,100);
+  ArraySerial A;
+  A.resize(100,100);
 
   Scalar * a = A.values();
   int n0,n1;
@@ -63,7 +64,7 @@ main()
   hdf5.dataset_close ();
   hdf5.file_close();
 
-  Array B;
+  ArraySerial B;
 
   hdf5.file_open("file_open_test.hdf5","r");
   hdf5.dataset_open ("dataset",B);
