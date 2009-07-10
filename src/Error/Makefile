@@ -1,6 +1,4 @@
 #
-# ( ) test:         Run unit tests
-# ( ) test_error:   Compile the unit tests
 # ( ) liberror.a:
 # ( ) clean:        Clean directory
 # ( ) dep:          Update dependencies
@@ -11,7 +9,6 @@ TOP = ../..
 SRC = ..
 
 PACKAGE   = error
-TEST_OBJS = test_error.o
 OBJ       = 
 
 #=======================================================================
@@ -26,33 +23,19 @@ OBJS = $(OBJ)
 #=======================================================================
 
 .PHONY: all
-
-all: test
-
-#-----------------------------------------------------------------------
-
-.PHONY: test
-
-test: test_error
-	./test_error
-
-#-----------------------------------------------------------------------
-
-test_error: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_error $(TEST_OBJS) $(OBJS) $(OPT) $(INC)
+all: $(OBJS)
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-@rm *.o *~ test_error lib*.a *.unit
+	-@rm *.o *~ lib*.a *.unit
 
 #-----------------------------------------------------------------------
 
 .PHONY: install
 
-install: install-include test_error $(OBJS)
-	cp ./test_error $(TOP)/bin
+install: install-include $(OBJS)
 	ar rcu $(TOP)/lib/libcello.a $(OBJS)
 	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
 

@@ -1,6 +1,4 @@
 #
-# ( ) test:         Run unit tests
-# ( ) test_timer:   Compile the unit tests
 # ( ) libperformance.a:
 # ( ) clean:        Clean directory
 # ( ) dep:          Update dependencies
@@ -11,7 +9,6 @@ TOP = ../..
 SRC = ..
 
 PACKAGE   = performance
-TEST_OBJS = test_timer.o
 OBJ       = 
 
 #=======================================================================
@@ -26,18 +23,9 @@ OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================
 
 .PHONY: all
-all: test time_matvec
+all: $(OBJS)
 
 #-----------------------------------------------------------------------
-
-.PHONY: test
-test: test_timer
-	./test_timer
-
-#-----------------------------------------------------------------------
-
-test_timer: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_timer $(TEST_OBJS) $(OBJS) $(OPT) $(INC)
 
 PERFORMANCE_FLAGS = 
 time_matvec: time_matvec.cpp
@@ -67,13 +55,12 @@ time_matvec-O5:    time_matvec.cpp
 
 .PHONY: clean
 clean:
-	-@rm *.o *~ test_timer time_matvec time_matvec-O? out.make.dep Makefile.bak lib*.a *.unit *.png *.eps
+	-@rm *.o *~ time_matvec time_matvec-O? out.make.dep Makefile.bak lib*.a *.unit *.png *.eps
 
 #-----------------------------------------------------------------------
 
 .PHONY: install
-install: install-include test_timer $(OBJS)
-	cp ./test_timer $(TOP)/bin
+install: install-include $(OBJS)
 	ar rcu $(TOP)/lib/libcello.a $(OBJS)
 	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
 

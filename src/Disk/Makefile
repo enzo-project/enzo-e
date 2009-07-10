@@ -1,6 +1,4 @@
 #
-# (x) test:         Run unit tests
-# (x) test_array:   Compile the unit tests
 # (x) clean:        Clean directory
 # (^) dep:          Update dependencies
 # ( ) install:      Install lib, include, and bin files
@@ -10,7 +8,6 @@ TOP = ../..
 SRC = ..
 
 PACKAGE   = disk
-TEST_OBJS = test_hdf5.o 
 OBJ       = hdf5.o
 
 #=======================================================================
@@ -23,29 +20,19 @@ OBJS = $(OBJ) $(OBJ_EXTERN)
 # TARGETS
 #=======================================================================
 
-#-----------------------------------------------------------------------
-
-.PHONY: test
-test: test_hdf5
-	./test_hdf5
-
-#-----------------------------------------------------------------------
-
-test_hdf5: $(TEST_OBJS) $(OBJS)
-	echo test $(TEST_OBJS) $(OBJS) $(ARRAY_OBJ)
-	$(CXX) -o test_hdf5 $(TEST_OBJS) $(OBJS) $(INC) $(LIB_HDF5)
+.PHONY: all
+all: $(OBJS)
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-@rm *.o test_*hdf5 *~ out.make.dep Makefile.bak lib*.a *.unit *.hdf5
+	-@rm *.o *~ out.make.dep Makefile.bak lib*.a *.hdf5
 
 #-----------------------------------------------------------------------
 
 .PHONY: install
-install: install-include test_hdf5 $(OBJS)
-	cp ./test_hdf5 $(TOP)/bin
+install: install-include $(OBJS)
 	ar rcu $(TOP)/lib/libcello.a $(OBJS)
 	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
 

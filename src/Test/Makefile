@@ -5,14 +5,40 @@
 TOP = ../..
 SRC = ..
 
+TEST_EXES = \
+	test_array \
+	test_disk_hdf5 \
+	test_error \
+	test_parameters \
+	test_performance_timer
+
+TEST_OBJS = $(patsubst %,%.o,$(TEST_EXES))
+
 #=======================================================================
 # TARGETS
 #=======================================================================
 
-.PHONY: test
-test:
+.PHONY: all
+all: test
 
 #-----------------------------------------------------------------------
+
+.PHONY: test
+test: $(TEST_EXES)
+
+#-----------------------------------------------------------------------
+
+test_array: $(TEST_OBJS) $(OBJS)
+	$(CXX) -o test_array $(TEST_OBJS) $(OBJS) $(INC)
+test_performance_timer: $(TEST_OBJS) $(OBJS)
+	$(CXX) -o test_performance_timer $(TEST_OBJS) $(OBJS) $(OPT) $(INC)
+test_parameters: $(TEST_OBJS) $(OBJS)
+	$(CXX) -o test_parameters $(TEST_OBJS) $(OBJS) $(INC)
+test_error: $(TEST_OBJS) $(OBJS)
+	$(CXX) -o test_error $(TEST_OBJS) $(OBJS) $(OPT) $(INC)
+test_disk_hdf5: $(TEST_OBJS) $(OBJS)
+	$(CXX) -o test_disk_hdf5 $(TEST_OBJS) $(OBJS) $(INC) $(LIB_HDF5)
+
 
 test_test:
 
@@ -28,7 +54,13 @@ clean:
 #-----------------------------------------------------------------------
 
 .PHONY: install
-install:
+install: $(TEST_EXES)
+	cp ./test_performance_timer $(TOP)/bin
+	cp ./test_array             $(TOP)/bin
+	cp ./test_parameters        $(TOP)/bin
+	cp ./test_error             $(TOP)/bin
+	cp ./test_disk_hdf5         $(TOP)/bin
+
 
 #-----------------------------------------------------------------------
 

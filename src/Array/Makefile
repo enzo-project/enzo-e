@@ -1,6 +1,4 @@
 #
-# (x) test:         Run unit tests
-# (x) test_array:   Compile the unit tests
 # (x) clean:        Clean directory
 # (^) dep:          Update dependencies
 # (X) install:      Install lib, include, and bin files
@@ -10,7 +8,6 @@ TOP = ../..
 SRC = ..
 
 PACKAGE   = array
-TEST_OBJS = test_array.o 
 OBJ       = array_array_serial.o
 
 #=======================================================================
@@ -21,26 +18,19 @@ OBJS = $(OBJ) $(OBJ_EXTERN)
 # TARGETS
 #=======================================================================
 
-.PHONY: test
-test: test_array
-	./test_array
-
-#-----------------------------------------------------------------------
-
-test_array: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_array $(TEST_OBJS) $(OBJS) $(INC)
+.PHONY: all
+all: $(OBJS)
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-@rm *.o test_array *~ out.make.dep Makefile.bak *.unit
+	-@rm *.o *~ out.make.dep Makefile.bak
 
 #-----------------------------------------------------------------------
 
 .PHONY: install
-install: install-include test_array $(OBJS)
-	cp ./test_array $(TOP)/bin
+install: install-include $(OBJS)
 	ar rcu $(TOP)/lib/libcello.a $(OBJS)   
 	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
 
