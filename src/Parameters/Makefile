@@ -1,59 +1,47 @@
 #
-# ( ) test:         Run unit tests
-# ( ) test_error:   Compile the unit tests
-# ( ) liberror.a:
-# ( ) clean:        Clean directory
-# ( ) dep:          Update dependencies
-# ( ) install:      Install lib, include, and bin files
+# (x) test:            Run unit tests
+# (x) test_parameters: Compile the unit tests
+# (x) clean:           Clean directory
+# (^) dep:             Update dependencies
+# (X) install:         Install lib, include, and bin files
 # 
 
 TOP = ../..
 SRC = ..
 
-PACKAGE   = error
-TEST_OBJS = test_error.o
-OBJ       = 
+PACKAGE   = parameters
+TEST_OBJS = test_parameters.o 
+OBJ       = parameters.o
 
 #=======================================================================
-INC_LOCAL  = 
 OBJ_EXTERN = 
 
-OBJS = $(OBJ)
-#=======================================================================
-
+OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================
 # TARGETS
 #=======================================================================
 
-.PHONY: all
-
-all: test
-
-#-----------------------------------------------------------------------
-
 .PHONY: test
-
-test: test_error
-	./test_error
+test: test_parameters
+	./test_parameters
 
 #-----------------------------------------------------------------------
 
-test_error: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_error $(TEST_OBJS) $(OBJS) $(OPT) $(INC)
+test_parameters: $(TEST_OBJS) $(OBJS)
+	$(CXX) -o test_parameters $(TEST_OBJS) $(OBJS) $(INC)
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-@rm *.o *~ test_error lib*.a *.unit
+	-@rm *.o test_parameters *~ out.make.dep Makefile.bak *.unit
 
 #-----------------------------------------------------------------------
 
 .PHONY: install
-
-install: install-include test_error $(OBJS)
-	cp ./test_error $(TOP)/bin
-	ar rcu $(TOP)/lib/libcello.a $(OBJS)
+install: install-include test_parameters $(OBJS)
+	cp ./test_parameters $(TOP)/bin
+	ar rcu $(TOP)/lib/libcello.a $(OBJS)   
 	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
 
 #-----------------------------------------------------------------------
@@ -62,7 +50,7 @@ INCLUDE = $(TOP)/include
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/error.hpp  $(INCLUDE)
+	ln -sf `pwd`/parameters.hpp               $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 
@@ -71,6 +59,4 @@ install-include:
 include DEPEND
 include $(SRC)/MAKE/Make.include
 
-
-
-
+# DO NOT DELETE

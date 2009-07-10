@@ -21,12 +21,13 @@
 # (*) Disk
 # (*) Error
 # ( ) Method
+# (*) Parameters
 # (*) Performance
 # (*) Test
 #
 #-----------------------------------------------------------------------
 
-DIR = Array Disk Test Performance Error
+DIR = Array Disk Test Parameters Performance Error
 # Method
 
 #=======================================================================

@@ -36,7 +36,7 @@ INCLUDE = $(TOP)/include
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/test.hpp   $(INCLUDE)
+	ln -sf `pwd`/test.hpp         $(INCLUDE)
 	ln -sf `pwd`/test_unit_.hpp   $(INCLUDE)
 
 #=======================================================================

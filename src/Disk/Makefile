@@ -1,7 +1,6 @@
 #
 # (x) test:         Run unit tests
 # (x) test_array:   Compile the unit tests
-# (x) libarray.a:
 # (x) clean:        Clean directory
 # (^) dep:          Update dependencies
 # ( ) install:      Install lib, include, and bin files
@@ -10,11 +9,12 @@
 TOP = ../..
 SRC = ..
 
+PACKAGE   = disk
 TEST_OBJS = test_hdf5.o 
 OBJ       = hdf5.o
 
 #=======================================================================
-OBJ_EXTERN = $(SRC)/Array/array_array_serial.o
+OBJ_EXTERN = $(patsubst %,$(SRC)/%,$(ARRAY_OBJS))
 
 OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================
@@ -32,6 +32,7 @@ test: test_hdf5
 #-----------------------------------------------------------------------
 
 test_hdf5: $(TEST_OBJS) $(OBJS)
+	echo test $(TEST_OBJS) $(OBJS) $(ARRAY_OBJ)
 	$(CXX) -o test_hdf5 $(TEST_OBJS) $(OBJS) $(INC) $(LIB_HDF5)
 
 #-----------------------------------------------------------------------
@@ -46,6 +47,7 @@ clean:
 install: install-include test_hdf5 $(OBJS)
 	cp ./test_hdf5 $(TOP)/bin
 	ar rcu $(TOP)/lib/libcello.a $(OBJS)
+	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
 
 #-----------------------------------------------------------------------
 
@@ -62,7 +64,7 @@ install-include:
 
 include DEPEND
 include $(SRC)/MAKE/Make.include
-
+include $(SRC)/MAKE/Make.objects
 
 
 

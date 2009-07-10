@@ -9,11 +9,11 @@
 TOP = ../..
 SRC = ..
 
+PACKAGE   = array
 TEST_OBJS = test_array.o 
 OBJ       = array_array_serial.o
 
 #=======================================================================
-INC_LOCAL  = -I$(SRC)/error
 OBJ_EXTERN = 
 
 OBJS = $(OBJ) $(OBJ_EXTERN)
@@ -42,6 +42,7 @@ clean:
 install: install-include test_array $(OBJS)
 	cp ./test_array $(TOP)/bin
 	ar rcu $(TOP)/lib/libcello.a $(OBJS)   
+	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
 
 #-----------------------------------------------------------------------
 

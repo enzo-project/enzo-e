@@ -68,7 +68,7 @@ public:
   /// Create the Timer object
   inline Timer();
   /// Start the timer
-  inline int start();
+  inline void start();
   /// Stop the timer
   inline double stop();
   /// Clear the timer
@@ -89,10 +89,10 @@ inline Timer::Timer ()
 //----------------------------------------------------------------------
 
 /// Start the timer
-inline int Timer::start() 
+inline void Timer::start() 
 { 
   is_running_ = true;
-  return gettimeofday(&t1_, &tz_);
+  int ret_val = gettimeofday(&t1_, &tz_);
 }
 
 //----------------------------------------------------------------------

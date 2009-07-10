@@ -10,12 +10,13 @@
 TOP = ../..
 SRC = ..
 
+PACKAGE   = performance
 TEST_OBJS = test_timer.o
 OBJ       = 
 
 #=======================================================================
-INC_LOCAL  = -I$(SRC)/Array
-OBJ_EXTERN = $(SRC)/Array/array.o
+INC_LOCAL  = 
+OBJ_EXTERN = 
 
 OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================
@@ -74,6 +75,7 @@ clean:
 install: install-include test_timer $(OBJS)
 	cp ./test_timer $(TOP)/bin
 	ar rcu $(TOP)/lib/libcello.a $(OBJS)
+	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
 
 #-----------------------------------------------------------------------
 

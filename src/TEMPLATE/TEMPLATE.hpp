@@ -57,20 +57,20 @@ private:
   /// A private attribute
   int private_attribute_;
 
+public:
+
   //-------------------------------------------------------------------
   // PUBLIC OPERATIONS
   //-------------------------------------------------------------------
 
-public:
-
   /// A public operation
   Foo(const Foo &);
+
+private:
 
   //-------------------------------------------------------------------
   // PRIVATE OPERATIONS
   //-------------------------------------------------------------------
-
-private:
 
   /// A private operation
   void foo_();
