@@ -4,6 +4,7 @@
 
 TOP = ../..
 SRC = ..
+LIB = -L../../lib -lcello
 
 TEST_EXES = \
 	test_array \
@@ -12,14 +13,12 @@ TEST_EXES = \
 	test_parameters \
 	test_performance_timer
 
-TEST_OBJS = $(patsubst %,%.o,$(TEST_EXES))
-
 #=======================================================================
 # TARGETS
 #=======================================================================
 
 .PHONY: all
-all: test
+all: test run-tests
 
 #-----------------------------------------------------------------------
 
@@ -28,16 +27,25 @@ test: $(TEST_EXES)
 
 #-----------------------------------------------------------------------
 
-test_array: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_array $(TEST_OBJS) $(OBJS) $(INC)
-test_performance_timer: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_performance_timer $(TEST_OBJS) $(OBJS) $(OPT) $(INC)
-test_parameters: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_parameters $(TEST_OBJS) $(OBJS) $(INC)
-test_error: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_error $(TEST_OBJS) $(OBJS) $(OPT) $(INC)
-test_disk_hdf5: $(TEST_OBJS) $(OBJS)
-	$(CXX) -o test_disk_hdf5 $(TEST_OBJS) $(OBJS) $(INC) $(LIB_HDF5)
+.PHONY: run-tests
+run-tests: $(TEST_EXES)
+	-./test_array
+	-./test_disk_hdf5
+	-./test_error
+	-./test_parameters
+	-./test_performance_timer
+#-----------------------------------------------------------------------
+
+test_array: test_array.o 
+	$(CXX) -o test_array test_array.o $(LIB) $(INC)
+test_disk_hdf5: test_disk_hdf5.o
+	$(CXX) -o test_disk_hdf5 test_disk_hdf5.o $(LIB) $(LIB_HDF5) $(INC)
+test_error: test_error.o
+	$(CXX) -o test_error test_error.o $(LIB) $(INC)
+test_parameters: test_parameters.o
+	$(CXX) -o test_parameters test_parameters.o $(LIB) $(INC)
+test_performance_timer: test_performance_timer.o 
+	$(CXX) -o test_performance_timer test_performance_timer.o $(LIB) $(INC)
 
 
 test_test:
@@ -50,16 +58,13 @@ libtest.a:
 
 .PHONY: clean
 clean:
+	-@rm *.o *~ $(TEST_EXES) *.unit *.hdf5
 
 #-----------------------------------------------------------------------
 
 .PHONY: install
 install: $(TEST_EXES)
-	cp ./test_performance_timer $(TOP)/bin
-	cp ./test_array             $(TOP)/bin
-	cp ./test_parameters        $(TOP)/bin
-	cp ./test_error             $(TOP)/bin
-	cp ./test_disk_hdf5         $(TOP)/bin
+	cp $(TEST_EXES) $(TOP)/bin
 
 
 #-----------------------------------------------------------------------

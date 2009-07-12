@@ -34,6 +34,7 @@
  *********************************************************************/
 
 #include "cello.def"
+#include "error_exception.hpp"
 
 #define ERROR_MESSAGE_LENGTH 80
 

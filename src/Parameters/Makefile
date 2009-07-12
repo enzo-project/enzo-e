@@ -31,8 +31,8 @@ clean:
 
 .PHONY: install
 install: install-include $(OBJS)
-	ar rcu $(TOP)/lib/libcello.a $(OBJS)   
-	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
+	ar rcu $(TOP)/lib/libcello.a      $(OBJS)   
+	ar rcu $(TOP)/lib/lib$(PACKAGE).a $(OBJS)   
 
 #-----------------------------------------------------------------------
 

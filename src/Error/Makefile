@@ -36,8 +36,8 @@ clean:
 .PHONY: install
 
 install: install-include $(OBJS)
-	ar rcu $(TOP)/lib/libcello.a $(OBJS)
-	ar rcu $(TOP)/lib/libcello-$(PACKAGE).a $(OBJS)   
+	ar rcu $(TOP)/lib/libcello.a      $(OBJS)
+	ar rcu $(TOP)/lib/lib$(PACKAGE).a $(OBJS)   
 
 #-----------------------------------------------------------------------
 
@@ -45,7 +45,8 @@ INCLUDE = $(TOP)/include
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/error.hpp  $(INCLUDE)
+	ln -sf `pwd`/error.hpp            $(INCLUDE)
+	ln -sf `pwd`/error_exception.hpp  $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 
