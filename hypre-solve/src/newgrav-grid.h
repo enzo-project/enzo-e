@@ -186,18 +186,18 @@ protected:
   /// Return a pointer to the solution array associated with the grid
   /// Allocate if not allocated
 
-  inline Scalar * get_u (int * nu0, int * nu1, int * nu2) throw ();
+  Scalar * get_u (int * nu0, int * nu1, int * nu2) throw ();
 
   /// Set the solution array associated with the grid
-  inline void set_u (Scalar *, int dims[3], bool dealloc = true) throw ();
+  void set_u (Scalar *, int dims[3], bool dealloc = true) throw ();
 
   /// Return a pointer to the right-hand side array associated with
   /// the grid Allocate if not allocated
 
-  inline Scalar * get_f (int * nu0, int * nu1, int * nu2) throw ();
+  Scalar * get_f (int * nu0, int * nu1, int * nu2) throw ();
 
   /// Set the right-hand side array associated with the grid
-  inline void set_f (Scalar *, int dims[3], bool dealloc = true) throw ();
+  void set_f (Scalar *, int dims[3], bool dealloc = true) throw ();
 
   /// Deallocate storage for the array of values associated with the grid
 
