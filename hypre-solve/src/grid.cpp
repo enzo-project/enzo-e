@@ -49,6 +49,7 @@ Grid::Grid (std::string parms) throw ()
   : faces_(NULL),
     level_ (-1),
     u_(NULL),
+    f_(NULL),
     counters_ (NULL)
 {
   // Initialize 0-sentinels in arrays
@@ -82,6 +83,7 @@ Grid::Grid (int     id,
   : faces_(NULL),
     level_ (-1),
     u_(NULL),
+    f_(NULL),
     counters_ (NULL)
 {
  // Initialize 0-sentinels in arrays
@@ -112,6 +114,7 @@ Grid::Grid (FILE *fp) throw ()
     faces_(NULL),
     level_(-1),
     u_(NULL),
+    f_(NULL),
     counters_(NULL)
 {
   this->read(fp);
@@ -121,15 +124,17 @@ Grid::Grid (FILE *fp) throw ()
 Grid::~Grid () throw ()
 {
   _TRACE_;
-  if (u_        != NULL) 
-    delete [] u_;        
-  u_        = NULL;
+
+  deallocate();
+
   if (faces_    != NULL) 
     delete    faces_;    
   faces_    = NULL;
+
   if (counters_ != NULL) 
     delete [] counters_; 
   counters_ = NULL;
+
   _TRACE_;
   neighbors0_.resize(0);
   _TRACE_;
@@ -161,14 +166,24 @@ void Grid::write (FILE *fp, bool brief) throw ()
 	  xl_[0],xl_[1],xl_[2],
 	  xu_[0],xu_[1],xu_[2],
 	  il_[0],il_[1],il_[2],
-	   n_ [0],n_ [1],n_ [2],
+          n_ [0],n_ [1],n_ [2],
 	   level_);
   if (u_ && ! brief) {
     for (int i0=0; i0<n_[0]; i0++) {
       for (int i1=0; i1<n_[1]; i1++) {
 	for (int i2=0; i2<n_[2]; i2++) {
-	  int i = index(i0,i1,i2,n_[0],n_[1],n_[2]);
+	  int i = index(i0,i1,i2,nu_[0],nu_[1],nu_[2]);
 	  fprintf (fp,"%d %d %d %22.15e\n",i0,i1,i2,u_[i]);
+	}
+      }
+    }
+  }
+  if (f_ && ! brief) {
+    for (int i0=0; i0<n_[0]; i0++) {
+      for (int i1=0; i1<n_[1]; i1++) {
+	for (int i2=0; i2<n_[2]; i2++) {
+	  int i = index(i0,i1,i2,nf_[0],nf_[1],nf_[2]);
+	  fprintf (fp,"%d %d %d %22.15e\n",i0,i1,i2,f_[i]);
 	}
       }
     }
@@ -204,26 +219,75 @@ void Grid::read (FILE *fp, bool brief) throw ()
     Scalar u;
     int status;
     while ((status = fscanf(fp,"%d%d%d"SCALAR_SCANF, &i0,&i1,&i2,&u)) != EOF) {
-      int i = index(i0,i1,i2,n_[0],n_[1],n_[2]);
+      int i = index(i0,i1,i2,nu_[0],nu_[1],nu_[2]);
       u_[i] = u;
+    }
+  }
+  if (f_ && ! brief) {
+    int i0,i1,i2;
+    Scalar f;
+    int status;
+    while ((status = fscanf(fp,"%d%d%d"SCALAR_SCANF, &i0,&i1,&i2,&f)) != EOF) {
+      int i = index(i0,i1,i2,nf_[0],nf_[1],nf_[2]);
+      f_[i] = f;
     }
   }
 }
 
-//======================================================================
+//----------------------------------------------------------------------
 
-Scalar * Grid::values () throw ()
+Scalar * Grid::get_u (int * nu0, int * nu1, int * nu2) throw ()
 {
   assert (u_);
+  *nu0 = nu_[0];
+  *nu1 = nu_[1];
+  *nu2 = nu_[2];
   return u_;
 }
 
-//======================================================================
+//----------------------------------------------------------------------
+
+void Grid::set_u (Scalar * u, int dims[3], bool dealloc) throw ()
+{
+  assert (u);
+  if (dealloc) delete [] u_;
+  u_ = u;
+}
+
+//----------------------------------------------------------------------
+
+Scalar * Grid::get_f (int * nf0, int * nf1, int * nf2) throw ()
+{
+  assert (f_);
+  *nf0 = nf_[0];
+  *nf1 = nf_[1];
+  *nf2 = nf_[2];
+  return f_;
+}
+
+//----------------------------------------------------------------------
+
+void Grid::set_f (Scalar * f, int dims[3], bool dealloc) throw ()
+{
+  assert (f);
+  if (dealloc) delete [] f_;
+  f_ = f;
+}
+
+//----------------------------------------------------------------------
 
 void Grid::allocate () throw ()
 {
   deallocate();
-  u_ = new Scalar [n_[0]*n_[1]*n_[2]];
+
+  // Set allocated sizes
+
+  nu_[0] = nf_[0] = n_[0];
+  nu_[1] = nf_[1] = n_[1];
+  nu_[2] = nf_[2] = n_[2];
+
+  u_ = new Scalar [nu_[0]*nu_[1]*nu_[2]];
+  f_ = new Scalar [nf_[0]*nf_[1]*nf_[2]];
 }
 
 //======================================================================
@@ -233,6 +297,13 @@ void Grid::deallocate () throw ()
   if (u_ != NULL) 
     delete [] u_;
   u_ = NULL;
+
+  if (f_ != NULL) 
+    delete [] f_;
+  f_ = NULL;
+  nu_[0] = nf_[0] = 0;
+  nu_[1] = nf_[1] = 0;
+  nu_[2] = nf_[2] = 0;
 }
 
 //======================================================================

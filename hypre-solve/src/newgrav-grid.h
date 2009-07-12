@@ -68,6 +68,10 @@ class Grid
   int                 il_[3];
   /// Number of zones
   int                 n_[3];
+  /// Allocated size of solution u_
+  int                 nu_[3];
+  /// Allocated size of right-hand side f_
+  int                 nf_[3];
   /// Faces class associated with grid
   Faces *             faces_;
 
@@ -79,6 +83,10 @@ class Grid
   /// Unknowns (single cell-centered variable) Stored as 3D
   /// fortran-style array
   Scalar *            u_;          
+
+  /// Right-hand side (single cell-centered variable) Stored as 3D
+  /// fortran-style array
+  Scalar *            f_;          
 
   /// Counters for nonstencil entries.  Required by
   /// hypre to maintain state between nonstencil and matrix initialization.
@@ -175,10 +183,21 @@ protected:
 			   int            num_types, 
 			   bool           full=true) throw ();
 
-  /// Return a pointer to the array of values associated with the grid
+  /// Return a pointer to the solution array associated with the grid
   /// Allocate if not allocated
 
-  Scalar * values () throw ();
+  inline Scalar * get_u (int * nu0, int * nu1, int * nu2) throw ();
+
+  /// Set the solution array associated with the grid
+  inline void set_u (Scalar *, int dims[3], bool dealloc = true) throw ();
+
+  /// Return a pointer to the right-hand side array associated with
+  /// the grid Allocate if not allocated
+
+  inline Scalar * get_f (int * nu0, int * nu1, int * nu2) throw ();
+
+  /// Set the right-hand side array associated with the grid
+  inline void set_f (Scalar *, int dims[3], bool dealloc = true) throw ();
 
   /// Deallocate storage for the array of values associated with the grid
 

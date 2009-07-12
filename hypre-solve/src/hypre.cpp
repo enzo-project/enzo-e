@@ -399,12 +399,16 @@ void Hypre::evaluate ()
 
     grid->allocate();
 
-    HYPRE_SStructVectorGetBoxValues (X_,level,lower,upper,0,grid->values());  
+    int nx[3];
+    HYPRE_SStructVectorGetBoxValues (X_,level,lower,upper,0,
+				     grid->get_u(&nx[0],&nx[1],&nx[2]));  
 
     sprintf (filename,"X.%d",grid->id());
     grid->write(filename);
     
-    HYPRE_SStructVectorGetBoxValues (B_,level,lower,upper,0,grid->values());  
+    int nb[3];
+    HYPRE_SStructVectorGetBoxValues (B_,level,lower,upper,0,
+				     grid->get_f(&nb[0],&nb[1],&nb[2]));  
 
     sprintf (filename,"B.%d",grid->id());
     grid->write(filename);
@@ -429,9 +433,10 @@ void Hypre::evaluate ()
 
     grid->allocate();
 
-    HYPRE_SStructVectorGetBoxValues (X_,level,lower,upper,0,grid->values());  
+    int nx[3];
 
-    Scalar * x = grid->values();
+    Scalar * x = grid->get_u(&nx[0],&nx[1],&nx[2]);
+    HYPRE_SStructVectorGetBoxValues (X_,level,lower,upper,0,x);  
 
     int n3[3];
 
@@ -440,7 +445,7 @@ void Hypre::evaluate ()
     for (int i2=0; i2<n3[2]; i2++) {
       for (int i1=0; i1<n3[1]; i1++) {
 	for (int i0=0; i0<n3[0]; i0++) {
-	  Scalar xval = x[grid->index(i0,i1,i2,n3[0],n3[1],n3[2])];
+	  Scalar xval = x[grid->index(i0,i1,i2,nx[0],nx[1],nx[2])];
 	  xsum_local  += xval;
 	  x2sum_local += xval*xval;
 	}
