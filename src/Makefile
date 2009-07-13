@@ -27,7 +27,7 @@
 #
 #-----------------------------------------------------------------------
 
-DIR = Array Disk Test Parameters Performance Error
+DIR = Array Disk Parameters Performance Error
 # Method
 
 #=======================================================================
@@ -50,10 +50,12 @@ clean:     $(patsubst %,%-clean,$(DIR))
 
 #-----------------------------------------------------------------------
 
-.PHONY: test %-test
-test:      $(patsubst %,%-test,$(DIR))
-%-test: %-DEP
-	$(MAKE) -C $* test
+# Run tests in Test directory, and display results in Tests/*.unit
+
+.PHONY: 
+test:   all install
+	$(MAKE) -C Test
+	cat Test/*.unit
 
 #-----------------------------------------------------------------------
 
