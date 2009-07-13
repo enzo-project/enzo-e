@@ -75,8 +75,9 @@ private:
   // init_vector() functions
 
   Scalar init_vector_points_  (std::vector<Point *> & points);
-  Scalar init_vector_density_ (std::string             file_prefix,
-			       bool is_packed);
+  Scalar init_vector_file_ (std::string             file_prefix,
+			    bool is_packed);
+  Scalar init_vector_attach_ ();
 
   // solve() functions
 

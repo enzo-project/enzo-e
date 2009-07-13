@@ -165,7 +165,6 @@ int main(int argc, char **argv)
     hypre.evaluate ();
     jbPerf.stop("hypre-evaluate");
 
-    jbPerf.start("hypre-delete");
     // --------------------------------------------------
     // jbPerf Finalize
     // --------------------------------------------------

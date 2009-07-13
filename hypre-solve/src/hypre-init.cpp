@@ -252,10 +252,10 @@ int main(int argc, char **argv)
 	     point_pos[k][0],point_pos[k][1],point_pos[k][2],id_point[k]);
   }
   fprintf (fp, "discret constant\n");
-  fprintf (fp, "solver_restol 1e-3\n");
+  fprintf (fp, "solver_restol 1e-2\n");
   if (strcmp(solver,"mg")==0) {
     fprintf (fp, "solver %s\n",((num_levels==1) ? "pfmg" : "fac") );
-    fprintf (fp, "solver_itmax 10\n");
+    fprintf (fp, "solver_itmax 20\n");
   } else   if (strcmp(solver,"cg")==0) {
     fprintf (fp, "solver bicgstab\n");
     fprintf (fp, "solver_itmax 100\n");

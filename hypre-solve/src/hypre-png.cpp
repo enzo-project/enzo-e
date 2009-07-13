@@ -106,7 +106,7 @@ int main(int argc, char **argv)
   for (; iarg<argc; iarg++) {
     printf ("Reading %s\n",argv[iarg]);
     FILE * fp = fopen(argv[iarg],"r");
-    Grid * grid = new Grid(fp);
+    Grid * grid = new Grid("u",fp);
     int level = grid->level();
     if (level < MAX_LEVELS) levels[level].push_back(grid);
     fclose(fp);
@@ -244,7 +244,8 @@ void images_grid_add(Grid   * grid,
   // kg: fine level zones / this grid zones
   int kg = int(pow(2,top_level - grid->level())); 
 
-  double *u = grid->values();
+  int nau[3];
+  double *u = grid->get_u(&nau[0],&nau[1],&nau[2]);
   int gl3[3];
   grid->index_lower(gl3[0],gl3[1],gl3[2]);
 
@@ -257,6 +258,7 @@ void images_grid_add(Grid   * grid,
   ng3[0] = grid->n(0);
   ng3[1] = grid->n(1);
   ng3[2] = grid->n(2);
+  printf ("%d %d %d   %d %d %d\n",nau[0],nau[1],nau[2],ng3[0],ng3[1],ng3[2]);
   // i0,i1,i2     grid local index 0 to ng3[*]
   // ii0,ii1,ii2  grid global index nl3 to nu3
   for (int i0=0; i0<ng3[0]; i0++) {
@@ -329,17 +331,17 @@ void images_colormap (double *images3[3],
       rmax3[axis] = MAX(rmax3[axis],images3[axis][i]);
     }
     printf ("Axis %d Min = %g Max = %g\n",axis,rmin3[axis],rmax3[axis]);
-    // Scale to VMIN : VMAX
-    double rmin = 1e10, rmax=-1e10;
-    for (int i=0; i<n1*n2; i++) {
-      double a = (images3[axis][i]-rmin3[axis]) / (rmax3[axis] - rmin3[axis]);
-      images3[axis][i] = (1.0-a)*VMIN + a*VMAX;
-      rmin = MIN(rmin,images3[axis][i]);
-      rmax = MAX(rmax,images3[axis][i]);
-    }
-    rmin3[axis] = rmin;
-    rmax3[axis] = rmax;
-    printf ("Axis %d Min = %g Max = %g\n",axis,rmin3[axis],rmax3[axis]);
+//     // Scale to VMIN : VMAX
+//     double rmin = 1e10, rmax=-1e10;
+//     for (int i=0; i<n1*n2; i++) {
+//       double a = (images3[axis][i]-rmin3[axis]) / (rmax3[axis] - rmin3[axis]);
+//       images3[axis][i] = (1.0-a)*VMIN + a*VMAX;
+//       rmin = MIN(rmin,images3[axis][i]);
+//       rmax = MAX(rmax,images3[axis][i]);
+//     }
+//     rmin3[axis] = rmin;
+//     rmax3[axis] = rmax;
+//     printf ("Axis %d Min = %g Max = %g\n",axis,rmin3[axis],rmax3[axis]);
     int index;
     if (rmax3[axis] > rmin3[axis]) {
       for (int i=0; i<n1*n2; i++) {

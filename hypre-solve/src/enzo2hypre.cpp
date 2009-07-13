@@ -214,7 +214,7 @@ int main(int argc, char ** argv)
 
   bool have_procmap = (fpin != NULL);
 
-  fprintf (fpout," enzo_density true\n");
+  fprintf (fpout," enzo_interface file\n");
   fprintf (fpout," enzo_procmap %s\n",have_procmap ? "true" : "false");
   fprintf (fpout," enzo_prefix  %s\n",argv[1]);
 

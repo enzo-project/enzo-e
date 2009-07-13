@@ -275,7 +275,8 @@ void Level::write (FILE *fp) throw ()
 
   for (int i=0; i<num_grids(); i++) {
     fprintf (fp,"Level %d\n",n_);
-    return_grid(i).write(fp);
+    return_grid(i).write("u",fp);
+    return_grid(i).write("f",fp);
   }
 }
 

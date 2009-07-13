@@ -210,22 +210,28 @@ void Hypre::init_graph ()
 {
   // Create the hypre graph object
 
+  _TRACE_;
   HYPRE_SStructGraphCreate (MPI_COMM_WORLD, grid_, &graph_);
   
+  _TRACE_;
   HYPRE_SStructGraphSetObjectType (graph_, HYPRE_SSTRUCT);
 
+  _TRACE_;
   ItHierarchyLevels itl (*hierarchy_);
 
+  _TRACE_;
   while (Level * level = itl++) {
 
     int part = level->index();
 
     // Define stencil connections within each level
 
+  _TRACE_;
     HYPRE_SStructGraphSetStencil (graph_, part, 0, stencil_);
 
     // Define graph connections between levels
 
+  _TRACE_;
     if (part > 0) {
 
       ItLevelGridsAll itag (*level);
@@ -240,6 +246,7 @@ void Hypre::init_graph ()
 
     ItLevelGridsAll itag (*level);
 
+  _TRACE_;
     while (Grid * grid = itag++) {
 
       // Initialize face counters for subsequent matrix inter-level entries
@@ -252,7 +259,9 @@ void Hypre::init_graph ()
 
   // Assemble the hypre graph
 
+  _TRACE_;
   HYPRE_SStructGraphAssemble (graph_);
+  _TRACE_;
 
 } // Hypre::init_graph()
 
@@ -403,15 +412,20 @@ void Hypre::evaluate ()
     HYPRE_SStructVectorGetBoxValues (X_,level,lower,upper,0,
 				     grid->get_u(&nx[0],&nx[1],&nx[2]));  
 
-    sprintf (filename,"X.%d",grid->id());
-    grid->write(filename);
+    if (parameters_->value("dump_x") == "true") {
+      sprintf (filename,"X.%d",grid->id());
+      grid->write("u",filename);
+    }
     
     int nb[3];
     HYPRE_SStructVectorGetBoxValues (B_,level,lower,upper,0,
 				     grid->get_f(&nb[0],&nb[1],&nb[2]));  
 
-    sprintf (filename,"B.%d",grid->id());
-    grid->write(filename);
+    if (parameters_->value("dump_b") == "true") {
+      sprintf (filename,"B.%d",grid->id());
+      grid->write("f",filename);
+    }
+
 
   } // grid = itg++
 
@@ -445,7 +459,11 @@ void Hypre::evaluate ()
     for (int i2=0; i2<n3[2]; i2++) {
       for (int i1=0; i1<n3[1]; i1++) {
 	for (int i0=0; i0<n3[0]; i0++) {
-	  Scalar xval = x[grid->index(i0,i1,i2,nx[0],nx[1],nx[2])];
+
+	  int i = i0 + nx[0]*(i1+nx[1]*i2);
+
+	  Scalar xval = x[i];
+
 	  xsum_local  += xval;
 	  x2sum_local += xval*xval;
 	}
@@ -708,15 +726,22 @@ void Hypre::init_elements_rhs_ (std::vector<Point *>  & points)
   Scalar local_shift_b_sum = 0.0;
   long long shift_b_count  = 0.0;
 
-  bool enzo_density = parameters_->value("enzo_density") == "true";
+  bool enzo_file   = parameters_->value("enzo_interface") == "file";
+  bool enzo_attach = parameters_->value("enzo_interface") == "attach";
 
-  if (enzo_density) {
+  if (enzo_file) {
 
     // Either set density according to Enzo grid files...
 
     bool        enzo_packed = parameters_->value("enzo_packed") == "true";
     std::string enzo_prefix = parameters_->value("enzo_prefix");
-    local_shift_b_sum += init_vector_density_ (enzo_prefix,enzo_packed);
+    local_shift_b_sum += init_vector_file_ (enzo_prefix,enzo_packed);
+
+  } else if (enzo_attach) {
+
+    // ... or attach to Enzo's actual density and potential fields ...
+
+    local_shift_b_sum += init_vector_attach_ ();
 
   } else {
 
@@ -1030,7 +1055,7 @@ Scalar Hypre::init_vector_points_ (std::vector<Point *> & points)
 
 /// Add contributions from Density in enzo HDF5 files to right-hand side B
 
-Scalar Hypre::init_vector_density_ (std::string             file_prefix,
+Scalar Hypre::init_vector_file_ (std::string             file_prefix,
 				    bool                    enzo_packed)
 
 {
@@ -1127,6 +1152,15 @@ Scalar Hypre::init_vector_density_ (std::string             file_prefix,
   }
 
   return 0.0;
+}
+
+//------------------------------------------------------------------------
+
+/// Add contributions from Density in enzo HDF5 files to right-hand side B
+
+Scalar Hypre::init_vector_attach_ ()
+{
+  return 0;
 }
 
 //------------------------------------------------------------------------

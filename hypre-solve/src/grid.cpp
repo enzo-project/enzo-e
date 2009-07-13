@@ -111,7 +111,7 @@ Grid::Grid (int     id,
 
 //======================================================================
 
-Grid::Grid (FILE *fp) throw ()
+Grid::Grid (std::string field, FILE *fp) throw ()
   : id_(-1),
     id_parent_(-1),
     ip_(-1),
@@ -123,7 +123,7 @@ Grid::Grid (FILE *fp) throw ()
     is_f_allocated_(false),
     counters_(NULL)
 {
-  this->read(fp);
+  this->read(field,fp);
 }
 //======================================================================
 
@@ -142,8 +142,11 @@ Grid::~Grid () throw ()
   counters_ = NULL;
 
   _TRACE_;
+
   neighbors0_.resize(0);
+
   _TRACE_;
+
   children0_.resize(0);
 }
 
@@ -151,12 +154,13 @@ Grid::~Grid () throw ()
 
 void Grid::print () throw ()
 {
-  this->write(stdout,true);
+  this->write("u",stdout,true);
+  this->write("f",stdout,true);
 }
 
 //======================================================================
 
-void Grid::write (FILE *fp, bool brief) throw ()
+void Grid::write (std::string field, FILE *fp, bool brief) throw ()
 {
   if (fp == 0) fp = stdout;
   fprintf (fp,"Grid\n"
@@ -174,7 +178,7 @@ void Grid::write (FILE *fp, bool brief) throw ()
 	  il_[0],il_[1],il_[2],
           n_ [0],n_ [1],n_ [2],
 	   level_);
-  if (u_ && ! brief) {
+  if (field=="u" && u_ && ! brief) {
     for (int i0=0; i0<n_[0]; i0++) {
       for (int i1=0; i1<n_[1]; i1++) {
 	for (int i2=0; i2<n_[2]; i2++) {
@@ -184,7 +188,7 @@ void Grid::write (FILE *fp, bool brief) throw ()
       }
     }
   }
-  if (f_ && ! brief) {
+  if (field=="f" && f_ && ! brief) {
     for (int i0=0; i0<n_[0]; i0++) {
       for (int i1=0; i1<n_[1]; i1++) {
 	for (int i2=0; i2<n_[2]; i2++) {
@@ -198,7 +202,7 @@ void Grid::write (FILE *fp, bool brief) throw ()
 
 //======================================================================
 
-void Grid::read (FILE *fp, bool brief) throw ()
+void Grid::read (std::string field, FILE *fp, bool brief) throw ()
 {
   if (fp == 0) fp = stdin;
   fscanf (fp,"Grid");
@@ -219,8 +223,13 @@ void Grid::read (FILE *fp, bool brief) throw ()
 	  &n_ [0],&n_ [1],&n_ [2]);
   fscanf (fp,"   level          %d",	 &level_);
 
-  this->allocate();
-  if (u_ && ! brief) {
+  nu_[0] = nf_[0] = n_[0];
+  nu_[1] = nf_[1] = n_[1];
+  nu_[2] = nf_[2] = n_[2];
+
+  if (field=="u" && ! brief) {
+    delete [] u_;
+    u_ = new Scalar [n_[0]*n_[1]*n_[2]];
     int i0,i1,i2;
     Scalar u;
     int status;
@@ -576,6 +585,12 @@ void Grid::input (std::string parms) throw ()
 	  &xu_[0],&xu_[1],&xu_[2],
 	  &il_[0],&il_[1],&il_[2],
 	  &n_[0],&n_[1],&n_[2]);
+
+  nu_[0] = nf_[0] = n_[0];
+  nu_[1] = nf_[1] = n_[1];
+  nu_[2] = nf_[2] = n_[2];
+
+
   if (debug_input) print();
 
 }
@@ -606,6 +621,12 @@ void Grid::input (int     id,
   n_[0]      = n[0];
   n_[1]      = n[1];
   n_[2]      = n[2];
+  nu_[0]     = n[0];
+  nu_[1]     = n[1];
+  nu_[2]     = n[2];
+  nf_[0]     = n[0];
+  nf_[1]     = n[1];
+  nf_[2]     = n[2];
 
 }
 

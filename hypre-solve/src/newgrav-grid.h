@@ -143,7 +143,7 @@ protected:
 
   /// Create a grid given a grid file as written by write()
 
-  Grid (FILE *) throw ();
+  Grid (std::string field, FILE *) throw ();
 
   ~Grid () throw ();
 
@@ -159,23 +159,25 @@ protected:
 
   /// Write the grid to a file in compact format
 
-  void write (std::string name) throw ()
-  { FILE *fp = fopen (name.c_str(),"w"); this->write(fp); fclose(fp); };
+  void write (std::string field, std::string name) throw ()
+  { 
+    FILE *fp = fopen (name.c_str(),"w"); this->write(field, fp); fclose(fp); 
+  };
 
   /// Write the grid to a file in compact format
 
-  void write (FILE * fp = 0, bool brief=0) throw ();
+  void write (std::string field, FILE * fp, bool brief=0) throw ();
 
   /// Read the grid from a file written using write()
 
-  void read (std::string name) throw ()
+  void read (std::string field, std::string name) throw ()
   {
-    FILE *fp = fopen (name.c_str(),"r"); this->read(fp); fclose(fp); 
+    FILE *fp = fopen (name.c_str(),"r"); this->read(field, fp); fclose(fp); 
   };
 
   /// Read the grid from a file written using write()
 
-  void read (FILE * fp = 0, bool brief=0) throw ();
+  void read (std::string field, FILE * fp = 0, bool brief=0) throw ();
 
   /// Write the grid outline to a geomview file 
 
@@ -192,8 +194,8 @@ protected:
 			   int            num_types, 
 			   bool           full=true) throw ();
 
-  /// Return a pointer to the solution array associated with the grid
-  /// Allocate if not allocated
+  /// Return a pointer to the solution array associated with
+  /// the grid
 
   Scalar * get_u (int * nu0, int * nu1, int * nu2) throw ();
 
@@ -201,7 +203,7 @@ protected:
   void set_u (Scalar *, int dims[3]) throw ();
 
   /// Return a pointer to the right-hand side array associated with
-  /// the grid Allocate if not allocated
+  /// the grid
 
   Scalar * get_f (int * nu0, int * nu1, int * nu2) throw ();
 
