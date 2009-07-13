@@ -27,17 +27,14 @@ public:
   Mpi (MPI_Comm comm)
     {
       comm_ = comm;
-      MPI_Comm_size (comm_, &np_);
-      MPI_Comm_rank (comm_, &ip_);
+      initialize_();
     }
 
   Mpi (int * argc, char ***argv)
     : comm_(MPI_COMM_WORLD)
     {
       MPI_Init (argc,argv);
-
-      MPI_Comm_size (comm_, &np_);
-      MPI_Comm_rank (comm_, &ip_);
+      initialize_();
     }
 
   ~Mpi ()
@@ -49,6 +46,11 @@ public:
   int ip () throw () {return ip_;};
   int np () throw () {return np_;};
   void barrier () throw () { MPI_Barrier (comm_); };
+  void initialize_()
+  {
+      MPI_Comm_size (comm_, &np_);
+      MPI_Comm_rank (comm_, &ip_);
+  }
     
 private:
 

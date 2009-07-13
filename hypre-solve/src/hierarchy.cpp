@@ -138,7 +138,9 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
       nu[0] = enzo_grid->GravitatingMassFieldDimension[0];
       nu[1] = enzo_grid->GravitatingMassFieldDimension[1];
       nu[2] = enzo_grid->GravitatingMassFieldDimension[2];
-      grid->set_u(enzo_grid->PotentialField,nu);
+      if (grid->is_local()) {
+	grid->set_u(enzo_grid->PotentialField,nu);
+      }
       //      grid->set_f(PotentialField);
 
       id++;

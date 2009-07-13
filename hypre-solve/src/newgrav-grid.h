@@ -68,10 +68,6 @@ class Grid
   int                 il_[3];
   /// Number of zones
   int                 n_[3];
-  /// Allocated size of solution u_
-  int                 nu_[3];
-  /// Allocated size of right-hand side f_
-  int                 nf_[3];
   /// Faces class associated with grid
   Faces *             faces_;
 
@@ -80,13 +76,26 @@ class Grid
   /// Containing Level number (0 = root)
   int                 level_;      
 
+  /// Allocated size of solution u_
+  int                 nu_[3];
+
   /// Unknowns (single cell-centered variable) Stored as 3D
   /// fortran-style array
   Scalar *            u_;          
 
+  /// Whether u_ was allocated by hypre-solve, or attached to an
+  /// external array
+  bool is_u_allocated_;
+
+  /// Allocated size of right-hand side f_
+  int                 nf_[3];
   /// Right-hand side (single cell-centered variable) Stored as 3D
   /// fortran-style array
   Scalar *            f_;          
+  /// Whether f_ was allocated by hypre-solve, or attached to an
+  /// external array
+  bool is_f_allocated_;
+
 
   /// Counters for nonstencil entries.  Required by
   /// hypre to maintain state between nonstencil and matrix initialization.
@@ -189,7 +198,7 @@ protected:
   Scalar * get_u (int * nu0, int * nu1, int * nu2) throw ();
 
   /// Set the solution array associated with the grid
-  void set_u (Scalar *, int dims[3], bool dealloc = true) throw ();
+  void set_u (Scalar *, int dims[3]) throw ();
 
   /// Return a pointer to the right-hand side array associated with
   /// the grid Allocate if not allocated
@@ -197,11 +206,19 @@ protected:
   Scalar * get_f (int * nu0, int * nu1, int * nu2) throw ();
 
   /// Set the right-hand side array associated with the grid
-  void set_f (Scalar *, int dims[3], bool dealloc = true) throw ();
+  void set_f (Scalar *, int dims[3]) throw ();
 
-  /// Deallocate storage for the array of values associated with the grid
+  /// Deallocate storage for the u_ and f_ arrays
 
   void deallocate () throw ();
+
+  /// Deallocate storage for the u_ array
+
+  void deallocate_u_ () throw ();
+
+  /// Deallocate storage for the f_ array
+
+  void deallocate_f_ () throw ();
 
   /// Allocate storage for the array of values associated with the grid
 

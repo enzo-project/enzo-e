@@ -49,7 +49,9 @@ Grid::Grid (std::string parms) throw ()
   : faces_(NULL),
     level_ (-1),
     u_(NULL),
+    is_u_allocated_(false),
     f_(NULL),
+    is_f_allocated_(false),
     counters_ (NULL)
 {
   // Initialize 0-sentinels in arrays
@@ -83,7 +85,9 @@ Grid::Grid (int     id,
   : faces_(NULL),
     level_ (-1),
     u_(NULL),
+    is_u_allocated_(false),
     f_(NULL),
+    is_f_allocated_(false),
     counters_ (NULL)
 {
  // Initialize 0-sentinels in arrays
@@ -114,7 +118,9 @@ Grid::Grid (FILE *fp) throw ()
     faces_(NULL),
     level_(-1),
     u_(NULL),
+    is_u_allocated_(false),
     f_(NULL),
+    is_f_allocated_(false),
     counters_(NULL)
 {
   this->read(fp);
@@ -247,11 +253,13 @@ Scalar * Grid::get_u (int * nu0, int * nu1, int * nu2) throw ()
 
 //----------------------------------------------------------------------
 
-void Grid::set_u (Scalar * u, int dims[3], bool dealloc) throw ()
+void Grid::set_u (Scalar * u, int dims[3]) throw ()
 {
-  assert (u);
-  if (dealloc) delete [] u_;
+  if (u == NULL) WARNING("Grid::set_u() called with NULL\n");
+  assert (u != NULL);
+  deallocate_u_();
   u_ = u;
+  is_u_allocated_ = false;
 }
 
 //----------------------------------------------------------------------
@@ -267,11 +275,13 @@ Scalar * Grid::get_f (int * nf0, int * nf1, int * nf2) throw ()
 
 //----------------------------------------------------------------------
 
-void Grid::set_f (Scalar * f, int dims[3], bool dealloc) throw ()
+void Grid::set_f (Scalar * f, int dims[3]) throw ()
 {
-  assert (f);
-  if (dealloc) delete [] f_;
+  if (f == NULL) WARNING("Grid::set_f() called with NULL\n");
+  //  assert (f != NULL);
+  deallocate_f_();
   f_ = f;
+  is_f_allocated_ = false;
 }
 
 //----------------------------------------------------------------------
@@ -294,18 +304,27 @@ void Grid::allocate () throw ()
 
 void Grid::deallocate () throw ()
 {
-  if (u_ != NULL) 
-    delete [] u_;
-  u_ = NULL;
+  deallocate_u_();
+  deallocate_f_();
 
-  if (f_ != NULL) 
-    delete [] f_;
-  f_ = NULL;
   nu_[0] = nf_[0] = 0;
   nu_[1] = nf_[1] = 0;
   nu_[2] = nf_[2] = 0;
 }
 
+void Grid::deallocate_u_ () throw ()
+{
+  if (is_u_allocated_ && u_ != NULL) delete [] u_;
+  u_ = NULL;
+  is_u_allocated_ = true; // reset default
+}
+
+void Grid::deallocate_f_ () throw ()
+{
+  if (is_f_allocated_ && f_ != NULL) delete [] f_;
+  f_ = NULL;
+  is_f_allocated_ = true; // reset default
+}
 //======================================================================
 
 void Grid::geomview_grid (FILE *fpr, bool full) throw ()
