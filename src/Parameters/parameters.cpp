@@ -87,9 +87,18 @@ Parameters::Parameters()
 void
 Parameters::read 
 ( FILE * file_pointer ) 
-  throw()
+  throw(ExceptionBadPointer)
 
 {
+  // check input
+
+  
+  if (file_pointer == 0) {
+    printf ("Throwing exception\n");
+    throw ExceptionBadPointer();
+    printf ("Threw exception??\n");
+  }
+
   char buffer[MAX_PARAMETER_FILE_WIDTH];
   char parameter[MAX_PARAMETER_FILE_WIDTH];
   

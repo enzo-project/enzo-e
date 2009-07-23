@@ -56,11 +56,11 @@ main()
 
   }
   // ERRORS ARE NOT CAUGHT HERE--WHY?
-  catch (const char * error_message) {
-    printf ("ERROR CAUGHT: %s\n",error_message);
+  catch (ExceptionBadPointer) {
+    printf ("CELLO ERROR: Bad pointer.\n");
   }
   catch (...) {
-    printf ("ERROR CAUGHT: UNKNOWN\n",error_message);
+    printf ("CELLO ERROR: Unknown error.\n",error_message);
   }
 
   unit_close();

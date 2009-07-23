@@ -39,6 +39,8 @@
 
 #include <stdio.h>
 
+#include "error_exception.hpp"
+
 // Maximum allowed width of a line in a parameter file
 #define MAX_PARAMETER_FILE_WIDTH 255
 
@@ -75,7 +77,7 @@ public:
   Parameters() throw();
 
   /// This function reads in parameters from a file
-  void read (FILE * file_pointer) throw();
+  void read (FILE * file_pointer) throw(ExceptionBadPointer);
 
   /// This function reads in parameters from a file
   std::string get_value (std::string parameter) throw();

@@ -66,5 +66,7 @@ private:
 
 };
 
+class ExceptionBadPointer : public Exception {};
+
 #endif /* EXCEPTION_HPP */
 
