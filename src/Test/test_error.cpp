@@ -31,7 +31,7 @@
 #include <string>
 
 #include "error.hpp"
-#include "test_unit_.hpp"
+#include "test.hpp"
 
 main()
 {

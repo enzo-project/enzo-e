@@ -27,7 +27,7 @@
 #
 #-----------------------------------------------------------------------
 
-DIR = Array Disk Parameters Performance Error
+DIR = Array Disk Parameters Performance Error Test
 # Method
 
 #=======================================================================

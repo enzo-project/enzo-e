@@ -24,6 +24,6 @@
 
 #include "cello.def"
 
-#include "performance_timer_.hpp"
+#include "performance_timer.hpp"
 
 #endif /* PERFORMANCE_HPP */

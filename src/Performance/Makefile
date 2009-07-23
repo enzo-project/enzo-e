@@ -70,8 +70,8 @@ INCLUDE =$(TOP)/include
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/performance.hpp        $(INCLUDE)
-	ln -sf `pwd`/performance_timer_.hpp $(INCLUDE)
+	ln -sf `pwd`/performance.hpp       $(INCLUDE)
+	ln -sf `pwd`/performance_timer.hpp $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 

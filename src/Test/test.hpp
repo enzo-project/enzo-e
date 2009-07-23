@@ -18,7 +18,7 @@
 
 #include "cello.def"
 
-#include "test_unit_.hpp"
+#include "test_unit.hpp"
 
 #endif /* TEST_HPP */
 
