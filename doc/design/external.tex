@@ -3,42 +3,69 @@
 \chapter{External Libraries} \label{c:external}
 %======================================================================@
 
-This chapter discusses related external software libraries and frameworks.
-We include brief descriptions and scope of each library,
-useful features, and list reasons why we decided to use or
-not use the library with \cello.
+This chapter discusses related external software libraries and
+frameworks.  We include brief descriptions and scope of each library,
+useful features, and list reasons why we decided to use or not use the
+library with \cello.
 
 % @REF@ External libraries referenced in compiling.tex
 
 \begin{tabular}{|ll|} \hline
 \textbf{Package} & \textbf{description} \\ \hline
-\code{lcaperf} & \textit{Parallel performance toolkit}  \\
-& \url{http://mngrid.ucsd.edu/packages/lcaperf/} \\
-\code{lcatest} & \textit{Parallel testing infrastructure}  \\
-& \url{http://mngrid.ucsd.edu/packages/lcatest/} \\
-\code{PAPI}    & \textit{Performance API}  \\
-& \url{http://icl.cs.utk.edu/papi/} \\
-\code{hypre}   & \textit{Scalable linear solvers}  \\
-& \url{http://www.llnl.gov/CASC/hypre/} \\
-\code{P3DFFT}  & \textit{Parallel 3D FFT} \\
-& \url{http://www.sdsc.edu/us/resources/p3dfft_download.html} \\
-\code{SPRNG}   & \textit{Scalable parallel random number generator} \\
-& \url{http://sprng.cs.fsu.edu/} \\
-\code{VisIt}   & \textit{Parallel visualization tool} \\
-& \url{https://wci.llnl.gov/codes/visit/home.html} \\
-\code{arprec}  & \textit{Arbitrary precision package} \\ 
-\code{POOMA}   & \textit{Parallel object-oriented methods and applications} \\
-\code{SAMRAI}  & \textit{Structured adaptive mesh refinement application infrastructure} \\
-\code{PETSc}  & \textit{Object-oriented toolkit for constructing parallel scientific applications} \\
-\code{Paramesh} & \textit{Parallel adaptive mesh refinement} \\
-\code{AMPI}    & \textit{Adaptive MPI with dynamic load balancing and multitreading} \\
-\code{CHARM++}  & \textit{Machine independent parallel programming system} \\
-\code{DAGH}    & \textit{Distributed Adaptive Grid hierarchy} \\
-\code{TAU}      & \textit{Portable profiling and tracing toolkit} \\
-\code{Blitz++}   & \textit{Numerical library using expression templates} \\
-\code{BoxLib} & \textit{Library for block structured finite difference methods} \\
-\code{Global Arrays} & \textit{Supports large arrays distributed across nodes} \\
-\code{VPython} & \textit{3D Programming for Ordinary Mortals} \\
+\usemaybe\ \code{AMPI}    & \textit{Adaptive MPI with dynamic load balancing and multitreading} \\
+\useno\ \code{arprec}  & \textit{Arbitrary precision package} \\ 
+\usemaybe\ \code{Blitz++}   & \textit{Numerical library using expression templates} \\
+\useno\ \code{BoxLib} & \textit{Library for block structured finite difference methods} \\
+\usemaybe\ \code{CHARM++}  & \textit{Machine independent parallel programming system} \\
+\useno\ \code{DAGH}    & \textit{Distributed Adaptive Grid hierarchy} \\
+\useno\ \code{Global Arrays} & \textit{Supports large arrays distributed across nodes} \\
+\usemaybe\ \code{hypre}   & \textit{Scalable linear solvers}  \\& \url{http://www.llnl.gov/CASC/hypre/} \\
+\useno\ \code{lcaperf} & \textit{Parallel performance toolkit}  \\& \url{http://mngrid.ucsd.edu/packages/lcaperf/} \\
+\useyes\ \code{lcatest} & \textit{Parallel testing infrastructure}  \\& \url{http://mngrid.ucsd.edu/packages/lcatest/} \\
+\useyes\ \code{libmatheval} & \textit{Parse and evaluate symbolic expressions}  \\& \url{http://mngrid.ucsd.edu/packages/lcatest/} \\
+\usemaybe\ \code{P3DFFT}  & \textit{Parallel 3D FFT} \\& \url{http://www.sdsc.edu/us/resources/p3dfft_download.html} \\
+\useyes\ \code{PAPI}    & \textit{Performance API}  \\& \url{http://icl.cs.utk.edu/papi/} \\
+\useno\ \code{Paramesh} & \textit{Parallel adaptive mesh refinement} \\
+\useno\ \code{PETSc}  & \textit{Object-oriented toolkit for constructing parallel scientific applications} \\
+\useno\ \code{POOMA}   & \textit{Parallel object-oriented methods and applications} \\
+\useyes\ \code{S2PLOT} & \textit{3D Plotting Library} \\
+\useno\ \code{SAMRAI}  & \textit{Structured adaptive mesh refinement application infrastructure} \\
+\useyes\ \code{SPRNG}   & \textit{Scalable parallel random number generator} \\& \url{http://sprng.cs.fsu.edu/} \\
+\usemaybe\ \code{TAU}      & \textit{Portable profiling and tracing toolkit} \\
+\usemaybe\ \code{VisIt}   & \textit{Parallel visualization tool} \\& \url{https://wci.llnl.gov/codes/visit/home.html} \\
+\usemaybe\ \code{VPython} & \textit{3D Programming for Ordinary Mortals} \\
 \hline
 \end{tabular}
+
+\section{\usemaybe\ \code{AMPI}}    
+\section{\useno\ \code{arprec}}  
+\section{\usemaybe\ \code{Blitz++}}   
+
+\code{Blitz++} is a ``C++ class library for scientific computing which
+provides performance on par with Fortran 77/90''.  It provides fast
+operations for dense vectors and multidimensional arrays.  Support
+is included for array interleaving, array blocking, and reference counting.
+Since portability may be an issue and since it's a work under development, 
+use of \code{Blitz++} will be optional.
+
+\section{\useno\ \code{BoxLib}} 
+\section{\usemaybe\ \code{CHARM++}}  
+\section{\useno\ \code{DAGH}}    
+\section{\useno\ \code{Global Arrays}} 
+\section{\usemaybe\ \code{hypre}}   
+\section{\useno\ \code{lcaperf}} 
+\section{\useyes\ \code{lcatest}} 
+\section{\usemaybe\ \code{P3DFFT}}  
+\section{\useyes\ \code{PAPI}}    
+\section{\useno\ \code{Paramesh}} 
+\section{\useno\ \code{PETSc}}  
+\section{\useno\ \code{POOMA}}   
+\section{\useyes\ \code{S2PLOT}} 
+\section{\useno\ \code{SAMRAI}}  
+\section{\useyes\ \code{SPRNG}}   
+\section{\usemaybe\ \code{TAU}}      
+\section{\usemaybe\ \code{VisIt}}   
+\section{\usemaybe\ \code{VPython}} 
+
+% \hline
 
