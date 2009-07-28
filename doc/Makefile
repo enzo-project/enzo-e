@@ -10,7 +10,7 @@ DOCS = \
       manual-devel \
       manual-user \
       manual-reference \
-      talk-intro \
+      talk-intro
 
 DIRS = $(DOCS) uml
  

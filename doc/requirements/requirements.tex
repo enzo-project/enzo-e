@@ -56,7 +56,7 @@ Acceptance & \textit{#3}
   {}
   {Proposed}
 %
-  {All software in the system shall be open source}
+  {All software in the system will be open source}
 
 %-----------------------------------------------------------------------
 \req
@@ -71,7 +71,7 @@ Acceptance & \textit{#3}
   {}
   {Proposed}
 %
-  {The system should support multiple as well as single simulations
+  {Support for running multiple simulations
   [quantitative limit?]}
 
 %-----------------------------------------------------------------------
@@ -79,18 +79,20 @@ Acceptance & \textit{#3}
   {}
   {Proposed}
 %
-  {The simulation initial and boundary conditions should be explicitly
-  specified by the user}
+  {Al initial and boundary conditions should be explicitly
+  specified by the user [as opposed to in \enzo\ where
+  initial and boundary conditions are hard coded in ``problems'',
+  such as ``shock tube'' or ``cosmology''].}
 
 %-----------------------------------------------------------------------
 \req
   {}
   {Proposed}
 %
-  {The simulation initial and boundary condition specification should
-  be sufficiently powerful to set up all known test problems in the
-  literature that can be run given the supported physics
-  capabilities.}
+  {The simulation's initial and boundary condition specification
+   should be sufficiently powerful to set up all known test problems
+   in the literature that can be run given the supported physics
+   capabilities. [Revise: how can this be tested?]}
 
 %-----------------------------------------------------------------------
 \req
@@ -98,23 +100,27 @@ Acceptance & \textit{#3}
   {Proposed}
 %
   {The simulation input shall include ``deep'' parameter control of
-  all supported physics and parallel datastructures}
+    all supported physics and parallel data-structures. [The purpose
+      is not to have undocumented compile-time parameters set with
+      \code{\#define}'s scattered throughout the code, but still let
+      users adjust low-level parameters if they want.]}
 
 %-----------------------------------------------------------------------
 \req
   {}
   {Proposed}
 %
-  {All standard test problems should be directly supported.  @@@ list
-  specific test problems}
+  {All standard test problems should be directly supported.  [List
+  specific test problems]}
 
 %-----------------------------------------------------------------------
 \req
   {}
   {Proposed}
 %
-  {User input shall include a single text file for problem
-  specification @@@ glossary: problem specification: }
+  {All problems are specified (specifiable) using a single user-written
+   text file, plus optional data files for complex initial conditions. 
+   [Basically this is the same as \enzo] }
 
 %-----------------------------------------------------------------------
 \req
