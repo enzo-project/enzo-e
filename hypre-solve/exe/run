@@ -7,14 +7,16 @@
 #        for usage
 #-----------------------------------------------------------------------
 
+set color  = 3
+set size   = 256 # png file size
+set thumb  = 64
+
+#-----------------------------------------------------------------------
+
 set PATH = `pwd`
 set bin = "$PATH/../bin"
 
-set extra = "dump_x true\n"
-if ($2 <= 32) then
-   set extra = "${extra}dump_a true\ndump_b true\n"
-endif
-
+set extra = "dump_hypre false\ndump_x true\ndump_b true"
 
 #----------------------------------------------------------------------
 # INITIALIZE PROBLEM
@@ -72,20 +74,42 @@ endif
 # GENERATE PLOTS
 #----------------------------------------------------------------------
 
-$bin/hypre-png 3 4 X.? X.?? >& out.hypre-png
+set n      = $1
+set levels = $5
+
+set factor = `echo "($size / $n) / 2^($levels-1)" | bc`
+
+$bin/hypre-png $color $factor X.? X.?? >& out.hypre-png
 mv project-0.png X0.png
 mv project-1.png X1.png
 mv project-2.png X2.png
+mv project-shift-0.png XS0.png
+mv project-shift-1.png XS1.png
+mv project-shift-2.png XS2.png
+
+set factor = `echo "($thumb / $n) / 2^($levels-1)" | bc`
+
+$bin/hypre-png $color $factor X.? X.?? >& out.hypre-png
+mv project-0.png TX0.png
+mv project-1.png TX1.png
+mv project-2.png TX2.png
+mv project-shift-0.png TXS0.png
+mv project-shift-1.png TXS1.png
+mv project-shift-2.png TXS2.png
 
 #----------------------------------------------------------------------
 # DISPLAY RESULT
 #----------------------------------------------------------------------
 
-set success = `grep "Success hypre-solve" outfile | wc`
+set success = `grep "Success" outfile | wc`
 set success = $success[1]
+set norm = `awk '/norm\(X\)/{print $3}' outfile`
 if ($success == 1) then
-   echo "Pass: $problem"
+   echo "\033[01;32mPass\033[00m: $problem $norm"
 else
-   echo "Fail: $problem"
+   echo "\033[01;38mFail\033[00m: $problem $norm"
 endif
+
+rm X.* B.*
+
 
