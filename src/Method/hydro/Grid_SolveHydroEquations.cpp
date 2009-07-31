@@ -48,43 +48,6 @@ extern "C" void FORTRAN_NAME(ppm_de)(
 			    int geindex[], float *temp,
                           int *ncolour, float *colourpt, int *coloff,
                             int colindex[]);
-extern "C" void FORTRAN_NAME(ppm_lr)(
-			  float *d, float *E, float *u, float *v, float *w,
-			    float *ge,
-                          int *grav, float *gr_ax, float *gr_ay, float *gr_az,
-			  float *gamma, float *dt, int *cycle_number,
-                            float dx[], float dy[], float dz[],
-			  int *rank, int *in, int *jn, int *kn,
-                            int is[], int ie[],
-			  float gridvel[], int *flatten, int *ipresfree,
-			  int *diff, int *steepen, int *idual,
-                            float *eta1, float *eta2,
-			  int *num_subgrids, int leftface[], int rightface[],
-			  int istart[], int iend[], int jstart[], int jend[],
-			  float *standard, int dindex[], int Eindex[],
-			  int uindex[], int vindex[], int windex[],
-			    int geindex[], float *temp,
-                          int *ncolour, float *colourpt, int *coloff,
-                            int colindex[]);
-extern "C" void FORTRAN_NAME(zeus_main)(
-			  float *d, float *E, float *u, float *v, float *w,
-			    float *ge, float *C1, float *C2,
-                          int *grav, float *gr_ax, float *gr_ay, float *gr_az,
-			  float *gamma, float *dt, int *cycle_number,
-                            float dx[], float dy[], float dz[],
-			  int *rank, int *in, int *jn, int *kn,
-                            int is[], int ie[],
-			  float gridvel[], int *flatten, int *ipresfree,
-			  int *diff, int *steepen, int *idual, int *igamfield,
-                            float *eta1, float *eta2,
-			  int *num_subgrids, int leftface[], int rightface[],
-			  int istart[], int iend[], int jstart[], int jend[],
-			  float *standard, int dindex[], int Eindex[],
-			  int uindex[], int vindex[], int windex[],
-			    int geindex[], float *temp,
-                          int *ncolour, float *colourpt, int *coloff,
-                            int colindex[], int *bottom,
-			  float *minsupecoef);
  
 int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
 			      fluxes *SubgridFluxes[], int level)
@@ -465,51 +428,6 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
 			  geindex, temp,
                         &NumberOfColours, colourpt, coloff, colindex);
  
-    if (HydroMethod == PPM_LagrangeRemap)
-      FORTRAN_NAME(ppm_lr)(
-			density, totalenergy, velocity1, velocity2, velocity3,
-                          gasenergy,
-			&GravityOn, AccelerationField[0],
-                           AccelerationField[1],
-                           AccelerationField[2],
-			&Gamma, &dtFixed, &CycleNumber,
-                          CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
-			&GridRank, &GridDimension[0], &GridDimension[1],
-                           &GridDimension[2], GridStartIndex, GridEndIndex,
-			GridVelocity, &PPMFlatteningParameter,
-                           &PressureFree,
-			&PPMDiffusionParameter, &PPMSteepeningParameter,
-                           &DualEnergyFormalism, &DualEnergyFormalismEta1,
-                           &DualEnergyFormalismEta2,
-			&NumberOfSubgrids, leftface, rightface,
-			istart, iend, jstart, jend,
-			standard, dindex, Eindex, uindex, vindex, windex,
-			  geindex, temp,
-                        &NumberOfColours, colourpt, coloff, colindex);
- 
-    if (HydroMethod == Zeus_Hydro)
-      FORTRAN_NAME(zeus_main)(
-			density, totalenergy, velocity1, velocity2, velocity3,
-                          zeus_temp, &ZEUSLinearArtificialViscosity,
-			  &ZEUSQuadraticArtificialViscosity,
-			&GravityOn, AccelerationField[0],
-                           AccelerationField[1],
-                           AccelerationField[2],
-			GammaField, &dtFixed, &CycleNumber,
-                          CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
-			&GridRank, &GridDimension[0], &GridDimension[1],
-                           &GridDimension[2], GridStartIndex, GridEndIndex,
-			GridVelocity, &PPMFlatteningParameter,
-                           &PressureFree,
-			&PPMDiffusionParameter, &PPMSteepeningParameter,
-                           &DualEnergyFormalism, &UseGammaField,
-                           &DualEnergyFormalismEta1, &DualEnergyFormalismEta2,
-			&NumberOfSubgrids, leftface, rightface,
-			istart, iend, jstart, jend,
-			standard, dindex, Eindex, uindex, vindex, windex,
-			  geindex, temp,
-                        &NumberOfColours, colourpt, coloff, colindex,
-			&LowestLevel, &MinimumSupportEnergyCoefficient);
  
     /* deallocate temporary space for solver */
  

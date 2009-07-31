@@ -9,17 +9,24 @@
  *********************************************************************
  */
  
- 
 #include <stdio.h>
 
-#include "scalar.hpp"
-#include "array.hpp"
-#include "unit.hpp"
+#include "test.hpp"
+
+#include "macros_and_parameters.h"
+#include "typedefs.h"
+#include "global_data.h"
+#include "Fluxes.h"
+#include "ExternalBoundary.h"
+#include "ProtoSubgrid.h"
+#include "GridList.h"
+#include "Grid.h"
+#include "Hierarchy.h"
+#include "LevelHierarchy.h"
 
 main()
 {
-  unit_class ("Array");
+  unit_class ("MethodPpm");
   unit_open();
-  unit_class_size(Array);
 
 }

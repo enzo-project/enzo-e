@@ -14,8 +14,8 @@
  
 // Compute the ratio of specific heats.
  
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "macros_and_parameters.h"
 #include "typedefs.h"
