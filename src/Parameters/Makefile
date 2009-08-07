@@ -8,7 +8,7 @@ TOP = ../..
 SRC = ..
 
 PACKAGE   = parameters
-OBJ       = parameters.o
+OBJ       = parameters.o parse
 
 #=======================================================================
 OBJ_EXTERN = 
@@ -26,6 +26,8 @@ all: $(OBJS)
 .PHONY: clean
 clean:
 	-@rm *.o *~ out.make.dep Makefile.bak *.unit
+	-@rm parse parse.c
+
 
 #-----------------------------------------------------------------------
 
@@ -41,6 +43,10 @@ INCLUDE = $(TOP)/include
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/parameters.hpp               $(INCLUDE)
+
+parse: parse.l
+	flex -t parse.l > parse.c
+	gcc -o parse parse.c -ll
 
 #=======================================================================
 # INCLUDES 

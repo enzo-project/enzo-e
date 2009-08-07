@@ -1,0 +1,71 @@
+  # ? Alternatively Field {...} "density", "totaly_energy" ?
+
+  Field {name = "density"}
+  Field {name = "total_energy"}
+
+  # pressure is computed not advected, and has a lower limit of 1e-6
+
+  Field {name = "pressure"; floor = 1.0e-6; type = "computed"}
+
+  # velocity variables are at cell faces
+  # ? how to handle variables on faces versus centers ?
+  # ? how to relate similar Fields, e.g. velocity_[xyz] ? How to interleave?
+  # ? let method assert location? How to have method check correctness of location?  Location relevant?
+
+  Field {name = "velocity_x"; location = [ 1 ] }
+
+  # ? how to simplify boxes ? type = box([0,1]) ?  (*) removing "restrict" defaults to bounding box ?
+  # rank determined by bound?  what if bound and rank differ?
+
+  Region {name = "domain"; rank = 1; bound = [0.0, 1.0]; restrict = (0.0 < x && x < 1.0) }
+  Region {name = "left";             bound = [0.0, 0.5]; restrict = (x <= 0.5) }  
+  Region {name = "right";            bound = [0.5, 1.0]; restrict = (x >  0.5) }  
+
+  # parallel should go in Parallel section?  Assume all fields defined on same Array?
+  # (*) Use "Grid" instead of "Array", and include type="amr" or type="array" ?
+  # (Breaks from convention of naming components by groups, but seems reasonable since
+  #  code design may not necessarily follow users view)
+
+  Array {name = "grid", size = [100], parallel=["omp"]}
+
+  Method {
+     solver = "ppm";
+     fields = {      
+        density      = "density";
+        total_energy = "total_energy";
+        velocity     = "velocity";
+     } 
+     parameters = {
+        gamma     = 1.4;
+        courant   = 0.8;
+        diffusion = false;
+     } 
+  }
+
+  Problem {
+
+     # Need to specify: problem domain, problem initial conditions, discretization, 
+     #  methods, stopping criteria
+
+     domain = "domain";
+     grid   = "grid";
+     method = ["ppm"];
+
+     initial = { field = "density";  value = [1.0, "left"]; value = [0.125, "right"] }
+     initial = { field = "pressure"; value = [1.0, "left"]; value = [0.1,   "right"] }
+
+     # ??? how to set total_energy = pressure / ((gamma - 1)*density + 0.5*velocity*velocity
+     #     hard-coded?
+
+     initial = { field = "velocity"; value = 0.0 }
+
+     boundary = { type = "reflecting" }
+
+     # stopping criteria: how general?  move to Control section?
+
+     stop_time = 0.251;       # Least general: "stop at 0.251"; also stop_cycle, stop_cycle_level = [level,num]
+     stop = (t >= 0.251)     # somewhat general: "stop when time t reaches 0.251"
+     stop = { time = 0.251 } # most general: "the stopping criteria are that the stopping time is 0.251"
+
+  }
+
