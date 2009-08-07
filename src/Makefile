@@ -45,7 +45,6 @@ all:       $(patsubst %,%-all,$(DIR))
 clean:     $(patsubst %,%-clean,$(DIR))
 %-clean:  %-DEP
 	-@rm -f *~
-	-@rm -rf html latex
 	$(MAKE) -C $* clean
 
 #-----------------------------------------------------------------------
