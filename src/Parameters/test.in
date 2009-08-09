@@ -58,6 +58,7 @@
      #     hard-coded?
 
      initial = { field = "velocity"; value = 0.0 }
+     initial = { field = "total_energy"; value = "pressure" / (("gamma" - 1)*"density" + 0.5*"velocity"*"velocity") }
 
      boundary = { type = "reflecting" }
 

@@ -18,7 +18,56 @@ E [Ee][+-]?{D}+
  * See CELLO_LICENSE in the main directory for full license agreement
  *
  */
+ int line_count = 0;
+
 %}
+
+/* double acos(double); */
+/* double acosh(double); */
+/* double asin(double); */
+/* double asinh(double); */
+/* double atan(double); */
+/* double atanh(double); */
+/* double cbrt(double); */
+/* double ceil(double); */
+/* double cos(double); */
+/* double cosh(double); */
+/* double erfc(double); */
+/* double erf(double); */
+/* double exp(double); */
+/* double expm1(double); */
+/* double fabs(double); */
+/* double floor(double); */
+/* double gamma(double); */
+/* double j0(double); */
+/* double j1(double); */
+/* double lgamma(double); */
+/* double log10(double); */
+/* double log1p(double); */
+/* double logb(double); */
+/* double log(double); */
+/* double sin(double); */
+/* double sinh(double); */
+/* double sqrt(double); */
+/* double tan(double); */
+/* double tanh(double); */
+/* double y0(double); */
+/* double y1(double); */
+/* int    ilogb(double); */
+/* int    isnan(double); */
+/* double rint(double); */
+/*  */
+/*  */
+/* double atan2(double, double); */
+/* double fmod(double, double); */
+/* double hypot(double, double); */
+/* double jn(int, double); */
+/* double ldexp(double, int); */
+/* double nextafter(double, double); */
+/* double pow(double, double); */
+/* double remainder(double, double); */
+/* double scalb(double, double); */
+/* double yn(int, double); */
 
 %%
 
@@ -50,7 +99,7 @@ true      { printf (" TRUE "); }
 "{"        { printf ("{"); } /* begin group */
 "}"        { printf ("}"); } /* end group ( and end assignment ) */
 ";"        { printf (";"); } /* end assignment */
-"#".*"\n"      { printf ("\n"); /* ignore comments */ }
+"#".*      { printf (""); /* ignore comments */ }
 
 [xyzt]             { printf (" CONSTANT "); }
 {D}+{E}*           { printf (" SCALAR "); }
@@ -60,9 +109,10 @@ true      { printf (" TRUE "); }
 \"(\\.|[^\\"])*\"   { printf (" STRING "); }
 
 [ ] { printf (" "); }
-^[ \t]*"\n" { printf (""); }
+^[ \t]* { printf (""); }
 
 [^ \v\f\t\n]  { /* ignore white space */ }
+\n { line_count++; printf ("\n"); }
 
 . { printf (""); }
 
