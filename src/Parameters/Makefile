@@ -44,9 +44,10 @@ INCLUDE = $(TOP)/include
 install-include:
 	ln -sf `pwd`/parameters.hpp               $(INCLUDE)
 
-parse: parse.l
-	flex -t parse.l > parse.c
-	gcc -o parse parse.c -ll
+parse: parse.y parse.l
+	bison -d parse.y 
+	flex parse.l
+	gcc -o parse parse.tab.c lex.yy.c -lfl
 
 #=======================================================================
 # INCLUDES 

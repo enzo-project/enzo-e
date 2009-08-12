@@ -18,7 +18,11 @@ E [Ee][+-]?{D}+
  * See CELLO_LICENSE in the main directory for full license agreement
  *
  */
- int line_count = 0;
+
+#include "parse.tab.h"
+
+ int    line_count = 0;
+ double scalar_value = 0;
 
 %}
 
@@ -71,54 +75,50 @@ E [Ee][+-]?{D}+
 
 %%
 
-false     { printf (" FALSE "); } 
-true      { printf (" TRUE "); } 
-{LU}{L}+  { printf (" GROUP "); }  /*  NAME_GROUP */
-{LL}{L}+  { printf (" PARAMETER "); } /* PARAMETER_NAME */
+false     { return FALSE; } 
+true      { return TRUE; } 
+{LU}{L}+  { return GROUP; }  /*  NAME_GROUP */
+{LL}{L}+  { return PARAMETER; } /* PARAMETER_NAME */
 
-"="        { printf ("="); }         /* = */
+"="        { return '='; }         /* = */
 
-"*"        { printf ("*"); }
-"/"        { printf ("/"); }
-"+"        { printf ("+"); }
-"-"        { printf ("-"); }
+"*"        { return '*'; }
+"/"        { return '/'; }
+"+"        { return '+'; }
+"-"        { return '-'; }
 
-"<"        { printf ("<"); }         /* = */
-">"        { printf (">"); }
-"<="        { printf ("LE"); }
-">="        { printf ("GE"); }
-"=="        { printf ("EQ"); }
-"!="        { printf ("NE"); }
-"&&"        { printf ("AND"); }
-"||"        { printf ("OR"); }
-"("          { printf ("("); }
-")"          { printf (")"); }
+"<"        { return '<'; }         /* = */
+">"        { return '>'; }
+"<="        { return LE; }
+">="        { return GE; }
+"=="        { return EQ; }
+"!="        { return NE; }
+"&&"        { return AND; }
+"||"        { return OR; }
+"("          { return '('; }
+")"          { return ')'; }
 
-"["        { printf ("["); } /* begin list */
-"]"        { printf ("]"); } /* end list */
-"{"        { printf ("{"); } /* begin group */
-"}"        { printf ("}"); } /* end group ( and end assignment ) */
-";"        { printf (";"); } /* end assignment */
-"#".*      { printf (""); /* ignore comments */ }
+"["        { return '['; } /* begin list */
+"]"        { return ']'; } /* end list */
+"{"        { return '{'; } /* begin group */
+"}"        { return '}'; } /* end group ( and end assignment ) */
+";"        { return ';'; } /* end assignment */
+"#".*      {  /* ignore comments */ }
 
-[xyzt]             { printf (" CONSTANT "); }
-{D}+{E}*           { printf (" SCALAR "); }
-{D}*"."{D}+({E})?  { printf (" SCALAR "); }
-{D}+"."{D}*({E})?  { printf (" SCALAR "); }
+[xyzt]             { return CONSTANT; }
+{D}+{E}*           { scalar_value = atof (yytext); return SCALAR; }
+{D}*"."{D}+({E})?  { scalar_value = atof (yytext); return SCALAR; }
+{D}+"."{D}*({E})?  { scalar_value = atof (yytext); return SCALAR; }
 
-\"(\\.|[^\\"])*\"   { printf (" STRING "); }
+\"(\\.|[^\\"])*\"   { return STRING; }
 
-[ ] { printf (" "); }
-^[ \t]* { printf (""); }
+[ ] {  }
+^[ \t]* {  }
 
 [^ \v\f\t\n]  { /* ignore white space */ }
-\n { line_count++; printf ("\n"); }
+\n { line_count++; }
 
-. { printf (""); }
+. {  }
 
 %%
 
-main()
-{
-    yylex() ;
-}
