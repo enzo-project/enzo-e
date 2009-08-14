@@ -21,56 +21,63 @@ E [Ee][+-]?{D}+
 
 #include "parse.tab.h"
 
- int    line_count = 0;
  double scalar_value = 0;
 
 %}
 
-/* double acos(double); */
-/* double acosh(double); */
-/* double asin(double); */
-/* double asinh(double); */
-/* double atan(double); */
-/* double atanh(double); */
-/* double cbrt(double); */
-/* double ceil(double); */
-/* double cos(double); */
-/* double cosh(double); */
-/* double erfc(double); */
-/* double erf(double); */
-/* double exp(double); */
-/* double expm1(double); */
-/* double fabs(double); */
-/* double floor(double); */
-/* double gamma(double); */
-/* double j0(double); */
-/* double j1(double); */
-/* double lgamma(double); */
-/* double log10(double); */
-/* double log1p(double); */
-/* double logb(double); */
-/* double log(double); */
-/* double sin(double); */
-/* double sinh(double); */
-/* double sqrt(double); */
-/* double tan(double); */
-/* double tanh(double); */
-/* double y0(double); */
-/* double y1(double); */
+/* double foo (double) */
+
+acos   { return ACOS; }
+acosh  { return ACOSH; }
+asin   { return ASIN; }
+asinh  { return ASINH; }
+atan   { return ATAN; }
+atanh  { return ATANH; }
+cbrt   { return CBRT; }
+ceil   { return CEIL; }
+cos    { return COS; }
+cosh   { return COSH; }
+erfc   { return ERFC; }
+erf    { return ERF; }
+exp    { return EXP; }
+expm1  { return EXPM1; }
+fabs   { return FABS; }
+floor  { return FLOOR; }
+gamma  { return GAMMA; }
+j0     { return J0; }
+j1     { return J1; }
+lgamma { return LGAMMA; }
+log10  { return LOG10; }
+log1p  { return LOG1P; }
+logb   { return LOGB; }
+log    { return LOG; }
+sin    { return SIN; }
+sinh   { return SINH; }
+sqrt   { return SQRT; }
+tan    { return TAN; }
+tanh   { return TANH; }
+y0     { return Y0; }
+y1     { return Y1; }
+rint   { return RINT; }
+
+/* int foo (double) */
+
 /* int    ilogb(double); */
 /* int    isnan(double); */
-/* double rint(double); */
+
 /*  */
-/*  */
-/* double atan2(double, double); */
-/* double fmod(double, double); */
-/* double hypot(double, double); */
+/* double foo (double,double) */
+
+atan2     { return ATAN2; }
+fmod      { return FMOD; }
+hypot     { return HYPOT; }
+nextafter { return NEXTAFTER; }
+pow       { return POW; }
+remainder { return REMAINDER; }
+scalb     { return SCALB; }
+
 /* double jn(int, double); */
 /* double ldexp(double, int); */
-/* double nextafter(double, double); */
-/* double pow(double, double); */
-/* double remainder(double, double); */
-/* double scalb(double, double); */
 /* double yn(int, double); */
 
 %%
@@ -116,7 +123,7 @@ true      { return TRUE; }
 ^[ \t]* {  }
 
 [^ \v\f\t\n]  { /* ignore white space */ }
-\n { line_count++; }
+\n { yylineno++; }
 
 . {  }
 
