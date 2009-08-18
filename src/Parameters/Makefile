@@ -19,14 +19,16 @@ OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================
 
 .PHONY: all
-all: $(OBJS)
+all: $(OBJS) tests
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
 	-@rm *.o *~ out.make.dep Makefile.bak *.unit
-	-@rm parse parse.c
+	-@rm parse parse.c *.out parse.tab.? lex.yy.c
+
+
 
 
 #-----------------------------------------------------------------------
@@ -49,8 +51,15 @@ parse: parse.y parse.l
 	flex parse.l
 	gcc -o parse parse.tab.c lex.yy.c -lfl
 
+tests: parse
+	-parse <	test.in         >& test.out
+	-parse < test_list.in    >& test_list.out
+	-parse < test_logical.in >& test_logical.out
+	-parse < test_scalar.in  >& test_scalar.out
+	-grep -i -l error *.out
+
 #=======================================================================
-# INCLUDES 
+#	INCLUDES 
 #=======================================================================
 
 include DEPEND

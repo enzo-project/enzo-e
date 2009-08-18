@@ -82,8 +82,8 @@ scalb     { return SCALB; }
 
 %%
 
-false     { return FALSE; } 
-true      { return TRUE; } 
+false     { return LOGICAL; } 
+true      { return LOGICAL; } 
 {LU}{L}+  { return GROUP; }  /*  NAME_GROUP */
 {LL}{L}+  { return PARAMETER; } /* PARAMETER_NAME */
 
@@ -109,7 +109,8 @@ true      { return TRUE; }
 "]"        { return ']'; } /* end list */
 "{"        { return '{'; } /* begin group */
 "}"        { return '}'; } /* end group ( and end assignment ) */
-";"        { return ';'; } /* end assignment */
+";"        { return ';'; } /* parameter assignment separator */
+","        { return ','; } /* list element separator */
 "#".*      {  /* ignore comments */ }
 
 [xyzt]             { return CONSTANT; }
@@ -123,7 +124,7 @@ true      { return TRUE; }
 ^[ \t]* {  }
 
 [^ \v\f\t\n]  { /* ignore white space */ }
-\n { yylineno++; }
+\n { yylineno++; printf ("Line %d\n",yylineno); }
 
 . {  }
 

@@ -1,0 +1,3 @@
+Group { parameter = 1.6 }
+Group { parameter = 1.3 + 2.7e16 }
+Group { parameter = 15*8 + 7*8 }

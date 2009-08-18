@@ -1,27 +1,44 @@
 %{
 #include <stdio.h>
 #include "parse.tab.h"
+  int yydebug;
+#define YYDEBUG 1
 %}
 
 %token GROUP
 %token PARAMETER
 
+/* %union {int logical_type; double scalar_type; char string_type[100];} */
+
+%token LOGICAL
 %token SCALAR
 %token STRING
+
+/* %token <logical_type> LOGICAL */
+/* %token <scalar_type> SCALAR */
+/* %token <string_type> STRING */
+/* %type <scalar_type> scalar_expression */
+/* %type <logical_type> logical */
+
 %token CONSTANT
 %token LIST_BEGIN
 %token LIST_END
 %token GROUP_BEGIN
 %token GROUP_END
 
-%token TRUE
-%token FALSE
 %token LE
 %token GE
 %token NE
 %token EQ
 %token AND
 %token OR
+
+%left OR
+%left AND
+%left EQ NE 
+%left  LE GE '<' '>'
+%left '+' '-'
+%left '*' '/'
 
 /* double foo (double) */
 
@@ -81,49 +98,78 @@
 %%
 
 file : /* nothing */
- | file group { printf ("file group EOF\n") }
+ | file named_group { }
  ;
 
-group : group_name '{' parameter_list '}' 
- { printf ("group { ... }\n"); }
+named_group: group_name group { }
+;
+
+group :  '{' parameter_list '}' 
+ {  }
  ;
 
-group_name : GROUP 
-{ printf ("group_name\n"); }
- ;
-
-parameter_list : /* nothing */
- | parameter_list parameter_assignment ';'
-{ printf ("parameter_list\n") }
+parameter_list : 
+   parameter_assignment 
+ | parameter_assignment  ';' parameter_list
+{  }
  ;
 
 parameter_assignment : parameter_name '=' parameter_value
-  { printf ("parameter_assignment\n"); }
+  {  }
  ;
 
 parameter_name : PARAMETER 
-   { printf ("parameter_name\n"); }
+   {  }
  ;
 
-parameter_value : STRING | scalar_expression
-{ printf ("parameter_value\n"); }
+parameter_value : STRING | scalar_expression | logical | list | group
+{  }
 ;
 
-scalar_expression: scalar_factor
- | scalar_expression '+' scalar_factor { printf (" + \n"); }
- | scalar_expression '-' scalar_factor { printf (" - \n"); }
+list: '[' list_elements ']'
+
+
+list_elements:
+  parameter_value 
+| parameter_value ',' list_elements
+{ }
+;
+
+/* logical_expression: '(' logical ')' */
+/*  { } */
+
+logical: 
+ '(' logical ')' { }
+ | scalar_expression LE scalar_expression { }
+ | scalar_expression GE scalar_expression { }
+ | scalar_expression '<' scalar_expression { }
+ | scalar_expression '>' scalar_expression { }
+ | scalar_expression EQ scalar_expression { }
+ | scalar_expression NE scalar_expression { }
+ | logical OR logical {  }
+ | logical AND logical {  }
+ | LOGICAL { }
+;
+
+group_name : GROUP 
+{  }
  ;
 
-scalar_factor: scalar_term
- | scalar_factor      '*' scalar_term   { printf (" *\n"); }
- | scalar_factor      '/' scalar_term   { printf (" /\n"); }
+
+scalar_expression: 
+   scalar_expression '+' scalar_expression {  }
+ | scalar_expression '-' scalar_expression {  }
+ | scalar_expression '*' scalar_expression {  }
+ | scalar_expression '/' scalar_expression {  }
+ | SCALAR { }
+ | CONSTANT { }
  ;
 
-scalar_term: SCALAR { printf ("SCALAR\n"); };
 
 %%
 main(int argc, char **argv)
 {
+  yydebug=1;
   yyparse();
 }
 
