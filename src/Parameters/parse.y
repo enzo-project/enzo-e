@@ -1,24 +1,20 @@
 %{
 #include <stdio.h>
 #include "parse.tab.h"
-  int yydebug;
-#define YYDEBUG 1
+  /*  int yydebug;     */
+  /* #define YYDEBUG 1 */
 %}
 
 %token GROUP
 %token PARAMETER
 
-/* %union {int logical_type; double scalar_type; char string_type[100];} */
+%union {int logical_type; double scalar_type; char string_type[100];}
 
-%token LOGICAL
-%token SCALAR
-%token STRING
-
-/* %token <logical_type> LOGICAL */
-/* %token <scalar_type> SCALAR */
-/* %token <string_type> STRING */
-/* %type <scalar_type> scalar_expression */
-/* %type <logical_type> logical */
+%token <string_type> STRING
+%token <scalar_type> SCALAR
+%token <logical_type> LOGICAL
+%type <scalar_type>  scalar_expression
+%type <logical_type> logical_expression
 
 %token CONSTANT
 %token LIST_BEGIN
@@ -122,7 +118,7 @@ parameter_name : PARAMETER
    {  }
  ;
 
-parameter_value : STRING | scalar_expression | logical | list | group
+parameter_value : STRING | scalar_expression | logical_expression | list | group
 {  }
 ;
 
@@ -135,19 +131,16 @@ list_elements:
 { }
 ;
 
-/* logical_expression: '(' logical ')' */
-/*  { } */
-
-logical: 
- '(' logical ')' { }
- | scalar_expression LE scalar_expression { }
- | scalar_expression GE scalar_expression { }
- | scalar_expression '<' scalar_expression { }
- | scalar_expression '>' scalar_expression { }
- | scalar_expression EQ scalar_expression { }
- | scalar_expression NE scalar_expression { }
- | logical OR logical {  }
- | logical AND logical {  }
+logical_expression: 
+ '(' logical_expression ')' { }
+ | scalar_expression  LE scalar_expression { }
+ | scalar_expression  GE scalar_expression { }
+ | scalar_expression  '<' scalar_expression { }
+ | scalar_expression  '>' scalar_expression { }
+ | scalar_expression  EQ scalar_expression { }
+ | scalar_expression  NE scalar_expression { }
+ | logical_expression OR logical_expression {  }
+ | logical_expression AND logical_expression {  }
  | LOGICAL { }
 ;
 
@@ -157,7 +150,8 @@ group_name : GROUP
 
 
 scalar_expression: 
-   scalar_expression '+' scalar_expression {  }
+  '(' scalar_expression ')' { }
+ | scalar_expression '+' scalar_expression {  }
  | scalar_expression '-' scalar_expression {  }
  | scalar_expression '*' scalar_expression {  }
  | scalar_expression '/' scalar_expression {  }
@@ -169,7 +163,7 @@ scalar_expression:
 %%
 main(int argc, char **argv)
 {
-  yydebug=1;
+  /*  yydebug=1; */
   yyparse();
 }
 

@@ -124,7 +124,7 @@ true      { return LOGICAL; }
 ^[ \t]* {  }
 
 [^ \v\f\t\n]  { /* ignore white space */ }
-\n { yylineno++; printf ("Line %d\n",yylineno); }
+\n { printf ("Line %d\n",yylineno); yylineno++; }
 
 . {  }
 

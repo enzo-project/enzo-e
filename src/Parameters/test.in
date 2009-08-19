@@ -17,9 +17,9 @@
   # ? how to simplify boxes ? type = box([0,1]) ?  (*) removing "restrict" defaults to bounding box ?
   # rank determined by bound?  what if bound and rank differ?
 
-  Region {name = "domain"; rank = 1; bound = [0.0, 1.0]; restrict = (0.0 < x && x < 1.0) }
-  Region {name = "left";             bound = [0.0, 0.5]; restrict = (x <= 0.5) }  
-  Region {name = "right";            bound = [0.5, 1.0]; restrict = (x >  0.5) }  
+  Region {name = "domain"; rank = 1; bound = [0.0, 1.0]; restrict = 0.0 < x && x < 1.0 }
+  Region {name = "left";             bound = [0.0, 0.5]; restrict = x <= 0.5 }  
+  Region {name = "right";            bound = [0.5, 1.0]; restrict = x >  0.5 }  
 
   # parallel should go in Parallel section?  Assume all fields defined on same Array?
   # (*) Use "Grid" instead of "Array", and include type="amr" or type="array" ?

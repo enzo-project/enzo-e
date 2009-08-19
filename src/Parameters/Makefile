@@ -52,7 +52,7 @@ parse: parse.y parse.l
 	gcc -o parse parse.tab.c lex.yy.c -lfl
 
 tests: parse
-	-parse <	test.in         >& test.out
+	-parse < test.in         >& test.out
 	-parse < test_list.in    >& test_list.out
 	-parse < test_logical.in >& test_logical.out
 	-parse < test_scalar.in  >& test_scalar.out
