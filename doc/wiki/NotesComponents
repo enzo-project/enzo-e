@@ -1,0 +1,34 @@
+= Cello Software Components =
+
+[[Image(htdocs:components.png)]]
+
+Below is the definitive list of Cello components (verified match with SVN doc/design revision 439 on 2008-12-19)
+
+||( )|| [NotesComponentAmr           Amr] || Adaptive mesh refinement infrastructure, built on top of `Array` || 
+|| ( ) || [NotesComponentArray       Array] || Fortran-like array, which may be parallelized or vectorized in various ways || 
+|| ( ) || [NotesComponentControl     Control] || Orchestrate the advancement of a `Simulation` in time ||
+|| ( ) || [NotesComponentDisk        Disk] || Provide functions for managing long-term data storage on disks || 
+|| ( ) || [NotesComponentError       Error] || Error prevention (including check-pointing), error detection and recovery || 
+|| ( ) || [NotesComponentField       Field] || Scalar or vector fields on an `Array` or `Amr` hierarchy ||
+|| ( ) || [NotesComponentMemory      Memory] || Manage dynamic memory allocation and deallocation ||
+|| ( ) || [NotesComponentMethod      Method] || Modularized hyperbolic, elliptic, or local physics algorithms; also analysis and visualization ||
+|| ( ) || [NotesComponentMonitor     Monitor] || User interface to monitor the status of a running simulation ||
+|| ( ) || [NotesComponentParallel    Parallel] || Functions for controlling various parallelization and vectorization strategies ||
+|| ( ) || [NotesComponentParameters  Parameters] || Input, parse, store, and access run-time parameters ||
+|| ( ) || [NotesComponentParticles   Particles] || Efficiently represent groups of distributed particles ||
+|| ( ) || [NotesComponentPerformance Performance] || Measure, and provide functions to access, run-time performance ||
+|| ( ) || [NotesComponentPortal      Portal] || Input from users or other applications to query and direct the `Simulation` ||
+|| ( ) || [NotesComponentProblem     Problem] || Defines the problem, including physics, discretization, boundary and initial conditions ||
+|| ( ) || [NotesComponentRegion      Region] || A parameterized region of space time, used for defining initial and boundary conditions ||
+|| ( ) || [NotesComponentSimulation  Simulation] || Defines a `Problem` or ensemble of `Problem`'s to run ||
+
+
+Code for components are organized into separate directories.
+
+== Software Component Dependencies ==
+
+Software components necessarily depend on one another, but their dependencies should be well-defined and kept minimal.  There should be no loops in the dependency graph.  Dependencies are represented in the code using "#include" statements.
+
+=== Component Depends On ===
+
+=== Component Depended On By ===

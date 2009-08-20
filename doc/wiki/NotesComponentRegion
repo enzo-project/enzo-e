@@ -1,0 +1,9 @@
+([NotesComponentProblem Problem] < [NotesComponents index] > [NotesComponentSimulation Simulation])
+
+= Region Component =
+
+  A `Region` is a parameterized subset of space (`x`,`y`,`z`) and time (`t`).
+  `Region`s are used whenever problem characteristics, data structure behavior, or physics computations vary between different spacial or temporal regions.  A `Region` is used to define the entire domain, and may be used to define initial conditions.  Complex `Region`s can be defined using set operations (e.g. union A + B, intersection A*B , complement -A, and set difference A \ B) on predefined elemental `Region`s (e.g. half-spaces, spheres, and cubes).
+
+
+([NotesComponentProblem Problem] < [NotesComponents index] > [NotesComponentSimulation Simulation])

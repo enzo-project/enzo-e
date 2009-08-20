@@ -1,0 +1,12 @@
+([NotesComponentField Field] < [NotesComponents index] > [NotesComponentMethod Method])
+
+= Memory Component =
+
+[[TOC]]
+
+|| ( ) || `Memory::allocate()` || ''Allocate memory'' ||
+|| ( ) ||  `Memory::deallocate()` || ''De-allocate memory'' ||
+|| ( ) ||  `Memory::current()` || ''Current number of bytes allocated'' ||
+|| ( ) ||  `Memory::highest()` || ''Maximum number of bytes allocated'' ||
+
+([NotesComponentField Field] < [NotesComponents index] > [NotesComponentMethod Method])

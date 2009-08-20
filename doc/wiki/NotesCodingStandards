@@ -1,0 +1,100 @@
+= Cello Coding Standards =
+
+[[TOC]]
+
+== General Guidelines ==
+
+ * Avoid repetition
+ * Write code for humans first, computers second
+ * Prefer stringent code to lenient code (e.g. `const int` instead of `const`)
+ * Avoid repetition
+
+== Components ==
+
+ * Component names are CamelCase, preferably a single word, e.g. `Amr`, `Disk`, `Error`
+ * There is exactly one subdirectory in the source tree for each component
+ * Each component subdirectory `foo/` contains a `foo.dir` file: see `TEMPLATE/TEMPLATE.dir` for format
+ * Components consist of one or more classes
+ * Components should not overlap functionality
+ * Dependencies between components should be minimized
+ * There must be no dependency loops between components
+ * If one component `foo1` depends on another component `foo2`, then (and only then) `foo1/*.cpp` files may include the `foo2.h` component header file
+
+== Classes ==
+
+ * Class names are CamelCase, e.g. `ArrayBlocked`, `Amr`
+ * Class header files for class `Foo` are in `foo.hpp`
+ * Class function implementations are in `foo.cpp`
+ * Inheritance is used to model "is-a" relationships, e.g. `ArrayBlocked` "is-a" `Array`
+ * Composition is used to model "has-a" relationships, e.g. `Hierarchy` "has-a" `Level`
+ * Composition is generally preferred to inheritance
+ * Begin iterator class names with `It`, as in `ItLevelGridsAll`
+ 
+== Functions ==
+
+ * Write all functions as pseudo-code first, then convert pseudo-code to comments
+ * All functions should be associated with a class
+ * Function names are short but descriptive
+ * Function names are all lower-case, and may contain underscores
+ * Public functions in a class should be minimal, no more than about a dozen per class
+ * Public functions in a class must not expose the underlying data-structures
+ * Private functions end in an underscore `foo_()` to easily identify them
+
+== Variables ==
+
+ * All variables should be associated with a class
+ * All variables should be private
+ * Variable names are short but descriptive
+ * Variable names are all lower-case, and may contain underscores
+ * Private variables end in an underscore `foo_` to easily identify them
+
+== Files ==
+
+ * Code and comments should be formatted to fit in 80 columns
+ * C++ code is contained in `*.cpp` files
+ * C++ headers are contained in `*.hpp` files
+ * C code is contained in `*.c` files
+ * C headers are contained in `*.h` files
+ * Each component `Foo` provides a single public header file `foo.hpp`
+ * All other header files in a component are private to the component, and end in an underscore `foo_.hpp` to easily identify them
+ * A header file can include another header file only if it is a public component header file
+ * Only component header files can include other header files
+
+== Code ==
+
+ * When evaluating polynomials or polynomial-like expressions, e.g. "`a0 + a1*x1 + a2*x2*x1 + a3*x3*x2*x1`..." for index computations, compute it as "`a0 + x1*(a1 + x2*(a2 + ...))`"
+ * For simple calculations that are ubiquitous (e.g. index calculations), use `cpp` macros or inline functions
+ * Use "`bool`" for variables that are "`true`" or "`false`", and name as "`isFoo`"
+ * Simplify boolean expressions; e.g. use "`if (isFoo)`" instead of "`if (isFoo == true)`", and "`isFoo = foo == blah`" instead of "`isFoo = (foo == blah) ? true : false`"
+ * Don't use embedded constants except for 0 or 1
+ * Use "`enum`" for related constants, e.g. "`const enum field_type {field_type_unknown, field_type_density, field_type_total_energy, ...}`"
+  
+== Error Handling ==
+
+== Examples ==
+
+{{{
+#!cpp
+
+  // For each level in the hierarchy...
+
+  ItHierarchyLevels itl (*hierarchy);
+
+  while (Level * level = itl++) {
+
+    // For each local grid patch in the level...
+
+    ItLevelGridsLocal itgl (*level);
+
+    while (Grid * grid = itgl++) {
+
+       // Advance the hydro one timestep
+
+       Method ppm;
+
+       ppm.apply (*grid, dt);
+    }
+  }
+
+}}}
+

@@ -1,0 +1,25 @@
+ = Enzo Test Problems =
+
+== Sod Shock Tube ==
+http://en.wikipedia.org/wiki/Shock_tube
+[[Image(http://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Shock_tube.png/800px-Shock_tube.png)]]
+
+{{{
+  int ShockTubeDirection = 0;      // x direction
+  float ShockTubeBoundary = 0.5;     //
+ 
+  ShockTubeDensity[0]  = 1.0;  // This is the classic Sod Shock tube problem
+  ShockTubePressure[0] = 1.0;
+  ShockTubeVelocity[0] = 0.0;
+ 
+  ShockTubeDensity[1]  = 0.125;
+  ShockTubePressure[1] = 0.1;
+  ShockTubeVelocity[1] = 0.0;
+}}}
+
+== Shock Pool ==
+== Wave Pool ==
+== Noh Problem ==
+== Zeldovich Pancake ==
+== Protostellar Collapse ==
+== Cosmology Simulation ==

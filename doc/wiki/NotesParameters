@@ -1,0 +1,447 @@
+= Cello Parameters =
+
+[[TOC]]
+
+This page is for developing the syntax and scope of parameters for Cello.
+
+For comparison with Enzo parameters, here is a review of ''all'' [NotesParametersEnzo Enzo Parameters] (both documented and undocumented) performed on May 2009 with code revision 2318.
+
+----
+
+= Syntax and Grammar =
+
+Whereas Enzo uses a flat parameter list with relatively simple data types, it is expected that Cello will use a more "hierarchical" parameter list and allow more complex data types.  The rationale is that the power of the application is limited by the expressiveness of its input; conversely, a rich and powerful input language can allow the application itself to be more powerful.  Flat lists of parameters with simple types are either limited if they are short, or difficult to read and write if they are long.
+
+== Preprocessing ==
+
+==== `#include` ====
+
+The `#include` preprocessor directive is used to include other parameter declarations from other files.  For example, you can have a file of parameters for AMR that is maintained separately from problem specific declarations:
+
+{{{
+#include "amr.cello"
+#include "problem.cello"
+}}}
+
+The advantage of using `#include` is that repetition between different parameter files can be kept to a minimum.  The disadvantage is that the parameters can be spread out among different files.  Cello should thus output a single uniform input file, as Enzo does for restarts.
+
+==== #define ====
+
+The `#define` preprocessing directive is used for macro definitions of frequently used objects, or
+to define constants that are used in multiple places in one place so that they can be modified easily. 
+
+{{{
+#define SPHERE(NAME,XP,YP,ZP,RADIUS) \
+     Region { \
+       name=NAME; \
+       type="sphere"; \
+       position = [XP,YP,ZP]; \
+       radius = RADIUS; \
+     }
+
+SPHERE("left-sphere", -1.0, 0.0, 0.0, 1.0)
+SPHERE("right-sphere", 1.0, 0.0, 0.0, 1.0)
+}}}
+
+==== Comments ====
+
+Comments begin with `#` and extend to the end of the line.
+
+== Basic types and operations ==
+
+==== Groups ====
+
+A group is a collection of related parameters: 
+
+|| `<group> ::=  "{" <parameter-assignment-list> "}"` ||
+
+Each group has a unique name, and is either specified by the "name" parameter in the group's parameter list,
+or by the group name if the "name" parameter is unspecified and the group-name is unique. 
+
+Top-level groups are associated with Cello components, which are capitalized:  
+
+|| `<named-group> ::= <component-name> <group>` ||
+
+Lower-level groups are treated as a composite variable type, and are assigned to variables.
+
+==== Parameter ====
+
+A parameter is a variable associated with a group.  A parameter assignment is the assignment of a value to a parameter.  All parameters are associated with a group.  The scope of a parameter is its enclosing group. Parameters may have default values, may be optional or required, and may have various types, such as list, scalar, logical expression, etc., described below.
+
+|| `<parameter-assignment> ::= <parameter-name> '=' <value>` ||
+
+
+==== Parameter assignment list ====
+
+A parameter assignment list is a (possibly empty) list of assignments to parameters.  White space is ignored.  
+
+|| `<parameter-assignment-list> ::= <parameter-assignment> | <parameter-assignment-list> <separator> <parameter-assignment>` ||
+
+The `<separator>` is one or more semi-colons or newline.
+
+==== Parameter types ====
+
+Parameters can be assigned different types, depending on the parameter name and the group the parameter belongs to.
+
+ || '''Basic Types''' || '''Examples''' ||
+ || || ||
+ ||scalar    || `6.673e-8` ||
+ ||string   || `"velocity-x"` ||
+ ||constant   || `x`, `y`, `z`, or `t` ||
+ || || ||
+ || '''Expression Types''' || '''Examples''' ||
+ || || ||
+ ||numerical expression ||  `2.0*sin(x) + cos(y)` ||
+ ||logical expression    || `(x < y) || (y < z)` ||
+ || || ||
+ || '''Composite Types''' || '''Examples''' ||
+ || || ||
+ ||list       || `[ "velocity-x", 3.14, x < y ]` ||
+ ||group      || `{ density = "D", velocity = "V" }` ||
+
+
+|| `<value> ::= <value-scalar> | <value-string> | <value-constant> | <value-numerical> | <value-logical> | <value-list> | <value-group>` ||
+
+Basic '''Scalar''' types are any floating point or integral numerical values.
+
+Basic '''String''' types are enclosed in double-quotes.
+
+Basic '''Constants''' represent the position in space (`x`, `y`, and `z`) and time (`t`). ''[Units are to be determined.  Capital constants `X`,`Y`,`Z`,`T` may have similar meaning but with different units, e.g. lower-case may be problem domain but upper-case  solution domain.]''
+
+'''Numerical expressions''' are any "C-like" expression evaluating to a `Scalar`, and involving `Scalar`'s, `Constant`'s, operations `+` `-` `*` `/`, and standard functions in `math.h`.  Numerical expressions are used for specifying time-varying boundary conditions, etc.
+
+'''Logical expressions''' are any "C-like" expressions that evaluate to "true" or "false", and involve `Scalar`'s, `Constant`'s, and at least one relational operator `==` `!=` `>` `<` `<=` `>=`.  Logical expressions are used for defining `Region`'s.
+
+'' '''Set expressions''' are operations on existing named regions, and involving set operations
+`-` `+` `*`, and at least one `String` value representing the name of a `Region`.  Set expressions are primarily used for defining a `Region`'s using existing ones.''
+
+'''Lists''' represent an ordered sequence of values of types except other lists, separated by commas.
+
+'''Groups''' represent a sequence of parameter assignments, separated by semi-colons.  The group type in an assignment is typically used for assigning named `Fields` and named parameters for a `Method`.
+
+== Parameters by Component ==
+
+Since each [NotesComponents Component] may have various parameters associated with it, this is one way to organize parameters.  There may be parameters not associated with any component, or parameters associated with multiple components, so this may not necessarily be the only organization approach; but it's a good place to start.  Also, many parameters may not be decided on until the component is well into the design phase, since they may not be known to be needed until later.
+
+=== [NotesComponentAmr Amr] ===
+
+==== Scope ====
+
+`Amr` parameters specify the following:
+
+ * Class of AMR to use, either octree-like or structured AMR
+ * Size of the initial root grid
+ * Refinement amount (r=2, 3, 4, etc.)
+ * Whether to fill-in between levels for r =4, 8, etc.
+ * Any regions of initial refinement, specified by `Region`s (index region?)
+  * Whether initial refinement regions are fixed
+  * Refinement depth of regions
+ * Whether to use only square refinement patches, or allow rectangular
+ * List of allowable `Array` configurations, e.g. 4^3^, etc.
+
+==== Examples ====
+
+{{{
+   Amr {
+      name   = "AMR"         # name used in Problem, with "Amr" default
+      class  = "subdivide"   # or "structured"
+      refine = 4             # for 8-tree, 27-tree, 64-tree, etc.
+      fill   = true          # for class==subdivide: whether to fill in between levels
+      root   = [64 64 64]    # size of the root level
+   }
+}}}
+
+==== Parameters ====
+ || Parameter || Type || Description ||
+=== [NotesComponentArray Array] ===
+
+==== Scope ====
+
+`Array` parameters specify the following:
+
+ * Name of the `Array`, to specify in `Problem` or `Amr`
+ * Size of the `Array`
+ * Parallelization of the `Array`, e.g. MPI-1, MPI-2, OMP
+ * Blocking of the `Array` for cache
+
+==== Examples ====
+
+{{{
+   Array {name = "grid", size = [64]}
+}}}
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+ || `name`     || string || name of the array ||
+ || `size`     || list || size of each array dimension, e.g. `[4,4,4]` ||
+
+=== [NotesComponentControl Control] ===
+
+==== Scope ====
+
+`Control` parameters specify the following:
+
+ * How to advance the simulation, e.g. CHARM++, static, dynamic, etc.
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentDisk Disk] ===
+
+==== Scope ====
+
+`Disk` parameters specify the following:
+
+ * Serial or parallel hdf5
+ * Specified subdirectories for files
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentError Error] ===
+
+==== Scope ====
+
+`Error` parameters specify the following:
+
+ * How to checkpoint, e.g. dump files, save to other processors, etc.
+ * How to detect node, core, disk, etc. failure and what to do about it
+ * Examples of "what to do about it":
+  * send an e-mail or IM and wait for user intervention via `Portal`
+  * wait a certain period then give up
+  * restart immediately from latest checkpoint on reconfigured machine
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentField Field] ===
+
+==== Scope ====
+
+`Field` parameters specify the following:
+
+ * Name of the field
+ * Where in a cell the associated variable is stored
+  * `[0,0,0]` for center, `[-1,0,0]` for lower x-axis face, etc.
+  * maybe interior, e.g. `[0.5,0.5,-0.5]`
+
+==== Examples ====
+
+{{{
+    Field {
+        name     = "density"
+        location = center
+    }
+}}}
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+ || `name`    || string || Unique identifier for the `Field` ||
+ || `location` || list || Position -1 <= [x,y,z] <= 1 within a cell of the unknown ||
+ || `floor`    || scalar || Minimum allowed value for the field ||
+ || `ceiling`  || scalar || Maximum allowed value for the field ||
+
+=== [NotesComponentMemory Memory] ===
+
+==== Scope ====
+
+`Memory` parameters specify the following:
+
+ * What error-checking to do
+  * fill new memory with bit field
+  * monitor memory allocation
+ * whether to free deallocated space or reuse
+ * when to alert `Monitor` or Error` component that memory is low
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentMethod Method] ===
+
+==== Scope ====
+
+`Method` parameters specify the following:
+
+ * Name of the method for referencing in `Problem`, default is method name
+ * The algorithm
+ * Type of solver, e.g. radiation, chemistry, hydro, etc.  
+  * More for checking and self-documenting parameter file
+  * May be a list, e.g. for ppml ["hydro", "mhd"]
+ * List of method-specific arguments
+  * `Field`'s by name
+  * `Field`'s by class
+  * Default is field name, e.g. default for density is "density"
+ * List of method-specific parameters
+
+==== Examples ====
+
+{{{
+     Method {
+        solver    = "ppm"
+        type      = "hydro"
+        arguments {
+           # Each method argument has a name: map them to fields
+           density    = "density"  # this is the default
+           # use a list to represent vector fields; this is also the default
+           velocity   = [ "velocity-x", "velocity-y", "velocity-z" ]
+           # list of remaining fields to advect.  Default is all others.
+           advect     = [ ... ]
+           # list of fields not to advect.  Only one of advect or ignore can be specified
+           ignore     = [ ... ]
+        }
+        parameters {
+           flattening = ...
+           diffusion  = ...
+           steepening = ...
+        }
+      }
+}}}
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentMonitor Monitor] ===
+
+==== Scope ====
+
+`Monitor` parameters specify the following:
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+
+=== [NotesComponentParallel Parallel] ===
+
+==== Scope ====
+
+`Parallel` parameters specify the following:
+
+ * What approach(es) to parallelism to allow:
+  * MPI-1 send/receive
+  * MPI-2 get/put
+  * OpenMP
+  * UPC
+ * Approach-specific parameters
+  * MPI-1 send/receive types, etc.
+  * OpenMP static or dynamic loop scheduling, etc.
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentParticles Particles] ===
+
+==== Scope ====
+
+`Particles` parameters specify the following:
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentPerformance Performance] ===
+
+==== Scope ====
+
+`Performance` parameters specify the following:
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentPortal Portal] ===
+
+==== Scope ====
+
+`Portal` parameters specify the following:
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentProblem Problem] ===
+
+==== Scope ====
+
+`Problem` parameters specify the following:
+
+ * Name of the `Problem`'s if more than one in a simulation
+ * Physics methods ''(ordering important?/method interactions?/hyperbolic vs elliptic?)''
+ * Initial conditions for all field variables ''(particles?)''
+ * Initial grid, either `Array` or `Amr`
+ * Boundary conditions
+
+==== Examples ====
+
+{{{
+   Problem {
+      methods { "ppm", "hypre-solve", ... }
+      initial { field = "velocity-x", value = sin(y) } 
+      initial { field = "density"
+                file_name    = "field-density"
+                file_dataset = "Density" 
+      boundary { type = periodic }
+      boundary { field = "density", type = outflow, value = 1 }
+   }
+}}}
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+
+=== [NotesComponentRegion Region] ===
+
+==== Scope ====
+
+`Region` parameters specify the following:
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||
+ || `name` || string || Name of the region ||
+ || `rank` || scalar || Dimensionality of the region.  Default 3 ||
+ || `bound` || list || Bounding box for the region: [xmin,xmax,ymin,ymax,zmin,zmax] ||
+ || `restrict`* || logical expression || true iff the point (x,y,z,t) is in the region ||
+
+? Allow the `restrict` variable to appear more than once?
+=== [NotesComponentSimulation Simulation] ===
+
+==== Scope ====
+
+`Simulation` parameters specify the following:
+
+ * List of `Problem`'s comprising the `Simulation`.  
+
+==== Examples ====
+
+==== Parameters ====
+
+ || Parameter || Type || Description ||

@@ -1,0 +1,33 @@
+([NotesComponentMemory Memory] < [NotesComponents index] > [NotesComponentMonitor Monitor])
+
+= `Method` Component =
+
+[[TOC]]
+
+The `Method` component conceptualizes numerical methods.  Specifically, hyperbolic
+methods applied for one timestep on a uniform grid.  Functions supporting applying
+the method on an AMR hierarchy are included, such as method-specific handling of
+boundary conditions.
+
+== `Method` types ==
+
+|| `Method` || ''Parent base class'' ||
+|| `MethodHyperbolic` || ''Hyperbolic method base class'' ||
+|| `MethodElliptic` || ''Elliptic method base class'' ||
+|| `MethodPPM` || ''Piecewise Parabolic Method'' ||
+|| `MethodPPML` || ''Piecewise Parabolic Method on a Local Stencil for Magnetized Supersonic Turbulence'' ||
+
+=== `Method` class ===
+
+==== Attributes ====
+
+==== Functions ====
+
+|| `Method::Method()` || ''Create a new method'' ||
+|| `Method::initialize()` || ''Initialize the method ''||
+|| `Method::add_argument()` || ''Specify a `Field` or `Particle` type read or modified ''||
+|| `Method::apply()` || ''Apply the method'' ||
+
+
+
+([NotesComponentMemory Memory] < [NotesComponents index] > [NotesComponentMonitor Monitor])

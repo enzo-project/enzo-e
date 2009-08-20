@@ -1,0 +1,128 @@
+([NotesComponentError Error] < [NotesComponents index] > [NotesComponentMemory Memory])
+
+= `Field` Component =
+
+[[TOC]]
+
+A `Field` represents a discretized scalar field.  A `Field` can be discretized on an `Amr` hierarchy,
+an `Array`, or a `Block` of an array.
+
+== `Field` supporting classes ==
+
+== `Field` operations ==
+
+== `Field` hierarchy ==
+
+=== Structure ===
+
+ * `Field`
+ *   `FieldBlock`
+ *   `FieldArray`
+ *   `FieldAmr`
+
+=== Descriptions ===
+
+=== `Field` class ===
+
+==== Attributes ====
+
+==== Functions ====
+
+==== Usage ====
+
+Issues:
+ * How to conceptualize "I need updated ghost zones" and "I have updated ghost zones available"?
+  * Want to be efficient: apply to all Fields with one call
+    * Enables e.g. grouping multiple MPI-1 send/receives for multiple `Fields` into one
+      * pack and unpack buffer
+    * Mark `Field`s as "updatable", and use static `Field::ghosts_available(block)` call?
+      * Will disallow independent simulations ("static bad, tree pretty")
+    * Create a `FieldGroup` object, like `ParticlesGroup`?
+      * Much of the functionality available in std::array<Field*>
+      * Can still implement the object using std::array<Field*>
+   * Want to be independent of OMP, MPI-1, MPI-2, (CHARM++?)
+
+
+{{{
+
+   // Create an MPI object (Parallel)
+
+   Mpi *mpi = new Mpi();
+
+   int na[] = {64,64,64};
+   int np[] = {8,8,8};
+
+   // Create a Layout object for MPI-distributed Arrays
+
+   Layout * layout = new LayoutArrayMpi(*mpi, na, np);
+
+   // Create Fields
+
+   Field * field_density    = new Field(*layout, "density");
+   Field * field_velocity_x = new Field(*layout, "velocity-x");
+   Field * field_velocity_y = new Field(*layout, "velocity-y");
+   Field * field_velocity_z = new Field(*layout, "velocity-z");
+
+    // Create a list of all Fields
+
+   ListField all_fields;
+
+   all_fields.push_back(field_density);
+   all_fields.push_back(field_velocity_x);
+   all_fields.push_back(field_velocity_y);
+   all_fields.push_back(field_velocity_z);
+
+   // Create an iterator over blocks in the layout
+
+   ItLayoutBlocks block_loop (*layout);
+
+   // Array block storage (initialize in loop below)
+
+   Scalar * array_density;
+   Scalar * array_velocity_x;
+   Scalar * array_velocity_y;
+   Scalar * array_velocity_z;
+
+   // Array block dimensions (initialize in loop below)
+
+   int nd0,  nd1,  nd2;
+   int nvx0, nvx1, nvx2;
+   int nvy0, nvy1, nvy2;
+   int nvz0, nvz1, nvz2;
+
+   // Array block size (initialize in loop below)
+
+   int n0,n1,n2;
+
+   while (Block * block = block_loop++) {
+
+      // Signal neighbors that ghost zones are required
+
+      all_fields.ghosts_required(*block);
+
+      // Get block size
+
+      block->get_size (&nx,&n1,&n2);
+
+      // Extract Field arrays and dimensions for the block
+
+      field_density   ->get_array(&array_density,    &nd0,  &nd1,  &nd2);
+      field_velocity_x->get_array(&array_velocity_x, &nvx0, &nvx1, &nvx2);
+      field_velocity_y->get_array(&array_velocity_y, &nvy0, &nvy1, &nvy2);
+      field_velocity_z->get_array(&array_velocity_z, &nvz0, &nvz1, &nvz2);
+
+      method_ppm.apply (dt, n0,n1,n2,
+                        array_density,nd0,nd1,nd2,
+                        array_velocity_x,nvx0,nvx1,nvx2,
+                        array_velocity_y,nvy0,nvy1,nvy2,
+                        array_velocity_z,nvz0,nvz1,nvz2,
+                        ...);
+
+      // Signal neighboring blocks that updated ghost zone data is available
+
+      all_fields.ghosts_available(*block);
+
+   }
+
+}}}
+([NotesComponentError Error] < [NotesComponents index] > [NotesComponentMemory Memor])

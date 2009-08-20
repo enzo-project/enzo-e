@@ -1,0 +1,7 @@
+([NotesComponentRegion Region] < [NotesComponents index] > [NotesComponentAmr Amr])
+
+= Simulation Component =
+
+        A `Simulation` defines and manages a computational astrophysics [NotesComponentProblem Problem] or an ensemble of related [NotesComponentProblem Problem]s.  Invokes [NotesComponentTimestep Timestep] to advance the [NotesComponentProblem Problem](s), and may call the [NotesComponentParallel Parallel] component to manage the high-level parallelization of multiple [NotesComponentProblem Problem]s in an ensemble.
+
+([NotesComponentRegion Region] < [NotesComponents index] > [NotesComponentAmr Amr])

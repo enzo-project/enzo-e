@@ -1,0 +1,36 @@
+= Cello Wish List =
+
+The purpose of this page is to get feedback from future users of Cello as early as possible to help direct development in a useful direction.  Meta-feedback about better ways to get feed back is also welcome.
+Feel free to add new "wish" items or comment on existing items.  If you add a new wish item, please include a new unique identifier "W###" so it can be referenced easily, as well as your initials in case clarification is needed.
+
+|| '''ID''' || '''User''' || '''Component(s)''' || '''Suggestion''' ||
+|| W001 || jbordner || `Method` || Integrate "inits" functionality into the main code||
+|| W002 || jbordner || `Simulation` ||Support ensembles within a single run, including inline-analysis||
+|| W003 || jbordner || `Parallel` ||Support multiple (hybrid) and flexible parallelization strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided get/put), OMP, and optionally UPC and GPU.||
+|| W004 || jbordner || `Control` ||Reduce implicit dependencies by dynamically allocating parallel tasks, ala CHARM++.(e.g. currently Enzo loops through patches within a level, but a given patch can proceed as soon as it has all its boundary data)||
+|| W005 || jbordner || || Auto-tune where possible--automatically optimize for cache-, parallel-, vector-, solver-, etc. parameters||
+|| W006 || jbordner || ||Use object-oriented design, organize into components (subdirectories) of classes (*.hpp/*.cpp files)||
+|| W007 || jbordner || ||Require more rigorous coding standards compared to Enzo development||
+|| W008 || jbordner ||`Disk` ||Enforce strict control over data storage formats (e.g. files) (see W0009)||
+|| W009 || jbordner ||`Disk`|| Require that all stored data be accessed through standard interface functions that are independent of specific file formats (i.e., stored datasets are conceptually treated as objects)||
+|| W010 || mnorman ||`Amr`|| Support both structured AMR (Enzo-like) and tree-based AMR||
+
+|| W011 || jbordner || `Particles` ||Store particle positions in single precision as -1 <= x,y,z <= 1 relative to their containing patch. [[BR]] [To reduce storage, improve performance, and address precision issues with deep AMR.]||
+
+|| W012 || jbordner ||`Amr` ||Do not store a patch's global position, only local position relative to immediate neighbors, parent, and children.  [[BR]][Toward distributed AMR data-structure, and to address precision issues with deep AMR.] (see W013)||
+
+|| W013 || jbordner ||`Amr`|| Represent patch extents with (small) integer values relative to parent. [[BR]][To reduce memory usage with deep AMR runs.] (see W012) ||
+
+|| W014 || jbordner ||`Amr` / `Parallel` ||Provide (or notify) neighboring patches with updated ghost zone data as soon as it's available.||
+
+|| W015 || jbordner ||`Control` ||Support optional variable timestep sizes within each level. [[BR]][To reduce synchronization costs when computing global CFL condition.]||
+
+|| W016 || jbordner ||`Control` ||Support optional uniform timesteps across all levels. [[BR]] [To improve parallel efficiency.]||
+
+|| W017 || jbordner || `Field` ||User-controlled optional floor/ceiling limits on individual `Field`s (ala "tiny_number" in Enzo), with user-specified `Error` behavior (warning, error, ignore, reset to given floor/ceiling, etc.)||
+
+|| W018 || jbordner || `Array` / `Parallel` ||Allow multiple patches per MPI task.  [[BR]][To improve cache use for unigrid problems, and improve load-balancing for AMR.]||
+
+|| W019 || mnorman ||`Particles` ||Use a binary tree data-structure to recursively partition the bounding boxes of particles.||
+
+ 
