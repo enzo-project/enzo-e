@@ -26,7 +26,8 @@ WIKI_FILES = \
 	NotesTestProblems \
 	NotesTestProblemShockPool \
 	NotesTestProblemWavePool \
-	NotesWishList
+	NotesWishList \
+	WikiStart
 
 # 	NotesParametersEnzoPoll
 
@@ -45,6 +46,6 @@ trac:
 diff: $(patsubst %,diff-%,$(WIKI_FILES))
 diff-%:
 	-@(gmake export-$*)
-	diff $* trac/$*
+	-diff $* trac/$*
 
 

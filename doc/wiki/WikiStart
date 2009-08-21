@@ -1,0 +1,61 @@
+= THE CELLO PROJECT =
+
+[[TOC]]
+
+Cello, AKA "Enzo-P", is designed to be the object-oriented petascale successor to the [http://lca.ucsd.edu/projects/enzo Enzo] terascale astrophysics and cosmology application.  It will include an overhaul of the distributed adaptive mesh refinement (AMR) and distributed particles data-structures, but will retain existing core physics kernels.  The object-oriented programming approach is expected to greatly ease maintaining and enhancing the code, which will in turn enable quickly adapting the code to future high-performance computing platforms as they continue to rapidly evolve.
+
+James Bordner (jobordner@ucsd.edu) [[BR]]
+[http://lca.ucsd.edu/  Laboratory for Computational Astrophysics] [[BR]]
+[http://cass.ucsd.edu/ Center for Astrophysics and Space Sciences][[BR]]
+[http://www.sdsc.edu/  San Diego Supercomputer Center]            [[BR]]
+[http://ucsd.edu/      University of California, San Diego]       [[BR]]
+
+-------------------------------------------------------------------------------------
+
+== DOCUMENTATION ==
+
+=== Wiki Pages ===
+
+The wiki pages are for users and developers to interactively collaborate on different aspects of Cello's development. 
+
+ * '''[NotesWishList Wish List]''': Wiki page for accumulating  desired features and functionality
+
+ * '''[NotesParameters  Parameters]''': Wiki page for developing the parameter file syntax, grammar, and list of parameters
+
+ * '''[NotesComponents  Components]''': Wiki pages for designing the Cello software at the component and class levels
+
+ * '''[NotesCodingStandards  Coding Guidelines]''': Wiki page for establishing Cello coding guidelines
+
+ * '''[NotesTestProblems  Tests]''': Wiki pages for collecting application tests and use cases
+
+=== Software Documents ===
+
+The Latex software documents serve to record the "official" vision and scope, requirements, design, and tests that were developed and decided on in the wiki pages.
+
+ * '''[http://client65-88.sdsc.edu/~bordner/cello/doc/vision/vision.pdf Vision and Scope Document]''' [http://client65-88.sdsc.edu/~bordner/cello/doc/vision/vision.html (online)]
+
+ * '''[http://.edu/~bordner/cello/doc/requirements/requirements.pdf Software Requirements Specification]''' [http://client65-88.sdsc.edu/~bordner/cello/doc/requirements/requirements.html (online)]
+
+ * '''[http://client65-88.sdsc.edu/~bordner/cello/doc/design/design.pdf Software Design Description]''' [http://client65-88.sdsc.edu/~bordner/cello/doc/design/design.html (online)]
+
+ * '''[http://client65-88.sdsc.edu/~bordner/cello/doc/testing/testing.pdf Software Test Document]'''[http://client65-88.sdsc.edu/~bordner/cello/doc/testing/testing.html (online)]
+
+=== User Manuals ===
+
+The Latex user manuals document how to use and further enhance or modify Cello.
+
+ * '''[http://client65-88.sdsc.edu/~bordner/cello/doc/manual-user/manual-user.pdf User Manual]''' [http://client65-88.sdsc.edu/~bordner/cello/doc/manual-user/manual-user.html (online)]
+
+ * '''[http://client65-88.sdsc.edu/~bordner/cello/doc/manual-reference/manual-reference.pdf Reference Manual]''' [http://client65-88.sdsc.edu/~bordner/cello/doc/manual-reference/manual-reference.html (online)]
+
+ * '''[http://client65-88.sdsc.edu/~bordner/cello/doc/manual-devel/manual-devel.pdf Developer Manual]'''[http://client65-88.sdsc.edu/~bordner/cello/doc/manual-devel/manual-devel.html (online)]
+
+-------------------------------------------------------------------------------------
+
+== SOURCE ==
+
+ * '''[http://client65-88.sdsc.edu/~bordner/cello/src/html/index.html doxygen]'''
+
+ * '''[http://client65-88.sdsc.edu/projects/cello/browser subversion]'''
+
+-------------------------------------------------------------------------------------
