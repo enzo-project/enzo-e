@@ -1,5 +1,5 @@
 D [0-9]
-L [A-Za-z_]
+LN [A-Za-z0-9_]
 LL [a-z]
 LU [A-Z]
 E [Ee][+-]?{D}+
@@ -21,6 +21,9 @@ E [Ee][+-]?{D}+
 
 #include "parse.tab.h"
 
+ void yyerror(char *s);
+
+ int    lineno       = 1;
  double scalar_value = 0;
 
 %}
@@ -84,8 +87,8 @@ scalb     { return SCALB; }
 
 false     { return LOGICAL; } 
 true      { return LOGICAL; } 
-{LU}{L}+  { return GROUP; }  /*  NAME_GROUP */
-{LL}{L}+  { return PARAMETER; } /* PARAMETER_NAME */
+{LU}{LN}+ { return GROUP_NAME; }  /*  NAME_GROUP */
+{LL}{LN}+ { return PARAMETER; } /* PARAMETER_NAME */
 
 "="        { return '='; }         /* = */
 
@@ -118,15 +121,22 @@ true      { return LOGICAL; }
 {D}*"."{D}+({E})?  { scalar_value = atof (yytext); return SCALAR; }
 {D}+"."{D}*({E})?  { scalar_value = atof (yytext); return SCALAR; }
 
-\"(\\.|[^\\"])*\"   { return STRING; }
+\"(\\.|[^\\"])*\"  { yylval.string_type = strdup(yytext+1); /* copy skipping open quote */
+                     yylval.string_type [yyleng-2] = '\0';   /* remove close quote */
+                     return STRING; }
 
 [ ] {  }
 ^[ \t]* {  }
 
 [^ \v\f\t\n]  { /* ignore white space */ }
-\n { printf ("Line %d\n",yylineno); yylineno++; }
+\n { lineno++; }
 
 . {  }
 
 %%
 
+void yyerror(char *s)
+{
+  fprintf(stderr, "\n\nERROR: %s in line %d\n\n\n", s,lineno);
+  exit(1);
+}

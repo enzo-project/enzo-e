@@ -1,14 +1,27 @@
 %{
+/*
+ * ENZO: THE NEXT GENERATION
+ *
+ * A parallel astrophysics and cosmology application
+ *
+ * Copyright (C) 2009 James Bordner
+ * Copyright (C) 2009 Laboratory for Computational Astrophysics
+ * Copyright (C) 2009 Regents of the University of California
+ *
+ * See CELLO_LICENSE in the main directory for full license agreement
+ *
+ */
+
 #include <stdio.h>
 #include "parse.tab.h"
   /*  int yydebug;     */
   /* #define YYDEBUG 1 */
 %}
 
-%token GROUP
+%token GROUP_NAME
 %token PARAMETER
 
-%union {int logical_type; double scalar_type; char string_type[100];}
+%union {int logical_type; double scalar_type; char * string_type;}
 
 %token <string_type> STRING
 %token <scalar_type> SCALAR
@@ -38,58 +51,13 @@
 
 /* double foo (double) */
 
-%token ACOS
-%token ACOSH
-%token ASIN
-%token ASINH
-%token ATAN
-%token ATANH
-%token CBRT
-%token CEIL
-%token COS
-%token COSH
-%token ERFC
-%token ERF
-%token EXP
-%token EXPM1
-%token FABS
-%token FLOOR
-%token GAMMA
-%token J0
-%token J1
-%token LGAMMA
-%token LOG10
-%token LOG1P
-%token LOGB
-%token LOG
-%token SIN
-%token SINH
-%token SQRT
-%token TAN
-%token TANH
-%token Y0
-%token Y1
-%token RINT
+%token ACOS ACOSH ASIN ASINH ATAN ATANH CBRT CEIL COS COSH ERFC ERF
+%token EXP EXPM1 FABS FLOOR GAMMA J0 J1 LGAMMA LOG10 LOG1P LOGB
+%token LOG SIN SINH SQRT TAN TANH Y0 Y1 RINT
 
-/* int foo (double) */
-
-/* int    ilogb(double); */
-/* int    isnan(double); */
-
-/*  */
 /* double foo (double,double) */
 
-%token ATAN2
-%token FMOD
-%token HYPOT
-%token NEXTAFTER
-%token POW
-%token REMAINDER
-%token SCALB
-
-/* double jn(int, double); */
-/* double ldexp(double, int); */
-/* double yn(int, double); */
+%token ATAN2 FMOD HYPOT NEXTAFTER POW REMAINDER SCALB
 
 %%
 
@@ -97,7 +65,7 @@ file : /* nothing */
  | file named_group { }
  ;
 
-named_group: group_name group { }
+named_group: GROUP_NAME group { }
 ;
 
 group :  '{' parameter_list '}' 
@@ -118,7 +86,12 @@ parameter_name : PARAMETER
    {  }
  ;
 
-parameter_value : STRING | scalar_expression | logical_expression | list | group
+parameter_value : 
+   STRING              { printf ("string %s\n",$1); free $1;}
+ | scalar_expression   { printf ("scalar expression\n"); }
+ | logical_expression  { printf ("logical expression\n"); }
+ | list                { printf ("list\n"); }
+ | group               { printf ("group\n"); }
 {  }
 ;
 
@@ -130,6 +103,7 @@ list_elements:
 | parameter_value ',' list_elements
 { }
 ;
+
 
 logical_expression: 
  '(' logical_expression ')' { }
@@ -143,10 +117,6 @@ logical_expression:
  | logical_expression AND logical_expression {  }
  | LOGICAL { }
 ;
-
-group_name : GROUP 
-{  }
- ;
 
 
 scalar_expression: 
@@ -167,7 +137,3 @@ main(int argc, char **argv)
   yyparse();
 }
 
-yyerror(char *s)
-{
-  fprintf(stderr, "error: %s\n", s);
-}
