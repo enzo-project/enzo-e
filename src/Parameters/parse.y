@@ -19,7 +19,7 @@
 %}
 
 %token GROUP_NAME
-%token PARAMETER
+%token IDENTIFIER
 
 %union {int logical_type; double scalar_type; char * string_type;}
 
@@ -65,11 +65,11 @@ file : /* nothing */
  | file named_group { }
  ;
 
-named_group: GROUP_NAME group { }
+named_group: GROUP_NAME group           { printf ("Group\n"); }
+          |  GROUP_NAME IDENTIFIER group { printf ("Group member\n"); }
 ;
 
-group :  '{' parameter_list '}' 
- {  }
+group :  '{' parameter_list '}'  { }
  ;
 
 parameter_list : 
@@ -78,12 +78,8 @@ parameter_list :
 {  }
  ;
 
-parameter_assignment : parameter_name '=' parameter_value
+parameter_assignment : IDENTIFIER '=' parameter_value
   {  }
- ;
-
-parameter_name : PARAMETER 
-   {  }
  ;
 
 parameter_value : 
@@ -92,6 +88,7 @@ parameter_value :
  | logical_expression  { printf ("logical expression\n"); }
  | list                { printf ("list\n"); }
  | group               { printf ("group\n"); }
+ | IDENTIFIER          { printf ("variable\n"); }
 {  }
 ;
 
@@ -100,7 +97,7 @@ list: '[' list_elements ']'
 
 list_elements:
   parameter_value 
-| parameter_value ',' list_elements
+  | list_elements  ',' parameter_value
 { }
 ;
 

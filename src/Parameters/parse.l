@@ -87,8 +87,9 @@ scalb     { return SCALB; }
 
 false     { return LOGICAL; } 
 true      { return LOGICAL; } 
-{LU}{LN}+ { return GROUP_NAME; }  /*  NAME_GROUP */
-{LL}{LN}+ { return PARAMETER; } /* PARAMETER_NAME */
+{LU}{LN}+ { return GROUP_NAME; } /* Group names begin with upper-case */
+{LL}{LN}+ { return IDENTIFIER; } /* group, parameter, and variables */
+                                 /* begin with lower-case */
 
 "="        { return '='; }         /* = */
 
