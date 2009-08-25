@@ -171,7 +171,7 @@ void Grid::write (std::string field, FILE *fp, bool brief) throw ()
 {
   if (fp == 0) fp = stdout;
 
-  if (field=="header") {
+  //  if (field=="header") {
   fprintf (fp,"Grid\n"
 	  "   id             %d\n"
 	  "   parent id      %d\n"
@@ -187,7 +187,7 @@ void Grid::write (std::string field, FILE *fp, bool brief) throw ()
 	  il_[0],il_[1],il_[2],
           n_ [0],n_ [1],n_ [2],
 	   level_);
-  }
+  //  }
   if (field=="u" && u_ && ! brief) {
     for (int i0=0; i0<n_[0]; i0++) {
       for (int i1=0; i1<n_[1]; i1++) {

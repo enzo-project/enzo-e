@@ -434,7 +434,7 @@ void Hypre::evaluate ()
 				     grid->get_u(&nx[0],&nx[1],&nx[2]));  
 
     if (parameters_->value("dump_x") == "true") {
-      sprintf (filename,"X-hypre-solve.%d",grid->id());
+      sprintf (filename,"X.%d",grid->id());
       grid->write("header",filename);
       grid->write("u",filename);
     }
@@ -444,7 +444,7 @@ void Hypre::evaluate ()
 				     grid->get_f(&nb[0],&nb[1],&nb[2]));  
 
     if (parameters_->value("dump_b") == "true") {
-      sprintf (filename,"B-hypre-solve.%d",grid->id());
+      sprintf (filename,"B.%d",grid->id());
       grid->write("f",filename);
     }
 
