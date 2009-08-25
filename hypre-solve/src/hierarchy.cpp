@@ -53,7 +53,11 @@ const int maximum_level   = 1000;
 
 //----------------------------------------------------------------------
 
-// Define what Enzo means is a float
+// defines
+
+#define WHERE printf ("%s:%d ",__FILE__,__LINE__);
+
+// Define what Enzo thinks is a float
 
 #  ifdef r4
 #    define ENZO_FLOAT float
@@ -168,17 +172,26 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[],
 // 	       enzo_grid->PotentialField,
 // 	       enzo_grid->GravitatingMassField);
 
+      
+      // Compute global grid size at this level
+      long long nd[3];
+      for (int dim=0; dim<3; dim++) {
+	nd[dim] = (long long) ((DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
+		       enzo_grid->CellWidth[dim][0] + 0.5);
+      }
+	
       Scalar xl[3],xu[3];
       int il[3],n[3];
+
       for (int dim=0; dim<3; dim++) {
 	xl[dim] = enzo_grid->GridLeftEdge[dim];
 	xu[dim] = enzo_grid->GridRightEdge[dim];
 	n[dim]  = enzo_grid->GridEndIndex[dim] - enzo_grid->GridStartIndex[dim] + 1;
 	il[dim] = int((xl[dim] - DomainLeftEdge[dim]) 
-		       / (DomainRightEdge-DomainLeftEdge) * n[dim] * levelfactor);
-	il[dim] = enzo_grid->GridStartIndex[dim];
+		       / (DomainRightEdge[dim]-DomainLeftEdge[dim]) * nd[dim]);
+	//	il[dim] = enzo_grid->GridStartIndex[dim];
       }
-
+	      
       // Create a new hypre-solve grid
 
       Grid * grid = new Grid (id,id_parent,ip,xl,xu,il,n);
