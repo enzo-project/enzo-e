@@ -114,3 +114,4 @@ public:
 
 };
 
+extern Parameters * hypre_parameters;

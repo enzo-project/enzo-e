@@ -29,6 +29,12 @@
 
 //----------------------------------------------------------------------
 
+// defines
+
+#define WHERE printf ("%s:%d ",__FILE__,__LINE__);
+
+//----------------------------------------------------------------------
+
 // Constants
 
 const bool debug = false;
@@ -114,12 +120,15 @@ void Hypre::init_hierarchy (Mpi & mpi)
 
   // Create the hypre grid
   
+  _TRACE_;
   HYPRE_SStructGridCreate (MPI_COMM_WORLD, dim, num_parts, &grid_);
 
   ItHierarchyLevels itl (*hierarchy_);
 
+  _TRACE_;
   while (Level * level = itl++) {
 
+  _TRACE_;
     int part = level->index();
 
     ItLevelGridsLocal itgl (*level);
@@ -139,6 +148,7 @@ void Hypre::init_hierarchy (Mpi & mpi)
       
     } // while grid = itgl++
 
+  _TRACE_;
     // Create a single cell-centered variable for each grid part (level)
 
     HYPRE_SStructVariable variable_types[] = { HYPRE_SSTRUCT_VARIABLE_CELL };
@@ -152,13 +162,16 @@ void Hypre::init_hierarchy (Mpi & mpi)
 		      hierarchy_->period_index(1,part),
 		      hierarchy_->period_index(2,part) };
 
+  _TRACE_;
     HYPRE_SStructGridSetPeriodic (grid_, part, period);
 
   } // while level = itl++
 
   // When finished, assemble the hypre grid
+  _TRACE_;
 
   HYPRE_SStructGridAssemble (grid_);
+  _TRACE_;
   
 } // Hypre::init_hierarchy()
 
@@ -172,8 +185,10 @@ void Hypre::init_stencil ()
 
 {
 
+  _TRACE_;
   int dim = hierarchy_->dimension();
 
+  _TRACE_;
   HYPRE_SStructStencilCreate (dim,dim*2+1,&stencil_);
 
   int entries[][3] = { {  0, 0, 0 },     // center
@@ -184,6 +199,7 @@ void Hypre::init_stencil ()
 		       {  0, 0, 1 },     // Z+
 		       {  0, 0,-1 } };   // Z-
 
+  _TRACE_;
   if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 0, entries[0], 0);
   if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 1, entries[1], 0);
   if (dim >= 1) HYPRE_SStructStencilSetEntry (stencil_, 2, entries[2], 0);
@@ -191,6 +207,7 @@ void Hypre::init_stencil ()
   if (dim >= 2) HYPRE_SStructStencilSetEntry (stencil_, 4, entries[4], 0);
   if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 5, entries[5], 0);
   if (dim >= 3) HYPRE_SStructStencilSetEntry (stencil_, 6, entries[6], 0);
+  _TRACE_;
 
 } // Hypre::init_stencil()
 
@@ -321,10 +338,14 @@ void Hypre::init_elements (std::vector<Point *>  points)
 
   // Optionally write the matrix and vectors to a file for debugging
 
-  if (parameters_->value("dump_hypre") == "true") {
-    HYPRE_SStructMatrixPrint ("A",A_,0);
-    HYPRE_SStructVectorPrint ("B",B_,0);
-    HYPRE_SStructVectorPrint ("X0",X_,0);
+  if (parameters_->value("dump_a") == "true") {
+    HYPRE_SStructMatrixPrint ("A-hypre",A_,0);
+  }
+  if (parameters_->value("dump_x") == "true") {
+    HYPRE_SStructVectorPrint ("X0-hypre",X_,0);
+  }
+  if (parameters_->value("dump_b") == "true") {
+    HYPRE_SStructVectorPrint ("B-hypre",B_,0);
   }
 
 } // Hypre::init_elements()
@@ -382,8 +403,8 @@ void Hypre::solve ()
     ERROR(error_message);
   }
   
-  if (parameters_->value("dump_hypre") == "true") {
-    HYPRE_SStructVectorPrint ("X",X_,1);
+  if (parameters_->value("dump_x") == "true") {
+    HYPRE_SStructVectorPrint ("X-hypre",X_,1);
   }
 
 } // Hypre::solve()
@@ -413,7 +434,8 @@ void Hypre::evaluate ()
 				     grid->get_u(&nx[0],&nx[1],&nx[2]));  
 
     if (parameters_->value("dump_x") == "true") {
-      sprintf (filename,"X.%d",grid->id());
+      sprintf (filename,"X-hypre-solve.%d",grid->id());
+      grid->write("header",filename);
       grid->write("u",filename);
     }
     
@@ -422,7 +444,7 @@ void Hypre::evaluate ()
 				     grid->get_f(&nb[0],&nb[1],&nb[2]));  
 
     if (parameters_->value("dump_b") == "true") {
-      sprintf (filename,"B.%d",grid->id());
+      sprintf (filename,"B-hypre-solve.%d",grid->id());
       grid->write("f",filename);
     }
 
@@ -739,7 +761,7 @@ void Hypre::init_elements_rhs_ (std::vector<Point *>  & points)
 
   } else if (enzo_attach) {
 
-    // ... or attach to Enzo's actual density and potential fields ...
+    // ... or use existing grid f and u
 
     local_shift_b_sum += init_vector_attach_ ();
 
@@ -865,6 +887,8 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
   int entries[7] = { 0,1,2,3,4,5,6 };
   double h3[3]   = {grid.h(0),grid.h(1),grid.h(2)};
   int    n3[3]   = {grid.n(0),grid.n(1),grid.n(2)};
+  printf ("%s:%d DEBUG h=%g %g %g\n",__FILE__,__LINE__,h3[0],h3[1],h3[2]);
+  printf ("%s:%d DEBUG n=%d %d %d\n",__FILE__,__LINE__,n3[0],n3[1],n3[2]);
 
   double h120 = h3[1]*h3[2] / h3[0];
   double h201 = h3[2]*h3[0] / h3[1];
@@ -888,6 +912,8 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
 
   double lower[3];
   grid.x_lower(lower[0],lower[1],lower[2]);
+
+  WHERE; printf ("h120  h201  h012 = %g %g %g\n",h120,  h201,  h012 );
 
   int i0,i1,i2,i;
   for (i2 = 0; i2 < n3[2]; i2++) {
@@ -926,6 +952,8 @@ void Hypre::init_matrix_stencil_ (Grid & grid)
       } // for i0
     } // for i1
   } // for i2
+
+  WHERE; printf ("v0[0]=%g\n",v0[0]);
 
   //-----------------------------------------------------------
   // Adjust stencil at grid boundaries
@@ -1056,7 +1084,7 @@ Scalar Hypre::init_vector_points_ (std::vector<Point *> & points)
 /// Add contributions from Density in enzo HDF5 files to right-hand side B
 
 Scalar Hypre::init_vector_file_ (std::string             file_prefix,
-				    bool                    enzo_packed)
+				 bool                    enzo_packed)
 
 {
   ItHierarchyGridsLocal itg (*hierarchy_);
@@ -1065,6 +1093,8 @@ Scalar Hypre::init_vector_file_ (std::string             file_prefix,
   herr_t status;
   hid_t  file_id;
   hid_t  dataset_id;
+
+  Scalar shift_b_sum = 0.0;
 
   while (Grid * grid = itg++) {
 
@@ -1116,14 +1146,6 @@ Scalar Hypre::init_vector_file_ (std::string             file_prefix,
 	      values[0],values[grid->n()-1]);
     }
 
-    //
-
-    TEMPORARY("Scaling density by grid size");
-    for (int i=0; i<grid->n(); i++) {
-      values[i] *= grid->n();
-      values[i] *= grid->h(0)*grid->h(0);
-    }
-
     // Copy the values to the hypre vector
 
     int part = grid->level();
@@ -1133,7 +1155,24 @@ Scalar Hypre::init_vector_file_ (std::string             file_prefix,
     int upper[3] = { grid->index_upper(0), 
 		     grid->index_upper(1), 
 		     grid->index_upper(2) };
+
+    // Set Hypre B_ vector to values from the file
     HYPRE_SStructVectorAddToBoxValues (B_,part,lower,upper,0,values);
+
+    // Compute sum to return in case we need to shift rhs for periodic problems
+
+    int n0 = grid->num_unknowns(0);
+    int n1 = grid->num_unknowns(1);
+    int n2 = grid->num_unknowns(2);
+
+    for (int i0=0; i0<n0; i0++) {
+      for (int i1=0; i1<n1; i1++) {
+	for (int i2=0; i2<n2; i2++) {
+	  int k = i0 + n0*(i1 + n1*i2);
+	  shift_b_sum += values[k];
+	}
+      }
+    }
 
     delete [] values;
 
@@ -1156,11 +1195,42 @@ Scalar Hypre::init_vector_file_ (std::string             file_prefix,
 
 //------------------------------------------------------------------------
 
-/// Add contributions from Density in enzo HDF5 files to right-hand side B
+/// Use existing f_ for right-hand side B
 
 Scalar Hypre::init_vector_attach_ ()
 {
-  return 0;
+  _TRACE_;
+  Scalar shift_b_sum = 0.0;
+  ItHierarchyGridsLocal itg (*hierarchy_);
+  while (Grid * grid = itg++) {
+    int part = grid->level();
+    int lower[3] = { grid->index_lower(0), 
+		     grid->index_lower(1), 
+		     grid->index_lower(2) };
+    int upper[3] = { grid->index_upper(0), 
+		     grid->index_upper(1), 
+		     grid->index_upper(2) };
+    int n0,n1,n2;
+    Scalar * values = grid->get_f(&n0,&n1,&n2);
+
+    // Set Hypre B_ vector to grid f_ values
+
+    HYPRE_SStructVectorAddToBoxValues (B_,part,lower,upper,0,values);
+
+    // Compute sum to return in case we need to shift rhs for periodic problems
+    
+    for (int i0=0; i0<n0; i0++) {
+      for (int i1=0; i1<n1; i1++) {
+	for (int i2=0; i2<n2; i2++) {
+	  int k = i0 + n0*(i1 + n1*i2);
+	  shift_b_sum += values[k];
+	}
+      }
+    }
+  }
+
+  printf ("%s:%d DEBUG shift_b_sum = %g\n",__FILE__,__LINE__,shift_b_sum);
+  return shift_b_sum;
 }
 
 //------------------------------------------------------------------------
@@ -1171,6 +1241,7 @@ void Hypre::solve_pfmg_ (int itmax, double restol)
 
 {
 
+  _TRACE_;
   // Create and initialize the solver
 
   HYPRE_SStructSysPFMGCreate    (MPI_COMM_WORLD, &solver_);
@@ -1180,25 +1251,31 @@ void Hypre::solve_pfmg_ (int itmax, double restol)
   if (itmax != 0 )   HYPRE_SStructSysPFMGSetMaxIter(solver_,itmax);
   if (restol != 0.0) HYPRE_SStructSysPFMGSetTol(solver_,    restol);
 
+  HYPRE_SStructSysPFMGSetPrintLevel(solver_, 1);
   HYPRE_SStructSysPFMGSetLogging(solver_, 1);
   HYPRE_SStructSysPFMGSetup     (solver_,A_,B_,X_);
 
   // Solve the linear system
 
+  printf ("%s:%d DEBUG entering PFMG solver\n",__FILE__,__LINE__);
   HYPRE_SStructSysPFMGSolve     (solver_,A_,B_,X_);
+  printf ("%s:%d DEBUG exiting PFMG solver\n",__FILE__,__LINE__);
 
   // Write out some diagnostic info about the solve
 
   HYPRE_SStructSysPFMGGetNumIterations (solver_,&iter_);
   HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm (solver_,&resid_);
 
-  printf ("HYPRE_SStructSysPFMGSolve num iterations: %d\n",iter_);
-  printf ("HYPRE_SStructSysPFMGSolve final relative residual norm: %g\n",resid_);
+  if (debug && pmpi->is_root()) {
+    printf ("hypre PFMG num iterations: %d\n",iter_);
+    printf ("hypre PFMG final relative residual norm: %g\n",resid_);
+  }
 
   // Delete the solver
 
   HYPRE_SStructSysPFMGDestroy (solver_);
 
+  _TRACE_;
 } // Hypre::solve_pfmg_()
 
 //------------------------------------------------------------------------
@@ -1208,6 +1285,7 @@ void Hypre::solve_pfmg_ (int itmax, double restol)
 void Hypre::solve_fac_ (int itmax, double restol)
 
 {
+  _TRACE_;
   int i;
 
   // Create the solver
@@ -1275,8 +1353,10 @@ void Hypre::solve_fac_ (int itmax, double restol)
   HYPRE_SStructFACGetNumIterations(solver_, &iter_);
   HYPRE_SStructFACGetFinalRelativeResidualNorm(solver_, &resid_);
 
-  printf ("HYPRE_SStructFACSolve num iterations: %d\n",iter_);
-  printf ("HYPRE_SStructFACSolve final relative residual norm: %g\n",resid_);
+  if (debug && pmpi->is_root()) {
+    printf ("hypre FAC num iterations: %d\n",iter_);
+    printf ("hypre FAC final relative residual norm: %g\n",resid_);
+  }
 
   // Delete the solver
 
@@ -1287,6 +1367,8 @@ void Hypre::solve_fac_ (int itmax, double restol)
   delete [] parts;
   delete [] refinements;
 
+  _TRACE_;
+
 } // Hypre::solve_fac_()
 
 //------------------------------------------------------------------------
@@ -1296,6 +1378,7 @@ void Hypre::solve_fac_ (int itmax, double restol)
 void Hypre::solve_bicgstab_ (int itmax, double restol)
 
 {
+  _TRACE_;
 
   // Create the solver
 
@@ -1316,20 +1399,25 @@ void Hypre::solve_bicgstab_ (int itmax, double restol)
 
   // Solve the linear system
 
+  printf ("%s:%d DEBUG entering BiCGSTAB solver\n",__FILE__,__LINE__);
   HYPRE_SStructBiCGSTABSolve(solver_, A_, B_, X_);
+  printf ("%s:%d DEBUG entering BiCGSTAB solver\n",__FILE__,__LINE__);
 
   // Write out some diagnostic info about the solve
 
   HYPRE_SStructBiCGSTABGetNumIterations(solver_, &iter_);
   HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(solver_, &resid_);
 
-  if (debug) printf ("HYPRE_SStructBiCGSTABSolve num iterations: %d\n",iter_);
-  if (debug) printf ("HYPRE_SStructBiCGSTABSolve final relative residual norm: %g\n",resid_);
-
+  if (debug && pmpi->is_root()) {
+    printf ("hypre BiCGSTAB num iterations: %d\n",iter_);
+    printf ("hypre BiCGSTAB final relative residual norm: %g\n",resid_);
+  }
 
   // Delete the solver
 
   HYPRE_SStructBiCGSTABDestroy(solver_);
+
+  _TRACE_;
 
 } // Hypre::solve_bicgstab_()
 
@@ -1341,6 +1429,7 @@ void Hypre::solve_bicgstab_boomer_ (int itmax, double restol)
 
 {
 
+  _TRACE_;
   HYPRE_Solver solver;
 
   // Create the solver
@@ -1389,14 +1478,17 @@ void Hypre::solve_bicgstab_boomer_ (int itmax, double restol)
   HYPRE_BiCGSTABGetNumIterations(solver, &iter_);
   HYPRE_BiCGSTABGetFinalRelativeResidualNorm(solver, &resid_);
 
-  if (debug) printf ("HYPRE_BiCGSTABSolve num iterations: %d\n",iter_);
-  if (debug) printf ("HYPRE_BiCGSTABSolve final relative residual norm: %g\n",resid_);
+  if (debug &&pmpi->is_root()) {
+    printf ("hypre BiCGSTAB num iterations: %d\n",iter_);
+    printf ("hypre BiCGSTAB final relative residual norm: %g\n",resid_);
+  }
 
 
   // Delete the solver
 
   HYPRE_BiCGSTABDestroy(solver);
 
+  _TRACE_;
 } // Hypre::solve_bicgstab_boomer_()
 
 //------------------------------------------------------------------------
@@ -1407,6 +1499,7 @@ void Hypre::solve_gmres_ (int itmax, double restol)
 
 {
 
+  _TRACE_;
   // Create the solver
 
   HYPRE_SStructGMRESCreate(MPI_COMM_WORLD, &solver_);
@@ -1433,14 +1526,17 @@ void Hypre::solve_gmres_ (int itmax, double restol)
   HYPRE_SStructGMRESGetNumIterations(solver_, &iter_);
   HYPRE_SStructGMRESGetFinalRelativeResidualNorm(solver_, &resid_);
 
-  if (debug) printf ("HYPRE_SStructGMRESSolve num iterations: %d\n",iter_);
-  if (debug) printf ("HYPRE_SStructGMRESSolve final relative residual norm: %g\n",resid_);
+  if (debug && pmpi->is_root()) {
+    printf ("hypre GMRES num iterations: %d\n",iter_);
+    printf ("hypre GMRES final relative residual norm: %g\n",resid_);
+  }
 
 
   // Delete the solver
 
   HYPRE_SStructGMRESDestroy(solver_);
 
+  _TRACE_;
 } // Hypre::solve_gmres_()
 
 //------------------------------------------------------------------------

@@ -19,4 +19,4 @@
 
 const int debug = 0;
 
-Mpi * pmpi;
+Mpi * pmpi = NULL;

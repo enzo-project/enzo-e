@@ -85,6 +85,7 @@ void Level::insert_grid (Grid & grid) throw ()
 void Level::print () throw ()
 {
   printf ("Level %d\n",n_);
+  printf ("   grids       = %d\n",grids0_.size()-1);
   printf ("   index_lower = (%d,%d,%d)\n",il_[0],il_[1],il_[2]);
   printf ("   index_upper = (%d,%d,%d)\n",iu_[0],iu_[1],iu_[2]);
   for (int i=0; i<num_grids(); i++) {
@@ -275,6 +276,7 @@ void Level::write (FILE *fp) throw ()
 
   for (int i=0; i<num_grids(); i++) {
     fprintf (fp,"Level %d\n",n_);
+    return_grid(i).write("header",fp);
     return_grid(i).write("u",fp);
     return_grid(i).write("f",fp);
   }

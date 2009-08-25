@@ -186,3 +186,4 @@ int Parameters::readline_ (FILE* fp, char * buffer, int n) throw()
   return (c != EOF);
 }
 
+Parameters * hypre_parameters = NULL;

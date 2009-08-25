@@ -15,6 +15,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <limits.h>
 
@@ -26,10 +27,12 @@
 
 //----------------------------------------------------------------------
 
-const int trace          = false;
-const int debug_hierarchy = 0;
-const int debug_detailed = 0;
-const int geomview       = 0;
+const bool trace           = false;
+const bool debug_hierarchy = false;
+const bool debug_detailed  = false;
+const bool geomview        = false;
+
+const int maximum_level   = 1000;
 
 //----------------------------------------------------------------------
 
@@ -45,10 +48,24 @@ const int geomview       = 0;
 #include "newgrav-hierarchy.h"
 #include "newgrav-hypre-solve.h"
 
-#ifdef HYPRE_GRAV
+#ifdef HYPRE_GRAV /* defined if we're interfacing with enzo */
 #include "newgrav-enzo.h"
+
+//----------------------------------------------------------------------
+
+// Define what Enzo means is a float
+
+#  ifdef r4
+#    define ENZO_FLOAT float
+#  endif
+#  ifdef r8
+#    define ENZO_FLOAT double
+#  endif
+
 #endif
 
+
+// #include "debug.h"
 //----------------------------------------------------------------------
 
 /// Hierarchy class constructor.
@@ -78,9 +95,12 @@ Hierarchy::~Hierarchy () throw ()
 
 #ifdef HYPRE_GRAV
 
-void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
+void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[],
+			     int level_coarsest,
+			     int level_finest) throw ()
 {
   _TRACE_;
+
   set_dim(3);
   // Determine Grid ID's
 
@@ -91,12 +111,38 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
   // Traverse levels in enzo hierarchy
   std::map<grid *,int> enzo_id;
 
-  int levelfactor = 1;
+  if (debug_hierarchy) printf ("DEBUG: %s:%d Called enzo_attach (%d %d)\n",
+			       __FILE__,__LINE__,level_coarsest,level_finest);
 
-  for (int lev=0; LevelArray[lev] != NULL; lev++,levelfactor*=RefineBy) {
+  // Set defaults for level_coarsest and level_finest:
+  //
+  //    if no levels specified: default to entire hierarchy
+  //    if one level specified: default to just that level
+
+  if (level_coarsest == LEVEL_UNKNOWN && level_finest == LEVEL_UNKNOWN) {
+    level_coarsest = 0;
+    level_finest   = INT_MAX;
+  } else if (level_coarsest != LEVEL_UNKNOWN && level_finest == LEVEL_UNKNOWN) {
+    level_finest   = level_coarsest;
+  }
+
+  if (! (level_coarsest <= level_finest)) {
+    ERROR("level_finest must not be less than level_coarsest");
+  }
+
+  if (debug_hierarchy) printf ("DEBUG: %s:%d Attaching to Enzo (%d %d)\n",
+			       __FILE__,__LINE__,level_coarsest,level_finest);
+
+  int levelfactor = 1;   // refinement factor for the current level
+
+  // Loop over levels
+
+  for (int level = level_coarsest; 
+       level <= level_finest && LevelArray[level] != NULL;
+       level++) {
 
     // Traverse grids in enzo level
-    for (LevelHierarchyEntry * itEnzoLevelGrid = LevelArray[lev];
+    for (LevelHierarchyEntry * itEnzoLevelGrid = LevelArray[level];
 	 itEnzoLevelGrid != NULL;
 	 itEnzoLevelGrid = itEnzoLevelGrid->NextGridThisLevel) {
 
@@ -108,7 +154,7 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
       // Collect required enzo grid data
 
       int id_parent;
-      if (lev == 0) {
+      if (level == level_coarsest) {
 	id_parent = -1;
       } else {
 	grid * enzo_parent = itEnzoLevelGrid->GridHierarchyEntry->ParentGrid->GridData;
@@ -116,6 +162,11 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
       }
 
       int ip = enzo_grid -> ProcessorNumber;
+
+//       fprintf (fp_debug,"%s:%d %d enzo grid[%d] PotentialField = %p  GravitatingMassField = %p\n",
+// 	       __FILE__,__LINE__,pmpi->ip(),id,
+// 	       enzo_grid->PotentialField,
+// 	       enzo_grid->GravitatingMassField);
 
       Scalar xl[3],xu[3];
       int il[3],n[3];
@@ -134,19 +185,96 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ()
       
       insert_grid(grid);
 
-      int nu[3];
-      nu[0] = enzo_grid->GravitatingMassFieldDimension[0];
-      nu[1] = enzo_grid->GravitatingMassFieldDimension[1];
-      nu[2] = enzo_grid->GravitatingMassFieldDimension[2];
       if (grid->is_local()) {
-	grid->set_u(enzo_grid->PotentialField,nu);
+
+	// CREATE THE X VECTOR
+
+	// Compute the grid dimensions, with no ghost zones
+
+	int ndh3[3];
+	ndh3[0] = enzo_grid->GridEndIndex[0] - enzo_grid->GridStartIndex[0] + 1;
+	ndh3[1] = enzo_grid->GridEndIndex[1] - enzo_grid->GridStartIndex[1] + 1;
+	ndh3[2] = enzo_grid->GridEndIndex[2] - enzo_grid->GridStartIndex[2] + 1;
+	
+	int ndh = ndh3[0]*ndh3[1]*ndh3[2];
+
+	// Allocate X, warning if we're reallocating
+
+	if (enzo_grid->hypre_grav_x == NULL) {
+	  WARNING_MESSAGE;
+	  delete [] enzo_grid->hypre_grav_x;
+	  enzo_grid->hypre_grav_x = NULL;
+	}
+	enzo_grid->hypre_grav_x = new ENZO_FLOAT [ndh]; // Deleted and nulled- in detach
+
+	// Clear X
+
+	for (int i=0; i<ndh; i++) enzo_grid->hypre_grav_x[i] = 0;
+
+	// CREATE THE B VECTOR
+
+	// Allocate B, warning if we're reallocating
+
+	if (enzo_grid->hypre_grav_b == NULL) {
+	  WARNING_MESSAGE;
+	  delete [] enzo_grid->hypre_grav_b;
+	  enzo_grid->hypre_grav_b = NULL;
+	}
+	enzo_grid->hypre_grav_b = new ENZO_FLOAT [ndh]; // Deleted and nulled- in detach
+
+	// Get the gravitating mass field array dimensions
+
+	int nde3[3];
+	nde3[0] = enzo_grid->GravitatingMassFieldDimension[0];
+	nde3[1] = enzo_grid->GravitatingMassFieldDimension[1];
+	nde3[2] = enzo_grid->GravitatingMassFieldDimension[2];
+
+	// Compute the gravitating mass field array offsets
+
+	int il[3];
+	il[0]= nint((enzo_grid->GridLeftEdge[0] -  enzo_grid->GravitatingMassFieldLeftEdge[0])
+		    /enzo_grid->GravitatingMassFieldCellSize);
+	il[1]= nint((enzo_grid->GridLeftEdge[1] -  enzo_grid->GravitatingMassFieldLeftEdge[1])
+		    /enzo_grid->GravitatingMassFieldCellSize);
+	il[2]= nint((enzo_grid->GridLeftEdge[2] -  enzo_grid->GravitatingMassFieldLeftEdge[2])
+		    /enzo_grid->GravitatingMassFieldCellSize);
+
+
+	// Copy the gravitating mass field to B
+
+	double sum_temp = 0.0;
+	int k=0;
+	for (int i2=0; i2<ndh3[2]; i2++) {
+	  for (int i1=0; i1<ndh3[1]; i1++) {
+	    for (int i0=0; i0<ndh3[0]; i0++) {
+	      int k0 = i0 + il[0];
+	      int k1 = i1 + il[1];
+	      int k2 = i2 + il[2];
+	      int ih =  i0 + ndh3[0] * ( i1 + ndh3[1] * i2 );
+	      int ie =  i0 + nde3[0] * ( i1 + nde3[1] * i2 );
+	      sum_temp += (enzo_grid->hypre_grav_b[ih] = enzo_grid->GravitatingMassField[ie]);
+	    }
+	  }
+	}
+
+	printf ("%s:%d %d DEBUG sum = %g\n",__FILE__,__LINE__,pmpi->ip(),sum_temp);
+
+	// Set the hypre arrays to point to the corresponding enzo hypre-grav arrays
+
+	grid->set_u(enzo_grid->hypre_grav_x,ndh3);
+
+	grid->set_f(enzo_grid->hypre_grav_b,ndh3);
+
+	WRITE_B_SUM(grid);
       }
-      //      grid->set_f(PotentialField);
 
       id++;
-    }
 
-  }
+    } // grids within level
+
+    levelfactor *= RefineBy;
+
+  } // level
 
   _TRACE_;
 }
@@ -238,6 +366,9 @@ void Hierarchy::geomview_grids (Mpi & mpi) throw ()
 void Hierarchy::print () throw ()
 {
   printf ("Hierarchy\n");
+  printf ("   levels      = %d\n",levels0_.size()-1);
+  printf ("   grids       = %d\n",grids0_.size()-1);
+  printf ("   dimension   = %d\n",dimension_);
   for (int i=0; i<num_levels(); i++) {
     level(i).print();
   }
@@ -276,7 +407,9 @@ void Hierarchy::init_grid_levels_ () throw ()
 {
   bool done = false;
 
-  while (! done) {
+  int pass_count = 0;
+
+  while (! done && pass_count++ < maximum_level) {
 
     done = true;
 
@@ -313,6 +446,17 @@ void Hierarchy::init_grid_levels_ () throw ()
 	}
       }
     }
+  } // while
+
+  if (pass_count >= maximum_level) {
+    printf ("%s:%d Hmmm, pass_count >= maximum_level\n",__FILE__,__LINE__);
+    ItHierarchyGridsAll itg (*this);
+    while (Grid * g = itg++) {
+      char filename[20];
+      sprintf (filename,"debug-grid-%d",g->id());
+      g->write("nofields",filename);
+    }
+    ERROR("too many passes in init_grid_levels_ loop: dumped grids");
   }
 }
 

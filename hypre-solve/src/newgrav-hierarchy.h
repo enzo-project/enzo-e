@@ -17,6 +17,9 @@
 #ifdef HYPRE_GRAV
 struct LevelHierarchyEntry;
 #endif
+
+#define LEVEL_UNKNOWN -1
+
 class Hierarchy
 {
 
@@ -84,7 +87,9 @@ protected:
 
   // Attach to the Enzo hierarchy
 
-  void enzo_attach (LevelHierarchyEntry *LevelArray[]) throw ();
+  void enzo_attach (LevelHierarchyEntry *LevelArray[],
+		    int level_coarse = LEVEL_UNKNOWN,
+		    int level_fine   = LEVEL_UNKNOWN) throw ();
 
   // Detach from the Enzo hierarchy
 

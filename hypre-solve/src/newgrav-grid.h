@@ -45,6 +45,7 @@
 class Grid
 {
 
+  friend class Hierarchy;
   //--------------------------------------------------------------------
   // PRIVATE MEMBER DATA
   //--------------------------------------------------------------------
@@ -83,6 +84,10 @@ class Grid
   /// fortran-style array
   Scalar *            u_;          
 
+  /// Offset of u_, such that u_ = new [] + offset, or u_ - offset = new[]
+
+  int                 offset_u_;
+
   /// Whether u_ was allocated by hypre-solve, or attached to an
   /// external array
   bool is_u_allocated_;
@@ -92,6 +97,8 @@ class Grid
   /// Right-hand side (single cell-centered variable) Stored as 3D
   /// fortran-style array
   Scalar *            f_;          
+  /// Offset of f_, such that f_ = new [] + offset, or f_ - offset = new[]
+  int                 offset_f_;
   /// Whether f_ was allocated by hypre-solve, or attached to an
   /// external array
   bool is_f_allocated_;
@@ -205,7 +212,7 @@ protected:
   /// Return a pointer to the right-hand side array associated with
   /// the grid
 
-  Scalar * get_f (int * nu0, int * nu1, int * nu2) throw ();
+  Scalar * get_f (int * nf0, int * nf1, int * nf2) throw ();
 
   /// Set the right-hand side array associated with the grid
   void set_f (Scalar *, int dims[3]) throw ();
@@ -225,6 +232,14 @@ protected:
   /// Allocate storage for the array of values associated with the grid
 
   void allocate () throw ();
+
+  /// Allocate storage for the u_ array
+
+  void allocate_u_ (int offset) throw ();
+
+  /// Allocate storage for the f_ array
+
+  void allocate_f_ (int offset) throw ();
 
   /// Input the grid from the given string in compact format
 
@@ -458,7 +473,9 @@ protected:
   bool is_adjacent (Grid & grid, Scalar period[3]) throw ();
   /// Return true iff the grid belongs to processor ip
   bool is_local () throw()
-  { return mpi_.ip() == ip_; };
+  { 
+    return mpi_.ip() == ip_; 
+  };
   /// Return true iff the grid contains the other grid (i.e. is an ancestor)
   bool contains (Grid * grid) throw ();
   

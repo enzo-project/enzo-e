@@ -49,8 +49,10 @@ Grid::Grid (std::string parms) throw ()
   : faces_(NULL),
     level_ (-1),
     u_(NULL),
+    offset_u_(0),
     is_u_allocated_(false),
     f_(NULL),
+    offset_f_(0),
     is_f_allocated_(false),
     counters_ (NULL)
 {
@@ -85,8 +87,10 @@ Grid::Grid (int     id,
   : faces_(NULL),
     level_ (-1),
     u_(NULL),
+    offset_u_(0),
     is_u_allocated_(false),
     f_(NULL),
+    offset_f_(0),
     is_f_allocated_(false),
     counters_ (NULL)
 {
@@ -118,8 +122,10 @@ Grid::Grid (std::string field, FILE *fp) throw ()
     faces_(NULL),
     level_(-1),
     u_(NULL),
+    offset_u_(0),
     is_u_allocated_(false),
     f_(NULL),
+    offset_f_(0),
     is_f_allocated_(false),
     counters_(NULL)
 {
@@ -154,8 +160,9 @@ Grid::~Grid () throw ()
 
 void Grid::print () throw ()
 {
-  this->write("u",stdout,true);
-  this->write("f",stdout,true);
+  this->write("header",stdout,true);
+  this->write("u",     stdout,true);
+  this->write("f",     stdout,true);
 }
 
 //======================================================================
@@ -163,6 +170,8 @@ void Grid::print () throw ()
 void Grid::write (std::string field, FILE *fp, bool brief) throw ()
 {
   if (fp == 0) fp = stdout;
+
+  if (field=="header") {
   fprintf (fp,"Grid\n"
 	  "   id             %d\n"
 	  "   parent id      %d\n"
@@ -178,6 +187,7 @@ void Grid::write (std::string field, FILE *fp, bool brief) throw ()
 	  il_[0],il_[1],il_[2],
           n_ [0],n_ [1],n_ [2],
 	   level_);
+  }
   if (field=="u" && u_ && ! brief) {
     for (int i0=0; i0<n_[0]; i0++) {
       for (int i1=0; i1<n_[1]; i1++) {
@@ -223,13 +233,12 @@ void Grid::read (std::string field, FILE *fp, bool brief) throw ()
 	  &n_ [0],&n_ [1],&n_ [2]);
   fscanf (fp,"   level          %d",	 &level_);
 
-  nu_[0] = nf_[0] = n_[0];
-  nu_[1] = nf_[1] = n_[1];
-  nu_[2] = nf_[2] = n_[2];
-
   if (field=="u" && ! brief) {
-    delete [] u_;
-    u_ = new Scalar [n_[0]*n_[1]*n_[2]];
+    nu_[0] = n_[0];
+    nu_[1] = n_[1];
+    nu_[2] = n_[2];
+    int offset = 0;
+    allocate_u_(offset);
     int i0,i1,i2;
     Scalar u;
     int status;
@@ -239,6 +248,11 @@ void Grid::read (std::string field, FILE *fp, bool brief) throw ()
     }
   }
   if (f_ && ! brief) {
+    nf_[0] = n_[0];
+    nf_[1] = n_[1];
+    nf_[2] = n_[2];
+    int offset = 0;
+    allocate_u_(offset);
     int i0,i1,i2;
     Scalar f;
     int status;
@@ -253,22 +267,43 @@ void Grid::read (std::string field, FILE *fp, bool brief) throw ()
 
 Scalar * Grid::get_u (int * nu0, int * nu1, int * nu2) throw ()
 {
-  assert (u_);
   *nu0 = nu_[0];
   *nu1 = nu_[1];
   *nu2 = nu_[2];
-  return u_;
+  return u_ - offset_u_;
 }
 
 //----------------------------------------------------------------------
 
 void Grid::set_u (Scalar * u, int dims[3]) throw ()
 {
-  if (u == NULL) WARNING("Grid::set_u() called with NULL\n");
-  assert (u != NULL);
+  nu_[0] = dims[0];
+  nu_[1] = dims[1];
+  nu_[2] = dims[2];
+
   deallocate_u_();
-  u_ = u;
-  is_u_allocated_ = false;
+
+  int i0 = (nu_[0] - n_[0]) / 2;
+  int i1 = (nu_[1] - n_[1]) / 2;
+  int i2 = (nu_[2] - n_[2]) / 2;
+  
+  int offset = i0 + nu_[0]*(i1 + nu_[1]*i2);
+
+  if (u == NULL) {
+    char message[80];
+    sprintf (message,"Grid(%p)::set_u() called with NULL--allocating\n",this);
+    WARNING(message);
+    allocate_u_(offset);
+    is_u_allocated_ = true;  
+
+  } else {
+
+    // Set u_ to first non-ghost value
+
+    offset_u_ = offset;
+    u_ = u + offset_u_;
+    is_u_allocated_ = false;  
+  }
 }
 
 //----------------------------------------------------------------------
@@ -279,34 +314,43 @@ Scalar * Grid::get_f (int * nf0, int * nf1, int * nf2) throw ()
   *nf0 = nf_[0];
   *nf1 = nf_[1];
   *nf2 = nf_[2];
-  return f_;
+  return f_ - offset_f_;
 }
 
 //----------------------------------------------------------------------
 
 void Grid::set_f (Scalar * f, int dims[3]) throw ()
 {
-  if (f == NULL) WARNING("Grid::set_f() called with NULL\n");
-  //  assert (f != NULL);
+
+  nf_[0] = dims[0];
+  nf_[1] = dims[1];
+  nf_[2] = dims[2];
+
   deallocate_f_();
-  f_ = f;
-  is_f_allocated_ = false;
-}
 
-//----------------------------------------------------------------------
+  int i0 = (nf_[0] - n_[0]) / 2;
+  int i1 = (nf_[1] - n_[1]) / 2;
+  int i2 = (nf_[2] - n_[2]) / 2;
+  
+  int offset = i0 + nf_[0]*(i1 + nf_[1]*i2);
 
-void Grid::allocate () throw ()
-{
-  deallocate();
+  if (f == NULL) {
+    char message[80];
+    sprintf (message,"Grid(%p)::set_f() called with NULL--allocating\n",this);
+    WARNING(message);
+    allocate_f_(offset);
+    is_f_allocated_ = true;  
 
-  // Set allocated sizes
+  } else {
 
-  nu_[0] = nf_[0] = n_[0];
-  nu_[1] = nf_[1] = n_[1];
-  nu_[2] = nf_[2] = n_[2];
+    printf ("%s:%d DEBUG offset=%d\n",__FILE__,__LINE__,offset);
+    offset_f_ = offset;
+    f_ = f + offset_f_;
+    is_f_allocated_ = false;
+  }
 
-  u_ = new Scalar [nu_[0]*nu_[1]*nu_[2]];
-  f_ = new Scalar [nf_[0]*nf_[1]*nf_[2]];
+  WRITE_B_SUM(this);
+  
 }
 
 //======================================================================
@@ -315,25 +359,76 @@ void Grid::deallocate () throw ()
 {
   deallocate_u_();
   deallocate_f_();
-
-  nu_[0] = nf_[0] = 0;
-  nu_[1] = nf_[1] = 0;
-  nu_[2] = nf_[2] = 0;
 }
+
+//----------------------------------------------------------------------
 
 void Grid::deallocate_u_ () throw ()
 {
-  if (is_u_allocated_ && u_ != NULL) delete [] u_;
+  if (is_u_allocated_ && u_ != NULL) {
+    if (trace) {
+      printf ("%s:%d TRACE deallocate_u_ %p %d\n",__FILE__,__LINE__,u_,offset_u_);
+      fflush(stdout);
+    }
+    delete [] (u_ - offset_u_);
+  }
   u_ = NULL;
+  offset_u_ = 0;
   is_u_allocated_ = true; // reset default
 }
 
+//----------------------------------------------------------------------
+
 void Grid::deallocate_f_ () throw ()
 {
-  if (is_f_allocated_ && f_ != NULL) delete [] f_;
+  if (is_f_allocated_ && f_ != NULL) {
+    if (trace) {
+      printf ("%s:%d TRACE deallocate_f_ %p %d\n",__FILE__,__LINE__,f_,offset_f_);
+      fflush(stdout);
+    }
+    delete [] (f_ - offset_f_);
+  }
   f_ = NULL;
+  offset_f_ = 0;
   is_f_allocated_ = true; // reset default
 }
+
+//======================================================================
+
+void Grid::allocate () throw ()
+{
+  allocate_u_(0);
+  allocate_f_(0);
+}
+
+//----------------------------------------------------------------------
+
+void Grid::allocate_u_ (int offset) throw ()
+{
+  deallocate_u_();
+  offset_u_ = offset;
+  u_ = new Scalar [nu_[0]*nu_[1]*nu_[2]] + offset_u_;
+  is_u_allocated_ = true;
+  if (trace) {
+    printf ("%s:%d TRACE allocate_u_ %p %d\n",__FILE__,__LINE__,u_,offset_u_);
+    fflush(stdout);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Grid::allocate_f_ (int offset) throw ()
+{
+  deallocate_f_();
+  offset_f_ = offset;
+  f_ = new Scalar [nf_[0]*nf_[1]*nf_[2]] + offset_f_;
+  is_f_allocated_ = true;
+  if (trace) {
+    printf ("%s:%d TRACE allocate_f_ %p %d\n",__FILE__,__LINE__,f_,offset_f_);
+    fflush(stdout);
+  }
+}
+
 //======================================================================
 
 void Grid::geomview_grid (FILE *fpr, bool full) throw ()
