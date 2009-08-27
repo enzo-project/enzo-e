@@ -11,16 +11,8 @@
 /  NOTE:
 /
 ************************************************************************/
- 
-#include <stdio.h>
-#include "macros_and_parameters.h"
-#include "typedefs.h"
-#include "global_data.h"
-#include "Fluxes.h"
-#include "GridList.h"
-#include "ExternalBoundary.h"
-#include "Grid.h"
-#include "CosmologyParameters.h"
+
+#include "cello_hydro.h"
  
 /* function prototypes */
  
@@ -63,40 +55,30 @@ int grid::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
  
     MinimumSupportEnergyCoefficient =
       GravitationalConstant/(4.0*pi) / (pi * (Gamma*(Gamma-1.0))) *
-                  CosmoFactor * MinimumPressureSupportParameter *
+      CosmoFactor * MinimumPressureSupportParameter *
                   CellWidth[0][0] * CellWidth[0][0];
  
-    if (HydroMethod == Zeus_Hydro)
-      ;
  
-      /* Zeus: TE is really GE (ugh) -- now applied to pressure inside
-	   zeus routine (much better and should be applied to ppm as well)
+    /* PPM: set GE. */
  
+    if (DualEnergyFormalism == TRUE) {
       for (i = 0; i < size; i++)
-	BaryonField[TENum][i] = max(BaryonField[TENum][i], Coeff*
-				    BaryonField[DensNum][i]);   */
-    else {
- 
-      /* PPM: set GE. */
- 
-      if (DualEnergyFormalism == TRUE) {
-	for (i = 0; i < size; i++)
-	  BaryonField[GENum][i] = max(BaryonField[GENum][i],
-				      MinimumSupportEnergyCoefficient *
-				      BaryonField[DensNum][i]);
-	if (GridRank != 3) return FAIL;
-	for (i = 0; i < size; i++)
-	  BaryonField[TENum][i] = max(BaryonField[GENum][i] + 0.5*
-		       (BaryonField[Vel1Num][i]*BaryonField[Vel1Num][i] +
-		        BaryonField[Vel2Num][i]*BaryonField[Vel2Num][i] +
-		        BaryonField[Vel3Num][i]*BaryonField[Vel3Num][i]),
-				      BaryonField[TENum][i]);
+	BaryonField[GENum][i] = max(BaryonField[GENum][i],
+				    MinimumSupportEnergyCoefficient *
+				    BaryonField[DensNum][i]);
+      if (GridRank != 3) return FAIL;
+      for (i = 0; i < size; i++)
+	BaryonField[TENum][i] = 
+	  max(BaryonField[GENum][i] + 0.5*
+	      (BaryonField[Vel1Num][i]*BaryonField[Vel1Num][i] +
+	       BaryonField[Vel2Num][i]*BaryonField[Vel2Num][i] +
+	       BaryonField[Vel3Num][i]*BaryonField[Vel3Num][i]),
+	      BaryonField[TENum][i]);
 								
-      }
-      else {
-	fprintf(stderr, "not implemented.\n");
-	return FAIL;
-      }
+    }
+    else {
+      fprintf(stderr, "not implemented.\n");
+      return FAIL;
     }
  
   } // end: if (NumberOfBaryonFields > 0)

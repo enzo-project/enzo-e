@@ -14,17 +14,8 @@
  
 // Compute the pressure at the requested time.  The pressure here is
 //   just the ideal-gas equation-of-state.
- 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "macros_and_parameters.h"
-#include "typedefs.h"
-#include "global_data.h"
-#include "Fluxes.h"
-#include "GridList.h"
-#include "ExternalBoundary.h"
-#include "Grid.h"
+
+#include "cello_hydro.h"
  
 /* function prototypes */
  
@@ -37,8 +28,8 @@ int grid::ComputePressure(FLOAT time, float *pressure)
  
   /* declarations */
  
-  float density, gas_energy, total_energy;
-  float velocity1, velocity2 = 0, velocity3 = 0;
+  float density, gas_energy;
+  float total_energy, velocity1, velocity2 = 0, velocity3 = 0;
   int i, size = 1;
  
   /* Error Check */
@@ -76,8 +67,6 @@ int grid::ComputePressure(FLOAT time, float *pressure)
      subtract the kinetic energy term. */
  
   float OneHalf = 0.5;
-  if (HydroMethod == Zeus_Hydro)
-    OneHalf = 0.0;
  
   /* Loop over the grid, compute the thermal energy, then the pressure,
      the timestep and finally the implied timestep. */
@@ -104,8 +93,8 @@ int grid::ComputePressure(FLOAT time, float *pressure)
  
       pressure[i] = (Gamma - 1.0)*density*gas_energy;
  
-      if (pressure[i] < tiny_number)
-	pressure[i] = tiny_number;
+      if (pressure[i] < pressure_floor)
+	pressure[i] = pressure_floor;
  
     } // end of loop
  
@@ -137,8 +126,8 @@ int grid::ComputePressure(FLOAT time, float *pressure)
  
       pressure[i] = (Gamma - 1.0)*density*gas_energy;
  
-      if (pressure[i] < tiny_number)
-	pressure[i] = tiny_number;
+      if (pressure[i] < pressure_floor)
+	pressure[i] = pressure_floor;
  
     }
  
@@ -182,7 +171,7 @@ int grid::ComputePressure(FLOAT time, float *pressure)
       /* First, approximate temperature. */
  
       if (number_density == 0)
-	number_density = tiny_number;
+	number_density = number_density_floor;
       temp = max(TemperatureUnits*pressure[i]/(number_density + nH2), 1);
  
       /* Only do full computation if there is a reasonable amount of H2.
@@ -193,7 +182,7 @@ int grid::ComputePressure(FLOAT time, float *pressure)
       if (nH2/number_density > 1e-3) {
 	x = temp/6100.0;
 	if (x < 10.0)
-	  GammaH2Inverse = 0.5*(5 + 2.0 * x*x * exp(x)/POW(exp(x)-1.0,2));
+	  GammaH2Inverse = 0.5*(5 + 2.0 * x*x * exp(x)/pow(exp(x)-1.0,2));
       }
  
       Gamma1 = 1.0 + (nH2 + number_density) /
@@ -210,8 +199,10 @@ int grid::ComputePressure(FLOAT time, float *pressure)
   /* To emulate the opacity limit in turbulent star formation 
      simulations */
   
+  // @@@ HOW TO PARAMETERIZE? jb @@@
+
   float Gamma1 = Gamma;
-  if ((ProblemType == 60 || ProblemType == 61) && SelfGravity == 1)
+  if ((ProblemType == 60 || ProblemType == 61) && GravityOn == TRUE)
     for (i=0; i<size; i++) {
       Gamma1 = min(Gamma + (log10(BaryonField[DensNum][i])-8.0)*0.3999/2.5, 1.4);
       pressure[i] *= (Gamma1 - 1.0)/(Gamma - 1.0);

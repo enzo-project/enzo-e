@@ -14,18 +14,8 @@
  
 // Compute the pressure at the requested time.  The pressure here is
 //   just the ideal-gas equation-of-state.
- 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "macros_and_parameters.h"
-#include "typedefs.h"
-#include "global_data.h"
-#include "Fluxes.h"
-#include "GridList.h"
-#include "ExternalBoundary.h"
-#include "fortran.def"
-#include "Grid.h"
+
+#include "cello_hydro.h"
  
 /* Set the mean molecular mass. */
  
@@ -45,10 +35,6 @@ int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
  
 int grid::ComputeTemperatureField(float *temperature)
 {
-  /* Return if this doesn't concern us. */
- 
-  if (ProcessorNumber != MyProcessorNumber)
-    return SUCCESS;
  
   int DensNum, result;
   int DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum, HMNum, H2INum, H2IINum,
@@ -57,18 +43,18 @@ int grid::ComputeTemperatureField(float *temperature)
   /* If Gadget equilibrium cooling is on, call the appropriate routine,
      then exit - don't use the rest of the routine. */
 
-  if(GadgetEquilibriumCooling){
-    if(DualEnergyFormalism)
-      result = this->GadgetComputeTemperatureDEF(Time, temperature);
-    else
-      result = this->GadgetComputeTemperature(Time,temperature);
+//   if(GadgetEquilibriumCooling){
+//     if(DualEnergyFormalism)
+//       result = this->GadgetComputeTemperatureDEF(Time, temperature);
+//     else
+//       result = this->GadgetComputeTemperature(Time,temperature);
 
-    if(result == FAIL) {
-      fprintf(stderr, "Error in grid->ComputePressure: Gadget.\n");
-      return FAIL;
-    }
-    return SUCCESS;
-  }
+//     if(result == FAIL) {
+//       fprintf(stderr, "Error in grid->ComputePressure: Gadget.\n");
+//       return FAIL;
+//     }
+//     return SUCCESS;
+//   }
 
   /* Compute the pressure first. */
  
@@ -95,7 +81,8 @@ int grid::ComputeTemperatureField(float *temperature)
     return FAIL;
   }
  
- 
+
+  // @@@ WHY PROBLEM-DEPENDENT? jb @@@
   if (ProblemType == 60 || ProblemType == 61) { //AK
     for (i = 0; i < size; i++) {
       if (BaryonField[DensNum][i] <= 0.0)
@@ -120,10 +107,11 @@ int grid::ComputeTemperatureField(float *temperature)
 
   /* For Sedov Explosion compute temperature without floor */
 
+  // @@@ WHY PROBLEM-DEPENDENT? jb @@@
   float mol_weight = DEFAULT_MU, min_temperature = 1.0;
   if (ProblemType == 7) {//AK for Sedov explosion test
     mol_weight = 1.0;
-    min_temperature = tiny_number;
+    min_temperature = temperature_floor;
   }
 
 
@@ -134,7 +122,7 @@ int grid::ComputeTemperatureField(float *temperature)
  
     for (i = 0; i < size; i++)
       temperature[i] = max((TemperatureUnits*temperature[i]*mol_weight
-		         /max(BaryonField[DensNum][i], tiny_number)),
+		         /max(BaryonField[DensNum][i], density_floor)),
 			 min_temperature);
   else {
  
@@ -164,7 +152,7 @@ int grid::ComputeTemperatureField(float *temperature)
  
       /* Ignore deuterium. */
  
-      temperature[i] *= TemperatureUnits/max(number_density, tiny_number);
+      temperature[i] *= TemperatureUnits/max(number_density, number_density_floor);
       temperature[i] = max(temperature[i], MINIMUM_TEMPERATURE);
     }
   }

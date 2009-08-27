@@ -14,17 +14,8 @@
  
 // Compute the pressure at the requested time.  The pressure here is
 //   just the ideal-gas equation-of-state (dual energy version).
- 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "macros_and_parameters.h"
-#include "typedefs.h"
-#include "global_data.h"
-#include "Fluxes.h"
-#include "GridList.h"
-#include "ExternalBoundary.h"
-#include "Grid.h"
+
+#include "cello_hydro.h"
  
 /* function prototypes */
  
@@ -82,8 +73,8 @@ int grid::ComputePressureDualEnergyFormalism(FLOAT time, float *pressure)
       pressure[i] = (Gamma - 1.0) * BaryonField[DensNum][i] *
                                     BaryonField[GENum][i];
  
-      if (pressure[i] < tiny_number)
-	pressure[i] = tiny_number;
+      if (pressure[i] < pressure_floor)
+	pressure[i] = pressure_floor;
  
     }
  
@@ -100,8 +91,8 @@ int grid::ComputePressureDualEnergyFormalism(FLOAT time, float *pressure)
  
       pressure[i] = (Gamma - 1.0)*density*gas_energy;
  
-      if (pressure[i] < tiny_number)
-	pressure[i] = tiny_number;
+      if (pressure[i] < pressure_floor)
+	pressure[i] = pressure_floor;
  
     }
  
@@ -145,7 +136,7 @@ int grid::ComputePressureDualEnergyFormalism(FLOAT time, float *pressure)
       /* First, approximate temperature. */
  
       if (number_density == 0)
-	number_density = tiny_number;
+	number_density = number_density_floor;
       temp = max(TemperatureUnits*pressure[i]/(number_density + nH2), 1);
  
       /* Only do full computation if there is a reasonable amount of H2.
@@ -156,7 +147,7 @@ int grid::ComputePressureDualEnergyFormalism(FLOAT time, float *pressure)
       if (nH2/number_density > 1e-3) {
 	x = temp/6100.0;
 	if (x < 10.0)
-	  GammaH2Inverse = 0.5*(5 + 2.0 * x*x * exp(x)/POW(exp(x)-1.0,2));
+	  GammaH2Inverse = 0.5*(5 + 2.0 * x*x * exp(x)/pow(exp(x)-1.0,2));
       }
  
       Gamma1 = 1.0 + (nH2 + number_density) /

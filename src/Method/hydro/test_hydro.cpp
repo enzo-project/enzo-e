@@ -13,20 +13,22 @@
 
 #include "test.hpp"
 
-#include "macros_and_parameters.h"
-#include "typedefs.h"
-#include "global_data.h"
-#include "Fluxes.h"
-#include "ExternalBoundary.h"
-#include "ProtoSubgrid.h"
-#include "GridList.h"
-#include "Grid.h"
-#include "Hierarchy.h"
-#include "LevelHierarchy.h"
+#include "cello_hydro.h"
+
+
 
 main()
 {
   unit_class ("MethodPpm");
   unit_open();
+  grid g;
 
+  initialize_hydro ();
+
+  int      cycle = 0;
+  int      num_subgrids = 0;
+  fluxes * subgrid_fluxes[1] = {NULL};
+  int      level = 0;
+
+  g.SolveHydroEquations(cycle, num_subgrids, subgrid_fluxes, level);
 }

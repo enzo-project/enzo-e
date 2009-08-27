@@ -12,11 +12,8 @@
 /
 ************************************************************************/
  
-#include <stdio.h>
-#include <math.h>
-#include "macros_and_parameters.h"
-#include "CosmologyParameters.h"
- 
+#include "cello_hydro.h"
+
 #define OMEGA_TOLERANCE 1.0e-5
  
 #ifdef p4
@@ -30,9 +27,6 @@
 #endif
  
 // function prototypes
- 
-double arccosh(double x);
-double arcsinh(double x);
  
 int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
 {
@@ -53,7 +47,7 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
   /* Convert the time from code units to Time * H0 (c.f. CosmologyGetUnits). */
  
   float TimeUnits = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
-                    POW(1 + InitialRedshift,FLOAT(1.5));
+                    pow(1 + InitialRedshift,FLOAT(1.5));
  
   FLOAT TimeHubble0 = time * TimeUnits * (HubbleConstantNow*3.24e-18);
  
@@ -61,7 +55,7 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
  
   if (fabs(OmegaMatterNow-1) < OMEGA_TOLERANCE &&
       OmegaLambdaNow < OMEGA_TOLERANCE)
-    *a      = POW(time/InitialTimeInCodeUnits, FLOAT(2.0/3.0));
+    *a      = pow(time/InitialTimeInCodeUnits, FLOAT(2.0/3.0));
  
 #define INVERSE_HYPERBOLIC_EXISTS
  
@@ -77,7 +71,7 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
  
   if (OmegaMatterNow < 1 && OmegaLambdaNow < OMEGA_TOLERANCE) {
  
-    x = 2*TimeHubble0*POW(1.0 - OmegaMatterNow, 1.5) / OmegaMatterNow;
+    x = 2*TimeHubble0*pow(1.0 - OmegaMatterNow, 1.5) / OmegaMatterNow;
  
     /* Compute eta in a three step process, first from a third-order
        Taylor expansion of the formula above, then use that in a fifth-order
@@ -85,11 +79,11 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
        eta.  This works well because parts 1 & 2 are an excellent approximation
        when x is small and part 3 converges quickly when x is large. */
  
-    eta = POW(6*x, FLOAT(1.0/3.0));                     // part 1
-    eta = POW(120*x/(20+eta*eta), FLOAT(1.0/3.0));      // part 2
+    eta = pow(6*x, FLOAT(1.0/3.0));                     // part 1
+    eta = pow(120*x/(20+eta*eta), FLOAT(1.0/3.0));      // part 2
     for (i = 0; i < 40; i++) {                          // part 3
       eta_old = eta;
-      eta = arcsinh(eta + x);
+      eta = asinh(eta + x);
       if (fabs(eta-eta_old) < ETA_TOLERANCE) break;
     }
     if (i == 40) {
@@ -113,8 +107,8 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
  
   if (fabs(OmegaCurvatureNow) < OMEGA_TOLERANCE &&
       OmegaLambdaNow > OMEGA_TOLERANCE) {
-    *a = POW(FLOAT(OmegaMatterNow/(1 - OmegaMatterNow)), FLOAT(1.0/3.0)) *
-         POW(FLOAT(sinh(1.5 * sqrt(1.0 - OmegaMatterNow)*TimeHubble0)),
+    *a = pow(FLOAT(OmegaMatterNow/(1 - OmegaMatterNow)), FLOAT(1.0/3.0)) *
+         pow(FLOAT(sinh(1.5 * sqrt(1.0 - OmegaMatterNow)*TimeHubble0)),
 	     FLOAT(2.0/3.0));
     *a *= (1 + InitialRedshift);    // to convert to code units, divide by [a]
   }

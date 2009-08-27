@@ -34,11 +34,8 @@
 /
 ************************************************************************/
  
-#include <stdio.h>
-#include <math.h>
-#include "macros_and_parameters.h"
-#include "CosmologyParameters.h"
- 
+#include "cello_hydro.h"
+
 /* function prototypes */
  
 int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
@@ -62,17 +59,17 @@ int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
  
   /* Determine the units. */
  
-  *DensityUnits     = 1.88e-29*OmegaMatterNow*POW(HubbleConstantNow,2)*
-                      POW(1 + CurrentRedshift,3);
+  *DensityUnits     = 1.88e-29*OmegaMatterNow*pow(HubbleConstantNow,2)*
+                      pow(1 + CurrentRedshift,3);
  
   *LengthUnits      = 3.086e24*ComovingBoxSize/HubbleConstantNow/
                       (1 + CurrentRedshift);
  
-  *TemperatureUnits = 1.88e6*POW(ComovingBoxSize,2)*OmegaMatterNow*
+  *TemperatureUnits = 1.88e6*pow(ComovingBoxSize,2)*OmegaMatterNow*
                       (1 + InitialRedshift);
  
   *TimeUnits        = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
-                      POW(1 + InitialRedshift,FLOAT(1.5));
+                      pow(1 + InitialRedshift,FLOAT(1.5));
  
   *VelocityUnits    = 1.225e7*ComovingBoxSize*sqrt(OmegaMatterNow)*
                       sqrt(1 + InitialRedshift);

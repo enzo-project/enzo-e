@@ -13,18 +13,8 @@
 ************************************************************************/
  
 // Compute the ratio of specific heats.
- 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "macros_and_parameters.h"
-#include "typedefs.h"
-#include "global_data.h"
-#include "Fluxes.h"
-#include "GridList.h"
-#include "ExternalBoundary.h"
-#include "fortran.def"
-#include "Grid.h"
+
+#include "cello_hydro.h"
  
 /* function prototypes */
  
@@ -88,7 +78,7 @@ int grid::ComputeGammaField(float *GammaField)
       if (nH2/number_density > 1e-3) {
 	x = GammaField[i]/6100.0;
 	if (x < 10.0)
-	  GammaH2Inverse = 0.5*(5 + 2.0 * x*x * exp(x)/POW(exp(x)-1.0,2));
+	  GammaH2Inverse = 0.5*(5 + 2.0 * x*x * exp(x)/pow(exp(x)-1.0,2));
       }
  
       /* Add in H2. */

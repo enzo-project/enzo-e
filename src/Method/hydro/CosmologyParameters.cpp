@@ -1,5 +1,5 @@
-#include "macros_and_parameters.h"
-#include "typedefs.h"
+
+#include "cello_hydro.h"
 
 /* Cosmology Parameters */
 

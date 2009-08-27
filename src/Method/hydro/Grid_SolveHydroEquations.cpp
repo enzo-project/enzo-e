@@ -16,16 +16,8 @@
 // Solve the hydro equations with the solver, saving the subgrid fluxes
 //
  
-#include <stdio.h>
-#include "macros_and_parameters.h"
-#include "typedefs.h"
-#include "global_data.h"
-#include "Fluxes.h"
-#include "GridList.h"
-#include "ExternalBoundary.h"
-#include "Grid.h"
-#include "fortran.def"
- 
+#include "cello_hydro.h"
+
 /* function prototypes */
  
 int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
@@ -38,7 +30,7 @@ extern "C" void FORTRAN_NAME(ppm_de)(
                             float dx[], float dy[], float dz[],
 			  int *rank, int *in, int *jn, int *kn,
                             int is[], int ie[],
-			  float gridvel[], int *flatten, int *ipresfree,
+			  int *flatten, int *ipresfree,
 			  int *diff, int *steepen, int *idual,
                             float *eta1, float *eta2,
 			  int *num_subgrids, int leftface[], int rightface[],
@@ -53,20 +45,13 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
 			      fluxes *SubgridFluxes[], int level)
 {
  
-  /* Return if this doesn't concern us. */
- 
-  if (ProcessorNumber != MyProcessorNumber)
-    return SUCCESS;
- 
-  this->DebugCheck("SolveHydroEquations");
- 
   if (NumberOfBaryonFields > 0) {
  
     /* initialize */
  
     int dim, i, idim, j, jdim, field, size, subgrid, n;
     int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num, coloff[MAX_COLOR];
-    Elong_int GridGlobalStart[MAX_DIMENSION];
+    long long GridGlobalStart[MAX_DIMENSION];
     FLOAT a = 1, dadt;
  
     float *colourpt = NULL;
@@ -154,33 +139,17 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
         velocity3[i] = 0.0;
     }
  
-    /* Allocate temporary space for Zeus_Hydro. */
- 
-    float *zeus_temp;
-    if (HydroMethod == Zeus_Hydro)
-      zeus_temp = new float[size];
-    int LowestLevel = (level > MaximumRefinementLevel-1) ? TRUE : FALSE;
- 
     /* Determine if Gamma should be a scalar or a field. */
  
     int UseGammaField = FALSE;
     float *GammaField;
-    if (HydroMethod == Zeus_Hydro && MultiSpecies > 1) {
-      UseGammaField = TRUE;
-      GammaField = new float[size];
-      if (this->ComputeGammaField(GammaField) == FAIL) {
-	fprintf(stderr, "Error in grid->ComputeGammaField.\n");
-	return FAIL;
-      }
-    } else {
-      GammaField = new float[1];
-      GammaField[0] = Gamma;
-    }
+    GammaField = new float[1];
+    GammaField[0] = Gamma;
  
     /* Set minimum support. */
  
     float MinimumSupportEnergyCoefficient = 0;
-    if (UseMinimumPressureSupport == TRUE && level > MaximumRefinementLevel-1)
+    if (UseMinimumPressureSupport == TRUE)
       if (this->SetMinimumSupport(MinimumSupportEnergyCoefficient) == FAIL) {
 	fprintf(stderr, "Error in grid->SetMinimumSupport,\n");
 	return FAIL;
@@ -252,7 +221,6 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
       GridDimension[i]   = 1;
       GridStartIndex[i]  = 0;
       GridEndIndex[i]    = 0;
-      GridVelocity[i]    = 0.0;
       GridGlobalStart[i] = 0;
     }
  
@@ -394,11 +362,6 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
 	  CellWidthTemp[dim][i] = 1.0;
     }
  
-    /* Prepare Gravity. */
- 
-    int GravityOn = 0, FloatSize = sizeof(float);
-    if (SelfGravity || UniformGravity || PointSourceGravity)
-      GravityOn = 1;
  
     /* call a Fortran routine to actually compute the hydro equations
        on this grid.
@@ -406,27 +369,28 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
        the right thing for < 3 dimensions. */
     /* note: Start/EndIndex are zero based */
  
-    if (HydroMethod == PPM_DirectEuler)
-      FORTRAN_NAME(ppm_de)(
-			density, totalenergy, velocity1, velocity2, velocity3,
-                          gasenergy,
-			&GravityOn, AccelerationField[0],
-                           AccelerationField[1],
-                           AccelerationField[2],
-			&Gamma, &dtFixed, &CycleNumber,
-                          CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
-			&GridRank, &GridDimension[0], &GridDimension[1],
-                           &GridDimension[2], GridStartIndex, GridEndIndex,
-			GridVelocity, &PPMFlatteningParameter,
-                           &PressureFree,
-			&PPMDiffusionParameter, &PPMSteepeningParameter,
-                           &DualEnergyFormalism, &DualEnergyFormalismEta1,
-			   &DualEnergyFormalismEta2,
-			&NumberOfSubgrids, leftface, rightface,
-			istart, iend, jstart, jend,
-			standard, dindex, Eindex, uindex, vindex, windex,
-			  geindex, temp,
-                        &NumberOfColours, colourpt, coloff, colindex);
+    FORTRAN_NAME(ppm_de)
+      (
+       density, totalenergy, velocity1, velocity2, velocity3,
+       gasenergy,
+       &GravityOn, AccelerationField[0],
+       AccelerationField[1],
+       AccelerationField[2],
+       &Gamma, &dtFixed, &CycleNumber,
+       CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
+       &GridRank, &GridDimension[0], &GridDimension[1],
+       &GridDimension[2], GridStartIndex, GridEndIndex,
+       &PPMFlatteningParameter,
+       &PressureFree,
+       &PPMDiffusionParameter, &PPMSteepeningParameter,
+       &DualEnergyFormalism, &DualEnergyFormalismEta1,
+       &DualEnergyFormalismEta2,
+       &NumberOfSubgrids, leftface, rightface,
+       istart, iend, jstart, jend,
+       standard, dindex, Eindex, uindex, vindex, windex,
+       geindex, temp,
+       &NumberOfColours, colourpt, coloff, colindex
+       );
  
  
     /* deallocate temporary space for solver */
@@ -434,8 +398,6 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
     delete [] temp;
     if (GridRank < 3) delete [] velocity3;
     if (GridRank < 2) delete [] velocity2;
-    if (HydroMethod == Zeus_Hydro)
-      delete [] zeus_temp;
  
     delete [] leftface;
     delete [] GammaField;
@@ -444,8 +406,6 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
       delete [] CellWidthTemp[dim];
  
   }  // end: if (NumberOfBaryonFields > 0)
- 
-  this->DebugCheck("SolveHydroEquations (after)");
  
   return SUCCESS;
  

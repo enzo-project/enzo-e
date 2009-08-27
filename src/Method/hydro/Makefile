@@ -7,36 +7,30 @@
 
 TOP = ../../..
 
-include $(TOP)/src/MAKE/Make.include
-
 INC_LOCAL  = -I$(TOP)/include
 
 OBJS = \
-        archsinh.o \
-	calcdiss.o \
 	CosmologyComputeExpansionFactor.o \
+	CosmologyComputeExpansionTimestep.o \
 	CosmologyGetUnits.o \
-	CosmologyParameters.o \
-	euler.o \
+        cello_hydro.o \
         c_message.o \
-        f_message.o \
-        global_data.o \
 	FindField.o \
-        Gadget.o \
 	Grid_ComputeGammaField.o \
 	Grid_ComputePressure.o \
 	Grid_ComputePressureDualEnergyFormalism.o \
 	Grid_ComputeTemperatureField.o \
-	Grid_DebugCheck.o \
-	Grid_GadgetComputeTemperature.o \
-	Grid_GadgetComputeTemperatureDEF.o \
-	Grid_Gadgetconvertutotemp.o \
-	Grid_Gadgetfindabundancesandrates.o \
+	Grid_ComputeTimeStep.o \
 	Grid_IdentifyPhysicalQuantities.o \
 	Grid_IdentifySpeciesFields.o \
 	Grid_SetMinimumSupport.o \
 	Grid_SolveHydroEquations.o \
+	calcdiss.o \
+	calc_dt.o \
+	euler.o \
+	f_message.o \
 	inteuler.o \
+	initialize_hydro.o \
 	intvar.o \
 	pgas2d_dual.o \
 	pgas2d.o \
@@ -46,6 +40,7 @@ OBJS = \
 	yeuler_sweep.o \
 	zeuler_sweep.o
 
+
 FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX
 CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX
 
@@ -54,15 +49,16 @@ CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
 LIB      = -lgfortran -lm
 
 
-obj: $(OBJS)
-
 test_hydro: $(OBJS) test_hydro.o
 	$(CXX) -o test_hydro test_hydro.o $(OBJS) $(LIB)
+
+obj: $(OBJS)
 
 test: test_hydro
 	test_hydro
 
 .PHONY: clean
 clean:
-	-rm *.o test_hydro *~ out.make.dep Makefile.bak
+	-@rm *.o test_hydro *~
 
+include $(TOP)/src/MAKE/Make.include

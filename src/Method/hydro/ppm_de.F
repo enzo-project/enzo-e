@@ -1,5 +1,4 @@
 #include "fortran.def"
-#include "error.def"
 
 c=======================================================================
 c/////////////////////////  SUBROUTINE PPM_DE  \\\\\\\\\\\\\\\\\\\\\\\\\
@@ -8,7 +7,7 @@ c
      &                  gravity, gr_xacc, gr_yacc, gr_zacc,
      &                  gamma, dt, nhy, dx, dy, dz,
      &                  rank, in, jn, kn, start, pend,
-     &                  gridvel, iflatten, ipresfree,
+     &                  iflatten, ipresfree,
      &                  idiff, isteepen, idual, eta1, eta2,
      &                  nsubgrids, lface, rface,
      &                  fistart, fiend, fjstart, fjend,
@@ -53,7 +52,6 @@ c     eta2    - (dual) selection parameter for total energy (typically ~0.001)
 c     ge      - gas energy (used when idual = 1)
 c     gr_x,y,zacc - gravitational acceleration fields
 c     gravity - flag indicating whether or not to use gravity field (1 = yes)
-c     gridvel - bulk grid velocity (vector of length 3)
 c     i,j,kn  - dimensions of field arrays
 c     idiff   - diffusion flag (0 = off)
 c     idual   - dual energy formalism flag (0 = off)
@@ -89,7 +87,7 @@ c
      &     v(in,jn,kn), w(in,jn,kn),ge(in,jn,jn),
      &     gr_xacc(in,jn,kn), gr_yacc(in,jn,kn), gr_zacc(in,jn,kn),
      &     dx(in), dy(jn), dz(kn)
-      real dt, eta1, eta2, gamma, gridvel(3), pmin
+      real dt, eta1, eta2, gamma, pmin
       real array(1), colorpt(1)
 c
 c  Parameters

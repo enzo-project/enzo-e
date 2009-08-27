@@ -10,18 +10,8 @@
 // UCSD
 //
 //======================================================================
- 
-#include<stdio.h>
-#include<stdlib.h>
- 
-#ifdef USE_MPI
-#include <mpi.h>
-#ifdef USE_MPE
-#include <mpe.h>
-#endif /* USE_MPE */
-#endif /* USE_MPI */
 
-#include "macros_and_parameters.h"
+#include "cello_hydro.h"
  
 //----------------------------------------------------------------------
  
