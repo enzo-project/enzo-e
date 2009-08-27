@@ -264,7 +264,7 @@ void Hierarchy::enzo_attach (LevelHierarchyEntry *LevelArray[],
 	      int k1 = i1 + il[1];
 	      int k2 = i2 + il[2];
 	      int ih =  i0 + ndh3[0] * ( i1 + ndh3[1] * i2 );
-	      int ie =  i0 + nde3[0] * ( i1 + nde3[1] * i2 );
+	      int ie =  k0 + nde3[0] * ( k1 + nde3[1] * k2 );
 	      sum_temp += (enzo_grid->hypre_grav_b[ih] = enzo_grid->GravitatingMassField[ie]);
 	    }
 	  }
