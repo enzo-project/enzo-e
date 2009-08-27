@@ -8,7 +8,7 @@ TOP = ../..
 SRC = ..
 
 PACKAGE   = parameters
-OBJ       = parameters.o parse
+OBJ       = parameters.o
 
 #=======================================================================
 OBJ_EXTERN = 
