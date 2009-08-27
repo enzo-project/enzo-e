@@ -31,9 +31,12 @@ clean:
         $(PAPER).ps \
         $(PAPER).pdf \
         $(PAPER).html \
+        $(PAPER).snm \
+        $(PAPER).nav \
+        $(PAPER).out \
         $(PAPER).toc
 distclean: clean
-	-@rm uml include.tex
+	-@rm uml include.tex 
 	-@rm makefile # Must be last!
 
 
