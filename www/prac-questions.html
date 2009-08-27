@@ -1,0 +1,142 @@
+
+* Programming languages: 
+
+* Programming frameworks: 
+
+* Scripting languages used:
+
+* Parallel partitioning approach: 
+
+* Communication libraries: 
+
+* Load-balancing: 
+
+* Overlap of communication, computation, output
+
+* Parallel IO
+
+* Fault tolerance: 
+
+* Third-party scientific libraries.  Only HDF5 is "necessary"; the
+    others we want to evaluate and may adapt:
+    
+* Use of computational steering
+  * Do compute nodes need to communicate outside system:
+  * Does the user expect to interact with a running job:
+
+* Analysis and visualization
+
+* Application status: Note Cello is currently in the requirements 
+     / development phase
+  * Single-core
+    * platforms used: have access to Intel, AMD
+    * performance tools used: expect to incorporate our own
+        jbPerf/lcaperf performance measuring tool into Cello,
+        with PAPI as a compile-time option
+    * level of effort thus far:
+    * degree of expertise of developers: main developer has developed
+       software for 25 years, and proficient in C, C++, and F77
+    * level of profiling performed: lcaperf is designed for
+        high-level (subroutine) level profiling
+    * performance bottlenecks: 
+       * PPM tends to be highly efficient, and we hope to support use
+         of highly-tuned PPM kernels, e.g. Woodward's 4^3 block
+         optimization.
+ 
+* Scalability:
+  * Platforms used: have access to Ranger, Kraken
+  * Whether an analytical performance model exists for the application: 
+      similar applications exist, so performance models likely exist,
+      though I am unaware of them.
+  * Parallel performance measurement tools employed: jbPerf/lcaperf 
+      (see above).
+  * Weak/strong scalability studies:
+  * History of changes to improve performance:
+  * Whether memory affinity / task-to-core assignment tools
+      have been used: no
+  * Performance bottlenecks currently identified: 
+     * communication for refreshing grid patch boundaries
+     * Parallel FFT for gravity, which we will use P3DFFT
+     * global communication for determining timestep will likely be a
+       scaling issue.  Plan to investigate adaptive timestepping
+       (different number of timesteps within a level) to bypass this
+       global dependence
+  * Special hardware:
+    * Use of hardware graphics acceleration: we don't expect to need
+      this.
+    * Use of large-format displays: Our Optiportal is roughly 80 MP.
+      12800 x 6400
+    * Use of accelerators for computation: Given the adaptation of GPU
+      acceleration hardware in HPC, we plan on investigating GPU
+      acceleration support in Cello.
+
+* Expected Use of Blue Waters
+  * Size of a typical simulation to be performed
+    * Unigrid:
+    * Cosmology: uniform AMR
+    * Star formation: nonuniform AMR
+  * Input data volume:
+  * Output data
+    * Check point strategy: volume and frequency
+    * Output dump (analysis and visualization) volume and frequency
+    * Mass storage requirement
+  * Analysis and visualization on Blue Waters
+    * Post-processing during job execution
+    * post-processing after job execution
+    * post-processing procedure
+  * Network connectivity requirements
+    * data volumes transmitted for input, output, mass storage
+    * location of data being transmitted to/from BW: SDSC / UCSD
+    * acceptable bandwidth for data transfer
+    * acceptable bandwidth for interactive remote visualization
+  * Workflow, co-scheduling, availability
+    * resources needed for pre-processing to generate input data:
+      * Enzo uses external "inits" application: Cello will generate
+        initial conditions 
+    * resources needed for post-processing and analysis during simulation:
+    * resources needed for post-processing and analysis after simulation:
+* PRAC Awarde resources
+  * Number of FTE's to be devoted to preparing applications for BW
+  * Funding sources for thes FTE's
+  * Access to computing platforms for application performance evaluation
+* Requested NCSA resources
+  * Consulting, training, workshops
+    * topics of interest
+    * when needed
+  * Applications specialists (level of effort)
+    * Number of FTE's
+    * Length of time
+  * Interim systems
+    * Power 5+ (BluePrint)
+  * Simulators
+    * Mambo (single Power7)
+    * BigSim (interconnect)
+  * Early hardware
+    * single chip workstation
+    * single node
+    * PERCS system (multinode BW prototype)
+    * Portions of BW
+* Preparation Timeline
+  * Access to details about Blue Waters
+    * Power 7 chip
+    * interconnection network
+    * full system configuration
+* Initial performance analysis on non-BW systems
+  * Tools
+  * Platforms
+* Code optimizations for Power 7 core and chip
+  * Mambo simulator
+  * Power 7 systems
+* Scalability studies on existing systems
+  * Type, size, scope
+  * Platforms
+* Code refactoring for scalability:
+* Parallel algorithm discovery / modification
+  * Parallel performance tools
+  * BigSim simulator (AMPI conversion)
+  * Performance evaluation on early BW hardware
+    
+
+      
+     
+    
