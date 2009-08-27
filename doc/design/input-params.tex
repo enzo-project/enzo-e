@@ -16,7 +16,6 @@ in \S\ref{c:components}.
 \code{Units}      & Parameters defining units \\
 \code{Problem}    & Parameters defining the problem setup \\
 \code{Domain}     & Parameters defining the problem domain \\
-\code{Region}     & Parameters defining a subregion of the domain \\
 \code{Boundary}    & Parameters defining and initializing boundary conditions \\
 \code{Field}       & Parameters defining and initializing a numerical field \\
 \code{Matter}      & Parameters defining matter properties \\
@@ -97,9 +96,9 @@ Problem parameters include initial conditions and boundary conditions.
 
 Different types of boundary conditions are supported, including
 periodic, in- and out-flow, specified, and dynamic.  Different
-boundary conditions can be specified for the entire domain, on
-separate faces, on subregions of faces, or on specific zones.
-Different boundary conditions can be specified for different fields.
+boundary conditions can be specified for the entire domain, or on
+discrete regions of individual faces.  Different boundary conditions
+can be specified for different fields.
 
 \subsubsection{Use Cases}
 
@@ -194,63 +193,6 @@ described in \S\ref{ss:params-units}.
 \end{enumerate}
 
 %-----------------------------------------------------------------------
-\subsection{Region parameters} \label{s:region}
-%-----------------------------------------------------------------------
-
-
-Specify partitions of the domain into regions.  Each region contains
-different materials with different properties.  Example partitions may
-be half-planes, spheres, boxes, or specified using a file containing a
-zone bit mask.  Default is region 0, first region is region 1, etc.
-Use solid modeling representations?
-
-\subsubsection{Use Cases}
-
-\begin{verbatim}
-   region {
-      x + y + z < 0.5
-   }
-\end{verbatim}
-
-\begin{verbatim}
-   BOX = region {
-      (x > 0) &&
-      (x < 1) &&
-      (y > 0) && (y < 1) &&
-      (z > 0) && (z < 1)
-   }
-\end{verbatim}
-
-\begin{verbatim}
-   region {
-      union {
-         region {BOX, translate = 0.0*x, scale = 0.1}
-         region {BOX, translate = 0.1*x, scale = <0.1,0.1,0.1>}
-         region {BOX, translate = 0.2*x, scale = 0.1}
-      }
-   }
-\end{verbatim}
-
-\begin{verbatim}
-   region {
-      x = domain:lower[0]
-   }
-\end{verbatim}
-
-\begin{verbatim}
-   region {
-      x*x + y*y + z*z < 1
-   }
-\end{verbatim}
-
-\begin{verbatim}
-   region {
-      bitmask = "filename.hdf5"
-   }
-\end{verbatim}
-
-
-%-----------------------------------------------------------------------
 \subsection{Boundary parameters}
 %-----------------------------------------------------------------------
 
@@ -307,7 +249,6 @@ Scalar and vector fields for each material, such as
    Matter {
       type  = gas_ideal
       gamma = 1.4
-      region { (x < 0) || (x > 1) }
    }
 \end{verbatim}
 

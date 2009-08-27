@@ -120,21 +120,8 @@
 %
    A \code{Problem} defines and manages an astrophysics problem,
    including defining \code{Physics} parameters, the domain and
-   initial conditions (with the domain and subregions of the domain
-   defined using the \code{Region} component), and boundary condition
-   type.
+   initial conditions, and boundary condition type and values.
 %
- \item [\done Region (\S\ref{s:component-region}): ]
-%
-   A \code{Region} is a parameterized subset of space (\code{x},\code{y},\code{z}) and
-   time (\code{t}).  \code{Region}s are used whenever problem characteristics,
-   data structure behavior, or physics computations vary between
-   different spacial or temporal regions.  A \code{Region} is used to
-   define the entire domain, and may be used to define initial
-   conditions.  Complex \code{Region}s can be defined using set operations
-   (e.g. union $A + B$, intersection $A * B$ , complement $- A$, and set
-   difference $A \backslash B$) on predefined elemental \code{Region}s
-   (e.g. half-spaces, spheres, ellipses, and cubes).
 %
  \item [\done Simulation (\S\ref{s:component-simulation}): ]
 %
@@ -167,7 +154,6 @@
 \input{component-performance}
 \input{component-portal}
 \input{component-problem}
-\input{component-region}
 \input{component-simulation}
 \input{component-timestep}
 
