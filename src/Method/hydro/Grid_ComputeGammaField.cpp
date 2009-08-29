@@ -20,7 +20,7 @@
  
  
  
-int grid::ComputeGammaField(float *GammaField)
+int ComputeGammaField(float *GammaField)
 {
  
   int DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum, HMNum, H2INum, H2IINum,
@@ -52,7 +52,7 @@ int grid::ComputeGammaField(float *GammaField)
  
     /* Compute the temperature. */
  
-    this->ComputeTemperatureField(GammaField);
+    ComputeTemperatureField(GammaField);
  
     /* Compute Gamma with molecular Hydrogen formula from Omukau \& Nishi
        astro-ph/9811308. */

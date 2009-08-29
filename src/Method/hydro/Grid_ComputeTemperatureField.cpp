@@ -33,7 +33,7 @@ int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
 		      float *VelocityUnits, FLOAT Time);
  
  
-int grid::ComputeTemperatureField(float *temperature)
+int ComputeTemperatureField(float *temperature)
 {
  
   int DensNum, result;
@@ -59,9 +59,9 @@ int grid::ComputeTemperatureField(float *temperature)
   /* Compute the pressure first. */
  
   if (DualEnergyFormalism)
-    result = this->ComputePressureDualEnergyFormalism(Time, temperature);
+    result = ComputePressureDualEnergyFormalism(Time, temperature);
   else
-    result = this->ComputePressure(Time, temperature);
+    result = ComputePressure(Time, temperature);
  
   if (result == FAIL) {
     fprintf(stderr, "Error in grid->ComputePressure.\n");

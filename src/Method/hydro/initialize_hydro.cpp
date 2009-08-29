@@ -99,6 +99,7 @@ void initialize_hydro ()
   GridLeftEdge[2]    = 0.0; // starting pos (active problem space)
   CourantSafetyNumber = 0.8; // Courant safety factor
   MaxExpansionRate   = 0.01; // Cosmology timestep constraint
+
   // Grid variables
 
 //     FLOAT  Time;                           // current problem time

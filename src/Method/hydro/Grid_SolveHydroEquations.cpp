@@ -41,7 +41,7 @@ extern "C" void FORTRAN_NAME(ppm_de)(
                           int *ncolour, float *colourpt, int *coloff,
                             int colindex[]);
  
-int grid::SolveHydroEquations
+int SolveHydroEquations
 (
  int   CycleNumber, 
  float dt)
@@ -69,7 +69,7 @@ int grid::SolveHydroEquations
  
     /* Find fields: density, total energy, velocity1-3. */
  
-    if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
+    if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
 					 Vel3Num, TENum) == FAIL) {
       fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
       return FAIL;
@@ -155,7 +155,7 @@ int grid::SolveHydroEquations
  
     float MinimumSupportEnergyCoefficient = 0;
     if (UseMinimumPressureSupport == TRUE)
-      if (this->SetMinimumSupport(MinimumSupportEnergyCoefficient) == FAIL) {
+      if (SetMinimumSupport(MinimumSupportEnergyCoefficient) == FAIL) {
 	fprintf(stderr, "Error in grid->SetMinimumSupport,\n");
 	return FAIL;
       }

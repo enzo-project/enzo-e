@@ -19,7 +19,7 @@
 int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
  
  
-int grid::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
+int SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
 {
   if (NumberOfBaryonFields > 0) {
  
@@ -45,7 +45,7 @@ int grid::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
        (where appropriate). */
  
     int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
-    if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
+    if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
 					 Vel3Num, TENum) == FAIL) {
       fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
       return FAIL;

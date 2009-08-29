@@ -35,6 +35,10 @@ int GridDimension[MAX_DIMENSION];   // total dimensions of all grids
 int GridStartIndex[MAX_DIMENSION];  // starting index of the active region
 int GridEndIndex[MAX_DIMENSION];    // stoping index of the active region
 FLOAT GridLeftEdge[MAX_DIMENSION];    // starting pos (active problem space)
+float  dtFixed;
+FLOAT  Time;
+FLOAT  OldTime;
+
 
 // Cello variables
 
@@ -44,21 +48,17 @@ int    cycle_stop;  // stop after this number of cycles
 // class grid
 // {
 
-//   FLOAT  Time;                           // current problem time
-//   FLOAT  OldTime;                        // time corresponding to OldBaryonField
+int    NumberOfBaryonFields;                        // active baryon fields
+float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS];    // pointers to arrays
+float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; // pointers to old arrays
+int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+FLOAT *CellWidth[MAX_DIMENSION];
 
-//   int    NumberOfBaryonFields;                        // active baryon fields
-//   float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS];    // pointers to arrays
-//   float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; // pointers to old arrays
-//   int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-//   FLOAT *CellWidth[MAX_DIMENSION];
-
-//   int    PPMFlatteningParameter;
-//   int    PPMDiffusionParameter;
-//   int    PPMSteepeningParameter;
-//   float *AccelerationField[MAX_DIMENSION]; // cell cntr acceleration at n+1/2
-//   int    ProcessorNumber;
-// };
+int    PPMFlatteningParameter;
+int    PPMDiffusionParameter;
+int    PPMSteepeningParameter;
+float *AccelerationField[MAX_DIMENSION]; // cell cntr acceleration at n+1/2
+int    ProcessorNumber;
 
 
 

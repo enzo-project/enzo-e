@@ -23,7 +23,7 @@ int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
 		      float *TemperatureUnits, float *TimeUnits,
 		      float *VelocityUnits, FLOAT Time);
  
-int grid::ComputePressure(FLOAT time, float *pressure)
+int ComputePressure(FLOAT time, float *pressure)
 {
  
   /* declarations */
@@ -57,7 +57,7 @@ int grid::ComputePressure(FLOAT time, float *pressure)
   /* Find fields: density, total energy, velocity1-3. */
  
   int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
-  if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
+  if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
 					 Vel3Num, TENum) == FAIL) {
     fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
     return FAIL;

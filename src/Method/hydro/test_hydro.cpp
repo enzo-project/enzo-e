@@ -37,16 +37,14 @@ main()
   int   cycle = 0;
   float time = 0.0;
 
-  grid g;
-
   for (cycle = 0, time = 0.0;
        ! is_converged (time,time_stop,cycle,cycle_stop);
        ++cycle, time += dt) {
 
-    dt = g.ComputeTimeStep();
+    dt = ComputeTimeStep();
     dt = min (dt, time_stop - time);
 
-    g.SolveHydroEquations(cycle, dt);
+    SolveHydroEquations(cycle, dt);
 
   }
 }

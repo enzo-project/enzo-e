@@ -20,10 +20,10 @@ int FindField(int f, int farray[], int n);
  
  
  
-int grid::IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum,
-				int &HeINum, int &HeIINum, int &HeIIINum,
-                                int &HMNum, int &H2INum, int &H2IINum,
-                                int &DINum, int &DIINum, int &HDINum)
+int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum,
+			  int &HeINum, int &HeIINum, int &HeIIINum,
+			  int &HMNum, int &H2INum, int &H2IINum,
+			  int &DINum, int &DIINum, int &HDINum)
 {
  
   DeNum = HINum = HIINum = HeINum = HeIINum = HeIIINum = 0;

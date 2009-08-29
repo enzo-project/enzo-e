@@ -43,7 +43,7 @@ extern "C" void FORTRAN_NAME(calc_dt)(
 			     float *dt, float *dtviscous);
  
  
-float grid::ComputeTimeStep()
+float ComputeTimeStep()
 {
  
   /* initialize */
@@ -77,7 +77,7 @@ float grid::ComputeTimeStep()
     /* Find fields: density, total energy, velocity1-3. */
  
     int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
-    if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
+    if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
 					 Vel3Num, TENum) == FAIL) {
       fprintf(stderr, "ComputeTimeStep: IdentifyPhysicalQuantities error.\n");
       exit(FAIL);
@@ -87,9 +87,9 @@ float grid::ComputeTimeStep()
  
     float *pressure_field = new float[size];
     if (DualEnergyFormalism)
-      result = this->ComputePressureDualEnergyFormalism(Time, pressure_field);
+      result = ComputePressureDualEnergyFormalism(Time, pressure_field);
     else
-      result = this->ComputePressure(Time, pressure_field);
+      result = ComputePressure(Time, pressure_field);
  
     if (result == FAIL) {
       fprintf(stderr, "Error in grid->ComputePressure.\n");

@@ -64,79 +64,78 @@ typedef long long unsigned  global_index; //
 // EXTERNS
 //----------------------------------------------------------------------
 
-extern int   ComovingCoordinates;
-extern int   DualEnergyFormalism;
-extern int   MultiSpecies;
-extern int   GravityOn;
-extern int   PressureFree;
-extern int   ProblemType;
-extern int   UseMinimumPressureSupport;
-extern float ComovingBoxSize;
-extern float DualEnergyFormalismEta1;
-extern float DualEnergyFormalismEta2;
-extern float Gamma;
-extern float GravitationalConstant;
-extern float HubbleConstantNow;
-extern float MinimumPressureSupportParameter;
-extern float OmegaLambdaNow;
-extern float OmegaMatterNow;
-extern float pressure_floor;
-extern float density_floor;
-extern float number_density_floor;
-extern float temperature_floor;
-extern float CourantSafetyNumber;
-extern float MaxExpansionRate;
-extern FLOAT DomainLeftEdge[MAX_DIMENSION];
-extern FLOAT InitialRedshift;
-extern FLOAT InitialTimeInCodeUnits;
+extern int    ComovingCoordinates;
+extern int    DualEnergyFormalism;
+extern int    MultiSpecies;
+extern int    GravityOn;
+extern int    PressureFree;
+extern int    ProblemType;
+extern int    UseMinimumPressureSupport;
+extern float  ComovingBoxSize;
+extern float  DualEnergyFormalismEta1;
+extern float  DualEnergyFormalismEta2;
+extern float  Gamma;
+extern float  GravitationalConstant;
+extern float  HubbleConstantNow;
+extern float  MinimumPressureSupportParameter;
+extern float  OmegaLambdaNow;
+extern float  OmegaMatterNow;
+extern float  pressure_floor;
+extern float  density_floor;
+extern float  number_density_floor;
+extern float  temperature_floor;
+extern float  CourantSafetyNumber;
+extern float  MaxExpansionRate;
+extern FLOAT  DomainLeftEdge[MAX_DIMENSION];
+extern FLOAT  InitialRedshift;
+extern FLOAT  InitialTimeInCodeUnits;
 //----------------------------------------------------------------------
 // CLASSES
 //----------------------------------------------------------------------
+
+struct fluxes;
 
 extern int    GridRank;
 extern int    GridDimension[MAX_DIMENSION];
 extern int    GridStartIndex[MAX_DIMENSION];
 extern int    GridEndIndex[MAX_DIMENSION];
 extern FLOAT  GridLeftEdge[MAX_DIMENSION];
+extern float  dtFixed;
+extern FLOAT  Time;
+extern FLOAT  OldTime;
+
+
+extern int    NumberOfBaryonFields;
+extern float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
+extern float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
+extern int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+extern FLOAT *CellWidth[MAX_DIMENSION];
 
 extern float  time_stop;   // stop after this simulation time
 extern int    cycle_stop;  // stop after this number of cycles
 
 struct fluxes;
-class grid
-{
-  FLOAT  Time;                           // current problem time
-  FLOAT  OldTime;                        // time corresponding to OldBaryonField
 
-  int    NumberOfBaryonFields;                        // active baryon fields
-  float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS];    // pointers to arrays
-  float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; // pointers to old arrays
-  int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-  FLOAT *CellWidth[MAX_DIMENSION];
+extern int    PPMFlatteningParameter;
+extern int    PPMDiffusionParameter;
+extern int    PPMSteepeningParameter;
+extern float *AccelerationField[MAX_DIMENSION];
+extern int    ProcessorNumber;
 
-  int    PPMFlatteningParameter;
-  int    PPMDiffusionParameter;
-  int    PPMSteepeningParameter;
-  float *AccelerationField[MAX_DIMENSION]; // cell cntr acceleration at n+1/2
-  int    ProcessorNumber;
+int ComputeGammaField(float *GammaField);
+int ComputePressure(FLOAT time, float *pressure);
+int ComputePressureDualEnergyFormalism(FLOAT time, float *pressure);
+int ComputeTemperatureField(float *temperature);
+int IdentifyPhysicalQuantities(int &DensNum, int &GENum,   int &Vel1Num, 
+			       int &Vel2Num, int &Vel3Num, int &TENum);
+int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum, 
+			  int &HeINum, int &HeIINum, int &HeIIINum,
+			  int &HMNum, int &H2INum, int &H2IINum,
+			  int &DINum, int &DIINum, int &HDINum);
+int SetMinimumSupport(float &MinimumSupportEnergyCoefficient);
+int SolveHydroEquations(int cycle, float dt);
+float ComputeTimeStep();
 
- public:
-
-  int ComputeGammaField(float *GammaField);
-  int ComputePressure(FLOAT time, float *pressure);
-  int ComputePressureDualEnergyFormalism(FLOAT time, float *pressure);
-  int ComputeTemperatureField(float *temperature);
-  int IdentifyPhysicalQuantities(int &DensNum, int &GENum,   int &Vel1Num, 
-				 int &Vel2Num, int &Vel3Num, int &TENum);
-  int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum, 
-			    int &HeINum, int &HeIINum, int &HeIIINum,
-			    int &HMNum, int &H2INum, int &H2IINum,
-                            int &DINum, int &DIINum, int &HDINum);
-  int SetMinimumSupport(float &MinimumSupportEnergyCoefficient);
-  int SolveHydroEquations(int CycleNumber, float dt);
-  float ComputeTimeStep();
-
-};
 
 //----------------------------------------------------------------------
 // STRUCTS

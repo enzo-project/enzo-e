@@ -20,7 +20,7 @@ int FindField(int f, int farray[], int n);
  
  
  
-int grid::IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num,
+int IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num,
 				     int &Vel2Num, int &Vel3Num, int &TENum)
 {
  
