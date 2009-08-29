@@ -31,6 +31,7 @@ OBJS = \
 	f_message.o \
 	inteuler.o \
 	initialize_hydro.o \
+	initialize_implosion.o \
 	intvar.o \
 	pgas2d_dual.o \
 	pgas2d.o \

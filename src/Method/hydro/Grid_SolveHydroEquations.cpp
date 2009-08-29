@@ -41,10 +41,15 @@ extern "C" void FORTRAN_NAME(ppm_de)(
                           int *ncolour, float *colourpt, int *coloff,
                             int colindex[]);
  
-int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
-			      fluxes *SubgridFluxes[], int level)
+int grid::SolveHydroEquations
+(
+ int   CycleNumber, 
+ float dt)
 {
- 
+
+  int NumberOfSubgrids = 0;
+  fluxes * SubgridFluxes[] = {NULL};
+
   if (NumberOfBaryonFields > 0) {
  
     /* initialize */
@@ -344,7 +349,7 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
        care of elsewhere). */
  
     if (ComovingCoordinates)
-      if (CosmologyComputeExpansionFactor(Time+0.5*dtFixed, &a, &dadt)
+      if (CosmologyComputeExpansionFactor(Time+0.5*dt, &a, &dadt)
 	  == FAIL) {
 	fprintf(stderr, "Error in CsomologyComputeExpansionFactors.\n");
 	return FAIL;
@@ -376,7 +381,7 @@ int grid::SolveHydroEquations(int CycleNumber, int NumberOfSubgrids,
        &GravityOn, AccelerationField[0],
        AccelerationField[1],
        AccelerationField[2],
-       &Gamma, &dtFixed, &CycleNumber,
+       &Gamma, &dt, &CycleNumber,
        CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
        &GridRank, &GridDimension[0], &GridDimension[1],
        &GridDimension[2], GridStartIndex, GridEndIndex,

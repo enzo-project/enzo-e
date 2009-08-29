@@ -36,10 +36,14 @@ int GridStartIndex[MAX_DIMENSION];  // starting index of the active region
 int GridEndIndex[MAX_DIMENSION];    // stoping index of the active region
 FLOAT GridLeftEdge[MAX_DIMENSION];    // starting pos (active problem space)
 
+// Cello variables
+
+float  time_stop;   // stop after this simulation time
+int    cycle_stop;  // stop after this number of cycles
+
 // class grid
 // {
 
-//   float  dtFixed;                        // current (fixed) timestep
 //   FLOAT  Time;                           // current problem time
 //   FLOAT  OldTime;                        // time corresponding to OldBaryonField
 

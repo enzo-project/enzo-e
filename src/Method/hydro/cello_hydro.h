@@ -99,10 +99,12 @@ extern int    GridStartIndex[MAX_DIMENSION];
 extern int    GridEndIndex[MAX_DIMENSION];
 extern FLOAT  GridLeftEdge[MAX_DIMENSION];
 
+extern float  time_stop;   // stop after this simulation time
+extern int    cycle_stop;  // stop after this number of cycles
+
 struct fluxes;
 class grid
 {
-  float  dtFixed;                        // current (fixed) timestep
   FLOAT  Time;                           // current problem time
   FLOAT  OldTime;                        // time corresponding to OldBaryonField
 
@@ -131,8 +133,7 @@ class grid
 			    int &HMNum, int &H2INum, int &H2IINum,
                             int &DINum, int &DIINum, int &HDINum);
   int SetMinimumSupport(float &MinimumSupportEnergyCoefficient);
-  int SolveHydroEquations(int CycleNumber, int NumberOfSubgrids, 
-			  fluxes *SubgridFluxes[], int level);
+  int SolveHydroEquations(int CycleNumber, float dt);
   float ComputeTimeStep();
 
 };
@@ -168,4 +169,5 @@ struct fluxes
 //----------------------------------------------------------------------
 
 void initialize_hydro ();
+void initialize_implosion ();
 

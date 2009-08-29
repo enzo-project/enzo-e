@@ -15,20 +15,38 @@
 
 #include "cello_hydro.h"
 
-
+bool is_converged 
+( 
+ double time,
+ double time_stop,
+ int    cycle,
+ int    cycle_stop
+) 
+{
+  return (time >= time_stop || cycle >= cycle_stop);
+}
 
 main()
 {
-  unit_class ("MethodPpm");
-  unit_open();
-  grid g;
 
   initialize_hydro ();
+  initialize_implosion();
 
-  int      cycle = 0;
-  int      num_subgrids = 0;
-  fluxes * subgrid_fluxes[1] = {NULL};
-  int      level = 0;
+  float dt;
 
-  g.SolveHydroEquations(cycle, num_subgrids, subgrid_fluxes, level);
+  int   cycle = 0;
+  float time = 0.0;
+
+  grid g;
+
+  for (cycle = 0, time = 0.0;
+       ! is_converged (time,time_stop,cycle,cycle_stop);
+       ++cycle, time += dt) {
+
+    dt = g.ComputeTimeStep();
+    dt = min (dt, time_stop - time);
+
+    g.SolveHydroEquations(cycle, dt);
+
+  }
 }
