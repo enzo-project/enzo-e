@@ -85,7 +85,6 @@ install-include:   $(patsubst %,%-install-include,$(DIR))
 .PHONY: doc
 doc:
 	doxygen
-	cp doxygen.css html
 
 #-----------------------------------------------------------------------
 
