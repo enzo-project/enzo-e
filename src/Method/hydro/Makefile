@@ -36,6 +36,7 @@ OBJS = \
 	pgas2d_dual.o \
 	pgas2d.o \
 	ppm_de.o \
+	sum_grid.o \
 	twoshock.o \
 	xeuler_sweep.o \
 	yeuler_sweep.o \
@@ -63,3 +64,5 @@ clean:
 	-@rm *.o test_hydro *~
 
 include $(TOP)/src/MAKE/Make.include
+
+include DEPEND

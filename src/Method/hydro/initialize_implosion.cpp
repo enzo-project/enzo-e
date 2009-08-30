@@ -50,106 +50,153 @@
 
 #include "cello_hydro.h"
  
-const int N = 32;
-
 void initialize_implosion ()
 
 {
 
-  // PPM parameters
+  int grid_size [] = { 400, 400 };
+  int implosion_density_out = 1.0;
+  int implosion_density_in  = 0.125;
+  int implosion_pressure_out = 1.0;
+  int implosion_pressure_in  = 0.14;
+  int implosion_velocity_x = 0.0;
+  int implosion_velocity_y = 0.0;
 
-  DualEnergyFormalism             = 0;    // Method: PPM parameter
-  PressureFree                    = 0;    // Physics: passed into ppm_de
-  UseMinimumPressureSupport       = 0;    // call UseMinimumPressureSupport() ?
-  DualEnergyFormalismEta1         = 0.001;// Method: PPM parameter
-  DualEnergyFormalismEta2         = 0.1;  // Method: PPM parameter
+  // Method PPM
 
-  // Gas parameters
+  PPMFlatteningParameter = 3;
+  PPMDiffusionParameter  = 1;
+  PPMSteepeningParameter = 1;
 
-  Gamma                           = 5.0/3.0; // Physics: ideal gas law constant
-  MinimumPressureSupportParameter = 100; // SetMinimumSupport() Enzo parameter
+  // Control
 
-  // Field limits
+  time_stop              = 2.5;
+  cycle_stop             = 20000;
 
-  pressure_floor                  = 1e-20; // Was "tiny_number"
-  number_density_floor            = 1e-20; // Was "tiny_number"
-  density_floor                   = 1e-20; // Was "tiny_number"
-  temperature_floor               = 1e-20; // Was "tiny_number"
+  CourantSafetyNumber    = 0.8;
+  InitialRedshift        = 20;
+  InitialTimeInCodeUnits = 0;
+  Time                   = 0;
+  OldTime                = 0;
 
-  // Grid parameters
-  
-  GridRank           =  2;  // number of dimensions
-  GridDimension[0]   = N+6;  // total dimensions
-  GridDimension[1]   = N+6;  // total dimensions
-  GridDimension[2]   = N+6;  // total dimensions
-  GridStartIndex[0]  =  3;  // starting index of the active region
-  GridStartIndex[1]  =  3;  // starting index of the active region
-  GridStartIndex[2]  =  3;  // starting index of the active region
-  GridEndIndex[0]    = N+3;  // stoping index of the active region
-  GridEndIndex[1]    = N+3;  // stoping index of the active region
-  GridEndIndex[2]    = N+3;  // stoping index of the active region
-  GridLeftEdge[0]    = 0.0; // starting pos (active problem space)
-  GridLeftEdge[1]    = 0.0; // starting pos (active problem space)
-  GridLeftEdge[2]    = 0.0; // starting pos (active problem space)
-  CourantSafetyNumber = 0.8; // Courant safety factor
+  // Domain
+
+  DomainLeftEdge[0]  = 0.0;
+  DomainLeftEdge[1]  = 0.0;
+
+  DomainRightEdge[0] = 0.3;
+  DomainRightEdge[1] = 0.3;
+
+  // Grid
+
+  GridRank           =  2;
+  GridDimension[0]   = grid_size[0] + 6;
+  GridDimension[1]   = grid_size[1] + 6;
+  GridDimension[2]   = 1;
+  GridStartIndex[0]  = 3;
+  GridStartIndex[1]  = 3;
+  GridStartIndex[2]  = 0;
+  GridEndIndex[0]    = grid_size[0] + 3;
+  GridEndIndex[1]    = grid_size[1] + 3;
+  GridEndIndex[2]    = 1;
+  GridLeftEdge[0]    = 0.0;
+  GridLeftEdge[1]    = 0.0;
+  GridLeftEdge[2]    = 0.0;
+
+  for (int dim=0; dim<GridRank; dim++) {
+    CellWidth[dim] = new FLOAT[GridDimension[dim]];
+    for (int i=0; i<GridDimension[dim]; i++) {
+      CellWidth[dim][i] = (DomainRightEdge[i] - DomainLeftEdge[i]) / 
+	(GridEndIndex[i] - GridStartIndex[i]);
+    }
+  }
 
   // Grid variables
+  
 
-  float  dtFixed;                        // current (fixed) timestep
-//     FLOAT  Time;                           // current problem time
-//     FLOAT  OldTime;                        // time corresponding to OldBaryonField
+  int k = 0;
 
-//     int    NumberOfBaryonFields;                        // active baryon fields
-//     float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS];    // pointers to arrays
-//     float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; // pointers to old arrays
-//     int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-//     FLOAT *CellWidth[MAX_DIMENSION];
+  FieldType[field_density         = k++] = Density;
+  FieldType[field_total_energy    = k++] = TotalEnergy;
+  FieldType[field_velocity_x      = k++] = Velocity1;
+  FieldType[field_velocity_y      = k++] = Velocity2;
+  //  FieldType[field_internal_energy = k++] = InternalEnergy;
 
-//     int    PPMFlatteningParameter;
-//     int    PPMDiffusionParameter;
-//     int    PPMSteepeningParameter;
-//     float *AccelerationField[MAX_DIMENSION]; // cell cntr acceleration at n+1/2
-//     int    ProcessorNumber;
+  NumberOfBaryonFields = k;
+  
+  int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
 
-//   //----------------------------------------------------------------------
-//   // STRUCTS
-//   //----------------------------------------------------------------------
+  float * baryon_fields = new float [NumberOfBaryonFields * nd];
+  for (int field = 0; field < NumberOfBaryonFields; field++) {
+    BaryonField[field] = baryon_fields + field*nd;
+  }
 
-//   struct fluxes
-//   {
-//     global_index LeftFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-//     global_index LeftFluxEndGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-//     global_index RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-//     global_index RightFluxEndGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-//     float       *LeftFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-//     float       *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-//   };
+  float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
+  for (int field = 0; field < NumberOfBaryonFields; field++) {
+    OldBaryonField[field] = baryon_fields + field*nd;
+  }
 
-//   //----------------------------------------------------------------------
-//   // CLASSES
-//   //----------------------------------------------------------------------
+  int ndx = GridDimension[0];
+  int ndy = GridDimension[1];
 
-//   class grid
-//   {
+  float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
+  float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
+  int  ixg = (GridEndIndex[0] - GridStartIndex[0]);
+  int  iyg = (GridEndIndex[1] - GridStartIndex[1]);
 
+  for (int iy = GridStartIndex[1]; iy<GridEndIndex[1]; iy++) {
 
-//   public:
+    float y = (iy - GridStartIndex[1]) * yd / iyg;
 
-//     int ComputeGammaField(float *GammaField);
-//     int ComputePressure(FLOAT time, float *pressure);
-//     int ComputePressureDualEnergyFormalism(FLOAT time, float *pressure);
-//     int ComputeTemperatureField(float *temperature);
-//     int IdentifyPhysicalQuantities(int &DensNum, int &GENum,   int &Vel1Num, 
-// 				   int &Vel2Num, int &Vel3Num, int &TENum);
-//     int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum, 
-// 			      int &HeINum, int &HeIINum, int &HeIIINum,
-// 			      int &HMNum, int &H2INum, int &H2IINum,
-// 			      int &DINum, int &DIINum, int &HDINum);
-//     int SetMinimumSupport(float &MinimumSupportEnergyCoefficient);
-//     int SolveHydroEquations(int CycleNumber, int NumberOfSubgrids, 
-// 			    fluxes *SubgridFluxes[], int level);
-//   };
+    for (int ix = GridStartIndex[0]; ix<GridEndIndex[0]; ix++) {
 
+      float x = (ix - GridStartIndex[0]) * xd / ixg;
 
+      int i = ix + ndx * iy;
+
+      // Initialize density
+
+      if (x + y < 0.15) {
+	BaryonField[ field_density ] [ i ] = implosion_density_in;
+      } else {
+	BaryonField[ field_density ] [ i ] = implosion_density_out;
+      }
+
+      // Initialize total energy
+
+      if (x + y < 0.15) {
+	BaryonField[ field_total_energy ][ i ] = 
+	  implosion_pressure_in / (Gamma - 1.0)*implosion_density_in;
+      } else {
+	BaryonField[ field_total_energy ][ i ] = 
+	  implosion_pressure_out / (Gamma - 1.0)*implosion_density_out;
+      }
+
+      // Initialize internal energy
+
+      //      BaryonField[ field_internal_energy ][ i ] = 
+
+      // Initialize velocity
+
+      BaryonField[ field_velocity_x ][ i ] = implosion_velocity_x;
+      BaryonField[ field_velocity_y ][ i ] = implosion_velocity_y;
+
+    }
+  }
+
+  printf ("%s:%d sum(density) = %g\n",__FILE__,__LINE__,sum_grid(field_density));
+  AccelerationField[0] = NULL;
+  AccelerationField[1] = NULL;
+  AccelerationField[2] = NULL;
+
+  // Numerics
+
+  DualEnergyFormalism             = 0;
+  DualEnergyFormalismEta1         = 0.001;
+  DualEnergyFormalismEta2         = 0.1;
+  pressure_floor                  = 1e-6;
+  number_density_floor            = 1e-6;
+  density_floor                   = 1e-6;
+  temperature_floor               = 1e-6;
 }
     

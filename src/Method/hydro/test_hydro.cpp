@@ -9,22 +9,7 @@
  *********************************************************************
  */
  
-#include <stdio.h>
-
-#include "test.hpp"
-
 #include "cello_hydro.h"
-
-bool is_converged 
-( 
- double time,
- double time_stop,
- int    cycle,
- int    cycle_stop
-) 
-{
-  return (time >= time_stop || cycle >= cycle_stop);
-}
 
 main()
 {
@@ -34,15 +19,22 @@ main()
 
   float dt;
 
-  int   cycle = 0;
-  float time = 0.0;
+  int   cycle;
+  float time;
 
   for (cycle = 0, time = 0.0;
-       ! is_converged (time,time_stop,cycle,cycle_stop);
+       (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
-    dt = ComputeTimeStep();
-    dt = min (dt, time_stop - time);
+    dt =  min (ComputeTimeStep(), time_stop - time);
+
+    printf ("%s:%d\n",__FILE__,__LINE__);
+    printf ("   dt = %g\n",dt);
+    printf (" sum (density) = %g\n",sum_grid(field_density));
+    printf (" sum (total_energy) = %g\n",sum_grid(field_total_energy));
+    printf (" sum (velocity_x) = %g\n",sum_grid(field_velocity_x));
+    printf (" sum (velocity_y) = %g\n",sum_grid(field_velocity_y));
+
 
     SolveHydroEquations(cycle, dt);
 

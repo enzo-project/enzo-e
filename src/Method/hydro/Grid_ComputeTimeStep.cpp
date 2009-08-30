@@ -170,10 +170,11 @@ float ComputeTimeStep()
  
   /* 5) calculate minimum timestep */
  
+  dt = dtBaryons;
   //  dt = min(dtBaryons, dtParticles);
-  dt = min(dt, dtViscous);
+  //  dt = min(dt, dtViscous);
 //   dt = min(dt, dtAcceleration);
-  dt = min(dt, dtExpansion);
+//  dt = min(dt, dtExpansion);
  
   return dt;
 }

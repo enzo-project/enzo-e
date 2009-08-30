@@ -48,7 +48,6 @@ int SolveHydroEquations
 {
 
   int NumberOfSubgrids = 0;
-  fluxes * SubgridFluxes[] = {NULL};
 
   if (NumberOfBaryonFields > 0) {
  
@@ -160,57 +159,57 @@ int SolveHydroEquations
 	return FAIL;
       }
  
-    /* allocate space for fluxes */
+//     /* allocate space for fluxes */
  
-    for (i = 0; i < NumberOfSubgrids; i++) {
-      for (dim = 0; dim < GridRank; dim++)  {
+//     for (i = 0; i < NumberOfSubgrids; i++) {
+//       for (dim = 0; dim < GridRank; dim++)  {
  
-	/* compute size (in floats) of flux storage */
+// 	/* compute size (in floats) of flux storage */
  
-        size = 1;
-        for (j = 0; j < GridRank; j++)
-          size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
-                  SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
+//         size = 1;
+//         for (j = 0; j < GridRank; j++)
+//           size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
+//                   SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
  
-	/* set unused dims (for the solver, which is hardwired for 3d). */
+// 	/* set unused dims (for the solver, which is hardwired for 3d). */
  
-        for (j = GridRank; j < 3; j++) {
-          SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] = 0;
-          SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] = 0;
-          SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
-          SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j] = 0;
-        }
+//         for (j = GridRank; j < 3; j++) {
+//           SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] = 0;
+//           SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] = 0;
+//           SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
+//           SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j] = 0;
+//         }
  
-	/* Allocate space (if necessary). */
+// 	/* Allocate space (if necessary). */
  
-        for (field = 0; field < NumberOfBaryonFields; field++) {
-	  if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
-	    SubgridFluxes[i]->LeftFluxes[field][dim]  = new float[size];
-	  if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
-	    SubgridFluxes[i]->RightFluxes[field][dim] = new float[size];
-	  for (n = 0; n < size; n++) {
-	    SubgridFluxes[i]->LeftFluxes[field][dim][n] = 0;
-	    SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
-	  }
-        }
+//         for (field = 0; field < NumberOfBaryonFields; field++) {
+// 	  if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
+// 	    SubgridFluxes[i]->LeftFluxes[field][dim]  = new float[size];
+// 	  if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
+// 	    SubgridFluxes[i]->RightFluxes[field][dim] = new float[size];
+// 	  for (n = 0; n < size; n++) {
+// 	    SubgridFluxes[i]->LeftFluxes[field][dim][n] = 0;
+// 	    SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
+// 	  }
+//         }
  
-	for (field = NumberOfBaryonFields; field < MAX_NUMBER_OF_BARYON_FIELDS;
-	     field++) {
-          SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
-          SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-	}
+// 	for (field = NumberOfBaryonFields; field < MAX_NUMBER_OF_BARYON_FIELDS;
+// 	     field++) {
+//           SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
+//           SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
+// 	}
  
-      }  // next dimension
+//       }  // next dimension
  
-      /* make things pretty */
+//       /* make things pretty */
  
-      for (dim = GridRank; dim < 3; dim++)
-        for (field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
-          SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
-          SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-	}
+//       for (dim = GridRank; dim < 3; dim++)
+//         for (field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
+//           SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
+//           SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
+// 	}
  
-    } // end of loop over subgrids
+//     } // end of loop over subgrids
  
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
@@ -254,94 +253,94 @@ int SolveHydroEquations
     int *geindex   = leftface + NumberOfSubgrids*3*16;
     int *colindex  = leftface + NumberOfSubgrids*3*18;
     float *standard = NULL;
-    if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
+//     if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
  
-    for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
-      for (dim = 0; dim < GridRank; dim++) {
+//     for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
+//       for (dim = 0; dim < GridRank; dim++) {
  
-        /* Set i,j dimensions of 2d flux slice (this works even if we
-           are in 1 or 2d) the correspond to the dimensions of the global
-           indicies.  I.e. for dim = 0, the plane is dims 1,2
-                           for dim = 1, the plane is dims 0,2
-                           for dim = 2, the plane is dims 0,1 */
+//         /* Set i,j dimensions of 2d flux slice (this works even if we
+//            are in 1 or 2d) the correspond to the dimensions of the global
+//            indicies.  I.e. for dim = 0, the plane is dims 1,2
+//                            for dim = 1, the plane is dims 0,2
+//                            for dim = 2, the plane is dims 0,1 */
  
-	idim = (dim == 0) ? 1 : 0;
-	jdim = (dim == 2) ? 1 : 2;
+// 	idim = (dim == 0) ? 1 : 0;
+// 	jdim = (dim == 2) ? 1 : 2;
  
-        /* Set the index (along the dimension perpindicular to the flux
-           plane) of the left and right flux planes.  The index is zero
-           based from the left side of the entire grid. */
+//         /* Set the index (along the dimension perpindicular to the flux
+//            plane) of the left and right flux planes.  The index is zero
+//            based from the left side of the entire grid. */
  
-	leftface[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
-	    GridGlobalStart[dim];
-	rightface[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
-	    GridGlobalStart[dim];   // (+1 done by fortran code)
+// 	leftface[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
+// 	    GridGlobalStart[dim];
+// 	rightface[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
+// 	    GridGlobalStart[dim];   // (+1 done by fortran code)
  
-        /* set the start and end indicies (zero based on entire grid)
-           of the 2d flux plane. */
+//         /* set the start and end indicies (zero based on entire grid)
+//            of the 2d flux plane. */
  
-	istart[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][idim] -
-	    GridGlobalStart[idim];
-	jstart[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][jdim] -
-	    GridGlobalStart[jdim];
-	iend[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][idim] -
-	    GridGlobalStart[idim];
-	jend[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][jdim] -
-	    GridGlobalStart[jdim];
+// 	istart[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][idim] -
+// 	    GridGlobalStart[idim];
+// 	jstart[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][jdim] -
+// 	    GridGlobalStart[jdim];
+// 	iend[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][idim] -
+// 	    GridGlobalStart[idim];
+// 	jend[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][jdim] -
+// 	    GridGlobalStart[jdim];
  
-        /* Compute offset from the standard pointer to the start of
-           each set of flux data.  This is done to compensate for
-           fortran's inability to handle arrays of pointers or structs.
-	   NOTE: This pointer arithmatic is illegal; some other way should
-	   be found to do it (like write higher level ppm stuff in c++). */
+//         /* Compute offset from the standard pointer to the start of
+//            each set of flux data.  This is done to compensate for
+//            fortran's inability to handle arrays of pointers or structs.
+// 	   NOTE: This pointer arithmatic is illegal; some other way should
+// 	   be found to do it (like write higher level ppm stuff in c++). */
  
-	dindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[DensNum][dim] - standard;
-	dindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[DensNum][dim] - standard;
-	Eindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[TENum][dim] - standard;
-	Eindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[TENum][dim] - standard;
-	uindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[Vel1Num][dim] - standard;
-	uindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[Vel1Num][dim] - standard;
+// 	dindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[DensNum][dim] - standard;
+// 	dindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[DensNum][dim] - standard;
+// 	Eindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[TENum][dim] - standard;
+// 	Eindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[TENum][dim] - standard;
+// 	uindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[Vel1Num][dim] - standard;
+// 	uindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[Vel1Num][dim] - standard;
  
-	if (GridRank > 1) {
-          vindex[subgrid*6+dim*2] =
-	    SubgridFluxes[subgrid]->LeftFluxes[Vel2Num][dim] - standard;
-          vindex[subgrid*6+dim*2+1] =
-	    SubgridFluxes[subgrid]->RightFluxes[Vel2Num][dim] - standard;
-        }
-	if (GridRank > 2) {
-          windex[subgrid*6+dim*2] =
-	    SubgridFluxes[subgrid]->LeftFluxes[Vel3Num][dim] - standard;
-          windex[subgrid*6+dim*2+1] =
-	    SubgridFluxes[subgrid]->RightFluxes[Vel3Num][dim] - standard;
-        }
+// 	if (GridRank > 1) {
+//           vindex[subgrid*6+dim*2] =
+// 	    SubgridFluxes[subgrid]->LeftFluxes[Vel2Num][dim] - standard;
+//           vindex[subgrid*6+dim*2+1] =
+// 	    SubgridFluxes[subgrid]->RightFluxes[Vel2Num][dim] - standard;
+//         }
+// 	if (GridRank > 2) {
+//           windex[subgrid*6+dim*2] =
+// 	    SubgridFluxes[subgrid]->LeftFluxes[Vel3Num][dim] - standard;
+//           windex[subgrid*6+dim*2+1] =
+// 	    SubgridFluxes[subgrid]->RightFluxes[Vel3Num][dim] - standard;
+//         }
  
-        if (DualEnergyFormalism) {
-          geindex[subgrid*6+dim*2] =
-            SubgridFluxes[subgrid]->LeftFluxes[GENum][dim] - standard;
-          geindex[subgrid*6+dim*2+1] =
-            SubgridFluxes[subgrid]->RightFluxes[GENum][dim] - standard;
-        }
+//         if (DualEnergyFormalism) {
+//           geindex[subgrid*6+dim*2] =
+//             SubgridFluxes[subgrid]->LeftFluxes[GENum][dim] - standard;
+//           geindex[subgrid*6+dim*2+1] =
+//             SubgridFluxes[subgrid]->RightFluxes[GENum][dim] - standard;
+//         }
  
-	for (i = 0; i < NumberOfColours; i++) {
-	  colindex[i*NumberOfSubgrids*6 + subgrid*6 + dim*2] =
-	    SubgridFluxes[subgrid]->LeftFluxes[ColourNum+i][dim] - standard;
-	  colindex[i*NumberOfSubgrids*6 + subgrid*6 + dim*2 + 1] =
-	    SubgridFluxes[subgrid]->RightFluxes[ColourNum+i][dim] - standard;
-	}
+// 	for (i = 0; i < NumberOfColours; i++) {
+// 	  colindex[i*NumberOfSubgrids*6 + subgrid*6 + dim*2] =
+// 	    SubgridFluxes[subgrid]->LeftFluxes[ColourNum+i][dim] - standard;
+// 	  colindex[i*NumberOfSubgrids*6 + subgrid*6 + dim*2 + 1] =
+// 	    SubgridFluxes[subgrid]->RightFluxes[ColourNum+i][dim] - standard;
+// 	}
  
-      }
+//       }
  
     /* If using comoving coordinates, multiply dx by a(n+1/2).
        In one fell swoop, this recasts the equations solved by solver

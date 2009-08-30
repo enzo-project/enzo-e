@@ -63,11 +63,6 @@ int ComputePressure(FLOAT time, float *pressure)
     return FAIL;
   }
  
-  /* If using Zeus_Hydro, then TotalEnergy is really GasEnergy so don't
-     subtract the kinetic energy term. */
- 
-  float OneHalf = 0.5;
- 
   /* Loop over the grid, compute the thermal energy, then the pressure,
      the timestep and finally the implied timestep. */
  
@@ -87,9 +82,9 @@ int ComputePressure(FLOAT time, float *pressure)
  
       /* gas energy = E - 1/2 v^2. */
  
-      gas_energy    = total_energy - OneHalf*(velocity1*velocity1 +
-					   velocity2*velocity2 +
-					   velocity3*velocity3);
+      gas_energy    = total_energy - 0.5*(velocity1*velocity1 +
+					  velocity2*velocity2 +
+					  velocity3*velocity3);
  
       pressure[i] = (Gamma - 1.0)*density*gas_energy;
  
@@ -120,7 +115,7 @@ int ComputePressure(FLOAT time, float *pressure)
  
       /* gas energy = E - 1/2 v^2. */
  
-      gas_energy    = total_energy - OneHalf*(velocity1*velocity1 +
+      gas_energy    = total_energy - 0.5*(velocity1*velocity1 +
 					  velocity2*velocity2 +
 					  velocity3*velocity3);
  
@@ -161,12 +156,14 @@ int ComputePressure(FLOAT time, float *pressure)
     for (i = 0; i < size; i++) {
  
       number_density =
-	  0.25*(BaryonField[HeINum][i]  + BaryonField[HeIINum][i] +
-		BaryonField[HeIIINum][i]                        ) +
-	        BaryonField[HINum][i]   + BaryonField[HIINum][i]  +
-                BaryonField[DeNum][i];
+	0.25*(BaryonField[HeINum][i] + 
+	      BaryonField[HeIINum][i] +
+	      BaryonField[HeIIINum][i]) +
+	BaryonField[HINum][i] + 
+	BaryonField[HIINum][i] +
+	BaryonField[DeNum][i];
  
-      nH2 = 0.5*(BaryonField[H2INum][i]  + BaryonField[H2IINum][i]);
+      nH2 = 0.5*(BaryonField[H2INum][i] + BaryonField[H2IINum][i]);
  
       /* First, approximate temperature. */
  
