@@ -1,7 +1,7 @@
 #ifndef CELLO_DEF
 #define CELLO_DEF
 
-#define CONFIG_PRECISION_DOUBLE
+#define CONFIG_PRECISION_SINGLE
 
 #include "scalar.def"
 
