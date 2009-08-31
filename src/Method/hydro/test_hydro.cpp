@@ -28,15 +28,13 @@ main()
 
     dt =  min (ComputeTimeStep(), time_stop - time);
 
+    data_dump(cycle);
+
     printf ("%s:%d\n",__FILE__,__LINE__);
     printf ("   dt = %g\n",dt);
-    printf (" sum (density) = %g\n",sum_grid(field_density));
-    printf (" sum (total_energy) = %g\n",sum_grid(field_total_energy));
-    printf (" sum (velocity_x) = %g\n",sum_grid(field_velocity_x));
-    printf (" sum (velocity_y) = %g\n",sum_grid(field_velocity_y));
-
 
     SolveHydroEquations(cycle, dt);
 
   }
 }
+

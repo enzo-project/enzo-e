@@ -8,6 +8,7 @@
 TOP = ../../..
 
 INC_LOCAL  = -I$(TOP)/include
+LIB_LOCAL  = -L$(TOP)/lib -lcello
 
 OBJS = \
 	CosmologyComputeExpansionFactor.o \
@@ -36,11 +37,13 @@ OBJS = \
 	pgas2d_dual.o \
 	pgas2d.o \
 	ppm_de.o \
-	sum_grid.o \
 	twoshock.o \
 	xeuler_sweep.o \
 	yeuler_sweep.o \
-	zeuler_sweep.o
+	zeuler_sweep.o \
+	print_field.o \
+	sum_field.o \
+	data_dump.o
 
 
 FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX
@@ -48,7 +51,7 @@ CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX
 
 FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
-LIB      = -lgfortran -lm
+LIB      = $(LIB_LOCAL) -lgfortran -lm -lhdf5
 
 
 test_hydro: $(OBJS) test_hydro.o

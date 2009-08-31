@@ -274,11 +274,15 @@ c     cla(i) = sqrt(max(gamma*pla(i)*dla(i), 0.0))
 c     cra(i) = sqrt(max(gamma*pra(i)*dra(i), 0.0))
          cla(i) = sqrt(max(gamma*pla(i),0.0)) * sqrt(max(dla(i),0.0))
          cra(i) = sqrt(max(gamma*pra(i),0.0)) * sqrt(max(dra(i),0.0))
-         if ((cla(i) .gt. huge).or.(cla(i).eq.0)) then
+         if ( (cla(i) .gt. huge) .or.
+     &        (cla(i) .eq.0)) then
             write(6,*) 'inteuler: cla', cla(i), pla(i),dla(i)
+            stop
          endif
-         if ((cra(i) .gt. huge).or.(cra(i).eq.0)) then
+         if ( (cra(i) .gt. huge) .or.
+     &        (cra(i).eq.0)) then
             write(6,*) 'inteuler: cra', cra(i), pra(i),dra(i)
+            stop
          endif
       enddo
 c

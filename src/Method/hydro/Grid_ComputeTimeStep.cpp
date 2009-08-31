@@ -51,9 +51,9 @@ float ComputeTimeStep()
   float dt, dtTemp;
   float dtBaryons      = HUGE_VAL;
   float dtViscous      = HUGE_VAL;
-//   float dtParticles    = HUGE_VAL;
+  float dtParticles    = HUGE_VAL;
   float dtExpansion    = HUGE_VAL;
-//   float dtAcceleration = HUGE_VAL;
+  float dtAcceleration = HUGE_VAL;
   int dim, i, result;
  
   /* Compute the field size. */
@@ -69,7 +69,9 @@ float ComputeTimeStep()
   if (ComovingCoordinates)
     CosmologyComputeExpansionFactor(Time, &a, &dadt);
   float afloat = float(a);
- 
+
+  printf ("%s:%d %g\n",__FILE__,__LINE__,afloat);
+   
   /* 1) Compute Courant condition for baryons. */
  
   if (NumberOfBaryonFields > 0) {
@@ -116,6 +118,7 @@ float ComputeTimeStep()
                                BaryonField[Vel1Num], BaryonField[Vel2Num],
                                BaryonField[Vel3Num], &dtBaryons, &dtViscous);
  
+    printf ("%s:%d dt=%g\n",__FILE__,__LINE__,dtBaryons);
     /* Clean up */
  
     delete pressure_field;
@@ -175,6 +178,7 @@ float ComputeTimeStep()
   //  dt = min(dt, dtViscous);
 //   dt = min(dt, dtAcceleration);
 //  dt = min(dt, dtExpansion);
+
  
   return dt;
 }

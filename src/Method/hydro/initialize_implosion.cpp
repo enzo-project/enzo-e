@@ -55,12 +55,16 @@ void initialize_implosion ()
 {
 
   int grid_size [] = { 400, 400 };
-  int implosion_density_out = 1.0;
-  int implosion_density_in  = 0.125;
-  int implosion_pressure_out = 1.0;
-  int implosion_pressure_in  = 0.14;
-  int implosion_velocity_x = 0.0;
-  int implosion_velocity_y = 0.0;
+  float implosion_density_out = 1.0;
+  float implosion_density_in  = 0.125;
+  float implosion_pressure_out = 1.0;
+  float implosion_pressure_in  = 0.14;
+  float implosion_velocity_x = 0.0;
+  float implosion_velocity_y = 0.0;
+
+  // Physics
+
+  Gamma                           = 1.4;
 
   // Method PPM
 
@@ -71,7 +75,7 @@ void initialize_implosion ()
   // Control
 
   time_stop              = 2.5;
-  cycle_stop             = 20000;
+  cycle_stop             = 1;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
@@ -96,18 +100,19 @@ void initialize_implosion ()
   GridStartIndex[0]  = 3;
   GridStartIndex[1]  = 3;
   GridStartIndex[2]  = 0;
-  GridEndIndex[0]    = grid_size[0] + 3;
-  GridEndIndex[1]    = grid_size[1] + 3;
-  GridEndIndex[2]    = 1;
+  GridEndIndex[0]    = grid_size[0] + 3 - 1;
+  GridEndIndex[1]    = grid_size[1] + 3 - 1;
+  GridEndIndex[2]    = 0;
   GridLeftEdge[0]    = 0.0;
   GridLeftEdge[1]    = 0.0;
   GridLeftEdge[2]    = 0.0;
 
   for (int dim=0; dim<GridRank; dim++) {
     CellWidth[dim] = new FLOAT[GridDimension[dim]];
+    float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
+      (GridEndIndex[dim] - GridStartIndex[dim] + 1);
     for (int i=0; i<GridDimension[dim]; i++) {
-      CellWidth[dim][i] = (DomainRightEdge[i] - DomainLeftEdge[i]) / 
-	(GridEndIndex[i] - GridStartIndex[i]);
+      CellWidth[dim][i] = h;
     }
   }
 
@@ -141,22 +146,32 @@ void initialize_implosion ()
 
   float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
   float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
-  int  ixg = (GridEndIndex[0] - GridStartIndex[0]);
-  int  iyg = (GridEndIndex[1] - GridStartIndex[1]);
+  int  ixg = (GridEndIndex[0] - GridStartIndex[0] + 1);
+  int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
+  float hx = CellWidth[0][0];
+  float hy = CellWidth[1][0];
 
-  for (int iy = GridStartIndex[1]; iy<GridEndIndex[1]; iy++) {
+  printf ("%g  %g %g  %g %g\n",
+	  Gamma, 
+	  implosion_pressure_out,implosion_density_out,
+	  implosion_pressure_in,implosion_density_in);
+  printf ("total energy: %g %g\n",
+	  implosion_pressure_out / ((Gamma - 1.0)*implosion_density_out),
+	  implosion_pressure_in / ((Gamma - 1.0)*implosion_density_in));
 
-    float y = (iy - GridStartIndex[1]) * yd / iyg;
+  for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
-    for (int ix = GridStartIndex[0]; ix<GridEndIndex[0]; ix++) {
+    float y = 0.5*hy + (iy - GridStartIndex[1]) * yd / iyg;
 
-      float x = (ix - GridStartIndex[0]) * xd / ixg;
+    for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
+
+      float x = 0.5*hx + (ix - GridStartIndex[0]) * xd / ixg;
 
       int i = ix + ndx * iy;
 
       // Initialize density
 
-      if (x + y < 0.15) {
+      if (x + y < 0.1517) {
 	BaryonField[ field_density ] [ i ] = implosion_density_in;
       } else {
 	BaryonField[ field_density ] [ i ] = implosion_density_out;
@@ -164,12 +179,12 @@ void initialize_implosion ()
 
       // Initialize total energy
 
-      if (x + y < 0.15) {
+      if (x + y < 0.1517) {
 	BaryonField[ field_total_energy ][ i ] = 
-	  implosion_pressure_in / (Gamma - 1.0)*implosion_density_in;
+	  implosion_pressure_in / ((Gamma - 1.0)*implosion_density_in);
       } else {
 	BaryonField[ field_total_energy ][ i ] = 
-	  implosion_pressure_out / (Gamma - 1.0)*implosion_density_out;
+	  implosion_pressure_out / ((Gamma - 1.0)*implosion_density_out);
       }
 
       // Initialize internal energy
@@ -184,7 +199,7 @@ void initialize_implosion ()
     }
   }
 
-  printf ("%s:%d sum(density) = %g\n",__FILE__,__LINE__,sum_grid(field_density));
+  printf ("density(3,3) = %g\n",BaryonField[field_density][1221]);
   AccelerationField[0] = NULL;
   AccelerationField[1] = NULL;
   AccelerationField[2] = NULL;

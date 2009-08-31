@@ -154,6 +154,23 @@ extern float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
 extern float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
 extern int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
+// Boundary
+
+enum boundary_type 
+  {
+    boundary_unknown    = 0, 
+    boundary_reflecting = 1, 
+    boundary_outflow    = 2, 
+    boundary_inflow     = 3, 
+    boundary_periodic   = 4
+  };
+
+extern int            BoundaryRank;
+extern int            BoundaryDimension[MAX_DIMENSION];
+extern int            BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+extern boundary_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+extern float         *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];  
+
 //----------------------------------------------------------------------
 // FUNCTION PROTOTYPES
 //----------------------------------------------------------------------
@@ -182,5 +199,6 @@ float ComputeTimeStep();
 
 void initialize_hydro ();
 void initialize_implosion ();
-float sum_grid (int field);
-
+float sum_field (int field);
+float print_field (int field);
+void data_dump (int cycle);
