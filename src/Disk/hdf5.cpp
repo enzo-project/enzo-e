@@ -50,7 +50,7 @@ Hdf5::Hdf5()
   dataset_name_(),
   is_dataset_open_(false),
   dataspace_(0),
-  datatype_(H5T_NATIVE_DOUBLE)
+  datatype_(SCALAR_HDF5)
 {
 }
 
@@ -168,9 +168,9 @@ void Hdf5::dataset_open (std::string name, Array & array)
     int m[3];
     array.size(&m[0],&m[1],&m[2]);
     d = 3;
-    if (n[2] == 1) {
+    if (m[2] == 1) {
       d--;
-      if (n[1] == 1) {
+      if (m[1] == 1) {
 	d--;
       }
     }
