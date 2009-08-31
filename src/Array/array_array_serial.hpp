@@ -46,6 +46,8 @@ public:
 
   /// Create a new uninitialized ArraySerial object
   ArraySerial() throw();
+  /// Create an initialized array
+  ArraySerial(Scalar * values,int nx,int ny=1,int nz=1) throw();
   /// Deallocate the array
   ~ArraySerial() throw();
   /// Copy an array into this one, deallocating any existing data
@@ -86,14 +88,14 @@ private:
 
 private:
 
-  /// Length of array
-  int     N_;
-
   /// Shape of array, right-padded with 1's
-  int     n_[3];
+  int     nx_,ny_,nz_;
 
   /// Array values stored in column-major ordering
   Scalar *a_;
+
+  /// Whether the array values are allocated internally or externally
+  bool is_allocated_;
 
   //-------------------------------------------------------------------
   // PUBLIC OPERATIONS

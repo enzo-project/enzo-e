@@ -41,12 +41,28 @@
  */
 
 ArraySerial::ArraySerial() throw()
-  : N_(0),
+  : nx_(0),
+    ny_(0),
+    nz_(0),
+    is_allocated_(true),
     a_(0)
 {
-  n_[0] = 0;
-  n_[1] = 0;
-  n_[2] = 0;
+}
+
+//----------------------------------------------------------------------
+
+/// Create an initialized array
+
+/**
+ */
+
+ArraySerial::ArraySerial(Scalar * a,int nx,int ny,int nz) throw()
+{
+  nx_ = nx;
+  ny_ = ny;
+  nz_ = nz;
+  is_allocated_ = false;
+  a_ = a;
 }
 
 //----------------------------------------------------------------------
@@ -71,7 +87,7 @@ ArraySerial::~ArraySerial() throw()
 ArraySerial::ArraySerial (const ArraySerial &array) throw()
 {
   this->deallocate_();
-  this->allocate_(array.n_[0],array.n_[1],array.n_[2]);
+  this->allocate_(array.nx_,array.ny_,array.nz_);
   this->copy_(array.values());
 }
 
@@ -85,7 +101,7 @@ ArraySerial::ArraySerial (const ArraySerial &array) throw()
 ArraySerial & ArraySerial::operator = (const ArraySerial &array) throw()
 {
   this->deallocate_();
-  this->allocate_(array.n_[0],array.n_[1],array.n_[2]);
+  this->allocate_(array.nx_,array.ny_,array.nz_);
   this->copy_(array.values());
   return *this;
 }
@@ -99,9 +115,9 @@ ArraySerial & ArraySerial::operator = (const ArraySerial &array) throw()
 
 void ArraySerial::resize (int n0, int n1, int n2) throw()
 {
-  if (n0 != n_[0] || 
-      n1 != n_[1] || 
-      n2 != n_[2]) {
+  if (n0 != nx_ || 
+      n1 != ny_ || 
+      n2 != nz_) {
     this->deallocate_();
     this->allocate_(n0,n1,n2);
   }
@@ -117,9 +133,9 @@ void ArraySerial::resize (int n0, int n1, int n2) throw()
 
 void ArraySerial::size (int * n0, int * n1, int * n2) const throw()
 {
-  if (n0) *n0 = n_[0];
-  if (n1) *n1 = n_[1];
-  if (n2) *n2 = n_[2];
+  if (n0) *n0 = nx_;
+  if (n1) *n1 = ny_;
+  if (n2) *n2 = nz_;
 }
 
 
@@ -132,7 +148,7 @@ void ArraySerial::size (int * n0, int * n1, int * n2) const throw()
 
 int ArraySerial::length () const throw()
 {
-  return N_;
+  return nx_*ny_*nz_;
 }
 
 
@@ -158,7 +174,7 @@ Scalar * ArraySerial::values () const throw()
 
 Scalar & ArraySerial::operator () (int i0, int i1, int i2) throw()
 {
-  return a_[i0 + n_[0]*(i1 + n_[1]*i2)];
+  return a_[i0 + nx_*(i1 + ny_*i2)];
 }
 
 //----------------------------------------------------------------------
@@ -171,7 +187,7 @@ Scalar & ArraySerial::operator () (int i0, int i1, int i2) throw()
 void ArraySerial::clear(Scalar value) throw()
 {
   int i;
-  for (i=0; i<N_; i++) a_[i] = value;
+  for (i=0; i<nx_*ny_*nz_; i++) a_[i] = value;
 }
 
 //======================================================================
@@ -181,16 +197,16 @@ void ArraySerial::clear(Scalar value) throw()
 
 void ArraySerial::allocate_(int n0, int n1, int n2) throw()
 {
-  n_[0] = n0;
-  n_[1] = n1;
-  n_[2] = n2;
+  nx_ = n0;
+  ny_ = n1;
+  nz_ = n2;
 
-  N_ = n0*n1*n2;
+  if (a_ != NULL) {
+    strcpy (warning_message,"Reallocating without deallocating");
+    WARNING_MESSAGE("ArraySerial::allocate_");
+  }
 
-  strcpy (warning_message,"Reallocating without deallocating");
-  if (a_) WARNING_MESSAGE("ArraySerial::allocate_");
-
-  a_ = new Scalar [N_];
+  a_ = new Scalar [nx_*ny_*nz_];
 }
 
 //----------------------------------------------------------------------
@@ -200,7 +216,12 @@ void ArraySerial::allocate_(int n0, int n1, int n2) throw()
 
 void ArraySerial::deallocate_() throw()
 {
-  delete [] a_;
+  if (is_allocated_) {
+    delete [] a_;
+  } else {
+    strcpy (warning_message,"Trying to deallocated non-allocated array");
+    WARNING_MESSAGE("ArraySerial::deallocate_");
+  }
   a_ = 0;
 }
 
@@ -211,7 +232,7 @@ void ArraySerial::deallocate_() throw()
 
 void ArraySerial::copy_(Scalar * a) throw()
 {
-  for (int i=0; i<N_; i++) a_[i] = a[i];
+  for (int i=0; i<nx_*ny_*nz_; i++) a_[i] = a[i];
 }
 
 //----------------------------------------------------------------------
