@@ -73,11 +73,14 @@ public:
 
 private:
 
-  /// Allocate array values
-  void allocate_ (int n0, int n1=1, int n2=1) throw();
-
   /// Deallocate array values
-  void deallocate_() throw();
+  void deallocate_() throw(ExceptionBadArrayDeallocation);
+
+  /// Allocate array values
+  void allocate_ (int n0, int n1=1, int n2=1) throw(ExceptionBadArrayAllocation);
+
+  /// Allocate array values
+  void reallocate_ (int n0, int n1=1, int n2=1) throw();
 
   /// Copy array values a[0:N-1] to ArraySerial
   void copy_ (Scalar * a) throw();

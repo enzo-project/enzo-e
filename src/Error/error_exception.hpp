@@ -66,7 +66,9 @@ private:
 
 };
 
-class ExceptionBadPointer : public Exception {};
+class ExceptionBadPointer           : public Exception {};
+class ExceptionBadArrayDeallocation : public Exception {};
+class ExceptionBadArrayAllocation   : public Exception {};
 
 #endif /* EXCEPTION_HPP */
 

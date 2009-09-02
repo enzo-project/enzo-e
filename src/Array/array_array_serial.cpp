@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "error.hpp"
+#include "error_exception.hpp"
 #include "array.hpp" 
 
 //----------------------------------------------------------------------
@@ -86,8 +86,7 @@ ArraySerial::~ArraySerial() throw()
  
 ArraySerial::ArraySerial (const ArraySerial &array) throw()
 {
-  this->deallocate_();
-  this->allocate_(array.nx_,array.ny_,array.nz_);
+  this->reallocate_(array.nx_,array.ny_,array.nz_);
   this->copy_(array.values());
 }
 
@@ -100,8 +99,7 @@ ArraySerial::ArraySerial (const ArraySerial &array) throw()
  
 ArraySerial & ArraySerial::operator = (const ArraySerial &array) throw()
 {
-  this->deallocate_();
-  this->allocate_(array.nx_,array.ny_,array.nz_);
+  this->reallocate_(array.nx_,array.ny_,array.nz_);
   this->copy_(array.values());
   return *this;
 }
@@ -118,8 +116,7 @@ void ArraySerial::resize (int n0, int n1, int n2) throw()
   if (n0 != nx_ || 
       n1 != ny_ || 
       n2 != nz_) {
-    this->deallocate_();
-    this->allocate_(n0,n1,n2);
+    this->reallocate_(n0,n1,n2);
   }
 }
 
@@ -195,15 +192,33 @@ void ArraySerial::clear(Scalar value) throw()
 /**
  */
 
-void ArraySerial::allocate_(int n0, int n1, int n2) throw()
+void ArraySerial::deallocate_() throw (ExceptionBadArrayDeallocation)
+{
+  if (is_allocated_) {
+    delete [] a_;
+  } else {
+    throw ExceptionBadArrayDeallocation();
+//     strcpy (warning_message,"Trying to deallocated non-allocated array");
+//     WARNING_MESSAGE("ArraySerial::deallocate_");
+  }
+  a_ = 0;
+}
+
+//----------------------------------------------------------------------
+
+/**
+ */
+
+void ArraySerial::allocate_(int n0, int n1, int n2) throw(ExceptionBadArrayAllocation)
 {
   nx_ = n0;
   ny_ = n1;
   nz_ = n2;
 
   if (a_ != NULL) {
-    strcpy (warning_message,"Reallocating without deallocating");
-    WARNING_MESSAGE("ArraySerial::allocate_");
+    throw ExceptionBadArrayAllocation();
+//     strcpy (warning_message,"Reallocating without deallocating");
+//     WARNING_MESSAGE("ArraySerial::allocate_");
   }
 
   a_ = new Scalar [nx_*ny_*nz_];
@@ -214,15 +229,10 @@ void ArraySerial::allocate_(int n0, int n1, int n2) throw()
 /**
  */
 
-void ArraySerial::deallocate_() throw()
+void ArraySerial::reallocate_(int n0, int n1, int n2) throw()
 {
-  if (is_allocated_) {
-    delete [] a_;
-  } else {
-    strcpy (warning_message,"Trying to deallocated non-allocated array");
-    WARNING_MESSAGE("ArraySerial::deallocate_");
-  }
-  a_ = 0;
+  deallocate_();
+  allocate_(n0,n1,n2);
 }
 
 //----------------------------------------------------------------------
