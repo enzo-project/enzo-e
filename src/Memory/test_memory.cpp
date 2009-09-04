@@ -41,6 +41,7 @@ main()
   unit_open();
 
   unit_func("allocate");
+  double * a_double = (double *) memory.allocate(sizeof(double[10]));
   unit_assert(false);
 
   unit_close();

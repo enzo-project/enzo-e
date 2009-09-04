@@ -60,8 +60,8 @@ public:
   Memory();
 
   //  	 Allocate memory
-  void * allocate(unsigned size);
-  void * allocate(unsigned size, std::string group);
+  void * allocate(size_t size);
+  void * allocate(size_t size, std::string group);
 
   //  	De-allocate memory
   void deallocate();

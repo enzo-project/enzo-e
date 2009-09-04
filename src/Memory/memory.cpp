@@ -96,7 +96,7 @@ void * Memory::allocate(size_t size)
   return (void *) buffer;
 }
 
-void * Memory::allocate(unsigned size, std::string group)
+void * Memory::allocate(size_t size, std::string group)
 /**
  *********************************************************************
  *

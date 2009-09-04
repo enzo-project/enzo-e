@@ -8,7 +8,7 @@ TOP = ../..
 SRC = ..
 
 PACKAGE   = memory
-OBJ       = memory.o test_memory.o
+OBJ       = memory.o
 TEST_EXES = \
         test_memory
 
@@ -38,7 +38,7 @@ run-tests: $(TEST_EXES)
 #-----------------------------------------------------------------------
 
 test_memory: test_memory.o 
-	$(CXX) -o test_memory test_memory.o $(LIB) $(INC)
+	$(CXX) -o test_memory test_memory.o $(OBJS) $(LIB) $(INC)
 
 #-----------------------------------------------------------------------
 
