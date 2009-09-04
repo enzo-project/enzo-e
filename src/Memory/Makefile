@@ -38,7 +38,7 @@ run-tests: $(TEST_EXES)
 #-----------------------------------------------------------------------
 
 test_memory: test_memory.o 
-	$(CXX) -o test_memory test_memory.o $(OBJS) $(LIB) $(INC)
+	$(CXX) -o test_memory test_memory.o $(LIB) $(INC) $(OBJ)
 
 #-----------------------------------------------------------------------
 
