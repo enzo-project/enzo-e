@@ -4,7 +4,7 @@
 
 [[TOC]]
 
-The `Control` component is the main scheduler in Cello, and orchestrates the distributed computations to advance the simulation in time.  Currently we are evaluating the use of [http://charm.cs.uiuc.edu CHARM++] to implement the `Control` component.
+The `Control` component is the main scheduler in Cello, and orchestrates the distributed computations to advance the simulation in time, as well as simulation initialization and finalization.  Currently we are evaluating the use of [http://charm.cs.uiuc.edu CHARM++] in the `Control` component.
 
 Compared to Enzo, the `Control` component does not loop through each level individually;  instead, it collapses the dependency tree to its theoretical shortest path, which is that of the finest level timesteps.  E.g. consider a 1-D problem with two levels of refinement near the center.  The parallel steps for Enzo versus Cello are shown below, with timesteps moving downward:
 

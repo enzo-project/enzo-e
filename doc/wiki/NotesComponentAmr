@@ -1,4 +1,4 @@
-([NotesComponentSimulation Simulation] < [NotesComponents index] > [NotesComponentArray Array])
+([NotesComponentSimulation Simulation] < [NotesComponents index] > [NotesComponentAnalysis Analysis])
 
 = Amr Component =
 
@@ -37,6 +37,3 @@ Tentative features of `Amr` support in Cello include the following:
 == `Amr` operations ==
 
 == `Amr` class hierarchy ==
-
-([NotesComponentSimulation Simulation] < [NotesComponents index] > [NotesComponentArray Array])
-

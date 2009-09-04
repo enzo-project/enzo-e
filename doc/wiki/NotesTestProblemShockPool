@@ -39,9 +39,11 @@
   ShockTubeVelocity[1]      = 0.0;
 }}}
 
-== Cello parameters ==
+== Cello parameters -- DRAFT 1.0 ==
 
 {{{
+
+  # Draft version 1.0
 
   # ? Alternatively Field {...} "density", "totaly_energy" ?
 
@@ -71,19 +73,19 @@
   # (Breaks from convention of naming components by groups, but seems reasonable since
   #  code design may not necessarily follow users view)
 
-  Array {name = "grid", size = [100], parallel=["omp"]}
+  Array {name = "grid"; size = [100]; parallel=["omp"]}
 
   Method {
      solver = "ppm";
      fields = {      
         density      = "density";
         total_energy = "total_energy";
-        velocity     = "velocity";
-     } 
+        velocity     = "velocity"
+     };
      parameters = {
         gamma     = 1.4;
         courant   = 0.8;
-        diffusion = false;
+        diffusion = false
      } 
   }
 
@@ -96,22 +98,75 @@
      grid   = "grid";
      method = ["ppm"];
 
-     initial = { field = "density";  value = [1.0, "left"]; value = [0.125, "right"] }
-     initial = { field = "pressure"; value = [1.0, "left"]; value = [0.1,   "right"] }
+     initial = { field = "density";  value = [1.0, "left"]; value = [0.125, "right"] };
+     initial = { field = "pressure"; value = [1.0, "left"]; value = [0.1,   "right"] };
 
      # ??? how to set total_energy = pressure / ((gamma - 1)*density + 0.5*velocity*velocity
      #     hard-coded?
 
-     initial = { field = "velocity"; value = 0.0 }
+     initial = { field = "velocity"; value = 0.0 };
 
-     boundary = { type = "reflecting" }
+     boundary = { type = "reflecting" };
 
      # stopping criteria: how general?  move to Control section?
 
      stop_time = 0.251;       # Least general: "stop at 0.251"; also stop_cycle, stop_cycle_level = [level,num]
-     stop = (t >= 0.251)     # somewhat general: "stop when time t reaches 0.251"
+     stop = (t >= 0.251);     # somewhat general: "stop when time t reaches 0.251"
      stop = { time = 0.251 } # most general: "the stopping criteria are that the stopping time is 0.251"
 
   }
 
+}}}
+
+== Cello parameters -- DRAFT 2.0 ==
+
+{{{
+  # Draft version 2.0
+
+  # Define the domain to be the 1D interval from 0 to 1
+
+  Domain { range = [0.0, 1.0] } 
+                                
+  # Define field properties with named groups 
+                                
+  Field pressure { floor = 1.0e-6 }
+  Field density  { floor = 1.0e-6 }
+                                   
+  # Set global field parameters with unnamed group
+
+  Field { interleave = [density, total_energy, internal_energy] }
+
+  # The grid is a "unigrid" array of 100 cells parallelized using OpenMP
+  # Other types are patch_amr and tree_amr                              
+
+  Grid array { size = [100]; parallel = ["omp"] }
+
+  # Only physics method is hydro using ppm
+
+  Method ppm {
+      gamma     = 1.4;  # This is more of a physics/gas parameter than a method parameter
+      courant   = 0.8;  # This is more of a timestep/control parameter than a method parameter
+      diffusion = false
+  }
+
+  # Define initial conditions
+
+  Initial {
+     pressure   = [1.0,   x <= 0.5,
+                   0.125, x > 0.5];
+     density    = [1.0, x <= 0.5,
+                   0.1]; # (implicit "else" if last logical expression is omitted)
+     velocity_x = 0
+  }
+
+  # Define boundary conditions
+
+  Boundary { type = "reflecting" }
+
+  # Define stopping criteria
+
+  Stopping {
+     time  = 0.251;
+     cycle = 10000
+  }
 }}}

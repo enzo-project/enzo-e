@@ -17,7 +17,7 @@ Feel free to add new "wish" items or comment on existing items.  If you add a ne
 
 || W011 || jbordner || `Particles` ||Store particle positions in single precision as -1 <= x,y,z <= 1 relative to their containing patch. [[BR]] [To reduce storage, improve performance, and address precision issues with deep AMR.]||
 
-|| W012 || jbordner ||`Amr` ||Do not store a patch's global position, only local position relative to immediate neighbors, parent, and children.  [[BR]][Toward distributed AMR data-structure, and to address precision issues with deep AMR.] (see W013)||
+|| W012 || jbordner ||`Amr` ||Do not store a patch's global position, only local position relative to immediate neighbors, parent, and children.  [[BR]][Toward distributed AMR data-structure, and to address precision issues with deep AMR.  Potential issues: boundary and initial conditions.] (see W013)||
 
 || W013 || jbordner ||`Amr`|| Represent patch extents with (small) integer values relative to parent. [[BR]][To reduce memory usage with deep AMR runs.] (see W012) ||
 
@@ -29,7 +29,7 @@ Feel free to add new "wish" items or comment on existing items.  If you add a ne
 
 || W017 || jbordner || `Field` ||User-controlled optional floor/ceiling limits on individual `Field`s (ala "tiny_number" in Enzo), with user-specified `Error` behavior (warning, error, ignore, reset to given floor/ceiling, etc.)||
 
-|| W018 || jbordner || `Array` / `Parallel` ||Allow multiple patches per MPI task.  [[BR]][To improve cache use for unigrid problems, and improve load-balancing for AMR.]||
+|| W018 || jbordner || `Array` / `Parallel` ||Allow multiple root-level patches per MPI task.  [[BR]][To improve cache use for unigrid problems, and improve load-balancing for AMR.]||
 
 || W019 || mnorman ||`Particles` ||Use a binary tree data-structure to recursively partition the bounding boxes of particles.||
 

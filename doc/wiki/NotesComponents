@@ -4,7 +4,8 @@
 
 Below is the definitive list of Cello components (verified match with SVN doc/design revision 439 on 2008-12-19)
 
-||( )|| [NotesComponentAmr           Amr] || Adaptive mesh refinement infrastructure, built on top of `Array` || 
+|| ( ) || [NotesComponentAmr         Amr] || Adaptive mesh refinement infrastructure, built on top of `Array` || 
+|| ( ) || [NotesComponentAnalysis    Analysis] || Inline analysis and visualization routines || 
 || ( ) || [NotesComponentArray       Array] || Fortran-like array, which may be parallelized or vectorized in various ways || 
 || ( ) || [NotesComponentControl     Control] || Orchestrate the advancement of a `Simulation` in time ||
 || ( ) || [NotesComponentDisk        Disk] || Provide functions for managing long-term data storage on disks || 
@@ -19,7 +20,6 @@ Below is the definitive list of Cello components (verified match with SVN doc/de
 || ( ) || [NotesComponentPerformance Performance] || Measure, and provide functions to access, run-time performance ||
 || ( ) || [NotesComponentPortal      Portal] || Input from users or other applications to query and direct the `Simulation` ||
 || ( ) || [NotesComponentProblem     Problem] || Defines the problem, including physics, discretization, boundary and initial conditions ||
-|| ( ) || [NotesComponentRegion      Region] || A parameterized region of space time, used for defining initial and boundary conditions ||
 || ( ) || [NotesComponentSimulation  Simulation] || Defines a `Problem` or ensemble of `Problem`'s to run ||
 
 

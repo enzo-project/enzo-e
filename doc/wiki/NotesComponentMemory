@@ -4,9 +4,33 @@
 
 [[TOC]]
 
-|| ( ) || `Memory::allocate()` || ''Allocate memory'' ||
-|| ( ) ||  `Memory::deallocate()` || ''De-allocate memory'' ||
-|| ( ) ||  `Memory::current()` || ''Current number of bytes allocated'' ||
-|| ( ) ||  `Memory::highest()` || ''Maximum number of bytes allocated'' ||
+== Functions ==
+
+|| ( ) ||  `Memory::allocate(size)` || ''Allocate local memory'' ||
+|| ( ) ||  `Memory::deallocate(buffer)` || ''De-allocate local memory'' ||
+|| ( ) ||  `Memory::begin_group(group)` || ''Begin allocating memory associated with the given group
+'' ||
+|| ( ) ||  `Memory::end_group(group)` || ''End allocating memory associated with the given group
+'' ||
+|| ( ) ||  `Memory::current([group])` || ''Current number of local bytes allocated'' ||
+|| ( ) ||  `Memory::available([group])` || ''Estimate of amount of local memory left'' ||
+|| ( ) ||  `Memory::efficiency([group])` || ''Estimate of ratio of current local usage to local available'' ||
+|| ( ) ||  `Memory::highest([group])` || ''Maximum number of local bytes allocated for group'' ||
+|| ( ) ||  `Memory::set_limit(size [,group])` || ''Set limit on number of local bytes available'' ||
+|| ( ) ||  `Memory::get_limit([group])` || ''Get limit on number of local bytes available'' ||
+|| ( ) ||  `Memory::num_allocate([group])` || ''Return the number of calls to allocate for the group'' ||
+|| ( ) ||  `Memory::num_deallocate([group])` || ''Return the number of calls to deallocate for the group'' ||
+== Parameters ==
+
+|| ( ) || `limit_available` || ''Set limit on the number of local bytes available for dynamic memory'' ||
+|| ( ) || `efficiency_threshold` || ''Set efficiency threshold before displaying a warning message'' ||
+|| ( ) || `fill_after_allocate` || ''Value to fill memory after it's allocated'' ||
+|| ( ) || `fill_before_deallocate` || ''Value to fill memory before it's deallocated'' ||
+|| ( ) || `tracking` || ''Set memory tracking on or off.  Turning off resorts to native new[]/delete[].' ||
+
+== Exceptions ==
+
+|| ( ) || `ExceptionBadMemoryAllocate` || ''Error while allocating memory'' ||
+|| ( ) || `ExceptionBadMemoryDeallocate` || ''Error while deallocating memory'' ||
 
 ([NotesComponentField Field] < [NotesComponents index] > [NotesComponentMethod Method])

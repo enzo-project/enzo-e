@@ -1,5 +1,82 @@
 ([NotesComponentMethod Method] < [NotesComponents index] > [NotesComponentParallel Parallel])
 
-= Monitor Component =
+= `Monitor` Component =
 
-([NotesComponentMethod Method] < [NotesComponents index] > [NotesComponentParallel Parallel])
+The `Monitor` component is used to communicate information about the running simulation to the user.  Information can be output in several forms, including text files, HTML files, plots, or other (generally small) image files.  Information is assumed to be from a correctly-running simulation: anomalous errors or warnings are output by the `Error` component.  It is assumed that `stdout` is ''not'' used for monitor output, except for possibly displaying header text with basic information about Cello and the simulation being run.
+
+Information output by `Monitor` can include the following:
+
+ * Cycle number (fine-level or coarse-level)
+ * Wall time
+ * Simulation time
+ * Estimated time to simulation end
+ * AMR statistics, including levels, patches per level, zones per level, etc.
+ * Disk statistics, including amount of data read/written for data / restart, # files, write rate, and % total time
+ * Projections of field data (low-res) and particle data (e.g. random sampling of N points)
+ * Statistics about different numerical methods (e.g. Riemann / chemistry / linear solver min/avg/max iterations, etc.)
+ * Simple derived statistics of data, e.g. norms of fields, min/avg/max, etc.
+ * Basic performance data, e.g. time in major components, time per zone, flop rate, etc.
+ * Debugging info, with control over amount and which components
+ * Parallel-related information, such as load balancing, communication amount, etc.
+ * Memory usage, including current and high-water marks for all shared-memory nodes
+
+ == Dependencies ==
+
+Since `Monitor` is for monitoring numerous aspects about the running simulation, it must have access to many components such as `Performance`, `Field`, `Amr`, `Particles`, `Method`, `Memory`, and `Parallel`.  To prevent loops in the dependency graph, `Monitor` services are only called by `Control`.
+
+ == Output data ==
+
+  || ||
+  || '''Amr''' || 
+  || ||
+  ||  `level_count` || integer[mpi] ||
+  ||  `patch_count` || integer[level][mpi] ||
+  ||  `zone_count` || integer[level][mpi] ||
+  ||   || 
+  || '''Control'''  || 
+  ||   || 
+  ||   `fine_cycle_count`  || integer ||
+  ||   `coarse_cycle_count`  || integer ||
+  ||   `time_simulation`  || scalar ||
+  ||   `time_duration`  || scalar ||
+  ||   `time_remaining`  || scalar ||
+  || ||
+  || '''Error''' ||
+  || ||
+  || `warning_<type>_count` || integer ||
+  || `error_<type>_count` || integer ||
+  || ||
+  || '''Field''' ||
+  || ||
+  || `[density|...]_project_[x|y|z]` || image ||
+  || || 
+  || '''Memory''' || 
+  || ||
+  || `bytes_curr` || integer[mpi] ||
+  || `bytes_high` ||integer[mpi] ||
+  || `bytes_new `||integer[mpi] ||
+  || `bytes_delete` ||integer[mpi] ||
+  || ||
+  || '''Method''' ||
+  || ||
+  || `ppm_...` ||
+  || ||
+  || '''Particles''' ||
+  || ||
+  || `[dark_matter|...]_project_[x|y|z]` || image ||
+  || ||
+  || '''Performance''' ||
+  || ||
+  ||  `cycles_[count|rate|util]` || [integer|scalar][mpi] ||
+  ||  `flop_[count|rate|util]` ||  [integer|scalar][mpi] ||
+  ||  `memory_[count|rate|util]` ||  [integer|scalar][mpi] ||
+  ||  `mpi_[count|rate|util]` ||  [integer|scalar][mpi] ||
+  ||  `disk_[count|rate|util]` ||  [integer|scalar][mpi] ||
+
+
+
+
+
+
+
+ 

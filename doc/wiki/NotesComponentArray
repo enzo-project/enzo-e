@@ -1,4 +1,4 @@
-([NotesComponentAmr Amr] < [NotesComponents index] > [NotesComponentControl Control])
+([NotesComponentAnalysis Analysis] < [NotesComponents index] > [NotesComponentControl Control])
 
 = `Array` Component =
 
@@ -229,6 +229,3 @@ physical processors and software virtual tasks.
 
 === `ArrayGpu` class ===
 === `ArrayUpc` class ===
-
-
-([NotesComponentAmr Amr] < [NotesComponents index] > [NotesComponentControl Control])
