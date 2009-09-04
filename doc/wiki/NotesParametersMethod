@@ -1,0 +1,21 @@
+ = Method Parameters =
+
+== Enzo hydrodynamics parameters ==
+
+||`CourantSafetyNumber`|| More of a Control or time-stepping parameter than a hydro parameter ||
+||`DualEnergyFormalism`|| Whether to evolve internal energy separately to avoid cancellation errors ||
+||`DualEnergyFormalismEta1`|| Dual energy mystery parameter #1 ||
+||`DualEnergyFormalismEta2`|| Dual energy mystery parameter #2 ||
+||`Gamma`|| More of a physics or gas parameter than hydro parameter ||
+||`HydroMethod`|| Selects the hydro method. ||
+||`PPMDiffusionParameter`|| PPM: Diffusion parameter.  More equations/fields than solver related. ||
+||`PPMFlatteningParameter`|| PPM: Flattening parameter ||
+||`PPMSteepeningParameter`|| PPM: Steepening parameter ||
+||`PressureFree`|| Fluid is assumed to be pressure-free.  More of a gas/physics parameter ||
+||`ZEUSLinearArtificialViscosity`|| ZEUS: quadratic artificial viscosity parameter C2 of Stone & Norman||
+||`ZEUSQuadraticArtificialViscosity`|| ZEUS: linear artificial viscosity parameter C1 of Stone & Norman ||
+
+=== PPM Hydro Parameters ===
+
+
+=== ZEUS Hydro Parameters ===

@@ -3,6 +3,7 @@ TRAC_PATH = /usr/local/trac-cello
 WIKI_FILES = \
 	NotesCodingStandards \
 	NotesComponentAmr \
+	NotesComponentAnalysis \
 	NotesComponentArray \
 	NotesComponentControl \
 	NotesComponentDisk \
@@ -23,6 +24,7 @@ WIKI_FILES = \
 	NotesEnzoTestProblems \
 	NotesParameters \
 	NotesParametersEnzo \
+	NotesParametersMethod \
 	NotesTestProblems \
 	NotesTestProblemShockPool \
 	NotesTestProblemWavePool \
@@ -31,15 +33,16 @@ WIKI_FILES = \
 
 # 	NotesParametersEnzoPoll
 
-import: $(patsubst %,import-%,$(WIKI_FILES))
+write: $(patsubst %,import-%,$(WIKI_FILES))
 
-import-%: export-%
-	-@(trac-admin $(TRAC_PATH) wiki import $* $*) >& /dev/null
+write-%:
+	-@echo "importing import/$*"
+	-@(trac-admin $(TRAC_PATH) wiki import $* write/$*)
 
-export: trac $(patsubst %,export-%,$(WIKI_FILES))
-export-%: 
-	-@rm -f trac/$*
-	-@(trac-admin $(TRAC_PATH) wiki export $* trac/$*) >& /dev/null
+read: $(patsubst %,read-%,$(WIKI_FILES))
+read-%: 
+	-@echo "exporting read/$*"
+	-@(trac-admin $(TRAC_PATH) wiki export $* read/$*) >& /dev/null
 
 trac:
 	-@mkdir trac
