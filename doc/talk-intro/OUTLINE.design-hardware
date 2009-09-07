@@ -1,0 +1,29 @@
+
+Hardware Components: Memory, Disk, Parallel
+
+   Provide controlled access to hardware
+
+   Memory
+      wrap new[]/delete[], adding useful functionality
+      Memory::allocate (size,class)
+      Memory::deallocate (class)
+      Memory::available()
+      Memory::used()
+      Memory::
+
+         monitor memory usage
+            warn when running low
+            provide load balancing with memory usage
+            optional checking for debugging
+               check for out-of-bounds bugs
+               initialize with 
+            controlled with parameters in the input file
+
+      Memory is only component to ever call new[]/delete[]
+         
+   Disk
+
+      wrap H5_*
+      allows other formats without rest of program knowing
+      
+

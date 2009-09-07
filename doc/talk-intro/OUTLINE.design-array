@@ -1,0 +1,24 @@
+   Array: Generalization of Fortran arrays
+     lowest-level data type
+     maintain efficiency by allowing direct access to actual arrays
+     additional functions for manipulating them
+
+     subclasses: Layout + Blocks + ItArrayBlock
+     Layout
+        defines how data is represented 
+ 
+        MPI-distributed
+        OMP-threaded
+        GPU-parallel
+        Blocked or padded for cache
+        useful combinations
+     Block
+     Functions for operating with arrays
+        access array properties
+        access array values
+        iterator over serial array components
+           blocks of a blocked array
+           tasks of an MPI-
+        ghost zones
+           static or dynamic allocation
+     examples      

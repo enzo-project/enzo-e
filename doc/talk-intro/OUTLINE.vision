@@ -1,0 +1,40 @@
+========================================================================
+Vision and Scope
+========================================================================
+
+   Goals
+      User design drivers
+         Easy to use
+         "Wide" control
+         "Deep" control
+      Push science limits on
+         Single-resolution ("unigrid") problems
+         Large homogeneous multi-resolution ("AMR") problems
+         Large "clustered" multi-resolution problems
+         Deep problems (star formation)
+         Multiple problems 
+         
+      Satisfy hardware performance requirements
+   
+   Parameter files
+      "Users should not have to write or edit code to run their problems"
+      Enzo problems
+         Enzo has problem-specific code (ShockTube, Cosmology, etc.)
+         Adding new parameters is labor intensive
+         Many "parameters" are in the code
+      Cello solutions
+         More powerful input file grammar
+            scalar and logical expressions
+         Adding a new parameter requires 1) documenting 2) using
+            example of code #include "parameters.h"  
+            parameters.open_group("Initial");
+            parameters.open_name("PPM");
+            parameters.evaluate_expression("
+      Want to move problem specification into the parameter file
+  Object oriented design
+      Complexity is controlled through objects, not functions
+      High-level classes include "Method", "Field", "Amr"
+      Low-level classes include ArraySerial, MethodPpm, Amr
+      
+      Deep parameter   Multiple parallel strategies
+   
