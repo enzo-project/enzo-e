@@ -2,29 +2,39 @@
 Vision and Scope
 ========================================================================
 
+
    Overview
-      Learn from Enzo
+      Enzo: The Next Generation
+
+   Approach
+
+      Lessons Learned from Enzo
          Improve what needs improving
          Keep what works well
       Areas to improve
          User interaction
          Hardware utilization
+         Middleware utilization
          Software design
          Science capabilities
+
+
       User Interaction
          Easy to use
-            Users should concentrate on science, not have to wrestle with software
+            Users should concentrate on science
+            Users should not have to wrestle with software
+              Unless they are experts at both
          "Wide" control: solve a large class of problems
          "Deep" control: access to "expert-level" parameters
-         Easy to modify if necessary
+             methods: chemistry subcycles
+             physics: floors on pressure, density
          Target multiple classes of users:
             physics experts
                deep control of physics
                flexible problem set-up for new problems
             numerical experts
                deep control of methods
-               easy to add new methods
-               easy to control new methods
+               easy to incorporate new methods with deep control
             students
                easy to set up simple problems and analyse results
                minimal software-related "gotcha's"
@@ -54,6 +64,14 @@ Vision and Scope
             node level: load balanced memory between nodes
             cpu/core level: load balanced workload within nodes
             highly tuned kernals on cores
+            take advantage of data-locality at all levels
+            control over task size to optimize cache usage
+            reuse data as much as possible
+            basic task: 
+               long sequences of operations
+                  hydro + chemistry + etc.
+               small blocks of data
+                  e.g. 4^3 or 8^3 patches
             floating point unit usage
             maximal useful work versus data structure handling
          Adaptability of data-structures to underlying hardware
@@ -65,6 +83,11 @@ Vision and Scope
                OMP
                UPC
                GPU
+
+      Middleware Use
+         Many useful tools / approaches
+           MPI HDF5
+           CHARM++
       Software Design
          Object-oriented design at high levels
             Layered
