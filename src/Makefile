@@ -54,7 +54,9 @@ clean:     $(patsubst %,%-clean,$(DIR))
 .PHONY: 
 test:   all install
 	$(MAKE) -C Test test
-	cat Test/*.unit
+	$(MAKE) -C Memory test
+	-@cat Test/*.unit
+	-@cat Memory/*.unit
 
 #-----------------------------------------------------------------------
 
