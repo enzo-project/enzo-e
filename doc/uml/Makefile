@@ -17,6 +17,6 @@ all: $(PS)
 clean:
 	-@rm -rf *.log *~
 distclean: clean
-	-@rm -rf *.1  *.ps *.png
+	-@rm -rf *.1  *.ps
 
 
