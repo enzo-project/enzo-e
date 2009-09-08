@@ -1,6 +1,455 @@
+------------------------------------------------------------------------
 Cello 
 
-   Vision and Scope
+   Overview
    Software Design
-   Issues and solutions
-   How can you help
+   Issues and Proposed Solutions
+------------------------------------------------------------------------
+Cello Overview
+
+   Cello is expected to be "Enzo: The Next Generation"
+   Expected to be around awhile
+   Lessons Learned from Enzo
+      Improve what needs improving
+      Keep what works well
+      Different people will disagree on which is which
+
+------------------------------------------------------------------------
+Target Areas to Improve
+
+   Science Capabilities
+   Hardware Peta-Scalability
+   Software Design
+   Quality Control
+   User Interface
+
+------------------------------------------------------------------------
+
+Target Areas to Improve: Science Capabilities
+
+         Design and data-structures must allow pushing limits on:
+            Single-resolution ("unigrid") problems
+               Enzo: O(P) data-structure, single large patch per MPI process
+               Cello: O(1) data-structure, multiple smaller patches for MPI-[12]/OMP/cache
+            Large homogeneous multi-resolution ("AMR") problems
+            Large "clustered" multi-resolution problems
+            Deep problems (star formation)
+            Multiple problems (parameter surveys, inter-problem analysis)
+
+------------------------------------------------------------------------
+
+Target Areas to Improve: Hardware Peta-Scalability
+
+       High overall performance requires high efficiency at *all* levels
+            node level: load balanced memory between nodes
+            cpu/core level: load balanced workload within nodes
+            highly tuned kernals on cores
+            take advantage of data-locality at all levels
+            control over task size to optimize cache usage
+            reuse data as much as possible
+            basic task: 
+               long sequences of operations
+                  hydro + chemistry + etc.
+               small blocks of data
+                  e.g. 4^3 or 8^3 patches
+            floating point unit usage
+            maximal useful work versus data structure handling
+         Adaptability of data-structures to underlying hardware
+            flexibility of data-structures
+               optimal grid patch sizes
+            flexibility of parallelization strategies
+               MPI-1 send/recv
+               MPI-2 get/put
+               OMP
+               UPC
+               GPU
+
+------------------------------------------------------------------------
+
+Target Areas to Improve: Software Design
+
+    Object-oriented design at high levels
+       Layered
+         keep low-level code out of high-levels
+         each function should have uniform 
+       Modular: to control code inter-dependencies
+       Program in problem-domain: Field, Amr, Array, Particles, Disk, Memory
+         OOP Current best approach for controlling software complexity
+              modifyability
+         Highly-tuned kernels at low levels
+            Fortran, possible migration to C89 ("restrict")
+         Modularize as much as possible
+            Core physics routines independent of parallel strategies
+
+------------------------------------------------------------------------
+
+Target Areas to Improve: Quality Control
+   Debugging is extremely costly
+      Can and have wasted a year on locating simple defects
+   Time-proven solution: follow improved software development practices
+      Coding to early actually takes longer than spending more time up front
+   Iterate on (requirements -> design -> implement -> test)
+      Design before sitting down at a computer
+      Unit test all code as it's written
+      Include assertions of things that should always be correct
+      Every line of code written should be reviewed, preferably by someone else
+        performance comes mainly from the design rather than the implementation
+   Write code so that bugs don't have anywhere to hide
+      Write code that's immediately readable
+          example: index calculations
+      Use appropriate abstraction levels
+          avoid pointers except at lowest code level and only when necessary
+          C++ standard template library
+             strings
+             vectors
+             associative maps
+             iterators
+
+------------------------------------------------------------------------
+
+Target Areas to Improve: User Interface
+
+   Goals: Identify classes of users, and design interface 
+          with all of them in mind
+       students
+          easy to set up simple problems and analyse results
+          minimal software-related "gotcha's"
+       physics experts
+          deep control of physics aspects
+             floors on pressure, density
+          flexible problem set-up for wide-range of problems
+       numerical experts
+          deep control of methods: chemistry subcycles
+          easy to add access to low-level parameters
+          easy to incorporate new methods with deep control
+       computing experts
+          deep control of data-structures
+             specify cores/node
+             cache blocking/padding
+             preferred patch size range
+
+   Requirements summary:
+      Shift problem set up from code to parameter file
+      Allow users to concentrate on science-related aspects only
+      Permit users to access algorithmic and data-structure parameters
+      Remove dependence of code on specific problem types
+Users should not have to wrestle with software or know about hidden parameters
+
+------------------------------------------------------------------------
+
+Target Areas to Improve: User Interface
+
+   Solution: 
+       Keep parameter file interface
+       Improve readability, flexibility, and power of parameter file grammar
+       Improve incorporation of parameter access in code
+       In particular
+          Hierarchical to organize parameters
+          More data types to increase expressive power
+             logical, numerical expressions, lists
+             allows much wider range of problems with less code
+          Remove dependence on hard-coded ProblemType
+          "Users should not have to write or edit code to run their problems"
+          "Parameter class" to control access to parameter values by code
+             
+------------------------------------------------------------------------
+
+Target Areas to Improve: User Interface
+
+  Accessing parameters in code
+
+  Adding new parameters in Enzo is error-prone, labor intensive, and confusing
+     edit ReadFile
+     add new variable
+     set default
+     not clear in code which variables are parameters and which are not
+
+  Many "parameters" require editing code and recompiling
+     Cello solutions
+          Want to move problem specification from code into the parameter file
+          Requires a more powerful input file grammar
+             scalar and logical expressions
+             control over individual fields (e.g. limits)
+          But want to keep grammar simple
+          New parameters can just be used
+             example of code #include "parameters.h"  
+             parameters.open_group("Initial");
+             parameters.open_name("PPM");
+             parameters.evaluate_expression("
+
+
+  
+
+------------------------------------------------------------------------
+SOFTWARE DESIGN
+
+------------------------------------------------------------------------
+
+Software Design: Components
+
+   Component diagram
+
+      Modular
+      Layered
+
+------------------------------------------------------------------------ 
+
+Hardware Components: Hardware
+
+   Low-level components provide controlled access to hardware
+
+------------------------------------------------------------------------ 
+
+Hardware Components: Hardware: Memory
+
+   wrap new[]/delete[]
+       optionally monitor usage by different components of the code 
+          AMR overhead, fields, particles, etc.
+          warn when running low
+          provide memory information to load balancing code
+       optionally fill arrays automatically with special values for debugging
+          after allocating and before deallocating
+       optionally use native new[]/delete[] for speed
+       all controlled by input file parameters
+         
+------------------------------------------------------------------------ 
+
+Hardware Components: Hardware: Disk
+
+   wrap H5_*
+   allows other formats without rest of program knowing
+   multiple data formats for different filesystem hardware or user needs
+      writing for restarts may be different than writing for user-analysis
+   disk hardware parameters controlled by input file parameters
+
+------------------------------------------------------------------------ 
+
+Hardware Components: Hardware: Parallel
+
+   Flexible use of MPI-1, MPI-2, OMP, UPC?, GPU??
+   Parallelize different parts of program in different ways (e.g. UPC particles)
+   Goal is to isolate data distribution, data layout, and threading from
+       the rest of the code
+   Higher-level software components independent of what parallelization strategy used
+   Parallelization orchestrated by Control component
+      Control calls Parallel and Method routines
+      Method code kernels are serial (but thread-safe)
+      Tasks:
+         field operations on grid patches
+            sequence of methods applied to a single rectangular patch
+         field operations on grid patches in adjacent levels
+            interpolation
+         flux operations between patches in adjacent levels
+            interpolation
+            flux-correction
+      Ghost zone updates as transparent as possible
+         ghost zones may be allocated dynamically to save memory
+
+------------------------------------------------------------------------ 
+
+Software Design:  Array: Generalization of Fortran arrays
+
+     lowest-level data type
+
+     Acts as interface between C++ and Fortran
+        C++ sees and manipulates Array objects
+        Fortran sees Arrays as efficient 3D Fortran-style arrays
+
+     Helper classes: Layout + Blocks + ItArrayBlock
+
+     Layout
+        defines how data is represented
+        MPI-[12] distributed
+        OMP threaded
+        GPU parallel
+        Blocked or padded for cache
+        useful combinations
+     Block
+        encapsulates a single 3D Fortran-style array
+        each Array is composed of one or more Blocks
+        a sequence of methods and a Block is the core parallel Task
+        functions for manipulating, refreshing, and accessing ghost zones
+           static or dynamic allocation
+           flexible ghost zone depth
+              determined by set of methods
+              can be overridden by parameter file
+           accessed as 2D fortran-style array
+     ItArrayBlock
+        "iterator" class for looping over Blocks in an Array
+        Example
+        This is where parallelization approach is decoupled from low-level routines
+           blocks of a blocked array
+           tasks of an MPI-
+
+------------------------------------------------------------------------ 
+Software Design:  Amr
+
+   Represent either tree- or structured-AMR hierarchies
+
+   Why both?
+     Each has advantages / disadvantages
+     tree-based first
+        
+   Helper classes: Array + Box + Grid + Patch
+      Array: grid of numbers
+      Box:   rectangle in space
+      Grid:  Array + Box
+      Patch: Grid + position in AMR
+      Tree:  The underlying interconnection structure
+      Node:  Node in the Tree
+
+      Tree-based
+
+         Degenerates to a single Array
+         K^D-tree
+           2^D for refinement by 2
+              relatively inefficient refinement
+              good for high fractal dimensional structures(?)
+           K^D for refinement by k
+              targeted refinement
+              may high jumps in refinement levels
+                 introduce "back-fill" to fill in levels to refinement by 2
+              good for low fractal dimensional structures(?)
+                  e.g. refine on point source
+         Issues
+             maintaining gradual refinement
+             efficiency of tree structure
+                direct for low K
+                "sparse" storage for high K
+         
+      Structured
+
+         Structure independent between levels
+           i.e. may have multiple parents
+           requires efficient parallel gridding algorithm
+             CITE
+
+  
+------------------------------------------------------------------------ 
+Software Design:  Field
+
+Represent a physics scalar field
+
+Built on Amr
+
+  FieldAmr
+  FieldLevel
+  FieldPatch
+  
+      Includes a name, values, and properties
+         "density"
+         floor_value
+         ceiling_value
+      
+
+------------------------------------------------------------------------ 
+Software Design:  Methods
+
+------------------------------------------------------------------------ 
+Software Design:  Particles
+
+------------------------------------------------------------------------ 
+Software Design:  Control: timestepping and parallel control
+    
+      CHARM++
+
+
+
+    
+    
+
+------------------------------------------------------------------------
+ISSUES AND SOLUTIONS
+
+Outstanding Issues
+
+ CHARM++?
+    Define problem in terms of single-thread tasks and dependencies
+       Tasks:
+          timestep on a single grid patch
+          data movement between grid patch and its parent
+          data movement between grid patch and a neighbor
+       Dependencies: data from neighboring grid patches up-to-date
+       Communication: get neighboring grid patch data
+    Addresses load balancing
+    Addresses 
+
+ Load balancing
+    balance by memory between nodes
+    balance by work between cores
+    global communication versus local only
+       balancing globally is more costly
+          global communication
+       balancing locally is more inaccurate
+          shifting work between neighboring processors
+          locally balanced but locally imbalanced
+       possible solution: "hierarchical" balancing, ala multigrid
+          maintain hierarchical
+          
+ Particles
+     How to load-balance particles across machine
+     How to associate particles with grid patches
+        use AMR k^d-tree?
+        use own tree data-structure
+        both?
+     Processing particles is best done in groups
+        large enough groups to amortize data-handling costs / vectorization
+        small enough groups to work within cache
+        
+ Grid patch / particle interaction
+
+ Elliptic + Hyperbolic
+
+
+ Support both structured AMR (Enzo-like) and tree-based AMR (W010)
+
+Store particle positions in single precision as -1 <= x,y,z <= 1 relative to their containing patch. [[BR]] [To reduce storage, improve performance, and address precision issues with deep AMR.] (W011)
+
+Do not store a patch's global position, only local position relative to immediate neighbors, parent, and children.  [[BR]][Toward distributed AMR data-structure, and to address precision issues with deep AMR.  Potential issues: boundary and initial conditions.] (see W01213) (W012)
+
+ Represent patch extents with (small) integer values relative to parent. [[BR]][To reduce memory usage with deep AMR runs.] (see W012)  (W013)
+
+Provide (or notify) neighboring patches with updated ghost zone data as soon as it's available. (W014)
+
+Support optional variable timestep sizes within each level. [[BR]][To reduce synchronization costs when computing global CFL condition.] (W015)
+
+Support optional uniform timesteps across all levels. [[BR]] [To improve parallel efficiency.] (W016)
+
+User-controlled optional floor/ceiling limits on individual `Field`s (ala "tiny_number" in Enzo), with user-specified `Error` behavior (warning, error, ignore, reset to given floor/ceiling, etc.) (W017)
+
+Allow multiple root-level patches per MPI task.  [[BR]][To improve cache use for unigrid problems, and improve load-balancing for AMR.] (W018)
+
+Use a binary tree data-structure to recursively partition the bounding boxes of particles. (W019)
+ 
+------------------------------------------------------------------------
+HOW CAN YOU HELP?
+
+   Recommend useful functionality
+   Point out non-useful functionality
+   Review design
+   Review code
+   Review documentation
+   Contribute code
+   Contribute documentation
+   Useability testing
+   Functional testing
+   Contribute to design, code, documentation, test
+   Review documentation
+   Contribute code
+
+------------------------------------------------------------------------
+How Can YOU Help?  Assignments
+
+   Area experts especially helpful
+     Kritsuk:  hydro, MHD
+     Collins:  MHD
+     Pascal:   chemistry,cooling
+     Harkness: hardware, algorithms, optimization
+     Turk:     star formation
+     *:        testing
+     
+   
+   
+   
+   
+   
