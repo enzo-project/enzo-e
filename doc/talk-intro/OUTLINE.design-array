@@ -1,24 +1,33 @@
    Array: Generalization of Fortran arrays
-     lowest-level data type
-     maintain efficiency by allowing direct access to actual arrays
-     additional functions for manipulating them
 
-     subclasses: Layout + Blocks + ItArrayBlock
+     lowest-level data type
+
+     Acts as interface between C++ and Fortran
+        C++ sees and manipulates Array objects
+        Fortran sees Arrays as efficient 3D Fortran-style arrays
+
+     Helper classes: Layout + Blocks + ItArrayBlock
+
      Layout
-        defines how data is represented 
- 
-        MPI-distributed
-        OMP-threaded
-        GPU-parallel
+        defines how data is represented
+        MPI-[12] distributed
+        OMP threaded
+        GPU parallel
         Blocked or padded for cache
         useful combinations
      Block
-     Functions for operating with arrays
-        access array properties
-        access array values
-        iterator over serial array components
+        encapsulates a single 3D Fortran-style array
+        each Array is composed of one or more Blocks
+        a sequence of methods and a Block is the core parallel Task
+        functions for manipulating, refreshing, and accessing ghost zones
+           static or dynamic allocation
+           flexible ghost zone depth
+              determined by set of methods
+              can be overridden by parameter file
+           accessed as 2D fortran-style array
+     ItArrayBlock
+        "iterator" class for looping over Blocks in an Array
+        Example
+        This is where parallelization approach is decoupled from low-level routines
            blocks of a blocked array
            tasks of an MPI-
-        ghost zones
-           static or dynamic allocation
-     examples      
