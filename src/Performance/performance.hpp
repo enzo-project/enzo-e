@@ -17,11 +17,6 @@
  */
 
 
-#include <sys/time.h>
-#ifdef __linux__
-#include <unistd.h>
-#endif
-
 #include "cello.def"
 
 #include "performance_timer.hpp"

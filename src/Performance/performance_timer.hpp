@@ -31,6 +31,11 @@
  *********************************************************************
  */
 
+#include <sys/time.h>
+#ifdef __linux__
+#include <unistd.h>
+#endif
+
 class Timer {
 
 /** 
