@@ -27,8 +27,12 @@
  */
  
 #include <stdio.h>
+#include <stdlib.h>
+
 #include <string>
 
+#include "cello.def"
+#include "performance_timer.hpp"
 #include "error.hpp"
 #include "memory.hpp"
 #include "test.hpp"
@@ -39,7 +43,9 @@ main()
   unit_class ("Memory");
   unit_open();
 
+  //----------------------------------------------------------------------
   // allocate()
+  //----------------------------------------------------------------------
 
   unit_func("allocate");
 
@@ -50,62 +56,128 @@ main()
 
   size_t size = 0;
 
-  f1 = new double[10]; 
-  size += sizeof(double[10]);
-  for (i=0; i<10; i++) f1[i] = 7.0;
+#define NEW(VAR,TYPE,SIZE,COUNT)			\
+  VAR = new TYPE[SIZE]; \
+  COUNT += sizeof(TYPE[SIZE]);			\
+  for (i=0; i<SIZE; i++) VAR[i] = 17;
 
-  f2 = new float[17];  
-  size += sizeof(float[17]);
-  for (i=0; i<17; i++) f2[i] = 8.0;
+#define DEL(VAR,TYPE,SIZE,COUNT)			\
+  delete [] VAR; \
+  COUNT -= sizeof(TYPE[SIZE]);
 
-  f3 = new int[25];    
-  size += sizeof(int[25]);
-  for (i=0; i<25; i++) f3[i] = 9;
+#define NEW_F1(SIZE) NEW(f1,double,10,SIZE);
+#define NEW_F2(SIZE) NEW(f2,float, 17,SIZE);
+#define NEW_F3(SIZE) NEW(f3,int,   25,SIZE);
+#define DEL_F1(SIZE) DEL(f1,double,10,SIZE);
+#define DEL_F2(SIZE) DEL(f2,float, 17,SIZE);
+#define DEL_F3(SIZE) DEL(f3,int,   25,SIZE);
 
-  unit_assert (Memory::current() == size);
+  NEW_F1(size);
+  NEW_F2(size);
+  NEW_F3(size);
+
+  unit_assert (Memory::bytes() == size);
   
+  //----------------------------------------------------------------------
   // deallocate()
+  //----------------------------------------------------------------------
 
   unit_func("deallocate");
 
-  delete [] f1; 
-  size -= sizeof(double[10]);
-  delete [] f3; 
-  size -= sizeof(int[25]);
-  unit_assert (Memory::current() == size);
+  DEL_F1(size);
+  DEL_F3(size);
 
-  delete [] f2; 
-  size -= sizeof(float[17]);
+  unit_assert (Memory::bytes() == size);
 
-  f1 = new double[10];
-  size += sizeof(double[10]);
-  for (i=0; i<10; i++) f1[i] = 7.0;
+  DEL_F2(size);
+  NEW_F1(size);
+  NEW_F2(size);
+  DEL_F1(size);
+  DEL_F2(size);
+  NEW_F3(size);
+  NEW_F2(size);
+  DEL_F3(size);
+  DEL_F2(size);
 
-  f2 = new float; 
-  size += sizeof(float);
-  *f2 = 10;
+  unit_assert (Memory::bytes() == size);
 
-  delete f1; 
-  size -= sizeof(double[10]);
+  Timer timer;
+  timer.start();
+  const int num_alloc = 10000;
+  const int size_alloc = 1000000;
+  for (int j=0; j<num_alloc; j++) {
+    f1 = new double[size_alloc];
+    delete [] f1;
+  }
+  timer.stop();
+  printf ("alloc/dealloc per sec = %g\n",num_alloc/timer.value());
 
-  delete f2; 
-  size -= sizeof(float);
-
-  f3 = new int[25]; 
-  size += sizeof(int[25]);
-  for (i=0; i<25; i++) f3[i] = 9;
-
-  f2 = new float[17];
-  size += sizeof(float[17]);
-  for (i=0; i<17; i++) f2[i] = 8;
+  timer.clear();
+  timer.start();
+  for (int j=0; j<num_alloc; j++) {
+    f1 = (double*)malloc(sizeof(double[size_alloc]));
+    free(f1);
+  }
+  timer.stop();
+  printf ("  new/delet e per sec = %g\n",num_alloc/timer.value());
   
-  delete [] f3; size -=  sizeof(int[25]);
 
-  unit_assert (Memory::current() == size);
+  unit_assert (Memory::bytes() == size);
 
+  //----------------------------------------------------------------------
   // begin_group(), end_group()
+  //----------------------------------------------------------------------
+
+  size_t size_test_1 = 0;
+  size_t size_test_2 = 0;
+
+  // Group 1
+
+  Memory::begin_group("Test 1");
+
+  int handle_1 = Memory::current_handle();
+
+  NEW_F1(size_test_1);
+  NEW_F3(size_test_1);
+
+  unit_assert (Memory::bytes(handle_1) == size_test_1);
+  unit_assert (Memory::bytes() == size);
+  
+  DEL_F1(size_test_1);
+  DEL_F3(size_test_1);
+
+  unit_assert (Memory::bytes(handle_1) == size_test_1);
+  unit_assert (Memory::bytes() == size);
+  unit_assert (strcmp(Memory::current_group(),"Test 1") == 0);
+
+  Memory::end_group("Test 1");
+
+  // Group 1
+
+  Memory::begin_group("Test 2");
+
+  int handle_2 = Memory::current_handle();
+
+  NEW_F2(size_test_2);
+  NEW_F3(size_test_2);
+
+  unit_assert (Memory::bytes(handle_1) == size_test_1);
+  unit_assert (Memory::bytes(handle_2) == size_test_2);
+  unit_assert (Memory::bytes() == size);
+  unit_assert (strcmp(Memory::current_group(),"Test 2") == 0);
+  
+  Memory::end_group("Test 2");
+
+  DEL_F2(size_test_2);
+  DEL_F3(size_test_2);
+ 
+  unit_assert (Memory::bytes(handle_1) == size_test_1);
+  unit_assert (Memory::bytes(handle_2) == size_test_2);
+  unit_assert (Memory::bytes() == size);
+  unit_assert (strcmp(Memory::current_group(),"\0") == 0);
+
   // curr_group()
-  // current()
+  // bytes()
   // available()
   // efficiency()
   // highest()

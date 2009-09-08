@@ -88,10 +88,13 @@ public:
   static void end_group ( const char * group_name ) throw ();
 
   /// Return name of the current group
-  static const char * curr_group () throw ();
+  static const char * current_group () throw ();
+
+  /// Return handle for the current group
+  static int current_handle () throw ();
 
   /// Current number of bytes allocated
-  static size_t current ( memory_group_handle group_handle = 0 ) throw ();
+  static size_t bytes ( memory_group_handle group_handle = 0 ) throw ();
   
   /// Estimate of amount of local memory availables);
   static size_t available ( memory_group_handle group_handle = 0 ) throw ();
@@ -150,7 +153,6 @@ private:
   /// Array of known group names
 
   static char * group_names_ [MEMORY_MAX_NUM_GROUPS];
-
 
   /// Collected statistics for different groups
 

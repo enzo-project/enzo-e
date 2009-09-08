@@ -87,6 +87,7 @@ Memory::Memory() throw ()
  *********************************************************************
  */
 {
+  printf ("Memory::Memory()\n");
   group_names_[0] = strdup("");
   group_names_[1] = strdup("memory");
 }
@@ -103,7 +104,7 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
  *********************************************************************
  */
 {
-  int * buffer = (int *)(malloc(bytes+sizeof(int)));
+  int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));
   if (buffer==0) throw ExceptionMemoryBadAllocate();
 
   buffer[0] = bytes;
@@ -173,7 +174,7 @@ void  Memory::begin_group ( const char * group_name ) throw ()
 
   // Test if group already exists, and set curr_group_ if it does
 
-  for (int i=0; i<num_groups_; i++) {
+  for (int i=1; i<num_groups_; i++) {
 
     if (strcmp(group_names_[i],group_name) == 0) {
 
@@ -223,7 +224,7 @@ void  Memory::end_group ( const char * group_name ) throw ()
 }
 
 
-const char * Memory::curr_group () throw ()
+const char * Memory::current_group () throw ()
 /**
  *********************************************************************
  *
@@ -234,15 +235,32 @@ const char * Memory::curr_group () throw ()
  *********************************************************************
  */
 {
-  if (curr_group_) {
-    return group_names_[curr_group_];
-  } else {
-    return 0;
+  // Create "null" group name if needed
+
+  if (group_names_[0] == 0) {
+    group_names_[0] = strdup("");
   }
+
+  return group_names_[curr_group_];
 }
 
 
-size_t Memory::current ( memory_group_handle group_handle ) throw ()
+int Memory::current_handle () throw ()
+/**
+ *********************************************************************
+ *
+ * @param  foo    Description of argument foo
+ * @return        There is no return value
+ *
+ *
+ *********************************************************************
+ */
+{
+  return curr_group_;
+}
+
+
+size_t Memory::bytes ( memory_group_handle group_handle ) throw ()
 /**
  *********************************************************************
  *
@@ -254,7 +272,6 @@ size_t Memory::current ( memory_group_handle group_handle ) throw ()
  *********************************************************************
  */
 {
-  check_handle_(group_handle);
   return bytes_[group_handle];
 }
 
@@ -364,19 +381,19 @@ int    Memory::num_groups_ = 1;
 
 int    Memory::curr_group_ = 0;
 
-char * Memory::group_names_ [MEMORY_MAX_NUM_GROUPS];
+char * Memory::group_names_ [MEMORY_MAX_NUM_GROUPS] = {0};
 
-size_t Memory::bytes_[MEMORY_MAX_NUM_GROUPS];
+size_t Memory::bytes_[MEMORY_MAX_NUM_GROUPS] = {0};
 
-size_t Memory::bytes_high_[MEMORY_MAX_NUM_GROUPS];
+size_t Memory::bytes_high_[MEMORY_MAX_NUM_GROUPS] = {0};
 
-size_t Memory::new_calls_[MEMORY_MAX_NUM_GROUPS];
+size_t Memory::new_calls_[MEMORY_MAX_NUM_GROUPS] = {0};
 
-size_t Memory::new_bytes_[MEMORY_MAX_NUM_GROUPS];
+size_t Memory::new_bytes_[MEMORY_MAX_NUM_GROUPS] = {0};
 
-size_t Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS];
+size_t Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS] = {0};
 
-size_t Memory::delete_bytes_[MEMORY_MAX_NUM_GROUPS];
+size_t Memory::delete_bytes_[MEMORY_MAX_NUM_GROUPS] = {0};
 
 //======================================================================
     
