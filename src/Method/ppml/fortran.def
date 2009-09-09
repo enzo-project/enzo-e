@@ -1,0 +1,23 @@
+#define MAX_ANY_SINGLE_DIRECTION __max_cube_plus_7
+#define MAX_COLOR __max_colors
+
+#ifdef p4
+#define tiny 1.0e-20
+#define huge 1.0e+20
+#define REALSUB real
+#endif
+
+#ifdef p8
+#define tiny 1.0e-20
+#define huge 1.0e+20
+#define REALSUB real*8
+#endif
+
+#ifdef p16
+#define tiny 1.0e-20
+#define huge 1.0e+20
+#define REALSUB real*16
+#endif
+
+#define RADIATION
+#define NO_CEN_METALS
