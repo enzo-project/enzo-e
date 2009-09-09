@@ -74,7 +74,10 @@ ArraySerial::ArraySerial(Scalar * a,int nx,int ny,int nz) throw()
 
 ArraySerial::~ArraySerial() throw()
 {
-  this->deallocate_();
+  if (is_allocated_) {
+    this->deallocate_();
+    is_allocated_ = false;
+  }
 }
 
 //----------------------------------------------------------------------
