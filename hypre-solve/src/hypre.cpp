@@ -291,7 +291,7 @@ void Hypre::init_graph ()
     values.
 */
 
-void Hypre::init_elements (std::vector<Point *>  points)
+void Hypre::init_elements (std::vector<Point *>  points, Scalar f_scale)
 
 {
   // Create the hypre matrix A_, solution X_, and right-hand side B_ objects
@@ -328,7 +328,7 @@ void Hypre::init_elements (std::vector<Point *>  points)
   // Initialize B_ elements 
   //--------------------------------------------------
 
-  init_elements_rhs_ (points);
+  init_elements_rhs_ (points,f_scale);
 
   // Assemble the matrix and vectors
 
@@ -742,7 +742,8 @@ void Hypre::init_elements_matrix_ ()
 
 /// Set right-hand-side elements
 
-void Hypre::init_elements_rhs_ (std::vector<Point *>  & points)
+void Hypre::init_elements_rhs_ (std::vector<Point *>  & points,
+				Scalar f_scale)
 {
 
   Scalar local_shift_b_sum = 0.0;
@@ -763,7 +764,7 @@ void Hypre::init_elements_rhs_ (std::vector<Point *>  & points)
 
     // ... or use existing grid f and u
 
-    local_shift_b_sum += init_vector_attach_ ();
+    local_shift_b_sum += init_vector_attach_ (f_scale);
 
   } else {
 
@@ -1197,12 +1198,31 @@ Scalar Hypre::init_vector_file_ (std::string             file_prefix,
 
 /// Use existing f_ for right-hand side B
 
-Scalar Hypre::init_vector_attach_ ()
+Scalar Hypre::init_vector_attach_ (Scalar f_scale)
 {
   _TRACE_;
   Scalar shift_b_sum = 0.0;
   ItHierarchyGridsLocal itg (*hierarchy_);
   while (Grid * grid = itg++) {
+    int n0,n1,n2;
+    Scalar * values = grid->get_f(&n0,&n1,&n2);
+
+    // Scale by 1/(hx*hy*hz)
+
+    Scalar hx,hy,hz;
+    grid->h(hx,hy,hz);
+    Scalar scale = hx*hy*hz * f_scale;
+    for (int i0=0; i0<n0; i0++) {
+      for (int i1=0; i1<n1; i1++) {
+	for (int i2=0; i2<n2; i2++) {
+	  int k = i0 + n0*(i1 + n1*i2);
+	  values[k] *= scale;
+	}
+      }
+    }
+
+    // Set Hypre B_ vector to grid f_ values
+
     int part = grid->level();
     int lower[3] = { grid->index_lower(0), 
 		     grid->index_lower(1), 
@@ -1210,10 +1230,6 @@ Scalar Hypre::init_vector_attach_ ()
     int upper[3] = { grid->index_upper(0), 
 		     grid->index_upper(1), 
 		     grid->index_upper(2) };
-    int n0,n1,n2;
-    Scalar * values = grid->get_f(&n0,&n1,&n2);
-
-    // Set Hypre B_ vector to grid f_ values
 
     HYPRE_SStructVectorAddToBoxValues (B_,part,lower,upper,0,values);
 

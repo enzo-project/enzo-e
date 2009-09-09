@@ -43,7 +43,7 @@ public:
   void init_hierarchy (Mpi        & mpi);
   void init_stencil   ();
   void init_graph     ();
-  void init_elements  (std::vector<Point *>  points);
+  void init_elements  (std::vector<Point *>  points, Scalar f_scale=1.0);
   void solve          ();
   void evaluate       ();
 
@@ -63,7 +63,7 @@ private:
   // init_elements() functions
 
   void init_elements_matrix_   ();
-  void init_elements_rhs_      (std::vector<Point *> & points);
+  void init_elements_rhs_      (std::vector<Point *> & points, Scalar f_scale=1.0);
 
   void init_matrix_stencil_    (Grid & grid);
   void init_matrix_clear_      (int part);
@@ -77,7 +77,7 @@ private:
   Scalar init_vector_points_  (std::vector<Point *> & points);
   Scalar init_vector_file_ (std::string             file_prefix,
 			    bool is_packed);
-  Scalar init_vector_attach_ ();
+  Scalar init_vector_attach_ (Scalar f_scale=1.0);
 
   // solve() functions
 
