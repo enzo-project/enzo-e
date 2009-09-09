@@ -1,0 +1,10 @@
+#!/bin/tcsh -f
+
+set color = /usr/share/h5utils/colormaps/jet
+
+foreach hdf5 (*.hdf5)
+   echo $hdf5
+   h5topng -m 0.125 -M 1.0 -c $color $hdf5
+end
+
+convert *.png implosion.mpg
