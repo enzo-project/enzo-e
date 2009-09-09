@@ -46,7 +46,7 @@
 //======================================================================
 
 typedef int      memory_group_handle;
-typedef unsigned size_t;
+// typedef unsigned size_t;
 
 class Memory {
 
