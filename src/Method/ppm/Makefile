@@ -26,6 +26,8 @@ OBJS = \
 	Grid_IdentifySpeciesFields.o \
 	Grid_SetMinimumSupport.o \
 	Grid_SolveHydroEquations.o \
+	Grid_SetExternalBoundaryValues.o \
+	SetExternalBoundary.o \
 	calcdiss.o \
 	calc_dt.o \
 	euler.o \
@@ -46,8 +48,8 @@ OBJS = \
 	data_dump.o
 
 
-FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX
-CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX
+FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O
+CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O
 
 FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)

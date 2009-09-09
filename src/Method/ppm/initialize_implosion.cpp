@@ -75,7 +75,7 @@ void initialize_implosion ()
   // Control
 
   time_stop              = 2.5;
-  cycle_stop             = 1;
+  cycle_stop             = 20000;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
@@ -213,5 +213,31 @@ void initialize_implosion ()
   number_density_floor            = 1e-6;
   density_floor                   = 1e-6;
   temperature_floor               = 1e-6;
+
+  // boundary
+
+  BoundaryRank = 2;
+  BoundaryDimension[0] = GridDimension[0];
+  BoundaryDimension[1] = GridDimension[1];
+
+  for (int field=0; field<NumberOfBaryonFields; field++) {
+    BoundaryFieldType[field] = FieldType[field];
+    for (int dim = 0; dim < 3; dim++) {
+      for (int face = 0; face < 2; face++) {
+	int n1 = GridDimension[(dim+1)%3];
+	int n2 = GridDimension[(dim+2)%3];
+	int size = n1*n2;
+	BoundaryType [field][dim][face] = new bc_type [size];
+	BoundaryValue[field][dim][face] = NULL;
+	for (int i2 = 0; i2<n2; i2++) {
+	  for (int i1 = 0; i1<n1; i1++) {
+	    int i = i1 + n1*i2;
+	    BoundaryType[field][dim][face][i] = bc_reflecting;
+	  }
+	}
+      }
+    }
+  }
+
 }
     

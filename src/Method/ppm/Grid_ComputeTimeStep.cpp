@@ -70,8 +70,6 @@ float ComputeTimeStep()
     CosmologyComputeExpansionFactor(Time, &a, &dadt);
   float afloat = float(a);
 
-  printf ("%s:%d %g\n",__FILE__,__LINE__,afloat);
-   
   /* 1) Compute Courant condition for baryons. */
  
   if (NumberOfBaryonFields > 0) {
@@ -118,7 +116,6 @@ float ComputeTimeStep()
                                BaryonField[Vel1Num], BaryonField[Vel2Num],
                                BaryonField[Vel3Num], &dtBaryons, &dtViscous);
  
-    printf ("%s:%d dt=%g\n",__FILE__,__LINE__,dtBaryons);
     /* Clean up */
  
     delete pressure_field;

@@ -20,6 +20,7 @@ main()
   float dt;
 
   int   cycle;
+  const int cycle_dump_frequency = 10;
   float time;
 
   for (cycle = 0, time = 0.0;
@@ -28,13 +29,20 @@ main()
 
     dt =  min (ComputeTimeStep(), time_stop - time);
 
-    data_dump(cycle);
+    printf ("cycle = %6d time = %6f dt = %6f\n",cycle,time,dt);
 
-    printf ("%s:%d\n",__FILE__,__LINE__);
-    printf ("   dt = %g\n",dt);
+    SetExternalBoundaryValues();
+
+    if ((cycle % cycle_dump_frequency) == 0) {
+      data_dump(cycle);
+    }
 
     SolveHydroEquations(cycle, dt);
 
+  }
+  if ((cycle % cycle_dump_frequency) == 0) {
+    SetExternalBoundaryValues();
+    data_dump(cycle);
   }
 }
 
