@@ -69,12 +69,14 @@ named_group: GROUP_NAME group           { printf ("Group\n"); }
           |  GROUP_NAME IDENTIFIER group { printf ("Group member\n"); }
 ;
 
-group :  '{' parameter_list '}'  { }
+group :  
+  '{' parameter_list '}'  { printf ("group\n"); }
+| '{' parameter_list ';' '}'  { printf ("group;\n"); }
  ;
 
 parameter_list : 
-   parameter_assignment 
- | parameter_assignment  ';' parameter_list
+   parameter_assignment  {  printf ("parameter assignment\n"); }
+ | parameter_list ';' parameter_assignment
 {  }
  ;
 
