@@ -194,6 +194,7 @@ void Hdf5::dataset_open (std::string name, Array & array)
 	     dataset_,name.c_str());
     WARNING_MESSAGE("Hdf5::dataset_open");
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -202,6 +203,7 @@ void Hdf5::dataset_close ()
 /**
  */
 {
+  H5Dclose( dataset_);
 }
 
 //----------------------------------------------------------------------
