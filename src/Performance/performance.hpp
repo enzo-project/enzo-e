@@ -17,7 +17,7 @@
  */
 
 
-#include "cello.def"
+#include "cello.h"
 
 #include "performance_timer.hpp"
 

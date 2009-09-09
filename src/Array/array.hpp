@@ -16,7 +16,7 @@
  *
  */
 
-#include "cello.def"
+#include "cello.h"
 
 #include "array_array.hpp"        /* Array abstract base class */
 #include "array_array_serial.hpp" /* Serial Array */

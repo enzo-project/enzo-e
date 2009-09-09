@@ -32,6 +32,8 @@
  *********************************************************************
  */
 
+#include "error_exception.hpp"
+
 class ArraySerial : public Array {
 
 /** 

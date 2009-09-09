@@ -16,7 +16,7 @@
  *
  */
 
-#include "cello.def"
+#include "cello.h"
 
 #include "disk_hdf5.hpp"
 

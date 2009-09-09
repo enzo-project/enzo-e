@@ -16,7 +16,7 @@
  *
  */
 
-#include "cello.def"
+#include "cello.h"
 
 #include "parallel_parallel.hpp"        /* Parallel abstract base class */
 

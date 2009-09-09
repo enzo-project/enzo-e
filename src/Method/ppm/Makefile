@@ -7,6 +7,8 @@
 
 TOP = ../../..
 
+TEST_EXES = test_hydro
+
 INC_LOCAL  = -I$(TOP)/include
 LIB_LOCAL  = -L$(TOP)/lib -lcello
 
@@ -58,6 +60,10 @@ LIB      = $(LIB_LOCAL) -lgfortran -lm -lhdf5
 
 test_hydro: $(OBJS) test_hydro.o
 	$(CXX) -o test_hydro test_hydro.o $(OBJS) $(LIB)
+
+.PHONY: install
+install: $(TEST_EXES)
+	cp $(TEST_EXES) $(TOP)/bin
 
 obj: $(OBJS)
 
