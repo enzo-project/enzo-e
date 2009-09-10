@@ -50,18 +50,49 @@
 
 #include "cello_hydro.h"
 #include "assert.h"
- 
+
+inline bool in_enzo (float x, float y, float enzo_start[2], float enzo_block[2])
+// Return boolean flag whether point is inside the text "Enzo"
+{
+  const int bitmap[5][3] = 
+    {{ 1, 1, 1},
+     { 1, 0, 0},
+     { 1, 1, 0},
+     { 1, 0, 0},
+     { 1, 1, 1}};
+  
+  if (x < enzo_start[0] || x > enzo_start[0] + 3*enzo_block[0]) return false;
+  if (y < enzo_start[1] || y > enzo_start[1] + 5*enzo_block[1]) return false;
+
+  int ix = (x - enzo_start[0]) / enzo_block[0];
+  int iy = (y - enzo_start[1]) / enzo_block[1];
+  
+  return bitmap[iy][ix] == 1;
+} 
 void initialize_enzo ()
 
 {
 
-  int grid_size [] = { 1000, 1000 };
+  int grid_size [] = { 1920, 1080 };
+
   float enzo_density_out = 1.0;
   float enzo_density_in  = 0.125;
   float enzo_pressure_out = 1.0;
   float enzo_pressure_in  = 0.14;
-  float enzo_velocity_x = 1.0;
+  float enzo_velocity_x = 0.0;
   float enzo_velocity_y = 0.0;
+
+  // Set extents of the E
+
+  // 5/p   @ @ @
+  // 4/4   @
+  // 3/4   @ @
+  // 2/4   @
+  // 1/4   @ @ @
+  //  0 
+
+  float enzo_start[2] = {1.0, 0.375};
+  float enzo_block[2] = {0.25, 0.25};
 
   // Physics
 
@@ -76,7 +107,7 @@ void initialize_enzo ()
   // Control
 
   time_stop              = 2.5;
-  cycle_stop             = 10;
+  cycle_stop             = 100;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
@@ -89,8 +120,8 @@ void initialize_enzo ()
   DomainLeftEdge[0]  = 0.0;
   DomainLeftEdge[1]  = 0.0;
 
-  DomainRightEdge[0] = double(grid_size[0]) / 500;
-  DomainRightEdge[1] = double(grid_size[1]) / 500;
+  DomainRightEdge[0] = 4;
+  DomainRightEdge[1] = 2;
 
   // Grid
 
@@ -112,9 +143,6 @@ void initialize_enzo ()
     CellWidth[dim] = new FLOAT[GridDimension[dim]];
     float h = double (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
       (GridEndIndex[dim] - GridStartIndex[dim] + 1);
-    printf ("%g %d\n",
-	    (DomainRightEdge[dim] - DomainLeftEdge[dim]),
-	    (GridEndIndex[dim] - GridStartIndex[dim] + 1));
     for (int i=0; i<GridDimension[dim]; i++) {
       CellWidth[dim][i] = h;
     }
@@ -154,41 +182,25 @@ void initialize_enzo ()
   int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];
-  printf ("h %g %g\n",hx,hy);
-  printf ("i?g %d %d\n",ixg,iyg);
-
-  printf ("%g  %g %g  %g %g\n",
-	  Gamma, 
-	  enzo_pressure_out,enzo_density_out,
-	  enzo_pressure_in,enzo_density_in);
-  printf ("total energy: %g %g\n",
-	  enzo_pressure_out / ((Gamma - 1.0)*enzo_density_out),
-	  enzo_pressure_in / ((Gamma - 1.0)*enzo_density_in));
 
   for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
-    float y = (iy + 0.5 - GridStartIndex[1])*hy;
+    float y = (iy - GridStartIndex[1] + 0.5)*hy;
 
     for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
 
-      float x = (ix + 0.5 - GridStartIndex[0])*hx;
+      float x = (ix - GridStartIndex[0] + 0.5)*hx;
 
-      int i = iy + ndy * ix;
+      int i = ix + ndx*iy;
 
-      // Initialize density
+      // Initialize density and total energy
 
-      if (x+y  < 0.1517) {
+      if (in_enzo(x,y,enzo_start,enzo_block)) {
 	BaryonField[ field_density ] [ i ] = enzo_density_in;
-      } else {
-	BaryonField[ field_density ] [ i ] = enzo_density_out;
-      }
-
-      // Initialize total energy
-
-      if (x+y  < 0.1517) {
 	BaryonField[ field_total_energy ][ i ] = 
 	  enzo_pressure_in / ((Gamma - 1.0)*enzo_density_in);
       } else {
+	BaryonField[ field_density ] [ i ] = enzo_density_out;
 	BaryonField[ field_total_energy ][ i ] = 
 	  enzo_pressure_out / ((Gamma - 1.0)*enzo_density_out);
       }

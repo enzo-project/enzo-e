@@ -112,11 +112,13 @@ void initialize_hydro ()
  
   /* Clear BoundaryType and BoundaryValue pointers. */
  
-  for (int field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++)
-    for (int dim = 0; dim < MAX_DIMENSION; dim++)
+  for (int field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
+    for (int dim = 0; dim < MAX_DIMENSION; dim++) {
       for (int i = 0; i < 2; i++) {
 	BoundaryType[field][dim][i] = NULL;
 	BoundaryValue[field][dim][i] = NULL;
       }
+    }
+  }
 }
     

@@ -47,7 +47,8 @@ int SetExternalBoundary(int FieldRank,
   }
  
   /* find requested field type */
- 
+
+  printf ("GridDims = %d %d %d\n",GridDims[0],GridDims[1],GridDims[2]);
   int field;
   for (field = 0; field < NumberOfBaryonFields; field++)
     if (FieldType == BoundaryFieldType[field]) break;
@@ -106,7 +107,8 @@ int SetExternalBoundary(int FieldRank,
   if (BoundaryDimension[0] > 1 && GridOffset[0]+GridDims[0] == BoundaryDimension[0]) {
  
     /* set x outer (right) face */
- 
+
+    
     for (i = 0; i < GridDims[0]-EndIndex[0]-1; i++)
       for (j = 0; j < GridDims[1]; j++)
 	for (k = 0; k < GridDims[2]; k++) {
