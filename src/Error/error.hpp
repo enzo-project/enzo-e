@@ -33,6 +33,8 @@
  *
  *********************************************************************/
 
+#include <assert.h>
+
 #include "cello.h"
 #include "error_exception.hpp"
 

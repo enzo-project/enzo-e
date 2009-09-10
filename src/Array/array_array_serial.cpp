@@ -114,12 +114,12 @@ ArraySerial & ArraySerial::operator = (const ArraySerial &array) throw()
 /**
  */
 
-void ArraySerial::resize (int n0, int n1, int n2) throw()
+void ArraySerial::resize (int nx, int ny, int nz) throw()
 {
-  if (n0 != nx_ || 
-      n1 != ny_ || 
-      n2 != nz_) {
-    this->reallocate_(n0,n1,n2);
+  if (nx != nx_ || 
+      ny != ny_ || 
+      nz != nz_) {
+    this->reallocate_(nx,ny,nz);
   }
 }
 
@@ -131,11 +131,11 @@ void ArraySerial::resize (int n0, int n1, int n2) throw()
 /**
  */
 
-void ArraySerial::size (int * n0, int * n1, int * n2) const throw()
+void ArraySerial::size (int * nx, int * ny, int * nz) const throw()
 {
-  if (n0) *n0 = nx_;
-  if (n1) *n1 = ny_;
-  if (n2) *n2 = nz_;
+  if (nx) *nx = nx_;
+  if (ny) *ny = ny_;
+  if (nz) *nz = nz_;
 }
 
 
@@ -212,11 +212,11 @@ void ArraySerial::deallocate_() throw (ExceptionBadArrayDeallocation)
 /**
  */
 
-void ArraySerial::allocate_(int n0, int n1, int n2) throw(ExceptionBadArrayAllocation)
+void ArraySerial::allocate_(int nx, int ny, int nz) throw(ExceptionBadArrayAllocation)
 {
-  nx_ = n0;
-  ny_ = n1;
-  nz_ = n2;
+  nx_ = nx;
+  ny_ = ny;
+  nz_ = nz;
 
   if (a_ != NULL) {
     throw ExceptionBadArrayAllocation();
@@ -232,10 +232,10 @@ void ArraySerial::allocate_(int n0, int n1, int n2) throw(ExceptionBadArrayAlloc
 /**
  */
 
-void ArraySerial::reallocate_(int n0, int n1, int n2) throw()
+void ArraySerial::reallocate_(int nx, int ny, int nz) throw()
 {
   deallocate_();
-  allocate_(n0,n1,n2);
+  allocate_(nx,ny,nz);
 }
 
 //----------------------------------------------------------------------
