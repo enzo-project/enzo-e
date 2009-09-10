@@ -28,6 +28,4 @@
 #   define SCALAR_HDF5    H5T_NATIVE_DOUBLE
 #endif
 
-#endif /* SCALAR_DEF */
-
 #endif /* CELLO_DEF */
