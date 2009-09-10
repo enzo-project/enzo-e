@@ -147,7 +147,12 @@ void Hdf5::dataset_open (std::string name, Array & array)
   int d;        // Dataset dimension
   hsize_t n[3]; // Dataset size
 
+
+
   if (file_mode_ == "r") {
+
+    // Open the dataset for reading
+
     // Open the dataset
     dataset_ = H5Dopen( file_, name.c_str());
     // Get the size of dataset
@@ -165,22 +170,43 @@ void Hdf5::dataset_open (std::string name, Array & array)
 
   } else if (file_mode_ == "w") {
 
+    // Open the dataset for writing
+
     int m[3];
     array.size(&m[0],&m[1],&m[2]);
+
+    // determine the dimension d
+
     d = 3;
-    if (m[2] == 1) {
+    if (m[2] == 1) { // <= 2D
       d--;
-      if (m[1] == 1) {
+      if (m[1] == 1) { // <= 1D
 	d--;
       }
     }
 
-    n[0] = m[0];
-    n[1] = m[1];
-    n[2] = m[2];
+    assert (1 <= d && d <= 3);
+
+    // Transpose Enzo -> HDF5 row/column ordering
+
+    if (d == 1) {
+      n[0] = m[0];
+    } else if (d == 2) {
+      n[0] = m[1]; // swap x, y
+      n[1] = m[0];
+    } else if (d == 3) {
+      n[0] = m[2]; // swap x, y, z
+      n[1] = m[1];
+      n[2] = m[0];
+    }
+      
     dataspace_ = H5Screate_simple (d,n,0);
     
-    dataset_   = H5Dcreate( file_, name.c_str(), datatype_, dataspace_,  H5P_DEFAULT);
+    dataset_   = H5Dcreate( file_, 
+			    name.c_str(), 
+			    datatype_, 
+			    dataspace_,  
+			    H5P_DEFAULT );
   }
 
   if (dataset_ >= 0) {
