@@ -7,7 +7,7 @@
 
 TOP = ../../..
 
-TEST_EXES = test_hydro
+TEST_EXES = test_implosion test_enzo
 
 INC_LOCAL  = -I$(TOP)/include
 LIB_LOCAL  = -L$(TOP)/lib -lcello
@@ -37,6 +37,7 @@ OBJS = \
 	inteuler.o \
 	initialize_hydro.o \
 	initialize_implosion.o \
+	initialize_enzo.o \
 	intvar.o \
 	pgas2d_dual.o \
 	pgas2d.o \
@@ -57,9 +58,11 @@ FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
 LIB      = $(LIB_LOCAL) -lgfortran -lm -lhdf5
 
-
-test_hydro: $(OBJS) test_hydro.o
-	$(CXX) -o test_hydro test_hydro.o $(OBJS) $(LIB)
+all: test_enzo test_implosion
+test_enzo: $(OBJS) test_enzo.o
+	$(CXX) -o test_enzo test_enzo.o $(OBJS) $(LIB)
+test_implosion: $(OBJS) test_implosion.o
+	$(CXX) -o test_implosion test_implosion.o $(OBJS) $(LIB)
 
 .PHONY: install
 install: $(TEST_EXES)
@@ -67,12 +70,13 @@ install: $(TEST_EXES)
 
 obj: $(OBJS)
 
-test: test_hydro
-	test_hydro
+test: $(TEST_EXES)
+#	./test_implosion # slow
+#	./test_enzo      # slow
 
 .PHONY: clean
 clean:
-	-@rm *.o test_hydro *~
+	-@rm *.o $(TEST_EXES) *~
 
 include $(TOP)/src/MAKE/Make.include
 
