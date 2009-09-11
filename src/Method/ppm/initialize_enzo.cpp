@@ -15,60 +15,70 @@
 
 
 /** 
- *********************************************************************
- *
- * @file      initialize_enzo.cpp
- * @brief     Initialize variables in cello_hydro.h
- * @author    James Bordner
- * @date      Sat Aug 29 14:20:09 PDT 2009
+*********************************************************************
+*
+* @file      initialize_enzo.cpp
+* @brief     Initialize variables in cello_hydro.h
+* @author    James Bordner
+* @date      Sat Aug 29 14:20:09 PDT 2009
 
- *
- * DESCRIPTION 
- * 
- *    Initialize variables in cello_hydro.h
- *
- * PACKAGES
- *
- *    NONE
- * 
- * INCLUDES
- *  
- *    cello_hydro.h
- *
- * PUBLIC FUNCTIONS
- *  
- *    initialize_enzo ();
- *
- * PRIVATE FUCTIONS
- *  
- *    NONE
- *
- * $Id$
- *
- *********************************************************************
- */
+*
+* DESCRIPTION 
+* 
+*    Initialize variables in cello_hydro.h
+*
+* PACKAGES
+*
+*    NONE
+* 
+* INCLUDES
+*  
+*    cello_hydro.h
+*
+* PUBLIC FUNCTIONS
+*  
+*    initialize_enzo ();
+*
+* PRIVATE FUCTIONS
+*  
+*    NONE
+*
+* $Id$
+*
+*********************************************************************
+*/
 
 #include "cello_hydro.h"
 #include "assert.h"
 
-inline bool in_enzo (float x, float y, float enzo_start[2], float enzo_block[2])
+// #include "enzo.h"
+#include "enzo.h"
+
+int bitmap[width][height];
+ 
+
+inline bool in_enzo (float x, float y, float enzo_lower[2], float enzo_upper[2])
 // Return boolean flag whether point is inside the text "Enzo"
 {
-  const int bitmap[5][3] = 
-    {{ 1, 1, 1},
-     { 1, 0, 0},
-     { 1, 1, 0},
-     { 1, 0, 0},
-     { 1, 1, 1}};
-  
-  if (x < enzo_start[0] || x > enzo_start[0] + 3*enzo_block[0]) return false;
-  if (y < enzo_start[1] || y > enzo_start[1] + 5*enzo_block[1]) return false;
+  //   const int bitmap[5][3] = 
+  //     {{ 1, 1, 1},
+  //      { 1, 0, 0},
+  //      { 1, 1, 0},
+  //      { 1, 0, 0},
+  //      { 1, 1, 1}};
 
-  int ix = (x - enzo_start[0]) / enzo_block[0];
-  int iy = (y - enzo_start[1]) / enzo_block[1];
-  
-  return bitmap[iy][ix] == 1;
+  if (x < enzo_lower[0] || x > enzo_upper[0]) return false;
+  if (y < enzo_lower[1] || y > enzo_upper[1]) return false;
+
+  int ix = width*(x - enzo_lower[0]) / (enzo_upper[0] - enzo_lower[0]);
+  int iy = height*(y - enzo_lower[1]) / (enzo_upper[1] - enzo_lower[1]);
+  assert (ix >= 0);
+  assert (iy >= 0);
+  assert (ix < width);
+  assert (iy < height);
+  return !(bitmap[ix][iy]);
 } 
+
 void initialize_enzo ()
 
 {
@@ -82,6 +92,15 @@ void initialize_enzo ()
   float enzo_velocity_x = 0.0;
   float enzo_velocity_y = 0.0;
 
+  int pixel[3];
+  char * data = header_data;
+  for (int iy=0; iy<height; iy++) {
+    for (int ix=0; ix<width; ix++) {
+      HEADER_PIXEL(data,pixel);
+      bitmap [ix][iy] = pixel[0];
+    }
+  }
+
   // Set extents of the E
 
   // 5/p   @ @ @
@@ -91,8 +110,8 @@ void initialize_enzo ()
   // 1/4   @ @ @
   //  0 
 
-  float enzo_start[2] = {1.0, 0.375};
-  float enzo_block[2] = {0.25, 0.25};
+  float enzo_lower[2] = {0.5, 0.5};
+  float enzo_upper[2] = {3.5, 1.5};
 
   // Physics
 
@@ -107,7 +126,7 @@ void initialize_enzo ()
   // Control
 
   time_stop              = 2.5;
-  cycle_stop             = 100;
+  cycle_stop             = 1;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
@@ -195,7 +214,7 @@ void initialize_enzo ()
 
       // Initialize density and total energy
 
-      if (in_enzo(x,y,enzo_start,enzo_block)) {
+      if (in_enzo(x,y,enzo_lower,enzo_upper)) {
 	BaryonField[ field_density ] [ i ] = enzo_density_in;
 	BaryonField[ field_total_energy ][ i ] = 
 	  enzo_pressure_in / ((Gamma - 1.0)*enzo_density_in);
