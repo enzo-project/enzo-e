@@ -6,7 +6,12 @@
 // create a tree refined to the array non-zeros
 // assume array width and height are powers of 2
 Tree4::Tree4(const bool *array, int width, int height)
+  : root_(new Node4(0)),
+    array_(array),
+    width_(width),
+    height_(height)
 {
+
 }
 
 /// Print the tree

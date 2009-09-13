@@ -1,5 +1,7 @@
 
 
+class Node4;
+
 class Tree4 {
 
  public:
@@ -14,8 +16,7 @@ class Tree4 {
 
  private:
 
-  class Node4;
-  Node4 * root;
+  Node4 * root_;
 
   const bool * array_;
   int width_;
