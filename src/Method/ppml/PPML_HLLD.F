@@ -34,7 +34,7 @@ c      #include "error.def"
       v_R=UR(3)/UR(1)
       w_R=UR(4)/UR (1)
 	
-      Bx=(Ul(5)+Ur(5))/2.d0
+      Bx=(Ul(5)+Ur(5))/2.e0
 
       By=UL(6)
       Bz=UL(7)
@@ -42,10 +42,10 @@ c      #include "error.def"
 	BB=Bx*Bx+By*By+Bz*Bz
 	ca=abs(Bx)/sqrt(UL(1))
 	f2=a*a+BB/UL(1)
-	ds=f2*f2-4.d0*a*a*ca*ca
+	ds=f2*f2-4.e0*a*a*ca*ca
 	if(ds.lt.0.) ds=0.
-	cf=sqrt(0.5d0*(f2+sqrt(ds)))
-	ptL=a*a*UL(1)+BB/2.d0
+	cf=sqrt(0.5e0*(f2+sqrt(ds)))
+	ptL=a*a*UL(1)+BB/2.e0
 
 	S1L=u_L-cf
 	S1R=u_L+cf
@@ -56,11 +56,11 @@ c      #include "error.def"
 	BB=Bx*Bx+By*By+Bz*Bz
 	ca=abs(Bx)/sqrt(UR(1))
 	f2=a*a+BB/UR(1)
-	ds=f2*f2-4.d0*a*a*ca*ca
+	ds=f2*f2-4.e0*a*a*ca*ca
 	if(ds.lt.0.) ds=0.
-	cf=sqrt(0.5d0*(f2+sqrt(ds)))
+	cf=sqrt(0.5e0*(f2+sqrt(ds)))
 	
-	ptR=a*a*UR(1)+BB/2.d0
+	ptR=a*a*UR(1)+BB/2.e0
 
 	S2L=u_R-cf
 	S2R=u_R+cf
@@ -188,12 +188,12 @@ c      #include "error.def"
 	goto 8888
 	endif
 
-	X=sqrt(Uhll(1))*sign(1.0d0,Bx)
+	X=sqrt(Uhll(1))*sign(1.0e0,Bx)
 
-	g3=(UL_ast(3)+UR_ast(3)+X*(UR_ast(6)-UL_ast(6)))/2.d0
-	g4=(UL_ast(4)+UR_ast(4)+X*(UR_ast(7)-UL_ast(7)))/2.d0
-	g5=(UL_ast(6)+UR_ast(6)+(UR_ast(3)-UL_ast(3))/X)/2.d0
-	g6=(UL_ast(7)+UR_ast(7)+(UR_ast(4)-UL_ast(4))/X)/2.d0
+	g3=(UL_ast(3)+UR_ast(3)+X*(UR_ast(6)-UL_ast(6)))/2.e0
+	g4=(UL_ast(4)+UR_ast(4)+X*(UR_ast(7)-UL_ast(7)))/2.e0
+	g5=(UL_ast(6)+UR_ast(6)+(UR_ast(3)-UL_ast(3))/X)/2.e0
+	g6=(UL_ast(7)+UR_ast(7)+(UR_ast(4)-UL_ast(4))/X)/2.e0
 
 
 	F(1)=Fhll(1)
@@ -260,7 +260,7 @@ c	pause
 	v_R=UR(3)/UR(1)
 	w_R=UR(4)/UR(1)
 	
-	By=(Ul(6)+Ur(6))/2.d0
+	By=(Ul(6)+Ur(6))/2.e0
 
 	Bx=UL(5)
 	Bz=UL(7)
@@ -268,10 +268,10 @@ c	pause
 	BB=Bx*Bx+By*By+Bz*Bz
 	ca=abs(By)/sqrt(UL(1))
 	f2=a*a+BB/UL(1)
-	ds=f2*f2-4.d0*a*a*ca*ca
+	ds=f2*f2-4.e0*a*a*ca*ca
 	if(ds.lt.0.) ds=0.
-	cf=sqrt(0.5d0*(f2+sqrt(ds)))
-	ptL=a*a*UL(1)+BB/2.d0
+	cf=sqrt(0.5e0*(f2+sqrt(ds)))
+	ptL=a*a*UL(1)+BB/2.e0
 
 	S1L=v_L-cf
 	S1R=v_L+cf
@@ -282,10 +282,10 @@ c	pause
 	BB=Bx*Bx+By*By+Bz*Bz
 	ca=abs(By)/sqrt(UR(1))
 	f2=a*a+BB/UR(1)
-	ds=f2*f2-4.d0*a*a*ca*ca
+	ds=f2*f2-4.e0*a*a*ca*ca
 	if(ds.lt.0.) ds=0.
-	cf=sqrt(0.5d0*(f2+sqrt(ds)))
-	ptR=a*a*UR(1)+BB/2.d0
+	cf=sqrt(0.5e0*(f2+sqrt(ds)))
+	ptR=a*a*UR(1)+BB/2.e0
 
 	S2L=v_R-cf
 	S2R=v_R+cf
@@ -416,12 +416,12 @@ c	pause
 	goto 7777
 	endif
 
-	X=sqrt(Uhll(1))*sign(1.0d0,By)
+	X=sqrt(Uhll(1))*sign(1.0e0,By)
 	
-	g2=(UL_ast(2)+UR_ast(2)+X*(UR_ast(5)-UL_ast(5)))/2.d0
-	g4=(UL_ast(4)+UR_ast(4)+X*(UR_ast(7)-UL_ast(7)))/2.d0
-	g5=(UL_ast(5)+UR_ast(5)+(UR_ast(2)-UL_ast(2))/X)/2.d0
-	g7=(UL_ast(7)+UR_ast(7)+(UR_ast(4)-UL_ast(4))/X)/2.d0
+	g2=(UL_ast(2)+UR_ast(2)+X*(UR_ast(5)-UL_ast(5)))/2.e0
+	g4=(UL_ast(4)+UR_ast(4)+X*(UR_ast(7)-UL_ast(7)))/2.e0
+	g5=(UL_ast(5)+UR_ast(5)+(UR_ast(2)-UL_ast(2))/X)/2.e0
+	g7=(UL_ast(7)+UR_ast(7)+(UR_ast(4)-UL_ast(4))/X)/2.e0
 
 	F(1)=Fhll(1)
 	F(2)=g2*u_ast-By*g5
@@ -488,7 +488,7 @@ c	pause
 	v_R=UR(3)/UR(1)
 	w_R=UR(4)/UR(1)
 	
-	Bz=(Ul(7)+Ur(7))/2.d0
+	Bz=(Ul(7)+Ur(7))/2.e0
 
 	Bx=UL(5)
 	By=UL(6)
@@ -496,10 +496,10 @@ c	pause
 	BB=Bx*Bx+By*By+Bz*Bz
 	ca=abs(Bz)/sqrt(UL(1))
 	f2=a*a+BB/UL(1)
-	ds=f2*f2-4.d0*a*a*ca*ca
+	ds=f2*f2-4.e0*a*a*ca*ca
 	if(ds.lt.0.) ds=0.
-	cf=sqrt(0.5d0*(f2+sqrt(ds)))
-	ptL=a*a*UL(1)+BB/2.d0
+	cf=sqrt(0.5e0*(f2+sqrt(ds)))
+	ptL=a*a*UL(1)+BB/2.e0
 
 	S1L=w_L-cf
 	S1R=w_L+cf
@@ -510,11 +510,11 @@ c	pause
 	BB=Bx*Bx+By*By+Bz*Bz
 	ca=abs(Bz)/sqrt(UR(1))
 	f2=a*a+BB/UR(1)
-	ds=f2*f2-4.d0*a*a*ca*ca
+	ds=f2*f2-4.e0*a*a*ca*ca
 	if(ds.lt.0.) ds=0.
-	cf=sqrt(0.5d0*(f2+sqrt(ds)))
+	cf=sqrt(0.5e0*(f2+sqrt(ds)))
 	
-	ptR=a*a*UR(1)+BB/2.d0
+	ptR=a*a*UR(1)+BB/2.e0
 
 	S2L=w_R-cf
 	S2R=w_R+cf
@@ -645,12 +645,12 @@ c	pause
 	goto 6666
 	endif
 
-	X=sqrt(Uhll(1))*sign(1.0d0,Bz)
+	X=sqrt(Uhll(1))*sign(1.0e0,Bz)
 
-	g2=(UL_ast(2)+UR_ast(2)+X*(UR_ast(5)-UL_ast(5)))/2.d0
-	g3=(UL_ast(3)+UR_ast(3)+X*(UR_ast(6)-UL_ast(6)))/2.d0
-	g5=(UL_ast(5)+UR_ast(5)+(UR_ast(2)-UL_ast(2))/X)/2.d0
-	g6=(UL_ast(6)+UR_ast(6)+(UR_ast(3)-UL_ast(3))/X)/2.d0
+	g2=(UL_ast(2)+UR_ast(2)+X*(UR_ast(5)-UL_ast(5)))/2.e0
+	g3=(UL_ast(3)+UR_ast(3)+X*(UR_ast(6)-UL_ast(6)))/2.e0
+	g5=(UL_ast(5)+UR_ast(5)+(UR_ast(2)-UL_ast(2))/X)/2.e0
+	g6=(UL_ast(6)+UR_ast(6)+(UR_ast(3)-UL_ast(3))/X)/2.e0
 
 
 	F(1)=Fhll(1)

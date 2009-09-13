@@ -52,8 +52,8 @@
          CALL AMPLTD(QL,qpr,c2)
 
 c	  Do m=1,7  
-c         c1(m)=(7.d0*(u2(m)+u3(m))-(u1(m)+u4(m)))/12.d0
-c         c2(m)=(7.d0*(u3(m)+u4(m))-(u2(m)+u5(m)))/12.d0
+c         c1(m)=(7.e0*(u2(m)+u3(m))-(u1(m)+u4(m)))/12.e0
+c         c2(m)=(7.e0*(u3(m)+u4(m))-(u2(m)+u5(m)))/12.e0
 c	  enddo
 
 		     Do m=1,7  
@@ -61,8 +61,8 @@ c	  enddo
 	          uwl = Xmedian(u3(m),c1(m),u2(m))
 	          uwr = Xmedian(u3(m),c2(m),u4(m))
 
-	          b1(m) = Xmedian(u3(m),uwl,3.d0*u3(m)-2.d0*uwr)
-	          b2(m) = Xmedian(u3(m),uwr,3.d0*u3(m)-2.d0*uwl)
+	          b1(m) = Xmedian(u3(m),uwl,3.e0*u3(m)-2.e0*uwr)
+	          b2(m) = Xmedian(u3(m),uwr,3.e0*u3(m)-2.e0*uwl)
 
 	        Enddo 
 
@@ -117,33 +117,33 @@ c	  enddo
 				dwl = Xmedian(u3(m),dml,u2(m))
 				dwr = Xmedian(u3(m),dmr,u4(m))
 
-				uwl = Xmedian(u3(m),3.d0*u3(m)-2.d0*dwr,dml)         
-				uwr = Xmedian(u3(m),3.d0*u3(m)-2.d0*dwl,dmr)
+				uwl = Xmedian(u3(m),3.e0*u3(m)-2.e0*dwr,dml)         
+				uwr = Xmedian(u3(m),3.e0*u3(m)-2.e0*dwl,dmr)
 		
 				c1(m) = Xmedian(uwl,dml,c1(m))         
 				c2(m) = Xmedian(uwr,dmr,c2(m))
 
             Else
 	  
-				sjn = 0.5d0*(u4(m)-u2(m))
-				sjm = 2.d0*Xmedian(0.,u4(m)-u3(m),u3(m)-u2(m))
+				sjn = 0.5e0*(u4(m)-u2(m))
+				sjm = 2.e0*Xmedian(0.,u4(m)-u3(m),u3(m)-u2(m))
 				sjx = Xmedian(0.,sjn,sjm)
 
-				sjn = 0.5d0*(u5(m)-u3(m))
-				sjm = 2.d0*Xmedian(0.,u5(m)-u4(m),u4(m)-u3(m))
+				sjn = 0.5e0*(u5(m)-u3(m))
+				sjm = 2.e0*Xmedian(0.,u5(m)-u4(m),u4(m)-u3(m))
 				sjy = Xmedian(0.,sjn,sjm)
 
-				dwr = 0.5d0*(u3(m)+u4(m))-(sjy-sjx)/6.d0
+				dwr = 0.5e0*(u3(m)+u4(m))-(sjy-sjx)/6.e0
 
-				sjn = 0.5d0*(u2(m)-u4(m))
-				sjm = 2.d0*Xmedian(0.,u2(m)-u3(m),u3(m)-u4(m))
+				sjn = 0.5e0*(u2(m)-u4(m))
+				sjm = 2.e0*Xmedian(0.,u2(m)-u3(m),u3(m)-u4(m))
 				sjx = Xmedian(0.,sjn,sjm)
 
-				sjn = 0.5d0*(u1(m)-u3(m))
-				sjm = 2.d0*Xmedian(0.,u1(m)-u2(m),u2(m)-u3(m))
+				sjn = 0.5e0*(u1(m)-u3(m))
+				sjm = 2.e0*Xmedian(0.,u1(m)-u2(m),u2(m)-u3(m))
 				sjy = Xmedian(0.,sjn,sjm)
 
-				dwl = 0.5d0*(u3(m)+u2(m))-(sjy-sjx)/6.d0
+				dwl = 0.5e0*(u3(m)+u2(m))-(sjy-sjx)/6.e0
 
 				uwr = Xmedian(dwr,vr(m),c2(m))
 				uwl = Xmedian(dwl,vl(m),c1(m))
@@ -151,8 +151,8 @@ c	  enddo
 				dmr = Xmedian(u3(m),uwr,u4(m))
 				dml = Xmedian(u3(m),uwl,u2(m))
 
-				uvr = Xmedian(u3(m),3.d0*u3(m)-2.d0*dml,dmr)         
-				uvl = Xmedian(u3(m),3.d0*u3(m)-2.d0*dmr,dml)
+				uvr = Xmedian(u3(m),3.e0*u3(m)-2.e0*dml,dmr)         
+				uvl = Xmedian(u3(m),3.e0*u3(m)-2.e0*dmr,dml)
 
 				c1(m) = Xmedian(uvl,vl(m),c1(m))         
 				c2(m) = Xmedian(uvr,vr(m),c2(m))
@@ -182,18 +182,18 @@ c	  enddo
 	          uwl=q4(m)-q3(m)
 	          uwr=q3(m)-q2(m)
 
-	          u1(m)=0.5d0*(SIGN(1.d0,uwl)+SIGN(1.d0,uwr))*
+	          u1(m)=0.5e0*(SIGN(1.e0,uwl)+SIGN(1.e0,uwr))*
      1             min(abs(uwl),abs(uwr))
 
             Enddo
 	 
             Do m=1,7  
 
-		      qxl(i,m)=q3(m)-u1(m)/2.d0
+		      qxl(i,m)=q3(m)-u1(m)/2.e0
 
 	        Enddo
 
-            if(abs(qxl(i,1)-q3(1)).ge.0.8d0*q3(1))then
+            if(abs(qxl(i,1)-q3(1)).ge.0.8e0*q3(1))then
 
                 Do m=1,7  
 
@@ -212,18 +212,18 @@ c	  enddo
 	          uwl=q4(m)-q3(m)
 	          uwr=q3(m)-q2(m)
 
-	          u1(m)=0.5d0*(SIGN(1.d0,uwl)+SIGN(1.d0,uwr))*
+	          u1(m)=0.5e0*(SIGN(1.e0,uwl)+SIGN(1.e0,uwr))*
      1             min(abs(uwl),abs(uwr))
 
              Enddo
 	 
              Do m=1,7  
 
- 		      qxr(i,m)=q3(m)+u1(m)/2.d0
+ 		      qxr(i,m)=q3(m)+u1(m)/2.e0
 
 	         Enddo
 
-             If(abs(qxr(i,1)-q3(1)).ge.0.8d0*q3(1))then
+             If(abs(qxr(i,1)-q3(1)).ge.0.8e0*q3(1))then
 
                Do m=1,7  
 
@@ -235,7 +235,7 @@ c	  enddo
 
          Endif
 
-         if(abs(q4(1)-q3(1))/max(q4(1),q3(1)).gt.0.8d0.
+         if(abs(q4(1)-q3(1))/max(q4(1),q3(1)).gt.0.8e0.
      1     and.dv2(i).lt.0.)then
 
           do m=1,7
@@ -244,7 +244,7 @@ c	  enddo
 
          endif
 
-         if(abs(q2(1)-q3(1))/max(q2(1),q3(1)).gt.0.8d0.
+         if(abs(q2(1)-q3(1))/max(q2(1),q3(1)).gt.0.8e0.
      1	     and.dv1(i).lt.0.)then
 
           do m=1,7

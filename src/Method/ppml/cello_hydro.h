@@ -194,6 +194,7 @@ int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum,
 int SetMinimumSupport(float &MinimumSupportEnergyCoefficient);
 
 int SolveHydroEquations(int cycle, float dt);
+int SolveMHDEquations(int  cycle, float dt);
 
 float ComputeTimeStep();
 int SetExternalBoundaryValues();

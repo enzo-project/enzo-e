@@ -11,7 +11,7 @@
 	  a2=1.
 	  
       DLT=1.E-12
-      X22=1.d0/sqrt(2.d0)
+      X22=1.e0/sqrt(2.e0)
  	
       SK1=sqrt(QU(1))
       BVX=QU(5)/SK1
@@ -25,11 +25,11 @@
       CSR=sqrt(CKV)
       CSV=CKV+VAH
       CWH=CKV-VAH
-      DSCV=CSV**2-4.d0*CKV*VAX
+      DSCV=CSV**2-4.e0*CKV*VAX
       IF(DSCV.LT.0.) DSCV=0.
       DSCV=sqrt(DSCV)
-      VF2=(CSV+DSCV)/2.d0
-      VS2=(CSV-DSCV)/2.d0
+      VF2=(CSV+DSCV)/2.e0
+      VS2=(CSV-DSCV)/2.e0
       IF(VS2.LT.0.) VS2=0.
       CF=sqrt(VF2)
       CS=sqrt(VS2)
@@ -44,9 +44,9 @@
 
       IF(BYZ.GT.DLT*BMG) THEN
 
-		ASS=sqrt(CWH**2+4.d0*CKV*(VAY+VAZ))
-		AS=sqrt(abs((1.d0-CWH/ASS)/2.d0))
-                AF=sqrt(abs((1.d0+CWH/ASS)/2.d0))
+		ASS=sqrt(CWH**2+4.e0*CKV*(VAY+VAZ))
+		AS=sqrt(abs((1.e0-CWH/ASS)/2.e0))
+                AF=sqrt(abs((1.e0+CWH/ASS)/2.e0))
 
 	    BY=QU(6)/SBB
         BZ=QU(7)/SBB
@@ -55,10 +55,10 @@
       ELSE
 
 	   IF(GPB.GT.DLT*GPP) THEN
-	       AS=sqrt(abs((1.d0-SIGN(1.d0,CWH))/2.d0))
-	       AF=sqrt(abs((1.d0+SIGN(1.d0,CWH))/2.d0))
-	       CS=sqrt(abs((CKV+VAX-SIGN(1.d0,CWH)*CWH)/2.d0))
-	       CF=sqrt(abs((CKV+VAX+SIGN(1.d0,CWH)*CWH)/2.d0))
+	       AS=sqrt(abs((1.e0-SIGN(1.e0,CWH))/2.e0))
+	       AF=sqrt(abs((1.e0+SIGN(1.e0,CWH))/2.e0))
+	       CS=sqrt(abs((CKV+VAX-SIGN(1.e0,CWH)*CWH)/2.e0))
+	       CF=sqrt(abs((CKV+VAX+SIGN(1.e0,CWH)*CWH)/2.e0))
 	   ELSE
 	       AS=X22
 	       AF=X22
@@ -71,10 +71,10 @@
 
       ENDIF
 
-      BSGN=SIGN(1.d0,QU(5))
-      CD2=2.d0*CKV
+      BSGN=SIGN(1.e0,QU(5))
+      CD2=2.e0*CKV
 	
-      QL(1,1)=AF/2.d0
+      QL(1,1)=AF/2.e0
       QL(1,2)=-QU(1)*AF*CF/CD2
       QL(1,3)=QU(1)*AS*CS*BY*BSGN/CD2
       QL(1,4)=QU(1)*AS*CS*BZ*BSGN/CD2
@@ -84,13 +84,13 @@
 	
       QL(2,1)=0.
       QL(2,2)=0.
-      QL(2,3)=-QU(1)*BZ*BSGN/2.d0
-      QL(2,4)=QU(1)*BY*BSGN/2.d0
+      QL(2,3)=-QU(1)*BZ*BSGN/2.e0
+      QL(2,4)=QU(1)*BY*BSGN/2.e0
       QL(2,5)=0.
-      QL(2,6)=-SK1*BZ/2.d0
-      QL(2,7)=SK1*BY/2.d0
+      QL(2,6)=-SK1*BZ/2.e0
+      QL(2,7)=SK1*BY/2.e0
 
-      QL(3,1)=AS/2.d0
+      QL(3,1)=AS/2.e0
       QL(3,2)=-QU(1)*AS*CS/CD2
       QL(3,3)=-QU(1)*AF*CF*BY*BSGN/CD2
       QL(3,4)=-QU(1)*AF*CF*BZ*BSGN/CD2
@@ -102,11 +102,11 @@
       QL(4,2)=0.
       QL(4,3)=0.
       QL(4,4)=0.
-      QL(4,5)=1.d0
+      QL(4,5)=1.e0
       QL(4,6)=0.
       QL(4,7)=0.
 
-      QL(5,1)=AS/2.d0
+      QL(5,1)=AS/2.e0
       QL(5,2)=QU(1)*AS*CS/CD2
       QL(5,3)=QU(1)*AF*CF*BY*BSGN/CD2
       QL(5,4)=QU(1)*AF*CF*BZ*BSGN/CD2
@@ -116,13 +116,13 @@
 
       QL(6,1)=0.
       QL(6,2)=0.
-      QL(6,3)=-QU(1)*BZ*BSGN/2.d0
-      QL(6,4)=QU(1)*BY*BSGN/2.d0
+      QL(6,3)=-QU(1)*BZ*BSGN/2.e0
+      QL(6,4)=QU(1)*BY*BSGN/2.e0
       QL(6,5)=0.
-      QL(6,6)=SK1*BZ/2.d0
-      QL(6,7)=-SK1*BY/2.d0
+      QL(6,6)=SK1*BZ/2.e0
+      QL(6,7)=-SK1*BY/2.e0
 
-      QL(7,1)=AF/2.d0
+      QL(7,1)=AF/2.e0
       QL(7,2)=QU(1)*AF*CF/CD2
       QL(7,3)=-QU(1)*AS*CS*BY*BSGN/CD2
       QL(7,4)=-QU(1)*AS*CS*BZ*BSGN/CD2
@@ -166,7 +166,7 @@
       QR(5,1)=0.
       QR(5,2)=0.
       QR(5,3)=0.
-      QR(5,4)=1.d0
+      QR(5,4)=1.e0
       QR(5,5)=0.
       QR(5,6)=0.
       QR(5,7)=0.
@@ -212,7 +212,7 @@
 	  a2=1.
 
       DLT=1.E-12
-      X22=1.d0/sqrt(2.d0)
+      X22=1.e0/sqrt(2.e0)
  	
 	  SK1=sqrt(QU(1))
       BVX=QU(5)/SK1
@@ -226,11 +226,11 @@
       CSR=sqrt(CKV)
       CSV=CKV+VAH
       CWH=CKV-VAH
-      DSCV=CSV**2-4.d0*CKV*VAY
+      DSCV=CSV**2-4.e0*CKV*VAY
       IF(DSCV.LT.0.) DSCV=0.
       DSCV=sqrt(DSCV)
-      VF2=(CSV+DSCV)/2.d0
-      VS2=(CSV-DSCV)/2.d0
+      VF2=(CSV+DSCV)/2.e0
+      VS2=(CSV-DSCV)/2.e0
       IF(VS2.LT.0.) VS2=0.
       CF=sqrt(VF2)
       CS=sqrt(VS2)
@@ -245,9 +245,9 @@
 
       IF(BXZ.GT.DLT*BMG) THEN
 
-		ASS=sqrt(CWH**2+4.d0*CKV*(VAX+VAZ))
-          AS=sqrt(abs((1.d0-CWH/ASS)/2.d0))
-          AF=sqrt(abs((1.d0+CWH/ASS)/2.d0))
+		ASS=sqrt(CWH**2+4.e0*CKV*(VAX+VAZ))
+          AS=sqrt(abs((1.e0-CWH/ASS)/2.e0))
+          AF=sqrt(abs((1.e0+CWH/ASS)/2.e0))
 
 	    BX=QU(5)/SBB
           BZ=QU(7)/SBB
@@ -255,10 +255,10 @@
       ELSE
 
 	   IF(GPB.GT.DLT*GPP) THEN
-	       AS=sqrt(abs((1.d0-SIGN(1.d0,CWH))/2.d0))
-	       AF=sqrt(abs((1.d0+SIGN(1.d0,CWH))/2.d0))
-	       CS=sqrt(abs((CKV+VAY-SIGN(1.d0,CWH)*CWH)/2.d0))
-	       CF=sqrt(abs((CKV+VAY+SIGN(1.d0,CWH)*CWH)/2.d0))
+	       AS=sqrt(abs((1.e0-SIGN(1.e0,CWH))/2.e0))
+	       AF=sqrt(abs((1.e0+SIGN(1.e0,CWH))/2.e0))
+	       CS=sqrt(abs((CKV+VAY-SIGN(1.e0,CWH)*CWH)/2.e0))
+	       CF=sqrt(abs((CKV+VAY+SIGN(1.e0,CWH)*CWH)/2.e0))
 	   ELSE
 	       AS=X22
 	       AF=X22
@@ -271,10 +271,10 @@
 
       ENDIF
 
-      BSGN=SIGN(1.d0,QU(6))
-      CD2=2.d0*CKV
+      BSGN=SIGN(1.e0,QU(6))
+      CD2=2.e0*CKV
 	
-      QL(1,1)=AF/2.d0
+      QL(1,1)=AF/2.e0
       QL(1,2)=QU(1)*AS*CS*BX*BSGN/CD2
       QL(1,3)=-QU(1)*AF*CF/CD2
       QL(1,4)=QU(1)*AS*CS*BZ*BSGN/CD2
@@ -283,14 +283,14 @@
       QL(1,7)=SK1*CSR*AS*BZ/CD2
 	
       QL(2,1)=0.
-      QL(2,2)=-QU(1)*BZ*BSGN/2.d0
+      QL(2,2)=-QU(1)*BZ*BSGN/2.e0
       QL(2,3)=0.
-      QL(2,4)=QU(1)*BX*BSGN/2.d0
-      QL(2,5)=-SK1*BZ/2.d0
+      QL(2,4)=QU(1)*BX*BSGN/2.e0
+      QL(2,5)=-SK1*BZ/2.e0
       QL(2,6)=0.
-      QL(2,7)=SK1*BX/2.d0
+      QL(2,7)=SK1*BX/2.e0
 
-      QL(3,1)=AS/2.d0
+      QL(3,1)=AS/2.e0
       QL(3,2)=-QU(1)*AF*CF*BX*BSGN/CD2
       QL(3,3)=-QU(1)*AS*CS/CD2
       QL(3,4)=-QU(1)*AF*CF*BZ*BSGN/CD2
@@ -303,10 +303,10 @@
       QL(4,3)=0.
       QL(4,4)=0.
       QL(4,5)=0.
-      QL(4,6)=1.d0
+      QL(4,6)=1.e0
       QL(4,7)=0.
 
-      QL(5,1)=AS/2.d0
+      QL(5,1)=AS/2.e0
       QL(5,2)=QU(1)*AF*CF*BX*BSGN/CD2
       QL(5,3)=QU(1)*AS*CS/CD2
       QL(5,4)=QU(1)*AF*CF*BZ*BSGN/CD2
@@ -315,14 +315,14 @@
       QL(5,7)=-SK1*CSR*AF*BZ/CD2
 
       QL(6,1)=0.
-      QL(6,2)=-QU(1)*BZ*BSGN/2.d0
+      QL(6,2)=-QU(1)*BZ*BSGN/2.e0
       QL(6,3)=0.
-      QL(6,4)=QU(1)*BX*BSGN/2.d0
-      QL(6,5)=SK1*BZ/2.d0
+      QL(6,4)=QU(1)*BX*BSGN/2.e0
+      QL(6,5)=SK1*BZ/2.e0
       QL(6,6)=0.
-      QL(6,7)=-SK1*BX/2.d0
+      QL(6,7)=-SK1*BX/2.e0
 
-      QL(7,1)=AF/2.d0
+      QL(7,1)=AF/2.e0
       QL(7,2)=-QU(1)*AS*CS*BX*BSGN/CD2
       QL(7,3)=QU(1)*AF*CF/CD2
       QL(7,4)=-QU(1)*AS*CS*BZ*BSGN/CD2
@@ -373,7 +373,7 @@
       QR(6,1)=0.
       QR(6,2)=0.
       QR(6,3)=0.
-      QR(6,4)=1.d0
+      QR(6,4)=1.e0
       QR(6,5)=0.
       QR(6,6)=0.
       QR(6,7)=0.
@@ -411,7 +411,7 @@
 	  a2=1.
 	  
 	  DLT=1.E-12
-      X22=1.d0/sqrt(2.d0)
+      X22=1.e0/sqrt(2.e0)
  	
 	  SK1=sqrt(QU(1))
       BVX=QU(5)/SK1
@@ -425,11 +425,11 @@
       CSR=sqrt(CKV)
       CSV=CKV+VAH
       CWH=CKV-VAH
-      DSCV=CSV**2-4.d0*CKV*VAZ
+      DSCV=CSV**2-4.e0*CKV*VAZ
       IF(DSCV.LT.0.) DSCV=0.
       DSCV=sqrt(DSCV)
-      VF2=(CSV+DSCV)/2.d0
-      VS2=(CSV-DSCV)/2.d0
+      VF2=(CSV+DSCV)/2.e0
+      VS2=(CSV-DSCV)/2.e0
       IF(VS2.LT.0.) VS2=0.
       CF=sqrt(VF2)
       CS=sqrt(VS2)
@@ -444,9 +444,9 @@
 
       IF(BXZ.GT.DLT*BMG) THEN
 
-		ASS=sqrt(CWH**2+4.d0*CKV*(VAX+VAY))
-          AS=sqrt(abs((1.d0-CWH/ASS)/2.d0))
-          AF=sqrt(abs((1.d0+CWH/ASS)/2.d0))
+		ASS=sqrt(CWH**2+4.e0*CKV*(VAX+VAY))
+          AS=sqrt(abs((1.e0-CWH/ASS)/2.e0))
+          AF=sqrt(abs((1.e0+CWH/ASS)/2.e0))
 
 	    BX=QU(5)/SBB
           BY=QU(6)/SBB
@@ -454,10 +454,10 @@
       ELSE
 
 	   IF(GPB.GT.DLT*GPP) THEN
-	       AS=sqrt(abs((1.d0-SIGN(1.d0,CWH))/2.d0))
-	       AF=sqrt(abs((1.d0+SIGN(1.d0,CWH))/2.d0))
-	       CS=sqrt(abs((CKV+VAZ-SIGN(1.d0,CWH)*CWH)/2.d0))
-	       CF=sqrt(abs((CKV+VAZ+SIGN(1.d0,CWH)*CWH)/2.d0))
+	       AS=sqrt(abs((1.e0-SIGN(1.e0,CWH))/2.e0))
+	       AF=sqrt(abs((1.e0+SIGN(1.e0,CWH))/2.e0))
+	       CS=sqrt(abs((CKV+VAZ-SIGN(1.e0,CWH)*CWH)/2.e0))
+	       CF=sqrt(abs((CKV+VAZ+SIGN(1.e0,CWH)*CWH)/2.e0))
 	   ELSE
 	       AS=X22
 	       AF=X22
@@ -470,10 +470,10 @@
 
       ENDIF
 
-      BSGN=SIGN(1.d0,QU(7))
-      CD2=2.d0*CKV
+      BSGN=SIGN(1.e0,QU(7))
+      CD2=2.e0*CKV
 	
-      QL(1,1)=AF/2.d0
+      QL(1,1)=AF/2.e0
       QL(1,2)=QU(1)*AS*CS*BX*BSGN/CD2
       QL(1,3)=QU(1)*AS*CS*BY*BSGN/CD2
       QL(1,4)=-QU(1)*AF*CF/CD2
@@ -482,14 +482,14 @@
       QL(1,7)=0.
 	
       QL(2,1)=0.
-      QL(2,2)=-QU(1)*BY*BSGN/2.d0
-      QL(2,3)=QU(1)*BX*BSGN/2.d0
+      QL(2,2)=-QU(1)*BY*BSGN/2.e0
+      QL(2,3)=QU(1)*BX*BSGN/2.e0
       QL(2,4)=0.
-      QL(2,5)=-SK1*BY/2.d0
-      QL(2,6)=SK1*BX/2.d0
+      QL(2,5)=-SK1*BY/2.e0
+      QL(2,6)=SK1*BX/2.e0
       QL(2,7)=0.
 
-      QL(3,1)=AS/2.d0
+      QL(3,1)=AS/2.e0
       QL(3,2)=-QU(1)*AF*CF*BX*BSGN/CD2
       QL(3,3)=-QU(1)*AF*CF*BY*BSGN/CD2
       QL(3,4)=-QU(1)*AS*CS/CD2
@@ -503,9 +503,9 @@
       QL(4,4)=0.
       QL(4,5)=0.
       QL(4,6)=0.
-      QL(4,7)=1.d0
+      QL(4,7)=1.e0
 
-      QL(5,1)=AS/2.d0
+      QL(5,1)=AS/2.e0
       QL(5,2)=QU(1)*AF*CF*BX*BSGN/CD2
       QL(5,3)=QU(1)*AF*CF*BY*BSGN/CD2
       QL(5,4)=QU(1)*AS*CS/CD2
@@ -514,14 +514,14 @@
       QL(5,7)=0.
 
       QL(6,1)=0.
-      QL(6,2)=-QU(1)*BY*BSGN/2.d0
-      QL(6,3)=QU(1)*BX*BSGN/2.d0
+      QL(6,2)=-QU(1)*BY*BSGN/2.e0
+      QL(6,3)=QU(1)*BX*BSGN/2.e0
       QL(6,4)=0.
-      QL(6,5)=SK1*BY/2.d0
-      QL(6,6)=-SK1*BX/2.d0
+      QL(6,5)=SK1*BY/2.e0
+      QL(6,6)=-SK1*BX/2.e0
       QL(6,7)=0.
 
-      QL(7,1)=AF/2.d0
+      QL(7,1)=AF/2.e0
       QL(7,2)=-QU(1)*AS*CS*BX*BSGN/CD2
       QL(7,3)=-QU(1)*AS*CS*BY*BSGN/CD2
       QL(7,4)=QU(1)*AF*CF/CD2
@@ -581,7 +581,7 @@
       QR(7,1)=0.
       QR(7,2)=0.
       QR(7,3)=0.
-      QR(7,4)=1.d0
+      QR(7,4)=1.e0
       QR(7,5)=0.
       QR(7,6)=0.
       QR(7,7)=0.
@@ -625,11 +625,11 @@
       CSR=sqrt(CKV)
       CSV=CKV+VAH
       CWH=CKV-VAH
-      DSCV=CSV**2-4.d0*CKV*VAX
+      DSCV=CSV**2-4.e0*CKV*VAX
       IF(DSCV.LT.0.) DSCV=0.
       DSCV=sqrt(DSCV)
-      VF2=(CSV+DSCV)/2.d0
-      VS2=(CSV-DSCV)/2.d0
+      VF2=(CSV+DSCV)/2.e0
+      VS2=(CSV-DSCV)/2.e0
       IF(VS2.LT.0.) VS2=0.
       CF=sqrt(VF2)
       CS=sqrt(VS2)
@@ -645,8 +645,8 @@
       IF(BYZ.LE.DLT*BMG) THEN
 
 	   IF(GPB.GT.DLT*GPP) THEN
-	       CS=sqrt(abs((CKV+VAX-SIGN(1.d0,CWH)*CWH)/2.d0))
-	       CF=sqrt(abs((CKV+VAX+SIGN(1.d0,CWH)*CWH)/2.d0))
+	       CS=sqrt(abs((CKV+VAX-SIGN(1.e0,CWH)*CWH)/2.e0))
+	       CF=sqrt(abs((CKV+VAX+SIGN(1.e0,CWH)*CWH)/2.e0))
 	   ELSE
 	       CS=CSR
 	       CF=CSR
@@ -691,11 +691,11 @@
       CSR=sqrt(CKV)
       CSV=CKV+VAH
       CWH=CKV-VAH
-      DSCV=CSV**2-4.d0*CKV*VAY
+      DSCV=CSV**2-4.e0*CKV*VAY
       IF(DSCV.LT.0.) DSCV=0.
       DSCV=sqrt(DSCV)
-      VF2=(CSV+DSCV)/2.d0
-      VS2=(CSV-DSCV)/2.d0
+      VF2=(CSV+DSCV)/2.e0
+      VS2=(CSV-DSCV)/2.e0
       IF(VS2.LT.0.) VS2=0.
       CF=sqrt(VF2)
       CS=sqrt(VS2)
@@ -711,8 +711,8 @@
       IF(BXZ.LE.DLT*BMG) THEN
 
 	   IF(GPB.GT.DLT*GPP) THEN
-	       CS=sqrt(abs((CKV+VAY-SIGN(1.d0,CWH)*CWH)/2.d0))
-	       CF=sqrt(abs((CKV+VAY+SIGN(1.d0,CWH)*CWH)/2.d0))
+	       CS=sqrt(abs((CKV+VAY-SIGN(1.e0,CWH)*CWH)/2.e0))
+	       CF=sqrt(abs((CKV+VAY+SIGN(1.e0,CWH)*CWH)/2.e0))
 	   ELSE
 	       CS=CSR
 	       CF=CSR
@@ -757,11 +757,11 @@
       CSR=sqrt(CKV)
       CSV=CKV+VAH
       CWH=CKV-VAH
-      DSCV=CSV**2-4.d0*CKV*VAZ
+      DSCV=CSV**2-4.e0*CKV*VAZ
       IF(DSCV.LT.0.) DSCV=0.
       DSCV=sqrt(DSCV)
-      VF2=(CSV+DSCV)/2.d0
-      VS2=(CSV-DSCV)/2.d0
+      VF2=(CSV+DSCV)/2.e0
+      VS2=(CSV-DSCV)/2.e0
       IF(VS2.LT.0.) VS2=0.
       CF=sqrt(VF2)
       CS=sqrt(VS2)
@@ -777,8 +777,8 @@
       IF(BYZ.LE.DLT*BMG) THEN
 
 	   IF(GPB.GT.DLT*GPP) THEN
-	       CS=sqrt(abs((CKV+VAZ-SIGN(1.d0,CWH)*CWH)/2.d0))
-	       CF=sqrt(abs((CKV+VAZ+SIGN(1.d0,CWH)*CWH)/2.d0))
+	       CS=sqrt(abs((CKV+VAZ-SIGN(1.e0,CWH)*CWH)/2.e0))
+	       CF=sqrt(abs((CKV+VAZ+SIGN(1.e0,CWH)*CWH)/2.e0))
 	   ELSE
 	       CS=CSR
 	       CF=CSR
@@ -808,7 +808,7 @@
 
       BKV=QU(5)**2+QU(6)**2+QU(7)**2
 
-      PXX=a2*qu(1)+BKV/2.d0
+      PXX=a2*qu(1)+BKV/2.e0
 
       F(1)=qu(1)*qu(2)
       F(2)=qu(1)*qu(2)**2+PXX-QU(5)**2
@@ -832,7 +832,7 @@
 
       BKV=QU(5)**2+QU(6)**2+QU(7)**2
 
-      PXX=A2*qu(1)+BKV/2.d0
+      PXX=A2*qu(1)+BKV/2.e0
 
       F(1)=qu(1)*qu(3)
       F(2)=qu(1)*qu(2)*QU(3)-QU(6)*QU(5)
@@ -856,7 +856,7 @@
 
       BKV=QU(5)**2+QU(6)**2+QU(7)**2
 
-      PXX=A2*qu(1)+BKV/2.d0
+      PXX=A2*qu(1)+BKV/2.e0
 
       F(1)=qu(1)*qu(4)
       F(2)=qu(1)*qu(2)*QU(4)-QU(5)*QU(7)
@@ -878,8 +878,8 @@
 
 	DO M=1,7
        DQ=QR(M)-QL(M)
-	 Q6=6.0*(QP(M)-(QR(M)+QL(M))/2.d0)
-	 QC(M)=QL(M)+Y/2.d0*(DQ+(1.d0-2.d0/3.*Y)*Q6)
+	 Q6=6.0*(QP(M)-(QR(M)+QL(M))/2.e0)
+	 QC(M)=QL(M)+Y/2.e0*(DQ+(1.e0-2.e0/3.*Y)*Q6)
       ENDDO
 
 	RETURN
@@ -894,8 +894,8 @@
 
 	DO M=1,7
        DQ=QR(M)-QL(M)
-	 Q6=6.0*(QP(M)-(QR(M)+QL(M))/2.d0)
-	 QC(M)=QR(M)-Y/2.d0*(DQ-(1.d0-2.d0/3.*Y)*Q6)
+	 Q6=6.0*(QP(M)-(QR(M)+QL(M))/2.e0)
+	 QC(M)=QR(M)-Y/2.e0*(DQ-(1.e0-2.e0/3.*Y)*Q6)
       ENDDO
 
 	RETURN
@@ -910,8 +910,8 @@
 
 	DO M=1,7
        DQ=QR(M)-QL(M)
-	 Q6=6.0*(QP(M)-(QR(M)+QL(M))/2.d0)
-	 QC(M)=QL(M)+Y*(DQ+(1.d0-Y)*Q6)
+	 Q6=6.0*(QP(M)-(QR(M)+QL(M))/2.e0)
+	 QC(M)=QL(M)+Y*(DQ+(1.e0-Y)*Q6)
       ENDDO
 
 	RETURN
@@ -931,7 +931,7 @@
 	qsr(2)=(rl*qul(2)+rr*qur(2))/rs
 	qsr(3)=(rl*qul(3)+rr*qur(3))/rs
 	qsr(4)=(rl*qul(4)+rr*qur(4))/rs
-	qsr(5)=(qul(5)+qur(5))/2.d0
+	qsr(5)=(qul(5)+qur(5))/2.e0
 	qsr(6)=(qul(6)/rl+qur(6)/rr)/rs*qsr(1)
 	qsr(7)=(qul(7)/rl+qur(7)/rr)/rs*qsr(1)
 
@@ -953,7 +953,7 @@
 	qsr(3)=(rl*qul(3)+rr*qur(3))/rs
 	qsr(4)=(rl*qul(4)+rr*qur(4))/rs
 	qsr(5)=(qul(5)/rl+qur(5)/rr)/rs*qsr(1)
-	qsr(6)=(qul(6)+qur(6))/2.d0
+	qsr(6)=(qul(6)+qur(6))/2.e0
 	qsr(7)=(qul(7)/rl+qur(7)/rr)/rs*qsr(1)
 
 	return
@@ -975,7 +975,7 @@
 	qsr(4)=(rl*qul(4)+rr*qur(4))/rs
 	qsr(5)=(qul(5)/rl+qur(5)/rr)/rs*qsr(1)
 	qsr(6)=(qul(6)/rl+qur(6)/rr)/rs*qsr(1)
-	qsr(7)=(qul(7)+qur(7))/2.d0
+	qsr(7)=(qul(7)+qur(7))/2.e0
 
 	return
 	end
@@ -1302,7 +1302,7 @@
       
 	REAL x,y,Xminmod
 	
-	Xminmod = 0.5*(sign(1.d0,x) + sign(1.d0,y))*min(abs(x),abs(y))
+	Xminmod = 0.5*(sign(1.e0,x) + sign(1.e0,y))*min(abs(x),abs(y))
 
 	Return
 	End
@@ -1327,21 +1327,21 @@
 	        
           DELTA = 1.0d-20
 	  
-          WS1 = 0.1D0
-	  WS2 = 0.6D0
-	  WS3 = 0.3D0 
+          WS1 = 0.1E0
+	  WS2 = 0.6E0
+	  WS3 = 0.3E0 
 
 
-	  WJ1 = (11.D0*VP3 - 7.D0*VP2 + 2.D0*VP1)/6.D0
-          WJ2 = (2.D0 *VP4 + 5.D0*VP3 -      VP2)/6.D0
-          WJ3 = (     -VP5 + 5.D0*VP4 + 2.D0*VP3)/6.D0
+	  WJ1 = (11.E0*VP3 - 7.E0*VP2 + 2.E0*VP1)/6.E0
+          WJ2 = (2.E0 *VP4 + 5.E0*VP3 -      VP2)/6.E0
+          WJ3 = (     -VP5 + 5.E0*VP4 + 2.E0*VP3)/6.E0
 
-	  IS1 = 13.D0/12.D0*(VP3 - 2.D0*VP2 + VP1)**2 
-     1	  + (3.D0*VP3 - 4.D0*VP2 + VP1)**2/4.D0
-	  IS2 = 13.D0/12.D0*(VP4 - 2.D0*VP3 + VP2)**2 
-     1	  + (VP4 - VP2)**2/4.D0
-	  IS3 = 13.D0/12.D0*(VP5 - 2.D0*VP4 + VP3)**2 
-     1	  + (VP5 - 4.D0*VP4 + 3.D0*VP3)**2/4.D0
+	  IS1 = 13.E0/12.E0*(VP3 - 2.E0*VP2 + VP1)**2 
+     1	  + (3.E0*VP3 - 4.E0*VP2 + VP1)**2/4.E0
+	  IS2 = 13.E0/12.E0*(VP4 - 2.E0*VP3 + VP2)**2 
+     1	  + (VP4 - VP2)**2/4.E0
+	  IS3 = 13.E0/12.E0*(VP5 - 2.E0*VP4 + VP3)**2 
+     1	  + (VP5 - 4.E0*VP4 + 3.E0*VP3)**2/4.E0
 
         AJ1 = WS1/(IS1+DELTA)**2   
         AJ2 = WS2/(IS2+DELTA)**2   
@@ -1353,12 +1353,12 @@
 	  WM2 = AJ2/AJS
 	  WM3 = AJ3/AJS
 
-       AJ1 = WM1*(WS1 + WS1*WS1 - 3.D0*WS1*WM1 + WM1*WM1)/(WS1*WS1 
-     1    + WM1*(1.D0 - 2.D0*WS1)) 
-       AJ2 = WM2*(WS2 + WS2*WS2 - 3.D0*WS2*WM2 + WM2*WM2)/(WS2*WS2 
-     1    + WM2*(1.D0 - 2.D0*WS2)) 
-       AJ3 = WM3*(WS3 + WS3*WS3 - 3.D0*WS3*WM3 + WM3*WM3)/(WS3*WS3 
-     1    + WM3*(1.D0 - 2.D0*WS3)) 
+       AJ1 = WM1*(WS1 + WS1*WS1 - 3.E0*WS1*WM1 + WM1*WM1)/(WS1*WS1 
+     1    + WM1*(1.E0 - 2.E0*WS1)) 
+       AJ2 = WM2*(WS2 + WS2*WS2 - 3.E0*WS2*WM2 + WM2*WM2)/(WS2*WS2 
+     1    + WM2*(1.E0 - 2.E0*WS2)) 
+       AJ3 = WM3*(WS3 + WS3*WS3 - 3.E0*WS3*WM3 + WM3*WM3)/(WS3*WS3 
+     1    + WM3*(1.E0 - 2.E0*WS3)) 
 
        AJS = AJ1 + AJ2 +AJ3 
 
@@ -1368,16 +1368,16 @@
 
        VR = WM1*WJ1 + WM2*WJ2 + WM3*WJ3 
 
-      WJ1 = (11.D0*VP3 - 7.D0*VP4 + 2.D0*VP5)/6.D0
-      WJ2 = (2.D0 *VP2 + 5.D0*VP3 -      VP4)/6.D0
-      WJ3 = (     -VP1 + 5.D0*VP2 + 2.D0*VP3)/6.D0
+      WJ1 = (11.E0*VP3 - 7.E0*VP4 + 2.E0*VP5)/6.E0
+      WJ2 = (2.E0 *VP2 + 5.E0*VP3 -      VP4)/6.E0
+      WJ3 = (     -VP1 + 5.E0*VP2 + 2.E0*VP3)/6.E0
 
-      IS1 = 13.D0/12.D0*(VP3 - 2.D0*VP4 + VP5)**2 
-     1	  + (3.D0*VP3 - 4.D0*VP4 + VP5)**2/4.D0
-	  IS2 = 13.D0/12.D0*(VP2 - 2.D0*VP3 + VP4)**2 
-     1	  + (VP2 - VP4)**2/4.D0
-	  IS3 = 13.D0/12.D0*(VP1 - 2.D0*VP2 + VP3)**2 
-     1	  + (VP1 - 4.D0*VP2 + 3.D0*VP3)**2/4.D0
+      IS1 = 13.E0/12.E0*(VP3 - 2.E0*VP4 + VP5)**2 
+     1	  + (3.E0*VP3 - 4.E0*VP4 + VP5)**2/4.E0
+	  IS2 = 13.E0/12.E0*(VP2 - 2.E0*VP3 + VP4)**2 
+     1	  + (VP2 - VP4)**2/4.E0
+	  IS3 = 13.E0/12.E0*(VP1 - 2.E0*VP2 + VP3)**2 
+     1	  + (VP1 - 4.E0*VP2 + 3.E0*VP3)**2/4.E0
 
       AJ1 = WS1/(IS1+DELTA)**2   
       AJ2 = WS2/(IS2+DELTA)**2   
@@ -1389,12 +1389,12 @@
 	  WM2 = AJ2/AJS
 	  WM3 = AJ3/AJS
 
-      AJ1 = WM1*(WS1 + WS1*WS1 - 3.D0*WS1*WM1 + WM1*WM1)/(WS1*WS1 
-     1    + WM1*(1.D0 - 2.D0*WS1)) 
-      AJ2 = WM2*(WS2 + WS2*WS2 - 3.D0*WS2*WM2 + WM2*WM2)/(WS2*WS2 
-     1    + WM2*(1.D0 - 2.D0*WS2)) 
-      AJ3 = WM3*(WS3 + WS3*WS3 - 3.D0*WS3*WM3 + WM3*WM3)/(WS3*WS3 
-     1    + WM3*(1.D0 - 2.D0*WS3)) 
+      AJ1 = WM1*(WS1 + WS1*WS1 - 3.E0*WS1*WM1 + WM1*WM1)/(WS1*WS1 
+     1    + WM1*(1.E0 - 2.E0*WS1)) 
+      AJ2 = WM2*(WS2 + WS2*WS2 - 3.E0*WS2*WM2 + WM2*WM2)/(WS2*WS2 
+     1    + WM2*(1.E0 - 2.E0*WS2)) 
+      AJ3 = WM3*(WS3 + WS3*WS3 - 3.E0*WS3*WM3 + WM3*WM3)/(WS3*WS3 
+     1    + WM3*(1.E0 - 2.E0*WS3)) 
 
       AJS = AJ1 + AJ2 +AJ3 
 

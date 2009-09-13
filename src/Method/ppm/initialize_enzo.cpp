@@ -52,38 +52,34 @@
 #include "assert.h"
 
 // #include "enzo.h"
-#include "enzo.h"
+// #include "enzo.h"
+#include "egret-bg.h"
 
-int bitmap[width][height];
+float image[width][height];
  
 
-inline bool in_enzo (float x, float y, float enzo_lower[2], float enzo_upper[2])
+inline float color_value (float x, float y, float enzo_lower[2], float enzo_upper[2])
 // Return boolean flag whether point is inside the text "Enzo"
 {
-  //   const int bitmap[5][3] = 
-  //     {{ 1, 1, 1},
-  //      { 1, 0, 0},
-  //      { 1, 1, 0},
-  //      { 1, 0, 0},
-  //      { 1, 1, 1}};
-
   if (x < enzo_lower[0] || x > enzo_upper[0]) return false;
   if (y < enzo_lower[1] || y > enzo_upper[1]) return false;
 
   int ix = width*(x - enzo_lower[0]) / (enzo_upper[0] - enzo_lower[0]);
   int iy = height*(y - enzo_lower[1]) / (enzo_upper[1] - enzo_lower[1]);
+  if (ix == width) ix--;
+  if (iy == height) iy--;
   assert (ix >= 0);
   assert (iy >= 0);
   assert (ix < width);
   assert (iy < height);
-  return !(bitmap[ix][iy]);
+  return (image[ix][iy]);
 } 
 
 void initialize_enzo ()
 
 {
 
-  int grid_size [] = { 1920, 1080 };
+  int grid_size [] = { 1280-6, 1024-6 };
 
   float enzo_density_out = 1.0;
   float enzo_density_in  = 0.125;
@@ -94,10 +90,15 @@ void initialize_enzo ()
 
   int pixel[3];
   char * data = header_data;
+  int min=1000;
+  int max=-1;
+
   for (int iy=0; iy<height; iy++) {
     for (int ix=0; ix<width; ix++) {
       HEADER_PIXEL(data,pixel);
-      bitmap [ix][iy] = pixel[0];
+      if (pixel[0] < min) min = pixel[0];
+      if (pixel[0] > max) max = pixel[0];
+      image [ix][iy] = 1.0*(pixel[0] + pixel[1] + pixel[2])/(255*3);
     }
   }
 
@@ -110,8 +111,8 @@ void initialize_enzo ()
   // 1/4   @ @ @
   //  0 
 
-  float enzo_lower[2] = {0.5, 0.5};
-  float enzo_upper[2] = {3.5, 1.5};
+  float enzo_lower[2] = {0.0, 0.0};
+  float enzo_upper[2] = {4.0, 2.0};
 
   // Physics
 
@@ -126,7 +127,7 @@ void initialize_enzo ()
   // Control
 
   time_stop              = 2.5;
-  cycle_stop             = 1;
+  cycle_stop             = 5000;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
@@ -214,15 +215,13 @@ void initialize_enzo ()
 
       // Initialize density and total energy
 
-      if (in_enzo(x,y,enzo_lower,enzo_upper)) {
-	BaryonField[ field_density ] [ i ] = enzo_density_in;
-	BaryonField[ field_total_energy ][ i ] = 
-	  enzo_pressure_in / ((Gamma - 1.0)*enzo_density_in);
-      } else {
-	BaryonField[ field_density ] [ i ] = enzo_density_out;
-	BaryonField[ field_total_energy ][ i ] = 
-	  enzo_pressure_out / ((Gamma - 1.0)*enzo_density_out);
-      }
+      float a = color_value(x,y,enzo_lower,enzo_upper);
+      float density  = a*enzo_density_in  + (1-a)*enzo_density_out;
+      float pressure = a*enzo_pressure_in + (1-a)*enzo_pressure_out;
+
+      BaryonField[ field_density ] [ i ] = density;
+      BaryonField[ field_total_energy ][ i ] = 
+	pressure / ((Gamma - 1.0)*density);
 
       // Initialize internal energy
 
@@ -236,7 +235,6 @@ void initialize_enzo ()
     }
   }
 
-  printf ("density(3,3) = %g\n",BaryonField[field_density][1221]);
   AccelerationField[0] = NULL;
   AccelerationField[1] = NULL;
   AccelerationField[2] = NULL;

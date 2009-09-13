@@ -72,8 +72,7 @@ extern "C" void FORTRAN_NAME(ppml)(float *dn,   float *vx,   float *vy,   float 
                           int *ncolour, float *colourpt, int *coloff,
                             int colindex[]);
 */
-int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
-			      fluxes *SubgridFluxes[], int level)
+int SolveMHDEquations(int cycle, float dt)
 {
  
   /* exit if not 3D */
@@ -81,13 +80,6 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
   if (GridRank != 3) 
     my_exit(EXIT_FAILURE);
 
-  /* Return if this doesn't concern us. */
- 
-  if (ProcessorNumber != MyProcessorNumber)
-    return SUCCESS;
- 
-  this->DebugCheck("SolveMHDEquations");
- 
   if (NumberOfBaryonFields > 0) {
  
     /* initialize */
@@ -137,55 +129,55 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
 
     /* allocate space for fluxes */
  
-    for (i = 0; i < NumberOfSubgrids; i++) {
-      for (dim = 0; dim < GridRank; dim++)  {
+//     for (i = 0; i < NumberOfSubgrids; i++) {
+//       for (dim = 0; dim < GridRank; dim++)  {
  
-	/* compute size (in floats) of flux storage */
+// 	/* compute size (in floats) of flux storage */
  
-        size = 1;
-        for (j = 0; j < GridRank; j++)
-          size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
-                  SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
+//         size = 1;
+//         for (j = 0; j < GridRank; j++)
+//           size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
+//                   SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
  
-	/* set unused dims (for the solver, which is hardwired for 3d). */
+// 	/* set unused dims (for the solver, which is hardwired for 3d). */
  
-        for (j = GridRank; j < 3; j++) {
-          SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j]  = 0;
-          SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j]    = 0;
-          SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
-          SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j]   = 0;
-        }
+//         for (j = GridRank; j < 3; j++) {
+//           SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j]  = 0;
+//           SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j]    = 0;
+//           SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
+//           SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j]   = 0;
+//         }
  
-	/* Allocate space (if necessary). */
+// 	/* Allocate space (if necessary). */
  
-        for (field = 0; field < NumberOfBaryonFields; field++) {
-	  if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
-	    SubgridFluxes[i]->LeftFluxes[field][dim]  = new float[size];
-	  if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
-	    SubgridFluxes[i]->RightFluxes[field][dim] = new float[size];
-	  for (n = 0; n < size; n++) {
-	    SubgridFluxes[i]->LeftFluxes[field][dim][n]  = 0;
-	    SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
-	  }
-        }
+//         for (field = 0; field < NumberOfBaryonFields; field++) {
+// 	  if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
+// 	    SubgridFluxes[i]->LeftFluxes[field][dim]  = new float[size];
+// 	  if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
+// 	    SubgridFluxes[i]->RightFluxes[field][dim] = new float[size];
+// 	  for (n = 0; n < size; n++) {
+// 	    SubgridFluxes[i]->LeftFluxes[field][dim][n]  = 0;
+// 	    SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
+// 	  }
+//         }
  
-	for (field = NumberOfBaryonFields; field < MAX_NUMBER_OF_BARYON_FIELDS;
-	     field++) {
-          SubgridFluxes[i]->LeftFluxes[field][dim]  = NULL;
-          SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-	}
+// 	for (field = NumberOfBaryonFields; field < MAX_NUMBER_OF_BARYON_FIELDS;
+// 	     field++) {
+//           SubgridFluxes[i]->LeftFluxes[field][dim]  = NULL;
+//           SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
+// 	}
  
-      }  // next dimension
+//       }  // next dimension
  
-      /* make things pretty */
+//       /* make things pretty */
  
-      for (dim = GridRank; dim < 3; dim++)
-        for (field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
-          SubgridFluxes[i]->LeftFluxes[field][dim]  = NULL;
-          SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-	}
+//       for (dim = GridRank; dim < 3; dim++)
+//         for (field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
+//           SubgridFluxes[i]->LeftFluxes[field][dim]  = NULL;
+//           SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
+// 	}
  
-    } // end of loop over subgrids
+//     } // end of loop over subgrids
  
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
@@ -201,7 +193,6 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
       GridDimension[i]   = 1;
       GridStartIndex[i]  = 0;
       GridEndIndex[i]    = 0;
-      GridVelocity[i]    = 0.0;
       GridGlobalStart[i] = 0;
     }
  
@@ -217,6 +208,7 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
     /* create and fill in arrays which are easiler for the solver to
        understand. */
 
+    int NumberOfSubgrids = 0;
     int *leftface  = new int[NumberOfSubgrids*3*20];
     int *rightface = leftface + NumberOfSubgrids*3*1;
     int *istart    = leftface + NumberOfSubgrids*3*2;
@@ -232,7 +224,7 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
     int *bzindex   = leftface + NumberOfSubgrids*3*18;
 
     float *standard = NULL;
-    if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
+    //    if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
  
     for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
       for (dim = 0; dim < GridRank; dim++) {
@@ -250,63 +242,63 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
            plane) of the left and right flux planes.  The index is zero
            based from the left side of the entire grid. */
  
-	leftface[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
-	    GridGlobalStart[dim];
-	rightface[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
-	    GridGlobalStart[dim];   // (+1 done by fortran code)
+// 	leftface[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->LeftFluxStartGlobalIndex[dim][dim] -
+// 	    GridGlobalStart[dim];
+// 	rightface[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][dim] -
+// 	    GridGlobalStart[dim];   // (+1 done by fortran code)
  
         /* set the start and end indicies (zero based on entire grid)
            of the 2d flux plane. */
  
-	istart[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][idim] -
-	    GridGlobalStart[idim];
-	jstart[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][jdim] -
-	    GridGlobalStart[jdim];
-	iend[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][idim] -
-	    GridGlobalStart[idim];
-	jend[subgrid*3+dim] =
-	  SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][jdim] -
-	    GridGlobalStart[jdim];
+// 	istart[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][idim] -
+// 	    GridGlobalStart[idim];
+// 	jstart[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxStartGlobalIndex[dim][jdim] -
+// 	    GridGlobalStart[jdim];
+// 	iend[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][idim] -
+// 	    GridGlobalStart[idim];
+// 	jend[subgrid*3+dim] =
+// 	  SubgridFluxes[subgrid]->RightFluxEndGlobalIndex[dim][jdim] -
+// 	    GridGlobalStart[jdim];
  
-        /* Compute offset from the standard pointer to the start of
-           each set of flux data.  This is done to compensate for
-           fortran's inability to handle arrays of pointers or structs.
-	   NOTE: This pointer arithmetic is illegal; some other way should
-	   be found to do it (like write higher level ppm stuff in c++). */
+//         /* Compute offset from the standard pointer to the start of
+//            each set of flux data.  This is done to compensate for
+//            fortran's inability to handle arrays of pointers or structs.
+// 	   NOTE: This pointer arithmetic is illegal; some other way should
+// 	   be found to do it (like write higher level ppm stuff in c++). */
  
-	dnindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[0][dim]  - standard;
-	dnindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[0][dim] - standard;
-	vxindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[1][dim]  - standard;
-	vxindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[1][dim] - standard;
-	vyindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[2][dim]  - standard;
-	vyindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[2][dim] - standard;
-	vzindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[3][dim]  - standard;
-	vzindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[3][dim] - standard;
-	bxindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[4][dim]  - standard;
-	bxindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[4][dim] - standard;
-	byindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[5][dim]  - standard;
-	byindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[5][dim] - standard;
-	bzindex[subgrid*6+dim*2] =
-	  SubgridFluxes[subgrid]->LeftFluxes[6][dim]  - standard;
-	bzindex[subgrid*6+dim*2+1] =
-	  SubgridFluxes[subgrid]->RightFluxes[6][dim] - standard;
+// 	dnindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[0][dim]  - standard;
+// 	dnindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[0][dim] - standard;
+// 	vxindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[1][dim]  - standard;
+// 	vxindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[1][dim] - standard;
+// 	vyindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[2][dim]  - standard;
+// 	vyindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[2][dim] - standard;
+// 	vzindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[3][dim]  - standard;
+// 	vzindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[3][dim] - standard;
+// 	bxindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[4][dim]  - standard;
+// 	bxindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[4][dim] - standard;
+// 	byindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[5][dim]  - standard;
+// 	byindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[5][dim] - standard;
+// 	bzindex[subgrid*6+dim*2] =
+// 	  SubgridFluxes[subgrid]->LeftFluxes[6][dim]  - standard;
+// 	bzindex[subgrid*6+dim*2+1] =
+// 	  SubgridFluxes[subgrid]->RightFluxes[6][dim] - standard;
  
       }
  
@@ -332,8 +324,8 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
     /* Prepare Gravity. */
  
     int GravityOn = 0;
-    if (SelfGravity || UniformGravity || PointSourceGravity)
-      GravityOn = 1;
+//     if (SelfGravity || UniformGravity || PointSourceGravity)
+//       GravityOn = 1;
  
     /* call a Fortran routine to actually compute the hydro equations
        on this grid.
@@ -341,7 +333,6 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
        the right thing for < 3 dimensions. */
     /* note: Start/EndIndex are zero based */
 
-    if (HydroMethod == PPML_Isothermal3D) {
 
     /* current PPML implementation only supports 3D and does not support color fields */	
 
@@ -349,7 +340,7 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
                          dens_rx, velox_rx, veloy_rx, veloz_rx, bfieldx_rx, bfieldy_rx, bfieldz_rx,
                          dens_ry, velox_ry, veloy_ry, veloz_ry, bfieldx_ry, bfieldy_ry, bfieldz_ry,
                          dens_rz, velox_rz, veloy_rz, veloz_rz, bfieldx_rz, bfieldy_rz, bfieldz_rz,
-                         &dtFixed, &CycleNumber, 
+                         &dt, &cycle, 
                          CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
                          &GridDimension[0], &GridDimension[1], &GridDimension[2], 
                          GridStartIndex, GridEndIndex,
@@ -358,29 +349,6 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
                          standard, dnindex,
                          vxindex, vyindex, vzindex,
                          bxindex, byindex, bzindex);
- 	}	
-    /*    if (HydroMethod == PPM_DirectEuler)
-      FORTRAN_NAME(ppm_de)(
-			density, totalenergy, velocity1, velocity2, velocity3,
-                          gasenergy,
-			&GravityOn, AccelerationField[0],
-                           AccelerationField[1],
-                           AccelerationField[2],
-			&Gamma, &dtFixed, &CycleNumber,
-                          CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
-			&GridRank, &GridDimension[0], &GridDimension[1],
-                           &GridDimension[2], GridStartIndex, GridEndIndex,
-			GridVelocity, &PPMFlatteningParameter,
-                           &PressureFree,
-			&PPMDiffusionParameter, &PPMSteepeningParameter,
-                           &DualEnergyFormalism, &DualEnergyFormalismEta1,
-			   &DualEnergyFormalismEta2,
-			&NumberOfSubgrids, leftface, rightface,
-			istart, iend, jstart, jend,
-			standard, dindex, Eindex, uindex, vindex, windex,
-			  geindex, temp,
-                        &NumberOfColours, colourpt, coloff, colindex);
-    */
 
     /* deallocate temporary space for solver */
  
@@ -392,8 +360,6 @@ int grid::SolveMHDEquations(int CycleNumber, int NumberOfSubgrids,
       delete [] CellWidthTemp[dim];
  
   }  // end: if (NumberOfBaryonFields > 0)
- 
-  this->DebugCheck("SolveMHDEquations (after)");
  
   return SUCCESS;
  

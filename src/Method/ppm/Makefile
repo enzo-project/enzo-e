@@ -7,10 +7,14 @@
 
 TOP = ../../..
 
-TEST_EXES = test_implosion test_enzo
+TEST_EXES = test_implosion test_enzo test_sdsc
 
 INC_LOCAL  = -I$(TOP)/include
 LIB_LOCAL  = -L$(TOP)/lib -lcello
+
+OBJS_ENZO = test_enzo.o initialize_enzo.o
+OBJS_SDSC = test_sdsc.o initialize_sdsc.o
+OBJS_IMPLOSION = test_implosion.o initialize_implosion.o
 
 OBJS = \
 	CosmologyComputeExpansionFactor.o \
@@ -36,8 +40,6 @@ OBJS = \
 	f_message.o \
 	inteuler.o \
 	initialize_hydro.o \
-	initialize_implosion.o \
-	initialize_enzo.o \
 	intvar.o \
 	pgas2d_dual.o \
 	pgas2d.o \
@@ -58,11 +60,13 @@ FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
 LIB      = $(LIB_LOCAL) -lgfortran -lm -lhdf5
 
-all: test_enzo test_implosion
-test_enzo: $(OBJS) test_enzo.o
-	$(CXX) -o test_enzo test_enzo.o $(OBJS) $(LIB)
-test_implosion: $(OBJS) test_implosion.o
-	$(CXX) -o test_implosion test_implosion.o $(OBJS) $(LIB)
+all: test_enzo test_implosion test_sdsc
+test_enzo: $(OBJS) $(OBJS_ENZO)
+	$(CXX) -o test_enzo $(OBJS_ENZO) $(OBJS) $(LIB)
+test_sdsc: $(OBJS) $(OBJS_SDSC) initialize_sdsc.o
+	$(CXX) -o test_sdsc $(OBJS_SDSC) $(OBJS) $(LIB)
+test_implosion: $(OBJS) $(OBJS_IMPLOSION)
+	$(CXX) -o test_implosion $(OBJS_IMPLOSION) $(OBJS) $(LIB)
 
 .PHONY: install
 install: $(TEST_EXES)

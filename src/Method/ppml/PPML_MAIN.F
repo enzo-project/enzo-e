@@ -1,4 +1,4 @@
-#include "error.def"
+/* #include "error.def" */
 
       Subroutine PPML(dn,vx,vy,vz,bx,by,bz,
      1                 dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,	 
@@ -119,7 +119,7 @@ c
 c check-it
 c
         if (nx.le.0) then
-           ERROR_MESSAGE
+C           ERROR_MESSAGE
         endif
 	  
       i1=GridStartIndex(1)+1
@@ -136,7 +136,7 @@ c
 !SU      kghost=GridEndIndex(3)	  
 
         if (i1.eq.0) then
-           ERROR_MESSAGE
+C           ERROR_MESSAGE
         endif
 
 	  
@@ -789,7 +789,8 @@ c--------------------------------------------------------
            else   
 		
 
-	      exc=-(vy(i,j+1,k+1)*bz(i,j+1,k+1)-vz(i,j+1,k+1)*by(i,j+1,k+1))
+	      exc=-(vy(i,j+1,k+1)*bz(i,j+1,k+1)
+     $             -vz(i,j+1,k+1)*by(i,j+1,k+1))
 		  dexy=-g7(i,j,k+1)-exc
 
            endif
@@ -798,7 +799,8 @@ c--------------------------------------------------------
 	      exc=-(vy(i,j+1,k)*bz(i,j+1,k)-vz(i,j+1,k)*by(i,j+1,k))         
 		  dexy1=-g7(i,j,k)-exc
 
-	      exc=-(vy(i,j+1,k+1)*bz(i,j+1,k+1)-vz(i,j+1,k+1)*by(i,j+1,k+1))
+	      exc=-(vy(i,j+1,k+1)*bz(i,j+1,k+1)
+     $                 -vz(i,j+1,k+1)*by(i,j+1,k+1))
 		  dexy2=-g7(i,j,k+1)-exc
 
 	  	  dexy=0.5*(dexy1+dexy2)
@@ -854,7 +856,8 @@ c--------------------------------------------------------
       
 	    else
 
-	      exc=-(vy(i,j+1,k+1)*bz(i,j+1,k+1)-vz(i,j+1,k+1)*by(i,j+1,k+1))
+	      exc=-(vy(i,j+1,k+1)*bz(i,j+1,k+1)
+     $              -vz(i,j+1,k+1)*by(i,j+1,k+1))
 
 		  dexy=h6(i,j+1,k)-exc
 
@@ -867,7 +870,8 @@ c--------------------------------------------------------
 
 		  dexy1=h6(i,j,k)-exc
 
-	      exc=-(vy(i,j+1,k+1)*bz(i,j+1,k+1)-vz(i,j+1,k+1)*by(i,j+1,k+1))
+	      exc=-(vy(i,j+1,k+1)*bz(i,j+1,k+1)
+     $                 -vz(i,j+1,k+1)*by(i,j+1,k+1))
 
 		  dexy2=h6(i,j+1,k)-exc
 
@@ -939,7 +943,8 @@ c--------------------------------------------------------
  
            else 
 
-	      exc=-(vz(i+1,j,k+1)*bx(i+1,j,k+1)-vx(i+1,j,k+1)*bz(i+1,j,k+1))
+	      exc=-(vz(i+1,j,k+1)*bx(i+1,j,k+1)
+     $             -vx(i+1,j,k+1)*bz(i+1,j,k+1))
 
 		  dexy=-h5(i+1,j,k)-exc
 
@@ -951,7 +956,8 @@ c--------------------------------------------------------
 
 		  dexy1=-h5(i,j,k)-exc
 
-	      exc=-(vz(i+1,j,k+1)*bx(i+1,j,k+1)-vx(i+1,j,k+1)*bz(i+1,j,k+1))
+	      exc=-(vz(i+1,j,k+1)*bx(i+1,j,k+1)
+     $                 -vx(i+1,j,k+1)*bz(i+1,j,k+1))
 
 		  dexy2=-h5(i+1,j,k)-exc
 
@@ -977,7 +983,8 @@ c--------------------------------------------------------
 
             else
 
-	      exc=-(vz(i,j,k+1)*bx(i,j,k+1)-vx(i,j,k+1)*bz(i,j,k+1))
+	      exc=-(vz(i,j,k+1)*bx(i,j,k+1)
+     $              -vx(i,j,k+1)*bz(i,j,k+1))
 
 		  dexy=f7(i,j,k+1)-exc
 
@@ -989,7 +996,8 @@ c--------------------------------------------------------
 
 		  dexy1=f7(i,j,k)-exc
 
-	      exc=-(vz(i,j,k+1)*bx(i,j,k+1)-vx(i,j,k+1)*bz(i,j,k+1))
+	      exc=-(vz(i,j,k+1)*bx(i,j,k+1)
+     $                 -vx(i,j,k+1)*bz(i,j,k+1))
 
 		  dexy2=f7(i,j,k+1)-exc
 
@@ -1014,7 +1022,8 @@ c--------------------------------------------------------
 
            else
 
-	      exc=-(vz(i+1,j,k+1)*bx(i+1,j,k+1)-vx(i+1,j,k+1)*bz(i+1,j,k+1))
+	      exc=-(vz(i+1,j,k+1)*bx(i+1,j,k+1)
+     $             -vx(i+1,j,k+1)*bz(i+1,j,k+1))
 
 		  dexy=f7(i,j,k+1)-exc
 
@@ -1026,7 +1035,8 @@ c--------------------------------------------------------
 
 		  dexy1=f7(i,j,k)-exc
 
-	      exc=-(vz(i+1,j,k+1)*bx(i+1,j,k+1)-vx(i+1,j,k+1)*bz(i+1,j,k+1))
+	      exc=-(vz(i+1,j,k+1)*bx(i+1,j,k+1)
+     $                 -vx(i+1,j,k+1)*bz(i+1,j,k+1))
 
 		  dexy2=f7(i,j,k+1)-exc
 
@@ -1098,7 +1108,8 @@ c--------------------------------------------------------
 
             else   
 
-	      exc=-(vx(i+1,j+1,k)*by(i+1,j+1,k)-vy(i+1,j+1,k)*bx(i+1,j+1,k))
+	      exc=-(vx(i+1,j+1,k)*by(i+1,j+1,k)
+     $              -vy(i+1,j+1,k)*bx(i+1,j+1,k))
 
 		  dexy=-f6(i,j+1,k)-exc
 
@@ -1110,7 +1121,8 @@ c--------------------------------------------------------
 
 		  dexy1=-f6(i,j,k)-exc
 
-	      exc=-(vx(i+1,j+1,k)*by(i+1,j+1,k)-vy(i+1,j+1,k)*bx(i+1,j+1,k))
+	      exc=-(vx(i+1,j+1,k)*by(i+1,j+1,k)
+     $                 -vy(i+1,j+1,k)*bx(i+1,j+1,k))
 
 		  dexy2=-f6(i,j+1,k)-exc
 
@@ -1170,7 +1182,8 @@ c--------------------------------------------------------
 
            else
 
-	      exc=-(vx(i+1,j+1,k)*by(i+1,j+1,k)-vy(i+1,j+1,k)*bx(i+1,j+1,k))
+	      exc=-(vx(i+1,j+1,k)*by(i+1,j+1,k)
+     $             -vy(i+1,j+1,k)*bx(i+1,j+1,k))
 
 		  dexy=g5(i+1,j,k)-exc
 
@@ -1182,7 +1195,8 @@ c--------------------------------------------------------
 
 		  dexy1=g5(i,j,k)-exc
 
-	      exc=-(vx(i+1,j+1,k)*by(i+1,j+1,k)-vy(i+1,j+1,k)*bx(i+1,j+1,k))
+                  exc=-(vx(i+1,j+1,k)*by(i+1,j+1,k)-
+     $                 vy(i+1,j+1,k)*bx(i+1,j+1,k))
 
 		  dexy2=g5(i+1,j,k)-exc
 		  
