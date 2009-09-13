@@ -156,7 +156,17 @@
 \part{Related Work}
 %========================================================================
 
+\section{SAGE/RAGE}
+
 \section{Paramesh / Flash}
+
+%----------------------------------------------------------------------
+\begin{frame}
+\frametitle{Paramesh}
+\centerline{\includegraphics[width=4in]{paramesh.eps}}
+\end{frame}
+%----------------------------------------------------------------------
+
 
 \section{Chombo}
 
@@ -175,8 +185,14 @@
 \part{Data Structures}
 %========================================================================
 
-\section{Components}
+\section{Cello Components}
 
+%----------------------------------------------------------------------
+\begin{frame}
+\frametitle{Components}
+\centerline{\includegraphics[width=3in]{components.eps}}
+\end{frame}
+%----------------------------------------------------------------------
 
 \section{\code{Array} class}
 
@@ -197,12 +213,20 @@
 \begin{frame}
 \frametitle{\code{Array} class}
 
- \includegraphics[width=0.4in]{array-serial.eps} \ \ \code{ArraySerial} 
- \includegraphics[width=0.4in]{array-block.eps} \ \ \code{ArrayBlock} \\
- \includegraphics[width=0.4in]{array-mpi.eps} \ \ \code{ArrayMpi} 
- \includegraphics[width=0.4in]{array-mpi-omp.eps} \ \ \code{ArrayMpiOmp} \\
- \includegraphics[width=0.4in]{array-mpi-omp-block.eps} \ \ \code{ArrayMpiOmpBlock} 
- \includegraphics[width=0.4in]{array-interleave.eps} \ \ \code{ArrayInterleave} 
+\begin{minipage}{1.8in}
+\begin{itemize}
+\item[]<1->\includegraphics[width=0.4in]{array-serial.eps} \ \ \code{ArraySerial}
+\item[]<2-> \includegraphics[width=0.4in]{array-block.eps} \ \ \code{ArrayBlock}
+\item[]<3-> \includegraphics[width=0.4in]{array-mpi.eps} \ \ \code{ArrayMpi}
+\end{itemize}
+\end{minipage} \ 
+\begin{minipage}{2in}
+\begin{itemize}
+\item[]<4-> \includegraphics[width=0.4in]{array-omp.eps} \ \ \code{ArrayOmp}
+\item[]<5-> \includegraphics[width=0.4in]{array-mpi-omp.eps} \ \ \code{ArrayMpiOmp}
+\item[]<6-> \includegraphics[width=0.4in]{array-interleave.eps} \ \ \code{ArrayInterleave}
+\end{itemize}
+\end{minipage}
 
 \end{frame}
 %----------------------------------------------------------------------

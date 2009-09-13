@@ -14,12 +14,18 @@ pdf2:ps2
 html:
 	tth -e2 $(PAPER).tex > $(PAPER).html
 
-dvi: include.tex uml
+dvi: include.tex uml figures
 	make -C uml
 	-latex $(PAPER)
 
+pdfimg: include.tex uml figures
+	make -C uml
+	-pdflatex $(PAPER)
 uml:
 	ln -s ../uml .
+.PHONY: figures
+figures:
+	-@ln -s ../figures/* .
 
 include.tex:
 	ln -s ../include.tex .
@@ -38,6 +44,3 @@ clean:
 distclean: clean
 	-@rm uml include.tex 
 	-@rm makefile # Must be last!
-
-
-	
