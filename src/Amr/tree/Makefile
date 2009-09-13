@@ -14,7 +14,7 @@ CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
 
 FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
-LIB      = $(LIB_LOCAL) 
+LIB      = $(LIB_LOCAL)  -lhdf5
 
 all: $(TEST_EXES)
 test_tree: $(OBJS) test_tree.o

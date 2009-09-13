@@ -11,29 +11,37 @@ class Tree4;
 
 class Node4 {
 
-  friend class Tree4;
+ public:
 
- protected:
+  // Create a new leaf node
+  Node4(int type);
 
-  /// Create a new leaf node
-  Node4(int type) : type_(type) 
-    { 
-      children_[0] = NULL;
-      children_[1] = NULL;
-      children_[2] = NULL;
-      children_[3] = NULL;
-    };
+  // return the num'th child
+  Node4 * child (int num);
 
-    /// return the num'th child
-    Node4 * child (int num) { return children_[num]; }
+  // Print the tree to stdout
+  void print(int level);
+  
+  // Refine if any elements in the array are true and recurse
+  // return the level
+  int refine 
+    (
+     const bool * array, 
+     int nd0,  int nd1,
+     int low0, int up0,  
+     int low1, int up1
+     );
 
-    /// Create 4 empty child nodes
-    void refine() {
-      children_[0] = new Node4(ordering_hilbert4[type_][0]);
-      children_[1] = new Node4(ordering_hilbert4[type_][1]);
-      children_[2] = new Node4(ordering_hilbert4[type_][2]);
-      children_[3] = new Node4(ordering_hilbert4[type_][3]);
-    }
+  // Fill the image region with values
+  void fill_image
+    (
+     float * image,
+     int nd0,  int nd1,
+     int low0, int up0,  
+     int low1, int up1,
+     int level,
+     int num_levels
+     );
 
  private:
 
