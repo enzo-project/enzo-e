@@ -7,17 +7,36 @@ const int ordering_hilbert4[4][4] =
     {2,3,1,2},
     {0,2,3,3}};
 
+
 class Tree4;
+
+enum face_type {
+  face_R = 0,
+  face_U = 1,
+  face_L = 2,
+  face_D = 3 };
+
+enum corner_type {
+  corner_UL = 0,
+  corner_DL = 1,
+  corner_UR = 2,
+  corner_DR = 3 };
 
 class Node4 {
 
  public:
 
   // Create a new leaf node
-  Node4(int type);
+  Node4();
 
   // return the num'th child
   Node4 * child (int num);
+
+  // return the num'th neighbor
+  Node4 * neighbor (int num);
+
+  // return the parent
+  Node4 * parent ();
 
   // Print the tree to stdout
   void print(int level);
@@ -32,6 +51,9 @@ class Node4 {
      int low1, int up1
      );
 
+  // Perform a pass of trying to remove level-jumps 
+  bool normalize_pass();
+
   // Fill the image region with values
   void fill_image
     (
@@ -43,16 +65,16 @@ class Node4 {
      int num_levels
      );
 
+  bool is_leaf() { return child_[0] == NULL; };
+
+
  private:
 
-  // types:
-  // 0 cup open up
-  // 1 cup open right
-  // 2 cup open down
-  // 3 cup open left
+  Node4 * child_[4];    // column-ordering
+  Node4 * neighbor_[4]; // Right up left down
+  Node4 * parent_;
 
-  int type_; // 0,1,2,3
-  Node4 * children_[4]; // column-ordering
+  void create_children_();
 
 };
 

@@ -20,6 +20,7 @@
 # (*) Array
 # (*) Disk
 # (*) Error
+# (*) Memory
 # ( ) Method
 # (*) Parameters
 # (*) Performance
@@ -27,7 +28,7 @@
 #
 #-----------------------------------------------------------------------
 
-DIR = Array Disk Parameters Performance Error Test
+DIR = Array Disk Error Memory Parameters Performance Error Test
 # Method
 
 #=======================================================================

@@ -13,6 +13,9 @@ class Tree4 {
   // Refine down to array
   void refine(const bool * array, int nd0, int nd1);
 
+  // Refine down to array
+  void normalize();
+
   // Print the tree
   void print(); 
 

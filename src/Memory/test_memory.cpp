@@ -31,7 +31,7 @@
 
 #include <string>
 
-#include "cello.def"
+#include "cello.h"
 #include "performance_timer.hpp"
 #include "error.hpp"
 #include "memory.hpp"

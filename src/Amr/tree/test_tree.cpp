@@ -12,8 +12,10 @@
 #include "node4.h"
 
 const bool debug = false;
+const int cell_size = 2;
 
 #include "sdsc.h"
+//
 //#include "test.h"  // peak
 
 // read in the gimp-generated image data into a bitmap array
@@ -44,39 +46,26 @@ main()
   int n0,n1;
 
   // read in the gimp image into bitmap
+
   bool * bitmap = create_bitmap(&n0,&n1);
 
-  if (debug) {
-    for (int i0=0; i0<n0; i0++) {
-      for (int i1=0; i1<n1; i1++) {
-	int i=i0 + n0*i1;
-	printf ( bitmap[i] ? "*" : ".");
-      }
-      printf ("\n");
-    }
-  }
+  // Create a tree and refine to the image
 
   Tree4 tree;
+
   tree.refine(bitmap,n0,n1);
+
   printf ("levels = %d\n",tree.levels());
-  //  tree.print();
   printf ("sizeof (Tree4) = %d\n",int(sizeof(Tree4)));
 
   // Generate an array containing an "image" of the tree
 
   int nd0, nd1;
-  float * image = tree.create_image(&nd0, &nd1,n0,n1,3);
+  float * image = tree.create_image(&nd0, &nd1,n0,n1,cell_size);
   printf ("Image size: %d x %d\n",nd0,nd1);
 
-  if (debug) {
-    for (int i0=0; i0<nd0; i0++) {
-      for (int i1=0; i1<nd1; i1++) {
-	int i=i0 + nd0*i1;
-	printf ("%1d",int(image[i]));
-      }
-      printf ("\n");
-    }
-  }
+  // Write the image to disk
+
   Hdf5 hdf5;
   hdf5.file_open("tree.hdf5","w");
   ArraySerial tree_array (image,nd0,nd1,1);
@@ -84,6 +73,31 @@ main()
   hdf5.write(tree_array);
   hdf5.dataset_close ();
   hdf5.file_close();
+
+  delete image;
+
+  // Normalize the tree
+
+  tree.normalize();
+
+  // Generate an array containing an "image" of the tree
+
+  nd0, nd1;
+  image = tree.create_image(&nd0, &nd1,n0,n1,cell_size);
+
+  // Write the image to disk
+
+  hdf5.file_open("tree-normal.hdf5","w");
+  ArraySerial tree_array_normal (image,nd0,nd1,1);
+  hdf5.dataset_open ("tree_image",tree_array_normal);
+  hdf5.write(tree_array_normal);
+  hdf5.dataset_close ();
+  hdf5.file_close();
+
+  delete image;
+
+
+  
 	    
   
 }
