@@ -71,10 +71,14 @@ int Node4::refine
 
       int mid0 = (up0 + low0)/2;
       int mid1 = (up1 + low1)/2;
-      int l0 = child_[corner_UL]->refine (mask_array,nd0,nd1,low0,mid0,low1,mid1);
-      int l1 = child_[corner_DL]->refine (mask_array,nd0,nd1,mid0,up0,low1,mid1);
-      int l2 = child_[corner_UR]->refine (mask_array,nd0,nd1,low0,mid0,mid1,up1);
-      int l3 = child_[corner_DR]->refine (mask_array,nd0,nd1,mid0,up0,mid1,up1);
+      int l0 = child_[corner_UL]->refine 
+	(mask_array,nd0,nd1,low0,mid0,low1,mid1);
+      int l1 = child_[corner_DL]->refine 
+	(mask_array,nd0,nd1,mid0,up0,low1,mid1);
+      int l2 = child_[corner_UR]->refine 
+	(mask_array,nd0,nd1,low0,mid0,mid1,up1);
+      int l3 = child_[corner_DR]->refine 
+	(mask_array,nd0,nd1,mid0,up0,mid1,up1);
 
       level = (l0 > level) ? l0 : level;
       level = (l1 > level) ? l1 : level;
@@ -223,16 +227,7 @@ bool Node4::normalize_pass()
 
 }
 
-void Node4::print(int level)
-{
-  if (child_[0] != NULL) child_[0]->print (level+1);
-  if (child_[1] != NULL) child_[1]->print (level+1);
-  if (child_[2] != NULL) child_[2]->print (level+1);
-  if (child_[3] != NULL) child_[3]->print (level+1);
-  
-}
-
-  // Fill the image region with values
+// Fill the image region with values
 void Node4::fill_image
 (
  float * image,

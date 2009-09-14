@@ -1,4 +1,4 @@
-
+#define MAX_LEVELS 80
 
 class Node4;
 
@@ -13,11 +13,11 @@ class Tree4 {
   // Refine down to array
   void refine(const bool * array, int nd0, int nd1);
 
+  // print levels
+  void print_levels();
+
   // Refine down to array
   void normalize();
-
-  // Print the tree
-  void print(); 
 
   // Create an image of levels
   float * create_image (int * nd0, int * nd1, int n0, int n1, int cell_width);

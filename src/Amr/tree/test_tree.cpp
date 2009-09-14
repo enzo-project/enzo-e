@@ -14,9 +14,14 @@
 const bool debug = false;
 const int cell_size = 2;
 
+//#include "peace3.h"
 #include "sdsc.h"
 //
 //#include "test.h"  // peak
+//#include "dot_UR.h"  // point near center in upper right
+//#include "dot_UL.h"  // point near center in upper left
+//#include "dot_DL.h"  // point near center in lower left
+//#include "dot_DR.h"  // point near center in lower right
 
 // read in the gimp-generated image data into a bitmap array
 bool * create_bitmap(int * n0, int * n1)
@@ -34,7 +39,7 @@ bool * create_bitmap(int * n0, int * n1)
       HEADER_PIXEL(data,pixel);
       if (debug) printf ("%d %d  %d %d %d\n",ix,iy,pixel[0],pixel[1],pixel[2]);
       int i = iy + height*ix;
-      bitmap_array[i] = ((pixel[0] + pixel[1] + pixel[2]) != 0);
+      bitmap_array[i] = ((pixel[0] + pixel[1] + pixel[2]) > 127*3);
     }
   }
   return bitmap_array;

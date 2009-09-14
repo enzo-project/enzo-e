@@ -38,9 +38,6 @@ class Node4 {
   // return the parent
   Node4 * parent ();
 
-  // Print the tree to stdout
-  void print(int level);
-  
   // Refine if any elements in the array are true and recurse
   // return the level
   int refine 
