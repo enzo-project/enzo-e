@@ -87,17 +87,12 @@ void initialize_enzo ()
   float enzo_pressure_in  = 0.14;
   float enzo_velocity_x = 0.0;
   float enzo_velocity_y = 0.0;
-
   int pixel[3];
   char * data = header_data;
-  int min=1000;
-  int max=-1;
 
   for (int iy=0; iy<height; iy++) {
     for (int ix=0; ix<width; ix++) {
       HEADER_PIXEL(data,pixel);
-      if (pixel[0] < min) min = pixel[0];
-      if (pixel[0] > max) max = pixel[0];
       image [ix][iy] = 1.0*(pixel[0] + pixel[1] + pixel[2])/(255*3);
     }
   }
