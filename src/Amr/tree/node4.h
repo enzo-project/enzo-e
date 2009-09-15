@@ -45,7 +45,9 @@ class Node4 {
      const bool * array, 
      int nd0,  int nd1,
      int low0, int up0,  
-     int low1, int up1
+     int low1, int up1,
+     int level, 
+     int max_level
      );
 
   // Perform a pass of trying to remove level-jumps 

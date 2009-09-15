@@ -11,9 +11,10 @@ Tree4::Tree4()
 }
 
 // Refine down to array
-void Tree4::refine(const bool * mask_array, int nd0, int nd1)
+void Tree4::refine(const bool * mask_array, int nd0, int nd1, int max_level)
 {
-  levels_ = root_->refine(mask_array,nd0,nd1,0,nd0,0,nd1);
+  levels_ = root_->refine(mask_array,nd0,nd1,0,nd0,0,nd1,0,max_level);
+  printf ("%d\n",levels_);
 }
 
 // Remove level-jumps 
@@ -31,14 +32,11 @@ void Tree4::normalize()
 
 /// Create an hdf5 file of tree, assuming given source bitmap size
 /// 
-float * Tree4::create_image 
-(int * nd0, int * nd1, int n0, int n1,int cell_width)
+float * Tree4::create_image (int n)
 {
-  *nd0 = (n0+1) + cell_width*n0;
-  *nd1 = (n1+1) + cell_width*n1;
-  float * image = new float [*nd0*(*nd1)];
+  float * image = new float [n*n];
   
-  root_->fill_image(image,(*nd0),(*nd1),0,(*nd0)-1,0,(*nd1)-1,0,levels_);
+  root_->fill_image(image,n,n,0,n-1,0,n-1,0,levels_);
   return image;
 }
 

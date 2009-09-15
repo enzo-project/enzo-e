@@ -11,7 +11,7 @@ class Tree4 {
   Tree4();
 
   // Refine down to array
-  void refine(const bool * array, int nd0, int nd1);
+  void refine(const bool * array, int nd0, int nd1, int max_level);
 
   // print levels
   void print_levels();
@@ -20,7 +20,7 @@ class Tree4 {
   void normalize();
 
   // Create an image of levels
-  float * create_image (int * nd0, int * nd1, int n0, int n1, int cell_width);
+  float * create_image (int n);
 
   // Return the number of levels
   int levels() { return levels_; }
