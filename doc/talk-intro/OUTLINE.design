@@ -2,40 +2,5 @@
 Software Design
 ========================================================================
 
-Components
-
-   Component diagram
-
-      Modular
-      Layered
-
-   OUTLINE.design-hardware         
-          
-   OUTLINE.design-array     
- 
-   Amr: tree- or structured-AMR hierarchies
-      Represent
-
-      Tree-based
-          
-         
-      Structured
-  
-   Field: represent a physics scalar field
-      Built on Array or Amr
-      Includes a name, values, and properties
-         "density"
-         floor_value
-         ceiling_value
-      
-
-   Methods
-
-   Particles
-
-   Control: timestepping and parallel control
-    
-      CHARM++
-    
 
 
