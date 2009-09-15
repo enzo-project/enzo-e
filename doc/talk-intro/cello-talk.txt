@@ -1,0 +1,66 @@
+### HEADER #####################################################################
+@<<
+\documentclass{beamer}
+\newcommand{\Code}[1]{\textsf{#1}}
+\newcommand{\cello}{\textsf{Cello}}
+\newcommand{\enzo}{\textsf{Enzo}}
+\usetheme{Copenhagen}
+\usecolortheme{default}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\good}{\textcolor{green}{\smiley}}
+\newcommand{\bad}{\textcolor{red}{\frownie}}
+\newcommand{\colorcode}[1]{\textcolor{blue}{\code{#1}}}
+%======================================================================
+\title[The \cello\ Project]
+      {The \cello\ Project \\ \small{Enzo: The Next Generation}}
+\author[James Bordner]{\small Laboratory for Computational Astrophysics \\ San Diego Supercomputer Center \\ University of California, San Diego \\ \ \\ James Bordner}
+\date{\today}
+\begin{document}
+\frame{\titlepage}
+\frame{\tableofcontents}
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+>>
+
+@+quotes
+@+subtractmaxindent
+@+blocks
+################################################################################
+Overview
+  Outline
+    Overview
+      Overview
+      Related Work
+      User's Perspective
+      Designer's Perspective
+      Data Structures
+    Goals
+      \enzo: The Next Generation
+      Computational Science tool for next 10+ years
+      Many competing design goals:
+        Easy to use, modify, maintain
+        Scalable to O($10^{5+}$)  cores
+        Adaptable to rapidly evolving hardware and middleware
+        Quality control
+        \textit{Science capabilities}
+    Target Classes of Users      
+      \textbf{Students}
+        easy to define problem, run, and analyze
+        minimal software-related ``gotcha's''
+      \textbf{Physics experts}
+        deep control of physics parameters
+        flexible problem set up for wide range of problems
+      \textbf{Numerical experts}
+        deep control of method parameters
+        easy to incorporate new methods
+      \textbf{Computing experts}
+        deep control of data structures
+        AMR, parallelization, data distribution, blocking/padding
+    
+################################################################################
+@end
+@!\end{document}

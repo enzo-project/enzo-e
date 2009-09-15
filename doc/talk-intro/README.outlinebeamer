@@ -1,0 +1,114 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                  outlinebeamer - Outline Beamer Class Presentation Maker %
+%                                    http://outlinebeamer.sourceforge.net/ %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+== OVERVIEW ==
+This perl script creates a beamer class .tex file from the outline given.
+The script reads from STDIN and writes to STDOUT, use piping as required.
+
+Usage example:
+perl outlinebeamer.pl < outline.txt > slides.tex
+The script currently takes no command-line parameters.
+
+There is a windows batch file provided for easy starting. You can simply drag files onto outlinepdf.bat.
+Warning: This batch file will overwrite any pdf files that have the same name as the input file.
+Another warning: The batch file is highly untested. Your mileage may vary. Do not complain if it first eats all your files and then your dog.
+The batch file will create a directory called outlinepdf.tmp and store a lot of temporary files into it. It will not be deleted automatically as it contains the intermediate TeX source code that is needed for debugging purposes. The batch file will overwrite most or all of the files in that directory on every run.
+The batch will create a file with the name of the input file appended by "-slides.pdf", so from outline.txt it creates outline-slides.pdf. This file will be DELETED without asking if it exists before the batch continues to compile the new version.
+
+== INSTALL ==
+To install, simply unzip into any directory. Under windows, you may wish to create a link to outlinepdf.bat and put it on your desktop or into the directory where you work on your outline files.
+
+You need perl, LaTeX and the LaTeX beamer class. For linux, install from your package sources, for debian just run:
+ apt-get install perl latex latex-beamer
+For Windows, download and install:
+ Active Perl: http://www.activestate.com/ActivePerl/
+ MikTeX: http://miktex.org/Default.aspx
+ Beamer Class: use the MikTeX package manager, go to Start->Programs->Miktex->Browse Packages and install "beamer"
+
+The commands "perl" and "pdflatex" must be working in any directory, if the installers of the above programs did not set your PATH correctly, you might need to do it manually (I think this should not be necessary).
+
+Under windows, you should be able to create a beamer class presentation by dragging an outline text file onto the outlinepdf.bat batch file (try it with the example!) or starting this batch with the outline file name as the only parameter.
+
+For linux, no shell script is currently availible, feed the outline to the script from stdin and get the TeX code from stdout like this:
+ ./outlinebeamer.pl < outline > slides.tex
+and then compile with pdflatex:
+ pdflatex slides.tex
+note that you might need to do this twice so the indexes get built correctly! You can also use a single command to do all this:
+ ./outlinebeamer.pl < outline > slides.tex && pdflatex slides.tex && pdflatex slides.tex
+(add your favorite PDF viewer to the end of the chain chain if you want)
+
+== QUICKSTART ==
+1. Understand the basic principle of the language (read the start of the next section)
+2. Copy a template/example (have a look at the sicherheitsworkshop-example, it is a real talk and shows nearly all features)
+3. Edit title, author and any options (language?)
+4. Write outline (have a look at examples, do not forget to escape special characters!)
+5. Compile your work manually or using one of the provided wrappers
+
+Understanding the simple indentation system and working off a template/example will allow you to create simple beamer class presentations without LaTeX/Beamer Class knowledge.
+If you want more freedom, learn the basics of LaTeX, the beamer class and read this readme!
+
+== LANGUAGE ==
+The outline (input file) has to be written in the following, simple language:
+ A line is either a data line or starts with either an # sign or an @ symbol. The symbol has to be the very first character in the line.
+ NOTHING is allowed in front of these symbols, not even white space characters!
+ Data lines consist of indentations followed by text, their meaning depends on indentation level
+  0 indentations: Start of a new section (text is section name)
+  1 indentation : Start of a new subsection (text is subsection name)
+  2 indentations: Start of a new frame (text is frame title)
+  3 indentations: Start of a new item (text is item text)
+  4 indentations: Start of a new subitem (text is item text)
+  5 indentations: Start of a new subsubitem (text is item text)
+  6 or more indentations: Any line starting with more than 5 indentation marks will be passed trough unchanged.
+ These special symbols are defined:
+  Any line that starts with a # sign is a comment line and will be ignored
+  The @end line *MUST* be used at the end of the document to close any open frames/itemize levels!
+  Any line that starts with an @ symbol is a function line and has a special meaning
+   A line starting with @@ will not be parsed for symbols (the @@ will be removed and the line treated as a data line)
+   A line starting with @! will just be passed trough (the @! will be removed and the line will be put directly into the output without any changes)
+   A line starting with @+OPTIONNAME will enable the option with the given name
+   A line starting with @-OPTIONNAME will disable the option with the given name
+    The following options are availible:
+     quotes: will try to create german typographic quotes from normal quotes
+     passleft: will cause any non-indented line to be passed trough unchanged, all other lines need one more indent than usual to have the same meaning
+     subtractmaxindent: will cause lines starting with more than 5 indentation mark have 6 indents removed before passing them on. Useful if you want to use passtrough with verbatim environments.
+     blocks: allows a simple syntax for opening/closing blocks
+      if you start a line with [[ indented at the level meant for items (3 indentations), a new block will be started, using the text after the [[ (if any) as the block title
+      you may also start arbitrary environments by using [environmentname[ - if you do not provide any text after that, the environment will be started without parameter, so you can start a verbatim environment by writing [verbatim[
+      if you DO provide a text after the [environmentname[, it will be passed as a parameter
+       [environmentname[pamram would turn into \begin{environmentname}{param} (only one parameter is supported!)
+      to end a block or environment started with the above syntax, use ]] (the correct environment name will be inserted into the \end statement)
+   A line starting with @<< will activate passtrough mode, all following lines will be passed trough without changes.
+   A line starting with >> will end passtrough mode.
+   You may specify a word after the @<< tag to change the end tag to include the word
+    i.e. a passtrough block opened by "@<<foo" will be ended by "foo>>" only
+   
+
+You may include LaTeX commands in data lines. You are responsible for not messing up the LaTeX code, the tool will NOT do any checks.
+You need to escape any characters that LaTeX might not like by putting a backslash (\) in front of them. The problematic characters are:
+  \ { } $ ^ _ % ~ # &
+Remember: The lines are passed 1:1 into the output, they are just wrapped with the start/end commands for the sections, frames, items etc., except if some option is enabled that changes the lines (like the quotes option).
+
+The language is checked only for a few obvious errors. Errors will probably create a bad .tex file so your LaTeX-compiler will give you error messages.
+
+You cannot create items without starting a frame first (this will cause a tex compilation error), but you may create frames without starting sections/subsections or subitems without items
+
+
+As this language is based on indentation, you need a text editor that can handle it well. The default windows editor (notepad) is not really suitable.
+I suggest the open source software "Notepad++" on Windows, Linux users should not have any difficulty finding an useable editor.
+
+It's up to you to choose an indentation sequence. I use the double space, but you can use four spaces, a single tab character, or nearly anything you want. Just configure it at the beginning of the perl script, and configure your editor accordingly.
+
+If you would like to contribute, you can:
+  Create/maintain a package for your favorite linux distribution
+  Create syntax highlighting for your favorite editor
+  Write documentation
+  Send enhancements
+  Donate
+   Why donate?
+    I have a lot of work to do and a day only has 24 hours. I cannot even start many of my personal projects, so I have to take a decision what project I will work on. This project was invented and created as a quick hack for me, with no documentation and few features. As I thought this might be useful to others, I spent a lot of my time on this project, enhancing it, putting features in to make it more user friendly and writing documentation. The time I used for this could have instead gone into earning money, doing other projects for myself or just enjoying my free time. If you want to show that you appreciate this work, you can do so by donating.
+  
+This software should run on any system running perl. It is being developed and tested on Windows.
+
+Requirements are perl, latex, latex beamer class and pdflatex to create pdf files (or suitable substitutes).
