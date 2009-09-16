@@ -11,19 +11,28 @@ class Tree4 {
   Tree4();
 
   // Refine down to array
-  void refine(const bool * array, int nd0, int nd1, int max_level);
+  void refine
+    (const bool * array, 
+     int nd0, int nd1, 
+     int max_level, 
+     bool is_full = true
+     );
 
   // print levels
   void print_levels();
 
-  // Refine down to array
-  void normalize();
+  // Refine nodes to remove level jumps
+  void normalize(bool is_full = true);
+
+  // Replace uniformly-refined patch with single node
+  void optimize(bool is_full = true);
 
   // Create an image of levels
   float * create_image (int n);
 
   // Return the number of levels
   int levels() { return levels_; }
+
  private:
 
   int levels_;

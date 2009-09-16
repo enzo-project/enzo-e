@@ -12,9 +12,9 @@
 #include "node4.h"
 
 const bool debug = false;
-const int cell_size = 3;
+const int cell_size = 1;
 const int gray_threshold = 127;
-const int max_level = 8;
+const int max_level = 10;
 
 //#include "dot_UR.h"  // point near center in upper right
 //#include "dot_UL.h"  // point near center in upper left
@@ -25,7 +25,12 @@ const int max_level = 8;
 //#include "peace3.h"
 //#include "sdsc.h"
 //#include "sdsc-logo.h"
-#include "sdsc-logo-512.h"
+//#include "sdsc-logo-512.h"
+// #include "sdsc-logo-2048.h"
+
+//#include "norman.h"
+
+#include "image.h"
 
 // read in the gimp-generated image data into a bitmap array
 
@@ -69,8 +74,9 @@ main()
 
   Tree4 tree;
 
-  tree.refine(bitmap,n0,n1,max_level);
+  tree.refine(bitmap,n0,n1,max_level,false);
 
+  printf ("nodes  = %d\n",Node4::num_nodes());
   printf ("levels = %d\n",tree.levels());
   printf ("sizeof (Tree4) = %d\n",int(sizeof(Tree4)));
 
@@ -100,6 +106,8 @@ main()
 
   tree.normalize();
 
+  printf ("nodes  = %d\n",Node4::num_nodes());
+
   // Generate an array containing an "image" of the tree
 
   // Determine image size
@@ -122,8 +130,32 @@ main()
 
   delete image;
 
+  // Optimize the tree
 
-  
-	    
+  tree.optimize();
+
+  printf ("nodes  = %d\n",Node4::num_nodes());
+
+  // Generate an array containing an "image" of the tree
+
+  // Determine image size
+  n = cell_size + 2;
+  for (int i=0; i<tree.levels(); i++) {
+    n = 2*n - 1;
+  }
+
+  // Generate the image
+  image = tree.create_image(n);
+
+  // Write the image to disk
+
+  hdf5.file_open("tree-optimal.hdf5","w");
+  ArraySerial tree_array_optimal (image,n,n,1);
+  hdf5.dataset_open ("tree_image",tree_array_optimal);
+  hdf5.write(tree_array_optimal);
+  hdf5.dataset_close ();
+  hdf5.file_close();
+
+  delete image;
   
 }

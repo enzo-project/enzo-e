@@ -1,3 +1,6 @@
+#ifndef NODE4_H
+#define NODE4_H
+
 #include <stdlib.h>
 
 // Production rules for ordering_hilbert4[type] 
@@ -10,30 +13,49 @@ const int ordering_hilbert4[4][4] =
 
 class Tree4;
 
+// WARNING: NUMBERING MUST BE SUCH THAT DIR AND (DIR+2) % 4 MUST BE
+// OPPOSITE DIRECTIONS
+
 enum face_type {
-  face_R = 0,
-  face_U = 1,
-  face_L = 2,
-  face_D = 3 };
+  R = 0,
+  U = 1,
+  L = 2,
+  D = 3 };
 
 enum corner_type {
-  corner_UL = 0,
-  corner_DL = 1,
-  corner_UR = 2,
-  corner_DR = 3 };
+  UL = 0,
+  DL = 1,
+  UR = 2,
+  DR = 3 };
+
+face_type opposite(face_type face);
 
 class Node4 {
 
  public:
 
   // Create a new leaf node
-  Node4();
+  Node4( int level_adjust = 0 );
+
+  // Delete a node and all descedents
+  ~Node4();
 
   // return the num'th child
-  Node4 * child (int num);
+  Node4 * child (corner_type corner);
 
   // return the num'th neighbor
-  Node4 * neighbor (int num);
+  Node4 * neighbor (face_type face);
+
+  // return the child's neighber
+  Node4 * child_neighbor (corner_type corner, face_type face);
+  // set the child's neighbor
+  Node4 * set_child_neighbor (corner_type corner, face_type face, Node4 * node);
+
+  // get the child's cousin
+  Node4 * cousin (face_type face, corner_type corner);
+
+  // set the child's cousin
+  Node4 * set_cousin (face_type face, corner_type corner, Node4 * cousin);
 
   // return the parent
   Node4 * parent ();
@@ -47,11 +69,15 @@ class Node4 {
      int low0, int up0,  
      int low1, int up1,
      int level, 
-     int max_level
+     int max_level,
+     bool is_full = true
      );
 
   // Perform a pass of trying to remove level-jumps 
-  bool normalize_pass();
+  void normalize_pass(bool & refined_tree, bool is_full = true);
+
+  // Perform a pass of trying to optimize uniformly-refined nodes
+  void optimize_pass(bool & refined_tree, bool is_full = true);
 
   // Fill the image region with values
   void fill_image
@@ -66,14 +92,25 @@ class Node4 {
 
   bool is_leaf() { return child_[0] == NULL; };
 
+  static int num_nodes() { return num_nodes_; };
 
  private:
 
   Node4 * child_[4];    // column-ordering
   Node4 * neighbor_[4]; // Right up left down
   Node4 * parent_;
+  int level_adjust_;      // scale for optimizing uniformly refined nodes
+
 
   void create_children_();
+  void update_children_();
+  void delete_children_();
+  void update_child_ (corner_type corner);
+  void create_child_ (corner_type corner);
+
+  static int num_nodes_;
 
 };
 
+
+#endif
