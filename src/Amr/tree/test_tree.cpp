@@ -12,9 +12,10 @@
 #include "node4.h"
 
 const bool debug = false;
-const int cell_size = 1;
-const int gray_threshold = 127;
-const int max_level = 10;
+const int  cell_size = 1;
+const int  gray_threshold = 127;
+const bool full_nodes = false;
+const int  max_level = 10;
 
 //#include "dot_UR.h"  // point near center in upper right
 //#include "dot_UL.h"  // point near center in upper left
@@ -74,7 +75,7 @@ main()
 
   Tree4 tree;
 
-  tree.refine(bitmap,n0,n1,max_level);
+  tree.refine(bitmap,n0,n1,max_level,full_nodes);
 
   printf ("nodes  = %d\n",Node4::num_nodes());
   printf ("levels = %d\n",tree.levels());
@@ -104,7 +105,7 @@ main()
 
   // Normalize the tree
 
-  tree.normalize();
+  tree.normalize(full_nodes);
 
   printf ("nodes  = %d\n",Node4::num_nodes());
 
@@ -132,7 +133,7 @@ main()
 
   // Optimize the tree
 
-  tree.optimize();
+  tree.optimize(full_nodes);
 
   printf ("nodes  = %d\n",Node4::num_nodes());
 

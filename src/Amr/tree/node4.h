@@ -46,16 +46,12 @@ class Node4 {
   // return the num'th neighbor
   Node4 * neighbor (face_type face);
 
-  // return the child's neighber
-  Node4 * child_neighbor (corner_type corner, face_type face);
-  // set the child's neighbor
-  Node4 * set_child_neighbor (corner_type corner, face_type face, Node4 * node);
+  // make the two nodes neighbors.  friend function since either can be NULL
+  friend void make_neighbors (Node4 * node_1, face_type face_1, 
+			      Node4 * node_2, face_type face_2 );
 
   // get the child's cousin
   Node4 * cousin (face_type face, corner_type corner);
-
-  // set the child's cousin
-  Node4 * set_cousin_neighbor (face_type face, corner_type corner, Node4 * cousin);
 
   // return the parent
   Node4 * parent ();
@@ -117,10 +113,38 @@ class Node4 {
   void create_children_();
   void update_children_();
   void delete_children_();
+
   void update_child_ (corner_type corner);
   void create_child_ (corner_type corner);
 
   static int num_nodes_;
+
+Node4 * child_neighbor (corner_type corner, face_type neighbor) 
+{ 
+  if (child_[corner]) {
+    return child_[corner]->neighbor_[neighbor];
+  } else {
+    return NULL;
+  }
+ };
+Node4 * set_cousin_neighbor (face_type face, corner_type corner, Node4 * node)
+{
+  if (neighbor_[face] && neighbor_[face]->child_[corner]) {
+    neighbor_[face]->child_[corner]->neighbor_[(face + 2) % 4] = node;
+  }
+ };
+
+Node4 * set_child_neighbor 
+(
+ corner_type corner, 
+ face_type face, 
+ Node4 * node
+ )
+{
+  if (child_[corner]) {
+    child_[corner]->neighbor_[face] = node;
+  }
+ };
 
 };
 

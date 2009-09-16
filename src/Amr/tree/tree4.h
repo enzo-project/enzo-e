@@ -15,17 +15,17 @@ class Tree4 {
     (const bool * array, 
      int nd0, int nd1, 
      int max_level, 
-     bool is_full = true
+     bool full_nodes = true
      );
 
   // print levels
   void print_levels();
 
   // Refine nodes to remove level jumps
-  void normalize(bool is_full = true);
+  void normalize(bool full_nodes = true);
 
   // Replace uniformly-refined patch with single node
-  void optimize(bool is_full = true);
+  void optimize(bool full_nodes = true);
 
   // Create an image of levels
   float * create_image (int n);

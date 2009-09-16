@@ -60,38 +60,17 @@ Node4::~Node4()
   parent_ = NULL;
 }
 
-Node4 * Node4::child (corner_type corner) 
+inline Node4 * Node4::child (corner_type corner) 
 { 
   return child_[corner]; 
 }
 
-Node4 * Node4::neighbor (face_type face) 
+inline Node4 * Node4::neighbor (face_type face) 
 { 
   return neighbor_[face]; 
 }
 
-Node4 * Node4::child_neighbor (corner_type corner, face_type neighbor) 
-{ 
-  if (child_[corner]) {
-    return child_[corner]->neighbor_[neighbor];
-  } else {
-    return NULL;
-  }
-}
-
-Node4 * Node4::set_child_neighbor 
-(
- corner_type corner, 
- face_type face, 
- Node4 * node
- )
-{
-  if (child_[corner]) {
-    child_[corner]->neighbor_[face] = node;
-  }
-}
-
-Node4 * Node4::cousin (face_type face, corner_type corner) 
+inline Node4 * Node4::cousin (face_type face, corner_type corner) 
 { 
   if (neighbor_[face] && neighbor_[face]->child_[corner]) {
     return neighbor_[face]->child_[corner];
@@ -100,17 +79,22 @@ Node4 * Node4::cousin (face_type face, corner_type corner)
   }
 }
 
-Node4 * Node4::set_cousin_neighbor (face_type face, corner_type corner, Node4 * node)
-{
-  if (neighbor_[face] && neighbor_[face]->child_[corner]) {
-    neighbor_[face]->child_[corner]->neighbor_[(face + 2) % 4] = node;
-  }
-}
-
-Node4 * Node4::parent () 
+inline Node4 * Node4::parent () 
 { 
   return parent_; 
 }
+
+// Set two nodes to be neighbors.  Friend function since nodes may be NULL
+inline void make_neighbors 
+(
+ Node4 * node_1, face_type face_1,
+ Node4 * node_2, face_type face_2
+ )
+{
+  if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
+  if (node_2 != NULL) node_2->neighbor_[face_2] = node_1;
+}
+
 
 // Create 4 empty child nodes
 
@@ -122,8 +106,8 @@ int Node4::refine
  int low1, int up1,
  int level, 
  int max_level,
- bool is_full
-)
+ bool full_nodes
+ )
 {
   int depth = 0;
 
@@ -131,41 +115,108 @@ int Node4::refine
 
     // determine whether to refine the node
 
-    bool refine_node = false;
 
-    for (int i1=low1; i1<up1 && !refine_node; i1++) {
-      for (int i0=low0; i0<up0 && !refine_node; i0++) {
-	if (mask_array[i0 + nd0 * i1]) refine_node = true;
+    int mid0 = (up0 + low0)/2;
+    int mid1 = (up1 + low1)/2;
+
+    int depth_child[4] = {0};
+
+    if (full_nodes) {
+
+      // Refine if any bits in the mask_array are in this node
+
+      bool refine_node = false;
+      for (int i1=low1; i1<up1 && !refine_node; i1++) {
+	for (int i0=low0; i0<up0 && !refine_node; i0++) {
+	  if (mask_array[i0 + nd0 * i1]) refine_node = true;
+	}
       }
+
+      // refine the node if needed
+
+      if (refine_node) {
+
+	create_children_();
+
+	update_children_();
+
+	depth_child[UL] = child_[UL]->refine 
+	  (mask_array,nd0,nd1,low0,mid0,low1,mid1,level+1,max_level,full_nodes);
+	depth_child[DL] = child_[DL]->refine 
+	  (mask_array,nd0,nd1,mid0,up0,low1,mid1,level+1,max_level,full_nodes);
+	depth_child[UR] = child_[UR]->refine 
+	  (mask_array,nd0,nd1,low0,mid0,mid1,up1,level+1,max_level,full_nodes);
+	depth_child[DR] = child_[DR]->refine 
+	  (mask_array,nd0,nd1,mid0,up0,mid1,up1,level+1,max_level,full_nodes);
+
+      }
+
+    } else {
+
+      // Refine each child separately if any bits in the mask_array
+      // are in in them
+
+      bool refine_child[4] = {false};
+
+      for (int i1=low1; i1<mid1 && !refine_child[UL]; i1++) {
+	for (int i0=low0; i0<mid0 && !refine_child[UL]; i0++) {
+	  if (mask_array[i0 + nd0 * i1]) refine_child[UL] = true;
+	}
+      }
+      for (int i1=low1; i1<mid1 && !refine_child[DL]; i1++) {
+	for (int i0=mid0; i0<up0 && !refine_child[DL]; i0++) {
+	  if (mask_array[i0 + nd0 * i1]) refine_child[DL] = true;
+	}
+      }
+      for (int i1=mid1; i1<up1 && !refine_child[UR]; i1++) {
+	for (int i0=low0; i0<mid0 && !refine_child[UR]; i0++) {
+	  if (mask_array[i0 + nd0 * i1]) refine_child[UR] = true;
+	}
+      }
+      for (int i1=mid1; i1<up1 && !refine_child[DR]; i1++) {
+	for (int i0=mid0; i0<up0 && !refine_child[DR]; i0++) {
+	  if (mask_array[i0 + nd0 * i1]) refine_child[DR] = true;
+	}
+      }
+
+      // refine each child if needed
+
+      if (refine_child[UL]) {
+	create_child_(UL);
+	update_child_(UL);
+	depth_child[UL] = child_[UL]->refine 
+	  (mask_array,nd0,nd1,low0,mid0,low1,mid1,level+1,max_level,full_nodes);
+      }
+
+      if (refine_child[DL]) {
+	create_child_(DL);
+	update_child_(DL);
+	depth_child[DL] = child_[DL]->refine 
+	  (mask_array,nd0,nd1,mid0,up0,low1,mid1,level+1,max_level,full_nodes);
+      }
+
+      if (refine_child[UR]) {
+	create_child_(UR);
+	update_child_(UR);
+	depth_child[UR] = child_[UR]->refine 
+	  (mask_array,nd0,nd1,low0,mid0,mid1,up1,level+1,max_level,full_nodes);
+      }
+
+      if (refine_child[DR]) {
+	create_child_(DR);
+	update_child_(DR);
+	depth_child[DR] = child_[DR]->refine 
+	  (mask_array,nd0,nd1,mid0,up0,mid1,up1,level+1,max_level,full_nodes);
+      }
+
     }
 
-    // refine the node if needed
+    depth = (depth_child[UL] > depth) ? depth_child[UL] : depth;
+    depth = (depth_child[DL] > depth) ? depth_child[DL] : depth;
+    depth = (depth_child[UR] > depth) ? depth_child[UR] : depth;
+    depth = (depth_child[DR] > depth) ? depth_child[DR] : depth;
 
-    if (refine_node) {
-
-      create_children_();
-
-      update_children_();
-
-      int mid0 = (up0 + low0)/2;
-      int mid1 = (up1 + low1)/2;
-      int l0 = child_[UL]->refine 
-	(mask_array,nd0,nd1,low0,mid0,low1,mid1,level+1,max_level,is_full);
-      int l1 = child_[DL]->refine 
-	(mask_array,nd0,nd1,mid0,up0,low1,mid1,level+1,max_level,is_full);
-      int l2 = child_[UR]->refine 
-	(mask_array,nd0,nd1,low0,mid0,mid1,up1,level+1,max_level,is_full);
-      int l3 = child_[DR]->refine 
-	(mask_array,nd0,nd1,mid0,up0,mid1,up1,level+1,max_level,is_full);
-
-      depth = (l0 > depth) ? l0 : depth;
-      depth = (l1 > depth) ? l1 : depth;
-      depth = (l2 > depth) ? l2 : depth;
-      depth = (l3 > depth) ? l3 : depth;
-
-      ++depth;
-
-    }
+    ++depth;
 
   } // if not at bottom of recursion
 
@@ -201,53 +252,38 @@ void Node4::update_child_ (corner_type corner)
 
     if (corner == UL) {
 
-      set_child_neighbor(UL,R,child(UR));
-      set_child_neighbor(UL,D,child(DL));
-
-      set_child_neighbor(UL,L,cousin(L,UR));
-      set_child_neighbor(UL,U,cousin(U,DL));
-
-      set_cousin_neighbor(L,UR,child(UL));
-      set_cousin_neighbor(U,DL,child(UL));
+      make_neighbors (child (UL),R,child (UR),  L);
+      make_neighbors (child (UL),D,child (DL),  U);
+      make_neighbors (child (UL),L,cousin(L,UR),R);
+      make_neighbors (child (UL),U,cousin(U,DL),D);
 
     } else if (corner == DL) {
 
-      set_child_neighbor(DL,U,child(UL));
-      set_child_neighbor(DL,R,child(DR));
-
-      set_child_neighbor(DL,D,cousin(D,UL));
-      set_child_neighbor(DL,L,cousin(L,DR));
-
-      set_cousin_neighbor(D,UL,child(DL));
-      set_cousin_neighbor(L,DR,child(DL));
+      make_neighbors (child (DL),U,child (UL),  D);
+      make_neighbors (child (DL),R,child (DR),  L);
+      make_neighbors (child (DL),D,cousin(D,UL),U);
+      make_neighbors (child (DL),L,cousin(L,DR),R);
 
     } else if (corner == UR) {
 
-      set_child_neighbor(UR,D,child(DR));
-      set_child_neighbor(UR,L,child(UL));
-
-      set_child_neighbor(UR,U,cousin(U,DR));
-      set_child_neighbor(UR,R,cousin(R,UL));
-
-      set_cousin_neighbor(U,DR,child(UR));
-      set_cousin_neighbor(R,UL,child(UR));
+      make_neighbors (child (UR),D,child (DR),  U);
+      make_neighbors (child (UR),L,child (UL),  R);
+      make_neighbors (child (UR),U,cousin(U,DR),D);
+      make_neighbors (child (UR),R,cousin(R,UL),L);
 
     } else if (corner == DR) {
 
-      set_child_neighbor(DR,U,child(UR));
-      set_child_neighbor(DR,L,child(DL));
+      make_neighbors (child (DR),U,child (UR),  D);
+      make_neighbors (child (DR),L,child (DL),  R);
+      make_neighbors (child (DR),D,cousin(D,UR),U);
+      make_neighbors (child (DR),R,cousin(R,DL),L);
 
-      set_child_neighbor(DR,D,cousin(D,UR));
-      set_child_neighbor(DR,R,cousin(R,DL));
-
-      set_cousin_neighbor(D,UR,child(DR));
-      set_cousin_neighbor(R,DL,child(DR));
     }
   }
 }
 
 // Perform a pass of trying to remove level-jumps 
-void Node4::normalize_pass(bool & refined_tree, bool is_full)
+void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
 {
 
   bool refine_UL = false;
@@ -257,92 +293,115 @@ void Node4::normalize_pass(bool & refined_tree, bool is_full)
 
   if (is_leaf()) {
 
-    int any = 0;
-
     refine_DR = refine_DR ||
       (neighbor_[R] && 
        neighbor_[R]->child_[UL] && 
-       neighbor_[R]->child_[UL]->child_[any]);
+       (neighbor_[R]->child_[UL]->child_[UL] ||
+	neighbor_[R]->child_[UL]->child_[DL]));
     refine_DR = refine_DR ||
       (neighbor_[D] && 
        neighbor_[D]->child_[UL] && 
-       neighbor_[D]->child_[UL]->child_[any]);
+       (neighbor_[D]->child_[UL]->child_[UL] ||
+	neighbor_[D]->child_[UL]->child_[UR]));
 
     refine_UR = refine_UR ||
       (neighbor_[R] && 
        neighbor_[R]->child_[DL] && 
-       neighbor_[R]->child_[DL]->child_[any]);
+       (neighbor_[R]->child_[DL]->child_[UL] ||
+	neighbor_[R]->child_[DL]->child_[DL]));
     refine_UR = refine_UR ||
       (neighbor_[U] && 
        neighbor_[U]->child_[DL] && 
-       neighbor_[U]->child_[DL]->child_[any]);
+       (neighbor_[U]->child_[DL]->child_[DL] ||
+	neighbor_[U]->child_[DL]->child_[DR]));
 
     refine_DL = refine_DL ||
       (neighbor_[L] && 
        neighbor_[L]->child_[UR] && 
-       neighbor_[L]->child_[UR]->child_[any]);
+       (neighbor_[L]->child_[UR]->child_[UR] ||
+	neighbor_[L]->child_[UR]->child_[DR]));
     refine_DL = refine_DL || 
       (neighbor_[D] && 
        neighbor_[D]->child_[UR] && 
-       neighbor_[D]->child_[UR]->child_[any]);
-
+       (neighbor_[D]->child_[UR]->child_[UL] ||
+	neighbor_[D]->child_[UR]->child_[UR]));
+       
     refine_UL = refine_UL ||
       (neighbor_[U] && 
        neighbor_[U]->child_[DR] && 
-       neighbor_[U]->child_[DR]->child_[any]);
+       (neighbor_[U]->child_[DR]->child_[DL] ||
+	neighbor_[U]->child_[DR]->child_[DR]));
     refine_UL = refine_UL || 
       (neighbor_[L] && 
        neighbor_[L]->child_[DR] && 
-       neighbor_[L]->child_[DR]->child_[any]);
-
+       (neighbor_[L]->child_[DR]->child_[UR] ||
+	neighbor_[L]->child_[DR]->child_[DR]));
+       
 
     if (refine_UL || refine_DL || refine_UR || refine_DR) {
 
       refined_tree = true;
 
-      if (is_full) {
+      if (full_nodes) {
+
+	// refine the node completely
 
 	create_children_();
 
 	update_children_();
 
-	child_[UL]->normalize_pass(refined_tree,is_full);
-	child_[DL]->normalize_pass(refined_tree,is_full);
-	child_[UR]->normalize_pass(refined_tree,is_full);
-	child_[DR]->normalize_pass(refined_tree,is_full);
+	child_[UL]->normalize_pass(refined_tree,full_nodes);
+	child_[DL]->normalize_pass(refined_tree,full_nodes);
+	child_[UR]->normalize_pass(refined_tree,full_nodes);
+	child_[DR]->normalize_pass(refined_tree,full_nodes);
 
       } else {
 
-	if (refine_UL) create_child_(UL); 
-	if (refine_DL) create_child_(DL); 
-	if (refine_UR) create_child_(UR); 
-	if (refine_DR) create_child_(DR); 
+	// refine only specified children
 
-	if (refine_UL) update_child_(UL);
-	if (refine_DL) update_child_(DL);
-	if (refine_UR) update_child_(UR);
-	if (refine_DR) update_child_(DR);
-
-	if (refine_UL) child(UL)->normalize_pass(refined_tree,is_full);
-	if (refine_DL) child(DL)->normalize_pass(refined_tree,is_full);
-	if (refine_UR) child(UR)->normalize_pass(refined_tree,is_full);
-	if (refine_UR) child(DR)->normalize_pass(refined_tree,is_full);
+	if (refine_UL) {
+	  create_child_(UL); 
+	  update_child_(UL);
+	  child(UL)->normalize_pass(refined_tree,full_nodes);
+	}
+	if (refine_DL) {
+	  create_child_(DL); 
+	  update_child_(DL);
+	  child(DL)->normalize_pass(refined_tree,full_nodes);
+	}
+	if (refine_UR) {
+	  create_child_(UR); 
+	  update_child_(UR);
+	  child(UR)->normalize_pass(refined_tree,full_nodes);
+	}
+	if (refine_DR) {
+	  create_child_(DR); 
+	  update_child_(DR);
+	  child(DR)->normalize_pass(refined_tree,full_nodes);
+	}
       }
     }
 
   } else {
-
-    child_[UL]->normalize_pass(refined_tree,is_full);
-    child_[DL]->normalize_pass(refined_tree,is_full);
-    child_[UR]->normalize_pass(refined_tree,is_full);
-    child_[DR]->normalize_pass(refined_tree,is_full);
+    
+    if (full_nodes) {
+      child_[UL]->normalize_pass(refined_tree,full_nodes);
+      child_[DL]->normalize_pass(refined_tree,full_nodes);
+      child_[UR]->normalize_pass(refined_tree,full_nodes);
+      child_[DR]->normalize_pass(refined_tree,full_nodes);
+    } else {
+      if (child(UL)) child(UL)->normalize_pass(refined_tree,full_nodes);
+      if (child(DL)) child(DL)->normalize_pass(refined_tree,full_nodes);
+      if (child(UR)) child(UR)->normalize_pass(refined_tree,full_nodes);
+      if (child(DR)) child(DR)->normalize_pass(refined_tree,full_nodes);
+    }
 
   }
 
 }
 
 // Perform a pass of trying to optimize uniformly-refined nodes
-void Node4::optimize_pass(bool & refined_tree, bool is_full)
+void Node4::optimize_pass(bool & refined_tree, bool full_nodes)
 {
   int any = 0;
   if (child_[0] && ! child_[0]->child_[any] &&
@@ -365,10 +424,10 @@ void Node4::optimize_pass(bool & refined_tree, bool is_full)
     refined_tree = true;
 
   } else {
-    if (child_[0]) child_[0]->optimize_pass(refined_tree,is_full);
-    if (child_[1]) child_[1]->optimize_pass(refined_tree,is_full);
-    if (child_[2]) child_[2]->optimize_pass(refined_tree,is_full);
-    if (child_[3]) child_[3]->optimize_pass(refined_tree,is_full);
+    if (child_[0]) child_[0]->optimize_pass(refined_tree,full_nodes);
+    if (child_[1]) child_[1]->optimize_pass(refined_tree,full_nodes);
+    if (child_[2]) child_[2]->optimize_pass(refined_tree,full_nodes);
+    if (child_[3]) child_[3]->optimize_pass(refined_tree,full_nodes);
   }
 
 }
