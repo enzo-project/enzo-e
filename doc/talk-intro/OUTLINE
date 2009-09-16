@@ -284,12 +284,16 @@ Software Design:  Array: Generalization of Fortran arrays
 ------------------------------------------------------------------------ 
 Software Design:  Amr
 
-   Represent either tree- or structured-AMR hierarchies
+   Represent either tree- or patch-AMR hierarchies
 
    Why both?
      Each has advantages / disadvantages
      tree-based first
-        
+
+   Amr class complements Array class
+   Unigrid problems degenterate to Amr hierarchies with single node
+   Corresponding Enzo hierarchies are P nodes
+
    Helper classes: Array + Box + Grid + Patch
       Array: grid of numbers
       Box:   rectangle in space
@@ -298,10 +302,40 @@ Software Design:  Amr
       Tree:  The underlying interconnection structure
       Node:  Node in the Tree
 
+   Basic quad- / oct-tree with small square patches
+      Flash
+      Example
+      Note need to "normalize" to prevent level jumps
+         Can propigate up tree
+   Quad/Octtree limitations
+      Over-refine small areas
+      Slow transition between coarse and fine
+      1. Collapse uniformly refined patches
+         Transfer of resolution from Amr to Array
+      2. Don't fully refine patch
+         Only create nodes for refined area of patches
+      3. High-degree (K^D)-tree
+         (not k-d trees)
+         More efficient for deep problems
+         Sparse storage of nodes
+            If have a lot of nodes, dynamically switch to lower-degree tree
+         Level jumps filled in implicitly
+            no extra Amr storage required
+    Preliminary results
+       Tests: SDSC, Norman, 2D cosmology slices
+       basic quadtree
+       normalized quadtree
+       variable patch resolution quadtree
+       incomplete refinement quadtree
+       4^2 tree, 8^2 tree
+       patch-based
+       
+       
+
       Tree-based
 
          Degenerates to a single Array
-         K^D-tree
+         
            2^D for refinement by 2
               relatively inefficient refinement
               good for high fractal dimensional structures(?)
