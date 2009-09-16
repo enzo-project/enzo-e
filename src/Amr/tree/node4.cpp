@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "cello.h"
 #include "node4.h"
+#include <assert.h>
 
 const bool debug = false;
 
@@ -93,16 +94,16 @@ Node4 * Node4::set_child_neighbor
 Node4 * Node4::cousin (face_type face, corner_type corner) 
 { 
   if (neighbor_[face] && neighbor_[face]->child_[corner]) {
-    return neighbor_[face]->child_[corner]->neighbor_[(face + 2) % 4];
+    return neighbor_[face]->child_[corner];
   } else {
     return NULL;
   }
 }
 
-Node4 * Node4::set_cousin (face_type face, corner_type corner, Node4 * node)
+Node4 * Node4::set_cousin_neighbor (face_type face, corner_type corner, Node4 * node)
 {
   if (neighbor_[face] && neighbor_[face]->child_[corner]) {
-    neighbor_[face]->child_[corner]->neighbor_[(face + 2) % 4];
+    neighbor_[face]->child_[corner]->neighbor_[(face + 2) % 4] = node;
   }
 }
 
@@ -202,47 +203,52 @@ void Node4::update_child_ (corner_type corner)
 
       set_child_neighbor(UL,R,child(UR));
       set_child_neighbor(UL,D,child(DL));
+
       set_child_neighbor(UL,L,cousin(L,UR));
       set_child_neighbor(UL,U,cousin(U,DL));
-      set_cousin(L,UR,child(UL));
-      set_cousin(U,DL,child(UL));
+
+      set_cousin_neighbor(L,UR,child(UL));
+      set_cousin_neighbor(U,DL,child(UL));
 
     } else if (corner == DL) {
 
       set_child_neighbor(DL,U,child(UL));
       set_child_neighbor(DL,R,child(DR));
+
       set_child_neighbor(DL,D,cousin(D,UL));
       set_child_neighbor(DL,L,cousin(L,DR));
-      set_cousin(D,UL,child(DL));
-      set_cousin(L,DR,child(DL));
+
+      set_cousin_neighbor(D,UL,child(DL));
+      set_cousin_neighbor(L,DR,child(DL));
 
     } else if (corner == UR) {
 
       set_child_neighbor(UR,D,child(DR));
       set_child_neighbor(UR,L,child(UL));
+
       set_child_neighbor(UR,U,cousin(U,DR));
       set_child_neighbor(UR,R,cousin(R,UL));
-      set_cousin(U,DR,child(UR));
-      set_cousin(R,UL,child(UR));
+
+      set_cousin_neighbor(U,DR,child(UR));
+      set_cousin_neighbor(R,UL,child(UR));
 
     } else if (corner == DR) {
 
       set_child_neighbor(DR,U,child(UR));
       set_child_neighbor(DR,L,child(DL));
+
       set_child_neighbor(DR,D,cousin(D,UR));
       set_child_neighbor(DR,R,cousin(R,DL));
-      set_cousin(D,UR,child(DR));
-      set_cousin(R,DL,child(DR));
+
+      set_cousin_neighbor(D,UR,child(DR));
+      set_cousin_neighbor(R,DL,child(DR));
     }
   }
 }
 
-
-
 // Perform a pass of trying to remove level-jumps 
 void Node4::normalize_pass(bool & refined_tree, bool is_full)
 {
-  if (debug) printf ("ENTER normalize_pass %p\n",this);
 
   bool refine_UL = false;
   bool refine_DL = false;
@@ -252,12 +258,6 @@ void Node4::normalize_pass(bool & refined_tree, bool is_full)
   if (is_leaf()) {
 
     int any = 0;
-
-    if (debug) printf ("neighbors RULD %d %d %d %d\n",
-	    neighbor_[R] != NULL,
-	    neighbor_[U] != NULL,
-	    neighbor_[L] != NULL,
-	    neighbor_[D]);
 
     refine_DR = refine_DR ||
       (neighbor_[R] && 
@@ -295,9 +295,8 @@ void Node4::normalize_pass(bool & refined_tree, bool is_full)
        neighbor_[L]->child_[DR] && 
        neighbor_[L]->child_[DR]->child_[any]);
 
-    if (refine_UL || refine_DL || refine_UR || refine_DR) {
 
-      if (debug) printf ("normalizing %p\n",this);
+    if (refine_UL || refine_DL || refine_UR || refine_DR) {
 
       refined_tree = true;
 
@@ -333,18 +332,13 @@ void Node4::normalize_pass(bool & refined_tree, bool is_full)
 
   } else {
 
-    if (debug) printf ("CALL 2 normalize_pass UL\n",this);
     child_[UL]->normalize_pass(refined_tree,is_full);
-    if (debug) printf ("CALL 2 normalize_pass DL\n",this);
     child_[DL]->normalize_pass(refined_tree,is_full);
-    if (debug) printf ("CALL 2 normalize_pass UR\n",this);
     child_[UR]->normalize_pass(refined_tree,is_full);
-    if (debug) printf ("CALL 2 normalize_pass DR\n",this);
     child_[DR]->normalize_pass(refined_tree,is_full);
 
   }
 
-  if (debug) printf ("EXIT  normalize_pass %p\n",this);
 }
 
 // Perform a pass of trying to optimize uniformly-refined nodes

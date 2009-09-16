@@ -55,7 +55,7 @@ class Node4 {
   Node4 * cousin (face_type face, corner_type corner);
 
   // set the child's cousin
-  Node4 * set_cousin (face_type face, corner_type corner, Node4 * cousin);
+  Node4 * set_cousin_neighbor (face_type face, corner_type corner, Node4 * cousin);
 
   // return the parent
   Node4 * parent ();
@@ -93,6 +93,18 @@ class Node4 {
   bool is_leaf() { return child_[0] == NULL; };
 
   static int num_nodes() { return num_nodes_; };
+
+  void print_neighbors() {
+    printf ("NEIGHBORS %d %d %d %d\n",
+	    neighbor_[R] != NULL,
+	    neighbor_[U] != NULL,
+	    neighbor_[L] != NULL,
+	    neighbor_[D] != NULL);
+    if (child_[UL]) child_[UL]->print_neighbors();
+    if (child_[DL]) child_[DL]->print_neighbors();
+    if (child_[UR]) child_[UR]->print_neighbors();
+    if (child_[DR]) child_[DR]->print_neighbors();
+  };
 
  private:
 

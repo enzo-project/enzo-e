@@ -74,7 +74,7 @@ main()
 
   Tree4 tree;
 
-  tree.refine(bitmap,n0,n1,max_level,false);
+  tree.refine(bitmap,n0,n1,max_level);
 
   printf ("nodes  = %d\n",Node4::num_nodes());
   printf ("levels = %d\n",tree.levels());
