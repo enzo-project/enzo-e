@@ -51,10 +51,12 @@ Node4::~Node4()
 
   // Update parent's child
 
-  if (parent_->child_[UL] == this) parent_->child_[UL] = NULL;
-  if (parent_->child_[DL] == this) parent_->child_[DL] = NULL;
-  if (parent_->child_[UR] == this) parent_->child_[UR] = NULL;
-  if (parent_->child_[DR] == this) parent_->child_[DR] = NULL;
+  if (parent_) {
+    if (parent_->child_[UL] == this) parent_->child_[UL] = NULL;
+    if (parent_->child_[DL] == this) parent_->child_[DL] = NULL;
+    if (parent_->child_[UR] == this) parent_->child_[UR] = NULL;
+    if (parent_->child_[DR] == this) parent_->child_[DR] = NULL;
+  }
 
   parent_ = NULL;
 }
@@ -99,7 +101,7 @@ inline void make_neighbors
 
 int Node4::refine 
 (
- const bool * mask_array, 
+ const int * level_array, 
  int nd0,  int nd1,
  int low0, int up0,  
  int low1, int up1,
@@ -122,12 +124,12 @@ int Node4::refine
 
     if (full_nodes) {
 
-      // Refine if any bits in the mask_array are in this node
+      // Refine if any bits in the level_array are in this node
 
       bool refine_node = false;
       for (int i1=low1; i1<up1 && !refine_node; i1++) {
 	for (int i0=low0; i0<up0 && !refine_node; i0++) {
-	  if (mask_array[i0 + nd0 * i1]) refine_node = true;
+	  if (level_array[i0 + nd0 * i1] >= level) refine_node = true;
 	}
       }
 
@@ -140,41 +142,41 @@ int Node4::refine
 	update_children_();
 
 	depth_child[UL] = child_[UL]->refine 
-	  (mask_array,nd0,nd1,low0,mid0,low1,mid1,level+1,max_level,full_nodes);
+	  (level_array,nd0,nd1,low0,mid0,low1,mid1,level+1,max_level,full_nodes);
 	depth_child[DL] = child_[DL]->refine 
-	  (mask_array,nd0,nd1,mid0,up0,low1,mid1,level+1,max_level,full_nodes);
+	  (level_array,nd0,nd1,mid0,up0,low1,mid1,level+1,max_level,full_nodes);
 	depth_child[UR] = child_[UR]->refine 
-	  (mask_array,nd0,nd1,low0,mid0,mid1,up1,level+1,max_level,full_nodes);
+	  (level_array,nd0,nd1,low0,mid0,mid1,up1,level+1,max_level,full_nodes);
 	depth_child[DR] = child_[DR]->refine 
-	  (mask_array,nd0,nd1,mid0,up0,mid1,up1,level+1,max_level,full_nodes);
+	  (level_array,nd0,nd1,mid0,up0,mid1,up1,level+1,max_level,full_nodes);
 
       }
 
     } else {
 
-      // Refine each child separately if any bits in the mask_array
+      // Refine each child separately if any bits in the level_array
       // are in in them
 
       bool refine_child[4] = {false};
 
       for (int i1=low1; i1<mid1; i1++) {
 	for (int i0=low0; i0<mid0; i0++) {
-	  if (mask_array[i0 + nd0 * i1]) refine_child[UL] = true;
+	  if (level_array[i0 + nd0 * i1] >= level) refine_child[UL] = true;
 	}
       }
       for (int i1=low1; i1<mid1; i1++) {
 	for (int i0=mid0; i0<up0; i0++) {
-	  if (mask_array[i0 + nd0 * i1]) refine_child[DL] = true;
+	  if (level_array[i0 + nd0 * i1] >= level) refine_child[DL] = true;
 	}
       }
       for (int i1=mid1; i1<up1; i1++) {
 	for (int i0=low0; i0<mid0; i0++) {
-	  if (mask_array[i0 + nd0 * i1]) refine_child[UR] = true;
+	  if (level_array[i0 + nd0 * i1] >= level) refine_child[UR] = true;
 	}
       }
       for (int i1=mid1; i1<up1; i1++) {
 	for (int i0=mid0; i0<up0; i0++) {
-	  if (mask_array[i0 + nd0 * i1]) refine_child[DR] = true;
+	  if (level_array[i0 + nd0 * i1] >= level) refine_child[DR] = true;
 	}
       }
 
@@ -184,28 +186,28 @@ int Node4::refine
 	create_child_(UL);
 	update_child_(UL);
 	depth_child[UL] = child_[UL]->refine 
-	  (mask_array,nd0,nd1,low0,mid0,low1,mid1,level+1,max_level,full_nodes);
+	  (level_array,nd0,nd1,low0,mid0,low1,mid1,level+1,max_level,full_nodes);
       }
 
       if (refine_child[DL]) {
 	create_child_(DL);
 	update_child_(DL);
 	depth_child[DL] = child_[DL]->refine 
-	  (mask_array,nd0,nd1,mid0,up0,low1,mid1,level+1,max_level,full_nodes);
+	  (level_array,nd0,nd1,mid0,up0,low1,mid1,level+1,max_level,full_nodes);
       }
 
       if (refine_child[UR]) {
 	create_child_(UR);
 	update_child_(UR);
 	depth_child[UR] = child_[UR]->refine 
-	  (mask_array,nd0,nd1,low0,mid0,mid1,up1,level+1,max_level,full_nodes);
+	  (level_array,nd0,nd1,low0,mid0,mid1,up1,level+1,max_level,full_nodes);
       }
 
       if (refine_child[DR]) {
 	create_child_(DR);
 	update_child_(DR);
 	depth_child[DR] = child_[DR]->refine 
-	  (mask_array,nd0,nd1,mid0,up0,mid1,up1,level+1,max_level,full_nodes);
+	  (level_array,nd0,nd1,mid0,up0,mid1,up1,level+1,max_level,full_nodes);
       }
 
     }
@@ -329,11 +331,11 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
     if (! all_children ()) {
 
 
-      bool refine[4] = {false};
+      bool refine_child[4] = {false};
 
       if (! child(UL)) {
 
-	refine[UL] = 
+	refine_child[UL] = 
 	  (cousin(U,DL) && 
 	   ( cousin(U,DL)->child(DL) ||
 	     cousin(U,DL)->child(DR))) ||
@@ -347,17 +349,18 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
 	   ( child(DL)->child(UL) ||
 	     child(DL)->child(UR)));
 
-	if (refine[UL]) {
+	if (refine_child[UL]) {
 	  create_child_(UL); 
 	  update_child_(UL);
 	  child(UL)->normalize_pass(refined_tree,full_nodes);
+	  refined_tree = true;
 	}
 
       }
 	 
       if ( ! child(DL) ) {
 
-	refine[DL] =
+	refine_child[DL] =
 	  (cousin(L,DR) && 
 	   ( cousin(L,DR)->child(UR) ||
 	     cousin(L,DR)->child(DR))) ||
@@ -371,16 +374,17 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
 	   ( child(UL)->child(DL) ||
 	     child(UL)->child(DR)));
 
-	if (refine[DL]) {
+	if (refine_child[DL]) {
 	  create_child_(DL); 
 	  update_child_(DL);
 	  child(DL)->normalize_pass(refined_tree,full_nodes);
+	  refined_tree = true;
 	}
       }
 
       if ( ! child(UR) ) {
 
-	refine[UR] = 
+	refine_child[UR] = 
 	  (cousin(R,UL) && 
 	   ( cousin(R,UL)->child(UL) ||
 	     cousin(R,UL)->child(DL))) ||
@@ -394,15 +398,16 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
 	   ( child(DR)->child(UL) ||
 	     child(DR)->child(UR)));
 
-	if (refine[UR]) {
+	if (refine_child[UR]) {
 	  create_child_(UR); 
 	  update_child_(UR);
 	  child(UR)->normalize_pass(refined_tree,full_nodes);
+	  refined_tree = true;
 	}
       }
        
       if ( ! child(DR) ) {
-	refine[DR] = refine[DR] || 
+	refine_child[DR] = 
 	  (cousin(R,DL) && 
 	   ( cousin(R,DL)->child(UL) ||
 	     cousin(R,DL)->child(DL))) ||
@@ -416,26 +421,21 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
 	   ( child(UR)->child(DL) ||
 	     child(UR)->child(DR)));
 
-	if (refine[DR]) {
+	if (refine_child[DR]) {
 	  create_child_(DR); 
 	  update_child_(DR);
 	  child(DR)->normalize_pass(refined_tree,full_nodes);
+	  refined_tree = true;
 	}
-
       }
-
-      if (refine[UL] || refine[DL] || refine[UR] || refine[DR]) {
-	refined_tree = true;
-      }
-
     }
-      
   }
 
   if (child(UL)) child(UL)->normalize_pass(refined_tree,full_nodes);
   if (child(DL)) child(DL)->normalize_pass(refined_tree,full_nodes);
   if (child(UR)) child(UR)->normalize_pass(refined_tree,full_nodes);
   if (child(DR)) child(DR)->normalize_pass(refined_tree,full_nodes);
+
 }
 
   // Perform a pass of trying to optimize uniformly-refined nodes
@@ -478,7 +478,8 @@ void Node4::fill_image
  int low0, int high0,  
  int low1, int high1,
  int level,
- int num_levels
+ int num_levels,
+ int line_width
  )
 {
   int i0,i1,i;
@@ -497,16 +498,24 @@ void Node4::fill_image
   // Draw border
   for (i0=low0; i0<=high0; i0++) {
     i1 = low1;
-    image[i0 + nd0*i1] = 0;
+    for (int k=0; k < line_width; k++) {
+      image[i0 + nd0*(i1+k)] = 0;
+    }
     i1 = high1;
-    image[i0 + nd0*i1] = 0;
+    for (int k=0; k < line_width; k++) {
+      image[i0 + nd0*(i1+k)] = 0;
+    }
   }
 
   for (i1=low1; i1<=high1; i1++) {
     i0 = low0;
-    image[i0 + nd0*i1] = 0;
+    for (int k=0; k < line_width; k++) {
+      image[(i0+k) + nd0*i1] = 0;
+    }
     i0 = high0;
-    image[i0 + nd0*i1] = 0;
+    for (int k=0; k < line_width; k++) {
+      image[(i0+k) + nd0*i1] = 0;
+    }
   }
     
 
@@ -517,19 +526,19 @@ void Node4::fill_image
 
   if (child_[UL]) {
     child_[UL]->fill_image 
-      (image,nd0,nd1,low0,mid0, low1,mid1, level + 1, num_levels);
+      (image,nd0,nd1,low0,mid0, low1,mid1, level + 1, num_levels,line_width);
   }
   if (child_[DL]) {
     child_[DL]->fill_image 
-      (image,nd0,nd1,mid0,high0,low1,mid1, level + 1, num_levels);
+      (image,nd0,nd1,mid0,high0,low1,mid1, level + 1, num_levels,line_width);
   }
   if (child_[UR]) {
     child_[UR]->fill_image 
-      (image,nd0,nd1,low0,mid0, mid1,high1,level + 1, num_levels);
+      (image,nd0,nd1,low0,mid0, mid1,high1,level + 1, num_levels,line_width);
   }
   if (child_[DR]) {
     child_[DR]->fill_image 
-      (image,nd0,nd1,mid0,high0,mid1,high1,level + 1, num_levels);
+      (image,nd0,nd1,mid0,high0,mid1,high1,level + 1, num_levels,line_width);
   }
 }
 

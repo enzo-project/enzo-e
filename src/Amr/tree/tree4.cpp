@@ -1,10 +1,10 @@
 
 #include <stdio.h>
 #include "cello.h"
-#include "tree4.h"
 #include "node4.h"
+#include "tree4.h"
 
-const bool debug = true;
+const bool debug = false;
 
 Tree4::Tree4()
   : root_(new Node4()),
@@ -15,13 +15,13 @@ Tree4::Tree4()
 // Refine down to array
 void Tree4::refine
 (
- const bool * mask_array, 
+ const int * level_array, 
  int nd0, int nd1, 
  int max_level,
  bool is_full
  )
 {
-  levels_ = root_->refine(mask_array,nd0,nd1,0,nd0,0,nd1,0,max_level,is_full);
+  levels_ = root_->refine(level_array,nd0,nd1,0,nd0,0,nd1,0,max_level,is_full);
   if (debug) printf ("%d\n",levels_);
 }
 
@@ -34,8 +34,10 @@ void Tree4::normalize(bool is_full)
   do {
     tree_changed = false;
     root_->normalize_pass(tree_changed,is_full);
-    if (debug) printf ("Normalize pass %d\n",pass++,tree_changed);
+    if (debug) printf ("Normalize pass %d\n",pass,tree_changed);
+    pass++;
   } while (tree_changed);
+  printf ("passes = %d\n",pass);
 }
 
 // Replace uniformly-refined patch with single node
@@ -47,17 +49,19 @@ void Tree4::optimize(bool is_full)
   do {
     tree_changed = false;
     root_->optimize_pass(tree_changed,is_full);
-    if (debug) printf ("Optimize pass %d\n",pass++,tree_changed);
+    if (debug) printf ("Optimize pass %d\n",pass,tree_changed);
+    pass++;
   } while (tree_changed);
+  printf ("passes = %d\n",pass);
 }
 
 /// Create an hdf5 file of tree, assuming given source bitmap size
 /// 
-float * Tree4::create_image (int n)
+float * Tree4::create_image (int n,int line_width)
 {
   float * image = new float [n*n];
   
-  root_->fill_image(image,n,n,0,n-1,0,n-1,0,levels_);
+  root_->fill_image(image,n,n,0,n-1,0,n-1,0,levels_,line_width);
   return image;
 }
 

@@ -1,7 +1,5 @@
 #define MAX_LEVELS 80
 
-class Node4;
-
 class Tree4 {
 
  public:
@@ -10,9 +8,11 @@ class Tree4 {
   // assume array width and height are powers of 2
   Tree4();
 
+  ~Tree4() { delete root_; };
+
   // Refine down to array
   void refine
-    (const bool * array, 
+    (const int * level_array, 
      int nd0, int nd1, 
      int max_level, 
      bool full_nodes = true
@@ -28,7 +28,7 @@ class Tree4 {
   void optimize(bool full_nodes = true);
 
   // Create an image of levels
-  float * create_image (int n);
+  float * create_image (int n, int line_width);
 
   // Return the number of levels
   int levels() { return levels_; }

@@ -60,7 +60,7 @@ class Node4 {
   // return the level
   int refine 
     (
-     const bool * array, 
+     const int * level_array, 
      int nd0,  int nd1,
      int low0, int up0,  
      int low1, int up1,
@@ -83,7 +83,8 @@ class Node4 {
      int low0, int up0,  
      int low1, int up1,
      int level,
-     int num_levels
+     int num_levels,
+     int line_width
      );
 
   // Return whether node has all children
