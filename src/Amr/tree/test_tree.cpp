@@ -54,9 +54,9 @@ bool * create_bitmap(int * n0, int * n1)
   for (int iy=0; iy<height; iy++) {
     for (int ix=0; ix<width; ix++) {
       HEADER_PIXEL(data,pixel);
-      if (debug) printf ("%d %d  %d %d %d\n",ix,iy,pixel[0],pixel[1],pixel[2]);
       int i = (iy+iy0) + size*(ix+ix0);
-      bitmap_array[i] = ((pixel[0] + pixel[1] + pixel[2]) > gray_threshold*3);
+      bitmap_array[i] = 
+	((pixel[0] + pixel[1] + pixel[2]) > gray_threshold*3);
     }
   }
   return bitmap_array;

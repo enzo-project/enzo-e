@@ -86,7 +86,23 @@ class Node4 {
      int num_levels
      );
 
-  bool is_leaf() { return child_[0] == NULL; };
+  // Return whether node has all children
+  bool all_children () {
+    return 
+      ((child_[0]) &&
+       (child_[1]) &&
+       (child_[2]) &&
+       (child_[3]));
+  };
+
+  // Return whether node has any children
+  bool any_children () { 
+    return 
+      ((child_[0]) ||
+       (child_[1]) ||
+       (child_[2]) ||
+       (child_[3]));
+  };
 
   static int num_nodes() { return num_nodes_; };
 
