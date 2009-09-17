@@ -10,8 +10,8 @@
 \newcommand{\good}{\textcolor{green}{\smiley}}
 \newcommand{\bad}{\textcolor{red}{\frownie}}
 \newcommand{\colorcode}[1]{\textcolor{blue}{\code{#1}}}
-\def\grayed<#1>{%
- \temporal<#1>{\color{gray}}{\color{black}}{\color{gray}}}
+\def\enhance<#1>{%
+ \temporal<#1>{\color{gray}}{\color{blue}}{\color{gray}}}
 %======================================================================
 \title[The \cello\ Project]
       {The \cello\ Project \\ \small{Enzo: The Next Generation}}
@@ -47,18 +47,30 @@ Overview
         Quality control
         \textit{Science capabilities}
     Target Classes of Users
-      \grayed<1>\textbf<1>{Students}
-        \grayed<1>easy to define problem, run, and analyze
-        \grayed<1>minimal software-related ``gotcha's''
-      \grayed<2>\textbf<2>{Physics experts}
-        \grayed<2>deep control of physics parameters
-        \grayed<2>flexible problem set up for wide range of problems
-      \grayed<3>\textbf<3>{Numerical experts}
-        \grayed<3>deep control of method parameters
-        \grayed<3>easy to incorporate new methods
-      \grayed<4>\textbf<4>{Computing experts}
-        \grayed<4>deep control of data structures
-        \grayed<4>AMR, parallelization, data distribution, blocking/padding
+      \enhance<1>\textbf<1>{Students}
+        \enhance<1>easy to define problem, run, and analyze
+        \enhance<1>minimal software-related ``gotcha's''
+      \enhance<2>\textbf<2>{Physics experts}
+        \enhance<2>deep control of physics parameters
+        \enhance<2>flexible problem set up for wide range of problems
+      \enhance<3>\textbf<3>{Numerical experts}
+        \enhance<3>deep control of method parameters
+        \enhance<3>easy to incorporate new methods
+      \enhance<4>\textbf<4>{Computing experts}
+        \enhance<4>deep control of data structures
+        \enhance<4>AMR, parallelization, data distribution, blocking/padding
+    Amr test
+@!\centerline{
+#!\includegraphics<1>[width=1in]{norman-1.png}
+@!\includegraphics<2>[width=1in]{norman-2.png}
+@!\includegraphics<3>[width=1in]{norman-3.png}
+@!\includegraphics<4>[width=1in]{norman-4.png}
+@!\includegraphics<5>[width=1in]{norman-5.png}
+@!\includegraphics<6>[width=1in]{norman-6.png}
+@!\includegraphics<7>[width=1in]{norman-7.png}
+@!\includegraphics<8>[width=1in]{norman-8.png}
+@!\includegraphics<9>[width=1in]{norman-10.png}
+@!}
     
 ################################################################################
 @end
