@@ -59,6 +59,69 @@ Overview
       \enhance<4>\textbf<4>{Computing experts}
         \enhance<4>deep control of data structures
         \enhance<4>AMR, parallelization, data distribution, blocking/padding
+    Target Classes of Problems
+@!More AMR $\rightarrow$ more data dependencies $\rightarrow$ less parallelism
+      \enhance<1>\textbf{Single-resolution (``unigrid'')}
+         \enhance<1>Parallelizes fully
+         \enhance<1>\enzo\ does well, but still room for improvement
+      \enhance<2>\textbf{Shallow multi-resolution}
+      \enhance<3>\textbf{Deep multi-resolution}
+      \enhance<4>\textbf{\textit{Extreme} multi-resolution}
+        \enhance<4>Most difficult to parallelize effectively
+        \enhance<4>\enzo\ does not scale well with hierarchy depth
+
+    Parameter Files
+    Software Components
+    Software Components: Hardware
+    Software Components: AMR data structures
+
+    AMR Approach
+      Enzo
+      Chombo
+      Paramesh
+      Cello
+
+    Software Components: \code{Array} + \code{Amr}
+
+    Software Components: \code{Array}
+
+    Software Components: \code{Amr}
+
+    Control
+      CHARM++
+      Serial task: advance grid patch one timestep
+    Timestepping
+      \enzo: adaptive timestepping between levels
+      Uniform timestepping: high parallel efficiency
+      Adaptive timestepping within levels
+    Particles
+    Load balancing
+    Precision issues: Particles
+      Use local coordinate system when possible
+        Particles coordinates [0:1] in containing grid patch
+        Simple coordinate transform when containing patch changes
+        Single precision sufficient 
+          Save memory
+          Save time
+    Precision issues: Grids
+      Define grid location only relative to neighboring grid
+      32-bit integerss always sufficient
+      No global tree structure
+      Issues
+        Load balancing 
+          CHARM++
+        Re-gridding
+          local algorithm
+        Global time step
+      High scalability
+      
+        
+    Gravity
+      Hypre insufficient
+        Best method FAC is unusable
+      Write own FAC
+   
+
     Amr test
 @!\centerline{
 #!\includegraphics<1>[width=1in]{norman-1.png}
