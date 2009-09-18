@@ -17,20 +17,6 @@ const int  line_width = 1;
 const int  gray_threshold = 127;
 const int  max_level = 12;
 
-//#include "dot_UR.h"  // point near center in upper right
-//#include "dot_UL.h"  // point near center in upper left
-//#include "dot_DL.h"  // point near center in lower left
-//#include "dot_DR.h"  // point near center in lower right
-
-//#include "egret-bg.h"  // point near center in lower right
-//#include "peace3.h"
-//#include "sdsc.h"
-//#include "sdsc-logo.h"
-//#include "sdsc-logo-512.h"
-// #include "sdsc-logo-2048.h"
-
-//#include "norman.h"
-
 #include "image.h"
 
 // read in the gimp-generated image data into a level array
@@ -91,6 +77,7 @@ main()
   Tree4 * tree = new Tree4;
   bool full_nodes;
   tree->refine(level_array,n0,n1,max_level,full_nodes=true);
+  printf ("Levels = %d\n",tree->levels());
 
   // Determine image size
   int n = cell_size + 2*line_width;
@@ -127,8 +114,11 @@ main()
 
   // Create a new tree and refine to the image with non-full nodes
 
+  delete tree;
+
   tree = new Tree4;
   tree->refine(level_array,n0,n1,max_level,full_nodes=false);
+  printf ("Levels = %d\n",tree->levels());
 
   // Determine image size
   n = cell_size + 2*line_width;
