@@ -484,6 +484,7 @@ void Node16::optimize_pass(bool & refined_tree, bool full_nodes)
     for (int ix=0; ix<4; ix++) {
       for (int iy=0; iy<4; iy++) {
 	delete child_[ix][iy];
+	child_[ix][iy]=NULL;
       }
     }
 

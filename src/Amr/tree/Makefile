@@ -9,8 +9,9 @@ LIB_LOCAL  = -L$(TOP)/lib -lcello
 
 OBJS = tree4.o node4.o tree16.o node16.o 
 
-FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -pg -g
-CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -pg -g
+
+FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 -pg
+CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 -pg
 
 FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
@@ -19,6 +20,7 @@ LIB      = $(LIB_LOCAL)  -lhdf5
 all: $(TEST_EXES)
 test_tree: $(OBJS) test_tree.o
 	$(CXX) -o test_tree test_tree.o $(CXXFLAGS_LOCAL) $(OBJS) $(LIB)
+
 
 .PHONY: install
 install: $(TEST_EXES)
