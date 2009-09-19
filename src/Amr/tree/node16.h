@@ -2,39 +2,26 @@
 #define NODE16_H
 
 #include <stdlib.h>
-
-// Production rules for ordering_hilbert4[type] 
-const int ordering_hilbert4[4][4] = 
-  { {3,0,0,1},
-    {1,1,2,0},
-    {2,3,1,2},
-    {0,2,3,3}};
-
+#include "node.h"
 
 class Tree16;
 
 // WARNING: NUMBERING MUST BE SUCH THAT DIR AND (DIR+2) % 4 MUST BE
-// OPPOSITE DIRECTIONS
+/* // OPPOSITE DIRECTIONS */
 
-enum face_type {
-  R = 0,
-  U = 1,
-  L = 2,
-  D = 3 };
+/* enum face_type { */
+/*   R = 0, */
+/*   U = 1, */
+/*   L = 2, */
+/*   D = 3 }; */
 
-enum corner_type {
-  UL = 0,
-  DL = 1,
-  UR = 2,
-  DR = 3 };
+/* enum corner_type { */
+/*   UL = 0, */
+/*   DL = 1, */
+/*   UR = 2, */
+/*   DR = 3 }; */
 
-enum edge_type {
-  LL = 0,
-  CL = 1,
-  CR = 2,
-  RR = 3 };
-
-face_type opposite(face_type face);
+/* face_type opposite(face_type face); */
 
 class Node16 {
 

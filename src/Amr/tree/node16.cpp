@@ -124,8 +124,8 @@ int Node16::refine
 
     // determine whether to refine the node
 
-    int dx = (upx + lowx)/4;
-    int dy = (upy + lowy)/4;
+    int dx = (upx - lowx)/4;
+    int dy = (upy - lowy)/4;
     int ix4[5] = {lowx, lowx+dx, lowx+2*dx,lowx+3*dx,upx};
     int iy4[5] = {lowy, lowy+dy, lowy+2*dy,lowy+3*dy,upy};
 
@@ -235,7 +235,7 @@ void Node16::create_children_()
 {
   for (int ix=0; ix<4; ix++) {
     for (int iy=0; iy<4; iy++) {
-      child_[ix][iy]->create_child_(ix,iy);
+      create_child_(ix,iy);
     }
   }
 }
@@ -495,7 +495,6 @@ void Node16::optimize_pass(bool & refined_tree, bool full_nodes)
 
     for (int ix=0; ix<4; ix++) {
       for (int iy=0; iy<4; iy++) {
-
 	if (child_[ix][iy]) {
 	  child_[ix][iy]->optimize_pass(refined_tree,full_nodes);
 	}
@@ -509,71 +508,66 @@ void Node16::optimize_pass(bool & refined_tree, bool full_nodes)
 void Node16::fill_image
 (
  float * image,
- int nd0,  int nd1,
- int low0, int high0,  
- int low1, int high1,
+ int ndx,  int ndy,
+ int lowx, int upx,  
+ int lowy, int upy,
  int level,
  int num_levels,
  int line_width
  )
 {
-  int i0,i1,i;
+  int ix,iy,i;
 
   level += level_adjust_;
 
   // Fill interior
 
-  for (i1=low1; i1<=high1; i1++) {
-    for (i0=low0; i0<=high0; i0++) {
-      i = i0 + nd0 * i1;
-      image[i] = 2*num_levels - level;
+  for (iy=lowy; iy<=upy; iy++) {
+    for (ix=lowx; ix<=upx; ix++) {
+      i = ix + ndx * iy;
+      image[i] = 2*num_levels - level; 
     }
   }
 
   // Draw border
-  for (i0=low0; i0<=high0; i0++) {
-    i1 = low1;
+  for (ix=lowx; ix<=upx; ix++) {
+    iy = lowy;
     for (int k=0; k < line_width; k++) {
-      image[i0 + nd0*(i1+k)] = 0;
+      image[ix + ndx*(iy+k)] = 0;
     }
-    i1 = high1;
+    iy = upy;
     for (int k=0; k < line_width; k++) {
-      image[i0 + nd0*(i1+k)] = 0;
+      image[ix + ndx*(iy+k)] = 0;
     }
   }
 
-  for (i1=low1; i1<=high1; i1++) {
-    i0 = low0;
+  for (iy=lowy; iy<=upy; iy++) {
+    ix = lowx;
     for (int k=0; k < line_width; k++) {
-      image[(i0+k) + nd0*i1] = 0;
+      image[(ix+k) + ndx*iy] = 0;
     }
-    i0 = high0;
+    ix = upx;
     for (int k=0; k < line_width; k++) {
-      image[(i0+k) + nd0*i1] = 0;
+      image[(ix+k) + ndx*iy] = 0;
     }
   }
     
 
   // Recurse
 
-  int mid0 = (high0 + low0)/2;
-  int mid1 = (high1 + low1)/2;
 
-  if (child_[UL]) {
-    child_[UL]->fill_image 
-      (image,nd0,nd1,low0,mid0, low1,mid1, level + 1, num_levels,line_width);
-  }
-  if (child_[DL]) {
-    child_[DL]->fill_image 
-      (image,nd0,nd1,mid0,high0,low1,mid1, level + 1, num_levels,line_width);
-  }
-  if (child_[UR]) {
-    child_[UR]->fill_image 
-      (image,nd0,nd1,low0,mid0, mid1,high1,level + 1, num_levels,line_width);
-  }
-  if (child_[DR]) {
-    child_[DR]->fill_image 
-      (image,nd0,nd1,mid0,high0,mid1,high1,level + 1, num_levels,line_width);
+  int dx = (upx - lowx)/4;
+  int dy = (upy - lowy)/4;
+  int ix4[5] = {lowx, lowx+dx, lowx+2*dx,lowx+3*dx,upx};
+  int iy4[5] = {lowy, lowy+dy, lowy+2*dy,lowy+3*dy,upy};
+
+  for (int ix=0; ix<4; ix++) {
+    for (int iy=0; iy<4; iy++) {
+      if (child_[ix][iy]) {
+	child_[ix][iy]->fill_image 
+	  (image,ndx,ndy,ix4[ix],ix4[ix+1], iy4[iy],iy4[iy+1], level + 1, num_levels,line_width);
+      }
+    }
   }
 }
 
