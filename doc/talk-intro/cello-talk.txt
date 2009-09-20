@@ -7,6 +7,9 @@
 \usetheme{Copenhagen}
 \usecolortheme{default}
 \newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\us}[1]{\color{blue}{#1}}
+\newcommand{\them}[1]{\color{red}{#1}}
+\newcommand{\newus}[1]{\color{magenta}{#1}}
 \newcommand{\good}{\textcolor{green}{\smiley}}
 \newcommand{\bad}{\textcolor{red}{\frownie}}
 \newcommand{\colorcode}[1]{\textcolor{blue}{\code{#1}}}
@@ -14,7 +17,7 @@
  \temporal<#1>{\color{gray}}{\color{blue}}{\color{gray}}}
 %======================================================================
 \title[The \cello\ Project]
-      {The \cello\ Project \\ \small{Enzo: The Next Generation}}
+      {The \cello\ Project \\ \small{\enzo: The Next Generation}}
 \author[James Bordner]{\small Laboratory for Computational Astrophysics \\ San Diego Supercomputer Center \\ University of California, San Diego \\ \ \\ James Bordner}
 \date{\today}
 \begin{document}
@@ -35,9 +38,21 @@
 Overview
     Outline
       Overview
-      User's Perspective
-      Designer's Perspective
-      Data Structures
+      User Perspective
+        Parameter files
+        Examples
+      AMR Data Structures
+        Other AMR codes
+        Cello Patch AMR
+        Cello Tree AMR
+      Code Architecture
+        Components
+        Hardware interface components
+        Method component
+        Data structures
+        Control 
+        
+     
     Goals
       \enzo: The Next Generation
       Computational science tool for next 10+ years
@@ -69,17 +84,45 @@ Overview
       \enhance<4>\textbf{\textit{Extreme} multi-resolution}
         \enhance<4>Most difficult to parallelize effectively
         \enhance<4>\enzo\ does not scale well with hierarchy depth
-
+    Petascale Performance Issues
+      Synchronization
+      Task size control
+        Large enough to be efficient
+        Small enough for sufficient parallelism
+      Task scheduling
+        Static scheduling with dynamic load balancing
+        Dynamic scheduling with job migration
+        Controlable via, e.g., CHARM++
+      Load balancing
+      Software resiliency
+      Restarts
+      AMR performance issues
+        Finding patch neighbors
+        Parallel gridding algorithms
+        Memory usage
+        Elliptic solves: gravity / radiation
+        
     Parameter Files
     Software Components
     Software Components: Hardware
     Software Components: AMR data structures
 
-    AMR Approach
-      Enzo
-      Chombo
-      Paramesh
-      Cello
+    Review of AMR Approaches
+@!    \footnotesize
+      [tabular[|l|ccc|cc|  
+@!\hline
+           
+                &  \textbf{Enzo} & \textbf{Chombo} & \textbf{Paramesh} & \textbf{Cello-patch} & \textbf{Cello-tree} \\  \hline
+                \textbf{Refinement} &  \us{patch} & \them{patch} &  \them{tree} & \newus{patch} & \newus{tree}  \\
+                \textbf{Tree type} & \us{none} & \them{octree} & \them{octree} & \newus{octree} & \newus{octree++} \\  \hline
+                \textbf{Parents} & \us{    single} & \them{multiple} & \them{single} &   \newus{multiple} & \newus{single} \\
+                \textbf{Children} & \us{variable} & \them{variable} & \them{constant} & \newus{variable} & \newus{limited} \\
+                \textbf{Neighbors} & \us{variable} & \them{variable} & \them{limited} & \newus{variable} & \newus{limited} \\\hline
+                \textbf{Level jumps} & \us{ yes} &    \them{no} &      \them{no}    &   \newus{no} & \newus{no} \\
+                \textbf{Symmetric} & \us{no} &  \them{yes} &  \them{yes} &  \newus{yes} & \newus{yes} \\\hline
+                \textbf{Patch shape} & \us{  variable} & \them{variable} &  \them{constant} & \newus{variable} & \newus{constant}(?) \\
+                \textbf{Patch size} & \us{  variable} & \them{variable} &  \them{constant} & \newus{variable} &\newus{limited}  \\ \hline
+      ]]
 
     Software Components: \code{Array} + \code{Amr}
 
@@ -88,14 +131,30 @@ Overview
     Software Components: \code{Amr}
 
     Control
-      CHARM++
-      Serial task: advance grid patch one timestep
-    Timestepping
-      \enzo: adaptive timestepping between levels
-      Uniform timestepping: high parallel efficiency
-      Adaptive timestepping within levels
-    Particles
-    Load balancing
+      Task: advance grid patch one timestep
+      Dependencies: boundary values
+      Dynamic task scheduling
+        No artificial dependencies imposed
+        Patches in different levels can advance concurrently
+        CHARM++ would be helpful
+       
+        
+    Local adaptive time-stepping
+      \enzo\ supports adaptive time-stepping between levels
+      Fully adaptive time-stepping option
+        No global timestep restriction
+        No global synchronization
+      Uniform time-stepping option
+        High parallel efficiency
+        Simplified code
+        Happy 
+    Particle positions
+      Particles are associated with a patch
+      Represent particles in patch-local coordinates
+      Simple coordinate transformation when particles migrate
+      Single-precision sufficient
+      Global coordinates
+    Hierarchical Load balancing
     Precision issues: Particles
       Use local coordinate system when possible
         Particles coordinates [0:1] in containing grid patch
@@ -120,19 +179,27 @@ Overview
       Hypre insufficient
         Best method FAC is unusable
       Write own FAC
+      Chombo group is on top of this
    
 
-    Amr test
+    AMR: Octree issues
 @!\centerline{
-#!\includegraphics<1>[width=1in]{norman-1.png}
-@!\includegraphics<2>[width=1in]{norman-2.png}
-@!\includegraphics<3>[width=1in]{norman-3.png}
-@!\includegraphics<4>[width=1in]{norman-4.png}
-@!\includegraphics<5>[width=1in]{norman-5.png}
-@!\includegraphics<6>[width=1in]{norman-6.png}
-@!\includegraphics<7>[width=1in]{norman-7.png}
-@!\includegraphics<8>[width=1in]{norman-8.png}
-@!\includegraphics<9>[width=1in]{norman-10.png}
+@!\includegraphics<1>[width=2in]{dot.png}
+@!\includegraphics<2>[width=2in]{dot-1.png}
+@!\includegraphics<3>[width=2in]{dot-2.png}
+@!\includegraphics<4>[width=2in]{dot-3.png}
+@!\includegraphics<5>[width=2in]{dot-4.png}
+@!\includegraphics<6>[width=2in]{dot_DL-0.png}
+@!\includegraphics<7>[width=2in]{dot_DL-1.png}
+@!\includegraphics<8>[width=2in]{dot_DL-2.png}
+@!\includegraphics<9>[width=2in]{dot_DL-3.png}
+@!\includegraphics<10>[width=2in]{dot_DL-4.png}
+
+@!}
+
+    AMR: Octree examples
+@!\centerline{
+@!\includegraphics<1>[width=1in]{norman-10.png}
 @!}
     
 ################################################################################
