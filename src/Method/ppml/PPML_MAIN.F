@@ -1,49 +1,49 @@
-/* #include "error.def" */
+      /* #include "error.def" */
 
       Subroutine PPML(dn,vx,vy,vz,bx,by,bz,
-     1                 dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,	 
-     1                 dnry,vxry,vyry,vzry,bxry,byry,bzry,	 
-     1                 dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,
-     1                 dt, CycleNumber, dx,dy,dz,
-     1                 nx, ny, nz,
-     1                 GridStartIndex, GridEndIndex,
-     1                 nsubgrids, lface, rface,
-     1                 fistart, fiend, fjstart, fjend,
-     1                 array, dnindex,
-     1                 vxindex, vyindex, vzindex,
-     1                 bxindex, byindex, bzindex)	 
+     1     dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,	 
+     1     dnry,vxry,vyry,vzry,bxry,byry,bzry,	 
+     1     dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,
+     1     dt, CycleNumber, dx,dy,dz,
+     1     nx, ny, nz,
+     1     GridStartIndex, GridEndIndex,
+     1     nsubgrids, lface, rface,
+     1     fistart, fiend, fjstart, fjend,
+     1     array, dnindex,
+     1     vxindex, vyindex, vzindex,
+     1     bxindex, byindex, bzindex)	 
 
-	 Implicit NONE
+      Implicit NONE
 
-!	 i1,j1,k1 - initial point of grid
-!	 i2,j2,k2 - last point of grid
-!    ighost,jghost,kghost - number of ghost zones	 
-!    dn,vx,vy,vz,bx,by,bz - central primitive variables
-!    dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx - x-right primitive variables
-!    dnry,vxry,vyry,vzry,bxry,byry,bzry - y-right primitive variables
-!    dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz - z-right primitive variables 
-!    f1,f2,f3,f4,f5,f6,f7 - x-fluxes
-!	 g1,g2,g3,g4,g5,g6,g7 - y-fluxes
-!    h1,h2,h3,h4,h5,h6,h7 - z-fluxes 
+c     i1,j1,k1                           - initial point of grid
+c     i2,j2,k2                           - last point of grid
+c     ighost,jghost,kghost               - number of ghost zones	 
+c     dn,vx,vy,vz,bx,by,bz               - central primitive variables
+c     dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx - x-right primitive variables
+c     dnry,vxry,vyry,vzry,bxry,byry,bzry - y-right primitive variables
+c     dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz - z-right primitive variables 
+c     f1,f2,f3,f4,f5,f6,f7               - x-fluxes
+c     g1,g2,g3,g4,g5,g6,g7               - y-fluxes
+c     h1,h2,h3,h4,h5,h6,h7               - z-fluxes 
 
       Integer nx,ny,nz,ighost,jghost,kghost,nsubgrids
-	  Integer nxb,nxe,nyb,nye,nzb,nze 
-	  Integer i1,j1,k1,i2,j2,k2,CycleNumber
-	  Integer nxp,nyp,nzp,i,j,k,m,n,idim,offset
+      Integer nxb,nxe,nyb,nye,nzb,nze 
+      Integer i1,j1,k1,i2,j2,k2,CycleNumber
+      Integer nxp,nyp,nzp,i,j,k,m,n,idim,offset
       Integer GridStartIndex(3), GridEndIndex(3)
-	  Integer m1,m2,m3
-	  
+      Integer m1,m2,m3
+      
       integer fistart(nsubgrids*3), fiend(nsubgrids*3),
-     1        fjstart(nsubgrids*3), fjend(nsubgrids*3), 
-     1        lface(nsubgrids*3)  , rface(nsubgrids*3)
+     1     fjstart(nsubgrids*3), fjend(nsubgrids*3), 
+     1     lface(nsubgrids*3)  , rface(nsubgrids*3)
       integer dnindex(nsubgrids*6), vxindex(nsubgrids*6),
-     1        vyindex(nsubgrids*6), vzindex(nsubgrids*6),
-     1        bxindex(nsubgrids*6), byindex(nsubgrids*6),
-     1        bzindex(nsubgrids*6)
-	 
+     1     vyindex(nsubgrids*6), vzindex(nsubgrids*6),
+     1     bxindex(nsubgrids*6), byindex(nsubgrids*6),
+     1     bzindex(nsubgrids*6)
+      
       real    array(1)	 
-	  
-	  
+      
+      
       real dn(nx,ny,nz)  	 
       real vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)  	 
       real bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)  	 

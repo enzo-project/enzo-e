@@ -12,7 +12,12 @@ LIB_LOCAL  = -L$(TOP)/lib -lcello
 
 OBJS = \
 	cello_hydro.o \
+        initialize_hydro.o \
+        initialize_implosion.o \
 	Grid_SolveMHDEquations.o \
+	SetExternalBoundary.o \
+        Grid_SetExternalBoundaryValues.o \
+        Grid_ComputeTimeStep.o \
 	PPML_Conservative.o \
 	PPML_HLLD.o \
 	PPML_MAIN.o \
@@ -21,11 +26,11 @@ OBJS = \
 	PPML_potoky.o \
 	PPML_potokz.o \
 	PPML_Primitive.o \
-	PPML_QDD6.o \
 	PPML_sub.o \
 	PPML_TimeStep.o \
-	test_ppml.o
+	calc_dt.o 
 
+#	PPML_QDD6.o \
 
 FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
 CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3

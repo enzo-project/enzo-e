@@ -77,8 +77,9 @@ int SolveMHDEquations(int cycle, float dt)
  
   /* exit if not 3D */
 
-  if (GridRank != 3) 
-    my_exit(EXIT_FAILURE);
+  // @@ assert GridRank == 3
+  //  if (GridRank != 3) 
+  //    my_exit(EXIT_FAILURE);
 
   if (NumberOfBaryonFields > 0) {
  
@@ -95,37 +96,35 @@ int SolveMHDEquations(int cycle, float dt)
  
     /* Get easy to handle pointers for each variable. */
  
-    float *density    = BaryonField[ 0];
-    float *velox      = BaryonField[ 1];
-    float *veloy      = BaryonField[ 2];
-    float *veloz      = BaryonField[ 3];
+
     float *bfieldx    = BaryonField[ 4];
-    float *bfieldy    = BaryonField[ 5];
-    float *bfieldz    = BaryonField[ 6];
-
-    float *dens_rx    = BaryonField[ 7];
-    float *velox_rx   = BaryonField[ 8];
-    float *veloy_rx   = BaryonField[ 9];
-    float *veloz_rx   = BaryonField[10];
     float *bfieldx_rx = BaryonField[11];
-    float *bfieldy_rx = BaryonField[12];
-    float *bfieldz_rx = BaryonField[13];
-
-    float *dens_ry    = BaryonField[14];
-    float *velox_ry   = BaryonField[15];
-    float *veloy_ry   = BaryonField[16];
-    float *veloz_ry   = BaryonField[17];
     float *bfieldx_ry = BaryonField[18];
-    float *bfieldy_ry = BaryonField[19];
-    float *bfieldz_ry = BaryonField[20];
-
-    float *dens_rz    = BaryonField[21];
-    float *velox_rz   = BaryonField[22];
-    float *veloy_rz   = BaryonField[23];
-    float *veloz_rz   = BaryonField[24];
     float *bfieldx_rz = BaryonField[25];
+    float *bfieldy    = BaryonField[ 5];
+    float *bfieldy_rx = BaryonField[12];
+    float *bfieldy_ry = BaryonField[19];
     float *bfieldy_rz = BaryonField[26];
+    float *bfieldz    = BaryonField[ 6];
+    float *bfieldz_rx = BaryonField[13];
+    float *bfieldz_ry = BaryonField[20];
     float *bfieldz_rz = BaryonField[27];
+    float *density    = BaryonField[ 0];
+    float *dens_rx    = BaryonField[ 7];
+    float *dens_ry    = BaryonField[14];
+    float *dens_rz    = BaryonField[21];
+    float *velox      = BaryonField[ 1];
+    float *velox_rx   = BaryonField[ 8];
+    float *velox_ry   = BaryonField[15];
+    float *velox_rz   = BaryonField[22];
+    float *veloy      = BaryonField[ 2];
+    float *veloy_rx   = BaryonField[ 9];
+    float *veloy_ry   = BaryonField[16];
+    float *veloy_rz   = BaryonField[23];
+    float *veloz      = BaryonField[ 3];
+    float *veloz_rx   = BaryonField[10];
+    float *veloz_ry   = BaryonField[17];
+    float *veloz_rz   = BaryonField[24];
 
     /* allocate space for fluxes */
  
@@ -208,7 +207,8 @@ int SolveMHDEquations(int cycle, float dt)
     /* create and fill in arrays which are easiler for the solver to
        understand. */
 
-    int NumberOfSubgrids = 0;
+    int NumberOfSubgrids = 0; // JB
+
     int *leftface  = new int[NumberOfSubgrids*3*20];
     int *rightface = leftface + NumberOfSubgrids*3*1;
     int *istart    = leftface + NumberOfSubgrids*3*2;
