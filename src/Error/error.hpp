@@ -89,5 +89,7 @@ static char incomplete_message[ERROR_MESSAGE_LENGTH+1];
    fflush(stdout); \
 }
 
+#define TRACE printf ("TRACE %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+
 #endif /* ERROR_HPP */
 

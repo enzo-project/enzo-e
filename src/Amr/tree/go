@@ -1,0 +1,40 @@
+#/bin/csh -f
+
+# set images = (peace2)
+# set images = (dot_DL dot_DR dot_UL dot_UR)
+set images = (dot)
+# set images = (ucsd-seal-1024)
+# set images = (gradient)
+# set images = (norman)
+# set images = (sdsc-logo)
+# set images = (cosmology-edit-2048)
+# set images = (cosmo2)
+
+set color = vga
+
+foreach image ($images)
+
+    ln -sf ${image}.h image.h
+    make dep
+    make clean
+    make
+    test_tree
+    echo "done"
+    h5topng -c $color tree4-0.hdf5
+    h5topng -c $color tree4-1.hdf5
+    h5topng -c $color tree4-2.hdf5
+    h5topng -c $color tree4-3.hdf5
+    h5topng -c $color tree4-4.hdf5
+    h5topng -c $color tree4-5.hdf5
+
+    h5topng -c $color tree16-0.hdf5
+    h5topng -c $color tree16-1.hdf5
+    h5topng -c $color tree16-2.hdf5
+    h5topng -c $color tree16-3.hdf5
+    h5topng -c $color tree16-4.hdf5
+    h5topng -c $color tree16-5.hdf5
+
+
+end
+
+

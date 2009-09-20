@@ -17,7 +17,7 @@ const bool debug = false;
 const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
-const int  max_level = 10;
+const int  max_level = 8;
 
 #include "image.h"
 
@@ -81,7 +81,6 @@ main()
   Tree4 * tree4 = new Tree4;
   bool full_nodes;
   tree4->refine(level_array,n0,n1,max_level,full_nodes=true);
-  printf ("Levels = %d\n",tree4->levels());
 
   // Determine image size
   int n = cell_size + 2*line_width;
@@ -93,8 +92,10 @@ main()
   float * image;
 
   printf ("\n");
+  printf ("INITIAL FULL TREE 4\n");
   image = tree4->create_image(n,line_width);
   printf ("nodes  = %d\n",Node4::num_nodes());
+  printf ("levels = %d\n",tree4->levels());
   write_image(image,n,n,"tree4-0.hdf5");
   delete image;
 
@@ -102,7 +103,9 @@ main()
 
   printf ("\n");
   tree4->normalize(full_nodes);
+  printf ("NORMALIZED FULL TREE 4\n");
   printf ("nodes  = %d\n",Node4::num_nodes());
+  printf ("levels = %d\n",tree4->levels());
   image = tree4->create_image(n,line_width);
   write_image(image,n,n,"tree4-1.hdf5");
   delete image;
@@ -111,7 +114,9 @@ main()
 
   printf ("\n");
   tree4->optimize(full_nodes);
+  printf ("OPTIMIZED FULL TREE 4\n");
   printf ("nodes  = %d\n",Node4::num_nodes());
+  printf ("levels = %d\n",tree4->levels());
   image = tree4->create_image(n,line_width);
   write_image(image,n,n,"tree4-2.hdf5");
   delete image;
@@ -124,7 +129,6 @@ main()
 
   tree4 = new Tree4;
   tree4->refine(level_array,n0,n1,max_level,full_nodes=false);
-  printf ("Levels = %d\n",tree4->levels());
 
   // Determine image size
   n = cell_size + 2*line_width;
@@ -133,16 +137,20 @@ main()
   }
 
   printf ("\n");
+  printf ("INITIAL NON-FULL TREE 4\n");
   image = tree4->create_image(n,line_width);
   printf ("nodes  = %d\n",Node4::num_nodes());
+  printf ("levels = %d\n",tree4->levels());
   write_image(image,n,n,"tree4-3.hdf5");
   delete image;
 
   // Normalize the tree
 
   printf ("\n");
+  printf ("NORMALIZED NON-FULL TREE 4\n");
   tree4->normalize(full_nodes);
   printf ("nodes  = %d\n",Node4::num_nodes());
+  printf ("levels = %d\n",tree4->levels());
   image = tree4->create_image(n,line_width);
   write_image(image,n,n,"tree4-4.hdf5");
   delete image;
@@ -150,8 +158,10 @@ main()
   // Optimize the tree
 
   printf ("\n");
+  printf ("OPTIMIZED NON-FULL TREE 4\n");
   tree4->optimize(full_nodes);
   printf ("nodes  = %d\n",Node4::num_nodes());
+  printf ("levels = %d\n",tree4->levels());
   image = tree4->create_image(n,line_width);
   write_image(image,n,n,"tree4-5.hdf5");
   delete image;
@@ -165,7 +175,6 @@ main()
   Tree16 * tree16 = new Tree16;
   full_nodes;
   tree16->refine(level_array,n0,n1,max_level,full_nodes=true);
-  printf ("Levels = %d\n",tree16->levels());
 
   // Determine image size
   n = cell_size + 2*line_width;
@@ -175,8 +184,11 @@ main()
 
 
   printf ("\n");
+  printf ("INITIAL FULL TREE 16\n");
   image = tree16->create_image(n,line_width);
+  printf ("TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
+  printf ("levels = %d\n",tree16->levels());
   write_image(image,n,n,"tree16-0.hdf5");
   delete image;
 
@@ -184,7 +196,9 @@ main()
 
   printf ("\n");
   tree16->normalize(full_nodes);
+  printf ("NORMALIZED FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
+  printf ("levels = %d\n",tree16->levels());
   image = tree16->create_image(n,line_width);
   write_image(image,n,n,"tree16-1.hdf5");
   delete image;
@@ -193,7 +207,9 @@ main()
 
   printf ("\n");
   tree16->optimize(full_nodes);
+  printf ("OPTIMIZED FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
+  printf ("levels = %d\n",tree16->levels());
   image = tree16->create_image(n,line_width);
   write_image(image,n,n,"tree16-2.hdf5");
   delete image;
@@ -206,7 +222,6 @@ main()
 
   tree16 = new Tree16;
   tree16->refine(level_array,n0,n1,max_level,full_nodes=false);
-  printf ("Levels = %d\n",tree16->levels());
 
   // Determine image size
   n = cell_size + 2*line_width;
@@ -216,7 +231,9 @@ main()
 
   printf ("\n");
   image = tree16->create_image(n,line_width);
+  printf ("INITIAL NON-FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
+  printf ("levels = %d\n",tree16->levels());
   write_image(image,n,n,"tree16-3.hdf5");
   delete image;
 
@@ -224,16 +241,20 @@ main()
 
   printf ("\n");
   tree16->normalize(full_nodes);
+  printf ("NORMALIZED NON-FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
+  printf ("levels = %d\n",tree16->levels());
   image = tree16->create_image(n,line_width);
-  write_image(image,n,n,"tree16-16.hdf5");
+  write_image(image,n,n,"tree16-4.hdf5");
   delete image;
 
   // Optimize the tree
 
   printf ("\n");
   tree16->optimize(full_nodes);
+  printf ("OPTIMIZED NON-FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
+  printf ("levels = %d\n",tree16->levels());
   image = tree16->create_image(n,line_width);
   write_image(image,n,n,"tree16-5.hdf5");
   delete image;

@@ -5,7 +5,6 @@
 
 const bool debug = false;
 
-
 //    3
 //
 //    2
@@ -126,8 +125,8 @@ int Node16::refine
 
     int dx = (upx - lowx)/4;
     int dy = (upy - lowy)/4;
-    int ix4[5] = {lowx, lowx+dx, lowx+2*dx,lowx+3*dx,upx};
-    int iy4[5] = {lowy, lowy+dy, lowy+2*dy,lowy+3*dy,upy};
+    int ix4[5] = {lowx, lowx+dx, lowx+2*dx, lowx+3*dx, upx};
+    int iy4[5] = {lowy, lowy+dy, lowy+2*dy, lowy+3*dy, upy};
 
     int depth_child[4][4] = {0};
 
@@ -154,68 +153,51 @@ int Node16::refine
 	  for (int iy=0; iy<4; iy++) {
 	    depth_child[ix][iy] = child_[ix][iy]->refine 
 	      (level_array,ndx,ndy,ix4[ix],ix4[ix+1],iy4[iy],iy4[iy+1],
-	       level+1,max_level,full_nodes);
+	       level+2,max_level,full_nodes);
 	  }
 	}
       }
 
-//     } else {
+    } else {
 
-//       // Refine each child separately if any bits in the level_array
-//       // are in in them
+      // Refine each child separately if any bits in the level_array
+      // are in in them
 
-//       bool refine_child[4][4] = {false};
+      bool refine_child[4][4] = {false};
 
-//       for (int iy=lowy; iy<midy; iy++) {
-// 	for (int ix=lowx; ix<midx; ix++) {
-// 	  if (level_array[ix + ndx * iy] >= level) refine_child[UL] = true;
-// 	}
-//       }
-//       for (int iy=lowy; iy<midy; iy++) {
-// 	for (int ix=midx; ix<upx; ix++) {
-// 	  if (level_array[ix + ndx * iy] >= level) refine_child[DL] = true;
-// 	}
-//       }
-//       for (int iy=midy; iy<upy; iy++) {
-// 	for (int ix=lowx; ix<midx; ix++) {
-// 	  if (level_array[ix + ndx * iy] >= level) refine_child[UR] = true;
-// 	}
-//       }
-//       for (int iy=midy; iy<upy; iy++) {
-// 	for (int ix=midx; ix<upx; ix++) {
-// 	  if (level_array[ix + ndx * iy] >= level) refine_child[DR] = true;
-// 	}
-//       }
+      // loop over children
 
-//       // refine each child if needed
+      for (int ix=0; ix<4; ix++) {
+	for (int iy=0; iy<4; iy++) {
 
-//       if (refine_child[UL]) {
-// 	create_child_(UL);
-// 	update_child_(UL);
-// 	depth_child[UL] = child_[UL]->refine 
-// 	  (level_array,ndx,ndy,lowx,midx,lowy,midy,level+1,max_level,full_nodes);
-//       }
+	  // loop over values in the level array
 
-//       if (refine_child[DL]) {
-// 	create_child_(DL);
-// 	update_child_(DL);
-// 	depth_child[DL] = child_[DL]->refine 
-// 	  (level_array,ndx,ndy,midx,upx,lowy,midy,level+1,max_level,full_nodes);
-//       }
+	  for (int ly=iy4[iy]; ly<iy4[iy+1]; ly++) {
+	    for (int lx=ix4[ix]; lx<ix4[ix+1]; lx++) {
 
-//       if (refine_child[UR]) {
-// 	create_child_(UR);
-// 	update_child_(UR);
-// 	depth_child[UR] = child_[UR]->refine 
-// 	  (level_array,ndx,ndy,lowx,midx,midy,upy,level+1,max_level,full_nodes);
-//       }
+	      if (level_array[lx + ndx * ly] >= level) {
+		refine_child[ix][iy] = true;
 
-//       if (refine_child[DR]) {
-// 	create_child_(DR);
-// 	update_child_(DR);
-// 	depth_child[DR] = child_[DR]->refine 
-// 	  (level_array,ndx,ndy,midx,upx,midy,upy,level+1,max_level,full_nodes);
-//       }
+	      }
+	    }
+	  }
+
+	}
+      }
+
+      // refine each child if needed
+
+      for (int ix=0; ix<4; ix++) {
+	for (int iy=0; iy<4; iy++) {
+	  if (refine_child[ix][iy]) {
+	    create_child_(ix,iy);
+	    update_child_(ix,iy);
+	    depth_child[ix][iy] = child_[ix][iy]->refine 
+	      (level_array,ndx,ndy,ix4[ix],ix4[ix+1],iy4[iy],iy4[iy+1],
+	       level+2,max_level,full_nodes);
+	  }
+	}
+      }
 
     }
 
@@ -224,7 +206,7 @@ int Node16::refine
 	depth = (depth_child[ix][iy] > depth) ? depth_child[ix][iy] : depth;
       }
     }
-    ++depth;
+    depth += 2;
 
   } // if not at bottom of recursion
 
@@ -244,7 +226,7 @@ void Node16::update_children_()
 {
   for (int ix=0; ix<4; ix++) {
     for (int iy=0; iy<4; iy++) {
-      child_[ix][iy]->update_child_(ix,iy);
+      update_child_(ix,iy);
     }
   }
 }
@@ -297,7 +279,6 @@ void Node16::update_child_ (int ix, int iy)
 // Perform a pass of trying to remove level-jumps 
 void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
 {
-
   if (full_nodes) {
 
     // is a leaf
@@ -307,7 +288,8 @@ void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
 
       // Check for adjacent nodes two levels finer
 
-      for (int i=0; i<4; ! refine_node && i++) {
+      for (int i=0; i<4; i++) {
+	
 	refine_node = refine_node ||
 	  ( cousin(R,0,i) && ( cousin(R,0,i)->child(0,0) ) ) ||
 	  ( cousin(L,3,i) && ( cousin(L,3,i)->child(0,0) ) ) ||
@@ -324,130 +306,101 @@ void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
 
 	for (int ix=0; ix<4; ix++) {
 	  for (int iy=0; iy<4; iy++) {
-	    child(ix,iy)->normalize_pass(refined_tree,full_nodes);
+	    if (child(ix,iy)) {
+	      child(ix,iy)->normalize_pass(refined_tree,full_nodes);
+	    }
 	  }
 	}
       }
     }
 
-//   } else { 
+  } else { 
 
-//     // not full node refinement
+    // not full node refinement
+    
+    if (! all_children ()) {
 
-//     if (! all_children ()) {
+      bool refine_child[4][4] = {false};
 
+      for (int ix=0; ix<4; ix++) {
+	for (int iy=0; iy<4; iy++) {
+	  if (! child(ix,iy)) {
+	    // right neighbor
+	    if (ix < 3 && child(ix+1,iy)) {
+	      for (int k=0; k<4; k++) {
+		refine_child[ix][iy] = refine_child[ix][iy] ||
+		  child(ix+1,iy)->child(0,k);
+	      }
+	    } else if (ix == 3 && cousin(R,0,iy)) {
+	      for (int k=0; k<4; k++) {
+		refine_child[ix][iy] = refine_child[ix][iy] ||
+		  cousin(R,0,iy)->child(0,k);
+	      }
+	    }
+	    // left neighbor
+	    if (ix > 0 && child(ix-1,iy)) {
+	      for (int k=0; k<4; k++) {
+		refine_child[ix][iy] = refine_child[ix][iy] ||
+		  child(ix-1,iy)->child(3,k);
+	      }
+	    } else if (ix == 0 && cousin(L,3,iy)) {
+	      for (int k=0; k<4; k++) {
+		refine_child[ix][iy] = refine_child[ix][iy] ||
+		  cousin(L,3,iy)->child(3,k);
+	      }
+	    }
+	    // up neighbor
+	    if (iy < 3 && child(ix,iy+1)) {
+	      for (int k=0; k<4; k++) {
+		refine_child[ix][iy] = refine_child[ix][iy] ||
+		  child(ix,iy+1)->child(k,0);
+	      }
+	    } else if (iy == 3 && cousin(U,ix,0)) {
+	      for (int k=0; k<4; k++) {
+		refine_child[ix][iy] = refine_child[ix][iy] ||
+		  cousin(U,ix,0)->child(k,0);
+	      }
+	    }
+	    // down neighbor
+	    if (iy > 0 && child(ix,iy-1)) {
+	      for (int k=0; k<4; k++) {
+		refine_child[ix][iy] = refine_child[ix][iy] ||
+		  child(ix,iy-1)->child(k,3);
+	      }
+	    } else if (iy == 0 && cousin(D,ix,3)) {
+	      for (int k=0; k<4; k++) {
+		refine_child[ix][iy] = refine_child[ix][iy] ||
+		  cousin(D,ix,3)->child(k,3);
+	      }
+	    }
+	  } // k
+	} // iy
+      } // ix
 
-//       bool refine_child[4][4] = {false};
+      for (int ix=0; ix<4; ix++) {
+	for (int iy=0; iy<4; iy++) {
+	  if (refine_child[ix][iy]) {
+	    create_child_(ix,iy); 
+	    update_child_(ix,iy);
+	    child(ix,iy)->normalize_pass(refined_tree,full_nodes);
+	  }
+	}
+      }
+    }
+  }
 
-//       if (! child(UL)) {
+  // not a leaf: recurse
 
-// 	refine_child[UL] = 
-// 	  (cousin(U,DL) && 
-// 	   ( cousin(U,DL)->child(DL) ||
-// 	     cousin(U,DL)->child(DR))) ||
-// 	  (cousin(L,UR) && 
-// 	   ( cousin(L,UR)->child(UR) ||
-// 	     cousin(L,UR)->child(DR))) ||
-// 	  (child(UR) && 
-// 	   ( child(UR)->child(UL) ||
-// 	     child(UR)->child(DL))) ||
-// 	  (child(DL) && 
-// 	   ( child(DL)->child(UL) ||
-// 	     child(DL)->child(UR)));
-
-// 	if (refine_child[UL]) {
-// 	  create_child_(UL); 
-// 	  update_child_(UL);
-// 	  child(UL)->normalize_pass(refined_tree,full_nodes);
-// 	  refined_tree = true;
-// 	}
-
-//       }
-	 
-//       if ( ! child(DL) ) {
-
-// 	refine_child[DL] =
-// 	  (cousin(L,DR) && 
-// 	   ( cousin(L,DR)->child(UR) ||
-// 	     cousin(L,DR)->child(DR))) ||
-// 	  (cousin(D,UL) && 
-// 	   ( cousin(D,UL)->child(UL) ||
-// 	     cousin(D,UL)->child(UR))) ||
-// 	  (child(DR) && 
-// 	   ( child(DR)->child(UL) ||
-// 	     child(DR)->child(DL))) ||
-// 	  (child(UL) && 
-// 	   ( child(UL)->child(DL) ||
-// 	     child(UL)->child(DR)));
-
-// 	if (refine_child[DL]) {
-// 	  create_child_(DL); 
-// 	  update_child_(DL);
-// 	  child(DL)->normalize_pass(refined_tree,full_nodes);
-// 	  refined_tree = true;
-// 	}
-//       }
-
-//       if ( ! child(UR) ) {
-
-// 	refine_child[UR] = 
-// 	  (cousin(R,UL) && 
-// 	   ( cousin(R,UL)->child(UL) ||
-// 	     cousin(R,UL)->child(DL))) ||
-// 	  (cousin(U,DR) && 
-// 	   ( cousin(U,DR)->child(DL) ||
-// 	     cousin(U,DR)->child(DR))) ||
-// 	  (child(UL) && 
-// 	   ( child(UL)->child(UR) ||
-// 	     child(UL)->child(DR))) ||
-// 	  (child(DR) && 
-// 	   ( child(DR)->child(UL) ||
-// 	     child(DR)->child(UR)));
-
-// 	if (refine_child[UR]) {
-// 	  create_child_(UR); 
-// 	  update_child_(UR);
-// 	  child(UR)->normalize_pass(refined_tree,full_nodes);
-// 	  refined_tree = true;
-// 	}
-//       }
-       
-//       if ( ! child(DR) ) {
-// 	refine_child[DR] = 
-// 	  (cousin(R,DL) && 
-// 	   ( cousin(R,DL)->child(UL) ||
-// 	     cousin(R,DL)->child(DL))) ||
-// 	  (cousin(D,UR) && 
-// 	   ( cousin(D,UR)->child(UL) ||
-// 	     cousin(D,UR)->child(UR))) ||
-// 	  (child(DL) && 
-// 	   ( child(DL)->child(UR) ||
-// 	     child(DL)->child(DR))) ||
-// 	  (child(UR) && 
-// 	   ( child(UR)->child(DL) ||
-// 	     child(UR)->child(DR)));
-
-// 	if (refine_child[DR]) {
-// 	  create_child_(DR); 
-// 	  update_child_(DR);
-// 	  child(DR)->normalize_pass(refined_tree,full_nodes);
-// 	  refined_tree = true;
-// 	}
-//       }
-//     }
-  } else {
-
-    // not a leaf: recurse
-
-    for (int ix=0; ix<4; ix++) {
-      for (int iy=0; iy<4; iy++) {
+  for (int ix=0; ix<4; ix++) {
+    for (int iy=0; iy<4; iy++) {
+      if (child(ix,iy)) {
 	child(ix,iy)->normalize_pass(refined_tree,full_nodes);
       }
     }
   }
 
+    //  }
 }
-
   // Perform a pass of trying to optimize uniformly-refined nodes
 void Node16::optimize_pass(bool & refined_tree, bool full_nodes)
 {
@@ -479,7 +432,7 @@ void Node16::optimize_pass(bool & refined_tree, bool full_nodes)
 
     // adjust effective resolution
 
-    level_adjust_ += 1 + child_[0][0]->level_adjust_; 
+    level_adjust_ += 2 + child_[0][0]->level_adjust_; 
 
     for (int ix=0; ix<4; ix++) {
       for (int iy=0; iy<4; iy++) {

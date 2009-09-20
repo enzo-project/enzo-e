@@ -3,6 +3,7 @@ TOP = ../../..
 
 TEST_EXES = test_tree
 
+PG = 
 INC_LOCAL  = -I$(TOP)/include
 LIB_LOCAL  = -L$(TOP)/lib -lcello
 
@@ -10,8 +11,8 @@ LIB_LOCAL  = -L$(TOP)/lib -lcello
 OBJS = tree4.o node4.o tree16.o node16.o 
 
 
-FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 -pg
-CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 -pg
+FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(PG)
+CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(PG)
 
 FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
