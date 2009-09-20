@@ -383,6 +383,7 @@ void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
 	    create_child_(ix,iy); 
 	    update_child_(ix,iy);
 	    child(ix,iy)->normalize_pass(refined_tree,full_nodes);
+	    refined_tree = true;
 	  }
 	}
       }

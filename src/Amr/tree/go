@@ -2,6 +2,7 @@
 
 # set images = (peace2)
 # set images = (dot_DL dot_DR dot_UL dot_UR)
+# set images = (dots)
 set images = (dot)
 # set images = (ucsd-seal-1024)
 # set images = (gradient)
@@ -20,20 +21,12 @@ foreach image ($images)
     make
     test_tree
     echo "done"
-    h5topng -c $color tree4-0.hdf5
-    h5topng -c $color tree4-1.hdf5
-    h5topng -c $color tree4-2.hdf5
-    h5topng -c $color tree4-3.hdf5
-    h5topng -c $color tree4-4.hdf5
-    h5topng -c $color tree4-5.hdf5
-
-    h5topng -c $color tree16-0.hdf5
-    h5topng -c $color tree16-1.hdf5
-    h5topng -c $color tree16-2.hdf5
-    h5topng -c $color tree16-3.hdf5
-    h5topng -c $color tree16-4.hdf5
-    h5topng -c $color tree16-5.hdf5
-
+    foreach tree (4 16)
+        foreach type (0 1 2 3 4 5)
+          h5topng -c $color tree$tree-$type.hdf5
+          mv tree$tree-$type.hdf5.png $image-$tree-$type.png
+        end
+    end
 
 end
 
