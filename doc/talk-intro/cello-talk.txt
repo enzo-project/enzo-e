@@ -236,11 +236,22 @@ Overview
       Chombo group is on top of this
    
 
-    AMR: Octree issues
-@!\centerline{
+    AMR: Octree variations
+@!\begin{minipage}{2.5in}
 @!\includegraphics<1>[width=2.5in]{dots.png}
 @!\includegraphics<2>[width=2.5in]{dots-4-0.png}
 @!\includegraphics<3>[width=2.5in]{dots-4-1.png}
+@!\end{minipage} \
+@!\begin{minipage}{2.5in}
+      \enhance<1>Want to refine on single points
+      \enhance<2>Simple quad-tree has level jumps
+      \enhance<3>Normalization helps but problems
+        \enhance<3>Numerous patches
+        \enhance<3>Slow refinement
+@!\end{minipage}
+
+    AMR: Octree issues
+@!\centerline{
 @!\includegraphics<4>[width=2.5in]{dots-4-2.png}
 @!\includegraphics<5>[width=2.5in]{dots-4-3.png}
 @!\includegraphics<6>[width=2.5in]{dots-4-4.png}
@@ -265,7 +276,6 @@ Overview
 @!\includegraphics<25>[width=2.5in]{cosmo2-16-4.png}
 @!\includegraphics<26>[width=2.5in]{cosmo2-16-5.png}
 @!}
-
     AMR: Octree examples
 @!\centerline{
 @!\includegraphics<1>[width=1in]{norman-10.png}
