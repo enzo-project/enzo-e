@@ -184,17 +184,32 @@ Overview
 
     AMR: Octree issues
 @!\centerline{
-@!\includegraphics<1>[width=2in]{dot.png}
-@!\includegraphics<2>[width=2in]{dot-1.png}
-@!\includegraphics<3>[width=2in]{dot-2.png}
-@!\includegraphics<4>[width=2in]{dot-3.png}
-@!\includegraphics<5>[width=2in]{dot-4.png}
-@!\includegraphics<6>[width=2in]{dot_DL-0.png}
-@!\includegraphics<7>[width=2in]{dot_DL-1.png}
-@!\includegraphics<8>[width=2in]{dot_DL-2.png}
-@!\includegraphics<9>[width=2in]{dot_DL-3.png}
-@!\includegraphics<10>[width=2in]{dot_DL-4.png}
-
+@!\includegraphics<1>[width=2.5in]{dots.png}
+@!\includegraphics<2>[width=2.5in]{dots-4-0.png}
+@!\includegraphics<3>[width=2.5in]{dots-4-1.png}
+@!\includegraphics<4>[width=2.5in]{dots-4-2.png}
+@!\includegraphics<5>[width=2.5in]{dots-4-3.png}
+@!\includegraphics<6>[width=2.5in]{dots-4-4.png}
+@!\includegraphics<7>[width=2.5in]{dots-4-5.png}
+@!\includegraphics<8>[width=2.5in]{dots-16-0.png}
+@!\includegraphics<9>[width=2.5in]{dots-16-1.png}
+@!\includegraphics<10>[width=2.5in]{dots-16-2.png}
+@!\includegraphics<11>[width=2.5in]{dots-16-3.png}
+@!\includegraphics<12>[width=2.5in]{dots-16-4.png}
+@!\includegraphics<13>[width=2.5in]{dots-16-5.png}
+@!\includegraphics<14>[width=2.5in]{cosmo2.png}
+@!\includegraphics<15>[width=2.5in]{cosmo2-4-0.png}
+@!\includegraphics<16>[width=2.5in]{cosmo2-4-1.png}
+@!\includegraphics<17>[width=2.5in]{cosmo2-4-2.png}
+@!\includegraphics<18>[width=2.5in]{cosmo2-4-3.png}
+@!\includegraphics<19>[width=2.5in]{cosmo2-4-4.png}
+@!\includegraphics<20>[width=2.5in]{cosmo2-4-5.png}
+@!\includegraphics<21>[width=2.5in]{cosmo2-16-0.png}
+@!\includegraphics<22>[width=2.5in]{cosmo2-16-1.png}
+@!\includegraphics<23>[width=2.5in]{cosmo2-16-2.png}
+@!\includegraphics<24>[width=2.5in]{cosmo2-16-3.png}
+@!\includegraphics<25>[width=2.5in]{cosmo2-16-4.png}
+@!\includegraphics<26>[width=2.5in]{cosmo2-16-5.png}
 @!}
 
     AMR: Octree examples
