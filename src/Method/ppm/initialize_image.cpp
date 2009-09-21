@@ -17,7 +17,7 @@
 /** 
 *********************************************************************
 *
-* @file      initialize_enzo.cpp
+* @file      initialize_image.cpp
 * @brief     Initialize variables in cello_hydro.h
 * @author    James Bordner
 * @date      Sat Aug 29 14:20:09 PDT 2009
@@ -25,7 +25,9 @@
 *
 * DESCRIPTION 
 * 
-*    Initialize variables in cello_hydro.h
+*    Initialize variables in cello_hydro.h.  Initial density and pressure
+*    are given by an image saved using "gimp" with the ".h" format.  This
+*    file is sym-linked or copied to image.h before compiling.
 *
 * PACKAGES
 *
@@ -37,7 +39,7 @@
 *
 * PUBLIC FUNCTIONS
 *  
-*    initialize_enzo ();
+*    initialize_image ();
 *
 * PRIVATE FUCTIONS
 *  
@@ -50,15 +52,11 @@
 
 #include "cello_hydro.h"
 #include "assert.h"
+#include "image.h"
 
-// #include "enzo.h"
-// #include "enzo.h"
-#include "egret-bg.h"
-
-float image[width][height];
- 
-
-inline float color_value (float x, float y, float enzo_lower[2], float enzo_upper[2])
+inline float color_value 
+(float * image, int nx, int ny,
+ float x, float y, float enzo_lower[2], float enzo_upper[2])
 // Return boolean flag whether point is inside the text "Enzo"
 {
   if (x < enzo_lower[0] || x > enzo_upper[0]) return false;
@@ -72,14 +70,14 @@ inline float color_value (float x, float y, float enzo_lower[2], float enzo_uppe
   assert (iy >= 0);
   assert (ix < width);
   assert (iy < height);
-  return (image[ix][iy]);
+  return (image[ix + width*iy]);
 } 
 
-void initialize_enzo ()
+void initialize_image ()
 
 {
 
-  int grid_size [] = { 1280-6, 1024-6 };
+  int grid_size [] = { width, height };
 
   float enzo_density_out = 1.0;
   float enzo_density_in  = 0.125;
@@ -90,10 +88,12 @@ void initialize_enzo ()
   int pixel[3];
   char * data = header_data;
 
+  float * image = new float [width*height];
   for (int iy=0; iy<height; iy++) {
     for (int ix=0; ix<width; ix++) {
       HEADER_PIXEL(data,pixel);
-      image [ix][iy] = 1.0*(pixel[0] + pixel[1] + pixel[2])/(255*3);
+      int i=ix + width*iy;
+      image [i] = 1.0*(pixel[0] + pixel[1] + pixel[2])/(255*3);
     }
   }
 
@@ -107,7 +107,7 @@ void initialize_enzo ()
   //  0 
 
   float enzo_lower[2] = {0.0, 0.0};
-  float enzo_upper[2] = {4.0, 2.0};
+  float enzo_upper[2] = {2.0, 2.0};
 
   // Physics
 
@@ -210,7 +210,7 @@ void initialize_enzo ()
 
       // Initialize density and total energy
 
-      float a = color_value(x,y,enzo_lower,enzo_upper);
+      float a = color_value(image, width,height,x,y,enzo_lower,enzo_upper);
       float density  = a*enzo_density_in  + (1-a)*enzo_density_out;
       float pressure = a*enzo_pressure_in + (1-a)*enzo_pressure_out;
 

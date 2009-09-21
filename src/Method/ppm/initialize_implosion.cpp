@@ -49,12 +49,14 @@
  */
 
 #include "cello_hydro.h"
+
+const bool debug = false;
  
-void initialize_implosion ()
+void initialize_implosion (int size_param, int cycles_param)
 
 {
 
-  int grid_size [] = { 400, 400 };
+  int grid_size [] = { size_param, size_param };
   float implosion_density_out = 1.0;
   float implosion_density_in  = 0.125;
   float implosion_pressure_out = 1.0;
@@ -74,8 +76,8 @@ void initialize_implosion ()
 
   // Control
 
-  time_stop              = 2.5;
-  cycle_stop             = 20000;
+  time_stop              = 10000;
+  cycle_stop             = cycles_param;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
@@ -151,11 +153,12 @@ void initialize_implosion ()
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];
 
-  printf ("%g  %g %g  %g %g\n",
+  if (debug) printf ("Size = %d %d \n",ndx,ndy);
+  if (debug) printf ("%g  %g %g  %g %g\n",
 	  Gamma, 
 	  implosion_pressure_out,implosion_density_out,
 	  implosion_pressure_in,implosion_density_in);
-  printf ("total energy: %g %g\n",
+  if (debug) printf ("total energy: %g %g\n",
 	  implosion_pressure_out / ((Gamma - 1.0)*implosion_density_out),
 	  implosion_pressure_in / ((Gamma - 1.0)*implosion_density_in));
 
@@ -199,7 +202,7 @@ void initialize_implosion ()
     }
   }
 
-  printf ("density(3,3) = %g\n",BaryonField[field_density][1221]);
+  if (debug) printf ("density(3,3) = %g\n",BaryonField[field_density][1221]);
   AccelerationField[0] = NULL;
   AccelerationField[1] = NULL;
   AccelerationField[2] = NULL;

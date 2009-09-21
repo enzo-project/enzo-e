@@ -5,15 +5,17 @@
 # dep          Generate dependencies
 # 
 
+# DEF_OPTIMIZE = -D OPTIMIZE_CELL_WIDTH
 TOP = ../../..
 
-TEST_EXES = test_implosion test_enzo test_sdsc
+PG = 
+
+TEST_EXES = test_implosion test_image
 
 INC_LOCAL  = -I$(TOP)/include
 LIB_LOCAL  = -L$(TOP)/lib -lcello
 
-OBJS_ENZO = test_enzo.o initialize_enzo.o
-OBJS_SDSC = test_sdsc.o initialize_sdsc.o
+OBJS_IMAGE     = test_image.o initialize_image.o
 OBJS_IMPLOSION = test_implosion.o initialize_implosion.o
 
 OBJS = \
@@ -34,12 +36,16 @@ OBJS = \
 	Grid_SolveHydroEquations.o \
 	Grid_SetExternalBoundaryValues.o \
 	SetExternalBoundary.o \
-	calcdiss.o \
+	print_field.o \
+	sum_field.o \
+	data_dump.o \
+        initialize_hydro.o
+
+OBJS_FC = calcdiss.o \
 	calc_dt.o \
 	euler.o \
 	f_message.o \
 	inteuler.o \
-	initialize_hydro.o \
 	intvar.o \
 	pgas2d_dual.o \
 	pgas2d.o \
@@ -47,26 +53,24 @@ OBJS = \
 	twoshock.o \
 	xeuler_sweep.o \
 	yeuler_sweep.o \
-	zeuler_sweep.o \
-	print_field.o \
-	sum_field.o \
-	data_dump.o
+	zeuler_sweep.o
 
+OBJS_FC_OPT = ppm.o
 
-FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
-CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
+FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(PG) $(DEF_OPTIMIZE)
+CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(PG) $(DEF_OPTIMIZE)
 
 FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
-LIB      = $(LIB_LOCAL) -lgfortran -lm -lhdf5
+LIB      = $(LIB_LOCAL) -lgfortran -lm -lhdf5 $(PG)
 
-all: test_enzo test_implosion test_sdsc
-test_enzo: $(OBJS) $(OBJS_ENZO)
-	$(CXX) -o test_enzo $(OBJS_ENZO) $(OBJS) $(LIB)
-test_sdsc: $(OBJS) $(OBJS_SDSC) initialize_sdsc.o
-	$(CXX) -o test_sdsc $(OBJS_SDSC) $(OBJS) $(LIB)
-test_implosion: $(OBJS) $(OBJS_IMPLOSION)
-	$(CXX) -o test_implosion $(OBJS_IMPLOSION) $(OBJS) $(LIB)
+all: test_image test_implosion
+test_image: $(OBJS) $(OBJS_FC) $(OBJS_IMAGE)
+	$(CXX) -o test_image $(OBJS_IMAGE) $(OBJS) $(OBJS_FC) $(LIB)
+test_implosion: $(OBJS) $(OBJS_FC) $(OBJS_IMPLOSION)
+	$(CXX) -o test_implosion $(OBJS_IMPLOSION) $(OBJS) $(OBJS_FC)  $(LIB)
+test_implosion_opt: $(OBJS) $(OBJS_FC_OPT) $(OBJS_IMPLOSION)
+	$(CXX) -o test_implosion_opt $(OBJS_IMPLOSION) $(OBJS) $(OBJS_FC_OPT)  $(LIB)
 
 .PHONY: install
 install: $(TEST_EXES)
@@ -74,9 +78,7 @@ install: $(TEST_EXES)
 
 obj: $(OBJS)
 
-test: $(TEST_EXES)
-#	./test_implosion # slow
-#	./test_enzo      # slow
+test:
 
 .PHONY: clean
 clean:

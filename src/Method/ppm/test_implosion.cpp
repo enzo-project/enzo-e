@@ -10,39 +10,65 @@
  */
  
 #include "cello_hydro.h"
+#include "performance_timer.hpp"
 
-main()
+int main(int argc, char * argv[])
 {
 
+  int n      = 394;
+  int cycles = 20000;
+  int cycle_dump_frequency = 10;
+  if (argc>=2)  {
+    n = atoi(argv[1]);
+    if (n < 1 || 10000 < n) {
+      printf ("Illegal size %d: resetting to 400\n",n);
+      n = 400;
+    }
+  }
+  if (argc>=3)  {
+    cycles = atoi(argv[2]);
+    if (cycles < 1 || 10000000 < cycles) {
+      printf ("Illegal cycles %d: resetting to 20000\n",n);
+      cycles = 20000;
+    }
+  }
+  if (argc>=4)  {
+    cycle_dump_frequency = atoi(argv[3]);
+    if (cycle_dump_frequency < 0) {
+      printf ("Illegal cycle_dump_frequency %d: resetting to 10\n",n);
+      cycle_dump_frequency = 10;
+    }
+  }
+
+  printf ("%d %d %d\n",n,cycles,cycle_dump_frequency);
   initialize_hydro ();
-  initialize_implosion();
+  initialize_implosion(n,cycles);
 
   float dt;
-
   int   cycle;
-  const int cycle_dump_frequency = 10;
   float time;
 
+  Timer timer;
+  timer.start();
   for (cycle = 0, time = 0.0;
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
     dt =  min (ComputeTimeStep(), time_stop - time);
 
-    printf ("cycle = %6d time = %6f dt = %6f\n",cycle,time,dt);
-
     SetExternalBoundaryValues();
 
-    if ((cycle % cycle_dump_frequency) == 0) {
-      data_dump(cycle);
-    }
+     if (cycle_dump_frequency && (cycle % cycle_dump_frequency) == 0) {
+       data_dump(cycle);
+     }
 
     SolveHydroEquations(cycle, dt);
 
   }
-  if ((cycle % cycle_dump_frequency) == 0) {
-    SetExternalBoundaryValues();
-    data_dump(cycle);
-  }
+  printf ("%g\n",timer.value());
+
+  SetExternalBoundaryValues();
+  data_dump(cycle);
+
 }
 

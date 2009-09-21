@@ -15,7 +15,7 @@ main()
 {
 
   initialize_hydro ();
-  initialize_enzo();
+  initialize_image();
 
   float dt;
 

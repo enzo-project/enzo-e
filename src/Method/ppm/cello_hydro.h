@@ -208,9 +208,8 @@ int SetExternalBoundary(int FieldRank,
 
 void initialize_hydro ();
 
-void initialize_implosion ();
-void initialize_enzo ();
-void initialize_sdsc ();
+void initialize_implosion (int size, int cycles);
+void initialize_image ();
 
 float sum_field (int field);
 float print_field (int field);
