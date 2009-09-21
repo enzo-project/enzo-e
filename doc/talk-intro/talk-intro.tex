@@ -22,6 +22,12 @@
 \newcommand{\colorcode}[1]{\textcolor{blue}{\code{#1}}}
 \def\enhance<#1>{%
  \temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
+\def\enhanceus<#1>{%
+ \temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
+\def\enhancenewus<#1>{%
+ \temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
+\def\enhancethem<#1>{%
+ \temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
 %======================================================================
 \title[The \cello\ Project]
       {The \cello\ Project \\ \small{\enzo: The Next Generation}}
@@ -131,7 +137,7 @@ More AMR $\rightarrow$ more data dependencies $\rightarrow$ less parallelism
     \begin{frame}[fragile] \frametitle{Petascale Performance Issues}
       \begin{itemize}
         \item Synchronization
-        \item Task size control
+        \item Parallel task control
         \begin{itemize}
           \item Large enough to be efficient
           \item Small enough for sufficient parallelism
@@ -183,6 +189,7 @@ More AMR $\rightarrow$ more data dependencies $\rightarrow$ less parallelism
 %------------------------------------------------------------------------
     \begin{frame}[fragile] \frametitle{Parameter File: Shock Pool draft}
  \footnotesize
+\begin{block}{Shock Pool: Domain, Grid, and Field parameters}
       \begin{verbatim}
   # Define the domain to be the 1D interval from 0 to 1
 
@@ -198,11 +205,13 @@ More AMR $\rightarrow$ more data dependencies $\rightarrow$ less parallelism
   Field pressure { floor = 1.0e-6 }
   Field density  { floor = 1.0e-6 }
       \end{verbatim}
+\end{block}
 \end{frame}
 
 %------------------------------------------------------------------------
     \begin{frame}[fragile] \frametitle{Parameter File: Shock Pool draft}
  \footnotesize
+\begin{block}{Shock Pool: Method and Boundary}
       \begin{verbatim}
   # Physics method is ppm hydro
  
@@ -216,11 +225,13 @@ More AMR $\rightarrow$ more data dependencies $\rightarrow$ less parallelism
  
   Boundary { type = reflecting }
       \end{verbatim}
+\end{block}
 \end{frame}
 
 %------------------------------------------------------------------------
     \begin{frame}[fragile] \frametitle{Parameter File: Shock Pool draft}
  \footnotesize
+\begin{block}{Shock Pool: Initial and Stopping}
       \begin{verbatim}
   # Define initial conditions
  
@@ -239,11 +250,12 @@ More AMR $\rightarrow$ more data dependencies $\rightarrow$ less parallelism
      cycle = 10000
   }
       \end{verbatim}
+\end{block}
 \end{frame}
 
 %------------------------------------------------------------------------
     \begin{frame}[fragile] \frametitle{Software Components}
-\centerline{\includegraphics[width=3in]{components.png}}
+\centerline{\includegraphics[width=4in]{components.png}}
 \end{frame}
 
 %------------------------------------------------------------------------
@@ -260,15 +272,15 @@ More AMR $\rightarrow$ more data dependencies $\rightarrow$ less parallelism
       \begin{tabular}{|l|ccc|cc|}
 \hline
     &  \textbf{Enzo} & \textbf{Chombo} & \textbf{Paramesh} & \textbf{Cello-patch} & \textbf{Cello-tree} \\  \hline
-    \textbf{Refinement} &  \us{patch} & \them{patch} &  \them{tree} & \newus{patch} & \newus{tree}  \\
-    \textbf{Tree type} & \us{none} & \them{octree} & \them{octree} & \newus{octree} & \newus{octree++} \\  \hline
-    \textbf{Parents} & \us{single} & \them{multiple} & \them{single} &   \newus{multiple} & \newus{single} \\
-    \textbf{Children} & \us{variable} & \them{variable} & \them{constant} & \newus{variable} & \newus{limited} \\
-    \textbf{Neighbors} & \us{variable} & \them{variable} & \them{limited} & \newus{variable} & \newus{limited} \\\hline
-    \textbf{Level jumps} & \us{ yes} &    \them{no} &      \them{no}    &   \newus{no} & \newus{no} \\
-    \textbf{Symmetric} & \us{no} &  \them{yes} &  \them{yes} &  \newus{yes} & \newus{yes} \\\hline
-    \textbf{Patch shape} & \us{  variable} & \them{variable} &  \them{constant} & \newus{variable} & \newus{constant} \\
-    \textbf{Patch size} & \us{  variable} & \them{variable} &  \them{constant} & \newus{variable} &\newus{limited}  \\ \hline
+    \textbf{Refinement} &  \enhanceus<2>{patch} & \enhancethem<3>{patch} &  \enhancethem<4>{tree} & \enhancenewus<5>{patch} & \enhancenewus<6>{tree}  \\
+    \textbf{Tree type} & \enhanceus<2>{none} & \enhancethem<3>{octree} & \enhancethem<4>{octree} & \enhancenewus<5>{octree} & \enhancenewus<6>{octree++} \\  \hline
+    \textbf{Parents} & \enhanceus<2>{single} & \enhancethem<3>{multiple} & \enhancethem<4>{single} &   \enhancenewus<5>{multiple} & \enhancenewus<6>{single} \\
+    \textbf{Children} & \enhanceus<2>{variable} & \enhancethem<3>{variable} & \enhancethem<4>{constant} & \enhancenewus<5>{variable} & \enhancenewus<6>{limited} \\
+    \textbf{Neighbors} & \enhanceus<2>{variable} & \enhancethem<3>{variable} & \enhancethem<4>{limited} & \enhancenewus<5>{variable} & \enhancenewus<6>{limited} \\\hline
+    \textbf{Level jumps} & \enhanceus<2>{ yes} &    \enhancethem<3>{no} &      \enhancethem<4>{no}    &   \enhancenewus<5>{no} & \enhancenewus<6>{no} \\
+    \textbf{Symmetric} & \enhanceus<2>{no} &  \enhancethem<3>{yes} &  \enhancethem<4>{yes} &  \enhancenewus<5>{yes} & \enhancenewus<6>{yes} \\\hline
+    \textbf{Patch shape} & \enhanceus<2>{  variable} & \enhancethem<3>{variable} &  \enhancethem<4>{constant} & \enhancenewus<5>{variable} & \enhancenewus<6>{constant} \\
+    \textbf{Patch size} & \enhanceus<2>{  variable} & \enhancethem<3>{variable} &  \enhancethem<4>{constant} & \enhancenewus<5>{variable} &\enhancenewus<6>{limited}  \\ \hline
       \end{tabular}
 \end{frame}
 
