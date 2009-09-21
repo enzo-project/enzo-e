@@ -7,6 +7,7 @@
 %                  outlinebeamer - Outline Beamer Class Presentation Maker %
 %                                    http://outlinebeamer.sourceforge.net/ %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\documentclass{beamer}
 \documentclass{beamer}
 
 \usetheme{Copenhagen}
@@ -22,15 +23,36 @@
 \newcommand{\good}{\textcolor{green}{\smiley}}
 \newcommand{\bad}{\textcolor{red}{\frownie}}
 \newcommand{\colorcode}[1]{\textcolor{blue}{\code{#1}}}
+\newcommand{\itemnum}[1]{\item<#1>}
 
-\def\enhance<#1>{%
+% UNCOMMENT TO PRINT
+
+\newcommand{\enhance}[1]{}
+\newcommand{\enhancebf}[2]{\textbf{#2}}
+\newcommand{\enhanceus}[1]{\color{blue}}
+\newcommand{\enhancenewus}[1]{\color{magenta}}
+\newcommand{\enhancethem}[1]{\color{red}}
+
+% UNCOMMENT FOR TALK:
+
+% \newcommand{\enhance}[1]{
+%  \temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
+% \newcommand{\textbftemporal}[2]{\enhance{1}\textbf{#2}}
+% \newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
+% \newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
+% \newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
+
+
+
+% \def\enhanceus<#1>{%
+%  \temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
+% \def\enhancenewus<#1>{%
+%  \temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
+% \def\enhancethem<#1>{%
+%  \temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
+
+\newcommand{\ENHANCE}[1]{
  \temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
-\def\enhanceus<#1>{%
- \temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
-\def\enhancenewus<#1>{%
- \temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
-\def\enhancethem<#1>{%
- \temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
 
 %======================================================================
 \title[The \cello\ Project]
@@ -39,33 +61,62 @@
 \date{\today}
 \begin{document}
 \frame{\titlepage}
-\frame{\tableofcontents}
-\AtBeginSubsection[]
+%\frame{\tableofcontents}
+% \AtBeginSubsection[]
 {
 %------------------------------------------------------------------------
   \begin{frame}<beamer>
     \tableofcontents[currentsection,currentsubsection]
+%    \tableofcontents[currentsection]
   \end{frame}
 }
 
 
-\include{outline}
+%========================================================================
+\section{Introduction}
+%========================================================================
 
+% \include{outline}
+
+%------------------------------------------------------------------------
+\subsection{Goals}
+%------------------------------------------------------------------------
 \include{goals}
 
-\include{users}
 
+%------------------------------------------------------------------------
+\subsection{Scope}
+%------------------------------------------------------------------------
+
+\include{users}
 \include{problems}
 
+%------------------------------------------------------------------------
+\subsection{Issues}
+%------------------------------------------------------------------------
 \include{petascale-issues}
 
+
 \include{enhancements}
+
+%========================================================================
+\section{Software design}
+%========================================================================
+
+%------------------------------------------------------------------------
+\subsection{Parameter files}
+%------------------------------------------------------------------------
 
 \include{shockpool-1}
 
 \include{shockpool-2}
 
 \include{shockpool-3}
+
+
+%------------------------------------------------------------------------
+\subsection{Software components}
+%------------------------------------------------------------------------
 
 \include{components}
 
@@ -79,10 +130,22 @@
 
 \include{components-support}
 
+%========================================================================
+\section{Data structures}
+%========================================================================
+
+%------------------------------------------------------------------------
+\subsection{Related applications}
+%------------------------------------------------------------------------
+
 \include{app-flash}
 \include{app-chombo}
 
 \include{app-table}
+
+%------------------------------------------------------------------------
+\subsection{AMR versus unigrid}
+%------------------------------------------------------------------------
 
 \include{array-amr}
 
@@ -90,15 +153,28 @@
 
 \include{amr}
 
+%------------------------------------------------------------------------
+\subsection{Tree-AMR examples}
+%------------------------------------------------------------------------
+
+\include{amr-point-source}
+
+\include{amr-cosmology}
+
+%========================================================================
+\section{Issues and solutions}
+%========================================================================
+
 \include{idea-timestepping}
 \include{idea-particle-precision}
 \include{idea-load-balance}
 \include{idea-grid-precision}
 \include{idea-gravity}
+\include{idea-resiliency}
 
-\include{amr-point-source}
-
-\include{amr-cosmology}
+%========================================================================
+\section{Conclusions}
+%========================================================================
 
 \include{summary}
 

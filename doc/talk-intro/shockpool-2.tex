@@ -1,0 +1,19 @@
+%------------------------------------------------------------------------
+    \begin{frame}[fragile] \frametitle{Parameter File: Shock Pool draft}
+ \footnotesize
+\begin{block}{Shock Pool: Method and Boundary}
+      \begin{verbatim}
+  # Physics method is ppm hydro
+ 
+  Method ppm {
+      gamma     = 1.4;
+      courant   = 0.5;
+      diffusion = false
+  }
+ 
+  # Define boundary conditions
+ 
+  Boundary { type = reflecting }
+      \end{verbatim}
+\end{block}
+\end{frame}

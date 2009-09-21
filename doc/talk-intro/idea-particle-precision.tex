@@ -1,0 +1,25 @@
+%------------------------------------------------------------------------
+\begin{frame}[fragile] \frametitle{Particle positions}
+      \begin{itemize}
+        \item Particles are associated with a patch
+        \item Represent particles in patch-local coordinates
+        \item Simple coordinate transformation when particles migrate
+        \item Single-precision sufficient
+        \item Global coordinates
+      \end{itemize}
+\end{frame}
+%------------------------------------------------------------------------
+    \begin{frame}[fragile] \frametitle{Precision issues: Particles}
+      \begin{itemize}
+        \item Use local coordinate system when possible
+        \begin{itemize}
+          \item Particles coordinates [0:1] in containing grid patch
+          \item Simple coordinate transform when containing patch changes
+          \item Single precision sufficient
+          \begin{itemize}
+            \item Save memory
+            \item Save time
+          \end{itemize}
+        \end{itemize}
+      \end{itemize}
+\end{frame}

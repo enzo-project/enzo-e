@@ -1,0 +1,16 @@
+%------------------------------------------------------------------------
+\begin{frame}[fragile] \frametitle{Software Components: High-level}
+\end{frame}
+%------------------------------------------------------------------------
+\begin{frame}[fragile] \frametitle{Control}
+      \begin{itemize}
+        \item Task: advance grid patch one timestep
+        \item Dependencies: boundary values
+        \item Dynamic task scheduling
+        \begin{itemize}
+          \item No artificial dependencies imposed
+          \item Patches in different levels can advance concurrently
+          \item CHARM++ would be helpful
+        \end{itemize}
+      \end{itemize}
+\end{frame}

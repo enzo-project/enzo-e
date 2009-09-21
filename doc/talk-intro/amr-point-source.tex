@@ -1,0 +1,107 @@
+%------------------------------------------------------------------------
+    \begin{frame}[fragile] \frametitle{AMR: point-source test with full $2^d$-trees}
+\begin{minipage}{2.3in}
+\includegraphics<1>[width=2.3in]{dots.png}
+\includegraphics<2>[width=2.3in]{dots-4-0.png}
+\includegraphics<3>[width=2.3in]{dots-4-1.png}
+\includegraphics<4>[width=2.3in]{dots-4-2.png}
+\end{minipage}
+\begin{minipage}{1.6in}
+\footnotesize
+      \begin{itemize}
+        \item \ENHANCE{1}Test problem: refine on point sources
+        \item \ENHANCE{2}Simple quad-tree has level jumps
+        \item \ENHANCE{3}Normalization helps, but issues remain
+        \begin{itemize}
+\footnotesize
+          \item \ENHANCE{3}numerous patches
+          \item \ENHANCE{3}slow refinement
+        \end{itemize}
+        \item \ENHANCE{4}Patch coalescing reduces patch count
+      \end{itemize}
+\end{minipage} \\
+\begin{minipage}{4.0in}
+\footnotesize
+Nodes: 
+\ENHANCE{2}549
+\ENHANCE{3}2137
+\ENHANCE{4}\textbf{1073}
+\color{lightgray}155
+\color{lightgray}650
+\color{lightgray}\textbf{650}
+\color{lightgray}86
+\color{lightgray}158
+\color{lightgray}\textbf{158}
+\end{minipage}
+\end{frame}
+
+%------------------------------------------------------------------------
+    \begin{frame}[fragile] \frametitle{AMR: point-source test with non-full $2^d$-trees}
+\begin{minipage}{2.3in}
+\includegraphics<1>[width=2.3in]{dots-4-3.png}
+\includegraphics<2>[width=2.3in]{dots-4-4.png}
+\includegraphics<3>[width=2.3in]{dots-4-5.png}
+\end{minipage} \
+\begin{minipage}{1.6in}
+\footnotesize
+      \begin{itemize}
+        \item \ENHANCE{1}Try refining subset of children
+        \item \ENHANCE{2}Still have to deal with level jumps
+        \item \ENHANCE{3}Patch coalescing not effective
+      \end{itemize}
+\end{minipage} \\
+\begin{minipage}{4.0in}
+\footnotesize
+Nodes: 
+\color{gray}549
+\color{gray}2137
+\color{gray}\textbf{1073}
+\ENHANCE{1}155
+\ENHANCE{2}650
+\ENHANCE{3}\textbf{650}
+\color{lightgray}86
+\color{lightgray}158
+\color{lightgray}\textbf{158}
+
+\end{minipage}
+\end{frame}
+
+%------------------------------------------------------------------------
+
+    \begin{frame}[fragile] \frametitle{AMR:  point-source test with non-full $4^d$-trees}
+\begin{minipage}{2.3in}
+\includegraphics<1>[width=2.3in]{dots-16-3.png}
+\includegraphics<2>[width=2.3in]{dots-16-4.png}
+\includegraphics<3>[width=2.3in]{dots-16-5.png}
+\includegraphics<4>[width=2.3in]{dots-16-5.png}
+\end{minipage} \
+\begin{minipage}{1.6in}
+\footnotesize
+      \begin{itemize}
+        \item \ENHANCE{1}Try refinement by 4 instead of 2
+        \item \ENHANCE{2}Deal with level jumps
+        \item \ENHANCE{3}Patch coalescing still not effective
+        \item \ENHANCE{4}Still relatively good
+      \begin{itemize}
+\footnotesize
+        \item \ENHANCE{4}Fewer patches
+	\item \ENHANCE{4}Steep refinement
+        \item \ENHANCE{4}Can 'back-fill' to regain refinement-by-2
+      \end{itemize}
+      \end{itemize}
+\end{minipage}
+\begin{minipage}{4.0in}
+\footnotesize
+Nodes: 
+\color{gray}549
+\color{gray}2137
+\color{gray}\textbf{1073}
+\color{gray}155
+\color{gray}650
+\color{gray}\textbf{650}
+\ENHANCE{1}86
+\ENHANCE{2}158
+\ENHANCE{3-4}\textbf{158}
+
+\end{minipage}
+\end{frame}

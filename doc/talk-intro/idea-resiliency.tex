@@ -1,0 +1,13 @@
+%------------------------------------------------------------------------
+    \begin{frame}[fragile] \frametitle{Software Resiliency}
+      \begin{itemize}
+        \item Handle software / hardware errors gracefully
+        \begin{itemize}
+          \item Identify problems: memory error, node crash, etc.
+          \item Bactrack and continue on reduced hardware
+        \end{itemize}
+        \item Use checkpointing libraries, e.g. BLCR
+        \item Application / library determines best checkpoint frequency
+        \item Minimize size of checkpoint dumps
+      \end{itemize}
+\end{frame}
