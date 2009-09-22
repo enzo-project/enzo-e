@@ -1,19 +1,21 @@
 %------------------------------------------------------------------------
-    \begin{frame}[fragile] \frametitle{Parameter File: Shock Pool draft}
- \footnotesize
-\begin{block}{Shock Pool: Method and Boundary}
-      \begin{verbatim}
-  # Physics method is ppm hydro
- 
-  Method ppm {
-      gamma     = 1.4;
-      courant   = 0.5;
-      diffusion = false
-  }
- 
-  # Define boundary conditions
- 
-  Boundary { type = reflecting }
-      \end{verbatim}
+\begin{frame}[fragile] \frametitle{Draft Parameter File: Implosion}
+\footnotesize
+\begin{block}{Implosion: Method and Boundary}
+\begin{verbatim}
+# PPM hydrodynamics
+
+Method ppm {
+   gamma     = 1.4;
+   courant   = 0.8;
+   diffusion = true;
+   flattening = true;
+   steepening = true;
+}
+
+# Define boundary conditions
+
+Boundary { type = "reflecting" }
+\end{verbatim}
 \end{block}
 \end{frame}

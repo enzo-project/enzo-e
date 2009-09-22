@@ -1,21 +1,20 @@
 %------------------------------------------------------------------------
-    \begin{frame}[fragile] \frametitle{Parameter File: Shock Pool draft}
+    \begin{frame}[fragile] \frametitle{Draft Parameter File: Implosion}
  \footnotesize
-\begin{block}{Shock Pool: Domain, Grid, and Field parameters}
-      \begin{verbatim}
-  # Define the domain to be the 1D interval from 0 to 1
+\begin{block}{Implosion: domain, grid, and field parameters}
+\begin{verbatim}
+# Define the domain to be the 2D box 0 < x,y < 0.3
 
-  Domain { range = [0.0, 1.0] }
-
-  # The grid is a unigrid array of 100 cells 
-  # parallelized using MPI+OpenMP (!)
+Domain { range = [0.0, 0.3, 0.0, 0.3] } 
+                                
+# The grid is a "unigrid" array of 400 cells parallelized using MPI
  
-  Grid { size = [100]; parallel = [mpi,omp] }
+Grid { size = [400,400]; parallel = ["mpi"] }
 
-  # define field properties
-
-  Field pressure { floor = 1.0e-6 }
-  Field density  { floor = 1.0e-6 }
-      \end{verbatim}
+# Define some field properties
+                                
+Field pressure { floor = 1.0e-6 }
+Field density  { floor = 1.0e-6 }
+\end{verbatim}
 \end{block}
 \end{frame}

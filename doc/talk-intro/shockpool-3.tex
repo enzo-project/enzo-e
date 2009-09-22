@@ -1,24 +1,23 @@
 %------------------------------------------------------------------------
-    \begin{frame}[fragile] \frametitle{Parameter File: Shock Pool draft}
+\begin{frame}[fragile] \frametitle{Draft Parameter File: Implosion}
  \footnotesize
-\begin{block}{Shock Pool: Initial and Stopping}
-      \begin{verbatim}
-  # Define initial conditions
- 
-  Initial {
-     pressure   = [1.0,   x <= 0.5,
-                   0.125, x > 0.5];
-     density    = [1.0, x <= 0.5,
-                   0.1]; # (implicit else)
-     velocity_x = 0
-  }
- 
-  # Define stopping criteria
- 
-  Stopping {
-     time  = 0.251;
-     cycle = 10000
-  }
-      \end{verbatim}
+\begin{block}{Implosion: Initial conditions and stopping criteria}
+\begin{verbatim}
+# Initial conditions
+
+Initial {
+   density  = [1.0, x + y >= 0.15, 0.125];
+   pressure = [1.0, x + y >= 0.15, 0.14];
+   velocity_x = 0;
+   velocity_y = 0;
+}
+
+# Stopping criteria
+
+Stopping {
+   time  = 2.5;
+   cycle = 20000;
+}
+\end{verbatim}
 \end{block}
 \end{frame}
