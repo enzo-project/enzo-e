@@ -1,0 +1,27 @@
+\begin{frame}[fragile] \frametitle{Cello AMR: Patch Coalescing}
+\centerline{\includegraphics[width=2.5in]{coalesce.png}}
+\begin{itemize}
+\enhance{2}\item Replace AMR nodes with larger arrays when possible
+\enhance{3}\item Replace arrays with AMR nodes when necessary
+\enhance{4}\item Allows adapting to constant versus changing resolution
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile] \frametitle{Cello AMR: Individual Child Refinement}
+\centerline{\includegraphics[width=2.5in]{amr-child.png}}
+\begin{itemize}
+\enhance{1}\item Refine children individually instead of all or nothing
+\enhance{2}\item Added flexibility can reduce AMR tree size
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile] \frametitle{Cello AMR: $k^d$ Refinement with Backfill}
+\centerline{\includegraphics[width=3.5in]{kd-backfill.png}}
+\begin{itemize}
+\enhance{1}\item If $k=4$, refine by $4$ instead of $2$
+\enhance{2}\item More ``targeted'' refinement
+\enhance{3}\item Can optionally remove level jumps by ``backfilling'' levels
+\enhance{4}\item Backfill patch locations are known implicitly---nominal storage
+\enhance{5}\item Many child nodes implies sparse storage
+\end{itemize}
+\end{frame}
