@@ -27,19 +27,19 @@
 
 % UNCOMMENT TO PRINT
 
-% \newcommand{\enhance}[1]{}
-% \newcommand{\enhancebf}[2]{\textbf{#2}}
-% \newcommand{\enhanceus}[1]{\color{blue}}
-% \newcommand{\enhancenewus}[1]{\color{magenta}}
-% \newcommand{\enhancethem}[1]{\color{red}}
+ \newcommand{\enhance}[1]{}
+ \newcommand{\enhancebf}[2]{\textbf{#2}}
+ \newcommand{\enhanceus}[1]{\color{blue}}
+ \newcommand{\enhancenewus}[1]{\color{magenta}}
+ \newcommand{\enhancethem}[1]{\color{red}}
 
 % UNCOMMENT FOR TALK:
 
-\newcommand{\enhance}[1]{\temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
-\newcommand{\enhancebf}[2]{\enhance{#1}\textbf{#2}}
-\newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
-\newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
-\newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
+% \newcommand{\enhance}[1]{\temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
+% \newcommand{\enhancebf}[2]{\enhance{#1}\textbf{#2}}
+% \newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
+% \newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
+% \newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
 
 
 
@@ -63,15 +63,16 @@
 \date{\today}
 \begin{document}
 \frame{\titlepage}
+
 %\frame{\tableofcontents}
 % \AtBeginSubsection[]
-{
+%{
 %------------------------------------------------------------------------
 %  \begin{frame}<beamer>
-%    \tableofcontents[currentsection,currentsubsection]
+%   \tableofcontents[currentsection,currentsubsection]
 %    \tableofcontents[currentsection]
 %  \end{frame}
-}
+%}
 
 %========================================================================
 \section{Introduction}
@@ -127,7 +128,7 @@
 %========================================================================
 
 %------------------------------------------------------------------------
-\subsection{Related applications}
+\subsection{Related AMR applications}
 %------------------------------------------------------------------------
 
 \include{app-chombo}
@@ -136,7 +137,7 @@
 \include{app-table}
 
 %------------------------------------------------------------------------
-\subsection{AMR versus unigrid}
+\subsection{Cello AMR}
 %------------------------------------------------------------------------
 
 \include{array-amr}
