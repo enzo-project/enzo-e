@@ -3,15 +3,15 @@
     \footnotesize
       \begin{tabular}{|l|ccc|cc|}
 \hline
-    &  \textbf{Enzo} & \textbf{Chombo} & \textbf{Paramesh} & \textbf{Cello-patch} & \textbf{Cello-tree} \\  \hline
-    \textbf{Refinement} &  \enhanceus{2}{patch} & \enhancethem{3}{patch} &  \enhancethem{4}{tree} & \enhancenewus{5}{patch} & \enhancenewus{6}{tree}  \\
-    \textbf{Tree type} & \enhanceus{2}{none} & \enhancethem{3}{octree} & \enhancethem{4}{octree} & \enhancenewus{5}{octree} & \enhancenewus{6}{octree++} \\  \hline
+    &  \textbf{Enzo} & \textbf{Chombo} & \textbf{FLASH} & \textbf{Cello-patch} & \textbf{Cello-tree} \\  \hline
+    \textbf{Refinement} &  \enhanceus{2}{patch} & \enhancethem{3}{patch} &  \enhancethem{4}{$2^d$-tree} & \enhancenewus{5}{patch} & \enhancenewus{6}{$k^d$-tree}  \\
+%    \textbf{Tree type} & \enhanceus{2}{none} & \enhancethem{3}{octree} & \enhancethem{4}{octree} & \enhancenewus{5}{octree} & \enhancenewus{6}{octree++} \\  \hline
+    \textbf{Patch shape} & \enhanceus{2}{  variable} & \enhancethem{3}{variable} &  \enhancethem{4}{constant} & \enhancenewus{5}{variable} & \enhancenewus{6}{constant} \\
+    \textbf{Patch size} & \enhanceus{2}{  variable} & \enhancethem{3}{variable} &  \enhancethem{4}{constant} & \enhancenewus{5}{variable} &\enhancenewus{6}{limited}  \\ \hline
     \textbf{Parents} & \enhanceus{2}{single} & \enhancethem{3}{multiple} & \enhancethem{4}{single} &   \enhancenewus{5}{multiple} & \enhancenewus{6}{single} \\
     \textbf{Children} & \enhanceus{2}{variable} & \enhancethem{3}{variable} & \enhancethem{4}{constant} & \enhancenewus{5}{variable} & \enhancenewus{6}{limited} \\
     \textbf{Neighbors} & \enhanceus{2}{variable} & \enhancethem{3}{variable} & \enhancethem{4}{limited} & \enhancenewus{5}{variable} & \enhancenewus{6}{limited} \\\hline
     \textbf{Level jumps} & \enhanceus{2}{ yes} &    \enhancethem{3}{no} &      \enhancethem{4}{no}    &   \enhancenewus{5}{no} & \enhancenewus{6}{no} \\
-    \textbf{Symmetric} & \enhanceus{2}{no} &  \enhancethem{3}{yes} &  \enhancethem{4}{yes} &  \enhancenewus{5}{yes} & \enhancenewus{6}{yes} \\\hline
-    \textbf{Patch shape} & \enhanceus{2}{  variable} & \enhancethem{3}{variable} &  \enhancethem{4}{constant} & \enhancenewus{5}{variable} & \enhancenewus{6}{constant} \\
-    \textbf{Patch size} & \enhanceus{2}{  variable} & \enhancethem{3}{variable} &  \enhancethem{4}{constant} & \enhancenewus{5}{variable} &\enhancenewus{6}{limited}  \\ \hline
+    \textbf{Asymmetric} & \enhanceus{2}{yes} &  \enhancethem{3}{no} &  \enhancethem{4}{no} &  \enhancenewus{5}{no} & \enhancenewus{6}{no} \\\hline
       \end{tabular}
 \end{frame}

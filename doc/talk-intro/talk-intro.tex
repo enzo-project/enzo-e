@@ -36,7 +36,7 @@
 % UNCOMMENT FOR TALK:
 
 \newcommand{\enhance}[1]{\temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
-\newcommand{\enhancebf}[2]{\enhance{1}\textbf{#2}}
+\newcommand{\enhancebf}[2]{\enhance{#1}\textbf{#2}}
 \newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
 \newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
 \newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
@@ -53,10 +53,13 @@
 \newcommand{\ENHANCE}[1]{
  \temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
 
+%\includeonly{array-amr}
+
+
 %======================================================================
 \title[The \cello\ Project]
       {The \cello\ Project \\ \small{\enzo: The Next Generation}}
-\author[James Bordner]{\small Laboratory for Computational Astrophysics \\ San Diego Supercomputer Center \\ University of California, San Diego \\ \ \\ James Bordner}
+\author[James Bordner]{\small Laboratory for Computational Astrophysics \\ Center for Astrophysics and Space Sciences \\San Diego Supercomputer Center \\ University of California, San Diego \\ \ \\ James Bordner}
 \date{\today}
 \begin{document}
 \frame{\titlepage}
@@ -64,12 +67,11 @@
 % \AtBeginSubsection[]
 {
 %------------------------------------------------------------------------
-  \begin{frame}<beamer>
-    \tableofcontents[currentsection,currentsubsection]
+%  \begin{frame}<beamer>
+%    \tableofcontents[currentsection,currentsubsection]
 %    \tableofcontents[currentsection]
-  \end{frame}
+%  \end{frame}
 }
-
 
 %========================================================================
 \section{Introduction}
@@ -93,41 +95,32 @@
 %------------------------------------------------------------------------
 \subsection{Issues}
 %------------------------------------------------------------------------
+
 \include{petascale-issues}
-
-
-\include{enhancements}
 
 %========================================================================
 \section{Software design}
 %========================================================================
 
 %------------------------------------------------------------------------
-\subsection{Parameter files}
+\subsection{Input files}
 %------------------------------------------------------------------------
 
-\include{shockpool-1}
-
-\include{shockpool-2}
-
-\include{shockpool-3}
-
+\include{parameters}
+\include{implosion-1}
+\include{implosion-2}
+\include{implosion-3}
 
 %------------------------------------------------------------------------
 \subsection{Software components}
 %------------------------------------------------------------------------
 
 \include{components}
-
-\include{components-control}
-
-\include{components-middle}
-
-\include{components-hardware}
-
-\include{components-interface}
-
-\include{components-support}
+% \include{components-control}
+% \include{components-middle}
+% \include{components-hardware}
+% \include{components-interface}
+% \include{components-support}
 
 %========================================================================
 \section{Data structures}
@@ -137,9 +130,9 @@
 \subsection{Related applications}
 %------------------------------------------------------------------------
 
-\include{app-flash}
 \include{app-chombo}
-
+\include{app-flash}
+\include{app-cello}
 \include{app-table}
 
 %------------------------------------------------------------------------
@@ -147,9 +140,7 @@
 %------------------------------------------------------------------------
 
 \include{array-amr}
-
 \include{array}
-
 \include{amr}
 
 %------------------------------------------------------------------------
@@ -157,7 +148,6 @@
 %------------------------------------------------------------------------
 
 \include{amr-point-source}
-
 \include{amr-cosmology}
 
 %========================================================================
