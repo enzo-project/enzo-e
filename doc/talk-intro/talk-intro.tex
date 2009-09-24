@@ -53,7 +53,7 @@
 \newcommand{\ENHANCE}[1]{
  \temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
 
-%\includeonly{array-amr}
+%\includeonly{array}
 
 
 %======================================================================
@@ -141,8 +141,8 @@
 %------------------------------------------------------------------------
 
 \include{array-amr}
-\include{amr}
 \include{array}
+\include{amr}
 
 %------------------------------------------------------------------------
 \subsection{Point-source tree-AMR example}
@@ -157,17 +157,21 @@
 %========================================================================
 \section{Issues and solutions}
 %========================================================================
-
+\include{ideas}
+\include{idea-charm}
 \include{idea-timestepping}
 \include{idea-particle-precision}
 \include{idea-load-balance}
-\include{idea-grid-precision}
-\include{idea-gravity}
+%\include{idea-grid-precision}
+%\include{idea-gravity}
 \include{idea-resiliency}
+\include{idea-quality}
 
 %========================================================================
 \section{Conclusions}
 %========================================================================
+
+\include{conclusions}
 
 \include{summary}
 

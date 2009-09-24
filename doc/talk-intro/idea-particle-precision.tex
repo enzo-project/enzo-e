@@ -1,25 +1,16 @@
 %------------------------------------------------------------------------
 \begin{frame}[fragile] \frametitle{Particle positions}
+\vspace{-0.2in}
+\begin{minipage}{1.8in}
+\includegraphics<1->[width=2.0in]{particles-global.png}
+\end{minipage} \
+\begin{minipage}{2.0in}
+\includegraphics<3->[width=2.0in]{particles-local.png}
+\end{minipage} \
       \begin{itemize}
-        \item Particles are associated with a patch
-        \item Represent particles in patch-local coordinates
-        \item Simple coordinate transformation when particles migrate
-        \item Single-precision sufficient
-        \item Global coordinates
-      \end{itemize}
-\end{frame}
-%------------------------------------------------------------------------
-    \begin{frame}[fragile] \frametitle{Precision issues: Particles}
-      \begin{itemize}
-        \item Use local coordinate system when possible
-        \begin{itemize}
-          \item Particles coordinates [0:1] in containing grid patch
-          \item Simple coordinate transform when containing patch changes
-          \item Single precision sufficient
-          \begin{itemize}
-            \item Save memory
-            \item Save time
-          \end{itemize}
-        \end{itemize}
+        \enhance{1}\item Precision issues with deep AMR
+        \enhance{2}\item Patch-local coordinates could address this
+        \enhance{3}\item Coordinate changes still accurate
+        \enhance{4}\item Single-precision may be sufficient (exponent?)
       \end{itemize}
 \end{frame}

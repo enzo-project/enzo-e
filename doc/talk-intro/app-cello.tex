@@ -2,15 +2,18 @@
 \begin{frame}[fragile] \frametitle{\cello: Hybrid Patch-AMR and Tree-AMR}
 
 \begin{minipage}{2in}
+\footnotesize
 \begin{itemize}
 \enhance{1}\item Patch-based AMR ala Chombo
-\enhance{2}\item Modified tree-based AMR ala FLASH
-\begin{itemize}
-\enhance{3}\item patch-reduction
-\enhance{4}\item child-based refinement
-\enhance{5}\item $k^d$-trees
-\end{itemize}
-\enhance{6}\item Code reuse between patch- and tree-AMR
+\enhance{2}\item Tree-based AMR ala FLASH\footnote{with some optimizations}
+%\enhance{3}\item Tree-based can be optimized:
+%\begin{itemize}
+%\footnotesize
+%\enhance{3}\item patch-coalescing
+%\enhance{4}\item individual child refinement
+%\enhance{5}\item higher-order refinement
+%\end{itemize}
+\enhance{3}\item Code reuse between patch- and tree-AMR
 \end{itemize}
 \end{minipage}
 \begin{minipage}{2.0in}

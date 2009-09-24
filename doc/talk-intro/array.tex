@@ -2,31 +2,39 @@
 %----------------------------------------------------------------------
 \begin{frame}
 \frametitle{Cello Arrays}
-
+\begin{minipage}{2.0in}
 \begin{itemize}
-\item Conceptually a Fortran-like array
-\item Data distributed via MPI-[12], OMP, [UPC]
-\item Data layout may be blocked / padded for cache
-\item Interface between high-level C++ and low-level Fortran/C
-\end{itemize}
-\end{frame}
-
-%----------------------------------------------------------------------
-\begin{frame}
-\frametitle{Cello Array variations}
-
-\begin{minipage}{1.8in}
-\begin{itemize}
-\item[]\enhance{1-}\includegraphics[width=0.4in]{array-serial.png} \ \ \code{ArraySerial}
-\item[]\enhance{2-}\includegraphics[width=0.4in]{array-block.png} \ \ \code{ArrayBlock}
-\item[]\enhance{3-}\includegraphics[width=0.4in]{array-mpi.png} \ \ \code{ArrayMpi}
+\enhance{1}\item Conceptually Fortran array
+\enhance{2}\item MPI-[12], OMP, UPC
+\enhance{3}\item Blocking / padding
 \end{itemize}
 \end{minipage} \ 
-\begin{minipage}{2in}
+\begin{minipage}{2.0in}
 \begin{itemize}
-\item[]\enhance{4-}\includegraphics[width=0.4in]{array-omp.png} \ \ \code{ArrayOmp}
-\item[]\enhance{5-}\includegraphics[width=0.4in]{array-mpi-omp.png} \ \ \code{ArrayMpiOmp}
-\item[]\enhance{6-}\includegraphics[width=0.4in]{array-interleave.png} \ \ \code{ArrayInterleave}
+\enhance{4}\item C++ / Fortran interface
+\enhance{5}\item Iterators over blocks
+\enhance{6}\item Unigrid is single \code{Array}
+\end{itemize}
+\end{minipage}
+\begin{minipage}{1.3in}
+\vspace{0.1in}
+\begin{itemize}
+\item[]\includegraphics[width=0.4in]{array-serial.png} \ \ \code{ArraySerial}
+\item[]\includegraphics[width=0.4in]{array-block.png} \ \ \code{ArrayBlock}
+\end{itemize}
+\end{minipage} \ 
+\begin{minipage}{1.3in}
+\vspace{0.1in}
+\begin{itemize}
+\item[]\includegraphics[width=0.4in]{array-mpi.png} \ \ \code{ArrayMpi}
+\item[]\includegraphics[width=0.4in]{array-omp.png} \ \ \code{ArrayOmp}
+\end{itemize}
+\end{minipage} \ 
+\begin{minipage}{1.3in}
+\vspace{0.1in}
+\begin{itemize}
+\item[]\includegraphics[width=0.4in]{array-mpi-omp.png} \ \ \code{ArrayMpiOmp}
+\item[]\includegraphics[width=0.4in]{array-interleave.png} \ \ \code{ArrayInterleave}
 \end{itemize}
 \end{minipage}
 

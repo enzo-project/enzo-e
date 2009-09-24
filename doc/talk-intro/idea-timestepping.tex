@@ -1,17 +1,26 @@
 %------------------------------------------------------------------------
-    \begin{frame}[fragile] \frametitle{Local adaptive time-stepping}
-      \begin{itemize}
-        \item \enzo\ supports adaptive time-stepping between levels
-        \item Fully adaptive time-stepping option
-        \begin{itemize}
-          \item No global timestep restriction
-          \item No global synchronization
-        \end{itemize}
-        \item Uniform time-stepping option
-        \begin{itemize}
-          \item High parallel efficiency
-          \item Simplified code
-          \item Happy
-        \end{itemize}
-      \end{itemize}
+    \begin{frame}[fragile] \frametitle{Concurrent level time-stepping}
+\begin{minipage}{1.3in}
+\includegraphics<1->[width=1.3in]{timestep-levels.png}
+\end{minipage} \
+\begin{minipage}{1.3in}
+\includegraphics<2->[width=1.3in]{timestep-dynamic.png}
+\end{minipage} \
+\begin{minipage}{1.3in}
+\includegraphics<5->[width=1.3in]{timestep-uniform.png}
+\end{minipage} \
+\begin{itemize}
+\enhance{1}\item \enzo\ timestepping proceeds level by level
+\enhance{2}\item Levels may proceed concurrently
+  \begin{itemize}
+  \enhance{3}\item[+] Faster if enough parallelism
+  \enhance{4}\item[-] Reduced parallel efficiency
+  \end{itemize}
+\enhance{5}\item Uniform timestepping possible option
+  \begin{itemize}
+  \enhance{7}\item[+] Improved parallel efficiency
+  \enhance{8}\item[+] Faster if enough parallelism
+  \enhance{6}\item[-] More overall work
+  \end{itemize}
+\end{itemize}
 \end{frame}

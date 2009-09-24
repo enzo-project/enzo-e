@@ -1,19 +1,20 @@
 %------------------------------------------------------------------------
 \begin{frame}[fragile] \frametitle{\cello\ AMR philosophy}
 \begin{itemize}
-\enhance{1}\item \code{Array}s are preferred for uniform resolution regions
-\enhance{2}\item \code{Amr} data structures required for multi-resolution
+\enhance{1}\item Use arrays in uniform resolution regions
+\enhance{2}\item Use AMR where resolution changes
 \enhance{3}\item Issues with standard tree-based AMR
-\begin{itemize}
+\begin{enumerate}
 \enhance{4}\item Lots of small patches at finest resolution
-\enhance{5}\item $2^d$-tree refinement is too ``shallow'' for deep AMR
-\end{itemize}
+\enhance{5}\item Want ``steeper'' refinement for deep AMR
+\end{enumerate}
 \enhance{6}\item Three proposed modifications:
 \begin{itemize}
-\enhance{7}\item Patch coalescing
-\enhance{8}\item Individual child refinement
-\enhance{9}\item $k^d$ refinement with backfill
+\enhance{7}\item Patch coalescing (1)
+\enhance{7}\item Individual child refinement (1)
+\enhance{7}\item Higher-order refinement with backfill (2)
 \end{itemize}
+\enhance{8}\item \code{Array} and \code{Amr} C++ class hierarchies
 \end{itemize}
 \end{frame}
 
