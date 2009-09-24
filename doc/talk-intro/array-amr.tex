@@ -1,19 +1,19 @@
 %------------------------------------------------------------------------
-\begin{frame}[fragile] \frametitle{\cello\ AMR philosophy}
+\begin{frame}[fragile] \frametitle{\cello\ AMR Philosophy}
 \begin{itemize}
 \enhance{1}\item Use arrays in uniform resolution regions
 \enhance{2}\item Use AMR where resolution changes
 \enhance{3}\item Issues with standard tree-based AMR
-\begin{enumerate}
-\enhance{4}\item Lots of small patches at finest resolution
-\enhance{5}\item Want ``steeper'' refinement for deep AMR
-\end{enumerate}
-\enhance{6}\item Three proposed modifications:
 \begin{itemize}
-\enhance{7}\item Patch coalescing (1)
-\enhance{7}\item Individual child refinement (1)
-\enhance{7}\item Higher-order refinement with backfill (2)
+\enhance{4}\item[a] Lots of small patches at finest resolution
+\enhance{5}\item[b] Want ``steeper'' refinement for deep AMR
 \end{itemize}
+\enhance{6}\item Three proposed modifications:
+\begin{enumerate}
+\enhance{7}\item Patch coalescing (a)
+\enhance{7}\item Individual child refinement (a)
+\enhance{7}\item Higher-order refinement with backfill (b)
+\end{enumerate}
 \enhance{8}\item \code{Array} and \code{Amr} C++ class hierarchies
 \end{itemize}
 \end{frame}

@@ -27,19 +27,19 @@
 
 % UNCOMMENT TO PRINT
 
- \newcommand{\enhance}[1]{}
- \newcommand{\enhancebf}[2]{\textbf{#2}}
- \newcommand{\enhanceus}[1]{\color{blue}}
- \newcommand{\enhancenewus}[1]{\color{magenta}}
- \newcommand{\enhancethem}[1]{\color{red}}
+% \newcommand{\enhance}[1]{}
+% \newcommand{\enhancebf}[2]{\textbf{#2}}
+% \newcommand{\enhanceus}[1]{\color{blue}}
+% \newcommand{\enhancenewus}[1]{\color{magenta}}
+% \newcommand{\enhancethem}[1]{\color{red}}
 
 % UNCOMMENT FOR TALK:
 
-% \newcommand{\enhance}[1]{\temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
-% \newcommand{\enhancebf}[2]{\enhance{#1}\textbf{#2}}
-% \newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
-% \newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
-% \newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
+ \newcommand{\enhance}[1]{\temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
+ \newcommand{\enhancebf}[2]{\enhance{#1}\textbf{#2}}
+ \newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
+ \newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
+ \newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
 
 
 
@@ -64,15 +64,17 @@
 \begin{document}
 \frame{\titlepage}
 
-%\frame{\tableofcontents}
-% \AtBeginSubsection[]
-%{
+\frame{\footnotesize
+\tableofcontents}
+ \AtBeginSection[]
+{
 %------------------------------------------------------------------------
-%  \begin{frame}<beamer>
-%   \tableofcontents[currentsection,currentsubsection]
+  \begin{frame}<beamer>
+\footnotesize
+   \tableofcontents[currentsection]
 %    \tableofcontents[currentsection]
-%  \end{frame}
-%}
+  \end{frame}
+}
 
 %========================================================================
 \section{Introduction}
@@ -100,7 +102,7 @@
 \include{petascale-issues}
 
 %========================================================================
-\section{Software design}
+\section{Software Design}
 %========================================================================
 
 %------------------------------------------------------------------------
@@ -124,7 +126,7 @@
 % \include{components-support}
 
 %========================================================================
-\section{Data structures}
+\section{Data Structures}
 %========================================================================
 
 %------------------------------------------------------------------------
@@ -155,17 +157,35 @@
 \include{amr-cosmology}
 
 %========================================================================
-\section{Issues and solutions}
+\section{Issues and Solutions}
 %========================================================================
-\include{ideas}
+%\include{ideas}
+%------------------------------------------------------------------------
+\subsection{Dynamic scheduling}
+%------------------------------------------------------------------------
 \include{idea-charm}
+%------------------------------------------------------------------------
+\subsection{Time-stepping}
+%------------------------------------------------------------------------
 \include{idea-timestepping}
+%------------------------------------------------------------------------
+\subsection{Particle positions}
+%------------------------------------------------------------------------
 \include{idea-particle-precision}
+%------------------------------------------------------------------------
+\subsection{Load balancing}
+%------------------------------------------------------------------------
 \include{idea-load-balance}
 %\include{idea-grid-precision}
 %\include{idea-gravity}
+%------------------------------------------------------------------------
+\subsection{Software resiliency}
+%------------------------------------------------------------------------
 \include{idea-resiliency}
-\include{idea-quality}
+%------------------------------------------------------------------------
+%\subsection{Software quality}
+%------------------------------------------------------------------------
+%\include{idea-quality}
 
 %========================================================================
 \section{Conclusions}
