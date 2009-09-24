@@ -2,17 +2,17 @@
 \begin{itemize}
    \item\enhance{1}Important: point-of-contact between user and application
    \item\enhance{2}Limiting factor in usability and power of the application
-   \item\enhance{3}Maximize expressibility while minimizing complexity
+   \item\enhance{3}Maximize expressibility; minimize complexity
    \item\enhance{4}Approach: remove ``\code{ProblemType}'' parameter
    \begin{itemize}
       \item\enhance{5}Restricts scope of problems solved
-      \item\enhance{6}Overall code size will be much smaller
+      \item\enhance{6}Problem solved not obvious from input file
+   \end{itemize}
+   \item\enhance{7}Overall code size will be much smaller
    \begin{itemize}
       \item\enhance{7} $\approx$\code{20\%} of \enzo\ C++ functions contain ``Initialize''!
    \end{itemize}
-      \item\enhance{8}Can fake it with e.g.~\code{\#include "implosion.param"}
-   \end{itemize}
-   \item\enhance{9}Problem solved evident from input file
+   \item\enhance{8}Can fake it with e.g.~\code{\#include "implosion.param"}
 \end{itemize}
 \end{frame}
 

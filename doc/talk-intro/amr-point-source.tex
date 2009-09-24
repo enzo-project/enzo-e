@@ -1,11 +1,11 @@
 %------------------------------------------------------------------------
-    \begin{frame}[fragile] \frametitle{Point-Source Test: $2^d$-Trees}
+    \begin{frame}[fragile] \frametitle{Point-Source Test: $2^d$-Trees with Coalescing}
 \begin{minipage}{4.0in}
 \footnotesize 
 Nodes: 
 \ENHANCE{2}549
-\ENHANCE{3}2137
-\ENHANCE{4}\textbf{1073}
+\ENHANCE{3-4}2137
+\ENHANCE{5}\textbf{1073}
 \color{lightgray}155
 \color{lightgray}650
 \color{lightgray}\textbf{650}
@@ -16,21 +16,22 @@ Nodes:
 \begin{minipage}{2.2in}
 \includegraphics<1>[width=2.2in]{dots.png}
 \includegraphics<2>[width=2.2in]{dots-4-0.png}
-\includegraphics<3>[width=2.2in]{dots-4-1.png}
-\includegraphics<4>[width=2.2in]{dots-4-2.png}
+\includegraphics<3-4>[width=2.2in]{dots-4-1.png}
+\includegraphics<5>[width=2.2in]{dots-4-2.png}
 \end{minipage}
 \begin{minipage}{1.6in}
 \footnotesize
       \begin{itemize}
         \item \ENHANCE{1}Test problem: refine on point sources
         \item \ENHANCE{2}Simple quad-tree has level jumps
-        \item \ENHANCE{3}After normalization issues remain:
+        \item \ENHANCE{3}Normalize to remove level jumps
+        \item \ENHANCE{4}Issues remain:
         \begin{itemize}
 \footnotesize
-          \item \ENHANCE{3}numerous patches
-          \item \ENHANCE{3}gradual refinement
+          \item \ENHANCE{4}numerous patches
+          \item \ENHANCE{4}gradual refinement
         \end{itemize}
-        \item \ENHANCE{4}Patch coalescing reduces patch count
+        \item \ENHANCE{5}Patch coalescing reduces patch count
       \end{itemize}
 \end{minipage}
 \end{frame}
@@ -60,7 +61,7 @@ Nodes:
       \begin{itemize}
         \item \ENHANCE{1}Individual child refinement
         \item \ENHANCE{2}Normalize for level jumps
-        \item \ENHANCE{3}Patch coalescing not effective
+        \item \ENHANCE{3}Patch coalescing not useful here
       \end{itemize}
 \end{minipage}
 \end{frame}
@@ -90,12 +91,12 @@ Nodes:
 \footnotesize
       \begin{itemize}
         \item \ENHANCE{1}Refinement by $4$
-        \item \ENHANCE{2}Normalize for ($r=4$) level jumps
+        \item \ENHANCE{2}Normalize for $r=4$ level jumps
         \item \ENHANCE{3}Patch coalescing not effective
-        \item \ENHANCE{4}Best result:
+        \item \ENHANCE{4}This seems the best:
       \begin{itemize}
 \footnotesize
-        \item \ENHANCE{4}Fewer patches
+        \item \ENHANCE{4}Fewest patches
 	\item \ENHANCE{4}Steep refinement
         \item \ENHANCE{4}Can 'backfill' to regain $r=2$
       \end{itemize}

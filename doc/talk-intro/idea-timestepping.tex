@@ -1,5 +1,5 @@
 %------------------------------------------------------------------------
-    \begin{frame}[fragile] \frametitle{Time-stepping optimizations}
+    \begin{frame}[fragile] \frametitle{Time-Stepping Optimization 1}
 \begin{minipage}{1.3in}
 \includegraphics<1->[width=1.3in]{timestep-levels.png}
 \end{minipage} \
@@ -16,7 +16,7 @@
   \enhance{3}\item[$+$] Faster if enough parallelism
   \enhance{4}\item[$-$] Reduced parallel efficiency
   \end{itemize}
-\enhance{5}\item Uniform time-stepping possible option
+\enhance{5}\item Uniform time-stepping
   \begin{itemize}
   \enhance{6}\item[$+$] Improved parallel efficiency
   \enhance{6}\item[$+$] Faster if enough parallelism
@@ -26,10 +26,15 @@
 \end{frame}
 
 %------------------------------------------------------------------------
-    \begin{frame}[fragile] \frametitle{Time-stepping optimizations}
+    \begin{frame}[fragile] \frametitle{Time-Stepping Optimization 2}
 \begin{itemize}
-\enhance{1}\item Adaptive time-stepping \text{within} levels
-\enhance{2}\item Avoids global time-step synchronization
-\enhance{3}\item Quantize time steps to powers of two
+\enhance{1}\item Allow adaptive time-stepping \textit{within} levels
+\enhance{2}\item Each patch determines its local time-step
+\enhance{3}\item Eliminates global time-step reduction
+\enhance{4}\item Well-suited for dynamic scheduling
+\begin{itemize}
+\enhance{4}\item Dependencies are local: neighboring patches
+\end{itemize}
+\enhance{5}\item Quantize time steps to powers of two for alignment
 \end{itemize}
 \end{frame}
