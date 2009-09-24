@@ -1,5 +1,5 @@
 %------------------------------------------------------------------------
-    \begin{frame}[fragile] \frametitle{Concurrent level time-stepping}
+    \begin{frame}[fragile] \frametitle{Time-stepping optimizations}
 \begin{minipage}{1.3in}
 \includegraphics<1->[width=1.3in]{timestep-levels.png}
 \end{minipage} \
@@ -22,5 +22,14 @@
   \enhance{6}\item[$+$] Faster if enough parallelism
   \enhance{7}\item[$-$] More overall work
   \end{itemize}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+    \begin{frame}[fragile] \frametitle{Time-stepping optimizations}
+\begin{itemize}
+\enhance{1}\item Adaptive time-stepping \text{within} levels
+\enhance{2}\item Avoids global time-step synchronization
+\enhance{3}\item Quantize time steps to powers of two
 \end{itemize}
 \end{frame}
