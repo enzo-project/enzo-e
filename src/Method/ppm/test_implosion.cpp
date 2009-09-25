@@ -10,7 +10,7 @@
  */
  
 #include "cello_hydro.h"
-#include "performance_timer.hpp"
+#include "performance.hpp"
 
 int main(int argc, char * argv[])
 {

@@ -1,16 +1,6 @@
-#
-# test         Run unit tests
-# clean        Clean directory
-# test_array   Compile the unit tests
-# dep          Generate dependencies
-# 
-
-# DEF_OPTIMIZE = -D OPTIMIZE_CELL_WIDTH
 TOP = ../../..
 
-PG = 
-
-TEST_EXES = test_implosion test_image
+TESTS = test_implosion test_image test_implosion_opt
 
 INC_LOCAL  = -I$(TOP)/include
 LIB_LOCAL  = -L$(TOP)/lib -lcello
@@ -57,33 +47,32 @@ OBJS_FC = calcdiss.o \
 
 OBJS_FC_OPT = ppm.o
 
-FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(PG) $(DEF_OPTIMIZE)
-CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(PG) $(DEF_OPTIMIZE)
+all: # WORKS ONLY IF empty all: TARGET IS HERE--WHY?
+
+include $(TOP)/src/MAKE/Make.include
+
+FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(DEF_OPTIMIZE)
+CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(DEF_OPTIMIZE)
 
 FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
-LIB      = $(LIB_LOCAL) -lgfortran -lm -lhdf5 $(PG)
+LIB      = $(LIB_LOCAL) -lgfortran -lm $(LIB_HDF5) $(PG)
 
-all: test_image test_implosion
 test_image: $(OBJS) $(OBJS_FC) $(OBJS_IMAGE)
 	$(CXX) -o test_image $(OBJS_IMAGE) $(OBJS) $(OBJS_FC) $(LIB)
 test_implosion: $(OBJS) $(OBJS_FC) $(OBJS_IMPLOSION)
 	$(CXX) -o test_implosion $(OBJS_IMPLOSION) $(OBJS) $(OBJS_FC)  $(LIB)
 test_implosion_opt: $(OBJS) $(OBJS_FC_OPT) $(OBJS_IMPLOSION)
-	$(CXX) -o test_implosion_opt $(OBJS_IMPLOSION) $(OBJS) $(OBJS_FC_OPT)  $(LIB)
+	$(CXX) -o test_implosion_opt $(OBJS_IMPLOSION) $(OBJS) $(OBJS_FC_OPT) $(LIB)
 
-.PHONY: install
-install: $(TEST_EXES)
-	cp $(TEST_EXES) $(TOP)/bin
 
 obj: $(OBJS)
 
 test:
 
-.PHONY: clean
-clean:
+.PHONY: clean-local
+clean-local:
 	-@rm *.o $(TEST_EXES) *~
 
-include $(TOP)/src/MAKE/Make.include
 
 include DEPEND
