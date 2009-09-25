@@ -119,7 +119,7 @@ main()
     free(f1);
   }
   timer.stop();
-  printf ("  new/delet e per sec = %g\n",num_alloc/timer.value());
+  printf ("  new/delete  per sec = %g\n",num_alloc/timer.value());
   
 
   unit_assert (Memory::bytes() == size);

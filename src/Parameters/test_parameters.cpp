@@ -55,7 +55,7 @@ main()
     unit_assert(did_pass);
 
   }
-  // ERRORS ARE NOT CAUGHT HERE--WHY?
+
   catch (ExceptionBadPointer) {
     printf ("CELLO ERROR: Bad pointer.\n");
   }

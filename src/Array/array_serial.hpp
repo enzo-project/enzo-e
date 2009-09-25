@@ -1,5 +1,5 @@
-#ifndef ARRAY_ARRAY_SERIAL_HPP
-#define ARRAY_ARRAY_SERIAL_HPP
+#ifndef ARRAY_SERIAL_HPP
+#define ARRAY_SERIAL_HPP
 
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
@@ -21,18 +21,16 @@
 /** 
  *********************************************************************
  *
- * @file      array_array_serial_.hpp
+ * @file      array_serial_.hpp
  * @brief     Declaration of the Array class
  * @author    James Bordner
  * @date      Thu Feb 21 13:54:19 PST 2008
  * @bug       none
  *
- * $Id: array_array_.hpp 712 2009-07-08 22:55:25Z bordner $
+ * $Id: array.hpp 712 2009-07-08 22:55:25Z bordner $
  * 
  *********************************************************************
  */
-
-#include "error_exception.hpp"
 
 class ArraySerial : public Array {
 
@@ -110,4 +108,4 @@ private:
 
 };
 
-#endif /* ARRAY_ARRAY_SERIAL_HPP */
+#endif /* ARRAY_SERIAL_HPP */

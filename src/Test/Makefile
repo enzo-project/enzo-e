@@ -7,7 +7,6 @@ SRC = ..
 LIB = -L../../lib -lcello
 
 TEST_EXES = \
-	test_array \
 	test_disk_hdf5 \
 	test_error \
 	test_parameters \
@@ -29,15 +28,12 @@ test: $(TEST_EXES) run-tests
 
 .PHONY: run-tests
 run-tests: $(TEST_EXES)
-	-./test_array
 	-./test_disk_hdf5
 	-./test_error
 	-./test_parameters
 	-./test_performance_timer
 #-----------------------------------------------------------------------
 
-test_array: test_array.o 
-	$(CXX) -o test_array test_array.o $(LIB) $(INC)
 test_disk_hdf5: test_disk_hdf5.o
 	$(CXX) -o test_disk_hdf5 test_disk_hdf5.o $(LIB) $(LIB_HDF5) $(INC)
 test_error: test_error.o

@@ -7,55 +7,50 @@
 
 TOP = ../..
 SRC = ..
+LIB = -L$(TOP)/lib -lcello
 
 PACKAGE   = performance
-OBJ       = 
-
-#=======================================================================
-INC_LOCAL  = 
-OBJ_EXTERN = 
-
-OBJS = $(OBJ) $(OBJ_EXTERN)
-#=======================================================================
+OBJS      = 
+TESTS     = test_performance time_matvec
 
 #=======================================================================
 # TARGETS
 #=======================================================================
 
 .PHONY: all
-all: $(OBJS)
+all: $(OBJS) $(TESTS)
 
 #-----------------------------------------------------------------------
 
-PERFORMANCE_FLAGS = 
-time_matvec: time_matvec.cpp
-	$(CXX) -o time_matvec.o time_matvec.cpp $(PERFORMANCE_FLAGS) -O $(INC) -c
-	$(CXX) -o $@            time_matvec.o   $(PERFORMANCE_FLAGS) -O $(INC)
-time_matvec-O0:  time_matvec.cpp
-	$(CXX) -o time_matvec.o time_matvec.cpp $(PERFORMANCE_FLAGS) -O0 $(INC) -c
-	$(CXX) -o $@            time_matvec.o   $(PERFORMANCE_FLAGS) -O0 $(INC)
-time_matvec-O1:    time_matvec.cpp
-	$(CXX) -o time_matvec.o time_matvec.cpp $(PERFORMANCE_FLAGS) -O1 $(INC) -c
-	$(CXX) -o $@            time_matvec.o   $(PERFORMANCE_FLAGS) -O1 $(INC)
-time_matvec-O2:    time_matvec.cpp
-	$(CXX) -o time_matvec.o time_matvec.cpp $(PERFORMANCE_FLAGS) -O2 $(INC) -c
-	$(CXX) -o $@            time_matvec.o   $(PERFORMANCE_FLAGS) -O2 $(INC)
-time_matvec-O3:    time_matvec.cpp
-	$(CXX) -o time_matvec.o time_matvec.cpp $(PERFORMANCE_FLAGS) -O3 $(INC) -c
-	$(CXX) -o $@            time_matvec.o   $(PERFORMANCE_FLAGS) -O3 $(INC)
-time_matvec-O4:    time_matvec.cpp
-	$(CXX) -o time_matvec.o time_matvec.cpp $(PERFORMANCE_FLAGS) -O4 $(INC) -c
-	$(CXX) -o $@            time_matvec.o   $(PERFORMANCE_FLAGS) -O4 $(INC)
-time_matvec-O5:    time_matvec.cpp
-	$(CXX) -o time_matvec.o time_matvec.cpp $(PERFORMANCE_FLAGS) -O5 $(INC) -c
-	$(CXX) -o $@            time_matvec.o   $(PERFORMANCE_FLAGS) -O5 $(INC)
+.PHONY: test
+test: $(TEST_EXES) run-tests
 
+#-----------------------------------------------------------------------
+
+.PHONY: run-tests
+run-tests: $(TESTS)
+	-./test_performance
+	-./time_matvec
+
+#-----------------------------------------------------------------------
+
+test_performance: test_performance.o
+	$(CXX) -o test_performance test_performance.o $(LIB)
+
+#-----------------------------------------------------------------------
+
+# force recompile of time_matvec in case OPT changes
+.PHONY: time_matvec
+time_matvec: time_matvec.cpp
+	@echo "Compile time_matvec with, e.g., OPT=-O3"
+	$(CXX) -o time_matvec.o time_matvec.cpp $(OPT) $(INC) -c
+	$(CXX) -o $@ time_matvec.o  $(OPT) $(INC)
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-@rm *.o *~ time_matvec time_matvec-O? out.make.dep Makefile.bak lib*.a *.unit *.png *.eps
+	-@rm *.o *~ $(TESTS) out.make.dep Makefile.bak lib*.a *.unit *.png *.eps
 
 #-----------------------------------------------------------------------
 

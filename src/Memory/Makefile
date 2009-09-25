@@ -6,24 +6,19 @@
 
 TOP = ../..
 SRC = ..
+LIB = -L$(TOP)/lib -lcello
 
-PACKAGE   = memory
-OBJ       = memory.o
-TEST_EXES = \
-        test_memory
+PACKAGE = memory
+OBJS    = memory.o
+TESTS   = test_memory
 
-#=======================================================================
-OBJ_EXTERN = 
-
-OBJS = $(OBJ) $(OBJ_EXTERN)
 #=======================================================================
 # TARGETS
 #=======================================================================
 
 .PHONY: all
-all: $(OBJS) $(TEST_EXES)
+all: $(OBJS) $(TESTS)
 
-#-----------------------------------------------------------------------
 #-----------------------------------------------------------------------
 
 .PHONY: test
@@ -32,19 +27,19 @@ test: $(TEST_EXES) run-tests
 #-----------------------------------------------------------------------
 
 .PHONY: run-tests
-run-tests: $(TEST_EXES)
+run-tests: $(TESTS)
 	-./test_memory
 
 #-----------------------------------------------------------------------
 
-test_memory: test_memory.o  $(OBJ)
-	$(CXX) -o test_memory test_memory.o $(LIB) $(INC) $(OBJ)
+test_memory: test_memory.o
+	$(CXX) -o test_memory test_memory.o $(LIB)
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean
 clean:
-	-@rm *.o *~ out.make.dep Makefile.bak $(TEST_EXE)
+	-@rm *.o *~ out.make.dep Makefile.bak $(TESTS)
 
 #-----------------------------------------------------------------------
 
@@ -59,7 +54,7 @@ INCLUDE = $(TOP)/include
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/memory.hpp              $(INCLUDE)
+	ln -sf `pwd`/memory.hpp $(INCLUDE)
 
 #=======================================================================
 # INCLUDES 

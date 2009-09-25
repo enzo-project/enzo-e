@@ -63,6 +63,8 @@ main(int argc, char ** argv)
 
   Scalar * array = new Scalar [(kend+2)*(kend+2)*(kend+2)*9];
 
+  printf ("size  mflop-const mflop-symm mflop-full mflop-block\n");
+
   for (k=kbegin; k<=kend; k++) {
 
     int k2  = k + 2;
@@ -230,14 +232,12 @@ main(int argc, char ** argv)
 
 
     int num_flops = count*k*k*k*13;
-    printf ("%d %20.12f %20.12f %20.12f %20.12f %20.12f\n",
+    printf ("%d %10.2f %10.2f %10.2f %10.2f\n",
 	    k,
 	    1e-6*num_flops/(time_const.value()-time_overhead.value()),
 	    1e-6*num_flops/(time_symm.value()-time_overhead.value()),
 	    1e-6*num_flops/(time_full.value()-time_overhead.value()),
-	    1e-6*num_flops/(time_block.value()-time_overhead.value()),
-	    1e-6*num_flops/(time_block.value()-time_overhead.value()) -
-	    1e-6*num_flops/(time_const.value()-time_overhead.value())
+	    1e-6*num_flops/(time_block.value()-time_overhead.value())
 	    ); 
     fflush(stdout);
 
