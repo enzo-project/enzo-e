@@ -1,2 +1,5 @@
+include DEPEND
 include $(TOP)/src/MAKE/Make.mach
 include $(TOP)/src/MAKE/Make.common
+include $(TOP)/src/MAKE/Make.targets
+

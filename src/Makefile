@@ -38,7 +38,7 @@ DIR = Array Disk Error Memory Parameters Performance Error Test
 .PHONY: all %-all
 all:       $(patsubst %,%-all,$(DIR))
 %-all:  %-DEP
-	$(MAKE) -C $*
+	-@($(MAKE) -C $*)
 
 #-----------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ all:       $(patsubst %,%-all,$(DIR))
 clean:   $(patsubst %,%-clean,$(DIR))
 %-clean:  %-DEP
 	-@rm -f *~
-	$(MAKE) -C $* clean
+	-@($(MAKE) -C $* clean)
 
 #-----------------------------------------------------------------------
 
@@ -66,14 +66,14 @@ dep:       $(patsubst %,%-dep,$(DIR))
 	$(MAKE) -C $* dep
 .PHONY: %-DEP
 %-DEP:
-	touch $*/DEPEND
+	-@(touch $*/DEPEND)
 
 #-----------------------------------------------------------------------
 
 .PHONY: install %-install
 install:   $(patsubst %,%-install,$(DIR))
 %-install: %-DEP
-	$(MAKE) -C $* install
+	-@($(MAKE) -C $* install)
 
 #-----------------------------------------------------------------------
 

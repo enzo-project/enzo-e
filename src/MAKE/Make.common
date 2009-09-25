@@ -1,14 +1,34 @@
 #========================================================================
+# Sets
 #
-# INC
-# CPPFLAGS
-# CXXFLAGS
-# CFLAGS
-# LDFLAGS
-# 
-# dep:
+#    INC
+#    LIB
+#    CPPFLAGS
+#    CXXFLAGS
+#    CFLAGS
+#    LDFLAGS
+#
+# References
+#
+#    TOP
+#    INC_LOCAL         $(PACKAGE)/Makefile
+#    INC_HDF5          Make.mach
+#    LIB_HDF5          Make.mach
+#    CXXFLAGS_LOCAL    $(PACKAGE)/Makefile
+#    CFLAGS_LOCAL      $(PACKAGE)/Makefile
+#    OPT               Make.mach
+#    TESTS             $(PACKAGE)/Makefile
+#    OBJS              $(PACKAGE)/Makefile
+#    PACKAGE           $(PACKAGE)/Makefile
+#   
 #
 #========================================================================
+
+#------------------------------------------------------------------------
+# SRC: Location of the source directory
+#------------------------------------------------------------------------
+
+SRC = $(TOP)/src
 
 #------------------------------------------------------------------------
 # INC: The include directories common to all components
@@ -17,13 +37,17 @@
 INC = -I$(TOP)/include
 
 #----------------------------------------------------------------------
+# LIB: The libraries common to all components
+#----------------------------------------------------------------------
 
-CPPFLAGS = $(DEFINES)
+LIB = -L$(TOP)/lib -lcello
+
+#----------------------------------------------------------------------
+
+CPPFLAGS = 
 CXXFLAGS = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CXXFLAGS_LOCAL) $(OPT)
 CFLAGS   = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CFLAGS_LOCAL)   $(OPT)
 LDFLAGS  = $(LIB_HDF5)
 
-#-----------------------------------------------------------------------
-.PHONY: dep
-dep:
-	-@(makedepend -fDEPEND $(INC) -- -- *.?pp)
+INCLUDE = $(TOP)/include
+
