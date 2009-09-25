@@ -43,7 +43,7 @@ all:       $(patsubst %,%-all,$(DIR))
 #-----------------------------------------------------------------------
 
 .PHONY: clean %-clean
-clean:     $(patsubst %,%-clean,$(DIR))
+clean:   $(patsubst %,%-clean,$(DIR))
 %-clean:  %-DEP
 	-@rm -f *~
 	$(MAKE) -C $* clean
@@ -53,11 +53,10 @@ clean:     $(patsubst %,%-clean,$(DIR))
 # Run tests in Test directory, and display results in Tests/*.unit
 
 .PHONY: 
-test:   all install
-	$(MAKE) -C Test test
-	$(MAKE) -C Memory test
-	-@cat Test/*.unit
-	-@cat Memory/*.unit
+run-tests: all install $(patsubst %,%-run-tests,$(DIR))
+
+%-run-tests:
+	$(MAKE) -C $* run-tests
 
 #-----------------------------------------------------------------------
 
