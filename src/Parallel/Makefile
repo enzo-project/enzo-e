@@ -12,3 +12,8 @@ include $(TOP)/src/MAKE/Make.include
 install-include:
 	ln -sf `pwd`/parallel.hpp               $(INCLUDE)
 	ln -sf `pwd`/parallel_parallel.hpp         $(INCLUDE)
+
+#-----------------------------------------------------------------------
+
+.PHONY: clean-local
+clean-local:

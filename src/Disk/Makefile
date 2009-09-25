@@ -32,3 +32,8 @@ test_disk_hdf5: test_disk_hdf5.o
 install-include:
 	ln -sf `pwd`/disk.hpp      $(INCLUDE)
 	ln -sf `pwd`/disk_hdf5.hpp $(INCLUDE)
+
+#-----------------------------------------------------------------------
+
+.PHONY: clean-local
+clean-local:

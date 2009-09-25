@@ -38,3 +38,10 @@ test_parse: parse.y parse.l
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/parameters.hpp $(INCLUDE)
+#-----------------------------------------------------------------------
+
+.PHONY: clean-local
+clean-local:
+	-@(rm -f lex.yy.c parse.c parse.tab.? *.out)
+
+

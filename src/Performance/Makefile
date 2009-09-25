@@ -34,3 +34,9 @@ time_matvec: time_matvec.cpp
 install-include:
 	ln -sf `pwd`/performance.hpp       $(INCLUDE)
 	ln -sf `pwd`/performance_timer.hpp $(INCLUDE)
+
+#-----------------------------------------------------------------------
+
+.PHONY: clean-local
+clean-local:
+

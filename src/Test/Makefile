@@ -12,4 +12,12 @@ install-include:
 	ln -sf `pwd`/test.hpp       $(INCLUDE)
 	ln -sf `pwd`/test_unit.hpp  $(INCLUDE)
 
+#-----------------------------------------------------------------------
+
+.PHONY: run-tests
 run-tests:
+
+#-----------------------------------------------------------------------
+
+.PHONY: clean-local
+clean-local:

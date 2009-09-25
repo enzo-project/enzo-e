@@ -34,3 +34,8 @@ test_error: test_error.o
 install-include:
 	ln -sf `pwd`/error.hpp            $(INCLUDE)
 	ln -sf `pwd`/error_exception.hpp  $(INCLUDE)
+
+#-----------------------------------------------------------------------
+
+.PHONY: clean-local
+clean-local:

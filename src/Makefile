@@ -28,8 +28,16 @@
 #
 #-----------------------------------------------------------------------
 
-DIR = Array Disk Error Memory Parameters Performance Error Test
-# Method
+DIR = \
+      Array \
+      Disk \
+      Error \
+      Error \
+      Memory \
+      Method \
+      Parameters \
+      Performance \
+      Test
 
 #=======================================================================
 # TARGETS
@@ -38,7 +46,7 @@ DIR = Array Disk Error Memory Parameters Performance Error Test
 .PHONY: all %-all
 all:       $(patsubst %,%-all,$(DIR))
 %-all:  %-DEP
-	-@($(MAKE) -C $*)
+	-@($(MAKE)  -C $*)
 
 #-----------------------------------------------------------------------
 
@@ -46,7 +54,7 @@ all:       $(patsubst %,%-all,$(DIR))
 clean:   $(patsubst %,%-clean,$(DIR))
 %-clean:  %-DEP
 	-@rm -f *~
-	-@($(MAKE) -C $* clean)
+	-@($(MAKE) -s -C $* clean)
 
 #-----------------------------------------------------------------------
 
@@ -56,14 +64,14 @@ clean:   $(patsubst %,%-clean,$(DIR))
 run-tests: all install $(patsubst %,%-run-tests,$(DIR))
 
 %-run-tests:
-	$(MAKE) -C $* run-tests
+	$(MAKE) -s -C $* run-tests
 
 #-----------------------------------------------------------------------
 
 .PHONY: dep %-dep
 dep:       $(patsubst %,%-dep,$(DIR))
 %-dep: %-DEP
-	$(MAKE) -C $* dep
+	$(MAKE) -s -C $* dep
 .PHONY: %-DEP
 %-DEP:
 	-@(touch $*/DEPEND)
@@ -73,14 +81,14 @@ dep:       $(patsubst %,%-dep,$(DIR))
 .PHONY: install %-install
 install:   $(patsubst %,%-install,$(DIR))
 %-install: %-DEP
-	-@($(MAKE) -C $* install)
+	-@($(MAKE) -s -C $* install)
 
 #-----------------------------------------------------------------------
 
 .PHONY: install-include %-install-include
 install-include:   $(patsubst %,%-install-include,$(DIR))
 %-install-include: %-DEP
-	$(MAKE) -C $* install-include
+	-@$(MAKE) -s -C $* install-include
 
 #-----------------------------------------------------------------------
 

@@ -22,3 +22,8 @@ test_memory: test_memory.o
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/memory.hpp $(INCLUDE)
+
+#-----------------------------------------------------------------------
+
+.PHONY: clean-local
+clean-local:
