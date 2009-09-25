@@ -25,22 +25,30 @@
 \newcommand{\colorcode}[1]{\textcolor{blue}{\code{#1}}}
 \newcommand{\itemnum}[1]{\item<#1>}
 
+%========================================================================
 % UNCOMMENT TO PRINT
+%========================================================================
 
-% \newcommand{\enhance}[1]{}
-% \newcommand{\enhancebf}[2]{\textbf{#2}}
-% \newcommand{\enhanceus}[1]{\color{blue}}
-% \newcommand{\enhancenewus}[1]{\color{magenta}}
-% \newcommand{\enhancethem}[1]{\color{red}}
+ \newcommand{\enhance}[1]{}
+ \newcommand{\enhancebf}[2]{\textbf{#2}}
+ \newcommand{\enhanceus}[1]{\color{blue}}
+ \newcommand{\enhancenewus}[1]{\color{magenta}}
+ \newcommand{\enhancethem}[1]{\color{red}}
+\newcommand{\ENHANCE}[1]{
+ \temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
 
+%========================================================================
 % UNCOMMENT FOR TALK:
+%========================================================================
 
- \newcommand{\enhance}[1]{\temporal<#1>{\color{lightgray}}{\color{black}}{\color{black}}}
- \newcommand{\enhancebf}[2]{\enhance{#1}\textbf{#2}}
- \newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
- \newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
- \newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
-
+% \newcommand{\enhance}[1]{\temporal<#1>{\color{lightgray}}{\color{black}}{\color{black}}}
+% \newcommand{\enhancebf}[2]{\enhance{#1}\textbf{#2}}
+% \newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
+% \newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
+% \newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
+%\newcommand{\ENHANCE}[1]{
+% \temporal<#1>{\color{lightgray}}{\color{black}}{\color{black}}}
+%========================================================================
 
 
 % \def\enhanceus<#1>{%
@@ -50,8 +58,6 @@
 % \def\enhancethem<#1>{%
 %  \temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
 
-\newcommand{\ENHANCE}[1]{
- \temporal<#1>{\color{lightgray}}{\color{black}}{\color{black}}}
 
 %\includeonly{array}
 
@@ -64,17 +70,22 @@
 \begin{document}
 \frame{\titlepage}
 
-\frame{\footnotesize
-\tableofcontents}
- \AtBeginSection[]
-{
-%------------------------------------------------------------------------
-  \begin{frame}<beamer>
-\footnotesize
-   \tableofcontents[currentsection]
-%    \tableofcontents[currentsection]
-  \end{frame}
-}
+%========================================================================
+% UNCOMMENT FOR TALK
+% COMMENT FOR PRINT
+%========================================================================
+%\frame{\footnotesize
+%\tableofcontents}
+% \AtBeginSection[]
+%{
+%%------------------------------------------------------------------------
+%  \begin{frame}<beamer>
+%\footnotesize
+%   \tableofcontents[currentsection]
+%%    \tableofcontents[currentsection]
+%  \end{frame}
+%}
+%========================================================================
 
 %========================================================================
 \section{Introduction}
