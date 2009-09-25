@@ -4,68 +4,20 @@
 
 TOP = ../..
 SRC = ..
-LIB = -L../../lib -lcello
-
-TEST_EXES = \
-	test_disk_hdf5 \
-	test_error \
-	test_parameters \
-	test_performance_timer
+LIB = -L$(TOP)/lib -lcello
 
 #=======================================================================
 # TARGETS
 #=======================================================================
 
-.PHONY: all
-all: $(TEST_EXES)
-
-#-----------------------------------------------------------------------
-
-.PHONY: test
-test: $(TEST_EXES) run-tests
-
-#-----------------------------------------------------------------------
-
-.PHONY: run-tests
-run-tests: $(TEST_EXES)
-	-./test_disk_hdf5
-	-./test_error
-	-./test_parameters
-	-./test_performance_timer
-#-----------------------------------------------------------------------
-
-test_disk_hdf5: test_disk_hdf5.o
-	$(CXX) -o test_disk_hdf5 test_disk_hdf5.o $(LIB) $(LIB_HDF5) $(INC)
-test_error: test_error.o
-	$(CXX) -o test_error test_error.o $(LIB) $(INC)
-test_parameters: test_parameters.o
-	$(CXX) -o test_parameters test_parameters.o $(LIB) $(INC)
-test_performance_timer: test_performance_timer.o 
-	$(CXX) -o test_performance_timer test_performance_timer.o $(LIB) $(INC)
-
-
-test_test:
-
-#-----------------------------------------------------------------------
-
-libtest.a:
-
-#-----------------------------------------------------------------------
-
-.PHONY: clean
-clean:
-	-@rm *.o *~ $(TEST_EXES) *.unit *.hdf5
-
-#-----------------------------------------------------------------------
-
-.PHONY: install
-install: $(TEST_EXES)
-	cp $(TEST_EXES) $(TOP)/bin
-
-
-#-----------------------------------------------------------------------
+all:
 
 INCLUDE = $(TOP)/include
+
+#=======================================================================
+
+.PHONY: install
+install: install-include $(OBJS)
 
 .PHONY: install-include
 install-include:
