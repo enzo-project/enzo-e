@@ -1,7 +1,0 @@
-
-ARRAY_OBJS = Array/array_array_serial.o
-
-DISK_OBJS = \
-   Disk/hdf5.o
-
-PERFORMANCE_OBJS = 
