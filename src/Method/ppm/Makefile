@@ -65,14 +65,8 @@ test_implosion: $(OBJS) $(OBJS_FC) $(OBJS_IMPLOSION)
 test_implosion_opt: $(OBJS) $(OBJS_FC_OPT) $(OBJS_IMPLOSION)
 	$(CXX) -o test_implosion_opt $(OBJS_IMPLOSION) $(OBJS) $(OBJS_FC_OPT) $(LIB)
 
-
-obj: $(OBJS)
-
-test:
-
 .PHONY: clean-local
 clean-local:
-	-@rm *.o $(TEST_EXES) *~
 
 
 include DEPEND

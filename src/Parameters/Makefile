@@ -2,7 +2,8 @@
 TOP     = ../..
 PACKAGE = parameters
 OBJS    = parameters.o
-TESTS   = test_parameters test_parse
+TESTS   = test_parameters
+EXES    = test_parse
 
 include $(TOP)/src/MAKE/Make.include
 
@@ -15,9 +16,9 @@ all: $(OBJS) $(TESTS)
 
 #-----------------------------------------------------------------------
 
-.PHONY: run-tests
-run-tests: $(TESTS)
-	-./test_parameters
+.PHONY: run-exes
+
+run-exes: $(EXES)
 	-./test_parse < test_list.in    > test_list.out
 	-./test_parse < test_logical.in > test_logical.out
 	-./test_parse < test_scalar.in  > test_scalar.out

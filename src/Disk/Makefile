@@ -13,17 +13,6 @@ include $(TOP)/src/MAKE/Make.include
 all: $(OBJS) $(TESTS)
 
 #-----------------------------------------------------------------------
-
-.PHONY: test
-test: $(TEST_EXES) run-tests
-
-#-----------------------------------------------------------------------
-
-.PHONY: run-tests
-run-tests: $(TESTS)
-	-./test_disk_hdf5
-
-#-----------------------------------------------------------------------
 test_disk_hdf5: test_disk_hdf5.o 
 	$(CXX) -o test_disk_hdf5 test_disk_hdf5.o $(LIB) $(LIB_HDF5)
 #-----------------------------------------------------------------------

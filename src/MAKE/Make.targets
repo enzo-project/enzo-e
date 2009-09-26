@@ -16,13 +16,19 @@ all: $(TESTS) $(OBJS)
 #-----------------------------------------------------------------------
 
 .PHONY: test
-test: $(TEST_EXES) run-tests
+test: $(TESTS) run-tests
 	@echo "Making $(PACKAGE) tests"
+
+.PHONY: run-tests
+run-tests: $(patsubst %,run-test-%,$(TESTS))
+
+run-test-%: %
+	    -./$*
 
 #-----------------------------------------------------------------------
 .PHONY: dep
 dep:
-	-@(makedepend -fDEPEND $(INC) -- -- *.?pp *.h *.F *.def)
+	-@(makedepend -fDEPEND $(INC) -- -- *.cpp *.F *.def)
 
 
 #-----------------------------------------------------------------------
@@ -47,7 +53,9 @@ clean: clean-local
 .PHONY: install
 install: install-include $(OBJS)
 	ar rcu $(TOP)/lib/libcello.a      $(OBJS)   
-	ar rcu $(TOP)/lib/lib$(PACKAGE).a $(OBJS)   
+	ar rcu $(TOP)/lib/lib$(PACKAGE).a $(OBJS)
+	cp $(TESTS) $(TOP)/bin
+	cp $(EXECS) $(TOP)/bin
 
 #-----------------------------------------------------------------------
 

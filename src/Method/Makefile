@@ -13,10 +13,10 @@ include $(TOP)/src/MAKE/Make.include
 # TARGETS
 #=======================================================================
 
-.PHONY: all
-all: $(OBJS)
-	$(MAKE) -C ppm
-	$(MAKE) -C ppml
+# .PHONY: all
+# all: $(OBJS)
+# 	$(MAKE) -C ppm
+# 	$(MAKE) -C ppml
 
 #-----------------------------------------------------------------------
 

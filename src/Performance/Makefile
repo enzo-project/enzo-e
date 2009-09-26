@@ -10,12 +10,6 @@ include $(TOP)/src/MAKE/Make.include
 # TARGETS
 #=======================================================================
 
-.PHONY: run-tests
-run-tests: $(TESTS)
-	-./test_performance
-
-#-----------------------------------------------------------------------
-
 test_performance: test_performance.o
 	$(CXX) -o test_performance test_performance.o $(LIB)
 

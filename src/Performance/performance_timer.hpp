@@ -57,7 +57,7 @@ private:
   //-------------------------------------------------------------------
 
   /// The accumulated time
-  Scalar time_;
+  float time_;
   /// Whether the timer is currently running
   bool is_running_;
   /// Struct values for gettimeofday()
@@ -75,11 +75,11 @@ public:
   /// Start the timer
   inline void start();
   /// Stop the timer
-  inline Scalar stop();
+  inline float stop();
   /// Clear the timer
   inline void clear();
   /// Return the value of the timer
-  inline Scalar value() const;
+  inline float value() const;
 };
 
 //======================================================================
@@ -103,7 +103,7 @@ inline void Timer::start()
 //----------------------------------------------------------------------
 
 /// Stop the timer
-inline Scalar Timer::stop() 
+inline float Timer::stop() 
 { 
   if (is_running_) {
     gettimeofday(&t2_, &tz_);
@@ -126,7 +126,7 @@ inline void Timer::clear()
 //----------------------------------------------------------------------
 
 /// Return the value of the timer
-inline Scalar Timer::value() const 
+inline float Timer::value() const 
 {
   if (is_running_) {
     gettimeofday((struct timeval *)&t2_, (struct timezone *)&tz_);
