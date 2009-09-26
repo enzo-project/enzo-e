@@ -1,0 +1,53 @@
+#=======================================================================
+#
+# Targets
+#
+#    all
+#    test
+#    dep
+#    clean
+#    install
+#
+#=======================================================================
+
+.PHONY: all
+all: $(TESTS) $(OBJS) 
+
+#-----------------------------------------------------------------------
+
+.PHONY: test
+test: $(TEST_EXES) run-tests
+	@echo "Making $(PACKAGE) tests"
+
+#-----------------------------------------------------------------------
+.PHONY: dep
+dep:
+	-@(makedepend -fDEPEND $(INC) -- -- *.?pp *.h *.F *.def)
+
+
+#-----------------------------------------------------------------------
+
+.PHONY: clean
+clean: clean-local
+	@echo "Cleaning src/$(PACKAGE)"
+	-@(rm -f *~ *.o DEPEND.bak)
+	-@(rm -f $(TESTS) *.unit)
+# lex.yy.c 
+# *.hdf5 
+# *.eps
+# lib*.a
+# Makefile.bak
+# *.out
+# out.make.dep
+# parse.c parse.tab.? *.png 
+
+
+#-----------------------------------------------------------------------
+
+.PHONY: install
+install: install-include $(OBJS)
+	ar rcu $(TOP)/lib/libcello.a      $(OBJS)   
+	ar rcu $(TOP)/lib/lib$(PACKAGE).a $(OBJS)   
+
+#-----------------------------------------------------------------------
+
