@@ -39,6 +39,7 @@ LIB      = $(LIB_LOCAL) -lgfortran -lm -lhdf5
 
 .PHONY: clean-local
 clean-local:
+	-@rm -f *.png *.hdf5
 
 
 test_ppml: $(OBJS) test_ppml.o

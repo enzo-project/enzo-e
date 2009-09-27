@@ -67,6 +67,7 @@ test_implosion_opt: $(OBJS) $(OBJS_FC_OPT) $(OBJS_IMPLOSION)
 
 .PHONY: clean-local
 clean-local:
+	-@rm -f *.png *.hdf5
 
 
 include DEPEND

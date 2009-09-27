@@ -29,5 +29,7 @@ install-include:
 
 .PHONY: clean-local
 clean-local:
+	-@$(MAKE) -C ppm clean
+	-@$(MAKE) -C ppml clean
 	-@(rm -f ppm/*.hdf5 ppm/*.png ppm/*.mpg)
 
