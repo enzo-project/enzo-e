@@ -8,7 +8,7 @@ foreach hdf5 (*.hdf5)
    h5topng -T -m 0.125 -M 1.0 -c $color $hdf5
 end
 
-convert *png > implosion.mpg
+# convert *png > implosion.mpg
 # ffmpeg -qscale 10 -r 10 -i *png sdsc.mpg
 
 

@@ -11,6 +11,8 @@
  
 #include "cello_hydro.h"
 
+const char * file_root = "image";
+
 main()
 {
 
@@ -34,7 +36,7 @@ main()
     SetExternalBoundaryValues();
 
     if ((cycle % cycle_dump_frequency) == 0) {
-      data_dump(cycle);
+      data_dump(file_root,cycle);
     }
 
     SolveHydroEquations(cycle, dt);
@@ -42,7 +44,7 @@ main()
   }
   if ((cycle % cycle_dump_frequency) == 0) {
     SetExternalBoundaryValues();
-    data_dump(cycle);
+    data_dump(file_root,cycle);
   }
 }
 

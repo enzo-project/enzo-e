@@ -209,8 +209,9 @@ int SetExternalBoundary(int FieldRank,
 void initialize_hydro ();
 
 void initialize_implosion (int size, int cycles);
+void initialize_implosion3 (int size, int cycles);
 void initialize_image ();
 
 float sum_field (int field);
 float print_field (int field);
-void data_dump (int cycle);
+void data_dump (const char * file_root, int cycle);

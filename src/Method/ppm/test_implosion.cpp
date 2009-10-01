@@ -12,6 +12,8 @@
 #include "cello_hydro.h"
 #include "performance.hpp"
 
+const char * file_root = "implosion";
+
 int main(int argc, char * argv[])
 {
 
@@ -54,12 +56,14 @@ int main(int argc, char * argv[])
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
+    printf ("cycle = %6d time = %6f dt = %6f\n",cycle,time,dt);
+
     dt =  min (ComputeTimeStep(), time_stop - time);
 
     SetExternalBoundaryValues();
 
      if (cycle_dump_frequency && (cycle % cycle_dump_frequency) == 0) {
-       data_dump(cycle);
+       data_dump(file_root, cycle);
      }
 
     SolveHydroEquations(cycle, dt);
@@ -68,7 +72,7 @@ int main(int argc, char * argv[])
   printf ("%g\n",timer.value());
 
   SetExternalBoundaryValues();
-  data_dump(cycle);
+  data_dump(file_root,cycle);
 
 }
 

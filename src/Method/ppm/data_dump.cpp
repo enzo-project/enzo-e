@@ -55,14 +55,14 @@
 #include "array.hpp"
 #include "disk.hpp"
 
-void data_dump(int cycle)
+void data_dump(const char * file_root, int cycle)
 { 
 
   Hdf5 hdf5;
 
   // Open hdf5 file dump for cycle
   char filename[80];
-  sprintf (filename,"cello-implosion-%06d.hdf5",cycle);
+  sprintf (filename,"%s-%06d.hdf5",file_root,cycle);
   hdf5.file_open(filename,"w");
 
   // Open density dataset
