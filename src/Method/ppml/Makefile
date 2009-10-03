@@ -27,7 +27,7 @@ OBJS = \
 	PPML_TimeStep.o \
 	calc_dt.o 
 TESTS = test_ppml
-all: $(OBJS)
+# all: $(OBJS)
 #	PPML_QDD6.o \
 
 include $(TOP)/src/MAKE/Make.include
