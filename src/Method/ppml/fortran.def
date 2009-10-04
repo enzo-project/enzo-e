@@ -1,23 +1,34 @@
-#define MAX_ANY_SINGLE_DIRECTION __max_cube_plus_7
-#define MAX_COLOR __max_colors
+#define huge                     1.0e+20
+#define tiny                     1.0e-20
+#define MAX_ANY_SINGLE_DIRECTION 4096+6
+#define MAX_COLOR                20
 
-#ifdef p4
-#define tiny 1.0e-20
-#define huge 1.0e+20
-#define REALSUB real
-#endif
+#define DEBUG_MESSAGE            CALL f_warning(__FILE__,__LINE__)
+#define ERROR_MESSAGE            CALL f_error(__FILE__,__LINE__)
+#define WARNING_MESSAGE          CALL f_warning(__FILE__,__LINE__)
 
-#ifdef p8
-#define tiny 1.0e-20
-#define huge 1.0e+20
-#define REALSUB real*8
-#endif
+#define REALSUB REAL*8 
 
-#ifdef p16
-#define tiny 1.0e-20
-#define huge 1.0e+20
-#define REALSUB real*16
-#endif
+/* #define MAX_ANY_SINGLE_DIRECTION __max_cube_plus_7 */
+/* #define MAX_COLOR __max_colors */
 
-#define RADIATION
-#define NO_CEN_METALS
+/* #ifdef p4 */
+/* #define tiny 1.0e-20 */
+/* #define huge 1.0e+20 */
+/* #define REALSUB real */
+/* #endif */
+
+/* #ifdef p8 */
+/* #define tiny 1.0e-20 */
+/* #define huge 1.0e+20 */
+/* #define REALSUB real*8 */
+/* #endif */
+
+/* #ifdef p16 */
+/* #define tiny 1.0e-20 */
+/* #define huge 1.0e+20 */
+/* #define REALSUB real*16 */
+/* #endif */
+
+/* #define RADIATION */
+/* #define NO_CEN_METALS */

@@ -6,11 +6,23 @@
 # 
 
 TOP = ../../..
+
 PACKAGE = method
+
+TESTS = test_ppml
+
+INC_LOCAL  = -I$(TOP)/include
+LIB_LOCAL  = -L$(TOP)/lib -lcello
+FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
+CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
+
+INCS = cello_hydro.h
 OBJS = \
 	cello_hydro.o \
         initialize_hydro.o \
-        initialize_implosion.o \
+        initialize_ppml.o \
+	CosmologyComputeExpansionFactor.o \
+	CosmologyComputeExpansionTimestep.o \
 	Grid_SolveMHDEquations.o \
 	SetExternalBoundary.o \
         Grid_SetExternalBoundaryValues.o \
@@ -25,25 +37,28 @@ OBJS = \
 	PPML_Primitive.o \
 	PPML_sub.o \
 	PPML_TimeStep.o \
-	calc_dt.o 
-TESTS = test_ppml
+	data_dump.o
+
+
 # all: $(OBJS)
 #	PPML_QDD6.o \
 
 include $(TOP)/src/MAKE/Make.include
 
-FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
-CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
-
-LIB      = $(LIB_LOCAL) -lgfortran -lm -lhdf5
+FFLAGS   = $(FFLAGS_LOCAL)
+CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
+LIB      = $(LIB_LOCAL) -lgfortran -lm $(LIB_HDF5)
 
 .PHONY: clean-local
 clean-local:
 	-@rm -f *.png *.hdf5
 
 
-test_ppml: $(OBJS) test_ppml.o
+test_ppml: $(INCS) $(OBJS) test_ppml.o
 	$(CXX) -o test_ppml test_ppml.o $(OBJS) $(LIB)
+
+cello_hydro.h:
+	ln -s ../ppm/cello_hydro.h .
 
 
 include DEPEND

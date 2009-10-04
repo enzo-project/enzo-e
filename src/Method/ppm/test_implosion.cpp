@@ -56,9 +56,9 @@ int main(int argc, char * argv[])
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
-    printf ("cycle = %6d time = %6f dt = %6f\n",cycle,time,dt);
-
     dt =  min (ComputeTimeStep(), time_stop - time);
+
+    printf ("cycle = %6d time = %6f dt = %6f\n",cycle,time,dt);
 
     SetExternalBoundaryValues();
 

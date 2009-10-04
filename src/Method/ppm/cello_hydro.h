@@ -194,6 +194,7 @@ int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum,
 int SetMinimumSupport(float &MinimumSupportEnergyCoefficient);
 
 int SolveHydroEquations(int cycle, float dt);
+int SolveMHDEquations(int cycle, float dt);
 
 float ComputeTimeStep();
 int SetExternalBoundaryValues();
@@ -208,9 +209,15 @@ int SetExternalBoundary(int FieldRank,
 
 void initialize_hydro ();
 
+// PPM
+
 void initialize_implosion (int size, int cycles);
 void initialize_implosion3 (int size, int cycles);
 void initialize_image ();
+
+// PPML
+
+void initialize_ppml (int size, int cycles);
 
 float sum_field (int field);
 float print_field (int field);
