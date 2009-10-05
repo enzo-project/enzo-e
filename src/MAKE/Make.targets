@@ -11,7 +11,7 @@
 #=======================================================================
 
 .PHONY: all
-all: $(TESTS) $(OBJS) 
+all: $(TESTS) $(EXES) $(OBJS) 
 
 #-----------------------------------------------------------------------
 
@@ -37,7 +37,7 @@ dep:
 clean: clean-local
 	@echo "Cleaning src/$(PACKAGE)"
 	-@(rm -f *~ *.o DEPEND.bak)
-	-@(rm -f $(TESTS) *.unit)
+	-@(rm -f $(TESTS) $(EXES) *.unit)
 # lex.yy.c 
 # *.hdf5 
 # *.eps
@@ -55,7 +55,7 @@ install: install-include $(OBJS)
 	ar rcu $(TOP)/lib/libcello.a      $(OBJS)   
 	ar rcu $(TOP)/lib/lib$(PACKAGE).a $(OBJS)
 	cp $(TESTS) $(TOP)/bin
-	cp $(EXECS) $(TOP)/bin
+	cp $(EXES)  $(TOP)/bin
 
 #-----------------------------------------------------------------------
 

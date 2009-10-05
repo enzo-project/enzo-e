@@ -18,6 +18,7 @@
 #    CFLAGS_LOCAL      $(PACKAGE)/Makefile
 #    OPT               Make.mach
 #    TESTS             $(PACKAGE)/Makefile
+#    EXES              $(PACKAGE)/Makefile
 #    OBJS              $(PACKAGE)/Makefile
 #    PACKAGE           $(PACKAGE)/Makefile
 #   
@@ -34,13 +35,13 @@ SRC = $(TOP)/src
 # INC: The include directories common to all components
 #------------------------------------------------------------------------
 
-INC = -I$(TOP)/include
+INC = $(INC_LOCAL) -I$(TOP)/include
 
 #----------------------------------------------------------------------
 # LIB: The libraries common to all components
 #----------------------------------------------------------------------
 
-LIB = -L$(TOP)/lib -lcello
+LIB = $(LIB_LOCAL) -L$(TOP)/lib -lcello
 
 #----------------------------------------------------------------------
 
