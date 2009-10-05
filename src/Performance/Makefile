@@ -3,6 +3,7 @@ TOP     = ../..
 PACKAGE = performance
 OBJS    = 
 TESTS   = test_performance
+EXES    = time_matvec
 
 include $(TOP)/src/MAKE/Make.include
 
