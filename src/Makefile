@@ -30,11 +30,13 @@
 
 DIR = \
       Array \
+      Control \
       Disk \
       Error \
       Error \
       Memory \
       Method \
+      Monitor \
       Parameters \
       Performance \
       Test
