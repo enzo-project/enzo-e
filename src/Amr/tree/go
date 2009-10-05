@@ -6,13 +6,15 @@
 # set images = (dot)
 # set images = (ucsd-seal-1024)
 # set images = (gradient)
-set images = (norman)
-set images = (skory)
+# set images = (norman)
+# set images = (skory)
 # set images = (sdsc-logo)
 # set images = (cosmology-edit-2048)
 # set images = (cosmo2)
+# set images = (saturn)
+set images = (saturn2)
 
-set color = vga
+set color = gray
 
 foreach image ($images)
 

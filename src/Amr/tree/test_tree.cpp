@@ -17,7 +17,7 @@ const bool debug = false;
 const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
-const int  max_level = 10;
+const int  max_level = 14;
 
 #include "image.h"
 
