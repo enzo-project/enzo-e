@@ -16,7 +16,15 @@ LIB_LOCAL  = -L$(TOP)/lib -lcello
 FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
 CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
 
-INCS = cello_hydro.h
+INCS = \
+	cello_hydro.h \
+	data_dump.cpp \
+	SetExternalBoundary.cpp \
+	initialize_hydro.cpp \
+	CosmologyComputeExpansionTimestep.cpp \
+	Grid_SetExternalBoundaryValues.cpp \
+	CosmologyComputeExpansionFactor.cpp \
+
 OBJS = \
 	cello_hydro.o \
         initialize_hydro.o \
@@ -59,6 +67,24 @@ test_ppml: $(INCS) $(OBJS) test_ppml.o
 
 cello_hydro.h:
 	ln -s ../ppm/cello_hydro.h .
+
+data_dump.cpp:
+	ln -s ../ppm/data_dump.cpp .
+
+SetExternalBoundary.cpp:
+	ln -s ../ppm/SetExternalBoundary.cpp .
+
+initialize_hydro.cpp:
+	ln -s ../ppm/initialize_hydro.cpp .
+
+CosmologyComputeExpansionTimestep.cpp:
+	ln -s ../ppm/CosmologyComputeExpansionTimestep.cpp .
+
+Grid_SetExternalBoundaryValues.cpp:
+	ln -s ../ppm/Grid_SetExternalBoundaryValues.cpp .
+
+CosmologyComputeExpansionFactor.cpp:
+	ln -s ../ppm/CosmologyComputeExpansionFactor.cpp .
 
 
 include DEPEND
