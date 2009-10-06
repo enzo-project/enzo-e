@@ -1,0 +1,7 @@
+Group { parameter = 1.6 }
+Group one { parameter = 3.2 }
+Group two { parameter = 6.2 }
+Group {
+   one { parameter = 1.6 };
+   two { parameter = 3.2 }
+}
