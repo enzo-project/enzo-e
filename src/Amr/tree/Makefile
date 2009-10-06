@@ -19,13 +19,7 @@ CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
 
 all: $(TEST_EXES)
 test_tree: $(OBJS) test_tree.o
-	echo "$(LIB)"
 	$(CXX) -o test_tree test_tree.o $(CXXFLAGS_LOCAL) $(OBJS) $(LIB)
-
-
-.PHONY: install
-install: $(TEST_EXES)
-	cp $(TEST_EXES) $(TOP)/bin
 
 obj: $(OBJS)
 
@@ -33,9 +27,8 @@ test: $(TEST_EXES)
 #	./test_implosion # slow
 #	./test_enzo      # slow
 
-.PHONY: clean
-clean:
-	-@rm *.o $(TEST_EXES) *~
+.PHONY: clean-local
+clean-local:
 
 include $(TOP)/src/MAKE/Make.include
 
