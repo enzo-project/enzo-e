@@ -43,7 +43,7 @@
  *    Parameters::~Parameters()
  *    Parameters::read()
  *    Parameters::set_value()
- *    Parameters::get_value()
+ *    Parameters::get_string()
  *
  * PRIVATE FUCTIONS
  *  
@@ -129,7 +129,7 @@ Parameters::read
  */
 
 std::string 
-Parameters::get_value 
+Parameters::get_string 
 ( std::string parameter  ) 
   throw()
 

@@ -80,7 +80,7 @@ public:
   void read (FILE * file_pointer) throw(ExceptionBadPointer);
 
   /// This function reads in parameters from a file
-  std::string get_value (std::string parameter) throw();
+  std::string get_string (std::string parameter) throw();
 
   /// This function reads in parameters from a file
   void set_value (std::string parameter, std::string value) throw();

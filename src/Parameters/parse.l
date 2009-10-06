@@ -30,60 +30,61 @@ E [Ee][+-]?{D}+
 
 /* double foo (double) */
 
-acos   { return ACOS; }
-acosh  { return ACOSH; }
-asin   { return ASIN; }
-asinh  { return ASINH; }
-atan   { return ATAN; }
-atanh  { return ATANH; }
-cbrt   { return CBRT; }
-ceil   { return CEIL; }
-cos    { return COS; }
-cosh   { return COSH; }
-erfc   { return ERFC; }
-erf    { return ERF; }
-exp    { return EXP; }
-expm1  { return EXPM1; }
-fabs   { return FABS; }
-floor  { return FLOOR; }
-gamma  { return GAMMA; }
-j0     { return J0; }
-j1     { return J1; }
-lgamma { return LGAMMA; }
-log10  { return LOG10; }
-log1p  { return LOG1P; }
-logb   { return LOGB; }
-log    { return LOG; }
-sin    { return SIN; }
-sinh   { return SINH; }
-sqrt   { return SQRT; }
-tan    { return TAN; }
-tanh   { return TANH; }
-y0     { return Y0; }
-y1     { return Y1; }
-rint   { return RINT; }
+/* acos   { return ACOS; } */
+/* acosh  { return ACOSH; } */
+/* asin   { return ASIN; } */
+/* asinh  { return ASINH; } */
+/* atan   { return ATAN; } */
+/* atanh  { return ATANH; } */
+/* cbrt   { return CBRT; } */
+/* ceil   { return CEIL; } */
+/* cos    { return COS; } */
+/* cosh   { return COSH; } */
+/* erfc   { return ERFC; } */
+/* erf    { return ERF; } */
+/* exp    { return EXP; } */
+/* expm1  { return EXPM1; } */
+/* fabs   { return FABS; } */
+/* floor  { return FLOOR; } */
+/* gamma  { return GAMMA; } */
+/* j0     { return J0; } */
+/* j1     { return J1; } */
+/* lgamma { return LGAMMA; } */
+/* log10  { return LOG10; } */
+/* log1p  { return LOG1P; } */
+/* logb   { return LOGB; } */
+/* log    { return LOG; } */
+/* sinh   { return SINH; } */
+/* sqrt   { return SQRT; } */
+/* tan    { return TAN; } */
+/* tanh   { return TANH; } */
+/* y0     { return Y0; } */
+/* y1     { return Y1; } */
+/* rint   { return RINT; } */
 
 /* int foo (double) */
 
 /* int    ilogb(double); */
 /* int    isnan(double); */
 
-/*  */
 /* double foo (double,double) */
 
-atan2     { return ATAN2; }
-fmod      { return FMOD; }
-hypot     { return HYPOT; }
-nextafter { return NEXTAFTER; }
-pow       { return POW; }
-remainder { return REMAINDER; }
-scalb     { return SCALB; }
+/* atan2     { return ATAN2; } */
+/* fmod      { return FMOD; } */
+/* hypot     { return HYPOT; } */
+/* nextafter { return NEXTAFTER; } */
+/* pow       { return POW; } */
+/* remainder { return REMAINDER; } */
+/* scalb     { return SCALB; } */
 
 /* double jn(int, double); */
 /* double ldexp(double, int); */
 /* double yn(int, double); */
 
 %%
+
+
+sin       { return SIN; }
 
 false     { return LOGICAL; } 
 true      { return LOGICAL; } 
@@ -117,7 +118,7 @@ true      { return LOGICAL; }
 ","        { return ','; } /* list element separator */
 "#".*      {  /* ignore comments */ }
 
-[xyzt]             { return CONSTANT; }
+[xyzt]             { return VARIABLE; }
 {D}+{E}*           { scalar_value = atof (yytext); return SCALAR; }
 {D}*"."{D}+({E})?  { scalar_value = atof (yytext); return SCALAR; }
 {D}+"."{D}*({E})?  { scalar_value = atof (yytext); return SCALAR; }

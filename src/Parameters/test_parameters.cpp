@@ -49,9 +49,9 @@ main()
     FILE * file_pointer = fopen ("in.test_parameters","r");
     parameters.read(file_pointer);
 
-    bool did_pass = (parameters.get_value("key1") == "value1");
+    bool did_pass = (parameters.get_string("key1") == "value1");
     
-    unit_func("get_value()");
+    unit_func("get_string()");
     unit_assert(did_pass);
 
   }

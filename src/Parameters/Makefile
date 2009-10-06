@@ -19,11 +19,12 @@ all: $(OBJS) $(TESTS)
 .PHONY: run-exes
 
 run-exes: $(EXES)
-	-./test_parse < test_list.in    > test_list.out
-	-./test_parse < test_logical.in > test_logical.out
-	-./test_parse < test_scalar.in  > test_scalar.out
+	-./test_parse < test_list.in      > test_list.out
+	-./test_parse < test_logical.in   > test_logical.out
+	-./test_parse < test_scalar.in    > test_scalar.out
+	-./test_parse < test_groups.in    > test_groups.out
 	-./test_parse < shock-pool-2.0.in > shock-pool-2.0.out
-	-./test_parse < implosion-1.0.in > implosion-1.0.out
+	-./test_parse < implosion-1.0.in  > implosion-1.0.out
 	-grep -i -l error *.out
 
 #-----------------------------------------------------------------------
