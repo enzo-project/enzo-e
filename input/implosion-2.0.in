@@ -1,0 +1,67 @@
+  # IMPLOSION DRAFT VERSION 2.0
+
+  # Define the domain to be the 2D box 0 < x,y < 0.3
+
+  Domain { extent = [0.0, 0.3, 0.0, 0.3] } 
+                                
+  # Define field properties with named groups 
+                                
+  Field pressure { floor = 1.0e-6 }
+  Field density  { floor = 1.0e-6 }
+                                   
+  # The grid is AMR starting with array of 400 cells parallelized using MPI
+ 
+  Grid {
+    root      = [400,400]; # size of the root grid
+    levels    = 4;         # maximum effective levels (for r_factor = 2)
+    refine    = 4;         # refinement factor
+    type      = tree;      # AMR type: patch or tree
+    full_tree = false;     # whether tree is full (ala Flash) or not
+    backfill  = true;      # whether to backfill for refinement > 2
+    coalesce  = true;      # whether to coalesce small patches to one big one
+    patch_min = 4;         # minimum patch size
+    patch_max = 128;       # maximum patch size
+  }
+
+  # Only physics method is hydro using ppm
+
+  Method ppm {
+      diffusion = true;
+      flattening = true;
+      steepening = true;
+  }
+
+  Eos {
+      gamma     = 1.4;
+  }
+
+  Timestep {
+      courant   = 0.8;
+  }
+
+  # Define initial conditions
+
+  Initial {
+     density  = [1.0, x + y >= 0.15, 0.125];
+     pressure = [1.0, x + y >= 0.15, 0.14];
+     velocity_x = 0;
+     velocity_y = 0;
+  }
+
+  # Define boundary conditions
+
+  Boundary { type = "reflecting" }
+
+  # Define stopping criteria
+
+  Stopping {
+     time  = 2.5;
+     cycle = 20000;
+  }
+
+  Output { 
+     period = 0.5;
+     time = [0.0, 0.3, 0.9, 1.6];
+     interval = [0.3, 0.5, 20]; # output t = 0.3 + k*0.5 for k = [0,20) 
+  }
+
