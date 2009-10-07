@@ -75,5 +75,7 @@ class ExceptionMemoryBadDeallocate  : public Exception {};
 class ExceptionMemoryBadAllocate    : public Exception {};
 class ExceptionMemoryBadGroupHandle : public Exception {};
 
+class ExceptionParametersBadType    : public Exception {};
+
 #endif /* EXCEPTION_HPP */
 

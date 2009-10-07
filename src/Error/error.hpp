@@ -38,7 +38,7 @@
 #include "cello.h"
 #include "error_exception.hpp"
 
-#define ERROR_MESSAGE_LENGTH 80
+#define ERROR_MESSAGE_LENGTH 255
 
 //-----------------------------------------------------------------------
 /// Handle a (non-lethal) warning message
@@ -89,7 +89,7 @@ static char incomplete_message[ERROR_MESSAGE_LENGTH+1];
    fflush(stdout); \
 }
 
-#define TRACE printf ("TRACE %s:%d\n",__FILE__,__LINE__); fflush(stdout);
+#define TRACE if (trace) {printf ("TRACE %s:%d\n",__FILE__,__LINE__); fflush(stdout); }
 
 #endif /* ERROR_HPP */
 
