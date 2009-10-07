@@ -13,8 +13,9 @@ include $(TOP)/src/MAKE/Make.include
 # TARGETS
 #=======================================================================
 
+# override all target to compile ppm and ppml
  .PHONY: all
-all: $(OBJS)
+all: $(OBJS) $(TESTS) $(EXES)
 	$(MAKE) -C ppm
 	$(MAKE) -C ppml
 
