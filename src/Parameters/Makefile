@@ -1,7 +1,8 @@
 
 TOP     = ../..
 PACKAGE = parameters
-OBJS    = parameters.o
+OBJS_PARSE = parse.tab.o lex.yy.o
+OBJS    = parameters.o $(OBJS_PARSE)
 TESTS   = test_parameters
 EXES    = test_parse
 
@@ -10,11 +11,6 @@ include $(TOP)/src/MAKE/Make.include
 #=======================================================================
 # TARGETS
 #=======================================================================
-
-.PHONY: all
-all: $(OBJS) $(TESTS)
-
-#-----------------------------------------------------------------------
 
 .PHONY: run-exes
 
@@ -29,13 +25,22 @@ run-exes: $(EXES)
 
 #-----------------------------------------------------------------------
 
-test_parameters: test_parameters.o
+test_parameters: test_parameters.o $(OBJS_PARSE)
 	$(CXX) -o test_parameters test_parameters.o $(LIB)
 
-test_parse: parse.y parse.l
+test_parse: test_parse.o $(OBJS_PARSE)
+	g++ -o test_parse test_parse.o $(LIB)
+
+parse.tab.o:parse.tab.c
+	gcc -o parse.tab.o parse.tab.c -c
+lex.yy.c:parse.l
 	flex parse.l
+parse.tab.h: parse.y
 	bison -d parse.y 
-	gcc -o test_parse parse.tab.c lex.yy.c -lfl
+parse.tab.c: parse.y
+	bison -d parse.y 
+lex.yy.o:lex.yy.c
+	gcc -o lex.yy.o lex.yy.c -c
 
 .PHONY: install-include
 install-include:

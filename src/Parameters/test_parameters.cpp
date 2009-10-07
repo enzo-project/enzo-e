@@ -1,18 +1,5 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
 /** 
  *********************************************************************
  *
@@ -43,25 +30,20 @@ main()
   // test parameter
   //----------------------------------------------------------------------
 
-  try {
-    Parameters parameters;
+  Parameters parameters;
 
-    FILE * file_pointer = fopen ("in.test_parameters","r");
-    parameters.read(file_pointer);
+  unit_func("set_group()");
 
-    bool did_pass = (parameters.get_string("key1") == "value1");
-    
-    unit_func("get_string()");
-    unit_assert(did_pass);
+  printf ("parameters.get_group() = %s\n",parameters.get_group().c_str());
+  parameters.set_group("Group 1");
 
-  }
+  unit_assert(parameters.get_group() == "Group 1");
+  unit_assert(parameters.get_subgroup() == "");
 
-  catch (ExceptionBadPointer) {
-    printf ("CELLO ERROR: Bad pointer.\n");
-  }
-  catch (...) {
-    printf ("CELLO ERROR: Unknown error.\n",error_message);
-  }
+  unit_func("read_bison()");
+  FILE *fp = fopen ("implosion-1.0.in","r");
+  parameters.read_bison(fp);
+  
 
   unit_close();
 

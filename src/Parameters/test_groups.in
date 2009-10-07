@@ -1,7 +1,8 @@
-Group { parameter = 1.6 }
-Group one { parameter = 3.2 }
-Group two { parameter = 6.2 }
-Group {
-   one { parameter = 1.6 };
-   two { parameter = 3.2 }
+Group_1 { blah_a = 1.6 }
+Group_2 one { blah_b = 3.2 }
+Group_2 two { blah_c = 6.2 }
+Group_3 {
+   three { blah_d = 1.6 };
+   
+   four  { blah_e = 3 + 3.2 }
 }

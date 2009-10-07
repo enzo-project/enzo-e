@@ -1,3 +1,5 @@
+%option noyywrap
+
 D [0-9]
 LN [A-Za-z0-9_]
 LL [a-z]
@@ -24,7 +26,7 @@ E [Ee][+-]?{D}+
  void yyerror(char *s);
 
  int    lineno       = 1;
- double scalar_value = 0;
+
 
 %}
 
@@ -88,8 +90,10 @@ sin       { return SIN; }
 
 false     { return LOGICAL; } 
 true      { return LOGICAL; } 
-{LU}{LN}+ { return GROUP_NAME; } /* Group names begin with upper-case */
-{LL}{LN}+ { return IDENTIFIER; } /* group, parameter, and variables */
+{LU}{LN}+ { yylval.string_type = strdup (yytext);
+            return GROUP_NAME; } /* Group names begin with upper-case */
+{LL}{LN}+ { yylval.string_type = strdup (yytext);
+            return IDENTIFIER; } /* group, parameter, and variables */
                                  /* begin with lower-case */
 
 "="        { return '='; }         /* = */
@@ -119,9 +123,9 @@ true      { return LOGICAL; }
 "#".*      {  /* ignore comments */ }
 
 [xyzt]             { return VARIABLE; }
-{D}+{E}*           { scalar_value = atof (yytext); return SCALAR; }
-{D}*"."{D}+({E})?  { scalar_value = atof (yytext); return SCALAR; }
-{D}+"."{D}*({E})?  { scalar_value = atof (yytext); return SCALAR; }
+{D}+{E}*           { yylval.scalar_type = atof (yytext); return SCALAR; }
+{D}*"."{D}+({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
+{D}+"."{D}*({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
 
 \"(\\.|[^\\"])*\"  { yylval.string_type = strdup(yytext+1); /* copy skipping open quote */
                      yylval.string_type [yyleng-2] = '\0';   /* remove close quote */

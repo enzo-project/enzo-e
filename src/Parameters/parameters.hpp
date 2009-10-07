@@ -3,19 +3,6 @@
 
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
 /** 
  *********************************************************************
  *
@@ -36,13 +23,17 @@
 
 #include <map>
 #include <string>
-
 #include <stdio.h>
 
+#include "cello.h"
 #include "error_exception.hpp"
-
+#include "type_parameter.h"
 // Maximum allowed width of a line in a parameter file
+
 #define MAX_PARAMETER_FILE_WIDTH 255
+
+// Types for parameters
+
 
 class Parameters {
 
@@ -58,15 +49,6 @@ class Parameters {
  *********************************************************************
  */
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-  /// A private attribute
-  std::map <std::string,std::string> values_;
-
 public:
 
   //-------------------------------------------------------------------
@@ -76,14 +58,43 @@ public:
   /// This function creates an empty parameters object
   Parameters() throw();
 
-  /// This function reads in parameters from a file
+  /// Read in parameters from a file
+
   void read (FILE * file_pointer) throw(ExceptionBadPointer);
+  void read_bison (FILE * file_pointer) throw(ExceptionBadPointer);
 
-  /// This function reads in parameters from a file
-  std::string get_string (std::string parameter) throw();
+  /// Return the string-valued parameter
 
-  /// This function reads in parameters from a file
-  void set_value (std::string parameter, std::string value) throw();
+  std::string value_string ( std::string parameter, 
+			     std::string deflt = "") throw();
+
+  /// Return the scalar-valued parameter
+
+  Scalar value_scalar (std::string parameter, 
+		       Scalar deflt = 0.0) throw();
+
+  /// Return the integer-valued parameter
+
+  int value_integer (std::string parameter, 
+		     int deflt = 0) throw();
+
+  /// Return the logical-valued parameter
+
+  bool value_logical (std::string parameter, 
+		      bool deflt = false) throw(ExceptionParametersBadType());
+
+  /// Access parameters specific to a group or (group, subgroup)
+
+  void set_group  (std::string group, std::string subgroup = "") throw ()
+  { 
+    current_group_ = group;
+    current_subgroup_ = subgroup;
+  };
+
+  std::string get_group () throw ()
+  { return current_group_; };
+  std::string get_subgroup () throw ()
+  { return current_subgroup_; };
 
 private:
 
@@ -97,7 +108,27 @@ private:
   /// Add a parameter / value pair
   void add_parameter_ ( std::string parameter,  std::string value )   throw();
 
+private:
+
+  //-------------------------------------------------------------------
+  // PRIVATE ATTRIBUTES
+  //-------------------------------------------------------------------
+
+  /// A private attribute
+
+  std::map <std::string,std::string> values_;
+
+  std::string current_group_;
+  std::string current_subgroup_;
+  
 };
+
+// Parser functions
+
+extern "C" { 
+  void cello_parameters_read(FILE *);
+  void cello_parameters_print();
+}
 
 #endif /* PARAMETERS_HPP */
 

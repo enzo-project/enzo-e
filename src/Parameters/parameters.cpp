@@ -1,19 +1,5 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
-
 /** 
  *********************************************************************
  *
@@ -42,8 +28,10 @@
  *    Parameters::Parameters()
  *    Parameters::~Parameters()
  *    Parameters::read()
- *    Parameters::set_value()
- *    Parameters::get_string()
+ *    Parameters::value_string()
+ *    Parameters::value_scalar()
+ *    Parameters::value_integer()
+ *    Parameters::value_logical()
  *
  * PRIVATE FUCTIONS
  *  
@@ -52,8 +40,10 @@
  *********************************************************************
  */
 
+#include <stdlib.h>
 #include <string.h>
 
+#include "error.hpp"
 #include "parameters.hpp"
  
 /**
@@ -69,7 +59,9 @@
 
 Parameters::Parameters() 
   throw()
-  : values_()
+  : values_(),
+    current_group_("testing"),
+    current_subgroup_("testing")
 {
 }
 
@@ -91,7 +83,6 @@ Parameters::read
 
 {
   // check input
-
   
   if (file_pointer == 0) {
     printf ("Throwing exception\n");
@@ -117,26 +108,119 @@ Parameters::read
   }
 }
 
+void
+Parameters::read_bison
+( FILE * file_pointer ) 
+  throw(ExceptionBadPointer)
+
+{
+  cello_parameters_read(file_pointer);
+}
+
 /**
  *********************************************************************
  *
  * @param   parameter
- * @return  Return the value of the parameter if it exists, or "" if not
+ * @return  Return the string value of the parameter if it exists, 
+ *          or deflt if not
  *
- * Return the value of the parameter if it exists, or "" if not
+ * Return the string value of the parameter if it exists, or deflt if
+ * not.
  *
  *********************************************************************
  */
 
 std::string 
-Parameters::get_string 
-( std::string parameter  ) 
-  throw()
-
+Parameters::value_string 
+( std::string parameter,
+  std::string deflt ) throw()
 {
-  return (values_.find(parameter) == values_.end()) ? 
-    "" : values_.find(parameter)->second;
+  return (values_.find(parameter) != values_.end()) ? 
+    values_.find(parameter)->second : deflt;
 }
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ * @return  Return the scalar value of the parameter if it exists, 
+ *          or deflt if not
+ *
+ * Return the scalar value of the parameter if it exists, or deflt if
+ * not.
+ *
+ *********************************************************************
+ */
+
+Scalar
+Parameters::value_scalar 
+( std::string parameter,
+  Scalar      deflt ) throw()
+{
+  return (values_.find(parameter) != values_.end()) ? 
+    atof(values_.find(parameter)->second.c_str()) : deflt;
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ * @return  Return the integer value of the parameter if it exists, 
+ *          or deflt if not
+ *
+ * Return the integer value of the parameter if it exists, or deflt if
+ * not.
+ *
+ *********************************************************************
+ */
+
+int
+Parameters::value_integer 
+( std::string parameter,
+  int         deflt ) throw()
+{
+  return (values_.find(parameter) != values_.end()) ? 
+    atoi(values_.find(parameter)->second.c_str()) : deflt;
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ * @return  Return the logical value of the parameter if it exists, 
+ *          or deflt if not
+ *
+ * Return the logical value of the parameter if it exists, or deflt if
+ * not.
+ *
+ *********************************************************************
+ */
+
+bool
+Parameters::value_logical 
+( std::string parameter,
+  bool        deflt ) throw(ExceptionParametersBadType())
+{
+  bool value;
+
+  if (values_.find(parameter) != values_.end()) {
+    if (values_.find(parameter)->second == "true") {
+      value == true;
+    } else if (values_.find(parameter)->second == "false") {
+      value == false;
+    } else {
+      throw ExceptionParametersBadType();
+    }
+  } else {
+    value = deflt;
+  }
+  
+  return value;
+}
+
+//======================================================================
+// PRIVATE FUNCTIONS
+//======================================================================
 
 /**
  *********************************************************************
