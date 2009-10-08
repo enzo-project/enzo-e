@@ -64,6 +64,7 @@ const char * type_name[]  = {
   void update_group (char * group)
     {
       struct param_type * p = param_curr;
+      printf ("update_group %p\n",p);
       while (p && p->group == NULL) {
 	p->group = strdup(group);
         p  = p -> next;
@@ -75,6 +76,7 @@ const char * type_name[]  = {
   void update_subgroup (char * subgroup)
     {
       struct param_type * p = param_curr;
+      printf ("update_subgroup %p\n",p);
       while (p && p->subgroup == NULL) {
 	p->subgroup = strdup(subgroup);
         p  = p -> next;
@@ -97,8 +99,10 @@ const char * type_name[]  = {
 
    /* Update the linked list pointers */
 
-     p->next = param_curr;
-     param_curr = p;
+     printf ("%p->next = %p\n",p,param_curr);
+     p->next = param_curr->next;
+     param_curr->next = p;
+     param_head = param_curr;
 
    /* Clear variables for the next assignment */
 
