@@ -88,11 +88,12 @@ E [Ee][+-]?{D}+
 
 sin       { return SIN; }
 
-false     { return LOGICAL; } 
-true      { return LOGICAL; } 
+false     { yylval.logical_type = 0; return LOGICAL; } 
+true      { yylval.logical_type = 1; return LOGICAL; } 
 {LU}{LN}+ { yylval.string_type = strdup (yytext);
             return GROUP_NAME; } /* Group names begin with upper-case */
-{LL}{LN}+ { yylval.string_type = strdup (yytext);
+[xyzt]             { return VARIABLE; }
+{LL}{LN}* { yylval.string_type = strdup (yytext);
             return IDENTIFIER; } /* group, parameter, and variables */
                                  /* begin with lower-case */
 
@@ -122,10 +123,10 @@ true      { return LOGICAL; }
 ","        { return ','; } /* list element separator */
 "#".*      {  /* ignore comments */ }
 
-[xyzt]             { return VARIABLE; }
-{D}+{E}*           { yylval.scalar_type = atof (yytext); return SCALAR; }
+{D}+{E}            { yylval.scalar_type = atof (yytext); return SCALAR; }
 {D}*"."{D}+({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
 {D}+"."{D}*({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
+{D}+               { yylval.integer_type = atoi (yytext); return INTEGER; }
 
 \"(\\.|[^\\"])*\"  { yylval.string_type = strdup(yytext+1); /* copy skipping open quote */
                      yylval.string_type [yyleng-2] = '\0';   /* remove close quote */
