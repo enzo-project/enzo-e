@@ -88,8 +88,12 @@ public:
   void set_group  (std::string group, std::string subgroup = "") throw ()
   { 
     current_group_ = group;
-    current_subgroup_ = subgroup;
   };
+
+  void set_subgroup  (std::string subgroup) throw ()
+  {
+    current_subgroup_ = subgroup;
+  }
 
   std::string get_group () throw ()
   { return current_group_; };

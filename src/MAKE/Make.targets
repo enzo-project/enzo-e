@@ -11,7 +11,10 @@
 #=======================================================================
 
 .PHONY: all
-all: dep $(OBJS)  $(TESTS) $(EXES)
+all: dep objs $(TESTS) $(EXES)
+
+.PHONY: objs
+objs: $(OBJS) install-objs
 
 #-----------------------------------------------------------------------
 
@@ -51,11 +54,14 @@ clean: clean-local
 #-----------------------------------------------------------------------
 
 .PHONY: install
-install: install-include $(OBJS)
-	ar rcu $(TOP)/lib/libcello.a      $(OBJS)   
-	ar rcu $(TOP)/lib/lib$(PACKAGE).a $(OBJS)
+install: install-include install-objs
 	cp $(TESTS) $(TOP)/bin
 	cp $(EXES)  $(TOP)/bin
+
+.PHONY: install-objs
+install-objs: $(OBJS)
+	ar rcu $(TOP)/lib/libcello.a      $(OBJS)   
+	ar rcu $(TOP)/lib/lib$(PACKAGE).a $(OBJS)
 
 #-----------------------------------------------------------------------
 

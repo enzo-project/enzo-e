@@ -33,7 +33,6 @@ DIR = \
       Control \
       Disk \
       Error \
-      Error \
       Memory \
       Method \
       Monitor \

@@ -25,10 +25,10 @@ run-exes: $(EXES)
 
 #-----------------------------------------------------------------------
 
-test_parameters: test_parameters.o $(OBJS_PARSE) install-objs
+test_parameters: test_parameters.o $(OBJS_PARSE)
 	$(CXX) -o test_parameters test_parameters.o $(LIB)
 
-test_parse: test_parse.o $(OBJS_PARSE) install-objs
+test_parse: test_parse.o $(OBJS_PARSE)
 	g++ -o test_parse test_parse.o $(LIB)
 
 parse.tab.o:parse.tab.c
