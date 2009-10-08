@@ -5,14 +5,14 @@ ps:dvi
 	dvips -o $(PAPER).ps $(PAPER).dvi
 ps2:ps
 	a2ps -2 $(PAPER).ps -o $(PAPER)2.ps
-pdf2:ps2
-	ps2pdf $(PAPER)2.ps $(PAPER)2.pdf
 2up: ps
 	a2ps -M Letter -2 -o $(PAPER)2.ps $(PAPER).ps
 html:
 	tth -e2 $(PAPER).tex > $(PAPER).html
-
-pdf: include.tex uml figures
+pdf:dvi
+	dvipdf $(PAPER).dvi $(PAPER).pdf
+pdf2: include.tex uml figures
+#	pdflatex $(PAPER).tex
 	pdflatex $(PAPER).tex
 dvi: include.tex uml figures
 	make -C uml
