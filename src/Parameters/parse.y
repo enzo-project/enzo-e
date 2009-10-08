@@ -51,8 +51,9 @@ const char * type_name[]  = {
 
   /* The head of the linked list of parameter / value pairs */
 
-  struct param_type * param_head = NULL;
-  struct param_type * param_curr = NULL;
+  struct param_type * param_head     = NULL;
+  struct param_type * param_group    = NULL;
+  struct param_type * param_subgroup = NULL;
 
   /* The current group, subgroup, and parameter type */
 
@@ -63,24 +64,24 @@ const char * type_name[]  = {
 
   void update_group (char * group)
     {
-      struct param_type * p = param_curr;
-      printf ("update_group %p\n",p);
-      while (p && p->group == NULL) {
-	p->group = strdup(group);
+      struct param_type * p = param_head;
+      while (p && p->next && p->next->group == NULL) {
+	p->next->group = strdup(group);
         p  = p -> next;
       }
+      param_group = p;
     }
 
   /* Function to update parameter's subgroups once the subgroup is known */
 
   void update_subgroup (char * subgroup)
     {
-      struct param_type * p = param_curr;
-      printf ("update_subgroup %p\n",p);
-      while (p && p->subgroup == NULL) {
-	p->subgroup = strdup(subgroup);
+      struct param_type * p = param_head;
+      while (p && p->next && p->next->subgroup == NULL) {
+	p->next->subgroup = strdup(subgroup);
         p  = p -> next;
       }
+      param_subgroup = p;
     }
 
   /* Function for creating and inserting a new parameter / value pair */
@@ -99,10 +100,8 @@ const char * type_name[]  = {
 
    /* Update the linked list pointers */
 
-     printf ("%p->next = %p\n",p,param_curr);
-     p->next = param_curr->next;
-     param_curr->next = p;
-     param_head = param_curr;
+     p->next = param_head->next;
+     param_head->next = p;
 
    /* Clear variables for the next assignment */
 
@@ -114,7 +113,6 @@ const char * type_name[]  = {
   /* New string parameter assignment */
   void new_string_param (char * value)
   {
-    printf ("new_string_param(%s)\n",value);
     struct param_type * p = new_param();
     p->type         = type_string;
     p->string_value = strdup(value);
@@ -124,7 +122,7 @@ const char * type_name[]  = {
   /* New empty parameter assignment: FIRST NODE IN LIST IS A SENTINEL  */
   void new_empty_param ()
   {
-    if (param_head != NULL || param_curr != NULL) {
+    if (param_head != NULL || param_group != NULL || param_subgroup != NULL) {
       printf ("Error: %s:%d Calling new_empty_param with non-empty list\n",
 	      __FILE__,__LINE__);
     } else {
@@ -136,15 +134,15 @@ const char * type_name[]  = {
       p->type = type_empty;
       p->next = NULL;
 
-      param_head = p;
-      param_curr = p;
+      param_head     = p;
+      param_group    = p;
+      param_subgroup = p;
     }
   }
 
   /* New list parameter assignment */
   void new_list_param (struct param_type * curr)
   {
-    printf ("new_list_param()\n");
     struct param_type * p = new_param();
     p->type       = type_list;
     p->list_value = curr;
@@ -153,7 +151,6 @@ const char * type_name[]  = {
   /* New scalar parameter assignment */
   void new_scalar_param (double value)
   {
-    printf ("new_scalar_param(%g)\n",value);
     struct param_type * p = new_param();
     p->type         = type_scalar;
     p->scalar_value = value;
@@ -162,7 +159,6 @@ const char * type_name[]  = {
   /* New logical parameter assignment */
   void new_logical_param (int value)
   {
-    printf ("new_logical_param(%d)\n",value);
     struct param_type * p = new_param();
     p->type          = type_logical;
     p->logical_value = value;
@@ -171,7 +167,6 @@ const char * type_name[]  = {
   /* New integer parameter assignment */
   void new_integer_param (int value)
   {
-    printf ("new_integer_param(%d)\n",value);
     struct param_type * p = new_param();
     p->type          = type_integer;
     p->integer_value = value;
@@ -254,7 +249,6 @@ parameter :
 
 parameter_assignment : 
    parameter '=' parameter_value { 
-     printf ("current_type = %s\n",type_name[current_type]);
      switch (current_type) {
      case type_integer:
        new_integer_param(yylval.integer_type);
@@ -289,7 +283,6 @@ parameter_assignment :
 
 parameter_value : 
    STRING                      { current_type = type_string; 
-                                 printf ("S=%s\n",$1);
                                  yylval.string_type = strdup($1);}
  | constant_integer_expression  { current_type = type_integer; 
                                  yylval.integer_type = $1;}
@@ -307,9 +300,9 @@ parameter_value :
 list: LIST_BEGIN list_elements LIST_END {  }
 
 LIST_BEGIN:
- '[' { printf ("[\n"); }
+ '[' { /* printf ("[\n"); */ }
 LIST_END:
- ']' { printf ("]\n"); }
+ ']' { /* printf ("]\n"); */ }
 
 
 list_elements:
@@ -329,7 +322,7 @@ constant_logical_expression:
  | constant_scalar_expression  NE constant_scalar_expression { $$ = $1 != $3; }
  | constant_logical_expression OR constant_logical_expression {  $$ = $1 || $3; }
  | constant_logical_expression AND constant_logical_expression {  $$ = $1 && $3; }
- | LOGICAL { printf ("L=%d\n",$1); $$ = $1; }
+ | LOGICAL { $$ = $1; }
 ;
 
 variable_logical_expression: 
@@ -368,7 +361,7 @@ constant_scalar_expression:
  | constant_scalar_expression '*' constant_scalar_expression { $$ = $1 * $3;}
  | constant_scalar_expression '/' constant_scalar_expression { $$ = $1 / $3;}
  | SIN '(' constant_scalar_expression ')' { $$ = sin($3); }
- | SCALAR { printf ("S=%g\n",$1); $$ = $1;}
+ | SCALAR { $$ = $1;}
  ;
 
 constant_integer_expression: 
@@ -377,7 +370,7 @@ constant_integer_expression:
  | constant_integer_expression '-' constant_integer_expression { $$ = $1 - $3;}
  | constant_integer_expression '*' constant_integer_expression { $$ = $1 * $3;}
  | constant_integer_expression '/' constant_integer_expression { $$ = $1 / $3;}
- | INTEGER { printf ("I=%d\n",$1); $$ = $1;}
+ | INTEGER { $$ = $1;}
  ;
 
 variable_scalar_expression: 
@@ -414,20 +407,19 @@ cello_parameters_read(FILE * fp)
 
 void cello_parameters_print()
 {
-  printf ("cello_parameters_print()\n");
   struct param_type * p = param_head;
-  printf ("param_head = %p\n",param_head);
-  if (param_head != NULL) printf ("param_head->next = %p\n",param_head->next);
-  while (p != NULL) {
-    printf ("%s %s:%s:%s value = ", 
-	    type_name[p->type],p->group, p->subgroup, p->parameter);
-    switch (p->type) {
-    case type_empty:   printf ("empty\n"); break;
-    case type_scalar:  printf ("%g\n",p->scalar_value);  break;
-    case type_integer: printf ("%d\n",p->integer_value); break;
-    case type_string:  printf ("%s\n",p->string_value);  break;
-    case type_logical: printf ("%s\n",p->logical_value ? "true" : "false"); break;
-    default: printf ("unknown type\n"); break;
+  int count = 0;
+  while (p != NULL && count++ < 100) {
+    if (p->type != type_empty) {
+      printf ("%s %s:%s:%s = ", 
+	      type_name[p->type],p->group, p->subgroup, p->parameter);
+      switch (p->type) {
+      case type_scalar:  printf ("%g\n",p->scalar_value);  break;
+      case type_integer: printf ("%d\n",p->integer_value); break;
+      case type_string:  printf ("%s\n",p->string_value);  break;
+      case type_logical: printf ("%s\n",p->logical_value ? "true" : "false"); break;
+      default: printf ("unknown type\n"); break;
+      }
     }
     p = p->next;
   }
