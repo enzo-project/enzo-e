@@ -29,10 +29,10 @@ test_parameters: test_parameters.o $(OBJS_PARSE)
 	$(CXX) -o test_parameters test_parameters.o $(LIB)
 
 test_parse: test_parse.o $(OBJS_PARSE)
-	g++ -o test_parse test_parse.o $(LIB)
+	$(CXX) -o test_parse test_parse.o $(LIB)
 
 parse.tab.o:parse.tab.c
-	gcc -o parse.tab.o parse.tab.c -c
+	$(CC) -o parse.tab.o parse.tab.c -c $(OPT)
 lex.yy.c:parse.l
 	flex parse.l
 parse.tab.h: parse.y
@@ -40,7 +40,7 @@ parse.tab.h: parse.y
 parse.tab.c: parse.y
 	bison -d parse.y 
 lex.yy.o:lex.yy.c
-	gcc -o lex.yy.o lex.yy.c -c
+	$(CC) -o lex.yy.o lex.yy.c -c $(OPT)
 
 .PHONY: install-include
 install-include:

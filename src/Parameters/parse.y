@@ -20,7 +20,8 @@
 #include "parse.tab.h"
 #include "type_parameter.h"
 const char * type_name[]  = {
-  "empty",
+  "unknown",
+  "sentinel",
   "integer",
   "scalar",
   "string",
@@ -51,38 +52,41 @@ const char * type_name[]  = {
 
   /* The head of the linked list of parameter / value pairs */
 
-  struct param_type * param_head     = NULL;
-  struct param_type * param_group    = NULL;
-  struct param_type * param_subgroup = NULL;
+  struct param_type * param_head = NULL; /* head of entire list */
+  struct param_type * param_curr = NULL; /* head of current list */
 
   /* The current group, subgroup, and parameter type */
 
   char *              current_parameter = NULL;
-  enum type_parameter current_type      = type_empty;
+  enum type_parameter current_type      = type_sentinel;
 
   /* Function to update parameter's groups once the group is known */
 
   void update_group (char * group)
     {
-      struct param_type * p = param_head;
-      while (p && p->next && p->next->group == NULL) {
+      struct param_type * p = param_curr;
+      while (p->next->type != type_sentinel && p->next->group == NULL) {
 	p->next->group = strdup(group);
         p  = p -> next;
       }
-      param_group = p;
     }
 
   /* Function to update parameter's subgroups once the subgroup is known */
 
   void update_subgroup (char * subgroup)
     {
-      struct param_type * p = param_head;
-      while (p && p->next && p->next->subgroup == NULL) {
+      struct param_type * p = param_curr;
+      while (p->next->type != type_sentinel && p->next->subgroup == NULL) {
 	p->next->subgroup = strdup(subgroup);
         p  = p -> next;
       }
-      param_subgroup = p;
     }
+
+  void insert_param(struct param_type * head, struct param_type * new)
+  {
+     new->next  = head->next;
+     head->next = new;
+  }
 
   /* Function for creating and inserting a new parameter / value pair */
   /* in the linked list */
@@ -96,16 +100,14 @@ const char * type_name[]  = {
 
    /* Fill in the non-type-specific values for the new node */
 
+     p->group     = NULL;
+     p->subgroup  = NULL;
      p->parameter = strdup(current_parameter);
+     current_type = type_unknown;
 
-   /* Update the linked list pointers */
-
-     p->next = param_head->next;
-     param_head->next = p;
+     insert_param(param_curr,p);
 
    /* Clear variables for the next assignment */
-
-     current_type = type_empty;
 
      return p;
   }
@@ -120,24 +122,18 @@ const char * type_name[]  = {
   }
 
   /* New empty parameter assignment: FIRST NODE IN LIST IS A SENTINEL  */
-  void new_empty_param ()
+  struct param_type * new_sentinel_param ()
   {
-    if (param_head != NULL || param_group != NULL || param_subgroup != NULL) {
-      printf ("Error: %s:%d Calling new_empty_param with non-empty list\n",
-	      __FILE__,__LINE__);
-    } else {
-      struct param_type * p = 
-	(struct param_type *) malloc (sizeof (struct param_type));
-      p->group     = NULL;
-      p->subgroup  = NULL;
-      p->parameter = NULL;
-      p->type = type_empty;
-      p->next = NULL;
+    struct param_type * p = 
+      (struct param_type *) malloc (sizeof (struct param_type));
+    p->group     = NULL;
+    p->subgroup  = NULL;
+    p->parameter = NULL;
+    p->type      = type_sentinel;
+    p->next       = p;
+    p->list_value = NULL;
 
-      param_head     = p;
-      param_group    = p;
-      param_subgroup = p;
-    }
+    return p;
   }
 
   /* New list parameter assignment */
@@ -172,6 +168,37 @@ const char * type_name[]  = {
     p->integer_value = value;
   }
 
+  void new_parameter()
+  {
+     switch (current_type) {
+     case type_integer:
+       new_integer_param(yylval.integer_type);
+       break;
+     case type_scalar:
+       new_scalar_param(yylval.scalar_type);
+       break;
+     case type_string: 
+       new_string_param(yylval.string_type);
+       break;
+     case type_identifier:
+       printf ("IDENTIFIER\n");
+       break;
+     case type_logical:
+       new_logical_param(yylval.logical_type);
+       break;
+     case type_list:
+       break;
+     case type_scalar_expr:
+       printf ("SCALAR EXPRESSION\n");
+       break;
+     case type_logical_expr:
+       printf ("LOGICAL EXPRESSION\n");
+       break;
+    default:
+       printf ("%s:%d Unknown type %d\n",__FILE__,__LINE__,current_type);
+       break;
+     }
+  }
 %}
 
 
@@ -248,41 +275,11 @@ parameter :
   IDENTIFIER { current_parameter = strdup($1);} 
 
 parameter_assignment : 
-   parameter '=' parameter_value { 
-     switch (current_type) {
-     case type_integer:
-       new_integer_param(yylval.integer_type);
-       break;
-     case type_scalar:
-       new_scalar_param(yylval.scalar_type);
-       break;
-     case type_string: 
-       new_string_param(yylval.string_type);
-       break;
-     case type_identifier:
-       printf ("IDENTIFIER\n");
-       break;
-     case type_logical:
-       new_logical_param(yylval.logical_type);
-       break;
-     case type_list:
-       printf ("LIST\n");
-       break;
-     case type_scalar_expr:
-       printf ("SCALAR EXPRESSION\n");
-       break;
-     case type_logical_expr:
-       printf ("LOGICAL EXPRESSION\n");
-       break;
-    default:
-       printf ("%s:%d Unknown type %d\n",__FILE__,__LINE__,current_type);
-       break;
-     }
-   }
+ parameter '=' parameter_value { new_parameter(); }
  ;
 
 parameter_value : 
-   STRING                      { current_type = type_string; 
+   STRING                      { current_type = type_string;
                                  yylval.string_type = strdup($1);}
  | constant_integer_expression  { current_type = type_integer; 
                                  yylval.integer_type = $1;}
@@ -300,14 +297,20 @@ parameter_value :
 list: LIST_BEGIN list_elements LIST_END {  }
 
 LIST_BEGIN:
- '[' { /* printf ("[\n"); */ }
+ '[' { 
+   struct param_type * p = new_sentinel_param();
+   p->list_value = param_curr;
+   new_list_param(p);
+   param_curr = p;
+ }
 LIST_END:
- ']' { /* printf ("]\n"); */ }
+ ']' { param_curr = param_curr->list_value; }
 
 
 list_elements:
-   parameter_value { }
-  | list_elements  ',' parameter_value
+  parameter_value { new_parameter();  }
+ | list_elements  ',' parameter_value    { new_parameter(); }
+
 { }
 ;
 
@@ -397,31 +400,46 @@ variable_scalar_expression:
 struct param_type * 
 cello_parameters_read(FILE * fp)
 {
-  /* initialize the linked list with an initial empty (sentinel) node */
-  new_empty_param();
+  /* initialize the linked list with an initial sentinel (sentinel) node */
+  param_head = param_curr = new_sentinel_param();
   
   yyrestart(fp);
   yyparse();
   return param_head;
 }
 
-void cello_parameters_print()
+void cello_parameters_print_list(struct param_type * head)
 {
-  struct param_type * p = param_head;
+/*   if (head==NULL) return; */
+  struct param_type * p = head->next;
   int count = 0;
-  while (p != NULL && count++ < 100) {
-    if (p->type != type_empty) {
+  while (p && p->type != type_sentinel && count++ < 100) {
+    if (p->group != NULL) {
       printf ("%s %s:%s:%s = ", 
 	      type_name[p->type],p->group, p->subgroup, p->parameter);
-      switch (p->type) {
-      case type_scalar:  printf ("%g\n",p->scalar_value);  break;
-      case type_integer: printf ("%d\n",p->integer_value); break;
-      case type_string:  printf ("%s\n",p->string_value);  break;
-      case type_logical: printf ("%s\n",p->logical_value ? "true" : "false"); break;
-      default: printf ("unknown type\n"); break;
-      }
+    } else {
+      /* list element */
+      printf ("   %s %s = ", 
+	      type_name[p->type], p->parameter);
+    }
+    switch (p->type) {
+    case type_scalar:  printf ("%g\n",p->scalar_value);  break;
+    case type_integer: printf ("%d\n",p->integer_value); break;
+    case type_string:  printf ("%s\n",p->string_value);  break;
+    case type_logical: printf ("%s\n",p->logical_value ? "true" : "false"); break;
+    case type_list:    
+      printf ("[\n"); 
+      cello_parameters_print_list(p->list_value);
+      printf ("]\n"); 
+      break;
+    default: printf ("unknown type\n"); break;
     }
     p = p->next;
   }
+}
+
+void cello_parameters_print()
+{
+  cello_parameters_print_list(param_head);
 }
 

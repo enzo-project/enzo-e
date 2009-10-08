@@ -1,5 +1,6 @@
 enum type_parameter {
-  type_empty,
+  type_unknown,
+  type_sentinel,
   type_integer,
   type_scalar,
   type_string,

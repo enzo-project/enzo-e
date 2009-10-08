@@ -3,6 +3,5 @@ Group_2 one { blah_b = 3.2 }
 Group_2 two { blah_c = 6.2 }
 Group_3 {
    three { blah_d = 1.6 };
-   
-   four  { blah_e = 3 + 3.2 }
+   four  { blah_e = 3.0 + 3.2 }
 }
