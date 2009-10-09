@@ -8,6 +8,8 @@ enum type_parameter {
   type_logical,
   type_list,
   type_scalar_expr,
-  type_logical_expr };
+  type_logical_expr,
+  type_function
+};
 
 

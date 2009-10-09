@@ -1,16 +1,38 @@
-  enum op_type {
-    op_unknown,
-    op_add,
-    op_sub,
-    op_mul,
-    op_div,
-    op_le,
-    op_lt,
-    op_ge,
-    op_gt,
-    op_eq,
-    op_ne,
-    op_and,
-    op_or
+  enum node_type {
+    type_node_unknown,
+    type_node_operation,
+    type_node_scalar,
+    type_node_integer,
+    type_node_variable,
+    type_node_function
   };
+
+  enum op_type {
+    type_op_add,
+    type_op_sub,
+    type_op_mul,
+    type_op_div,
+    type_op_le,
+    type_op_lt,
+    type_op_ge,
+    type_op_gt,
+    type_op_eq,
+    type_op_ne,
+    type_op_and,
+    type_op_or
+  };
+
+const char * op_name[] = {
+    "+",
+    "-",
+    "*",
+    "/",
+    "<=",
+    "<",
+    ">=",
+    ">",
+    "==",
+    "!=",
+    "&&",
+    "||"};
 
