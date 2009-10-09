@@ -22,6 +22,15 @@
     type_op_or
   };
 
+const char * node_name[] = {
+  "node_unknown",
+  "node_operation",
+  "node_scalar",
+  "node_integer",
+  "node_variable",
+  "node_function"
+  };
+
 const char * op_name[] = {
     "+",
     "-",

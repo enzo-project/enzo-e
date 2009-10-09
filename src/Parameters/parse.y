@@ -50,6 +50,7 @@
      };
     struct node_expr * left;
     struct node_expr * right;
+    char * function_name;
   };
 
   struct node_expr * new_node_operation
@@ -99,14 +100,16 @@
   }
   struct node_expr * new_node_function
     (double (*function)(double),
+     char * function_name,
      struct node_expr * argument)
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type = type_function;
+    node->type = type_node_function;
     node->fun_value = function;
     node->left = argument;
     node->right = NULL;
+    node->function_name = function_name;
     return node;
   }
 
@@ -374,10 +377,38 @@
 
 /* double foo (double) */
 
+%token ACOS
+%token ACOSH
+%token ASIN
+%token ASINH
+%token ATAN
+%token ATANH
+%token CBRT
+%token CEIL
+%token COS
+%token COSH
+%token ERFC
+%token ERF
+%token EXP
+%token EXPM1
+%token FABS
+%token FLOOR
+/* %token GAMMA */
+%token J0
+%token J1
+%token LGAMMA
+%token LOG10
+%token LOG1P
+%token LOGB
+%token LOG
 %token SIN
- /* %token ACOS ACOSH ASIN ASINH ATAN ATANH CBRT CEIL COS COSH ERFC ERF */
- /* %token EXP EXPM1 FABS FLOOR GAMMA J0 J1 LGAMMA LOG10 LOG1P LOGB */
- /* %token LOG SIN SINH SQRT TAN TANH Y0 Y1 RINT */
+%token SINH
+%token SQRT
+%token TAN
+%token TANH
+%token Y0
+%token Y1
+%token RINT
 
 /* double foo (double,double) */
 
@@ -470,7 +501,38 @@ cse:
  | cse '-' cse { $$ = $1 - $3;}
  | cse '*' cse { $$ = $1 * $3;}
  | cse '/' cse { $$ = $1 / $3;}
- | SIN '(' cse ')' { $$ = sin($3); }
+| ACOS '(' cse ')' { $$ = acos($3); }
+| ACOSH '(' cse ')' { $$ = acosh($3); }
+| ASIN '(' cse ')' { $$ = asin($3); }
+| ASINH '(' cse ')' { $$ = asinh($3); }
+| ATAN '(' cse ')' { $$ = atan($3); }
+| ATANH '(' cse ')' { $$ = atanh($3); }
+| CBRT '(' cse ')' { $$ = cbrt($3); }
+| CEIL '(' cse ')' { $$ = ceil($3); }
+| COS '(' cse ')' { $$ = cos($3); }
+| COSH '(' cse ')' { $$ = cosh($3); }
+| ERFC '(' cse ')' { $$ = erfc($3); }
+| ERF '(' cse ')' { $$ = erf($3); }
+| EXP '(' cse ')' { $$ = exp($3); }
+| EXPM1 '(' cse ')' { $$ = expm1($3); }
+| FABS '(' cse ')' { $$ = fabs($3); }
+| FLOOR '(' cse ')' { $$ = floor($3); }
+/* | GAMMA '(' cse ')' { $$ = gamma($3); } */
+| J0 '(' cse ')' { $$ = j0($3); }
+| J1 '(' cse ')' { $$ = j1($3); }
+| LGAMMA '(' cse ')' { $$ = lgamma($3); }
+| LOG10 '(' cse ')' { $$ = log10($3); }
+| LOG1P '(' cse ')' { $$ = log1p($3); }
+| LOGB '(' cse ')' { $$ = logb($3); }
+| LOG '(' cse ')' { $$ = log($3); }
+| SIN '(' cse ')' { $$ = sin($3); }
+| SINH '(' cse ')' { $$ = sinh($3); }
+| SQRT '(' cse ')' { $$ = sqrt($3); }
+| TAN '(' cse ')' { $$ = tan($3); }
+| TANH '(' cse ')' { $$ = tanh($3); }
+| Y0 '(' cse ')' { $$ = y0($3); }
+| Y1 '(' cse ')' { $$ = y1($3); }
+| RINT '(' cse ')' { $$ = rint($3); }
 | SCALAR { $$ = $1;}
  ;
 
@@ -485,9 +547,9 @@ cie:
 
 vse: 
 '(' vse ')'    { $2; }
-| vse '+' cse { $$ = new_node_operation ($1, type_op_add,new_node_scalar($3)); }
-| cse '+' vse { $$ = new_node_operation (new_node_scalar($1), type_op_add,$3); }
-| vse '+' vse { $$ = new_node_operation ($1, type_op_add,$3); }
+ | vse '+' cse { $$ = new_node_operation ($1, type_op_add,new_node_scalar($3)); }
+ | cse '+' vse { $$ = new_node_operation (new_node_scalar($1), type_op_add,$3); }
+ | vse '+' vse { $$ = new_node_operation ($1, type_op_add,$3); }
  | vse '-' cse { $$ = new_node_operation ($1, type_op_sub,new_node_scalar($3)); }
  | cse '-' vse { $$ = new_node_operation (new_node_scalar($1), type_op_sub,$3); }
  | vse '-' vse { $$ = new_node_operation ($1, type_op_sub,$3); }
@@ -497,7 +559,38 @@ vse:
  | vse '/' cse { $$ = new_node_operation ($1, type_op_div,new_node_scalar($3)); }
  | cse '/' vse { $$ = new_node_operation (new_node_scalar($1), type_op_div,$3); }
  | vse '/' vse { $$ = new_node_operation ($1, type_op_div,$3); }
- | SIN '(' vse ')' { $$ = new_node_function (sin, $3); }
+ | ACOS   '(' vse ')' { $$ = new_node_function ( acos, "acos", $3); }
+ | ACOSH  '(' vse ')' { $$ = new_node_function ( acosh, "acosh", $3); }
+ | ASIN   '(' vse ')' { $$ = new_node_function ( asin, "asin", $3); }
+ | ASINH  '(' vse ')' { $$ = new_node_function ( asinh, "asinh", $3); }
+ | ATAN   '(' vse ')' { $$ = new_node_function ( atan, "atan", $3); }
+ | ATANH  '(' vse ')' { $$ = new_node_function ( atanh, "atanh", $3); }
+ | CBRT   '(' vse ')' { $$ = new_node_function ( cbrt, "cbrt", $3); }
+ | CEIL   '(' vse ')' { $$ = new_node_function ( ceil, "ceil", $3); }
+ | COS    '(' vse ')' { $$ = new_node_function ( cos, "cos", $3); }
+ | COSH   '(' vse ')' { $$ = new_node_function ( cosh, "cosh", $3); }
+ | ERFC   '(' vse ')' { $$ = new_node_function ( erfc, "erfc", $3); }
+ | ERF    '(' vse ')' { $$ = new_node_function ( erf, "erf", $3); }
+ | EXP    '(' vse ')' { $$ = new_node_function ( exp, "exp", $3); }
+ | EXPM1  '(' vse ')' { $$ = new_node_function ( expm1, "expm1", $3); }
+ | FABS   '(' vse ')' { $$ = new_node_function ( fabs, "fabs", $3); }
+ | FLOOR  '(' vse ')' { $$ = new_node_function ( floor, "floor", $3); }
+/* | GAMMA '(' vse ')' { $$ = new_node_function ( gamma, "gamma", $3); } */
+ | J0     '(' vse ')' { $$ = new_node_function ( j0, "j0", $3); }
+ | J1     '(' vse ')' { $$ = new_node_function ( j1, "j1", $3); }
+ | LGAMMA '(' vse ')' { $$ = new_node_function ( lgamma, "lgamma", $3); }
+ | LOG10  '(' vse ')' { $$ = new_node_function ( log10, "log10", $3); }
+ | LOG1P  '(' vse ')' { $$ = new_node_function ( log1p, "log1p", $3); }
+ | LOGB   '(' vse ')' { $$ = new_node_function ( logb, "logb", $3); }
+ | LOG    '(' vse ')' { $$ = new_node_function ( log, "log", $3); }
+ | SIN    '(' vse ')' { $$ = new_node_function ( sin, "sin", $3); }
+ | SINH   '(' vse ')' { $$ = new_node_function ( sinh, "sinh", $3); }
+ | SQRT   '(' vse ')' { $$ = new_node_function ( sqrt, "sqrt", $3); }
+ | TAN    '(' vse ')' { $$ = new_node_function ( tan, "tan", $3); }
+ | TANH   '(' vse ')' { $$ = new_node_function ( tanh, "tanh", $3); }
+ | Y0     '(' vse ')' { $$ = new_node_function ( y0, "y0", $3); }
+ | Y1     '(' vse ')' { $$ = new_node_function ( y1, "y1", $3); }
+ | RINT   '(' vse ')' { $$ = new_node_function ( rint, "rint", $3); }
  | VARIABLE { $$ = new_node_variable ($1[0]);  }
  ;
 
@@ -569,6 +662,11 @@ void print_expression (struct node_expr * node)
     case type_node_variable:
       printf ("%c",node->var_value);
       break;
+    case type_node_function:
+      printf ("%s(",node->function_name); fflush(stdout);
+      print_expression(node->left);
+      printf (")"); fflush(stdout);
+      break;
     case type_node_operation:
       printf ("(");  fflush(stdout);
       print_expression(node->left);
@@ -623,7 +721,7 @@ void cello_parameters_print_list(struct param_type * head, int level)
       indent(level);
       print_expression(p->op_value); printf ("\n");
       break;
-    case type_node_operation:
+    case type_scalar_expr:
       indent(level);
       print_expression(p->op_value); printf ("\n");
       break;

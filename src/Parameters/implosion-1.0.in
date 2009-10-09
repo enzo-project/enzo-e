@@ -1,6 +1,6 @@
   Domain { range = [0.0, 0.3, 0.0, 0.3] } 
-  Field pressure { floor = 1.0e-6 }
-  Field density  { floor = 1.0e-6 }
+  Field pressure { min = 1.0e-6 }
+  Field density  { min = 1.0e-6 }
   Grid array { size = [400,400]; parallel = ["mpi"] }
   Method ppm {
       gamma     = 1.4;
@@ -11,7 +11,7 @@
   }
   Initial {
      density  = [1.0, x + y >= 0.15, [1.0, x <= y + 0.15, 0.125], 0.125];
-     pressure = [1.0, x + y >= 0.15, 0.14];
+     pressure = [1.0, x + y >= 0.15, tan(x+1.0)];
      velocity_x = 0;
      velocity_y = 0;
   }

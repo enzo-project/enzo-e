@@ -32,37 +32,6 @@ E [Ee][+-]?{D}+
 
 /* double foo (double) */
 
-/* acos   { return ACOS; } */
-/* acosh  { return ACOSH; } */
-/* asin   { return ASIN; } */
-/* asinh  { return ASINH; } */
-/* atan   { return ATAN; } */
-/* atanh  { return ATANH; } */
-/* cbrt   { return CBRT; } */
-/* ceil   { return CEIL; } */
-/* cos    { return COS; } */
-/* cosh   { return COSH; } */
-/* erfc   { return ERFC; } */
-/* erf    { return ERF; } */
-/* exp    { return EXP; } */
-/* expm1  { return EXPM1; } */
-/* fabs   { return FABS; } */
-/* floor  { return FLOOR; } */
-/* gamma  { return GAMMA; } */
-/* j0     { return J0; } */
-/* j1     { return J1; } */
-/* lgamma { return LGAMMA; } */
-/* log10  { return LOG10; } */
-/* log1p  { return LOG1P; } */
-/* logb   { return LOGB; } */
-/* log    { return LOG; } */
-/* sinh   { return SINH; } */
-/* sqrt   { return SQRT; } */
-/* tan    { return TAN; } */
-/* tanh   { return TANH; } */
-/* y0     { return Y0; } */
-/* y1     { return Y1; } */
-/* rint   { return RINT; } */
 
 /* int foo (double) */
 
@@ -86,7 +55,37 @@ E [Ee][+-]?{D}+
 %%
 
 
-sin       { return SIN; }
+acos   { return ACOS; }
+acosh  { return ACOSH; }
+asin   { return ASIN; }
+asinh  { return ASINH; }
+atan   { return ATAN; }
+atanh  { return ATANH; }
+cbrt   { return CBRT; }
+ceil   { return CEIL; }
+cos    { return COS; }
+cosh   { return COSH; }
+erfc   { return ERFC; }
+erf    { return ERF; }
+exp    { return EXP; }
+expm1  { return EXPM1; }
+fabs   { return FABS; }
+floor  { return FLOOR; }
+j0     { return J0; }
+j1     { return J1; }
+lgamma { return LGAMMA; }
+log10  { return LOG10; }
+log1p  { return LOG1P; }
+logb   { return LOGB; }
+log    { return LOG; }
+sin    { return SIN; }
+sinh   { return SINH; }
+sqrt   { return SQRT; }
+tan    { return TAN; }
+tanh   { return TANH; }
+y0     { return Y0; }
+y1     { return Y1; }
+rint   { return RINT; }
 
 false     { yylval.logical_type = 0; return LOGICAL; } 
 true      { yylval.logical_type = 1; return LOGICAL; } 
