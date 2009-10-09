@@ -18,21 +18,73 @@
 #include <malloc.h>
 
 #include "parse.tab.h"
+
 #include "type_parameter.h"
-const char * type_name[]  = {
-  "unknown",
-  "sentinel",
-  "integer",
-  "scalar",
-  "string",
-  "identifier",
-  "logical",
-  "list",
-  "scalar_expr",
-  "logical_expr" };
+#include "type_op.h" 
+
+  const char * type_name[]  = {
+    "unknown",
+    "sentinel",
+    "integer",
+    "scalar",
+    "string",
+    "identifier",
+    "logical",
+    "list",
+    "scalar_expr",
+    "logical_expr" };
 
   /* Structure for storing a single parameter / value pair in a linked list */
    
+  struct op_node {
+    enum type_parameter type;
+     union {
+       enum op_type oper;   /* operator */
+       double scalar_value; /* number */ 
+       char var_value;      /* variable x,y,z,t */
+     };
+    struct op_node * left;
+    struct op_node * right;
+  };
+
+  struct op_node * new_oper
+    (enum type_parameter type,
+     enum op_type oper,
+     struct op_node * left, 
+     struct op_node * right)
+  {
+    struct op_node * node = malloc (sizeof (struct op_node));
+    node->oper = oper;
+    node->type = type;
+    node->left = left;
+    node->right = right;
+  }
+
+  struct op_node * new_scalar
+    (enum type_parameter type,
+     double value,
+     struct op_node * left, 
+     struct op_node * right)
+  {
+    struct op_node * node = malloc (sizeof (struct op_node));
+    node->type = type;
+    node->scalar_value = value;
+    node->left = NULL;
+    node->right = NULL;
+  }
+  struct op_node * new_var
+    (enum type_parameter type,
+     char value,
+     struct op_node * left, 
+     struct op_node * right)
+  {
+    struct op_node * node = malloc (sizeof (struct op_node));
+    node->type = type;
+    node->var_value = value;
+    node->left = NULL;
+    node->right = NULL;
+  }
+
   struct param_type {
     char * group;
     char * subgroup;
@@ -44,6 +96,7 @@ const char * type_name[]  = {
        double              scalar_value; 
        char *              string_value;
        struct param_type * list_value;
+      struct op_node    * op_value;    /* expression tree */
     };
     struct param_type *   next;
   } ;
