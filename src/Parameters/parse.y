@@ -31,8 +31,6 @@ const char * type_name[]  = {
   "scalar_expr",
   "logical_expr" };
 
-
-
   /* Structure for storing a single parameter / value pair in a linked list */
    
   struct param_type {
@@ -189,16 +187,35 @@ const char * type_name[]  = {
      case type_list:
        break;
      case type_scalar_expr:
-       printf ("SCALAR EXPRESSION\n");
+       new_string_param(yylval.string_type);
+       param_curr->next->type = type_scalar_expr;
        break;
      case type_logical_expr:
-       printf ("LOGICAL EXPRESSION\n");
+       new_string_param(yylval.string_type);
+       param_curr->next->type = type_logical_expr;
        break;
     default:
        printf ("%s:%d Unknown type %d\n",__FILE__,__LINE__,current_type);
        break;
      }
   }
+
+  char * strcat3 (const char * s1,const char * s2,const char * s3)
+  {
+    char * s = malloc (strlen(s1) + strlen(s2) + strlen(s3) + 1);
+    strcpy(s,s1);
+    strcpy(s+strlen(s1),s2);
+    strcpy(s+strlen(s1)+strlen(s2),s3);
+    return s;
+  }
+
+  char * ftoa (double f)
+    { 
+      char * a = malloc(25); 
+      sprintf (a,"%24.16e",f);
+      return a;
+    }
+
 %}
 
 
@@ -216,7 +233,7 @@ const char * type_name[]  = {
 %type <string_type>  variable_scalar_expression
 %type <string_type>  variable_logical_expression
 
-%token VARIABLE
+%token <string_type> VARIABLE
 
 %token LE
 %token GE
@@ -317,45 +334,16 @@ list_elements:
 
 constant_logical_expression: 
 '(' constant_logical_expression ')' { $$ = $2; }
- | constant_scalar_expression  LE constant_scalar_expression { $$ = $1 <= $3; }
- | constant_scalar_expression  GE constant_scalar_expression { $$ = $1 >= $3; }
- | constant_scalar_expression  '<' constant_scalar_expression { $$ = $1 < $3; }
- | constant_scalar_expression  '>' constant_scalar_expression { $$ = $1 > $3; }
- | constant_scalar_expression  EQ constant_scalar_expression { $$ = $1 == $3; }
- | constant_scalar_expression  NE constant_scalar_expression { $$ = $1 != $3; }
- | constant_logical_expression OR constant_logical_expression {  $$ = $1 || $3; }
- | constant_logical_expression AND constant_logical_expression {  $$ = $1 && $3; }
- | LOGICAL { $$ = $1; }
+ | constant_scalar_expression  LE constant_scalar_expression  { $$ = $1 <= $3; }
+ | constant_scalar_expression  GE constant_scalar_expression  { $$ = $1 >= $3; }
+ | constant_scalar_expression  '<' constant_scalar_expression { $$ = $1 <  $3; }
+ | constant_scalar_expression  '>' constant_scalar_expression { $$ = $1 >  $3; }
+ | constant_scalar_expression  EQ constant_scalar_expression  { $$ = $1 == $3; }
+ | constant_scalar_expression  NE constant_scalar_expression  { $$ = $1 != $3; }
+ | constant_logical_expression OR constant_logical_expression { $$ = $1 || $3; }
+ | constant_logical_expression AND constant_logical_expression {$$ = $1 && $3; }
+ | LOGICAL { printf ("%d\n",$1);$$ = $1; }
 ;
-
-variable_logical_expression: 
- '(' variable_logical_expression ')' { }
- | variable_scalar_expression  LE constant_scalar_expression  { }
- | constant_scalar_expression  LE variable_scalar_expression { }
- | variable_scalar_expression  LE variable_scalar_expression { }
- | variable_scalar_expression  GE constant_scalar_expression { }
- | constant_scalar_expression  GE variable_scalar_expression { }
- | variable_scalar_expression  GE variable_scalar_expression { }
- | variable_scalar_expression  '<' constant_scalar_expression { }
- | constant_scalar_expression  '<' variable_scalar_expression { }
- | variable_scalar_expression  '<' variable_scalar_expression { }
- | variable_scalar_expression  '>' constant_scalar_expression { }
- | constant_scalar_expression  '>' variable_scalar_expression { }
- | variable_scalar_expression  '>' variable_scalar_expression { }
- | variable_scalar_expression  EQ constant_scalar_expression { }
- | constant_scalar_expression  EQ variable_scalar_expression { }
- | variable_scalar_expression  EQ variable_scalar_expression { }
- | variable_scalar_expression  NE constant_scalar_expression { }
- | constant_scalar_expression  NE variable_scalar_expression { }
- | variable_scalar_expression  NE variable_scalar_expression { }
- | variable_logical_expression OR constant_logical_expression {  }
- | constant_logical_expression OR variable_logical_expression {  }
- | variable_logical_expression OR variable_logical_expression {  }
- | variable_logical_expression AND constant_logical_expression {  }
- | constant_logical_expression AND variable_logical_expression {  }
- | variable_logical_expression AND variable_logical_expression {  }
-;
-
 
 constant_scalar_expression: 
  '(' constant_scalar_expression ')'               { $$ = $2; }
@@ -364,8 +352,9 @@ constant_scalar_expression:
  | constant_scalar_expression '*' constant_scalar_expression { $$ = $1 * $3;}
  | constant_scalar_expression '/' constant_scalar_expression { $$ = $1 / $3;}
  | SIN '(' constant_scalar_expression ')' { $$ = sin($3); }
- | SCALAR { $$ = $1;}
+| SCALAR { printf ("%g\n",$1); $$ = $1;}
  ;
+
 
 constant_integer_expression: 
  '(' constant_integer_expression ')'               { $$ = $2; }
@@ -373,26 +362,96 @@ constant_integer_expression:
  | constant_integer_expression '-' constant_integer_expression { $$ = $1 - $3;}
  | constant_integer_expression '*' constant_integer_expression { $$ = $1 * $3;}
  | constant_integer_expression '/' constant_integer_expression { $$ = $1 / $3;}
- | INTEGER { $$ = $1;}
+ | INTEGER { printf ("%d\n",$1); $$ = $1;}
  ;
 
+
 variable_scalar_expression: 
-   '(' variable_scalar_expression ')'      { }
- | variable_scalar_expression '+' constant_scalar_expression { }
- | constant_scalar_expression '+' variable_scalar_expression { }
- | variable_scalar_expression '+' variable_scalar_expression { }
- | variable_scalar_expression '-' constant_scalar_expression { }
- | constant_scalar_expression '-' variable_scalar_expression { }
- | variable_scalar_expression '-' variable_scalar_expression { }
- | variable_scalar_expression '*' constant_scalar_expression { }
- | constant_scalar_expression '*' variable_scalar_expression { }
- | variable_scalar_expression '*' variable_scalar_expression { }
- | variable_scalar_expression '/' constant_scalar_expression { }
- | constant_scalar_expression '/' variable_scalar_expression { }
- | variable_scalar_expression '/' variable_scalar_expression { }
- | SIN '(' variable_scalar_expression ')' { }
- | VARIABLE { }
+'(' variable_scalar_expression ')' 
+ { yylval.string_type = strcat3 ("(",$2,")");}
+ | variable_scalar_expression '+' constant_scalar_expression 
+ { yylval.string_type = strcat3 (strdup($1)," + ", ftoa($3)); }
+ | constant_scalar_expression '+' variable_scalar_expression
+ { yylval.string_type = strcat3 (ftoa($1)," + ", strdup($3)); }
+ | variable_scalar_expression '+' variable_scalar_expression
+ { yylval.string_type = strcat3 (strdup($1)," + ", strdup($3)); 
+   printf ("(%s)\n",yylval.string_type); }
+ | variable_scalar_expression '-' constant_scalar_expression
+ { yylval.string_type = strcat3 (strdup($1)," - ", ftoa($3)); }
+ | constant_scalar_expression '-' variable_scalar_expression
+ { yylval.string_type = strcat3 (ftoa($1)," - ", strdup($3)); }
+ | variable_scalar_expression '-' variable_scalar_expression
+ { yylval.string_type = strcat3 (strdup($1)," - ", strdup($3)); }
+ | variable_scalar_expression '*' constant_scalar_expression
+ { yylval.string_type = strcat3 (strdup($1)," * ", ftoa($3)); }
+ | constant_scalar_expression '*' variable_scalar_expression
+ { yylval.string_type = strcat3 (ftoa($1)," * ", strdup($3)); }
+ | variable_scalar_expression '*' variable_scalar_expression
+ { yylval.string_type = strcat3 (strdup($1)," * ", strdup($3)); }
+ | variable_scalar_expression '/' constant_scalar_expression
+ { yylval.string_type = strcat3 (strdup($1)," / ", ftoa($3)); }
+ | constant_scalar_expression '/' variable_scalar_expression
+ { yylval.string_type = strcat3 (ftoa($1)," / ", strdup($3)); }
+ | variable_scalar_expression '/' variable_scalar_expression
+ { yylval.string_type = strcat3 (strdup($1)," / ", strdup($3)); }
+ | SIN '(' variable_scalar_expression ')'
+ { yylval.string_type = strcat3 ("sin(",$3,")"); }
+ | VARIABLE { printf ("%s\n",$1); }
  ;
+
+
+variable_logical_expression: 
+ '(' variable_logical_expression ')' { }
+ | variable_scalar_expression  LE constant_scalar_expression  
+{ yylval.string_type = strcat3 (strdup($1)," <= ", ftoa($3)); }
+ | constant_scalar_expression  LE variable_scalar_expression  
+{ yylval.string_type = strcat3 (ftoa($1)," <= ", strdup($3)); }
+ | variable_scalar_expression  LE variable_scalar_expression  
+{ yylval.string_type = strcat3 (strdup($1)," <= ", strdup($3)); }
+ | variable_scalar_expression  GE constant_scalar_expression 
+{ yylval.string_type = strcat3 (strdup($1)," >= ", ftoa($3)); }
+ | constant_scalar_expression  GE variable_scalar_expression 
+{  yylval.string_type = strcat3 (ftoa($1)," >= ", strdup($3)); }
+ | variable_scalar_expression  GE variable_scalar_expression 
+{  yylval.string_type = strcat3 (strdup($1)," >= ", strdup($3)); }
+ | variable_scalar_expression  '<' constant_scalar_expression 
+{   yylval.string_type =  strdup ("7");}
+ | constant_scalar_expression  '<' variable_scalar_expression 
+{   yylval.string_type =  strdup ("7");}
+ | variable_scalar_expression  '<' variable_scalar_expression 
+{   yylval.string_type =  strdup ("7");}
+ | variable_scalar_expression  '>' constant_scalar_expression 
+{   yylval.string_type =  strdup ("10");}
+ | constant_scalar_expression  '>' variable_scalar_expression 
+{   yylval.string_type =  strdup ("10");}
+ | variable_scalar_expression  '>' variable_scalar_expression 
+{   yylval.string_type =  strdup ("10");}
+ | variable_scalar_expression  EQ constant_scalar_expression 
+{   yylval.string_type =  strdup ("13");}
+ | constant_scalar_expression  EQ variable_scalar_expression 
+{   yylval.string_type =  strdup ("13");}
+ | variable_scalar_expression  EQ variable_scalar_expression 
+{   yylval.string_type =  strdup ("13");}
+ | variable_scalar_expression  NE constant_scalar_expression 
+{   yylval.string_type =  strdup ("16");}
+ | constant_scalar_expression  NE variable_scalar_expression 
+{   yylval.string_type =  strdup ("16");}
+ | variable_scalar_expression  NE variable_scalar_expression 
+{   yylval.string_type =  strdup ("16");}
+ | variable_logical_expression OR constant_logical_expression 
+{   yylval.string_type =  strdup ("19");}
+ | constant_logical_expression OR variable_logical_expression 
+{   yylval.string_type =  strdup ("19");}
+ | variable_logical_expression OR variable_logical_expression 
+{   yylval.string_type =  strdup ("19");}
+ | variable_logical_expression AND constant_logical_expression
+{   yylval.string_type =  strdup ("22");}
+ | constant_logical_expression AND variable_logical_expression
+{   yylval.string_type =  strdup ("22");}
+ | variable_logical_expression AND variable_logical_expression
+{   yylval.string_type =  strdup ("22");}
+;
+
 
 
 %%
@@ -431,6 +490,12 @@ void cello_parameters_print_list(struct param_type * head)
       printf ("[\n"); 
       cello_parameters_print_list(p->list_value);
       printf ("]\n"); 
+      break;
+    case type_logical_expr:
+      printf ("%s\n",p->string_value);  
+      break;
+    case type_scalar_expr:
+      printf ("%s\n",p->string_value);  
       break;
     default: printf ("unknown type\n"); break;
     }
