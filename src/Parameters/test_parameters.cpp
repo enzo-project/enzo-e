@@ -30,20 +30,22 @@ main()
   // test parameter
   //----------------------------------------------------------------------
 
-  Parameters parameters;
+  Parameters * parameters = new Parameters;
 
   unit_func("set_group()");
 
-  printf ("parameters.get_group() = %s\n",parameters.get_group().c_str());
-  parameters.set_group("Group 1");
+  printf ("parameters->get_group() = %s\n",parameters->get_group().c_str());
+  parameters->set_group("Group 1");
 
-  unit_assert(parameters.get_group() == "Group 1");
-  unit_assert(parameters.get_subgroup() == "");
+  unit_assert(parameters->get_group() == "Group 1");
+  unit_assert(parameters->get_subgroup() == "");
 
   unit_func("read_bison()");
   FILE *fp = fopen ("implosion-1.0.in","r");
-  parameters.read_bison(fp);
+  parameters->read ( fp );
 
   unit_close();
+
+  delete parameters;
 
 }

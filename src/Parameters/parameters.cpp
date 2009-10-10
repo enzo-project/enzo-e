@@ -46,6 +46,8 @@
 #include "error.hpp"
 #include "parameters.hpp"
 
+const bool trace = true;
+
 /**
  *********************************************************************
  *
@@ -59,11 +61,34 @@
 
 Parameters::Parameters() 
   throw()
-  : values_(),
-    current_group_("testing"),
-    current_subgroup_("testing"),
-    parameter_list_(NULL)
+  :
+  current_group_("testing"),
+  current_subgroup_("testing"),
+  parameter_list_(NULL)
 {
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   
+ * @return  
+ *
+ * This function deletes a Parameters object
+ *
+ *********************************************************************
+ */
+
+Parameters::~Parameters()
+{
+  TRACE;
+  std::map<std::string,Param *>::iterator it_param;
+  for (it_param =  parameter_map_.begin();
+       it_param != parameter_map_.end();
+       ++it_param) {
+    printf ("%s \n",it_param->first.c_str());
+  }
+  TRACE;
 }
 
 /**
@@ -77,72 +102,65 @@ Parameters::Parameters()
  *********************************************************************
  */
 
-void
-Parameters::read 
-( FILE * file_pointer ) 
-  throw(ExceptionBadPointer)
-
-{
-  // check input
-  
-  if (file_pointer == 0) {
-    printf ("Throwing exception\n");
-    throw ExceptionBadPointer();
-    printf ("Threw exception??\n");
-  }
-
-  char buffer[MAX_PARAMETER_FILE_WIDTH];
-  char parameter[MAX_PARAMETER_FILE_WIDTH];
-  
-  // Read in one line at a time
-  while (readline_(file_pointer,buffer,MAX_PARAMETER_FILE_WIDTH)) {
-
-    // Get the parameter
-    sscanf(buffer,"%s",parameter);
-
-    // Find the value
-    const char * value = buffer + strlen(parameter);
-    while (isspace(*++value)) ;
-
-    add_parameter_(parameter,value);
-
-  }
-}
 
 void
-Parameters::read_bison
-( FILE * file_pointer ) 
-  throw(ExceptionBadPointer)
+Parameters::read ( FILE * file_pointer ) throw(ExceptionBadPointer)
 
 {
   parameter_list_ = cello_parameters_read(file_pointer);
 
   struct param_type * node = parameter_list_ -> next; // skip sentinel
+  struct param_type * prev = node;
+
   while (node->type != enum_parameter_sentinel) {
-    Parameter * parameter = new Parameter;
+
     std::string parameter_name = 
       std::string(node->group) + ":" +
       std::string(node->subgroup) + ":" +
       std::string(node->parameter);
+
     printf ("parameter %s\n",parameter_name.c_str()); fflush(stdout);
+
     enum_parameter type = node->type;
+    
+    Param * param;
+
     switch (type) {
     case enum_parameter_integer:
+      param = new Param_integer(node->integer_value);
       break;
     case enum_parameter_scalar:
+      param = new Param_scalar(node->scalar_value);
       break;
     case enum_parameter_string:
+      param = new Param_string(node->string_value);
       break;
     case enum_parameter_logical:
+      param = new Param_logical(node->logical_value);
       break;
     case enum_parameter_list:
+      param = new Param_list(node->list_value);
       break;
     case enum_parameter_scalar_expr:
+      param = new Param_scalar_expr(node->op_value);
       break;
     case enum_parameter_logical_expr:
+      param = new Param_logical_expr(node->op_value);
       break;
     }
+
+    parameter_map_[parameter_name] = param;
+
     node = node->next;
+
+//     free (prev->group);
+//     free (prev->subgroup);
+//     free (prev->parameter);
+
+    free (prev); // free not delete since allocated in parse.y
+
+    prev = node;
+    
   }
 }
 
@@ -164,8 +182,8 @@ Parameters::value_string
 ( std::string parameter,
   std::string deflt ) throw()
 {
-  return (values_.find(parameter) != values_.end()) ? 
-    values_.find(parameter)->second : deflt;
+//   return (values_.find(parameter) != values_.end()) ? 
+//     values_.find(parameter)->second : deflt;
 }
 
 /**
@@ -186,8 +204,8 @@ Parameters::value_scalar
 ( std::string parameter,
   Scalar      deflt ) throw()
 {
-  return (values_.find(parameter) != values_.end()) ? 
-    atof(values_.find(parameter)->second.c_str()) : deflt;
+//   return (values_.find(parameter) != values_.end()) ? 
+//     atof(values_.find(parameter)->second.c_str()) : deflt;
 }
 
 /**
@@ -208,8 +226,8 @@ Parameters::value_integer
 ( std::string parameter,
   int         deflt ) throw()
 {
-  return (values_.find(parameter) != values_.end()) ? 
-    atoi(values_.find(parameter)->second.c_str()) : deflt;
+//   return (values_.find(parameter) != values_.end()) ? 
+//     atoi(values_.find(parameter)->second.c_str()) : deflt;
 }
 
 /**
@@ -230,19 +248,19 @@ Parameters::value_logical
 ( std::string parameter,
   bool        deflt ) throw(ExceptionParametersBadType())
 {
-  bool value;
+  bool value = deflt;
 
-  if (values_.find(parameter) != values_.end()) {
-    if (values_.find(parameter)->second == "true") {
-      value == true;
-    } else if (values_.find(parameter)->second == "false") {
-      value == false;
-    } else {
-      throw ExceptionParametersBadType();
-    }
-  } else {
-    value = deflt;
-  }
+//   if (values_.find(parameter) != values_.end()) {
+//     if (values_.find(parameter)->second == "true") {
+//       value == true;
+//     } else if (values_.find(parameter)->second == "false") {
+//       value == false;
+//     } else {
+//       throw ExceptionParametersBadType();
+//     }
+//   } else {
+//     value = deflt;
+//   }
   
   return value;
 }
@@ -315,6 +333,6 @@ Parameters::add_parameter_
   throw()
 
 {
-    if (parameter=="" || parameter=="#" || parameter=="//") return;
-  values_.insert( std::pair<std::string,std::string>(parameter,value) );
+//     if (parameter=="" || parameter=="#" || parameter=="//") return;
+//   values_.insert( std::pair<std::string,std::string>(parameter,value) );
 }

@@ -36,22 +36,40 @@
 
 // Types for parameters
 
-
-class Parameter {
-    enum enum_parameter type;
-    union  {
-       bool                logical_value; 
-       int                 integer_value; 
-       double              scalar_value; 
-       char *              string_value;
-       struct param_type * list_value;
-       struct node_expr  * op_value;    /* expression tree */
-    };
-};
-
 class Parameters {
 
-  friend class Parameter;
+  class Param { };
+  class Param_integer : public Param {
+    int value_; 
+  public: Param_integer(int value) { value_ = value; }
+  };
+
+  class Param_scalar : public Param  {
+    double value_; 
+  public: Param_scalar(double value) { value_ = value; }
+  };
+  class Param_logical : public Param  {
+    bool value_; 
+  public: Param_logical(int value) { value_ = (value != 0); }
+  };
+  class Param_string : public Param  {
+    char * value_;
+  public: Param_string(char *  value) { value_ = value; }
+  };
+  class Param_list : public Param  {
+    struct param_type * value_;
+  public: Param_list(param_type * value) { value_ = value; }
+  };
+  class Param_scalar_expr : public Param  {
+    struct node_expr * value_;    /* expression tree */
+  public: Param_scalar_expr(node_expr * value) { value_ = value; }
+  };
+  class Param_logical_expr : public Param  {
+    struct node_expr * value_;    /* expression tree */
+  public: Param_logical_expr(node_expr * value) { value_ = value; }
+  };
+
+  //   friend class Parameter;
 
 /** 
  *********************************************************************
@@ -71,13 +89,17 @@ public:
   // PUBLIC OPERATIONS
   //-------------------------------------------------------------------
 
-  /// This function creates an empty parameters object
+  /// Create an empty Parameters object
+
   Parameters() throw();
+
+  /// Deletes a Parameters object
+
+  ~Parameters();
 
   /// Read in parameters from a file
 
   void read (FILE * file_pointer) throw(ExceptionBadPointer);
-  void read_bison (FILE * file_pointer) throw(ExceptionBadPointer);
 
   /// Return the string-valued parameter
 
@@ -136,12 +158,10 @@ private:
 
   /// A private attribute
 
-  std::map <std::string,std::string> values_;
-
   std::string current_group_;
   std::string current_subgroup_;
 
-  std::map<std::string, Parameter *> parameter_map_;
+  std::map<std::string, Param *> parameter_map_;
   struct param_type * parameter_list_;
 };
 
