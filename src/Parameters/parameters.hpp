@@ -27,7 +27,9 @@
 
 #include "cello.h"
 #include "error_exception.hpp"
-#include "type_parameter.h"
+
+#include "parse.h"
+
 // Maximum allowed width of a line in a parameter file
 
 #define MAX_PARAMETER_FILE_WIDTH 255
@@ -35,7 +37,21 @@
 // Types for parameters
 
 
+class Parameter {
+    enum enum_parameter type;
+    union  {
+       bool                logical_value; 
+       int                 integer_value; 
+       double              scalar_value; 
+       char *              string_value;
+       struct param_type * list_value;
+       struct node_expr  * op_value;    /* expression tree */
+    };
+};
+
 class Parameters {
+
+  friend class Parameter;
 
 /** 
  *********************************************************************
@@ -124,13 +140,15 @@ private:
 
   std::string current_group_;
   std::string current_subgroup_;
-  
+
+  std::map<std::string, Parameter *> parameter_map_;
+  struct param_type * parameter_list_;
 };
 
 // Parser functions
 
 extern "C" { 
-  void cello_parameters_read(FILE *);
+  struct param_type * cello_parameters_read(FILE *);
   void cello_parameters_print();
 }
 

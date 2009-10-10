@@ -25,7 +25,7 @@ run-exes: $(EXES)
 
 #-----------------------------------------------------------------------
 
-test_parameters: test_parameters.o $(OBJS_PARSE)
+test_parameters: test_parameters.o $(OBJS)
 	$(CXX) -o test_parameters test_parameters.o $(LIB)
 
 test_parse: test_parse.o $(OBJS_PARSE)

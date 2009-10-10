@@ -20,10 +20,32 @@
 
 #include "parse.tab.h"
 
-#include "type_parameter.h"
-#include "type_op.h" 
+#include "parse.h"
 
-  const char * type_name[]  = {
+const char * node_name[] = {
+  "node_unknown",
+  "node_operation",
+  "node_scalar",
+  "node_integer",
+  "node_variable",
+  "node_function"
+  };
+
+const char * op_name[] = {
+    "+",
+    "-",
+    "*",
+    "/",
+    "<=",
+    "<",
+    ">=",
+    ">",
+    "==",
+    "!=",
+    "&&",
+    "||"};
+
+  const char * parameter_name[]  = {
     "unknown",
     "sentinel",
     "integer",
@@ -37,31 +59,16 @@
 
   /* Structure for storing a single parameter / value pair in a linked list */
 
-  char * buffer = NULL;
-
-  struct node_expr {
-    enum node_type type;
-     union {
-       enum op_type op_value;       /* arthmetic / logical operation */
-       double       scalar_value;   /* floating point number */
-       int          integer_value;  /* integer / logical constant */
-       char         var_value;      /* variable, e.g. x,y,z,t */
-       double (*fun_value)(double); /* math.h function */
-     };
-    struct node_expr * left;
-    struct node_expr * right;
-    char * function_name;
-  };
 
   struct node_expr * new_node_operation
     (struct node_expr * left, 
-     enum op_type oper,
+     enum enum_op oper,
      struct node_expr * right)
   {
     
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type     = type_node_operation;
+    node->type     = enum_node_operation;
     node->op_value = oper;
     node->left     = left;
     node->right    = right;
@@ -72,7 +79,7 @@
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type = type_node_scalar;
+    node->type = enum_node_scalar;
     node->scalar_value = value;
     node->left = NULL;
     node->right = NULL;
@@ -82,7 +89,7 @@
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type = type_node_integer;
+    node->type = enum_node_integer;
     node->integer_value = value;
     node->left = NULL;
     node->right = NULL;
@@ -92,7 +99,7 @@
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type = type_node_variable;
+    node->type = enum_node_variable;
     node->var_value = value;
     node->left = NULL;
     node->right = NULL;
@@ -105,7 +112,7 @@
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type = type_node_function;
+    node->type = enum_node_function;
     node->fun_value = function;
     node->left = argument;
     node->right = NULL;
@@ -113,21 +120,6 @@
     return node;
   }
 
-  struct param_type {
-    char * group;
-    char * subgroup;
-    char * parameter;
-    enum type_parameter type;
-    union  {
-       int                 logical_value; 
-       int                 integer_value; 
-       double              scalar_value; 
-       char *              string_value;
-       struct param_type * list_value;
-       struct node_expr    * op_value;    /* expression tree */
-    };
-    struct param_type *   next;
-  } ;
 
   /* The head of the linked list of parameter / value pairs */
 
@@ -137,14 +129,14 @@
   /* The current group, subgroup, and parameter type */
 
   char *              current_parameter = NULL;
-  enum type_parameter current_type      = type_sentinel;
+  enum enum_parameter current_type      = enum_parameter_sentinel;
 
   /* Function to update parameter's groups once the group is known */
 
   void update_group (char * group)
     {
       struct param_type * p = param_curr;
-      while (p->next->type != type_sentinel && p->next->group == NULL) {
+      while (p->next->type != enum_parameter_sentinel && p->next->group == NULL) {
 	p->next->group = strdup(group);
         p  = p -> next;
       }
@@ -155,7 +147,7 @@
   void update_subgroup (char * subgroup)
     {
       struct param_type * p = param_curr;
-      while (p->next->type != type_sentinel && p->next->subgroup == NULL) {
+      while (p->next->type != enum_parameter_sentinel && p->next->subgroup == NULL) {
 	p->next->subgroup = strdup(subgroup);
         p  = p -> next;
       }
@@ -179,7 +171,7 @@
 
     do {
       /* If parameter is a list, recursively reverse it as well */
-      if (c->type == type_list) {
+      if (c->type == enum_parameter_list) {
 	c->list_value = reverse_param(c->list_value);
       }
       c->next = p;
@@ -187,7 +179,7 @@
       p=c;
       c=n;
       n=n->next;
-    } while (p->type != type_sentinel) ;
+    } while (p->type != enum_parameter_sentinel) ;
 
     new_head = p;
     return new_head;
@@ -209,7 +201,7 @@
      p->group     = NULL;
      p->subgroup  = NULL;
      p->parameter = strdup(current_parameter);
-     current_type = type_unknown;
+     current_type = enum_parameter_unknown;
 
      insert_param(param_curr,p);
 
@@ -222,7 +214,7 @@
   void new_param_string (char * value)
   {
     struct param_type * p = new_param();
-    p->type         = type_string;
+    p->type         = enum_parameter_string;
     p->string_value = strdup(value);
 
   }
@@ -236,7 +228,7 @@
     p->group     = NULL;
     p->subgroup  = NULL;
     p->parameter = NULL;
-    p->type      = type_sentinel;
+    p->type      = enum_parameter_sentinel;
     p->next       = p;
     p->list_value = NULL;
 
@@ -247,7 +239,7 @@
   void new_param_list (struct param_type * curr)
   {
     struct param_type * p = new_param();
-    p->type       = type_list;
+    p->type       = enum_parameter_list;
     p->list_value = curr;
   }
 
@@ -255,7 +247,7 @@
   void new_param_scalar (double value)
   {
     struct param_type * p = new_param();
-    p->type         = type_scalar;
+    p->type         = enum_parameter_scalar;
     p->scalar_value = value;
   }
 
@@ -263,7 +255,7 @@
   void new_param_logical (int value)
   {
     struct param_type * p = new_param();
-    p->type          = type_logical;
+    p->type          = enum_parameter_logical;
     p->logical_value = value;
   }
 
@@ -271,12 +263,12 @@
   void new_param_integer (int value)
   {
     struct param_type * p = new_param();
-    p->type          = type_integer;
+    p->type          = enum_parameter_integer;
     p->integer_value = value;
   }
 
   /* New string parameter assignment */
-  void new_param_expr (enum type_parameter type,
+  void new_param_expr (enum enum_parameter type,
 		       struct node_expr * value)
   {
     struct param_type * p = new_param();
@@ -288,28 +280,28 @@
   void new_parameter()
   {
      switch (current_type) {
-     case type_integer:
+     case enum_parameter_integer:
        new_param_integer(yylval.integer_type);
        break;
-     case type_scalar:
+     case enum_parameter_scalar:
        new_param_scalar(yylval.scalar_type);
        break;
-     case type_string: 
+     case enum_parameter_string: 
        new_param_string(yylval.string_type);
        break;
-     case type_identifier:
-       printf ("IDENTIFIER\n");
-       break;
-     case type_logical:
+/*      case enum_parameter_identifier: */
+/*        printf ("IDENTIFIER\n"); */
+/*        break; */
+     case enum_parameter_logical:
        new_param_logical(yylval.logical_type);
        break;
-     case type_list:
+     case enum_parameter_list:
        break;
-     case type_scalar_expr:
-       new_param_expr(type_scalar_expr,yylval.node_type);
+     case enum_parameter_scalar_expr:
+       new_param_expr(enum_parameter_scalar_expr,yylval.node_type);
        break;
-     case type_logical_expr:
-       new_param_expr(type_logical_expr,yylval.node_type);
+     case enum_parameter_logical_expr:
+       new_param_expr(enum_parameter_logical_expr,yylval.node_type);
        break;
     default:
        printf ("%s:%d Unknown type %d\n",__FILE__,__LINE__,current_type);
@@ -450,15 +442,15 @@ parameter_assignment :
  ;
 
 parameter_value : 
- STRING { current_type = type_string;       yylval.string_type = strdup($1);}
- | cie  { current_type = type_integer;      yylval.integer_type = $1;}
- | cse  { current_type = type_scalar;       yylval.scalar_type = $1;}
- | cle  { current_type = type_logical;      yylval.logical_type = $1; }
- | vse  { current_type = type_scalar_expr;  yylval.node_type = $1; }
- | vle  { current_type = type_logical_expr; yylval.node_type = $1; }
- | list { current_type = type_list; }
- | IDENTIFIER  { current_type = type_identifier; }
-{  }
+ STRING { current_type = enum_parameter_string;       yylval.string_type = strdup($1);}
+ | cie  { current_type = enum_parameter_integer;      yylval.integer_type = $1;}
+ | cse  { current_type = enum_parameter_scalar;       yylval.scalar_type = $1;}
+ | cle  { current_type = enum_parameter_logical;      yylval.logical_type = $1; }
+ | vse  { current_type = enum_parameter_scalar_expr;  yylval.node_type = $1; }
+ | vle  { current_type = enum_parameter_logical_expr; yylval.node_type = $1; }
+ | list { current_type = enum_parameter_list; }
+/*  | IDENTIFIER  { current_type = enum_parameter_identifier; } */
+/* {  } */
 ;
 
 list: LIST_BEGIN list_elements LIST_END {  }
@@ -547,18 +539,18 @@ cie:
 
 vse: 
 '(' vse ')'    { $2; }
- | vse '+' cse { $$ = new_node_operation ($1, type_op_add,new_node_scalar($3)); }
- | cse '+' vse { $$ = new_node_operation (new_node_scalar($1), type_op_add,$3); }
- | vse '+' vse { $$ = new_node_operation ($1, type_op_add,$3); }
- | vse '-' cse { $$ = new_node_operation ($1, type_op_sub,new_node_scalar($3)); }
- | cse '-' vse { $$ = new_node_operation (new_node_scalar($1), type_op_sub,$3); }
- | vse '-' vse { $$ = new_node_operation ($1, type_op_sub,$3); }
- | vse '*' cse { $$ = new_node_operation ($1, type_op_mul,new_node_scalar($3)); }
- | cse '*' vse { $$ = new_node_operation (new_node_scalar($1), type_op_mul,$3); }
- | vse '*' vse { $$ = new_node_operation ($1, type_op_mul,$3); }
- | vse '/' cse { $$ = new_node_operation ($1, type_op_div,new_node_scalar($3)); }
- | cse '/' vse { $$ = new_node_operation (new_node_scalar($1), type_op_div,$3); }
- | vse '/' vse { $$ = new_node_operation ($1, type_op_div,$3); }
+ | vse '+' cse { $$ = new_node_operation ($1, enum_op_add,new_node_scalar($3)); }
+ | cse '+' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_add,$3); }
+ | vse '+' vse { $$ = new_node_operation ($1, enum_op_add,$3); }
+ | vse '-' cse { $$ = new_node_operation ($1, enum_op_sub,new_node_scalar($3)); }
+ | cse '-' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_sub,$3); }
+ | vse '-' vse { $$ = new_node_operation ($1, enum_op_sub,$3); }
+ | vse '*' cse { $$ = new_node_operation ($1, enum_op_mul,new_node_scalar($3)); }
+ | cse '*' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_mul,$3); }
+ | vse '*' vse { $$ = new_node_operation ($1, enum_op_mul,$3); }
+ | vse '/' cse { $$ = new_node_operation ($1, enum_op_div,new_node_scalar($3)); }
+ | cse '/' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_div,$3); }
+ | vse '/' vse { $$ = new_node_operation ($1, enum_op_div,$3); }
  | ACOS   '(' vse ')' { $$ = new_node_function ( acos, "acos", $3); }
  | ACOSH  '(' vse ')' { $$ = new_node_function ( acosh, "acosh", $3); }
  | ASIN   '(' vse ')' { $$ = new_node_function ( asin, "asin", $3); }
@@ -597,30 +589,30 @@ vse:
 
 vle: 
  '(' vle ')' { }
- | vse LE cse  { $$ = new_node_operation ($1, type_op_le,new_node_scalar($3)); }
- | cse LE vse  { $$ = new_node_operation (new_node_scalar($1), type_op_le,$3); }
- | vse LE vse  { $$ = new_node_operation ($1, type_op_le,$3); }
- | vse GE cse  { $$ = new_node_operation ($1, type_op_ge,new_node_scalar($3)); }
- | cse GE vse  { $$ = new_node_operation (new_node_scalar($1), type_op_ge,$3); }
- | vse GE vse  { $$ = new_node_operation ($1, type_op_ge,$3); }
- | vse '<' cse { $$ = new_node_operation ($1, type_op_lt,new_node_scalar($3)); }
- | cse '<' vse { $$ = new_node_operation (new_node_scalar($1), type_op_lt,$3); }
- | vse '<' vse { $$ = new_node_operation ($1, type_op_lt,$3); }
- | vse '>' cse { $$ = new_node_operation ($1, type_op_gt,new_node_scalar($3)); }
- | cse '>' vse { $$ = new_node_operation (new_node_scalar($1), type_op_gt,$3); }
- | vse '>' vse { $$ = new_node_operation ($1, type_op_gt,$3); }
- | vse EQ cse  { $$ = new_node_operation ($1, type_op_eq,new_node_scalar($3)); }
- | cse EQ vse  { $$ = new_node_operation (new_node_scalar($1), type_op_eq,$3); }
- | vse EQ vse  { $$ = new_node_operation ($1, type_op_eq,$3); }
- | vse NE cse  { $$ = new_node_operation ($1, type_op_ne,new_node_scalar($3)); }
- | cse NE vse  { $$ = new_node_operation (new_node_scalar($1), type_op_ne,$3); }
- | vse NE vse  { $$ = new_node_operation ($1, type_op_ne,$3); }
- | vle OR cle  { $$ = new_node_operation ($1, type_op_or,new_node_logical($3)); }
- | cle OR vle  { $$ = new_node_operation (new_node_logical($1), type_op_or,$3); }
- | vle OR vle  { $$ = new_node_operation ($1, type_op_or,$3); }
- | vle AND cle { $$ = new_node_operation ($1, type_op_and,new_node_logical($3)); }
- | cle AND vle { $$ = new_node_operation (new_node_logical($1), type_op_and,$3); }
- | vle AND vle { $$ = new_node_operation ($1, type_op_and,$3); }
+ | vse LE cse  { $$ = new_node_operation ($1, enum_op_le,new_node_scalar($3)); }
+ | cse LE vse  { $$ = new_node_operation (new_node_scalar($1), enum_op_le,$3); }
+ | vse LE vse  { $$ = new_node_operation ($1, enum_op_le,$3); }
+ | vse GE cse  { $$ = new_node_operation ($1, enum_op_ge,new_node_scalar($3)); }
+ | cse GE vse  { $$ = new_node_operation (new_node_scalar($1), enum_op_ge,$3); }
+ | vse GE vse  { $$ = new_node_operation ($1, enum_op_ge,$3); }
+ | vse '<' cse { $$ = new_node_operation ($1, enum_op_lt,new_node_scalar($3)); }
+ | cse '<' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_lt,$3); }
+ | vse '<' vse { $$ = new_node_operation ($1, enum_op_lt,$3); }
+ | vse '>' cse { $$ = new_node_operation ($1, enum_op_gt,new_node_scalar($3)); }
+ | cse '>' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_gt,$3); }
+ | vse '>' vse { $$ = new_node_operation ($1, enum_op_gt,$3); }
+ | vse EQ cse  { $$ = new_node_operation ($1, enum_op_eq,new_node_scalar($3)); }
+ | cse EQ vse  { $$ = new_node_operation (new_node_scalar($1), enum_op_eq,$3); }
+ | vse EQ vse  { $$ = new_node_operation ($1, enum_op_eq,$3); }
+ | vse NE cse  { $$ = new_node_operation ($1, enum_op_ne,new_node_scalar($3)); }
+ | cse NE vse  { $$ = new_node_operation (new_node_scalar($1), enum_op_ne,$3); }
+ | vse NE vse  { $$ = new_node_operation ($1, enum_op_ne,$3); }
+ | vle OR cle  { $$ = new_node_operation ($1, enum_op_or,new_node_logical($3)); }
+ | cle OR vle  { $$ = new_node_operation (new_node_logical($1), enum_op_or,$3); }
+ | vle OR vle  { $$ = new_node_operation ($1, enum_op_or,$3); }
+ | vle AND cle { $$ = new_node_operation ($1, enum_op_and,new_node_logical($3)); }
+ | cle AND vle { $$ = new_node_operation (new_node_logical($1), enum_op_and,$3); }
+ | vle AND vle { $$ = new_node_operation ($1, enum_op_and,$3); }
 ;
 
 
@@ -653,21 +645,21 @@ void print_expression (struct node_expr * node)
     printf ("NULL");
   } else {
     switch (node->type) {
-    case type_node_integer:
+    case enum_node_integer:
       printf ("%d",node->integer_value);
       break;
-    case type_node_scalar:
+    case enum_node_scalar:
       printf ("%g",node->scalar_value);
       break;
-    case type_node_variable:
+    case enum_node_variable:
       printf ("%c",node->var_value);
       break;
-    case type_node_function:
+    case enum_node_function:
       printf ("%s(",node->function_name); fflush(stdout);
       print_expression(node->left);
       printf (")"); fflush(stdout);
       break;
-    case type_node_operation:
+    case enum_node_operation:
       printf ("(");  fflush(stdout);
       print_expression(node->left);
       printf (") %s (",op_name[node->op_value]); fflush(stdout);
@@ -685,43 +677,43 @@ void cello_parameters_print_list(struct param_type * head, int level)
 {
   struct param_type * p = head->next;
   int count = 0;
-  while (p && p->type != type_sentinel && count++ < 100) {
+  while (p && p->type != enum_parameter_sentinel && count++ < 100) {
 /*     printf ("%p %s\n",p,type_name[p->type]); */
     if (p->group != NULL) {
       indent(level);
       printf ("%s %s:%s:%s = ", 
-	      type_name[p->type],p->group, p->subgroup, p->parameter);
+	      parameter_name[p->type],p->group, p->subgroup, p->parameter);
     } else {
       /* list element */
       indent(level);
       printf ("%s %s = ", 
-	      type_name[p->type], p->parameter);
+	      parameter_name[p->type], p->parameter);
     }
     switch (p->type) {
-    case type_scalar:  
+    case enum_parameter_scalar:  
       printf ("%g\n",p->scalar_value);  
       break;
-    case type_integer: 
+    case enum_parameter_integer: 
       printf ("%d\n",p->integer_value); 
       break;
-    case type_string:  
+    case enum_parameter_string:  
       printf ("%s\n",p->string_value); 
       break;
-    case type_logical:
+    case enum_parameter_logical:
       printf ("%s\n",p->logical_value ? "true" : "false");
       break;
-    case type_list:    
+    case enum_parameter_list:    
       indent(level);
       printf ("[\n"); 
       cello_parameters_print_list(p->list_value, level + 1);
       indent(level);
       printf ("]\n"); 
       break;
-    case type_logical_expr:
+    case enum_parameter_logical_expr:
       indent(level);
       print_expression(p->op_value); printf ("\n");
       break;
-    case type_scalar_expr:
+    case enum_parameter_scalar_expr:
       indent(level);
       print_expression(p->op_value); printf ("\n");
       break;

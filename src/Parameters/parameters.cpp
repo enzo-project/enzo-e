@@ -45,7 +45,7 @@
 
 #include "error.hpp"
 #include "parameters.hpp"
- 
+
 /**
  *********************************************************************
  *
@@ -61,7 +61,8 @@ Parameters::Parameters()
   throw()
   : values_(),
     current_group_("testing"),
-    current_subgroup_("testing")
+    current_subgroup_("testing"),
+    parameter_list_(NULL)
 {
 }
 
@@ -114,7 +115,35 @@ Parameters::read_bison
   throw(ExceptionBadPointer)
 
 {
-  cello_parameters_read(file_pointer);
+  parameter_list_ = cello_parameters_read(file_pointer);
+
+  struct param_type * node = parameter_list_ -> next; // skip sentinel
+  while (node->type != enum_parameter_sentinel) {
+    Parameter * parameter = new Parameter;
+    std::string parameter_name = 
+      std::string(node->group) + ":" +
+      std::string(node->subgroup) + ":" +
+      std::string(node->parameter);
+    printf ("parameter %s\n",parameter_name.c_str()); fflush(stdout);
+    enum_parameter type = node->type;
+    switch (type) {
+    case enum_parameter_integer:
+      break;
+    case enum_parameter_scalar:
+      break;
+    case enum_parameter_string:
+      break;
+    case enum_parameter_logical:
+      break;
+    case enum_parameter_list:
+      break;
+    case enum_parameter_scalar_expr:
+      break;
+    case enum_parameter_logical_expr:
+      break;
+    }
+    node = node->next;
+  }
 }
 
 /**

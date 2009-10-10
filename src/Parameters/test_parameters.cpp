@@ -43,7 +43,6 @@ main()
   unit_func("read_bison()");
   FILE *fp = fopen ("implosion-1.0.in","r");
   parameters.read_bison(fp);
-  
 
   unit_close();
 
