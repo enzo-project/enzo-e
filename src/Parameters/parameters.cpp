@@ -46,8 +46,6 @@
 #include "error.hpp"
 #include "parameters.hpp"
 
-const bool trace = true;
-
 /**
  *********************************************************************
  *
@@ -81,14 +79,13 @@ Parameters::Parameters()
 
 Parameters::~Parameters()
 {
-  TRACE;
   std::map<std::string,Param *>::iterator it_param;
   for (it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
     printf ("%s \n",it_param->first.c_str());
+    it_param->second->dealloc();
   }
-  TRACE;
 }
 
 /**
@@ -153,9 +150,9 @@ Parameters::read ( FILE * file_pointer ) throw(ExceptionBadPointer)
 
     node = node->next;
 
-//     free (prev->group);
-//     free (prev->subgroup);
-//     free (prev->parameter);
+    free (prev->group);
+    free (prev->subgroup);
+    free (prev->parameter);
 
     free (prev); // free not delete since allocated in parse.y
 

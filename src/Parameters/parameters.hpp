@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "cello.h"
 #include "error_exception.hpp"
@@ -34,39 +35,78 @@
 
 #define MAX_PARAMETER_FILE_WIDTH 255
 
+// Functions for deleting parse.* structs
+
 // Types for parameters
 
 class Parameters {
 
-  class Param { };
+  class Param { 
+  public:
+    virtual void dealloc() { } 
+  protected:
+    void dealloc_param_ (struct param_type * p)
+    {
+      struct param_type * head = p;
+      struct param_type * q;
+      p = p->next;
+      while (p->type != enum_parameter_sentinel) {
+	q = p->next;
+	if (p->type == enum_parameter_list) {
+	  dealloc_param_ (p);
+	} else {
+	  free ( p );
+	}
+	p = q;
+      }
+    };
+
+    void dealloc_node_expr_ (struct node_expr * p)
+    {
+      if (p->left != NULL) dealloc_node_expr_(p->left);
+      if (p->right != NULL) dealloc_node_expr_(p->right);
+      free (p);
+    };
+  };
   class Param_integer : public Param {
     int value_; 
-  public: Param_integer(int value) { value_ = value; }
+  public: 
+    Param_integer(int value) { value_ = value; }
   };
 
   class Param_scalar : public Param  {
     double value_; 
-  public: Param_scalar(double value) { value_ = value; }
+  public: 
+    Param_scalar(double value) { value_ = value; }
   };
   class Param_logical : public Param  {
     bool value_; 
-  public: Param_logical(int value) { value_ = (value != 0); }
+  public: 
+    Param_logical(int value) { value_ = (value != 0); }
   };
   class Param_string : public Param  {
     char * value_;
-  public: Param_string(char *  value) { value_ = value; }
+  public: 
+    Param_string(char *  value) { value_ = value; }
+    void dealloc() { free (value_); } 
   };
   class Param_list : public Param  {
     struct param_type * value_;
-  public: Param_list(param_type * value) { value_ = value; }
+  public: 
+    Param_list(param_type * value) { value_ = value; }
+    void dealloc() { dealloc_param_ (value_); } 
   };
   class Param_scalar_expr : public Param  {
     struct node_expr * value_;    /* expression tree */
-  public: Param_scalar_expr(node_expr * value) { value_ = value; }
+  public: 
+    Param_scalar_expr(node_expr * value) { value_ = value; }
+    void dealloc() { dealloc_node_expr_ (value_); } 
   };
   class Param_logical_expr : public Param  {
     struct node_expr * value_;    /* expression tree */
-  public: Param_logical_expr(node_expr * value) { value_ = value; }
+  public: 
+    Param_logical_expr(node_expr * value) { value_ = value; }
+    void dealloc() { dealloc_node_expr_ (value_); } 
   };
 
   //   friend class Parameter;
@@ -141,7 +181,7 @@ public:
 private:
 
   //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
+  // PRIVATE FUNCTIONS
   //-------------------------------------------------------------------
 
   /// Read in the next line of the input file
