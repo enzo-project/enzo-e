@@ -6,8 +6,8 @@ TESTS = test_implosion test_implosion3 test_image test_implosion_opt
 
 INC_LOCAL  = -I$(TOP)/include
 LIB_LOCAL  = -L$(TOP)/lib -lcello
-FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -g $(DEF_OPTIMIZE)
-CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -g $(DEF_OPTIMIZE)
+FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(DEF_OPTIMIZE)
+CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(DEF_OPTIMIZE)
 
 OBJS_IMAGE      = test_image.o initialize_image.o
 OBJS_IMPLOSION  = test_implosion.o  initialize_implosion.o
