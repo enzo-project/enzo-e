@@ -32,7 +32,7 @@ Group5 {
 
 Group6 subgroup6 {
      param_scalar_expr1 = sin(x);
-     param_scalar_expr2 = atan(y/3.0+2.0*t);
+     param_scalar_expr2 = atan(y/3.0+3.0*t);
 }
 
 

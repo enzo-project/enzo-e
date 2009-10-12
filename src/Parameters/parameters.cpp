@@ -60,8 +60,8 @@
 Parameters::Parameters() 
   throw()
   :
-  current_group_("testing"),
-  current_subgroup_("testing"),
+  current_group_(""),
+  current_subgroup_(""),
   parameter_list_(NULL)
 {
 }

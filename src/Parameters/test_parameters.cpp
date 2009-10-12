@@ -34,25 +34,29 @@ int main(int argc, char **argv)
 
   Parameters * parameters = new Parameters;
 
-  unit_func("set_group()");
+  unit_func("set_group");
 
   printf ("parameters->get_group() = %s\n",parameters->get_group().c_str());
   parameters->set_group("Group 1");
 
   unit_assert(parameters->get_group() == "Group 1");
-  unit_assert(parameters->get_subgroup() == "");
 
-  unit_func("read()");
+  unit_func("read");
   FILE * fp = fopen ("test.in","r");
 
   parameters->read ( fp );
 
+  unit_func("set_group");
   parameters->set_group("Group4");
+  unit_assert(parameters->get_group() == "Group4");
 
+  unit_func("set_subgroup");
   parameters->set_subgroup("subgroup3");
+  unit_assert(parameters->get_subgroup() == "subgroup3");
 
   double value;
 
+  unit_func("value_scalar");
   value = parameters->value_scalar("param_scalar_expr1");
   unit_assert(value == 30.625);
 
@@ -77,6 +81,7 @@ int main(int argc, char **argv)
   unit_assert(value == -30.625);
 
 
+  unit_func("evaluate_scalar");
 
   double x[] = { 1, 2, 3};
   double y[] = {5 , 4, 3};
@@ -123,9 +128,17 @@ int main(int argc, char **argv)
   //  param_scalar_expr2 = atan(y/3.0+2*t);
   parameters->evaluate_scalar("param_scalar_expr2",
 			      3,values,deflts,x,y,z,t);
-  unit_assert (values[0]==atan(y[0]/3.0+2*t[0]));
-  unit_assert (values[1]==atan(y[1]/3.0+2*t[1]));
-  unit_assert (values[2]==atan(y[2]/3.0+2*t[2]));
+  unit_assert (values[0]==atan(y[0]/3.0+3*t[0]));
+  unit_assert (values[1]==atan(y[1]/3.0+3*t[1]));
+  unit_assert (values[2]==atan(y[2]/3.0+3*t[2]));
+
+  unit_func("value_logical");
+  unit_assert(0);
+  unit_func("value_integer");
+  unit_assert(0);
+  unit_func("value_string");
+  unit_assert(0);
+  unit_func("value_list");
 
   unit_close();
 
