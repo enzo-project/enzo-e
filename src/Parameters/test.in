@@ -1,0 +1,38 @@
+Group1 { param_scalar = 1.0 }
+
+Group2 subgroup1 { param_integer = 1 }
+
+Group3 subgroup2 { 
+   param_logical_false = false;
+   param_logical_true = true;
+   param_logical_expr_true  = 6.1 < 8.7;
+   param_logical_expr_false = 6.1 >= 8.7;
+}
+
+Group4 {
+   subgroup3 {
+     param_scalar_expr1 = 24.5 + 6.125;
+     param_scalar_expr2 = 24.5 - 6.125;
+     param_scalar_expr3 = 24.5 * 6.125;
+     param_scalar_expr4 = 24.5 / 6.125;
+   };
+   subgroup4 {
+     param_scalar_expr1 = 24.5 + 6.125*2.0;
+     param_scalar_expr2 = 24.5*3.0 - 6.125;
+     param_scalar_expr3 = (24.5 + 6.125*2.0) - (24.5*3.0 - 6.125);
+   }
+}
+Group5 {
+   subgroup5 {
+     param_scalar_expr1 = x;
+     param_scalar_expr2 = x + 3.0;
+     param_scalar_expr3 = x+y+z+t;
+   }
+}
+
+Group6 subgroup6 {
+     param_scalar_expr1 = sin(x);
+     param_scalar_expr2 = atan(y/3.0+2.0*t);
+}
+
+

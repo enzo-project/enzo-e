@@ -68,10 +68,11 @@ const char * op_name[] = {
     
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type     = enum_node_operation;
-    node->op_value = oper;
-    node->left     = left;
-    node->right    = right;
+    node->type          = enum_node_operation;
+    node->op_value      = oper;
+    node->left          = left;
+    node->right         = right;
+    node->function_name = NULL;
     return node;
   }
 
@@ -79,30 +80,33 @@ const char * op_name[] = {
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type = enum_node_scalar;
-    node->scalar_value = value;
-    node->left = NULL;
-    node->right = NULL;
+    node->type          = enum_node_scalar;
+    node->scalar_value  = value;
+    node->left          = NULL;
+    node->right         = NULL;
+    node->function_name = NULL;
     return node;
   }
   struct node_expr * new_node_logical (int value)
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type = enum_node_integer;
+    node->type          = enum_node_integer;
     node->integer_value = value;
-    node->left = NULL;
-    node->right = NULL;
+    node->left          = NULL;
+    node->right         = NULL;
+    node->function_name = NULL;
     return node;
   }
   struct node_expr * new_node_variable (char value)
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type = enum_node_variable;
-    node->var_value = value;
-    node->left = NULL;
-    node->right = NULL;
+    node->type          = enum_node_variable;
+    node->var_value     = value;
+    node->left          = NULL;
+    node->right         = NULL;
+    node->function_name = NULL;
     return node;
   }
   struct node_expr * new_node_function
@@ -112,11 +116,11 @@ const char * op_name[] = {
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
-    node->type = enum_node_function;
-    node->fun_value = function;
-    node->left = argument;
-    node->right = NULL;
-    node->function_name = function_name;
+    node->type          = enum_node_function;
+    node->fun_value     = function;
+    node->left          = argument;
+    node->right         = NULL;
+    node->function_name = strdup(function_name);
     return node;
   }
 
@@ -136,9 +140,10 @@ const char * op_name[] = {
   void update_group (char * group)
     {
       struct param_type * p = param_curr;
-      while (p->next->type != enum_parameter_sentinel && p->next->group == NULL) {
+      while (p->next->type  != enum_parameter_sentinel && 
+	     p->next->group == NULL) {
 	p->next->group = strdup(group);
-        p  = p -> next;
+        p = p -> next;
       }
     }
 
@@ -147,9 +152,10 @@ const char * op_name[] = {
   void update_subgroup (char * subgroup)
     {
       struct param_type * p = param_curr;
-      while (p->next->type != enum_parameter_sentinel && p->next->subgroup == NULL) {
+      while (p->next->type     != enum_parameter_sentinel && 
+	     p->next->subgroup == NULL) {
 	p->next->subgroup = strdup(subgroup);
-        p  = p -> next;
+        p = p -> next;
       }
     }
 
@@ -175,10 +181,9 @@ const char * op_name[] = {
 	c->list_value = reverse_param(c->list_value);
       }
       c->next = p;
-
-      p=c;
-      c=n;
-      n=n->next;
+      p       = c;
+      c       = n;
+      n = n->next;
     } while (p->type != enum_parameter_sentinel) ;
 
     new_head = p;
@@ -195,12 +200,12 @@ const char * op_name[] = {
      struct param_type * p = 
        (struct param_type *) malloc (sizeof (struct param_type));
 
-
    /* Fill in the non-type-specific values for the new node */
 
-     p->group     = NULL;
-     p->subgroup  = NULL;
+     p->group     = NULL; /* Initialized in update_group() */
+     p->subgroup  = NULL; /* Initialized in update_subgroup() */
      p->parameter = strdup(current_parameter);
+     free (current_parameter);
      current_type = enum_parameter_unknown;
 
      insert_param(param_curr,p);
@@ -236,6 +241,7 @@ const char * op_name[] = {
   }
 
   /* New list parameter assignment */
+
   void new_param_list (struct param_type * curr)
   {
     struct param_type * p = new_param();
@@ -244,6 +250,7 @@ const char * op_name[] = {
   }
 
   /* New scalar parameter assignment */
+
   void new_param_scalar (double value)
   {
     struct param_type * p = new_param();
@@ -252,6 +259,7 @@ const char * op_name[] = {
   }
 
   /* New logical parameter assignment */
+
   void new_param_logical (int value)
   {
     struct param_type * p = new_param();
@@ -260,6 +268,7 @@ const char * op_name[] = {
   }
 
   /* New integer parameter assignment */
+
   void new_param_integer (int value)
   {
     struct param_type * p = new_param();
@@ -268,13 +277,13 @@ const char * op_name[] = {
   }
 
   /* New string parameter assignment */
+
   void new_param_expr (enum enum_parameter type,
 		       struct node_expr * value)
   {
     struct param_type * p = new_param();
     p->type     = type;
     p->op_value = value;
-
   }
 
   void new_parameter()
@@ -289,9 +298,6 @@ const char * op_name[] = {
      case enum_parameter_string: 
        new_param_string(yylval.string_type);
        break;
-/*      case enum_parameter_identifier: */
-/*        printf ("IDENTIFIER\n"); */
-/*        break; */
      case enum_parameter_logical:
        new_param_logical(yylval.logical_type);
        break;
@@ -304,7 +310,8 @@ const char * op_name[] = {
        new_param_expr(enum_parameter_logical_expr,yylval.node_type);
        break;
     default:
-       printf ("%s:%d Unknown type %d\n",__FILE__,__LINE__,current_type);
+       printf ("%s:%d Parse Error: unknown type %d\n",
+	       __FILE__,__LINE__,current_type);
        break;
      }
   }
@@ -414,28 +421,35 @@ file : /* nothing */
 
 group: 
    GROUP_NAME '{' parameter_list '}'               { update_group($1);
+                                                     free($1);
                                                      update_subgroup(""); }
  | GROUP_NAME '{' parameter_list ';' '}'           { update_group($1);
+                                                     free($1);
                                                      update_subgroup(""); }
  | GROUP_NAME IDENTIFIER '{' parameter_list '}'    { update_group($1); 
-                                                     update_subgroup($2); }
+                                                     free($1);
+                                                     update_subgroup($2);
+                                                     free($2);
+ }
  | GROUP_NAME IDENTIFIER '{' parameter_list ';' '}'{ update_group($1); 
-                                                     update_subgroup($2); }
+                                                     free($1);
+                                                     update_subgroup($2);
+                                                     free($2);
+ }
 
 subgroup : 
-    IDENTIFIER  '{' parameter_list '}'      { update_subgroup($1); }
- |  IDENTIFIER  '{' parameter_list ';' '}'  { update_subgroup($1); }
+   IDENTIFIER  '{' parameter_list '}'      { update_subgroup($1); free ($1); }
+|  IDENTIFIER  '{' parameter_list ';' '}'  { update_subgroup($1); free ($1); }
 
 parameter_list : 
    parameter_assignment                     { }
  | subgroup                                 {  }
  | parameter_list ';' parameter_assignment  {  }
  | parameter_list ';' subgroup              {  } 
-{  }
  ;
 
 parameter :
-  IDENTIFIER { current_parameter = strdup($1);} 
+  IDENTIFIER { current_parameter = $1;} 
 
 parameter_assignment : 
  parameter '=' parameter_value { new_parameter(); }

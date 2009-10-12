@@ -2,7 +2,7 @@
 TOP     = ../..
 PACKAGE = parameters
 OBJS_PARSE = parse.tab.o lex.yy.o
-OBJS    = parameters.o $(OBJS_PARSE)
+OBJS    = parameters.o param.o $(OBJS_PARSE)
 TESTS   = test_parameters
 EXES    = test_parse
 
@@ -45,6 +45,7 @@ lex.yy.o:lex.yy.c
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/parameters.hpp $(INCLUDE)
+	ln -sf `pwd`/param.hpp $(INCLUDE)
 #-----------------------------------------------------------------------
 
 .PHONY: clean-local

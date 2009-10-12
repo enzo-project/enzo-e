@@ -3,7 +3,7 @@
 /** 
  *********************************************************************
  *
- * @file      Parameters.cpp
+ * @file      parameters.cpp
  * @brief     Read in a parameter file and access parameter values
  * @author    James Bordner
  * @date      Thu Jul  9 15:38:43 PDT 2009
@@ -83,8 +83,8 @@ Parameters::~Parameters()
   for (it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
-    printf ("%s \n",it_param->first.c_str());
     it_param->second->dealloc();
+    delete it_param->second;
   }
 }
 
@@ -116,7 +116,8 @@ Parameters::read ( FILE * file_pointer ) throw(ExceptionBadPointer)
       std::string(node->subgroup) + ":" +
       std::string(node->parameter);
 
-    printf ("parameter %s\n",parameter_name.c_str()); fflush(stdout);
+    // monitor: debug
+    //    if (debug) printf ("parameter %s\n",parameter_name.c_str()); fflush(stdout);
 
     enum_parameter type = node->type;
     
@@ -124,32 +125,39 @@ Parameters::read ( FILE * file_pointer ) throw(ExceptionBadPointer)
 
     switch (type) {
     case enum_parameter_integer:
-      param = new Param_integer(node->integer_value);
+      param = new Param;
+      param->set_integer_(node->integer_value);
       break;
     case enum_parameter_scalar:
-      param = new Param_scalar(node->scalar_value);
+      param = new Param;
+      param->set_scalar_(node->scalar_value);
       break;
     case enum_parameter_string:
-      param = new Param_string(node->string_value);
+      param = new Param;
+      param->set_string_(node->string_value);
       break;
     case enum_parameter_logical:
-      param = new Param_logical(node->logical_value);
+      param = new Param;
+      param->set_logical_(node->logical_value);
       break;
     case enum_parameter_list:
-      param = new Param_list(node->list_value);
+      param = new Param;
+      param->set_list_(node->list_value);
       break;
     case enum_parameter_scalar_expr:
-      param = new Param_scalar_expr(node->op_value);
+      param = new Param;
+      param->set_scalar_expr_(node->op_value);
       break;
     case enum_parameter_logical_expr:
-      param = new Param_logical_expr(node->op_value);
+      param = new Param;
+      param->set_logical_expr_(node->op_value);
       break;
     }
 
     parameter_map_[parameter_name] = param;
 
     node = node->next;
-
+    
     free (prev->group);
     free (prev->subgroup);
     free (prev->parameter);
@@ -179,8 +187,8 @@ Parameters::value_string
 ( std::string parameter,
   std::string deflt ) throw()
 {
-//   return (values_.find(parameter) != values_.end()) ? 
-//     values_.find(parameter)->second : deflt;
+  Param * param = parameter_(parameter);
+  return (param != NULL) ? param->value_string_ : deflt;
 }
 
 /**
@@ -201,8 +209,8 @@ Parameters::value_scalar
 ( std::string parameter,
   Scalar      deflt ) throw()
 {
-//   return (values_.find(parameter) != values_.end()) ? 
-//     atof(values_.find(parameter)->second.c_str()) : deflt;
+  Param * param = parameter_(parameter);
+  return (param != NULL) ? param->value_scalar_ : deflt;
 }
 
 /**
@@ -223,8 +231,8 @@ Parameters::value_integer
 ( std::string parameter,
   int         deflt ) throw()
 {
-//   return (values_.find(parameter) != values_.end()) ? 
-//     atoi(values_.find(parameter)->second.c_str()) : deflt;
+  Param * param = parameter_(parameter);
+  return (param != NULL) ? param->value_integer_ : deflt;
 }
 
 /**
@@ -245,21 +253,41 @@ Parameters::value_logical
 ( std::string parameter,
   bool        deflt ) throw(ExceptionParametersBadType())
 {
-  bool value = deflt;
+  Param * param = parameter_(parameter);
+  return (param != NULL) ? param->value_logical_ : deflt;
+}
 
-//   if (values_.find(parameter) != values_.end()) {
-//     if (values_.find(parameter)->second == "true") {
-//       value == true;
-//     } else if (values_.find(parameter)->second == "false") {
-//       value == false;
-//     } else {
-//       throw ExceptionParametersBadType();
-//     }
-//   } else {
-//     value = deflt;
-//   }
-  
-  return value;
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ *
+ * @return  Return the scalar value of the expression parameter if it
+ *          exists, or deflt if not
+ *
+ * Return the scalar value of the expression parameter if it exists,
+ * or deflt if not.
+ *
+ *********************************************************************
+ */
+
+void Parameters::evaluate_scalar 
+  (
+   std::string parameter,
+   int         n, 
+   double    * result, 
+   double    * deflt,
+   double    * x, 
+   double    * y, 
+   double    * z, 
+   double    * t)
+{
+  Param * param = parameter_(parameter);
+  if (param != NULL) {
+    param->evaluate_scalar(n,result,x,y,z,t);
+  } else {
+    for (int i=0; i<n; i++) result[i] = deflt[i];
+  }
 }
 
 //======================================================================
