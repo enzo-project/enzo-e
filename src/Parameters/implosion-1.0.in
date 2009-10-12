@@ -10,14 +10,14 @@
       steepening = true;
   }
   Initial {
-     density  = [1.0, x + y >= 0.15, [1.0, x <= y + 0.15, 0.125], 0.125];
-     pressure = [1.0, x + y >= 0.15, x+1.0];
+     density  = [1.0, x + y >= 0.15, 0.125];
+     pressure = [1.0, x + y >= 0.15, 0.14];
      velocity_x = 0;
      velocity_y = 0;
   }
   Boundary { type = "reflecting" }
   Stopping {
-     time  = 2.5 + 1.0;
+     time  = 2.5;
      cycle = 20000;
   }
   Output { delta_time = 0.5 ; } # dt? time?

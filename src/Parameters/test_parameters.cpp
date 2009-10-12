@@ -34,52 +34,89 @@ int main(int argc, char **argv)
 
   Parameters * parameters = new Parameters;
 
-  unit_func("set_group");
-
-  printf ("parameters->get_group() = %s\n",parameters->get_group().c_str());
-  parameters->set_group("Group 1");
-
-  unit_assert(parameters->get_group() == "Group 1");
-
   unit_func("read");
   FILE * fp = fopen ("test.in","r");
 
   parameters->read ( fp );
 
+  // set_group()
+
   unit_func("set_group");
-  parameters->set_group("Group4");
-  unit_assert(parameters->get_group() == "Group4");
+  parameters->set_group("Group");
+  unit_assert(parameters->get_group() == "Group");
 
+  // set_subgroup()
   unit_func("set_subgroup");
-  parameters->set_subgroup("subgroup3");
-  unit_assert(parameters->get_subgroup() == "subgroup3");
+  parameters->set_subgroup("subgroup_1");
+  unit_assert(parameters->get_subgroup() == "subgroup_1");
+  parameters->set_subgroup("subgroup_2");
+  unit_assert(parameters->get_subgroup() == "subgroup_2");
 
-  double value;
+  // set_group() without set_subgroup() clears subgroup to ""
+
+  unit_func("set_group");
+  parameters->set_group("Group2");
+  unit_assert(parameters->get_group() == "Group2");
+  unit_assert(parameters->get_subgroup() == "");
+
+  // value_logical()
+
+  bool value_logical;
+
+  unit_func("value_logical");
+
+  parameters->set_group("Logical");
+  
+  unit_assert (parameters->value_logical("test_true")  == true);
+  unit_assert (parameters->value_logical("test_false") == false);
+  unit_assert (parameters->value_logical("test_none",true) == true);
+  unit_assert (parameters->value_logical("test_none",false) == false);
+
+  // value_integer()
+
+  int value_integer;
+
+  unit_func("value_integer");
+
+  parameters->set_group("Integer");
+  
+  unit_assert (parameters->value_integer("test_1")  == 1);
+  unit_assert (parameters->value_integer("test_37") == 37);
+  unit_assert (parameters->value_integer("test_none",58) == 58);
+
+  // value_scalar()
+  
+  double value_scalar;
 
   unit_func("value_scalar");
-  value = parameters->value_scalar("param_scalar_expr1");
-  unit_assert(value == 30.625);
 
-  value = parameters->value_scalar("param_scalar_expr2");
-  unit_assert(value == 18.375);
+  parameters->set_group("Scalar");
+  
+  unit_assert (parameters->value_scalar("test_1_5")  == 1.5);
+  unit_assert (parameters->value_scalar("test_37_25") == 37.25);
+  unit_assert (parameters->value_scalar("test_none",58.75) == 58.75);
 
-  value = parameters->value_scalar("param_scalar_expr3");
-  unit_assert(value == 150.0625);
+  // Constant scalar expressions
+  // subgroups
 
-  value = parameters->value_scalar("param_scalar_expr4");
-  unit_assert(value == 4.0000000000);
+  unit_func("value_scalar");
 
-  parameters->set_subgroup("subgroup4");
+  parameters->set_group("Scalar");
 
-  value = parameters->value_scalar("param_scalar_expr1");
-  unit_assert(value == 36.750);
+  parameters->set_subgroup("const_scalar_1");
 
-  value = parameters->value_scalar("param_scalar_expr2");
-  unit_assert(value == 67.375);
+  unit_assert(parameters->value_scalar("num1") == 30.625);
+  unit_assert(parameters->value_scalar("num2") == 18.375);
+  unit_assert(parameters->value_scalar("num3") == 150.0625);
+  unit_assert(parameters->value_scalar("num4") == 4.0000000000);
 
-  value = parameters->value_scalar("param_scalar_expr3");
-  unit_assert(value == -30.625);
+  parameters->set_subgroup("const_scalar_2");
 
+  unit_assert(parameters->value_scalar("num1") == 36.750);
+  unit_assert(parameters->value_scalar("num2") == 67.375);
+  unit_assert(parameters->value_scalar("num3") == -30.625);
+
+  // Variable scalar expressions
 
   unit_func("evaluate_scalar");
 
@@ -90,55 +127,51 @@ int main(int argc, char **argv)
   double values[] = {0,0,0};
   double deflts[] = {-1,-2,-3};
 
-  parameters->set_group("Group5");
-  parameters->set_subgroup("subgroup5");
-  
-  //  param_scalar_expr1 = x;
-  parameters->evaluate_scalar("param_scalar_expr1",
-			      3,values,deflts,x,y,z,t);
+  parameters->set_group("Scalar_expr");
+
+  parameters->set_subgroup("var_scalar_1");
+
+  parameters->evaluate_scalar("num1",3,values,deflts,x,y,z,t);
   unit_assert (values[0]==x[0]);
   unit_assert (values[1]==x[1]);
   unit_assert (values[2]==x[2]);
 
   
-  //  param_scalar_expr2 = x+3.0;
-  parameters->evaluate_scalar("param_scalar_expr2",
-			      3,values,deflts,x,y,z,t);
+  parameters->evaluate_scalar("num2",3,values,deflts,x,y,z,t);
   unit_assert (values[0]==x[0]+3.0);
   unit_assert (values[1]==x[1]+3.0);
   unit_assert (values[2]==x[2]+3.0);
 
-  //  param_scalar_expr3 = x+y+z+t;
-  parameters->evaluate_scalar("param_scalar_expr3",
-			      3,values,deflts,x,y,z,t);
+  parameters->evaluate_scalar("num3",3,values,deflts,x,y,z,t);
   unit_assert (values[0]==x[0]+y[0]+z[0]+t[0]);
   unit_assert (values[1]==x[1]+y[1]+z[1]+t[1]);
   unit_assert (values[2]==x[2]+y[2]+z[2]+t[2]);
 
-  parameters->set_group("Group6");
-  parameters->set_subgroup("subgroup6");
+  parameters->set_subgroup("var_scalar_2");
 
-  //  param_scalar_expr1 = sin(x);
-  parameters->evaluate_scalar("param_scalar_expr1",
-			      3,values,deflts,x,y,z,t);
+  parameters->evaluate_scalar("num1",3,values,deflts,x,y,z,t);
   unit_assert (values[0]==sin(x[0]));
   unit_assert (values[1]==sin(x[1]));
   unit_assert (values[2]==sin(x[2]));
 
-  //  param_scalar_expr2 = atan(y/3.0+2*t);
-  parameters->evaluate_scalar("param_scalar_expr2",
-			      3,values,deflts,x,y,z,t);
+  parameters->evaluate_scalar("num2",3,values,deflts,x,y,z,t);
   unit_assert (values[0]==atan(y[0]/3.0+3*t[0]));
   unit_assert (values[1]==atan(y[1]/3.0+3*t[1]));
   unit_assert (values[2]==atan(y[2]/3.0+3*t[2]));
 
-  unit_func("value_logical");
+  unit_func("evaluate_logical");
   unit_assert(0);
-  unit_func("value_integer");
-  unit_assert(0);
-  unit_func("value_string");
-  unit_assert(0);
+
+  // Lists
+
   unit_func("value_list");
+
+  parameters->set_group("List");
+
+  unit_assert(parameters->list_value_scalar(0,"num1") == 1.0);
+  unit_assert(parameters->list_value_logical(1,"num1") == true);
+  unit_assert(parameters->list_value_integer(2,"num1") == 37);
+  unit_assert(parameters->list_value_string(3,"num1") == "string");
 
   unit_close();
 

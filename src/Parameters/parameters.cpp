@@ -7,7 +7,7 @@
  * @brief     Read in a parameter file and access parameter values
  * @author    James Bordner
  * @date      Thu Jul  9 15:38:43 PDT 2009
- * @bug       
+ * @bug       Probable memory leaks
  * @note      
  *
  * DESCRIPTION 
@@ -123,36 +123,9 @@ Parameters::read ( FILE * file_pointer ) throw(ExceptionBadPointer)
     
     Param * param;
 
-    switch (type) {
-    case enum_parameter_integer:
-      param = new Param;
-      param->set_integer_(node->integer_value);
-      break;
-    case enum_parameter_scalar:
-      param = new Param;
-      param->set_scalar_(node->scalar_value);
-      break;
-    case enum_parameter_string:
-      param = new Param;
-      param->set_string_(node->string_value);
-      break;
-    case enum_parameter_logical:
-      param = new Param;
-      param->set_logical_(node->logical_value);
-      break;
-    case enum_parameter_list:
-      param = new Param;
-      param->set_list_(node->list_value);
-      break;
-    case enum_parameter_scalar_expr:
-      param = new Param;
-      param->set_scalar_expr_(node->op_value);
-      break;
-    case enum_parameter_logical_expr:
-      param = new Param;
-      param->set_logical_expr_(node->op_value);
-      break;
-    }
+    param = new Param;
+
+    param->set(node);
 
     parameter_map_[parameter_name] = param;
 
@@ -173,22 +146,22 @@ Parameters::read ( FILE * file_pointer ) throw(ExceptionBadPointer)
  *********************************************************************
  *
  * @param   parameter
- * @return  Return the string value of the parameter if it exists, 
+ * @return  Return the integer value of the parameter if it exists, 
  *          or deflt if not
  *
- * Return the string value of the parameter if it exists, or deflt if
+ * Return the integer value of the parameter if it exists, or deflt if
  * not.
  *
  *********************************************************************
  */
 
-std::string 
-Parameters::value_string 
+int
+Parameters::value_integer 
 ( std::string parameter,
-  std::string deflt ) throw()
+  int         deflt ) throw(ExceptionParametersBadType)
 {
   Param * param = parameter_(parameter);
-  return (param != NULL) ? param->value_string_ : deflt;
+  return (param != NULL) ? param->value_integer_ : deflt;
 }
 
 /**
@@ -207,32 +180,10 @@ Parameters::value_string
 Scalar
 Parameters::value_scalar 
 ( std::string parameter,
-  Scalar      deflt ) throw()
+  Scalar      deflt ) throw(ExceptionParametersBadType)
 {
   Param * param = parameter_(parameter);
   return (param != NULL) ? param->value_scalar_ : deflt;
-}
-
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the integer value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the integer value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
-
-int
-Parameters::value_integer 
-( std::string parameter,
-  int         deflt ) throw()
-{
-  Param * param = parameter_(parameter);
-  return (param != NULL) ? param->value_integer_ : deflt;
 }
 
 /**
@@ -251,10 +202,32 @@ Parameters::value_integer
 bool
 Parameters::value_logical 
 ( std::string parameter,
-  bool        deflt ) throw(ExceptionParametersBadType())
+  bool        deflt ) throw(ExceptionParametersBadType)
 {
   Param * param = parameter_(parameter);
   return (param != NULL) ? param->value_logical_ : deflt;
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ * @return  Return the string value of the parameter if it exists, 
+ *          or deflt if not
+ *
+ * Return the string value of the parameter if it exists, or deflt if
+ * not.
+ *
+ *********************************************************************
+ */
+
+std::string 
+Parameters::value_string 
+( std::string parameter,
+  std::string deflt ) throw(ExceptionParametersBadType)
+{
+  Param * param = parameter_(parameter);
+  return (param != NULL) ? param->value_string_ : deflt;
 }
 
 /**
@@ -280,7 +253,7 @@ void Parameters::evaluate_scalar
    double    * x, 
    double    * y, 
    double    * z, 
-   double    * t)
+   double    * t) throw(ExceptionParametersBadType)
 {
   Param * param = parameter_(parameter);
   if (param != NULL) {
@@ -288,6 +261,98 @@ void Parameters::evaluate_scalar
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ * @return  Return the integer value of the parameter if it exists, 
+ *          or deflt if not
+ *
+ * Return the integer value of the parameter if it exists, or deflt if
+ * not.
+ *
+ *********************************************************************
+ */
+
+int
+Parameters::list_value_integer 
+( int index,
+  std::string parameter,
+  int         deflt ) throw(ExceptionParametersBadType)
+{
+  Param * param = parameter_(parameter);
+  return (param != NULL) ? (*(param->value_list_))[index]->value_integer_ : deflt;
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ * @return  Return the scalar value of the parameter if it exists, 
+ *          or deflt if not
+ *
+ * Return the scalar value of the parameter if it exists, or deflt if
+ * not.
+ *
+ *********************************************************************
+ */
+
+double
+Parameters::list_value_scalar 
+( int index,
+  std::string parameter,
+  Scalar      deflt ) throw(ExceptionParametersBadType)
+{
+  Param * param = parameter_(parameter);
+  return (param != NULL) ? (*(param->value_list_))[index]->value_scalar_ : deflt;
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ * @return  Return the logical value of the parameter if it exists, 
+ *          or deflt if not
+ *
+ * Return the logical value of the parameter if it exists, or deflt if
+ * not.
+ *
+ *********************************************************************
+ */
+
+bool
+Parameters::list_value_logical 
+( int index,
+  std::string parameter,
+  bool        deflt ) throw(ExceptionParametersBadType)
+{
+  Param * param = parameter_(parameter);
+  return (param != NULL) ?(*(param->value_list_))[index]->value_logical_ : deflt;
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ * @return  Return the string value of the parameter if it exists, 
+ *          or deflt if not
+ *
+ * Return the string value of the parameter if it exists, or deflt if
+ * not.
+ *
+ *********************************************************************
+ */
+
+std::string 
+Parameters::list_value_string 
+( int index,
+  std::string parameter,
+  std::string deflt ) throw(ExceptionParametersBadType)
+{
+  Param * param = parameter_(parameter);
+  return (param != NULL) ? (*(param->value_list_))[index]->value_string_ : deflt;
 }
 
 //======================================================================

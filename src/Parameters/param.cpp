@@ -7,7 +7,7 @@
 * @brief     Helper Param* classes for parameters
 * @author    James Bordner
 * @date      Sun Oct 11 15:02:08 PDT 2009
-* @bug       
+* @bug       Probable memory leaks
 * @note      
 *
 * DESCRIPTION 
@@ -38,6 +38,71 @@
 #include "parse.h"
 #include "param.hpp"
 #include "error.hpp"
+
+      
+/**
+*********************************************************************
+*
+* @param   file_pointer: An opened input parameter file or stdin
+* @return  There is no return value
+*
+* This function reads in parameter-value key pairs, one per line
+*
+*********************************************************************
+*/
+
+void Param::set (struct param_type * node)
+{
+  switch (node->type) {
+  case enum_parameter_integer:
+    set_integer_(node->integer_value);
+    break;
+  case enum_parameter_scalar:
+    set_scalar_(node->scalar_value);
+    break;
+  case enum_parameter_string:
+    set_string_(node->string_value);
+    break;
+  case enum_parameter_logical:
+    set_logical_(node->logical_value);
+    break;
+  case enum_parameter_list:
+    set_list_(node->list_value);
+    break;
+  case enum_parameter_scalar_expr:
+    set_scalar_expr_(node->op_value);
+    break;
+  case enum_parameter_logical_expr:
+    set_logical_expr_(node->op_value);
+    break;
+  }
+}
+
+/**
+*********************************************************************
+*
+* @param   file_pointer: An opened input parameter file or stdin
+* @return  There is no return value
+*
+* This function reads in parameter-value key pairs, one per line
+*
+*********************************************************************
+*/
+
+void Param::dealloc() { 
+  switch (type_) {
+  case type_string_: 
+    dealloc_string_(); 
+    break;
+  case type_list_:   
+    dealloc_list_(value_list_); 
+    break;
+  case type_logical_expr_:
+  case type_scalar_expr_:
+    dealloc_string_();
+    break;
+  }
+} 
 
 /**
 *********************************************************************
@@ -196,23 +261,19 @@ void Param::evaluate_scalar_
 *********************************************************************
 */
 
-void Param::dealloc_param_ (struct param_type * p)
+void Param::dealloc_list_ (list_type * value)
 {
-  struct param_type * head = p;
-  struct param_type * q;
-  p = p->next;
-  while (p->type != enum_parameter_sentinel) {
-    q = p->next;
-    if (p->type == enum_parameter_list) {
-      dealloc_param_ (p);
+  printf ("size = %d\n",int((*value).size()));
+  for (int i=0; i<(*value).size(); i++) {
+    printf ("%d\n",i);
+    if ((*value)[i]->type_ == type_list_) {
+      dealloc_list_ ((*value)[i]->value_list_);
     } else {
-      free ( p );
+      delete ( (*value)[i] );
     }
-    p = q;
   }
-  free (head);
+  delete value;
 }
-
 
 /**
 *********************************************************************

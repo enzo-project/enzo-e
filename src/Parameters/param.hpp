@@ -21,6 +21,7 @@
  *********************************************************************
  */
 
+#include <vector>
 
 //======================================================================
 
@@ -33,20 +34,9 @@ public:
   void evaluate_scalar  
   ( int n, double * result, double *x, double *y, double *z, double *t);
 
-  void dealloc() { 
-    switch (type_) {
-    case type_string_: 
-      dealloc_string_(); 
-      break;
-    case type_list_:   
-      dealloc_param_(value_list_); 
-      break;
-    case type_logical_expr_:
-    case type_scalar_expr_:
-      dealloc_string_();
-      break;
-    }
-  } 
+  void set(struct param_type * param);
+
+  void dealloc();
 
 private:
 
@@ -63,12 +53,14 @@ private:
 
   enum type_param type_;
 
+  typedef std::vector<class Param *> list_type;
+
   union {
     int                value_integer_; 
     double             value_scalar_; 
     bool               value_logical_; 
     char *             value_string_;
-    struct param_type * value_list_;
+    list_type        * value_list_;
     struct node_expr * value_expr_;
   };
 
@@ -99,7 +91,14 @@ private:
   void set_list_ (struct param_type * value) 
   { 
     type_ = type_list_; 
-    value_list_ = value; 
+    value_list_ = new list_type;
+    value = value->next; // Skip sentinel
+    while (value->type != enum_parameter_sentinel) {
+      Param * param = new Param;
+      param->set(value);
+      (*value_list_).push_back(param);
+      value = value->next;
+    }
   };
 
   void set_scalar_expr_ (struct node_expr * value)
@@ -123,7 +122,7 @@ private:
 //     bool * result, double *x, double *y, double *z, double *t);
 
   void dealloc_string_() { free (value_string_); } 
-  void dealloc_param_ (struct param_type * p);
+  void dealloc_list_     (list_type *value_list_);
   void dealloc_node_expr_ (struct node_expr * p);
 
 };

@@ -1,38 +1,48 @@
-Group1 { param_scalar = 1.0 }
 
-Group2 subgroup1 { param_integer = 1 }
-
-Group3 subgroup2 { 
-   param_logical_false = false;
-   param_logical_true = true;
-   param_logical_expr_true  = 6.1 < 8.7;
-   param_logical_expr_false = 6.1 >= 8.7;
+Logical {
+  test_true = true;
+  test_false = false;
 }
 
-Group4 {
-   subgroup3 {
-     param_scalar_expr1 = 24.5 + 6.125;
-     param_scalar_expr2 = 24.5 - 6.125;
-     param_scalar_expr3 = 24.5 * 6.125;
-     param_scalar_expr4 = 24.5 / 6.125;
+Integer {
+  test_1 = 1;
+  test_37 = 37
+}
+
+Scalar {
+  test_1_5 = 1.5;
+  test_37_25 = 37.25;
+}
+
+Scalar {
+   const_scalar_1 {
+     num1 = 24.5 + 6.125;
+     num2 = 24.5 - 6.125;
+     num3 = 24.5 * 6.125;
+     num4 = 24.5 / 6.125;
    };
-   subgroup4 {
-     param_scalar_expr1 = 24.5 + 6.125*2.0;
-     param_scalar_expr2 = 24.5*3.0 - 6.125;
-     param_scalar_expr3 = (24.5 + 6.125*2.0) - (24.5*3.0 - 6.125);
-   }
-}
-Group5 {
-   subgroup5 {
-     param_scalar_expr1 = x;
-     param_scalar_expr2 = x + 3.0;
-     param_scalar_expr3 = x+y+z+t;
+   const_scalar_2 {
+     num1 = 24.5 + 6.125*2.0;
+     num2 = 24.5*3.0 - 6.125;
+     num3 = (24.5 + 6.125*2.0) - (24.5*3.0 - 6.125);
    }
 }
 
-Group6 subgroup6 {
-     param_scalar_expr1 = sin(x);
-     param_scalar_expr2 = atan(y/3.0+3.0*t);
+Scalar_expr {
+   var_scalar_1 {
+     num1 = x;
+     num2 = x + 3.0;
+     num3 = x+y+z+t;
+   }
+}
+
+Scalar_expr var_scalar_2 {
+     num1 = sin(x);
+     num2 = atan(y/3.0+3.0*t);
+}
+
+List {
+     num1 = [1.0, true, 37, "string" ];
 }
 
 

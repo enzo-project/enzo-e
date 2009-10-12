@@ -23,6 +23,7 @@
 
 #include <map>
 #include <string>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -73,30 +74,30 @@ public:
 
   /// Read in parameters from a file
 
-  void read (FILE * file_pointer) throw(ExceptionBadPointer);
-
-  /// Return the string-valued parameter
-
-  std::string value_string ( std::string parameter, 
-			     std::string deflt = "") throw();
-
-  /// Return the scalar-valued parameter
-
-  Scalar value_scalar (std::string parameter, 
-		       Scalar deflt = 0.0) throw();
+  void read (FILE * file_pointer) 
+    throw(ExceptionBadPointer);
 
   /// Return the integer-valued parameter
 
-  int value_integer (std::string parameter, 
-		     int deflt = 0) throw();
+  int value_integer (std::string , int deflt = 0) 
+    throw(ExceptionParametersBadType);
+
+  /// Return the scalar-valued parameter
+
+  Scalar value_scalar (std::string, Scalar deflt = 0.0) 
+    throw(ExceptionParametersBadType);
 
   /// Return the logical-valued parameter
 
-  bool value_logical (std::string parameter, 
-		      bool deflt = false) throw(ExceptionParametersBadType());
+  bool value_logical (std::string , bool deflt = false) 
+    throw(ExceptionParametersBadType);
 
-  int value_list_length (std::string parameter) {
-  }
+  /// Return the string-valued parameter
+
+  std::string value_string ( std::string , std::string deflt = "") 
+    throw(ExceptionParametersBadType);
+
+  /// Evaluate the scalar-valued parameter expression
 
   void evaluate_scalar 
   (
@@ -107,13 +108,51 @@ public:
    double    * x, 
    double    * y, 
    double    * z, 
-   double    * t);
+   double    * t)
+    throw(ExceptionParametersBadType);
+
+  /// Return the length of the list
+
+  int length_list (std::string parameter);
+
+  /// Access an integer list element
+  int list_value_integer (int , std::string , int deflt = 0)    
+    throw(ExceptionParametersBadType);
+
+  /// Access an integer list element
+  double list_value_scalar (int , std::string , Scalar deflt = 0.0)    
+    throw(ExceptionParametersBadType);
+
+  /// Access an integer list element
+  bool list_value_logical (int ,std::string , bool deflt = false)    
+    throw(ExceptionParametersBadType);
+
+  /// Access an integer list element
+  std::string list_value_string (int ,std::string , std::string deflt = "")    
+    throw(ExceptionParametersBadType);
+
+  /// Access an integer list element
+  double list_evaluate_scalar 
+  (
+   int ,
+   std::string parameter,
+   int         n, 
+   double    * result, 
+   double    * deflt,
+   double    * x, 
+   double    * y, 
+   double    * z, 
+   double    * t
+   )    
+    throw(ExceptionParametersBadType);
+
 
   /// Access parameters specific to a group or (group, subgroup)
 
   void set_group  (std::string group, std::string subgroup = "") throw ()
   { 
-    current_group_ = group;
+    current_group_    = group;
+    current_subgroup_ = "";
   };
 
   void set_subgroup  (std::string subgroup) throw ()
