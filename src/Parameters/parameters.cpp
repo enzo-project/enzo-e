@@ -79,13 +79,16 @@ Parameters::Parameters()
 
 Parameters::~Parameters()
 {
+  // Iterate over all parameters 
+
   std::map<std::string,Param *>::iterator it_param;
   for (it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
-    it_param->second->dealloc();
+
     delete it_param->second;
   }
+
 }
 
 /**
@@ -115,9 +118,6 @@ Parameters::read ( FILE * file_pointer ) throw(ExceptionBadPointer)
       std::string(node->group) + ":" +
       std::string(node->subgroup) + ":" +
       std::string(node->parameter);
-
-    // monitor: debug
-    //    if (debug) printf ("parameter %s\n",parameter_name.c_str()); fflush(stdout);
 
     enum_parameter type = node->type;
     
@@ -161,6 +161,7 @@ Parameters::value_integer
   int         deflt ) throw(ExceptionParametersBadType)
 {
   Param * param = parameter_(parameter);
+  if (param && ! param->is_integer()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_integer_ : deflt;
 }
 
@@ -177,12 +178,13 @@ Parameters::value_integer
  *********************************************************************
  */
 
-Scalar
+double
 Parameters::value_scalar 
 ( std::string parameter,
-  Scalar      deflt ) throw(ExceptionParametersBadType)
+  double      deflt ) throw(ExceptionParametersBadType)
 {
   Param * param = parameter_(parameter);
+  if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_scalar_ : deflt;
 }
 
@@ -205,6 +207,7 @@ Parameters::value_logical
   bool        deflt ) throw(ExceptionParametersBadType)
 {
   Param * param = parameter_(parameter);
+  if (param && ! param->is_logical()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_logical_ : deflt;
 }
 
@@ -227,6 +230,7 @@ Parameters::value_string
   std::string deflt ) throw(ExceptionParametersBadType)
 {
   Param * param = parameter_(parameter);
+  if (param && ! param->is_string()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_string_ : deflt;
 }
 
@@ -256,6 +260,7 @@ void Parameters::evaluate_scalar
    double    * t) throw(ExceptionParametersBadType)
 {
   Param * param = parameter_(parameter);
+  if (param && ! param->is_scalar_expr()) throw ExceptionParametersBadType();
   if (param != NULL) {
     param->evaluate_scalar(n,result,x,y,z,t);
   } else {
@@ -282,8 +287,9 @@ Parameters::list_value_integer
   std::string parameter,
   int         deflt ) throw(ExceptionParametersBadType)
 {
-  Param * param = parameter_(parameter);
-  return (param != NULL) ? (*(param->value_list_))[index]->value_integer_ : deflt;
+  Param * param = list_element_(parameter,index);
+  if (param && ! param->is_integer()) throw ExceptionParametersBadType();
+  return (param != NULL) ? param->value_integer_ : deflt;
 }
 
 /**
@@ -303,10 +309,11 @@ double
 Parameters::list_value_scalar 
 ( int index,
   std::string parameter,
-  Scalar      deflt ) throw(ExceptionParametersBadType)
+  double      deflt ) throw(ExceptionParametersBadType)
 {
-  Param * param = parameter_(parameter);
-  return (param != NULL) ? (*(param->value_list_))[index]->value_scalar_ : deflt;
+  Param * param = list_element_(parameter,index);
+  if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
+  return (param != NULL) ? param->value_scalar_ : deflt;
 }
 
 /**
@@ -328,8 +335,9 @@ Parameters::list_value_logical
   std::string parameter,
   bool        deflt ) throw(ExceptionParametersBadType)
 {
-  Param * param = parameter_(parameter);
-  return (param != NULL) ?(*(param->value_list_))[index]->value_logical_ : deflt;
+  Param * param = list_element_(parameter,index);
+  if (param && ! param->is_logical()) throw ExceptionParametersBadType();
+  return (param != NULL) ? param->value_logical_ : deflt;
 }
 
 /**
@@ -351,8 +359,9 @@ Parameters::list_value_string
   std::string parameter,
   std::string deflt ) throw(ExceptionParametersBadType)
 {
-  Param * param = parameter_(parameter);
-  return (param != NULL) ? (*(param->value_list_))[index]->value_string_ : deflt;
+  Param * param = list_element_ (parameter,index);
+  if (param && ! param->is_string()) throw (ExceptionParametersBadType());
+  return (param != NULL) ? param->value_string_ : deflt;
 }
 
 //======================================================================

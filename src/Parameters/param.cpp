@@ -263,9 +263,7 @@ void Param::evaluate_scalar_
 
 void Param::dealloc_list_ (list_type * value)
 {
-  printf ("size = %d\n",int((*value).size()));
   for (int i=0; i<(*value).size(); i++) {
-    printf ("%d\n",i);
     if ((*value)[i]->type_ == type_list_) {
       dealloc_list_ ((*value)[i]->value_list_);
     } else {

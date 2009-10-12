@@ -84,7 +84,7 @@ public:
 
   /// Return the scalar-valued parameter
 
-  Scalar value_scalar (std::string, Scalar deflt = 0.0) 
+  double value_scalar (std::string, double deflt = 0.0) 
     throw(ExceptionParametersBadType);
 
   /// Return the logical-valued parameter
@@ -120,7 +120,7 @@ public:
     throw(ExceptionParametersBadType);
 
   /// Access an integer list element
-  double list_value_scalar (int , std::string , Scalar deflt = 0.0)    
+  double list_value_scalar (int , std::string , double deflt = 0.0)    
     throw(ExceptionParametersBadType);
 
   /// Access an integer list element
@@ -183,6 +183,18 @@ private:
     std::string p = current_group_ + ":" + current_subgroup_ + ":" + parameter;
     return parameter_map_[p];
   };
+
+  /// Return the Param pointer for the specified list parameter element
+
+  Param * list_element_ (std::string parameter, int index)
+  {
+    Param * list = parameter_(parameter);
+    Param * param = NULL;
+    if (list != NULL) {
+      param = (*(list->value_list_))[index];
+    }
+    return param;
+  }
 
 
 private:

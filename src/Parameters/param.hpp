@@ -31,12 +31,21 @@ class Param {
 
 public:
 
+  ~Param () { dealloc(); };
   void evaluate_scalar  
   ( int n, double * result, double *x, double *y, double *z, double *t);
 
   void set(struct param_type * param);
 
   void dealloc();
+
+  bool is_integer()      { return type_ == type_integer_; };
+  bool is_scalar()       { return type_ == type_scalar_; };
+  bool is_logical()      { return type_ == type_logical_; };
+  bool is_string()       { return type_ == type_string_; };
+  bool is_list()         { return type_ == type_list_; };
+  bool is_scalar_expr()  { return type_ == type_scalar_expr_; };
+  bool is_logical_expr() { return type_ == type_logical_expr_; };
 
 private:
 
