@@ -21,6 +21,8 @@
 #include "error.hpp"
 #include "parameters.hpp"
 
+#define CLOSE(a,b) ((((a) - (b)) / (fabs(a) + fabs(b))) < 1e-16)
+
 int main(int argc, char **argv)
 {
 
@@ -150,14 +152,14 @@ int main(int argc, char **argv)
   parameters->set_subgroup("var_scalar_2");
 
   parameters->evaluate_scalar("num1",3,values,deflts,x,y,z,t);
-  unit_assert (values[0]==sin(x[0]));
-  unit_assert (values[1]==sin(x[1]));
-  unit_assert (values[2]==sin(x[2]));
+  unit_assert (CLOSE(values[0],sin(x[0])));
+  unit_assert (CLOSE(values[1],sin(x[1])));
+  unit_assert (CLOSE(values[2],sin(x[2])));
 
   parameters->evaluate_scalar("num2",3,values,deflts,x,y,z,t);
-  unit_assert (values[0]==atan(y[0]/3.0+3*t[0]));
-  unit_assert (values[1]==atan(y[1]/3.0+3*t[1]));
-  unit_assert (values[2]==atan(y[2]/3.0+3*t[2]));
+  unit_assert (CLOSE(values[0],atan(y[0]/3.0+3*t[0])));
+  unit_assert (CLOSE(values[1],atan(y[1]/3.0+3*t[1])));
+  unit_assert (CLOSE(values[2],atan(y[2]/3.0+3*t[2])));
 
   unit_func("evaluate_logical");
   unit_assert(0);
