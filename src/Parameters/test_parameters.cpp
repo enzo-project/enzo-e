@@ -118,6 +118,13 @@ int main(int argc, char **argv)
   unit_assert(parameters->value_scalar("num2") == 67.375);
   unit_assert(parameters->value_scalar("num3") == -30.625);
 
+  // Strings
+
+  parameters->set_group("String");
+  unit_assert(parameters->value_string("str1") == "testing");
+  unit_assert(parameters->value_string("str1","blah") == "testing");
+  unit_assert(parameters->value_string("none","blah") == "blah");
+
   // Variable scalar expressions
 
   unit_func("evaluate_scalar");
@@ -126,43 +133,65 @@ int main(int argc, char **argv)
   double y[] = {5 , 4, 3};
   double z[] = {8, 9, 10};
   double t[] = {-1, 2, -7};
-  double values[] = {0,0,0};
-  double deflts[] = {-1,-2,-3};
+  double values_scalar[] = {0,0,0};
+  double deflts_scalar[] = {-1,-2,-3};
 
   parameters->set_group("Scalar_expr");
 
   parameters->set_subgroup("var_scalar_1");
 
-  parameters->evaluate_scalar("num1",3,values,deflts,x,y,z,t);
-  unit_assert (values[0]==x[0]);
-  unit_assert (values[1]==x[1]);
-  unit_assert (values[2]==x[2]);
+  parameters->evaluate_scalar("num1",3,values_scalar,deflts_scalar,x,y,z,t);
+  unit_assert (values_scalar[0]==x[0]);
+  unit_assert (values_scalar[1]==x[1]);
+  unit_assert (values_scalar[2]==x[2]);
 
   
-  parameters->evaluate_scalar("num2",3,values,deflts,x,y,z,t);
-  unit_assert (values[0]==x[0]+3.0);
-  unit_assert (values[1]==x[1]+3.0);
-  unit_assert (values[2]==x[2]+3.0);
+  parameters->evaluate_scalar("num2",3,values_scalar,deflts_scalar,x,y,z,t);
+  unit_assert (values_scalar[0]==x[0]+3.0);
+  unit_assert (values_scalar[1]==x[1]+3.0);
+  unit_assert (values_scalar[2]==x[2]+3.0);
 
-  parameters->evaluate_scalar("num3",3,values,deflts,x,y,z,t);
-  unit_assert (values[0]==x[0]+y[0]+z[0]+t[0]);
-  unit_assert (values[1]==x[1]+y[1]+z[1]+t[1]);
-  unit_assert (values[2]==x[2]+y[2]+z[2]+t[2]);
+  parameters->evaluate_scalar("num3",3,values_scalar,deflts_scalar,x,y,z,t);
+  unit_assert (values_scalar[0]==x[0]+y[0]+z[0]+t[0]);
+  unit_assert (values_scalar[1]==x[1]+y[1]+z[1]+t[1]);
+  unit_assert (values_scalar[2]==x[2]+y[2]+z[2]+t[2]);
 
   parameters->set_subgroup("var_scalar_2");
 
-  parameters->evaluate_scalar("num1",3,values,deflts,x,y,z,t);
-  unit_assert (CLOSE(values[0],sin(x[0])));
-  unit_assert (CLOSE(values[1],sin(x[1])));
-  unit_assert (CLOSE(values[2],sin(x[2])));
+  parameters->evaluate_scalar("num1",3,values_scalar,deflts_scalar,x,y,z,t);
+  unit_assert (CLOSE(values_scalar[0],sin(x[0])));
+  unit_assert (CLOSE(values_scalar[1],sin(x[1])));
+  unit_assert (CLOSE(values_scalar[2],sin(x[2])));
 
-  parameters->evaluate_scalar("num2",3,values,deflts,x,y,z,t);
-  unit_assert (CLOSE(values[0],atan(y[0]/3.0+3*t[0])));
-  unit_assert (CLOSE(values[1],atan(y[1]/3.0+3*t[1])));
-  unit_assert (CLOSE(values[2],atan(y[2]/3.0+3*t[2])));
+  parameters->evaluate_scalar("num2",3,values_scalar,deflts_scalar,x,y,z,t);
+  unit_assert (CLOSE(values_scalar[0],atan(y[0]/3.0+3*t[0])));
+  unit_assert (CLOSE(values_scalar[1],atan(y[1]/3.0+3*t[1])));
+  unit_assert (CLOSE(values_scalar[2],atan(y[2]/3.0+3*t[2])));
+
+  // Logical expressions
 
   unit_func("evaluate_logical");
-  unit_assert(0);
+
+  bool values_logical[] = {false, false, false};
+  bool deflt_logical[] = {true, false,true};
+
+  parameters->set_group("Logical_expr");
+  parameters->set_subgroup("var_logical_1");
+
+  parameters->evaluate_logical("num1",3,values_logical,deflt_logical,x,y,z,t);
+  unit_assert (values_logical[0] == x[0] < y[0]);
+  unit_assert (values_logical[1] == x[1] < y[1]);
+  unit_assert (values_logical[2] == x[2] < y[2]);
+
+  parameters->evaluate_logical("num2",3,values_logical,deflt_logical,x,y,z,t);
+  unit_assert (values_logical[0] == x[0] + y[0] >= t[0] + 3.0);
+  unit_assert (values_logical[1] == x[1] + y[1] >= t[1] + 3.0);
+  unit_assert (values_logical[2] == x[2] + y[2] >= t[2] + 3.0);
+
+  parameters->evaluate_logical("num3",3,values_logical,deflt_logical,x,y,z,t);
+  unit_assert (values_logical[0] == (x[0] == y[0]));
+  unit_assert (values_logical[1] == (x[1] == y[1]));
+  unit_assert (values_logical[2] == (x[2] == y[2]));
 
   // Lists
 
@@ -170,10 +199,16 @@ int main(int argc, char **argv)
 
   parameters->set_group("List");
 
+  unit_assert(parameters->list_length("num1") == 5);
   unit_assert(parameters->list_value_scalar(0,"num1") == 1.0);
   unit_assert(parameters->list_value_logical(1,"num1") == true);
   unit_assert(parameters->list_value_integer(2,"num1") == 37);
   unit_assert(parameters->list_value_string(3,"num1") == "string");
+  printf ("%s\n",parameters->list_value_string(3,"num1").c_str());
+  parameters->list_evaluate_scalar(4,"num1",3,values_scalar,deflts_scalar,x,y,z,t);
+  unit_assert (values_scalar[0]==x[0]-y[0]+2.0*z[0]);
+  unit_assert (values_scalar[1]==x[1]-y[1]+2.0*z[1]);
+  unit_assert (values_scalar[2]==x[2]-y[2]+2.0*z[2]);
 
   unit_close();
 

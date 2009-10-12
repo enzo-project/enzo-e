@@ -68,7 +68,7 @@ public:
 
   Parameters() throw();
 
-  /// Deletes a Parameters object
+  /// Delete a Parameters object
 
   ~Parameters();
 
@@ -111,28 +111,42 @@ public:
    double    * t)
     throw(ExceptionParametersBadType);
 
-  /// Return the length of the list
+  /// Evaluate the logical-valued parameter expression
 
-  int length_list (std::string parameter);
+  void evaluate_logical 
+  (
+   std::string parameter,
+   int         n, 
+   bool      * result, 
+   bool      * deflt,
+   double    * x, 
+   double    * y, 
+   double    * z, 
+   double    * t)
+    throw(ExceptionParametersBadType);
+
+  /// Return the length of the list parameter
+
+  int list_length (std::string parameter);
 
   /// Access an integer list element
   int list_value_integer (int , std::string , int deflt = 0)    
     throw(ExceptionParametersBadType);
 
-  /// Access an integer list element
+  /// Access a scalar list element
   double list_value_scalar (int , std::string , double deflt = 0.0)    
     throw(ExceptionParametersBadType);
 
-  /// Access an integer list element
+  /// Access a logical list element
   bool list_value_logical (int ,std::string , bool deflt = false)    
     throw(ExceptionParametersBadType);
 
-  /// Access an integer list element
+  /// Access a string list element
   std::string list_value_string (int ,std::string , std::string deflt = "")    
     throw(ExceptionParametersBadType);
 
-  /// Access an integer list element
-  double list_evaluate_scalar 
+  /// Evaluate the scalar-valued list element expression
+  void list_evaluate_scalar 
   (
    int ,
    std::string parameter,
@@ -146,8 +160,22 @@ public:
    )    
     throw(ExceptionParametersBadType);
 
+  /// Evaluate the scalar-valued list element expression
+  void list_evaluate_logical
+  (
+   int ,
+   std::string parameter,
+   int         n, 
+   bool      * result, 
+   bool      * deflt,
+   double    * x, 
+   double    * y, 
+   double    * z, 
+   double    * t
+   )    
+    throw(ExceptionParametersBadType);
 
-  /// Access parameters specific to a group or (group, subgroup)
+  /// Set the current group
 
   void set_group  (std::string group, std::string subgroup = "") throw ()
   { 
@@ -155,13 +183,20 @@ public:
     current_subgroup_ = "";
   };
 
+  /// Set the current subgroup
+
   void set_subgroup  (std::string subgroup) throw ()
   {
     current_subgroup_ = subgroup;
   }
 
+  /// Get the current group
+
   std::string get_group () throw ()
   { return current_group_; };
+
+  /// Get the current subgroup
+
   std::string get_subgroup () throw ()
   { return current_subgroup_; };
 

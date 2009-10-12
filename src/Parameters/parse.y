@@ -205,7 +205,8 @@ const char * op_name[] = {
      p->group     = NULL; /* Initialized in update_group() */
      p->subgroup  = NULL; /* Initialized in update_subgroup() */
      p->parameter = strdup(current_parameter);
-     free (current_parameter);
+     /* THIS FREE MESSES THINGS UP FOR STRINGS */
+     /*     free (current_parameter); */
      current_type = enum_parameter_unknown;
 
      insert_param(param_curr,p);
@@ -215,13 +216,40 @@ const char * op_name[] = {
      return p;
   }
 
+  /* New integer parameter assignment */
+
+  void new_param_integer (int value)
+  {
+    struct param_type * p = new_param();
+    p->type          = enum_parameter_integer;
+    p->integer_value = value;
+  }
+
+
+  /* New scalar parameter assignment */
+
+  void new_param_scalar (double value)
+  {
+    struct param_type * p = new_param();
+    p->type         = enum_parameter_scalar;
+    p->scalar_value = value;
+  }
+
+  /* New logical parameter assignment */
+
+  void new_param_logical (int value)
+  {
+    struct param_type * p = new_param();
+    p->type          = enum_parameter_logical;
+    p->logical_value = value;
+  }
+
   /* New string parameter assignment */
   void new_param_string (char * value)
   {
     struct param_type * p = new_param();
     p->type         = enum_parameter_string;
     p->string_value = strdup(value);
-
   }
 
   /* New empty parameter assignment: FIRST NODE IN LIST IS A SENTINEL  */
@@ -247,33 +275,6 @@ const char * op_name[] = {
     struct param_type * p = new_param();
     p->type       = enum_parameter_list;
     p->list_value = curr;
-  }
-
-  /* New scalar parameter assignment */
-
-  void new_param_scalar (double value)
-  {
-    struct param_type * p = new_param();
-    p->type         = enum_parameter_scalar;
-    p->scalar_value = value;
-  }
-
-  /* New logical parameter assignment */
-
-  void new_param_logical (int value)
-  {
-    struct param_type * p = new_param();
-    p->type          = enum_parameter_logical;
-    p->logical_value = value;
-  }
-
-  /* New integer parameter assignment */
-
-  void new_param_integer (int value)
-  {
-    struct param_type * p = new_param();
-    p->type          = enum_parameter_integer;
-    p->integer_value = value;
   }
 
   /* New string parameter assignment */
@@ -456,16 +457,14 @@ parameter_assignment :
  ;
 
 parameter_value : 
- STRING { current_type = enum_parameter_string;       yylval.string_type = strdup($1);}
+STRING { current_type = enum_parameter_string;       yylval.string_type = strdup($1); }
  | cie  { current_type = enum_parameter_integer;      yylval.integer_type = $1;}
  | cse  { current_type = enum_parameter_scalar;       yylval.scalar_type = $1;}
  | cle  { current_type = enum_parameter_logical;      yylval.logical_type = $1; }
  | vse  { current_type = enum_parameter_scalar_expr;  yylval.node_type = $1; }
  | vle  { current_type = enum_parameter_logical_expr; yylval.node_type = $1; }
  | list { current_type = enum_parameter_list; }
-/*  | IDENTIFIER  { current_type = enum_parameter_identifier; } */
-/* {  } */
-;
+ ;
 
 list: LIST_BEGIN list_elements LIST_END {  }
 

@@ -99,10 +99,13 @@ void Param::dealloc() {
     break;
   case type_logical_expr_:
   case type_scalar_expr_:
-    dealloc_string_();
+    dealloc_node_expr_(value_expr_);
     break;
   }
 } 
+
+// Evaluate scalar expression
+
 
 /**
 *********************************************************************
@@ -116,31 +119,6 @@ void Param::dealloc() {
 */
 
 void Param::evaluate_scalar
-(int                n, 
- double *           result, 
- double *           x, 
- double *           y, 
- double *           z, 
- double *           t)
-{
-  evaluate_scalar_(value_expr_, n, result, x,y,z,t);
-}
-
-// Private evaluate scalar expression
-
-
-/**
-*********************************************************************
-*
-* @param   file_pointer: An opened input parameter file or stdin
-* @return  There is no return value
-*
-* This function reads in parameter-value key pairs, one per line
-*
-*********************************************************************
-*/
-
-void Param::evaluate_scalar_
 (struct node_expr * node, 
  int                n, 
  double *           result, 
@@ -154,29 +132,21 @@ void Param::evaluate_scalar_
 
   if (node->left) {
     left = new double [n];
-    evaluate_scalar_(node->left,n,left,x,y,z,t);
+    evaluate_scalar(node->left,n,left,x,y,z,t);
   }
   if (node->right) {
     right = new double [n];
-    evaluate_scalar_(node->right,n,right,x,y,z,t);
+    evaluate_scalar(node->right,n,right,x,y,z,t);
   }
       
   int i;
   switch (node->type) {
   case enum_node_operation:
     switch (node->op_value) {
-    case enum_op_add:
-      for (i=0; i<n; i++) result[i] = left[i] + right[i]; 
-      break;
-    case enum_op_sub:
-      for (i=0; i<n; i++) result[i] = left[i] - right[i]; 
-      break;
-    case enum_op_mul:
-      for (i=0; i<n; i++) result[i] = left[i] * right[i]; 
-      break;
-    case enum_op_div:
-      for (i=0; i<n; i++) result[i] = left[i] / right[i]; 
-      break;
+    case enum_op_add: for (i=0; i<n; i++) result[i] = left[i] + right[i]; break;
+    case enum_op_sub: for (i=0; i<n; i++) result[i] = left[i] - right[i]; break;
+    case enum_op_mul: for (i=0; i<n; i++) result[i] = left[i] * right[i]; break;
+    case enum_op_div: for (i=0; i<n; i++) result[i] = left[i] / right[i]; break;
     default:
     case enum_op_le:
     case enum_op_lt:
@@ -221,7 +191,11 @@ void Param::evaluate_scalar_
     break;
   }
 
+  delete [] left;
+  delete [] right;
 }
+
+// Evaluate logical expression
 
 
 /**
@@ -235,19 +209,102 @@ void Param::evaluate_scalar_
 *********************************************************************
 */
 
-// bool Param::evaluate_logical_
-// (struct node_expr * node, 
-//  int                n, 
-//  double *           result, 
-//  double *           x, 
-//  double *           y, 
-//  double *           z, 
-//  double *           t)
-// {
-//   bool result;
-//   return result;
-// }
+void Param::evaluate_logical
+(struct node_expr * node, 
+ int                n, 
+ bool   *           result, 
+ double *           x, 
+ double *           y, 
+ double *           z, 
+ double *           t)
+{
+  double * left_scalar  = NULL;
+  double * right_scalar = NULL;
+  bool * left_logical  = NULL;
+  bool * right_logical = NULL;
 
+  // Recurse on left subtree
+
+  if (node->left && node->left->type == enum_node_operation) {
+    // left node is an operation
+    if (node->op_value == enum_op_and || 
+	node->op_value == enum_op_or) {
+      // left node is a logical operation
+      left_logical = new bool [n];
+      evaluate_logical(node->left,n,left_logical,x,y,z,t);
+    } else {
+      // left node is a scalar operation
+      left_scalar = new double [n];
+      evaluate_scalar(node->left,n,left_scalar,x,y,z,t);
+    }
+  } else {
+    // left node is a scalar operation
+    left_scalar = new double [n];
+    evaluate_scalar(node->left,n,left_scalar,x,y,z,t);
+  }
+
+  // Recurse on left subtree
+
+  if (node->right && node->right->type == enum_node_operation) {
+    // right node exists
+    // right node is an operation
+    if (node->op_value == enum_op_and || 
+	node->op_value == enum_op_or) {
+      // right node is a logical operation
+      right_logical = new bool [n];
+      evaluate_logical(node->right,n,right_logical,x,y,z,t);
+    } else {
+      // right node is a scalar operation
+      right_scalar = new double [n];
+      evaluate_scalar(node->right,n,right_scalar,x,y,z,t);
+    }
+  } else {
+    // right node is a scalar operation
+    right_scalar = new double [n];
+    evaluate_scalar(node->right,n,right_scalar,x,y,z,t);
+  }
+      
+  int i;
+  if (node->type == enum_node_operation) {
+    switch (node->op_value) {
+    case enum_op_le:
+      for (i=0; i<n; i++) result[i] = left_scalar[i] <= right_scalar[i];
+      break;
+    case enum_op_lt:
+      for (i=0; i<n; i++) result[i] = left_scalar[i] <  right_scalar[i];
+      break;
+    case enum_op_ge:
+      for (i=0; i<n; i++) result[i] = left_scalar[i] >= right_scalar[i];
+      break;
+    case enum_op_gt:
+      for (i=0; i<n; i++) result[i] = left_scalar[i] >  right_scalar[i];
+      break;
+    case enum_op_eq:
+      // warning: comparing equality of doubles
+      for (i=0; i<n; i++) result[i] = left_scalar[i] == right_scalar[i];
+      break;
+    case enum_op_ne:
+      // warning: comparing inequality of doubles
+      for (i=0; i<n; i++) result[i] = left_scalar[i] != right_scalar[i];
+      break;
+    case enum_op_and:
+      for (i=0; i<n; i++) result[i] = left_logical[i] && right_logical[i];
+      break;
+    case enum_op_or:
+      for (i=0; i<n; i++) result[i] = left_logical[i] || right_logical[i];
+      break;
+    default:
+      sprintf (error_message,"unknown expression type %d\n",node->type);
+      ERROR_MESSAGE("Param::evaluate_logical");
+      break;
+    }
+  }
+
+  delete [] left_scalar;
+  delete [] right_scalar;
+  delete [] left_logical;
+  delete [] right_logical;
+}
 
 
 /**

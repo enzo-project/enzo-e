@@ -262,10 +262,52 @@ void Parameters::evaluate_scalar
   Param * param = parameter_(parameter);
   if (param && ! param->is_scalar_expr()) throw ExceptionParametersBadType();
   if (param != NULL) {
-    param->evaluate_scalar(n,result,x,y,z,t);
+    param->evaluate_scalar(param->value_expr_,n,result,x,y,z,t);
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ *
+ * @return  Return the logical value of the expression parameter if it
+ *          exists, or deflt if not
+ *
+ * Return the logical value of the expression parameter if it exists,
+ * or deflt if not.
+ *
+ *********************************************************************
+ */
+
+void Parameters::evaluate_logical 
+  (
+   std::string parameter,
+   int         n, 
+   bool      * result, 
+   bool      * deflt,
+   double    * x, 
+   double    * y, 
+   double    * z, 
+   double    * t) throw(ExceptionParametersBadType)
+{
+  Param * param = parameter_(parameter);
+  if (param && ! param->is_logical_expr()) throw ExceptionParametersBadType();
+  if (param != NULL) {
+    param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
+  } else {
+    for (int i=0; i<n; i++) result[i] = deflt[i];
+  }
+}
+
+int
+Parameters::list_length(std::string parameter)
+{
+  Param * param = parameter_(parameter);
+  if (param && ! param->is_list()) throw ExceptionParametersBadType();
+  return (param != NULL) ? (param->value_list_)->size() : 0;
 }
 
 /**
@@ -362,6 +404,77 @@ Parameters::list_value_string
   Param * param = list_element_ (parameter,index);
   if (param && ! param->is_string()) throw (ExceptionParametersBadType());
   return (param != NULL) ? param->value_string_ : deflt;
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ * @return  Return the string value of the parameter if it exists, 
+ *          or deflt if not
+ *
+ * Return the string value of the parameter if it exists, or deflt if
+ * not.
+ *
+ *********************************************************************
+ */
+
+void Parameters::list_evaluate_scalar 
+(
+ int index,
+ std::string parameter,
+ int         n, 
+ double    * result, 
+ double    * deflt,
+ double    * x, 
+ double    * y, 
+ double    * z, 
+ double    * t
+ ) throw(ExceptionParametersBadType)
+{
+
+  Param * param = list_element_(parameter,index);
+  if (param && ! param->is_scalar_expr()) throw ExceptionParametersBadType();
+  if (param != NULL) {
+    param->evaluate_scalar(param->value_expr_,n,result,x,y,z,t);
+  } else {
+    for (int i=0; i<n; i++) result[i] = deflt[i];
+  }
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   parameter
+ *
+ * @return  Return the logical value of the expression parameter if it
+ *          exists, or deflt if not
+ *
+ * Return the logical value of the expression parameter if it exists,
+ * or deflt if not.
+ *
+ *********************************************************************
+ */
+
+void Parameters::list_evaluate_logical 
+  (
+   int index,
+   std::string parameter,
+   int         n, 
+   bool      * result, 
+   bool      * deflt,
+   double    * x, 
+   double    * y, 
+   double    * z, 
+   double    * t) throw(ExceptionParametersBadType)
+{
+  Param * param = list_element_(parameter,index);
+  if (param && ! param->is_logical_expr()) throw ExceptionParametersBadType();
+  if (param != NULL) {
+    param->evaluate_logical(param->value_expr_,n,result,x,y,z,t);
+  } else {
+    for (int i=0; i<n; i++) result[i] = deflt[i];
+  }
 }
 
 //======================================================================

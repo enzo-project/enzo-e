@@ -28,6 +28,12 @@ Scalar {
    }
 }
 
+String {
+   str1 = "testing";
+   str2 = "one";
+   str3 = "two";
+}
+
 Scalar_expr {
    var_scalar_1 {
      num1 = x;
@@ -41,8 +47,14 @@ Scalar_expr var_scalar_2 {
      num2 = atan(y/3.0+3.0*t);
 }
 
-List {
-     num1 = [1.0, true, 37, "string" ];
+Logical_expr {
+   var_logical_1 {
+     num1 = x < y;
+     num2 = x + y >= t + 3.0;
+     num3 = x == y;
+   }
 }
 
-
+List {
+     num1 = [1.0, true, 37, "string", x-y+2.0*z ];
+}

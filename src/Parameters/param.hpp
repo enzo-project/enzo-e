@@ -32,8 +32,12 @@ class Param {
 public:
 
   ~Param () { dealloc(); };
+
   void evaluate_scalar  
-  ( int n, double * result, double *x, double *y, double *z, double *t);
+  ( struct node_expr * node, int n, double * result, double *x, double *y, double *z, double *t);
+
+  void evaluate_logical  
+  ( struct node_expr * node, int n, bool * result, double *x, double *y, double *z, double *t);
 
   void set(struct param_type * param);
 
@@ -94,7 +98,7 @@ private:
   void set_string_ (char * value) 
   { 
     type_ = type_string_; 
-    value_string_ = value; 
+    value_string_ = value;
   };
 
   void set_list_ (struct param_type * value) 
@@ -121,14 +125,6 @@ private:
     type_ = type_logical_expr_;
     value_expr_ = value; 
   };
-
-  void evaluate_scalar_
-  ( struct node_expr * node, int n, 
-    double * result, double *x, double *y, double *z, double *t);
-
-//   bool evaluate_logical_
-//   ( struct node_expr * node, int n, 
-//     bool * result, double *x, double *y, double *z, double *t);
 
   void dealloc_string_() { free (value_string_); } 
   void dealloc_list_     (list_type *value_list_);
