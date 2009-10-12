@@ -63,6 +63,13 @@ clean:   $(patsubst %,%-clean,$(DIR))
 
 .PHONY: 
 run-tests: all install $(patsubst %,%-run-tests,$(DIR))
+	-@echo
+	-@echo "=================================================="
+	-@echo "FAILED TESTS:"
+	-@echo "=================================================="
+	-@echo
+	-@grep FAIL */*unit
+	-@echo
 
 %-run-tests:
 	$(MAKE) -s -C $* run-tests
