@@ -74,8 +74,11 @@ public:
 
   /// Read in parameters from a file
 
-  void read (FILE * file_pointer) 
-    throw(ExceptionBadPointer);
+  void read (FILE * file_pointer);
+
+  /// Write parameters to a file
+
+  void write (FILE * file_pointer);
 
   /// Return the integer-valued parameter
 

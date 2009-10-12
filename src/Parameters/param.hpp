@@ -22,6 +22,7 @@
  */
 
 #include <vector>
+#include <string>
 
 //======================================================================
 
@@ -42,6 +43,9 @@ public:
   void set(struct param_type * param);
 
   void dealloc();
+
+  void write(FILE * file_pointer,
+	     std::string parameter);
 
   bool is_integer()      { return type_ == type_integer_; };
   bool is_scalar()       { return type_ == type_scalar_; };

@@ -104,6 +104,15 @@ void Param::dealloc() {
   }
 } 
 
+// Write parameter to file
+
+void Param::write(FILE * file_pointer,
+		  std::string parameter)
+{
+  fprintf (file_pointer,"%s\n",parameter.c_str());
+}
+
+
 // Evaluate scalar expression
 
 

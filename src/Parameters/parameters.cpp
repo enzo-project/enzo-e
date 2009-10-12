@@ -97,14 +97,14 @@ Parameters::~Parameters()
  * @param   file_pointer: An opened input parameter file or stdin
  * @return  There is no return value
  *
- * This function reads in parameter-value key pairs, one per line
+ * This function reads in parameters
  *
  *********************************************************************
  */
 
 
 void
-Parameters::read ( FILE * file_pointer ) throw(ExceptionBadPointer)
+Parameters::read ( FILE * file_pointer )
 
 {
   parameter_list_ = cello_parameters_read(file_pointer);
@@ -139,6 +139,33 @@ Parameters::read ( FILE * file_pointer ) throw(ExceptionBadPointer)
 
     prev = node;
     
+  }
+}
+
+/**
+ *********************************************************************
+ *
+ * @param   file_pointer: An opened output parameter file or stdout
+ * @return  There is no return value
+ *
+ * This function writes parameters to the file
+ *
+ *********************************************************************
+ */
+
+
+void
+Parameters::write ( FILE * file_pointer )
+
+{
+  std::map<std::string,Param *>::iterator it_param;
+
+  for (it_param =  parameter_map_.begin();
+       it_param != parameter_map_.end();
+       ++it_param) {
+
+    it_param->second->write(file_pointer, it_param->first);
+
   }
 }
 

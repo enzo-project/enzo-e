@@ -36,10 +36,18 @@ int main(int argc, char **argv)
 
   Parameters * parameters = new Parameters;
 
-  unit_func("read");
-  FILE * fp = fopen ("test.in","r");
+  // Read
 
-  parameters->read ( fp );
+  unit_func("read");
+  FILE * fpin = fopen ("test.in","r");
+  parameters->read ( fpin );
+
+  // Write
+
+  unit_func("write");
+  FILE * fpout = fopen ("test.out","w");
+  parameters->write ( fpout );
+  unit_assert(0);
 
   // set_group()
 
@@ -209,8 +217,6 @@ int main(int argc, char **argv)
   unit_assert (values_scalar[0]==x[0]-y[0]+2.0*z[0]);
   unit_assert (values_scalar[1]==x[1]-y[1]+2.0*z[1]);
   unit_assert (values_scalar[2]==x[2]-y[2]+2.0*z[2]);
-
-  unit_close();
 
   delete parameters;
 
