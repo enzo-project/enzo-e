@@ -66,34 +66,7 @@
  */
 
 MethodPpm::MethodPpm() throw()
-  : field_name_density_(),
-    field_name_velocity_x_(),
-    field_name_velocity_y_(),
-    field_name_velocity_z_(),
-    field_name_total_energy_(),
-    field_name_pressure_()
 {
-}
-
-/**
- *********************************************************************
- *
- * @param  method The MethodPpm being copied 
- * @return        There is no return value
- *
- * Create a new copy of the given MethodPpm
- *
- *********************************************************************
- */
-
-MethodPpm::MethodPpm(const MethodPpm & method) throw()
-{
-  field_name_density_      = method.field_name_density_;
-  field_name_velocity_x_   = method.field_name_velocity_x_;
-  field_name_velocity_y_   = method.field_name_velocity_y_;
-  field_name_velocity_z_   = method.field_name_velocity_z_;
-  field_name_total_energy_ = method.field_name_total_energy_;
-  field_name_pressure_     = method.field_name_pressure_;
 }
 
 /**
@@ -111,22 +84,7 @@ void MethodPpm::initialize() throw()
 }
 
 /**
- *********************************************************************
- *
- * @param  name   Name of the Field or Particle set, or tag
- * @return        There is no return value
- *
- * Specify a Field or Particle type read or modified 
- *
- *********************************************************************
- */
-
-void MethodPpm::add_argument(std::string name) throw()
-{
-}
-
-/**
- *********************************************************************
+cd *********************************************************************
  *
  * @return        There is no return value
  *

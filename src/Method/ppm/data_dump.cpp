@@ -66,10 +66,10 @@ void data_dump(const char * file_root, int cycle)
   hdf5.file_open(filename,"w");
 
   // Open density dataset
-  ArraySerial density (BaryonField[field_density],
-		       GridDimension[0],
-		       GridDimension[1],
-		       GridDimension[2]);
+  Array density (BaryonField[field_density],
+		 GridDimension[0],
+		 GridDimension[1],
+		 GridDimension[2]);
   hdf5.dataset_open ("density",density);
 
   // Write the data to disk

@@ -86,6 +86,9 @@ private:
   /// Size of the array
   int nx_,ny_,nz_;
 
+  /// Stride;
+  int ns_;
+
 };   
 
 #endif /* BLOCK_HPP */

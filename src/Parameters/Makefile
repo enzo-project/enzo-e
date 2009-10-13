@@ -45,7 +45,9 @@ lex.yy.o:lex.yy.c
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/parameters.hpp $(INCLUDE)
-	ln -sf `pwd`/param.hpp $(INCLUDE)
+	ln -sf `pwd`/param.hpp      $(INCLUDE)
+	ln -sf `pwd`/parse.h        $(INCLUDE)
+	ln -sf `pwd`/parse.tab.h    $(INCLUDE)
 #-----------------------------------------------------------------------
 
 .PHONY: clean-local

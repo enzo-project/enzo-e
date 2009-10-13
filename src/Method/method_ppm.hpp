@@ -3,19 +3,6 @@
 
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
 /** 
  *********************************************************************
  *
@@ -40,11 +27,11 @@
 //  *     g) iflatten = 3 -> Flattening recomended for multidimensional
 //  *        calculations.  Described in CW84 A7-A10.
 
-enum enum_flatten_type {
-  flatten_type_none,
-  flatten_type_simple,
-  flatten_type_lagrangean,
-  flatten_type_multidimension
+enum flatten_type {
+  flatten_none,
+  flatten_simple,
+  flatten_lagrangean,
+  flatten_multidimension
 };
 
 class MethodPpm : public Method {
@@ -83,9 +70,6 @@ public:
   /// Initialize the PPM method
   void initialize() throw(); 
 
-  /// Specify a Field or Particle type read or modified 
-  void add_argument(std::string) throw(); 
-
   /// Apply the method
   void apply() throw(); 
 
@@ -93,14 +77,7 @@ private:
 
   void solve_hydro_equations_() throw ();
 
-  std::string field_name_density_;
-  std::string field_name_velocity_x_;
-  std::string field_name_velocity_y_;
-  std::string field_name_velocity_z_;
-  std::string field_name_total_energy_;
-  std::string field_name_pressure_;
-
-  enum_flatten_type flatten_type_;
+  flatten_type flatten_type_;
 
   //-------------------------------------------------------------------
   // PRIVATE OPERATIONS

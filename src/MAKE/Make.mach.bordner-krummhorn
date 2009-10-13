@@ -32,6 +32,7 @@
 
   OPT = -O3 -pipe $(PROF)
   OPT = -g -fsignaling-nans
+  OPT = -g -fsignaling-nans -Wall
 
 #------------------------------------------------------------------------
 # HDF Library and includes
@@ -39,4 +40,16 @@
 
   LIB_HDF5 = -lhdf5
   INC_HDF5 = 
+
+#------------------------------------------------------------------------
+# System includes for makedepend
+#------------------------------------------------------------------------
+
+# ( "cpp -v < /dev/null" to get these: )
+  INC_SYS = \
+    -I /usr/local/include \
+    -I /usr/lib/gcc/x86_64-linux-gnu/4.3.3/include \
+    -I /usr/lib/gcc/x86_64-linux-gnu/4.3.3/include-fixed \
+    -I /usr/include/c++/4.3 \
+    -I /usr/include/c++/4.3/x86_64-linux-gnu
 
