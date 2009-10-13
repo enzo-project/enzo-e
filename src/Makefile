@@ -36,6 +36,7 @@ DIR = \
       Memory \
       Method \
       Monitor \
+      Parallel \
       Parameters \
       Performance \
       Test

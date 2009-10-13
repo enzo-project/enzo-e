@@ -45,7 +45,7 @@ LIB = $(LIB_LOCAL) -L$(TOP)/lib -lcello
 
 #----------------------------------------------------------------------
 
-CPPFLAGS = 
+CPPFLAGS = $(DEF_HDF5)
 CXXFLAGS = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CXXFLAGS_LOCAL) $(OPT)
 CFLAGS   = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CFLAGS_LOCAL)   $(OPT)
 LDFLAGS  = $(LIB_HDF5)
