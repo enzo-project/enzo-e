@@ -177,14 +177,41 @@ int main(int argc, char ** argv)
   unit_assert (strcmp(Memory::current_group(),"\0") == 0);
 
   // curr_group()
-  // bytes()
-  // available()
-  // efficiency()
-  // highest()
-  // set_limit()
-  // get_limit()
-  // num_new()
-  // num_delete()
+  unit_func ("curr_group()");
+  unit_assert(0);
 
+  // bytes()
+  unit_func ("bytes()");
+  unit_assert(0);
+
+  // available()
+  unit_func ("available()");
+  unit_assert(0);
+
+  // efficiency()
+  unit_func ("efficiency()");
+  unit_assert(0);
+
+  // highest()
+  unit_func ("highest()");
+  unit_assert(0);
+
+  // set_limit()
+  unit_func ("set_limit()");
+  unit_assert(0);
+
+  // get_limit()
+  unit_func ("get_limit()");
+  unit_assert(0);
+
+  // num_new()
+  unit_func ("num_new()");
+  unit_assert(0);
+
+  // num_delete()
+  unit_func ("num_delete()");
+  unit_assert(0);
+
+  
   unit_close();
 }

@@ -80,7 +80,6 @@ public:
   static void deallocate ( void * pointer ) 
     throw (ExceptionMemoryBadDeallocate());
 
-
   /// Begin allocating memory associated with the specified group
   static void begin_group ( const char * group_name ) throw ();
 
