@@ -27,6 +27,7 @@
  * @date      Wed Jul  8 16:01:10 PDT 2009
  * @bug       none
  * @note      Adding Array base class, and renaming old Array to ArraySerial
+ * @note      Renaming old ArraySerial to Array.  Heh.
  *
  * $Id: array.hpp 715 2009-07-08 23:48:09Z bordner $
  * 
@@ -50,7 +51,6 @@ class Array {
  *********************************************************************
  */
 
-private:
 
   //-------------------------------------------------------------------
   // PUBLIC OPERATIONS
@@ -59,25 +59,60 @@ private:
 public:
 
   /// Create a new uninitialized Array object
-  Array() throw() {};
+  Array() throw();
+  /// Create a new initialized Array object
+  Array(Scalar * values,int nx,int ny=1,int nz=1) throw();
   /// Deallocate the array
-  ~Array() throw() {};
+  ~Array() throw();
   /// Copy an array into this one, deallocating any existing data
-  Array(const Array &) throw() {};
+  Array(const Array &) throw();
   /// Copy an array into this one, deallocating any existing data
-  Array & operator = (const Array &) throw() {};
+  Array & operator = (const Array &) throw();
   /// Resize the array, deallocating any existing data
-  virtual void resize (int n0, int n1=1, int n2=1) throw() = 0 ;
+  virtual void resize (int n0, int n1=1, int n2=1) throw() ;
   /// Return the size of the array
-  virtual void size (int * n0, int * n1=0, int * n2=0) const throw() = 0;
+  virtual void size (int * n0, int * n1=0, int * n2=0) const throw();
   /// Return the total length of the array
-  virtual int  length() const throw() = 0;
+  virtual int  length() const throw();
   /// Return a pointer to the array values
-  virtual Scalar * values () const throw() = 0;
+  virtual Scalar * values () const throw();
   /// Return the given array element
-  virtual Scalar & operator() (int  i0, int  i1=0, int  i2=0) throw() = 0;
+  virtual Scalar & operator() (int  i0, int  i1=0, int  i2=0) throw();
   /// Set all values to 0, or to the given value if supplied
-  virtual void clear(Scalar value = 0.0) throw() = 0;
+  virtual void clear(Scalar value = 0.0) throw();
+
+  //-------------------------------------------------------------------
+  // PRIVATE OPERATIONS
+  //-------------------------------------------------------------------
+
+private:
+
+  /// Deallocate array values
+  void deallocate_() throw(ExceptionBadArrayDeallocation);
+
+  /// Allocate array values
+  void allocate_ (int n0, int n1=1, int n2=1) throw(ExceptionBadArrayAllocation);
+
+  /// Allocate array values
+  void reallocate_ (int n0, int n1=1, int n2=1) throw();
+
+  /// Copy array values a[0:N-1] to ArraySerial
+  void copy_ (Scalar * a) throw();
+
+  //-------------------------------------------------------------------
+  // PRIVATE ATTRIBUTES
+  //-------------------------------------------------------------------
+
+private:
+
+  /// Shape of array, right-padded with 1's
+  int     nx_,ny_,nz_;
+
+  /// Array values stored in column-major ordering
+  Scalar *a_;
+
+  /// Whether the array values are allocated internally or externally
+  bool is_allocated_;
 
 //   //--------------------------------------------------
 //   // CONSTRUCTORS AND DESTRUCTORS
@@ -182,7 +217,6 @@ public:
 
 };   
 
-#include "array_serial.hpp" /* Serial Array */
 #include "block.hpp"
 
 #endif /* ARRAY_HPP */

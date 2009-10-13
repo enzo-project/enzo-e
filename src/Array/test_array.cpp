@@ -17,7 +17,7 @@
  *********************************************************************
  *
  * @file      test_array.cpp
- * @brief     Program implementing unit tests for the ArraySerial class
+ * @brief     Program implementing unit tests for the Array class
  * @author    James Bordner
  * @date      Thu Feb 21 16:04:03 PST 2008
  * 
@@ -37,14 +37,14 @@ main()
 
   unit_open();
 
-  unit_class ("ArraySerial");
+  unit_class ("Array");
 
   //----------------------------------------------------------------------
   // test single array WITH resize: length, size, clear, values, access
   //----------------------------------------------------------------------
 
   {
-    ArraySerial a;
+    Array a;
 
     int n0=10,n1=15,n2=20;
     a.resize(n0,n1,n2);
@@ -117,7 +117,7 @@ main()
 
     int n0=10,n1=15,n2=20;
     
-    ArraySerial a;
+    Array a;
     a.resize(n0,n1,n2);
  
     int n = n0*n1*n2;
@@ -163,7 +163,7 @@ main()
     unit_assert(passed);
 
     // Multiple arrays: copy
-    ArraySerial b;
+    Array b;
     b = a;
 
     Scalar * bv = b.values();
@@ -211,7 +211,7 @@ main()
 
     int n0=10,n1=15,n2=20;
     
-    ArraySerial a;
+    Array a;
     a.resize(n0,n1,n2);
 
     int m0,m1,m2;

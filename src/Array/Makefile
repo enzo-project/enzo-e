@@ -1,6 +1,6 @@
 TOP     = ../..
 PACKAGE = array
-OBJS    = array_serial.o
+OBJS    = array.o
 TESTS   = test_array
 
 include $(TOP)/src/MAKE/Make.include
@@ -16,7 +16,6 @@ test_array: test_array.o
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/array.hpp         $(INCLUDE)
-	ln -sf `pwd`/array_serial.hpp  $(INCLUDE)
 	ln -sf `pwd`/block.hpp         $(INCLUDE)
 
 #-----------------------------------------------------------------------
