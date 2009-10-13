@@ -119,8 +119,6 @@ Parameters::read ( FILE * file_pointer )
       std::string(node->subgroup) + ":" +
       std::string(node->parameter);
 
-    enum_parameter type = node->type;
-    
     Param * param;
 
     param = new Param;

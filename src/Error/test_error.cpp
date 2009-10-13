@@ -33,7 +33,7 @@
 #include "error.hpp"
 #include "test.hpp"
 
-main()
+int main(int argc, char ** argv)
 {
 
   unit_class ("Error");
@@ -42,24 +42,27 @@ main()
   //----------------------------------------------------------------------
   printf ("Warning message:\n");
 
+  char warning_message[ERROR_MESSAGE_LENGTH];
   sprintf (warning_message,"Warning message test");
-  WARNING_MESSAGE("main");
+  WARNING_MESSAGE("main",warning_message);
 
   unit_assert (true);
 
   //----------------------------------------------------------------------
   printf ("Incomplete message:\n");
 
+  char incomplete_message[ERROR_MESSAGE_LENGTH];
   sprintf (incomplete_message,"Incomplete message test");
-  INCOMPLETE_MESSAGE("main");
+  INCOMPLETE_MESSAGE("main",incomplete_message);
 
   unit_assert (true);
 
   //----------------------------------------------------------------------
   printf ("Error message:\n");
 
+  char error_message[ERROR_MESSAGE_LENGTH];
   sprintf (error_message,"Error message test");
-  ERROR_MESSAGE("main");
+  ERROR_MESSAGE("main",error_message);
   
   // Errors should abort, so all following linse should not be executed
   unit_assert (false); 

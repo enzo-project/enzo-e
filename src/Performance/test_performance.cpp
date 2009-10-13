@@ -34,7 +34,7 @@
 #include "array.hpp"
 #include "performance.hpp"
 
-main()
+int main(int argc, char ** argv)
 {
   Timer timer;
   const double time_tolerance = 0.05;

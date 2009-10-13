@@ -168,7 +168,7 @@ void  Memory::begin_group ( const char * group_name ) throw ()
 {
   // check for whether we have already called begin_group before
   if (curr_group_ != 0) {
-    INCOMPLETE_MESSAGE("Memory::begin_group()");
+    INCOMPLETE_MESSAGE("Memory::begin_group()","");
     curr_group_ = 0;
   }
 
@@ -197,7 +197,7 @@ void  Memory::begin_group ( const char * group_name ) throw ()
     
     // Otherwise we hit the array limit: set curr_group_ to 0
   
-    INCOMPLETE_MESSAGE("Memory::begin_group()");
+    INCOMPLETE_MESSAGE("Memory::begin_group()","");
     // WARNING MESSAGE: reverting to "null" group 0
 
     curr_group_ = 0;
@@ -218,7 +218,7 @@ void  Memory::end_group ( const char * group_name ) throw ()
 {
   // check for whether we have already called begin_group before
   if (curr_group_ == 0) {
-    INCOMPLETE_MESSAGE("Memory::end_group()");
+    INCOMPLETE_MESSAGE("Memory::end_group()","");
   }
   curr_group_ = 0;
 }
@@ -288,7 +288,7 @@ size_t Memory::available ( memory_group_handle group_handle ) throw ()
  */
 {
   check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::available()");
+  INCOMPLETE_MESSAGE("Memory::available()","");
   return 0;
 }
 
@@ -305,7 +305,7 @@ float Memory::efficiency ( memory_group_handle group_handle ) throw ()
  */
 {
   check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::efficiency()");
+  INCOMPLETE_MESSAGE("Memory::efficiency()","");
   return 0.0;
 }
 
@@ -322,7 +322,8 @@ size_t Memory::highest ( memory_group_handle group_handle ) throw ()
  */
 {
   check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::highest(group)");
+  INCOMPLETE_MESSAGE("Memory::highest(group)","");
+  return 0;
 }
 
 void Memory::set_limit ( size_t size, memory_group_handle group_handle )
@@ -339,7 +340,8 @@ void Memory::set_limit ( size_t size, memory_group_handle group_handle )
  */
 {
   check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::set_highest()");
+  INCOMPLETE_MESSAGE("Memory::set_highest()","");
+  return;
 }
 
 /// Return the number of calls to allocate for the group
@@ -356,6 +358,8 @@ int Memory::num_new ( memory_group_handle group_handle ) throw ()
 */
 {
   check_handle_(group_handle);
+  INCOMPLETE_MESSAGE("Memory::num_new()","");
+  return 0;
 }
 
 /// Return the number of calls to deallocate for the group
@@ -372,6 +376,8 @@ int Memory::num_delete ( memory_group_handle group_handle ) throw ()
 */
 {
   check_handle_(group_handle);
+  INCOMPLETE_MESSAGE("Memory::num_delete()","");
+  return 0;
 }
 
 //======================================================================

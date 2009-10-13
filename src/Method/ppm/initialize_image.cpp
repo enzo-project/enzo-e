@@ -86,7 +86,7 @@ void initialize_image ()
   float enzo_velocity_x = 0.0;
   float enzo_velocity_y = 0.0;
   int pixel[3];
-  char * data = header_data;
+  const char * data = header_data;
 
   float * image = new float [width*height];
   for (int iy=0; iy<height; iy++) {

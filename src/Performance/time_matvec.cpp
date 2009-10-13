@@ -35,14 +35,15 @@
 #include "cello.h"
 #include "performance.hpp"
 
-main(int argc, char ** argv)
+int main(int argc, char ** argv)
 {
   Timer time_overhead;
   Timer time_const;
   Timer time_symm;
   Timer time_full;
   Timer time_block;
-  int i,j,k,i0,i1,i2,ii2;
+  int i,j,k;
+  int i0,i1,i2;
 
   const int CACHE_SIZE = 65536;
   char cache[CACHE_SIZE];

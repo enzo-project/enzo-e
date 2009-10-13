@@ -75,6 +75,11 @@ void Param::set (struct param_type * node)
   case enum_parameter_logical_expr:
     set_logical_expr_(node->op_value);
     break;
+  case enum_parameter_unknown:
+  case enum_parameter_sentinel:
+  case enum_parameter_identifier:
+  case enum_parameter_function:
+    break;
   }
 }
 
@@ -100,6 +105,11 @@ void Param::dealloc() {
   case type_logical_expr_:
   case type_scalar_expr_:
     dealloc_node_expr_(value_expr_);
+    break;
+  case type_unknown_:
+  case type_integer_:
+  case type_scalar_:
+  case type_logical_:
     break;
   }
 } 
@@ -165,9 +175,10 @@ void Param::evaluate_scalar
     case enum_op_ne:
     case enum_op_and:
     case enum_op_or:
+      char error_message[ERROR_MESSAGE_LENGTH];
       sprintf (error_message,"logical operator %d in scalar expression\n",
 	       node->op_value);
-      ERROR_MESSAGE("Param::evaluate_scalar");
+      ERROR_MESSAGE("Param::evaluate_scalar",error_message);
       break;
     }
     break;
@@ -184,9 +195,10 @@ void Param::evaluate_scalar
     case 'z':	for (i=0; i<n; i++) result[i] = z[i]; break;
     case 't':	for (i=0; i<n; i++) result[i] = t[i]; break;
     default:
+      char error_message[ERROR_MESSAGE_LENGTH];
       sprintf (error_message,"unknown variable %c in scalar expression\n",
 	       node->var_value);
-      ERROR_MESSAGE("Param::evaluate_scalar");
+      ERROR_MESSAGE("Param::evaluate_scalar",error_message);
       break;
     }
     break;
@@ -195,8 +207,9 @@ void Param::evaluate_scalar
     break;
   case enum_node_unknown:
   default:
+    char error_message[ERROR_MESSAGE_LENGTH];
     sprintf (error_message,"unknown expression type %d\n",node->type);
-    ERROR_MESSAGE("Param::evaluate_scalar");
+    ERROR_MESSAGE("Param::evaluate_scalar",error_message);
     break;
   }
 
@@ -303,8 +316,9 @@ void Param::evaluate_logical
       for (i=0; i<n; i++) result[i] = left_logical[i] || right_logical[i];
       break;
     default:
+      char error_message[ERROR_MESSAGE_LENGTH];
       sprintf (error_message,"unknown expression type %d\n",node->type);
-      ERROR_MESSAGE("Param::evaluate_logical");
+      ERROR_MESSAGE("Param::evaluate_logical",error_message);
       break;
     }
   }
@@ -329,7 +343,7 @@ void Param::evaluate_logical
 
 void Param::dealloc_list_ (list_type * value)
 {
-  for (int i=0; i<(*value).size(); i++) {
+  for (unsigned i=0; i<(*value).size(); i++) {
     if ((*value)[i]->type_ == type_list_) {
       dealloc_list_ ((*value)[i]->value_list_);
     } else {

@@ -22,7 +22,7 @@
 #include "parameters.hpp"
 #include "performance.hpp"
 
-main(int argc, char ** argv)
+int main(int argc, char ** argv)
 {
 
   try {
@@ -46,14 +46,16 @@ main(int argc, char ** argv)
 
     if (argc != 2) {
       // Print usage
+      char error_message[ERROR_MESSAGE_LENGTH];
       sprintf (error_message,"Usage: %s <filename>\n",argv[0]);
-      ERROR_MESSAGE("main");
+      ERROR_MESSAGE("main",error_message);
     } else {
       // Read in parameters
       FILE * fp = fopen (argv[1],"r");
       if (fp == NULL) {
+	char error_message[ERROR_MESSAGE_LENGTH];
 	sprintf (error_message,"Filename '%s' unreadable\n",argv[1]);
-	ERROR_MESSAGE("main");
+	ERROR_MESSAGE("main",error_message);
       } else {
 	monitor.print ("Reading parameters");
 	parameters.read(fp);

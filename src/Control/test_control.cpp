@@ -19,7 +19,7 @@
 #include "test.hpp"
 // #include "control.hpp"
 
-main()
+int main(int argc, char ** argv)
 {
   bool passed = false;
 

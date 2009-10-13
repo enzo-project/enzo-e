@@ -551,7 +551,7 @@ cie:
  ;
 
 vse: 
-'(' vse ')'    { $2; }
+'(' vse ')'    { $$ = $2; }
  | vse '+' cse { $$ = new_node_operation ($1, enum_op_add,new_node_scalar($3)); }
  | cse '+' vse { $$ = new_node_operation (new_node_scalar($1), enum_op_add,$3); }
  | vse '+' vse { $$ = new_node_operation ($1, enum_op_add,$3); }
@@ -631,6 +631,8 @@ vle:
 
 
 %%
+
+void yyrestart  (FILE * input_file );
 
 struct param_type * 
 cello_parameters_read(FILE * fp)

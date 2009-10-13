@@ -71,8 +71,6 @@ int main(int argc, char **argv)
 
   // value_logical()
 
-  bool value_logical;
-
   unit_func("value_logical");
 
   parameters->set_group("Logical");
@@ -84,8 +82,6 @@ int main(int argc, char **argv)
 
   // value_integer()
 
-  int value_integer;
-
   unit_func("value_integer");
 
   parameters->set_group("Integer");
@@ -96,8 +92,6 @@ int main(int argc, char **argv)
 
   // value_scalar()
   
-  double value_scalar;
-
   unit_func("value_scalar");
 
   parameters->set_group("Scalar");
@@ -187,14 +181,14 @@ int main(int argc, char **argv)
   parameters->set_subgroup("var_logical_1");
 
   parameters->evaluate_logical("num1",3,values_logical,deflt_logical,x,y,z,t);
-  unit_assert (values_logical[0] == x[0] < y[0]);
-  unit_assert (values_logical[1] == x[1] < y[1]);
-  unit_assert (values_logical[2] == x[2] < y[2]);
+  unit_assert (values_logical[0] == (x[0] < y[0]));
+  unit_assert (values_logical[1] == (x[1] < y[1]));
+  unit_assert (values_logical[2] == (x[2] < y[2]));
 
   parameters->evaluate_logical("num2",3,values_logical,deflt_logical,x,y,z,t);
-  unit_assert (values_logical[0] == x[0] + y[0] >= t[0] + 3.0);
-  unit_assert (values_logical[1] == x[1] + y[1] >= t[1] + 3.0);
-  unit_assert (values_logical[2] == x[2] + y[2] >= t[2] + 3.0);
+  unit_assert (values_logical[0] == (x[0] + y[0] >= t[0] + 3.0));
+  unit_assert (values_logical[1] == (x[1] + y[1] >= t[1] + 3.0));
+  unit_assert (values_logical[2] == (x[2] + y[2] >= t[2] + 3.0));
 
   parameters->evaluate_logical("num3",3,values_logical,deflt_logical,x,y,z,t);
   unit_assert (values_logical[0] == (x[0] == y[0]));
@@ -214,9 +208,9 @@ int main(int argc, char **argv)
   unit_assert(parameters->list_value_string(3,"num1") == "string");
   printf ("%s\n",parameters->list_value_string(3,"num1").c_str());
   parameters->list_evaluate_scalar(4,"num1",3,values_scalar,deflts_scalar,x,y,z,t);
-  unit_assert (values_scalar[0]==x[0]-y[0]+2.0*z[0]);
-  unit_assert (values_scalar[1]==x[1]-y[1]+2.0*z[1]);
-  unit_assert (values_scalar[2]==x[2]-y[2]+2.0*z[2]);
+  unit_assert (values_scalar[0] == (x[0]-y[0]+2.0*z[0]));
+  unit_assert (values_scalar[1] == (x[1]-y[1]+2.0*z[1]));
+  unit_assert (values_scalar[2] == (x[2]-y[2]+2.0*z[2]));
 
   delete parameters;
 

@@ -97,7 +97,7 @@ inline Timer::Timer ()
 inline void Timer::start() 
 { 
   is_running_ = true;
-  int ret_val = gettimeofday(&t1_, &tz_);
+  gettimeofday(&t1_, &tz_);
 }
 
 //----------------------------------------------------------------------

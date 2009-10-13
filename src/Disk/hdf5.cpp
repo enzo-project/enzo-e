@@ -47,8 +47,8 @@ Hdf5::Hdf5()
   file_mode_(),
   is_file_open_(false),
   dataset_(0),
-  dataset_name_(),
   is_dataset_open_(false),
+  dataset_name_(),
   dataspace_(0),
   datatype_(SCALAR_HDF5)
 {
@@ -67,8 +67,9 @@ int Hdf5::file_open  (std::string name, std::string mode)
 {
   if (is_file_open_) {
 
+    char warning_message[ERROR_MESSAGE_LENGTH];
     sprintf (warning_message,"Attempting to open an open file %s",name.c_str());
-    WARNING_MESSAGE("Hdf5::file_open");
+    WARNING_MESSAGE("Hdf5::file_open",warning_message);
 
   } else {
 
@@ -80,17 +81,19 @@ int Hdf5::file_open  (std::string name, std::string mode)
     } else if (mode == "w") {
       file_ = H5Fcreate(name.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     } else {
+      char error_message[ERROR_MESSAGE_LENGTH];
       sprintf (error_message,"Unrecognized mode: %s",mode.c_str());
-      ERROR_MESSAGE("Hdf5::file_open");
+      ERROR_MESSAGE("Hdf5::file_open",error_message);
     }
 
     if (file_ >= 0) {
       is_file_open_ = true;
     } else {
+      char warning_message[ERROR_MESSAGE_LENGTH];
       sprintf (warning_message,
 	       "Return value %d opening file %s",
 	       file_,file_name_.c_str());
-      WARNING_MESSAGE("Hdf5::file_open");
+      WARNING_MESSAGE("Hdf5::file_open",warning_message);
     }
   }
 
@@ -105,19 +108,21 @@ void Hdf5::file_close ()
  */
 {
   if (! is_file_open_) {
+    char warning_message[ERROR_MESSAGE_LENGTH];
     sprintf (warning_message,
 	     "Attempting to close a closed file %s",
 	     this->file_name_.c_str());
-    WARNING_MESSAGE("Hdf5::file_close");
+    WARNING_MESSAGE("Hdf5::file_close",warning_message);
   } else {
     int retval = H5Fclose (file_);
     if (retval >= 0) {
       is_file_open_ = false;
     } else {
+      char warning_message[ERROR_MESSAGE_LENGTH];
       sprintf (warning_message,
 	       "Return value %d closing file %s",
 	       retval,file_name_.c_str());
-      WARNING_MESSAGE("Hdf5::file_close");
+      WARNING_MESSAGE("Hdf5::file_close",warning_message);
     }
   }
 }
@@ -159,8 +164,9 @@ void Hdf5::dataset_open (std::string name, Array & array)
     dataspace_ = H5Dget_space (dataset_);
     d = H5Sget_simple_extent_ndims(dataspace_);
     if (d > 3) {
+      char error_message[ERROR_MESSAGE_LENGTH];
       sprintf (error_message, "Dataset has too many dimensions %d\n",d);
-      ERROR_MESSAGE("Hdf5::dataset_open");
+      ERROR_MESSAGE("Hdf5::dataset_open",error_message);
     }
     H5Sget_simple_extent_dims(dataspace_,n,0);
     // Set the array size accordingly
@@ -215,10 +221,11 @@ void Hdf5::dataset_open (std::string name, Array & array)
     dataset_name_ = name;
       
   } else {
+    char warning_message[ERROR_MESSAGE_LENGTH];
     sprintf (warning_message,
 	     "Return value %d opening dataset %s",
 	     dataset_,name.c_str());
-    WARNING_MESSAGE("Hdf5::dataset_open");
+    WARNING_MESSAGE("Hdf5::dataset_open",warning_message);
   }
 
 }

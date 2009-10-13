@@ -35,7 +35,7 @@
 #include "array.hpp"
 #include "disk.hpp"
 
-main()
+int main(int argc, char ** argv)
 {
   Array A;
   A.resize(100,100);

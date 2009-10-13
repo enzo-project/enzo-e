@@ -44,15 +44,13 @@
 /// Handle a (non-lethal) warning message
 //-----------------------------------------------------------------------
 
-static char warning_message[ERROR_MESSAGE_LENGTH+1];
-
-#define WARNING_MESSAGE(FUNCTION) {		\
+#define WARNING_MESSAGE(FUNCTION,MESSAGE) { \
     printf ("\n" \
             "     WARNING File:     %s:%d\n" \
             "     WARNING Function: %s()\n" \
             "     WARNING Message:  %s\n" \
             "\n", \
-	    __FILE__,__LINE__,FUNCTION,warning_message); \
+	    __FILE__,__LINE__,FUNCTION,MESSAGE); \
   fflush(stdout); \
 }
 
@@ -60,15 +58,13 @@ static char warning_message[ERROR_MESSAGE_LENGTH+1];
 /// Handle a (lethal) error message
 //-----------------------------------------------------------------------
 
-static char error_message[ERROR_MESSAGE_LENGTH+1];
-
-#define ERROR_MESSAGE(FUNCTION) { \
+#define ERROR_MESSAGE(FUNCTION,MESSAGE) { \
     printf ("\n" \
             "     ERROR File:     %s:%d\n" \
             "     ERROR Function: %s()\n" \
             "     ERROR Message:  %s\n" \
             "\n", \
-	    __FILE__,__LINE__,FUNCTION,error_message);			\
+	    __FILE__,__LINE__,FUNCTION,MESSAGE);			\
   fflush(stdout); \
   exit(1); \
 }
@@ -77,15 +73,13 @@ static char error_message[ERROR_MESSAGE_LENGTH+1];
 /// Placeholder for code that is incomplete
 //-----------------------------------------------------------------------
 
-static char incomplete_message[ERROR_MESSAGE_LENGTH+1];
-
-#define INCOMPLETE_MESSAGE(FUNCTION) { \
+#define INCOMPLETE_MESSAGE(FUNCTION,MESSAGE) { \
     printf ("\n" \
             "     INCOMPLETE File:     %s:%d\n" \
             "     INCOMPLETE Function: %s()\n" \
             "     INCOMPLETE Message:  %s\n" \
             "\n", \
-	    __FILE__,__LINE__,FUNCTION,incomplete_message);			\
+	    __FILE__,__LINE__,FUNCTION,MESSAGE);			\
    fflush(stdout); \
 }
 

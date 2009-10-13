@@ -32,7 +32,7 @@
 #include "error.hpp"
 #include "array.hpp"
 
-main()
+int main()
 {
 
   unit_open();

@@ -44,8 +44,9 @@ Array::Array() throw()
   : nx_(0),
     ny_(0),
     nz_(0),
-    is_allocated_(true),
-    a_(0)
+    a_(0),
+    is_allocated_(true)
+
 {
 }
 
