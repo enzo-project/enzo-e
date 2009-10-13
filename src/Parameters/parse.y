@@ -18,6 +18,12 @@
 #include <string.h>
 #include <malloc.h>
 
+  /* Quiet a few -Wall errors */
+
+int yylex (void);
+void yyrestart  (FILE * input_file );
+void yyerror(char *s);
+
 #include "parse.tab.h"
 
 #include "parse.h"
@@ -631,8 +637,6 @@ vle:
 
 
 %%
-
-void yyrestart  (FILE * input_file );
 
 struct param_type * 
 cello_parameters_read(FILE * fp)
