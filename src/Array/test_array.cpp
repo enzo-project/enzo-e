@@ -34,8 +34,10 @@
 
 main()
 {
-  unit_class ("ArraySerial");
+
   unit_open();
+
+  unit_class ("ArraySerial");
 
   //----------------------------------------------------------------------
   // test single array WITH resize: length, size, clear, values, access
@@ -202,6 +204,35 @@ main()
     unit_assert(passed);
 
   }
+
+  unit_class ("Block");
+
+  {
+
+    int n0=10,n1=15,n2=20;
+    
+    ArraySerial a;
+    a.resize(n0,n1,n2);
+
+    int m0,m1,m2;
+    a.size(&m0,&m1,&m2);
+    Block b (a.values(),m0,m0,m1,m1,m2,m2);
+
+    int nx,ny,nz;
+    b.n(&nx,&ny,&nz);
+
+    Scalar * bv = b.array();
+    for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+	for (int ix=0; ix<nx; ix++) {
+	  int i = ix + nx*(iy + ny*iz);
+	  bv[i] = 1.0;
+	}
+      }
+    }
+
+  }
+  
   unit_close();
 
 }

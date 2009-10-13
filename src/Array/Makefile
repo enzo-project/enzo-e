@@ -17,6 +17,7 @@ test_array: test_array.o
 install-include:
 	ln -sf `pwd`/array.hpp         $(INCLUDE)
 	ln -sf `pwd`/array_serial.hpp  $(INCLUDE)
+	ln -sf `pwd`/block.hpp         $(INCLUDE)
 
 #-----------------------------------------------------------------------
 

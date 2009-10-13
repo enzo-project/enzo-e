@@ -21,13 +21,13 @@
 /** 
  *********************************************************************
  *
- * @file      array_serial_.hpp
- * @brief     Declaration of the Array class
+ * @file      array_serial.hpp
+ * @brief     Declaration of the serial Array class
  * @author    James Bordner
  * @date      Thu Feb 21 13:54:19 PST 2008
  * @bug       none
  *
- * $Id: array.hpp 712 2009-07-08 22:55:25Z bordner $
+ * $Id: array_serial.hpp 712 2009-07-08 22:55:25Z bordner $
  * 
  *********************************************************************
  */

@@ -21,14 +21,14 @@
 /** 
  *********************************************************************
  *
- * @file      array_array_.hpp
+ * @file      array.hpp
  * @brief     Declaration of the Array abstract base class
  * @author    James Bordner
  * @date      Wed Jul  8 16:01:10 PDT 2009
  * @bug       none
  * @note      Adding Array base class, and renaming old Array to ArraySerial
  *
- * $Id: array_array.hpp 715 2009-07-08 23:48:09Z bordner $
+ * $Id: array.hpp 715 2009-07-08 23:48:09Z bordner $
  * 
  *********************************************************************
  */
@@ -183,5 +183,6 @@ public:
 };   
 
 #include "array_serial.hpp" /* Serial Array */
+#include "block.hpp"
 
 #endif /* ARRAY_HPP */
