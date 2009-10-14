@@ -47,10 +47,6 @@ OBJS = \
 	PPML_TimeStep.o \
 	data_dump.o
 
-
-# all: $(OBJS)
-#	PPML_QDD6.o \
-
 include $(TOP)/src/MAKE/Make.include
 
 .PHONY: clean-local

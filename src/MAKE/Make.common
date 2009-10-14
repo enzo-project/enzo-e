@@ -6,6 +6,7 @@
 #    CPPFLAGS
 #    CXXFLAGS
 #    CFLAGS
+#    FFLAGS
 #    LDFLAGS
 #
 # References
@@ -45,10 +46,10 @@ LIB = -L$(TOP)/lib -lcello $(LIB_LOCAL)
 
 #----------------------------------------------------------------------
 
-CPPFLAGS = $(DEF_HDF5)
+CPPFLAGS = $(DEF_HDF5) $(CPPFLAGS_LOCAL)
 CXXFLAGS = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CXXFLAGS_LOCAL) $(OPT)
 CFLAGS   = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CFLAGS_LOCAL)   $(OPT)
-LDFLAGS  = $(LIB_HDF5)
+LDFLAGS  = $(LIB_HDF5) $(LIB_FORTRAN)
 
 INCLUDE = $(TOP)/include
 

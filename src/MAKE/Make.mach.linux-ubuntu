@@ -23,7 +23,6 @@
 
   OPT_DEBUG = -g -fsignaling-nans -Wall
   OPT_FAST  = -O3
-
   OPT = $(OPT_DEBUG)
 
 #------------------------------------------------------------------------
@@ -32,3 +31,5 @@
 
   LIB_HDF5 = -lhdf5
   INC_HDF5 = 
+
+  LIB_FORTRAN = -lgfortran
