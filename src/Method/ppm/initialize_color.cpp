@@ -15,54 +15,102 @@
 
 
 /** 
- *********************************************************************
- *
- * @file      initialize_implosion.cpp
- * @brief     Initialize variables in cello_hydro.h
- * @author    James Bordner
- * @date      Sat Aug 29 14:20:09 PDT 2009
+*********************************************************************
+*
+* @file      initialize_color.cpp
+* @brief     Initialize variables in cello_hydro.h
+* @author    James Bordner
+* @date      Sat Aug 29 14:20:09 PDT 2009
 
- *
- * DESCRIPTION 
- * 
- *    Initialize variables in cello_hydro.h
- *
- * PACKAGES
- *
- *    NONE
- * 
- * INCLUDES
- *  
- *    cello_hydro.h
- *
- * PUBLIC FUNCTIONS
- *  
- *    initialize_implosion ();
- *
- * PRIVATE FUCTIONS
- *  
- *    NONE
- *
- * $Id$
- *
- *********************************************************************
- */
+*
+* DESCRIPTION 
+* 
+*    Initialize variables in cello_hydro.h.  Initial density and pressure
+*    are given by an image saved using "gimp" with the ".h" format.  This
+*    file is sym-linked or copied to image.h before compiling.
+*
+* PACKAGES
+*
+*    NONE
+* 
+* INCLUDES
+*  
+*    cello_hydro.h
+*
+* PUBLIC FUNCTIONS
+*  
+*    initialize_color ();
+*
+* PRIVATE FUCTIONS
+*  
+*    NONE
+*
+* $Id$
+*
+*********************************************************************
+*/
 
 #include "cello_hydro.h"
+#include "assert.h"
+#include "image.h"
 
-const bool debug = false;
- 
-void initialize_implosion (int size_param, int cycles_param)
+inline float color_value 
+(float * image, int nx, int ny,
+ float x, float y, float enzo_lower[2], float enzo_upper[2])
+// Return boolean flag whether point is inside the text "Enzo"
+{
+  if (x < enzo_lower[0] || x > enzo_upper[0]) return false;
+  if (y < enzo_lower[1] || y > enzo_upper[1]) return false;
+
+  int ix = width*(x - enzo_lower[0]) / (enzo_upper[0] - enzo_lower[0]);
+  int iy = height*(y - enzo_lower[1]) / (enzo_upper[1] - enzo_lower[1]);
+  if (ix == width) ix--;
+  if (iy == height) iy--;
+  assert (ix >= 0);
+  assert (iy >= 0);
+  assert (ix < width);
+  assert (iy < height);
+  return (image[ix + width*iy]);
+} 
+
+void initialize_color ()
 
 {
 
-  int grid_size [] = { size_param, size_param };
-  float implosion_density_out = 1.0;
-  float implosion_density_in  = 0.125;
-  float implosion_pressure_out = 1.0;
-  float implosion_pressure_in  = 0.14;
-  float implosion_velocity_x = 0.0;
-  float implosion_velocity_y = 0.0;
+  int grid_size [] = { width, height };
+
+  float color_density_out = 1.0;
+  float color_density_in  = 0.125;
+  float color_pressure_out = 1.0;
+  float color_pressure_in  = 0.14;
+  float color_velocity_x = 0.0;
+  float color_velocity_y = 0.0;
+  float color_in = 1.0;
+  float color_out= 0.0;
+
+  int pixel[3];
+  const char * data = header_data;
+
+  float * image = new float [width*height];
+  for (int iy=0; iy<height; iy++) {
+    for (int ix=0; ix<width; ix++) {
+      HEADER_PIXEL(data,pixel);
+      int i=ix + width*iy;
+      image [i] = 1.0*(pixel[0] + pixel[1] + pixel[2])/(255*3);
+    }
+  }
+
+  // Set extents of the E
+
+  // 5/p   @ @ @
+  // 4/4   @
+  // 3/4   @ @
+  // 2/4   @
+  // 1/4   @ @ @
+  //  0 
+
+  float enzo_lower[2] = {0.0, 0.0};
+  float enzo_upper[2] = {0.3, 0.3};
 
   // Physics
 
@@ -76,8 +124,8 @@ void initialize_implosion (int size_param, int cycles_param)
 
   // Control
 
-  time_stop              = 10000;
-  cycle_stop             = cycles_param;
+  time_stop              = 2.5;
+  cycle_stop             = 5000;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
@@ -111,7 +159,7 @@ void initialize_implosion (int size_param, int cycles_param)
 
   for (int dim=0; dim<GridRank; dim++) {
     CellWidth[dim] = new FLOAT[GridDimension[dim]];
-    float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
+    float h = double (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
       (GridEndIndex[dim] - GridStartIndex[dim] + 1);
     for (int i=0; i<GridDimension[dim]; i++) {
       CellWidth[dim][i] = h;
@@ -130,6 +178,8 @@ void initialize_implosion (int size_param, int cycles_param)
   FieldType[field_color        = k++] = ElectronDensity;
 
   NumberOfBaryonFields = k;
+
+  assert (NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
   
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
 
@@ -153,41 +203,32 @@ void initialize_implosion (int size_param, int cycles_param)
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];
 
-  if (debug) printf ("Size = %d %d \n",ndx,ndy);
-  if (debug) printf ("%g  %g %g  %g %g\n",
-	  Gamma, 
-	  implosion_pressure_out,implosion_density_out,
-	  implosion_pressure_in,implosion_density_in);
-  if (debug) printf ("total energy: %g %g\n",
-	  implosion_pressure_out / ((Gamma - 1.0)*implosion_density_out),
-	  implosion_pressure_in / ((Gamma - 1.0)*implosion_density_in));
-
   for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
-    float y = 0.5*hy + (iy - GridStartIndex[1]) * yd / iyg;
+    float y = (iy - GridStartIndex[1] + 0.5)*hy;
 
     for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
 
-      float x = 0.5*hx + (ix - GridStartIndex[0]) * xd / ixg;
+      float x = (ix - GridStartIndex[0] + 0.5)*hx;
 
-      int i = ix + ndx * iy;
+      int i = ix + ndx*iy;
 
-      // Initialize density
+      // Initialize density and total energy
 
       if (x + y < 0.1517) {
-	BaryonField[ field_density ] [ i ] = implosion_density_in;
+	BaryonField[ field_density ] [ i ] = color_density_in;
       } else {
-	BaryonField[ field_density ] [ i ] = implosion_density_out;
+	BaryonField[ field_density ] [ i ] = color_density_out;
       }
 
       // Initialize total energy
 
       if (x + y < 0.1517) {
 	BaryonField[ field_total_energy ][ i ] = 
-	  implosion_pressure_in / ((Gamma - 1.0)*implosion_density_in);
+	  color_pressure_in / ((Gamma - 1.0)*color_density_in);
       } else {
 	BaryonField[ field_total_energy ][ i ] = 
-	  implosion_pressure_out / ((Gamma - 1.0)*implosion_density_out);
+	  color_pressure_out / ((Gamma - 1.0)*color_density_out);
       }
 
       // Initialize internal energy
@@ -196,17 +237,20 @@ void initialize_implosion (int size_param, int cycles_param)
 
       // Initialize velocity
 
-      BaryonField[ field_velocity_x ][ i ] = implosion_velocity_x;
-      BaryonField[ field_velocity_y ][ i ] = implosion_velocity_y;
+      BaryonField[ field_velocity_x ][ i ] = color_velocity_x;
+      BaryonField[ field_velocity_y ][ i ] = color_velocity_y;
 
       // Initialize color
 
-      BaryonField[ field_color ][ i ] = 0.0;
+      float a = color_value(image, width,height,x,y,enzo_lower,enzo_upper);
+
+      float color  = a * color_in  + (1-a) * color_out;
+
+      BaryonField[ field_color ][ i ] = color;
 
     }
   }
 
-  if (debug) printf ("density(3,3) = %g\n",BaryonField[field_density][1221]);
   AccelerationField[0] = NULL;
   AccelerationField[1] = NULL;
   AccelerationField[2] = NULL;
@@ -231,8 +275,8 @@ void initialize_implosion (int size_param, int cycles_param)
     BoundaryFieldType[field] = FieldType[field];
     for (int dim = 0; dim < 3; dim++) {
       for (int face = 0; face < 2; face++) {
-	int n1 = GridDimension[(dim+1)%3];
-	int n2 = GridDimension[(dim+2)%3];
+	int n1 = GridDimension[(dim+2)%3];
+	int n2 = GridDimension[(dim+1)%3];
 	int size = n1*n2;
 	BoundaryType [field][dim][face] = new bc_type [size];
 	BoundaryValue[field][dim][face] = NULL;

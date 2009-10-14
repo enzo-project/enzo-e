@@ -2,14 +2,14 @@ TOP = ../../..
 
 PACKAGE = method
 
-TESTS = test_implosion test_implosion3 test_image test_implosion_opt
+TESTS = test_implosion test_implosion3 test_image test_color test_implosion_opt
 
 INC_LOCAL  = $(INC_HDF5)
 LIB_LOCAL  = $(LIB_HDF5) $(LIB_FORTRAN)
-FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(DEF_OPTIMIZE)
-CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(DEF_OPTIMIZE)
+CPPFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(DEF_OPTIMIZE)
 
 OBJS_IMAGE      = test_image.o initialize_image.o
+OBJS_COLOR      = test_color.o initialize_color.o
 OBJS_IMPLOSION  = test_implosion.o  initialize_implosion.o
 OBJS_IMPLOSION3 = test_implosion3.o initialize_implosion3.o
 
@@ -52,12 +52,12 @@ OBJS_FC = calcdiss.o \
 
 OBJS_FC_OPT = ppm.o
 
-# all: # WORKS ONLY IF empty all: TARGET IS HERE--WHY?
-
 include $(TOP)/src/MAKE/Make.include
 
 test_image: $(OBJS) $(OBJS_FC) $(OBJS_IMAGE)
 	$(CXX) -o test_image $(OBJS_IMAGE) $(OBJS) $(OBJS_FC) $(LIB)
+test_color: $(OBJS) $(OBJS_FC) $(OBJS_COLOR)
+	$(CXX) -o test_color $(OBJS_COLOR) $(OBJS) $(OBJS_FC) $(LIB)
 test_implosion: $(OBJS) $(OBJS_FC) $(OBJS_IMPLOSION)
 	$(CXX) -o test_implosion $(OBJS_IMPLOSION) $(OBJS) $(OBJS_FC)  $(LIB)
 test_implosion3: $(OBJS) $(OBJS_FC) $(OBJS_IMPLOSION3)

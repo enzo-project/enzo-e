@@ -98,7 +98,14 @@ int SolveHydroEquations
 	coloff[i] = BaryonField[ColourNum+i] - colourpt;
  
     }
+
+    // Initialize color field
  
+    NumberOfColours = 1;
+    ColourNum       = field_color;
+    colourpt        = BaryonField[field_color];
+    coloff[0]       = 0;
+
     /* Add metallicity as a colour variable. */
  
     int MetalNum;

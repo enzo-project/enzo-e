@@ -65,18 +65,25 @@ void data_dump(const char * file_root, int cycle)
   sprintf (filename,"%s-%06d.hdf5",file_root,cycle);
   hdf5.file_open(filename,"w");
 
-  // Open density dataset
+  // Write density
   Array density (BaryonField[field_density],
 		 GridDimension[0],
 		 GridDimension[1],
 		 GridDimension[2]);
   hdf5.dataset_open ("density",density);
-
-  // Write the data to disk
   hdf5.write(density);
-
-  // Close the dateset
   hdf5.dataset_close ();
+
+  // Write color
+
+  Array color (BaryonField[field_color],
+		 GridDimension[0],
+		 GridDimension[1],
+		 GridDimension[2]);
+  hdf5.dataset_open ("color",color);
+  hdf5.write(color);
+  hdf5.dataset_close ();
+
 
   // Close the file
   hdf5.file_close();

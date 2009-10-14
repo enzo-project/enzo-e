@@ -131,6 +131,7 @@ void initialize_implosion3 (int size_param, int cycles_param)
   FieldType[field_velocity_x      = k++] = Velocity1;
   FieldType[field_velocity_y      = k++] = Velocity2;
   FieldType[field_velocity_z      = k++] = Velocity3;
+  FieldType[field_color        = k++] = ElectronDensity;
 
   //  FieldType[field_internal_energy = k++] = InternalEnergy;
 
@@ -212,6 +213,10 @@ void initialize_implosion3 (int size_param, int cycles_param)
 	BaryonField[ field_velocity_x ][ i ] = implosion_velocity_x;
 	BaryonField[ field_velocity_y ][ i ] = implosion_velocity_y;
 	BaryonField[ field_velocity_z ][ i ] = implosion_velocity_z;
+
+	// Initialize color
+
+	BaryonField[ field_color ][ i ] = 0.0;
 
       }
     }

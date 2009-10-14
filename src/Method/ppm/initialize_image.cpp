@@ -168,14 +168,16 @@ void initialize_image ()
 
   int k = 0;
 
-  FieldType[field_density         = k++] = Density;
-  FieldType[field_total_energy    = k++] = TotalEnergy;
-  FieldType[field_velocity_x      = k++] = Velocity1;
-  FieldType[field_velocity_y      = k++] = Velocity2;
-  //  FieldType[field_internal_energy = k++] = InternalEnergy;
+  FieldType[field_density      = k++] = Density;
+  FieldType[field_total_energy = k++] = TotalEnergy;
+  FieldType[field_velocity_x   = k++] = Velocity1;
+  FieldType[field_velocity_y   = k++] = Velocity2;
+  FieldType[field_color        = k++] = ElectronDensity;
 
   NumberOfBaryonFields = k;
   
+  assert (NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
+
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
 
   float * baryon_fields = new float [NumberOfBaryonFields * nd];
@@ -211,6 +213,7 @@ void initialize_image ()
       // Initialize density and total energy
 
       float a = color_value(image, width,height,x,y,enzo_lower,enzo_upper);
+
       float density  = a*enzo_density_in  + (1-a)*enzo_density_out;
       float pressure = a*enzo_pressure_in + (1-a)*enzo_pressure_out;
 
@@ -227,6 +230,9 @@ void initialize_image ()
       BaryonField[ field_velocity_x ][ i ] = enzo_velocity_x;
       BaryonField[ field_velocity_y ][ i ] = enzo_velocity_y;
 
+      // Initialize color
+
+      BaryonField[ field_color ][ i ] = 0.0;
     }
   }
 

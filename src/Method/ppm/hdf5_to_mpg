@@ -1,11 +1,14 @@
 #!/bin/tcsh -f
 
-set color = /usr/share/h5utils/colormaps/jet
-# set color = /usr/share/h5utils/colormaps/gray
+# set color = /usr/share/h5utils/colormaps/jet
+set color = /usr/share/h5utils/colormaps/gray
 
 foreach hdf5 (*.hdf5)
    echo $hdf5
-   h5topng -T -m 0.125 -M 1.0 -c $color $hdf5
+   h5topng -d density -T -m 0.125 -M 1.0 -c $color $hdf5
+   mv $hdf5.png density-$hdf5.png
+   h5topng -d color -T -m 0.125 -M 1.0 -c $color $hdf5
+   mv $hdf5.png color-$hdf5.png
 end
 
 # convert *png > implosion.mpg
