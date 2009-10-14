@@ -4,8 +4,8 @@ PACKAGE = method
 
 TESTS = test_implosion test_implosion3 test_image test_implosion_opt
 
-INC_LOCAL  = -I$(TOP)/include
-LIB_LOCAL  = -L$(TOP)/lib -lcello
+INC_LOCAL  = $(INC_HDF5)
+LIB_LOCAL  = $(LIB_HDF5) $(LIB_FORTRAN)
 FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(DEF_OPTIMIZE)
 CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(DEF_OPTIMIZE)
 
@@ -55,10 +55,6 @@ OBJS_FC_OPT = ppm.o
 # all: # WORKS ONLY IF empty all: TARGET IS HERE--WHY?
 
 include $(TOP)/src/MAKE/Make.include
-
-FFLAGS   = $(FFLAGS_LOCAL)
-CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
-LIB      = $(LIB_LOCAL) -lgfortran -lm $(LIB_HDF5) $(PG)
 
 test_image: $(OBJS) $(OBJS_FC) $(OBJS_IMAGE)
 	$(CXX) -o test_image $(OBJS_IMAGE) $(OBJS) $(OBJS_FC) $(LIB)

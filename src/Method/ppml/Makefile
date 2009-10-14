@@ -11,8 +11,8 @@ PACKAGE = method
 
 TESTS = test_ppml
 
-INC_LOCAL  = -I$(TOP)/include
-LIB_LOCAL  = -L$(TOP)/lib -lcello
+INC_LOCAL  = 
+LIB_LOCAL  = -L$(TOP)/lib -lcello $(LIB_HDF5) $(LIB_FORTRAN)
 FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
 CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
 
@@ -52,10 +52,6 @@ OBJS = \
 #	PPML_QDD6.o \
 
 include $(TOP)/src/MAKE/Make.include
-
-FFLAGS   = $(FFLAGS_LOCAL)
-CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
-LIB      = $(LIB_LOCAL) -lgfortran -lm $(LIB_HDF5)
 
 .PHONY: clean-local
 clean-local:

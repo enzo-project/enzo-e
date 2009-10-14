@@ -41,7 +41,7 @@ INC = $(INC_LOCAL) -I$(TOP)/include
 # LIB: The libraries common to all components
 #----------------------------------------------------------------------
 
-LIB = $(LIB_LOCAL) -L$(TOP)/lib -lcello
+LIB = -L$(TOP)/lib -lcello $(LIB_LOCAL) 
 
 #----------------------------------------------------------------------
 

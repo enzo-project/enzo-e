@@ -224,7 +224,7 @@ c	endif
 c      print*,'hlld finished'
 c	pause
 
-      End Subroutine HLLDx
+      End ! Subroutine HLLDx
 
 	Subroutine HLLDy(UL,UR,F,U)             !SL and SR from min/max
 	
@@ -451,7 +451,7 @@ c	endif
 c      print*,'hlld finished'
 c	pause
 
-      End Subroutine HLLDy
+      End ! Subroutine HLLDy
 
 
 	Subroutine HLLDz(UL,UR,F,U) !SL and SR from min/max
@@ -681,4 +681,4 @@ c	endif
 c      print*,'hlld finished'
 c	pause
 
-      End Subroutine HLLDz
+      End ! Subroutine HLLDz

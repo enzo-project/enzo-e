@@ -71,7 +71,9 @@ void initialize_hydro ()
   // Gravity
 
   GravityOn                       = 0;    // Whether gravity is included
-  float *AccelerationField[]      = {NULL,NULL,NULL};
+  AccelerationField[0]            = NULL;
+  AccelerationField[1]            = NULL;
+  AccelerationField[2]            = NULL;
 
   // Physics
 
