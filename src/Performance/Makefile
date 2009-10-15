@@ -1,7 +1,7 @@
 
 TOP     = ../..
 PACKAGE = performance
-OBJS    = 
+OBJS    = performance.o
 TESTS   = test_performance
 EXES    = time_matvec
 
@@ -19,7 +19,9 @@ test_performance: test_performance.o
 # force recompile of time_matvec in case OPT changes
 .PHONY: time_matvec
 time_matvec: time_matvec.cpp
-	@echo "Compile time_matvec with, e.g., OPT=-O3"
+	@echo " ***"
+	@echo " *** Compile time_matvec with, e.g., 'make OPT=-O3'"
+	@echo " ***"
 	$(CXX) -o time_matvec.o time_matvec.cpp $(OPT) $(INC) -c
 	$(CXX) -o $@ time_matvec.o  $(OPT) $(LIB)
 
