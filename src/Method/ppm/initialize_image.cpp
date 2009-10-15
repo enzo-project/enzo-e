@@ -56,7 +56,7 @@
 
 inline float color_value 
 (float * image, int nx, int ny,
- float x, float y, float enzo_lower[2], float enzo_upper[2])
+ float x, float y, double enzo_lower[2], double enzo_upper[2])
 // Return boolean flag whether point is inside the text "Enzo"
 {
   if (x < enzo_lower[0] || x > enzo_upper[0]) return false;
@@ -97,20 +97,6 @@ void initialize_image ()
     }
   }
 
-  // Set extents of the E
-
-  // 5/p   @ @ @
-  // 4/4   @
-  // 3/4   @ @
-  // 2/4   @
-  // 1/4   @ @ @
-  //  0 
-
-  float enzo_lower[2] = {0.0, 0.0};
-  float enzo_upper[2] = {2.0, 2.0};
-
-  // Physics
-
   Gamma                           = 1.4;
 
   // Method PPM
@@ -135,8 +121,8 @@ void initialize_image ()
   DomainLeftEdge[0]  = 0.0;
   DomainLeftEdge[1]  = 0.0;
 
-  DomainRightEdge[0] = 4;
-  DomainRightEdge[1] = 2;
+  DomainRightEdge[0] = 1.0*width  / 2000.0;
+  DomainRightEdge[1] = 1.0*height / 2000.0;
 
   // Grid
 
@@ -175,7 +161,7 @@ void initialize_image ()
   FieldType[field_color        = k++] = ElectronDensity;
 
   NumberOfBaryonFields = k;
-  
+
   assert (NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
 
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
@@ -212,7 +198,8 @@ void initialize_image ()
 
       // Initialize density and total energy
 
-      float a = color_value(image, width,height,x,y,enzo_lower,enzo_upper);
+      float a = color_value(image, width,height,x,y,			    
+			    DomainLeftEdge,DomainRightEdge);
 
       float density  = a*enzo_density_in  + (1-a)*enzo_density_out;
       float pressure = a*enzo_pressure_in + (1-a)*enzo_pressure_out;
@@ -232,7 +219,7 @@ void initialize_image ()
 
       // Initialize color
 
-      BaryonField[ field_color ][ i ] = 0.0;
+      BaryonField[ field_color ][ i ] = BaryonField[ field_density ] [ i ];
     }
   }
 

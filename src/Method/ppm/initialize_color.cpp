@@ -56,7 +56,7 @@
 
 inline float color_value 
 (float * image, int nx, int ny,
- float x, float y, float enzo_lower[2], float enzo_upper[2])
+ float x, float y, double enzo_lower[2], double enzo_upper[2])
 // Return boolean flag whether point is inside the text "Enzo"
 {
   if (x < enzo_lower[0] || x > enzo_upper[0]) return false;
@@ -83,7 +83,7 @@ void initialize_color ()
   float color_density_in  = 0.125;
   float color_pressure_out = 1.0;
   float color_pressure_in  = 0.14;
-  float color_velocity_x = 0.0;
+  float color_velocity_x = 10.0;
   float color_velocity_y = 0.0;
   float color_in = 1.0;
   float color_out= 0.0;
@@ -99,18 +99,6 @@ void initialize_color ()
       image [i] = 1.0*(pixel[0] + pixel[1] + pixel[2])/(255*3);
     }
   }
-
-  // Set extents of the E
-
-  // 5/p   @ @ @
-  // 4/4   @
-  // 3/4   @ @
-  // 2/4   @
-  // 1/4   @ @ @
-  //  0 
-
-  float enzo_lower[2] = {0.0, 0.0};
-  float enzo_upper[2] = {0.3, 0.3};
 
   // Physics
 
@@ -138,8 +126,9 @@ void initialize_color ()
   DomainLeftEdge[0]  = 0.0;
   DomainLeftEdge[1]  = 0.0;
 
-  DomainRightEdge[0] = 0.3;
-  DomainRightEdge[1] = 0.3;
+  DomainRightEdge[0] = 1.0*width  / 2000.0;
+  DomainRightEdge[1] = 1.0*height / 2000.0;
+
 
   // Grid
 
@@ -203,6 +192,8 @@ void initialize_color ()
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];
 
+      printf ("%s:%d Changed density initialization\n",__FILE__,__LINE__);
+      printf ("%s:%d Changed energy initialization\n",__FILE__,__LINE__);
   for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
     float y = (iy - GridStartIndex[1] + 0.5)*hy;
@@ -215,20 +206,22 @@ void initialize_color ()
 
       // Initialize density and total energy
 
-      if (x + y < 0.1517) {
+      float front = 0.2*(DomainRightEdge[0] - DomainLeftEdge[0]);
+
+      if (x < front) {
 	BaryonField[ field_density ] [ i ] = color_density_in;
       } else {
-	BaryonField[ field_density ] [ i ] = color_density_out;
+	BaryonField[ field_density ] [ i ] = color_density_in;
       }
 
       // Initialize total energy
 
-      if (x + y < 0.1517) {
+      if (x < front) {
 	BaryonField[ field_total_energy ][ i ] = 
 	  color_pressure_in / ((Gamma - 1.0)*color_density_in);
       } else {
 	BaryonField[ field_total_energy ][ i ] = 
-	  color_pressure_out / ((Gamma - 1.0)*color_density_out);
+	  color_pressure_in / ((Gamma - 1.0)*color_density_in);
       }
 
       // Initialize internal energy
@@ -237,12 +230,16 @@ void initialize_color ()
 
       // Initialize velocity
 
-      BaryonField[ field_velocity_x ][ i ] = color_velocity_x;
+      float vel_low = 0.4*(DomainRightEdge[1] - DomainLeftEdge[1]);
+      float vel_high = 0.6*(DomainRightEdge[1] - DomainLeftEdge[1]);
+      BaryonField[ field_velocity_x ][ i ] = 
+	(y < vel_low || y > vel_high) ? 0.0 : color_velocity_x;
       BaryonField[ field_velocity_y ][ i ] = color_velocity_y;
 
       // Initialize color
 
-      float a = color_value(image, width,height,x,y,enzo_lower,enzo_upper);
+      float a = color_value(image, width,height,x,y,
+			    DomainLeftEdge,DomainRightEdge);
 
       float color  = a * color_in  + (1-a) * color_out;
 
