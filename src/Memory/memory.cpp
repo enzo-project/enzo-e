@@ -340,7 +340,7 @@ void Memory::set_limit ( size_t size, memory_group_handle group_handle )
  */
 {
   check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::set_highest()","");
+  available_[group_handle] = size;
   return;
 }
 
@@ -386,6 +386,8 @@ int Memory::num_delete ( memory_group_handle group_handle ) throw ()
 int    Memory::num_groups_ = 1;
 
 int    Memory::curr_group_ = 0;
+
+size_t Memory::available_[MEMORY_MAX_NUM_GROUPS] = {0};
 
 char * Memory::group_names_ [MEMORY_MAX_NUM_GROUPS] = {0};
 

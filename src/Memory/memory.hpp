@@ -153,6 +153,10 @@ private:
 
   static char * group_names_ [MEMORY_MAX_NUM_GROUPS];
 
+  /// Hardware parameters
+
+  static size_t available_   [MEMORY_MAX_NUM_GROUPS];
+
   /// Collected statistics for different groups
 
   static size_t bytes_       [MEMORY_MAX_NUM_GROUPS];
@@ -165,4 +169,3 @@ private:
 
 
 #endif /* MEMORY_HPP */
-
