@@ -40,10 +40,24 @@ Parallel::Parallel()
 /**
  *********************************************************************
  *
- * @param  parallel Parallel object to copy
- * @return          There is no return value
+ * @param   
+ * @return  
  *
- * Copy a Parallel object
+ * Create a Parallel object
+ *
+ *********************************************************************
+ */
+{
+}
+
+Parallel::~Parallel()
+/**
+ *********************************************************************
+ *
+ * @param   
+ * @return 
+ *
+ * Delete a Parallel object
  *
  *********************************************************************
  */
