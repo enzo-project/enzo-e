@@ -42,14 +42,14 @@ INC = $(INC_LOCAL) -I$(TOP)/include
 # LIB: The libraries common to all components
 #----------------------------------------------------------------------
 
-LIB = -L$(TOP)/lib -lcello $(LIB_LOCAL) 
+LIB = -L$(TOP)/lib -lcello $(LIB_LOCAL) $(LIB_HDF5) $(LIB_FORTRAN) 
 
 #----------------------------------------------------------------------
 
 CPPFLAGS = $(DEF_HDF5) $(CPPFLAGS_LOCAL)
 CXXFLAGS = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CXXFLAGS_LOCAL) $(OPT)
 CFLAGS   = $(INC) $(INC_LOCAL) $(INC_HDF5) $(CFLAGS_LOCAL)   $(OPT)
-LDFLAGS  = $(LIB_HDF5) $(LIB_FORTRAN)
+LDFLAGS  = $(OPT) $(LIB)
 
 INCLUDE = $(TOP)/include
 
