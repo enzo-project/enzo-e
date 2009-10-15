@@ -54,9 +54,10 @@ clean: clean-local
 #-----------------------------------------------------------------------
 
 .PHONY: install
-install: install-include install-objs
-	cp $(TESTS) $(TOP)/bin
-	cp $(EXES)  $(TOP)/bin
+install: install-include install-objs $(patsubst %,copy-bin-%,$(TESTS) $(EXES)) 
+
+copy-bin-%: %
+	cp $* $(TOP)/bin
 
 .PHONY: install-objs
 install-objs: $(OBJS)
