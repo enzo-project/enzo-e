@@ -45,6 +45,24 @@ class Hdf5 {
  */
 
   //-------------------------------------------------------------------
+  // PUBLIC OPERATIONS
+  //-------------------------------------------------------------------
+
+public:
+
+  /// Initialize the Hdf5 object
+  Hdf5();
+  int file_open  (std::string name, std::string mode);
+  void file_close ();
+  void group_open (std::string name);
+  void group_close ();
+  void dataset_open_read (std::string name, int * nx, int * ny, int * nz);
+  void dataset_open_write (std::string name, int nx, int ny, int nz);
+  void dataset_close ();
+  void read  (Scalar * buffer);
+  void write (Scalar * buffer);
+
+  //-------------------------------------------------------------------
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
@@ -66,9 +84,6 @@ private:
   /// HDF5 dataset descriptor
   hid_t dataset_;
 
-  /// Whether dataset is open or closed
-  bool  is_dataset_open_;
-
   /// HDF5 dataset name
   std::string dataset_name_;
 
@@ -77,23 +92,6 @@ private:
 
   /// HDF5 data type
   hid_t datatype_;
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-public:
-
-  /// Initialize the Hdf5 object
-  Hdf5();
-  int file_open  (std::string name, std::string mode);
-  void file_close ();
-  void group_open (std::string name);
-  void group_close ();
-  void dataset_open (std::string name, Array & array);
-  void dataset_close ();
-  void read  (Array & array);
-  void write (Array & array);
 
   //-------------------------------------------------------------------
   // PRIVATE OPERATIONS

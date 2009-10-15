@@ -58,17 +58,21 @@ int main(int argc, char ** argv)
 
   Hdf5 hdf5;
 
+  int n[3];
+
   hdf5.file_open("file_open_test.hdf5","w");
-  hdf5.dataset_open ("dataset",A);
-  hdf5.write(A);
+  A.size(&n[0],&n[1],&n[2]);
+  hdf5.dataset_open_write ("dataset",n[0],n[1],n[2]);
+  hdf5.write(A.values());
   hdf5.dataset_close ();
   hdf5.file_close();
 
   Array B;
 
   hdf5.file_open("file_open_test.hdf5","r");
-  hdf5.dataset_open ("dataset",B);
-  hdf5.read(B);
+  hdf5.dataset_open_read ("dataset",&n[0],&n[1],&n[2]);
+  B.resize(n[0],n[1],n[2]);
+  hdf5.read(B.values());
   hdf5.dataset_close ();
   hdf5.file_close();
 
