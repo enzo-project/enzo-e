@@ -34,8 +34,10 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
   /* Error check. */
  
   if (InitialTimeInCodeUnits == 0) {
-    fprintf(stderr, "The cosmology parameters seem to be improperly set.\n");
-    return FAIL;
+    
+    char error_message[ERROR_MESSAGE_LENGTH];
+    sprintf(error_message, "The cosmology parameters seem to be improperly set");
+    ERROR_MESSAGE("CosmologyComputeExpansionFactor",error_message);
   }
  
   *a = FLOAT_UNDEFINED;

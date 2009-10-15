@@ -2,7 +2,7 @@ TOP = ../../..
 
 PACKAGE = method
 
-TESTS = test_implosion test_implosion3 test_image test_color test_implosion_opt
+TESTS = test_ppm test_implosion test_implosion3 test_image test_color test_implosion_opt
 
 # This does no good--why not?  OMP_NUM_THREADS = 4 on stingmeyer
 # PARALLEL = -fopenmp -ftree-parallelize-loops=4 
@@ -11,6 +11,7 @@ INC_LOCAL  = $(INC_HDF5)
 LIB_LOCAL  = $(LIB_HDF5) $(LIB_FORTRAN) $(PARALLEL)
 CPPFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(DEF_OPTIMIZE) $(PARALLEL)
 
+OBJS_PPM        = test_ppm.o initialize_ppm.o
 OBJS_IMAGE      = test_image.o initialize_image.o
 OBJS_COLOR      = test_color.o initialize_color.o
 OBJS_IMPLOSION  = test_implosion.o  initialize_implosion.o
@@ -57,6 +58,8 @@ OBJS_FC_OPT = ppm.o
 
 include $(TOP)/src/MAKE/Make.include
 
+test_ppm: $(OBJS) $(OBJS_FC) $(OBJS_PPM)
+	$(CXX) -o test_ppm $(OBJS_PPM) $(OBJS) $(OBJS_FC) $(LIB)
 test_image: $(OBJS) $(OBJS_FC) $(OBJS_IMAGE)
 	$(CXX) -o test_image $(OBJS_IMAGE) $(OBJS) $(OBJS_FC) $(LDFLAGS)
 test_color: $(OBJS) $(OBJS_FC) $(OBJS_COLOR)

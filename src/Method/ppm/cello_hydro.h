@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "fortran.def"
+#include "defines.h"
+#include "error.hpp"
 
 //----------------------------------------------------------------------
 // DEFINES
@@ -208,7 +209,6 @@ int SetExternalBoundary(int FieldRank,
 			     int FieldType);
 
 
-void initialize_hydro ();
 
 // PPM
 
