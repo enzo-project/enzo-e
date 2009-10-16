@@ -28,4 +28,31 @@
 #   define SCALAR_HDF5    H5T_NATIVE_DOUBLE
 #endif
 
+/* Performance attribute values for Performance::attr_component */
+
+enum type_perf_group {
+  perf_group_amr,
+  perf_group_analysis,
+  perf_group_array,
+  perf_group_control,
+  perf_group_disk,
+  perf_group_error,
+  perf_group_field,
+  perf_group_memory,
+  perf_group_method,
+  perf_group_monitor,
+  perf_group_parallel,
+  perf_group_parameters,
+  perf_group_particles,
+  perf_group_performance,
+  perf_group_portal,
+  perf_group_problem,
+  perf_group_simulation
+};
+
+/* Include "global" components */
+
+#include "error.hpp"
+#include "performance.hpp"
+
 #endif /* CELLO_DEF */
