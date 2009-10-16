@@ -7,8 +7,9 @@
 const bool debug = false;
 
 Tree4::Tree4()
-  : root_(new Node4()),
-    levels_(0)
+  : levels_(0),
+    root_(new Node4())
+
 {
 }
 
@@ -34,7 +35,7 @@ void Tree4::normalize(bool is_full)
   do {
     tree_changed = false;
     root_->normalize_pass(tree_changed,is_full);
-    if (debug) printf ("Normalize pass %d\n",pass,tree_changed);
+    if (debug) printf ("Normalize pass %d\n",pass);
     pass++;
   } while (tree_changed);
   printf ("passes = %d\n",pass);
@@ -49,7 +50,7 @@ void Tree4::optimize(bool is_full)
   do {
     tree_changed = false;
     root_->optimize_pass(tree_changed,is_full);
-    if (debug) printf ("Optimize pass %d\n",pass,tree_changed);
+    if (debug) printf ("Optimize pass %d\n",pass);
     pass++;
   } while (tree_changed);
   printf ("passes = %d\n",pass);

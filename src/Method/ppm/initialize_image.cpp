@@ -55,15 +55,15 @@
 #include "image.h"
 
 inline float color_value 
-(float * image, int nx, int ny,
+(float * image, size_t nx, size_t ny,
  float x, float y, double enzo_lower[2], double enzo_upper[2])
 // Return boolean flag whether point is inside the text "Enzo"
 {
   if (x < enzo_lower[0] || x > enzo_upper[0]) return false;
   if (y < enzo_lower[1] || y > enzo_upper[1]) return false;
 
-  int ix = width*(x - enzo_lower[0]) / (enzo_upper[0] - enzo_lower[0]);
-  int iy = height*(y - enzo_lower[1]) / (enzo_upper[1] - enzo_lower[1]);
+  size_t ix = width*(x - enzo_lower[0]) / (enzo_upper[0] - enzo_lower[0]);
+  size_t iy = height*(y - enzo_lower[1]) / (enzo_upper[1] - enzo_lower[1]);
   if (ix == width) ix--;
   if (iy == height) iy--;
   assert (ix >= 0);
@@ -89,8 +89,8 @@ void initialize_image ()
   const char * data = header_data;
 
   float * image = new float [width*height];
-  for (int iy=0; iy<height; iy++) {
-    for (int ix=0; ix<width; ix++) {
+  for (size_t iy=0; iy<height; iy++) {
+    for (size_t ix=0; ix<width; ix++) {
       HEADER_PIXEL(data,pixel);
       int i=ix + width*iy;
       image [i] = 1.0*(pixel[0] + pixel[1] + pixel[2])/(255*3);
@@ -171,18 +171,18 @@ void initialize_image ()
     BaryonField[field] = baryon_fields + field*nd;
   }
 
-  float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
-  for (int field = 0; field < NumberOfBaryonFields; field++) {
-    OldBaryonField[field] = baryon_fields + field*nd;
-  }
+//   float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
+//   for (int field = 0; field < NumberOfBaryonFields; field++) {
+//     OldBaryonField[field] = baryon_fields + field*nd;
+//   }
 
   int ndx = GridDimension[0];
-  int ndy = GridDimension[1];
+//   int ndy = GridDimension[1];
 
-  float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
-  float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
-  int  ixg = (GridEndIndex[0] - GridStartIndex[0] + 1);
-  int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
+//   float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
+//   float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
+//   int  ixg = (GridEndIndex[0] - GridStartIndex[0] + 1);
+//   int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];
 

@@ -53,7 +53,7 @@ int SolveHydroEquations
  
     /* initialize */
  
-    int dim, i, idim, j, jdim, field, size, subgrid, n;
+    int dim, i,  size;
     int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num, coloff[MAX_COLOR];
     long long GridGlobalStart[MAX_DIMENSION];
     FLOAT a = 1, dadt;
@@ -152,7 +152,6 @@ int SolveHydroEquations
  
     /* Determine if Gamma should be a scalar or a field. */
  
-    int UseGammaField = FALSE;
     float *GammaField;
     GammaField = new float[1];
     GammaField[0] = Gamma;

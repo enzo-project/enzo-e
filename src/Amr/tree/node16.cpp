@@ -128,7 +128,7 @@ int Node16::refine
     int ix4[5] = {lowx, lowx+dx, lowx+2*dx, lowx+3*dx, upx};
     int iy4[5] = {lowy, lowy+dy, lowy+2*dy, lowy+3*dy, upy};
 
-    int depth_child[4][4] = {0};
+    int depth_child[4][4] = {{0}};
 
     if (full_nodes) {
 
@@ -163,7 +163,7 @@ int Node16::refine
       // Refine each child separately if any bits in the level_array
       // are in in them
 
-      bool refine_child[4][4] = {false};
+      bool refine_child[4][4] = {{false}};
 
       // loop over children
 
@@ -320,7 +320,7 @@ void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
     
     if (! all_children ()) {
 
-      bool refine_child[4][4] = {false};
+      bool refine_child[4][4] = {{false}};
 
       for (int ix=0; ix<4; ix++) {
 	for (int iy=0; iy<4; iy++) {

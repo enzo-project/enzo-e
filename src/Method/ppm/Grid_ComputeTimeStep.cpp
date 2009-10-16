@@ -48,13 +48,13 @@ float ComputeTimeStep()
  
   /* initialize */
  
-  float dt, dtTemp;
+  //  float dt, dtTemp;
   float dtBaryons      = HUGE_VAL;
   float dtViscous      = HUGE_VAL;
-  float dtParticles    = HUGE_VAL;
+  //  float dtParticles    = HUGE_VAL;
   float dtExpansion    = HUGE_VAL;
-  float dtAcceleration = HUGE_VAL;
-  int dim, i, result;
+  //  float dtAcceleration = HUGE_VAL;
+  int dim, result;
  
   /* Compute the field size. */
  
@@ -170,7 +170,7 @@ float ComputeTimeStep()
  
   /* 5) calculate minimum timestep */
  
-  dt = dtBaryons;
+  double dt = dtBaryons;
   //  dt = min(dtBaryons, dtParticles);
   //  dt = min(dt, dtViscous);
 //   dt = min(dt, dtAcceleration);

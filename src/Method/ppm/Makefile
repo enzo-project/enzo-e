@@ -45,7 +45,6 @@ OBJS = \
 	pgas2d_dual.o \
 	pgas2d.o \
 	ppm_de.o \
-	print_field.o \
 	SetExternalBoundary.o \
 	sum_field.o \
 	twoshock.o \

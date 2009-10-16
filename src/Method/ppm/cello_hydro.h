@@ -210,6 +210,8 @@ int SetExternalBoundary(int FieldRank,
 
 
 
+void initialize_hydro ();
+
 // PPM
 
 void initialize_implosion (int size, int cycles);

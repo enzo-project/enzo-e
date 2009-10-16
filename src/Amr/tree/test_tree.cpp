@@ -6,7 +6,6 @@
 
 #include "cello.h"
 
-#include "array.hpp"
 #include "disk.hpp"
 #include "node4.h"
 #include "tree4.h"
@@ -26,6 +25,7 @@ const int  max_level = 14;
 
 int * create_level_array (int * n0, int * n1, int max_levels)
 {
+
   int size = (width > height) ? width: height;
 
   int * level_array = new int [size*size];
@@ -41,8 +41,8 @@ int * create_level_array (int * n0, int * n1, int max_levels)
   int iy0 = (size - height) / 2;
 
   int max = 0;
-  for (int iy=0; iy<height; iy++) {
-    for (int ix=0; ix<width; ix++) {
+  for (size_t iy=0; iy<height; iy++) {
+    for (size_t ix=0; ix<width; ix++) {
       HEADER_PIXEL(data,pixel);
       int i = (iy+iy0) + size*(ix+ix0);
       float r = 1.0*pixel[0]/256;
@@ -59,14 +59,13 @@ void write_image(float * image, int nx, int ny, const char * filename)
 {
   Hdf5 hdf5;
   hdf5.file_open(filename,"w");
-  ArraySerial tree_array (image,nx,ny,1);
-  hdf5.dataset_open ("tree_image",tree_array);
-  hdf5.write(tree_array);
+  hdf5.dataset_open_write ("tree_image",nx,ny,1);
+  hdf5.write(image);
   hdf5.dataset_close ();
   hdf5.file_close();
 }
 
-main()
+int main(int argc, char ** argv)
 {
   int n0,n1;
 
@@ -173,7 +172,6 @@ main()
   // 3
 
   Tree16 * tree16 = new Tree16;
-  full_nodes;
   tree16->refine(level_array,n0,n1,max_level,full_nodes=true);
 
   // Determine image size

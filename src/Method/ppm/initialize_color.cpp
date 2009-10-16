@@ -55,15 +55,15 @@
 #include "image.h"
 
 inline float color_value 
-(float * image, int nx, int ny,
+(float * image, size_t nx, size_t ny,
  float x, float y, double enzo_lower[2], double enzo_upper[2])
 // Return boolean flag whether point is inside the text "Enzo"
 {
   if (x < enzo_lower[0] || x > enzo_upper[0]) return false;
   if (y < enzo_lower[1] || y > enzo_upper[1]) return false;
 
-  int ix = width*(x - enzo_lower[0]) / (enzo_upper[0] - enzo_lower[0]);
-  int iy = height*(y - enzo_lower[1]) / (enzo_upper[1] - enzo_lower[1]);
+  size_t ix = width*(x - enzo_lower[0]) / (enzo_upper[0] - enzo_lower[0]);
+  size_t iy = height*(y - enzo_lower[1]) / (enzo_upper[1] - enzo_lower[1]);
   if (ix == width) ix--;
   if (iy == height) iy--;
   assert (ix >= 0);
@@ -92,8 +92,8 @@ void initialize_color ()
   const char * data = header_data;
 
   float * image = new float [width*height];
-  for (int iy=0; iy<height; iy++) {
-    for (int ix=0; ix<width; ix++) {
+  for (size_t iy=0; iy<height; iy++) {
+    for (size_t ix=0; ix<width; ix++) {
       HEADER_PIXEL(data,pixel);
       int i=ix + width*iy;
       image [i] = 1.0*(pixel[0] + pixel[1] + pixel[2])/(255*3);
@@ -177,23 +177,21 @@ void initialize_color ()
     BaryonField[field] = baryon_fields + field*nd;
   }
 
-  float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
-  for (int field = 0; field < NumberOfBaryonFields; field++) {
-    OldBaryonField[field] = baryon_fields + field*nd;
-  }
+//   float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
+//   for (int field = 0; field < NumberOfBaryonFields; field++) {
+//     OldBaryonField[field] = baryon_fields + field*nd;
+//   }
 
   int ndx = GridDimension[0];
-  int ndy = GridDimension[1];
+//   int ndy = GridDimension[1];
 
-  float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
-  float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
-  int  ixg = (GridEndIndex[0] - GridStartIndex[0] + 1);
-  int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
+//   float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
+//   float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
+//   int  ixg = (GridEndIndex[0] - GridStartIndex[0] + 1);
+//   int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];
 
-      printf ("%s:%d Changed density initialization\n",__FILE__,__LINE__);
-      printf ("%s:%d Changed energy initialization\n",__FILE__,__LINE__);
   for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
     float y = (iy - GridStartIndex[1] + 0.5)*hy;
@@ -211,7 +209,7 @@ void initialize_color ()
       if (x < front) {
 	BaryonField[ field_density ] [ i ] = color_density_in;
       } else {
-	BaryonField[ field_density ] [ i ] = color_density_in;
+	BaryonField[ field_density ] [ i ] = color_density_out;
       }
 
       // Initialize total energy
@@ -221,7 +219,7 @@ void initialize_color ()
 	  color_pressure_in / ((Gamma - 1.0)*color_density_in);
       } else {
 	BaryonField[ field_total_energy ][ i ] = 
-	  color_pressure_in / ((Gamma - 1.0)*color_density_in);
+	  color_pressure_out / ((Gamma - 1.0)*color_density_out);
       }
 
       // Initialize internal energy

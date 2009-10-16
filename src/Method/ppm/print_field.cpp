@@ -17,7 +17,7 @@
 /** 
  *********************************************************************
  *
- * @file      print_grid.cpp
+ * @file      print_field.cpp
  * @brief     Print the active values of the grid field
  * @author    James Bordner
  * @date      Sat Aug 29 23:45:03 PDT 2009
@@ -49,7 +49,7 @@
 
 #include "cello_hydro.h"
  
-float print_field (int field)
+void print_field (int field)
 
 {
   if (BaryonField[field] == NULL) return -1;

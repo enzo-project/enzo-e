@@ -27,14 +27,11 @@
 class Performance {
 
   enum type_counter {
-    time_real_rel,       // Wallclock time of region
-    first_counter = time_real_rel,
-    time_real_abs,       // Elapsed wallclock time
-    time_user_rel,       // CPU time in user code of region
-    time_user_abs,       // Elapsed CPU time in user code
-    time_sys_rel,        // CPU time in system of region
-    time_sys_abs,        // Elapsed CPU time in system
-    time_sim_abs,        // Simulation time
+    first_counter,       // Wallclock time of region
+    time_real = first_counter,
+    time_user,           // CPU time in user code of region
+    time_sys,            // CPU time in system of region
+    time_sim,            // Simulation time
     comm_send_bytes,     // Amount of data sent from this thread
     comm_recv_bytes,     // Amount of data sent from this thread
     comm_send_time,      // Time spent sending data
@@ -57,26 +54,26 @@ class Performance {
     user_cell_count,     // Number of grid cells in each level
     user_particle_count, // Number of particles
     cpu_flop_count,      // Number of floating point operations
-    cpu_mem_count,       // Number of memory accesses
-    last_counter = cpu_mem_count
+    last_counter,        // Number of memory accesses
+    cpu_mem_count = last_counter
   };
 
   enum type_attr {
-    attr_timestep,  // Simulation timesteps [monotonic]
-    first_attr = attr_timestep,
-    attr_level,     // AMR hierarchy level
-    attr_component, // software component [memory]
-    attr_function,  // code function
-    attr_process,   // MPI process id
-    last_attr = attr_process
+    first_attr,          // Simulation timesteps [monotonic]
+    attr_timestep = first_attr,
+    attr_level,          // AMR hierarchy level
+    attr_component,      // software component [memory]
+    attr_function,       // code function
+    last_attr,           // MPI process id
+    attr_process = last_attr
   };
 
   enum type_metric {
-    time_balance, // Relative time load balance at given level
-    first_metric = time_balance,
-    mem_balance,  // Relative memory load balance at given level
-    comm_balance, // Relative communication load balance at given level
-    last_metric = comm_balance
+    first_metric,        // Relative time load balance at given level
+    time_balance = first_metric,
+    mem_balance,         // Relative memory load balance at given level
+    last_metric,         // Relative communication load balance at given level
+    comm_balance = last_metric
   };
 
 /** 

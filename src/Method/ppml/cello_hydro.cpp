@@ -74,6 +74,7 @@ int field_internal_energy;
 int field_velocity_x;
 int field_velocity_y;
 int field_velocity_z;
+int field_color;
 
 int    GridRank;
 int    GridDimension[MAX_DIMENSION];   // total dimensions of all grids

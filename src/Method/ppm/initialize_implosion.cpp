@@ -138,10 +138,10 @@ void initialize_implosion (int size_param, int cycles_param)
     BaryonField[field] = baryon_fields + field*nd;
   }
 
-  float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
-  for (int field = 0; field < NumberOfBaryonFields; field++) {
-    OldBaryonField[field] = baryon_fields + field*nd;
-  }
+//   float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
+//   for (int field = 0; field < NumberOfBaryonFields; field++) {
+//     OldBaryonField[field] = baryon_fields + field*nd;
+//   }
 
   int ndx = GridDimension[0];
   int ndy = GridDimension[1];

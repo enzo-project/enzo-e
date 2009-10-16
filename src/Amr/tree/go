@@ -13,7 +13,8 @@
 # set images = (cosmo2)
 # set images = (max2)
 # set images = (saturn)
-set images = (saturn2)
+#set images = (saturn2)
+set images = (egret-square)
 
 set color = gray
 
