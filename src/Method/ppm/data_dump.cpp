@@ -52,7 +52,6 @@
 #include <string>
 #include <hdf5.h>
 
-#include "array.hpp"
 #include "disk.hpp"
 
 void data_dump(const char * file_root, int cycle)
@@ -63,25 +62,23 @@ void data_dump(const char * file_root, int cycle)
   // Open hdf5 file dump for cycle
   char filename[80];
   sprintf (filename,"%s-%06d.hdf5",file_root,cycle);
+
   hdf5.file_open(filename,"w");
 
-  // Write density
-  Array density (BaryonField[field_density],
-		 GridDimension[0],
-		 GridDimension[1],
-		 GridDimension[2]);
-  hdf5.dataset_open ("density",density);
-  hdf5.write(density);
+  hdf5.dataset_open_write ("density",
+			   GridDimension[0],
+			   GridDimension[1],
+			   GridDimension[2]);
+  hdf5.write(BaryonField[field_density]);
   hdf5.dataset_close ();
 
   // Write color
 
-  Array color (BaryonField[field_color],
-		 GridDimension[0],
-		 GridDimension[1],
-		 GridDimension[2]);
-  hdf5.dataset_open ("color",color);
-  hdf5.write(color);
+  hdf5.dataset_open_write ("color",
+			   GridDimension[0],
+			   GridDimension[1],
+			   GridDimension[2]);
+  hdf5.write(BaryonField[field_color]);
   hdf5.dataset_close ();
 
 
