@@ -50,9 +50,19 @@ enum type_perf_group {
   perf_group_simulation
 };
 
+/* System includes */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <string>
+#include <vector>
+#include <map>
+
 /* Include "global" components */
 
 #include "error.hpp"
 #include "performance.hpp"
+
 
 #endif /* CELLO_DEF */

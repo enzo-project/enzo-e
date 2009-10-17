@@ -58,14 +58,14 @@ class Performance {
     cpu_mem_count = last_counter
   };
 
-  enum type_attr {
-    first_attr,          // Simulation timesteps [monotonic]
-    attr_timestep = first_attr,
-    attr_level,          // AMR hierarchy level
-    attr_component,      // software component [memory]
-    attr_function,       // code function
-    last_attr,           // MPI process id
-    attr_process = last_attr
+  enum type_attribute {
+    first_attribute,          // Simulation timesteps [monotonic]
+    attribute_timestep = first_attribute,
+    attribute_level,          // AMR hierarchy level
+    attribute_component,      // software component [memory]
+    attribute_function,       // code function
+    last_attribute,           // MPI process id
+    attribute_process = last_attribute
   };
 
   enum type_metric {
@@ -99,6 +99,64 @@ public:
 
   /// 
   ~Performance();
+
+  // GROUPS
+
+  ///  	 Define the start of a group
+  void group_begin(std::string);
+
+  ///  	Define the end of a group
+  void group_end(std::string group_name);
+
+  // REGIONS
+
+  ///  	Define the start of a region
+  void region_start(std::string region_name);
+
+  ///  	Define the end of a region
+  void region_stop(std::string region_name);
+
+  // ATTRIBUTES
+
+  ///  	Create a new attribute
+  void attribute_create(type_attribute id_attribute, 
+			std::string    attribute_name,
+			bool           is_monotonic    = false,
+			int            max_value       = 0);
+
+  /// Return the value of an attribute
+  int attribute_get(type_attribute id_attribute);
+
+  /// Assign a value to an attribute
+  void attribute_set(type_attribute id_attribute);
+
+  /// Return the number of attributes
+  size_t attribute_count();
+
+  // COUNTERS
+
+  ///  	Create a new user counter
+  void counter_create(type_counter id_counter,
+		      std::string counter_name);
+
+  ///  	Return the value of a counter
+  long long counter_get(type_counter id_counter);
+
+  ///  	Assign a value to a user counter
+  void counter_set(type_counter id_counter,
+			 long long value);
+  ///  	Increment a user counter
+  void counter_increment(type_counter id_counter,
+			 long long value);
+
+  /// Return the number of counters
+  size_t counter_count();
+
+  // DISK
+
+  ///  	Flush data to disk
+  void flush();
+
 
 private:
 

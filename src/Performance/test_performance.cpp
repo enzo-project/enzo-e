@@ -39,10 +39,11 @@ int main(int argc, char ** argv)
   Timer timer;
   const double time_tolerance = 0.05;
 
+  unit_open();
+
   // Timer tests
 
   unit_class ("Timer");
-  unit_open();
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 
@@ -63,6 +64,49 @@ int main(int argc, char ** argv)
   printf ("Initial timer value = %24.16f\n",timer.value());
 
   unit_assert((timer.value() - 2.0) < time_tolerance);
+
+  unit_class ("Performance");
+
+  unit_func ("group_begin");
+
+  unit_func("group_end");
+  unit_assert (false);
+
+  unit_func("region_start");
+  unit_assert (false);
+
+  unit_func("region_stop");
+  unit_assert (false);
+
+  unit_func("attribute_create");
+  unit_assert (false);
+
+  unit_func("attribute_get");
+  unit_assert (false);
+
+  unit_func("attribute_set");
+  unit_assert (false);
+
+  unit_func("attribute_count");
+  unit_assert (false);
+
+  unit_func("counter_create");
+  unit_assert (false);
+
+  unit_func("counter_get");
+  unit_assert (false);
+
+  unit_func("counter_set");
+  unit_assert (false);
+
+  unit_func("counter_increment");
+  unit_assert (false);
+
+  unit_func("counter_count");
+  unit_assert (false);
+
+  unit_func("flush");
+  unit_assert (false);
 
   unit_close();
 }
