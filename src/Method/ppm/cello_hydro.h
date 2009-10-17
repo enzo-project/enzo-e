@@ -22,7 +22,7 @@
 #define ISYM                              "d" // Scalar
 
 #define MAX_DIMENSION                       3 // for array declarations and loops in SolveHydro
-#define MAX_NUMBER_OF_BARYON_FIELDS         5 // for array declarations and loops in SolveHydro
+#define MAX_NUMBER_OF_BARYON_FIELDS         28 // for array declarations and loops in SolveHydro
 
 #define sign(A)   ((A) >  0  ?  1  : -1 )     // upper-case inline function
 #define nint(A)   ((int) ((A) + 0.5*sign(A)) ) // rename to round(), upper-case inline function

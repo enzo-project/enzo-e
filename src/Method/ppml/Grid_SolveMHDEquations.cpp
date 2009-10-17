@@ -85,7 +85,7 @@ int SolveMHDEquations(int cycle, float dt)
  
     /* initialize */
  
-    int dim, i, idim, j, jdim, field, size, subgrid, n;
+    int dim, i, idim,  jdim,  size, subgrid;
     Elong_int GridGlobalStart[MAX_DIMENSION];
  
     /* Compute size (in floats) of the current grid. */
@@ -323,7 +323,7 @@ int SolveMHDEquations(int cycle, float dt)
  
     /* Prepare Gravity. */
  
-    int GravityOn = 0;
+//     int GravityOn = 0;
 //     if (SelfGravity || UniformGravity || PointSourceGravity)
 //       GravityOn = 1;
  

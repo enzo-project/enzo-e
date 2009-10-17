@@ -49,13 +49,15 @@ float ComputeTimeStep()
  
   /* initialize */
  
-  float dt, dtTemp;
+  float dt;
+//   float dtTemp;
   float dtBaryons      = HUGE_VAL;
   float dtViscous      = HUGE_VAL;
   float dtParticles    = HUGE_VAL;
   float dtExpansion    = HUGE_VAL;
   float dtAcceleration = HUGE_VAL;
-  int dim, i, result;
+  int dim;
+//   int i, result;
  
   /* Compute the field size. */
  
@@ -69,7 +71,7 @@ float ComputeTimeStep()
   FLOAT a = 1, dadt;
   if (ComovingCoordinates)
     CosmologyComputeExpansionFactor(Time, &a, &dadt);
-  float afloat = float(a);
+//   float afloat = float(a);
  
   /* 1) Compute Courant condition for baryons. */
  
@@ -77,8 +79,8 @@ float ComputeTimeStep()
  
     /* Find fields: density, total energy, velocity1-3. */
  
-    int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
-    float *pressure_field;
+//     int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
+//     float *pressure_field;
 
 //     if (HydroMethod != PPML_Isothermal3D) {
 //       if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
