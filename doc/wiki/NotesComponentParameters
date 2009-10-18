@@ -2,4 +2,37 @@
 
 = Parameters Component =
 
+=== `Parameters` class ===
+
+==== Attributes ==== 
+
+==== Functions ==== 
+
+ || `Parameters::Parameters()` ||   Create an empty Parameters object ||
+ || `Parameters::~Parameters()` || Delete a Parameters object ||
+ || || ||
+ || `Parameters::read()` ||  Read parameters from a file ||
+ || `Parameters::write()` ||  Write parameters to a file ||
+ || || ||
+ || `Parameters::value_integer()`  || Return the integer-valued parameter ||
+ || `Parameters::value_scalar()`  ||  Return the scalar-valued parameter ||
+ || `Parameters::value_logical ()`  ||  Return the logical-valued parameter ||
+ || `Parameters::value_string ()`  || Return the string-valued parameter ||
+ || `Parameters::evaluate_scalar()` || Evaluate the scalar-valued parameter expression ||
+ || || ||
+ || `Parameters::length_list()` || Return the length of the list parameter ||
+ || `Parameters::list_value_integer()` ||  Access an integer list element ||
+ || `Parameters::list_value_scalar()`     || Access a scalar list element ||
+ || `Parameters::list_value_logical()`     ||  Access aa logical list element ||
+ || `Parameters::list_value_string()`     || Access a string list element ||
+ || `Parameters::list_evaluate_scalar()` || Evaluate the scalar-valued list element expression ||
+ || || ||
+ || `Parameters::set_group()` || Set the current group ||
+ || `Parameters::set_subgroup()` || Set the current subgroup ||
+ || `Parameters::get_group()` || Get the current group ||
+ || `Parameters::get_subgroup()` || Get the current subgroup ||
+
+==== Parameters ==== 
+
+
 ([NotesComponentParallel Parallel] < [NotesComponents index] > [NotesComponentParticles Particles])

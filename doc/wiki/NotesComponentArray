@@ -7,54 +7,44 @@
 The `Array` component is used to represent the concept of a Fortran-style 3D array, but with
 data distributed or threaded in various ways.  Tentative functionality includes the following:
 
- * Basic 1-, 2-, 3-D style Fortran arrays
+ * Related groups of 1-, 2-, 3-D style Fortran arrays
+ * MPI-distributed arrays
+ * OMP-threaded array
+ * UPC-distributed arrays
+ * Hybrid distributed/threaded arrays
+ * Efficient iterators over array blocks for computations
+ * Parallelization and data distribution are hidden in block iterators
+ * Support for both permanent and allocate-when-needed ghost zones
+ * Efficient resizing / combining / merging functions for integration with `Amr`
+ * Efficient transposing / permuting of axes, e.g. for PPM to compute with stride-1 along all axes
+ * Efficient ghost-zone refresh
+ * Group operations for controlling relative data layout of multiple arrays
+ * Support for cell-centered, face-centered, edge-centered, or corner storage
  * Optional ''blocked'' storage for improved cache use or vector behavior
  * Optional ''padding'' for low-associativity caches
- * MPI-distributed arrays
- * OMP-threaded arrays
- * (UPC-distributed arrays)
- * Efficient iterators over array blocks for computations
- * Parallelization and data distribution are (mostly) hidden in block iterators
- * Support for both implicit and explicit ghost zones
-  * e.g. automatic allocation/deallocation for implicit ghosts
-  * can use Chombo's idea of `shrink()` and `grow()` functions
- * Efficient resizing / combining / merging functions for integration with `Amr`
-  * `merge()` and `split()` may be sufficient?
- * Efficient transposing / permuting of axes, e.g. for PPM to compute with stride-1 along all axes
- * Flexible mix-and-match feature support, via "Decorator" design pattern
-  * ''may not be feasible due to complex interactions between decorators''
-  * Substitute set of useful configurations: MPI-1, MPI-2 , OMP, (MPI-1 + OMP), (MPI-2 + OMP)
+
+To implement `Array`'s, other related classes are used to share implementation responsibilities.  These classes are described in separate pages.
+
+ * [NotesComponentArrayLayout Layout] The `Layout` class is used to define an `Array`'s configuration, but does not allocate any data.  `Array`'s that share the same `Layout` object are said to be conforming.  An `Array`'s `Layout` describes how to distribute an `Array`'s data over MPI processes, between OpenMP threads, etc.  For unigrid problems, only one `Layout` is used.  For `Amr` problems, typically several `Layout`s are used.
+
+ * [NotesComponentArrayBlock Block ] The `Block` class is a lightweight wrapper for portions of an `Array` to be actively computed by a single thread.  It represents a Fortran-style array, together with offset, stride, dimension, and size.
+
+ * [NotesComponentArrayItBlock ItBlock] The `ItBlock` class is used to iterate over `Block`'s of `Array`'s that share conforming `Layout`'s.
 
 == Issues ==
 
- * How to handle iterators in a way that the calling code doesn't know what `Layout` varieties are used?
- * How to handle nested iterators in calling code? ''meta-iterator function that loops only over smallest blocks, e.g. MPI / OMP tasks''
- * How to support load balancing?
- * How to iterate over multiple arrays: 
-   * `Layout` specifies configuration
-  * `Array` allocates elements
-  * `Block` is a lightweight wrapper (struct?) over Fortran-style array (start, stride, size, dimensions)
-  * iterators over `Layout`
-  * iterators access `Layout`-conforming `Array`'s, returning `Block`'s
+Issues with `Array`s and supporting classes include the following:
 
-== `Array` supporting classes ==
+ * How to handle iterators in a way that the calling code doesn't know what `Layout` varieties are used
+ * How to handle nested iterators in calling code for hybrid parallelization `Layout`s
+ * How to handle load balancing
+ * How to communicate between array blocks to refresh ghost zones
+ * How to communicate between arrary blocks for interpolation
+ * How to handle permanent versus temporary ghost zones
+ * How to support cell-, face-, edge-centered variables in same layout
+ * How to control layout within a `Layout`, e.g. interleave range of arrays but not others.
 
-To implement `Array`'s, other related classes are used to share implementation responsibilities.
-
-==== `Layout` ====
-The `Layout` class is used to define an `Array`'s configuration, but does not allocate any data.  `Array`'s
-that share the same `Layout` object are said to be conforming.  An `Array`'s `Layout` describes how to distribute an `Array`'s data over MPI processes, between OpenMP threads, etc.
-
-==== `Block` ====
-The `Block` class is a lightweight wrapper for blocks of an `Array` to be computed on.  It represents
-a Fortran-style array, together with offset, stride, dimension, and size.  A `Block` is operated on
-by a single thread.
-
-==== `ItArrayBlock` ====
-
-The `ItArrayBlock` class is used to iterate over `Block`'s of `Array`'s that share conforming `Layout`'s.
-
-== `Array` operations ==
+== Operations ==
 
  * Allocation and deallocation functions (`Memory`)
  * Copy functions
@@ -62,170 +52,47 @@ The `ItArrayBlock` class is used to iterate over `Block`'s of `Array`'s that sha
  * Universal properties functions for obtaining information about the array (dimensions, etc.)
  * `Layout`-dependent properties (MPI task distribution, cache block sizes, etc.)
  * Iterators for looping over array blocks
- * Accessor functions for getting various sub-arrays  (OMP tasks, cache blocks, "MPI" tasks) and
-   associated parameters (dimension, size, stride)
- * Reshape functions for converting between different array configurations (blocked to unblocked, with ghosts to without ghosts, etc.)
+ * Reshape / resize functions for converting between different array configurations (blocked to unblocked, with ghosts to without ghosts, etc.)
  * Accessor functions for neighboring values
  * Refresh functions for obtaining updated ghost zone values (accesses `Parallel`)
- * I/O functions (may access `Disk` ? )
+ * I/O functions (`Disk`)
 
-== `Array` hierarchy ==
+== `Array` class ==
 
-=== Structure ===
+=== Attributes ===
 
- * `Array`
-  * `ArrayMpi`
-   * `ArrayMpi1`
-   * `ArrayMpi2`
-  * `ArrayOmp`
-  * `ArrayBlocked`
-  * `ArrayPadded`
-  * [`ArrayGpu`]
-  * [`ArrayUpc`]
-
-May want to add an additional layer, e.g. with `ArrayDistributed` and `ArrayThreaded`,
-to support the similarities of MPI-1 and MPI-2, and OpenMP and (say) pthreads.
-
-The `ArrayGpu` class may not be needed, except if the GPU blocking is smaller than the smallest
-block otherwise used.  I would expect just using `ArrayBlocked` is sufficient.  If we want
-to block for cache and GPU separately, then maybe `ArrayBlocked` can support nested block sizes.
-
-=== Descriptions ===
-`Array` variations are constructed using the Decorator design pattern.
-
- || `ArrayMpi1` || MPI send/recv distributed `Array` ||
- || `ArrayMpi2`|| MPI get/put distributed `Array`||
- || `ArrayOmp`|| OMP-threaded `Array`||
- || `ArrayBlocked`|| cache-blocked `Array`||
- || `ArrayPadded`|| cache-padded `Array`||
- || || ||
- || `ArrayGpu`|| GPU-blocked `Array`||
- || `ArrayUpc`|| UPC-distributed `Array`||
-
-=== `Array` class ===
-
-Array elements are accessed as `i0*(ns_[0] + i1*(ns_[1] + i2*ns_[2]))` (1 mul + 2 madd's)
-
-Stride 1 array elements can be accessed as `i0 + i1*(ns_[1] + i2*ns_[2])` (2 madd's)
-
-These 
-
-==== Attributes ====
-
- * `int dimension_[3];` ''allocated size''
- * `int size_[3];`  ''array size''
- * `int stride_[3];` ''strides''
- * `int values_` ''array elements''
+ * `Scalar ** values_` ''array elements''
  * `bool is_allocated_` ''true iff values_ should ever be deallocated''
+ * `Layout layout_` ''Layout for the arrays''
 
-==== Functions ====
+=== Functions ===
 
- || `Array::Array()`|| ''`Array` constructor'' ||
- || `Array::~Array()`|| ''`Array` destructor'' ||
+ || `Array::ArraySerial()`|| ''`Array` constructor'' ||
+ || `Array::~ArraySerial()`|| ''`Array` destructor'' ||
  || || ||
  || `Array::allocate()`|| ''Allocate storage for the `Array`'' ||
  || `Array::deallocate()`|| ''Allocate storage for the `Array`'' ||
  || `Array::is_allocated()` || ''Return whether storage is allocated for the `Array`''||
  || `Array::set_allocated()` || ''Assert whether values should or should not ever be deallocated'' ||
  || || ||
- || `Array::set_size()`|| ''Set the size (and dimension) of the `Array`'' ||
- || `Array::get_size()`|| ''Get the size (and dimension) of the `Array`'' ||
- || `Array::set_array()`|| ''Set the `Array` elements to an existing array'' ||
- || `Array::get_array()`|| ''Return the `Array` elements as an array'' ||
+ || `Array::set_layout()`|| ''Set the `Layout` of the `Array`'' ||
+ || `Array::get_layout()`|| ''Get the `Layout` of the `Array`'' ||
+ || `Array::read_block()`|| ''Copy (alias) elements from the `Array` to the `Block` '' ||
+ || `Array::write_block()`|| ''Copy (nop) elements from the `Block` to the `Array`'' ||
  || || ||
- || `Array::split()`    || ''Split an `Array` into two at some point along some axis'' ||
- || `Array::merge()`    || ''Merge two `Array`s into one along some axis'' ||
- || `Array::shrink()`   || ''Shrink the `Array` by some number of zones along each axis'' ||
- || `Array::grow()`     || ''Enlarge the `Array` by some number of zones along each axis'' ||
+ || `Array::split()` || ''Split an `Array` into two (or more) at some point along some axis'' ||
+ || `Array::merge()`  || ''Merge two (or more) `Array`s into one along some axis'' ||
+ || `Array::shrink()` || ''Shrink the `Array` by some number of zones along each axis'' ||
+ || `Array::grow()`  || ''Enlarge the `Array` by some number of zones along each axis'' ||
  || || ||
- || `Array::copy()`|| ''Copy the `Array` (use operator =() ?)'' ||
- || `Array::clear()`|| ''Clear the `Array` to the given value'' ||
+ || `Array::copy()`|| ''Copy arrays in the `Array` '' ||
+ || `Array::clear()`|| ''Clear/set arrays in the `Array` to the given value'' ||
  || || ||
- || `Array::write()`|| ''Write the `Array` to disk'' ||
- || `Array::read()`|| ''Read the `Array` from disk'' ||
- || || ||
- || `Array::iterator()`|| ''Return an `ItArrayBlock` iterator over all `Block`s of the `Array`''||
+ || `Array::read_disk()`|| ''Read the `Array` from disk'' ||
+ || `Array::write_disk()`|| ''Write the `Array` to disk'' ||
 
- || `ItArrayBlock::ItArrayBlock()`|| ''`ItArrayBlock` constructor'' ||
- || `ItArrayBlock::~ItArrayBlock()`|| ''`ItArrayBlock` destructor'' || 
- || `ItArrayBlock::reset()`|| ''Reset iterator to first `Array` `Block`.''||
- || `ItArrayBlock::next()`|| ''Return next `Array` `Block`.''||
+=== Usage ===
 
-==== Usage ====
 
-{{{
-  int dimension[3] = {20,20,20};
-  int size[3]      = {10,10,10};
+=== Parameters ===
 
-  Array A(size);
-  Array B(size,dimension);
-
-  int new_dimension[3] = {14,12,8};
-  int new_size[3]      = {14,12,8};
-
-  A.resize(new_size); // reallocates data
-  B.resize(new_size); // does not reallocate data
-  B.resize(new_size,new_dimension); // reallocates unless dimension does not change
-}}}
-
-{{{
-  ItArrayBlock itA = A.iterator();
-  while (itA.next(offset,dimensions)) { // Return offset and dimensions of the next array block
-     Scalar * a = A.(offset); // a is a pointer into A's elements
-     Scalar * b = B.(offset); // b is a pointer into B's elements.  A and B must be conforming
-  }
-}}}
-
-=== `ArrayMpi1` and `ArrayMpi2` classes ===
-
-Mpi-1 and Mpi-2 are mutually exclusive.  They share the same functions, but the implementations
-are of course different.  (Perhaps an intermediate `ArrayMpi`, or `ArrayDistributed` class could
-be used, or an `ArrayMpi` class can be used to implement either one- or two-sided communication).
-
-Instead of `operator ++()` for the iterator, `next_mpi()` is used to
-avoid clashes between iterators over other `Layout` varieties.  Note that `next_mpi()` may not necessarily
-only return one MPI block, since `ArrayMpi`'s may assign multiple blocks to a process (e.g. for
-load balancing the root grid in AMR problems, or simply to decouple the dependence between
-physical processors and software virtual tasks.
-
-==== Attributes ====
-
-==== Functions ====
-
- ||  `ArrayMpi::ArrayMpi()` || ''`Array` constructor'' ||
- ||  `ArrayMpi::~ArrayMpi()` || ''`ArryMPI` destructor'' ||
- || || ||
- || `ArrayMpi[12]::mpi_set()` || ''Set/reset MPI distribution information'' ||
- ||  `ArrayMpi[12]::mpi_get()` || ''Obtain MPI distribution information'' ||
- || || ||
- || `ArrayMpi[12]::mpi_set_ghost()` || ''Set the ghost value depth'' ||
- || `ArrayMpi[12]::mpi_get_ghost()` || ''Return the current ghost value depth'' ||
- ||  `ArrayMpi[12]::mpi_refresh_ghost()` || ''Refresh the internal ghost values'' ||
-
- ||  `ItArrayBlockMpi::ItArrayBlockMpi()` || ''`ItArrayBlockMpi` constructor'' ||
- ||  `ItArrayBlockMpi::~ItArrayBlockMpi()` || ''`ItArrayBlockMpi` destructor'' ||
- ||  `ItArrayBlockMpi::reset_mpi()`|| ''Reset the iterator to the first `ArrayMpi` `Block`''||
- ||  `ItArrayBlockMpi::next_mpi()` || ''Return the next `ArrayMpi` `Block` (if any)'' ||
-
-=== `ArrayOmp` class ===
-
-==== Attributes ====
-
-==== Functions ====
-
- * `ArrayOmp::omp_set()`
- * `ArrayOmp::omp_get()`
- * `ArrayOmp::omp_ghost_set()`
- * `ArrayOmp::omp_ghost_get()`
- * `ArrayOmp::omp_ghost_refresh()`
-
- * `ItArrayBlockOmp::ItArrayBlockOmp()`
- * `ItArrayBlockOmp::~ItArrayBlockOmp()`
- * `ItArrayBlockOmp::reset_omp()`
- * `ItArrayBlockOmp::next_omp()`
-
-=== `ArrayBlocked` class ===
-=== `ArrayPadded` class ===
-
-=== `ArrayGpu` class ===
-=== `ArrayUpc` class ===

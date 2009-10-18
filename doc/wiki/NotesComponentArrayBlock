@@ -1,0 +1,83 @@
+([NotesComponentArrayLayout Array:Layout] < [NotesComponentArray Array] > [NotesComponentArrayItBlock Array:ItBlock])
+
+= `Block` Subcomponent =
+
+[[TOC]]
+
+== `Block` class ==
+
+`Block` variations include the following:
+
+ || Block1 || ''Unit-stride blocks ||
+
+=== Index calculation ===
+
+Possible ways of calculating indices:
+
+ ||  `ix + nx*(iy + ny*iz)` ||2 madd's||
+ ||  `ns*(ix + nx*(iy + ny*iz))` ||1 mul + 2 madd's||
+ ||  `ix*dx + iy*dy + iz*dz` ||1 mul + 2 madd's||
+ ||  `ix += dx; iy += dy; iz += dz` ||1 add in inner-loop||
+
+=== Attributes ===
+=== Functions ===
+
+ || `Block::Block()`|| ''`Block` constructor'' ||
+ || `Block::~Block()`|| ''`Block` destructor'' || 
+ || `Block::array()` || ''Return pointer to the start of an array in `Array` ||
+ || `Block::get_dim()` || ''Return allocated block dimensions'' ||
+ || `Block::get_stride()` || ''Return stride for the array'' ||
+ || `Block::get_size()` || ''Return size of the block'' ||
+ || `Block::get_inc()` || ''Return increments for loop index calculations'' ||
+
+=== Usage ===
+
+{{{
+   Array a(layout);
+   Array b(layout);
+
+   double * av;
+   double * bv;
+
+   ItBlock * itBlock (layout);
+
+   Block * block;
+
+   int nx,ny,nz;
+   int dx,dy,dz
+
+   while (block = itBlock++) {
+
+     av = block->array(a);
+     bv = block->array(b);
+     block->get_size(&nx,&ny,&nz);
+     block->get_inc(&dx,&dy,&dz);
+ 
+     int i,ix,iy,iz;
+
+     // Absolute index calculation
+
+     for (iz=0; iz<nz; iz++) {
+       for (iy=0; iy<ny; iy++) {
+         for (ix=0; ix<nx; ix++) {
+           i = ix*dx + iy*dy + iz*dz;
+           bv[i] = av[i];
+         }
+       }
+     }
+     i = 0;
+
+     // Relative index updates
+
+     for (iz=0; iz<nz; iz++) {
+       for (iy=0; iy<ny; iy++) {
+         for (ix=0; ix<nx; ix++) {
+           av[i] = bv[i];
+           i += dx;
+         }
+         i += (-nx*dx + dy);
+       }
+       i += (-ny*dy + dz);
+     }
+   }
+}}}

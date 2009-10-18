@@ -17,7 +17,13 @@ Tentative features of `Amr` support in Cello include the following:
  * '''Optimized `Amr` - `Array` data-structure partitioning'''. Efficiency can be improved by optimizing `Array`s versus the `Amr` refinement tree.  For example, if a domain is flagged to be refined everywhere, then the `Amr` data-structure detects this and collapses back to a single but larger `Array`.
  * '''Scalable depth'''.  We want to allow "massively deep" `Amr` hierarchies without limits based on floating point      precision or limited integer range.  For example, positions of particles associated with an `Amr` `Patch`, are stored      with positions normalized between -1.0 and 1.0.  This enables more than sufficient accuracy, even with single precision.   Also, positions defining the extents of a `Patch` are also stored only relative to neighboring `Patch`es, or the domain boundary.
 
-[[Image(htdocs:amr4-1.png)]] [[Image(htdocs:amr4-2.png)]] [[Image(htdocs:amr4-3.png)]]
+[[Image(htdocs:amr4-1.png)]] 
+[[Image(htdocs:amr4-2.png)]] 
+[[Image(htdocs:amr4-3.png)]] 
+[[Image(htdocs:amr4-4.png)]]
+[[Image(htdocs:amr4-5.png)]]
+[[Image(htdocs:amr4-6.png)]]
+[[Image(htdocs:amr4-7.png)]]
 
 == Issues ==
 
@@ -25,14 +31,19 @@ Tentative features of `Amr` support in Cello include the following:
  * What support is needed for `Particles`?
  * How to handle remeshing?
  * How to dynamically adjust tree size (2^3^,4^3^, 8^3^, etc.) ("adaptive adaptivity")
+ * How to deal with ghost zones
 
 == `Amr` supporting classes ==
 
- * `Amr`
-  * `Node`: ''A node of the `Amr` "whatever"-tree (octree, 4^3^ trees, combinations, etc.)''.
-  * `Patch`: ''A "container" for holding information about an `Amr` patch.
-  * `Array`: ''A Fortran-style array, which may be distributed, associated with an `Amr` `Patch`.
-  * `Box`: ''The physical box with extents, positions relative to neighboring `Box`es (to avoid precision loss from storing positions in a global coordinate system), or physical positions (e.g. at a domain boundary).''
+[[Image(htdocs:uml-amr.png)]]
+
+ * `Amr`: ''Distributed AMR hierarchy data-structure''
+ * `Level`: ''Uniresolution partition of an `Amr` hierarchy''
+ * `Patch`: ''A basic rectangular uniresolution section of an `Amr` hierarchy''
+ * `Tree`: ''The k^d^ tree, which may be distributed''.
+ * `Node`: ''A node of the `Tree` that defines local inter-relationships with other nodes''
+ * `Layout`: ''Description of a Fortran-style array, which may be distributed''
+ * `Box`: ''A physical box with a size and position, either absolute or relative to neighboring `Box`es
 
 == `Amr` operations ==
 

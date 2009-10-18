@@ -1,0 +1,312 @@
+= Implosion Test Problem =
+
+[[Image(htdocs:implosion.mpg)]]
+[[TOC]]
+
+== Enzo parameters ==
+
+{{{
+#
+# PROBLEM DEFINITION FILE: Implosion test (unigrid version)
+#
+#  A 2D converging shock test problem.
+#
+#  Liska & Wendroff, 2003, SIAM J. Sci. Comp., 25, N3, 995-1017
+#  http://www-troja.fjfi.cvut.cz/~liska/CompareEuler/compare8
+#
+#  Jim Stone's Athena test page
+#  http://www.astro.princeton.edu/~jstone/tests/implode/Implode.html
+#
+#  problem setup
+#
+ProblemType               = 6       // implosion
+Gamma                     = 1.4
+DomainRightEdge           = 0.3 0.3
+#
+#  grid setup
+#
+TopGridRank               = 2
+TopGridDimensions         = 400 400
+#
+#  set I/O and stop/start parameters
+#
+StopTime                  = 2.5
+StopCycle                 = 20000
+dtDataDump                = 0.5         # Changed from 0.005 to reduce output  -jb
+DataDumpName              = implosion_
+#
+#  set hydro parameters
+#
+HydroMethod               = 0       // PPM - 0; ZEUS - 2
+PPMDiffusionParameter     = 1
+PPMFlatteningParameter    = 3
+PPMSteepeningParameter    = 1
+CourantSafetyNumber       = 0.8     // ppm - 0.8; zeus - 0.5
+#
+#  set grid refinement parameters
+#
+StaticHierarchy           = 0       // dynamic hierarchy
+MaximumRefinementLevel    = 0       // use up to 0 levels
+#
+#  set some global parameters
+#
+tiny_number               = 1.0e-6  // fixes velocity slope problem
+
+}}}
+
+== Enzo code ==
+
+{{{
+int ImplosionInitialize(FILE *fptr, FILE *Outfptr, HierarchyEntry &TopGrid,
+		       TopGridData &MetaData)
+{
+  char *DensName = "Density";
+  char *TEName   = "TotalEnergy";
+  char *Vel1Name = "x-velocity";
+  char *Vel2Name = "y-velocity";
+  char *Vel3Name = "z-velocity";
+ 
+  /* parameter declarations */
+ 
+  FLOAT ImplosionSubgridLeft, ImplosionSubgridRight;
+  FLOAT LeftEdge[MAX_DIMENSION], RightEdge[MAX_DIMENSION];
+ 
+  /* local declarations */
+ 
+  char line[MAX_LINE_LENGTH];
+  int  dim, ret, NumberOfSubgridZones[MAX_DIMENSION],
+                          SubgridDims[MAX_DIMENSION];
+ 
+  /* set default parameters */
+ 
+  float ImplosionVelocity[3]     = {0.0, 0.0, 0.0};   // gas initally at rest
+  float ImplosionPressure        = 1.0;
+  float ImplosionDiamondPressure = 0.14;
+  ImplosionDensity               = 1.0;
+  ImplosionDiamondDensity        = 0.125;
+  ImplosionSubgridLeft           = 0.0;    // start of subgrid(s)
+  ImplosionSubgridRight          = 0.0;    // end of subgrid(s)
+ 
+  /* read input from file */
+ 
+  while (fgets(line, MAX_LINE_LENGTH, fptr) != NULL) {
+ 
+    ret = 0;
+ 
+    /* read parameters */
+ 
+    ret += sscanf(line, "ImplosionDensity  = %"FSYM, &ImplosionDensity);
+    ret += sscanf(line, "ImplosionPressure = %"FSYM, &ImplosionPressure);
+    ret += sscanf(line, "ImplosionDiamondDensity  = %"FSYM,
+		        &ImplosionDiamondDensity);
+    ret += sscanf(line, "ImplosionDiamondPressure = %"FSYM,
+		        &ImplosionDiamondPressure);
+    ret += sscanf(line, "ImplosionSubgridLeft = %"FSYM,
+		        &ImplosionSubgridLeft);
+    ret += sscanf(line, "ImplosionSubgridRight = %"FSYM,
+		        &ImplosionSubgridRight);
+ 
+    /* if the line is suspicious, issue a warning */
+ 
+    if (ret == 0 && strstr(line, "=") && strstr(line, "Implosion") &&
+	line[0] != '#' && MyProcessorNumber == ROOT_PROCESSOR)
+      fprintf(stderr,
+	 "warning: the following parameter line was not interpreted:\n%s\n",
+	      line);
+ 
+  } // end input from parameter file
+ 
+ 
+  /* Compute total energies */
+ 
+  ImplosionTotalEnergy = ImplosionPressure/((Gamma - 1.0)*ImplosionDensity);
+  ImplosionDiamondTotalEnergy = ImplosionDiamondPressure/((Gamma - 1.0)*
+						   ImplosionDiamondDensity);
+ 
+  /* set the reflecting boundaries */
+ 
+  for (dim = 0; dim < MetaData.TopGridRank; dim++) {
+    MetaData.LeftFaceBoundaryCondition[dim]  = reflecting;
+    MetaData.RightFaceBoundaryCondition[dim] = reflecting;
+  }
+ 
+  /* set up uniform grid without a "diamond" */
+ 
+  if (TopGrid.GridData->InitializeUniformGrid(ImplosionDensity,
+					      ImplosionTotalEnergy,
+					      ImplosionTotalEnergy,
+					      ImplosionVelocity) == FAIL) {
+    fprintf(stderr, "Error in InitializeUniformGrid.\n");
+    return FAIL;
+  }
+ 
+  /* set up the diamond */
+ 
+  if (TopGrid.GridData->ImplosionInitializeGrid(ImplosionDiamondDensity,
+					      ImplosionDiamondTotalEnergy)
+      == FAIL) {
+    fprintf(stderr, "Error in ImplosionInitializeGrid.\n");
+    return FAIL;
+  }
+ 
+ 
+  /* Create as many subgrids as refinement levels to resolve
+     the initial discontinuity upon the start-up.            */
+ 
+  HierarchyEntry ** Subgrid;
+  if (MaximumRefinementLevel > 0)
+    Subgrid   = new HierarchyEntry*[MaximumRefinementLevel];
+ 
+  /* Create new HierarchyEntries. */
+ 
+  int lev;
+  for (lev = 0; lev < MaximumRefinementLevel; lev++)
+    Subgrid[lev] = new HierarchyEntry;
+ 
+  for (lev = 0; lev < MaximumRefinementLevel; lev++) {
+ 
+    for (dim = 0; dim < MetaData.TopGridRank; dim++)
+      NumberOfSubgridZones[dim] =
+	nint((ImplosionSubgridRight - ImplosionSubgridLeft)/
+	     ((DomainRightEdge[dim] - DomainLeftEdge[dim] )/
+	      float(MetaData.TopGridDims[dim])))
+        *POW(RefineBy, lev + 1);
+ 
+    if (debug)
+      printf("Implosion:: Level[%"ISYM"]: NumberOfSubgridZones[0] = %"ISYM"\n", lev+1,
+	     NumberOfSubgridZones[0]);
+ 
+    if (NumberOfSubgridZones[0] > 0) {
+ 
+      /* fill them out */
+ 
+      if (lev == 0)
+	TopGrid.NextGridNextLevel  = Subgrid[0];
+      Subgrid[lev]->NextGridThisLevel = NULL;
+      if (lev == MaximumRefinementLevel-1)
+	Subgrid[lev]->NextGridNextLevel = NULL;
+      else
+	Subgrid[lev]->NextGridNextLevel = Subgrid[lev+1];
+      if (lev == 0)
+	Subgrid[lev]->ParentGrid        = &TopGrid;
+      else
+	Subgrid[lev]->ParentGrid        = Subgrid[lev-1];
+ 
+      /* compute the dimensions and left/right edges for the subgrid */
+ 
+      for (dim = 0; dim < MetaData.TopGridRank; dim++) {
+	SubgridDims[dim] = NumberOfSubgridZones[dim] + 2*DEFAULT_GHOST_ZONES;
+	LeftEdge[dim]    = ImplosionSubgridLeft;
+	RightEdge[dim]   = ImplosionSubgridRight;
+      }
+ 
+      /* create a new subgrid and initialize it */
+ 
+      Subgrid[lev]->GridData = new grid;
+      Subgrid[lev]->GridData->InheritProperties(TopGrid.GridData);
+      Subgrid[lev]->GridData->PrepareGrid(MetaData.TopGridRank, SubgridDims,
+				     LeftEdge, RightEdge, 0);
+      if (Subgrid[lev]->GridData->InitializeUniformGrid(ImplosionDensity,
+						   ImplosionTotalEnergy,
+						   ImplosionTotalEnergy,
+					        ImplosionVelocity) == FAIL) {
+	fprintf(stderr, "Error in InitializeUniformGrid (subgrid).\n");
+	return FAIL;
+      }
+ 
+      /* set up the diamond */
+ 
+      if (Subgrid[lev]->GridData->ImplosionInitializeGrid(
+				  ImplosionDiamondDensity,
+				  ImplosionDiamondTotalEnergy)
+	  == FAIL) {
+	fprintf(stderr, "Error in ImplosionInitialize[Sub]Grid.\n");
+	return FAIL;
+      }
+    }
+    else
+      printf("Implosion: single grid start-up.\n");
+  }
+ 
+  /* set up field names and units */
+ 
+  DataLabel[0] = DensName;
+  DataLabel[1] = TEName;
+  DataLabel[2] = Vel1Name;
+  DataLabel[3] = Vel2Name;
+  DataLabel[4] = Vel3Name;
+ 
+  DataUnits[0] = NULL;
+  DataUnits[1] = NULL;
+  DataUnits[2] = NULL;
+  DataUnits[3] = NULL;
+  DataUnits[4] = NULL;
+ 
+  /* Write parameters to parameter output file */
+ 
+  if (MyProcessorNumber == ROOT_PROCESSOR) {
+    fprintf(Outfptr, "ImplosionDensity         = %"FSYM"\n"  , ImplosionDensity);
+    fprintf(Outfptr, "ImplosionPressure        = %"FSYM"\n"  , ImplosionPressure);
+    fprintf(Outfptr, "ImplosionDiamondDensity  = %"FSYM"\n",
+	    ImplosionDiamondDensity);
+    fprintf(Outfptr, "ImplosionDiamondPressure = %"FSYM"\n",
+	    ImplosionDiamondPressure);
+  }
+ 
+  return SUCCESS;
+ 
+}
+
+}}}
+
+== Cello parameters ==
+ 
+{{{
+  # Draft version 1.0
+
+  # Define the domain to be the 2D box 0 < x,y < 0.3
+
+  Domain { range = [0.0, 0.3, 0.0, 0.3] } 
+                                
+  # Define field properties with named groups 
+                                
+  Field pressure { floor = 1.0e-6 }
+  Field density  { floor = 1.0e-6 }
+                                   
+  # The grid is a "unigrid" array of 400 cells parallelized using MPI
+ 
+  Grid array { size = [400,400]; parallel = ["mpi"] }
+
+  # Only physics method is hydro using ppm
+
+  Method ppm {
+      gamma     = 1.4;  # This is more of a physics/gas parameter than a method parameter
+      courant   = 0.8;  # This is more of a timestep/control parameter than a method parameter
+      diffusion = true;
+      flattening = true;
+      steepening = true;
+  }
+
+  # Define initial conditions
+
+  Initial {
+     density  = [1.0, x + y >= 0.15, 0.125];
+     pressure = [1.0, x + y >= 0.15, 0.14];
+     velocity_x = 0;
+     velocity_y = 0;
+  }
+
+  # Define boundary conditions
+
+  Boundary { type = "reflecting" }
+
+  # Define stopping criteria
+
+  Stopping {
+     time  = 2.5;
+     cycle = 20000;
+  }
+
+  Dump { delta_time = 0.5 ; } # dt? time?
+
+}}}

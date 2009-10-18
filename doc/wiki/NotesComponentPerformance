@@ -2,4 +2,84 @@
 
 = Performance Component =
 
+The `Performance` component is used to collect information about how efficiently the application is using the underlying hardware.  Metrics recorded include time, memory, communication, disk, floating point operations, and memory accesses.
+
+== `Performance` class ==
+
+`Performance` is based on the `lcaperf` package.  It collects the following data for code regions:
+
+ || `time_real` || ''Wallclock time'' ||
+ || `time_user` || ''CPU time in user code'' ||
+ || `time_sys`  || ''CPU time in system'' ||
+ || `time_sim`  || ''Simulation time'' ||
+ || || ||
+ || `comm_send_bytes` || ''Amount of data sent from this thread'' ||
+ || `comm_recv_bytes` || ''Amount of data received from this thread''||
+ || `comm_send_time` || ''Time spent sending data''||
+ || `comm_recv_time` || ''Time spent receiving data''||
+ || `comm_global_time` || ''Time spent in collective communication '' ||
+ || `comm_send_count` || ''Number of sends'' ||
+ || `comm_recv_count` || ''Number of receives'' ||
+ || `comm_global_count` || ''Number of barriers/reductions'' ||
+ || || ||
+ || `mem_curr_bytes`   || ''Current number of bytes allocated'' ||
+ || `mem_high_bytes`   || ''Maximum number of bytes allocated'' ||
+ || `mem_new_count`    || ''Number of calls to allocate memory'' ||
+ || `mem_delete_count` || ''Number of calls to deallocate memory'' ||
+ || `mem_new_bytes`    || ''Number of bytes allocated'' ||
+ || `mem_delete_bytes` || ''Number of bytes deallocated'' ||
+ || || ||
+ || `disk_read_bytes`  || ''Number of bytes read from disk'' ||
+ || `disk_write_bytes` || ''Number of bytes written to disk'' ||
+ || `disk_read_time`   || ''Time spent reading from disk'' ||
+ || `disk_write_time`  || ''Time spent writing to disk'' ||
+ || || ||
+ || `user_patch_count` || ''Number of grid patches in each level'' ||
+ || `user_cell_count` || ''Number of grid cells in each level'' ||
+ || `user_particle_count` || ''Number of particles'' ||
+ || || ||
+ || `cpu_flop_count` || Number of floating point operations ||
+ || `cpu_mem_count`   || Number of memory accesses ||
+
+Performance data are partitioned into the following groups:
+
+ || `attr_process`  || ''MPI process id (OMP, UPC)'' ||
+ || `attr_group`    || ''code group / component'' [memory] ||
+ || `attr_region`   || ''code region'' ||
+ || `attr_timestep` || ''Simulation timesteps'' [monotonic] ||
+ || `attr_level`    || ''AMR hierarchy level'' ||
+
+The following metrics are computed:
+
+ || `time_balance` || ''Relative time load balance at given level'' ||
+ || `mem_balance`  || ''Relative memory load balance at given level'' ||
+ || `comm_balance` || ''Relative communication load balance at given level'' ||
+
+If a metric is unchanged for a region, then nothing is stored in memory or written to disk.  Attributes such as timestep that are
+monotonic allow for deallocating stored metrics after periodic dumps to disk to free memory.
+
+ ===  Attributes ===
+ ===  Functions ===
+
+ || `Performance::group_begin()` || ''Define the start of a group'' ||
+ || `Performance::group_end()`   || ''Define the end of a group'' ||
+ || `Performance::region_start()`   || ''Define the start of a region'' ||
+ || `Performance::region_stop()`   || ''Define the end of a region'' ||
+ || || ||
+ || `Performance::attribute_create()`   || ''Create a new attribute'' ||
+ || `Performance::attribute_get()` || ''Return the value of an attribute'' ||
+ || `Performance::attribute_set()` || ''Assign a value to an attribute'' ||
+ || `Performance::attribute_count()` || ''Return the number of attributes'' ||
+|| || ||
+ || `Performance::counter_create()`   || ''Create a new user counter'' ||
+ || `Performance::counter_get()` || ''Return the value of a counter'' ||
+ || `Performance::counter_set()` || ''Assign a value to a user counter'' ||
+ || `Performance::counter_increment()` || ''Increment a user counter'' ||
+ || `Performance::counter_count()` || ''Return the number of counters'' ||
+ || || ||
+ || `Performance::flush()` || ''Flush data to disk'' ||
+
+ ===  Usage ===
+ ===  Parameters ===
+
 ([NotesComponentParticles Particles] < [NotesComponents index] > [NotesComponentPortal Portal])

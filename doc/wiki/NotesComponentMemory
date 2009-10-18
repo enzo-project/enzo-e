@@ -8,10 +8,14 @@
 
 || ( ) ||  `Memory::allocate(size)` || ''Allocate local memory'' ||
 || ( ) ||  `Memory::deallocate(buffer)` || ''De-allocate local memory'' ||
-|| ( ) ||  `Memory::begin_group(group)` || ''Begin allocating memory associated with the given group''||
-|| ( ) ||  `Memory::end_group(group)` || ''End allocating memory associated with the given group'' ||
-|| ( ) ||  `Memory::curr_group()` || ''Return name of the current group'' ||
-|| ( ) ||  `Memory::current([group])` || ''Current number of local bytes allocated'' ||
+|| ( ) ||  `Memory::begin_group(group)` || ''Begin allocating memory associated with the given group
+'' ||
+|| ( ) ||  `Memory::end_group(group)` || ''End allocating memory associated with the given group
+'' ||
+|| ( ) ||  `Memory::current_group()` || ''Return the name of the currently active group'' ||
+|| ( ) ||  `Memory::current_handle()` || ''Return the handle for the currently active group'' ||
+
+|| ( ) ||  `Memory::bytes([group])` || ''Current number of local bytes allocated'' ||
 || ( ) ||  `Memory::available([group])` || ''Estimate of amount of local memory left'' ||
 || ( ) ||  `Memory::efficiency([group])` || ''Estimate of ratio of current local usage to local available'' ||
 || ( ) ||  `Memory::highest([group])` || ''Maximum number of local bytes allocated for group'' ||

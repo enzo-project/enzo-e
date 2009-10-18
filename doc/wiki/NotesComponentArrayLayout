@@ -1,0 +1,103 @@
+([NotesComponentArrayItBlock Array:ItBlock] < [NotesComponentArray Array] > [NotesComponentArrayBlock Array:Block])
+
+= `Layout` Subcomponent =
+
+[[TOC]]
+
+`Layout` variations include the following:
+
+ || `LayoutSerial` || Basic `Layout` ||
+ || `LayoutMpi` || MPI send/recv or get/put distributed `Layout` ||
+ || `LayoutOmp`|| OpenMP-threaded `Layout`||
+ || `LayoutMpiOmp` || Hybrid MPI/OpenMP `Layout` ||
+ || `LayoutUpc`|| UPC-distributed `Layout`||
+ || `LayoutBlocked`|| cache-blocked `Layout`||
+ || `LayoutPadded`|| cache-padded `Layout`||
+ || `LayoutInterleaved`|| multiple interleaved `Layout`s||
+
+== `LayoutSerial` class ==
+
+
+
+=== Attributes ===
+
+  || `int LayoutSerial::dimension_[3];`||  ''allocated size''|| 
+  || `int LayoutSerial::size_[3];` ||  ''array size''|| 
+  || `int LayoutSerial::stride_[3];` || ''strides''|| 
+
+=== Functions ===
+
+ || `LayoutSerial::iterator()`|| ''Return an `ItBlock` iterator over all `Block`s of the `Layout`''||
+
+=== Usage ===
+
+{{{
+  int dimension[3] = {20,20,20};
+  int size[3]      = {10,10,10};
+  int count        = 6;
+
+  // Allocate 6 arrays, each 10 x 10 x 10
+  LayoutSerial (dimension,size,count);
+
+  Array array(layout);
+ 
+}}}
+
+== `LayoutMpi` class ==
+
+Instead of `operator ++()` for the iterator, `next_mpi()` is used to avoid clashes between iterators over other `Layout` varieties.  Note that `next_mpi()` may not necessarily only return one MPI block, since `LayoutMpi`'s may assign multiple blocks to a process (e.g. for load balancing the root grid in AMR problems, or simply to decouple the dependence between physical processors and software virtual tasks.)
+
+=== Attributes ===
+
+=== Functions ===
+
+ ||  `LayoutMpi::LayoutMpi()` || ''`` constructor'' ||
+ ||  `LayoutMpi::~LayoutMpi()` || ''`LayoutMpi` destructor'' ||
+ || || ||
+ || `LayoutMpi::mpi_set()` || ''Set/reset MPI distribution information'' ||
+ ||  `LayoutMpi::mpi_get()` || ''Obtain MPI distribution information'' ||
+ || || ||
+ || `LayoutMpi::mpi_set_ghost()` || ''Set the ghost value depth'' ||
+ || `LayoutMpi::mpi_get_ghost()` || ''Return the current ghost value depth'' ||
+ ||  `LayoutMpi::mpi_refresh_ghost()` || ''Refresh the internal ghost values'' ||
+
+=== Parameters ===
+
+== `LayoutOmp` class ==
+
+=== Attributes ===
+
+=== Functions ===
+
+ || `LayoutOmp::omp_set()`||
+ || `LayoutOmp::omp_get()`||
+ || `LayoutOmp::omp_ghost_set()`||
+ || `LayoutOmp::omp_ghost_get()`||
+ || `LayoutOmp::omp_ghost_refresh()`||
+
+=== Parameters ===
+
+== `LayoutUpc` class ==
+
+=== Attributes ===
+=== Functions ===
+=== Parameters ===
+
+== `LayoutBlocked` class ==
+
+=== Attributes ===
+=== Functions ===
+=== Parameters ===
+
+== `LayoutPadded` class ==
+
+=== Attributes ===
+=== Functions ===
+=== Parameters ===
+
+== `LayoutInterleaved` class ==
+
+=== Attributes ===
+=== Functions ===
+=== Parameters ===
+

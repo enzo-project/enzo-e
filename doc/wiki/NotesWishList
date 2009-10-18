@@ -33,4 +33,18 @@ Feel free to add new "wish" items or comment on existing items.  If you add a ne
 
 || W019 || mnorman ||`Particles` ||Use a binary tree data-structure to recursively partition the bounding boxes of particles.||
 
- 
+|| W020 || jbordner ||`Amr` || For very deep AMR where coarser levels never complete their timestep, delete coarse levels to free storage.||
+
+|| W021 || jbordner ||`Amr` || Relax rigid refinement criteria to inhibit excessive changes in octree-like tree refinement. ||
+
+|| W022 || akritsuk ||`Parameters` || Support for user-supplied code for problem initialization. ||
+
+|| W023 || jbordner ||`Parallel` || Load-balance by having over-loaded processors reassign tasks to random processes. [[BR]][To reduce global communication for determining which processes are under-loaded] ||
+
+|| W024 || jbordner ||`Parallel` || Load-balance using "over-compensation", since heavily-loaded processes tend to continue to become more heavily loaded (cosmology / star-formation application-dependent). ||
+
+|| W025 || jbordner || `Amr` || Reduce tree-AMR node size by only storing parent, single neighbor, and single child. [[BR]][Assuming one pointer for field data and SAMR patches indexed by single-precision offsets into parent patches, 32 bytes / tree-AMR and 48 bytes / patch-AMR] ||
+
+|| W026 || jbordner || `Amr` || Support flexible node types: memory-efficient versus compute-efficient. ||
+
+|| W027 || jbordner ||`Amr` / `Parallel` || Support temporary "allocate as-needed" ghost zones in addition to "permanent" ones||

@@ -5,6 +5,9 @@ WIKI_FILES = \
 	NotesComponentAmr \
 	NotesComponentAnalysis \
 	NotesComponentArray \
+	NotesComponentArrayBlock \
+	NotesComponentArrayItBlock \
+	NotesComponentArrayLayout \
 	NotesComponentControl \
 	NotesComponentDisk \
 	NotesComponentError \
@@ -13,6 +16,7 @@ WIKI_FILES = \
 	NotesComponentMethod \
 	NotesComponentMonitor \
 	NotesComponentParallel \
+	NotesComponentParallelMpi \
 	NotesComponentParameters \
 	NotesComponentParticles \
 	NotesComponentPerformance \
@@ -25,6 +29,7 @@ WIKI_FILES = \
 	NotesParameters \
 	NotesParametersEnzo \
 	NotesParametersMethod \
+	NotesTestProblemImplosion \
 	NotesTestProblems \
 	NotesTestProblemShockPool \
 	NotesTestProblemWavePool \
@@ -42,6 +47,7 @@ write-%:
 read: $(patsubst %,read-%,$(WIKI_FILES))
 read-%: 
 	-@echo "exporting read/$*"
+	-@rm -f read/$*
 	-@(trac-admin $(TRAC_PATH) wiki export $* read/$*) >& /dev/null
 
 trac:

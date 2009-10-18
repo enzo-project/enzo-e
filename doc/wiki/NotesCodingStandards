@@ -18,55 +18,57 @@
  * Components should not overlap functionality
  * Dependencies between components should be minimized
  * There must be no dependency loops between components
- * If one component `foo1` depends on another component `foo2`, then (and only then) `foo1/*.cpp` files may include the `foo2.h` component header file
+ * The header file for a component `Foo` is `foo.h`
+ * The header file for a class `bar` in component `Foo` is `foo_bar.h`
+ * All header files are associated with some component...
+ * Except the global `cello.h` include file
 
 == Classes ==
 
  * Class names are CamelCase, e.g. `ArrayBlocked`, `Amr`
- * Class header files for class `Foo` are in `foo.hpp`
+ * Class header files for class `Foo` are in `foo.h`
  * Class function implementations are in `foo.cpp`
+ * If class `Foo` is accessed in a different component `Component`, it is included as `component_foo.h` (or `component.h`)
  * Inheritance is used to model "is-a" relationships, e.g. `ArrayBlocked` "is-a" `Array`
  * Composition is used to model "has-a" relationships, e.g. `Hierarchy` "has-a" `Level`
  * Composition is generally preferred to inheritance
- * Begin iterator class names with `It`, as in `ItLevelGridsAll`
+ * Iterator class names begin with `It`, as in `ItLevelGridsAll`
  
 == Functions ==
 
- * Write all functions as pseudo-code first, then convert pseudo-code to comments
+ * A helpful way to write a function is first write it as pseudo-code, then convert pseudo-code to comments
  * All functions should be associated with a class
  * Function names are short but descriptive
  * Function names are all lower-case, and may contain underscores
- * Public functions in a class should be minimal, no more than about a dozen per class
- * Public functions in a class must not expose the underlying data-structures
+ * There should be few public functions in a class, no more than about a dozen per class
+ * Public functions in a class must not expose the underlying data-structures, even simple scalars
  * Private functions end in an underscore `foo_()` to easily identify them
+ * Implementations of functions should avoid referencing "this" unnecessarily (e.g. prefer `foo_(blah);` to `this->foo_(blah);`)
 
 == Variables ==
 
  * All variables should be associated with a class
- * All variables should be private
- * Variable names are short but descriptive
- * Variable names are all lower-case, and may contain underscores
+ * All variables should be private or protected
+ * Variable names should be short but descriptive
+ * Variable names should be all lower-case, and may contain underscores
  * Private variables end in an underscore `foo_` to easily identify them
 
 == Files ==
 
  * Code and comments should be formatted to fit in 80 columns
  * C++ code is contained in `*.cpp` files
- * C++ headers are contained in `*.hpp` files
+ * C++ headers are contained in `*.h` files
  * C code is contained in `*.c` files
  * C headers are contained in `*.h` files
- * Each component `Foo` provides a single public header file `foo.hpp`
- * All other header files in a component are private to the component, and end in an underscore `foo_.hpp` to easily identify them
- * A header file can include another header file only if it is a public component header file
- * Only component header files can include other header files
+ * Fortran code is contained in `*.F` files
 
 == Code ==
 
- * When evaluating polynomials or polynomial-like expressions, e.g. "`a0 + a1*x1 + a2*x2*x1 + a3*x3*x2*x1`..." for index computations, compute it as "`a0 + x1*(a1 + x2*(a2 + ...))`"
+ * When evaluating polynomials or polynomial-like expressions, e.g. "`ix + nx*iy + nx*ny*iz + `..." for index computations, write it as "`ix + nx*(iy + ny*iz)`"
  * For simple calculations that are ubiquitous (e.g. index calculations), use `cpp` macros or inline functions
- * Use "`bool`" for variables that are "`true`" or "`false`", and name as "`isFoo`"
- * Simplify boolean expressions; e.g. use "`if (isFoo)`" instead of "`if (isFoo == true)`", and "`isFoo = foo == blah`" instead of "`isFoo = (foo == blah) ? true : false`"
- * Don't use embedded constants except for 0 or 1
+ * Use "`bool`" for variables that are "`true`" or "`false`", and name as "`is_foo`"
+ * Simplify boolean expressions; e.g. use "`if (is_foo)`" instead of "`if (is_foo == true)`", and "`is_foo = (foo == blah)`" instead of "`is_foo = (foo == blah) ? true : false`"
+ * Avoid embedded constants except for 0 or 1
  * Use "`enum`" for related constants, e.g. "`const enum field_type {field_type_unknown, field_type_density, field_type_total_energy, ...}`"
   
 == Error Handling ==
@@ -88,7 +90,7 @@
 
     while (Grid * grid = itgl++) {
 
-       // Advance the hydro one timestep
+       // Advance hydro one timestep
 
        Method ppm;
 
