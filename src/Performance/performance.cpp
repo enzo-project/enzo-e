@@ -37,7 +37,7 @@
 
 #include "cello.h"
 
-#include "error_exception.hpp" 
+#include "error.hpp" 
 #include "memory.hpp"
 #include "performance.hpp"
 

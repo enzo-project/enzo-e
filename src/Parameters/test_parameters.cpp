@@ -17,8 +17,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "test.hpp"
 #include "error.hpp"
+#include "test.hpp"
 #include "parameters.hpp"
 
 #define CLOSE(a,b) ((((a) - (b)) / (fabs(a) + fabs(b))) < 1e-16)

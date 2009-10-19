@@ -87,7 +87,6 @@ Memory::Memory() throw ()
  *********************************************************************
  */
 {
-  printf ("Memory::Memory()\n");
   group_names_[0] = strdup("");
   group_names_[1] = strdup("memory");
 }

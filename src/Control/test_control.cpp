@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string>
 
+#include "error.hpp"
 #include "test.hpp"
 // #include "control.hpp"
 

@@ -33,6 +33,7 @@
 #define MIN(a,b) ((a)<(b)?(a):(b))
 
 #include "cello.h"
+#include "error.hpp"
 #include "performance.hpp"
 
 int main(int argc, char ** argv)

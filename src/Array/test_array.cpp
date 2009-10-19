@@ -28,16 +28,16 @@
  
 #include <stdio.h>
 
-#include "test.hpp"
 #include "error.hpp"
+#include "test.hpp"
 #include "array.hpp"
 
 int main()
 {
 
-  unit_open();
-
   unit_class ("Array");
+
+  unit_open();
 
   //----------------------------------------------------------------------
   // test single array WITH resize: length, size, clear, values, access

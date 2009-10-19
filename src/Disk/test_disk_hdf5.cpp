@@ -31,6 +31,7 @@
 
 #include "hdf5.h"
 
+#include "error.hpp"
 #include "test.hpp"
 #include "array.hpp"
 #include "disk.hpp"

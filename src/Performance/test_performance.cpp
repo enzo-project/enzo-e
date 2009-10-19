@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string>
 
+#include "error.hpp"
 #include "test.hpp"
 #include "array.hpp"
 #include "performance.hpp"
@@ -39,11 +40,11 @@ int main(int argc, char ** argv)
   Timer timer;
   const double time_tolerance = 0.05;
 
-  unit_open();
-
   // Timer tests
 
   unit_class ("Timer");
+
+  unit_open();
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 

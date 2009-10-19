@@ -59,8 +59,8 @@
 
 namespace unit {
 
-  char class_name[UNIT_MAX_NAME_LEN];
-  char func_name[UNIT_MAX_NAME_LEN];
+  char class_name[UNIT_MAX_NAME_LEN] = {0};
+  char func_name[UNIT_MAX_NAME_LEN] = {0};
 
   FILE *fp;
 
@@ -94,6 +94,9 @@ void unit_func (const char * f)
 void unit_open ()
 {
   char filename [UNIT_MAX_NAME_LEN+5];
+  if (strlen(unit::class_name)==0) {
+    ERROR_MESSAGE("Test::unit_open","class_class() not called before unit_open()"); 
+  }
   sprintf (filename,"%s.unit",unit::class_name);
   unit::fp = fopen (filename,"w");
 }
