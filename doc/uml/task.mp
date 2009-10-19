@@ -1,11 +1,11 @@
 prologues := 2
 input metauml;
 beginfig(1)
-  Class.A("Method")()();
-  Class.B("Field")()();
+  Class.A("Control")()();
+  Class.B("Parallel")()();
   Class.C("Task")()();
-  Class.D("Control")()();
-  Class.E("Parallel")()();
+  Class.D("Method")()();
+  Class.E("Field")()();
 
   A.info.iName.iFont.scale := 1.5;
   B.info.iName.iFont.scale := 1.5;
