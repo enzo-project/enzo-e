@@ -69,18 +69,64 @@ int main(int argc, char ** argv)
   unit_class ("Performance");
 
   unit_func("Performance");
-  Performance performance ( num_perf_attributes,
-			    num_perf_counters,
+  Performance performance ( num_attributes,
+			    num_counters,
 			    num_components,
 			    3 ); // 3 regions
+
+  // Add attributes
+
+  performance.new_attribute(time_real,          "time_real");
+  performance.new_attribute(time_sim,           "time_sim");
+  performance.new_attribute(mem_curr_bytes,     "mem_curr_bytes");
+  performance.new_attribute(mem_high_bytes,     "mem_high_bytes");
+  performance.new_attribute(mem_new_count,      "mem_new_count");
+  performance.new_attribute(mem_delete_count,   "mem_delete_count");
+  performance.new_attribute(mem_new_bytes,      "mem_new_bytes");
+  performance.new_attribute(mem_delete_bytes,   "mem_delete_bytes");
+  performance.new_attribute(disk_read_bytes,    "disk_read_bytes");
+  performance.new_attribute(disk_write_bytes,   "disk_write_bytes");
+  performance.new_attribute(disk_read_time,     "disk_read_time");
+  performance.new_attribute(disk_write_time,    "disk_write_time");
+  performance.new_attribute(user_patch_count,   "user_patch_count");
+  performance.new_attribute(user_cell_count,    "user_cell_count");
+  performance.new_attribute(user_particle_count,"user_particle_count");
+
+#ifdef CONFIG_USE_MPI
+  performance.new_attribute(comm_send_bytes,    "comm_send_bytes");
+  performance.new_attribute(comm_recv_bytes,    "comm_recv_bytes");
+  performance.new_attribute(comm_send_time,     "comm_send_time");
+  performance.new_attribute(comm_recv_time,     "comm_recv_time");
+  performance.new_attribute(comm_global_time,   "comm_global_time");
+  performance.new_attribute(comm_send_count,    "comm_send_count");
+  performance.new_attribute(comm_recv_count,    "comm_recv_count");
+  performance.new_attribute(comm_global_count,  "comm_global_count");
+#endif /* CONFIG_USE_MPI */
+
+  // Add counters
+  // Add groups
+  // Add functions
+
+  // Initialize counters that are non-zero at start
+
   unit_assert(true);
+
+  unit_func("new_attribute");
+  unit_assert (false);
+
+  unit_func("new_counter");
+  unit_assert (false);
+
+  unit_func("new_group");
+  unit_assert (false);
+
+  unit_func("new_region");
+  unit_assert (false);
+
 
   //--------------------------------------------------
   // Attributes
   //--------------------------------------------------
-
-  unit_func("new_attribute");
-  unit_assert (false);
 
   unit_func("get_attribute");
   unit_assert (false);
@@ -98,9 +144,6 @@ int main(int argc, char ** argv)
   unit_func ("begin_group");
 
 
-  unit_func("new_group");
-  unit_assert (false);
-
   unit_func("get_group");
   unit_assert (false);
 
@@ -117,9 +160,6 @@ int main(int argc, char ** argv)
   // Regions
   //--------------------------------------------------
 
-
-  unit_func("new_region");
-  unit_assert (false);
 
   unit_func("get_region");
   unit_assert (false);
@@ -139,9 +179,6 @@ int main(int argc, char ** argv)
   //--------------------------------------------------
   // Counters
   //--------------------------------------------------
-
-  unit_func("new_counter");
-  unit_assert (false);
 
   unit_func("get_counter");
   unit_assert (false);

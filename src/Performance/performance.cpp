@@ -43,13 +43,23 @@
 
 Performance::Performance 
 (
- int num_attributes,
- int num_counters,
- int num_groups,
- int num_regions)
+ size_t num_attributes,
+ size_t num_counters,
+ size_t num_groups,
+ size_t num_regions)
   : counters_(),
-    is_monotonic_(NULL),
-    in_region_(false)
+    num_attributes_(num_attributes),
+    attribute_names_(NULL),
+    monotonic_attributes_(NULL),
+    monotonic_attribute_values_(NULL),
+    num_counters_(num_counters),
+    counter_names_(NULL),
+    num_groups_(num_groups),
+    current_group_(0),
+    group_names_(NULL),
+    num_regions_(num_regions),
+    region_names_(NULL),
+    current_region_(0)
 /**
  *********************************************************************
  *
@@ -64,8 +74,22 @@ Performance::Performance
 {
   Memory::begin_group("Performance");
 
-  is_monotonic_ = new bool [num_attributes];
-  for (int i=0; i<num_attributes; i++) is_monotonic_[i] = false;
+  attribute_names_              = new std::string [ num_attributes_ ];
+  counter_names_                = new std::string [ num_counters_ ];
+  group_names_                  = new std::string [ num_groups_ ];
+  region_names_                 = new std::string [ num_regions_ ];
+  monotonic_attributes_         = new bool [num_attributes];
+  for (size_t i=0; i<num_attributes; i++) {
+    monotonic_attributes_[i]       = false;
+  }
+  monotonic_attribute_values_   = new int [num_attributes];
+  for (size_t i=0; i<num_attributes; i++) {
+    monotonic_attribute_values_[i] = 0;
+  }
+
+  // Create initial Counters object
+
+  counters_.push_back(new Counters(num_attributes,num_counters));
 
   Memory::end_group("Performance");
 }
@@ -85,11 +109,16 @@ Performance::~Performance()
 
   Memory::begin_group("Performance");
 
-  for (size_t i=0; i<counters_.size(); i++) {
-    delete [] counters_[i];
-  }
+  delete [] attribute_names_;
+  delete [] counter_names_;
+  delete [] group_names_;
+  delete [] region_names_;
+  delete [] monotonic_attributes_;
+  delete [] monotonic_attribute_values_;
 
-  delete [] is_monotonic_;
+  for (size_t i=0; i<counters_.size(); i++) {
+    delete counters_.at(i);
+  }
 
   Memory::end_group("Performance");
 
@@ -141,21 +170,6 @@ void Performance::set_attribute(int id_attribute)
 {
 }
 
-size_t Performance::num_attributes()
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Return the number of attributes
- *
- *********************************************************************
- */
-{
-  return 0;
-}
-
 void Performance::new_group(int         id_group, 
 			    std::string group_name)
 /**
@@ -200,21 +214,6 @@ void Performance::set_group(int id_group)
 {
 }
 
-size_t Performance::num_groups()
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Return the number of groups
- *
- *********************************************************************
- */
-{
-  return 0;
-}
-
 void Performance::begin_group(int group_id)
 /**
  *********************************************************************
@@ -228,13 +227,12 @@ void Performance::begin_group(int group_id)
  */
 {
   
-  if ( in_group_ ){
+  if ( current_group_ ){
     char message [ ERROR_MESSAGE_LENGTH ];
     sprintf (message, "Performance group started when one already active");
     WARNING_MESSAGE("Performance::begin_group",message);
   } else {
 
-    in_group_ = true;
     current_group_ = group_id;
 
   }
@@ -299,21 +297,6 @@ void Performance::set_region(int id_region)
 {
 }
 
-size_t Performance::num_regions()
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Return the number of regions
- *
- *********************************************************************
- */
-{
-  return 0;
-}
-
 void Performance::start_region(int region_id)
 /**
  *********************************************************************
@@ -358,7 +341,7 @@ void Performance::new_counter(int         id_counter,
 {
 }
 
-long long Performance::get_counter(int id_counter)
+type_counter Performance::get_counter(int id_counter)
 /**
  *********************************************************************
  *
@@ -373,8 +356,8 @@ long long Performance::get_counter(int id_counter)
   return 0;
 }
 
-void Performance::set_counter(int       id_counter,
-			      long long value)
+void Performance::set_counter(int          id_counter,
+			      type_counter value)
 /**
  *********************************************************************
  *
@@ -388,8 +371,8 @@ void Performance::set_counter(int       id_counter,
 {
 }
 
-void Performance::increment_counter(int       id_counter,
-				    long long value)
+void Performance::increment_counter(int          id_counter,
+				    type_counter value)
 /**
  *********************************************************************
  *
@@ -401,21 +384,6 @@ void Performance::increment_counter(int       id_counter,
  *********************************************************************
  */
 {
-}
-
-size_t Performance::num_counters()
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Return the number of counters
- *
- *********************************************************************
- */
-{
-  return 0;
 }
 
 void Performance::flush()

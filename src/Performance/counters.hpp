@@ -43,7 +43,7 @@ public:
   //-------------------------------------------------------------------
 
   /// 
-  Counters(int num_attributes, int num_counters)
+  Counters(size_t num_attributes, size_t num_counters)
     {
       Memory::begin_group("Performance");
       a_  = new int       [num_attributes];

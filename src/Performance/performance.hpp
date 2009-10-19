@@ -27,6 +27,8 @@
 #include "performance_timer.hpp"
 #include "counters.hpp"
 
+typedef unsigned long long type_counter;
+
 class Performance {
 
 /** 
@@ -48,10 +50,10 @@ public:
   //-------------------------------------------------------------------
 
   /// 
-  Performance(int num_attributes, 
-	      int num_counters,
-	      int num_groups,
-	      int num_regions);
+  Performance(size_t num_attributes, 
+	      size_t num_counters,
+	      size_t num_groups,
+	      size_t num_regions);
 
   /// 
   ~Performance();
@@ -72,9 +74,6 @@ public:
   /// Assign a value to an attribute
   void set_attribute(int id_attribute);
 
-  /// Return the number of attributes
-  size_t num_attributes();
-
   //--------------------------------------------------
   // GROUPS
   //--------------------------------------------------
@@ -87,9 +86,6 @@ public:
 
   /// Assign a value to an group
   void set_group(int id_group);
-
-  /// Return the number of groups
-  size_t num_groups();
 
   ///  	 Define the start of a group
   void begin_group(int id_group);
@@ -110,9 +106,6 @@ public:
   /// Assign a value to an region
   void set_region(int id_region);
 
-  /// Return the number of regions
-  size_t num_regions();
-
   ///  	Define the start of a region
   void start_region(int region_name);
 
@@ -123,22 +116,19 @@ public:
   // COUNTERS
   //--------------------------------------------------
 
-  ///  	Create a new user counter
+  ///  	Create a new user counter.
   void new_counter(int id_counter,
-		      std::string counter_name);
+		   std::string counter_name);
 
-  ///  	Return the value of a counter
-  long long get_counter(int id_counter);
+  ///  	Return the value of a counter.
+  type_counter get_counter(int id_counter);
 
-  ///  	Assign a value to a user counter
+  ///  	Assign a value to a user counter.
   void set_counter(int id_counter,
-			 long long value);
-  ///  	Increment a user counter
+		   type_counter value);
+  ///  	Increment a user counter.
   void increment_counter(int id_counter,
-			 long long value);
-
-  /// Return the number of counters
-  size_t num_counters();
+			 type_counter value);
 
   //--------------------------------------------------
   // DISK
@@ -156,6 +146,29 @@ private:
 
   /// 
 
+//----------------------------------------------------------------------
+
+  type_counter get_real_ () const
+  {
+    struct timeval tv;
+    struct timezone tz;
+    gettimeofday(&tv,&tz);
+    return (type_counter) (1000000) * tv.tv_sec + tv.tv_usec;
+  }
+
+//----------------------------------------------------------------------
+
+  type_counter get_virt_ () const
+  {
+# ifdef CONFIG_USE_PAPI
+    return PAPI_get_virt_usec();
+# else
+    return 0;
+# endif
+  }
+
+//----------------------------------------------------------------------
+
 private:
 
   //-------------------------------------------------------------------
@@ -165,21 +178,41 @@ private:
   /// Array of counters for regions
   std::vector<Counters *> counters_;
 
-  /// Whether an attribute is monotonic
-  bool * is_monotonic_;
+  /// Number of attributes
+  size_t num_attributes_;
 
-  /// Current group
+  /// Attribute names
+  std::string * attribute_names_;
+
+  /// Which attributes are monotonic
+  bool * monotonic_attributes_;
+
+  /// Values of monotonic attributes
+  int  * monotonic_attribute_values_;
+
+  /// Number of counters
+  size_t num_counters_;
+
+  /// Counter names
+  std::string * counter_names_;
+
+  /// Number of groups
+  size_t num_groups_;
+
+  /// Current group; 0 if none
   int current_group_;
 
-  /// Current region
+  /// Group names
+  std::string * group_names_;
+
+  /// Number of regions
+  size_t num_regions_;
+
+  /// Region names
+  std::string * region_names_;
+
+  /// Current region; 0 if none
   int current_region_;
-
-  /// Whether a group is active
-  bool in_group_;
-
-  /// Whether a region is active
-  bool in_region_;
-
 
 
 };
