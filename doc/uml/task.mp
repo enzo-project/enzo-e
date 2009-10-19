@@ -20,10 +20,10 @@ beginfig(1)
   
   drawObjects(A,B,C,D,E);
   
-  link(association)(pathStepY(C.n, A.s, 15));
-  link(association)(pathStepY(C.n, B.s, 15));
-  link(association)(pathStepY(D.n, C.s, 15));
-  link(association)(pathStepY(E.n, C.s, 15));
+  link(association)(pathStepX(A.s, C.w, 0));
+  link(association)(pathStepY(C.e, E.n, 0));
+  link(association)(pathStepY(C.e, B.s, 0));
+  link(association)(pathStepX(D.n, C.w, 0));
 	
 endfig;
 end
