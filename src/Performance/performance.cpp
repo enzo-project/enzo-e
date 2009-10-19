@@ -34,21 +34,40 @@
  *
  *********************************************************************
  */
- 
+
+#include "cello.h"
+
+#include "error_exception.hpp" 
+#include "memory.hpp"
 #include "performance.hpp"
 
-Performance::Performance()
+Performance::Performance 
+(
+ int num_attributes,
+ int num_counters,
+ int num_groups,
+ int num_regions)
+  : counters_(),
+    is_monotonic_(NULL),
+    in_region_(false)
 /**
  *********************************************************************
  *
  * @param         
  * @return        
  *
- * Create a Performance object
+ * Create a Performance object with space reserved for the specified
+ * number of attributes and the specified number of counters
  *
  *********************************************************************
  */
 {
+  Memory::begin_group("Performance");
+
+  is_monotonic_ = new bool [num_attributes];
+  for (int i=0; i<num_attributes; i++) is_monotonic_[i] = false;
+
+  Memory::end_group("Performance");
 }
 
 Performance::~Performance()
@@ -63,69 +82,23 @@ Performance::~Performance()
  *********************************************************************
  */
 {
+
+  Memory::begin_group("Performance");
+
+  for (size_t i=0; i<counters_.size(); i++) {
+    delete [] counters_[i];
+  }
+
+  delete [] is_monotonic_;
+
+  Memory::end_group("Performance");
+
 }
 
-void Performance::group_begin(std::string)
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Define the start of a group
- *
- *********************************************************************
- */
-{
-}
-
-void Performance::group_end(std::string group_name)
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Define the end of a group
- *
- *********************************************************************
- */
-{
-}
-
-void Performance::region_start(std::string region_name)
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Define the start of a region
- *
- *********************************************************************
- */
-{
-}
-
-void Performance::region_stop(std::string region_name)
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Define the end of a region
- *
- *********************************************************************
- */
-{
-}
-
-
-void Performance::attribute_create(type_attribute id_attribute, 
-				   std::string    attribute_name,
-				   bool           is_monotonic,
-				   int            max_value)
+void Performance::new_attribute(int         id_attribute, 
+				 std::string attribute_name,
+				 bool        is_monotonic,
+				 int         max_value)
 /**
  *********************************************************************
  *
@@ -139,7 +112,7 @@ void Performance::attribute_create(type_attribute id_attribute,
 {
 }
 
-int Performance::attribute_get(type_attribute id_attribute)
+int Performance::get_attribute(int id_attribute)
 /**
  *********************************************************************
  *
@@ -154,7 +127,7 @@ int Performance::attribute_get(type_attribute id_attribute)
   return 0;
 }
 
-void Performance::attribute_set(type_attribute id_attribute)
+void Performance::set_attribute(int id_attribute)
 /**
  *********************************************************************
  *
@@ -168,7 +141,7 @@ void Performance::attribute_set(type_attribute id_attribute)
 {
 }
 
-size_t Performance::attribute_count()
+size_t Performance::num_attributes()
 /**
  *********************************************************************
  *
@@ -183,8 +156,195 @@ size_t Performance::attribute_count()
   return 0;
 }
 
-void Performance::counter_create(type_counter id_counter,
-				 std::string counter_name)
+void Performance::new_group(int         id_group, 
+			    std::string group_name)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Create a new group
+ *
+ *********************************************************************
+ */
+{
+}
+
+int Performance::get_group(int id_group)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Return the value of the currently active group
+ *
+ *********************************************************************
+ */
+{
+  return 0;
+}
+
+void Performance::set_group(int id_group)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Assign a value to a group
+ *
+ *********************************************************************
+ */
+{
+}
+
+size_t Performance::num_groups()
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Return the number of groups
+ *
+ *********************************************************************
+ */
+{
+  return 0;
+}
+
+void Performance::begin_group(int group_id)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Define the start of a group
+ *
+ *********************************************************************
+ */
+{
+  
+  if ( in_group_ ){
+    char message [ ERROR_MESSAGE_LENGTH ];
+    sprintf (message, "Performance group started when one already active");
+    WARNING_MESSAGE("Performance::begin_group",message);
+  } else {
+
+    in_group_ = true;
+    current_group_ = group_id;
+
+  }
+  
+}
+
+void Performance::end_group(int group_id)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Define the end of a group
+ *
+ *********************************************************************
+ */
+{
+}
+
+void Performance::new_region(int         id_region, 
+			     std::string region_name)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Create a new region
+ *
+ *********************************************************************
+ */
+{
+}
+
+int Performance::get_region(int id_region)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Return the value of the currently active region
+ *
+ *********************************************************************
+ */
+{
+  return 0;
+}
+
+void Performance::set_region(int id_region)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Assign a value to a region
+ *
+ *********************************************************************
+ */
+{
+}
+
+size_t Performance::num_regions()
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Return the number of regions
+ *
+ *********************************************************************
+ */
+{
+  return 0;
+}
+
+void Performance::start_region(int region_id)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Define the start of a region
+ *
+ *********************************************************************
+ */
+{
+}
+
+void Performance::stop_region(int region_id)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Define the end of a region
+ *
+ *********************************************************************
+ */
+{
+}
+
+
+void Performance::new_counter(int         id_counter,
+			      std::string counter_name)
 /**
  *********************************************************************
  *
@@ -198,7 +358,7 @@ void Performance::counter_create(type_counter id_counter,
 {
 }
 
-long long Performance::counter_get(type_counter id_counter)
+long long Performance::get_counter(int id_counter)
 /**
  *********************************************************************
  *
@@ -213,7 +373,7 @@ long long Performance::counter_get(type_counter id_counter)
   return 0;
 }
 
-void Performance::counter_set(type_counter id_counter,
+void Performance::set_counter(int       id_counter,
 			      long long value)
 /**
  *********************************************************************
@@ -228,7 +388,7 @@ void Performance::counter_set(type_counter id_counter,
 {
 }
 
-void Performance::counter_increment(type_counter id_counter,
+void Performance::increment_counter(int       id_counter,
 				    long long value)
 /**
  *********************************************************************
@@ -243,7 +403,7 @@ void Performance::counter_increment(type_counter id_counter,
 {
 }
 
-size_t Performance::counter_count()
+size_t Performance::num_counters()
 /**
  *********************************************************************
  *

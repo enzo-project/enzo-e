@@ -67,45 +67,101 @@ int main(int argc, char ** argv)
 
   unit_class ("Performance");
 
-  unit_func ("group_begin");
+  unit_func("Performance");
+  Performance performance ( num_perf_attributes,
+			    num_perf_counters,
+			    num_components,
+			    3 ); // 3 regions
+  unit_assert(true);
 
-  unit_func("group_end");
+  //--------------------------------------------------
+  // Attributes
+  //--------------------------------------------------
+
+  unit_func("new_attribute");
   unit_assert (false);
 
-  unit_func("region_start");
+  unit_func("get_attribute");
   unit_assert (false);
 
-  unit_func("region_stop");
+  unit_func("set_attribute");
   unit_assert (false);
 
-  unit_func("attribute_create");
+  unit_func("num_attributes");
   unit_assert (false);
 
-  unit_func("attribute_get");
+  //--------------------------------------------------
+  // Groups
+  //--------------------------------------------------
+
+  unit_func ("begin_group");
+
+
+  unit_func("new_group");
   unit_assert (false);
 
-  unit_func("attribute_set");
+  unit_func("get_group");
   unit_assert (false);
 
-  unit_func("attribute_count");
+  unit_func("set_group");
   unit_assert (false);
 
-  unit_func("counter_create");
+  unit_func("num_groups");
   unit_assert (false);
 
-  unit_func("counter_get");
+  unit_func("end_group");
   unit_assert (false);
 
-  unit_func("counter_set");
+  //--------------------------------------------------
+  // Regions
+  //--------------------------------------------------
+
+
+  unit_func("new_region");
   unit_assert (false);
 
-  unit_func("counter_increment");
+  unit_func("get_region");
   unit_assert (false);
 
-  unit_func("counter_count");
+  unit_func("set_region");
   unit_assert (false);
+
+  unit_func("num_regions");
+  unit_assert (false);
+
+  unit_func("start_region");
+  unit_assert (false);
+
+  unit_func("stop_region");
+  unit_assert (false);
+
+  //--------------------------------------------------
+  // Counters
+  //--------------------------------------------------
+
+  unit_func("new_counter");
+  unit_assert (false);
+
+  unit_func("get_counter");
+  unit_assert (false);
+
+  unit_func("set_counter");
+  unit_assert (false);
+
+  unit_func("increment_counter");
+  unit_assert (false);
+
+  unit_func("num_counters");
+  unit_assert (false);
+
+  //--------------------------------------------------
+  // Disk
+  //--------------------------------------------------
 
   unit_func("flush");
+  unit_assert (false);
+
+  unit_func("~Performance");
   unit_assert (false);
 
   unit_close();
