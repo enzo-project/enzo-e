@@ -4,6 +4,8 @@
 #include "error.hpp"
 #include "performance.hpp"
 
+// Estimate the latency from the root process to all other processes
+
 int main (int argc, char ** argv)
 {
   MPI_Status status;
