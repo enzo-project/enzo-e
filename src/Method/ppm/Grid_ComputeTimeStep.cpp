@@ -49,11 +49,11 @@ float ComputeTimeStep()
   /* initialize */
  
   //  float dt, dtTemp;
-  float dtBaryons      = HUGE_VAL;
-  float dtViscous      = HUGE_VAL;
-  //  float dtParticles    = HUGE_VAL;
-  float dtExpansion    = HUGE_VAL;
-  //  float dtAcceleration = HUGE_VAL;
+  float dtBaryons      = HUGE_VALF;
+  float dtViscous      = HUGE_VALF;
+  //  float dtParticles    = HUGE_VALF;
+  float dtExpansion    = HUGE_VALF;
+  //  float dtAcceleration = HUGE_VALF;
   int dim, result;
  
   /* Compute the field size. */

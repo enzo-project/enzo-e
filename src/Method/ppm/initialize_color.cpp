@@ -66,8 +66,6 @@ inline float color_value
   size_t iy = height*(y - enzo_lower[1]) / (enzo_upper[1] - enzo_lower[1]);
   if (ix == width) ix--;
   if (iy == height) iy--;
-  assert (ix >= 0);
-  assert (iy >= 0);
   assert (ix < width);
   assert (iy < height);
   return (image[ix + width*iy]);

@@ -55,7 +55,7 @@ int SolveHydroEquations
  
     int dim, i,  size;
     int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num, coloff[MAX_COLOR];
-    long long GridGlobalStart[MAX_DIMENSION];
+//     long long GridGlobalStart[MAX_DIMENSION];
     FLOAT a = 1, dadt;
  
     float *colourpt = NULL;
@@ -220,10 +220,10 @@ int SolveHydroEquations
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
  
-    for (dim = 0; dim < GridRank; dim++)
-      GridGlobalStart[dim] =
-	nint((GridLeftEdge[dim] - DomainLeftEdge[dim])/(*(CellWidth[dim]))) -
-	GridStartIndex[dim];
+//     for (dim = 0; dim < GridRank; dim++)
+//       GridGlobalStart[dim] =
+// 	nint((GridLeftEdge[dim] - DomainLeftEdge[dim])/(*(CellWidth[dim]))) -
+// 	GridStartIndex[dim];
  
     /* fix grid quantities so they are defined to at least 3 dims */
  
@@ -231,7 +231,7 @@ int SolveHydroEquations
       GridDimension[i]   = 1;
       GridStartIndex[i]  = 0;
       GridEndIndex[i]    = 0;
-      GridGlobalStart[i] = 0;
+      //      GridGlobalStart[i] = 0;
     }
  
     /* allocate temporary space for solver (enough to fit 31 of the largest
