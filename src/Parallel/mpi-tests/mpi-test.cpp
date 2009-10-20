@@ -13,11 +13,11 @@ int main (int argc, char ** argv)
   if (argc > 1) {
     num_sends = atoi(argv[1]);
   }
-  printf ("num_sends = %d\n",num_sends);
     
   MPI_Init(&argc,&argv);
   MPI_Comm_size (MPI_COMM_WORLD, &np);
   MPI_Comm_rank (MPI_COMM_WORLD, &ip);
+  if (ip==0) printf ("num_sends = %d\n",num_sends);
   MPI_Barrier(MPI_COMM_WORLD);
   if (ip == 0) {
     Timer timer;
@@ -42,5 +42,6 @@ int main (int argc, char ** argv)
     }
     }
   }
+  fflush(stdout);
   MPI_Finalize();
 }
