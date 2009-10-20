@@ -1,5 +1,5 @@
-mpi-test: mpi-test.cpp
-	mpiCC -o mpi-test mpi-test.cpp -I ../../../include -L../../../lib -lperformance
+mpi-distance: mpi-distance.cpp
+	mpiCC -o mpi-distance mpi-distance.cpp -I ../../../include -L../../../lib -lperformance
 
 clean:
-	-@rm -f *.o *~ mpi-test
+	-@rm -f *.o *~ mpi-distance
