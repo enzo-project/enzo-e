@@ -1,8 +1,7 @@
 Mpi_array {
-   mpi_type   = "B";
+   mpi_type   = 1;
    data_type  = 1;
    grid_size  = [128,128,128];
    block_size = [  4,  4,  4];
    proc_size  = [  1,  2,  2];
-   task_order = 1;
 }

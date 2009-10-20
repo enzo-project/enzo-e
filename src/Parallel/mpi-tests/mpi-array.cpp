@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <mpi.h>
 
+#include "cello.h"
+
 #include "error.hpp"
 #include "parameters.hpp"
 #include "performance.hpp"
@@ -36,11 +38,6 @@
 //      2   In-place multi-block
 //      4   Ghost-copy per-block
 //      5   Ghost-copy multi-block
-//
-// task_order
-//
-//      1   natural
-//      2   hilbert
 //
 // grid_size    [nx, ny, nz]
 //
@@ -144,18 +141,9 @@ int main (int argc, char ** argv)
   };
   int  data_type;
 
-  enum enum_task_order {
-    task_order_unknown,
-    task_order_natural,
-    task_order_hilbert,
-    task_order_maximum = task_order_hilbert
-  };
-  int  task_order;
-
   int         nx,ny,nz;  // grid size
   int         bx,by,bz;  // block size
   int         px,py,pz;  // processor grid size
-  int         tx,ty,tz;  // task grid size
 
   int         gx,gy,gz;  // ghost zone depth
 
@@ -167,29 +155,41 @@ int main (int argc, char ** argv)
 
   parameters.set_group ("Mpi_array");
   mpi_type   = parameters.value_integer ("mpi_type",0);
-  check_range (ip,"mpi_type",mpi_type,1,mpi_type_maximum);
   data_type  = parameters.value_integer ("data_type",0);
-  check_range (ip,"data_type",data_type,1,data_type_maximum);
-  task_order = parameters.value_integer ("task_order",0);
-  check_range (ip,"task_order",task_order,1,task_order_maximum);
   nx         = parameters.list_value_integer (0,"grid_size",16);
-  check_range (ip,"nx",nx,4,256);
   ny         = parameters.list_value_integer (1,"grid_size",16);
-  check_range (ip,"ny",ny,4,256);
   nz         = parameters.list_value_integer (2,"grid_size",16);
-  check_range (ip,"nz",nz,4,256);
   bx         = parameters.list_value_integer (0,"block_size",8);
-  check_range (ip,"bx",bx,4,128);
   by         = parameters.list_value_integer (1,"block_size",8);
-  check_range (ip,"by",by,4,128);
   bz         = parameters.list_value_integer (2,"block_size",8);
-  check_range (ip,"bz",bz,4,128);
   px         = parameters.list_value_integer (0,"proc_size",2);
-  check_range (ip,"px",px,1,128);
   py         = parameters.list_value_integer (1,"proc_size",2);
-  check_range (ip,"py",py,1,128);
   pz         = parameters.list_value_integer (2,"proc_size",1);
+  gx         = parameters.list_value_integer (0,"ghost_depth",1);
+  gy         = parameters.list_value_integer (1,"ghost_depth",1);
+  gz         = parameters.list_value_integer (2,"ghost_depth",1);
+  
+  //--------------------------------------------------
+  // Check parameters
+  //--------------------------------------------------
+
+  check_range (ip,"mpi_type",mpi_type,1,mpi_type_maximum);
+  check_range (ip,"data_type",data_type,1,data_type_maximum);
+  check_range (ip,"nx",nx,4,256);
+  check_range (ip,"ny",ny,4,256);
+  check_range (ip,"nz",nz,4,256);
+  check_range (ip,"bx",bx,4,128);
+  check_range (ip,"by",by,4,128);
+  check_range (ip,"bz",bz,4,128);
+  check_range (ip,"px",px,1,128);
+  check_range (ip,"py",py,1,128);
   check_range (ip,"pz",pz,1,128);
+  check_range (ip,"gx",gx,1,8);
+  check_range (ip,"gy",gy,1,8);
+  check_range (ip,"gz",gz,1,8);
+
+  // Check processor count
+
   if ((px * py * pz) != np) {
     if (ip==0) {
       fprintf (stderr,
@@ -199,29 +199,42 @@ int main (int argc, char ** argv)
     MPI_Abort(MPI_COMM_WORLD,1);
     exit(1);
   }
-  gx         = parameters.list_value_integer (0,"ghost_depth",1);
-  check_range (ip,"gx",gx,1,8);
-  gy         = parameters.list_value_integer (1,"ghost_depth",1);
-  check_range (ip,"gy",gy,1,8);
-  gz         = parameters.list_value_integer (2,"ghost_depth",1);
-  check_range (ip,"gz",gz,1,8);
+
+  // Check number of processors * processor block size = problem size
+
+  int qx = nx / px; // array size per processor 
+  int qy = ny / py;
+  int qz = nz / pz;
   
-  tx = nx / bx;
-  ty = ny / by;
-  tz = nz / bz;
-  if (tx*bx != nx || ty*by != ny || tz*bz != nz) {
+  if (px*qx != nx || py*qy != ny || pz*qz != nz) {
     if (ip==0) {
       fprintf (stderr,
-	       "%s:%d Error: [nx ny nz] = [%d %d %d] not divisible by [bx by bz] = [%d %d %d]\n",
-	       __FILE__,__LINE__,nx,ny,nz,bx,by,bz);
+	       "%s:%d Error: [nx ny nz] = [%d %d %d] not divisible by [px py pz] = [%d %d %d]\n",
+	       __FILE__,__LINE__,nx,ny,nz,px,py,pz);
     }
     MPI_Abort(MPI_COMM_WORLD,1);
     exit(1);
   }
 
-  //--------------------------------------------------
-  // Check parameters
-  //--------------------------------------------------
+  // Check tasks per processor * task size = number of processors
+
+  int tx = nx / bx; // number of tasks in domain
+  int ty = ny / by;
+  int tz = nz / bz;
+
+  int tpx = tx / px; // Number of tasks per processor
+  int tpy = ty / py;
+  int tpz = tz / pz;
+
+  if (tx*tpx != px || ty*tpy != py || tz*tpz != pz) {
+    if (ip==0) {
+      fprintf (stderr,
+	       "%s:%d Error: [px py pz] = [%d %d %d] not divisible by [tx ty tz] = [%d %d %d]\n",
+	       __FILE__,__LINE__,px,py,pz,tx,ty,tz);
+    }
+    MPI_Abort(MPI_COMM_WORLD,1);
+    exit(1);
+  }
 
   //--------------------------------------------------
   // Write parameters
@@ -230,7 +243,6 @@ int main (int argc, char ** argv)
   if (ip==0) {
     printf ("mpi_type   = %d\n",mpi_type);
     printf ("data_type  = %d\n",data_type);
-    printf ("task_order = %d\n",task_order);
     printf ("nx,ny,nz   = [%d %d %d]\n",nx,ny,nz);
     printf ("bx,by,bz   = [%d %d %d]\n",bx,by,bz);
     printf ("px,py,pz   = [%d %d %d]\n",px,py,pz);
@@ -238,6 +250,43 @@ int main (int argc, char ** argv)
     printf ("gx,gy,gz   = [%d %d %d]\n",gx,gy,gz);
     printf ("levels     = [%d %d %d]\n",levels[0],levels[1],levels[2]);
   }
+
+
+  //--------------------------------------------------
+  // Initialize task arrays
+  //--------------------------------------------------
+  
+  // Allocate processor-local array
+
+  int ndx = qx + 2*gx;
+  int ndy = qy + 2*gy;
+  int ndz = qz + 2*gz;
+  Scalar * array = new Scalar [ ndx * ndy * ndz ];
+
+  // Allocate task array pointers
+
+  Scalar ** task_blocks = new Scalar * [ tpx * tpy * tpz ];
+
+  int go = gx + ndx * (gy + ndy * gz);
+
+  for (int itpz = 0; itpz < tpz; itpz ++) {
+    for (int itpy = 0; itpy < tpy; itpy ++) {
+      for (int itpx = 0; itpx < tpx; itpx ++) {
+	int itp = itpx + tpx * (itpy + tpy * itpz);
+	int ia = (itpx*bx) + ndx * ( (itpy*by) + ndy * (itpz*bz) );
+	task_blocks [ itp ] = & array [ ia ];
+      }
+    }
+  }
+
+  //--------------------------------------------------
+  // Run test
+  //--------------------------------------------------
+
+
+  //--------------------------------------------------
+  // Exit
+  //--------------------------------------------------
 
   MPI_Barrier(MPI_COMM_WORLD);
   fflush(stdout);
