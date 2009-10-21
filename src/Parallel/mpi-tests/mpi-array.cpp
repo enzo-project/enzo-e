@@ -1,12 +1,3 @@
-#include <stdio.h>
-#include <mpi.h>
-
-#include "cello.h"
-
-#include "error.hpp"
-#include "parameters.hpp"
-#include "performance.hpp"
-
 const bool trace = false;
 
 //----------------------------------------------------------------------
@@ -53,22 +44,105 @@ const bool trace = false;
 //
 //----------------------------------------------------------------------
 
-void  init_block (Scalar * task_block,
-		  int bx, int by, int bz,
-		  int gx, int gy, int gz);
+//----------------------------------------------------------------------
+// INCLUDES
+//----------------------------------------------------------------------
 
-void compute_B (Scalar ** task_blocks,
-		int sx, int sy, int sz,
-		int bx, int by, int bz,
-		int gx, int gy, int gz);
+#include <stdio.h>
+#include <mpi.h>
 
-void update_block (Scalar * task_block,
-		   int bx, int by, int bz,
-		   int gx, int gy, int gz);
+#include "cello.h"
+
+#include "error.hpp"
+#include "parameters.hpp"
+#include "performance.hpp"
+
+//----------------------------------------------------------------------
+// ENUMERATIONS
+//----------------------------------------------------------------------
+
+  enum enum_mpi_type {
+    mpi_type_unknown,
+    mpi_type_B,
+    mpi_type_I,
+    mpi_type_BB,
+    mpi_type_BI,
+    mpi_type_GF,
+    mpi_type_G4,
+    mpi_type_GL,
+    mpi_type_PF,
+    mpi_type_P4,
+    mpi_type_PL,
+    mpi_type_maximum = mpi_type_PL
+  };
+
+  enum enum_data_type {
+    data_type_unknown,
+    data_type_alias,
+    data_type_copy,
+    data_type_alias_packed,
+    data_type_copy_ghost,
+    data_type_copy_ghost_packed,
+    data_type_maximum = data_type_copy_ghost_packed
+  };
+
+//----------------------------------------------------------------------
+// FUNCTION PROTOTYPES
+//----------------------------------------------------------------------
+
+void  init_block 
+(
+ Scalar * task_block,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
+
+void compute_B 
+(
+ enum_data_type data_type,
+ Scalar ** task_blocks,
+ int sx, int sy, int sz,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
+
+void update_block 
+(
+ Scalar * task_block,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
 
 
-void check_range (int ip, std::string name, int var, int min, int max);
+void check_range 
+(
+ int ip, 
+ std::string name, 
+ int var, 
+ int min, 
+ int max
+ );
 
+void ghost_exchange 
+(
+ Scalar * task_block,
+ enum_data_type data_type,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
+
+void ghost_exchange_packed 
+(
+ Scalar ** task_blocks,
+ enum_data_type data_type,
+ int sx, int sy, int sz,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
+
+//======================================================================
+// MAIN
+//======================================================================
 
 int main (int argc, char ** argv)
 {
@@ -121,31 +195,8 @@ int main (int argc, char ** argv)
   // Declare parameters
   //--------------------------------------------------
 
-  enum enum_mpi_type {
-    mpi_type_unknown,
-    mpi_type_B,
-    mpi_type_I,
-    mpi_type_BB,
-    mpi_type_BI,
-    mpi_type_GF,
-    mpi_type_G4,
-    mpi_type_GL,
-    mpi_type_PF,
-    mpi_type_P4,
-    mpi_type_PL,
-    mpi_type_maximum = mpi_type_PL
-  };
   int mpi_type;
 
-  enum enum_data_type {
-    data_type_unknown,
-    data_type_alias,
-    data_type_copy,
-    data_type_alias_packed,
-    data_type_copy_ghost,
-    data_type_copy_ghost_packed,
-    data_type_maximum = data_type_copy_ghost_packed
-  };
   int  data_type;
 
   int         nx,ny,nz;  // grid size
@@ -304,24 +355,32 @@ int main (int argc, char ** argv)
   //--------------------------------------------------
 
   switch (mpi_type) {
+
   case mpi_type_B:
 
     for (int is=0; is<sx*sy*sz; is++) {
       init_block (task_blocks[is],bx,by,bz,gx,gy,gz);
     }
 
-    compute_B (task_blocks,sx,sy,sz,bx,by,bz,gx,gy,gz);
-
+    compute_B ((enum_data_type)data_type,
+	       task_blocks,
+	       sx,sy,sz,
+	       bx,by,bz,
+	       gx,gy,gz);
     
     break;
+
   default:
+
     if (ip==0) {
       fprintf (stderr,
 	       "%s:%d Error: unknown mpi_type %d\n\n",
 	       __FILE__,__LINE__,mpi_type);
     }
     MPI_Abort (MPI_COMM_WORLD,1);
+
     break;
+
   }
 
   //--------------------------------------------------
@@ -377,11 +436,20 @@ void  init_block (Scalar * task_block,
 
 //----------------------------------------------------------------------
 
-void compute_B (Scalar ** task_blocks,
+void compute_B (enum_data_type data_type,
+		Scalar ** task_blocks,
 		int sx, int sy, int sz,
 		int bx, int by, int bz,
 		int gx, int gy, int gz)
 {
+
+  // packed ghost zone exchange
+
+  ghost_exchange_packed (task_blocks,
+			 data_type,
+			 sx,sy,sz,
+			 bx,by,bz,
+			 gx,gy,gz);
 
   // loop over blocks (isx,isy,isz)
 
@@ -390,6 +458,11 @@ void compute_B (Scalar ** task_blocks,
       for (int isx = 0; isx < sx; isx++) {
 
 	int is = isx + sx * (isy + isy * isz);
+
+	// non-packed ghost zone exchange
+
+	ghost_exchange (task_blocks[is],data_type,bx,by,bz,gx,gy,gz);
+
 
 	// update the block
 
@@ -432,3 +505,56 @@ void update_block (Scalar * task_block,
   }
 
 }
+
+void ghost_exchange 
+(
+ Scalar * task_block,
+ enum_data_type data_type,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ )
+{
+
+  switch (data_type) {
+  case data_type_alias:
+    break;
+  case data_type_copy:
+    break;
+  case data_type_copy_ghost:
+    break;
+  case data_type_alias_packed:
+  case data_type_copy_ghost_packed:
+    // Skip
+    break;
+  case data_type_unknown:
+  default:
+    // Error
+    break;
+  }
+}
+
+void ghost_exchange_packed 
+(
+ Scalar ** task_blocks,
+ enum_data_type data_type,
+ int sx, int sy, int sz,
+ int bx, int by, int bz,
+ int gx, int gy, int gz)
+{
+  switch (data_type) {
+  case data_type_alias_packed:
+    break;
+  case data_type_copy_ghost_packed:
+    break;
+  case data_type_alias:
+  case data_type_copy:
+  case data_type_copy_ghost:
+    // Skip
+    break;
+  case data_type_unknown:
+  default:
+    // Error
+    break;
+  }
+}
+
