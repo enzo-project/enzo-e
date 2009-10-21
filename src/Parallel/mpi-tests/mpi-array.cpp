@@ -7,6 +7,8 @@
 #include "parameters.hpp"
 #include "performance.hpp"
 
+const bool trace = false;
+
 //----------------------------------------------------------------------
 //
 // PURPOSE
@@ -91,12 +93,15 @@ int main (int argc, char ** argv)
     exit(1);
   }
 
+  TRACE;
+
   Parameters parameters;
 
   //--------------------------------------------------
   // Read in input file
   //--------------------------------------------------
 
+  TRACE;
   FILE * fp = fopen (argv[1],"r");
 
   if (fp == NULL) {
@@ -109,6 +114,7 @@ int main (int argc, char ** argv)
     exit(1);
   }
 
+  TRACE;
   parameters.read(fp);
 
   //--------------------------------------------------
@@ -170,6 +176,7 @@ int main (int argc, char ** argv)
   gy         = parameters.list_value_integer (1,"ghost_depth",1);
   gz         = parameters.list_value_integer (2,"ghost_depth",1);
   
+  TRACE;
   //--------------------------------------------------
   // Check parameters
   //--------------------------------------------------
@@ -191,6 +198,7 @@ int main (int argc, char ** argv)
 
   // Check processor count
 
+  TRACE;
   if ((px * py * pz) != np) {
     if (ip==0) {
       fprintf (stderr,
@@ -200,6 +208,7 @@ int main (int argc, char ** argv)
     MPI_Abort(MPI_COMM_WORLD,1);
     exit(1);
   }
+  TRACE;
 
   // Check number of processors * processor block size = problem size
 
@@ -218,25 +227,33 @@ int main (int argc, char ** argv)
   }
 
   // Check tasks per processor * task size = number of processors
+  TRACE;
 
   int tx = nx / bx; // number of tasks in domain
   int ty = ny / by;
   int tz = nz / bz;
 
+
+  TRACE;
   int sx = tx / px; // Number of tasks per processor
   int sy = ty / py;
   int sz = tz / pz;
 
-  if (tx*sx != px || ty*sy != py || tz*sz != pz) {
+
+
+  TRACE;
+  if (px*sx != tx || py*sy != ty || pz*sz != tz) {
     if (ip==0) {
       fprintf (stderr,
-	       "%s:%d Error: [px py pz] = [%d %d %d] not divisible by [tx ty tz] = [%d %d %d]\n",
-	       __FILE__,__LINE__,px,py,pz,tx,ty,tz);
+	       "%s:%d Error: [tx ty tz] = [%d %d %d] not divisible by [px py pz] = [%d %d %d]\n",
+	       __FILE__,__LINE__,tx,ty,tz,px,py,pz);
+      fflush(stderr);
     }
     MPI_Abort(MPI_COMM_WORLD,1);
     exit(1);
   }
 
+  TRACE;
   //--------------------------------------------------
   // Write parameters
   //--------------------------------------------------
@@ -252,6 +269,7 @@ int main (int argc, char ** argv)
     printf ("levels     = [%d %d %d]\n",levels[0],levels[1],levels[2]);
   }
 
+  TRACE;
 
   //--------------------------------------------------
   // Initialize task arrays
@@ -280,6 +298,7 @@ int main (int argc, char ** argv)
     }
   }
 
+  TRACE;
   //--------------------------------------------------
   // Run test
   //--------------------------------------------------
@@ -311,6 +330,7 @@ int main (int argc, char ** argv)
 
   MPI_Barrier(MPI_COMM_WORLD);
   fflush(stdout);
+  TRACE;
   MPI_Finalize();
 }
 
