@@ -6,6 +6,7 @@
  * @file      performance.cpp
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
+ * @ingroup   Performance
  * @date      
  * @bug       
  * @note      

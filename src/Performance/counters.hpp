@@ -29,7 +29,7 @@ class Counters {
  *
  * @class     Counters
  * @brief     
- * @ingroup   
+ * @ingroup   Performance
  *
  * 
  *

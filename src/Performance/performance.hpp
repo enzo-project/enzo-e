@@ -36,7 +36,7 @@ class Performance {
  *
  * @class     Performance
  * @brief     
- * @ingroup   
+ * @ingroup   Performance
  *
  * 
  *

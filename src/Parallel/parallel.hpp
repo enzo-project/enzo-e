@@ -27,7 +27,7 @@ class Parallel {
  *
  * @class     Parallel
  * @brief     
- * @ingroup   
+ * @ingroup   Parallel
  *
  * 
  *

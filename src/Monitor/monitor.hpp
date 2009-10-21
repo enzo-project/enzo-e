@@ -43,7 +43,7 @@ class Monitor {
  *
  * @class     Monitor
  * @brief     Brief description of the class
- * @ingroup   Group 
+ * @ingroup   Monitor
  *
  * Detailed description of the class
  *
