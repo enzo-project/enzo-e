@@ -51,20 +51,21 @@
 //
 //----------------------------------------------------------------------
 
-void check_range (int ip,
-		  std::string name,
-		  int var,
-		  int min,
-		  int max)
-{	  
-  if ( ! (min <= var && var <= max)) {
-    if (ip==0) {
-      fprintf (stderr,"%s = %d is out of range [%d,%d]\n",
-	       name.c_str(),var,min,max);
-    }
-    MPI_Abort(MPI_COMM_WORLD,1);
-  }
-}
+void  init_block (Scalar * task_block,
+		  int bx, int by, int bz,
+		  int gx, int gy, int gz);
+
+void compute_B (Scalar ** task_blocks,
+		int sx, int sy, int sz,
+		int bx, int by, int bz,
+		int gx, int gy, int gz);
+
+void update_block (Scalar * task_block,
+		   int bx, int by, int bz,
+		   int gx, int gy, int gz);
+
+
+void check_range (int ip, std::string name, int var, int min, int max);
 
 
 int main (int argc, char ** argv)
@@ -222,11 +223,11 @@ int main (int argc, char ** argv)
   int ty = ny / by;
   int tz = nz / bz;
 
-  int tpx = tx / px; // Number of tasks per processor
-  int tpy = ty / py;
-  int tpz = tz / pz;
+  int sx = tx / px; // Number of tasks per processor
+  int sy = ty / py;
+  int sz = tz / pz;
 
-  if (tx*tpx != px || ty*tpy != py || tz*tpz != pz) {
+  if (tx*sx != px || ty*sy != py || tz*sz != pz) {
     if (ip==0) {
       fprintf (stderr,
 	       "%s:%d Error: [px py pz] = [%d %d %d] not divisible by [tx ty tz] = [%d %d %d]\n",
@@ -265,16 +266,16 @@ int main (int argc, char ** argv)
 
   // Allocate task array pointers
 
-  Scalar ** task_blocks = new Scalar * [ tpx * tpy * tpz ];
+  Scalar ** task_blocks = new Scalar * [ sx * sy * sz ];
 
-  int go = gx + ndx * (gy + ndy * gz);
+  int ga = gx + ndx * (gy + ndy * gz);
 
-  for (int itpz = 0; itpz < tpz; itpz ++) {
-    for (int itpy = 0; itpy < tpy; itpy ++) {
-      for (int itpx = 0; itpx < tpx; itpx ++) {
-	int itp = itpx + tpx * (itpy + tpy * itpz);
-	int ia = (itpx*bx) + ndx * ( (itpy*by) + ndy * (itpz*bz) );
-	task_blocks [ itp ] = & array [ ia ];
+  for (int isz = 0; isz < sz; isz ++) {
+    for (int isy = 0; isy < sy; isy ++) {
+      for (int isx = 0; isx < sx; isx ++) {
+	int is = isx + sx * (isy + sy * isz);
+	int ia = (isx*bx) + ndx * ( (isy*by) + ndy * (isz*bz) );
+	task_blocks [ is ] = & array [ ia + ga ];
       }
     }
   }
@@ -283,6 +284,26 @@ int main (int argc, char ** argv)
   // Run test
   //--------------------------------------------------
 
+  switch (mpi_type) {
+  case mpi_type_B:
+
+    for (int is=0; is<sx*sy*sz; is++) {
+      init_block (task_blocks[is],bx,by,bz,gx,gy,gz);
+    }
+
+    compute_B (task_blocks,sx,sy,sz,bx,by,bz,gx,gy,gz);
+
+    
+    break;
+  default:
+    if (ip==0) {
+      fprintf (stderr,
+	       "%s:%d Error: unknown mpi_type %d\n\n",
+	       __FILE__,__LINE__,mpi_type);
+    }
+    MPI_Abort (MPI_COMM_WORLD,1);
+    break;
+  }
 
   //--------------------------------------------------
   // Exit
@@ -291,4 +312,103 @@ int main (int argc, char ** argv)
   MPI_Barrier(MPI_COMM_WORLD);
   fflush(stdout);
   MPI_Finalize();
+}
+
+//----------------------------------------------------------------------
+
+void check_range (int ip,
+		  std::string name,
+		  int var,
+		  int min,
+		  int max)
+{	  
+  if ( ! (min <= var && var <= max)) {
+    if (ip==0) {
+      fprintf (stderr,"%s = %d is out of range [%d,%d]\n",
+	       name.c_str(),var,min,max);
+    }
+    MPI_Abort(MPI_COMM_WORLD,1);
+  }
+}
+
+//----------------------------------------------------------------------
+
+void  init_block (Scalar * task_block,
+		  int bx, int by, int bz,
+		  int gx, int gy, int gz)
+{
+  // Compute block size with ghosts
+
+  int nx = bx + 2*gx;
+  int ny = by + 2*gy;
+  int nz = bz + 2*gz;
+
+  // Initialize blocks including ghosts
+
+  for (int isz = -gz; isz < bz + gz; isz++) {
+    for (int isy = -gy; isy < by + gy; isy++) {
+      for (int isx = -gx; isx < bx + gx; isx++) {
+	int is = isx + nx * (isy + ny* isz);
+	task_block [is] = isx + isy + isz;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void compute_B (Scalar ** task_blocks,
+		int sx, int sy, int sz,
+		int bx, int by, int bz,
+		int gx, int gy, int gz)
+{
+
+  // loop over blocks (isx,isy,isz)
+
+  for (int isz = 0; isz < sz; isz++) {
+    for (int isy = 0; isy < sy; isy++) {
+      for (int isx = 0; isx < sx; isx++) {
+
+	int is = isx + sx * (isy + isy * isz);
+
+	// update the block
+
+	update_block (task_blocks[is],bx,by,bz,gx,gy,gz);
+
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void update_block (Scalar * task_block,
+		   int bx, int by, int bz,
+		   int gx, int gy, int gz)
+{
+  // Compute block size with ghosts
+
+  int nx = bx + 2*gx;
+  int ny = by + 2*gy;
+  int nz = bz + 2*gz;
+
+  // Update blocks including ghosts
+
+  int dx = 1;
+  int dy = bx;
+  int dz = bx*by;
+  Scalar d = 1.0 / 6.0;
+
+  for (int isz = 0; isz < bz; isz++) {
+    for (int isy = 0; isy < by; isy++) {
+      for (int isx = 0; isx < bx; isx++) {
+	int is = isx + nx * (isy + ny* isz);
+	task_block [is] = 
+	  d * (task_block [is + dx] + task_block [is - dx] +
+	       task_block [is + dy] + task_block [is - dy] +
+	       task_block [is + dz] + task_block [is - dz]);
+      }
+    }
+  }
+
 }
