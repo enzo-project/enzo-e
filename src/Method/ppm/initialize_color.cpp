@@ -77,11 +77,11 @@ void initialize_color ()
 
   int grid_size [] = { width, height };
 
-  float color_density_out = 1.0;
-  float color_density_in  = 0.125;
-  float color_pressure_out = 1.0;
-  float color_pressure_in  = 0.14;
-  float color_velocity_x = 10.0;
+  float color_density_in = 1.0;
+  float color_density_out  = 0.125;
+  float color_pressure_in = 1.0;
+  float color_pressure_out  = 0.14;
+  float color_velocity_x = 0.0;
   float color_velocity_y = 0.0;
   float color_in = 1.0;
   float color_out= 0.0;
@@ -202,9 +202,9 @@ void initialize_color ()
 
       // Initialize density and total energy
 
-      float front = 0.2*(DomainRightEdge[0] - DomainLeftEdge[0]);
+      float radius = 0.2*(DomainRightEdge[0] - DomainLeftEdge[0]);
 
-      if (x < front) {
+      if (x*x + y*y < radius) {
 	BaryonField[ field_density ] [ i ] = color_density_in;
       } else {
 	BaryonField[ field_density ] [ i ] = color_density_out;
@@ -212,7 +212,7 @@ void initialize_color ()
 
       // Initialize total energy
 
-      if (x < front) {
+      if (x*x + y*y < radius) {
 	BaryonField[ field_total_energy ][ i ] = 
 	  color_pressure_in / ((Gamma - 1.0)*color_density_in);
       } else {
@@ -226,11 +226,8 @@ void initialize_color ()
 
       // Initialize velocity
 
-      float vel_low = 0.4*(DomainRightEdge[1] - DomainLeftEdge[1]);
-      float vel_high = 0.6*(DomainRightEdge[1] - DomainLeftEdge[1]);
-      BaryonField[ field_velocity_x ][ i ] = 
-	(y < vel_low || y > vel_high) ? 0.0 : color_velocity_x;
-      BaryonField[ field_velocity_y ][ i ] = color_velocity_y;
+      BaryonField[ field_velocity_x ][ i ] = 0;
+      BaryonField[ field_velocity_y ][ i ] = 0;
 
       // Initialize color
 
