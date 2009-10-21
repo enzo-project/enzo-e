@@ -1,6 +1,6 @@
 TOP     = ../..
 PACKAGE = disk
-OBJS    = hdf5.o
+OBJS    = disk_hdf5.o
 TESTS   = test_disk_hdf5
 
 include $(TOP)/src/MAKE/Make.include

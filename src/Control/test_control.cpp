@@ -13,12 +13,10 @@
  *********************************************************************
  */
  
-#include <stdio.h>
-#include <string>
+#include "cello.h"
 
 #include "error.hpp"
 #include "test.hpp"
-// #include "control.hpp"
 
 int main(int argc, char ** argv)
 {

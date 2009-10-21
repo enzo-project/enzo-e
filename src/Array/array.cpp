@@ -26,11 +26,8 @@
  *********************************************************************
  */
  
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
+#include "cello.h"
 
-#include "error_exception.hpp"
 #include "array.hpp" 
 
 //----------------------------------------------------------------------

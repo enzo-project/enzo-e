@@ -26,7 +26,7 @@
  *********************************************************************
  */
  
-#include <stdio.h>
+#include "cello.h"
 
 #include "error.hpp"
 #include "test.hpp"

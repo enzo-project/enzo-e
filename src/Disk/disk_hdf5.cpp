@@ -26,15 +26,11 @@
  *********************************************************************
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <string>
-
-#include "hdf5.h"
+#include <hdf5.h>
 
 #include "error.hpp"
-#include "disk.hpp"
+
+#include "disk_hdf5.hpp"
  
 //----------------------------------------------------------------------
 

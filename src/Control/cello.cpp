@@ -12,15 +12,11 @@
  *
  *********************************************************************
  */
- 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
 
-#include "error.hpp"
+#include "cello.h"
+
 #include "monitor.hpp"
 #include "parameters.hpp"
-#include "performance.hpp"
 
 int main(int argc, char ** argv)
 {
