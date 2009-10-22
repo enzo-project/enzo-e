@@ -8,7 +8,7 @@
 #define CONFIG_PRECISION_SINGLE
 /* #define CONFIG_PRECISION_DOUBLE */
 
-/* #define CONFIG_USE_MPI */
+#define CONFIG_USE_MPI
 /* #define CONFIG_USE_PAPI */
 
 /*********************************************************************
