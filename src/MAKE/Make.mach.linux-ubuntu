@@ -14,8 +14,9 @@
 # Compilers
 #----------------------------------------------------------------------
 
-  CXX = g++
-  FC  = gfortran
+  CXX = mpiCC
+  CC  = mpicc
+  FC  = mpif77
 
 #----------------------------------------------------------------------
 # OPT:  optimization/debug compiler flags
@@ -23,6 +24,8 @@
 
   OPT_DEBUG = -g -fsignaling-nans -Wall
   OPT_FAST  = -O3
+
+  OPT = $(OPT_FAST)
   OPT = $(OPT_DEBUG)
 
 #------------------------------------------------------------------------
