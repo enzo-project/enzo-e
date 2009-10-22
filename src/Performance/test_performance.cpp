@@ -1,18 +1,5 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
 /** 
  *********************************************************************
  *
@@ -32,7 +19,7 @@
 
 #include "error.hpp"
 #include "test.hpp"
-#include "array.hpp"
+#include "memory.hpp"
 #include "performance.hpp"
 
 int main(int argc, char ** argv)
@@ -69,43 +56,68 @@ int main(int argc, char ** argv)
   unit_class ("Performance");
 
   unit_func("Performance");
-  Performance performance ( num_attributes,
-			    num_counters,
-			    num_components,
-			    3 ); // 3 regions
+  Performance * performance = new Performance
+    ( num_attributes, num_counters, num_components, 3 );
 
   // Add attributes
 
-  performance.new_attribute(time_real,          "time_real");
-  performance.new_attribute(time_sim,           "time_sim");
-  performance.new_attribute(mem_curr_bytes,     "mem_curr_bytes");
-  performance.new_attribute(mem_high_bytes,     "mem_high_bytes");
-  performance.new_attribute(mem_new_count,      "mem_new_count");
-  performance.new_attribute(mem_delete_count,   "mem_delete_count");
-  performance.new_attribute(mem_new_bytes,      "mem_new_bytes");
-  performance.new_attribute(mem_delete_bytes,   "mem_delete_bytes");
-  performance.new_attribute(disk_read_bytes,    "disk_read_bytes");
-  performance.new_attribute(disk_write_bytes,   "disk_write_bytes");
-  performance.new_attribute(disk_read_time,     "disk_read_time");
-  performance.new_attribute(disk_write_time,    "disk_write_time");
-  performance.new_attribute(user_patch_count,   "user_patch_count");
-  performance.new_attribute(user_cell_count,    "user_cell_count");
-  performance.new_attribute(user_particle_count,"user_particle_count");
+  performance->new_attribute(attribute_timestep, "timestep", true);
+  performance->new_attribute(attribute_level,    "level");
+  
+  // Add counters
+
+  performance->new_counter(time_real,          "time_real");
+  performance->new_counter(time_sim,           "time_sim");
+  performance->new_counter(mem_curr_bytes,     "mem_curr_bytes");
+  performance->new_counter(mem_high_bytes,     "mem_high_bytes");
+  performance->new_counter(mem_new_count,      "mem_new_count");
+  performance->new_counter(mem_delete_count,   "mem_delete_count");
+  performance->new_counter(mem_new_bytes,      "mem_new_bytes");
+  performance->new_counter(mem_delete_bytes,   "mem_delete_bytes");
+  performance->new_counter(disk_read_bytes,    "disk_read_bytes");
+  performance->new_counter(disk_write_bytes,   "disk_write_bytes");
+  performance->new_counter(disk_read_time,     "disk_read_time");
+  performance->new_counter(disk_write_time,    "disk_write_time");
+  performance->new_counter(user_patch_count,   "user_patch_count");
+  performance->new_counter(user_cell_count,    "user_cell_count");
+  performance->new_counter(user_particle_count,"user_particle_count");
 
 #ifdef CONFIG_USE_MPI
-  performance.new_attribute(comm_send_bytes,    "comm_send_bytes");
-  performance.new_attribute(comm_recv_bytes,    "comm_recv_bytes");
-  performance.new_attribute(comm_send_time,     "comm_send_time");
-  performance.new_attribute(comm_recv_time,     "comm_recv_time");
-  performance.new_attribute(comm_global_time,   "comm_global_time");
-  performance.new_attribute(comm_send_count,    "comm_send_count");
-  performance.new_attribute(comm_recv_count,    "comm_recv_count");
-  performance.new_attribute(comm_global_count,  "comm_global_count");
+  performance->new_counter(comm_send_bytes,    "comm_send_bytes");
+  performance->new_counter(comm_recv_bytes,    "comm_recv_bytes");
+  performance->new_counter(comm_send_time,     "comm_send_time");
+  performance->new_counter(comm_recv_time,     "comm_recv_time");
+  performance->new_counter(comm_global_time,   "comm_global_time");
+  performance->new_counter(comm_send_count,    "comm_send_count");
+  performance->new_counter(comm_recv_count,    "comm_recv_count");
+  performance->new_counter(comm_global_count,  "comm_global_count");
 #endif /* CONFIG_USE_MPI */
 
-  // Add counters
   // Add groups
+
+  performance->new_group(component_amr,"amr");
+  performance->new_group(component_analysis,"analysis");
+  performance->new_group(component_array,"array");
+  performance->new_group(component_control,"control");
+  performance->new_group(component_disk,"disk");
+  performance->new_group(component_error,"error");
+  performance->new_group(component_field,"field");
+  performance->new_group(component_memory,"memory");
+  performance->new_group(component_method,"method");
+  performance->new_group(component_monitor,"monitor");
+  performance->new_group(component_parallel,"parallel");
+  performance->new_group(component_parameters,"parameters");
+  performance->new_group(component_particles,"particles");
+  performance->new_group(component_performance,"performance");
+  performance->new_group(component_portal,"portal");
+  performance->new_group(component_problem,"problem");
+  performance->new_group(component_simulation,"simulation");
+  
   // Add functions
+
+  performance->new_region(1, "function_1");
+  performance->new_region(2, "function_2");
+  performance->new_region(3, "function_3");
 
   // Initialize counters that are non-zero at start
 
@@ -201,6 +213,10 @@ int main(int argc, char ** argv)
 
   unit_func("~Performance");
   unit_assert (false);
+
+  delete performance;
+
+  Memory::print();
 
   unit_close();
 }

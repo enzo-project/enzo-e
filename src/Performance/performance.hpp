@@ -31,6 +31,14 @@ typedef unsigned long long type_counter;
 
 class Performance {
 
+enum enum_item_type {
+  item_unknown,
+  item_attribute,
+  item_counter,
+  item_group,
+  item_region
+};
+
 /** 
  *********************************************************************
  *
@@ -50,10 +58,10 @@ public:
   //-------------------------------------------------------------------
 
   /// 
-  Performance(size_t num_attributes, 
-	      size_t num_counters,
-	      size_t num_groups,
-	      size_t num_regions);
+  Performance(unsigned num_attributes, 
+	      unsigned num_counters,
+	      unsigned num_groups,
+	      unsigned num_regions);
 
   /// 
   ~Performance();
@@ -63,71 +71,70 @@ public:
   //--------------------------------------------------
 
   ///  	Create a new attribute
-  void new_attribute(int         id_attribute, 
+  void new_attribute(unsigned    id_attribute, 
 		     std::string attribute_name,
-		     bool        is_monotonic    = false,
-		     int         max_value       = 0);
+		     bool        is_monotonic    = false);
 
   /// Return the value of an attribute
-  int get_attribute(int id_attribute);
+  int get_attribute(unsigned id_attribute);
 
   /// Assign a value to an attribute
-  void set_attribute(int id_attribute);
+  void set_attribute(unsigned id_attribute);
 
   //--------------------------------------------------
   // GROUPS
   //--------------------------------------------------
 
-  void new_group(int         id_group, 
+  void new_group(unsigned         id_group, 
 		 std::string group_name);
 
   /// Return the value of an group
-  int get_group(int id_group);
+  int get_group(unsigned id_group);
 
   /// Assign a value to an group
-  void set_group(int id_group);
+  void set_group(unsigned id_group);
 
   ///  	 Define the start of a group
-  void begin_group(int id_group);
+  void begin_group(unsigned id_group);
 
   ///  	Define the end of a group
-  void end_group(int id_group);
+  void end_group(unsigned id_group);
 
   //--------------------------------------------------
   // REGIONS
   //--------------------------------------------------
 
-  void new_region(int         id_region, 
+  void new_region(unsigned    id_region, 
 		  std::string region_name);
 
   /// Return the value of an region
-  int get_region(int id_region);
+  int get_region(unsigned id_region);
 
   /// Assign a value to an region
-  void set_region(int id_region);
+  void set_region(unsigned id_region);
 
   ///  	Define the start of a region
-  void start_region(int region_name);
+  void start_region(unsigned region_name);
 
   ///  	Define the end of a region
-  void stop_region(int region_name);
+  void stop_region(unsigned region_name);
 
   //--------------------------------------------------
   // COUNTERS
   //--------------------------------------------------
 
   ///  	Create a new user counter.
-  void new_counter(int id_counter,
+  void new_counter(unsigned id_counter,
 		   std::string counter_name);
 
   ///  	Return the value of a counter.
-  type_counter get_counter(int id_counter);
+  type_counter get_counter(unsigned id_counter);
 
   ///  	Assign a value to a user counter.
-  void set_counter(int id_counter,
+  void set_counter(unsigned id_counter,
 		   type_counter value);
   ///  	Increment a user counter.
-  void increment_counter(int id_counter,
+  void increment_counter(unsigned id_counter,
 			 type_counter value);
 
   //--------------------------------------------------
@@ -167,7 +174,17 @@ private:
 # endif
   }
 
-//----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+
+  void new_item_ 
+  (
+   enum_item_type  item_type,
+   std::string item_type_name,
+   unsigned id_item, 
+   std::string item_name,
+   std::string * item_names,
+   unsigned num_items_
+   );
 
 private:
 
@@ -179,7 +196,7 @@ private:
   std::vector<Counters *> counters_;
 
   /// Number of attributes
-  size_t num_attributes_;
+  unsigned num_attributes_;
 
   /// Attribute names
   std::string * attribute_names_;
@@ -187,32 +204,32 @@ private:
   /// Which attributes are monotonic
   bool * monotonic_attributes_;
 
-  /// Values of monotonic attributes
+  /// Values of monotonic attributes; 0 for non-monotonic
   int  * monotonic_attribute_values_;
 
   /// Number of counters
-  size_t num_counters_;
+  unsigned num_counters_;
 
   /// Counter names
   std::string * counter_names_;
 
   /// Number of groups
-  size_t num_groups_;
+  unsigned num_groups_;
 
   /// Current group; 0 if none
-  int current_group_;
+  unsigned current_group_;
 
   /// Group names
   std::string * group_names_;
 
   /// Number of regions
-  size_t num_regions_;
+  unsigned num_regions_;
 
   /// Region names
   std::string * region_names_;
 
   /// Current region; 0 if none
-  int current_region_;
+  unsigned current_region_;
 
 
 };
