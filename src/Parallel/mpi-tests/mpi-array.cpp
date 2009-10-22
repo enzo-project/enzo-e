@@ -1,5 +1,3 @@
-const bool trace = false;
-
 //----------------------------------------------------------------------
 //
 // PURPOSE
@@ -123,7 +121,7 @@ void check_range
  int max
  );
 
-void ghost_exchange 
+Scalar * ghost_exchange_task 
 (
  Scalar * task_block,
  enum_data_type data_type,
@@ -131,7 +129,28 @@ void ghost_exchange
  int gx, int gy, int gz
  );
 
-void ghost_exchange_packed 
+Scalar * ghost_exchange_task_alias
+(
+ Scalar * task_block,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
+
+Scalar * ghost_exchange_task_copy
+(
+ Scalar * task_block,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
+
+Scalar * ghost_exchange_task_copy_ghost
+(
+ Scalar * task_block,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
+
+void ghost_exchange_all 
 (
  Scalar ** task_blocks,
  enum_data_type data_type,
@@ -140,6 +159,81 @@ void ghost_exchange_packed
  int gx, int gy, int gz
  );
 
+void ghost_exchange_all_alias
+(
+ Scalar ** task_blocks,
+ int sx, int sy, int sz,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
+
+void ghost_exchange_all_copy
+(
+ Scalar ** task_blocks,
+ int sx, int sy, int sz,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ );
+
+void recv 
+(
+ int ip_to,
+ enum_mpi_type mpi_type,
+ Scalar * buffer,
+ int ndx, int ndy, int ndz,
+ int nx, int ny, int nz
+ )
+// Receive a 1D, 2D, or 3D array.  Any packing performed is done
+// outside this function
+{
+  int cy; // count number of messages in y direction
+  int cz; // count number of messages in z direction
+  int m;  // message length
+  
+  if (nx == ndx && ny == ndy) {
+    // 3D volume receives
+    m = nx*ny*nz;
+    cy = 1;
+    cz = 1;
+  } else if (nx == ndx && ny !=ndy) {
+    // 2D plane receives
+    m = nx*ny;
+    cy = 1;
+    cz = nz;
+  } else {
+    // 1D line receives
+    m = nx;
+    cy = ny;
+    cz = nz;
+  }
+
+  MPI_Status status;
+
+  switch (mpi_type) {
+  case mpi_type_B:
+    for (int iy = 0; iy < cy; iy++) {
+      for (int iz = 0; iz < cz; iz++) {
+	int i = ndx * (iy + ndy * iz);
+	MPI_Recv (&buffer[i], m, SCALAR_MPI, ip_to, 0, MPI_COMM_WORLD, &status);
+      }
+    }
+    break;
+  case mpi_type_I:
+  case mpi_type_BB:
+  case mpi_type_BI:
+  case mpi_type_GF:
+  case mpi_type_G4:
+  case mpi_type_GL:
+  case mpi_type_PF:
+  case mpi_type_P4:
+  case mpi_type_PL:
+    INCOMPLETE_MESSAGE("recv","");
+    break;
+  case mpi_type_unknown:
+  default:
+    ERROR_MESSAGE("recv","Bad mpi_type");
+  }
+}
 //======================================================================
 // MAIN
 //======================================================================
@@ -167,15 +261,12 @@ int main (int argc, char ** argv)
     exit(1);
   }
 
-  TRACE;
-
   Parameters parameters;
 
   //--------------------------------------------------
   // Read in input file
   //--------------------------------------------------
 
-  TRACE;
   FILE * fp = fopen (argv[1],"r");
 
   if (fp == NULL) {
@@ -188,7 +279,6 @@ int main (int argc, char ** argv)
     exit(1);
   }
 
-  TRACE;
   parameters.read(fp);
 
   //--------------------------------------------------
@@ -227,7 +317,6 @@ int main (int argc, char ** argv)
   gy         = parameters.list_value_integer (1,"ghost_depth",1);
   gz         = parameters.list_value_integer (2,"ghost_depth",1);
   
-  TRACE;
   //--------------------------------------------------
   // Check parameters
   //--------------------------------------------------
@@ -249,7 +338,6 @@ int main (int argc, char ** argv)
 
   // Check processor count
 
-  TRACE;
   if ((px * py * pz) != np) {
     if (ip==0) {
       fprintf (stderr,
@@ -259,7 +347,6 @@ int main (int argc, char ** argv)
     MPI_Abort(MPI_COMM_WORLD,1);
     exit(1);
   }
-  TRACE;
 
   // Check number of processors * processor block size = problem size
 
@@ -278,21 +365,17 @@ int main (int argc, char ** argv)
   }
 
   // Check tasks per processor * task size = number of processors
-  TRACE;
 
   int tx = nx / bx; // number of tasks in domain
   int ty = ny / by;
   int tz = nz / bz;
 
-
-  TRACE;
   int sx = tx / px; // Number of tasks per processor
   int sy = ty / py;
   int sz = tz / pz;
 
 
 
-  TRACE;
   if (px*sx != tx || py*sy != ty || pz*sz != tz) {
     if (ip==0) {
       fprintf (stderr,
@@ -304,7 +387,6 @@ int main (int argc, char ** argv)
     exit(1);
   }
 
-  TRACE;
   //--------------------------------------------------
   // Write parameters
   //--------------------------------------------------
@@ -319,8 +401,6 @@ int main (int argc, char ** argv)
     printf ("gx,gy,gz   = [%d %d %d]\n",gx,gy,gz);
     printf ("levels     = [%d %d %d]\n",levels[0],levels[1],levels[2]);
   }
-
-  TRACE;
 
   //--------------------------------------------------
   // Initialize task arrays
@@ -349,7 +429,6 @@ int main (int argc, char ** argv)
     }
   }
 
-  TRACE;
   //--------------------------------------------------
   // Run test
   //--------------------------------------------------
@@ -389,7 +468,6 @@ int main (int argc, char ** argv)
 
   MPI_Barrier(MPI_COMM_WORLD);
   fflush(stdout);
-  TRACE;
   MPI_Finalize();
 }
 
@@ -420,7 +498,6 @@ void  init_block (Scalar * task_block,
 
   int nx = bx + 2*gx;
   int ny = by + 2*gy;
-  int nz = bz + 2*gz;
 
   // Initialize blocks including ghosts
 
@@ -443,13 +520,9 @@ void compute_B (enum_data_type data_type,
 		int gx, int gy, int gz)
 {
 
-  // packed ghost zone exchange
+  // exchange ghost zones for all tasks
 
-  ghost_exchange_packed (task_blocks,
-			 data_type,
-			 sx,sy,sz,
-			 bx,by,bz,
-			 gx,gy,gz);
+  ghost_exchange_all (task_blocks, data_type, sx,sy,sz, bx,by,bz, gx,gy,gz);
 
   // loop over blocks (isx,isy,isz)
 
@@ -459,14 +532,15 @@ void compute_B (enum_data_type data_type,
 
 	int is = isx + sx * (isy + isy * isz);
 
-	// non-packed ghost zone exchange
+	// exchange ghost zones for current task
 
-	ghost_exchange (task_blocks[is],data_type,bx,by,bz,gx,gy,gz);
+	Scalar * buffer = 
+	  ghost_exchange_task (task_blocks[is],data_type,bx,by,bz,gx,gy,gz);
 
 
 	// update the block
 
-	update_block (task_blocks[is],bx,by,bz,gx,gy,gz);
+	update_block (buffer,bx,by,bz,gx,gy,gz);
 
       }
     }
@@ -483,7 +557,6 @@ void update_block (Scalar * task_block,
 
   int nx = bx + 2*gx;
   int ny = by + 2*gy;
-  int nz = bz + 2*gz;
 
   // Update blocks including ghosts
 
@@ -506,7 +579,9 @@ void update_block (Scalar * task_block,
 
 }
 
-void ghost_exchange 
+//----------------------------------------------------------------------
+
+Scalar * ghost_exchange_task 
 (
  Scalar * task_block,
  enum_data_type data_type,
@@ -515,12 +590,17 @@ void ghost_exchange
  )
 {
 
+  Scalar * buffer;
+
   switch (data_type) {
   case data_type_alias:
+    buffer = ghost_exchange_task_alias(task_block,bx,by,bz,gx,gy,gz);
     break;
   case data_type_copy:
+    buffer = ghost_exchange_task_copy(task_block,bx,by,bz,gx,gy,gz);
     break;
   case data_type_copy_ghost:
+    buffer = ghost_exchange_task_copy_ghost(task_block,bx,by,bz,gx,gy,gz);
     break;
   case data_type_alias_packed:
   case data_type_copy_ghost_packed:
@@ -531,9 +611,12 @@ void ghost_exchange
     // Error
     break;
   }
+  return buffer;
 }
 
-void ghost_exchange_packed 
+//----------------------------------------------------------------------
+
+void ghost_exchange_all 
 (
  Scalar ** task_blocks,
  enum_data_type data_type,
@@ -543,8 +626,10 @@ void ghost_exchange_packed
 {
   switch (data_type) {
   case data_type_alias_packed:
+    ghost_exchange_all_alias(task_blocks,sx,sy,sz,bx,by,bz,gx,gy,gz);
     break;
   case data_type_copy_ghost_packed:
+    ghost_exchange_all_copy(task_blocks,sx,sy,sz,bx,by,bz,gx,gy,gz);
     break;
   case data_type_alias:
   case data_type_copy:
@@ -558,3 +643,67 @@ void ghost_exchange_packed
   }
 }
 
+//----------------------------------------------------------------------
+
+Scalar * ghost_exchange_task_alias
+(
+ Scalar * task_block,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ )
+{
+  INCOMPLETE_MESSAGE("ghost_exchange_task_alias","");
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
+Scalar * ghost_exchange_task_copy
+(
+ Scalar * task_block,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ )
+{
+  INCOMPLETE_MESSAGE("ghost_exchange_task_copy","");
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
+Scalar * ghost_exchange_task_copy_ghost
+(
+ Scalar * task_block,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ )
+{
+  INCOMPLETE_MESSAGE("ghost_exchange_task_copy_ghost","");
+  return NULL;
+}
+
+//----------------------------------------------------------------------
+
+void ghost_exchange_all_alias
+(
+ Scalar ** task_blocks,
+ int sx, int sy, int sz,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ )
+{
+  INCOMPLETE_MESSAGE("ghost_exchange_all_alias","");
+}
+
+//----------------------------------------------------------------------
+
+void ghost_exchange_all_copy
+(
+ Scalar ** task_blocks,
+ int sx, int sy, int sz,
+ int bx, int by, int bz,
+ int gx, int gy, int gz
+ )
+{
+  INCOMPLETE_MESSAGE("ghost_exchange_all_copy","");
+}
