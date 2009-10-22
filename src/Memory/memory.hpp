@@ -119,6 +119,8 @@ public:
   /// Return the number of calls to deallocate for the group
   static int num_delete ( memory_group_handle group_handle = 0 ) throw ();
 
+  static void print () throw ();
+
 private:
 
   //-------------------------------------------------------------------

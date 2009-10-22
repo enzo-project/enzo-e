@@ -212,6 +212,7 @@ int main(int argc, char ** argv)
   unit_func ("num_delete()");
   unit_assert(0);
 
-  
+  Memory::print();
+
   unit_close();
 }

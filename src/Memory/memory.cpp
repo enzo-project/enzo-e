@@ -379,6 +379,32 @@ int Memory::num_delete ( memory_group_handle group_handle ) throw ()
   return 0;
 }
 
+/// Print memory summary
+void Memory::print () throw ()
+/**
+*********************************************************************
+*
+* @param  foo    
+* @return        
+*
+* Print memory summary
+*
+*********************************************************************
+*/
+{
+  for (int i=0; i<num_groups_; i++) {
+
+    printf ("Group %s\n",group_names_[i]);
+    printf ("   available_    = %ld\n",long(available_[i]));
+    printf ("   bytes_        = %ld\n",long(bytes_[i]));
+    printf ("   bytes_high_   = %ld\n",long(bytes_high_[i]));
+    printf ("   new_calls_    = %ld\n",long(new_calls_[i]));
+    printf ("   new_bytes_    = %ld\n",long(new_bytes_[i]));
+    printf ("   delete_calls_ = %ld\n",long(delete_calls_[i]));
+    printf ("   delete_bytes_ = %ld\n",long(delete_bytes_[i]));
+  }
+}
+
 //======================================================================
 
 
