@@ -73,7 +73,8 @@ Performance::Performance
  *********************************************************************
  */
 {
-  Memory::begin_group("Performance");
+  Memory::new_group (component_performance, "Performance");
+  Memory::begin_group(component_performance);
 
   attribute_names_              = new std::string [ num_attributes_ + 1];
   counter_names_                = new std::string [ num_counters_ + 1];
@@ -92,7 +93,7 @@ Performance::Performance
 
   counters_.push_back(new Counters(num_attributes,num_counters));
 
-  Memory::end_group("Performance");
+  Memory::end_group(component_performance);
 }
 
 Performance::~Performance()
@@ -108,7 +109,7 @@ Performance::~Performance()
  */
 {
 
-  Memory::begin_group("Performance");
+  Memory::begin_group(component_performance);
 
   delete [] attribute_names_;
   delete [] counter_names_;
@@ -121,7 +122,7 @@ Performance::~Performance()
     delete counters_.at(i);
   }
 
-  Memory::end_group("Performance");
+  Memory::end_group(component_performance);
 
 }
 

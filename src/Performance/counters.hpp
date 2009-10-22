@@ -20,6 +20,8 @@
  *********************************************************************
  */
 
+#include "cello.h"
+
 #include "memory.hpp"
 
 class Counters {
@@ -45,21 +47,21 @@ public:
   /// 
   Counters(size_t num_attributes, size_t num_counters)
     {
-      Memory::begin_group("Performance");
+      Memory::begin_group(component_performance);
       a_  = new int       [num_attributes];
       c_  = new long long [num_counters];
       dc_ = new long long [num_counters];
-      Memory::end_group("Performance");
+      Memory::end_group(component_performance);
     }
 
   /// 
   ~Counters()
     {
-      Memory::begin_group("Performance");
+      Memory::begin_group(component_performance);
       delete [] a_;
       delete [] c_;
       delete [] dc_;
-      Memory::end_group("Performance");
+      Memory::end_group(component_performance);
     }
 
 
