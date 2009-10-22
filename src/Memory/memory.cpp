@@ -109,10 +109,13 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
   buffer[0] = bytes;
   buffer[1] = curr_group_;
 
-  ++ new_calls_[curr_group_] ;
-  new_bytes_[curr_group_] += bytes;
-  bytes_[curr_group_] += bytes;
-  if (bytes_[curr_group_] > bytes_high_[curr_group_]) {
+  ++ new_calls_[0] ;
+  bytes_[0] += bytes;
+  bytes_high_[0] = bytes_[0];
+
+  if (curr_group_ != 0) {
+    ++ new_calls_[curr_group_] ;
+    bytes_[curr_group_] += bytes;
     bytes_high_[curr_group_] = bytes_[curr_group_];
   }
 
@@ -134,23 +137,49 @@ void Memory::deallocate ( void * pointer )
 {
   int *buffer = (int *)(pointer) - 2;
 
-  int curr_group = buffer[1];
+  unsigned curr_group = buffer[1];
 
-  ++ delete_calls_[curr_group] ;
-  delete_bytes_[curr_group] += buffer[0];
-  bytes_[curr_group]        -= buffer[0];
+  ++ delete_calls_[0] ;
+  bytes_[0] -= buffer[0];
+
+  if (curr_group != 0) {
+    ++ delete_calls_[curr_group] ;
+    bytes_[curr_group] -= buffer[0];
+  }
 
   free(buffer);
 }
 
-void  Memory::begin_group ( const char * group_name ) throw ()
+void Memory::new_group ( unsigned group_id, const char * group_name ) throw ()
 /**
  *********************************************************************
  *
- * @param  foo    Description of argument foo
- * @return        There is no return value
+ * @param  group_id    non-zero ID of the group
+ * @param  group_name  Name of the group
  *
- * Begin allocating memory associated with the specified group name
+ * Name a new group
+ *
+ *********************************************************************
+ */
+{
+  if (group_id == 0 || group_id > MEMORY_MAX_NUM_GROUPS) {
+
+    WARNING_MESSAGE("Memory::new_group()","group_id out of range");
+
+  } else {
+
+    group_names_[group_id] = strdup(group_name);
+
+  }
+}
+
+void  Memory::begin_group ( unsigned group_id ) throw ()
+/**
+ *********************************************************************
+ *
+ * @param  group_id ID of the group
+ *
+ * Begin allocating memory associated with the specified group ID
  *
  * Error handling:
  *
@@ -166,45 +195,43 @@ void  Memory::begin_group ( const char * group_name ) throw ()
  */
 {
   // check for whether we have already called begin_group before
-  if (curr_group_ != 0) {
-    INCOMPLETE_MESSAGE("Memory::begin_group()","");
-    curr_group_ = 0;
-  }
 
-  // Test if group already exists, and set curr_group_ if it does
+  bool inactive = (curr_group_ == 0);
 
-  for (int i=1; i<num_groups_; i++) {
+  bool in_range = ((1 <= group_id) && (group_id <= MEMORY_MAX_NUM_GROUPS));
 
-    if (strcmp(group_names_[i],group_name) == 0) {
+  if ( in_range && inactive ) {
 
-      curr_group_ = (memory_group_handle) (i);
-
-    }
+      curr_group_ = group_id;
 
   }
 
-  if (curr_group_ == 0 && (num_groups_ < MEMORY_MAX_NUM_GROUPS - 1)) {
+  if ( ! in_range ) { // curr_group_ out of range
 
-    // Otherwise, add a new group if there is room, and set curr_group_
+    char warning_message [ ERROR_MESSAGE_LENGTH ];
 
-    group_names_[num_groups_] = strdup(group_name);
-    curr_group_ = num_groups_;
+    sprintf (warning_message, "Group %d is out of range [1,%d]\n",
+	     group_id, MEMORY_MAX_NUM_GROUPS);
 
-    num_groups_++;
+    WARNING_MESSAGE("Memory::begin_group()",warning_message);
 
-  } else {
-    
-    // Otherwise we hit the array limit: set curr_group_ to 0
-  
-    INCOMPLETE_MESSAGE("Memory::begin_group()","");
-    // WARNING MESSAGE: reverting to "null" group 0
+  } else if ( ! inactive ) {
 
-    curr_group_ = 0;
+    // ASSERT: group_id is in range, so group_names_[group_id] is valid
+
+    char warning_message [ ERROR_MESSAGE_LENGTH ];
+
+    sprintf (warning_message,
+	     "Beginning group %d (%s) when group %d (%s) is already active\n",
+	     group_id,    group_names_[group_id],
+	     curr_group_, group_names_[curr_group_]);
+
+    WARNING_MESSAGE("Memory::begin_group()",warning_message);
   }
 
 }
 
-void  Memory::end_group ( const char * group_name ) throw ()
+void  Memory::end_group ( unsigned group_id ) throw ()
 /**
  *********************************************************************
  *
@@ -215,11 +242,39 @@ void  Memory::end_group ( const char * group_name ) throw ()
  *********************************************************************
  */
 {
-  // check for whether we have already called begin_group before
-  if (curr_group_ == 0) {
-    INCOMPLETE_MESSAGE("Memory::end_group()","");
+  bool active = (curr_group_ == group_id);
+
+  bool in_range = ((1 <= group_id) && (group_id <= MEMORY_MAX_NUM_GROUPS));
+
+  if ( in_range && active ) {
+
+    curr_group_ = 0;
+
   }
-  curr_group_ = 0;
+
+  if ( ! in_range ) { // curr_group_ out of range
+
+    char warning_message [ ERROR_MESSAGE_LENGTH ];
+
+    sprintf (warning_message, "Group %d is out of range [1,%d]\n",
+	     group_id, MEMORY_MAX_NUM_GROUPS);
+
+    WARNING_MESSAGE("Memory::end_group()",warning_message);
+
+  } else if ( ! active ) {
+
+    // ASSERT: group_id is in range, so group_names_[group_id] is valid
+
+    char warning_message [ ERROR_MESSAGE_LENGTH ];
+
+    sprintf (warning_message,
+	     "Ending group %d (%s) when group %d (%s) is already active\n",
+	     group_id,    group_names_[group_id],
+	     curr_group_, group_names_[curr_group_]);
+
+    WARNING_MESSAGE("Memory::end_group()",warning_message);
+  }
+
 }
 
 
@@ -244,7 +299,7 @@ const char * Memory::current_group () throw ()
 }
 
 
-int Memory::current_handle () throw ()
+memory_group_handle Memory::current_handle () throw ()
 /**
  *********************************************************************
  *
@@ -259,7 +314,7 @@ int Memory::current_handle () throw ()
 }
 
 
-size_t Memory::bytes ( memory_group_handle group_handle ) throw ()
+long long Memory::bytes ( memory_group_handle group_handle ) throw ()
 /**
  *********************************************************************
  *
@@ -274,7 +329,7 @@ size_t Memory::bytes ( memory_group_handle group_handle ) throw ()
   return bytes_[group_handle];
 }
 
-size_t Memory::available ( memory_group_handle group_handle ) throw ()
+long long Memory::available ( memory_group_handle group_handle ) throw ()
 /**
  *********************************************************************
  *
@@ -308,7 +363,7 @@ float Memory::efficiency ( memory_group_handle group_handle ) throw ()
   return 0.0;
 }
 
-size_t Memory::highest ( memory_group_handle group_handle ) throw ()
+long long Memory::highest ( memory_group_handle group_handle ) throw ()
 /**
  *********************************************************************
  *
@@ -325,7 +380,7 @@ size_t Memory::highest ( memory_group_handle group_handle ) throw ()
   return 0;
 }
 
-void Memory::set_limit ( size_t size, memory_group_handle group_handle )
+void Memory::set_limit ( long long size, memory_group_handle group_handle )
   throw ()
 /**
  *********************************************************************
@@ -392,41 +447,31 @@ void Memory::print () throw ()
 *********************************************************************
 */
 {
-  for (int i=0; i<num_groups_; i++) {
+  for (memory_group_handle i=0; i<= MEMORY_MAX_NUM_GROUPS; i++) {
 
-    printf ("Group %s\n",group_names_[i]);
-    printf ("   available_    = %ld\n",long(available_[i]));
-    printf ("   bytes_        = %ld\n",long(bytes_[i]));
-    printf ("   bytes_high_   = %ld\n",long(bytes_high_[i]));
-    printf ("   new_calls_    = %ld\n",long(new_calls_[i]));
-    printf ("   new_bytes_    = %ld\n",long(new_bytes_[i]));
-    printf ("   delete_calls_ = %ld\n",long(delete_calls_[i]));
-    printf ("   delete_bytes_ = %ld\n",long(delete_bytes_[i]));
+    if (i == 0 || group_names_[i] != NULL) {
+      printf ("Group %s\n",i ? group_names_[i]: "Total");
+      if (available_[i]) printf ("   available_    = %ld\n",long(available_[i]));
+      printf ("   bytes_        = %ld\n",long(bytes_[i]));
+      printf ("   bytes_high_   = %ld\n",long(bytes_high_[i]));
+      printf ("   new_calls_    = %ld\n",long(new_calls_[i]));
+      printf ("   delete_calls_ = %ld\n",long(delete_calls_[i]));
+    }
   }
 }
 
 //======================================================================
 
 
-int    Memory::num_groups_ = 1;
+memory_group_handle Memory::curr_group_ = 0;
 
-int    Memory::curr_group_ = 0;
+char *    Memory::group_names_ [MEMORY_MAX_NUM_GROUPS + 1] = {0};
 
-size_t Memory::available_[MEMORY_MAX_NUM_GROUPS] = {0};
-
-char * Memory::group_names_ [MEMORY_MAX_NUM_GROUPS] = {0};
-
-size_t Memory::bytes_[MEMORY_MAX_NUM_GROUPS] = {0};
-
-size_t Memory::bytes_high_[MEMORY_MAX_NUM_GROUPS] = {0};
-
-size_t Memory::new_calls_[MEMORY_MAX_NUM_GROUPS] = {0};
-
-size_t Memory::new_bytes_[MEMORY_MAX_NUM_GROUPS] = {0};
-
-size_t Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS] = {0};
-
-size_t Memory::delete_bytes_[MEMORY_MAX_NUM_GROUPS] = {0};
+long long Memory::available_   [MEMORY_MAX_NUM_GROUPS + 1] = {0};
+long long Memory::bytes_       [MEMORY_MAX_NUM_GROUPS + 1] = {0};
+long long Memory::bytes_high_  [MEMORY_MAX_NUM_GROUPS + 1] = {0};
+long long Memory::new_calls_   [MEMORY_MAX_NUM_GROUPS + 1] = {0};
+long long Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS + 1] = {0};
 
 //======================================================================
     

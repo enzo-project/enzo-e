@@ -133,7 +133,15 @@ int main(int argc, char ** argv)
 
   // Group 1
 
-  Memory::begin_group("Test 1");
+  unsigned group_test_1 = 1;
+  unsigned group_test_2 = 2;
+
+  Memory::new_group (group_test_1,"Test_1");
+  Memory::new_group (group_test_2,"Test_2");
+
+  Memory::begin_group(group_test_1);
+
+  unit_assert (strcmp(Memory::current_group(),"Test_1") == 0);
 
   int handle_1 = Memory::current_handle();
 
@@ -141,20 +149,21 @@ int main(int argc, char ** argv)
   NEW_F3(size_test_1);
 
   unit_assert (Memory::bytes(handle_1) == size_test_1);
-  unit_assert (Memory::bytes() == size);
+  unit_assert (Memory::bytes() == size + size_test_1);
   
   DEL_F1(size_test_1);
   DEL_F3(size_test_1);
 
   unit_assert (Memory::bytes(handle_1) == size_test_1);
   unit_assert (Memory::bytes() == size);
-  unit_assert (strcmp(Memory::current_group(),"Test 1") == 0);
 
-  Memory::end_group("Test 1");
+  Memory::end_group(group_test_1);
 
   // Group 1
 
-  Memory::begin_group("Test 2");
+  Memory::begin_group(group_test_2);
+
+  unit_assert (strcmp(Memory::current_group(),"Test_2") == 0);
 
   int handle_2 = Memory::current_handle();
 
@@ -163,10 +172,11 @@ int main(int argc, char ** argv)
 
   unit_assert (Memory::bytes(handle_1) == size_test_1);
   unit_assert (Memory::bytes(handle_2) == size_test_2);
-  unit_assert (Memory::bytes() == size);
-  unit_assert (strcmp(Memory::current_group(),"Test 2") == 0);
+  unit_assert (Memory::bytes() == size + size_test_1 + size_test_2);
   
-  Memory::end_group("Test 2");
+  Memory::end_group(group_test_2);
+
+  unit_assert (strcmp(Memory::current_group(),"\0") == 0);
 
   DEL_F2(size_test_2);
   DEL_F3(size_test_2);
@@ -174,7 +184,7 @@ int main(int argc, char ** argv)
   unit_assert (Memory::bytes(handle_1) == size_test_1);
   unit_assert (Memory::bytes(handle_2) == size_test_2);
   unit_assert (Memory::bytes() == size);
-  unit_assert (strcmp(Memory::current_group(),"\0") == 0);
+
 
   // curr_group()
   unit_func ("curr_group()");
