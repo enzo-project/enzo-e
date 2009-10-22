@@ -59,31 +59,52 @@
 // ENUMERATIONS
 //----------------------------------------------------------------------
 
-  enum enum_mpi_type {
-    mpi_type_unknown,
-    mpi_type_B,
-    mpi_type_I,
-    mpi_type_BB,
-    mpi_type_BI,
-    mpi_type_GF,
-    mpi_type_G4,
-    mpi_type_GL,
-    mpi_type_PF,
-    mpi_type_P4,
-    mpi_type_PL,
-    mpi_type_maximum = mpi_type_PL
-  };
+enum enum_mpi_type {
+  mpi_type_unknown,
+  mpi_type_B,
+  mpi_type_I,
+  mpi_type_BB,
+  mpi_type_BI,
+  mpi_type_GF,
+  mpi_type_G4,
+  mpi_type_GL,
+  mpi_type_PF,
+  mpi_type_P4,
+  mpi_type_PL,
+  mpi_type_maximum = mpi_type_PL
+};
 
-  enum enum_data_type {
-    data_type_unknown,
-    data_type_alias,
-    data_type_copy,
-    data_type_alias_packed,
-    data_type_copy_ghost,
-    data_type_copy_ghost_packed,
-    data_type_maximum = data_type_copy_ghost_packed
-  };
+const char * mpi_type_names[] = {
+  "mpi_type_B",
+  "mpi_type_I",
+  "mpi_type_BB",
+  "mpi_type_BI",
+  "mpi_type_GF",
+  "mpi_type_G4",
+  "mpi_type_GL",
+  "mpi_type_PF",
+  "mpi_type_P4",
+  "mpi_type_PL"
+};
+  
+enum enum_data_type {
+  data_type_unknown,
+  data_type_alias,
+  data_type_copy,
+  data_type_alias_packed,
+  data_type_copy_ghost,
+  data_type_copy_ghost_packed,
+  data_type_maximum = data_type_copy_ghost_packed
+};
 
+const char * data_type_names[] = {
+  "data_type_alias",
+  "data_type_copy",
+  "data_type_alias_packed",
+  "data_type_copy_ghost",
+  "data_type_copy_ghost_packed"
+};
+  
 //----------------------------------------------------------------------
 // FUNCTION PROTOTYPES
 //----------------------------------------------------------------------
@@ -392,14 +413,14 @@ int main (int argc, char ** argv)
   //--------------------------------------------------
   
   if (ip==0) {
-    printf ("mpi_type   = %d\n",mpi_type);
-    printf ("data_type  = %d\n",data_type);
-    printf ("nx,ny,nz   = [%d %d %d]\n",nx,ny,nz);
-    printf ("bx,by,bz   = [%d %d %d]\n",bx,by,bz);
-    printf ("px,py,pz   = [%d %d %d]\n",px,py,pz);
-    printf ("tx,ty,tz   = [%d %d %d]\n",tx,ty,tz);
-    printf ("gx,gy,gz   = [%d %d %d]\n",gx,gy,gz);
-    printf ("levels     = [%d %d %d]\n",levels[0],levels[1],levels[2]);
+    printf ("mpi_type   = %s\n",mpi_type_names[mpi_type]);
+    printf ("data_type  = %s\n",data_type_names[data_type]);
+    printf ("problem size nx,ny,nz   = [%d %d %d]\n",nx,ny,nz);
+    printf ("block size   bx,by,bz   = [%d %d %d]\n",bx,by,bz);
+    printf ("processors   px,py,pz   = [%d %d %d]\n",px,py,pz);
+    printf ("tasks        tx,ty,tz   = [%d %d %d]\n",tx,ty,tz);
+    printf ("ghosts       gx,gy,gz   = [%d %d %d]\n",gx,gy,gz);
+    printf ("levels                  = [%d %d %d]\n",levels[0],levels[1],levels[2]);
   }
 
   //--------------------------------------------------
