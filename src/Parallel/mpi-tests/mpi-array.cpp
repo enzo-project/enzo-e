@@ -24,11 +24,11 @@
 //
 // data_type          int
 //
-//      1   In-place per-block
-//      3   Copy per-block
-//      2   In-place multi-block
-//      4   Ghost-copy per-block
-//      5   Ghost-copy multi-block
+//      1   In-place full exchange   comm comp comm comp ...
+//      1   In-place x-y-z exchange  comm-x comp-x comm-y comp-y ...
+//      2   Copy multi-block x-y-z   copy-x comm-x comp-x copy-y...
+//      3   Ordered task-by-task copy  get-order comm1 comp1 comm2 comp2 ...
+//      3   In-place multi-block      get-order comm1-b comp1-b
 //
 // grid_size    [nx, ny, nz]
 //
@@ -112,14 +112,15 @@ const char * data_type_names[] = {
 void  init_block 
 (
  Scalar * task_block,
- int bx, int by, int bz,
- int gx, int gy, int gz
+ int ndx,int ndy,int ndz,
+ int bx, int by, int bz
  );
 
 void compute_B 
 (
  enum_data_type data_type,
  Scalar ** task_blocks,
+ int ndx,int ndy,int ndz,
  int sx, int sy, int sz,
  int bx, int by, int bz,
  int gx, int gy, int gz
@@ -400,7 +401,8 @@ int main (int argc, char ** argv)
   if (px*sx != tx || py*sy != ty || pz*sz != tz) {
     if (ip==0) {
       fprintf (stderr,
-	       "%s:%d Error: [tx ty tz] = [%d %d %d] not divisible by [px py pz] = [%d %d %d]\n",
+	       "%s:%d Error: [tx ty tz] = [%d %d %d] "
+	       "not divisible by [px py pz] = [%d %d %d]\n",
 	       __FILE__,__LINE__,tx,ty,tz,px,py,pz);
       fflush(stderr);
     }
@@ -420,7 +422,8 @@ int main (int argc, char ** argv)
     printf ("processors   px,py,pz   = [%d %d %d]\n",px,py,pz);
     printf ("tasks        tx,ty,tz   = [%d %d %d]\n",tx,ty,tz);
     printf ("ghosts       gx,gy,gz   = [%d %d %d]\n",gx,gy,gz);
-    printf ("levels                  = [%d %d %d]\n",levels[0],levels[1],levels[2]);
+    printf ("levels                  = [%d %d %d]\n",
+	    levels[0],levels[1],levels[2]);
   }
 
   //--------------------------------------------------
@@ -429,16 +432,32 @@ int main (int argc, char ** argv)
   
   // Allocate processor-local array
 
-  int ndx = qx + 2*gx;
-  int ndy = qy + 2*gy;
-  int ndz = qz + 2*gz;
+  int ndx,ndy,ndz;
+  bool is_aliased = (data_type == data_type_alias || 
+		     data_type == data_type_alias_packed);
+
+  if (is_aliased) {
+    // Don't store ghosts
+    ndx = qx;       
+    ndy = qy;
+    ndz = qz;
+  } else {
+    // Store ghosts
+    ndx = qx + (sx+1)*gx;  
+    ndy = qy + (sy+1)*gy;
+    ndz = qz + (sz+1)*gz;
+  }
+
+  // Allocate storage for task arrays
+
   Scalar * array = new Scalar [ ndx * ndy * ndz ];
 
-  // Allocate task array pointers
+  // Initialize task array pointers
 
   Scalar ** task_blocks = new Scalar * [ sx * sy * sz ];
 
-  int ga = gx + ndx * (gy + ndy * gz);
+  // Offset for ghosts, if any
+  int ga = is_aliased ? gx + ndx * (gy + ndy * gz) : 0;
 
   for (int isz = 0; isz < sz; isz ++) {
     for (int isy = 0; isy < sy; isy ++) {
@@ -454,16 +473,17 @@ int main (int argc, char ** argv)
   // Run test
   //--------------------------------------------------
 
+  for (int is=0; is<sx*sy*sz; is++) {
+    init_block (task_blocks[is],ndx,ndy,ndz,bx,by,bz);
+  }
+
   switch (mpi_type) {
 
   case mpi_type_B:
 
-    for (int is=0; is<sx*sy*sz; is++) {
-      init_block (task_blocks[is],bx,by,bz,gx,gy,gz);
-    }
-
     compute_B ((enum_data_type)data_type,
 	       task_blocks,
+	       ndx,ndy,ndz,
 	       sx,sy,sz,
 	       bx,by,bz,
 	       gx,gy,gz);
@@ -512,20 +532,15 @@ void check_range (int ip,
 //----------------------------------------------------------------------
 
 void  init_block (Scalar * task_block,
-		  int bx, int by, int bz,
-		  int gx, int gy, int gz)
+		  int ndx,int ndy,int ndz,
+		  int bx, int by, int bz)
 {
-  // Compute block size with ghosts
+  // Initialize blocks
 
-  int nx = bx + 2*gx;
-  int ny = by + 2*gy;
-
-  // Initialize blocks including ghosts
-
-  for (int isz = -gz; isz < bz + gz; isz++) {
-    for (int isy = -gy; isy < by + gy; isy++) {
-      for (int isx = -gx; isx < bx + gx; isx++) {
-	int is = isx + nx * (isy + ny* isz);
+  for (int isz = 0; isz < bz; isz++) {
+    for (int isy = 0; isy < by; isy++) {
+      for (int isx = 0; isx < bx; isx++) {
+	int is = isx + ndx * (isy + ndy* isz);
 	task_block [is] = isx + isy + isz;
       }
     }
@@ -536,10 +551,14 @@ void  init_block (Scalar * task_block,
 
 void compute_B (enum_data_type data_type,
 		Scalar ** task_blocks,
+		int ndx,int ndy,int ndz,
 		int sx, int sy, int sz,
 		int bx, int by, int bz,
 		int gx, int gy, int gz)
 {
+
+  bool is_aliased = (data_type == data_type_alias || 
+		     data_type == data_type_alias_packed);
 
   // exchange ghost zones for all tasks
 
@@ -553,11 +572,11 @@ void compute_B (enum_data_type data_type,
 
 	int is = isx + sx * (isy + isy * isz);
 
-	// exchange ghost zones for current task
+	// exchange ghost zones for current task buffer is returned,
+	// since task data may be either a copy or aliased
 
 	Scalar * buffer = 
 	  ghost_exchange_task (task_blocks[is],data_type,bx,by,bz,gx,gy,gz);
-
 
 	// update the block
 
