@@ -28,6 +28,7 @@
  
 #include "cello.h"
 
+#include "error.hpp"
 #include "array.hpp" 
 
 //----------------------------------------------------------------------

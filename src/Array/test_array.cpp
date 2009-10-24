@@ -216,12 +216,12 @@ int main()
 
     int m0,m1,m2;
     a.size(&m0,&m1,&m2);
-    Block b (a.values(),m0,m0,m1,m1,m2,m2);
+    Block b (a.values(),0,m0,m0,m1,m2);
 
     int nx,ny,nz;
-    b.n(&nx,&ny,&nz);
+    b.get_size(&nx,&ny,&nz);
 
-    Scalar * bv = b.array();
+    Scalar * bv = b.array(0);
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
