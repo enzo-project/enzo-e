@@ -226,8 +226,8 @@ void initialize_color ()
 
       // Initialize velocity
 
-      BaryonField[ field_velocity_x ][ i ] = 0;
-      BaryonField[ field_velocity_y ][ i ] = 0;
+      BaryonField[ field_velocity_x ][ i ] = color_velocity_x;
+      BaryonField[ field_velocity_y ][ i ] = color_velocity_y;
 
       // Initialize color
 
