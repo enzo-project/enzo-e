@@ -49,7 +49,7 @@ public:
   /// Create a new uninitialized Block object
   Block(Scalar * array, 
 	int * p,
-	int ndx,  int ndy,  int ndz,  int nda,
+	int ndx,  int ndy,  int ndz,  int nda=1,
 	int nx=0, int ny=0, int nz=0, int na=0)
     throw() :
     array_(array)
@@ -65,14 +65,26 @@ public:
       p_[2] = 2;
       p_[3] = 3;
     }
+    q_[p_[0]] = 0;
+    q_[p_[1]] = 1;
+    q_[p_[2]] = 2;
+    q_[p_[3]] = 3;
+
     nd_[p_[0]] = ndx;
     nd_[p_[1]] = ndy;
     nd_[p_[2]] = ndz;
     nd_[p_[3]] = nda;
+
     n_[p_[0]] = nx ? nx : ndx;
     n_[p_[1]] = ny ? ny : ndy;
     n_[p_[2]] = nz ? nz : ndz;
     n_[p_[3]] = na ? na : nda;
+
+    m_[p_[0]] = n_[p_[3]];
+    m_[p_[1]] = n_[p_[0]]*m_[p_[0]];
+    m_[p_[2]] = n_[p_[1]]*m_[p_[1]];
+    m_[p_[3]] = n_[p_[2]]*m_[p_[2]];
+
   }
 
   /// Return allocated block dimensions
@@ -84,24 +96,27 @@ public:
   }
 
   /// Return the array size
-  void get_size (int * nx, int * ny = NULL, int * nz = NULL) const throw()
+  void get_size (int * nx, int * ny = NULL, int * nz = NULL, int *na = 0) const throw()
   {
     if (nx) *nx = n_[p_[0]];
     if (ny) *ny = n_[p_[1]];
     if (nz) *nz = n_[p_[2]];
+    if (na) *na = n_[p_[3]];
   }
 
   /// Return increments for loop index calculations
-  void get_inc(int * m1, int * m2 = NULL, int * m3 = NULL, int * m4 = NULL) const throw () 	
+  void get_inc (int * mx, int * my = NULL, int * mz = NULL, int * ma = NULL) const throw () 	
   {
-    INCOMPLETE_MESSAGE("Block::array()","");
+    if (mx) *mx = m_[p_[0]];
+    if (my) *my = m_[p_[1]];
+    if (mz) *mz = m_[p_[2]];
+    if (ma) *ma = m_[p_[3]];
   }
 
   /// Return a pointer to the ith array
   Scalar * array(int i=0) const throw()
   {
-    INCOMPLETE_MESSAGE("Block::array()","");
-    return 0;
+    return & array_[i*m_[3]];
   }
 
 
@@ -122,8 +137,14 @@ private:
   /// Size of the array
   int n_[4];
 
-  /// Permutation p_[0:3] = [k, ix, iy, iz]
+  /// Increments
+  int m_[4];
+
+  /// Permutation p_[0:3] = [ix, iy, iz, ia]
   int p_[4];
+
+  /// Inverse permutation q_[ix,iy,iz,ia] = [0:3]
+  int q_[4];
 
 };   
 
