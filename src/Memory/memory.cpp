@@ -460,6 +460,18 @@ void Memory::print () throw ()
   }
 }
 
+void Memory::reset() throw()
+{
+  curr_group_ = 0;
+
+  for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
+    bytes_       [i] = 0;
+    bytes_high_  [i] = 0;
+    new_calls_   [i] = 0;
+    delete_calls_[i] = 0;
+  }
+}
+
 //======================================================================
 
 

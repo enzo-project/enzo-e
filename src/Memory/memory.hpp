@@ -123,6 +123,8 @@ public:
 
   static void print () throw ();
 
+  static void reset () throw ();
+
 private:
 
   //-------------------------------------------------------------------

@@ -40,6 +40,8 @@
 int main(int argc, char ** argv)
 {
 
+  Memory::reset();
+
   unit_class ("Memory");
   unit_open();
 
@@ -53,8 +55,6 @@ int main(int argc, char ** argv)
   double *f1;
   float  *f2;
   int    *f3;
-
-  unsigned size = 0;
 
 #define NEW(VAR,TYPE,SIZE,COUNT)			\
   VAR = new TYPE[SIZE]; \
@@ -72,9 +72,15 @@ int main(int argc, char ** argv)
 #define DEL_F2(SIZE) DEL(f2,float, 17,SIZE);
 #define DEL_F3(SIZE) DEL(f3,int,   25,SIZE);
 
+  unsigned size = 0;
+
+  printf ("%d %d\n",Memory::bytes(),size);
   NEW_F1(size);
+  printf ("%d %d\n",Memory::bytes(),size);
   NEW_F2(size);
+  printf ("%d %d\n",Memory::bytes(),size);
   NEW_F3(size);
+  printf ("%d %d\n",Memory::bytes(),size);
 
   unit_assert (Memory::bytes() == size);
   
