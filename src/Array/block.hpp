@@ -65,10 +65,6 @@ public:
       p_[2] = 2;
       p_[3] = 3;
     }
-    q_[p_[0]] = 0;
-    q_[p_[1]] = 1;
-    q_[p_[2]] = 2;
-    q_[p_[3]] = 3;
 
     nd_[p_[0]] = ndx;
     nd_[p_[1]] = ndy;
@@ -142,9 +138,6 @@ private:
 
   /// Permutation p_[0:3] = [ix, iy, iz, ia]
   int p_[4];
-
-  /// Inverse permutation q_[ix,iy,iz,ia] = [0:3]
-  int q_[4];
 
 };   
 

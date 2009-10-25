@@ -54,7 +54,7 @@ int main(int argc, char ** argv)
   float  *f2;
   int    *f3;
 
-  size_t size = 0;
+  unsigned size = 0;
 
 #define NEW(VAR,TYPE,SIZE,COUNT)			\
   VAR = new TYPE[SIZE]; \
@@ -128,8 +128,8 @@ int main(int argc, char ** argv)
   // begin_group(), end_group()
   //----------------------------------------------------------------------
 
-  size_t size_test_1 = 0;
-  size_t size_test_2 = 0;
+  unsigned size_test_1 = 0;
+  unsigned size_test_2 = 0;
 
   // Group 1
 

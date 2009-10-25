@@ -58,14 +58,14 @@ int main(int argc, char ** argv)
   unit_assert (true);
 
   //----------------------------------------------------------------------
-  printf ("Error message:\n");
+//   printf ("Error message:\n");
 
-  char error_message[ERROR_MESSAGE_LENGTH];
-  sprintf (error_message,"Error message test");
-  ERROR_MESSAGE("main",error_message);
+//   char error_message[ERROR_MESSAGE_LENGTH];
+//   sprintf (error_message,"Error message test");
+//   ERROR_MESSAGE("main",error_message);
   
-  // Errors should abort, so all following linse should not be executed
-  unit_assert (false); 
+//   // Errors should abort, so all following lines should not be executed
+//   exit(1);
   //----------------------------------------------------------------------
 
   unit_close();
