@@ -74,13 +74,9 @@ int main(int argc, char ** argv)
 
   unsigned size = 0;
 
-  printf ("%d %d\n",Memory::bytes(),size);
   NEW_F1(size);
-  printf ("%d %d\n",Memory::bytes(),size);
   NEW_F2(size);
-  printf ("%d %d\n",Memory::bytes(),size);
   NEW_F3(size);
-  printf ("%d %d\n",Memory::bytes(),size);
 
   unit_assert (Memory::bytes() == size);
   
