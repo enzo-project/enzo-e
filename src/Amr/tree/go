@@ -1,38 +1,20 @@
 #/bin/csh -f
 
-# set images = (peace2)
-# set images = (dot_DL dot_DR dot_UL dot_UR)
-# set images = (dots)
-# set images = (dot)
-# set images = (ucsd-seal-1024)
-# set images = (gradient)
-# set images = (norman)
-# set images = (skory)
-# set images = (sdsc-logo)
-# set images = (cosmology-edit-2048)
-# set images = (cosmo2)
-# set images = (max2)
-# set images = (saturn)
-#set images = (saturn2)
-set images = (egret-square)
 
-set color = gray
+set colormap_dir = /usr/share/h5utils/colormaps/
 
-foreach image ($images)
+set color = vga
 
-    ln -sf ${image}.h image.h
-    make dep
-    make clean
-    make
-    test_tree
-    echo "done"
-    foreach tree (4 16)
-        foreach type (0 1 2 3 4 5)
-          h5topng -c $color tree$tree-$type.hdf5
-          mv tree$tree-$type.hdf5.png $image-$tree-$type.png
-        end
+make dep
+make clean
+make
+test_tree
+echo "done"
+foreach tree (4 16)
+    foreach type (0 1 2 3 4 5)
+      h5topng -c $colormap_dir/$color tree$tree-$type.hdf5
     end
-
 end
+
 
 

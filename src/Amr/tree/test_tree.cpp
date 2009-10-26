@@ -6,6 +6,8 @@
 
 #include "cello.h"
 
+#include "error.hpp"
+#include "memory.hpp"
 #include "disk.hpp"
 #include "node4.h"
 #include "tree4.h"
@@ -16,7 +18,7 @@ const bool debug = false;
 const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
-const int  max_level = 14;
+const int  max_level = 12;
 
 #include "image.h"
 
@@ -29,6 +31,7 @@ int * create_level_array (int * n0, int * n1, int max_levels)
   int size = (width > height) ? width: height;
 
   int * level_array = new int [size*size];
+
   for (int i=0; i<size*size; i++) level_array[i] = false;
 
   *n0 = size;
@@ -78,8 +81,16 @@ int main(int argc, char ** argv)
   // 1 
 
   Tree4 * tree4 = new Tree4;
+
   bool full_nodes;
+
+  Memory::reset();
+
+  Memory::set_active(true);
   tree4->refine(level_array,n0,n1,max_level,full_nodes=true);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
 
   // Determine image size
   int n = cell_size + 2*line_width;
@@ -100,8 +111,15 @@ int main(int argc, char ** argv)
 
   // Normalize the tree
 
+
   printf ("\n");
+
+  Memory::set_active(true);
   tree4->normalize(full_nodes);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
+
   printf ("NORMALIZED FULL TREE 4\n");
   printf ("nodes  = %d\n",Node4::num_nodes());
   printf ("levels = %d\n",tree4->levels());
@@ -112,7 +130,12 @@ int main(int argc, char ** argv)
   // Optimize the tree
 
   printf ("\n");
+  Memory::set_active(true);
   tree4->optimize(full_nodes);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
+
   printf ("OPTIMIZED FULL TREE 4\n");
   printf ("nodes  = %d\n",Node4::num_nodes());
   printf ("levels = %d\n",tree4->levels());
@@ -127,7 +150,14 @@ int main(int argc, char ** argv)
   // 2
 
   tree4 = new Tree4;
+
+  Memory::set_active(true);
   tree4->refine(level_array,n0,n1,max_level,full_nodes=false);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
+
+  Memory::print();
 
   // Determine image size
   n = cell_size + 2*line_width;
@@ -147,7 +177,14 @@ int main(int argc, char ** argv)
 
   printf ("\n");
   printf ("NORMALIZED NON-FULL TREE 4\n");
+  Memory::set_active(true);
   tree4->normalize(full_nodes);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
+
+  Memory::print();
+
   printf ("nodes  = %d\n",Node4::num_nodes());
   printf ("levels = %d\n",tree4->levels());
   image = tree4->create_image(n,line_width);
@@ -158,7 +195,13 @@ int main(int argc, char ** argv)
 
   printf ("\n");
   printf ("OPTIMIZED NON-FULL TREE 4\n");
+
+  Memory::set_active(true);
   tree4->optimize(full_nodes);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
+
   printf ("nodes  = %d\n",Node4::num_nodes());
   printf ("levels = %d\n",tree4->levels());
   image = tree4->create_image(n,line_width);
@@ -172,7 +215,11 @@ int main(int argc, char ** argv)
   // 3
 
   Tree16 * tree16 = new Tree16;
+  Memory::set_active(true);
   tree16->refine(level_array,n0,n1,max_level,full_nodes=true);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());
 
   // Determine image size
   n = cell_size + 2*line_width;
@@ -193,7 +240,13 @@ int main(int argc, char ** argv)
   // Normalize the tree
 
   printf ("\n");
+
+  Memory::set_active(true);
   tree16->normalize(full_nodes);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());
+
   printf ("NORMALIZED FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
   printf ("levels = %d\n",tree16->levels());
@@ -204,7 +257,13 @@ int main(int argc, char ** argv)
   // Optimize the tree
 
   printf ("\n");
+
+  Memory::set_active(true);
   tree16->optimize(full_nodes);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());
+
   printf ("OPTIMIZED FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
   printf ("levels = %d\n",tree16->levels());
@@ -219,7 +278,12 @@ int main(int argc, char ** argv)
   // 4
 
   tree16 = new Tree16;
+
+  Memory::set_active(true);
   tree16->refine(level_array,n0,n1,max_level,full_nodes=false);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());
 
   // Determine image size
   n = cell_size + 2*line_width;
@@ -238,7 +302,13 @@ int main(int argc, char ** argv)
   // Normalize the tree
 
   printf ("\n");
+
+  Memory::set_active(true);
   tree16->normalize(full_nodes);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());
+
   printf ("NORMALIZED NON-FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
   printf ("levels = %d\n",tree16->levels());
@@ -249,7 +319,13 @@ int main(int argc, char ** argv)
   // Optimize the tree
 
   printf ("\n");
+
+  Memory::set_active(true);
   tree16->optimize(full_nodes);
+  Memory::print();
+  Memory::set_active(false);
+  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());
+
   printf ("OPTIMIZED NON-FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
   printf ("levels = %d\n",tree16->levels());

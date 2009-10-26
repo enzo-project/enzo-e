@@ -1,7 +1,7 @@
 
 TOP = ../../..
 
-TEST_EXES = test_tree
+EXES = test_tree
 
 PG = 
 INC_LOCAL  = -I$(TOP)/include
@@ -17,13 +17,13 @@ CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(PG)
 FFLAGS   = $(FFLAGS_LOCAL)
 CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
 
-all: $(TEST_EXES)
+all: $(EXES)
 test_tree: $(OBJS) test_tree.o
 	$(CXX) -o test_tree test_tree.o $(CXXFLAGS_LOCAL) $(OBJS) $(LIB)
 
 obj: $(OBJS)
 
-test: $(TEST_EXES)
+test: $(EXES)
 #	./test_implosion # slow
 #	./test_enzo      # slow
 

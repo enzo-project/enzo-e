@@ -60,6 +60,7 @@ void Tree16::optimize(bool is_full)
 /// 
 float * Tree16::create_image (int n,int line_width)
 {
+  printf ("n = %d\n",n);
   float * image = new float [n*n];
   
   root_->fill_image(image,n,n,0,n-1,0,n-1,0,levels_,line_width);
