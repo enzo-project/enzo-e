@@ -109,14 +109,16 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
   buffer[0] = bytes;
   buffer[1] = curr_group_;
 
-  ++ new_calls_[0] ;
-  bytes_[0] += bytes;
-  bytes_high_[0] = bytes_[0];
+  if (is_active_) {
+    ++ new_calls_[0] ;
+    bytes_[0] += bytes;
+    bytes_high_[0] = bytes_[0];
 
-  if (curr_group_ != 0) {
-    ++ new_calls_[curr_group_] ;
-    bytes_[curr_group_] += bytes;
-    bytes_high_[curr_group_] = bytes_[curr_group_];
+    if (curr_group_ != 0) {
+      ++ new_calls_[curr_group_] ;
+      bytes_[curr_group_] += bytes;
+      bytes_high_[curr_group_] = bytes_[curr_group_];
+    }
   }
 
   return (void *)(buffer + 2);
@@ -139,12 +141,14 @@ void Memory::deallocate ( void * pointer )
 
   unsigned curr_group = buffer[1];
 
-  ++ delete_calls_[0] ;
-  bytes_[0] -= buffer[0];
+  if (is_active_) {
+    ++ delete_calls_[0] ;
+    bytes_[0] -= buffer[0];
 
-  if (curr_group != 0) {
-    ++ delete_calls_[curr_group] ;
-    bytes_[curr_group] -= buffer[0];
+    if (curr_group != 0) {
+      ++ delete_calls_[curr_group] ;
+      bytes_[curr_group] -= buffer[0];
+    }
   }
 
   free(buffer);
@@ -474,6 +478,8 @@ void Memory::reset() throw()
 
 //======================================================================
 
+
+bool Memory::is_active_  =  true;
 
 memory_group_handle Memory::curr_group_ = 0;
 

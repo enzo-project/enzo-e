@@ -125,6 +125,9 @@ public:
 
   static void reset () throw ();
 
+  static void set_active (bool is_active) throw ()
+  { is_active_ = is_active; } ;
+
 private:
 
   //-------------------------------------------------------------------
@@ -146,6 +149,10 @@ private:
   //-------------------------------------------------------------------
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
+
+
+  /// Whether keeping track of memory statistics is active or not
+  static bool is_active_;
 
   /// The current group index, or 0 if none
 
