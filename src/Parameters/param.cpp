@@ -119,7 +119,43 @@ void Param::dealloc() {
 void Param::write(FILE * file_pointer,
 		  std::string parameter)
 {
-  fprintf (file_pointer,"%s\n",parameter.c_str());
+  // Write the parameter name
+  fprintf (file_pointer,"%s ",parameter.c_str());
+
+  // Write the parameter value
+  switch (type_) {
+  case type_string_: 
+    fprintf (file_pointer,"%s\n",value_string_);
+    break;
+  case type_list_:
+    fprintf (file_pointer,"LIST\n");
+    INCOMPLETE_MESSAGE("Param::write","Writing lists is not implemented yet");
+    break;
+  case type_logical_expr_:
+  case type_scalar_expr_:
+    write_scalar_expr_(file_pointer,value_expr_);
+    fprintf (file_pointer,"\n");
+    break;
+  case type_integer_:
+    fprintf (file_pointer,"%d\n",value_integer_);
+    break;
+  case type_scalar_:
+    fprintf (file_pointer,"%g\n",value_scalar_);
+    break;
+  case type_logical_:
+    fprintf (file_pointer,"%s\n",value_logical_ ? "true" : "false");
+    break;
+  case type_unknown_:
+    fprintf (file_pointer,"UNKNOWN\n");
+    break;
+  }
+}
+
+
+void Param::write_scalar_expr_(FILE * fp,
+			       struct node_expr * node)
+{
+  print_expression(node,fp);
 }
 
 
@@ -176,7 +212,7 @@ void Param::evaluate_scalar
     case enum_op_and:
     case enum_op_or:
       char error_message[ERROR_MESSAGE_LENGTH];
-      sprintf (error_message,"logical operator %d in scalar expression\n",
+      sprintf (error_message,"logical operator %d in scalar expression",
 	       node->op_value);
       ERROR_MESSAGE("Param::evaluate_scalar",error_message);
       break;
@@ -196,7 +232,7 @@ void Param::evaluate_scalar
     case 't':	for (i=0; i<n; i++) result[i] = t[i]; break;
     default:
       char error_message[ERROR_MESSAGE_LENGTH];
-      sprintf (error_message,"unknown variable %c in scalar expression\n",
+      sprintf (error_message,"unknown variable %c in scalar expression",
 	       node->var_value);
       ERROR_MESSAGE("Param::evaluate_scalar",error_message);
       break;
@@ -208,7 +244,7 @@ void Param::evaluate_scalar
   case enum_node_unknown:
   default:
     char error_message[ERROR_MESSAGE_LENGTH];
-    sprintf (error_message,"unknown expression type %d\n",node->type);
+    sprintf (error_message,"unknown expression type %d",node->type);
     ERROR_MESSAGE("Param::evaluate_scalar",error_message);
     break;
   }
@@ -317,7 +353,7 @@ void Param::evaluate_logical
       break;
     default:
       char error_message[ERROR_MESSAGE_LENGTH];
-      sprintf (error_message,"unknown expression type %d\n",node->type);
+      sprintf (error_message,"unknown expression type %d",node->type);
       ERROR_MESSAGE("Param::evaluate_logical",error_message);
       break;
     }

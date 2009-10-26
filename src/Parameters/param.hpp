@@ -26,6 +26,12 @@
 
 //======================================================================
 
+extern "C" { 
+  void print_expression(struct node_expr * node,
+		      FILE * fp = stdout);
+  void cello_parameters_print_list(struct param_type * head, int level);
+}
+
 class Param {
 
   friend class Parameters;
@@ -46,6 +52,8 @@ public:
 
   void write(FILE * file_pointer,
 	     std::string parameter);
+  void write_scalar_expr_(FILE * file_pointer,
+			  struct node_expr * value_expr_);
 
   bool is_integer()      { return type_ == type_integer_; };
   bool is_scalar()       { return type_ == type_scalar_; };

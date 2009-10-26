@@ -37,6 +37,7 @@ const char * node_name[] = {
   "node_function"
   };
 
+
 const char * op_name[] = {
     "+",
     "-",
@@ -658,36 +659,45 @@ void indent (int level)
   }
 }
 
-void print_expression (struct node_expr * node)
+void print_expression (struct node_expr * node,
+		       FILE * fp)
 {
   if (node == NULL) {
-    printf ("NULL");
+    fprintf (fp,"NULL");
   } else {
+    char left,right;
     switch (node->type) {
     case enum_node_integer:
-      printf ("%d",node->integer_value);
+      fprintf (fp,"%d",node->integer_value);
       break;
     case enum_node_scalar:
-      printf ("%g",node->scalar_value);
+      fprintf (fp,"%g",node->scalar_value);
       break;
     case enum_node_variable:
-      printf ("%c",node->var_value);
+      fprintf (fp,"%c",node->var_value);
       break;
     case enum_node_function:
-      printf ("%s(",node->function_name); fflush(stdout);
-      print_expression(node->left);
-      printf (")"); fflush(stdout);
+      fprintf (fp,"%s(",node->function_name);
+      print_expression(node->left,fp);
+      fprintf (fp,")");
       break;
     case enum_node_operation:
-      printf ("(");  fflush(stdout);
-      print_expression(node->left);
-      printf (") %s (",op_name[node->op_value]); fflush(stdout);
-      print_expression(node->right);
-      printf (")"); fflush(stdout);
+      left  = (node->left->type == enum_node_operation) ? '(' : ' ';
+      right = (node->left->type == enum_node_operation) ? ')' : ' ';
+      fprintf (fp,"%c",left);
+      print_expression(node->left,fp);
+      fprintf (fp,"%c",right);
+      fprintf (fp," %s ",op_name[node->op_value]);
+      left  = (node->right->type == enum_node_operation) ? '(' : ' ';
+      right = (node->right->type == enum_node_operation) ? ')' : ' ';
+      fprintf (fp,"%c",left);
+      print_expression(node->right,fp);
+      fprintf (fp,"%c",right);
       break;
     default:
       break;
     }
+    fflush(fp);
   }
 
 }
@@ -730,11 +740,11 @@ void cello_parameters_print_list(struct param_type * head, int level)
       break;
     case enum_parameter_logical_expr:
       indent(level);
-      print_expression(p->op_value); printf ("\n");
+      print_expression(p->op_value,stdout); printf ("\n");
       break;
     case enum_parameter_scalar_expr:
       indent(level);
-      print_expression(p->op_value); printf ("\n");
+      print_expression(p->op_value,stdout); printf ("\n");
       break;
     default: 
       indent(level);

@@ -37,7 +37,6 @@ enum enum_op {
   enum_op_or
 };
 
-
 struct node_expr {
   enum enum_node type;
   union {
@@ -67,3 +66,4 @@ struct param_type {
   };
   struct param_type *   next;
 };
+
