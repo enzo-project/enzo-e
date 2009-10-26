@@ -403,7 +403,7 @@ void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
     //  }
 }
   // Perform a pass of trying to optimize uniformly-refined nodes
-void Node16::optimize_pass(bool & refined_tree, bool full_nodes)
+void Node16::optimize_pass(bool & refined_tree)
 {
 
   bool single_children = true;
@@ -451,7 +451,7 @@ void Node16::optimize_pass(bool & refined_tree, bool full_nodes)
     for (int ix=0; ix<4; ix++) {
       for (int iy=0; iy<4; iy++) {
 	if (child_[ix][iy]) {
-	  child_[ix][iy]->optimize_pass(refined_tree,full_nodes);
+	  child_[ix][iy]->optimize_pass(refined_tree);
 	}
       }
     }

@@ -322,127 +322,127 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
 
       }
 
+    } else {
+      child(UL)->normalize_pass(refined_tree,full_nodes);
+      child(DL)->normalize_pass(refined_tree,full_nodes);
+      child(UR)->normalize_pass(refined_tree,full_nodes);
+      child(DR)->normalize_pass(refined_tree,full_nodes);
     }
 
   } else { 
 
     // not full node refinement
 
-    if (! all_children ()) {
 
+    bool refine_child[4] = {false};
 
-      bool refine_child[4] = {false};
+    if (! child(UL)) {
 
-      if (! child(UL)) {
+      refine_child[UL] = 
+	(cousin(U,DL) && 
+	 ( cousin(U,DL)->child(DL) ||
+	   cousin(U,DL)->child(DR))) ||
+	(cousin(L,UR) && 
+	 ( cousin(L,UR)->child(UR) ||
+	   cousin(L,UR)->child(DR))) ||
+	(child(UR) && 
+	 ( child(UR)->child(UL) ||
+	   child(UR)->child(DL))) ||
+	(child(DL) && 
+	 ( child(DL)->child(UL) ||
+	   child(DL)->child(UR)));
 
-	refine_child[UL] = 
-	  (cousin(U,DL) && 
-	   ( cousin(U,DL)->child(DL) ||
-	     cousin(U,DL)->child(DR))) ||
-	  (cousin(L,UR) && 
-	   ( cousin(L,UR)->child(UR) ||
-	     cousin(L,UR)->child(DR))) ||
-	  (child(UR) && 
-	   ( child(UR)->child(UL) ||
-	     child(UR)->child(DL))) ||
-	  (child(DL) && 
-	   ( child(DL)->child(UL) ||
-	     child(DL)->child(UR)));
-
-	if (refine_child[UL]) {
-	  create_child_(UL); 
-	  update_child_(UL);
-	  child(UL)->normalize_pass(refined_tree,full_nodes);
-	  refined_tree = true;
-	}
-
+      if (refine_child[UL]) {
+	create_child_(UL); 
+	update_child_(UL);
+	child(UL)->normalize_pass(refined_tree,full_nodes);
+	refined_tree = true;
       }
+    } else {
+      child(UL)->normalize_pass(refined_tree,full_nodes);
+    }
 	 
-      if ( ! child(DL) ) {
+    if ( ! child(DL) ) {
 
-	refine_child[DL] =
-	  (cousin(L,DR) && 
-	   ( cousin(L,DR)->child(UR) ||
-	     cousin(L,DR)->child(DR))) ||
-	  (cousin(D,UL) && 
-	   ( cousin(D,UL)->child(UL) ||
-	     cousin(D,UL)->child(UR))) ||
-	  (child(DR) && 
-	   ( child(DR)->child(UL) ||
-	     child(DR)->child(DL))) ||
-	  (child(UL) && 
-	   ( child(UL)->child(DL) ||
-	     child(UL)->child(DR)));
+      refine_child[DL] =
+	(cousin(L,DR) && 
+	 ( cousin(L,DR)->child(UR) ||
+	   cousin(L,DR)->child(DR))) ||
+	(cousin(D,UL) && 
+	 ( cousin(D,UL)->child(UL) ||
+	   cousin(D,UL)->child(UR))) ||
+	(child(DR) && 
+	 ( child(DR)->child(UL) ||
+	   child(DR)->child(DL))) ||
+	(child(UL) && 
+	 ( child(UL)->child(DL) ||
+	   child(UL)->child(DR)));
 
-	if (refine_child[DL]) {
-	  create_child_(DL); 
-	  update_child_(DL);
-	  child(DL)->normalize_pass(refined_tree,full_nodes);
-	  refined_tree = true;
-	}
+      if (refine_child[DL]) {
+	create_child_(DL); 
+	update_child_(DL);
+	child(DL)->normalize_pass(refined_tree,full_nodes);
+	refined_tree = true;
       }
+    } else {
+      child(DL)->normalize_pass(refined_tree,full_nodes);
+    }
 
-      if ( ! child(UR) ) {
+    if ( ! child(UR) ) {
 
-	refine_child[UR] = 
-	  (cousin(R,UL) && 
-	   ( cousin(R,UL)->child(UL) ||
-	     cousin(R,UL)->child(DL))) ||
-	  (cousin(U,DR) && 
-	   ( cousin(U,DR)->child(DL) ||
-	     cousin(U,DR)->child(DR))) ||
-	  (child(UL) && 
-	   ( child(UL)->child(UR) ||
-	     child(UL)->child(DR))) ||
-	  (child(DR) && 
-	   ( child(DR)->child(UL) ||
-	     child(DR)->child(UR)));
+      refine_child[UR] = 
+	(cousin(R,UL) && 
+	 ( cousin(R,UL)->child(UL) ||
+	   cousin(R,UL)->child(DL))) ||
+	(cousin(U,DR) && 
+	 ( cousin(U,DR)->child(DL) ||
+	   cousin(U,DR)->child(DR))) ||
+	(child(UL) && 
+	 ( child(UL)->child(UR) ||
+	   child(UL)->child(DR))) ||
+	(child(DR) && 
+	 ( child(DR)->child(UL) ||
+	   child(DR)->child(UR)));
 
-	if (refine_child[UR]) {
-	  create_child_(UR); 
-	  update_child_(UR);
-	  child(UR)->normalize_pass(refined_tree,full_nodes);
-	  refined_tree = true;
-	}
+      if (refine_child[UR]) {
+	create_child_(UR); 
+	update_child_(UR);
+	child(UR)->normalize_pass(refined_tree,full_nodes);
+	refined_tree = true;
       }
+    } else {
+      child(UR)->normalize_pass(refined_tree,full_nodes);
+    }
        
-      if ( ! child(DR) ) {
-	refine_child[DR] = 
-	  (cousin(R,DL) && 
-	   ( cousin(R,DL)->child(UL) ||
-	     cousin(R,DL)->child(DL))) ||
-	  (cousin(D,UR) && 
-	   ( cousin(D,UR)->child(UL) ||
-	     cousin(D,UR)->child(UR))) ||
-	  (child(DL) && 
-	   ( child(DL)->child(UR) ||
-	     child(DL)->child(DR))) ||
-	  (child(UR) && 
-	   ( child(UR)->child(DL) ||
-	     child(UR)->child(DR)));
+    if ( ! child(DR) ) {
+      refine_child[DR] = 
+	(cousin(R,DL) && 
+	 ( cousin(R,DL)->child(UL) ||
+	   cousin(R,DL)->child(DL))) ||
+	(cousin(D,UR) && 
+	 ( cousin(D,UR)->child(UL) ||
+	   cousin(D,UR)->child(UR))) ||
+	(child(DL) && 
+	 ( child(DL)->child(UR) ||
+	   child(DL)->child(DR))) ||
+	(child(UR) && 
+	 ( child(UR)->child(DL) ||
+	   child(UR)->child(DR)));
 
-	if (refine_child[DR]) {
-	  create_child_(DR); 
-	  update_child_(DR);
-	  child(DR)->normalize_pass(refined_tree,full_nodes);
-	  refined_tree = true;
-	}
+      if (refine_child[DR]) {
+	create_child_(DR); 
+	update_child_(DR);
+	child(DR)->normalize_pass(refined_tree,full_nodes);
+	refined_tree = true;
       }
+    } else {
+      child(DR)->normalize_pass(refined_tree,full_nodes);
     }
   }
-  // else { ???
-
-  if (child(UL)) child(UL)->normalize_pass(refined_tree,full_nodes);
-  if (child(DL)) child(DL)->normalize_pass(refined_tree,full_nodes);
-  if (child(UR)) child(UR)->normalize_pass(refined_tree,full_nodes);
-  if (child(DR)) child(DR)->normalize_pass(refined_tree,full_nodes);
-
-  //  } ???
-
 }
 
-  // Perform a pass of trying to optimize uniformly-refined nodes
-void Node4::optimize_pass(bool & refined_tree, bool full_nodes)
+// Perform a pass of trying to optimize uniformly-refined nodes
+void Node4::optimize_pass(bool & refined_tree)
 {
 
   if (child_[0] && ! child_[0]->any_children() &&
@@ -465,10 +465,10 @@ void Node4::optimize_pass(bool & refined_tree, bool full_nodes)
     refined_tree = true;
 
   } else {
-    if (child_[0]) child_[0]->optimize_pass(refined_tree,full_nodes);
-    if (child_[1]) child_[1]->optimize_pass(refined_tree,full_nodes);
-    if (child_[2]) child_[2]->optimize_pass(refined_tree,full_nodes);
-    if (child_[3]) child_[3]->optimize_pass(refined_tree,full_nodes);
+    if (child_[0]) child_[0]->optimize_pass(refined_tree);
+    if (child_[1]) child_[1]->optimize_pass(refined_tree);
+    if (child_[2]) child_[2]->optimize_pass(refined_tree);
+    if (child_[3]) child_[3]->optimize_pass(refined_tree);
   }
 
 }

@@ -25,7 +25,7 @@ class Tree4 {
   void normalize(bool full_nodes = true);
 
   // Replace uniformly-refined patch with single node
-  void optimize(bool full_nodes = true);
+  void optimize();
 
   // Create an image of levels
   float * create_image (int n, int line_width);

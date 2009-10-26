@@ -131,7 +131,7 @@ int main(int argc, char ** argv)
 
   printf ("\n");
   Memory::set_active(true);
-  tree4->optimize(full_nodes);
+  tree4->optimize();
   Memory::print();
   Memory::set_active(false);
   printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
@@ -197,7 +197,7 @@ int main(int argc, char ** argv)
   printf ("OPTIMIZED NON-FULL TREE 4\n");
 
   Memory::set_active(true);
-  tree4->optimize(full_nodes);
+  tree4->optimize();
   Memory::print();
   Memory::set_active(false);
   printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
@@ -259,7 +259,7 @@ int main(int argc, char ** argv)
   printf ("\n");
 
   Memory::set_active(true);
-  tree16->optimize(full_nodes);
+  tree16->optimize();
   Memory::print();
   Memory::set_active(false);
   printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());
@@ -321,7 +321,7 @@ int main(int argc, char ** argv)
   printf ("\n");
 
   Memory::set_active(true);
-  tree16->optimize(full_nodes);
+  tree16->optimize();
   Memory::print();
   Memory::set_active(false);
   printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());

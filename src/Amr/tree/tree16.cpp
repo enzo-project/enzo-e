@@ -42,14 +42,14 @@ void Tree16::normalize(bool is_full)
 }
 
 // Replace uniformly-refined patch with single node
-void Tree16::optimize(bool is_full)
+void Tree16::optimize()
 {
   // Repeatedly optimize
   int pass = 0;
   bool tree_changed;
   do {
     tree_changed = false;
-    root_->optimize_pass(tree_changed,is_full);
+    root_->optimize_pass(tree_changed);
     if (debug) printf ("Optimize pass %d\n",pass);
     pass++;
   } while (tree_changed);

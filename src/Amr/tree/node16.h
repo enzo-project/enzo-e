@@ -65,7 +65,7 @@ class Node16 {
   void normalize_pass(bool & refined_tree, bool is_full = true);
 
   // Perform a pass of trying to optimize uniformly-refined nodes
-  void optimize_pass(bool & refined_tree, bool is_full = true);
+  void optimize_pass(bool & refined_tree);
 
   // Fill the image region with values
   void fill_image
