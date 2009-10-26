@@ -50,22 +50,6 @@ enum type_perf_attribute {
 
 enum type_perf_counter {
   counter_undefined, // 0 is an undefined counter
-  time_real,           // Wallclock time of region
-  time_sim,            // Simulation time
-  mem_curr_bytes,      // Current number of bytes allocated
-  mem_high_bytes,      // Maximum number of bytes allocated
-  mem_new_count,       // Number of calls to allocate memory
-  mem_delete_count,    // Number of calls to deallocate memory
-  mem_new_bytes,       // Number of bytes allocated
-  mem_delete_bytes,    // Number of bytes deallocated
-  disk_read_bytes,     // Number of bytes read from disk
-  disk_write_bytes,    // Number of bytes written to disk
-  disk_read_time,      // Time spent reading from disk
-  disk_write_time,     // Time spent writing to disk
-  user_patch_count,    // Number of grid patches in each level
-  user_cell_count,     // Number of grid cells in each level
-  user_particle_count, // Number of particles
-
 #ifdef CONFIG_USE_MPI
   comm_send_bytes,     // Amount of data sent from this thread
   comm_recv_bytes,     // Amount of data sent from this thread
@@ -83,7 +67,21 @@ enum type_perf_counter {
   cpu_flop_count,      // Number of floating point operations
   mem_count,           // Number of memory accesses
 #endif /* CONFIG_USE_PAPI */
-
+  time_real,           // Wallclock time of region
+  time_sim,            // Simulation time
+  mem_curr_bytes,      // Current number of bytes allocated
+  mem_high_bytes,      // Maximum number of bytes allocated
+  mem_new_count,       // Number of calls to allocate memory
+  mem_delete_count,    // Number of calls to deallocate memory
+  mem_new_bytes,       // Number of bytes allocated
+  mem_delete_bytes,    // Number of bytes deallocated
+  disk_read_bytes,     // Number of bytes read from disk
+  disk_write_bytes,    // Number of bytes written to disk
+  disk_read_time,      // Time spent reading from disk
+  disk_write_time,     // Time spent writing to disk
+  user_patch_count,    // Number of grid patches in each level
+  user_cell_count,     // Number of grid cells in each level
+  user_particle_count, // Number of particles
   num_counters = user_particle_count
 };
 
