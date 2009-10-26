@@ -3,8 +3,17 @@ TOP     = ../..
 PACKAGE = parallel
 OBJS    = parallel.o mpi.o
 TESTS   = 
+DIRS    = mpi-tests
 
 include $(TOP)/src/MAKE/Make.include
+
+#=======================================================================
+
+# override all target to compile $(DIRS)
+
+ .PHONY: all
+all: $(OBJS) $(TESTS) $(EXES)
+	$(MAKE) -C mpi-tests
 
 #-----------------------------------------------------------------------
 

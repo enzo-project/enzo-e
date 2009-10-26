@@ -11,7 +11,8 @@ include $(TOP)/src/MAKE/Make.include
 # TARGETS
 #=======================================================================
 
-# override all target to compile ppm and ppml
+# override all target to compile $(DIRS)
+
  .PHONY: all
 all: $(OBJS) $(TESTS) $(EXES)
 	$(MAKE) -C tree
