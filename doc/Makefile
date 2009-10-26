@@ -1,16 +1,17 @@
 DOCS = \
+      design \
+      devel-uml \
+      manual-devel \
+      manual-reference \
+      manual-user \
       notes \
-      vision \
+      paper-tree \
       performance \
       project \
       requirements \
-      design \
-      devel-uml \
+      talk-intro \
       testing \
-      manual-devel \
-      manual-user \
-      manual-reference \
-      talk-intro
+      vision
 
 DIRS = $(DOCS) uml
  
@@ -53,6 +54,9 @@ manual-user:
 manual-reference: 
 	cd manual-reference; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C manual-reference
+paper-tree: 
+	cd paper-tree; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C paper-tree
 talk-intro: 
 	cd talk-intro; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C talk-intro
