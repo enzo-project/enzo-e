@@ -191,26 +191,18 @@ void  Memory::begin_group ( unsigned group_id ) throw ()
  *        issue a warning
  *        fall back to "general" group
  *
- *  ( ) begin_group/end_group should be properly nested
- *        issue a warning
- *        fall back to "general" group
- *
  *********************************************************************
  */
 {
   // check for whether we have already called begin_group before
 
-  bool inactive = (curr_group_ == 0);
+  bool in_range = (group_id <= MEMORY_MAX_NUM_GROUPS);
 
-  bool in_range = ((1 <= group_id) && (group_id <= MEMORY_MAX_NUM_GROUPS));
-
-  if ( in_range && inactive ) {
+  if ( in_range ) {
 
       curr_group_ = group_id;
 
-  }
-
-  if ( ! in_range ) { // curr_group_ out of range
+  } else { // curr_group_ out of range
 
     char warning_message [ ERROR_MESSAGE_LENGTH ];
 
@@ -219,18 +211,6 @@ void  Memory::begin_group ( unsigned group_id ) throw ()
 
     WARNING_MESSAGE("Memory::begin_group()",warning_message);
 
-  } else if ( ! inactive ) {
-
-    // ASSERT: group_id is in range, so group_names_[group_id] is valid
-
-    char warning_message [ ERROR_MESSAGE_LENGTH ];
-
-    sprintf (warning_message,
-	     "Beginning group %d (%s) when group %d (%s) is already active\n",
-	     group_id,    group_names_[group_id],
-	     curr_group_, group_names_[curr_group_]);
-
-    WARNING_MESSAGE("Memory::begin_group()",warning_message);
   }
 
 }
@@ -246,17 +226,13 @@ void  Memory::end_group ( unsigned group_id ) throw ()
  *********************************************************************
  */
 {
-  bool active = (curr_group_ == group_id);
+  bool in_range = (group_id <= MEMORY_MAX_NUM_GROUPS);
 
-  bool in_range = ((1 <= group_id) && (group_id <= MEMORY_MAX_NUM_GROUPS));
-
-  if ( in_range && active ) {
+  if ( in_range ) {
 
     curr_group_ = 0;
 
-  }
-
-  if ( ! in_range ) { // curr_group_ out of range
+  } else { // curr_group_ out of range
 
     char warning_message [ ERROR_MESSAGE_LENGTH ];
 
@@ -265,20 +241,7 @@ void  Memory::end_group ( unsigned group_id ) throw ()
 
     WARNING_MESSAGE("Memory::end_group()",warning_message);
 
-  } else if ( ! active ) {
-
-    // ASSERT: group_id is in range, so group_names_[group_id] is valid
-
-    char warning_message [ ERROR_MESSAGE_LENGTH ];
-
-    sprintf (warning_message,
-	     "Ending group %d (%s) when group %d (%s) is already active\n",
-	     group_id,    group_names_[group_id],
-	     curr_group_, group_names_[curr_group_]);
-
-    WARNING_MESSAGE("Memory::end_group()",warning_message);
   }
-
 }
 
 

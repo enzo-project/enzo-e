@@ -136,7 +136,7 @@ private:
 
   static void check_handle_(memory_group_handle group_handle) 
     throw (ExceptionMemoryBadGroupHandle())
-      {  if (!(0 <= group_handle && group_handle <= MEMORY_MAX_NUM_GROUPS)) {
+      {  if ( group_handle > MEMORY_MAX_NUM_GROUPS) {
 	  throw (ExceptionMemoryBadGroupHandle());
 	}
       }
