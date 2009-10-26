@@ -557,8 +557,8 @@ void compute_B (enum_data_type data_type,
 		int gx, int gy, int gz)
 {
 
-  bool is_aliased = (data_type == data_type_alias || 
-		     data_type == data_type_alias_packed);
+//   bool is_aliased = (data_type == data_type_alias || 
+// 		     data_type == data_type_alias_packed);
 
   // exchange ghost zones for all tasks
 
@@ -572,7 +572,7 @@ void compute_B (enum_data_type data_type,
 
 	int is = isx + sx * (isy + isy * isz);
 
-	// exchange ghost zones for current task buffer is returned,
+	// exchange ghost zones for current task.  Buffer is returned,
 	// since task data may be either a copy or aliased
 
 	Scalar * buffer = 
