@@ -59,7 +59,7 @@ paper-tree:
 	$(MAKE) -C paper-tree
 talk-intro: 
 	cd talk-intro; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C talk-intro
+	$(MAKE) -C talk-intro pdf2
 
 #-----------------------------------------------------------------------
 
