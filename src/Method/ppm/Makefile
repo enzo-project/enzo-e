@@ -22,10 +22,10 @@ OBJS = \
 	calc_dt.o \
         cello_hydro.o \
         c_message.o \
-	CosmologyComputeExpansionFactor.o \
-	CosmologyComputeExpansionTimestep.o \
+	../CosmologyComputeExpansionFactor.o \
+	../CosmologyComputeExpansionTimestep.o \
 	CosmologyGetUnits.o \
-	data_dump.o \
+	../data_dump.o \
 	euler.o \
 	FindField.o \
 	f_message.o \
@@ -36,16 +36,16 @@ OBJS = \
 	Grid_ComputeTimeStep.o \
 	Grid_IdentifyPhysicalQuantities.o \
 	Grid_IdentifySpeciesFields.o \
-	Grid_SetExternalBoundaryValues.o \
+	../Grid_SetExternalBoundaryValues.o \
 	Grid_SetMinimumSupport.o \
 	Grid_SolveHydroEquations.o \
-        initialize_hydro.o \
+	../initialize_hydro.o \
 	inteuler.o \
 	intvar.o \
 	pgas2d_dual.o \
 	pgas2d.o \
 	ppm_de.o \
-	SetExternalBoundary.o \
+	../SetExternalBoundary.o \
 	sum_field.o \
 	twoshock.o \
 	xeuler_sweep.o \
@@ -64,6 +64,19 @@ test_implosion: $(OBJS) $(OBJS_IMPLOSION)
 	$(CXX) -o test_implosion $(OBJS_IMPLOSION) $(OBJS)  $(LDFLAGS)
 test_implosion3: $(OBJS) $(OBJS_IMPLOSION3)
 	$(CXX) -o test_implosion3 $(OBJS_IMPLOSION3) $(OBJS)  $(LDFLAGS)
+
+#-----------------------------------------------------------------------
+
+.PHONY: includes
+includes:
+	ln -s ../ppm/cello_hydro.h .
+	ln -s ../ppm/defines.h .
+
+.PHONY: install-include
+install-include:
+	ln -sf `pwd`/cello_hydro.h             $(INCLUDE)
+
+#-----------------------------------------------------------------------
 
 .PHONY: clean-local
 clean-local:
