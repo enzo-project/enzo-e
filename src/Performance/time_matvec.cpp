@@ -112,7 +112,7 @@ int main(int argc, char ** argv)
 	  time_const.stop();
 
 	  for (i=0; i<CACHE_SIZE; i++) {
-	    cache[i] = 1;
+	    cache[i] = 0;
 	  }
 	}
 
@@ -120,7 +120,7 @@ int main(int argc, char ** argv)
 	  time_overhead.start();
 	  time_overhead.stop();
 	  for (i=0; i<CACHE_SIZE; i++) {
-	    cache[i] = 1;
+	    cache[i] = 0;
 	  }
 	}
       }
@@ -149,7 +149,7 @@ int main(int argc, char ** argv)
 	  }
 	  time_symm.stop();
 	  for (i=0; i<CACHE_SIZE; i++) {
-	    cache[i] = 1;
+	    cache[i] = 0;
 	  }
 	}
       }
@@ -177,7 +177,7 @@ int main(int argc, char ** argv)
 	  }
 	  time_full.stop();
 	  for (i=0; i<CACHE_SIZE; i++) {
-	    cache[i] = 1;
+	    cache[i] = 0;
 	  }
 	}
       }
@@ -218,7 +218,7 @@ int main(int argc, char ** argv)
 	  time_block.stop();
 
 	  for (i=0; i<CACHE_SIZE; i++) {
-	    cache[i] = 1;
+	    cache[i] = 0;
 	  }
 	}
 
@@ -226,14 +226,13 @@ int main(int argc, char ** argv)
 	  time_overhead.start();
 	  time_overhead.stop();
 	  for (i=0; i<CACHE_SIZE; i++) {
-	    cache[i] = 1;
+	    cache[i] = 0;
 	  }
 	}
       }
     }
 
-
-    int num_flops = count*k*k*k*13;
+    int num_flops = count*k*k*k*13+int(cache[0]);
     printf ("%d %10.2f %10.2f %10.2f %10.2f\n",
 	    k,
 	    1e-6*num_flops/(time_const.value()-time_overhead.value()),

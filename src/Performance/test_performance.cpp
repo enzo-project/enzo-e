@@ -35,10 +35,9 @@ int main(int argc, char ** argv)
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 
-  int return_value;
   timer.start();
 
-  return_value = system("sleep 1");
+  system("sleep 1");
   timer.stop();
 
   printf ("Initial timer value = %24.16f\n",timer.value());
@@ -46,7 +45,7 @@ int main(int argc, char ** argv)
   unit_assert((timer.value() - 1.0) < time_tolerance);
 
   timer.start();
-  return_value = system("sleep 1");
+  system("sleep 1");
   timer.stop();
 
   printf ("Initial timer value = %24.16f\n",timer.value());
