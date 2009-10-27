@@ -20,7 +20,6 @@ cello: cello.o
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/control.hpp      $(INCLUDE)
 
 #-----------------------------------------------------------------------
 
