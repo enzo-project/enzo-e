@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "cello.h"
-#include "node16.h"
+#include "amr_node16.hpp"
 #include <assert.h>
 
 const bool debug = false;

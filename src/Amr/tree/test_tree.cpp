@@ -9,10 +9,10 @@
 #include "error.hpp"
 #include "memory.hpp"
 #include "disk.hpp"
-#include "node4.h"
-#include "tree4.h"
-#include "node16.h"
-#include "tree16.h"
+#include "amr_node4.hpp"
+#include "amr_tree4.hpp"
+#include "amr_node16.hpp"
+#include "amr_tree16.hpp"
 
 const bool debug = false;
 const int  cell_size = 1;

@@ -1,20 +1,20 @@
 
 #include <stdio.h>
 #include "cello.h"
-#include "node16.h"
-#include "tree16.h"
+#include "amr_node4.hpp"
+#include "amr_tree4.hpp"
 
 const bool debug = false;
 
-Tree16::Tree16()
+Tree4::Tree4()
   : levels_(0),
-    root_(new Node16())
-    
+    root_(new Node4())
+
 {
 }
 
 // Refine down to array
-void Tree16::refine
+void Tree4::refine
 (
  const int * level_array, 
  int nd0, int nd1, 
@@ -27,7 +27,7 @@ void Tree16::refine
 }
 
 // Remove level-jumps 
-void Tree16::normalize(bool is_full)
+void Tree4::normalize(bool is_full)
 {
   // Repeatedly normalize
   int pass = 0;
@@ -42,7 +42,7 @@ void Tree16::normalize(bool is_full)
 }
 
 // Replace uniformly-refined patch with single node
-void Tree16::optimize()
+void Tree4::optimize()
 {
   // Repeatedly optimize
   int pass = 0;
@@ -58,9 +58,8 @@ void Tree16::optimize()
 
 /// Create an hdf5 file of tree, assuming given source bitmap size
 /// 
-float * Tree16::create_image (int n,int line_width)
+float * Tree4::create_image (int n,int line_width)
 {
-  printf ("n = %d\n",n);
   float * image = new float [n*n];
   
   root_->fill_image(image,n,n,0,n-1,0,n-1,0,levels_,line_width);

@@ -1,35 +1,32 @@
 
-TOP = ../../..
+TOP     = ../../..
+PACKAGE = amr
+OBJS    = amr_tree4.o amr_node4.o amr_tree16.o amr_node16.o 
+TESTS   = test_tree
+DIRS    = 
 
-EXES = test_tree
-
-PG = 
-INC_LOCAL  = -I$(TOP)/include
-LIB_LOCAL  = $(LIB_HDF5)
-
-
-OBJS = tree4.o node4.o tree16.o node16.o 
-
-
-FFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(PG)
-CXXFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3 $(PG)
-
-FFLAGS   = $(FFLAGS_LOCAL)
-CXXFLAGS = $(CXXFLAGS_LOCAL) $(INC_LOCAL)
-
-all: $(EXES)
-test_tree: $(OBJS) test_tree.o
-	$(CXX) -o test_tree test_tree.o $(CXXFLAGS_LOCAL) $(OBJS) $(LIB)
-
-obj: $(OBJS)
-
-test: $(EXES)
-#	./test_implosion # slow
-#	./test_enzo      # slow
-
-.PHONY: clean-local
-clean-local:
+#-----------------------------------------------------------------------
 
 include $(TOP)/src/MAKE/Make.include
 
-include DEPEND
+#=======================================================================
+# TARGETS
+#=======================================================================
+
+test_tree: test_tree.o
+	$(CXX) -o test_tree test_tree.o $(LIB)
+
+#-----------------------------------------------------------------------
+
+.PHONY: install-include
+install-include:
+	ln -sf `pwd`/amr_node16.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_node4.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_node.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_tree16.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_tree4.hpp $(INCLUDE)
+
+#-----------------------------------------------------------------------
+
+.PHONY: clean-local
+clean-local:
