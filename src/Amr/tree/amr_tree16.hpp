@@ -22,7 +22,7 @@ class Tree16 {
   void print_levels();
 
   // Refine nodes to remove level jumps
-  void normalize(bool full_nodes = true);
+  void balance(bool full_nodes = true);
 
   // Refine nodes to remove level jumps
   void fill(bool full_nodes = true);

@@ -71,7 +71,7 @@ inline Node4 * Node4::neighbor (face_type face)
   return neighbor_[face]; 
 }
 
-inline Node4 * Node4::cousin (face_type face, corner_type corner) 
+inline Node4 * Node4::cousin (face_type face, corner_type corner)
 { 
   if (neighbor_[face] && neighbor_[face]->child_[corner]) {
     return neighbor_[face]->child_[corner];
@@ -88,8 +88,9 @@ inline Node4 * Node4::parent ()
 // Set two nodes to be neighbors.  Friend function since nodes may be NULL
 inline void make_neighbors 
 (
- Node4 * node_1, face_type face_1,
- Node4 * node_2
+ Node4 * node_1,
+ Node4 * node_2,
+ face_type face_1
  )
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
@@ -253,38 +254,38 @@ void Node4::update_child_ (corner_type corner)
 
     if (corner == UL) {
 
-      make_neighbors (child (UL),R,child (UR));
-      make_neighbors (child (UL),D,child (DL));
-      make_neighbors (child (UL),L,cousin(L,UR));
-      make_neighbors (child (UL),U,cousin(U,DL));
-
+      make_neighbors (child (UL),child (UR),R);
+      make_neighbors (child (UL),child (DL),D);
+      make_neighbors (child (UL),cousin(L,UR),L);
+      make_neighbors (child (UL),cousin(U,DL),U);
+      
     } else if (corner == DL) {
 
-      make_neighbors (child (DL),U,child (UL));
-      make_neighbors (child (DL),R,child (DR));
-      make_neighbors (child (DL),D,cousin(D,UL));
-      make_neighbors (child (DL),L,cousin(L,DR));
-
+      make_neighbors (child (DL),child (UL),U);
+      make_neighbors (child (DL),child (DR),R);
+      make_neighbors (child (DL),cousin(D,UL),D);
+      make_neighbors (child (DL),cousin(L,DR),L);
+      
     } else if (corner == UR) {
 
-      make_neighbors (child (UR),D,child (DR));
-      make_neighbors (child (UR),L,child (UL));
-      make_neighbors (child (UR),U,cousin(U,DR));
-      make_neighbors (child (UR),R,cousin(R,UL));
-
+      make_neighbors (child (UR),child (DR),D);
+      make_neighbors (child (UR),child (UL),L);
+      make_neighbors (child (UR),cousin(U,DR),U);
+      make_neighbors (child (UR),cousin(R,UL),R);
+      
     } else if (corner == DR) {
 
-      make_neighbors (child (DR),U,child (UR));
-      make_neighbors (child (DR),L,child (DL));
-      make_neighbors (child (DR),D,cousin(D,UR));
-      make_neighbors (child (DR),R,cousin(R,DL));
-
+      make_neighbors (child (DR),child (UR),U);
+      make_neighbors (child (DR),child (DL),L);
+      make_neighbors (child (DR),cousin(D,UR),D);
+      make_neighbors (child (DR),cousin(R,DL),R);
+      
     }
   }
 }
 
 // Perform a pass of trying to remove level-jumps 
-void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
+void Node4::balance_pass(bool & refined_tree, bool full_nodes)
 {
 
   if (full_nodes) {
@@ -315,18 +316,18 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
 	create_children_();
 	update_children_();
 
-	child(UL)->normalize_pass(refined_tree,full_nodes);
-	child(DL)->normalize_pass(refined_tree,full_nodes);
-	child(UR)->normalize_pass(refined_tree,full_nodes);
-	child(DR)->normalize_pass(refined_tree,full_nodes);
+	child(UL)->balance_pass(refined_tree,full_nodes);
+	child(DL)->balance_pass(refined_tree,full_nodes);
+	child(UR)->balance_pass(refined_tree,full_nodes);
+	child(DR)->balance_pass(refined_tree,full_nodes);
 
       }
 
     } else {
-      child(UL)->normalize_pass(refined_tree,full_nodes);
-      child(DL)->normalize_pass(refined_tree,full_nodes);
-      child(UR)->normalize_pass(refined_tree,full_nodes);
-      child(DR)->normalize_pass(refined_tree,full_nodes);
+      child(UL)->balance_pass(refined_tree,full_nodes);
+      child(DL)->balance_pass(refined_tree,full_nodes);
+      child(UR)->balance_pass(refined_tree,full_nodes);
+      child(DR)->balance_pass(refined_tree,full_nodes);
     }
 
   } else { 
@@ -355,11 +356,11 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
       if (refine_child[UL]) {
 	create_child_(UL); 
 	update_child_(UL);
-	child(UL)->normalize_pass(refined_tree,full_nodes);
+	child(UL)->balance_pass(refined_tree,full_nodes);
 	refined_tree = true;
       }
     } else {
-      child(UL)->normalize_pass(refined_tree,full_nodes);
+      child(UL)->balance_pass(refined_tree,full_nodes);
     }
 	 
     if ( ! child(DL) ) {
@@ -381,11 +382,11 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
       if (refine_child[DL]) {
 	create_child_(DL); 
 	update_child_(DL);
-	child(DL)->normalize_pass(refined_tree,full_nodes);
+	child(DL)->balance_pass(refined_tree,full_nodes);
 	refined_tree = true;
       }
     } else {
-      child(DL)->normalize_pass(refined_tree,full_nodes);
+      child(DL)->balance_pass(refined_tree,full_nodes);
     }
 
     if ( ! child(UR) ) {
@@ -407,11 +408,11 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
       if (refine_child[UR]) {
 	create_child_(UR); 
 	update_child_(UR);
-	child(UR)->normalize_pass(refined_tree,full_nodes);
+	child(UR)->balance_pass(refined_tree,full_nodes);
 	refined_tree = true;
       }
     } else {
-      child(UR)->normalize_pass(refined_tree,full_nodes);
+      child(UR)->balance_pass(refined_tree,full_nodes);
     }
        
     if ( ! child(DR) ) {
@@ -432,11 +433,11 @@ void Node4::normalize_pass(bool & refined_tree, bool full_nodes)
       if (refine_child[DR]) {
 	create_child_(DR); 
 	update_child_(DR);
-	child(DR)->normalize_pass(refined_tree,full_nodes);
+	child(DR)->balance_pass(refined_tree,full_nodes);
 	refined_tree = true;
       }
     } else {
-      child(DR)->normalize_pass(refined_tree,full_nodes);
+      child(DR)->balance_pass(refined_tree,full_nodes);
     }
   }
 }

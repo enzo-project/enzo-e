@@ -18,7 +18,7 @@ const bool debug = false;
 const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
-const int  max_level = 12;
+const int  max_level = 10;
 
 #include "image.h"
 
@@ -109,18 +109,18 @@ int main(int argc, char ** argv)
   write_image(image,n,n,"tree4-0.hdf5");
   delete image;
 
-  // Normalize the tree
+  // Balance the tree
 
 
   printf ("\n");
 
   Memory::set_active(true);
-  tree4->normalize(full_nodes);
+  tree4->balance(full_nodes);
   Memory::print();
   Memory::set_active(false);
   printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
 
-  printf ("NORMALIZED FULL TREE 4\n");
+  printf ("BALANCED FULL TREE 4\n");
   printf ("nodes  = %d\n",Node4::num_nodes());
   printf ("levels = %d\n",tree4->levels());
   image = tree4->create_image(n,line_width);
@@ -173,12 +173,12 @@ int main(int argc, char ** argv)
   write_image(image,n,n,"tree4-3.hdf5");
   delete image;
 
-  // Normalize the tree
+  // Balance the tree
 
   printf ("\n");
-  printf ("NORMALIZED NON-FULL TREE 4\n");
+  printf ("BALANCED NON-FULL TREE 4\n");
   Memory::set_active(true);
-  tree4->normalize(full_nodes);
+  tree4->balance(full_nodes);
   Memory::print();
   Memory::set_active(false);
   printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node4::num_nodes());
@@ -237,17 +237,17 @@ int main(int argc, char ** argv)
   write_image(image,n,n,"tree16-0.hdf5");
   delete image;
 
-  // Normalize the tree
+  // Balance the tree
 
   printf ("\n");
 
   Memory::set_active(true);
-  tree16->normalize(full_nodes);
+  tree16->balance(full_nodes);
   Memory::print();
   Memory::set_active(false);
   printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());
 
-  printf ("NORMALIZED FULL TREE 16\n");
+  printf ("BALANCED FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
   printf ("levels = %d\n",tree16->levels());
   image = tree16->create_image(n,line_width);
@@ -299,17 +299,17 @@ int main(int argc, char ** argv)
   write_image(image,n,n,"tree16-3.hdf5");
   delete image;
 
-  // Normalize the tree
+  // Balance the tree
 
   printf ("\n");
 
   Memory::set_active(true);
-  tree16->normalize(full_nodes);
+  tree16->balance(full_nodes);
   Memory::print();
   Memory::set_active(false);
   printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node16::num_nodes());
 
-  printf ("NORMALIZED NON-FULL TREE 16\n");
+  printf ("BALANCED NON-FULL TREE 16\n");
   printf ("nodes  = %d\n",Node16::num_nodes());
   printf ("levels = %d\n",tree16->levels());
   image = tree16->create_image(n,line_width);

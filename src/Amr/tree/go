@@ -3,15 +3,18 @@
 
 set colormap_dir = /usr/share/h5utils/colormaps/
 
-set color = vga
+set color = gray
 
 make dep
 make clean
 make
 test_tree
+
 echo "done"
+
 foreach tree (4 16)
     foreach type (0 1 2 3 4 5)
+      echo "tree$tree-$type.hdf5"
       h5topng -c $colormap_dir/$color tree$tree-$type.hdf5
     end
 end

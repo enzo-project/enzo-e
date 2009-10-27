@@ -5,15 +5,6 @@
 
 const bool debug = false;
 
-//    3
-//
-//    2
-//
-//    1        
-//
-//iy  0  1  2  3  
-// ix
-
 Node16::Node16(int level_adjust) 
   : level_adjust_(level_adjust)
 
@@ -96,8 +87,9 @@ inline Node16 * Node16::parent ()
 // Set two nodes to be neighbors.  Friend function since nodes may be NULL
 inline void make_neighbors 
 (
- Node16 * node_1, face_type face_1,
- Node16 * node_2
+ Node16 * node_1, 
+ Node16 * node_2, 
+ face_type face_1
  )
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
@@ -245,39 +237,39 @@ void Node16::update_child_ (int ix, int iy)
     // Right neighbor
 
     if (ix < 3) {
-      make_neighbors (child (ix,iy),R,child (ix+1,iy));
+      make_neighbors (child (ix,iy),child (ix+1,iy),R);
     } else {
-      make_neighbors (child (ix,iy),R,cousin (R,0,iy));
+      make_neighbors (child (ix,iy),cousin (R,0,iy),R);
     }
 
     // Left neighbor
 
     if (ix > 0) {
-      make_neighbors (child (ix,iy),L,child (ix-1,iy));
+      make_neighbors (child (ix,iy),child (ix-1,iy),L);
     } else {
-      make_neighbors (child (ix,iy),L,cousin (L,3,iy));
+      make_neighbors (child (ix,iy),cousin (L,3,iy),L);
     }
 
     // Up neighbor
 
     if (iy < 3) {
-      make_neighbors (child (ix,iy),U,child (ix,iy+1));
+      make_neighbors (child (ix,iy),child (ix,iy+1),U);
     } else {
-      make_neighbors (child (ix,iy),U,cousin (U,ix,0));
+      make_neighbors (child (ix,iy),cousin (U,ix,0),U);
     }
 
     // Down neighbor
 
     if (iy > 0) {
-      make_neighbors (child (ix,iy),D,child (ix,iy-1));
+      make_neighbors (child (ix,iy),child (ix,iy-1),D);
     } else {
-      make_neighbors (child (ix,iy),D,cousin (D,ix,3));
+      make_neighbors (child (ix,iy),cousin (D,ix,3),D);
     }
   }
 }
 
 // Perform a pass of trying to remove level-jumps 
-void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
+void Node16::balance_pass(bool & refined_tree, bool full_nodes)
 {
   if (full_nodes) {
 
@@ -307,7 +299,7 @@ void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
 	for (int ix=0; ix<4; ix++) {
 	  for (int iy=0; iy<4; iy++) {
 	    if (child(ix,iy)) {
-	      child(ix,iy)->normalize_pass(refined_tree,full_nodes);
+	      child(ix,iy)->balance_pass(refined_tree,full_nodes);
 	    }
 	  }
 	}
@@ -382,7 +374,7 @@ void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
 	  if (refine_child[ix][iy]) {
 	    create_child_(ix,iy); 
 	    update_child_(ix,iy);
-	    child(ix,iy)->normalize_pass(refined_tree,full_nodes);
+	    child(ix,iy)->balance_pass(refined_tree,full_nodes);
 	    refined_tree = true;
 	  }
 	}
@@ -395,7 +387,7 @@ void Node16::normalize_pass(bool & refined_tree, bool full_nodes)
   for (int ix=0; ix<4; ix++) {
     for (int iy=0; iy<4; iy++) {
       if (child(ix,iy)) {
-	child(ix,iy)->normalize_pass(refined_tree,full_nodes);
+	child(ix,iy)->balance_pass(refined_tree,full_nodes);
       }
     }
   }

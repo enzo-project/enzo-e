@@ -7,9 +7,9 @@
 *********************************************************************
 *
 * @file      node4.hpp
-* @brief     
+* @brief     Node class for 2^2-trees
 * @author    James Bordner (jobordner@ucsd.edu)
-* @date      
+* @date      Tue Oct 27 12:32:07 PDT 2009
 * @bug       
 * @note      
 *
@@ -30,14 +30,14 @@ class Tree4;
 
 class Node4 {
 
-  /** 
+/** 
 *********************************************************************
 *
 * @class     Node4
-* @brief     
-* @ingroup   GROUP
+* @brief     Node class for 2^2-trees
+* @ingroup   Amr
 *
-* 
+* Node class for 2^2-trees
 *
 *********************************************************************
 */
@@ -54,14 +54,16 @@ class Node4 {
   /// Delete a node and all descedents
   ~Node4();
 
-  /// return the num'th child
+  /// return the specified child
   Node4 * child (corner_type corner);
 
-  /// return the num'th neighbor
+  /// return the specified neighbor
   Node4 * neighbor (face_type face);
 
   /// make the two nodes neighbors.  friend function since either can be NULL
-  friend void make_neighbors (Node4 * node_1, face_type face_1, Node4 * node_2);
+  friend 
+  void make_neighbors
+  (Node4 * node_1, Node4 * node_2, face_type face_1);
 
   /// get the child's cousin
   Node4 * cousin (face_type face, corner_type corner);
@@ -83,7 +85,7 @@ class Node4 {
    );
 
   /// Perform a pass of trying to remove level-jumps 
-  void normalize_pass(bool & refined_tree, bool is_full = true);
+  void balance_pass(bool & refined_tree, bool is_full = true);
 
   /// Perform a pass of trying to optimize uniformly-refined nodes
   void optimize_pass(bool & refined_tree);

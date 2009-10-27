@@ -27,15 +27,15 @@ void Tree4::refine
 }
 
 // Remove level-jumps 
-void Tree4::normalize(bool is_full)
+void Tree4::balance(bool is_full)
 {
-  // Repeatedly normalize
+  // Repeatedly balance
   int pass = 0;
   bool tree_changed;
   do {
     tree_changed = false;
-    root_->normalize_pass(tree_changed,is_full);
-    if (debug) printf ("Normalize pass %d\n",pass);
+    root_->balance_pass(tree_changed,is_full);
+    if (debug) printf ("Balance pass %d\n",pass);
     pass++;
   } while (tree_changed);
   printf ("passes = %d\n",pass);

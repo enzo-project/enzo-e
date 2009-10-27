@@ -22,7 +22,7 @@ class Tree4 {
   void print_levels();
 
   // Refine nodes to remove level jumps
-  void normalize(bool full_nodes = true);
+  void balance(bool full_nodes = true);
 
   // Replace uniformly-refined patch with single node
   void optimize();
