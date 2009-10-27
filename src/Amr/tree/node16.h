@@ -1,31 +1,52 @@
-#ifndef NODE16_H
-#define NODE16_H
+#ifndef NODE16_HPP
+#define NODE16_HPP
+
+//345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+/** 
+ *********************************************************************
+ *
+ * @file      node16.hpp
+ * @brief     
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      
+ * @bug       
+ * @note      
+ *
+ * 
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */
 
 #include <stdlib.h>
+
+#include "cello.h"
+
 #include "node.h"
 
 class Tree16;
 
-// WARNING: NUMBERING MUST BE SUCH THAT DIR AND (DIR+2) % 4 MUST BE
-/* // OPPOSITE DIRECTIONS */
-
-/* enum face_type { */
-/*   R = 0, */
-/*   U = 1, */
-/*   L = 2, */
-/*   D = 3 }; */
-
-/* enum corner_type { */
-/*   UL = 0, */
-/*   DL = 1, */
-/*   UR = 2, */
-/*   DR = 3 }; */
-
-/* face_type opposite(face_type face); */
-
 class Node16 {
 
- public:
+/** 
+ *********************************************************************
+ *
+ * @class     Node16
+ * @brief     
+ * @ingroup   GROUP
+ *
+ * 
+ *
+ *********************************************************************
+ */
+
+public:
+
+  //-------------------------------------------------------------------
+  // PUBLIC OPERATIONS
+  //-------------------------------------------------------------------
 
   // Create a new leaf node
   Node16( int level_adjust = 0 );
@@ -97,16 +118,19 @@ class Node16 {
        (child_[0][3]) || (child_[1][3]) || (child_[2][3]) || (child_[3][3]));
   };
 
+  //-------------------------------------------------------------------
+  // STATIC OPERATIONS
+  //-------------------------------------------------------------------
+
   static int num_nodes() { return num_nodes_; };
 
- private:
+private:
 
-  Node16 * child_[4][4];    // column-ordering
-  Node16 * neighbor_[4]; // Right up left down
-  Node16 * parent_;
-  int level_adjust_;      // scale for optimizing uniformly refined nodes
+  //-------------------------------------------------------------------
+  // PRIVATE OPERATIONS
+  //-------------------------------------------------------------------
 
-
+  /// 
   void create_children_();
   void update_children_();
   void delete_children_();
@@ -114,8 +138,24 @@ class Node16 {
   void update_child_ (int ix, int iy);
   void create_child_ (int ix, int iy);
 
+private:
+
+  //-------------------------------------------------------------------
+  // PRIVATE ATTRIBUTES
+  //-------------------------------------------------------------------
+
+  /// 
+  Node16 * child_[4][4];    // column-ordering
+  Node16 * neighbor_[4]; // Right up left down
+  Node16 * parent_;
+  int level_adjust_;      // scale for optimizing uniformly refined nodes
+
+  //-------------------------------------------------------------------
+  // STATIC ATTRIBUTES
+  //-------------------------------------------------------------------
+
   static int num_nodes_;
 
 };
 
-#endif
+#endif /* NODE16_HPP */

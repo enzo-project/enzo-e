@@ -1,28 +1,52 @@
-#ifndef NODE4_H
-#define NODE4_H
+#ifndef NODE4_HPP
+#define NODE4_HPP
+
+//345678901234567890123456789012345678901234567890123456789012345678901234567890
+
+/** 
+ *********************************************************************
+ *
+ * @file      node4.hpp
+ * @brief     
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      
+ * @bug       
+ * @note      
+ *
+ * 
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */
 
 #include <stdlib.h>
+
+#include "cello.h"
+
 #include "node.h"
-
-/* // Production rules for ordering_hilbert4[type]  */
-/* const int ordering_hilbert4[4][4] =  */
-/*   { {3,0,0,1}, */
-/*     {1,1,2,0}, */
-/*     {2,3,1,2}, */
-/*     {0,2,3,3}}; */
-
 
 class Tree4;
 
-// WARNING: NUMBERING MUST BE SUCH THAT DIR AND (DIR+2) % 4 MUST BE
-// OPPOSITE DIRECTIONS
-
-
-face_type opposite(face_type face);
-
 class Node4 {
 
- public:
+/** 
+ *********************************************************************
+ *
+ * @class     Node4
+ * @brief     
+ * @ingroup   GROUP
+ *
+ * 
+ *
+ *********************************************************************
+ */
+
+public:
+
+  //-------------------------------------------------------------------
+  // PUBLIC OPERATIONS
+  //-------------------------------------------------------------------
 
   // Create a new leaf node
   Node4( int level_adjust = 0 );
@@ -94,16 +118,19 @@ class Node4 {
        (child_[3]));
   };
 
+  //-------------------------------------------------------------------
+  // STATIC OPERATIONS
+  //-------------------------------------------------------------------
+
   static int num_nodes() { return num_nodes_; };
 
- private:
+private:
 
-  Node4 * child_[4];    // column-ordering
-  Node4 * neighbor_[4]; // Right up left down
-  Node4 * parent_;
-  int level_adjust_;      // scale for optimizing uniformly refined nodes
+  //-------------------------------------------------------------------
+  // PRIVATE OPERATIONS
+  //-------------------------------------------------------------------
 
-
+  /// 
   void create_children_();
   void update_children_();
   void delete_children_();
@@ -111,7 +138,25 @@ class Node4 {
   void update_child_ (corner_type corner);
   void create_child_ (corner_type corner);
 
+private:
+
+  //-------------------------------------------------------------------
+  // PRIVATE ATTRIBUTES
+  //-------------------------------------------------------------------
+
+  /// 
+  Node4 * child_[4];    // column-ordering
+  Node4 * neighbor_[4]; // Right up left down
+  Node4 * parent_;
+  int level_adjust_;      // scale for optimizing uniformly refined nodes
+
+  //-------------------------------------------------------------------
+  // STATIC ATTRIBUTES
+  //-------------------------------------------------------------------
+
   static int num_nodes_;
 
+
 };
-#endif
+
+#endif /* NODE4_HPP */

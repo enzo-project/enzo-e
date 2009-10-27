@@ -30,9 +30,12 @@ run-test-%: %
 
 #-----------------------------------------------------------------------
 .PHONY: dep
-dep:
-	-@(makedepend -fDEPEND -ignore {CIncludes} $(INC) -- -- *.cpp *.hpp 2> /dev/null)
+dep:  $(patsubst %,dep-%,$(DIRS))
+	-@(touch DEPEND; makedepend -fDEPEND -ignore {CIncludes} $(INC) -- -- *.cpp *.hpp 2> /dev/null)
 
+.PHONY: dep-%
+dep-%:
+	-@(cd $*; touch DEPEND; makedepend -fDEPEND -ignore {CIncludes} $(INC) -- -- *.cpp *.hpp 2> /dev/null)
 
 #-----------------------------------------------------------------------
 
