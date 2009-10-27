@@ -21,6 +21,7 @@ all: $(OBJS) $(TESTS) $(EXES)
 
 .PHONY: install-include
 install-include:
+	$(MAKE) -C tree install-include
 
 #-----------------------------------------------------------------------
 
