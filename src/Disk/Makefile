@@ -10,7 +10,7 @@ include $(TOP)/src/MAKE/Make.include
 #=======================================================================
 
 test_disk_hdf5: test_disk_hdf5.o 
-	$(CXX) -o test_disk_hdf5 test_disk_hdf5.o $(LIB) $(LIB_HDF5)
+	$(CXX) -o test_disk_hdf5 test_disk_hdf5.o $(LIB)
 #-----------------------------------------------------------------------
 
 .PHONY: install-include
