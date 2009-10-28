@@ -15,11 +15,14 @@ if ($run == 1) then
 endif
 
 
-foreach tree (4 16)
-    foreach type (0 1 2 3 4 5)
-      echo "tree$tree-$type.hdf5"
-      h5topng -c $colormap_dir/$color tree$tree-$type.hdf5
+foreach tree (2 4 8)
+  foreach full (0 1)
+    foreach type (0 1 2)
+      set file = "tree$tree-f$full-$type.hdf5"
+      echo "$file"
+      h5topng -c $colormap_dir/$color $file
     end
+  end
 end
 
 

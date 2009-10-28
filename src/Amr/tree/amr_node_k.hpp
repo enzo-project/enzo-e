@@ -148,6 +148,12 @@ private:
   /// Create a child
   void create_child_ (int ix, int iy);
 
+  /// Index into child[] for ix,iy
+  int index_(int ix, int iy) { return ix + k_*iy; };
+
+  /// Return index of opposite face
+  int opposite_face_ (int face) { return (face + 2) % 4; };
+
 private:
 
   //-------------------------------------------------------------------
@@ -156,6 +162,9 @@ private:
 
   /// Number of cells per node axis, e.g. 2 or 4
   char k_;
+
+  /// Level increment: dl_ = log2(k_)
+  char dl_;
 
   /// Child nodes in edge_type x edge_type ordering
   Node_k ** child_;

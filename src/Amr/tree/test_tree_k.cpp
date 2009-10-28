@@ -8,6 +8,7 @@
 
 #include "error.hpp"
 #include "memory.hpp"
+#include "monitor.hpp"
 #include "disk.hpp"
 #include "amr_node_k.hpp"
 #include "amr_tree_k.hpp"
@@ -20,10 +21,37 @@ const int  max_level = 10;
 
 #include "image.h"
 
+int * create_level_array (int * n0, int * ny, int max_levels);
+void write_image(float * image, int nx, int ny, std::string filename);
+void create_tree 
+(
+ int * level_array,
+ int nx, int ny, 
+ int k,  int d, 
+ std::string name, 
+ bool full_nodes
+ );
+
+int main(int argc, char ** argv)
+{
+  // read in the gimp image into level
+
+  int nx,ny;
+  int * level_array = create_level_array(&nx,&ny,max_level);
+
+  int k,d;
+  create_tree (level_array, nx, ny, k=2, d=2, "tree2-f1", true);
+  create_tree (level_array, nx, ny, k=2, d=2, "tree2-f0", false);
+  create_tree (level_array, nx, ny, k=4, d=2, "tree4-f1", true);
+  create_tree (level_array, nx, ny, k=4, d=2, "tree4-f0", false);
+  create_tree (level_array, nx, ny, k=8, d=2, "tree8-f1", true);
+  create_tree (level_array, nx, ny, k=8, d=2, "tree8-f0", false);
+
+}
 // read in the gimp-generated image data into a level array
 // values are set to [0:max_levels)
 
-int * create_level_array (int * n0, int * n1, int max_levels)
+int * create_level_array (int * nx, int * ny, int max_levels)
 {
 
   int size = (width > height) ? width: height;
@@ -32,8 +60,8 @@ int * create_level_array (int * n0, int * n1, int max_levels)
 
   for (int i=0; i<size*size; i++) level_array[i] = false;
 
-  *n0 = size;
-  *n1 = size;
+  *nx = size;
+  *ny = size;
 
   int pixel[3];
   char * data = header_data;
@@ -56,283 +84,110 @@ int * create_level_array (int * n0, int * n1, int max_levels)
   return level_array;
 }
 
-void write_image(float * image, int nx, int ny, const char * filename)
+void write_image(float * image, int nx, int ny, std::string filename)
 {
   Hdf5 hdf5;
-  hdf5.file_open(filename,"w");
+  hdf5.file_open((filename+".hdf5").c_str(),"w");
   hdf5.dataset_open_write ("tree_image",nx,ny,1);
   hdf5.write(image);
   hdf5.dataset_close ();
   hdf5.file_close();
+
+  Monitor monitor;
+  float min=image[0];
+  float max=image[0];
+  for (int i=0; i<nx*ny; i++) {
+    if (min > image[i]) min = image[i];
+    if (max < image[i]) max = image[i];
+  }
+  int color_map[] = {0,0,0,1,1,1};
+  monitor.plot_png ((filename+".png").c_str(),image,nx,ny,min,max,color_map, 2);
+
 }
 
-int main(int argc, char ** argv)
+
+void create_tree 
+(
+ int * level_array, 
+ int nx, int ny, 
+ int k,  int d, 
+ std::string name, 
+ bool full_nodes
+ )
 {
-  int n0,n1;
-
-  // read in the gimp image into level
-
-  int * level_array = create_level_array(&n0,&n1,max_level);
-
-  // Create a tree with full nodes and refine to the image
-
-  // 1 
-
-  Tree_k * tree4 = new Tree_k(2);
-
-  bool full_nodes;
-
-  Memory::reset();
-
-  Memory::set_active(true);
-  tree4->refine(level_array,n0,n1,max_level,full_nodes=true);
-  Memory::print();
-  Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  // Determine image size
-  int n = cell_size + 2*line_width;
-  for (int i=0; i<tree4->levels(); i++) {
-    n = 2*n - line_width;
-  }
-
 
   float * image;
 
-  printf ("\n");
-  printf ("INITIAL FULL TREE 4\n");
-  image = tree4->create_image(n,line_width);
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree4->levels());
-  write_image(image,n,n,"tree4-0.hdf5");
-  delete image;
+  Tree_k * tree = new Tree_k(k);
+  float mem_per_node;
 
-  // Balance the tree
+  Memory::reset();
 
+  printf ("--------------------------------------------------\n");
+  printf ("k=%d d=%d full=%d\n",k,d,full_nodes);
+  printf ("--------------------------------------------------\n");
 
-  printf ("\n");
-
-  Memory::set_active(true);
-  tree4->balance(full_nodes);
-  Memory::print();
-  Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  printf ("BALANCED FULL TREE 4\n");
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree4->levels());
-  image = tree4->create_image(n,line_width);
-  write_image(image,n,n,"tree4-1.hdf5");
-  delete image;
-
-  // Optimize the tree
-
-  printf ("\n");
-  Memory::set_active(true);
-  tree4->optimize();
-  Memory::print();
-  Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  printf ("OPTIMIZED FULL TREE 4\n");
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree4->levels());
-  image = tree4->create_image(n,line_width);
-  write_image(image,n,n,"tree4-2.hdf5");
-  delete image;
-
-  delete tree4;
-
-  // Create a new tree and refine to the image with non-full nodes
-
-  // 2
-
-  tree4 = new Tree_k(2);
+  //--------------------------------------------------
+  // Refine the tree
+  //--------------------------------------------------
 
   Memory::set_active(true);
-  tree4->refine(level_array,n0,n1,max_level,full_nodes=false);
+  tree->refine(level_array,nx,ny,max_level,full_nodes);
   Memory::print();
   Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
 
-  Memory::print();
+  mem_per_node = (float) Memory::bytes(0) / Node_k::num_nodes();
 
   // Determine image size
-  n = cell_size + 2*line_width;
-  for (int i=0; i<tree4->levels(); i++) {
-    n = 2*n - line_width;
+  int image_size = cell_size + 2*line_width;
+  for (int i=0; i<tree->levels(); i++) {
+    image_size = 2*image_size - line_width;
   }
 
-  printf ("\n");
-  printf ("INITIAL NON-FULL TREE 4\n");
-  image = tree4->create_image(n,line_width);
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree4->levels());
-  write_image(image,n,n,"tree4-3.hdf5");
-  delete image;
+  printf ("\nINITIAL TREE\n");
+  image = tree->create_image(image_size,line_width);
+  printf ("nodes      = %d\n",Node_k::num_nodes());
+  printf ("levels     = %d\n",tree->levels());
+  printf ("bytes/node = %g\n",mem_per_node);
+  write_image(image,image_size,image_size,name + "-0");
+  delete [] image;
 
+  //--------------------------------------------------
   // Balance the tree
+  //--------------------------------------------------
 
-  printf ("\n");
-  printf ("BALANCED NON-FULL TREE 4\n");
+  printf ("\nBALANCED TREE\n");
   Memory::set_active(true);
-  tree4->balance(full_nodes);
+  tree->balance(full_nodes);
   Memory::print();
   Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  Memory::print();
-
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree4->levels());
-  image = tree4->create_image(n,line_width);
-  write_image(image,n,n,"tree4-4.hdf5");
+  mem_per_node = (float) Memory::bytes(0) / Node_k::num_nodes();
+  printf ("nodes      = %d\n",Node_k::num_nodes());
+  printf ("levels     = %d\n",tree->levels());
+  printf ("bytes/node = %g\n",mem_per_node);
+  image = tree->create_image(image_size,line_width);
+  write_image(image,image_size,image_size,name + "-1");
   delete image;
 
+
+  //--------------------------------------------------
   // Optimize the tree
+  //--------------------------------------------------
 
-  printf ("\n");
-  printf ("OPTIMIZED NON-FULL TREE 4\n");
-
+  printf ("\nOPTIMIZED TREE\n");
   Memory::set_active(true);
-  tree4->optimize();
+  tree->optimize();
   Memory::print();
   Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
 
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree4->levels());
-  image = tree4->create_image(n,line_width);
-  write_image(image,n,n,"tree4-5.hdf5");
-  delete image;
-  
-  delete tree4;
-
-  // Create a tree with full nodes and refine to the image
-
-  // 3
-
-  Tree_k * tree16 = new Tree_k(4);
-  Memory::set_active(true);
-  tree16->refine(level_array,n0,n1,max_level,full_nodes=true);
-  Memory::print();
-  Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  // Determine image size
-  n = cell_size + 2*line_width;
-  for (int i=0; i<tree16->levels(); i++) {
-    n = 2*n - line_width;
-  }
-
-
-  printf ("\n");
-  printf ("INITIAL FULL TREE 16\n");
-  image = tree16->create_image(n,line_width);
-  printf ("TREE 16\n");
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree16->levels());
-  write_image(image,n,n,"tree16-0.hdf5");
+  mem_per_node = (float) Memory::bytes(0) / Node_k::num_nodes();
+  printf ("nodes      = %d\n",Node_k::num_nodes());
+  printf ("levels     = %d\n",tree->levels());
+  printf ("bytes/node = %g\n",mem_per_node);
+  image = tree->create_image(image_size,line_width);
+  write_image(image,image_size,image_size,name + "-2");
   delete image;
 
-  // Balance the tree
-
-  printf ("\n");
-
-  Memory::set_active(true);
-  tree16->balance(full_nodes);
-  Memory::print();
-  Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  printf ("BALANCED FULL TREE 16\n");
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree16->levels());
-  image = tree16->create_image(n,line_width);
-  write_image(image,n,n,"tree16-1.hdf5");
-  delete image;
-
-  // Optimize the tree
-
-  printf ("\n");
-
-  Memory::set_active(true);
-  tree16->optimize();
-  Memory::print();
-  Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  printf ("OPTIMIZED FULL TREE 16\n");
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree16->levels());
-  image = tree16->create_image(n,line_width);
-  write_image(image,n,n,"tree16-2.hdf5");
-  delete image;
-
-  delete tree16;
-
-  // Create a new tree and refine to the image with non-full nodes
-
-  // 4
-
-  tree16 = new Tree_k(4);
-
-  Memory::set_active(true);
-  tree16->refine(level_array,n0,n1,max_level,full_nodes=false);
-  Memory::print();
-  Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  // Determine image size
-  n = cell_size + 2*line_width;
-  for (int i=0; i<tree16->levels(); i++) {
-    n = 2*n - line_width;
-  }
-
-  printf ("\n");
-  image = tree16->create_image(n,line_width);
-  printf ("INITIAL NON-FULL TREE 16\n");
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree16->levels());
-  write_image(image,n,n,"tree16-3.hdf5");
-  delete image;
-
-  // Balance the tree
-
-  printf ("\n");
-
-  Memory::set_active(true);
-  tree16->balance(full_nodes);
-  Memory::print();
-  Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  printf ("BALANCED NON-FULL TREE 16\n");
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree16->levels());
-  image = tree16->create_image(n,line_width);
-  write_image(image,n,n,"tree16-4.hdf5");
-  delete image;
-
-  // Optimize the tree
-
-  printf ("\n");
-
-  Memory::set_active(true);
-  tree16->optimize();
-  Memory::print();
-  Memory::set_active(false);
-  printf ("Bytes / node = %g\n",(float)Memory::bytes(0) / Node_k::num_nodes());
-
-  printf ("OPTIMIZED NON-FULL TREE 16\n");
-  printf ("nodes  = %d\n",Node_k::num_nodes());
-  printf ("levels = %d\n",tree16->levels());
-  image = tree16->create_image(n,line_width);
-  write_image(image,n,n,"tree16-5.hdf5");
-  delete image;
-  
-  delete tree16;
-
-
+  delete tree;
 
 }
