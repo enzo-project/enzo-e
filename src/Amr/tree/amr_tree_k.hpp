@@ -22,12 +22,12 @@
 
 #define MAX_LEVELS 80
 
-class Tree_K {
+class Tree_k {
 
 /** 
  *********************************************************************
  *
- * @class     Tree_K
+ * @class     Tree_k
  * @brief     
  * @ingroup   GROUP
  *
@@ -42,9 +42,9 @@ public:
   // PUBLIC OPERATIONS
   //-------------------------------------------------------------------
 
-  Tree_K(int k);
+  Tree_k(int k);
 
-  ~Tree_K() { delete root_; };
+  ~Tree_k() { delete root_; };
 
   /// Refine down to array
   void refine
@@ -85,7 +85,7 @@ private:
   //-------------------------------------------------------------------
 
   int levels_;
-  Node_K * root_;
+  Node_k * root_;
 
 
 };

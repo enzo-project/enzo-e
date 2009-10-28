@@ -13,11 +13,4 @@ enum corner_type {
   UR = 2,
   DR = 3 };
 
-enum edge_type {
-  LL = 0,
-  CL = 1,
-  CR = 2,
-  RR = 3 };
-
-
 #endif

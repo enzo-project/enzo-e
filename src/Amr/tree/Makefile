@@ -2,7 +2,7 @@
 TOP     = ../../..
 PACKAGE = amr
 OBJS    = amr_tree4.o amr_node4.o amr_tree16.o amr_node16.o amr_tree_k.o amr_node_k.o
-TESTS   = test_tree
+TESTS   = test_tree test_tree_k
 DIRS    = 
 
 #-----------------------------------------------------------------------
@@ -13,8 +13,10 @@ include $(TOP)/src/MAKE/Make.include
 # TARGETS
 #=======================================================================
 
-test_tree: test_tree.o
+test_tree: test_tree.o $(OBJS)
 	$(CXX) -o test_tree test_tree.o $(LIB)
+test_tree_k: test_tree_k.o $(OBJS)
+	$(CXX) -o test_tree_k test_tree_k.o $(LIB)
 
 #-----------------------------------------------------------------------
 

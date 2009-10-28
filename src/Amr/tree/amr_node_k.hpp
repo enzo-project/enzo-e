@@ -24,7 +24,7 @@
 
 #include "cello.h"
 
-#include "amr_node_k.hpp"
+#include "amr_node.hpp"
 
 
 class Tree_k;
@@ -50,26 +50,26 @@ public:
   //-------------------------------------------------------------------
 
   /// Create a new leaf node
-  Node_K( int k, int level_adjust = 0 );
+  Node_k( int k, int level_adjust = 0 );
 
   /// Delete a node and all descedents
-  ~Node_K();
+  ~Node_k();
 
   /// return the specified child
-  Node_K * child (int ix, int iy);
+  Node_k * child (int ix, int iy);
 
   /// return the specified neighbor
-  Node_K * neighbor (face_type face);
+  Node_k * neighbor (face_type face);
 
   /// make the two nodes neighbors.  friend function since either can be NULL
   friend void make_neighbors 
-  (Node_K * node_1, Node_K * node_2, face_type face_1);
+  (Node_k * node_1, Node_k * node_2, face_type face_1);
 
   /// get the child's cousin
-  Node_K * cousin (face_type face, int ix, int iy);
+  Node_k * cousin (face_type face, int ix, int iy);
 
   /// return the parent
-  Node_K * parent ();
+  Node_k * parent ();
 
   /// Refine if any elements in the array are true and recurse
   /// return the level
@@ -104,10 +104,8 @@ public:
 
   /// Return whether node has all children
   bool all_children () {
-    for (int ix=0; ix<k_; ix++) {
-      for (int iy=0; iy<k_; iy++) {
-	if (! child_[ix][iy]) return false;
-      }
+    for (int i=0; i<k_*k_; i++) {
+	if (! child_[i]) return false;
     }
     return true;
   };
@@ -115,10 +113,8 @@ public:
   /// Return whether node has any children
   bool any_children () { 
 
-    for (int ix=0; ix<k_; ix++) {
-      for (int iy=0; iy<k_; iy++) {
-	if (child_[ix][iy]) return true;
-      }
+    for (int i=0; i<k_*k_; i++) {
+	if (child_[i]) return true;
     }
     return false;
 
@@ -162,13 +158,13 @@ private:
   char k_;
 
   /// Child nodes in edge_type x edge_type ordering
-  Node_K ** child_;
+  Node_k ** child_;
 
   /// Neighbor nodes in edge_type ordering
-  Node_K ** neighbor_;
+  Node_k ** neighbor_;
 
   /// Parent node
-  Node_K * parent_;
+  Node_k * parent_;
 
   /// Relative level for coalesced nodes
   int level_adjust_;

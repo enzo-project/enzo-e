@@ -3,7 +3,7 @@
 /** 
  *********************************************************************
  *
- * @file      Tree_K.cpp
+ * @file      amr_tree_k.cpp
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
@@ -43,16 +43,16 @@
 
 const bool debug = false;
 
-Tree_K::Tree_K(int k)
+Tree_k::Tree_k(int k)
   : levels_(0),
-    root_(new Node_K(k))
+    root_(new Node_k(k))
 /**
  *********************************************************************
  *
  * @param         
  * @return        
  *
- * Create a Tree_K object
+ * Create a Tree_k object
  *
  *********************************************************************
  */
@@ -60,7 +60,7 @@ Tree_K::Tree_K(int k)
 {
 }
 
-void Tree_K::refine
+void Tree_k::refine
 /**
  *********************************************************************
  *
@@ -83,7 +83,7 @@ void Tree_K::refine
   if (debug) printf ("%d\n",levels_);
 }
 
-void Tree_K::balance(bool is_full)
+void Tree_k::balance(bool is_full)
 /**
  *********************************************************************
  *
@@ -107,7 +107,7 @@ void Tree_K::balance(bool is_full)
   printf ("passes = %d\n",pass);
 }
 
-void Tree_K::optimize()
+void Tree_k::optimize()
 /**
  *********************************************************************
  *
@@ -130,7 +130,7 @@ void Tree_K::optimize()
   printf ("passes = %d\n",pass);
 }
 
-float * Tree_K::create_image (int n,int line_width)
+float * Tree_k::create_image (int n,int line_width)
 /**
  *********************************************************************
  *

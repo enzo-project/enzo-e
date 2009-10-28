@@ -1,23 +1,21 @@
 #include <stdio.h>
 #include "cello.h"
-#include "amr_node_k_2.hpp"
+#include "amr_node_k.hpp"
 #include <assert.h>
 
-Node_K::Node_K(int k, int level_adjust) 
+Node_k::Node_k(int k, int level_adjust) 
   : k_(k),
     level_adjust_(level_adjust)
 
 { 
-  ++Node_K::num_nodes_;
+  ++Node_k::num_nodes_;
 
-  neighbor_ = new Node_K * [k_];
-
+  neighbor_ = new Node_k * [k_];
   for (int ix=0; ix<k_; ix++) {
     neighbor_[ix] = NULL;
   }
 
-  child_    = new Node_K * [k_*k_];
-
+  child_    = new Node_k * [k_*k_];
   for (int i=0; i<k_*k_; i++) {
       child_[i] = NULL;
   }
@@ -25,21 +23,19 @@ Node_K::Node_K(int k, int level_adjust)
   parent_ = NULL;
 }
 
-@@@
-
 // Delete the node and all descendents
 
-Node_K::~Node_K() 
+Node_k::~Node_k() 
 { 
-  --Node_K::num_nodes_;
+  --Node_k::num_nodes_;
 
-  // recursively delete children
+  delete [] neighbor_;
 
-  for (int ix=0; ix<k_; ix++) {
-    for (int iy=0; iy<k_; iy++) {
-      if (child_[ix][iy]) delete child_[ix][iy];
-    }
+  for (int i=0; i<k_*k_; i++) {
+    delete child_[i];
   }
+
+  delete [] child_;
 
   // update neighbor's neighbors
 
@@ -56,36 +52,34 @@ Node_K::~Node_K()
   // Update parent's children
 
   if (parent_) {
-    for (int ix=0; ix<k_; ix++) {
-      for (int iy=0; iy<k_; iy++) {
-	if (parent_->child_[ix][iy] == this) parent_->child_[ix][iy] = NULL;
-      }
+    for (int i=0; i<k_*k_; i++) {
+      if (parent_->child_[i] == this) parent_->child_[i] = NULL;
     }
   }
 
   parent_ = NULL;
 }
 
-inline Node_K * Node_K::child (int ix, int iy) 
+inline Node_k * Node_k::child (int ix, int iy) 
 { 
-  return child_[ix][iy]; 
+  return child_[ix + k_*iy]; 
 }
 
-inline Node_K * Node_K::neighbor (face_type face) 
+inline Node_k * Node_k::neighbor (face_type face) 
 { 
   return neighbor_[face]; 
 }
 
-inline Node_K * Node_K::cousin (face_type face, int ix, int iy) 
+inline Node_k * Node_k::cousin (face_type face, int ix, int iy) 
 { 
-  if (neighbor_[face] && neighbor_[face]->child_[ix][iy]) {
-    return neighbor_[face]->child_[ix][iy];
+  if (neighbor_[face] && neighbor_[face]->child(ix,iy)) {
+    return neighbor_[face]->child(ix,iy);
   } else {
     return NULL;
   }
 }
 
-inline Node_K * Node_K::parent () 
+inline Node_k * Node_k::parent () 
 { 
   return parent_; 
 }
@@ -93,19 +87,19 @@ inline Node_K * Node_K::parent ()
 // Set two nodes to be neighbors.  Friend function since nodes may be NULL
 inline void make_neighbors 
 (
- Node_K * node_1, 
- Node_K * node_2, 
+ Node_k * node_1, 
+ Node_k * node_2, 
  face_type face_1
  )
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
-  if (node_2 != NULL) node_2->neighbor_[(face_1+2)%k_] = node_1;
+  if (node_2 != NULL) node_2->neighbor_[(face_1+2)%2] = node_1;
 }
 
 
 // Create 4 empty child nodes
 
-int Node_K::refine 
+int Node_k::refine 
 (
  const int * level_array, 
  int ndx,  int ndy,
@@ -123,10 +117,15 @@ int Node_K::refine
 
     int dx = (upx - lowx)/k_;
     int dy = (upy - lowy)/k_;
-    int ix2[3] = {lowx, lowx+dx, upx};
-    int iy2[3] = {lowy, lowy+dy, upy};
+    int * ixk = new int [k_+1];
+    int * iyk = new int [k_+1];
+    for (int i=0; i<=k_; i++) {
+      ixk[i] = lowx + i*dx;
+      iyk[i] = lowy + i*dy;
+    }
 
-    int depth_child[k_][k_] = {{0}};
+    int * depth_child = new int [k_*k_];
+    for (int i=0; i<k_*k_; i++) depth_child[i] = 0;
 
     if (full_nodes) {
 
@@ -149,8 +148,8 @@ int Node_K::refine
 
 	for (int ix=0; ix<k_; ix++) {
 	  for (int iy=0; iy<k_; iy++) {
-	    depth_child[ix][iy] = child_[ix][iy]->refine 
-	      (level_array,ndx,ndy,ix2[ix],ix2[ix+1],iy2[iy],iy2[iy+1],
+	    depth_child[ix+k_*iy] = child(ix,iy)->refine 
+	      (level_array,ndx,ndy,ixk[ix],ixk[ix+1],iyk[iy],iyk[iy+1],
 	       level+2,max_level,full_nodes);
 	  }
 	}
@@ -161,7 +160,9 @@ int Node_K::refine
       // Refine each child separately if any bits in the level_array
       // are in in them
 
-      bool refine_child[k_][k_] = {{false}};
+      bool * refine_child = new bool [k_*k_];
+      for (int i=0; i<k_*k_; i++) refine_child[i] = false;
+      
 
       // loop over children
 
@@ -170,11 +171,11 @@ int Node_K::refine
 
 	  // loop over values in the level array
 
-	  for (int ly=iy2[iy]; ly<iy2[iy+1]; ly++) {
-	    for (int lx=ix2[ix]; lx<ix2[ix+1]; lx++) {
+	  for (int ly=iyk[iy]; ly<iyk[iy+1]; ly++) {
+	    for (int lx=ixk[ix]; lx<ixk[ix+1]; lx++) {
 
 	      if (level_array[lx + ndx * ly] >= level) {
-		refine_child[ix][iy] = true;
+		refine_child[ix+k_*iy] = true;
 
 	      }
 	    }
@@ -187,11 +188,11 @@ int Node_K::refine
 
       for (int ix=0; ix<k_; ix++) {
 	for (int iy=0; iy<k_; iy++) {
-	  if (refine_child[ix][iy]) {
+	  if (refine_child[ix+k_*iy]) {
 	    create_child_(ix,iy);
 	    update_child_(ix,iy);
-	    depth_child[ix][iy] = child_[ix][iy]->refine 
-	      (level_array,ndx,ndy,ix2[ix],ix2[ix+1],iy2[iy],iy2[iy+1],
+	    depth_child[ix+k_*iy] = child(ix,iy)->refine 
+	      (level_array,ndx,ndy,ixk[ix],ixk[ix+1],iyk[iy],iyk[iy+1],
 	       level+2,max_level,full_nodes);
 	  }
 	}
@@ -201,7 +202,7 @@ int Node_K::refine
 
     for (int ix=0; ix<k_; ix++) {
       for (int iy=0; iy<k_; iy++) {
-	depth = (depth_child[ix][iy] > depth) ? depth_child[ix][iy] : depth;
+	depth = (depth_child[ix+k_*iy] > depth) ? depth_child[ix+k_*iy] : depth;
       }
     }
     depth += 2;
@@ -211,7 +212,7 @@ int Node_K::refine
   return depth;
 }
 
-void Node_K::create_children_()
+void Node_k::create_children_()
 {
   for (int ix=0; ix<k_; ix++) {
     for (int iy=0; iy<k_; iy++) {
@@ -220,7 +221,7 @@ void Node_K::create_children_()
   }
 }
 
-void Node_K::update_children_()
+void Node_k::update_children_()
 {
   for (int ix=0; ix<k_; ix++) {
     for (int iy=0; iy<k_; iy++) {
@@ -229,12 +230,12 @@ void Node_K::update_children_()
   }
 }
 
-void Node_K::create_child_(int ix, int iy)
+void Node_k::create_child_(int ix, int iy)
 {
-  child_[ix][iy] = new Node_K();
+  child_[ix + k_*iy] = new Node_k(k_);
 }
 
-void Node_K::update_child_ (int ix, int iy)
+void Node_k::update_child_ (int ix, int iy)
 {
   if (child(ix,iy)) {
 
@@ -242,7 +243,7 @@ void Node_K::update_child_ (int ix, int iy)
 
     // Right neighbor
 
-    if (ix < 3) {
+    if (ix < k_-1) {
       make_neighbors (child (ix,iy),child (ix+1,iy),R);
     } else {
       make_neighbors (child (ix,iy),cousin (R,0,iy),R);
@@ -253,12 +254,12 @@ void Node_K::update_child_ (int ix, int iy)
     if (ix > 0) {
       make_neighbors (child (ix,iy),child (ix-1,iy),L);
     } else {
-      make_neighbors (child (ix,iy),cousin (L,3,iy),L);
+      make_neighbors (child (ix,iy),cousin (L,k_-1,iy),L);
     }
 
     // Up neighbor
 
-    if (iy < 3) {
+    if (iy < k_-1) {
       make_neighbors (child (ix,iy),child (ix,iy+1),U);
     } else {
       make_neighbors (child (ix,iy),cousin (U,ix,0),U);
@@ -269,13 +270,13 @@ void Node_K::update_child_ (int ix, int iy)
     if (iy > 0) {
       make_neighbors (child (ix,iy),child (ix,iy-1),D);
     } else {
-      make_neighbors (child (ix,iy),cousin (D,ix,3),D);
+      make_neighbors (child (ix,iy),cousin (D,ix,k_-1),D);
     }
   }
 }
 
 // Perform a pass of trying to remove level-jumps 
-void Node_K::balance_pass(bool & refined_tree, bool full_nodes)
+void Node_k::balance_pass(bool & refined_tree, bool full_nodes)
 {
   if (full_nodes) {
 
@@ -289,10 +290,10 @@ void Node_K::balance_pass(bool & refined_tree, bool full_nodes)
       for (int i=0; i<k_; i++) {
 	
 	refine_node = refine_node ||
-	  ( cousin(R,0,i) && ( cousin(R,0,i)->child(0,0) ) ) ||
-	  ( cousin(L,3,i) && ( cousin(L,3,i)->child(0,0) ) ) ||
-	  ( cousin(U,i,0) && ( cousin(U,i,0)->child(0,0) ) ) ||
-	  ( cousin(D,i,3) && ( cousin(D,i,3)->child(0,0) ) );
+	  ( cousin(R,0,i)    && ( cousin(R,0,i)   ->any_children() ) ) ||
+	  ( cousin(L,k_-1,i) && ( cousin(L,k_-1,i)->any_children() ) ) ||
+	  ( cousin(U,i,0)    && ( cousin(U,i,0)   ->any_children() ) ) ||
+	  ( cousin(D,i,k_-1) && ( cousin(D,i,k_-1)->any_children() ) );
       }
 
       if (refine_node) {
@@ -318,57 +319,59 @@ void Node_K::balance_pass(bool & refined_tree, bool full_nodes)
     
     if (! all_children ()) {
 
-      bool refine_child[k_][k_] = {{false}};
+      bool * refine_child = new bool [k_*k_];
+      for (int i=0; i<k_*k_; i++) refine_child[i] = 0;
+      
 
       for (int ix=0; ix<k_; ix++) {
 	for (int iy=0; iy<k_; iy++) {
 	  if (! child(ix,iy)) {
 	    // right neighbor
-	    if (ix < 3 && child(ix+1,iy)) {
+	    if (ix < k_-1 && child(ix+1,iy)) {
 	      for (int k=0; k<k_; k++) {
-		refine_child[ix][iy] = refine_child[ix][iy] ||
+		refine_child[ix+k_*iy] = refine_child[ix+k_*iy] ||
 		  child(ix+1,iy)->child(0,k);
 	      }
-	    } else if (ix == 3 && cousin(R,0,iy)) {
+	    } else if (ix == k_-1 && cousin(R,0,iy)) {
 	      for (int k=0; k<k_; k++) {
-		refine_child[ix][iy] = refine_child[ix][iy] ||
+		refine_child[ix+k_*iy] = refine_child[ix+k_*iy] ||
 		  cousin(R,0,iy)->child(0,k);
 	      }
 	    }
 	    // left neighbor
 	    if (ix > 0 && child(ix-1,iy)) {
 	      for (int k=0; k<k_; k++) {
-		refine_child[ix][iy] = refine_child[ix][iy] ||
-		  child(ix-1,iy)->child(3,k);
+		refine_child[ix+k_*iy] = refine_child[ix+k_*iy] ||
+		  child(ix-1,iy)->child(k_-1,k);
 	      }
-	    } else if (ix == 0 && cousin(L,3,iy)) {
+	    } else if (ix == 0 && cousin(L,k_-1,iy)) {
 	      for (int k=0; k<k_; k++) {
-		refine_child[ix][iy] = refine_child[ix][iy] ||
-		  cousin(L,3,iy)->child(3,k);
+		refine_child[ix+k_*iy] = refine_child[ix+k_*iy] ||
+		  cousin(L,k_-1,iy)->child(k_-1,k);
 	      }
 	    }
 	    // up neighbor
-	    if (iy < 3 && child(ix,iy+1)) {
+	    if (iy < k_-1 && child(ix,iy+1)) {
 	      for (int k=0; k<k_; k++) {
-		refine_child[ix][iy] = refine_child[ix][iy] ||
+		refine_child[ix+k_*iy] = refine_child[ix+k_*iy] ||
 		  child(ix,iy+1)->child(k,0);
 	      }
-	    } else if (iy == 3 && cousin(U,ix,0)) {
+	    } else if (iy == k_-1 && cousin(U,ix,0)) {
 	      for (int k=0; k<k_; k++) {
-		refine_child[ix][iy] = refine_child[ix][iy] ||
+		refine_child[ix+k_*iy] = refine_child[ix+k_*iy] ||
 		  cousin(U,ix,0)->child(k,0);
 	      }
 	    }
 	    // down neighbor
 	    if (iy > 0 && child(ix,iy-1)) {
 	      for (int k=0; k<k_; k++) {
-		refine_child[ix][iy] = refine_child[ix][iy] ||
-		  child(ix,iy-1)->child(k,3);
+		refine_child[ix+k_*iy] = refine_child[ix+k_*iy] ||
+		  child(ix,iy-1)->child(k,k_-1);
 	      }
-	    } else if (iy == 0 && cousin(D,ix,3)) {
+	    } else if (iy == 0 && cousin(D,ix,k_-1)) {
 	      for (int k=0; k<k_; k++) {
-		refine_child[ix][iy] = refine_child[ix][iy] ||
-		  cousin(D,ix,3)->child(k,3);
+		refine_child[ix+k_*iy] = refine_child[ix+k_*iy] ||
+		  cousin(D,ix,k_-1)->child(k,k_-1);
 	      }
 	    }
 	  } // k
@@ -377,7 +380,7 @@ void Node_K::balance_pass(bool & refined_tree, bool full_nodes)
 
       for (int ix=0; ix<k_; ix++) {
 	for (int iy=0; iy<k_; iy++) {
-	  if (refine_child[ix][iy]) {
+	  if (refine_child[ix+k_*iy]) {
 	    create_child_(ix,iy); 
 	    update_child_(ix,iy);
 	    child(ix,iy)->balance_pass(refined_tree,full_nodes);
@@ -401,7 +404,7 @@ void Node_K::balance_pass(bool & refined_tree, bool full_nodes)
     //  }
 }
   // Perform a pass of trying to optimize uniformly-refined nodes
-void Node_K::optimize_pass(bool & refined_tree)
+void Node_k::optimize_pass(bool & refined_tree)
 {
 
   bool single_children = true;
@@ -410,7 +413,7 @@ void Node_K::optimize_pass(bool & refined_tree)
   for (int ix=0; ix<k_; ix++) {
     for (int iy=0; iy<k_; iy++) {
       single_children = single_children && 
-	child_[ix][iy] && (! child_[ix][iy]->any_children());
+	child(ix,iy) && (! child(ix,iy)->any_children());
     }
   }
 
@@ -431,13 +434,11 @@ void Node_K::optimize_pass(bool & refined_tree)
 
     // adjust effective resolution
 
-    level_adjust_ += 2 + child_[0][0]->level_adjust_; 
+    level_adjust_ += 2 + child(0,0)->level_adjust_; 
 
-    for (int ix=0; ix<k_; ix++) {
-      for (int iy=0; iy<k_; iy++) {
-	delete child_[ix][iy];
-	child_[ix][iy]=NULL;
-      }
+    for (int i=0; i<k_*k_; i++) {
+      delete child_[i];
+      child_[i] = NULL;
     }
 
     refined_tree = true;
@@ -448,8 +449,8 @@ void Node_K::optimize_pass(bool & refined_tree)
 
     for (int ix=0; ix<k_; ix++) {
       for (int iy=0; iy<k_; iy++) {
-	if (child_[ix][iy]) {
-	  child_[ix][iy]->optimize_pass(refined_tree);
+	if (child(ix,iy)) {
+	  child(ix,iy)->optimize_pass(refined_tree);
 	}
       }
     }
@@ -458,7 +459,7 @@ void Node_K::optimize_pass(bool & refined_tree)
 }
 
 // Fill the image region with values
-void Node_K::fill_image
+void Node_k::fill_image
 (
  float * image,
  int ndx,  int ndy,
@@ -511,18 +512,23 @@ void Node_K::fill_image
 
   int dx = (upx - lowx)/k_;
   int dy = (upy - lowy)/k_;
-  int ix2[5] = {lowx, lowx+dx, upx};
-  int iy2[5] = {lowy, lowy+dy, upy};
+
+  int * ixk = new int [k_+1];
+  int * iyk = new int [k_+1];
+  for (int i=0; i<=k_; i++) {
+    ixk[i] = lowx + i*dx;
+    iyk[i] = lowy + i*dy;
+  }
 
   for (int ix=0; ix<k_; ix++) {
     for (int iy=0; iy<k_; iy++) {
-      if (child_[ix][iy]) {
-	child_[ix][iy]->fill_image 
-	  (image,ndx,ndy,ix2[ix],ix2[ix+1], iy2[iy],iy2[iy+1], level + 1, num_levels,line_width);
+      if (child(ix,iy)) {
+	child(ix,iy)->fill_image 
+	  (image,ndx,ndy,ixk[ix],ixk[ix+1], iyk[iy],iyk[iy+1], level + 1, num_levels,line_width);
       }
     }
   }
 }
 
-int Node_K::num_nodes_ = 0;
+int Node_k::num_nodes_ = 0;
 
