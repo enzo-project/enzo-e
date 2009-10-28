@@ -11,7 +11,7 @@ Node_k::Node_k(int k, int level_adjust)
   ++Node_k::num_nodes_;
 
   neighbor_ = new Node_k * [k_];
-  for (int ix=0; ix<k_; ix++) {
+  for (int ix=0; ix<num_faces; ix++) {
     neighbor_[ix] = NULL;
   }
 

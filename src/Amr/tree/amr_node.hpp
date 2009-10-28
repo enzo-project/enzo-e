@@ -5,7 +5,8 @@ enum face_type {
   R = 0,
   U = 1,
   L = 2,
-  D = 3 };
+  D = 3,
+  num_faces };
 
 enum corner_type {
   UL = 0,
