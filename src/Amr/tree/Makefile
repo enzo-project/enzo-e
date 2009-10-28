@@ -1,7 +1,7 @@
 
 TOP     = ../../..
 PACKAGE = amr
-OBJS    = amr_tree4.o amr_node4.o amr_tree16.o amr_node16.o 
+OBJS    = amr_tree4.o amr_node4.o amr_tree16.o amr_node16.o amr_tree_k.o amr_node_k.o
 TESTS   = test_tree
 DIRS    = 
 
@@ -20,11 +20,13 @@ test_tree: test_tree.o
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/amr_node16.hpp $(INCLUDE)
-	ln -sf `pwd`/amr_node4.hpp $(INCLUDE)
 	ln -sf `pwd`/amr_node.hpp $(INCLUDE)
-	ln -sf `pwd`/amr_tree16.hpp $(INCLUDE)
 	ln -sf `pwd`/amr_tree4.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_node4.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_tree16.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_node16.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_tree_k.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_node_k.hpp $(INCLUDE)
 
 #-----------------------------------------------------------------------
 
