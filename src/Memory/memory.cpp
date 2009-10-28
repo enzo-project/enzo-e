@@ -1,18 +1,6 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2009 James Bordner
- * Copyright (C) 2009 Laboratory for Computational Astrophysics
- * Copyright (C) 2009 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
+#ifdef USE_MEMORY
 
 /** 
  *********************************************************************
@@ -502,3 +490,4 @@ void operator delete [] (void *p) throw ()
 
 }
 
+#endif

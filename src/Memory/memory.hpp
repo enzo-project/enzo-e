@@ -34,6 +34,9 @@
  *********************************************************************
  */
 
+typedef unsigned memory_group_handle;
+
+#ifdef USE_MEMORY
 
 //======================================================================
 // LOCAL DEFINES
@@ -45,19 +48,16 @@
 // TYPEDEFS
 //======================================================================
 
-typedef unsigned memory_group_handle;
-// typedef unsigned size_t;
-
 class Memory {
 
 /** 
  *********************************************************************
  *
  * @class     Memory
- * @brief     Brief description of the class
+ * @brief     Maintains memory allocation and deallocation statistics
  * @ingroup   Group 
  *
- * Detailed description of the class
+ * Maintains memory allocation and deallocation statistics
  *
  *********************************************************************
  */
@@ -174,5 +174,86 @@ private:
   static long long delete_calls_[MEMORY_MAX_NUM_GROUPS + 1];
 };
 
+#else /* USE_MEMORY */
+
+class Memory {
+
+/** 
+*********************************************************************
+*
+* @class     Memory
+* @brief     Dummy functions for not maintaining memory statistics
+* @ingroup   Group 
+*
+* Dummy functions for not maintaining memory statistics
+*
+*********************************************************************
+*/
+
+public:
+
+//-------------------------------------------------------------------
+// PUBLIC OPERATIONS
+//-------------------------------------------------------------------
+
+/// Initialize the memory component
+Memory() throw () {};
+
+/// Allocate memory
+static void * allocate ( size_t size ) { return 0; };
+
+/// De-allocate memory
+static void deallocate ( void * pointer ) {};
+
+/// Assign a name to a group
+static void new_group ( memory_group_handle, const char *) {};
+
+/// Begin allocating memory associated with the specified group
+static void begin_group ( memory_group_handle group_id ) {};
+
+/// End allocating memory associated with the specified group
+static void end_group ( memory_group_handle group_id ) {};
+
+/// Return name of the current group
+static const char * current_group () {return ""; };
+
+/// Return handle for the current group
+static memory_group_handle current_handle () {return 0; };
+
+/// Current number of bytes allocated
+static long long bytes ( memory_group_handle group_handle = 0 ) {return 0; };
+  
+/// Estimate of amount of local memory availables);
+static long long available ( memory_group_handle group_handle = 0 ) {return 0; };
+
+/// Estimate of used / available memory
+static float efficiency ( memory_group_handle group_handle = 0 ) {return 0; };
+
+/// Maximum number of bytes allocated
+static long long highest ( memory_group_handle group_handle = 0 ) {return 0; };
+
+
+/// Specify the maximum number of bytes to use
+static void set_limit ( long long size, memory_group_handle group_handle = 0)
+  {};
+
+/// Query the maximum number of bytes to use
+static long long get_limit ( memory_group_handle group_handle = 0 ) {return 0; };
+
+
+/// Return the number of calls to allocate for the group
+static int num_new ( memory_group_handle group_handle = 0 ) {return 0; };
+
+/// Return the number of calls to deallocate for the group
+static int num_delete ( memory_group_handle group_handle = 0 ) {return 0; };
+
+static void print () {};
+
+static void reset () {};
+
+static void set_active (bool is_active) {}
+};
+
+#endif
 
 #endif /* MEMORY_HPP */
