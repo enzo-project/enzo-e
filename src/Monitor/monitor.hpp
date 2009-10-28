@@ -69,10 +69,16 @@ public:
   {  timer_.start();};
 
   /// Print a message
-  void print (const char * message)
+  void print (std::string message)
   {
-    fprintf (fp_,"%6.1f %s\n",timer_.value(),message);
+    fprintf (fp_,"%6.1f %s\n",timer_.value(),message.c_str());
   };
+
+  /// Plot an array as a PNG file
+  void plot_png (std::string name, 
+		 Scalar * array, int nx, int ny,
+		 Scalar min, Scalar max, 
+		 const int * color_map, int color_length);
   
 private:
 

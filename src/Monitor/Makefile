@@ -1,10 +1,13 @@
 
 TOP     = ../..
 PACKAGE = monitor
-OBJS    = 
+OBJS    = monitor.o pngwriter.o
 TESTS   = 
 
 include $(TOP)/src/MAKE/Make.include
+
+
+CPPFLAGS_LOCAL = -DNO_FREETYPE
 
 #=======================================================================
 # TARGETS
@@ -18,6 +21,7 @@ include $(TOP)/src/MAKE/Make.include
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/monitor.hpp       $(INCLUDE)
+	ln -sf `pwd`/pngwriter.h       $(INCLUDE)
 
 #-----------------------------------------------------------------------
 
