@@ -10,11 +10,11 @@
 #include "memory.hpp"
 #include "monitor.hpp"
 #include "disk.hpp"
-#include "amr_node_k.hpp"
-#include "amr_tree_k.hpp"
+#include "amr_node2k.hpp"
+#include "amr_tree2k.hpp"
 
 const bool debug = false;
-const int  cell_size = 1;
+const int  cell_size = 32;
 const int  line_width = 1;
 const int  gray_threshold = 127;
 const int  max_level = 10;
@@ -119,7 +119,7 @@ void create_tree
 
   float * image;
 
-  Tree_k * tree = new Tree_k(2,k);
+  Tree2K * tree = new Tree2K(k);
   float mem_per_node;
 
   Memory::reset();
@@ -133,11 +133,11 @@ void create_tree
   //--------------------------------------------------
 
   Memory::set_active(true);
-  tree->refine(level_array,nx,ny,nz,max_level,full_nodes);
+  tree->refine(level_array,nx,ny,max_level,full_nodes);
   Memory::print();
   Memory::set_active(false);
 
-  mem_per_node = (float) Memory::bytes(0) / Node_k::num_nodes();
+  mem_per_node = (float) Memory::bytes(0) / Node2K::num_nodes();
 
   // Determine image size
   int image_size = cell_size + 2*line_width;
@@ -147,7 +147,7 @@ void create_tree
 
   printf ("\nINITIAL TREE\n");
   image = tree->create_image(image_size,line_width);
-  printf ("nodes      = %d\n",Node_k::num_nodes());
+  printf ("nodes      = %d\n",Node2K::num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
   write_image(image,image_size,image_size,name + "-0");
@@ -162,8 +162,8 @@ void create_tree
   tree->balance(full_nodes);
   Memory::print();
   Memory::set_active(false);
-  mem_per_node = (float) Memory::bytes(0) / Node_k::num_nodes();
-  printf ("nodes      = %d\n",Node_k::num_nodes());
+  mem_per_node = (float) Memory::bytes(0) / Node2K::num_nodes();
+  printf ("nodes      = %d\n",Node2K::num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
   image = tree->create_image(image_size,line_width);
@@ -181,8 +181,8 @@ void create_tree
   Memory::print();
   Memory::set_active(false);
 
-  mem_per_node = (float) Memory::bytes(0) / Node_k::num_nodes();
-  printf ("nodes      = %d\n",Node_k::num_nodes());
+  mem_per_node = (float) Memory::bytes(0) / Node2K::num_nodes();
+  printf ("nodes      = %d\n",Node2K::num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
   image = tree->create_image(image_size,line_width);

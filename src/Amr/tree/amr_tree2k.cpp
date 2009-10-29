@@ -3,7 +3,7 @@
 /** 
  *********************************************************************
  *
- * @file      amr_tree_k.cpp
+ * @file      amr_tree2k.cpp
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
@@ -38,22 +38,22 @@
 
 #include <stdio.h>
 #include "cello.h"
-#include "amr_node_k.hpp"
-#include "amr_tree_k.hpp"
+#include "amr_node2k.hpp"
+#include "amr_tree2k.hpp"
 
 const bool debug = false;
 
-Tree_k::Tree_k(int d, int r)
-  : d_(d),
+Tree2K::Tree2K(int r)
+  : r_(r),
     levels_(0),
-    root_(new Node_k(r))
+    root_(new Node2K(r))
 /**
  *********************************************************************
  *
  * @param         
  * @return        
  *
- * Create a Tree_k object
+ * Create a Tree2K object
  *
  *********************************************************************
  */
@@ -61,7 +61,7 @@ Tree_k::Tree_k(int d, int r)
 {
 }
 
-void Tree_k::refine
+void Tree2K::refine
 /**
  *********************************************************************
  *
@@ -74,17 +74,17 @@ void Tree_k::refine
  */
 (
  const int * level_array, 
- int ndx, int ndy, int ndz,
+ int ndx, int ndy,
  int max_level,
  bool is_full
  )
 {
   levels_ = root_->refine
-    (level_array,ndx,ndy,ndz,0,ndx,0,ndy,0,ndz,0,max_level,is_full);
+    (level_array,ndx,ndy,0,ndx,0,ndy,0,max_level,is_full);
   if (debug) printf ("%d\n",levels_);
 }
 
-void Tree_k::balance(bool is_full)
+void Tree2K::balance(bool is_full)
 /**
  *********************************************************************
  *
@@ -108,7 +108,7 @@ void Tree_k::balance(bool is_full)
   printf ("passes = %d\n",pass);
 }
 
-void Tree_k::optimize()
+void Tree2K::optimize()
 /**
  *********************************************************************
  *
@@ -131,7 +131,7 @@ void Tree_k::optimize()
   printf ("passes = %d\n",pass);
 }
 
-float * Tree_k::create_image (int n,int line_width)
+float * Tree2K::create_image (int n,int line_width)
 /**
  *********************************************************************
  *

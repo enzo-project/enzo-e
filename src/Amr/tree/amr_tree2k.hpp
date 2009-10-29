@@ -1,12 +1,12 @@
-#ifndef TREE_K_HPP
-#define TREE_K_HPP
+#ifndef TREE2K_HPP
+#define TREE2K_HPP
 
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 /** 
  *********************************************************************
  *
- * @file      amr_tree_k.hpp
+ * @file      amr_tree2k.hpp
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
@@ -20,14 +20,12 @@
  *********************************************************************
  */
 
-#define MAX_LEVELS 80
-
-class Tree_k {
+class Tree2K {
 
 /** 
  *********************************************************************
  *
- * @class     Tree_k
+ * @class     Tree2K
  * @brief     
  * @ingroup   GROUP
  *
@@ -42,14 +40,14 @@ public:
   // PUBLIC OPERATIONS
   //-------------------------------------------------------------------
 
-  Tree_k(int dimension, int k);
+  Tree2K(int k);
 
-  ~Tree_k() { delete root_; };
+  ~Tree2K() { delete root_; };
 
   /// Refine down to array
   void refine
     (const int * level_array, 
-     int ndx, int ndy, int ndz,
+     int ndx, int ndy,
      int max_level, 
      bool full_nodes = true
      );
@@ -84,9 +82,6 @@ private:
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
-  /// Dimension of the tree
-  int d_;
-
   /// Refinement factor
   int r_;
 
@@ -94,7 +89,7 @@ private:
   int levels_;
 
   /// Root of the tree
-  Node_k * root_;
+  Node2K * root_;
 
 
 };

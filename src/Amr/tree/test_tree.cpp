@@ -15,7 +15,7 @@
 #include "amr_tree16.hpp"
 
 const bool debug = false;
-const int  cell_size = 1;
+const int  cell_size = 32;
 const int  line_width = 1;
 const int  gray_threshold = 127;
 const int  max_level = 10;

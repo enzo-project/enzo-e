@@ -1,13 +1,13 @@
-#ifndef NODE_K_HPP
-#define NODE_K_HPP
+#ifndef NODE2K_HPP
+#define NODE2K_HPP
 
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 /** 
  *********************************************************************
  *
- * @file      amr_node-k.hpp
- * @brief     Node class for k^2-trees
+ * @file      amr_node2k.hpp
+ * @brief     Node class for 2D k-trees
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Tue Oct 27 12:32:07 PDT 2009
  * @bug       
@@ -24,18 +24,15 @@
 
 #include "cello.h"
 
-
 enum face_type {
   XM = 0,
   XP = 1,
   YM = 2,
-  YP = 3,
-  ZM = 4,
-  ZP = 5};
+  YP = 3};
 
-class Tree_k;
+class Tree2K;
 
-class Node_k {
+class Node2K {
 
 /** 
  *********************************************************************
@@ -56,36 +53,35 @@ public:
   //-------------------------------------------------------------------
 
   /// Create a new leaf node
-  Node_k( int k, int level_adjust = 0 );
+  Node2K( int k );
 
   /// Delete a node and all descedents
-  ~Node_k();
+  ~Node2K();
 
   /// return the specified child
-  Node_k * child (int ix, int iy, int iz=0);
+  Node2K * child (int ix, int iy);
 
   /// return the specified neighbor
-  Node_k * neighbor (face_type face);
+  Node2K * neighbor (face_type face);
 
   /// make the two nodes neighbors.  friend function since either can be NULL
   friend void make_neighbors 
-  (Node_k * node_1, Node_k * node_2, face_type face_1);
+  (Node2K * node_1, Node2K * node_2, face_type face_1);
 
   /// get the child's cousin
-  Node_k * cousin (face_type face, int ix, int iy, int iz=0);
+  Node2K * cousin (face_type face, int ix, int iy);
 
   /// return the parent
-  Node_k * parent ();
+  Node2K * parent ();
 
   /// Refine if any elements in the array are true and recurse
   /// return the level
   int refine 
     (
      const int * level_array, 
-     int ndx,  int ndy, int ndz,
+     int ndx,  int ndy,
      int lowx, int upx,
      int lowy, int upy,
-     int lowz, int upz,
      int level, 
      int max_level,
      bool is_full = true
@@ -150,27 +146,22 @@ private:
   void delete_children_();
 
   /// Update neighbors for a child
-  void update_child_ (int ix, int iy, int iz=0);
+  void update_child_ (int ix, int iy);
 
   /// Create a child
-  void create_child_ (int ix, int iy, int iz=0);
+  void create_child_ (int ix, int iy);
 
   /// Index into child[] for ix,iy, iz
-  int index_(int ix, int iy, int iz=0) { 
-    return 
-      (d_ == 2 ? 
-       ix + k_*iy : 
-       ix + k_*(iy + k_*iz)); 
-  };
+  int index_(int ix, int iy) { return (ix + k_*iy); };
 
   /// Return index of opposite face
   int opposite_face_ (face_type face) { return int(face) ^ 1; };
 
   /// Return number of faces
-  int num_faces_() { return (d_ == 2) ? 4 : 6; };
+  int num_faces_() { return 4; };
 
   /// Return maximum number of children
-  int num_children_() { return (d_ == 2) ? k_*k_ : k_*k_*k_; };
+  int num_children_() { return k_*k_; };
 
   /// Return the level increment log2(k_)
   int level_increment_() { 
@@ -180,7 +171,7 @@ private:
     case 8:  return ( 3 ); break;
     case 16: return ( 4 ); break;
     default:
-      fprintf (stderr,"Invalid k=%d for Node_k\n",k_);
+      fprintf (stderr,"Invalid k=%d for Node2K\n",k_);
       exit(1);
       break;
     }
@@ -195,20 +186,14 @@ private:
   /// Number of cells per node axis, e.g. 2, 4, etc.
   char k_;
 
-  /// Dimension of the node
-  char d_;
-
-  /// Level increment: dl_ = log2(k_)
-  char dl_;
-
   /// Child nodes in edge_type x edge_type ordering
-  Node_k ** child_;
+  Node2K ** child_;
 
   /// Neighbor nodes in edge_type ordering
-  Node_k ** neighbor_;
+  Node2K ** neighbor_;
 
   /// Parent node
-  Node_k * parent_;
+  Node2K * parent_;
 
   /// Relative level for coalesced nodes
   int level_adjust_;
