@@ -53,7 +53,7 @@ public:
   //-------------------------------------------------------------------
 
   /// Create a new leaf node
-  Node2K( int k );
+  Node2K( int k,  int level_adjust = 0  );
 
   /// Delete a node and all descedents
   ~Node2K();

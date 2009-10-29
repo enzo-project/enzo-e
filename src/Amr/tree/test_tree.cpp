@@ -154,7 +154,6 @@ int main(int argc, char ** argv)
   delete tree4;
 
   // Create a new tree and refine to the image with non-full nodes
-  exit(1);
   // 2
 
   tree4 = new Tree4;

@@ -42,12 +42,11 @@ int main(int argc, char ** argv)
 
   int k,d;
   create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f1", true);
-  exit(1);
   create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f0", false);
   create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f1", true);
   create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f0", false);
-  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree8-f1", true);
-  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree8-f0", false);
+//   create_tree (level_array, nx, ny, nz, k=8, d=2, "tree8-f1", true);
+//   create_tree (level_array, nx, ny, nz, k=8, d=2, "tree8-f0", false);
 
 }
 // read in the gimp-generated image data into a level array
@@ -106,7 +105,7 @@ void write_image(float * image, int nx, int ny, std::string filename)
     if (max < image[i]) max = image[i];
   }
   int color_map[] = {0,0,0,1,1,1};
-  monitor.plot_png ((filename+".png").c_str(),image,nx,ny,min,max,color_map, 2);
+  //  monitor.plot_png ((filename+".png").c_str(),image,nx,ny,min,max,color_map, 2);
 
 }
 

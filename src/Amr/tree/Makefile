@@ -18,7 +18,7 @@ include $(TOP)/src/MAKE/Make.include
 test_tree: test_tree.o $(OBJS)
 	$(CXX) -o test_tree test_tree.o $(LIB)
 test_tree_k: test_tree_k.o $(OBJS)
-	$(CXX) -o test_tree_k test_tree_k.o -lpng $(LIB)
+	$(CXX) -o test_tree_k test_tree_k.o $(LIB) #-lpng 
 
 #-----------------------------------------------------------------------
 

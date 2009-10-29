@@ -5,8 +5,9 @@
 
 #include "amr_node2k.hpp"
 
-Node2K::Node2K(int k) 
-  : k_(k)
+Node2K::Node2K(int k, int level_adjust) 
+  : level_adjust_(level_adjust),
+    k_(k)
 
 { 
   ++Node2K::num_nodes_;
@@ -61,7 +62,7 @@ Node2K::~Node2K()
 
 inline Node2K * Node2K::child (int ix, int iy) 
 { 
-  return child_[index_(ix,iy)]; 
+  return child_[index_(ix,iy)];
 }
 
 inline Node2K * Node2K::neighbor (face_type face) 
@@ -384,19 +385,19 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
 	  int i = index_(ix,iy);
 
+	  bool r = refine_child[i];
+
 	  if (! child(ix,iy)) {
 
 	    // XM-face neighbor
 
 	    if (ix > 0 && child(ix-1,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		refine_child[i] = refine_child[i] ||
-		  child(ix-1,iy)->child(nx-1,ky);
+		r = r || child(ix-1,iy)->child(nx-1,ky);
 	      }
 	    } else if (ix == 0 && cousin(XM,nx-1,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		refine_child[i] = refine_child[i] ||
-		  cousin(XM,nx-1,iy)->child(nx-1,ky);
+		r = r || cousin(XM,nx-1,iy)->child(nx-1,ky);
 	      }
 	    }
 
@@ -404,13 +405,11 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
 	    if (ix < nx-1 && child(ix+1,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		refine_child[i] = refine_child[i] ||
-		  child(ix+1,iy)->child(0,ky);
+		r = r || child(ix+1,iy)->child(0,ky);
 	      }
 	    } else if (ix == nx-1 && cousin(XP,0,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		refine_child[i] = refine_child[i] ||
-		  cousin(XP,0,iy)->child(0,ky);
+		r = r || cousin(XP,0,iy)->child(0,ky);
 	      }
 	    }
 
@@ -418,13 +417,11 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
 	    if (iy > 0 && child(ix,iy-1)) {
 	      for (int kx=0; kx<nx; kx++) {
-		refine_child[i] = refine_child[i] ||
-		  child(ix,iy-1)->child(kx,ny-1);
+		r = r || child(ix,iy-1)->child(kx,ny-1);
 	      }
 	    } else if (iy == 0 && cousin(YM,ix,ny-1)) {
 	      for (int kx=0; kx<nx; kx++) {
-		refine_child[i] = refine_child[i] ||
-		  cousin(XM,ix,ny-1)->child(kx,ny-1);
+		r = r || cousin(YM,ix,ny-1)->child(kx,ny-1);
 	      }
 	    }
 
@@ -432,17 +429,17 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
 	    if (iy < ny-1 && child(ix,iy+1)) {
 	      for (int kx=0; kx<nx; kx++) {
-		refine_child[i] = refine_child[i] ||
-		  child(ix,iy+1)->child(kx,0);
+		r = r || child(ix,iy+1)->child(kx,0);
 	      }
 	    } else if (iy == ny-1 && cousin(YP,ix,0)) {
 	      for (int kx=0; kx<nx; kx++) {
-		refine_child[i] = refine_child[i] ||
-		  cousin(YP,ix,0)->child(kx,0);
+		r = r || cousin(YP,ix,0)->child(kx,0);
 	      }
 	    }
 
 	  } // if ! child
+
+	  refine_child[i] = r;
 
 	} // ix
       } // iy

@@ -446,6 +446,8 @@ void Node_k::balance_pass(bool & refined_tree, bool full_nodes)
 
 	    int i = index_(ix,iy,iz);
 
+	    bool r = refine_child[i];
+
 	    if (! child(ix,iy,iz)) {
 
 	      // XM-face neighbor
@@ -453,15 +455,13 @@ void Node_k::balance_pass(bool & refined_tree, bool full_nodes)
 	      if (ix > 0 && child(ix-1,iy,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int ky=0; ky<ny; ky++) {
-		    refine_child[i] = refine_child[i] ||
-		      child(ix-1,iy,iz)->child(nx-1,ky,kz);
+		    r = r || child(ix-1,iy,iz)->child(nx-1,ky,kz);
 		  }
 		}
 	      } else if (ix == 0 && cousin(XM,nx-1,iy,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int ky=0; ky<ny; ky++) {
-		    refine_child[i] = refine_child[i] ||
-		      cousin(XM,nx-1,iy,iz)->child(nx-1,ky,kz);
+		    r = r || cousin(XM,nx-1,iy,iz)->child(nx-1,ky,kz);
 		  }
 		}
 	      }
@@ -472,16 +472,14 @@ void Node_k::balance_pass(bool & refined_tree, bool full_nodes)
 		for (int kz=0; kz<nz; kz++) {
 		  for (int ky=0; ky<ny; ky++) {
 		    int i = index_(ix,iy,iz);
-		    refine_child[i] = refine_child[i] ||
-		      child(ix+1,iy,iz)->child(0,ky,kz);
+		    r = r || child(ix+1,iy,iz)->child(0,ky,kz);
 		  }
 		}
 	      } else if (ix == nx-1 && cousin(XP,0,iy,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int ky=0; ky<ny; ky++) {
 		    int i = index_(ix,iy,iz);
-		    refine_child[i] = refine_child[i] ||
-		      cousin(XP,0,iy,iz)->child(0,ky,kz);
+		    r = r || cousin(XP,0,iy,iz)->child(0,ky,kz);
 		  }
 		}
 	      }
@@ -491,15 +489,13 @@ void Node_k::balance_pass(bool & refined_tree, bool full_nodes)
 	      if (iy > 0 && child(ix,iy-1,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int kx=0; kx<nx; kx++) {
-		    refine_child[i] = refine_child[i] ||
-		      child(ix,iy-1,iz)->child(kx,ny-1,kz);
+		    r = r || child(ix,iy-1,iz)->child(kx,ny-1,kz);
 		  }
 		}
 	      } else if (iy == 0 && cousin(YM,ix,ny-1,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int kx=0; kx<nx; kx++) {
-		    refine_child[i] = refine_child[i] ||
-		      cousin(XM,ix,ny-1,iz)->child(kx,ny-1,kz);
+		    r = r || cousin(YM,ix,ny-1,iz)->child(kx,ny-1,kz);
 		  }
 		}
 	      }
@@ -509,16 +505,14 @@ void Node_k::balance_pass(bool & refined_tree, bool full_nodes)
 	      if (iy < ny-1 && child(ix,iy+1,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int kx=0; kx<nx; kx++) {
-		    refine_child[i] = refine_child[i] ||
-		      child(ix,iy+1,iz)->child(kx,0,kz);
+		    r = r || child(ix,iy+1,iz)->child(kx,0,kz);
 		  }
 		}
 
 	      } else if (iy == ny-1 && cousin(YP,ix,0,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int kx=0; kx<nx; kx++) {
-		    refine_child[i] = refine_child[i] ||
-		      cousin(YP,ix,0,iz)->child(kx,0,kz);
+		    r = r || cousin(YP,ix,0,iz)->child(kx,0,kz);
 		  }
 		}
 	      }
@@ -530,15 +524,13 @@ void Node_k::balance_pass(bool & refined_tree, bool full_nodes)
 		if (iz > 0 && child(ix,iy,iz-1)) {
 		  for (int ky=0; ky<ny; ky++) {
 		    for (int kx=0; kx<nx; kx++) {
-		      refine_child[i] = refine_child[i] ||
-			child(ix,iy,iz-1)->child(kx,ky,nz-1);
+		      r = r || child(ix,iy,iz-1)->child(kx,ky,nz-1);
 		    }
 		  }
 		} else if (iz == 0 && cousin(ZM,ix,iy,nz-1)) {
 		  for (int ky=0; ky<ny; ky++) {
 		    for (int kx=0; kx<nx; kx++) {
-		      refine_child[i] = refine_child[i] ||
-			cousin(ZM,ix,iy,nz-1)->child(kx,ky,nz-1);
+		      r = r || cousin(ZM,ix,iy,nz-1)->child(kx,ky,nz-1);
 		    }
 		  }
 		}
@@ -548,16 +540,14 @@ void Node_k::balance_pass(bool & refined_tree, bool full_nodes)
 		if (iz < nz-1 && child(ix,iy,iz+1)) {
 		  for (int ky=0; ky<ny; ky++) {
 		    for (int kx=0; kx<nx; kx++) {
-		      refine_child[i] = refine_child[i] ||
-			child(ix,iy,iz+1)->child(kx,ky,0);
+		      r = r || child(ix,iy,iz+1)->child(kx,ky,0);
 		    }
 		  }
 
 		} else if (iz == nz-1 && cousin(ZP,ix,iy,0)) {
 		  for (int ky=0; ky<ny; ky++) {
 		    for (int kx=0; kx<nx; kx++) {
-		      refine_child[i] = refine_child[i] ||
-			cousin(ZP,ix,iy,0)->child(kx,ky,0);
+		      r = r || cousin(ZP,ix,iy,0)->child(kx,ky,0);
 		    }
 		  }
 		}

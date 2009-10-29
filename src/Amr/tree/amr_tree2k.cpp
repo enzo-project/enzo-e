@@ -144,7 +144,7 @@ float * Tree2K::create_image (int n,int line_width)
  */
 {
   float * image = new float [n*n];
-  
+
   root_->fill_image(image,n,n,0,n-1,0,n-1,0,levels_,line_width);
   return image;
 }
