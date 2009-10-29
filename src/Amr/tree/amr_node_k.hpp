@@ -24,8 +24,14 @@
 
 #include "cello.h"
 
-#include "amr_node.hpp"
 
+enum face_type {
+  XM = 0,
+  XP = 1,
+  YM = 2,
+  YP = 3,
+  ZM = 4,
+  ZP = 5};
 
 class Tree_k;
 
@@ -56,7 +62,7 @@ public:
   ~Node_k();
 
   /// return the specified child
-  Node_k * child (int ix, int iy);
+  Node_k * child (int ix, int iy, int iz=0);
 
   /// return the specified neighbor
   Node_k * neighbor (face_type face);
@@ -66,7 +72,7 @@ public:
   (Node_k * node_1, Node_k * node_2, face_type face_1);
 
   /// get the child's cousin
-  Node_k * cousin (face_type face, int ix, int iy);
+  Node_k * cousin (face_type face, int ix, int iy, int iz=0);
 
   /// return the parent
   Node_k * parent ();
@@ -76,9 +82,10 @@ public:
   int refine 
     (
      const int * level_array, 
-     int ndx,  int ndy,
-     int lowx, int upx,  
+     int ndx,  int ndy, int ndz,
+     int lowx, int upx,
      int lowy, int upy,
+     int lowz, int upz,
      int level, 
      int max_level,
      bool is_full = true
@@ -143,16 +150,41 @@ private:
   void delete_children_();
 
   /// Update neighbors for a child
-  void update_child_ (int ix, int iy);
+  void update_child_ (int ix, int iy, int iz=0);
 
   /// Create a child
-  void create_child_ (int ix, int iy);
+  void create_child_ (int ix, int iy, int iz=0);
 
-  /// Index into child[] for ix,iy
-  int index_(int ix, int iy) { return ix + k_*iy; };
+  /// Index into child[] for ix,iy, iz
+  int index_(int ix, int iy, int iz=0) { 
+    return 
+      (d_ == 2 ? 
+       ix + k_*iy : 
+       ix + k_*(iy + k_*iz)); 
+  };
 
   /// Return index of opposite face
-  int opposite_face_ (int face) { return (face + 2) % 4; };
+  int opposite_face_ (face_type face) { return int(face) ^ 1; };
+
+  /// Return number of faces
+  int num_faces_() { return (d_ == 2) ? 4 : 6; };
+
+  /// Return maximum number of children
+  int num_children_() { return (d_ == 2) ? k_*k_ : k_*k_*k_; };
+
+  /// Return the level increment log2(k_)
+  int level_increment_() { 
+    switch (k_) {
+    case 2:  return ( 1 ); break;
+    case 4:  return ( 2 ); break;
+    case 8:  return ( 3 ); break;
+    case 16: return ( 4 ); break;
+    default:
+      fprintf (stderr,"Invalid k=%d for Node_k\n",k_);
+      exit(1);
+      break;
+    }
+  }
 
 private:
 
@@ -160,8 +192,11 @@ private:
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
-  /// Number of cells per node axis, e.g. 2 or 4
+  /// Number of cells per node axis, e.g. 2, 4, etc.
   char k_;
+
+  /// Dimension of the node
+  char d_;
 
   /// Level increment: dl_ = log2(k_)
   char dl_;

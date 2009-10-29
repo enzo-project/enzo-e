@@ -43,9 +43,10 @@
 
 const bool debug = false;
 
-Tree_k::Tree_k(int k)
-  : levels_(0),
-    root_(new Node_k(k))
+Tree_k::Tree_k(int d, int r)
+  : d_(d),
+    levels_(0),
+    root_(new Node_k(r))
 /**
  *********************************************************************
  *
@@ -73,13 +74,13 @@ void Tree_k::refine
  */
 (
  const int * level_array, 
- int ndx, int ndy, 
+ int ndx, int ndy, int ndz,
  int max_level,
  bool is_full
  )
 {
   levels_ = root_->refine
-    (level_array,ndx,ndy,0,ndx,0,ndy,0,max_level,is_full);
+    (level_array,ndx,ndy,ndz,0,ndx,0,ndy,0,ndz,0,max_level,is_full);
   if (debug) printf ("%d\n",levels_);
 }
 

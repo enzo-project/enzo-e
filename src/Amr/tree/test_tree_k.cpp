@@ -26,7 +26,7 @@ void write_image(float * image, int nx, int ny, std::string filename);
 void create_tree 
 (
  int * level_array,
- int nx, int ny, 
+ int nx, int ny, int nz,
  int k,  int d, 
  std::string name, 
  bool full_nodes
@@ -36,16 +36,17 @@ int main(int argc, char ** argv)
 {
   // read in the gimp image into level
 
-  int nx,ny;
+  int nx,ny,nz;
   int * level_array = create_level_array(&nx,&ny,max_level);
+  nz = 1;
 
   int k,d;
-  create_tree (level_array, nx, ny, k=2, d=2, "tree2-f1", true);
-  create_tree (level_array, nx, ny, k=2, d=2, "tree2-f0", false);
-  create_tree (level_array, nx, ny, k=4, d=2, "tree4-f1", true);
-  create_tree (level_array, nx, ny, k=4, d=2, "tree4-f0", false);
-  create_tree (level_array, nx, ny, k=8, d=2, "tree8-f1", true);
-  create_tree (level_array, nx, ny, k=8, d=2, "tree8-f0", false);
+  create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f1", true);
+  create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f0", false);
+  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f1", true);
+  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f0", false);
+  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree8-f1", true);
+  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree8-f0", false);
 
 }
 // read in the gimp-generated image data into a level array
@@ -109,7 +110,7 @@ void write_image(float * image, int nx, int ny, std::string filename)
 void create_tree 
 (
  int * level_array, 
- int nx, int ny, 
+ int nx, int ny, int nz,
  int k,  int d, 
  std::string name, 
  bool full_nodes
@@ -118,7 +119,7 @@ void create_tree
 
   float * image;
 
-  Tree_k * tree = new Tree_k(k);
+  Tree_k * tree = new Tree_k(2,k);
   float mem_per_node;
 
   Memory::reset();
@@ -132,7 +133,7 @@ void create_tree
   //--------------------------------------------------
 
   Memory::set_active(true);
-  tree->refine(level_array,nx,ny,max_level,full_nodes);
+  tree->refine(level_array,nx,ny,nz,max_level,full_nodes);
   Memory::print();
   Memory::set_active(false);
 

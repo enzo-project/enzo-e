@@ -42,14 +42,14 @@ public:
   // PUBLIC OPERATIONS
   //-------------------------------------------------------------------
 
-  Tree_k(int k);
+  Tree_k(int dimension, int k);
 
   ~Tree_k() { delete root_; };
 
   /// Refine down to array
   void refine
     (const int * level_array, 
-     int ndx, int ndy, 
+     int ndx, int ndy, int ndz,
      int max_level, 
      bool full_nodes = true
      );
@@ -84,7 +84,16 @@ private:
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
+  /// Dimension of the tree
+  int d_;
+
+  /// Refinement factor
+  int r_;
+
+  /// Number of levels in the tree
   int levels_;
+
+  /// Root of the tree
   Node_k * root_;
 
 
