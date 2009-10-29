@@ -14,7 +14,7 @@
 #include "amr_tree2k.hpp"
 
 const bool debug = false;
-const int  cell_size = 32;
+const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
 const int  max_level = 10;
@@ -42,6 +42,7 @@ int main(int argc, char ** argv)
 
   int k,d;
   create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f1", true);
+  exit(1);
   create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f0", false);
   create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f1", true);
   create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f0", false);
@@ -87,6 +88,9 @@ int * create_level_array (int * nx, int * ny, int max_levels)
 
 void write_image(float * image, int nx, int ny, std::string filename)
 {
+  if (nx > 8192 || ny > 8192) {
+    printf ("%s:%d (nx,ny) = (%d,%d)\n",__FILE__,__LINE__,nx,ny);
+  }
   Hdf5 hdf5;
   hdf5.file_open((filename+".hdf5").c_str(),"w");
   hdf5.dataset_open_write ("tree_image",nx,ny,1);
@@ -150,7 +154,7 @@ void create_tree
   printf ("nodes      = %d\n",Node2K::num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
-  write_image(image,image_size,image_size,name + "-0");
+  write_image(image,image_size,image_size,name + "-0-new");
   delete [] image;
 
   //--------------------------------------------------
@@ -167,7 +171,7 @@ void create_tree
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
   image = tree->create_image(image_size,line_width);
-  write_image(image,image_size,image_size,name + "-1");
+  write_image(image,image_size,image_size,name + "-1-new");
   delete image;
 
 
@@ -186,7 +190,7 @@ void create_tree
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
   image = tree->create_image(image_size,line_width);
-  write_image(image,image_size,image_size,name + "-2");
+  write_image(image,image_size,image_size,name + "-2-new");
   delete image;
 
   delete tree;

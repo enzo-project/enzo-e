@@ -155,7 +155,7 @@ int Node_k::refine
       for (int iz=lowz; iz<upz && !refine_node; iz++) {
 	for (int iy=lowy; iy<upy && !refine_node; iy++) {
 	  for (int ix=lowx; ix<upx && !refine_node; ix++) {
-	    if (level_array[index_(ix,iy,iz)] >= level) refine_node = true;
+	    if (level_array[ix + ndx*(iy + ndy*iz)] >= level) refine_node = true;
 	  }
 	}
       }

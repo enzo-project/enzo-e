@@ -1,6 +1,8 @@
 #/bin/csh -f
 
 set run = 0
+set old = 1
+set new = 1
 
 set colormap_dir = /usr/share/h5utils/colormaps/
 
@@ -14,16 +16,33 @@ if ($run == 1) then
   echo "done"
 endif
 
+# new
 
-foreach tree (2 4 8)
-  foreach full (0 1)
-    foreach type (0 1 2)
-      set file = "tree$tree-f$full-$type.hdf5"
-      echo "$file"
-      h5topng -c $colormap_dir/$color $file
-    end
-  end
-end
+if ($new == 1) then
+   foreach tree (2 4 8)
+     foreach full (0 1)
+       foreach type (0 1 2)
+         set file = "tree$tree-f$full-$type-new.hdf5"
+         echo "$file"
+         h5topng -c $colormap_dir/$color $file
+       end
+     end
+   end
+endif
+
+# old
+
+if ($new == 1) then
+   foreach tree (2 4 8)
+     foreach full (0 1)
+       foreach type (0 1 2)
+         set file = "tree$tree-f$full-$type-old.hdf5"
+         echo "$file"
+         h5topng -c $colormap_dir/$color $file
+       end
+     end
+   end
+endif
 
 
 

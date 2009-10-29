@@ -1,7 +1,9 @@
 #include <stdio.h>
-#include "cello.h"
-#include "amr_node2k.hpp"
 #include <assert.h>
+
+#include "cello.h"
+
+#include "amr_node2k.hpp"
 
 Node2K::Node2K(int k) 
   : k_(k)
@@ -33,6 +35,7 @@ Node2K::~Node2K()
   }
 
   delete [] child_;
+  child_ = NULL;
 
   // update neighbor's neighbors
 
@@ -43,6 +46,7 @@ Node2K::~Node2K()
   }
 
   delete [] neighbor_;
+  neighbor_ = NULL;
 
   // Update parent's children
 
@@ -87,9 +91,11 @@ inline void make_neighbors
  face_type face_1
  )
 {
-  face_type face_2 = face_type(node_2->opposite_face_(face_1));
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
-  if (node_2 != NULL) node_2->neighbor_[face_2] = node_1;
+  if (node_2 != NULL) {
+      face_type face_2 = face_type(node_2->opposite_face_(face_1));
+      node_2->neighbor_[face_2] = node_1;
+  }
 }
 
 
@@ -108,6 +114,7 @@ int Node2K::refine
 {
 
   int depth = 0;
+  int increment = level_increment_();
 
   if ( level < max_level && 
        lowx < upx-1 && 
@@ -140,7 +147,7 @@ int Node2K::refine
 
       for (int iy=lowy; iy<upy && !refine_node; iy++) {
 	for (int ix=lowx; ix<upx && !refine_node; ix++) {
-	  if (level_array[index_(ix,iy)] >= level) refine_node = true;
+	  if (level_array[ix + ndx*iy] >= level) refine_node = true;
 	}
       }
 
@@ -151,8 +158,6 @@ int Node2K::refine
 	create_children_();
 
 	update_children_();
-
-	int increment = level_increment_();
 
 	for (int iy=0; iy<k_; iy++) {
 	  for (int ix=0; ix<k_; ix++) {
@@ -173,7 +178,10 @@ int Node2K::refine
       // are in in them
 
       bool * refine_child = new bool [num_children_()];
-      for (int i=0; i<num_children_(); i++) refine_child[i] = false;
+
+      for (int i=0; i<num_children_(); i++) {
+	refine_child[i] = false;
+      }
       
 
       // loop over children
@@ -181,14 +189,16 @@ int Node2K::refine
       for (int iy=0; iy<k_; iy++) {
 	for (int ix=0; ix<k_; ix++) {
 
+	  int i = index_(ix,iy);
+
 	  // loop over values in the level array
 
-	  for (int ly=iyk[iy]; ly<iyk[iy+1]; ly++) {
-	    for (int lx=ixk[ix]; lx<ixk[ix+1]; lx++) {
+	  for (int ly=iyk[iy]; ly<iyk[iy+1] && ! refine_child[i]; ly++) {
+	    for (int lx=ixk[ix]; lx<ixk[ix+1] && ! refine_child[i]; lx++) {
 
 	      int l = lx + ndx * ly;
 	      if (level_array[l] >= level) {
-		refine_child[index_(ix,iy)] = true;
+		refine_child[i] = true;
 	      }
 
 	    }
@@ -199,15 +209,15 @@ int Node2K::refine
 
       // refine each child if needed
 
-      int increment = level_increment_();
-
       for (int iy=0; iy<k_; iy++) {
 	for (int ix=0; ix<k_; ix++) {
 
-	  if (refine_child[index_(ix,iy)]) {
+	  int i = index_(ix,iy);
+
+	  if (refine_child[i]) {
 	    create_child_(ix,iy);
 	    update_child_(ix,iy);
-	    depth_child[index_(ix,iy)] = child(ix,iy)->refine 
+	    depth_child[i] = child(ix,iy)->refine 
 	      (level_array,
 	       ndx,ndy,
 	       ixk[ix],ixk[ix+1],
@@ -222,14 +232,15 @@ int Node2K::refine
 
     // determine depth as depth of deepest child + level increment
 
-  for (int iy=0; iy<k_; iy++) {
-    for (int ix=0; ix<k_; ix++) {
-      depth = (depth_child[index_(ix,iy)] > depth) ? 
-	depth_child[index_(ix,iy)] : depth;
+    for (int iy=0; iy<k_; iy++) {
+      for (int ix=0; ix<k_; ix++) {
+	int i = index_(ix,iy);
+	depth = (depth_child[i] > depth) ? 
+	  depth_child[i] : depth;
+      }
     }
-  }
 
-    depth += level_increment_();
+    depth += increment;
 
   } // if not at bottom of recursion
 
@@ -365,7 +376,7 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
       bool * refine_child = new bool [num_children_()];
 
       for (int i=0; i<num_children_(); i++) {
-	refine_child[i] = 0;
+	refine_child[i] = false;
       }
 
       for (int iy=0; iy<ny; iy++) {
@@ -393,13 +404,11 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
 	    if (ix < nx-1 && child(ix+1,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		int i = index_(ix,iy);
 		refine_child[i] = refine_child[i] ||
 		  child(ix+1,iy)->child(0,ky);
 	      }
 	    } else if (ix == nx-1 && cousin(XP,0,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		int i = index_(ix,iy);
 		refine_child[i] = refine_child[i] ||
 		  cousin(XP,0,iy)->child(0,ky);
 	      }

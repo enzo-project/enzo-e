@@ -1,7 +1,9 @@
 #include <stdio.h>
-#include "cello.h"
-#include "amr_node4.hpp"
 #include <assert.h>
+
+#include "cello.h"
+
+#include "amr_node4.hpp"
 
 const bool debug = false;
 
