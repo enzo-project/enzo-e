@@ -3,7 +3,7 @@
 /** 
  *********************************************************************
  *
- * @file      amr_tree_k.cpp
+ * @file      amr_tree_3k.cpp
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
@@ -38,22 +38,22 @@
 
 #include <stdio.h>
 #include "cello.h"
-#include "amr_node_k.hpp"
-#include "amr_tree_k.hpp"
+#include "amr_node3k.hpp"
+#include "amr_tree3k.hpp"
 
 const bool debug = false;
 
-Tree_k::Tree_k(int d, int r)
-  : d_(d),
+Tree3K::Tree3K(int r)
+  : r_(r),
     levels_(0),
-    root_(new Node_k(r,d))
+    root_(new Node3K(r))
 /**
  *********************************************************************
  *
  * @param         
  * @return        
  *
- * Create a Tree_k object
+ * Create a Tree3K object
  *
  *********************************************************************
  */
@@ -61,7 +61,7 @@ Tree_k::Tree_k(int d, int r)
 {
 }
 
-void Tree_k::refine
+void Tree3K::refine
 /**
  *********************************************************************
  *
@@ -84,7 +84,7 @@ void Tree_k::refine
   if (debug) printf ("%d\n",levels_);
 }
 
-void Tree_k::balance(bool is_full)
+void Tree3K::balance(bool is_full)
 /**
  *********************************************************************
  *
@@ -108,7 +108,7 @@ void Tree_k::balance(bool is_full)
   printf ("passes = %d\n",pass);
 }
 
-void Tree_k::optimize()
+void Tree3K::optimize()
 /**
  *********************************************************************
  *
@@ -131,7 +131,7 @@ void Tree_k::optimize()
   printf ("passes = %d\n",pass);
 }
 
-float * Tree_k::create_image (int n,int line_width)
+float * Tree3K::create_image (int n,int line_width)
 /**
  *********************************************************************
  *
@@ -143,10 +143,9 @@ float * Tree_k::create_image (int n,int line_width)
  *********************************************************************
  */
 {
-  printf ("n = %d\n",n);
   float * image = new float [n*n];
-  
-  root_->fill_image(image,n,n,0,n-1,0,n-1,0,levels_,line_width);
+
+  root_->fill_image(image,n,n,n,0,n-1,0,n-1,0,n-1,0,levels_,line_width);
   return image;
 }
 

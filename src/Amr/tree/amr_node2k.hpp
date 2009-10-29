@@ -7,7 +7,7 @@
  *********************************************************************
  *
  * @file      amr_node2k.hpp
- * @brief     Node class for 2D k-trees
+ * @brief     Node class for 2D k^2-trees
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Tue Oct 27 12:32:07 PDT 2009
  * @bug       

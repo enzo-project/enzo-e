@@ -12,16 +12,20 @@
 #include "disk.hpp"
 #include "amr_node2k.hpp"
 #include "amr_tree2k.hpp"
+#include "amr_node3k.hpp"
+#include "amr_tree3k.hpp"
 
 const bool debug = false;
 const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
 const int  max_level = 10;
+const int  n3 = 128;  // 3D sphere image size
 
 #include "image.h"
 
 int * create_level_array (int * n0, int * ny, int max_levels);
+int * create_level_array3 (int n3, int max_levels);
 void write_image(float * image, int nx, int ny, std::string filename);
 void create_tree 
 (
@@ -40,13 +44,33 @@ int main(int argc, char ** argv)
   int * level_array = create_level_array(&nx,&ny,max_level);
   nz = 1;
 
+  //--------------------------------------------------
+  // 2D tests
+  //--------------------------------------------------
+
   int k,d;
-  create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f1", true);
-  create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f0", false);
-  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f1", true);
-  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f0", false);
+//   create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f1", true);
+//   create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-f0", false);
+//   create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f1", true);
+//   create_tree (level_array, nx, ny, nz, k=4, d=2, "tree4-f0", false);
 //   create_tree (level_array, nx, ny, nz, k=8, d=2, "tree8-f1", true);
 //   create_tree (level_array, nx, ny, nz, k=8, d=2, "tree8-f0", false);
+
+  delete [] level_array;
+
+  //--------------------------------------------------
+  // 3D tests
+  //--------------------------------------------------
+
+  create_level_array3(n3,max_level);
+  create_tree (level_array, n3, n3, n3, k=2, d=3, "tree2-f1", true);
+  create_tree (level_array, n3, n3, n3, k=2, d=3, "tree2-f0", false);
+  create_tree (level_array, n3, n3, n3, k=4, d=3, "tree4-f1", true);
+  create_tree (level_array, n3, n3, n3, k=4, d=3, "tree4-f0", false);
+
+  delete [] level_array;
+
+  Memory::print();
 
 }
 // read in the gimp-generated image data into a level array
@@ -59,7 +83,7 @@ int * create_level_array (int * nx, int * ny, int max_levels)
 
   int * level_array = new int [size*size];
 
-  for (int i=0; i<size*size; i++) level_array[i] = false;
+  for (int i=0; i<size*size; i++) level_array[i] = 0;
 
   *nx = size;
   *ny = size;
@@ -80,6 +104,33 @@ int * create_level_array (int * nx, int * ny, int max_levels)
       float b = 1.0*pixel[2]/256;
       level_array[i] = max_levels * (r + g + b) / 3;
       if (level_array[i] > max) max = level_array[i];
+    }
+  }
+  return level_array;
+}
+
+int * create_level_array3 (int n3, int max_levels)
+{
+
+  int * level_array = new int [n3*n3*n3];
+
+  for (int i=0; i<n3*n3*n3; i++) level_array[i] = 0;
+
+  const double R = 0.3;  // radius
+  double R2 = R*R*R;
+  
+  double x,y,z;
+
+  for (int iz=0; iz<n3; iz++) {
+    z = iz / n3;
+    for (int iy=0; iy<n3; iy++) {
+      y = iy / n3;
+      for (int ix=0; ix<n3; ix++) {
+	x = ix / n3;
+	double r2 = x*x + y*y + z*z;
+	int i = ix + n3*(iy + n3*iz);
+	level_array[i] = r2 < R2 ? max_levels : 0;
+      }
     }
   }
   return level_array;
@@ -122,7 +173,7 @@ void create_tree
 
   float * image;
 
-  Tree2K * tree = new Tree2K(k);
+  Tree3K * tree = new Tree3K(k);
   float mem_per_node;
 
   Memory::reset();
@@ -140,7 +191,7 @@ void create_tree
   Memory::print();
   Memory::set_active(false);
 
-  mem_per_node = (float) Memory::bytes(0) / Node2K::num_nodes();
+  mem_per_node = (float) Memory::bytes(0) / Node3K::num_nodes();
 
   // Determine image size
   int image_size = cell_size + 2*line_width;
@@ -150,7 +201,7 @@ void create_tree
 
   printf ("\nINITIAL TREE\n");
   image = tree->create_image(image_size,line_width);
-  printf ("nodes      = %d\n",Node2K::num_nodes());
+  printf ("nodes      = %d\n",Node3K::num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
   write_image(image,image_size,image_size,name + "-0-new");
@@ -165,8 +216,8 @@ void create_tree
   tree->balance(full_nodes);
   Memory::print();
   Memory::set_active(false);
-  mem_per_node = (float) Memory::bytes(0) / Node2K::num_nodes();
-  printf ("nodes      = %d\n",Node2K::num_nodes());
+  mem_per_node = (float) Memory::bytes(0) / Node3K::num_nodes();
+  printf ("nodes      = %d\n",Node3K::num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
   image = tree->create_image(image_size,line_width);
@@ -184,8 +235,8 @@ void create_tree
   Memory::print();
   Memory::set_active(false);
 
-  mem_per_node = (float) Memory::bytes(0) / Node2K::num_nodes();
-  printf ("nodes      = %d\n",Node2K::num_nodes());
+  mem_per_node = (float) Memory::bytes(0) / Node3K::num_nodes();
+  printf ("nodes      = %d\n",Node3K::num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
   image = tree->create_image(image_size,line_width);

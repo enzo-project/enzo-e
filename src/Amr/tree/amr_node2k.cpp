@@ -236,8 +236,7 @@ int Node2K::refine
     for (int iy=0; iy<k_; iy++) {
       for (int ix=0; ix<k_; ix++) {
 	int i = index_(ix,iy);
-	depth = (depth_child[i] > depth) ? 
-	  depth_child[i] : depth;
+	depth = (depth_child[i] > depth) ? depth_child[i] : depth;
       }
     }
 
@@ -335,20 +334,16 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
       for (int iy=0; iy<ny; iy++) {
 	refine_node = refine_node ||
-	  (cousin(XP,0,iy) && 
-	   cousin(XP,0,iy)->any_children() ) ||
-	  (cousin(XM,nx-1,iy) && 
-	   cousin(XM,nx-1,iy)->any_children() );
+	  (cousin(XP,   0,iy) && cousin(XP,   0,iy)->any_children() ) ||
+	  (cousin(XM,nx-1,iy) && cousin(XM,nx-1,iy)->any_children() );
       }
 
       // Y faces
 
       for (int ix=0; ix<nx; ix++) {
 	refine_node = refine_node ||
-	  (cousin(YP,ix,0) && 
-	   cousin(YP,ix,0)->any_children() ) ||
-	  (cousin(YM,ix,ny-1) && 
-	   cousin(YM,ix,ny-1)->any_children() );
+	  (cousin(YP,ix,   0) && cousin(YP,ix,   0)->any_children() ) ||
+	  (cousin(YM,ix,ny-1) && cousin(YM,ix,ny-1)->any_children() );
       }
 
       if (refine_node) {

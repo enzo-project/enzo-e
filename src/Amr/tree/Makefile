@@ -3,7 +3,8 @@ TOP     = ../../..
 PACKAGE = amr
 OBJS    = amr_tree4.o  amr_node4.o \
           amr_tree16.o amr_node16.o \
-          amr_tree2k.o amr_node2k.o
+          amr_tree2k.o amr_node2k.o \
+          amr_tree3k.o amr_node3k.o
 TESTS   = test_tree test_tree_k
 DIRS    = 
 

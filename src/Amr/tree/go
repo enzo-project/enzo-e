@@ -1,12 +1,12 @@
 #/bin/csh -f
 
-set run = 1
+set run = 0
 set old = 1
 set new = 1
 
 set colormap_dir = /usr/share/h5utils/colormaps/
 
-set color = gray
+set color = vga
 
 if ($run == 1) then
   make dep
