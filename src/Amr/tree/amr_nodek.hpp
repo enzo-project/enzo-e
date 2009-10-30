@@ -9,4 +9,5 @@ enum face_type {
   ZM = 4,
   ZP = 5};
 
-#endif
+#endif /* NODE_K_HPP */
+

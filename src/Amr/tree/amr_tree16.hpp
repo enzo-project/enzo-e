@@ -24,9 +24,6 @@ class Tree16 {
   // Refine nodes to remove level jumps
   void balance(bool full_nodes = true);
 
-  // Refine nodes to remove level jumps
-  void fill(bool full_nodes = true);
-
   // Replace uniformly-refined patch with single node
   void optimize();
 

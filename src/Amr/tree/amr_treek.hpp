@@ -1,12 +1,12 @@
-#ifndef TREE2K_HPP
-#define TREE2K_HPP
+#ifndef TREEK_HPP
+#define TREEK_HPP
 
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 /** 
  *********************************************************************
  *
- * @file      amr_tree2k.hpp
+ * @file      amr_treek.hpp
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
@@ -20,14 +20,12 @@
  *********************************************************************
  */
 
-#include "amr_treek.hpp"
-
-class Tree2K : public TreeK {
+class TreeK {
 
 /** 
  *********************************************************************
  *
- * @class     Tree2K
+ * @class     TreeK
  * @brief     
  * @ingroup   GROUP
  *
@@ -42,12 +40,12 @@ public:
   // PUBLIC OPERATIONS
   //-------------------------------------------------------------------
 
-  Tree2K(int k);
+  TreeK(int r) : r_(r), levels_(0) {};
 
-  ~Tree2K() { delete root_; };
+  ~TreeK() {};
 
   /// Refine down to array
-  void refine
+  virtual  void refine
     (const int * level_array, 
      int ndx, int ndy,
      int max_level, 
@@ -55,26 +53,31 @@ public:
      );
 
   /// print levels
-  void print_levels();
+  virtual void print_levels();
 
   /// Refine nodes to remove level jumps
-  void balance(bool full_nodes = true);
+  virtual void balance(bool full_nodes = true);
 
   /// Replace uniformly-refined patch with single node
-  void optimize();
-
+  virtual void optimize();
+  
   /// Create an image of levels
-  float * create_image (int n, int line_width);
+  virtual float * create_image (int n, int line_width);
+
+  /// Return the number of levels
+  int levels() { return levels_; }
+
+protected:
 
   //-------------------------------------------------------------------
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
-private:
+  /// Refinement factor
+  int r_;
 
-  /// Root of the tree
-  Node2K * root_;
-
+  /// Number of levels in the tree
+  int levels_;
 
 };
 

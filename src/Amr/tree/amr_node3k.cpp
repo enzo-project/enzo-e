@@ -155,10 +155,14 @@ int Node3K::refine
       for (int iz=lowz; iz<upz && !refine_node; iz++) {
 	for (int iy=lowy; iy<upy && !refine_node; iy++) {
 	  for (int ix=lowx; ix<upx && !refine_node; ix++) {
-	    if (level_array[ix + ndx*(iy + ndy*iz)] >= level) refine_node = true;
+	    if (level_array[ix + ndx*(iy + ndy*iz)] >= level) {
+	      refine_node = true;
+	    }
 	  }
 	}
       }
+
+      printf ("%s:%d refine = %d\n",__FILE__,__LINE__,refine_node);
 
       // refine the node if needed
 
@@ -171,6 +175,14 @@ int Node3K::refine
 	for (int iz=0; iz<k_; iz++) {
 	  for (int iy=0; iy<k_; iy++) {
 	    for (int ix=0; ix<k_; ix++) {
+	      printf ("%s:%d refine %d %d %d  %d %d %d  %d %d  %d %d  %d %d\n",
+		      __FILE__,__LINE__,
+		      ix,iy,iz,
+		      ndx,ndy,ndz,
+		      ixk[ix],ixk[ix+1],
+		      iyk[iy],iyk[iy+1],
+		      izk[iz],izk[iz+1]
+		      );
 	      depth_child[index_(ix,iy,iz)] = child(ix,iy,iz)->refine 
 		(level_array,
 		 ndx,ndy,ndz,

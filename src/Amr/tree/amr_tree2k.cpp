@@ -44,8 +44,7 @@
 const bool debug = false;
 
 Tree2K::Tree2K(int r)
-  : r_(r),
-    levels_(0),
+  : TreeK(r),
     root_(new Node2K(r))
 /**
  *********************************************************************

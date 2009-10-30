@@ -20,7 +20,9 @@
  *********************************************************************
  */
 
-class Tree3K {
+#include "amr_treek.hpp"
+
+class Tree3K : public TreeK {
 
 /** 
  *********************************************************************
@@ -58,39 +60,20 @@ public:
   /// Refine nodes to remove level jumps
   void balance(bool full_nodes = true);
 
-  /// Refine nodes to remove level jumps
-  void fill(bool full_nodes = true);
-
   /// Replace uniformly-refined patch with single node
   void optimize();
 
   /// Create an image of levels
   float * create_image (int n, int line_width);
 
-  /// Return the number of levels
-  int levels() { return levels_; }
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-private:
-
   //-------------------------------------------------------------------
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
-  /// Refinement factor
-  int r_;
-
-  /// Number of levels in the tree
-  int levels_;
+private:
 
   /// Root of the tree
   Node3K * root_;
-
 
 };
 

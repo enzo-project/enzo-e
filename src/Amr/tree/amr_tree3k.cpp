@@ -44,8 +44,7 @@
 const bool debug = false;
 
 Tree3K::Tree3K(int r)
-  : r_(r),
-    levels_(0),
+  : TreeK(r),
     root_(new Node3K(r))
 /**
  *********************************************************************
