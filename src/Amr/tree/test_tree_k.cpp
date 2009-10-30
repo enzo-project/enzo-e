@@ -62,7 +62,8 @@ int main(int argc, char ** argv)
   // 3D tests
   //--------------------------------------------------
 
-  create_level_array3(n3,max_level);
+  level_array = create_level_array3(n3,max_level);
+
   create_tree (level_array, n3, n3, n3, k=2, d=3, "tree2-f1", true);
   create_tree (level_array, n3, n3, n3, k=2, d=3, "tree2-f0", false);
   create_tree (level_array, n3, n3, n3, k=4, d=3, "tree4-f1", true);
@@ -121,18 +122,21 @@ int * create_level_array3 (int n3, int max_levels)
   
   double x,y,z;
 
+  double sum = 0.0;
   for (int iz=0; iz<n3; iz++) {
-    z = iz / n3;
+    z = double(iz) / n3;
     for (int iy=0; iy<n3; iy++) {
-      y = iy / n3;
+      y = double(iy) / n3;
       for (int ix=0; ix<n3; ix++) {
-	x = ix / n3;
+	x = double(ix) / n3;
 	double r2 = x*x + y*y + z*z;
 	int i = ix + n3*(iy + n3*iz);
 	level_array[i] = r2 < R2 ? max_levels : 0;
+	sum += level_array[i];
       }
     }
   }
+  printf ("sum = %g\n",sum);
   return level_array;
 }
 

@@ -26,6 +26,7 @@ test_tree_k: test_tree_k.o $(OBJS)
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/amr_node.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_nodek.hpp $(INCLUDE)
 	ln -sf `pwd`/amr_tree4.hpp $(INCLUDE)
 	ln -sf `pwd`/amr_node4.hpp $(INCLUDE)
 	ln -sf `pwd`/amr_tree16.hpp $(INCLUDE)

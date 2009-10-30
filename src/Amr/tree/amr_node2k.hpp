@@ -24,11 +24,7 @@
 
 #include "cello.h"
 
-enum face_type {
-  XM = 0,
-  XP = 1,
-  YM = 2,
-  YP = 3};
+#include "amr_nodek.hpp"
 
 class Tree2K;
 

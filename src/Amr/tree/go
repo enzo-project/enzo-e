@@ -1,6 +1,6 @@
 #/bin/csh -f
 
-set run = 0
+set run = 1
 set old = 1
 set new = 1
 
