@@ -101,6 +101,16 @@ public:
      int line_width
      );
 
+  /// Write a geomview file
+  void geomview
+  (
+   FILE * fpr,
+   double lowx, double upx,  
+   double lowy, double upy,
+   double lowz, double upz,
+   bool full = true);
+
+
   /// Return whether node has all children
   bool all_children () {
     for (int i=0; i<k_*k_; i++) {

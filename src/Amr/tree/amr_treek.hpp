@@ -47,22 +47,22 @@ public:
   /// Refine down to array
   virtual  void refine
     (const int * level_array, 
-     int ndx, int ndy,
+     int ndx, int ndy, int ndz,
      int max_level, 
      bool full_nodes = true
-     );
-
-  /// print levels
-  virtual void print_levels();
+     ) = 0;
 
   /// Refine nodes to remove level jumps
-  virtual void balance(bool full_nodes = true);
+  virtual void balance(bool full_nodes = true)= 0;
 
   /// Replace uniformly-refined patch with single node
-  virtual void optimize();
+  virtual void optimize()= 0;
   
   /// Create an image of levels
-  virtual float * create_image (int n, int line_width);
+  virtual float * create_image (int n, int line_width)= 0;
+
+  /// Create a geomview file
+  virtual void geomview (std::string filename) = 0;
 
   /// Return the number of levels
   int levels() { return levels_; }

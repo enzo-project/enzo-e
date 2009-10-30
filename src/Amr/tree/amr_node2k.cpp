@@ -6,8 +6,8 @@
 #include "amr_node2k.hpp"
 
 Node2K::Node2K(int k, int level_adjust) 
-  : level_adjust_(level_adjust),
-    k_(k)
+  : k_(k),
+    level_adjust_(level_adjust)
 
 { 
   ++Node2K::num_nodes_;
@@ -589,6 +589,72 @@ void Node2K::fill_image
       if (child(ix,iy)) {
 	child(ix,iy)->fill_image 
 	  (image,ndx,ndy,ixk[ix],ixk[ix+1], iyk[iy],iyk[iy+1], level + 1, num_levels,line_width);
+      }
+    }
+  }
+}
+
+// Fill the image region with values
+void Node2K::geomview
+(
+ FILE * fpr,
+ double lowx, double upx,  
+ double lowy, double upy,
+ double lowz, double upz,
+ bool full )
+{
+
+  if (full) {
+    fprintf (fpr,"VECT\n");
+    fprintf (fpr,"6 18 2\n");
+    fprintf (fpr,"1 1 8 3 3 2\n");
+    fprintf (fpr,"1 0 1 0 0 0\n");
+
+    // Print points at domain boundaries to provide geomview with bounding box
+
+    fprintf (fpr,"0 0 0\n");
+    fprintf (fpr,"1 1 1\n");
+
+  }
+  fprintf (fpr,"%g %g %g\n",lowx,lowy,lowz);
+  fprintf (fpr,"%g %g %g\n",upx,lowy,lowz);
+  fprintf (fpr,"%g %g %g\n",upx,upy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,upy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,lowy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,lowy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,lowy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,lowy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,upy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,upy,upz);
+  fprintf (fpr,"%g %g %g\n",lowx,lowy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,upy,lowz);
+  fprintf (fpr,"%g %g %g\n",upx,upy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,lowy,upz);
+  fprintf (fpr,"%g %g %g\n",lowx,upy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,upy,upz);
+
+  if (full) {
+    fprintf (fpr,"1 1 1 1\n");
+    fprintf (fpr,"1 1 1 0\n");
+  }
+
+  double * xk = new double [k_+1];
+  double * yk = new double [k_+1];
+  double hx = (upx-lowx) / k_;
+  double hy = (upy-lowy) / k_;
+
+  for (int i=0; i<k_+1; i++) {
+    xk[i] = lowx + hx*i;
+    yk[i] = lowy + hy*i;
+  }
+  for (int iy=0; iy<k_; iy++) {
+    for (int ix=0; ix<k_; ix++) {
+      if (child(ix,iy)) {
+	child(ix,iy)->geomview
+	  (fpr,
+	   xk[ix],xk[ix+1], 
+	   yk[iy],yk[iy+1],
+	   lowz+1,upz+1,false);
       }
     }
   }

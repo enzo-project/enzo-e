@@ -54,9 +54,6 @@ public:
      bool full_nodes = true
      );
 
-  /// print levels
-  void print_levels();
-
   /// Refine nodes to remove level jumps
   void balance(bool full_nodes = true);
 
@@ -65,6 +62,9 @@ public:
 
   /// Create an image of levels
   float * create_image (int n, int line_width);
+
+  /// Create an image of levels
+  void geomview (std::string filename);
 
   //-------------------------------------------------------------------
   // PRIVATE ATTRIBUTES

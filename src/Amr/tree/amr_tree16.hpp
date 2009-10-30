@@ -18,9 +18,6 @@ class Tree16 {
      bool full_nodes = true
      );
 
-  // print levels
-  void print_levels();
-
   // Refine nodes to remove level jumps
   void balance(bool full_nodes = true);
 

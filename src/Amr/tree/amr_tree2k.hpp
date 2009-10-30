@@ -49,13 +49,10 @@ public:
   /// Refine down to array
   void refine
     (const int * level_array, 
-     int ndx, int ndy,
+     int ndx, int ndy, int ndz,
      int max_level, 
      bool full_nodes = true
      );
-
-  /// print levels
-  void print_levels();
 
   /// Refine nodes to remove level jumps
   void balance(bool full_nodes = true);
@@ -65,6 +62,9 @@ public:
 
   /// Create an image of levels
   float * create_image (int n, int line_width);
+
+  /// Create a geomview file
+  void geomview (std::string filename);
 
   //-------------------------------------------------------------------
   // PRIVATE ATTRIBUTES

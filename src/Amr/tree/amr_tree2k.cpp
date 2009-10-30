@@ -73,7 +73,7 @@ void Tree2K::refine
  */
 (
  const int * level_array, 
- int ndx, int ndy,
+ int ndx, int ndy, int ndz,
  int max_level,
  bool is_full
  )
@@ -146,5 +146,45 @@ float * Tree2K::create_image (int n,int line_width)
 
   root_->fill_image(image,n,n,0,n-1,0,n-1,0,levels_,line_width);
   return image;
+}
+
+void Tree2K::geomview (std::string filename)
+/**
+ *********************************************************************
+ *
+ * @param         
+ * @return        
+ *
+ * Create an hdf5 file of tree, assuming given source bitmap size
+ *
+ *********************************************************************
+ */
+{
+  FILE * fpr = fopen (filename.c_str(),"w");
+
+  int n = Node2K::num_nodes();
+
+  fprintf (fpr,"VECT\n");
+  fprintf (fpr,"%d %d 1\n",2+4*n, 2+16*n);
+
+  // Write vertices per polygon
+  fprintf (fpr,"1 1 ");
+  for (int i=0; i<n; i++) {
+    fprintf (fpr,"8 3 3 2 ");
+  }
+  fprintf (fpr,"\n");
+
+  // Write colors changes
+  fprintf (fpr,"1 0 ");
+  for (int i=0; i<n; i++) fprintf (fpr,"0 0 0 0 "); fprintf (fpr,"\n");
+
+  fprintf (fpr,"0 0 0\n");
+  fprintf (fpr,"1 1 1\n");
+
+  root_->geomview(fpr,0,1,0,1,0,0,false);
+
+  fprintf (fpr,"1 1 1 0\n");
+
+  fclose(fpr);
 }
 

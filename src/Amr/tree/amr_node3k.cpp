@@ -162,8 +162,6 @@ int Node3K::refine
 	}
       }
 
-      printf ("%s:%d refine = %d\n",__FILE__,__LINE__,refine_node);
-
       // refine the node if needed
 
       if (refine_node) {
@@ -175,14 +173,6 @@ int Node3K::refine
 	for (int iz=0; iz<k_; iz++) {
 	  for (int iy=0; iy<k_; iy++) {
 	    for (int ix=0; ix<k_; ix++) {
-	      printf ("%s:%d refine %d %d %d  %d %d %d  %d %d  %d %d  %d %d\n",
-		      __FILE__,__LINE__,
-		      ix,iy,iz,
-		      ndx,ndy,ndz,
-		      ixk[ix],ixk[ix+1],
-		      iyk[iy],iyk[iy+1],
-		      izk[iz],izk[iz+1]
-		      );
 	      depth_child[index_(ix,iy,iz)] = child(ix,iy,iz)->refine 
 		(level_array,
 		 ndx,ndy,ndz,
@@ -716,6 +706,7 @@ void Node3K::fill_image
 	image[INDEX( upx+k,iy,iz,ndx,ndy)] = 0;
       }
     }
+
   }
 
   // Recurse
@@ -739,7 +730,12 @@ void Node3K::fill_image
       for (int ix=0; ix<k_; ix++) {
 	if (child(ix,iy,iz)) {
 	  child(ix,iy,iz)->fill_image 
-	    (image,ndx,ndy,ndz,ixk[ix],ixk[ix+1], iyk[iy],iyk[iy+1], izk[iz],izk[iz+1], level + 1, num_levels,line_width);
+	    (image,
+	     ndx,ndy,ndz,
+	     ixk[ix],ixk[ix+1], 
+	     iyk[iy],iyk[iy+1],
+	     izk[iz],izk[iz+1], 
+	     level + 1, num_levels,line_width);
 	}
       }
     }
@@ -748,6 +744,78 @@ void Node3K::fill_image
   delete [] ixk;
   delete [] iyk;
   delete [] izk;
+}
+
+
+// Fill the image region with values
+void Node3K::geomview
+(
+ FILE * fpr,
+ double lowx, double upx,  
+ double lowy, double upy,
+ double lowz, double upz,
+ bool full )
+{
+
+  if (full) {
+    fprintf (fpr,"VECT\n");
+    fprintf (fpr,"6 18 2\n");
+    fprintf (fpr,"1 1 8 3 3 2\n");
+    fprintf (fpr,"1 0 1 0 0 0\n");
+
+    // Print points at domain boundaries to provide geomview with bounding box
+
+    fprintf (fpr,"0 0 0\n");
+    fprintf (fpr,"1 1 1\n");
+
+  }
+  fprintf (fpr,"%g %g %g\n",lowx,lowy,lowz);
+  fprintf (fpr,"%g %g %g\n",upx,lowy,lowz);
+  fprintf (fpr,"%g %g %g\n",upx,upy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,upy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,lowy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,lowy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,lowy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,lowy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,upy,lowz);
+  fprintf (fpr,"%g %g %g\n",lowx,upy,upz);
+  fprintf (fpr,"%g %g %g\n",lowx,lowy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,upy,lowz);
+  fprintf (fpr,"%g %g %g\n",upx,upy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,lowy,upz);
+  fprintf (fpr,"%g %g %g\n",lowx,upy,upz);
+  fprintf (fpr,"%g %g %g\n",upx,upy,upz);
+
+  if (full) {
+    fprintf (fpr,"1 1 1 1\n");
+    fprintf (fpr,"1 1 1 0\n");
+  }
+
+  double * xk = new double [k_+1];
+  double * yk = new double [k_+1];
+  double * zk = new double [k_+1];
+  double hx = (upx-lowx) / k_;
+  double hy = (upy-lowy) / k_;
+  double hz = (upz-lowz) / k_;
+
+  for (int i=0; i<k_+1; i++) {
+    xk[i] = lowx + hx*i;
+    yk[i] = lowy + hy*i;
+    zk[i] = lowz + hz*i;
+  }
+  for (int iz=0; iz<k_; iz++) {
+    for (int iy=0; iy<k_; iy++) {
+      for (int ix=0; ix<k_; ix++) {
+	if (child(ix,iy,iz)) {
+	  child(ix,iy,iz)->geomview
+	    (fpr,
+	     xk[ix],xk[ix+1], 
+	     yk[iy],yk[iy+1],
+	     zk[iz],zk[iz+1],false);
+	}
+      }
+    }
+  }
 }
 
 int Node3K::num_nodes_ = 0;
