@@ -1,12 +1,12 @@
-#ifndef BLOCK_HPP
-#define BLOCK_HPP
+#ifndef ARRAY_BLOCK_HPP
+#define ARRAY_BLOCK_HPP
 
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 /** 
 *********************************************************************
 *
-* @file      block.hpp
+* @file      array_block.hpp
 * @brief     Declaration of the Block class
 * @author    James Bordner
 * @date      Mon Oct 12 14:38:21 PDT 2009
@@ -141,4 +141,4 @@ private:
 
 };   
 
-#endif /* BLOCK_HPP */
+#endif /* ARRAY_BLOCK_HPP */

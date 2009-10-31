@@ -25,3 +25,5 @@ install-include:
 
 .PHONY: clean-local
 clean-local:
+	$(MAKE) -C mpi-tests clean
+

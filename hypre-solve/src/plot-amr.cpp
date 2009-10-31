@@ -138,7 +138,6 @@ void image_create (double      *image,
       png.plot(ix+1,iy+1,red[i],green[i],blue[i]);
     }
   }
-
   png.close();
 }
 
