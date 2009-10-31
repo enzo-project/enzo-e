@@ -111,3 +111,48 @@ doc:
 .PHONY: cccc
 cccc:
 	cccc */*.cpp
+
+#-----------------------------------------------------------------------
+# Package dependencies
+#-----------------------------------------------------------------------
+
+.PHONY: Amr
+Amr: Disk
+Amr: Error
+Amr: Memory
+Amr: Monitor
+
+Array: Error
+Array: Test
+
+Control: Error
+Control: Monitor
+Control: Parameters
+Control: Test
+
+Disk: Array
+Disk: Error
+Disk: Test
+
+Error: Test
+
+Memory: Error
+Memory: Test
+
+Method: Disk
+Method: Error
+Method: Performance
+
+Monitor: Performance
+
+Parallel: Error
+Parallel: Parameters
+Parallel: Performance
+
+Parameters: Error
+Parameters: Test
+
+Performance: Error
+Performance: Memory
+Performance: Test
+

@@ -7,7 +7,7 @@ TESTS = test_ppm test_implosion test_implosion3 test_image test_color
 # This does no good--why not?  OMP_NUM_THREADS = 4 on stingmeyer
 # PARALLEL = -fopenmp -ftree-parallelize-loops=4 
 
-INC_LOCAL  = $(INC_HDF5)
+INC_LOCAL  = -I..
 LIB_LOCAL  = $(LIB_HDF5) $(LIB_FORTRAN) $(PARALLEL)
 CPPFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(PARALLEL)
 

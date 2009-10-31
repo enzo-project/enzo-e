@@ -11,7 +11,7 @@ PACKAGE = method
 
 TESTS = test_ppml
 
-INC_LOCAL  = 
+INC_LOCAL  = -I..
 LIB_LOCAL  = -L$(TOP)/lib -lcello $(LIB_HDF5) $(LIB_FORTRAN)
 CPPFLAGS_LOCAL = -Dp8 -Dr8 -DSMALL_INTS -DLINUX -O3
 
