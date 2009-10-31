@@ -52,25 +52,27 @@ OBJS = \
 	yeuler_sweep.o \
 	zeuler_sweep.o
 
+new_all: includes all
+
 include $(TOP)/src/MAKE/Make.include
 
-test_ppm: $(OBJS) $(OBJS_PPM)
+test_ppm: includes $(OBJS) $(OBJS_PPM)
 	$(CXX) -o test_ppm $(OBJS_PPM) $(OBJS) $(LIB)
-test_image: $(OBJS) $(OBJS_IMAGE)
+test_image: includes $(OBJS) $(OBJS_IMAGE)
 	$(CXX) -o test_image $(OBJS_IMAGE) $(OBJS) $(LDFLAGS)
-test_color: $(OBJS) $(OBJS_COLOR)
+test_color: includes $(OBJS) $(OBJS_COLOR)
 	$(CXX) -o test_color $(OBJS_COLOR) $(OBJS) $(LDFLAGS)
-test_implosion: $(OBJS) $(OBJS_IMPLOSION)
+test_implosion: includes $(OBJS) $(OBJS_IMPLOSION)
 	$(CXX) -o test_implosion $(OBJS_IMPLOSION) $(OBJS)  $(LDFLAGS)
-test_implosion3: $(OBJS) $(OBJS_IMPLOSION3)
+test_implosion3: includes $(OBJS) $(OBJS_IMPLOSION3)
 	$(CXX) -o test_implosion3 $(OBJS_IMPLOSION3) $(OBJS)  $(LDFLAGS)
 
 #-----------------------------------------------------------------------
 
 .PHONY: includes
 includes:
-	ln -s ../ppm/cello_hydro.h .
-	ln -s ../ppm/defines.h .
+	-@ln -sf ../cello_hydro.h .
+	-@ln -sf ../defines.h .
 
 .PHONY: install-include
 install-include:
