@@ -219,6 +219,6 @@ private:
 
 };   
 
-#include "block.hpp"
+#include "array_block.hpp"
 
 #endif /* ARRAY_HPP */
