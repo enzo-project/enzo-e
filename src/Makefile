@@ -46,9 +46,9 @@ DIR = \
 # TARGETS
 #=======================================================================
 
-.PHONY: all %-all
-all:       $(patsubst %,%-all,$(DIR))
-%-all:  %-DEP
+.PHONY: all %-component
+all: install-include dep $(patsubst %,%-component,$(DIR))
+%-component:  %-DEP
 	-@($(MAKE)  -C $*)
 
 #-----------------------------------------------------------------------
@@ -117,42 +117,43 @@ cccc:
 #-----------------------------------------------------------------------
 
 .PHONY: Amr
-Amr: Disk
-Amr: Error
-Amr: Memory
-Amr: Monitor
 
-Array: Error
-Array: Test
+Amr-component: Disk-component
+Amr-component: Error-component
+Amr-component: Memory-component
+Amr-component: Monitor-component
 
-Control: Error
-Control: Monitor
-Control: Parameters
-Control: Test
+Array-component: Error-component
+Array-component: Test-component
 
-Disk: Array
-Disk: Error
-Disk: Test
+Control-component: Error-component
+Control-component: Monitor-component
+Control-component: Parameters-component
+Control-component: Test-component
 
-Error: Test
+Disk-component: Array-component
+Disk-component: Error-component
+Disk-component: Test-component
 
-Memory: Error
-Memory: Test
+Error-component: Test-component
 
-Method: Disk
-Method: Error
-Method: Performance
+Memory-component: Error-component
+Memory-component: Test-component
 
-Monitor: Performance
+Method-component: Disk-component
+Method-component: Error-component
+Method-component: Performance-component
 
-Parallel: Error
-Parallel: Parameters
-Parallel: Performance
+Monitor-component: Performance-component
 
-Parameters: Error
-Parameters: Test
+Parallel-component: Error-component
+Parallel-component: Parameters-component
+Parallel-component: Performance-component
 
-Performance: Error
-Performance: Memory
-Performance: Test
+Parameters-component: Error-component
+Parameters-component: Test-component
+
+Performance-component: Error-component
+Performance-component: Memory-component
+Performance-component: Test-component
 
