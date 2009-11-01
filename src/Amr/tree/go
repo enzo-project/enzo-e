@@ -29,7 +29,12 @@ if ($new == 1) then
          if ($dim == 2) then
             h5topng -c $colormap_dir/$color $file
          else
+            h5topng -x 127 -c $colormap_dir/$color $file
+            mv $file.png $file-x.png
+            h5topng -y 127 -c $colormap_dir/$color $file
+            mv $file.png $file-y.png
             h5topng -z 127 -c $colormap_dir/$color $file
+            mv $file.png $file-z.png
          endif 
        end
      end

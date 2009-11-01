@@ -94,8 +94,8 @@ inline void make_neighbors
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
   if (node_2 != NULL) {
-      face_type face_2 = face_type(node_2->opposite_face_(face_1));
-      node_2->neighbor_[face_2] = node_1;
+    face_type face_2 = face_type(node_2->opposite_face_(face_1));
+    node_2->neighbor_[face_2] = node_1;
   }
 }
 
@@ -148,7 +148,9 @@ int Node2K::refine
 
       for (int iy=lowy; iy<upy && !refine_node; iy++) {
 	for (int ix=lowx; ix<upx && !refine_node; ix++) {
-	  if (level_array[ix + ndx*iy] >= level) refine_node = true;
+	  if (level_array[ix + ndx*iy] >= level) {
+	    refine_node = true;
+	  }
 	}
       }
 
@@ -229,6 +231,8 @@ int Node2K::refine
 
 	}
       }
+
+      delete [] refine_child;
     }
 
     // determine depth as depth of deepest child + level increment
@@ -239,6 +243,8 @@ int Node2K::refine
 	depth = (depth_child[i] > depth) ? depth_child[i] : depth;
       }
     }
+
+    delete [] depth_child;
 
     depth += increment;
 
@@ -334,16 +340,20 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
       for (int iy=0; iy<ny; iy++) {
 	refine_node = refine_node ||
-	  (cousin(XP,   0,iy) && cousin(XP,   0,iy)->any_children() ) ||
-	  (cousin(XM,nx-1,iy) && cousin(XM,nx-1,iy)->any_children() );
+	  (cousin(XP,   0,iy) && 
+	   cousin(XP,   0,iy)->any_children() ) ||
+	  (cousin(XM,nx-1,iy) && 
+	   cousin(XM,nx-1,iy)->any_children() );
       }
 
       // Y faces
 
       for (int ix=0; ix<nx; ix++) {
 	refine_node = refine_node ||
-	  (cousin(YP,ix,   0) && cousin(YP,ix,   0)->any_children() ) ||
-	  (cousin(YM,ix,ny-1) && cousin(YM,ix,ny-1)->any_children() );
+	  (cousin(YP,ix,   0) && 
+	   cousin(YP,ix,   0)->any_children() ) ||
+	  (cousin(YM,ix,ny-1) && 
+	   cousin(YM,ix,ny-1)->any_children() );
       }
 
       if (refine_node) {
@@ -654,7 +664,7 @@ void Node2K::geomview
 	  (fpr,
 	   xk[ix],xk[ix+1], 
 	   yk[iy],yk[iy+1],
-	   lowz+1,upz+1,false);
+	   lowz+0.25,upz+0.25,false);
       }
     }
   }

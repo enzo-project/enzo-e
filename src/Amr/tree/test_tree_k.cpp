@@ -15,11 +15,13 @@
 #include "amr_tree2k.hpp"
 #include "amr_tree3k.hpp"
 
-const bool debug = false;
+const bool debug    = false;
+const bool geomview = true;
+
 const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
-const int  max_level = 6;
+const int  max_level = 8;
 const int  n3 = 128;  // 3D sphere image size
 
 #include "image.h"
@@ -122,15 +124,24 @@ int * create_level_array3 (int n3, int max_levels)
   
   double x,y,z;
 
-  for (int iz=0; iz<n3; iz++) {
+#define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
+  for (int iz=0; iz<n3/2; iz++) {
     z = double(iz) / n3 - 0.5;
-    for (int iy=0; iy<n3; iy++) {
+    for (int iy=0; iy<n3/2; iy++) {
       y = double(iy) / n3 - 0.5;
-      for (int ix=0; ix<n3; ix++) {
+      for (int ix=0; ix<n3/2; ix++) {
 	x = double(ix) / n3 - 0.5;
 	double r2 = x*x + y*y + z*z;
-	int i = ix + n3*(iy + n3*iz);
-	level_array[i] = r2 < R2 ? max_levels : 0;
+	double v = r2 < R2 ? max_levels : 0;
+
+	level_array[index(     ix,     iy,     iz,n3)] = v;
+	level_array[index(n3-ix-1,     iy,     iz,n3)] = v;
+	level_array[index(     ix,n3-iy-1,     iz,n3)] = v;
+	level_array[index(n3-ix-1,n3-iy-1,     iz,n3)] = v;
+	level_array[index(     ix,     iy,n3-iz-1,n3)] = v;
+	level_array[index(n3-ix-1,     iy,n3-iz-1,n3)] = v;
+	level_array[index(     ix,n3-iy-1,n3-iz-1,n3)] = v;
+	level_array[index(n3-ix-1,n3-iy-1,n3-iz-1,n3)] = v;
       }
     }
   }
@@ -211,7 +222,9 @@ void create_tree
 
   printf ("\nINITIAL TREE\n");
   image = tree->create_image(image_size,line_width);
-  tree->geomview(name + "-0-new.gv");
+  if (geomview) {
+    tree->geomview(name + "-0-new.gv");
+  }
   num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
   printf ("nodes      = %d\n",num_nodes);
   printf ("levels     = %d\n",tree->levels());
@@ -234,7 +247,9 @@ void create_tree
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
   image = tree->create_image(image_size,line_width);
-  tree->geomview(name + "-1-new.gv");
+  if (geomview) {
+    tree->geomview(name + "-1-new.gv");
+  }
   write_image(name + "-1-new",image,image_size,image_size,mz);
   delete image;
 
@@ -256,7 +271,9 @@ void create_tree
   printf ("bytes/node = %g\n",mem_per_node);
   image = tree->create_image(image_size,line_width);
   write_image(name + "-2-new",image,image_size,image_size,mz);
-  tree->geomview(name + "-2-new.gv");
+  if (geomview) {
+    tree->geomview(name + "-2-new.gv");
+  }
   delete image;
 
   delete tree;

@@ -8,7 +8,6 @@
 Node3K::Node3K(int k, int level_adjust) 
   : k_(k),
     level_adjust_(level_adjust)
-    
 
 { 
   ++Node3K::num_nodes_;
@@ -208,9 +207,9 @@ int Node3K::refine
 	  
 	    // loop over values in the level array
 
-	    for (int lz=izk[iz]; lz<izk[iz+1]; lz++) {
-	      for (int ly=iyk[iy]; ly<iyk[iy+1]; ly++) {
-		for (int lx=ixk[ix]; lx<ixk[ix+1]; lx++) {
+	    for (int lz=izk[iz]; lz<izk[iz+1] && ! refine_child[i]; lz++) {
+	      for (int ly=iyk[iy]; ly<iyk[iy+1] && ! refine_child[i]; ly++) {
+		for (int lx=ixk[ix]; lx<ixk[ix+1] && ! refine_child[i]; lx++) {
 
 		  int l = lx + ndx * (ly + ndy * lz);
 		  if (level_array[l] >= level) {
@@ -348,7 +347,7 @@ void Node3K::update_child_ (int ix, int iy, int iz)
     if (iz > 0) {
       make_neighbors (child (ix,iy,iz), child (ix,iy,iz-1),ZM);
     } else {
-      make_neighbors (child (ix,iy,iz), cousin (ZM,ix,ny,iz-1),ZM);
+      make_neighbors (child (ix,iy,iz), cousin (ZM,ix,iy,nz-1),ZM);
     }
 
     // ZP-face neighbor
@@ -384,8 +383,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
       for (int iz=0; iz<nz; iz++) {
 	for (int iy=0; iy<ny; iy++) {
 	  refine_node = refine_node ||
-	    (cousin(XP,   0,iy,iz) && cousin(XP,   0,iy,iz)->any_children() ) ||
-	    (cousin(XM,nx-1,iy,iz) && cousin(XM,nx-1,iy,iz)->any_children() );
+	    (cousin(XP,   0,iy,iz) && 
+	     cousin(XP,   0,iy,iz)->any_children() ) ||
+	    (cousin(XM,nx-1,iy,iz) && 
+	     cousin(XM,nx-1,iy,iz)->any_children() );
 	}
       }
 
@@ -394,8 +395,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
       for (int iz=0; iz<nz; iz++) {
 	for (int ix=0; ix<nx; ix++) {
 	  refine_node = refine_node ||
-	    (cousin(YP,ix,   0,iz) && cousin(YP,ix,   0,iz)->any_children() ) ||
-	    (cousin(YM,ix,ny-1,iz) && cousin(YM,ix,ny-1,iz)->any_children() );
+	    (cousin(YP,ix,   0,iz) && 
+	     cousin(YP,ix,   0,iz)->any_children() ) ||
+	    (cousin(YM,ix,ny-1,iz) && 
+	     cousin(YM,ix,ny-1,iz)->any_children() );
 	}
       }
 
@@ -404,8 +407,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
 	  refine_node = refine_node ||
-	    (cousin(ZP,ix,iy,   0) && cousin(ZP,ix,iy,   0)->any_children() ) ||
-	    (cousin(ZM,ix,iy,nz-1) && cousin(ZM,ix,iy,nz-1)->any_children() );
+	    (cousin(ZP,ix,iy,   0) && 
+	     cousin(ZP,ix,iy,   0)->any_children() ) ||
+	    (cousin(ZM,ix,iy,nz-1) && 
+	     cousin(ZM,ix,iy,nz-1)->any_children() );
 	}
       }
 
