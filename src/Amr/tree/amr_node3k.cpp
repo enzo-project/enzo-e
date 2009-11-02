@@ -112,9 +112,9 @@ int Node3K::refine
 (
  const int * level_array, 
  int ndx,  int ndy, int ndz,
- int lowx, int upx,  
- int lowy, int upy,
- int lowz, int upz,
+ int nxm, int nxp,  
+ int nym, int nyp,
+ int nzm, int nzp,
  int level, 
  int max_level,
  bool full_nodes
@@ -125,24 +125,24 @@ int Node3K::refine
   int increment = level_increment_();
 
   if ( level < max_level && 
-       lowx < upx-1 && 
-       lowy < upy-1 &&
-       lowz < upz-1  ) {
+       nxm < nxp-1 && 
+       nym < nyp-1 &&
+       nzm < nzp-1  ) {
 
     // determine whether to refine the node
 
-    int dx = (upx - lowx)/k_;
-    int dy = (upy - lowy)/k_;
-    int dz = (upz - lowz)/k_;
+    int dx = (nxp - nxm)/k_;
+    int dy = (nyp - nym)/k_;
+    int dz = (nzp - nzm)/k_;
 
     int * ixk = new int [k_+1];
     int * iyk = new int [k_+1];
     int * izk = new int [k_+1];
 
     for (int i=0; i<=k_; i++) {
-      ixk[i] = lowx + i*dx;
-      iyk[i] = lowy + i*dy;
-      izk[i] = lowz + i*dz;
+      ixk[i] = nxm + i*dx;
+      iyk[i] = nym + i*dy;
+      izk[i] = nzm + i*dz;
     }
 
     int * depth_child = new int [num_children_()];
@@ -157,9 +157,9 @@ int Node3K::refine
 
       bool refine_node = false;
 
-      for (int iz=lowz; iz<upz && !refine_node; iz++) {
-	for (int iy=lowy; iy<upy && !refine_node; iy++) {
-	  for (int ix=lowx; ix<upx && !refine_node; ix++) {
+      for (int iz=nzm; iz<nzp && !refine_node; iz++) {
+	for (int iy=nym; iy<nyp && !refine_node; iy++) {
+	  for (int ix=nxm; ix<nxp && !refine_node; ix++) {
 	    if (level_array[ix + ndx*(iy + ndy*iz)] >= level) {
 	      refine_node = true;
 	    }
@@ -684,72 +684,69 @@ void Node3K::fill_image
 (
  float * image,
  int ndx,  int ndy, int ndz,
- int lowx, int upx,  
- int lowy, int upy,
- int lowz, int upz,
+ int nxm, int nxp,  
+ int nym, int nyp,
+ int nzm, int nzp,
  int level,
  int num_levels,
- int line_width
+ int line_width,
+ int ia
  )
 {
 
-  int ix,iy,iz,i;
-
   level += level_adjust_;
+
+  int jx = (ia + 1) % 3;
+  int jy = (ia + 2) % 3;
+
+  int nm3[3] = {nxm,nym,nzm};
+  int np3[3] = {nxp,nyp,nzp};
+  int n3[3] = {ndx,ndy,ndz};
+  // Exit if we're not in the middle slice orthogonal to axis ia
+  if ( ! (nm3[ia] <= n3[ia]/2 && n3[ia]/2 <= np3[ia])) return;
+
+  int n = n3[jx];
 
   // Fill interior
 
-#define INDEX(ix,iy,iz,ndx,ndy) (ix) + (ndx) * ((iy) + (ndy)*(iz))
+  int ix,iy;
 
-  for (iz=lowz; iz<=upz; iz++) {
-    for (iy=lowy; iy<=upy; iy++) {
-      for (ix=lowx; ix<=upx; ix++) {
-	i = INDEX(ix,iy,iz,ndx,ndy);
-	image[i] = 2*num_levels - level; 
-      }
+  for (iy=nm3[jy]; iy<=np3[jy]; iy++) {
+    for (ix=nm3[jx]; ix<=np3[jx]; ix++) {
+      int i = ix + iy*n;
+      image[i] = 2*num_levels - level; 
     }
   }
 
-//   // Draw border
+  //   // Draw border
   for (int k=0; k < line_width; k++) {
 
-    for (iy=lowy; iy<=upy; iy++) {
-      for (ix=lowx; ix<=upx; ix++) {
-	image[INDEX(ix,iy,lowz+k,ndx,ndy)] = 0;
-	image[INDEX(ix,iy, upz+k,ndx,ndy)] = 0;
-      }
+    for (ix=nm3[jx]; ix<=np3[jx]; ix++) {
+      image[ix + (nm3[jy]+k)*n] = 0;
+      image[ix + (np3[jy]+k)*n] = 0;
     }
 
-    for (iz=lowz; iz<=upz; iz++) {
-      for (ix=lowx; ix<=upx; ix++) {
-	image[INDEX(ix,lowy+k,iz,ndx,ndy)] = 0;
-	image[INDEX(ix, upy+k,iz,ndx,ndy)] = 0;
-      }
-    }
-
-    for (iz=lowz; iz<=upz; iz++) {
-      for (iy=lowy; iy<=upy; iy++) {
-	image[INDEX(lowx+k,iy,iz,ndx,ndy)] = 0;
-	image[INDEX( upx+k,iy,iz,ndx,ndy)] = 0;
-      }
+    for (iy=nm3[jy]; iy<=np3[jy]; iy++) {
+      image[(nm3[jx]+k) + iy*n] = 0;
+      image[(np3[jx]+k) + iy*n] = 0;
     }
 
   }
-
+  
   // Recurse
-
-  int dx = (upx - lowx)/k_;
-  int dy = (upy - lowy)/k_;
-  int dz = (upz - lowz)/k_;
+  
+  int dx = (nxp - nxm)/k_;
+  int dy = (nyp - nym)/k_;
+  int dz = (nzp - nzm)/k_;
 
   int * ixk = new int [k_+1];
   int * iyk = new int [k_+1];
   int * izk = new int [k_+1];
 
   for (int i=0; i<=k_; i++) {
-    ixk[i] = lowx + i*dx;
-    iyk[i] = lowy + i*dy;
-    izk[i] = lowz + i*dz;
+    ixk[i] = nxm + i*dx;
+    iyk[i] = nym + i*dy;
+    izk[i] = nzm + i*dz;
   }
 
   for (int iz=0; iz<k_; iz++) {
@@ -762,7 +759,7 @@ void Node3K::fill_image
 	     ixk[ix],ixk[ix+1], 
 	     iyk[iy],iyk[iy+1],
 	     izk[iz],izk[iz+1], 
-	     level + 1, num_levels,line_width);
+	     level + 1, num_levels,line_width,ia);
 	}
       }
     }
@@ -781,9 +778,9 @@ void Node3K::fill_image
 void Node3K::geomview
 (
  FILE * fpr,
- double lowx, double upx,  
- double lowy, double upy,
- double lowz, double upz,
+ double nxm, double nxp,  
+ double nym, double nyp,
+ double nzm, double nzp,
  bool full )
 {
 
@@ -799,22 +796,22 @@ void Node3K::geomview
     fprintf (fpr,"1 1 1\n");
 
   }
-  fprintf (fpr,"%g %g %g\n",lowx,lowy,lowz);
-  fprintf (fpr,"%g %g %g\n",upx,lowy,lowz);
-  fprintf (fpr,"%g %g %g\n",upx,upy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,upy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,lowy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,lowy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,lowy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,lowy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,upy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,upy,upz);
-  fprintf (fpr,"%g %g %g\n",lowx,lowy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,upy,lowz);
-  fprintf (fpr,"%g %g %g\n",upx,upy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,lowy,upz);
-  fprintf (fpr,"%g %g %g\n",lowx,upy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,upy,upz);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,nzm);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,nzm);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,nzp);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,nzm);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,nzp);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,nzp);
 
   if (full) {
     fprintf (fpr,"1 1 1 1\n");
@@ -824,14 +821,14 @@ void Node3K::geomview
   double * xk = new double [k_+1];
   double * yk = new double [k_+1];
   double * zk = new double [k_+1];
-  double hx = (upx-lowx) / k_;
-  double hy = (upy-lowy) / k_;
-  double hz = (upz-lowz) / k_;
+  double hx = (nxp-nxm) / k_;
+  double hy = (nyp-nym) / k_;
+  double hz = (nzp-nzm) / k_;
 
   for (int i=0; i<k_+1; i++) {
-    xk[i] = lowx + hx*i;
-    yk[i] = lowy + hy*i;
-    zk[i] = lowz + hz*i;
+    xk[i] = nxm + hx*i;
+    yk[i] = nym + hy*i;
+    zk[i] = nzm + hz*i;
   }
   for (int iz=0; iz<k_; iz++) {
     for (int iy=0; iy<k_; iy++) {

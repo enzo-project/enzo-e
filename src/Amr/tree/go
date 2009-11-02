@@ -24,18 +24,16 @@ if ($new == 1) then
    foreach tree (2 4 8 16)
      foreach full (0 1)
        foreach type (0 1 2)
-         set file = "tree$dim-$tree-f$full-$type-new.hdf5"
-         echo "$file"
          if ($dim == 2) then
+            set file = "tree$dim-$tree-f$full-$type.hdf5"
             h5topng -c $colormap_dir/$color $file
-            mv $file.png k$tree-f$full-t$type-d$dim.hdf5
+            mv $file.png k$tree-f$full-t$type-d$dim.png
          else
-            h5topng -x 65 -c $colormap_dir/$color $file
-            mv $file.png k$tree-f$full-t$type-d$dim-x.hdf5
-            h5topng -y 65 -c $colormap_dir/$color $file
-            mv $file.png k$tree-f$full-t$type-d$dim-y.hdf5
-            h5topng -z 65 -c $colormap_dir/$color $file
-            mv $file.png k$tree-f$full-t$type-d$dim-z.hdf5
+	   foreach axis (x y z)
+              set file = "tree$dim-$tree-f$full-$type-$axis.hdf5"
+              h5topng -c $colormap_dir/$color $file
+              mv $file.png k$tree-f$full-t$type-d$dim-a$axis.png
+           end
          endif 
        end
      end

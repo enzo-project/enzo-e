@@ -100,7 +100,8 @@ public:
      int lowz, int upz,
      int level,
      int num_levels,
-     int line_width
+     int line_width,
+     int axis
      );
 
   /// Write a geomview file

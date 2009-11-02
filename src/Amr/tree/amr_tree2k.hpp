@@ -61,7 +61,7 @@ public:
   void optimize();
 
   /// Create an image of levels
-  float * create_image (int n, int line_width);
+  float * create_image (int n, int line_width,int axis=0);
 
   /// Create a geomview file
   void geomview (std::string filename);

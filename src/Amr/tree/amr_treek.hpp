@@ -59,7 +59,7 @@ public:
   virtual void optimize()= 0;
   
   /// Create an image of levels
-  virtual float * create_image (int n, int line_width)= 0;
+  virtual float * create_image (int n, int line_width, int axis=0)= 0;
 
   /// Create a geomview file
   virtual void geomview (std::string filename) = 0;

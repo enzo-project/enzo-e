@@ -130,7 +130,7 @@ void Tree3K::optimize()
   printf ("passes = %d\n",pass);
 }
 
-float * Tree3K::create_image (int n,int line_width)
+float * Tree3K::create_image (int n,int line_width, int axis)
 /**
  *********************************************************************
  *
@@ -142,9 +142,9 @@ float * Tree3K::create_image (int n,int line_width)
  *********************************************************************
  */
 {
-  float * image = new float [n*n*n];
+  float * image = new float [n*n];
 
-  root_->fill_image(image,n,n,n,0,n-1,0,n-1,0,n-1,0,levels_,line_width);
+  root_->fill_image(image,n,n,n,0,n-1,0,n-1,0,n-1,0,levels_,line_width,axis);
   return image;
 }
 

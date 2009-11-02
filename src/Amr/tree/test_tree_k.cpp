@@ -15,6 +15,8 @@
 #include "amr_tree2k.hpp"
 #include "amr_tree3k.hpp"
 
+#define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
+
 const bool debug    = false;
 const bool geomview = true;
 
@@ -22,21 +24,21 @@ const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
 const int  max_level = 6;
-const int  n3 = 128;  // 3D sphere image size
+const int sphere_size = 128;
 
 #include "image.h"
 
+//----------------------------------------------------------------------
+
 int * create_level_array (int * n0, int * ny, int max_levels);
-int * create_level_array3 (int n3, int max_levels);
+int * create_level_array3 (int * n3, int max_levels);
+int * create_sphere (int n3, int max_levels);
 void write_image(std::string filename, float * image, int nx, int ny, int nz=0);
-void create_tree 
-(
- int * level_array,
- int nx, int ny, int nz,
- int k,  int d, 
- std::string name, 
- bool full_nodes
- );
+
+void create_tree ( int * level_array, int nx, int ny, int nz, int k,  int d, 
+		   std::string name, bool full_nodes );
+
+//----------------------------------------------------------------------
 
 int main(int argc, char ** argv)
 {
@@ -66,7 +68,9 @@ int main(int argc, char ** argv)
   // 3D tests
   //--------------------------------------------------
 
-  level_array = create_level_array3(n3,max_level);
+  int n3;
+  level_array = create_sphere(n3 = sphere_size,max_level);
+  // level_array = create_level_array3(&n3,max_level);
 
   create_tree (level_array, n3, n3, n3, k=2, d=3, "tree3-2-f1", true);
   create_tree (level_array, n3, n3, n3, k=2, d=3, "tree3-2-f0", false);
@@ -82,6 +86,9 @@ int main(int argc, char ** argv)
   Memory::print();
 
 }
+
+//----------------------------------------------------------------------
+
 // read in the gimp-generated image data into a level array
 // values are set to [0:max_levels)
 
@@ -118,7 +125,56 @@ int * create_level_array (int * nx, int * ny, int max_levels)
   return level_array;
 }
 
-int * create_level_array3 (int n3, int max_levels)
+//----------------------------------------------------------------------
+// read in the gimp-generated image data into a level array
+// values are set to [0:max_levels)
+
+int * create_level_array3 (int * n3, int max_levels)
+{
+
+  if (width != height) {
+    printf ("%s:%d width = %d  height = %d\n",__FILE__,__LINE__,width, height);
+    exit(1);
+  }
+
+  *n3 = width;
+  int n = *n3;
+
+  int * level_array = new int [n*n*n];
+
+  for (int i=0; i<n*n*n; i++) level_array[i] = 0;
+
+  int pixel[3];
+  char * data = header_data;
+ 
+  float r = 0.125;  // width of the 2D image in the 3D cube
+  int nxm = n*(1.0-r)/2;
+  int nxp = n*(1.0+r)/2;
+
+  for (int iz=0; iz<n; iz++) {
+    for (int iy=0; iy<n; iy++) {
+      HEADER_PIXEL(data,pixel);
+      for (int ix=0; ix<nxm; ix++) {
+	level_array[index(iz,iy,ix,n)] = 0;
+      }
+      for (int ix=nxm; ix<nxp; ix++) {
+	float r = 1.0*pixel[0]/256;
+	float g = 1.0*pixel[1]/256;
+	float b = 1.0*pixel[2]/256;
+	int value = max_levels * (r + g + b) / 3;
+	level_array[index(iz,iy,ix,n)] = value;
+      }
+      for (int ix=nxp; ix<n; ix++) {
+	level_array[index(iz,iy,ix,n)] = 0;
+      }
+    }
+  }
+  return level_array;
+}
+
+//----------------------------------------------------------------------
+
+int * create_sphere (int n3, int max_levels)
 {
 
   int * level_array = new int [n3*n3*n3];
@@ -130,7 +186,6 @@ int * create_level_array3 (int n3, int max_levels)
   
   double x,y,z;
 
-#define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
   for (int iz=0; iz<n3/2; iz++) {
     z = double(iz) / n3 - 0.5;
     for (int iy=0; iy<n3/2; iy++) {
@@ -154,10 +209,13 @@ int * create_level_array3 (int n3, int max_levels)
   return level_array;
 }
 
+//----------------------------------------------------------------------
+
 void write_image(std::string filename, float * image, int nx, int ny, int nz)
 {
   if (nx > 8192 || ny > 8192 || nz > 8192) {
     printf ("%s:%d (nx,ny,nz) = (%d,%d,%d)\n",__FILE__,__LINE__,nx,ny,nz);
+    exit(1);
   }
   Hdf5 hdf5;
   hdf5.file_open((filename+".hdf5").c_str(),"w");
@@ -179,6 +237,7 @@ void write_image(std::string filename, float * image, int nx, int ny, int nz)
 
 }
 
+//----------------------------------------------------------------------
 
 void create_tree 
 (
@@ -209,14 +268,13 @@ void create_tree
   // Refine the tree
   //--------------------------------------------------
 
+  printf ("\nINITIAL TREE\n");
+
   Memory::set_active(true);
   tree->refine(level_array,nx,ny,nz,max_level,full_nodes);
   Memory::print();
   Memory::set_active(false);
 
-  
-  num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
-  mem_per_node = (float) Memory::bytes(0) / num_nodes;
 
   // Determine image size
   int image_size = cell_size + 2*line_width;
@@ -224,18 +282,25 @@ void create_tree
     image_size = 2*image_size - line_width;
   }
 
-  int mz = (d == 2) ? 1 : image_size;
-
-  printf ("\nINITIAL TREE\n");
-  image = tree->create_image(image_size,line_width);
-  if (geomview) {
-    tree->geomview(name + "-0-new.gv");
+  if (d==2) {
+    image = tree->create_image(image_size,line_width);
+    write_image(name + "-0",image,image_size,image_size,1);
+  } else {
+    image = tree->create_image(image_size,line_width,0);
+    write_image(name + "-0-x",image,image_size,image_size,1);
+    image = tree->create_image(image_size,line_width,1);
+    write_image(name + "-0-y",image,image_size,image_size,1);
+    image = tree->create_image(image_size,line_width,2);
+    write_image(name + "-0-z",image,image_size,image_size,1);
   }
+  if (geomview) tree->geomview(name + "-0.gv");
+
   num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
+  mem_per_node = (float) Memory::bytes(0) / num_nodes;
   printf ("nodes      = %d\n",num_nodes);
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
-  write_image(name + "-0-new",image,image_size,image_size,mz);
+
   delete [] image;
 
   //--------------------------------------------------
@@ -243,20 +308,23 @@ void create_tree
   //--------------------------------------------------
 
   printf ("\nBALANCED TREE\n");
+
   Memory::set_active(true);
   tree->balance(full_nodes);
   Memory::print();
   Memory::set_active(false);
+
+
+  image = tree->create_image(image_size,line_width);
+  write_image(name + "-1",image,image_size,image_size,1);
+  if (geomview) tree->geomview(name + "-1.gv");
+
   num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
   mem_per_node = (float) Memory::bytes(0) / num_nodes;
   printf ("nodes      = %d\n",num_nodes);
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
-  image = tree->create_image(image_size,line_width);
-  if (geomview) {
-    tree->geomview(name + "-1-new.gv");
-  }
-  write_image(name + "-1-new",image,image_size,image_size,mz);
+
   delete image;
 
 
@@ -265,21 +333,22 @@ void create_tree
   //--------------------------------------------------
 
   printf ("\nOPTIMIZED TREE\n");
+
   Memory::set_active(true);
   tree->optimize();
   Memory::print();
   Memory::set_active(false);
+
+  image = tree->create_image(image_size,line_width);
+  write_image(name + "-2",image,image_size,image_size,1);
+  if (geomview) tree->geomview(name + "-2.gv");
 
   num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
   mem_per_node = (float) Memory::bytes(0) / num_nodes;
   printf ("nodes      = %d\n",num_nodes);
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
-  image = tree->create_image(image_size,line_width);
-  write_image(name + "-2-new",image,image_size,image_size,mz);
-  if (geomview) {
-    tree->geomview(name + "-2-new.gv");
-  }
+
   delete image;
 
   delete tree;

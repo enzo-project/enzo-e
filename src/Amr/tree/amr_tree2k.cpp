@@ -130,7 +130,7 @@ void Tree2K::optimize()
   printf ("passes = %d\n",pass);
 }
 
-float * Tree2K::create_image (int n,int line_width)
+float * Tree2K::create_image (int n,int line_width, int axis)
 /**
  *********************************************************************
  *
