@@ -214,7 +214,7 @@ int main()
     int m0,m1,m2;
     int nx,ny,nz,na;
     int mx,my,mz,ma;
-    int i,j=0;
+    int i,j,k;
     bool is_same = true;
 
     a.resize(n0,n1,n2);
@@ -248,12 +248,14 @@ int main()
 	for (int ix=0; ix<nx; ix++) {
 	  j = ix + nx*(iy + ny*iz);
 	  if (i != j) is_same = false;
+	  k = ix*mx + iy*my + iz*mz;
+	  if (j != k) is_same = false;
 	  bv[i] = ix + 7*iy + 19*iz;
 	  i += mx;
 	}
 	i += my - nx*mx;
       }
-      i += mz-ny*my;
+      i += mz - ny*my;
     }
     unit_assert (is_same);
 
@@ -288,6 +290,8 @@ int main()
 	for (int ix=0; ix<nx; ix++) {
 	  int j = na*(ix + nx*(iy + ny*iz));
 	  if (i != j) is_same = false;
+	  k = ix*mx + iy*my + iz*mz;
+	  if (i != k) is_same = false;
 	  bv[i] = ix + 7*iy + 19*iz;
 	  i += mx;
 	}

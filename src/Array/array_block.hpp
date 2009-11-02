@@ -83,8 +83,17 @@ public:
 
   }
 
+  /// Return a pointer to the ith array
+  Scalar * array(int i=0) const throw()
+  {
+    return & array_[i*m_[3]];
+  }
+
   /// Return allocated block dimensions
-  void get_dim (int * ndx, int * ndy = NULL, int * ndz = NULL) const throw()
+  void get_dim 
+  (int * ndx, 
+   int * ndy = NULL,
+   int * ndz = NULL) const throw()
   { 
     if (ndx) *ndx = nd_[p_[0]];
     if (ndy) *ndy = nd_[p_[1]];
@@ -92,7 +101,11 @@ public:
   }
 
   /// Return the array size
-  void get_size (int * nx, int * ny = NULL, int * nz = NULL, int *na = 0) const throw()
+  void get_size 
+  (int * nx,
+   int * ny = NULL,
+   int * nz = NULL, 
+   int  *na = NULL) const throw()
   {
     if (nx) *nx = n_[p_[0]];
     if (ny) *ny = n_[p_[1]];
@@ -101,7 +114,11 @@ public:
   }
 
   /// Return increments for loop index calculations
-  void get_inc (int * mx, int * my = NULL, int * mz = NULL, int * ma = NULL) const throw () 	
+  void get_inc 
+  (int * mx, 
+   int * my = NULL,
+   int * mz = NULL,
+   int * ma = NULL) const throw () 	
   {
     if (mx) *mx = m_[p_[0]];
     if (my) *my = m_[p_[1]];
@@ -109,22 +126,9 @@ public:
     if (ma) *ma = m_[p_[3]];
   }
 
-  /// Return a pointer to the ith array
-  Scalar * array(int i=0) const throw()
-  {
-    return & array_[i*m_[3]];
-  }
-
-
-  /// Return stride for the array
-  void get_stride() const throw ()
-  {
-    INCOMPLETE_MESSAGE("Block::get_stride()","");
-  }
-  
 private:
 
-  /// Pointer to the 0 element of the array
+  /// Pointer to the first element of the array
   Scalar * array_;
 
   /// Dimensions of the array
@@ -133,10 +137,10 @@ private:
   /// Size of the array
   int n_[4];
 
-  /// Increments
+  /// Increments along each dimension
   int m_[4];
 
-  /// Permutation p_[0:3] = [ix, iy, iz, ia]
+  /// Permutation such that p_[0:3] = [ix, iy, iz, ia]
   int p_[4];
 
 };   
