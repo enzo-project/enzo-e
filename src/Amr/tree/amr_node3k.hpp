@@ -114,8 +114,12 @@ public:
 
   /// Return whether node has all children
   bool all_children () {
-    for (int i=0; i<k_*k_; i++) {
-	if (! child_[i]) return false;
+    for (int iz=0; iz<k_; iz++) {
+      for (int iy=0; iy<k_; iy++) {
+	for (int ix=0; ix<k_; ix++) {
+	  if (! child(ix,iy,iz)) return false;
+	}
+      }
     }
     return true;
   };
@@ -123,8 +127,14 @@ public:
   /// Return whether node has any children
   bool any_children () { 
 
-    for (int i=0; i<k_*k_; i++) {
-	if (child_[i]) return true;
+    if (!child_) return false;
+
+    for (int iz=0; iz<k_; iz++) {
+      for (int iy=0; iy<k_; iy++) {
+	for (int ix=0; ix<k_; ix++) {
+	  if (child(ix,iy,iz)) return true;
+	}
+      }
     }
     return false;
 
@@ -183,6 +193,11 @@ private:
       break;
     }
   }
+
+  void allocate_neighbors_ ();
+  void deallocate_neighbors_ ();
+  void allocate_children_ ();
+  void deallocate_children_ ();
 
 private:
 

@@ -5,25 +5,26 @@
 
 #include "amr_node3k.hpp"
 
+//----------------------------------------------------------------------
+
 Node3K::Node3K(int k, int level_adjust) 
   : k_(k),
+    child_(0),
+    neighbor_(0),
+    parent_(0),
     level_adjust_(level_adjust)
 
 { 
   ++Node3K::num_nodes_;
 
-  neighbor_ = new Node3K * [num_faces_()];
-  for (int i=0; i<num_faces_(); i++) {
-    neighbor_[i] = NULL;
-  }
-  
-  child_    = new Node3K * [num_children_()];
-  for (int i=0; i<num_children_(); i++) {
-      child_[i] = NULL;
-  }
+  allocate_neighbors_();
+
+  allocate_children_();
 
   parent_ = NULL;
 }
+
+//----------------------------------------------------------------------
 
 // Delete the node and all descendents
 
@@ -31,12 +32,7 @@ Node3K::~Node3K()
 { 
   --Node3K::num_nodes_;
 
-  for (int i=0; i<num_children_(); i++) {
-    delete child_[i];
-  }
-
-  delete [] child_;
-  child_ = NULL;
+  deallocate_children_();
 
   // update neighbor's neighbors
 
@@ -46,8 +42,7 @@ Node3K::~Node3K()
     neighbor_[i] = NULL;
   }
 
-  delete [] neighbor_;
-  neighbor_ = NULL;
+  deallocate_neighbors_();
 
   // Update parent's children
 
@@ -60,15 +55,22 @@ Node3K::~Node3K()
   parent_ = NULL;
 }
 
+//----------------------------------------------------------------------
+
 inline Node3K * Node3K::child (int ix, int iy, int iz) 
 { 
+  if (child_==NULL) return NULL;
   return child_[index_(ix,iy,iz)]; 
 }
+
+//----------------------------------------------------------------------
 
 inline Node3K * Node3K::neighbor (face_type face) 
 { 
   return neighbor_[face]; 
 }
+
+//----------------------------------------------------------------------
 
 inline Node3K * Node3K::cousin (face_type face, int ix, int iy, int iz) 
 { 
@@ -78,6 +80,8 @@ inline Node3K * Node3K::cousin (face_type face, int ix, int iy, int iz)
     return NULL;
   }
 }
+
+//----------------------------------------------------------------------
 
 inline Node3K * Node3K::parent () 
 { 
@@ -99,6 +103,8 @@ inline void make_neighbors
   }
 }
 
+
+//----------------------------------------------------------------------
 
 // Create empty child nodes
 
@@ -272,6 +278,8 @@ int Node3K::refine
   return depth;
 }
 
+//----------------------------------------------------------------------
+
 void Node3K::create_children_()
 {
   for (int iz=0; iz<k_; iz++) {
@@ -282,6 +290,8 @@ void Node3K::create_children_()
     }
   }
 }
+
+//----------------------------------------------------------------------
 
 void Node3K::update_children_()
 {
@@ -294,10 +304,15 @@ void Node3K::update_children_()
   }
 }
 
+//----------------------------------------------------------------------
+
 void Node3K::create_child_(int ix, int iy, int iz)
 {
+  if (child_ == NULL) allocate_children_();
   child_[index_(ix,iy,iz)] = new Node3K(k_);
 }
+
+//----------------------------------------------------------------------
 
 void Node3K::update_child_ (int ix, int iy, int iz)
 {
@@ -361,7 +376,10 @@ void Node3K::update_child_ (int ix, int iy, int iz)
   }
 }
 
+//----------------------------------------------------------------------
+
 // Perform a pass of trying to remove level-jumps 
+
 void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
 {
   int nx = k_;
@@ -591,7 +609,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
 }
 
 
+//----------------------------------------------------------------------
+
 // Perform a pass of trying to optimize uniformly-refined nodes
+
 void Node3K::optimize_pass(bool & refined_tree)
 {
 
@@ -634,10 +655,7 @@ void Node3K::optimize_pass(bool & refined_tree)
 
     level_adjust_ += increment + child(0,0,0)->level_adjust_; 
 
-    for (int i=0; i<num_children_(); i++) {
-      delete child_[i];
-      child_[i] = NULL;
-    }
+    deallocate_children_();
 
     refined_tree = true;
 
@@ -658,7 +676,10 @@ void Node3K::optimize_pass(bool & refined_tree)
 
 }
 
+//----------------------------------------------------------------------
+
 // Fill the image region with values
+
 void Node3K::fill_image
 (
  float * image,
@@ -671,6 +692,7 @@ void Node3K::fill_image
  int line_width
  )
 {
+
   int ix,iy,iz,i;
 
   level += level_adjust_;
@@ -688,7 +710,7 @@ void Node3K::fill_image
     }
   }
 
-  // Draw border
+//   // Draw border
   for (int k=0; k < line_width; k++) {
 
     for (iy=lowy; iy<=upy; iy++) {
@@ -752,7 +774,10 @@ void Node3K::fill_image
 }
 
 
+//----------------------------------------------------------------------
+
 // Fill the image region with values
+
 void Node3K::geomview
 (
  FILE * fpr,
@@ -822,6 +847,52 @@ void Node3K::geomview
     }
   }
 }
+
+//----------------------------------------------------------------------
+
+void Node3K::allocate_neighbors_ ()
+{
+  neighbor_ = new Node3K * [num_faces_()];
+  for (int i=0; i<num_faces_(); i++) {
+    neighbor_[i] = NULL;
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Node3K::deallocate_neighbors_ ()
+{
+  delete [] neighbor_;
+  neighbor_ = NULL;
+}
+
+
+//----------------------------------------------------------------------
+
+void Node3K::allocate_children_ ()
+{
+  child_    = new Node3K * [num_children_()];
+  for (int i=0; i<num_children_(); i++) {
+    child_[i] = NULL;
+  }
+}
+
+
+//----------------------------------------------------------------------
+
+void Node3K::deallocate_children_ ()
+{
+  if (child_) {
+    for (int i=0; i<num_children_(); i++) {
+      delete child_[i];
+    }
+
+    delete [] child_;
+    child_ = NULL;
+  }
+}
+
+//----------------------------------------------------------------------
 
 int Node3K::num_nodes_ = 0;
 

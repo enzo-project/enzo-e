@@ -5,25 +5,26 @@
 
 #include "amr_node2k.hpp"
 
+//----------------------------------------------------------------------
+
 Node2K::Node2K(int k, int level_adjust) 
   : k_(k),
+    child_(0),
+    neighbor_(0),
+    parent_(0),
     level_adjust_(level_adjust)
 
 { 
   ++Node2K::num_nodes_;
 
-  neighbor_ = new Node2K * [num_faces_()];
-  for (int i=0; i<num_faces_(); i++) {
-    neighbor_[i] = NULL;
-  }
+  allocate_neighbors_ ();
   
-  child_    = new Node2K * [num_children_()];
-  for (int i=0; i<num_children_(); i++) {
-      child_[i] = NULL;
-  }
+//   allocate_children_ ();
 
   parent_ = NULL;
 }
+
+//----------------------------------------------------------------------
 
 // Delete the node and all descendents
 
@@ -31,12 +32,7 @@ Node2K::~Node2K()
 { 
   --Node2K::num_nodes_;
 
-  for (int i=0; i<num_children_(); i++) {
-    delete child_[i];
-  }
-
-  delete [] child_;
-  child_ = NULL;
+  deallocate_children_();
 
   // update neighbor's neighbors
 
@@ -46,8 +42,7 @@ Node2K::~Node2K()
     neighbor_[i] = NULL;
   }
 
-  delete [] neighbor_;
-  neighbor_ = NULL;
+  deallocate_neighbors_();
 
   // Update parent's children
 
@@ -60,15 +55,22 @@ Node2K::~Node2K()
   parent_ = NULL;
 }
 
+//----------------------------------------------------------------------
+
 inline Node2K * Node2K::child (int ix, int iy) 
-{ 
+{
+  if (child_==NULL) return NULL;
   return child_[index_(ix,iy)];
 }
+
+//----------------------------------------------------------------------
 
 inline Node2K * Node2K::neighbor (face_type face) 
 { 
   return neighbor_[face]; 
 }
+
+//----------------------------------------------------------------------
 
 inline Node2K * Node2K::cousin (face_type face, int ix, int iy) 
 { 
@@ -78,6 +80,8 @@ inline Node2K * Node2K::cousin (face_type face, int ix, int iy)
     return NULL;
   }
 }
+
+//----------------------------------------------------------------------
 
 inline Node2K * Node2K::parent () 
 { 
@@ -99,6 +103,8 @@ inline void make_neighbors
   }
 }
 
+
+//----------------------------------------------------------------------
 
 // Create empty child nodes
 
@@ -253,6 +259,8 @@ int Node2K::refine
   return depth;
 }
 
+//----------------------------------------------------------------------
+
 void Node2K::create_children_()
 {
   for (int iy=0; iy<k_; iy++) {
@@ -261,6 +269,8 @@ void Node2K::create_children_()
     }
   }
 }
+
+//----------------------------------------------------------------------
 
 void Node2K::update_children_()
 {
@@ -271,10 +281,15 @@ void Node2K::update_children_()
   }
 }
 
+//----------------------------------------------------------------------
+
 void Node2K::create_child_(int ix, int iy)
 {
+  if (child_ == NULL) allocate_children_();
   child_[index_(ix,iy)] = new Node2K(k_);
 }
+
+//----------------------------------------------------------------------
 
 void Node2K::update_child_ (int ix, int iy)
 {
@@ -320,7 +335,10 @@ void Node2K::update_child_ (int ix, int iy)
   }
 }
 
+//----------------------------------------------------------------------
+
 // Perform a pass of trying to remove level-jumps 
+
 void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 {
   int nx = k_;
@@ -474,7 +492,10 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 }
 
 
+//----------------------------------------------------------------------
+
 // Perform a pass of trying to optimize uniformly-refined nodes
+
 void Node2K::optimize_pass(bool & refined_tree)
 {
 
@@ -512,10 +533,7 @@ void Node2K::optimize_pass(bool & refined_tree)
 
     level_adjust_ += increment + child(0,0)->level_adjust_; 
 
-    for (int i=0; i<num_children_(); i++) {
-      delete child_[i];
-      child_[i] = NULL;
-    }
+    deallocate_children_();
 
     refined_tree = true;
 
@@ -534,7 +552,10 @@ void Node2K::optimize_pass(bool & refined_tree)
 
 }
 
+//----------------------------------------------------------------------
+
 // Fill the image region with values
+
 void Node2K::fill_image
 (
  float * image,
@@ -604,7 +625,10 @@ void Node2K::fill_image
   }
 }
 
+//----------------------------------------------------------------------
+
 // Fill the image region with values
+
 void Node2K::geomview
 (
  FILE * fpr,
@@ -669,6 +693,50 @@ void Node2K::geomview
     }
   }
 }
+
+//----------------------------------------------------------------------
+
+void Node2K::allocate_neighbors_ ()
+{
+  neighbor_ = new Node2K * [num_faces_()];
+  for (int i=0; i<num_faces_(); i++) {
+    neighbor_[i] = NULL;
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Node2K::deallocate_neighbors_ ()
+{
+  delete [] neighbor_;
+  neighbor_ = NULL;
+}
+
+//----------------------------------------------------------------------
+
+void Node2K::allocate_children_ ()
+{
+  child_    = new Node2K * [num_children_()];
+  for (int i=0; i<num_children_(); i++) {
+    child_[i] = NULL;
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Node2K::deallocate_children_ ()
+{
+  if (child_) {
+    for (int i=0; i<num_children_(); i++) {
+      delete child_[i];
+    }
+
+    delete [] child_;
+    child_ = NULL;
+  }
+}
+
+
 
 int Node2K::num_nodes_ = 0;
 

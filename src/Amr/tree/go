@@ -21,40 +21,25 @@ endif
 
 if ($new == 1) then
    foreach dim (2 3)
-   foreach tree (2 4 8)
+   foreach tree (2 4 8 16)
      foreach full (0 1)
        foreach type (0 1 2)
          set file = "tree$dim-$tree-f$full-$type-new.hdf5"
          echo "$file"
          if ($dim == 2) then
             h5topng -c $colormap_dir/$color $file
+            mv $file.png k$tree-f$full-t$type-d$dim.hdf5
          else
-            h5topng -x 127 -c $colormap_dir/$color $file
-            mv $file.png $file-x.png
-            h5topng -y 127 -c $colormap_dir/$color $file
-            mv $file.png $file-y.png
-            h5topng -z 127 -c $colormap_dir/$color $file
-            mv $file.png $file-z.png
+            h5topng -x 65 -c $colormap_dir/$color $file
+            mv $file.png k$tree-f$full-t$type-d$dim-x.hdf5
+            h5topng -y 65 -c $colormap_dir/$color $file
+            mv $file.png k$tree-f$full-t$type-d$dim-y.hdf5
+            h5topng -z 65 -c $colormap_dir/$color $file
+            mv $file.png k$tree-f$full-t$type-d$dim-z.hdf5
          endif 
        end
      end
    end
    end
 endif
-
-# old
-
-if ($new == 1) then
-   foreach tree (2 4 8)
-     foreach full (0 1)
-       foreach type (0 1 2)
-         set file = "tree$tree-f$full-$type-old.hdf5"
-         echo "$file"
-         h5topng -c $colormap_dir/$color $file
-       end
-     end
-   end
-endif
-
-
 

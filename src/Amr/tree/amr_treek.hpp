@@ -42,7 +42,7 @@ public:
 
   TreeK(int r) : r_(r), levels_(0) {};
 
-  ~TreeK() {};
+  virtual ~TreeK() {};
 
   /// Refine down to array
   virtual  void refine
