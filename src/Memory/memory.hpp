@@ -3,20 +3,6 @@
 
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2009 James Bordner
- * Copyright (C) 2009 Laboratory for Computational Astrophysics
- * Copyright (C) 2009 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
-
 /** 
  *********************************************************************
  *
@@ -35,8 +21,6 @@
  */
 
 typedef unsigned memory_group_handle;
-
-#ifdef USE_MEMORY
 
 //======================================================================
 // LOCAL DEFINES
@@ -126,7 +110,11 @@ public:
   static void reset () throw ();
 
   static void set_active (bool is_active) throw ()
+#ifdef USE_MEMORY
   { is_active_ = is_active; } ;
+#else
+  { } ;
+#endif
 
 private:
 
@@ -136,20 +124,24 @@ private:
 
   static void check_handle_(memory_group_handle group_handle) 
     throw (ExceptionMemoryBadGroupHandle())
-      {  if ( group_handle > MEMORY_MAX_NUM_GROUPS) {
-	  throw (ExceptionMemoryBadGroupHandle());
-	}
-      }
+#ifdef USE_MEMORY
+  {  if ( group_handle > MEMORY_MAX_NUM_GROUPS) {
+      throw (ExceptionMemoryBadGroupHandle());
+    }
+  }
+#else
+  {
+  }
+#endif
   
-//   void *new_(size_t bytes) throw (std::bad_alloc);
-//   void delete_(void *p) throw ();
-
 private:
 
   //-------------------------------------------------------------------
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
+
+#ifdef USE_MEMORY
 
   /// Whether keeping track of memory statistics is active or not
   static bool is_active_;
@@ -172,88 +164,8 @@ private:
   static long long bytes_high_  [MEMORY_MAX_NUM_GROUPS + 1];
   static long long new_calls_   [MEMORY_MAX_NUM_GROUPS + 1];
   static long long delete_calls_[MEMORY_MAX_NUM_GROUPS + 1];
-};
-
-#else /* USE_MEMORY */
-
-class Memory {
-
-/** 
-*********************************************************************
-*
-* @class     Memory
-* @brief     Dummy functions for not maintaining memory statistics
-* @ingroup   Group 
-*
-* Dummy functions for not maintaining memory statistics
-*
-*********************************************************************
-*/
-
-public:
-
-//-------------------------------------------------------------------
-// PUBLIC OPERATIONS
-//-------------------------------------------------------------------
-
-/// Initialize the memory component
-Memory() throw () {};
-
-/// Allocate memory
-static void * allocate ( size_t size ) { return 0; };
-
-/// De-allocate memory
-static void deallocate ( void * pointer ) {};
-
-/// Assign a name to a group
-static void new_group ( memory_group_handle, const char *) {};
-
-/// Begin allocating memory associated with the specified group
-static void begin_group ( memory_group_handle group_id ) {};
-
-/// End allocating memory associated with the specified group
-static void end_group ( memory_group_handle group_id ) {};
-
-/// Return name of the current group
-static const char * current_group () {return ""; };
-
-/// Return handle for the current group
-static memory_group_handle current_handle () {return 0; };
-
-/// Current number of bytes allocated
-static long long bytes ( memory_group_handle group_handle = 0 ) {return 0; };
-  
-/// Estimate of amount of local memory availables);
-static long long available ( memory_group_handle group_handle = 0 ) {return 0; };
-
-/// Estimate of used / available memory
-static float efficiency ( memory_group_handle group_handle = 0 ) {return 0; };
-
-/// Maximum number of bytes allocated
-static long long highest ( memory_group_handle group_handle = 0 ) {return 0; };
-
-
-/// Specify the maximum number of bytes to use
-static void set_limit ( long long size, memory_group_handle group_handle = 0)
-  {};
-
-/// Query the maximum number of bytes to use
-static long long get_limit ( memory_group_handle group_handle = 0 ) {return 0; };
-
-
-/// Return the number of calls to allocate for the group
-static int num_new ( memory_group_handle group_handle = 0 ) {return 0; };
-
-/// Return the number of calls to deallocate for the group
-static int num_delete ( memory_group_handle group_handle = 0 ) {return 0; };
-
-static void print () {};
-
-static void reset () {};
-
-static void set_active (bool is_active) {}
-};
-
 #endif
+
+};
 
 #endif /* MEMORY_HPP */

@@ -431,6 +431,7 @@ void Memory::reset() throw()
 
 //======================================================================
 
+#ifdef USE_MEMORY
 
 bool Memory::is_active_  =  true;
 
@@ -443,6 +444,8 @@ long long Memory::bytes_       [MEMORY_MAX_NUM_GROUPS + 1] = {0};
 long long Memory::bytes_high_  [MEMORY_MAX_NUM_GROUPS + 1] = {0};
 long long Memory::new_calls_   [MEMORY_MAX_NUM_GROUPS + 1] = {0};
 long long Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS + 1] = {0};
+
+#endif
 
 //======================================================================
     
