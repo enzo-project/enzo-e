@@ -17,6 +17,7 @@ WIKI_FILES = \
 	NotesComponentMonitor \
 	NotesComponentParallel \
 	NotesComponentParallelMpi \
+	NotesComponentParallelTask \
 	NotesComponentParameters \
 	NotesComponentParticles \
 	NotesComponentPerformance \
