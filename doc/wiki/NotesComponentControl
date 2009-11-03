@@ -6,6 +6,15 @@
 
 The `Control` component is the main scheduler in Cello, and orchestrates the distributed computations to advance the simulation in time, as well as simulation initialization and finalization.  Currently we are evaluating the use of [http://charm.cs.uiuc.edu CHARM++] in the `Control` component.  The top-level function of `Control` is `main()`.
 
+ * main()
+   * initialize components
+   * read in the input file(s)
+   * initialize the simulation
+     * execute the simulation
+     * handle any errors
+   * finalize components
+   * terminate execution
+
 == Patch scheduling ==
 
 Compared to Enzo, the `Control` component does not loop through each level individually;  instead, it collapses the dependency tree to its theoretical shortest path, which is that of the finest level timesteps.  E.g. consider a 1-D problem with two levels of refinement near the center.  The parallel steps for Enzo versus Cello are shown below, with timesteps moving downward:
@@ -77,6 +86,6 @@ As an oversimplified summary:
 
 == `Control` Supporting Classes ==
 
- * `Task`: A `Task` is the combination of a sequence of `Method`'s  and a `Block` (see the [NotesComponentArray Array] component).  The main operation of a `Task` is to advance the simulation one timestep on the `Block`.  Since each `Block` corresponds to a serial thread, a `Task` would be implemented as a "Chare" object in CHARM++.
+ * [NotesComponentParallelTask Task]: A `Task`, which is part of the `Parallel` component, is the combination of a sequence of `Method`'s (algorithms) and a `FieldBlock` (data).  Parallel distribution and load-balancing of `Task`s is controlled by the `Parallel` component, whereas scheduling of inter-`Task` communication and scheduling of `Task` methods is controlled by the `Control` component.  Since each `FieldBlock` corresponds to a serial thread, a `Task` is analagous to a "Chare" object in CHARM++.
 
 ([NotesComponentArray Array] < [NotesComponents index] > [NotesComponentDisk Disk])

@@ -43,11 +43,11 @@ The `Performance` component is used to collect information about how efficiently
 
 Performance data are partitioned into the following groups:
 
- || `attr_process`  || ''MPI process id (OMP, UPC)'' ||
- || `attr_group`    || ''code group / component'' [memory] ||
- || `attr_region`   || ''code region'' ||
- || `attr_timestep` || ''Simulation timesteps'' [monotonic] ||
- || `attr_level`    || ''AMR hierarchy level'' ||
+ || `attribute_process` || ''process rank'' [implicit] ||
+ || `attribute_group`    || ''code group / component'' [memory] ||
+ || `attribute_region`   || ''code region'' ||
+ || `attribute_timestep` || ''Simulation timesteps'' [monotonic] ||
+ || `attribute_level`    || ''AMR hierarchy level'' ||
 
 The following metrics are computed:
 
@@ -55,27 +55,36 @@ The following metrics are computed:
  || `mem_balance`  || ''Relative memory load balance at given level'' ||
  || `comm_balance` || ''Relative communication load balance at given level'' ||
 
-If a metric is unchanged for a region, then nothing is stored in memory or written to disk.  Attributes such as timestep that are
-monotonic allow for deallocating stored metrics after periodic dumps to disk to free memory.
+If a metric is unchanged for a region, then nothing is stored in memory or written to disk.  Attributes such as timestep that are monotonic allow for deallocating stored metrics after periodic dumps to disk to free memory.
+
+One may also want to periodically clear some metrics, in particular `mem_high_bytes`, to get a more usable metric for load-balancing.  For example, `mem_high_bytes_timestep` for the largest amount of memory allocated at any one time since the previous timestep, or `mem_high_bytes_balance_<n>` for high-water memory since the last load balance step at hardware level n (0=core, 1=cpu, 2=node, etc.)
 
  ===  Attributes ===
  ===  Functions ===
 
- || `Performance::group_begin()` || ''Define the start of a group'' ||
- || `Performance::group_end()`   || ''Define the end of a group'' ||
- || `Performance::region_start()`   || ''Define the start of a region'' ||
- || `Performance::region_stop()`   || ''Define the end of a region'' ||
+ || `Performance::Performance()` || ''Create a new performance object'' ||
+ || `Performance::~Performance()` || ''Delete a performance object'' ||
  || || ||
- || `Performance::attribute_create()`   || ''Create a new attribute'' ||
- || `Performance::attribute_get()` || ''Return the value of an attribute'' ||
- || `Performance::attribute_set()` || ''Assign a value to an attribute'' ||
- || `Performance::attribute_count()` || ''Return the number of attributes'' ||
-|| || ||
- || `Performance::counter_create()`   || ''Create a new user counter'' ||
- || `Performance::counter_get()` || ''Return the value of a counter'' ||
- || `Performance::counter_set()` || ''Assign a value to a user counter'' ||
- || `Performance::counter_increment()` || ''Increment a user counter'' ||
- || `Performance::counter_count()` || ''Return the number of counters'' ||
+ || `Performance::new_attribute()`   || ''Create a new attribute'' ||
+ || `Performance::get_attribute()` || ''Return the value of an attribute'' ||
+ || `Performance::set_attribute()` || ''Assign a value to an attribute'' ||
+ || || ||
+ || `Performance::new_group()`   || ''Create a new group'' ||
+ || `Performance::get_group()` || ''Return the value of an group'' ||
+ || `Performance::set_group()` || ''Assign a value to an group'' ||
+ || `Performance::begin_group()` || ''Define the start of a group'' ||
+ || `Performance::end_group()`   || ''Define the end of a group'' ||
+ || || ||
+ || `Performance::new_region()`   || ''Create a new region'' ||
+ || `Performance::get_region()` || ''Return the value of a region'' ||
+ || `Performance::set_region()` || ''Assign a value to a region'' ||
+ || `Performance::start_region()`   || ''Define the start of a region'' ||
+ || `Performance::stop_region()`   || ''Define the end of a region'' ||
+ || || ||
+ || `Performance::new_counter()`   || ''Create a new user counter'' ||
+ || `Performance::get_counter()` || ''Return the value of a counter'' ||
+ || `Performance::set_counter()` || ''Assign a value to a user counter'' ||
+ || `Performance::increment_counter()` || ''Increment a user counter'' ||
  || || ||
  || `Performance::flush()` || ''Flush data to disk'' ||
 

@@ -48,3 +48,6 @@ Feel free to add new "wish" items or comment on existing items.  If you add a ne
 || W026 || jbordner || `Amr` || Support flexible node types: memory-efficient versus compute-efficient. ||
 
 || W027 || jbordner ||`Amr` / `Parallel` || Support temporary "allocate as-needed" ghost zones in addition to "permanent" ones||
+
+|| W028 || jbordner ||`Parallel` || Only use inter-core, inter-cpu, inter-node, etc. level-communicators to bound communicator size and manage communication nonuniformity. ||
+

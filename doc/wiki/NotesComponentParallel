@@ -4,22 +4,27 @@
 
 = Parallel Component =
 
-The `Parallel` component provides services to aid in the efficient data distribution and dynamic load balancing
-on hierarchical parallel platforms.  This is done using one or more parallelization languages or libraries, including MPI, OpenMP, or UPC.
+The `Parallel` component provides services to aid in the efficient data distribution, dynamic load balancing, and task management on hierarchical parallel platforms.  This is done using one or more parallelization languages or libraries, including MPI, OpenMP, or UPC.  The `Parallel` component keeps track of data assigned to processors in a hierarchical manner, which helps both to efficiently map data to the physical hardware, and reduce the amount of storage and communication required for load balancing.
 
-The `Parallel` component keeps track of data assigned to processors in a hierarchical manner.  This helps to both efficiently map data to the physical hardware, and to reduce the amount of storage or communication required for load balancing.
+ == Hierarchical Parallelism ==
 
-The main data structure is a tree with nodes corresponding to threads or processes, and how they are organized into higher levels (e.g. cpu's, compute nodes, supernodes, etc.)  The actual tree is stored in a distributed manner, with tree nodes stored only for level entities (cpu, compute node, etc.) that  contain the process.
+The main data structure is a distributed tree with leaves corresponding to threads or processes, and nodes corresponding to how they are organized into higher levels, e.g. cpu's, compute nodes, supernodes, etc.  Communicators (subsets of threads, like MPI communicators, but generalized to UPC as well) are available at each level of the hierarchy to facilitate efficient communication between cores within a CPU, between CPU's in a node, etc.  By default, communicators link corresponding compute components in coarser-levels; for example, all processors that have rank `k` relative to their containing node form a communicator.  Communicators thus define a hypercube-like topology based on the hardware levels. To provide some flexibility to reduce hotspots in the hardware network, processors can be remapped dynamically and independently within levels to "load balance" communication.
 
-Communicators are available at each level of the hierarchy to facilitate efficient communication within a cpu, node, etc.  By default, communicators involve one tree node per level, all tree nodes in a level are in a communicator.  For example, in a process hierarchy of 4 compute nodes (level 0), 32 cpu's per compute node (level ), and 8 cores per cpu (level 2), each process would be in one communicator of size 4 at level 0, one of size 32 at level 1, and one of size 8 at level 2.
+[[Image(htdocs:mpi-latency-triton.png)]]
 
-By default, communicators link corresponding compute components , for example, all like-processes in coarser hierarchy levels share a communicator with their counterpart in other .  To provide some flexibility to reduce hotspots in the hardware network, these can be remapped dynamically to "load balance" communication.
-  
-=== Related Classes ===
+Each level can be assigned a different communication approach, either MPI, UPC, or OpenMP, subject to restrictions of inter-operability, and shared-memory for OMP.  Additional levels can also be specified, for example to split a level between MPI and OMP to aid in optimizing performance.
+
+== Hierarchical Load Balancing ==
+
+Load balancing is performed on different levels independently, with load balancing on lower parallel hierarchy levels performed more frequently than higher levels.  Before load balancing at a given parallel hierarchy level, all lower levels are balanced recursively from smallest (core-level) to largest.  To balance the given level, a smoothing-type operation is used with respect to some performance metric, such as user time (not wallclock or cpu), high-water memory usage since the previous timestep or previous level load balancing step.  The smoothing operation may include over-relaxation to intentionally "over-shoot" the balancing to reduce the frequency of load balancing steps by roughly half.  Furthermore, information from previous level balance steps may be used to identify trends to anticipate .  Since all communication is performed between processes the same distance from each other, communication latencies will be similar.  Tasks are transfered in a round-robin manner starting with the next-lower parallel hierarchy level to reduce the need for a second recursive re-balancing step at lower parallel hierarchy levels.
+
+There are some potential issues with this approach.  In particular, it does not preserve existing data locality of AMR grid patches with neighbors, parents, or children.  A variation of the above approach is to select tasks that are closest on the space-filling curve in the AMR octree-like data structure.  Load balancing higher parallel hierarchy levels may involve "shifting" tasks through a node, much like a front through a grid, creating a "task flux".  Since lower parallel hierarchy levels may become imbalanced, a second downward rebalance sweep may be required, which will induce a W cycle in load balancing.
+
+== Related Classes ==
 
 To implement `Parallel`, other related classes are used to share implementation responsibilities. These classes are described in separate pages.
 
- * [NotesComponentParallelTask Task] The `Task` class is used to control different distributed entities.  It maintains information such as time and storage estimates, and is the mechanism for data and operations to be migrated between physical processes to keep the distributed workload balanced.  It is analogous to a virtual thread, as opposed to a physical thread.  Distributed entities are associated with `Task`s, and are responsible for packing and unpacking data for inter-process migration.  `Task`s can also share data.
+ * [NotesComponentParallelTask Task] The `Task` class is used to control different distributed entities.  It maintains information such as time and storage estimates, and is the mechanism for data and operations to be migrated between physical processes to keep the distributed workload balanced.  It is analogous to a virtual thread, as opposed to a physical thread.  Distributed entities are associated with `Task`s, and are responsible for packing and unpacking data for inter-process migration.  `Task`s can also send and receive data, in particular to update `FieldBlock` ghost zones.  The `Control` component, which schedules when `Task`s are executed, determines when `Task`s should communicate their data.
 
  * [NotesComponentParallelMpi Mpi] The `Mpi` class is used as a wrapper for calls to MPI.
  * [NotesComponentParallelOmp Omp] The `Omp` class is used as a wrapper for calls to OpenMP.
@@ -36,13 +41,20 @@ To implement `Parallel`, other related classes are used to share implementation 
 
 === Functions ===
 
- || `Parallel::balance(int)` || ''Remap `Task`s at given level to load balance computation or memory'' ||
+ || `Parallel::balance(int)` || ''Load balance `Task`s at given level based on computation or memory'' ||
  || `Parallel::size(int)` || ''Number of processes/threads in the given level'' ||
  || `Parallel::rank(int)` || ''Rank of the processes/threads in the given level'' ||
+ || `Parallel::num_levels()` || ''Number of communication levels'' ||
  || `Parallel::comm(int)` || ''Communicator/handle for the given level'' ||
+ || || ||
+ || `Parallel::get_type(i)` || ''Return the type of parallelization for the given level, e.g. mpi, upc, omp'' ||
+ || `Parallel::set_type(i)` || ''Set the type of parallelization for the given level, e.g. mpi, upc, omp'' ||
+
 
 === Usage ===
 
 === Parameters ===
 
- || `Parallel:levels` || [int , int, ... ] || E.g. `[8,32]` for 8 cores/cpu, 32 cpu's/node, etc. ||
+ || `Parallel:levels` || [int,int, ... ] || E.g. `[8,32]` for 8 cores/cpu, 32 cpu's/node  ||
+ || `Parallel:type` || [string,string, ... ] || E.g. `["upc","upc","mpi"]` for UPC within a node and MPI between nodes||
+ || `Parallel:balance_frequency` || [int,int,...] || E.g. `[1,8,64]` for timesteps between load-balancing, with 0 turning balancing off ||

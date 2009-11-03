@@ -5,22 +5,22 @@
 Below is the definitive list of Cello components (verified match with SVN doc/design revision 439 on 2008-12-19)
 
 || ( ) || [NotesComponentAmr         Amr] || Adaptive mesh refinement infrastructure, built on top of `Array` || 
-|| ( ) || [NotesComponentAnalysis    Analysis] || Inline analysis and visualization routines || 
+|| ( ) || ~~[NotesComponentAnalysis    Analysis]~~ || ~~Inline analysis and visualization routines~~ || 
 || ( ) || [NotesComponentArray       Array] || Fortran-like array, which may be parallelized or vectorized in various ways || 
-|| ( ) || [NotesComponentControl     Control] || Orchestrate the advancement of a `Simulation` in time ||
-|| ( ) || [NotesComponentDisk        Disk] || Provide functions for managing long-term data storage on disks || 
+|| ( ) || [NotesComponentControl     Control] || Orchestrates the parallel advancement of a `Simulation` in time ||
+|| ( ) || [NotesComponentDisk        Disk] || Provides functions for writing and reading data to and from disk storage  || 
 || ( ) || [NotesComponentError       Error] || Error prevention (including check-pointing), error detection and recovery || 
-|| ( ) || [NotesComponentField       Field] || Scalar or vector fields on an `Array` or `Amr` hierarchy ||
+|| ( ) || [NotesComponentField       Field] || Scalar fields on an `Array` or `Amr` hierarchy ||
 || ( ) || [NotesComponentMemory      Memory] || Manage dynamic memory allocation and deallocation ||
-|| ( ) || [NotesComponentMethod      Method] || Modularized hyperbolic, elliptic, or local physics algorithms; also analysis and visualization ||
+|| ( ) || [NotesComponentMethod      Method] || Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and pre-visualization ||
 || ( ) || [NotesComponentMonitor     Monitor] || User interface to monitor the status of a running simulation ||
-|| ( ) || [NotesComponentParallel    Parallel] || Functions for controlling various parallelization and vectorization strategies ||
+|| ( ) || [NotesComponentParallel    Parallel] || Functions for data distribution, communication, and load balancing ||
 || ( ) || [NotesComponentParameters  Parameters] || Input, parse, store, and access run-time parameters ||
 || ( ) || [NotesComponentParticles   Particles] || Efficiently represent groups of distributed particles ||
 || ( ) || [NotesComponentPerformance Performance] || Measure, and provide functions to access, run-time performance ||
-|| ( ) || [NotesComponentPortal      Portal] || Input from users or other applications to query and direct the `Simulation` ||
-|| ( ) || [NotesComponentProblem     Problem] || Defines the problem, including physics, discretization, boundary and initial conditions ||
-|| ( ) || [NotesComponentSimulation  Simulation] || Defines a `Problem` or ensemble of `Problem`'s to run ||
+|| ( ) || [NotesComponentPortal      Portal] || Interface with other applications, including querying state, modifying parameters, and post-visualization ||
+|| ( ) || ~~[NotesComponentProblem     Problem]~~ || ~~Defines the problem (or problems), including physics, discretization, boundary and initial conditions~~ ||
+|| ( ) || [NotesComponentSimulation  Simulation] || Defines the problem (or problems) to run ||
 
 
 Code for components are organized into separate directories.

@@ -24,14 +24,15 @@
  || `Mpi::rank()` || Rank of the MPI process in a communicator ||
  || `Mpi::comm()` || Return global communicator in a communicator||
  || || ||
- || `Mpi::send_init()` || Initiate sending an array ||
- || `Mpi::send()` || Complete sending an array ||
- || `Mpi::recv_init()` || Initiate receiving an array ||
- || `Mpi::recv()` || Complete receiving an array ||
+ || `Mpi::begin_send()` || Begin sending an array ||
+ || `Mpi::end_send()` || Complete sending an array ||
+ || `Mpi::begin_recv()` || Begin receiving an array ||
+ || `Mpi::end_recv()` || Complete receiving an array ||
  || || ||
  || `Mpi::barrier()` || Barrier  in a communicator||
 
  === Usage === 
+
  === Parameters === 
 
  || `Parallel:mpi:type` || [1|2] || Type of MPI: 1 (send/recv) or 2 (get/put) ||
