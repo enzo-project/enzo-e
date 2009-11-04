@@ -19,18 +19,21 @@ void initialize_image ();
 void initialize_implosion ();
 void initialize_implosion2 ();
 
-const char * file_root = "image";
 
+void print_usage(const char * name)
+{
+  printf ("Usage: %s <image|implosion|implosion3> [size] [cycles] [dump-frequency]\n",name);
+    exit(1);
+}
 int main(int argc, char ** argv)
 {
   enum type_problem problem_type;
-  int n      = 394;
+  int n;
   int cycles = 20000;
   int cycle_dump_frequency = 10;
 
   if (argc < 2) {
-    printf ("Usage: %s [image|implosion|implosion3\n",argv[0]);
-    exit(1);
+    print_usage(argv[0]);
   } else {
     if (strcmp(argv[1],"image")==0) {
       problem_type = problem_image;
@@ -40,14 +43,24 @@ int main(int argc, char ** argv)
     } else if (strcmp(argv[1],"implosion3")==0) {
       problem_type = problem_implosion3;
     } else {
-      printf ("Usage: %s [image|implosion|implosion3\n",argv[0]);
-      exit(1);
+      print_usage(argv[0]);
     }
     if (argc>=3)  {
       n = atoi(argv[2]);
       if (n < 1 || 10000 < n) {
-	printf ("Illegal size %d: resetting to 400\n",n);
-	n = 400;
+	int n_old = n;
+	if (problem_type == problem_implosion3) {
+	  n = 32-6;
+	} else {
+	  n = 400-6;
+	}
+	printf ("Illegal size %d: resetting to %d\n",n_old,n);
+      }
+    } else {
+      if (problem_type == problem_implosion3) {
+	n = 32-6;
+      } else {
+	n = 400-6;
       }
     }
     if (argc>=4)  {
@@ -66,13 +79,18 @@ int main(int argc, char ** argv)
     }
   }
 
-
   initialize_hydro ();
 
   switch (problem_type) {
-  case problem_image:      initialize_image();              break;
-  case problem_implosion:  initialize_implosion(n,cycles);  break;
-  case problem_implosion3: initialize_implosion3(n,cycles); break;
+  case problem_image:
+    initialize_image(cycles);
+    break;
+  case problem_implosion:
+    initialize_implosion(n,cycles);
+    break;
+  case problem_implosion3:
+    initialize_implosion3(n,cycles);
+    break;
   }
 
   float dt;
@@ -94,7 +112,7 @@ int main(int argc, char ** argv)
     SetExternalBoundaryValues();
 
     if ((cycle % cycle_dump_frequency) == 0) {
-      data_dump(file_root,cycle);
+      data_dump(problem_name[problem_type],cycle);
     }
 
     SolveHydroEquations(cycle, dt);
@@ -102,7 +120,7 @@ int main(int argc, char ** argv)
   }
   if ((cycle % cycle_dump_frequency) == 0) {
     SetExternalBoundaryValues();
-    data_dump(file_root,cycle);
+    data_dump(problem_name[problem_type],cycle);
   }
 }
 

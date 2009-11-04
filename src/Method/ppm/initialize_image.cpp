@@ -1,18 +1,5 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
 
 /** 
 *********************************************************************
@@ -56,14 +43,14 @@
 
 inline float color_value 
 (float * image, size_t nx, size_t ny,
- float x, float y, double enzo_lower[2], double enzo_upper[2])
+ float x, float y, double lower[2], double upper[2])
 // Return boolean flag whether point is inside the text "Enzo"
 {
-  if (x < enzo_lower[0] || x > enzo_upper[0]) return false;
-  if (y < enzo_lower[1] || y > enzo_upper[1]) return false;
+  if (x < lower[0] || x > upper[0]) return false;
+  if (y < lower[1] || y > upper[1]) return false;
 
-  size_t ix = width*(x - enzo_lower[0]) / (enzo_upper[0] - enzo_lower[0]);
-  size_t iy = height*(y - enzo_lower[1]) / (enzo_upper[1] - enzo_lower[1]);
+  size_t ix = width*(x - lower[0]) / (upper[0] - lower[0]);
+  size_t iy = height*(y - lower[1]) / (upper[1] - lower[1]);
   if (ix == width) ix--;
   if (iy == height) iy--;
   assert (ix < width);
@@ -71,18 +58,18 @@ inline float color_value
   return (image[ix + width*iy]);
 } 
 
-void initialize_image ()
+void initialize_image (int cycles_param)
 
 {
 
   int grid_size [] = { width, height };
 
-  float enzo_density_out = 1.0;
-  float enzo_density_in  = 0.125;
-  float enzo_pressure_out = 1.0;
-  float enzo_pressure_in  = 0.14;
-  float enzo_velocity_x = 0.0;
-  float enzo_velocity_y = 0.0;
+  float density_out = 1.0;
+  float density_in  = 0.125;
+  float pressure_out = 1.0;
+  float pressure_in  = 0.14;
+  float velocity_x = 0.0;
+  float velocity_y = 0.0;
   int pixel[3];
   const char * data = header_data;
 
@@ -106,7 +93,7 @@ void initialize_image ()
   // Control
 
   time_stop              = 2.5;
-  cycle_stop             = 5000;
+  cycle_stop             = cycles_param;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
@@ -140,7 +127,7 @@ void initialize_image ()
 
   for (int dim=0; dim<GridRank; dim++) {
     CellWidth[dim] = new FLOAT[GridDimension[dim]];
-    float h = double (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
+    float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
       (GridEndIndex[dim] - GridStartIndex[dim] + 1);
     for (int i=0; i<GridDimension[dim]; i++) {
       CellWidth[dim][i] = h;
@@ -199,8 +186,8 @@ void initialize_image ()
       float a = color_value(image, width,height,x,y,			    
 			    DomainLeftEdge,DomainRightEdge);
 
-      float density  = a*enzo_density_in  + (1-a)*enzo_density_out;
-      float pressure = a*enzo_pressure_in + (1-a)*enzo_pressure_out;
+      float density  = a*density_in  + (1-a)*density_out;
+      float pressure = a*pressure_in + (1-a)*pressure_out;
 
       BaryonField[ field_density ] [ i ] = density;
       BaryonField[ field_total_energy ][ i ] = 
@@ -212,8 +199,8 @@ void initialize_image ()
 
       // Initialize velocity
 
-      BaryonField[ field_velocity_x ][ i ] = enzo_velocity_x;
-      BaryonField[ field_velocity_y ][ i ] = enzo_velocity_y;
+      BaryonField[ field_velocity_x ][ i ] = velocity_x;
+      BaryonField[ field_velocity_y ][ i ] = velocity_y;
 
       // Initialize color
 

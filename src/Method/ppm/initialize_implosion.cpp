@@ -1,19 +1,5 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
-
 /** 
  *********************************************************************
  *
@@ -57,12 +43,12 @@ void initialize_implosion (int size_param, int cycles_param)
 {
 
   int grid_size [] = { size_param, size_param };
-  float implosion_density_out = 1.0;
-  float implosion_density_in  = 0.125;
-  float implosion_pressure_out = 1.0;
-  float implosion_pressure_in  = 0.14;
-  float implosion_velocity_x = 0.0;
-  float implosion_velocity_y = 0.0;
+  float density_out = 1.0;
+  float density_in  = 0.125;
+  float pressure_out = 1.0;
+  float pressure_in  = 0.14;
+  float velocity_x = 0.0;
+  float velocity_y = 0.0;
 
   // Physics
 
@@ -76,7 +62,7 @@ void initialize_implosion (int size_param, int cycles_param)
 
   // Control
 
-  time_stop              = 10000;
+  time_stop              = 2.5;
   cycle_stop             = cycles_param;
 
   CourantSafetyNumber    = 0.8;
@@ -130,6 +116,8 @@ void initialize_implosion (int size_param, int cycles_param)
   FieldType[field_color        = k++] = ElectronDensity;
 
   NumberOfBaryonFields = k;
+
+  assert (NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
   
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
 
@@ -156,11 +144,11 @@ void initialize_implosion (int size_param, int cycles_param)
   if (debug) printf ("Size = %d %d \n",ndx,ndy);
   if (debug) printf ("%g  %g %g  %g %g\n",
 	  Gamma, 
-	  implosion_pressure_out,implosion_density_out,
-	  implosion_pressure_in,implosion_density_in);
+	  pressure_out,density_out,
+	  pressure_in,density_in);
   if (debug) printf ("total energy: %g %g\n",
-	  implosion_pressure_out / ((Gamma - 1.0)*implosion_density_out),
-	  implosion_pressure_in / ((Gamma - 1.0)*implosion_density_in));
+	  pressure_out / ((Gamma - 1.0)*density_out),
+	  pressure_in / ((Gamma - 1.0)*density_in));
 
   for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
@@ -175,19 +163,19 @@ void initialize_implosion (int size_param, int cycles_param)
       // Initialize density
 
       if (x + y < 0.1517) {
-	BaryonField[ field_density ] [ i ] = implosion_density_in;
+	BaryonField[ field_density ] [ i ] = density_in;
       } else {
-	BaryonField[ field_density ] [ i ] = implosion_density_out;
+	BaryonField[ field_density ] [ i ] = density_out;
       }
 
       // Initialize total energy
 
       if (x + y < 0.1517) {
 	BaryonField[ field_total_energy ][ i ] = 
-	  implosion_pressure_in / ((Gamma - 1.0)*implosion_density_in);
+	  pressure_in / ((Gamma - 1.0)*density_in);
       } else {
 	BaryonField[ field_total_energy ][ i ] = 
-	  implosion_pressure_out / ((Gamma - 1.0)*implosion_density_out);
+	  pressure_out / ((Gamma - 1.0)*density_out);
       }
 
       // Initialize internal energy
@@ -196,8 +184,8 @@ void initialize_implosion (int size_param, int cycles_param)
 
       // Initialize velocity
 
-      BaryonField[ field_velocity_x ][ i ] = implosion_velocity_x;
-      BaryonField[ field_velocity_y ][ i ] = implosion_velocity_y;
+      BaryonField[ field_velocity_x ][ i ] = velocity_x;
+      BaryonField[ field_velocity_y ][ i ] = velocity_y;
 
       // Initialize color
 
