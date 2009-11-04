@@ -18,7 +18,7 @@
 #define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
 
 const bool debug    = false;
-const bool geomview = true;
+const bool geomview = false;
 
 const int  cell_size = 1;
 const int  line_width = 1;
