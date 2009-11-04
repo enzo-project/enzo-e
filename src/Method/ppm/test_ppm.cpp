@@ -12,6 +12,7 @@
 #include "string.h"
 #include "cello_hydro.h"
 #include "test_ppm.h"
+#include "performance_timer.hpp"
 
 void initialize_hydro ();
 void initialize_image ();
@@ -79,13 +80,16 @@ int main(int argc, char ** argv)
   int   cycle;
   float time;
 
+  Timer timer;
+  timer.start();
+    
   for (cycle = 0, time = 0.0;
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
     dt =  min(ComputeTimeStep(), time_stop - time);
 
-    printf ("cycle = %6d time = %6f dt = %6f\n",cycle,time,dt);
+    printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",cycle,timer.value(),time,dt);
 
     SetExternalBoundaryValues();
 
