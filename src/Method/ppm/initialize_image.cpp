@@ -192,7 +192,7 @@ void initialize_image ()
 
       float x = (ix - GridStartIndex[0] + 0.5)*hx;
 
-      int i = ix + ndx*iy;
+      int i = ix + ndx*(GridEndIndex[1] - (iy-GridStartIndex[1]));
 
       // Initialize density and total energy
 
@@ -217,7 +217,8 @@ void initialize_image ()
 
       // Initialize color
 
-      BaryonField[ field_color ][ i ] = BaryonField[ field_density ] [ i ];
+      //      BaryonField[ field_color ][ i ] = BaryonField[ field_density ] [ i ];
+      BaryonField[ field_color ][ i ] = 0;
     }
   }
 

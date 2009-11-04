@@ -14,7 +14,9 @@
 #include "test_ppm.h"
 
 void initialize_hydro ();
-void initialize_ppm (enum type_problem);
+void initialize_image ();
+void initialize_implosion ();
+void initialize_implosion2 ();
 
 const char * file_root = "image";
 
@@ -26,19 +28,18 @@ int main(int argc, char ** argv)
   int cycle_dump_frequency = 10;
 
   if (argc < 2) {
-    printf ("Usage: %s [color|image|implosion|implosion3\n",argv[0]);
+    printf ("Usage: %s [image|implosion|implosion3\n",argv[0]);
     exit(1);
   } else {
-    if (strcmp(argv[1],"color")) {
-      problem_type = problem_color;
-    } else if (strcmp(argv[1],"image")) {
+    if (strcmp(argv[1],"image")==0) {
       problem_type = problem_image;
-    } else if (strcmp(argv[1],"implosion")) {
+      printf ("image\n");
+    } else if (strcmp(argv[1],"implosion")==0) {
       problem_type = problem_implosion;
-    } else if (strcmp(argv[1],"implosion3")) {
+    } else if (strcmp(argv[1],"implosion3")==0) {
       problem_type = problem_implosion3;
     } else {
-      printf ("Usage: %s [color|image|implosion|implosion3\n",argv[0]);
+      printf ("Usage: %s [image|implosion|implosion3\n",argv[0]);
       exit(1);
     }
     if (argc>=3)  {
@@ -67,7 +68,11 @@ int main(int argc, char ** argv)
 
   initialize_hydro ();
 
-  initialize_ppm(problem_type);
+  switch (problem_type) {
+  case problem_image:      initialize_image();              break;
+  case problem_implosion:  initialize_implosion(n,cycles);  break;
+  case problem_implosion3: initialize_implosion3(n,cycles); break;
+  }
 
   float dt;
 
