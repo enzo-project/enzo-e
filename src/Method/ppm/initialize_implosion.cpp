@@ -49,6 +49,7 @@ void initialize_implosion (int size_param, int cycles_param)
   float pressure_in  = 0.14;
   float velocity_x = 0.0;
   float velocity_y = 0.0;
+  int cutoff = 0.1517;
 
   // Physics
 
@@ -162,7 +163,7 @@ void initialize_implosion (int size_param, int cycles_param)
 
       // Initialize density
 
-      if (x + y < 0.1517) {
+      if (x + y < cutoff) {
 	BaryonField[ field_density ] [ i ] = density_in;
       } else {
 	BaryonField[ field_density ] [ i ] = density_out;
@@ -170,7 +171,7 @@ void initialize_implosion (int size_param, int cycles_param)
 
       // Initialize total energy
 
-      if (x + y < 0.1517) {
+      if (x + y < cutoff) {
 	BaryonField[ field_total_energy ][ i ] = 
 	  pressure_in / ((Gamma - 1.0)*density_in);
       } else {

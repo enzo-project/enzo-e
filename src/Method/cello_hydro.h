@@ -216,8 +216,7 @@ void initialize_hydro ();
 
 void initialize_implosion (int size, int cycles);
 void initialize_implosion3 (int size, int cycles);
-void initialize_image ();
-void initialize_color ();
+void initialize_image (int cycles);
 
 // PPML
 

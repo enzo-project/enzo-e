@@ -72,16 +72,6 @@ void data_dump(const char * file_root, int cycle)
   hdf5.write(BaryonField[field_density]);
   hdf5.dataset_close ();
 
-  // Write color
-
-  hdf5.dataset_open_write ("color",
-			   GridDimension[0],
-			   GridDimension[1],
-			   GridDimension[2]);
-  hdf5.write(BaryonField[field_color]);
-  hdf5.dataset_close ();
-
-
   // Close the file
   hdf5.file_close();
 }
