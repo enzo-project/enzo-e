@@ -58,6 +58,11 @@ include $(TOP)/src/MAKE/Make.include
 test_ppm: includes $(OBJS) $(OBJS_PPM)
 	$(CXX) -o test_ppm $(OBJS_PPM) $(OBJS) $(LIB)
 
+initialize_image.o: image.h
+
+image.h:
+	ln -s circle2.h image.h
+
 #-----------------------------------------------------------------------
 
 .PHONY: includes
