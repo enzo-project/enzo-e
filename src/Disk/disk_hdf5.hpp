@@ -58,6 +58,8 @@ public:
   void group_close ();
   void dataset_open_read (std::string name, int * nx, int * ny, int * nz);
   void dataset_open_write (std::string name, int nx, int ny, int nz);
+  void dataset_set_hyperslab (int ix0,int iy0, int iz0, 
+			       int mx, int my, int mz);
   void dataset_close ();
   void read  (Scalar * buffer);
   void write (Scalar * buffer);
@@ -92,6 +94,9 @@ private:
 
   /// HDF5 data type
   hid_t datatype_;
+
+  /// Last error
+  herr_t      status_;
 
   //-------------------------------------------------------------------
   // PRIVATE OPERATIONS
