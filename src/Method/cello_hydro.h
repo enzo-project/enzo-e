@@ -151,6 +151,35 @@ extern int field_velocity_y;
 extern int field_velocity_z;
 extern int field_color;
 
+extern int field_magnetic_x;
+extern int field_magnetic_y;
+extern int field_magnetic_z;
+
+extern int field_density_xp;
+extern int field_velocity_x_xp;
+extern int field_velocity_y_xp;
+extern int field_velocity_z_xp;
+extern int field_magnetic_x_xp;
+extern int field_magnetic_y_xp;
+extern int field_magnetic_z_xp;
+
+extern int field_density_yp;
+extern int field_velocity_x_yp;
+extern int field_velocity_y_yp;
+extern int field_velocity_z_yp;
+extern int field_magnetic_x_yp;
+extern int field_magnetic_y_yp;
+extern int field_magnetic_z_yp;
+
+extern int field_density_zp;
+extern int field_velocity_x_zp;
+extern int field_velocity_y_zp;
+extern int field_velocity_z_zp;
+extern int field_magnetic_x_zp;
+extern int field_magnetic_y_zp;
+extern int field_magnetic_z_zp;
+
+
 extern int    NumberOfBaryonFields;
 extern float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
 extern float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
