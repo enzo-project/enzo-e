@@ -18,14 +18,14 @@ const char * file_root = "ppml";
 int main(int argc, char * argv[])
 {
 
-  int n      = 394;
+  int n      = 64;
   int cycles = 20000;
   int cycle_dump_frequency = 10;
   if (argc>=2)  {
     n = atoi(argv[1]);
-    if (n < 1 || 10000 < n) {
-      printf ("Illegal size %d: resetting to 400\n",n);
-      n = 400;
+    if (n < 1 || 200 < n) {
+      printf ("Illegal size %d: resetting to 64\n",n);
+      n = 64;
     }
   }
   if (argc>=3)  {

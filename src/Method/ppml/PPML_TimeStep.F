@@ -19,22 +19,22 @@
       REAL cga,dsc,cfsx,cgs,taux,cfsy,tauy,cfsz,tauz,c0,dt	  
       REALSUB dx(nx),dy(ny),dz(nz)
 
-      print*, 'nx,ny,nz=',nx,ny,nz
-      print*, 'i1,i2=',i1,i2
-      print*, 'j1,j2=',j1,j2
-      print*, 'k1,k2=',k1,k2
-      print*, 'dx(i1)=',dx(1)
-      print*, 'dy(j1)=',dy(1)
-      print*, 'dz(k1)=',dz(1)
-      print*, 'dn(10,10,1)=',dn(10,10,1)
-      print*, 'vx(10,10,1)=',vx(10,10,1)
-      print*, 'vy(10,10,1)=',vy(10,10,1)
-      print*, 'vz(10,10,1)=',vz(10,10,1)
-      print*, 'bx(10,10,1)=',bx(10,10,1)
-      print*, 'by(10,10,1)=',by(10,10,1)
-      print*, 'bz(10,10,1)=',bz(10,10,1)
-      print*, 'dt=',dt
-      
+C      print*, 'nx,ny,nz=',nx,ny,nz
+C      print*, 'i1,i2=',i1,i2
+C      print*, 'j1,j2=',j1,j2
+C      print*, 'k1,k2=',k1,k2
+C      print*, 'dx(i1)=',dx(1)
+C      print*, 'dy(j1)=',dy(1)
+C      print*, 'dz(k1)=',dz(1)
+C      print*, 'dn(10,10,1)=',dn(10,10,1)
+C      print*, 'vx(10,10,1)=',vx(10,10,1)
+C      print*, 'vy(10,10,1)=',vy(10,10,1)
+C      print*, 'vz(10,10,1)=',vz(10,10,1)
+C      print*, 'bx(10,10,1)=',bx(10,10,1)
+C      print*, 'by(10,10,1)=',by(10,10,1)
+C      print*, 'bz(10,10,1)=',bz(10,10,1)
+C      print*, 'dt=',dt
+
       DTMX=1.E+10
       DTMY=1.E+10
       DTMZ=1.E+10

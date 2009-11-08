@@ -57,13 +57,16 @@ void initialize_ppml (int size_param, int cycles_param)
 {
 
   int grid_size [] = { size_param, size_param, size_param };
-  float implosion_density_out = 1.0;
-  float implosion_density_in  = 0.125;
-  float implosion_pressure_out = 1.0;
-  float implosion_pressure_in  = 0.14;
-  float implosion_velocity_x = 0.0;
-  float implosion_velocity_y = 0.0;
-  float implosion_velocity_z = 0.0;
+
+  float MHDBlastDensity = 100.0;
+  float MHDBlastField = 10.0;
+  float radiusBlast = 0.125;
+  float R2 = radiusBlast*radiusBlast;
+
+  float density_out = 1.0;
+  float density_in  = MHDBlastDensity;
+  float pressure_out = 1.0;
+  float pressure_in  = 0.14;
 
   // Physics
 
@@ -126,11 +129,39 @@ void initialize_ppml (int size_param, int cycles_param)
 
   int k = 0;
 
-  FieldType[field_density         = k++] = Density;
-  FieldType[field_total_energy    = k++] = TotalEnergy;
-  FieldType[field_velocity_x      = k++] = Velocity1;
-  FieldType[field_velocity_y      = k++] = Velocity2;
-  FieldType[field_velocity_z      = k++] = Velocity3;
+  FieldType[field_density      = k] = k; k++;
+  FieldType[field_velocity_x   = k] = k; k++;
+  FieldType[field_velocity_y   = k] = k; k++;
+  FieldType[field_velocity_z   = k] = k; k++;
+  FieldType[field_magnetic_x   = k] = k; k++;
+  FieldType[field_magnetic_y   = k] = k; k++;
+  FieldType[field_magnetic_z   = k] = k; k++;
+
+  FieldType[field_density_xp    = k] = k; k++;
+  FieldType[field_velocity_x_xp = k] = k; k++;
+  FieldType[field_velocity_y_xp = k] = k; k++;
+  FieldType[field_velocity_z_xp = k] = k; k++;
+  FieldType[field_magnetic_x_xp = k] = k; k++;
+  FieldType[field_magnetic_y_xp = k] = k; k++;
+  FieldType[field_magnetic_z_xp = k] = k; k++;
+
+  FieldType[field_density_yp    = k] = k; k++;
+  FieldType[field_velocity_x_yp = k] = k; k++;
+  FieldType[field_velocity_y_yp = k] = k; k++;
+  FieldType[field_velocity_z_yp = k] = k; k++;
+  FieldType[field_magnetic_x_yp = k] = k; k++;
+  FieldType[field_magnetic_y_yp = k] = k; k++;
+  FieldType[field_magnetic_z_yp = k] = k; k++;
+
+  FieldType[field_density_zp    = k] = k; k++;
+  FieldType[field_velocity_x_zp = k] = k; k++;
+  FieldType[field_velocity_y_zp = k] = k; k++;
+  FieldType[field_velocity_z_zp = k] = k; k++;
+  FieldType[field_magnetic_x_zp = k] = k; k++;
+  FieldType[field_magnetic_y_zp = k] = k; k++;
+  FieldType[field_magnetic_z_zp = k] = k; k++;
+
+
 
   //  FieldType[field_internal_energy = k++] = InternalEnergy;
 
@@ -162,56 +193,55 @@ void initialize_ppml (int size_param, int cycles_param)
   float hy = CellWidth[1][0];
   float hz = CellWidth[2][0];
 
+  printf ("%g %g %g\n",hx,hy,hz);
+  printf ("%g %g %g\n", xd / ixg,yd/iyg,zd/izg);
   if (debug) printf ("Size = %d %d %d\n",ndx,ndy,ndz);
   if (debug) printf ("%g  %g %g  %g %g\n",
 	  Gamma, 
-	  implosion_pressure_out,implosion_density_out,
-	  implosion_pressure_in,implosion_density_in);
+	  pressure_out,density_out,
+	  pressure_in,density_in);
   if (debug) printf ("total energy: %g %g\n",
-	  implosion_pressure_out / ((Gamma - 1.0)*implosion_density_out),
-	  implosion_pressure_in / ((Gamma - 1.0)*implosion_density_in));
+	  pressure_out / ((Gamma - 1.0)*density_out),
+	  pressure_in / ((Gamma - 1.0)*density_in));
+
+  float ** field = BaryonField;
 
   for (int iz = GridStartIndex[2]; iz<=GridEndIndex[2]; iz++) {
 
-    float z = 0.5*hz + (iz - GridStartIndex[2]) * zd / izg;
+    float z0 = 0.5*hz + (iz - GridStartIndex[2]) * hz;
+    float zp = 1.0*hz + (iz - GridStartIndex[2]) * hz;
 
     for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
-      float y = 0.5*hy + (iy - GridStartIndex[1]) * yd / iyg;
+      float y0 = 0.5*hy + (iy - GridStartIndex[1]) * hy;
+      float yp = 1.0*hy + (iy - GridStartIndex[1]) * hy;
 
       for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
 
-	float x = 0.5*hx + (ix - GridStartIndex[0]) * xd / ixg;
+	float x0 = 0.5*hx + (ix - GridStartIndex[0]) * hx;
+	float xp = 1.0*hx + (ix - GridStartIndex[0]) * hx;
 
 	int i = ix + ndx * (iy + ndy * iz);
 
+
+	float r2   = x0*x0 + y0*y0 + z0*z0;
+	float rxp2 = xp*xp + y0*y0 + z0*z0;
+	float ryp2 = x0*x0 + yp*yp + z0*z0;
+	float rzp2 = x0*x0 + y0*y0 + zp*zp;
+
 	// Initialize density
 
-	if (x + y + z < 0.1517) {
-	  BaryonField[ field_density ] [ i ] = implosion_density_in;
-	} else {
-	  BaryonField[ field_density ] [ i ] = implosion_density_out;
-	}
+	field[field_density]    [i] = (r2   < R2) ? density_in : density_out;
+	field[field_density_xp] [i] = (rxp2 < R2) ? density_in : density_out;
+	field[field_density_yp] [i] = (ryp2 < R2) ? density_in : density_out;
+	field[field_density_zp] [i] = (rzp2 < R2) ? density_in : density_out;
 
-	// Initialize total energy
+	// Initialize magnetic field
 
-	if (x + y + z < 0.1517) {
-	  BaryonField[ field_total_energy ][ i ] = 
-	    implosion_pressure_in / ((Gamma - 1.0)*implosion_density_in);
-	} else {
-	  BaryonField[ field_total_energy ][ i ] = 
-	    implosion_pressure_out / ((Gamma - 1.0)*implosion_density_out);
-	}
-
-	// Initialize internal energy
-
-	//      BaryonField[ field_internal_energy ][ i ] = 
-
-	// Initialize velocity
-
-	BaryonField[ field_velocity_x ][ i ] = implosion_velocity_x;
-	BaryonField[ field_velocity_y ][ i ] = implosion_velocity_y;
-	BaryonField[ field_velocity_z ][ i ] = implosion_velocity_z;
+	field[field_magnetic_x]    [i] = MHDBlastField;
+	field[field_magnetic_x_xp] [i] = MHDBlastField;
+	field[field_magnetic_x_yp] [i] = MHDBlastField;
+	field[field_magnetic_x_zp] [i] = MHDBlastField;
 
       }
     }

@@ -49,11 +49,12 @@ clean-local:
 
 
 test_ppml: includes $(INCS) $(OBJS) test_ppml.o
-	$(CXX) -o test_ppml test_ppml.o $(OBJS) $(LIB)
+	$(CXX) -o test_ppml test_ppml.o $(LDFLAGS)
 
 
 .PHONY: includes
 includes:
+	-@ln -sf ../cello_hydro.cpp .
 	-@ln -sf ../cello_hydro.h .
 	-@ln -sf ../defines.h .
 
