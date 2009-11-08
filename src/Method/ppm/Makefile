@@ -67,6 +67,7 @@ image.h:
 
 .PHONY: includes
 includes:
+	-@ln -sf ../cello_hydro.cpp .
 	-@ln -sf ../cello_hydro.h .
 	-@ln -sf ../defines.h .
 
