@@ -39,14 +39,14 @@
 int main(int argc, char ** argv)
 {
   Array A;
-  A.resize(100,100);
+  A.resize(50,100);
 
   Scalar * a = A.values();
   int n0,n1;
   A.size(&n0,&n1);
 
-  for (int i0=0; i0<100; i0++) {
-    for (int i1=0; i1<100; i1++) {
+  for (int i1=0; i1<100; i1++) {
+    for (int i0=0; i0<50; i0++) {
       int i = i0 + n0*(i1);
       a[i] = i0*3 + i1*5;
     }
@@ -80,8 +80,8 @@ int main(int argc, char ** argv)
   Scalar * b = B.values();
 
   bool passed = true;
-  for (int i0=0; i0<100; i0++) {
-    for (int i1=0; i1<100; i1++) {
+  for (int i1=0; i1<100 && passed; i1++) {
+    for (int i0=0; i0<50 && passed; i0++) {
       int i = i0 + n0*(i1);
       if (a[i] != B(i0,i1)) passed = false;
       if (b[i] != A(i0,i1)) passed = false;

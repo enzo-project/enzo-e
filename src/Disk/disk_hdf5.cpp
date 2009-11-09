@@ -158,30 +158,29 @@ void Hdf5::dataset_open_write (std::string name,
 
     int d = 3;
     
-    if (nz == 1) { // <= 2D
-      d--;
-      if (ny == 1) { // <= 1D
-	d--;
-      }
-    }
+    if (nz == 1) { d--;  if (ny == 1) { d--; }}
 
     assert (1 <= d && d <= 3);
 
-    // Transpose Enzo -> HDF5 row/column ordering
-
     hsize_t n[3];
 
-    if (d == 1) {
-      n[0] = nx;
-    } else if (d == 2) {
-      n[0] = ny; // swap x, y
-      n[1] = nx;
-    } else if (d == 3) {
-      n[0] = nz; // swap x, y, z
-      n[1] = ny;
-      n[2] = nx;
-    }
+    // Transpose Enzo -> HDF5 row/column ordering
+
+//     if (d == 1) {
+//       n[0] = nx;
+//     } else if (d == 2) {
+//       n[0] = ny; // swap x, y
+//       n[1] = nx;
+//     } else if (d == 3) {
+//       n[0] = nz; // swap x, y, z
+//       n[1] = ny;
+//       n[2] = nx;
+//     }
       
+    n[0] = nx;
+    n[1] = ny;
+    n[2] = nz;
+
     dataspace_ = H5Screate_simple (d,n,0);
     
     dataset_   = H5Dcreate( file_, 
