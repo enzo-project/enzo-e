@@ -1,7 +1,7 @@
 
 TOP     = ../..
 PACKAGE = method
-OBJS    = method_method.o \
+OBJS    = method.o \
           method_ppm.o \
           method_ppm_solve_hydro_equations.o
 TESTS   = 
@@ -25,7 +25,6 @@ all: $(OBJS) $(TESTS) $(EXES)
 install-include:
 	ln -sf `pwd`/defines.h                 $(INCLUDE)
 	ln -sf `pwd`/method.hpp                $(INCLUDE)
-	ln -sf `pwd`/method_method.hpp         $(INCLUDE)
 
 #-----------------------------------------------------------------------
 

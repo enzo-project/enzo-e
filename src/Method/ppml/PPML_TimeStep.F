@@ -11,12 +11,12 @@
 
       Integer nx,ny,nz,i,j,k,i1,j1,k1,i2,j2,k2
       
-      REAL dn(nx,ny,nz)  	 
-      REAL vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)  	 
-      REAL bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)  	 
+      REAL dn(nx,ny,nz)           
+      REAL vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)           
+      REAL bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)           
       
       REAL dtmx,dtmy,dtmz,rr0,bkb,vah,vax,vay,vaz,cg,a2
-      REAL cga,dsc,cfsx,cgs,taux,cfsy,tauy,cfsz,tauz,c0,dt	  
+      REAL cga,dsc,cfsx,cgs,taux,cfsy,tauy,cfsz,tauz,c0,dt          
       REALSUB dx(nx),dy(ny),dz(nz)
 
 C      print*, 'nx,ny,nz=',nx,ny,nz

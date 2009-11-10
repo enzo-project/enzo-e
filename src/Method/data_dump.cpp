@@ -66,30 +66,10 @@ void data_dump(const char * file_root, int cycle)
   // Open hdf5 file dump for cycle
   char filename[80];
 
-  if (GridRank == 2) {
-    sprintf (filename,"%s-%06d.hdf5",file_root,cycle);
-    hdf5.file_open(filename,"w");
-    hdf5.dataset_open_write ("density",nx,ny,nz);
-    hdf5.write(BaryonField[field_density]);
-    hdf5.dataset_close ();
-    hdf5.file_close();
-  } else {
-    sprintf (filename,"%s-%06d-x.hdf5",file_root,cycle);
-    hdf5.file_open(filename,"w");
-    hdf5.dataset_open_write ("density",nx,ny,1);
-    hdf5.dataset_set_hyperslab(0,0,nz/2,nx,ny,1);
-    hdf5.write(BaryonField[field_density]);
-    hdf5.dataset_close ();
-    hdf5.file_close();
-
-    sprintf (filename,"%s-%06d-y.hdf5",file_root,cycle);
-    hdf5.file_open(filename,"w");
-    hdf5.dataset_open_write ("density",1,ny,nz);
-    hdf5.dataset_set_hyperslab(0,0,0,1,ny,nz);
-    hdf5.write(BaryonField[field_density]);
-    hdf5.dataset_close ();
-    hdf5.file_close();
-
-  }
-  
+  sprintf (filename,"%s-%06d.hdf5",file_root,cycle);
+  hdf5.file_open(filename,"w");
+  hdf5.dataset_open_write ("density",nx,ny,nz);
+  hdf5.write(BaryonField[field_density]);
+  hdf5.dataset_close ();
+  hdf5.file_close();
 }

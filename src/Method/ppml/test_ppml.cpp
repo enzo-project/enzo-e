@@ -43,8 +43,6 @@ int main(int argc, char * argv[])
     }
   }
 
-  printf ("%d %d %d\n",n,cycles,cycle_dump_frequency);
-
   initialize_hydro ();
   initialize_ppml(n,cycles);
 
@@ -61,18 +59,21 @@ int main(int argc, char * argv[])
 
     dt =  min (ComputeTimeStep(), time_stop - time);
 
-    printf ("cycle = %6d time = %6f dt = %6f\n",cycle,time,dt);
-
     SetExternalBoundaryValues();
 
-    if ((cycle % cycle_dump_frequency) == 0) {
+    if (cycle_dump_frequency && (cycle % cycle_dump_frequency) == 0) {
+      printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
+	      cycle,timer.value(),time,dt);
       data_dump(file_root,cycle);
     }
 
     SolveMHDEquations(cycle, dt);
 
   }
-  if ((cycle % cycle_dump_frequency) == 0) {
+
+  printf ("%d %d %g\n",n+6,cycles,timer.value());
+
+  if (cycle_dump_frequency && (cycle % cycle_dump_frequency) == 0) {
     SetExternalBoundaryValues();
     data_dump(file_root,cycle);
   }

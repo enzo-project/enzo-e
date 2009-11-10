@@ -43,8 +43,7 @@ extern "C" void FORTRAN_NAME(ppml)(float *dn,   float *vx,   float *vy,   float 
 			           float *bxry, float *byry, float *bzry,
 			           float *dnrz, float *vxrz, float *vyrz, float *vzrz,
 			           float *bxrz, float *byrz, float *bzrz,
-                                   float *dt, int *cycle_number, 
-                                   float dx[], float dy[], float dz[],
+                                   float *dt, float dx[], float dy[], float dz[],
                                    int *in, int *jn, int *kn,
 				   int is[], int ie[],
                                    int *num_subgrids, int leftface[], int rightface[],
@@ -57,7 +56,7 @@ extern "C" void FORTRAN_NAME(ppml)(float *dn,   float *vx,   float *vy,   float 
 			  float *d, float *E, float *u, float *v, float *w,
 			    float *ge,
                           int *grav, float *gr_ax, float *gr_ay, float *gr_az,
-			  float *gamma, float *dt, int *cycle_number,
+			  float *gamma, float *dt,
                             float dx[], float dy[], float dz[],
 			  int *rank, int *in, int *jn, int *kn,
                             int is[], int ie[],
@@ -97,34 +96,37 @@ int SolveMHDEquations(int cycle, float dt)
     /* Get easy to handle pointers for each variable. */
  
 
-    float *bfieldx    = BaryonField[ 4];
-    float *bfieldx_rx = BaryonField[11];
-    float *bfieldx_ry = BaryonField[18];
-    float *bfieldx_rz = BaryonField[25];
-    float *bfieldy    = BaryonField[ 5];
-    float *bfieldy_rx = BaryonField[12];
-    float *bfieldy_ry = BaryonField[19];
-    float *bfieldy_rz = BaryonField[26];
-    float *bfieldz    = BaryonField[ 6];
-    float *bfieldz_rx = BaryonField[13];
-    float *bfieldz_ry = BaryonField[20];
-    float *bfieldz_rz = BaryonField[27];
     float *density    = BaryonField[ 0];
-    float *dens_rx    = BaryonField[ 7];
-    float *dens_ry    = BaryonField[14];
-    float *dens_rz    = BaryonField[21];
     float *velox      = BaryonField[ 1];
-    float *velox_rx   = BaryonField[ 8];
-    float *velox_ry   = BaryonField[15];
-    float *velox_rz   = BaryonField[22];
     float *veloy      = BaryonField[ 2];
-    float *veloy_rx   = BaryonField[ 9];
-    float *veloy_ry   = BaryonField[16];
-    float *veloy_rz   = BaryonField[23];
     float *veloz      = BaryonField[ 3];
+    float *bfieldx    = BaryonField[ 4];
+    float *bfieldy    = BaryonField[ 5];
+    float *bfieldz    = BaryonField[ 6];
+
+    float *dens_rx    = BaryonField[ 7];
+    float *velox_rx   = BaryonField[ 8];
+    float *veloy_rx   = BaryonField[ 9];
     float *veloz_rx   = BaryonField[10];
+    float *bfieldx_rx = BaryonField[11];
+    float *bfieldy_rx = BaryonField[12];
+    float *bfieldz_rx = BaryonField[13];
+
+    float *dens_ry    = BaryonField[14];
+    float *velox_ry   = BaryonField[15];
+    float *veloy_ry   = BaryonField[16];
     float *veloz_ry   = BaryonField[17];
+    float *bfieldx_ry = BaryonField[18];
+    float *bfieldy_ry = BaryonField[19];
+    float *bfieldz_ry = BaryonField[20];
+
+    float *dens_rz    = BaryonField[21];
+    float *velox_rz   = BaryonField[22];
+    float *veloy_rz   = BaryonField[23];
     float *veloz_rz   = BaryonField[24];
+    float *bfieldx_rz = BaryonField[25];
+    float *bfieldy_rz = BaryonField[26];
+    float *bfieldz_rz = BaryonField[27];
 
     /* allocate space for fluxes */
  
@@ -336,19 +338,19 @@ int SolveMHDEquations(int cycle, float dt)
 
     /* current PPML implementation only supports 3D and does not support color fields */	
 
-      FORTRAN_NAME(ppml)(density, velox,    veloy,    veloz,    bfieldx,    bfieldy,    bfieldz,
-                         dens_rx, velox_rx, veloy_rx, veloz_rx, bfieldx_rx, bfieldy_rx, bfieldz_rx,
-                         dens_ry, velox_ry, veloy_ry, veloz_ry, bfieldx_ry, bfieldy_ry, bfieldz_ry,
-                         dens_rz, velox_rz, veloy_rz, veloz_rz, bfieldx_rz, bfieldy_rz, bfieldz_rz,
-                         &dt, &cycle, 
-                         CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
-                         &GridDimension[0], &GridDimension[1], &GridDimension[2], 
-                         GridStartIndex, GridEndIndex,
-                         &NumberOfSubgrids, leftface, rightface,
-                         istart, iend, jstart, jend,
-                         standard, dnindex,
-                         vxindex, vyindex, vzindex,
-                         bxindex, byindex, bzindex);
+      FORTRAN_NAME(ppml)
+	(density,velox,   veloy,   veloz,   bfieldx,   bfieldy,   bfieldz,
+	 dens_rx,velox_rx,veloy_rx,veloz_rx,bfieldx_rx,bfieldy_rx,bfieldz_rx,
+	 dens_ry,velox_ry,veloy_ry,veloz_ry,bfieldx_ry,bfieldy_ry,bfieldz_ry,
+	 dens_rz,velox_rz,veloy_rz,veloz_rz,bfieldx_rz,bfieldy_rz,bfieldz_rz,
+	 &dt, CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
+	 &GridDimension[0], &GridDimension[1], &GridDimension[2], 
+	 GridStartIndex, GridEndIndex,
+	 &NumberOfSubgrids, leftface, rightface,
+	 istart, iend, jstart, jend,
+	 standard, dnindex,
+	 vxindex, vyindex, vzindex,
+	 bxindex, byindex, bzindex);
 
     /* deallocate temporary space for solver */
  

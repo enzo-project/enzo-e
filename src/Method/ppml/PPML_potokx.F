@@ -1,16 +1,16 @@
       Subroutine POTOKx(Nx,Dx,Dt,Qlx,Qrx,Qpm,Qdy,Qdz,Qrp,Fm) 
-	  Implicit NONE
+          Implicit NONE
 
       Integer nx,i,j,k,m,l
 
       REAL Qlx(Nx,7),Qrx(Nx,7),Qpm(Nx,7),Qdy(Nx,7),Qdz(Nx,7)
-	  REAL Qrp(Nx,7),Fm(Nx,7) 
+          REAL Qrp(Nx,7),Fm(Nx,7) 
       
       REAL qp(7),px(7),qc(7),qvl(7),qvr(7)
-	  REAL vm(7),ql(7,7),qr(7,7),uv(7),vl(7)
+          REAL vm(7),ql(7,7),qr(7,7),uv(7),vl(7)
       REAL sl(7),qul(7),qur(7),tl(7)
-	  REAL tr(7),fr(7),f(7),ur(7),qv(7)
-	  REAL udy(7),udz(7),ay(7,7),az(7,7),av(7)
+          REAL tr(7),fr(7),f(7),ur(7),qv(7)
+          REAL udy(7),udz(7),ay(7,7),az(7,7),av(7)
       REAL tvl(7),tvr(7),tp(7),tc(7),tdy(7),tdz(7)
       REAL DT,DX,DTX,DXI,TL5
       REAL bl,br,fl1,fr1,ul_v,ur_v,cfl,qsr(7)
@@ -18,75 +18,75 @@
          Do i=1,Nx  
            Do m=1,7
              qrp(i,m)=0.
-		     fm(i,m)=0.
-           Enddo		  
-         Enddo		  
+                     fm(i,m)=0.
+           Enddo                  
+         Enddo                  
 
       Do i=3,Nx-3
-	    
-		Do m=1,7
-		
-		   Qvl(m)=Qlx(i,m)
-		   Qvr(m)=Qrx(i,m)
-		   Qp(m)=Qpm(i,m)
-	       Udy(m)=Qdy(i,m)
-	       Udz(m)=Qdz(i,m)
-	  
-		   Tvl(m)=Qlx(i+1,m)
-		   Tvr(m)=Qrx(i+1,m)
-		   Tp(m)=Qpm(i+1,m)
-	       Tdy(m)=Qdy(i+1,m)
-	       Tdz(m)=Qdz(i+1,m)
+            
+                Do m=1,7
+                
+                   Qvl(m)=Qlx(i,m)
+                   Qvr(m)=Qrx(i,m)
+                   Qp(m)=Qpm(i,m)
+               Udy(m)=Qdy(i,m)
+               Udz(m)=Qdz(i,m)
+          
+                   Tvl(m)=Qlx(i+1,m)
+                   Tvr(m)=Qrx(i+1,m)
+                   Tp(m)=Qpm(i+1,m)
+               Tdy(m)=Qdy(i+1,m)
+               Tdz(m)=Qdz(i+1,m)
 
         Enddo
 
       DTX=DT/DX
-	
-	    CALL VECTEGx(QP,QC)
-	    CALL VECTEGx(TP,TC)
-
-	    IF(QC(7).GT.0.)THEN                  
         
-	    DXI=QC(7)*DTX
+            CALL VECTEGx(QP,QC)
+            CALL VECTEGx(TP,TC)
 
-	    CALL FPML(DXI,QVL,QVR,QP,VM) 
+            IF(QC(7).GT.0.)THEN                  
+        
+            DXI=QC(7)*DTX
 
-	    CALL VECTLRX(QP,QL,QR,UV)
+            CALL FPML(DXI,QVL,QVR,QP,VM) 
+
+            CALL VECTLRX(QP,QL,QR,UV)
         CALL MATR_AY(QP,AY)
         CALL MATR_AZ(QP,AZ)
         
-	    DO L=1,7
+            DO L=1,7
             VL(L)=0.
           ENDDO
 
-	  DO M=1,7
-	     AV(M)=0.
-	   DO L=1,7
-		 AV(M)=AV(M)+AY(M,L)*UDy(L)+AZ(M,L)*UDz(L)
+          DO M=1,7
+             AV(M)=0.
+           DO L=1,7
+                 AV(M)=AV(M)+AY(M,L)*UDy(L)+AZ(M,L)*UDz(L)
          ENDDO
-	     AV(M)=AV(M)*DTX/2.
+             AV(M)=AV(M)*DTX/2.
         ENDDO
 
-	  DO M=1,7  
-	   
-	    IF(QC(M).GT.0.)THEN                  
+          DO M=1,7  
+           
+            IF(QC(M).GT.0.)THEN                  
 
-		  DXI=QC(M)*DTX
+                  DXI=QC(M)*DTX
 
-	      CALL FPML(DXI,QVL,QVR,QP,QV) 
+              CALL FPML(DXI,QVL,QVR,QP,QV) 
 
-	      SL(M)=0.   
-	    DO L=1,7
+              SL(M)=0.   
+            DO L=1,7
             SL(M)=SL(M)+QL(M,L)*(VM(L)-QV(L)+AV(L))
           ENDDO
 
-	    DO L=1,7
+            DO L=1,7
             VL(L)=VL(L)+QR(L,M)*SL(M)
           ENDDO
 
           ENDIF
-			  
-	  ENDDO
+                          
+          ENDDO
          
         DO M=1,7 
          QUL(M)=VM(M)-VL(M)
@@ -100,48 +100,48 @@
 
        ENDIF 
 
-	  IF(TC(1).LT.0.)THEN                  
+          IF(TC(1).LT.0.)THEN                  
         
-	    DXI=-TC(1)*DTX
+            DXI=-TC(1)*DTX
  
-	    CALL FPMR(DXI,TVL,TVR,TP,VM) 
+            CALL FPMR(DXI,TVL,TVR,TP,VM) 
 
-	    CALL VECTLRX(TP,QL,QR,UV)
+            CALL VECTLRX(TP,QL,QR,UV)
         CALL MATR_AY(TP,AY)
         CALL MATR_AZ(TP,AZ)
 
- 	    DO L=1,7
+             DO L=1,7
             VL(L)=0.
           ENDDO
 
-	  DO M=1,7
-	     AV(M)=0.
-	   DO L=1,7
-		 AV(M)=AV(M)+AY(M,L)*TDy(L)+AZ(M,L)*TDz(L)
+          DO M=1,7
+             AV(M)=0.
+           DO L=1,7
+                 AV(M)=AV(M)+AY(M,L)*TDy(L)+AZ(M,L)*TDz(L)
          ENDDO
-	     AV(M)=AV(M)*DTX/2.
+             AV(M)=AV(M)*DTX/2.
         ENDDO
 
-	  DO M=1,7  
+          DO M=1,7  
          
-	    IF(TC(M).LT.0.)THEN                  
+            IF(TC(M).LT.0.)THEN                  
 
-	      DXI=-TC(M)*DTX
+              DXI=-TC(M)*DTX
 
-	      CALL FPMR(DXI,TVL,TVR,TP,QV) 
+              CALL FPMR(DXI,TVL,TVR,TP,QV) 
 
-	      SL(M)=0.   
-	    DO L=1,7
+              SL(M)=0.   
+            DO L=1,7
             SL(M)=SL(M)+QL(M,L)*(VM(L)-QV(L)+AV(L))
           ENDDO
         
-	    DO L=1,7
+            DO L=1,7
             VL(L)=VL(L)+QR(L,M)*SL(M)
           ENDDO
-	  
+          
           ENDIF
 
-	  ENDDO
+          ENDDO
          
           DO M=1,7
            QUR(M)=VM(M)-VL(M)
@@ -156,20 +156,20 @@
        ENDIF 
 
        do M=1,7
-	    TL(M)=QUL(M)
-	    TR(M)=QUR(M)
+            TL(M)=QUL(M)
+            TR(M)=QUR(M)
        enddo
 
-	        TL5=0.5d0*(TL(5)+TR(5))
+                TL5=0.5d0*(TL(5)+TR(5))
         
-		    TL(5)=TL5
-	        TR(5)=TL5
+                    TL(5)=TL5
+                TR(5)=TL5
 
-	        CALL CONS(TL,PX)
-	        CALL CONS(TR,VL)
+                CALL CONS(TL,PX)
+                CALL CONS(TR,VL)
             CALL HLLDx(PX,VL,FR,UR)      !HLLD method
 
-	   Do M=1,7  
+           Do M=1,7  
         Fm(I,M)=FR(M)      
        Enddo 
 
@@ -179,48 +179,48 @@
 
 
 
-	   IF(QC(7).GT.0.)THEN                  
+           IF(QC(7).GT.0.)THEN                  
 
-	  DXI=1.-QC(7)*DTX
+          DXI=1.-QC(7)*DTX
 
-	  CALL FQML(DXI,QVL,QVR,QP,VM) 
+          CALL FQML(DXI,QVL,QVR,QP,VM) 
 
-	  CALL VECTLRX(QP,QL,QR,UV)
+          CALL VECTLRX(QP,QL,QR,UV)
         CALL MATR_AY(QP,AY)
         CALL MATR_AZ(QP,AZ)
 
-	    DO L=1,7
+            DO L=1,7
             VL(L)=0.
-		ENDDO
+                ENDDO
   
-	  DO M=1,7
-	     AV(M)=0.
-	   DO L=1,7
-		 AV(M)=AV(M)+AY(M,L)*UDy(L)+AZ(M,L)*UDz(L)
+          DO M=1,7
+             AV(M)=0.
+           DO L=1,7
+                 AV(M)=AV(M)+AY(M,L)*UDy(L)+AZ(M,L)*UDz(L)
          ENDDO
-	     AV(M)=AV(M)*DTX/2.
+             AV(M)=AV(M)*DTX/2.
         ENDDO
 
-	  DO M=1,7  
-	   
-	    IF(QC(M).GT.0.)THEN                  
+          DO M=1,7  
+           
+            IF(QC(M).GT.0.)THEN                  
 
-		  DXI=1.-QC(M)*DTX
+                  DXI=1.-QC(M)*DTX
 
-	      CALL FQML(DXI,QVL,QVR,QP,QV) 
+              CALL FQML(DXI,QVL,QVR,QP,QV) 
 
-	      SL(M)=0.   
-	    DO L=1,7
+              SL(M)=0.   
+            DO L=1,7
             SL(M)=SL(M)+QL(M,L)*(QP(L)-QV(L)+AV(L))
           ENDDO
         
-	    DO L=1,7
+            DO L=1,7
             VL(L)=VL(L)+QR(L,M)*SL(M)
           ENDDO
 
           ENDIF
-			  
-	  ENDDO
+                          
+          ENDDO
          
         DO M=1,7 
          QUL(M)=QP(M)-VL(M)
@@ -234,48 +234,48 @@
 
        ENDIF 
 
-	  IF(TC(1).LT.0.)THEN                  
+          IF(TC(1).LT.0.)THEN                  
         
-	   DXI=-TC(1)*DTX
+           DXI=-TC(1)*DTX
 
-	  CALL FQML(DXI,TVL,TVR,TP,VM) 
+          CALL FQML(DXI,TVL,TVR,TP,VM) 
 
-	  CALL VECTLRX(TP,QL,QR,UV)
+          CALL VECTLRX(TP,QL,QR,UV)
         CALL MATR_AY(TP,AY)
         CALL MATR_AZ(TP,AZ)
 
-	    DO L=1,7
+            DO L=1,7
             VL(L)=0.
           ENDDO
 
-	  DO M=1,7
-	     AV(M)=0.
-	   DO L=1,7
-		 AV(M)=AV(M)+AY(M,L)*TDy(L)+AZ(M,L)*TDz(L)
+          DO M=1,7
+             AV(M)=0.
+           DO L=1,7
+                 AV(M)=AV(M)+AY(M,L)*TDy(L)+AZ(M,L)*TDz(L)
          ENDDO
-	     AV(M)=AV(M)*DTX/2.
+             AV(M)=AV(M)*DTX/2.
         ENDDO
 
-	  DO M=1,7  
+          DO M=1,7  
          
-	    IF(TC(M).LT.0.)THEN                  
+            IF(TC(M).LT.0.)THEN                  
 
-	      DXI=-TC(M)*DTX
+              DXI=-TC(M)*DTX
 
-	      CALL FQML(DXI,TVL,TVR,TP,QV) 
+              CALL FQML(DXI,TVL,TVR,TP,QV) 
 
-	      SL(M)=0.   
-	    DO L=1,7
+              SL(M)=0.   
+            DO L=1,7
             SL(M)=SL(M)+QL(M,L)*(TP(L)-QV(L)+AV(L))
           ENDDO
         
-	    DO L=1,7
+            DO L=1,7
             VL(L)=VL(L)+QR(L,M)*SL(M)
           ENDDO
-	  
+          
           ENDIF
 
-	  ENDDO
+          ENDDO
          
           DO M=1,7 
            QUR(M)=TP(M)-VL(M)
@@ -290,18 +290,18 @@
        ENDIF 
 
 
-	  DO M=1,7
-	   TL(M)=QUL(M)
-	   TR(M)=QUR(M)
+          DO M=1,7
+           TL(M)=QUL(M)
+           TR(M)=QUR(M)
       ENDDO
-	
-	        TL5=0.5d0*(TL(5)+TR(5))
         
-		    TL(5)=TL5
-	        TR(5)=TL5
+                TL5=0.5d0*(TL(5)+TR(5))
+        
+                    TL(5)=TL5
+                TR(5)=TL5
 
-	        CALL CONS(TL,PX)
-	        CALL CONS(TR,VL)
+                CALL CONS(TL,PX)
+                CALL CONS(TR,VL)
             CALL HLLDx(PX,VL,FR,UR)      !HLLD method
 
 
@@ -311,7 +311,7 @@
           QRP(I,M)=PX(M)      
         ENDDO 
 
-	  Enddo
-	   
-	  Return
-	  End
+          Enddo
+           
+          Return
+          End

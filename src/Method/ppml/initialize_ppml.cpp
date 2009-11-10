@@ -60,13 +60,17 @@ void initialize_ppml (int size_param, int cycles_param)
 
   float MHDBlastDensity = 100.0;
   float MHDBlastField = 10.0;
-  float radiusBlast = 0.125;
-  float R2 = radiusBlast*radiusBlast;
 
-  float density_out = 1.0;
-  float density_in  = MHDBlastDensity;
-  float pressure_out = 1.0;
-  float pressure_in  = 0.14;
+  float radiusBlast = 0.125;
+
+  const float R2 (radiusBlast*radiusBlast);
+
+  float density_out  = 1.0;
+  float density_in   = MHDBlastDensity;
+  float magnetic_out = MHDBlastField;
+  float magnetic_in  = MHDBlastField;
+
+  bool is_full = true;
 
   // Physics
 
@@ -91,13 +95,23 @@ void initialize_ppml (int size_param, int cycles_param)
 
   // Domain
 
-  DomainLeftEdge[0]  = 0.0;
-  DomainLeftEdge[1]  = 0.0;
-  DomainLeftEdge[2]  = 0.0;
+  if (is_full) {
+    DomainLeftEdge[0]  = -0.5;
+    DomainLeftEdge[1]  = -0.5;
+    DomainLeftEdge[2]  = -0.5;
 
-  DomainRightEdge[0] = 0.3;
-  DomainRightEdge[1] = 0.3;
-  DomainRightEdge[2] = 0.3;
+    DomainRightEdge[0] = 0.5;
+    DomainRightEdge[1] = 0.5;
+    DomainRightEdge[2] = 0.5;
+  } else {
+    DomainLeftEdge[0]  = 0.0;
+    DomainLeftEdge[1]  = 0.0;
+    DomainLeftEdge[2]  = 0.0;
+
+    DomainRightEdge[0] = 1;
+    DomainRightEdge[1] = 1;
+    DomainRightEdge[2] = 1;
+  }
 
   // Grid
 
@@ -114,6 +128,7 @@ void initialize_ppml (int size_param, int cycles_param)
   GridLeftEdge[0]    = 0.0;
   GridLeftEdge[1]    = 0.0;
   GridLeftEdge[2]    = 0.0;
+
 
   for (int dim=0; dim<GridRank; dim++) {
     CellWidth[dim] = new FLOAT[GridDimension[dim]];
@@ -174,37 +189,38 @@ void initialize_ppml (int size_param, int cycles_param)
     BaryonField[field] = baryon_fields + field*nd;
   }
 
-//   float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
-//   for (int field = 0; field < NumberOfBaryonFields; field++) {
-//     OldBaryonField[field] = baryon_fields + field*nd;
-//   }
-
   int ndx = GridDimension[0];
   int ndy = GridDimension[1];
   int ndz = GridDimension[2];
 
-  float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
-  float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
-  float zd = (DomainRightEdge[2] - DomainLeftEdge[2]) ;
-  int  ixg = (GridEndIndex[0] - GridStartIndex[0] + 1);
-  int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
-  int  izg = (GridEndIndex[2] - GridStartIndex[2] + 1);
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];
   float hz = CellWidth[2][0];
 
-  printf ("%g %g %g\n",hx,hy,hz);
-  printf ("%g %g %g\n", xd / ixg,yd/iyg,zd/izg);
   if (debug) printf ("Size = %d %d %d\n",ndx,ndy,ndz);
-  if (debug) printf ("%g  %g %g  %g %g\n",
-	  Gamma, 
-	  pressure_out,density_out,
-	  pressure_in,density_in);
-  if (debug) printf ("total energy: %g %g\n",
-	  pressure_out / ((Gamma - 1.0)*density_out),
-	  pressure_in / ((Gamma - 1.0)*density_in));
 
-  float ** field = BaryonField;
+  // Clear all fields
+
+  for (int field=0; field<NumberOfBaryonFields; field++) {
+    for (int i=0; i<nd; i++) {
+      BaryonField[field][i] = 0.0;
+    }
+  }
+
+  // Initializize background density and magnetic_x
+  for (int i=0; i<nd; i++) {
+    BaryonField[field_density   ][i] = density_out;
+    BaryonField[field_density_xp][i] = density_out;
+    BaryonField[field_density_yp][i] = density_out;
+    BaryonField[field_density_zp][i] = density_out;
+
+    BaryonField[field_magnetic_x   ][i] = magnetic_out;
+    BaryonField[field_magnetic_x_xp][i] = magnetic_out;
+    BaryonField[field_magnetic_x_yp][i] = magnetic_out;
+    BaryonField[field_magnetic_x_zp][i] = magnetic_out;
+  }
+
+
 
   for (int iz = GridStartIndex[2]; iz<=GridEndIndex[2]; iz++) {
 
@@ -229,20 +245,39 @@ void initialize_ppml (int size_param, int cycles_param)
 	float ryp2 = x0*x0 + yp*yp + z0*z0;
 	float rzp2 = x0*x0 + y0*y0 + zp*zp;
 
-	// Initialize density
+	// Initialize fields
 
-	field[field_density]    [i] = (r2   < R2) ? density_in : density_out;
-	field[field_density_xp] [i] = (rxp2 < R2) ? density_in : density_out;
-	field[field_density_yp] [i] = (ryp2 < R2) ? density_in : density_out;
-	field[field_density_zp] [i] = (rzp2 < R2) ? density_in : density_out;
+	if (r2 < R2) {
+	  BaryonField[field_density]    [i] = density_in;
+	  BaryonField[field_magnetic_x] [i] = magnetic_in;
+	} else {
+	  BaryonField[field_density]    [i] = density_out;
+	  BaryonField[field_magnetic_x] [i] = magnetic_in;
+	}
 
-	// Initialize magnetic field
+	if (rxp2 < R2) {
+	  BaryonField[field_density_xp]    [i] = density_in;
+	  BaryonField[field_magnetic_x_xp] [i] = magnetic_in;
+	} else {
+	  BaryonField[field_density_xp]    [i] = density_out;
+	  BaryonField[field_magnetic_x_xp] [i] = magnetic_in;
+	}
 
-	field[field_magnetic_x]    [i] = MHDBlastField;
-	field[field_magnetic_x_xp] [i] = MHDBlastField;
-	field[field_magnetic_x_yp] [i] = MHDBlastField;
-	field[field_magnetic_x_zp] [i] = MHDBlastField;
+	if (ryp2 < R2) {
+	  BaryonField[field_density_yp]    [i] = density_in;
+	  BaryonField[field_magnetic_x_yp] [i] = magnetic_in;
+	} else {
+	  BaryonField[field_density_yp]    [i] = density_out;
+	  BaryonField[field_magnetic_x_yp] [i] = magnetic_in;
+	}
 
+	if (rzp2 < R2) {
+	  BaryonField[field_density_zp]    [i] = density_in;
+	  BaryonField[field_magnetic_x_zp] [i] = magnetic_in;
+	} else {
+	  BaryonField[field_density_zp]    [i] = density_out;
+	  BaryonField[field_magnetic_x_zp] [i] = magnetic_in;
+	}
       }
     }
   }
@@ -280,7 +315,7 @@ void initialize_ppml (int size_param, int cycles_param)
 	for (int i2 = 0; i2<n2; i2++) {
 	  for (int i1 = 0; i1<n1; i1++) {
 	    int i = i1 + n1*i2;
-	    BoundaryType[field][dim][face][i] = bc_reflecting;
+	    BoundaryType[field][dim][face][i] = bc_periodic;
 	  }
 	}
       }
