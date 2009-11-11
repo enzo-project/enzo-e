@@ -13,9 +13,8 @@
  
   Grid {
     root      = [400,400]; # size of the root grid
-    levels    = 4;         # maximum effective levels (for r_factor = 2)
+    max_level = 4;         # maximum effective level (for r_factor = 2)
     refine    = 4;         # refinement factor
-    type      = tree;      # AMR type: patch or tree
     full_tree = false;     # whether tree is full (ala Flash) or not
     backfill  = true;      # whether to backfill for refinement > 2
     coalesce  = true;      # whether to coalesce small patches to one big one
