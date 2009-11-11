@@ -20,6 +20,10 @@ test_tree: test_tree.o $(OBJS)
 	$(CXX) -o test_tree test_tree.o $(LIB)
 test_tree_k: test_tree_k.o $(OBJS)
 	$(CXX) -o test_tree_k test_tree_k.o $(LIB) #-lpng 
+test_tree.o: image.h 
+test_tree_k.o: image.h 
+image.h:
+	ln -s circle2.h image.h
 
 #-----------------------------------------------------------------------
 
@@ -27,6 +31,7 @@ test_tree_k: test_tree_k.o $(OBJS)
 install-include:
 	ln -sf `pwd`/amr_node.hpp $(INCLUDE)
 	ln -sf `pwd`/amr_nodek.hpp $(INCLUDE)
+	ln -sf `pwd`/amr_treek.hpp $(INCLUDE)
 	ln -sf `pwd`/amr_tree4.hpp $(INCLUDE)
 	ln -sf `pwd`/amr_node4.hpp $(INCLUDE)
 	ln -sf `pwd`/amr_tree16.hpp $(INCLUDE)

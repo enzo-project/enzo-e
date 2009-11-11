@@ -21,6 +21,7 @@ all: $(OBJS) $(TESTS) $(EXES)
 
 .PHONY: install-include
 install-include:
+	ln -sf `pwd`/amr.hpp       $(INCLUDE)
 	$(MAKE) -C tree install-include
 
 #-----------------------------------------------------------------------
