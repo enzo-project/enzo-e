@@ -45,7 +45,7 @@
 
 #define PNGWRITER_VERSION 0.53
 
-#include <png.h>
+#include "png.h"
 
 // REMEMBER TO ADD -DNO_FREETYPE TO YOUR COMPILATION FLAGS IF PNGwriter WAS
 // COMPILED WITHOUT FREETYPE SUPPORT!!!
@@ -387,7 +387,7 @@ class pngwriter
    double getgamma(void);
 
    /* Bezier Curve
-    * (After Frenchman Pierre BŽzier from Regie Renault)
+    * (After Frenchman Pierre BÂŽzier from Regie Renault)
     * A collection of formulae for describing curved lines 
     * and surfaces, first used in 1972 to model automobile surfaces. 
     *             (from the The Free On-line Dictionary of Computing)

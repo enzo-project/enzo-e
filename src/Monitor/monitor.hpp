@@ -19,20 +19,21 @@
 /** 
  *********************************************************************
  *
- * @file      TEMPLATE.hpp
- * @brief     Brief description of the file
- * @author    Bart Simpson
- * @date      Thu Feb 21 12:45:56 PST 2008
- * @bug       Example bug description 
- * @note      Modified by Alfred E. Newman, Thu Feb 21 12:49:16 PST 2008
- *            description of modification
+ * @file      monitor.hpp
+ * @brief     Declaration for Monitor clas
+ * @author    James Bordner
+ * @date      2009-10-05
  *
- * Detailed description of the file
+ * Declaration for Monitor clas
  *
  * $Id$
  *
  *********************************************************************
  */
+
+#include <string>
+
+#include "cello.h"
 
 #include "performance_timer.hpp"
 
