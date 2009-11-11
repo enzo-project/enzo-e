@@ -34,12 +34,14 @@ DIR = \
       Control \
       Disk \
       Error \
+      Field \
       Memory \
       Method \
       Monitor \
       Parallel \
       Parameters \
       Performance \
+      Simulation \
       Test
 
 #=======================================================================
@@ -116,7 +118,18 @@ cccc:
 # Package dependencies
 #-----------------------------------------------------------------------
 
-.PHONY: Amr
+.PHONY: Amr-component
+.PHONY: Array-component
+.PHONY: Control-component
+.PHONY: Disk-component
+.PHONY: Error-component
+.PHONY: Memory-component
+.PHONY: Method-component
+.PHONY: Monitor-component
+.PHONY: Parallel-component
+.PHONY: Parameters-component
+.PHONY: Performance-component
+.PHONY: Test-component
 
 Amr-component: Disk-component
 Amr-component: Error-component
@@ -156,4 +169,5 @@ Parameters-component: Test-component
 Performance-component: Error-component
 Performance-component: Memory-component
 Performance-component: Test-component
+
 
