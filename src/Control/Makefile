@@ -1,7 +1,7 @@
 
 TOP     = ../..
 PACKAGE = control
-OBJS    = 
+OBJS    = control.o
 TESTS   = test_control
 EXES    = cello
 

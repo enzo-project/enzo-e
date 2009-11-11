@@ -15,8 +15,15 @@
 
 #include "cello.h"
 
+#include "control.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"
+
+void usage(int argc, char ** argv) 
+{
+  fprintf (stderr,"Usage: %s <filename>\n",argv[0]);
+  exit(1);
+}
 
 int main(int argc, char ** argv)
 {
@@ -36,33 +43,35 @@ int main(int argc, char ** argv)
     Monitor monitor;
     monitor.print ("CELLO BEGIN");
 
+    // INITIALIZE CONTROL
+
+    Control control(&monitor);
+
     // INPUT PARAMETERS
 
-    Parameters parameters;
-
-    if (argc != 2) {
-      // Print usage
-      char error_message[ERROR_MESSAGE_LENGTH];
-      sprintf (error_message,"Usage: %s <filename>\n",argv[0]);
-      ERROR_MESSAGE("main",error_message);
+    FILE *fp = 0;
+    if (argc == 2) {
+      fp = fopen(argv[1],"r");
+      if ( !fp ) usage(argc,argv);
     } else {
-      // Read in parameters
-      FILE * fp = fopen (argv[1],"r");
-      if (fp == NULL) {
-	char error_message[ERROR_MESSAGE_LENGTH];
-	sprintf (error_message,"Filename '%s' unreadable\n",argv[1]);
-	ERROR_MESSAGE("main",error_message);
-      } else {
-	monitor.print ("Reading parameters");
-	parameters.read(fp);
-      }
+      usage(argc,argv);
     }
+
+    assert (fp != 0);
+  
+    control.read_parameters(fp);
 
     // INITIALIZE SIMULATION
 
+    control.initialize_simulation();
+
     // RUN SIMULATION
 
+    control.execute_simulation();
+
     // FINALIZE SIMULATION
+
+    control.terminate_simulation();
 
     monitor.print ("CELLO END");
   }
