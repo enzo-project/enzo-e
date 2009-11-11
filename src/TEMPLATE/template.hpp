@@ -27,7 +27,7 @@ class Foo {
  *
  * @class     Foo
  * @brief     
- * @ingroup   GROUP
+ * @ingroup   Foo
  *
  * 
  *
