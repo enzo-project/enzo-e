@@ -25,6 +25,7 @@ all: $(OBJS) $(TESTS) $(EXES)
 install-include:
 	ln -sf `pwd`/defines.h                 $(INCLUDE)
 	ln -sf `pwd`/method.hpp                $(INCLUDE)
+	ln -sf `pwd`/method_ppm.hpp                $(INCLUDE)
 
 #-----------------------------------------------------------------------
 
