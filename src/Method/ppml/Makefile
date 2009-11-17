@@ -27,6 +27,7 @@ OBJS = \
 	Grid_SolveMHDEquations.o \
 	../initialize_hydro.o \
         initialize_ppml.o \
+        initialize_ppml_implosion3.o \
 	PPML_Conservative.o \
 	PPML_HLLD.o \
 	PPML_MAIN.o \

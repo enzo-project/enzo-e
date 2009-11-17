@@ -1,23 +1,9 @@
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
-
 /** 
  *********************************************************************
  *
- * @file      initialize_ppml.cpp
+ * @file      initialize_ppml_implosion3.cpp
  * @brief     Initialize variables in cello_hydro.h
  * @author    James Bordner
  * @date      Sat Aug 29 14:20:09 PDT 2009
@@ -52,25 +38,20 @@
 
 const bool debug = false;
  
-void initialize_ppml (int size_param, int cycles_param)
+void initialize_ppml_implosion3 (int size_param, int cycles_param)
 
 {
 
   int grid_size [] = { size_param, size_param, size_param };
 
-  float MHDBlastDensity = 100.0;
-  float MHDBlastField = 10.0;
-
-  float radiusBlast = 0.125;
-
-  const float R2 (radiusBlast*radiusBlast);
-
   float density_out  = 1.0;
-  float density_in   = MHDBlastDensity;
-  float magnetic_out = MHDBlastField;
-  float magnetic_in  = MHDBlastField;
+  float density_in   = 0.125;
+  float pressure_out = 1.0;
+  float pressure_in  = 0.14;
+  float magnetic_out = 0.0;
+  float magnetic_in  = 0.0;
 
-  bool is_full = true;
+  bool is_full = false;
 
   // Physics
 
@@ -95,23 +76,14 @@ void initialize_ppml (int size_param, int cycles_param)
 
   // Domain
 
-  if (is_full) {
-    DomainLeftEdge[0]  = -0.5;
-    DomainLeftEdge[1]  = -0.5;
-    DomainLeftEdge[2]  = -0.5;
+  DomainLeftEdge[0]  = 0.0;
+  DomainLeftEdge[1]  = 0.0;
+  DomainLeftEdge[2]  = 0.0;
 
-    DomainRightEdge[0] = 0.5;
-    DomainRightEdge[1] = 0.5;
-    DomainRightEdge[2] = 0.5;
-  } else {
-    DomainLeftEdge[0]  = 0.0;
-    DomainLeftEdge[1]  = 0.0;
-    DomainLeftEdge[2]  = 0.0;
+  DomainRightEdge[0] = 0.3;
+  DomainRightEdge[1] = 0.3;
+  DomainRightEdge[2] = 0.3;
 
-    DomainRightEdge[0] = 1;
-    DomainRightEdge[1] = 1;
-    DomainRightEdge[2] = 1;
-  }
 
   // Grid
 
@@ -243,42 +215,36 @@ void initialize_ppml (int size_param, int cycles_param)
 
 	int i = ix + ndx * (iy + ndy * iz);
 
-
-	float r2   = xc*xc + yc*yc + zc*zc;
-	float rxp2 = xp*xp + yc*yc + zc*zc;
-	float ryp2 = xc*xc + yp*yp + zc*zc;
-	float rzp2 = xc*xc + yc*yc + zp*zp;
-
 	// Initialize fields
 
 	// cell-centered density and magnetic
 
-	float d = (r2 < R2) ? density_in  : density_out;
-	float b = (r2 < R2) ? magnetic_in : magnetic_out;
+	float d = (xc + yc + zc < 0.1517) ? density_in  : density_out;
+	float b = (xc + yc + zc < 0.1517) ? magnetic_in : magnetic_out;
 
 	BaryonField[field_density]    [i] = d;
 	BaryonField[field_magnetic_x] [i] = b;
 
 	// X-face density and magnetic
 
-	d = (rxp2 < R2) ? density_in  : density_out;
-	b = (rxp2 < R2) ? magnetic_in : magnetic_out;
+	d = (xp + yc + zc < 0.1517) ? density_in  : density_out;
+	b = (xp + yc + zc < 0.1517) ? magnetic_in : magnetic_out;
 	
 	BaryonField[field_density_xp]    [i] = d;
 	BaryonField[field_magnetic_x_xp] [i] = b;
 
 	// Y-face density and magnetic
 
-	d = (ryp2 < R2) ? density_in  : density_out;
-	b = (ryp2 < R2) ? magnetic_in : magnetic_out;
+	d = (xc + yp + zc < 0.1517) ? density_in  : density_out;
+	b = (xc + yp + zc < 0.1517) ? magnetic_in : magnetic_out;
 	
 	BaryonField[field_density_yp]    [i] = d;
 	BaryonField[field_magnetic_x_yp] [i] = b;
 
 	// Z-face density and magnetic
 
-	d = (rzp2 < R2) ? density_in  : density_out;
-	b = (rzp2 < R2) ? magnetic_in : magnetic_out;
+	d = (xc + yc + zp < 0.1517) ? density_in  : density_out;
+	b = (xc + yc + zp < 0.1517) ? magnetic_in : magnetic_out;
 	
 	BaryonField[field_density_zp]    [i] = d;
 	BaryonField[field_magnetic_x_zp] [i] = b;
@@ -320,7 +286,7 @@ void initialize_ppml (int size_param, int cycles_param)
 	for (int i2 = 0; i2<n2; i2++) {
 	  for (int i1 = 0; i1<n1; i1++) {
 	    int i = i1 + n1*i2;
-	    BoundaryType[field][dim][face][i] = bc_periodic;
+	    BoundaryType[field][dim][face][i] = bc_reflecting;
 	  }
 	}
       }
