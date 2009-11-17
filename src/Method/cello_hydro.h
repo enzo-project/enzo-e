@@ -250,6 +250,7 @@ void initialize_image (int cycles);
 // PPML
 
 void initialize_ppml (int size, int cycles);
+void initialize_ppml_implosion3 (int size, int cycles);
 
 float sum_field (int field);
 float print_field (int field);
