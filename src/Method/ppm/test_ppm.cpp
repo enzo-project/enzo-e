@@ -14,78 +14,46 @@
 #include "test_ppm.h"
 #include "performance_timer.hpp"
 
-void initialize_hydro ();
-void initialize_image ();
-void initialize_implosion ();
-void initialize_implosion2 ();
-
+//----------------------------------------------------------------------
 
 void print_usage(const char * name)
 {
   printf ("Usage: %s <image|implosion|implosion3> [size] [cycles] [dump-frequency]\n",name);
+  exit(1);
 }
+
+//----------------------------------------------------------------------
+
 int main(int argc, char ** argv)
 {
-  enum type_problem problem_type;
-  int n;
-  int cycles = 20000;
-  int cycle_dump_frequency = 10;
-  int block_size = 0;
+  enum type_problem problem_type = problem_unknown;
 
   if (argc < 2) {
     print_usage(argv[0]);
-    exit(1);
   }
-  if (strcmp(argv[1],"image")==0) {
-    problem_type = problem_image;
-    printf ("image\n");
-  } else if (strcmp(argv[1],"implosion")==0) {
-    problem_type = problem_implosion;
-  } else if (strcmp(argv[1],"implosion3")==0) {
-    problem_type = problem_implosion3;
-  } else {
-    print_usage(argv[0]);
-    exit(1);
-  }
-  if (argc>=3)  {
-    n = atoi(argv[2]);
-    if (n < 1 || 10000 < n) {
-      int n_old = n;
-      if (problem_type == problem_implosion3) {
-	n = 32-6;
-      } else {
-	n = 400-6;
+
+  int argi = 0;
+
+  // Problem type
+
+  if (argc > ++argi) {
+    for (int i=0; i<num_problems; i++) {
+      if (strcmp(argv[argi],problem_name[i]) == 0) {
+	problem_type = type_problem(i);
       }
-      printf ("Illegal size %d: resetting to %d\n",n_old,n);
-    }
-  } else {
-    if (problem_type == problem_implosion3) {
-      n = 32-6;
-    } else {
-      n = 400-6;
     }
   }
-  if (argc>=4)  {
-    cycles = atoi(argv[3]);
-    if (cycles < 1 || 10000000 < cycles) {
-      printf ("Illegal cycles %d: resetting to 20000\n",n);
-      cycles = 20000;
-    }
-  }
-  if (argc>=5)  {
-    cycle_dump_frequency = atoi(argv[4]);
-    if (cycle_dump_frequency < 0) {
-      printf ("Illegal cycle_dump_frequency %d: resetting to 10\n",n);
-      cycle_dump_frequency = 10;
-    }
-  }
-  if (argc>=6)  {
-    block_size = atoi(argv[5]);
-    if (block_size != 0 && (block_size < 4 || block_size > 256) ) {
-      printf ("Illegal block_size %d: resetting to 0\n",block_size);
-      block_size = 0;
-    }
-  }
+  if (problem_type == 0) print_usage(argv[0]);
+
+  int size = problem_size[problem_type];
+  if (argc > ++argi) size = atoi(argv[argi]);
+  int cycles = problem_cycles[problem_type];
+  if (argc > ++argi) cycles = atoi(argv[argi]);
+  int dump_frequency = 10;
+  if (argc > ++argi) dump_frequency = atoi(argv[argi]);
+
+  printf ("problem = %s  size = %d  cycles = %d  dump_frequency = %d\n",
+	  problem_name[problem_type], size, cycles, dump_frequency);
 
   initialize_hydro ();
 
@@ -94,11 +62,13 @@ int main(int argc, char ** argv)
     initialize_image(cycles);
     break;
   case problem_implosion:
-    initialize_implosion(n,cycles);
+    initialize_implosion(size,cycles);
     break;
   case problem_implosion3:
-    initialize_implosion3(n,cycles);
+    initialize_implosion3(size,cycles);
     break;
+  default:
+    print_usage(argv[0]);
   }
 
   float dt;
@@ -118,7 +88,7 @@ int main(int argc, char ** argv)
 
     SetExternalBoundaryValues();
 
-    if (cycle_dump_frequency && (cycle % cycle_dump_frequency) == 0) {
+    if (dump_frequency && (cycle % dump_frequency) == 0) {
       printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
 	      cycle,timer.value(),time,dt);
       data_dump(problem_name[problem_type],cycle);
@@ -127,9 +97,9 @@ int main(int argc, char ** argv)
     SolveHydroEquations(cycle, dt);
 
   }
-  printf ("%d %d %g\n",n+6,cycles,timer.value());
+  printf ("%d %d %g\n",size+6,cycles,timer.value());
 
-  if (cycle_dump_frequency && (cycle % cycle_dump_frequency) == 0) {
+  if (dump_frequency && (cycle % dump_frequency) == 0) {
     SetExternalBoundaryValues();
     data_dump(problem_name[problem_type],cycle);
   }
