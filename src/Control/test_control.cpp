@@ -27,7 +27,7 @@ int main(int argc, char ** argv)
 
   //  Control control;
 
-  unit_assert(passed);
+  unit_assert(passed); //FAILS
 
   unit_close();
 }

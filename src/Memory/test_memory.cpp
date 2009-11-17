@@ -191,39 +191,39 @@ int main(int argc, char ** argv)
 
   // curr_group()
   unit_func ("curr_group()");
-  unit_assert(0);
+  unit_assert(0);  //FAILS
 
   // bytes()
   unit_func ("bytes()");
-  unit_assert(0);
+  unit_assert(0); //FAILS
 
   // available()
   unit_func ("available()");
-  unit_assert(0);
+  unit_assert(0); //FAILS
 
   // efficiency()
   unit_func ("efficiency()");
-  unit_assert(0);
+  unit_assert(0); //FAILS
 
   // highest()
   unit_func ("highest()");
-  unit_assert(0);
+  unit_assert(0); //FAILS
 
   // set_limit()
   unit_func ("set_limit()");
-  unit_assert(0);
+  unit_assert(0); //FAILS
 
   // get_limit()
   unit_func ("get_limit()");
-  unit_assert(0);
+  unit_assert(0); //FAILS
 
   // num_new()
   unit_func ("num_new()");
-  unit_assert(0);
+  unit_assert(0); //FAILS
 
   // num_delete()
   unit_func ("num_delete()");
-  unit_assert(0);
+  unit_assert(0); //FAILS
 
   Memory::print();
 

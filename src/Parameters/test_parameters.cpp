@@ -47,7 +47,7 @@ int main(int argc, char **argv)
   unit_func("write");
   FILE * fpout = fopen ("test.out","w");
   parameters->write ( fpout );
-  unit_assert(0);
+  unit_assert(0); //FAILS
 
   // set_group()
 

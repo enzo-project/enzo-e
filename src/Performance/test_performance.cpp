@@ -123,16 +123,16 @@ int main(int argc, char ** argv)
   unit_assert(true);
 
   unit_func("new_attribute");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("new_counter");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("new_group");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("new_region");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
 
   //--------------------------------------------------
@@ -140,13 +140,13 @@ int main(int argc, char ** argv)
   //--------------------------------------------------
 
   unit_func("get_attribute");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("set_attribute");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("num_attributes");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   //--------------------------------------------------
   // Groups
@@ -156,16 +156,16 @@ int main(int argc, char ** argv)
 
 
   unit_func("get_group");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("set_group");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("num_groups");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("end_group");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   //--------------------------------------------------
   // Regions
@@ -173,45 +173,45 @@ int main(int argc, char ** argv)
 
 
   unit_func("get_region");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("set_region");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("num_regions");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("start_region");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("stop_region");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   //--------------------------------------------------
   // Counters
   //--------------------------------------------------
 
   unit_func("get_counter");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("set_counter");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("increment_counter");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("num_counters");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   //--------------------------------------------------
   // Disk
   //--------------------------------------------------
 
   unit_func("flush");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   unit_func("~Performance");
-  unit_assert (false);
+  unit_assert (false); //FAILS
 
   delete performance;
 
