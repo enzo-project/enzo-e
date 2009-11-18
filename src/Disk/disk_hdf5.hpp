@@ -57,9 +57,10 @@ public:
   void group_open (std::string name);
   void group_close ();
   void dataset_open_read (std::string name, int * nx, int * ny, int * nz);
-  void dataset_open_write (std::string name, int nx, int ny, int nz);
-  void dataset_set_hyperslab (int ix0,int iy0, int iz0, 
-			       int mx, int my, int mz);
+  void dataset_open_write (std::string name, 
+			   int nx, int ny, int nz,
+			   int ix0=0,int iy0=0,int iz0=0, 
+			   int mx=0, int my=0, int mz=0);
   void dataset_close ();
   void read  (Scalar * buffer);
   void write (Scalar * buffer);

@@ -140,9 +140,9 @@ void Hdf5::group_close ()
 //----------------------------------------------------------------------
 
 void Hdf5::dataset_open_write (std::string name, 
-			       int nx,
-			       int ny,
-			       int nz)
+			       int nx,  int ny,  int nz,
+			       int ix0, int iy0, int iz0, 
+			       int mx,  int my,  int mz)
 {
   if (file_mode_ != "w") {
 
@@ -267,8 +267,7 @@ void Hdf5::dataset_open_read (std::string name,
 
 //----------------------------------------------------------------------
 
-void Hdf5::dataset_set_hyperslab (int ix0,int iy0, int iz0, 
-				  int mx, int my, int mz)
+void Hdf5::dataset_set_hyperslab ()
 {
   hsize_t offset[3] = {ix0,iy0,iz0};
   hsize_t count[3]  = {mx,my,mz};
