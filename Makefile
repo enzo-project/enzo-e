@@ -8,11 +8,15 @@ all:
 
 .PHONY: clean
 
-clean: clean-src clean-include clean-lib
+clean: clean-bin clean-src clean-include clean-lib
 
 .PHONY: clean-src
 clean-src:
 	$(MAKE) -C src     clean
+
+.PHONY: clean-bin
+clean-bin:
+	$(MAKE) -C bin     clean
 
 .PHONY: clean-include
 clean-include:
