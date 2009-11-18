@@ -35,62 +35,152 @@
  *********************************************************************
  */
 
-#include "cello.h"
+#include <assert.h>
 
+#include "cello.h"
 #include "pngwriter.h"
 
 #include "monitor.hpp" 
 
-void Monitor::plot_png 
+void Monitor::image
 (std::string name, 
  Scalar * array, 
- int nx, int ny,
+ int nx, int ny, int nz,
+ int nx0, int ny0, int nz0,
+ int nx1, int ny1, int nz1,
+ int axis, enum_reduce op_reduce,
  Scalar min, Scalar max, 
  const int * map, 
  int map_length)
 /**
  *********************************************************************
  *
- * @param  name       File name
- * @param  array      Array of values to plot
- * @param  nx,ny      Size of the array
- * @param  min,max    Bounds for color map
- * @param  map        Color map [r0, g0, b0, r1, g1, b1, ...]
- * @param  map_length Length of color map / 3
+ * @param  name         File name
+ * @param  array        Array of values to plot
+ * @param  nx,ny,nz     Size of the array
+ * @param  nx0,ny0,nz0  Lower corner of the sub-array
+ * @param  nx1,ny1,nz1  Upper bound on the sub-array
+ * @param  axis         Which axis to reduce
+ * @param  op_reduce    Reduction operator
+ * @param  min,max      Bounds for color map values
+ * @param  map          Color map [r0, g0, b0, r1, g1, b1, ...]
+ * @param  map_length   Length of color map / 3
  *
  * Plot an array as a png file
  *
  *********************************************************************
  */
 {
-  pngwriter png (nx,ny,0,name.c_str());
-  double h = (max-min) / (map_length-1);
-  for (int ix=0; ix<nx; ix++) {
-    for (int iy=0; iy<ny; iy++) {
-      int i = ix + nx*iy;
-      // find lower index (0:map_length-2) into color map
-      int index = (array[i] - min) / h;
-      if (index > map_length - 2) index = map_length-2;
-      double ratio = (array[i] - min - index*h) / h;
-      if (index < 0 || index > map_length -2) {
-	printf ("%s:%d out of range index = %d\n",__FILE__,__LINE__,index);
-	printf ("min=%g max=%g value=%g map_length=%d\n",
-		min,max,array[i],map_length);
-	exit(1);
-      }
-      if (ratio < 0 || ratio > 1) {
-	printf ("%s:%d out of range ratio = %g\n",__FILE__,__LINE__,ratio);
-	printf ("min=%g max=%g value=%g map_length=%d\n",
-		min,max,array[i],map_length);
-	exit(1);
-      }
-      double r = (1-r)*map[3*index+0] + r*map[3*(index+1)+0];
-      double g = (1-r)*map[3*index+1] + r*map[3*(index+1)+1];
-      double b = (1-r)*map[3*index+2] + r*map[3*(index+1)+2];
-      png.plot(ix+1,iy+1,r,g,b);
+
+  // Array size
+  int n3[3] = {1, nx, nx*ny}; // Array multipliers
+
+  // Sub-array size
+  int m3[3] = {nx1-nx0, ny1-ny0, nz1-nz0};  // sub-array size
+  int m0[3] = {nx0, ny0, nz0};              // sub-array start
+
+  // Map array axes to image axes iax,iay
+  int iax = (axis+1) % 3;  // image x axis
+  int iay = (axis+2) % 3;  // image y-axis
+  int iaz = axis;          // reduction axis
+
+  // Array range
+  int mx = m3[iax];
+  int my = m3[iay];
+  int mz = m3[iaz];
+
+  // Array start
+  int mx0 = m0[iax];
+  int my0 = m0[iay];
+  int mz0 = m0[iaz];
+
+  double * image = new double [mx*my];
+
+  // Loop over array subsection
+
+  // image x-axis
+  for (int jx=0; jx<mx; jx++) {
+
+    int ix = jx + mx0;
+
+    // image y-axis
+
+    for (int jy=0; jy<my; jy++) {
+      int iy = jy + my0;
       
+      int i = n3[iax]*ix + n3[iay]*iy;
+      int j = jx + mx*jy;
+
+      // reduction axis
+
+      // initialize reduction
+      switch (op_reduce) {
+      case reduce_min: image[j] = array[i]; break;
+      case reduce_max: image[j] = array[i]; break;
+      case reduce_avg: image[j] = 0; break;
+      case reduce_sum: image[j] = 0; break;
+      default:         image[j] = 0; break;
+      }
+
+      for (int jz=0; jz<mz; jz++) {
+	int iz = jz + mz0;
+	i = n3[iax]*ix + n3[iay]*iy + n3[iaz]*iz;
+	// reduce along iaz axis
+	switch (op_reduce) {
+	case reduce_min: image[j] = MIN(array[i],image[j]); break;
+	case reduce_max: image[j] = MIN(array[i],image[j]); break;
+	case reduce_avg: image[j] += array[i]; break;
+	case reduce_sum: image[j] += array[i]; break;
+	default:         break;
+	}
+      }
+      if (op_reduce == reduce_avg) image[j] /= m3[iaz];
     }
   }
+
+  // Adjust min and max bounds if needed
+
+  double rmin = image[0];
+  double rmax = image[0];
+  for (int i=0; i<mx*my; i++) {
+    if (min > image[i]) min = image[i];
+    if (max < image[i]) max = image[i];
+    rmin = MIN (rmin,image[i]);
+    rmax = MAX (rmax,image[i]);
+  }
+
+  printf ("%g %g\n",rmin,rmax);
+
+  double h = (max-min) / (map_length-1);
+
+  pngwriter png (mx,my,0,name.c_str());
+
+  for (int jx = 0; jx<mx; jx++) {
+    for (int jy = 0; jy<my; jy++) {
+
+      int j = jx + mx*jy;
+      double v = image[j];
+
+      // map v to lower colormap index
+      int index = (map_length-1)*(v - min) / (max-min);
+      if (index > map_length - 2) index = map_length-2;
+
+      // linear interpolate colormap values
+      double lo = min + h*index;
+      double hi = min + h*(index+1);
+      assert (lo <= v && v <= hi);
+      double ratio = (v - lo) / (hi-lo);
+       double r = (1-ratio)*map[3*index+0] + ratio*map[3*(index+1)+0];
+       double g = (1-ratio)*map[3*index+1] + ratio*map[3*(index+1)+1];
+       double b = (1-ratio)*map[3*index+2] + ratio*map[3*(index+1)+2];
+       printf ("%g %g %g %g\n",ratio,r,g,b);
+       png.plot(jx+1,jy+1,r,g,b);
+    }
+  }      
+
   png.close();
+
+  delete [] image;
+
 }
 
