@@ -15,6 +15,7 @@
  
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string>
 
 #include "test.hpp"
@@ -25,8 +26,6 @@ int main(int argc, char ** argv)
   unit_class ("Monitor");
 
   unit_open();
-
-  unit_func("Monitor");
 
   int n = 128;
 
@@ -43,18 +42,34 @@ int main(int argc, char ** argv)
       for (int ix=0; ix<n; ix++) {
 	int i = ix + n*(iy + n*iz);
 	double x = (ix - 0.5*n) / n;
-	double r = x*x + y*y + z*z;
-	if (n/8 < r && r < n/4) array[i] = 1;
+	//	array[i] = y;
+	double r = sqrt(x*x + y*y + z*z);
+	if (0.25 < r && r < 0.5) array[i] = 1;
       }
     }
   }
 
+  unit_func("Monitor");
   Monitor monitor;
+  unit_assert(true);
 
-  int map[] = {0,0,0,1,1,1};
+  unit_func("image");
+  double map1[] = {0,0,0, 1,1,1};
   
-  monitor.image("test1.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map,2);
+  monitor.image("test1.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map1,2);
+  unit_assert(true);
 
-  unit_assert(0);
+  double map2[] = {0,0,0, 1,0,0, 1,1,1};
+  monitor.image("test2.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map2,3);
+  unit_assert(true);
+
+  double map3[] = {0,0,0, 1,0,0, 0,1,0, 0,0,1, 1,1,1};
+  monitor.image("test3.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map3,5);
+  unit_assert(true);
+
+  double map4[] = {1,0,0, 1,1,0, 0,1,0, 0,1,1, 0,0,1, 1,0,1};
+  monitor.image("test4.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map4,6);
+  unit_assert(true);
+
   unit_close();
 }

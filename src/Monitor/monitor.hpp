@@ -76,7 +76,7 @@ public:
 	      int nx1, int ny1, int nz1,  // upper indices of subarray
 	      int axis, enum_reduce op_reduce, // Axis along which to project
 	      Scalar min, Scalar max,  // Limits for color map
-	      const int * color_map, int color_length);  // Color map
+	      const double * color_map, int color_length);  // Color map
   
 private:
 

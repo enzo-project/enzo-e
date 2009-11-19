@@ -50,7 +50,7 @@ void Monitor::image
  int nx1, int ny1, int nz1,
  int axis, enum_reduce op_reduce,
  Scalar min, Scalar max, 
- const int * map, 
+ const double * map, 
  int map_length)
 /**
  *********************************************************************
@@ -145,11 +145,9 @@ void Monitor::image
   for (int i=0; i<mx*my; i++) {
     if (min > image[i]) min = image[i];
     if (max < image[i]) max = image[i];
-    rmin = MIN (rmin,image[i]);
-    rmax = MAX (rmax,image[i]);
+    rmin = MIN(rmin,image[i]);
+    rmax = MAX(rmax,image[i]);
   }
-
-  printf ("%g %g\n",rmin,rmax);
 
   double h = (max-min) / (map_length-1);
 
@@ -163,18 +161,24 @@ void Monitor::image
 
       // map v to lower colormap index
       int index = (map_length-1)*(v - min) / (max-min);
+
+      // prevent index == map_length-1, which happens if v == max
       if (index > map_length - 2) index = map_length-2;
 
       // linear interpolate colormap values
-      double lo = min + h*index;
-      double hi = min + h*(index+1);
+      double lo = min + index*(max-min)/(map_length-1);
+      double hi = min + (index+1)*(max-min)/(map_length-1);
+
+      // should be in bounds, but force if not due to rounding error
+      if (v < lo) v = lo;
+      if (v > hi) v = hi;
       assert (lo <= v && v <= hi);
+
       double ratio = (v - lo) / (hi-lo);
-       double r = (1-ratio)*map[3*index+0] + ratio*map[3*(index+1)+0];
-       double g = (1-ratio)*map[3*index+1] + ratio*map[3*(index+1)+1];
-       double b = (1-ratio)*map[3*index+2] + ratio*map[3*(index+1)+2];
-       printf ("%g %g %g %g\n",ratio,r,g,b);
-       png.plot(jx+1,jy+1,r,g,b);
+      double r = (1-ratio)*map[3*index+0] + ratio*map[3*(index+1)+0];
+      double g = (1-ratio)*map[3*index+1] + ratio*map[3*(index+1)+1];
+      double b = (1-ratio)*map[3*index+2] + ratio*map[3*(index+1)+2];
+      png.plot(jx+1,jy+1,r,g,b);
     }
   }      
 
