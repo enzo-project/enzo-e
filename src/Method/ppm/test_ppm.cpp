@@ -78,13 +78,15 @@ int main(int argc, char ** argv)
 
   Timer timer;
   timer.start();
-    
+
+  double lower = 0.125*size;
+  double upper =   1.0*size;
+
   for (cycle = 0, time = 0.0;
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
     dt =  min(ComputeTimeStep(), time_stop - time);
-
 
     SetExternalBoundaryValues();
 
@@ -92,16 +94,19 @@ int main(int argc, char ** argv)
       printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
 	      cycle,timer.value(),time,dt);
       data_dump(problem_name[problem_type],cycle);
+      image_dump(problem_name[problem_type],cycle,lower,upper);
     }
 
     SolveHydroEquations(cycle, dt);
 
   }
+
   printf ("%d %d %g\n",size+6,cycles,timer.value());
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     SetExternalBoundaryValues();
     data_dump(problem_name[problem_type],cycle);
+    image_dump(problem_name[problem_type],cycle,lower,upper);
   }
 }
 

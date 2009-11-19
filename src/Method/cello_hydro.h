@@ -255,3 +255,4 @@ void initialize_ppml_implosion3 (int size, int cycles);
 float sum_field (int field);
 float print_field (int field);
 void data_dump (const char * file_root, int cycle);
+void image_dump (const char * file_root, int cycle, double lower, double upper);

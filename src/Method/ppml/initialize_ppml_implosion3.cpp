@@ -46,12 +46,8 @@ void initialize_ppml_implosion3 (int size_param, int cycles_param)
 
   float density_out  = 1.0;
   float density_in   = 0.125;
-  float pressure_out = 1.0;
-  float pressure_in  = 0.14;
   float magnetic_out = 0.0;
   float magnetic_in  = 0.0;
-
-  bool is_full = false;
 
   // Physics
 

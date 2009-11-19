@@ -22,6 +22,7 @@ OBJS = \
 	../CosmologyComputeExpansionFactor.o \
 	../CosmologyComputeExpansionTimestep.o \
 	../data_dump.o \
+	../image_dump.o \
         Grid_ComputeTimeStep.o \
 	../Grid_SetExternalBoundaryValues.o \
 	Grid_SolveMHDEquations.o \
@@ -50,7 +51,7 @@ clean-local:
 
 
 test_ppml: includes $(INCS) $(OBJS) test_ppml.o
-	$(CXX) -o test_ppml test_ppml.o $(LDFLAGS)
+	$(CXX) -o test_ppml test_ppml.o $(LDFLAGS) -lpng
 
 
 .PHONY: includes

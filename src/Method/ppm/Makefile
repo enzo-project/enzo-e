@@ -25,6 +25,7 @@ OBJS = \
 	../CosmologyComputeExpansionTimestep.o \
 	CosmologyGetUnits.o \
 	../data_dump.o \
+	../image_dump.o \
 	euler.o \
 	FindField.o \
 	f_message.o \
@@ -56,7 +57,7 @@ new_all: includes all
 include $(TOP)/src/MAKE/Make.include
 
 test_ppm: includes $(OBJS) $(OBJS_PPM)
-	$(CXX) -o test_ppm $(OBJS_PPM) $(OBJS) $(LIB)
+	$(CXX) -o test_ppm $(OBJS_PPM) $(OBJS) $(LIB) -lpng
 
 initialize_image.o: image.h
 
