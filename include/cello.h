@@ -98,8 +98,8 @@ enum type_perf_functions {
  * GLOBAL FUNCTIONS
  **********************************************************************/
 
-inline double MIN (double x, double y) {return x < y ? x : y; }
-inline double MAX (double x, double y) {return x > y ? x : y; }
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
 /*********************************************************************
  * COMPONENTS
