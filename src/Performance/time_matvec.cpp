@@ -30,8 +30,6 @@
 #include <stdlib.h>
 #include <string>
 
-#define MIN(a,b) ((a)<(b)?(a):(b))
-
 #include "cello.h"
 #include "error.hpp"
 #include "performance.hpp"
