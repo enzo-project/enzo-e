@@ -267,13 +267,13 @@ void Hdf5::dataset_open_read (std::string name,
 
 //----------------------------------------------------------------------
 
-void Hdf5::dataset_set_hyperslab ()
-{
-  hsize_t offset[3] = {ix0,iy0,iz0};
-  hsize_t count[3]  = {mx,my,mz};
-  status_ = H5Sselect_hyperslab 
-    (dataspace_, H5S_SELECT_SET,  offset, NULL, count, NULL);
-}
+// void Hdf5::dataset_set_hyperslab ()
+// {
+//   hsize_t offset[3] = {ix0,iy0,iz0};
+//   hsize_t count[3]  = {mx,my,mz};
+//   status_ = H5Sselect_hyperslab 
+//     (dataspace_, H5S_SELECT_SET,  offset, NULL, count, NULL);
+// }
 
 //----------------------------------------------------------------------
 
