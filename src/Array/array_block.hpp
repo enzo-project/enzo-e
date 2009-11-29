@@ -47,18 +47,18 @@ public:
   Block() throw() {};
 
   /// Create a new uninitialized Block object
-  Block(Scalar * array, 
-	int * p,
+  Block(Scalar * values, 
+	int * permute,
 	int ndx,  int ndy,  int ndz,  int nda=1,
 	int nx=0, int ny=0, int nz=0, int na=0)
     throw() :
-    array_(array)
+    values_(values)
   { 
-    if (p) {
-      p_[p[0]] = 0; // default 1 = x
-      p_[p[1]] = 1; // default 2 = y
-      p_[p[2]] = 2; // default 3 = z
-      p_[p[3]] = 3; // default 4 = a
+    if (permute) {
+      p_[permute[0]] = 0; // default 1 = x
+      p_[permute[1]] = 1; // default 2 = y
+      p_[permute[2]] = 2; // default 3 = z
+      p_[permute[3]] = 3; // default 4 = a
     } else {
       p_[0] = 0;
       p_[1] = 1;
@@ -84,9 +84,9 @@ public:
   }
 
   /// Return a pointer to the ith array
-  Scalar * array(int i=0) const throw()
+  Scalar * values(int i=0) const throw()
   {
-    return & array_[i*m_[3]];
+    return & values_[i*m_[3]];
   }
 
   /// Return allocated block dimensions
@@ -129,7 +129,7 @@ public:
 private:
 
   /// Pointer to the first element of the array
-  Scalar * array_;
+  Scalar * values_;
 
   /// Dimensions of the array
   int nd_[4];

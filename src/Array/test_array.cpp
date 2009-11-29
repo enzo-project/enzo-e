@@ -79,7 +79,7 @@ int main()
       for (i1=0; i1<n1; i1++) {
 	for (i2=0; i2<n2; i2++) {
 	  int i = i0 + n0*(i1 + n1*i2);
-	  if (av[i]!=a(i0,i1,i2) && passed) {
+	  if (av[i] != a(i0,i1,i2) && passed) {
 	    passed = false;
 	    printf ("av[%d] = %g  a(%d,%d,%d) = %g\n",
 		    i,av[i],i0,i1,i2,a(i0,i1,i2));
@@ -93,6 +93,7 @@ int main()
     // clear() to 0
 
     a.clear();
+
     passed = true;
     for (i0=0; i0<n0; i0++) {
       for (i1=0; i1<n1; i1++) {
@@ -227,7 +228,7 @@ int main()
     printf ("(nx ny nz na) = %d %d %d %d\n",nx,ny,nz,na);
     unit_assert (nx == 10 && ny == 15 && nz == 20);
 
-    Scalar * bv = b.array(0);
+    Scalar * bv = b.values(0);
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
@@ -269,7 +270,7 @@ int main()
     printf ("(nx ny nz na) = %d %d %d %d\n",nx,ny,nz,na);
     unit_assert (nx == m0 && ny == m1 && nz == m2);
 
-    bv = b2.array(0);
+    bv = b2.values(0);
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
