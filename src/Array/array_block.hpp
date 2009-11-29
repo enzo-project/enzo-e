@@ -46,7 +46,7 @@ public:
   /// Create a new uninitialized Block object
   Block() throw() {};
 
-  /// Create a new uninitialized Block object
+  /// Create a new initialized Block object
   Block(Scalar * values, 
 	int * permute,
 	int ndx,  int ndy,  int ndz,  int nda=1,
