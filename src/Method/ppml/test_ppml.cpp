@@ -92,7 +92,7 @@ int main(int argc, char * argv[])
     if (dump_frequency && (cycle % dump_frequency) == 0) {
       printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
 	      cycle,timer.value(),time,dt);
-      data_dump(problem_name[problem_type],cycle);
+      fflush(stdout);
       image_dump(problem_name[problem_type],cycle,lower,upper);
     }
 
@@ -101,10 +101,10 @@ int main(int argc, char * argv[])
   }
 
   printf ("%d %d %g\n",size+6,cycles,timer.value());
+  fflush(stdout);
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     SetExternalBoundaryValues();
-    data_dump(problem_name[problem_type],cycle);
     image_dump(problem_name[problem_type],cycle,lower,upper);
   }
 }

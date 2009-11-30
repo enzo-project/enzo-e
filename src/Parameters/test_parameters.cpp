@@ -8,7 +8,7 @@
  * @author    James Bordner
  * @date      Thu Feb 21 16:04:03 PST 2008
  * 
- * $Id: test_parameters.cpp 715 2009-07-08 23:48:09Z bordner $
+ * $Id$
  * 
  *********************************************************************
  */

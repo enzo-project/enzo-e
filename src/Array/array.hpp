@@ -31,7 +31,7 @@
  * @note      Adding Array base class, and renaming old Array to ArraySerial
  * @note      Renaming old ArraySerial to Array.  Heh.
  *
- * $Id: array.hpp 715 2009-07-08 23:48:09Z bordner $
+ * $Id$
  * 
  *********************************************************************
  */
