@@ -2,7 +2,7 @@
 
 [[TOC]]
 
-Cello, AKA "Enzo-P", is designed to be the object-oriented petascale successor to the [http://lca.ucsd.edu/projects/enzo Enzo] terascale astrophysics and cosmology application.  It will include an overhaul of the distributed adaptive mesh refinement (AMR) and distributed particles data-structures, but will retain existing core physics kernels.  The object-oriented programming approach is expected to greatly ease maintaining and enhancing the code, which will in turn enable quickly adapting the code to future high-performance computing platforms as they continue to rapidly evolve.
+Cello, AKA "Enzo-P", is designed to be an object-oriented redesign of the [http://lca.ucsd.edu/projects/enzo Enzo] astrophysics and cosmology application.  It will include an overhaul of the distributed adaptive mesh refinement (AMR) and distributed particles data-structures, but will retain existing core physics kernels.  The object-oriented programming approach is expected to greatly ease maintaining and enhancing the code, which will in turn enable quickly adapting the code to future high-performance computing platforms as they continue to rapidly evolve.
 
 James Bordner (jobordner@ucsd.edu) [[BR]]
 [http://lca.ucsd.edu/  Laboratory for Computational Astrophysics] [[BR]]
@@ -22,15 +22,15 @@ James Bordner (jobordner@ucsd.edu) [[BR]]
 
 The wiki pages are for users and developers to interactively collaborate on different aspects of Cello's development. 
 
- * '''[NotesWishList Wish List]''': Wiki page for accumulating  desired features and functionality
+ * '''[NotesWishList Wish List]''': The "Wish List" is for listing desired features and functionality.  All future users of Cello are encouraged to review this list and add their own items.
 
- * '''[NotesParameters  Parameters]''': Wiki page for developing the parameter file syntax, grammar, and list of parameters
+ * '''[NotesParameters  Parameters]''': The "Parameters" wiki pages are for developing the parameter file syntax, grammar, and list of parameters.  All future users of Cello are encouraged to review these pages and provide feedback.
 
- * '''[NotesComponents  Components]''': Wiki pages for designing the Cello software at the component and class levels
+ * '''[NotesComponents  Components]''': The "Components" wiki pages are for designing the Cello software at the component and class levels.  All developers of Cello are encouraged to review these pages and provide feedback.
 
- * '''[NotesCodingStandards  Coding Guidelines]''': Wiki page for establishing Cello coding guidelines
+ * '''[NotesCodingStandards  Coding Guidelines]''': The "Coding Guidelines" page is for establishing basic suggestions and guidelines for Cello developers.  All developers must read these guidelines and are encouraged to provide feedback.
 
- * '''[NotesTestProblems  Tests]''': Wiki pages for collecting application tests and use cases
+ * '''[NotesTestProblems  Tests]''': The "Tests" pages are for developing application tests, which will be used for developing input file format and [NotesParameters Parameters] as well as testing.
 
 === Software Documents ===
 

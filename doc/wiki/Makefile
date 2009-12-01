@@ -17,7 +17,7 @@ WIKI_FILES = \
 	NotesComponentMonitor \
 	NotesComponentParallel \
 	NotesComponentParallelMpi \
-	NotesComponentParallelTask \
+	NotesComponentTask \
 	NotesComponentParameters \
 	NotesComponentParticles \
 	NotesComponentPerformance \
@@ -28,8 +28,8 @@ WIKI_FILES = \
 	NotesComponentSimulation \
 	NotesEnzoTestProblems \
 	NotesParameters \
+	NotesParametersCello \
 	NotesParametersEnzo \
-	NotesParametersMethod \
 	NotesTestProblemImplosion \
 	NotesTestProblems \
 	NotesTestProblemShockPool \

@@ -4,16 +4,27 @@
 
 [[TOC]]
 
-The `Control` component is the main scheduler in Cello, and orchestrates the distributed computations to advance the simulation in time, as well as simulation initialization and finalization.  Currently we are evaluating the use of [http://charm.cs.uiuc.edu CHARM++] in the `Control` component.  The top-level function of `Control` is `main()`.
+The `Control` component is the main scheduler in Cello, and orchestrates the distributed computations to advance the simulation in time, as well as simulation initialization and finalization.  Currently we are evaluating the use of [http://charm.cs.uiuc.edu CHARM++] in the `Control` component.
 
- * main()
-   * initialize components
-   * read in the input file(s)
-   * initialize the simulation
-     * execute the simulation
-     * handle any errors
-   * finalize components
-   * terminate execution
+   * execute the simulation
+     * create tasks
+     * schedule tasks
+     * trap errors
+     * handle errors
+
+== `Control` Supporting Classes ==
+
+ * [NotesComponentTask Task]: A `Task`, which is part of the `Parallel` component, is the combination of a sequence of `Method`'s (algorithms) and a `FieldBlock` (data).  Parallel distribution and load-balancing of `Task`s is controlled by the `Parallel` component, whereas scheduling of inter-`Task` communication and scheduling of `Task` methods is controlled by the `Control` component.  Since each `FieldBlock` corresponds to a serial thread, a `Task` is analagous to a "Chare" object in CHARM++.
+
+== `Control` Functions ==
+
+  || `Control()` || || 
+  ||  `~Control()` || || 
+  || `create_tasks()` ||  ''Create one or more `Task`s'' || 
+  || `run_tasks()` ||  ''Execute one or more `Task`s'' || 
+  || `delete_tasks()` || ''Delete one or more `Task`s'' || 
+  || `push_tasks()` || ''Push one or more `Task`s on a queue'' ||
+  || `pop_tasks()` || ''Pop one or more `Task`s from a queue'' ||
 
 == Patch scheduling ==
 
@@ -83,9 +94,3 @@ As an oversimplified summary:
  * Uniform time-stepping is preferred when sufficient parallelism is available
  * Multiple simulations may be "interleaved" to gain higher parallel efficiency than single simulations
  * Intelligent dynamic scheduling might improve efficiency
-
-== `Control` Supporting Classes ==
-
- * [NotesComponentParallelTask Task]: A `Task`, which is part of the `Parallel` component, is the combination of a sequence of `Method`'s (algorithms) and a `FieldBlock` (data).  Parallel distribution and load-balancing of `Task`s is controlled by the `Parallel` component, whereas scheduling of inter-`Task` communication and scheduling of `Task` methods is controlled by the `Control` component.  Since each `FieldBlock` corresponds to a serial thread, a `Task` is analagous to a "Chare" object in CHARM++.
-
-([NotesComponentArray Array] < [NotesComponents index] > [NotesComponentDisk Disk])

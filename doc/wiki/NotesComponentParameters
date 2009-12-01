@@ -20,7 +20,7 @@
  || `Parameters::value_string ()`  || Return the string-valued parameter ||
  || `Parameters::evaluate_scalar()` || Evaluate the scalar-valued parameter expression ||
  || || ||
- || `Parameters::length_list()` || Return the length of the list parameter ||
+ || `Parameters::list_length()` || Return the length of the list parameter ||
  || `Parameters::list_value_integer()` ||  Access an integer list element ||
  || `Parameters::list_value_scalar()`     || Access a scalar list element ||
  || `Parameters::list_value_logical()`     ||  Access aa logical list element ||
@@ -31,8 +31,3 @@
  || `Parameters::set_subgroup()` || Set the current subgroup ||
  || `Parameters::get_group()` || Get the current group ||
  || `Parameters::get_subgroup()` || Get the current subgroup ||
-
-==== Parameters ==== 
-
-
-([NotesComponentParallel Parallel] < [NotesComponents index] > [NotesComponentParticles Particles])

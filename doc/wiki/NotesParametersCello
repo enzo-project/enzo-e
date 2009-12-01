@@ -1,0 +1,127 @@
+
+([NotesParameters Parameters])
+
+[[TOC]]
+
+= Cello Parameters =
+
+== Array == 
+
+Group defining Array parameters.
+
+== Boundary == 
+
+Group defining the boundary conditions.
+
+
+ || '''Boundary:type''' ||  `string` ||  Type of boundary condition, one of "reflecting",  "inflow", "outflow", "periodic", "dirichlet", "neumann" ||
+
+
+ == Domain == 
+
+Group defining the problem domain.
+
+ || '''Domain:extent'''||  `list` ||  Extent of the domain, `[xmin, xmax]`, `[xmin, xmax, ymin, ymax]`, or `[xmin, xmax, ymin, ymax, zmin, zmax]` ||
+
+ == Error ==
+
+Group for initializing error/fault tolerance parameters.
+
+ == Field ==
+
+Parameters relating to data fields.  See [NotesComponentField Field Component] for the list of fields.
+
+
+ || '''Field:courant''' ||  `scalar` ||  Courant condition for fields ||
+ || '''Field:interleave''' ||  `list` ||   List of fields to group together ||
+ || '''Field:FIELD:minumum''' ||  `scalar` ||  Minimum value for the given field ||
+ || '''Field:FIELD:maxumum''' ||  `scalar` ||  Maxmum value for the given field ||
+
+
+ == Grid ==
+
+Group defining the discretization; includes both unigrid and AMR.
+
+
+ || '''Grid:root''' ||  `list` ||  Size of the grid on the root level. ||
+ || '''Grid:max_level''' ||  `integer` ||  Maximum effective level, based on r=2 with root-level 0.  ''What about refine=3?'' ||
+ || '''Grid:refine''' ||  `integer` ||  Refinement factor, e.g. 2, 4, 8, etc. ||
+ || '''Grid:balanced''' ||  `logical` ||  Whether the tree is balanced or "full" (ala Flash) or not.  Balanced tree nodes require less storage (nominally three pointers), but all child nodes are allocated. ||
+ || '''Grid:backfill''' ||  `logical` ||  Whether to "backfill" for refinement > 2.  This generates additional "implicit" grid patches to regain proper nesting for refinement = 2 even when the actual refinement level is greater. ||
+ || '''Grid:coalesce''' ||  `logical` ||  Whether to coalesce small patches into one big one.  This is an attempt to regain patch-based AMR efficiency in terms of patch counts when using tree-based AMR.  Useful when large regions of the domain have the same refinement level, especially for finer levels. ||
+ || '''Grid:patch_min''' ||  `integer` ||  The minimum allowed patch size.  When `coalesce` is `false`, all patches are this size. ||
+ || '''Grid:patch_max''' ||  `integer` ||  The maximum allowed patch size. Larger patches can occur only when `coalesce` is `true`. ||
+
+
+ == Initial ==
+
+Group defining the initial conditions.
+
+
+ || '''Initial:FIELD''' ||  `list` ||  List of scalar-expression / logical-expression pairs ||
+
+
+
+ == Method ==
+
+Group for initializing method parameters.
+
+
+ || '''Method:ppm:diffusion'''  `scalar`  ||  PPM diffusion parameter ||
+ || '''Method:ppm:flattening''' ||  `scalar` ||  PPM flattening parameter ||
+ || '''Method:ppm:steepening''' ||  `scalar` ||  PPM steepening parameter ||
+
+
+
+ == Monitor ==
+
+Group for initializing monitor parameters.
+
+ == Output ==
+
+Group for initializing output parameters.
+
+
+ || '''Output:file''' ||  `list` ||  Name for the output files, where the first element is a format string (ala `printf()`), and remaining elements are scalar expressions.  E.g.  `["wave_pool-t=%3.1f.data", t]` ||
+ || '''Output:time''' ||  `list` ||  List of times to generate an output dump. ||
+ || '''Output:period''' ||  `scalar` ||  Output every `t = p * k` for integer `k`. ||
+ || '''Output:interval''' ||  `list` ||  Triplet [i1,i2,i3]: output every t = i1 + k*i2 for `k = 0 .. i3-1` ||
+
+
+ == Parallel ==
+
+Group for initializing parallel parameters.
+
+ == Particles ==
+
+Parameters relating to particles
+
+ == Physics ==
+
+Group for initializing physics parameters.
+
+
+ || `Physics:gamma` ||  `scalar`  ||  Ratio of specific heats for an ideal gas ||
+
+
+
+ == Portal ==
+
+Group for initializing portal parameters.
+
+ == Refine ==
+
+Group defining Amr refinement parameters.
+
+ == Restart ==
+
+Group for initializing restart parameters.
+
+ == Stopping ==
+
+Group for defining the problem stopping criteria.
+
+ || '''Stopping:time''' ||  `scalar`  ||  Stopping time ||
+ || '''Stopping:cycle''' ||  `integer`  ||  Stopping cycle (root grid)  ||
+
+

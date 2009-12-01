@@ -8,68 +8,81 @@
 
 === Index calculation ===
 
-Possible ways of calculating indices, assuming loops are `ix=0 to nx-1`, `iy=0 to ny-1`, and `iz=0 to nz-1`:
+`Block`s support two ways of calculating indices, ''absolute'' and ''relative''.  There are advantages and disadvantages to each.
+Absolute indices allow more flexibility in loop bounds and ordering, are easier to read and visually confirm correctness, and may vectorize better. Relative indices require fewer index computations.  In general, absolute index calculations are to be preferred, but relative ''may'' be faster in some situations.
 
-|| Absolute ||  `for iz { for iy { for ix {i = ix*dx + iy*dy + iz*dz}}}` ||1 mul + 2 madd's||
-|| Relative ||  `for iz { for iy { for ix {i += dx} i += dy - nx*dx} i += dz - ny*dy }` ||1 add in inner-loop||
+==== Absolute ====
+
+Assuming an array with unit stride, the absolute index `i` should be computed as follows:
+
+{{{
+   Block b;
+
+   // get the block size (nx,ny,nz)
+
+   int nx,ny,nz;
+   b.get_size(&nx,&ny,&nz);
+
+   // get the block allocated dimension (dx,dy,dz)
+
+   int dx,dy,dz;  
+   b.get_dim(&dx,&dy,&dz);
+
+   for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+         for (int ix=0; ix<nx; ix++) {
+
+            i = ix + dx*(iy + dy*iz);
+
+            // loop body here
+
+         }
+      }
+   }
+}}}
+
+==== Relative ====
+
+Assuming an array with unit stride, the relative index `j` should be computed as follows:
+
+{{{ 
+   Block b;
+
+   // get the block size (nx,ny,nz)
+
+   int nx,ny,nz;
+   b.get_size(&nx,&ny,&nz);
+
+   // get the block increments (dx,dy,dz)
+
+   int dx,dy,dz;  
+   b.get_inc(&dx,&dy,&dz);
+
+   int j = 0;
+
+   for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+         for (int ix=0; ix<nx; ix++) {
+
+            // ...
+
+            j += dx;
+         }
+         j += dy - nx*dx;
+      }
+      j += dz - ny*dy;
+   }
+}}}
 
 === Attributes ===
 === Functions ===
 
- || `Block::Block()`|| ''`Block` constructor'' ||
- || `Block::~Block()`|| ''`Block` destructor'' || 
- || `Block::array()` || ''Return pointer to the start of an array in `Array` ||
- || `Block::get_dim()` || ''Return allocated block dimensions'' ||
- || `Block::get_size()` || ''Return size of the block'' ||
- || `Block::get_inc()` || ''Return increments for loop index calculations'' ||
+ || `(*)` || `Block::Block()`|| ''`Block` constructor'' ||
+ || `(*)` || `Block::~Block()`|| ''`Block` destructor'' || 
+ || `(*)` || `Block::values()` || ''Return pointer to the start of the block values'' ||
+ || `(*)` || `Block::get_dim()` || ''Return allocated block dimensions'' ||
+ || `(*)` || `Block::get_size()` || ''Return size of the block'' ||
+ || `(*)` || `Block::get_inc()` || ''Return increments for loop index calculations'' ||
 
 === Usage ===
 
-{{{
-   Array a(layout);
-   Array b(layout);
-
-   double * av;
-   double * bv;
-
-   ItBlock * itBlock (layout);
-
-    while (Block * itBblock = itBlock++) {
-
-     av = a.block(itBlock);
-     bv = b.block(itBlock);
-
-     int nx,ny,nz;
-     int dx,dy,dz
-
-     block->get_size(&nx,&ny,&nz);
-     block->get_inc (&dx,&dy,&dz);
- 
-     int i,ix,iy,iz;
-
-     // Absolute index calculation
-
-     for (iz=0; iz<nz; iz++) {
-       for (iy=0; iy<ny; iy++) {
-         for (ix=0; ix<nx; ix++) {
-           i = ix*dx + iy*dy + iz*dz;
-           bv[i] = av[i];
-         }
-       }
-     }
-     i = 0;
-
-     // Relative index updates
-
-     for (iz=0; iz<nz; iz++) {
-       for (iy=0; iy<ny; iy++) {
-         for (ix=0; ix<nx; ix++) {
-           av[i] = bv[i];
-           i += dx;
-         }
-         i += (-nx*dx + dy);
-       }
-       i += (-ny*dy + dz);
-     }
-   }
-}}}

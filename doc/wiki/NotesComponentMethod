@@ -9,6 +9,8 @@ methods applied for one timestep on a uniform grid.  Functions supporting applyi
 the method on an AMR hierarchy are included, such as method-specific handling of
 boundary conditions.
 
+[[Image(htdocs:gedeckt-ppm-ppml-rate.png)]]
+
 == `Method` types ==
 
 || `Method` || ''Parent base class'' ||

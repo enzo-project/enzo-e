@@ -1,5 +1,22 @@
-([NotesComponentProblem Problem] < [NotesComponents index] > [NotesComponentAmr Amr])
+([NotesComponentProblem Problem] < [NotesComponents index] > [NotesComponentTask Task])
 
 = Simulation Component =
 
-A `Simulation` defines and manages a computational astrophysics [NotesComponentProblem Problem] or an ensemble of related [NotesComponentProblem Problem]s.  Invokes [NotesComponentTimestep Timestep] to advance the [NotesComponentProblem Problem](s), and may call the [NotesComponentParallel Parallel] component to manage the high-level parallelization of multiple [NotesComponentProblem Problem]s in an ensemble.
+A `Simulation` defines a computational astrophysics [NotesComponentProblem Problem] as initialized from `Parameters`.  [NotesComponentControl Control] is used to initialize the simulation and run it.
+
+
+  || `Simulation()` || || 
+  ||  `~Simulation()` || || 
+  || `initialize()` || ''Initialize the Simulation given input parameters'' ||
+  || || ||
+  || `dimension()` ||  ''Return the dimensionality of the problem'' || 
+  || `domain_extents()` ||  ''Return the lower and upper extents of the domain'' || 
+  || || ||
+  || `num_fields()` || ''Return the number of fields'' ||
+  || `field()` || ''Return the nth field '' ||
+  || `num_methods()` || ''Return the number of methods'' ||
+  || `method()` || ''Return the nth method '' ||
+  || `parallel()` || ''Return the `Parallel` object'' ||
+  || `amr()` || ''Return the `Amr` object'' ||
+
+ 

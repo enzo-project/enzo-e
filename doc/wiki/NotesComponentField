@@ -4,21 +4,83 @@
 
 [[TOC]]
 
-A `Field` represents a discretized scalar field.  A `Field` can be discretized on an `Amr` hierarchy,
-an `Array`, or a `Block` of an array.
+A `Field` represents a discretized scalar field.  A `Field` is typically discretized on an `Amr` hierarchy, but can be accessed at the `Array` or a `Block` levels as well.  In addition to the array of elements, a `Field` includes an identifier for the field, the location of the field values with respect to computational cells (cell centered, face-centered, etc.), the index into the `Block` or `Array` of the field, optional minimum or maximum allowed values, units, and user-defined tags.
+
+Attributes:
+ || name || String defining the field's name, e.g. "density", "velocity-x", etc. ||
+ || id || Integer identifying the `Field` ||
+ || array || `Array` containing `Field` values for the containing `Patch` ||
+ || index  || Index of the specific array in the 4D `Array` ||
+ || position || cell position, defined as (0,0,0) <= (px,py,pz) <= (1,1,1).  (.5,.5,.5)=cell centered ||
+ || min || minimum allowed value for the `Field` ||
+ || max || maximum allowed value for the `Field` ||
+ || min_action || what should be done if `Field` goes below `min` (e.g. 1: set to min, 2: warning, 4: error, g: retry with smaller timestep, etc.) ||
+ || max_action || what should be done if `Field` goes above `max` ||
+
+A set of `Field`s defined on a `Block`, along with groups of `Particles` associated with the block, are the main input to (and output from) `Method`s.  `Method`s have access to the `Field`'s values, size, cell position, units, tags, limits, etc. 
+
+Actual `Field` objects are stored in the `Amr` `Patch` object.  `Patch` objects also contain associated `Particle` objects, and a `Box` object defining the `Patch`'s extents and position.
+
+== List of fields ==
+
+ || `acceleration_x` ||
+ || `acceleration_y` ||
+ || `acceleration_z` ||
+ || `density` ||
+ || `density_C2I` ||
+ || `density_CH2I` ||
+ || `density_CH3II` ||
+ || `density_CHI` ||
+ || `density_CI` ||
+ || `density_CII` ||
+ || `density_COI` ||
+ || `density_CR` ||
+ || `density_DI` ||
+ || `density_DII` ||
+ || `density_electron` ||
+ || `density_H2I` ||
+ || `density_H2II` ||
+ || `density_H2OI` ||
+ || `density_HCOII` ||
+ || `density_HDI` ||
+ || `density_HeI` ||
+ || `density_HeII` ||
+ || `density_HeIII` ||
+ || `density_HI` ||
+ || `density_HII` ||
+ || `density_HM` ||
+ || `density_O2I` ||
+ || `density_OHI` ||
+ || `density_OI` ||
+ || `density_OII` ||
+ || `density_preshock` ||
+ || `density_SiI` ||
+ || `density_SiII` ||
+ || `density_SiIII` ||
+ || `energy_internal` ||
+ || `energy_total` ||
+ || `flagging` ||
+ || `gravitating_mass` ||
+ || `mach` ||
+ || `metallicity` ||
+ || `potential` ||
+ || `potential_gravitation` ||
+ || `pressure` ||
+ || `temperature` ||
+ || `temperature_preshock` ||
+ || `velocity_x` ||
+ || `velocity_y` ||
+ || `velocity_z` ||
 
 == `Field` supporting classes ==
 
+  
 == `Field` operations ==
 
 == `Field` hierarchy ==
 
 === Structure ===
 
- * `Field`
- *   `FieldBlock`
- *   `FieldArray`
- *   `FieldAmr`
 
 === Descriptions ===
 
@@ -31,37 +93,32 @@ an `Array`, or a `Block` of an array.
 ==== Usage ====
 
 Issues:
- * How to conceptualize "I need updated ghost zones" and "I have updated ghost zones available"?
-  * Want to be efficient: apply to all Fields with one call
-    * Enables e.g. grouping multiple MPI-1 send/receives for multiple `Fields` into one
-      * pack and unpack buffer
-    * Mark `Field`s as "updatable", and use static `Field::ghosts_available(block)` call?
-      * Will disallow independent simulations ("static bad, tree pretty")
-    * Create a `FieldGroup` object, like `ParticlesGroup`?
-      * Much of the functionality available in std::array<Field*>
-      * Can still implement the object using std::array<Field*>
-   * Want to be independent of OMP, MPI-1, MPI-2, (CHARM++?)
+ * What operations are the responsibility of `Field` versus `Array`, `Task`, `Patch`, etc.
+    * see below: `Field` stores only global properties of field, not actual data
+ * How to store global attributes (name, index, min, max, position, etc.) versus non-global (values)
+    * Single global `Field` object for each field
+    * `Field`s don't store actual `Array`s, `Patches` do--`Field` only stores `Array` index.
+{{{ 
 
-
-{{{
+@@@ UPDATE @@@
 
    // Create an MPI object (Parallel)
 
-   Mpi *mpi = new Mpi();
+   Mpi *mpi = new Mpi(...);
 
-   int na[] = {64,64,64};
-   int np[] = {8,8,8};
+   int na[] = {64,64,64};  // Array size
+   int np[] = {8,8,8};     // Mpi processor topology
 
    // Create a Layout object for MPI-distributed Arrays
 
-   Layout * layout = new LayoutArrayMpi(*mpi, na, np);
+   Layout * layout = new LayoutMpi(*mpi, na, np);
 
    // Create Fields
 
-   Field * field_density    = new Field(*layout, "density");
-   Field * field_velocity_x = new Field(*layout, "velocity-x");
-   Field * field_velocity_y = new Field(*layout, "velocity-y");
-   Field * field_velocity_z = new Field(*layout, "velocity-z");
+   Field * field_density    = new Field(0,"density",...);
+   Field * field_velocity_x = new Field(1,"velocity-x");
+   Field * field_velocity_y = new Field(2,"velocity-y");
+   Field * field_velocity_z = new Field(3,"velocity-z");
 
     // Create a list of all Fields
 
@@ -74,7 +131,7 @@ Issues:
 
    // Create an iterator over blocks in the layout
 
-   ItLayoutBlocks block_loop (*layout);
+   ItBlocks block_loop (*layout);
 
    // Array block storage (initialize in loop below)
 

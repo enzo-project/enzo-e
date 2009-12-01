@@ -61,35 +61,42 @@ Issues with `Array`s and supporting classes include the following:
 
 === Attributes ===
 
- * `Scalar ** values_` ''array elements''
- * `bool is_allocated_` ''true iff values_ should ever be deallocated''
- * `Layout layout_` ''Layout for the arrays''
+  || `(*)` || `Scalar * values_` || ''array elements'' ||
+  || `(*)`?|| `int nx_,ny_,nz_`  || ''array size'' ||
+  || `(*)` || `bool is_allocated_`  || ''true iff values_ should ever be deallocated'' ||
+  || `( )` || `Layout layout_`  || ''Layout for the arrays'' ||
 
 === Functions ===
 
- || `Array::ArraySerial()`|| ''`Array` constructor'' ||
- || `Array::~ArraySerial()`|| ''`Array` destructor'' ||
- || || ||
- || `Array::allocate()`|| ''Allocate storage for the `Array`'' ||
- || `Array::deallocate()`|| ''Allocate storage for the `Array`'' ||
- || `Array::is_allocated()` || ''Return whether storage is allocated for the `Array`''||
- || `Array::set_allocated()` || ''Assert whether values should or should not ever be deallocated'' ||
- || || ||
- || `Array::set_layout()`|| ''Set the `Layout` of the `Array`'' ||
- || `Array::get_layout()`|| ''Get the `Layout` of the `Array`'' ||
- || `Array::read_block()`|| ''Copy (alias) elements from the `Array` to the `Block` '' ||
- || `Array::write_block()`|| ''Copy (nop) elements from the `Block` to the `Array`'' ||
- || || ||
- || `Array::split()` || ''Split an `Array` into two (or more) at some point along some axis'' ||
- || `Array::merge()`  || ''Merge two (or more) `Array`s into one along some axis'' ||
- || `Array::shrink()` || ''Shrink the `Array` by some number of zones along each axis'' ||
- || `Array::grow()`  || ''Enlarge the `Array` by some number of zones along each axis'' ||
- || || ||
- || `Array::copy()`|| ''Copy arrays in the `Array` '' ||
- || `Array::clear()`|| ''Clear/set arrays in the `Array` to the given value'' ||
- || || ||
- || `Array::read_disk()`|| ''Read the `Array` from disk'' ||
- || `Array::write_disk()`|| ''Write the `Array` to disk'' ||
+ || `(*)` || `Array::Array()`|| ''`Array` constructor'' ||
+ || `(*)` || `Array::~Array()`|| ''`Array` destructor'' ||
+ || || || ||
+ || `(*)` ?|| `Array::resize()` || ''Resize an array'' ||
+ || `(*)` ?|| `Array::size()` || ''Get the size of an array'' ||
+ || `(*)` ?|| `Array::length()` || ''Get the length of the array'' ||
+ || `(*)` ?|| `Array::values()` || ''Return a pointer to the array values'' ||
+ || `(*)` ?|| `Array::operator()()` || ''Return an array element'' ||
+ || || || ||
+ || `( )` || `Array::allocate()`|| ''Allocate storage for the `Array`'' ||
+ || `( )` || `Array::deallocate()`|| ''Allocate storage for the `Array`'' ||
+ || `( )` || `Array::is_allocated()` || ''Return whether storage is allocated for the `Array`''||
+ || `( )` || `Array::set_allocated()` || ''Assert whether values should or should not ever be deallocated'' ||
+ || || || ||
+ || `( )` || `Array::set_layout()`|| ''Set the distributed `Layout` of the `Array`'' ||
+ || `( )` || `Array::get_layout()`|| ''Get the distributed `Layout` of the `Array`'' ||
+ || `( )` || `Array::read_block()`|| ''Copy (alias) elements from the `Array` to the `Block` '' ||
+ || `( )` || `Array::write_block()`|| ''Copy (nop) elements from the `Block` to the `Array`'' ||
+ || || || ||
+ || `( )` || `Array::split()` || ''Split an `Array` into two (or more) at some point along some axis'' ||
+ || `( )` || `Array::merge()`  || ''Merge two (or more) `Array`s into one along some axis'' ||
+ || `( )` || `Array::shrink()` || ''Shrink the `Array` by some number of zones along each axis'' ||
+ || `( )` || `Array::grow()`  || ''Enlarge the `Array` by some number of zones along each axis'' ||
+ || || || ||
+ || `( )` || `Array::copy()`|| ''Copy arrays in the `Array` '' ||
+ || `( )` || `Array::clear()`|| ''Clear/set arrays in the `Array` to the given value'' ||
+ || || || ||
+ || `( )` || `Array::read_disk()`|| ''Read the `Array` from disk'' ||
+ || `( )` || `Array::write_disk()`|| ''Write the `Array` to disk'' ||
 
 === Usage ===
 

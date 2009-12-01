@@ -1,8 +1,8 @@
-([NotesComponentParallelUpc Parallel:Upc] < [NotesComponentParallel Parallel] > [NotesComponentParallelMpi Parallel:Mpi])
+([NotesComponentSimulation Simulation] < [NotesComponents index] > [NotesComponentAmr Amr])
 
 [[TOC]]
 
-= Parallel Task Subcomponent =
+= Task Component =
 
 The `Task` component is used for representing parallel tasks.   It is accessed by both the `Parallel` component for data distribution and dynamic load balancing of data (`Fields` and `Particles`), and the `Control` component for scheduling associated `Method`s.  `Task`s are linked together if they are nearby and expect to share data, e.g. for neighboring patches in an AMR hierarchy.  If linked `Task`s exist on different processes, "ghost" tasks are created and used as proxies for communicating data between the local and remote `Task`s, analagous to ghost zones and active zones in the AMR hierarchy.  
 
@@ -145,35 +145,35 @@ Entities involved in communication at any one time
 
   === Algorithms ===
 
-[[Image(htdocs:tasks.png)]]
-
   ==== Relocate ====
+
+[[Image(htdocs:tasks.png)]]
 
     A `Task` is associated with "neighbors" and "ghosts".  Neighbors of `Task` `A` represent all other `Task`s that involve direct communication with `A`, e.g. neighboring patches, parent patch, or child patches.  Neighbors may be "local" or "remote", where remote neighbors include information on how to access the data associated with the neighbor, including MPI process, and functions for retrieving data for ghost zone updates or interpolations.  Functions for retrieving data are the same for local and remote `Task`s to help hide communication details from higher code levels.  Ghosts of `Task` `A` are all the "remote" `Task` A's on other processes.  Each `Task` `A` ghost is associated with a remote neighbor of `A`, and each remote neighbor of `A` is associated with an `A` ghost.
     
-    Relocate `A` from from process p to process q.
+    To relocate `Task` `A` from from process `p` to process `r`:
 
-Process p:
-    0. Hold all incoming messages to `A` (suspend A)
-    1. Process all outstanding incoming messages to `A`.
-    2. Create new remote `Task` `A`
-    3. Receive `Task` A info from q
-    4. Send `A`'s data to q
-    5. Initialize `A`'s neighbor links
-    6. Update `A`'s neighbors neighbor links 
-    7. Send `A`'s ghost links
-    8. Delete old local `A`
+   @@@
 
-Process q:
-    2. Create new local `Task` A
-    3. Send `Task` A info to p
-    4. Receive `A`'s data from p
-    5. Initialize `A`'s neighbor links
-    6. Update `A`'s neighbors neighbor links
-    7. Receive `A`'s ghost links
-    8. Delete old remote `A`
-    9. Lift hold on incoming messages to `A` (release A)
- 
+    *  p: Complete all outstanding communication for A-p
+    *  p->r: Transfer A-p info (data, ghosts, neighbors)
+    *  p: Create a-p if needed
+    *  r: Create b-r and other neighbors if needed
+    *  r: Create new A-r
+    *  r->p: Transfer A-r info (pointer)
+
+    *  r: Initialize local neighbor links A-r to b-r
+    *  r: Initialize local neighbor links b-r to A-r
+
+    *  r: Initialize local A-r ghost links from A-p to A-q
+    *  r: Initialize local b-r ghost links to B-x if needed
+    *  x: Update remote neighbor's ghosts B-x from b-p to b-r
+    *  x: Update remote neighbor's ghosts a-q from A-p to A-r
+    *  p: Terminate A-p
+    *  p: Terminate b-p if needed
+    *  r: Delete a-r if needed
+    *  r: Set A-r to ready
+
   === Attributes ===
 
  || `Task::ip_`              || ''Owner of `Task` if it's remote. `Parallel` object?`'' ||
@@ -201,7 +201,14 @@ Process q:
  || || ||
  || `Task::create_link()` || ''Create a neighbor link between two `Tasks`'' ||
  || `Task::delete_link()` || ''Delete a neighbor link between two `Tasks`'' ||
-
+ || || ||
+ || `Task::create()`   || ''Create a new `Task` and set to ready'' ||
+ || `Task::block()`   || ''Block the `Task`.'' ||
+ || `Task::suspend()` || ''Suspend the `Task`.'' ||
+ || `Task::resume()`   || ''Resume task after being `suspended`' ||
+ || `Task::release()` || ''Release `Task` from being `blocked`.'' ||
+ || `Task::run()` || ''Run the `Task`'' ||
+ || `Task::terminate()` || ''Terminate the `Task`'' ||
 
   === Usage ===
   === Parameters ===

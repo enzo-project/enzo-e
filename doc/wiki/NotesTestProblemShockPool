@@ -125,7 +125,7 @@
 
   # Define the domain to be the 1D interval from 0 to 1
 
-  Domain { range = [0.0, 1.0] } 
+  Domain { extent = [0.0, 1.0] } 
                                 
   # Define field properties with named groups 
                                 

@@ -24,8 +24,6 @@ There are some potential issues with this approach.  In particular, it does not 
 
 To implement `Parallel`, other related classes are used to share implementation responsibilities. These classes are described in separate pages.
 
- * [NotesComponentParallelTask Task] The `Task` class is used to control different distributed entities.  It maintains information such as time and storage estimates, and is the mechanism for data and operations to be migrated between physical processes to keep the distributed workload balanced.  It is analogous to a virtual thread, as opposed to a physical thread.  Distributed entities are associated with `Task`s, and are responsible for packing and unpacking data for inter-process migration.  `Task`s can also send and receive data, in particular to update `FieldBlock` ghost zones.  The `Control` component, which schedules when `Task`s are executed, determines when `Task`s should communicate their data.
-
  * [NotesComponentParallelMpi Mpi] The `Mpi` class is used as a wrapper for calls to MPI.
  * [NotesComponentParallelOmp Omp] The `Omp` class is used as a wrapper for calls to OpenMP.
  * [NotesComponentParallelUpc Upc] The `Upc` class is used as a wrapper for calls to Upc.

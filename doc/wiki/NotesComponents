@@ -2,17 +2,17 @@
 
 [[Image(htdocs:components.png)]]
 
-Below is the definitive list of Cello components (verified match with SVN doc/design revision 439 on 2008-12-19)
+Below is the list of Cello components:
 
 || ( ) || [NotesComponentAmr         Amr] || Adaptive mesh refinement infrastructure, built on top of `Array` || 
 || ( ) || ~~[NotesComponentAnalysis    Analysis]~~ || ~~Inline analysis and visualization routines~~ || 
 || ( ) || [NotesComponentArray       Array] || Fortran-like array, which may be parallelized or vectorized in various ways || 
-|| ( ) || [NotesComponentControl     Control] || Orchestrates the parallel advancement of a `Simulation` in time ||
+|| ( ) || [NotesComponentControl     Control] || Schedules `Task`s to  advance the `Simulation` in time ||
 || ( ) || [NotesComponentDisk        Disk] || Provides functions for writing and reading data to and from disk storage  || 
 || ( ) || [NotesComponentError       Error] || Error prevention (including check-pointing), error detection and recovery || 
 || ( ) || [NotesComponentField       Field] || Scalar fields on an `Array` or `Amr` hierarchy ||
 || ( ) || [NotesComponentMemory      Memory] || Manage dynamic memory allocation and deallocation ||
-|| ( ) || [NotesComponentMethod      Method] || Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and pre-visualization ||
+|| ( ) || [NotesComponentMethod      Method] || Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and visualization ||
 || ( ) || [NotesComponentMonitor     Monitor] || User interface to monitor the status of a running simulation ||
 || ( ) || [NotesComponentParallel    Parallel] || Functions for data distribution, communication, and load balancing ||
 || ( ) || [NotesComponentParameters  Parameters] || Input, parse, store, and access run-time parameters ||
@@ -20,7 +20,8 @@ Below is the definitive list of Cello components (verified match with SVN doc/de
 || ( ) || [NotesComponentPerformance Performance] || Measure, and provide functions to access, run-time performance ||
 || ( ) || [NotesComponentPortal      Portal] || Interface with other applications, including querying state, modifying parameters, and post-visualization ||
 || ( ) || ~~[NotesComponentProblem     Problem]~~ || ~~Defines the problem (or problems), including physics, discretization, boundary and initial conditions~~ ||
-|| ( ) || [NotesComponentSimulation  Simulation] || Defines the problem (or problems) to run ||
+|| ( ) || [NotesComponentSimulation  Simulation] || Specifies the problem(s) to run ||
+|| ( ) || [NotesComponentTask Task] || Encapsulates `Methods` and data that are distributed using `Parallel` and scheduled to run using `Control` ||
 
 
 Code for components are organized into separate directories.
