@@ -56,6 +56,7 @@ OBJS_ALL = \
        mpi.o \
        parameters.o \
        point.o \
+       lcamem.o \
        problem.o
 
 OBJS_INIT  = hypre-init.o

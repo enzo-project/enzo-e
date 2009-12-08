@@ -14,7 +14,7 @@
  */
 
 #include <assert.h>
-
+#include <stdio.h>
 #include <string>
 
 #include "newgrav-scalar.h"

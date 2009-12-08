@@ -25,7 +25,7 @@
 #include "HYPRE_sstruct_ls.h"
 
 #include "newgrav-hypre-solve.h"
-#include "jbMem.h"
+#include "lcamem.h"
 
 //----------------------------------------------------------------------
 
@@ -52,8 +52,8 @@ const int trace    = 0;
 //======================================================================
 
 #define PRINT_MEM \
-  printf ("%s:%d jbMem bytes = %lld\n", \
-  __FILE__,__LINE__,jbMem::bytes_);
+  printf ("%s:%d lcamem bytes = %lld\n", \
+  __FILE__,__LINE__,lcamem::bytes_);
 
 //======================================================================
 
@@ -87,36 +87,36 @@ int main(int argc, char **argv)
   // Test Grid class
 
   MPI_Barrier(MPI_COMM_WORLD);
-  bytes_begin = jbMem::bytes_;
+  bytes_begin = lcamem::bytes_;
   test_grid();
-  bytes_end = jbMem::bytes_;
+  bytes_end = lcamem::bytes_;
   print_result ("Grid",bytes_begin,bytes_end);
   MPI_Barrier(MPI_COMM_WORLD);
 
   // Test Level class
 
   MPI_Barrier(MPI_COMM_WORLD);
-  bytes_begin = jbMem::bytes_;
+  bytes_begin = lcamem::bytes_;
   test_level();
-  bytes_end = jbMem::bytes_;
+  bytes_end = lcamem::bytes_;
   print_result ("Level",bytes_begin,bytes_end);
   MPI_Barrier(MPI_COMM_WORLD);
 
   // Test Problem class
 
   MPI_Barrier(MPI_COMM_WORLD);
-  bytes_begin = jbMem::bytes_;
+  bytes_begin = lcamem::bytes_;
   test_problem();
-  bytes_end = jbMem::bytes_;
+  bytes_end = lcamem::bytes_;
   print_result ("Problem",bytes_begin,bytes_end);
   MPI_Barrier(MPI_COMM_WORLD);
 
   // Test Hierarchy class
 
   MPI_Barrier(MPI_COMM_WORLD);
-  bytes_begin = jbMem::bytes_;
+  bytes_begin = lcamem::bytes_;
   test_hierarchy();
-  bytes_end = jbMem::bytes_;
+  bytes_end = lcamem::bytes_;
   print_result ("Hierarchy",bytes_begin,bytes_end);
   MPI_Barrier(MPI_COMM_WORLD);
 
