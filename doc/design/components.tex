@@ -127,14 +127,14 @@
 %
    A \code{Simulation} defines and manages a computational
    astrophysics \code{Problem} or an ensemble of related
-   \code{Problem}s. Invokes \code{Timestep} to advance the
+   \code{Problem}s. Invokes \code{Control} to advance the
    \code{Problem}(s), and may call the \code{Parallel} component to
    manage the high-level parallelization of multiple \code{Problem}s
    in an ensemble.
 %
- \item [\todo Timestep (\S\ref{s:component-timestep}): ]
+ \item [\todo Control (\S\ref{s:component-control}): ]
 %
-        \code{Timestep} handles the timestepping of methods to advance
+        \code{Control} handles the timestepping of methods to advance
         the problem forward in time.
 \end{description}
 
@@ -142,6 +142,7 @@
 
 \input{component-amr}
 \input{component-array}
+\input{component-control}
 \input{component-disk}
 \input{component-error}
 \input{component-field}
@@ -153,9 +154,8 @@
 \input{component-particles}
 \input{component-performance}
 \input{component-portal}
-\input{component-problem}
 \input{component-simulation}
-\input{component-timestep}
+\input{component-task}
 
 % \input{component-control}
 % \input{component-parameters}

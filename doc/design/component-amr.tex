@@ -76,6 +76,8 @@ Tentative features of \code{Amr} support in Cello include the following:
     \item How to handle remeshing?
     \item How to dynamically adjust tree size (23,43, 83,
       etc.)(adaptive adaptivity)
+    \item How to deal with ghost zones
+    \item What operations needed for load balancing
 \end{itemize}
 
 \subsection{\code{Amr} supporting classes}
@@ -96,14 +98,13 @@ Tentative features of \code{Amr} support in Cello include the following:
 
 Operations
 
-The \code{\code{Amr}} component accesses the \code{Array} component to define
-the ``intra-resolution'' aspect of field data on an AMR hierarchy, and
-the
-\code{Particles} component to define particles on the AMR
+The \code{\code{Amr}} component accesses the \code{Array} component to
+define the ``intra-resolution'' aspect of field data on an AMR
+hierarchy, and the \code{Particles} component to define particles on
+the AMR hierarchy.  
 
-to, such as number of mesh
-levels, grid patch properties, rebuild algorithm, dynamic load
-balancing, refinement criteria, etc.
+to, such as number of mesh levels, grid patch properties,
+rebuild algorithm, dynamic load balancing, refinement criteria, etc.
 
 Hierarchy
 \code{Array}

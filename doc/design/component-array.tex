@@ -2,10 +2,9 @@
 \section{Array Component} \label{s:component-array}
 %=======================================================================
 
-Use chunked field storage \\
-Field chunk size or range
-The \code{Array} classes encapsulate Fortran-style arrays with
-convenient operations and optional special features.  
+The \code{Array} classes encapsulate Fortran-style distributed or
+vectorized arrays with convenient operations and optional special
+features.
 
 Optional features include storing as a blocked array to improve cache
 use, array padding to avoid cache thrashing on large power-of-two
@@ -14,11 +13,91 @@ according to \code{Parallel} objects such as
 \code{Parallel::Mpi} for MPI-parallel distributed arrays, or
 \code{Parallel::Omp} for OpenMP-parallel threaded arrays (or both).
 
-To manage the various optional features, Array classes use the
-Decorator design pattern for dynamically adding special features at
-run time:
+The Array component is used to represent the concept of a
+Fortran-style 3D array, but with data distributed or threaded in
+various ways. Tentative functionality includes the following:
 
- \centerline{\includegraphics{uml/arrays.ps}}
+\begin{itemize}
+\item Related groups of 1-, 2-, 3-D style Fortran arrays
+\item MPI-distributed arrays
+\item OMP-threaded array
+\item UPC-distributed arrays
+\item Hybrid distributed/threaded arrays
+\item Efficient iterators over array blocks for computations
+\item Parallelization and data distribution are hidden in block
+  iterators
+\item Support for both permanent and allocate-when-needed ghost zones
+\item Efficient resizing / combining / merging functions for
+  integration with Amr
+\item Efficient transposing / permuting of axes, e.g. for PPM to
+  compute with stride-1 along all axes
+\item Efficient ghost-zone refresh
+\item Group operations for controlling relative data layout of
+  multiple arrays
+\item Support for cell-centered, face-centered, edge-centered, or
+  corner storage
+\item Optional blocked storage for improved cache use or vector
+  behavior
+\item Optional padding for low-associativity caches
+\end{itemize}
+
+To implement Array's, other related classes are used to share implementation responsibilities. These classes are described in separate pages.
+
+\begin{description}
+\item [Layout] The Layout class is used to define an Array's
+  configuration, but does not allocate any data. Array's that share
+  the same Layout object are said to be conforming. An Array's Layout
+  describes how to distribute an Array's data over MPI processes,
+  between OpenMP threads, etc. For unigrid problems, only one Layout
+  is used. For Amr problems, typically several Layouts are used.
+
+\item [Block] The Block class is a lightweight wrapper for portions of
+  an Array to be actively computed by a single thread. It represents a
+  Fortran-style array, together with offset, stride, dimension, and
+  size.
+
+\item [ItBlock] The ItBlock class is used to iterate over Block's of
+  Array's that share conforming Layout's.
+\end{description}
+
+\subsubsection{Issues}
+
+Issues with Arrays and supporting classes include the following:
+
+\begin{itemize}
+\item How to handle iterators in a way that the calling code doesn't
+  know what Layout varieties are used
+\item How to handle nested iterators in calling code for hybrid
+  parallelization Layouts
+\item How to handle load balancing
+\item How to communicate between array blocks to refresh ghost zones
+\item How to communicate between arrary blocks for interpolation
+\item How to handle permanent versus temporary ghost zones
+\item How to support cell-, face-, edge-centered variables in same
+  layout
+\item How to control layout within a Layout, e.g. interleave range of
+  arrays but not others.
+\end{itemize}
+
+\subsubsection{Operations}
+
+\begin{itemize}
+\item Allocation and deallocation functions (Memory)
+\item Copy functions
+\item Merge / split functions (for Amr)
+\item Universal properties functions for obtaining information about
+  the array (dimensions, etc.)
+\item Layout-dependent properties (MPI task distribution, cache block
+  sizes, etc.)
+\item Iterators for looping over array blocks
+\item Reshape / resize functions for converting between different
+  array configurations (blocked to unblocked, with ghosts to without
+  ghosts, etc.)
+\item Accessor functions for neighboring values
+\item Refresh functions for obtaining updated ghost zone values
+  (accesses Parallel)
+\item I/O functions (Disk)
+\end{itemize}
 
 \subsection{\code{Array}}
 

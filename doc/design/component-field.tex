@@ -82,3 +82,64 @@ Scalar and vector fields for each material, such as
       gamma = 1.4
    }
 \end{verbatim}
+
+
+\subsection{ Field  Component}
+Scalar fields on an Array or Amr hierarchy
+
+A Field represents a discretized scalar field. A Field is typically
+discretized on an Amr hierarchy, but can be accessed at the Array or a
+Block levels as well. In addition to the array of elements, a Field
+includes an identifier for the field, the location of the field values
+with respect to computational cells (cell centered, face-centered,
+etc.), the index into the Block or Array of the field, optional
+minimum or maximum allowed values, units, and user-defined tags.
+
+Attributes:
+
+\begin{tabular}{ll}
+    \code{name}        & String defining the field's name, e.g. "density", "velocity-x", etc. \\
+    \code{id} 	& Integer identifying the Field \\
+    \code{array} &	Array containing Field values for the containing Patch \\
+    \code{index} &	Index of the specific array in the 4D Array \\
+    \code{position} &	cell position, defined as (0,0,0) <= (px,py,pz) <= (1,1,1). (.5,.5,.5)=cell centered \\
+    \code{min} &	minimum allowed value for the Field \\
+    \code{max} &	maximum allowed value for the Field \\
+    \code{min\_action} &	what should be done if Field goes below min (e.g. 1: set to min, 2: warning, 4: error, g: retry with smaller timestep, etc.) \\
+    \code{max\_action} &	what should be done if Field goes above max
+\end{tabular}
+
+A set of Fields defined on a Block, along with groups of Particles
+associated with the block, are the main input to (and output from)
+Methods. Methods have access to the Field's values, size, cell
+position, units, tags, limits, etc.
+
+Actual Field objects are stored in the Amr Patch object. Patch objects
+also contain associated Particle objects, and a Box object defining
+the Patch's extents and position.  List of fields
+
+
+Field supporting classes
+
+Field operations
+Field hierarchy
+Structure
+Descriptions
+Field class
+Attributes
+Functions
+Usage
+
+Issues:
+
+\begin{itemize}
+\item What operations are the responsibility of Field versus Array,
+  Task, Patch, etc.
+\item see below: Field stores only global properties of field, not
+  actual data
+\item How to store global attributes (name, index, min, max, position,
+  etc.) versus non-global (values)
+\item Single global Field object for each field
+\item Fields don't store actual Arrays, Patches do--Field only stores
+  Array index.
+\end{itemize}
