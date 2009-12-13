@@ -8,7 +8,8 @@
  *
  *********************************************************************
  */
- 
+
+#include "cello.h" 
 #include "string.h"
 #include "cello_hydro.h"
 #include "test_ppml.h"
