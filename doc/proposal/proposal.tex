@@ -18,7 +18,19 @@
 % \subsubsection{Dynamic Task Scheduling}
 %    CHARM++
 %
-%
+
+
+Hardware-related issues
+   load balancing
+   fault tolerance
+Data structure scaling issues
+   particle precision
+   grid position
+   timestepping
+Requirements
+   
+Design
+Implementation
 
 
 %=======================================================================
@@ -32,14 +44,73 @@
 \begin{document}
 
 %=======================================================================
-\TITLE{Petascale Adaptive Mesh Refinement}{James Bordner}{$Rev$}
+\TITLE{A Software Framework for Extreme Adaptive Mesh Refinement}{James Bordner}{$Rev$}
 %=======================================================================
 
 %=======================================================================
 \section{Project Summary} \label{s:summary}
 %=======================================================================
 
-\note{keywords: petascale multiscale multiphysics }
+We propose to develop a new software library for adaptive mesh
+refinement (AMR) that allows application developers to develop
+multiphysics applications for simulating phenomena on an extreme range
+of spacial and temporal scales, and that require an extreme amount of
+computation, memory, and storage (petascale and beyond).
+%
+Our basic data structure is a fully parallel distributed octree, with
+associated array and particle data, thus supporting both Eularian, Lagrangian,
+and hybrid methods such as Particle Mesh (PM).
+%
+Multiple parallelization technologies can be used, including hybrid
+approaches such as MPI or UPC for distributed memory data, and UPC or
+OpenMP for shared memory data.  CHARM++ will also be supported.
+%
+Dynamic load balancing will be hierarchical, both to better adapt to
+the hierarchical nature of extreme scale computational platforms, and
+to allow flexibility in load balancing frequency and metrics at different
+levels.
+%
+Extreme scalability will be obtained by localizing the patch / block
+problems as much as is feasible; this will help control scalability
+issues related to limited floating-point precision and ranges, as well
+as reducing the need for global synchronization and reduction
+operations.
+%
+Fault tolerance and software resilience are crucial factors at extreme scales.
+%
+Disk I/O is also a crucial factor for petascale 
+
+terms of scaling to extreme hardware platforms (petascale and beyond),
+and extreme AMR data structure breadth (number of grid patches) and
+depth (range of spacial and temporal resolution).
+
+\subsection{keywords}
+DOE buzzwords
+http://www.er.doe.gov/ASCR/WorkshopsConferences/MathTalks/M_wright.pdf
+
+AMR \\
+applied mathematics\\
+collaborative software environments\\
+computer science technologies\\
+exascale \\
+extreme scale\\
+failure avoidance \\
+failure effects avoidance \\
+fault tolerance\\
+GPU \\
+HPC \\
+memory hierarchy\\
+multicore\\
+multiphysics \\
+multiscale \\
+one-sided communication\\
+performance tuning\\
+petascale \\
+PGAS \\
+research goals\\
+resilient software \\
+UPC \\
+virtual processes \\
 
 \note{describe existing  technology: Flash, Chombo}
 \note{describe contributions: improved tree-based AMR}
@@ -48,7 +119,7 @@
 \note{dynamic execution and communication scheduling: prefetch messages}
 \note{dependencies known: patch can advance when its neighbor data is known}
 
-http://diversity.doe.gov/documents/Writing_Winning_Proposals.pdf
+\url{http://diversity.doe.gov/documents/Writing\_Winning\_Proposals.pdf}
 
 milestones
 
@@ -85,64 +156,286 @@ sales document not technical manual
 \section{Project Description} \label{s:description}
 %=======================================================================
 
-%-----------------------------------------------------------------------
-\subsection{Objectives and Expected Significance}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Background and Technical Need}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Research Description}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Education and Human Resources}
-%-----------------------------------------------------------------------
-%-----------------------------------------------------------------------
-\subsection{Plan of Work}
-%-----------------------------------------------------------------------
+\subsection{Petascale issues}
 
-%=======================================================================
-\section{Results from Prior Support}
-%=======================================================================
-%=======================================================================
-\section{References}
-%=======================================================================
-%=======================================================================
-\section{Biographical Sketches}
-%=======================================================================
-%=======================================================================
-\section{Budget}
-%=======================================================================
-%=======================================================================
-\section{Current and Pending Support}
-%=======================================================================
-%=======================================================================
-\section{Facilities and Special Considerations}
-%=======================================================================
+\begin{itemize}
+\item synchronization and collective operations
+\item parallel I/O
+\item fault tolerance / software resiliency
+\item distributed data structures
+\item hierarchical memory
+\item hierarchy parallelism
+\item dynamic load balancing
+\item heterogeneous computational components: GPU's
+\item ease of use: unigrid update + interpolation + flux correction
+\end{itemize}
 
+\subsection{Existing AMR frameworks}
+
+CHOMBO
+
+Paramesh
+
+``Alternatively, in its simplest use, and with minimal effort, it can
+operate as a domain decomposition tool for users who want to
+parallelize their serial codes, but who do not wish to use
+adaptivity.''
+
+
+\subsection{Algorithm design}
+
+General goals
+\begin{itemize}
+\item for parallel scalability: aggressive minimization of
+  synchronization and collective operations
+\item ``localize'' problem as much as possible
+  \begin{itemize}
+  \item For each patch, only store patch, location information for
+    neighboring patches (``ghost patches''), and ancestors for octree
+  \item patch-local adaptive timestep control
+    \begin{itemize}
+    \item prevents rapidly evolving feature in one localized region of
+      domain from determining timestep elsewhere
+    \end{itemize}
+  \end{itemize}
+\item facilitate dynamic load balancing, dynamic scheduling of
+  communication and computation
+\item maximize data structure flexibility
+\item dynamically optimize data structure parameters to hardware
+  during run time
+\item for algorithmic scalability: aggresively minimize dependencies
+  of fp and integer precision on data structure size
+\item related to ``localization'' of tasks
+  \begin{itemize}
+  \item particle positions stored using local coordinate system with
+    origin at patch corner
+  \item absolute patch coordinates not stored, only position relative
+    to neighbors
+     \begin{itemize}
+     \item global coordinates only needed for initialization
+     \item only need mesh width and timestep size for advancing
+     \item not needed for restarts
+     \item can still be computed dynamically
+     \item localization an option--not needed for smaller problems
+     \item absolute particle positions / grid locations may be needed
+       for some output, e.g. global particle analysis
+     \item in that case low precision
+     \item still scaling issues relative to depth
+      \begin{itemize}
+      \item neighbor location
+      \end{itemize}
+     \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+\item targeted refinement by 4 or 8
+  \begin{itemize}
+  \item especially effective for deep AMR, e.g. star formation with
+    30+ levels
+  \item still supports effective resolution jumps of 2 using backfill
+  \end{itemize}
+\item patch coalescing
+  \begin{itemize}
+  \item reduced AMR overhead (number of patches) especially in shallow
+    AMR relative to Paramesh
+  \item improved performance since locally unifrom grid instead of AMR
+    patches
+  \item still supports variable block sizes for optimizing memory
+    hierarchy, parallel task size, task counts
+  \end{itemize}
+\item variable patch resolution
+\item instead of uniformly refining a patch, can replace with higher
+  resolution array
+\item need AMR machinery where resolution requirements change, not
+  where high resolution is needed
+\end{itemize}
+
+
+\subsection{Data structure design}
+
+\begin{itemize}
+\item tree-based AMR: weigh advantages / disadvantages of patch-
+  versus tree-amr
+\item Fully distributed AMR data structure
+\item For each local grid patch, only immediate neighbors and
+  ancestors stored
+\item Store only actual data
+  \begin{itemize}
+  \item use flux registers for communication
+  \item allocate patch ghost zones only for computation
+  \end{itemize}
+\item Could store appropriate subset of neighbor data as well for
+  fault-tolerance
+\item AMR operations
+  \begin{itemize}
+  \item initial grid generation
+  \item refinement criteria: tag refine or coarsen
+  \item refinement or coarsening localized
+  \end{itemize}
+\end{itemize}
+
+
+\subsection{I/O}
+
+\begin{itemize}
+\item Routines for data dumps, checkpointing, output of visualizaton /
+  analysis
+\item Leverage standard for AMR data output when possible
+\item parallel HDF5
+\item support I/O from subset of nodes , dedicated or shared, to
+  optimize I/O performance, and overlap I/O with computation
+\end{itemize}
+
+\subsection{Parallelism}
+\begin{itemize}
+\item CHARM++ to control data placement, task scheduling,
+  checkpointing for fault tolerance
+\item platform hierarchical architecture-aware data structures
+  \begin{itemize}
+  \item e.g. MPI communicator for cores in a socket, sockets in a
+    node, nodes in a supernode, supernodes in a machine
+  \item facilitates hierarchical dynamic load balancing
+    \begin{itemize}
+    \item E.g. load balance more frequently at core / socket level to
+      keep functional units busy
+    \item load balance node / supernode levels less frequently to keep
+      memory usage uniform
+    \item less frequent because:
+      \begin{itemize}
+      \item problem changes less at larger scales
+      \item rebalancing is more expensive: larger data sizes, slower
+        interconnects
+      \end{itemize}
+    \item user-defined parameters and metrics for load balancing at
+      different levels
+      \begin{itemize}
+      \item dynamically collected performance data can be fed back
+        into hierarchical load balancing algorithm
+      \end{itemize}
+    \end{itemize}
+  \item note linearization of octree datastructure is insufficient:
+    assumes equal work per patch
+    \begin{itemize}
+    \item particles are associated with nodes, changing weight
+    \item adaptive timestepping drastically weights more highly
+      refined patches
+    \item performance of physics algorithms on a patch is not
+      necessarily uniform, e.g. localized chemistry subcycling, front
+      tracking, etc.
+    \item arrays on patches may be different sized
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\subsection{Software implementation}
+
+\begin{itemize}
+\item Trac + SVN or mercurial
+\item documenting as I go
+\item OOP design: improves component reuse, controls software
+  complexity, eases software maintenance
+\item heavy emphasis on designing before coding
+\begin{itemize}
+\item organize into components (subdirectories) of related classes
+  \begin{itemize}
+  \item Simulation, Control, Parallel, Task
+  \item Amr, Patch: stores the AMR hierarchy
+  \item Fields, Particles, Array: for storing data
+  \item Block, Fluxes: for computing / communicating data
+  \item Performance, Error, Parameters, Memory: globally-accesible functions; components in aspect-oriented programming paradigm; not sufficiently important to use AspectC, but techniques (primarily using templates) usable
+  \item Method [Analysis] [Visualize]: hooks to user code; multiple methods permitted, selectable and scheduled at run-time
+  \item External, User
+  \end{itemize}
+\item interdependencies controlled at component and class level
+\item classes with access functions used instead of raw arrays to improve modularity and modifiability
+\item block structure for interface with user code
+\end{itemize}
+\item unit testing, including performance and parallel scaling
+\item prototyping for proof-of-concept
+\item application testing
+\item code reviews
+\item Languages C++; user code can be C, C++, Fortran
+\item attempt to componentize parallelization : MPI (two-sided, one-sided) + OMP + UPC + GPU + CHARM++
+\item advantages / disadvantages of each
+  \begin{itemize}
+  \item MPI: + widespread, optimized implementations, familiar
+  \item MPI: - data replication, difficult to use
+  \item UPC + easier to use, combines shared memory view with efficient data affinity
+  \item UPC - no concept of MPI communicator, still under development--not as mature
+  \item OMP + can be used progressively
+  \item OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
+  \item GPU + very fast / power efficient when usable
+  \item GPU - no usable standard, difficult to program, difficult to map problem to hardware
+  \item CHARM++ + higher-level, dynamic scheduling, dynamic load-balancing, fault tolerant through checkpointing to other node memory
+  \item CHARM++ - requires learning separate language, separate runtime system, no data prefetching(?)
+  \end{itemize}
+    \begin{itemize}
+    \item currently not fully realizable for GPU since depends on
+      computational code
+    \item hierarchical parallelism: MPI + OMP, MPI + UPC, MPI + GPU,
+      etc.
+    \item advantages of hybrid
+      \begin{itemize}
+      \item reduced data replication from MPI distributed memory
+      \item dynamic parallel threads--use more when helpful, fewer when not
+      \item UPC
+      \end{itemize}
+    \item disadvantages of hybrid
+      \begin{itemize}
+      \item performance hit from data sharing in MPI + OMP
+      \item MPI and UPC communication cannot (currently) proceed concurrently
+      \end{itemize}
+    \item code for two modes: distributed memory and shared memory
+    \item parallel tasks: grid patches, arrays, grid patch groups,
+      particle groups
+    \item flexible data structure parameters (grid patch size, patch
+      decomposition, patch grouping) to dynamically optimize task size
+    \end{itemize}
+\end{itemize}
+    
 %=======================================================================
 \section{Enhancements}
 %=======================================================================
 
 \begin{itemize}
- \item Require more rigorous coding standards compared to Enzo development
- \item Use object-oriented design, organize into components (subdirectories) of classes (*.hpp/*.cpp files)
- \item Auto-tune where possible--automatically optimize for cache-, parallel-, vector-, solver-, etc. parameters
+\item Require more rigorous coding standards compared to Enzo
+  development
+\item Auto-tune where possible--automatically optimize for cache-,
+  parallel-, vector-, solver-, etc. parameters
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Adaptive Mesh Refinement}
 %-----------------------------------------------------------------------
+
 \begin{itemize}
- \item Do not store a patch's global position, only local position relative to immediate neighbors, parent, and children. [Toward distributed AMR data-structure, and to address precision issues with deep AMR. Potential issues: boundary and initial conditions.] (see W013)
- \item For very deep AMR where coarser levels never complete their timestep, delete coarse levels to free storage.
- \item / Parallel Provide (or notify) neighboring patches with updated ghost zone data as soon as it's available.
- \item / Parallel Support temporary ``allocate as-needed'' ghost zones in addition to ``permanent'' ones
- \item Reduce tree-AMR node size by only storing parent, single neighbor, and single child. [Assuming one pointer for field data and SAMR patches indexed by single-precision offsets into parent patches, 32 bytes / tree-AMR and 48 bytes / patch-AMR]
- \item Relax rigid refinement criteria to inhibit excessive changes in octree-like tree refinement.
- \item Represent patch extents with (small) integer values relative to parent. [To reduce memory usage with deep AMR runs.] (see W012)
- \item Support both structured AMR (Enzo-like) and tree-based AMR
- \item Support flexible node types: memory-efficient versus compute-efficient.
+\item enhancements for both ``deep'' and ``shallow'' AMR
+\end{itemize}
+
+\begin{itemize}
+\item Do not store a patch's global position, only local position
+  relative to immediate neighbors, parent, and children. [Toward
+  distributed AMR data-structure, and to address precision issues with
+  deep AMR. Potential issues: boundary and initial conditions.] (see
+  W013)
+\item For very deep AMR where coarser levels never complete their
+  timestep, delete coarse levels to free storage.
+\item / Parallel Provide (or notify) neighboring patches with updated
+  ghost zone data as soon as it's available.
+\item / Parallel Support temporary ``allocate as-needed'' ghost zones
+  in addition to ``permanent'' ones
+\item Reduce tree-AMR node size by only storing parent, single
+  neighbor, and single child. [Assuming one pointer for field data and
+  SAMR patches indexed by single-precision offsets into parent
+  patches, 32 bytes / tree-AMR and 48 bytes / patch-AMR]
+\item Relax rigid refinement criteria to inhibit excessive changes in
+  octree-like tree refinement.
+\item Represent patch extents with (small) integer values relative to
+  parent. [To reduce memory usage with deep AMR runs.] (see W012)
+\item Support both structured AMR (Enzo-like) and tree-based AMR
+\item Support flexible node types: memory-efficient versus
+  compute-efficient.
 \end{itemize}
 
 %-----------------------------------------------------------------------
@@ -150,70 +443,93 @@ sales document not technical manual
 %-----------------------------------------------------------------------
 
 \begin{itemize}
- \item Allow multiple root-level patches per MPI task. [To improve cache use for unigrid problems, and improve load-balancing for AMR.]
+\item Allow multiple root-level patches per MPI task. [To improve
+  cache use for unigrid problems, and improve load-balancing for AMR.]
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Control}
 %-----------------------------------------------------------------------
 \begin{itemize}
- \item Reduce implicit dependencies by dynamically allocating parallel tasks, ala CHARM++.(e.g. currently Enzo loops through patches within a level, but a given patch can proceed as soon as it has all its boundary data)
- \item Support optional uniform timesteps across all levels. [To improve parallel efficiency.]
- \item Support optional variable timestep sizes within each level. [To reduce synchronization costs when computing global CFL condition.]
+\item Reduce implicit dependencies by dynamically allocating parallel
+  tasks, ala CHARM++.(e.g. currently Enzo loops through patches within
+  a level, but a given patch can proceed as soon as it has all its
+  boundary data)
+\item Support optional uniform timesteps across all levels. [To
+  improve parallel efficiency.]
+\item Support optional variable timestep sizes within each level. [To
+  reduce synchronization costs when computing global CFL condition.]
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Storage}
 %-----------------------------------------------------------------------
 \begin{itemize}
- \item Enforce strict control over data storage formats (e.g. files) (see W0009)
- \item Require that all stored data be accessed through standard interface functions that are independent of specific file formats (i.e., stored datasets are conceptually treated as objects)
+\item Enforce strict control over data storage formats (e.g. files)
+  (see W0009)
+\item Require that all stored data be accessed through standard
+  interface functions that are independent of specific file formats
+  (i.e., stored datasets are conceptually treated as objects)
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Fields}
 %-----------------------------------------------------------------------
 \begin{itemize}
- \item User-controlled optional floor/ceiling limits on individual Fields (ala ``tiny\_number'' in Enzo), with user-specified Error behavior (warning, error, ignore, reset to given floor/ceiling, etc.)
+\item User-controlled optional floor/ceiling limits on individual
+  Fields (ala ``tiny\_number'' in Enzo), with user-specified Error
+  behavior (warning, error, ignore, reset to given floor/ceiling,
+  etc.)
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Methods}
 %-----------------------------------------------------------------------
 \begin{itemize}
-  \item  Integrate ``inits'' functionality into the main code
+\item Integrate ``inits'' functionality into the main code
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Parallelization}
 %-----------------------------------------------------------------------
 \begin{itemize}
- \item Load-balance by having over-loaded processors reassign tasks to random processes. [To reduce global communication for determining which processes are under-loaded]
- \item Load-balance using ``over-compensation'', since heavily-loaded processes tend to continue to become more heavily loaded (cosmology / star-formation application-dependent).
- \item Only use inter-core, inter-cpu, inter-node, etc. level-communicators to bound communicator size and manage communication nonuniformity. 
- \item Support multiple (hybrid) and flexible parallelization strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided get/put), OMP, and optionally UPC and GPU.
+\item Load-balance by having over-loaded processors reassign tasks to
+  random processes. [To reduce global communication for determining
+  which processes are under-loaded]
+\item Load-balance using ``over-compensation'', since heavily-loaded
+  processes tend to continue to become more heavily loaded (cosmology
+  / star-formation application-dependent).
+\item Only use inter-core, inter-cpu, inter-node, etc.
+  level-communicators to bound communicator size and manage
+  communication nonuniformity.
+\item Support multiple (hybrid) and flexible parallelization
+  strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided
+  get/put), OMP, and optionally UPC and GPU.
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Parameters}
 %-----------------------------------------------------------------------
 \begin{itemize}
- \item Support for user-supplied code for problem initialization.
+\item Support for user-supplied code for problem initialization.
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Particles}
 %-----------------------------------------------------------------------
 \begin{itemize}
- \item Store particle positions in single precision as -1 <= x,y,z <= 1 relative to their containing patch. [To reduce storage, improve performance, and address precision issues with deep AMR.]
- \item Use a binary tree data-structure to recursively partition the bounding boxes of particles.
+\item Store particle positions in single precision as -1 <= x,y,z <= 1
+  relative to their containing patch. [To reduce storage, improve
+  performance, and address precision issues with deep AMR.]
+\item Use a binary tree data-structure to recursively partition the
+  bounding boxes of particles.
 \end{itemize}
 
 %-----------------------------------------------------------------------
 \subsection{Simulations}
 %-----------------------------------------------------------------------
 \begin{itemize}
- \item Support ensembles within a single run, including inline-analysis
+\item Support ensembles within a single run, including inline-analysis
 \end{itemize}
 
 \end{document}
