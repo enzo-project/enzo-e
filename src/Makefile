@@ -130,6 +130,7 @@ Array-component: Test-component
 Control-component: Error-component
 Control-component: Monitor-component
 Control-component: Parameters-component
+Control-component: Simulation-component
 Control-component: Test-component
 
 Disk-component: Array-component
@@ -139,13 +140,16 @@ Disk-component: Test-component
 Error-component: Test-component
 
 Memory-component: Error-component
+Memory-component: Performance-component
 Memory-component: Test-component
 
 Method-component: Disk-component
 Method-component: Error-component
 Method-component: Performance-component
+Method-component: Monitor-component
 
 Monitor-component: Performance-component
+Monitor-component: Test-component
 
 Parallel-component: Error-component
 Parallel-component: Parameters-component
@@ -157,5 +161,11 @@ Parameters-component: Test-component
 Performance-component: Error-component
 Performance-component: Memory-component
 Performance-component: Test-component
+
+Simulation-component: Amr-component
+Simulation-component: Field-component
+Simulation-component: Method-component
+Simulation-component: Parallel-component
+Simulation-component: Parameters-component
 
 
