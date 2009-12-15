@@ -18,19 +18,85 @@
 % \subsubsection{Dynamic Task Scheduling}
 %    CHARM++
 %
+% OUTLINE
+% SUMMARY
+% EXTREME SCALING ISSUES
+%    Hardware-related issues
+%    Data structure scaling issues
+% REVIEW
+%    Paramesh
+%    CHOMBO
+%    SAMARAI
+% CELLO 
+%    particle precision
+%    grid position
+%    timestepping
+% REQUIREMENTS: scope of library / framework
+%    capabilities
+%       physics
+%          hyperbolic
+%          elliptic
+%          ray-tracing?
+%       AMR
+%       Particles
+%       performance
+%       parallel scaling
+%       data structure scaling
+%       ease of use
+%       dynamic scheduling
+%       aggressive minimization of global communication
+%       I/O
+%       fault tolerance
+%       adaptivity
+%       extensibility
+% DESIGN: software organization and data structures
+%    high-level design
+%       OOP
+%       components
+%          Simulation, Control, Parallel, Task
+%          Amr, Patch: stores the AMR hierarchy
+%          Fields, Particles, Array: for storing data
+%          Block, Fluxes: for computing / communicating data
+%          Performance, Error, Parameters, Memory
+%             globally-accesible functions; components in
+%             aspect-oriented programming paradigm; not sufficiently
+%             important to use AspectC, but techniques (primarily
+%             using templates) usable
+%          Method [Analysis] [Visualize]
+%             hooks to user code; multiple methods permitted,
+%             selectable and scheduled at run-time
+%       user interface
+%          External, User
+%       application-driven
+%    data structures
+%
+% ALGORITHMS: and how problems solved
+%    AMR
+%    particles
+%    parallelization
+%    load balancing
+%    fault tolerance
+% IMPLEMENTATION
+%    Languages: C++, C99, UPC, OpenMP
+%    Libraries: HDF5, MPI
+%    Frameworks: CHARM++, OpenCL
+%    TRAC
+%      wiki used for design
+%      tickets for tasks and documenting defects
+%    Subversion
+%    unit testing
+%    regression testing
+%      lcatest
+%      correctness, single-thread performance, parallel scaling
+%      lcaperf
+%    software reviews
+
+% Requirements
+%    
+% Design
+% Implementation
 
 
-Hardware-related issues
-   load balancing
-   fault tolerance
-Data structure scaling issues
-   particle precision
-   grid position
-   timestepping
-Requirements
-   
-Design
-Implementation
 
 
 %=======================================================================
@@ -47,46 +113,56 @@ Implementation
 \TITLE{A Software Framework for Extreme Adaptive Mesh Refinement}{James Bordner}{$Rev$}
 %=======================================================================
 
+% \renewcommand{\pargraph}[1]{}
+
 %=======================================================================
 \section{Project Summary} \label{s:summary}
 %=======================================================================
 
+%
+\pargraph{Motivation}
+%
+\pargraph{Proposal}
 We propose to develop a new software library for adaptive mesh
 refinement (AMR) that allows application developers to develop
 multiphysics applications for simulating phenomena on an extreme range
 of spacial and temporal scales, and that require an extreme amount of
-computation, memory, and storage (petascale and beyond).
+computation, memory, and storage (petascale and exascale).
 %
+\pargraph{data structure scope summary}
 Our basic data structure is a fully parallel distributed octree, with
 associated array and particle data, thus supporting both Eularian, Lagrangian,
 and hybrid methods such as Particle Mesh (PM).
 %
+\pargraph{parallelization strategy}
 Multiple parallelization technologies can be used, including hybrid
 approaches such as MPI or UPC for distributed memory data, and UPC or
 OpenMP for shared memory data.  CHARM++ will also be supported.
-%
-Dynamic load balancing will be hierarchical, both to better adapt to
-the hierarchical nature of extreme scale computational platforms, and
-to allow flexibility in load balancing frequency and metrics at different
-levels.
-%
 Extreme scalability will be obtained by localizing the patch / block
 problems as much as is feasible; this will help control scalability
 issues related to limited floating-point precision and ranges, as well
 as reducing the need for global synchronization and reduction
 operations.
 %
-Fault tolerance and software resilience are crucial factors at extreme scales.
+\pargraph{load balancing}
+Dynamic load balancing will be hierarchical, both to better adapt to
+the hierarchical nature of extreme scale computational platforms, and
+to allow flexibility in load balancing frequency and metrics at different
+levels.
 %
+\pargraph{fault tolerance}
+Fault tolerance and software resilience are crucial factors at extreme scales,
+since it has been observed that frequency of failures is proportional to
+the number of sockets.
+due to the reduced MTTI (mean time to interrupt) , since the probability that hardware component, operating system, library, or application component fails Unfortunately, approaches to fault tolerance are still 
+%
+\pargraph{I/O}
 Disk I/O is also a crucial factor for petascale 
 
-terms of scaling to extreme hardware platforms (petascale and beyond),
-and extreme AMR data structure breadth (number of grid patches) and
-depth (range of spacial and temporal resolution).
+Advantage: designing with extreme scale in mind from the beginning.
 
-\subsection{keywords}
 DOE buzzwords
-http://www.er.doe.gov/ASCR/WorkshopsConferences/MathTalks/M_wright.pdf
+\url{http://www.er.doe.gov/ASCR/WorkshopsConferences/MathTalks/M\_wright.pdf}
 
 AMR \\
 applied mathematics\\
@@ -153,10 +229,14 @@ sales document not technical manual
 
 
 %=======================================================================
-\section{Project Description} \label{s:description}
+\section{Extreme Scaling Issues} \label{s:scaling}
 %=======================================================================
 
-\subsection{Petascale issues}
+Petascale AMR research issue.
+
+
+\pargraph{equation scope}
+Nonlinear time-dependent hyperbolic conservation laws, and elliptic PDE's
 
 \begin{itemize}
 \item synchronization and collective operations
@@ -170,9 +250,11 @@ sales document not technical manual
 \item ease of use: unigrid update + interpolation + flux correction
 \end{itemize}
 
-\subsection{Existing AMR frameworks}
+\section{Review of Existing AMR frameworks}
 
 CHOMBO
+
+  Block-structured AMR
 
 Paramesh
 
@@ -182,7 +264,9 @@ parallelize their serial codes, but who do not wish to use
 adaptivity.''
 
 
-\subsection{Algorithm design}
+\section{Project requirements}
+
+\section{Project design}
 
 General goals
 \begin{itemize}
@@ -252,14 +336,27 @@ General goals
 \end{itemize}
 
 
-\subsection{Data structure design}
+\section{Project data structures and algorithms}
+
+Amr, Tree, Array, Patch
 
 \begin{itemize}
-\item tree-based AMR: weigh advantages / disadvantages of patch-
-  versus tree-amr
+\item generalized octree-based AMR 
+  \begin{itemize}
+  \item weigh advantages / disadvantages of patch- versus tree-amr
+  \item 8-tree, sparse 64-tree, sparse 512-tree
+  \item decoupled AMR / Array
+  \item 
+  \end{itemize}
 \item Fully distributed AMR data structure
+  \begin{itemize}
 \item For each local grid patch, only immediate neighbors and
   ancestors stored
+  \item Proxies for remotely stored patches
+    \begin{itemize}
+    \item remote thread identifier + pointer
+    \end{itemize}
+  \end{itemize}
 \item Store only actual data
   \begin{itemize}
   \item use flux registers for communication
@@ -275,6 +372,8 @@ General goals
   \end{itemize}
 \end{itemize}
 
+
+\section{Project Implementation}
 
 \subsection{I/O}
 
@@ -325,6 +424,20 @@ General goals
       tracking, etc.
     \item arrays on patches may be different sized
     \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\subsection{Fault tolerance}
+\begin{itemize}
+\item  FT-MPI 
+  \begin{itemize}
+  \item ``fault-tolerante MPI''
+  \item http://icl.cs.utk.edu/ftmpi/overview/index.html 
+  \end{itemize}
+\item MPICH-V 
+  \begin{itemize}
+  \item ``MPI Implementation for Volatile resources''
+  \item http://mpich-v.lri.fr/index.php 
   \end{itemize}
 \end{itemize}
 
