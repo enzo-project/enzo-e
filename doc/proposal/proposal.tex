@@ -87,7 +87,8 @@
 %    unit testing
 %    regression testing
 %      lcatest
-%      correctness, single-thread performance, parallel scaling
+%      correctness, single-thread performance, weak and strong parallel scaling
+%          shallow and deep problems
 %      lcaperf
 %    software reviews
 
@@ -105,9 +106,16 @@
 
 \include{include}
 
+\usepackage{natbib}
+
 %=======================================================================
 
 \begin{document}
+
+\nocite{StSh09} % Scalability challenges for massively parallel {AMR} applications
+\nocite{WiHy03} % Enhancing scalability of parallel structured {AMR} calculations
+\nocite{GuWi06} % Parallel clustering algorithms for structured {AMR}
+\nocite{BuGh08} % Towards adaptive mesh {PDE} simulations on petascale computers
 
 %=======================================================================
 \TITLE{A Software Framework for Extreme Adaptive Mesh Refinement}{James Bordner}{$Rev$}
@@ -158,6 +166,9 @@ due to the reduced MTTI (mean time to interrupt) , since the probability that ha
 %
 \pargraph{I/O}
 Disk I/O is also a crucial factor for petascale 
+
+\pargraph{availablity}
+We plan to make this framework publicly available for scientific research use.
 
 Advantage: designing with extreme scale in mind from the beginning.
 
@@ -248,27 +259,44 @@ Nonlinear time-dependent hyperbolic conservation laws, and elliptic PDE's
 \item dynamic load balancing
 \item heterogeneous computational components: GPU's
 \item ease of use: unigrid update + interpolation + flux correction
+\item weigh advantages / disadvantages of patch- versus tree-amr
 \end{itemize}
+
 
 \section{Review of Existing AMR frameworks}
 
-CHOMBO
+\pargraph{CHOMBO}
 
   Block-structured AMR
 
-Paramesh
+\pargraph{SAMRAI}
 
-``Alternatively, in its simplest use, and with minimal effort, it can
-operate as a domain decomposition tool for users who want to
-parallelize their serial codes, but who do not wish to use
-adaptivity.''
+   [2001]
+   good scaling for numerical and data communication
+   poorer scaling in adaptive meshing and communication schedule construction 
 
+\pargraph{Paramesh}
+
+  Octree-based AMR
+
+GADGET-2: Preeminent cosmological TreeSPH simulation code
+DAGH (1998)
 
 \section{Project requirements}
 
 \section{Project design}
 
 General goals
+
+\begin{itemize}
+\item extreme parallel scalability
+\item extreme data structure scalability
+  \begin{itemize}
+  \item breadth: number of grid patches
+  \item depth: number of AMR hierarchy levels
+  \end{itemize}
+\end{itemize}
+
 \begin{itemize}
 \item for parallel scalability: aggressive minimization of
   synchronization and collective operations
@@ -340,10 +368,56 @@ General goals
 
 Amr, Tree, Array, Patch
 
+\begin{center}
+\begin{minipage}{7.0in}
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{cosmo2.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{cosmo2-4-1.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{cosmo2-4-2.png}
+\end{minipage}
+\end{minipage} \\
+\ \\
+\begin{minipage}{7in}
+\textbf{Left}: 2D Source cosmology density field projection.  
+\textbf{Middle}: Balanced octree: 81701 patches.
+\textbf{Right}: Balanced octree with coalesced patches: 32529 patches.
+\ \\
+\end{minipage}
+\end{center}
+
+
+\begin{center}
+\begin{minipage}{7.0in}
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{dots.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{dots-4-1.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{dots-16-5.png}
+\end{minipage}
+\end{minipage} \\
+\begin{minipage}{7in}
+\begin{minipage}[t]{2.2in}
+2D Source cosmology density field projection
+\end{minipage} \ 
+\begin{minipage}[t]{2.2in}
+Balanced octree: 2137 patches
+\end{minipage} \ 
+\begin{minipage}[t]{2.2in}
+Balanced sparse $4^3$-tree: 158 explicit patches
+\end{minipage}
+\end{minipage}
+\end{center}
+
 \begin{itemize}
 \item generalized octree-based AMR 
   \begin{itemize}
-  \item weigh advantages / disadvantages of patch- versus tree-amr
   \item 8-tree, sparse 64-tree, sparse 512-tree
   \item decoupled AMR / Array
   \item 
@@ -396,6 +470,7 @@ Amr, Tree, Array, Patch
     node, nodes in a supernode, supernodes in a machine
   \item facilitates hierarchical dynamic load balancing
     \begin{itemize}
+    \item improves dynamic mapping of data structures to hardware components
     \item E.g. load balance more frequently at core / socket level to
       keep functional units busy
     \item load balance node / supernode levels less frequently to keep
@@ -423,6 +498,7 @@ Amr, Tree, Array, Patch
       necessarily uniform, e.g. localized chemistry subcycling, front
       tracking, etc.
     \item arrays on patches may be different sized
+    \item linearization of patches reduces flexibility, and constrains data movement to a single dimension
     \end{itemize}
   \end{itemize}
 \end{itemize}
@@ -449,6 +525,7 @@ Amr, Tree, Array, Patch
 \item OOP design: improves component reuse, controls software
   complexity, eases software maintenance
 \item heavy emphasis on designing before coding
+\end{itemize}
 \begin{itemize}
 \item organize into components (subdirectories) of related classes
   \begin{itemize}
@@ -460,14 +537,18 @@ Amr, Tree, Array, Patch
   \item Method [Analysis] [Visualize]: hooks to user code; multiple methods permitted, selectable and scheduled at run-time
   \item External, User
   \end{itemize}
+\end{itemize}
+\begin{itemize}
 \item interdependencies controlled at component and class level
 \item classes with access functions used instead of raw arrays to improve modularity and modifiability
 \item block structure for interface with user code
-\end{itemize}
 \item unit testing, including performance and parallel scaling
 \item prototyping for proof-of-concept
 \item application testing
 \item code reviews
+\end{itemize}
+
+\begin{itemize}
 \item Languages C++; user code can be C, C++, Fortran
 \item attempt to componentize parallelization : MPI (two-sided, one-sided) + OMP + UPC + GPU + CHARM++
 \item advantages / disadvantages of each
@@ -534,9 +615,9 @@ Amr, Tree, Array, Patch
   W013)
 \item For very deep AMR where coarser levels never complete their
   timestep, delete coarse levels to free storage.
-\item / Parallel Provide (or notify) neighboring patches with updated
+\item  Provide (or notify) neighboring patches with updated
   ghost zone data as soon as it's available.
-\item / Parallel Support temporary ``allocate as-needed'' ghost zones
+\item  Support temporary ``allocate as-needed'' ghost zones
   in addition to ``permanent'' ones
 \item Reduce tree-AMR node size by only storing parent, single
   neighbor, and single child. [Assuming one pointer for field data and
@@ -644,6 +725,12 @@ Amr, Tree, Array, Patch
 \begin{itemize}
 \item Support ensembles within a single run, including inline-analysis
 \end{itemize}
+
+
+%=======================================================================
+\bibliography{papers}
+\bibliographystyle{unsrt}
+%=======================================================================
 
 \end{document}
 
