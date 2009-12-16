@@ -243,6 +243,276 @@ sales document not technical manual
 \section{Extreme Scaling Issues} \label{s:scaling}
 %=======================================================================
 
+
+\begin{verbatim}
+load balancing
+   hierarchical
+   load balance locally in given level
+   different metrics at different levels
+     memory at node level
+     workload below
+   different frequency at different levels
+     lower frequency balancing at higher levels
+        more costly
+        solution changes less frequently
+     higher frequency balancing at lower levels
+        less costly
+        solution changes more frequently
+   task adjacency maintained
+   use collected performance data
+dynamic scheduling
+   task = grid patch + sequence of 
+   dynamically schedule local tasks
+      increased scheduling freedom
+      improves slack for latency hiding
+   schedule communication to/from local patches
+   tasks scheduled biased towards patches that limit other patches, e.g. coarse
+   optionally pipeline multiple methods on cores
+      increase available parallelism: (e.g. deep AMR with many physics modules)
+      data reuse
+   communication scheduling to maximize releasing patches and prefetch data
+   gang-scheduling groups of patches for improved GPU / accelerator utilization
+octree AMR versus SAMR   
+other AMR libraries / frameworks
+   CHOMBO
+   Paramesh
+   SAMRAI
+limitations of existing AMR libraries / frameworks
+parallel scalability issues
+   global synchronization / reductions
+   load balancing
+   I/O
+   fault tolerance
+AMR-specific parallel scalability issues
+   elliptic
+   remeshing--especially SAMR
+   load balancing
+   timestep determination
+AMR datastructure scalability
+   breadth--number of grid patches
+   depth--range of multi-resolution
+   floating point precision issues
+   floating point range issues
+   integer range issues
+octree advantages
+octree limitations
+   Morton ordering not always feasible
+      different patch sizes
+      different particle counts
+      adaptive timestepping on finer levels
+      physics method variations
+         shock capturing--Riemann solver iterations
+         variable subcycling of iterative stiff methods
+hierarchical parallelism
+   encourage communication within hardware components
+      sockets within node
+      cores within socket
+      hyperthreads within core
+parallel technology encapsulation
+  distributed / shared memory
+    MPI (two-sided and one-sided) (distributed memory)
+    OpenMP (shared memory) 
+    UPC (either distributed memory or shared memory)
+    CHARM++
+  multiple strategies enhance software resiliency
+    i.e. buggy MPI implementation--dynamically switch to UPC
+hierarchical task scheduling
+   multiblock (GPU)
+   single block (process)
+   plane (thread)
+hybrid parallel
+   MPI + OMP
+   MPI + UPC
+   CHARM++ + OMP (?)
+   flexible subset of cores, sockets, nodes, supernodes
+   Task scheduling CHARM++ model, but implemented in MPI, UPC, OMP
+software components
+   functional decomposition
+   ...
+user functions supplied
+   block advance (multiple)
+   inter-level flux correction
+   refine / coarsen
+   timestep determination
+   constraint enforcement (div B)
+   error checking / invariant checking for fault tolerance / software resiliency
+relaxed local timestep control
+   adaptive timesteps important for deep AMR runs, e.g. star formation (cite Abel)
+   reducing global synchronizations and global dependencies crucial for extreme scaling
+   allow variable timesteps within level
+      eliminates requirement for global reduction
+      timesteps quantized by two
+         eliminates roundoff errors
+      enforce timestep balancing--temporal level jumps(?)
+distributed AMR hierarchy
+   local patches: store parent, neighbors, children (sparse)
+   proxies for remotely stored patches
+task migration
+   migrate tasks dynamically
+   CHARM++ model: pack, relocate, unpack data
+   maintain locality by moving task to owner of a neighbor
+   maintain parent-child locality when possible
+      relax for deep hierarchies
+   migrate using hierarchical parallelism
+I/O
+   parallel HDF5
+   compression
+   CRC error-checking and recovery
+   different formats for different uses
+fault-tolerance strategies
+   checkpoint to disk
+      issue: failures will become more frequent than time to checkpoint
+   checkpoint to memory
+     CHARM++ does this(?)
+   flash memory
+   fault-tolerant MPI
+   leverage new approaches when available
+   need to deal with continuous stream of failures
+memory storage
+   different formats for different uses
+   option to not store guard / ghost cells
+   compute in reformatted ``computational registers''
+      basic idea used in Paramesh
+      more flexible:
+        arbitrary reordering of array axes
+          more adaptable to existing legacy ``unigrid'' routines
+          different reorderings possible for different methods (hydro, chemistry, etc.)
+          flexibilty allows improved data-layout for single-thread performance
+             cache blocking, padding
+   communicate using reformatted ``flux registers''
+      idea used in CHOMBO
+   scheduler reuse for computation / communication scheduling
+patch-local coordinates for particles
+   control accumulation of roundoff
+   minimize effects of limited precision and range
+   absolute coordinates computed when necessary
+relative coordinates for patches   
+   relative to neighbors
+   frequently only cell size and timestep needed for computations
+   absolute coordinates computed when necessary
+      initialization
+      inline analysis
+      global position dependent physics (materials)
+visualization
+   use existing library, e.g. Visit
+   Method can include visualization or inline analysis
+software resilience
+   take advantage of only Methods change data
+   methods signal which fields / particles changed
+particles
+   groups of related particles stored together
+   particles associated with grid patch
+   flexibility in particle ownership
+     may belong to immediate neighbor to reduce communication
+AMR algorithm enhancements
+   patch coalescing
+     improves ``shallow'' AMR
+     especially helpful when large connected regions of domain at finest level
+     less AMR overhead (fewer nodes)
+     task size still controlable (multiple Blocks per Array)
+     EXAMPLE: cosmology
+   targeted refinement by 4 or 8
+     improves ``deep'' AMR
+     refinement by 2 shallow
+     balancing refinement by 2 can extend across entire domain independent of # levels
+     balancing refinementy by 4 or 8 probabalistically (provably?) local
+     sparse child nodes
+     back filling possible to regain effect of balanced tree
+     no explicit AMR patches required for backfill--can live on child nodes 
+     EXAMPLE: point refinement
+problem scope
+  hyperbolic conservation
+  local physics
+  elliptic problems
+     support for global and level solves
+AMR hierarchy data
+     multiple refinement levels
+       SEE Paramesh user guide for motivation
+       improving solution
+       refinement criteria (cite Berger)
+     only  finest level
+       reduced memory usage
+       reduced computation: only finest level
+       reduced communication: no inter-level interpolation (except refinement)
+monitor: support for interfacing with user
+portal: support interfacing with other codes
+   post-processing solvers
+   data analysis pipeline
+   visualization
+autotuning of parameters
+   patch size
+   refinement factor
+   load balancing frequency
+application driven
+   Enzo II
+   cosmology / astrophysics
+   wide range of AMR capabilities
+     broad for galaxy structure formation
+     deep for star formation
+     turbulence
+   decouple physics modules from AMR framework
+testing
+   unit tests
+   component tests
+   lcatest: automated application testing
+   test for multiple things:
+      functionality
+      correctness
+      performance
+      scaling
+   uses integrated performance monitoring
+   help identify functional, performance, scaling bugs early
+   extreme scaling designed into framework from the start
+
+integrated performance monitoring
+   summaries at different hardware levels
+   less frequent at lower levels--more data
+   more frequent at upper levels
+   performance data available to other components
+      load balancing based on actual memory usage / cpu time
+      feedback for adaptivity
+      help identify performance and scaling issues early
+      poor-performance resilient
+
+design
+   still primarily in design phase
+     still flexible to redesign
+     little code and time wasted
+   emphasis on thorough designing before coding
+      prototype ideas before final implementation
+upcoming systems
+   BW
+   ...
+   ...
+   core counts
+   extrapolate top500 10 years
+AMR basic unigrid
+   unigrid is single AMR node(?)
+     (how to link with level 1?)
+I/O different output formats for different uses
+   checkpointing
+   analysis
+   visualization
+   general ``data dump''
+   cheaper to rerun and regenerate data than store
+   node / processor independent
+     checkpoints restartable on different configurations / platforms
+   ``accessor code'' included with all output data
+power -- idle components when not in use to reduce power usage
+   shared caches help normalize performance
+development
+   implement prorgessively to fill user beta testing pipeline
+    
+
+       
+   
+
+       
+   
+   
+
+\end{verbatim}
+
 Petascale AMR research issue.
 
 
