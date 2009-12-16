@@ -1,4 +1,4 @@
-current:pdf
+current:pdf2
 PAPER = `pwd | awk 'BEGIN{FS="/"}{print $$NF}'`
 
 ps:dvi
@@ -17,6 +17,8 @@ pdf2: include.tex uml figures
 dvi: include.tex uml figures
 	make -C uml
 	-latex $(PAPER)
+bib: 
+	bibtex $(PAPER)
 
 pdfimg: include.tex uml figures
 	make -C uml
