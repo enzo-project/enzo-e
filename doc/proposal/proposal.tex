@@ -334,11 +334,6 @@ Advantage: designing with extreme scale in mind from the beginning.
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-
-
-
-
-
 %=======================================================================
 \section{Extreme Scaling Issues} \label{s:scaling}
 %=======================================================================
@@ -346,22 +341,116 @@ Advantage: designing with extreme scale in mind from the beginning.
 
 \begin{verbatim}
 
-load balancing
-   hierarchical
-   load balance locally in given level
-   different metrics at different levels
-     memory at node level
-     workload below
-   different frequency at different levels
-     lower frequency balancing at higher levels
-        more costly
-        solution changes less frequently
-     higher frequency balancing at lower levels
-        less costly
-        solution changes more frequently
-   task adjacency maintained
-   use collected performance data
+\note{load balancing summary}
 
+We will use a hierarchical dynamic load balancing approach, balancing
+for different metrics at different hierarchical computational
+components (node, socket, etc.) with different balancing frequencies.
+
+\note{load balancing details}
+
+Dynamic load balancing is well known to be a crucial operation for
+extreme scalability in general, and for extreme adaptive mesh
+refinement in particular.  We will explore several innovative ideas
+for dynamic load balancing, including hierarchical load balancing and
+overcompensation.
+
+Hierarchical load balancing refers to rebalancing tasks between higher
+levels (nodes or supernodes) independently from rebalancing between
+lower levels (socket or cores).  This will have several advantages
+over traditional non-hierarchical load balancing.  First, rebalancing at
+different levels could be based on different metrics, e.g. memory usage for
+rebalancing between nodes, and computational load for rebalancing between
+sockets.  This will be very useful, because memory is the crucial metric
+we want to keep balanced at the node level, but computation is the crucial
+metric for lower levels.  Second, rebalancing frequencies at different
+levels can be decoupled, rebalancing less frequently at the upper node
+levels, where rebalancing is more costly, and where rebalancing is not
+required to be as frequent.
+
+By ``overcompensation'', we mean rebalancing by relocating
+\textit{more} than enough tasks from high-load to low-load processes.
+The motivation is for physics phenomena such as gravitational collapse
+or explosions that involve a continuous and regular change in computational resources.
+This is conceptually analagous to successive over relaxation (SOR) relaxation method.
+This could potentially reduce the frequency of rebalancing the load by half
+with the same tolerance on imbalance.
+
+We also note that a common approach of rebalancing SAMR based on octrees
+is to linearize using a Morton or Hilbert type ordering, and partitioning
+nodes evenly among processes.  If the work and memory usage is roughly equal
+for each node, this is sufficient, but for our purposes this assumption is
+not met for several reasons.  
+%
+One, we require adaptive timestepping, which
+scales the work load for a node by a factor of roughly $2^k$ for level
+$k$.  
+%
+Two, particle distributions among nodes may not be uniform.  
+%
+Three, array patches may be differently sized, if we use our coalesced patches enhancement to reduce the AMR tree node count.  
+%
+Four, performance of physics methods on a patch is not necessarily uniform, due to e.g. localized subcycling of stiff methods, front tracking methods, etc.
+%
+Additionally, we suspect that linearizing patches may not be optimal in terms of
+the amount of data that needs to be redistributed during each rebalancing step,
+since it restricts workload along a single dimension, whereas the actual workload
+is typically distributed along three or four dimensions (three spacial and one time).
+
+
+
+% load balancing
+%    hierarchical
+%    load balance locally in given level
+%    different metrics at different levels
+%      memory at node level
+%      workload below
+%    different frequency at different levels
+%      lower frequency balancing at higher levels
+%         more costly
+%         solution changes less frequently
+%      higher frequency balancing at lower levels
+%         less costly
+%         solution changes more frequently
+%    task adjacency maintained
+%    use collected performance data
+%    explore overcompensation technique
+%       ala SOR
+%       two regimes
+%          local collapsing / explosion
+%          shock advancement
+%       identify regimes and adapt
+%    linearized morton curve / hilbert curve insufficient
+%       assumes equal work per patch
+%       particles are associated with nodes, changing weight
+%       adaptive timestepping drastically weights more highly  refined patches
+%       performance of physics algorithms on a patch is not necessarily uniform
+%          localized chemistry subcycling, front tracking, etc.
+%       arrays on patches may be different sized (assuming coalesced patches)
+%       linearization constricts dimensionality
+%          constrains data movement along a single dimension
+%          physics imbalances 4 dimensional
+
+\note{task scheduling summary}
+
+We plan to use dynamic scheduling of tasks to processes, which is more suitable
+than static scheduling for heterogeneous sized tasks, and reduces 
+
+\note{task scheduling details}
+
+After tasks are distributed among processing elements, the next decision is
+how to schedule tasks among processing elements.  Two main approaches are
+static and dynamic.  Static scheduling is preferred when workload is evenly mapped to processing components, and when there are relatively few tasks per process.  We
+will use dynamic scheduling, since workload (communication as well as computation)
+per task varies between tasks.  
+
+Our approach will be well-mapped to
+CHARM++, so we plan to investigate that first.  We also plan to develop
+our own scheduler, for several reasons.  One, 
+
+to schedule tasks is 
+Assuming 
+Two approches to Dynamic scheduling is
 dynamic scheduling
    task = grid patch + sequence of 
    dynamically schedule local tasks
