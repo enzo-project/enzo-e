@@ -9,13 +9,13 @@ CPPFLAGS = -g -Wall
 # JBPERF
 
 #--------------------------------
+JBDEF = -DUSE_JBPERF
+JBINC = -I$(HOME)/lcaperf/include 
+JBLIB = -L$(HOME)/lcaperf/lib -ljbperf
 JBDEF = 
 JBINC = 
 JBLIB = 
 #--------------------------------
-JBDEF = -DUSE_JBPERF
-JBINC = -I$(HOME)/lcaperf/include 
-JBLIB = -L$(HOME)/lcaperf/lib -ljbperf
 #--------------------------------
 
 # LIBPNG
