@@ -86,7 +86,7 @@
 
 
 %=======================================================================
-\documentclass[14pt]{article}
+\documentclass[14pt,letter]{article}
 %=======================================================================
 \include{include}
 
@@ -95,7 +95,9 @@
 %=======================================================================
 
 \begin{document}
-\Large
+
+%\Large
+% \renewcommand{\pargraph}[1]{}
 
 \nocite{StSh09} % Scalability challenges for massively parallel {AMR} applications
 \nocite{WiHy03} % Enhancing scalability of parallel structured {AMR} calculations
@@ -107,8 +109,6 @@
 %=======================================================================
 \TITLE{A Software Framework for Extreme Adaptive Mesh Refinement}{James Bordner}{$Rev$}
 %=======================================================================
-
-% \renewcommand{\pargraph}[1]{}
 
 \section{PROJECT SUMMARY}  \label{s:summary}
 
@@ -429,59 +429,100 @@ refined  / borrowed ideas
 
 \note{load balancing summary}
 
-We will use a hierarchical dynamic load balancing approach, balancing
-for different metrics at different hierarchical computational
-components (node, socket, etc.) with different balancing frequencies.
+We will use a hierarchical dynamic load balancing approach, with
+support for balancing with respect to multiple metrics (memory use,
+computational load, etc.) for different hierarchical computational
+components (node, socket, etc.), with different rebalancing
+frequencies for different levels.
 
 \note{load balancing details}
 
 Dynamic load balancing is well known to be a crucial operation for
 extreme scalability in general, and for extreme adaptive mesh
-refinement in particular.  We will explore several innovative ideas
-for dynamic load balancing, including hierarchical load balancing and
-deliberate overcompensation.
+refinement in particular.
 
-Hierarchical load balancing refers to rebalancing tasks between higher
-levels (nodes or supernodes) independently from rebalancing between
-lower levels (socket or cores).  This will have several advantages
-over traditional non-hierarchical load balancing.  First, rebalancing at
-different levels could be based on different metrics, e.g. memory usage for
-rebalancing between nodes, and computational load for rebalancing between
-sockets.  This will be very useful, because memory is the crucial metric
-we want to keep balanced at the node level, but computation is the crucial
-metric for lower levels.  Second, rebalancing frequencies at different
-levels can be decoupled, rebalancing less frequently at the upper node
-levels, where rebalancing is more costly, and where rebalancing is not
-required to be as frequent.
+A common approach of rebalancing SAMR hierarchies based on octrees is
+to linearize the data structure using a Morton or Hilbert type
+space-filling curve, and partition the nodes among processes by
+dividing the linearized structure into $N_P$ evenly sized pieces.
+This approach works well if the work and memory usage is roughly equal
+for each node, and if the global \code{MPI\_AllGather} of long
+integers on $N_C$ cores is acceptable \footnote{\cite{BuGh07}
+  indicates $N_C$ cores, though we believe with a hybrid programming
+  approach their global reduction could be reduced to an even more
+  scalable $N_P$ MPI processes}.  However, we anticipate that this
+approach will not be sufficient for a general-purpose extreme AMR
+framework for several reasons.
+%
+One, adaptive timestepping is required for efficient ``deep'' AMR
+problems, but that scales the work load for a given node by a
+non-constant factor of roughly $2^k$ for level $k$.
+%
+Two, particle distributions among nodes may not be uniform, affecting both memory and computational loads.
+%
+Three, array patches may be differently sized, if we use our ``coalesced patches'' enhancement to reduce the AMR tree node count.  
+%
+Four, performance of physics methods on a patch is not necessarily
+uniform, due to, e.g., localized subcycling of stiff methods, front
+tracking methods, etc.  The first three issues, and possibly the
+fourth, could be addressed by dynamically weighting nodes before
+partitioning them among processes, but that would require additional
+global communication to perform the reduction.
+%
 
-By ``deliberate overcompensation'', we mean rebalancing by relocating
-\textit{more} than enough tasks from high-load to low-load processes.
-The motivation is for physics phenomena such as gravitational collapse
-or explosions that involve a continuous and regular change in computational resources.
-This is conceptually analagous to successive over relaxation (SOR) relaxation method.
-This could potentially reduce the frequency of rebalancing the load by half
-with the same tolerance on imbalance.
+Lastly, we suspect that linearizing the workload artificially
+restricts the flexibility of data movement allowed (along one
+dimension instead of three), creating more communication traffic
+during task migration.  than in not be optimal in terms of the amount
+of data that needs to be redistributed during each rebalancing step,
+since it restricts workload along a single dimension, whereas the
+actual workload is typically distributed along three or four
+dimensions (three spacial and one time).
 
-We also note that a common approach of rebalancing SAMR based on octrees
-is to linearize using a Morton or Hilbert type ordering, and partitioning
-nodes evenly among processes.  If the work and memory usage is roughly equal
-for each node, this is sufficient, but for our purposes this assumption is
-not met for several reasons.  
-%
-One, we require adaptive timestepping, which
-scales the work load for a node by a factor of roughly $2^k$ for level
-$k$.  
-%
-Two, particle distributions among nodes may not be uniform.  
-%
-Three, array patches may be differently sized, if we use our coalesced patches enhancement to reduce the AMR tree node count.  
-%
-Four, performance of physics methods on a patch is not necessarily uniform, due to e.g. localized subcycling of stiff methods, front tracking methods, etc.
-%
-Additionally, we suspect that linearizing patches may not be optimal in terms of
-the amount of data that needs to be redistributed during each rebalancing step,
-since it restricts workload along a single dimension, whereas the actual workload
-is typically distributed along three or four dimensions (three spacial and one time).
+Since we suspect that a space-filling curve approach is only effective
+for a strict subset of AMR problems we wish to support, we will
+explore two ideas for dynamic load balancing, including ``hierarchical
+load balancing'', and a new approach we call ``deliberate
+overcompensation''.
+
+By \textit{hierarchical load balancing} we mean rebalancing tasks
+between higher levels (nodes or supernodes) independently from
+rebalancing between lower levels (socket or cores).  This will have
+several advantages over more traditional non-hierarchical load
+balancing.  First, rebalancing at different levels could be based on
+different metrics, e.g. memory usage for rebalancing between nodes,
+and computational load for rebalancing between sockets.  This will be
+particularly useful for AMR problems, because memory is the crucial
+metric we want to keep balanced at the node level, yet we want to
+balance computational time at lower hardware platform levels to keep
+computational elements busy.  Second, rebalancing frequencies at
+different levels can be decoupled, rebalancing less frequently at the
+upper node levels where rebalancing is more costly, and where load
+tends to take longer to become unbalanced.
+
+By \textit{deliberate overcompensation} we mean rebalancing by
+relocating \textit{more} than enough tasks from high-load to low-load
+processes.  The motivation is for physics phenomena, such as
+gravitational collapse or explosions, that require a continuous and
+regular redistribution of computational resources.  The idea is
+conceptually analagous to the successive over-relaxation (SOR) variant
+of the Gauss-Seidel method.  This approach could potentially reduce
+the frequency of rebalancing the load by half with the same tolerance
+on imbalance.
+
+Data locality is crucial for parallel performance, so tasks associated
+with neighboring patches and parent-child patches are kept on the same
+process when possible, or failing that, on ``close'' processes (same
+socket or node) if possible.  This will be maintained by weighting
+migration of tasks to closer processes (through hierarchical load
+balancing), and migrating a task to another process only if a
+neighbor, parent, or child of the task is associated with that
+process.  This will enforce the spacial data associated with tasks
+assigned to a process to be simply connected.  We also wish to keep
+the surface area-to-volume ratio low.  The space-filling curve
+approach is a specialization of maintaining simply connectednes, and
+we expect the additional generalization can be used to improve data
+locality, surface-to-volume ratio, and reduce task migration traffic.
 
 
 
