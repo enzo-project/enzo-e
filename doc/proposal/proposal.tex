@@ -112,14 +112,15 @@
 
 \section{PROJECT SUMMARY}  \label{s:summary}
 
-\pargraph{Motivation}
-%
 \pargraph{Proposal}
 We propose to develop a new software library for adaptive mesh
 refinement (AMR) that allows application developers to develop
 multiphysics applications for simulating phenomena on an extreme range
 of spacial and temporal scales, and that require an extreme amount of
 computation, memory, and storage (petascale and exascale).
+%
+\note{data parallel plus optional pipelined task parallelism}
+
 %
 \pargraph{data structure scope summary}
 Our basic data structure is a fully parallel distributed octree, with
@@ -154,6 +155,8 @@ Disk I/O is also a crucial factor for petascale
 \pargraph{availablity}
 We plan to make this framework publicly available for scientific research use.
 
+\pargraph{motivation}
+Our motivation for this project is to develop a new AMR framework with emphasis on extreme scalabilityboth in the parallel and data structure sense.
 Advantage: designing with extreme scale in mind from the beginning.
 
 % DOE buzzwords
@@ -165,6 +168,13 @@ Advantage: designing with extreme scale in mind from the beginning.
 \note{flexible data storage in memory}
 \note{dynamic execution and communication scheduling}
 
+Runtime management system:
+\begin{enumerate}
+\item Partition applications
+\item Allocate resources
+\item Balance load
+\item Manage communication
+\end{enumerate}
 % AMR \\
 % applied mathematics\\
 % collaborative software environments\\
@@ -252,11 +262,42 @@ Advantage: designing with extreme scale in mind from the beginning.
 
 \section{EXISTING AMR FRAMEWORKS} \label{s:review}
 
+% http://people.sc.fsu.edu/~tomek/AMR/index.html
+%    *   Adaptive Mesh Refinement Software for Hyperbolic Conservation Laws, Marsha Berger
+%    * Adaptive Mesh Refinement and Parallel Computing, John A. Trangenstein, Mathematics Department, Duke University.
+%    * Amrita, James Quirk.
+%    * AMR1D, a simple adaptive mesh refinement code for solving the one-dimensional Euler equations on an unstructured grid.
+%    * AMRCART, The AMRCART MHD Code, Rolf Walder.
+%    * AMRCLAW, Adaptive Mesh Refinement + CLAWPACK. AMRCLAW is a joint project between Randy LeVeque and Marsha Berger.
+%    * AMRMHD3D, 3-D AMR code with FCT MHD solver.
+%    * AMROC, Blockstructured Adaptive Mesh Refinement in object-oriented C++, Ralf Deiterding.
+%    * AMRPoisson, Solving Poisson's Equation using Adaptive Mesh Refinement (AMR), Computational Fluid Dynamics, Dept. of Mechanical Engineering, U.C. Berkeley.
+%    * ARMS, 3-D AMR code with FCT MHD solver.
+%    * BEARCLAW, general purpose software package for solving time-dependent partial differential equations, Sorin Mitran, Applied Mathematics Program, The University of North Carolina at Chapel Hill.
+%    * BSAMR, Block Structured Adaptive Mesh Refinement, Daniel D. Wake, College of Engineering, UC Davis.
+%    * Cactus, The Cactus Code Server, Max Planck Institute for Gravitational Physics (Albert Einstein Institute), Max Planck Society.
+%    * Cart3D, Michael J. Aftosmis, Numerical Aerospace Simulation (NAS) Division Systems, NASA Ames Research Center
+%    * CTH, 3-D multi-material Eulerian AMR code from Sandia (export controlled).
+%    * Enzo, Cosmological Simulation Code, Laboratory for Computational Astrophysics, UCSD.
+%    * FEMLAB, FEM with automatic error control for two-dimensional convection-diffusion-absorption problems.
+%    * FLASH, multi-physics 3-D octree AMR parallel code.
+%    * Gerris Flow Solver, incompressible fluid flow with arbitrarily complex solid boundaries and adaptive mesh refinement, Stephane Popinet.
+%    * GrACE, Grid Adaptive Computational Engine, Manish Parashar.
+%    * NIRVANA, 3-D MHD AMR code, Udo Ziegler.
+%    * PARAMESH, 3-D octree AMR parallel code.
+%    * RACOON, Institute for Theoretical Physics I, University of Bochum.
+%    * SARA, A Solution Adaptive Remeshing Algorithm for structured grids, Dave Banks, Center for CFD, Dept. of Mech & Aero Eng, UC Davis.
+%    * Solution-Adaptive Grids, W. M. Keck Foundation CFD laboratory, University of Michigan.
+%    * SUUMA3D, Scalable Unstructured Mesh Algorithms and Applications, MCS ANL. 
+
 There are numerous AMR frameworks, libraries, and applications, each
 with different design goals and decisions, data structures, AMR
 algorithms, parallelization strategies, and parallel performance and
 scaling.  Perhaps the top three most successful and closely related to
-our proposed effort are PARAMESH, Chombo, and SAMRAI.
+our proposed effort are PARAMESH, Chombo, and SAMRAI.  Other notable
+software include Clawpack (Conservation Laws Package), GrACe (DAGH),
+and ARTS (@), Carpet (adaptive mesh refinement and multi-patch driver
+for the Cactus Framework)
 
 
 \note{PARAMESH}
@@ -485,21 +526,27 @@ explore two ideas for dynamic load balancing, including ``hierarchical
 load balancing'', and a new approach we call ``deliberate
 overcompensation''.
 
-By \textit{hierarchical load balancing} we mean rebalancing tasks
-between higher levels (nodes or supernodes) independently from
-rebalancing between lower levels (socket or cores).  This will have
-several advantages over more traditional non-hierarchical load
-balancing.  First, rebalancing at different levels could be based on
-different metrics, e.g. memory usage for rebalancing between nodes,
-and computational load for rebalancing between sockets.  This will be
-particularly useful for AMR problems, because memory is the crucial
-metric we want to keep balanced at the node level, yet we want to
-balance computational time at lower hardware platform levels to keep
+\note{load-balancing: hierarchical} By \textit{hierarchical load
+  balancing} we mean rebalancing tasks between higher levels (nodes or
+supernodes) independently from rebalancing between lower levels
+(socket or cores).  The idea of hierarchical task scheduling and load
+balancing has been known for at least 15 years (\cite{AhGh94}, but is
+not commonly used for AMR frameworks.
+
+in many yhas been This will have several advantages
+over more traditional non-hierarchical load balancing.  First,
+rebalancing at different levels could be based on different metrics,
+e.g. memory usage for rebalancing between nodes, and computational
+load for rebalancing between sockets.  This will be particularly
+useful for AMR problems, because memory is the crucial metric we want
+to keep balanced at the node level, yet we want to balance
+computational time at lower hardware platform levels to keep
 computational elements busy.  Second, rebalancing frequencies at
 different levels can be decoupled, rebalancing less frequently at the
 upper node levels where rebalancing is more costly, and where load
 tends to take longer to become unbalanced.
 
+\note{load-balancing: deliberate overcompensation}
 By \textit{deliberate overcompensation} we mean rebalancing by
 relocating \textit{more} than enough tasks from high-load to low-load
 processes.  The motivation is for physics phenomena, such as
@@ -510,6 +557,7 @@ of the Gauss-Seidel method.  This approach could potentially reduce
 the frequency of rebalancing the load by half with the same tolerance
 on imbalance.
 
+\note{load-balancing: data locality}
 Data locality is crucial for parallel performance, so tasks associated
 with neighboring patches and parent-child patches are kept on the same
 process when possible, or failing that, on ``close'' processes (same
@@ -524,7 +572,7 @@ approach is a specialization of maintaining simply connectednes, and
 we expect the additional generalization can be used to improve data
 locality, surface-to-volume ratio, and reduce task migration traffic.
 
-
+``diffusion-based scheme''
 
 % load balancing
 %    hierarchical
@@ -1073,6 +1121,8 @@ General goals
   \end{itemize}
 \end{itemize}
 
+
+
 \begin{itemize}
 \item targeted refinement by 4 or 8
   \begin{itemize}
@@ -1101,10 +1151,26 @@ General goals
 
 Amr, Tree, Array, Patch
 
-\begin{center}
+\FIGURE{Coalescing}{f:coalesce}{
+\begin{minipage}{3.75in}
+\includegraphics[width=3.75in]{coalesce.png}
+\end{minipage}}
+\FIGURE{Targeted refinement with backfill}{f:backfill}{
+\begin{minipage}{6.15in}
+\includegraphics[width=6.15in]{kd-backfill.png}
+\end{minipage}}
+
+
+\FIGURE{
+Coalesced patches proof-of-concept using a 2D cosmology density field projection.
+\textbf{Left}: 2D cosmology density field projection.  
+\textbf{Middle}: Balanced octree: 81701 patches.
+\textbf{Right}: Balanced octree with coalesced patches: 32529 patches. \\
+}
+{f:cosmo}{
 \begin{minipage}{7.0in}
 \begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{cosmo2.png}
+\includegraphics[width=2.2in]{cosmo2-invert.png}
 \end{minipage} \ 
 \begin{minipage}{2.2in}
 \includegraphics[width=2.2in]{cosmo2-4-1.png}
@@ -1112,21 +1178,20 @@ Amr, Tree, Array, Patch
 \begin{minipage}{2.2in}
 \includegraphics[width=2.2in]{cosmo2-4-2.png}
 \end{minipage}
-\end{minipage} \\
-\ \\
-\begin{minipage}{7in}
-\textbf{Left}: 2D Source cosmology density field projection.  
-\textbf{Middle}: Balanced octree: 81701 patches.
-\textbf{Right}: Balanced octree with coalesced patches: 32529 patches.
-\ \\
 \end{minipage}
-\end{center}
+}
 
 
-\begin{center}
+\FIGURE{
+Targeted refinement proof-of-concept using multiple point sources in 2D.
+\textbf{Left}: 2D point sources.  
+\textbf{Middle}: Balanced octree: 2137 patches.
+\textbf{Right}: Balanced octree with coalesced patches: 158 explicit patches.
+}
+{f:dots}{
 \begin{minipage}{7.0in}
 \begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{dots.png}
+\includegraphics[width=2.2in]{dots-invert.png}
 \end{minipage} \ 
 \begin{minipage}{2.2in}
 \includegraphics[width=2.2in]{dots-4-1.png}
@@ -1134,19 +1199,7 @@ Amr, Tree, Array, Patch
 \begin{minipage}{2.2in}
 \includegraphics[width=2.2in]{dots-16-5.png}
 \end{minipage}
-\end{minipage} \\
-\begin{minipage}{7in}
-\begin{minipage}[t]{2.2in}
-2D Source cosmology density field projection
-\end{minipage} \ 
-\begin{minipage}[t]{2.2in}
-Balanced octree: 2137 patches
-\end{minipage} \ 
-\begin{minipage}[t]{2.2in}
-Balanced sparse $4^3$-tree: 158 explicit patches
-\end{minipage}
-\end{minipage}
-\end{center}
+\end{minipage}}
 
 \begin{itemize}
 \item generalized octree-based AMR 

@@ -21,6 +21,25 @@
 %=======================================================================
 % Packages
 %=======================================================================
+\newcounter{figctr}
+
+\newcommand{\FIGURE}[3]{
+\noindent
+\parbox{\textwidth}{
+%\ \\ \hrule \ \\
+\begin{center}
+#3
+\end{center}%
+\ \nolinebreak%
+\refstepcounter{figctr}%
+\begin{center}%
+\begin{minipage}{7.0in}
+\textbf{Figure \thefigctr}. #1
+\end{minipage}
+\end{center}
+\label{#2}
+%\ \\ \hrule \ \\
+}}
 
 \usepackage{wasysym}
 \usepackage{epsfig}
