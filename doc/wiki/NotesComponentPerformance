@@ -4,6 +4,18 @@
 
 The `Performance` component is used to collect information about how efficiently the application is using the underlying hardware.  Metrics recorded include time, memory, communication, disk, floating point operations, and memory accesses.
 
+Performance data collected and stored is similar to `lcaperf`, but with the following modifications:
+
+ * `( )` Regions are identified by numbers instead of strings in calls, and include a number-to-string mapping
+ * `( )` All attributes and metrics are stored uniformly
+ * `( )` Each region start-stop is stored, not summed, by including an (optional?) "event_number" attribute
+ * `( )` Both regions and isolated points are traced
+ * `( )` Only inclusive metrics are stored
+ * `( )` Code is OOP, with one performance object per event (region or isolated point)
+ * `( )` Data flushed to disk are deleted in memory
+ * `( )` Post-processing is a single utility to improve processing speed and reduce disk access
+ * `( )` Disk data is binary, possibly compressed HDF5, possibly parallel, possibly using file format standard
+
 == `Performance` class ==
 
 `Performance` is based on the `lcaperf` package.  It collects the following data for code regions:
@@ -13,33 +25,41 @@ The `Performance` component is used to collect information about how efficiently
  || `time_sys`  || ''CPU time in system'' ||
  || `time_sim`  || ''Simulation time'' ||
  || || ||
- || `comm_send_bytes` || ''Amount of data sent from this thread'' ||
- || `comm_recv_bytes` || ''Amount of data received from this thread''||
- || `comm_send_time` || ''Time spent sending data''||
- || `comm_recv_time` || ''Time spent receiving data''||
- || `comm_global_time` || ''Time spent in collective communication '' ||
- || `comm_send_count` || ''Number of sends'' ||
- || `comm_recv_count` || ''Number of receives'' ||
- || `comm_global_count` || ''Number of barriers/reductions'' ||
+ || `comm_bytes_recv` || ''Amount of data received by this process''||
+ || `comm_bytes_reduce`|| ''Amount of data in reduction operations on this process '' ||
+ || `comm_bytes_send` || ''Amount of data sent from this process'' ||
+ || `comm_count_barrier` || ''Number of barrier operations'' ||
+ || `comm_count_recv` || ''Number of receive operations'' ||
+ || `comm_count_reduce` || ''Number of reduction operations'' ||
+ || `comm_count_send` || ''Number of send operations'' ||
+ || `comm_time_barrier`|| ''Time spent in barriers '' ||
+ || `comm_time_recv`  || ''Time spent receiving data''||
+ || `comm_time_reduce`|| ''Time spent in reduction operations'' ||
+ || `comm_time_send`  || ''Time spent sending data''||
  || || ||
- || `mem_curr_bytes`   || ''Current number of bytes allocated'' ||
- || `mem_high_bytes`   || ''Maximum number of bytes allocated'' ||
- || `mem_new_count`    || ''Number of calls to allocate memory'' ||
- || `mem_delete_count` || ''Number of calls to deallocate memory'' ||
- || `mem_new_bytes`    || ''Number of bytes allocated'' ||
- || `mem_delete_bytes` || ''Number of bytes deallocated'' ||
+ || `mem_bytes_curr`   || ''Current number of bytes allocated'' ||
+ || `mem_bytes_high`   || ''Maximum number of bytes allocated'' ||
+ || `mem_bytes_new`    || ''Number of bytes allocated'' ||
+ || `mem_bytes_delete` || ''Number of bytes deallocated'' ||
+ || `mem_count_new`    || ''Number of calls to allocate memory'' ||
+ || `mem_count_delete` || ''Number of calls to deallocate memory'' ||
  || || ||
- || `disk_read_bytes`  || ''Number of bytes read from disk'' ||
- || `disk_write_bytes` || ''Number of bytes written to disk'' ||
- || `disk_read_time`   || ''Time spent reading from disk'' ||
- || `disk_write_time`  || ''Time spent writing to disk'' ||
+ || `disk_bytes_read`  || ''Number of bytes read from disk'' ||
+ || `disk_bytes_write` || ''Number of bytes written to disk'' ||
+ || `disk_time_read`   || ''Time spent reading from disk'' ||
+ || `disk_time_write`  || ''Time spent writing to disk'' ||
  || || ||
- || `user_patch_count` || ''Number of grid patches in each level'' ||
- || `user_cell_count` || ''Number of grid cells in each level'' ||
- || `user_particle_count` || ''Number of particles'' ||
+ || `amr_count_patch` || ''Number of grid patches in each level'' ||
+ || `amr_count_cell` || ''Number of grid cells in each level'' ||
  || || ||
- || `cpu_flop_count` || Number of floating point operations ||
- || `cpu_mem_count`   || Number of memory accesses ||
+ || `particles_count` || ''Number of particles'' ||
+ || || ||
+ || `cpu_count_cycle` || Number of cycles ||
+ || `cpu_count_op` || Number of operations ||
+ || `cpu_count_flop` || Number of floating point operations ||
+ || `cpu_count_intop` || Number of integer operations ||
+ || `cpu_bytes_read`   || Number of memory reads ||
+ || `cpu_bytes_write`   || Number of memory writes ||
 
 Performance data are partitioned into the following groups:
 

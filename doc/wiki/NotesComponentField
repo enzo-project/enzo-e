@@ -7,15 +7,16 @@
 A `Field` represents a discretized scalar field.  A `Field` is typically discretized on an `Amr` hierarchy, but can be accessed at the `Array` or a `Block` levels as well.  In addition to the array of elements, a `Field` includes an identifier for the field, the location of the field values with respect to computational cells (cell centered, face-centered, etc.), the index into the `Block` or `Array` of the field, optional minimum or maximum allowed values, units, and user-defined tags.
 
 Attributes:
- || name || String defining the field's name, e.g. "density", "velocity-x", etc. ||
- || id || Integer identifying the `Field` ||
- || array || `Array` containing `Field` values for the containing `Patch` ||
- || index  || Index of the specific array in the 4D `Array` ||
- || position || cell position, defined as (0,0,0) <= (px,py,pz) <= (1,1,1).  (.5,.5,.5)=cell centered ||
- || min || minimum allowed value for the `Field` ||
- || max || maximum allowed value for the `Field` ||
- || min_action || what should be done if `Field` goes below `min` (e.g. 1: set to min, 2: warning, 4: error, g: retry with smaller timestep, etc.) ||
- || max_action || what should be done if `Field` goes above `max` ||
+ ||  || name || String defining the field's name, e.g. "density", "velocity-x", etc. ||
+ ||  || id || Integer identifying the `Field` ||
+ ||  || array || `Array` containing `Field` values for the containing `Patch` ||
+ ||  || index  || Index of the specific array in the 4D `Array` ||
+ ||  || position || cell position, defined as (0,0,0) <= (px,py,pz) <= (1,1,1).  (.5,.5,.5)=cell centered ||
+ ||  || min || minimum allowed value for the `Field` ||
+ ||  || max || maximum allowed value for the `Field` ||
+ ||  || min_action || what should be done if `Field` goes below `min` (e.g. 1: set to min, 2: warning, 4: error, g: retry with smaller timestep, etc.) ||
+ ||  || max_action || what should be done if `Field` goes above `max` ||
+ ||  || precision || single, double, ...? ||
 
 A set of `Field`s defined on a `Block`, along with groups of `Particles` associated with the block, are the main input to (and output from) `Method`s.  `Method`s have access to the `Field`'s values, size, cell position, units, tags, limits, etc. 
 
