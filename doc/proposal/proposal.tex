@@ -488,7 +488,7 @@ space-filling curve, and partition the nodes among processes by
 dividing the linearized structure into $N_P$ evenly sized pieces.
 This approach works well if the work and memory usage is roughly equal
 for each node, and if the global \code{MPI\_AllGather} of long
-integers on $N_C$ cores is acceptable \footnote{\cite{BuGh07}
+integers on $N_C$ cores is acceptable \footnote{\cite{BuGh08}
   indicates $N_C$ cores, though we believe with a hybrid programming
   approach their global reduction could be reduced to an even more
   scalable $N_P$ MPI processes}.  However, we anticipate that this
