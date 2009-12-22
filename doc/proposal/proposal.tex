@@ -96,6 +96,7 @@
 
 \begin{document}
 
+\tableofcontents
 %\Large
 % \renewcommand{\pargraph}[1]{}
 
@@ -109,6 +110,8 @@
 %=======================================================================
 \TITLE{A Software Framework for Extreme Adaptive Mesh Refinement}{James Bordner}{$Rev$}
 %=======================================================================
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 \section{PROJECT SUMMARY}  \label{s:summary}
 
@@ -175,6 +178,7 @@ Runtime management system:
 \item Balance load
 \item Manage communication
 \end{enumerate}
+
 % AMR \\
 % applied mathematics\\
 % collaborative software environments\\
@@ -201,267 +205,87 @@ Runtime management system:
 % 
 % \url{http://diversity.doe.gov/documents/Writing\_Winning\_Proposals.pdf}
 % 
-% \begin{itemize}
-% \item intro: compelling, organization goals and success, relevence to agency
-% \item problem statement--needs assessment
-%   \begin{itemize}
-%     \item purpose
-%     \item beneficiaries
-%     \item what is being done
-%     \item what we will do
-%   \end{itemize}
-% \item objectives: table with direct items
-% \item development plan
-%   \begin{itemize}
-%    \item chart with timelines
-%    \item decision points
-%    \item milestones
-%    \item tasks
-%   \end{itemize}
-% \item methods and design
-%   \begin{itemize}
-%     \item use flow charts and diagrams to break up text
-%     \item justify course of action
-%     \item highlight innovative features
-%   \end{itemize}
-% \item past experience
-% \item management approach
-%   \begin{itemize}
-%   \item quality control
-%   \item emphasize performance management
-%   \item technological systems in place
-%   \end{itemize}
-% 
-%    
-% \item preliminary results
-% \item good references critical; only give great references
-% \item use rfp keywoards
-% \item quality control
-% \item sustainability--what happens when money ends
-% \item deliverables: software, research papers, workshop/training
-% sales document not technical manual
-% \item visit agency web site for similar funding
-% \item make benefits clear
-% \item write for evaluators
-% \item justify and support all claims
-% \item active voice: strong subjects and active verbs
-% \item first paragraph sentence conveys topic
-% \item 65 characters per line
-% \item duplicate information instead of cross reference
-% \item use graphics and tables
-% \item short text with bullets
-% \item stay on topic
-% \end{itemize}
+\begin{verbatim}
+intro: compelling, organization goals and success, relevence to agency
+problem statement--needs assessment
+    purpose
+    beneficiaries
+    what is being done
+    what we will do
+objectives: table with direct items
+development plan
+   chart with timelines
+   decision points
+   milestones
+   tasks
+methods and design
+    use flow charts and diagrams to break up text
+    justify course of action
+    highlight innovative features
+past experience
+management approach
+  quality control
+  emphasize performance management
+  technological systems in place
+\end{verbatim}
 
-\section{EXTREME SCALING ISSUES} \label{s:issues}
-
-%    Hardware-related parallel scaling issues
-%        software resiliency
-%    AMR-specific parallel scaling issues
-%    AMR data structure scaling issues
-
-\section{EXISTING AMR FRAMEWORKS} \label{s:review}
-
-% http://people.sc.fsu.edu/~tomek/AMR/index.html
-%    *   Adaptive Mesh Refinement Software for Hyperbolic Conservation Laws, Marsha Berger
-%    * Adaptive Mesh Refinement and Parallel Computing, John A. Trangenstein, Mathematics Department, Duke University.
-%    * Amrita, James Quirk.
-%    * AMR1D, a simple adaptive mesh refinement code for solving the one-dimensional Euler equations on an unstructured grid.
-%    * AMRCART, The AMRCART MHD Code, Rolf Walder.
-%    * AMRCLAW, Adaptive Mesh Refinement + CLAWPACK. AMRCLAW is a joint project between Randy LeVeque and Marsha Berger.
-%    * AMRMHD3D, 3-D AMR code with FCT MHD solver.
-%    * AMROC, Blockstructured Adaptive Mesh Refinement in object-oriented C++, Ralf Deiterding.
-%    * AMRPoisson, Solving Poisson's Equation using Adaptive Mesh Refinement (AMR), Computational Fluid Dynamics, Dept. of Mechanical Engineering, U.C. Berkeley.
-%    * ARMS, 3-D AMR code with FCT MHD solver.
-%    * BEARCLAW, general purpose software package for solving time-dependent partial differential equations, Sorin Mitran, Applied Mathematics Program, The University of North Carolina at Chapel Hill.
-%    * BSAMR, Block Structured Adaptive Mesh Refinement, Daniel D. Wake, College of Engineering, UC Davis.
-%    * Cactus, The Cactus Code Server, Max Planck Institute for Gravitational Physics (Albert Einstein Institute), Max Planck Society.
-%    * Cart3D, Michael J. Aftosmis, Numerical Aerospace Simulation (NAS) Division Systems, NASA Ames Research Center
-%    * CTH, 3-D multi-material Eulerian AMR code from Sandia (export controlled).
-%    * Enzo, Cosmological Simulation Code, Laboratory for Computational Astrophysics, UCSD.
-%    * FEMLAB, FEM with automatic error control for two-dimensional convection-diffusion-absorption problems.
-%    * FLASH, multi-physics 3-D octree AMR parallel code.
-%    * Gerris Flow Solver, incompressible fluid flow with arbitrarily complex solid boundaries and adaptive mesh refinement, Stephane Popinet.
-%    * GrACE, Grid Adaptive Computational Engine, Manish Parashar.
-%    * NIRVANA, 3-D MHD AMR code, Udo Ziegler.
-%    * PARAMESH, 3-D octree AMR parallel code.
-%    * RACOON, Institute for Theoretical Physics I, University of Bochum.
-%    * SARA, A Solution Adaptive Remeshing Algorithm for structured grids, Dave Banks, Center for CFD, Dept. of Mech & Aero Eng, UC Davis.
-%    * Solution-Adaptive Grids, W. M. Keck Foundation CFD laboratory, University of Michigan.
-%    * SUUMA3D, Scalable Unstructured Mesh Algorithms and Applications, MCS ANL. 
-
-There are numerous AMR frameworks, libraries, and applications, each
-with different design goals and decisions, data structures, AMR
-algorithms, parallelization strategies, and parallel performance and
-scaling.  Perhaps the top three most successful and closely related to
-our proposed effort are PARAMESH, Chombo, and SAMRAI.  Other notable
-software include Clawpack (Conservation Laws Package), GrACe (DAGH),
-and ARTS (@), Carpet (adaptive mesh refinement and multi-patch driver
-for the Cactus Framework)
-
-
-\note{PARAMESH}
-
-\nocite{wwwparamesh}
-\nocite{MaOl00} % PARAMESH requested references
-\nocite{OlMa05}
-\nocite{Ol06}
-
-The PARAMESH software was developed at the NASA Goddard Space Flight
-Center and Drexel University.
-
-Due to a loss of funding PARAMESH can no longer be supported
-
-\note{Chombo}
-
-\nocite{wwwchombo}
-\nocite{CoGr09}
-
-Chombo is actively developed by the Applied Numerical Algorithms Group
-of Lawrence Berkeley National Lab.  Its high-level design consists of
-five loosely-coupled components based on the mathematical
-decomposition: \code{BoxTools} for set calculus on point sets and
-unions of rectangles, \code{AMRTools} for interprocess communication
-between AMR levels, \code{AMRTimeDependent} for advancing the solution
-using adaptive timestepping, \code{AMRElliptic} for the
-multigrid-based solution of elliptic AMR problems, \code{EBTools} for
-embedded boundaries, and \code{ParticleTools} for particle processing
-(not available in the current 3.0 version, according to the website
-due to re-engineering of the component).
-
-CHOMBO is highly scalabale, and designed to run both hyperbolic and
-elliptic problems on 10,000 processors.
-
-Berger-Rigoutsos 
-
-\note{Chombo parallel data distribution}
-
-Distributed data in \code{LayoutData}, \code{BoxLayoutData}, and 
-\code{LevelData} containers. [ch7 design]
-
-\note{Chombo load balancing}
-Provides load balancing algorithm, as well as allowing user to provide their own.
-[ch7 design]
-
-
-
-\note{SAMRAI}
-
-
-%    AMR types--structured AMR (SAMR-Chombo), unstructured AMR (SAMRAI),
-
-%    PARAMESH
-%    Chombo
-%    SAMARAI
-
-%    ALPS
-%    Gadget-2
-\section{CELLO REQUIREMENTS / SCOPE} \label{s:requirements}
-
-%    multi-level
-%    multi-physics
-%    Enzo II: built on framework, but independent
-%    equations
-%       hyperbolic conservation
-%       elliptic
-%       local physics
-%    user-supplied functions
-%       single-patch advance
-%       inter-resolution constraints
-%       refinement criteria
-%    performance
-%       serial performance
-%       parallel performance
-%       parallel scaling
-%       memory usage
-%    data structures
-%       breadth
-%       depth
-%    software resiliency
-%    hardware support
-%       multicore
-%       gpu / accelerators
-%       distributed and / or shared memory
-%    parallel technology support
-%       directly: CHARM++, MPI, UPC, OpenMP, + combinations
-%       indirectly: GPU / accelerator
-%    I/O
-%    what we do not do
-%       visualization
-%       analysis utilities
-
-\section{CELLO DESIGN} \label{s:design}
-
-% Components
-%   Method
-%   Control, Parallel, Task
-%      dependencies known: patch can advance when its neighbor data is known
-%   Amr, Array, Patch, Tree, Node 
-%   Fields, Particles
-%   Block, Fluxes, ItBlock*
-%   Memory, Performance
-%   Error
-%   Monitor, Portal
-%   Simulation
-%   Parameters
-\section{CELLO IMPLEMENTATION} \label{s:implementation}
-
-%   Trac
-%   Subversion
-%   Languages
-%      C++, optional UPC, OpenMP
-%   User languages
-%      C++, C, Fortran, CUDA
-%   Parallel libraries / frameworks
-%      optional MPI (one-sided and send-recv), CHARM++
-%   testing
-%   documentation
-%   
-\section{DEVELOPMENT PLAN} \label{s:plan}
-
-%   CHARM++ generalized unigrid
-%      evaluate effectiveness
-%   AMR hyperbolic
-%   particle methods
-%   AMR elliptic
-% 
-\section{MILESTONES AND DELIVERABLES} \label{s:milestones}
-%
-%   Cello software framework
-%   Complete Enzo II application
-%   large-scale demonstration using Enzo II
-%   
-
+\begin{verbatim}
 Overriding design goals
-\begin{itemize}
-\item Extreme parallel scalability
-\item Extreme data structure scalability
-\end{itemize}
+Extreme parallel scalability
+Extreme data structure scalability
 
 Innovative ideas
-\begin{itemize}
-\item hierarchical load balancing
-\item separate scheduling of communication and computation
-\item pipelining computational methods to increase parallelism
-\item AMR: patch coalescing
-\item AMR: targeted refinement by 4, 8 with backfill
-\item only store local coordinates for particles
-\item only store local patch connectivity
-\item gang scheduling for GPU support
-\item fault tolerance @@@
-\item multiple parallelization technologies with flexible hybrid support
-\end{itemize}
+hierarchical load balancing
+separate scheduling of communication and computation
+pipelining computational methods to increase parallelism
+AMR: patch coalescing
+AMR: targeted refinement by 4, 8 with backfill
+only store local coordinates for particles
+only store local patch connectivity
+gang scheduling for GPU support
+fault tolerance @@@
+multiple parallelization technologies with flexible hybrid support
 
 refined  / borrowed ideas
-\begin{itemize}
-\item fully distributed AMR datastructure
-\item patch block registers for improved computing / user interface flexibility
-\item communication flux registers (Chombo) for communication
-\item guard cells allocated when needed
-\item localized fully-adaptive time-stepping (no global reductions) (refined)
-\end{itemize}
+fully distributed AMR datastructure
+patch block registers for improved computing / user interface flexibility
+communication flux registers (Chombo) for communication
+guard cells allocated when needed
+localized fully-adaptive time-stepping (no global reductions) (refined)
+\end{verbatim}
 
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+\begin{verbatim}
+preliminary results
+good references critical; only give great references
+use rfp keywoards
+quality control
+sustainability--what happens when money ends
+deliverables: software, research papers, workshop/training
+sales document not technical manual
+visit agency web site for similar funding
+make benefits clear
+write for evaluators
+justify and support all claims
+active voice: strong subjects and active verbs
+first paragraph sentence conveys topic
+65 characters per line
+duplicate information instead of cross reference
+use graphics and tables
+short text with bullets
+stay on topic
+\end{verbatim}
+
+%=======================================================================
+\section{EXTREME SCALING ISSUES} \label{s:issues}
+%=======================================================================
+
+\begin{verbatim}
+Hardware-related parallel scaling issues
+   software resiliency
+   AMR-specific parallel scaling issues
+   AMR data structure scaling issues
+\end{verbatim}
 
 %=======================================================================
 \section{Extreme Scaling Issues} \label{s:scaling}
@@ -476,7 +300,265 @@ computational load, etc.) for different hierarchical computational
 components (node, socket, etc.), with different rebalancing
 frequencies for different levels.
 
-\note{load balancing details}
+%=======================================================================
+\section{EXISTING AMR FRAMEWORKS} \label{s:review}
+%=======================================================================
+
+\begin{verbatim}
+ http://people.sc.fsu.edu/~tomek/AMR/index.html
+ *   Adaptive Mesh Refinement Software for Hyperbolic Conservation Laws, Marsha Berger
+ * Adaptive Mesh Refinement and Parallel Computing, John A. Trangenstein, Mathematics Department, Duke University.
+ * Amrita, James Quirk.
+ * AMR1D, a simple adaptive mesh refinement code for solving the one-dimensional Euler equations on an unstructured grid.
+ * AMRCART, The AMRCART MHD Code, Rolf Walder.
+ * AMRCLAW, Adaptive Mesh Refinement + CLAWPACK. AMRCLAW is a joint project between Randy LeVeque and Marsha Berger.
+ * AMRMHD3D, 3-D AMR code with FCT MHD solver.
+ * AMROC, Blockstructured Adaptive Mesh Refinement in object-oriented C++, Ralf Deiterding.
+ * AMRPoisson, Solving Poisson's Equation using Adaptive Mesh Refinement (AMR), Computational Fluid Dynamics, Dept. of Mechanical Engineering, U.C. Berkeley.
+ * ARMS, 3-D AMR code with FCT MHD solver.
+ * BEARCLAW, general purpose software package for solving time-dependent partial differential equations, Sorin Mitran, Applied Mathematics Program, The University of North Carolina at Chapel Hill.
+ * BSAMR, Block Structured Adaptive Mesh Refinement, Daniel D. Wake, College of Engineering, UC Davis.
+ * Cactus, The Cactus Code Server, Max Planck Institute for Gravitational Physics (Albert Einstein Institute), Max Planck Society.
+ * Cart3D, Michael J. Aftosmis, Numerical Aerospace Simulation (NAS) Division Systems, NASA Ames Research Center
+ * CTH, 3-D multi-material Eulerian AMR code from Sandia (export controlled).
+ * Enzo, Cosmological Simulation Code, Laboratory for Computational Astrophysics, UCSD.
+ * FEMLAB, FEM with automatic error control for two-dimensional convection-diffusion-absorption problems.
+ * FLASH, multi-physics 3-D octree AMR parallel code.
+ * Gerris Flow Solver, incompressible fluid flow with arbitrarily complex solid boundaries and adaptive mesh refinement, Stephane Popinet.
+ * GrACE, Grid Adaptive Computational Engine, Manish Parashar.
+ * NIRVANA, 3-D MHD AMR code, Udo Ziegler.
+ * PARAMESH, 3-D octree AMR parallel code.
+ * RACOON, Institute for Theoretical Physics I, University of Bochum.
+ * SARA, A Solution Adaptive Remeshing Algorithm for structured grids, Dave Banks, Center for CFD, Dept. of Mech & Aero Eng, UC Davis.
+ * Solution-Adaptive Grids, W. M. Keck Foundation CFD laboratory, University of Michigan.
+ * SUUMA3D, Scalable Unstructured Mesh Algorithms and Applications, MCS ANL. 
+\end{verbatim}
+
+There are numerous AMR frameworks, libraries, and applications, each
+with different design goals and decisions, data structures, AMR
+algorithms, parallelization strategies, and parallel performance and
+scaling.  Perhaps the top three most successful and closely related to
+our proposed effort are PARAMESH (\cite{MaOl00} \nocite{OlMa05}
+\nocite{Ol06}), Chombo (\cite{wwwchombo} \cite{CoGr09}), and SAMRAI
+(@@@).  Other notable software include Clawpack (@@@), GrACe / DAGH
+(@@@), ALPS (\cite{BuBu09}), and Carpet (@@@).
+
+
+GADGET-2: Preeminent cosmological TreeSPH simulation code
+DAGH (1998)
+
+%-----------------------------------------------------------------------
+\subsection{PARAMESH}
+%-----------------------------------------------------------------------
+
+\nocite{wwwparamesh}
+\nocite{MaOl00} % PARAMESH requested references
+\nocite{OlMa05}
+\nocite{Ol06}
+
+The PARAMESH software was developed at the NASA Goddard Space Flight
+Center and Drexel University.
+
+Octree-based AMR
+
+
+Due to a loss of funding PARAMESH can no longer be supported.
+
+%-----------------------------------------------------------------------
+\subsection{Chombo}
+%-----------------------------------------------------------------------
+
+\nocite{wwwchombo}
+\nocite{CoGr09}
+
+Chombo is in active development by the Applied Numerical Algorithms
+Group of Lawrence Berkeley National Lab.  Its high-level design
+consists of five loosely-coupled components based on a mathematical
+decomposition: \code{BoxTools} for set calculus on point sets and
+unions of rectangles, \code{AMRTools} for interprocess communication
+between AMR levels, \code{AMRTimeDependent} for advancing the solution
+using adaptive timestepping, \code{AMRElliptic} for the
+multigrid-based solution of elliptic AMR problems, \code{EBTools} for
+embedded boundaries, and \code{ParticleTools} for particle processing
+(not available in the current 3.0 version, according to the website
+due to re-engineering of the component).
+
+CHOMBO is very scalabale, and designed to run both hyperbolic and
+elliptic problems on 10,000 processors.
+
+Berger-Rigoutsos 
+
+\note{Chombo parallel data distribution}
+
+Distributed data in \code{LayoutData}, \code{BoxLayoutData}, and 
+\code{LevelData} containers. [ch7 design]
+
+\note{Chombo load balancing}
+Provides load balancing algorithm, as well as allowing user to provide their own.
+[ch7 design]
+
+
+%-----------------------------------------------------------------------
+\subsection{SAMRAI}
+%-----------------------------------------------------------------------
+
+[2001]
+
+
+good scaling for numerical and data communication
+poorer scaling in adaptive meshing and communication schedule construction 
+
+
+%=======================================================================
+\section{CELLO REQUIREMENTS / SCOPE} \label{s:requirements}
+%=======================================================================
+
+\begin{verbatim}
+ multi-level
+ multi-physics
+ Enzo II: built on framework, but independent
+ equations
+    hyperbolic conservation
+    elliptic
+    local physics
+ user-supplied functions
+    single-patch advance
+    inter-resolution constraints
+    refinement criteria
+ performance
+    serial performance
+    parallel performance
+    parallel scaling
+    memory usage
+ data structures
+    breadth
+    depth
+ software resiliency
+ hardware support
+    multicore
+    gpu / accelerators
+    distributed and / or shared memory
+ parallel technology support
+    directly: CHARM++, MPI, UPC, OpenMP, + combinations
+    indirectly: GPU / accelerator
+ I/O
+ what we do not do
+    visualization
+    analysis utilities
+\end{verbatim}
+
+%=======================================================================
+\section{CELLO DESIGN} \label{s:design}
+%=======================================================================
+
+\begin{verbatim}
+Components
+   Method
+   Control, Parallel, Task
+      dependencies known: patch can advance when its neighbor data is known
+   Amr, Array, Patch, Tree, Node 
+   Fields, Particles
+   Block, Fluxes, ItBlock*
+   Memory, Performance
+   Error
+   Monitor, Portal
+   Simulation
+   Parameters
+\end{verbatim}
+
+\begin{verbatim}
+General goals
+
+extreme parallel scalability
+extreme data structure scalability
+  breadth: number of grid patches
+  depth: number of AMR hierarchy levels
+
+for parallel scalability: aggressive minimization of
+  synchronization and collective operations
+``localize'' problem as much as possible
+  For each patch, only store patch, location information for
+    neighboring patches (``ghost patches''), and ancestors for octree
+  patch-local adaptive timestep control
+    prevents rapidly evolving feature in one localized region of
+      domain from determining timestep elsewhere
+facilitate dynamic load balancing, dynamic scheduling of
+  communication and computation
+maximize data structure flexibility
+dynamically optimize data structure parameters to hardware
+  during run time
+for algorithmic scalability: aggresively minimize dependencies
+  of fp and integer precision on data structure size
+related to ``localization'' of tasks
+  particle positions stored using local coordinate system with
+    origin at patch corner
+  absolute patch coordinates not stored, only position relative
+    to neighbors
+     global coordinates only needed for initialization
+     only need mesh width and timestep size for advancing
+     not needed for restarts
+     can still be computed dynamically
+     localization an option--not needed for smaller problems
+     absolute particle positions / grid locations may be needed
+       for some output, e.g. global particle analysis
+     in that case low precision
+     still scaling issues relative to depth
+      neighbor location
+\end{verbatim}
+
+%=======================================================================
+\section{Project data structures and algorithms}
+%=======================================================================
+
+%-----------------------------------------------------------------------
+\subsection{Dynamic task scheduling}
+%-----------------------------------------------------------------------
+\note{task scheduling summary}
+
+Given that tasks are acceptably load-balanced across process, the
+tasks must be schedule for execution.  The @@@
+
+
+We will use dynamic scheduling of tasks assigned to a processes, since
+it @@@  Dynamic scheduling is more suitable than static scheduling for
+heterogeneous sized tasks, non-regular communication dependencies @@@
+
+\note{task scheduling details}
+
+After tasks are distributed among processing elements, the next
+decision is how to schedule tasks among processing elements.  Two main
+approaches are static and dynamic.  Static scheduling is preferred
+when workload is evenly mapped to processing components, and when
+there are relatively few tasks per process.  We will use dynamic
+scheduling, since workload (communication as well as computation) per
+task varies between tasks.
+
+\note{CHARM++ summary} 
+Our approach will be well-mapped to CHARM++,
+which is a fault-tolerant message-driven parallel programming
+framework.  CHARM++ also provides dynamic load balancing through task
+migration, and provides fault tolerance through its built-in disk (or
+memory + disk) checkpoint / restart mechanism.
+
+\note{implementation in CHARM++}
+Implementation of AMR for a hyperbolic problem, a parallel task, or
+CHARM++ ``chare'', would correspond to advancing a numerical method or
+sequence of methods one timestep on a single grid patch block.  The
+exchange of guard cell data would correspond to CHARM++ messages.
+This implementation would allow a block to advance one timestep as
+soon as all of its guard cell data is available.
+
+\note{non-CHARM++ implementation}
+
+We also plan to develop our own scheduler, for several reasons.  One,
+to schedule communication in addition to computation, to help hide
+latency through prefetching.  Second, to take advantage of
+hierarchical hardware components (node, socket, core...)  Third, to
+remove any hard dependencies on any single parallel technology.
+
+%-----------------------------------------------------------------------
+\subsection{hierarchical dynamic load balancing}
+%-----------------------------------------------------------------------
 
 Dynamic load balancing is well known to be a crucial operation for
 extreme scalability in general, and for extreme adaptive mesh
@@ -487,6 +569,7 @@ to linearize the data structure using a Morton or Hilbert type
 space-filling curve, and partition the nodes among processes by
 dividing the linearized structure into $N_P$ evenly sized pieces.
 This approach works well if the work and memory usage is roughly equal
+
 for each node, and if the global \code{MPI\_AllGather} of long
 integers on $N_C$ cores is acceptable \footnote{\cite{BuGh08}
   indicates $N_C$ cores, though we believe with a hybrid programming
@@ -526,27 +609,30 @@ explore two ideas for dynamic load balancing, including ``hierarchical
 load balancing'', and a new approach we call ``deliberate
 overcompensation''.
 
-\note{load-balancing: hierarchical} By \textit{hierarchical load
-  balancing} we mean rebalancing tasks between higher levels (nodes or
-supernodes) independently from rebalancing between lower levels
-(socket or cores).  The idea of hierarchical task scheduling and load
-balancing has been known for at least 15 years (\cite{AhGh94}, but is
-not commonly used for AMR frameworks.
+\note{load-balancing: hierarchical} 
+%
+By \textit{hierarchical load balancing} we mean rebalancing tasks
+between higher levels (nodes or supernodes) independently from
+rebalancing between lower levels (socket or cores).  The idea of
+hierarchical task scheduling and load balancing has been known for at
+least 15 years (\cite{AhGh94}, but is not commonly used for AMR
+frameworks.
 
-in many yhas been This will have several advantages
-over more traditional non-hierarchical load balancing.  First,
-rebalancing at different levels could be based on different metrics,
-e.g. memory usage for rebalancing between nodes, and computational
-load for rebalancing between sockets.  This will be particularly
-useful for AMR problems, because memory is the crucial metric we want
-to keep balanced at the node level, yet we want to balance
-computational time at lower hardware platform levels to keep
-computational elements busy.  Second, rebalancing frequencies at
-different levels can be decoupled, rebalancing less frequently at the
-upper node levels where rebalancing is more costly, and where load
-tends to take longer to become unbalanced.
+This will have several advantages over more traditional
+non-hierarchical load balancing.  First, rebalancing at different
+levels could be based on different metrics, e.g. memory usage for
+rebalancing between nodes, and computational load for rebalancing
+between sockets.  This will be particularly useful for AMR problems,
+because memory is the crucial metric we want to keep balanced at the
+node level, yet we want to balance computational time at lower
+hardware platform levels to keep computational elements busy.  Second,
+rebalancing frequencies at different levels can be decoupled,
+rebalancing less frequently at the upper node levels where rebalancing
+is more costly, and where load tends to take longer to become
+unbalanced.
 
 \note{load-balancing: deliberate overcompensation}
+%
 By \textit{deliberate overcompensation} we mean rebalancing by
 relocating \textit{more} than enough tasks from high-load to low-load
 processes.  The motivation is for physics phenomena, such as
@@ -557,6 +643,7 @@ of the Gauss-Seidel method.  This approach could potentially reduce
 the frequency of rebalancing the load by half with the same tolerance
 on imbalance.
 
+%
 \note{load-balancing: data locality}
 Data locality is crucial for parallel performance, so tasks associated
 with neighboring patches and parent-child patches are kept on the same
@@ -574,84 +661,204 @@ locality, surface-to-volume ratio, and reduce task migration traffic.
 
 ``diffusion-based scheme''
 
-% load balancing
-%    hierarchical
-%    load balance locally in given level
-%    different metrics at different levels
-%      memory at node level
-%      workload below
-%    different frequency at different levels
-%      lower frequency balancing at higher levels
-%         more costly
-%         solution changes less frequently
-%      higher frequency balancing at lower levels
-%         less costly
-%         solution changes more frequently
-%    task adjacency maintained
-%    use collected performance data
-%    explore overcompensation technique
-%       ala SOR
-%       two regimes
-%          local collapsing / explosion
-%          shock advancement
-%       identify regimes and adapt
-%    linearized morton curve / hilbert curve insufficient
-%       assumes equal work per patch
-%       particles are associated with nodes, changing weight
-%       adaptive timestepping drastically weights more highly  refined patches
-%       performance of physics algorithms on a patch is not necessarily uniform
-%          localized chemistry subcycling, front tracking, etc.
-%       arrays on patches may be different sized (assuming coalesced patches)
-%       linearization constricts dimensionality
-%          constrains data movement along a single dimension
-%          physics imbalances 4 dimensional
-
-\note{task scheduling summary}
-
-Given that tasks are acceptably load-balanced across process, the
-tasks must be schedule for execution.  The 
-
-
-We will use dynamic scheduling of tasks assigned to a processes,
-since it 
-Dynamic scheduling is more suitable than static scheduling for
-heterogeneous sized tasks, non-regular communication dependencies
-
-\note{task scheduling details}
-
-After tasks are distributed among processing elements, the next decision is
-how to schedule tasks among processing elements.  Two main approaches are
-static and dynamic.  Static scheduling is preferred when workload is evenly mapped to processing components, and when there are relatively few tasks per process.  We
-will use dynamic scheduling, since workload (communication as well as computation)
-per task varies between tasks.  
-
-\note{CHARM++ summary}
-Our approach will be well-mapped to CHARM++, which is a fault-tolerant
-message-driven parallel programming framework.  CHARM++ also provides
-dynamic load balancing through task migration, and provides fault
-tolerance through its built-in disk (or memory + disk) checkpoint /
-restart mechanism.
-
-\note{implementation in CHARM++}
-Implementation of AMR for a hyperbolic problem, a parallel task, or CHARM++ ``chare'',
-would correspond to advancing a numerical method or sequence of
-methods one timestep on a single grid patch block.  The exchange of
-guard cell data would correspond to CHARM++ messages.  This
-implementation would allow a block to advance one timestep as soon as
-all of its guard cell data is available.
-
-
-
-cell 
-in CHARM++ terminology) correspond to , so we plan to investigate that first.  We also plan to develop
-our own scheduler, for several reasons.  One, 
-
-to schedule tasks is 
-Assuming 
-Two approches to Dynamic scheduling is
+%-----------------------------------------------------------------------
+\subsection{AMR data structure optimization: patch coalescing  for ``shallow'' AMR}
+%-----------------------------------------------------------------------
 
 \begin{verbatim}
+AMR algorithm enhancements: patch coalescing
+   improves ``shallow'' AMR
+   SAMR does this naturally--tree-based AMR doesn't
+   especially helpful when large connected regions of domain at finest level
+   less AMR overhead: fewer nodes / patches
+   task size still controlable through computational registers
+   EXAMPLE: cosmology
+\end{verbatim}
 
+Amr, Tree, Array, Patch
+
+\FIGURE{Coalescing}{f:coalesce}{
+\begin{minipage}{3.75in}
+\includegraphics[width=3.75in]{coalesce.png}
+\end{minipage}}
+\FIGURE{Targeted refinement with backfill}{f:backfill}{
+\begin{minipage}{6.15in}
+\includegraphics[width=6.15in]{kd-backfill.png}
+\end{minipage}}
+
+
+
+\FIGURE{
+Coalesced patches proof-of-concept using a 2D cosmology density field projection.
+\textbf{Left}: 2D cosmology density field projection.  
+\textbf{Middle}: Balanced octree: 81701 patches.
+\textbf{Right}: Balanced octree with coalesced patches: 32529 patches. \\
+}
+{f:cosmo}{
+\begin{minipage}{7.0in}
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{cosmo2-invert.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{cosmo2-4-1.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{cosmo2-4-2.png}
+\end{minipage}
+\end{minipage}
+}
+
+
+%-----------------------------------------------------------------------
+\subsection{AMR data structure optimization: targeted refinement with backfill for ``deep'' AMR}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+AMR algorithm enhancements: targeted refinement by 4 or 8
+   improves ``deep'' AMR
+   refinement by 2 too ``shallow''
+   back filling possible to regain effect of balanced tree
+   sparse storage format of child patches to reduce storage 
+   balancing octrees can have global effect
+     balancing refinementy by 4 or 8 probabalistically (provably?) local
+     no explicit AMR patches required for backfill--can live on child nodes 
+     EXAMPLE: point refinement
+\end{verbatim}
+
+\begin{verbatim}
+targeted refinement by 4 or 8
+  especially effective for deep AMR, e.g. star formation with
+    30+ levels
+  still supports effective resolution jumps of 2 using backfill
+patch coalescing
+  reduced AMR overhead (number of patches) especially in shallow
+    AMR relative to PARAMESH
+  improved performance since locally unifrom grid instead of AMR
+    patches
+  still supports variable block sizes for optimizing memory
+    hierarchy, parallel task size, task counts
+variable patch resolution
+instead of uniformly refining a patch, can replace with higher
+  resolution array
+need AMR machinery where resolution requirements change, not
+  where high resolution is needed
+\end{verbatim}
+
+\FIGURE{
+Targeted refinement proof-of-concept using multiple point sources in 2D.
+\textbf{Left}: 2D point sources.  
+\textbf{Middle}: Balanced octree: 2137 patches.
+\textbf{Right}: Balanced octree with coalesced patches: 158 explicit patches.
+}
+{f:dots}{
+\begin{minipage}{7.0in}
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{dots-invert.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{dots-4-1.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{dots-16-5.png}
+\end{minipage}
+\end{minipage}}
+
+\begin{verbatim}
+generalized octree-based AMR 
+  8-tree, sparse 64-tree, sparse 512-tree
+  decoupled AMR / Array
+Fully distributed AMR data structure
+For each local grid patch, only immediate neighbors and
+  ancestors stored
+  Proxies for remotely stored patches
+    remote thread identifier + pointer
+Store only actual data
+  use flux registers for communication
+  allocate patch ghost zones only for computation
+Could store appropriate subset of neighbor data as well for
+  fault-tolerance
+AMR operations
+  initial grid generation
+  refinement criteria: tag refine or coarsen
+  refinement or coarsening localized
+\end{verbatim}
+
+
+%=======================================================================
+\section{CELLO IMPLEMENTATION} \label{s:implementation}
+%=======================================================================
+
+
+\begin{verbatim}
+  Trac
+  Subversion
+  Languages
+     C++, optional UPC, OpenMP
+  User languages
+     C++, C, Fortran, CUDA
+  Parallel libraries / frameworks
+     optional MPI (one-sided and send-recv), CHARM++
+  testing
+  documentation
+\end{verbatim}
+  
+\section{DEVELOPMENT PLAN} \label{s:plan}
+
+\begin{verbatim}
+  CHARM++ generalized unigrid
+     evaluate effectiveness
+  AMR hyperbolic
+  particle methods
+  AMR elliptic
+\end{verbatim}
+
+\section{MILESTONES AND DELIVERABLES} \label{s:milestones}
+
+\begin{verbatim}
+   Cello software framework
+   Complete Enzo II application
+   large-scale demonstration using Enzo II
+\end{verbatim}
+
+
+
+
+\begin{verbatim}
+ load balancing
+    hierarchical
+    load balance locally in given level
+    different metrics at different levels
+      memory at node level
+      workload below
+    different frequency at different levels
+      lower frequency balancing at higher levels
+         more costly
+         solution changes less frequently
+      higher frequency balancing at lower levels
+         less costly
+         solution changes more frequently
+    task adjacency maintained
+    use collected performance data
+    explore overcompensation technique
+       ala SOR
+       two regimes
+          local collapsing / explosion
+          shock advancement
+       identify regimes and adapt
+    linearized morton curve / hilbert curve insufficient
+       assumes equal work per patch
+       particles are associated with nodes, changing weight
+       adaptive timestepping drastically weights more highly  refined patches
+       performance of physics algorithms on a patch is not necessarily uniform
+          localized chemistry subcycling, front tracking, etc.
+       arrays on patches may be different sized (assuming coalesced patches)
+       linearization constricts dimensionality
+          constrains data movement along a single dimension
+          physics imbalances 4 dimensional
+\end{verbatim}
+
+
+\begin{verbatim}
 dynamic scheduling
    task = grid patch + sequence of 
    dynamically schedule local tasks
@@ -877,23 +1084,6 @@ particles
    flexibility in particle ownership
      may belong to immediate neighbor to reduce communication
 
-AMR algorithm enhancements: patch coalescing
-   improves ``shallow'' AMR
-   SAMR does this naturally--tree-based AMR doesn't
-   especially helpful when large connected regions of domain at finest level
-   less AMR overhead: fewer nodes / patches
-   task size still controlable through computational registers
-   EXAMPLE: cosmology
-
-AMR algorithm enhancements: targeted refinement by 4 or 8
-   improves ``deep'' AMR
-   refinement by 2 too ``shallow''
-   back filling possible to regain effect of balanced tree
-   sparse storage format of child patches to reduce storage 
-   balancing octrees can have global effect
-     balancing refinementy by 4 or 8 probabalistically (provably?) local
-     no explicit AMR patches required for backfill--can live on child nodes 
-     EXAMPLE: point refinement
 
 problem scope
   hyperbolic conservation
@@ -1020,497 +1210,288 @@ power -- idle components when not in use to reduce power usage
    shared caches help normalize performance
 
 development
-   implement prorgessively to fill user beta testing pipeline
-
+   implement progessively to fill user beta testing pipeline
 \end{verbatim}
 
 Petascale AMR research issue.
 
-
 \pargraph{equation scope}
+
+\begin{verbatim}
 Nonlinear time-dependent hyperbolic conservation laws, and elliptic PDE's
-
-\begin{itemize}
-\item synchronization and collective operations
-\item parallel I/O
-\item fault tolerance / software resiliency
-\item distributed data structures
-\item hierarchical memory
-\item hierarchy parallelism
-\item dynamic load balancing
-\item heterogeneous computational components: GPU's
-\item ease of use: unigrid update + interpolation + flux correction
-\item weigh advantages / disadvantages of patch- versus tree-amr
-\end{itemize}
-
-
-\section{Review of Existing AMR frameworks}
-
-\pargraph{Chombo}
-
-  Block-structured AMR
-
-\pargraph{SAMRAI}
-
-   [2001]
-   good scaling for numerical and data communication
-   poorer scaling in adaptive meshing and communication schedule construction 
-
-\pargraph{PARAMESH}
-
-  Octree-based AMR
-
-GADGET-2: Preeminent cosmological TreeSPH simulation code
-DAGH (1998)
-
-\section{Project requirements}
-
-\section{Project design}
-
-General goals
-
-\begin{itemize}
-\item extreme parallel scalability
-\item extreme data structure scalability
-  \begin{itemize}
-  \item breadth: number of grid patches
-  \item depth: number of AMR hierarchy levels
-  \end{itemize}
-\end{itemize}
-
-\begin{itemize}
-\item for parallel scalability: aggressive minimization of
-  synchronization and collective operations
-\item ``localize'' problem as much as possible
-  \begin{itemize}
-  \item For each patch, only store patch, location information for
-    neighboring patches (``ghost patches''), and ancestors for octree
-  \item patch-local adaptive timestep control
-    \begin{itemize}
-    \item prevents rapidly evolving feature in one localized region of
-      domain from determining timestep elsewhere
-    \end{itemize}
-  \end{itemize}
-\item facilitate dynamic load balancing, dynamic scheduling of
-  communication and computation
-\item maximize data structure flexibility
-\item dynamically optimize data structure parameters to hardware
-  during run time
-\item for algorithmic scalability: aggresively minimize dependencies
-  of fp and integer precision on data structure size
-\item related to ``localization'' of tasks
-  \begin{itemize}
-  \item particle positions stored using local coordinate system with
-    origin at patch corner
-  \item absolute patch coordinates not stored, only position relative
-    to neighbors
-     \begin{itemize}
-     \item global coordinates only needed for initialization
-     \item only need mesh width and timestep size for advancing
-     \item not needed for restarts
-     \item can still be computed dynamically
-     \item localization an option--not needed for smaller problems
-     \item absolute particle positions / grid locations may be needed
-       for some output, e.g. global particle analysis
-     \item in that case low precision
-     \item still scaling issues relative to depth
-      \begin{itemize}
-      \item neighbor location
-      \end{itemize}
-     \end{itemize}
-  \end{itemize}
-\end{itemize}
-
-
-
-\begin{itemize}
-\item targeted refinement by 4 or 8
-  \begin{itemize}
-  \item especially effective for deep AMR, e.g. star formation with
-    30+ levels
-  \item still supports effective resolution jumps of 2 using backfill
-  \end{itemize}
-\item patch coalescing
-  \begin{itemize}
-  \item reduced AMR overhead (number of patches) especially in shallow
-    AMR relative to PARAMESH
-  \item improved performance since locally unifrom grid instead of AMR
-    patches
-  \item still supports variable block sizes for optimizing memory
-    hierarchy, parallel task size, task counts
-  \end{itemize}
-\item variable patch resolution
-\item instead of uniformly refining a patch, can replace with higher
-  resolution array
-\item need AMR machinery where resolution requirements change, not
-  where high resolution is needed
-\end{itemize}
-
-
-\section{Project data structures and algorithms}
-
-Amr, Tree, Array, Patch
-
-\FIGURE{Coalescing}{f:coalesce}{
-\begin{minipage}{3.75in}
-\includegraphics[width=3.75in]{coalesce.png}
-\end{minipage}}
-\FIGURE{Targeted refinement with backfill}{f:backfill}{
-\begin{minipage}{6.15in}
-\includegraphics[width=6.15in]{kd-backfill.png}
-\end{minipage}}
-
-
-\FIGURE{
-Coalesced patches proof-of-concept using a 2D cosmology density field projection.
-\textbf{Left}: 2D cosmology density field projection.  
-\textbf{Middle}: Balanced octree: 81701 patches.
-\textbf{Right}: Balanced octree with coalesced patches: 32529 patches. \\
-}
-{f:cosmo}{
-\begin{minipage}{7.0in}
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{cosmo2-invert.png}
-\end{minipage} \ 
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{cosmo2-4-1.png}
-\end{minipage} \ 
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{cosmo2-4-2.png}
-\end{minipage}
-\end{minipage}
-}
-
-
-\FIGURE{
-Targeted refinement proof-of-concept using multiple point sources in 2D.
-\textbf{Left}: 2D point sources.  
-\textbf{Middle}: Balanced octree: 2137 patches.
-\textbf{Right}: Balanced octree with coalesced patches: 158 explicit patches.
-}
-{f:dots}{
-\begin{minipage}{7.0in}
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{dots-invert.png}
-\end{minipage} \ 
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{dots-4-1.png}
-\end{minipage} \ 
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{dots-16-5.png}
-\end{minipage}
-\end{minipage}}
-
-\begin{itemize}
-\item generalized octree-based AMR 
-  \begin{itemize}
-  \item 8-tree, sparse 64-tree, sparse 512-tree
-  \item decoupled AMR / Array
-  \item 
-  \end{itemize}
-\item Fully distributed AMR data structure
-  \begin{itemize}
-\item For each local grid patch, only immediate neighbors and
-  ancestors stored
-  \item Proxies for remotely stored patches
-    \begin{itemize}
-    \item remote thread identifier + pointer
-    \end{itemize}
-  \end{itemize}
-\item Store only actual data
-  \begin{itemize}
-  \item use flux registers for communication
-  \item allocate patch ghost zones only for computation
-  \end{itemize}
-\item Could store appropriate subset of neighbor data as well for
-  fault-tolerance
-\item AMR operations
-  \begin{itemize}
-  \item initial grid generation
-  \item refinement criteria: tag refine or coarsen
-  \item refinement or coarsening localized
-  \end{itemize}
-\end{itemize}
+synchronization and collective operations
+parallel I/O
+fault tolerance / software resiliency
+distributed data structures
+hierarchical memory
+hierarchy parallelism
+dynamic load balancing
+heterogeneous computational components: GPU's
+ease of use: unigrid update + interpolation + flux correction
+weigh advantages / disadvantages of patch- versus tree-amr
+\end{verbatim}
 
 
 \section{Project Implementation}
 
 \subsection{I/O}
 
-\begin{itemize}
-\item Routines for data dumps, checkpointing, output of visualizaton /
+\begin{verbatim}
+Routines for data dumps, checkpointing, output of visualizaton /
   analysis
-\item Leverage standard for AMR data output when possible
-\item parallel HDF5
-\item support I/O from subset of nodes , dedicated or shared, to
+Leverage standard for AMR data output when possible
+parallel HDF5
+support I/O from subset of nodes , dedicated or shared, to
   optimize I/O performance, and overlap I/O with computation
-\end{itemize}
+
+\end{verbatim}
 
 \subsection{Parallelism}
-\begin{itemize}
-\item CHARM++ to control data placement, task scheduling,
+
+\begin{verbatim}
+CHARM++ to control data placement, task scheduling,
   checkpointing for fault tolerance
-\item platform hierarchical architecture-aware data structures
-  \begin{itemize}
-  \item e.g. MPI communicator for cores in a socket, sockets in a
+platform hierarchical architecture-aware data structures
+  e.g. MPI communicator for cores in a socket, sockets in a
     node, nodes in a supernode, supernodes in a machine
-  \item facilitates hierarchical dynamic load balancing
-    \begin{itemize}
-    \item improves dynamic mapping of data structures to hardware components
-    \item E.g. load balance more frequently at core / socket level to
+  facilitates hierarchical dynamic load balancing
+    improves dynamic mapping of data structures to hardware components
+    E.g. load balance more frequently at core / socket level to
       keep functional units busy
-    \item load balance node / supernode levels less frequently to keep
+    load balance node / supernode levels less frequently to keep
       memory usage uniform
-    \item less frequent because:
-      \begin{itemize}
-      \item problem changes less at larger scales
-      \item rebalancing is more expensive: larger data sizes, slower
+    less frequent because:
+      problem changes less at larger scales
+      rebalancing is more expensive: larger data sizes, slower
         interconnects
-      \end{itemize}
-    \item user-defined parameters and metrics for load balancing at
+    user-defined parameters and metrics for load balancing at
       different levels
-      \begin{itemize}
-      \item dynamically collected performance data can be fed back
+      dynamically collected performance data can be fed back
         into hierarchical load balancing algorithm
-      \end{itemize}
-    \end{itemize}
-  \item note linearization of octree datastructure is insufficient:
+  note linearization of octree datastructure is insufficient:
     assumes equal work per patch
-    \begin{itemize}
-    \item particles are associated with nodes, changing weight
-    \item adaptive timestepping drastically weights more highly
+    particles are associated with nodes, changing weight
+    adaptive timestepping drastically weights more highly
       refined patches
-    \item performance of physics algorithms on a patch is not
+    performance of physics algorithms on a patch is not
       necessarily uniform, e.g. localized chemistry subcycling, front
       tracking, etc.
-    \item arrays on patches may be different sized
-    \item linearization of patches reduces flexibility, and constrains data movement to a single dimension
-    \end{itemize}
-  \end{itemize}
-\end{itemize}
+    arrays on patches may be different sized
+    linearization of patches reduces flexibility, and constrains data movement to a single dimension
+\end{verbatim}
 
 \subsection{Fault tolerance}
-\begin{itemize}
-\item  FT-MPI 
-  \begin{itemize}
-  \item ``fault-tolerante MPI''
-  \item http://icl.cs.utk.edu/ftmpi/overview/index.html 
-  \end{itemize}
-\item MPICH-V 
-  \begin{itemize}
-  \item ``MPI Implementation for Volatile resources''
-  \item http://mpich-v.lri.fr/index.php 
-  \end{itemize}
-\end{itemize}
+
+\begin{verbatim}
+ FT-MPI 
+  ``fault-tolerante MPI''
+  http://icl.cs.utk.edu/ftmpi/overview/index.html 
+MPICH-V 
+  ``MPI Implementation for Volatile resources''
+  http://mpich-v.lri.fr/index.php 
+\end{verbatim}
 
 \subsection{Software implementation}
 
-\begin{itemize}
-\item Trac + SVN or mercurial
-\item documenting as I go
-\item OOP design: improves component reuse, controls software
+\begin{verbatim}
+Trac + SVN or mercurial
+documenting as I go
+OOP design: improves component reuse, controls software
   complexity, eases software maintenance
-\item heavy emphasis on designing before coding
-\end{itemize}
-\begin{itemize}
-\item organize into components (subdirectories) of related classes
-  \begin{itemize}
-  \item Simulation, Control, Parallel, Task
-  \item Amr, Patch: stores the AMR hierarchy
-  \item Fields, Particles, Array: for storing data
-  \item Block, Fluxes: for computing / communicating data
-  \item Performance, Error, Parameters, Memory: globally-accesible functions; components in aspect-oriented programming paradigm; not sufficiently important to use AspectC, but techniques (primarily using templates) usable
-  \item Method [Analysis] [Visualize]: hooks to user code; multiple methods permitted, selectable and scheduled at run-time
-  \item External, User
-  \end{itemize}
-\end{itemize}
-\begin{itemize}
-\item interdependencies controlled at component and class level
-\item classes with access functions used instead of raw arrays to improve modularity and modifiability
-\item block structure for interface with user code
-\item unit testing, including performance and parallel scaling
-\item prototyping for proof-of-concept
-\item application testing
-\item code reviews
-\end{itemize}
+heavy emphasis on designing before coding
+organize into components (subdirectories) of related classes
+  Simulation, Control, Parallel, Task
+  Amr, Patch: stores the AMR hierarchy
+  Fields, Particles, Array: for storing data
+  Block, Fluxes: for computing / communicating data
+  Performance, Error, Parameters, Memory: globally-accesible functions; components in aspect-oriented programming paradigm; not sufficiently important to use AspectC, but techniques (primarily using templates) usable
+  Method [Analysis] [Visualize]: hooks to user code; multiple methods permitted, selectable and scheduled at run-time
+  External, User
+interdependencies controlled at component and class level
+classes with access functions used instead of raw arrays to improve modularity and modifiability
+block structure for interface with user code
+unit testing, including performance and parallel scaling
+prototyping for proof-of-concept
+application testing
+code reviews
+\end{verbatim}
 
-\begin{itemize}
-\item Languages C++; user code can be C, C++, Fortran
-\item attempt to componentize parallelization : MPI (two-sided, one-sided) + OMP + UPC + GPU + CHARM++
-\item advantages / disadvantages of each
-  \begin{itemize}
-  \item MPI: + widespread, optimized implementations, familiar
-  \item MPI: - data replication, difficult to use
-  \item UPC + easier to use, combines shared memory view with efficient data affinity
-  \item UPC - no concept of MPI communicator, still under development--not as mature
-  \item OMP + can be used progressively
-  \item OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
-  \item GPU + very fast / power efficient when usable
-  \item GPU - no usable standard, difficult to program, difficult to map problem to hardware
-  \item CHARM++ + higher-level, dynamic scheduling, dynamic load-balancing, fault tolerant through checkpointing to other node memory
-  \item CHARM++ - requires learning separate language, separate runtime system, no data prefetching(?)
-  \end{itemize}
-    \begin{itemize}
-    \item currently not fully realizable for GPU since depends on
+\begin{verbatim}
+Languages C++; user code can be C, C++, Fortran
+attempt to componentize parallelization : MPI (two-sided, one-sided) + OMP + UPC + GPU + CHARM++
+advantages / disadvantages of each
+  MPI: + widespread, optimized implementations, familiar
+  MPI: - data replication, difficult to use
+  UPC + easier to use, combines shared memory view with efficient data affinity
+  UPC - no concept of MPI communicator, still under development--not as mature
+  OMP + can be used progressively
+  OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
+  GPU + very fast / power efficient when usable
+  GPU - no usable standard, difficult to program, difficult to map problem to hardware
+  CHARM++ + higher-level, dynamic scheduling, dynamic load-balancing, fault tolerant through checkpointing to other node memory
+  CHARM++ - requires learning separate language, separate runtime system, no data prefetching(?)
+    currently not fully realizable for GPU since depends on
       computational code
-    \item hierarchical parallelism: MPI + OMP, MPI + UPC, MPI + GPU,
+    hierarchical parallelism: MPI + OMP, MPI + UPC, MPI + GPU,
       etc.
-    \item advantages of hybrid
-      \begin{itemize}
-      \item reduced data replication from MPI distributed memory
-      \item dynamic parallel threads--use more when helpful, fewer when not
-      \item UPC
-      \end{itemize}
-    \item disadvantages of hybrid
-      \begin{itemize}
-      \item performance hit from data sharing in MPI + OMP
-      \item MPI and UPC communication cannot (currently) proceed concurrently
-      \end{itemize}
-    \item code for two modes: distributed memory and shared memory
-    \item parallel tasks: grid patches, arrays, grid patch groups,
+    advantages of hybrid
+      reduced data replication from MPI distributed memory
+      dynamic parallel threads--use more when helpful, fewer when not
+      UPC
+    disadvantages of hybrid
+      performance hit from data sharing in MPI + OMP
+      MPI and UPC communication cannot (currently) proceed concurrently
+    code for two modes: distributed memory and shared memory
+    parallel tasks: grid patches, arrays, grid patch groups,
       particle groups
-    \item flexible data structure parameters (grid patch size, patch
+    flexible data structure parameters (grid patch size, patch
       decomposition, patch grouping) to dynamically optimize task size
-    \end{itemize}
-\end{itemize}
+\end{verbatim}
     
 %=======================================================================
 \section{Enhancements}
 %=======================================================================
 
-\begin{itemize}
-\item Require more rigorous coding standards compared to Enzo
+\begin{verbatim}
+Require more rigorous coding standards compared to Enzo
   development
-\item Auto-tune where possible--automatically optimize for cache-,
+Auto-tune where possible--automatically optimize for cache-,
   parallel-, vector-, solver-, etc. parameters
-\end{itemize}
+\end{verbatim}
 
 %-----------------------------------------------------------------------
 \subsection{Adaptive Mesh Refinement}
 %-----------------------------------------------------------------------
 
-\begin{itemize}
-\item enhancements for both ``deep'' and ``shallow'' AMR
-\end{itemize}
+\begin{verbatim}
+enhancements for both ``deep'' and ``shallow'' AMR
 
-\begin{itemize}
-\item Do not store a patch's global position, only local position
+Do not store a patch's global position, only local position
   relative to immediate neighbors, parent, and children. [Toward
   distributed AMR data-structure, and to address precision issues with
   deep AMR. Potential issues: boundary and initial conditions.] (see
   W013)
-\item For very deep AMR where coarser levels never complete their
+For very deep AMR where coarser levels never complete their
   timestep, delete coarse levels to free storage.
-\item  Provide (or notify) neighboring patches with updated
+ Provide (or notify) neighboring patches with updated
   ghost zone data as soon as it's available.
-\item  Support temporary ``allocate as-needed'' ghost zones
+ Support temporary ``allocate as-needed'' ghost zones
   in addition to ``permanent'' ones
-\item Reduce tree-AMR node size by only storing parent, single
+Reduce tree-AMR node size by only storing parent, single
   neighbor, and single child. [Assuming one pointer for field data and
   SAMR patches indexed by single-precision offsets into parent
   patches, 32 bytes / tree-AMR and 48 bytes / patch-AMR]
-\item Relax rigid refinement criteria to inhibit excessive changes in
+Relax rigid refinement criteria to inhibit excessive changes in
   octree-like tree refinement.
-\item Represent patch extents with (small) integer values relative to
+Represent patch extents with (small) integer values relative to
   parent. [To reduce memory usage with deep AMR runs.] (see W012)
-\item Support both structured AMR (Enzo-like) and tree-based AMR
-\item Support flexible node types: memory-efficient versus
+Support both structured AMR (Enzo-like) and tree-based AMR
+Support flexible node types: memory-efficient versus
   compute-efficient.
-\end{itemize}
+\end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Arrays}
+\subsubsection{\code{Arrays} Component}
 %-----------------------------------------------------------------------
 
-\begin{itemize}
-\item Allow multiple root-level patches per MPI task. [To improve
+\begin{verbatim}
+Allow multiple root-level patches per MPI task. [To improve
   cache use for unigrid problems, and improve load-balancing for AMR.]
-\end{itemize}
+\end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Control}
+\subsubsection{\code{Control} Component}
 %-----------------------------------------------------------------------
-\begin{itemize}
-\item Reduce implicit dependencies by dynamically allocating parallel
+
+\begin{verbatim}
+Reduce implicit dependencies by dynamically allocating parallel
   tasks, ala CHARM++.(e.g. currently Enzo loops through patches within
   a level, but a given patch can proceed as soon as it has all its
   boundary data)
-\item Support optional uniform timesteps across all levels. [To
+Support optional uniform timesteps across all levels. [To
   improve parallel efficiency.]
-\item Support optional variable timestep sizes within each level. [To
+Support optional variable timestep sizes within each level. [To
   reduce synchronization costs when computing global CFL condition.]
-\end{itemize}
+\end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Storage}
+\subsubsection{\code{Storage} Component}
 %-----------------------------------------------------------------------
-\begin{itemize}
-\item Enforce strict control over data storage formats (e.g. files)
+
+\begin{verbatim}
+Enforce strict control over data storage formats (e.g. files)
   (see W0009)
-\item Require that all stored data be accessed through standard
+Require that all stored data be accessed through standard
   interface functions that are independent of specific file formats
   (i.e., stored datasets are conceptually treated as objects)
-\end{itemize}
+\end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Fields}
+\subsubsection{\code{Fields} Component}
 %-----------------------------------------------------------------------
-\begin{itemize}
-\item User-controlled optional floor/ceiling limits on individual
+
+\begin{verbatim}
+User-controlled optional floor/ceiling limits on individual
   Fields (ala ``tiny\_number'' in Enzo), with user-specified Error
   behavior (warning, error, ignore, reset to given floor/ceiling,
   etc.)
-\end{itemize}
+\end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Methods}
+\subsubsection{\code{Methods} Component}
 %-----------------------------------------------------------------------
-\begin{itemize}
-\item Integrate ``inits'' functionality into the main code
-\end{itemize}
+
+\begin{verbatim}
+Integrate ``inits'' functionality into the main code
+\end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Parallelization}
+\subsubsection{\code{Parallelization} Component}
 %-----------------------------------------------------------------------
-\begin{itemize}
-\item Load-balance by having over-loaded processors reassign tasks to
+
+\begin{verbatim}
+Load-balance by having over-loaded processors reassign tasks to
   random processes. [To reduce global communication for determining
   which processes are under-loaded]
-\item Load-balance using ``over-compensation'', since heavily-loaded
+Load-balance using ``over-compensation'', since heavily-loaded
   processes tend to continue to become more heavily loaded (cosmology
   / star-formation application-dependent).
-\item Only use inter-core, inter-cpu, inter-node, etc.
+Only use inter-core, inter-cpu, inter-node, etc.
   level-communicators to bound communicator size and manage
   communication nonuniformity.
-\item Support multiple (hybrid) and flexible parallelization
+Support multiple (hybrid) and flexible parallelization
   strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided
   get/put), OMP, and optionally UPC and GPU.
-\end{itemize}
+\end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Parameters}
+\subsubsection{\code{Parameters} Component}
 %-----------------------------------------------------------------------
-\begin{itemize}
-\item Support for user-supplied code for problem initialization.
-\end{itemize}
+
+\begin{verbatim}
+Support for user-supplied code for problem initialization.
+\end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Particles}
+\subsubsection{\code{Particles} Component}
 %-----------------------------------------------------------------------
-\begin{itemize}
-\item Store particle positions in single precision as -1 <= x,y,z <= 1
+
+\begin{verbatim}
+Store particle positions in single precision as -1 <= x,y,z <= 1
   relative to their containing patch. [To reduce storage, improve
   performance, and address precision issues with deep AMR.]
-\item Use a binary tree data-structure to recursively partition the
+Use a binary tree data-structure to recursively partition the
   bounding boxes of particles.
-\end{itemize}
+\end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Simulations}
+\subsubsection{\code{Simulations} Component}
 %-----------------------------------------------------------------------
-\begin{itemize}
-\item Support ensembles within a single run, including inline-analysis
-\end{itemize}
+
+\begin{verbatim}
+Support ensembles within a single run, including inline-analysis
+
+\end{verbatim}
 
 
 %=======================================================================
