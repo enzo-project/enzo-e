@@ -111,35 +111,36 @@
 \TITLE{A Software Framework for Extreme Adaptive Mesh Refinement}{James Bordner}{$Rev$}
 %=======================================================================
 
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
 \section{PROJECT SUMMARY}  \label{s:summary}
 
 \pargraph{Proposal}
-We propose to develop a new software library for adaptive mesh
-refinement (AMR) that allows application developers to develop
+We propose to develop a new software framework for adaptive mesh
+refinement (AMR) that allows application developers to write
 multiphysics applications for simulating phenomena on an extreme range
 of spacial and temporal scales, and that require an extreme amount of
-computation, memory, and storage (petascale and exascale).
+computation, memory, and storage (petascale and beyond).
 %
 \note{data parallel plus optional pipelined task parallelism}
-
 %
 \pargraph{data structure scope summary}
 Our basic data structure is a fully parallel distributed octree, with
-associated array and particle data, thus supporting both Eularian, Lagrangian,
+associated arrays and particles, supporting both Eularian, Lagrangian,
 and hybrid methods such as Particle Mesh (PM).
 %
 \pargraph{parallelization strategy}
-Multiple parallelization technologies can be used, including hybrid
-approaches such as MPI or UPC for distributed memory data, and UPC or
-OpenMP for shared memory data.  CHARM++ will also be supported.
-Extreme scalability will be obtained by localizing the patch / block
-problems as much as is feasible; this will help control scalability
-issues related to limited floating-point precision and ranges, as well
-as reducing the need for global synchronization and reduction
-operations.
+Multiple parallelization technologies can be used, including MPI, UPC,
+OpenMP, or CHARM++.  Hybrid approaches will also be supported, with
+MPI or UPC for distributed memory data and UPC or OpenMP for shared
+memory data.
 %
+\pargraph{extreme scalability}
+Extreme scalability will be obtained by aggressively localizing the
+individual patch / block problems; this will help control scalability issues
+related to limited floating-point precision and range, as well as
+reducing the need for global synchronization and reduction operations.
+% integer range
+%
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \pargraph{load balancing}
 Dynamic load balancing will be hierarchical, both to better adapt to
 the hierarchical nature of extreme scale computational platforms, and
@@ -667,11 +668,12 @@ locality, surface-to-volume ratio, and reduce task migration traffic.
 
 \begin{verbatim}
 AMR algorithm enhancements: patch coalescing
-   improves ``shallow'' AMR
-   SAMR does this naturally--tree-based AMR doesn't
+   improves ``shallow'' octree-based AMR
+   SAMR does this naturally--octree-based AMR doesn't
    especially helpful when large connected regions of domain at finest level
    less AMR overhead: fewer nodes / patches
-   task size still controlable through computational registers
+   task size still controlable (fixed or restricted) through computational registers
+       otherwise large patches an impedement to load balancing
    EXAMPLE: cosmology
 \end{verbatim}
 
@@ -1249,8 +1251,12 @@ support I/O from subset of nodes , dedicated or shared, to
 \subsection{Parallelism}
 
 \begin{verbatim}
-CHARM++ to control data placement, task scheduling,
+CHARM++ 
+  data placement
+  load balancing
+  task scheduling
   checkpointing for fault tolerance
+  performance monitoring and visualization
 platform hierarchical architecture-aware data structures
   e.g. MPI communicator for cores in a socket, sockets in a
     node, nodes in a supernode, supernodes in a machine
