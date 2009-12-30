@@ -113,6 +113,7 @@
 
 \section{PROJECT SUMMARY}  \label{s:summary}
 
+\pargraph{$Id$}
 \pargraph{Proposal}
 We propose to develop a new software framework for adaptive mesh
 refinement (AMR) that allows application developers to write
@@ -282,10 +283,36 @@ stay on topic
 %=======================================================================
 
 \begin{verbatim}
-Hardware-related parallel scaling issues
-   software resiliency
-   AMR-specific parallel scaling issues
-   AMR data structure scaling issues
+distributed data placement
+   hierarchical
+   different needs for different tasks
+      compute
+      store
+parallel computation
+   data parallelism (SPMD)
+   task parallelism
+   cooperative parallism (MPMD)
+parallel technology
+   MPI / CHARM++ / UPC / OpenMP / GPU
+heterogeneous hardware computation
+   GPUs
+load balancing
+   keep all cores busy
+   between shared memory nodes
+   within shared memory nodes
+task definition
+   size
+   count
+   hierarchical
+task scheduling
+   hierarchical
+     distributed versus shared memory
+   communication / computation
+   decouple data distribution from task scheduling
+reducing synchronization / increasing task independence
+software resiliency / fault tolerance
+checkpointing / restart
+   trend: disk progressively slower
 \end{verbatim}
 
 %=======================================================================
