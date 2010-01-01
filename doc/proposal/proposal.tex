@@ -1,89 +1,5 @@
 %0       1         2         3         4         5         6         7         8
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
-%
-%
-%
-% \subsection{Science Goals}
-% \subsection{Software Goals}
-% \subsubsection{Adaptive Mesh Refinement}
-% \subsubsection{Particles}
-% \subsubsection{Hyperbolic and Elliptic Methods}
-% \subsubsection{Dynamic Task Scheduling}
-%    CHARM++
-%
-%    large-scale demonstration
-
-%    particle precision
-%    grid position
-%    timestepping
-% REQUIREMENTS: scope of library / framework
-%    capabilities
-%       physics
-%          hyperbolic
-%          elliptic
-%          ray-tracing?
-%       AMR
-%       Particles
-%       performance
-%       parallel scaling
-%       data structure scaling
-%       ease of use
-%       dynamic scheduling
-%       aggressive minimization of global communication
-%       I/O
-%       fault tolerance
-%       adaptivity
-%       extensibility
-% DESIGN: software organization and data structures
-%    high-level design
-%       OOP
-%       components
-%          Simulation, Control, Parallel, Task
-%          Amr, Patch: stores the AMR hierarchy
-%          Fields, Particles, Array: for storing data
-%          Block, Fluxes: for computing / communicating data
-%          Performance, Error, Parameters, Memory
-%             globally-accesible functions; components in
-%             aspect-oriented programming paradigm; not sufficiently
-%             important to use AspectC, but techniques (primarily
-%             using templates) usable
-%          Method [Analysis] [Visualize]
-%             hooks to user code; multiple methods permitted,
-%             selectable and scheduled at run-time
-%       user interface
-%          External, User
-%       application-driven
-%    data structures
-%
-% ALGORITHMS: and how problems solved
-%    AMR
-%    particles
-%    parallelization
-%    load balancing
-%    fault tolerance
-% IMPLEMENTATION
-%    Languages: C++, C99, UPC, OpenMP
-%    Libraries: HDF5, MPI
-%    Frameworks: CHARM++, OpenCL
-%    TRAC
-%      wiki used for design
-%      tickets for tasks and documenting defects
-%    Subversion
-%    unit testing
-%    regression testing
-%      lcatest
-%      correctness, single-thread performance, weak and strong parallel scaling
-%          shallow and deep problems
-%      lcaperf
-%    software reviews
-
-% Requirements
-%    
-% Design
-% Implementation
-
-
-
 
 %=======================================================================
 \documentclass[14pt,letter]{article}
@@ -106,14 +22,18 @@
 \nocite{BuGh08} % Towards adaptive mesh {PDE} simulations on petascale computers
 \nocite{BaBu09} % MPI on a million processors
 
+\nocite{LaTa06} % hierarchical load balancing
+
 
 %=======================================================================
 \TITLE{A Software Framework for Extreme Adaptive Mesh Refinement}{James Bordner}{$Rev$}
 %=======================================================================
 
+%=======================================================================
 \section{PROJECT SUMMARY}  \label{s:summary}
+%=======================================================================
 
-\pargraph{Proposal}
+\ \\ \pargraph{Proposal}
 We propose to develop a new software framework for adaptive mesh
 refinement (AMR) that allows application developers to write
 multiphysics applications for simulating phenomena on an extreme range
@@ -122,44 +42,44 @@ computation, memory, and storage (petascale and beyond).
 %
 \note{data parallel plus optional pipelined task parallelism}
 %
-\pargraph{data structure scope summary}
+\ \\ \pargraph{data structure scope summary}
 Our basic data structure is a fully parallel distributed octree, with
 associated arrays and particles, supporting both Eularian, Lagrangian,
 and hybrid methods such as Particle Mesh (PM).
 %
-\pargraph{parallelization strategy}
+\ \\ \pargraph{parallelization strategy}
 Multiple parallelization technologies can be used, including MPI, UPC,
 OpenMP, or CHARM++.  Hybrid approaches will also be supported, with
 MPI or UPC for distributed memory data and UPC or OpenMP for shared
 memory data.
 %
-\pargraph{extreme scalability}
+\ \\ \pargraph{extreme scalability}
 Extreme scalability will be obtained by aggressively localizing the
 individual patch / block problems; this will help control scalability issues
 related to limited floating-point precision and range, as well as
 reducing the need for global synchronization and reduction operations.
 % integer range
-%
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-\pargraph{load balancing}
+\ \\ \pargraph{load balancing}
 Dynamic load balancing will be hierarchical, both to better adapt to
 the hierarchical nature of extreme scale computational platforms, and
 to allow flexibility in load balancing frequency and metrics at different
 levels.
 %
-\pargraph{fault tolerance}
+\ \\ \pargraph{fault tolerance}
 Fault tolerance and software resilience are crucial factors at extreme scales,
 since it has been observed that frequency of failures is proportional to
 the number of sockets.
 due to the reduced MTTI (mean time to interrupt) , since the probability that hardware component, operating system, library, or application component fails Unfortunately, approaches to fault tolerance are still 
 %
-\pargraph{I/O}
+\ \\ \pargraph{I/O}
 Disk I/O is also a crucial factor for petascale 
 
-\pargraph{availablity}
+\ \\ \pargraph{availablity}
 We plan to make this framework publicly available for scientific research use.
 
-\pargraph{motivation}
+\ \\ \pargraph{motivation}
 Our motivation for this project is to develop a new AMR framework with emphasis on extreme scalabilityboth in the parallel and data structure sense.
 Advantage: designing with extreme scale in mind from the beginning.
 
@@ -180,32 +100,33 @@ Runtime management system:
 \item Manage communication
 \end{enumerate}
 
-% AMR \\
-% applied mathematics\\
-% collaborative software environments\\
-% computer science technologies\\
-% exascale \\
-% extreme scale\\
-% failure avoidance \\
-% failure effects avoidance \\
-% fault tolerance\\
-% GPU \\
-% HPC \\
-% memory hierarchy\\
-% multicore\\
-% multiphysics \\
-% multiscale \\
-% one-sided communication\\
-% performance tuning\\
-% petascale \\
-% PGAS \\
-% research goals\\
-% resilient software \\
-% UPC \\
-% virtual processes \\
-% 
-% \url{http://diversity.doe.gov/documents/Writing\_Winning\_Proposals.pdf}
-% 
+\begin{verbatim}
+AMR
+applied mathematics
+collaborative software environments
+computer science technologies
+exascale
+extreme scale
+failure avoidance
+failure effects avoidance
+fault tolerance
+GPU
+hierarchical
+HPC
+memory hierarchy
+multicore
+multiphysics
+multiscale
+one-sided communication
+performance tuning
+petascale
+PGAS
+research goals
+resilient software
+UPC
+virtual processes
+\end{verbatim}
+
 \begin{verbatim}
 intro: compelling, organization goals and success, relevence to agency
 problem statement--needs assessment
@@ -313,10 +234,6 @@ software resiliency / fault tolerance
 checkpointing / restart
    trend: disk progressively slower
 \end{verbatim}
-
-%=======================================================================
-\section{Extreme Scaling Issues} \label{s:scaling}
-%=======================================================================
 
 
 \note{load balancing summary}
@@ -437,10 +354,11 @@ poorer scaling in adaptive meshing and communication schedule construction
 
 
 %=======================================================================
-\section{CELLO REQUIREMENTS / SCOPE} \label{s:requirements}
+\section{REQUIREMENTS } \label{s:requirements}
 %=======================================================================
 
 \begin{verbatim}
+ project scope
  multi-level
  multi-physics
  Enzo II: built on framework, but independent
@@ -472,10 +390,28 @@ poorer scaling in adaptive meshing and communication schedule construction
  what we do not do
     visualization
     analysis utilities
+
+ capabilities
+    physics
+       hyperbolic
+       elliptic
+       ray-tracing?
+    AMR
+    Particles
+    performance
+    parallel scaling
+    data structure scaling
+    ease of use
+    dynamic scheduling
+    aggressive minimization of global communication
+    I/O
+    fault tolerance
+    adaptivity
+    extensibility
 \end{verbatim}
 
 %=======================================================================
-\section{CELLO DESIGN} \label{s:design}
+\section{DESIGN} \label{s:design}
 %=======================================================================
 
 \begin{verbatim}
@@ -491,6 +427,26 @@ Components
    Monitor, Portal
    Simulation
    Parameters
+
+   high-level design
+      OOP
+      components
+         Simulation, Control, Parallel, Task
+         Amr, Patch: stores the AMR hierarchy
+         Fields, Particles, Array: for storing data
+         Block, Fluxes: for computing / communicating data
+         Performance, Error, Parameters, Memory
+            globally-accesible functions; components in
+            aspect-oriented programming paradigm; not sufficiently
+            important to use AspectC, but techniques (primarily
+            using templates) usable
+         Method [Analysis] [Visualize]
+            hooks to user code; multiple methods permitted,
+            selectable and scheduled at run-time
+      user interface
+         External, User
+      application-driven
+   data structures
 \end{verbatim}
 
 \begin{verbatim}
@@ -533,9 +489,23 @@ related to ``localization'' of tasks
       neighbor location
 \end{verbatim}
 
-%=======================================================================
-\section{Project data structures and algorithms}
-%=======================================================================
+%-----------------------------------------------------------------------
+\subsection{Data structures}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+ALGORITHMS: and how problems solved
+   AMR
+   particles
+   parallelization
+   load balancing
+   fault tolerance
+\end{verbatim}
+
+
+%-----------------------------------------------------------------------
+\subsection{Algorithms}
+%-----------------------------------------------------------------------
 
 %-----------------------------------------------------------------------
 \subsection{Dynamic task scheduling}
@@ -813,7 +783,7 @@ AMR operations
 
 
 %=======================================================================
-\section{CELLO IMPLEMENTATION} \label{s:implementation}
+\section{IMPLEMENTATION} \label{s:implementation}
 %=======================================================================
 
 
@@ -828,9 +798,26 @@ AMR operations
      optional MPI (one-sided and send-recv), CHARM++
   testing
   documentation
+
+  Languages: C++, C99, UPC, OpenMP
+  Libraries: HDF5, MPI
+  Frameworks: CHARM++, OpenCL
+  TRAC
+    wiki used for design
+    tickets for tasks and documenting defects
+  Subversion
+  unit testing
+  regression testing
+    lcatest
+    correctness, single-thread performance, weak and strong parallel scaling
+        shallow and deep problems
+    lcaperf
+  software reviews
 \end{verbatim}
   
+%=======================================================================
 \section{DEVELOPMENT PLAN} \label{s:plan}
+%=======================================================================
 
 \begin{verbatim}
   CHARM++ generalized unigrid
@@ -840,7 +827,9 @@ AMR operations
   AMR elliptic
 \end{verbatim}
 
+%=======================================================================
 \section{MILESTONES AND DELIVERABLES} \label{s:milestones}
+%=======================================================================
 
 \begin{verbatim}
    Cello software framework
@@ -1243,7 +1232,7 @@ development
 
 Petascale AMR research issue.
 
-\pargraph{equation scope}
+\ \\ \pargraph{equation scope}
 
 \begin{verbatim}
 Nonlinear time-dependent hyperbolic conservation laws, and elliptic PDE's
@@ -1271,7 +1260,6 @@ Leverage standard for AMR data output when possible
 parallel HDF5
 support I/O from subset of nodes , dedicated or shared, to
   optimize I/O performance, and overlap I/O with computation
-
 \end{verbatim}
 
 \subsection{Parallelism}
