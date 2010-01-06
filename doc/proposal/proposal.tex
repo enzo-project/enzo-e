@@ -8,8 +8,8 @@
 
 % Project summary
 % Introduction
-%    Extreme parallel scaling
-%    Extreme AMR scaling
+%    Extreme parallelism
+%    Extreme AMR
 %    Existing AMR frameworks
 %       PARAMESH
 %       Chombo
@@ -133,43 +133,64 @@
 
 
 %=======================================================================
-\section{Project summary}  \label{s:summary}
+\section{Project Summary}  \label{s:summary}
 %=======================================================================
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \ \\
 
 \ \\ \pargraph{Proposal} 
+%
 We propose to develop a new parallel software framework for adaptive
-mesh refinement (AMR).  Its main distinction is it will be designed to
-allow application developers to write multiphysics applications for
-simulating phenomena on an extreme range of spacial and temporal
-scales, and that require an extreme amount of computation, memory, and
-storage.
+mesh refinement (AMR).  
 %
-\ \\ \pargraph{data structure scope summary} Our basic data structure
-is a fully parallel distributed generalized octree, with tree nodes
-associated with both array and particle data to support both Eularian
-and Lagrangian methods.
+Distinguishing characteristics of the software relative to existing
+AMR libraries and frameworks include the aggressive pursuit of extreme
+scalability with respect to hardware parallelism and software data
+structures in its design and implementation.
 %
-\ \\ \pargraph{parallelization strategy} Parallelization will be
-primarily data parallel (SPMD), though task parallelization (MPMD)
-will also be supported to increase parallelism in cases where data
-parallelism is insufficient.  A wide variety of parallelization
-technologies will be supported from the start, including both one- and
-two-sided message passing (MPI-1 / MPI-2 libraries), the partitioned
-global address space approach (UPC language), shared memory
-programming (OpenMP directives), and process virtualization (CHARM++
-framework).  Hybrid approaches will also be supported, including MPI
-with OpenMP, and MPI with UPC.
-\pargraph{load balancing} Dynamic load balancing / task migration will
-be hierarchical, both to better adapt to the hierarchical nature of
-extreme scale computational platforms (cabinets, nodes, sockets,
-cores), and to provide flexibility in load balancing frequencies and
-metrics at individual levels.
+The resulting AMR framework will enable application developers to
+write multiphysics applications for simulating phenomena on an
+unprecidented range of spacial and temporal scales.
+%
+The framework will be designed from the ground up to efficiently use
+hierarchical parallelism and memory of the largest currently existing
+supercomputers, and designed to be adaptable to future HPC platforms
+as they evolve through the petascale era and into the exascale.
+
+\ \\ \pargraph{data structure scope summary}
+%
+AMR will be implemented using a fully distributed generalization of
+the octree data structure.  Tree nodes will be associated with
+both arrays and particle data, to support Eularian, Lagrangian, and
+hybrid methods.
+
+\ \\ \pargraph{parallelization strategy}
+%
+Parallelization will be primarily data parallel (SPMD), though task
+parallelization (MPMD) will also be supported to augment the data
+parallelism in cases where data parallelism is insufficient.  A wide
+variety of parallelization technologies will be supported from the
+start, including both one- and two-sided message passing via the
+MPI~\cite{@@@MPI} library, the partitioned global address space
+approach via the UPC~\cite{@@@UPC} language), shared memory parallel
+programming using OpenMP directives, and the processor virtualization
+approach provided by the CHARM++ framework~\cite{@@@CHARM}.  Select
+hybrid approaches will also be supported, including MPI with OpenMP,
+and MPI with UPC.
+
+\pargraph{load balancing}
+%
+Dynamic load balancing of parallel tasks will be hierarchical, which
+will improve mapping of the software data structures to the
+hierarchical components of the target computational platforms (i.e.
+cabinets, compute nodes, sockets, cores).~\cite{@@@LAN-DLB}.  Advantages will
+include the elimination of the scaling problem  to loada reducing the
+number of of flexibility in load balancing frequencies and metrics at
+individual levels.
 %
 \ \\ \pargraph{extreme scalability} The general approach for pursuing
 extreme scalability for both parallelism and data structures is by
-aggressively localizing the individual AMR patch / block problems;
+aggressively localizing the individual AMR patch / block tasks;
 this will help control scalability issues related to limited
 floating-point precision and range, as well as reducing the need for
 global synchronization and reduction operations.
@@ -199,9 +220,23 @@ multi-resolution multi-physics applications.
 %=======================================================================
 
 
+The \cello\ Project began as a successor to the parallel AMR
+astrophysics and cosmology application \enzo\ \cite{@@@ENZO}.  \enzo\
+was conceived in the early 1990's by Michael L.~Norman and Greg Bryan,
+and implemented using structured (patch-based) adaptive mesh
+refinement (SAMR) \cite{@@@SAMR}.  It incorporated a modified
+high-order Piecewise Parabolic Method (PPM) solver \cite{@@@PPM} for
+hydrodynamics, and a Particle-Mesh (PM) method \cite{@@@PM} for dark
+matter dynamics.  So far in its 15 year lifetime, \enzo\ simulations
+have led to important scientific contributions to the fields of
+astrophysics, cosmology, and turbulence.
+
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \ \\
 
 \begin{verbatim}
+Motivation
+Forward-looking
+Supercomputer trends
 Innovative / core ideas
   hierarchical load balancing
   separate scheduling of communication and computation
@@ -243,11 +278,7 @@ refined  / borrowed ideas
 \end{verbatim}
 
 
-
-
-%-----------------------------------------------------------------------
-\subsection{Extreme parallel scaling} \label{ss:parallel-scaling}
-%-----------------------------------------------------------------------
+\note{Extreme parallelism}
 
 \begin{verbatim}
 distributed data placement
@@ -277,8 +308,8 @@ heterogeneous hardware computation
 \begin{verbatim}
 load balancing
    keep all cores busy
-   between shared memory nodes -- memory
-   within shared memory nodes -- computation
+   between shared memory compute nodes -- memory
+   within shared memory compute nodes -- computation
 \end{verbatim}
 
 \begin{verbatim}
@@ -314,12 +345,10 @@ checkpointing / restart
 We will use a hierarchical dynamic load balancing approach, with
 support for balancing with respect to multiple metrics (memory use,
 computational load, etc.) for different hierarchical computational
-components (node, socket, etc.), with different rebalancing
+components (compute node, socket, etc.), with different rebalancing
 frequencies for different levels.
 
-%-----------------------------------------------------------------------
-\subsection{Extreme AMR scaling} \label{ss:amr-scaling}
-%-----------------------------------------------------------------------
+\note{Extreme AMR}
 
 \begin{verbatim}
 parallel scalability issues
@@ -452,7 +481,7 @@ poorer scaling in adaptive meshing and communication schedule construction
 
 
 %=======================================================================
-\section{Software requirements} \label{s:requirements}
+\section{Software Requirements} \label{s:requirements}
 %=======================================================================
 
 \begin{verbatim}
@@ -505,8 +534,8 @@ Guiding goals
     extreme hierarchy depth
  software resiliency
     resistent to continuous hardware and software failures
-       memory failure / local node limits
-       compute component (node, socket, core) failures
+       memory failure / local compute node limits
+       compute component (compute node, socket, core) failures
        network failures
        disk failures
        algorithm failure
@@ -555,7 +584,7 @@ Routines for data dumps, checkpointing, output of visualizaton /
 Leverage standard for AMR data output when possible
 parallel HDF5
 I/O performance
-   design: support I/O from subset of nodes , dedicated or shared, to
+   design: support I/O from subset of compute nodes , dedicated or shared, to
            optimize I/O performance, and overlap I/O with computation
 \end{verbatim}
 
@@ -568,7 +597,7 @@ automatic performance tuning
 \end{verbatim}
 
 %=======================================================================
-\section{Software design} \label{s:design}
+\section{Software Design} \label{s:design}
 %=======================================================================
 
 
@@ -576,6 +605,7 @@ automatic performance tuning
 OOP
 still primarily in design phase
    available flexibility to modify current design
+   design as described is current snapshot
    little code and time wasted
 emphasis on thorough designing before coding
    prototype ideas before final implementation
@@ -668,7 +698,7 @@ related to ``localization'' of tasks
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{High level components} \label{ss:components}
+\subsection{Software components} \label{ss:components}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
@@ -866,7 +896,7 @@ monitor: support for interfacing with user while running
 
 
 %-----------------------------------------------------------------------
-\subsection{Data structures} \label{ss:datastructures}
+\subsection{AMR data structures} \label{ss:datastructures}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
@@ -880,7 +910,7 @@ ALGORITHMS: and how problems solved
 
 \begin{verbatim}
 AMR basic unigrid
-   unigrid is single AMR node(?)
+   unigrid is single AMR tree node(?)
      (how to link with level 1?)
 \end{verbatim}
 
@@ -953,7 +983,7 @@ AMR hierarchy
    Represent patch extents with (small) integer values relative to
      parent. [To reduce memory usage with deep AMR runs.] (see W012)
    Support both structured AMR (Enzo-like) and tree-based AMR
-   Support flexible node types: memory-efficient versus
+   Support flexible tree node types: memory-efficient versus
      compute-efficient.
 \end{verbatim}
 
@@ -1001,7 +1031,7 @@ AMR hierarchy data
 \end{verbatim}
 
 %--------------------------------------------------
-\subsubsection{Patch coalescing  for ``shallow'' AMR} \label{sss:patch-coalescing}
+\subsubsection{Patch coalescing } \label{sss:patch-coalescing}
 %--------------------------------------------------
 
 \begin{verbatim}
@@ -1060,7 +1090,7 @@ Coalesced patches proof-of-concept using a 2D cosmology density field projection
 }
 
 %--------------------------------------------------
-\subsubsection{Targeted refinement with backfill for ``deep'' AMR} \label{sss:targeted-refinement}
+\subsubsection{Targeted refinement} \label{sss:targeted-refinement}
 %--------------------------------------------------
 
 \begin{verbatim}
@@ -1099,7 +1129,7 @@ Targeted refinement proof-of-concept using multiple point sources in 2D.
 \end{minipage}}
 
 %-----------------------------------------------------------------------
-\subsection{Parallelization}
+\subsection{Parallelization approach}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
@@ -1114,7 +1144,7 @@ hybrid parallel
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Data placement} \label{ss:data-placement}
+\subsection{Data distribution} \label{ss:data-placement}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
@@ -1215,6 +1245,20 @@ remove any hard dependencies on any single parallel technology.
 \subsection{Load balancing} \label{ss:loadbalancing}
 %-----------------------------------------------------------------------
 
+Dynamic load balancing is well known to be a crucial operation for
+extreme scalability in general, and for extreme adaptive mesh
+refinement in particular.  Computational load must be well-distributed
+across computational components to maintain high parallel efficiency,
+and dynamically allocated memory must be well-distributed across
+distributed memory nodes to prevent depletion of physical memory.
+
+A common approach of rebalancing SAMR hierarchies based on octrees is
+to linearize the data structure using a Morton or Hilbert type
+space-filling curve, and partition the tree nodes among processes by
+dividing the linearized structure into $N_P$ evenly sized pieces.
+This approach works well if the work and memory usage are proportional
+to each other, and are roughly equal between tree nodes
+but requires $O(P)$ storage 
 
 \begin{verbatim}
  load balancing
@@ -1260,15 +1304,10 @@ task migration
    migrate using hierarchical parallelism
 \end{verbatim}
 
-Dynamic load balancing is well known to be a crucial operation for
-extreme scalability in general, and for extreme adaptive mesh
-refinement in particular.
+(e.g.~load balancing
+across $\approx 2^20$ cores can be replaced by four hierarchical
+load balancing steps across $\approx 2^5$)
 
-A common approach of rebalancing SAMR hierarchies based on octrees is
-to linearize the data structure using a Morton or Hilbert type
-space-filling curve, and partition the nodes among processes by
-dividing the linearized structure into $N_P$ evenly sized pieces.
-This approach works well if the work and memory usage is roughly equal
 
 for each node, and if the global \code{MPI\_AllGather} of long
 integers on $N_C$ cores is acceptable \footnote{\cite{BuGh08}
@@ -1362,7 +1401,7 @@ locality, surface-to-volume ratio, and reduce task migration traffic.
 ``diffusion-based scheme''
 
 %-----------------------------------------------------------------------
-\subsection{Software Resilience} \label{ss:resilience}
+\subsection{Software resilience} \label{ss:resilience}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
@@ -1644,7 +1683,7 @@ hierarchical parallelism
 \end{verbatim}
 
 \begin{verbatim}
-parallel technology encapsulation / virtualization
+parallel technology encapsulation / processor virtualization
   distributed / shared memory
     MPI (two-sided and one-sided) (distributed memory)
     OpenMP (shared memory) 
@@ -1668,7 +1707,7 @@ MPICH-V
 \end{verbatim}
 
 %=======================================================================
-\section{Development plan} \label{s:plan} 
+\section{Development Plan} \label{s:plan} 
 %=======================================================================
 
 \begin{verbatim}
@@ -1680,7 +1719,7 @@ MPICH-V
 \end{verbatim}
 
 %=======================================================================
-\section{Milestones and deliverables} \label{s:milestones}
+\section{Milestones and Deliverables} \label{s:milestones}
 %=======================================================================
 
 \begin{verbatim}
