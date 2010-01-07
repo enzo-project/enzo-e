@@ -136,73 +136,82 @@
 \section{Project Summary}  \label{s:summary}
 %=======================================================================
 
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \ \\
 
 \ \\ \pargraph{Proposal} 
 %
 We propose to develop a new parallel software framework for adaptive
 mesh refinement (AMR).  
 %
-Distinguishing characteristics of the software relative to existing
-AMR libraries and frameworks include the aggressive pursuit of extreme
-scalability with respect to hardware parallelism and software data
-structures in its design and implementation.
+A distinguishing characteristic relative to existing AMR libraries and
+frameworks is the aggressive pursuit of extreme scalability, with
+respect to both hardware parallelism and software data structures.
 %
-The resulting AMR framework will enable application developers to
+The design will be forward-looking, targeted not just at the largest
+existing supercomputers, but also future HPC platforms as they evolve
+through the petascale era and into the exascale.
+%
+The proposed AMR framework will enable application developers to
 write multiphysics applications for simulating phenomena on an
 unprecidented range of spacial and temporal scales.
-%
-The framework will be designed from the ground up to efficiently use
-hierarchical parallelism and memory of the largest currently existing
-supercomputers, and designed to be adaptable to future HPC platforms
-as they evolve through the petascale era and into the exascale.
+
+
+Parallelization will be primarily data parallel, with task
+parallelization also available to augment the data parallelism if
+desired.  A wide variety of parallelization technologies will be
+supported from the start, including both one- and two-sided message
+passing via the MPI~\cite{@@@MPI} library, the partitioned global
+address space (PGAS) approach via the UPC~\cite{@@@UPC} language,
+shared memory parallel programming using OpenMP compiler directives,
+and the processor virtualization approach provided by the CHARM++
+framework~\cite{@@@CHARM}.  Select hybrid approaches will also be
+supported, including MPI with OpenMP, and MPI with UPC.  This will be
+accomplished by encapsulating the parallelization technologies within
+low-level distributed memory and shared memory API's.
+
 
 \ \\ \pargraph{data structure scope summary}
 %
-AMR will be implemented using a fully distributed generalization of
-the octree data structure.  Tree nodes will be associated with
-both arrays and particle data, to support Eularian, Lagrangian, and
-hybrid methods.
+The AMR data structures will be implemented using a fully distributed
+generalization of the octree data structure.  Tree nodes will be
+associated with both logically Cartesian grids and particles, so both
+Eularian and Lagrangian (and hybrid) methods can be implemented.
+
+\ \\ \pargraph{extreme scalability} The general approach for pursuing
+extreme scalability for both parallelism and data structures is by
+aggressively localizing the individual AMR patch / block tasks by removing
+all unnecessary global communication.  This
+will help control data structure scalability issues related to limited
+floating-point precision and range, as well as reducing the need for
+global synchronization and reduction operations.
+
+\ \\ \pargraph{fault tolerance} Fault tolerance and software
+resilience are also crucial factors at extreme scales.  The
+checkpoint / restart to disk paradigm is known to be ultimately unscalable, so we will Our framework
+will be designed to be resistent to memory, compute component, network,
+disk, and software failures., since it has been
+observed that frequency of failures is proportional to the number of
+sockets. CITE Fault tolerance Approaches to fault tolerancedue to the
+reduced MTTI (mean time to interrupt) , since the probability that
+hardware component, operating system, library, or application
+component fails Unfortunately, approaches to fault tolerance are still
+
+@@@@@@@@@@@@@@@@@@@@
+
+\ \\ \pargraph{Intellectual Merit.}
+
 
 \ \\ \pargraph{parallelization strategy}
 %
-Parallelization will be primarily data parallel (SPMD), though task
-parallelization (MPMD) will also be supported to augment the data
-parallelism in cases where data parallelism is insufficient.  A wide
-variety of parallelization technologies will be supported from the
-start, including both one- and two-sided message passing via the
-MPI~\cite{@@@MPI} library, the partitioned global address space
-approach via the UPC~\cite{@@@UPC} language), shared memory parallel
-programming using OpenMP directives, and the processor virtualization
-approach provided by the CHARM++ framework~\cite{@@@CHARM}.  Select
-hybrid approaches will also be supported, including MPI with OpenMP,
-and MPI with UPC.
 
 \pargraph{load balancing}
 %
 Dynamic load balancing of parallel tasks will be hierarchical, which
 will improve mapping of the software data structures to the
 hierarchical components of the target computational platforms (i.e.
-cabinets, compute nodes, sockets, cores).~\cite{@@@LAN-DLB}.  Advantages will
-include the elimination of the scaling problem  to loada reducing the
-number of of flexibility in load balancing frequencies and metrics at
-individual levels.
+compute nodes, sockets, cores).~\cite{@@@LAN-DLB}.
 %
-\ \\ \pargraph{extreme scalability} The general approach for pursuing
-extreme scalability for both parallelism and data structures is by
-aggressively localizing the individual AMR patch / block tasks;
-this will help control scalability issues related to limited
-floating-point precision and range, as well as reducing the need for
-global synchronization and reduction operations.
 % integer range
 %
-\ \\ \pargraph{fault tolerance} Fault tolerance and software
-resilience are crucial factors at extreme scales, since it has been
-observed that frequency of failures is proportional to the number of
-sockets. CITE Fault tolerance Approaches to fault tolerancedue to the
-reduced MTTI (mean time to interrupt) , since the probability that
-hardware component, operating system, library, or application
-component fails Unfortunately, approaches to fault tolerance are still
 %
 \ \\ \pargraph{I/O}
 Disk I/O is also a crucial factor for petascale 
@@ -220,16 +229,28 @@ multi-resolution multi-physics applications.
 %=======================================================================
 
 
-The \cello\ Project began as a successor to the parallel AMR
-astrophysics and cosmology application \enzo\ \cite{@@@ENZO}.  \enzo\
-was conceived in the early 1990's by Michael L.~Norman and Greg Bryan,
-and implemented using structured (patch-based) adaptive mesh
-refinement (SAMR) \cite{@@@SAMR}.  It incorporated a modified
-high-order Piecewise Parabolic Method (PPM) solver \cite{@@@PPM} for
-hydrodynamics, and a Particle-Mesh (PM) method \cite{@@@PM} for dark
-matter dynamics.  So far in its 15 year lifetime, \enzo\ simulations
-have led to important scientific contributions to the fields of
-astrophysics, cosmology, and turbulence.
+The \cello\ Project began as an effort to redesign the parallel data
+structures of the astrophysics and cosmology application \enzo\
+\cite{@@@ENZO}.  \enzo\ was conceived in the early 1990's by Michael
+L.~Norman and Greg Bryan, and implemented using structured
+(patch-based) adaptive mesh refinement (SAMR) \cite{@@@SAMR}.  It
+incorporated a modified high-order Piecewise Parabolic Method (PPM)
+solver \cite{@@@PPM} for hydrodynamics, and a Particle-Mesh (PM)
+method \cite{@@@PM} for dark matter dynamics.  So far in its 15 year
+lifetime, \enzo\ simulations have led to important scientific
+contributions to the fields of astrophysics, cosmology, and
+turbulence.
+
+\enzo\ scales well up to $\approx 10^4$ to $\approx 10^5$ processes,
+depending on the problem.  Efforts to improve its scalability beyond
+this have become increasingly difficult, due to the increasing
+invasiveness of the desired changes and the increasing complexity of
+the code base.  The \cello\ Project aims to improve on \enzo\ in three
+ways: improved software development process, object-oriented design
+and implementation, and overhauled distributed AMR infrastructure.  The
+physics capabilites, which are continually being improved and refined in \enzo, will be retained in \enzo II
+
+
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \ \\
 
@@ -321,7 +342,7 @@ task definition
 
 \begin{verbatim}
 task scheduling
-   hierarchical
+   hierarchical / multiscale
      distributed versus shared memory
    communication / computation
    decouple data distribution from task scheduling
@@ -453,7 +474,7 @@ consists of five loosely-coupled components based on a mathematical
 decomposition: \code{BoxTools} for set calculus on point sets and
 unions of rectangles, \code{AMRTools} for interprocess communication
 between AMR levels, \code{AMRTimeDependent} for advancing the solution
-using adaptive timestepping, \code{AMRElliptic} for the
+using adaptive time-stepping, \code{AMRElliptic} for the
 multigrid-based solution of elliptic AMR problems, \code{EBTools} for
 embedded boundaries, and \code{ParticleTools} for particle processing
 (not available in the current 3.0 version, according to the website
@@ -643,7 +664,7 @@ relative coordinates for patches
 \end{verbatim}
 
 \begin{verbatim}
-local timestepping
+local time-stepping
    global scaling of dx, dt may not be needed
       only power-of-two quantization of dx, dt
         mantissa unchanged--no fp precision issue
@@ -932,7 +953,7 @@ octree AMR versus SAMR
       Morton ordering not always feasible
          different patch sizes
          different particle counts
-         adaptive timestepping on finer levels
+         adaptive time-stepping on finer levels
          physics method variations
             shock capturing--Riemann solver iterations
             variable subcycling of iterative stiff methods
@@ -1181,6 +1202,7 @@ memory storage formats and data movement
 %-----------------------------------------------------------------------
 \note{task scheduling summary}
 
+
 \begin{verbatim}
 dynamic scheduling
    task = grid patch + sequence of 
@@ -1194,7 +1216,7 @@ dynamic scheduling
       helpful when multiple physics components available with similar costs
    communication scheduling to maximize releasing patches and prefetch data
    gang-scheduling groups of patches for improved GPU throughput / accelerator utilization
-hierarchical task scheduling
+hierarchical / multiscale task scheduling
    multiblock (GPU)
    single block (process)
    plane / line (thread)
@@ -1247,22 +1269,35 @@ remove any hard dependencies on any single parallel technology.
 
 Dynamic load balancing is well known to be a crucial operation for
 extreme scalability in general, and for extreme adaptive mesh
-refinement in particular.  Computational load must be well-distributed
-across computational components to maintain high parallel efficiency,
-and dynamically allocated memory must be well-distributed across
-distributed memory nodes to prevent depletion of physical memory.
+refinement in particular.  Computational load must be evenly
+distributed to maintain high overall parallel computational
+efficiency; dynamically allocated memory must be well-distributed
+across compute nodes to avoid running out of physical memory; and data
+locality must be maintained within compute nodes to maintain high
+communication performance over the interconnect.
 
-A common approach of rebalancing SAMR hierarchies based on octrees is
-to linearize the data structure using a Morton or Hilbert type
-space-filling curve, and partition the tree nodes among processes by
-dividing the linearized structure into $N_P$ evenly sized pieces.
-This approach works well if the work and memory usage are proportional
-to each other, and are roughly equal between tree nodes
-but requires $O(P)$ storage 
+A highly scalable approach of rebalancing octree-based SAMR
+hierarchies is to linearize the data structure using a Morton or
+Hilbert type space-filling curve, then partition the tree nodes among
+processes by dividing the linearized structure into $N_P$ evenly sized
+pieces.  This approach has been shown to scale to over $60K$
+cores~\cite{@@@ART}.  It works well if workload and memory usage are
+proportional to each other within tree nodes, and when workload
+between tree nodes is roughly equal; however, neither of these
+conditions is met when adaptive time-stepping is used.  Also, this
+approach still requires $O(N_P)$ storage, and a global all-gather
+operation (e.g.~\code{MPI\_Allgather}) is required on all processes.
+
+@@@@@@@@@@@@@@@@@@@@
+
+Our approach will be to 
 
 \begin{verbatim}
  load balancing
     hierarchical
+       improved scalability
+       improved flexibility
+       improved efficiency
     load balance locally in given level
     different metrics at different levels
       memory at node level
@@ -1285,7 +1320,7 @@ but requires $O(P)$ storage
     linearized morton curve / hilbert curve insufficient
        assumes equal work per patch
        particles are associated with nodes, changing weight
-       adaptive timestepping drastically weights more highly  refined patches
+       adaptive time-stepping drastically weights more highly  refined patches
        performance of physics algorithms on a patch is not necessarily uniform
           localized chemistry subcycling, front tracking, etc.
        arrays on patches may be different sized (assuming coalesced patches)
@@ -1317,7 +1352,7 @@ integers on $N_C$ cores is acceptable \footnote{\cite{BuGh08}
 approach will not be sufficient for a general-purpose extreme AMR
 framework for several reasons.
 %
-One, adaptive timestepping is required for efficient ``deep'' AMR
+One, adaptive time-stepping is required for efficient ``deep'' AMR
 problems, but that scales the work load for a given node by a
 non-constant factor of roughly $2^k$ for level $k$.
 %
@@ -1663,7 +1698,7 @@ platform hierarchical architecture-aware data structures
   note linearization of octree datastructure is insufficient:
     assumes equal work per patch
     particles are associated with nodes, changing weight
-    adaptive timestepping drastically weights more highly
+    adaptive time-stepping drastically weights more highly
       refined patches
     performance of physics algorithms on a patch is not
       necessarily uniform, e.g. localized chemistry subcycling, front
@@ -1696,6 +1731,11 @@ parallel technology encapsulation / processor virtualization
 %-----------------------------------------------------------------------  
 \subsection{Fault tolerance} \label{ss:fault-tolerance}
 %-----------------------------------------------------------------------  
+
+\ \\ \pargraph{fault tolerance} Fault tolerance and software
+resilience are crucial factors at extreme scales, since it has been
+observed that frequency of failures is proportional to the number of
+sockets~\cite{@@@}
 
 \begin{verbatim}
  FT-MPI 
