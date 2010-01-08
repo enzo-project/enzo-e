@@ -2,7 +2,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 %=======================================================================
-\documentclass[14pt,letter]{article}
+\documentclass[12pt]{article}
 %=======================================================================
 \include{include}
 
@@ -143,21 +143,20 @@ We propose to develop a new parallel software framework for adaptive
 mesh refinement (AMR).  
 %
 A distinguishing characteristic relative to existing AMR libraries and
-frameworks is the aggressive pursuit of extreme scalability, with
-respect to both hardware parallelism and software data structures.
+frameworks is the aggressive pursuit of extreme scalability, in terms
+of hardware parallelism and software data structures.
 %
 The design will be forward-looking, targeted not just at the largest
-existing supercomputers, but also future HPC platforms as they evolve
-through the petascale era and into the exascale.
+existing supercomputers, but also expected future HPC platforms as
+they evolve through the petascale era and into the exascale.
 %
 The proposed AMR framework will enable application developers to
 write multiphysics applications for simulating phenomena on an
 unprecidented range of spacial and temporal scales.
 
-
 Parallelization will be primarily data parallel, with task
-parallelization also available to augment the data parallelism if
-desired.  A wide variety of parallelization technologies will be
+parallelization also available to augment the data parallelism.
+A wide variety of parallelization technologies will be
 supported from the start, including both one- and two-sided message
 passing via the MPI~\cite{@@@MPI} library, the partitioned global
 address space (PGAS) approach via the UPC~\cite{@@@UPC} language,
@@ -178,22 +177,26 @@ Eularian and Lagrangian (and hybrid) methods can be implemented.
 
 \ \\ \pargraph{extreme scalability} The general approach for pursuing
 extreme scalability for both parallelism and data structures is by
-aggressively localizing the individual AMR patch / block tasks by removing
-all unnecessary global communication.  This
+localizing the individual AMR patch / block tasks as much as feasible
+by aggressively removing all unnecessary global communication.  
+%In particular, for hyperbolic problems, which are based on local physics,
+%we will pursue no global communication.
 will help control data structure scalability issues related to limited
 floating-point precision and range, as well as reducing the need for
 global synchronization and reduction operations.
 
 \ \\ \pargraph{fault tolerance} Fault tolerance and software
-resilience are also crucial factors at extreme scales.  The
-checkpoint / restart to disk paradigm is known to be ultimately unscalable, so we will Our framework
-will be designed to be resistent to memory, compute component, network,
-disk, and software failures., since it has been
-observed that frequency of failures is proportional to the number of
-sockets. CITE Fault tolerance Approaches to fault tolerancedue to the
-reduced MTTI (mean time to interrupt) , since the probability that
-hardware component, operating system, library, or application
-component fails Unfortunately, approaches to fault tolerance are still
+resilience are also crucial factors at extreme scales.  The checkpoint
+/ restart to disk paradigm is known to be ultimately unscalable, so we
+will support other alternatives, including checkpoint to memory.
+Our framework will be designed to be resistent to memory, compute
+component, network, disk, and software failures.
+%, since it has been
+%observed that frequency of failures is proportional to the number of
+%sockets. CITE Fault tolerance Approaches to fault tolerancedue to the
+%reduced MTTI (mean time to interrupt) , since the probability that
+%hardware component, operating system, library, or application
+%component fails Unfortunately, approaches to fault tolerance are still
 
 @@@@@@@@@@@@@@@@@@@@
 
@@ -247,10 +250,9 @@ this have become increasingly difficult, due to the increasing
 invasiveness of the desired changes and the increasing complexity of
 the code base.  The \cello\ Project aims to improve on \enzo\ in three
 ways: improved software development process, object-oriented design
-and implementation, and overhauled distributed AMR infrastructure.  The
-physics capabilites, which are continually being improved and refined in \enzo, will be retained in \enzo II
-
-
+and implementation, and overhauled distributed AMR infrastructure.
+The physics capabilites, which are continually being improved and
+refined in \enzo, will be retained in \enzo II.
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \ \\
 
@@ -1152,6 +1154,17 @@ Targeted refinement proof-of-concept using multiple point sources in 2D.
 %-----------------------------------------------------------------------
 \subsection{Parallelization approach}
 %-----------------------------------------------------------------------
+
+A wide variety of parallelization technologies will be
+supported from the start, including both one- and two-sided message
+passing via the MPI~\cite{@@@MPI} library, the partitioned global
+address space (PGAS) approach via the UPC~\cite{@@@UPC} language,
+shared memory parallel programming using OpenMP compiler directives,
+and the processor virtualization approach provided by the CHARM++
+framework~\cite{@@@CHARM}.  Select hybrid approaches will also be
+supported, including MPI with OpenMP, and MPI with UPC.  This will be
+accomplished by encapsulating the parallelization technologies within
+low-level distributed memory and shared memory API's.
 
 \begin{verbatim}
 hybrid parallel
