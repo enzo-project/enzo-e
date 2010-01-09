@@ -14,6 +14,7 @@
 %       PARAMESH
 %       Chombo
 %       SAMRAI
+%       GADGET
 % Software requirements
 % Software design
 %    High level components
@@ -143,11 +144,11 @@ We propose to develop a new parallel software framework for adaptive
 mesh refinement (AMR).  
 %
 A distinguishing characteristic relative to existing AMR libraries and
-frameworks is the aggressive pursuit of extreme scalability, in terms
-of hardware parallelism and software data structures.
+frameworks is the aggressive pursuit of extreme scalability in terms
+of software data structures, and thus hardware parallelism.
 %
 The design will be forward-looking, targeted not just at the largest
-existing supercomputers, but also expected future HPC platforms as
+existing supercomputers, but also prospective future HPC platforms as
 they evolve through the petascale era and into the exascale.
 %
 The proposed AMR framework will enable application developers to
@@ -155,14 +156,14 @@ write multiphysics applications for simulating phenomena on an
 unprecidented range of spacial and temporal scales.
 
 Parallelization will be primarily data parallel, with task
-parallelization also available to augment the data parallelism.
-A wide variety of parallelization technologies will be
-supported from the start, including both one- and two-sided message
-passing via the MPI~\cite{@@@MPI} library, the partitioned global
-address space (PGAS) approach via the UPC~\cite{@@@UPC} language,
-shared memory parallel programming using OpenMP compiler directives,
-and the processor virtualization approach provided by the CHARM++
-framework~\cite{@@@CHARM}.  Select hybrid approaches will also be
+parallelization also available to augment the data parallelism.  A
+wide variety of parallelization technologies will be supported from
+the start, including both one- and two-sided message passing via the
+MPI~\cite{@@@MPI} library, the partitioned global address space (PGAS)
+approach via the UPC~\cite{@@@UPC} language, shared memory parallel
+programming using OpenMP compiler directives, and the processor
+virtualization approach provided by the \charm\
+framework~\cite{@@@Charm}.  Select hybrid approaches will also be
 supported, including MPI with OpenMP, and MPI with UPC.  This will be
 accomplished by encapsulating the parallelization technologies within
 low-level distributed memory and shared memory API's.
@@ -295,7 +296,7 @@ upcoming systems
 refined  / borrowed ideas
   fully distributed AMR datastructure
   patch block registers for improved computing / user interface flexibility
-  communication flux registers (\code{Chombo}) for communication
+  communication flux registers (\chombo) for communication
   guard cells allocated when needed
   localized fully-adaptive time-stepping (no global reductions) (refined)
 \end{verbatim}
@@ -320,7 +321,7 @@ parallel computation
 
 \begin{verbatim}
 parallel technology
-   MPI / CHARM++ / UPC / OpenMP / GPU
+   MPI / charm++  / UPC / OpenMP / GPU
 \end{verbatim}
 
 \begin{verbatim}
@@ -402,6 +403,8 @@ AMR datastructure scalability
 \subsection{Existing AMR frameworks} \label{ss:review}
 %-----------------------------------------------------------------------
 
+@@@@@@@@@@@@@@@@@@@@
+
 \begin{verbatim}
  http://people.sc.fsu.edu/~tomek/AMR/index.html
  *   Adaptive Mesh Refinement Software for Hyperbolic Conservation Laws, Marsha Berger
@@ -437,7 +440,7 @@ with different design goals and decisions, data structures, AMR
 algorithms, parallelization strategies, and parallel performance and
 scaling.  Perhaps the top three most successful and closely related to
 our proposed effort are PARAMESH (\cite{MaOl00} \nocite{OlMa05}
-\nocite{Ol06}), \code{Chombo} (\cite{wwwchombo} \cite{CoGr09}), and SAMRAI
+\nocite{Ol06}), \chombo\  (\cite{wwwchombo} \cite{CoGr09}), and SAMRAI
 (@@@).  Other notable software include Clawpack (@@@), GrACe / DAGH
 (@@@), ALPS (\cite{BuBu09}), and Carpet (@@@).
 
@@ -449,6 +452,8 @@ DAGH (1998)
 %-----------------------------------------------------------------------
 \subsubsection{\code{PARAMESH}} \label{sss:paramesh}
 %-----------------------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@@
 
 \nocite{wwwparamesh}
 \nocite{MaOl00} % PARAMESH requested references
@@ -464,48 +469,61 @@ Octree-based AMR
 Due to a loss of funding PARAMESH can no longer be supported.
 
 %-----------------------------------------------------------------------
-\subsubsection{\code{Chombo}} \label{sss:chombo}
+\subsubsection{\chombo} \label{sss:chombo}
 %-----------------------------------------------------------------------
 
-\nocite{wwwchombo}
-\nocite{CoGr09}
 
-\code{Chombo} is in active development by the Applied Numerical Algorithms
-Group of Lawrence Berkeley National Lab.  Its high-level design
-consists of five loosely-coupled components based on a mathematical
-decomposition: \code{BoxTools} for set calculus on point sets and
-unions of rectangles, \code{AMRTools} for interprocess communication
-between AMR levels, \code{AMRTimeDependent} for advancing the solution
-using adaptive time-stepping, \code{AMRElliptic} for the
-multigrid-based solution of elliptic AMR problems, \code{EBTools} for
-embedded boundaries, and \code{ParticleTools} for particle processing
-(not available in the current 3.0 version, according to the website
-due to re-engineering of the component).
 
-\code{CHOMBO} is very scalabale, and designed to run both hyperbolic and
+\chombo~\nocite{CoGr09} is an MPI-parallel structured AMR (SAMR)
+framework in active development by the Applied Numerical Algorithms
+Group of Lawrence Berkeley National Lab.  It supports hyperbolic,
+elliptic, and parabolic methods. Its high-level design consists of
+five loosely-coupled components: \code{BoxTools} for set calculus on
+point sets and unions of rectangles, \code{AMRTools} for interprocess
+communication between AMR levels, \code{AMRTimeDependent} for
+advancing the solution using adaptive time-stepping,
+\code{AMRElliptic} for the multigrid-based solution of elliptic AMR
+problems, and \code{EBTools} for embedded boundaries.  A sixth
+component, \code{ParticleTools} for particle processing, is not
+currently available due to re-engineering of the
+component~\ref{wwwchombo}.
+
+@@@@@@@@@@@@@@@@@@@@
+
+\chombo\ is parallelized using MPI.  An effort to modify \chombo\ to
+use UPC was undertaken~\cite{We04}.
+Distributed data in \code{LayoutData}, \code{BoxLayoutData}, and
+\code{LevelData} containers.  \chombo\ provides a load balancing
+algorithm, and also allows the user to provide their own.
+
+\chombo\ is very scalabale, and designed to run both hyperbolic and
 elliptic problems on 10,000 processors.
 
 Berger-Rigoutsos 
 
-\pargraph{\code{Chombo} data distribution and load balancing}
-Distributed data in \code{LayoutData}, \code{BoxLayoutData}, and
-\code{LevelData} containers.  \code{Chombo} provides a load balancing
-algorithm, and also allows the user to provide their own.
+\pargraph{\chombo\  data distribution and load balancing}
 
 
 %-----------------------------------------------------------------------
 \subsubsection{\code{SAMRAI}} \label{sss:samrai}
 %-----------------------------------------------------------------------
 
+@@@@@@@@@@@@@@@@@@@@
+
 [2001]
 
 good scaling for numerical and data communication
 poorer scaling in adaptive meshing and communication schedule construction 
 
+%-----------------------------------------------------------------------
+\subsubsection{\gadget } \label{sss:chombo}
+%-----------------------------------------------------------------------
 
 %=======================================================================
 \section{Software Requirements} \label{s:requirements}
 %=======================================================================
+
+@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
 Overriding design goals
@@ -570,7 +588,7 @@ Guiding goals
     gpu / accelerators
     distributed and / or shared memory
  parallel technology support
-    directly: CHARM++, MPI, UPC, OpenMP, + combinations
+    directly: charm, MPI, UPC, OpenMP, + combinations
     indirectly: GPU / accelerator
  I/O
 \end{verbatim}
@@ -623,9 +641,13 @@ automatic performance tuning
 \section{Software Design} \label{s:design}
 %=======================================================================
 
+@@@@@@@@@@@@@@@@@@@@
+
 
 \begin{verbatim}
 OOP
+  improves component reuse, controls software
+  complexity, eases software maintenance
 still primarily in design phase
    available flexibility to modify current design
    design as described is current snapshot
@@ -724,6 +746,8 @@ related to ``localization'' of tasks
 \subsection{Software components} \label{ss:components}
 %-----------------------------------------------------------------------
 
+@@@@@@@@@@@@@@@@@@@@
+
 \begin{verbatim}
 Code organization: components based on functional decomposition
    High level components: Control
@@ -787,7 +811,7 @@ Allow multiple root-level patches per MPI task. [To improve
 
 \begin{verbatim}
 Reduce implicit dependencies by dynamically allocating parallel
-  tasks, ala CHARM++.(e.g. currently Enzo loops through patches within
+  tasks, ala \charm. (e.g. currently Enzo loops through patches within
   a level, but a given patch can proceed as soon as it has all its
   boundary data)
 Support optional uniform timesteps across all levels. [To
@@ -919,8 +943,167 @@ monitor: support for interfacing with user while running
 
 
 %-----------------------------------------------------------------------
+\subsection{Parallelization approach}
+%-----------------------------------------------------------------------
+
+We plan to support a variety of parallelization technologies and
+paradigms from the start.  These technologies will including message
+passing via the MPI~\cite{@@@MPI} library, partitioned global address
+space (PGAS) programming via the UPC~\cite{@@@UPC} language, shared
+memory parallel programming via OpenMP~\cite{@@@OpenMP} compiler
+directives, processor virtualization via the charm
+framework~\cite{@@@Charm}.  Select hybrid approaches will also be
+supported, including MPI with OpenMP, and MPI with UPC.  While
+heterogeneous platforms, such as those containing general purpose
+graphics processing units (GPGPU's), will not be directly supported,
+but the framework's design will facilitate their use by the
+user-written physics kernels.
+
+\textit{Why would we want to include multiple parallelization technologies?}
+First, because the performance and scalability of the technologies
+vary between machines and implementations, and we want to always use
+the fastest and most scalable approach.  Also, one technology may
+perform better in the distributed memory regime, whereas another may
+perform better within a shared memory node, hence our decision to
+support hybrid approaches.  Second, by including multiple existing
+parallelization paradigms from the start, the resulting software
+design will likely be more amenable to incorporating new future
+parallelization technologies.  Thirdly, it could be used as a tool for
+parallel technology designers and implementers to compare their
+approach with other existing approaches.
+
+\textit{How will we design the software to use multiple
+  parallelization technologies?}  The basic approach will be to
+abstract out the concept of a parallel task---something that runs on a
+single computational component, and which may involve temporal
+dependencies with other tasks.  This approach is most similar to the
+model used by \charm, so we will begin parallelization development
+using the \charm\ framework.  Will will also provide task scheduling,
+load balancing, and fault tolerance API's---functionality that is
+provided by \charm---so that other parallelization technologies can be
+used as well.
+
+We are also considering encapsulating data communication between tasks
+as a task itself, so that scheduling of communication can be
+integrated with scheduling of computation.  The motivation is that it
+could improve performance, while reducing memory cost in communication
+buffers and code complexity.
+
+We expect to implement two variations of parallelization API's, one
+for distributed memory and one for shared memory.  The distributed
+memory API would encapsulate MPI and UPC, whereas the shared memory
+API would encapsulate OpenMP and UPC.
+
+When 
+
+@@@@@@@@@@@@@@@@@@@@
+
+\begin{verbatim}
+hybrid parallel
+   MPI + OMP
+   MPI + UPC
+   UPC + OMP (?)
+   Charm++ + OMP (?)
+   flexible subset of cores, sockets, nodes, supernodes
+   Task scheduling Charm++ model, but implemented in MPI, UPC, OMP
+   processor-task affinity
+\end{verbatim}
+
+\begin{verbatim}
+Charm++ 
+  data placement
+  load balancing
+  task scheduling
+  checkpointing for fault tolerance
+  performance monitoring and visualization
+\end{verbatim}
+
+\begin{verbatim}
+platform hierarchical architecture-aware data structures
+  e.g. MPI communicator for cores in a socket, sockets in a
+    node, nodes in a supernode, supernodes in a machine
+  facilitates hierarchical dynamic load balancing
+    improves dynamic mapping of data structures to hardware components
+    E.g. load balance more frequently at core / socket level to
+      keep functional units busy
+    load balance node / supernode levels less frequently to keep
+      memory usage uniform
+    less frequent because:
+      problem changes less at larger scales
+      rebalancing is more expensive: larger data sizes, slower
+        interconnects
+    user-defined parameters and metrics for load balancing at
+      different levels
+      dynamically collected performance data can be fed back
+        into hierarchical load balancing algorithm
+  note linearization of octree datastructure is insufficient:
+    assumes equal work per patch
+    particles are associated with nodes, changing weight
+    adaptive time-stepping drastically weights more highly
+      refined patches
+    performance of physics algorithms on a patch is not
+      necessarily uniform, e.g. localized chemistry subcycling, front
+      tracking, etc.
+    arrays on patches may be different sized
+    linearization of patches 
+        reduces flexibility
+        constrains data movement along a single dimension
+\end{verbatim}
+
+\begin{verbatim}
+Multiple parallelization strategies
+  MPI: + widespread, optimized implementations, familiar
+  MPI: - data replication, difficult to use
+  UPC + easier to use, combines shared memory view with efficient data affinity
+  UPC - no concept of MPI communicator, still under development--not as mature
+  OMP + can be used progressively
+  OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
+  GPU + very fast / power efficient when usable
+  GPU - no usable standard, difficult to program, difficult to map problem to hardware
+  Charm++ + higher-level, dynamic scheduling, dynamic load-balancing, fault tolerant through checkpointing to other node memory
+  Charm++ - requires learning separate language, separate runtime system, no data prefetching(?)
+    currently not fully realizable for GPU since depends on
+      computational code
+    hierarchical parallelism: MPI + OMP, MPI + UPC, MPI + GPU,
+      etc.
+    advantages of hybrid
+      reduced data replication from MPI distributed memory
+      dynamic parallel threads--use more when helpful, fewer when not
+      UPC
+    disadvantages of hybrid
+      performance hit from data sharing in MPI + OMP
+      MPI and UPC communication cannot (currently) proceed concurrently
+    code for two modes: distributed memory and shared memory
+    parallel tasks: grid patches, arrays, grid patch groups,
+      particle groups
+    flexible data structure parameters (grid patch size, patch
+      decomposition, patch grouping) to dynamically optimize task size
+\end{verbatim}
+
+\begin{verbatim}
+hierarchical parallelism
+   encourage communication within hardware components
+      sockets within node
+      cores within socket
+      hyperthreads within core
+\end{verbatim}
+
+\begin{verbatim}
+parallel technology encapsulation / processor virtualization
+  distributed / shared memory
+    MPI (two-sided and one-sided) (distributed memory)
+    OpenMP (shared memory) 
+    UPC (either distributed memory or shared memory)
+    Charm++
+  multiple strategies enhance software resiliency
+    i.e. buggy MPI implementation--dynamically switch to UPC
+\end{verbatim}
+
+%-----------------------------------------------------------------------
 \subsection{AMR data structures} \label{ss:datastructures}
 %-----------------------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
 ALGORITHMS: and how problems solved
@@ -1057,6 +1240,8 @@ AMR hierarchy data
 \subsubsection{Patch coalescing } \label{sss:patch-coalescing}
 %--------------------------------------------------
 
+@@@@@@@@@@@@@@@@@@@@
+
 \begin{verbatim}
 AMR algorithm enhancements: patch coalescing
    improves ``shallow'' octree-based AMR
@@ -1116,6 +1301,8 @@ Coalesced patches proof-of-concept using a 2D cosmology density field projection
 \subsubsection{Targeted refinement} \label{sss:targeted-refinement}
 %--------------------------------------------------
 
+@@@@@@@@@@@@@@@@@@@@
+
 \begin{verbatim}
 AMR algorithm enhancements: targeted refinement by 4 or 8
    improves ``deep'' AMR
@@ -1152,34 +1339,10 @@ Targeted refinement proof-of-concept using multiple point sources in 2D.
 \end{minipage}}
 
 %-----------------------------------------------------------------------
-\subsection{Parallelization approach}
-%-----------------------------------------------------------------------
-
-A wide variety of parallelization technologies will be
-supported from the start, including both one- and two-sided message
-passing via the MPI~\cite{@@@MPI} library, the partitioned global
-address space (PGAS) approach via the UPC~\cite{@@@UPC} language,
-shared memory parallel programming using OpenMP compiler directives,
-and the processor virtualization approach provided by the CHARM++
-framework~\cite{@@@CHARM}.  Select hybrid approaches will also be
-supported, including MPI with OpenMP, and MPI with UPC.  This will be
-accomplished by encapsulating the parallelization technologies within
-low-level distributed memory and shared memory API's.
-
-\begin{verbatim}
-hybrid parallel
-   MPI + OMP
-   MPI + UPC
-   UPC + OMP (?)
-   CHARM++ + OMP (?)
-   flexible subset of cores, sockets, nodes, supernodes
-   Task scheduling CHARM++ model, but implemented in MPI, UPC, OMP
-   processor-task affinity
-\end{verbatim}
-
-%-----------------------------------------------------------------------
 \subsection{Data distribution} \label{ss:data-placement}
 %-----------------------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
 memory storage formats and data movement
@@ -1206,15 +1369,15 @@ memory storage formats and data movement
           flexibilty allows improved data-layout for single-thread performance
              cache blocking, padding
    communicate using reformatted ``flux registers''
-      idea used in \code{Chombo}
+      idea used in \chombo\ 
    scheduler reuse for computation / communication scheduling
 \end{verbatim}
 
 %-----------------------------------------------------------------------
 \subsection{Task scheduling} \label{ss:scheduling}
 %-----------------------------------------------------------------------
-\note{task scheduling summary}
 
+@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
 dynamic scheduling
@@ -1253,22 +1416,21 @@ there are relatively few tasks per process.  We will use dynamic
 scheduling, since workload (communication as well as computation) per
 task varies between tasks.
 
-\note{CHARM++ summary} 
-Our approach will be well-mapped to CHARM++,
+\note{Charm++ summary} Our approach will be well-mapped to \charm,
 which is a fault-tolerant message-driven parallel programming
-framework.  CHARM++ also provides dynamic load balancing through task
+framework.  \charm\ also provides dynamic load balancing through task
 migration, and provides fault tolerance through its built-in disk (or
 memory + disk) checkpoint / restart mechanism.
 
-\note{implementation in CHARM++}
+\note{implementation in Charm++}
 Implementation of AMR for a hyperbolic problem, a parallel task, or
-CHARM++ ``chare'', would correspond to advancing a numerical method or
+\charm\  ``chare'', would correspond to advancing a numerical method or
 sequence of methods one timestep on a single grid patch block.  The
-exchange of guard cell data would correspond to CHARM++ messages.
+exchange of guard cell data would correspond to \charm\  messages.
 This implementation would allow a block to advance one timestep as
 soon as all of its guard cell data is available.
 
-\note{non-CHARM++ implementation}
+\note{non-Charm++ implementation}
 
 We also plan to develop our own scheduler, for several reasons.  One,
 to schedule communication in addition to computation, to help hide
@@ -1345,7 +1507,7 @@ Our approach will be to
 \begin{verbatim}
 task migration
    migrate tasks dynamically
-   CHARM++ model: pack, relocate, unpack data
+   Charm++ model: pack, relocate, unpack data
    maintain locality by moving task to owner of a neighbor
    maintain parent-child locality when possible
       relax for deep hierarchies
@@ -1452,6 +1614,23 @@ locality, surface-to-volume ratio, and reduce task migration traffic.
 \subsection{Software resilience} \label{ss:resilience}
 %-----------------------------------------------------------------------
 
+\ \\ \pargraph{fault tolerance} Fault tolerance and software
+resilience are crucial factors at extreme scales, since it has been
+observed that frequency of failures is proportional to the number of
+sockets~\cite{@@@}
+
+@@@@@@@@@@@@@@@@@@@@
+
+\begin{verbatim}
+ FT-MPI 
+  ``fault-tolerante MPI''
+  http://icl.cs.utk.edu/ftmpi/overview/index.html 
+MPICH-V 
+  ``MPI Implementation for Volatile resources''
+  http://mpich-v.lri.fr/index.php 
+\end{verbatim}
+
+
 \begin{verbatim}
 software resilience
    take advantage of only Methods change data
@@ -1470,7 +1649,7 @@ fault-tolerance / software resilience strategies
          methods identify which data modified
             may help lower disk output--only checkpoint modified data
    checkpoint to memory
-     CHARM++ does this(?)
+     Charm++ does this(?)
    detect hardware errors and mark as defective
        memory
        disk
@@ -1496,6 +1675,8 @@ fault-tolerance / software resilience strategies
 %-----------------------------------------------------------------------
 \subsection{I/O} \label{ss:io}
 %-----------------------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
 I/O different output formats for different uses
@@ -1524,105 +1705,137 @@ I/O
 \section{Implementation} \label{s:implementation}
 %=======================================================================
 
+@@@@@@@@@@@@@@@@@@@@
+
+
 \begin{verbatim}
-Trac + SVN or mercurial
-documenting as I go
-OOP design: improves component reuse, controls software
-  complexity, eases software maintenance
-heavy emphasis on designing before coding
+   Programming environment
+     Trac
+        wiki for developing design
+        browser for viewing source code
+        roadmap for organizing milestones
+        tickets for defining tasks and tracking defects
+   Editor
+      xemacs
+      Eclipse?
+   Source code     
+      currently subversion
+      likely move to mercurial
+   Documentation
+      Doxygen
+      Latex for 
 \end{verbatim}
 
 \begin{verbatim}
-interdependencies controlled at component and class level
-classes with access functions used instead of raw arrays to improve modularity and modifiability
-block structure for interface with user code
-unit testing, including performance and parallel scaling
-prototyping for proof-of-concept
-application testing
-code reviews
+   Development approach
+     requirements, design, implement, test
+        developed on Trac wiki
+        formalized in Latex documents
+   Iterative
+      begin with core functionality
+      iterate on added functionaly
+      ensure correct at each iteration
+      quick iterations avoid spending too much time in any one step
+   Heavy emphasis on designing before coding
+     easier to change requirements than design, design than code
+     explore new ideas before implementing them
+     prototyping useful as approximate ``predictor step'' of final design
 \end{verbatim}
 
 \begin{verbatim}
-Languages C++; user code can be C, C++, Fortran
-attempt to componentize parallelization : MPI (two-sided, one-sided) + OMP + UPC + GPU + CHARM++
-advantages / disadvantages of each
+   Components
+      correspond to a source code directory
+      may have subcomponents
+      User code provided as overriden Method classes
+      Only Fortran or C required of user
+      Minimal C++ required for application developer
+   Interdependencies  
+      controlled at component and class level
+      correspond to \code{#include "component.h"}
+   Classes
+      access functions used instead of direct attribute access
+   Rapid prototyping
+      proof-of-concept
+      explore software designs
 \end{verbatim}
-
-\begin{verbatim}
-Multiple parallelization strategies
-  MPI: + widespread, optimized implementations, familiar
-  MPI: - data replication, difficult to use
-  UPC + easier to use, combines shared memory view with efficient data affinity
-  UPC - no concept of MPI communicator, still under development--not as mature
-  OMP + can be used progressively
-  OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
-  GPU + very fast / power efficient when usable
-  GPU - no usable standard, difficult to program, difficult to map problem to hardware
-  CHARM++ + higher-level, dynamic scheduling, dynamic load-balancing, fault tolerant through checkpointing to other node memory
-  CHARM++ - requires learning separate language, separate runtime system, no data prefetching(?)
-    currently not fully realizable for GPU since depends on
-      computational code
-    hierarchical parallelism: MPI + OMP, MPI + UPC, MPI + GPU,
-      etc.
-    advantages of hybrid
-      reduced data replication from MPI distributed memory
-      dynamic parallel threads--use more when helpful, fewer when not
-      UPC
-    disadvantages of hybrid
-      performance hit from data sharing in MPI + OMP
-      MPI and UPC communication cannot (currently) proceed concurrently
-    code for two modes: distributed memory and shared memory
-    parallel tasks: grid patches, arrays, grid patch groups,
-      particle groups
-    flexible data structure parameters (grid patch size, patch
-      decomposition, patch grouping) to dynamically optimize task size
-\end{verbatim}
-
-\begin{verbatim}
-  TRAC
-    wiki used for design
-    tickets for tasks and documenting defects
-  Subversion
-\end{verbatim}
-
 
 \begin{verbatim}
   Languages
-     C++, C99, legacy Fortran
-  Libraries: HDF5
+    Framework: C++
+       components, subcomponents, classes
+       composition preferred to inheritance
+    Parallelization
+       isolated CHARM++, UPC, C99 + OpenMP directives
+       MPI library
+    User code
+       C, C++, Fortran 
+       CUDA / OpenCL / etc (user code only)
 \end{verbatim}
 
 \begin{verbatim}
-  Languages: C++, C99, UPC, OpenMP
-  Parallel frameworks / languages / libraries / directives
-     CHARM++
-     MPI (one-sided and send-recv)
-     UPC
-     OpenMP
-  CUDA / OpenCL (user code only)
+  Libraries
+     I/O: HDF5
+     random: SPRNG, user-defined
 \end{verbatim}
 
 \begin{verbatim}
-  documentation
+  Configuration
+    Minimal compile-time configuration for library availability
+    Precision is run-time option
+    Field-by-field precision override
 \end{verbatim}
 
 \begin{verbatim}
-  quality control
-    testing 
-       unit testing
-       regression testing
-          lcatest parallel testing framework
+   Building
+      Currently GNU make
+      Possibly add GNU Autotools
+      Explore Ant or SCons
+\end{verbatim}
+
+
+\begin{verbatim}
+   Documentation
+      source code: Doxygen
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Quality control}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+   Improving quality reduces development costs
+      defects costly, especially later in development cycle
+      time spent in finding and preventing defects well worth it
+         more time spent testing and reviewing can paradoxically
+         reduce overall development time
+   Testing + design and code reviews (collaborative construction)
+      Testing complement reviews [CITE code complete]
+      may try pair programming
+   Refactoring to reduce code complexity
+      continually refactor
+      rigorous testing
+   Testing approach
+      unit test all code
+      regression testing
+          use lcatest parallel testing framework
+          correctness, performance, scaling, resilience
           correctness
+             EnzoII implementation
+             compare agains Enzo I results
+             existing test problems
           performance
              built-in performance monitoring
              single-thread
              weak and strong parallel scaling 
              communication performance
              I/O performance
-          data structure scaling
+          scaling
              extreme broad problems (grid / particle counts)
+                cosmology
              extreme depth problems
-          software resilience / fault tolerance
+                star formation
+          software resilience
+             memory, compute, network, disk, algorithms
              memory failures
                 fill
                 load balancing for memory
@@ -1636,10 +1849,10 @@ Multiple parallelization strategies
              algorithm failure
                 support adaptive algorithms
                 locally override spacial mesh width / timesteps
-       software reviews
-          testing + reviews highly effective [CITE code complete]
-   refactoring
-      iterative development: requirements - design - implementation - testing   
+   Software reviews
+      line-by-line checking
+         by another person, or after time elapsed
+   Refactoring
 development
    implement progessively to fill user beta testing pipeline
 \end{verbatim}
@@ -1677,94 +1890,14 @@ testing
    extreme scaling designed into framework from the start
 \end{verbatim}
 
-%-----------------------------------------------------------------------  
-\subsection{Parallelism} \label{ss:parallelism}
-%-----------------------------------------------------------------------  
-
-\begin{verbatim}
-CHARM++ 
-  data placement
-  load balancing
-  task scheduling
-  checkpointing for fault tolerance
-  performance monitoring and visualization
-\end{verbatim}
-
-\begin{verbatim}
-platform hierarchical architecture-aware data structures
-  e.g. MPI communicator for cores in a socket, sockets in a
-    node, nodes in a supernode, supernodes in a machine
-  facilitates hierarchical dynamic load balancing
-    improves dynamic mapping of data structures to hardware components
-    E.g. load balance more frequently at core / socket level to
-      keep functional units busy
-    load balance node / supernode levels less frequently to keep
-      memory usage uniform
-    less frequent because:
-      problem changes less at larger scales
-      rebalancing is more expensive: larger data sizes, slower
-        interconnects
-    user-defined parameters and metrics for load balancing at
-      different levels
-      dynamically collected performance data can be fed back
-        into hierarchical load balancing algorithm
-  note linearization of octree datastructure is insufficient:
-    assumes equal work per patch
-    particles are associated with nodes, changing weight
-    adaptive time-stepping drastically weights more highly
-      refined patches
-    performance of physics algorithms on a patch is not
-      necessarily uniform, e.g. localized chemistry subcycling, front
-      tracking, etc.
-    arrays on patches may be different sized
-    linearization of patches 
-        reduces flexibility
-        constrains data movement along a single dimension
-\end{verbatim}
-
-\begin{verbatim}
-hierarchical parallelism
-   encourage communication within hardware components
-      sockets within node
-      cores within socket
-      hyperthreads within core
-\end{verbatim}
-
-\begin{verbatim}
-parallel technology encapsulation / processor virtualization
-  distributed / shared memory
-    MPI (two-sided and one-sided) (distributed memory)
-    OpenMP (shared memory) 
-    UPC (either distributed memory or shared memory)
-    CHARM++
-  multiple strategies enhance software resiliency
-    i.e. buggy MPI implementation--dynamically switch to UPC
-\end{verbatim}
-
-%-----------------------------------------------------------------------  
-\subsection{Fault tolerance} \label{ss:fault-tolerance}
-%-----------------------------------------------------------------------  
-
-\ \\ \pargraph{fault tolerance} Fault tolerance and software
-resilience are crucial factors at extreme scales, since it has been
-observed that frequency of failures is proportional to the number of
-sockets~\cite{@@@}
-
-\begin{verbatim}
- FT-MPI 
-  ``fault-tolerante MPI''
-  http://icl.cs.utk.edu/ftmpi/overview/index.html 
-MPICH-V 
-  ``MPI Implementation for Volatile resources''
-  http://mpich-v.lri.fr/index.php 
-\end{verbatim}
-
 %=======================================================================
 \section{Development Plan} \label{s:plan} 
 %=======================================================================
 
+@@@@@@@@@@@@@@@@@@@@
+
 \begin{verbatim}
-  CHARM++ generalized unigrid
+  Charm++ generalized unigrid
      evaluate effectiveness
   AMR hyperbolic
   particle methods
@@ -1774,6 +1907,8 @@ MPICH-V
 %=======================================================================
 \section{Milestones and Deliverables} \label{s:milestones}
 %=======================================================================
+
+@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
    Cello software framework
