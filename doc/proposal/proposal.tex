@@ -796,6 +796,44 @@ organize into components (subdirectories) of related classes
 \includegraphics[width=6.15in]{components2.pdf}
 \end{minipage}}
 
+\subsubsection{High level components}
+
+\begin{verbatim}
+      Schedule, Distribute, Task
+\end{verbatim}
+
+\subsubsection{Middle level components}
+
+\begin{verbatim}
+      Simulation
+         defines simulation
+      Method [+ analysis / visualization]
+         hooks to user code
+         dynamic method application
+            different physics for different resolutions
+            different algorithms for increased software resilience
+         multiple methods permitted
+         selectable and scheduled at run-time
+      Field / Particles 
+      Amr / Patch / Tree / Node / Array : storing and accessing AMR
+      Block / Fluxes: computing and communicating
+\end{verbatim}
+
+\subsubsection{Low level components}
+
+\begin{verbatim}
+      Disk, Memory, Parallel      
+\end{verbatim}
+
+\subsubsection{Cross-cutting components}
+
+\begin{verbatim}
+      Performance, Error, Monitor, Portal, Parameters
+      globally-accesible functions
+      components in aspect-oriented programming paradigm
+         not sufficient for including specialized language (e.g. AspectC)
+         techniques (e.g. templates) usable
+\end{verbatim}
 %-----------------------------------------------------------------------
 \code{Arrays} Component
 %-----------------------------------------------------------------------
@@ -866,7 +904,7 @@ user functions supplied
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\code{Parallelization} Component
+\code{Parallel} Component
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
