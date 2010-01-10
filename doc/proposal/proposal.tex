@@ -525,54 +525,64 @@ poorer scaling in adaptive meshing and communication schedule construction
 
 @@@@@@@@@@@@@@@@@@@@
 
-\begin{verbatim}
-Overriding design goals
-   Extreme parallel scalability
-      O(10^6)+ cores
-   Extreme data structure scalability
-      breadth: grid patches per AMR level
-      depth: number of AMR levels
-\end{verbatim}
+%-----------------------------------------------------------------------
+\subsection{Overriding goals}
+%-----------------------------------------------------------------------
 
 \begin{verbatim}
 Guiding goals
-   scalable
-   efficient
-   correct
+   scalable 
+      highly effective dynamic load-balancing
+      highly effective task scheduling
+   efficient (code, data structures (AMR approach), algorithms)
+   correct (verifiable with Enzo-II (New Enzo) comparison with Enzo Classic)
    agile
-   complete
-   resilient
+   complete 
+      multilevel hyperbolic, elliptic, parabolic problems
+      Eulerian, Lagrangian, hybrid methods
+      everything for astrophysics / cosmology
+   resilient 
+      continual hardware faults, software faults, performance
    useable
+   readable
    flexible
+      no hard-coded restrictions, e.g. ghosts, grids, levels, procs, etc.
+      dynamic modification of data structure parameters 
+         Grid patch sizes
+         Refinement factors
+         Other AMR parameters
+      allow dynamic selection of user-supplied methods
+         if one method fails, switch to another
    modifyable
+      controlled design and code dependencies
+   extensible
+      new data structures (e.g. parallel ray tracing)
+      new run-time parameters
+   complexity control
 \end{verbatim}
 
 \begin{verbatim}
- project scope
- arbitrary multi-level
- multi-physics
-    nonlinear
-    hyperbolic conservation
-     hydrodynamics
-    elliptic
-     self-gravity
-    parabolic?
-    local physics
-     chemistry
- user-supplied functions
-    single-patch timestep advance
-    inter-resolution constraints
-    localized spacial resolution requirements: refinement criteria
-    localized timestep requirements: CFL condition
+Overriding design goals
+   Extreme data structure scalability
+      $< O(P)$ storage / compute per process
+      $<= O(N/P)$ storage per process ($\log N$ or $\log $ ok)
+      extreme particle count
+      extreme grid patch count
+      extreme hierarchy depth
+      resolution range: number of levels
+      requires extreme parallel scalability
+         O(10^6)+ cores
+\end{verbatim}
+
+\begin{verbatim}
  performance / efficiency of hardware utilization
+    highly competetive parallel scaling
     competetive serial performance
     competetive parallel performance
-    highly competetive parallel scaling
     competetive memory usage
- data structures
-    extreme particle count
-    extreme grid patch count
-    extreme hierarchy depth
+\end{verbatim}
+
+\begin{verbatim}
  software resiliency
     resistent to continuous hardware and software failures
        memory failure / local compute node limits
@@ -580,17 +590,29 @@ Guiding goals
        network failures
        disk failures
        algorithm failure
+    depends on available middleware
+    checkpointing
+       to disk, memory, other
+       user-supplied checkpoint data
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Problem scope}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+ framework for user-defined Eulerian / Lagrangian solvers
 \end{verbatim}
 
 \begin{verbatim}
- hardware support
-    multicore
-    gpu / accelerators
-    distributed and / or shared memory
- parallel technology support
-    directly: charm, MPI, UPC, OpenMP, + combinations
-    indirectly: GPU / accelerator
- I/O
+ multi-physics
+    hyperbolic conservation
+       hydrodynamics
+    elliptic
+       self-gravity
+    parabolic?
+    local physics
+      chemistry
 \end{verbatim}
 
 \begin{verbatim}
@@ -600,42 +622,81 @@ Guiding goals
 \end{verbatim}
 
 \begin{verbatim}
- capabilities
-    physics
-       hyperbolic
-       elliptic
-       ray-tracing?
-    AMR
-    Particles
-    performance
-    parallel scaling
-    data structure scaling
-    ease of use
-    dynamic scheduling
-    aggressive minimization of global communication
-    I/O
-    fault tolerance
-    adaptivity
-    extensibility
+Hardware support
+   Unix-based, but may be portable to other platforms
+   direct support for multilevel parallelism (node, socket, core)
+   distributed memory, shared memory, or both
+   directly: CHARM++, MPI, UPC, OpenMP, + combinations
+   indirectly: GPU / accelerator
 \end{verbatim}
 
 \begin{verbatim}
-Routines for data dumps, checkpointing, output of visualizaton /
-  analysis
-Leverage standard for AMR data output when possible
-parallel HDF5
-I/O performance
-   design: support I/O from subset of compute nodes , dedicated or shared, to
-           optimize I/O performance, and overlap I/O with computation
+Range and precision
+   Floating point
+      single 32-bit and double 64-bit IEEE
+      Stored field / particle precision independent of problem size
+         e.g. global particle positions in deep hierarchy
+         dependent on accuracy requirements only
+         allow different stored precisions for different fields
+   Integers
+      16- 32- 64-bit
+      Stored integer indices range independent of problem size
+         e.g. avoid storing global grid indices in deep AMR
+      Ideally 32-bit always sufficient
+      breadth: grid patches per AMR level
+      depth: number of AMR levels
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Framework services}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+ data structures provided to user
+    support Eulerian methods and solvers on multilevel AMR grids
+    support Lagrangian methods and solvers with particles
+    support hybrid PM, TPM, PPPM, etc. methods and solvers
 \end{verbatim}
 
 \begin{verbatim}
-automatic performance tuning
-   computational block size, padding
-   AMR patch size (by level)(possible?)
-   refinement factor (2,4,8)
-   load balancing frequency
+  run-time parameters
+     integrated parameter file for user and framework
+     define arbitrary grid fields and characteristics
+     define arbitrary particles and characteristics (at least position)
+     user-methods have direct access to field and particle data
+         how to handle variable precision?
+         user code accesses Field / Particles objects?
+         dynamic typing?
 \end{verbatim}
+
+\begin{verbatim}
+I/O 
+   Support for data dumps of all or subset of data
+      select fields or select particle types
+   parallel HDF5 format
+   I/O routines accessible to user functions
+      data dumps
+      method-dependent check-pointing
+   efficient and scalable
+   resilient to disk faults
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{User-supplied code}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+ user-supplied functions
+    advance single-patch one timestep
+    impose inter-resolution constraints (flux correction)
+    refinement criteria for localized spacial resolution requirements (accuracy)
+    timestep criteria for localized temporal resolution requirements (CFL)
+    interpolation of individual fields
+ checkpoint / restart code?
+ user functions return error codes
+\end{verbatim}
+
+@@@@@@@@@@@@@@@@@@@@@
 
 %=======================================================================
 \section{Software Design} \label{s:design}
@@ -646,8 +707,17 @@ automatic performance tuning
 
 \begin{verbatim}
 OOP
+  addresses 
+    agility, readability, flexibility, modifyability, extensibility, complexity
   improves component reuse, controls software
   complexity, eases software maintenance
+  still not always ideal
+     cross-cutting components
+     can use aspect-oriented ideas
+\end{verbatim}
+
+\begin{verbatim}
+
 still primarily in design phase
    available flexibility to modify current design
    design as described is current snapshot
