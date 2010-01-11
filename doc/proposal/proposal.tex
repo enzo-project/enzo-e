@@ -2,7 +2,8 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 %=======================================================================
-\documentclass[12pt]{article}
+% \documentclass[12pt]{article}
+\documentclass{article}
 %=======================================================================
 \include{include}
 
@@ -519,191 +520,220 @@ poorer scaling in adaptive meshing and communication schedule construction
 \subsubsection{\gadget } \label{sss:chombo}
 %-----------------------------------------------------------------------
 
+
+\newpage
 %=======================================================================
 \section{Software Requirements} \label{s:requirements}
 %=======================================================================
 
-@@@@@@@@@@@@@@@@@@@@
 
-%-----------------------------------------------------------------------
-\subsection{Overriding goals}
-%-----------------------------------------------------------------------
-
-\begin{verbatim}
-Guiding goals
-   scalable 
-      highly effective dynamic load-balancing
-      highly effective task scheduling
-   efficient (code, data structures (AMR approach), algorithms)
-   correct (verifiable with Enzo-II (New Enzo) comparison with Enzo Classic)
-   agile
-   complete 
-      multilevel hyperbolic, elliptic, parabolic problems
-      Eulerian, Lagrangian, hybrid methods
-      everything for astrophysics / cosmology
-   resilient 
-      continual hardware faults, software faults, performance
-   useable
-   readable
-   flexible
-      no hard-coded restrictions, e.g. ghosts, grids, levels, procs, etc.
-      dynamic modification of data structure parameters 
-         Grid patch sizes
-         Refinement factors
-         Other AMR parameters
-      allow dynamic selection of user-supplied methods
-         if one method fails, switch to another
-   modifyable
-      controlled design and code dependencies
-   extensible
-      new data structures (e.g. parallel ray tracing)
-      new run-time parameters
-   complexity control
-\end{verbatim}
-
-\begin{verbatim}
-Overriding design goals
-   Extreme data structure scalability
-      $< O(P)$ storage / compute per process
-      $<= O(N/P)$ storage per process ($\log N$ or $\log $ ok)
-      extreme particle count
-      extreme grid patch count
-      extreme hierarchy depth
-      resolution range: number of levels
-      requires extreme parallel scalability
-         O(10^6)+ cores
-\end{verbatim}
-
-\begin{verbatim}
- performance / efficiency of hardware utilization
-    highly competetive parallel scaling
-    competetive serial performance
-    competetive parallel performance
-    competetive memory usage
-\end{verbatim}
-
-\begin{verbatim}
- software resiliency
-    resistent to continuous hardware and software failures
-       memory failure / local compute node limits
-       compute component (compute node, socket, core) failures
-       network failures
-       disk failures
-       algorithm failure
-    depends on available middleware
-    checkpointing
-       to disk, memory, other
-       user-supplied checkpoint data
-\end{verbatim}
+All software in the system will be released as open source.
 
 %-----------------------------------------------------------------------
 \subsection{Problem scope}
 %-----------------------------------------------------------------------
 
-\begin{verbatim}
- framework for user-defined Eulerian / Lagrangian solvers
-\end{verbatim}
-
-\begin{verbatim}
- multi-physics
-    hyperbolic conservation
-       hydrodynamics
-    elliptic
-       self-gravity
-    parabolic?
-    local physics
-      chemistry
-\end{verbatim}
-
-\begin{verbatim}
- what we do not do
-    visualization
-    analysis utilities
-\end{verbatim}
-
-\begin{verbatim}
-Hardware support
-   Unix-based, but may be portable to other platforms
-   direct support for multilevel parallelism (node, socket, core)
-   distributed memory, shared memory, or both
-   directly: CHARM++, MPI, UPC, OpenMP, + combinations
-   indirectly: GPU / accelerator
-\end{verbatim}
-
-\begin{verbatim}
-Range and precision
-   Floating point
-      single 32-bit and double 64-bit IEEE
-      Stored field / particle precision independent of problem size
-         e.g. global particle positions in deep hierarchy
-         dependent on accuracy requirements only
-         allow different stored precisions for different fields
-   Integers
-      16- 32- 64-bit
-      Stored integer indices range independent of problem size
-         e.g. avoid storing global grid indices in deep AMR
-      Ideally 32-bit always sufficient
-      breadth: grid patches per AMR level
-      depth: number of AMR levels
-\end{verbatim}
+\begin{enumerate}
+    \item hyperbolic conservation, elliptic (parabolic?), local physics, and combinations
+    \item logically cartesion grids
+    \item $1$D, $2$D, and $3$D
+      \\ \textit{1D and 2D useful for testing}
+    \item eulerian, lagrangian, or hybrid methods
+      \\ \textit{hybrid PM, TPM, PPPM, etc. methods and solvers, PPM, multigrid }
+    \item Possible support for running multiple simulations
+      \\ \textit{could potentially be useful for inline analysis of multiple simulations in a parameter study which would otherwise require much disk storage }
+\end{enumerate}
 
 %-----------------------------------------------------------------------
-\subsection{Framework services}
+\subsection{User-supplied functions}
 %-----------------------------------------------------------------------
 
-\begin{verbatim}
- data structures provided to user
-    support Eulerian methods and solvers on multilevel AMR grids
-    support Lagrangian methods and solvers with particles
-    support hybrid PM, TPM, PPPM, etc. methods and solvers
-\end{verbatim}
-
-\begin{verbatim}
-  run-time parameters
-     integrated parameter file for user and framework
-     define arbitrary grid fields and characteristics
-     define arbitrary particles and characteristics (at least position)
-     user-methods have direct access to field and particle data
-         how to handle variable precision?
-         user code accesses Field / Particles objects?
-         dynamic typing?
-\end{verbatim}
-
-\begin{verbatim}
-I/O 
-   Support for data dumps of all or subset of data
-      select fields or select particle types
-   parallel HDF5 format
-   I/O routines accessible to user functions
-      data dumps
-      method-dependent check-pointing
-   efficient and scalable
-   resilient to disk faults
-\end{verbatim}
+\begin{enumerate}
+   \item user-supplied methods, solvers, analysis, visualization
+   \item user code in fortran, C, or C++
+   \item advance single-patch one timestep
+   \item impose inter-resolution constraints (flux correction)
+   \item refinement criteria for localized spacial resolution requirements (accuracy)
+   \item timestep criteria for localized temporal resolution requirements (CFL)
+   \item interpolation of individual fields
+\end{enumerate}
 
 %-----------------------------------------------------------------------
-\subsection{User-supplied code}
+\subsection{Run-time parameters}
 %-----------------------------------------------------------------------
 
-\begin{verbatim}
- user-supplied functions
-    advance single-patch one timestep
-    impose inter-resolution constraints (flux correction)
-    refinement criteria for localized spacial resolution requirements (accuracy)
-    timestep criteria for localized temporal resolution requirements (CFL)
-    interpolation of individual fields
- checkpoint / restart code?
- user functions return error codes
-\end{verbatim}
+\begin{enumerate}
+    \item Input via single or multiple included parameter files
+    \item Both framework and user code have access to run-time parameters
+      \\ \textit{useful for user code to take advantage of framework parameters }
+      \\ \textit{indicates an API for parameters }
+    \item Sufficiently powerful parameter file language to specify user problems
+      \\ \textit{difficult to test, but ability to e.g.~express arbitrary scalar and
+        logical expressions, including standard functions (sin, log, etc.) for initial conditions using x,y,z,t variables }
+      \\ \textit{in particular, Enzo II will be able to define any current
+        hydro / gravity / MHD test problem that Enzo can, despite not having
+        specialized problem types }
+    \item Explicit initial conditions via data files
+    \item Allow ``deep'' parameter control of parallelism, parallel data 
+      structures, and user code
+      \\ \textit{indicates many parameters, which indicates parameters grouped by common functionality to reduce complexity }
+\end{enumerate}
+ 
+%-----------------------------------------------------------------------
+\subsection{Performance}
+%-----------------------------------------------------------------------
 
-@@@@@@@@@@@@@@@@@@@@@
+\begin{enumerate}
+    \item computation scalable to $> 10^6$ cores
+      \\ \textit{$< O(P)$ storage / compute per process }
+      \\ \textit{$<= O(N/P)$ storage per process ($\log N$ or $\log $ ok) }
+    \item memory scalable to $> 10^6$ cores
+    \item communication  scalable to $> 10^6$ cores
+       \\ \textit{affects checkpointing strategy}
+    \item disk storage  scalable to $> 10^6$ cores
+       \\ \textit{affects checkpointing strategy}
+    \item highly competetive parallel scaling
+    \item competetive serial performance
+    \item competetive parallel performance
+    \item competetive memory usage
+\end{enumerate}
 
+%-----------------------------------------------------------------------
+\subsection{Adaptive mesh refinement}
+%-----------------------------------------------------------------------
+
+\begin{enumerate}
+    \item  AMR data structure size (number of grids) is ``close'' to optimal
+       \\ \textit{eliminates fixed-sized patches }
+    \item  ``Fast'' searching of neighboring patches
+       \\ \textit{indicates either octree or chaining mesh type data structure}
+    \item  Support extreme hierarchy size (number of patches at least $10^6$)
+       \\ \textit{indicates partial or fully distributed AMR data structure}
+    \item  Support extreme hierarchy depth (dynamic range of at least $60$ levels)
+       \\ \textit{Greater than the age of the universe in seconds}
+      \\  \textit{indicates no precision or range issues with global floating 
+         point positions or global integer indices}
+    \item Coordinate system may be (slowly) time-varying
+      \\ \textit{In particular to support cosmological expansion }
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\subsection{Data Fields}
+%-----------------------------------------------------------------------
+
+\begin{enumerate}
+    \item Support multiple user-defined fields
+    \item support stencils spanning at least 7 cells (3 ghost zones)
+    \item support efficient and scalable global linear solves
+      \\ \textit{required by accurate elliptic and parabolic solves}
+    \item No assumptions shall be made on field variable names in the source
+      code
+      \\ \textit{indicates they are specified in the parameter file, and
+        user methods must use subset of fields }
+    \item Different fields can have different precision, single or double
+    \item Fields can include scaling factor for improved numerical accuracy
+      \\ \textit{e.g. if single precision has enough precision but not enough range }
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\subsection{Particles}
+%-----------------------------------------------------------------------
+
+\begin{enumerate}
+    \item Support multiple user-defined particle groups
+      \\ \textit{e.g. star particles, dark matter particles, tracer particles, etc. }
+    \item Each particle group can include arbitrary user-defined parameters
+      \\ \textit{minimal is position }
+    \item User code has access to particle type and particle parameter values
+    \item  ``Fast'' searching of nearby particles
+       \\ \textit{indicates an octree-like data structure}
+    \item Extreme particle count $> 10^9$
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\subsection{Parallelism}
+%-----------------------------------------------------------------------
+
+\begin{enumerate}
+    \item No fundamental limit on process / thread counts
+      \\ \textit{i.e. no hard-coded MAX\_PROCESSORS}
+    \item Support distributed memory, shared memory, and hybrid parallelism
+    \item Include thread-safety
+      \\ \textit{requires user code to be thread-safe }
+    \item Support range of parallel task sizes, including single array cells
+     (note conflicts with AMR data structure size for standard octree AMR)
+    \item no limit on processor count
+    \item direct or indirect support of GPU's
+      \\ \textit{at least ability to schedule groups of many tasks at once }
+      \\ \textit{requires support of GPU programming in user code }
+    \item direct support for multilevel parallelism of up to 4 levels
+      \\ \textit{not just distributed and shared memory.  E.g. distinguish
+        between cores, sockets, nodes, cabinets }
+    \item efficient, reliable, and effective load balancing
+      \\ \textit{indicates hierarchical, takes into account cost to relocate task,
+        and level-dependent (and user-defined)  metrics }
+    \item efficient, reliable, and effective dynamic task scheduling
+      \\ \textit{given load balance, schedule tasks.  Indicates hierarchical,
+        ability to group-schedule (for GPU).  Could use component parallelism
+        to improve load balancing on extreme scales~\cite{@@@Shalf} }
+\end{enumerate}
+  
+%-----------------------------------------------------------------------
+\subsection{Resilience}
+%-----------------------------------------------------------------------
+
+\begin{enumerate}
+    \item be resilient to multiple compute, memory, disk, interconnect, libraries, code failures
+      \\ \textit{depends on ability to detect failures, which may require OS or
+      library support not currently available }
+      \\ \textit{indicates virtualization of processors and nodes: can backtrack
+          and continue with reduced hardware }
+      \\ \textit{indicates ability to flag components as unreliable }
+    \item the system shall attempt to recover from numerical errors (NaN, Inf)
+      \\ \textit{e.g. by switching to an alternative method or solver, or using a smaller timestep}
+    \item the system shall support outputing data for restart dumps to disk or memory
+    \item user code can checkpoint its data
+      \\ \textit{indicates ability of user code to call resiliance / fault tolerance API }
+    \item user code can indicate a failure
+    \item users can supply multiple methods or solvers to improve robustness
+      \\ \textit{e.g. if a geometric multigrid-based linear solver does not converge, a more robust but slower linear solver may dynamically be called }
+\end{enumerate}
+
+%-----------------------------------------------------------------------
+\subsection{External interfaces}
+%-----------------------------------------------------------------------
+
+\begin{enumerate}
+    \item Clear output to the user reguarding the current state of the simulation.
+     \\ \textit{ progress, performance, warnings, errors, attempts at recovery }
+     \\ \textit{ can include text, web page, simple plots, to show a dashboard of current
+        and historical state }
+    \item Output includes user-defined output
+     \\ \textit{indicates user code can call logging API, including web pages and simple plots }
+    \item Ability to view and modify data structure parameters dynamically at run time
+\end{enumerate}
+
+
+%-----------------------------------------------------------------------
+\subsection{I/O }
+%-----------------------------------------------------------------------
+
+\begin{enumerate}
+     \item Support for data dumps of all or subset of data fields and particles
+     \item Support user method-dependent data output
+       \\ \textit{indicates user code can access disk storage API }
+     \item Parallel I/O using standardized AMR file formats \cite{AlKl08}
+       \\ \textit{e.g.~ADIOS API }
+\end{enumerate}
+       
 %=======================================================================
 \section{Software Design} \label{s:design}
 %=======================================================================
 
 @@@@@@@@@@@@@@@@@@@@
 
+Our design will be object-oriented, with related classes grouped into
+high-level components.
 
 \begin{verbatim}
 OOP
@@ -813,7 +843,7 @@ related to ``localization'' of tasks
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Software components} \label{ss:components}
+\subsection{Software components} \label{ss:design-components}
 %-----------------------------------------------------------------------
 
 @@@@@@@@@@@@@@@@@@@@
@@ -1051,7 +1081,7 @@ monitor: support for interfacing with user while running
 
 
 %-----------------------------------------------------------------------
-\subsection{Parallelization approach}
+\subsection{Parallelization approach} \label{ss:design-parallel}
 %-----------------------------------------------------------------------
 
 We plan to support a variety of parallelization technologies and
@@ -1208,7 +1238,7 @@ parallel technology encapsulation / processor virtualization
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{AMR data structures} \label{ss:datastructures}
+\subsection{AMR data structures} \label{ss:design-data}
 %-----------------------------------------------------------------------
 
 @@@@@@@@@@@@@@@@@@@@
@@ -1447,7 +1477,7 @@ Targeted refinement proof-of-concept using multiple point sources in 2D.
 \end{minipage}}
 
 %-----------------------------------------------------------------------
-\subsection{Data distribution} \label{ss:data-placement}
+\subsection{Data distribution} \label{ss:design-distribution}
 %-----------------------------------------------------------------------
 
 @@@@@@@@@@@@@@@@@@@@
@@ -1482,7 +1512,7 @@ memory storage formats and data movement
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Task scheduling} \label{ss:scheduling}
+\subsection{Task scheduling} \label{ss:design-scheduling}
 %-----------------------------------------------------------------------
 
 @@@@@@@@@@@@@@@@@@@@
@@ -1547,7 +1577,7 @@ hierarchical hardware components (node, socket, core...)  Third, to
 remove any hard dependencies on any single parallel technology.
 
 %-----------------------------------------------------------------------
-\subsection{Load balancing} \label{ss:loadbalancing}
+\subsection{Load balancing} \label{ss:design-balancing}
 %-----------------------------------------------------------------------
 
 Dynamic load balancing is well known to be a crucial operation for
@@ -1719,7 +1749,7 @@ locality, surface-to-volume ratio, and reduce task migration traffic.
 ``diffusion-based scheme''
 
 %-----------------------------------------------------------------------
-\subsection{Software resilience} \label{ss:resilience}
+\subsection{Software resilience} \label{ss:design-resilience}
 %-----------------------------------------------------------------------
 
 \ \\ \pargraph{fault tolerance} Fault tolerance and software
@@ -1781,7 +1811,7 @@ fault-tolerance / software resilience strategies
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{I/O} \label{ss:io}
+\subsection{I/O} \label{ss:design-io}
 %-----------------------------------------------------------------------
 
 @@@@@@@@@@@@@@@@@@@@
@@ -1906,9 +1936,40 @@ I/O
       source code: Doxygen
 \end{verbatim}
 
-%-----------------------------------------------------------------------
-\subsection{Quality control}
-%-----------------------------------------------------------------------
+
+
+%=======================================================================
+\section{Quality Control} \label{s:testing}
+%=======================================================================
+
+No single method of improving software quality finds all defects, so
+we will employ a set of techniques that have been proven in practice
+to be successful~\ref{Mc04}.  These include unit testing, integration
+testing, regression testing, beta testing, code reviews, design reviews, and
+refactoring.
+
+Defects can be costly, but they are much more costly when found later
+in the development cycle.  Defects can occur in any phase of the
+development cycle, but those in earlier phases (requirements and
+design) tend to be much more costly than those in later phases
+(implementation and testing).  Although we We therefore concentrate on quality
+control more heavily our effort on earlier phases.
+
+It is well known that improving the quality of software reduces the overall
+development costs. 
+ phasesWe therefore
+approach to quality control is to concentrate on all phases of the
+development cycle.  software development approach is to 
+concentrate on 
+
+Software in general is difficult to develop in part because it
+involves a litany of desirable characteristics determining its overall
+quality: software should be maintainable, flexible, portable,
+usable, reusable, readable, testable, understandable, efficient, correct,
+reliable, adaptable, accurate, robust, etc.  These characteristics
+depend on decisions made during the development process, so design
+and implementation decisions must be made deliberately and thoughtfully.
+
 
 \begin{verbatim}
    Improving quality reduces development costs
