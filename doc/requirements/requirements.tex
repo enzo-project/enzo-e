@@ -51,449 +51,196 @@ Acceptance & \textit{#3}
 \section{System}
 %=======================================================================
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {All software in the system will be open source}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {}
-
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Support for running multiple simulations
-  [quantitative limit?]}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {All initial and boundary conditions should be explicitly
-  specified by the user [as opposed to in \enzo\ where
-  initial and boundary conditions are hard coded in ``problems'',
-  such as ``shock tube'' or ``cosmology''].}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The simulation's initial and boundary condition specification
-   should be sufficiently powerful to set up all known test problems
-   in the literature that can be run given the supported physics
-   capabilities. [Revise: how can this be tested?]}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The simulation input shall include ``deep'' parameter control of
-    all supported physics and parallel data-structures. [The purpose
-      is not to have undocumented compile-time parameters set with
-      \code{\#define}'s scattered throughout the code, but still let
-      users adjust low-level parameters if they want.]}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {All standard test problems should be directly supported.  [List
-  specific test problems]}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {All problems are specified (specifiable) using a single user-written
-   text file, plus optional data files for complex initial conditions. 
-   [Basically this is the same as \enzo] }
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {User input may include a graphical user interface (GUI) @@@
-  glossary: graphical user interface: for problem specification}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support simulations in $1$D, $2$D, and $3$D}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall output text information to the user regarding the
-  current state of the simulation}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system should output visual information to the user regarding
-  the current state of the simulation}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall enable external modification of physics and
-  data-structure parameters of a running simulation}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-  {The system shall attempt to recover from numerical errors (NaN, Inf)}
-
-%-----------------------------------------------------------------------
-\req
-  {} {Proposed}
-%
-  {The system shall support outputing data for restart dumps}
-
-%-----------------------------------------------------------------------
-\req
-  {} {Proposed}
-%
-  {The system shall support restarting a computation that has not
-  completed with at most $10\%$ loss of total simulation time}
+\begin{enumerate}
+\item  All software in the system will be open source
+\item  Multiple simulations will be supported (optional)
+\item  The system will contain no problem-dependent code
+\item  The user may supply problem-dependent initialization routines
+\item  All problems are specified using a single user-written parameter file
+\item  Parameter files may include other parameter files (optional)
+\item  Initial conditions may be initialized using data files
+\item  Expressive power of parameter files is sufficient to specify all \enzo\ test problems without problem-dependent routines that can be run given the supported physics capabilities
+\item  Expressive power of parameter files is sufficient to specify all standard test problems that can be run given the supported physics capabilities
+\item Parameters shall be sufficient for deep control of all physics, algorithms, and data structures
+\item The system shall support simulations in $1$D, $2$D, and $3$D
+\item The system shall support text logging of the history and current state of the simulation
+\item The system shall support simple visualization logging (plots, graphs, field data, and particle data)
+\item All logging data will be available from a single file (e.g. web page)
+\item The system shall enable external modification of physics and
+  data-structure parameters of a running simulation
+\item The system shall attempt to detect and recover from numerical errors (NaN, Inf)
+\item The system shall attempt to detect and recover from loss of a core, process, or node
+\item The system shall attempt to detect and recover from memory errors
+\item The system shall attempt to detect and recover from communication errors
+\item The system shall attempt to detect and recover from disk errors
+\item The system shall support checkpoint / restart to disk
+\item The system shall support checkpoint / restart to memory
+\end{enumerate}
 
 %=======================================================================
 \section{Problem definition}
 %=======================================================================
 
-
-\req
-  {}
-  {Proposed}
-%
-  {Problems shall be fully defined using an input text file, called
-  the ``problem definition file''}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Problems may input HDF5 files as part of the problem definition}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {No assumptions shall be made on field variable names in the source
-  code}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Problem definition files shall be sufficiently powerful to define
-  all standard test problems. [quantify: explicitly list]}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Problem definition files shall support defining simple regions in
-  space, including half-spaces, spheres, ellipsoids}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Problem definition files shall support constructing composite
+\begin{enumerate}
+ \item Problems shall be fully defined using an input text file, called
+  the ``parameter file''
+  \item Problems may input HDF5 files as part of the parameter
+  \item No assumptions shall be made on field variable names in the source
+  code
+  \item parameter files shall be sufficiently powerful to define
+  all standard test problems
+  \item parameter files shall support defining general subregions of space for initial conditions
+  \item parameter files shall support constructing composite
   regions using intersection, union, and set difference on simple
-  regions}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Composite regions shall not have any imposed restriction on number
-  of constituent simple regions}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Problem definition files shall support defining field properties
-  within a regions}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Field properties may vary between regions}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Numerical values in problem definition files may include arithmetic
-  operations}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Numerical values in problem definition files may include the
+  regions
+  \item Composite regions shall not have any imposed restriction on number
+  of constituent simple regions
+  \item parameter files shall support defining field properties
+  within a regions
+  \item Field properties may vary between regions
+  \item Numerical values in parameter files may include arithmetic
+  operations
+  \item Numerical values in parameter files may include the
   functions \code{log}, \code{exp}, \code{sin}, \code{cos},
-  \code{min}, \code{max}.}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Numerical values in problem definition files may include \code{x},
+  \code{min}, \code{max}
+  \item Numerical values in parameter files may include \code{x},
   \code{y}, \code{z}, and \code{t} to represent spacial and temporal
-  coodinates.}
+  coodinates
+\end{enumerate}
 
 %=======================================================================
 \section{Methods}
 %=======================================================================
 
-\subsection{Hydrodynamics}
+\begin{enumerate}
+  \item The system shall support systems of coupled PDE's involving hyperbolic conservation and elliptic equations
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall perform hydrodynamics computations with at least
-  2nd order in both space and time ``almost everywhere''}
-\subsection{Self-gravity}
+  \item The system shall perform hydrodynamics computations with at least
+  2nd order in both space and time ``almost everywhere''
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall perform self-gravity computations with at least
-  2nd order accuracy in both space and time ``almost everywhere''}
-\subsection{Cosmological expansion}
+  \item The system shall perform self-gravity computations with at least
+  2nd order accuracy in both space and time ``almost everywhere''
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support cosmological expansion as an option}
+  \item The system shall support cosmological expansion as an option
 
-\subsection{Radiative cooling}
+  \item The system shall perform radiative cooling computations
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall perform radiative cooling computations}
-\subsection{Multi-species chemistry}
+  \item The system shall perform multispecies chemistry computations
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall perform multispecies chemistry computations}
-\subsection{Star formation}
+  \item The system shall perform star-formation computations
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall perform star-formation computations}
-\subsection{Magnetohydrodynamics}
+  \item The system shall perform magnetohydrodynamic computations
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall perform magnetohydrodynamic computations}
-\subsection{Radiation transfer}
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall perform radiative transfer computations}
+  \item The system shall perform radiative transfer computations
+\end{enumerate}
 
 %=======================================================================
 \section{Fields}
 %=======================================================================
 
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall be able to represent ideal gas density, velocity,
-  and @@@energy}
+\begin{enumerate}
+  \item The system shall be able to represent ideal gas density, velocity,
+  and @@@energy
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall be able to represent dark matter density and
-  velocity}
+  \item The system shall be able to represent dark matter density and
+  velocity
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system should support multiple ideal gases}
+  \item The system should support multiple ideal gases
 
-%
-%-----------------------------------------------------------------------
-\subsection{Accuracy}
-%-----------------------------------------------------------------------
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Simulation dynamic resolution range @@@ glossary: dynamic
+  \item Simulation dynamic resolution range @@@ glossary: dynamic
   resolution range: shall be at least $2^64$, e.g.~$1024^3$
   @@@glossary: root grid: with $27$ additional levels of refinement by
-  $4$)}
+  $4$)
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Simulation resolution range should be at least $2^128$}
+  \item Simulation resolution range should be at least $2^128$
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {Simulation size shall be virtually unbounded (run on largest
-  parallel computer available)}
+  \item Simulation size shall be virtually unbounded (run on largest
+  parallel computer available)
+\end{enumerate}
+
+%=======================================================================
+\section{Particles}
+%=======================================================================
+
+%=======================================================================
+\section{Multiresolution}
+%=======================================================================
 
 %=======================================================================
 \section{Performance}
 %=======================================================================
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support multiple levels of parallelism}
+\begin{enumerate}
+  \item The system shall support multiple levels of parallelism
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support a data-parallel model using point-to-point
-  @@@glossary MPI-1 communication}
+  \item The system shall support a data-parallel model using point-to-point
+  @@@glossary MPI-1 communication
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system may support a data-parallel model using one-sided
-  @@@glossary MPI-2 communication}
+  \item The system may support a data-parallel model using one-sided
+  @@@glossary MPI-2 communication
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support multiple levels of parallelism}
+  \item The system shall support multiple levels of parallelism
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support OpenMP shared memory parallelism with
+  \item The system shall support OpenMP shared memory parallelism with
   parallel efficiency at least $80\%$ of maximum based on flops and
-  memory relative to single-core up to $100$ cores}
+  memory relative to single-core up to $100$ cores
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support uniform resolution problems with at least
-  $10\%$ average core flop rate on largest platform sizes available.}
+  \item The system shall support uniform resolution problems with at least
+  $10\%$ average core flop rate on largest platform sizes available
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support moderately non-uniform resolution problems
+  \item The system shall support moderately non-uniform resolution problems
   (dynamic resolution range of $2^32$) with at least $3\%$ average
-  core flop rate on largest platform sizes available.}
+  core flop rate on largest platform sizes available
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support highly non-uniform resolution problems
+  \item The system shall support highly non-uniform resolution problems
   (dynamic resolution range of $2^48$) with $1\%$ average core flop
   rate and $50\%$ parallel efficiency on largest platform sizes
-  available.}
+  available
 
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {The system shall support highly non-uniform resolution problems on
+  \item The system shall support highly non-uniform resolution problems on
   the largest platform sizes available that have at least $1GB$ memory
-  per computational element.}
+  per computational element
+\end{enumerate}
+
+%=======================================================================
+\section{WIKI Wish List}
+%=======================================================================
+
+\begin{description}
+ \item[W001] Integrate "inits" functionality into the main code
+ \item[W002] Support ensembles within a single run, including inline-analysis
+ \item[W003] Support multiple (hybrid) and flexible parallelization strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided get/put), OMP, and optionally UPC and GPU
+ \item[W004] Reduce implicit dependencies by dynamically allocating parallel tasks, ala CHARM++
+ \item[W005] Auto-tune where possible--automatically optimize for cache-, parallel-, vector-, solver-, etc. parameters
+ \item[W006] Use object-oriented design, organize into components (subdirectories) of classes (*.hpp/*.cpp files)
+ \item[W007] Require more rigorous coding standards compared to Enzo development
+ \item[W008] Enforce strict control over data storage formats (e.g. files) (see W0009)
+ \item[W009] Require that all stored data be accessed through standard interface functions that are independent of specific file formats (i.e., stored datasets are conceptually treated as objects)
+ \item[W010] Support both structured AMR (Enzo-like) and tree-based AMR
+ \item[W011] Store particle positions in single precision as -1 <= x,y,z <= 1 relative to their containing patch
+ \item[W012] Do not store a patch's global position, only local position relative to immediate neighbors, parent, and children
+ \item[W013] Represent patch extents with (small) integer values relative to parent
+ \item[W014] Provide (or notify) neighboring patches with updated ghost zone data as soon as it's available
+ \item[W015] Support optional variable timestep sizes within each level
+ \item[W016] Support optional uniform timesteps across all levels
+ \item[W017] User-controlled optional floor/ceiling limits on individual Fields (ala "tiny\_number" in Enzo), with user-specified Error behavior (warning, error, ignore, reset to given floor/ceiling, etc.)
+ \item[W018] Allow multiple root-level patches per MPI task
+ \item[W019] Use a binary tree data-structure to recursively partition the bounding boxes of particles
+ \item[W020] For very deep AMR where coarser levels never complete their timestep, delete coarse levels to free storage
+ \item[W021] Relax rigid refinement criteria to inhibit excessive changes in octree-like tree refinement
+ \item[W022] Support for user-supplied code for problem initialization
+ \item[W023] Load-balance by having over-loaded processors reassign tasks to random processes
+ \item[W024] Load-balance using "over-compensation", since heavily-loaded processes tend to continue to become more heavily loaded (cosmology / star-formation application-dependent)
+ \item[W025] Reduce tree-AMR node size by only storing parent, single neighbor, and single child
+ \item[W026] Support flexible node types: memory-efficient versus compute-efficient
+ \item[W027] Support temporary "allocate as-needed" ghost zones in addition to "permanent" ones
+ \item[W028] Only use inter-core, inter-cpu, inter-node, etc. level-communicators to bound communicator size and manage communication nonuniformity
+\end{description}
 
 %=======================================================================
 \section{Input}
 %=======================================================================
-
 
 \begin{itemize}
 \item Problem
@@ -504,42 +251,6 @@ Acceptance & \textit{#3}
 \item I/O
 \item Performance
 \end{itemize}
-
-Equivalent \enzo\ parameters
-
-\begin{tabular}{ll}
-ControlCourantSafetyFactor        & CourantSafetyNumber \\
-ControlStopCycle           & StopCycle \\
-ControlStopTime            & StopTime \\
-HydroMethod                & HydroMethod \\
-HydroParameter "diffusion"    & PPMDiffusionParameter \\
-HydroParameter "dual-energy"  & DualEnergyFormalism \\
-HydroParameter "eta1"    & DualEnergyFormalismEta1 \\
-HydroParameter "eta2"    & DualEnergyFormalismEta2 \\
-HydroParameter "flattening"   & PPMFlatteningParameter \\
-HydroParameter "pressure free" & PressureFree \\
-HydroParameter "steepening"  & PPMSteepeningParameter \\
-Material1Gamma             & Gamma \\
-OutputUserDt               & dtDataDump \\
-OutputUserDumpName         & DataDumpName \\
-ProblemBcLower             & LeftFaceBoundaryCondition \\
-ProblemBcUpper             & RightFaceBoundaryCondition \\
-ProblemDomainLower         & DomainLeftEdge \\
-ProblemDomainUpper         & DomainRightEdge \\
-ProblemStartCycle          & InitialCycleNumber \\
-ProblemStartTime           & InitialTime \\
-                           & ProblemType \\
-\end{tabular}
-
-There are some variables defined that can be accessed in the input file.
-\begin{tabbing}
-xxx\=xxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
-\> \code{x},\code{y},\code{z} \> Coordinates in problem distance units. \\
-\> \code{t} \> Time in problem time units. \\
-\> \code{X},\code{Y},\code{Z} \> Coordinates in computational units. \\
-\> \code{T} \> Time in computational units. \\
-\> \code{PI} \> $\pi$ \\
-\end{tabbing}
 
 %=======================================================================
 \section{Output}
