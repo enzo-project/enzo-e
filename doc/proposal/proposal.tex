@@ -950,6 +950,33 @@ communicator sizes.
 \subsection{Resilience}
 %-----------------------------------------------------------------------
 
+The importance of fault tolerance and software resilience increases
+with the number of components in an HPC platform.  As platforms
+continue to grow in size, faults will transition from being occasional
+events into being a continuous stream of failures.
+
+Our framework will be resilient to multiple compute, memory, disk, interconnect, and
+software failures.  This will depend on the ability to detect failures, which
+may require OS or library support not currently available.
+Even if these requirements may not be fully realizable yet, resilience still indicates
+properties of the software framework, including virtualization of processors and nodes,
+and the ibility to flag components as unreliable.
+
+The software will also support recovering from numerical errors,
+either by dynamically reducing the timestep, dynamically modifying
+method parameters, or switching to a compatable but different
+user-supplied numerical method for solving the same problem.  For
+example, switching from a fast but sensitive linear solver to a slower
+but more robust one.
+
+The standard checkpoint / restart approach to fault tolerance will be
+supported, though this is unlikely to scale well due to the magnitued
+and rate of change in disparity in performance between disk I/O and
+computation, and is sensitive to disk faults.  The software will also
+support checkpointing to memory, which is a known
+technique~\cite{@@@CHARM}.  This approach scales better, but of course
+reduces the amount of available memory for the application.
+
 \begin{enumerate}
     \item be resilient to multiple compute, memory, disk, interconnect, libraries, code failures
       \\ \textit{depends on ability to detect failures, which may require OS or
