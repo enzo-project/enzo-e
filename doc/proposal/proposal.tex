@@ -527,157 +527,425 @@ poorer scaling in adaptive meshing and communication schedule construction
 %=======================================================================
 
 
-All software in the system will be released as open source.
+The software will be a framework that allows application developers to
+write multiphysics PDE applications that span a wide range of resolutions,
+and that require an amount of memory, storage, and computational
+resources only available on the largest available HPC platforms.  All
+software in the system will be released as open source.  Below we
+describe a subset of the software requirements specification in more
+detail.
 
 %-----------------------------------------------------------------------
 \subsection{Problem scope}
 %-----------------------------------------------------------------------
 
-\begin{enumerate}
-    \item hyperbolic conservation, elliptic (parabolic?), local physics, and combinations
-    \item logically cartesion grids
-    \item $1$D, $2$D, and $3$D
-      \\ \textit{1D and 2D useful for testing}
-    \item eulerian, lagrangian, or hybrid methods
-      \\ \textit{hybrid PM, TPM, PPPM, etc. methods and solvers, PPM, multigrid }
-    \item Possible support for running multiple simulations
-      \\ \textit{could potentially be useful for inline analysis of multiple simulations in a parameter study which would otherwise require much disk storage }
-\end{enumerate}
+The scope of problems that the framework will support includes systems
+of nonlinear PDE's, including hyperbolic conservation laws and
+elliptic equations.  Specifically in terms of the astrophysics /
+cosmological application \enzoii\ driving the development, the
+framework will support solving Euler's equations of hydrodynamics,
+magnetohydrodynamics, radiation-hydrodyanmics, and Poisson's equation
+for self-gravity.
 
-%-----------------------------------------------------------------------
-\subsection{User-supplied functions}
-%-----------------------------------------------------------------------
+Spacial dimensions will include $3$D, but the framework will also
+support $1$D and $2$D, primarily for test problems.  Supported
+algorithms (the implementations of which are not in the scope of the
+framework, but are in the scope of the user functions and \enzoii\
+driving application) include Eulerian mesh-based methods, Lagrangian
+particle-based methods, and hybrid particle-mesh methods.  
 
-\begin{enumerate}
-   \item user-supplied methods, solvers, analysis, visualization
-   \item user code in fortran, C, or C++
-   \item advance single-patch one timestep
-   \item impose inter-resolution constraints (flux correction)
-   \item refinement criteria for localized spacial resolution requirements (accuracy)
-   \item timestep criteria for localized temporal resolution requirements (CFL)
-   \item interpolation of individual fields
-\end{enumerate}
+Optionally, we may also support multiple simulations run
+simultaneously; this could allow for inter-simulation inline analysis
+for parameter studies that would otherwise be infeasible due to
+excessive data storage requirements.
 
-%-----------------------------------------------------------------------
-\subsection{Run-time parameters}
-%-----------------------------------------------------------------------
-
-\begin{enumerate}
-    \item Input via single or multiple included parameter files
-    \item Both framework and user code have access to run-time parameters
-      \\ \textit{useful for user code to take advantage of framework parameters }
-      \\ \textit{indicates an API for parameters }
-    \item Sufficiently powerful parameter file language to specify user problems
-      \\ \textit{difficult to test, but ability to e.g.~express arbitrary scalar and
-        logical expressions, including standard functions (sin, log, etc.) for initial conditions using x,y,z,t variables }
-      \\ \textit{in particular, Enzo II will be able to define any current
-        hydro / gravity / MHD test problem that Enzo can, despite not having
-        specialized problem types }
-    \item Explicit initial conditions via data files
-    \item Allow ``deep'' parameter control of parallelism, parallel data 
-      structures, and user code
-      \\ \textit{indicates many parameters, which indicates parameters grouped by common functionality to reduce complexity }
-\end{enumerate}
- 
-%-----------------------------------------------------------------------
-\subsection{Performance}
-%-----------------------------------------------------------------------
-
-\begin{enumerate}
-    \item computation scalable to $> 10^6$ cores
-      \\ \textit{$< O(P)$ storage / compute per process }
-      \\ \textit{$<= O(N/P)$ storage per process ($\log N$ or $\log $ ok) }
-    \item memory scalable to $> 10^6$ cores
-    \item communication  scalable to $> 10^6$ cores
-       \\ \textit{affects checkpointing strategy}
-    \item disk storage  scalable to $> 10^6$ cores
-       \\ \textit{affects checkpointing strategy}
-    \item highly competetive parallel scaling
-    \item competetive serial performance
-    \item competetive parallel performance
-    \item competetive memory usage
-\end{enumerate}
+% \begin{enumerate}
+%     \item hyperbolic conservation, elliptic (parabolic?), local physics, and combinations
+%     \item logically cartesion grids
+%     \item $1$D, $2$D, and $3$D
+%       \\ \textit{1D and 2D useful for testing}
+%     \item eulerian, lagrangian, or hybrid methods
+%       \\ \textit{hybrid PM, TPM, PPPM, etc. methods and solvers, PPM, multigrid }
+%     \item Possible support for running multiple simulations
+%       \\ \textit{could potentially be useful for inline analysis of multiple simulations in a parameter study which would otherwise require much disk storage }
+% \end{enumerate}
 
 %-----------------------------------------------------------------------
 \subsection{Adaptive mesh refinement}
 %-----------------------------------------------------------------------
 
-\begin{enumerate}
-    \item  AMR data structure size (number of grids) is ``close'' to optimal
-       \\ \textit{eliminates fixed-sized patches }
-    \item  ``Fast'' searching of neighboring patches
-       \\ \textit{indicates either octree or chaining mesh type data structure}
-    \item  Support extreme hierarchy size (number of patches at least $10^6$)
-       \\ \textit{indicates partial or fully distributed AMR data structure}
-    \item  Support extreme hierarchy depth (dynamic range of at least $60$ levels)
-       \\ \textit{Greater than the age of the universe in seconds}
-      \\  \textit{indicates no precision or range issues with global floating 
-         point positions or global integer indices}
-    \item Coordinate system may be (slowly) time-varying
-      \\ \textit{In particular to support cosmological expansion }
-\end{enumerate}
+The AMR data structure must be highly scalable in both breadth and
+depth, supporting at least @@@ $10^8$ grid patches and @@@ $60$ levels
+of refinement.  The extreme number of possible grid patches indicates
+that the data structure must be at least partially distributed.  The
+extreme possible depth indicates that there must be no precision or
+range issues with global floating point positions or global integer
+indices.  The great range in resolutions also suggests that the
+framework should support flexible numerical scaling at different mesh
+levels, to reduce floating point errors and prevent underflow or
+overflow errors.
+
+The AMR data structure should also be ``efficient'' at adapting in
+terms of the number of grid patches.  In particular, if much of the
+region consists of large areas that require the finest grid level,
+then the number of patches covering those regions should not be
+excessive.  We note that this requirement essentially eliminates
+fixed-size patches, which most octree-based AMR approaches use.
+
+The AMR data structure should also be efficient and scalable in terms
+of all of its operations, including coarsening, refining, and locating
+neighboring patches.  Note that this indicates that some sort of
+spacial data structure, such as octrees or chaining meshes, will
+be required.
+
+The mesh hierarchy should dynamically adapt to problem features as
+specified by the user.  Local changes in resolution should remain
+bounded, e.g.~neighboring patches must be at most one level different,
+to maintain numerical accuracy.  Also, refinement of symmetric
+problems should retain logical symmetry (cells but not necessarily
+patches) in the AMR data structure, to help prevent asymmetries in the
+numerical solution.
+
+% \begin{enumerate}
+%     \item  AMR data structure size (number of grids) is ``close'' to optimal
+%        \\ \textit{eliminates fixed-sized patches }
+%     \item  ``Fast'' searching of neighboring patches
+%        \\ \textit{indicates either octree or chaining mesh type data structure}
+%     \item  Support extreme hierarchy size (number of patches at least $10^6$)
+%        \\ \textit{indicates partial or fully distributed AMR data structure}
+%     \item  Support extreme hierarchy depth (dynamic range of at least $60$ levels)
+%        \\ \textit{Greater than the age of the universe in seconds}
+%       \\  \textit{indicates no precision or range issues with global floating 
+%          point positions or global integer indices}
+%     \item Coordinate system may be (slowly) time-varying
+%       \\ \textit{In particular to support cosmological expansion }
+% \end{enumerate}
 
 %-----------------------------------------------------------------------
-\subsection{Data Fields}
+\subsection{Mesh data}
 %-----------------------------------------------------------------------
 
-\begin{enumerate}
-    \item Support multiple user-defined fields
-    \item support stencils spanning at least 7 cells (3 ghost zones)
-    \item support efficient and scalable global linear solves
-      \\ \textit{required by accurate elliptic and parabolic solves}
-    \item No assumptions shall be made on field variable names in the source
-      code
-      \\ \textit{indicates they are specified in the parameter file, and
-        user methods must use subset of fields }
-    \item Different fields can have different precision, single or double
-    \item Fields can include scaling factor for improved numerical accuracy
-      \\ \textit{e.g. if single precision has enough precision but not enough range }
-\end{enumerate}
+Multiresolution data fields defined on logically Cartesian meshes,
+used for Eulerian mesh-based and hybrid particle-mesh methods, will be
+supported by the AMR data structure.  The number and identification of
+fields will be flexible and declared by the user: no assumptions will
+be made on specific data field names or properties in the framework.
+
+Stencil-based discretization methods will of course be supported,
+which indicates that a layer of ``ghost'' or ``guard'' cells will be
+required for computations.  The framework will allow flexible layers
+of ghost zones, up to at least three zones deep.  Furthermore, the number and
+depth of ghost zones may depend on the specific field, and ghost zones
+may or may not be permanantly stored.
+
+Data fields may be single or double precision, and different fields
+may have different precisions, depending on the relative importance of
+storage and accuracy for individual fields.  The framework will also
+support scaling different fields by different amounts at different
+levels, to improve the numerical behavior of user methods on an
+extreme range of scales.
+
+The framework will also allow for user methods to operate on
+individual patches, all patches within a level, or all patches in the
+hierarchy.  The motivation is that the most scalable and accurate
+methods for coupled hyperbolic and elliptic problems defined on AMR
+hierarchies typically involve solving linear systems defined both
+within a single level and on the entire AMR hierarchy~\cite{MiCo07}.
+
+% \begin{enumerate}
+%     \item Support multiple user-defined fields
+%     \item support stencils spanning at least 7 cells (3 ghost zones)
+%     \item support efficient and scalable global linear solves
+%       \\ \textit{required by accurate elliptic and parabolic solves}
+%     \item No assumptions shall be made on field variable names in the source
+%       code
+%       \\ \textit{indicates they are specified in the parameter file, and
+%         user methods must use subset of fields }
+%     \item Different fields can have different precision, single or double
+%     \item Fields can include scaling factor for improved numerical accuracy
+%       \\ \textit{e.g. if single precision has enough precision but not enough range }
+% \end{enumerate}
 
 %-----------------------------------------------------------------------
-\subsection{Particles}
+\subsection{Particle data}
 %-----------------------------------------------------------------------
 
-\begin{enumerate}
-    \item Support multiple user-defined particle groups
-      \\ \textit{e.g. star particles, dark matter particles, tracer particles, etc. }
-    \item Each particle group can include arbitrary user-defined parameters
-      \\ \textit{minimal is position }
-    \item User code has access to particle type and particle parameter values
-    \item  ``Fast'' searching of nearby particles
-       \\ \textit{indicates an octree-like data structure}
-    \item Extreme particle count $> 10^9$
-\end{enumerate}
+In addition to mesh data, particle data will also be supported, for
+use in Lagrangian particle-based and hybrid particle-mesh methods.
+Multiple groups of particles will be supported, e.g.~\enzoii\ will
+include ``star'' particles, dark matter particles for collisionless
+gravitational dynamics, tracer particles for analysis and
+visualization, etc.  All particles will have position, and different particle
+groups will have different user-defined attributes associated with them, such
+as velocity, mass or momentum, etc.
 
+Extreme particle counts will be supported, indicating that particles
+must be at least partially distributed.  Since many algorithms on
+particles require particle proximities, operations such as finding
+nearest neighbors must be efficient.  This indicates that an efficient
+distributed spacial data structure must be used, such as an octree or
+orthogonal recursive bisection.  Also, since hybrid particle-mesh
+methods will be supported, locating all particles within a mesh, and
+locating the mesh for a given particle, must be efficient.
+
+% \begin{enumerate}
+%     \item Support multiple user-defined particle groups
+%       \\ \textit{e.g. star particles, dark matter particles, tracer particles, etc. }
+%     \item Each particle group can include arbitrary user-defined parameters
+%       \\ \textit{minimal is position }
+%     \item User code has access to particle type and particle parameter values
+%     \item  ``Fast'' searching of nearby particles
+%        \\ \textit{indicates an octree-like data structure}
+%     \item Extreme particle count $> 10^9$
+% \end{enumerate}
+
+%-----------------------------------------------------------------------
+\subsection{User-supplied functions}
+%-----------------------------------------------------------------------
+
+While the framework supports adaptive mesh refinement for both mesh
+and particle data, algorithms and other problem-dependent functions
+must be provided by the user.  User functions may be either Fortran or
+C (or C++).  
+
+The main functions users supply will be numerical algorithms for
+advancing a patch, hierarchy level, or full hierarchy one timestep.
+Inline-analysis and visualization functions may also be provided by
+the user.  Patch-based user functions will have access to the
+associated mesh and particle data, plus a bounding layer of ``ghost''
+or ``guard'' zones on the mesh, as well as an analagous layer of
+nearby particles.
+
+Other user functions provided by the user will include functions for
+imposing inter-level constraints such as flux correction, functions
+for interpolating data to a finer mesh or for restricting data to a
+coarser mesh, and functions for evaluating refinement criteria to
+refine or coarsen a given patch.
+
+
+% \begin{enumerate}
+%    \item user-supplied methods, solvers, analysis, visualization
+%    \item user code in fortran, C, or C++
+%    \item advance single-patch one timestep
+%    \item impose inter-resolution constraints (flux correction)
+%    \item refinement criteria for localized spacial resolution requirements (accuracy)
+%    \item timestep criteria for localized temporal resolution requirements (CFL)
+%    \item interpolation of individual fields
+% \end{enumerate}
+
+%-----------------------------------------------------------------------
+\subsection{Run-time parameters}
+%-----------------------------------------------------------------------
+
+Run-time parameters, such as those defining the domain, initial
+conditions, AMR data structure properties, parallelism approach,
+numerical method parameters, mesh fields and particle groups, etc.,
+will be specified using a single or multiple included parameter files.
+User code will have access to all parameters, including those
+associated with the framework.
+
+The parameter file grammar and data types should be powerful enough to
+specify user problems; in particular, it should be powerful enough to
+define any existing \enzo\ test problem for the \enzoii\ driving
+application, despite not having problem-specific parameters and
+initialization implemented in the code.  Since initial conditions are
+typically specified by setting fields equal to different numerical
+expresions in different subregions of the domain, the parameter file
+grammar must be able to support both arbitrary scalar expressions for
+field values, and arbitrary logical expressions involving spacial
+variables (e.g.~\code{x}, \code{y}, and \code{z}) for specifying
+subregions of the domain.  Common data types such as scalars, strings,
+and lists or arrays should be supported as well.  Field and particle
+initial conditions may also be defined in terms of user code or data
+files.
+
+The range of parameters should be both broad and deep, allowing
+flexible definition of simulations and detailed control of data
+structures and methods.  The expected large number of parameters
+indicates a hierarchical organization of parameters, e.g.~explicit
+grouping of parameters based on related functionality to improve
+parameter file readability.
+
+% \begin{enumerate}
+%     \item Input via single or multiple included parameter files
+%     \item Both framework and user code have access to run-time parameters
+%       \\ \textit{useful for user code to take advantage of framework parameters }
+%       \\ \textit{indicates an API for parameters }
+%     \item Sufficiently powerful parameter file language to specify user problems
+%       \\ \textit{difficult to test, but ability to e.g.~express arbitrary scalar and
+%         logical expressions, including standard functions (sin, log, etc.) for initial conditions using x,y,z,t variables }
+%       \\ \textit{in particular, Enzo II will be able to define any current
+%         hydro / gravity / MHD test problem that Enzo can, despite not having
+%         specialized problem types }
+%     \item Explicit initial conditions via data files
+%     \item Allow ``deep'' parameter control of parallelism, parallel data 
+%       structures, and user code
+%       \\ \textit{indicates many parameters, which indicates parameters grouped by common functionality to reduce complexity }
+% \end{enumerate}
+ 
 %-----------------------------------------------------------------------
 \subsection{Parallelism}
 %-----------------------------------------------------------------------
 
-\begin{enumerate}
-    \item No fundamental limit on process / thread counts
-      \\ \textit{i.e. no hard-coded MAX\_PROCESSORS}
-    \item Support distributed memory, shared memory, and hybrid parallelism
-    \item Include thread-safety
-      \\ \textit{requires user code to be thread-safe }
-    \item Support range of parallel task sizes, including single array cells
-     (note conflicts with AMR data structure size for standard octree AMR)
-    \item no limit on processor count
-    \item direct or indirect support of GPU's
-      \\ \textit{at least ability to schedule groups of many tasks at once }
-      \\ \textit{requires support of GPU programming in user code }
-    \item direct support for multilevel parallelism of up to 4 levels
-      \\ \textit{not just distributed and shared memory.  E.g. distinguish
-        between cores, sockets, nodes, cabinets }
-    \item efficient, reliable, and effective load balancing
-      \\ \textit{indicates hierarchical, takes into account cost to relocate task,
-        and level-dependent (and user-defined)  metrics }
-    \item efficient, reliable, and effective dynamic task scheduling
-      \\ \textit{given load balance, schedule tasks.  Indicates hierarchical,
-        ability to group-schedule (for GPU).  Could use component parallelism
-        to improve load balancing on extreme scales~\cite{@@@Shalf} }
+The framework will be highly scalable, so parallelism is a key
+feature of the software.  There will be no fundamental limit on
+process or thread counts (i.e.~no hard-coded \code{MAX\_PROCESSORS} constant).
+
+Parallelism will include both distributed and shared memory models, as
+well as hybrid parallelism.  This implies that many sections of both
+the framework and user code must be thread safe.
+
+Parallel task definition is crucial to both performance and scaling of
+parallel applications---there must be enough tasks to provide
+sufficient parallelism, individual tasks must be large enough that
+overhead does not dominate computation, and tasks must be defined such
+that there is not excessive inter-task communication.  We note that
+this requirement can conflict with standard AMR data structures if
+individual AMR patches are taken to be individual parallel tasks.
+This is because patch counts and sizes are dependent functions of
+resolution requirements, which leaves parallelism to be only
+indirectly controllable through AMR parameters, such as limits on the
+range of allowable patch sizes.  This indicates that relaxing the
+constraint of defining parallel tasks as individual AMR patches could
+be beneficial.
+
+The framework will directly support multiple levels of parallelism,
+not just at the distributed memory / shared memory levels.
+Specifically, the framework will support up to four levels of
+parallelism, for example corresponding to hardware cabinents, nodes,
+processors, and cores.  We expect that this will improve both
+efficiency and scalability, by allowing more flexible mapping of the
+distributed data structures onto the hierarchical parallel hardware,
+and by reducing the size of groups of intercommunicating
+procesess~\cite{BaBu09}.
+
+Dynamic load balancing / task migration is crucial for parallel performance
+of AMR due to the ever-changing workload, so load balancing must be
+efficient, reliable, and effective.  Since we will support multiple
+levels of parallelism, this indicates that a hierarchical load balancing 
+approach should be used~\cite{LaTa06}.  This would allow for balancing between different levels at different frequencies, and balancing with respect to
+different metrics (e.g.~to balance computation between cores, and balance
+both computation and memory between nodes).
+
+Task scheduling must also be efficient, minimizing overhead and
+maximizing throughput.  Again, a hierarchical scheduling approach may
+be used.  Since we want to at least indirectly support GPU programming
+in user code, we will want to support scheduling large groups of
+concurrent tasks to keep the GPU's busy.
+
+% \begin{enumerate}
+%     \item No fundamental limit on process / thread counts
+%       \\ \textit{i.e. no hard-coded MAX\_PROCESSORS}
+%     \item Support distributed memory, shared memory, and hybrid parallelism
+%     \item Include thread-safety
+%       \\ \textit{requires user code to be thread-safe }
+%     \item Support range of parallel task sizes, including single array cells
+%      (note conflicts with AMR data structure size for standard octree AMR)
+%     \item no limit on processor count
+%     \item direct or indirect support of GPU's
+%       \\ \textit{at least ability to schedule groups of many tasks at once }
+%       \\ \textit{requires support of GPU programming in user code }
+%     \item direct support for multilevel parallelism of up to 4 levels
+%       \\ \textit{not just distributed and shared memory.  E.g. distinguish
+%         between cores, sockets, nodes, cabinets }
+%     \item efficient, reliable, and effective load balancing
+%       \\ \textit{indicates hierarchical, takes into account cost to relocate task,
+%         and level-dependent (and user-defined)  metrics }
+%     \item efficient, reliable, and effective dynamic task scheduling
+%       \\ \textit{given load balance, schedule tasks.  Indicates hierarchical,
+%         ability to group-schedule (for GPU).  Could use component parallelism
+%         to improve load balancing on extreme scales~\cite{@@@Shalf} }
 \end{enumerate}
   
+%-----------------------------------------------------------------------
+\subsection{Interfaces}
+%-----------------------------------------------------------------------
+
+The framework must be able to communicate with users while running, to
+provide clear output of the state and progress of the simulation.
+This should include an estimate of progress, performance, list of any
+warnings or errors, as well as method-specific information such as
+solver iterations or method-specific warnings or errors.  This
+indicates that user code should have access to functions for
+communicating values to users in a running simulation.
+
+The mode of output should not be limited to text, but should include
+support for generating simple plots of data fields and particle
+groups, and graphs indicating the progress or performance of the
+simulation, and the historical output of important values indicating
+correctness or progress, such as total mass, $||\div B||$, and
+timestep size.
+
+All output should be easily viewable, at varying levels of detail from
+high-level summary levels to more in-depth detailed levels.  This
+could indicate the framework periodically writing a set of dynamically
+changing web pages.
+
+% \begin{enumerate}
+%     \item Clear output to the user reguarding the current state of the simulation.
+%      \\ \textit{ progress, performance, warnings, errors, attempts at recovery }
+%      \\ \textit{ can include text, web page, simple plots, to show a dashboard of current
+%         and historical state }
+%     \item Output includes user-defined output
+%      \\ \textit{indicates user code can call logging API, including web pages and simple plots }
+%     \item Ability to view and modify data structure parameters dynamically at run time
+% \end{enumerate}
+
+
+%-----------------------------------------------------------------------
+\subsection{I/O }
+%-----------------------------------------------------------------------
+
+I/O must be efficient, scalable, and portable, indicating a parallel
+I/O library such as HDF5, and using a standardized AMR file format
+such as that provided by the ADIOS API~\cite{LoKl08}.  Data dumps
+should include all or a subset of data fields and particle groups, and
+different sets of data may be written at different frequencies
+depending on post-processing requirements.
+
+% \begin{enumerate}
+%      \item Support for data dumps of all or subset of data fields and particles
+%      \item Support user method-dependent data output
+%        \\ \textit{indicates user code can access disk storage API }
+%      \item Parallel I/O using standardized AMR file formats \cite{LoKl08}
+%        \\ \textit{e.g.~ADIOS API }
+% \end{enumerate}
+       
+%-----------------------------------------------------------------------
+\subsection{Performance}
+%-----------------------------------------------------------------------
+
+Performance is a non-functional requirement, but crucial to the
+development and behavior of the framework.  We desire high
+performance, high utilization, and high scalability of all available
+computational, memory, communication, and disk hardware components.
+This implies high performance and scalability at all levels of the
+software, including data structures, algorithms, communication, I/O,
+external libraries.
+
+We wish to scale a problem of size $N$ efficiently to $> P = 10^6$
+cores, which indicates that memory and computation should be $< O(P)$
+per compute process, as well as $<= O(N/P)$ per process.  This
+indicates that $O(N)$ data structures must be distributed.  Since MPI
+itself is not necessarily $< O(P)$ per process~\cite{BaBu09}, this also
+further motivates using a hierarchical parallelism approach to bound
+communicator sizes.
+
+% \begin{enumerate}
+%     \item computation scalable to $> 10^6$ cores
+%       \\ \textit{$< O(P)$ storage / compute per process }
+%       \\ \textit{$<= O(N/P)$ storage per process ($\log N$ or $\log $ ok) }
+%     \item memory scalable to $> 10^6$ cores
+%     \item communication  scalable to $> 10^6$ cores
+%        \\ \textit{affects checkpointing strategy}
+%     \item disk storage  scalable to $> 10^6$ cores
+%        \\ \textit{affects checkpointing strategy}
+%     \item highly competetive parallel scaling
+%     \item competetive serial performance
+%     \item competetive parallel performance
+%     \item competetive memory usage
+% \end{enumerate}
+
 %-----------------------------------------------------------------------
 \subsection{Resilience}
 %-----------------------------------------------------------------------
@@ -699,33 +967,6 @@ All software in the system will be released as open source.
       \\ \textit{e.g. if a geometric multigrid-based linear solver does not converge, a more robust but slower linear solver may dynamically be called }
 \end{enumerate}
 
-%-----------------------------------------------------------------------
-\subsection{Interfaces}
-%-----------------------------------------------------------------------
-
-\begin{enumerate}
-    \item Clear output to the user reguarding the current state of the simulation.
-     \\ \textit{ progress, performance, warnings, errors, attempts at recovery }
-     \\ \textit{ can include text, web page, simple plots, to show a dashboard of current
-        and historical state }
-    \item Output includes user-defined output
-     \\ \textit{indicates user code can call logging API, including web pages and simple plots }
-    \item Ability to view and modify data structure parameters dynamically at run time
-\end{enumerate}
-
-
-%-----------------------------------------------------------------------
-\subsection{I/O }
-%-----------------------------------------------------------------------
-
-\begin{enumerate}
-     \item Support for data dumps of all or subset of data fields and particles
-     \item Support user method-dependent data output
-       \\ \textit{indicates user code can access disk storage API }
-     \item Parallel I/O using standardized AMR file formats \cite{LoKl08}
-       \\ \textit{e.g.~ADIOS API }
-\end{enumerate}
-       
 %=======================================================================
 \section{Software Design} \label{s:design}
 %=======================================================================
@@ -734,6 +975,7 @@ All software in the system will be released as open source.
 
 Our design will be object-oriented, with related classes grouped into
 high-level components.
+
 
 \begin{verbatim}
 OOP
@@ -744,10 +986,10 @@ OOP
   still not always ideal
      cross-cutting components
      can use aspect-oriented ideas
+  design patterns
 \end{verbatim}
 
 \begin{verbatim}
-
 still primarily in design phase
    available flexibility to modify current design
    design as described is current snapshot
