@@ -528,12 +528,12 @@ poorer scaling in adaptive meshing and communication schedule construction
 
 
 The software will be a framework that allows application developers to
-write multiphysics PDE applications that span a wide range of resolutions,
-and that require an amount of memory, storage, and computational
-resources only available on the largest available HPC platforms.  All
-software in the system will be released as open source.  Below we
-describe a subset of the software requirements specification in more
-detail.
+write multiphysics PDE applications that span a wide range of
+resolutions, and that require an amount of computational resources,
+memory, and storage only available on the largest available HPC
+platforms.  All software in the system will be released as open
+source.  Below we describe a subset of the software requirements
+specification, though more qualitatively than quantitatively.
 
 %-----------------------------------------------------------------------
 \subsection{Problem scope}
@@ -774,7 +774,7 @@ parameter file readability.
 %     \item Sufficiently powerful parameter file language to specify user problems
 %       \\ \textit{difficult to test, but ability to e.g.~express arbitrary scalar and
 %         logical expressions, including standard functions (sin, log, etc.) for initial conditions using x,y,z,t variables }
-%       \\ \textit{in particular, Enzo II will be able to define any current
+%       \\ \textit{in particular, \enzoii\  will be able to define any current
 %         hydro / gravity / MHD test problem that Enzo can, despite not having
 %         specialized problem types }
 %     \item Explicit initial conditions via data files
@@ -873,7 +873,7 @@ The mode of output should not be limited to text, but should include
 support for generating simple plots of data fields and particle
 groups, and graphs indicating the progress or performance of the
 simulation, and the historical output of important values indicating
-correctness or progress, such as total mass, $||\div B||$, and
+correctness or progress, such as total mass, $||\nabla \cdot B||$, and
 timestep size.
 
 All output should be easily viewable, at varying levels of detail from
@@ -900,8 +900,9 @@ I/O must be efficient, scalable, and portable, indicating a parallel
 I/O library such as HDF5, and using a standardized AMR file format
 such as that provided by the ADIOS API~\cite{LoKl08}.  Data dumps
 should include all or a subset of data fields and particle groups, and
-different sets of data may be written at different frequencies
-depending on post-processing requirements.
+different sets of data may be written at different intervals, times,
+or when certain user-defined conditions are met, depending on
+post-processing requirements.
 
 % \begin{enumerate}
 %      \item Support for data dumps of all or subset of data fields and particles
@@ -955,12 +956,15 @@ with the number of components in an HPC platform.  As platforms
 continue to grow in size, faults will transition from being occasional
 events into being a continuous stream of failures.
 
-Our framework will be resilient to multiple compute, memory, disk, interconnect, and
-software failures.  This will depend on the ability to detect failures, which
-may require OS or library support not currently available.
-Even if these requirements may not be fully realizable yet, resilience still indicates
-properties of the software framework, including virtualization of processors and nodes,
-and the ibility to flag components as unreliable.
+Our framework will attempt to be resilient to multiple compute,
+memory, disk, interconnect, and software failures.  Its success will
+depend on the ability to detect failures, which may require OS or
+library support not currently available.  Even if these requirements
+may not be fully realizable yet, resilience still indicates properties
+of the software framework, including virtualization of processors and
+nodes, the ability to flag certain hardware or software components as
+unreliable, and the ability and flexibility to continue the simulation
+despite multiple failures.
 
 The software will also support recovering from numerical errors,
 either by dynamically reducing the timestep, dynamically modifying
@@ -970,29 +974,31 @@ example, switching from a fast but sensitive linear solver to a slower
 but more robust one.
 
 The standard checkpoint / restart approach to fault tolerance will be
-supported, though this is unlikely to scale well due to the magnitued
-and rate of change in disparity in performance between disk I/O and
-computation, and is sensitive to disk faults.  The software will also
-support checkpointing to memory, which is a known
-technique~\cite{@@@CHARM}.  This approach scales better, but of course
-reduces the amount of available memory for the application.
+supported, though this is unlikely to scale well due to the disparity
+in performance between disk I/O and computation, both in magnitude and
+rate of change.  The software will also support checkpointing to
+memory; this approach scales better, but of course reduces the amount
+of available memory for the application.  As with detection of
+failures, the checkpoint / restart functionality may be outsourced to
+an external library, such as the Berkeley Lab Checkpoint Restart
+(BLCR) library~\cite{wwwblcr}.
 
-\begin{enumerate}
-    \item be resilient to multiple compute, memory, disk, interconnect, libraries, code failures
-      \\ \textit{depends on ability to detect failures, which may require OS or
-      library support not currently available }
-      \\ \textit{indicates virtualization of processors and nodes: can backtrack
-          and continue with reduced hardware }
-      \\ \textit{indicates ability to flag components as unreliable }
-    \item the system shall attempt to recover from numerical errors (NaN, Inf)
-      \\ \textit{e.g. by switching to an alternative method or solver, or using a smaller timestep}
-    \item the system shall support outputing data for restart dumps to disk or memory
-    \item user code can checkpoint its data
-      \\ \textit{indicates ability of user code to call resiliance / fault tolerance API }
-    \item user code can indicate a failure
-    \item users can supply multiple methods or solvers to improve robustness
-      \\ \textit{e.g. if a geometric multigrid-based linear solver does not converge, a more robust but slower linear solver may dynamically be called }
-\end{enumerate}
+% \begin{enumerate}
+%     \item be resilient to multiple compute, memory, disk, interconnect, libraries, code failures
+%       \\ \textit{depends on ability to detect failures, which may require OS or
+%       library support not currently available }
+%       \\ \textit{indicates virtualization of processors and nodes: can backtrack
+%           and continue with reduced hardware }
+%       \\ \textit{indicates ability to flag components as unreliable }
+%     \item the system shall attempt to recover from numerical errors (NaN, Inf)
+%       \\ \textit{e.g. by switching to an alternative method or solver, or using a smaller timestep}
+%     \item the system shall support outputing data for restart dumps to disk or memory
+%     \item user code can checkpoint its data
+%       \\ \textit{indicates ability of user code to call resiliance / fault tolerance API }
+%     \item user code can indicate a failure
+%     \item users can supply multiple methods or solvers to improve robustness
+%       \\ \textit{e.g. if a geometric multigrid-based linear solver does not converge, a more robust but slower linear solver may dynamically be called }
+% \end{enumerate}
 
 %=======================================================================
 \section{Software Design} \label{s:design}
@@ -1031,7 +1037,7 @@ application driven
    helpful for ensuring completeness
       missing functionality in design will become apparent
    helpful for testing
-   Enzo II
+   \enzoii\ 
    cosmology / astrophysics
    requires wide range of AMR capabilities
      broad for galaxy structure formation
@@ -1042,7 +1048,7 @@ application driven
      elliptic: self-gravity, FLD radiation
      local physics: chemistry, heating/cooling
    decouple physics modules from AMR framework
-   make both Enzo II and underlying AMR framework publicly available
+   make both \enzoii\  and underlying AMR framework publicly available
 \end{verbatim}
 
 \begin{verbatim}
@@ -2258,7 +2264,7 @@ and implementation decisions must be made deliberately and thoughtfully.
           use lcatest parallel testing framework
           correctness, performance, scaling, resilience
           correctness
-             EnzoII implementation
+             \enzoii\  implementation
              compare agains Enzo I results
              existing test problems
           performance
@@ -2351,8 +2357,8 @@ testing
 \begin{verbatim}
    Cello software framework
    research papers
-   Complete Enzo II application
-   large-scale demonstration using Enzo II
+   Complete \enzoii\  application
+   large-scale demonstration using \enzoii
    workshop/training
 \end{verbatim}
 
