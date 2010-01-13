@@ -200,8 +200,6 @@ component, network, disk, and software failures.
 %hardware component, operating system, library, or application
 %component fails Unfortunately, approaches to fault tolerance are still
 
-@@@@@@@@@@@@@@@@@@@@
-
 \ \\ \pargraph{Intellectual Merit.}
 
 
@@ -255,8 +253,6 @@ ways: improved software development process, object-oriented design
 and implementation, and overhauled distributed AMR infrastructure.
 The physics capabilites, which are continually being improved and
 refined in \enzo, will be retained in \enzo II.
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ \ \\
 
 \begin{verbatim}
 Motivation
@@ -404,8 +400,6 @@ AMR datastructure scalability
 \subsection{Existing AMR frameworks} \label{ss:review}
 %-----------------------------------------------------------------------
 
-@@@@@@@@@@@@@@@@@@@@
-
 \begin{verbatim}
  http://people.sc.fsu.edu/~tomek/AMR/index.html
  *   Adaptive Mesh Refinement Software for Hyperbolic Conservation Laws, Marsha Berger
@@ -454,8 +448,6 @@ DAGH (1998)
 \subsubsection{\code{PARAMESH}} \label{sss:paramesh}
 %-----------------------------------------------------------------------
 
-@@@@@@@@@@@@@@@@@@@@
-
 \nocite{wwwparamesh}
 \nocite{MaOl00} % PARAMESH requested references
 \nocite{OlMa05}
@@ -489,8 +481,6 @@ component, \code{ParticleTools} for particle processing, is not
 currently available due to re-engineering of the
 component~\ref{wwwchombo}.
 
-@@@@@@@@@@@@@@@@@@@@
-
 \chombo\ is parallelized using MPI.  An effort to modify \chombo\ to
 use UPC was undertaken~\cite{We04}.
 Distributed data in \code{LayoutData}, \code{BoxLayoutData}, and
@@ -508,8 +498,6 @@ Berger-Rigoutsos
 %-----------------------------------------------------------------------
 \subsubsection{\code{SAMRAI}} \label{sss:samrai}
 %-----------------------------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@
 
 [2001]
 
@@ -535,17 +523,12 @@ platforms.  All software in the system will be released as open
 source.  Below we describe a subset of the software requirements
 specification, though more qualitatively than quantitatively.
 
-%-----------------------------------------------------------------------
-\subsection{Problem scope}
-%-----------------------------------------------------------------------
-
-The scope of problems that the framework will support includes systems
-of nonlinear PDE's, including hyperbolic conservation laws and
-elliptic equations.  Specifically in terms of the astrophysics /
-cosmological application \enzoii\ driving the development, the
-framework will support solving Euler's equations of hydrodynamics,
-magnetohydrodynamics, radiation-hydrodyanmics, and Poisson's equation
-for self-gravity.
+Problems that the framework will support include systems of nonlinear
+PDE's, including hyperbolic conservation laws and elliptic equations.
+Specifically in terms of the astrophysics / cosmological application
+\enzoii\ driving the development, the framework will support solving
+Euler's equations of hydrodynamics, magnetohydrodynamics,
+radiation-hydrodyanmics, and Poisson's equation for self-gravity.
 
 Spacial dimensions will include $3$D, but the framework will also
 support $1$D and $2$D, primarily for test problems.  Supported
@@ -819,13 +802,17 @@ distributed data structures onto the hierarchical parallel hardware,
 and by reducing the size of groups of intercommunicating
 procesess~\cite{BaBu09}.
 
-Dynamic load balancing / task migration is crucial for parallel performance
-of AMR due to the ever-changing workload, so load balancing must be
-efficient, reliable, and effective.  Since we will support multiple
-levels of parallelism, this indicates that a hierarchical load balancing 
-approach should be used~\cite{LaTa06}.  This would allow for balancing between different levels at different frequencies, and balancing with respect to
-different metrics (e.g.~to balance computation between cores, and balance
-both computation and memory between nodes).
+Dynamic load balancing / task migration is critical for parallel
+performance of AMR, due to the dynamically changing workload
+distributed across nodes with limited memory and potentially millions
+of computational cores.  Dynamic load balancing must therefore be
+efficient, reliable, and effective.  Since we will directly support
+multiple levels of hardware parallelism, this indicates that a
+hierarchical load balancing approach should be used,
+e.g.~\cite{LaTa06}.  This would allow for balancing between different
+parallel levels at different frequencies, and balancing with respect
+to different metrics (e.g.~stress balanced computation between cores
+and balanced memory usage between nodes).
 
 Task scheduling must also be efficient, minimizing overhead and
 maximizing throughput.  Again, a hierarchical scheduling approach may
@@ -1004,78 +991,6 @@ an external library, such as the Berkeley Lab Checkpoint Restart
 \section{Software Design} \label{s:design}
 %=======================================================================
 
-@@@@@@@@@@@@@@@@@@@@
-
-Our design will be object-oriented, with related classes grouped into
-high-level components.
-
-
-\begin{verbatim}
-OOP
-  addresses 
-    agility, readability, flexibility, modifyability, extensibility, complexity
-  improves component reuse, controls software
-  complexity, eases software maintenance
-  still not always ideal
-     cross-cutting components
-     can use aspect-oriented ideas
-  design patterns
-\end{verbatim}
-
-\begin{verbatim}
-still primarily in design phase
-   available flexibility to modify current design
-   design as described is current snapshot
-   little code and time wasted
-emphasis on thorough designing before coding
-   prototype ideas before final implementation
-   more time upfront known to lead to faster overall development times
-\end{verbatim}
-
-\begin{verbatim}
-application driven
-   helpful for ensuring completeness
-      missing functionality in design will become apparent
-   helpful for testing
-   \enzoii\ 
-   cosmology / astrophysics
-   requires wide range of AMR capabilities
-     broad for galaxy structure formation
-     deep for star formation
-     turbulence
-   requires wide range of physics capabilities
-     hyperbolic: hydrodynamics
-     elliptic: self-gravity, FLD radiation
-     local physics: chemistry, heating/cooling
-   decouple physics modules from AMR framework
-   make both \enzoii\  and underlying AMR framework publicly available
-\end{verbatim}
-
-\begin{verbatim}
-relative coordinates for patches   
-   relative to neighbors
-   computations frequently only require cell size and timestep
-      hydrodynamics
-   absolute coordinates computed dynamically when necessary to required precision
-      initialization
-      inline analysis
-      global position dependent physics (materials)
-\end{verbatim}
-
-\begin{verbatim}
-local time-stepping
-   global scaling of dx, dt may not be needed
-      only power-of-two quantization of dx, dt
-        mantissa unchanged--no fp precision issue
-        fp range issue
-            support coordinate rescaling at deep levels
-\end{verbatim}
-
-\begin{verbatim}
-iterative development
-   requirements, design, implementation, tests, user documentation updated in sequence
-\end{verbatim}
-
 \begin{verbatim}
 Design goals
   extreme parallel scalability
@@ -1084,64 +999,77 @@ Design goals
   depth: number of AMR hierarchy levels
 \end{verbatim}
 
+Our design will be primarily object-oriented, which is a proven
+software design and implementation paradigm that helps control
+software complexity and reuse.  Aspect-oriented programming techniques
+will also be used to help separate cross-cutting concerns, such as
+logging state information, memory management, accessing run-time
+parameters, and detecting and resolving hardware or software faults.
+
+The design will involve high-level, medium-level, and low-level design
+phases.  High-level design of the framework will be a functional
+decomposition of the software into several large scale components or
+packages.  Components will be organized into hierarchical levels, with
+higher-level components calling functions and methods in lower-level
+components.  Each component will be implemented as one or more
+interoperating classes.  Medium level design will involve defining
+class hierarchies and interfaces for each component.  Low-level design
+will involve defining class attributes and implementing individual
+class member functions.
+
+Below is a snapshot of the current component diagram for the software
+framework.  Since the software development process is iterative, the final
+component diagram may be slightly different.
+
+\FIGURE{Software component diagram}{f:components}{
+\begin{minipage}{5.0in}
+\includegraphics[width=5.0in]{components2.pdf}
+\end{minipage}}
+
+The top level components involve defining parallel tasks (\code{Task},
+distributing and load-balancing tasks across available resources
+(\code{Distribute}, and scheduling tasks for execution
+(\code{Schedule}).  
+
+The middle level includes a component for defining the simulation
+(\code{Simulation} and user-supplied functions for performing the
+numerical computations, inline analysis, and visualization processing
+required to run the simulation in (\code{Method}).  Distributed AMR is
+implemented in the \code{Amr} package, with related components
+\code{Field} and \code{Particles} for representing data fields and
+particle groups defined on the AMR hierarchy.  \code{Array} is a
+lower-level component for defining and manipulating distributed
+Fortran-like arrays.
+
+The low-level components include convenience functions for interacting
+with hardware, including \code{Disk} for disk I/O, \code{Memory} for
+memory management, and \code{Parallel} for parallel synchronization
+and data transfer.  Including these lower level components is helpful
+for several reasions: it encapsulates lower-level library calls,
+e.g.~HDF5 for \code{Disk}; it allows for incorporating error checking
+code, e.g.~ tracking memory usage and performing bounds checking in
+\code{Memory}; and parallel technologies such as MPI, UPC, and OpenMP
+can also be encapsulated in \code{Parallel}.
+
+The cross-cutting concern components include 
+
 \begin{verbatim}
-for parallel scalability: aggressive minimization of
-  synchronization and collective operations
-``localize'' problem as much as possible
-  For each patch, only store patch, location information for
-    neighboring patches (``ghost patches''), and ancestors for octree
-  patch-local adaptive timestep control
-    prevents rapidly evolving feature in one localized region of
-      domain from determining timestep elsewhere
-facilitate dynamic load balancing, dynamic scheduling of
-  communication and computation
-maximize data structure flexibility
-dynamically optimize data structure parameters to hardware
-  during run time
-for algorithmic scalability: aggresively minimize dependencies
-  of fp and integer precision on data structure size
-related to ``localization'' of tasks
-  particle positions stored using local coordinate system with
-    origin at patch corner
-  absolute patch coordinates not stored, only position relative
-    to neighbors
-     global coordinates only needed for initialization
-     only need mesh width and timestep size for advancing
-     not needed for restarts
-     can still be computed dynamically
-     localization an option--not needed for smaller problems
-     absolute particle positions / grid locations may be needed
-       for some output, e.g. global particle analysis
-     in that case low precision
-     still scaling issues relative to depth
-      neighbor location
+      Performance, Error, Monitor, Portal, Parameters
+      globally-accesible functions
+      components in aspect-oriented programming paradigm
+         not sufficient for including specialized language (e.g. AspectC)
+         techniques (e.g. templates) usable
 \end{verbatim}
 
-%-----------------------------------------------------------------------
-\subsection{Software components} \label{ss:design-components}
-%-----------------------------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@
+\begin{verbatim}
+  Performance, Error, Parameters, Memory
+    globally-accesible functions
+    components in aspect-oriented programming paradigm
+    not sufficiently important to use AspectC
+    techniques usable
+\end{verbatim}
 
 \begin{verbatim}
-Code organization: components based on functional decomposition
-   High level components: Control
-      Schedule, Distribute, Task
-   Middle level components: Data and algorithms
-      Simulation
-         defines simulation
-      Method [+ analysis / visualization]
-         hooks to user code
-         dynamic method application
-            different physics for different resolutions
-            different algorithms for increased software resilience
-         multiple methods permitted
-         selectable and scheduled at run-time
-      Field / Particles 
-      Amr / Patch / Tree / Node / Array : storing and accessing AMR
-      Block / Fluxes: computing and communicating
-   Low level components: hardware 
-      Disk, Memory, Parallel      
    cross-cutting components
       Performance, Error, Monitor, Portal, Parameters
       globally-accesible functions
@@ -1150,373 +1078,18 @@ Code organization: components based on functional decomposition
          techniques (e.g. templates) usable
 \end{verbatim}
 
-\begin{verbatim}
-organize into components (subdirectories) of related classes
-  Simulation, Control, Parallel, Task
-  Amr, Patch: stores the AMR hierarchy
-  Fields, Particles, Array: for storing data
-  Block, Fluxes: for computing / communicating data
-  Performance, Error, Parameters, Memory
-    globally-accesible functions
-    components in aspect-oriented programming paradigm
-    not sufficiently important to use AspectC
-    techniques usable
-  Method [Analysis] [Visualize]
-     hooks to user code
-  External, User
-\end{verbatim}
-
-\FIGURE{Software component diagram}{f:components}{
-\begin{minipage}{6.15in}
-\includegraphics[width=6.15in]{components2.pdf}
-\end{minipage}}
-
-\subsubsection{High level components}
-
-\begin{verbatim}
-      Schedule, Distribute, Task
-\end{verbatim}
-
-\subsubsection{Middle level components}
-
-\begin{verbatim}
-      Simulation
-         defines simulation
-      Method [+ analysis / visualization]
-         hooks to user code
-         dynamic method application
-            different physics for different resolutions
-            different algorithms for increased software resilience
-         multiple methods permitted
-         selectable and scheduled at run-time
-      Field / Particles 
-      Amr / Patch / Tree / Node / Array : storing and accessing AMR
-      Block / Fluxes: computing and communicating
-\end{verbatim}
-
-\subsubsection{Low level components}
-
-\begin{verbatim}
-      Disk, Memory, Parallel      
-\end{verbatim}
-
-\subsubsection{Cross-cutting components}
-
-\begin{verbatim}
-      Performance, Error, Monitor, Portal, Parameters
-      globally-accesible functions
-      components in aspect-oriented programming paradigm
-         not sufficient for including specialized language (e.g. AspectC)
-         techniques (e.g. templates) usable
-\end{verbatim}
-%-----------------------------------------------------------------------
-\code{Arrays} Component
-%-----------------------------------------------------------------------
-
-\begin{verbatim}
-Allow multiple root-level patches per MPI task. [To improve
-  cache use for unigrid problems, and improve load-balancing for AMR.]
-\end{verbatim}
+Some components will be much larger than others: \code{Amr} is
+expected to be large since representing and manipulating distributed
+AMR hierarchies is inherently complex, whereas \code{Memory} is likely
+to be relatively small.  Larger components will be further decomposed
+into smaller sub-components, e.g.~\code{Tree}, \code{Patch},
+\code{Level}, \code{Box}, etc. for \code{Amr}, to help organize and
+control the complexity.  Smaller components may be implemented using a
+single class.
 
 %-----------------------------------------------------------------------
-\code{Control} Component
+\subsection{Adaptive mesh refinement} \label{ss:design-data}
 %-----------------------------------------------------------------------
-
-\begin{verbatim}
-Reduce implicit dependencies by dynamically allocating parallel
-  tasks, ala \charm. (e.g. currently Enzo loops through patches within
-  a level, but a given patch can proceed as soon as it has all its
-  boundary data)
-Support optional uniform timesteps across all levels. [To
-  improve parallel efficiency.]
-Support optional variable timestep sizes within each level. [To
-  reduce synchronization costs when computing global CFL condition.]
-\end{verbatim}
-
-%-----------------------------------------------------------------------
-\code{Storage} Component
-%-----------------------------------------------------------------------
-
-\begin{verbatim}
-Enforce strict control over data storage formats (e.g. files)
-  (see W0009)
-Require that all stored data be accessed through standard
-  interface functions that are independent of specific file formats
-  (i.e., stored datasets are conceptually treated as objects)
-\end{verbatim}
-
-%-----------------------------------------------------------------------
-\code{Fields} Component
-%-----------------------------------------------------------------------
-
-\begin{verbatim}
-User-controlled optional floor/ceiling limits on individual
-  Fields (ala ``tiny\_number'' in Enzo), with user-specified Error
-  behavior (warning, error, ignore, reset to given floor/ceiling,
-  etc.)
-\end{verbatim}
-
-%-----------------------------------------------------------------------
-\code{Methods} Component
-%-----------------------------------------------------------------------
-
-\begin{verbatim}
-Integrate ``inits'' functionality into the main code
-user functions supplied
-   field / particle initialization
-   particle advance
-   particle computation
-   particle - grid interaction
-   block advance (multiple)
-   inter-level flux correction
-   refine / coarsen
-   timestep determination
-   constraint enforcement (div B)
-   error checking / invariant checking for fault tolerance / software resiliency
-      detects memory / cpu errors and mark core as faulty and bypass
-   elliptic support:
-      global and level operations / solves
-\end{verbatim}
-
-%-----------------------------------------------------------------------
-\code{Parallel} Component
-%-----------------------------------------------------------------------
-
-\begin{verbatim}
-Load-balance by having over-loaded processors reassign tasks to
-  random processes. [To reduce global communication for determining
-  which processes are under-loaded]
-Load-balance using ``over-compensation'', since heavily-loaded
-  processes tend to continue to become more heavily loaded (cosmology
-  / star-formation application-dependent).
-Only use inter-core, inter-cpu, inter-node, etc.
-  level-communicators to bound communicator size and manage
-  communication nonuniformity.
-Support multiple (hybrid) and flexible parallelization
-  strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided
-  get/put), OMP, and optionally UPC and GPU.
-hierarchical synchronization and collective operations
-\end{verbatim}
-
-%-----------------------------------------------------------------------
-\code{Parameters} Component
-%-----------------------------------------------------------------------
-
-\begin{verbatim}
-Support for user-supplied code for problem initialization.
-\end{verbatim}
-
-\code{Particles} Component
-
-\begin{verbatim}
-Store particle positions in single precision as -1 <=  x,y,z <= 1
-  relative to their containing patch. [To reduce storage, improve
-  performance, and address precision issues with deep AMR.]
-Use a binary tree data-structure to recursively partition the
-  bounding boxes of particles.
-\end{verbatim}
-
-\code{Simulations} Component
-
-\begin{verbatim}
-Support ensembles within a single run, including inline-analysis
-\end{verbatim}
-
-\code{Performance} Component
-
-\begin{verbatim}
-integrated performance monitoring
-   summaries at different hardware levels
-   less frequent at lower levels--more data
-   more frequent at upper levels
-   performance data available to other components
-      load balancing based on actual memory usage / cpu time
-      feedback for adaptivity
-      help identify performance and scaling issues early
-      poor-performance resilient
-\end{verbatim}
-
-\code{Portal} Component
-
-\begin{verbatim}
-portal: support interfacing with other codes
-   post-processing solvers
-   data analysis pipeline
-   visualization pipeline
-      use existing library, e.g. Visit
-      Method can include visualization or inline analysis
-\end{verbatim}
-
-\code{Monitor} Component
-
-\begin{verbatim}
-monitor: support for interfacing with user while running
-   ``dashboard'' for real-time monitoring state of simulation
-\end{verbatim}
-
-
-%-----------------------------------------------------------------------
-\subsection{Parallelization approach} \label{ss:design-parallel}
-%-----------------------------------------------------------------------
-
-We plan to support a variety of parallelization technologies and
-paradigms from the start.  These technologies will including message
-passing via the MPI~\cite{@@@MPI} library, partitioned global address
-space (PGAS) programming via the UPC~\cite{@@@UPC} language, shared
-memory parallel programming via OpenMP~\cite{@@@OpenMP} compiler
-directives, processor virtualization via the charm
-framework~\cite{@@@Charm}.  Select hybrid approaches will also be
-supported, including MPI with OpenMP, and MPI with UPC.  While
-heterogeneous platforms, such as those containing general purpose
-graphics processing units (GPGPU's), will not be directly supported,
-but the framework's design will facilitate their use by the
-user-written physics kernels.
-
-\textit{Why would we want to include multiple parallelization technologies?}
-First, because the performance and scalability of the technologies
-vary between machines and implementations, and we want to always use
-the fastest and most scalable approach.  Also, one technology may
-perform better in the distributed memory regime, whereas another may
-perform better within a shared memory node, hence our decision to
-support hybrid approaches.  Second, by including multiple existing
-parallelization paradigms from the start, the resulting software
-design will likely be more amenable to incorporating new future
-parallelization technologies.  Thirdly, it could be used as a tool for
-parallel technology designers and implementers to compare their
-approach with other existing approaches.
-
-\textit{How will we design the software to use multiple
-  parallelization technologies?}  The basic approach will be to
-abstract out the concept of a parallel task---something that runs on a
-single computational component, and which may involve temporal
-dependencies with other tasks.  This approach is most similar to the
-model used by \charm, so we will begin parallelization development
-using the \charm\ framework.  Will will also provide task scheduling,
-load balancing, and fault tolerance API's---functionality that is
-provided by \charm---so that other parallelization technologies can be
-used as well.
-
-We are also considering encapsulating data communication between tasks
-as a task itself, so that scheduling of communication can be
-integrated with scheduling of computation.  The motivation is that it
-could improve performance, while reducing memory cost in communication
-buffers and code complexity.
-
-We expect to implement two variations of parallelization API's, one
-for distributed memory and one for shared memory.  The distributed
-memory API would encapsulate MPI and UPC, whereas the shared memory
-API would encapsulate OpenMP and UPC.
-
-When 
-
-@@@@@@@@@@@@@@@@@@@@
-
-\begin{verbatim}
-hybrid parallel
-   MPI + OMP
-   MPI + UPC
-   UPC + OMP (?)
-   Charm++ + OMP (?)
-   flexible subset of cores, sockets, nodes, supernodes
-   Task scheduling Charm++ model, but implemented in MPI, UPC, OMP
-   processor-task affinity
-\end{verbatim}
-
-\begin{verbatim}
-Charm++ 
-  data placement
-  load balancing
-  task scheduling
-  checkpointing for fault tolerance
-  performance monitoring and visualization
-\end{verbatim}
-
-\begin{verbatim}
-platform hierarchical architecture-aware data structures
-  e.g. MPI communicator for cores in a socket, sockets in a
-    node, nodes in a supernode, supernodes in a machine
-  facilitates hierarchical dynamic load balancing
-    improves dynamic mapping of data structures to hardware components
-    E.g. load balance more frequently at core / socket level to
-      keep functional units busy
-    load balance node / supernode levels less frequently to keep
-      memory usage uniform
-    less frequent because:
-      problem changes less at larger scales
-      rebalancing is more expensive: larger data sizes, slower
-        interconnects
-    user-defined parameters and metrics for load balancing at
-      different levels
-      dynamically collected performance data can be fed back
-        into hierarchical load balancing algorithm
-  note linearization of octree datastructure is insufficient:
-    assumes equal work per patch
-    particles are associated with nodes, changing weight
-    adaptive time-stepping drastically weights more highly
-      refined patches
-    performance of physics algorithms on a patch is not
-      necessarily uniform, e.g. localized chemistry subcycling, front
-      tracking, etc.
-    arrays on patches may be different sized
-    linearization of patches 
-        reduces flexibility
-        constrains data movement along a single dimension
-\end{verbatim}
-
-\begin{verbatim}
-Multiple parallelization strategies
-  MPI: + widespread, optimized implementations, familiar
-  MPI: - data replication, difficult to use
-  UPC + easier to use, combines shared memory view with efficient data affinity
-  UPC - no concept of MPI communicator, still under development--not as mature
-  OMP + can be used progressively
-  OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
-  GPU + very fast / power efficient when usable
-  GPU - no usable standard, difficult to program, difficult to map problem to hardware
-  Charm++ + higher-level, dynamic scheduling, dynamic load-balancing, fault tolerant through checkpointing to other node memory
-  Charm++ - requires learning separate language, separate runtime system, no data prefetching(?)
-    currently not fully realizable for GPU since depends on
-      computational code
-    hierarchical parallelism: MPI + OMP, MPI + UPC, MPI + GPU,
-      etc.
-    advantages of hybrid
-      reduced data replication from MPI distributed memory
-      dynamic parallel threads--use more when helpful, fewer when not
-      UPC
-    disadvantages of hybrid
-      performance hit from data sharing in MPI + OMP
-      MPI and UPC communication cannot (currently) proceed concurrently
-    code for two modes: distributed memory and shared memory
-    parallel tasks: grid patches, arrays, grid patch groups,
-      particle groups
-    flexible data structure parameters (grid patch size, patch
-      decomposition, patch grouping) to dynamically optimize task size
-\end{verbatim}
-
-\begin{verbatim}
-hierarchical parallelism
-   encourage communication within hardware components
-      sockets within node
-      cores within socket
-      hyperthreads within core
-\end{verbatim}
-
-\begin{verbatim}
-parallel technology encapsulation / processor virtualization
-  distributed / shared memory
-    MPI (two-sided and one-sided) (distributed memory)
-    OpenMP (shared memory) 
-    UPC (either distributed memory or shared memory)
-    Charm++
-  multiple strategies enhance software resiliency
-    i.e. buggy MPI implementation--dynamically switch to UPC
-\end{verbatim}
-
-%-----------------------------------------------------------------------
-\subsection{AMR data structures} \label{ss:design-data}
-%-----------------------------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
 ALGORITHMS: and how problems solved
@@ -1555,6 +1128,26 @@ octree AMR versus SAMR
          physics method variations
             shock capturing--Riemann solver iterations
             variable subcycling of iterative stiff methods
+\end{verbatim}
+
+\begin{verbatim}
+relative coordinates for patches   
+   relative to neighbors
+   computations frequently only require cell size and timestep
+      hydrodynamics
+   absolute coordinates computed dynamically when necessary to required precision
+      initialization
+      inline analysis
+      global position dependent physics (materials)
+\end{verbatim}
+
+\begin{verbatim}
+local time-stepping
+   global scaling of dx, dt may not be needed
+      only power-of-two quantization of dx, dt
+        mantissa unchanged--no fp precision issue
+        fp range issue
+            support coordinate rescaling at deep levels
 \end{verbatim}
 
 \begin{verbatim}
@@ -1649,11 +1242,42 @@ AMR hierarchy data
        reduced communication: no inter-level interpolation (except refinement)
 \end{verbatim}
 
+\begin{verbatim}
+for parallel scalability: aggressive minimization of
+  synchronization and collective operations
+``localize'' problem as much as possible
+  For each patch, only store patch, location information for
+    neighboring patches (``ghost patches''), and ancestors for octree
+  patch-local adaptive timestep control
+    prevents rapidly evolving feature in one localized region of
+      domain from determining timestep elsewhere
+facilitate dynamic load balancing, dynamic scheduling of
+  communication and computation
+maximize data structure flexibility
+dynamically optimize data structure parameters to hardware
+  during run time
+for algorithmic scalability: aggresively minimize dependencies
+  of fp and integer precision on data structure size
+related to ``localization'' of tasks
+  particle positions stored using local coordinate system with
+    origin at patch corner
+  absolute patch coordinates not stored, only position relative
+    to neighbors
+     global coordinates only needed for initialization
+     only need mesh width and timestep size for advancing
+     not needed for restarts
+     can still be computed dynamically
+     localization an option--not needed for smaller problems
+     absolute particle positions / grid locations may be needed
+       for some output, e.g. global particle analysis
+     in that case low precision
+     still scaling issues relative to depth
+      neighbor location
+\end{verbatim}
+
 %--------------------------------------------------
 \subsubsection{Patch coalescing } \label{sss:patch-coalescing}
 %--------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
 AMR algorithm enhancements: patch coalescing
@@ -1714,8 +1338,6 @@ Coalesced patches proof-of-concept using a 2D cosmology density field projection
 \subsubsection{Targeted refinement} \label{sss:targeted-refinement}
 %--------------------------------------------------
 
-@@@@@@@@@@@@@@@@@@@@
-
 \begin{verbatim}
 AMR algorithm enhancements: targeted refinement by 4 or 8
    improves ``deep'' AMR
@@ -1751,11 +1373,160 @@ Targeted refinement proof-of-concept using multiple point sources in 2D.
 \end{minipage}
 \end{minipage}}
 
+
+
 %-----------------------------------------------------------------------
-\subsection{Data distribution} \label{ss:design-distribution}
+\subsection{Mesh data}
 %-----------------------------------------------------------------------
 
-@@@@@@@@@@@@@@@@@@@@
+\begin{verbatim}
+User-controlled optional floor/ceiling limits on individual
+  Fields (ala ``tiny\_number'' in Enzo), with user-specified Error
+  behavior (warning, error, ignore, reset to given floor/ceiling,
+  etc.)
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Particle data}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+Store particle positions in single precision as -1 <=  x,y,z <= 1
+  relative to their containing patch. [To reduce storage, improve
+  performance, and address precision issues with deep AMR.]
+Use a binary tree data-structure to recursively partition the
+  bounding boxes of particles.
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{User-supplied functions}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+Integrate ``inits'' functionality into the main code
+user functions supplied
+   field / particle initialization
+   particle advance
+   particle computation
+   particle - grid interaction
+   block advance (multiple)
+   inter-level flux correction
+   refine / coarsen
+   timestep determination
+   constraint enforcement (div B)
+   error checking / invariant checking for fault tolerance / software resiliency
+      detects memory / cpu errors and mark core as faulty and bypass
+   elliptic support:
+      global and level operations / solves
+\end{verbatim}
+
+
+\begin{verbatim}
+Support ensembles within a single run, including inline-analysis
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Run-time parameters} \label{ss:design-parameters}
+%-----------------------------------------------------------------------
+
+
+
+%-----------------------------------------------------------------------
+\subsection{Parallelism} \label{ss:design-parallel}
+%-----------------------------------------------------------------------
+
+We plan to support a variety of parallelization technologies and
+paradigms from the start.  These technologies will including message
+passing via the MPI~\cite{@@@MPI} library, partitioned global address
+space (PGAS) programming via the UPC~\cite{@@@UPC} language, shared
+memory parallel programming via OpenMP~\cite{@@@OpenMP} compiler
+directives, processor virtualization via the \charm\
+framework~\cite{@@@Charm}.  Select hybrid approaches will also be
+supported, including MPI with OpenMP, and MPI with UPC.  While
+heterogeneous platforms, such as those containing general purpose
+graphics processing units (GPGPU's), will not be directly supported,
+but the framework's design will facilitate their use by the
+user-written physics kernels.
+
+There are several reasons why we plan to include multiple
+parallelization technologies.  First, because the performance and
+scalability of the technologies vary between machines and
+implementations, and we want to always use the fastest and most
+scalable approach.  Second, one technology may perform better in the
+distributed memory regime, whereas another may perform better within a
+shared memory node, which motivates flexible hybrid parallel
+approaches.  Third, by including multiple existing parallelization
+paradigms from the start, the resulting software design will likely be
+more amenable to incorporating new future parallelization
+technologies.  And fourth, the framework could be used as a tool for
+parallel technology designers and implementers to compare and improve
+their approach with other existing approaches on new and existing
+hardware platforms.
+
+Our approach to including multiple parallelization technologies will
+be to abstract out the concept of a parallel task: an entity that runs
+on a single computational component, and which may have dependencies
+with other tasks.  Defining, balancing, and executing tasks will be
+performed by the high-level components \code{Task}, \code{Distribute},
+and \code{Schedule}.  Low-level parallel operations required for task
+migration, synchronization, and data transfer will be implemented in
+the \code{Parallel} component.  We expect the component will include
+two parallelization API's, one for distributed memory and one for
+shared memory.  The distributed memory API would encapsulate MPI and
+UPC, whereas the shared memory API would encapsulate OpenMP and UPC.
+
+This approach is most similar to the process virtualization model used
+by \charm, the functionality of which subsumes that of all three of
+our high level \code{Task} (``chare''), \code{Distribute}, and
+\code{Schedule} components~\footnote{We note that \charm\ also
+  supports checkpointing for fault-tolerance, and performance
+  monitoring and visualization, which we may encapsulate in our
+  \code{Error} and \code{Performance} components.}  This similarity is
+no coincidence, since the \charm\ model helped influence our
+high-level parallelization design.  Because of this close match in
+design, we will therefore begin parallel development using the
+high-level \charm\ framework.  Later development will include
+supporting MPI, UPC, and OpenMP for hierarchical and hybrid
+parallelism, and will reuse code kernels required for \charm, e.g.~for
+``packing'' and ``unpacking'' task-related data for migration.
+
+We are also considering encapsulating data communication between tasks
+as a task itself, so that scheduling of communication can be
+integrated with scheduling of computation.  The motivation is that it
+could improve performance, while reducing memory cost in communication
+buffers and code complexity.
+
+\begin{verbatim}
+Reduce implicit dependencies by dynamically allocating parallel
+  tasks, ala \charm. (e.g. currently Enzo loops through patches within
+  a level, but a given patch can proceed as soon as it has all its
+  boundary data)
+Support optional uniform timesteps across all levels. [To
+  improve parallel efficiency.]
+Support optional variable timestep sizes within each level. [To
+  reduce synchronization costs when computing global CFL condition.]
+\end{verbatim}
+
+\begin{verbatim}
+Allow multiple root-level patches per MPI task. [To improve
+  cache use for unigrid problems, and improve load-balancing for AMR.]
+\end{verbatim}
+
+\begin{verbatim}
+Load-balance by having over-loaded processors reassign tasks to
+  random processes. [To reduce global communication for determining
+  which processes are under-loaded]
+Load-balance using ``over-compensation'', since heavily-loaded
+  processes tend to continue to become more heavily loaded (cosmology
+  / star-formation application-dependent).
+Only use inter-core, inter-cpu, inter-node, etc.
+  level-communicators to bound communicator size and manage
+  communication nonuniformity.
+Support multiple (hybrid) and flexible parallelization
+  strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided
+  get/put), OMP, and optionally UPC and GPU.
+hierarchical synchronization and collective operations
+\end{verbatim}
 
 \begin{verbatim}
 memory storage formats and data movement
@@ -1787,10 +1558,8 @@ memory storage formats and data movement
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Task scheduling} \label{ss:design-scheduling}
+\subsubsection{Task scheduling} \label{ss:design-scheduling}
 %-----------------------------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
 dynamic scheduling
@@ -1852,7 +1621,7 @@ hierarchical hardware components (node, socket, core...)  Third, to
 remove any hard dependencies on any single parallel technology.
 
 %-----------------------------------------------------------------------
-\subsection{Load balancing} \label{ss:design-balancing}
+\subsubsection{Load balancing} \label{ss:design-balancing}
 %-----------------------------------------------------------------------
 
 Dynamic load balancing is well known to be a crucial operation for
@@ -1875,8 +1644,6 @@ between tree nodes is roughly equal; however, neither of these
 conditions is met when adaptive time-stepping is used.  Also, this
 approach still requires $O(N_P)$ storage, and a global all-gather
 operation (e.g.~\code{MPI\_Allgather}) is required on all processes.
-
-@@@@@@@@@@@@@@@@@@@@
 
 Our approach will be to 
 
@@ -2023,16 +1790,207 @@ locality, surface-to-volume ratio, and reduce task migration traffic.
 
 ``diffusion-based scheme''
 
+% \begin{verbatim}
+% OOP
+%   addresses 
+%     agility, readability, flexibility, modifyability, extensibility, complexity
+%   improves component reuse, controls software
+%   complexity, eases software maintenance
+%   still not always ideal
+%      cross-cutting components
+%      can use aspect-oriented ideas
+%   design patterns
+% \end{verbatim}
+% 
+
+
+
+
+
 %-----------------------------------------------------------------------
-\subsection{Software resilience} \label{ss:design-resilience}
+\subsection{Interfaces} \label{ss:design-interfaces}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
+\subsection{I/O} \label{ss:design-io}
+%-----------------------------------------------------------------------
+
+
+\begin{verbatim}
+I/O different output formats for different uses
+   checkpointing
+   analysis
+   visualization
+   general ``data dump''
+   cheaper to rerun and regenerate data to process than dump and reread later
+      inline analysis capability to reduce overall output required
+   checkpoints
+       node / processor independent: software resiliency
+       checkpoints restartable on different configurations / platforms
+   ``accessor code'' included with all output data
+\end{verbatim}
+\begin{verbatim}
+I/O
+   parallel HDF5
+   compression
+   CRC error-checking and retry
+   subset of nodes do I/O
+   detection of faulty disk and mark as unusable
+   different formats for different uses
+\end{verbatim}
+
+\begin{verbatim}
+Enforce strict control over data storage formats (e.g. files)
+  (see W0009)
+Require that all stored data be accessed through standard
+  interface functions that are independent of specific file formats
+  (i.e., stored datasets are conceptually treated as objects)
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Performance} \label{ss:design-performance}
+%-----------------------------------------------------------------------
+
+\begin{verbatim}
+integrated performance monitoring
+   summaries at different hardware levels
+   less frequent at lower levels--more data
+   more frequent at upper levels
+   performance data available to other components
+      load balancing based on actual memory usage / cpu time
+      feedback for adaptivity
+      help identify performance and scaling issues early
+      poor-performance resilient
+\end{verbatim}
+
+\code{Portal} Component
+
+\begin{verbatim}
+portal: support interfacing with other codes
+   post-processing solvers
+   data analysis pipeline
+   visualization pipeline
+      use existing library, e.g. Visit
+      Method can include visualization or inline analysis
+\end{verbatim}
+
+\code{Monitor} Component
+
+\begin{verbatim}
+monitor: support for interfacing with user while running
+   ``dashboard'' for real-time monitoring state of simulation
+\end{verbatim}
+
+
+% \begin{verbatim}
+% hybrid parallel
+%    MPI + OMP
+%    MPI + UPC
+%    UPC + OMP (?)
+%    Charm++ + OMP (?)
+%    flexible subset of cores, sockets, nodes, supernodes
+%    Task scheduling Charm++ model, but implemented in MPI, UPC, OMP
+%    processor-task affinity
+% \end{verbatim}
+
+% \begin{verbatim}
+% Charm++ 
+%   data placement
+%   load balancing
+%   task scheduling
+%   checkpointing for fault tolerance
+%   performance monitoring and visualization
+% \end{verbatim}
+
+\begin{verbatim}
+platform hierarchical architecture-aware data structures
+  e.g. MPI communicator for cores in a socket, sockets in a
+    node, nodes in a supernode, supernodes in a machine
+  facilitates hierarchical dynamic load balancing
+    improves dynamic mapping of data structures to hardware components
+    E.g. load balance more frequently at core / socket level to
+      keep functional units busy
+    load balance node / supernode levels less frequently to keep
+      memory usage uniform
+    less frequent because:
+      problem changes less at larger scales
+      rebalancing is more expensive: larger data sizes, slower
+        interconnects
+    user-defined parameters and metrics for load balancing at
+      different levels
+      dynamically collected performance data can be fed back
+        into hierarchical load balancing algorithm
+  note linearization of octree datastructure is insufficient:
+    assumes equal work per patch
+    particles are associated with nodes, changing weight
+    adaptive time-stepping drastically weights more highly
+      refined patches
+    performance of physics algorithms on a patch is not
+      necessarily uniform, e.g. localized chemistry subcycling, front
+      tracking, etc.
+    arrays on patches may be different sized
+    linearization of patches 
+        reduces flexibility
+        constrains data movement along a single dimension
+\end{verbatim}
+
+\begin{verbatim}
+Multiple parallelization strategies
+  MPI: + widespread, optimized implementations, familiar
+  MPI: - data replication, difficult to use
+  UPC + easier to use, combines shared memory view with efficient data affinity
+  UPC - no concept of MPI communicator, still under development--not as mature
+  OMP + can be used progressively
+  OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
+  GPU + very fast / power efficient when usable
+  GPU - no usable standard, difficult to program, difficult to map problem to hardware
+  Charm++ + higher-level, dynamic scheduling, dynamic load-balancing, fault tolerant through checkpointing to other node memory
+  Charm++ - requires learning separate language, separate runtime system, no data prefetching(?)
+    currently not fully realizable for GPU since depends on
+      computational code
+    hierarchical parallelism: MPI + OMP, MPI + UPC, MPI + GPU,
+      etc.
+    advantages of hybrid
+      reduced data replication from MPI distributed memory
+      dynamic parallel threads--use more when helpful, fewer when not
+      UPC
+    disadvantages of hybrid
+      performance hit from data sharing in MPI + OMP
+      MPI and UPC communication cannot (currently) proceed concurrently
+    code for two modes: distributed memory and shared memory
+    parallel tasks: grid patches, arrays, grid patch groups,
+      particle groups
+    flexible data structure parameters (grid patch size, patch
+      decomposition, patch grouping) to dynamically optimize task size
+\end{verbatim}
+
+\begin{verbatim}
+hierarchical parallelism
+   encourage communication within hardware components
+      sockets within node
+      cores within socket
+      hyperthreads within core
+\end{verbatim}
+
+\begin{verbatim}
+parallel technology encapsulation / processor virtualization
+  distributed / shared memory
+    MPI (two-sided and one-sided) (distributed memory)
+    OpenMP (shared memory) 
+    UPC (either distributed memory or shared memory)
+    Charm++
+  multiple strategies enhance software resiliency
+    i.e. buggy MPI implementation--dynamically switch to UPC
+\end{verbatim}
+
+%-----------------------------------------------------------------------
+\subsection{Resilience} \label{ss:design-resilience}
 %-----------------------------------------------------------------------
 
 \ \\ \pargraph{fault tolerance} Fault tolerance and software
 resilience are crucial factors at extreme scales, since it has been
 observed that frequency of failures is proportional to the number of
 sockets~\cite{@@@}
-
-@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
  FT-MPI 
@@ -2085,40 +2043,10 @@ fault-tolerance / software resilience strategies
       design software to use new approaches
 \end{verbatim}
 
-%-----------------------------------------------------------------------
-\subsection{I/O} \label{ss:design-io}
-%-----------------------------------------------------------------------
-
-@@@@@@@@@@@@@@@@@@@@
-
-\begin{verbatim}
-I/O different output formats for different uses
-   checkpointing
-   analysis
-   visualization
-   general ``data dump''
-   cheaper to rerun and regenerate data to process than dump and reread later
-      inline analysis capability to reduce overall output required
-   checkpoints
-       node / processor independent: software resiliency
-       checkpoints restartable on different configurations / platforms
-   ``accessor code'' included with all output data
-\end{verbatim}
-\begin{verbatim}
-I/O
-   parallel HDF5
-   compression
-   CRC error-checking and retry
-   subset of nodes do I/O
-   detection of faulty disk and mark as unusable
-   different formats for different uses
-\end{verbatim}
 
 %=======================================================================
 \section{Implementation} \label{s:implementation}
 %=======================================================================
-
-@@@@@@@@@@@@@@@@@@@@
 
 
 \begin{verbatim}
@@ -2153,6 +2081,42 @@ I/O
      easier to change requirements than design, design than code
      explore new ideas before implementing them
      prototyping useful as approximate ``predictor step'' of final design
+\end{verbatim}
+\begin{verbatim}
+iterative development
+   requirements, design, implementation, tests, user documentation updated in sequence
+\end{verbatim}
+
+
+
+\begin{verbatim}
+application driven
+   helpful for ensuring completeness
+      missing functionality in design will become apparent
+   helpful for testing
+   \enzoii\ 
+   cosmology / astrophysics
+   requires wide range of AMR capabilities
+     broad for galaxy structure formation
+     deep for star formation
+     turbulence
+   requires wide range of physics capabilities
+     hyperbolic: hydrodynamics
+     elliptic: self-gravity, FLD radiation
+     local physics: chemistry, heating/cooling
+   decouple physics modules from AMR framework
+   make both \enzoii\  and underlying AMR framework publicly available
+\end{verbatim}
+
+\begin{verbatim}
+currently primarily in early requirements capturing and high-level 
+        design phase
+   available flexibility to modify current design
+   design as described is current snapshot
+   little code and time wasted
+emphasis on thorough designing before coding
+   prototype ideas before final implementation
+   more time upfront known to lead to faster overall development times
 \end{verbatim}
 
 \begin{verbatim}
@@ -2338,8 +2302,6 @@ testing
 \section{Development Plan} \label{s:plan} 
 %=======================================================================
 
-@@@@@@@@@@@@@@@@@@@@
-
 \begin{verbatim}
   Charm++ generalized unigrid
      evaluate effectiveness
@@ -2351,8 +2313,6 @@ testing
 %=======================================================================
 \section{Milestones and Deliverables} \label{s:milestones}
 %=======================================================================
-
-@@@@@@@@@@@@@@@@@@@@
 
 \begin{verbatim}
    Cello software framework
