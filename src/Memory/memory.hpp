@@ -28,6 +28,8 @@ typedef unsigned memory_group_handle;
 
 #define MEMORY_MAX_NUM_GROUPS 20
 
+#include <stack>
+
 //======================================================================
 // TYPEDEFS
 //======================================================================
@@ -52,8 +54,11 @@ public:
   // PUBLIC OPERATIONS
   //-------------------------------------------------------------------
 
+  /// Don't do anything
+  Memory() throw () {};
+
   /// Initialize the memory component
-  Memory() throw ();
+  static void initialize() throw ();
 
   /// Allocate memory
   static void * allocate ( size_t size ) 
@@ -110,7 +115,7 @@ public:
   static void reset () throw ();
 
   static void set_active (bool is_active) throw ()
-#ifdef USE_MEMORY
+#ifdef CONFIG_USE_MEMORY
   { is_active_ = is_active; } ;
 #else
   { } ;
@@ -124,7 +129,7 @@ private:
 
   static void check_handle_(memory_group_handle group_handle) 
     throw (ExceptionMemoryBadGroupHandle())
-#ifdef USE_MEMORY
+#ifdef CONFIG_USE_MEMORY
   {  if ( group_handle > MEMORY_MAX_NUM_GROUPS) {
       throw (ExceptionMemoryBadGroupHandle());
     }
@@ -141,14 +146,14 @@ private:
   //-------------------------------------------------------------------
 
 
-#ifdef USE_MEMORY
+#ifdef CONFIG_USE_MEMORY
 
   /// Whether keeping track of memory statistics is active or not
   static bool is_active_;
 
   /// The current group index, or 0 if none
 
-  static memory_group_handle curr_group_;
+  static std::stack<memory_group_handle> curr_group_;
 
   /// Array of known group names
 

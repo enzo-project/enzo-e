@@ -8,8 +8,8 @@ include $(TOP)/src/MAKE/Make.include
 
 #-----------------------------------------------------------------------
 
-test_memory: test_memory.o
-	$(CXX) -o test_memory test_memory.o $(LIB)
+test_memory: test_memory.o $(OBJS)
+	$(CXX) -o test_memory test_memory.o $(OBJS)
 
 #-----------------------------------------------------------------------
 

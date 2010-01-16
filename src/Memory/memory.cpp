@@ -14,8 +14,6 @@
 #include "error.hpp"
 #include "memory.hpp"
 
-#ifdef USE_MEMORY
-
 /** 
  *********************************************************************
  *
@@ -65,7 +63,7 @@
 // FUNCTIONS
 //======================================================================
  
-Memory::Memory() throw ()
+void Memory::initialize() throw ()
 /**
  *********************************************************************
  *
@@ -77,8 +75,12 @@ Memory::Memory() throw ()
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
+  curr_group_.push(0);
+  is_active_ = true;
   group_names_[0] = strdup("");
   group_names_[1] = strdup("memory");
+#endif
 }
 
 void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
@@ -93,25 +95,38 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
   int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));
+
+
   if (buffer==0) throw ExceptionMemoryBadAllocate();
 
-  buffer[0] = bytes;
-  buffer[1] = curr_group_;
-
   if (is_active_) {
+    buffer[0] = bytes;
+    buffer[1] = curr_group_.top();
+
     ++ new_calls_[0] ;
     bytes_[0] += bytes;
     bytes_high_[0] = bytes_[0];
 
-    if (curr_group_ != 0) {
-      ++ new_calls_[curr_group_] ;
-      bytes_[curr_group_] += bytes;
-      bytes_high_[curr_group_] = bytes_[curr_group_];
-    }
-  }
+    memory_group_handle current = curr_group_.top();
 
+    if (current != 0) {
+      ++ new_calls_[current] ;
+      bytes_[current] += bytes;
+      bytes_high_[current] = bytes_[current];
+    }
+
+  } else {
+    buffer[0] = 0;
+    buffer[1] = 0;
+  }
   return (void *)(buffer + 2);
+
+
+#else
+  return 0;
+#endif
 }
 
 void Memory::deallocate ( void * pointer )
@@ -127,21 +142,23 @@ void Memory::deallocate ( void * pointer )
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
   int *buffer = (int *)(pointer) - 2;
-
-  unsigned curr_group = buffer[1];
 
   if (is_active_) {
     ++ delete_calls_[0] ;
     bytes_[0] -= buffer[0];
 
-    if (curr_group != 0) {
-      ++ delete_calls_[curr_group] ;
-      bytes_[curr_group] -= buffer[0];
+    memory_group_handle current = buffer[1];
+
+    if (current != 0) {
+      ++ delete_calls_[current] ;
+      bytes_[current] -= buffer[0];
     }
   }
 
   free(buffer);
+#endif
 }
 
 void Memory::new_group ( unsigned group_id, const char * group_name ) throw ()
@@ -156,6 +173,7 @@ void Memory::new_group ( unsigned group_id, const char * group_name ) throw ()
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
   if (group_id == 0 || group_id > MEMORY_MAX_NUM_GROUPS) {
 
     WARNING_MESSAGE("Memory::new_group()","group_id out of range");
@@ -165,6 +183,7 @@ void Memory::new_group ( unsigned group_id, const char * group_name ) throw ()
     group_names_[group_id] = strdup(group_name);
 
   }
+#endif
 }
 
 void  Memory::begin_group ( unsigned group_id ) throw ()
@@ -184,13 +203,14 @@ void  Memory::begin_group ( unsigned group_id ) throw ()
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
   // check for whether we have already called begin_group before
 
   bool in_range = (group_id <= MEMORY_MAX_NUM_GROUPS);
 
   if ( in_range ) {
 
-      curr_group_ = group_id;
+    curr_group_.push(group_id);
 
   } else { // curr_group_ out of range
 
@@ -202,10 +222,10 @@ void  Memory::begin_group ( unsigned group_id ) throw ()
     WARNING_MESSAGE("Memory::begin_group()",warning_message);
 
   }
-
+#endif
 }
 
-void  Memory::end_group ( unsigned group_id ) throw ()
+void Memory::end_group ( unsigned group_id ) throw ()
 /**
  *********************************************************************
  *
@@ -216,22 +236,44 @@ void  Memory::end_group ( unsigned group_id ) throw ()
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
+
+  char warning_message [ ERROR_MESSAGE_LENGTH ];
+
   bool in_range = (group_id <= MEMORY_MAX_NUM_GROUPS);
 
   if ( in_range ) {
 
-    curr_group_ = 0;
+    if (curr_group_.size() > 0) {
+
+      if (curr_group_.top() != group_id) {
+	sprintf (warning_message, 
+		 "Mismatch between end_group(%d) and group stack top %d\n",
+		 group_id,curr_group_.top());
+
+	WARNING_MESSAGE("Memory::end_group",warning_message);
+      }
+
+      curr_group_.pop();
+
+    } else {
+
+      sprintf (warning_message, 
+	       "end_group(%d) called with empty group stack\n",
+	       group_id);
+
+      WARNING_MESSAGE("Memory::end_group",warning_message);
+      
+    }
 
   } else { // curr_group_ out of range
-
-    char warning_message [ ERROR_MESSAGE_LENGTH ];
 
     sprintf (warning_message, "Group %d is out of range [1,%d]\n",
 	     group_id, MEMORY_MAX_NUM_GROUPS);
 
-    WARNING_MESSAGE("Memory::end_group()",warning_message);
-
+    WARNING_MESSAGE("Memory::end_group",warning_message);
   }
+#endif
 }
 
 
@@ -246,13 +288,20 @@ const char * Memory::current_group () throw ()
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
+
   // Create "null" group name if needed
 
-  if (group_names_[0] == 0) {
-    group_names_[0] = strdup("");
+  memory_group_handle current = curr_group_.top();
+
+  if (group_names_[current] == 0) {
+    group_names_[current] = strdup("");
   }
 
-  return group_names_[curr_group_];
+  return group_names_[current];
+#else
+  return "";
+#endif
 }
 
 
@@ -267,7 +316,11 @@ memory_group_handle Memory::current_handle () throw ()
  *********************************************************************
  */
 {
-  return curr_group_;
+#ifdef CONFIG_USE_MEMORY
+  return curr_group_.top();
+#else
+  return 0;
+#endif
 }
 
 
@@ -283,7 +336,11 @@ long long Memory::bytes ( memory_group_handle group_handle ) throw ()
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
   return bytes_[group_handle];
+#else
+  return 0;
+#endif
 }
 
 long long Memory::available ( memory_group_handle group_handle ) throw ()
@@ -298,9 +355,13 @@ long long Memory::available ( memory_group_handle group_handle ) throw ()
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
   INCOMPLETE_MESSAGE("Memory::available()","");
   return 0;
+#else
+  return 0;
+#endif
 }
 
 float Memory::efficiency ( memory_group_handle group_handle ) throw ()
@@ -315,9 +376,13 @@ float Memory::efficiency ( memory_group_handle group_handle ) throw ()
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
   INCOMPLETE_MESSAGE("Memory::efficiency()","");
   return 0.0;
+#else
+  return 0;
+#endif
 }
 
 long long Memory::highest ( memory_group_handle group_handle ) throw ()
@@ -332,9 +397,13 @@ long long Memory::highest ( memory_group_handle group_handle ) throw ()
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
   INCOMPLETE_MESSAGE("Memory::highest(group)","");
   return 0;
+#else
+  return 0;
+#endif
 }
 
 void Memory::set_limit ( long long size, memory_group_handle group_handle )
@@ -350,9 +419,10 @@ void Memory::set_limit ( long long size, memory_group_handle group_handle )
  *********************************************************************
  */
 {
+#ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
   available_[group_handle] = size;
-  return;
+#endif
 }
 
 /// Return the number of calls to allocate for the group
@@ -368,9 +438,13 @@ int Memory::num_new ( memory_group_handle group_handle ) throw ()
 *********************************************************************
 */
 {
+#ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
   INCOMPLETE_MESSAGE("Memory::num_new()","");
   return 0;
+#else
+  return 0;
+#endif
 }
 
 /// Return the number of calls to deallocate for the group
@@ -386,9 +460,13 @@ int Memory::num_delete ( memory_group_handle group_handle ) throw ()
 *********************************************************************
 */
 {
+#ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
   INCOMPLETE_MESSAGE("Memory::num_delete()","");
   return 0;
+#else
+  return 0;
+#endif
 }
 
 /// Print memory summary
@@ -404,8 +482,8 @@ void Memory::print () throw ()
 *********************************************************************
 */
 {
+#ifdef CONFIG_USE_MEMORY
   for (memory_group_handle i=0; i<= MEMORY_MAX_NUM_GROUPS; i++) {
-
     if (i == 0 || group_names_[i] != NULL) {
       printf ("Group %s\n",i ? group_names_[i]: "Total");
       if (available_[i]) printf ("   available_    = %ld\n",long(available_[i]));
@@ -415,11 +493,15 @@ void Memory::print () throw ()
       printf ("   delete_calls_ = %ld\n",long(delete_calls_[i]));
     }
   }
+#endif
 }
 
 void Memory::reset() throw()
 {
-  curr_group_ = 0;
+#ifdef CONFIG_USE_MEMORY
+  while (! curr_group_.empty()) curr_group_.pop();
+
+  curr_group_.push(0);
 
   for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
     bytes_       [i] = 0;
@@ -427,15 +509,16 @@ void Memory::reset() throw()
     new_calls_   [i] = 0;
     delete_calls_[i] = 0;
   }
+#endif
 }
 
 //======================================================================
 
-#ifdef USE_MEMORY
+#ifdef CONFIG_USE_MEMORY
 
-bool Memory::is_active_  =  true;
+bool Memory::is_active_  =  false;
 
-memory_group_handle Memory::curr_group_ = 0;
+std::stack<memory_group_handle> Memory::curr_group_;
 
 char *    Memory::group_names_ [MEMORY_MAX_NUM_GROUPS + 1] = {0};
 
@@ -449,9 +532,9 @@ long long Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS + 1] = {0};
 
 //======================================================================
     
+#ifdef CONFIG_USE_MEMORY
 void *operator new (size_t bytes) throw (std::bad_alloc)
 {
-
   size_t p = (size_t) Memory::allocate(bytes);
 
 
@@ -464,7 +547,6 @@ void *operator new (size_t bytes) throw (std::bad_alloc)
 
 void *operator new [] (size_t bytes) throw (std::bad_alloc)
 {
-
   size_t p = (size_t) Memory::allocate(bytes);
 
 
@@ -490,9 +572,6 @@ void operator delete [] (void *p) throw ()
 {
   if (p==0) return;
 
-
   Memory::deallocate(p);
-
 }
-
-#endif
+#endif /* CONFIG_USE_MEMORY */

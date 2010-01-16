@@ -1,17 +1,9 @@
 #ifndef CELLO_DEF
 #define CELLO_DEF
 
-/**********************************************************************
- * EDIT CONFIGURATION SETTINGS BELOW
- **********************************************************************/
+/* Include configuration settings */
 
-#define CONFIG_PRECISION_SINGLE
-/* #define CONFIG_PRECISION_DOUBLE */
-
-#define CONFIG_USE_MPI
-/* #define CONFIG_USE_PAPI */
-
-#define USE_MEMORY
+#include "config.def"
 
 /*********************************************************************
  * PRECISION DECLARATIONS
@@ -23,6 +15,7 @@
 #   define SCALAR_PRINTF "%e "
 #   define SCALAR_MPI     MPI_FLOAT
 #   define SCALAR_HDF5    H5T_NATIVE_FLOAT
+#   define SCALAR_DEFINED
 #endif
 
 #ifdef CONFIG_PRECISION_DOUBLE
@@ -31,6 +24,11 @@
 #   define SCALAR_PRINTF "%le "
 #   define SCALAR_MPI     MPI_DOUBLE
 #   define SCALAR_HDF5    H5T_NATIVE_DOUBLE
+#   define SCALAR_DEFINED /* if error here, then both single and double defined */
+#endif
+
+#ifndef SCALAR_DEFINED
+@@@ Error: CONFIG_PRECISION_* not defined
 #endif
 
 /*********************************************************************
@@ -136,5 +134,6 @@ enum type_component {
 #include <string>
 #include <vector>
 #include <map>
+#include <stack>
 
 #endif /* CELLO_DEF */

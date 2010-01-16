@@ -41,6 +41,9 @@
 int main(int argc, char ** argv)
 {
 
+  Memory::initialize();
+
+  printf ("start\n"); fflush(stdout);
   Memory::reset();
 
   unit_class ("Memory");
