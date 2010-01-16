@@ -1,7 +1,7 @@
 %0       1         2         3         4         5         6         7         8
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %=======================================================================
-\documentclass{book}
+\documentclass[10pt]{book}
 %=======================================================================
 
 \newcommand{\req}[3]{
@@ -13,11 +13,149 @@ Acceptance & \textit{#3}
 }
 
 \include{include}
+\usepackage{glossary}
+\makeglossary
+
+%    1. Introduction
+% 
+%          1. Purpose
+% 
+% <Identify the product whose software requirements are specified in this document, including the revision or release number. Describe the scope of the product that is covered by this SRS, particularly if this SRS describes only part of the system or a single subsystem.>
+% 
+%          2. Document Conventions
+% 
+% <Describe any standards or typographical conventions that were followed when writing this SRS, such as fonts or highlighting that have special significance. For example, state whether priorities  for higher-level requirements are assumed to be inherited by detailed requirements, or whether every requirement statement is to have its own priority.>
+% 
+%          3. Intended Audience and Reading Suggestions
+% 
+% <Describe the different types of reader that the document is intended for, such as developers, project managers, marketing staff, users, testers, and documentation writers. Describe what the rest of this SRS contains and how it is organized. Suggest a sequence for reading the document, beginning with the overview sections and proceeding through the sections that are most pertinent to each reader type.>
+% 
+%          4. Project Scope
+% 
+% <Provide a short description of the software being specified and its purpose, including relevant benefits, objectives, and goals. Relate the software to corporate goals or business strategies. If a separate vision and scope document is available, refer to it rather than duplicating its contents here. An SRS that specifies the next release of an evolving product should contain its own scope statement as a subset of the long-term strategic product vision.>
+% 
+%          5. References
+% 
+% <List any other documents or Web addresses to which this SRS refers. These may include user interface style guides, contracts, standards, system requirements specifications, use case documents, or a vision and scope document. Provide enough information so that the reader could access a copy of each reference, including title, author, version number, date, and source or location.>
+% 
+%    2. Overall Description
+% 
+%          1. Product Perspective
+% 
+% <Describe the context and origin of the product being specified in this SRS. For example, state whether this product is a follow-on member of a product family, a replacement for certain existing systems, or a new, self-contained product. If the SRS defines a component of a larger system, relate the requirements of the larger system to the functionality of this software and identify interfaces between the two. A simple diagram that shows the major components of the overall system, subsystem interconnections, and external interfaces can be helpful.>
+% 
+%          2. Product Features
+% 
+% <Summarize the major features the product contains or the significant functions that it performs or lets the user perform. Details will be provided in Section 3, so only a high level summary  is needed here. Organize the functions to make them understandable to any reader of the SRS. A picture of the major groups of related requirements and how they relate, such as a top level data flow diagram or a class diagram, is often effective.>
+% 
+%          3. User Classes and Characteristics
+% 
+% <Identify the various user classes that you anticipate will use this product. User classes may be differentiated based on frequency of use, subset of product functions used, technical expertise, security or privilege levels, educational level, or experience. Describe the pertinent characteristics of each user class. Certain requirements may pertain only to certain user classes. Distinguish the favored user classes from those who are less important to satisfy.>
+% 
+%          4. Operating Environment
+% 
+% <Describe the environment in which the software will operate, including the hardware platform, operating system and versions, and any other software components or applications with which it must peacefully coexist.>
+% 
+%          5. Design and Implementation Constraints
+% 
+% <Describe any items or issues that will limit the options available to the developers. These might include: corporate or regulatory policies; hardware limitations (timing requirements, memory requirements); interfaces to other applications; specific technologies, tools, and databases to be used; parallel operations; language requirements; communications protocols; security considerations; design conventions or programming standards (for example, if the customer-F¢s organization will be responsible for maintaining the delivered software).>-A
+% 
+%          6. User Documentation
+% 
+% <List the user documentation components (such as user manuals, on-line help, and tutorials) that will be delivered along with the software. Identify any known user documentation delivery formats or standards.>
+% 
+%          7. Assumptions and Dependencies
+% 
+% <List any assumed factors (as opposed to known facts) that could affect the requirements stated in the SRS. These could include third-party or commercial components that you plan to use, issues around the development or operating environment, or constraints. The project could be affected if these assumptions are incorrect, are not shared, or change. Also identify any dependencies the project has on external factors, such as software components that you intend to reuse from another project, unless they are already documented elsewhere (for example, in the vision and scope document or the project plan).>
+% 
+%    3. System Features
+% 
+% <This template illustrates organizing the functional requirements for the product by system features, the major services provided by the product. You may prefer to organize this section by use case, mode of operation, user class, object class, functional hierarchy, or combinations of these, whatever makes the most logical sense for your product.>
+% 
+%          1. System Feature 1
+% 
+% <Don-F¢t really say -Y-A´System Feature 1.¡ State the feature name in just a few words.>
+% 
+%       3.1.1 Description and Priority
+% 
+%             <Provide a short description of the feature and indicate whether it is of High, Medium, or Low priority. You could also include specific priority component ratings, such as benefit, penalty, cost, and risk (each rated on a relative scale from a low of 1 to a high of 9).>
+% 
+%       3.1.2 Stimulus/Response Sequences
+% 
+%             <List the sequences of user actions and system responses that stimulate the behavior defined for this feature. These will correspond to the dialog elements associated with use cases.>
+% 
+%       3.1.3 Functional Requirements
+% 
+%             <Itemize the detailed functional requirements associated with this feature. These are the software capabilities that must be present in order for the user to carry out the services provided by the feature, or to execute the use case. Include how the product should respond to anticipated error conditions or invalid inputs. Requirements should be concise, complete, unambiguous, verifiable, and necessary. Use ´TBD¡ as a placeholder to indicate when necessary information is not yet available.>
+% 
+%  
+% 
+%             <Each requirement should be uniquely identified with a sequence number or a meaningful tag of some kind.>
+% 
+%  
+% 
+%                   REQ-1: 
+% 
+%                   REQ-2: 
+% 
+%          2. System Feature 2 (and so on)
+% 
+%    4. External Interface Requirements
+% 
+%          1. User Interfaces
+% 
+% <Describe the logical characteristics of each interface between the software product and the users. This may include sample screen images, any GUI standards or product family style guides that are to be followed, screen layout constraints, standard buttons and functions (e.g., help) that will appear on every screen, keyboard shortcuts, error message display standards, and so on. Define the software components for which a user interface is needed. Details of the user interface design should be documented in a separate user interface specification.>
+% 
+%          2. Hardware Interfaces
+% 
+% <Describe the logical and physical characteristics of each interface between the software product and the hardware components of the system. This may include the supported device types, the nature of the data and control interactions between the software and the hardware, and communication protocols to be used.>
+% 
+%          3. Software Interfaces
+% 
+% <Describe the connections between this product and other specific software components (name and version), including databases, operating systems, tools, libraries, and integrated commercial components. Identify the data items or messages coming into the system and going out and describe the purpose of each. Describe the services needed and the nature of communications. Refer to documents that describe detailed application programming interface protocols. Identify data that will be shared across software components. If the data sharing mechanism must be implemented in a specific way (for example, use of a global data area in a multitasking operating system), specify this as an implementation constraint.>
+% 
+%          4. Communications Interfaces
+% 
+% <Describe the requirements associated with any communications functions required by this product, including e-mail, web browser, network server communications protocols, electronic forms, and so on. Define any pertinent message formatting. Identify any communication standards that will be used, such as FTP or HTTP. Specify any communication security or encryption issues, data transfer rates, and synchronization mechanisms.>
+% 
+%    5. Other Nonfunctional Requirements
+% 
+%          1. Performance Requirements
+% 
+% <If there are performance requirements for the product under various circumstances, state them here and explain their rationale, to help the developers understand the intent and make suitable design choices. Specify the timing relationships for real time systems. Make such requirements as specific as possible. You may need to state performance requirements for individual functional requirements or features.>
+% 
+%          2. Safety Requirements
+% 
+% <Specify those requirements that are concerned with possible loss, damage, or harm that could result from the use of the product. Define any safeguards or actions that must be taken, as well as actions that must be prevented. Refer to any external policies or regulations that state safety issues that affect the product-F-F¢s design or use. Define any safety certifications that must be satisfied.>-A
+% 
+%          3. Security Requirements
+% 
+% <Specify any requirements regarding security or privacy issues surrounding use of the product or protection of the data used or created by the product. Define any user identity authentication requirements. Refer to any external policies or regulations containing security issues that affect the product. Define any security or privacy certifications that must be satisfied.>
+% 
+%          4. Software Quality Attributes
+% 
+% <Specify any additional quality characteristics for the product that will be important to either the customers or the developers. Some to consider are: adaptability, availability, correctness, flexibility, interoperability, maintainability, portability, reliability, reusability, robustness, testability, and usability. Write these to be specific, quantitative, and verifiable when possible. At the least, clarify the relative preferences for various attributes, such as ease of use over ease of learning.>
+% 
+%    6. Other Requirements
+% 
+% <Define any other requirements not covered elsewhere in the SRS. This might include database requirements, internationalization requirements, legal requirements, reuse objectives for the project, and so on. Add any new sections that are pertinent to the project.>
+% 
+% Appendix A: Glossary
+% 
+% <Define all the terms necessary to properly interpret the SRS, including acronyms and abbreviations. You may wish to build a separate glossary that spans multiple projects or the entire organization, and just include terms specific to a single project in each SRS.>
+% 
+% Appendix B: Analysis Models
+% 
+% <Optionally, include any pertinent analysis models, such as data flow diagrams, class diagrams, state-transition diagrams, or entity-relationship diagrams.>
+% 
+% Appendix C: Issues List
+% 
+% < This is a dynamic list of the open requirements issues that remain to be resolved, including TBDs, pending decisions, information that is needed, conflicts awaiting resolution, and the like.>
 
 %=======================================================================
 
 \begin{document}
-
+\small
 %=======================================================================
 \TITLE{\cello\ Software Requirements Specification}{James Bordner}{$Rev$}
 %=======================================================================
@@ -25,87 +163,431 @@ Acceptance & \textit{#3}
 \tableofcontents
 
 %=======================================================================
+%=======================================================================
 \chapter{Introduction} \label{c:intro}
 %=======================================================================
+%=======================================================================
 
+%=======================================================================
 \section{Purpose}
-\section{Scope}
-\section{Definitions, acronyms, abbreviations}
-\section{References}
-\section{Overview}
+%=======================================================================
 
+%=======================================================================
+\section{Scope}
+%=======================================================================
+
+%=======================================================================
+\section{Definitions, acronyms, abbreviations}
+%=======================================================================
+
+%=======================================================================
+\section{References}
+%=======================================================================
+
+%=======================================================================
+\section{Overview}
+%=======================================================================
+
+ 
+%=======================================================================
 %=======================================================================
 \chapter{Overall Description} \label{c:descr}
 %=======================================================================
-\section{Product perspective}
-\section{Product functions}
-\section{User characteristics}
-\section{Constraints}
-\section{Assumptions and dependencies}
+%=======================================================================
 
+%=======================================================================
+\section{Product perspective}
+%=======================================================================
+
+%=======================================================================
+\section{Product functions}
+%=======================================================================
+
+%=======================================================================
+\section{User characteristics}
+%=======================================================================
+
+%=======================================================================
+\section{Constraints}
+%=======================================================================
+
+%=======================================================================
+\section{Assumptions and dependencies}
+%=======================================================================
+
+
+%=======================================================================
 %=======================================================================
 \chapter{Specific Requirements} \label{c:req}
 %=======================================================================
+%=======================================================================
+
+%=======================================================================
+\section{Scope}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item All software in the system will be open source
+%
+\item The system shall be partitioned into two sub-systems: the
+  distributed AMR data structure framework ``\cello'', and the
+  collection of physics algorithms ``\enzoii''
+%
+\item The \cello\ framework shall not have any dependencies on the
+  \enzoii\ algorithms
+%
+\item The system shall support coupled hyperbolic conservation,
+  elliptic, and parabolic PDE's
+%
+\item logically cartesion grids
+%
+\item The system shall support simulations in $1$D, $2$D, and $3$D \\
+  \textit{1D and 2D useful for testing}
+%
+\item eulerian, lagrangian, or hybrid methods \\
+  \textit{hybrid PM, TPM, PPPM, etc. methods and solvers, PPM,
+    multigrid }
+%
+\item The system will support multiple concurrent simulations    \\
+  \textit{could potentially be useful for inline analysis of multiple
+    simulations in a parameter study which would otherwise require
+    much disk storage }
+\end{enumerate}
+
+%=======================================================================
+\section{Adaptive mesh refinement}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item AMR data structure size (number of grids) is ``close'' to
+  optimal \textit{eliminates fixed-sized patches }
+%
+\item ``Fast'' searching of neighboring patches \textit{indicates
+    either octree or chaining mesh type data structure}
+%
+\item Support extreme hierarchy size (number of patches at least
+  $10^6$) \textit{indicates partial or fully distributed AMR data
+    structure}
+%
+\item Support extreme hierarchy depth (dynamic range of at least $60$
+  levels) \textit{Greater than the age of the universe in seconds} \\
+  \textit{indicates no precision or range issues with global floating
+    point positions or global integer indices}
+%
+\item Coordinate system may be (slowly) time-varying \textit{In
+    particular to support cosmological expansion }
+\end{enumerate}
+
+%=======================================================================
+\section{Mesh data}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item Support multiple user-defined fields
+%
+\item support stencils spanning at least 7 cells (3 ghost zones)
+%
+\item support efficient and scalable global linear solves
+  \textit{required by accurate elliptic and parabolic solves}
+%
+\item No assumptions shall be made on field variable names in the
+  source code \\
+  \textit{indicates they are specified in the parameter file, and user
+    methods must use subset of fields }
+%
+\item Different fields can have different precision, single or double
+%
+\item Fields can include scaling factor for improved numerical
+  accuracy \textit{e.g. if single precision has enough precision but
+    not enough range }
+\end{enumerate}
+
+%=======================================================================
+\section{Particle data}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item Support multiple user-defined particle groups \textit{e.g. star
+    particles, dark matter particles, tracer particles, etc. }
+%
+\item Each particle group can include arbitrary user-defined
+  parameters \textit{minimal is position }
+%
+\item User code has access to particle type and particle parameter
+  values
+%
+\item ``Fast'' searching of nearby particles \textit{indicates an
+    octree-like data structure}
+%
+\item Extreme particle count $> 10^9$
+\end{enumerate}
+
+%=======================================================================
+\section{User-supplied functions}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item user-supplied methods, solvers, analysis, visualization
+%
+\item user code in fortran, C, or C++
+%
+\item advance single-patch one timestep
+%
+\item impose inter-resolution constraints (flux correction)
+%
+\item refinement criteria for localized spacial resolution
+  requirements (accuracy)
+%
+\item timestep criteria for localized temporal resolution requirements
+  (CFL)
+%
+\item interpolation of individual fields
+
+%
+\item user code can indicate a failure
+%
+\item user code can include multiple methods or solvers to improve
+  robustness \\
+  \textit{e.g. if a geometric multigrid-based linear solver does not
+    converge, a more robust but slower linear solver may dynamically
+    be called }
+\end{enumerate}
+
+
+%=======================================================================
+\section{Run-time parameters}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item Problems shall be fully defined using an input text file, called
+  the ``parameter file''
+%
+\item Parameter files may include other parameter files
+%
+\item Initial conditions may be initialized using data files
+%
+\item Initial conditions may be initialized using functions
+%
+\item Input via single or multiple included parameter files
+%
+\item Both framework and user code have access to run-time parameters
+  \textit{useful for user code to take advantage of framework
+    parameters } \textit{indicates an API for parameters }
+%
+\item Sufficiently powerful parameter file language to specify user
+  problems \textit{difficult to test, but ability to e.g.~express
+    arbitrary scalar and logical expressions, including standard
+    functions (sin, log, etc.) for initial conditions using x,y,z,t
+    variables } \textit{in particular, \enzoii\ will be able to define
+    any current hydro / gravity / MHD test problem that Enzo can,
+    despite not having specialized problem types }
+%
+\item Explicit initial conditions via data files
+%
+\item Allow ``deep'' parameter control of parallelism, parallel data
+  structures, and user code \textit{indicates many parameters, which
+    indicates parameters grouped by common functionality to reduce
+    complexity }
+\end{enumerate}
+ 
+
+%=======================================================================
+\section{Parallelism}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item No fundamental limit on process / thread counts \textit{i.e. no
+    hard-coded MAX\_PROCESSORS}
+%
+\item Support distributed memory, shared memory, and hybrid
+  parallelism
+%
+\item Include thread-safety \textit{requires user code to be
+    thread-safe }
+%
+\item Support range of parallel task sizes, including single array
+  cells (note conflicts with AMR data structure size for standard
+  octree AMR)
+%
+\item no limit on processor count
+%
+\item direct or indirect support of GPU's \textit{at least ability to
+    schedule groups of many tasks at once } \textit{requires support
+    of GPU programming in user code }
+%
+\item direct support for multilevel parallelism of up to 4 levels
+  \textit{not just distributed and shared memory.  E.g. distinguish
+    between cores, sockets, nodes, cabinets }
+%
+\item efficient, reliable, and effective load balancing
+  \textit{indicates hierarchical, takes into account cost to relocate
+    task, and level-dependent (and user-defined) metrics }
+%
+\item efficient, reliable, and effective dynamic task scheduling
+  \textit{given load balance, schedule tasks.  Indicates hierarchical,
+    ability to group-schedule (for GPU).  Could use component
+    parallelism to improve load balancing on extreme
+    scales~\cite{@@@Shalf} }
+\end{enumerate}
+
+%=======================================================================
+\section{Problem Definition}
+%=======================================================================
+
+\begin{enumerate}
+\item The expressive power of parameter files is sufficient to specify
+  all \enzo\ test problems supported by the available \enzoii\ physics
+  algorithms
+%
+\item The expressive power of parameter files is sufficient to specify
+  all standard test problems in the literature supported by the
+  available \enzoii\ physics algorithms
+%
+\item The expressive power of parameter files shall be sufficient for
+  deep control of all available physics algorithms and distributed
+  data structures
+\end{enumerate}
+%
+%=======================================================================
+\section{User Monitoring}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item The system shall support text logging of the history and current
+  state of the simulation
+%
+\item Clear output to the user reguarding the current state of the
+  simulation.  \\
+  \textit{ progress, performance, warnings, errors, attempts at
+    recovery } \\
+  \textit{ can include text, web page, simple plots, to
+    show a dashboard of current and historical state }
+%
+\item Output includes user-defined output \textit{indicates user code
+    can call logging API, including web pages and simple plots }
+%
+\item Ability to view and modify data structure parameters dynamically
+  at run time
+%
+\item The system shall support simple visualization logging (plots,
+  graphs, field data, and particle data)
+%
+\item All logging data will be available from a single file (e.g. web
+  page)
+\end{enumerate}
+%
+%=======================================================================
+\section{User Control}
+%=======================================================================
+
+\begin{enumerate}
+\item The system shall enable external modification of physics and
+  data-structure parameters of a running simulation
+\end{enumerate}
+
+%=======================================================================
+\section{Disk I/O }
+%=======================================================================
+
+\begin{enumerate}
+%
+\item Support for data dumps of all or subset of data fields and
+  particles
+%
+\item Support user method-dependent data output \textit{indicates user
+    code can access disk storage API }
+%
+\item Parallel I/O using standardized AMR file formats \cite{LoKl08}
+  \textit{e.g.~ADIOS API }
+\end{enumerate}
+       
+%=======================================================================
+\section{Performance}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item computation scalable to $> 10^6$ cores \textit{$< O(P)$ storage
+    / compute per process } \textit{$<= O(N/P)$ storage per process
+    ($\log N$ or $\log $ ok) }
+%
+\item memory scalable to $> 10^6$ cores
+%
+\item communication scalable to $> 10^6$ cores \textit{affects
+    checkpointing strategy}
+%
+\item disk storage scalable to $> 10^6$ cores \textit{affects
+    checkpointing strategy}
+%
+\item highly competetive parallel scaling
+%
+\item competetive serial performance
+%
+\item competetive parallel performance
+%
+\item competetive memory usage
+\end{enumerate}
+
+%=======================================================================
+\section{Fault Tolerance}
+%=======================================================================
+
+\begin{enumerate}
+%
+\item The system shall attempt to detect and recover from numerical errors (NaN, Inf) \\
+  \textit{e.g. by switching to an alternative method or solver, or
+    using a smaller timestep}
+%
+\item The system shall attempt to detect and recover from loss of
+  processing elements, including cores, processes, or nodes \\
+  \textit{depends on ability to detect failures, which may require OS
+    or library support not currently available } \\ \textit{indicates
+    virtualization of processors and nodes: can backtrack and continue
+    with reduced hardware } \\ \textit{indicates ability to flag
+    components as unreliable }
+%
+\item The system shall attempt to detect and recover from memory
+  faults
+%
+\item The system shall attempt to detect and recover from network
+  interconnect faults
+%
+\item The system shall attempt to detect and recover from disk faults
+%
+\item The system shall support checkpoint / restart to disk
+  \textit{indicates ability of user code to call \cello\ resiliance /
+    fault tolerance API }
+%
+\item The system shall support checkpoint / restart to memory
+%
+\item The system shall be resilient to multiple failures
+%
+\item The system shall attempt to predict failures a priori and act to
+  prevent probable failures
+%
+\end{enumerate}
+
+@@@@@@@@@@@@@@@@@@@@@@@
 
 %=======================================================================
 \section{System}
 %=======================================================================
 
 \begin{enumerate}
-\item  All software in the system will be open source
-\item  Multiple simulations will be supported (optional)
-\item  The system will contain no problem-dependent code
-\item  The user may supply problem-dependent initialization routines
-\item  All problems are specified using a single user-written parameter file
-\item  Parameter files may include other parameter files (optional)
-\item  Initial conditions may be initialized using data files
-\item  Expressive power of parameter files is sufficient to specify all \enzo\ test problems without problem-dependent routines that can be run given the supported physics capabilities
-\item  Expressive power of parameter files is sufficient to specify all standard test problems that can be run given the supported physics capabilities
-\item Parameters shall be sufficient for deep control of all physics, algorithms, and data structures
-\item The system shall support simulations in $1$D, $2$D, and $3$D
-\item The system shall support text logging of the history and current state of the simulation
-\item The system shall support simple visualization logging (plots, graphs, field data, and particle data)
-\item All logging data will be available from a single file (e.g. web page)
-\item The system shall enable external modification of physics and
-  data-structure parameters of a running simulation
-\item The system shall attempt to detect and recover from numerical errors (NaN, Inf)
-\item The system shall attempt to detect and recover from loss of a core, process, or node
-\item The system shall attempt to detect and recover from memory errors
-\item The system shall attempt to detect and recover from communication errors
-\item The system shall attempt to detect and recover from disk errors
-\item The system shall support checkpoint / restart to disk
-\item The system shall support checkpoint / restart to memory
-\end{enumerate}
+%
 
-%=======================================================================
-\section{Problem definition}
-%=======================================================================
-
-\begin{enumerate}
- \item Problems shall be fully defined using an input text file, called
-  the ``parameter file''
-  \item Problems may input HDF5 files as part of the parameter
-  \item No assumptions shall be made on field variable names in the source
-  code
-  \item parameter files shall be sufficiently powerful to define
-  all standard test problems
-  \item parameter files shall support defining general subregions of space for initial conditions
-  \item parameter files shall support constructing composite
-  regions using intersection, union, and set difference on simple
-  regions
-  \item Composite regions shall not have any imposed restriction on number
-  of constituent simple regions
-  \item parameter files shall support defining field properties
-  within a regions
-  \item Field properties may vary between regions
-  \item Numerical values in parameter files may include arithmetic
-  operations
-  \item Numerical values in parameter files may include the
-  functions \code{log}, \code{exp}, \code{sin}, \code{cos},
-  \code{min}, \code{max}
-  \item Numerical values in parameter files may include \code{x},
-  \code{y}, \code{z}, and \code{t} to represent spacial and temporal
-  coodinates
+%
+%
+%
+%
 \end{enumerate}
 
 %=======================================================================
@@ -113,25 +595,35 @@ Acceptance & \textit{#3}
 %=======================================================================
 
 \begin{enumerate}
-  \item The system shall support systems of coupled PDE's involving hyperbolic conservation and elliptic equations
+%
+\item The system shall support systems of coupled PDE's involving
+  hyperbolic conservation and elliptic equations
 
-  \item The system shall perform hydrodynamics computations with at least
-  2nd order in both space and time ``almost everywhere''
+%
+\item The system shall perform hydrodynamics computations with at
+  least 2nd order in both space and time ``almost everywhere''
 
-  \item The system shall perform self-gravity computations with at least
+%
+\item The system shall perform self-gravity computations with at least
   2nd order accuracy in both space and time ``almost everywhere''
 
-  \item The system shall support cosmological expansion as an option
+%
+\item The system shall support cosmological expansion as an option
 
-  \item The system shall perform radiative cooling computations
+%
+\item The system shall perform radiative cooling computations
 
-  \item The system shall perform multispecies chemistry computations
+%
+\item The system shall perform multispecies chemistry computations
 
-  \item The system shall perform star-formation computations
+%
+\item The system shall perform star-formation computations
 
-  \item The system shall perform magnetohydrodynamic computations
+%
+\item The system shall perform magnetohydrodynamic computations
 
-  \item The system shall perform radiative transfer computations
+%
+\item The system shall perform radiative transfer computations
 \end{enumerate}
 
 %=======================================================================
@@ -140,23 +632,15 @@ Acceptance & \textit{#3}
 
 
 \begin{enumerate}
-  \item The system shall be able to represent ideal gas density, velocity,
-  and @@@energy
 
-  \item The system shall be able to represent dark matter density and
-  velocity
+%
+\item The system should support general problem-dependent
+  multi-resolution fields on locally logically Cartesian meshes.
+%
+\item Fields
+%
+\item Field size shall not be bounded by software constraints.
 
-  \item The system should support multiple ideal gases
-
-  \item Simulation dynamic resolution range @@@ glossary: dynamic
-  resolution range: shall be at least $2^64$, e.g.~$1024^3$
-  @@@glossary: root grid: with $27$ additional levels of refinement by
-  $4$)
-
-  \item Simulation resolution range should be at least $2^128$
-
-  \item Simulation size shall be virtually unbounded (run on largest
-  parallel computer available)
 \end{enumerate}
 
 %=======================================================================
@@ -167,40 +651,70 @@ Acceptance & \textit{#3}
 \section{Multiresolution}
 %=======================================================================
 
+\begin{enumerate}
+%
+\item Simulation dynamic spacial resolution range shall be at least
+  $2^64$, that is $64$ total hierarchy levels with refinement factor
+  $r=2$.
+%
+\item Simulation temporal resolution shall be determined by local
+  patch constraints
+\end{enumerate}
+
 %=======================================================================
 \section{Performance}
 %=======================================================================
 
 \begin{enumerate}
-  \item The system shall support multiple levels of parallelism
+%
+\item The system shall support multiple levels of parallelism
 
-  \item The system shall support a data-parallel model using point-to-point
-  @@@glossary MPI-1 communication
+\glossary{name = {two-sided}, description = {Communication from process A to process B where both A and B are directly involved in the data transfer}}
 
-  \item The system may support a data-parallel model using one-sided
-  @@@glossary MPI-2 communication
 
-  \item The system shall support multiple levels of parallelism
+%
+\item The system shall support a data-parallel model using two-sided
+  MPI-1 communication
 
-  \item The system shall support OpenMP shared memory parallelism with
+\glossary{name = {one-sided}, description = {Communication from process A to process B where exactly one of A or B is directly involved in the data transfer}}
+
+%
+\item The system may support a data-parallel model using one-sided
+  MPI-2 communication
+
+%
+\item The system shall support hierarchical parallelism of at least
+  four levels.
+
+%
+\item The system shall directly support both distributed memory and
+  shared memory parallelism.
+
+%
+\item The system shall support OpenMP shared memory parallelism with
   parallel efficiency at least $80\%$ of maximum based on flops and
   memory relative to single-core up to $100$ cores
 
-  \item The system shall support uniform resolution problems with at least
-  $10\%$ average core flop rate on largest platform sizes available
+%
+\item The system shall support uniform resolution problems with at
+  least $10\%$ average core flop rate on largest platform sizes
+  available
 
-  \item The system shall support moderately non-uniform resolution problems
-  (dynamic resolution range of $2^32$) with at least $3\%$ average
-  core flop rate on largest platform sizes available
+%
+\item The system shall support moderately non-uniform resolution
+  problems (dynamic resolution range of $2^32$) with at least $3\%$
+  average core flop rate on largest platform sizes available
 
-  \item The system shall support highly non-uniform resolution problems
+%
+\item The system shall support highly non-uniform resolution problems
   (dynamic resolution range of $2^48$) with $1\%$ average core flop
   rate and $50\%$ parallel efficiency on largest platform sizes
   available
 
-  \item The system shall support highly non-uniform resolution problems on
-  the largest platform sizes available that have at least $1GB$ memory
-  per computational element
+%
+\item The system shall support highly non-uniform resolution problems
+  on the largest platform sizes available that have at least $1GB$
+  memory per computational element
 \end{enumerate}
 
 %=======================================================================
@@ -208,34 +722,90 @@ Acceptance & \textit{#3}
 %=======================================================================
 
 \begin{description}
- \item[W001] Integrate "inits" functionality into the main code
- \item[W002] Support ensembles within a single run, including inline-analysis
- \item[W003] Support multiple (hybrid) and flexible parallelization strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided get/put), OMP, and optionally UPC and GPU
- \item[W004] Reduce implicit dependencies by dynamically allocating parallel tasks, ala CHARM++
- \item[W005] Auto-tune where possible--automatically optimize for cache-, parallel-, vector-, solver-, etc. parameters
- \item[W006] Use object-oriented design, organize into components (subdirectories) of classes (*.hpp/*.cpp files)
- \item[W007] Require more rigorous coding standards compared to Enzo development
- \item[W008] Enforce strict control over data storage formats (e.g. files) (see W0009)
- \item[W009] Require that all stored data be accessed through standard interface functions that are independent of specific file formats (i.e., stored datasets are conceptually treated as objects)
- \item[W010] Support both structured AMR (Enzo-like) and tree-based AMR
- \item[W011] Store particle positions in single precision as -1 <= x,y,z <= 1 relative to their containing patch
- \item[W012] Do not store a patch's global position, only local position relative to immediate neighbors, parent, and children
- \item[W013] Represent patch extents with (small) integer values relative to parent
- \item[W014] Provide (or notify) neighboring patches with updated ghost zone data as soon as it's available
- \item[W015] Support optional variable timestep sizes within each level
- \item[W016] Support optional uniform timesteps across all levels
- \item[W017] User-controlled optional floor/ceiling limits on individual Fields (ala "tiny\_number" in Enzo), with user-specified Error behavior (warning, error, ignore, reset to given floor/ceiling, etc.)
- \item[W018] Allow multiple root-level patches per MPI task
- \item[W019] Use a binary tree data-structure to recursively partition the bounding boxes of particles
- \item[W020] For very deep AMR where coarser levels never complete their timestep, delete coarse levels to free storage
- \item[W021] Relax rigid refinement criteria to inhibit excessive changes in octree-like tree refinement
- \item[W022] Support for user-supplied code for problem initialization
- \item[W023] Load-balance by having over-loaded processors reassign tasks to random processes
- \item[W024] Load-balance using "over-compensation", since heavily-loaded processes tend to continue to become more heavily loaded (cosmology / star-formation application-dependent)
- \item[W025] Reduce tree-AMR node size by only storing parent, single neighbor, and single child
- \item[W026] Support flexible node types: memory-efficient versus compute-efficient
- \item[W027] Support temporary "allocate as-needed" ghost zones in addition to "permanent" ones
- \item[W028] Only use inter-core, inter-cpu, inter-node, etc. level-communicators to bound communicator size and manage communication nonuniformity
+%
+\item[W001] Integrate "inits" functionality into the main code
+%
+\item[W002] Support ensembles within a single run, including
+  inline-analysis
+%
+\item[W003] Support multiple (hybrid) and flexible parallelization
+  strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided
+  get/put), OMP, and optionally UPC and GPU
+%
+\item[W004] Reduce implicit dependencies by dynamically allocating
+  parallel tasks, ala CHARM++
+%
+\item[W005] Auto-tune where possible--automatically optimize for
+  cache-, parallel-, vector-, solver-, etc. parameters
+%
+\item[W006] Use object-oriented design, organize into components
+  (subdirectories) of classes (*.hpp/*.cpp files)
+%
+\item[W007] Require more rigorous coding standards compared to Enzo
+  development
+%
+\item[W008] Enforce strict control over data storage formats (e.g.
+  files) (see W0009)
+%
+\item[W009] Require that all stored data be accessed through standard
+  interface functions that are independent of specific file formats
+  (i.e., stored datasets are conceptually treated as objects)
+%
+\item[W010] Support both structured AMR (Enzo-like) and tree-based AMR
+%
+\item[W011] Store particle positions in single precision as -1 <=
+  x,y,z <= 1 relative to their containing patch
+%
+\item[W012] Do not store a patch's global position, only local
+  position relative to immediate neighbors, parent, and children
+%
+\item[W013] Represent patch extents with (small) integer values
+  relative to parent
+%
+\item[W014] Provide (or notify) neighboring patches with updated ghost
+  zone data as soon as it's available
+%
+\item[W015] Support optional variable timestep sizes within each level
+%
+\item[W016] Support optional uniform timesteps across all levels
+%
+\item[W017] User-controlled optional floor/ceiling limits on
+  individual Fields (ala "tiny\_number" in Enzo), with user-specified
+  Error behavior (warning, error, ignore, reset to given
+  floor/ceiling, etc.)
+%
+\item[W018] Allow multiple root-level patches per MPI task
+%
+\item[W019] Use a binary tree data-structure to recursively partition
+  the bounding boxes of particles
+%
+\item[W020] For very deep AMR where coarser levels never complete
+  their timestep, delete coarse levels to free storage
+%
+\item[W021] Relax rigid refinement criteria to inhibit excessive
+  changes in octree-like tree refinement
+%
+\item[W022] Support for user-supplied code for problem initialization
+%
+\item[W023] Load-balance by having over-loaded processors reassign
+  tasks to random processes
+%
+\item[W024] Load-balance using "over-compensation", since
+  heavily-loaded processes tend to continue to become more heavily
+  loaded (cosmology / star-formation application-dependent)
+%
+\item[W025] Reduce tree-AMR node size by only storing parent, single
+  neighbor, and single child
+%
+\item[W026] Support flexible node types: memory-efficient versus
+  compute-efficient
+%
+\item[W027] Support temporary "allocate as-needed" ghost zones in
+  addition to "permanent" ones
+%
+\item[W028] Only use inter-core, inter-cpu, inter-node, etc.
+  level-communicators to bound communicator size and manage
+  communication nonuniformity
 \end{description}
 
 %=======================================================================
@@ -243,12 +813,19 @@ Acceptance & \textit{#3}
 %=======================================================================
 
 \begin{itemize}
+%
 \item Problem
+%
 \item Physics
+%
 \item Algorithms
+%
 \item Data
+%
 \item Parallel
+%
 \item I/O
+%
 \item Performance
 \end{itemize}
 
@@ -264,8 +841,7 @@ Acceptance & \textit{#3}
   {}
 
 \appendix
-
-
+\printglossary
 \end{document}
 
 %==================================================================
