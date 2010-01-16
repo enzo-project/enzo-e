@@ -32,6 +32,9 @@ figures:
 include.tex:
 	ln -s ../include.tex .
 
+glo:
+	makeindex $(PAPER).glo -s $(PAPER).ist -t $(PAPER).glg -o $(PAPER).gls
+
 clean:
 	-@rm -f *~ *.aux \
         $(PAPER).dvi \
