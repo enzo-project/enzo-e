@@ -1,7 +1,7 @@
 %0       1         2         3         4         5         6         7         8
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %=======================================================================
-\documentclass[10pt]{book}
+\documentclass[10pt]{article}
 %=======================================================================
 
 \newcommand{\req}[3]{
@@ -13,8 +13,8 @@ Acceptance & \textit{#3}
 }
 
 \include{include}
-\usepackage{glossary}
-\makeglossary
+%\usepackage{glossary}
+%\makeglossary
 
 %    1. Introduction
 % 
@@ -160,68 +160,9 @@ Acceptance & \textit{#3}
 \TITLE{\cello\ Software Requirements Specification}{James Bordner}{$Rev$}
 %=======================================================================
 
-\tableofcontents
+%\tableofcontents
 
 %=======================================================================
-%=======================================================================
-\chapter{Introduction} \label{c:intro}
-%=======================================================================
-%=======================================================================
-
-%=======================================================================
-\section{Purpose}
-%=======================================================================
-
-%=======================================================================
-\section{Scope}
-%=======================================================================
-
-%=======================================================================
-\section{Definitions, acronyms, abbreviations}
-%=======================================================================
-
-%=======================================================================
-\section{References}
-%=======================================================================
-
-%=======================================================================
-\section{Overview}
-%=======================================================================
-
- 
-%=======================================================================
-%=======================================================================
-\chapter{Overall Description} \label{c:descr}
-%=======================================================================
-%=======================================================================
-
-%=======================================================================
-\section{Product perspective}
-%=======================================================================
-
-%=======================================================================
-\section{Product functions}
-%=======================================================================
-
-%=======================================================================
-\section{User characteristics}
-%=======================================================================
-
-%=======================================================================
-\section{Constraints}
-%=======================================================================
-
-%=======================================================================
-\section{Assumptions and dependencies}
-%=======================================================================
-
-
-%=======================================================================
-%=======================================================================
-\chapter{Specific Requirements} \label{c:req}
-%=======================================================================
-%=======================================================================
-
 %=======================================================================
 \section{Scope}
 %=======================================================================
@@ -237,22 +178,15 @@ Acceptance & \textit{#3}
 \item The \cello\ framework shall not have any dependencies on the
   \enzoii\ algorithms
 %
-\item The system shall support coupled hyperbolic conservation,
+\item The system shall support coupled systems of hyperbolic,
   elliptic, and parabolic PDE's
-%
-\item logically cartesion grids
 %
 \item The system shall support simulations in $1$D, $2$D, and $3$D \\
   \textit{1D and 2D useful for testing}
 %
-\item eulerian, lagrangian, or hybrid methods \\
-  \textit{hybrid PM, TPM, PPPM, etc. methods and solvers, PPM,
-    multigrid }
+\item The system shall support Eulerian, Lagrangian, or hybrid methods \\
 %
-\item The system will support multiple concurrent simulations    \\
-  \textit{could potentially be useful for inline analysis of multiple
-    simulations in a parameter study which would otherwise require
-    much disk storage }
+\item The system shall support multiple concurrent simulations
 \end{enumerate}
 
 %=======================================================================
@@ -261,23 +195,28 @@ Acceptance & \textit{#3}
 
 \begin{enumerate}
 %
-\item AMR data structure size (number of grids) is ``close'' to
-  optimal \textit{eliminates fixed-sized patches }
+\item AMR data structure size (number of patches) is ``close'' to
+  optimal \\
+  \textit{Note that this eliminates fixed-sized patches}
 %
-\item ``Fast'' searching of neighboring patches \textit{indicates
-    either octree or chaining mesh type data structure}
+\item The system shall support ``fast'' searching of neighboring
+  patches \\
+  \textit{indicates either direct storage of neighbors, or an octree
+    or chaining mesh type data structure}
 %
-\item Support extreme hierarchy size (number of patches at least
-  $10^6$) \textit{indicates partial or fully distributed AMR data
-    structure}
+\item The system shall not impose limits on hierarchy size in terms of
+  number of grid patches patches at least $10^6$) \textit{indicates
+    partial or fully distributed AMR data structure}
 %
-\item Support extreme hierarchy depth (dynamic range of at least $60$
-  levels) \textit{Greater than the age of the universe in seconds} \\
-  \textit{indicates no precision or range issues with global floating
-    point positions or global integer indices}
+\item The system shall support hierarchy depth of up to $64$ levels, for
+  a dynamic range of $2^{64}$
+  \textit{Note this is greater than the age of the universe in seconds for}
 %
-\item Coordinate system may be (slowly) time-varying \textit{In
-    particular to support cosmological expansion }
+\item The system shall support adaptive timestepping at the grid patch level
+%
+\item Spacial change in resolution will be bounded above by $2$.
+%
+\item AMR levels of symmetric problems will cover symmetric areas
 \end{enumerate}
 
 %=======================================================================
@@ -286,23 +225,30 @@ Acceptance & \textit{#3}
 
 \begin{enumerate}
 %
-\item Support multiple user-defined fields
+\item The system should support multiple general problem-dependent
+  multi-resolution fields on locally logically Cartesian grids.
 %
-\item support stencils spanning at least 7 cells (3 ghost zones)
+\item Data layout of fields will be flexible enough to interface
+  directly with most grid-based user functions
 %
-\item support efficient and scalable global linear solves
-  \textit{required by accurate elliptic and parabolic solves}
+\item Field size shall not be bounded by software constraints,
+  e.g.~\code{MAX\_ZONES}, etc.
 %
-\item No assumptions shall be made on field variable names in the
-  source code \\
-  \textit{indicates they are specified in the parameter file, and user
-    methods must use subset of fields }
+\item The number of Fields shall not be bounded by software constraints.
 %
-\item Different fields can have different precision, single or double
+\item Field size shall not be bounded by limited range of global indices
 %
-\item Fields can include scaling factor for improved numerical
-  accuracy \textit{e.g. if single precision has enough precision but
-    not enough range }
+\item Field variables may be located at zone centers, faces, edges, or vertices
+%
+\item Fields will support level-dependent scaling to maintain numerical accuracy at high resolutions
+%
+\item Precision of field variables may be 32-bit or 64-bit 
+%
+\item Different fields may have different precision
+%
+\item Fields will support stencils spanning up to three ghost/guard cells
+%
+\item Minumum or maximum values of fields may be specified
 \end{enumerate}
 
 %=======================================================================
@@ -311,19 +257,24 @@ Acceptance & \textit{#3}
 
 \begin{enumerate}
 %
-\item Support multiple user-defined particle groups \textit{e.g. star
-    particles, dark matter particles, tracer particles, etc. }
+\item The system shall support multiple user-defined particle groups \\
+  \textit{e.g. star particles, dark matter particles, tracer
+    particles, etc. }
 %
 \item Each particle group can include arbitrary user-defined
-  parameters \textit{minimal is position }
+  scalar attributes
 %
-\item User code has access to particle type and particle parameter
-  values
+\item User code has access to particles by group, and all particle attributes
 %
-\item ``Fast'' searching of nearby particles \textit{indicates an
-    octree-like data structure}
+\item The system shall support ``Fast'' searching of nearby particles
 %
-\item Extreme particle count $> 10^9$
+\item Numbers of particles shall not be bounded by software constraints, e.g.~\code{MAX\_PARTICLES}
+%
+\item Data layout of particles will be flexible enough to interface
+  directly with most grid-based user functions
+%
+\item The local accuracy of nearby particle positions shall not be
+  limited by the global extent of particle positions.
 \end{enumerate}
 
 %=======================================================================
@@ -332,30 +283,47 @@ Acceptance & \textit{#3}
 
 \begin{enumerate}
 %
-\item user-supplied methods, solvers, analysis, visualization
+\item The system shall support user-supplied patch-based methods, analysis, and visualization
 %
-\item user code in fortran, C, or C++
+\item The system shall support user-supplied level-based methods, analysis, and visualization
 %
-\item advance single-patch one timestep
+\item The system shall support user-supplied hierarchy-based methods, analysis, and visualization
 %
-\item impose inter-resolution constraints (flux correction)
+\item User functions may be written in Fortran, C, or C++
 %
-\item refinement criteria for localized spacial resolution
-  requirements (accuracy)
+\item User functions may impose inter-resolution constraints,
+  e.g.~flux correction
 %
-\item timestep criteria for localized temporal resolution requirements
-  (CFL)
+\item User functions may impose assertions on field or particles
 %
-\item interpolation of individual fields
-
+\item User functions may specify local spacial resolution requirements
+  by tagging patch cells for coarsening or refinement
 %
-\item user code can indicate a failure
+\item User functions may specify local temporal resolution requirements
+  by returning a minimum timestep
 %
-\item user code can include multiple methods or solvers to improve
-  robustness \\
-  \textit{e.g. if a geometric multigrid-based linear solver does not
-    converge, a more robust but slower linear solver may dynamically
-    be called }
+\item User functions may define how individual fields may be
+  interpolated between levels
+%
+\item Any user function can indicate a failure
+%
+\item Any user code can include alternate methods or solvers to
+  improve  robustness
+%
+\item User functions can define problem initialization code
+%
+\item Different user functions can indicate different field ghost zone
+  depth requirements for different fields
+%
+\item Different user functions can indicate different particle ghost
+  zone depth requirements for different particle groups
+%
+\item User functions indicate which fields and particle groups they
+  read or modify
+%
+\item User functions may define local persistent or transient fields
+  or particle groups
+%
 \end{enumerate}
 
 
@@ -364,6 +332,17 @@ Acceptance & \textit{#3}
 %=======================================================================
 
 \begin{enumerate}
+\item The expressive power of parameter files is sufficient to specify
+  all \enzo\ test problems supported by the available \enzoii\ physics
+  algorithms
+%
+\item The expressive power of parameter files is sufficient to specify
+  all standard test problems in the literature supported by the
+  available \enzoii\ physics algorithms
+%
+\item The expressive power of parameter files shall be sufficient for
+  deep control of all available physics algorithms and distributed
+  data structures
 %
 \item Problems shall be fully defined using an input text file, called
   the ``parameter file''
@@ -416,47 +395,43 @@ Acceptance & \textit{#3}
   cells (note conflicts with AMR data structure size for standard
   octree AMR)
 %
-\item no limit on processor count
-%
 \item direct or indirect support of GPU's \textit{at least ability to
     schedule groups of many tasks at once } \textit{requires support
     of GPU programming in user code }
 %
-\item direct support for multilevel parallelism of up to 4 levels
+\item The system shall support multilevel parallelism of up to 4 levels
   \textit{not just distributed and shared memory.  E.g. distinguish
     between cores, sockets, nodes, cabinets }
 %
-\item efficient, reliable, and effective load balancing
+\item The system's load balancing of parallel tasks shall be efficient, reliable, and effective
   \textit{indicates hierarchical, takes into account cost to relocate
     task, and level-dependent (and user-defined) metrics }
 %
-\item efficient, reliable, and effective dynamic task scheduling
+\item The system's parallel task scheduling shall be efficient, reliable, and effective
   \textit{given load balance, schedule tasks.  Indicates hierarchical,
     ability to group-schedule (for GPU).  Could use component
     parallelism to improve load balancing on extreme
     scales~\cite{@@@Shalf} }
+%
+\item The system shall directly support both distributed memory and
+  shared memory parallelism.
+%
+\item The system shall support  distributed memory data-parallelism
+  using MPI
+%
+\item The system shall support distributed memory task-parallelism
+  using MPI
+%
+\item The system shall support shared-memory data-parallelism using
+  OpenMP
+%
+\item The system shall support data-parallelism using UPC
+%
 \end{enumerate}
 
-%=======================================================================
-\section{Problem Definition}
-%=======================================================================
-
-\begin{enumerate}
-\item The expressive power of parameter files is sufficient to specify
-  all \enzo\ test problems supported by the available \enzoii\ physics
-  algorithms
-%
-\item The expressive power of parameter files is sufficient to specify
-  all standard test problems in the literature supported by the
-  available \enzoii\ physics algorithms
-%
-\item The expressive power of parameter files shall be sufficient for
-  deep control of all available physics algorithms and distributed
-  data structures
-\end{enumerate}
 %
 %=======================================================================
-\section{User Monitoring}
+\section{Monitoring}
 %=======================================================================
 
 \begin{enumerate}
@@ -485,7 +460,7 @@ Acceptance & \textit{#3}
 \end{enumerate}
 %
 %=======================================================================
-\section{User Control}
+\section{Run-time Control}
 %=======================================================================
 
 \begin{enumerate}
@@ -494,19 +469,20 @@ Acceptance & \textit{#3}
 \end{enumerate}
 
 %=======================================================================
-\section{Disk I/O }
+\section{I/O }
 %=======================================================================
 
 \begin{enumerate}
 %
-\item Support for data dumps of all or subset of data fields and
-  particles
+\item The system shall support data dumps of all or subset of data fields and
+  particle groups
 %
-\item Support user method-dependent data output \textit{indicates user
-    code can access disk storage API }
+\item The system shall support user method-dependent data output
 %
-\item Parallel I/O using standardized AMR file formats \cite{LoKl08}
-  \textit{e.g.~ADIOS API }
+\item The system shall use a standardized file format for AMR grid and
+  particle data
+%
+\item All disk output shall include code for accessing the data
 \end{enumerate}
        
 %=======================================================================
@@ -515,29 +491,35 @@ Acceptance & \textit{#3}
 
 \begin{enumerate}
 %
-\item computation scalable to $> 10^6$ cores \textit{$< O(P)$ storage
-    / compute per process } \textit{$<= O(N/P)$ storage per process
-    ($\log N$ or $\log $ ok) }
+\item The system shall be scalable to $> 10^6$ cores with greater than
+  $50\%$ parallel efficiency in terms of computation, memory usage, and communication
 %
-\item memory scalable to $> 10^6$ cores
+\item The system's memory usage shall be scalable to $> 10^6$ cores with 
+  at most $1GB$ per core
 %
-\item communication scalable to $> 10^6$ cores \textit{affects
-    checkpointing strategy}
+\item The system shall exhibit highly competetive serial performance
 %
-\item disk storage scalable to $> 10^6$ cores \textit{affects
-    checkpointing strategy}
+\item The system shall exhibit highly competetive parallel performance
 %
-\item highly competetive parallel scaling
+\item The system shall exhibit highly competetive parallel scaling
 %
-\item competetive serial performance
+\item The system shall exhibit highly competetive memory usage
 %
-\item competetive parallel performance
+\item The system shall exhibit highly competetive performance of
+  uniform resolution problems
 %
-\item competetive memory usage
+\item The system shall exhibit highly competetive performance of
+  moderately non-uniform resolution problems (dynamic resolution range
+  of $2^{10}$)
+%
+\item The system shall exhibit highly competetive performanece of
+  higmly non-uniform resolution problems (dynamic resolution range of
+  up to $2^{64}$)
+%
 \end{enumerate}
 
 %=======================================================================
-\section{Fault Tolerance}
+\section{Resilience}
 %=======================================================================
 
 \begin{enumerate}
@@ -575,260 +557,9 @@ Acceptance & \textit{#3}
 %
 \end{enumerate}
 
-@@@@@@@@@@@@@@@@@@@@@@@
 
-%=======================================================================
-\section{Methods}
-%=======================================================================
-
-\begin{enumerate}
-%
-\item The system shall support systems of coupled PDE's involving
-  hyperbolic conservation and elliptic equations
-
-%
-\item The system shall perform hydrodynamics computations with at
-  least 2nd order in both space and time ``almost everywhere''
-
-%
-\item The system shall perform self-gravity computations with at least
-  2nd order accuracy in both space and time ``almost everywhere''
-
-%
-\item The system shall support cosmological expansion as an option
-
-%
-\item The system shall perform radiative cooling computations
-
-%
-\item The system shall perform multispecies chemistry computations
-
-%
-\item The system shall perform star-formation computations
-
-%
-\item The system shall perform magnetohydrodynamic computations
-
-%
-\item The system shall perform radiative transfer computations
-\end{enumerate}
-
-%=======================================================================
-\section{Fields}
-%=======================================================================
-
-
-\begin{enumerate}
-
-%
-\item The system should support general problem-dependent
-  multi-resolution fields on locally logically Cartesian meshes.
-%
-\item Fields
-%
-\item Field size shall not be bounded by software constraints.
-
-\end{enumerate}
-
-%=======================================================================
-\section{Particles}
-%=======================================================================
-
-%=======================================================================
-\section{Multiresolution}
-%=======================================================================
-
-\begin{enumerate}
-%
-\item Simulation dynamic spacial resolution range shall be at least
-  $2^64$, that is $64$ total hierarchy levels with refinement factor
-  $r=2$.
-%
-\item Simulation temporal resolution shall be determined by local
-  patch constraints
-\end{enumerate}
-
-%=======================================================================
-\section{Performance}
-%=======================================================================
-
-\begin{enumerate}
-%
-\item The system shall support multiple levels of parallelism
-
-\glossary{name = {two-sided}, description = {Communication from process A to process B where both A and B are directly involved in the data transfer}}
-
-
-%
-\item The system shall support a data-parallel model using two-sided
-  MPI-1 communication
-
-\glossary{name = {one-sided}, description = {Communication from process A to process B where exactly one of A or B is directly involved in the data transfer}}
-
-%
-\item The system may support a data-parallel model using one-sided
-  MPI-2 communication
-
-%
-\item The system shall support hierarchical parallelism of at least
-  four levels.
-
-%
-\item The system shall directly support both distributed memory and
-  shared memory parallelism.
-
-%
-\item The system shall support OpenMP shared memory parallelism with
-  parallel efficiency at least $80\%$ of maximum based on flops and
-  memory relative to single-core up to $100$ cores
-
-%
-\item The system shall support uniform resolution problems with at
-  least $10\%$ average core flop rate on largest platform sizes
-  available
-
-%
-\item The system shall support moderately non-uniform resolution
-  problems (dynamic resolution range of $2^32$) with at least $3\%$
-  average core flop rate on largest platform sizes available
-
-%
-\item The system shall support highly non-uniform resolution problems
-  (dynamic resolution range of $2^48$) with $1\%$ average core flop
-  rate and $50\%$ parallel efficiency on largest platform sizes
-  available
-
-%
-\item The system shall support highly non-uniform resolution problems
-  on the largest platform sizes available that have at least $1GB$
-  memory per computational element
-\end{enumerate}
-
-%=======================================================================
-\section{WIKI Wish List}
-%=======================================================================
-
-\begin{description}
-%
-\item[W001] Integrate "inits" functionality into the main code
-%
-\item[W002] Support ensembles within a single run, including
-  inline-analysis
-%
-\item[W003] Support multiple (hybrid) and flexible parallelization
-  strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided
-  get/put), OMP, and optionally UPC and GPU
-%
-\item[W004] Reduce implicit dependencies by dynamically allocating
-  parallel tasks, ala CHARM++
-%
-\item[W005] Auto-tune where possible--automatically optimize for
-  cache-, parallel-, vector-, solver-, etc. parameters
-%
-\item[W006] Use object-oriented design, organize into components
-  (subdirectories) of classes (*.hpp/*.cpp files)
-%
-\item[W007] Require more rigorous coding standards compared to Enzo
-  development
-%
-\item[W008] Enforce strict control over data storage formats (e.g.
-  files) (see W0009)
-%
-\item[W009] Require that all stored data be accessed through standard
-  interface functions that are independent of specific file formats
-  (i.e., stored datasets are conceptually treated as objects)
-%
-\item[W010] Support both structured AMR (Enzo-like) and tree-based AMR
-%
-\item[W011] Store particle positions in single precision as -1 <=
-  x,y,z <= 1 relative to their containing patch
-%
-\item[W012] Do not store a patch's global position, only local
-  position relative to immediate neighbors, parent, and children
-%
-\item[W013] Represent patch extents with (small) integer values
-  relative to parent
-%
-\item[W014] Provide (or notify) neighboring patches with updated ghost
-  zone data as soon as it's available
-%
-\item[W015] Support optional variable timestep sizes within each level
-%
-\item[W016] Support optional uniform timesteps across all levels
-%
-\item[W017] User-controlled optional floor/ceiling limits on
-  individual Fields (ala "tiny\_number" in Enzo), with user-specified
-  Error behavior (warning, error, ignore, reset to given
-  floor/ceiling, etc.)
-%
-\item[W018] Allow multiple root-level patches per MPI task
-%
-\item[W019] Use a binary tree data-structure to recursively partition
-  the bounding boxes of particles
-%
-\item[W020] For very deep AMR where coarser levels never complete
-  their timestep, delete coarse levels to free storage
-%
-\item[W021] Relax rigid refinement criteria to inhibit excessive
-  changes in octree-like tree refinement
-%
-\item[W022] Support for user-supplied code for problem initialization
-%
-\item[W023] Load-balance by having over-loaded processors reassign
-  tasks to random processes
-%
-\item[W024] Load-balance using "over-compensation", since
-  heavily-loaded processes tend to continue to become more heavily
-  loaded (cosmology / star-formation application-dependent)
-%
-\item[W025] Reduce tree-AMR node size by only storing parent, single
-  neighbor, and single child
-%
-\item[W026] Support flexible node types: memory-efficient versus
-  compute-efficient
-%
-\item[W027] Support temporary "allocate as-needed" ghost zones in
-  addition to "permanent" ones
-%
-\item[W028] Only use inter-core, inter-cpu, inter-node, etc.
-  level-communicators to bound communicator size and manage
-  communication nonuniformity
-\end{description}
-
-%=======================================================================
-\section{Input}
-%=======================================================================
-
-\begin{itemize}
-%
-\item Problem
-%
-\item Physics
-%
-\item Algorithms
-%
-\item Data
-%
-\item Parallel
-%
-\item I/O
-%
-\item Performance
-\end{itemize}
-
-%=======================================================================
-\section{Output}
-%=======================================================================
-
-%-----------------------------------------------------------------------
-\req
-  {}
-  {Proposed}
-%
-  {}
-
-\appendix
-\printglossary
+%\appendix
+%\printglossary
 \end{document}
 
 %==================================================================
