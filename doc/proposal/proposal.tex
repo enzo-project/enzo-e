@@ -489,7 +489,7 @@ good scaling for numerical and data communication
 poorer scaling in adaptive meshing and communication schedule construction 
 
 %-----------------------------------------------------------------------
-\subsubsection{\gadget } \label{sss:chombo}
+\subsubsection{\gadget } \label{sss:gadget}
 %-----------------------------------------------------------------------
 
 
@@ -548,7 +548,9 @@ terms of the number of grid patches.  In particular, if much of the
 region consists of large areas that require the finest grid level,
 then the number of patches covering those regions should not be
 excessive.  We note that this requirement essentially eliminates
-fixed-size patches, which most octree-based AMR approaches use.
+fixed-size patches, which most octree-based AMR approaches use.  It
+also indicates that when AMR is not used, the AMR data structure should
+require nominal additional resources.
 
 The AMR data structure should also be efficient and scalable in terms
 of all of its operations, including coarsening, refining, and locating
@@ -566,7 +568,7 @@ numerical solution.
 
 
 %-----------------------------------------------------------------------
-\subsection{Mesh data}
+\subsection{Mesh data} \label{ss:require-fields}
 %-----------------------------------------------------------------------
 
 Multiresolution data fields defined on logically Cartesian meshes,
@@ -598,7 +600,7 @@ within a single level and on the entire AMR hierarchy~\cite{MiCo07}.
 
 
 %-----------------------------------------------------------------------
-\subsection{Particle data}
+\subsection{Particle data} \label{ss:require-particles}
 %-----------------------------------------------------------------------
 
 In addition to mesh data, particle data will also be supported, for
@@ -621,7 +623,7 @@ locating the mesh for a given particle, must be efficient.
 
 
 %-----------------------------------------------------------------------
-\subsection{User-supplied functions}
+\subsection{User functions} \label{ss:require-user}
 %-----------------------------------------------------------------------
 
 While the framework supports adaptive mesh refinement for both mesh
@@ -645,7 +647,7 @@ refine or coarsen a given patch.
 
 
 %-----------------------------------------------------------------------
-\subsection{Run-time parameters}
+\subsection{Run-time parameters} \label{ss:require-parameters}
 %-----------------------------------------------------------------------
 
 Run-time parameters, such as those defining the domain, initial
@@ -717,6 +719,10 @@ distributed data structures onto the hierarchical parallel hardware,
 and by reducing the size of groups of intercommunicating
 procesess~\cite{BaBu09}.
 
+%-----------------------------------------------------------------------
+\subsection{Load balancing} \label{ss:require-balance}
+%-----------------------------------------------------------------------
+
 Dynamic load balancing / task migration is critical for parallel
 performance of AMR, due to the dynamically changing workload
 distributed across nodes with limited memory and potentially millions
@@ -729,6 +735,10 @@ parallel levels at different frequencies, and balancing with respect
 to different metrics (e.g.~stress balanced computation between cores
 and balanced memory usage between nodes).
 
+%-----------------------------------------------------------------------
+\subsection{Task scheduling}\label{ss:require-schedule}
+%-----------------------------------------------------------------------
+
 Task scheduling must also be efficient, minimizing overhead and
 maximizing throughput.  Again, a hierarchical scheduling approach may
 be used.  Since we want to at least indirectly support GPU programming
@@ -737,7 +747,7 @@ concurrent tasks to keep the GPU's busy.
 
   
 %-----------------------------------------------------------------------
-\subsection{Interfaces}
+\subsection{Interfaces} \label{ss:require-interfaces}
 %-----------------------------------------------------------------------
 
 The framework must be able to communicate with users while running, to
@@ -745,8 +755,9 @@ provide clear output of the state and progress of the simulation.
 This should include an estimate of progress, performance, list of any
 warnings or errors, as well as method-specific information such as
 solver iterations or method-specific warnings or errors.  This
-indicates that user code should have access to functions for
-communicating values to users in a running simulation.
+indicates that user code as well as the \cello\ framework should have
+access to functions for communicating values to users in a running
+simulation.
 
 The mode of output should not be limited to text, but should include
 support for generating simple plots of data fields and particle
@@ -762,7 +773,7 @@ changing web pages.
 
 
 %-----------------------------------------------------------------------
-\subsection{I/O }
+\subsection{I/O } \label{ss:require-io}
 %-----------------------------------------------------------------------
 
 I/O must be efficient, scalable, and portable, indicating a parallel
@@ -774,7 +785,7 @@ or when certain user-defined conditions are met, depending on
 post-processing requirements.
 
 %-----------------------------------------------------------------------
-\subsection{Performance}
+\subsection{Performance}  \label{ss:require-performance}
 %-----------------------------------------------------------------------
 
 Performance is a non-functional requirement, but crucial to the
@@ -835,32 +846,32 @@ an external library, such as the Berkeley Lab Checkpoint Restart
 \section{Software Design} \label{s:design}
 %=======================================================================
 
-\begin{verbatim}
-Design goals
-  extreme parallel scalability
-  extreme data structure scalability
-  breadth: number of grid patches
-  depth: number of AMR hierarchy levels
-Overall approach
-  aggressive minimization of synchronization and collective operations
-  ``localize'' problem as much as possible
-\end{verbatim}
+% \begin{verbatim}
+% Design goals
+%   extreme parallel scalability
+%   extreme data structure scalability
+%   breadth: number of grid patches
+%   depth: number of AMR hierarchy levels
+% Overall approach
+%   aggressive minimization of synchronization and collective operations
+%   ``localize'' problem as much as possible
+% \end{verbatim}
 
-Our design will be primarily object-oriented, which is a proven
-software design and implementation paradigm that helps control
-software complexity and reuse.  Aspect-oriented programming techniques
-will also be used to help separate cross-cutting concerns, such as
-logging state information, memory management, accessing run-time
-parameters, and detecting and resolving hardware or software faults.
+Our design will be object-oriented, a proven software design and
+coding paradigm that helps control software complexity and improve
+code maintainability and reuse.
+% Aspect-oriented programming techniques will also be used to help
+% separate cross-cutting concerns, such as logging state information,
+% memory management, accessing run-time parameters, and detecting and
+% resolving hardware or software faults.
 
-The design will be decomposed into high-level, medium-level,
-and low-level design.  High-level design of the framework will be a
-functional decomposition of the software into several large scale
-components or packages.  Components will be organized into
-hierarchical levels, with higher-level components calling functions
-and methods in lower-level components.  Each component will be
-implemented as one or more interoperating classes.  Medium level
-design will involve defining class hierarchies and interfaces for each
+High-level design of the framework involves functionally decomposing
+the proposed software into several large-scale components or packages.
+Components will be primarily layered, with higher-level components
+calling functions and methods in lower-level components; cross-cutting
+concerns will also be implemented as components.  Each component will
+be implemented as one or more interoperating classes.  Medium level
+design will involve defining interfaces and class hierarchies for each
 component.  Low-level design will involve defining class attributes
 and implementing individual class member functions.
 
@@ -875,13 +886,13 @@ iterative, the final component diagram may still evolve somewhat.
 \includegraphics[width=5.0in]{components2.pdf}
 \end{minipage}}
 
-The high-level components include \code{Task} for defining parallel
-tasks, \code{Distribute} for distributing and load-balancing tasks
-across available resources, and \code{Schedule} for scheduling tasks
-for execution.
+The high-level components include \code{Task} for encapsulating
+parallel tasks, \code{Distribute} for distributing and load-balancing
+tasks across available resources, and \code{Schedule} for scheduling
+the tasks for execution.
 
 The middle-level components include \code{Simulation} for defining the
-simulation, and \code{Method} for user-supplied functions for
+simulation, and \code{Method} for user functions for
 performing the numerical computations, inline analysis, and
 visualization processing required to run the simulation.  Distributed
 AMR is implemented in the \code{Amr} package, with related components
@@ -891,7 +902,7 @@ component for defining and manipulating distributed Fortran-like
 arrays.
 
 The low-level components include API's for interacting with hardware,
-including \code{Disk} for disk I/O, \code{Memory} for memory
+including \code{Disk} for disk I/O, \code{Memory} for dynamic memory
 management, and \code{Parallel} for parallel synchronization and data
 transfer.  Including these lower level components is helpful for
 several reasions: it encapsulates lower-level library calls, e.g.~HDF5
@@ -899,24 +910,25 @@ for \code{Disk}, which can include extra functions for collecting
 performance data; it allows for incorporating error checking code,
 e.g.~ tracking memory usage and performing bounds checking in
 \code{Memory}; and parallel technologies such as MPI, UPC, and OpenMP
-can also be encapsulated in \code{Parallel}.
+can be encapsulated in \code{Parallel}.
 
-The cross-cutting concern components include \code{Parameters} for
-reading, storing, and accessing parameters, \code{Monitor} for logging
-performance and status information, and \code{Portal} for dynamically
-interacting with external utilities or systems.  \code{Performance} is
-used for collecting and accessing performance-related data, and
-\code{Error} is used for signalling hardware or software faults.
+Components implementing cross-cutting concerns include
+\code{Parameters} for reading, storing, and accessing parameters,
+\code{Monitor} for logging performance and status information, and
+\code{Portal} for dynamically interacting with external utilities or
+systems.  \code{Performance} is used for collecting and accessing
+performance-related data, and \code{Error} is used for signalling
+hardware or software faults.
 
-
-Some components will be much larger than others: \code{Amr} is
-expected to be large since representing and manipulating distributed
-AMR hierarchies is inherently complex, whereas \code{Memory} is likely
-to be relatively small.  Larger components will be further decomposed
-into smaller sub-components, e.g.~\code{Tree}, \code{Patch},
-\code{Level}, \code{Box}, etc. for \code{Amr}, to help organize and
-control the complexity.  Smaller components may be implemented using a
-single class.
+Component sizes will vary: \code{Amr} is expected to be large since
+representing and manipulating distributed AMR hierarchies is
+inherently complex, whereas \code{Memory} is likely to be relatively
+small.  Larger components will be further decomposed into smaller
+sub-components, e.g.~\code{Amr} may contain \code{Tree}, \code{Patch},
+\code{Level}, and \code{Box} subcomponents, to help organize and
+control software complexity.  Larger components may be implemented
+using several interacting class hierarchies, whereas smaller
+components may be implemented as a single class.
 
 Below in sections \S\ref{ss:design-data} through
 \S\ref{ss:design-resilience} we describe preliminary design issues
@@ -926,6 +938,39 @@ through \S\ref{ss:require-resilience}, respectively.
 %-----------------------------------------------------------------------
 \subsection{Adaptive mesh refinement} \label{ss:design-data}
 %-----------------------------------------------------------------------
+
+How adaptive mesh refinement is designed is crucial for it to meet the
+scaling requirements outlined in \ref{ss:require-data}.  It must
+maintain high parallel efficiency throughout the range of single-level
+``unigrid'' problems, through ``wide'' problems requiring millions of
+patches, and ``deep'' problems requiring several dozens of levels.
+All must be efficiently mapped to HPC architectures with millions of
+cores with fixed physical memory capacity per node.
+
+The most important design decision is what variant of AMR to use.  The
+two leading variants are ``structured AMR (SAMR)'', or patch-based
+AMR, as used by \samrai\ and \chombo; and ``continuous AMR (CAMR)'',
+or octree-based AMR, as used by \paramesh.  There are numerous
+advantages and disadvantages to each, and significant effort has gone
+into deciding which approach to pursue.  We have decided on a modified
+octree-based AMR approach, with two modifications that improve AMR
+efficiency for both ``wide'' and ``deep'' problems.  We review these
+two modifications below.
+
+We feel that octree-based approaches are arguably more
+scalable~\cite{BuGh08}, in part because they avoid the parallel patch
+placement algorithms required by SAMR, which are a significant
+hinderance to scalability~\cite{GuWi06}.  Also, high quality SAMR
+frameworks such as \chombo\ and \SAMRAI\ are already available and
+being actively developed.  Lastly, the octree in octree-based AMR can
+be leveraged for particle neighbor searches; octrees have particularly
+efficient representations and operations (e.g.~an octree node can be
+stored using three pointers~\cite{@@@octree}); and absolute patch
+extents are computed not stored, which can be used to address
+precision and range issues of global indices that arise for extremely
+large or deep AMR hierarchies.
+
+@@@@@@@@@@@@@@@
 
 \begin{verbatim}
 AMR basic unigrid
@@ -1193,7 +1238,7 @@ Targeted refinement proof-of-concept using multiple point sources in 2D.
 \end{minipage}}
 
 %-----------------------------------------------------------------------
-\subsection{Mesh data}
+\subsection{Mesh data} \label{ss:design-fields}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
@@ -1205,7 +1250,7 @@ User-controlled optional floor/ceiling limits on individual
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsection{Particle data}
+\subsection{Particle data} \label{ss:design-particles}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
@@ -1238,7 +1283,7 @@ particle positions stored using local coordinate system with
 
 
 %-----------------------------------------------------------------------
-\subsection{User-supplied functions}
+\subsection{User functions} \label{ss:design-user}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
@@ -1438,86 +1483,7 @@ Scheduling optimized for computing / communication
 \end{verbatim}
 
 %-----------------------------------------------------------------------
-\subsubsection{Task scheduling} \label{ss:design-scheduling}
-%-----------------------------------------------------------------------
-
-Given that tasks are acceptably load-balanced across process, the
-tasks must be schedule for execution.  The @@@
-
-\begin{verbatim}
-dynamic scheduling
-\end{verbatim}
-
-\begin{verbatim}
-task definition Task
-   task = grid patch block (fields and particles) + sequence of methods
-      increased scheduling freedom over loop over levels
-      improves slack for latency hiding
-   elliptic tasks?
-\end{verbatim}
-
-\begin{verbatim}
-   tradeoff between number of concurrent messages and storage
-      dynamic allocation of flux buffers
-\end{verbatim}
-
-\begin{verbatim}
-   communication tasks scheduled with computation
-      prefetch comm
-      pipeline comm and comp
-\end{verbatim}
-
-\begin{verbatim}
-   prioritized queue: fine levels higher priority
-      determine rate of progress: bottleneck
-\end{verbatim}
-
-\begin{verbatim}
-hierarchical / multiscale task scheduling
-   multiblock (GPU)
-   single block (process)
-   plane / line (thread)
-\end{verbatim}
-
-
-We will use dynamic scheduling of tasks assigned to a processes, since
-it @@@  Dynamic scheduling is more suitable than static scheduling for
-heterogeneous sized tasks, non-regular communication dependencies @@@
-
-\note{task scheduling details}
-
-After tasks are distributed among processing elements, the next
-decision is how to schedule tasks among processing elements.  Two main
-approaches are static and dynamic.  Static scheduling is preferred
-when workload is evenly mapped to processing components, and when
-there are relatively few tasks per process.  We will use dynamic
-scheduling, since workload (communication as well as computation) per
-task varies between tasks.
-
-\note{Charm++ summary} Our approach will be well-mapped to \charm,
-which is a fault-tolerant message-driven parallel programming
-framework.  \charm\ also provides dynamic load balancing through task
-migration, and provides fault tolerance through its built-in disk (or
-memory + disk) checkpoint / restart mechanism.
-
-\note{implementation in Charm++}
-Implementation of AMR for a hyperbolic problem, a parallel task, or
-\charm\  ``chare'', would correspond to advancing a numerical method or
-sequence of methods one timestep on a single grid patch block.  The
-exchange of guard cell data would correspond to \charm\  messages.
-This implementation would allow a block to advance one timestep as
-soon as all of its guard cell data is available.
-
-\note{non-Charm++ implementation}
-
-We also plan to develop our own scheduler, for several reasons.  One,
-to schedule communication in addition to computation, to help hide
-latency through prefetching.  Second, to take advantage of
-hierarchical hardware components (node, socket, core...)  Third, to
-remove any hard dependencies on any single parallel technology.
-
-%-----------------------------------------------------------------------
-\subsubsection{Load balancing} \label{ss:design-balancing}
+\subsection{Load balancing} \label{ss:design-balance}
 %-----------------------------------------------------------------------
 
 Dynamic load balancing is well known to be a crucial operation for
@@ -1705,6 +1671,85 @@ locality, surface-to-volume ratio, and reduce task migration traffic.
 % 
 
 
+
+%-----------------------------------------------------------------------
+\subsection{Task scheduling} \label{ss:design-schedule}
+%-----------------------------------------------------------------------
+
+Given that tasks are acceptably load-balanced across process, the
+tasks must be schedule for execution.  The @@@
+
+\begin{verbatim}
+dynamic scheduling
+\end{verbatim}
+
+\begin{verbatim}
+task definition Task
+   task = grid patch block (fields and particles) + sequence of methods
+      increased scheduling freedom over loop over levels
+      improves slack for latency hiding
+   elliptic tasks?
+\end{verbatim}
+
+\begin{verbatim}
+   tradeoff between number of concurrent messages and storage
+      dynamic allocation of flux buffers
+\end{verbatim}
+
+\begin{verbatim}
+   communication tasks scheduled with computation
+      prefetch comm
+      pipeline comm and comp
+\end{verbatim}
+
+\begin{verbatim}
+   prioritized queue: fine levels higher priority
+      determine rate of progress: bottleneck
+\end{verbatim}
+
+\begin{verbatim}
+hierarchical / multiscale task scheduling
+   multiblock (GPU)
+   single block (process)
+   plane / line (thread)
+\end{verbatim}
+
+
+We will use dynamic scheduling of tasks assigned to a processes, since
+it @@@  Dynamic scheduling is more suitable than static scheduling for
+heterogeneous sized tasks, non-regular communication dependencies @@@
+
+\note{task scheduling details}
+
+After tasks are distributed among processing elements, the next
+decision is how to schedule tasks among processing elements.  Two main
+approaches are static and dynamic.  Static scheduling is preferred
+when workload is evenly mapped to processing components, and when
+there are relatively few tasks per process.  We will use dynamic
+scheduling, since workload (communication as well as computation) per
+task varies between tasks.
+
+\note{Charm++ summary} Our approach will be well-mapped to \charm,
+which is a fault-tolerant message-driven parallel programming
+framework.  \charm\ also provides dynamic load balancing through task
+migration, and provides fault tolerance through its built-in disk (or
+memory + disk) checkpoint / restart mechanism.
+
+\note{implementation in Charm++}
+Implementation of AMR for a hyperbolic problem, a parallel task, or
+\charm\  ``chare'', would correspond to advancing a numerical method or
+sequence of methods one timestep on a single grid patch block.  The
+exchange of guard cell data would correspond to \charm\  messages.
+This implementation would allow a block to advance one timestep as
+soon as all of its guard cell data is available.
+
+\note{non-Charm++ implementation}
+
+We also plan to develop our own scheduler, for several reasons.  One,
+to schedule communication in addition to computation, to help hide
+latency through prefetching.  Second, to take advantage of
+hierarchical hardware components (node, socket, core...)  Third, to
+remove any hard dependencies on any single parallel technology.
 
 
 
