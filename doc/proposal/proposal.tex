@@ -3,7 +3,7 @@
 
 %=======================================================================
 % \documentclass[12pt]{article}
-\documentclass{article}
+\documentclass[10pt]{article}
 %=======================================================================
 \include{include}
 
@@ -39,7 +39,7 @@
 
 \tableofcontents
 %\Large
-% \renewcommand{\pargraph}[1]{}
+\renewcommand{\pargraph}[1]{}
 
 \nocite{StSh09} % Scalability challenges for massively parallel {AMR} applications
 \nocite{WiHy03} % Enhancing scalability of parallel structured {AMR} calculations
@@ -139,14 +139,15 @@
 %=======================================================================
 
 
-\ \\ \pargraph{Proposal} 
+\pargraph{Proposal} 
 %
 We propose to develop a new parallel software framework for adaptive
 mesh refinement (AMR).  
 %
 A distinguishing characteristic relative to existing AMR libraries and
 frameworks is the aggressive pursuit of extreme scalability in terms
-of software data structures and hardware parallelism.
+of software data structures and hardware parallelism from the
+beginning.
 %
 The design will be forward-looking, targeted not just at the largest
 existing supercomputers, but also future HPC platforms as they evolve
@@ -156,7 +157,7 @@ The proposed AMR framework will enable application developers to
 write multiphysics applications for simulating phenomena on an
 unprecidented range of spacial and temporal scales.
 
-\ \\ \pargraph{multiple parallel technologies}
+\pargraph{multiple parallel technologies}
 %
 Parallelization will be primarily data parallel, with task
 parallelization also available to augment the data parallelism.
@@ -179,14 +180,14 @@ will improve mapping of the software data structures to the
 hierarchical components of the target computational platforms (i.e.
 compute nodes, sockets, cores).~\cite{@@@LAN-DLB}.
 
-\ \\ \pargraph{AMR fields + particles}
+\pargraph{AMR fields + particles}
 %
 The AMR data structures will be implemented using a fully distributed
 generalization of the octree data structure.  Tree nodes will be
 associated with both logically Cartesian grids and particles, so both
 Eularian and Lagrangian (and hybrid) methods can be implemented.
 
-\ \\ \pargraph{extreme scalability through localization}
+\pargraph{extreme scalability through localization}
 %
 Extreme parallel scalability will be pursued by localizing the
 individual AMR patch / block tasks as much as feasible by aggressively
@@ -197,20 +198,25 @@ global index ranges, localizing the problem will also improve scaling
 of the data structures without having to resort to 64-bit or higher
 scalars.
 
-\ \\ \pargraph{fault tolerance} Fault tolerance and software
+\pargraph{fault tolerance} Fault tolerance and software
 resilience are also crucial factors at extreme scales.  The checkpoint
 / restart to disk paradigm is known to be ultimately unscalable, so we
 will support other alternatives, including checkpoint to memory.  Our
 framework will be designed to be resistent to memory, compute
 component, network, disk, and software failures.
 
-\ \\ \pargraph{deliverables} 
+\pargraph{deliverables} 
 %
 We plan to make this framework freely available for use by the
 research community.  The result of this project will be software
 framework capable of allowing application developers write extremely
 scalable multi-resolution multi-physics applications.
 
+\begin{verbatim}
+\cite{StSh09} quote
+load balancing and communication are often cited as the main
+barriers to AMR scaling, but instead ``...many of the scaling problems related to early design decisions''
+\end{verbatim}
 %=======================================================================
 \section{Introduction} \label{s:intro}
 %=======================================================================
@@ -279,7 +285,7 @@ refined  / borrowed ideas
   patch block registers for improved computing / user interface flexibility
   communication flux registers (\chombo) for communication
   guard cells allocated when needed
-  localized fully-adaptive time-stepping (no global reductions) (refined)
+  localized fully-adaptive time steps (no global reductions) (refined)
 \end{verbatim}
 
 
@@ -361,6 +367,8 @@ parallel scalability issues
    load balancing
    I/O
    fault tolerance
+   ``OS jitter'' and memory management can lead to load imbalances
+        independent of application\cite{StSh09}
 \end{verbatim}
 
 \begin{verbatim}
@@ -368,7 +376,7 @@ AMR-specific parallel scalability issues
    elliptic
    remeshing--especially SAMR
    load balancing
-   timestep determination
+   time step determination
 \end{verbatim}
 
 \begin{verbatim}
@@ -407,7 +415,7 @@ AMR datastructure scalability
  * Gerris Flow Solver, incompressible fluid flow with arbitrarily complex solid boundaries and adaptive mesh refinement, Stephane Popinet.
  * GrACE, Grid Adaptive Computational Engine, Manish Parashar.
  * NIRVANA, 3-D MHD AMR code, Udo Ziegler.
- * PARAMESH, 3-D octree AMR parallel code.
+ * \paramesh, 3-D octree AMR parallel code.
  * RACOON, Institute for Theoretical Physics I, University of Bochum.
  * SARA, A Solution Adaptive Remeshing Algorithm for structured grids, Dave Banks, Center for CFD, Dept. of Mech & Aero Eng, UC Davis.
  * Solution-Adaptive Grids, W. M. Keck Foundation CFD laboratory, University of Michigan.
@@ -418,9 +426,9 @@ There are numerous AMR frameworks, libraries, and applications, each
 with different design goals and decisions, data structures, AMR
 algorithms, parallelization strategies, and parallel performance and
 scaling.  Perhaps the top three most successful and closely related to
-our proposed effort are PARAMESH (\cite{MaOl00} \nocite{OlMa05}
-\nocite{Ol06}), \chombo\  (\cite{wwwchombo} \cite{CoGr09}), and SAMRAI
-(@@@).  Other notable software include Clawpack (@@@), GrACe / DAGH
+our proposed effort are \paramesh\ (\cite{MaOl00} \nocite{OlMa05}
+\nocite{Ol06}), \chombo\  (\cite{wwwchombo} \cite{CoGr09}), and \samrai
+(\cite{@@@}).  Other notable software include Clawpack (@@@), GrACe / DAGH
 (@@@), ALPS (\cite{BuBu09}), and Carpet (@@@).
 
 limitations of existing AMR libraries / frameworks
@@ -428,8 +436,25 @@ limitations of existing AMR libraries / frameworks
 GADGET-2: Preeminent cosmological TreeSPH simulation code
 DAGH (1998)
 
+\begin{verbatim}
+SCALING
+
+\samrai\ scalability of parallel clustering algorithm up to 16384~\cite{GuWi06}
+\chombo: demonstrated scalability up to 8192 processors~\cite{StSh09},
+        and goals to continually improve scaling by a factor of 100 in 5 years~\cite{St09} (@@@public slides?).
+  
+FLASH: \paramesh\ re-gridding does not scale well
+       I/O costly despite not being particularly inefficient
+ALPS: scalable up to 32K cores and 4 billion ellements~\cite{BuGh07}
+     (uses ``time windows''~\cite{SuWh04} to improve re-gridding performance,
+      which requires ``...repeat[ing] the numerical integration of the PDEs over a time window one or more times to accumulate error estimates''. Depending
+     on the PDE integration cost, this could improve apparent scalability
+     by increasing task size )
+\cite
+\end{verbatim}
+
 %-----------------------------------------------------------------------
-\subsubsection{\code{PARAMESH}} \label{sss:paramesh}
+\subsubsection{\paramesh} \label{sss:paramesh}
 %-----------------------------------------------------------------------
 
 \nocite{wwwparamesh}
@@ -437,13 +462,14 @@ DAGH (1998)
 \nocite{OlMa05}
 \nocite{Ol06}
 
-The PARAMESH software was developed at the NASA Goddard Space Flight
+The \paramesh\ software was developed at the NASA Goddard Space Flight
 Center and Drexel University.
 
-Octree-based AMR
+It is an octree-based AMR framework
 
+\paramesh\ grid blocks can be arbitrary constant even size $($\code{NXB},\code{NYB}, \code{NZB}$)$~\cite{wwwparamesh}.
 
-Due to a loss of funding PARAMESH can no longer be supported.
+Due to a loss of funding, \paramesh\ is not currently supported.
 
 %-----------------------------------------------------------------------
 \subsubsection{\chombo} \label{sss:chombo}
@@ -458,7 +484,7 @@ elliptic, and parabolic methods. Its high-level design consists of
 five loosely-coupled components: \code{BoxTools} for set calculus on
 point sets and unions of rectangles, \code{AMRTools} for interprocess
 communication between AMR levels, \code{AMRTimeDependent} for
-advancing the solution using adaptive time-stepping,
+advancing the solution using adaptive time steps,
 \code{AMRElliptic} for the multigrid-based solution of elliptic AMR
 problems, and \code{EBTools} for embedded boundaries.  A sixth
 component, \code{ParticleTools} for particle processing, is not
@@ -474,13 +500,20 @@ algorithm, and also allows the user to provide their own.
 \chombo\ is very scalabale, and designed to run both hyperbolic and
 elliptic problems on 10,000 processors.
 
+In \chombo, all processes store $O(N)$ data, including all patch
+extents and process assignments.  Although the size has been
+aggressively reduced to an impressive $\approx 50$ bytes per
+patch~\cite{CoKe07}, this still represents an eventual scaling
+impediment for \chombo.
+
 Berger-Rigoutsos 
+
 
 \pargraph{\chombo\  data distribution and load balancing}
 
 
 %-----------------------------------------------------------------------
-\subsubsection{\code{SAMRAI}} \label{sss:samrai}
+\subsubsection{\samrai} \label{sss:samrai}
 %-----------------------------------------------------------------------
 
 [2001]
@@ -529,7 +562,7 @@ excessive data storage requirements.
 
 
 %-----------------------------------------------------------------------
-\subsection{Adaptive mesh refinement} \label{ss:require-data}
+\subsection{Adaptive mesh refinement} \label{ss:require-amr}
 %-----------------------------------------------------------------------
 
 The AMR data structure must be highly scalable in both breadth and
@@ -555,8 +588,9 @@ require nominal additional resources.
 The AMR data structure should also be efficient and scalable in terms
 of all of its operations, including coarsening, refining, and locating
 neighboring patches.  Note that this indicates that some sort of
-spacial data structure, such as octrees or chaining meshes, will
-be required.
+spacial data structure or other optimization, such as octrees,
+chaining meshes, or caching intersection lists~\cite{StSh09}, will be
+required.
 
 The mesh hierarchy should dynamically adapt to problem features as
 specified by the user.  Local changes in resolution should remain
@@ -632,7 +666,7 @@ must be provided by the user.  User functions may be either Fortran or
 C (or C++).  
 
 The main functions users supply will be numerical algorithms for
-advancing a patch, hierarchy level, or full hierarchy one timestep.
+advancing a patch, hierarchy level, or full hierarchy one time step.
 Inline-analysis and visualization functions may also be provided by
 the user.  Patch-based user functions will have access to the
 associated mesh and particle data, plus a bounding layer of ``ghost''
@@ -764,7 +798,7 @@ support for generating simple plots of data fields and particle
 groups, and graphs indicating the progress or performance of the
 simulation, and the historical output of important values indicating
 correctness or progress, such as total mass, $||\nabla \cdot B||$, and
-timestep size.
+time step size.
 
 All output should be easily viewable, at varying levels of detail from
 high-level summary levels to more in-depth detailed levels.  This
@@ -825,7 +859,7 @@ despite multiple failures.
 % also flag components that may soon fail due to overheating, etc.
 
 The software will also support recovering from numerical errors,
-either by dynamically reducing the timestep, dynamically modifying
+either by dynamically reducing the time step, dynamically modifying
 method parameters, or switching to a compatable but different
 user-supplied numerical method for solving the same problem.  For
 example, switching from a fast but sensitive linear solver to a slower
@@ -930,38 +964,39 @@ control software complexity.  Larger components may be implemented
 using several interacting class hierarchies, whereas smaller
 components may be implemented as a single class.
 
-Below in sections \S\ref{ss:design-data} through
+Below in sections \S\ref{ss:design-amr} through
 \S\ref{ss:design-resilience} we describe preliminary design issues
-related to requirements listed in sections \S\ref{ss:require-data}
+related to requirements listed in sections \S\ref{ss:require-amr}
 through \S\ref{ss:require-resilience}, respectively.
 
+\newpage
 %-----------------------------------------------------------------------
-\subsection{Adaptive mesh refinement} \label{ss:design-data}
+\subsection{Adaptive mesh refinement} \label{ss:design-amr}
 %-----------------------------------------------------------------------
 
 How adaptive mesh refinement is designed is crucial for it to meet the
-scaling requirements outlined in \ref{ss:require-data}.  It must
+scaling requirements outlined in \ref{ss:require-amr}.  It must
 maintain high parallel efficiency throughout the range of single-level
 ``unigrid'' problems, through ``wide'' problems requiring millions of
 patches, and ``deep'' problems requiring several dozens of levels.
 All must be efficiently mapped to HPC architectures with millions of
 cores with fixed physical memory capacity per node.
 
-The most important design decision is what variant of AMR to use.  The
-two leading variants are ``structured AMR (SAMR)'', or patch-based
-AMR, as used by \samrai\ and \chombo; and ``continuous AMR (CAMR)'',
-or octree-based AMR, as used by \paramesh.  There are numerous
-advantages and disadvantages to each, and significant effort has gone
-into deciding which approach to pursue.  We have decided on a modified
-octree-based AMR approach, with two modifications that improve AMR
-efficiency for both ``wide'' and ``deep'' problems.  We review these
-two modifications below.
+The most important AMR data structure design decision is what variant
+of AMR to use.  The two leading variants are ``block-structured AMR
+(SAMR)'', or patch-based AMR, as used by \samrai\ and \chombo; and
+``continuous AMR (CAMR)'', or octree-based AMR, as used by \paramesh.
+There are numerous advantages and disadvantages to each, and
+significant effort has gone into deciding which approach to pursue.
+We have decided on a modified octree-based AMR approach, with two
+modifications that improve AMR efficiency for both ``wide'' and
+``deep'' problems.  We review these two modifications below.
 
 We feel that octree-based approaches are arguably more
 scalable~\cite{BuGh08}, in part because they avoid the parallel patch
 placement algorithms required by SAMR, which are a significant
 hinderance to scalability~\cite{GuWi06}.  Also, high quality SAMR
-frameworks such as \chombo\ and \SAMRAI\ are already available and
+frameworks such as \chombo\ and \samrai\ are already available and
 being actively developed.  Lastly, the octree in octree-based AMR can
 be leveraged for particle neighbor searches; octrees have particularly
 efficient representations and operations (e.g.~an octree node can be
@@ -972,203 +1007,84 @@ large or deep AMR hierarchies.
 
 @@@@@@@@@@@@@@@
 
-\begin{verbatim}
-AMR basic unigrid
-   unigrid is single AMR tree node(?)
-     (how to link with level 1?)
-\end{verbatim}
+Standard octree-based approaches involve an octree or forest of
+octrees.  Nodes of the octree typically correspond to small fixed-size
+locally Cartesian grid blocks, such as the $4^3$ grid blocks used in
+the FLASH astrophysics application built on the \paramesh\ framework.
 
-\begin{verbatim}
-AMR hierarchy data
-     fields at multiple refinement levels 
-       (internal tree nodes as well as leaves)
-       SEE PARAMESH user guide for motivation
-       improving solution
-       refinement criteria (cite Berger)
-     fields only finest level (only tree leaves)
-       reduced memory usage
-       reduced computation: only finest level
-       reduced communication: no inter-level interpolation (except refinement)
-\end{verbatim}
-
-
-@@@1
-
-\begin{verbatim}
-octree AMR versus SAMR   
-   octree advantages
-      arguably more scalable
-
-   octree limitations
-      Morton ordering not always feasible
-         different patch sizes
-         different particle counts
-         adaptive time-stepping on finer levels
-         physics method variations
-            shock capturing--Riemann solver iterations
-            variable subcycling of iterative stiff methods
-\end{verbatim}
-
-@@@A
-
-\begin{verbatim}
-relative coordinates for patches   
-   relative to neighbors
-   computations frequently only require cell size and timestep
-      hydrodynamics
-   absolute coordinates computed dynamically when necessary to required precision
-      initialization
-      inline analysis
-      global position dependent physics (materials)
-   Do not store a patch's global position, only local position
-     relative to immediate neighbors, parent, and children. [Toward
-     distributed AMR data-structure, and to address precision issues with
-     deep AMR. Potential issues: boundary and initial conditions.] (see
-     W013)
-eliminate integer precision dependence on data structure size
-  absolute patch coordinates computed not stored 
-      global: computed with octree
-      distributed: only position relative to neighbors
-  global coordinates only needed for initialization
-  only need mesh width and timestep size for advancing
-  not needed for restarts
-  can still be computed dynamically
-  localization an option--not needed for smaller problems
-  absolute particle positions / grid locations may be needed
-     for some output, e.g. global particle analysis
-  in that case low precision
-  still scaling issues relative to depth
-   neighbor location
-\end{verbatim}
-
-@@@C
-
-\begin{verbatim}
-local time-stepping
-   global scaling of dx, dt may not be needed
-      only power-of-two quantization of dx, dt
-        mantissa unchanged--no fp precision issue
-        fp range issue
-            support coordinate rescaling at deep levels
-relaxed local timestep control
-   improves performance by not restricting timestep globally
-   adaptive timesteps important for deep AMR runs, e.g. star formation (cite Abel)
-   reduces global synchronizations for extreme scaling
-   reduces global dependencies for extreme scaling
-   allow variable timesteps within level
-      eliminates requirement for global reduction
-      timesteps quantized by two
-         eliminates roundoff errors
-      enforce timestep balancing--temporal level jumps(?)
-  patch-local adaptive timestep control
-    prevents rapidly evolving feature in one localized region of
-      domain from determining timestep elsewhere
-\end{verbatim}
-
-@@@2
-
-\begin{verbatim}
-AMR hierarchy
-   generalized octree-based AMR 
-     8-tree, sparse 64-tree, sparse 512-tree
-     decoupled AMR / Array
-\end{verbatim}
-
-@@@B
-\begin{verbatim}
-   Support fully distributed AMR data structure
-   For each local grid patch, only immediate neighbors and
-     ancestors stored
-     Proxies for remotely stored patches
-       remote thread identifier + pointer
-   Replicated as well as distributed
-     Hybrid: top k levels replicated
-   Replicated option: reduce tree-AMR node size
-      only storing parent, child, data pointer \cite{@@@
-      SAMR patches indexed by single-precision offsets into parent
-      patches, 32 bytes / tree-AMR and 48 bytes / patch-AMR]
-   distributed AMR hierarchy
-      local patches: store parent, neighbors, children (sparse)
-      not as memory efficient as globally stored nodes 
-         (3 pointers, 24 bytes average)
-         cite (petascale AMR?)
-      proxies for remotely stored patches
-  For each patch, only store patch, location information for
-    neighboring patches (``ghost patches''), and ancestors for octree
-\end{verbatim}
-
-\begin{verbatim}
-   Store only actual data
-     use flux registers for communication
-     allocate patch ghost zones only for computation
-     Support temporary ``allocate as-needed'' ghost zones
-        in addition to ``permanent'' ones
-     optimized for storage: Amr
-        option to not store guard / ghost cells
-        AMR patches may be larger than computationally optimal
-   Could store appropriate subset of neighbor data as well for
-     fault-tolerance
-\end{verbatim}
 
 \begin{verbatim}
    AMR operations
      initial grid generation
      refinement criteria: tag refine or coarsen
-     refinement or coarsening localized
+     refine or coarsen
+     octree-specific: balance
+     parallel distribution and redistribution
+     access to associated fields, particles
+     access to neighbors, parent, children
+        for interpolate fields
+     block-structured-specific: parallel clustering algorithm
 \end{verbatim}
 
 \begin{verbatim}
-AMR ``broad'' scaling enhancements
-   Broad scaling enhancements: patch coalescing
-      Relax rigid refinement criteria to inhibit excessive changes in
-        octree-like tree refinement.
-      Represent patch extents with (small) integer values relative to
-        parent. [To reduce memory usage with deep AMR runs.] (see W012)
+Octree AMR starting point
+Remaining issues and solutions
+  1. fixed-sized grid patches for large unigrid areas
+     ``Coalescing'' optimization
+  2. ``shallow'' refinemet for deep
+     ``Targeted refinement with backfill''
+  3. global indices
+      option for relative coordinates for patches   
+  4. global time steps
+      Patch-local adaptive time steps
+  5. replicated data
+      Hybrid replicated / distributed  data structure
+
+Related issues
+   Load balancing: \ref{ss:design-balance}
+   Task definition and scheduling: \ref{ss:design-schedule}
+Next: mesh and particles
 \end{verbatim}
 
-\begin{verbatim}
-AMR algorithm enhancements: patch coalescing
-   improves ``shallow'' octree-based AMR
-   SAMR does this naturally--octree-based AMR doesn't
-   especially helpful when large connected regions of domain at finest level
-   less AMR overhead: fewer nodes / patches
-   task size still controlable (fixed or restricted) 
-       large patches an impedement to load balancing
-       decouple parallel tasks from AMR patches 
-          allow distributed patches
-          regain task size control
-            ``Block'' is basic single-thread array
-         computational registers (see scheduling)
-   EXAMPLE: cosmology
-     note improvement despite suboptimality of test problem
-\end{verbatim}
+@@@@@@@@@@
 
-\begin{verbatim}
-   variable patch resolution
-   instead of uniformly refining a patch, can replace with higher
-     resolution array
-   need AMR machinery where resolution requirements change, not
-     where high resolution is needed
-   reduced AMR overhead (number of patches) especially in shallow
-     AMR relative to PARAMESH
-   improved performance since locally unifrom grid instead of AMR
-     patches
-   still supports variable block sizes for optimizing memory
-     hierarchy, parallel task size, task counts
-\end{verbatim}
+\textbf{Patch coalescing}. One proposed enhancement to the typical
+octree-based AMR approach is to allow variable mesh sizes per AMR
+hierarchy patch.  This can be introduced using the simple invertable
+AMR-invariant operation illustrated in Figure~\ref{f:coalesce}.  While
+keeping the underlying mesh resolution constant, the operation
+transforms multiple AMR patches with a single patch, but with a larger
+mesh.  We call this \textit{patch coalescing}.  The inverse operation
+is permitted as well if the patch requires subsequent refinement or
+coarsening.
 
 \FIGURE{Coalescing}{f:coalesce}{
 \begin{minipage}{3.75in}
 \includegraphics[width=3.75in]{coalesce.pdf}
 \end{minipage}}
 
-\FIGURE{
-Coalesced patches proof-of-concept using a 2D cosmology density field projection.
-\textbf{Left}: 2D cosmology density field projection.  
-\textbf{Middle}: Balanced octree with 81701 patches.
-\textbf{Right}: Balanced octree with 32529 coalesced patches. \\
-}
-{f:cosmo}{
+
+This operation decouples the AMR topology from the local resolution
+requirements, which permits a more efficient AMR data structure for
+the same resolution requirement.  Patch coalescing will be
+particularly efficient for AMR problems that involve large regions
+in which the resolution is uniform.  We note that this modification
+is not relevant to block-structured AMR, since patch sizes are already
+variable.
+
+As a proof-of-concept, below in Figure~\ref{f:cosmo} is an image of a
+2D cosmology density field projection, together with two balanced 2D
+quadtrees adapted to the image's gray scale.  One of the quadtrees
+used fixed-resolution patches, whereas the other used patch
+coalescing.  Even though the example problem is not particularly
+well-suited for this technique, it nevertheless leads to a quadtree
+with $2 1/2$ times fewer nodes.
+
+\FIGURE{ Coalesced patches proof-of-concept using a 2D cosmology
+  density field projection.  \textbf{Left}: 2D cosmology density field
+  projection.  \textbf{Middle}: Balanced quadtree with 81701 patches.
+  \textbf{Right}: Balanced quadtree with 32529 coalesced patches. \\
+} {f:cosmo}{
 \begin{minipage}{7.0in}
 \begin{minipage}{2.2in}
 \includegraphics[width=2.2in]{cosmo2-invert.png}
@@ -1182,41 +1098,34 @@ Coalesced patches proof-of-concept using a 2D cosmology density field projection
 \end{minipage}
 }
 
-\begin{verbatim}
-AMR ``deep'' scaling enhancements
-   Deep scaling enhancements: targeted refinement with backtracking
-      For very deep AMR where coarser levels never complete their
-        timestep, delete coarse levels to free storage.
-   Flexibility
-      Support flexible tree node types: memory-efficient versus
-        compute-efficient.
-\end{verbatim}
+While allowing flexible patch block sizes can greatly reduce the size
+of the octree-based AMR data structure, the variable block size can
+complicate other issues, specifically load balancing and parallel task
+definition.  Load balancing is complicated since work load per grid
+patch is no longer ``constant'' within a level (though we argue later
+that it is not necessarily constant to begin with), and task
+definition is complicated by the wide variation in task size.  We
+address this issue by decoupling parallel tasks from AMR patch blocks,
+essentially by allowing parallelism within a patch block.  With this
+approach, which we describe in more detail in
+\S\ref{ss:design-schedule}, we can maintain a constant subblock task
+size despite permitting arbitrarily large AMR patch blocks.
 
-\begin{verbatim}
-AMR algorithm enhancements: targeted refinement by 4 or 8
-   improves ``deep'' AMR
-   refinement by 2 too ``shallow''
-   back filling possible to regain effect of balanced tree
-   sparse storage format of child patches to reduce storage 
-   balancing octrees can have global effect
-     balancing refinementy by 4 or 8 probabalistically (provably?) local
-     no explicit AMR patches required for backfill--can live on child nodes 
-     EXAMPLE: point refinement
-   targeted refinement by 4 or 8
-     especially effective for deep AMR, e.g. star formation with
-       30+ levels
-     still supports effective resolution jumps of 2 using backfill
-     still representable with octree data structure 
-        skip intermediate levels
-        add additional backfill patches
-   Note refining single point introduces global refinement back to coarse level
-      effects entire domain even for infinitely localized point
-\end{verbatim}
 
-\FIGURE{Targeted refinement with backfill}{f:backfill}{
-\begin{minipage}{6.15in}
-\includegraphics[width=6.15in]{kd-backfill.pdf}
-\end{minipage}}
+%------------------------------------------------------------------------
+
+\textbf{Targeted refinement}.  Another proposed enhancement to the
+octree-based AMR approach is, instead of using a $2^3$-tree (octree)
+and refining by $r=2$, we use a $4^3$-tree and refine by $r=4$, or an
+$8^3$-tree and refine by $r=8$.  We call this $r^3$-tree approach
+\textit{targeted refinement}.
+
+The motivation and main advantage of targeted refinement is for
+particularly deep AMR runs, where the region of interest is tiny
+relative to the global domain size, such as simulations of galaxy or
+star formation.  As a proof-of-concept example, in Figure~\ref{f:dots}
+two balanced $r^2$-trees are shown refined on a small set of points in 2D, one
+with $r=2$ and one with $r=4$.
 
 \FIGURE{
 Targeted refinement proof-of-concept using multiple point sources in 2D.
@@ -1237,6 +1146,161 @@ Targeted refinement proof-of-concept using multiple point sources in 2D.
 \end{minipage}
 \end{minipage}}
 
+The advantage is clear: the number of nodes in the AMR hierarchy is
+reduced by a factor of about $13.5$.  There are apparent disadvantages
+as well.
+
+One disadvantage is that balancing an $r^3$-tree still allows jumps in
+refinement greater than two.  We can regain this mesh constraint by
+introducing implicit \textit{backfill} patches, as indicated in
+Figure~\ref{f:backfill}.
+
+\FIGURE{Targeted refinement with backfill}{f:backfill}{
+\begin{minipage}{6.15in}
+\includegraphics[width=6.15in]{kd-backfill.pdf}
+\end{minipage}}
+
+Another disadvantage is that we need to represent the $r^3$-trees.
+This can be done by simply using the $2^3$-tree data structure
+implementation and ignoring intermediate levels.  This still reduces
+the overall data structure size, since the balancing step is only
+performed on the ``active'' levels.  This can also improve parallel
+scaling: the $2^3$-tree balancing operation potentially affects all
+levels of the hierarchy,.whereas for $r>2$ the $r^3$-tree balancing
+and backfill operations are more localized.
+
+%------------------------------------------------------------------------
+
+\textbf{Delete coarse levels}.  For particularly
+deep AMR runs, the simulated time of interest can be much less
+than the time steps at the coarser levels.  If it is known that
+data at a coarse level is no longer required, that level can
+simply be removed from the simulation, freeing up resources for
+finer levels.  In principle, this could allow arbitarily deep AMR runs,
+provided other data structure limits and numerical scaling is
+handled appropriately.
+
+
+\begin{verbatim}
+2. AMR algorithm enhancements: targeted refinement by 4 or 8
+   improves ``deep'' AMR
+   refinement by 2 too ``shallow''
+   back filling possible to regain effect of balanced tree
+   sparse storage format of child patches to reduce storage 
+   balancing octrees can have global effect
+     balancing refinementy by 4 or 8 probabalistically (provably?) local
+     no explicit AMR patches required for backfill--can live on child nodes 
+     EXAMPLE: point refinement
+   targeted refinement by 4 or 8
+     especially effective for deep AMR, e.g. star formation with
+       30+ levels
+     still supports effective resolution jumps of 2 using backfill
+     still representable with octree data structure 
+        skip intermediate levels
+        add additional backfill patches
+   Note refining single point introduces global refinement back to coarse level
+      effects entire domain even for infinitely localized point
+\end{verbatim}
+
+
+
+%------------------------------------------------------------------------
+\textbf{Implicit global indices.}
+
+\begin{verbatim}
+3. option for relative coordinates for patches   
+   relative to neighbors
+   hydro computations generally only require local cell size and time step
+      global indices an issue for deep AMR due to limited precision: limit scalability
+         ``eliminate integer precision dependence on data structure size''       
+      no stored global indices
+         compute absolute coordinates only when necessary using octree structure
+            compute to required precision
+            initialization
+            inline analysis
+            global position dependent physics
+               e.g. internal boundaries or fixed sources or sinks
+               not necessarily supported by the initial framework
+      global: computed with octree
+      distributed: only position relative to neighbors
+  only need mesh width and time step size for advancing
+  localization an option--not needed for smaller problems
+  use similar localization approach for particles, described in \ref{ss:design-particles}
+\end{verbatim}
+
+%------------------------------------------------------------------------
+
+\textbf{Patch-local adaptive time steps}. There are two common
+variants in time step determination: uniform time steps over the
+entire domain, and adaptive time steps at each refinement level.
+These variants have their relative advantages and disadvantages:
+adaptive time steps are more computationally efficient, especially for
+``deep'' AMR runs, whereas using uniform time steps is more scalable
+since all patches can advance a time step simultaneously.
+
+One disadvantage of both is that determining the time step, either for
+the entire domain or within individual levels, requires a global
+reduction operation.  However, global operations are particularly costly for
+massively parallel machines.  
+
+We believe this global operation can be avoided by relaxing the
+constraint of a fixed time step within a level.  The time step is
+determined to a large part by the spacial resolution of the mesh,
+which is constant within a level; however, in highly dynamic regions
+such as rapid gravitational collapse, the local physics may lead to
+requiring a smaller time step.  Instead of allowing these isolated
+regions to determine the time step for the entire level, we will
+optionally permit individual patches to make multiple time steps
+relative to other patches in the same level.  For some problems, this
+may help prevent rapidly evolving feature in one localized region of
+the domain from determining the time step everywhere else.
+
+
+%------------------------------------------------------------------------
+
+\textbf{Distributed data structure.} There are two main approaches
+used for representing the AMR hierarchy structure on a distributed
+memory machine: storing part of the hierarchy on each process, and
+storing the entire hierarchy on all nodes or processes.
+
+Each clearly has its advantages and disadvantages.  Duplicating the
+entire hierarchy on all processes can be more efficient, since
+operations involving the hierarchy as a whole may require no
+communication.  However, the approach ultimately does not scale, since
+available memory per process is always limited, so as the problem size
+growes, eventually the AMR data structure storage will consume all
+available memory.
+
+Our solution, which has been used by others
+(e.g.~\cite{@@@hybrid-storage}), will be to support both, by
+duplicating coarser levels of the octree, and distributing the finer
+levels.
+
+\begin{verbatim}
+5. Hybrid replicated / distributed  data structure
+   For each local grid patch, only immediate neighbors and
+     ancestors stored
+     Proxies for remotely stored patches
+       remote thread identifier + pointer
+   Replicated as well as distributed
+     Hybrid: top k levels replicated
+   Replicated option: reduce tree-AMR node size
+      only storing parent, child, data pointer \cite{@@@
+      SAMR patches indexed by single-precision offsets into parent
+      patches, 32 bytes / tree-AMR and 48 bytes / patch-AMR]
+   distributed AMR hierarchy
+      local patches: store parent, neighbors, children (sparse)
+      not as memory efficient as globally stored nodes 
+         (3 pointers, 24 bytes average)
+         cite (petascale AMR?)
+      proxies for remotely stored patches
+  For each patch, only store patch, location information for
+    neighboring patches (``ghost patches''), and ancestors for octree
+\end{verbatim}
+
+@@@@@@@
+
+
 %-----------------------------------------------------------------------
 \subsection{Mesh data} \label{ss:design-fields}
 %-----------------------------------------------------------------------
@@ -1247,6 +1311,8 @@ User-controlled optional floor/ceiling limits on individual
   Fields (ala ``tiny\_number'' in Enzo), with user-specified Error
   behavior (warning, error, ignore, reset to given floor/ceiling,
   etc.)
+support coordinate rescaling at deep levels
+Units
 \end{verbatim}
 
 %-----------------------------------------------------------------------
@@ -1260,6 +1326,9 @@ Store particle positions in single precision as -1 <=  x,y,z <= 1
   performance, and address precision issues with deep AMR.]
 Use a binary tree data-structure to recursively partition the
   bounding boxes of particles.
+  absolute particle positions / grid locations may be needed
+     for some output, e.g. global particle analysis
+  in that case low precision
 \end{verbatim}
 
 \begin{verbatim}
@@ -1316,7 +1385,7 @@ user functions supplied
    block advance (multiple)
    inter-level flux correction
    refine / coarsen
-   timestep determination
+   time step determination
    constraint enforcement (div B)
    error checking / invariant checking for fault tolerance / software resiliency
       detects memory / cpu errors and mark core as faulty and bypass
@@ -1326,7 +1395,7 @@ user functions supplied
       can be different for different fields
       can be different for different methods
    hydro support:
-       advance single block a single timestep
+       advance single block a single time step
        full data including ghost fields and ghost particles available 
           see Schedule
    elliptic support:
@@ -1334,9 +1403,9 @@ user functions supplied
        parallelism?
        how to implement?
    global and level operations / solves
-Support optional uniform timesteps across all levels. [To
+Support optional uniform time steps across all levels. [To
   improve parallel efficiency.]
-Support optional variable timestep sizes within each level. [To
+Support optional variable time step sizes within each level. [To
   reduce synchronization costs when computing global CFL condition.]
 \end{verbatim}
 
@@ -1452,13 +1521,13 @@ hierarchical synchronization and collective operations
 memory storage formats and data movement
    Amr data stored for memory and operations; restructure for comp and comm
    Compute in reformatted ``computational registers'' (Block class in Array)
-      basic idea used in PARAMESH
+      basic idea used in \paramesh
          ``working block'' 
          ``work'' datastructures
       can alias with Amr if ghost zones stored to avoid copy
       particle types collected / distributed
    Communicate using reformatted ``flux registers''
-      idea used in \chombo\ (cite)
+      idea used in \chombo: \code{LevelFluxRegister}
       can alias with fields if ghost zones stored to avoid copy
       can alias with particles 
         pointer per particle?  
@@ -1503,7 +1572,7 @@ evenly sized pieces.  This approach has been shown to scale to over
 $60K$ cores~\cite{@@@ART}.  It works well if workload and memory usage
 are proportional to each other within tree nodes, and when workload
 between tree nodes is roughly equal; however, neither of these
-conditions is met when adaptive time-stepping is used.  Also, this
+conditions is met when adaptive time steps are used.  Also, this
 approach still requires $O(N_P)$ storage, and a global all-gather
 operation (e.g.~\code{MPI\_Allgather}) is required on all processes.
 
@@ -1515,6 +1584,12 @@ Our approach will be to
        improved scalability
        improved flexibility
        improved efficiency
+    distribution approaches
+       replicated
+       distributed
+       hybrid
+         optimize computational performance versus memory usage
+     
     load balance locally in given level
     different metrics at different levels
       memory at node level
@@ -1537,14 +1612,21 @@ Our approach will be to
     linearized Morton, Gray code, Hilbert curve insufficient
        assumes equal work per patch
        particles are associated with nodes, changing weight
-       adaptive time-stepping drastically weights more highly  refined patches
+       adaptive time steps drastically weights more highly  refined patches
        performance of physics algorithms on a patch is not necessarily uniform
           localized chemistry subcycling, front tracking, etc.
        arrays on patches may be different sized (assuming coalesced patches)
        linearization constricts dimensionality
           constrains data movement along a single dimension
           physics imbalances 4 dimensional
+      Morton ordering not always feasible
+         different particle counts
+         adaptive time steps on finer levels
+         physics method variations
+            shock capturing--Riemann solver iterations
+            variable subcycling of iterative stiff methods
 \end{verbatim}
+
 
 \begin{verbatim}
 task migration
@@ -1574,7 +1656,7 @@ integers on $N_C$ cores is acceptable \footnote{\cite{BuGh08}
 approach will not be sufficient for a general-purpose extreme AMR
 framework for several reasons.
 %
-One, adaptive time-stepping is required for efficient ``deep'' AMR
+One, adaptive time steps are required for efficient ``deep'' AMR
 problems, but that scales the work load for a given node by a
 non-constant factor of roughly $2^k$ for level $k$.
 %
@@ -1714,6 +1796,18 @@ hierarchical / multiscale task scheduling
    plane / line (thread)
 \end{verbatim}
 
+\begin{verbatim}
+   Store only actual data
+     use flux registers for communication
+     allocate patch ghost zones only for computation
+     Support temporary ``allocate as-needed'' ghost zones
+        in addition to ``permanent'' ones
+     optimized for storage: Amr
+        option to not store guard / ghost cells
+        AMR patches may be larger than computationally optimal
+   Could store appropriate subset of neighbor data as well for
+     fault-tolerance
+\end{verbatim}
 
 We will use dynamic scheduling of tasks assigned to a processes, since
 it @@@  Dynamic scheduling is more suitable than static scheduling for
@@ -1738,9 +1832,9 @@ memory + disk) checkpoint / restart mechanism.
 \note{implementation in Charm++}
 Implementation of AMR for a hyperbolic problem, a parallel task, or
 \charm\  ``chare'', would correspond to advancing a numerical method or
-sequence of methods one timestep on a single grid patch block.  The
+sequence of methods one time step on a single grid patch block.  The
 exchange of guard cell data would correspond to \charm\  messages.
-This implementation would allow a block to advance one timestep as
+This implementation would allow a block to advance one time step as
 soon as all of its guard cell data is available.
 
 \note{non-Charm++ implementation}
@@ -1869,7 +1963,7 @@ platform hierarchical architecture-aware data structures
   note linearization of octree datastructure is insufficient:
     assumes equal work per patch
     particles are associated with nodes, changing weight
-    adaptive time-stepping drastically weights more highly
+    adaptive time steps drastically weights more highly
       refined patches
     performance of physics algorithms on a patch is not
       necessarily uniform, e.g. localized chemistry subcycling, front
@@ -1933,7 +2027,7 @@ parallel technology encapsulation / processor virtualization
 \subsection{Resilience} \label{ss:design-resilience}
 %-----------------------------------------------------------------------
 
-\ \\ \pargraph{fault tolerance} Fault tolerance and software
+\pargraph{fault tolerance} Fault tolerance and software
 resilience are crucial factors at extreme scales, since it has been
 observed that frequency of failures is proportional to the number of
 sockets~\cite{@@@}
@@ -2202,7 +2296,7 @@ and implementation decisions must be made deliberately and thoughtfully.
                 checksums
              algorithm failure
                 support adaptive algorithms
-                locally override spacial mesh width / timesteps
+                locally override spacial mesh width / time steps
    Software reviews
       line-by-line checking
          by another person, or after time elapsed
