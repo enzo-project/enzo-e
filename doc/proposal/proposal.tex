@@ -614,9 +614,9 @@ be made on specific data field names or properties in the framework.
 Stencil-based discretization methods will of course be supported,
 which indicates that a layer of ``ghost'' or ``guard'' cells will be
 required for computations.  The framework will allow flexible layers
-of ghost zones, up to at least three zones deep.  Furthermore, the number and
-depth of ghost zones may depend on the specific field, and ghost zones
-may or may not be permanantly stored.
+of ghost zones, up to at least three zones deep.  Furthermore, the
+number and depth of ghost zones may depend on the specific field, and
+ghost zones may or may not be permanantly stored.
 
 Data fields may be single or double precision, and different fields
 may have different precisions, depending on the relative importance of
@@ -969,7 +969,6 @@ Below in sections \S\ref{ss:design-amr} through
 related to requirements listed in sections \S\ref{ss:require-amr}
 through \S\ref{ss:require-resilience}, respectively.
 
-\newpage
 %-----------------------------------------------------------------------
 \subsection{Adaptive mesh refinement} \label{ss:design-amr}
 %-----------------------------------------------------------------------
@@ -1005,50 +1004,79 @@ extents are computed not stored, which can be used to address
 precision and range issues of global indices that arise for extremely
 large or deep AMR hierarchies.
 
+
 @@@@@@@@@@@@@@@
 
-Standard octree-based approaches involve an octree or forest of
-octrees.  Nodes of the octree typically correspond to small fixed-size
-locally Cartesian grid blocks, such as the $4^3$ grid blocks used in
-the FLASH astrophysics application built on the \paramesh\ framework.
+Standard octree-based approaches involve either an octree or a forest
+of octrees.  Nodes of the octree typically correspond to small
+fixed-size locally-Cartesian grid blocks, such as the $4^3$ grid
+blocks used in the FLASH astrophysics application built on the
+\paramesh\ framework.  Refining a tree node involves partitioning the
+node into eight octants, and coarsening involves the inverse
+operation.  Mesh blocks can be associated with either all nodes in the
+tree, or just the leaf nodes.  If the tree supports particle data as
+well, particles are generally associated with leaf nodes.  To
+eliminate ``level jumps''---a maximum of one level difference between
+adjacent mesh blocks---a ``balancing'' operation is performed by
+refining all coarse blocks that are adjacent to blocks that are
+greater than one level finer.  Time steps are globally determined,
+but may be adaptive at each resolution level.
 
+Parallelizing involves distributing $N$ tree nodes across $P$
+processors.  This is frequently accomplished using a space-filling
+curve: first blocks are linearizing using a linearized Morton, Gray
+code, or Hilbert ordering; then the list is divided evenly into $P$
+section, with blocks in the $k$th section assigned to the $k$th
+processor.
 
-\begin{verbatim}
-   AMR operations
-     initial grid generation
-     refinement criteria: tag refine or coarsen
-     refine or coarsen
-     octree-specific: balance
-     parallel distribution and redistribution
-     access to associated fields, particles
-     access to neighbors, parent, children
-        for interpolate fields
-     block-structured-specific: parallel clustering algorithm
-\end{verbatim}
+There are several operations required of the distributed AMR data
+structure, all of which must be designed and implemented in a highly
+scalable manner.  These include generating the initial grid hierarchy,
+dynamically refining and coarsening grid patches or blocks,
+maintaining a balanced AMR data structure free of level jumps,
+defining and distributing parallel computational tasks, and
+maintaining a uniform work distribution by dynamically load balancing
+tasks.  The AMR data structure must also support efficient access to
+grid block/patch mesh data and particles.  This includes interpolating
+data between hierarchy levels, and accessing mesh data and particles
+in adjacent blocks, which is required for computational stencils and
+locality-depedent particle methods such as $P^3M$.
 
-\begin{verbatim}
-Octree AMR starting point
-Remaining issues and solutions
-  1. fixed-sized grid patches for large unigrid areas
-     ``Coalescing'' optimization
-  2. ``shallow'' refinemet for deep
-     ``Targeted refinement with backfill''
-  3. global indices
-      option for relative coordinates for patches   
-  4. global time steps
-      Patch-local adaptive time steps
-  5. replicated data
-      Hybrid replicated / distributed  data structure
+As described, there are several issues with the standard octree-based
+AMR approach that we wish to address.  
+%
+1) By only supporting small fixed-sized blocks, the AMR data structure
+size can grow very large in reqions in which the resolution is
+uniform.
+%
+2) The AMR data structure can also grow large for ``deep'' AMR
+problems due to the combination of the shallow refinement-by-two and
+octree balancing steps.
+%
+3) Extremely deep AMR runs can consume a large amount of memory
+relative to the small amount of available parallelism, making them
+unrunable on machines that have restricted memory per process.
+%
+4) For extremely large or extremely deep AMR problems, the excessive
+range of global indices, or excessive precision of particle positions,
+can require 64-bit or higher integers / floats.
+%
+5) Determining the time step generally requires global reduction
+operations, which we wish to avoid if possible for scalability.
+%
+6) Applications frequently store the hierarchy ``metadata''---the AMR
+data structure excluding mesh and particle data---redundantly on each
+processor, which is a roadblock to scalability.
 
-Related issues
-   Load balancing: \ref{ss:design-balance}
-   Task definition and scheduling: \ref{ss:design-schedule}
-Next: mesh and particles
-\end{verbatim}
+We summarize our approaches to these issues below.  Two more
+fundamental issues, load balancing and parallel task definition and
+scheduling, are described in their own sections
+\S\ref{ss:design-balance} and \S\ref{ss:design-schedule},
+respectively.
 
-@@@@@@@@@@
+%------------------------------------------------------------------------
 
-\textbf{Patch coalescing}. One proposed enhancement to the typical
+\textbf{1) Patch coalescing.} One proposed enhancement to the typical
 octree-based AMR approach is to allow variable mesh sizes per AMR
 hierarchy patch.  This can be introduced using the simple invertable
 AMR-invariant operation illustrated in Figure~\ref{f:coalesce}.  While
@@ -1114,7 +1142,7 @@ size despite permitting arbitrarily large AMR patch blocks.
 
 %------------------------------------------------------------------------
 
-\textbf{Targeted refinement}.  Another proposed enhancement to the
+\textbf{2) Targeted refinement.}  Another proposed enhancement to the
 octree-based AMR approach is, instead of using a $2^3$-tree (octree)
 and refining by $r=2$, we use a $4^3$-tree and refine by $r=4$, or an
 $8^3$-tree and refine by $r=8$.  We call this $r^3$-tree approach
@@ -1171,66 +1199,55 @@ and backfill operations are more localized.
 
 %------------------------------------------------------------------------
 
-\textbf{Delete coarse levels}.  For particularly
-deep AMR runs, the simulated time of interest can be much less
-than the time steps at the coarser levels.  If it is known that
-data at a coarse level is no longer required, that level can
-simply be removed from the simulation, freeing up resources for
-finer levels.  In principle, this could allow arbitarily deep AMR runs,
-provided other data structure limits and numerical scaling is
-handled appropriately.
+\textbf{3) Level window.}  For particularly deep AMR runs, the
+amount of parallelism is relatively small, since the serial bottleneck
+is the time step on the finest levels.  Memory consumption can be
+large, however, especially relative to the amount of parallelism.
+These problems stress scaling not just due to the limited parallelism
+available, but because of restriced amount of physical memory
+available per process.
 
+We plan to address this issue not just by increasing parallelism, but
+by reducing the memory requirement per process by deallocating
+unnecessary storage.  Because of the smaller time steps taken on finer
+levels, the simulated time of interest can be much less than the time
+steps at the coarser levels.  If it is known that data at a coarse
+level is no longer required, then that level can simply be removed
+from the simulation, freeing up resources for finer levels.  In
+principle, this could allow arbitarily deep AMR runs, since only a
+fixed interval or ``window'' of levels may be required.  This would
+only be feasible if other data structure limits and numerical scaling
+is handled appropriately, and provided the total number of fine level
+time steps is not excessive.
 
-\begin{verbatim}
-2. AMR algorithm enhancements: targeted refinement by 4 or 8
-   improves ``deep'' AMR
-   refinement by 2 too ``shallow''
-   back filling possible to regain effect of balanced tree
-   sparse storage format of child patches to reduce storage 
-   balancing octrees can have global effect
-     balancing refinementy by 4 or 8 probabalistically (provably?) local
-     no explicit AMR patches required for backfill--can live on child nodes 
-     EXAMPLE: point refinement
-   targeted refinement by 4 or 8
-     especially effective for deep AMR, e.g. star formation with
-       30+ levels
-     still supports effective resolution jumps of 2 using backfill
-     still representable with octree data structure 
-        skip intermediate levels
-        add additional backfill patches
-   Note refining single point introduces global refinement back to coarse level
-      effects entire domain even for infinitely localized point
-\end{verbatim}
+%------------------------------------------------------------------------
+\textbf{4) Implicit global indices.}  For particularly large and deep
+AMR runs, the range of global indices and precision of absolute
+positions can become issues.  The limits of 32-bit values can quickly
+be exhausted, and it is conceivable that for extreme AMR even 64-bit
+values is insufficient.  This can lead to increased memory usage for
+storing the AMR meta-data, and increased code complexity to support
+non-standard 128-bit values.
 
+Our approach will be to support the option of not storing global
+indices and positions for the supporting AMR data structure, and only
+compute them when absolutely necessary.  The octree data structure
+defines the relative configuration of a block with its parent,
+neighbors, and child blocks, which is sufficient for many operations.
+In particular, only knowing the local mesh width and timestep is
+sufficient for many hyperbolic conservation problems.
+
+Some operations may require absolute positions however, such as
+problem initialization, inline analysis routines, or internal material
+boundaries.  In these cases absolute positions or indices can still be
+determined using the octree data structure in $O(\log N)$ time, using
+whatever precision or range is necessary.  A similar approach for
+particle positions is outlined in \S\ref{ss:design-particles}.
 
 
 %------------------------------------------------------------------------
-\textbf{Implicit global indices.}
 
-\begin{verbatim}
-3. option for relative coordinates for patches   
-   relative to neighbors
-   hydro computations generally only require local cell size and time step
-      global indices an issue for deep AMR due to limited precision: limit scalability
-         ``eliminate integer precision dependence on data structure size''       
-      no stored global indices
-         compute absolute coordinates only when necessary using octree structure
-            compute to required precision
-            initialization
-            inline analysis
-            global position dependent physics
-               e.g. internal boundaries or fixed sources or sinks
-               not necessarily supported by the initial framework
-      global: computed with octree
-      distributed: only position relative to neighbors
-  only need mesh width and time step size for advancing
-  localization an option--not needed for smaller problems
-  use similar localization approach for particles, described in \ref{ss:design-particles}
-\end{verbatim}
-
-%------------------------------------------------------------------------
-
-\textbf{Patch-local adaptive time steps}. There are two common
+\textbf{5) Patch-local adaptive time steps.} There are two common
 variants in time step determination: uniform time steps over the
 entire domain, and adaptive time steps at each refinement level.
 These variants have their relative advantages and disadvantages:
@@ -1258,7 +1275,7 @@ the domain from determining the time step everywhere else.
 
 %------------------------------------------------------------------------
 
-\textbf{Distributed data structure.} There are two main approaches
+\textbf{6) Distributed data structure.} There are two main approaches
 used for representing the AMR hierarchy structure on a distributed
 memory machine: storing part of the hierarchy on each process, and
 storing the entire hierarchy on all nodes or processes.
@@ -1266,153 +1283,164 @@ storing the entire hierarchy on all nodes or processes.
 Each clearly has its advantages and disadvantages.  Duplicating the
 entire hierarchy on all processes can be more efficient, since
 operations involving the hierarchy as a whole may require no
-communication.  However, the approach ultimately does not scale, since
-available memory per process is always limited, so as the problem size
-growes, eventually the AMR data structure storage will consume all
-available memory.
+communication.  Storage of octree data structures is extremely
+efficient, using at most three pointer variables~\cite{@@@}.  However,
+the approach still ultimately does not scale, because it requires
+$O(N)$ storage and computation per process, and since available memory
+per process is always limited.  As the problem size grows, eventually
+the AMR data structure storage will exhaust all available physical
+memory.
 
 Our solution, which has been used by others
-(e.g.~\cite{@@@hybrid-storage}), will be to support both, by
-duplicating coarser levels of the octree, and distributing the finer
-levels.
+(e.g.~\cite{@@@hybrid-storage}), will be to support a hybrid
+duplicated and distributed AMR data structure.  Coarser levels, which
+span wider areas of the domain, can be stored redundantly but
+efficiently on every process.  Grid patches in finer levels (along
+with a layer of adjacent ``remote proxy patches'' analagous to ghost
+zones for AMR patches) can be stored only on the local processes to
+which the patches are assigned.  The exact level at which the switch
+occurs may be arbitrary, may change during a simulation, and may vary
+in different regions of the domain, depending on how the local tradeoff
+between memory and communication costs change.
 
-\begin{verbatim}
-5. Hybrid replicated / distributed  data structure
-   For each local grid patch, only immediate neighbors and
-     ancestors stored
-     Proxies for remotely stored patches
-       remote thread identifier + pointer
-   Replicated as well as distributed
-     Hybrid: top k levels replicated
-   Replicated option: reduce tree-AMR node size
-      only storing parent, child, data pointer \cite{@@@
-      SAMR patches indexed by single-precision offsets into parent
-      patches, 32 bytes / tree-AMR and 48 bytes / patch-AMR]
-   distributed AMR hierarchy
-      local patches: store parent, neighbors, children (sparse)
-      not as memory efficient as globally stored nodes 
-         (3 pointers, 24 bytes average)
-         cite (petascale AMR?)
-      proxies for remotely stored patches
-  For each patch, only store patch, location information for
-    neighboring patches (``ghost patches''), and ancestors for octree
-\end{verbatim}
-
-@@@@@@@
-
+In the following two sections, we describe our treatment of mesh data
+and particle data.
 
 %-----------------------------------------------------------------------
 \subsection{Mesh data} \label{ss:design-fields}
 %-----------------------------------------------------------------------
 
-\begin{verbatim}
-[review requirements]
-User-controlled optional floor/ceiling limits on individual
-  Fields (ala ``tiny\_number'' in Enzo), with user-specified Error
-  behavior (warning, error, ignore, reset to given floor/ceiling,
-  etc.)
-support coordinate rescaling at deep levels
-Units
-\end{verbatim}
+Mesh data, as described previously, will be represented as locally
+Cartesian grids on octree nodes.  The stored size may vary, but the
+parallel task size may be kept constant, which implies that field data
+in a single patch may be distributed across multiple processes.  In
+the limit of a large ``unigrid'' (single AMR level) run, the AMR data
+structure would be a single octree node, and the array would be
+partitioned into at least $P$ blocks.
+
+As outlined in the mesh data requirements
+section~\S\ref{require-fields}, there will be any number of
+user-defined fields, which may be stored using either single or double
+precision.  Different fields are identified by user code using 
+opaque field ID's, and by users (e.g.~in output files) by
+user-defined string identifiers.  Different user methods may
+declare different fields to be read-only, or writable.
+
+Optional scaling factors may be defined, which may vary for different
+fields, different AMR levels, or different methods.  Level-dependent
+scaling factors may be defined if the user's solvers have
+scale-sensitive numerical behavior, and method-dependent scaling
+factors may be defined to simplify the integration of different
+solvers that expect fields to be stored using different physical
+units.
+
+Ghost zone data may be either explicitly stored, or only allocated
+when required.  Ghost zone depths may vary between fields to improve
+memory utilization and the cost of copying data that is not required
+by the user's solvers.  
+
+Users may optionally specify bounds on individual fields, e.g. a
+minimum of $0$ or some small positive constant for pressure.  This
+will allow \cello\ to optionally check for some software or numerical
+errors.  If a field goes out of bounds, then some action can be taken
+to address the problem, such as reduce the size of the time step
+constraint or switch to an alternate solver.  Support for more general
+assertions on field values may be implemented as well, such as checking
+that conserved fields are indeed conserved, or similar constraints
+such as $\div\cdot B=0$ for MHD problems.
 
 %-----------------------------------------------------------------------
 \subsection{Particle data} \label{ss:design-particles}
 %-----------------------------------------------------------------------
 
-\begin{verbatim}
-[review requirements]
-Store particle positions in single precision as -1 <=  x,y,z <= 1
-  relative to their containing patch. [To reduce storage, improve
-  performance, and address precision issues with deep AMR.]
-Use a binary tree data-structure to recursively partition the
-  bounding boxes of particles.
-  absolute particle positions / grid locations may be needed
-     for some output, e.g. global particle analysis
-  in that case low precision
-\end{verbatim}
+The same octree data structure that is used to support
+multi-resolution field data will also be used to spacially organize
+particles.  Particles will be associated with leaf nodes of the
+octree, which will enable fast and accurate Lagrangian methods such
+as $PPPM$~\cite{HoEa88}.
 
-\begin{verbatim}
-patch-local coordinates for particles
-   control accumulation of roundoff
-   minimize / eliminate effects of limited precision and range
-   absolute coordinates computed when necessary
-      analysis
-      visualization
-\end{verbatim}
+Particles will also be grouped into arbitrary user-defined particle
+groups.  As indicated by the requirement summary, different particle
+groups may have arbitary user-defined logical, integer, or
+floating-point attributes associated with each particle in the group.
+Particle groups are identified by user code using opaque particle
+group ID's, and by users by user-defined stringe identifiers.
 
-\begin{verbatim}
-particles
-   groups of related particles stored together
-   particles associated with grid patch
-   flexibility in particle ownership
-     may belong to immediate neighbor to reduce communication
-particle positions stored using local coordinate system with
-  origin at patch corner
-\end{verbatim}
+To address the issue of AMR depth-dependent precision requirements on
+global particle positions, particle positions may optionally be stored
+relative to a local coordinate system defined by the containing AMR
+patch.  This is illustrated in Figure~\ref{f:local-particles}.  One
+advantage is that for very deep AMR levels, the accuracy of
+patch-local positions do not deteriorate due to catastrophic
+cancellation, as they do when global positions are stored.  Also, even
+single precision is expected to provide more than sufficient
+positional accuracy for local computations, which will additionally
+improve both memory storage requirements and memory access costs.
 
+\FIGURE{Patch-local coordinate systems for
+  particles}{f:local-particles}{
+\begin{minipage}{6.8in}
+\begin{minipage}{3.3in}
+\includegraphics[width=3.3in]{particles-global.pdf}
+\end{minipage} \ 
+\begin{minipage}{3.3in}
+\includegraphics[width=3.3in]{particles-local.pdf}
+\end{minipage}
+\end{minipage}}
+
+A consequence of using patch-local coordinate systems is that
+particles that relocate from one patch to a neighboring patch will
+require a coordinate transform: this transformation is trivial to
+implement and compute.  Also, sometimes global particle positions are
+still required, for example for analysis or visualization.  In these
+cases global positions can still be made available by providing
+functions for accessing global as well as local particle positions.
+Global positions can be internally computed by \cello\ to any required
+precision by traversing the AMR octree with $O(\log N)$ cost, even
+if they are not explicitly stored.
 
 %-----------------------------------------------------------------------
 \subsection{User functions} \label{ss:design-user}
 %-----------------------------------------------------------------------
 
-\begin{verbatim}
-Integrate ``inits'' functionality into the main code
-Declarative rather than imperative
-   define actions
-   define dependencies
-   system determines order to do things
-   support override?
-user functions supplied
-   method ``checkin'' or initialization functions
-      identify by name (for performance and monitoring)
-      defines fields required
-         variable ghost zone depths
-      defines particle groups required
-         levels of ghost zones
-      type: hydro, elliptic
-      any parameters required
-      any other data required for checkpointing
-      ... 
-      any temporary method-local fields / particles required
-      any static  method-local fields / particles required
-      data layout of fields expected (can be interleaved, etc.)
-   define method sequence within a level (hydro then gravity)
-   define method sequence between levels (flux correction)
-   field / particle initialization
-   particle advance
-   particle computation
-   particle - grid interaction
-   block advance (multiple)
-   inter-level flux correction
-   refine / coarsen
-   time step determination
-   constraint enforcement (div B)
-   error checking / invariant checking for fault tolerance / software resiliency
-      detects memory / cpu errors and mark core as faulty and bypass
-      API provided for signalling errors
- 
-   field and data ghost zones available
-      can be different for different fields
-      can be different for different methods
-   hydro support:
-       advance single block a single time step
-       full data including ghost fields and ghost particles available 
-          see Schedule
-   elliptic support:
-       solver on single level or entire hierarchy
-       parallelism?
-       how to implement?
-   global and level operations / solves
-Support optional uniform time steps across all levels. [To
-  improve parallel efficiency.]
-Support optional variable time step sizes within each level. [To
-  reduce synchronization costs when computing global CFL condition.]
-\end{verbatim}
+How user functions interface with \cello\ is an important design
+issue, since it balances ease of use with power and flexibility.  
 
+User initialization functions will be required to define the fields
+are particle groups that will be used.  These functions may initialize
+fields and particles as well, or simple initialization can be
+performed using \cello\ parameter files.  Physics functions must also
+be ``registered,'' which may involve declaring which field or particle
+groups are read or modified by each function, whether each function is
+patch-, level-, or hierarchy-oriented, whether a method requires
+either temporary or persistent local fields or particle groups, and
+how functions are to be sequenced.  Initialization functions also
+assign string identifiers by the user, which is used for example to
+support user function-specific run-time parameters.  To improve
+software resilience, alternate methods may also be specified, which
+\cello\ will invoke in the event the primary method signals a failure.
 
-\begin{verbatim}
-Support ensembles within a single run, including inline-analysis
-\end{verbatim}
+The primary physics-related user functions will be those that advance
+the field or particle data one timestep on a single logically
+Cartesian grid.  \cello\ will schedule and execute these user
+functions on individual patch blocks as outlined in
+\S\ref{ss:design-schedule}.  
+
+The secondary physics-related user functions will be for computations
+at level interfaces, such as flux-correction or other constraint
+enforcement at AMR level boundaries.  In this case user code will
+operate on fields and particle data defined on two adjacent patches in
+different levels, rather than a single patch.  Scheduling and
+executing these functions will also be controlled by \cello's scheduler.
+
+Other user-functions supplied will be AMR-related, and include tagging
+AMR patches for refinement or coarsening, and determining the local
+time step.
+
+All user functions will have access to \cello\ API's, which include
+signalling a software or method failure, defining additional
+values for user monitoring during a running simulation, and for
+measuring performance.
 
 %-----------------------------------------------------------------------
 \subsection{Run-time parameters} \label{ss:design-parameters}
