@@ -761,13 +761,15 @@ Dynamic load balancing / task migration is critical for parallel
 performance of AMR, due to the dynamically changing workload
 distributed across nodes with limited memory and potentially millions
 of computational cores.  Dynamic load balancing must therefore be
-efficient, reliable, and effective.  Since we will directly support
-multiple levels of hardware parallelism, this indicates that a
-hierarchical load balancing approach should be used,
-e.g.~\cite{LaTa06}.  This would allow for balancing between different
-parallel levels at different frequencies, and balancing with respect
-to different metrics (e.g.~stress balanced computation between cores
-and balanced memory usage between nodes).
+scalable, efficient, reliable, and effective.  Efficiency indicates
+that data locality is maintained, to reduce communication costs
+between tasks.  Also, we wish to directly support multiple levels of
+hardware parallelism, which indicates that a hierarchical load
+balancing approach should be used.  This would allow for balancing
+between different parallel levels at different frequencies, and
+balancing with respect to different metrics (e.g.~balance computation
+between cores and balance memory usage between nodes).  Scalability
+implies that the scheme is less than $O(N_P)$ cost per process.
 
 %-----------------------------------------------------------------------
 \subsection{Task scheduling}\label{ss:require-schedule}
@@ -1446,37 +1448,87 @@ measuring performance.
 \subsection{Run-time parameters} \label{ss:design-parameters}
 %-----------------------------------------------------------------------
 
-The parameter component is currently implemented and functional.
+The run-time parameters component will use \code{flex} and
+\code{bison} parsing tools to generate code to read and parse the
+run-time parameter file.  Parameter types will include integers,
+scalars, logicals, strings, and lists.  Logical and scalar expressions
+involving spacial variables \code{x}, \code{y}, and \code{z}, and time
+variable \code{t}, will also be supported to enable defining simple
+initial conditions and time-dependent boundary conditions via the
+run-time parameter file.
 
-[wiki]
-
-[devel]
-
+The run-time parameters API will allow access to parameter values by
+type, as well as evaluation of scalar and logical expressions
+involving \code{x}, \code{y}, \code{z}, and \code{t}.  User-defined
+parameters can be accessed by user code, so that parameters specific
+to the user code can be integrated into the same run-time parameters
+file as the \cello\ parameters.  Related parameters will be grouped
+into individual sections, e.g.~fields, particles, AMR, user functions,
+etc., to improve organization of the parameters.
 
 %-----------------------------------------------------------------------
 \subsection{Parallelism} \label{ss:design-parallel}
 %-----------------------------------------------------------------------
 
-@ 1 charm mode
+For a hyperpolic problem defined on an arbitrary AMR hierarchy, any
+given patch in the hierarchy may advance one time step if all of its
+boundary data is up to date.  Assuming that the advancement of a grid
+patch one time step is taken to be a parallel task, this defines a
+dependency graph.  \cello\ will use this dependency graph to control
+the parallel execution of the simulation.
 
-@ 2 reasons [requirements]
+Since the AMR approach will include varying patch sizes, data on a
+single patch may be distributed among multiple processes.  The basic
+approach of defining a dependency graph will still be used, but
+sub-patches will be used to define a parallel task.  In \cello, a task
+may be an entire patch, or a portion of a patch.  Task sizes can be
+controlled by restricting sub-patch sizes within a given range, which
+may be constant.  Tasks are encapsulated in the \code{Task} software
+component.
 
-@ 3 other technologies \& reasons [hierarchical]
+\cello\ will maintain a priority queue of runnable tasks on each
+process, with tasks associated with sub-patches in finer AMR levels
+given higher priority since they determine the critical path through
+the dependency graph.  Communication will be similarly scheduled to
+effectively prefetch ghost data required by a patch so that it is
+available when the patch is executed.  Scheduling and execution of
+tasks will be controlled by the \code{Schedule} software component.
 
-We plan to support a variety of parallelization technologies and
-paradigms from the start.  These technologies will including message
+Execution of tasks and communication of ghost data will be performed
+using ``computational registers'' (motivated by and analagous to
+``working block'' or ``work'' data structures in \paramesh), and
+``flux registers'' (motivated by and analagous to
+\code{LevelFluxRegister}s in \chombo).  This overall approach will
+allow decoupling of how data is stored in the AMR data structure from
+how it is stored when it is being actively computed or communicated.
+This in turn permits flexibility to 1) optimize how data is stored
+when not being processed, e.g.~without ghost zone data to greatly
+reduce memory use, 2) optimize how data is stored when it \textit{is}
+being processed, either to ease the interface to user code or to
+rearrange data to improve cache performance when being processed, and
+3) optimize how ghost zone data is communicated, e.g.~to group
+multiple communication requests between a pair of processes or nodes
+together into a single communication call to improve communication
+performance.
+
+This overall task approach maps well to the data-driven process
+virtualization model used by \charm, the functionality of which
+subsumes that of both the \code{Task} (``chare'') and \code{Schedule}
+components, as well as \code{Distribute}, which is used for task
+distribution and dynamic load balancing (\S\ss:design-balance).  This
+similarity is no coincidence, since the \charm\ model helped influence
+our high-level parallelization design.  Because of this close match in
+design, we will therefore begin parallel development using the
+high-level \charm\ framework.  
+
+However, later development will also include supporting message
 passing via the MPI library~\cite{wwwmpi}, partitioned global address
-space (PGAS) programming via the UPC~\cite{@@@UPC} language, shared
-memory parallel programming via OpenMP~\cite{@@@OpenMP} compiler
-directives, processor virtualization via the \charm\
-framework~\cite{@@@Charm}.  Select hybrid approaches will also be
-supported, including MPI with OpenMP, and MPI with UPC.  While
-heterogeneous platforms, such as those containing general purpose
-graphics processing units (GPGPU's), will not be directly supported,
-but the framework's design will facilitate their use by the
-user-written physics kernels.
+space (PGAS) programming via the UPC~\cite{@@@UPC} language, and
+shared memory parallel programming via OpenMP~\cite{@@@OpenMP}
+compiler directives.  We will also allow direct support of hybrid
+parallelism approaches, including MPI with OpenMP, and MPI with UPC.
 
-There are several reasons why we plan to include multiple
+There are several other reasons why we plan to include multiple
 parallelization technologies.  First, because the performance and
 scalability of the technologies vary between machines and
 implementations~\cite{MaTa09}, and we want to always use the fastest
@@ -1484,286 +1536,232 @@ and most scalable approach.  Second, one technology may perform better
 in the distributed memory regime, whereas another may perform better
 within a shared memory node, which motivates flexible hybrid parallel
 approaches.  Third, by including multiple existing parallelization
-paradigms from the start, the resulting software design will likely be
-more amenable to incorporating new parallelization technologies that
-may be developed in the future.  And fourth, the framework could be
-used as a tool for parallel technology designers and implementers to
-compare and improve their approach with other existing approaches on
-new and existing hardware platforms.
+paradigms from the start, we expect that the resulting software design
+will be more amenable to incorporating new parallelization
+technologies that may be developed in the future.  And fourth, the
+framework could be used as a tool for parallel technology designers
+and implementers to compare and improve their approach and software
+with other existing approaches on new and existing hardware platforms.
 
-Our approach to including multiple parallelization technologies will
-be to abstract out the concept of a parallel task: an entity that runs
-on a single computational component, and which may have dependencies
-with other tasks.  Defining, balancing, and executing tasks will be
-performed by the high-level components \code{Task}, \code{Distribute},
-and \code{Schedule}.  Low-level parallel operations required for task
-migration, synchronization, and data transfer will be implemented in
-the \code{Parallel} component.  We expect the component will include
-two parallelization API's, one for distributed memory and one for
-shared memory.  The distributed memory API would encapsulate MPI and
-UPC, whereas the shared memory API would encapsulate OpenMP and UPC.
+The low level \code{Parallel} component will encapsulate the core
+parallel synchronization and data transfer operations, which will
+remove dependencies on MPI, UPC, or OpenMP from other components.  We
+expect the \code{Parallel} component will include two parallelization
+API's, one for distributed memory and one for shared memory; the
+distributed memory API would encapsulate MPI and UPC, whereas the
+shared memory API would encapsulate OpenMP and UPC.  The
+\code{Parallel} component will also directly support hierarchical
+parallelism, which we will use to improve the mapping of data and
+communication onto the specific hardware, for example hierarchical
+load balancing summarized in \ref{design-balance}.  Additionally,
+while heterogeneous platforms such as those containing general purpose
+graphics processing units (GPGPU's) will not be directly supported,
+the framework's design will facilitate their use by user-written
+physics kernels written for GPGPU's.
 
-This approach is most similar to the process virtualization model used
-by \charm, the functionality of which subsumes that of all three of
-our high level \code{Task} (``chare''), \code{Distribute}, and
-\code{Schedule} components~\footnote{We note that \charm\ also
-  supports checkpointing for fault-tolerance, and performance
-  monitoring and visualization, which we may encapsulate in our
-  \code{Error} and \code{Performance} components.}  This similarity is
-no coincidence, since the \charm\ model helped influence our
-high-level parallelization design.  Because of this close match in
-design, we will therefore begin parallel development using the
-high-level \charm\ framework.  Later development will include
-supporting MPI, UPC, and OpenMP for hierarchical and hybrid
-parallelism, and will reuse code kernels required for \charm, e.g.~for
-``packing'' and ``unpacking'' task-related data for migration.
-
-We are also considering encapsulating data communication between tasks
-as a task itself, so that scheduling of communication can be
-integrated with scheduling of computation.  The motivation is that it
-could improve performance, while reducing memory cost in communication
-buffers and code complexity.
-
-\begin{verbatim}
-Reduce implicit dependencies by dynamically allocating parallel
-  tasks, ala \charm. (e.g. currently Enzo loops through patches within
-  a level, but a given patch can proceed as soon as it has all its
-  boundary data)
-\end{verbatim}
-
-\begin{verbatim}
-Only use inter-core, inter-cpu, inter-node, etc.
-  level-communicators to bound communicator size and manage
-     communication nonuniformity.
-  motivates MPI,UPC,OpenMP
-\end{verbatim}
-
-\begin{verbatim}
-Support multiple (hybrid) and flexible parallelization
-  strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided
-  get/put), OMP, and optionally UPC and GPU.
-hierarchical synchronization and collective operations
-\end{verbatim}
-
-\begin{verbatim}
-memory storage formats and data movement
-   Amr data stored for memory and operations; restructure for comp and comm
-   Compute in reformatted ``computational registers'' (Block class in Array)
-      basic idea used in \paramesh
-         ``working block'' 
-         ``work'' datastructures
-      can alias with Amr if ghost zones stored to avoid copy
-      particle types collected / distributed
-   Communicate using reformatted ``flux registers''
-      idea used in \chombo: \code{LevelFluxRegister}
-      can alias with fields if ghost zones stored to avoid copy
-      can alias with particles 
-        pointer per particle?  
-        pointer / length per particle sub array
-\end{verbatim}
- 
-\begin{verbatim}
-Scheduling optimized for computing / communication
-     compute block size optimized for cache
-        copied to array compute registers
-        blocking/padding for cache / memory hierarchy
-        groups of blocks for GPU / fp accelerators
-     more flexible:
-        arbitrary reordering of array axes
-        arbitrary subset of axes
-        arbitrary ghost zone depth
-          more adaptable to existing legacy ``unigrid'' routines
-          different reorderings possible for different methods (hydro, chemistry, etc.)
-          flexibilty allows improved data-layout for single-thread performance
-             cache blocking, padding
-   scheduler reuse for computation / communication scheduling
-\end{verbatim}
+While the higher level \code{Schedule}, \code{Task}, and
+\code{Distribute} components will be independent of whether MPI, UPC,
+or OpenMP is used, it will still be dependent on whether the
+high-level \charm\ parallelization framework is used.  We still expect
+to reuse much of the \charm-related code in the higher level
+components when augmenting the code with other parallelism
+technologies, such as functions for ``packing'' and ``unpacking''
+task-related data required for task migration.  This code reuse will
+help reduce development time.
 
 %-----------------------------------------------------------------------
 \subsection{Load balancing} \label{ss:design-balance}
 %-----------------------------------------------------------------------
 
-Dynamic load balancing is well known to be a crucial operation for
-extreme scalability in general, and for extreme adaptive mesh
-refinement in particular.  Computational load must be evenly
+The \code{Distribute} component will be used to distribute and
+dynamically load balance tasks across available computational
+resources.  Dynamic load balancing is well known to be a crucial
+operation for extreme scalability in general, and for extreme adaptive
+mesh refinement in particular.  Computational load must be evenly
 distributed to maintain high overall parallel computational
 efficiency; dynamically allocated memory must be well-distributed
-across compute nodes to avoid running out of physical memory; and data
-locality must be maintained within compute nodes to maintain high
+across compute nodes to avoid depleting available physical memory; and
+data locality must be maintained within compute nodes to maintain high
 communication performance over the interconnect.
 
-A highly scalable approach of rebalancing octree-based SAMR
-hierarchies is to linearize the data structure using a Morton, Gray
-code, or Hilbert type space-filling curve, then partition the tree
-nodes among processes by dividing the linearized structure into $N_P$
-evenly sized pieces.  This approach has been shown to scale to over
-$60K$ cores~\cite{@@@ART}.  It works well if workload and memory usage
-are proportional to each other within tree nodes, and when workload
-between tree nodes is roughly equal; however, neither of these
-conditions is met when adaptive time steps are used.  Also, this
-approach still requires $O(N_P)$ storage, and a global all-gather
-operation (e.g.~\code{MPI\_Allgather}) is required on all processes.
+A common approach to distributing octree-based SAMR hierarchy tasks is
+to linearize the data structure using a Morton, Gray code, or Hilbert
+type space-filling curve, then partition the tree nodes among
+processes by dividing the linearized structure into $N_P$ evenly sized
+pieces.  This approach has been shown to scale to over $60K$
+cores~\cite{@@@ART}, and works well if workload and memory usage are
+proportional to each other within tree nodes, when workload between
+tree nodes is roughly equal, and when the evolutionary change in the
+hierarchy is sufficiently restricted.
 
-Our approach will be to 
-
-\begin{verbatim}
- load balancing
-    hierarchical
-       improved scalability
-       improved flexibility
-       improved efficiency
-    distribution approaches
-       replicated
-       distributed
-       hybrid
-         optimize computational performance versus memory usage
-     
-    load balance locally in given level
-    different metrics at different levels
-      memory at node level
-      workload below
-    different frequency at different levels
-      lower frequency balancing at higher levels
-         more costly
-         solution changes less frequently
-      higher frequency balancing at lower levels
-         less costly
-         solution changes more frequently
-    task adjacency maintained
-    use collected performance data
-    explore overcompensation technique
-       ala SOR
-       two regimes
-          local collapsing / explosion
-          shock advancement
-       identify regimes and adapt
-    linearized Morton, Gray code, Hilbert curve insufficient
-       assumes equal work per patch
-       particles are associated with nodes, changing weight
-       adaptive time steps drastically weights more highly  refined patches
-       performance of physics algorithms on a patch is not necessarily uniform
-          localized chemistry subcycling, front tracking, etc.
-       arrays on patches may be different sized (assuming coalesced patches)
-       linearization constricts dimensionality
-          constrains data movement along a single dimension
-          physics imbalances 4 dimensional
-      Morton ordering not always feasible
-         different particle counts
-         adaptive time steps on finer levels
-         physics method variations
-            shock capturing--Riemann solver iterations
-            variable subcycling of iterative stiff methods
-\end{verbatim}
-
-
-\begin{verbatim}
-task migration
-   migrate tasks dynamically
-   Charm++ model: pack, relocate, unpack data
-   maintain locality by moving task to owner of a neighbor
-   maintain parent-child locality when possible
-      relax for deep hierarchies
-   migrate using hierarchical parallelism
-\end{verbatim}
-\begin{verbatim}
-Load-balance using ``over-compensation'', since heavily-loaded
-  processes tend to continue to become more heavily loaded (cosmology
-  / star-formation application-dependent).
-\end{verbatim}
-
-(e.g.~load balancing
-across $\approx 2^20$ cores can be replaced by four hierarchical
-load balancing steps across $\approx 2^5$)
-
-
-for each node, and if the global \code{MPI\_AllGather} of long
-integers on $N_C$ cores is acceptable \footnote{\cite{BuGh08}
-  indicates $N_C$ cores, though we believe with a hybrid programming
-  approach their global reduction could be reduced to an even more
-  scalable $N_P$ MPI processes}.  However, we anticipate that this
-approach will not be sufficient for a general-purpose extreme AMR
-framework for several reasons.
+However, we anticipate that this approach will not be sufficient for a
+general-purpose extreme AMR framework for several reasons.
 %
-One, adaptive time steps are required for efficient ``deep'' AMR
+First, adaptive time steps are required for efficient ``deep'' AMR
 problems, but that scales the work load for a given node by a
 non-constant factor of roughly $2^k$ for level $k$.
 %
-Two, particle distributions among nodes may not be uniform, affecting both memory and computational loads.
+Second, particle distributions among nodes may not be uniform, affecting both memory and computational loads.
 %
-Three, array patches may be differently sized, if we use our ``coalesced patches'' enhancement to reduce the AMR tree node count.  
+Third, array patches may be differently sized, if we use our
+``coalesced patches'' enhancement to reduce the AMR tree node count.
 %
-Four, performance of physics methods on a patch is not necessarily
-uniform, due to, e.g., localized subcycling of stiff methods, front
-tracking methods, etc.  The first three issues, and possibly the
-fourth, could be addressed by dynamically weighting nodes before
-partitioning them among processes, but that would require additional
-global communication to perform the reduction.
+And fourth, performance of physics methods on a patch is not
+necessarily uniform, e.g.~due to localized subcycling of stiff
+methods, extra computations along shock fronts for front tracking
+methods, etc.  
+%The first three issues, and possibly the fourth, could
+%be addressed by dynamically weighting nodes before partitioning them
+%among processes, but that would require additional global
+%communication to perform the reduction.
 %
-
-Lastly, we suspect that linearizing the workload artificially
-restricts the flexibility of data movement allowed (along one
-dimension instead of three), creating more communication traffic
-during task migration.  than in not be optimal in terms of the amount
-of data that needs to be redistributed during each rebalancing step,
-since it restricts workload along a single dimension, whereas the
-actual workload is typically distributed along three or four
-dimensions (three spacial and one time).
+Also, this approach will eventually be unscalable since it
+requires $O(N_P)$ storage per process, and a global all-gather
+operation (e.g.~\code{MPI\_Allgather}) is required on all processes.
 
 Since we suspect that a space-filling curve approach is only effective
-for a strict subset of AMR problems we wish to support, we will
+for a strict subset of AMR problems we wish to support, we will also
 explore two ideas for dynamic load balancing, including ``hierarchical
-load balancing'', and a new approach we call ``deliberate
-overcompensation''.
+diffusion-based load balancing'', and a technique we call
+``deliberate overcompensation''.
 
-\note{load-balancing: hierarchical} 
-%
-By \textit{hierarchical load balancing} we mean rebalancing tasks
-between higher levels (nodes or supernodes) independently from
-rebalancing between lower levels (socket or cores).  The idea of
-hierarchical task scheduling and load balancing has been known for at
-least 15 years (\cite{AhGh94}, but is not commonly used for AMR
-frameworks.
+\textbf{hierarchical diffusion-based load balancing} Load balancing
+schemes can be either global or local.  Global schemes, such as
+space-filling curves or spectral methods, are considered to either
+generate lower-quality task partitionings quickly, or produce
+high-quality partitionings slowly~\cite{MeMo09}.  Local schemes,
+such as diffusion-based methods, are considered to be efficient
+at balancing tasks locally, but cannot effectively balance tasks
+globally.
 
-This will have several advantages over more traditional
-non-hierarchical load balancing.  First, rebalancing at different
-levels could be based on different metrics, e.g. memory usage for
-rebalancing between nodes, and computational load for rebalancing
-between sockets.  This will be particularly useful for AMR problems,
-because memory is the crucial metric we want to keep balanced at the
-node level, yet we want to balance computational time at lower
-hardware platform levels to keep computational elements busy.  Second,
-rebalancing frequencies at different levels can be decoupled,
-rebalancing less frequently at the upper node levels where rebalancing
-is more costly, and where load tends to take longer to become
-unbalanced.
+Due to the hierarchical nature of HPC platforms, we believe that a
+hierarchical load balancing scheme will be the most effective approach
+for both scalability and efficiency.  By \textit{hierarchical load
+  balancing} we mean rebalancing tasks between higher levels (nodes or
+supernodes) independently from rebalancing between lower levels
+(socket or cores).  The idea of hierarchical task scheduling and load
+balancing has been explored for at least 15 years (\cite{AhGh94}), and
+is being actively adapted specifically to AMR applications
+(\cite{LaTa06}), but is not commonly available in currently existing
+AMR frameworks.
+
+We will begin with a hierarchical load balancing scheme such as that
+developed in~\cite{LaTa06} specifically for AMR applications.
+Hierarchical load balancing will have several advantages over more
+traditional non-hierarchical load balancing methods.  First,
+rebalancing at different levels could be based on different metrics,
+e.g.~memory usage together with computational load for rebalancing
+between nodes, but just computational load for rebalancing between
+processes or threads within node.  Balancing with respect to memory
+across nodes will be particularly useful for AMR problems, because
+memory is the crucial metric we want to keep balanced at the node
+level, yet we want to balance computational time at lower hardware
+platform levels to keep computational elements busy.  Second,
+hierarchical load balancing can facilitate rebalancing at different
+frequencies between different levels.  This will improve load
+balancing costs, since rebalancing at higher levels is required less
+frequently and involves higher communication costs.
+
+Additionally, we will pursue a hierarchical diffusion-based
+approach~\cite{MeMo09}.  We expect that such an approach could be
+efficient at balancing tasks globally as well as locally, due to
+hierarchically balancing across both low-level and high-level hardware
+components.  (This is analagous to multigrid iterative linear system
+solvers, which apply local error reducing relaxation operators at a
+hierarchy of resolution levels to reduce the error globally.)  Such a
+hierarchical diffusion method could also be implemented with less than
+$O(N_P)$ cost, since only a fixed amount of localized task information
+is required for each hierarchical level.
 
 \note{load-balancing: deliberate overcompensation}
 %
-By \textit{deliberate overcompensation} we mean rebalancing by
-relocating \textit{more} than enough tasks from high-load to low-load
-processes.  The motivation is for physics phenomena, such as
-gravitational collapse or explosions, that require a continuous and
-regular redistribution of computational resources.  The idea is
-conceptually analagous to the successive over-relaxation (SOR) variant
-of the Gauss-Seidel method.  This approach could potentially reduce
-the frequency of rebalancing the load by half with the same tolerance
-on imbalance.
+Another new approach we wish to explore is \textit{deliberate
+  overcompensation}.  By deliberate overcopensation we mean
+rebalancing by relocating \textit{more} than enough tasks from
+high-load to low-load processes.  The motivation is that imbalances
+from physics phenomena such as gravitational collapse tend to require
+a continuous and regular redistribution of computational resources.
+The deliberate overcompenastion idea is conceptually analagous to the
+successive over-relaxation (SOR) variant of the Gauss-Seidel method.
+Given the same tolerance on load imbalance, we expect this approach to
+improve the cost of load balancing by up to a factor of two.
 
-%
-\note{load-balancing: data locality}
-Data locality is crucial for parallel performance, so tasks associated
-with neighboring patches and parent-child patches are kept on the same
-process when possible, or failing that, on ``close'' processes (same
-socket or node) if possible.  This will be maintained by weighting
-migration of tasks to closer processes (through hierarchical load
-balancing), and migrating a task to another process only if a
-neighbor, parent, or child of the task is associated with that
-process.  This will enforce the spacial data associated with tasks
-assigned to a process to be simply connected.  We also wish to keep
-the surface area-to-volume ratio low.  The space-filling curve
-approach is a specialization of maintaining simply connectednes, and
-we expect the additional generalization can be used to improve data
-locality, surface-to-volume ratio, and reduce task migration traffic.
+In general, since load balancing is known to be a hard problem to
+solve (it is NP-complete), and since we still consider it to be an
+unresolved research issue, we will implement the \code{Distribute}
+component to easily incorporate new hierarchical load balancing
+schemes.
+
+
+
+% \begin{verbatim}
+%  load balancing
+%     hierarchical
+%        improved scalability
+%        improved flexibility
+%        improved efficiency
+%     distribution approaches
+%        replicated
+%        distributed
+%        hybrid
+%          optimize computational performance versus memory usage
+%      
+%     load balance locally in given level
+%     different metrics at different levels
+%       memory at node level
+%       workload below
+%     different frequency at different levels
+%       lower frequency balancing at higher levels
+%          more costly
+%          solution changes less frequently
+%       higher frequency balancing at lower levels
+%          less costly
+%          solution changes more frequently
+%     task adjacency maintained
+%     use collected performance data
+%     explore overcompensation technique
+%        ala SOR
+%        two regimes
+%           local collapsing / explosion
+%           shock advancement
+%        identify regimes and adapt
+%     linearized Morton, Gray code, Hilbert curve insufficient
+%        assumes equal work per patch
+%        particles are associated with nodes, changing weight
+%        adaptive time steps drastically weights more highly  refined patches
+%        performance of physics algorithms on a patch is not necessarily uniform
+%           localized chemistry subcycling, front tracking, etc.
+%        arrays on patches may be different sized (assuming coalesced patches)
+%        linearization constricts dimensionality
+%           constrains data movement along a single dimension
+%           physics imbalances 4 dimensional
+%       Morton ordering not always feasible
+%          different particle counts
+%          adaptive time steps on finer levels
+%          physics method variations
+%             shock capturing--Riemann solver iterations
+%             variable subcycling of iterative stiff methods
+% \end{verbatim}
+% 
+% 
+% \begin{verbatim}
+% task migration
+%    migrate tasks dynamically
+%    Charm++ model: pack, relocate, unpack data
+%    maintain locality by moving task to owner of a neighbor
+%    maintain parent-child locality when possible
+%       relax for deep hierarchies
+%    migrate using hierarchical parallelism
+% \end{verbatim}
+% \begin{verbatim}
+% Load-balance using ``over-compensation'', since heavily-loaded
+%   processes tend to continue to become more heavily loaded (cosmology
+%   / star-formation application-dependent).
+% \end{verbatim}
+
+% (e.g.~load balancing
+% across $\approx 2^20$ cores can be replaced by four hierarchical
+% load balancing steps across $\approx 2^5$)
 
 ``diffusion-based scheme''
 
