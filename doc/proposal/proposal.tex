@@ -1584,6 +1584,7 @@ across compute nodes to avoid depleting available physical memory; and
 data locality must be maintained within compute nodes to maintain high
 communication performance over the interconnect.
 
+\textbf{Space-filling curve approach.}
 A common approach to distributing octree-based SAMR hierarchy tasks is
 to linearize the data structure using a Morton, Gray code, or Hilbert
 type space-filling curve, then partition the tree nodes among
@@ -1625,7 +1626,7 @@ explore two ideas for dynamic load balancing, including ``hierarchical
 diffusion-based load balancing'', and a technique we call
 ``deliberate overcompensation''.
 
-\textbf{hierarchical diffusion-based load balancing} Load balancing
+\textbf{Hierarchical diffusion-based approach.} Load balancing
 schemes can be either global or local.  Global schemes, such as
 space-filling curves or spectral methods, are considered to either
 generate lower-quality task partitionings quickly, or produce
@@ -1662,6 +1663,7 @@ frequencies between different levels.  This will improve load
 balancing costs, since rebalancing at higher levels is required less
 frequently and involves higher communication costs.
 
+\nocite{ScKa97}
 Additionally, we will pursue a hierarchical diffusion-based
 approach~\cite{MeMo09}.  We expect that such an approach could be
 efficient at balancing tasks globally as well as locally, due to
@@ -1673,7 +1675,7 @@ hierarchical diffusion method could also be implemented with less than
 $O(N_P)$ cost, since only a fixed amount of localized task information
 is required for each hierarchical level.
 
-\note{load-balancing: deliberate overcompensation}
+\textbf{Deliberate overcompensation technique.}
 %
 Another new approach we wish to explore is \textit{deliberate
   overcompensation}.  By deliberate overcopensation we mean
@@ -2114,45 +2116,136 @@ fault-tolerance / software resilience strategies
 \section{Implementation} \label{s:implementation}
 %=======================================================================
 
+\cello\ will be written primarily in C++, with C and Fortran callable
+interfaces to the public API's, allowing user physics functions to be
+written in C or Fortran.  
 
-\begin{verbatim}
-   Programming environment
-     Trac
-        wiki for developing design
-        browser for viewing source code
-        roadmap for organizing milestones
-        tickets for defining tasks and tracking defects
-   Editor
-      xemacs
-      Eclipse?
-   Source code     
-      currently subversion
-      likely move to mercurial
-   Documentation
-      Doxygen
-      Latex for 
-\end{verbatim}
+For parallelism, the CHARM++ parallelization framework, the MPI
+parallel library, the UPC parallel language, and OpenMP threading
+compiler directives will be used as well.  All are optional, so
+building and running \cello\ applications will not depend on any
+single parallelization component.  We will attempt to isolate
+dependencies on CHARM++ to the high-level parallelization components,
+and isolate dependencies on the remaining parallelization technologies
+to the low-level \code{Parallel} component.
 
-\begin{verbatim}
-   Development approach
-     requirements, design, implement, test
-        developed on Trac wiki
-        formalized in Latex documents
-   Iterative
-      begin with core functionality
-      iterate on added functionaly
-      ensure correct at each iteration
-      quick iterations avoid spending too much time in any one step
-   Heavy emphasis on designing before coding
-     easier to change requirements than design, design than code
-     explore new ideas before implementing them
-     prototyping useful as approximate ``predictor step'' of final design
-\end{verbatim}
-\begin{verbatim}
-iterative development
-   requirements, design, implementation, tests, user documentation updated in sequence
-\end{verbatim}
+Our development environment involves several components anchored at a
+Trac site~\cite{wwwtrac}
+(\url{http://client65-88.sdsc.edu/projects/cello}, login ``guest''
+password ``guest'').  Trac's wiki support is used for brainstorming,
+recording, and refining design issues, after which they will be
+migrated to formal development documentation written in Latex.  Trac's
+roadmap support will be used for organizing and tracking long-term
+progress, its ticket support will be used for individual tasks and bug
+tracking, and its browser used for viewing the subversion repository.
 
+Subversion is currently used for source code revision control, which
+we may migrate to mercurial.  Make is used for controlling
+compilation, which we may later migrate to SCons.  Latex is used for
+development and user documentation, and Doxygen is used for directly
+documenting the source code.
+
+Additional software libraries used will include HDF5~\cite{hdf5} for
+parallel disk I/O, and SPRNG~\cite{wwwsprng} for scalable parallel
+pseudo-random number generation, which will be used in \enzoii's
+cosmology initial conditions generation.
+
+%=======================================================================
+\section{Quality Control} \label{s:testing}
+%=======================================================================
+
+
+% \begin{verbatim}
+%    Improving quality reduces development costs
+%       defects costly, especially later in development cycle
+%       time spent in finding and preventing defects well worth it
+%          more time spent testing and reviewing can paradoxically
+%          reduce overall development time
+%    Testing + design and code reviews (collaborative construction)
+%       Testing complement reviews [CITE code complete]
+%       may try pair programming
+%    Refactoring to reduce code complexity
+%       continually refactor
+%       rigorous testing
+%    Testing approach
+%       unit test all code
+%       regression testing
+%           use lcatest parallel testing framework
+%           correctness, performance, scaling, resilience
+%           correctness
+%              \enzoii\  implementation
+%              compare agains Enzo I results
+%              existing test problems
+%           performance
+%              built-in performance monitoring
+%              single-thread
+%              weak and strong parallel scaling 
+%              communication performance
+%              I/O performance
+%           scaling
+%              extreme broad problems (grid / particle counts)
+%                 cosmology
+%              extreme depth problems
+%                 star formation
+%           software resilience
+%              memory, compute, network, disk, algorithms
+%              memory failures
+%                 fill
+%                 load balancing for memory
+%              compute failures
+%                 tag component (cabinet, node, socket, core) as unusable
+%              network failures
+%                 checksums
+%                 reroute P1->P2 as P1->Pj->P2
+%              disk failures
+%                 checksums
+%              algorithm failure
+%                 support adaptive algorithms
+%                 locally override spacial mesh width / time steps
+%    Software reviews
+%       line-by-line checking
+%          by another person, or after time elapsed
+%    Refactoring
+% development
+%    implement progessively to fill user beta testing pipeline
+% \end{verbatim}
+
+% \begin{verbatim}
+% testing
+%    lcatest: automated parallel application testing
+%    multiple test levels
+%       unit tests
+%       component tests
+%       application tests
+%       in-house / community beta-testing
+%          (progressive as functionality comes online)
+%    test for multiple things:
+%       functionality
+%       correctness
+%       performance
+%       scaling
+%    tests also help supplement user documentation
+%    use integrated performance monitoring
+%       PAPI for hardware counters
+%       PMPI for MPI communication
+%       new[] / delete[] overload for dynamic memory usage
+%          particularly important for AMR
+%       user-defined independent attributes
+%          cycle
+%          level
+%          process
+%       user-defined dependent metrics
+%          process-local patch counts
+%          process-local cell / zone counts
+%          process-local particle counts
+%       less frequent output at finer levels (more data)
+%    helps identify functional, performance, scaling bugs early
+%    extreme scaling designed into framework from the start
+% \end{verbatim}
+
+%=======================================================================
+\section{Development Plan} \label{s:plan} 
+%=======================================================================
 
 
 \begin{verbatim}
@@ -2174,211 +2267,113 @@ application driven
    make both \enzoii\  and underlying AMR framework publicly available
 \end{verbatim}
 
-\begin{verbatim}
-currently primarily in early requirements capturing and high-level 
-        design phase
-   available flexibility to modify current design
-   design as described is current snapshot
-   little code and time wasted
-emphasis on thorough designing before coding
-   prototype ideas before final implementation
-   more time upfront known to lead to faster overall development times
-\end{verbatim}
 
-\begin{verbatim}
-   Components
-      correspond to a source code directory
-      may have subcomponents
-      User code provided as overriden Method classes
-      Only Fortran or C required of user
-      Minimal C++ required for application developer
-   Interdependencies  
-      controlled at component and class level
-      correspond to \code{#include "component.h"}
-   Classes
-      access functions used instead of direct attribute access
-   Rapid prototyping
-      proof-of-concept
-      explore software designs
-\end{verbatim}
+Our development plan will be to progressively implement \charm\ with
+\enzoii\ as its driving application.  Functionality will be
+progressively added, with all phases of the software lifecycle updated
+with each iteration.  The initial cycle will require the most effort,
+since many components and interfaces must be designed before even the
+first simple single-level hyperbolic end-to-end simulation can
+proceed.
 
-\begin{verbatim}
-  Languages
-    Framework: C++
-       components, subcomponents, classes
-       composition preferred to inheritance
-    Parallelization
-       isolated CHARM++, UPC, C99 + OpenMP directives
-       MPI library
-    User code
-       C, C++, Fortran 
-       CUDA / OpenCL / etc (user code only)
-\end{verbatim}
+Our basic software development life cycle is based on the standard
+requirements, design, implementation, and testing phases.  We iterate
+over the phases, progressively adding functionality.  This will help
+us ensure that code is correct and scalable at each iteration, and it
+allows us to concentrate on small sections of the code at a time
+through its entire development cycle.  
 
-\begin{verbatim}
-  Libraries
-     I/O: HDF5
-     random: SPRNG, user-defined
-\end{verbatim}
+Initially individual components will be developed in isolation, then
+gradually integrated with each other, strictly controlling
+interdependencies.  Software components (Figure~\ref{f:components})
+and subcomponents are mapped onto directories and subdirectories in
+the source code, and class hierarchies in .cpp and .hpp files.
 
-\begin{verbatim}
-  Configuration
-    Minimal compile-time configuration for library availability
-    Precision is run-time option
-    Field-by-field precision override
-\end{verbatim}
+Prototyping will be used to aid the design process, to quickly assess
+the feasibility of new ideas.  While the prototype code will generally
+not end up in the final code, the process of writing it can
+significantly help with writing the final implementation (somewhat
+analagous to the predictor in a ``predictor-corrector'' numerical
+algorithm).
 
-\begin{verbatim}
-   Building
-      Currently GNU make
-      Possibly add GNU Autotools
-      Explore Ant or SCons
-\end{verbatim}
-
-
-\begin{verbatim}
-   Documentation
-      source code: Doxygen
-\end{verbatim}
-
-
-
-%=======================================================================
-\section{Quality Control} \label{s:testing}
-%=======================================================================
+Quality control will be a major component of our development approach.
+High quality software in general is difficult to develop, in part
+because it involves a litany of desirable characteristics determining
+its overall quality: software should be maintainable, flexible,
+portable, usable, reusable, readable, testable, understandable,
+efficient, scalable, correct, reliable, adaptable, accurate, robust,
+etc.  These characteristics depend on decisions made during the
+development process, and are frequently in conflict with each other,
+so design and implementation decisions must be made deliberately and
+thoughtfully.
 
 No single method of improving software quality finds all defects, so
 we will employ a set of techniques that have been proven in practice
-to be successful~\cite{Mc04}.  These include unit testing, integration
-testing, regression testing, beta testing, code reviews, design reviews, and
-refactoring.
+to be successful~\cite{Mc04}.  These include testing, code reviews, design
+reviews, and refactoring.
 
 Defects can be costly, but they are much more costly when found later
 in the development cycle.  Defects can occur in any phase of the
 development cycle, but those in earlier phases (requirements and
 design) tend to be much more costly than those in later phases
-(implementation and testing).  Although we We therefore concentrate on quality
-control more heavily our effort on earlier phases.
+(implementation and testing).  To improve quality as well as lower
+development costs, we will emphasize our quality control efforts on
+earlier phases.
 
-It is well known that improving the quality of software reduces the overall
-development costs. 
- phasesWe therefore
-approach to quality control is to concentrate on all phases of the
-development cycle.  software development approach is to 
-concentrate on 
+Our test approach will include unit testing, integration testing,
+system testing, and regression testing, and beta-testing.  Our unit
+tests will test individual pieces of code as they are written.
+Currently we use a simple framework of our own design; we may
+transition to a more flexible and powerful system such as
+CppUnit~\cite{wwwcppunit} later, but our current simple approach has
+proven satisfactory so far.  Our integration testing will involve
+testing the interfaces between components and subcomponents.  Our
+system testing will include the entire \cello\ framework with \enzoii\
+application functions, and will include test problems corresponding to
+those in the \enzo\ test suite.  These tests include hydrodynamics,
+MHD, self-gravity, cosmology, etc.  Our regression testing will
+include automated testing of the entire code base.  Regression tests
+will include tests that expose previously found bugs, and tests for
+each of the specific requirements in our Software Requirements
+Specifications document.  Automated testing will be performed with
+\lcatest, an automated software test environment for parallel
+applications.  
 
-Software in general is difficult to develop in part because it
-involves a litany of desirable characteristics determining its overall
-quality: software should be maintainable, flexible, portable,
-usable, reusable, readable, testable, understandable, efficient, correct,
-reliable, adaptable, accurate, robust, etc.  These characteristics
-depend on decisions made during the development process, so design
-and implementation decisions must be made deliberately and thoughtfully.
+The scope of our tests will include not just correctness, but also
+performance, scaling, and resilience at all levels.  Performance
+testing will be aided by the \code{Performance} component of \cello,
+which will be based on a refinement of the \code{lcaperf}
+package~\ref{wwwlcaperf}, which integrates hardware performance
+metrics with software data structure attributes.
 
-
-\begin{verbatim}
-   Improving quality reduces development costs
-      defects costly, especially later in development cycle
-      time spent in finding and preventing defects well worth it
-         more time spent testing and reviewing can paradoxically
-         reduce overall development time
-   Testing + design and code reviews (collaborative construction)
-      Testing complement reviews [CITE code complete]
-      may try pair programming
-   Refactoring to reduce code complexity
-      continually refactor
-      rigorous testing
-   Testing approach
-      unit test all code
-      regression testing
-          use lcatest parallel testing framework
-          correctness, performance, scaling, resilience
-          correctness
-             \enzoii\  implementation
-             compare agains Enzo I results
-             existing test problems
-          performance
-             built-in performance monitoring
-             single-thread
-             weak and strong parallel scaling 
-             communication performance
-             I/O performance
-          scaling
-             extreme broad problems (grid / particle counts)
-                cosmology
-             extreme depth problems
-                star formation
-          software resilience
-             memory, compute, network, disk, algorithms
-             memory failures
-                fill
-                load balancing for memory
-             compute failures
-                tag component (cabinet, node, socket, core) as unusable
-             network failures
-                checksums
-                reroute P1->P2 as P1->Pj->P2
-             disk failures
-                checksums
-             algorithm failure
-                support adaptive algorithms
-                locally override spacial mesh width / time steps
-   Software reviews
-      line-by-line checking
-         by another person, or after time elapsed
-   Refactoring
-development
-   implement progessively to fill user beta testing pipeline
-\end{verbatim}
-
-\begin{verbatim}
-testing
-   lcatest: automated parallel application testing
-   multiple test levels
-      unit tests
-      component tests
-      application tests
-      in-house / community beta-testing
-         (progressive as functionality comes online)
-   test for multiple things:
-      functionality
-      correctness
-      performance
-      scaling
-   tests also help supplement user documentation
-   use integrated performance monitoring
-      PAPI for hardware counters
-      PMPI for MPI communication
-      new[] / delete[] overload for dynamic memory usage
-         particularly important for AMR
-      user-defined independent attributes
-         cycle
-         level
-         process
-      user-defined dependent metrics
-         process-local patch counts
-         process-local cell / zone counts
-         process-local particle counts
-      less frequent output at finer levels (more data)
-   helps identify functional, performance, scaling bugs early
-   extreme scaling designed into framework from the start
-\end{verbatim}
-
-%=======================================================================
-\section{Development Plan} \label{s:plan} 
-%=======================================================================
-
-\begin{verbatim}
-  Charm++ generalized unigrid
-     evaluate effectiveness
-  AMR hyperbolic
-  particle methods
-  AMR elliptic
-\end{verbatim}
 
 %=======================================================================
 \section{Milestones and Deliverables} \label{s:milestones}
 %=======================================================================
+
+Tasks
+
+Learn CHARM++
+Design and implement high-level components
+Design and implement low-level components
+Design and implement middle-level components
+Design and implement core cross-cutting components
+
+Milestones
+
+Unigrid hyperbolic
+  serial multi-block
+  + CHARM++
+AMR hydrodynamics
+  + MPI
+    AMR paper
+    uni-level load balancing
+Unigrid elliptic
+  + OpenMP
+  + hierarchical load balancing
+AMR elliptic
+  + UPC
+    resilience
 
 \begin{verbatim}
    Cello software framework
