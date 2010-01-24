@@ -168,7 +168,7 @@ MPI~\cite{wwwmpi} library, the partitioned global address space (PGAS)
 approach via the UPC~\cite{@@@UPC} language, shared memory parallel
 programming using OpenMP compiler directives, and the message-driven
 processor virtualization approach provided by the \charm\
-framework~\cite{@@@Charm}.
+framework~(\cite{KaBo07} \cite{wwwcharm}).
 %
 Hierarchical parallelism will be supported though select hybrid
 approaches, such as MPI with OpenMP, and MPI with UPC.
@@ -238,11 +238,11 @@ turbulence.
 depending on the problem.  Efforts to improve its scalability beyond
 this have become increasingly difficult, due to the increasing
 invasiveness of the desired changes and the increasing complexity of
-the code base.  The \cello\ Project aims to improve on \enzo\ in three
+the code base.  The \cello\ project aims to improve on \enzo\ in three
 ways: improved software development process, object-oriented design
-and implementation, and overhauled distributed AMR infrastructure.
-The physics capabilites, which are continually being improved and
-refined in \enzo, will be retained in \enzo II.
+and implementation, and overhauled parallel AMR infrastructure.  The
+physics capabilites, which are continually being improved and refined
+in \enzo, will be retained in \enzoii.
 
 \begin{verbatim}
 Motivation
@@ -392,44 +392,16 @@ AMR datastructure scalability
 \subsection{Existing AMR frameworks} \label{ss:review}
 %-----------------------------------------------------------------------
 
-\begin{verbatim}
- http://people.sc.fsu.edu/~tomek/AMR/index.html
- *   Adaptive Mesh Refinement Software for Hyperbolic Conservation Laws, Marsha Berger
- * Adaptive Mesh Refinement and Parallel Computing, John A. Trangenstein, Mathematics Department, Duke University.
- * Amrita, James Quirk.
- * AMR1D, a simple adaptive mesh refinement code for solving the one-dimensional Euler equations on an unstructured grid.
- * AMRCART, The AMRCART MHD Code, Rolf Walder.
- * AMRCLAW, Adaptive Mesh Refinement + CLAWPACK. AMRCLAW is a joint project between Randy LeVeque and Marsha Berger.
- * AMRMHD3D, 3-D AMR code with FCT MHD solver.
- * AMROC, Blockstructured Adaptive Mesh Refinement in object-oriented C++, Ralf Deiterding.
- * AMRPoisson, Solving Poisson's Equation using Adaptive Mesh Refinement (AMR), Computational Fluid Dynamics, Dept. of Mechanical Engineering, U.C. Berkeley.
- * ARMS, 3-D AMR code with FCT MHD solver.
- * BEARCLAW, general purpose software package for solving time-dependent partial differential equations, Sorin Mitran, Applied Mathematics Program, The University of North Carolina at Chapel Hill.
- * BSAMR, Block Structured Adaptive Mesh Refinement, Daniel D. Wake, College of Engineering, UC Davis.
- * Cactus, The Cactus Code Server, Max Planck Institute for Gravitational Physics (Albert Einstein Institute), Max Planck Society.
- * Cart3D, Michael J. Aftosmis, Numerical Aerospace Simulation (NAS) Division Systems, NASA Ames Research Center
- * CTH, 3-D multi-material Eulerian AMR code from Sandia (export controlled).
- * Enzo, Cosmological Simulation Code, Laboratory for Computational Astrophysics, UCSD.
- * FEMLAB, FEM with automatic error control for two-dimensional convection-diffusion-absorption problems.
- * FLASH, multi-physics 3-D octree AMR parallel code.
- * Gerris Flow Solver, incompressible fluid flow with arbitrarily complex solid boundaries and adaptive mesh refinement, Stephane Popinet.
- * GrACE, Grid Adaptive Computational Engine, Manish Parashar.
- * NIRVANA, 3-D MHD AMR code, Udo Ziegler.
- * \paramesh, 3-D octree AMR parallel code.
- * RACOON, Institute for Theoretical Physics I, University of Bochum.
- * SARA, A Solution Adaptive Remeshing Algorithm for structured grids, Dave Banks, Center for CFD, Dept. of Mech & Aero Eng, UC Davis.
- * Solution-Adaptive Grids, W. M. Keck Foundation CFD laboratory, University of Michigan.
- * SUUMA3D, Scalable Unstructured Mesh Algorithms and Applications, MCS ANL. 
-\end{verbatim}
-
 There are numerous AMR frameworks, libraries, and applications, each
 with different design goals and decisions, data structures, AMR
 algorithms, parallelization strategies, and parallel performance and
-scaling.  Perhaps the top three most successful and closely related to
-our proposed effort are \paramesh\ (\cite{MaOl00} \nocite{OlMa05}
-\nocite{Ol06}), \chombo\  (\cite{wwwchombo} \cite{CoGr09}), and \samrai
-(\cite{@@@}).  Other notable software include Clawpack (@@@), GrACe / DAGH
-(@@@), ALPS (\cite{BuBu09}), and Carpet (@@@).
+scaling.  Perhaps the most successful software frameworks related our
+proposed project are \paramesh\ (\cite{MaOl00} \nocite{OlMa05}
+\nocite{Ol06}), \chombo\ (\cite{wwwchombo} \cite{CoGr09}), \samrai
+(\cite{@@@}), and \gadget\ (\cite{wwwgadget} \cite{Sp05}).  Other
+notable frameworks include \clawpack\ (\cite{wwwclawpack}), \grace\
+(\cite{PaLi10}), ALPS (\cite{BuBu09}), and Carpet (\cite{ScDi06}
+\cite{wwwcarpet}).
 
 limitations of existing AMR libraries / frameworks
 
@@ -439,17 +411,11 @@ DAGH (1998)
 \begin{verbatim}
 SCALING
 
-\samrai\ scalability of parallel clustering algorithm up to 16384~\cite{GuWi06}
 \chombo: demonstrated scalability up to 8192 processors~\cite{StSh09},
         and goals to continually improve scaling by a factor of 100 in 5 years~\cite{St09} (@@@public slides?).
   
 FLASH: \paramesh\ re-gridding does not scale well
        I/O costly despite not being particularly inefficient
-ALPS: scalable up to 32K cores and 4 billion ellements~\cite{BuGh07}
-     (uses ``time windows''~\cite{SuWh04} to improve re-gridding performance,
-      which requires ``...repeat[ing] the numerical integration of the PDEs over a time window one or more times to accumulate error estimates''. Depending
-     on the PDE integration cost, this could improve apparent scalability
-     by increasing task size )
 \cite
 \end{verbatim}
 
@@ -471,62 +437,147 @@ It is an octree-based AMR framework
 
 Due to a loss of funding, \paramesh\ is not currently supported.
 
+
+%-----------------------------------------------------------------------
+\subsubsection{\samrai} \label{sss:samrai}
+%-----------------------------------------------------------------------
+
+\samrai\ (Structured Adaptive Mesh Refinement Application
+Infrastructure), is a SAMR framework developed by the Center for
+Applied Scientific Computing at Lawrence Livermore National
+Laboratory.  A distinguishing capability of \samrai\ is its coupling
+of ALE (Arbitrary Lagrangian-Eulerian) methods with AMR.  ALE-AMR
+methods are especially efficient and accurate for large-scale
+multi-material calculations.
+
+\samrai\ is written in C++, and parallelized using MPI.  It's
+high-level design is a collection of functionally decomposed
+components.  Components include \code{Toolbox} for basic memory,
+pointer, and array utilities; and \code{Math Operations} for basic
+arithmetic and BLAS-type functions.  \code{Hierarchy} is used to
+represent a distributed AMR data structure; \code{Mesh} contains
+operators on the hierarchy, such as regridding, tagging cells, and
+load balancing; and \code{Patchdata} defines patch data such as
+arrays, particles, and embedded boundaries.  Other components include
+support for solvers, algorithms, geometries,  and visualization.
+
+The SAMR hierarchy uses sophisticated clustering algorithms for
+defining the configuration of patches~\cite{GuWi06}.  Load balancing
+is level-independent, and may involve larger patches being divided
+into several smaller ones.  A Morton space filling curve algorithm is
+used to determine the patch distribution across
+processors~\cite{WiHo01}.  Partitioning the linearized set of patches
+can be based either on a spacially uniform work distribution, or based
+on a user-specified non-uniform workload~\cite{wwwsamraicode}.
+
+\samrai\ has demonstrated modest overall scaling of up to 1024
+processors~\cite{WiHy03}, and algorithmic improvements to the parallel
+clustering algorithm have improved the scaling of that particular
+component on up to 16384 processors~\cite{GuWi06}.  While it is a very
+powerful framework, especially for problems well-suited to the ALE-AMR
+class of methods, issues with scaling indicate that SAMR may not be the
+ideal choice of AMR data structure.
+
 %-----------------------------------------------------------------------
 \subsubsection{\chombo} \label{sss:chombo}
 %-----------------------------------------------------------------------
 
-
-
 \chombo~\nocite{CoGr09} is an MPI-parallel structured AMR (SAMR)
 framework in active development by the Applied Numerical Algorithms
 Group of Lawrence Berkeley National Lab.  It supports hyperbolic,
-elliptic, and parabolic methods. Its high-level design consists of
-five loosely-coupled components: \code{BoxTools} for set calculus on
-point sets and unions of rectangles, \code{AMRTools} for interprocess
-communication between AMR levels, \code{AMRTimeDependent} for
-advancing the solution using adaptive time steps,
+elliptic, and parabolic methods.  \chombo\ is quite scalabale, and
+designed to run both hyperbolic and elliptic problems on 10,000
+processors.  Both C++/Fortran and Titanium
+(\cite{wwwtitanium}~\cite{YeSe98}) versions have been developed.  An
+effort to develop a UPC version was undertaken~\cite{We04}, though the
+outcome of that effort is unknown.  It was surmised that the package
+would have to be re-written from scratch to be successful.
+
+Its high-level design consists of five loosely-coupled
+mathematically-decomposed components: \code{BoxTools} for set calculus
+on point sets and unions of rectangles, \code{AMRTools} for
+interprocess communication between AMR levels, \code{AMRTimeDependent}
+for advancing the solution using adaptive time steps,
 \code{AMRElliptic} for the multigrid-based solution of elliptic AMR
 problems, and \code{EBTools} for embedded boundaries.  A sixth
 component, \code{ParticleTools} for particle processing, is not
 currently available due to re-engineering of the
 component~\cite{wwwchombo}.
 
-\chombo\ is parallelized using MPI.  An effort to modify \chombo\ to
-use UPC was undertaken~\cite{We04}.
-Distributed data in \code{LayoutData}, \code{BoxLayoutData}, and
-\code{LevelData} containers.  \chombo\ provides a load balancing
-algorithm, and also allows the user to provide their own.
+Load balancing is performed using the Kernighan-Lin algorithm within
+each level in the C++/Fortran implementation, and using a Morton
+space-filling curve approach in the Titanium
+implementation~\cite{WeSu07}.  \chombo\ also allows the user to
+provide their own load balancing algorithm.  Communication performance
+is improved by using communication buffers for packing and unpacking
+multiple messages between pairs of processes into one.
 
-\chombo\ is very scalabale, and designed to run both hyperbolic and
-elliptic problems on 10,000 processors.
+In \chombo, all processes store $O(N)$
+data, including all patch extents and process assignments.  Although
+the size has been aggressively reduced to an impressive $\approx 50$
+bytes per patch~\cite{CoKe07}, this still represents an eventual
+scaling impediment for \chombo.
 
-In \chombo, all processes store $O(N)$ data, including all patch
-extents and process assignments.  Although the size has been
-aggressively reduced to an impressive $\approx 50$ bytes per
-patch~\cite{CoKe07}, this still represents an eventual scaling
-impediment for \chombo.
-
-Berger-Rigoutsos 
-
-
-\pargraph{\chombo\  data distribution and load balancing}
-
+\chombo's elliptic solver is weakly scalable up to 8,000
+processors~\cite{WeSu07}, and the group continues to aggressively
+improve \chombo's scalability.  We agree with their assessment
+in~\cite{WeSu07} that relaxing the bulk synchronous communication
+constraint, in favor of smaller messages with one-sided communication
+and communication-computation overlap, will improve scalability.
 
 %-----------------------------------------------------------------------
-\subsubsection{\samrai} \label{sss:samrai}
+\subsubsection{\alps } \label{sss:alps}
 %-----------------------------------------------------------------------
 
-[2001]
+\alps~\cite{BuBu09}, is a highly scalable AMR framework based on
+octrees.  
 
-good scaling for numerical and data communication
-poorer scaling in adaptive meshing and communication schedule construction 
+
+\alps\ appears to be one of the most highly scalable AMR frameworks
+currently available, with demonstrated scaling on up to 32K cores and
+4 billion ellements~\cite{BuGh07}.  To achieve this level of scaling,
+they use ``time windows''~\cite{SuWh04} to improve re-gridding
+performance, which requires ``...repeat[ing] the numerical integration
+of the PDEs over a time window one or more times to accumulate error
+estimates''.  It is uncertain whether this adds to the PDE integration
+cost, thus artificially improving the scalability by increasing
+computational cost relative to communication.  Nevertheless, the basic
+octree approach still seems to have a lot of promise in terms of
+designing and implementing extreme AMR.
+
 
 %-----------------------------------------------------------------------
 \subsubsection{\gadget } \label{sss:gadget}
 %-----------------------------------------------------------------------
 
+\gadget, developed by Volker Springel at the Max-Planck-Institute for
+Astrophysics since 2000, is a cosmology application for massively
+parallel TreeSPH simulations.  It supports long-range force
+calculations using an FFT-based particle-mesh (PM) method, and
+octree-based hierarchical multipole expansion for short-range forces.
+The SPH formulation is entropy-conserving.  \gadget\ is written in
+ANSI C, and uses MPI-1.0 for parallelization.  \gadget-3.0 also
+supports multithreading in addition to MPI.
 
-\newpage
+Particles are partitioned in \gadget-2.0 using the Barnes-Hut
+algorithm (\cite{BaHu86}) on a distributed octree.  Octree nodes are
+distributed using a Peano-Hilbert space-filling curve.  Particles are
+integrated using adaptive time steps, where time steps differ from
+each other by a factor of two.
+
+While floating point accuracies can be an issue at the particle level,
+collective statistical properties still converge.  In \cite{OsNa05} it
+was shown that \gadget\ had better performance and lower memory usage
+than the comparable gravity solver in \enzo\ at comparable force
+resolution.  This is due to \enzo's hierarchical PM method, which
+requires relatively fine mesh refinement to obtain comparable accuracy
+of the short-range forces.
+
+We wish to support a similar PPPM method in \enzoii, so the \cello\
+framework will similarly require fast distributed spacial data
+structures to quickly determine short-range versus long-range forces.
+
+
 %=======================================================================
 \section{Software Requirements} \label{s:requirements}
 %=======================================================================
@@ -753,6 +804,12 @@ distributed data structures onto the hierarchical parallel hardware,
 and by reducing the size of groups of intercommunicating
 procesess~\cite{BaBu09}.
 
+Task scheduling must also be efficient, minimizing overhead and
+maximizing throughput.  Again, a hierarchical scheduling approach may
+be used.  Since we want to at least indirectly support GPU programming
+in user code, we will want to support scheduling large groups of
+concurrent tasks to keep the GPU's busy.
+
 %-----------------------------------------------------------------------
 \subsection{Load balancing} \label{ss:require-balance}
 %-----------------------------------------------------------------------
@@ -770,16 +827,6 @@ between different parallel levels at different frequencies, and
 balancing with respect to different metrics (e.g.~balance computation
 between cores and balance memory usage between nodes).  Scalability
 implies that the scheme is less than $O(N_P)$ cost per process.
-
-%-----------------------------------------------------------------------
-\subsection{Task scheduling}\label{ss:require-schedule}
-%-----------------------------------------------------------------------
-
-Task scheduling must also be efficient, minimizing overhead and
-maximizing throughput.  Again, a hierarchical scheduling approach may
-be used.  Since we want to at least indirectly support GPU programming
-in user code, we will want to support scheduling large groups of
-concurrent tasks to keep the GPU's busy.
 
   
 %-----------------------------------------------------------------------
@@ -1005,9 +1052,6 @@ stored using three pointers~\cite{@@@octree}); and absolute patch
 extents are computed not stored, which can be used to address
 precision and range issues of global indices that arise for extremely
 large or deep AMR hierarchies.
-
-
-@@@@@@@@@@@@@@@
 
 Standard octree-based approaches involve either an octree or a forest
 of octrees.  Nodes of the octree typically correspond to small
@@ -1487,9 +1531,11 @@ may be constant.  Tasks are encapsulated in the \code{Task} software
 component.
 
 \cello\ will maintain a priority queue of runnable tasks on each
-process, with tasks associated with sub-patches in finer AMR levels
-given higher priority since they determine the critical path through
-the dependency graph.  Communication will be similarly scheduled to
+process.  Such dynamic scheduling is well suited for heterogeneous
+sized tasks and non-regular communication dependencies. Tasks
+associated with sub-patches in finer AMR levels will likely be given
+higher priority since they determine the critical path through the
+dependency graph.  Communication will be similarly scheduled to
 effectively prefetch ghost data required by a patch so that it is
 available when the patch is executed.  Scheduling and execution of
 tasks will be controlled by the \code{Schedule} software component.
@@ -1517,9 +1563,11 @@ subsumes that of both the \code{Task} (``chare'') and \code{Schedule}
 components, as well as \code{Distribute}, which is used for task
 distribution and dynamic load balancing (\S\ss:design-balance).  This
 similarity is no coincidence, since the \charm\ model helped influence
-our high-level parallelization design.  Because of this close match in
-design, we will therefore begin parallel development using the
-high-level \charm\ framework.  
+our high-level parallelization design.  \charm\ also \charm\ also
+provides fault tolerance support through its built-in disk, or memory
++ disk, checkpoint / restart mechanism.  Because of this close match
+in design, we will begin parallel development using the high-level
+\charm\ framework.
 
 However, later development will also include supporting message
 passing via the MPI library~\cite{wwwmpi}, partitioned global address
@@ -1539,9 +1587,8 @@ approaches.  Third, by including multiple existing parallelization
 paradigms from the start, we expect that the resulting software design
 will be more amenable to incorporating new parallelization
 technologies that may be developed in the future.  And fourth, the
-framework could be used as a tool for parallel technology designers
-and implementers to compare and improve their approach and software
-with other existing approaches on new and existing hardware platforms.
+framework could be used as a benchmark tool for parallel technology
+designers to evaluate their approaches (\cite{WeSu07}).
 
 The low level \code{Parallel} component will encapsulate the core
 parallel synchronization and data transfer operations, which will
@@ -1561,13 +1608,12 @@ physics kernels written for GPGPU's.
 
 While the higher level \code{Schedule}, \code{Task}, and
 \code{Distribute} components will be independent of whether MPI, UPC,
-or OpenMP is used, it will still be dependent on whether the
-high-level \charm\ parallelization framework is used.  We still expect
-to reuse much of the \charm-related code in the higher level
-components when augmenting the code with other parallelism
-technologies, such as functions for ``packing'' and ``unpacking''
-task-related data required for task migration.  This code reuse will
-help reduce development time.
+or OpenMP is used, it will still be dependent on whether \charm\ is
+used.  We still expect to reuse much of the \charm-related code in the
+higher level components when augmenting the code with other
+parallelism technologies, such as functions for ``packing'' and
+``unpacking'' task-related data required for task migration.  This
+code reuse will help reduce development time.
 
 %-----------------------------------------------------------------------
 \subsection{Load balancing} \label{ss:design-balance}
@@ -1782,96 +1828,6 @@ schemes.
 
 
 
-%-----------------------------------------------------------------------
-\subsection{Task scheduling} \label{ss:design-schedule}
-%-----------------------------------------------------------------------
-
-Given that tasks are acceptably load-balanced across process, the
-tasks must be schedule for execution.  The @@@
-
-\begin{verbatim}
-dynamic scheduling
-\end{verbatim}
-
-\begin{verbatim}
-task definition Task
-   task = grid patch block (fields and particles) + sequence of methods
-      increased scheduling freedom over loop over levels
-      improves slack for latency hiding
-   elliptic tasks?
-\end{verbatim}
-
-\begin{verbatim}
-   tradeoff between number of concurrent messages and storage
-      dynamic allocation of flux buffers
-\end{verbatim}
-
-\begin{verbatim}
-   communication tasks scheduled with computation
-      prefetch comm
-      pipeline comm and comp
-\end{verbatim}
-
-\begin{verbatim}
-   prioritized queue: fine levels higher priority
-      determine rate of progress: bottleneck
-\end{verbatim}
-
-\begin{verbatim}
-hierarchical / multiscale task scheduling
-   multiblock (GPU)
-   single block (process)
-   plane / line (thread)
-\end{verbatim}
-
-\begin{verbatim}
-   Store only actual data
-     use flux registers for communication
-     allocate patch ghost zones only for computation
-     Support temporary ``allocate as-needed'' ghost zones
-        in addition to ``permanent'' ones
-     optimized for storage: Amr
-        option to not store guard / ghost cells
-        AMR patches may be larger than computationally optimal
-   Could store appropriate subset of neighbor data as well for
-     fault-tolerance
-\end{verbatim}
-
-We will use dynamic scheduling of tasks assigned to a processes, since
-it @@@  Dynamic scheduling is more suitable than static scheduling for
-heterogeneous sized tasks, non-regular communication dependencies @@@
-
-\note{task scheduling details}
-
-After tasks are distributed among processing elements, the next
-decision is how to schedule tasks among processing elements.  Two main
-approaches are static and dynamic.  Static scheduling is preferred
-when workload is evenly mapped to processing components, and when
-there are relatively few tasks per process.  We will use dynamic
-scheduling, since workload (communication as well as computation) per
-task varies between tasks.
-
-\note{Charm++ summary} Our approach will be well-mapped to \charm,
-which is a fault-tolerant message-driven parallel programming
-framework.  \charm\ also provides dynamic load balancing through task
-migration, and provides fault tolerance through its built-in disk (or
-memory + disk) checkpoint / restart mechanism.
-
-\note{implementation in Charm++}
-Implementation of AMR for a hyperbolic problem, a parallel task, or
-\charm\  ``chare'', would correspond to advancing a numerical method or
-sequence of methods one time step on a single grid patch block.  The
-exchange of guard cell data would correspond to \charm\  messages.
-This implementation would allow a block to advance one time step as
-soon as all of its guard cell data is available.
-
-\note{non-Charm++ implementation}
-
-We also plan to develop our own scheduler, for several reasons.  One,
-to schedule communication in addition to computation, to help hide
-latency through prefetching.  Second, to take advantage of
-hierarchical hardware components (node, socket, core...)  Third, to
-remove any hard dependencies on any single parallel technology.
 
 
 
@@ -2055,10 +2011,9 @@ parallel technology encapsulation / processor virtualization
 \subsection{Resilience} \label{ss:design-resilience}
 %-----------------------------------------------------------------------
 
-\pargraph{fault tolerance} Fault tolerance and software
-resilience are crucial factors at extreme scales, since it has been
-observed that frequency of failures is proportional to the number of
-sockets~\cite{@@@}
+Fault tolerance and software resilience are crucial factors at extreme
+scales, since it has been observed that frequency of failures is
+proportional to the number of sockets~\cite{@@@}
 
 \begin{verbatim}
  FT-MPI 
@@ -2118,7 +2073,9 @@ fault-tolerance / software resilience strategies
 
 \cello\ will be written primarily in C++, with C and Fortran callable
 interfaces to the public API's, allowing user physics functions to be
-written in C or Fortran.  
+written in C or Fortran.  It will be written using an eminently
+object-oriented approach, with use of design patterns~(\cite{GaHe95}
+\cite{BuHe07}) where appropriate.
 
 For parallelism, the CHARM++ parallelization framework, the MPI
 parallel library, the UPC parallel language, and OpenMP threading
