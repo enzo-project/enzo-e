@@ -3,7 +3,7 @@
 
 %=======================================================================
 % \documentclass[12pt]{article}
-\documentclass[10pt]{article}
+\documentclass[10pt,twocolumn]{article}
 %=======================================================================
 \include{include}
 
@@ -50,7 +50,8 @@
 %\nocite{LaTa06} % hierarchical load balancing
 
 %=======================================================================
-\TITLE{A Software Framework for Extreme Adaptive Mesh Refinement}{James Bordner}{$Rev$}
+\TITLE{\cello: A Software Framework for Extreme Adaptive Mesh
+  Refinement}{James Bordner}{$Rev$}
 %=======================================================================
 
 %
@@ -941,10 +942,15 @@ partitioned into high-level, middle-level, low-level, and
 cross-cutting concerns.  Since the software development process is
 iterative, the final component diagram may still evolve somewhat.
 
-\FIGURE{Software component diagram}{f:components}{
-\begin{minipage}{5.0in}
-\includegraphics[width=5.0in]{components2.pdf}
+\FIGURETWOCOL{Software component diagram}{f:components}{
+\begin{minipage}{3in}
+\includegraphics[width=3in]{components2.pdf}
 \end{minipage}}
+
+% \FIGURE{Software component diagram}{f:components}{
+% \begin{minipage}{6in}
+% \includegraphics[width=6in]{components2.pdf}
+% \end{minipage}}
 
 The high-level components include \code{Task} for encapsulating
 parallel tasks, \code{Distribute} for distributing and load balancing
@@ -1091,10 +1097,9 @@ data structure excluding mesh and particle data---redundantly on each
 processor, which is a roadblock to scalability.
 
 We summarize our approaches to these issues below.  Two more
-fundamental issues, load balancing and parallel task definition and
-scheduling, are described in their own sections
-\S\ref{ss:design-balance} and \S\ref{ss:design-schedule},
-respectively.
+fundamental issues, parallelism and load balancing, are described in
+their own sections \S\ref{ss:design-parallel} and
+\S\ref{ss:design-balance}, respectively.
 
 %------------------------------------------------------------------------
 
@@ -1108,10 +1113,15 @@ mesh.  We call this \textit{patch coalescing}.  The inverse operation
 is permitted as well if the patch requires subsequent refinement or
 coarsening.
 
-\FIGURE{Coalescing}{f:coalesce}{
-\begin{minipage}{3.75in}
-\includegraphics[width=3.75in]{coalesce.pdf}
+\FIGURETWOCOL{Coalescing}{f:coalesce}{
+\begin{minipage}{1.875in}
+\includegraphics[width=1.875in]{coalesce.pdf}
 \end{minipage}}
+
+% \FIGURE{Coalescing}{f:coalesce}{
+% \begin{minipage}{3.75in}
+% \includegraphics[width=3.75in]{coalesce.pdf}
+% \end{minipage}}
 
 
 This operation decouples the AMR topology from the local resolution
@@ -1130,23 +1140,41 @@ coalescing.  Even though the example problem is not particularly
 well-suited for this technique, it nevertheless leads to a quadtree
 with $2 1/2$ times fewer nodes.
 
-\FIGURE{ Coalesced patches proof-of-concept using a 2D cosmology
+\FIGURETWOCOL{ Coalesced patches proof-of-concept using a 2D cosmology
   density field projection.  \textbf{Left}: 2D cosmology density field
   projection.  \textbf{Middle}: Balanced quadtree with 81701 patches.
   \textbf{Right}: Balanced quadtree with 32529 coalesced patches. \\
 } {f:cosmo}{
-\begin{minipage}{7.0in}
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{cosmo2-invert.png}
+\begin{minipage}{3.2in}
+\begin{minipage}{1.0in}
+\includegraphics[width=1.0in]{cosmo2-invert.png}
 \end{minipage} \ 
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{cosmo2-4-1-inv.png}
+\begin{minipage}{1.0in}
+\includegraphics[width=1.0in]{cosmo2-4-1-inv.png}
 \end{minipage} \ 
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{cosmo2-4-2-inv.png}
+\begin{minipage}{1.0in}
+\includegraphics[width=1.0in]{cosmo2-4-2-inv.png}
 \end{minipage}
 \end{minipage}
 }
+
+% \FIGURE{ Coalesced patches proof-of-concept using a 2D cosmology
+%   density field projection.  \textbf{Left}: 2D cosmology density field
+%   projection.  \textbf{Middle}: Balanced quadtree with 81701 patches.
+%   \textbf{Right}: Balanced quadtree with 32529 coalesced patches. \\
+% } {f:cosmo}{
+% \begin{minipage}{7.0in}
+% \begin{minipage}{2.2in}
+% \includegraphics[width=2.2in]{cosmo2-invert.png}
+% \end{minipage} \ 
+% \begin{minipage}{2.2in}
+% \includegraphics[width=2.2in]{cosmo2-4-1-inv.png}
+% \end{minipage} \ 
+% \begin{minipage}{2.2in}
+% \includegraphics[width=2.2in]{cosmo2-4-2-inv.png}
+% \end{minipage}
+% \end{minipage}
+% }
 
 While allowing flexible patch block sizes can greatly reduce the size
 of the octree-based AMR data structure, the variable block size can
@@ -1158,8 +1186,9 @@ definition is complicated by the wide variation in task size.  We
 address this issue by decoupling parallel tasks from AMR patch blocks,
 essentially by allowing parallelism within a patch block.  With this
 approach, which we describe in more detail in
-\S\ref{ss:design-schedule}, we can maintain a constant subblock task
-size despite permitting arbitrarily large AMR patch blocks.
+\S\ref{ss:design-parallel}, we can maintain a constant or bounded
+subblock task size despite permitting arbitrarily large AMR patch
+blocks.
 
 
 %------------------------------------------------------------------------
@@ -1177,24 +1206,43 @@ star formation.  As a proof-of-concept example, in Figure~\ref{f:dots}
 two balanced $r^2$-trees are shown refined on a small set of points in 2D, one
 with $r=2$ and one with $r=4$.
 
-\FIGURE{
+\FIGURETWOCOL{
 Targeted refinement proof-of-concept using multiple point sources in 2D.
 \textbf{Left}: 2D point sources.  
 \textbf{Middle}: Balanced octree with 2137 patches.
 \textbf{Right}: Balanced octree with 158 explicit patches.
 }
 {f:dots}{
-\begin{minipage}{7.0in}
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{dots-invert.png}
+\begin{minipage}{3.2in}
+\begin{minipage}{1.0in}
+\includegraphics[width=1.0in]{dots-invert.png}
 \end{minipage} \ 
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{dots-4-1-inv.png}
+\begin{minipage}{1.0in}
+\includegraphics[width=1.0in]{dots-4-1-inv.png}
 \end{minipage} \ 
-\begin{minipage}{2.2in}
-\includegraphics[width=2.2in]{dots-16-5-inv.png}
+\begin{minipage}{1.0in}
+\includegraphics[width=1.0in]{dots-16-5-inv.png}
 \end{minipage}
 \end{minipage}}
+
+% \FIGURE{
+% Targeted refinement proof-of-concept using multiple point sources in 2D.
+% \textbf{Left}: 2D point sources.  
+% \textbf{Middle}: Balanced octree with 2137 patches.
+% \textbf{Right}: Balanced octree with 158 explicit patches.
+% }
+% {f:dots}{
+% \begin{minipage}{7.0in}
+% \begin{minipage}{2.2in}
+% \includegraphics[width=2.2in]{dots-invert.png}
+% \end{minipage} \ 
+% \begin{minipage}{2.2in}
+% \includegraphics[width=2.2in]{dots-4-1-inv.png}
+% \end{minipage} \ 
+% \begin{minipage}{2.2in}
+% \includegraphics[width=2.2in]{dots-16-5-inv.png}
+% \end{minipage}
+% \end{minipage}}
 
 The advantage is clear: the number of nodes in the AMR hierarchy is
 reduced by a factor of about $13.5$.  There are apparent disadvantages
@@ -1205,10 +1253,15 @@ refinement greater than two.  We can regain this mesh constraint by
 introducing implicit \textit{backfill} patches, as indicated in
 Figure~\ref{f:backfill}.
 
-\FIGURE{Targeted refinement with backfill}{f:backfill}{
-\begin{minipage}{6.15in}
-\includegraphics[width=6.15in]{kd-backfill.pdf}
+\FIGURETWOCOL{Targeted refinement with backfill}{f:backfill}{
+\begin{minipage}{3in}
+\includegraphics[width=3in]{kd-backfill.pdf}
 \end{minipage}}
+
+% \FIGURE{Targeted refinement with backfill}{f:backfill}{
+% \begin{minipage}{6.15in}
+% \includegraphics[width=6.15in]{kd-backfill.pdf}
+% \end{minipage}}
 
 Another disadvantage is that we need to represent the $r^3$-trees.
 This can be done by simply using the $2^3$-tree data structure
@@ -1306,7 +1359,7 @@ Each clearly has its advantages and disadvantages.  Duplicating the
 entire hierarchy on all processes can be more efficient, since
 operations involving the hierarchy as a whole may require no
 communication.  Storage of octree data structures is extremely
-efficient, using at most three pointer variables~\cite{@@@}.  However,
+efficient, using at most three pointer variables~\cite{FrPe02}.  However,
 the approach still ultimately does not scale, because it requires
 $O(N)$ storage and computation per process, and since available memory
 per process is always limited.  As the problem size grows, eventually
@@ -1341,7 +1394,7 @@ structure would be a single octree node, and the array would be
 partitioned into at least $P$ blocks.
 
 As outlined in the mesh data requirements
-section~\S\ref{require-fields}, there will be any number of
+section~\S\ref{ss:require-fields}, there will be any number of
 user-defined fields, which may be stored using either single or double
 precision.  Different fields are identified by user code using 
 opaque field ID's, and by users (e.g.~in output files) by
@@ -1399,16 +1452,27 @@ single precision is expected to provide more than sufficient
 positional accuracy for local computations, which will additionally
 improve both memory storage requirements and memory access costs.
 
-\FIGURE{Patch-local coordinate systems for
+\FIGURETWOCOL{Patch-local coordinate systems for
   particles}{f:local-particles}{
-\begin{minipage}{6.8in}
-\begin{minipage}{3.3in}
-\includegraphics[width=3.3in]{particles-global.pdf}
+\begin{minipage}{3.2in}
+\begin{minipage}{1.5in}
+\includegraphics[width=1.5in]{particles-global.pdf}
 \end{minipage} \ 
-\begin{minipage}{3.3in}
-\includegraphics[width=3.3in]{particles-local.pdf}
+\begin{minipage}{1.5in}
+\includegraphics[width=1.5in]{particles-local.pdf}
 \end{minipage}
 \end{minipage}}
+
+% \FIGURE{Patch-local coordinate systems for
+%   particles}{f:local-particles}{
+% \begin{minipage}{6.8in}
+% \begin{minipage}{3.3in}
+% \includegraphics[width=3.3in]{particles-global.pdf}
+% \end{minipage} \ 
+% \begin{minipage}{3.3in}
+% \includegraphics[width=3.3in]{particles-local.pdf}
+% \end{minipage}
+% \end{minipage}}
 
 A consequence of using patch-local coordinate systems is that
 particles that relocate from one patch to a neighboring patch will
@@ -1446,7 +1510,7 @@ The primary physics-related user functions will be those that advance
 the field or particle data one timestep on a single logically
 Cartesian grid.  \cello\ will schedule and execute these user
 functions on individual patch blocks as outlined in
-\S\ref{ss:design-schedule}.  
+\S\ref{ss:design-parallel}.  
 
 The secondary physics-related user functions will be for computations
 at level interfaces, such as flux-correction or other constraint
@@ -1537,7 +1601,7 @@ This overall task approach maps well to the data-driven process
 virtualization model used by \charm, the functionality of which
 subsumes that of both the \code{Task} (``chare'') and \code{Schedule}
 components, as well as \code{Distribute}, which is used for task
-distribution and dynamic load balancing (\S\ss:design-balance).  This
+distribution and dynamic load balancing (\S\ref{ss:design-balance}).  This
 similarity is no coincidence, since the \charm\ model helped influence
 our high-level parallelization design.  \charm\ also \charm\ also
 provides fault tolerance support through its built-in disk, or memory
@@ -1547,10 +1611,11 @@ in design, we will begin parallel development using the high-level
 
 However, later development will also include supporting message
 passing via the MPI library~\cite{wwwmpi}, partitioned global address
-space (PGAS) programming via the UPC~\cite{@@@UPC} language, and
-shared memory parallel programming via OpenMP~\cite{@@@OpenMP}
-compiler directives.  We will also allow direct support of hybrid
-parallelism approaches, including MPI with OpenMP, and MPI with UPC.
+space (PGAS) programming via the UPC
+language~\cite{wwwupc}~\cite{upc}, and shared memory parallel
+programming via OpenMP API~\cite{wwwopenmp}.  We will also allow
+direct support of hybrid parallelism approaches, including MPI with
+OpenMP, and MPI with UPC.
 
 There are several other reasons why we plan to include multiple
 parallelization technologies.  First, because the performance and
@@ -1576,7 +1641,7 @@ shared memory API would encapsulate OpenMP and UPC.  The
 \code{Parallel} component will also directly support hierarchical
 parallelism, which we will use to improve the mapping of data and
 communication onto the specific hardware, for example hierarchical
-load balancing summarized in \ref{design-balance}.  Additionally,
+load balancing summarized in \ref{ss:design-balance}.  Additionally,
 while heterogeneous platforms such as those containing general purpose
 graphics processing units (GPGPU's) will not be directly supported,
 the framework's design will facilitate their use by user-written
@@ -1815,7 +1880,7 @@ schemes.
 \subsection{I/O} \label{ss:design-io}
 %-----------------------------------------------------------------------
 
-
+{\tiny
 \begin{verbatim}
 I/O different output formats for different uses
    checkpointing
@@ -1846,11 +1911,12 @@ Require that all stored data be accessed through standard
   interface functions that are independent of specific file formats
   (i.e., stored datasets are conceptually treated as objects)
 \end{verbatim}
-
+}
 %-----------------------------------------------------------------------
 \subsection{Performance} \label{ss:design-performance}
 %-----------------------------------------------------------------------
 
+{\tiny
 \begin{verbatim}
 integrated performance monitoring
    summaries at different hardware levels
@@ -1982,15 +2048,16 @@ parallel technology encapsulation / processor virtualization
   multiple strategies enhance software resiliency
     i.e. buggy MPI implementation--dynamically switch to UPC
 \end{verbatim}
-
+}
 %-----------------------------------------------------------------------
 \subsection{Resilience} \label{ss:design-resilience}
 %-----------------------------------------------------------------------
 
 Fault tolerance and software resilience are crucial factors at extreme
 scales, since it has been observed that frequency of failures is
-proportional to the number of sockets~\cite{@@@}
+proportional to the number of sockets~\cite{@@@fault-sockets}
 
+{\tiny
 \begin{verbatim}
  FT-MPI 
   ``fault-tolerante MPI''
@@ -2041,7 +2108,7 @@ fault-tolerance / software resilience strategies
       keep up to date in latest practices
       design software to use new approaches
 \end{verbatim}
-
+}
 
 %=======================================================================
 \section{Implementation} \label{s:implementation}
@@ -2064,8 +2131,8 @@ to the low-level \code{Parallel} component.
 
 Our development environment involves several components anchored at a
 Trac site~\cite{wwwtrac}
-(\url{http://client65-88.sdsc.edu/projects/cello}, login ``guest''
-password ``guest'').  Trac's wiki support is used for brainstorming,
+(\url{http://client65-88.sdsc.edu/projects/cello}, login \code{guest}
+password \code{guest}).  Trac's wiki support is used for brainstorming,
 recording, and refining design issues, after which they will be
 migrated to formal development documentation written in Latex.  Trac's
 roadmap support will be used for organizing and tracking long-term
@@ -2218,6 +2285,9 @@ metrics with software data structure attributes.
 \section{Milestones and Deliverables} \label{s:milestones}
 %=======================================================================
 
+{\tiny
+\begin{verbatim}
+
 Tasks
 
 Learn \charm\ 
@@ -2241,7 +2311,7 @@ Unigrid elliptic
 AMR elliptic
   + UPC
     resilience
-
+\end{verbatim}
 \begin{verbatim}
    Cello software framework
    research papers
@@ -2249,7 +2319,9 @@ AMR elliptic
    large-scale demonstration using \enzoii
    workshop/training
 \end{verbatim}
+}
 
+\tiny
 %=======================================================================
 \bibliography{papers}
 \bibliographystyle{unsrt}
