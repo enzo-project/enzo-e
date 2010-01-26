@@ -41,6 +41,23 @@
 %\ \\ \hrule \ \\
 }}
 
+\newcommand{\FIGURETWOCOL}[3]{
+\noindent
+%\ \\ \hrule \ \\
+\begin{center}
+#3
+\end{center}%
+\ \nolinebreak%
+\refstepcounter{figctr}%
+\begin{center}%
+\begin{minipage}{3in}
+\textbf{Figure \thefigctr}. #1
+\end{minipage}
+\end{center}
+\label{#2}
+%\ \\ \hrule \ \\
+}
+
 \usepackage{wasysym}
 \usepackage{epsfig}
 \usepackage{url}
@@ -60,6 +77,9 @@
 \newcommand{\samrai}{\textsf{SAMRAI}}
 \newcommand{\paramesh}{\textsf{PARAMESH}}
 \newcommand{\gadget}{\textsf{GADGET}}
+\newcommand{\clawpack}{\textsf{CLAWPACK}}
+\newcommand{\grace}{\textsf{GrACe}}
+\newcommand{\alps}{\textsf{ALPS}}
 
 \newcommand{\samr}{SAMR}
 \newcommand{\camr}{CAMR}
