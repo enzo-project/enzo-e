@@ -1114,8 +1114,8 @@ is permitted as well if the patch requires subsequent refinement or
 coarsening.
 
 \FIGURETWOCOL{Coalescing}{f:coalesce}{
-\begin{minipage}{1.875in}
-\includegraphics[width=1.875in]{coalesce.pdf}
+\begin{minipage}{2.5in}
+\includegraphics[width=2.5in]{coalesce.pdf}
 \end{minipage}}
 
 % \FIGURE{Coalescing}{f:coalesce}{
@@ -1140,20 +1140,22 @@ coalescing.  Even though the example problem is not particularly
 well-suited for this technique, it nevertheless leads to a quadtree
 with $2 1/2$ times fewer nodes.
 
-\FIGURETWOCOL{ Coalesced patches proof-of-concept using a 2D cosmology
-  density field projection.  \textbf{Left}: 2D cosmology density field
-  projection.  \textbf{Middle}: Balanced quadtree with 81701 patches.
-  \textbf{Right}: Balanced quadtree with 32529 coalesced patches. \\
-} {f:cosmo}{
+\FIGURETWOCOL{Coalesced patches example} {f:cosmo}{
 \begin{minipage}{3.2in}
-\begin{minipage}{1.0in}
-\includegraphics[width=1.0in]{cosmo2-invert.png}
+\begin{minipage}{1.5in}
+\includegraphics[width=1.5in]{cosmo2-invert.png}
+\end{minipage} \
+\begin{minipage}{1.5in} \raggedright
+\small Coalesced patches using a 2D cosmology
+  density field projection.  \textbf{Top left}: Source density field.
+  \textbf{Bottom left}: Balanced quadtree with 81701 patches.
+  \textbf{Bottom right}: Balanced quadtree with 32529 coalesced patches.
+\end{minipage}
+\begin{minipage}{1.5in}
+\includegraphics[width=1.5in]{cosmo2-4-1-inv.png}
 \end{minipage} \ 
-\begin{minipage}{1.0in}
-\includegraphics[width=1.0in]{cosmo2-4-1-inv.png}
-\end{minipage} \ 
-\begin{minipage}{1.0in}
-\includegraphics[width=1.0in]{cosmo2-4-2-inv.png}
+\begin{minipage}{1.5in}
+\includegraphics[width=1.5in]{cosmo2-4-2-inv.png}
 \end{minipage}
 \end{minipage}
 }
@@ -1206,22 +1208,23 @@ star formation.  As a proof-of-concept example, in Figure~\ref{f:dots}
 two balanced $r^2$-trees are shown refined on a small set of points in 2D, one
 with $r=2$ and one with $r=4$.
 
-\FIGURETWOCOL{
-Targeted refinement proof-of-concept using multiple point sources in 2D.
-\textbf{Left}: 2D point sources.  
-\textbf{Middle}: Balanced octree with 2137 patches.
-\textbf{Right}: Balanced octree with 158 explicit patches.
-}
+\FIGURETWOCOL{Targeted refinement example}
 {f:dots}{
 \begin{minipage}{3.2in}
-\begin{minipage}{1.0in}
-\includegraphics[width=1.0in]{dots-invert.png}
+\begin{minipage}{1.5in}
+\includegraphics[width=1.5in]{dots-invert.png}
 \end{minipage} \ 
-\begin{minipage}{1.0in}
-\includegraphics[width=1.0in]{dots-4-1-inv.png}
+\begin{minipage}{1.5in}
+\small Targeted refinement using multiple point sources in 2D.
+\textbf{Top left}: Point sources.  
+\textbf{Bottom left}: Balanced octree with 2137 patches.
+\textbf{Bottom right}: Balanced octree with 158 explicit patches.
+\end{minipage}
+\begin{minipage}{1.5in}
+\includegraphics[width=1.5in]{dots-4-1-inv.png}
 \end{minipage} \ 
-\begin{minipage}{1.0in}
-\includegraphics[width=1.0in]{dots-16-5-inv.png}
+\begin{minipage}{1.5in}
+\includegraphics[width=1.5in]{dots-16-5-inv.png}
 \end{minipage}
 \end{minipage}}
 
@@ -1248,19 +1251,23 @@ The advantage is clear: the number of nodes in the AMR hierarchy is
 reduced by a factor of about $13.5$.  There are apparent disadvantages
 as well.
 
-One disadvantage is that balancing an $r^3$-tree still allows jumps in
+One disadvantage is that a balance $r^3$-tree still has jumps in
 refinement greater than two.  We can regain this mesh constraint by
-introducing implicit \textit{backfill} patches, as indicated in
-Figure~\ref{f:backfill}.
+introducing \textit{implicit backfill} patches, as indicated by the
+magenta patches in Figure~\ref{f:backfill}.  We refer to these as
+``implicit'' because they are not part of the $r^3$-tree data
+structure, but rather are associated with all fine-coarse level
+interfaces.
+
 
 \FIGURETWOCOL{Targeted refinement with backfill}{f:backfill}{
 \begin{minipage}{3in}
-\includegraphics[width=3in]{kd-backfill.pdf}
+\includegraphics[width=3in]{kd-backfill2.pdf}
 \end{minipage}}
 
 % \FIGURE{Targeted refinement with backfill}{f:backfill}{
 % \begin{minipage}{6.15in}
-% \includegraphics[width=6.15in]{kd-backfill.pdf}
+% \includegraphics[width=6.15in]{kd-backfill2.pdf}
 % \end{minipage}}
 
 Another disadvantage is that we need to represent the $r^3$-trees.
@@ -1452,7 +1459,7 @@ single precision is expected to provide more than sufficient
 positional accuracy for local computations, which will additionally
 improve both memory storage requirements and memory access costs.
 
-\FIGURETWOCOL{Patch-local coordinate systems for
+\FIGURETWOCOL{Global versus patch-local coordinate systems for
   particles}{f:local-particles}{
 \begin{minipage}{3.2in}
 \begin{minipage}{1.5in}
