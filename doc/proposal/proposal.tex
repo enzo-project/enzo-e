@@ -41,13 +41,13 @@
 %\Large
 \renewcommand{\pargraph}[1]{}
 
-\nocite{StSh09} % Scalability challenges for massively parallel {AMR} applications
-\nocite{WiHy03} % Enhancing scalability of parallel structured {AMR} calculations
-\nocite{GuWi06} % Parallel clustering algorithms for structured {AMR}
-\nocite{BuGh08} % Towards adaptive mesh {PDE} simulations on petascale computers
-\nocite{BaBu09} % MPI on a million processors
+% \nocite{StSh09} % Scalability challenges for massively parallel {AMR} applications
+% \nocite{WiHy03} % Enhancing scalability of parallel structured {AMR} calculations
+%\nocite{GuWi06} % Parallel clustering algorithms for structured {AMR}
+% \nocite{BuGh08} % Towards adaptive mesh {PDE} simulations on petascale computers
+% \nocite{BaBu09} % MPI on a million processors
 
-\nocite{LaTa06} % hierarchical load balancing
+%\nocite{LaTa06} % hierarchical load balancing
 
 %=======================================================================
 \TITLE{A Software Framework for Extreme Adaptive Mesh Refinement}{James Bordner}{$Rev$}
@@ -147,13 +147,13 @@ mesh refinement (AMR).
 A distinguishing characteristic relative to existing AMR libraries and
 frameworks is the aggressive pursuit of extreme scalability in terms
 of software data structures and hardware parallelism from the
-beginning.
+onset.
 %
 The design will be forward-looking, targeted not just at the largest
 existing supercomputers, but also future HPC platforms as they evolve
 through the petascale era and into the exascale.
 %
-The proposed AMR framework will enable application developers to
+The proposed AMR framework would enable application developers to
 write multiphysics applications for simulating phenomena on an
 unprecidented range of spacial and temporal scales.
 
@@ -164,11 +164,11 @@ parallelization also available to augment the data parallelism.
 %
 A wide variety of parallelization technologies will be supported from
 the start, including both one- and two-sided message passing via the
-MPI~\cite{wwwmpi} library, the partitioned global address space (PGAS)
-approach via the UPC~\cite{@@@UPC} language, shared memory parallel
-programming using OpenMP compiler directives, and the message-driven
-processor virtualization approach provided by the \charm\
-framework~(\cite{KaBo07} \cite{wwwcharm}).
+MPI library~\cite{wwwmpi}, the partitioned global address space (PGAS)
+approach via the UPC language~\cite{wwwupc}~\cite{upc}, shared memory
+parallel programming using the OpenMP API~\cite{wwwopenmp}, and the
+message-driven processor virtualization approach provided by the
+\charm\ framework~\cite{KaBo07} \cite{wwwcharm}.
 %
 Hierarchical parallelism will be supported though select hybrid
 approaches, such as MPI with OpenMP, and MPI with UPC.
@@ -176,27 +176,26 @@ approaches, such as MPI with OpenMP, and MPI with UPC.
 \pargraph{Load balancing}
 %
 Dynamic load balancing of parallel tasks will be hierarchical, which
-will improve mapping of the software data structures to the
-hierarchical components of the target computational platforms (i.e.
-compute nodes, sockets, cores).~\cite{@@@LAN-DLB}.
+will improve mapping the distributed software data structures to the
+hierarchical hardware components of the target computational
+platforms~\cite{LaTa06}.
 
 \pargraph{AMR fields + particles}
 %
-The AMR data structures will be implemented using a fully distributed
-generalization of the octree data structure.  Tree nodes will be
-associated with both logically Cartesian grids and particles, so both
-Eularian and Lagrangian (and hybrid) methods can be implemented.
+The AMR data structures will be implemented using a hybrid
+replicated/distributed generalization of the octree data structure.
+Tree nodes will be associated with both logically Cartesian grids and
+particles, enabling both Eularian and Lagrangian (and hybrid) methods.
 
 \pargraph{extreme scalability through localization}
 %
 Extreme parallel scalability will be pursued by localizing the
-individual AMR patch / block tasks as much as feasible by aggressively
-removing all unnecessary global data, global communication, and global
-coordinate systems.  For the latter, since fixed-size integers and
-floating-point values limit particle global position accuracy and
-global index ranges, localizing the problem will also improve scaling
-of the data structures without having to resort to 64-bit or higher
-scalars.
+individual AMR block tasks as much as feasible by aggressively
+removing all unnecessary global communication, global synchronization,
+global indexing, and global coordinate systems.  Since this can lead
+to reducing the required ranges of integers and precision of floating
+point values, this will additionally result in lower memory usage and
+improved performance.
 
 \pargraph{fault tolerance} Fault tolerance and software
 resilience are also crucial factors at extreme scales.  The checkpoint
@@ -207,226 +206,137 @@ component, network, disk, and software failures.
 
 \pargraph{deliverables} 
 %
-We plan to make this framework freely available for use by the
-research community.  The result of this project will be software
-framework capable of allowing application developers write extremely
-scalable multi-resolution multi-physics applications.
+We plan to make the \cello\ framework and accompanying documentation
+freely available for use by the research community.  The result of
+this project will be software framework capable of allowing
+application developers write extremely scalable multi-resolution
+multi-physics applications.
 
-\begin{verbatim}
-\cite{StSh09} quote
-load balancing and communication are often cited as the main
-barriers to AMR scaling, but instead ``...many of the scaling problems related to early design decisions''
-\end{verbatim}
 %=======================================================================
 \section{Introduction} \label{s:intro}
 %=======================================================================
 
+% \cite{StSh09} quote
+% load balancing and communication are often cited as the main
+% barriers to AMR scaling, but instead ``...many of the scaling problems related to early design decisions''
 
-The \cello\ Project began as an effort to redesign the parallel data
-structures of the astrophysics and cosmology application \enzo\
-\cite{OsBr04}.  \enzo\ was conceived in the early 1990's by Michael
-L.~Norman and Greg Bryan, and implemented using structured
-(patch-based) adaptive mesh refinement (SAMR) \cite{BeCo89}.  It
+The \cello\ Project originated as an effort to redesign the parallel
+data structures of the astrophysics and cosmology application
+\enzo~\cite{OsBr04}, to improve its performance and create a highly
+scalable version ``\enzoii.''  \enzo\ was conceived in the early 1990's by
+Michael L.~Norman and Greg Bryan, and implemented using structured
+(patch-based) adaptive mesh refinement (SAMR)~\cite{BeCo89}.  It
 incorporated a modified high-order Piecewise Parabolic Method (PPM)
-solver \cite{WoCo84b} for hydrodynamics, and a Particle-Mesh (PM)
-method \cite{@@@PM} for dark matter dynamics.  So far in its 15 year
+solver for hydrodynamics~\cite{WoCo84b}, and a Particle-Mesh (PM)
+method for dark matter dynamics~\cite{@@@PM}.  So far in its 15 year
 lifetime, \enzo\ simulations have led to important scientific
 contributions to the fields of astrophysics, cosmology, and
-turbulence.
+turbulence~\cite{@@@enzo-science}.
 
-\enzo\ scales well up to $\approx 10^4$ to $\approx 10^5$ processes,
+\enzo's AMR scales well up to around $10^4$ or $10^5$ processes,
 depending on the problem.  Efforts to improve its scalability beyond
 this have become increasingly difficult, due to the increasing
-invasiveness of the desired changes and the increasing complexity of
-the code base.  The \cello\ project aims to improve on \enzo\ in three
-ways: improved software development process, object-oriented design
-and implementation, and overhauled parallel AMR infrastructure.  The
-physics capabilites, which are continually being improved and refined
-in \enzo, will be retained in \enzoii.
+invasiveness of the desired changes and increasing complexity of the
+code base.  The \cello\ Project aims to address issues with \enzo\ in
+at three ways: an improved software development process, an
+object-oriented design and implementation, and overhauled parallel AMR
+infrastructure.  The physics routines, which are continually being
+improved in \enzo, will be retained in \enzoii.
 
-\begin{verbatim}
-Motivation
-Forward-looking
-Supercomputer trends
-Innovative / core ideas
-  hierarchical load balancing
-  separate scheduling of communication and computation
-  flexible dynamic data organization for comm, comp, disk
-  task size / count control
-  gang scheduling for GPU support
-  task parallelism: pipeline computational methods to increase parallelism
-  AMR: patch coalescing
-  AMR: targeted refinement by 4, 8 with backfill
-  aggresive localization
-    only store local coordinates for particles
-    only store local patch connectivity
-  fault tolerance @@@
-  multiple parallelization technologies with flexible hybrid support
-     why?  
-        experimentally 
-        forces encapsulation of parallelism; 
-        likely improves ease of adapting future parallel strategies
-  designing with extreme scale in mind from the beginning
-\end{verbatim}
+There are numerous issues with developing parallel scientific
+frameworks and applications even at modest scalability.  These issues
+increase in number and become more important as scalabilily is pushed
+from terascale through petascale and into the exascale.  Many of these
+issues are known or suspected, such as increased expected fault rates,
+relatively slower disk performance leading to a breakdown in the disk
+checkpoint/restart paradigm, increased importance of scaling of
+algorithms and implementations, increased importance of locality,
+increased cost of global communication and synchronization, increased
+importance of uncovering and capitalising on parallelism in the
+problem, increased affect of variation in performance due to
+e.g.~operating system jitter or memory management~\cite{StSh09},
+taking advantage of possible heterogeneous architectures (e.g.~CPU +
+GPGPU), and increased importance of mirroring the hierarchical nature
+of concurrent hardware in the parallelization strategy and software
+data structures.  Further unknown and unexpected issues are likely to
+arise as well.
 
-\begin{verbatim}
-upcoming systems
-   BW
-   ...
-   ...
-   core counts
-   extrapolate top500 10 years
-   what this means for extreme scalable AMR + particles
-\end{verbatim}
+There are also known and suspected issues with the scaling of AMR in
+particular, such as AMR patch size control versus parallel task size
+control, keeping the dynamic workload continually balanced across the
+platform, maintaining performance and scalability in remeshing and
+other AMR operations, maintaining data locality between nodes to
+control communication costs, maintaining data locality within nodes to
+control memory hierarchy efficiency, solving inherently global
+parabolic and elliptic source problems efficiently, and addressing
+limits of AMR data structure scalability due to e.g.~increased ranges
+of global indices and precision of particle locations.  Again, further
+unknown and unexpected issues are likely to arise.
 
-\begin{verbatim}
-refined  / borrowed ideas
-  fully distributed AMR datastructure
-  patch block registers for improved computing / user interface flexibility
-  communication flux registers (\chombo) for communication
-  guard cells allocated when needed
-  localized fully-adaptive time steps (no global reductions) (refined)
-\end{verbatim}
+We will address extreme AMR scalability issues with a wide range of
+general approaches and specific algorithms, including using existing
+proven techniques, refining existing approaches that show promise, and
+developing new ideas and methods for unresolved issues.
+%
+An overall guiding principle will be to aggressively localize
+operations when possible, to reduce global synchronization and
+communication.
+%
+Some specific approaches include the following: 
+%
+use a hybrid replicated/distributed octree-based AMR approach, with
+refinement modifications to improve scaling in terms of size (number
+of grid zones) and depth (number of AMR levels);
+%
+use patch-local adaptive time steps;
+%
+support flexible hybrid parallelization strategies;
+%
+use a hierarchical load balancing approach based on collected performance measurements; 
+%
+dynamically schedule tasks and communication;
+%
+allow flexible reorganization of AMR data to permit independent
+optimization of computation, communication, and storage;
+%
+support variable grid patch sizes while still maintaining fixed or
+bounded parallel task sizes;
+%
+and support detecting and handling hardware or software faults.
 
-
-\note{Extreme parallelism}
-
-\begin{verbatim}
-distributed data placement
-   hierarchical
-   different needs for different tasks
-      compute
-      store
-\end{verbatim}
-
-\begin{verbatim}
-parallel computation
-   data parallelism (SPMD)
-   task parallelism
-   cooperative parallism (MPMD)
-\end{verbatim}
-
-\begin{verbatim}
-parallel technology
-   MPI / charm++  / UPC / OpenMP / GPU
-\end{verbatim}
-
-\begin{verbatim}
-heterogeneous hardware computation
-   GPUs, cores
-\end{verbatim}
-
-\begin{verbatim}
-load balancing
-   keep all cores busy
-   between shared memory compute nodes -- memory
-   within shared memory compute nodes -- computation
-\end{verbatim}
-
-\begin{verbatim}
-task definition
-   size
-   count
-   hierarchical
-\end{verbatim}
-
-\begin{verbatim}
-task scheduling
-   hierarchical / multiscale
-     distributed versus shared memory
-   communication / computation
-   decouple data distribution from task scheduling
-\end{verbatim}
-
-\begin{verbatim}
-reducing synchronization / increasing task independence
-\end{verbatim}
-
-\begin{verbatim}
-software resiliency / fault tolerance
-\end{verbatim}
-
-\begin{verbatim}
-checkpointing / restart
-   trend: disk progressively slower
-\end{verbatim}
-
-
-\pargraph{load balancing summary}
-We will use a hierarchical dynamic load balancing approach, with
-support for balancing with respect to multiple metrics (memory use,
-computational load, etc.) for different hierarchical computational
-components (compute node, socket, etc.), with different rebalancing
-frequencies for different levels.
-
-\note{Extreme AMR}
-
-\begin{verbatim}
-parallel scalability issues
-   global synchronization / reductions
-   load balancing
-   I/O
-   fault tolerance
-   ``OS jitter'' and memory management can lead to load imbalances
-        independent of application\cite{StSh09}
-\end{verbatim}
-
-\begin{verbatim}
-AMR-specific parallel scalability issues
-   elliptic
-   remeshing--especially SAMR
-   load balancing
-   time step determination
-\end{verbatim}
-
-\begin{verbatim}
-AMR datastructure scalability
-   breadth--number of grid patches
-   depth--range of multi-resolution
-   floating point precision issues
-   floating point range issues
-   integer range issues
-\end{verbatim}
+Next in \S\ref{s:review} we review some of the existing software
+frameworks and applications that are closest to our proposed effort.
+In \S\ref{s:develop} we outline our overall software development
+approach; following this is a more detailed summary of requirements
+and design in \S\ref{s:require} and \S\ref{s:design}, and a discussion
+of our approaches to implementation and software testing in
+\S\ref{s:implementation} and \S\ref{s:testing}.  Finally we describe
+our development plan in \S\ref{s:plan}, and list our milestones and
+deliverables in \S\ref{s:milestones}.
 
 %-----------------------------------------------------------------------
-\subsection{Existing AMR frameworks} \label{ss:review}
+\section{Existing AMR frameworks} \label{s:review}
 %-----------------------------------------------------------------------
 
 There are numerous AMR frameworks, libraries, and applications, each
 with different design goals and decisions, data structures, AMR
 algorithms, parallelization strategies, and parallel performance and
 scaling.  Perhaps the most successful software frameworks related our
-proposed project are \paramesh\ (\cite{MaOl00} \nocite{OlMa05}
-\nocite{Ol06}), \chombo\ (\cite{wwwchombo} \cite{CoGr09}), \samrai
-(\cite{@@@}), and \gadget\ (\cite{wwwgadget} \cite{Sp05}).  Other
-notable frameworks include \clawpack\ (\cite{wwwclawpack}), \grace\
-(\cite{PaLi10}), ALPS (\cite{BuBu09}), and Carpet (\cite{ScDi06}
-\cite{wwwcarpet}).
+proposed project are
+\paramesh~\cite{MaOl00}~\cite{OlMa05}~\cite{Ol06}~\cite{wwwparamesh},
+\chombo~\cite{wwwchombo}~\cite{CoGr09},
+\samrai~\cite{WiHo01}~\cite{wwwsamraicode}, ALPS~\cite{BuBu09}, and
+\gadget~\cite{wwwgadget}~\cite{Sp05}.  Other notable frameworks
+include \clawpack~\cite{wwwclawpack}, \grace~\cite{PaLi10}, and
+Carpet~\cite{ScDi06}~\cite{wwwcarpet}.
 
-limitations of existing AMR libraries / frameworks
+%-----------------------------------------------------------------------
+\subsection{\paramesh} \label{ss:paramesh}
+%-----------------------------------------------------------------------
 
-GADGET-2: Preeminent cosmological TreeSPH simulation code
-DAGH (1998)
 
-\begin{verbatim}
-SCALING
-
-\chombo: demonstrated scalability up to 8192 processors~\cite{StSh09},
-        and goals to continually improve scaling by a factor of 100 in 5 years~\cite{St09} (@@@public slides?).
-  
 FLASH: \paramesh\ re-gridding does not scale well
        I/O costly despite not being particularly inefficient
-\cite
-\end{verbatim}
-
-%-----------------------------------------------------------------------
-\subsubsection{\paramesh} \label{sss:paramesh}
-%-----------------------------------------------------------------------
-
-\nocite{wwwparamesh}
-\nocite{MaOl00} % PARAMESH requested references
-\nocite{OlMa05}
-\nocite{Ol06}
 
 The \paramesh\ software was developed at the NASA Goddard Space Flight
 Center and Drexel University.
@@ -439,7 +349,7 @@ Due to a loss of funding, \paramesh\ is not currently supported.
 
 
 %-----------------------------------------------------------------------
-\subsubsection{\samrai} \label{sss:samrai}
+\subsection{\samrai} \label{ss:samrai}
 %-----------------------------------------------------------------------
 
 \samrai\ (Structured Adaptive Mesh Refinement Application
@@ -479,19 +389,20 @@ class of methods, issues with scaling indicate that SAMR may not be the
 ideal choice of AMR data structure.
 
 %-----------------------------------------------------------------------
-\subsubsection{\chombo} \label{sss:chombo}
+\subsection{\chombo} \label{ss:chombo}
 %-----------------------------------------------------------------------
 
-\chombo~\nocite{CoGr09} is an MPI-parallel structured AMR (SAMR)
-framework in active development by the Applied Numerical Algorithms
-Group of Lawrence Berkeley National Lab.  It supports hyperbolic,
+\chombo is an MPI-parallel structured AMR (SAMR) framework in active
+development by the Applied Numerical Algorithms Group of Lawrence
+Berkeley National Lab~\nocite{CoGr09}.  It supports hyperbolic,
 elliptic, and parabolic methods.  \chombo\ is quite scalabale, and
 designed to run both hyperbolic and elliptic problems on 10,000
-processors.  Both C++/Fortran and Titanium
-(\cite{wwwtitanium}~\cite{YeSe98}) versions have been developed.  An
-effort to develop a UPC version was undertaken~\cite{We04}, though the
-outcome of that effort is unknown.  It was surmised that the package
-would have to be re-written from scratch to be successful.
+processors.  Both C++/Fortran and
+Titanium~\cite{wwwtitanium}~\cite{YeSe98} versions have been
+developed.  An effort to develop a UPC version was
+undertaken~\cite{We04}, though the outcome of that effort is unknown.
+It was surmised that the package would have to be re-written from
+scratch to be successful.
 
 Its high-level design consists of five loosely-coupled
 mathematically-decomposed components: \code{BoxTools} for set calculus
@@ -518,7 +429,7 @@ the size has been aggressively reduced to an impressive $\approx 50$
 bytes per patch~\cite{CoKe07}, this still represents an eventual
 scaling impediment for \chombo.
 
-\chombo's elliptic solver is weakly scalable up to 8,000
+\chombo's elliptic solver is weakly scalable up to $8192$
 processors~\cite{WeSu07}, and the group continues to aggressively
 improve \chombo's scalability.  We agree with their assessment
 in~\cite{WeSu07} that relaxing the bulk synchronous communication
@@ -526,28 +437,25 @@ constraint, in favor of smaller messages with one-sided communication
 and communication-computation overlap, will improve scalability.
 
 %-----------------------------------------------------------------------
-\subsubsection{\alps } \label{sss:alps}
+\subsection{\alps } \label{ss:alps}
 %-----------------------------------------------------------------------
 
 \alps~\cite{BuBu09}, is a highly scalable AMR framework based on
-octrees.  
-
-
-\alps\ appears to be one of the most highly scalable AMR frameworks
-currently available, with demonstrated scaling on up to 32K cores and
-4 billion ellements~\cite{BuGh07}.  To achieve this level of scaling,
-they use ``time windows''~\cite{SuWh04} to improve re-gridding
-performance, which requires ``...repeat[ing] the numerical integration
-of the PDEs over a time window one or more times to accumulate error
-estimates''.  It is uncertain whether this adds to the PDE integration
-cost, thus artificially improving the scalability by increasing
-computational cost relative to communication.  Nevertheless, the basic
-octree approach still seems to have a lot of promise in terms of
-designing and implementing extreme AMR.
+octrees.  It appears to be one of the most highly scalable AMR
+frameworks currently available, with demonstrated scaling on up to 32K
+cores and 4 billion ellements~\cite{BuGh08}.  To achieve this level of
+scaling, they use ``time windows''~\cite{SuWh04} to improve
+re-gridding performance, which requires ``...repeat[ing] the numerical
+integration of the PDEs over a time window one or more times to
+accumulate error estimates''.  It is uncertain whether this adds to
+the PDE integration cost, thus artificially improving the scalability
+by increasing computational cost relative to communication.
+Nevertheless, the basic octree approach used still seems to have a lot
+of promise in terms of designing and implementing extreme AMR.
 
 
 %-----------------------------------------------------------------------
-\subsubsection{\gadget } \label{sss:gadget}
+\subsection{\gadget } \label{ss:gadget}
 %-----------------------------------------------------------------------
 
 \gadget, developed by Volker Springel at the Max-Planck-Institute for
@@ -560,7 +468,7 @@ ANSI C, and uses MPI-1.0 for parallelization.  \gadget-3.0 also
 supports multithreading in addition to MPI.
 
 Particles are partitioned in \gadget-2.0 using the Barnes-Hut
-algorithm (\cite{BaHu86}) on a distributed octree.  Octree nodes are
+algorithm on a distributed octree~\cite{BaHu86}.  Octree nodes are
 distributed using a Peano-Hilbert space-filling curve.  Particles are
 integrated using adaptive time steps, where time steps differ from
 each other by a factor of two.
@@ -579,7 +487,76 @@ structures to quickly determine short-range versus long-range forces.
 
 
 %=======================================================================
-\section{Software Requirements} \label{s:requirements}
+\section{Software Development Approach} \label{s:develop} 
+%=======================================================================
+
+
+% \begin{verbatim}
+% application driven
+%    helpful for ensuring completeness
+%       missing functionality in design will become apparent
+%    helpful for testing
+%    \enzoii\ 
+%    cosmology / astrophysics
+%    requires wide range of AMR capabilities
+%      broad for galaxy structure formation
+%      deep for star formation
+%      turbulence
+%    requires wide range of physics capabilities
+%      hyperbolic: hydrodynamics
+%      elliptic: self-gravity, FLD radiation
+%      local physics: chemistry, heating/cooling
+%    decouple physics modules from AMR framework
+%    make both \enzoii\  and underlying AMR framework publicly available
+% \end{verbatim}
+
+
+Our development approach will be to progressively implement \cello\ with
+\enzoii\ as its driving application.  Functionality will be
+progressively added, with all phases of the software lifecycle updated
+with each iteration.  The initial cycle will require the most effort,
+since many components and interfaces must be designed before even the
+first simple single-level hyperbolic end-to-end simulation can
+proceed.
+
+Our basic software development life cycle is based on the standard
+requirements, design, implementation, and testing phases.  We iterate
+over the phases, progressively adding functionality.  This will help
+us ensure that code is correct and scalable at each iteration, and it
+allows us to concentrate on small sections of the code at a time
+through its entire development cycle.  
+
+Initially individual components will be developed in isolation, then
+gradually integrated with each other, strictly controlling
+interdependencies.  Software components (Figure~\ref{f:components})
+and subcomponents are mapped onto directories and subdirectories in
+the source code, and class hierarchies in .cpp and .hpp files.
+
+Prototyping will be used to aid the design process, to quickly assess
+the feasibility of new ideas.  While the prototype code will generally
+not end up in the final code, the process of writing it can
+significantly help with writing the final implementation (somewhat
+analagous to the predictor in a ``predictor-corrector'' numerical
+algorithm).
+
+Quality control will be a major component of our development approach.
+High quality software in general is difficult to develop, in part
+because maintaining high quality software involves optimizing a litany
+of desirable characteristics: software should be maintainable,
+flexible, portable, usable, reusable, readable, testable,
+understandable, efficient, scalable, correct, reliable, adaptable,
+accurate, robust, etc.  These characteristics depend on decisions made
+during the development process, and are frequently in conflict with
+each other, so design and implementation decisions must be made
+deliberately and thoughtfully.  We recognize that no single method of
+improving software quality is sufficient, so we will employ a set of
+techniques that have been proven in practice to be
+successful~\cite{Mc04}.  These include testing, code reviews, design
+reviews, and refactoring.
+
+
+%=======================================================================
+\section{Software Requirements} \label{s:require}
 %=======================================================================
 
 
@@ -604,7 +581,7 @@ algorithms (the implementations of which are not in the scope of the
 framework, but are in the scope of the user functions and \enzoii\
 driving application) include Eulerian mesh-based methods
 (e.g.~PPM~\cite{WoCo84b}), Lagrangian particle-based methods, and
-hybrid particle-mesh (e.g.~PPPM~\cite{HoEa88}) methods.
+hybrid particle-mesh methods~(e.g.~PPPM~\cite{HoEa88}).
 
 Optionally, we may also support multiple simulations run
 simultaneously; this could allow for inter-simulation inline analysis
@@ -881,11 +858,11 @@ external libraries.
 
 We wish to scale a problem of size $N$ efficiently to $> P = 10^6$
 cores, which indicates that memory and computation should be $< O(P)$
-per compute process, as well as $<= O(N/P)$ per process.  This
+per compute process, as well as $\leq O(N/P)$ per process.  This
 indicates that $O(N)$ data structures must be distributed.  Since MPI
-itself is not necessarily $< O(P)$ per process~\cite{BaBu09}, this also
-further motivates using a hierarchical parallelism approach to bound
-communicator sizes.
+itself is not necessarily $< O(P)$ per process for large
+communicators~\cite{BaBu09}, this further motivates using a
+hierarchical parallelism approach to bound communicator sizes.
 
 %-----------------------------------------------------------------------
 \subsection{Resilience} \label{ss:require-resilience}
@@ -970,7 +947,7 @@ iterative, the final component diagram may still evolve somewhat.
 \end{minipage}}
 
 The high-level components include \code{Task} for encapsulating
-parallel tasks, \code{Distribute} for distributing and load-balancing
+parallel tasks, \code{Distribute} for distributing and load balancing
 tasks across available resources, and \code{Schedule} for scheduling
 the tasks for execution.
 
@@ -1047,8 +1024,7 @@ hinderance to scalability~\cite{GuWi06}.  Also, high quality SAMR
 frameworks such as \chombo\ and \samrai\ are already available and
 being actively developed.  Lastly, the octree in octree-based AMR can
 be leveraged for particle neighbor searches; octrees have particularly
-efficient representations and operations (e.g.~an octree node can be
-stored using three pointers~\cite{@@@octree}); and absolute patch
+efficient representations and operations~\cite{FrPe02}; and absolute patch
 extents are computed not stored, which can be used to address
 precision and range issues of global indices that arise for extremely
 large or deep AMR hierarchies.
@@ -1393,7 +1369,7 @@ to address the problem, such as reduce the size of the time step
 constraint or switch to an alternate solver.  Support for more general
 assertions on field values may be implemented as well, such as checking
 that conserved fields are indeed conserved, or similar constraints
-such as $\div\cdot B=0$ for MHD problems.
+such as $\nabla\cdot B=0$ for MHD problems.
 
 %-----------------------------------------------------------------------
 \subsection{Particle data} \label{ss:design-particles}
@@ -1687,10 +1663,10 @@ for both scalability and efficiency.  By \textit{hierarchical load
   balancing} we mean rebalancing tasks between higher levels (nodes or
 supernodes) independently from rebalancing between lower levels
 (socket or cores).  The idea of hierarchical task scheduling and load
-balancing has been explored for at least 15 years (\cite{AhGh94}), and
-is being actively adapted specifically to AMR applications
-(\cite{LaTa06}), but is not commonly available in currently existing
-AMR frameworks.
+balancing has been explored for at least 15 years~\cite{AhGh94}, and
+is being actively adapted specifically to AMR
+applications~\cite{LaTa06}, but is not commonly available in currently
+existing AMR frameworks.
 
 We will begin with a hierarchical load balancing scheme such as that
 developed in~\cite{LaTa06} specifically for AMR applications.
@@ -1802,7 +1778,7 @@ schemes.
 %    migrate using hierarchical parallelism
 % \end{verbatim}
 % \begin{verbatim}
-% Load-balance using ``over-compensation'', since heavily-loaded
+% Load balance using ``over-compensation'', since heavily-loaded
 %   processes tend to continue to become more heavily loaded (cosmology
 %   / star-formation application-dependent).
 % \end{verbatim}
@@ -1968,7 +1944,7 @@ Multiple parallelization strategies
   OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
   GPU + very fast / power efficient when usable
   GPU - no usable standard, difficult to program, difficult to map problem to hardware
-  Charm++ + higher-level, dynamic scheduling, dynamic load-balancing, fault tolerant through checkpointing to other node memory
+  Charm++ + higher-level, dynamic scheduling, dynamic load balancing, fault tolerant through checkpointing to other node memory
   Charm++ - requires learning separate language, separate runtime system, no data prefetching(?)
     currently not fully realizable for GPU since depends on
       computational code
@@ -2077,12 +2053,12 @@ written in C or Fortran.  It will be written using an eminently
 object-oriented approach, with use of design patterns~(\cite{GaHe95}
 \cite{BuHe07}) where appropriate.
 
-For parallelism, the CHARM++ parallelization framework, the MPI
+For parallelism, the \charm\  parallelization framework, the MPI
 parallel library, the UPC parallel language, and OpenMP threading
 compiler directives will be used as well.  All are optional, so
 building and running \cello\ applications will not depend on any
 single parallelization component.  We will attempt to isolate
-dependencies on CHARM++ to the high-level parallelization components,
+dependencies on \charm\  to the high-level parallelization components,
 and isolate dependencies on the remaining parallelization technologies
 to the low-level \code{Parallel} component.
 
@@ -2108,9 +2084,43 @@ pseudo-random number generation, which will be used in \enzoii's
 cosmology initial conditions generation.
 
 %=======================================================================
-\section{Quality Control} \label{s:testing}
+\section{Software Testing} \label{s:testing}
 %=======================================================================
 
+
+Defects can be costly, but they are much more costly when found later
+in the development cycle.  Defects can occur in any phase of the
+development cycle, but those in earlier phases (requirements and
+design) tend to be much more costly than those in later phases
+(implementation and testing).  To improve quality as well as lower
+development costs, we will emphasize our quality control efforts on
+earlier phases.
+
+Our test approach will include unit testing, integration testing,
+system testing, and regression testing, and beta-testing.  Our unit
+tests will test individual pieces of code as they are written.
+Currently we use a simple framework of our own design; we may
+transition to a more flexible and powerful system such as
+CppUnit~\cite{wwwcppunit} later, but our current simple approach has
+proven satisfactory so far.  Our integration testing will involve
+testing the interfaces between components and subcomponents.  Our
+system testing will include the entire \cello\ framework with \enzoii\
+application functions, and will include test problems corresponding to
+those in the \enzo\ test suite.  These tests include hydrodynamics,
+MHD, self-gravity, cosmology, etc.  Our regression testing will
+include automated testing of the entire code base.  Regression tests
+will include tests that expose previously found bugs, and tests for
+each of the specific requirements in our Software Requirements
+Specifications document.  Automated testing will be performed with
+\lcatest, an automated software test environment for parallel
+applications.  
+
+The scope of our tests will include not just correctness, but also
+performance, scaling, and resilience at all levels.  Performance
+testing will be aided by the \code{Performance} component of \cello,
+which will be based on a refinement of the \code{lcaperf}
+package~\cite{wwwlcaperf}, which integrates hardware performance
+metrics with software data structure attributes.
 
 % \begin{verbatim}
 %    Improving quality reduces development costs
@@ -2201,108 +2211,8 @@ cosmology initial conditions generation.
 % \end{verbatim}
 
 %=======================================================================
-\section{Development Plan} \label{s:plan} 
+\section{Development Plan} \label{s:plan}
 %=======================================================================
-
-
-\begin{verbatim}
-application driven
-   helpful for ensuring completeness
-      missing functionality in design will become apparent
-   helpful for testing
-   \enzoii\ 
-   cosmology / astrophysics
-   requires wide range of AMR capabilities
-     broad for galaxy structure formation
-     deep for star formation
-     turbulence
-   requires wide range of physics capabilities
-     hyperbolic: hydrodynamics
-     elliptic: self-gravity, FLD radiation
-     local physics: chemistry, heating/cooling
-   decouple physics modules from AMR framework
-   make both \enzoii\  and underlying AMR framework publicly available
-\end{verbatim}
-
-
-Our development plan will be to progressively implement \charm\ with
-\enzoii\ as its driving application.  Functionality will be
-progressively added, with all phases of the software lifecycle updated
-with each iteration.  The initial cycle will require the most effort,
-since many components and interfaces must be designed before even the
-first simple single-level hyperbolic end-to-end simulation can
-proceed.
-
-Our basic software development life cycle is based on the standard
-requirements, design, implementation, and testing phases.  We iterate
-over the phases, progressively adding functionality.  This will help
-us ensure that code is correct and scalable at each iteration, and it
-allows us to concentrate on small sections of the code at a time
-through its entire development cycle.  
-
-Initially individual components will be developed in isolation, then
-gradually integrated with each other, strictly controlling
-interdependencies.  Software components (Figure~\ref{f:components})
-and subcomponents are mapped onto directories and subdirectories in
-the source code, and class hierarchies in .cpp and .hpp files.
-
-Prototyping will be used to aid the design process, to quickly assess
-the feasibility of new ideas.  While the prototype code will generally
-not end up in the final code, the process of writing it can
-significantly help with writing the final implementation (somewhat
-analagous to the predictor in a ``predictor-corrector'' numerical
-algorithm).
-
-Quality control will be a major component of our development approach.
-High quality software in general is difficult to develop, in part
-because it involves a litany of desirable characteristics determining
-its overall quality: software should be maintainable, flexible,
-portable, usable, reusable, readable, testable, understandable,
-efficient, scalable, correct, reliable, adaptable, accurate, robust,
-etc.  These characteristics depend on decisions made during the
-development process, and are frequently in conflict with each other,
-so design and implementation decisions must be made deliberately and
-thoughtfully.
-
-No single method of improving software quality finds all defects, so
-we will employ a set of techniques that have been proven in practice
-to be successful~\cite{Mc04}.  These include testing, code reviews, design
-reviews, and refactoring.
-
-Defects can be costly, but they are much more costly when found later
-in the development cycle.  Defects can occur in any phase of the
-development cycle, but those in earlier phases (requirements and
-design) tend to be much more costly than those in later phases
-(implementation and testing).  To improve quality as well as lower
-development costs, we will emphasize our quality control efforts on
-earlier phases.
-
-Our test approach will include unit testing, integration testing,
-system testing, and regression testing, and beta-testing.  Our unit
-tests will test individual pieces of code as they are written.
-Currently we use a simple framework of our own design; we may
-transition to a more flexible and powerful system such as
-CppUnit~\cite{wwwcppunit} later, but our current simple approach has
-proven satisfactory so far.  Our integration testing will involve
-testing the interfaces between components and subcomponents.  Our
-system testing will include the entire \cello\ framework with \enzoii\
-application functions, and will include test problems corresponding to
-those in the \enzo\ test suite.  These tests include hydrodynamics,
-MHD, self-gravity, cosmology, etc.  Our regression testing will
-include automated testing of the entire code base.  Regression tests
-will include tests that expose previously found bugs, and tests for
-each of the specific requirements in our Software Requirements
-Specifications document.  Automated testing will be performed with
-\lcatest, an automated software test environment for parallel
-applications.  
-
-The scope of our tests will include not just correctness, but also
-performance, scaling, and resilience at all levels.  Performance
-testing will be aided by the \code{Performance} component of \cello,
-which will be based on a refinement of the \code{lcaperf}
-package~\ref{wwwlcaperf}, which integrates hardware performance
-metrics with software data structure attributes.
-
 
 %=======================================================================
 \section{Milestones and Deliverables} \label{s:milestones}
@@ -2310,7 +2220,7 @@ metrics with software data structure attributes.
 
 Tasks
 
-Learn CHARM++
+Learn \charm\ 
 Design and implement high-level components
 Design and implement low-level components
 Design and implement middle-level components
@@ -2320,7 +2230,7 @@ Milestones
 
 Unigrid hyperbolic
   serial multi-block
-  + CHARM++
+  + \charm\ 
 AMR hydrodynamics
   + MPI
     AMR paper
