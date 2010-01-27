@@ -7,6 +7,8 @@
 %=======================================================================
 \include{include}
 
+\setcounter{secnumdepth}{3}
+
 % Project summary
 % Introduction
 %    Extreme parallelism
@@ -169,7 +171,7 @@ MPI library~\cite{wwwmpi}, the partitioned global address space (PGAS)
 approach via the UPC language~\cite{wwwupc}~\cite{upc}, shared memory
 parallel programming using the OpenMP API~\cite{wwwopenmp}, and the
 message-driven processor virtualization approach provided by the
-\charm\ framework~\cite{KaBo07} \cite{wwwcharm}.
+\charm\ framework~\cite{KaBo07}~\cite{wwwcharm}.
 %
 Hierarchical parallelism will be supported though select hybrid
 approaches, such as MPI with OpenMP, and MPI with UPC.
@@ -224,9 +226,9 @@ multi-physics applications.
 The \cello\ Project originated as an effort to redesign the parallel
 data structures of the astrophysics and cosmology application
 \enzo~\cite{OsBr04}, to improve its performance and create a highly
-scalable version ``\enzoii.''  \enzo\ was conceived in the early 1990's by
-Michael L.~Norman and Greg Bryan, and implemented using structured
-(patch-based) adaptive mesh refinement (SAMR)~\cite{BeCo89}.  It
+scalable version ``\enzoii.''  \enzo\ was conceived in the early
+1990's by Michael L.~Norman and Greg Bryan, and implemented using
+structured adaptive mesh refinement (SAMR)~\cite{BeCo89}.  It
 incorporated a modified high-order Piecewise Parabolic Method (PPM)
 solver for hydrodynamics~\cite{WoCo84b}, and a Particle-Mesh (PM)
 method for dark matter dynamics~\cite{@@@PM}.  So far in its 15 year
@@ -307,13 +309,11 @@ and support detecting and handling hardware or software faults.
 
 Next in \S\ref{s:review} we review some of the existing software
 frameworks and applications that are closest to our proposed effort.
-In \S\ref{s:develop} we outline our overall software development
-approach; following this is a more detailed summary of requirements
-and design in \S\ref{s:require} and \S\ref{s:design}, and a discussion
-of our approaches to implementation and software testing in
-\S\ref{s:implementation} and \S\ref{s:testing}.  Finally we describe
-our development plan in \S\ref{s:plan}, and list our milestones and
-deliverables in \S\ref{s:milestones}.
+We summarize our software requirements in \S\ref{s:require}, software design in
+\S\ref{s:design}, software implementation in \S\ref{s:implementation}, and
+software testing in \S\ref{s:testing}.  Finally we describe our development
+plan in \S\ref{s:plan}, and list our milestones and deliverables in
+\S\ref{s:milestones}.
 
 %-----------------------------------------------------------------------
 \section{Existing AMR frameworks} \label{s:review}
@@ -361,7 +361,7 @@ of ALE (Arbitrary Lagrangian-Eulerian) methods with AMR.  ALE-AMR
 methods are especially efficient and accurate for large-scale
 multi-material calculations.
 
-\samrai\ is written in C++, and parallelized using MPI.  It's
+\samrai\ is written in \cpp, and parallelized using MPI.  It's
 high-level design is a collection of functionally decomposed
 components.  Components include \code{Toolbox} for basic memory,
 pointer, and array utilities; and \code{Math Operations} for basic
@@ -398,7 +398,7 @@ development by the Applied Numerical Algorithms Group of Lawrence
 Berkeley National Lab~\nocite{CoGr09}.  It supports hyperbolic,
 elliptic, and parabolic methods.  \chombo\ is quite scalabale, and
 designed to run both hyperbolic and elliptic problems on 10,000
-processors.  Both C++/Fortran and
+processors.  Both \cpp/Fortran and
 Titanium~\cite{wwwtitanium}~\cite{YeSe98} versions have been
 developed.  An effort to develop a UPC version was
 undertaken~\cite{We04}, though the outcome of that effort is unknown.
@@ -417,7 +417,7 @@ currently available due to re-engineering of the
 component~\cite{wwwchombo}.
 
 Load balancing is performed using the Kernighan-Lin algorithm within
-each level in the C++/Fortran implementation, and using a Morton
+each level in the \cpp/Fortran implementation, and using a Morton
 space-filling curve approach in the Titanium
 implementation~\cite{WeSu07}.  \chombo\ also allows the user to
 provide their own load balancing algorithm.  Communication performance
@@ -485,75 +485,6 @@ of the short-range forces.
 We wish to support a similar PPPM method in \enzoii, so the \cello\
 framework will similarly require fast distributed spacial data
 structures to quickly determine short-range versus long-range forces.
-
-
-%=======================================================================
-\section{Software Development Approach} \label{s:develop} 
-%=======================================================================
-
-
-% \begin{verbatim}
-% application driven
-%    helpful for ensuring completeness
-%       missing functionality in design will become apparent
-%    helpful for testing
-%    \enzoii\ 
-%    cosmology / astrophysics
-%    requires wide range of AMR capabilities
-%      broad for galaxy structure formation
-%      deep for star formation
-%      turbulence
-%    requires wide range of physics capabilities
-%      hyperbolic: hydrodynamics
-%      elliptic: self-gravity, FLD radiation
-%      local physics: chemistry, heating/cooling
-%    decouple physics modules from AMR framework
-%    make both \enzoii\  and underlying AMR framework publicly available
-% \end{verbatim}
-
-
-Our development approach will be to progressively implement \cello\ with
-\enzoii\ as its driving application.  Functionality will be
-progressively added, with all phases of the software lifecycle updated
-with each iteration.  The initial cycle will require the most effort,
-since many components and interfaces must be designed before even the
-first simple single-level hyperbolic end-to-end simulation can
-proceed.
-
-Our basic software development life cycle is based on the standard
-requirements, design, implementation, and testing phases.  We iterate
-over the phases, progressively adding functionality.  This will help
-us ensure that code is correct and scalable at each iteration, and it
-allows us to concentrate on small sections of the code at a time
-through its entire development cycle.  
-
-Initially individual components will be developed in isolation, then
-gradually integrated with each other, strictly controlling
-interdependencies.  Software components (Figure~\ref{f:components})
-and subcomponents are mapped onto directories and subdirectories in
-the source code, and class hierarchies in .cpp and .hpp files.
-
-Prototyping will be used to aid the design process, to quickly assess
-the feasibility of new ideas.  While the prototype code will generally
-not end up in the final code, the process of writing it can
-significantly help with writing the final implementation (somewhat
-analagous to the predictor in a ``predictor-corrector'' numerical
-algorithm).
-
-Quality control will be a major component of our development approach.
-High quality software in general is difficult to develop, in part
-because maintaining high quality software involves optimizing a litany
-of desirable characteristics: software should be maintainable,
-flexible, portable, usable, reusable, readable, testable,
-understandable, efficient, scalable, correct, reliable, adaptable,
-accurate, robust, etc.  These characteristics depend on decisions made
-during the development process, and are frequently in conflict with
-each other, so design and implementation decisions must be made
-deliberately and thoughtfully.  We recognize that no single method of
-improving software quality is sufficient, so we will employ a set of
-techniques that have been proven in practice to be
-successful~\cite{Mc04}.  These include testing, code reviews, design
-reviews, and refactoring.
 
 
 %=======================================================================
@@ -631,7 +562,7 @@ numerical solution.
 
 
 %-----------------------------------------------------------------------
-\subsection{Mesh data} \label{ss:require-fields}
+\subsubsection{Mesh data} \label{sss:require-fields}
 %-----------------------------------------------------------------------
 
 Multiresolution data fields defined on logically Cartesian meshes,
@@ -663,7 +594,7 @@ within a single level and on the entire AMR hierarchy~\cite{MiCo07}.
 
 
 %-----------------------------------------------------------------------
-\subsection{Particle data} \label{ss:require-particles}
+\subsubsection{Particle data} \label{sss:require-particles}
 %-----------------------------------------------------------------------
 
 In addition to mesh data, particle data will also be supported, for
@@ -684,63 +615,6 @@ orthogonal recursive bisection.  Also, since hybrid particle-mesh
 methods will be supported, locating all particles within a mesh, and
 locating the mesh for a given particle, must be efficient.
 
-
-%-----------------------------------------------------------------------
-\subsection{User functions} \label{ss:require-user}
-%-----------------------------------------------------------------------
-
-While the framework supports adaptive mesh refinement for both mesh
-and particle data, algorithms and other problem-dependent functions
-must be provided by the user.  User functions may be either Fortran or
-C (or C++).  
-
-The main functions users supply will be numerical algorithms for
-advancing a patch, hierarchy level, or full hierarchy one time step.
-Inline-analysis and visualization functions may also be provided by
-the user.  Patch-based user functions will have access to the
-associated mesh and particle data, plus a bounding layer of ``ghost''
-or ``guard'' zones on the mesh, as well as an analagous layer of
-nearby particles.
-
-Other user functions provided by the user will include functions for
-imposing inter-level constraints such as flux correction, functions
-for interpolating data to a finer mesh or for restricting data to a
-coarser mesh, and functions for evaluating refinement criteria to
-refine or coarsen a given patch.
-
-
-%-----------------------------------------------------------------------
-\subsection{Run-time parameters} \label{ss:require-parameters}
-%-----------------------------------------------------------------------
-
-Run-time parameters, such as those defining the domain, initial
-conditions, AMR data structure properties, parallelism approach,
-numerical method parameters, mesh fields and particle groups, etc.,
-will be specified using a single or multiple included parameter files.
-User code will have access to all parameters, including those
-associated with the framework.
-
-The parameter file grammar and data types should be powerful enough to
-specify user problems; in particular, it should be powerful enough to
-define any existing \enzo\ test problem for the \enzoii\ driving
-application, despite not having problem-specific parameters and
-initialization implemented in the code.  Since initial conditions are
-typically specified by setting fields equal to different numerical
-expresions in different subregions of the domain, the parameter file
-grammar must be able to support both arbitrary scalar expressions for
-field values, and arbitrary logical expressions involving spacial
-variables (e.g.~\code{x}, \code{y}, and \code{z}) for specifying
-subregions of the domain.  Common data types such as scalars, strings,
-and lists or arrays should be supported as well.  Field and particle
-initial conditions may also be defined in terms of user code or data
-files.
-
-The range of parameters should be both broad and deep, allowing
-flexible definition of simulations and detailed control of data
-structures and methods.  The expected large number of parameters
-indicates a hierarchical organization of parameters, e.g.~explicit
-grouping of parameters based on related functionality to improve
-parameter file readability.
 
 %-----------------------------------------------------------------------
 \subsection{Parallelism} \label{ss:require-parallel}
@@ -789,7 +663,7 @@ in user code, we will want to support scheduling large groups of
 concurrent tasks to keep the GPU's busy.
 
 %-----------------------------------------------------------------------
-\subsection{Load balancing} \label{ss:require-balance}
+\subsubsection{Load balancing} \label{ss:require-balance}
 %-----------------------------------------------------------------------
 
 Dynamic load balancing / task migration is critical for parallel
@@ -806,9 +680,73 @@ balancing with respect to different metrics (e.g.~balance computation
 between cores and balance memory usage between nodes).  Scalability
 implies that the scheme is less than $O(N_P)$ cost per process.
 
+%-----------------------------------------------------------------------
+\subsection{Other requirements} \label{ss:require-other}
+%-----------------------------------------------------------------------
+
+Below in \S\S\ref{sss:require-user}-\ref{sss:require-resilience} we
+summarize other requirements, both functional and non-functional.
   
 %-----------------------------------------------------------------------
-\subsection{Interfaces} \label{ss:require-interfaces}
+\subsubsection{User functions} \label{sss:require-user}
+%-----------------------------------------------------------------------
+
+While the framework supports adaptive mesh refinement for both mesh
+and particle data, algorithms and other problem-dependent functions
+must be provided by the user.  User functions may be either Fortran or
+C (or \cpp).  
+
+The main functions users supply will be numerical algorithms for
+advancing a patch, hierarchy level, or full hierarchy one time step.
+Inline-analysis and visualization functions may also be provided by
+the user.  Patch-based user functions will have access to the
+associated mesh and particle data, plus a bounding layer of ``ghost''
+or ``guard'' zones on the mesh, as well as an analagous layer of
+nearby particles.
+
+Other user functions provided by the user will include functions for
+imposing inter-level constraints such as flux correction, functions
+for interpolating data to a finer mesh or for restricting data to a
+coarser mesh, and functions for evaluating refinement criteria to
+refine or coarsen a given patch.
+
+
+
+%-----------------------------------------------------------------------
+\subsubsection{Run-time parameters} \label{sss:require-parameters}
+%-----------------------------------------------------------------------
+
+Run-time parameters, such as those defining the domain, initial
+conditions, AMR data structure properties, parallelism approach,
+numerical method parameters, mesh fields and particle groups, etc.,
+will be specified using a single or multiple included parameter files.
+User code will have access to all parameters, including those
+associated with the framework.
+
+The parameter file grammar and data types should be powerful enough to
+specify user problems; in particular, it should be powerful enough to
+define any existing \enzo\ test problem for the \enzoii\ driving
+application, despite not having problem-specific parameters and
+initialization implemented in the code.  Since initial conditions are
+typically specified by setting fields equal to different numerical
+expresions in different subregions of the domain, the parameter file
+grammar must be able to support both arbitrary scalar expressions for
+field values, and arbitrary logical expressions involving spacial
+variables (e.g.~\code{x}, \code{y}, and \code{z}) for specifying
+subregions of the domain.  Common data types such as scalars, strings,
+and lists or arrays should be supported as well.  Field and particle
+initial conditions may also be defined in terms of user code or data
+files.
+
+The range of parameters should be both broad and deep, allowing
+flexible definition of simulations and detailed control of data
+structures and methods.  The expected large number of parameters
+indicates a hierarchical organization of parameters, e.g.~explicit
+grouping of parameters based on related functionality to improve
+parameter file readability.
+
+%-----------------------------------------------------------------------
+\subsubsection{Interfaces} \label{sss:require-interfaces}
 %-----------------------------------------------------------------------
 
 The framework must be able to communicate with users while running, to
@@ -834,7 +772,7 @@ changing web pages.
 
 
 %-----------------------------------------------------------------------
-\subsection{I/O } \label{ss:require-io}
+\subsubsection{I/O } \label{sss:require-io}
 %-----------------------------------------------------------------------
 
 I/O must be efficient, scalable, and portable, indicating a parallel
@@ -846,7 +784,7 @@ or when certain user-defined conditions are met, depending on
 post-processing requirements.
 
 %-----------------------------------------------------------------------
-\subsection{Performance}  \label{ss:require-performance}
+\subsubsection{Performance}  \label{sss:require-performance}
 %-----------------------------------------------------------------------
 
 Performance is a non-functional requirement, but crucial to the
@@ -866,7 +804,7 @@ communicators~\cite{BaBu09}, this further motivates using a
 hierarchical parallelism approach to bound communicator sizes.
 
 %-----------------------------------------------------------------------
-\subsection{Resilience} \label{ss:require-resilience}
+\subsubsection{Resilience} \label{sss:require-resilience}
 %-----------------------------------------------------------------------
 
 The importance of fault tolerance and software resilience increases
@@ -997,9 +935,9 @@ using several interacting class hierarchies, whereas smaller
 components may be implemented as a single class.
 
 Below in sections \S\ref{ss:design-amr} through
-\S\ref{ss:design-resilience} we describe preliminary design issues
+\S\ref{ss:design-other} we describe preliminary design issues
 related to requirements listed in sections \S\ref{ss:require-amr}
-through \S\ref{ss:require-resilience}, respectively.
+through \S\ref{ss:require-other}, respectively.
 
 %-----------------------------------------------------------------------
 \subsection{Adaptive mesh refinement} \label{ss:design-amr}
@@ -1096,10 +1034,9 @@ operations, which we wish to avoid if possible for scalability.
 data structure excluding mesh and particle data---redundantly on each
 processor, which is a roadblock to scalability.
 
-We summarize our approaches to these issues below.  Two more
-fundamental issues, parallelism and load balancing, are described in
-their own sections \S\ref{ss:design-parallel} and
-\S\ref{ss:design-balance}, respectively.
+We summarize our approaches to these issues below.  Other 
+fundamental issues, parallelism and  load balancing, are described in
+\S\ref{ss:design-parallel}.
 
 %------------------------------------------------------------------------
 
@@ -1324,7 +1261,7 @@ problem initialization, inline analysis routines, or internal material
 boundaries.  In these cases absolute positions or indices can still be
 determined using the octree data structure in $O(\log N)$ time, using
 whatever precision or range is necessary.  A similar approach for
-particle positions is outlined in \S\ref{ss:design-particles}.
+particle positions is outlined in \S\ref{sss:design-particles}.
 
 
 %------------------------------------------------------------------------
@@ -1389,7 +1326,7 @@ In the following two sections, we describe our treatment of mesh data
 and particle data.
 
 %-----------------------------------------------------------------------
-\subsection{Mesh data} \label{ss:design-fields}
+\subsubsection{Mesh data} \label{sss:design-fields}
 %-----------------------------------------------------------------------
 
 Mesh data, as described previously, will be represented as locally
@@ -1401,7 +1338,7 @@ structure would be a single octree node, and the array would be
 partitioned into at least $P$ blocks.
 
 As outlined in the mesh data requirements
-section~\S\ref{ss:require-fields}, there will be any number of
+section~\S\ref{sss:require-fields}, there will be any number of
 user-defined fields, which may be stored using either single or double
 precision.  Different fields are identified by user code using 
 opaque field ID's, and by users (e.g.~in output files) by
@@ -1432,7 +1369,7 @@ that conserved fields are indeed conserved, or similar constraints
 such as $\nabla\cdot B=0$ for MHD problems.
 
 %-----------------------------------------------------------------------
-\subsection{Particle data} \label{ss:design-particles}
+\subsubsection{Particle data} \label{sss:design-particles}
 %-----------------------------------------------------------------------
 
 The same octree data structure that is used to support
@@ -1493,71 +1430,6 @@ precision by traversing the AMR octree with $O(\log N)$ cost, even
 if they are not explicitly stored.
 
 %-----------------------------------------------------------------------
-\subsection{User functions} \label{ss:design-user}
-%-----------------------------------------------------------------------
-
-How user functions interface with \cello\ is an important design
-issue, since it balances ease of use with power and flexibility.  
-
-User initialization functions will be required to define the fields
-are particle groups that will be used.  These functions may initialize
-fields and particles as well, or simple initialization can be
-performed using \cello\ parameter files.  Physics functions must also
-be ``registered,'' which may involve declaring which field or particle
-groups are read or modified by each function, whether each function is
-patch-, level-, or hierarchy-oriented, whether a method requires
-either temporary or persistent local fields or particle groups, and
-how functions are to be sequenced.  Initialization functions also
-assign string identifiers by the user, which is used for example to
-support user function-specific run-time parameters.  To improve
-software resilience, alternate methods may also be specified, which
-\cello\ will invoke in the event the primary method signals a failure.
-
-The primary physics-related user functions will be those that advance
-the field or particle data one timestep on a single logically
-Cartesian grid.  \cello\ will schedule and execute these user
-functions on individual patch blocks as outlined in
-\S\ref{ss:design-parallel}.  
-
-The secondary physics-related user functions will be for computations
-at level interfaces, such as flux-correction or other constraint
-enforcement at AMR level boundaries.  In this case user code will
-operate on fields and particle data defined on two adjacent patches in
-different levels, rather than a single patch.  Scheduling and
-executing these functions will also be controlled by \cello's scheduler.
-
-Other user-functions supplied will be AMR-related, and include tagging
-AMR patches for refinement or coarsening, and determining the local
-time step.
-
-All user functions will have access to \cello\ API's, which include
-signalling a software or method failure, defining additional
-values for user monitoring during a running simulation, and for
-measuring performance.
-
-%-----------------------------------------------------------------------
-\subsection{Run-time parameters} \label{ss:design-parameters}
-%-----------------------------------------------------------------------
-
-The run-time parameters component will use \code{flex} and
-\code{bison} parsing tools to generate code to read and parse the
-run-time parameter file.  Parameter types will include integers,
-scalars, logicals, strings, and lists.  Logical and scalar expressions
-involving spacial variables \code{x}, \code{y}, and \code{z}, and time
-variable \code{t}, will also be supported to enable defining simple
-initial conditions and time-dependent boundary conditions via the
-run-time parameter file.
-
-The run-time parameters API will allow access to parameter values by
-type, as well as evaluation of scalar and logical expressions
-involving \code{x}, \code{y}, \code{z}, and \code{t}.  User-defined
-parameters can be accessed by user code, so that parameters specific
-to the user code can be integrated into the same run-time parameters
-file as the \cello\ parameters.  Related parameters will be grouped
-into individual sections, e.g.~fields, particles, AMR, user functions,
-etc., to improve organization of the parameters.
-
-%-----------------------------------------------------------------------
 \subsection{Parallelism} \label{ss:design-parallel}
 %-----------------------------------------------------------------------
 
@@ -1608,7 +1480,7 @@ This overall task approach maps well to the data-driven process
 virtualization model used by \charm, the functionality of which
 subsumes that of both the \code{Task} (``chare'') and \code{Schedule}
 components, as well as \code{Distribute}, which is used for task
-distribution and dynamic load balancing (\S\ref{ss:design-balance}).  This
+distribution and dynamic load balancing (\S\ref{sss:design-balance}).  This
 similarity is no coincidence, since the \charm\ model helped influence
 our high-level parallelization design.  \charm\ also \charm\ also
 provides fault tolerance support through its built-in disk, or memory
@@ -1648,7 +1520,7 @@ shared memory API would encapsulate OpenMP and UPC.  The
 \code{Parallel} component will also directly support hierarchical
 parallelism, which we will use to improve the mapping of data and
 communication onto the specific hardware, for example hierarchical
-load balancing summarized in \ref{ss:design-balance}.  Additionally,
+load balancing summarized in \ref{sss:design-balance}.  Additionally,
 while heterogeneous platforms such as those containing general purpose
 graphics processing units (GPGPU's) will not be directly supported,
 the framework's design will facilitate their use by user-written
@@ -1664,7 +1536,7 @@ parallelism technologies, such as functions for ``packing'' and
 code reuse will help reduce development time.
 
 %-----------------------------------------------------------------------
-\subsection{Load balancing} \label{ss:design-balance}
+\subsubsection{Load balancing} \label{sss:design-balance}
 %-----------------------------------------------------------------------
 
 The \code{Distribute} component will be used to distribute and
@@ -1874,85 +1746,226 @@ schemes.
 % \end{verbatim}
 % 
 
+%-----------------------------------------------------------------------
+\subsection{Other components} \label{ss:design-other}
+%-----------------------------------------------------------------------
 
 
+Below in \S\ref{sss:design-user}-\ref{sss:design-resilience} we
+summarize other requirements, both functional and non-functional.
 
+%-----------------------------------------------------------------------
+\subsubsection{User functions} \label{sss:design-user}
+%-----------------------------------------------------------------------
+
+How user functions interface with \cello\ is an important design
+issue, since it balances ease of use with power and flexibility.  
+
+User initialization functions will be required to define the fields
+are particle groups that will be used.  These functions may initialize
+fields and particles as well, or simple initialization can be
+performed using \cello\ parameter files.  Physics functions must also
+be ``registered,'' which may involve declaring which field or particle
+groups are read or modified by each function, whether each function is
+patch, level, or hierarchy-oriented, whether a method requires
+either temporary or persistent local fields or particle groups, and
+how functions are to be sequenced.  Initialization functions also
+assign string identifiers by the user, which is used for example to
+support user function-specific run-time parameters.  To improve
+software resilience, alternate methods may also be specified, which
+\cello\ will invoke in the event the primary method signals a failure.
+
+The primary physics-related user functions will be those that advance
+the field or particle data one timestep on a single logically
+Cartesian grid.  \cello\ will schedule and execute these user
+functions on individual patch blocks as outlined in
+\S\ref{ss:design-parallel}.  
+
+The secondary physics-related user functions will be for computations
+at level interfaces, such as flux-correction or other constraint
+enforcement at AMR level boundaries.  In this case user code will
+operate on fields and particle data defined on two adjacent patches in
+different levels, rather than a single patch.  Scheduling and
+executing these functions will also be controlled by \cello's scheduler.
+
+Other user-functions supplied will be AMR-related, and include tagging
+AMR patches for refinement or coarsening, and determining the local
+time step.
+
+All user functions will have access to \cello\ API's, which include
+signalling a software or method failure, defining additional
+values for user monitoring during a running simulation, and for
+measuring performance.
+
+%-----------------------------------------------------------------------
+\subsubsection{Run-time parameters} \label{sss:design-parameters}
+%-----------------------------------------------------------------------
+
+The run-time parameters component will use \code{flex} and
+\code{bison} parsing tools to generate code to read and parse the
+run-time parameter file.  Parameter types will include integers,
+scalars, logicals, strings, and lists.  Logical and scalar expressions
+involving spacial variables \code{x}, \code{y}, and \code{z}, and time
+variable \code{t}, will also be supported to enable defining simple
+initial conditions and time-dependent boundary conditions via the
+run-time parameter file.
+
+The run-time parameters API will allow access to parameter values by
+type, as well as evaluation of scalar and logical expressions
+involving \code{x}, \code{y}, \code{z}, and \code{t}.  User-defined
+parameters can be accessed by user code, so that parameters specific
+to the user code can be integrated into the same run-time parameters
+file as the \cello\ parameters.  Related parameters will be grouped
+into individual sections, e.g.~fields, particles, AMR, user functions,
+etc., to improve organization of the parameters.
 
 
 %-----------------------------------------------------------------------
-\subsection{Interfaces} \label{ss:design-interfaces}
+\subsubsection{Interfaces} \label{sss:design-interfaces}
 %-----------------------------------------------------------------------
 
-%-----------------------------------------------------------------------
-\subsection{I/O} \label{ss:design-io}
-%-----------------------------------------------------------------------
+User monitoring functionality will be implemented in the
+\code{Monitor} component.  Its API will be callable by other
+components, including user functions, for declaring data to output,
+and the format (text, HTML, simple plots).  The component will have
+access to other components, including \code{Performance} and
+\code{Error}, to allow reporting to the user information regarding the
+simulation's computational, communication, and memory performance, as
+well as any errors or warnings encountered.
 
-{\tiny
-\begin{verbatim}
-I/O different output formats for different uses
-   checkpointing
-   analysis
-   visualization
-   general ``data dump''
-   cheaper to rerun and regenerate data to process than dump and reread later
-      inline analysis capability to reduce overall output required
-   checkpoints
-       node / processor independent: software resiliency
-       checkpoints restartable on different configurations / platforms
-   ``accessor code'' included with all output data
-\end{verbatim}
-\begin{verbatim}
-I/O
-   parallel HDF5
-   compression
-   CRC error-checking and retry
-   subset of nodes do I/O
-   detection of faulty disk and mark as unusable
-   different formats for different uses
-\end{verbatim}
+Since \code{Monitor} is a cross-cutting concern, it is not easily
+modularizable, so an aspect-oriented approach may be more appropriate
+than an object-oriented approach.  We may investigate languages for
+aspect-oriented programming, such as
+\code{Aspect\cpp}~\cite{aspectcpp}, though we expect the cross-cutting
+concerns in \cello\ to be minor enough that we can still easily work
+within the limitations of \cpp.
 
-\begin{verbatim}
-Enforce strict control over data storage formats (e.g. files)
-  (see W0009)
-Require that all stored data be accessed through standard
-  interface functions that are independent of specific file formats
-  (i.e., stored datasets are conceptually treated as objects)
-\end{verbatim}
-}
 %-----------------------------------------------------------------------
-\subsection{Performance} \label{ss:design-performance}
+\subsubsection{I/O} \label{sss:design-io}
 %-----------------------------------------------------------------------
 
-{\tiny
-\begin{verbatim}
-integrated performance monitoring
-   summaries at different hardware levels
-   less frequent at lower levels--more data
-   more frequent at upper levels
-   performance data available to other components
-      load balancing based on actual memory usage / cpu time
-      feedback for adaptivity
-      help identify performance and scaling issues early
-      poor-performance resilient
-\end{verbatim}
+As indicated previously in \S\ref{sss:require-io}, we expect to
+implement the \code{Disk} component of \cello\ using parallel HDF5,
+following a standardized AMR file format such as the ADIOS
+API~\cite{LoKl08}.  I/O is known to be a significant performance and
+scaling issue.  Even when it is implemented efficiently, it can still
+adversely affect overall performance due to the relatively slow
+performance of disk hardware.  We plan to make use of available
+compression capabilities of HDF5 to reduce disk traffic and storage.
+To improve resilience, we also plan to include support for error
+checking on all reads and writes, so that the \code{Error} component
+can detect faulty disk hardware and mark it as unusable.
 
-\code{Portal} Component
+We plan to support using a dedicated subset of available hardware to
+implement I/O in a task parallel manner.  This will permit taking
+advantage of dedicated ``I/O nodes'' that are directly attached to
+disks, and allow the rest of the simulation to proceed concurrently
+with I/O.  Disadvantages of this approach will include reduced
+parallelism available for computation, and increased inter-node
+communication.
 
-\begin{verbatim}
-portal: support interfacing with other codes
-   post-processing solvers
-   data analysis pipeline
-   visualization pipeline
-      use existing library, e.g. Visit
-      Method can include visualization or inline analysis
-\end{verbatim}
 
-\code{Monitor} Component
 
-\begin{verbatim}
-monitor: support for interfacing with user while running
-   ``dashboard'' for real-time monitoring state of simulation
-\end{verbatim}
+% {\tiny
+% \begin{verbatim}
+% I/O different output formats for different uses
+%    checkpointing
+%    analysis
+%    visualization
+%    general ``data dump''
+%    cheaper to rerun and regenerate data to process than dump and reread later
+%       inline analysis capability to reduce overall output required
+%    checkpoints
+%        node / processor independent: software resiliency
+%        checkpoints restartable on different configurations / platforms
+%    ``accessor code'' included with all output data
+% \end{verbatim}
+% \begin{verbatim}
+% I/O
+%    parallel HDF5
+%    compression
+%    CRC error-checking and retry
+%    subset of nodes do I/O
+%    detection of faulty disk and mark as unusable
+%    different formats for different uses
+% \end{verbatim}
+% 
+% \begin{verbatim}
+% Enforce strict control over data storage formats (e.g. files)
+%   (see W0009)
+% Require that all stored data be accessed through standard
+%   interface functions that are independent of specific file formats
+%   (i.e., stored datasets are conceptually treated as objects)
+% \end{verbatim}
+% }
+
+%-----------------------------------------------------------------------
+\subsubsection{Performance} \label{sss:design-performance}
+%-----------------------------------------------------------------------
+
+Although performance is a non-functional requirement, our
+\code{Performance} component will help us to meet our performance and
+scaling requirements.  The \code{Performance} component will provide
+an API that will enable measuring the hardware, software, and data
+structure performance of the simulation.  
+
+The design of the \code{Performance} component will be motivated by
+that of \code{lcaperf}~\cite{wwwlcaperf}, but will include several
+improvements.  One simple improvement will be to use opaque handles
+for code regions instead of string constants to reduce overhead.  A
+second improvement will be to support declaring a user attribute as
+``monotonic;'' for example, a ``\code{level}'' attribute defining the
+current active AMR level would not be monotonic, but a
+``\code{timestep}'' attribute defining the current time step on the
+root level would be.  Defining appropriate attributes to be monotonic
+will allow detecting when performance data groups will no longer be
+updated, so that the data can be flushed to disk and deallocated to
+reduce memory consumption.
+
+The API will also allow access to performance data at run-time by
+other components.  This will be used in the \code{Monitor} component
+for example, to display pertinant peformance information to the user.
+It can also be used in the \code{Distribute} component for load
+balancing, so that performance metrics used in dynamic load balancing
+decisions can be defined in terms of actual collected performance data
+rather than just estimates.
+
+As with the \code{Monitor} component, \code{Performance} is a
+cross-cutting concern.  Since \cpp\ does not directly support the
+aspect-oriented programming model, care must be taken in its design to
+reduce overall code complexity.
+
+% {\tiny
+% \begin{verbatim}
+% integrated performance monitoring
+%    summaries at different hardware levels
+%    less frequent at lower levels--more data
+%    more frequent at upper levels
+%    performance data available to other components
+%       load balancing based on actual memory usage / cpu time
+%       feedback for adaptivity
+%       help identify performance and scaling issues early
+%       poor-performance resilient
+% \end{verbatim}
+% 
+% \code{Portal} Component
+% 
+% \begin{verbatim}
+% portal: support interfacing with other codes
+%    post-processing solvers
+%    data analysis pipeline
+%    visualization pipeline
+%       use existing library, e.g. Visit
+%       Method can include visualization or inline analysis
+% \end{verbatim}
+% 
+% \code{Monitor} Component
+% 
+% \begin{verbatim}
+% monitor: support for interfacing with user while running
+%    ``dashboard'' for real-time monitoring state of simulation
+% \end{verbatim}
 
 
 % \begin{verbatim}
@@ -1975,153 +1988,172 @@ monitor: support for interfacing with user while running
 %   performance monitoring and visualization
 % \end{verbatim}
 
-\begin{verbatim}
-platform hierarchical architecture-aware data structures
-  e.g. MPI communicator for cores in a socket, sockets in a
-    node, nodes in a supernode, supernodes in a machine
-  facilitates hierarchical dynamic load balancing
-    improves dynamic mapping of data structures to hardware components
-    E.g. load balance more frequently at core / socket level to
-      keep functional units busy
-    load balance node / supernode levels less frequently to keep
-      memory usage uniform
-    less frequent because:
-      problem changes less at larger scales
-      rebalancing is more expensive: larger data sizes, slower
-        interconnects
-    user-defined parameters and metrics for load balancing at
-      different levels
-      dynamically collected performance data can be fed back
-        into hierarchical load balancing algorithm
-  note linearization of octree datastructure is insufficient:
-    assumes equal work per patch
-    particles are associated with nodes, changing weight
-    adaptive time steps drastically weights more highly
-      refined patches
-    performance of physics algorithms on a patch is not
-      necessarily uniform, e.g. localized chemistry subcycling, front
-      tracking, etc.
-    arrays on patches may be different sized
-    linearization of patches 
-        reduces flexibility
-        constrains data movement along a single dimension
-\end{verbatim}
+% \begin{verbatim}
+% platform hierarchical architecture-aware data structures
+%   e.g. MPI communicator for cores in a socket, sockets in a
+%     node, nodes in a supernode, supernodes in a machine
+%   facilitates hierarchical dynamic load balancing
+%     improves dynamic mapping of data structures to hardware components
+%     E.g. load balance more frequently at core / socket level to
+%       keep functional units busy
+%     load balance node / supernode levels less frequently to keep
+%       memory usage uniform
+%     less frequent because:
+%       problem changes less at larger scales
+%       rebalancing is more expensive: larger data sizes, slower
+%         interconnects
+%     user-defined parameters and metrics for load balancing at
+%       different levels
+%       dynamically collected performance data can be fed back
+%         into hierarchical load balancing algorithm
+%   note linearization of octree datastructure is insufficient:
+%     assumes equal work per patch
+%     particles are associated with nodes, changing weight
+%     adaptive time steps drastically weights more highly
+%       refined patches
+%     performance of physics algorithms on a patch is not
+%       necessarily uniform, e.g. localized chemistry subcycling, front
+%       tracking, etc.
+%     arrays on patches may be different sized
+%     linearization of patches 
+%         reduces flexibility
+%         constrains data movement along a single dimension
+% \end{verbatim}
 
-\begin{verbatim}
-Multiple parallelization strategies
-  MPI: + widespread, optimized implementations, familiar
-  MPI: - data replication, difficult to use
-  UPC + easier to use, combines shared memory view with efficient data affinity
-  UPC - no concept of MPI communicator, still under development--not as mature
-  OMP + can be used progressively
-  OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
-  GPU + very fast / power efficient when usable
-  GPU - no usable standard, difficult to program, difficult to map problem to hardware
-  Charm++ + higher-level, dynamic scheduling, dynamic load balancing, fault tolerant through checkpointing to other node memory
-  Charm++ - requires learning separate language, separate runtime system, no data prefetching(?)
-    currently not fully realizable for GPU since depends on
-      computational code
-    hierarchical parallelism: MPI + OMP, MPI + UPC, MPI + GPU,
-      etc.
-    advantages of hybrid
-      reduced data replication from MPI distributed memory
-      dynamic parallel threads--use more when helpful, fewer when not
-      UPC
-    disadvantages of hybrid
-      performance hit from data sharing in MPI + OMP
-      MPI and UPC communication cannot (currently) proceed concurrently
-    code for two modes: distributed memory and shared memory
-    parallel tasks: grid patches, arrays, grid patch groups,
-      particle groups
-    flexible data structure parameters (grid patch size, patch
-      decomposition, patch grouping) to dynamically optimize task size
-\end{verbatim}
+% \begin{verbatim}
+% Multiple parallelization strategies
+%   MPI: + widespread, optimized implementations, familiar
+%   MPI: - data replication, difficult to use
+%   UPC + easier to use, combines shared memory view with efficient data affinity
+%   UPC - no concept of MPI communicator, still under development--not as mature
+%   OMP + can be used progressively
+%   OMP - not scalable outside of socket / node;  inefficiencies due to false cache sharing
+%   GPU + very fast / power efficient when usable
+%   GPU - no usable standard, difficult to program, difficult to map problem to hardware
+%   Charm++ + higher-level, dynamic scheduling, dynamic load balancing, fault tolerant through checkpointing to other node memory
+%   Charm++ - requires learning separate language, separate runtime system, no data prefetching(?)
+%     currently not fully realizable for GPU since depends on
+%       computational code
+%     hierarchical parallelism: MPI + OMP, MPI + UPC, MPI + GPU,
+%       etc.
+%     advantages of hybrid
+%       reduced data replication from MPI distributed memory
+%       dynamic parallel threads--use more when helpful, fewer when not
+%       UPC
+%     disadvantages of hybrid
+%       performance hit from data sharing in MPI + OMP
+%       MPI and UPC communication cannot (currently) proceed concurrently
+%     code for two modes: distributed memory and shared memory
+%     parallel tasks: grid patches, arrays, grid patch groups,
+%       particle groups
+%     flexible data structure parameters (grid patch size, patch
+%       decomposition, patch grouping) to dynamically optimize task size
+% \end{verbatim}
+% 
+% \begin{verbatim}
+% hierarchical parallelism
+%    encourage communication within hardware components
+%       sockets within node
+%       cores within socket
+%       hyperthreads within core
+% \end{verbatim}
+% 
+% \begin{verbatim}
+% parallel technology encapsulation / processor virtualization
+%   distributed / shared memory
+%     MPI (two-sided and one-sided) (distributed memory)
+%     OpenMP (shared memory) 
+%     UPC (either distributed memory or shared memory)
+%     Charm++
+%   multiple strategies enhance software resiliency
+%     i.e. buggy MPI implementation--dynamically switch to UPC
+% \end{verbatim}
+% }
 
-\begin{verbatim}
-hierarchical parallelism
-   encourage communication within hardware components
-      sockets within node
-      cores within socket
-      hyperthreads within core
-\end{verbatim}
-
-\begin{verbatim}
-parallel technology encapsulation / processor virtualization
-  distributed / shared memory
-    MPI (two-sided and one-sided) (distributed memory)
-    OpenMP (shared memory) 
-    UPC (either distributed memory or shared memory)
-    Charm++
-  multiple strategies enhance software resiliency
-    i.e. buggy MPI implementation--dynamically switch to UPC
-\end{verbatim}
-}
 %-----------------------------------------------------------------------
-\subsection{Resilience} \label{ss:design-resilience}
+\subsubsection{Resilience} \label{sss:design-resilience}
 %-----------------------------------------------------------------------
 
-Fault tolerance and software resilience are crucial factors at extreme
-scales, since it has been observed that frequency of failures is
-proportional to the number of sockets~\cite{@@@fault-sockets}
+Like performance, resilience is another non-functional requirement.
+Also like performance, despite being a non-functional requirement, a
+software component (\code{Error}) will be implemented to aid in
+meeting the requirement.  
 
-{\tiny
-\begin{verbatim}
- FT-MPI 
-  ``fault-tolerante MPI''
-  http://icl.cs.utk.edu/ftmpi/overview/index.html 
-MPICH-V 
-  ``MPI Implementation for Volatile resources''
-  http://mpich-v.lri.fr/index.php 
-\end{verbatim}
+The \code{Error} component will be used to flag a fault related to
+either hardware or software.  It will be the responsibility of other
+components to call the appropriate function in the \code{Error} API to
+flag an error, such as \code{Disk} to flag a disk fault, \code{Memory}
+to flag a memory allocation error, \code{Parallel} to flag a
+communication or synchronization error, or a user function in
+\code{Method} to flag an algorithmic error.  Some errors will be easier
+to detect than others, and some are currently not possible without
+OS or software library support.
 
+The \code{Error} component will include a list of hardware and software
+components that are faulty, and will provide other components access to
+the list.  For example, a list of faulty nodes will be kept, which will
+be accessible by the \code{Parallel} and high-level parallelization components,
+so that they will isolate the component, recover any lost data, and proceed
+with the simulation if possible.
 
-\begin{verbatim}
-software resilience
-   take advantage of only Methods change data
-   methods signal which fields / particles changed
-\end{verbatim}
-\begin{verbatim}
-fault-tolerance / software resilience strategies
-   need to deal with continuous stream of failures
-   MTTF < MTTC
-   checkpoint to disk
-      issue: failures will become more frequent than time to checkpoint
-      agressively reduce checkpoint data size and write time
-         dedicated I/O nodes
-         compress
-         check data
-         methods identify which data modified
-            may help lower disk output--only checkpoint modified data
-   checkpoint to memory
-     Charm++ does this(?)
-   detect hardware errors and mark as defective
-       memory
-       disk
-       core
-       socket
-       node
-       interconnect (pairs of nodes)
-       software libraries (MPI versus UPC, etc.)
-   flash memory
-   log faults to disk for subsequent analysis
-   performance resilience
-      dynamically adapt to reduce cache thrashing / ineffeciency
-          array blocking or padding in computational array registers
-      adapt AMR patch size, refinement factor (2,4,8)
-   fault-tolerant MPI
-      FT-MPI
-   leverage new approaches when available
-      active research area
-      keep up to date in latest practices
-      design software to use new approaches
-\end{verbatim}
-}
+% {\tiny
+% \begin{verbatim}
+%  FT-MPI 
+%   ``fault-tolerante MPI''
+%   http://icl.cs.utk.edu/ftmpi/overview/index.html 
+% MPICH-V 
+%   ``MPI Implementation for Volatile resources''
+%   http://mpich-v.lri.fr/index.php 
+% \end{verbatim}
+% 
+% 
+% \begin{verbatim}
+% software resilience
+%    take advantage of only Methods change data
+%    methods signal which fields / particles changed
+% \end{verbatim}
+% \begin{verbatim}
+% fault-tolerance / software resilience strategies
+%    need to deal with continuous stream of failures
+%    MTTF < MTTC
+%    checkpoint to disk
+%       issue: failures will become more frequent than time to checkpoint
+%       agressively reduce checkpoint data size and write time
+%          dedicated I/O nodes
+%          compress
+%          check data
+%          methods identify which data modified
+%             may help lower disk output--only checkpoint modified data
+%    checkpoint to memory
+%      Charm++ does this(?)
+%    detect hardware errors and mark as defective
+%        memory
+%        disk
+%        core
+%        socket
+%        node
+%        interconnect (pairs of nodes)
+%        software libraries (MPI versus UPC, etc.)
+%    flash memory
+%    log faults to disk for subsequent analysis
+%    performance resilience
+%       dynamically adapt to reduce cache thrashing / ineffeciency
+%           array blocking or padding in computational array registers
+%       adapt AMR patch size, refinement factor (2,4,8)
+%    fault-tolerant MPI
+%       FT-MPI
+%    leverage new approaches when available
+%       active research area
+%       keep up to date in latest practices
+%       design software to use new approaches
+% \end{verbatim}
+% }
 
 %=======================================================================
-\section{Implementation} \label{s:implementation}
+\section{Software Implementation} \label{s:implementation}
 %=======================================================================
 
-\cello\ will be written primarily in C++, with C and Fortran callable
+\cello\ will be written primarily in \cpp, with C and Fortran callable
 interfaces to the public API's, allowing user physics functions to be
 written in C or Fortran.  It will be written using an eminently
 object-oriented approach, with use of design patterns~(\cite{GaHe95}
@@ -2139,16 +2171,17 @@ to the low-level \code{Parallel} component.
 Our development environment involves several components anchored at a
 Trac site~\cite{wwwtrac}
 (\url{http://client65-88.sdsc.edu/projects/cello}, login \code{guest}
-password \code{guest}).  Trac's wiki support is used for brainstorming,
-recording, and refining design issues, after which they will be
-migrated to formal development documentation written in Latex.  Trac's
-roadmap support will be used for organizing and tracking long-term
-progress, its ticket support will be used for individual tasks and bug
-tracking, and its browser used for viewing the subversion repository.
+password \code{guest}).  Trac's wiki support is used for
+brainstorming, organizing, and refining design issues, after which
+they will be migrated to formal \LaTeX\ development documentation.
+Trac's roadmap support will be used for organizing and tracking
+long-term progress, its ticket support will be used for individual
+tasks and bug tracking, and its browser used for viewing the
+subversion repository.
 
 Subversion is currently used for source code revision control, which
 we may migrate to mercurial.  Make is used for controlling
-compilation, which we may later migrate to SCons.  Latex is used for
+compilation, which we may later migrate to SCons.  \LaTeX\ is used for
 development and user documentation, and Doxygen is used for directly
 documenting the source code.
 
@@ -2287,6 +2320,72 @@ metrics with software data structure attributes.
 %=======================================================================
 \section{Development Plan} \label{s:plan}
 %=======================================================================
+
+
+% \begin{verbatim}
+% application driven
+%    helpful for ensuring completeness
+%       missing functionality in design will become apparent
+%    helpful for testing
+%    \enzoii\ 
+%    cosmology / astrophysics
+%    requires wide range of AMR capabilities
+%      broad for galaxy structure formation
+%      deep for star formation
+%      turbulence
+%    requires wide range of physics capabilities
+%      hyperbolic: hydrodynamics
+%      elliptic: self-gravity, FLD radiation
+%      local physics: chemistry, heating/cooling
+%    decouple physics modules from AMR framework
+%    make both \enzoii\  and underlying AMR framework publicly available
+% \end{verbatim}
+
+
+Our development approach will be to progressively implement \cello\ with
+\enzoii\ as its driving application.  Functionality will be
+progressively added, with all phases of the software lifecycle updated
+with each iteration.  The initial cycle will require the most effort,
+since many components and interfaces must be designed before even the
+first simple single-level hyperbolic end-to-end simulation can
+proceed.
+
+Our basic software development life cycle is based on the standard
+requirements, design, implementation, and testing phases.  We iterate
+over the phases, progressively adding functionality.  This will help
+us ensure that code is correct and scalable at each iteration, and it
+allows us to concentrate on small sections of the code at a time
+through its entire development cycle.  
+
+Initially individual components will be developed in isolation, then
+gradually integrated with each other, strictly controlling
+interdependencies.  Software components (Figure~\ref{f:components})
+and subcomponents are mapped onto directories and subdirectories in
+the source code, and class hierarchies in .cpp and .hpp files.
+
+Prototyping will be used to aid the design process, to quickly assess
+the feasibility of new ideas.  While the prototype code will generally
+not end up in the final code, the process of writing it can
+significantly help with writing the final implementation (somewhat
+analagous to the predictor in a ``predictor-corrector'' numerical
+algorithm).
+
+Quality control will be a major component of our development approach.
+High quality software in general is difficult to develop, in part
+because maintaining high quality software involves optimizing a litany
+of desirable characteristics: software should be maintainable,
+flexible, portable, usable, reusable, readable, testable,
+understandable, efficient, scalable, correct, reliable, adaptable,
+accurate, robust, etc.  These characteristics depend on decisions made
+during the development process, and are frequently in conflict with
+each other, so design and implementation decisions must be made
+deliberately and thoughtfully.  We recognize that no single method of
+improving software quality is sufficient, so we will employ a set of
+techniques that have been proven in practice to be
+successful~\cite{Mc04}.  These include testing, code reviews, design
+reviews, and refactoring.
+
+
 
 %=======================================================================
 \section{Milestones and Deliverables} \label{s:milestones}
