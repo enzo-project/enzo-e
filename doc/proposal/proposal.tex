@@ -52,7 +52,7 @@
 %\nocite{LaTa06} % hierarchical load balancing
 
 %=======================================================================
-\TITLE{\cello: A Software Framework for Extreme Adaptive Mesh
+\TITLE{A Software Framework for \\ Extreme Adaptive Mesh
   Refinement}{James Bordner}{$Rev$}
 %=======================================================================
 
@@ -329,7 +329,7 @@ proposed project are
 \samrai~\cite{WiHo01}~\cite{wwwsamraicode}, ALPS~\cite{BuBu09}, and
 \gadget~\cite{wwwgadget}~\cite{Sp05}.  Other notable frameworks
 include \clawpack~\cite{wwwclawpack}, \grace~\cite{PaLi10}, and
-Carpet~\cite{ScDi06}~\cite{wwwcarpet}.
+\carpet~\cite{ScDi06}~\cite{wwwcarpet}.
 
 %-----------------------------------------------------------------------
 \subsection{\paramesh} \label{ss:paramesh}
@@ -444,16 +444,38 @@ and communication-computation overlap, will improve scalability.
 \alps~\cite{BuBu09}, is a highly scalable AMR framework based on
 octrees.  It appears to be one of the most highly scalable AMR
 frameworks currently available, with demonstrated scaling on up to 32K
-cores and 4 billion ellements~\cite{BuGh08}.  To achieve this level of
-scaling, they use ``time windows''~\cite{SuWh04} to improve
-re-gridding performance, which requires ``...repeat[ing] the numerical
-integration of the PDEs over a time window one or more times to
-accumulate error estimates''.  It is uncertain whether this adds to
-the PDE integration cost, thus artificially improving the scalability
-by increasing computational cost relative to communication.
-Nevertheless, the basic octree approach used still seems to have a lot
-of promise in terms of designing and implementing extreme AMR.
+cores and 4 billion elements~\cite{BuGh08}.
 
+The framework provides a small set of AMR functions, including
+functions for marking elements for coarsening/refinement, performing
+the remeshing step, balancing the tree to eliminate level jumps,
+interpolating field data after a remeshing step, and partitioning 
+patches across cores.
+
+The AMR hierarchy is octree-based, with only the leaves of the octree
+used as patches.  This approach can reduce communication compared to
+both the SAMR approach, as well as octree hierarchies in which all
+nodes are used as patches, since communication is not required for
+interpolating between levels~\cite{BuGh08b}.  The octree is kept
+balanced to maintain at most one refinement level difference between
+neighboring nodes.  The hierarchy is fully distributed across cores
+using a linearized Morton ordered space-filling curve.  Solving
+elliptic problems is not directly supported, but it has been used with
+the \code{BoomerAMG} algebraic multigrid solver~\cite{HeYa02},
+available in the \code{hypre} scalable linear solver
+package~\cite{FaJo06}.
+
+The octree-based AMR approach has numerous features that could satisfy
+many of our requirements, including relatively high hierarchy
+performance and scalability, a built-in spacial data structure that
+can support fast particle methods as well as mesh-based methods, and
+established and effective parallelization approaches using
+space-filling curves.  As implemented, the \alps\ framework itself
+does not meet all of our specific requirements; for example, it does
+not support particles, and it does not appear to be applicable to
+adaptive time stepping (due in part to distributing equal number of
+elements to each core~\cite{BuGh08b}).  Nevertheless, we expect the
+\alps\ framework to significantly influence our design decisions.
 
 %-----------------------------------------------------------------------
 \subsection{\gadget } \label{ss:gadget}
@@ -1837,7 +1859,7 @@ Since \code{Monitor} is a cross-cutting concern, it is not easily
 modularizable, so an aspect-oriented approach may be more appropriate
 than an object-oriented approach.  We may investigate languages for
 aspect-oriented programming, such as
-\code{Aspect\cpp}~\cite{aspectcpp}, though we expect the cross-cutting
+\code{Aspect\cpp}~\cite{wwwaspectcpp}, though we expect the cross-cutting
 concerns in \cello\ to be minor enough that we can still easily work
 within the limitations of \cpp.
 
