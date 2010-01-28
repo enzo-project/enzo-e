@@ -7,7 +7,7 @@
 %=======================================================================
 \include{include}
 
-\setcounter{secnumdepth}{3}
+\setcounter{secnumdepth}{2}
 
 % Project summary
 % Introduction
@@ -52,7 +52,7 @@
 %\nocite{LaTa06} % hierarchical load balancing
 
 %=======================================================================
-\TITLE{A Software Framework for \\ Extreme Adaptive Mesh
+\TITLE{\cello: A New Software Framework for \\ Extreme Adaptive Mesh
   Refinement}{James Bordner}{$Rev$}
 %=======================================================================
 
@@ -141,15 +141,14 @@
 \section{Project Summary}  \label{s:summary}
 %=======================================================================
 
-
 \pargraph{Proposal} 
 %
 We propose to develop a new parallel software framework for adaptive
 mesh refinement (AMR).  
 %
 A distinguishing characteristic relative to existing AMR libraries and
-frameworks is the aggressive pursuit of extreme scalability in terms
-of software data structures and hardware parallelism from the
+frameworks is the aggressive pursuit of extreme scalability, both in terms
+of software data structures and hardware parallelism, from the
 onset.
 %
 The design will be forward-looking, targeted not just at the largest
@@ -159,6 +158,21 @@ through the petascale era and into the exascale.
 The proposed AMR framework would enable application developers to
 write multiphysics applications for simulating phenomena on an
 unprecidented range of spacial and temporal scales.
+
+\pargraph{AMR fields + particles}
+%
+The AMR data structures will be implemented using a hybrid
+replicated/distributed generalization of the octree data structure.
+Tree nodes will be associated with both logically Cartesian grid
+blocks and particles, enabling both Eularian and Lagrangian (and
+hybrid) methods.  Unlike standard octree-based AMR methods, grid block
+sizes will be allowed to vary and may be distributed, such that
+optimal ``unigrid'' parallel performance is naturally obtained in
+subregions of the problem domain that are smooth.  Higher refinement
+factors, such as $r=4$ or even $r=8$, will also be supported for
+particularly ``deep'' AMR problems; this will be designed in a way
+that maintains at most $r=2$ level jumps, and will still use the
+efficient octree data structure.
 
 \pargraph{multiple parallel technologies}
 %
@@ -182,13 +196,6 @@ Dynamic load balancing of parallel tasks will be hierarchical, which
 will improve mapping the distributed software data structures to the
 hierarchical hardware components of the target computational
 platforms~\cite{LaTa06}.
-
-\pargraph{AMR fields + particles}
-%
-The AMR data structures will be implemented using a hybrid
-replicated/distributed generalization of the octree data structure.
-Tree nodes will be associated with both logically Cartesian grids and
-particles, enabling both Eularian and Lagrangian (and hybrid) methods.
 
 \pargraph{extreme scalability through localization}
 %
@@ -410,7 +417,7 @@ multiple messages between pairs of processes into one.
 In \chombo, all processes store $O(N)$
 data, including all patch extents and process assignments.  Although
 the size has been aggressively reduced to an impressive $\approx 50$
-bytes per patch~\cite{CoKe07}, this still represents an eventual
+bytes per patch~\cite{CoBe07}, this still represents an eventual
 scaling impediment for \chombo.
 
 \chombo's elliptic solver is weakly scalable up to $8192$
@@ -431,34 +438,42 @@ used in many applications, including serving as the AMR framework in
 the \flash\ code for astrophysical thermonuclear
 flashes~\cite{FrOl00}~\cite{wwwflash}.  It consists of a collection of
 Fortran 90 subroutines, and is parallelized using the MPI library.
+Due to a loss of funding, \paramesh\ is not currently being developed
+further by the original authors.
 
-Nodes of the octree are associated with small blocks that have fixed
-size, but the size of which can be set at compile-time.  Blocks are
-represented with a five dimensional array, with the leading dimension
-selecting the field type (density, energy, etc.), the next three
-dimensions select the grid cell, and the last dimension selects the
-AMR block.  Ghost zones may be permanantly allocated or not,
-resolution jumps are restricted to at most one level, and time
-stepping may be constant or adaptive on different refinement levels.
-Load balancing uses a linearized Morton or Peano-Hilbert space-filling
-curve, with the option of assigning different weighting factors to
-different blocks.  Checkpoint/restart to disk is implemented as well,
-using parallel HDF5~\cite{hdf5} or MPI-IO.
+In \paramesh, nodes of the octree are associated with small blocks
+that have fixed size, but the size of which can be set at
+compile-time.  Blocks are represented with a five dimensional array,
+with the leading dimension selecting the field type (density, energy,
+etc.), the next three dimensions select the grid cell, and the last
+dimension selects the AMR block.  Ghost zones may be permanantly
+allocated or not, resolution jumps are restricted to at most one
+level, and time stepping may be constant or adaptive on different
+refinement levels.  Load balancing uses a linearized Morton or
+Peano-Hilbert space-filling curve, with the option of assigning
+different weighting factors to different blocks.  Checkpoint/restart
+to disk is implemented as well, using parallel HDF5~\cite{hdf5} or
+MPI-IO.
 
-Developing an application with \paramesh\ involves several steps, including
+Scaling of applications using \paramesh\ have been good, for example
+\flash\ has demonstrated scaling up to $8192$
+processors~\cite{CoBe07}.  Obtaining this scaling required the
+application developers to minimize communication costs by using
+space-filling curves for efficient load balancing, using fast search
+algorithms and caching for computing and storing block intersection
+lists, and optimizing boundary condition computations at resolution
+level boundaries.
 
-
- : \paramesh\ re-gridding does
-not scale well I/O costly despite not being particularly inefficient
-
-The \paramesh\ software was developed at the .
-
-It is an octree-based AMR framework
-
-\paramesh\ grid blocks can be arbitrary constant even size $($\code{NXB},\code{NYB}, \code{NZB}$)$~\cite{wwwparamesh}.
-
-Due to a loss of funding, \paramesh\ is not currently supported.
-
+\paramesh\ has many attractive features, including associating small
+mesh blocks to tree nodes (as opposed to a single computational cell)
+to amortize AMR overhead costs, and supporting adaptive time steps
+with non-constant weighting factors for blocks in different levels.
+It does not support particle methods, however, which we wish to
+support.  We also consider its fixed-size blocks a potential
+performance issue: in particular, areas of uniform refinement will
+necessarily be covered by many small blocks, rather than just a few
+larger patches as in SAMR approach.  \paramesh\ also replicates
+AMR data on all processors, which will ultimately limit its scalability.
 
 %-----------------------------------------------------------------------
 \subsection{\alps } \label{ss:alps}
@@ -705,9 +720,9 @@ procesess~\cite{BaBu09}.
 
 Task scheduling must also be efficient, minimizing overhead and
 maximizing throughput.  Again, a hierarchical scheduling approach may
-be used.  Since we want to at least indirectly support GPU programming
-in user code, we will want to support scheduling large groups of
-concurrent tasks to keep the GPU's busy.
+be used.  Since we want to at least indirectly support GPGPU
+programming in user code, we will want to support scheduling large
+groups of concurrent tasks to keep the GPGPU's busy.
 
 %-----------------------------------------------------------------------
 \subsubsection{Load balancing} \label{ss:require-balance}
@@ -731,8 +746,8 @@ implies that the scheme is less than $O(P)$ cost per process.
 \subsection{Other requirements} \label{ss:require-other}
 %-----------------------------------------------------------------------
 
-Below in \S\S\ref{sss:require-user}-\ref{sss:require-resilience} we
-summarize other requirements, both functional and non-functional.
+Below we summarize other requirements, both functional and
+non-functional.
   
 %-----------------------------------------------------------------------
 \subsubsection{User functions} \label{sss:require-user}
@@ -1308,7 +1323,7 @@ problem initialization, inline analysis routines, or internal material
 boundaries.  In these cases absolute positions or indices can still be
 determined using the octree data structure in $O(\log N)$ time, using
 whatever precision or range is necessary.  A similar approach for
-particle positions is outlined in \S\ref{sss:design-particles}.
+particle positions is outlined below in ``Particle Data.''
 
 
 %------------------------------------------------------------------------
@@ -1384,13 +1399,13 @@ the limit of a large ``unigrid'' (single AMR level) run, the AMR data
 structure would be a single octree node, and the array would be
 partitioned into at least $P$ blocks.
 
-As outlined in the mesh data requirements
-section~\S\ref{sss:require-fields}, there will be any number of
-user-defined fields, which may be stored using either single or double
-precision.  Different fields are identified by user code using 
-opaque field ID's, and by users (e.g.~in output files) by
-user-defined string identifiers.  Different user methods may
-declare different fields to be read-only, or writable.
+As outlined in the corresponding mesh data section in
+\S\ref{ss:require-amr}, there will be any number of user-defined
+fields, which may be stored using either single or double precision.
+Different fields are identified by user code using opaque field ID's,
+and by users (e.g.~in output files) by user-defined string
+identifiers.  Different user methods may declare different fields to
+be read-only, or writable.
 
 Optional scaling factors may be defined, which may vary for different
 fields, different AMR levels, or different methods.  Level-dependent
@@ -1527,7 +1542,7 @@ This overall task approach maps well to the data-driven process
 virtualization model used by \charm, the functionality of which
 subsumes that of both the \code{Task} (``chare'') and \code{Schedule}
 components, as well as \code{Distribute}, which is used for task
-distribution and dynamic load balancing (\S\ref{sss:design-balance}).  This
+distribution and dynamic load balancing.  This
 similarity is no coincidence, since the \charm\ model helped influence
 our high-level parallelization design.  \charm\ also \charm\ also
 provides fault tolerance support through its built-in disk, or memory
@@ -1567,8 +1582,8 @@ shared memory API would encapsulate OpenMP and UPC.  The
 \code{Parallel} component will also directly support hierarchical
 parallelism, which we will use to improve the mapping of data and
 communication onto the specific hardware, for example hierarchical
-load balancing summarized in \ref{sss:design-balance}.  Additionally,
-while heterogeneous platforms such as those containing general purpose
+load balancing summarized in the next section.  Additionally, while
+heterogeneous platforms such as those containing general purpose
 graphics processing units (GPGPU's) will not be directly supported,
 the framework's design will facilitate their use by user-written
 physics kernels written for GPGPU's.
@@ -1676,7 +1691,6 @@ frequencies between different levels.  This will improve load
 balancing costs, since rebalancing at higher levels is required less
 frequently and involves higher communication costs.
 
-\nocite{ScKa97}
 Additionally, we will pursue a hierarchical diffusion-based
 approach~\cite{ScKa97}.  We expect that such an approach could be
 efficient at balancing tasks globally as well as locally, due to
@@ -1798,8 +1812,8 @@ schemes.
 %-----------------------------------------------------------------------
 
 
-Below in \S\ref{sss:design-user}-\ref{sss:design-resilience} we
-summarize other requirements, both functional and non-functional.
+Below we summarize other proposed design solutions for both functional
+and non-functional requirements.
 
 %-----------------------------------------------------------------------
 \subsubsection{User functions} \label{sss:design-user}
@@ -1892,17 +1906,18 @@ within the limitations of \cpp.
 \subsubsection{I/O} \label{sss:design-io}
 %-----------------------------------------------------------------------
 
-As indicated previously in \S\ref{sss:require-io}, we expect to
-implement the \code{Disk} component of \cello\ using parallel HDF5,
-following a standardized AMR file format such as the ADIOS
-API~\cite{LoKl08}.  I/O is known to be a significant performance and
-scaling issue.  Even when it is implemented efficiently, it can still
-adversely affect overall performance due to the relatively slow
-performance of disk hardware.  We plan to make use of available
-compression capabilities of HDF5 to reduce disk traffic and storage.
-To improve resilience, we also plan to include support for error
-checking on all reads and writes, so that the \code{Error} component
-can detect faulty disk hardware and mark it as unusable.
+As indicated in the corresponding I/O section in
+\S\ref{ss:require-other}, we expect to implement the \code{Disk}
+component of \cello\ using parallel HDF5, following a standardized AMR
+file format such as the ADIOS API~\cite{LoKl08}.  I/O is known to be a
+significant performance and scaling issue.  Even when it is
+implemented efficiently, it can still adversely affect overall
+performance due to the relatively slow performance of disk hardware.
+We plan to make use of available compression capabilities of HDF5 to
+reduce disk traffic and storage.  To improve resilience, we also plan
+to include support for error checking on all reads and writes, so that
+the \code{Error} component can detect faulty disk hardware and mark it
+as unusable.
 
 We plan to support using a dedicated subset of available hardware to
 implement I/O in a task parallel manner.  This will permit taking
