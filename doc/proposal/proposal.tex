@@ -324,30 +324,13 @@ with different design goals and decisions, data structures, AMR
 algorithms, parallelization strategies, and parallel performance and
 scaling.  Perhaps the most successful software frameworks related our
 proposed project are
-\paramesh~\cite{MaOl00}~\cite{OlMa05}~\cite{Ol06}~\cite{wwwparamesh},
 \chombo~\cite{wwwchombo}~\cite{CoGr09},
-\samrai~\cite{WiHo01}~\cite{wwwsamraicode}, ALPS~\cite{BuBu09}, and
+\samrai~\cite{WiHo01}~\cite{wwwsamraicode}, 
+\paramesh~\cite{MaOl00}~\cite{OlMa05}~\cite{Ol06}~\cite{wwwparamesh},
+\alps~\cite{BuBu09}, and
 \gadget~\cite{wwwgadget}~\cite{Sp05}.  Other notable frameworks
 include \clawpack~\cite{wwwclawpack}, \grace~\cite{PaLi10}, and
 \carpet~\cite{ScDi06}~\cite{wwwcarpet}.
-
-%-----------------------------------------------------------------------
-\subsection{\paramesh} \label{ss:paramesh}
-%-----------------------------------------------------------------------
-
-
-FLASH: \paramesh\ re-gridding does not scale well
-       I/O costly despite not being particularly inefficient
-
-The \paramesh\ software was developed at the NASA Goddard Space Flight
-Center and Drexel University.
-
-It is an octree-based AMR framework
-
-\paramesh\ grid blocks can be arbitrary constant even size $($\code{NXB},\code{NYB}, \code{NZB}$)$~\cite{wwwparamesh}.
-
-Due to a loss of funding, \paramesh\ is not currently supported.
-
 
 %-----------------------------------------------------------------------
 \subsection{\samrai} \label{ss:samrai}
@@ -438,6 +421,46 @@ constraint, in favor of smaller messages with one-sided communication
 and communication-computation overlap, will improve scalability.
 
 %-----------------------------------------------------------------------
+\subsection{\paramesh} \label{ss:paramesh}
+%-----------------------------------------------------------------------
+
+\paramesh~\cite{MaOl00}~\cite{OlMa05}~\cite{Ol06}~\cite{wwwparamesh}
+is an octree-based AMR framework developed by the NASA Goddard Space
+Flight Center and Drexel University.  \paramesh\ has been successfully
+used in many applications, including serving as the AMR framework in
+the \flash\ code for astrophysical thermonuclear
+flashes~\cite{FrOl00}~\cite{wwwflash}.  It consists of a collection of
+Fortran 90 subroutines, and is parallelized using the MPI library.
+
+Nodes of the octree are associated with small blocks that have fixed
+size, but the size of which can be set at compile-time.  Blocks are
+represented with a five dimensional array, with the leading dimension
+selecting the field type (density, energy, etc.), the next three
+dimensions select the grid cell, and the last dimension selects the
+AMR block.  Ghost zones may be permanantly allocated or not,
+resolution jumps are restricted to at most one level, and time
+stepping may be constant or adaptive on different refinement levels.
+Load balancing uses a linearized Morton or Peano-Hilbert space-filling
+curve, with the option of assigning different weighting factors to
+different blocks.  Checkpoint/restart to disk is implemented as well,
+using parallel HDF5~\cite{hdf5} or MPI-IO.
+
+Developing an application with \paramesh\ involves several steps, including
+
+
+ : \paramesh\ re-gridding does
+not scale well I/O costly despite not being particularly inefficient
+
+The \paramesh\ software was developed at the .
+
+It is an octree-based AMR framework
+
+\paramesh\ grid blocks can be arbitrary constant even size $($\code{NXB},\code{NYB}, \code{NZB}$)$~\cite{wwwparamesh}.
+
+Due to a loss of funding, \paramesh\ is not currently supported.
+
+
+%-----------------------------------------------------------------------
 \subsection{\alps } \label{ss:alps}
 %-----------------------------------------------------------------------
 
@@ -459,7 +482,7 @@ nodes are used as patches, since communication is not required for
 interpolating between levels~\cite{BuGh08b}.  The octree is kept
 balanced to maintain at most one refinement level difference between
 neighboring nodes.  The hierarchy is fully distributed across cores
-using a linearized Morton ordered space-filling curve.  Solving
+using a linearized Morton space-filling curve.  Solving
 elliptic problems is not directly supported, but it has been used with
 the \code{BoomerAMG} algebraic multigrid solver~\cite{HeYa02},
 available in the \code{hypre} scalable linear solver
@@ -472,10 +495,12 @@ can support fast particle methods as well as mesh-based methods, and
 established and effective parallelization approaches using
 space-filling curves.  As implemented, the \alps\ framework itself
 does not meet all of our specific requirements; for example, it does
-not support particles, and it does not appear to be applicable to
-adaptive time stepping (due in part to distributing equal number of
-elements to each core~\cite{BuGh08b}).  Nevertheless, we expect the
-\alps\ framework to significantly influence our design decisions.
+not support particles, its patches support individual finite or
+spectral elements rather than grid blocks, and it does not appear to
+be applicable to adaptive time stepping (due in part to distributing
+equal number of elements to each core~\cite{BuGh08b}).  Nevertheless,
+we expect the \alps\ framework to significantly influence our design
+decisions.
 
 %-----------------------------------------------------------------------
 \subsection{\gadget } \label{ss:gadget}
@@ -700,7 +725,7 @@ balancing approach should be used.  This would allow for balancing
 between different parallel levels at different frequencies, and
 balancing with respect to different metrics (e.g.~balance computation
 between cores and balance memory usage between nodes).  Scalability
-implies that the scheme is less than $O(N_P)$ cost per process.
+implies that the scheme is less than $O(P)$ cost per process.
 
 %-----------------------------------------------------------------------
 \subsection{Other requirements} \label{ss:require-other}
@@ -1576,7 +1601,7 @@ communication performance over the interconnect.
 A common approach to distributing octree-based SAMR hierarchy tasks is
 to linearize the data structure using a Morton, Gray code, or Hilbert
 type space-filling curve, then partition the tree nodes among
-processes by dividing the linearized structure into $N_P$ evenly sized
+processes by dividing the linearized structure into $P$ evenly sized
 pieces.  This approach has been shown to scale to over $60K$
 cores~\cite{@@@ART}, and works well if workload and memory usage are
 proportional to each other within tree nodes, when workload between
@@ -1605,7 +1630,7 @@ methods, etc.
 %communication to perform the reduction.
 %
 Also, this approach will eventually be unscalable since it
-requires $O(N_P)$ storage per process, and a global all-gather
+requires $O(P)$ storage per process, and a global all-gather
 operation (e.g.~\code{MPI\_Allgather}) is required on all processes.
 
 Since we suspect that a space-filling curve approach is only effective
@@ -1660,7 +1685,7 @@ components.  (This is analagous to multigrid iterative linear system
 solvers, which apply local error reducing relaxation operators at a
 hierarchy of resolution levels to reduce the error globally.)  Such a
 hierarchical diffusion method could also be implemented with less than
-$O(N_P)$ cost, since only a fixed amount of localized task information
+$O(P)$ cost, since only a fixed amount of localized task information
 is required for each hierarchical level.
 
 \textbf{Deliberate overcompensation technique.}
@@ -2413,43 +2438,76 @@ reviews, and refactoring.
 \section{Milestones and Deliverables} \label{s:milestones}
 %=======================================================================
 
-{\tiny
-\begin{verbatim}
+In Figure~\ref{t:phases} we list the major phases of development.
+Milestones at the completion of each phase will include a scalable
+version of the \cello\ framework software, a corresponding version of
+the \enzoii\ physics methods built on top of \cello, and accompanying
+development and user documentation.  Each phase will last roughly four
+months.
 
-Tasks
-
-Learn \charm\ 
-Design and implement high-level components
-Design and implement low-level components
-Design and implement middle-level components
-Design and implement core cross-cutting components
-
-Milestones
-
-Unigrid hyperbolic
-  serial multi-block
-  + \charm\ 
-AMR hydrodynamics
-  + MPI
-    AMR paper
-    uni-level load balancing
-Unigrid elliptic
-  + OpenMP
-  + hierarchical load balancing
-AMR elliptic
-  + UPC
-    resilience
-\end{verbatim}
-\begin{verbatim}
-   Cello software framework
-   research papers
-   Complete \enzoii\  application
-   large-scale demonstration using \enzoii
-   workshop/training
-\end{verbatim}
+\FIGURETWOCOL{Development Phases}{t:phases}{
+\begin{tabular}{|lrl|} \hline
+\multicolumn{3}{|l|}{\textbf{1. Initial Hyperbolic Phase}} \\ \hline
+ &  Physics: & hyperbolic problems\\
+ &  Data: & single level mesh \\
+ &  Parallel: & \charm \\
+ &  \enzoii: & PPM, PPML \\ \hline
+\multicolumn{3}{|l|}{\textbf{2. Basic AMR Phase}}  \\ \hline
+ &  Data: & AMR mesh \\
+ &  \enzoii: & metals, cooling, \ldots \\ \hline
+\multicolumn{3}{|l|}{\textbf{3. Elliptic Phase}}  \\ \hline
+ &  Physics: & elliptic problems \\
+ &  Data: & AMR particles \\
+ &  \enzoii: & PPPM  \\ \hline
+\multicolumn{3}{|l|}{\textbf{4. Advanced AMR Phase}} \\ \hline
+ &  Data: & patch coalescing \\
+ &  Data: & targeted refinement \\ \hline
+\multicolumn{3}{|l|}{\textbf{5. Multi-Parallel Phase}} \\ \hline
+ &  Parallel: & MPI-2, OpenMP, UPC \\
+ &  Parallel: & load balancing \\
+ &  Parallel: & task scheduling \\
+ &  Parallel: & task-parallelism \\ \hline
+\end{tabular}
 }
+   
 
-\tiny
+\textbf{1. Initial Hyperbolic Phase.} The first phase will support
+single-level ``unigrid'' problems, parallelized with \charm.  This
+capability is on the surface simple, but it must be designed in a way
+that will later support a distributed AMR data structure, as well as
+explicit dynamic task scheduling and load balancing methods.  The
+associated \enzoii\ physics implementation will include both PPM
+hydrodynamic (HD) and PPML ideal magnetohydrodynamic
+(MHD)~\cite{UsPo09} methods.
+
+\textbf{2. Basic AMR Phase.}  The second phase will involve implementing a
+basic distributed octree AMR method with level-adaptive time stepping.
+\enzoii\ will be updated to include flux correction step for PPM and
+PPML solvers, and other local physics methods will be migrated from
+\enzo\ to \enzoii.
+
+\textbf{3. Elliptic Phase.}  The third phase will involve implementing
+distributed particles, and implementing support for level and
+hierarchy operations.  \enzoii\ will be augmented with a PPPM method,
+including associated level- and hierarchy-based linear solvers for
+solving Poisson's equation for self-gravity.
+
+\textbf{4. Advanced AMR Phase.} The fourth phase will involve augmenting the
+AMR capabilities, including the ``patch coalescing'' AMR modification
+to improve ``shallow'' AMR refinement efficiency, and the ``targeted
+refinement with backfill'' modification to improve ``deep'' AMR
+refinement efficiency.
+
+\textbf{5. Multi-Parallel Phase.}  The fifth phase will involve adding
+other parallelization support, including MPI-2 one-sided
+communication, OpenMP threading, and UPC.  The parallelization
+approach will be the same as with \charm, but the low-level parallel
+communication and synchronization routines will be updated.  This will
+also involve explicitly implementing the task scheduling and load
+balancing functionality supported by the higher-level \charm\
+framework.
+
+
 %=======================================================================
 \bibliography{papers}
 \bibliographystyle{unsrt}
