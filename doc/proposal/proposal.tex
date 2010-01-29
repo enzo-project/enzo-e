@@ -188,7 +188,7 @@ extreme scales.  The checkpoint/restart to disk paradigm is known to
 be ultimately unscalable, so we will support other alternatives,
 including checkpoint to memory, or other options as they become
 technologically feasible.  Our framework will be designed to be
-resistent to memory, compute component, network, disk, and software
+resistant to memory, compute component, network, disk, and software
 failures.
 
 We plan to make the framework and accompanying documentation freely
@@ -231,14 +231,14 @@ improved in \enzo, will be retained in \enzoii.
 There are numerous issues with developing scalable parallel scientific
 frameworks and applications, even at modest levels of scalability.
 These issues increase in number and become more important as
-scalabilily is pushed from terascale through petascale and into the
+scalability is pushed from terascale through petascale and into the
 exascale.  Many of these scaling issues are known or suspected, such
 as increased expected fault rates, relatively slower disk performance
 leading to a breakdown in the disk checkpoint/restart paradigm,
 increased importance of scaling of underlying algorithms and
 implementations, increased importance of locality, increased cost of
 global communication and synchronization, increased importance of
-uncovering and capitalising on existing parallelism in the problem,
+uncovering and capitalizing on existing parallelism in the problem,
 increased effects of variation in performance due to e.g.~operating
 system jitter or memory management~\cite{StSh09}, taking advantage of
 possible heterogeneous architectures such as those including GPGPU's,
@@ -415,7 +415,7 @@ blocks that have fixed size, though the mesh block size can be set at
 compile time.  Block meshes are represented using a five dimensional
 array, with the leading dimension selecting the field type (density,
 energy, etc.), the next three dimensions select the grid cell, and the
-last dimension selects the AMR block.  Ghost zones may be permanantly
+last dimension selects the AMR block.  Ghost zones may be permanently
 allocated or not, resolution jumps are restricted to at most one
 level, and time stepping may be constant or adaptive on different
 refinement levels.  Load balancing uses a linearized Morton or
@@ -538,7 +538,7 @@ PDE's, including hyperbolic conservation laws and elliptic equations.
 Specifically, in terms of the astrophysics/cosmological application
 \enzoii\ driving its development, the framework will support solving
 Euler's equations of hydrodynamics, magnetohydrodynamics,
-radiation-hydrodyanmics, and Poisson's equation for self-gravity.
+radiation-hydrodynamics, and Poisson's equation for self-gravity.
 
 Spacial dimensions will include $3$D, but the framework will also
 support $1$D and $2$D, primarily for test problems.  Supported
@@ -605,7 +605,7 @@ which indicates that a layer of ``ghost'' or ``guard'' cells will be
 required for computations.  The framework will allow flexible layers
 of ghost zones, up to at least three zones deep.  Furthermore, the
 number and depth of ghost zones may depend on the specific field, and
-ghost zones may or may not be permanantly stored to conserve physical
+ghost zones may or may not be permanently stored to conserve physical
 memory.
 
 Data fields may be single or double precision, and different fields
@@ -681,12 +681,12 @@ as individual AMR patches could be beneficial.
 The framework will directly support multiple levels of parallelism,
 not just at the distributed memory / shared memory levels.
 Specifically, the framework will support up to four levels of
-parallelism, for example corresponding to hardware cabinents, nodes,
+parallelism, for example corresponding to hardware cabinets, nodes,
 processors, and cores.  We expect that this will improve both
 efficiency and scalability, by allowing more flexible mapping of the
 distributed data structures onto the hierarchical parallel hardware,
 and by reducing the maximum size of groups of intercommunicating
-procesess~\cite{BaBu09}.
+processess~\cite{BaBu09}.
 
 Task scheduling must also be efficient, minimizing overhead and
 maximizing throughput.  Again, a hierarchical scheduling approach may
@@ -736,7 +736,7 @@ advancing a patch, hierarchy level, or full hierarchy one time step.
 Inline-analysis and visualization functions may also be provided by
 the user.  Patch-based user functions will have access to the
 associated mesh and particle data, plus a bounding layer of ``ghost''
-or ``guard'' zones on the mesh, as well as an analagous layer of
+or ``guard'' zones on the mesh, as well as an analogous layer of
 nearby particles.
 
 Other user functions provided by the user will include functions for
@@ -764,7 +764,7 @@ define any existing \enzo\ test problem for the \enzoii\ driving
 application, despite not having problem-specific parameters and
 initialization implemented in the code.  Since initial conditions are
 typically specified by setting fields equal to different numerical
-expresions in different subregions of the domain, the parameter file
+expressions in different subregions of the domain, the parameter file
 grammar must be able to support both arbitrary scalar expressions for
 field values, and arbitrary logical expressions involving spacial
 variables (e.g.~\code{x}, \code{y}, and \code{z}) for specifying
@@ -857,7 +857,7 @@ multiple failures.
 
 The software will also support recovering from numerical errors,
 either by dynamically reducing the time step, dynamically modifying
-method parameters, or switching to a compatable but different
+method parameters, or switching to a compatible but different
 user-supplied numerical method for solving the same problem.  For
 example, switching from a fast but sensitive linear solver to a slower
 but more robust one.
@@ -901,7 +901,7 @@ the proposed software into a collection of large-scale components or
 packages.  Components will be primarily layered, with higher-level
 components calling functions and methods in lower-level components;
 cross-cutting concerns will also be implemented as components.  Each
-component will be implemented as one or more interoperating classes.
+component will be implemented as one or more inter-operating classes.
 Medium level design will involve defining interfaces and class
 hierarchies for each component.  Low-level design will involve
 defining class attributes and implementing individual class member
@@ -1042,7 +1042,7 @@ tasks.  The AMR data structure must also support efficient access to
 grid block/patch mesh data and particles.  This includes interpolating
 data between hierarchy levels, and accessing mesh data and particles
 in adjacent blocks, which is required for computational stencils and
-locality-depedent particle methods such as $P^3M$.
+locality-dependent particle methods such as $P^3M$.
 
 There are several specific issues with the standard octree-based AMR
 approach that we wish to address.
@@ -1075,7 +1075,7 @@ We summarize our approaches to these issues below.
 
 \textbf{1) Patch coalescing.} One proposed enhancement to the typical
 octree-based AMR approach is to allow variable mesh sizes per AMR
-hierarchy patch.  This can be introduced using the simple invertable
+hierarchy patch.  This can be introduced using the simple invertible
 AMR-invariant operation illustrated in Figure~\ref{f:coalesce}.  While
 keeping the underlying mesh resolution constant, the operation
 transforms multiple AMR patches into a single patch, but with a larger
@@ -1259,7 +1259,7 @@ amount of parallelism is relatively small, since the serial bottleneck
 is the time step on the finest levels.  Memory consumption can be
 large, however, especially relative to the amount of parallelism.
 These problems stress scaling not just due to the limited parallelism
-available, but because of restriced amount of physical memory
+available, but because of restricted amount of physical memory
 available per process.
 
 We plan to address this issue not just by increasing parallelism, but
@@ -1269,7 +1269,7 @@ levels, the entire simulated time of interest can be much less than a
 single time step at the coarser levels.  If it is known that data at a
 coarse level is no longer required, then that level can simply be
 removed from the simulation, freeing up resources for finer levels.
-In principle, this could allow arbitarily deep AMR runs, since only a
+In principle, this could allow arbitrarily deep AMR runs, since only a
 fixed interval or ``window'' of levels may be required.  This would
 only be feasible if other data structure limits and numerical scaling
 is handled appropriately, and provided the total number of fine level
@@ -1350,7 +1350,7 @@ Our solution, which has been used by others
 duplicated and distributed AMR data structure.  Coarser levels, which
 span wider areas of the domain, can be stored redundantly but
 efficiently on every process.  Grid patches in finer levels (along
-with a layer of adjacent ``remote proxy patches'' analagous to ghost
+with a layer of adjacent ``remote proxy patches'' analogous to ghost
 zones for AMR patches) can be stored only on the local processes to
 which the patches are assigned.  The exact refinement level at which
 the switch occurs may be arbitrary, may change during a simulation,
@@ -1415,7 +1415,7 @@ methods such as $PPPM$~\cite{HoEa88}.
 
 Particles will also be grouped into different user-defined particle
 groups.  As indicated by the requirement summary, different particle
-groups may have arbitary user-defined logical, integer, or
+groups may have arbitrary user-defined logical, integer, or
 floating-point attributes associated with each particle in the group.
 Particle groups are identified by user code using opaque particle
 group ID's, and by users by user-defined stringe identifiers.
@@ -1469,7 +1469,7 @@ using patch-local coordinates.
 \subsection{Parallelism} \label{ss:design-parallel}
 %-----------------------------------------------------------------------
 
-For a hyperpolic problem defined on an arbitrary AMR hierarchy, any
+For a hyperbolic problem defined on an arbitrary AMR hierarchy, any
 given patch in the hierarchy may advance one time step if all of its
 boundary data is up to date.  Assuming that the advancement of a grid
 patch one time step is taken to be a parallel task, this defines a
@@ -1514,7 +1514,7 @@ improve communication performance.
 
 This overall task approach maps well to the data-driven process
 virtualization model used by \charm, the functionality of which
-subsumes that of both the \code{Task} (analagous to a ``chare'' object
+subsumes that of both the \code{Task} (analogous to a ``chare'' object
 in \charm) and \code{Schedule} components, as well as
 \code{Distribute}, which is used for task distribution and dynamic
 load balancing.  This similarity is no coincidence, since the \charm\
@@ -1669,7 +1669,7 @@ Additionally, we will pursue a hierarchical diffusion-based
 approach~\cite{ScKa97}.  We expect that such an approach could be
 efficient at balancing tasks globally as well as locally, due to
 hierarchically balancing across both low-level and high-level hardware
-components.  (This is analagous to multigrid iterative linear system
+components.  (This is analogous to multigrid iterative linear system
 solvers, which apply local error reducing relaxation operators at a
 hierarchy of resolution levels to reduce the error globally.)  Such a
 hierarchical diffusion method could also be implemented with strictly
@@ -1679,12 +1679,12 @@ information is required for each hierarchical level.
 \textbf{Deliberate overcompensation technique.}
 %
 Another new approach we wish to explore is \textit{deliberate
-  overcompensation}.  By deliberate overcopensation we mean
+  overcompensation}.  By deliberate overcompensation we mean
 rebalancing by relocating \textit{more} than enough tasks from
 high-load to low-load processes.  The motivation is that imbalances
 from physics phenomena such as gravitational collapse tend to require
 a continuous and regular redistribution of computational resources.
-The deliberate overcompenastion idea is conceptually analagous to the
+The deliberate overcompensation idea is conceptually analogous to the
 successive over-relaxation (SOR) variant of the Gauss-Seidel method.
 Given the same tolerance on load imbalance, we expect this approach to
 improve the performance of load balancing by up to a factor of two.
@@ -1957,7 +1957,7 @@ reduce memory consumption.
 
 The API will also allow access to performance data at run-time by
 other components.  This will be used in the \code{Monitor} component
-for example, to display pertinant peformance information to the user.
+for example, to display pertinent performance information to the user.
 It can also be used in the \code{Distribute} component for load
 balancing, so that performance metrics used in dynamic load balancing
 decisions can be defined in terms of actual collected performance data
@@ -2398,7 +2398,7 @@ Prototyping will be used to aid the design process, to quickly assess
 the feasibility of new ideas.  While the prototype code will generally
 not end up in the final code, the process of writing it can
 significantly help with writing the final implementation (somewhat
-analagous to the predictor in a ``predictor-corrector'' numerical
+analogous to the predictor in a ``predictor-corrector'' numerical
 algorithm).
 
 Quality control will be a major component of our development approach.
