@@ -108,7 +108,7 @@
 %
 % more suggestions
 %
-% [ compelling, organization goals and success, relevence to agency]
+% [ compelling, organization goals and success, relevance to agency]
 % problem statement--needs assessment
 %     motivation / history
 %       enzo
@@ -150,13 +150,13 @@ forward-looking, targeted not just at the largest existing
 supercomputers, but also future HPC platforms as they evolve through
 the petascale era and into the exascale.  The proposed AMR framework
 would enable application developers to write multiphysics applications
-for simulating phenomena on an unprecidented range of spacial and
+for simulating phenomena on an unprecedented range of spacial and
 temporal scales.
 
 The AMR data structures will be implemented using a hybrid
 replicated/distributed generalization of the octree data structure.
 Tree nodes will be associated with both logically Cartesian mesh
-blocks and particles, enabling Eularian, Lagrangian, and hybrid
+blocks and particles, enabling Eulerian, Lagrangian, and hybrid
 particle/mesh methods.  Unlike standard octree-based AMR methods, grid
 block sizes will be allowed to vary and individual blocks may be
 distributed, such that optimal ``unigrid'' parallel performance is
@@ -185,7 +185,7 @@ platforms.
 
 Fault tolerance and software resilience are also crucial factors at
 extreme scales.  The checkpoint/restart to disk paradigm is known to
-be ultimately unscalable, so we will support other alternatives,
+be ultimately non-scalable, so we will support other alternatives,
 including checkpoint to memory, or other options as they become
 technologically feasible.  Our framework will be designed to be
 resistant to memory, compute component, network, disk, and software
@@ -359,7 +359,7 @@ extreme scaling requirements.
 AMR (SAMR) framework in active development by the Applied Numerical
 Algorithms Group of Lawrence Berkeley National Lab.  It supports
 hyperbolic, elliptic, and parabolic methods.  \chombo\ is quite
-scalabale, and designed to run both hyperbolic and elliptic problems
+scalable, and designed to run both hyperbolic and elliptic problems
 on 10,000 processors.  Both \cpp/Fortran and
 Titanium~\cite{wwwtitanium}~\cite{YeSe98} versions have been
 developed, and an effort to develop a UPC version was
@@ -686,7 +686,7 @@ processors, and cores.  We expect that this will improve both
 efficiency and scalability, by allowing more flexible mapping of the
 distributed data structures onto the hierarchical parallel hardware,
 and by reducing the maximum size of groups of intercommunicating
-processess~\cite{BaBu09}.
+processes~\cite{BaBu09}.
 
 Task scheduling must also be efficient, minimizing overhead and
 maximizing throughput.  Again, a hierarchical scheduling approach may
@@ -865,7 +865,7 @@ but more robust one.
 The standard checkpoint/restart approach to fault tolerance will be
 supported, though this is unlikely to scale well due to the disparity
 in performance between disk I/O and computation, both in magnitude and
-rate of change.  The software will also support checkpointing to
+rate of change.  The software will also support checkpoint to
 memory; this approach scales better, but of course reduces the amount
 of available memory for the application.  As with detection of
 failures, the checkpoint/restart functionality may be outsourced to
@@ -997,7 +997,7 @@ two modifications below.
 We feel that octree-based approaches are arguably more
 scalable~\cite{BuGh08}, in part because they avoid the parallel patch
 placement algorithms required by SAMR, which can be a significant
-hinderance to scalability~\cite{GuWi06}.  
+hindrance to scalability~\cite{GuWi06}.  
 %Also, high quality SAMR
 %frameworks such as \chombo\ and \samrai\ are already available and
 %being actively developed.  
@@ -1055,8 +1055,8 @@ problems, due to the combination of the shallow refinement-by-two and
 octree balancing steps.
 %
 3) Extremely deep AMR runs can consume a large amount of memory
-relative to the small amount of available parallelism, making them
-unrunable on machines that have restricted memory per process.
+relative to the small amount of available parallelism, making them not
+able to execute on machines that have restricted memory per process.
 %
 4) For extremely large or extremely deep AMR problems, the excessive
 range of global indices, or excessive precision of particle positions,
@@ -1289,7 +1289,7 @@ indices and positions for the supporting AMR data structure, and only
 compute them when absolutely necessary.  The octree data structure
 defines the relative configuration of a block with its parent,
 neighbors, and child blocks, which is sufficient for many operations.
-In particular, only knowing the local mesh width and timestep is
+In particular, only knowing the local mesh width and time step is
 sufficient for many hyperbolic conservation problems.
 
 Some operations may require absolute positions however, such as
@@ -1418,7 +1418,7 @@ groups.  As indicated by the requirement summary, different particle
 groups may have arbitrary user-defined logical, integer, or
 floating-point attributes associated with each particle in the group.
 Particle groups are identified by user code using opaque particle
-group ID's, and by users by user-defined stringe identifiers.
+group ID's, and by users by user-defined string identifiers.
 
 To address the issue of AMR depth-dependent precision requirements on
 global particle positions, particle positions may optionally be stored
@@ -1491,7 +1491,7 @@ sized tasks and non-regular communication dependencies. Tasks
 associated with sub-patches in finer AMR levels will likely be given
 higher priority since they determine the critical path through the
 dependency graph.  Communication will be similarly scheduled to
-effectively prefetch ghost data required by a patch so that it is
+effectively pre-fetch ghost data required by a patch so that it is
 available when the patch is executed.  Scheduling and execution of
 tasks will be controlled by the \code{Schedule} software component.
 
@@ -1618,7 +1618,7 @@ methods, etc.
 %among processes, but that would require additional global
 %communication to perform the reduction.
 %
-Also, this approach will eventually be unscalable since it
+Also, this approach will eventually be non-scalable since it
 requires $O(P)$ storage per process, and a global all-gather
 operation (e.g.~\code{MPI\_Allgather}) is required on all processes.
 
@@ -1640,8 +1640,8 @@ globally.
 Due to the hierarchical nature of HPC platforms, we believe that a
 hierarchical load balancing scheme will be the most effective approach
 for both scalability and efficiency.  By \textit{hierarchical load
-  balancing} we mean rebalancing tasks between higher levels (nodes or
-supernodes) independently from rebalancing between lower levels
+  balancing} we mean balancing tasks between higher levels (nodes or
+supernodes) independently from balancing between lower levels
 (socket or cores).  The idea of hierarchical task scheduling and load
 balancing has been explored for at least 15 years~\cite{AhGh94}, and
 is being actively adapted specifically to AMR
@@ -1652,17 +1652,17 @@ We will begin with a hierarchical load balancing scheme such as that
 developed in~\cite{LaTa06} specifically for AMR applications.
 Hierarchical load balancing will have several advantages over more
 traditional non-hierarchical load balancing methods.  First,
-rebalancing at different levels could be based on different metrics,
-e.g.~memory usage together with computational load for rebalancing
-between nodes, but just computational load for rebalancing between
+balancing at different levels could be based on different metrics,
+e.g.~memory usage together with computational load for balancing
+between nodes, but just computational load for balancing between
 processes or threads within node.  Balancing with respect to memory
 across nodes will be particularly useful for AMR problems, because
 memory is the crucial metric we want to keep balanced at the node
 level, yet we want to balance computational time at lower hardware
 platform levels to maintain high processor utilization.  Second,
-hierarchical load balancing can facilitate rebalancing at different
+hierarchical load balancing can facilitate balancing at different
 frequencies between different levels.  This will improve load
-balancing costs, since rebalancing at higher levels is required less
+balancing costs, since balancing at higher levels is required less
 frequently and involves higher communication costs.
 
 Additionally, we will pursue a hierarchical diffusion-based
@@ -1680,7 +1680,7 @@ information is required for each hierarchical level.
 %
 Another new approach we wish to explore is \textit{deliberate
   overcompensation}.  By deliberate overcompensation we mean
-rebalancing by relocating \textit{more} than enough tasks from
+balancing by relocating \textit{more} than enough tasks from
 high-load to low-load processes.  The motivation is that imbalances
 from physics phenomena such as gravitational collapse tend to require
 a continuous and regular redistribution of computational resources.
@@ -1768,7 +1768,7 @@ easily incorporate new hierarchical load balancing schemes.
 % \begin{verbatim}
 % OOP
 %   addresses 
-%     agility, readability, flexibility, modifyability, extensibility, complexity
+%     agility, readability, flexibility, modifiability, extensibility, complexity
 %   improves component reuse, controls software
 %   complexity, eases software maintenance
 %   still not always ideal
@@ -1809,7 +1809,7 @@ which \cello\ will invoke in the event the primary method signals a
 failure.
 
 The primary physics-related user functions will be those that advance
-the field or particle data one timestep on a single AMR block.
+the field or particle data one time step on a single AMR block.
 \cello\ will schedule and execute these user functions on individual
 patch blocks as outlined in \S\ref{ss:design-parallel}.
 
@@ -1866,7 +1866,7 @@ simulation's computational, communication, and memory performance, as
 well as any errors or warnings encountered.
 
 Since \code{Monitor} is a cross-cutting concern, it is not easily
-modularizable, so an aspect-oriented approach may be more appropriate
+to modularize, so an aspect-oriented approach may be more appropriate
 than an object-oriented approach.  We may investigate languages for
 aspect-oriented programming, such as
 \code{Aspect\cpp}~\cite{wwwaspectcpp}, though we expect the cross-cutting
@@ -1949,7 +1949,7 @@ for code regions instead of string constants to reduce overhead.  A
 second improvement will be to support declaring a user attribute as
 ``monotonic;'' for example, a ``\code{level}'' attribute defining the
 current active AMR level would not be monotonic, but a
-``\code{timestep}'' attribute defining the current time step on the
+``\code{time-step}'' attribute defining the current time step on the
 root level would be.  Defining appropriate attributes to be monotonic
 will allow detecting when performance data groups will no longer be
 updated, so that the data can be flushed to disk and deallocated to
@@ -2032,7 +2032,7 @@ reduce overall code complexity.
 %       memory usage uniform
 %     less frequent because:
 %       problem changes less at larger scales
-%       rebalancing is more expensive: larger data sizes, slower
+%       balancing is more expensive: larger data sizes, slower
 %         interconnects
 %     user-defined parameters and metrics for load balancing at
 %       different levels
@@ -2131,7 +2131,7 @@ with the simulation if possible.
 % {\tiny
 % \begin{verbatim}
 %  FT-MPI 
-%   ``fault-tolerante MPI''
+%   ``fault-tolerant MPI''
 %   http://icl.cs.utk.edu/ftmpi/overview/index.html 
 % MPICH-V 
 %   ``MPI Implementation for Volatile resources''
@@ -2150,7 +2150,7 @@ with the simulation if possible.
 %    MTTF < MTTC
 %    checkpoint to disk
 %       issue: failures will become more frequent than time to checkpoint
-%       agressively reduce checkpoint data size and write time
+%       aggressively reduce checkpoint data size and write time
 %          dedicated I/O nodes
 %          compress
 %          check data
@@ -2169,7 +2169,7 @@ with the simulation if possible.
 %    flash memory
 %    log faults to disk for subsequent analysis
 %    performance resilience
-%       dynamically adapt to reduce cache thrashing / ineffeciency
+%       dynamically adapt to reduce cache thrashing / inefficiency
 %           array blocking or padding in computational array registers
 %       adapt AMR patch size, refinement factor (2,4,8)
 %    fault-tolerant MPI
@@ -2279,7 +2279,7 @@ testing will be aided by the \code{Performance} component of \cello.
 %           correctness, performance, scaling, resilience
 %           correctness
 %              \enzoii\  implementation
-%              compare agains Enzo I results
+%              compare against Enzo I results
 %              existing test problems
 %           performance
 %              built-in performance monitoring
@@ -2312,7 +2312,7 @@ testing will be aided by the \code{Performance} component of \cello.
 %          by another person, or after time elapsed
 %    Refactoring
 % development
-%    implement progessively to fill user beta testing pipeline
+%    implement progressively to fill user beta testing pipeline
 % \end{verbatim}
 
 % \begin{verbatim}
@@ -2375,7 +2375,7 @@ testing will be aided by the \code{Performance} component of \cello.
 
 Our development approach will be to progressively implement \cello\ in
 phases, with \enzoii\ as its driving application.  Functionality will
-be gradually added, with all phases of the software lifecycle updated
+be gradually added, with all phases of the software life cycle updated
 with each iteration.  The initial cycle will require the most effort,
 since many components and interfaces must be designed before even the
 first simple single-level hyperbolic end-to-end simulation can
