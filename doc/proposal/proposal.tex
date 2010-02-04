@@ -1,6 +1,12 @@
 %0       1         2         3         4         5         6         7         8
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
+%
+% patch  structured AMR (SAMR)
+% block  octree-based AMR
+% grid   single block grid
+% mesh   entire mesh hierarchy
+%
 %=======================================================================
 % \documentclass[12pt]{article}
 \documentclass[10pt,twocolumn]{article}
@@ -144,58 +150,61 @@
 We propose to develop a new parallel software framework for adaptive
 mesh refinement (AMR).  A distinguishing characteristic relative to
 existing AMR libraries and frameworks is the aggressive pursuit at the
-onset of extreme scalability, both in terms of software data
+onset of extreme scalability, in terms of both software data
 structures and hardware parallelism.  The design will be
-forward-looking, targeted not just at the largest existing
-supercomputers, but also future HPC platforms as they evolve through
-the petascale era and into the exascale.  The proposed AMR framework
-would enable application developers to write multiphysics applications
-for simulating phenomena on an unprecedented range of spacial and
-temporal scales.
+forward-looking, targeting not just the largest existing
+supercomputers, but also expected future large-scale HPC platforms as
+they evolve through the petascale era and into the exascale.
+% The proposed AMR framework would enable application
+% developers to write multiphysics applications for simulating phenomena
+% on an unprecedented range of spacial and temporal scales.
 
-The AMR data structures will be implemented using a hybrid
-replicated/distributed generalization of the octree data structure.
-Tree nodes will be associated with both logically Cartesian mesh
-blocks and particles, enabling Eulerian, Lagrangian, and hybrid
-particle/mesh methods.  Unlike standard octree-based AMR methods, grid
-block sizes will be allowed to vary and individual blocks may be
-distributed, such that optimal ``unigrid'' parallel performance is
-recovered in subregions of the problem domain that are smooth.
-Additionally, higher refinement factors, such as $r=4$ or even $r=8$,
-will be supported for particularly ``deep'' AMR problems; this will be
-designed in a way that still maintains at most $r=2$ level jumps, and
-will retain the high efficiency of the octree data structure.
+AMR will be implemented using a modified octree-based approach.  Nodes
+of an octree will be associated with both logically Cartesian grid
+blocks and groups of particles, for Eulerian, Lagrangian, and hybrid
+methods for solving coupled hyperbolic, elliptic, and parabolic PDE's.
+Unlike standard octree-based AMR, grid block sizes may vary, and
+individual blocks may be distributed, such that optimal ``unigrid''
+parallel performance is recovered in subregions of the problem domain
+that are smooth.  Additionally, higher refinement factors, such as
+$r=4$ or even $r=8$, will be supported for particularly ``deep'' AMR
+problems; this will be designed in a way that still maintains at most
+$r=2$ level jumps, and will retain the high efficiency of the octree
+data structure.
 
-Parallelization will be primarily data parallel (SIMD), with task
-parallelization (MIMD) also available to augment the data parallelism.
-A variety of parallelization technologies will be supported from the
+Parallelization will be primarily data parallel, with task
+parallelization also available to augment the data parallelism.  A
+variety of parallelization technologies will be supported from the
 start, beginning with the message-driven processor virtualization
-approach provided by the \charm\
-framework~\cite{KaBo07}~\cite{wwwcharm}.  Other parallelization
-methods used will include one-sided message passing via the MPI-2.0
-library~\cite{wwwmpi}, the partitioned global address space (PGAS)
-approach via the UPC language~\cite{wwwupc}~\cite{upc}, and shared
-memory parallel programming using the OpenMP API~\cite{wwwopenmp}.
-Hybrid parallelism will be supported though select pairs of
-approaches, including MPI with OpenMP and MPI with UPC.  Dynamic load
-balancing of parallel tasks will include hierarchical methods, which
-will improve mapping the distributed software data structures to the
-hierarchical hardware components of the target computational
-platforms.
+approach provided by the
+\charm\ framework~\cite{KaBo07}~\cite{wwwcharm}.  Other
+parallelization methods used will include one-sided message passing
+via the MPI-2.0 library~\cite{wwwmpi}, the partitioned global address
+space (PGAS) approach via the UPC language~\cite{wwwupc}~\cite{upc},
+and shared memory parallel programming using the OpenMP
+API~\cite{wwwopenmp}.  Hybrid parallelism will be supported, including
+MPI with OpenMP and MPI with UPC.  Dynamic load balancing of parallel
+tasks will include hierarchical methods, which will improve mapping
+the distributed software data structures to the hierarchical hardware
+components of HPC platforms.
 
 Fault tolerance and software resilience are also crucial factors at
-extreme scales.  The checkpoint/restart to disk paradigm is known to
-be ultimately non-scalable, so we will support other alternatives,
-including checkpoint to memory, or other options as they become
-technologically feasible.  Our framework will be designed to be
-resistant to memory, compute component, network, disk, and software
-failures.
+extreme scales.  The checkpoint-to-disk paradigm is known to be
+ultimately non-scalable, so we will support other alternatives,
+including checkpoint-to-memory, or other options as they become
+technologically feasible.  Our framework will be designed at the onset
+to be resistant to memory, compute component, network, disk, and
+software failures.
 
 We plan to make the framework and accompanying documentation freely
 available for use by the research community.  The result of this
-project will be a software framework capable of allowing application
-developers to write extremely scalable multiresolution multiphysics
-applications.
+project will be a software framework that allows application
+developers to write multiphysics applications for simulating phenomena
+on an unprecedented range of spacial and temporal scales for many
+years to come.
+
+% The proposed AMR framework would enable application
+% developers to write 
 
 %=======================================================================
 \section{Introduction} \label{s:intro}
@@ -271,14 +280,14 @@ the required ranges of integers and precision of floating point
 values, this approach can additionally lead to lower memory usage and
 improved performance.  Some specific approaches include the following:
 using a hybrid replicated/distributed octree-based AMR approach, with
-modifications to improve scaling in terms of both size (number of grid
-zones) and depth (number of AMR levels); using patch-local adaptive
+modifications to improve scaling in terms of both size (number of AMR
+blocks) and depth (number of AMR levels); using patch-local adaptive
 time steps; supporting flexible hybrid parallelization strategies;
 using a hierarchical load balancing approach based on collected
 performance measurements; dynamically scheduling tasks and
 communication; allowing flexible reorganization of AMR data to permit
 independent optimization of computation, communication, and storage;
-supporting variable grid patch sizes while still maintaining bounded
+supporting variable grid block sizes while still maintaining bounded
 or fixed parallel task sizes; and detecting and handling hardware or
 software faults.
 
@@ -321,16 +330,18 @@ coupling of ALE (Arbitrary Lagrangian-Eulerian) methods with AMR.
 ALE-AMR methods are especially efficient and accurate for large-scale
 multi-material calculations.
 
-\samrai\ is written in \cpp, and parallelized using MPI.  It's
+\samrai\ is written in \cpp, and parallelized using MPI.  Its
 high-level design consists of a collection of functionally decomposed
-components.  Components include \code{Toolbox} for basic memory,
-pointer, and array utilities, and \code{Math Operations} for basic
-arithmetic and BLAS-type functions.  \code{Hierarchy} is used to
-represent a distributed AMR data structure \code{Mesh} contains
-operators on the hierarchy, such as regridding, tagging cells, and
-load balancing; and \code{Patchdata} defines patch data, including
-arrays, particles, and embedded boundaries.  Other components include
-support for solvers, algorithms, geometries, and visualization.
+components.  Low-level components include \code{Toolbox} for basic
+memory, pointer, and array utilities, and \code{Math Operations} for
+basic arithmetic and BLAS-type functions.  AMR hierarchy components
+include \code{Hierarchy}, which is used to represent a distributed AMR
+data structure, and \code{Mesh}, which contains operators on the
+hierarchy, such as remeshing, tagging cells, and load balancing.
+Patch data, including arrays, particles, and embedded boundaries, are
+represented using the \code{Patchdata} component.  Other components
+include support for solvers, algorithms, geometries, and
+visualization.
 
 The SAMR hierarchy uses sophisticated clustering algorithms for
 defining the configuration of patches~\cite{GuWi06}.  Load balancing
@@ -358,11 +369,11 @@ extreme scaling requirements.
 \chombo~\cite{wwwchombo}~\cite{CoGr09} is an MPI-parallel structured
 AMR (SAMR) framework in active development by the Applied Numerical
 Algorithms Group of Lawrence Berkeley National Lab.  It supports
-hyperbolic, elliptic, and parabolic methods.  \chombo\ is quite
-scalable, and designed to run both hyperbolic and elliptic problems
-on 10,000 processors.  Both \cpp/Fortran and
-Titanium~\cite{wwwtitanium}~\cite{YeSe98} versions have been
-developed, and an effort to develop a UPC version was
+methods for solving coupled hyperbolic, elliptic, and parabolic
+PDE's.  \chombo\ is quite scalable, and designed to run both
+hyperbolic and elliptic problems on 10,000 processors.  Both
+\cpp/Fortran and Titanium~\cite{wwwtitanium}~\cite{YeSe98} versions
+have been developed, and an effort to develop a UPC version was
 undertaken~\cite{We04}.
 
 Its high-level design consists of a small number of loosely-coupled
@@ -410,9 +421,9 @@ collection of Fortran 90 subroutines, and is parallelized using the
 MPI library.  Due to discontinued funding, \paramesh\ is not currently
 being developed further by the original authors.
 
-In \paramesh, nodes of the octree are associated with small mesh
-blocks that have fixed size, though the mesh block size can be set at
-compile time.  Block meshes are represented using a five dimensional
+In \paramesh, nodes of the octree are associated with small grid
+blocks that have fixed size, though the grid block size can be set at
+compile time.  Grid blocks are represented using a five dimensional
 array, with the leading dimension selecting the field type (density,
 energy, etc.), the next three dimensions select the grid cell, and the
 last dimension selects the AMR block.  Ghost zones may be permanently
@@ -434,7 +445,7 @@ intersection lists, and optimizing boundary condition computations at
 resolution level boundaries.
 
 \paramesh\ has many attractive features, including associating small
-mesh blocks to tree nodes (as opposed to using a single computational
+grid blocks to tree nodes (as opposed to using a single computational
 cell) to help amortize AMR overhead costs, and supporting adaptive
 time steps with non-constant weighting factors for blocks in different
 levels.  However, it does not support particle methods, which we wish
@@ -473,20 +484,20 @@ algebraic multigrid solver~\cite{HeYa02}, which is available in the
 \code{hypre} scalable linear solver package~\cite{FaJo06}.
 
 The octree-based AMR approach has numerous features that could satisfy
-many of our requirements, including relatively high hierarchy
+many of our requirements, including relatively high AMR data structure
 performance and scalability, a built-in spacial data structure that
-can support fast particle methods as well as mesh-based methods, and
-established and effective parallelization approaches using
-space-filling curves.  As implemented, the \alps\ framework itself
-does not meet all of our specific requirements; for example, it does
-not support particles, its blocks support individual finite or
-spectral elements rather than small mesh blocks, and it does not
-appear to be applicable to adaptive time stepping, due in part to its
-assigning an equal number of elements to each core~\cite{BuGh08b}.
-Also, like \paramesh\ and most other octree-type AMR frameworks, we
-believe the efficiency of refinement in regions of uniform resolution
-can be significantly improved.  Nevertheless, due to its impressive
-demonstrated scalability, we expect the \alps\ framework to
+could support fast particle methods as well as mesh-based methods, and
+an established and effective parallel partitioning approach using
+space-filling curves.  However, as implemented the \alps\ framework
+does not meet all of our specific requirements.  For example, it does
+not support particles, its octree nodes support individual finite or
+spectral elements rather than small grid blocks, and it does not
+appear to support adaptive time stepping (due in part to its assigning
+an equal number of elements to each core~\cite{BuGh08b}).  Also, we
+believe that the efficiency of refinement in localized regions of
+refined but uniform resolution can be significantly improved for
+octree-based AMR in general.  Nevertheless, due to its impressive
+demonstrated scalability, we expect that the \alps\ framework will
 significantly influence our design decisions.
 
 %-----------------------------------------------------------------------
@@ -558,15 +569,15 @@ excessive data storage requirements.
 %-----------------------------------------------------------------------
 
 The AMR data structure must be highly scalable in both breadth and
-depth, supporting at least @@@ $10^8$ grid patches and @@@ $60$ levels
-of refinement.  The extreme number of possible grid patches indicates
-that the data structure must be at least partially distributed.  The
-extreme possible depth indicates that there must be no precision or
-range issues with global floating point positions or global integer
-indices.  The large range in resolutions also suggests that the
-framework should support flexible numerical scaling at different mesh
-levels, to reduce floating point errors and prevent underflow or
-overflow errors.
+depth, supporting at least @@@ $10^8$ grid blocks or patches and @@@
+$60$ levels of refinement.  The huge number of possible grid blocks
+indicates that the data structure must be at least partially
+distributed.  The extreme possible depth indicates that there must be
+no precision or range issues with global floating point positions or
+global integer indices.  The large range in resolutions also suggests
+that the framework should support flexible numerical scaling at
+different mesh levels, to reduce floating point errors and prevent
+underflow or overflow errors.
 
 The AMR data structure should also be ``efficient'' at adapting in
 terms of the number of grid patches.  In particular, if much of the
@@ -581,7 +592,7 @@ neighboring patches.  Note that this indicates that some sort of
 spacial data structure or other optimization be used, such as octrees,
 chaining meshes, or caching intersection lists~\cite{StSh09}.
 
-The mesh hierarchy should dynamically adapt to problem features as
+The AMR hierarchy should dynamically adapt to problem features as
 specified by the user.  Localized changes in resolution should remain
 bounded, e.g.~adjacent patches should be within one refinement
 level of each other, to maintain numerical accuracy.  Also, refinement
@@ -594,7 +605,7 @@ asymmetries in the numerical solution.
 \subsubsection{Mesh data} \label{sss:require-fields}
 %-----------------------------------------------------------------------
 
-Multiresolution data fields defined on logically Cartesian meshes,
+Multiresolution data fields defined on logically Cartesian grids,
 used for Eulerian mesh-based and hybrid particle-mesh methods, will be
 supported by the AMR data structure.  The number and identification of
 fields will be flexible and declared by the user: no assumptions will
@@ -632,9 +643,9 @@ use in Lagrangian particle methods and hybrid particle-mesh methods.
 Multiple groups of particles will be supported, e.g.~\enzoii\ will
 include ``star'' particles, dark matter particles for collisionless
 gravitational dynamics, tracer particles for analysis and
-visualization, etc.  All particles will have position, and different particle
-groups will have different user-defined attributes associated with them, such
-as velocity, mass or momentum, etc.
+visualization, etc.  All particles will have position, and different
+particle groups will have different user-defined attributes associated
+with them, such as velocity, mass or momentum, etc.
 
 Extreme particle counts will be supported, indicating that particles
 must be at least partially distributed.  Since many algorithms on
@@ -642,10 +653,9 @@ particles require particle proximities, operations such as finding
 nearest neighbors must be efficient.  This indicates that an efficient
 distributed spacial data structure must be used, such as an octree or
 orthogonal recursive bisection.  Also, since hybrid particle-mesh
-methods will be supported, locating all particles within a patch, and
-locating the mesh block overlapping a given particle, must be
-efficient.
-
+methods will be supported, efficient operations must be implemented
+for locating all particles within a patch, and for locating the block
+or patch overlapping a given particle.
 
 %-----------------------------------------------------------------------
 \subsection{Parallelism} \label{ss:require-parallel}
@@ -726,26 +736,23 @@ non-functional.
 \subsubsection{User functions} \label{sss:require-user}
 %-----------------------------------------------------------------------
 
-While the framework supports adaptive mesh refinement for both mesh
-and particle data, algorithms and other problem-dependent functions
-must be provided by the user.  User functions may be either Fortran or
-C (or \cpp).  
+While the framework will support adaptive mesh refinement for both
+grid and particle data, algorithms and other problem-dependent
+functions must be provided by the user.  User functions may be either
+Fortran or C (or \cpp).
 
 The main functions users supply will be numerical algorithms for
 advancing a patch, hierarchy level, or full hierarchy one time step.
 Inline-analysis and visualization functions may also be provided by
 the user.  Patch-based user functions will have access to the
 associated mesh and particle data, plus a bounding layer of ``ghost''
-or ``guard'' zones on the mesh, as well as an analogous layer of
-nearby particles.
+or ``guard'' zones around the grid block, as well as an analogous
+layer of nearby particles.
 
-Other user functions provided by the user will include functions for
-imposing inter-level constraints such as flux correction, functions
-for interpolating data to a finer mesh or for restricting data to a
-coarser mesh, and functions for evaluating refinement criteria to
-refine or coarsen a given patch.
-
-
+Other user functions will include those for imposing inter-level
+constraints such as flux correction, transfering mesh data between AMR
+levels, and evaluating refinement criteria to locally refine or
+coarsen the mesh.
 
 %-----------------------------------------------------------------------
 \subsubsection{Run-time parameters} \label{sss:require-parameters}
@@ -1014,11 +1021,11 @@ fixed-size locally-Cartesian grid blocks, such as the $4^3$ grid
 blocks used in the FLASH astrophysics application built on the
 \paramesh\ framework.  Refining a tree node involves subdividing the
 node into eight octants, and coarsening involves the inverse
-operation.  Mesh blocks can be associated with either all nodes in the
+operation.  Grid blocks can be associated with either all nodes in the
 tree, or just the leaf nodes.  If the tree supports particle data as
 well, particles are generally associated with leaf nodes.  To
 eliminate ``level jumps''---a jump of more than one refinement level
-between adjacent mesh blocks---a ``balancing'' operation is performed
+between adjacent grid blocks---a ``balancing'' operation is performed
 by refining all coarse blocks that are adjacent to blocks that are
 greater than one level finer.  Efficient methods have been developed
 for this operation~\cite{@@@fast-balance}.  Time steps are globally
@@ -1039,10 +1046,11 @@ maintaining a balanced AMR data structure free of level jumps,
 defining and distributing parallel computational tasks, and
 maintaining a uniform work distribution by dynamically load balancing
 tasks.  The AMR data structure must also support efficient access to
-grid block/patch mesh data and particles.  This includes interpolating
-data between hierarchy levels, and accessing mesh data and particles
-in adjacent blocks, which is required for computational stencils and
-locality-dependent particle methods such as $P^3M$.
+mesh and particle data.  This includes interpolating data between
+hierarchy levels, and accessing mesh data and particles in adjacent
+blocks.
+%, which is required for computational stencils and
+%locality-dependent particle methods such as $P^3M$.
 
 There are several specific issues with the standard octree-based AMR
 approach that we wish to address.
@@ -1072,6 +1080,7 @@ processor, which is a roadblock to scalability.
 We summarize our approaches to these issues below.
 
 %------------------------------------------------------------------------
+% @@@@@@ mesh block -> grid block @@@@@
 
 \textbf{1) Patch coalescing.} One proposed enhancement to the typical
 octree-based AMR approach is to allow variable mesh sizes per AMR
