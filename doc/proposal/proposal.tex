@@ -1083,12 +1083,12 @@ We summarize our approaches to these issues below.
 % @@@@@@ mesh block -> grid block @@@@@
 
 \textbf{1) Patch coalescing.} One proposed enhancement to the typical
-octree-based AMR approach is to allow variable mesh sizes per AMR
-hierarchy patch.  This can be introduced using the simple invertible
+octree-based AMR approach is to allow variable grid sizes per AMR
+hierarchy block.  This can be introduced using the simple invertible
 AMR-invariant operation illustrated in Figure~\ref{f:coalesce}.  While
 keeping the underlying mesh resolution constant, the operation
 transforms multiple AMR patches into a single patch, but with a larger
-mesh block.  We call this \textit{patch coalescing}.  The inverse
+grid block.  We call this \textit{patch coalescing}.  The inverse
 operation is permitted as well if the patch requires subsequent
 refinement or coarsening.
 
@@ -1366,8 +1366,8 @@ the switch occurs may be arbitrary, may change during a simulation,
 and may vary in different regions of the domain, depending on how the
 local tradeoff between memory and communication costs change.
 
-In the following two sections, we describe our treatment of mesh data
-and particle data within the AMR hierarchy.
+In the following two sections, we describe our treatment of grid block
+data and particle data within the AMR hierarchy.
 
 %-----------------------------------------------------------------------
 \subsubsection{Mesh data} \label{sss:design-fields}
