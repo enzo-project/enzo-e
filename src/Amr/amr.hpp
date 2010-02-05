@@ -1,18 +1,46 @@
 #ifndef AMR_HPP
 #define AMR_HPP
 
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
-
 /** 
  *********************************************************************
  *
  * @file      amr.hpp
- * @brief     
+ * @brief     Adaptive mesh refinement hierarchy
  * @author    James Bordner (jobordner@ucsd.edu)
- * @package   Amr
  * @date      Tue Nov 10 15:38:40 PST 2009
+ * @ingroup   Amr
+ * @bug       
+ * @note      
  *
- * Adaptive mesh refinement hierarchy
+ *--------------------------------------------------------------------
+ *
+ * SYNOPSIS:
+ *
+ *    
+ *
+ * DESCRIPTION:
+ *
+ *    
+ *
+ * CLASSES:
+ *
+ *    
+ *
+ * FUCTIONS:
+ *
+ *    
+ *
+ * USAGE:
+ *
+ *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
  *
  * $Id$
  *
