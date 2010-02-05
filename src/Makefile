@@ -9,22 +9,12 @@
 #
 # (*) all
 # (*) clean
-# (*) test
-# (*) doc
+# (*) run-tests
 # (*) dep
 # (*) install
 # (*) install-include
-#
-# Directories
-#
-# (*) Array
-# (*) Disk
-# (*) Error
-# (*) Memory
-# ( ) Method
-# (*) Parameters
-# (*) Performance
-# (*) Test
+# (*) doc
+# (*) cccc
 #
 #-----------------------------------------------------------------------
 
@@ -32,6 +22,7 @@ DIR = \
       Amr \
       Array \
       Disk \
+      Distribute \
       Error \
       Field \
       Memory \
