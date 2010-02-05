@@ -31,7 +31,6 @@
 DIR = \
       Amr \
       Array \
-      Control \
       Disk \
       Error \
       Field \
@@ -41,6 +40,7 @@ DIR = \
       Parallel \
       Parameters \
       Performance \
+      Schedule \
       Simulation \
       Test
 
@@ -127,11 +127,11 @@ Amr-component: Monitor-component
 Array-component: Error-component
 Array-component: Test-component
 
-Control-component: Error-component
-Control-component: Monitor-component
-Control-component: Parameters-component
-Control-component: Simulation-component
-Control-component: Test-component
+Schedule-component: Error-component
+Schedule-component: Monitor-component
+Schedule-component: Parameters-component
+Schedule-component: Simulation-component
+Schedule-component: Test-component
 
 Disk-component: Array-component
 Disk-component: Error-component
