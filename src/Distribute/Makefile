@@ -1,7 +1,7 @@
 
 TOP     = ../..
-PACKAGE = parallel
-OBJS    = parallel.o mpi.o
+PACKAGE = distribute
+OBJS    = distribute.o mpi.o
 TESTS   = 
 DIRS    = mpi-tests
 
@@ -19,7 +19,7 @@ all: $(OBJS) $(TESTS) $(EXES)
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/parallel.hpp               $(INCLUDE)
+	ln -sf `pwd`/distribute.hpp               $(INCLUDE)
 
 #-----------------------------------------------------------------------
 
