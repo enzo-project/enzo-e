@@ -1,12 +1,12 @@
-#ifndef CONTROL_HPP
-#define CONTROL_HPP
+#ifndef SCHEDULE_HPP
+#define SCHEDULE_HPP
 
 //345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 /** 
  *********************************************************************
  *
- * @file      control.hpp
+ * @file      schedule.hpp
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
@@ -26,14 +26,14 @@
 #include "monitor.hpp"
 #include "parameters.hpp"
 
-class Control {
+class Schedule {
 
 /** 
  *********************************************************************
  *
- * @class     Control
+ * @class     Schedule
  * @brief     
- * @ingroup   Control
+ * @ingroup   Schedule
  *
  * 
  *
@@ -47,10 +47,10 @@ public:
   //-------------------------------------------------------------------
 
   /// 
-  Control(Monitor * monitor);
+  Schedule(Monitor * monitor);
 
   /// 
-  ~Control();
+  ~Schedule();
 
   /// Read parameter file
   void read_parameters(FILE * fp);
@@ -81,17 +81,17 @@ private:
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
-  /// The simulation we're controlling
+  /// The simulation we're scheduling
   Monitor * monitor_;
 
   /// Input parameters
   Parameters * parameters_;
 
-  /// The simulation we're controlling
+  /// The simulation we're scheduling
   Simulation * simulation_;
 
 
 };
 
-#endif /* CONTROL_HPP */
+#endif /* SCHEDULE_HPP */
 

@@ -1,8 +1,8 @@
 
 TOP     = ../..
-PACKAGE = control
-OBJS    = control.o
-TESTS   = test_control
+PACKAGE = schedule
+OBJS    = schedule.o
+TESTS   = test_schedule
 EXES    = cello
 
 include $(TOP)/src/MAKE/Make.include
@@ -11,8 +11,8 @@ include $(TOP)/src/MAKE/Make.include
 # TARGETS
 #=======================================================================
 
-test_control: test_control.o 
-	$(CXX) -o test_control test_control.o $(LIB)
+test_schedule: test_schedule.o 
+	$(CXX) -o test_schedule test_schedule.o $(LIB)
 #-----------------------------------------------------------------------
 cello: cello.o 
 	$(CXX) -o cello cello.o $(LIB)

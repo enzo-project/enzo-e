@@ -3,8 +3,8 @@
 /** 
  *********************************************************************
  *
- * @file      test_control.cpp
- * @brief     Program implementing unit tests for the Control class
+ * @file      test_schedule.cpp
+ * @brief     Program implementing unit tests for the Schedule class
  * @author    James Bordner
  * @date      Thu Feb 21 16:47:35 PST 2008
  *
@@ -22,10 +22,10 @@ int main(int argc, char ** argv)
 {
   bool passed = false;
 
-  unit_class ("Control");
+  unit_class ("Schedule");
   unit_open();
 
-  //  Control control;
+  //  Schedule schedule;
 
   unit_assert(passed); //FAILS
 

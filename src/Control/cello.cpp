@@ -15,7 +15,7 @@
 
 #include "cello.h"
 
-#include "control.hpp"
+#include "schedule.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"
 
@@ -43,9 +43,9 @@ int main(int argc, char ** argv)
     Monitor monitor;
     monitor.print ("CELLO BEGIN");
 
-    // INITIALIZE CONTROL
+    // INITIALIZE SCHEDULE
 
-    Control control(&monitor);
+    Schedule schedule(&monitor);
 
     // INPUT PARAMETERS
 
@@ -59,19 +59,19 @@ int main(int argc, char ** argv)
 
     assert (fp != 0);
   
-    control.read_parameters(fp);
+    schedule.read_parameters(fp);
 
     // INITIALIZE SIMULATION
 
-    control.initialize_simulation();
+    schedule.initialize_simulation();
 
     // RUN SIMULATION
 
-    control.execute_simulation();
+    schedule.execute_simulation();
 
     // FINALIZE SIMULATION
 
-    control.terminate_simulation();
+    schedule.terminate_simulation();
 
     monitor.print ("CELLO END");
   }

@@ -3,7 +3,7 @@
 /** 
  *********************************************************************
  *
- * @file      control.cpp
+ * @file      schedule.cpp
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
@@ -35,13 +35,13 @@
  *********************************************************************
  */
 
-#include "control.hpp"
+#include "schedule.hpp"
  
 //====================================================================
 // PUBLIC FUNCTIONS
 //====================================================================
 
-Control::Control(Monitor * monitor)
+Schedule::Schedule(Monitor * monitor)
   : monitor_(monitor),
     parameters_(NULL),
     simulation_(NULL)
@@ -51,21 +51,21 @@ Control::Control(Monitor * monitor)
  * @param         
  * @return        
  *
- * Create a Control object
+ * Create a Schedule object
  *
  *********************************************************************
  */
 {
 }
 
-Control::~Control()
+Schedule::~Schedule()
 /**
  *********************************************************************
  *
  * @param         
  * @return        
  *
- * Delete a Control object
+ * Delete a Schedule object
  *
  *********************************************************************
  */
@@ -73,7 +73,7 @@ Control::~Control()
 }
 
 /// 
-void Control::read_parameters(FILE * fp)
+void Schedule::read_parameters(FILE * fp)
 /**
  *********************************************************************
  *
@@ -88,7 +88,7 @@ void Control::read_parameters(FILE * fp)
   monitor_->print ("Reading parameters");
 
   if (parameters_ != NULL) {
-    WARNING_MESSAGE("Control::read_parameters","Parameters object already exists");
+    WARNING_MESSAGE("Schedule::read_parameters","Parameters object already exists");
     delete parameters_;
     parameters_ = 0;
   }
@@ -98,7 +98,7 @@ void Control::read_parameters(FILE * fp)
   parameters_->read(fp);
 }
 
-void Control::initialize_simulation()
+void Schedule::initialize_simulation()
 /**
  *********************************************************************
  *
@@ -110,11 +110,11 @@ void Control::initialize_simulation()
  *********************************************************************
  */
 {
-  INCOMPLETE_MESSAGE("Control::initialize_simulation","");
+  INCOMPLETE_MESSAGE("Schedule::initialize_simulation","");
 
 }
 
-void Control::execute_simulation()
+void Schedule::execute_simulation()
 /**
  *********************************************************************
  *
@@ -126,10 +126,10 @@ void Control::execute_simulation()
  *********************************************************************
  */
 {
-  INCOMPLETE_MESSAGE("Control::execute_simulation","");
+  INCOMPLETE_MESSAGE("Schedule::execute_simulation","");
 }
 
-void Control::terminate_simulation()
+void Schedule::terminate_simulation()
 /**
  *********************************************************************
  *
@@ -141,7 +141,7 @@ void Control::terminate_simulation()
  *********************************************************************
  */
 {
-  INCOMPLETE_MESSAGE("Control::terminate_simulation","");
+  INCOMPLETE_MESSAGE("Schedule::terminate_simulation","");
 }
 
 //====================================================================
