@@ -1,1 +1,15 @@
-/// @defgroup Simulation
+/** 
+ *********************************************************************
+ *
+ * @file      simulation.dir
+ * @brief     Specifies the problem(s) to run 
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      2010-02-05
+ * @defgroup  Simulation
+ * @bug       
+ * @note      
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */

@@ -1,1 +1,15 @@
-/// @defgroup Field
+/** 
+ *********************************************************************
+ *
+ * @file      field.dir
+ * @brief     Scalar fields on an Array or Amr hierarchy 
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      2010-02-05
+ * @defgroup  Field
+ * @bug       
+ * @note      
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */

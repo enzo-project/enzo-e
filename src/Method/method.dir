@@ -1,7 +1,16 @@
 /** 
  *********************************************************************
  *
+ * @file      method.dir
+ * @brief     Modularized hyperbolic, elliptic, or local physics
+ * @brief     algorithms, analysis, and visualization 
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      2010-02-05
  * @defgroup  Method
+ * @bug       
+ * @note      
+ *
+ * $Id$
  *
  *********************************************************************
  */

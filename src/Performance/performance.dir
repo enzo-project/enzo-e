@@ -1,1 +1,16 @@
-/// @defgroup Performance
+/** 
+ *********************************************************************
+ *
+ * @file      performance.dir
+ * @brief     Measure, and provide functions to access, run-time 
+ * @brief     performance 
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      2010-02-05
+ * @defgroup  Performance
+ * @bug       
+ * @note      
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */

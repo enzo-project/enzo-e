@@ -1,1 +1,15 @@
-/// @defgroup Particles
+/** 
+ *********************************************************************
+ *
+ * @file      particles.dir
+ * @brief     Efficiently represent groups of distributed particles 
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      2010-02-05
+ * @defgroup  Particles
+ * @bug       
+ * @note      
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */

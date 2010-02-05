@@ -1,1 +1,16 @@
-/// @defgroup Error
+/** 
+ *********************************************************************
+ *
+ * @file      
+ * @brief     Error prevention (including check-pointing), error 
+ * @brief     detection and recovery 
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      2010-02-05
+ * @defgroup  Error
+ * @bug       
+ * @note      
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */

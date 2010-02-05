@@ -1,1 +1,15 @@
-/// @defgroup Monitor
+/** 
+ *********************************************************************
+ *
+ * @file      monitor.dir
+ * @brief     User interface to monitor the status of a running simulation 
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      2010-02-05
+ * @defgroup  Monitor
+ * @bug       
+ * @note      
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */

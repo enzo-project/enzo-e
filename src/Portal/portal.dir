@@ -1,1 +1,16 @@
-/// @defgroup Portal
+/** 
+ *********************************************************************
+ *
+ * @file      portal.dir
+ * @brief     Interface with other applications, including querying
+ * @brief     state, modifying parameters, and post-visualization 
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      2010-02-05
+ * @defgroup  Portal
+ * @bug       
+ * @note      
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */

@@ -1,12 +1,11 @@
 /** 
  *********************************************************************
  *
- * @file      error.dir
- * @brief     Distribute (and dynamically redistribute) Tasks among
- * @brief     nodes and processes 
+ * @file      amr.dir
+ * @brief     Adaptive mesh refinement infrastructure, built on top of Array 
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      2010-02-05
- * @defgroup  Distribute
+ * @defgroup  Amr
  * @bug       
  * @note      
  *
