@@ -9,6 +9,7 @@
  * @file      amr.hpp
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
+ * @package   Amr
  * @date      Tue Nov 10 15:38:40 PST 2009
  *
  * Adaptive mesh refinement hierarchy
