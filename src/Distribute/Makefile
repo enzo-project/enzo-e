@@ -1,9 +1,9 @@
 
 TOP     = ../..
 PACKAGE = distribute
-OBJS    = distribute.o mpi.o
+OBJS    = distribute.o
 TESTS   = 
-DIRS    = mpi-tests
+DIRS    = 
 
 include $(TOP)/src/MAKE/Make.include
 
@@ -13,7 +13,6 @@ include $(TOP)/src/MAKE/Make.include
 
  .PHONY: all
 all: $(OBJS) $(TESTS) $(EXES)
-	$(MAKE) -C mpi-tests
 
 #-----------------------------------------------------------------------
 
@@ -25,5 +24,4 @@ install-include:
 
 .PHONY: clean-local
 clean-local:
-	$(MAKE) -C mpi-tests clean
 
