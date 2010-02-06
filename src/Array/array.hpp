@@ -1,19 +1,50 @@
 #ifndef ARRAY_HPP
 #define ARRAY_HPP
 
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-/*
- * ENZO: THE NEXT GENERATION
+/** 
+ *********************************************************************
  *
- * A parallel astrophysics and cosmology application
+ * @file      array.hpp
+ * @brief     Fortran-style array class
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      Fri Feb  5 15:58:38 PST 2010
+ * @ingroup   Array
+ * @bug       
+ * @note      
  *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
+ *--------------------------------------------------------------------
  *
- * See CELLO_LICENSE in the main directory for full license agreement
+ * SYNOPSIS:
  *
+ *    
+ *
+ * DESCRIPTION:
+ *
+ *    
+ *
+ * CLASSES:
+ *
+ *    
+ *
+ * FUCTIONS:
+ *
+ *    
+ *
+ * USAGE:
+ *
+ *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
+ *
+ * $Id$
+ *
+ *********************************************************************
  */
 
 #include "cello.h"
@@ -29,7 +60,7 @@
  * @date      Wed Jul  8 16:01:10 PDT 2009
  * @bug       none
  * @note      Adding Array base class, and renaming old Array to ArraySerial
- * @note      Renaming old ArraySerial to Array.  Heh.
+ * @note      Renaming old ArraySerial to Array
  *
  * $Id$
  * 

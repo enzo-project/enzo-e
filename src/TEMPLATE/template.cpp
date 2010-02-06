@@ -1,34 +1,39 @@
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
-
 /** 
  *********************************************************************
  *
- * @file      foo.cpp
+ * @file      
  * @brief     
- * @author    James Bordner (jobordner@ucsd.edu)
+ * @author    
  * @date      
+ * @ingroup
  * @bug       
  * @note      
  *
- * DESCRIPTION 
- * 
- *    
+ *--------------------------------------------------------------------
  *
- * PACKAGES
+ * DESCRIPTION:
  *
  *    
- * 
- * INCLUDES
- *  
+ *
+ * CLASSES:
+ *
  *    
  *
- * PUBLIC FUNCTIONS
- *  
+ * FUCTIONS:
+ *
  *    
  *
- * PRIVATE FUCTIONS
- *  
+ * USAGE:
+ *
  *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
  *
  * $Id$
  *
@@ -46,7 +51,9 @@ Foo::Foo()
  * @param         
  * @return        
  *
- * Create a Foo object
+ * Synopsis: 
+ *
+ * Description:
  *
  *********************************************************************
  */
@@ -60,7 +67,9 @@ Foo::~Foo()
  * @param         
  * @return        
  *
- * Delete a Foo object
+ * Synopsis: 
+ *
+ * Description:
  *
  *********************************************************************
  */

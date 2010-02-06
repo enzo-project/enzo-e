@@ -1,41 +1,51 @@
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-
 /** 
-*********************************************************************
-*
-* @file      initialize_image.cpp
-* @brief     Initialize variables in cello_hydro.h
-* @author    James Bordner
-* @date      Sat Aug 29 14:20:09 PDT 2009
-
-*
-* DESCRIPTION 
-* 
-*    Initialize variables in cello_hydro.h.  Initial density and pressure
-*    are given by an image saved using "gimp" with the ".h" format.  This
-*    file is sym-linked or copied to image.h before compiling.
-*
-* PACKAGES
-*
-*    NONE
-* 
-* INCLUDES
-*  
-*    cello_hydro.h
-*
-* PUBLIC FUNCTIONS
-*  
-*    initialize_image ();
-*
-* PRIVATE FUCTIONS
-*  
-*    NONE
-*
-* $Id$
-*
-*********************************************************************
-*/
+ *********************************************************************
+ *
+ * @file      initialize_image.cpp
+ * @brief     Initialize variables in cello_hydro.h
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      Sat Aug 29 14:20:09 PDT 2009
+ * @ingroup   Method
+ * @bug       
+ * @note      
+ *
+ *--------------------------------------------------------------------
+ *
+ * SYNOPSIS:
+ *
+ *    
+ *
+ * DESCRIPTION:
+ *
+ *    Initialize variables in cello_hydro.h.  Initial density and
+ *    pressure are given by an image saved using "gimp" with the ".h"
+ *    format.  This file is sym-linked or copied to image.h before
+ *    compiling.
+ *
+ * CLASSES:
+ *
+ *    
+ *
+ * FUCTIONS:
+ *
+ *    initialize_image ();
+ *
+ * USAGE:
+ *
+ *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */
 
 #include "cello_hydro.h"
 #include "assert.h"

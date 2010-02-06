@@ -1,3 +1,49 @@
+/** 
+ *********************************************************************
+ *
+ * @file      
+ * @brief     
+ * @author    
+ * @date      
+ * @ingroup
+ * @bug       
+ * @note      
+ *
+ *--------------------------------------------------------------------
+ *
+ * SYNOPSIS:
+ *
+ *    
+ *
+ * DESCRIPTION:
+ *
+ *    
+ *
+ * CLASSES:
+ *
+ *    
+ *
+ * FUCTIONS:
+ *
+ *    
+ *
+ * USAGE:
+ *
+ *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */
+
 #ifndef DISK_IFRIT_HPP
 #define DISK_IFRIT_HPP
 

@@ -1,33 +1,43 @@
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
-
 /** 
  *********************************************************************
  *
  * @file      initialize_implosion.cpp
  * @brief     Initialize variables in cello_hydro.h
- * @author    James Bordner
+ * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Sat Aug 29 14:20:09 PDT 2009
-
+ * @ingroup   Method
+ * @bug       
+ * @note      
  *
- * DESCRIPTION 
- * 
- *    Initialize variables in cello_hydro.h
+ *--------------------------------------------------------------------
  *
- * PACKAGES
+ * SYNOPSIS:
  *
- *    NONE
- * 
- * INCLUDES
- *  
- *    cello_hydro.h
+ *    
  *
- * PUBLIC FUNCTIONS
- *  
+ * DESCRIPTION:
+ *
+ *    
+ *
+ * CLASSES:
+ *
+ *    
+ *
+ * FUCTIONS:
+ *
  *    initialize_implosion ();
  *
- * PRIVATE FUCTIONS
- *  
- *    NONE
+ * USAGE:
+ *
+ *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
  *
  * $Id$
  *

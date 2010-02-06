@@ -1,15 +1,48 @@
-//======================================================================
-//
-// File:        c_message.C
-//
-// Description: Display warning and error messages
-//
-//----------------------------------------------------------------------
-//
-// James Bordner
-// UCSD
-//
-//======================================================================
+/** 
+ *********************************************************************
+ *
+ * @file      c_message.cpp
+ * @brief     Display warning and error messages
+ * @author    James Bordner (jobordner@ucsd.edu)
+ * @date      
+ * @ingroup   Enzo
+ * @bug       
+ * @note      
+ *
+ *--------------------------------------------------------------------
+ *
+ * SYNOPSIS:
+ *
+ *    
+ *
+ * DESCRIPTION:
+ *
+ *    
+ *
+ * CLASSES:
+ *
+ *    
+ *
+ * FUCTIONS:
+ *
+ *    
+ *
+ * USAGE:
+ *
+ *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */
 
 #include "cello_hydro.h"
  

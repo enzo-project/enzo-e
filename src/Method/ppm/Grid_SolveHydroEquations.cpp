@@ -1,20 +1,48 @@
-/***********************************************************************
-/
-/  GRID CLASS (SOLVE THE HYDRO EQUATIONS, SAVING SUBGRID FLUXES)
-/
-/  written by: Greg Bryan
-/  date:       November, 1994
-/  modified1:
-/
-/  PURPOSE:
-/
-/  RETURNS:
-/    SUCCESS or FAIL
-/
-************************************************************************/
- 
-// Solve the hydro equations with the solver, saving the subgrid fluxes
-//
+/** 
+ *********************************************************************
+ *
+ * @file      Grid_SolveHydroEquations.cpp
+ * @brief     Solve the hydro equations, saving subgrid fluxes
+ * @author    Greg Bryan
+ * @date      November, 1994
+ * @ingroup   Enzo
+ * @bug       
+ * @note      
+ *
+ *--------------------------------------------------------------------
+ *
+ * SYNOPSIS:
+ *
+ *    Solve the hydro equations with the solver, saving the subgrid fluxes
+ *
+ * DESCRIPTION:
+ *
+ *    
+ *
+ * CLASSES:
+ *
+ *    
+ *
+ * FUCTIONS:
+ *
+ *    
+ *
+ * USAGE:
+ *
+ *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */
  
 #include "cello_hydro.h"
 

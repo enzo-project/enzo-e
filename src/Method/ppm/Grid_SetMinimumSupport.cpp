@@ -1,16 +1,48 @@
-/***********************************************************************
-/
-/  GRID CLASS (SET THE ENERGY TO PROVIDE MINIMAL PRESSURE SUPPORT)
-/
-/  written by: Greg Bryan
-/  date:       November, 1998
-/  modified1:
-/
-/  PURPOSE:
-/
-/  NOTE:
-/
-************************************************************************/
+/** 
+ *********************************************************************
+ *
+ * @file      Grid_SetMinimumSupport.cpp
+ * @brief     Set the energy to provide minimal pressure support
+ * @author    Greg Bryan
+ * @date      November, 1998
+ * @ingroup   Enzo
+ * @bug       
+ * @note      
+ *
+ *--------------------------------------------------------------------
+ *
+ * SYNOPSIS:
+ *
+ *    
+ *
+ * DESCRIPTION:
+ *
+ *    
+ *
+ * CLASSES:
+ *
+ *    
+ *
+ * FUCTIONS:
+ *
+ *    
+ *
+ * USAGE:
+ *
+ *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
+ *
+ * $Id$
+ *
+ *********************************************************************
+ */
 
 #include "cello_hydro.h"
  

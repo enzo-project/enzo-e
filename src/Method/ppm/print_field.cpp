@@ -1,46 +1,39 @@
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2009 James Bordner
- * Copyright (C) 2009 Laboratory for Computational Astrophysics
- * Copyright (C) 2009 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
-
-
 /** 
  *********************************************************************
  *
  * @file      print_field.cpp
  * @brief     Print the active values of the grid field
- * @author    James Bordner
+ * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Sat Aug 29 23:45:03 PDT 2009
+ * @ingroup   Method
+ * @bug       
+ * @note      
  *
- * DESCRIPTION 
- * 
- *    Print the active values of the grid field
+ *--------------------------------------------------------------------
  *
- * PACKAGES
+ * DESCRIPTION:
  *
- *    NONE
- * 
- * INCLUDES
- *  
- *    cello_hydro.h
+ *    
  *
- * PUBLIC FUNCTIONS
- *  
- *    NONE
+ * CLASSES:
  *
- * PRIVATE FUCTIONS
- *  
- *    NONE
+ *    
+ *
+ * FUCTIONS:
+ *
+ *    
+ *
+ * USAGE:
+ *
+ *    
+ *
+ * REVISION HISTORY:
+ *
+ *    
+ *
+ * COPYRIGHT: See the LICENSE_CELLO file in the project directory
+ *
+ *--------------------------------------------------------------------
  *
  * $Id$
  *
