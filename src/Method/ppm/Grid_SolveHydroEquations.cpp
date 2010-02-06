@@ -11,10 +11,6 @@
  *
  *--------------------------------------------------------------------
  *
- * SYNOPSIS:
- *
- *    Solve the hydro equations with the solver, saving the subgrid fluxes
- *
  * DESCRIPTION:
  *
  *    

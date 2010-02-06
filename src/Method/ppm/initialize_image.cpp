@@ -11,10 +11,6 @@
  *
  *--------------------------------------------------------------------
  *
- * SYNOPSIS:
- *
- *    
- *
  * DESCRIPTION:
  *
  *    Initialize variables in cello_hydro.h.  Initial density and
