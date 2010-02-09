@@ -8,7 +8,8 @@ DOCS = \
       paper-tree \
       performance \
       project \
-      proposal \
+      proposal-nsf \
+      proposal-ascr \
       requirements \
       talk-intro \
       testing \
@@ -34,9 +35,12 @@ performance:
 project:
 	cd project; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C project
-proposal:
-	cd proposal; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C proposal
+proposal-nsf:
+	cd proposal-nsf; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C proposal-nsf
+proposal-ascr:
+	cd proposal-ascr; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C proposal-ascr
 requirements: 
 	cd requirements; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C requirements
