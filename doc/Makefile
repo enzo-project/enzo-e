@@ -16,7 +16,6 @@ DOCS = \
       vision
 
 DIRS = $(DOCS) uml
- 
 
 .PHONY: all
 all: $(DOCS)
@@ -37,9 +36,11 @@ project:
 	$(MAKE) -C project
 proposal-nsf:
 	cd proposal-nsf; ln -sf ../Makefile.1 makefile
+	cd proposal-nsf; ln -sf ../papers.bib .
 	$(MAKE) -C proposal-nsf
 proposal-ascr:
 	cd proposal-ascr; ln -sf ../Makefile.1 makefile
+	cd proposal-ascr; ln -sf ../papers.bib .
 	$(MAKE) -C proposal-ascr
 requirements: 
 	cd requirements; ln -sf ../Makefile.1 makefile
