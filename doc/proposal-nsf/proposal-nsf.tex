@@ -1,19 +1,87 @@
-%0       1         2         3         4         5         6         7         8
-%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%%%%%%%%% MASTER -- compiles the 4 sections
 
-%
-% patch  structured AMR (SAMR)
-% block  octree-based AMR
-% grid   single block grid
-% mesh   entire mesh hierarchy
-%
-%=======================================================================
-% \documentclass[12pt]{article}
-\documentclass[10pt]{article}
-%=======================================================================
-\include{include}
+\documentclass[11pt,letterpaper]{article}
 
-\setcounter{secnumdepth}{2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{plain}                                                      %%
+%%%%%%%%%% EXACT 1in MARGINS %%%%%%%                                   %%
+\setlength{\textwidth}{6.5in}     %%                                   %%
+\setlength{\oddsidemargin}{0in}   %% (It is recommended that you       %%
+\setlength{\evensidemargin}{0in}  %%  not change these parameters,     %%
+\setlength{\textheight}{8.5in}    %%  at the risk of having your       %%
+\setlength{\topmargin}{0in}       %%  proposal dismissed on the basis  %%
+\setlength{\headheight}{0in}      %%  of incorrect formatting!!!)      %%
+\setlength{\headsep}{0in}         %%                                   %%
+\setlength{\footskip}{.5in}       %%                                   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                                   %%
+\newcommand{\required}[1]{\section*{\hfil #1\hfil}}                    %%
+\renewcommand{\refname}{\hfil References Cited\hfil}                   %%
+\bibliographystyle{plain}                                              %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{epsfig}
+\usepackage{url}
+
+\newcommand{\cello}{\textsf{Cello}}
+\newcommand{\enzo}{\textsf{Enzo}}
+\newcommand{\enzoii}{\textsf{Enzo}-\texttt{II}}
+\newcommand{\lcaperf}{\textsf{lcaperf}}
+\newcommand{\lcatest}{\textsf{lcatest}}
+
+\newcommand{\pp}{\texttt{++}}
+\newcommand{\cpp}{C\pp}
+\newcommand{\charm}{\textsf{Charm\pp}}
+\newcommand{\chombo}{\textsf{Chombo}}
+\newcommand{\samrai}{\textsf{SAMRAI}}
+\newcommand{\paramesh}{\textsf{PARAMESH}}
+\newcommand{\gadget}{\textsf{GADGET}}
+\newcommand{\alps}{\textsf{ALPS}}
+\newcommand{\clawpack}{\textsf{CLAWPACK}}
+\newcommand{\grace}{\textsf{GrACe}}
+\newcommand{\carpet}{\textsf{Carpet}}
+\newcommand{\flash}{\textsf{FLASH}}
+
+\newcommand{\code}[1]{\textsf{#1}}
+
+\newcounter{figctr}
+
+\newcommand{\FIGURE}[3]{
+\noindent
+\parbox{\textwidth}{
+%\ \\ \hrule \ \\
+\begin{center}
+#3
+\end{center}%
+\ \nolinebreak%
+\refstepcounter{figctr}%
+\begin{center}%
+\begin{minipage}{7.0in}
+\textbf{Figure \thefigctr}. #1
+\end{minipage}
+\end{center}
+\label{#2}
+%\ \\ \hrule \ \\
+}}
+
+% NSF proposal generation template style file.
+% based on latex stylefiles  written by Stefan Llewellyn Smith and
+% Sarah Gille, with contributions from other collaborators.
+
+\DeclareFontFamily{OT1}{psyr}{}
+\DeclareFontShape{OT1}{psyr}{m}{n}{<-> psyr}{}
+\def\times{{\fontfamily{psyr}\selectfont\char180}}
+
+
+\renewcommand{\refname}{\centerline{References cited}}
+
+% this handles hanging indents for publications
+\def\rrr#1\\{\par
+\medskip\hbox{\vbox{\parindent=2em\hsize=6.12in
+\hangindent=4em\hangafter=1#1}}}
+
+\def\baselinestretch{1}
+
+% \setcounter{secnumdepth}{2}
 
 % Project summary
 % Introduction
@@ -41,13 +109,14 @@
 
 \usepackage{natbib}
 
+\newcommand{\delete}[1]{}
+
 %=======================================================================
 
 \begin{document}
 
 %\tableofcontents
 %\Large
-\renewcommand{\pargraph}[1]{}
 
 % \nocite{StSh09} % Scalability challenges for massively parallel {AMR} applications
 % \nocite{WiHy03} % Enhancing scalability of parallel structured {AMR} calculations
@@ -57,9 +126,20 @@
 
 %\nocite{LaTa06} % hierarchical load balancing
 
+\begin{center}
+{\Large{\bf \cello: A New Software Framework for \\ Extreme Adaptive Mesh
+  Refinement}}\\*[3mm]
+% {\bf Proposal Title} \\*[3mm]
+
+James Bordner \\
+Michael L. Norman \\
+Robert Harkness \\
+Alexei Kritsuk \\
+
+\end{center}
+
 %=======================================================================
-\TITLE{\cello: A New Software Framework for \\ Extreme Adaptive Mesh
-  Refinement}{James Bordner}{$Rev$}
+%\TITLE{}{James Bordner}{$Rev$}
 %=======================================================================
 
 %
@@ -920,15 +1000,15 @@ partitioned into high-level, middle-level, low-level, and
 cross-cutting concerns.  Since the software development process is
 iterative, the final component diagram may still evolve somewhat.
 
-\FIGURETWOCOL{Software component diagram}{f:components}{
-\begin{minipage}{3in}
-\includegraphics[width=3in]{components2.pdf}
-\end{minipage}}
-
-% \FIGURE{Software component diagram}{f:components}{
-% \begin{minipage}{6in}
-% \includegraphics[width=6in]{components2.pdf}
+% \FIGURETWOCOL{Software component diagram}{f:components}{
+% \begin{minipage}{3in}
+% \includegraphics[width=3in]{components2.pdf}
 % \end{minipage}}
+
+\FIGURE{Software component diagram}{f:components}{
+\begin{minipage}{6in}
+\includegraphics[width=6in]{components2.pdf}
+\end{minipage}}
 
 The high-level components include \code{Task} for encapsulating
 parallel tasks, \code{Distribute} for distributing and load balancing
@@ -1092,15 +1172,15 @@ grid block.  We call this \textit{patch coalescing}.  The inverse
 operation is permitted as well if the patch requires subsequent
 refinement or coarsening.
 
-\FIGURETWOCOL{$2$D illustration of patch coalescing}{f:coalesce}{
-\begin{minipage}{2.5in}
-\includegraphics[width=2.5in]{coalesce.pdf}
-\end{minipage}}
-
-% \FIGURE{Coalescing}{f:coalesce}{
-% \begin{minipage}{3.75in}
-% \includegraphics[width=3.75in]{coalesce.pdf}
+% \FIGURETWOCOL{$2$D illustration of patch coalescing}{f:coalesce}{
+% \begin{minipage}{2.5in}
+% \includegraphics[width=2.5in]{coalesce.pdf}
 % \end{minipage}}
+
+\FIGURE{$2$D illustration of patch coalescing}{f:coalesce}{
+\begin{minipage}{3.75in}
+\includegraphics[width=3.75in]{coalesce.pdf}
+\end{minipage}}
 
 
 This operation decouples the AMR topology from the local resolution
@@ -1119,43 +1199,43 @@ coalescing.  Even though the example problem is not particularly
 well-suited for this technique, it nevertheless leads to a quadtree
 with $2.5$ times fewer nodes.
 
-\FIGURETWOCOL{Coalesced patches example} {f:cosmo}{
-\begin{minipage}{3.2in}
-\begin{minipage}{1.5in}
-\includegraphics[width=1.5in]{cosmo2-invert.png}
-\end{minipage} \
-\begin{minipage}{1.5in} \raggedright
-\small Coalesced patches using a 2D cosmology
-  density field projection.  \textbf{Top left}: Source density field.
-  \textbf{Bottom left}: Balanced quadtree with 81701 patches.
-  \textbf{Bottom right}: Balanced quadtree with 32529 coalesced patches.
-\end{minipage}
-\begin{minipage}{1.5in}
-\includegraphics[width=1.5in]{cosmo2-4-1-inv.png}
-\end{minipage} \ 
-\begin{minipage}{1.5in}
-\includegraphics[width=1.5in]{cosmo2-4-2-inv.png}
-\end{minipage}
-\end{minipage}
-}
-
-% \FIGURE{ Coalesced patches proof-of-concept using a 2D cosmology
-%   density field projection.  \textbf{Left}: 2D cosmology density field
-%   projection.  \textbf{Middle}: Balanced quadtree with 81701 patches.
-%   \textbf{Right}: Balanced quadtree with 32529 coalesced patches. \\
-% } {f:cosmo}{
-% \begin{minipage}{7.0in}
-% \begin{minipage}{2.2in}
-% \includegraphics[width=2.2in]{cosmo2-invert.png}
+% \FIGURETWOCOL{Coalesced patches example} {f:cosmo}{
+% \begin{minipage}{3.2in}
+% \begin{minipage}{1.5in}
+% \includegraphics[width=1.5in]{cosmo2-invert.png}
+% \end{minipage} \
+% \begin{minipage}{1.5in} \raggedright
+% \small Coalesced patches using a 2D cosmology
+%   density field projection.  \textbf{Top left}: Source density field.
+%   \textbf{Bottom left}: Balanced quadtree with 81701 patches.
+%   \textbf{Bottom right}: Balanced quadtree with 32529 coalesced patches.
+% \end{minipage}
+% \begin{minipage}{1.5in}
+% \includegraphics[width=1.5in]{cosmo2-4-1-inv.png}
 % \end{minipage} \ 
-% \begin{minipage}{2.2in}
-% \includegraphics[width=2.2in]{cosmo2-4-1-inv.png}
-% \end{minipage} \ 
-% \begin{minipage}{2.2in}
-% \includegraphics[width=2.2in]{cosmo2-4-2-inv.png}
+% \begin{minipage}{1.5in}
+% \includegraphics[width=1.5in]{cosmo2-4-2-inv.png}
 % \end{minipage}
 % \end{minipage}
 % }
+
+\FIGURE{ Coalesced patches using a 2D cosmology
+   density field projection.  \textbf{Top left}: Source density field.
+   \textbf{Bottom left}: Balanced quadtree with 81701 patches.
+   \textbf{Bottom right}: Balanced quadtree with 32529 coalesced patches.
+} {f:cosmo}{
+\begin{minipage}{7.0in}
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{cosmo2-invert.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{cosmo2-4-1-inv.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{cosmo2-4-2-inv.png}
+\end{minipage}
+\end{minipage}
+}
 
 While allowing flexible patch block sizes can greatly reduce the size
 of the octree-based AMR data structure, the variable block size can
@@ -1190,44 +1270,44 @@ star formation.  As a proof-of-concept example, in Figure~\ref{f:dots}
 two balanced $r^2$-trees are shown refined on a small set of points in 2D, one
 with $r=2$ and one with $r=4$.
 
-\FIGURETWOCOL{Targeted refinement example}
-{f:dots}{
-\begin{minipage}{3.2in}
-\begin{minipage}{1.5in}
-\includegraphics[width=1.5in]{dots-invert.png}
-\end{minipage} \ 
-\begin{minipage}{1.5in}
-\small Targeted refinement using multiple point sources in 2D.
-\textbf{Top left}: Point sources.  
-\textbf{Bottom left}: Balanced octree with 2137 patches.
-\textbf{Bottom right}: Balanced octree with 158 explicit patches.
-\end{minipage}
-\begin{minipage}{1.5in}
-\includegraphics[width=1.5in]{dots-4-1-inv.png}
-\end{minipage} \ 
-\begin{minipage}{1.5in}
-\includegraphics[width=1.5in]{dots-16-5-inv.png}
-\end{minipage}
-\end{minipage}}
-
-% \FIGURE{
-% Targeted refinement proof-of-concept using multiple point sources in 2D.
-% \textbf{Left}: 2D point sources.  
-% \textbf{Middle}: Balanced octree with 2137 patches.
-% \textbf{Right}: Balanced octree with 158 explicit patches.
-% }
+% \FIGURETWOCOL{Targeted refinement example}
 % {f:dots}{
-% \begin{minipage}{7.0in}
-% \begin{minipage}{2.2in}
-% \includegraphics[width=2.2in]{dots-invert.png}
+% \begin{minipage}{3.2in}
+% \begin{minipage}{1.5in}
+% \includegraphics[width=1.5in]{dots-invert.png}
 % \end{minipage} \ 
-% \begin{minipage}{2.2in}
-% \includegraphics[width=2.2in]{dots-4-1-inv.png}
+% \begin{minipage}{1.5in}
+% \small Targeted refinement using multiple point sources in 2D.
+% \textbf{Top left}: Point sources.  
+% \textbf{Bottom left}: Balanced octree with 2137 patches.
+% \textbf{Bottom right}: Balanced octree with 158 explicit patches.
+% \end{minipage}
+% \begin{minipage}{1.5in}
+% \includegraphics[width=1.5in]{dots-4-1-inv.png}
 % \end{minipage} \ 
-% \begin{minipage}{2.2in}
-% \includegraphics[width=2.2in]{dots-16-5-inv.png}
+% \begin{minipage}{1.5in}
+% \includegraphics[width=1.5in]{dots-16-5-inv.png}
 % \end{minipage}
 % \end{minipage}}
+
+\FIGURE{
+Targeted refinement using multiple point sources in 2D.
+ \textbf{Top left}: Point sources.  
+ \textbf{Bottom left}: Balanced octree with 2137 patches.
+ \textbf{Bottom right}: Balanced octree with 158 explicit patches.
+}
+{f:dots}{
+\begin{minipage}{7.0in}
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{dots-invert.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{dots-4-1-inv.png}
+\end{minipage} \ 
+\begin{minipage}{2.2in}
+\includegraphics[width=2.2in]{dots-16-5-inv.png}
+\end{minipage}
+\end{minipage}}
 
 The advantage is clear: the number of nodes in the AMR hierarchy is
 reduced by a factor of about $13.5$.  
@@ -1241,15 +1321,15 @@ they are not part of the $r^3$-tree data structure, but rather are
 associated with fine-coarse level interfaces.
 
 
-\FIGURETWOCOL{Targeted refinement with backfill}{f:backfill}{
-\begin{minipage}{3in}
-\includegraphics[width=3in]{kd-backfill2.pdf}
-\end{minipage}}
-
-% \FIGURE{Targeted refinement with backfill}{f:backfill}{
-% \begin{minipage}{6.15in}
-% \includegraphics[width=6.15in]{kd-backfill2.pdf}
+% \FIGURETWOCOL{Targeted refinement with backfill}{f:backfill}{
+% \begin{minipage}{3in}
+% \includegraphics[width=3in]{kd-backfill2.pdf}
 % \end{minipage}}
+
+ \FIGURE{Targeted refinement with backfill}{f:backfill}{
+ \begin{minipage}{6.15in}
+ \includegraphics[width=6.15in]{kd-backfill2.pdf}
+ \end{minipage}}
 
 Another disadvantage is that we need to represent the $r^3$-trees.
 This can be done by simply using the octree data structure
@@ -1441,27 +1521,27 @@ to provide more than enough positional accuracy for local
 computations, which will additionally improve both memory storage
 requirements and memory access costs.
 
-\FIGURETWOCOL{Global (left) versus patch-local (right) coordinate systems for
-  particle positions}{f:local-particles}{
-\begin{minipage}{3.2in}
-\begin{minipage}{1.5in}
-\includegraphics[width=1.5in]{particles-global.pdf}
-\end{minipage} \ 
-\begin{minipage}{1.5in}
-\includegraphics[width=1.5in]{particles-local.pdf}
-\end{minipage}
-\end{minipage}}
-
-% \FIGURE{Patch-local coordinate systems for
-%   particles}{f:local-particles}{
-% \begin{minipage}{6.8in}
-% \begin{minipage}{3.3in}
-% \includegraphics[width=3.3in]{particles-global.pdf}
+% \FIGURETWOCOL{Global (left) versus patch-local (right) coordinate systems for
+%   particle positions}{f:local-particles}{
+% \begin{minipage}{3.2in}
+% \begin{minipage}{1.5in}
+% \includegraphics[width=1.5in]{particles-global.pdf}
 % \end{minipage} \ 
-% \begin{minipage}{3.3in}
-% \includegraphics[width=3.3in]{particles-local.pdf}
+% \begin{minipage}{1.5in}
+% \includegraphics[width=1.5in]{particles-local.pdf}
 % \end{minipage}
 % \end{minipage}}
+
+\FIGURE{Global (left) versus patch-local (right) coordinate systems for
+  particle positions}{f:local-particles}{
+\begin{minipage}{6.8in}
+\begin{minipage}{3.3in}
+\includegraphics[width=3.3in]{particles-global.pdf}
+\end{minipage} \ 
+\begin{minipage}{3.3in}
+\includegraphics[width=3.3in]{particles-local.pdf}
+\end{minipage}
+\end{minipage}}
 
 A consequence of using patch-local coordinate systems is that
 particles that migrate from one patch to a neighboring patch will
@@ -2438,7 +2518,7 @@ the \enzoii\ physics methods built on top of \cello, and accompanying
 development and user documentation.  We expect that each phase will
 last about three to four months.
 
-\FIGURETWOCOL{Development Phases}{t:phases}{
+\FIGURE{Development Phases}{t:phases}{
 \begin{tabular}{|lrl|} \hline
 \multicolumn{3}{|l|}{\textbf{1. Initial Hyperbolic Phase}} \\ \hline
  &  Physics: & hyperbolic problems\\
@@ -2503,7 +2583,7 @@ framework.
 
 %=======================================================================
 \bibliography{papers}
-\bibliographystyle{unsrt}
+%\bibliographystyle{unsrt}
 %=======================================================================
 
 \end{document}
