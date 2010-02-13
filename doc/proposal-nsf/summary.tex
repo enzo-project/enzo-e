@@ -1,0 +1,248 @@
+%%%%%%%%% MASTER -- compiles the 4 sections
+
+\documentclass[11pt,letterpaper]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{plain}                                                      %%
+%%%%%%%%%% EXACT 1in MARGINS %%%%%%%                                   %%
+\setlength{\textwidth}{6.5in}     %%                                   %%
+\setlength{\oddsidemargin}{0in}   %% (It is recommended that you       %%
+\setlength{\evensidemargin}{0in}  %%  not change these parameters,     %%
+\setlength{\textheight}{8.5in}    %%  at the risk of having your       %%
+\setlength{\topmargin}{0in}       %%  proposal dismissed on the basis  %%
+\setlength{\headheight}{0in}      %%  of incorrect formatting!!!)      %%
+\setlength{\headsep}{0in}         %%                                   %%
+\setlength{\footskip}{.5in}       %%                                   %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                                   %%
+\newcommand{\required}[1]{\section*{\hfil #1\hfil}}                    %%
+\renewcommand{\refname}{\hfil References Cited\hfil}                   %%
+\bibliographystyle{plain}                                              %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{epsfig}
+\usepackage{url}
+
+\newcommand{\cello}{\textsf{Cello}}
+\newcommand{\enzo}{\textsf{Enzo}}
+\newcommand{\enzoii}{\textsf{Enzo}-\texttt{II}}
+\newcommand{\lcaperf}{\textsf{lcaperf}}
+\newcommand{\lcatest}{\textsf{lcatest}}
+
+\newcommand{\pp}{\texttt{++}}
+\newcommand{\cpp}{C\pp}
+\newcommand{\charm}{\textsf{Charm\pp}}
+\newcommand{\chombo}{\textsf{Chombo}}
+\newcommand{\samrai}{\textsf{SAMRAI}}
+\newcommand{\paramesh}{\textsf{PARAMESH}}
+\newcommand{\gadget}{\textsf{GADGET}}
+\newcommand{\alps}{\textsf{ALPS}}
+\newcommand{\clawpack}{\textsf{CLAWPACK}}
+\newcommand{\grace}{\textsf{GrACe}}
+\newcommand{\carpet}{\textsf{Carpet}}
+\newcommand{\flash}{\textsf{FLASH}}
+
+\newcommand{\code}[1]{\textsf{#1}}
+
+\newcounter{figctr}
+
+\newcommand{\FIGURE}[3]{
+\noindent
+\parbox{\textwidth}{
+%\ \\ \hrule \ \\
+\begin{center}
+#3
+\end{center}%
+\ \nolinebreak%
+\refstepcounter{figctr}%
+\begin{center}%
+\begin{minipage}{7.0in}
+\textbf{Figure \thefigctr}. #1
+\end{minipage}
+\end{center}
+\label{#2}
+%\ \\ \hrule \ \\
+}}
+
+% NSF proposal generation template style file.
+% based on latex stylefiles  written by Stefan Llewellyn Smith and
+% Sarah Gille, with contributions from other collaborators.
+
+\DeclareFontFamily{OT1}{psyr}{}
+\DeclareFontShape{OT1}{psyr}{m}{n}{<-> psyr}{}
+\def\times{{\fontfamily{psyr}\selectfont\char180}}
+
+
+\renewcommand{\refname}{\centerline{References cited}}
+
+% this handles hanging indents for publications
+\def\rrr#1\\{\par
+\medskip\hbox{\vbox{\parindent=2em\hsize=6.12in
+\hangindent=4em\hangafter=1#1}}}
+
+\def\baselinestretch{1}
+
+% \setcounter{secnumdepth}{2}
+
+%-----------------------------------------------------------------------
+% NSF
+%-----------------------------------------------------------------------
+%
+% FIVE SOFTWARE FOCUS AREAS
+%
+%  * 1. software for HPC systems
+%    2. software for digital data management
+%    3. software for broadband and networking
+%    4. middleware
+%    5. cybersecurity
+%
+% CROSS CUTTING ISSUES
+%
+%  * software sustainability
+%
+%  * software self-manageability
+%
+%  - software power/energy efficiency
+%
+%
+% HPC SOFTWARE ISSUES
+%
+%  * deep-memory hierarchies
+%  * multi-core architectures
+%  * heterogeneous/hybrid systems
+%  * architecture agnostic
+%
+% SDCI REQUIREMENTS
+%
+%  * identify software focus area and category in title
+%  * support for at least one cross-cutting issue
+%  * identify multiple application areas in science or engineering
+%    - missing capability required
+%    - specific examples of how tool will impact science research
+%  * clear description of how approach compares to existing approaches
+%  * explicit outreach and education plan for additional end user groups
+%  * explicit description of the engineering process used
+%    - design, development, release, deployments, tool interoperability,
+%    - evaluation plan that includes end users [ref nmi.cs.wisc.edu]
+%  * list of tangible metrics to measure success, with end users
+%    - quantitative + qualitative definition of "working prototype"
+%    - steps from prototype to production use
+%  * compelling discussion of software's potential use by broader communities
+%    - use cases with relevant domain scientists
+%  * sustainability plan beyond the award lifetime
+%  * identify open source licence
+%    
+%-----------------------------------------------------------------------
+
+
+% Project summary
+% Introduction
+%    Extreme parallelism
+%    Extreme AMR
+%    Existing AMR frameworks
+%       PARAMESH
+%       Chombo
+%       SAMRAI
+%       GADGET
+% Software requirements
+% Software design
+%    High level components
+%    Data structures
+%       Patch coalescing  for ``shallow'' AMR
+%       Targeted refinement with backfill for ``deep'' AMR
+%    Task scheduling
+%    Load balancing
+% Implementation
+%    Parallelism
+%    Fault tolerance
+%    Software implementation
+% Development plan
+% Milestones and deliverables
+
+\usepackage{natbib}
+
+\newcommand{\delete}[1]{}
+
+%=======================================================================
+
+\begin{document}
+
+\textbf{Project Summary}
+%
+% Cello + Enzo-II
+%
+%   formalization of Enzo-P development as a physics application built
+%   on a new independent extreme AMR framework
+%
+This project proposes to develop a new parallel software framework for
+developing multiscale science simulations, in particular those that
+require the enormous computing power of HPC platforms as they evolve
+through the petascale era and into the exascale.
+
+ multiscale scienceadaptive
+mesh refinement (AMR) 
+%
+A distinguishing characteristic relative to existing AMR frameworks is
+the aggressive pursuit at the onset of extreme scalability, in terms
+of both software data structures and hardware parallelism.
+%
+
+Development and design will be approached with software sustainability
+in mindThe design will be forward-looking, targeting not just the
+% The proposed AMR framework would enable application
+% developers to write multiphysics applications for simulating phenomena
+% on an unprecedented range of spacial and temporal scales.
+
+AMR will be implemented using a modified octree-based approach.  Nodes
+of an octree will be associated with both logically Cartesian grid
+blocks and groups of particles, for Eulerian, Lagrangian, and hybrid
+methods for solving coupled hyperbolic, elliptic, and parabolic PDE's.
+Unlike standard octree-based AMR, grid block sizes may vary, and
+individual blocks may be distributed, such that optimal ``unigrid''
+parallel performance is recovered in subregions of the problem domain
+that are smooth.  Additionally, higher refinement factors, such as
+$r=4$ or even $r=8$, will be supported for particularly ``deep'' AMR
+problems; this will be designed in a way that still maintains at most
+$r=2$ level jumps, and will retain the high efficiency of the octree
+data structure.
+
+Parallelization will be primarily data parallel, with task
+parallelization also available to augment the data parallelism.  A
+variety of parallelization technologies will be supported from the
+start, beginning with the message-driven processor virtualization
+approach provided by the
+\charm\ framework~\cite{KaBo07}~\cite{wwwcharm}.  Other
+parallelization methods used will include one-sided message passing
+via the MPI-2.0 library~\cite{wwwmpi}, the partitioned global address
+space (PGAS) approach via the UPC language~\cite{wwwupc}~\cite{upc},
+and shared memory parallel programming using the OpenMP
+API~\cite{wwwopenmp}.  Hybrid parallelism will be supported, including
+MPI with OpenMP and UPC with MPI.  Dynamic load balancing of parallel
+tasks will include hierarchical methods, which will improve mapping
+the distributed software data structures to the hierarchical hardware
+components of HPC platforms.
+
+Fault tolerance and software resilience are also crucial factors at
+extreme scales.  The checkpoint-to-disk paradigm is known to be
+ultimately non-scalable, so this project will support other alternatives,
+including checkpoint-to-memory, or other options as they become
+technologically feasible.  Our framework will be designed at the onset
+to be resistant to memory, compute component, network, disk, and
+software failures.
+
+This project plans to make the framework and accompanying documentation freely
+available for use by the research community.  The result of this
+project will be a software framework that allows application
+developers to write multiphysics applications for simulating phenomena
+on an unprecedented range of spacial and temporal scales for many
+years to come.
+
+% The proposed AMR framework would enable application
+% developers to write 
+\textbf{intellectual merit}
+
+\textbf{broader impact}
+
+\end{document}
+
+%==================================================================
+
