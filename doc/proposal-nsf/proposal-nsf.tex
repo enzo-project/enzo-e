@@ -407,8 +407,7 @@ related software frameworks to our proposed project are
 \chombo~\cite{wwwchombo}~\cite{CoGr09},
 \paramesh~\cite{MaOl00}~\cite{OlMa05}~\cite{Ol06}~\cite{wwwparamesh},
 \alps~\cite{BuBu09}, and \gadget~\cite{wwwgadget}~\cite{Sp05}, which
-we discuss in \S\S\ref{ss:samrai} through \ref{ss:gadget},
-respectively.  Other notable frameworks include
+we discuss below.  Other notable frameworks include
 \clawpack~\cite{wwwclawpack}, \grace~\cite{PaLi10}, and
 \carpet~\cite{ScDi06}~\cite{wwwcarpet}.
 
@@ -1419,13 +1418,11 @@ the limit of a large ``unigrid'' (single AMR level) run, the AMR data
 structure would be a single large AMR patch, and the array would be
 partitioned into at least $P$ blocks.
 
-As outlined in the corresponding mesh data section in
-\S\ref{ss:require-amr}, there will be any number of user-defined
-fields, which may be stored using either single or double precision.
-Different fields are identified by user code using opaque field ID's,
-and by user-defined string identifiers, e.g.~in output files.
-Different user methods may declare different fields to be read-only,
-or writable.
+There will be any number of user-defined fields, which may be stored
+using either single or double precision.  Different fields are
+identified by user code using opaque field ID's, and by user-defined
+string identifiers, e.g.~in output files.  Different user methods may
+declare different fields to be read-only, or writable.
 
 Optional scaling factors may be defined, which may vary for different
 fields, different AMR levels, or different methods.  Level-dependent
@@ -1924,18 +1921,16 @@ within the limitations of \cpp.
 \subsubsection{I/O} \label{sss:design-io}
 %-----------------------------------------------------------------------
 
-As indicated in the corresponding I/O section in
-\S\ref{ss:require-other}, we expect to implement the \code{Disk}
-component of \cello\ using parallel HDF5, following a standardized AMR
-file format such as the ADIOS API~\cite{LoKl08}.  I/O is known to be a
-significant performance and scaling issue.  Even when it is
-implemented efficiently, it can still adversely affect overall
-performance due to the relatively slow performance of disk hardware.
-We plan to make use of available compression capabilities of HDF5 to
-reduce disk traffic and storage.  To improve resilience, we also plan
-to include support for error checking on all reads and writes, so that
-the \code{Error} component can detect faulty disk hardware and mark it
-as unusable.
+We expect to implement the \code{Disk} component of \cello\ using
+parallel HDF5, following a standardized AMR file format such as the
+ADIOS API~\cite{LoKl08}.  I/O is known to be a significant performance
+and scaling issue.  Even when it is implemented efficiently, it can
+still adversely affect overall performance due to the relatively slow
+performance of disk hardware.  We plan to make use of available
+compression capabilities of HDF5 to reduce disk traffic and storage.
+To improve resilience, we also plan to include support for error
+checking on all reads and writes, so that the \code{Error} component
+can detect faulty disk hardware and mark it as unusable.
 
 We plan to support using a dedicated subset of available hardware to
 implement I/O in a task parallel manner.  This will permit taking
