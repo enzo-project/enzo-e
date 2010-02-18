@@ -27,59 +27,60 @@
 \usepackage{epsfig}
 \usepackage{url}
 
+\include{newcommand}
 % INCLUDE DEVELOPMENT TEXT
 
-\newcommand{\devel}[1]{\textbf{#1}}
-
-% EXCLUDE DEVELOPMENT TEXT
-
-% \newcommand{\devel}[1]{}
-
-\newcommand{\SUBSECTION}[1]{\subsection{#1} }
-\newcommand{\SUBSUBSECTION}[1]{\subsubsection{#1} }
-
-\newcommand{\pargraph}[1]{\devel{\P\ \textbf{#1} \\}}
-\newcommand{\cello}{\textsf{Cello}}
-\newcommand{\enzo}{\textsf{Enzo}}
-%\newcommand{\enzoii}{\textsf{Enzo}-\texttt{II}}
-\newcommand{\enzoii}{\textsf{Enzo-P}}
-\newcommand{\lcaperf}{\textsf{lcaperf}}
-\newcommand{\lcatest}{\textsf{lcatest}}
-
-\newcommand{\pp}{\texttt{++}}
-\newcommand{\cpp}{C\pp}
-\newcommand{\charm}{\textsf{Charm\pp}}
-\newcommand{\chombo}{\textsf{Chombo}}
-\newcommand{\samrai}{\textsf{SAMRAI}}
-\newcommand{\paramesh}{\textsf{PARAMESH}}
-\newcommand{\gadget}{\textsf{GADGET}}
-\newcommand{\alps}{\textsf{ALPS}}
-\newcommand{\clawpack}{\textsf{CLAWPACK}}
-\newcommand{\grace}{\textsf{GrACe}}
-\newcommand{\carpet}{\textsf{Carpet}}
-\newcommand{\flash}{\textsf{FLASH}}
-
-\newcommand{\code}[1]{\textsf{#1}}
-
-\newcounter{figctr}
-
-\newcommand{\FIGURE}[3]{
-\noindent
-\parbox{\textwidth}{
-%\ \\ \hrule \ \\
-\begin{center}
-#3
-\end{center}%
-\ \nolinebreak%
-\refstepcounter{figctr}%
-\begin{center}%
-\begin{minipage}{\textwidth}
-\textbf{Figure \thefigctr}. #1
-\end{minipage}
-\end{center}
-\label{#2}
-%\ \\ \hrule \ \\
-}}
+% \newcommand{\devel}[1]{\textbf{#1}}
+% 
+% % EXCLUDE DEVELOPMENT TEXT
+% 
+% % \newcommand{\devel}[1]{}
+% 
+% %\newcommand{\SUBSUBSECTION}[1]{\subsubsection{#1} }
+% \newcommand{\SUBSUBSECTION}[1]{\textbf{#1.}~}
+% 
+% \newcommand{\pargraph}[1]{\devel{\P\ \textbf{#1} \\}}
+% \newcommand{\cello}{\textsf{Cello}}
+% \newcommand{\enzo}{\textsf{Enzo}}
+% %\newcommand{\enzoii}{\textsf{Enzo}-\texttt{II}}
+% \newcommand{\enzoii}{\textsf{Enzo-P}}
+% \newcommand{\lcaperf}{\textsf{lcaperf}}
+% \newcommand{\lcatest}{\textsf{lcatest}}
+% 
+% \newcommand{\pp}{\texttt{++}}
+% \newcommand{\cpp}{C\pp}
+% \newcommand{\charm}{\textsf{Charm\pp}}
+% \newcommand{\chombo}{\textsf{Chombo}}
+% \newcommand{\samrai}{\textsf{SAMRAI}}
+% \newcommand{\paramesh}{\textsf{PARAMESH}}
+% \newcommand{\gadget}{\textsf{GADGET}}
+% \newcommand{\alps}{\textsf{ALPS}}
+% \newcommand{\clawpack}{\textsf{CLAWPACK}}
+% \newcommand{\grace}{\textsf{GrACe}}
+% \newcommand{\carpet}{\textsf{Carpet}}
+% \newcommand{\flash}{\textsf{FLASH}}
+% 
+% \newcommand{\code}[1]{\textsf{#1}}
+% 
+% \newcounter{figctr}
+% 
+% \newcommand{\FIGURE}[3]{
+% \noindent
+% \parbox{\textwidth}{
+% %\ \\ \hrule \ \\
+% \begin{center}
+% #3
+% \end{center}%
+% \ \nolinebreak%
+% \refstepcounter{figctr}%
+% \begin{center}%
+% \begin{minipage}{\textwidth}
+% \textbf{Figure \thefigctr}. #1
+% \end{minipage}
+% \end{center}
+% \label{#2}
+% %\ \\ \hrule \ \\
+% }}
 
 % NSF proposal generation template style file.
 % based on latex stylefiles  written by Stefan Llewellyn Smith and
@@ -184,7 +185,7 @@
 
 \begin{document}
 
-\tableofcontents
+% \tableofcontents
 %\Large
 
 % \nocite{StSh09} % Scalability challenges for massively parallel {AMR} applications
@@ -408,6 +409,10 @@ development approach in \S\ref{s:implementation}, and software testing in
 \S\ref{s:milestones}.
 
 %-----------------------------------------------------------------------
+%\include{section-facilities}
+%-----------------------------------------------------------------------
+
+%-----------------------------------------------------------------------
 \section{Review of related software} \label{s:review}
 %-----------------------------------------------------------------------
 
@@ -435,7 +440,7 @@ software capabilities.
 
 %-----------------------------------------------------------------------
 
-\SUBSECTION{\samrai}
+\SUBSUBSECTION{\samrai}
 %
 \samrai~\cite{WiHo01}~\cite{wwwsamraicode} (Structured Adaptive Mesh
 Refinement Application Infrastructure), is an MPI-parallel patch-based
@@ -462,7 +467,7 @@ extreme scaling requirements.
 
 %-----------------------------------------------------------------------
 
-\SUBSECTION{\chombo} 
+\SUBSUBSECTION{\chombo} 
 %
 \chombo~\cite{wwwchombo}~\cite{CoGr09} is an MPI-parallel patch-based
 SAMR framework in active development by the Applied Numerical
@@ -498,7 +503,7 @@ we plan to pursue that approach from the start.
 
 %-----------------------------------------------------------------------
 
-\SUBSECTION{\paramesh}
+\SUBSUBSECTION{\paramesh}
 %
 \paramesh~\cite{MaOl00}~\cite{OlMa05}~\cite{Ol06}~\cite{wwwparamesh}
 is an octree-based AMR framework developed by the NASA Goddard Space
@@ -535,7 +540,7 @@ ultimately limits its scalability.
 
 %-----------------------------------------------------------------------
 
-\SUBSECTION{\alps}
+\SUBSUBSECTION{\alps}
 %
 \alps~\cite{BuBu09}, developed at the University of Texas at Austin,
 is a highly scalable AMR framework based on octrees.  It appears to be
@@ -579,7 +584,7 @@ fine but uniform resolution.
 
 %-----------------------------------------------------------------------
 
-\SUBSECTION{\gadget}
+\SUBSUBSECTION{\gadget}
 %
 \gadget~\cite{wwwgadget}~\cite{Sp05}, developed by Volker Springel at
 the Max-Planck-Institute for Astrophysics since 2000, is an
@@ -1134,7 +1139,7 @@ satisfy our rigorous performance and scaling requirements.
 %------------------------------------------------------------------------
 % @@@@@@ mesh block -> grid block @@@@@
 
-\SUBSECTION{Patch coalescing}
+\SUBSUBSECTION{Patch coalescing}
 %
 By only supporting small fixed-sized blocks, the number of AMR blocks
 can grow very large in regions of uniform resolution in the standard
@@ -1229,7 +1234,7 @@ requirements.
 
 %------------------------------------------------------------------------
 
-\SUBSECTION{Targeted refinement}
+\SUBSUBSECTION{Targeted refinement}
 %
 Another limitation of the standard octree-based AMR approach is that
 the data structure can grow excessively large for ``deep'' AMR
@@ -1334,7 +1339,7 @@ cost of the intermediate levels of empty octree nodes.
 
 %------------------------------------------------------------------------
 
-\SUBSECTION{Level windows}
+\SUBSUBSECTION{Level windows}
 %
 For particularly deep AMR runs, the amount of parallelism is
 relatively small, since the serial bottleneck is time stepping on the
@@ -1356,7 +1361,7 @@ would be required.
 % is not excessive.
 
 %------------------------------------------------------------------------
-\SUBSECTION{Implicit global indices}
+\SUBSUBSECTION{Implicit global indices}
 %
 For particularly large and deep AMR runs, the limited range of global
 indices and precision of absolute positions can become problematic.
@@ -1379,7 +1384,7 @@ approach will be used for particle position data.
 
 %------------------------------------------------------------------------
 
-\SUBSECTION{Patch-local adaptive time steps}
+\SUBSUBSECTION{Patch-local adaptive time steps}
 %
 There are two common variants in time step determination: uniform time
 steps over the entire domain, and adaptive time steps at each
@@ -1405,7 +1410,7 @@ numerical accuracy and satisfy required stability constraints.
 
 %------------------------------------------------------------------------
 
-\SUBSECTION{Octree AMR data structure}
+\SUBSUBSECTION{Octree AMR data structure}
 %
 Some AMR applications and frameworks store the entire hierarchy
 metadata redundantly on each processor, which limits scalability.
@@ -1435,7 +1440,7 @@ domain, depending on how the local tradeoff between memory and
 communication costs change.
 
 %-----------------------------------------------------------------------
-\SUBSECTION{Mesh data}
+\SUBSUBSECTION{Mesh data}
 %
 There will be any number of user-defined fields defined on grids
 (density, pressure, etc.).  Different fields will be accessed using
@@ -1473,7 +1478,7 @@ constraint or switch to an alternate solver.
 % @@@ self-management
 
 %-----------------------------------------------------------------------
-\SUBSECTION{Particle data}
+\SUBSUBSECTION{Particle data}
 %
 There will be any number of user-defined particle groups (dark matter,
 tracer particles, etc.).  Different particle groups may have different
@@ -1554,7 +1559,7 @@ patch, or a portion of a patch.  Task sizes can be controlled by
 restricting subblock sizes within a given range, which may be
 constant.
 
-\SUBSECTION{Dynamic task scheduling}
+\SUBSUBSECTION{Dynamic task scheduling}
 %
 Scheduling and execution of tasks will be controlled by the
 \code{Schedule} software component.  \cello\ will maintain a priority
@@ -1584,7 +1589,7 @@ requests between a pair of processes or nodes together into a single
 communication call to improve communication performance.
 
 %-----------------------------------------------------------------------
-\SUBSECTION{Load balancing}
+\SUBSUBSECTION{Load balancing}
 %
 The \code{Distribute} component will be used to distribute and
 dynamically load balance tasks across available computational
@@ -1795,7 +1800,7 @@ user-implemented load balancing schemes.
 % 
 
 %-----------------------------------------------------------------------
-\SUBSECTION{Parallelization approach}
+\SUBSUBSECTION{Parallelization approach}
 %
 This overall task approach maps well to the data-driven process
 virtualization model used by \charm.
@@ -1866,7 +1871,7 @@ Below we summarize other proposed design solutions for both functional
 and non-functional requirements.
 
 %-----------------------------------------------------------------------
-\SUBSECTION{Application functions}
+\SUBSUBSECTION{Application functions}
 %
 Applications developed using \cello, including \enzoii, will include
 application functions for initializing fields and particles, functions
@@ -1907,7 +1912,7 @@ simulation, and for accessing application run-time parameters.
 % executing these functions will also be controlled by \cello's scheduler.
 
 %-----------------------------------------------------------------------
-\SUBSECTION{Run-time parameters}
+\SUBSUBSECTION{Run-time parameters}
 %
 The run-time parameters API will allow access to parameter values by
 type, as well as evaluation of scalar and logical expressions.
@@ -1926,7 +1931,7 @@ initial conditions will be supported through optional application
 functions.
 
 % %-----------------------------------------------------------------------
-% \SUBSECTION{Interfaces}
+% \SUBSUBSECTION{Interfaces}
 % %
 % User monitoring functionality will be implemented in the
 % \code{Monitor} component.  Its API will be callable by other
@@ -1945,7 +1950,7 @@ functions.
 %easily work within the limitations of \cpp.
 
 %-----------------------------------------------------------------------
-\SUBSECTION{Disk I/O}
+\SUBSUBSECTION{Disk I/O}
 %
 We expect to implement the \code{Disk} component of \cello\ using
 parallel HDF5, following a standardized AMR file format such as the
@@ -2001,7 +2006,7 @@ concurrently.
 % }
 
 %-----------------------------------------------------------------------
-\SUBSECTION{Performance measurement}
+\SUBSUBSECTION{Performance measurement}
 %
 The \code{Performance} component will provide an API that will enable
 measuring hardware, software, and data structure-related performance.
@@ -2168,7 +2173,7 @@ AMR levels, and parallel tasks.
 % }
 
 %-----------------------------------------------------------------------
-\SUBSECTION{Software resilience and self-management.}
+\SUBSUBSECTION{Software resilience and self-management.}
 % Like performance, resilience is another non-functional requirement.
 % Also like performance, despite being a non-functional requirement, a
 % software component, \code{Error}, will be implemented to aid in
@@ -2517,41 +2522,43 @@ require about three to four months.
 % }
    
 
-\textbf{1.~Initial Hyperbolic Phase.}~The initial phase will support
+\textbf{Version 0.1: Initial Hyperbolic Version.}~The initial phase will support
 hyperbolic problems on a single-level ``unigrid'' mesh, parallelized
-with \charm.  This capability is on the surface simple, but \charm\ is
-known to have a steep learning curve, and the software will be
-designed to later support a distributed AMR data structure, dynamic
-task scheduling, and dynamic load balancing.  The associated \enzoii\
-physics implementation will include both PPM hydrodynamic (HD) and
-PPML ideal magnetohydrodynamic (MHD)~\cite{UsPo09} methods.
+with \charm.  
+%This capability is on the surface simple, but \charm\ is
+%known to have a steep learning curve, and the software will be
+%designed to later support a distributed AMR data structure, dynamic
+%task scheduling, and dynamic load balancing. 
+The associated \enzoii\ physics implementation will include both PPM
+hydrodynamic (HD) and PPML ideal magnetohydrodynamic
+(MHD)~\cite{UsPo09} methods.
 
-\textbf{2.~Basic AMR Phase.}~The second phase will involve implementing a
-basic distributed octree AMR method with level-adaptive time stepping.
-\enzoii\ will be updated to include flux correction step for PPM and
-PPML solvers, and other local physics methods will be migrated from
-\enzo\ to \enzoii.
+\textbf{Version 0.2: Basic AMR Version.}~The second phase will involve
+implementing a basic distributed octree AMR method with level-adaptive
+time stepping.  \enzoii\ will be updated to include flux correction
+step for PPM and PPML solvers, and other local physics methods will be
+migrated from \enzo\ to \enzoii.
 
-\textbf{3.~Elliptic Phase.}~This phase will involve implementing
-distributed particles, as well as support for user level- and
-hierarchy-based operations.  \enzoii\ will be augmented with a PPPM
-method, including associated level- and hierarchy-based multigrid
+\textbf{Version 0.3: Elliptic Version.}~This phase will involve
+implementing distributed particles, as well as support for user level-
+and hierarchy-based operations.  \enzoii\ will be augmented with a
+PPPM method, including associated level- and hierarchy-based multigrid
 linear solvers for solving Poisson's equation for self-gravity.
 
-\textbf{4.~Advanced AMR Phase.}~The next phase will involve augmenting the
-AMR capabilities, including the ``patch coalescing'' AMR modification
-to improve ``shallow'' AMR refinement efficiency, and the ``targeted
-refinement with backfill'' modification to improve ``deep'' AMR
-refinement efficiency.
+\textbf{Version 0.4: Advanced AMR Version.}~The next phase will
+involve augmenting the AMR capabilities, including the ``patch
+coalescing'' AMR modification to improve ``shallow'' AMR refinement
+efficiency, and the ``targeted refinement with backfill'' modification
+to improve ``deep'' AMR refinement efficiency.
 
-\textbf{5.~Multi-Parallel Phase.}~The fifth phase will involve adding
-other parallelization support, including MPI-2 one-sided
-communication, OpenMP threading, and UPC.  The parallelization
-approach will be the same as with \charm, but the low-level parallel
-communication and synchronization routines will be updated.  This will
-also involve explicitly implementing the task scheduling and load
-balancing functionality supported by the higher-level \charm\
-framework.
+\textbf{Version 0.5: Multi-Parallel Version.}~The fifth phase will
+involve adding other parallelization support, including MPI-2
+one-sided communication, OpenMP threading, and UPC.  The
+parallelization approach will be the same as with \charm, but the
+low-level parallel communication and synchronization routines will be
+updated.  This will also involve explicitly implementing the task
+scheduling and load balancing functionality supported by the
+higher-level \charm\ framework.
 
 
 %=======================================================================

@@ -22,46 +22,48 @@
 \usepackage{epsfig}
 \usepackage{url}
 
-\newcommand{\cello}{\textsf{Cello}}
-\newcommand{\enzo}{\textsf{Enzo}}
-\newcommand{\enzoii}{\textsf{Enzo}-\texttt{II}}
-\newcommand{\lcaperf}{\textsf{lcaperf}}
-\newcommand{\lcatest}{\textsf{lcatest}}
+% \newcommand{\cello}{\textsf{Cello}}
+% \newcommand{\enzo}{\textsf{Enzo}}
+% \newcommand{\enzoii}{\textsf{Enzo}-\texttt{II}}
+% \newcommand{\lcaperf}{\textsf{lcaperf}}
+% \newcommand{\lcatest}{\textsf{lcatest}}
+% 
+% \newcommand{\pp}{\texttt{++}}
+% \newcommand{\cpp}{C\pp}
+% \newcommand{\charm}{\textsf{Charm\pp}}
+% \newcommand{\chombo}{\textsf{Chombo}}
+% \newcommand{\samrai}{\textsf{SAMRAI}}
+% \newcommand{\paramesh}{\textsf{PARAMESH}}
+% \newcommand{\gadget}{\textsf{GADGET}}
+% \newcommand{\alps}{\textsf{ALPS}}
+% \newcommand{\clawpack}{\textsf{CLAWPACK}}
+% \newcommand{\grace}{\textsf{GrACe}}
+% \newcommand{\carpet}{\textsf{Carpet}}
+% \newcommand{\flash}{\textsf{FLASH}}
+% 
+% \newcommand{\code}[1]{\textsf{#1}}
+% 
+% \newcounter{figctr}
+% 
+% \newcommand{\FIGURE}[3]{
+% \noindent
+% \parbox{\textwidth}{
+% %\ \\ \hrule \ \\
+% \begin{center}
+% #3
+% \end{center}%
+% \ \nolinebreak%
+% \refstepcounter{figctr}%
+% \begin{center}%
+% \begin{minipage}{7.0in}
+% \textbf{Figure \thefigctr}. #1
+% \end{minipage}
+% \end{center}
+% \label{#2}
+% %\ \\ \hrule \ \\
+% }}
 
-\newcommand{\pp}{\texttt{++}}
-\newcommand{\cpp}{C\pp}
-\newcommand{\charm}{\textsf{Charm\pp}}
-\newcommand{\chombo}{\textsf{Chombo}}
-\newcommand{\samrai}{\textsf{SAMRAI}}
-\newcommand{\paramesh}{\textsf{PARAMESH}}
-\newcommand{\gadget}{\textsf{GADGET}}
-\newcommand{\alps}{\textsf{ALPS}}
-\newcommand{\clawpack}{\textsf{CLAWPACK}}
-\newcommand{\grace}{\textsf{GrACe}}
-\newcommand{\carpet}{\textsf{Carpet}}
-\newcommand{\flash}{\textsf{FLASH}}
-
-\newcommand{\code}[1]{\textsf{#1}}
-
-\newcounter{figctr}
-
-\newcommand{\FIGURE}[3]{
-\noindent
-\parbox{\textwidth}{
-%\ \\ \hrule \ \\
-\begin{center}
-#3
-\end{center}%
-\ \nolinebreak%
-\refstepcounter{figctr}%
-\begin{center}%
-\begin{minipage}{7.0in}
-\textbf{Figure \thefigctr}. #1
-\end{minipage}
-\end{center}
-\label{#2}
-%\ \\ \hrule \ \\
-}}
+\include{newcommand}
 
 % NSF proposal generation template style file.
 % based on latex stylefiles  written by Stefan Llewellyn Smith and
@@ -181,37 +183,43 @@
 %
 This project proposes to develop \cello, a new parallel adaptive mesh
 refinement (AMR) software framework.  The purpose of \cello\ is to
-enable researchers to write multiscale multiphysics science
+enable researchers to write multiscale multiphysics science software
 applications that can harness the enormous computing power of current
 and future world-class HPC platforms.  The distinguishing
 characteristic relative to existing AMR frameworks is the aggressive
 pursuit at the onset of extreme scalability, both in terms of software
-data structures and hardware parallelism.  
+data structures and hardware parallelism.
 %
-An integral component of developing \cello\ will be developing
-\enzoii, the next generation of the NSF funded \enzo\ astrophysics and
-cosmology application.  \enzoii\ will help drive the development of
-\cello, as well as end-product itself: a computational astrophysics
-and cosmology application enabling the advancement of scientific
-knowledge.
+Integral to developing \cello\ will be developing \enzoii, a petascale
+astrophysics and cosmology application built on top of the \cello\
+framework.  \enzoii\ will not only help drive development of the
+underlying \cello\ framework, but it will serve as the successor to
+the \enzo\ terascale astrophysics and cosmology community code.  Both
+the \enzoii\ science application, and the underlying \cello\ extreme
+AMR software framework, will be released and supported as community
+software.
 
-\textit{Software sustainability} will be built on the existing legacy
-of long-term successful software projects produced qby the Laboratory
-for Computational Astrophysics (LCA).  The LCA already has a proven
-track record of successfully sustaining software projects for almost
-$20$ years.  Furthermore, the group continually improves its software
-design, quality control, and interaction with end users.
-
+\textit{Software sustainability} will be built on the legacy of the
+Laboratory for Computational Astrophysics (LCA), which has a proven
+track record of over 15 years of successfully developing and providing
+user support for community codes.
+%Furthermore, the LCA is
+%continually improving its methods of software design, software quality
+%control, and end-user support.
+%
 \textit{Software self-management} will be an integral component of the
-\cello\ software design.  \cello\ will be designed from the start to
-identify hardware, software, performance, and numerical issues, and
-will dynamically backtrack, reconfigure, or adapt to changes in the
-run-time environment.
-
-\textit{Energy efficiency} will also be implicitly handled in the
-underlying adaptive mesh refinement approach, which specifically aims
-to target available hardware resources precisely to the dynamically
-changing spacial and temporal simulations.
+\cello\ software design, with software resilience a high priority.
+%
+The \cello\ framework will be designed to detect hardware and software
+faults, identify performance and numerical issues, and dynamically
+reconfigure to always perform with the highest possible efficiency on
+available hardware components.
+%
+\textit{Energy efficiency} is implicitly handled in the underlying
+adaptive mesh refinement approach, which dynamically targets the
+application of available hardware resources to where they are needed,
+and avoids applying resources to where they are not.  The adaptivity
+of AMR translates directly to energy savings.
 
 % The proposed AMR framework would enable application
 % developers to write multiphysics applications for simulating phenomena
@@ -263,6 +271,7 @@ changing spacial and temporal simulations.
 
 % The proposed AMR framework would enable application
 % developers to write 
+
 The \textbf{intellectual merit} in the project includes 
 %
 
