@@ -166,81 +166,127 @@
 
 \begin{document}
 
-\textbf{Project Summary}
-%
+\textbf{Project Summary} \\
+
 % Cello + Enzo-II
 %
 %   formalization of Enzo-P development as a physics application built
 %   on a new independent extreme AMR framework
 %
-This project proposes to develop a new parallel software framework for
-developing multiscale science simulations, in particular those that
-require the enormous computing power of HPC platforms as they evolve
-through the petascale era and into the exascale.
-
- multiscale scienceadaptive
-mesh refinement (AMR) 
 %
-A distinguishing characteristic relative to existing AMR frameworks is
-the aggressive pursuit at the onset of extreme scalability, in terms
-of both software data structures and hardware parallelism.
 %
+This project proposes first to develop \cello, a new parallel adaptive
+mesh refinement (AMR) software framework.  The purpose of \cello\ is
+to enable researchers to write multiscale multiphysics science
+applications that can harness the enormous computing power of current
+and future world-class HPC platforms.  The distinguishing
+characteristic relative to existing AMR frameworks is the aggressive
+pursuit at the onset of extreme scalability, both in terms of software
+data structures and hardware parallelism.
 
-Development and design will be approached with software sustainability
-in mindThe design will be forward-looking, targeting not just the
+This project proposes second to develop \enzoii, the next generation
+of the NSF funded \enzo\ astrophysics and cosmology application.  The
+purpose of \enzoii\ will be to first help drive the development of
+\cello, and second as an end-product itself: a computational
+astrophysics and cosmology application enabling the advancement of
+scientific knowledge.
+
+\textit{Software sustainability} will be built on an existing legacy
+of successful software projects by the Laboratory for Computational
+Astrophysics (LCA).  The LCA already has a proven track record of
+successfully sustaining software projects for almost $20$ years.
+Furthermore, the group continually improves its software design,
+quality control, and interaction with end users.
+
+\textit{Software self-management} will be an integral component of the
+\cello\ software design.  \cello\ will be designed from the start to
+identify hardware, software, performance, and numerical issues, and
+will dynamically backtrack, reconfigure, or adapt to changes in the
+run-time environment.
+
+\textit{Energy efficiency} will also be implicitly handled in the
+underlying adaptive mesh refinement approach, which specifically aims
+to target available hardware resources precisely to the dynamically
+changing spacial and temporal simulations.
+
 % The proposed AMR framework would enable application
 % developers to write multiphysics applications for simulating phenomena
 % on an unprecedented range of spacial and temporal scales.
 
-AMR will be implemented using a modified octree-based approach.  Nodes
-of an octree will be associated with both logically Cartesian grid
-blocks and groups of particles, for Eulerian, Lagrangian, and hybrid
-methods for solving coupled hyperbolic, elliptic, and parabolic PDE's.
-Unlike standard octree-based AMR, grid block sizes may vary, and
-individual blocks may be distributed, such that optimal ``unigrid''
-parallel performance is recovered in subregions of the problem domain
-that are smooth.  Additionally, higher refinement factors, such as
-$r=4$ or even $r=8$, will be supported for particularly ``deep'' AMR
-problems; this will be designed in a way that still maintains at most
-$r=2$ level jumps, and will retain the high efficiency of the octree
-data structure.
+% AMR will be implemented using a modified octree-based approach.  Nodes
+% of an octree will be associated with both logically Cartesian grid
+% blocks and groups of particles, for Eulerian, Lagrangian, and hybrid
+% methods for solving coupled hyperbolic, elliptic, and parabolic PDE's.
+% Unlike standard octree-based AMR, grid block sizes may vary, and
+% individual blocks may be distributed, such that optimal ``unigrid''
+% parallel performance is recovered in subregions of the problem domain
+% that are smooth.  Additionally, higher refinement factors, such as
+% $r=4$ or even $r=8$, will be supported for particularly ``deep'' AMR
+% problems; this will be designed in a way that still maintains at most
+% $r=2$ level jumps, and will retain the high efficiency of the octree
+% data structure.
 
-Parallelization will be primarily data parallel, with task
-parallelization also available to augment the data parallelism.  A
-variety of parallelization technologies will be supported from the
-start, beginning with the message-driven processor virtualization
-approach provided by the
-\charm\ framework~\cite{KaBo07}~\cite{wwwcharm}.  Other
-parallelization methods used will include one-sided message passing
-via the MPI-2.0 library~\cite{wwwmpi}, the partitioned global address
-space (PGAS) approach via the UPC language~\cite{wwwupc}~\cite{upc},
-and shared memory parallel programming using the OpenMP
-API~\cite{wwwopenmp}.  Hybrid parallelism will be supported, including
-MPI with OpenMP and UPC with MPI.  Dynamic load balancing of parallel
-tasks will include hierarchical methods, which will improve mapping
-the distributed software data structures to the hierarchical hardware
-components of HPC platforms.
+% Parallelization will be primarily data parallel, with task
+% parallelization also available to augment the data parallelism.  A
+% variety of parallelization technologies will be supported from the
+% start, beginning with the message-driven processor virtualization
+% approach provided by the
+% \charm\ framework~\cite{KaBo07}~\cite{wwwcharm}.  Other
+% parallelization methods used will include one-sided message passing
+% via the MPI-2.0 library~\cite{wwwmpi}, the partitioned global address
+% space (PGAS) approach via the UPC language~\cite{wwwupc}~\cite{upc},
+% and shared memory parallel programming using the OpenMP
+% API~\cite{wwwopenmp}.  Hybrid parallelism will be supported, including
+% MPI with OpenMP and UPC with MPI.  Dynamic load balancing of parallel
+% tasks will include hierarchical methods, which will improve mapping
+% the distributed software data structures to the hierarchical hardware
+% components of HPC platforms.
 
-Fault tolerance and software resilience are also crucial factors at
-extreme scales.  The checkpoint-to-disk paradigm is known to be
-ultimately non-scalable, so this project will support other alternatives,
-including checkpoint-to-memory, or other options as they become
-technologically feasible.  Our framework will be designed at the onset
-to be resistant to memory, compute component, network, disk, and
-software failures.
-
-This project plans to make the framework and accompanying documentation freely
-available for use by the research community.  The result of this
-project will be a software framework that allows application
-developers to write multiphysics applications for simulating phenomena
-on an unprecedented range of spacial and temporal scales for many
-years to come.
+% Fault tolerance and software resilience are also crucial factors at
+% extreme scales.  The checkpoint-to-disk paradigm is known to be
+% ultimately non-scalable, so this project will support other alternatives,
+% including checkpoint-to-memory, or other options as they become
+% technologically feasible.  Our framework will be designed at the onset
+% to be resistant to memory, compute component, network, disk, and
+% software failures.
+% 
+% This project plans to make the framework and accompanying documentation freely
+% available for use by the research community.  The result of this
+% project will be a software framework that allows application
+% developers to write multiphysics applications for simulating phenomena
+% on an unprecedented range of spacial and temporal scales for many
+% years to come.
 
 % The proposed AMR framework would enable application
 % developers to write 
-\textbf{intellectual merit}
+The \textbf{intellectual merit} in the project includes 
+%
+
+The team of adaptive mesh refinement experts---with overlapping yet
+targeted areas of expertise in software development, high performance
+computing, and computational astrophysics---form the perfect group to
+design, implement, and rigorously test the proposed software.  The
+resulting astrophysics application \enzoii\ will build on the existing
+success of \enzo.
+
+
+\begin{itemize}
+\item importance of advancing knowledge / understanding in field
+\item qualifications of team
+\item extent of creative, original, transformative concepts
+\item how well-conceived and organized
+\item sufficient access to resources
+\end{itemize}
 
 \textbf{broader impact}
+
+\begin{itemize}
+\item advance discovery and understanding while promote teaching, training, learning
+\item broaden underrepresented groups
+\item enhance research / education infrastructure
+\item disseminate results to enhance science and technology
+\item benefits to society
+\end{itemize}
 
 \end{document}
 
