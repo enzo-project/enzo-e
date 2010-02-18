@@ -75,11 +75,14 @@
 \renewcommand{\refname}{\centerline{References cited}}
 
 % this handles hanging indents for publications
-\def\rrr#1\\{\par
-\medskip\hbox{\vbox{\parindent=2em\hsize=6.12in
-\hangindent=4em\hangafter=1#1}}}
+% \def\rrr#1\\{\par
+%\medskip\hbox{\vbox{\parindent=2em\hsize=6.12in
+%\hangindent=4em\hangafter=1#1}}}
 
 \def\baselinestretch{1}
+
+ \addtolength{\parskip}{\baselineskip}
+\setlength{\parindent}{0pt}
 
 % \setcounter{secnumdepth}{2}
 
@@ -166,6 +169,7 @@
 
 \begin{document}
 
+\noindent
 \textbf{Project Summary} \\
 
 % Cello + Enzo-II
@@ -175,28 +179,28 @@
 %
 %
 %
-This project proposes first to develop \cello, a new parallel adaptive
-mesh refinement (AMR) software framework.  The purpose of \cello\ is
-to enable researchers to write multiscale multiphysics science
+This project proposes to develop \cello, a new parallel adaptive mesh
+refinement (AMR) software framework.  The purpose of \cello\ is to
+enable researchers to write multiscale multiphysics science
 applications that can harness the enormous computing power of current
 and future world-class HPC platforms.  The distinguishing
 characteristic relative to existing AMR frameworks is the aggressive
 pursuit at the onset of extreme scalability, both in terms of software
-data structures and hardware parallelism.
+data structures and hardware parallelism.  
+%
+An integral component of developing \cello\ will be developing
+\enzoii, the next generation of the NSF funded \enzo\ astrophysics and
+cosmology application.  \enzoii\ will help drive the development of
+\cello, as well as end-product itself: a computational astrophysics
+and cosmology application enabling the advancement of scientific
+knowledge.
 
-This project proposes second to develop \enzoii, the next generation
-of the NSF funded \enzo\ astrophysics and cosmology application.  The
-purpose of \enzoii\ will be to first help drive the development of
-\cello, and second as an end-product itself: a computational
-astrophysics and cosmology application enabling the advancement of
-scientific knowledge.
-
-\textit{Software sustainability} will be built on an existing legacy
-of successful software projects by the Laboratory for Computational
-Astrophysics (LCA).  The LCA already has a proven track record of
-successfully sustaining software projects for almost $20$ years.
-Furthermore, the group continually improves its software design,
-quality control, and interaction with end users.
+\textit{Software sustainability} will be built on the existing legacy
+of long-term successful software projects produced qby the Laboratory
+for Computational Astrophysics (LCA).  The LCA already has a proven
+track record of successfully sustaining software projects for almost
+$20$ years.  Furthermore, the group continually improves its software
+design, quality control, and interaction with end users.
 
 \textit{Software self-management} will be an integral component of the
 \cello\ software design.  \cello\ will be designed from the start to
