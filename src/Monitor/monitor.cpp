@@ -169,7 +169,7 @@ void Monitor::image
 	// reduce along iaz axis
 	switch (op_reduce) {
 	case reduce_min: image[j] = MIN(array[i],image[j]); break;
-	case reduce_max: image[j] = MIN(array[i],image[j]); break;
+	case reduce_max: image[j] = MAX(array[i],image[j]); break;
 	case reduce_avg: image[j] += array[i]; break;
 	case reduce_sum: image[j] += array[i]; break;
 	default:         break;
