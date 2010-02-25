@@ -1,3 +1,8 @@
+@String{apj = "The Astrophysical Journal"}
+@String{apjs = "The Astrophysical Journal, Supplement"}
+@String{apjl = "The Astrophysical Journal, Letters"}
+@String{nat = "Nature"}
+@String{mnras = "Monthly Notices of the Royal Astronomical Society"}
 
 @techreport{Ab93,
    author = {Jamshid Samareh-Abolhassani},
@@ -214,6 +219,7 @@
 @Misc{Du09,
   author = "Anshu Dubey",
   title = "What the Paradigm shift means for large mature codes like {FLASH}",
+  year = 2009,
   howpublished={\url{http://gladiator.ncsa.uiuc.edu/PDFs/accelerators/day3/breakouts/astro/dubey.pdf}}
 }
 
@@ -548,14 +554,18 @@
   year =        2001,
   }
 
-@InProceedings{BrAb01,
-  author = 	 {Greg L.~Bryan and Tom Abel and Michael L.~Norman},
-  title = 	 {Achieving Extreme Resolution in numerical Cosmology using adaptive mesh refinement: resolving primordial star formation},
-  booktitle = 	 {Proceedings of SC01},
-  year =	 2001,
-  publisher =	 {IEEE Computer Society Press}
-}
-
+@article{BrAb01,
+ author = {Bryan, Greg L. and Abel, Tom and Norman, Michael L.},
+ title = {Achieving extreme resolution in numerical cosmology using adaptive mesh refinement: resolving primordial star formation},
+ journal = {Sci. Program.},
+ volume = 10,
+ number = 4,
+ year = 2002,
+ issn = {1058-9244},
+ pages = {291--302},
+ publisher = {IOS Press},
+ address = {Amsterdam, The Netherlands, The Netherlands},
+ }
 
 @InCollection{BrCh99,
   author = 	 {Peter N.~Brown and Britton Chang and Frank Graziani and Carol S.~Woodward},
@@ -684,58 +694,77 @@ Methods in Scientific Computation IV},
 @misc{wwwcharm,
   author = "Orion Sky Lawlor and Gengbin Zheng",
   title = "{PPL}: Parallel objects",
-  howpublished = {\url{http://charm.cs.uiuc.edu/research/charm/}}
+  howpublished = {\url{http://charm.cs.uiuc.edu/research/charm/}},
+  year = 2010
+}
+
+@misc{wwwtotalview,
+  author = "Totalview Technologies",
+  title = "{TotalView} {Technologies} - {L}inux Debugger and Memory Leak Detection Tool for Multi-Threaded {C}/{C}++ and {F}ortran",
+  year = 2010,
+  howpublished = {\url{http://totalviewtech.com/}}
 }
 
 
 @InCollection{KaBo07,
   author = 	 {Laxmikant V. Kale and Eric Bohm and Celso L. Mendes and Terry Wilmarth and Gengbin Zheng },
-  title = 	 {Programming Petascale Applications with Charm++ and AMPI },
+  title = 	 {Programming Petascale Applications with {Charm++} and {AMPI} },
   booktitle = 	 {Petascale Computing: Algorithms and Applications},
   publisher =	 {Chapman \& Hall/CRC Computational Science},
   year =	 2007,
   editor =	 {David A. Bader}
 }
 
+
+@InCollection{KaKr96,
+  author =	 {L. V. Kale and Sanjeev Krishnan},
+  editor =	 {Wilson, Gregory V. and Lu, Paul},
+  booktitle = 	 {Parallel Programming Using C++},
+  title = 	 {{Charm++}: Parallel Programming with Message-Driven Objects},
+ publisher = {MIT Press},
+  pages = {175--213},
+ address = {Cambridge, MA, USA},
+  year = 	 1996
+}
+
 @misc{wwwcarpet,
   author = "Erik Schnetter",
-  title = "{Carpet}---{AMR} for {C}actus",
+  title = "{Carpet}---{A}daptive mesh refinement for the {C}actus framework",
+  year = 2009,
   howpublished = {\url{http://www.carpetcode.org/}}
 }
 
 @misc{wwwsamraicode,
-  author = "Doxygen",
+  author = "Center for Applied Scientific Computing (CASC) at Lawrence Livermore National Laboratory (LLNL)",
+  year = 2005,
   title = "{SAMRAI}: {SAMRAI} Source Code Documentation",
   howpublished = {\url{http://wwwrel.ph.utexas.edu/openGR/samrai-dox/html/main.html}}
 }
 
 @misc{wwwopenmp,
   author = "OpenMP Architecture Review Board",
+  year = 2010,
   title = "{OpenMP}: {T}he {OpenMP} {API} specification for parallel programming",
   howpublished = {\url{http://openmp.org/wp/}}
 }
 @misc{wwwflash,
   author = "ASC Flash Center, University of Chicago",
-  title = "{ASC} Center for astrophysical thermonuclear flashes",
+  title = "{ASC} {C}enter for {A}strophysical {T}hermonuclear {F}lashes",
+  year = 2010,
   howpublished = {\url{http://flash.uchicago.edu/website/home/}}
 }
 
 
 @article{BuBu09,
-   author = {{Burstedde}, C. and {Burtscher}, M. and {Ghattas}, O. and {Stadler}, G. and 
-	{Tu}, T. and {Wilcox}, L.~C.},
-    title = "{ALPS: A framework for parallel adaptive PDE solution}",
-  journal = {Journal of Physics Conference Series},
-     year = 2009,
-    month = jul,
-   volume = 180,
-   number = 1,
-    pages = {012009-+},
-      doi = {10.1088/1742-6596/180/1/012009},
-   adsurl = {http://adsabs.harvard.edu/abs/2009JPhCS.180a2009B},
-  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+  author={Carsten Burstedde and Martin Burtscher and Omar Ghattas and Georg Stadler and Tiankai Tu and Lucas C Wilcox},
+  title={{ALPS}: A framework for parallel adaptive {PDE} solution},
+  journal={Journal of Physics: Conference Series},
+  volume=180,
+  pages={012009},
+  url={http://stacks.iop.org/1742-6596/180/012009},
+  year=2009,
+  abstract={Adaptive mesh refinement and coarsening (AMR) is essential for the numerical solution of partial differential equations (PDEs) that exhibit behavior over a wide range of length and time scales. Because of the complex dynamic data structures and communication patterns and frequent data exchange and redistribution, scaling dynamic AMR to tens of thousands of processors has long been considered a challenge. We are developing ALPS, a library for dynamic mesh adaptation of PDEs that is designed to scale to hundreds of thousands of compute cores. Our approach uses parallel forest-of-octree-based hexahedral finite element meshes and dynamic load balancing based on space-filling curves. ALPS supports arbitrary-order accurate continuous and discontinuous finite element/spectral element discretizations on general geometries. We present scalability and performance results for two applications from geophysics: seismic wave propagation and mantle convection.}
 }
-
 
 
 @Article{BaHu86,
@@ -748,10 +777,12 @@ Methods in Scientific Computation IV},
   month =	 {December}
 }
 
-@InProceedings{BuGh08,
+@Misc{BuGh08,
   author = 	 {Carsten Burstedde and Omar Ghattas and Georg Stadler and Tiankai Tu and Lucas C. Wilcox},
   title = 	 {Towards adaptive mesh {PDE} simulations on petascale computers},
-  booktitle = 	 {Proceedings of Teragrid, 2008},
+  url = {\url{http://users.ices.utexas.edu/~carsten/papers/BursteddeGhattasStadlerEtAl08.pdf}},
+  booktitle = 	 {TeraGrid 2008, Las Vegas, NV},
+  month = {June},
   year =	 2008
 }
 
@@ -950,9 +981,13 @@ Methods in Scientific Computation IV},
 @INPROCEEDINGS{CoBe07,
     author = {Phillip Colella and John Bell and Noel Keen and Terry Ligocki and Brian Van Straalen},
     title = {Performance and scaling of locally-structured grid methods for partial differential equations},
-    booktitle = {Journal of Physics: Conference Series, 78:012013 (13pp},
+    booktitle = {Journal of Physics: Conference Series},
+    url = {\url{https://seesar.lbl.gov/anag/publications/colella/AMRPerformance.pdf}},
+    volume = 78,
+    pages = {1--13},
     year = 2007
 }
+
 
 @TechReport{CoGr09,
   author =	 {P.~Colella and D.~T.~Graves and N.~D.~Keen and T.~J.~Ligocki and D.~F.~Martin and P.~W.~McCorquodale and D.~Modiano and P.~O.~Schwartz and T.~D.~Sternberg and B.~Van Straalen},
@@ -1662,7 +1697,7 @@ Methods},
 @Article{GuWi06,
   author = 	 {Brian T.~N.~Gunney and Andrew M.~Wissink and David A.~Hysom},
   title = 	 {Parallel clustering algorithms for structured {AMR}},
-  journal = 	 {Journal of parallel and Distributed Computing},
+  journal = 	 {Journal of Parallel and Distributed Computing},
   year = 	 2006,
   volume = 	 66,
   pages = 	 {1419--1430}}
@@ -1684,6 +1719,24 @@ Methods},
   month =	 {September},
   publisher =	 {Brebbia--Wendland (Hrsg.)}
 }
+
+@ARTICLE{Hallman07,
+   author = {{Hallman}, E.~J. and {O'Shea}, B.~W. and {Burns}, J.~O. and 
+	{Norman}, M.~L. and {Harkness}, R. and {Wagner}, R.},
+    title = "{The Santa Fe Light Cone Simulation Project. I. Confusion and the Warm-Hot Intergalactic Medium in Upcoming Sunyaev-Zel'dovich Effect Surveys}",
+  journal = apj,
+archivePrefix = "arXiv",
+   eprint = {0704.2607},
+ keywords = {Cosmology: Cosmic Microwave Background, Cosmology: Observations, Cosmology: Theory, Galaxies: Clusters: General, Hydrodynamics, Methods: Numerical},
+     year = 2007,
+    month = dec,
+   volume = 671,
+    pages = {27-39},
+      doi = {10.1086/522912},
+   adsurl = {http://adsabs.harvard.edu/abs/2007ApJ...671...27H},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
 
 @Article{HaHo93,
   author = 	 {Martin Hanke and Marlis Hochbruck},
@@ -1737,12 +1790,6 @@ Methods},
 }
 
 
-
-@Misc{hdf5,
-  author =	 {The National Center for Supercomputing Applications},
-  title =	 {{HDF5} library and file format},
-  note =	 {\texttt{http://hdf.ncsa.uiuc.edu/HDF5/}}
-}
 
 
 @Article{HeHo03,
@@ -1829,9 +1876,9 @@ Methods},
   author = {R. W. {Hockney} and J. W. {Eastwood}},
   interHash = {e1042a2509b100b5d82e246c3ff03a9c},
   intraHash = {6f9933cf106eac0cb4d51d96072a709a},
-  publisher = {Bristol: Hilger, 1988},
+  publisher = {Bristol: Hilger},
   title = {{Computer simulation using particles}},
-  year = {1988},
+  year = 1988,
   adsnote = {Provided by the SAO/NASA Astrophysics Data System},
   adsurl = {http://adsabs.harvard.edu/abs/1988csup.book.....H}
 }
@@ -1968,10 +2015,14 @@ of Illinois at Urbana-Champaign},
   note = {\texttt{http://cosmos.ucsd.edu/jbPerf/}}
 }
 
-@Misc{enzo,
-  title =	 {{Enzo} cosmology application},
-  note = {\texttt{http://cosmos.ucsd.edu/enzo/}}
+
+@Misc{wwwenzo,
+  author = "Laboratory for Computational Astrophysics at the University of California in San Diego",
+  title =	 {{Enzo}},
+  year = 2010,
+  howpublished = {\url{http://lca.ucsd.edu/projects/enzo}}
 }
+
 
 @InCollection{Je84,
   author = 	 {Dennis C.~Jespersen},
@@ -2187,6 +2238,20 @@ of Illinois at Urbana-Champaign},
   month =	 {July}
 }
 
+@INPROCEEDINGS{Kritsuk09,
+   author = {{Kritsuk}, A.~G. and {Ustyugov}, S.~D. and {Norman}, M.~L. and 
+	{Padoan}, P.},
+    title = "{Simulations of Supersonic Turbulence in Molecular Clouds: Evidence for a New Universality}",
+booktitle = {Astronomical Society of the Pacific Conference Series},
+     year = 2009,
+   series = {Astronomical Society of the Pacific Conference Series},
+   volume = 406,
+   editor = "{N.~V.~Pogorelov, E.~Audit, P.~Colella, \& G.~P.~Zank}",
+    month = apr,
+    pages = {15-+},
+   adsurl = {http://adsabs.harvard.edu/abs/2009ASPC..406...15K},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
 
 @Unpublished{LaRa95,
   author = 	 {Roberto Lattuada and Jonathan Raper},
@@ -2226,7 +2291,7 @@ of Illinois at Urbana-Champaign},
 
 @article{LaTa06,
  author = {Lan, Zhiling and Taylor, Valerie E. and Li, Yawei},
- title = {DistDLB: improving cosmology SAMR simulations on distributed computing systems through hierarchical load balancing},
+ title = {{DistDLB}: {I}mproving cosmology {SAMR} simulations on distributed computing systems through hierarchical load balancing},
  journal = {J. Parallel Distrib. Comput.},
  volume = 66,
  number = 5,
@@ -2240,7 +2305,7 @@ of Illinois at Urbana-Champaign},
 
 @inproceedings{WiHo01,
  author = {Wissink, Andrew M. and Hornung, Richard D. and Kohn, Scott R. and Smith, Steve S. and Elliott, Noah},
- title = {Large scale parallel structured AMR calculations using the SAMRAI framework},
+ title = {Large scale parallel structured {AMR} calculations using the {SAMRAI} framework},
  booktitle = {Supercomputing '01: Proceedings of the 2001 ACM/IEEE conference on Supercomputing (CDROM)},
  year = 2001,
  isbn = {1-58113-293-X},
@@ -2304,20 +2369,21 @@ of Illinois at Urbana-Champaign},
 }
 @INPROCEEDINGS{YeSe98,
     author = {Kathy Yelick and Luigi Semenzato and Geoff Pike and Carleton Miyamoto and Ben Liblit and Arvind Krishnamurthy and Paul Hilfinger and Susan Graham and David Gay and Phil Colella and Alex Aiken},
-    title = {Titanium: A High-Performance Java Dialect},
+    title = {Titanium: A High-Performance {J}ava Dialect},
     booktitle = {In ACM},
     year = 1998,
     pages = {10--11}
 }
 @misc{wwwblcr,
-  author = "Susan L. Graham and Paul Hilfinger and Katherine A. Yelick and Phillip Colella",
-  title = "Titanium project home page",
+  author = "Future Technologies Group, Berkeley Lab Computing Sciences",
+  title = "Berkeley Lab Checkpoint/Restart ({BLCR})",
   howpublished = {\url{https://ftg.lbl.gov/CheckpointRestart/CheckpointRestart.shtml}}
 }
 
 @misc{wwwtitanium,
-  author = "Future Technologies Group, Berkeley Lab Computing Sciences",
-  title = "Berkeley Lab Checkpoint/Restart ({BLCR})",
+  author = "Susan L. Graham and Paul Hilfinger and Katherine A. Yelick and Phillip Colella",
+  title = "Titanium project home page",
+  year = 2006,
   howpublished = {\url{http://titanium.cs.berkeley.edu/}}
 }
 
@@ -2325,6 +2391,7 @@ of Illinois at Urbana-Champaign},
   author = {Randall J. LeVeque and Jan Olav Langseth and Marsha Berger and David McQueen and Donna Calhoun and Peter Blossey and Sorin Mitran},
   organization = "Department of Applied Mathematics of the University of Washington",
   title = "{CLAWPACK}",
+  year = 2006,
   howpublished = {\url{http://www.amath.washington.edu/~claw/}}
 }
 
@@ -2332,6 +2399,7 @@ of Illinois at Urbana-Champaign},
   author = {Volker Springel},
   organization = "Max-Planck-Institute for Astrophysics, Garching, Germany",
   title = "Cosmological simulations with {GADGET}",
+  year = 2005,
   howpublished = {\url{http://www.mpa-garching.mpg.de/gadget/}}
 }
 
@@ -2359,6 +2427,20 @@ of Illinois at Urbana-Champaign},
   adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 
+@article{MaSr00,
+ author = {Mascagni, Michael and Srinivasan, Ashok},
+ title = {Algorithm 806: {SPRNG}: a scalable library for pseudorandom number generation},
+ journal = {ACM Trans. Math. Softw.},
+ volume = {26},
+ number = {3},
+ year = {2000},
+ issn = {0098-3500},
+ pages = {436--461},
+ doi = {http://doi.acm.org/10.1145/358407.358427},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
 
 @misc{wwwsprng,
   author = "Michael Mascagni and Hongmei Chi et al",
@@ -2375,30 +2457,35 @@ of Illinois at Urbana-Champaign},
     and Andrew Lumsdaine
     and Ewing Lusk
     and Rolf Rabenseifner},
-  title = "Message Passing Interface Forum",
+  title = "Message Passing Interface ({MPI}) Forum home page",
+  year = 2010,
   howpublished = {\url{http://www.mpi-forum.org/}}
 }
 
 @misc{wwwtrac,
   author = {Edgewall Software},
   title = "The {T}rac {P}roject",
+  year = 2010,
   howpublished = {\url{http://trac.edgewall.org/}}
 }
 
 @misc{wwwcppunit,
   author = {Baptiste Lepilleur},
   title = "{CppUnit} - {C}++ port of {JUnit}",
-  howpublished = {\url{http://sourceforge.net/projects/cppunit/}}
+  howpublished = {\url{http://sourceforge.net/projects/cppunit/}},
+  year = 2010
 }
 
 @misc{wwwlcatest,
   author = {James Bordner},
   title = "{LCATEST}",
+  year = 2010,
   howpublished = {\url{http://lca.ucsd.edu/projects/lcatest}}
 }
 
 @misc{wwwlcaperf,
   author = {James Bordner},
+  year = 2009,
   title = "{LCAPERF}",
   howpublished = {\url{http://lca.ucsd.edu/projects/lcaperf}}
 }
@@ -2406,6 +2493,7 @@ of Illinois at Urbana-Champaign},
 @misc{wwwaspectcpp,
   author = {Olaf Spinczyk and Matthias Urban and Daniel Lohmann and Georg Blaschke and Rainer Sand and Horst Schirmeier},
   title = "The Home of {AspectC++}",
+  year = 2007,
   howpublished = {\url{http://www.aspectc.org/}}
 }
 
@@ -2536,15 +2624,16 @@ of Illinois at Urbana-Champaign},
 }
 
 
-    @InProceedings{OlMa05,
+@InProceedings{OlMa05,
   author = 	 {Kevin Olson and Peter MacNeice},
   title = 	 {An Overview of the {PARAMESH} {AMR} Software Package and Some of  Its Applications},
   booktitle = 	 {Adaptive Mesh Refinement-Theory and Applications, Proceedings of the Chicago Workshop on Adaptive Mesh Refinement Methods},
   year =	 2005,
   editor =	 {Tomasz Plewa and Timur Linde and V.~Gregory Weirs},
   volume =	 41,
+  pages = {315--330},
   series =	 {Lecture Notes in Computational Science and Engineering},
-  publisher =	 {Berlin: Springer}
+  publisher =	 {Springer Berlin Heidelberg}
 }
 
 
@@ -2554,6 +2643,7 @@ of Illinois at Urbana-Champaign},
   booktitle = 	 {Parallel Computational Fluid Dynamics 2005: Theory and Applications: Proceedings of the Parallel CFD Conference, College Park, MD, U.S.A.},
   year =	 2006,
   editor =	 {A.~Deane and A.~Ecer and G.~Brenner and D.~Emerson and J.~McDonough and J.~Periaux and N.~Satofuka and D.~Tromeur-Dervout},
+  pages = {341--348},
   publisher =	 {Elsevier}
 }
 
@@ -2613,12 +2703,14 @@ of Illinois at Urbana-Champaign},
 @Misc{wwwparamesh,
   title =	 {{PARAMESH} V4.1: Parallel Adaptive Mesh Refinement},
   author = {NASA Goddard Space Flight Center and Drexel University},
+  year = 2008,
   howpublished = {\url{http://www.physics.drexel.edu/~olson/paramesh-doc/Users_manual/amr.html}}
 }
 
 @Misc{wwwupc,
   title =	 {{B}erkeley {U}nified {P}arallel {C} ({UPC}) project},
   author = {LBNL and UC Berkeley},
+  year = 2010,
   howpublished = {\url{http://upc.lbl.gov/}}
 }
 
@@ -2634,7 +2726,15 @@ of Illinois at Urbana-Champaign},
 @Misc{wwwchombo,
   title = {Chombo---Infrastructure for adaptive mesh refinement},
   author = "Applied Numerical Algorithms Group, Lawrence Berkeley National Laboratory",
+  year = 2009,
   howpublished =	 {\url{https://seesar.lbl.gov/ANAG/chombo/}}
+}
+
+@Misc{wwwhdf5,
+  title =	 {{HDF} Group---{HDF5}},
+  author =	 {The HDF Group at The University of Illinois},
+  year = 2010,
+  howpublished =	 {\url{http://www.hdfgroup.org/HDF5/}}
 }
 
 
@@ -2933,6 +3033,7 @@ of Illinois at Urbana-Champaign},
   title = 	 {Introducing {E}nzo, an {AMR} cosmology application},
   booktitle = 	 {Adaptive Mesh Refinement---Theory and Applications},
   year =	 2004,
+  pages = {341--349},
   series =	 {Lecture Notes in Computational Sciences and Engineering},
   publisher =	 {Springer-Verlag}
 }
@@ -3022,6 +3123,20 @@ of Illinois at Urbana-Champaign},
   year =	 2002,
   note =	 {Pittsburgh, PA}
 }
+
+@ARTICLE{Padoan05,
+   author = {{Padoan}, P. and {Kritsuk}, A. and {Michael} and {Norman}, L. and 
+	{Nordlund}, {\AA}.},
+    title = "{Brown dwarfs from turbulent fragmentation}",
+  journal = {Memorie della Societa Astronomica Italiana},
+   eprint = {arXiv:astro-ph/0411480},
+     year = 2005,
+   volume = 76,
+    pages = {187--192},
+   adsurl = {http://adsabs.harvard.edu/abs/2005MmSAI..76..187P},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
 
 @Article{PeEi95,
   author = 	 {Robert M.~Peitzsch and Mois\'{e}s Eisenberg and Kim A.~Sharp and Stuart McLaughlin},
@@ -3184,6 +3299,64 @@ of Illinois at Urbana-Champaign},
   year = 	 1995,
   number =	 {NAS-95-021},
   month =	 {December}
+}
+
+@ARTICLE{Reynolds09,
+   author = {{Reynolds}, D.~R. and {Hayes}, J.~C. and {Paschos}, P. and {Norman}, M.~L.
+	},
+    title = "{Self-consistent solution of cosmological radiation-hydrodynamics and chemical ionization}",
+  journal = {Journal of Computational Physics},
+archivePrefix = "arXiv",
+   eprint = {0901.1110},
+ keywords = {Origin and formation of the Universe, Numerical simulation; solution of equations, Ordinary and partial differential equations; boundary value problems},
+     year = 2009,
+    month = oct,
+   volume = 228,
+    pages = {6833-6854},
+      doi = {10.1016/j.jcp.2009.06.006},
+   adsurl = {http://adsabs.harvard.edu/abs/2009JCoPh.228.6833R},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{Iliev09,
+   author = {{Iliev}, I.~T. and {Whalen}, D. and {Mellema}, G. and {Ahn}, K. and 
+	{Baek}, S. and {Gnedin}, N.~Y. and {Kravtsov}, A.~V. and {Norman}, M. and 
+	{Raicevic}, M. and {Reynolds}, D.~R. and {Sato}, D. and {Shapiro}, P.~R. and 
+	{Semelin}, B. and {Smidt}, J. and {Susa}, H. and {Theuns}, T. and 
+	{Umemura}, M.},
+    title = "{Cosmological radiative transfer comparison project - II. The radiation-hydrodynamic tests}",
+  journal = mnras,
+archivePrefix = "arXiv",
+   eprint = {0905.2920},
+ keywords = {radiative transfer , methods: numerical , HII regions , galaxies: high-redshift , intergalactic medium , cosmology: theory},
+     year = 2009,
+    month = dec,
+   volume = 400,
+    pages = {1283-1316},
+      doi = {10.1111/j.1365-2966.2009.15558.x},
+   adsurl = {http://adsabs.harvard.edu/abs/2009MNRAS.400.1283I},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+
+@ARTICLE{Springel05,
+   author = {{Springel}, V. and {White}, S.~D.~M. and {Jenkins}, A. and {Frenk}, C.~S. and 
+	{Yoshida}, N. and {Gao}, L. and {Navarro}, J. and {Thacker}, R. and 
+	{Croton}, D. and {Helly}, J. and {Peacock}, J.~A. and {Cole}, S. and 
+	{Thomas}, P. and {Couchman}, H. and {Evrard}, A. and {Colberg}, J. and 
+	{Pearce}, F.},
+    title = "{Simulations of the formation, evolution and clustering of galaxies and quasars}",
+  journal = nat,
+   eprint = {arXiv:astro-ph/0504097},
+     year = 2005,
+    month = jun,
+   volume = 435,
+    pages = {629-636},
+      doi = {10.1038/nature03597},
+   adsurl = {http://adsabs.harvard.edu/abs/2005Natur.435..629S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 
 @inproceedings{WeSu07,
@@ -3724,9 +3897,9 @@ Tests},
 @Misc{We04,
   author =	 {Mike Welcome},
   title =	 {{UPC} {AMR} Status Report},
-  howpublished = {UPC Review Presentations
-Lawrence Berkeley National Laboratory, 5/17/2004},
-  note =	 {\url{http://upc.lbl.gov/publications/UPCReview-s04}}
+  howpublished = {UPC Review Presentations,
+Lawrence Berkeley National Laboratory, \url{http://upc.lbl.gov/publications/UPCReview-s04/mike-amr-review04.pdf}},
+  year = 2004,
 }
 
 @InProceedings{WeGi04,
@@ -3893,4 +4066,90 @@ Lawrence Berkeley National Laboratory, 5/17/2004},
   pages =	 {899--911},
   month =	 {September}
 }
+
+@ARTICLE{Collins10,
+   author = {{Collins}, D.~C. and {Xu}, H. and {Norman}, M.~L. and {Li}, H. and 
+	{Li}, S.},
+    title = "{Cosmological Adaptive Mesh Refinement Magnetohydrodynamics with Enzo}",
+  journal = apjs,
+archivePrefix = "arXiv",
+   eprint = {0902.2594},
+ keywords = {cosmology: theory, methods: numerical, magnetohydrodynamics: MHD },
+     year = 2010,
+    month = feb,
+   volume = 186,
+    pages = {308-333},
+      doi = {10.1088/0067-0049/186/2/308},
+   adsurl = {http://adsabs.harvard.edu/abs/2010ApJS..186..308C},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Xu09,
+   author = {{Xu}, H. and {Li}, H. and {Collins}, D.~C. and {Li}, S. and 
+	{Norman}, M.~L.},
+    title = "{Turbulence and Dynamo in Galaxy Cluster Medium: Implications on the Origin of Cluster Magnetic Fields}",
+  journal = apjl,
+archivePrefix = "arXiv",
+   eprint = {0905.2196},
+ keywords = {galaxies: active, galaxies: clusters: general, methods: numerical, MHD, turbulence},
+     year = 2009,
+    month = jun,
+   volume = 698,
+    pages = {L14-L17},
+      doi = {10.1088/0004-637X/698/1/L14},
+   adsurl = {http://adsabs.harvard.edu/abs/2009ApJ...698L..14X},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+@ARTICLE{Xu08a,
+   author = {{Xu}, H. and {Li}, H. and {Collins}, D.~C. and {Li}, S. and {Norman}, M.~L.
+	},
+    title = "{Formation of X-Ray Cavities by the Magnetically Dominated Jet-Lobe System in a Galaxy Cluster}",
+  journal = apjl,
+archivePrefix = "arXiv",
+   eprint = {0806.3789},
+ keywords = {Galaxies: Active, Galaxies: Clusters: General, Galaxies: Jets, Methods: Numerical, Magnetohydrodynamics: MHD},
+     year = 2008,
+    month = jul,
+   volume = 681,
+    pages = {L61-L64},
+      doi = {10.1086/590407},
+   adsurl = {http://adsabs.harvard.edu/abs/2008ApJ...681L..61X},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@ARTICLE{Xu08b,
+   author = {{Xu}, H. and {O'Shea}, B.~W. and {Collins}, D.~C. and {Norman}, M.~L. and 
+	{Li}, H. and {Li}, S.},
+    title = "{The Biermann Battery in Cosmological MHD Simulations of Population III Star Formation}",
+  journal = apjl,
+archivePrefix = "arXiv",
+   eprint = {0807.2647},
+ keywords = {Cosmology: Theory, Galaxies: High-Redshift, Magnetohydrodynamics: MHD, Stars: Formation},
+     year = 2008,
+    month = dec,
+   volume = 688,
+    pages = {L57-L60},
+      doi = {10.1086/595617},
+   adsurl = {http://adsabs.harvard.edu/abs/2008ApJ...688L..57X},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@INPROCEEDINGS{Norman09,
+   author = {{Norman}, M.~L. and {Reynolds}, D.~R. and {So}, G.~C.},
+    title = "{Cosmological Radiation Hydrodynamics with Enzo}",
+ keywords = {radiative transfer, hydrodynamics, numerical analysis, Radiative transfer; scattering, Hydrodynamics, Numerical approximation and analysis},
+booktitle = {American Institute of Physics Conference Series},
+     year = 2009,
+   series = {American Institute of Physics Conference Series},
+   volume = 1171,
+   editor = "{I.~Hubeny, J.~M.~Stone, K.~MacGregor, \& K.~Werner}",
+    month = sep,
+    pages = {260-272},
+      doi = {10.1063/1.3250065},
+   adsurl = {http://adsabs.harvard.edu/abs/2009AIPC.1171..260N},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
 
