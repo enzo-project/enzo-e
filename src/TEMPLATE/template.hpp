@@ -7,8 +7,8 @@
 #ifndef FOO_HPP
 #define FOO_HPP
 
-///
-/// @brief     
+/// Brief class description
+
 /// @author    
 /// @date      
 /// @ingroup
@@ -29,10 +29,10 @@ public:
   // PUBLIC FUNCTIONS
   //-------------------------------------------------------------------
 
-  /// Brief description
+  /// Brief description Foo() in template.hpp
   Foo();
 
-  /// Brief description
+  /// Brief description ~Foo() in template.hpp
   ~Foo();
 
 private:

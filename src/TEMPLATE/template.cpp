@@ -4,30 +4,26 @@
 // See LICENSE_CELLO file for license and copyright information
 //
 
-// $Id$
-
 //--------------------------------------------------------------------
 // PUBLIC FUNCTIONS
 //--------------------------------------------------------------------
 
 Foo::Foo()
 ///
-/// @brief         Brief description
+/// Long description Foo() in template.cpp
+/// 
 /// @param         Parameter
 /// @return        Return value
-/// 
-/// Long description
 /// 
 {
 }
 
 Foo::~Foo()
-///
-/// @brief         Brief description
+/// 
+/// Long description Foo() in template.cpp
+//
 /// @param         Parameter
 /// @return        Return value
-/// 
-/// Long description
 /// 
 {
 }
