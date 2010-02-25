@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef ERROR_EXCEPTION_HPP
+#define ERROR_EXCEPTION_HPP
+
 /** 
  *********************************************************************
  *
@@ -40,8 +49,6 @@
  *********************************************************************
  */
 
-#ifndef ERROR_EXCEPTION_HPP
-#define ERROR_EXCEPTION_HPP
 
 /** 
  *********************************************************************

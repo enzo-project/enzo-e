@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef TEST_HPP
+#define TEST_HPP
+
 /** 
  *********************************************************************
  *
@@ -39,8 +48,6 @@
  *
  *********************************************************************
  */
-#ifndef TEST_HPP
-#define TEST_HPP
 
 
 #include "cello.h"

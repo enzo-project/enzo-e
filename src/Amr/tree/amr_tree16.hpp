@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef AMR_TREE16_HPP
+#define AMR_TREE16_HPP
+
 /** 
  *********************************************************************
  *
@@ -40,8 +49,6 @@
  *********************************************************************
  */
 
-#ifndef AMR_TREE16_HPP
-#define AMR_TREE16_HPP
 
 #define MAX_LEVELS 80
 

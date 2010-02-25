@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef MONITOR_HPP
+#define MONITOR_HPP
+
 /** 
  *********************************************************************
  *
@@ -40,8 +49,6 @@
  *********************************************************************
  */
 
-#ifndef MONITOR_HPP
-#define MONITOR_HPP
 
 
 /** 

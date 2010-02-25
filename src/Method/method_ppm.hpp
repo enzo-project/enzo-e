@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef METHOD_PPM_HPP
+#define METHOD_PPM_HPP
+
 /** 
  *********************************************************************
  *
@@ -40,8 +49,6 @@
  *********************************************************************
  */
 
-#ifndef METHOD_PPM_HPP
-#define METHOD_PPM_HPP
 
 
 /** 

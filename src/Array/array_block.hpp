@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef ARRAY_BLOCK_HPP
+#define ARRAY_BLOCK_HPP
+
 /** 
  *********************************************************************
  *

@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef SCHEDULE_HPP
+#define SCHEDULE_HPP
+
 /** 
  *********************************************************************
  *
@@ -39,8 +48,6 @@
  *
  *********************************************************************
  */
-#ifndef SCHEDULE_HPP
-#define SCHEDULE_HPP
 
 /** 
  *********************************************************************

@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef PARAMETERS_HPP
+#define PARAMETERS_HPP
+
 /** 
  *********************************************************************
  *
@@ -40,8 +49,6 @@
  *********************************************************************
  */
 
-#ifndef PARAMETERS_HPP
-#define PARAMETERS_HPP
 
 /** 
  *********************************************************************

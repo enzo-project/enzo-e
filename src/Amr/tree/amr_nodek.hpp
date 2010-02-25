@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef AMR_NODEK_HPP
+#define AMR_NODEK_HPP
+
 /** 
  *********************************************************************
  *
@@ -40,8 +49,6 @@
  *********************************************************************
  */
 
-#ifndef NODEK_HPP
-#define NODEK_HPP
 
 enum face_type {
   XM = 0,

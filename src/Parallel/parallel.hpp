@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef PARALLEL_HPP
+#define PARALLEL_HPP
+
 /** 
  *********************************************************************
  *
@@ -40,8 +49,6 @@
  *********************************************************************
  */
 
-#ifndef PARALLEL_HPP
-#define PARALLEL_HPP
 
 /** 
  *********************************************************************

@@ -1,3 +1,12 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
+
+#ifndef DISK_IFRIT_HPP
+#define DISK_IFRIT_HPP
+
 /** 
  *********************************************************************
  *
@@ -40,8 +49,6 @@
  *********************************************************************
  */
 
-#ifndef DISK_IFRIT_HPP
-#define DISK_IFRIT_HPP
 
 /** 
  *********************************************************************
