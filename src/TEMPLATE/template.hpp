@@ -6,18 +6,21 @@
 
 /// @file
 /// @brief    Brief description file template.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Thu Feb 25 16:20:17 PST 2010
+///
+/// Detailed description file template.hpp
 
 class Foo {
 
-  /// @class     Foo
-  /// @brief     Brief description class Foo
-  /// @ingroup   Foo
-  /// @date
-  /// @author    
-  /// @bug       
-  /// @note      
+  /// @brief Brief description class Foo.
   ///
   /// Detailed description class Foo
+  ///
+  /// @class     Foo
+  /// @ingroup   Template
+  /// @author    
+  /// @date
   ///
 
 public:

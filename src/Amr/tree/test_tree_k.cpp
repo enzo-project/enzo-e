@@ -6,7 +6,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -65,7 +64,7 @@ const bool geomview = false;
 const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
-const int  max_level = 6;
+const int  max_level = 10;
 const int sphere_size = 128;
 
 #include "image.h"
@@ -95,12 +94,12 @@ int main(int argc, char ** argv)
   //--------------------------------------------------
 
   int k,d;
-  create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-2-f0", false);
+  //  create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-2-f0", false);
   create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-2-f1", true);
-  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree2-4-f1", true);
-  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree2-4-f0", false);
-  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree2-8-f1", true);
-  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree2-8-f0", false);
+  //  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree2-4-f1", true);
+  //  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree2-4-f0", false);
+  //  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree2-8-f1", true);
+  //  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree2-8-f0", false);
 //   create_tree (level_array, nx, ny, nz, k=16, d=2, "tree2-16-f1", true);
 //   create_tree (level_array, nx, ny, nz, k=16, d=2, "tree2-16-f0", false);
 
@@ -114,12 +113,12 @@ int main(int argc, char ** argv)
   level_array = create_sphere(n3 = sphere_size,max_level);
   // level_array = create_level_array3(&n3,max_level);
 
-  create_tree (level_array, n3, n3, n3, k=2, d=3, "tree3-2-f1", true);
-  create_tree (level_array, n3, n3, n3, k=2, d=3, "tree3-2-f0", false);
-  create_tree (level_array, n3, n3, n3, k=4, d=3, "tree3-4-f1", true);
-  create_tree (level_array, n3, n3, n3, k=4, d=3, "tree3-4-f0", false);
-  create_tree (level_array, n3, n3, n3, k=8, d=3, "tree3-8-f1", true);
-  create_tree (level_array, n3, n3, n3, k=8, d=3, "tree3-8-f0", false);
+  //  create_tree (level_array, n3, n3, n3, k=2, d=3, "tree3-2-f1", true);
+  // create_tree (level_array, n3, n3, n3, k=2, d=3, "tree3-2-f0", false);
+  //  create_tree (level_array, n3, n3, n3, k=4, d=3, "tree3-4-f1", true);
+  //  create_tree (level_array, n3, n3, n3, k=4, d=3, "tree3-4-f0", false);
+  //  create_tree (level_array, n3, n3, n3, k=8, d=3, "tree3-8-f1", true);
+  //  create_tree (level_array, n3, n3, n3, k=8, d=3, "tree3-8-f0", false);
 //   create_tree (level_array, n3, n3, n3, k=16, d=3, "tree3-16-f1", true);
 //   create_tree (level_array, n3, n3, n3, k=16, d=3, "tree3-16-f0", false);
 

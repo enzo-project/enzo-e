@@ -6,7 +6,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -48,7 +47,6 @@
  * @author    James Bordner (jobordner@ucsd.edu)
  * @ingroup   Performance
  * @date      
- * @bug       
  * @note      
  *
  * DESCRIPTION 

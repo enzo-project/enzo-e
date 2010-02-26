@@ -6,7 +6,6 @@
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Thu Feb 21 16:02:08 PST 2008
  * @ingroup   Array
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------

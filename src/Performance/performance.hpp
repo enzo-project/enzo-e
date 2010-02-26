@@ -7,6 +7,14 @@
 #ifndef PERFORMANCE_HPP
 #define PERFORMANCE_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -57,7 +64,6 @@
  * @brief     Classes for collecting and allowing access to performance data
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Wed Oct 14 23:40:13 PDT 2009
- * @bug       
  * @note      
  *
  * Classes for collecting and allowing access to performance data

@@ -7,6 +7,14 @@
 #ifndef PERFORMANCE_TIMER_HPP
 #define PERFORMANCE_TIMER_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------

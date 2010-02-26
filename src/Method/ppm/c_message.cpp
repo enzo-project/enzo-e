@@ -6,7 +6,6 @@
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
  * @ingroup   Enzo
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------

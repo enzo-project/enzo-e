@@ -6,7 +6,8 @@ set new = 1
 
 set colormap_dir = /usr/share/h5utils/colormaps/
 
-set color = vga
+# set color = vga
+set color = gray
 
 if ($run == 1) then
   make dep
@@ -20,12 +21,13 @@ endif
 # new
 
 if ($new == 1) then
-   foreach dim (2 3)
-   foreach tree (2 4 8 16)
+   foreach dim (2)
+   foreach tree (2)
      foreach full (0 1)
        foreach type (0 1 2)
          if ($dim == 2) then
-            set file = "tree$dim-$tree-f$full-$type.hdf5"
+#            set file = "tree$dim-$tree-f$full-$type.hdf5"
+            set file = "tree$dim-f$full-$type-old.hdf5"
             h5topng -c $colormap_dir/$color $file
             mv $file.png k$tree-f$full-t$type-d$dim.png
          else

@@ -7,6 +7,14 @@
 #ifndef FIELD_HPP
 #define FIELD_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -57,7 +64,6 @@
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
- * @bug       
  * @note      
  *
  * 

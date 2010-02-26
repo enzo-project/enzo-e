@@ -7,48 +7,13 @@
 #ifndef ARRAY_HPP
 #define ARRAY_HPP
 
-/** 
- *********************************************************************
- *
- * @file      array.hpp
- * @brief     Fortran-style array class
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      Fri Feb  5 15:58:38 PST 2010
- * @ingroup   Array
- * @bug       
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
+///
+/// @brief     Fortran-style array class
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Fri Feb  5 15:58:38 PST 2010
+/// @ingroup   Array
+/// @note      
+///
 
 #include "cello.h"
 
@@ -61,7 +26,6 @@
  * @brief     Declaration of the Array abstract base class
  * @author    James Bordner
  * @date      Wed Jul  8 16:01:10 PDT 2009
- * @bug       none
  * @note      Adding Array base class, and renaming old Array to ArraySerial
  * @note      Renaming old ArraySerial to Array
  *

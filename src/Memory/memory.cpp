@@ -6,7 +6,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -61,7 +60,6 @@
  * @brief     Functions for dynamic memory management
  * @author    James Bordner
  * @date      Thu Sep  3 16:44:18 PDT 2009
- * @bug       
  * @note      
  *
  * DESCRIPTION 

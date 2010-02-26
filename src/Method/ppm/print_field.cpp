@@ -6,7 +6,6 @@
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Sat Aug 29 23:45:03 PDT 2009
  * @ingroup   Method
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------

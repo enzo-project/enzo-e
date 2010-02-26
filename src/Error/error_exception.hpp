@@ -7,6 +7,14 @@
 #ifndef ERROR_EXCEPTION_HPP
 #define ERROR_EXCEPTION_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------

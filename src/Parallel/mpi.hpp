@@ -7,6 +7,14 @@
 #ifndef MPI_HPP
 #define MPI_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -57,7 +64,6 @@
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Thu Oct 15 10:40:37 PDT 2009
- * @bug       
  * @note      
  *
  * MPI helper functions

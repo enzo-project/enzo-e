@@ -7,6 +7,14 @@
 #ifndef SCHEDULE_HPP
 #define SCHEDULE_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -56,7 +63,6 @@
  * @brief     
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
- * @bug       
  * @note      
  *
  * 

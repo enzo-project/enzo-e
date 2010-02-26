@@ -6,7 +6,6 @@
  * @author    Greg Bryan
  * @date      November, 1994
  * @ingroup   Enzo
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------

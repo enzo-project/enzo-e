@@ -7,6 +7,14 @@
 #ifndef PARAM_HPP
 #define PARAM_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -57,7 +64,6 @@
  * @brief     Helper Param* classes for parameters
  * @author    James Bordner
  * @date      Sun Oct 11 14:55:25 PDT 2009
- * @bug       
  * @note      
  *
  * Classes Param* to represent and evaluate various parameter types and

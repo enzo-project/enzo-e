@@ -7,6 +7,14 @@
 #ifndef AMR_HPP
 #define AMR_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Tue Nov 10 15:38:40 PST 2009
  * @ingroup   Amr
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------

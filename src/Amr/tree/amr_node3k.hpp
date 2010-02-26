@@ -7,6 +7,14 @@
 #ifndef AMR_NODE3K_HPP
 #define AMR_NODE3K_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -57,7 +64,6 @@
  * @brief     Node class for 3D k^3-trees
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Tue Oct 27 12:32:07 PDT 2009
- * @bug       
  * @note      
  *
  * 

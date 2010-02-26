@@ -6,7 +6,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -48,7 +47,6 @@
  * @brief     Routines for simple output of text, plots, and graphs
  * @author    James Bordner
  * @date      Thu Feb 21 12:45:56 PST 2009
- * @bug       
  * @note      
  *
  * DESCRIPTION 

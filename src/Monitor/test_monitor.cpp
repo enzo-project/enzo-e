@@ -5,7 +5,6 @@
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Wed Apr 23 12:25:18 PDT 2008
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------

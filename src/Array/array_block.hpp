@@ -7,84 +7,18 @@
 #ifndef ARRAY_BLOCK_HPP
 #define ARRAY_BLOCK_HPP
 
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @bug       
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+/// Interface class between Array and low-level (C/fortran) routines.
 
-#ifndef ARRAY_BLOCK_HPP
-#define ARRAY_BLOCK_HPP
-
-/** 
-*********************************************************************
-*
-* @file      array_block.hpp
-* @brief     Declaration of the Block class
-* @author    James Bordner
-* @date      Mon Oct 12 14:38:21 PDT 2009
-* @bug       none
-* @note      
-*
-* Defines up to a 4-D fortran-like array for storing 1 or more 3D
-* arrays.  Axes can be permuted, including the index selecting the
-* array for storing interleaved arrays.
-*
-* $Id$
-* 
-*********************************************************************
-*/
+/// Defines up to a 4-D fortran-like array for storing 1 or more 3D
+/// arrays.  Axes can be permuted, including the index selecting the
+/// array for storing interleaved arrays.
+///
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Mon Oct 12 14:38:21 PDT 2009
+/// @ingroup   Array
+/// @note      
 
 class Block {
-
-  /** 
-*********************************************************************
-*
-* @class     Block
-* @brief     Interface class between Array and low-level (C/fortran) routines
-* @ingroup   Array
-*
-* DEPENDENCIES
-*
-*
-*********************************************************************
-*/
 
   //-------------------------------------------------------------------
   // PUBLIC OPERATIONS

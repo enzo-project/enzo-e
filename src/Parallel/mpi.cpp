@@ -6,7 +6,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -47,7 +46,6 @@
  * @brief     MPI helper functions
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Thu Oct 15 10:41:28 PDT 2009
- * @bug       
  * @note      
  *
  * DESCRIPTION 

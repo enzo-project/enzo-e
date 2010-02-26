@@ -1,3 +1,8 @@
+//
+// $Id$
+//
+// See LICENSE_CELLO file for license and copyright information
+//
 /** 
  *********************************************************************
  *
@@ -6,7 +11,6 @@
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      Thu Feb 21 16:04:03 PST 2008
  * @ingroup   Array
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------

@@ -7,6 +7,14 @@
 #ifndef PARAMETERS_HPP
 #define PARAMETERS_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -57,7 +64,6 @@
  * @brief     Read in a parameter file and access parameter values
  * @author    James Bordner
  * @date      Thu Jul  9 15:44:21 PDT 2009
- * @bug       
  * @note      
  *
  * Class Parameters to read in a parameter file and access

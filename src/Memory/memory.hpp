@@ -7,6 +7,14 @@
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
 
+///
+/// @brief     
+/// @author    
+/// @date      
+/// @ingroup
+/// @note      
+///
+
 /** 
  *********************************************************************
  *
@@ -15,7 +23,6 @@
  * @author    
  * @date      
  * @ingroup
- * @bug       
  * @note      
  *
  *--------------------------------------------------------------------
@@ -56,7 +63,6 @@
  * @brief     Functions for dynamic memory management
  * @author    James Bordner
  * @date      Thu Sep  3 16:29:56 PDT 2009
- * @bug       
  * @note      
  *
  * Functions for dynamic memory management
@@ -87,7 +93,7 @@ class Memory {
  *
  * @class     Memory
  * @brief     Maintains memory allocation and deallocation statistics
- * @ingroup   Group 
+ * @ingroup   Memory
  *
  * Maintains memory allocation and deallocation statistics
  *
