@@ -1,47 +1,37 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef FOO_HPP
 #define FOO_HPP
 
-/// Brief class description
-
-/// @author    
-/// @date      
-/// @ingroup
-/// @bug       
-/// @note      
-///
+/// @file
+/// @brief    Brief description file template.hpp
 
 class Foo {
 
-  ///  
   /// @class     Foo
+  /// @brief     Brief description class Foo
   /// @ingroup   Foo
+  /// @date
+  /// @author    
+  /// @bug       
+  /// @note      
+  ///
+  /// Detailed description class Foo
   ///
 
 public:
 
-  //-------------------------------------------------------------------
-  // PUBLIC FUNCTIONS
-  //-------------------------------------------------------------------
-
-  /// Brief description Foo() in template.hpp
+  /// Brief description Foo::Foo() in template.hpp
   Foo();
 
-  /// Brief description ~Foo() in template.hpp
+  /// Brief description Foo::~Foo() in template.hpp
   ~Foo();
 
 private:
 
-  //-------------------------------------------------------------------
-  // PRIVATE FUNCTIONS
-  //-------------------------------------------------------------------
-
-  /// 
+  /// Brief description Foo::private_function_() in template.hpp
+  private_function_();
 
 private:
 
@@ -49,8 +39,8 @@ private:
   // PRIVATE ATTRIBUTES
   //-------------------------------------------------------------------
 
-  /// 
-
+  /// Brief description Foo::private_attribute_ in template.hpp
+  int private_attribute_;
 
 };
 
