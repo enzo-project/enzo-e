@@ -1,84 +1,11 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-/** 
- *********************************************************************
- *
- * @file      monitor.cpp
- * @brief     Routines for simple output of text, plots, and graphs
- * @author    James Bordner
- * @date      Thu Feb 21 12:45:56 PST 2009
- * @note      
- *
- * DESCRIPTION 
- * 
- *    Routines for simple output of text, plots, and graphs
- *
- * PACKAGES
- *
- *    none
- * 
- * INCLUDES
- *  
- *    pngwriter.h
- *
- * PUBLIC FUNCTIONS
- *  
- *    
- *
- * PRIVATE FUCTIONS
- *  
- *    
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      monitor.cpp
+/// @brief     Routines for simple output of text, plots, and graphs
+/// @author    James Bordner
+/// @date      Thu Feb 21 12:45:56 PST 2009
 
 #include <assert.h>
-
 #include "cello.h"
 #include "pngwriter.h"
-
 #include "monitor.hpp" 
 
 void Monitor::image

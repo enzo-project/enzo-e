@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef DISK_HDF5_HPP
 #define DISK_HDF5_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file disk_hdf5.hpp
+
 
 /** 
  *********************************************************************
@@ -72,6 +69,9 @@
  
 class Hdf5 {
 
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 /** 
  *********************************************************************
  *

@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef AMR_NODE16_HPP
 #define AMR_NODE16_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file amr_node16.hpp
+
 
 /** 
  *********************************************************************
@@ -82,6 +79,10 @@
 class Tree16;
 
 class Node16 {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
 /** 
  *********************************************************************

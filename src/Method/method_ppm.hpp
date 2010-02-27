@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef METHOD_PPM_HPP
 #define METHOD_PPM_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file method_ppm.hpp
+
 
 /** 
  *********************************************************************
@@ -90,6 +87,10 @@ enum flatten_type {
 };
 
 class MethodPpm : public Method {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
 /** 
  *********************************************************************

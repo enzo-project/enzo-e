@@ -1,40 +1,40 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef ARRAY_BLOCK_HPP
 #define ARRAY_BLOCK_HPP
 
-/// Interface class between Array and low-level (C/fortran) routines.
-
-/// Defines up to a 4-D fortran-like array for storing 1 or more 3D
-/// arrays.  Axes can be permuted, including the index selecting the
-/// array for storing interleaved arrays.
-///
-/// @author    James Bordner (jobordner@ucsd.edu)
-/// @date      Mon Oct 12 14:38:21 PDT 2009
-/// @ingroup   Array
-/// @note      
+/// @file     array_block.hpp
+/// @brief    Fortran-style array class
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Mon Oct 12 14:38:21 PDT 2009
 
 class Block {
 
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
+  /// @class    Block
+  /// @brief    Interface between Array and low-level (C/fortran) routines.
+  /// @ingroup  Array
+  /// 
+  /// Defines up to a 4-D fortran-like array for storing 1 or more 3D
+  /// arrays.  Axes can be permuted, including the index selecting the
+  /// array for storing interleaved arrays.
 
-public:
+public: // interface
 
   /// Create a new uninitialized Block object
   Block() throw() {};
 
   /// Create a new initialized Block object
   Block(Scalar * values, 
-	int * permute,
-	int ndx,  int ndy,  int ndz,  int nda=1,
-	int nx=0, int ny=0, int nz=0, int na=0)
-    throw() :
+	int *    permute,
+	int      ndx,  
+	int      ndy,
+	int      ndz,
+	int      nda=1,
+	int      nx=0,
+	int      ny=0,
+	int      nz=0,
+	int      na=0) throw() :
     values_(values)
   { 
     if (permute) {
@@ -75,8 +75,8 @@ public:
   /// Return allocated block dimensions
   void get_dim 
   (int * ndx, 
-   int * ndy = NULL,
-   int * ndz = NULL) const throw()
+   int * ndy = 0,
+   int * ndz = 0) const throw()
   { 
     if (ndx) *ndx = nd_[p_[0]];
     if (ndy) *ndy = nd_[p_[1]];
@@ -86,9 +86,9 @@ public:
   /// Return the array size
   void get_size 
   (int * nx,
-   int * ny = NULL,
-   int * nz = NULL, 
-   int  *na = NULL) const throw()
+   int * ny = 0,
+   int * nz = 0, 
+   int  *na = 0) const throw()
   {
     if (nx) *nx = n_[p_[0]];
     if (ny) *ny = n_[p_[1]];
@@ -99,9 +99,9 @@ public:
   /// Return increments for loop index calculations
   void get_inc 
   (int * mx, 
-   int * my = NULL,
-   int * mz = NULL,
-   int * ma = NULL) const throw () 	
+   int * my = 0,
+   int * mz = 0,
+   int * ma = 0) const throw () 	
   {
     if (mx) *mx = m_[p_[0]];
     if (my) *my = m_[p_[1]];
@@ -109,7 +109,9 @@ public:
     if (ma) *ma = m_[p_[3]];
   }
 
-private:
+private: // functions
+
+private: // attributes
 
   /// Pointer to the first element of the array
   Scalar * values_;

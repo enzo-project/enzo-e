@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef TEST_HPP
 #define TEST_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file test.hpp
+
 
 /** 
  *********************************************************************

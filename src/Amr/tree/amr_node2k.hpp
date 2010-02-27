@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef AMR_NODE2K_HPP
 #define AMR_NODE2K_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file amr_node2k.hpp
+
 
 /** 
  *********************************************************************
@@ -82,6 +79,10 @@
 class Tree2K;
 
 class Node2K {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
 /** 
  *********************************************************************

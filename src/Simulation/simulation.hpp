@@ -1,82 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef SIMULATION_HPP
 #define SIMULATION_HPP
 
-///
-/// @brief     
-/// @author    
-/// @date      
-/// @ingroup
-/// @note      
-///
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      simulation.hpp
- * @brief     
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      
- * @note      
- *
- * 
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file     simulation.hpp
+/// @brief    Interface file for the Simulation class
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-11-10 16:14:57
 
 #include <vector>
-
 #include "cello.h"
-
 #include "parameters.hpp"
 #include "amr.hpp"
 #include "field.hpp"
@@ -85,28 +19,16 @@
 
 class Simulation {
 
-/** 
- *********************************************************************
- *
- * @class     Simulation
- * @brief     
- * @ingroup   Simulation
- *
- * 
- *
- *********************************************************************
- */
+  /// @class    Simulation
+  /// @brief    Class specifying a simulation to run
+  /// @ingroup  Simulation
 
-public:
+public: // interface
 
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
+  /// Initialize the Simulation object
   Simulation();
 
-  /// 
+  /// Delete the Simulation object
   ~Simulation();
 
   /// Initialize from parameters
@@ -148,19 +70,11 @@ public:
   /// Return the Amr object
   Amr * amr () { return amr_; };
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
+private: // functions
 
   /// 
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+private: // attributes
 
   /// Domain extents
   std::vector<double> lower_;

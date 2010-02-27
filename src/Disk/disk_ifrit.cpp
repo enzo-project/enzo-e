@@ -1,47 +1,6 @@
 /** 
  *********************************************************************
  *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
  * @file      disk_ifrit.cpp
  * @brief     Implementation of the Ifrit class
  * @author    James Bordner
@@ -61,9 +20,12 @@
 //----------------------------------------------------------------------
 
 void Ifrit::read_bin
-(std::string name, Scalar * buffer, int * nx, int * ny, int * nz)
-/**
- */
+(std::string name, 
+ Scalar *    buffer, 
+ int *       nx, 
+ int *       ny, 
+ int *       nz) throw()
+///
 {
   FILE * fp = fopen (name.c_str(), "r");
   assert (sizeof(int)==4);
@@ -77,9 +39,12 @@ void Ifrit::read_bin
 //----------------------------------------------------------------------
 
 void Ifrit::write_bin 
-(std::string name, Scalar * buffer, int   nx, int   ny, int   nz)
-/**
- */
+(std::string name, 
+ Scalar *    buffer, 
+ int         nx, 
+ int         ny, 
+ int         nz) throw()
+///
 {
   FILE * fp = fopen (name.c_str(), "w");
   assert (sizeof(int)==4);

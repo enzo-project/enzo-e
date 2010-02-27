@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef COUNTERS_HPP
 #define COUNTERS_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file counters.hpp
+
 
 /** 
  *********************************************************************
@@ -78,6 +75,10 @@
 #include "memory.hpp"
 
 class Counters {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
 /** 
  *********************************************************************

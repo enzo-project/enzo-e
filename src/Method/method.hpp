@@ -1,19 +1,15 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef METHOD_HPP
 #define METHOD_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file method.hpp
 
 ///
 /// @brief     
@@ -138,6 +134,10 @@
  */
 
 class Method {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
 /** 
  *********************************************************************

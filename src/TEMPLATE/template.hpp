@@ -4,43 +4,31 @@
 #ifndef FOO_HPP
 #define FOO_HPP
 
-/// @file
+/// @file     template.hpp
 /// @brief    Brief description of file template.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-///
-/// Detailed description of file template.hpp
 
 class Foo {
 
-  /// @brief    Brief description of class Foo.
-  ///
-  /// Detailed description of class Foo
-  ///
   /// @class    Foo
+  /// @brief    Brief description of class Foo.
   /// @ingroup  Template
-  /// @author    
-  /// @date
-  ///
 
-public:
+public: // interface
 
-  /// Brief description of Foo::Foo() in template.hpp
+  /// Initialize the Foo object
   Foo();
 
-  /// Brief description of Foo::~Foo() in template.hpp
+  /// Delete the Foo object
   ~Foo();
 
-private:
+private: // functions
 
   /// Brief description of Foo::private_function_() in template.hpp
   private_function_();
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+private: // attributes
 
   /// Brief description of Foo::private_attribute_ in template.hpp
   int private_attribute_;

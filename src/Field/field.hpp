@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef FIELD_HPP
 #define FIELD_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file field.hpp
+
 
 /** 
  *********************************************************************
@@ -75,6 +72,9 @@
 
 class Field {
 
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 /** 
  *********************************************************************
  *

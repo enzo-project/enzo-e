@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef AMR_TREEK_HPP
 #define AMR_TREEK_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file amr_treek.hpp
+
 
 /** 
  *********************************************************************
@@ -75,6 +72,9 @@
 
 class TreeK {
 
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 /** 
  *********************************************************************
  *

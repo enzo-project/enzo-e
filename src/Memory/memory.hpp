@@ -1,112 +1,33 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
 
-///
-/// @brief     
-/// @author    
-/// @date      
-/// @ingroup
-/// @note      
-///
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
- * @file      memory.hpp
- * @brief     Functions for dynamic memory management
- * @author    James Bordner
- * @date      Thu Sep  3 16:29:56 PDT 2009
- * @note      
- *
- * Functions for dynamic memory management
- *
- * $Id$
- *
- *********************************************************************
- */
-
-typedef unsigned memory_group_handle;
-
-//======================================================================
-// LOCAL DEFINES
-//======================================================================
-
-#define MEMORY_MAX_NUM_GROUPS 20
+/// @file     memory.hpp
+/// @brief    Functions for dynamic memory management 
+/// @author   James Bordner (jobordner@ucsd.edu) 
+/// @date     Thu Sep  3 16:29:56 PDT 2009 
 
 #include <stack>
 
-//======================================================================
-// TYPEDEFS
-//======================================================================
+/// @def      MEMORY_MAX_NUM_GROUPS
+/// @brief    Maximum number of groups for memory allocation tracking
+#define MEMORY_MAX_NUM_GROUPS 20
+
+/// @var      typedef int memory_group_handle
+/// @brief    Type for opaque group handles
+typedef int memory_group_handle;
 
 class Memory {
 
-/** 
- *********************************************************************
- *
- * @class     Memory
- * @brief     Maintains memory allocation and deallocation statistics
- * @ingroup   Memory
- *
- * Maintains memory allocation and deallocation statistics
- *
- *********************************************************************
- */
+  /// @class    Memory
+  /// @brief    Maintains memory allocation and deallocation statistics
+  /// @ingroup  Memory
 
-public:
+public: // interface
 
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// Don't do anything
+  /// Initialize the Memory object
   Memory() throw () {};
 
   /// Initialize the memory component
@@ -121,7 +42,8 @@ public:
     throw (ExceptionMemoryBadDeallocate());
 
   /// Assign a name to a group
-  static void new_group ( memory_group_handle group_id, const char * group_name ) throw ();
+  static void new_group ( memory_group_handle group_id, 
+			  const char *        group_name ) throw ();
 
   /// Begin allocating memory associated with the specified group
   static void begin_group ( memory_group_handle group_id ) throw ();
@@ -149,8 +71,8 @@ public:
 
 
   /// Specify the maximum number of bytes to use
-  static void set_limit ( long long size, memory_group_handle group_handle = 0)
-    throw ();
+  static void set_limit ( long long           size, 
+			  memory_group_handle group_handle = 0) throw ();
 
   /// Query the maximum number of bytes to use
   static long long get_limit ( memory_group_handle group_handle = 0 ) throw ();
@@ -162,10 +84,13 @@ public:
   /// Return the number of calls to deallocate for the group
   static int num_delete ( memory_group_handle group_handle = 0 ) throw ();
 
+  /// 
   static void print () throw ();
 
+  /// 
   static void reset () throw ();
 
+  /// 
   static void set_active (bool is_active) throw ()
 #ifdef CONFIG_USE_MEMORY
   { is_active_ = is_active; } ;
@@ -173,30 +98,20 @@ public:
   { } ;
 #endif
 
-private:
+private: // functions
 
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
+  /// 
   static void check_handle_(memory_group_handle group_handle) 
     throw (ExceptionMemoryBadGroupHandle())
+  {  
 #ifdef CONFIG_USE_MEMORY
-  {  if ( group_handle > MEMORY_MAX_NUM_GROUPS) {
+    if ( 0 > group_handle || group_handle > MEMORY_MAX_NUM_GROUPS) {
       throw (ExceptionMemoryBadGroupHandle());
     }
-  }
-#else
-  {
-  }
 #endif
+  }
   
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
+private: // attributes
 
 #ifdef CONFIG_USE_MEMORY
 
@@ -204,23 +119,20 @@ private:
   static bool is_active_;
 
   /// The current group index, or 0 if none
-
   static std::stack<memory_group_handle> curr_group_;
 
   /// Array of known group names
-
   static char * group_names_ [MEMORY_MAX_NUM_GROUPS + 1];
 
   /// Hardware parameters
-
   static long long available_   [MEMORY_MAX_NUM_GROUPS + 1];
 
   /// Collected statistics for different groups
-
   static long long bytes_       [MEMORY_MAX_NUM_GROUPS + 1];
   static long long bytes_high_  [MEMORY_MAX_NUM_GROUPS + 1];
   static long long new_calls_   [MEMORY_MAX_NUM_GROUPS + 1];
   static long long delete_calls_[MEMORY_MAX_NUM_GROUPS + 1];
+
 #endif
 
 };

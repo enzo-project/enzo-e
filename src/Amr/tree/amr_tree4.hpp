@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef AMR_TREE4_HPP
 #define AMR_TREE4_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file amr_tree4.hpp
+
 
 /** 
  *********************************************************************
@@ -60,6 +57,10 @@
 #define MAX_LEVELS 80
 
 class Tree4 {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
  public:
 

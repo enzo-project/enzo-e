@@ -1,112 +1,92 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef ARRAY_HPP
 #define ARRAY_HPP
 
-///
-/// @brief     Fortran-style array class
-/// @author    James Bordner (jobordner@ucsd.edu)
-/// @date      Fri Feb  5 15:58:38 PST 2010
-/// @ingroup   Array
-/// @note      
-///
+/// @file     array.hpp
+/// @brief    Include file for the Array component
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Wed Jul  8 16:01:10 PDT 2009
+/// @todo     Split file into array.hpp module include file and
+///           array_array.hpp class definition file
 
 #include "cello.h"
-
 #include "error_exception.hpp"
-
-/** 
- *********************************************************************
- *
- * @file      array.hpp
- * @brief     Declaration of the Array abstract base class
- * @author    James Bordner
- * @date      Wed Jul  8 16:01:10 PDT 2009
- * @note      Adding Array base class, and renaming old Array to ArraySerial
- * @note      Renaming old ArraySerial to Array
- *
- * $Id$
- * 
- *********************************************************************
- */
 
 class Array {
 
-/** 
- *********************************************************************
- *
- * @class     Array
- * @brief     Define the interface for a 1D,2D, or 3D array
- * @ingroup   Array
- *
- * DEPENDENCIES
- *
- * Parallel: For controlling parallelism in distributed or threaded Arrays
- * Disk:     For I/O
- *
- *********************************************************************
- */
+  /// @class    Array
+  /// @brief    Defines the interface for arrays
+  /// @ingroup  Array
+  /// @todo     Add commented-out functions at bottom
 
+public: // interface
 
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-public:
-
-  /// Create a new uninitialized Array object
+  /// Initialize an empty Array object
   Array() throw();
-  /// Create a new initialized Array object
-  Array(Scalar * values,int nx,int ny=1,int nz=1) throw();
-  /// Deallocate the array
+
+  /// Initiazize a new Array object
+  Array (Scalar * values,
+	 int      nx,
+	 int      ny=1,
+	 int      nz=1) throw();
+
+  /// Deallocate the Array object
   ~Array() throw();
-  /// Copy an array into this one, deallocating any existing data
+
+  /// Initialize the Array as a copy of another
   Array(const Array &) throw();
+
   /// Copy an array into this one, deallocating any existing data
   Array & operator = (const Array &) throw();
+
   /// Resize the array, deallocating any existing data
-  virtual void resize (int n0, int n1=1, int n2=1) throw() ;
+  virtual void resize (int n0, 
+		       int n1=1,
+		       int n2=1) throw();
+
   /// Return the size of the array
-  virtual void size (int * n0, int * n1=0, int * n2=0) const throw();
+  virtual void size (int * n0, 
+		     int * n1=0, 
+		     int * n2=0) const throw();
+
   /// Return the total length of the array
-  virtual int  length() const throw();
+  virtual int length() const throw();
+
   /// Return a pointer to the array values
   virtual Scalar * values () const throw();
+
   /// Return the given array element
-  virtual Scalar & operator() (int  i0, int  i1=0, int  i2=0) throw();
+  virtual Scalar & operator() (int  i0, 
+			       int  i1=0, 
+			       int  i2=0) throw();
+
   /// Set all values to 0, or to the given value if supplied
   virtual void clear(Scalar value = 0.0) throw();
 
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-private:
+private: // functions
 
   /// Deallocate array values
   void deallocate_() throw(ExceptionBadArrayDeallocation);
 
   /// Allocate array values
-  void allocate_ (int n0, int n1=1, int n2=1) throw(ExceptionBadArrayAllocation);
+  void allocate_ (int n0, 
+		  int n1=1, 
+		  int n2=1) throw(ExceptionBadArrayAllocation);
 
-  /// Allocate array values
-  void reallocate_ (int n0, int n1=1, int n2=1) throw();
+  /// Re-allocate array values
+  void reallocate_ (int n0, 
+		    int n1=1, 
+		    int n2=1) throw();
 
   /// Copy array values a[0:N-1] to ArraySerial
   void copy_ (Scalar * a) throw();
 
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+private: // attributes
 
-private:
-
-  /// Shape of array, right-padded with 1's
-  int     nx_,ny_,nz_;
+  /// Shape of the array, right-padded with 1's
+  int nx_,ny_,nz_;
 
   /// Array values stored in column-major ordering
   Scalar *a_;

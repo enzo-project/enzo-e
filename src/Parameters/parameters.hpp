@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef PARAMETERS_HPP
 #define PARAMETERS_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file parameters.hpp
+
 
 /** 
  *********************************************************************
@@ -96,6 +93,9 @@
 
 class Parameters {
 
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
   //   friend class Parameter;
 

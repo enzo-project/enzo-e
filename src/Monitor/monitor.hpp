@@ -1,142 +1,60 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef MONITOR_HPP
 #define MONITOR_HPP
 
-///
-/// @brief     
-/// @author    
-/// @date      
-/// @ingroup
-/// @note      
-///
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-
-/** 
- *********************************************************************
- *
- * @file      monitor.hpp
- * @brief     Declaration for Monitor clas
- * @author    James Bordner
- * @date      2009-10-05
- *
- * Declaration for Monitor clas
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file     monitor.hpp
+/// @brief    Include file for the Monitor component
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-10-05
 
 #include <string>
-
 #include "cello.h"
-
 #include "performance_timer.hpp"
 
+/// @enum     enum_reduce
+/// @brief    Reduction operator, used for image projections
 enum enum_reduce {
-  reduce_unknown,
-  reduce_min,
-  reduce_max,
-  reduce_avg,
-  reduce_sum
+  reduce_unknown, /// Unknown reduction
+  reduce_min,     /// Minimal value along the axis
+  reduce_max,     /// Maximal value along the axis
+  reduce_avg,     /// Average value along the axis
+  reduce_sum      /// Sum of values along the axis
 };
 
 class Monitor {
 
-/** 
- *********************************************************************
- *
- * @class     Monitor
- * @brief     Functions for user monitoring of the execution status
- * @ingroup   Monitor
- *
- * The Monitor component is used to communicate information about the
- * running simulation to the user. Information can be output in
- * several forms, including text files, HTML files, plots, or other
- * (generally small) image files. Information is assumed to be from a
- * correctly-running simulation: anomalous errors or warnings are
- * output by the Error component. It is assumed that stdout is not
- * used for monitor output, except for possibly displaying header text
- * with basic information about Cello and the simulation being run.
- *
- *********************************************************************
- */
+  /// @class    Monitor
+  /// @brief    Functions for user monitoring of the execution status
+  /// @ingroup  Monitor
 
-private:
+  /// The Monitor component is used to communicate information about
+  /// the running simulation to the user. Information can be output in
+  /// several forms, including text files, HTML files, plots, or other
+  /// (generally small) image files. Information is assumed to be from
+  /// a correctly-running simulation: anomalous errors or warnings are
+  /// output by the Error component. It is assumed that stdout is not
+  /// used for monitor output, except for possibly displaying header
+  /// text with basic information about Cello and the simulation being
+  /// run.
 
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
+public: // interface
 
   /// Initialize the Monitor object
-
   Monitor(FILE * fp = stdout,
-	  bool active = true) 
+	  bool   active = true) 
     : active_(active),
       fp_(fp)
-  {  timer_.start();};
+  {  timer_.start(); };
 
   /// Print a message
-
   void print (std::string message)
   {
     if (active_) fprintf (fp_,"%6.1f %s\n",timer_.value(),message.c_str());
   };
 
   /// Generate a PNG image of an array
-
   void image (std::string name, 
 	      Scalar * array, 
 	      int nx,  int ny,  int nz,   // Array dimensions
@@ -149,7 +67,7 @@ public:
 	      int            color_length // length of color map / 3
 	      );
   
-private:
+private: // functions
 
   bool   active_;  // Whether monitoring is activated.  Used for e.g. np != 0.
   FILE * fp_;      // File pointer for message logging

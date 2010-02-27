@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef PERFORMANCE_TIMER_HPP
 #define PERFORMANCE_TIMER_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file performance_timer.hpp
+
 
 /** 
  *********************************************************************
@@ -78,6 +75,10 @@
 #endif
 
 class Timer {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
 /** 
  *********************************************************************

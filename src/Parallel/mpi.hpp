@@ -1,19 +1,17 @@
-//
-// $Id$
-//
+// $Id:
+mpi.hpp 1254 2010-02-26 00:35:30Z bordner $
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef MPI_HPP
 #define MPI_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file mpi.hpp
+
 
 /** 
  *********************************************************************
@@ -74,6 +72,10 @@
  */
 
 class Mpi {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
 /** 
  *********************************************************************

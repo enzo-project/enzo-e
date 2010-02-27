@@ -87,7 +87,7 @@ Array::Array(Scalar * a,int nx,int ny,int nz) throw()
 Array::~Array() throw()
 {
   if (is_allocated_) {
-    this->deallocate_();
+    deallocate_();
     is_allocated_ = false;
   }
 }
@@ -101,8 +101,8 @@ Array::~Array() throw()
  
 Array::Array (const Array &array) throw()
 {
-  this->reallocate_(array.nx_,array.ny_,array.nz_);
-  this->copy_(array.values());
+  reallocate_(array.nx_,array.ny_,array.nz_);
+  copy_(array.values());
 }
 
 //----------------------------------------------------------------------
@@ -114,8 +114,8 @@ Array::Array (const Array &array) throw()
  
 Array & Array::operator = (const Array &array) throw()
 {
-  this->reallocate_(array.nx_,array.ny_,array.nz_);
-  this->copy_(array.values());
+  reallocate_(array.nx_,array.ny_,array.nz_);
+  copy_(array.values());
   return *this;
 }
 
@@ -131,7 +131,7 @@ void Array::resize (int nx, int ny, int nz) throw()
   if (nx != nx_ || 
       ny != ny_ || 
       nz != nz_) {
-    this->reallocate_(nx,ny,nz);
+    reallocate_(nx,ny,nz);
   }
 }
 

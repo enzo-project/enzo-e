@@ -9,31 +9,31 @@
 /// Detailed description of file template.cpp
 
 Foo::Foo()
-///
+
 /// @param         Parameter
 /// @return        Return value
 ///
 /// Detailed description of function Foo::Foo() in template.cpp
-/// 
+
 {
 }
 
 Foo::~Foo()
-//
+
 /// @param         Parameter
 /// @return        Return value
 /// 
 /// Detailed description of function Foo::~Foo() in template.cpp
-/// 
+
 {
 }
 
 Foo::private_function_()
-/// 
+
 /// @param         Parameter
 /// @return        Return value
 /// 
 /// Detailed description of function Foo::private_function_() in template.cpp
-//
+
 {
 }

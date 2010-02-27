@@ -199,7 +199,7 @@ void Memory::deallocate ( void * pointer )
 #endif
 }
 
-void Memory::new_group ( unsigned group_id, const char * group_name ) throw ()
+void Memory::new_group ( memory_group_handle group_id, const char * group_name ) throw ()
 /**
  *********************************************************************
  *
@@ -224,7 +224,7 @@ void Memory::new_group ( unsigned group_id, const char * group_name ) throw ()
 #endif
 }
 
-void  Memory::begin_group ( unsigned group_id ) throw ()
+void  Memory::begin_group ( memory_group_handle group_id ) throw ()
 /**
  *********************************************************************
  *
@@ -263,7 +263,7 @@ void  Memory::begin_group ( unsigned group_id ) throw ()
 #endif
 }
 
-void Memory::end_group ( unsigned group_id ) throw ()
+void Memory::end_group ( memory_group_handle group_id ) throw ()
 /**
  *********************************************************************
  *

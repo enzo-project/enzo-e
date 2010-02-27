@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef PERFORMANCE_HPP
 #define PERFORMANCE_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file performance.hpp
+
 
 /** 
  *********************************************************************
@@ -83,6 +80,10 @@
 typedef unsigned long long type_counter;
 
 class Performance {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
 enum enum_item_type {
   item_unknown,

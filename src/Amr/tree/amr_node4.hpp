@@ -1,19 +1,16 @@
-//
 // $Id$
-//
 // See LICENSE_CELLO file for license and copyright information
-//
 
 #ifndef AMR_NODE4_HPP
 #define AMR_NODE4_HPP
 
-///
+/// @file
 /// @brief     
 /// @author    
 /// @date      
-/// @ingroup
-/// @note      
 ///
+/// Detailed description of file amr_node4.hpp
+
 
 /** 
  *********************************************************************
@@ -82,6 +79,10 @@
 class Tree4;
 
 class Node4 {
+
+  /// @class    Foo
+  /// @brief    Brief description of class Foo.
+  /// @ingroup  Template
 
 /** 
 *********************************************************************
