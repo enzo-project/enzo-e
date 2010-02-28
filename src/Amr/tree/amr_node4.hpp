@@ -4,9 +4,9 @@
 #ifndef AMR_NODE4_HPP
 #define AMR_NODE4_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     node4.hpp
+/// @brief    Interface for the Node4 class
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date      
 ///
 /// Detailed description of file amr_node4.hpp

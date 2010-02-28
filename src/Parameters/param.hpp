@@ -4,9 +4,9 @@
 #ifndef PARAM_HPP
 #define PARAM_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     param.hpp
+/// @brief    Interface for the Param class
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date      
 ///
 /// Detailed description of file param.hpp

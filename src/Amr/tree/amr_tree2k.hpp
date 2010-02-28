@@ -4,9 +4,9 @@
 #ifndef AMR_TREE2K_HPP
 #define AMR_TREE2K_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     tree2k.hpp
+/// @brief    Interface for the Tree2K class
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date      
 ///
 /// Detailed description of file amr_tree2k.hpp

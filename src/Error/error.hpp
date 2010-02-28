@@ -4,9 +4,9 @@
 #ifndef ERROR_HPP
 #define ERROR_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     error.hpp
+/// @brief    Error-related defines
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date      
 ///
 /// Detailed description of file error.hpp

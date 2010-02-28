@@ -4,9 +4,9 @@
 #ifndef AMR_TREE4_HPP
 #define AMR_TREE4_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     tree4.hpp
+/// @brief    Interface for the Tree4 class
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date      
 ///
 /// Detailed description of file amr_tree4.hpp

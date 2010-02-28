@@ -4,9 +4,9 @@
 #ifndef FIELD_HPP
 #define FIELD_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     field.hpp
+/// @brief    Interface for the Field class
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date      
 ///
 /// Detailed description of file field.hpp

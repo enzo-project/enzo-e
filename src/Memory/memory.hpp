@@ -5,7 +5,7 @@
 #define MEMORY_HPP
 
 /// @file     memory.hpp
-/// @brief    Functions for dynamic memory management 
+/// @brief    Interface for the Memory class
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
 

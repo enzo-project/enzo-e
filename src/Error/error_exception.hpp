@@ -4,9 +4,9 @@
 #ifndef ERROR_EXCEPTION_HPP
 #define ERROR_EXCEPTION_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     exception.hpp
+/// @brief    Declaration of Exception classes
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date      
 ///
 /// Detailed description of file error_exception.hpp

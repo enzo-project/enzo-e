@@ -4,9 +4,9 @@
 #ifndef COUNTERS_HPP
 #define COUNTERS_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     counters.hpp
+/// @brief    Interface for the Counters class
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date      
 ///
 /// Detailed description of file counters.hpp

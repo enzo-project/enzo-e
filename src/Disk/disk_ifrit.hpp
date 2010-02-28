@@ -4,10 +4,10 @@
 #ifndef DISK_IFRIT_HPP
 #define DISK_IFRIT_HPP
 
-/// @file      disk_ifrit.hpp
-/// @brief     Interface for the Ifrit class
-/// @author    James Bordner
-/// @date      Thu Feb 21 16:05:34 PST 2008
+/// @file     disk_ifrit.hpp
+/// @brief    Interface for the Ifrit class
+/// @author   James Bordner
+/// @date     Thu Feb 21 16:05:34 PST 2008
  
 class Ifrit {
 

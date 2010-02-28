@@ -4,9 +4,9 @@
 #ifndef AMR_TREE3K_HPP
 #define AMR_TREE3K_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     tree3k.hpp
+/// @brief    Interface for the Tree3K class
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date      
 ///
 /// Detailed description of file amr_tree3k.hpp
