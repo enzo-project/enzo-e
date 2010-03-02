@@ -5,156 +5,60 @@
 #define PARAMETERS_HPP
 
 /// @file     parameters.hpp
-/// @brief    Interface for the Parameters class
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date      
-///
-/// Detailed description of file parameters.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      parameters.hpp
- * @brief     Read in a parameter file and access parameter values
- * @author    James Bordner
- * @date      Thu Jul  9 15:44:21 PDT 2009
- * @note      
- *
- * Class Parameters to read in a parameter file and access
- * parameter values
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @date     Thu Jul  9 15:44:21 PDT 2009
+/// @brief    Interface for the Parameters class
 
 #include <map>
 #include <string>
-
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "cello.h"
 #include "error.hpp"
-
 #include "parse.h"
 #include "param.hpp"
 
-// Maximum allowed width of a line in a parameter file
-
+/// @def      MAX_PARAMETER_FILE_WIDTH
+/// @brief    Maximum allowed width of a line in a parameter file
 #define MAX_PARAMETER_FILE_WIDTH 255
-
-// Functions for deleting parse.* structs
-
-// Types for parameters
 
 class Parameters {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Parameters
+  /// @ingroup  Parameters
+  /// @brief    Read in a parameter file and access parameter values
 
-  //   friend class Parameter;
-
-/** 
- *********************************************************************
- *
- * @class     Parameters
- * @brief     Read in a parameter file and access parameter values
- * @ingroup   Parameters
- *
- * Read in a parameter file and access parameter values
- *
- *********************************************************************
- */
-
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
+public: // interface
 
   /// Create an empty Parameters object
-
   Parameters() throw();
 
   /// Delete a Parameters object
-
   ~Parameters();
 
   /// Read in parameters from a file
-
   void read (FILE * file_pointer);
 
   /// Write parameters to a file
-
   void write (FILE * file_pointer);
 
   /// Return the integer-valued parameter
-
   int value_integer (std::string , int deflt = 0) 
     throw(ExceptionParametersBadType);
 
   /// Return the scalar-valued parameter
-
   double value_scalar (std::string, double deflt = 0.0) 
     throw(ExceptionParametersBadType);
 
   /// Return the logical-valued parameter
-
   bool value_logical (std::string , bool deflt = false) 
     throw(ExceptionParametersBadType);
 
   /// Return the string-valued parameter
-
   std::string value_string ( std::string , std::string deflt = "") 
     throw(ExceptionParametersBadType);
 
   /// Evaluate the scalar-valued parameter expression
-
   void evaluate_scalar 
   (
    std::string parameter,
@@ -168,7 +72,6 @@ public:
     throw(ExceptionParametersBadType);
 
   /// Evaluate the logical-valued parameter expression
-
   void evaluate_logical 
   (
    std::string parameter,
@@ -182,7 +85,6 @@ public:
     throw(ExceptionParametersBadType);
 
   /// Return the length of the list parameter
-
   int list_length (std::string parameter);
 
   /// Access an integer list element
@@ -232,7 +134,6 @@ public:
     throw(ExceptionParametersBadType);
 
   /// Set the current group
-
   void set_group  (std::string group, std::string subgroup = "") throw ()
   { 
     current_group_    = group;
@@ -240,27 +141,20 @@ public:
   };
 
   /// Set the current subgroup
-
   void set_subgroup  (std::string subgroup) throw ()
   {
     current_subgroup_ = subgroup;
   }
 
   /// Get the current group
-
   std::string get_group () throw ()
   { return current_group_; };
 
   /// Get the current subgroup
-
   std::string get_subgroup () throw ()
   { return current_subgroup_; };
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE FUNCTIONS
-  //-------------------------------------------------------------------
+private: // functions
 
   /// Read in the next line of the input file
   int readline_ (FILE* fp, char * buffer, int n) throw();
@@ -276,7 +170,6 @@ private:
   };
 
   /// Return the Param pointer for the specified list parameter element
-
   Param * list_element_ (std::string parameter, int index)
   {
     Param * list = parameter_(parameter);
@@ -287,14 +180,7 @@ private:
     return param;
   }
 
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-  /// A private attribute
+private: // attributes
 
   std::string current_group_;
   std::string current_subgroup_;
@@ -303,10 +189,11 @@ private:
   struct param_type * parameter_list_;
 };
 
-// Parser functions
 
 extern "C" { 
+  /// C function for reading parameters from a file
   struct param_type * cello_parameters_read(FILE *);
+  /// C function for printing parameters to stdout
   void cello_parameters_print();
 }
 

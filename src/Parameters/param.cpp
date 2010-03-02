@@ -133,7 +133,7 @@ void Param::set (struct param_type * node)
 *********************************************************************
 */
 
-void Param::dealloc() { 
+void Param::dealloc_() { 
   switch (type_) {
   case type_string_: 
     dealloc_string_(); 

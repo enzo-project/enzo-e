@@ -3,6 +3,7 @@
  *
  * @file      c_message.cpp
  * @brief     Display warning and error messages
+ * @todo     Remove static for thread safety
  * @author    James Bordner (jobordner@ucsd.edu)
  * @date      
  * @ingroup   Enzo
@@ -43,6 +44,7 @@
  
 //----------------------------------------------------------------------
  
+// @@@ WARNING @@@: not thread safe
 int static warning_count = 0;
  
 //----------------------------------------------------------------------

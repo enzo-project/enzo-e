@@ -5,70 +5,9 @@
 #define COUNTERS_HPP
 
 /// @file     counters.hpp
-/// @brief    Interface for the Counters class
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date      
-///
-/// Detailed description of file counters.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      counters.hpp
- * @brief     
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      
- * @note      
- *
- * 
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @date     2009-10-19 12:55:54
+/// @brief    Interface for the Counters class
 
 #include "cello.h"
 
@@ -76,29 +15,13 @@
 
 class Counters {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Counters
+  /// @ingroup  Performance
+  /// @brief    Represent counter values for a single set of attributes
 
-/** 
- *********************************************************************
- *
- * @class     Counters
- * @brief     
- * @ingroup   Performance
- *
- * 
- *
- *********************************************************************
- */
+public: // interface
 
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
+  /// Initialize a Counters object
   Counters(size_t num_attributes, size_t num_counters)
     {
       Memory::begin_group(component_performance);
@@ -108,7 +31,7 @@ public:
       Memory::end_group(component_performance);
     }
 
-  /// 
+  /// Delete a Counters object
   ~Counters()
     {
       Memory::begin_group(component_performance);
@@ -119,19 +42,7 @@ public:
     }
 
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+private: // attributes
 
   /// Array of attribute values
   int       * a_;

@@ -7,6 +7,7 @@
 /// @file
 /// @brief     
 /// @author    
+/// @todo     Remove static for thread safety
 /// @date      
 ///
 /// Detailed description of file amr_node16.hpp

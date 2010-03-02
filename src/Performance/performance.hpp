@@ -4,86 +4,30 @@
 #ifndef PERFORMANCE_HPP
 #define PERFORMANCE_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file performance.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      performance.hpp
- * @brief     Classes for collecting and allowing access to performance data
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      Wed Oct 14 23:40:13 PDT 2009
- * @note      
- *
- * Classes for collecting and allowing access to performance data
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file     performance.hpp
+/// @todo     Split performance.hpp into component include and class files
+/// @todo     Complete detailed description of Performance class
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Wed Oct 14 23:40:13 PDT 2009
+/// @brief    Interface and include file for the Performance component and class
 
 #include <vector>
-
 #include "cello.h"
-
 #include "performance_timer.hpp"
 #include "counters.hpp"
 
+/// @def      type_counter
+/// @brief    Counter value type
 typedef unsigned long long type_counter;
 
 class Performance {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Performance
+  /// @ingroup  Performance
+  /// @brief    Measuring and allow access to run-time parallel performance
+  ///
+  /// Performance data is organized into attributes, counters, groups, and
+  /// regions. @@@
 
 enum enum_item_type {
   item_unknown,
@@ -93,35 +37,18 @@ enum enum_item_type {
   item_region
 };
 
-/** 
- *********************************************************************
- *
- * @class     Performance
- * @brief     
- * @ingroup   Performance
- *
- * 
- *
- *********************************************************************
- */
 
-public:
+public: // interface
 
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
+  /// Initialize a Performance object
   Performance(unsigned num_attributes, 
 	      unsigned num_counters,
 	      unsigned num_groups,
 	      unsigned num_regions);
 
-  /// 
+  /// Delete a Performance object
   ~Performance();
 
-  //--------------------------------------------------
-  // ATTRIBUTES
   //--------------------------------------------------
 
   ///  	Create a new attribute
@@ -135,8 +62,6 @@ public:
   /// Assign a value to an attribute
   void set_attribute(unsigned id_attribute);
 
-  //--------------------------------------------------
-  // GROUPS
   //--------------------------------------------------
 
   void new_group(unsigned         id_group, 
@@ -155,8 +80,6 @@ public:
   void end_group(unsigned id_group);
 
   //--------------------------------------------------
-  // REGIONS
-  //--------------------------------------------------
 
   void new_region(unsigned    id_region, 
 		  std::string region_name);
@@ -174,8 +97,6 @@ public:
   void stop_region(unsigned region_name);
 
   //--------------------------------------------------
-  // COUNTERS
-  //--------------------------------------------------
 
   ///  	Create a new user counter.
   void new_counter(unsigned id_counter,
@@ -192,22 +113,11 @@ public:
 			 type_counter value);
 
   //--------------------------------------------------
-  // DISK
-  //--------------------------------------------------
 
   ///  	Flush data to disk
   void flush();
 
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
-
-//----------------------------------------------------------------------
+private: // functions
 
   type_counter get_real_ () const
   {
@@ -217,7 +127,8 @@ private:
     return (type_counter) (1000000) * tv.tv_sec + tv.tv_usec;
   }
 
-//----------------------------------------------------------------------
+
+  //--------------------------------------------------
 
   type_counter get_virt_ () const
   {
@@ -228,7 +139,7 @@ private:
 # endif
   }
 
-  //----------------------------------------------------------------------
+  //--------------------------------------------------
 
   void new_item_ 
   (
@@ -240,11 +151,7 @@ private:
    unsigned num_items_
    );
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+private: // attributes
 
   /// Array of counters for regions
   std::vector<Counters *> counters_;
@@ -284,7 +191,6 @@ private:
 
   /// Current region; 0 if none
   unsigned current_region_;
-
 
 };
 

@@ -4,92 +4,25 @@
 #ifndef TEST_UNIT_HPP
 #define TEST_UNIT_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file test_unit.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/**
- *********************************************************************
- *
- * @file    unit.hpp
- * @brief   Unit testing functions
- * @author  James Bordner 
- * @date    Sat Feb 23 15:22:59 PST 2008
- *
- * $Id$
- *
- *********************************************************************
- */
-
-//======================================================================
-// INCLUDES
-//======================================================================
+/// @file     test_unit.hpp
+/// @brief    Define the unit namespace and unit testing functions
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @todo     Convert namespace to class
+/// @todo     Address need to edit code to use pass/fail string colors or not
+/// @date     Sat Feb 23 15:22:59 PST 2008
 
 #include <string.h>
-
 #include "error.hpp"
 
-//======================================================================
-// DEFINES
-//======================================================================
-
-
-//----------------------------------------------------------------------
-
+/// @def      UNIT_MAX_NAME_LEN
+/// @brief    Maximum length of a class or function name
 #define UNIT_MAX_NAME_LEN 40
-
-//======================================================================
-// VARIABLES
-//======================================================================
 
 namespace unit {
 
+  /// @namespace unit
+  /// @brief     Current class name, function name, and test results
+       
   char class_name[UNIT_MAX_NAME_LEN] = {0};
   char func_name[UNIT_MAX_NAME_LEN] = {0};
 
@@ -104,27 +37,22 @@ namespace unit {
 
 }
 
-//======================================================================
-// FUNCTIONS
-//======================================================================
-
+/// @brief Set the current unit testing class name
 void unit_class (const char * c)
 {
   strncpy (unit::class_name,c,UNIT_MAX_NAME_LEN);
 }
 
-//----------------------------------------------------------------------
-
+/// @brief Set the current unit testing function name
 void unit_func (const char * f)
 {
   strncpy (unit::func_name,f,UNIT_MAX_NAME_LEN);
 }
 
-//----------------------------------------------------------------------
-
-
+/// @brief Assert result of test; macro used for FILE and LINE expansion
 #define unit_assert(RESULT) unit_assert_(RESULT, __FILE__,__LINE__);
 
+/// @brief Assert result of test macro; called by unit_assert macro
 void unit_assert_ (bool result, const char * file, int line)
 {
   printf ("%s %s:%3d  %s::%s() %d\n",
@@ -140,8 +68,7 @@ void unit_assert_ (bool result, const char * file, int line)
   unit::test_num++;
 }
 
-//----------------------------------------------------------------------
-
+/// @brief Open the file for unit test results.  Call to unit_class() required
 void unit_open ()
 {
   char filename [UNIT_MAX_NAME_LEN+5];
@@ -152,8 +79,7 @@ void unit_open ()
   unit::fp = fopen (filename,"w");
 }
 
-//----------------------------------------------------------------------
-
+/// @brief Close the file for unit test results.  Call to unit_open() required
 void unit_close ()
 {
   if (unit::fp) {

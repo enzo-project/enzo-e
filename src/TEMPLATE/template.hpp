@@ -5,15 +5,15 @@
 #define FOO_HPP
 
 /// @file     template.hpp
-/// @brief    Brief description of file template.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
+/// @brief    Brief description of file template.hpp
 
 class Foo {
 
   /// @class    Foo
-  /// @brief    Brief description of class Foo.
   /// @ingroup  Template
+  /// @brief    Brief description of class Foo.
 
 public: // interface
 

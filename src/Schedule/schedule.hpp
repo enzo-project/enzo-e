@@ -4,70 +4,10 @@
 #ifndef SCHEDULE_HPP
 #define SCHEDULE_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file schedule.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
- * @file      schedule.hpp
- * @brief     
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      
- * @note      
- *
- * 
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file     schedule.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-11-10 16:12:58
+/// @brief    Interface for the Schedule class
 
 #include <stdio.h>
 
@@ -77,32 +17,16 @@
 
 class Schedule {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Schedule
+  /// @ingroup  Schedule
+  /// @brief    Class for controlling scheduling of parallel tasks
 
-/** 
- *********************************************************************
- *
- * @class     Schedule
- * @brief     
- * @ingroup   Schedule
- *
- * 
- *
- *********************************************************************
- */
+public: // interface
 
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
+  /// Initialize a Schedule object
   Schedule(Monitor * monitor);
 
-  /// 
+  /// Delete a Schedule object
   ~Schedule();
 
   /// Read parameter file

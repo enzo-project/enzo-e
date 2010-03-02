@@ -119,5 +119,7 @@ private:
 
 };
 
+#include "mpi.hpp"
+
 #endif /* PARALLEL_HPP */
 

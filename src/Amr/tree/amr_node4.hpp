@@ -7,6 +7,7 @@
 /// @file     node4.hpp
 /// @brief    Interface for the Node4 class
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @todo     Remove static for thread safety
 /// @date      
 ///
 /// Detailed description of file amr_node4.hpp

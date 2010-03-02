@@ -59,6 +59,7 @@
  * @file      memory.cpp
  * @brief     Functions for dynamic memory management
  * @author    James Bordner
+ * @todo     Remove static for thread safety
  * @date      Thu Sep  3 16:44:18 PDT 2009
  * @note      
  *

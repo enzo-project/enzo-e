@@ -7,6 +7,7 @@
 /// @file     memory.hpp
 /// @brief    Interface for the Memory class
 /// @author   James Bordner (jobordner@ucsd.edu) 
+/// @todo     Remove static for thread safety
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
 
 #include <stack>
@@ -60,7 +61,7 @@ public: // interface
   /// Current number of bytes allocated
   static long long bytes ( memory_group_handle group_handle = 0 ) throw ();
   
-  /// Estimate of amount of local memory availables);
+  /// Estimate of amount of local memory available
   static long long available ( memory_group_handle group_handle = 0 ) throw ();
 
   /// Estimate of used / available memory
@@ -84,13 +85,13 @@ public: // interface
   /// Return the number of calls to deallocate for the group
   static int num_delete ( memory_group_handle group_handle = 0 ) throw ();
 
-  /// 
+  /// Print memory summary
   static void print () throw ();
 
-  /// 
+  /// Reset memory counters for the current group
   static void reset () throw ();
 
-  /// 
+  /// Set whether memory tracking is active or not
   static void set_active (bool is_active) throw ()
 #ifdef CONFIG_USE_MEMORY
   { is_active_ = is_active; } ;
@@ -100,7 +101,7 @@ public: // interface
 
 private: // functions
 
-  /// 
+  ///  Check the group handle, and throw an exception if bad
   static void check_handle_(memory_group_handle group_handle) 
     throw (ExceptionMemoryBadGroupHandle())
   {  
@@ -127,10 +128,16 @@ private: // attributes
   /// Hardware parameters
   static long long available_   [MEMORY_MAX_NUM_GROUPS + 1];
 
-  /// Collected statistics for different groups
+  /// Current bytes allocated for different groups
   static long long bytes_       [MEMORY_MAX_NUM_GROUPS + 1];
+
+  /// High-water bytes allocated for different groups
   static long long bytes_high_  [MEMORY_MAX_NUM_GROUPS + 1];
+
+  /// Number of calls to new for different groups
   static long long new_calls_   [MEMORY_MAX_NUM_GROUPS + 1];
+
+  /// Number of calls to delete for different groups
   static long long delete_calls_[MEMORY_MAX_NUM_GROUPS + 1];
 
 #endif

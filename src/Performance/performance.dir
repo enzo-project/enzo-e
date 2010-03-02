@@ -8,6 +8,8 @@
  * @date      2010-02-05
  * @defgroup  Performance
  *
+ * Classes for collecting and allowing access to performance data
+ * 
  * $Id$
  *
  *********************************************************************

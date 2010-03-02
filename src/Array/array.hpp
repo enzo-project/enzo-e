@@ -5,11 +5,10 @@
 #define ARRAY_HPP
 
 /// @file     array.hpp
-/// @brief    Include file for the Array component
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul  8 16:01:10 PDT 2009
-/// @todo     Split file into array.hpp module include file and
-///           array_array.hpp class definition file
+/// @todo     Split file into separate include and class definition files
+/// @brief    Include file for the Array component
 
 #include "cello.h"
 #include "error_exception.hpp"
@@ -17,9 +16,9 @@
 class Array {
 
   /// @class    Array
-  /// @brief    Defines the interface for arrays
   /// @ingroup  Array
   /// @todo     Add commented-out functions at bottom
+  /// @brief    Defines the interface for arrays
 
 public: // interface
 

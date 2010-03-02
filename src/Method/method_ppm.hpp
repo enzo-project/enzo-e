@@ -4,80 +4,31 @@
 #ifndef METHOD_PPM_HPP
 #define METHOD_PPM_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
+/// @file     method_ppm.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @todo     fix enum flatten_type detailed comment to be deoxygen-friendly
+/// @todo     Move Enzo-specific stuff from Cello into external Enzo scoped
+/// @todo     Rename Enzo-specific defines FOO as ENZO_FOO
+/// @todo     Replace Enzo FORTRAN_NAME with Cello fortran name handler 
+/// @todo     fix definition of FLOAT as double
+/// @todo     remove need for MAX_NUMBER_OF_BARYON_FIELDS
+/// @todo     rename lower-case defines as upper-case
+/// @todo     rename nint to e.g. round
+/// @todo     replace computational defines with inline functions
+/// @date     Sat Jul 18 13:45:13 PDT 2009
+/// @brief    Implementation of the PPM method
+
+/// @enum     flatten_type
+/// @brief    Flattening parameter for PPM
 ///
-/// Detailed description of file method_ppm.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-
-/** 
- *********************************************************************
- *
- * @file      method_ppm.hpp
- * @brief     Defines the PPM Enzo hydrodynamics Method
- * @author    James Bordner
- * @date      Sat Jul 18 13:45:13 PDT 2009
- *
- * Defines the PPM Enzo hydrodynamics Method
- *
- * $Id$
- *
- *********************************************************************
- */
-
-//  *     d) iflatten = 0 -> no flattening
-//  *     e) iflatten = 1 -> The simple flattening scheme described in eqs
-//  *        A1 & A2 of CW84.
-//  *     f) iflatten = 2 -> Flattening needed for Lagrangean hydrodynamics
-//  *        (note: not L+remap).  Stuck in for completeness, but not tested.
-//  *        This is described in equations. A.4 - A.6.
-//  *     g) iflatten = 3 -> Flattening recomended for multidimensional
-//  *        calculations.  Described in CW84 A7-A10.
+///  iflatten = 0 -> no flattening
+///  iflatten = 1 -> The simple flattening scheme described in eqs
+///      A1 & A2 of CW84.
+///  iflatten = 2 -> Flattening needed for Lagrangean hydrodynamics
+///      (note: not L+remap).  Stuck in for completeness, but not tested.
+///      This is described in equations. A.4 - A.6.
+///  iflatten = 3 -> Flattening recomended for multidimensional
+///      calculations.  Described in CW84 A7-A10.
 
 enum flatten_type {
   flatten_none,
@@ -88,34 +39,11 @@ enum flatten_type {
 
 class MethodPpm : public Method {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    MethodPpm
+  /// @brief    PPM Enzo hydrodynamics Method
+  /// @ingroup  Method
 
-/** 
- *********************************************************************
- *
- * @class     MethodPpm
- * @brief     PPM Enzo hydrodynamics Method
- * @ingroup   Method
- *
- * PPM Enzo hydrodynamics Method
- *
- *********************************************************************
- */
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
+public: // interface
 
   /// Create a new PPM method
   MethodPpm() throw();
@@ -129,39 +57,70 @@ public:
   /// Apply the method
   void apply() throw(); 
 
-private:
+private: // functions
 
   void solve_hydro_equations_() throw ();
 
+private: // attributes
+
   flatten_type flatten_type_;
 
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
 
 };
 
+/// @def WARNING
+/// @brief Enzo: print a warning message
 #define WARNING(MESSAGE) printf ("%s:%d WARNING: %s\n",__FILE__,__LINE__,MESSAGE);
 
-#define FAIL                                0 // Error handling
-#define SUCCESS                             1 // Error handling
+/// @def FAIL
+/// @brief Enzo: return value for failure
+#define FAIL                                0
+/// @def SUCCESS
+/// @brief Enzo: return value for success
+#define SUCCESS                             1
 
-#define FALSE                               0 // Needed for fortran
-#define TRUE                                1 // Needed for fortran
+/// @def FALSE
+/// @brief Enzo: value defining false for fortran
+#define FALSE                               0
+/// @def TRUE
+/// @brief Enzo: value defining true for fortran
+#define TRUE                                1
 
-#define FLOAT                          double // Scalar
+/// @def FLOAT
+/// @brief Enzo: define FLOAT as double
+#define FLOAT                          double
+/// @def FLOAT_UNDEFINED
+/// @brief Enzo: value for an 'undefined' value
 #define FLOAT_UNDEFINED              -99999.0 // use NaN: CosmologyComputeExpansionFactor()
+/// @def ISYM
+/// @brief Enzo: printf format for an integer
 #define ISYM                              "d" // Scalar
 
-#define MAX_DIMENSION                       3 // for array declarations and loops in SolveHydro
-#define MAX_NUMBER_OF_BARYON_FIELDS         5 // for array declarations and loops in SolveHydro
+/// @def MAX_DIMENSION
+/// @brief Enzo: maximum problem dimension
+#define MAX_DIMENSION                       3
+/// @def MAX_NUMBER_OF_BARYON_FIELDS
+/// @brief Enzo: Maximum number of fields PPM can handle
+#define MAX_NUMBER_OF_BARYON_FIELDS         5
 
+/// @def sign
+/// @brief Enzo: Return 1 or -1 depending on the sign of the argument
 #define sign(A)   ((A) >  0  ?  1  : -1 )     // upper-case inline function
-#define nint(A)   ((int) ((A) + 0.5*sign(A)) ) // rename to round(), upper-case inline function
+/// @def nint
+/// @brief Enzo: Return properly rounded value, unlike e.g. "int (2.9)"
+#define nint(A)   ((int) ((A) + 0.5*sign(A)) )
+/// @def min
+/// @brief Enzo: Return the minimum of two values
 #define min(A,B)  ((A) < (B) ? (A) : (B))      // upper-case inline function
+/// @def max
+/// @brief Enzo:  Return the maximum of two values
 #define max(A,B)  ((A) > (B) ? (A) : (B))      // upper-case inline function
 
+/// @def FORTRAN_NAME
+/// @brief Enzo: Adds an underscore to Fortran file names
+
 // #define FORTRAN_NAME(NAME) NAME
+/// @brief Enzo: 
 #define FORTRAN_NAME(NAME) NAME##_
 
 

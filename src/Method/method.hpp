@@ -4,164 +4,21 @@
 #ifndef METHOD_HPP
 #define METHOD_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file method.hpp
-
-///
-/// @brief     
-/// @author    
-/// @date      
-/// @ingroup
-/// @note      
-///
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-//345678901234567890123456789012345678901234567890123456789012345678901234567890
-
-/*
- * ENZO: THE NEXT GENERATION
- *
- * A parallel astrophysics and cosmology application
- *
- * Copyright (C) 2008 James Bordner
- * Copyright (C) 2008 Laboratory for Computational Astrophysics
- * Copyright (C) 2008 Regents of the University of California
- *
- * See CELLO_LICENSE in the main directory for full license agreement
- *
- */
+/// @file     method.hpp 
+/// @author   James Bordner (jobordner@ucsd.edu) 
+/// @date     Mon Jul 13 11:11:47 PDT 2009 
+/// @todo     Split file into separate include and class definition files
+/// @brief    Include file for the Method component
 
 #include "cello.h"
 
-/** 
- *********************************************************************
- *
- * @file      method_method.hpp
- * @brief     Defines the Method base class
- * @author    James Bordner
- * @date      Mon Jul 13 11:11:47 PDT 2009
- *
- * Defines the Method base class
- *
- * $Id$
- *
- *********************************************************************
- */
-
 class Method {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Method
+  /// @ingroup  Method
+  /// @brief    Encapsulate external method / analysis / visualization function.
 
-/** 
- *********************************************************************
- *
- * @class     Method
- * @brief     Base class for numerical methods
- * @ingroup   Method
- *
- * Base class for numerical methods
- *
- *********************************************************************
- */
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
+public: // interface
 
   /// Create a new Method
   Method() throw();
@@ -177,12 +34,6 @@ public:
 
   /// Apply the method
   void apply() throw(); 
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
 
 };
 

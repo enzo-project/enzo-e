@@ -4,70 +4,10 @@
 #ifndef PERFORMANCE_TIMER_HPP
 #define PERFORMANCE_TIMER_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file performance_timer.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      timer.hpp
- * @brief     Timer class
- * @author    James Bordner
- * @date      Wed Apr 23 12:40:04 PDT 2008
- *
- * A Timer is used for timing pieces of code
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file     performance_time.hpp
+/// @author   James bordner (jobordner@ucsd.edu)
+/// @date     Wed Apr 23 12:40:04 PDT 2008
+/// @brief    Interface and implementation of the Timer class
 
 #include <sys/time.h>
 #ifdef __linux__
@@ -76,41 +16,11 @@
 
 class Timer {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Timer
+  /// @ingroup  Performance
+  /// @brief    Simple class for timing code sections
 
-/** 
- *********************************************************************
- *
- * @class     Timer
- * @brief     A high resolution timer
- * @ingroup   Performance
- *
- * A Timer is used for timing pieces of code
- *
- *********************************************************************
- */
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-  /// The accumulated time
-  float time_;
-  /// Whether the timer is currently running
-  bool is_running_;
-  /// Struct values for gettimeofday()
-  struct timeval t1_, t2_;
-  struct timezone tz_;
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-public:
+public: // interface
 
   /// Create the Timer object
   inline Timer();
@@ -122,6 +32,17 @@ public:
   inline void clear();
   /// Return the value of the timer
   inline float value() const;
+
+private: // attributes
+
+  /// The accumulated time
+  float time_;
+  /// Whether the timer is currently running
+  bool is_running_;
+  /// Struct values for gettimeofday()
+  struct timeval t1_, t2_;
+  struct timezone tz_;
+
 };
 
 //======================================================================

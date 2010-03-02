@@ -5,16 +5,16 @@
 #define ARRAY_BLOCK_HPP
 
 /// @file     array_block.hpp
-/// @brief    Fortran-style array class
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
+/// @brief    Fortran-style array class.
 
 class Block {
 
   /// @class    Block
-  /// @brief    Interface between Array and low-level (C/fortran) routines.
   /// @ingroup  Array
-  /// 
+  /// @brief    Interface between Array and low-level (C/fortran) routines.
+  ///
   /// Defines up to a 4-D fortran-like array for storing 1 or more 3D
   /// arrays.  Axes can be permuted, including the index selecting the
   /// array for storing interleaved arrays.

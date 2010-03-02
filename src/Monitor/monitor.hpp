@@ -5,9 +5,9 @@
 #define MONITOR_HPP
 
 /// @file     monitor.hpp
-/// @brief    Include file for the Monitor component
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-05
+/// @brief    Include file for the Monitor component
 
 #include <string>
 #include "cello.h"
@@ -26,9 +26,9 @@ enum enum_reduce {
 class Monitor {
 
   /// @class    Monitor
-  /// @brief    Functions for user monitoring of the execution status
   /// @ingroup  Monitor
-
+  /// @brief    Functions for user monitoring of the execution status
+  ///
   /// The Monitor component is used to communicate information about
   /// the running simulation to the user. Information can be output in
   /// several forms, including text files, HTML files, plots, or other

@@ -5,9 +5,9 @@
 #define SIMULATION_HPP
 
 /// @file     simulation.hpp
-/// @brief    Interface file for the Simulation class
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
+/// @brief    Interface file for the Simulation class
 
 #include <vector>
 #include "cello.h"
@@ -20,8 +20,8 @@
 class Simulation {
 
   /// @class    Simulation
-  /// @brief    Class specifying a simulation to run
   /// @ingroup  Simulation
+  /// @brief    Class specifying a simulation to run
 
 public: // interface
 
@@ -69,10 +69,6 @@ public: // interface
 
   /// Return the Amr object
   Amr * amr () { return amr_; };
-
-private: // functions
-
-  /// 
 
 private: // attributes
 
