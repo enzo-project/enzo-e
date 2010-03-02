@@ -5,15 +5,15 @@
 #define DISK_IFRIT_HPP
 
 /// @file     disk_ifrit.hpp
-/// @brief    Interface for the Ifrit class
 /// @author   James Bordner
 /// @date     Thu Feb 21 16:05:34 PST 2008
+/// @brief    Interface for the Ifrit class
  
 class Ifrit {
 
   /// @class    Ifrit
-  /// @brief    Class for writing and reading IFRIT files
   /// @ingroup  Disk
+  /// @brief    Class for writing and reading IFRIT files
   ///
   /// An Ifrit object currently corresponds to a single IFRIT file /
   /// group dataset.  "IFrIT is a powerful tool that can be used to
@@ -41,11 +41,6 @@ public: /// interface
 		  int         nx, 
 		  int         ny, 
 		  int         nz) throw();
-
-private: /// functions
-
-
-private: /// attributes
 
 };
 

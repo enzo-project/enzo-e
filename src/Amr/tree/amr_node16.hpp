@@ -4,104 +4,25 @@
 #ifndef AMR_NODE16_HPP
 #define AMR_NODE16_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     Amr_node16
+/// @brief    Declaration of the Node16 class 
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Remove static for thread safety
-/// @date      
-///
-/// Detailed description of file amr_node16.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      node16.hpp
- * @brief     Node class for 4^2-trees
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      Tue Oct 27 12:32:07 PDT 2009
- * @note      
- *
- * 
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @date     Tue Oct 27 12:32:07 PDT 2009
 
 #include <stdlib.h>
-
 #include "cello.h"
-
 #include "amr_node.hpp"
 
 class Tree16;
 
 class Node16 {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Node16
+  /// @ingroup  Amr
+  /// @brief    Node class for 4^2-trees
 
-/** 
- *********************************************************************
- *
- * @class     Node16
- * @brief     Node class for 4^2-trees
- * @ingroup   Amr
- *
- * Node class for 2^2-trees 
- *
- *********************************************************************
- */
-
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
+public: // interface
 
   /// Create a new leaf node
   Node16( int level_adjust = 0 );
@@ -125,7 +46,7 @@ public:
   /// return the parent
   Node16 * parent ();
 
-  /// Refine if any elements in the array are true and recurse
+  /// Refine if any elements in the array are true and recurse.  
   /// return the level
   int refine 
     (
@@ -174,18 +95,10 @@ public:
        (child_[0][3]) || (child_[1][3]) || (child_[2][3]) || (child_[3][3]));
   };
 
-  //-------------------------------------------------------------------
-  // STATIC OPERATIONS
-  //-------------------------------------------------------------------
-
   /// Return the number of nodes
   static int num_nodes() { return num_nodes_; };
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
+private: // functions
 
   /// Create child nodes
   void create_children_();
@@ -202,11 +115,7 @@ private:
   /// Create a child
   void create_child_ (int ix, int iy);
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+private: // attributes
 
   /// Child nodes in edge_type x edge_type ordering
   Node16 * child_[4][4];
@@ -219,10 +128,6 @@ private:
 
   /// Relative level for coalesced nodes
   int level_adjust_;
-
-  //-------------------------------------------------------------------
-  // STATIC ATTRIBUTES
-  //-------------------------------------------------------------------
 
   /// Number of nodes allocated
   static int num_nodes_;

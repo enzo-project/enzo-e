@@ -4,114 +4,53 @@
 #ifndef DISK_HDF5_HPP
 #define DISK_HDF5_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file disk_hdf5.hpp
+/// @file     disk_hdf5.hpp
+/// @brief    Interface for the Hdf5 class
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Thu Feb 21 16:05:34 PST 2008
 
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      hdf5.hpp
- * @brief     Definition of the Hdf5 class
- * @author    James Bordner
- * @date      Thu Feb 21 16:05:34 PST 2008
- *
- * $Id$
- *
- *********************************************************************
- */
- 
 class Hdf5 {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
-/** 
- *********************************************************************
- *
- * @class     Hdf5
- * @brief     Class for writing and reading HDF5 files
- * @ingroup   Storage
- *
- * An Hdf5 object currently corresponds to a single HDF5 file / group
- * / dataset.
- *
- *********************************************************************
- */
+  /// @class    Hdf5
+  /// @brief    Class for writing and reading HDF5 files
+  /// @ingroup  Disk
+  ///
+  /// An Hdf5 object currently corresponds to a single HDF5 file / group
 
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-public:
+public: // interface
 
   /// Initialize the Hdf5 object
   Hdf5();
+
+  /// Open the file with the given mode
   int file_open  (std::string name, std::string mode);
+
+  /// Close the file
   void file_close ();
+
+  /// Open the given group
   void group_open (std::string name);
+
+  /// Close the current group
   void group_close ();
+
+  /// Open the given dataset with given size for reading
   void dataset_open_read (std::string name, int * nx, int * ny, int * nz);
+
+  /// Open the given dataset with the given size for writing
   void dataset_open_write (std::string name, 
-			   int nx, int ny, int nz,
-			   int ix0=0,int iy0=0,int iz0=0, 
-			   int mx=0, int my=0, int mz=0);
+			   int nx, int ny, int nz);
+
+  /// Close the current dataset
   void dataset_close ();
+
+  /// Read the current dataset into the buffer
   void read  (Scalar * buffer);
+
+  /// Write the current dataset from the buffer
   void write (Scalar * buffer);
 
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-private:
-
+private: // attributes
 
   /// HDF5 file descriptor
   hid_t file_;
@@ -139,12 +78,6 @@ private:
 
   /// Last error
   herr_t      status_;
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-private:
 
 };
 

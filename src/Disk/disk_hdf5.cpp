@@ -166,9 +166,9 @@ void Hdf5::group_close ()
 //----------------------------------------------------------------------
 
 void Hdf5::dataset_open_write (std::string name, 
-			       int nx,  int ny,  int nz,
-			       int ix0, int iy0, int iz0, 
-			       int mx,  int my,  int mz)
+			       int nx,  int ny,  int nz)
+			       //			       int ix0, int iy0, int iz0,  /// unused
+			       //			       int mx,  int my,  int mz)   /// unused
 {
   if (file_mode_ != "w") {
 
