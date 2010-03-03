@@ -1,43 +1,10 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     amr_node16.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     
+/// @brief    Node class for 4^2-trees Tree16
 
 #include <stdio.h>
 #include "cello.h"
@@ -48,7 +15,7 @@ const bool debug = false;
 
 Node16::Node16(int level_adjust) 
   : level_adjust_(level_adjust)
-
+/// @param    level_adjust difference actual mesh level - tree level
 { 
   ++Node16::num_nodes_;
 
@@ -62,9 +29,8 @@ Node16::Node16(int level_adjust)
   parent_ = NULL;
 }
 
-// Delete the node and all descendents
-
 Node16::~Node16() 
+///
 { 
   --Node16::num_nodes_;
 
@@ -102,16 +68,22 @@ Node16::~Node16()
 }
 
 inline Node16 * Node16::child (int ix, int iy) 
+/// @param    ix Index 0 <= ix < 3 of cell in grid block
+/// @param    iy Index 0 <= iy < 3 of cell in grid block
 { 
   return child_[ix][iy]; 
 }
 
 inline Node16 * Node16::neighbor (face_type face) 
+/// @param    face Face 0 <= (face = [XYZ][MP]) < 6
 { 
   return neighbor_[face]; 
 }
 
 inline Node16 * Node16::cousin (face_type face, int ix, int iy) 
+/// @param    face Face 0 <= (face = [XYZ][MP]) < 6
+/// @param    ix Index 0 <= ix < 3 of cell in grid block
+/// @param    iy Index 0 <= iy < 3 of cell in grid block
 { 
   if (neighbor_[face] && neighbor_[face]->child_[ix][iy]) {
     return neighbor_[face]->child_[ix][iy];
@@ -121,6 +93,7 @@ inline Node16 * Node16::cousin (face_type face, int ix, int iy)
 }
 
 inline Node16 * Node16::parent () 
+///
 { 
   return parent_; 
 }
@@ -132,13 +105,13 @@ inline void make_neighbors
  Node16 * node_2, 
  face_type face_1
  )
+/// @param    node_1 First neighbor node pointer 
+/// @param    node_2 Second neighbor node pointer
+/// @param    face_1 Face 0 <= face_1 < 6 of node_1 that is adjacent to node_2
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
   if (node_2 != NULL) node_2->neighbor_[(face_1+2)%4] = node_1;
 }
-
-
-// Create 16 empty child nodes
 
 int Node16::refine 
 (
@@ -150,6 +123,17 @@ int Node16::refine
  int max_level,
  bool full_nodes
  )
+/// @param    level_array @@@
+/// @param    ndx
+/// @param    ndx
+/// @param    ndy
+/// @param    lowx
+/// @param    upx  
+/// @param    lowy
+/// @param    upy
+/// @param    level
+/// @param    max_level
+/// @param    full_nodes
 {
   int depth = 0;
   if ( level < max_level && lowx < upx-1 && lowy < upy-1 ) {
