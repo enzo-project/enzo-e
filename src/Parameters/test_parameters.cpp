@@ -1,57 +1,11 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
 
-/** 
- *********************************************************************
- *
- * @file      test_parameters.cpp
- * @brief     Program implementing unit tests for the Parameters class
- * @author    James Bordner
- * @date      Thu Feb 21 16:04:03 PST 2008
- * 
- * $Id$
- * 
- *********************************************************************
- */
- 
+/// @file     test_parameters.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Thu Feb 21 16:04:03 PST 2008
+/// @brief    Program implementing unit tests for the Parameters class
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -60,6 +14,8 @@
 #include "test.hpp"
 #include "parameters.hpp"
 
+/// @def      CLOSE
+/// @brief    Local definition for testing whether two scalars are close
 #define CLOSE(a,b) ((((a) - (b)) / (fabs(a) + fabs(b))) < 1e-16)
 
 int main(int argc, char **argv)

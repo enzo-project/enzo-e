@@ -1,75 +1,11 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
 
-/** 
-*********************************************************************
-*
-* @file      param.cpp
-* @brief     Helper Param* classes for parameters
-* @author    James Bordner
-* @date      Sun Oct 11 15:02:08 PDT 2009
-* @bug       Probable memory leaks
-* @note      
-*
-* DESCRIPTION 
-* 
-*    Classes Param* to represent and evaluate various parameter types and
-*    expressions
-*
-* PACKAGES
-*
-*    NONE
-* 
-* INCLUDES
-*  
-*    NONE
-*
-* PUBLIC FUNCTIONS
-*  
-* PRIVATE FUCTIONS
-*  
-* $Id$
-*
-*********************************************************************
-*/
+/// @file     param.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Sun Oct 11 15:02:08 PDT 2009
+/// @bug      Probable memory leaks
+/// @brief    Implementation of the Param class
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -79,18 +15,9 @@
 #include "error.hpp"
 
       
-/**
-*********************************************************************
-*
-* @param   file_pointer: An opened input parameter file or stdin
-* @return  There is no return value
-*
-* This function reads in parameter-value key pairs, one per line
-*
-*********************************************************************
-*/
 
 void Param::set (struct param_type * node)
+/// @param   node  The node from which to copy the type and value
 {
   switch (node->type) {
   case enum_parameter_integer:
@@ -122,18 +49,9 @@ void Param::set (struct param_type * node)
   }
 }
 
-/**
-*********************************************************************
-*
-* @param   file_pointer: An opened input parameter file or stdin
-* @return  There is no return value
-*
-* This function reads in parameter-value key pairs, one per line
-*
-*********************************************************************
-*/
-
-void Param::dealloc_() { 
+void Param::dealloc_() 
+///
+{ 
   switch (type_) {
   case type_string_: 
     dealloc_string_(); 
@@ -153,10 +71,12 @@ void Param::dealloc_() {
   }
 } 
 
-// Write parameter to file
 
 void Param::write(FILE * file_pointer,
 		  std::string parameter)
+/// @param file_pointer  File pointer to which the parameter is written
+/// @param parameter     Name of this parameter
+/// @todo  Writing lists is not implemented yet
 {
   // Write the parameter name
   fprintf (file_pointer,"%s ",parameter.c_str());
@@ -193,24 +113,11 @@ void Param::write(FILE * file_pointer,
 
 void Param::write_scalar_expr_(FILE * fp,
 			       struct node_expr * node)
+/// @param fp Pointer to an open file to which the expression is to be written
+/// @param node Head node of the tree defining the scalar expression
 {
   print_expression(node,fp);
 }
-
-
-// Evaluate scalar expression
-
-
-/**
-*********************************************************************
-*
-* @param   file_pointer: An opened input parameter file or stdin
-* @return  There is no return value
-*
-* This function reads in parameter-value key pairs, one per line
-*
-*********************************************************************
-*/
 
 void Param::evaluate_scalar
 (struct node_expr * node, 
@@ -220,6 +127,13 @@ void Param::evaluate_scalar
  double *           y, 
  double *           z, 
  double *           t)
+/// @param node Head node of the tree defining the scalar expression
+/// @param n Length of the result buffer
+/// @param result Array in which to store the expression evaluations
+/// @param x Array of X spatial values
+/// @param y Array of Y spatial values
+/// @param z Array of Z spatial values
+/// @param t Array of time values
 {
   double * left  = NULL;
   double * right = NULL;
@@ -292,20 +206,6 @@ void Param::evaluate_scalar
   delete [] right;
 }
 
-// Evaluate logical expression
-
-
-/**
-*********************************************************************
-*
-* @param   file_pointer: An opened input parameter file or stdin
-* @return  There is no return value
-*
-* This function reads in parameter-value key pairs, one per line
-*
-*********************************************************************
-*/
-
 void Param::evaluate_logical
 (struct node_expr * node, 
  int                n, 
@@ -314,6 +214,13 @@ void Param::evaluate_logical
  double *           y, 
  double *           z, 
  double *           t)
+/// @param node Head node of the tree defining the scalar expression
+/// @param n Length of the result buffer
+/// @param result Array in which to store the expression evaluations
+/// @param x Array of X spatial values
+/// @param y Array of Y spatial values
+/// @param z Array of Z spatial values
+/// @param t Array of time values
 {
   double * left_scalar  = NULL;
   double * right_scalar = NULL;
@@ -404,19 +311,8 @@ void Param::evaluate_logical
   delete [] right_logical;
 }
 
-
-/**
-*********************************************************************
-*
-* @param   file_pointer: An opened input parameter file or stdin
-* @return  There is no return value
-*
-* This function reads in parameter-value key pairs, one per line
-*
-*********************************************************************
-*/
-
 void Param::dealloc_list_ (list_type * value)
+/// @param value List to be deallocated
 {
   for (unsigned i=0; i<(*value).size(); i++) {
     if ((*value)[i]->type_ == type_list_) {
@@ -428,18 +324,8 @@ void Param::dealloc_list_ (list_type * value)
   delete value;
 }
 
-/**
-*********************************************************************
-*
-* @param   file_pointer: An opened input parameter file or stdin
-* @return  There is no return value
-*
-* This function reads in parameter-value key pairs, one per line
-*
-*********************************************************************
-*/
-
 void Param::dealloc_node_expr_ (struct node_expr * p)
+/// @param p Head node of the tree defining the scalar expression to deallocate
 {
   if (p->left != NULL)  dealloc_node_expr_(p->left);
   if (p->right != NULL) dealloc_node_expr_(p->right);
