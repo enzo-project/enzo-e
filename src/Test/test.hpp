@@ -4,58 +4,12 @@
 #ifndef TEST_HPP
 #define TEST_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file test.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
+/// @file     test.hpp
+/// @brief    Include file for the Test component 
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2008-03-18
 
 #include "cello.h"
-
 #include "test_unit.hpp"
 
 #endif /* TEST_HPP */

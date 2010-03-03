@@ -40,8 +40,8 @@ enum flatten_type {
 class MethodPpm : public Method {
 
   /// @class    MethodPpm
-  /// @brief    PPM Enzo hydrodynamics Method
   /// @ingroup  Method
+  /// @brief    PPM Enzo hydrodynamics Method
 
 public: // interface
 

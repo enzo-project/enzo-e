@@ -5,118 +5,48 @@
 #define ERROR_EXCEPTION_HPP
 
 /// @file     exception.hpp
-/// @brief    Declaration of Exception classes
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date      
-///
-/// Detailed description of file error_exception.hpp
+/// @date     Sun Jul 12 13:12:09 PDT 2009
+/// @brief    Declaration of Exception classes
 
+/// @class    Exception
+/// @ingroup  Error
+/// @brief    Base class for the Exception class hierarchy
+class Exception { };
 
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      error_exception.hpp
- * @brief     Exception class hierarchy
- * @author    James Bordner
- * @date      Sun Jul 12 13:12:09 PDT 2009
- *
- * Exception class hierarchy
- *
- * $Id$
- *
- *********************************************************************
- */
-
-class Exception {
-
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
-
-/** 
- *********************************************************************
- *
- * @class     Exception
- * @brief     Exception bass class
- * @ingroup   Error
- *
- * Exception bass class
- *
- *********************************************************************
- */
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-
-};
-
+/// @class    ExceptionBadPointer
+/// @ingroup  Error
+/// @brief    Global exception class for encountering a bad pointer
 class ExceptionBadPointer           : public Exception {};
 
+/// @class    ExceptionBadArrayDeallocation
+/// @ingroup  Error
+/// @brief    Array exception class for bad deallocation
 class ExceptionBadArrayDeallocation : public Exception {};
+
+/// @class    ExceptionBadArrayAllocation
+/// @ingroup  Error
+/// @brief    Array exception class for bad allocation
 class ExceptionBadArrayAllocation   : public Exception {};
 
+/// @class    ExceptionMemoryBadDeallocate
+/// @ingroup  Error
+/// @brief    Memory exception class for bad deallocation
 class ExceptionMemoryBadDeallocate  : public Exception {};
+
+/// @class    ExceptionMemoryBadAllocate
+/// @ingroup  Error
+/// @brief    Memory exception class for bad allocation
 class ExceptionMemoryBadAllocate    : public Exception {};
+
+/// @class    ExceptionMemoryBadGroupHandle
+/// @ingroup  Error
+/// @brief    Memory exception class for a bad group handle
 class ExceptionMemoryBadGroupHandle : public Exception {};
 
+/// @class    ExceptionParametersBadType
+/// @ingroup  Error
+/// @brief    Parameters exception class for bad parameter type
 class ExceptionParametersBadType    : public Exception {};
 
 #endif /* EXCEPTION_HPP */

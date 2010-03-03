@@ -10,7 +10,6 @@
 /// @brief    Interface for the Counters class
 
 #include "cello.h"
-
 #include "memory.hpp"
 
 class Counters {

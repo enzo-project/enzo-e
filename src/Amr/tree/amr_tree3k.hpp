@@ -4,99 +4,26 @@
 #ifndef AMR_TREE3K_HPP
 #define AMR_TREE3K_HPP
 
-/// @file     tree3k.hpp
-/// @brief    Interface for the Tree3K class
+/// @file     amr_tree3k.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date      
-///
-/// Detailed description of file amr_tree3k.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      amr_tree3k.hpp
- * @brief     
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      
- * @note      
- *
- * 
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @date     2009-10-29
+/// @todo     Decide on either k or r as refinement factor variable name
+/// @brief    Interface for the Tree3K class
 
 #include "amr_treek.hpp"
 
 class Tree3K : public TreeK {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
-/** 
- *********************************************************************
- *
- * @class     Tree3K
- * @brief     
- * @ingroup   GROUP
- *
- * 
- *
- *********************************************************************
- */
+  /// @class    Tree3K
+  /// @ingroup  Amr
+  /// @brief    Generalized k^3-tree
 
-public:
+public: // interface
 
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
+  /// Initialize a Tree3K with given refinement factor k
   Tree3K(int k);
 
+  /// Delete a Tree3K object
   ~Tree3K() { delete root_; };
 
   /// Refine down to array
@@ -119,11 +46,7 @@ public:
   /// Create an image of levels
   void geomview (std::string filename);
 
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-private:
+private: // attributes
 
   /// Root of the tree
   Node3K * root_;

@@ -4,56 +4,13 @@
 #ifndef AMR_NODEK_HPP
 #define AMR_NODEK_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file amr_nodek.hpp
+/// @file     amr_nodek.hpp
+/// @brief    Include file for amr_node[23].hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-10-30
 
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
+/// @enum     face_type
+/// @brief    Cell faces [XYZ][MP]
 enum face_type {
   XM = 0,
   XP = 1,

@@ -29,13 +29,13 @@ class Performance {
   /// Performance data is organized into attributes, counters, groups, and
   /// regions. @@@
 
-enum enum_item_type {
-  item_unknown,
-  item_attribute,
-  item_counter,
-  item_group,
-  item_region
-};
+  enum enum_item_type {
+    item_unknown,
+    item_attribute,
+    item_counter,
+    item_group,
+    item_region
+  };
 
 
 public: // interface

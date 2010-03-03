@@ -4,106 +4,27 @@
 #ifndef AMR_NODE4_HPP
 #define AMR_NODE4_HPP
 
-/// @file     node4.hpp
-/// @brief    Interface for the Node4 class
+/// @file     amr_node4.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Remove static for thread safety
-/// @date      
-///
-/// Detailed description of file amr_node4.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
-*********************************************************************
-*
-* @file      node4.hpp
-* @brief     Node class for 2^2-trees
-* @author    James Bordner (jobordner@ucsd.edu)
-* @date      Tue Oct 27 12:32:07 PDT 2009
-* @note      
-*
-* 
-*
-* $Id$
-*
-*********************************************************************
-*/
+/// @date     Tue Oct 27 12:32:07 PDT 2009  
+/// @brief    Interface for the Node4 class
 
 #include <stdlib.h>
-
 #include "cello.h"
-
 #include "amr_node.hpp"
 
 class Tree4;
 
 class Node4 {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Node4
+  /// @ingroup  Amr
+  /// @brief    Node class for 2^2-trees
 
-/** 
-*********************************************************************
-*
-* @class     Node4
-* @brief     Node class for 2^2-trees
-* @ingroup   Amr
-*
-* Node class for 2^2-trees
-*
-*********************************************************************
-*/
+public: // interface
 
- public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  // Create a new leaf node
+  /// Create a new leaf node
   Node4( int level_adjust = 0 );
 
   /// Delete a node and all descedents
@@ -175,18 +96,10 @@ class Node4 {
        (child_[3]));
   };
 
-  //-------------------------------------------------------------------
-  // STATIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// Return the number of nodes
+  /// @@@ Return the number of nodes
   static int num_nodes() { return num_nodes_; };
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
+private: // functions
 
   /// Create child nodes
   void create_children_();
@@ -203,11 +116,7 @@ private:
   /// Create a child
   void create_child_ (corner_type corner);
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+private: // attributes
 
   /// Child nodes in corner_type ordering
   Node4 * child_[4];
@@ -221,11 +130,7 @@ private:
   /// Relative level for coalesced nodes
   int level_adjust_;
 
-  //-------------------------------------------------------------------
-  // STATIC ATTRIBUTES
-  //-------------------------------------------------------------------
-
-  /// Number of nodes allocated
+  /// @@@ Number of nodes allocated
   static int num_nodes_;
 
 };

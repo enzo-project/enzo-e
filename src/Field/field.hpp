@@ -5,116 +5,24 @@
 #define FIELD_HPP
 
 /// @file     field.hpp
-/// @brief    Interface for the Field class
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date      
-///
-/// Detailed description of file field.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      field.hpp
- * @brief     
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      
- * @note      
- *
- * 
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @date     2009-11-17
+/// @todo     Split into separate component include and class declaration files
+/// @brief    Include file for the Field component and Field class declaration
 
 class Field {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
-/** 
- *********************************************************************
- *
- * @class     Field
- * @brief     
- * @ingroup   Field
- *
- * 
- *
- *********************************************************************
- */
+  /// @class    Field
+  /// @ingroup  Field
+  /// @brief    Interface for the Field class
 
-public:
+public: // public
 
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
+  /// Initialize a Field object
   Field();
 
-  /// 
+  /// Delete a Field object
   ~Field();
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-  /// 
-
 
 };
 

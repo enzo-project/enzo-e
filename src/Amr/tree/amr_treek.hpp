@@ -4,97 +4,23 @@
 #ifndef AMR_TREEK_HPP
 #define AMR_TREEK_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file amr_treek.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      amr_treek.hpp
- * @brief     
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      
- * @note      
- *
- * 
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file     amr_treek.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-10-30
+/// @brief    Include file for amr_tree[23]k.hpp
 
 class TreeK {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
-/** 
- *********************************************************************
- *
- * @class     TreeK
- * @brief     
- * @ingroup   GROUP
- *
- * 
- *
- *********************************************************************
- */
+  /// @class    TreeK
+  /// @ingroup  Amr
+  /// @brief    Base class for Tree[23]K classes
 
-public:
+public: // interface
 
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
+  /// Initialize a TreeK with refinement factor r
   TreeK(int r) : r_(r), levels_(0) {};
 
+  /// Delete a TreeK object
   virtual ~TreeK() {};
 
   /// Refine down to array
@@ -120,11 +46,7 @@ public:
   /// Return the number of levels
   int levels() { return levels_; }
 
-protected:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+protected: // attributes
 
   /// Refinement factor
   int r_;

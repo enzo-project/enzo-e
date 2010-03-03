@@ -5,15 +5,15 @@
 #define DISK_HDF5_HPP
 
 /// @file     disk_hdf5.hpp
-/// @brief    Interface for the Hdf5 class
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
+/// @brief    Interface for the Hdf5 class
 
 class Hdf5 {
 
   /// @class    Hdf5
-  /// @brief    Class for writing and reading HDF5 files
   /// @ingroup  Disk
+  /// @brief    Class for writing and reading HDF5 files
   ///
   /// An Hdf5 object currently corresponds to a single HDF5 file / group
 

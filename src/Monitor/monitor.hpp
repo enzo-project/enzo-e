@@ -27,6 +27,8 @@ class Monitor {
 
   /// @class    Monitor
   /// @ingroup  Monitor
+  /// @todo     Make calling image() easier
+  /// @todo     Incorporate Parallel
   /// @brief    Functions for user monitoring of the execution status
   ///
   /// The Monitor component is used to communicate information about

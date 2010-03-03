@@ -4,118 +4,25 @@
 #ifndef PARALLEL_HPP
 #define PARALLEL_HPP
 
-/// @file
-/// @brief     
-/// @author    
-/// @date      
-///
-/// Detailed description of file parallel.hpp
-
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      parallel.hpp
- * @brief     
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      
- * @note      
- *
- * 
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file     parallel.hpp
+/// @todo     Split into separate component include and class define files
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-10-16
+/// @brief    Interface for the Parallel class and component include file
 
 class Parallel {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Parallel
+  /// @ingroup  Parallel
+  /// @brief    Class for encapsulating different parallel technologies
 
-/** 
- *********************************************************************
- *
- * @class     Parallel
- * @brief     
- * @ingroup   Parallel
- *
- * 
- *
- *********************************************************************
- */
+public: // interface
 
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
+  /// Initialize a Parallel object
   Parallel();
 
-  /// 
+  /// Delete a Parallel object
   ~Parallel();
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
-
-  /// 
-
 
 };
 

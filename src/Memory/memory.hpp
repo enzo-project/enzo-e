@@ -5,10 +5,10 @@
 #define MEMORY_HPP
 
 /// @file     memory.hpp
-/// @brief    Interface for the Memory class
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @todo     Remove static for thread safety
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
+/// @brief    Interface for the Memory class
 
 #include <stack>
 
@@ -23,8 +23,8 @@ typedef int memory_group_handle;
 class Memory {
 
   /// @class    Memory
-  /// @brief    Maintains memory allocation and deallocation statistics
   /// @ingroup  Memory
+  /// @brief    Maintains memory allocation and deallocation statistics
 
 public: // interface
 

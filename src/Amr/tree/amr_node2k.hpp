@@ -4,104 +4,27 @@
 #ifndef AMR_NODE2K_HPP
 #define AMR_NODE2K_HPP
 
-/// @file
-/// @brief     
-/// @author    
+/// @file     amr_node2k.hpp
+/// @brief    Interface for Node2K class
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Remove static for thread safety
-/// @date      
+/// @date     Tue Oct 27 12:32:07 PDT 2009
 ///
 /// Detailed description of file amr_node2k.hpp
 
-
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-
-/** 
- *********************************************************************
- *
- * @file      amr_node2k.hpp
- * @brief     Node class for 2D k^2-trees
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      Tue Oct 27 12:32:07 PDT 2009
- * @note      
- *
- * 
- *
- * $Id$
- *
- *********************************************************************
- */
-
 #include <stdlib.h>
-
 #include "cello.h"
-
 #include "amr_nodek.hpp"
 
 class Tree2K;
 
 class Node2K {
 
-  /// @class    Foo
-  /// @brief    Brief description of class Foo.
-  /// @ingroup  Template
+  /// @class    Node2K
+  /// @brief    Node class for 2D k^2-trees
+  /// @ingroup  Amr
 
-/** 
- *********************************************************************
- *
- * @class     Node
- * @brief     Node class for K^2-trees
- * @ingroup   Amr
- *
- * Node class for K^2-trees 
- *
- *********************************************************************
- */
-
-public:
-
-  //-------------------------------------------------------------------
-  // PUBLIC OPERATIONS
-  //-------------------------------------------------------------------
+public: // interface
 
   /// Create a new leaf node
   Node2K( int k,  int level_adjust = 0  );
@@ -187,18 +110,10 @@ public:
 
   };
 
-  //-------------------------------------------------------------------
-  // STATIC OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// Return the number of nodes
+  /// @@@ Return the number of nodes
   static int num_nodes() { return num_nodes_; };
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
+private: // functions
 
   /// Create child nodes
   void create_children_();
@@ -246,11 +161,7 @@ private:
   void allocate_children_ ();
   void deallocate_children_ ();
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+private: // attributes
 
   /// Number of cells per node axis, e.g. 2, 4, etc.
   char k_;
@@ -267,11 +178,7 @@ private:
   /// Relative level for coalesced nodes
   int level_adjust_;
 
-  //-------------------------------------------------------------------
-  // STATIC ATTRIBUTES
-  //-------------------------------------------------------------------
-
-  /// Number of nodes allocated
+  /// @@@ Number of nodes allocated
   static int num_nodes_;
 
 };

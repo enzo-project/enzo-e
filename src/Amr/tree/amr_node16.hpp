@@ -4,11 +4,11 @@
 #ifndef AMR_NODE16_HPP
 #define AMR_NODE16_HPP
 
-/// @file     Amr_node16
-/// @brief    Declaration of the Node16 class 
+/// @file     amr_node16.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Remove static for thread safety
 /// @date     Tue Oct 27 12:32:07 PDT 2009
+/// @todo     Remove static for thread safety
+/// @brief    Declaration of the Node16 class 
 
 #include <stdlib.h>
 #include "cello.h"
@@ -46,8 +46,7 @@ public: // interface
   /// return the parent
   Node16 * parent ();
 
-  /// Refine if any elements in the array are true and recurse.  
-  /// return the level
+  /// Refine if any elements in the array are true and recurse, returning level
   int refine 
     (
      const int * level_array, 
@@ -95,7 +94,7 @@ public: // interface
        (child_[0][3]) || (child_[1][3]) || (child_[2][3]) || (child_[3][3]));
   };
 
-  /// Return the number of nodes
+  /// @@@ Return the number of nodes
   static int num_nodes() { return num_nodes_; };
 
 private: // functions
@@ -129,7 +128,7 @@ private: // attributes
   /// Relative level for coalesced nodes
   int level_adjust_;
 
-  /// Number of nodes allocated
+  /// @@@ Number of nodes allocated
   static int num_nodes_;
 
 };
