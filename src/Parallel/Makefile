@@ -20,6 +20,7 @@ all: $(OBJS) $(TESTS) $(EXES)
 .PHONY: install-include
 install-include:
 	ln -sf `pwd`/parallel.hpp               $(INCLUDE)
+	ln -sf `pwd`/mpi.hpp                    $(INCLUDE)
 
 #-----------------------------------------------------------------------
 

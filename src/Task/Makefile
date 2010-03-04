@@ -1,7 +1,7 @@
 
 TOP     = ../..
 PACKAGE = task
-OBJS    = task.o
+OBJS    = 
 TESTS   = 
 DIRS    = 
 
