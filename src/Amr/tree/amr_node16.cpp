@@ -15,7 +15,7 @@ const bool debug = false;
 
 Node16::Node16(int level_adjust) 
   : level_adjust_(level_adjust)
-/// @param    level_adjust difference actual mesh level - tree level
+    /// @param    level_adjust difference: actual mesh level - tree level
 { 
   ++Node16::num_nodes_;
 
@@ -301,7 +301,7 @@ void Node16::update_child_ (int ix, int iy)
 // Perform a pass of trying to remove level-jumps 
 void Node16::balance_pass(bool & refined_tree, bool full_nodes)
 /// @param    refined_tree Whether tree has been refined
-/// @param    full_nodes Whether nodes always have a full complement of children
+/// @param    full_nodes   Whether nodes always have a full complement of children
 {
   if (full_nodes) {
 

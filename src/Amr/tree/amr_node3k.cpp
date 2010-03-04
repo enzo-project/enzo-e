@@ -1,43 +1,10 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     amr_node3k.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     
+/// @brief    Implementation for Node3K node class
 
 #include <stdio.h>
 #include <assert.h>
@@ -54,7 +21,8 @@ Node3K::Node3K(int k, int level_adjust)
     neighbor_(0),
     parent_(0),
     level_adjust_(level_adjust)
-
+    /// @param k            Refinement factor   
+    /// @param    level_adjust difference: actual mesh level - tree level
 { 
   ++Node3K::num_nodes_;
 
@@ -69,7 +37,8 @@ Node3K::Node3K(int k, int level_adjust)
 
 // Delete the node and all descendents
 
-Node3K::~Node3K() 
+Node3K::~Node3K()
+///
 { 
   --Node3K::num_nodes_;
 
@@ -99,6 +68,9 @@ Node3K::~Node3K()
 //----------------------------------------------------------------------
 
 inline Node3K * Node3K::child (int ix, int iy, int iz) 
+/// @param    ix        Index 0 <= ix < k of cell in grid block
+/// @param    iy        Index 0 <= iy < k of cell in grid block
+/// @param    iz        Index 0 <= iz < k of cell in grid block
 { 
   if (child_==NULL) return NULL;
   return child_[index_(ix,iy,iz)]; 
@@ -107,6 +79,7 @@ inline Node3K * Node3K::child (int ix, int iy, int iz)
 //----------------------------------------------------------------------
 
 inline Node3K * Node3K::neighbor (face_type face) 
+/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
 { 
   return neighbor_[face]; 
 }
@@ -114,6 +87,10 @@ inline Node3K * Node3K::neighbor (face_type face)
 //----------------------------------------------------------------------
 
 inline Node3K * Node3K::cousin (face_type face, int ix, int iy, int iz) 
+/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
+/// @param    ix        Index 0 <= ix < k of cell in grid block
+/// @param    iy        Index 0 <= iy < k of cell in grid block
+/// @param    iz        Index 0 <= iz < k of cell in grid block
 { 
   if (neighbor_[face] && neighbor_[face]->child(ix,iy,iz)) {
     return neighbor_[face]->child(ix,iy,iz);
@@ -125,6 +102,7 @@ inline Node3K * Node3K::cousin (face_type face, int ix, int iy, int iz)
 //----------------------------------------------------------------------
 
 inline Node3K * Node3K::parent () 
+///
 { 
   return parent_; 
 }
@@ -136,6 +114,9 @@ inline void make_neighbors
  Node3K * node_2, 
  face_type face_1
  )
+/// @param    node_1    First neighbor node pointer 
+/// @param    node_2    Second neighbor node pointer
+/// @param    face_1    Face 0 <= face_1 < 6 of node_1 that is adjacent to node_2
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
   if (node_2 != NULL) {
@@ -144,10 +125,7 @@ inline void make_neighbors
   }
 }
 
-
 //----------------------------------------------------------------------
-
-// Create empty child nodes
 
 int Node3K::refine 
 (
@@ -160,6 +138,19 @@ int Node3K::refine
  int max_level,
  bool full_nodes
  )
+/// @param    level_array Array of levels to refine to
+/// @param    ndx       x-dimension of level_array[]
+/// @param    ndy       y-dimension of level_array[]
+/// @param    ndz       z-dimension of level_array[]
+/// @param    nxm       Lowest x-index of array for this node
+/// @param    nxp       Upper bound on x-index of array for this node
+/// @param    nym       Lowest y-index of array for this node
+/// @param    nyp       Upper bound on y-index of array for this node
+/// @param    nzm       Lowest z-index of array for this node
+/// @param    nzp       Upper bound on z-index of array for this node
+/// @param    level     Level of this node
+/// @param    max_level Maximum refinement level
+/// @param    full_nodes Whether nodes always have a full complement of children
 {
 
   int depth = 0;
@@ -322,6 +313,7 @@ int Node3K::refine
 //----------------------------------------------------------------------
 
 void Node3K::create_children_()
+///
 {
   for (int iz=0; iz<k_; iz++) {
     for (int iy=0; iy<k_; iy++) {
@@ -335,6 +327,7 @@ void Node3K::create_children_()
 //----------------------------------------------------------------------
 
 void Node3K::update_children_()
+///
 {
   for (int iz=0; iz<k_; iz++) {
     for (int iy=0; iy<k_; iy++) {
@@ -356,6 +349,9 @@ void Node3K::create_child_(int ix, int iy, int iz)
 //----------------------------------------------------------------------
 
 void Node3K::update_child_ (int ix, int iy, int iz)
+/// @param    ix        Index 0 <= ix < k of cell in grid block
+/// @param    iy        Index 0 <= iy < k of cell in grid block
+/// @param    iz        Index 0 <= iz < k of cell in grid block
 {
   if (child(ix,iy,iz)) {
 
@@ -397,7 +393,6 @@ void Node3K::update_child_ (int ix, int iy, int iz)
       make_neighbors (child (ix,iy,iz), cousin (YP,ix,0,iz),YP);
     }
 
-
     // ZM-face neighbor
 
     if (iz > 0) {
@@ -413,7 +408,6 @@ void Node3K::update_child_ (int ix, int iy, int iz)
     } else {
       make_neighbors (child (ix,iy,iz), cousin (ZP,ix,iy,0),ZP);
     }
-
   }
 }
 
@@ -422,6 +416,8 @@ void Node3K::update_child_ (int ix, int iy, int iz)
 // Perform a pass of trying to remove level-jumps 
 
 void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
+/// @param    refined_tree Whether tree has been refined
+/// @param    full_nodes   Whether nodes always have a full complement of children
 {
   int nx = k_;
   int ny = k_;
@@ -655,6 +651,7 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
 // Perform a pass of trying to optimize uniformly-refined nodes
 
 void Node3K::optimize_pass(bool & refined_tree)
+/// @param    refined_tree Whether tree has been refined
 {
 
   bool single_children = true;
@@ -733,6 +730,20 @@ void Node3K::fill_image
  int line_width,
  int ia
  )
+/// @param    image     Array of colormap indices
+/// @param    ndx       x-dimension of image[]
+/// @param    ndy       y-dimension of image[]
+/// @param    ndz       z-dimension of image[]
+/// @param    nxm       Lowest x-index of image[] for this node
+/// @param    nxp       Upper bound on x-index of image[] for this node
+/// @param    nym       Lowest y-index of image[] for this node
+/// @param    nyp       Upper bound on y-index of image[] for this node
+/// @param    nzm       Lowest z-index of image[] for this node
+/// @param    nzp       Upper bound on z-index of image[] for this node
+/// @param    level     Level of this node
+/// @param    num_levels Total number of levels
+/// @param    line_width Width of lines bounding nodes
+/// @param    ia        Axis along which center slice is taken
 {
 
   level += level_adjust_;
@@ -759,7 +770,8 @@ void Node3K::fill_image
     }
   }
 
-  //   // Draw border
+  // Draw border
+
   for (int k=0; k < line_width; k++) {
 
     for (ix=nm3[jx]; ix<=np3[jx]; ix++) {
@@ -823,6 +835,14 @@ void Node3K::geomview
  double nym, double nyp,
  double nzm, double nzp,
  bool full )
+/// @param    fpr       Open file pointer for geomview file
+/// @param    nxm       Lowest x-index of image[] for this node
+/// @param    nxp       Upper bound on x-index of image[] for this node
+/// @param    nym       Lowest y-index of image[] for this node
+/// @param    nyp       Upper bound on y-index of image[] for this node
+/// @param    nzm       Lowest z-index of image[] for this node
+/// @param    nzp       Upper bound on z-index of image[] for this node
+/// @param    full      Whether this is a standalone geomview node file or part of a tree
 {
 
   if (full) {
