@@ -1,43 +1,10 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     amr_tree16.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-09-18
+/// @brief    Implementation of the Tree16 class
 
 #include <stdio.h>
 #include "cello.h"
@@ -47,9 +14,9 @@
 const bool debug = false;
 
 Tree16::Tree16()
+  ///   
   : levels_(0),
     root_(new Node16())
-    
 {
 }
 
@@ -61,6 +28,11 @@ void Tree16::refine
  int max_level,
  bool is_full
  )
+/// @param    level_array Array of levels to refine to
+/// @param    nd0       x-dimension of level_array[]
+/// @param    nd1       y-dimension of level_array[]
+/// @param    max_level Maximum refinement level
+/// @param    is_full   Whether nodes always have a full complement of children
 {
   levels_ = root_->refine(level_array,nd0,nd1,0,nd0,0,nd1,0,max_level,is_full);
   if (debug) printf ("%d\n",levels_);
@@ -68,6 +40,7 @@ void Tree16::refine
 
 // Remove level-jumps 
 void Tree16::balance(bool is_full)
+/// @param    is_full   Whether nodes always have a full complement of children
 {
   // Repeatedly balance
   int pass = 0;
@@ -83,6 +56,7 @@ void Tree16::balance(bool is_full)
 
 // Replace uniformly-refined patch with single node
 void Tree16::optimize()
+///
 {
   // Repeatedly optimize
   int pass = 0;
@@ -99,6 +73,8 @@ void Tree16::optimize()
 /// Create an hdf5 file of tree, assuming given source bitmap size
 /// 
 float * Tree16::create_image (int n,int line_width)
+/// @param    n         Size of the image along each dimension
+/// @param    line_width Width of lines bounding nodes
 {
   printf ("n = %d\n",n);
   float * image = new float [n*n];

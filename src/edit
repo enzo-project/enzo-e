@@ -1,5 +1,5 @@
-emacs -nw ./Amr/tree/amr_node16.cpp ./TEMPLATE/template.cpp
-emacs -nw ./Amr/tree/amr_tree16.cpp ./TEMPLATE/template.cpp
+# emacs -nw ./Amr/tree/amr_node16.cpp ./TEMPLATE/template.cpp
+# emacs -nw ./Amr/tree/amr_tree16.cpp ./TEMPLATE/template.cpp
 emacs -nw ./Amr/tree/amr_node3k.cpp ./TEMPLATE/template.cpp
 emacs -nw ./Amr/tree/amr_node4.cpp ./TEMPLATE/template.cpp
 emacs -nw ./Amr/tree/amr_tree3k.cpp ./TEMPLATE/template.cpp

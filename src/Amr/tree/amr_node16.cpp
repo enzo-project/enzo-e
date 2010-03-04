@@ -3,7 +3,7 @@
 
 /// @file     amr_node16.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     
+/// @date     2009-09-18
 /// @brief    Node class for 4^2-trees Tree16
 
 #include <stdio.h>
@@ -68,22 +68,22 @@ Node16::~Node16()
 }
 
 inline Node16 * Node16::child (int ix, int iy) 
-/// @param    ix Index 0 <= ix < 3 of cell in grid block
-/// @param    iy Index 0 <= iy < 3 of cell in grid block
+/// @param    ix        Index 0 <= ix < 3 of cell in grid block
+/// @param    iy        Index 0 <= iy < 3 of cell in grid block
 { 
   return child_[ix][iy]; 
 }
 
 inline Node16 * Node16::neighbor (face_type face) 
-/// @param    face Face 0 <= (face = [XYZ][MP]) < 6
+/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
 { 
   return neighbor_[face]; 
 }
 
 inline Node16 * Node16::cousin (face_type face, int ix, int iy) 
-/// @param    face Face 0 <= (face = [XYZ][MP]) < 6
-/// @param    ix Index 0 <= ix < 3 of cell in grid block
-/// @param    iy Index 0 <= iy < 3 of cell in grid block
+/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
+/// @param    ix        Index 0 <= ix < 3 of cell in grid block
+/// @param    iy        Index 0 <= iy < 3 of cell in grid block
 { 
   if (neighbor_[face] && neighbor_[face]->child_[ix][iy]) {
     return neighbor_[face]->child_[ix][iy];
@@ -105,9 +105,9 @@ inline void make_neighbors
  Node16 * node_2, 
  face_type face_1
  )
-/// @param    node_1 First neighbor node pointer 
-/// @param    node_2 Second neighbor node pointer
-/// @param    face_1 Face 0 <= face_1 < 6 of node_1 that is adjacent to node_2
+/// @param    node_1    First neighbor node pointer 
+/// @param    node_2    Second neighbor node pointer
+/// @param    face_1    Face 0 <= face_1 < 6 of node_1 that is adjacent to node_2
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
   if (node_2 != NULL) node_2->neighbor_[(face_1+2)%4] = node_1;
@@ -123,17 +123,16 @@ int Node16::refine
  int max_level,
  bool full_nodes
  )
-/// @param    level_array @@@
-/// @param    ndx
-/// @param    ndx
-/// @param    ndy
-/// @param    lowx
-/// @param    upx  
-/// @param    lowy
-/// @param    upy
-/// @param    level
-/// @param    max_level
-/// @param    full_nodes
+/// @param    level_array Array of levels to refine to
+/// @param    ndx       x-dimension of level_array[]
+/// @param    ndy       y-dimension of level_array[]
+/// @param    lowx      Lowest x-index of array for this node
+/// @param    upx       Upper bound on x-index of array for this node
+/// @param    lowy      Lowest y-index of array for this node
+/// @param    upy       Upper bound on y-index of array for this node
+/// @param    level     Level of this node
+/// @param    max_level Maximum refinement level
+/// @param    full_nodes Whether nodes always have a full complement of children
 {
   int depth = 0;
   if ( level < max_level && lowx < upx-1 && lowy < upy-1 ) {
@@ -231,6 +230,7 @@ int Node16::refine
 }
 
 void Node16::create_children_()
+///
 {
   for (int ix=0; ix<4; ix++) {
     for (int iy=0; iy<4; iy++) {
@@ -240,6 +240,7 @@ void Node16::create_children_()
 }
 
 void Node16::update_children_()
+///
 {
   for (int ix=0; ix<4; ix++) {
     for (int iy=0; iy<4; iy++) {
@@ -249,11 +250,15 @@ void Node16::update_children_()
 }
 
 void Node16::create_child_(int ix, int iy)
+/// @param    ix        Index 0 <= ix < 3 of cell in grid block
+/// @param    iy        Index 0 <= iy < 3 of cell in grid block
 {
   child_[ix][iy] = new Node16();
 }
 
 void Node16::update_child_ (int ix, int iy)
+/// @param    ix        Index 0 <= ix < 3 of cell in grid block
+/// @param    iy        Index 0 <= iy < 3 of cell in grid block
 {
   if (child(ix,iy)) {
 
@@ -295,6 +300,8 @@ void Node16::update_child_ (int ix, int iy)
 
 // Perform a pass of trying to remove level-jumps 
 void Node16::balance_pass(bool & refined_tree, bool full_nodes)
+/// @param    refined_tree Whether tree has been refined
+/// @param    full_nodes Whether nodes always have a full complement of children
 {
   if (full_nodes) {
 
@@ -421,6 +428,7 @@ void Node16::balance_pass(bool & refined_tree, bool full_nodes)
 }
   // Perform a pass of trying to optimize uniformly-refined nodes
 void Node16::optimize_pass(bool & refined_tree)
+/// @param    refined_tree Whether tree has been refined
 {
 
   bool single_children = true;
@@ -487,6 +495,16 @@ void Node16::fill_image
  int num_levels,
  int line_width
  )
+/// @param    image     Array of colormap indices
+/// @param    ndx       x-dimension of image[]
+/// @param    ndy       y-dimension of image[]
+/// @param    lowx      Lowest x-index of image[] for this node
+/// @param    upx       Upper bound on x-index of image[] for this node
+/// @param    lowy      Lowest y-index of image[] for this node
+/// @param    upy       Upper bound on y-index of image[] for this node
+/// @param    level     Level of this node
+/// @param    num_levels Total number of levels
+/// @param    line_width Width of lines bounding nodes
 {
   int ix,iy,i;
 
@@ -523,10 +541,8 @@ void Node16::fill_image
       image[(ix+k) + ndx*iy] = 0;
     }
   }
-    
 
   // Recurse
-
 
   int dx = (upx - lowx)/4;
   int dy = (upy - lowy)/4;
@@ -537,7 +553,10 @@ void Node16::fill_image
     for (int iy=0; iy<4; iy++) {
       if (child_[ix][iy]) {
 	child_[ix][iy]->fill_image 
-	  (image,ndx,ndy,ix4[ix],ix4[ix+1], iy4[iy],iy4[iy+1], level + 1, num_levels,line_width);
+	  (image,ndx,ndy,
+	   ix4[ix],ix4[ix+1], 
+	   iy4[iy],iy4[iy+1], 
+	   level + 1, num_levels, line_width);
       }
     }
   }
