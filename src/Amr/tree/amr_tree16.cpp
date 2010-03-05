@@ -76,7 +76,6 @@ float * Tree16::create_image (int n,int line_width)
 /// @param    n         Size of the image along each dimension
 /// @param    line_width Width of lines bounding nodes
 {
-  printf ("n = %d\n",n);
   float * image = new float [n*n];
   
   root_->fill_image(image,n,n,0,n-1,0,n-1,0,levels_,line_width);

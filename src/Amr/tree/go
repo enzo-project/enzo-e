@@ -22,24 +22,24 @@ endif
 
 if ($new == 1) then
    foreach dim (2)
-   foreach tree (2)
-     foreach full (0 1)
-       foreach type (0 1 2)
-         if ($dim == 2) then
+      foreach tree (2 4)
+        foreach full (0 1)
+          foreach type (0 1 2)
+            if ($dim == 2) then
 #            set file = "tree$dim-$tree-f$full-$type.hdf5"
-            set file = "tree$dim-f$full-$type-old.hdf5"
-            h5topng -c $colormap_dir/$color $file
-            mv $file.png k$tree-f$full-t$type-d$dim.png
-         else
-	   foreach axis (x y z)
-              set file = "tree$dim-$tree-f$full-$type-$axis.hdf5"
-              h5topng -c $colormap_dir/$color $file
-              mv $file.png k$tree-f$full-t$type-d$dim-a$axis.png
-           end
-         endif 
-       end
-     end
-   end
-   end
-endif
+               set file = "tree$tree-f$full-$type-old.hdf5"
+               h5topng -c $colormap_dir/$color $file
+               mv $file.png k$tree-f$full-t$type-d$dim.png
+            else
+              foreach axis (x y z)
+                 set file = "tree$dim-$tree-f$full-$type-$axis.hdf5"
+                 h5topng -c $colormap_dir/$color $file
+                 mv $file.png k$tree-f$full-t$type-d$dim-a$axis.png
+              end # foreach
+            endif # dim
+          end # type
+        end # full
+      end # tree
+   end # dim
+endif # new
 
