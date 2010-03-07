@@ -1,10 +1,10 @@
 # emacs -nw ./Amr/tree/amr_node16.cpp ./TEMPLATE/template.cpp
 # emacs -nw ./Amr/tree/amr_tree16.cpp ./TEMPLATE/template.cpp
-emacs -nw ./Amr/tree/amr_node3k.cpp ./TEMPLATE/template.cpp
-emacs -nw ./Amr/tree/amr_node4.cpp ./TEMPLATE/template.cpp
-emacs -nw ./Amr/tree/amr_tree3k.cpp ./TEMPLATE/template.cpp
-emacs -nw ./Amr/tree/test_tree.cpp ./TEMPLATE/template.cpp
-emacs -nw ./Amr/tree/amr_tree4.cpp ./TEMPLATE/template.cpp
+#emacs -nw ./Amr/tree/amr_node3k.cpp ./TEMPLATE/template.cpp
+#emacs -nw ./Amr/tree/amr_node4.cpp ./TEMPLATE/template.cpp
+#emacs -nw ./Amr/tree/amr_tree3k.cpp ./TEMPLATE/template.cpp
+#emacs -nw ./Amr/tree/test_tree.cpp ./TEMPLATE/template.cpp
+#emacs -nw ./Amr/tree/amr_tree4.cpp ./TEMPLATE/template.cpp
 emacs -nw ./Amr/tree/amr_node2k.cpp ./TEMPLATE/template.cpp
 emacs -nw ./Amr/tree/amr_tree2k.cpp ./TEMPLATE/template.cpp
 emacs -nw ./Amr/tree/test_tree_k.cpp ./TEMPLATE/template.cpp

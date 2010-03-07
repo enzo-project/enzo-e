@@ -20,7 +20,6 @@ Tree16::Tree16()
 {
 }
 
-// Refine down to array
 void Tree16::refine
 (
  const int * level_array, 
@@ -38,7 +37,6 @@ void Tree16::refine
   if (debug) printf ("%d\n",levels_);
 }
 
-// Remove level-jumps 
 void Tree16::balance(bool is_full)
 /// @param    is_full   Whether nodes always have a full complement of children
 {
@@ -54,7 +52,6 @@ void Tree16::balance(bool is_full)
   printf ("passes = %d\n",pass);
 }
 
-// Replace uniformly-refined patch with single node
 void Tree16::optimize()
 ///
 {
@@ -70,8 +67,6 @@ void Tree16::optimize()
   printf ("passes = %d\n",pass);
 }
 
-/// Create an hdf5 file of tree, assuming given source bitmap size
-/// 
 float * Tree16::create_image (int n,int line_width)
 /// @param    n         Size of the image along each dimension
 /// @param    line_width Width of lines bounding nodes

@@ -7,6 +7,7 @@
 /// @file     amr_tree16.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-09-18
+/// @bug      Implementations of Tree4 and Tree16 are essentially identical
 /// @brief    Declaration of the Tree16 class 
 
 /// @def      MAX_LEVELS
