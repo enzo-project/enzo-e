@@ -1,43 +1,10 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     amr_node4.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     
+/// @brief    Node class for 2^2-trees Tree4
 
 #include <stdio.h>
 #include <assert.h>
@@ -50,7 +17,7 @@ const bool debug = false;
 
 Node4::Node4(int level_adjust) 
   : level_adjust_(level_adjust)
-
+    /// @param    level_adjust difference: actual mesh level - tree level
 { 
   ++Node4::num_nodes_;
 
@@ -69,7 +36,8 @@ Node4::Node4(int level_adjust)
 
 // Delete the node and all descendents
 
-Node4::~Node4() 
+Node4::~Node4()
+///
 { 
   --Node4::num_nodes_;
 
@@ -105,16 +73,20 @@ Node4::~Node4()
 }
 
 inline Node4 * Node4::child (corner_type corner) 
+/// @param    corner     Corner [UL|DL|UR|DR] of the child node to return
 { 
   return child_[corner]; 
 }
 
 inline Node4 * Node4::neighbor (face_type face) 
+/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
 { 
   return neighbor_[face]; 
 }
 
 inline Node4 * Node4::cousin (face_type face, corner_type corner)
+/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
+/// @param    corner     Corner [UL|DL|UR|DR] of the child node to return
 { 
   if (neighbor_[face] && neighbor_[face]->child_[corner]) {
     return neighbor_[face]->child_[corner];
@@ -123,7 +95,8 @@ inline Node4 * Node4::cousin (face_type face, corner_type corner)
   }
 }
 
-inline Node4 * Node4::parent () 
+inline Node4 * Node4::parent ()
+///
 { 
   return parent_; 
 }
@@ -135,13 +108,13 @@ inline void make_neighbors
  Node4 * node_2,
  face_type face_1
  )
+/// @param    node_1    First neighbor node pointer 
+/// @param    node_2    Second neighbor node pointer
+/// @param    face_1    Face 0 <= face_1 < 6 of node_1 that is adjacent to node_2
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
   if (node_2 != NULL) node_2->neighbor_[(face_1+2)%4] = node_1;
 }
-
-
-// Create 4 empty child nodes
 
 int Node4::refine 
 (
@@ -153,6 +126,16 @@ int Node4::refine
  int max_level,
  bool full_nodes
  )
+/// @param    level_array Array of levels to refine to
+/// @param    nd0       x-dimension of level_array[]
+/// @param    nd1       y-dimension of level_array[]
+/// @param    low0      Lowest x-index of array for this node
+/// @param    up0       Upper bound on x-index of array for this node
+/// @param    low1      Lowest y-index of array for this node
+/// @param    up1       Upper bound on y-index of array for this node
+/// @param    level     Level of this node
+/// @param    max_level Maximum refinement level
+/// @param    full_nodes Whether nodes always have a full complement of children
 {
   int depth = 0;
 
@@ -269,6 +252,7 @@ int Node4::refine
 }
 
 void Node4::create_children_()
+///
 {
   create_child_(UL);
   create_child_(DL);
@@ -277,6 +261,7 @@ void Node4::create_children_()
 }
 
 void Node4::update_children_()
+///
 {
   update_child_ (UL);
   update_child_ (DL);
@@ -285,11 +270,13 @@ void Node4::update_children_()
 }
 
 void Node4::create_child_(corner_type corner)
+/// @param    corner     Corner [UL|DL|UR|DR] of the child node to return
 {
   child_[corner] = new Node4();
 }
 
 void Node4::update_child_ (corner_type corner)
+/// @param    corner     Corner [UL|DL|UR|DR] of the child node to return
 {
   if (child(corner)) {
 

@@ -7,9 +7,11 @@
 /// @brief    Node class for 4^2-trees Tree16
 
 #include <stdio.h>
-#include "cello.h"
-#include "amr_node16.hpp"
 #include <assert.h>
+
+#include "cello.h"
+
+#include "amr_node16.hpp"
 
 const bool debug = false;
 

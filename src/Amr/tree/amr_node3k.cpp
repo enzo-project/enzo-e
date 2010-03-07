@@ -909,6 +909,7 @@ void Node3K::geomview
 //----------------------------------------------------------------------
 
 void Node3K::allocate_neighbors_ ()
+///
 {
   neighbor_ = new Node3K * [num_faces_()];
   for (int i=0; i<num_faces_(); i++) {
@@ -919,6 +920,7 @@ void Node3K::allocate_neighbors_ ()
 //----------------------------------------------------------------------
 
 void Node3K::deallocate_neighbors_ ()
+///
 {
   delete [] neighbor_;
   neighbor_ = NULL;
@@ -928,6 +930,7 @@ void Node3K::deallocate_neighbors_ ()
 //----------------------------------------------------------------------
 
 void Node3K::allocate_children_ ()
+///
 {
   child_    = new Node3K * [num_children_()];
   for (int i=0; i<num_children_(); i++) {
@@ -939,6 +942,7 @@ void Node3K::allocate_children_ ()
 //----------------------------------------------------------------------
 
 void Node3K::deallocate_children_ ()
+///
 {
   if (child_) {
     for (int i=0; i<num_children_(); i++) {

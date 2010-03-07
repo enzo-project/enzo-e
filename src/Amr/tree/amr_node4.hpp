@@ -11,7 +11,9 @@
 /// @brief    Interface for the Node4 class
 
 #include <stdlib.h>
+
 #include "cello.h"
+
 #include "amr_node.hpp"
 
 class Tree4;
