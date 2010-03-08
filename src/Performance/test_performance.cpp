@@ -254,7 +254,7 @@ int main(int argc, char ** argv)
 
   delete performance;
 
-  Memory::print();
+  Memory::get_instance()->print();
 
   unit_close();
 }

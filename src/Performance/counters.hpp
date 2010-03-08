@@ -23,21 +23,23 @@ public: // interface
   /// Initialize a Counters object
   Counters(size_t num_attributes, size_t num_counters)
     {
-      Memory::begin_group(component_performance);
+      Memory * memory = Memory::get_instance();
+      memory->begin_group(component_performance);
       a_  = new int       [num_attributes];
       c_  = new long long [num_counters];
       dc_ = new long long [num_counters];
-      Memory::end_group(component_performance);
+      memory->end_group(component_performance);
     }
 
   /// Delete a Counters object
   ~Counters()
     {
-      Memory::begin_group(component_performance);
+      Memory * memory = Memory::get_instance();
+      memory->begin_group(component_performance);
       delete [] a_;
       delete [] c_;
       delete [] dc_;
-      Memory::end_group(component_performance);
+      memory->end_group(component_performance);
     }
 
 

@@ -67,10 +67,9 @@
 int main(int argc, char ** argv)
 {
 
-  Memory::initialize();
+  Memory * memory = Memory::get_instance();
 
   printf ("start\n"); fflush(stdout);
-  Memory::reset();
 
   unit_class ("Memory");
   unit_open();
@@ -108,7 +107,8 @@ int main(int argc, char ** argv)
   NEW_F2(size);
   NEW_F3(size);
 
-  unit_assert (Memory::bytes() == size);
+  printf ("%d %d\n",memory->bytes(), size);
+  unit_assert (memory->bytes() == size);
   
   //----------------------------------------------------------------------
   // deallocate()
@@ -119,7 +119,7 @@ int main(int argc, char ** argv)
   DEL_F1(size);
   DEL_F3(size);
 
-  unit_assert (Memory::bytes() == size);
+  unit_assert (memory->bytes() == size);
 
   DEL_F2(size);
   NEW_F1(size);
@@ -131,7 +131,7 @@ int main(int argc, char ** argv)
   DEL_F3(size);
   DEL_F2(size);
 
-  unit_assert (Memory::bytes() == size);
+  unit_assert (memory->bytes() == size);
 
   Timer timer;
   timer.start();
@@ -154,7 +154,7 @@ int main(int argc, char ** argv)
   printf ("  new/delete  per sec = %g\n",num_alloc/timer.value());
   
 
-  unit_assert (Memory::bytes() == size);
+  unit_assert (memory->bytes() == size);
 
   //----------------------------------------------------------------------
   // begin_group(), end_group()
@@ -168,54 +168,54 @@ int main(int argc, char ** argv)
   unsigned group_test_1 = 1;
   unsigned group_test_2 = 2;
 
-  Memory::new_group (group_test_1,"Test_1");
-  Memory::new_group (group_test_2,"Test_2");
+  memory->new_group (group_test_1,"Test_1");
+  memory->new_group (group_test_2,"Test_2");
 
-  Memory::begin_group(group_test_1);
+  memory->begin_group(group_test_1);
 
-  unit_assert (strcmp(Memory::current_group(),"Test_1") == 0);
+  unit_assert (strcmp(memory->current_group(),"Test_1") == 0);
 
-  int handle_1 = Memory::current_handle();
+  int handle_1 = memory->current_handle();
 
   NEW_F1(size_test_1);
   NEW_F3(size_test_1);
 
-  unit_assert (Memory::bytes(handle_1) == size_test_1);
-  unit_assert (Memory::bytes() == size + size_test_1);
+  unit_assert (memory->bytes(handle_1) == size_test_1);
+  unit_assert (memory->bytes() == size + size_test_1);
   
   DEL_F1(size_test_1);
   DEL_F3(size_test_1);
 
-  unit_assert (Memory::bytes(handle_1) == size_test_1);
-  unit_assert (Memory::bytes() == size);
+  unit_assert (memory->bytes(handle_1) == size_test_1);
+  unit_assert (memory->bytes() == size);
 
-  Memory::end_group(group_test_1);
+  memory->end_group(group_test_1);
 
   // Group 1
 
-  Memory::begin_group(group_test_2);
+  memory->begin_group(group_test_2);
 
-  unit_assert (strcmp(Memory::current_group(),"Test_2") == 0);
+  unit_assert (strcmp(memory->current_group(),"Test_2") == 0);
 
-  int handle_2 = Memory::current_handle();
+  int handle_2 = memory->current_handle();
 
   NEW_F2(size_test_2);
   NEW_F3(size_test_2);
 
-  unit_assert (Memory::bytes(handle_1) == size_test_1);
-  unit_assert (Memory::bytes(handle_2) == size_test_2);
-  unit_assert (Memory::bytes() == size + size_test_1 + size_test_2);
+  unit_assert (memory->bytes(handle_1) == size_test_1);
+  unit_assert (memory->bytes(handle_2) == size_test_2);
+  unit_assert (memory->bytes() == size + size_test_1 + size_test_2);
   
-  Memory::end_group(group_test_2);
+  memory->end_group(group_test_2);
 
-  unit_assert (strcmp(Memory::current_group(),"\0") == 0);
+  unit_assert (strcmp(memory->current_group(),"\0") == 0);
 
   DEL_F2(size_test_2);
   DEL_F3(size_test_2);
  
-  unit_assert (Memory::bytes(handle_1) == size_test_1);
-  unit_assert (Memory::bytes(handle_2) == size_test_2);
-  unit_assert (Memory::bytes() == size);
+  unit_assert (memory->bytes(handle_1) == size_test_1);
+  unit_assert (memory->bytes(handle_2) == size_test_2);
+  unit_assert (memory->bytes() == size);
 
 
   // curr_group()
@@ -254,7 +254,7 @@ int main(int argc, char ** argv)
   unit_func ("num_delete()");
   unit_assert(0); //FAILS
 
-  Memory::print();
+  memory->print();
 
   unit_close();
 }

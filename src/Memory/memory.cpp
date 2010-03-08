@@ -53,6 +53,8 @@
 #include "error.hpp"
 #include "memory.hpp"
 
+Memory Memory::instance_;
+
 /** 
  *********************************************************************
  *
@@ -102,7 +104,7 @@
 // FUNCTIONS
 //======================================================================
  
-void Memory::initialize() throw ()
+void Memory::initialize_() throw ()
 /**
  *********************************************************************
  *
@@ -119,6 +121,16 @@ void Memory::initialize() throw ()
   is_active_ = true;
   group_names_[0] = strdup("");
   group_names_[1] = strdup("memory");
+
+  for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
+    group_names_ [i] = 0;
+    available_   [i] = 0;
+    bytes_       [i] = 0;
+    bytes_high_  [i] = 0;
+    new_calls_   [i] = 0;
+    delete_calls_[i] = 0;
+  }
+
 #endif
 }
 
@@ -555,17 +567,17 @@ void Memory::reset() throw()
 
 #ifdef CONFIG_USE_MEMORY
 
-bool Memory::is_active_  =  false;
+// bool Memory::is_active_  =  false;
 
-std::stack<memory_group_handle> Memory::curr_group_;
+// std::stack<memory_group_handle> Memory::curr_group_;
 
-char *    Memory::group_names_ [MEMORY_MAX_NUM_GROUPS + 1] = {0};
+// char *    Memory::group_names_ [MEMORY_MAX_NUM_GROUPS + 1] = {0};
 
-long long Memory::available_   [MEMORY_MAX_NUM_GROUPS + 1] = {0};
-long long Memory::bytes_       [MEMORY_MAX_NUM_GROUPS + 1] = {0};
-long long Memory::bytes_high_  [MEMORY_MAX_NUM_GROUPS + 1] = {0};
-long long Memory::new_calls_   [MEMORY_MAX_NUM_GROUPS + 1] = {0};
-long long Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS + 1] = {0};
+// long long Memory::available_   [MEMORY_MAX_NUM_GROUPS + 1] = {0};
+// long long Memory::bytes_       [MEMORY_MAX_NUM_GROUPS + 1] = {0};
+// long long Memory::bytes_high_  [MEMORY_MAX_NUM_GROUPS + 1] = {0};
+// long long Memory::new_calls_   [MEMORY_MAX_NUM_GROUPS + 1] = {0};
+// long long Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS + 1] = {0};
 
 #endif
 
@@ -574,8 +586,7 @@ long long Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS + 1] = {0};
 #ifdef CONFIG_USE_MEMORY
 void *operator new (size_t bytes) throw (std::bad_alloc)
 {
-  size_t p = (size_t) Memory::allocate(bytes);
-
+  size_t p = (size_t) Memory::get_instance()->allocate(bytes);
 
   // Return pointer to new storage
 
@@ -586,8 +597,7 @@ void *operator new (size_t bytes) throw (std::bad_alloc)
 
 void *operator new [] (size_t bytes) throw (std::bad_alloc)
 {
-  size_t p = (size_t) Memory::allocate(bytes);
-
+  size_t p = (size_t) Memory::get_instance()->allocate(bytes);
 
   // Return pointer to new storage
 
@@ -601,7 +611,7 @@ void operator delete (void *p) throw ()
 {
   if (p==0) return;
 
-  Memory::deallocate(p);
+  Memory::get_instance()->deallocate(p);
 
 }
 
@@ -611,6 +621,6 @@ void operator delete [] (void *p) throw ()
 {
   if (p==0) return;
 
-  Memory::deallocate(p);
+  Memory::get_instance()->deallocate(p);
 }
 #endif /* CONFIG_USE_MEMORY */
