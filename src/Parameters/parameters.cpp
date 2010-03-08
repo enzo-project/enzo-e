@@ -157,7 +157,8 @@ void Parameters::evaluate_scalar
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_scalar_expr()) throw ExceptionParametersBadType();
-  if (param != NULL) {       param->evaluate_scalar(param->value_expr_
+  if (param != NULL) {
+    param->evaluate_scalar(param->value_expr_,n,result,x,y,z,t);
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
