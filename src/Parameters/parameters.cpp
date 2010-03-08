@@ -1,83 +1,11 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
 
-/** 
- *********************************************************************
- *
- * @file      parameters.cpp
- * @brief     Read in a parameter file and access parameter values
- * @author    James Bordner
- * @date      Thu Jul  9 15:38:43 PDT 2009
- * @bug       Probable memory leaks
- * @note      
- *
- * DESCRIPTION 
- * 
- *    Class Parameters to read in a parameter file and access
- *    parameter values
- *
- * PACKAGES
- *
- *    NONE
- * 
- * INCLUDES
- *  
- *    parameters.hpp
- *
- * PUBLIC FUNCTIONS
- *  
- *    Parameters::Parameters()
- *    Parameters::~Parameters()
- *    Parameters::read()
- *    Parameters::value_string()
- *    Parameters::value_scalar()
- *    Parameters::value_integer()
- *    Parameters::value_logical()
- *
- * PRIVATE FUCTIONS
- *  
- * $Id$
- *
- *********************************************************************
- */
+/// @file     parameters.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Thu Jul  9 15:38:43 PDT 2009
+/// @bug      Probable memory leaks
+/// @brief    Read in a parameter file and access parameter values
 
 #include <stdlib.h>
 #include <string.h>
@@ -85,40 +13,20 @@
 #include "error.hpp"
 #include "parameters.hpp"
 
-/**
- *********************************************************************
- *
- * @param   
- * @return  
- *
- * This function creates an empty Parameters object
- *
- *********************************************************************
- */
-
 Parameters::Parameters() 
   throw()
   :
   current_group_(""),
   current_subgroup_(""),
   parameter_list_(NULL)
+  ///
 {
 }
 
-/**
- *********************************************************************
- *
- * @param   
- * @return  
- *
- * This function deletes a Parameters object
- *
- *********************************************************************
- */
-
 Parameters::~Parameters()
+///
 {
-  // Iterate over all parameters 
+  // Iterate over all parameters, deleting their values
 
   std::map<std::string,Param *>::iterator it_param;
   for (it_param =  parameter_map_.begin();
@@ -127,24 +35,10 @@ Parameters::~Parameters()
 
     delete it_param->second;
   }
-
 }
 
-/**
- *********************************************************************
- *
- * @param   file_pointer: An opened input parameter file or stdin
- * @return  There is no return value
- *
- * This function reads in parameters
- *
- *********************************************************************
- */
-
-
-void
-Parameters::read ( FILE * file_pointer )
-
+void Parameters::read ( FILE * file_pointer )
+/// @param    file_pointer An opened input parameter file or stdin
 {
   parameter_list_ = cello_parameters_read(file_pointer);
 
@@ -179,21 +73,8 @@ Parameters::read ( FILE * file_pointer )
   }
 }
 
-/**
- *********************************************************************
- *
- * @param   file_pointer: An opened output parameter file or stdout
- * @return  There is no return value
- *
- * This function writes parameters to the file
- *
- *********************************************************************
- */
-
-
-void
-Parameters::write ( FILE * file_pointer )
-
+void Parameters::write ( FILE * file_pointer )
+/// @param    file_pointer An opened output parameter file or stdout
 {
   std::map<std::string,Param *>::iterator it_param;
 
@@ -206,111 +87,54 @@ Parameters::write ( FILE * file_pointer )
   }
 }
 
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the integer value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the integer value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
-
-int
-Parameters::value_integer 
+int Parameters::value_integer 
 ( std::string parameter,
   int         deflt ) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   deflt     Default parameter value
+/// @return  Return integer parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_integer()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_integer_ : deflt;
 }
 
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the scalar value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the scalar value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
 
-double
-Parameters::value_scalar 
+double Parameters::value_scalar 
 ( std::string parameter,
   double      deflt ) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   deflt     Default parameter value
+/// @return  Return scalar (double) parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_scalar_ : deflt;
 }
 
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the logical value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the logical value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
-
-bool
-Parameters::value_logical 
+bool Parameters::value_logical 
 ( std::string parameter,
   bool        deflt ) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   deflt     Default parameter value
+/// @return  Return logical parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_logical()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_logical_ : deflt;
 }
 
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the string value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the string value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
-
-std::string 
-Parameters::value_string 
+std::string Parameters::value_string 
 ( std::string parameter,
   std::string deflt ) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   deflt     Default parameter value
+/// @return  Return string parameter value if it exists, deflt if not
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_string()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_string_ : deflt;
 }
-
-/**
- *********************************************************************
- *
- * @param   parameter
- *
- * @return  Return the scalar value of the expression parameter if it
- *          exists, or deflt if not
- *
- * Return the scalar value of the expression parameter if it exists,
- * or deflt if not.
- *
- *********************************************************************
- */
 
 void Parameters::evaluate_scalar 
   (
@@ -322,29 +146,22 @@ void Parameters::evaluate_scalar
    double    * y, 
    double    * z, 
    double    * t) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   n         Length of variable arrays
+/// @param   result    Output array of evaluated scalar parameters values if it exists, or deflt if not
+/// @param   deflt     Array of default values
+/// @param   x         Array of X values
+/// @param   y         Array of Y values
+/// @param   z         Array of Z values
+/// @param   t         Array of T values
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_scalar_expr()) throw ExceptionParametersBadType();
-  if (param != NULL) {
-    param->evaluate_scalar(param->value_expr_,n,result,x,y,z,t);
+  if (param != NULL) {       param->evaluate_scalar(param->value_expr_
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
 }
-
-/**
- *********************************************************************
- *
- * @param   parameter
- *
- * @return  Return the logical value of the expression parameter if it
- *          exists, or deflt if not
- *
- * Return the logical value of the expression parameter if it exists,
- * or deflt if not.
- *
- *********************************************************************
- */
 
 void Parameters::evaluate_logical 
   (
@@ -356,6 +173,14 @@ void Parameters::evaluate_logical
    double    * y, 
    double    * z, 
    double    * t) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   n         Length of variable arrays
+/// @param   result    Output array of evaluated logical parameters values if it exists, or deflt if not
+/// @param   deflt     Array of default values
+/// @param   x         Array of X values
+/// @param   y         Array of Y values
+/// @param   z         Array of Z values
+/// @param   t         Array of T values
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_logical_expr()) throw ExceptionParametersBadType();
@@ -366,122 +191,69 @@ void Parameters::evaluate_logical
   }
 }
 
-int
-Parameters::list_length(std::string parameter)
+int Parameters::list_length(std::string parameter)
+/// @param   parameter Parameter name
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_list()) throw ExceptionParametersBadType();
   return (param != NULL) ? (param->value_list_)->size() : 0;
 }
 
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the integer value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the integer value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
-
-int
-Parameters::list_value_integer 
+int Parameters::list_value_integer 
 ( int index,
   std::string parameter,
   int         deflt ) throw(ExceptionParametersBadType)
+/// @param   index     Index of the integer list parameter element
+/// @param   parameter Parameter name
+/// @param   deflt     Default parameter value
+/// @return  Return integer list parameter element value if it exists, deflt if not
 {
   Param * param = list_element_(parameter,index);
   if (param && ! param->is_integer()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_integer_ : deflt;
 }
 
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the scalar value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the scalar value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
-
-double
-Parameters::list_value_scalar 
+double Parameters::list_value_scalar 
 ( int index,
   std::string parameter,
   double      deflt ) throw(ExceptionParametersBadType)
+/// @param   index     Index of the scalar (double) list parameter element
+/// @param   parameter Parameter name
+/// @param   deflt     Default parameter value
+/// @return  Return scalar (double) list parameter element value if it exists, deflt if not
 {
   Param * param = list_element_(parameter,index);
   if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_scalar_ : deflt;
 }
 
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the logical value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the logical value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
-
-bool
-Parameters::list_value_logical 
+bool Parameters::list_value_logical 
 ( int index,
   std::string parameter,
   bool        deflt ) throw(ExceptionParametersBadType)
+/// @param   index     Index of the logical list parameter element
+/// @param   parameter Parameter name
+/// @param   deflt     Default parameter value
+/// @return  Return logical list parameter element value if it exists, deflt if not
 {
   Param * param = list_element_(parameter,index);
   if (param && ! param->is_logical()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_logical_ : deflt;
 }
 
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the string value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the string value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
-
-std::string 
-Parameters::list_value_string 
+std::string Parameters::list_value_string 
 ( int index,
   std::string parameter,
   std::string deflt ) throw(ExceptionParametersBadType)
+/// @param   index     Index of the string list parameter element
+/// @param   parameter Parameter name
+/// @param   deflt     Default parameter value
+/// @return  Return string list parameter element value if it exists, deflt if not
 {
   Param * param = list_element_ (parameter,index);
   if (param && ! param->is_string()) throw (ExceptionParametersBadType());
   return (param != NULL) ? param->value_string_ : deflt;
 }
-
-/**
- *********************************************************************
- *
- * @param   parameter
- * @return  Return the string value of the parameter if it exists, 
- *          or deflt if not
- *
- * Return the string value of the parameter if it exists, or deflt if
- * not.
- *
- *********************************************************************
- */
 
 void Parameters::list_evaluate_scalar 
 (
@@ -495,6 +267,14 @@ void Parameters::list_evaluate_scalar
  double    * z, 
  double    * t
  ) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   n         Length of variable arrays
+/// @param   result    Output array of evaluated scalar expression list parameter element values if it exists, or deflt if not
+/// @param   deflt     Array of default values
+/// @param   x         Array of X values
+/// @param   y         Array of Y values
+/// @param   z         Array of Z values
+/// @param   t         Array of T values
 {
 
   Param * param = list_element_(parameter,index);
@@ -505,20 +285,6 @@ void Parameters::list_evaluate_scalar
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
 }
-
-/**
- *********************************************************************
- *
- * @param   parameter
- *
- * @return  Return the logical value of the expression parameter if it
- *          exists, or deflt if not
- *
- * Return the logical value of the expression parameter if it exists,
- * or deflt if not.
- *
- *********************************************************************
- */
 
 void Parameters::list_evaluate_logical 
   (
@@ -531,6 +297,14 @@ void Parameters::list_evaluate_logical
    double    * y, 
    double    * z, 
    double    * t) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   n         Length of variable arrays
+/// @param   result    Output array of evaluated logical expression list parameter element values if it exists, or deflt if not
+/// @param   deflt     Array of default values
+/// @param   x         Array of X values
+/// @param   y         Array of Y values
+/// @param   z         Array of Z values
+/// @param   t         Array of T values
 {
   Param * param = list_element_(parameter,index);
   if (param && ! param->is_logical_expr()) throw ExceptionParametersBadType();
@@ -541,31 +315,16 @@ void Parameters::list_evaluate_logical
   }
 }
 
-//======================================================================
-// PRIVATE FUNCTIONS
-//======================================================================
 
-/**
- *********************************************************************
- *
- * @param   file_pointer       the opened input file
- * @param   buffer             a character string buffer
- * @param   buffer_length      size of the buffer
- *
- * @return  Whether the end of the file has been reached
- *
- * Read in the next line of the input file into the buffer
- *
- *********************************************************************
- */
-
-int 
-Parameters::readline_ 
+int Parameters::readline_ 
 ( FILE*  file_pointer, 
   char * buffer, 
   int    buffer_length ) 
   throw()
-
+/// @param   file_pointer       the opened input file
+/// @param   buffer             a character string buffer
+/// @param   buffer_length      size of the buffer
+/// @return  Whether the end of the file has been reached
 {
 
   int i;
@@ -600,15 +359,4 @@ Parameters::readline_
 
   return (c != EOF);
 
-}
-
-void    
-Parameters::add_parameter_ 
-( std::string parameter,
-  std::string value ) 
-  throw()
-
-{
-//     if (parameter=="" || parameter=="#" || parameter=="//") return;
-//   values_.insert( std::pair<std::string,std::string>(parameter,value) );
 }

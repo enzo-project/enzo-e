@@ -159,9 +159,6 @@ private: // functions
   /// Read in the next line of the input file
   int readline_ (FILE* fp, char * buffer, int n) throw();
 
-  /// Add a parameter / value pair
-  void add_parameter_ ( std::string parameter,  std::string value )   throw();
-
   /// Return the Param pointer for the specified parameter
   Param * parameter_ (std::string parameter)
   {
