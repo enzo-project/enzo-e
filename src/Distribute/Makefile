@@ -1,7 +1,7 @@
 
 TOP     = ../..
 PACKAGE = distribute
-OBJS    = distribute.o
+OBJS    = 
 TESTS   = 
 DIRS    = 
 

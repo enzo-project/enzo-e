@@ -1,44 +1,3 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <hdf5.h>
@@ -124,7 +83,7 @@ int main(int argc, char ** argv)
 
   delete [] level_array;
 
-  Memory::print();
+  Memory::get_instance()->print();
 
 }
 
@@ -299,7 +258,9 @@ void create_tree
   int num_nodes;
   float mem_per_node;
 
-  Memory::reset();
+  Memory * memory = Memory::get_instance();
+
+  memory->reset();
 
   printf ("--------------------------------------------------\n");
   printf ("k=%d d=%d full=%d\n",k,d,full_nodes);
@@ -311,10 +272,10 @@ void create_tree
 
   printf ("\nINITIAL TREE\n");
 
-  Memory::set_active(true);
+  memory->set_active(true);
   tree->refine(level_array,nx,ny,nz,max_level,full_nodes);
-  Memory::print();
-  Memory::set_active(false);
+  memory->print();
+  memory->set_active(false);
 
 
   // Determine image size
@@ -337,7 +298,7 @@ void create_tree
   if (geomview) tree->geomview(name + "-0.gv");
 
   num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
-  mem_per_node = (float) Memory::bytes(0) / num_nodes;
+  mem_per_node = (float) memory->bytes(0) / num_nodes;
   printf ("nodes      = %d\n",num_nodes);
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
@@ -350,10 +311,10 @@ void create_tree
 
   printf ("\nBALANCED TREE\n");
 
-  Memory::set_active(true);
+  memory->set_active(true);
   tree->balance(full_nodes);
-  Memory::print();
-  Memory::set_active(false);
+  memory->print();
+  memory->set_active(false);
 
 
   image = tree->create_image(image_size,line_width);
@@ -361,7 +322,7 @@ void create_tree
   if (geomview) tree->geomview(name + "-1.gv");
 
   num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
-  mem_per_node = (float) Memory::bytes(0) / num_nodes;
+  mem_per_node = (float) memory->bytes(0) / num_nodes;
   printf ("nodes      = %d\n",num_nodes);
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
@@ -375,17 +336,17 @@ void create_tree
 
   printf ("\nOPTIMIZED TREE\n");
 
-  Memory::set_active(true);
+  memory->set_active(true);
   tree->optimize();
-  Memory::print();
-  Memory::set_active(false);
+  memory->print();
+  memory->set_active(false);
 
   image = tree->create_image(image_size,line_width);
   write_image(name + "-2",image,image_size,image_size,1);
   if (geomview) tree->geomview(name + "-2.gv");
 
   num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
-  mem_per_node = (float) Memory::bytes(0) / num_nodes;
+  mem_per_node = (float) memory->bytes(0) / num_nodes;
   printf ("nodes      = %d\n",num_nodes);
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);

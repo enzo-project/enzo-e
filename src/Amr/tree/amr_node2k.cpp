@@ -1,43 +1,13 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     amr_node2k.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-10-27
+/// @todo     Rename lowx, etc. for integer arguments as e.g. ix_min, etc
+/// @todo     Rename lowx, etc. for double arguments as e.g. x_min, etc.
+/// @todo     Remove static for thread safety
+/// @brief    Declaration of the Node16 class 
 
 #include <stdio.h>
 #include <assert.h>
@@ -54,7 +24,8 @@ Node2K::Node2K(int k, int level_adjust)
     neighbor_(0),
     parent_(0),
     level_adjust_(level_adjust)
-
+    /// @param    k            refinement factor, typically 2 or 4
+    /// @param    level_adjust difference: actual mesh level - tree level
 { 
   ++Node2K::num_nodes_;
 
@@ -67,9 +38,8 @@ Node2K::Node2K(int k, int level_adjust)
 
 //----------------------------------------------------------------------
 
-// Delete the node and all descendents
-
 Node2K::~Node2K() 
+///
 { 
   --Node2K::num_nodes_;
 
@@ -99,6 +69,8 @@ Node2K::~Node2K()
 //----------------------------------------------------------------------
 
 inline Node2K * Node2K::child (int ix, int iy) 
+/// @param    ix        Index 0 <= ix < k of cell in grid block
+/// @param    iy        Index 0 <= iy < k of cell in grid block
 {
   if (child_==NULL) return NULL;
   return child_[index_(ix,iy)];
@@ -107,6 +79,7 @@ inline Node2K * Node2K::child (int ix, int iy)
 //----------------------------------------------------------------------
 
 inline Node2K * Node2K::neighbor (face_type face) 
+/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
 { 
   return neighbor_[face]; 
 }
@@ -114,6 +87,9 @@ inline Node2K * Node2K::neighbor (face_type face)
 //----------------------------------------------------------------------
 
 inline Node2K * Node2K::cousin (face_type face, int ix, int iy) 
+/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
+/// @param    ix        Index 0 <= ix < k of cell in grid block
+/// @param    iy        Index 0 <= iy < k of cell in grid block
 { 
   if (neighbor_[face] && neighbor_[face]->child(ix,iy)) {
     return neighbor_[face]->child(ix,iy);
@@ -125,6 +101,7 @@ inline Node2K * Node2K::cousin (face_type face, int ix, int iy)
 //----------------------------------------------------------------------
 
 inline Node2K * Node2K::parent () 
+///
 { 
   return parent_; 
 }
@@ -147,8 +124,6 @@ inline void make_neighbors
 
 //----------------------------------------------------------------------
 
-// Create empty child nodes
-
 int Node2K::refine 
 (
  const int * level_array, 
@@ -159,6 +134,16 @@ int Node2K::refine
  int max_level,
  bool full_nodes
  )
+/// @param    level_array Array of levels to refine to
+/// @param    ndx       x-dimension of level_array[]
+/// @param    ndy       y-dimension of level_array[]
+/// @param    lowx      Lowest x-index of array for this node
+/// @param    upx       Upper bound on x-index of array for this node
+/// @param    lowy      Lowest y-index of array for this node
+/// @param    upy       Upper bound on y-index of array for this node
+/// @param    level     Level of this node
+/// @param    max_level Maximum refinement level
+/// @param    full_nodes Whether nodes always have a full complement of children
 {
 
   int depth = 0;
@@ -303,6 +288,7 @@ int Node2K::refine
 //----------------------------------------------------------------------
 
 void Node2K::create_children_()
+///
 {
   for (int iy=0; iy<k_; iy++) {
     for (int ix=0; ix<k_; ix++) {
@@ -314,6 +300,7 @@ void Node2K::create_children_()
 //----------------------------------------------------------------------
 
 void Node2K::update_children_()
+///
 {
   for (int iy=0; iy<k_; iy++) {
     for (int ix=0; ix<k_; ix++) {
@@ -325,6 +312,8 @@ void Node2K::update_children_()
 //----------------------------------------------------------------------
 
 void Node2K::create_child_(int ix, int iy)
+/// @param    ix        Index 0 <= ix < k of cell in grid block
+/// @param    iy        Index 0 <= iy < k of cell in grid block
 {
   if (child_ == NULL) allocate_children_();
   child_[index_(ix,iy)] = new Node2K(k_);
@@ -333,6 +322,8 @@ void Node2K::create_child_(int ix, int iy)
 //----------------------------------------------------------------------
 
 void Node2K::update_child_ (int ix, int iy)
+/// @param    ix        Index 0 <= ix < k of cell in grid block
+/// @param    iy        Index 0 <= iy < k of cell in grid block
 {
   if (child(ix,iy)) {
 
@@ -381,6 +372,8 @@ void Node2K::update_child_ (int ix, int iy)
 // Perform a pass of trying to remove level-jumps 
 
 void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
+/// @param    refined_tree Whether tree has been refined
+/// @param    full_nodes   Whether nodes always have a full complement of children
 {
   int nx = k_;
   int ny = k_;
@@ -538,6 +531,7 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 // Perform a pass of trying to optimize uniformly-refined nodes
 
 void Node2K::optimize_pass(bool & refined_tree)
+/// @param    refined_tree Whether tree has been refined
 {
 
   bool single_children = true;
@@ -607,6 +601,16 @@ void Node2K::fill_image
  int num_levels,
  int line_width
  )
+/// @param    image     Array of colormap indices
+/// @param    ndx       x-dimension of image[]
+/// @param    ndy       y-dimension of image[]
+/// @param    lowx      Lowest x-index of image[] for this node
+/// @param    upx       Upper bound on x-index of image[] for this node
+/// @param    lowy      Lowest y-index of image[] for this node
+/// @param    upy       Upper bound on y-index of image[] for this node
+/// @param    level     Level of this node
+/// @param    num_levels Total number of levels
+/// @param    line_width Width of lines bounding nodes
 {
   int ix,iy,i;
 
@@ -668,8 +672,6 @@ void Node2K::fill_image
 
 //----------------------------------------------------------------------
 
-// Fill the image region with values
-
 void Node2K::geomview
 (
  FILE * fpr,
@@ -677,6 +679,16 @@ void Node2K::geomview
  double lowy, double upy,
  double lowz, double upz,
  bool full )
+/// @param    fpr       File pointer of geomview file opened for output
+/// @param    lowx      Lowest x-index of this node
+/// @param    upx       Upper bound on x-index of this node (warning: different meanings)
+/// @param    lowy      Lowest y-index of this node (warning: different meanings)
+/// @param    upy       Upper bound on y-index of this node (warning: different meanings)
+/// @param    lowy      Lowest y-index of this node (warning: different meanings)
+/// @param    upy       Upper bound on y-index of this node (warning: different meanings)
+/// @param    level     Level of this node
+/// @param    num_levels Total number of levels
+/// @param    line_width Width of lines bounding nodes
 {
 
   if (full) {
@@ -738,6 +750,7 @@ void Node2K::geomview
 //----------------------------------------------------------------------
 
 void Node2K::allocate_neighbors_ ()
+///
 {
   neighbor_ = new Node2K * [num_faces_()];
   for (int i=0; i<num_faces_(); i++) {
@@ -748,6 +761,7 @@ void Node2K::allocate_neighbors_ ()
 //----------------------------------------------------------------------
 
 void Node2K::deallocate_neighbors_ ()
+///
 {
   delete [] neighbor_;
   neighbor_ = NULL;
@@ -756,6 +770,7 @@ void Node2K::deallocate_neighbors_ ()
 //----------------------------------------------------------------------
 
 void Node2K::allocate_children_ ()
+///
 {
   child_    = new Node2K * [num_children_()];
   for (int i=0; i<num_children_(); i++) {
@@ -766,6 +781,7 @@ void Node2K::allocate_children_ ()
 //----------------------------------------------------------------------
 
 void Node2K::deallocate_children_ ()
+///
 {
   if (child_) {
     for (int i=0; i<num_children_(); i++) {
@@ -777,7 +793,6 @@ void Node2K::deallocate_children_ ()
   }
 }
 
-
-
+/// @@@ Number of nodes allocated
 int Node2K::num_nodes_ = 0;
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "omp.h"
+#include "error.hpp"
 #include "memory.hpp"
 #include "performance.hpp"
 
