@@ -26,7 +26,7 @@ public: // interface
 
 };
 
-#include "mpi.hpp"
+#include "parallel_mpi.hpp"
 
 #endif /* PARALLEL_HPP */
 

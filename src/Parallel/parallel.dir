@@ -1,14 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      parallel.dir
- * @brief     Low-level functions for facilitating data distribution,
- * @brief     communication, and load balancing 
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Parallel
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup  Parallel
+/// @brief    Low-level functions for facilitating data distribution, communication, and load balancing

@@ -1,27 +1,27 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MPI_HPP
-#define MPI_HPP
+#ifndef PARALLEL_MPI_HPP
+#define PARALLEL_MPI_HPP
 
 /// @file     mpi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Oct 15 10:40:37 PDT 2009 
-/// @brief    Interface for the Mpi class
+/// @brief    Interface for the ParallelMpi class
 
-class Mpi {
+class ParallelMpi {
 
-  /// @class    Mpi
+  /// @class    ParallelMpi
   /// @ingroup  Parallel
   /// @brief    MPI helper functions
 
 public: // interface
 
-  /// Initialize an Mpi object
-  Mpi();
+  /// Initialize an ParallelMpi object
+  ParallelMpi();
 
-  /// Delete an Mpi object
-  ~Mpi();
+  /// Delete an ParallelMpi object
+  ~ParallelMpi();
 
 private: // attributes
 
@@ -37,5 +37,5 @@ private: // attributes
 
 };
 
-#endif /* MPI_HPP */
+#endif /* PARALLEL_MPI_HPP */
 
