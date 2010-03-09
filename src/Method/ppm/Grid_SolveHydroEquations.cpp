@@ -1,43 +1,8 @@
-/** 
- *********************************************************************
- *
- * @file      Grid_SolveHydroEquations.cpp
- * @brief     Solve the hydro equations, saving subgrid fluxes
- * @author    Greg Bryan
- * @date      November, 1994
- * @ingroup   Enzo
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      Grid_SolveHydroEquations.cpp
+/// @author    Greg Bryan
+/// @date      November, 1994
+/// @ingroup   Enzo
+/// @brief     Solve the hydro equations, saving subgrid fluxes
  
 #include "cello_hydro.h"
 

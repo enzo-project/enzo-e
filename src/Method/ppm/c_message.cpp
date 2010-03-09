@@ -1,44 +1,9 @@
-/** 
- *********************************************************************
- *
- * @file      c_message.cpp
- * @brief     Display warning and error messages
- * @todo     Remove static for thread safety
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      
- * @ingroup   Enzo
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file     c_message.cpp
+/// @todo     Remove static for thread safety
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @ingroup  Enzo
+/// @date      
+/// @brief    Display warning and error messages
 
 #include "cello_hydro.h"
  

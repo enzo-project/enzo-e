@@ -1,43 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      print_field.cpp
- * @brief     Print the active values of the grid field
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      Sat Aug 29 23:45:03 PDT 2009
- * @ingroup   Method
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      print_field.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Sat Aug 29 23:45:03 PDT 2009
+/// @brief     Print the active values of the grid field
 
 #include "cello_hydro.h"
  

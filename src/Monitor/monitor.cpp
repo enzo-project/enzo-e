@@ -1,7 +1,7 @@
 /// @file      monitor.cpp
-/// @brief     Routines for simple output of text, plots, and graphs
-/// @author    James Bordner
+/// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 12:45:56 PST 2009
+/// @brief     Routines for simple output of text, plots, and graphs
 
 #include <assert.h>
 #include "cello.h"

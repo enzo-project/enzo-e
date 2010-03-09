@@ -1,45 +1,11 @@
-/** 
- *********************************************************************
- *
- * @file      Grid_ComputePressureDualEnergyFormalism.cpp
- * @brief     (COMPUTE THE PRESSURE FIELD AT THE GIVEN TIME) - DUAL ENERGY
- * @author    Greg Bryan
- * @date      November, 1994
- * @ingroup   Enzo
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    Compute the pressure at the requested time.  The pressure here
- *    is just the ideal-gas equation-of-state (dual energy version).
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
+/// @file      Grid_ComputePressureDualEnergyFormalism.cpp
+/// @author    Greg Bryan
+/// @date      November, 1994
+/// @ingroup   Enzo
+/// @brief     (COMPUTE THE PRESSURE FIELD AT THE GIVEN TIME) - DUAL ENERGY
+///
+/// Compute the pressure at the requested time.  The pressure here is
+/// just the ideal-gas equation-of-state (dual energy version).
 
 #include "cello_hydro.h"
  
