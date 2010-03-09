@@ -1,47 +1,6 @@
 /** 
  *********************************************************************
  *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
  * @file      mpi.cpp
  * @brief     MPI helper functions
  * @author    James Bordner (jobordner@ucsd.edu)
@@ -75,34 +34,34 @@
 
 #include "cello.h"
 
-#include "mpi.hpp"
+#include "parallel_mpi.hpp"
  
 //====================================================================
 // PUBLIC FUNCTIONS
 //====================================================================
 
-Mpi::Mpi()
+ParallelMpi::ParallelMpi()
 /**
  *********************************************************************
  *
  * @param         none
  * @return        none
  *
- * Create an Mpi object
+ * Create an ParallelMpi object
  *
  *********************************************************************
  */
 {
 }
 
-Mpi::~Mpi()
+ParallelMpi::~ParallelMpi()
 /**
  *********************************************************************
  *
  * @param         none
  * @return        none
  *
- * Delete an Mpi object
+ * Delete an ParallelMpi object
  *
  *********************************************************************
  */
