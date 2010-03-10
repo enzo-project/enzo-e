@@ -4,12 +4,16 @@ PACKAGE = method
 
 TESTS = test_ppm
 
+# Whether to use the constant cell width optimization
+
+LOCAL_OPTIMIZE = -D NO_OPTIMIZE_CELL_WIDTH
+
 # This does no good--why not?  OMP_NUM_THREADS = 4 on stingmeyer
 # PARALLEL = -fopenmp -ftree-parallelize-loops=4 
 
 INC_LOCAL  = -I..
 LIB_LOCAL  = $(LIB_HDF5) $(LIB_FORTRAN) $(PARALLEL)
-CPPFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(PARALLEL)
+CPPFLAGS_LOCAL   = -Dp8 -Dr8 -DSMALL_INTS -DLINUX $(PARALLEL) $(LOCAL_OPTIMIZE)
 
 OBJS_PPM = test_ppm.o \
            initialize_image.o \

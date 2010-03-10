@@ -76,7 +76,7 @@ c  argument declarations
 c
       integer gravity, i1, i2, idim, idual, iflatten, ipresfree, isteep,
      &        j1, j2, jdim, ncolor
-      real    dt, eta1, eta2, gamma, tempw
+      real    dt, eta1, eta2, gamma
       real   dslice(idim,jdim),     dxi(idim     ),  pslice(idim,jdim),
      &       uslice(idim,jdim),  vslice(idim,jdim),  wslice(idim,jdim),
      &      grslice(idim,jdim), geslice(idim,jdim)
@@ -92,7 +92,7 @@ c  local declarations
 c
       integer i, j, ic
       real steepen(ijkn),tmp1(ijkn),tmp2(ijkn),tmp3(ijkn),tmp4(ijkn)
-      real qa,qb,qc,qd,qe,s1,s2      
+      real qa,qb,qc,qd,s1,s2      
       real  c1(ijkn), c2(ijkn), c3(ijkn), c4(ijkn), c5(ijkn), c6(ijkn)
      &    ,dp(ijkn),pl(ijkn),pr(ijkn),p6(ijkn)
      &    ,du(ijkn),ul(ijkn),ur(ijkn),u6(ijkn)

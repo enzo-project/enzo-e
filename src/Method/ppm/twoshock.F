@@ -86,10 +86,8 @@ c  real*8.  [BWO v1_1_6]
      &         ps(ijkn),    ubl(ijkn),   ubr(ijkn),
      &         qa      ,     zl(ijkn),    zr(ijkn)
 
-      integer itok, jjj
-      integer mask(ijkn), jfail(ijkn)
+      integer mask(ijkn)
       real    old_ps(ijkn), delta_ps(ijkn)
-      real    fails(ijkn)
 
 !     To reduce this to the old fixed iteration count method
 !     simply set tolerance = 1.0e-50

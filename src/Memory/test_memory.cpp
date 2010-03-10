@@ -107,7 +107,6 @@ int main(int argc, char ** argv)
   NEW_F2(size);
   NEW_F3(size);
 
-  printf ("%d %d\n",memory->bytes(), size);
   unit_assert (memory->bytes() == size);
   
   //----------------------------------------------------------------------

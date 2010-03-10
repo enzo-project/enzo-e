@@ -1,7 +1,7 @@
 
 TOP     = ../..
 PACKAGE = particles
-OBJS    = particles.o
+OBJS    = 
 TESTS   = 
 DIRS    = 
 
@@ -18,7 +18,7 @@ all: $(OBJS) $(TESTS) $(EXES)
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/particles.hpp               $(INCLUDE)
+#	ln -sf `pwd`/particles.hpp               $(INCLUDE)
 
 #-----------------------------------------------------------------------
 

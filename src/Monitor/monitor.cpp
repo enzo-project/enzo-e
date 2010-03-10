@@ -115,8 +115,6 @@ void Monitor::image
     rmax = MAX(rmax,image[i]);
   }
 
-  double h = (max-min) / (map_length-1);
-
   pngwriter png (mx,my,0,name.c_str());
 
   for (int jx = 0; jx<mx; jx++) {

@@ -1,5 +1,7 @@
 #!/bin/tcsh -f
 
+set suffix = .optimize=no
+
 set n = 3
 
 while ($n <= 128)
@@ -9,7 +11,7 @@ while ($n <= 128)
   else
      set cycles = 10
   endif
-  test_ppm implosion3 $n $cycles 0
+  test_ppm${suffix} implosion3 $n $cycles 0 >> out.test_ppm${suffix}
 
   @ n = $n + 1
 end

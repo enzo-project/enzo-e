@@ -130,7 +130,7 @@ c
       integer i, j, nyz, is, isp, ism
       real    cj2s, di(ijkn), difftemp(ijkn), flattemp(ijkn),
      &        kappa(ijkn), kappa_tilde, omega(ijkn),
-     &        qa, qb, qc, s, sigma(ijkn),
+     &        qa, qb, s, sigma(ijkn),
      &        sigma_tilde, vdiff1(ijkn), vdiff2(ijkn), wdiff1(ijkn),
      &        wdiff2(ijkn), wflag(ijkn), Z, ZE
       logical ljx1,ljy1,ljz1,ljx2,ljy2,ljz2,lj1,lj2

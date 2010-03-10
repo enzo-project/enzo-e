@@ -144,7 +144,7 @@ c
 c     Factored out temp2 [JOB v1_1_6]
          if (temp2*(temp2-temp3) .lt. 0.0) then
             ql(i) = 3.0*qslice(i) - 2.0*qr(i)
-         endif	
+         endif
          if (temp2*(temp2+temp3) .lt. 0.0) then
             qr(i) = 3.0*qslice(i) - 2.0*ql(i)
          endif
