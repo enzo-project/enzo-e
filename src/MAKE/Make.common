@@ -17,6 +17,7 @@
 #    LIB_HDF5          Make.mach
 #    CXXFLAGS_LOCAL    $(PACKAGE)/Makefile
 #    CFLAGS_LOCAL      $(PACKAGE)/Makefile
+#    LIB_LOCAL         $(PACKAGE)/Makefile
 #    OPT               Make.mach
 #    TESTS             $(PACKAGE)/Makefile
 #    EXES              $(PACKAGE)/Makefile
