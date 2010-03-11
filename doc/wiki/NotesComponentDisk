@@ -1,5 +1,46 @@
-([NotesComponentControl Control] < [NotesComponents index] > [NotesComponentError Error])
+([NotesComponentArray Array] < [NotesComponents index] > [NotesComponentDistribute Distribute])
+
+[[TOC]]
 
 = `Disk` Component =
 
-([NotesComponentControl Control] < [NotesComponents index] > [NotesComponentError Error])
+The `Disk` component provides low-level functions for writing and reading data to and from disk storage.  It handles disk
+`File`s, self-describing 
+
+== `Disk` classes ==
+
+
+ || ||  `File` || ''a disk file'' ||
+ || * ||  `Hdf5` || ''HDF5 files'' ||
+ ||  ||  `Ifrit` || ''IIFrIT (Ionization FRont Interactive Tool)  files'' ||
+
+=== `Hdf5` class ===
+
+   ==== `Hdf5` attributes ====
+
+
+ || `hid_t` || `file_ `|| ''HDF5 file descriptor'' ||
+ || `std::string` || `file_name_` || ''HDF5 file name'' ||
+ || `std::string` || `file_mode_`|| ''HDF5 file mode'' ||
+ || `bool`  || `is_file_open_` || ''Whether file is open or closed'' ||
+ || `hid_t` || `dataset_` || ''HDF5 dataset descriptor'' ||
+ || `std::string` || `dataset_name_` || ''HDF5 dataset name'' ||
+ || `hid_t` || `dataspace_` || ''HDF5 dataspace descriptor'' ||
+ || `hid_t` || `datatype_` || ''HDF5 data type'' ||
+ || `herr_t`  ||     `status_` || ''Last error'' ||
+
+   ==== `Hdf5` functions ====
+
+ || * ||  `Hdf5::file_open()` ||  ''Open the file with the given mode'' ||
+ || * || `Hdf5::file_close )` || ''Close the file'' ||
+ || * ||   `Hdf5::group_open()` || ''Open the given group'' ||
+ || * ||   `Hdf5::group_close()` || ''Close the current group'' ||
+ || * ||  `Hdf5::dataset_open_read()` || ''Open the given dataset with given size for reading'' ||
+ || * ||  `Hdf5::dataset_open_write()` || ''Open the given dataset with the given size for writing'' ||
+ || * || `Hdf5::dataset_close()` || ''Close the current dataset'' ||
+ || * || `Hdf5::read()` || ''Read the current dataset into the buffer'' ||
+ || * || `Hdf5::write()` || ''Write the current dataset from the buffer'' ||
+
+
+
+   ==== `Hdf5` parameters ====

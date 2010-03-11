@@ -13,25 +13,26 @@
 
  * Component names are CamelCase, preferably a single word, e.g. `Amr`, `Disk`, `Error`
  * There is exactly one subdirectory in the source tree for each component
- * Each component subdirectory `foo/` contains a `foo.dir` file: see `TEMPLATE/TEMPLATE.dir` for format
- * Components consist of one or more classes
+ * Each component subdirectory `foo/` contains a `foo.dir` file: see `TEMPLATE/template.dir` for format
+ * Components consist of one or more closely-related classes
  * Components should not overlap functionality
  * Dependencies between components should be minimized
  * There must be no dependency loops between components
- * The header file for a component `Foo` is `foo.h`
- * The header file for a class `bar` in component `Foo` is `foo_bar.h`
- * All header files are associated with some component...
- * Except the global `cello.h` include file
+ * The header file for a component `Foo` is `foo.hpp`
+ * All header files (except global `cello.h` include file) are associated with some component
 
 == Classes ==
 
- * Class names are CamelCase, e.g. `ArrayBlocked`, `Amr`
- * Class header files for class `Foo` are in `foo.h`
- * Class function implementations are in `foo.cpp`
- * If class `Foo` is accessed in a different component `Component`, it is included as `component_foo.h` (or `component.h`)
+ * Class names are CamelCase, e.g. `ArrayBlocked`
+ * Compound class names go from general to specific, e.g. `ArrayBlocked`
+ * The header file for class `Foo` in component `Component` is `component_foo.hpp`
+ * Copy `TEMPLATE/template.hpp` to create a new class header file
+ * The member function implementations for class `Foo` in component `Component` are in `component_foo.cpp`
+ * Copy `TEMPLATE/template.cpp` to create a new class function implementation file
  * Inheritance is used to model "is-a" relationships, e.g. `ArrayBlocked` "is-a" `Array`
  * Composition is used to model "has-a" relationships, e.g. `Hierarchy` "has-a" `Level`
  * Composition is generally preferred to inheritance
+ * Use design patterns where appropriate, and document as such
  * Iterator class names begin with `It`, as in `ItLevelGridsAll`
  
 == Functions ==
@@ -39,30 +40,39 @@
  * A helpful way to write a function is first write it as pseudo-code, then convert pseudo-code to comments
  * All functions should be associated with a class
  * Function names are short but descriptive
- * Function names are all lower-case, and may contain underscores
- * There should be few public functions in a class, no more than about a dozen per class
+ * Function names are all lower-case, and may contain underscores, e.g. `foo_fi_fo_fum()`
+ * Private function names end in an underscore `foo_()` to easily identify them
+ * There should be few public functions in a class, no more than about a dozen
+ * Classes with too many public functions should be split into subclasses
  * Public functions in a class must not expose the underlying data-structures, even simple scalars
- * Private functions end in an underscore `foo_()` to easily identify them
  * Implementations of functions should avoid referencing "this" unnecessarily (e.g. prefer `foo_(blah);` to `this->foo_(blah);`)
 
 == Variables ==
 
- * All variables should be associated with a class
- * All variables should be private or protected
+ * There shalt be no global variables
+ * All class member variables should be private (or protected)
+ * All private (or protected) class member variables end in an underscore `foo_` to easily identify them
  * Variable names should be short but descriptive
- * Variable names should be all lower-case, and may contain underscores
- * Private variables end in an underscore `foo_` to easily identify them
+ * Variable names should be all lower-case, and may contain underscores, e.g. `foo_fi_fo_fum`
+ * Declare local variables close to their first access
+ * Initialize all variables
 
-== Files ==
+=== Dynamically allocated variables ===
+
+ * Before allocating or deallocating memory, define the component using, e.g., `memory->set_group(component_amr)`
+ * Access the memory allocation object using `Memory * memory = Memory::get_instance()`
+ * Allocate or deallocate memory only using `new()` and `delete()`, not `malloc()` or `free`
+
+== Source Files ==
 
  * Code and comments should be formatted to fit in 80 columns
  * C++ code is contained in `*.cpp` files
- * C++ headers are contained in `*.h` files
+ * C++ headers are contained in `*.hpp` files
  * C code is contained in `*.c` files
  * C headers are contained in `*.h` files
  * Fortran code is contained in `*.F` files
 
-== Code ==
+== Source Code ==
 
  * When evaluating polynomials or polynomial-like expressions, e.g. "`ix + nx*iy + nx*ny*iz + `..." for index computations, write it as "`ix + nx*(iy + ny*iz)`"
  * For simple calculations that are ubiquitous (e.g. index calculations), use `cpp` macros or inline functions

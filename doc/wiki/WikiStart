@@ -28,6 +28,8 @@ The wiki pages are for users and developers to interactively collaborate on diff
 
  * '''[NotesComponents  Components]''': The "Components" wiki pages are for designing the Cello software at the component and class levels.  All developers of Cello are encouraged to review these pages and provide feedback.
 
+ * '''[NotesDesignPatterns  Design Patterns]''': A list of design patterns used in Cello.
+
  * '''[NotesCodingStandards  Coding Guidelines]''': The "Coding Guidelines" page is for establishing basic suggestions and guidelines for Cello developers.  All developers must read these guidelines and are encouraged to provide feedback.
 
  * '''[NotesTestProblems  Tests]''': The "Tests" pages are for developing application tests, which will be used for developing input file format and [NotesParameters Parameters] as well as testing.

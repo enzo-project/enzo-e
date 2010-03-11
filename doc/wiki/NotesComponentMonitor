@@ -1,5 +1,7 @@
 ([NotesComponentMethod Method] < [NotesComponents index] > [NotesComponentParallel Parallel])
 
+[[TOC]]
+
 = `Monitor` Component =
 
 The `Monitor` component is used to communicate information about the running simulation to the user.  Information can be output in several forms, including text files, HTML files, plots, or other (generally small) image files.  Information is assumed to be from a correctly-running simulation: anomalous errors or warnings are output by the `Error` component.  It is assumed that `stdout` is ''not'' used for monitor output, except for possibly displaying header text with basic information about Cello and the simulation being run.
@@ -74,6 +76,14 @@ Since `Monitor` is for monitoring numerous aspects about the running simulation,
   ||  `disk_[count|rate|util]` ||  [integer|scalar][mpi] ||
 
 
+== Monitor class ==
+=== Monitor  attributes ===
+=== Monitor  functions ===
+
+|| `Monitor::print()` || ''Display a text message'' ||
+|| `Monitor::image()` || ''Generate an image file'' ||
+
+=== Monitor  parameters ===
 
 
 

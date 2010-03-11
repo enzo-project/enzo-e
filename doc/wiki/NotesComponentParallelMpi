@@ -1,46 +1,46 @@
 ([NotesComponentParallelTask ParallelTask] < [NotesComponentParallel Parallel] > [NotesComponentParallelOmp ParallelOmp])
 
-= `Mpi` `Parallel` subcomponent =
+= `ParallelMpi` subcomponent =
 
-== `Mpi` class ==
+== `ParallelMpi` class ==
 
  === Attributes === 
 
-  || `enum Mpi::type_`          || ''Type of MPI: : 1 for send/recv, 2 for get/put'' ||
-  || || ||
-  || `bool Mpi::send_type_` || ''MPI Send type: standard, buffered, synchronous, or ready'' ||
-  || `enum Mpi::send_immediate_` || ''Whether sends are immediate'' ||
-  || `enum Mpi::recv_immediate_` || ''Whether receives are immediate'' ||
-  || || ||
-  || `enum Mpi::type_get_`  || ''Type of get'' ||
-  || `enum Mpi::type_put_`  || ''Type of put'' ||
+ ||  || `enum` || `ParallelMpi::sided_`          || ''Type of MPI: : `one_sided` for get/put, `two_sided` for send/recv'' ||
+ ||  || || ||
+ ||  || `enum` || `ParallelMpi::send_type_` || ''MPI Send type: standard, buffered, synchronous, or ready'' ||
+ ||  || `bool` || `ParallelMpi::send_is_immediate_` || ''Whether sends are immediate'' ||
+ ||  || `bool` || `ParallelMpi::recv_is_immediate_` || ''Whether receives are immediate'' ||
+ ||  || || ||
+ ||  || `enum` || `ParallelMpi::type_get_`  || ''Type of get'' ||
+ ||  || `enum` || `ParallelMpi::type_put_`  || ''Type of put'' ||
 
  === Functions === 
 
- || `Mpi::initialize()` || Initialize MPI ||
- || `Mpi::finalize()` || Finalize MPI ||
- || || ||
- || `Mpi::size()` || Number of MPI processes in a communicator ||
- || `Mpi::rank()` || Rank of the MPI process in a communicator ||
- || `Mpi::comm()` || Return global communicator in a communicator||
- || || ||
- || `Mpi::begin_send()` || Begin sending an array ||
- || `Mpi::end_send()` || Complete sending an array ||
- || `Mpi::begin_recv()` || Begin receiving an array ||
- || `Mpi::end_recv()` || Complete receiving an array ||
- || || ||
- || `Mpi::barrier()` || Barrier  in a communicator||
+ ||  || `ParallelMpi::initialize()` || ''Initialize MPI'' ||
+ ||  || `ParallelMpi::finalize()` || ''Finalize MPI'' ||
+ ||  || || ||
+ ||  || `ParallelMpi::size()` || ''Number of MPI processes in a communicator'' ||
+ ||  || `ParallelMpi::rank()` || ''Rank of the MPI process in a communicator '' ||
+ ||  || `ParallelMpi::comm()` || ''Return global communicator in a communicator'' ||
+ || || || ||
+ ||  || `ParallelMpi::send_begin()` || ''Initiate sending an array'' ||
+ ||  || `ParallelMpi::send_end()` || ''Complete sending an array'' ||
+ ||  || `ParallelMpi::recv_begin()` || ''Initiate receiving an array'' ||
+ ||  || `ParallelMpi::recv_end()` || ''Complete receiving an array'' ||
+ ||  || || ||
+ ||  || `ParallelMpi::barrier()` || Barrier in a communicator||
 
  === Usage === 
 
  === Parameters === 
 
- || `Parallel:mpi:type` || [1|2] || Type of MPI: 1 (send/recv) or 2 (get/put) ||
- || || ||
- || `Parallel:mpi:send_type` || ["standard","buffered","synchronous","ready"] || MPI send variations ||
- || `Parallel:mpi:immediate` || [true|false] || MPI recv variations ||
- || || ||
- || `Parallel:mpi:get` || [...] || MPI get variations ||
- || `Parallel:mpi:put` || [...] || MPI put variations ||
- || `Parallel:mpi:permute` || [ ... ] || Reordering of MPI tasks ||
+ ||  || `Parallel:mpi:sided` || `["one"|"two"]` || ''Type of MPI: one-sided (get/put) or two-sided (send/receive) ||
+ ||  || || ||
+ ||  || `Parallel:mpi:send_type` || `["standard","buffered","synchronous","ready"]` || ''MPI send variations'' ||
+ ||  || `Parallel:mpi:immediate` || `[true|false]` || MPI recv variations ||
+ ||  || || ||
+ || || `Parallel:mpi:get` || [...] || ''MPI get variations'' ||
+ ||  || `Parallel:mpi:put` || [...] || ''MPI put variations'' ||
+ ||  || `Parallel:mpi:permute` || [ ... ] || ''Reordering of MPI tasks'' ||
  

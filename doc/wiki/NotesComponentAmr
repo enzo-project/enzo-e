@@ -72,12 +72,12 @@ Refine if (density) / (cell volume) >  MinimumMassForRefinement*r ^ (level*Minim
 ==== `Amr` functions ====
 ==== `Amr` parameters ====
 
-  ||  `root`      || ''size of the root grid, e.g. ![400,400]'' ||
-  ||  `max_level` || ''maximum level (with root = 0), assuming refinement by two ||
-  ||  `refine`    || ''refinement factor = 2, 4, etc.'' ||
-  ||  `full_tree` || ''whether tree is full (ala Flash) or not'' ||
-  ||  `backfill`  || ''whether to backfill for refinement > 2'' ||
-  ||  `coalesce`  || ''whether to coalesce small patches to one big one'' ||
-  ||  `patch_min` || ''minimum patch size'' ||
-  ||  `patch_max` || ''maximum patch size'' ||
+||  `root`      || ''size of the root grid, e.g. ![400,400]'' ||
+||  `max_level` || ''maximum level (with root = 0), assuming refinement by two ||
+||  `refine`    || ''refinement factor = 2, 4, etc.'' ||
+||  `full_tree` || ''whether tree is full (ala Flash) or not'' ||
+||  `backfill`  || ''whether to backfill for refinement > 2'' ||
+||  `coalesce`  || ''whether to coalesce small patches to one big one'' ||
+||  `patch_min` || ''minimum patch size'' ||
+||  `patch_max` || ''maximum patch size'' ||
 

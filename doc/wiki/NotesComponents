@@ -1,48 +1,31 @@
 = Cello Software Components =
 
-[[Image(htdocs:components.png)]]
+[[Image(htdocs:components2.png)]]
 
 Below is the list of Cello components:
 
 || ( ) || [NotesComponentAmr         Amr] || Adaptive mesh refinement infrastructure, built on top of `Array` || 
 || ( ) || [NotesComponentArray       Array] || Fortran-like array, which may be parallelized or vectorized in various ways || 
-|| ( ) || [NotesComponentControl     Control] || Schedules `Task`s to  advance the `Simulation` in time ||
 || ( ) || [NotesComponentDisk        Disk] || Provides functions for writing and reading data to and from disk storage  || 
+|| ( ) || [NotesComponentDistribute  Distribute] || Distribute (and dynamically redistribute) `Task`s among nodes and processes || 
 || ( ) || [NotesComponentError       Error] || Error prevention (including check-pointing), error detection and recovery || 
 || ( ) || [NotesComponentField       Field] || Scalar fields on an `Array` or `Amr` hierarchy ||
 || ( ) || [NotesComponentMemory      Memory] || Manage dynamic memory allocation and deallocation ||
 || ( ) || [NotesComponentMethod      Method] || Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and visualization ||
 || ( ) || [NotesComponentMonitor     Monitor] || User interface to monitor the status of a running simulation ||
-|| ( ) || [NotesComponentParallel    Parallel] || Functions for data distribution, communication, and load balancing ||
+|| ( ) || [NotesComponentParallel    Parallel] || Low-level functions for facilitating data distribution, communication, and load balancing ||
 || ( ) || [NotesComponentParameters  Parameters] || Input, parse, store, and access run-time parameters ||
 || ( ) || [NotesComponentParticles   Particles] || Efficiently represent groups of distributed particles ||
 || ( ) || [NotesComponentPerformance Performance] || Measure, and provide functions to access, run-time performance ||
 || ( ) || [NotesComponentPortal      Portal] || Interface with other applications, including querying state, modifying parameters, and post-visualization ||
+|| ( ) || [NotesComponentControl     Schedule] || Schedules `Task`s to  advance the `Simulation` in time [was `Control`] ||
 || ( ) || [NotesComponentSimulation  Simulation] || Specifies the problem(s) to run ||
-|| ( ) || [NotesComponentTask Task] || Encapsulates `Methods` and data that are distributed using `Parallel` and scheduled to run using `Control` ||
+|| ( ) || [NotesComponentTask Task] || Encapsulates `Methods` and data on an `Array` for a single process / thread ||
 
 
 Code for components are organized into separate directories.
 
 == Software Component Dependencies ==
 
-Software components necessarily depend on one another, but their dependencies should be well-defined and kept minimal.  There should be no loops in the dependency graph.  Dependencies are represented in the code using "#include" statements.  In general, "fan out" is bad (when a component depends on a lot of other components), but fan-in is ok (when a lot of other components depend on a component).
+Software components necessarily depend on one another, but their dependencies should be well-defined and kept minimal.  There should be no loops in the dependency graph.  Dependencies are represented in the code using "#include" statements.  In general, "fan out" is bad (when one component depends on many other components), but fan-in is ok (when many other components depend on one component).
 
-|| depends on: || Amr || Array || Control || Disk || Error || Field || Memory || Method || Monitor || Parallel || Parameters || Particles || Performance || Portal || Simulation || Task || Test ||
-|| Amr         ||   ||   ||   || X || X ||   || X ||   || X ||   ||   ||   ||   ||   ||   ||   ||   ||
-|| Array       ||   ||   ||   ||   || X ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   || X ||
-|| Control     ||   ||   ||   ||   || X ||   ||   ||   || X ||   || X ||   ||   ||   || X ||   || X ||
-|| Disk        ||   || ? ||   ||   || X ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   || X ||
-|| Error       ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   || X ||
-|| Field       ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||
-|| Memory      ||   ||   ||   ||   || X ||   ||   ||   ||   ||   ||   ||   || X ||   ||   ||   || X ||
-|| Method      ||   ||   ||   || X || X ||   ||   ||   || X ||   ||   ||   || X ||   ||   ||   ||   ||
-|| Monitor     ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   || X ||   ||   ||   || X ||
-|| Parallel    ||   ||   ||   ||   || X ||   ||   ||   ||   ||   || X ||   || X ||   ||   ||   ||   ||
-|| Parameters  ||   ||   ||   ||   || X ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   || X ||
-|| Particles   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||
-|| Performance ||   ||   ||   ||   || X ||   || X ||   ||   ||   ||   ||   ||   ||   ||   ||   || X ||
-|| Portal      ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||
-|| Simulation  || X ||   ||   ||   ||   || X ||   || X ||   || X || X ||   ||   ||   ||   ||   ||   ||
-|| Task        ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||
-|| Test        ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||   ||

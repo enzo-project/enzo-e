@@ -10,6 +10,7 @@ WIKI_FILES = \
 	NotesComponentArrayLayout \
 	NotesComponentControl \
 	NotesComponentDisk \
+	NotesComponentDistribute \
 	NotesComponentError \
 	NotesComponentField \
 	NotesComponentMemory \
@@ -26,6 +27,7 @@ WIKI_FILES = \
 	NotesComponentRegion \
 	NotesComponents \
 	NotesComponentSimulation \
+	NotesDesignPatterns \
 	NotesEnzoTestProblems \
 	NotesParameters \
 	NotesParametersCello \
