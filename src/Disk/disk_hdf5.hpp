@@ -7,6 +7,9 @@
 /// @file     disk_hdf5.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
+/// @todo     Refactor interface to be hdf5-independent (groups, datasets, etc.)
+/// @todo     Rename to, e.g., FileHdf5
+/// @todo     Add support for relative/absolute directory / group
 /// @brief    Interface for the Hdf5 class
 
 class Hdf5 {

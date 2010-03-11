@@ -45,6 +45,7 @@
  * @file      test_hdf5.cpp
  * @brief     Program implementing unit tests for the Hdf5 class
  * @author    James Bordner
+ * @todo      Test group operations
  * @date      Thu Feb 21 16:47:35 PST 2008
  *
  * $Id$
