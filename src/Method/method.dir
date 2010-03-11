@@ -1,14 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      method.dir
- * @brief     Modularized hyperbolic, elliptic, or local physics
- * @brief     algorithms, analysis, and visualization 
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Method
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup  Method
+/// @brief    Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and visualization

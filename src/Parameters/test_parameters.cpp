@@ -117,6 +117,8 @@ int main(int argc, char **argv)
 
   // Strings
 
+  unit_func("value_string");
+
   parameters->set_group("String");
   unit_assert(parameters->value_string("str1") == "testing");
   unit_assert(parameters->value_string("str1","blah") == "testing");
@@ -170,42 +172,57 @@ int main(int argc, char **argv)
   unit_func("evaluate_logical");
 
   bool values_logical[] = {false, false, false};
-  bool deflt_logical[] = {true, false,true};
+  bool deflts_logical[] = {true, false,true};
 
   parameters->set_group("Logical_expr");
   parameters->set_subgroup("var_logical_1");
 
-  parameters->evaluate_logical("num1",3,values_logical,deflt_logical,x,y,z,t);
+  parameters->evaluate_logical("num1",3,values_logical,deflts_logical,x,y,z,t);
   unit_assert (values_logical[0] == (x[0] < y[0]));
   unit_assert (values_logical[1] == (x[1] < y[1]));
   unit_assert (values_logical[2] == (x[2] < y[2]));
 
-  parameters->evaluate_logical("num2",3,values_logical,deflt_logical,x,y,z,t);
+  parameters->evaluate_logical("num2",3,values_logical,deflts_logical,x,y,z,t);
   unit_assert (values_logical[0] == (x[0] + y[0] >= t[0] + 3.0));
   unit_assert (values_logical[1] == (x[1] + y[1] >= t[1] + 3.0));
   unit_assert (values_logical[2] == (x[2] + y[2] >= t[2] + 3.0));
 
-  parameters->evaluate_logical("num3",3,values_logical,deflt_logical,x,y,z,t);
+  parameters->evaluate_logical("num3",3,values_logical,deflts_logical,x,y,z,t);
   unit_assert (values_logical[0] == (x[0] == y[0]));
   unit_assert (values_logical[1] == (x[1] == y[1]));
   unit_assert (values_logical[2] == (x[2] == y[2]));
 
   // Lists
 
-  unit_func("value_list");
-
   parameters->set_group("List");
 
-  unit_assert(parameters->list_length("num1") == 5);
+  unit_func("list_length");
+  unit_assert(parameters->list_length("num1") == 6);
+
+  unit_func("list_value_scalar");
   unit_assert(parameters->list_value_scalar(0,"num1") == 1.0);
+
+  unit_func("list_value_logical");
   unit_assert(parameters->list_value_logical(1,"num1") == true);
+
+  unit_func("list_value_integer");
   unit_assert(parameters->list_value_integer(2,"num1") == 37);
+
+  unit_func("list_value_string");
   unit_assert(parameters->list_value_string(3,"num1") == "string");
   printf ("%s\n",parameters->list_value_string(3,"num1").c_str());
+
+  unit_func("list_evaluate_scalar");
   parameters->list_evaluate_scalar(4,"num1",3,values_scalar,deflts_scalar,x,y,z,t);
   unit_assert (values_scalar[0] == (x[0]-y[0]+2.0*z[0]));
   unit_assert (values_scalar[1] == (x[1]-y[1]+2.0*z[1]));
   unit_assert (values_scalar[2] == (x[2]-y[2]+2.0*z[2]));
+
+  unit_func("list_evaluate_logical");
+  parameters->list_evaluate_logical(5,"num1",3,values_logical,deflts_logical,x,y,z,t);
+  unit_assert (values_logical[0] == (x[0]+y[0]+t[0] > 0 ));
+  unit_assert (values_logical[1] == (x[1]+y[1]+t[1] > 0 ));
+  unit_assert (values_logical[2] == (x[2]+y[2]+t[2] > 0 ));
 
   delete parameters;
 

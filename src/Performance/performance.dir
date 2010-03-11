@@ -1,16 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      performance.dir
- * @brief     Measure, and provide functions to access, run-time 
- * @brief     performance 
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Performance
- *
- * Classes for collecting and allowing access to performance data
- * 
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup  Performance
+/// @brief     Classes for collecting and allowing access to performance data

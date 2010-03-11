@@ -1,13 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      field.dir
- * @brief     Scalar fields on an Array or Amr hierarchy 
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Field
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup Field
+/// @brief    Scalar fields on an Array or Amr hierarchy  

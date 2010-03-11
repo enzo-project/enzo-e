@@ -1,14 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      disk.dir
- * @brief     Provides functions for writing and reading data to and
- * @brief     from disk storage 
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Disk
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup Disk
+/// @brief    Provides functions for writing and reading data to and from disk storage

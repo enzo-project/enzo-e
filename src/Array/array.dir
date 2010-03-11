@@ -1,14 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      array.dir
- * @brief     Fortran-like array, which may be parallelized or
- * @brief     vectorized in various ways 
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Array
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup Array
+/// @brief    Fortran-like arrays, which may be distributed, threaded, and blocked in various ways

@@ -1,13 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      particles.dir
- * @brief     Efficiently represent groups of distributed particles 
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Particles
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup Particles
+/// @brief    Efficiently represent groups of distributed particles on an Amr hierarchy 

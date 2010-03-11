@@ -1,57 +1,10 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
 
-/** 
- *********************************************************************
- *
- * @file      test_hdf5.cpp
- * @brief     Program implementing unit tests for the Hdf5 class
- * @author    James Bordner
- * @todo      Test group operations
- * @date      Thu Feb 21 16:47:35 PST 2008
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file     test_hdf5.cpp
+/// @brief    Program implementing unit tests for the Hdf5 class
+/// @author   James Bordner
+/// @date     Thu Feb 21 16:47:35 PST 2008
  
 #include <stdio.h>
 #include <string>

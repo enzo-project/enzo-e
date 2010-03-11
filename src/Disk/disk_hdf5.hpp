@@ -10,6 +10,7 @@
 /// @todo     Refactor interface to be hdf5-independent (groups, datasets, etc.)
 /// @todo     Rename to, e.g., FileHdf5
 /// @todo     Add support for relative/absolute directory / group
+/// @todo     Add unit tests for group operations to test_disk_hdf5
 /// @brief    Interface for the Hdf5 class
 
 class Hdf5 {

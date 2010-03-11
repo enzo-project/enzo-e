@@ -56,5 +56,5 @@ Logical_expr {
 }
 
 List {
-     num1 = [1.0, true, 37, "string", x-y+2.0*z ];
+     num1 = [1.0, true, 37, "string", x-y+2.0*z, x+y+t > 0.0 ];
 }

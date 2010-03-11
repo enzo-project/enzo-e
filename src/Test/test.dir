@@ -1,13 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      test.dir
- * @brief     Unit testing framework
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Test
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup Test
+/// @brief    Unit testing framework 

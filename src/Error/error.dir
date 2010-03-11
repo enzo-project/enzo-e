@@ -1,14 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     Error prevention (including check-pointing), error 
- * @brief     detection and recovery 
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Error
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup Error
+/// @brief    Error prevention (including check-pointing), error detection and recovery 

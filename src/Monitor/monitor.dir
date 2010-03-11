@@ -1,13 +1,5 @@
-/** 
- *********************************************************************
- *
- * @file      monitor.dir
- * @brief     User interface to monitor the status of a running simulation 
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      2010-02-05
- * @defgroup  Monitor
- *
- * $Id$
- *
- *********************************************************************
- */
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @defgroup  Monitor
+/// @brief     User interface to monitor the status of a running simulation 
