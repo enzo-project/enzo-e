@@ -1,0 +1,35 @@
+([NotesComponentDisk Disk] < [NotesComponents index] > [NotesComponentError Error])
+
+
+[[TOC]]
+
+= `Distribute` Component =
+
+The `Distribute` component handles dynamic load balancing of [NotesComponentTask Tasks].
+
+== Hierarchical load balancing ==
+
+Load balancing is performed on different levels independently, with load balancing on lower parallel hierarchy levels performed more frequently than higher levels.  Before load balancing at a given parallel hierarchy level, all lower levels are balanced recursively from smallest (core-level) to largest.  To balance the given level, a smoothing-type operation is used with respect to some performance metric, such as user time (not wallclock or cpu), high-water memory usage since the previous timestep or previous level load balancing step.  The smoothing operation may include over-relaxation to intentionally "over-shoot" the balancing to reduce the frequency of load balancing steps by roughly half.  Furthermore, information from previous level balance steps may be used to identify trends to anticipate .  Since all communication is performed between processes the same distance from each other, communication latencies will be similar.  Tasks are transfered in a round-robin manner starting with the next-lower parallel hierarchy level to reduce the need for a second recursive re-balancing step at lower parallel hierarchy levels.
+
+There are some potential issues with this approach.  In particular, it does not preserve existing data locality of AMR grid patches with neighbors, parents, or children.  A variation of the above approach is to select tasks that are closest on the space-filling curve in the AMR octree-like data structure.  Load balancing higher parallel hierarchy levels may involve "shifting" tasks through a node, much like a front through a grid, creating a "task flux".  Since lower parallel hierarchy levels may become imbalanced, a second downward rebalance sweep may be required, which will induce a W cycle in load balancing.
+
+
+== Parallel class ==
+
+ ===  Attributes ===
+
+ || `double || Distribute::load_[][]` || ''Estimate of the load on each process group in each level'' ||
+ || `Task * || Distribute::tasks_` || ''list of local tasks'' ||
+
+ ===   Functions ===
+
+ || `Parallel::rebalance(int)` || ''Load balance `Task`s at given level based on computation or memory'' ||
+ || `Parallel::determine_load(int,int)` || ''Measure or estimate the load for the given group on the given level (or all)'' ||
+
+ ===  Usage ===
+
+ ===  Parameters ===
+
+ || `Parallel:balance_frequency` || [int,int,...] || E.g. `[1,8,64]` for timesteps between load-balancing, with 0 turning balancing off ||
+ || `Parallel:balance_method` || string || Specifies the method to use for load balancing.  Default is "none". ||
+

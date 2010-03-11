@@ -1,0 +1,118 @@
+= Design Patterns =
+
+[[TOC]]
+
+This section serves to collect potentially useful design patterns, and describe how they may be used in Cello.
+
+----
+
+ == Creational patterns ==
+
+=== [http://tinyurl.com/ylqfek2 Abstract factory pattern] ===
+
+''Provide an interface for creating families of related or dependent objects without specifying their concrete classes.''
+
+The abstract factory pattern may be useful for interfacing multiple parallelization techniques, e.g. MPI, MPI+OMP, etc.  As an example, for a given parallelization technique, the abstract factory would create the appropriate collection of objects--`FieldMpi`, `ParticlesMpi`, etc. --which would be transparent to the rest of the code, which only sees `Array`s and `Particles`.
+
+=== [http://en.wikipedia.org/wiki/Prototype_pattern Prototype pattern] ===
+
+''Specify the kinds of objects to create using a prototypical instance, and create new objects by copying this prototype.''
+
+This could be used for `Amr` `Patch`es, et al, so that run-time parameters are only required when creating the initial root AMR node.  We may want to change or adapt AMR parameters, however.
+
+=== [http://en.wikipedia.org/wiki/Singleton_pattern Singleton pattern] ===
+
+''Ensure a class has only one instance, and provide a global point of access to it.''
+
+Used in `Memory` to avoid multiple copies of memory allocation and deallocation statistics.
+
+Could be used in `Parameters`.
+
+----
+
+ == Structural patterns ==
+
+=== [http://en.wikipedia.org/wiki/Composite_pattern Composite pattern] ===
+
+''Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.''
+
+The composite pattern may possibly be useful for `Layout`s, which may be composed of a hierarchy (tree) of subblocks. The pattern allows a uniform view of complex `Layout`s (nodes) and the low-level `Block`s (leaves).  This may not be appropriate due to the process / threading aspect, though that may be encapsulated in `LayoutThreaded`, `LayoutParallel`, or similar.
+
+=== [http://en.wikipedia.org/wiki/Decorator_pattern Decorator pattern] ===
+
+''Attach additional responsibilities to an object dynamically keeping the same interface.  Decorators provide a flexible alternative to subclassing for extending functionality''
+
+The decorator pattern was originally considered for `Array`, to allow flexible combinations of features such as data distribution, threading, and blocking.  This was abandoned in favour of using subclassing, since the additional features are not independent.
+
+=== [http://en.wikipedia.org/wiki/Facade_pattern Facade pattern] ===
+
+''A facade is an object that provides a simplified interface to a larger body of code, such as a class library.''
+
+  This can be used for example in the `Disk` component to interface with libraries such as HDF5.
+
+=== [http://en.wikipedia.org/wiki/Flyweight_pattern Flyweight pattern] ===
+
+''Use sharing to support large numbers of fine-grained objects efficiently.''
+
+The flyweight pattern may be useful for `Particle` groups.  Its intrinsic state is the type, and the extrinsic state is position, velocity, etc.  This may not be appropriate since the amount of intrinsic state is small (type, name), and different extrinsic states are required for different particle groups.
+
+=== [http://en.wikipedia.org/wiki/Proxy_pattern Proxy pattern] ===
+
+''Provide a surrogate or placeholder for another object to control access to it.''
+
+This pattern can be used to represent remote `Patches` or `Tasks`, so that accessing neighbour data is independent of whether the data is readily available or must be transferred from a different processor.
+
+----
+
+ == Behavioral patterns ==
+
+=== [http://tinyurl.com/ycmzo4z Chain-of-responsibility pattern] ===
+
+''Avoid coupling the sender of a request to its receiver by giving more than one object a chance to handle the request. Chain the receiving objects and pass the request along the chain until an object handles it.''
+
+This pattern may be useful for hierarchical parallelism.  E.g., if process p1 in node n1 (n1,p1) needs to communicate with process p2 in node n2 (n2,p2).  Inter-node communicators are (n1,pk) - (n2,pk), so the communication chain would be e.g. (n1,p1) --> (n1,p2) --> (n2,p2).
+
+Also, a similar idea may be used for load balancing: an overloaded processor may send tasks to "random" processes, which may forward them on.  Not a good idea though since locality is not preserved.
+
+=== [http://en.wikipedia.org/wiki/Command_pattern Command pattern] ===
+
+''Encapsulate a request as an object, thereby letting you parameterize clients with different requests, queue or log requests, and support undoable operations.''
+
+The command pattern will likely be useful for implementing `Schedule` and `Task` components.  See "Active object pattern" below.
+
+
+=== [http://en.wikipedia.org/wiki/Iterator_pattern Iterator pattern] ===
+
+''Provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation.''
+
+The iterator pattern will likely be useful in many components, e.g. iterating over `Patches` in an `Amr` hierarchy, `Block`s in a `Layout`, etc.
+
+=== [http://en.wikipedia.org/wiki/Memento_pattern Memento pattern] ===
+
+''Without violating encapsulation, capture and externalize an object's internal state so that the object can be restored to this state later.''
+
+The memento pattern may be potentially useful in terms of restoring a previous state of the calculation due to a software or numerical fault.
+
+=== [http://en.wikipedia.org/wiki/Strategy_pattern Strategy pattern] ===
+
+''Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from clients that use it.''
+
+The strategy pattern may be useful in `Method` for implementing different algorithms for the same method, in `Disk` for reading and writing multiple types of files, etc.
+
+=== [http://tinyurl.com/y9ndgu7 Template method pattern] ===
+
+''Define the skeleton of an algorithm in an operation, deferring some steps to subclasses. Template Method lets subclasses redefine certain steps of an algorithm without changing the algorithm's structure.''
+
+The template method pattern will be useful for `Schedule` / `Task` for implementing a sequence of methods, possibly including parabolic or elliptic problems.  This is a very fundamental pattern, and seems rather obvious.
+
+----
+
+ == Concurrency patterns ==
+
+=== [http://en.wikipedia.org/wiki/Active_object Active object pattern] ===
+
+''The active object design pattern decouples method execution from method invocation that reside in their own thread of control.''
+
+This sounds related to what we want to with `Schedule` and `Task` components.
+
+----
