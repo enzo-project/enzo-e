@@ -35,7 +35,7 @@ project:
 	cd project; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C project
 proposal-nsf:
-	cd proposal-nsf; ln -sf ../Makefile.1 makefile
+#       use own Makefile
 	cd proposal-nsf; ln -sf ../papers.bib .
 	$(MAKE) -C proposal-nsf
 proposal-ascr:
