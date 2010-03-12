@@ -1,0 +1,604 @@
+%==================================================================
+% Commands
+%==================================================================
+
+\newcommand{\GRAPHICSSUFFIX}{eps}
+% \newcommand{\GRAPHICSSUFFIX}{pdf}
+
+%==================================================================
+% Lists
+%==================================================================
+
+\newcommand{\BeginDESCRIPTION}{\begin{description}\setlength{\itemsep}{-4pt}}
+\newcommand{\EndDESCRIPTION}{\end{description}}
+\newcommand{\BeginENUMERATE}{\begin{enumerate}\setlength{\itemsep}{-4pt}}
+\newcommand{\EndENUMERATE}{\end{enumerate}}
+\newcommand{\BeginITEMIZE}{\begin{itemize}\setlength{\itemsep}{-4pt}}
+\newcommand{\EndITEMIZE}{\end{itemize}}
+
+%==================================================================
+% Performance metrics
+%==================================================================
+
+% time
+
+\newcommand{\Time}{\mbox{$t$}}
+\newcommand{\Proc}[1]{\mbox{$^{#1}$}\hspace{-3pt}}
+
+% descriptors
+
+% \newcommand{\Start}{\mbox{$_{\vdash}$}}
+% \newcommand{\Stop}{\mbox{$_{\dashv}$}}
+\newcommand{\Start}[1]{\mbox{\mbox{$|#1$}}}
+\newcommand{\Stop}[1] {\mbox{\mbox{$#1|$}}}
+
+
+% peak
+
+\newcommand{\rate}{\mbox{$r$}}
+%\newcommand{\peakrate}{\mbox{$\hat{r}$}}
+\newcommand{\counts}{\mbox{$n$}}
+\newcommand{\amount}{\mbox{$N$}}
+\newcommand{\blocks}{\mbox{$b$}}
+
+% Efficiencies
+
+\newcommand{\eff}{\mbox{$e$}}
+\newcommand{\leff}{\mbox{$\dot{e}$}}
+\newcommand{\effuse}{\mbox{$E$}}
+\newcommand{\leffuse}{\mbox{$\dot{E}$}}
+\newcommand{\releff}{\mbox{$\varepsilon$}}
+\newcommand{\lreleff}{\mbox{$\dot{\varepsilon}$}}
+\newcommand{\releffuse}{\mbox{${\cal E}$}}
+\newcommand{\lreleffuse}{\mbox{$\dot{\cal E}$}}
+
+\newcommand{\Peak}[1]{\mbox{$\hat{#1}$}}
+\newcommand{\Max}[1]{\mbox{$\overline{#1}$}}
+\newcommand{\Min}[1]{\mbox{$\underline{#1}$}}
+\newcommand{\Avg}[1]{\mbox{$\langle#1\rangle$}}
+\newcommand{\Norm}[1]{\mbox{$\tilde{#1}$}}
+
+%\newcommand{\peakcapacity}{\mbox{$\hat{n}$}}
+%\newcommand{\peakamount}{\mbox{$\hat{N}$}}
+%\newcommand{\maxcapacity}{\mbox{$\overline{n}$}}
+%\newcommand{\maxamount}{\mbox{$\overline{N}$}}
+
+\newcommand{\flops}{\mbox{$_f$}}
+\newcommand{\comm}{\mbox{$_c$}}
+\newcommand{\mem}{\mbox{$_m$}}
+\newcommand{\disk}{\mbox{$_d$}}
+% \newcommand{\Mem}{\mbox{$_M$}}
+% \newcommand{\Disk}{\mbox{$_D$}}
+
+\newcommand{\attribute}{\mbox{$A$}}
+\newcommand{\software}{\mbox{$_s$}}
+\newcommand{\hardware}{\mbox{$_h$}}
+\newcommand{\datastructure}{\mbox{$_d$}}
+
+\newcommand{\Serial}[1]{\mbox{$\dot{#1}$}}
+\newcommand{\Parallel}[1]{\mbox{$\ddot{#1}$}}
+\newcommand{\Send}[1]{\mbox{$\stackrel{\scriptscriptstyle\rightarrow}{#1}$}}
+\newcommand{\Recv}[1]{\mbox{$\stackrel{\scriptscriptstyle\leftarrow}{#1}$}}
+\newcommand{\Write}[1]{\mbox{$\stackrel{\scriptscriptstyle\rightarrow}{#1}$}}
+\newcommand{\Read}[1]{\mbox{$\stackrel{\scriptscriptstyle\leftarrow}{#1}$}}
+\newcommand{\Store}[1]{\mbox{$\stackrel{\scriptscriptstyle\rightarrow}{#1}$}}
+\newcommand{\Load}[1]{\mbox{$\stackrel{\scriptscriptstyle\leftarrow}{#1}$}}
+\newcommand{\To}[1]{\mbox{$\stackrel{\scriptscriptstyle\rightarrow}{#1}$}}
+\newcommand{\From}[1]{\mbox{$\stackrel{\scriptscriptstyle\leftarrow}{#1}$}}
+
+\newcommand{\Resources}{\mbox{${\cal R}$}}
+\newcommand{\Levels}{\mbox{${\cal P}$}}
+\newcommand{\Metrics}{\mbox{${\cal M}$}}
+\newcommand{\aresource}{\rho}
+\newcommand{\alevel}{\pi}
+\newcommand{\ametric}{\mu}
+
+
+
+
+% peak rates
+
+% \newcommand{\peakrateflops}{\peakrate\flops}
+% \newcommand{\peakratemem}{\peakrate\mem}
+% \newcommand{\peakratecomm}{\peakrate\comm}
+% \newcommand{\peakratedisk}{\peakrate\disk}
+
+% max memory/disk
+% \newcommand{\maxmem}{\peakcapacity\Mem}
+% \newcommand{\maxdisk}{\peakcapacity\Disk}
+% flop count, etc.
+
+% \newcommand{\flopcount}{\mbox{$n_f$}}
+% \newcommand{\memcount}{\mbox{$n_m$}}
+% \newcommand{\commcount}{\mbox{$n_c$}}
+% \newcommand{\commcalls}{\mbox{$m_c$}}
+% \newcommand{\diskcount}{\mbox{$n_d$}}
+% \newcommand{\diskcalls}{\mbox{$m_d$}}
+
+% restricted flop count, etc.
+
+% \newcommand{\rnumflops}[1]{\mbox{$n_{f|#1}$}}
+% \newcommand{\rnummem}[1]{\mbox{$n_{m|#1}$}}
+% \newcommand{\rnumcomm}[1]{\mbox{$n_{c|#1}$}}
+% \newcommand{\rnumdisk}[1]{\mbox{$n_{d|#1}$}}
+
+% memory used, etc.
+
+% \newcommand{\usedmem}{\mbox{$n_M$}}
+% \newcommand{\useddisk}{\mbox{$n_D$}}
+
+% restricted memory used, etc.
+
+% \newcommand{\rusedmem}[1]{\mbox{$n_{M|#1}$}}
+% \newcommand{\ruseddisk}[1]{\mbox{$n_{D|#1}$}}
+% flop rate, etc.
+
+% \newcommand{\rateflops}{\mbox{$r_f$}}
+% \newcommand{\ratemem}{\mbox{$r_m$}}
+% \newcommand{\ratecomm}{\mbox{$r_c$}}
+% \newcommand{\ratedisk}{\mbox{$r_d$}}
+
+% restricted flop rate, etc.
+
+% \newcommand{\rrateflops}[1]{$er_{f|#1}$}
+% \newcommand{\rratemem}[1]{\mbox{$r_{m|#1}$}}
+% \newcommand{\rratecomm}[1]{\mbox{$r_{c|#1}$}}
+% \newcommand{\rratedisk}[1]{\mbox{$r_{d|#1}$}}
+% flop efficiencies, etc.
+% \newcommand{\efficflops}{\mbox{$e_f$}}
+% \newcommand{\efficmem}{\mbox{$e_m$}}
+% \newcommand{\efficcomm}{\mbox{$e_c$}}
+% \newcommand{\efficdisk}{\mbox{$e_d$}}
+
+% \newcommand{\efficDisk}{\mbox{$e_D$}}
+% \newcommand{\efficMem}{\mbox{$e_M$}}
+% restricted flop efficiencies, etc.
+
+% \newcommand{\refficflops}[1]{\mbox{$e_{f|#1}$}}
+% \newcommand{\refficmem}[1]{\mbox{$e_{m|#1}$}}
+% \newcommand{\refficcomm}[1]{\mbox{$e_{c|#1}$}}
+% \newcommand{\refficdisk}[1]{\mbox{$e_{d|#1}$}}
+
+% \newcommand{\refficDisk}[1]{\mbox{$e_{D|#1}$}}
+% \newcommand{\refficMem}[1]{\mbox{$e_{M|#1}$}}
+
+\newcommand{\parspeedup}[1]{\mbox{$\sigma(#1)$}}
+\newcommand{\parefficiency}[1]{\mbox{$\epsilon(#1)$}}
+\newcommand{\parloadbalance}[1]{\mbox{$lb(#1)$}}
+
+\newcommand{\numgrids}{n}
+\newcommand{\numprocs}{p}
+
+%==================================================================
+% TITLE
+%==================================================================
+
+\newcommand{\TITLE}[3]{
+\title{ {\huge #1}  \\ \vspace{0.1in}
+     {\small Document Version: #3} \vspace{-0.1in}
+    }
+\author{      #2 \\
+        Laboratory for Computational Astrophysics\\
+        University of California, San Diego}
+\maketitle}
+
+\newcommand{\USERTITLE}[3]{
+\title{ {\huge #1}  \\ 
+      #2 \\ \vspace{0.1in}
+     {\small Document Version: \number\year-\ifnum\number\month<10 0\else\fi\number\month-\ifnum\number\day<10 0\else\fi\number\day} \\ \vspace{-0.1in}
+     {\small Code Version: #3} \vspace{-0.1in}
+    }
+\author{James Bordner \\
+        Laboratory for Computational Astrophysics\\
+        University of California, San Diego}
+\maketitle}
+
+%==================================================================
+% FIGURE
+%==================================================================
+
+\newcounter{figctr}
+
+\newcommand{\FIGURE}[3]{
+\noindent
+\parbox{\textwidth}{
+%\ \\ \hrule \ \\
+\begin{center}
+#3
+\end{center}
+\ \nolinebreak 
+\ \\ 
+\nolinebreak
+\refstepcounter{figctr}
+\centerline{Figure \thefigctr: #1}
+\label{#2}
+%\ \\ \hrule \ \\
+}}
+
+\newcommand{\FIGUREPLOTS}[3]{
+\noindent
+\parbox{\textwidth}{
+%\ \\ \hrule \ \\
+#3
+\ \nolinebreak 
+\ \\ 
+\nolinebreak
+\refstepcounter{figctr}
+\centerline{Figure \thefigctr: #1}
+\label{#2}
+%\ \\ \hrule \ \\
+}}
+
+\newcommand{\PLOTONE}[1]{
+\begin{minipage}{5in}
+   \begin{minipage}{5.0in}
+     \epsfig{file=#1,angle=-90,width=5.0in}
+   \end{minipage}
+\end{minipage}}
+
+\newcommand{\PLOTONESMALL}[1]{
+\begin{minipage}{3.5in}
+   \begin{minipage}{3.125in}
+     \epsfig{file=#1,angle=-90,width=3.125in}
+   \end{minipage}
+\end{minipage}}
+
+\newcommand{\PLOTONEBIG}[1]{
+\begin{minipage}{7in}
+   \begin{minipage}{4.0in}
+     \epsfig{file=#1,angle=-90,width=4.0in}
+   \end{minipage}
+\end{minipage}}
+
+
+\newcommand{\PLOTSTWO}[2]{
+\begin{minipage}{\textwidth}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#1,angle=-90,width=3.5in}
+   \end{minipage}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#2,angle=-90,width=3.5in}
+   \end{minipage}
+\end{minipage} \\
+}
+
+\newcommand{\PLOTSTWONOROTATE}[2]{
+\begin{minipage}{\textwidth}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#1,width=3.5in}
+   \end{minipage}  \hfill
+   \begin{minipage}{3.5in}
+     \epsfig{file=#2,width=3.5in}
+   \end{minipage}
+\end{minipage} \\
+}
+
+
+\newcommand{\PLOTSTHREE}[3]{
+\begin{minipage}{7in}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#1,angle=-90,width=3.5in}
+   \end{minipage}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#2,angle=-90,width=3.5in}
+   \end{minipage}
+\end{minipage} \ \\
+\begin{minipage}{7in}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#3,angle=-90,width=3.5in}
+   \end{minipage}
+\end{minipage}}
+
+\newcommand{\PLOTSTHREENOROTATE}[3]{
+\begin{minipage}{\textwidth}
+   \begin{minipage}{2.25in}
+     \epsfig{file=#1,width=2.25in}
+   \end{minipage}  \hfill
+   \begin{minipage}{2.25in}
+     \epsfig{file=#2,width=2.25in}
+   \end{minipage} \hfill
+   \begin{minipage}{2.25in}
+     \epsfig{file=#3,width=2.25in}
+   \end{minipage}
+\end{minipage} \\
+}
+\newcommand{\PLOTSFOUR}[4]{
+\begin{minipage}{7in}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#1,angle=-90,width=3.5in}
+   \end{minipage}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#2,angle=-90,width=3.5in}
+   \end{minipage}
+\end{minipage} \ \\
+\begin{minipage}{7in}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#3,angle=-90,width=3.5in}
+   \end{minipage}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#4,angle=-90,width=3.5in}
+   \end{minipage}
+\end{minipage}}
+
+\newcommand{\PLOTSFOURNOROTATE}[4]{
+\begin{minipage}{7in}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#1,width=3.5in}
+   \end{minipage}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#2,width=3.5in}
+   \end{minipage}
+\end{minipage} \ \\
+\begin{minipage}{7in}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#3,width=3.5in}
+   \end{minipage}
+   \begin{minipage}{3.5in}
+     \epsfig{file=#4,width=3.5in}
+   \end{minipage}
+\end{minipage}}
+
+\newcommand{\PLOTSTWOBIG}[2]{
+\begin{minipage}{7in}
+   \begin{minipage}{4.0in}
+     \epsfig{file=#1,angle=-90,width=4.0in}
+   \end{minipage} \ \\
+   \begin{minipage}{4.0in}
+     \epsfig{file=#2,angle=-90,width=4.0in}
+   \end{minipage}
+\end{minipage}
+}
+
+\newcommand{\PLOTSTHREEBIG}[3]{
+\begin{minipage}{7in}
+   \begin{center}
+   \begin{minipage}{4.0in}
+     \epsfig{file=#1,angle=-90,width=4.0in}
+   \end{minipage} \ \\
+   \begin{minipage}{4.0in}
+     \epsfig{file=#2,angle=-90,width=4.0in}
+   \end{minipage} \ \\
+   \begin{minipage}{4.0in}
+     \epsfig{file=#3,angle=-90,width=4.0in}
+   \end{minipage}
+   \end{center}
+\end{minipage}}
+
+%==================================================================
+% Commands
+%==================================================================
+
+% AMR commands
+
+\newcommand{\hierarchy}{\mbox{$H$}}
+\newcommand{\hierarchies}{\mbox{${\cal H}$}}
+
+\newcommand{\level}{\mbox{{$L$}}}
+\newcommand{\levels}{\mbox{${\cal L}$}}
+
+\newcommand{\grid}{\mbox{$G$}}
+\newcommand{\grids}{\mbox{${\cal G}$}}
+
+\newcommand{\zone}{\mbox{$Z$}}
+\newcommand{\zones}{\mbox{${\cal Z}$}}
+\newcommand{\activezone}{\mbox{$Z^\bullet$}}
+\newcommand{\activezones}{\mbox{${\cal Z}^\bullet$}}
+\newcommand{\ghostzone}{\mbox{$Z^\circ$}}
+\newcommand{\ghostzones}{\mbox{${\cal Z}^\circ$}}
+
+\newcommand{\ghostdepth}{\mbox{${n_\gamma}$}}
+
+
+%------------------------------------------------------------------
+\newcommand{\amrSolve}{\textsf{amrSolve}}
+\newcommand{\amrLeech}{\textsf{amrLeech}}
+\newcommand{\assert}[1]{\textit{Assert: \function{#1}}}
+\newcommand{\bfcode}[1]{\textbf{\code{#1}}}
+\newcommand{\class}[1]{\textsf{#1}}
+\newcommand{\code}[1]{\textsf{#1}}
+\newcommand{\icode}[1]{\textit{\textsf{#1}}}
+\newcommand{\macro}[1]{\textsf{#1}}
+\newcommand{\refer}[1]{\underline{#1}}
+\newcommand{\comment}[1]{\textit{// #1}}
+\newcommand{\enzo}{\textsf{Enzo}}
+\newcommand{\papi}{\textsf{PAPI}}
+\newcommand{\mgmpi}{\textsf{MGMPI}}
+\newcommand{\hypreinit}{\textsf{hypre-init}}
+\newcommand{\hypresolve}{\textsf{hypre-solve}}
+\newcommand{\enzotohypre}{\textsf{enzo2hypre}}
+\newcommand{\hypre}{\textsf{hypre}}
+\newcommand{\lcatest}{\textsf{lcatest}}
+\newcommand{\sage}{\textsf{SAGE}}
+\newcommand{\rage}{\textsf{RAGE}}
+\newcommand{\function}[1]{\textsf{#1}}
+\newcommand{\functionbf}[1]{\textbf{\textsf{#1}}}
+\newcommand{\functionit}[1]{\textbf{\textit{#1}}}
+\newcommand{\handle}[1]{\textit{\texttt{\textcolor{parametercolor}{#1}}}\index{#1}}
+\newcommand{\ibcode}[1]{\textit{\textbf{\code{#1}}}}
+\newcommand{\codebf}[1]{\code{\textbf{#1}}}
+\newcommand{\itcode}[1]{\textit{\code{#1}}}
+\newcommand{\lcaperf}{\code{lcaperf}}
+\newcommand{\jbPerf}{\code{lcaperf}}
+\newcommand{\jbPerfFun}[2]{\code{jbPerf.#1(}\textit{#2}\code{)}}
+\newcommand{\Label}[1]{\textsf{#1}}
+\newcommand{\logfile}{\code{LOG}.\textit{suite-version}}
+\newcommand{\mpi}{\code{MPI}}
+\newcommand{\newcode}[1]{\textit{\textsf{#1}}}
+\newcommand{\TABS}{xxxx\=xxxxxxxxx\=xxxxxxxxx\=\kill}
+\newcommand{\cnull}{'$\backslash$0'}
+\newcommand{\fnull}{''}
+\newcommand{\threedee}{$3$D}
+\newcommand{\twodee}{$2$D}
+\newcommand{\onedee}{$1$D}
+
+%-----------------------------------------------------------------------
+\newcommand{\devel}[1]{#1}  % Turn ON development notes
+%\newcommand{\devel}[1]{}    % Turn OFF development notes
+%-----------------------------------------------------------------------
+
+\newcommand{\note}[1]{\devel{\eighthnote\ \textit{#1} \\}}
+\newcommand{\noteinline}[1]{\devel{[\eighthnote\ \textit{#1}]}}
+\newcommand{\paperonly}[1]{\devel{\textit{\underline{Paper}: #1}}}
+\newcommand{\pargraph}[1]{\devel{\P\ \textbf{#1} \\}}
+\newcommand{\point}[1]{\devel{$\bullet$ \textit{#1} \\}}
+\newcommand{\pointinline}[1]{\devel{[$\bullet$ \textit{#1}]}}
+\newcommand{\question}[1]{\devel{\textbf{???} \textit{#1} \textbf{???} \\}}
+\newcommand{\reportonly}[1]{\devel{\textit{\underline{Report}: #1}}}
+\newcommand{\todotext}[1]{\devel{$\bigcirc$ \textit{#1} \\}}
+\newcommand{\donetext}[1]{\textcolor{gray}{\textit{#1}} \\}
+\newcommand{\todo}{\devel{$\circ$}}
+\newcommand{\done}{\devel{$\bullet$}}
+\newcommand{\noop}    {\devel{\textcolor{gray}{$\bullet$}}}
+\newcommand{\halfdone}{\devel{\textcolor{gray}{$\bullet$}}}
+\newcommand{\fade}{\halfdone}
+
+\newcommand{\CodeSnippetTabbing}[1]{
+\begin{center}
+\begin{minipage}[l]{6in}
+\small
+\hrule \ \\
+\vspace{-\baselineskip}
+\begin{tabbing}
+xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxx\=xxxxx\= \kill
+#1
+\end{tabbing}
+\hrule
+\end{minipage}
+\end{center}}
+
+\newcommand{\EndDOCUMENT}{
+%=======================================================================
+\bibliography{papers}
+\bibliographystyle{unsrt}
+%==================================================================
+\end{document}
+}
+
+%==================================================================
+% Packages
+%==================================================================
+
+\usepackage[dvips]{graphicx}
+\usepackage{epsfig}
+\usepackage{color}
+% \usepackage{url}
+\usepackage{pst-uml}
+\usepackage{rotating}
+\usepackage{wasysym}
+
+%==================================================================
+% Margins and spacing
+%==================================================================
+
+\raggedbottom
+
+\setlength{\textwidth}{7in}
+\setlength{\oddsidemargin}{-0.375in}
+\setlength{\evensidemargin}{-0.375in}
+\setlength{\topmargin}{0.0in}
+\setlength{\textheight}{9.00in}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{\baselineskip}
+
+\pagestyle{headings}
+% \pagestyle{myheadings}
+% \markboth{\today}{\today}
+
+%==================================================================
+% MGMPI-like function description
+%==================================================================
+\newlength{\fparmwidth}
+\newlength{\cparmwidth}
+%\newcommand{\FunctionDescription}[7]{
+\newcommand{\FunctionDescription}[4]{
+\begin{center}
+  \framebox{
+    \hfill\begin{tabular}[c]{l} 
+ \ \\
+    \FunctionBigColor{#1()} \\
+ \ \\
+%      \parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{plaintextcolor}{#7}}} \\ \textcolor{black}{\hrule}} \\
+      \parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{plaintextcolor}{#4}}} \\ \textcolor{black}{\hrule}} \\
+ \ \\
+      \hspace{0.2in}\parbox[l]{5.5in}{
+     \settowidth{\cparmwidth}{\mbox{\keyword{#2} \cfunctionColor{#1}}}
+     \addtolength{\cparmwidth}{-5.43in}
+     \addtolength{\cparmwidth}{-2\cparmwidth}
+        \makebox[5.0in][l]{{\mbox{\keyword{#2} \cfunctionColor{#1} \parameterColor{\texttt{(}\parbox[t]{\cparmwidth}{\texttt{#3)}}}}}\ \hfill}
+%       \\ \ \\
+       \\
+     \settowidth{\fparmwidth}{\mbox{\keyword{#2} \cfunctionColor{#1}}}
+     \addtolength{\fparmwidth}{-5.0in}
+     \addtolength{\fparmwidth}{-2\fparmwidth}
+%        \makebox[5.0in][l]{{\mbox{\keyword{#4} \ffunctionColor{#1} \parameterColor{\texttt{(}\parbox[t]{\fparmwidth}{\texttt{#5)}}}}}\ \hfill} 
+%       \\ 
+%      #6 \\
+    }
+% \ \\
+    \end{tabular}
+  }
+\end{center}
+}
+
+\newcommand{\FunctionDescriptionCF}[7]{
+\begin{center}
+  \framebox{
+    \hfill\begin{tabular}[c]{l} 
+ \ \\
+    \FunctionBigColor{#1} \\
+ \ \\
+      \parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{plaintextcolor}{#7}}} \\ \textcolor{black}{\hrule}} \\
+ \ \\
+      \hspace{0.2in}\parbox[l]{5.5in}{
+     \settowidth{\cparmwidth}{\mbox{\keyword{#2} \cfunctionColor{#1}}}
+     \addtolength{\cparmwidth}{-5.43in}
+     \addtolength{\cparmwidth}{-2\cparmwidth}
+        \makebox[5.0in][l]{{\mbox{\keyword{#2} \cfunctionColor{#1} \parameterColor{\texttt{(}\parbox[t]{\cparmwidth}{\texttt{#3)}}}}}\ \hfill}
+       \\ \ \\
+     \settowidth{\fparmwidth}{\mbox{\keyword{#2} \cfunctionColor{#1}}}
+     \addtolength{\fparmwidth}{-5.0in}
+     \addtolength{\fparmwidth}{-2\fparmwidth}
+        \makebox[5.0in][l]{{\mbox{\keyword{#4} \ffunctionColor{#1} \parameterColor{\texttt{(}\parbox[t]{\fparmwidth}{\texttt{#5)}}}}}\ \hfill} 
+       \\ 
+      #6 \\}
+ \ \\
+    \end{tabular}
+  }
+\end{center}
+}
+
+\newcommand{\cparm}[2]{\mbox{\keyword{#1}#2}}
+\newcommand{\fparm}[1]{\mbox{#1}}
+
+\newcommand{\hR}[1]{\textcolor{inoutcolor}{\underline{\parameterColor{#1}}}}
+\newcommand{\hW}[1]{\textcolor{inoutcolor}{$\overline{\parameterColor{#1}}$}}
+\newcommand{\hRW}[1]{\hR{\hW{#1}}}
+\newcommand{\R}[1]{$\parameterColor{#1}^{\textcolor{inoutcolor}{\downarrow}}$}
+\newcommand{\W}[1]{$\parameterColor{#1}^{\textcolor{inoutcolor}{\uparrow}}$}
+\newcommand{\RW}[1]{$\parameterColor{#1}^{\textcolor{inoutcolor}{\updownarrow}}$}
+
+\newcommand{\chR}[1]{\textcolor{inoutcolor}{\underline{\ClassParameterColor{#1}}}}
+\newcommand{\chW}[1]{\textcolor{inoutcolor}{$\overline{\ClassParameterColor{#1}}$}}
+\newcommand{\chRW}[1]{\hR{\textcolor{inoutcolor}{$\overline{\ClassParameterColor{#1}}$}}}
+\newcommand{\cR}[1]{$\ClassParameterColor{#1}^{\textcolor{inoutcolor}{\downarrow}}$}
+\newcommand{\cW}[1]{$\ClassParameterColor{#1}^{\textcolor{inoutcolor}{\uparrow}}$}
+\newcommand{\cRW}[1]{$\ClassParameterColor{#1}^{\textcolor{inoutcolor}{\updownarrow}}$}
+\newcommand{\FunctionBigColor}[1]{\textcolor{functionbigcolor}{\large{\textsf{#1}}}\index{#1|textbf}}
+\newcommand{\keyword}[1]{\textcolor{keywordcolor}{\code{#1}}}
+\newcommand{\cprefix}{jbPerf.}
+\newcommand{\fprefix}{jbPerf\_}
+\newcommand{\cfunctionColor}[1]{\textcolor{functioncolor}{\code{\cprefix #1}}}
+\newcommand{\ffunctionColor}[1]{\textcolor{functioncolor}{\code{\fprefix #1}}}
+\newcommand{\parameterColor}[1]{\textcolor{parametercolor}{\code{#1}}}
+
+\definecolor{gray}{rgb}{0.4,0.4,0.4}
+\definecolor{functionbigcolor}{rgb}{1.0,0.0,0.0}
+\definecolor{plaintextcolor}{rgb}{0.0,0.0,0.0}
+\definecolor{parametercolor}{rgb}{0.0,0.0,0.5}
+\definecolor{keywordcolor}{rgb}{0.0,0.0,0.0}
+\definecolor{functioncolor}{rgb}{0.5,0.0,0.0}
+% \definecolor{inoutcolor}{named}{Magenta}
+
+\newcommand{\FUNCTION}[1]{\input{functions/fbegin}
+   \input{functions/#1}
+\input{functions/fend}}
