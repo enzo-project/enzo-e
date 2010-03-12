@@ -83,7 +83,7 @@ int main(int argc, char **argv)
     // JBPERF initialization
     // --------------------------------------------------
 
-    jbPerf.begin("EL");
+    lcaperf.begin("EL");
 
     std::string filename (argv[1]);
 
@@ -93,13 +93,13 @@ int main(int argc, char **argv)
 
     // create a new problem and read it in
 
-    jbPerf.start("problem");
+    lcaperf.start("problem");
     Problem problem;
-    jbPerf.stop("problem");
+    lcaperf.stop("problem");
 
-    jbPerf.start("problem-read");
+    lcaperf.start("problem-read");
     problem.read  (filename);
-    jbPerf.stop("problem-read");
+    lcaperf.stop("problem-read");
 
     // --------------------------------------------------
     // Initialize the hierarchy
@@ -112,9 +112,9 @@ int main(int argc, char **argv)
     // determine interconnections between grids
 
     bool is_periodic = problem.parameters().value("boundary") == "periodic";
-    jbPerf.start("hierarchy-initialize");
+    lcaperf.start("hierarchy-initialize");
     hierarchy.initialize(problem.domain(), *pmpi,is_periodic);
-    jbPerf.stop("hierarchy-initialize");
+    lcaperf.stop("hierarchy-initialize");
 
     if (debug) problem.print ();
 
@@ -127,46 +127,46 @@ int main(int argc, char **argv)
     Hypre hypre (hierarchy,problem.parameters());
 
 
-    jbPerf.start("hypre-init-hierarchy");
+    lcaperf.start("hypre-init-hierarchy");
     hypre.init_hierarchy (*pmpi);
-    jbPerf.stop("hypre-init-hierarchy");
+    lcaperf.stop("hypre-init-hierarchy");
 
     // Initialize the stencils
     
-    jbPerf.start("hypre-init-stencil");
+    lcaperf.start("hypre-init-stencil");
     hypre.init_stencil ();
-    jbPerf.stop("hypre-init-stencil");
+    lcaperf.stop("hypre-init-stencil");
 
     // Initialize the graph
 
-    jbPerf.start("hypre-init-graph");
+    lcaperf.start("hypre-init-graph");
     hypre.init_graph ();
-    jbPerf.stop("hypre-init-graph");
+    lcaperf.stop("hypre-init-graph");
 
     // Initialize the elements of matrix A and vector B
 
-    jbPerf.start("hypre-init-elements");
+    lcaperf.start("hypre-init-elements");
     hypre.init_elements (problem.points());
-    jbPerf.stop("hypre-init-elements");
+    lcaperf.stop("hypre-init-elements");
 
     // --------------------------------------------------
     // Solve the linear system A X = B
     // --------------------------------------------------
 
-    jbPerf.start("hypre-solve");
+    lcaperf.start("hypre-solve");
     hypre.solve ();
-    jbPerf.stop("hypre-solve");
+    lcaperf.stop("hypre-solve");
 
     // --------------------------------------------------
     // Evaluate the solution
     // --------------------------------------------------
 
-    jbPerf.start("hypre-evaluate");
+    lcaperf.start("hypre-evaluate");
     hypre.evaluate ();
-    jbPerf.stop("hypre-evaluate");
+    lcaperf.stop("hypre-evaluate");
 
     // --------------------------------------------------
-    // jbPerf Finalize
+    // lcaperf Finalize
     // --------------------------------------------------
 
     // --------------------------------------------------
@@ -177,7 +177,7 @@ int main(int argc, char **argv)
     MPI_Finalize();
     delete pmpi;
 
-    jbPerf.end("EL");
+    lcaperf.end("EL");
 
   } else {
 

@@ -13,24 +13,24 @@
  *
  */
 
-#ifdef USE_JBPERF
+#ifdef USE_LCAPERF
 
-#   include "jbPerf.h"
+#   include "lcaperf.h"
 
 
-#   define JBPERF_BEGIN(SEGMENT) jbPerf.begin(SEGMENT)
-#   define JBPERF_END(SEGMENT)   jbPerf.end(SEGMENT)
-#   define JBPERF_START(REGION)  jbPerf.start(REGION)
-#   define JBPERF_STOP(REGION)   jbPerf.stop(REGION)
-#   define JBPERF_GLOBAL(NAME,VALUE) jbPerf.global(NAME,VALUE)
+#   define LCAPERF_BEGIN(SEGMENT) lcaperf.begin(SEGMENT)
+#   define LCAPERF_END(SEGMENT)   lcaperf.end(SEGMENT)
+#   define LCAPERF_START(REGION)  lcaperf.start(REGION)
+#   define LCAPERF_STOP(REGION)   lcaperf.stop(REGION)
+#   define LCAPERF_GLOBAL(NAME,VALUE) lcaperf.global(NAME,VALUE)
 
 #else
 
-#   define JBPERF_BEGIN(SEGMENT)     ;
-#   define JBPERF_END(SEGMENT)       ;
-#   define JBPERF_START(REGION)      ;
-#   define JBPERF_STOP(REGION)       ;
-#   define JBPERF_GLOBAL(NAME,VALUE) ;
+#   define LCAPERF_BEGIN(SEGMENT)     ;
+#   define LCAPERF_END(SEGMENT)       ;
+#   define LCAPERF_START(REGION)      ;
+#   define LCAPERF_STOP(REGION)       ;
+#   define LCAPERF_GLOBAL(NAME,VALUE) ;
 
 #endif
 
