@@ -6,7 +6,6 @@
 
 /// @file     memory.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
-/// @todo     Remove static for thread safety
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
 /// @brief    Interface for the Memory class.  Uses a simple Singleton pattern.
 

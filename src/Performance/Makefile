@@ -29,8 +29,9 @@ time_matvec: time_matvec.cpp
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/counters.hpp          $(INCLUDE)
-	ln -sf `pwd`/performance.hpp       $(INCLUDE)
+	ln -sf `pwd`/counters.hpp $(INCLUDE)
+	ln -sf `pwd`/performance.hpp $(INCLUDE)
+	ln -sf `pwd`/performance_performance.hpp $(INCLUDE)
 	ln -sf `pwd`/performance_timer.hpp $(INCLUDE)
 
 #-----------------------------------------------------------------------

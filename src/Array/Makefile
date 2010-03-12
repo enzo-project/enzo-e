@@ -15,8 +15,9 @@ test_array: test_array.o
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/array.hpp         $(INCLUDE)
-	ln -sf `pwd`/array_block.hpp         $(INCLUDE)
+	ln -sf `pwd`/array.hpp $(INCLUDE)
+	ln -sf `pwd`/array_array.hpp $(INCLUDE)
+	ln -sf `pwd`/array_block.hpp $(INCLUDE)
 
 #-----------------------------------------------------------------------
 
