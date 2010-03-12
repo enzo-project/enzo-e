@@ -28,8 +28,6 @@ pdf.$(PAPER):$(PAPER).dvi
 $(PAPER)2.pdf:$(PAPER)2.ps
 	ps2pdf $(PAPER)2.ps $(PAPER)2.pdf
 
-include.tex:
-	ln -sf ~/latex/include-common.tex include.tex
 ########################################################################
 
 clean:
