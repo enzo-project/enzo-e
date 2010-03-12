@@ -23,36 +23,115 @@ double gflops (double time)
 
 //----------------------------------------------------------------------
 
-void update_y(Timer & timer,
-	      int thread_start,
-	      int thread_stop,
-	      double * array,
-	      double * sum)
+double update_x
+(
+ Timer &  timer,
+ int      thread_start,
+ int      thread_stop,
+ double * array
+ )
 {
-    *sum = 0;
+  double sum = 0;
+  for (int iz=0; iz<SIZE; iz++) {
+    for (int iy = 0; iy<SIZE; iy++) {
+      for (int ix=thread_start; ix<thread_stop; ix++) {
+	int k = ix + SIZE*(iy + iz*SIZE);
+	array[k] = k;
+	sum += array[k];
+      }
+    }
+  }
+  timer.clear();
+  timer.start();
+  for (int ic = 0; ic < COUNT; ic++) {
+    for (int iz=0; iz<SIZE; iz++) {
+      for (int iy = 0; iy<SIZE; iy++) {
+	for (int ix=thread_start; ix<thread_stop; ix++) {
+	  int k = ix + SIZE*(iy + iz*SIZE);
+	  array[k] = CODE;
+	}
+      }
+    }
+  }
+  timer.stop();
+  return sum;
+}
+
+//----------------------------------------------------------------------
+
+double update_y
+(
+ Timer &  timer,
+ int      thread_start,
+ int      thread_stop,
+ double * array
+ )
+{
+  double sum = 0;
+  for (int iz = 0; iz<SIZE; iz++) {
+    for (int iy=thread_start; iy<thread_stop; iy++) {
+      for (int ix=0; ix<SIZE; ix++) {
+	int k = ix + SIZE*(iy + iz*SIZE);
+	array[k] = k;
+	sum += array[k];
+      }
+    }
+  }
+  timer.clear();
+  timer.start();
+  for (int ic = 0; ic < COUNT; ic++) {
     for (int iz = 0; iz<SIZE; iz++) {
       for (int iy=thread_start; iy<thread_stop; iy++) {
 	for (int ix=0; ix<SIZE; ix++) {
 	  int k = ix + SIZE*(iy + iz*SIZE);
-	  array[k] = k;
-	  *sum += array[k];
+	  array[k] = CODE;
 	}
       }
     }
-    timer.start();
-    for (int ic = 0; ic < COUNT; ic++) {
-      for (int iz = 0; iz<SIZE; iz++) {
-	for (int iy=thread_start; iy<thread_stop; iy++) {
-	  for (int ix=0; ix<SIZE; ix++) {
-	    int k = ix + SIZE*(iy + iz*SIZE);
-	    array[k] = CODE;
-	  }
-	}
-      }
-    }
-    timer.stop();
+  }
+  timer.stop();
+  return sum;
 }
 
+//----------------------------------------------------------------------
+
+double update_z
+(
+ Timer &  timer,
+ int      thread_start,
+ int      thread_stop,
+ double * array
+ )
+{
+  double sum = 0;
+
+  sum = 0;
+  for (int iz=thread_start; iz<thread_stop; iz++) {
+    for (int iy = 0; iy<SIZE; iy++) {
+      for (int ix=0; ix<SIZE; ix++) {
+	int k = ix + SIZE*(iy + iz*SIZE);
+	array[k] = k;
+	sum += array[k];
+      }
+    }
+  }
+  timer.clear();
+  timer.start();
+  for (int ic = 0; ic < COUNT; ic++) {
+    for (int iz=thread_start; iz<thread_stop; iz++) {
+      for (int iy = 0; iy<SIZE; iy++) {
+	for (int ix=0; ix<SIZE; ix++) {
+	  int k = ix + SIZE*(iy + iz*SIZE);
+	  array[k] = CODE;
+	}
+      }
+    }
+  }
+  timer.stop();
+  return sum;
+}
+
+//----------------------------------------------------------------------
 
 void print_time (Timer & timer,char axis,int ip_omp,double sum)
 {
@@ -95,59 +174,12 @@ int main(int argc, char ** argv)
 
     Timer timer;
 
-    // bring into cache
-    sum = 0;
-    for (int iz=0; iz<SIZE; iz++) {
-      for (int iy = 0; iy<SIZE; iy++) {
-	for (int ix=thread_start; ix<thread_stop; ix++) {
-	  int k = ix + SIZE*(iy + iz*SIZE);
-	  array[k] = k;
-	  sum += array[k];
-	}
-      }
-    }
-    timer.start();
-    for (int ic = 0; ic < COUNT; ic++) {
-      for (int iz=0; iz<SIZE; iz++) {
-	for (int iy = 0; iy<SIZE; iy++) {
-	  for (int ix=thread_start; ix<thread_stop; ix++) {
-	    int k = ix + SIZE*(iy + iz*SIZE);
-	    array[k] = CODE;
-	  }
-	}
-      }
-    }
-    timer.stop();
-    printf ("(axis,thread,time,gflops,sum) = (X,%d,%g,%g,%g)\n",
-	    ip_omp,timer.value(), gflops(timer.value()),sum);
+    sum = update_x(timer,thread_start,thread_stop,array);
+    print_time (timer,'X',ip_omp,sum);
 
-
-    update_y(timer,thread_start,thread_stop,array,&sum);
+    sum = update_y(timer,thread_start,thread_stop,array);
     print_time (timer,'Y',ip_omp,sum);
 
-    timer.clear();
-    sum = 0;
-    for (int iz=thread_start; iz<thread_stop; iz++) {
-      for (int iy = 0; iy<SIZE; iy++) {
-	for (int ix=0; ix<SIZE; ix++) {
-	  int k = ix + SIZE*(iy + iz*SIZE);
-	  array[k] = k;
-	  sum += array[k];
-	}
-      }
-    }
-    timer.start();
-    for (int ic = 0; ic < COUNT; ic++) {
-      for (int iz=thread_start; iz<thread_stop; iz++) {
-	for (int iy = 0; iy<SIZE; iy++) {
-	  for (int ix=0; ix<SIZE; ix++) {
-	    int k = ix + SIZE*(iy + iz*SIZE);
-	    array[k] = CODE;
-	  }
-	}
-      }
-    }
-    timer.stop();
     printf ("(axis,thread,time,gflops,sum) = (Z,%d,%g,%g,%g)\n",
 	    ip_omp,timer.value(), gflops(timer.value()),sum);
   }
