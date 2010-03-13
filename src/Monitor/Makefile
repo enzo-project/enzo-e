@@ -21,8 +21,8 @@ test_monitor: test_monitor.o
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/monitor.hpp       $(INCLUDE)
-	ln -sf `pwd`/pngwriter.h       $(INCLUDE)
+	ln -sf `pwd`/monitor.hpp $(INCLUDE)
+	ln -sf `pwd`/monitor_monitor.hpp $(INCLUDE)
 
 #-----------------------------------------------------------------------
 

@@ -48,6 +48,7 @@ install-include:
 	ln -sf `pwd`/param.hpp      $(INCLUDE)
 	ln -sf `pwd`/parse.h        $(INCLUDE)
 	ln -sf `pwd`/parse.tab.h    $(INCLUDE)
+	ln -sf `pwd`/parameters_parameters.hpp $(INCLUDE)
 #-----------------------------------------------------------------------
 
 .PHONY: clean-local

@@ -15,7 +15,8 @@ include $(TOP)/src/MAKE/Make.include
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/field.hpp       $(INCLUDE)
+	ln -sf `pwd`/field.hpp $(INCLUDE)
+	ln -sf `pwd`/field_field.hpp $(INCLUDE)
 
 #-----------------------------------------------------------------------
 
