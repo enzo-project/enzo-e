@@ -1,4 +1,0 @@
-#!/bin/csh -f
-
-awk 'BEGIN {p = 0;}; {if ($1=="Data:") p=1;} ; {if (p == 1) print substr($2,2,length($2)-2),substr($3,1,length($3)-1),substr($4,1,length($4)-1),$6}' $1
-
