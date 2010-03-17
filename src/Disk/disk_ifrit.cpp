@@ -1,15 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      disk_ifrit.cpp
- * @brief     Implementation of the Ifrit class
- * @author    James Bordner
- * @date      Thu Feb 21 16:11:36 PST 2008
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      disk_ifrit.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Thu Feb 21 16:11:36 PST 2008
+/// @brief     Implementation of the Ifrit class
 
 #include <stdio.h>
 

@@ -1,47 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-//======================================================================
-// INCLUDES
-//======================================================================
+/// @file      memory.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Thu Sep  3 16:44:18 PDT 2009
+/// @brief     Functions for dynamic memory management
 
 #include <stdio.h>
 #include <string.h>
@@ -54,50 +14,6 @@
 #include "memory.hpp"
 
 Memory Memory::instance_;
-
-/** 
- *********************************************************************
- *
- * @file      memory.cpp
- * @brief     Functions for dynamic memory management
- * @author    James Bordner
- * @date      Thu Sep  3 16:44:18 PDT 2009
- * @note      
- *
- * DESCRIPTION 
- * 
- *    Functions for dynamic memory management
- *
- * PACKAGES
- *
- *    NONE
- * 
- * INCLUDES
- *  
- *    NONE
- *
- * PUBLIC FUNCTIONS
- *  
- *   ( ) static Memory();
- *   ( ) static void * allocate(size_t size);
- *   ( ) static void * allocate(size_t size, std::string class);
- *   ( ) static deallocate();
- *   ( ) static deallocate(std::string class);
- *   ( ) static current(class);
- *   ( ) static available();
- *   ( ) static efficiency();
- *   ( ) static highest(class);
- *   ( ) static set_highest();
- *
- *
- * PRIVATE FUCTIONS
- *  
- *    
- *
- * $Id$
- *
- *********************************************************************
- */
 
 //======================================================================
 // FUNCTIONS

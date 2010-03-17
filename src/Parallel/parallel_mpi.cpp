@@ -1,36 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      mpi.cpp
- * @brief     MPI helper functions
- * @author    James Bordner (jobordner@ucsd.edu)
- * @date      Thu Oct 15 10:41:28 PDT 2009
- * @note      
- *
- * DESCRIPTION 
- * 
- *    MPI helper functions
- *
- * PACKAGES
- *
- *    
- * 
- * INCLUDES
- *  
- *    
- *
- * PUBLIC FUNCTIONS
- *  
- *    
- *
- * PRIVATE FUCTIONS
- *  
- *    
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      mpi.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Thu Oct 15 10:41:28 PDT 2009
+/// @brief     MPI helper functions
 
 #include "cello.h"
 

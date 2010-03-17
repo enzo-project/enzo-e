@@ -1,54 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
- * @file      test_hydro.cpp
- * @brief     Program implementing unit tests for hydrodynamics
- * @author    James Bordner
- * @date      Fri Mar  7 17:11:14 PST 2008
- *
- *********************************************************************
- */
+/// @file      test_hydro.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Fri Mar  7 17:11:14 PST 2008
+/// @brief     Program implementing unit tests for hydrodynamics
 
 #include "string.h"
 #include "cello_hydro.h"

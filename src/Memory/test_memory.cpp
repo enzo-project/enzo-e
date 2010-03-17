@@ -1,56 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
- * @file      test_memory.cpp
- * @brief     Program implementing unit tests for the Memory component
- * @author    James Bordner
- * @date      Thu Sep  3 16:37:24 PDT 2009
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      test_memory.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Thu Sep  3 16:37:24 PDT 2009
+/// @brief     Program implementing unit tests for the Memory component
  
 #include <stdio.h>
 #include <stdlib.h>

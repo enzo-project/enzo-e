@@ -1,43 +1,8 @@
-/** 
- *********************************************************************
- *
- * @file      Grid_SetMinimumSupport.cpp
- * @brief     Set the energy to provide minimal pressure support
- * @author    Greg Bryan
- * @date      November, 1998
- * @ingroup   Enzo
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      Grid_SetMinimumSupport.cpp
+/// @author    Greg Bryan
+/// @date      November, 1998
+/// @ingroup   Enzo
+/// @brief     Set the energy to provide minimal pressure support
 
 #include "cello_hydro.h"
  

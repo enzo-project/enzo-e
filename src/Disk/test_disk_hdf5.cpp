@@ -2,9 +2,9 @@
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_hdf5.cpp
-/// @brief    Program implementing unit tests for the Hdf5 class
-/// @author   James Bordner
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:47:35 PST 2008
+/// @brief    Program implementing unit tests for the Hdf5 class
  
 #include <stdio.h>
 #include <string>

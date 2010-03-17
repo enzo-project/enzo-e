@@ -1,38 +1,10 @@
+/// @file      parallel.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Wed Oct 14 11:23:14 PDT 2009
+/// @brief     Implementation of the Parallel class
+ 
 #include "parallel.hpp"
 
-/** 
- *********************************************************************
- *
- * @file      parallel.cpp
- * @brief     Parallel base class
- * @author    James Bordner
- * @date      Wed Oct 14 11:23:14 PDT 2009
- *
- * DESCRIPTION 
- * 
- *    Parallel bass class
- *
- * PACKAGES
- *
- *    
- * 
- * INCLUDES
- *  
- *    
- *
- * PUBLIC FUNCTIONS
- *  
- *    
- *
- * PRIVATE FUCTIONS
- *  
- *    
- *
- * $Id$
- *
- *********************************************************************
- */
- 
 Parallel::Parallel()
 /**
  *********************************************************************

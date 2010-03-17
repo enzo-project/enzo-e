@@ -1,56 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
- * @file      test_performance.cpp
- * @brief     Program implementing unit tests for performance classes
- * @author    James Bordner
- * @date      Wed Apr 23 12:25:18 PDT 2008
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      test_performance.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Wed Apr 23 12:25:18 PDT 2008
+/// @brief     Program implementing unit tests for performance classes
  
 #include <stdio.h>
 #include <stdlib.h>

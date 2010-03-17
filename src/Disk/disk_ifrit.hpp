@@ -5,7 +5,7 @@
 #define DISK_IFRIT_HPP
 
 /// @file     disk_ifrit.hpp
-/// @author   James Bordner
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
 /// @brief    Interface for the Ifrit class
  

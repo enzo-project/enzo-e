@@ -5,7 +5,7 @@
 #define PERFORMANCE_TIMER_HPP
 
 /// @file     performance_time.hpp
-/// @author   James bordner (jobordner@ucsd.edu)
+/// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Apr 23 12:40:04 PDT 2008
 /// @brief    Interface and implementation of the Timer class
 

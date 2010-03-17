@@ -58,19 +58,23 @@ clean:   $(patsubst %,%-clean,$(DIR))
 
 # Run tests in Test directory, and display results in Tests/*.unit
 
-.PHONY: 
+.PHONY: run-tests
 run-tests: all install $(patsubst %,%-run-tests,$(DIR))
 	-@echo
 	-@echo "=================================================="
 	-@echo "FAILED TESTS:"
 	-@echo "=================================================="
 	-@echo
-	-@grep FAIL */*unit
-	-@echo
+	-@$(MAKE) -s failed-tests
 
 %-run-tests:
 	$(MAKE) -s -C $* run-tests
 
+#-----------------------------------------------------------------------
+
+.PHONY: failed-tests
+failed-tests:
+	-@grep FAIL `find . -name "*.unit"` | awk '{print $$2,$$3}'
 #-----------------------------------------------------------------------
 
 .PHONY: dep %-dep

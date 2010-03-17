@@ -55,11 +55,11 @@ void unit_func (const char * f)
 /// @brief Assert result of test macro; called by unit_assert macro
 void unit_assert_ (bool result, const char * file, int line)
 {
-  printf ("%s %s:%3d  %s::%s() %d\n",
+  printf ("%s %s:%d  %s::%s() %d\n",
 	  (result)? unit::pass_string : unit::fail_string,
 	  file,line,unit::class_name,unit::func_name,unit::test_num);
   if (unit::fp) {
-    fprintf (unit::fp,"%s %s:%3d  %s::%s() %d\n",
+    fprintf (unit::fp,"%s %s:%d  %s::%s() %d\n",
 	     (result)? unit::pass_string : unit::fail_string,
 	     file,line,unit::class_name,unit::func_name,unit::test_num);
   } else {

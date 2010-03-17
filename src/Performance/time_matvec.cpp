@@ -1,55 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-/** 
- *********************************************************************
- *
- * @file      time_matvec.cpp
- * @brief     Program timing sparse matrix-vector multiplies
- * @author    James Bordner
- * @date      Thu Apr 24 16:25:43 PDT 2008
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      time_matvec.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Thu Apr 24 16:25:43 PDT 2008
+/// @brief     Program timing sparse matrix-vector multiplies
  
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,56 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
- * @file      hdf5.cpp
- * @brief     Implementation of the Hdf5 class
- * @author    James Bordner
- * @date      Thu Feb 21 16:11:36 PST 2008
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      disk_hdf5.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Thu Feb 21 16:11:36 PST 2008
+/// @brief     Implementation of the Hdf5 class
 
 #include <hdf5.h>
 

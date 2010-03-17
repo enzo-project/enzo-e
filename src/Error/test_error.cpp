@@ -1,56 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
- * @file      test_error.cpp
- * @brief     Program implementing unit tests for error classes
- * @author    James Bordner
- * @date      Wed Aug 20 11:24:14 PDT 2008
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      test_error.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Wed Aug 20 11:24:14 PDT 2008
+/// @brief     Program implementing unit tests for error classes
  
 #include <stdio.h>
 #include <stdlib.h>

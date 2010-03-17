@@ -1,56 +1,7 @@
-/** 
- *********************************************************************
- *
- * @file      
- * @brief     
- * @author    
- * @date      
- * @ingroup
- * @note      
- *
- *--------------------------------------------------------------------
- *
- * DESCRIPTION:
- *
- *    
- *
- * CLASSES:
- *
- *    
- *
- * FUCTIONS:
- *
- *    
- *
- * USAGE:
- *
- *    
- *
- * REVISION HISTORY:
- *
- *    
- *
- * COPYRIGHT: See the LICENSE_CELLO file in the project directory
- *
- *--------------------------------------------------------------------
- *
- * $Id$
- *
- *********************************************************************
- */
-
-/** 
- *********************************************************************
- *
- * @file      cello.cpp
- * @brief     Cello main
- * @author    James Bordner
- * @date      Mon Oct  5 15:10:56 PDT 2009
- *
- * $Id$
- *
- *********************************************************************
- */
+/// @file      cello.cpp
+/// @author    James Bordner (jobordner@ucsd.edu)
+/// @date      Mon Oct  5 15:10:56 PDT 2009
+/// @brief     Cello main
 
 #include "cello.h"
 
