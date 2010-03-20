@@ -5,12 +5,10 @@
 #define AMR_NODE2K_HPP
 
 /// @file     amr_node2k.hpp
-/// @brief    Interface for Node2K class
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Remove static for thread safety
 /// @date     Tue Oct 27 12:32:07 PDT 2009
-///
-/// Detailed description of file amr_node2k.hpp
+/// @brief    Interface for Node2K class
 
 #include <stdlib.h>
 #include "cello.h"
