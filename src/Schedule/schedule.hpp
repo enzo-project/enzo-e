@@ -44,19 +44,7 @@ public: // interface
   /// Terminate the simulation
   void terminate_simulation();
 
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE OPERATIONS
-  //-------------------------------------------------------------------
-
-  /// 
-
-private:
-
-  //-------------------------------------------------------------------
-  // PRIVATE ATTRIBUTES
-  //-------------------------------------------------------------------
+private: // attributes
 
   /// The simulation we're scheduling
   Monitor * monitor_;
@@ -66,7 +54,6 @@ private:
 
   /// The simulation we're scheduling
   Simulation * simulation_;
-
 
 };
 

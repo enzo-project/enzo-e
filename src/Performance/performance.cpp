@@ -110,7 +110,7 @@ void Performance::new_attribute(unsigned    id_attribute,
  *********************************************************************
  */
 {
-  new_item_ (item_attribute, 
+  new_item_ (item_type_attribute, 
 	     "attribute", 
 	     id_attribute, 
 	     attribute_name,
@@ -163,7 +163,7 @@ void Performance::new_group(unsigned    id_group,
  *********************************************************************
  */
 {
-  new_item_ (item_group, 
+  new_item_ (item_type_group, 
 	     "group", 
 	     id_group, 
 	     group_name,
@@ -260,7 +260,7 @@ void Performance::new_region(unsigned    id_region,
  *********************************************************************
  */
 {
-  new_item_ (item_region, 
+  new_item_ (item_type_region, 
 	     "region", 
 	     id_region, 
 	     region_name,
@@ -339,7 +339,7 @@ void Performance::new_counter(unsigned    id_counter,
  *********************************************************************
  */
 {
-  new_item_ (item_counter, 
+  new_item_ (item_type_counter, 
 	     "counter", 
 	     id_counter, 
 	     counter_name,

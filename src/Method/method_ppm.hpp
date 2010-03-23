@@ -31,10 +31,10 @@
 ///      calculations.  Described in CW84 A7-A10.
 
 enum flatten_type {
-  flatten_none,
-  flatten_simple,
-  flatten_lagrangean,
-  flatten_multidimension
+  flatten_type_none,
+  flatten_type_simple,
+  flatten_type_lagrangean,
+  flatten_type_multidimension
 };
 
 class MethodPpm : public Method {

@@ -30,10 +30,10 @@ private: // attributes
   
   /// Whether to use standard, buffered, synchronous, or ready sends
   enum type_send {
-    type_standard,
-    type_buffered,
-    type_synchronous,
-    type_ready } type_;
+    type_send_standard,
+    type_send_buffered,
+    type_send_synchronous,
+    type_send_ready } type_send_;
 
 };
 

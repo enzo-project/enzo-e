@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef COUNTERS_HPP
-#define COUNTERS_HPP
+#ifndef PERFORMANCE_COUNTERS_HPP
+#define PERFORMANCE_COUNTERS_HPP
 
-/// @file     counters.hpp
+/// @file     performance_counters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-19 12:55:54
 /// @brief    Interface for the Counters class
@@ -56,5 +56,5 @@ private: // attributes
 
 };
 
-#endif /* COUNTERS_HPP */
+#endif /* PERFORMANCE_COUNTERS_HPP */
 

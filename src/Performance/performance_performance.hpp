@@ -5,9 +5,9 @@
 #define PERFORMANCE_PERFORMANCE_HPP
 
 /// @file     performance.hpp
-/// @todo     Complete detailed description of Performance class
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Oct 14 23:40:13 PDT 2009
+/// @todo     Complete detailed description of Performance class
 /// @brief    Interface for Performance class
 
 /// @def      type_counter
@@ -24,11 +24,11 @@ class Performance {
   /// regions. @@@
 
   enum enum_item_type {
-    item_unknown,
-    item_attribute,
-    item_counter,
-    item_group,
-    item_region
+    item_type_unknown,
+    item_type_attribute,
+    item_type_counter,
+    item_type_group,
+    item_type_region
   };
 
 

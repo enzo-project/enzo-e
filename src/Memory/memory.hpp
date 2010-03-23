@@ -25,20 +25,6 @@ class Memory {
   /// @ingroup  Memory
   /// @brief    Maintains memory allocation and deallocation statistics
 
-private: // private creation and destruction for singleton pattern
-
-  /// Create the (single) Memory object
-  Memory() throw () { initialize_(); };
-
-  /// Delete the (single) Memory object
-  ~Memory() throw () {};
-
-  /// Copy the (single) Memory object
-  Memory (const Memory &) {};
-
-  /// Assign the (single) Memory object
-  Memory & operator = (const Memory & memory) { return *this; };
-
 public: // interface
 
   /// Get single instance of the Memory object
@@ -111,6 +97,18 @@ public: // interface
 #endif
 
 private: // functions
+
+  /// Create the (single) Memory object (singleton design pattern)
+  Memory() throw () { initialize_(); };
+
+  /// Delete the (single) Memory object (singleton design pattern)
+  ~Memory() throw () {};
+
+  /// Copy the (single) Memory object (singleton design pattern)
+  Memory (const Memory &) {};
+
+  /// Assign the (single) Memory object (singleton design pattern)
+  Memory & operator = (const Memory & memory) { return *this; };
 
   /// Initialize the memory component
   void initialize_() throw ();

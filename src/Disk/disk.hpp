@@ -5,9 +5,9 @@
 #define DISK_HPP
 
 /// @file     disk.hpp
-/// @brief    Include file for the Disk component
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2008-03-18 17:48:36
+/// @brief    Include file for the Disk component
 
 #include "cello.h"
 #include "disk_hdf5.hpp"
