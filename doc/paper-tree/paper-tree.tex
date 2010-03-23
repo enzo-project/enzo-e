@@ -18,6 +18,38 @@
 %=======================================================================
 \section{Introduction} \label{s:intro}
 %=======================================================================
+petascale
+
+%=======================================================================
+\section{AMR review} \label{s:intro}
+%=======================================================================
+
+%=======================================================================
+\section{Patch Coalescing} \label{s:intro}
+%=======================================================================
+
+% 
+% Issue: octtree has too many nodes for refinement requirements
+% Solution: coalesce uniformly refined patches into a single larger patch
+
+% properties:
+%
+%   greatest advantage in extended regions of shallow refinement
+%   underlying refinement area remains unchanged
+%   + no changes required for octree data structure
+%   
+%   -: parallel load balancing
+%     solution 1: sub-blocking
+%     solution 2: hierarchical load balancing
+%     
+%   +: "unigrid" degenerates into a single large patch (assuming cubical domains)
+
+
+%=======================================================================
+\section{Targeted Refinement} \label{s:intro}
+%=======================================================================
+
+%   greatest advantage in localized regions of deep refinement
 
 \end{document}
 
