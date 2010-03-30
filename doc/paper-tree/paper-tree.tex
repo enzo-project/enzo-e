@@ -18,11 +18,43 @@
 %=======================================================================
 \section{Introduction} \label{s:intro}
 %=======================================================================
-petascale
+
+AMR motivation
+
+AMR limitation summary
+
+AMR improvement summary
 
 %=======================================================================
 \section{AMR review} \label{s:intro}
 %=======================================================================
+
+Assumptions: structured or tree-based AMR (FV), not unstructured FE meshes
+  structured / tree-based more efficient
+  unstructured more flexible, e.g. conforming to internal boundaries
+
+Define
+   $r$ refinement 
+   $l$ level, counting from $l=0$ root
+   $L$ maximum level, with $l=0$ root
+   
+patch-based
+  + efficient AMR (roughly optimal node counts)
+  - arguably less scalable
+  - variable parallel task size
+  - ``deep'' refinement requires $r=4$ level jumps
+  
+tree-based
+  + arguably more scalable
+  + fixed parallel task size
+  + better support for leaf-only grids 
+     + reduces inter-level communication
+     + does not require zeroing out grid ``shadows'' in parent
+     + does not require interpolating from internal zones
+    
+  - inefficient AMR (excessive node counts)
+  - inefficient ``deep'' refinement
+
 
 %=======================================================================
 \section{Patch Coalescing} \label{s:intro}
