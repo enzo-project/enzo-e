@@ -35,7 +35,8 @@ DIR = \
       Schedule \
       Simulation \
       Task \
-      Test
+      Test \
+      User
 
 #=======================================================================
 # TARGETS

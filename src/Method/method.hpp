@@ -10,6 +10,5 @@
 /// @brief    Include file for the Method component
 
 #include "method_method.hpp"
-#include "method_ppm.hpp"
 
 #endif /* METHOD_HPP */

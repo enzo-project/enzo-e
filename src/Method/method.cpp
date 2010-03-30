@@ -1,6 +1,6 @@
 /// @file      method_method.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
-/// @date      Mon Jul 13 11:12:25 PDT 2009
+/// @date      
 /// @brief     Implements the Method base class
 
 #include <string>
@@ -46,9 +46,9 @@ Method::Method(const Method & method) throw()
  *********************************************************************
  */
 
-void Method::initialize() throw()
-{
-}
+// void Method::initialize() throw()
+// {
+// }
 
 /**
  *********************************************************************

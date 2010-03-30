@@ -1,9 +1,10 @@
 
-TOP     = ../..
-PACKAGE = method
-OBJS    = method_method.o
+TOP     = ../../..
+PACKAGE = user
+OBJS    =  
 TESTS   = 
-DIRS    = 
+EXES    = 
+DIRS    = ppm ppml
 
 include $(TOP)/src/MAKE/Make.include
 
@@ -11,20 +12,22 @@ include $(TOP)/src/MAKE/Make.include
 # TARGETS
 #=======================================================================
 
-# override all target to compile ppm and ppml
  .PHONY: all
 all: $(OBJS) $(TESTS) $(EXES)
+	$(MAKE) -C ppm
+	$(MAKE) -C ppml
+
+#-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
 
 .PHONY: install-include
 install-include:
-	ln -sf `pwd`/defines.h $(INCLUDE)
-	ln -sf `pwd`/method.hpp $(INCLUDE)
-	ln -sf `pwd`/method_method.hpp $(INCLUDE)
 
 #-----------------------------------------------------------------------
 
 .PHONY: clean-local
 clean-local:
+	$(MAKE) -C ppm clean
+	$(MAKE) -C ppml clean
 
