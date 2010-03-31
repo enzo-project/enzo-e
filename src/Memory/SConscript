@@ -1,0 +1,15 @@
+Import('env')
+
+env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('*hpp')]))
+
+sources  = [Glob('memory*cpp')]
+
+env.Library ('memory', [sources])
+env.Alias('install-lib',env.Install ('$LIBPATH','libmemory.a'))
+
+test_memory   = env.Program (['test_memory.cpp', sources])
+env.Alias('install-bin', env.Install ('$BINPATH', test_memory))
+
+
+
+

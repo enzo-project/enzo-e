@@ -1,0 +1,34 @@
+
+Import('env')
+
+components = ['disk', 'memory']
+
+libraries  = 'hdf5'
+
+env = env.Clone(LIBS=[components,libraries])
+
+includes = [
+	'amr_node16.hpp',
+	'amr_node2k.hpp',
+	'amr_node3k.hpp',
+	'amr_node4.hpp',
+	'amr_node.hpp',
+	'amr_nodek.hpp',
+	'amr_tree16.hpp',
+	'amr_tree2k.hpp',
+	'amr_tree3k.hpp',
+	'amr_tree4.hpp',
+	'amr_treek.hpp']
+
+env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+
+sources  = [Glob('amr*cpp')]
+
+env.Library ('amr', [sources])
+env.Alias('install-lib',env.Install ('$LIBPATH','libamr.a'))
+
+test_tree   = env.Program (['test_tree.cpp',   sources])
+test_tree_k = env.Program (['test_tree_k.cpp', sources])
+
+env.Alias('install-bin', env.Install ('$BINPATH', [test_tree, test_tree_k]))
+

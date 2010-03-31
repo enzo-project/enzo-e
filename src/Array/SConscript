@@ -1,0 +1,19 @@
+Import('env')
+
+includes = [Glob('array*hpp')]
+
+env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+
+sources  = [Glob('array*cpp')]
+
+lib_array = env.Library ('array', [sources])
+env.Alias('install-lib',env.Install ('$LIBPATH',lib_array))
+
+test_array   = env.Program (['test_array.cpp',   sources])
+env.Alias('install-bin', env.Install ('$BINPATH', test_array))
+
+
+
+
+
+

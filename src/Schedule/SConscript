@@ -1,0 +1,29 @@
+Import('env')
+
+components = [
+	'monitor',
+	'parameters',
+	'schedule',
+	'simulation']
+
+env = env.Clone(LIBS=[components])
+
+includes = [Glob('schedule*hpp')]
+
+env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+
+sources  = [Glob('schedule*cpp')]
+
+lib_schedule = env.Library ('schedule', sources)
+env.Alias('install-lib',env.Install ('$LIBPATH',lib_schedule))
+
+test_schedule = env.Program(['test_schedule.cpp', sources])
+env.Alias('install-bin', env.Install ('$BINPATH', [test_schedule]))
+
+
+
+
+
+
+
+

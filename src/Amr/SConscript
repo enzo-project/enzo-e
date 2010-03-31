@@ -1,0 +1,9 @@
+Import('env')
+
+includes = ['amr.hpp', 'amr_amr.hpp']
+env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+
+SConscript('tree/SConscript')
+
+
+

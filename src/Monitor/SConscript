@@ -1,0 +1,26 @@
+Import('env')
+
+libraries  = 'png'
+
+env = env.Clone(
+	CPPDEFINES = ['NO_FREETYPE'],
+	LIBS=[libraries])
+
+
+includes = [Glob('monitor*hpp'), Glob('png*h')]
+env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+
+sources  = [Glob('monitor*cpp'), Glob('png*cpp')]
+
+env.Library ('monitor', [sources])
+env.Alias('install-lib',env.Install ('$LIBPATH','libmonitor.a'))
+
+test_monitor = env.Program (['test_monitor.cpp', sources])
+env.Alias('install-bin', env.Install ('$BINPATH', test_monitor))
+
+
+
+
+
+
+

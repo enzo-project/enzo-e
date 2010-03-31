@@ -1,0 +1,13 @@
+Import('env')
+
+
+env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('method*hpp')]))
+
+sources  = ['method_method.cpp']
+
+env.Library ('method', [sources])
+env.Alias('install-lib',env.Install ('$LIBPATH','libmethod.a'))
+
+
+
+

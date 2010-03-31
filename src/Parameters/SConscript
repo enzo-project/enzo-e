@@ -1,0 +1,27 @@
+Import('env')
+
+includes = [
+	'parameters.hpp',
+	'parameters_parameters.hpp',
+	'param.hpp',
+	'parse.h',
+	'parse.tab.h']
+env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+
+sources  = ['parse.tab.c', 'lex.yy.c', 'parameters.o', 'param.o']
+
+env.CFile(target = 'parse.tab.c', source = 'parse.y')
+env.CFile(target = 'lex.yy.c', source = 'parse.l')
+
+env.Library ('parameters', [sources])
+env.Alias('install-lib',env.Install ('$LIBPATH','libparameters.a'))
+
+test_parameters = env.Program (['test_parameters.cpp', sources])
+test_parse      = env.Program (['test_parse.cpp', sources])
+inputs          = Glob('*.in')
+env.Alias('install-bin', env.Install ('$BINPATH', 
+	[test_parameters, test_parse, inputs]))
+
+
+
+

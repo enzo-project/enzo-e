@@ -1,0 +1,12 @@
+Import('env')
+
+env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('*hpp')]))
+
+sources  = [Glob('error*cpp')]
+
+test_error   = env.Program (['test_error.cpp',  sources])
+env.Alias('install-bin', env.Install ('$BINPATH', test_error))
+
+
+
+

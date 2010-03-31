@@ -3,6 +3,7 @@
 /// @date      
 /// @brief     
 
+#include "parameters.hpp"
 #include "schedule.hpp"
  
 //====================================================================
