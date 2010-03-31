@@ -30,4 +30,5 @@ install-include:
 
 .PHONY: clean-local
 clean-local:
+	$(MAKE) -C Enzo clean
 
