@@ -1,10 +1,22 @@
 Import('env')
 
+libraries  = ['hdf5', 'array']
+sources  = Glob('disk*cpp')
+
+env = env.Clone(
+	LIBS=[libraries])
+
 env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('*hpp')]))
 
 lib_disk = env.Library ('disk', Glob('disk*cpp'))
 env.Alias('install-lib',env.Install ('$LIBPATH',lib_disk))
 
+
+test_disk_hdf5 = env.Program (['test_disk_hdf5.cpp', sources])
+test_disk_ifrit = env.Program (['test_disk_ifrit.cpp', sources])
+
+env.Alias('install-bin', env.Install ('$BINPATH', 
+	[test_disk_hdf5, test_disk_ifrit]))
 
 
 
