@@ -56,26 +56,17 @@ OBJS = \
 	yeuler_sweep.o \
 	zeuler_sweep.o
 
-new_all: includes all
+new_all: all
 
 include $(TOP)/src/MAKE/Make.include
 
-test_ppm: includes $(OBJS) $(OBJS_PPM)
+test_ppm: $(OBJS) $(OBJS_PPM)
 	$(CXX) -o test_ppm $(OBJS_PPM) $(OBJS) $(LIB) -lpng
 
 initialize_image.o: image.h
 
 image.h:
 	ln -s circle2.h image.h
-
-#-----------------------------------------------------------------------
-
-.PHONY: includes
-includes:
-
-.PHONY: install-include
-install-include:
-	ln -sf `pwd`/cello_hydro.h             $(INCLUDE)
 
 #-----------------------------------------------------------------------
 
