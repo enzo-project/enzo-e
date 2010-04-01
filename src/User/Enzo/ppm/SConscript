@@ -1,8 +1,8 @@
 Import('env')
 
-components = ['disk', 'memory']
+components = ['disk', 'memory', 'monitor']
 
-libraries  = ['hdf5', 'gfortran']
+libraries  = ['hdf5', 'gfortran', 'png']
 
 #-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX
 
@@ -35,7 +35,6 @@ sources  = [
 	'Grid_SetExternalBoundaryValues.cpp',
 	'Grid_SetMinimumSupport.cpp',
 	'Grid_SolveHydroEquations.cpp',
-	'initialize_hydro.cpp',
 	'SetExternalBoundary.cpp',
         'calcdiss.F',
         'calc_dt.F',
@@ -52,8 +51,10 @@ sources  = [
 	'yeuler_sweep.F',
 	'zeuler_sweep.F']
 
-env.Library ('user', [sources])
-env.Alias('install-lib',env.Install ('$LIBPATH','libuser.a'))
+lib_user = env.Library ('user-enzo-ppm', [sources])
+
+# env.Alias('install-lib',env.Install ('$LIBPATH','libuser-enzo-ppm.a'))
+
 
 test_ppm   = env.Program (['test_ppm.cpp',   sources])
 

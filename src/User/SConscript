@@ -2,6 +2,8 @@ Import('env')
 
 SConscript('Enzo/SConscript')
 
+lib_user = env.Library ('user', 'Enzo/libuser-enzo.a')
+env.Alias('install-lib',env.Install ('$LIBPATH',lib_user))
 
 
 

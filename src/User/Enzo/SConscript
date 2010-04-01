@@ -3,6 +3,10 @@ Import('env')
 SConscript('ppm/SConscript')
 SConscript('ppml/SConscript')
 
+env.Library ('user-enzo', 
+	['ppm/libuser-enzo-ppm.a', 
+	 'ppml/libuser-enzo-ppml.a'])
+
 
 
 

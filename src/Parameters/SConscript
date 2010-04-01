@@ -4,13 +4,16 @@ includes = [
 	'parameters.hpp',
 	'parameters_parameters.hpp',
 	'param.hpp',
-	'parse.h',
-	'parse.tab.h']
+	'parse.h']
+
 env.Alias('install-inc',env.Install ('$CPPPATH',includes))
 
-sources  = ['parse.tab.c', 'lex.yy.c', 'parameters.o', 'param.o']
+sources  = ['parse.tab.c', 'lex.yy.c', 'parameters.cpp', 'param.cpp']
 
-env.CFile(target = 'parse.tab.c', source = 'parse.y')
+env.CFile(target = ['parse.tab.c', 'parse.tab.h'], 
+          source = 'parse.y',
+          YACCFLAGS='-d')
+
 env.CFile(target = 'lex.yy.c', source = 'parse.l')
 
 env.Library ('parameters', [sources])
