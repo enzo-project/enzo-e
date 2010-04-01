@@ -41,7 +41,7 @@ OBJS = \
 	PPML_TimeStep.o \
 	SetExternalBoundary.o
 
-new_all: includes all
+new_all: all
 
 include $(TOP)/src/MAKE/Make.include
 
@@ -50,15 +50,8 @@ clean-local:
 	-@rm -f *.png *.hdf5
 
 
-test_ppml: includes $(INCS) $(OBJS) test_ppml.o
+test_ppml: $(INCS) $(OBJS) test_ppml.o
 	$(CXX) -o test_ppml test_ppml.o $(LDFLAGS) -lpng
-
-
-.PHONY: includes
-includes:
-	-@ln -sf ../cello_hydro.cpp .
-	-@ln -sf ../cello_hydro.h .
-	-@ln -sf ../defines.h .
 
 
 include DEPEND
