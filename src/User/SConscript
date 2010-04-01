@@ -1,6 +1,6 @@
 Import('env')
 
-# SConscript('Enzo/SConscript')
+SConscript('Enzo/SConscript')
 
 
 

@@ -1,0 +1,66 @@
+Import('env')
+
+components = ['disk', 'memory']
+
+libraries  = ['hdf5', 'gfortran']
+
+#-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX
+
+env = env.Clone(LIBS=[components,libraries], CPPFLAGS='-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX')
+
+# includes = []
+
+# env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+
+sources  = [
+	  'initialize_hydro.cpp',
+          'initialize_implosion3.cpp',
+          'initialize_image.cpp',
+          'initialize_implosion.cpp',
+       'cello_hydro.cpp',
+       'c_message.cpp',
+	'CosmologyComputeExpansionFactor.cpp',
+	'CosmologyComputeExpansionTimestep.cpp',
+	'CosmologyGetUnits.cpp',
+	'data_dump.cpp',
+	'image_dump.cpp',
+	'FindField.cpp',
+	'Grid_ComputeGammaField.cpp',
+	'Grid_ComputePressureDualEnergyFormalism.cpp',
+	'Grid_ComputePressure.cpp',
+	'Grid_ComputeTemperatureField.cpp',
+	'Grid_ComputeTimeStep.cpp',
+	'Grid_IdentifyPhysicalQuantities.cpp',
+	'Grid_IdentifySpeciesFields.cpp',
+	'Grid_SetExternalBoundaryValues.cpp',
+	'Grid_SetMinimumSupport.cpp',
+	'Grid_SolveHydroEquations.cpp',
+	'initialize_hydro.cpp',
+	'SetExternalBoundary.cpp',
+        'calcdiss.F',
+        'calc_dt.F',
+	'f_message.F',
+	'inteuler.F',
+	'intvar.F',
+	'pgas2d_dual.F',
+	'euler.F',
+	'pgas2d.F',
+	'ppm_de.F',
+	'sum_field.F',
+	'twoshock.F',
+	'xeuler_sweep.F',
+	'yeuler_sweep.F',
+	'zeuler_sweep.F']
+
+env.Library ('user', [sources])
+env.Alias('install-lib',env.Install ('$LIBPATH','libuser.a'))
+
+test_ppm   = env.Program (['test_ppm.cpp',   sources])
+
+env.Alias('install-bin', env.Install ('$BINPATH', [test_ppm]))
+
+
+
+
+
+
