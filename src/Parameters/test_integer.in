@@ -1,0 +1,4 @@
+Group { parameter = 1 }
+Group { parameter = 1 + 3 }
+Group { parameter = 15*8 + 7*8 }
+Group { parameter = 5 + 15*8 + 8 }
