@@ -46,7 +46,7 @@ sources  = [
 	'euler.F',
 	'pgas2d.F',
 	'ppm_de.F',
-	'sum_field.F',
+	'sum_field.cpp',
 	'twoshock.F',
 	'xeuler_sweep.F',
 	'yeuler_sweep.F',

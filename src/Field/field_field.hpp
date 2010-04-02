@@ -4,7 +4,7 @@
 #ifndef FIELD_FIELD_HPP
 #define FIELD_FIELD_HPP
 
-/// @file     field.hpp
+/// @file     field_field.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-17
 /// @brief    Declaration for the Field class
@@ -18,10 +18,10 @@ class Field {
 public: // public
 
   /// Initialize a Field object
-  Field();
+  Field() { };
 
   /// Delete a Field object
-  ~Field();
+  ~Field() { };
 
 };
 

@@ -1,6 +1,7 @@
 
 SConscript('Amr/SConscript')
 SConscript('Array/SConscript')
+SConscript('Data/SConscript')
 SConscript('Disk/SConscript')
 SConscript('Distribute/SConscript')
 SConscript('Error/SConscript')

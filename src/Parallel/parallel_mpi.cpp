@@ -3,6 +3,8 @@
 /// @date      Thu Oct 15 10:41:28 PDT 2009
 /// @brief     MPI helper functions
 
+#include <mpi.h>
+
 #include "cello.h"
 
 #include "parallel_mpi.hpp"
@@ -12,6 +14,11 @@
 //====================================================================
 
 ParallelMpi::ParallelMpi()
+  : size_(1),
+    rank_(0),
+    send_blocking_(true),
+    recv_blocking_(true),
+    send_type_(send_type_standard)
 /**
  *********************************************************************
  *

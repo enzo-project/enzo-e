@@ -2,6 +2,7 @@ Import('env')
 
 components = [
 	'monitor',
+	'parallel',
 	'parameters',
 	'schedule',
 	'simulation']
@@ -18,7 +19,9 @@ lib_schedule = env.Library ('schedule', sources)
 env.Alias('install-lib',env.Install ('$LIBPATH',lib_schedule))
 
 test_schedule = env.Program(['test_schedule.cpp', sources])
-env.Alias('install-bin', env.Install ('$BINPATH', [test_schedule]))
+exe_cello     = env.Program(['cello.cpp', sources])
+
+env.Alias('install-bin', env.Install ('$BINPATH', [test_schedule,exe_cello]))
 
 
 

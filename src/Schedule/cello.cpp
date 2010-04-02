@@ -5,6 +5,7 @@
 
 #include "cello.h"
 
+#include "parallel.hpp"h
 #include "schedule.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"
@@ -28,14 +29,9 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
-    // INITALIZE MONITOR
+    ParallelMpi mpi;
 
-    Monitor monitor;
-    monitor.print ("CELLO BEGIN");
-
-    // INITIALIZE SCHEDULE
-
-    Schedule schedule(&monitor);
+    mpi.initialize(&argc, &argv);
 
     // INPUT PARAMETERS
 
@@ -48,7 +44,16 @@ int main(int argc, char ** argv)
     }
 
     assert (fp != 0);
-  
+
+    // INITALIZE MONITOR
+
+    Monitor monitor;
+    monitor.print ("CELLO BEGIN");
+
+    // INITIALIZE SCHEDULE
+
+    Schedule schedule(&monitor);
+
     schedule.read_parameters(fp);
 
     // INITIALIZE SIMULATION
@@ -64,6 +69,9 @@ int main(int argc, char ** argv)
     schedule.terminate_simulation();
 
     monitor.print ("CELLO END");
+
+    mpi.finalize();
+
   }
 
   catch (ExceptionBadPointer) {

@@ -7,4 +7,7 @@ sources  = [Glob('parallel*cpp')]
 env.Library ('parallel', [sources])
 env.Alias('install-lib',env.Install ('$LIBPATH','libparallel.a'))
 
+test_parallel_mpi = env.Program (['test_parallel_mpi.cpp', sources])
+env.Alias('install-bin', env.Install ('$BINPATH', [test_parallel_mpi]))
+
 

@@ -1,5 +1,7 @@
 Import('env')
 
+env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('*hpp')]))
+
 
 
 
