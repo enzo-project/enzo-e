@@ -5,7 +5,7 @@
 
 #include "cello.h"
 
-#include "parallel.hpp"h
+#include "parallel.hpp"
 #include "schedule.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"
