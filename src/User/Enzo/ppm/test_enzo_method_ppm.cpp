@@ -8,14 +8,17 @@
 
 #include <stdio.h>
 
-#include "method.hpp"
+#include "user.hpp"
 #include "test.hpp"
+#include "user.hpp"
 
 main ()
 {
   unit_class ("EnzoMethodPpm");
   unit_open();
-  unit_func("initialize");
+  unit_func("register");
+  EnzoMethodPpm ppm;
+  ppm.initialize("PPM");
   unit_assert(false);
   unit_close();
 }

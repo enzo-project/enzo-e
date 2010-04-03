@@ -7,6 +7,8 @@
 #include <vector>
 #include <string>
 
+#include "error.hpp"
+
 enum enum_argument_type {
   enum_argument_type_unknown,
   enum_argument_type_field,
@@ -46,23 +48,23 @@ public: // interface
 
   ~Method () throw();
 
-  /// Initialize the method
-
-  virtual void initialize(std::string method_name) throw() = 0; 
-
 
   /// Apply the method
 
   virtual void apply() throw() = 0; 
 
 
-protected: // functions
+public: // functions
+
+  /// Register the method
+
+  void initialize(std::string method_name) throw();
 
   /// Specify a Field or Particle type, and its access type
 
   void add_argument(enum_argument_type argument_type,
 		    std::string        argument_name,
-		    enum_access_type   access_type) throw(); 
+		    enum_access_type   access_type) throw();
 
 protected: // attributes
 

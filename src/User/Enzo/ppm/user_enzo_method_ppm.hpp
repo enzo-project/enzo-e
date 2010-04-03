@@ -11,10 +11,10 @@
 
 #include <vector>
 #include <string>
-#include "method.h"
+#include "method.hpp"
 
 
-class EnzoMethodPpm : Method {
+class EnzoMethodPpm : public Method {
 
   /// @class    EnzoMethodPpm
   /// @ingroup  Enzo
@@ -24,23 +24,23 @@ public: // interface
 
   /// Create a new Method
 
-  EnzoMethodPpm() throw();
+  EnzoMethodPpm() throw()
+  {}
 
   /// Create Method
 
-  EnzoMethodPpm(const EnzoMethodPpm &) throw();
+  EnzoMethodPpm(const EnzoMethodPpm &) throw()
+  {}
 
   /// Delete a Method
 
-  ~EnzoMethodPpm () throw();
-
-  /// Initialize the method
-
-  virtual void initialize(std::string method_name) throw(); 
+  ~EnzoMethodPpm () throw()
+  {}
 
   /// Apply the method
 
-  virtual void apply() throw(); 
+  virtual void apply() throw()
+  {}
 
 
 };

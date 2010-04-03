@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['disk', 'memory', 'monitor']
+components = ['disk', 'memory', 'monitor', 'method']
 
 libraries  = ['hdf5', 'gfortran', 'png']
 
@@ -10,7 +10,7 @@ env = env.Clone(LIBS=[components,libraries], CPPFLAGS='-D NO_OPTIMIZE_CELL_WIDTH
 
 includes = ['user_enzo_method_ppm.hpp']
 
-# env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+env.Alias('install-inc',env.Install ('$CPPPATH',includes))
 
 sources  = [
           'user_enzo_method_ppm.cpp',

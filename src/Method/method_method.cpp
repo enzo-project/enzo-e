@@ -10,19 +10,34 @@
 
 #include "method_method.hpp"
 
+//----------------------------------------------------------------------
+
 Method::Method() throw ()
 ///
 {
 }
 
+//----------------------------------------------------------------------
+
 Method::Method(const Method &) throw()
 {
 }
+
+//----------------------------------------------------------------------
 
 Method::~Method() throw ()
 ///
 {
 }
+
+//----------------------------------------------------------------------
+
+void Method::initialize(std::string method_name) throw()
+{ 
+  INCOMPLETE_MESSAGE("initialize",""); 
+}
+
+//----------------------------------------------------------------------
 
 void Method::add_argument
 (
@@ -34,5 +49,5 @@ void Method::add_argument
 /// @param         argument_name  Name of the argument, e.g. "Density"
 /// @param         access_type    Access type of the argument, e.g. read, write
 {
-  
+  INCOMPLETE_MESSAGE("add_argument","");
 }
