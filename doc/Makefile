@@ -47,10 +47,10 @@ requirements:
 	$(MAKE) -C requirements
 design: 
 	cd design; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C design
+	$(MAKE) -C design pdf
 devel-uml: 
 	cd devel-uml; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C devel-uml
+	$(MAKE) -C devel-uml pdf
 testing: 
 	cd testing; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C testing
