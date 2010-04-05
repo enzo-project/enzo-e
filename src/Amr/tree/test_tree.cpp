@@ -3,7 +3,7 @@
 
 /// @file     test_tree.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @date     2009-10-28
 /// @brief    Test program for Tree4 and Tree16 classes
 
 #include <stdio.h>

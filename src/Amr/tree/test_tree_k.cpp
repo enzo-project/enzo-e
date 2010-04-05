@@ -1,3 +1,11 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     test_tree_k.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-10-28
+/// @brief    Test program for Tree2K and Tree3K classes
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <hdf5.h>
@@ -15,6 +23,8 @@
 #include "amr_tree2k.hpp"
 #include "amr_tree3k.hpp"
 
+#include "image.h"
+
 #define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
 
 const bool debug    = false;
@@ -26,7 +36,6 @@ const int  gray_threshold = 127;
 const int  max_level = 10;
 const int sphere_size = 128;
 
-#include "image.h"
 
 //----------------------------------------------------------------------
 
