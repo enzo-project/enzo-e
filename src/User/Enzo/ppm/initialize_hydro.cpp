@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_ENZO file for license and copyright information
+
 /// @file      initialize_hydro.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Sun Aug 23 12:22:10 PDT 2009

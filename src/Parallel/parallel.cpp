@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
 /// @file      parallel.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Wed Oct 14 11:23:14 PDT 2009

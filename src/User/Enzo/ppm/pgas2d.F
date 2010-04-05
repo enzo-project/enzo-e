@@ -1,3 +1,6 @@
+c     $Id$
+c     See LICENSE_ENZO file for license and copyright information
+
 c=======================================================================
 c////////////////////////  SUBROUTINE PGAS2D  \\\\\\\\\\\\\\\\\\\\\\\\\\
 c

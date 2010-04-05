@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_ENZO file for license and copyright information
+
 /***********************************************************************
 /
 /  GRID CLASS (COMPUTE TIME STEP)

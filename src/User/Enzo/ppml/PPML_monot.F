@@ -1,3 +1,6 @@
+c     $Id$
+c     See LICENSE_ENZO file for license and copyright information
+
       Subroutine Monot(md,nx,dv1,dv2,qp,qm,qxl,qxr)
       Implicit NONE
 

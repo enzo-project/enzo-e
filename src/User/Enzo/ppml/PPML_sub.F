@@ -1,3 +1,6 @@
+c     $Id$
+c     See LICENSE_CELLO file for license and copyright information
+
       SUBROUTINE VECTLRx(QU,QL,QR,U)
       Implicit NONE
 

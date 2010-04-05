@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
 /// @file      disk_ifrit.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 16:11:36 PST 2008

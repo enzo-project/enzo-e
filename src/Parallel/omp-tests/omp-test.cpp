@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "omp.h"

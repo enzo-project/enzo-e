@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_ENZO file for license and copyright information
+
 /***********************************************************************
 /
 /  COMPUTES THE EXPANSION FACTORS (A & DADT) AT THE REQUESTED TIME

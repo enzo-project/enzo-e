@@ -1,3 +1,10 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     
+/// @brief    
  
 #include "cello.h"
 

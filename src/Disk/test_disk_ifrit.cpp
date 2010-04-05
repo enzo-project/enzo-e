@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
 /// @file      test_hdf5.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 16:47:35 PST 2008

@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
 /// @file      method_method.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      

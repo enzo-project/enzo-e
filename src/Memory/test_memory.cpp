@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
 /// @file      test_memory.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Sep  3 16:37:24 PDT 2009

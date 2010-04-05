@@ -1,3 +1,6 @@
+c     $Id$
+c     See LICENSE_ENZO file for license and copyright information
+
       Subroutine Conserv(nx,ny,nz,dn,vx,vy,vz,bx,by,bz,
      1                 qu1,qu2,qu3,qu4,qu5,qu6,qu7)
          Implicit NONE

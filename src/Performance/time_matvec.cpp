@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
 /// @file      time_matvec.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Apr 24 16:25:43 PDT 2008

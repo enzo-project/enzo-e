@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
 /// @file      test_error.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Wed Aug 20 11:24:14 PDT 2008

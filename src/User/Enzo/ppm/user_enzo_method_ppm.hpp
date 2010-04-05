@@ -1,5 +1,5 @@
 // $Id: method.hpp 1258 2010-03-02 01:07:36Z bordner $
-// See LICENSE_CELLO file for license and copyright information
+// See LICENSE_ENZO file for license and copyright information
 
 /// @file     user_enzo_method_ppm.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 

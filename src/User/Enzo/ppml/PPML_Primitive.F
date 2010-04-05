@@ -1,3 +1,6 @@
+c     $Id$
+c     See LICENSE_ENZO file for license and copyright information
+
       Subroutine Primitiv(nx,ny,nz,qu1,qu2,qu3,qu4,qu5,qu6,qu7,
      1                 dn,vx,vy,vz,bx,by,bz)
           Implicit NONE

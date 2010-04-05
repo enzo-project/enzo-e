@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_ENZO file for license and copyright information
+
 /// @file      image_dump.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Wed Nov 18 2009

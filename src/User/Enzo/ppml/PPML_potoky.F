@@ -1,3 +1,6 @@
+c     $Id$
+c     See LICENSE_ENZO file for license and copyright information
+
       Subroutine POTOKy(Nx,Dx,Dt,Qlx,Qrx,Qpm,Qdx,Qdz,Qrp,Fm) 
       Implicit NONE
       Integer nx,i,m,l

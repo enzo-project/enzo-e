@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_ENZO file for license and copyright information
+
 /***********************************************************************
 /
 /  EXTERNAL BOUNDARY CLASS (SET A GRID'S BOUNDARY)

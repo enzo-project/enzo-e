@@ -1,3 +1,6 @@
+c     $Id$
+c     See LICENSE_ENZO file for license and copyright information
+
 c      #include "error.def"
 
       Subroutine HLLDx(UL,UR,F,U) !SL and SR from min/max

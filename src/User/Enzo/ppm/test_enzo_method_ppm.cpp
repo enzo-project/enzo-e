@@ -1,5 +1,5 @@
 // $Id: test_enzo_method_ppm.cpp 1262 2010-03-03 15:44:05Z bordner $
-// See LICENSE_CELLO file for license and copyright information
+// See LICENSE_ENZO file for license and copyright information
 
 /// @file     test_enzo_method_ppm.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)

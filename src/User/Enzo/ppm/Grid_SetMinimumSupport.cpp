@@ -1,3 +1,6 @@
+// $Id$
+// See LICENSE_ENZO file for license and copyright information
+
 /// @file      Grid_SetMinimumSupport.cpp
 /// @author    Greg Bryan
 /// @date      November, 1998
