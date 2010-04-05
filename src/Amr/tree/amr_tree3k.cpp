@@ -1,7 +1,10 @@
-/// @file      amr_tree_3k.cpp
-/// @author    James Bordner (jobordner@ucsd.edu)
-/// @date      
-/// @brief     
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     amr_tree3k.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-10-29
+/// @brief    Implementation of Tree3K class for K^3-trees
 
 #include <stdio.h>
 #include "cello.h"

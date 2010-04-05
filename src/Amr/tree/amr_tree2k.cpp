@@ -1,3 +1,10 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     amr_tree2k.cpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2009-10-27
+/// @brief    Implementation of Tree2K class for K^2-trees
 
 #include <stdio.h>
 #include "cello.h"
