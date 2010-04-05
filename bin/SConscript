@@ -1,0 +1,46 @@
+
+# Define a test for running unit tests
+
+unit       = Builder(action = "./$SOURCE")
+unit_parse = Builder(action = "test_parse < $SOURCE > $TARGET")
+
+env = Environment(BUILDERS = {'Unit': unit, 'UnitParse' : unit_parse})
+
+# Implement the tests
+
+# Array.unit
+# Data.unit
+# EnzoMethodPpm.unit
+# Error.unit
+# Hdf5.unit
+# Memory.unit
+# Monitor.unit
+# Parameters.unit
+# Schedule.unit
+# Timer.unit
+
+env.Unit('Array.unit','test_array')
+env.Unit('Data.unit','test_data')
+env.Unit('Hdf5.unit','test_disk_hdf5')
+env.Unit('Error.unit','test_error')
+env.Unit('Memory.unit','test_memory')
+env.Unit('Monitor.unit','test_monitor')
+env.Unit('Parameters.unit','test_parameters')
+env.Unit('Schedule.unit','test_schedule')
+env.Unit('Timer.unit','test_performance')
+
+# env.Unit('Array.unit','test_enzo_method_ppm')
+# env.Unit('Array.unit','test_tree')
+# env.Unit('Array.unit','test_tree_k')
+# env.UnitParse('implosion.out','implosion.in')
+#	./test_parse < shock-pool.in > shock-pool.out
+#	./test_parse < test_groups.in > test_groups.out
+#	./test_parse < test.in > test.out
+#	./test_parse < test_list.in > test_list.out
+#	./test_parse < test_logical.in > test_logical.out
+#	./test_parse < test_scalar.in > test_scalar.out
+#	-grep -i -l error *.out
+#
+#
+#
+#

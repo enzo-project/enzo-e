@@ -12,5 +12,8 @@ env = Environment (
 
 Export('env')
 
+SConscript('bin/SConscript')
 SConscript('src/SConscript')
+
+
 

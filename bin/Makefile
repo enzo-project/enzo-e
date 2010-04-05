@@ -1,5 +1,5 @@
 clean:
-	-rm -f test_* *.hdf5 *.png *.unit cello *.out *~
+	-rm -f *.hdf5 *.png *.unit cello *.out *~
 run-tests:
 	./test_array
 	./test_data
