@@ -74,6 +74,7 @@ talk-intro:
 
 .PHONY: clean
 clean: $(patsubst %,%-clean,$(DIRS))
+	-rm `find . -type l`
 	-rm -f *~
 
 %-clean:
