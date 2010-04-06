@@ -39,7 +39,7 @@ void Method::initialize(std::string method_name) throw()
 
 //----------------------------------------------------------------------
 
-void Method::add_argument
+void Method::argument
 (
  enum_argument_type argument_type,
  std::string        argument_name,

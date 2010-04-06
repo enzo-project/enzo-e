@@ -4,9 +4,10 @@ SConscript('ppm/SConscript')
 SConscript('ppml/SConscript')
 
 env.Library ('user-enzo', 
-	['ppm/libuser-enzo-ppm.a', 
-	 'ppml/libuser-enzo-ppml.a'])
+            ['ppm/libenzo-ppm.a', 
+             'ppml/libenzo-ppml.a'])
 
+env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('*hpp')]))
 
 
 

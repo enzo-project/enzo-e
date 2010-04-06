@@ -1,3 +1,4 @@
+Import('env')
 
 SConscript('Amr/SConscript')
 SConscript('Array/SConscript')
@@ -21,4 +22,14 @@ SConscript('Test/SConscript')
 SConscript('User/SConscript')
 
 
+components = [
+	'schedule',
+	'monitor',
+	'parallel',
+	'parameters',
+	'simulation']
 
+env = env.Clone(LIBS=[components])
+
+exe_cello = env.Program(['cello.cpp'])
+env.Alias('install-bin', env.Install ('$BINPATH', [exe_cello]))

@@ -10,7 +10,6 @@
 
 #include "user.hpp"
 #include "test.hpp"
-#include "user.hpp"
 
 main ()
 {

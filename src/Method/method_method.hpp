@@ -60,11 +60,13 @@ public: // functions
 
   void initialize(std::string method_name) throw();
 
-  /// Specify a Field or Particle type, and its access type
+protected: // functions
 
-  void add_argument(enum_argument_type argument_type,
-		    std::string        argument_name,
-		    enum_access_type   access_type) throw();
+  /// Specify a Field or Particle type and its access type
+
+  void argument(enum_argument_type argument_type,
+		std::string        argument_name,
+		enum_access_type   access_type) throw();
 
 protected: // attributes
 

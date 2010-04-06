@@ -38,7 +38,7 @@ sources  = [
 	'PPML_TimeStep.F',
 	'SetExternalBoundary.cpp']
 
-lib_user = env.Library ('user-enzo-ppml', [sources])
+lib_user = env.Library ('enzo-ppml', [sources])
 
 # env.Alias('install-lib',env.Install ('$LIBPATH','libuser-enzo-ppml.a'))
 

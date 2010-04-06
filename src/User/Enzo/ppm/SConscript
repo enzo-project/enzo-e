@@ -8,14 +8,16 @@ libraries  = ['hdf5', 'gfortran', 'png']
 
 #-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX
 
-env = env.Clone(LIBS=[components,libraries], CPPFLAGS='-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX')
+env = env.Clone (
+  LIBS     = [components,libraries], 
+  CPPFLAGS ='-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX')
 
-includes = ['user_enzo_method_ppm.hpp']
+includes = ['enzo_ppm.hpp']
 
 env.Alias('install-inc',env.Install ('$CPPPATH',includes))
 
 sources  = [
-          'user_enzo_method_ppm.cpp',
+          'enzo_ppm.cpp',
 	  'initialize_hydro.cpp',
           'initialize_implosion3.cpp',
           'initialize_image.cpp',
@@ -54,10 +56,9 @@ sources  = [
 	'yeuler_sweep.F',
 	'zeuler_sweep.F']
 
-lib_user = env.Library ('user-enzo-ppm', [sources])
+lib_user = env.Library ('enzo-ppm', [sources])
 
-# env.Alias('install-lib',env.Install ('$LIBPATH','libuser-enzo-ppm.a'))
-
+# env.Alias('install-lib',env.Install ('$LIBPATH','libuser-enzo.a'))
 
 test_ppm             = env.Program (['test_ppm.cpp',             sources])
 test_enzo_method_ppm = env.Program (['test_enzo_method_ppm.cpp', sources])
