@@ -21,6 +21,7 @@
 namespace unit {
 
   /// @namespace unit
+  /// @ingroup   Test
   /// @brief     Current class name, function name, and test results
        
   char class_name[UNIT_MAX_NAME_LEN] = {0};

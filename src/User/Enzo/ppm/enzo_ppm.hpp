@@ -1,48 +1,35 @@
-// $Id: method.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: enzo_ppm.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file     user_enzo_method_ppm.hpp 
+/// @file     enzo_ppm.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Apr  1 16:14:38 PDT 2010
 /// @brief    Implementation of Enzo PPM hydro method
 
-#ifndef USER_ENZO_METHOD_PPM_HPP
-#define USER_ENZO_METHOD_PPM_HPP
+#ifndef ENZO_PPM_HPP
+#define ENZO_PPM_HPP
 
 #include <vector>
 #include <string>
 #include "method.hpp"
 
+class MethodEnzoPpm : public Method {
 
-class EnzoMethodPpm : public Method {
-
-  /// @class    EnzoMethodPpm
+  /// @class    MethodEnzoPpm
   /// @ingroup  Enzo
   /// @brief    Encapsulate Enzo's PPM hydro method
 
 public: // interface
 
-  /// Create a new Method
+  /// Perform any method-specific initialization
 
-  EnzoMethodPpm() throw()
-  {}
-
-  /// Create Method
-
-  EnzoMethodPpm(const EnzoMethodPpm &) throw()
-  {}
-
-  /// Delete a Method
-
-  ~EnzoMethodPpm () throw()
-  {}
+  void initialize(std::string method_name) throw();
 
   /// Apply the method
 
-  virtual void apply() throw()
-  {}
+  void apply() throw();
 
 
 };
 
-#endif /* USER_ENZO_METHOD_PPM_HPP */
+#endif /* ENZO_PPM_HPP */

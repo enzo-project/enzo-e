@@ -7,6 +7,7 @@
 /// @file     user_enzo.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-06
+/// @ingroup  User
 /// @brief    Include file for the Enzo User component
 
 #include "enzo_ppm.hpp"

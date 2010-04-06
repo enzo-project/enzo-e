@@ -40,33 +40,27 @@ public: // interface
 
   Method() throw();
 
-  /// Create Method
-
-  Method(const Method &) throw();
-
   /// Delete a Method
 
   ~Method () throw();
 
+public: // virtual functions
+
+  /// Perform any method-specific initialization
+
+  virtual void initialize(std::string method_name) throw() = 0;
 
   /// Apply the method
 
   virtual void apply() throw() = 0; 
 
-
-public: // functions
-
-  /// Register the method
-
-  void initialize(std::string method_name) throw();
-
 protected: // functions
 
   /// Specify a Field or Particle type and its access type
 
-  void argument(enum_argument_type argument_type,
-		std::string        argument_name,
-		enum_access_type   access_type) throw();
+  void add_argument_(enum_argument_type argument_type,
+		     std::string        argument_name,
+		     enum_access_type   access_type) throw();
 
 protected: // attributes
 

@@ -15,12 +15,7 @@
 Method::Method() throw ()
 ///
 {
-}
-
-//----------------------------------------------------------------------
-
-Method::Method(const Method &) throw()
-{
+  INCOMPLETE_MESSAGE("Method",""); 
 }
 
 //----------------------------------------------------------------------
@@ -28,18 +23,12 @@ Method::Method(const Method &) throw()
 Method::~Method() throw ()
 ///
 {
+  INCOMPLETE_MESSAGE("~Method",""); 
 }
 
 //----------------------------------------------------------------------
 
-void Method::initialize(std::string method_name) throw()
-{ 
-  INCOMPLETE_MESSAGE("initialize",""); 
-}
-
-//----------------------------------------------------------------------
-
-void Method::argument
+void Method::add_argument_
 (
  enum_argument_type argument_type,
  std::string        argument_name,

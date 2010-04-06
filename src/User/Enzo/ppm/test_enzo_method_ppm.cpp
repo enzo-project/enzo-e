@@ -13,11 +13,19 @@
 
 main ()
 {
-  unit_class ("EnzoMethodPpm");
+  unit_class ("MethodEnzoPpm");
+  MethodEnzoPpm ppm;
+
   unit_open();
-  unit_func("register");
-  EnzoMethodPpm ppm;
+
+  unit_func("initialize");
   ppm.initialize("PPM");
   unit_assert(false);
+
+  unit_func("apply");
+  ppm.apply();
+  unit_assert(false);
+
+
   unit_close();
 }
