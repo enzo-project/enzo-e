@@ -175,6 +175,7 @@ private: // attributes
 
   std::map<std::string, Param *> parameter_map_;
   struct param_type * parameter_list_;
+
 };
 
 
