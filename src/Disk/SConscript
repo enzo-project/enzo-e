@@ -1,9 +1,10 @@
 Import('env')
 
 libraries  = ['hdf5', 'array']
+components = ['error']
 sources  = Glob('disk*cpp')
 
-env = env.Clone(LIBS=[libraries])
+env = env.Clone(LIBS=[components,libraries])
 
 env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('*hpp')]))
 

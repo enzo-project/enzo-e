@@ -48,9 +48,9 @@ int ComputeGammaField(float *GammaField)
     /* Find Multi-species fields. */
  
     if (IdentifySpeciesFields(DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum,
-		      HMNum, H2INum, H2IINum, DINum, DIINum, HDINum) == FAIL) {
+		      HMNum, H2INum, H2IINum, DINum, DIINum, HDINum) == ENZO_FAIL) {
       fprintf(stderr, "Error in grid->IdentifySpeciesFields.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
     /* Compute the temperature. */
@@ -93,5 +93,5 @@ int ComputeGammaField(float *GammaField)
  
   } // end: if (MultiSpecies < 2)
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
 }

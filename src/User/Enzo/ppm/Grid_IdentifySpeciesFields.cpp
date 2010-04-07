@@ -47,7 +47,7 @@ int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum,
       HeIIINum < 0) {
     fprintf(stderr, "De=%"ISYM", HI=%"ISYM", HII=%"ISYM", HeI=%"ISYM", HeII=%"ISYM", HeIII=%"ISYM"\n",
 	    DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum);
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Find Fields for the 9-species model. */
@@ -59,7 +59,7 @@ int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum,
  
     if (HMNum < 0 || H2INum < 0 || H2IINum < 0) {
       fprintf(stderr, "H2 related field missing.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
   }
@@ -73,10 +73,10 @@ int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum,
  
     if (DINum < 0 || DIINum < 0 || HDINum < 0) {
       fprintf(stderr, "HD related field missing.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
   }
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
 }

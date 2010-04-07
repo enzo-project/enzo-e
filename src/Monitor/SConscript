@@ -1,10 +1,11 @@
 Import('env')
 
-libraries  = 'png'
+components = ['parallel']
+libraries  = ['png']
 
 env = env.Clone(
 	CPPDEFINES = ['NO_FREETYPE'],
-	LIBS=[libraries])
+	LIBS=[components,libraries])
 
 
 includes = [Glob('monitor*hpp'), Glob('png*h')]

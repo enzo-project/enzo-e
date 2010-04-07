@@ -27,13 +27,13 @@
  
 void my_exit(int status);
 
-int CosmologyComputeExpansionTimestep(FLOAT time, float *dtExpansion);
-int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
+int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);
+int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
 extern "C" void FORTRAN_NAME(calc_dt)(
                   int *rank, int *idim, int *jdim, int *kdim,
                   int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
 			     int *ihydro, float *C2,
-                  FLOAT *dx, FLOAT *dy, FLOAT *dz, float *vgx, float *vgy,
+                  ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz, float *vgx, float *vgy,
                              float *vgz, float *gamma, int *ipfree, float *aye,
                   float *d, float *p, float *u, float *v, float *w,
 			     float *dt, float *dtviscous);
@@ -41,7 +41,7 @@ extern "C" void FORTRAN_NAME(calc_dt)(
 extern "C" void FORTRAN_NAME(calc_dt_ppml)(
                   int *idim, int *jdim, int *kdim,
                   int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
-                  FLOAT *dx, FLOAT *dy, FLOAT *dz,
+                  ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz,
                   float *dn, float *vx, float *vy, float *vz, 
                              float *bx, float *by, float *bz, 
 			     float *dt);
@@ -71,7 +71,7 @@ float ComputeTimeStep()
   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
      set it to one. */
  
-  FLOAT a = 1, dadt;
+  ENZO_FLOAT a = 1, dadt;
   if (ComovingCoordinates)
     CosmologyComputeExpansionFactor(Time, &a, &dadt);
 //   float afloat = float(a);
@@ -87,9 +87,9 @@ float ComputeTimeStep()
 
 //     if (HydroMethod != PPML_Isothermal3D) {
 //       if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
-// 					 Vel3Num, TENum) == FAIL) {
+// 					 Vel3Num, TENum) == ENZO_FAIL) {
 // 	fprintf(stderr, "ComputeTimeStep: IdentifyPhysicalQuantities error.\n");
-// 	exit(FAIL);
+// 	exit(ENZO_FAIL);
 //       }
  
 //     /* Compute the pressure. */
@@ -100,9 +100,9 @@ float ComputeTimeStep()
 //       else
 // 	result = this->ComputePressure(Time, pressure_field);
  
-//       if (result == FAIL) {
+//       if (result == ENZO_FAIL) {
 // 	fprintf(stderr, "Error in grid->ComputePressure.\n");
-// 	exit(EXIT_FAILURE);
+// 	exit(EXIT_ENZO_FAILURE);
 //       }
 //     }
 
@@ -116,7 +116,7 @@ float ComputeTimeStep()
  
 //     if (HydroMethod == PPML_Isothermal3D) {
 //       if (GridRank !=3) 
-// 	my_exit(EXIT_FAILURE);
+// 	my_exit(EXIT_ENZO_FAILURE);
       FORTRAN_NAME(calc_dt_ppml)
 	(GridDimension, GridDimension+1, GridDimension+2,
 	 GridStartIndex, GridEndIndex,
@@ -179,9 +179,9 @@ float ComputeTimeStep()
   /* 3) Find dt from expansion. */
  
   if (ComovingCoordinates)
-    if (CosmologyComputeExpansionTimestep(Time, &dtExpansion) == FAIL) {
+    if (CosmologyComputeExpansionTimestep(Time, &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
-      exit(FAIL);
+      exit(ENZO_FAIL);
     }
  
   /* 4) Calculate minimum dt due to acceleration field (if present). */

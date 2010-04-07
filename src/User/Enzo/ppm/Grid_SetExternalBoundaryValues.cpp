@@ -12,7 +12,7 @@
 /  PURPOSE:
 /
 /  RETURNS:
-/    SUCCESS or FAIL
+/    ENZO_SUCCESS or ENZO_FAIL
 /
 ************************************************************************/
  
@@ -40,7 +40,7 @@ int SetExternalBoundaryValues()
  
     if (BaryonField[field] == NULL) {
       fprintf(stderr, "Baryon field missing.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
 
 #ifdef OOC_BOUNDARY
@@ -50,13 +50,13 @@ int SetExternalBoundaryValues()
     if (SetExternalBoundary(GridRank, GridDimension, GridOffset,
 				      GridStartIndex, GridEndIndex,
 				      BaryonField[field], FieldType[field])
-	== FAIL) {
+	== ENZO_FAIL) {
       fprintf(stderr, "Error in SetExternalBoundary.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
   }
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
  
 }

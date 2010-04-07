@@ -11,7 +11,7 @@
 
 /* function prototypes */
  
-int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
+int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
 int FindField(int f, int farray[], int n);
 extern "C" void FORTRAN_NAME(ppm_de)(
 			  float *d, float *E, float *u, float *v, float *w,
@@ -47,7 +47,7 @@ int SolveHydroEquations
     int dim, i,  size;
     int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num, coloff[MAX_COLOR];
 //     long long GridGlobalStart[MAX_DIMENSION];
-    FLOAT a = 1, dadt;
+    ENZO_FLOAT a = 1, dadt;
  
     float *colourpt = NULL;
  
@@ -60,9 +60,9 @@ int SolveHydroEquations
     /* Find fields: density, total energy, velocity1-3. */
  
     if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
-					 Vel3Num, TENum) == FAIL) {
+					 Vel3Num, TENum) == ENZO_FAIL) {
       fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
     /* If multi-species being used, then treat them as colour variables
@@ -77,7 +77,7 @@ int SolveHydroEquations
       if ((ColourNum =
 	   FindField(ElectronDensity, FieldType, NumberOfBaryonFields)) < 0) {
 	fprintf(stderr, "Could not find ElectronDensity.\n");
-	return FAIL;
+	return ENZO_FAIL;
       }
  
       /* Set Offsets from the first field (here assumed to be the electron
@@ -151,9 +151,9 @@ int SolveHydroEquations
  
     float MinimumSupportEnergyCoefficient = 0;
     if (UseMinimumPressureSupport == TRUE)
-      if (SetMinimumSupport(MinimumSupportEnergyCoefficient) == FAIL) {
+      if (SetMinimumSupport(MinimumSupportEnergyCoefficient) == ENZO_FAIL) {
 	fprintf(stderr, "Error in grid->SetMinimumSupport,\n");
-	return FAIL;
+	return ENZO_FAIL;
       }
  
 //     /* allocate space for fluxes */
@@ -346,9 +346,9 @@ int SolveHydroEquations
  
     if (ComovingCoordinates)
       if (CosmologyComputeExpansionFactor(Time+0.5*dt, &a, &dadt)
-	  == FAIL) {
+	  == ENZO_FAIL) {
 	fprintf(stderr, "Error in CsomologyComputeExpansionFactors.\n");
-	return FAIL;
+	return ENZO_FAIL;
       }
  
     /* Create a cell width array to pass (and convert to absolute coords). */
@@ -408,6 +408,6 @@ int SolveHydroEquations
  
   }  // end: if (NumberOfBaryonFields > 0)
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
  
 }

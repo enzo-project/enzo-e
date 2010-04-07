@@ -22,7 +22,7 @@ enum enum_data_type {
   data_type_single,
   data_type_double };
 
-class ParallelMpi {
+class ParallelMpi : public Parallel {
 
   /// @class    ParallelMpi
   /// @ingroup  Parallel
@@ -95,6 +95,12 @@ public: // interface
   /// Get send type: standard, buffered, synchronous, or ready
   enum_send_type get_send_type () 
   { return send_type_; }
+
+public: // virtual
+
+  /// Return whether this is the root process
+  virtual bool is_root()
+  { return rank_ == 0; }
 
 private: // attributes
 

@@ -16,23 +16,13 @@
 #include "error.hpp"
 #include "memory.hpp"
 
-Memory Memory::instance_;
+Memory Memory::instance_; // (singleton design pattern)
 
 //======================================================================
 // FUNCTIONS
 //======================================================================
  
 void Memory::initialize_() throw ()
-/**
- *********************************************************************
- *
- * @param         There are no parameters
- * @return        There is no return value
- *
- * Initialize the Memory class
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
   curr_group_.push(0);
@@ -52,17 +42,11 @@ void Memory::initialize_() throw ()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
-/**
- *********************************************************************
- *
- * @param  bytes   Number of bytes to allocate
- * @return        Pointer to the allocated memory
- *
- * Allocate memory with the default group
- *
- *********************************************************************
- */
+/// @param  bytes   Number of bytes to allocate
+/// @return        Pointer to the allocated memory
 {
 #ifdef CONFIG_USE_MEMORY
   int * buffer = (int *)(malloc(bytes + 2*sizeof(int)));
@@ -91,25 +75,15 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
     buffer[1] = 0;
   }
   return (void *)(buffer + 2);
-
-
 #else
   return 0;
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Memory::deallocate ( void * pointer )
   throw (ExceptionMemoryBadDeallocate())
-/**
- *********************************************************************
- *
- * @param  foo    Description of argument foo
- * @return        There is no return value
- *
- * Detailed description of the function
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
   int *buffer = (int *)(pointer) - 2;
@@ -130,17 +104,11 @@ void Memory::deallocate ( void * pointer )
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Memory::new_group ( memory_group_handle group_id, const char * group_name ) throw ()
-/**
- *********************************************************************
- *
- * @param  group_id    non-zero ID of the group
- * @param  group_name  Name of the group
- *
- * Name a new group
- *
- *********************************************************************
- */
+/// @param  group_id    non-zero ID of the group
+/// @param  group_name  Name of the group
 {
 #ifdef CONFIG_USE_MEMORY
   if (group_id == 0 || group_id > MEMORY_MAX_NUM_GROUPS) {
@@ -155,22 +123,13 @@ void Memory::new_group ( memory_group_handle group_id, const char * group_name )
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void  Memory::begin_group ( memory_group_handle group_id ) throw ()
-/**
- *********************************************************************
- *
- * @param  group_id ID of the group
- *
- * Begin allocating memory associated with the specified group ID
- *
- * Error handling:
- *
- *  ( ) number of groups could exceed MEMORY_MAX_NUM_GROUPS_
- *        issue a warning
- *        fall back to "general" group
- *
- *********************************************************************
- */
+/// @param  group_id ID of the group
+///
+/// If number of groups exceeds MEMORY_MAX_NUM_GROUPS_, issue a
+/// warning and fall back to "general" group
 {
 #ifdef CONFIG_USE_MEMORY
   // check for whether we have already called begin_group before
@@ -194,16 +153,9 @@ void  Memory::begin_group ( memory_group_handle group_id ) throw ()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Memory::end_group ( memory_group_handle group_id ) throw ()
-/**
- *********************************************************************
- *
- * @param  foo    Description of argument foo
- * @return        There is no return value
- *
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
 
@@ -245,17 +197,9 @@ void Memory::end_group ( memory_group_handle group_id ) throw ()
 #endif
 }
 
+//----------------------------------------------------------------------
 
 const char * Memory::current_group () throw ()
-/**
- *********************************************************************
- *
- * @param  foo    Description of argument foo
- * @return        There is no return value
- *
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
 
@@ -273,17 +217,9 @@ const char * Memory::current_group () throw ()
 #endif
 }
 
+//----------------------------------------------------------------------
 
 memory_group_handle Memory::current_handle () throw ()
-/**
- *********************************************************************
- *
- * @param  foo    Description of argument foo
- * @return        There is no return value
- *
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
   return curr_group_.top();
@@ -292,18 +228,9 @@ memory_group_handle Memory::current_handle () throw ()
 #endif
 }
 
+//----------------------------------------------------------------------
 
 long long Memory::bytes ( memory_group_handle group_handle ) throw ()
-/**
- *********************************************************************
- *
- * @param  foo    Description of argument foo
- * @return        There is no return value
- *
- * Detailed description of the function
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
   return bytes_[group_handle];
@@ -312,17 +239,9 @@ long long Memory::bytes ( memory_group_handle group_handle ) throw ()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 long long Memory::available ( memory_group_handle group_handle ) throw ()
-/**
- *********************************************************************
- *
- * @param  foo    Description of argument foo
- * @return        There is no return value
- *
- * Detailed description of the function
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
@@ -333,17 +252,9 @@ long long Memory::available ( memory_group_handle group_handle ) throw ()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 float Memory::efficiency ( memory_group_handle group_handle ) throw ()
-/**
- *********************************************************************
- *
- * @param  foo    Description of argument foo
- * @return        There is no return value
- *
- * Detailed description of the function
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
@@ -354,17 +265,9 @@ float Memory::efficiency ( memory_group_handle group_handle ) throw ()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 long long Memory::highest ( memory_group_handle group_handle ) throw ()
-/**
- *********************************************************************
- *
- * @param  foo    Description of argument foo
- * @return        There is no return value
- *
- * Detailed description of the function
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
@@ -375,18 +278,10 @@ long long Memory::highest ( memory_group_handle group_handle ) throw ()
 #endif
 }
 
+//----------------------------------------------------------------------
+
 void Memory::set_limit ( long long size, memory_group_handle group_handle )
   throw ()
-/**
- *********************************************************************
- *
- * @param  foo    Description of argument foo
- * @return        There is no return value
- *
- * Detailed description of the function
- *
- *********************************************************************
- */
 {
 #ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
@@ -394,18 +289,9 @@ void Memory::set_limit ( long long size, memory_group_handle group_handle )
 #endif
 }
 
-/// Return the number of calls to allocate for the group
+//----------------------------------------------------------------------
+
 int Memory::num_new ( memory_group_handle group_handle ) throw ()
-/**
-*********************************************************************
-*
-* @param  foo    Description of argument foo
-* @return        There is no return value
-*
-* Detailed description of the function
-*
-*********************************************************************
-*/
 {
 #ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
@@ -416,18 +302,9 @@ int Memory::num_new ( memory_group_handle group_handle ) throw ()
 #endif
 }
 
-/// Return the number of calls to deallocate for the group
+//----------------------------------------------------------------------
+
 int Memory::num_delete ( memory_group_handle group_handle ) throw ()
-/**
-*********************************************************************
-*
-* @param  foo    Description of argument foo
-* @return        There is no return value
-*
-* Detailed description of the function
-*
-*********************************************************************
-*/
 {
 #ifdef CONFIG_USE_MEMORY
   check_handle_(group_handle);
@@ -438,18 +315,9 @@ int Memory::num_delete ( memory_group_handle group_handle ) throw ()
 #endif
 }
 
-/// Print memory summary
+//----------------------------------------------------------------------
+
 void Memory::print () throw ()
-/**
-*********************************************************************
-*
-* @param  foo    
-* @return        
-*
-* Print memory summary
-*
-*********************************************************************
-*/
 {
 #ifdef CONFIG_USE_MEMORY
   for (memory_group_handle i=0; i<= MEMORY_MAX_NUM_GROUPS; i++) {
@@ -464,6 +332,8 @@ void Memory::print () throw ()
   }
 #endif
 }
+
+//----------------------------------------------------------------------
 
 void Memory::reset() throw()
 {
@@ -483,24 +353,6 @@ void Memory::reset() throw()
 
 //======================================================================
 
-#ifdef CONFIG_USE_MEMORY
-
-// bool Memory::is_active_  =  false;
-
-// std::stack<memory_group_handle> Memory::curr_group_;
-
-// char *    Memory::group_names_ [MEMORY_MAX_NUM_GROUPS + 1] = {0};
-
-// long long Memory::available_   [MEMORY_MAX_NUM_GROUPS + 1] = {0};
-// long long Memory::bytes_       [MEMORY_MAX_NUM_GROUPS + 1] = {0};
-// long long Memory::bytes_high_  [MEMORY_MAX_NUM_GROUPS + 1] = {0};
-// long long Memory::new_calls_   [MEMORY_MAX_NUM_GROUPS + 1] = {0};
-// long long Memory::delete_calls_[MEMORY_MAX_NUM_GROUPS + 1] = {0};
-
-#endif
-
-//======================================================================
-    
 #ifdef CONFIG_USE_MEMORY
 void *operator new (size_t bytes) throw (std::bad_alloc)
 {

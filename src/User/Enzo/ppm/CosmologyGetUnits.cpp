@@ -33,24 +33,24 @@
 
 /* function prototypes */
  
-int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
+int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
  
 int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
 		      float *TemperatureUnits, float *TimeUnits,
-		      float *VelocityUnits, FLOAT Time)
+		      float *VelocityUnits, ENZO_FLOAT Time)
 {
  
   /* From the time, compute the current redshift. */
  
-  FLOAT a, dadt;
-  if (CosmologyComputeExpansionFactor(Time, &a, &dadt) == FAIL) {
+  ENZO_FLOAT a, dadt;
+  if (CosmologyComputeExpansionFactor(Time, &a, &dadt) == ENZO_FAIL) {
     fprintf(stderr, "Error in ComputeExpansionFactor.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Compute the current redshift (remember a(init) = 1). */
  
-  FLOAT CurrentRedshift = (1 + InitialRedshift)/a - 1;
+  ENZO_FLOAT CurrentRedshift = (1 + InitialRedshift)/a - 1;
  
   /* Determine the units. */
  
@@ -64,10 +64,10 @@ int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
                       (1 + InitialRedshift);
  
   *TimeUnits        = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
-                      pow(1 + InitialRedshift,FLOAT(1.5));
+                      pow(1 + InitialRedshift,ENZO_FLOAT(1.5));
  
   *VelocityUnits    = 1.225e7*ComovingBoxSize*sqrt(OmegaMatterNow)*
                       sqrt(1 + InitialRedshift);
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
 }

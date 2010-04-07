@@ -33,14 +33,14 @@ int IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num,
  
   if ((DensNum = FindField(Density, FieldType, NumberOfBaryonFields)) < 0) {
     fprintf(stderr, "GIPQ: Cannot find density.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Find Total energy, if possible. */
  
   if ((TENum = FindField(TotalEnergy, FieldType, NumberOfBaryonFields)) < 0) {
     fprintf(stderr, "Cannot find total energy.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Find gas energy, if possible. */
@@ -49,14 +49,14 @@ int IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num,
     if ((GENum = FindField(InternalEnergy, FieldType,
 			   NumberOfBaryonFields)) < 0) {
       fprintf(stderr, "Cannot find gas energy.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
   /* Find Velocity1, if possible. */
  
   if ((Vel1Num = FindField(Velocity1, FieldType, NumberOfBaryonFields)) < 0) {
     fprintf(stderr, "Cannot find Velocity1.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Find Velocity2, if possible. */
@@ -65,7 +65,7 @@ int IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num,
     if ((Vel2Num = FindField(Velocity2, FieldType,
 			     NumberOfBaryonFields)) < 0) {
       fprintf(stderr, "Cannot find Velocity2.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
   /* Find Velocity3, if possible. */
@@ -74,8 +74,8 @@ int IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num,
     if ((Vel3Num = FindField(Velocity3, FieldType,
 			     NumberOfBaryonFields)) == 0) {
       fprintf(stderr, "Cannot find Velocity3.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
 }

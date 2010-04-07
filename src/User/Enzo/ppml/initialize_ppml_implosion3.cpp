@@ -71,7 +71,7 @@ void initialize_ppml_implosion3 (int size_param, int cycles_param)
 
 
   for (int dim=0; dim<GridRank; dim++) {
-    CellWidth[dim] = new FLOAT[GridDimension[dim]];
+    CellWidth[dim] = new ENZO_FLOAT[GridDimension[dim]];
     float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
       (GridEndIndex[dim] - GridStartIndex[dim] + 1);
     for (int i=0; i<GridDimension[dim]; i++) {

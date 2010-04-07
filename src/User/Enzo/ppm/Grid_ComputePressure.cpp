@@ -24,9 +24,9 @@
  
 int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
 		      float *TemperatureUnits, float *TimeUnits,
-		      float *VelocityUnits, FLOAT Time);
+		      float *VelocityUnits, ENZO_FLOAT Time);
  
-int ComputePressure(FLOAT time, float *pressure)
+int ComputePressure(ENZO_FLOAT time, float *pressure)
 {
  
   /* declarations */
@@ -39,7 +39,7 @@ int ComputePressure(FLOAT time, float *pressure)
  
   if (time < OldTime || time > Time) {
     fprintf(stderr, "requested time is outside available range.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Compute interpolation coefficients. */
@@ -61,9 +61,9 @@ int ComputePressure(FLOAT time, float *pressure)
  
   int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
   if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
-					 Vel3Num, TENum) == FAIL) {
+					 Vel3Num, TENum) == ENZO_FAIL) {
     fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Loop over the grid, compute the thermal energy, then the pressure,
@@ -142,18 +142,18 @@ int ComputePressure(FLOAT time, float *pressure)
     int DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum, HMNum, H2INum,
         H2IINum, DINum, DIINum, HDINum;
     if (IdentifySpeciesFields(DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum,
-		      HMNum, H2INum, H2IINum, DINum, DIINum, HDINum) == FAIL) {
+		      HMNum, H2INum, H2IINum, DINum, DIINum, HDINum) == ENZO_FAIL) {
       fprintf(stderr, "Error in grid->IdentifySpeciesFields.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
     /* Find the temperature units if we are using comoving coordinates. */
  
     if (ComovingCoordinates)
       if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
-			    &TimeUnits, &VelocityUnits, Time) == FAIL) {
+			    &TimeUnits, &VelocityUnits, Time) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyGetUnits.\n");
-	return FAIL;
+	return ENZO_FAIL;
       }
  
     for (i = 0; i < size; i++) {
@@ -209,5 +209,5 @@ int ComputePressure(FLOAT time, float *pressure)
     }
 
 
-  return SUCCESS;
+  return ENZO_SUCCESS;
 }

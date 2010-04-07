@@ -9,6 +9,8 @@
 /// @date     2009-10-05
 /// @brief    Declaration of the Monitor class
 
+#include "parallel.hpp"
+
 /// @enum     enum_reduce
 /// @brief    Reduction operator, used for image projections
 enum enum_reduce {
@@ -19,13 +21,12 @@ enum enum_reduce {
   reduce_sum      /// Sum of values along the axis
 };
 
-
 class Monitor {
 
   /// @class    Monitor
   /// @ingroup  Monitor
   /// @todo     Make calling image() easier
-  /// @todo     Incorporate Parallel
+  /// @todo     Use singleton design pattern
   /// @brief    Functions for user monitoring of the execution status
   ///
   /// The Monitor component is used to communicate information about
@@ -41,11 +42,15 @@ class Monitor {
 public: // interface
 
   /// Initialize the Monitor object
-  Monitor(FILE * fp = stdout,
+  Monitor(Parallel * parallel,
+	  FILE * fp = stdout,
 	  bool   active = true) 
-    : active_(active),
+    : parallel_(parallel),
+      active_(parallel->is_root()),
       fp_(fp)
-  {  timer_.start(); };
+  {  
+    timer_.start(); 
+  }
 
   /// Print a message
   void print (std::string message)
@@ -66,11 +71,13 @@ public: // interface
 	      int            color_length // length of color map / 3
 	      );
   
-private: // functions
+protected: // attributes
 
-  bool   active_;  // Whether monitoring is activated.  Used for e.g. np != 0.
+  Parallel * parallel_; // Parallel object, used for is_root()
+  bool   active_;  // Whether monitoring is activated.  Used for e.g. ip != 0.
   FILE * fp_;      // File pointer for message logging
   Timer  timer_;   // Timer from Performance
+  
 
 };
 

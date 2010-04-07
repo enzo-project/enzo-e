@@ -13,6 +13,7 @@ class Parallel {
 
   /// @class    Parallel
   /// @ingroup  Parallel
+  /// @todo     Use singleton design pattern with variations: Mpi, Omp, etc.
   /// @brief    Class for encapsulating different parallel technologies
 
 public: // interface
@@ -22,6 +23,9 @@ public: // interface
 
   /// Delete a Parallel object
   ~Parallel();
+
+  virtual bool is_root()
+  { return true; }
 
 };
 

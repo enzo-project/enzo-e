@@ -1,5 +1,8 @@
 Import('env')
 
+components = ['error']
+env = env.Clone(LIBS=[components])
+
 includes = [
 	'parameters.hpp',
 	'parameters_parameters.hpp',

@@ -11,14 +11,14 @@
 
 #define WARNING(MESSAGE) printf ("%s:%d WARNING: %s\n",__FILE__,__LINE__,MESSAGE);
 
-#define FAIL                                0 // Error handling
-#define SUCCESS                             1 // Error handling
+#define ENZO_FAIL                           0 // Error handling
+#define ENZO_SUCCESS                        1 // Error handling
 
 #define FALSE                               0 // Needed for fortran
 #define TRUE                                1 // Needed for fortran
 
-#define FLOAT                          double // Scalar
-#define FLOAT_UNDEFINED              -99999.0 // use NaN: CosmologyComputeExpansionFactor()
+#define ENZO_FLOAT                          double // Scalar
+#define ENZO_FLOAT_UNDEFINED              -99999.0 // use NaN: CosmologyComputeExpansionFactor()
 #define ISYM                              "d" // Scalar
 
 #define MAX_DIMENSION                       3 // for array declarations and loops in SolveHydro
@@ -122,15 +122,15 @@ extern float  time_stop;   // stop after this simulation time
 extern int    cycle_stop;  // stop after this number of cycles
 
 extern float  CourantSafetyNumber;
-extern FLOAT  InitialRedshift;
-extern FLOAT  InitialTimeInCodeUnits;
-extern FLOAT  Time;
-extern FLOAT  OldTime;
+extern ENZO_FLOAT  InitialRedshift;
+extern ENZO_FLOAT  InitialTimeInCodeUnits;
+extern ENZO_FLOAT  Time;
+extern ENZO_FLOAT  OldTime;
 
 // Domain
 
-extern FLOAT  DomainLeftEdge [MAX_DIMENSION];
-extern FLOAT  DomainRightEdge[MAX_DIMENSION];
+extern ENZO_FLOAT  DomainLeftEdge [MAX_DIMENSION];
+extern ENZO_FLOAT  DomainRightEdge[MAX_DIMENSION];
 
 // Grid
 
@@ -138,8 +138,8 @@ extern int    GridRank;
 extern int    GridDimension[MAX_DIMENSION];
 extern int    GridStartIndex[MAX_DIMENSION];
 extern int    GridEndIndex[MAX_DIMENSION];
-extern FLOAT  GridLeftEdge[MAX_DIMENSION];
-extern FLOAT *CellWidth[MAX_DIMENSION];
+extern ENZO_FLOAT  GridLeftEdge[MAX_DIMENSION];
+extern ENZO_FLOAT *CellWidth[MAX_DIMENSION];
 
 // Fields
 
@@ -208,9 +208,9 @@ extern float   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
 
 int ComputeGammaField(float *GammaField);
 
-int ComputePressure(FLOAT time, float *pressure);
+int ComputePressure(ENZO_FLOAT time, float *pressure);
 
-int ComputePressureDualEnergyFormalism(FLOAT time, float *pressure);
+int ComputePressureDualEnergyFormalism(ENZO_FLOAT time, float *pressure);
 
 int ComputeTemperatureField(float *temperature);
 
@@ -255,4 +255,10 @@ void initialize_ppml_implosion3 (int size, int cycles);
 float sum_field (int field);
 float print_field (int field);
 void data_dump (const char * file_root, int cycle);
-void image_dump (const char * file_root, int cycle, double lower, double upper);
+
+class Monitor;
+void image_dump (Monitor    * monitor,
+		 const char * file_root, 
+		 int          cycle, 
+		 double       lower, 
+		 double       upper);

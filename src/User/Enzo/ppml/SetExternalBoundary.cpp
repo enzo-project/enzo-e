@@ -11,7 +11,7 @@
 /
 /  PURPOSE:
 /
-/  RETURNS: SUCCESS or FAIL
+/  RETURNS: ENZO_SUCCESS or ENZO_FAIL
 /
 ************************************************************************/
  
@@ -46,7 +46,7 @@ int SetExternalBoundary(int FieldRank,
   if (FieldRank != BoundaryRank) {
     fprintf(stderr, "FieldRank(%"ISYM") != BoundaryRank(%"ISYM").\n",
             FieldRank, BoundaryRank);
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* find requested field type */
@@ -57,7 +57,7 @@ int SetExternalBoundary(int FieldRank,
     if (FieldType == BoundaryFieldType[field]) break;
   if (field == NumberOfBaryonFields) {
     fprintf(stderr, "Field type (%"ISYM") not found in Boundary.\n", FieldType);
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* error check: make sure the boundary type array exists */
@@ -66,7 +66,7 @@ int SetExternalBoundary(int FieldRank,
     if (BoundaryDimension[dim] != 1) {
       if (BoundaryType[field][dim][0] == NULL) {
 	fprintf(stderr, "BoundaryType not yet declared.\n");
-	return FAIL;
+	return ENZO_FAIL;
       }
     }
  
@@ -102,7 +102,7 @@ int SetExternalBoundary(int FieldRank,
 	  case bc_unknown:
 	  default:
 	    fprintf(stderr, "BoundaryType not recognized (x-left).\n");
-	    return FAIL;
+	    return ENZO_FAIL;
 	  }
 	}
   }
@@ -136,7 +136,7 @@ int SetExternalBoundary(int FieldRank,
 	  case bc_unknown:
 	  default:
 	    fprintf(stderr, "BoundaryType not recognized (x-right).\n");
-	    return FAIL;
+	    return ENZO_FAIL;
 	  }
 	}							
   }
@@ -171,7 +171,7 @@ int SetExternalBoundary(int FieldRank,
 	  case bc_unknown:
 	  default:
 	    fprintf(stderr, "BoundaryType not recognized (y-left).\n");
-	    return FAIL;
+	    return ENZO_FAIL;
 	  }
 	}
   }
@@ -204,7 +204,7 @@ int SetExternalBoundary(int FieldRank,
 	  case bc_unknown:
 	  default:
 	    fprintf(stderr, "BoundaryType not recognized (y-right).\n");
-	    return FAIL;
+	    return ENZO_FAIL;
 	  }
 	}							
   }
@@ -239,7 +239,7 @@ int SetExternalBoundary(int FieldRank,
 	  case bc_unknown:
 	  default:
 	    fprintf(stderr, "BoundaryType not recognized (z-left).\n");
-	    return FAIL;
+	    return ENZO_FAIL;
 	  }
 	}
   }
@@ -272,11 +272,11 @@ int SetExternalBoundary(int FieldRank,
 	  case bc_unknown:
 	  default:
 	    fprintf(stderr, "BoundaryType not recognized (z-right).\n");
-	    return FAIL;
+	    return ENZO_FAIL;
 	  }
 	}							
   }
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
  
 }

@@ -16,7 +16,6 @@
 
 #include "error.hpp"
 #include "memory.hpp"
-#include "monitor.hpp"
 #include "disk.hpp"
 #include "amr_node2k.hpp"
 #include "amr_node3k.hpp"
@@ -51,6 +50,7 @@ void create_tree ( int * level_array, int nx, int ny, int nz, int k,  int d,
 
 int main(int argc, char ** argv)
 {
+
   // read in the gimp image into level
 
   int nx,ny,nz;
@@ -234,15 +234,15 @@ void write_image(std::string filename, float * image, int nx, int ny, int nz)
   hdf5.dataset_close ();
   hdf5.file_close();
 
-  Monitor monitor;
   float min=image[0];
   float max=image[0];
   for (int i=0; i<nx*ny*nz; i++) {
     if (min > image[i]) min = image[i];
     if (max < image[i]) max = image[i];
   }
-  //  int color_map[] = {0,0,0,1,1,1};
-  //  monitor.plot_png ((filename+".png").c_str(),image,nx,ny,min,max,color_map, 2);
+
+//   int color_map[] = {0,0,0,1,1,1};
+//   monitor->plot_png ((filename+".png").c_str(),image,nx,ny,min,max,color_map, 2);
 
 }
 

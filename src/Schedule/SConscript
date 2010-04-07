@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['parameters']
+components = ['error','parameters']
 
 env = env.Clone(LIBS=[components])
 

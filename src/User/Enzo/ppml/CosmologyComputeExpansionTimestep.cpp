@@ -19,26 +19,26 @@
  
 /* Function prototypes */
  
-int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
+int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
  
  
  
-int CosmologyComputeExpansionTimestep(FLOAT time, float *dtExpansion)
+int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion)
 {
  
   /* Error check. */
  
   if (InitialTimeInCodeUnits == 0) {
     fprintf(stderr, "The cosmology parameters seem to be improperly set.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Compute the expansion factors. */
  
-  FLOAT a, dadt;
-  if (CosmologyComputeExpansionFactor(time, &a, &dadt) == FAIL) {
+  ENZO_FLOAT a, dadt;
+  if (CosmologyComputeExpansionFactor(time, &a, &dadt) == ENZO_FAIL) {
     fprintf(stderr, "Error in ComputeExpnasionFactors.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Compute the maximum allwed timestep given the maximum allowed
@@ -46,5 +46,5 @@ int CosmologyComputeExpansionTimestep(FLOAT time, float *dtExpansion)
  
   *dtExpansion = MaxExpansionRate*a/dadt;
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
 }

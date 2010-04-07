@@ -6,21 +6,25 @@
 /// @date      Wed Nov 18 2009
 /// @brief     Project fields to images
 
+#include "cello.h"
 #include "cello_hydro.h"
 
 #include <string>
 #include <hdf5.h>
 
+#include "parallel.hpp"
 #include "monitor.hpp"
 
-void image_dump(const char * file_root, int cycle, double lower, double upper)
+void image_dump(Monitor * monitor,
+		const char * file_root, 
+		int cycle, 
+		double lower, 
+		double upper)
 { 
 
   int nx = GridDimension[0];
   int ny = GridDimension[1];
   int nz = GridDimension[2];
-
-  Monitor monitor;
 
   // Open hdf5 file dump for cycle
   char filename[80];
@@ -31,7 +35,7 @@ void image_dump(const char * file_root, int cycle, double lower, double upper)
 
   // slice
   sprintf (filename,"slice-%s-%06d-z.png",file_root,cycle);
-  monitor.image(filename,
+  monitor->image(filename,
 		BaryonField[field_density],nx,ny,nz,
 		3,3,3,nx-3,ny-3,4,
 		2,reduce_sum, lower/nx, upper/nx, map,2);
@@ -39,7 +43,7 @@ void image_dump(const char * file_root, int cycle, double lower, double upper)
   if (nz > 1) {
     // projection
     sprintf (filename,"project-%s-%06d-z.png",file_root,cycle);
-    monitor.image(filename,
+    monitor->image(filename,
 		  BaryonField[field_density],nx,ny,nz,
 		  3,3,3,nx-3,ny-3,nz-3,
 		  2,reduce_sum,lower, upper, map,2);

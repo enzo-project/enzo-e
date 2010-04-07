@@ -7,11 +7,15 @@
 #include <string>
 
 #include "test.hpp"
+#include "parallel.hpp"
 #include "monitor.hpp"
 
 int main(int argc, char ** argv)
 {
   unit_class ("Monitor");
+
+  ParallelMpi mpi;
+  mpi.initialize(&argc,&argv);
 
   int n = 128;
 
@@ -36,7 +40,7 @@ int main(int argc, char ** argv)
   }
 
   unit_func("Monitor");
-  Monitor monitor;
+  Monitor monitor (&mpi);
   unit_assert(true);
 
   unit_func("image");

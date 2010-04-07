@@ -1,7 +1,7 @@
 
 Import('env')
 
-components = ['disk', 'memory']
+components = ['disk', 'error', 'memory']
 
 libraries  = 'hdf5'
 

@@ -1,18 +1,14 @@
 Import('env')
 
-env.SetOption('warn', 'no-fortran-cxx-mix')
-
-components = ['disk', 'memory', 'monitor']
-
+components = ['error', 'disk', 'memory', 'parallel', 'monitor']
 libraries  = ['hdf5', 'gfortran', 'png']
+defines    = "-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX"
 
-#-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX
+env = env.Clone(
+    LIBS     = [components,libraries], 
+    CPPFLAGS = defines)
 
-env = env.Clone(LIBS=[components,libraries], CPPFLAGS='-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX')
-
-# includes = []
-
-# env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+env.SetOption('warn', 'no-fortran-cxx-mix')
 
 sources  = [
 	'cello_hydro.cpp',

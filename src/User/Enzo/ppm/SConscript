@@ -2,7 +2,7 @@ Import('env')
 
 env.SetOption('warn', 'no-fortran-cxx-mix')
 
-components = ['disk', 'memory', 'monitor', 'method']
+components = ['error','disk','memory','parallel','monitor','method']
 
 libraries  = ['hdf5', 'gfortran', 'png']
 

@@ -30,6 +30,7 @@ SConscript('User/SConscript')
 
 components = [
 	'schedule',
+	'error',
 	'monitor',
 	'parallel',
 	'parameters',

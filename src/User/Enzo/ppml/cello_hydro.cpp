@@ -59,15 +59,15 @@ float  time_stop;   // stop after this simulation time
 int    cycle_stop;  // stop after this number of cycles
 
 float  CourantSafetyNumber;
-FLOAT  InitialRedshift;
-FLOAT  InitialTimeInCodeUnits;
-FLOAT  Time;
-FLOAT  OldTime;
+ENZO_FLOAT  InitialRedshift;
+ENZO_FLOAT  InitialTimeInCodeUnits;
+ENZO_FLOAT  Time;
+ENZO_FLOAT  OldTime;
 
 // Domain
 
-FLOAT DomainLeftEdge [MAX_DIMENSION];
-FLOAT DomainRightEdge[MAX_DIMENSION];
+ENZO_FLOAT DomainLeftEdge [MAX_DIMENSION];
+ENZO_FLOAT DomainRightEdge[MAX_DIMENSION];
 
 // Grid
 
@@ -111,8 +111,8 @@ int    GridRank;
 int    GridDimension[MAX_DIMENSION];   // total dimensions of all grids
 int    GridStartIndex[MAX_DIMENSION];  // starting index of the active region
 int    GridEndIndex[MAX_DIMENSION];    // stoping index of the active region
-FLOAT  GridLeftEdge[MAX_DIMENSION];    // starting pos (active problem space)
-FLOAT *CellWidth[MAX_DIMENSION];
+ENZO_FLOAT  GridLeftEdge[MAX_DIMENSION];    // starting pos (active problem space)
+ENZO_FLOAT *CellWidth[MAX_DIMENSION];
 
 // Fields
 

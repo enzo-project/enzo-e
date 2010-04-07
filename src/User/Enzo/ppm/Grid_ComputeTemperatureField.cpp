@@ -33,7 +33,7 @@
 int FindField(int f, int farray[], int n);
 int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
 		      float *TemperatureUnits, float *TimeUnits,
-		      float *VelocityUnits, FLOAT Time);
+		      float *VelocityUnits, ENZO_FLOAT Time);
  
  
 int ComputeTemperatureField(float *temperature)
@@ -52,11 +52,11 @@ int ComputeTemperatureField(float *temperature)
 //     else
 //       result = this->GadgetComputeTemperature(Time,temperature);
 
-//     if(result == FAIL) {
+//     if(result == ENZO_FAIL) {
 //       fprintf(stderr, "Error in grid->ComputePressure: Gadget.\n");
-//       return FAIL;
+//       return ENZO_FAIL;
 //     }
-//     return SUCCESS;
+//     return ENZO_SUCCESS;
 //   }
 
   /* Compute the pressure first. */
@@ -66,9 +66,9 @@ int ComputeTemperatureField(float *temperature)
   else
     result = ComputePressure(Time, temperature);
  
-  if (result == FAIL) {
+  if (result == ENZO_FAIL) {
     fprintf(stderr, "Error in grid->ComputePressure.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
   /* Compute the size of the fields. */
@@ -81,7 +81,7 @@ int ComputeTemperatureField(float *temperature)
  
   if ((DensNum = FindField(Density, FieldType, NumberOfBaryonFields)) < 0) {
     fprintf(stderr, "Cannot find density.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
 
@@ -93,7 +93,7 @@ int ComputeTemperatureField(float *temperature)
       else
 	temperature[i] /=  BaryonField[DensNum][i];
     }
-    return SUCCESS;
+    return ENZO_SUCCESS;
   }
  
   float TemperatureUnits = 1, number_density;
@@ -103,9 +103,9 @@ int ComputeTemperatureField(float *temperature)
  
   if (ComovingCoordinates)
     if (CosmologyGetUnits(&DensityUnits, &LengthUnits, &TemperatureUnits,
-			  &TimeUnits, &VelocityUnits, Time) == FAIL) {
+			  &TimeUnits, &VelocityUnits, Time) == ENZO_FAIL) {
       fprintf(stderr, "Error in CosmologyGetUnits.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
 
   /* For Sedov Explosion compute temperature without floor */
@@ -132,9 +132,9 @@ int ComputeTemperatureField(float *temperature)
     /* Find Multi-species fields. */
  
     if (IdentifySpeciesFields(DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum,
-		      HMNum, H2INum, H2IINum, DINum, DIINum, HDINum) == FAIL) {
+		      HMNum, H2INum, H2IINum, DINum, DIINum, HDINum) == ENZO_FAIL) {
       fprintf(stderr, "Error in grid->IdentifySpeciesFields.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
     /* Compute temperature with mu calculated directly. */
@@ -160,5 +160,5 @@ int ComputeTemperatureField(float *temperature)
     }
   }
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
 }

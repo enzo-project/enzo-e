@@ -10,7 +10,7 @@
 
 #include "cello.h"
 
-#include "parallel_mpi.hpp"
+#include "parallel.hpp"
  
 //====================================================================
 // PUBLIC FUNCTIONS

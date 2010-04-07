@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string>
 
-#include "parallel_mpi.hpp"
+#include "parallel.hpp"
 #include "test.hpp"
 
 

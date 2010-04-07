@@ -31,7 +31,7 @@
  
 // function prototypes
  
-int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
+int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt)
 {
  
   /* Error check. */
@@ -43,7 +43,7 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
     ERROR_MESSAGE("CosmologyComputeExpansionFactor",error_message);
   }
  
-  *a = FLOAT_UNDEFINED;
+  *a = ENZO_FLOAT_UNDEFINED;
  
   /* Find Omega due to curvature. */
  
@@ -52,21 +52,21 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
   /* Convert the time from code units to Time * H0 (c.f. CosmologyGetUnits). */
  
   float TimeUnits = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
-                    pow(1 + InitialRedshift,FLOAT(1.5));
+                    pow(1 + InitialRedshift,ENZO_FLOAT(1.5));
  
-  FLOAT TimeHubble0 = time * TimeUnits * (HubbleConstantNow*3.24e-18);
+  ENZO_FLOAT TimeHubble0 = time * TimeUnits * (HubbleConstantNow*3.24e-18);
  
   /* 1) For a flat universe with OmegaMatterNow = 1, it's easy. */
  
   if (fabs(OmegaMatterNow-1) < OMEGA_TOLERANCE &&
       OmegaLambdaNow < OMEGA_TOLERANCE)
-    *a      = pow(time/InitialTimeInCodeUnits, FLOAT(2.0/3.0));
+    *a      = pow(time/InitialTimeInCodeUnits, ENZO_FLOAT(2.0/3.0));
  
 #define INVERSE_HYPERBOLIC_EXISTS
  
 #ifdef INVERSE_HYPERBOLIC_EXISTS
  
-  FLOAT eta, eta_old, x;
+  ENZO_FLOAT eta, eta_old, x;
   int i;
  
   /* 2) For OmegaMatterNow < 1 and OmegaLambdaNow == 0 see
@@ -84,8 +84,8 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
        eta.  This works well because parts 1 & 2 are an excellent approximation
        when x is small and part 3 converges quickly when x is large. */
  
-    eta = pow(6*x, FLOAT(1.0/3.0));                     // part 1
-    eta = pow(120*x/(20+eta*eta), FLOAT(1.0/3.0));      // part 2
+    eta = pow(6*x, ENZO_FLOAT(1.0/3.0));                     // part 1
+    eta = pow(120*x/(20+eta*eta), ENZO_FLOAT(1.0/3.0));      // part 2
     for (i = 0; i < 40; i++) {                          // part 3
       eta_old = eta;
       eta = asinh(eta + x);
@@ -93,7 +93,7 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
     }
     if (i == 40) {
       fprintf(stderr, "Case 2 -- no convergence after %"ISYM" iterations.\n", i);
-      return FAIL;
+      return ENZO_FAIL;
     }
  
     /* Now use eta to compute the expansion factor (eq. 13-10, part 2). */
@@ -112,9 +112,9 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
  
   if (fabs(OmegaCurvatureNow) < OMEGA_TOLERANCE &&
       OmegaLambdaNow > OMEGA_TOLERANCE) {
-    *a = pow(FLOAT(OmegaMatterNow/(1 - OmegaMatterNow)), FLOAT(1.0/3.0)) *
-         pow(FLOAT(sinh(1.5 * sqrt(1.0 - OmegaMatterNow)*TimeHubble0)),
-	     FLOAT(2.0/3.0));
+    *a = pow(ENZO_FLOAT(OmegaMatterNow/(1 - OmegaMatterNow)), ENZO_FLOAT(1.0/3.0)) *
+         pow(ENZO_FLOAT(sinh(1.5 * sqrt(1.0 - OmegaMatterNow)*TimeHubble0)),
+	     ENZO_FLOAT(2.0/3.0));
     *a *= (1 + InitialRedshift);    // to convert to code units, divide by [a]
   }
  
@@ -122,17 +122,17 @@ int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt)
  
   /* Compute the derivative of the expansion factor (Peebles93, eq. 13.3). */
  
-  FLOAT TempVal = (*a)/(1 + InitialRedshift);
+  ENZO_FLOAT TempVal = (*a)/(1 + InitialRedshift);
   *dadt = sqrt( 2.0/(3.0*OmegaMatterNow*(*a)) *
 	       (OmegaMatterNow + OmegaCurvatureNow*TempVal +
 		OmegaLambdaNow*TempVal*TempVal*TempVal));
  
   /* Someday, we'll implement the general case... */
  
-  if ((*a) == FLOAT_UNDEFINED) {
+  if ((*a) == ENZO_FLOAT_UNDEFINED) {
     fprintf(stderr, "Cosmology selected is not implemented.\n");
-    return FAIL;
+    return ENZO_FAIL;
   }
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
 }

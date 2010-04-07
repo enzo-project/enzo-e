@@ -7,7 +7,7 @@
 /// @file     memory.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
-/// @brief    Interface for the Memory class.  Uses a simple Singleton pattern.
+/// @brief    Interface for the Memory class.  Uses the Singleton design pattern.
 
 #include <stack>
 
@@ -126,7 +126,7 @@ private: // functions
   
 private: // attributes
 
-  /// Single instance of the Memory object, using the singleton pattern
+  /// Single instance of the Memory object (singleton design pattern)
   static Memory instance_;
 
 #ifdef CONFIG_USE_MEMORY

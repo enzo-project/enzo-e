@@ -12,7 +12,7 @@
 /  PURPOSE:
 /
 /  RETURNS:
-/    SUCCESS or FAIL
+/    ENZO_SUCCESS or ENZO_FAIL
 /
 ************************************************************************/
  
@@ -81,7 +81,7 @@ int SolveMHDEquations(int cycle, float dt)
 
   // @@ assert GridRank == 3
   //  if (GridRank != 3) 
-  //    my_exit(EXIT_FAILURE);
+  //    my_exit(EXIT_ENZO_FAILURE);
 
   if (NumberOfBaryonFields > 0) {
  
@@ -366,6 +366,6 @@ int SolveMHDEquations(int cycle, float dt)
  
   }  // end: if (NumberOfBaryonFields > 0)
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
  
 }

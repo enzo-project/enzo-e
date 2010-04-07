@@ -11,7 +11,7 @@
  
 /* function prototypes */
  
-int CosmologyComputeExpansionFactor(FLOAT time, FLOAT *a, FLOAT *dadt);
+int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
  
  
 int SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
@@ -22,11 +22,11 @@ int SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
  
     /* Compute cosmology factors. */
  
-    FLOAT a = 1, dadt;
+    ENZO_FLOAT a = 1, dadt;
     if (ComovingCoordinates)
-      if (CosmologyComputeExpansionFactor(Time, &a, &dadt) == FAIL) {
+      if (CosmologyComputeExpansionFactor(Time, &a, &dadt) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyComputeExpansionFactor.\n");
-	return FAIL;
+	return ENZO_FAIL;
       }
     float CosmoFactor = 1.0/a;
  
@@ -41,9 +41,9 @@ int SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
  
     int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
     if (IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
-					 Vel3Num, TENum) == FAIL) {
+					 Vel3Num, TENum) == ENZO_FAIL) {
       fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
     /* Set minimum GE. */
@@ -61,7 +61,7 @@ int SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
 	BaryonField[GENum][i] = max(BaryonField[GENum][i],
 				    MinimumSupportEnergyCoefficient *
 				    BaryonField[DensNum][i]);
-      if (GridRank != 3) return FAIL;
+      if (GridRank != 3) return ENZO_FAIL;
       for (i = 0; i < size; i++)
 	BaryonField[TENum][i] = 
 	  max(BaryonField[GENum][i] + 0.5*
@@ -73,10 +73,10 @@ int SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
     }
     else {
       fprintf(stderr, "not implemented.\n");
-      return FAIL;
+      return ENZO_FAIL;
     }
  
   } // end: if (NumberOfBaryonFields > 0)
  
-  return SUCCESS;
+  return ENZO_SUCCESS;
 }

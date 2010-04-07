@@ -28,29 +28,35 @@ int main(int argc, char ** argv)
 
   try {
 
-    //    printf ("\n");
-    //    printf ("     The Laboratory for Computational Astrophysics proudly presents:\n");
-    printf ("\n");
-    printf ("    =================================================================\n");
-    printf ("\n");
-    printf ("    oooooooooooo                                          ooooo ooooo \n");
-    printf ("    `888'     `8                                          `888' `888' \n");
-    printf ("     888         ooo. .oo.     oooooooo  .ooooo.           888   888  \n");
-    printf ("     888oooo8    `888P\"Y88b   d'\"\"7d8P  d88' `88b          888   888  \n");
-    printf ("     888    \"     888   888     .d8P'   888   888 8888888  888   888  \n");
-    printf ("     888       o  888   888   .d8P'  .P 888   888          888   888  \n");
-    printf ("    o888ooooood8 o888o o888o d8888888P  `Y8bod8P'         o888o o888o\n");
-    printf ("\n");
-    printf ("    =================================================================\n");
-    printf ("              E N Z O : T H E   N E X T  G E N E R A T I O N\n");
-    printf ("    =================================================================\n");
-    printf ("\n");
-
     // INITIALIZE PARALLEL
 
     ParallelMpi mpi;
 
     mpi.initialize(&argc, &argv);
+
+    // INITALIZE MONITOR
+
+    Monitor monitor (&mpi);
+    monitor.print ("CELLO BEGIN");
+
+
+    //    monitor.print ("");
+    //    monitor.print ("     The Laboratory for Computational Astrophysics proudly presents:");
+    monitor.print ("");
+    monitor.print ("    =================================================================");
+    monitor.print ("");
+    monitor.print ("    oooooooooooo                                          ooooo ooooo ");
+    monitor.print ("    `888'     `8                                          `888' `888' ");
+    monitor.print ("     888         ooo. .oo.     oooooooo  .ooooo.           888   888  ");
+    monitor.print ("     888oooo8    `888P\"Y88b   d'\"\"7d8P  d88' `88b          888   888  ");
+    monitor.print ("     888    \"     888   888     .d8P'   888   888 8888888  888   888  ");
+    monitor.print ("     888       o  888   888   .d8P'  .P 888   888          888   888  ");
+    monitor.print ("    o888ooooood8 o888o o888o d8888888P  `Y8bod8P'         o888o o888o");
+    monitor.print ("");
+    monitor.print ("    =================================================================");
+    monitor.print ("              E N Z O : T H E   N E X T  G E N E R A T I O N");
+    monitor.print ("    =================================================================");
+    monitor.print ("");
 
     // INPUT PARAMETERS
 
@@ -63,11 +69,6 @@ int main(int argc, char ** argv)
     }
 
     assert (fp != 0);
-
-    // INITALIZE MONITOR
-
-    Monitor monitor;
-    monitor.print ("CELLO BEGIN");
 
     // INITIALIZE SCHEDULE
 
