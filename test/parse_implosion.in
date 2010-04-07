@@ -1,0 +1,23 @@
+  Domain { range = [0.0, 0.3, 0.0, 0.3] } 
+  Field pressure { min = 1.0e-6 }
+  Field density  { min = 1.0e-6 }
+  Grid array { size = [400,400]; parallel = ["mpi"] }
+  Method ppm {
+      gamma     = 1.4;
+      courant   = 0.8;
+      diffusion = true;
+      flattening = true;
+      steepening = true;
+  }
+  Initial {
+     density  = [1.0, x + y >= 0.15, 0.125];
+     pressure = [1.0, x + y >= 0.15, 0.14];
+     velocity_x = 0;
+     velocity_y = 0;
+  }
+  Boundary { type = "reflecting" }
+  Stopping {
+     time  = 2.5;
+     cycle = 20000;
+  }
+  Output { delta_time = 0.5 ; } # dt? time?
