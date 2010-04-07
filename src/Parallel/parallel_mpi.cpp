@@ -11,45 +11,5 @@
 #include "cello.h"
 
 #include "parallel.hpp"
- 
-//====================================================================
-// PUBLIC FUNCTIONS
-//====================================================================
 
-ParallelMpi::ParallelMpi()
-  : size_(1),
-    rank_(0),
-    send_blocking_(true),
-    recv_blocking_(true),
-    send_type_(send_type_standard)
-/**
- *********************************************************************
- *
- * @param         none
- * @return        none
- *
- * Create an ParallelMpi object
- *
- *********************************************************************
- */
-{
-}
-
-ParallelMpi::~ParallelMpi()
-/**
- *********************************************************************
- *
- * @param         none
- * @return        none
- *
- * Delete an ParallelMpi object
- *
- *********************************************************************
- */
-{
-}
-    
-//====================================================================
-// PRIVATE FUNCTIONS
-//====================================================================
-
+ParallelMpi ParallelMpi::instance_; // (singleton design pattern)

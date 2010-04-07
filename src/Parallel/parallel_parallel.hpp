@@ -18,14 +18,45 @@ class Parallel {
 
 public: // interface
 
-  /// Initialize a Parallel object
-  Parallel();
+  /// Initialize
+  virtual void initialize(int * argc = 0, char ***argv = 0) 
+  {}
 
-  /// Delete a Parallel object
-  ~Parallel();
+  /// Finalize
+  virtual void finalize()
+  {}
+
+  /// Get size
+  virtual int size()
+  { return 1; }
+
+  /// Get rank
+  virtual int rank()
+  { return 0; }
 
   virtual bool is_root()
   { return true; }
+
+public: // static functions
+
+  /// Get single instance of the Parallel object
+  static Parallel * instance() throw ();
+
+protected: // functions
+
+  /// Initialize a Parallel object (singleton design pattern)
+  Parallel() 
+  {};
+
+  /// Delete a Parallel object (singleton design pattern)
+  ~Parallel() 
+  {};
+
+private: // attributes
+
+  /// Single instance of the Parallel object (singleton design pattern)
+  static Parallel * instance_;
+
 
 };
 

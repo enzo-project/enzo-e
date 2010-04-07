@@ -1,8 +1,9 @@
 Import('env')
 
-components = ['error','parameters']
+components = ['error','parameters', 'monitor', 'parallel']
+libraries  = ['png']
 
-env = env.Clone(LIBS=[components])
+env = env.Clone(LIBS=[components,libraries])
 
 includes = [Glob('schedule*hpp')]
 

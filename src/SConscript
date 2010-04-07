@@ -35,8 +35,9 @@ components = [
 	'parallel',
 	'parameters',
 	'simulation']
+libraries = ['png']
 
-env = env.Clone(LIBS=[components])
+env = env.Clone(LIBS=[components,libraries])
 
 exe_cello = env.Program(['cello.cpp'])
 env.Alias('install-bin', env.Install ('$BINPATH', [exe_cello]))

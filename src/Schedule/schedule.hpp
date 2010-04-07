@@ -12,7 +12,6 @@
 #include <stdio.h>
 
 #include "simulation.hpp"
-#include "monitor.hpp"
 #include "parameters.hpp"
 
 class Schedule {
@@ -24,7 +23,7 @@ class Schedule {
 public: // interface
 
   /// Initialize a Schedule object
-  Schedule(Monitor * monitor);
+  Schedule();
 
   /// Delete a Schedule object
   ~Schedule();
@@ -45,9 +44,6 @@ public: // interface
   void terminate_simulation();
 
 private: // attributes
-
-  /// The simulation we're scheduling
-  Monitor * monitor_;
 
   /// Input parameters
   Parameters * parameters_;

@@ -41,16 +41,9 @@ class Monitor {
 
 public: // interface
 
-  /// Initialize the Monitor object
-  Monitor(Parallel * parallel,
-	  FILE * fp = stdout,
-	  bool   active = true) 
-    : parallel_(parallel),
-      active_(parallel->is_root()),
-      fp_(fp)
-  {  
-    timer_.start(); 
-  }
+  /// Get single instance of the Monitor object
+  static Monitor * instance() throw ()
+  { return & instance_; };
 
   /// Print a message
   void print (std::string message)
@@ -71,13 +64,28 @@ public: // interface
 	      int            color_length // length of color map / 3
 	      );
   
-protected: // attributes
+private: // functions
+
+  /// Initialize the Monitor object (singleton design pattern)
+  Monitor(Parallel * parallel,
+	  FILE * fp = stdout,
+	  bool   active = true) 
+    : parallel_(parallel),
+      active_(parallel->is_root()),
+      fp_(fp)
+  {  
+    timer_.start(); 
+  }
+
+private: // attributes
 
   Parallel * parallel_; // Parallel object, used for is_root()
   bool   active_;  // Whether monitoring is activated.  Used for e.g. ip != 0.
   FILE * fp_;      // File pointer for message logging
   Timer  timer_;   // Timer from Performance
   
+  /// Single instance of the Monitor object (singleton design pattern)
+  static Monitor instance_;
 
 };
 

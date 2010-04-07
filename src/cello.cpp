@@ -30,33 +30,33 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
-    ParallelMpi mpi;
+    Parallel * mpi = Parallel::instance();
 
-    mpi.initialize(&argc, &argv);
+    mpi->initialize(&argc, &argv);
 
     // INITALIZE MONITOR
 
-    Monitor monitor (&mpi);
-    monitor.print ("CELLO BEGIN");
+    Monitor * monitor = Monitor::instance();
+    monitor->print ("CELLO BEGIN");
 
 
-    //    monitor.print ("");
-    //    monitor.print ("     The Laboratory for Computational Astrophysics proudly presents:");
-    monitor.print ("");
-    monitor.print ("    =================================================================");
-    monitor.print ("");
-    monitor.print ("    oooooooooooo                                          ooooo ooooo ");
-    monitor.print ("    `888'     `8                                          `888' `888' ");
-    monitor.print ("     888         ooo. .oo.     oooooooo  .ooooo.           888   888  ");
-    monitor.print ("     888oooo8    `888P\"Y88b   d'\"\"7d8P  d88' `88b          888   888  ");
-    monitor.print ("     888    \"     888   888     .d8P'   888   888 8888888  888   888  ");
-    monitor.print ("     888       o  888   888   .d8P'  .P 888   888          888   888  ");
-    monitor.print ("    o888ooooood8 o888o o888o d8888888P  `Y8bod8P'         o888o o888o");
-    monitor.print ("");
-    monitor.print ("    =================================================================");
-    monitor.print ("              E N Z O : T H E   N E X T  G E N E R A T I O N");
-    monitor.print ("    =================================================================");
-    monitor.print ("");
+    //    monitor->print ("");
+    //    monitor->print ("     The Laboratory for Computational Astrophysics proudly presents:");
+    monitor->print ("");
+    monitor->print ("    =================================================================");
+    monitor->print ("");
+    monitor->print ("    oooooooooooo                                          ooooo ooooo ");
+    monitor->print ("    `888'     `8                                          `888' `888' ");
+    monitor->print ("     888         ooo. .oo.     oooooooo  .ooooo.           888   888  ");
+    monitor->print ("     888oooo8    `888P\"Y88b   d'\"\"7d8P  d88' `88b          888   888  ");
+    monitor->print ("     888    \"     888   888     .d8P'   888   888 8888888  888   888  ");
+    monitor->print ("     888       o  888   888   .d8P'  .P 888   888          888   888  ");
+    monitor->print ("    o888ooooood8 o888o o888o d8888888P  `Y8bod8P'         o888o o888o");
+    monitor->print ("");
+    monitor->print ("    =================================================================");
+    monitor->print ("              E N Z O : T H E   N E X T  G E N E R A T I O N");
+    monitor->print ("    =================================================================");
+    monitor->print ("");
 
     // INPUT PARAMETERS
 
@@ -72,7 +72,7 @@ int main(int argc, char ** argv)
 
     // INITIALIZE SCHEDULE
 
-    Schedule schedule(&monitor);
+    Schedule schedule;
 
     schedule.read_parameters(fp);
 
@@ -88,9 +88,9 @@ int main(int argc, char ** argv)
 
     schedule.terminate_simulation();
 
-    monitor.print ("CELLO END");
+    monitor->print ("CELLO END");
 
-    mpi.finalize();
+    mpi->finalize();
 
   }
 

@@ -10,7 +10,6 @@
 #include "cello_hydro.h"
 #include "test_ppm.h"
 #include "parallel.hpp"
-#include "monitor.hpp"
 #include "performance_timer.hpp"
 
 //----------------------------------------------------------------------
@@ -26,10 +25,10 @@ void print_usage(const char * name)
 int main(int argc, char ** argv)
 {
 
-  ParallelMpi mpi;
-  mpi.initialize(&argc,&argv);
+  Parallel * parallel = Parallel::instance();
 
-  Monitor monitor (&mpi);
+  parallel->initialize(&argc,&argv);
+
 
   enum type_problem problem_type = problem_unknown;
 
@@ -99,7 +98,7 @@ int main(int argc, char ** argv)
       printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
 	      cycle,timer.value(),time,dt);
       fflush(stdout);
-      image_dump(&monitor,problem_name[problem_type],cycle,lower,upper);
+      image_dump(problem_name[problem_type],cycle,lower,upper);
     }
 
     SolveHydroEquations(cycle, dt);
@@ -111,7 +110,7 @@ int main(int argc, char ** argv)
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     SetExternalBoundaryValues();
-    image_dump(&monitor,problem_name[problem_type],cycle,lower,upper);
+    image_dump(problem_name[problem_type],cycle,lower,upper);
   }
 }
 

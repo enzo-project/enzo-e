@@ -7,15 +7,15 @@
 /// @brief     
 
 #include "parameters.hpp"
+#include "monitor.hpp"
 #include "schedule.hpp"
  
 //====================================================================
 // PUBLIC FUNCTIONS
 //====================================================================
 
-Schedule::Schedule(Monitor * monitor)
-  : monitor_(monitor),
-    parameters_(NULL),
+Schedule::Schedule()
+  : parameters_(NULL),
     simulation_(NULL)
 /**
  *********************************************************************
@@ -57,7 +57,9 @@ void Schedule::read_parameters(FILE * fp)
  *********************************************************************
  */
 {
-  monitor_->print ("Reading parameters");
+  Monitor * monitor = Monitor::instance();
+
+  monitor->print ("Reading parameters");
 
   if (parameters_ != NULL) {
     WARNING_MESSAGE("Schedule::read_parameters","Parameters object already exists");

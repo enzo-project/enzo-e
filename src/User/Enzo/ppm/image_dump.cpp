@@ -12,11 +12,9 @@
 #include <string>
 #include <hdf5.h>
 
-#include "parallel.hpp"
 #include "monitor.hpp"
 
-void image_dump(Monitor * monitor,
-		const char * file_root, 
+void image_dump(const char * file_root, 
 		int cycle, 
 		double lower, 
 		double upper)
@@ -32,6 +30,8 @@ void image_dump(Monitor * monitor,
 
   // color map
   double map[] = {1,1,1, 0,0,0};
+
+  Monitor * monitor = Monitor::instance();
 
   // slice
   sprintf (filename,"slice-%s-%06d-z.png",file_root,cycle);

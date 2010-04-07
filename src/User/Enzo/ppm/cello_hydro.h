@@ -256,9 +256,7 @@ float sum_field (int field);
 float print_field (int field);
 void data_dump (const char * file_root, int cycle);
 
-class Monitor;
-void image_dump (Monitor    * monitor,
-		 const char * file_root, 
+void image_dump (const char * file_root, 
 		 int          cycle, 
 		 double       lower, 
 		 double       upper);

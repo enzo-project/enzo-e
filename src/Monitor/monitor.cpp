@@ -9,7 +9,12 @@
 #include <assert.h>
 #include "cello.h"
 #include "pngwriter.h"
+#include "parallel.hpp"
 #include "monitor.hpp" 
+
+Monitor Monitor::instance_ (Parallel::instance()); // (singleton design pattern)
+
+//----------------------------------------------------------------------
 
 void Monitor::image
 (std::string name, 

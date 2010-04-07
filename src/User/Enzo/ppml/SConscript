@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['error', 'disk', 'memory', 'parallel', 'monitor']
+components = ['error', 'disk', 'memory', 'monitor', 'parallel']
 libraries  = ['hdf5', 'gfortran', 'png']
 defines    = "-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX"
 

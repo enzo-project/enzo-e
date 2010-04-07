@@ -9,9 +9,9 @@
 #include <stdio.h>
 #include <string>
 
+#include "cello.h"
 #include "parallel.hpp"
 #include "test.hpp"
-
 
 int main(int argc, char ** argv)
 {
@@ -19,45 +19,50 @@ int main(int argc, char ** argv)
 
   unit_func("ParallelMpi");
 
-  ParallelMpi mpi;
+  // @@@@@@@@@@@@@@@@
+  // WARNING: downcasting (Parallel *) to (ParallelMpi *)
+  // @@@@@@@@@@@@@@@@
+
+  ParallelMpi * mpi = (ParallelMpi *) Parallel::instance();
+
   unit_assert(true);
 
   unit_func("initialize");
-  mpi.initialize(&argc,&argv);
+  mpi->initialize(&argc,&argv);
   unit_assert(true);
 
   unit_func("size");
-  printf ("size = %d\n",mpi.size());
+  printf ("size = %d\n",mpi->size());
   unit_assert(true);
 
   unit_func("rank");
-  printf ("rank = %d\n",mpi.rank());
+  printf ("rank = %d\n",mpi->rank());
   unit_assert(true);
 
   unit_func("set_send_blocking");
-  mpi.set_send_blocking(true);
-  unit_assert (mpi.get_send_blocking() == true);
+  mpi->set_send_blocking(true);
+  unit_assert (mpi->get_send_blocking() == true);
   unit_func("get_send_blocking");
-  mpi.set_send_blocking(false);
-  unit_assert (mpi.get_send_blocking() == false);
+  mpi->set_send_blocking(false);
+  unit_assert (mpi->get_send_blocking() == false);
 
   unit_func("set_recv_blocking");
-  mpi.set_recv_blocking(true);
-  unit_assert (mpi.get_recv_blocking() == true);
+  mpi->set_recv_blocking(true);
+  unit_assert (mpi->get_recv_blocking() == true);
   unit_func("get_recv_blocking");
-  mpi.set_recv_blocking(false);
-  unit_assert (mpi.get_recv_blocking() == false);
+  mpi->set_recv_blocking(false);
+  unit_assert (mpi->get_recv_blocking() == false);
 
   unit_func("set_send_type");
-  mpi.set_send_type(send_type_standard);
-  unit_assert (mpi.get_send_type() == send_type_standard);
+  mpi->set_send_type(send_type_standard);
+  unit_assert (mpi->get_send_type() == send_type_standard);
   unit_func("get_send_type");
-  mpi.set_send_type(send_type_buffered);
-  unit_assert (mpi.get_send_type() == send_type_buffered);
-  mpi.set_send_type(send_type_ready);
-  unit_assert (mpi.get_send_type() == send_type_ready);
+  mpi->set_send_type(send_type_buffered);
+  unit_assert (mpi->get_send_type() == send_type_buffered);
+  mpi->set_send_type(send_type_ready);
+  unit_assert (mpi->get_send_type() == send_type_ready);
 
   unit_func("finalize");
-  mpi.finalize();
+  mpi->finalize();
   unit_assert(true);
 }

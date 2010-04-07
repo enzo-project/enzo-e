@@ -30,12 +30,6 @@ class ParallelMpi : public Parallel {
 
 public: // interface
 
-  /// Initialize an ParallelMpi object
-  ParallelMpi();
-
-  /// Delete an ParallelMpi object
-  ~ParallelMpi();
-
   /// Initialize MPI
   void initialize(int * argc, char ***argv)
   {
@@ -96,11 +90,37 @@ public: // interface
   enum_send_type get_send_type () 
   { return send_type_; }
 
+public: // static functions
+
+  /// Get single instance of the Parallel object
+  static ParallelMpi * instance() throw ()
+  { return & ParallelMpi::instance_; }
+
 public: // virtual
 
   /// Return whether this is the root process
   virtual bool is_root()
   { return rank_ == 0; }
+
+protected: // functions
+
+  /// Initialize an ParallelMpi object (singleton design pattern)
+  ParallelMpi()
+    : size_(1),
+      rank_(0),
+      send_blocking_(true),
+      recv_blocking_(true),
+      send_type_(send_type_standard)
+  {};
+
+  /// Delete an ParallelMpi object (singleton design pattern)
+  ~ParallelMpi()
+  {};
+
+private: // static functions
+
+  /// Single instance of the Parallel object (singleton design pattern)
+  static ParallelMpi instance_;
 
 private: // attributes
 
@@ -119,6 +139,7 @@ private: // attributes
   /// Whether to use standard, buffered, synchronous, or ready sends
   enum_send_type send_type_;
 
+protected: // static attributes
 
 };
 
