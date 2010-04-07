@@ -10,6 +10,19 @@
 
 #include "cello.h"
 
+#include <mpi.h>
 #include "parallel.hpp"
 
 ParallelMpi ParallelMpi::instance_; // (singleton design pattern)
+
+void ParallelMpi::initialize(int * argc, char ***argv)
+{
+  MPI_Init(argc,argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
+  MPI_Comm_size(MPI_COMM_WORLD, &size_);
+};
+
+void ParallelMpi::finalize()
+{
+  MPI_Finalize();
+}

@@ -4,8 +4,6 @@
 #ifndef PARALLEL_MPI_HPP
 #define PARALLEL_MPI_HPP
 
-#include <mpi.h>
-
 /// @file     mpi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Oct 15 10:40:37 PDT 2009 
@@ -31,18 +29,10 @@ class ParallelMpi : public Parallel {
 public: // interface
 
   /// Initialize MPI
-  void initialize(int * argc, char ***argv)
-  {
-    MPI_Init(argc,argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
-    MPI_Comm_size(MPI_COMM_WORLD, &size_);
-  };
+  void initialize(int * argc, char ***argv);
 
   /// Finalize MPI
-  void finalize()
-  {
-    MPI_Finalize();
-  }
+  void finalize();
 
   /// Get MPI size
   int size() 

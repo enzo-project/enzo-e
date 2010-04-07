@@ -10,7 +10,6 @@
 #include "cello_hydro.h"
 
 #include <string>
-#include <hdf5.h>
 
 #include "monitor.hpp"
 
