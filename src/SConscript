@@ -1,5 +1,11 @@
 Import('env')
 
+# Define tests for running cccc
+
+# cccc      = Builder(action = "cccc --outdir=$TARGET `find src -name '*.cpp'`")
+# env = Environment(BUILDERS = {'Cccc': cccc})
+# env.Cccc("cccc");
+
 SConscript('Amr/SConscript')
 SConscript('Array/SConscript')
 SConscript('Data/SConscript')

@@ -15,7 +15,11 @@
 
 void usage(int argc, char ** argv) 
 {
-  fprintf (stderr,"Usage: %s <filename>\n",argv[0]);
+#ifdef CONFIG_USE_MPI
+  fprintf (stderr,"Usage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
+#else
+  fprintf (stderr,"Usage: %s <parameter-file>\n\n",argv[0]);
+#endif
   exit(1);
 }
 
@@ -24,11 +28,21 @@ int main(int argc, char ** argv)
 
   try {
 
-    printf ("\n	 ====================================================\n");
-    printf ("		      ENZO: THE NEXT GENERATION\n\n");
-    printf ("	  A parallel astrophysics and cosmology application\n\n");
-    printf ("	     See CELLO_LICENSE for full license agreement\n");
-    printf ("	 ====================================================\n\n");
+    printf ("\n");   
+    printf ("        Astrophysics and Cosmology for Supercomputers:\n");
+    printf ("\n");   
+    printf ("           .oooooo.             oooo  oooo            \n");
+    printf ("          d8P'  `Y8b            `888  `888            \n");
+    printf ("         888           .ooooo.   888   888   .ooooo.  \n");
+    printf ("         888          d88' `88b  888   888  d88' `88b \n");
+    printf ("         888          888ooo888  888   888  888   888 \n");
+    printf ("         `88b    ooo  888    .o  888   888  888   888 \n");
+    printf ("          `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' \n");
+    printf ("\n");
+    printf ("        ==============================================\n");   
+    printf ("        E N Z O : T H E   N E X T  G E N E R A T I O N\n");
+    printf ("        ==============================================\n");   
+    printf ("\n");
 
     // INITIALIZE PARALLEL
 
