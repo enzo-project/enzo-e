@@ -60,7 +60,6 @@ void Parameters::read ( FILE * file_pointer )
     param->set(node);
 
     parameter_map_     [parameter_name] = param;
-    parameter_accessed_[parameter_name] = false;
 
     node = node->next;
     
