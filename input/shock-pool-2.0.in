@@ -7,17 +7,17 @@
  
   # define field properties 
  
-  Field pressure { floor = 1.0e-6 }
-  Field density  { floor = 1.0e-6 }
+  Field pressure { min = 1.0e-6 }
+  Field density  { min = 1.0e-6 }
  
   # Global field parameters set in Field group
 
-  Field { interleave = [density, total_energy, internal_energy] }
+  Field { interleave = ["density", "total_energy", "internal_energy"] }
 
   # The grid is a "unigrid" array of 100 cells parallelized using OpenMP
   # Other types are patch_amr and tree_amr
 
-  Grid array { size = [100]; parallel = [omp] }
+  Grid array { size = [100]; parallel = ["omp"] }
 
   # Only physics method is hydro using ppm
 
