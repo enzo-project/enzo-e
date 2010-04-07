@@ -28,20 +28,22 @@ int main(int argc, char ** argv)
 
   try {
 
-    printf ("\n");   
-    printf ("        Astrophysics and Cosmology for Supercomputers:\n");
-    printf ("\n");   
-    printf ("           .oooooo.             oooo  oooo            \n");
-    printf ("          d8P'  `Y8b            `888  `888            \n");
-    printf ("         888           .ooooo.   888   888   .ooooo.  \n");
-    printf ("         888          d88' `88b  888   888  d88' `88b \n");
-    printf ("         888          888ooo888  888   888  888   888 \n");
-    printf ("         `88b    ooo  888    .o  888   888  888   888 \n");
-    printf ("          `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' \n");
+    //    printf ("\n");
+    //    printf ("     The Laboratory for Computational Astrophysics proudly presents:\n");
     printf ("\n");
-    printf ("        ==============================================\n");   
-    printf ("        E N Z O : T H E   N E X T  G E N E R A T I O N\n");
-    printf ("        ==============================================\n");   
+    printf ("    =================================================================\n");
+    printf ("\n");
+    printf ("    oooooooooooo                                          ooooo ooooo \n");
+    printf ("    `888'     `8                                          `888' `888' \n");
+    printf ("     888         ooo. .oo.     oooooooo  .ooooo.           888   888  \n");
+    printf ("     888oooo8    `888P\"Y88b   d'\"\"7d8P  d88' `88b          888   888  \n");
+    printf ("     888    \"     888   888     .d8P'   888   888 8888888  888   888  \n");
+    printf ("     888       o  888   888   .d8P'  .P 888   888          888   888  \n");
+    printf ("    o888ooooood8 o888o o888o d8888888P  `Y8bod8P'         o888o o888o\n");
+    printf ("\n");
+    printf ("    =================================================================\n");
+    printf ("              E N Z O : T H E   N E X T  G E N E R A T I O N\n");
+    printf ("    =================================================================\n");
     printf ("\n");
 
     // INITIALIZE PARALLEL
