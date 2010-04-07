@@ -2,7 +2,7 @@
 # Define a test for running unit tests
 
 unit       = Builder(action = "$SOURCE > $TARGET")
-unit_parse = Builder(action = "#/bin/test_parse < #/test/$SOURCE > #/test/$TARGET")
+unit_parse = Builder(action = "bin/test_parse < $SOURCE > $TARGET")
 
 env = Environment(BUILDERS = {'Unit': unit, 'UnitParse' : unit_parse})
 
@@ -16,10 +16,16 @@ env.Unit('test_parameters.out','#/bin/test_parameters')
 env.Unit('test_schedule.out','#/bin/test_schedule')
 env.Unit('test_performance.out','#/bin/test_performance')
 
+env.UnitParse('parse_implosion.out', '#/bin/parse_implosion.in')
+env.UnitParse('parse_groups.out',    '#/bin/parse_groups.in')
+env.UnitParse('parse_integer.out',   '#/bin/parse_integer.in')
+env.UnitParse('parse_list.out',      '#/bin/parse_list.in')
+env.UnitParse('parse_logical.out',   '#/bin/parse_logical.in')
+env.UnitParse('parse_scalar.out',    '#/bin/parse_scalar.in')
+
 # env.Unit('Array.unit','test_enzo_method_ppm')
 # env.Unit('Array.unit','test_tree')
 # env.Unit('Array.unit','test_tree_k')
-# env.UnitParse('implosion.out','implosion.in')
 #	./test_parse < shock-pool.in > shock-pool.out
 #	./test_parse < test_groups.in > test_groups.out
 #	./test_parse < test.in > test.out
