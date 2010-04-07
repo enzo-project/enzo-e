@@ -17,7 +17,6 @@ int main(int argc, char ** argv)
 {
 
   unit_class ("Error");
-  unit_open();
 
   //----------------------------------------------------------------------
   printf ("Warning message:\n");
@@ -48,5 +47,4 @@ int main(int argc, char ** argv)
 //   exit(1);
   //----------------------------------------------------------------------
 
-  unit_close();
 }

@@ -13,8 +13,6 @@ int main(int argc, char ** argv)
 {
   unit_class ("Monitor");
 
-  unit_open();
-
   int n = 128;
 
   // Allocate array
@@ -59,5 +57,4 @@ int main(int argc, char ** argv)
   monitor.image("test4.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map4,6);
   unit_assert(true);
 
-  unit_close();
 }

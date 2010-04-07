@@ -16,7 +16,6 @@
 int main(int argc, char ** argv)
 {
   unit_class ("ParallelMpi");
-  unit_open();
 
   unit_func("ParallelMpi");
 
@@ -61,6 +60,4 @@ int main(int argc, char ** argv)
   unit_func("finalize");
   mpi.finalize();
   unit_assert(true);
-
-  unit_close();
 }

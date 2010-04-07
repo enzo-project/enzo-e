@@ -16,8 +16,6 @@ main ()
   unit_class ("MethodEnzoPpm");
   MethodEnzoPpm ppm;
 
-  unit_open();
-
   unit_func("initialize");
   ppm.initialize("PPM");
   unit_assert(false);
@@ -26,6 +24,4 @@ main ()
   ppm.apply();
   unit_assert(false);
 
-
-  unit_close();
 }

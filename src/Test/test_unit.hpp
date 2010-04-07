@@ -70,24 +70,24 @@ void unit_assert_ (bool result, const char * file, int line)
 }
 
 /// @brief Open the file for unit test results.  Call to unit_class() required
-void unit_open ()
-{
-  char filename [UNIT_MAX_NAME_LEN+5];
-  if (strlen(unit::class_name)==0) {
-    WARNING_MESSAGE("Test::unit_open","unit_class() not called before unit_open()"); 
-  }
-  sprintf (filename,"%s.unit",unit::class_name);
-  unit::fp = fopen (filename,"w");
-}
+// void unit_open ()
+// {
+//   char filename [UNIT_MAX_NAME_LEN+5];
+//   if (strlen(unit::class_name)==0) {
+//     WARNING_MESSAGE("Test::unit_open","unit_class() not called before unit_open()"); 
+//   }
+//   sprintf (filename,"%s.unit",unit::class_name);
+//   unit::fp = fopen (filename,"w");
+// }
 
 /// @brief Close the file for unit test results.  Call to unit_open() required
-void unit_close ()
-{
-  if (unit::fp) {
-    fclose (unit::fp);
-  } else {
-    WARNING_MESSAGE("Test::unit_close","unit_open() not called before unit_close()"); 
-  }
-}
+// void unit_close ()
+// {
+//   if (unit::fp) {
+//     fclose (unit::fp);
+//   } else {
+//     WARNING_MESSAGE("Test::unit_close","unit_open() not called before unit_close()"); 
+//   }
+// }
 
 #endif

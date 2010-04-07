@@ -17,8 +17,6 @@ int main()
 
   unit_class ("Array");
 
-  unit_open();
-
   //----------------------------------------------------------------------
   // test single array WITH resize: length, size, clear, values, access
   //----------------------------------------------------------------------
@@ -283,6 +281,4 @@ int main()
     unit_assert (is_same);
   }
   
-  unit_close();
-
 }

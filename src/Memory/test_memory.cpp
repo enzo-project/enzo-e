@@ -26,7 +26,6 @@ int main(int argc, char ** argv)
   printf ("start\n"); fflush(stdout);
 
   unit_class ("Memory");
-  unit_open();
 
   //----------------------------------------------------------------------
   // allocate()
@@ -209,5 +208,4 @@ int main(int argc, char ** argv)
 
   memory->print();
 
-  unit_close();
 }

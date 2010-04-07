@@ -19,9 +19,6 @@ int main()
 
   unit_class ("Data");
 
-  unit_open();
-
-
   Data data;
 
   unit_func("set_particles");
@@ -43,7 +40,5 @@ int main()
   Field * f;
   data.get_fields(&f);
   unit_assert(f == & field);
-
-  unit_close();
 
 }

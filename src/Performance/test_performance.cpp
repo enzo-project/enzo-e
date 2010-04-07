@@ -24,8 +24,6 @@ int main(int argc, char ** argv)
 
   unit_class ("Timer");
 
-  unit_open();
-
   printf ("Initial timer value = %24.16f\n",timer.value());
 
   timer.start();
@@ -210,5 +208,4 @@ int main(int argc, char ** argv)
 
   Memory::get_instance()->print();
 
-  unit_close();
 }

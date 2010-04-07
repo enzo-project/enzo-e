@@ -17,12 +17,9 @@ int main(int argc, char ** argv)
 
   unit_class ("Schedule");
   unit_func ("null");
-  unit_open();
 
   //  Schedule schedule;
 
   //FAILS
   unit_assert(passed);
-
-  unit_close();
 }

@@ -33,7 +33,6 @@ int main(int argc, char ** argv)
   }
 
   unit_class ("Hdf5");
-  unit_open();
 
   unit_func("file_open");
 
@@ -71,5 +70,4 @@ int main(int argc, char ** argv)
   unit_func("read,write");
   unit_assert(passed);
 
-  unit_close();
 }
