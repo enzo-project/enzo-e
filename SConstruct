@@ -7,7 +7,8 @@ env = Environment (
 	CXX     = 'mpiCC',	
 	CPPPATH = '#/include',
 	LIBPATH = '#/lib',
-	BINPATH = '#/bin'
+	BINPATH = '#/bin',
+	CPPFLAGS = '-Wall -g'
          )
 
 Export('env')

@@ -42,13 +42,6 @@ int main(int argc, char **argv)
   FILE * fpin = fopen ("test.in","r");
   parameters->read ( fpin );
 
-  // Write
-
-  unit_func("write");
-  FILE * fpout = fopen ("test.out","w");
-  parameters->write ( fpout );
-  unit_assert(0); //FAILS
-
   // set_group()
 
   unit_func("set_group");
@@ -77,8 +70,8 @@ int main(int argc, char **argv)
   
   unit_assert (parameters->value_logical("test_true")  == true);
   unit_assert (parameters->value_logical("test_false") == false);
-  unit_assert (parameters->value_logical("test_none",true) == true);
-  unit_assert (parameters->value_logical("test_none",false) == false);
+  unit_assert (parameters->value_logical("none",true) == true);
+  unit_assert (parameters->value_logical("none",false) == false);
 
   // value_integer()
 
@@ -88,7 +81,7 @@ int main(int argc, char **argv)
   
   unit_assert (parameters->value_integer("test_1")  == 1);
   unit_assert (parameters->value_integer("test_37") == 37);
-  unit_assert (parameters->value_integer("test_none",58) == 58);
+  unit_assert (parameters->value_integer("none",58) == 58);
 
   // value_scalar()
   
@@ -98,7 +91,7 @@ int main(int argc, char **argv)
   
   unit_assert (parameters->value_scalar("test_1_5")  == 1.5);
   unit_assert (parameters->value_scalar("test_37_25") == 37.25);
-  unit_assert (parameters->value_scalar("test_none",58.75) == 58.75);
+  unit_assert (parameters->value_scalar("none",58.75) == 58.75);
 
   // Constant scalar expressions
   // subgroups
@@ -126,7 +119,7 @@ int main(int argc, char **argv)
 
   parameters->set_group("String");
   unit_assert(parameters->value_string("str1") == "testing");
-  unit_assert(parameters->value_string("str1","blah") == "testing");
+  unit_assert(parameters->value_string("str2","blah") == "one");
   unit_assert(parameters->value_string("none","blah") == "blah");
 
   // Variable scalar expressions
@@ -229,6 +222,13 @@ int main(int argc, char **argv)
   unit_assert (values_logical[1] == (x[1]+y[1]+t[1] > 0 ));
   unit_assert (values_logical[2] == (x[2]+y[2]+t[2] > 0 ));
 
+  // Write
+
+  unit_func("write");
+  FILE * fpout = fopen ("test.out","w");
+  parameters->write ( fpout );
+  unit_assert(0); //FAILS
+
   delete parameters;
 
 }
@@ -269,7 +269,6 @@ void generate_input()
   fprintf (fp, " String {\n");
   fprintf (fp, "  str1 = \"testing\";\n");
   fprintf (fp, "  str2 = \"one\";\n");
-  fprintf (fp, "  str3 = \"two\";\n");
   fprintf (fp, "}\n");
 
   fprintf (fp, " Scalar_expr {\n");

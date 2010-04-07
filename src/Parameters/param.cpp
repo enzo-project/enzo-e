@@ -14,11 +14,12 @@
 #include "param.hpp"
 #include "error.hpp"
 
-      
-
 void Param::set (struct param_type * node)
 /// @param   node  The node from which to copy the type and value
 {
+
+  value_accessed_ = false;
+
   switch (node->type) {
   case enum_parameter_integer:
     set_integer_(node->integer_value);
@@ -78,6 +79,10 @@ void Param::write(FILE * file_pointer,
 /// @param parameter     Name of this parameter
 /// @todo  Writing lists is not implemented yet
 {
+
+  // Write access indicator
+  fprintf (file_pointer, value_accessed_ ? "[*] " : "[ ] ");
+
   // Write the parameter name
   fprintf (file_pointer,"%s ",parameter.c_str());
 
@@ -137,6 +142,8 @@ void Param::evaluate_scalar
 {
   double * left  = NULL;
   double * right = NULL;
+
+  value_accessed_ = true;
 
   if (node->left) {
     left = new double [n];
@@ -226,6 +233,8 @@ void Param::evaluate_logical
   double * right_scalar = NULL;
   bool * left_logical  = NULL;
   bool * right_logical = NULL;
+
+  value_accessed_ = true;
 
   // Recurse on left subtree
 

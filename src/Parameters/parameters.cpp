@@ -83,7 +83,15 @@ void Parameters::write ( FILE * file_pointer )
        it_param != parameter_map_.end();
        ++it_param) {
 
-    it_param->second->write(file_pointer, it_param->first);
+    if (it_param->second) {
+      it_param->second->write(file_pointer, it_param->first);
+    } else {
+      char message [ ERROR_MESSAGE_LENGTH ];
+      sprintf (message, 
+	       "uninitialized parameter %s accessed\n",
+	       it_param->first.c_str());
+      WARNING_MESSAGE("Parameters::write",message);
+    }
 
   }
 }
@@ -97,7 +105,7 @@ int Parameters::value_integer
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_integer()) throw ExceptionParametersBadType();
-  return (param != NULL) ? param->value_integer_ : deflt;
+  return (param != NULL) ? param->get_integer() : deflt;
 }
 
 
@@ -110,7 +118,7 @@ double Parameters::value_scalar
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
-  return (param != NULL) ? param->value_scalar_ : deflt;
+  return (param != NULL) ? param->get_scalar() : deflt;
 }
 
 bool Parameters::value_logical 
@@ -122,7 +130,7 @@ bool Parameters::value_logical
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_logical()) throw ExceptionParametersBadType();
-  return (param != NULL) ? param->value_logical_ : deflt;
+  return (param != NULL) ? param->get_logical() : deflt;
 }
 
 std::string Parameters::value_string 
@@ -134,7 +142,7 @@ std::string Parameters::value_string
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_string()) throw ExceptionParametersBadType();
-  return (param != NULL) ? param->value_string_ : deflt;
+  return (param != NULL) ? param->get_string() : deflt;
 }
 
 void Parameters::evaluate_scalar 

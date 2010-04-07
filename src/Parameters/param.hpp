@@ -95,6 +95,22 @@ public: // interface
   /// Return whether the parameter is a logical expression
   bool is_logical_expr() { return type_ == type_logical_expr_; };
 
+  /// Get an integer parameter
+  int get_integer () 
+  { value_accessed_ = true; return value_integer_; }
+
+  /// Get a scalar parameter (note that scalar parameters are doubles)
+  double get_scalar  () 
+  { value_accessed_ = true; return value_scalar_; }
+
+  /// Get a logical parameter
+  int get_logical ()    
+  { value_accessed_ = true; return value_logical_; }
+
+  /// Get a string parameter (note that string is aliased)
+  std::string get_string () 
+  { value_accessed_ = true; return value_string_; }
+
 private: // attributes
 
   /// @enum type_param
@@ -113,8 +129,8 @@ private: // attributes
   /// Parameter type
   enum type_param type_;
 
-  /// Whether para'meter value has been accessed
-  bool param_value_accessed_;
+  /// Whether parameter value has been accessed
+  bool value_accessed_;
 
   /// Type definition for a list of parameters
   typedef std::vector<class Param *> list_type;
@@ -132,7 +148,7 @@ private: // attributes
 private: // functions
 
   /// Set an integer parameter
-  void set_integer_ (int value)    
+  void set_integer_ (int value)
   { 
     type_ = type_integer_; 
     value_integer_ = value; 
@@ -180,14 +196,14 @@ private: // functions
   void set_scalar_expr_ (struct node_expr * value)
   { 
     type_ = type_scalar_expr_;
-    value_expr_ = value; 
+    value_expr_     = value; 
   };
 
   /// Set a logical expression parameter
   void set_logical_expr_ (struct node_expr * value)
   { 
     type_ = type_logical_expr_;
-    value_expr_ = value; 
+    value_expr_     = value; 
   };
 
   /// Deallocate the parameter
