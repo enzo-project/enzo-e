@@ -20,9 +20,11 @@ void ParallelMpi::initialize(int * argc, char ***argv)
   MPI_Init(argc,argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
   MPI_Comm_size(MPI_COMM_WORLD, &size_);
+  set_initialized_(true);
 };
 
 void ParallelMpi::finalize()
 {
   MPI_Finalize();
+  set_initialized_(false);
 }

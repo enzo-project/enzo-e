@@ -15,11 +15,16 @@
 
 void usage(int argc, char ** argv) 
 {
+  Parallel * parallel = Parallel::instance();
+
+  if (parallel->is_root()) {
 #ifdef CONFIG_USE_MPI
-  fprintf (stderr,"Usage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
+    fprintf (stderr,"Usage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
 #else
-  fprintf (stderr,"Usage: %s <parameter-file>\n\n",argv[0]);
+    fprintf (stderr,"Usage: %s <parameter-file>\n\n",argv[0]);
 #endif
+  }
+  parallel->finalize();
   exit(1);
 }
 
@@ -37,8 +42,8 @@ int main(int argc, char ** argv)
     // INITALIZE MONITOR
 
     Monitor * monitor = Monitor::instance();
-    monitor->print ("CELLO BEGIN");
 
+    monitor->print ("CELLO BEGIN");
 
     //    monitor->print ("");
     //    monitor->print ("     The Laboratory for Computational Astrophysics proudly presents:");

@@ -20,11 +20,11 @@ public: // interface
 
   /// Initialize
   virtual void initialize(int * argc = 0, char ***argv = 0) 
-  {}
+  { initialized_ = true; }
 
   /// Finalize
   virtual void finalize()
-  {}
+  { initialized_ = false; }
 
   /// Get size
   virtual int size()
@@ -36,6 +36,9 @@ public: // interface
 
   virtual bool is_root()
   { return true; }
+
+  bool is_initialized()
+  { return initialized_; }
 
 public: // static functions
 
@@ -52,11 +55,17 @@ protected: // functions
   ~Parallel() 
   {};
 
-private: // attributes
+  void set_initialized_ (bool initialized)
+  { initialized_ = initialized; }
+
+private: // static attributes
 
   /// Single instance of the Parallel object (singleton design pattern)
   static Parallel * instance_;
 
+private: // attributes
+
+  bool initialized_;
 
 };
 

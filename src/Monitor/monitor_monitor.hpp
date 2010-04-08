@@ -10,6 +10,7 @@
 /// @brief    Declaration of the Monitor class
 
 #include "parallel.hpp"
+#include "error.hpp"
 
 /// @enum     enum_reduce
 /// @brief    Reduction operator, used for image projections
@@ -46,15 +47,20 @@ public: // interface
   { 
     // Delayed creation since Parallel must be initialized
     if (Monitor::instance_ == 0) {
-      instance_ = new Monitor(Parallel::instance());
+      Parallel * parallel = Parallel::instance();
+      if (parallel->is_initialized()) {
+	instance_ = new Monitor(Parallel::instance());
+      } else {
+	ERROR_MESSAGE("Monitor::instance","Monitor::instance() called before Parallel::initialize()");
+      }
     }
     return instance_;
   };
 
-  /// Print a message
-  void print (std::string message)
+  /// Print a message to stdout
+  void print (std::string message, FILE * fp = stdout)
   {
-    if (active_) fprintf (fp_,"%6.1f %s\n",timer_.value(),message.c_str());
+    if (active_) fprintf (fp,"%6.1f %s\n",timer_.value(),message.c_str());
   };
 
   /// Generate a PNG image of an array
@@ -73,11 +79,9 @@ public: // interface
 private: // functions
 
   /// Initialize the Monitor object (singleton design pattern)
-  Monitor(Parallel * parallel,
-	  FILE * fp = stdout) 
+  Monitor(Parallel * parallel) 
     : parallel_(parallel),
-      active_(parallel->is_root()),
-      fp_(fp)
+      active_(parallel->is_root())
   {  
     timer_.start(); 
   }
@@ -86,7 +90,6 @@ private: // attributes
 
   Parallel * parallel_; // Parallel object, used for is_root()
   bool   active_;  // Whether monitoring is activated.  Used for e.g. ip != 0.
-  FILE * fp_;      // File pointer for message logging
   Timer  timer_;   // Timer from Performance
   
   /// Single instance of the Monitor object (singleton design pattern)

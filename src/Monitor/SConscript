@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['parallel']
+components = ['parallel', 'error']
 libraries  = ['png']
 
 env = env.Clone(

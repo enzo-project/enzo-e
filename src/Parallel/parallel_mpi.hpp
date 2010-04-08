@@ -96,7 +96,8 @@ protected: // functions
 
   /// Initialize an ParallelMpi object (singleton design pattern)
   ParallelMpi()
-    : size_(1),
+    : Parallel(),
+      size_(1),
       rank_(0),
       send_blocking_(true),
       recv_blocking_(true),

@@ -15,9 +15,9 @@ int main(int argc, char ** argv)
   unit_class ("Monitor");
 
   Parallel * parallel = Parallel::instance();
-  Monitor  * monitor  = Monitor::instance();
-
   parallel->initialize(&argc,&argv);
+
+  Monitor  * monitor  = Monitor::instance();
 
   int n = 128;
 
