@@ -21,7 +21,7 @@
 int main(int argc, char ** argv)
 {
 
-  Memory * memory = Memory::get_instance();
+  Memory * memory = Memory::instance();
 
   printf ("start\n"); fflush(stdout);
 

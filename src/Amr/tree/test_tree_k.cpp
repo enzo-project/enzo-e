@@ -92,7 +92,7 @@ int main(int argc, char ** argv)
 
   delete [] level_array;
 
-  Memory::get_instance()->print();
+  Memory::instance()->print();
 
 }
 
@@ -267,7 +267,7 @@ void create_tree
   int num_nodes;
   float mem_per_node;
 
-  Memory * memory = Memory::get_instance();
+  Memory * memory = Memory::instance();
 
   memory->reset();
 

@@ -20,7 +20,7 @@ class Error {
 public: // functions
 
   /// Get single instance of the Error object
-  static Error * handler() throw ()
+  static Error * instance() throw ()
   { return & instance_; };
 
   /// Warning message
@@ -112,22 +112,22 @@ private: // attributes
 /// @def      WARNING_MESSAGE
 /// @brief    Handle a (non-lethal) warning message
 #define WARNING_MESSAGE(FUNCTION,MESSAGE) \
-  Error::handler()->warning(__FILE__,__LINE__,FUNCTION,MESSAGE)
+  Error::instance()->warning(__FILE__,__LINE__,FUNCTION,MESSAGE)
 
 /// @def      ERROR_MESSAGE
 /// @brief    Handle a (lethal) error message
 #define ERROR_MESSAGE(FUNCTION,MESSAGE) \
-  Error::handler()->error(__FILE__,__LINE__,FUNCTION,MESSAGE)
+  Error::instance()->error(__FILE__,__LINE__,FUNCTION,MESSAGE)
 
 /// @def      INCOMPLETE_MESSAGE
 /// @brief    Placeholder for code that is incomplete
 #define INCOMPLETE_MESSAGE(FUNCTION,MESSAGE) \
-  Error::handler()->incomplete(__FILE__,__LINE__,FUNCTION,MESSAGE)
+  Error::instance()->incomplete(__FILE__,__LINE__,FUNCTION,MESSAGE)
 
 /// @def      TRACE
 /// @brief    Trace file name and location to stdout
 #define TRACE					\
-  Error::handler()->trace(__FILE__,__LINE__)
+  Error::instance()->trace(__FILE__,__LINE__)
 
 
 #endif /* ERROR_ERROR_HPP */

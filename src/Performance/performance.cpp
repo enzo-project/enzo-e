@@ -43,7 +43,7 @@ Performance::Performance
  *********************************************************************
  */
 {
-  Memory * memory = Memory::get_instance();
+  Memory * memory = Memory::instance();
 
   memory->new_group (component_performance, "Performance");
   memory->begin_group(component_performance);
@@ -80,7 +80,7 @@ Performance::~Performance()
  *********************************************************************
  */
 {
-  Memory * memory = Memory::get_instance();
+  Memory * memory = Memory::instance();
 
   memory->begin_group(component_performance);
 

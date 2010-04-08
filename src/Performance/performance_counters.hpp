@@ -23,7 +23,7 @@ public: // interface
   /// Initialize a Counters object
   Counters(size_t num_attributes, size_t num_counters)
     {
-      Memory * memory = Memory::get_instance();
+      Memory * memory = Memory::instance();
       memory->begin_group(component_performance);
       a_  = new int       [num_attributes];
       c_  = new long long [num_counters];
@@ -34,7 +34,7 @@ public: // interface
   /// Delete a Counters object
   ~Counters()
     {
-      Memory * memory = Memory::get_instance();
+      Memory * memory = Memory::instance();
       memory->begin_group(component_performance);
       delete [] a_;
       delete [] c_;

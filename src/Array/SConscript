@@ -10,7 +10,8 @@ lib_array = env.Library ('array', [sources])
 env.Alias('install-lib',env.Install ('$LIBPATH',lib_array))
 
 test_array   = env.Program (['test_array.cpp',   sources])
-env.Alias('install-bin', env.Install ('$BINPATH', test_array))
+test_block   = env.Program (['test_block.cpp',   sources])
+env.Alias('install-bin', env.Install ('$BINPATH', [test_array,test_block]))
 
 
 

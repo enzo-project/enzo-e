@@ -206,6 +206,6 @@ int main(int argc, char ** argv)
 
   delete performance;
 
-  Memory::get_instance()->print();
+  Memory::instance()->print();
 
 }

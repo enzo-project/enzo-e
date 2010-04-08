@@ -356,7 +356,7 @@ void Memory::reset() throw()
 #ifdef CONFIG_USE_MEMORY
 void *operator new (size_t bytes) throw (std::bad_alloc)
 {
-  size_t p = (size_t) Memory::get_instance()->allocate(bytes);
+  size_t p = (size_t) Memory::instance()->allocate(bytes);
 
   // Return pointer to new storage
 
@@ -367,7 +367,7 @@ void *operator new (size_t bytes) throw (std::bad_alloc)
 
 void *operator new [] (size_t bytes) throw (std::bad_alloc)
 {
-  size_t p = (size_t) Memory::get_instance()->allocate(bytes);
+  size_t p = (size_t) Memory::instance()->allocate(bytes);
 
   // Return pointer to new storage
 
@@ -381,7 +381,7 @@ void operator delete (void *p) throw ()
 {
   if (p==0) return;
 
-  Memory::get_instance()->deallocate(p);
+  Memory::instance()->deallocate(p);
 
 }
 
@@ -391,6 +391,6 @@ void operator delete [] (void *p) throw ()
 {
   if (p==0) return;
 
-  Memory::get_instance()->deallocate(p);
+  Memory::instance()->deallocate(p);
 }
 #endif /* CONFIG_USE_MEMORY */

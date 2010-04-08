@@ -28,7 +28,7 @@ class Memory {
 public: // interface
 
   /// Get single instance of the Memory object
-  static Memory * get_instance() throw ()
+  static Memory * instance() throw ()
   { return & instance_; }
 
   /// Allocate memory

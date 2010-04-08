@@ -7,6 +7,7 @@ unit_parse = Builder(action = "bin/test_parse < $SOURCE > $TARGET")
 env = Environment(BUILDERS = {'Unit': unit, 'UnitParse' : unit_parse})
 
 env.Unit('test_array.out',       '#/bin/test_array')
+env.Unit('test_block.out',       '#/bin/test_block')
 env.Unit('test_data.out',        '#/bin/test_data')
 env.Unit('test_disk_hdf5.out',   '#/bin/test_disk_hdf5')
 env.Unit('test_error.out',       '#/bin/test_error')
