@@ -1,15 +1,13 @@
 Import('env')
 
-SConscript('Enzo/SConscript')
-
-includes = [Glob('*hpp')]
-
-env.Alias('install-inc',env.Install ('#/include',includes))
+includes  = [Glob('*hpp')]
 
 libraries = env.Library ('user', 'Enzo/libuser-enzo.a')
 
+env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 
+SConscript('Enzo/SConscript')
 
 
 

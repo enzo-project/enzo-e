@@ -1,20 +1,16 @@
 Import('env')
 
 libraries  = ['png']
+includes   = [Glob('parallel*hpp')]
+sources    = [Glob('parallel*cpp')]
 
 env = env.Clone(LIBS=[libraries])
 
-includes = [Glob('parallel*hpp')]
+libraries = env.Library ('parallel', [sources])
+binaries  = env.Program (['test_parallel_mpi.cpp', sources])
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-
-sources  = [Glob('parallel*cpp')]
-
-libraries = env.Library ('parallel', [sources])
-
 env.Alias('install-lib',env.Install ('#/lib',libraries))
-
-test_parallel_mpi = env.Program (['test_parallel_mpi.cpp', sources])
-env.Alias('install-bin', env.Install ('$BINPATH', [test_parallel_mpi]))
+env.Alias('install-bin',env.Install ('$BINPATH', [binaries]))
 
 

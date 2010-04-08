@@ -2,21 +2,18 @@ Import('env')
 
 components = ['error','parameters', 'monitor', 'parallel']
 libraries  = ['png']
+includes   = [Glob('schedule*hpp')]
+sources    = [Glob('schedule*cpp')]
 
 env = env.Clone(LIBS=[components,libraries])
 
-includes = [Glob('schedule*hpp')]
+libraries = env.Library ('schedule', [sources])
+binaries  = env.Program (['test_schedule.cpp', sources])
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-
-sources  = [Glob('schedule*cpp')]
-
-libraries = env.Library ('schedule', [sources])
-
 env.Alias('install-lib',env.Install ('#/lib',libraries))
+env.Alias('install-bin',env.Install ('$BINPATH', binaries))
 
-test_schedule = env.Program(['test_schedule.cpp', sources])
-env.Alias('install-bin', env.Install ('$BINPATH', test_schedule))
 
 
 

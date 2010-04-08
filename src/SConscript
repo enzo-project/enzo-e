@@ -28,17 +28,14 @@ SConscript('Test/SConscript')
 SConscript('User/SConscript')
 
 
-components = [
-	'schedule',
-	'error',
-	'monitor',
-	'parallel',
-	'parameters',
-	'simulation']
+components = ['schedule','error','monitor','parallel','parameters','simulation']
+libraries  = ['png']
 
-libraries = ['png']
 
 env = env.Clone(LIBS=[components,libraries])
 
-exe_cello = env.Program(['cello.cpp'])
-env.Alias('install-bin', env.Install ('$BINPATH', [exe_cello]))
+
+binaries = env.Program(['cello.cpp'])
+
+
+env.Alias('install-bin', env.Install ('$BINPATH', [binaries]))
