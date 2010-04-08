@@ -30,9 +30,9 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
-    Parallel * mpi = Parallel::instance();
+    Parallel * parallel = Parallel::instance();
 
-    mpi->initialize(&argc, &argv);
+    parallel->initialize(&argc, &argv);
 
     // INITALIZE MONITOR
 
@@ -90,7 +90,7 @@ int main(int argc, char ** argv)
 
     monitor->print ("CELLO END");
 
-    mpi->finalize();
+    parallel->finalize();
 
   }
 

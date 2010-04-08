@@ -43,7 +43,13 @@ public: // interface
 
   /// Get single instance of the Monitor object
   static Monitor * instance() throw ()
-  { return & instance_; };
+  { 
+    // Delayed creation since Parallel must be initialized
+    if (Monitor::instance_ == 0) {
+      instance_ = new Monitor(Parallel::instance());
+    }
+    return instance_;
+  };
 
   /// Print a message
   void print (std::string message)
@@ -68,8 +74,7 @@ private: // functions
 
   /// Initialize the Monitor object (singleton design pattern)
   Monitor(Parallel * parallel,
-	  FILE * fp = stdout,
-	  bool   active = true) 
+	  FILE * fp = stdout) 
     : parallel_(parallel),
       active_(parallel->is_root()),
       fp_(fp)
@@ -85,7 +90,7 @@ private: // attributes
   Timer  timer_;   // Timer from Performance
   
   /// Single instance of the Monitor object (singleton design pattern)
-  static Monitor instance_;
+  static Monitor * instance_;
 
 };
 

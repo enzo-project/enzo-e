@@ -12,7 +12,7 @@
 #include "parallel.hpp"
 #include "monitor.hpp" 
 
-Monitor Monitor::instance_ (Parallel::instance()); // (singleton design pattern)
+Monitor * Monitor::instance_; // (singleton design pattern)
 
 //----------------------------------------------------------------------
 
