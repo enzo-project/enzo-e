@@ -1,0 +1,24 @@
+import os
+
+TOPDIR  = GetLaunchDir()
+
+print TOPDIR + '/include'
+
+env = Environment (
+        ENV = {'PATH' : os.environ['PATH'],
+	       'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
+	CXX     = 'mpicxx',	
+	CPPPATH = ['#/include', '/opt/pgi/hdf5_pgi/include'],
+	LIBPATH = ['#/lib', '/opt/pgi/hdf5_pgi/lib'],
+	BINPATH = '#/bin',
+	CPPFLAGS = '-g -DH5_USE_16_API',
+        LINKFLAGS = '-pgf90libs'
+         )
+
+Export('env')
+
+SConscript('src/SConscript')
+SConscript('test/SConscript')
+
+
+
