@@ -8,8 +8,7 @@
  
 #include <stdio.h>
 #include <string>
-
-#include "hdf5.h"
+#include <hdf5.h>
 
 #include "error.hpp"
 #include "test.hpp"
