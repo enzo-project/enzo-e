@@ -20,12 +20,13 @@ includes = [
 	'amr_tree4.hpp',
 	'amr_treek.hpp']
 
-env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+env.Alias('install-inc',env.Install ('#/include',includes))
 
 sources  = [Glob('amr*cpp')]
 
-env.Library ('amr', [sources])
-env.Alias('install-lib',env.Install ('$LIBPATH','libamr.a'))
+libraries = env.Library ('amr', [sources])
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 test_tree   = env.Program (['test_tree.cpp',   sources])
 test_tree_k = env.Program (['test_tree_k.cpp', sources])

@@ -9,12 +9,14 @@ env = env.Clone(
 
 
 includes = [Glob('monitor*hpp'), Glob('png*h')]
-env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+
+env.Alias('install-inc',env.Install ('#/include',includes))
 
 sources  = [Glob('monitor*cpp'), Glob('png*cpp')]
 
-env.Library ('monitor', [sources])
-env.Alias('install-lib',env.Install ('$LIBPATH','libmonitor.a'))
+libraries = env.Library ('monitor', [sources])
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 test_monitor = env.Program (['test_monitor.cpp', sources])
 env.Alias('install-bin', env.Install ('$BINPATH', test_monitor))

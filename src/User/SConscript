@@ -2,10 +2,13 @@ Import('env')
 
 SConscript('Enzo/SConscript')
 
-env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('*hpp')]))
+includes = [Glob('*hpp')]
 
-lib_user = env.Library ('user', 'Enzo/libuser-enzo.a')
-env.Alias('install-lib',env.Install ('$LIBPATH',lib_user))
+env.Alias('install-inc',env.Install ('#/include',includes))
+
+libraries = env.Library ('user', 'Enzo/libuser-enzo.a')
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 
 

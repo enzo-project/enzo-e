@@ -2,14 +2,13 @@ Import('env')
 
 includes = [Glob('simulation*hpp')]
 
-env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+env.Alias('install-inc',env.Install ('#/include',includes))
 
 sources  = []
 
-env.Library ('simulation', [sources])
-env.Library ('cello',      [sources])
-env.Precious ('cello')
-env.Alias('install-lib',env.Install ('$LIBPATH','libsimulation.a'))
+libraries = env.Library ('simulation', [sources])
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 
 

@@ -6,12 +6,13 @@ env = env.Clone(LIBS=[components])
 
 includes = [Glob('performance*hpp')]
 
-env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+env.Alias('install-inc',env.Install ('#/include',includes))
 
 sources  = [Glob('performance*cpp')]
 
-env.Library ('performance', [sources])
-env.Alias('install-lib',env.Install ('$LIBPATH','libperformance.a'))
+libraries = env.Library ('performance', [sources])
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 test_performance = env.Program(['test_performance.cpp', sources])
 time_matvec      = env.Program(['time_matvec.cpp',      sources])

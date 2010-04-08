@@ -35,6 +35,7 @@ components = [
 	'parallel',
 	'parameters',
 	'simulation']
+
 libraries = ['png']
 
 env = env.Clone(LIBS=[components,libraries])

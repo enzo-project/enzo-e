@@ -2,12 +2,13 @@ Import('env')
 
 includes = [Glob('data*hpp')]
 
-env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+env.Alias('install-inc',env.Install ('#/include',includes))
 
 sources  = [Glob('data*cpp')]
 
-lib_data = env.Library ('data', [sources])
-env.Alias('install-lib',env.Install ('$LIBPATH',lib_data))
+libraries = env.Library ('data', [sources])
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 test_data   = env.Program (['test_data.cpp',   sources])
 env.Alias('install-bin', env.Install ('$BINPATH', test_data))

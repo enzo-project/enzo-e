@@ -3,12 +3,15 @@ Import('env')
 components = ['error']
 env = env.Clone(LIBS=[components])
 
-env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('*hpp')]))
+includes = [Glob('*hpp')]
+
+env.Alias('install-inc',env.Install ('#/include',includes))
 
 sources  = [Glob('memory*cpp')]
 
-env.Library ('memory', [sources])
-env.Alias('install-lib',env.Install ('$LIBPATH','libmemory.a'))
+libraries = env.Library ('memory', [sources])
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 test_memory   = env.Program (['test_memory.cpp', sources])
 env.Alias('install-bin', env.Install ('$BINPATH', test_memory))

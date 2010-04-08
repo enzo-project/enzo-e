@@ -4,9 +4,7 @@ components = ['error', 'disk', 'memory', 'monitor', 'parallel']
 libraries  = ['hdf5', 'gfortran', 'png']
 defines    = "-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX"
 
-env = env.Clone(
-    LIBS     = [components,libraries], 
-    CPPFLAGS = defines)
+env = env.Clone(LIBS = [components,libraries], CPPFLAGS = defines)
 
 env.SetOption('warn', 'no-fortran-cxx-mix')
 
@@ -35,8 +33,6 @@ sources  = [
 	'SetExternalBoundary.cpp']
 
 lib_user = env.Library ('enzo-ppml', [sources])
-
-# env.Alias('install-lib',env.Install ('$LIBPATH','libuser-enzo-ppml.a'))
 
 test_ppml   = env.Program (['test_ppml.cpp',   sources])
 

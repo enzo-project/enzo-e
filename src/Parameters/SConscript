@@ -9,7 +9,7 @@ includes = [
 	'param.hpp',
 	'parse.h']
 
-env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+env.Alias('install-inc',env.Install ('#/include',includes))
 
 sources  = ['parse.tab.c', 'lex.yy.c', 'parameters.cpp', 'param.cpp']
 
@@ -19,8 +19,9 @@ env.CFile(target = ['parse.tab.c', 'parse.tab.h'],
 
 env.CFile(target = 'lex.yy.c', source = 'parse.l')
 
-env.Library ('parameters', [sources])
-env.Alias('install-lib',env.Install ('$LIBPATH','libparameters.a'))
+libraries = env.Library ('parameters', [sources])
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 test_parameters = env.Program (['test_parameters.cpp', sources])
 test_parse      = env.Program (['test_parse.cpp', sources])

@@ -7,12 +7,13 @@ env = env.Clone(LIBS=[components,libraries])
 
 includes = [Glob('schedule*hpp')]
 
-env.Alias('install-inc',env.Install ('$CPPPATH',includes))
+env.Alias('install-inc',env.Install ('#/include',includes))
 
 sources  = [Glob('schedule*cpp')]
 
-lib_schedule = env.Library ('schedule', [sources])
-env.Alias('install-lib',env.Install ('$LIBPATH',lib_schedule))
+libraries = env.Library ('schedule', [sources])
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 test_schedule = env.Program(['test_schedule.cpp', sources])
 env.Alias('install-bin', env.Install ('$BINPATH', test_schedule))

@@ -2,16 +2,21 @@ Import('env')
 
 libraries  = ['hdf5', 'array']
 components = ['error']
-sources  = Glob('disk*cpp')
 
 env = env.Clone(LIBS=[components,libraries])
 
-env.Alias('install-inc',env.Install ('$CPPPATH',[Glob('*hpp')]))
+includes = [Glob('*hpp')]
 
-lib_disk = env.Library ('disk', Glob('disk*cpp'))
-env.Alias('install-lib',env.Install ('$LIBPATH',lib_disk))
+env.Alias('install-inc',env.Install ('#/include',includes))
+
+libraries = env.Library ('disk', Glob('disk*cpp'))
+
+env.Alias('install-lib',env.Install ('#/lib',libraries))
+
+sources  = Glob('disk*cpp')
 
 test_disk_hdf5 = env.Program (['test_disk_hdf5.cpp', sources])
+
 env.Alias('install-bin', env.Install ('$BINPATH', [test_disk_hdf5]))
 
 
