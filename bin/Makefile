@@ -5,7 +5,7 @@ run-tests:
 	./test_data
 	./test_disk_hdf5
 	./test_disk_ifrit
-	./test_enzo_method_ppm
+	./test_enzo_ppm
 	./test_error
 	./test_memory
 	./test_monitor
