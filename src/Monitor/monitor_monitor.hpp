@@ -27,7 +27,6 @@ class Monitor {
   /// @class    Monitor
   /// @ingroup  Monitor
   /// @todo     Make calling image() easier
-  /// @todo     Use singleton design pattern
   /// @brief    Functions for user monitoring of the execution status
   ///
   /// The Monitor component is used to communicate information about

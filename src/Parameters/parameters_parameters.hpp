@@ -21,11 +21,9 @@ class Parameters {
 
 public: // interface
 
-  /// Create an empty Parameters object
-  Parameters() throw();
-
-  /// Delete a Parameters object
-  ~Parameters();
+  /// Get single instance of the Parameters object
+  static Parameters * instance() throw ()
+  { return & instance_; }
 
   /// Read in parameters from a file
   void read (FILE * file_pointer);
@@ -147,6 +145,12 @@ public: // interface
 
 private: // functions
 
+  /// Create an empty Parameters object (singleton design pattern)
+  Parameters() throw();
+
+  /// Delete a Parameters object (singleton design pattern)
+  ~Parameters();
+
   /// Read in the next line of the input file
   int readline_ (FILE* fp, char * buffer, int n) throw();
 
@@ -169,6 +173,9 @@ private: // functions
   }
 
 private: // attributes
+
+  /// Single instance of the Parameters object (singleton design pattern)
+  static Parameters instance_;
 
   std::string current_group_;
   std::string current_subgroup_;

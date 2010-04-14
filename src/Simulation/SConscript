@@ -4,7 +4,7 @@ includes = [Glob('simulation*hpp')]
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 
-sources  = []
+sources  = [Glob("*.cpp")]
 
 libraries = env.Library ('simulation', [sources])
 

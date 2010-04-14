@@ -13,6 +13,10 @@
 #include "error.hpp"
 #include "parameters.hpp"
 
+Parameters Parameters::instance_; // (singleton design pattern)
+
+//----------------------------------------------------------------------
+
 Parameters::Parameters() 
   throw()
   :

@@ -6,9 +6,7 @@
 /// @date      
 /// @brief     
  
-//====================================================================
-// PUBLIC FUNCTIONS
-//====================================================================
+#include "simulation.hpp"
 
 Simulation::Simulation()
   : lower_(),
@@ -17,36 +15,20 @@ Simulation::Simulation()
     parallel_(NULL),
     fields_(NULL),
     methods_(NULL)
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Create a Simulation object
- *
- *********************************************************************
- */
 {
 }
 
 Simulation::~Simulation()
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Delete a Simulation object
- *
- *********************************************************************
- */
 {
+  INCOMPLETE_MESSAGE("Simulation::~Simulation()","");
 }
     
 /// Initialize from parameters
-void Simulation::initialize (Parameters * parameters)
+void Simulation::initialize ()
 {
+
+  Parameters * parameters = Parameters::instance();
+
   // --------------------------------------------------
   // Initialize domain
   // --------------------------------------------------
@@ -60,8 +42,8 @@ void Simulation::initialize (Parameters * parameters)
   }
   assert (extent_length % 2 == 0);
   for (int i=0; i<extent_length/2; i++) {
-    lower_.push_back(parameters->list_value_integer(i));
-    upper_.push_back(parameters->list_value_integer(i+1));
+    lower_.push_back(parameters->list_value_integer(i,  "extent",0));
+    upper_.push_back(parameters->list_value_integer(i+1,"extent",1));
   }
 
   // --------------------------------------------------
@@ -87,21 +69,24 @@ void Simulation::initialize (Parameters * parameters)
   // Initialize parallel object
   // --------------------------------------------------
 
-  parallel_ = new Parallel ();
+  parallel_ = Parallel::instance ();
 
+  // --------------------------------------------------
+  // Initiazize methods
+  // --------------------------------------------------
+
+  INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Methods");
+
+  // --------------------------------------------------
+  // Initialize Amr / Arrays
+  // --------------------------------------------------
+
+  INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Amr");
+  
   // --------------------------------------------------
   // Initialize data fields
   // --------------------------------------------------
 
-  fields_(NULL),
+  INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Fields");
 
-  // --------------------------------------------------
-      // 
-  // --------------------------------------------------
-    methods_(NULL)
 }
-
-//====================================================================
-// PRIVATE FUNCTIONS
-//====================================================================
-

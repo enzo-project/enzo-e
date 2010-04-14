@@ -7,6 +7,7 @@
 /// @brief     
 
 #include "parameters.hpp"
+#include "simulation.hpp"
 #include "monitor.hpp"
 #include "schedule.hpp"
  
@@ -15,110 +16,40 @@
 //====================================================================
 
 Schedule::Schedule()
-  : parameters_(NULL),
-    simulation_(NULL)
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Create a Schedule object
- *
- *********************************************************************
- */
+  : simulation_(NULL)
 {
 }
+
+//----------------------------------------------------------------------
 
 Schedule::~Schedule()
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Delete a Schedule object
- *
- *********************************************************************
- */
 {
 }
 
-/// 
-void Schedule::read_parameters(FILE * fp)
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Read parameter file
- *
- *********************************************************************
- */
-{
-  Monitor * monitor = Monitor::instance();
-
-  monitor->print ("Reading parameters");
-
-  if (parameters_ != NULL) {
-    WARNING_MESSAGE("Schedule::read_parameters","Parameters object already exists");
-    delete parameters_;
-    parameters_ = 0;
-  }
-
-  parameters_ = new Parameters;
-
-  parameters_->read(fp);
-}
+//----------------------------------------------------------------------
 
 void Schedule::initialize_simulation()
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Initialize the simulation
- *
- *********************************************************************
- */
 {
-  INCOMPLETE_MESSAGE("Schedule::initialize_simulation","");
+  if (simulation_ != 0) {
+    ERROR_MESSAGE("Schedule::initialize_simulation()",
+		  "Attempting to re-initialize an existing simulation");
+  }
 
+  simulation_ = new Simulation;
+
+  simulation_ -> initialize();
 }
 
+//----------------------------------------------------------------------
+
 void Schedule::execute_simulation()
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Run the simulation
- *
- *********************************************************************
- */
 {
   INCOMPLETE_MESSAGE("Schedule::execute_simulation","");
 }
 
+//----------------------------------------------------------------------
+
 void Schedule::terminate_simulation()
-/**
- *********************************************************************
- *
- * @param         
- * @return        
- *
- * Terminate the simulation
- *
- *********************************************************************
- */
 {
   INCOMPLETE_MESSAGE("Schedule::terminate_simulation","");
 }
-
-//====================================================================
-// PRIVATE FUNCTIONS
-//====================================================================
-

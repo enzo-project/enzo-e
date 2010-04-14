@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['error','parameters', 'monitor', 'parallel']
+components = ['error', 'monitor', 'simulation', 'parallel', 'parameters', ]
 libraries  = ['png']
 includes   = [Glob('schedule*hpp')]
 sources    = [Glob('schedule*cpp')]

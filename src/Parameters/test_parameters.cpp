@@ -29,7 +29,7 @@ int main(int argc, char **argv)
   // test parameter
   //----------------------------------------------------------------------
 
-  Parameters * parameters = new Parameters;
+  Parameters * parameters = Parameters::instance();
 
   // Generate test.in to make sure it exists
 
@@ -228,9 +228,6 @@ int main(int argc, char **argv)
   FILE * fpout = fopen ("test.out","w");
   parameters->write ( fpout );
   unit_assert(0); //FAILS
-
-  delete parameters;
-
 }
 
 void generate_input()

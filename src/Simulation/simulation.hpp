@@ -32,7 +32,7 @@ public: // interface
   ~Simulation();
 
   /// Initialize from parameters
-  void initialize (Parameters * parameters);
+  void initialize ();
 
   /// Return the dimension 1 <= d <= 3, of the simulation
   int dimension() 

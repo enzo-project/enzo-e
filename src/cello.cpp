@@ -75,13 +75,15 @@ int main(int argc, char ** argv)
 
     assert (fp != 0);
 
-    // INITIALIZE SCHEDULE
+    // READ PARAMETERS
 
-    Schedule schedule;
+    Parameters * parameters = Parameters::instance();
 
-    schedule.read_parameters(fp);
+    parameters->read(fp);
 
     // INITIALIZE SIMULATION
+
+    Schedule schedule;
 
     schedule.initialize_simulation();
 

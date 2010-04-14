@@ -28,9 +28,6 @@ public: // interface
   /// Delete a Schedule object
   ~Schedule();
 
-  /// Read parameter file
-  void read_parameters(FILE * fp);
-
   /// Create the simulation
   void create_simulation();
 
@@ -44,9 +41,6 @@ public: // interface
   void terminate_simulation();
 
 private: // attributes
-
-  /// Input parameters
-  Parameters * parameters_;
 
   /// The simulation we're scheduling
   Simulation * simulation_;
