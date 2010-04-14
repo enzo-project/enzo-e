@@ -5,59 +5,32 @@ env.SetOption('warn', 'no-fortran-cxx-mix')
 components = ['error','disk','memory','monitor','parallel','method']
 libraries  = ['hdf5', 'gfortran', 'png']
 defines    = '-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX'
+includes   = ['enzo_ppm.hpp']
+sources  = [Glob('initialize*cpp'),
+            Glob('Cosmology*.cpp'),
+            Glob('Grid_*cpp'),
+            Glob('*.F'),
+           'enzo_ppm.cpp',
+           'cello_hydro.cpp',
+           'c_message.cpp',
+           'data_dump.cpp',
+	   'image_dump.cpp',
+	   'FindField.cpp',
+           'SetExternalBoundary.cpp',
+           'sum_field.cpp']
 
 env = env.Clone (LIBS = [components,libraries], CPPFLAGS = defines)
 
-includes = ['enzo_ppm.hpp']
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 
-sources  = [
-          'enzo_ppm.cpp',
-	  'initialize_hydro.cpp',
-          'initialize_implosion3.cpp',
-          'initialize_image.cpp',
-          'initialize_implosion.cpp',
-       'cello_hydro.cpp',
-       'c_message.cpp',
-	'CosmologyComputeExpansionFactor.cpp',
-	'CosmologyComputeExpansionTimestep.cpp',
-	'CosmologyGetUnits.cpp',
-	'data_dump.cpp',
-	'image_dump.cpp',
-	'FindField.cpp',
-	'Grid_ComputeGammaField.cpp',
-	'Grid_ComputePressureDualEnergyFormalism.cpp',
-	'Grid_ComputePressure.cpp',
-	'Grid_ComputeTemperatureField.cpp',
-	'Grid_ComputeTimeStep.cpp',
-	'Grid_IdentifyPhysicalQuantities.cpp',
-	'Grid_IdentifySpeciesFields.cpp',
-	'Grid_SetExternalBoundaryValues.cpp',
-	'Grid_SetMinimumSupport.cpp',
-	'Grid_SolveHydroEquations.cpp',
-	'SetExternalBoundary.cpp',
-        'calcdiss.F',
-        'calc_dt.F',
-	'f_message.F',
-	'inteuler.F',
-	'intvar.F',
-	'pgas2d_dual.F',
-	'euler.F',
-	'pgas2d.F',
-	'ppm_de.F',
-	'sum_field.cpp',
-	'twoshock.F',
-	'xeuler_sweep.F',
-	'yeuler_sweep.F',
-	'zeuler_sweep.F']
 
 env.Library ('enzo-ppm', [sources])
 
-test_ppm             = env.Program (['test_ppm.cpp',             sources])
-test_enzo_method_ppm = env.Program (['test_enzo_method_ppm.cpp', sources])
+binaries = [env.Program (['test_ppm.cpp',      sources]),
+            env.Program (['test_enzo_ppm.cpp', sources])]
 
-env.Alias('install-bin', env.Install ('$BINPATH', [test_ppm,test_enzo_method_ppm]))
+env.Alias('install-bin', env.Install ('$BINPATH', binaries))
 
 
 

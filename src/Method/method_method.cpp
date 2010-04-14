@@ -30,9 +30,9 @@ Method::~Method() throw ()
 
 void Method::add_argument_
 (
- enum_argument_type argument_type,
- std::string        argument_name,
- enum_access_type   access_type
+ argument_type argument_type,
+ std::string   argument_name,
+ access_type   access_type
  ) throw()
 /// @param         argument_type  Type of argument, field or particles
 /// @param         argument_name  Name of the argument, e.g. "Density"

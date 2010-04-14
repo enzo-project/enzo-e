@@ -1,8 +1,9 @@
 Import('env')
 
 includes  = [Glob('*hpp')]
+sources   = 'Enzo/libuser-enzo.a'
 
-libraries = env.Library ('user', 'Enzo/libuser-enzo.a')
+libraries = env.Library ('user', sources)
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',libraries))

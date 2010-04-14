@@ -1,17 +1,11 @@
 Import('env')
 
-SConscript('ppm/SConscript')
-SConscript('ppml/SConscript')
+includes   = [Glob('*hpp')]
+sources    = ['ppm/libenzo-ppm.a', 'ppml/libenzo-ppml.a']
 
-env.Library ('user-enzo', 
-            ['ppm/libenzo-ppm.a', 
-             'ppml/libenzo-ppml.a'])
+env.Library ('user-enzo', sources)
 
-includes = [Glob('*hpp')]
 env.Alias('install-inc',env.Install ('#/include',includes))
 
-
-
-
-
-
+SConscript('ppm/SConscript')
+SConscript('ppml/SConscript')

@@ -10,16 +10,11 @@ env.SetOption('warn', 'no-fortran-cxx-mix')
 
 sources  = [
 	'cello_hydro.cpp',
-	'CosmologyComputeExpansionFactor.cpp',
-	'CosmologyComputeExpansionTimestep.cpp',
+        Glob('Cosmology*cpp'),
 	'data_dump.cpp',
 	'image_dump.cpp',
-        'Grid_ComputeTimeStep.cpp',
-	'Grid_SetExternalBoundaryValues.cpp',
-	'Grid_SolveMHDEquations.cpp',
-	'initialize_hydro.cpp',
-        'initialize_ppml.cpp',
- 	'initialize_ppml_implosion3.cpp',
+        Glob('Grid_*cpp'),
+        Glob('initialize_*cpp'),
 	'PPML_Conservative.F',
 	'PPML_HLLD.F',
 	'PPML_MAIN.F',
@@ -32,11 +27,10 @@ sources  = [
 	'PPML_TimeStep.F',
 	'SetExternalBoundary.cpp']
 
-lib_user = env.Library ('enzo-ppml', [sources])
+libraries = env.Library ('enzo-ppml', sources)
+binaries  = env.Program (['test_ppml.cpp', sources])
 
-test_ppml   = env.Program (['test_ppml.cpp',   sources])
-
-env.Alias('install-bin', env.Install ('$BINPATH', [test_ppml]))
+env.Alias('install-bin', env.Install ('$BINPATH', binaries))
 
 
 

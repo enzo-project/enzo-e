@@ -17,6 +17,10 @@ void MethodEnzoPpm::initialize(std::string method_name) throw()
 
   // Specify arguments
 
+  add_argument_(argument_type_field, "density", access_type_read_write);
+  add_argument_(argument_type_field, "velocity_x", access_type_read_write);
+  add_argument_(argument_type_field, "velocity_y", access_type_read_write);
+
   // Initialize from parameters
 }
 

@@ -9,17 +9,17 @@
 
 #include "error.hpp"
 
-enum enum_argument_type {
-  enum_argument_type_unknown,
-  enum_argument_type_field,
-  enum_argument_type_particles
+enum argument_type {
+  argument_type_unknown,
+  argument_type_field,
+  argument_type_particles
 };
 
-enum enum_access_type {
-  enum_access_type_unknown,
-  enum_access_type_read,
-  enum_access_type_write,
-  enum_access_type_read_write
+enum access_type {
+  access_type_unknown,
+  access_type_read,
+  access_type_write,
+  access_type_read_write
 };
 
 
@@ -58,23 +58,23 @@ protected: // functions
 
   /// Specify a Field or Particle type and its access type
 
-  void add_argument_(enum_argument_type argument_type,
-		     std::string        argument_name,
-		     enum_access_type   access_type) throw();
+  void add_argument_(argument_type argument_type,
+		     std::string   argument_name,
+		     access_type   access_type) throw();
 
 protected: // attributes
 
-  /// List of argument types, e.g. enum_argument_type_field
+  /// List of argument types, e.g. argument_type_field
 
-  std::vector<enum_argument_type> argument_types_;
+  std::vector<argument_type> argument_types_;
 
   /// List of argument names, e.g. "Density", "Velocity-X", etc.
 
-  std::vector<std::string>        argument_names_;
+  std::vector<std::string>   argument_names_;
 
-  /// List of argument access types, e.g. enum_access_type_read_write
+  /// List of argument access types, e.g. access_type_read_write
 
-  std::vector<enum_access_type>   access_types_;
+  std::vector<access_type>   access_types_;
 
 };
 
