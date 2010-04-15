@@ -1,5 +1,9 @@
 Import('env')
 
+components = ['field']
+
+env = env.Clone(LIBS=[components])
+
 includes = [Glob('data*hpp')]
 
 env.Alias('install-inc',env.Install ('#/include',includes))

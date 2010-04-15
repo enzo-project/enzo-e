@@ -1,8 +1,12 @@
 Import('env')
 
-includes = [Glob('*hpp')]
+includes = [Glob('field*hpp')]
+sources  = [Glob('field*cpp')]
+
 env.Alias('install-inc',env.Install ('#/include',includes))
 
+libraries = env.Library ('field', [sources])
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 
 

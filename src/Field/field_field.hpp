@@ -20,9 +20,12 @@ enum action_field {
 };
 
 enum precision_type {
-  precision_32bit,  //  32-bit field data
-  precision_64bit,  //  64-bit field data
+  precision_unknown,  //  32-bit field data
+  precision_32bit,    //  32-bit field data
+  precision_64bit,    //  64-bit field data
 };
+
+#include <string>
 
 class Field {
 
@@ -33,10 +36,10 @@ class Field {
 public: // public
 
   /// Initialize a Field object
-  Field() { };
+  Field();
 
   /// Delete a Field object
-  ~Field() { };
+  ~Field();
 
 private: // attributes
 
@@ -56,9 +59,9 @@ private: // attributes
   /// Identify where in the Block is the Field data
   int block_offset_ ;
 
-  /// Cell position, defined as (0,0,0) <= (px,py,pz) <= (1,1,1)
+  /// Cell centering, defined as (0,0,0) <= (px,py,pz) <= (1,1,1)
   /// Cell centered = (.5,.5,.5)
-  float position_[3];
+  float * centering_;
 
   /// Minimum allowed value for the Field (double for range not precision)
   double min_;
