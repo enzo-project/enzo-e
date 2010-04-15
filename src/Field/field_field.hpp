@@ -9,6 +9,21 @@
 /// @date     2009-11-17
 /// @brief    Declaration for the Field class
 
+enum action_field {
+  action_field_unknown,  // Uninitialized action
+  action_field_none,     // Do nothing if range exceeded
+  action_field_set,      // Set field values to min / max if range exceeded
+  action_field_warning,  // Issue warning if range exceeded
+  action_field_error,    // Issue error if range exceeded
+  action_field_timestep, // Retry with reduced timestep if range exceeded
+  action_field_method    // Retry with alternate method if range exceeded
+};
+
+enum precision_type {
+  precision_32bit,  //  32-bit field data
+  precision_64bit,  //  64-bit field data
+};
+
 class Field {
 
   /// @class    Field
@@ -22,6 +37,43 @@ public: // public
 
   /// Delete a Field object
   ~Field() { };
+
+private: // attributes
+
+  /// String defining the field's name
+  std::string name_;
+
+  /// Integer handle identifying the Field (somewhat redundant with
+  /// block_* attributes)
+  int id_;
+
+  /// Dimension of the Field
+  int dim_;
+
+  /// Identify which Block contains the Field data
+  int block_number_;
+
+  /// Identify where in the Block is the Field data
+  int block_offset_ ;
+
+  /// Cell position, defined as (0,0,0) <= (px,py,pz) <= (1,1,1)
+  /// Cell centered = (.5,.5,.5)
+  float position_[3];
+
+  /// Minimum allowed value for the Field (double for range not precision)
+  double min_;
+
+  /// Maximum allowed value for the Field (double for range not precision)
+  double max_;
+
+  /// Action to perform if Field values go below min_
+  action_field min_action_ ;
+
+  /// Action to perform if Field values go above max_
+  action_field max_action_ ;
+
+  /// Precision of the Field data
+  precision_type precision_;
 
 };
 
