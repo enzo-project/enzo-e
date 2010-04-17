@@ -59,7 +59,10 @@ public: // interface
   /// Print a message to stdout
   void print (std::string message, FILE * fp = stdout)
   {
-    if (active_) fprintf (fp,"%6.1f %s\n",timer_.value(),message.c_str());
+    Parallel * parallel = Parallel::instance();
+    if (active_) fprintf (fp,"%s %6.1f %s\n",
+			  parallel->name().c_str(),
+			  timer_.value(),message.c_str());
   };
 
   /// Generate a PNG image of an array

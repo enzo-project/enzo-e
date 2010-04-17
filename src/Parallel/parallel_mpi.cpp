@@ -6,8 +6,9 @@
 /// @date      Thu Oct 15 10:41:28 PDT 2009
 /// @brief     MPI helper functions
 
-#include <mpi.h>
+#include <sstream>
 
+#include <mpi.h>
 #include "cello.h"
 
 #include <mpi.h>
@@ -20,11 +21,19 @@ void ParallelMpi::initialize(int * argc, char ***argv)
   MPI_Init(argc,argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_);
   MPI_Comm_size(MPI_COMM_WORLD, &size_);
+
+  // Get name_ by converting rank_ to a string using std::stringstream
+
+  std::stringstream out;
+  out << rank_;
+  name_ = out.str();
+
   set_initialized_(true);
 };
 
 void ParallelMpi::finalize()
 {
   MPI_Finalize();
+
   set_initialized_(false);
 }

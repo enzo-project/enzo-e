@@ -34,6 +34,11 @@ public: // interface
   virtual int rank()
   { return 0; }
 
+  /// Get rank
+  virtual std::string name()
+  { return "0"; }
+
+  /// Return whether this is the root process
   virtual bool is_root()
   { return true; }
 

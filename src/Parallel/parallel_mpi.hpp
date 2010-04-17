@@ -28,7 +28,7 @@ class ParallelMpi : public Parallel {
 
 public: // interface
 
-  /// Initialize MPI
+  /// Initialize MPI (virtual)
   void initialize(int * argc, char ***argv);
 
   /// Finalize MPI
@@ -41,6 +41,12 @@ public: // interface
   /// Get MPI rank
   int rank() 
   { return rank_; }
+
+  /// Get rank
+  virtual std::string name()
+  { return name_; }
+
+public: // interface
 
   /// Initiate sending an array
   void send_begin(char *         array, 
@@ -99,6 +105,7 @@ protected: // functions
     : Parallel(),
       size_(1),
       rank_(0),
+      name_("0"),
       send_blocking_(true),
       recv_blocking_(true),
       send_type_(send_type_standard)
@@ -120,6 +127,9 @@ private: // attributes
 
   /// MPI global rank
   int rank_;
+
+  /// MPI global name
+  std::string name_;
 
   /// Whether to use blocking sends
   bool send_blocking_;

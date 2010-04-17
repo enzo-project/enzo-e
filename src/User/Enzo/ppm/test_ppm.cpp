@@ -25,10 +25,13 @@ void print_usage(const char * name)
 int main(int argc, char ** argv)
 {
 
+  // Initialize parallelism
+
   Parallel * parallel = Parallel::instance();
 
   parallel->initialize(&argc,&argv);
 
+  // Check command line arguments
 
   enum type_problem problem_type = problem_unknown;
 
@@ -38,7 +41,7 @@ int main(int argc, char ** argv)
 
   int argi = 0;
 
-  // Problem type
+  // Parse command line arguments
 
   if (argc > ++argi) {
     for (int i=0; i<num_problems; i++) {
@@ -59,7 +62,11 @@ int main(int argc, char ** argv)
   printf ("problem = %s  size = %d  cycles = %d  dump_frequency = %d\n",
 	  problem_name[problem_type], size, cycles, dump_frequency);
 
+  // Initialize for generic hydrodynamics
+
   initialize_hydro ();
+
+  // Initialize for specific problem type
 
   switch (problem_type) {
   case problem_image:

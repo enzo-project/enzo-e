@@ -1,6 +1,6 @@
 Import('env')
 
-includes = [Glob('*hpp')]
+includes   = [Glob('*hpp')]
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 
