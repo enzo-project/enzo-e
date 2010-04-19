@@ -1,39 +1,39 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     template.cpp
+/// @file     filename.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file template.cpp
+/// @brief    Brief description of file filename.cpp
 ///
-/// Detailed description of file template.cpp
+/// Detailed description of file filename.cpp
 
-Foo::Foo()
+Classname::Classname()
 
 /// @param         Parameter
 /// @return        Return value
 ///
-/// Detailed description of function Foo::Foo() in template.cpp
+/// Detailed description of function Classname::Classname() in filename.cpp
 
 {
 }
 
-Foo::~Foo()
+Classname::~Classname()
 
 /// @param         Parameter
 /// @return        Return value
 /// 
-/// Detailed description of function Foo::~Foo() in template.cpp
+/// Detailed description of function Classname::~Classname() in filename.cpp
 
 {
 }
 
-Foo::private_function_()
+Classname::private_function_()
 
 /// @param         Parameter
 /// @return        Return value
 /// 
-/// Detailed description of function Foo::private_function_() in template.cpp
+/// Detailed description of function Classname::private_function_() in filename.cpp
 
 {
 }
