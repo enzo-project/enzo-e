@@ -43,7 +43,7 @@ public: // interface
   void optimize();
 
   /// Create an image of levels
-  float * create_image (int n, int line_width);
+ float * create_image (int n, int line_width);
 
   /// Return the number of levels
   int levels() { return levels_; }

@@ -18,22 +18,27 @@
 /// @def      WARNING_MESSAGE
 /// @brief    Handle a (non-lethal) warning message
 #define WARNING_MESSAGE(FUNCTION,MESSAGE) \
-  Error::instance()->warning(__FILE__,__LINE__,FUNCTION,MESSAGE)
+  Error::instance()->warning_(__FILE__,__LINE__,FUNCTION,MESSAGE)
 
 /// @def      ERROR_MESSAGE
 /// @brief    Handle a (lethal) error message
 #define ERROR_MESSAGE(FUNCTION,MESSAGE) \
-  Error::instance()->error(__FILE__,__LINE__,FUNCTION,MESSAGE)
+  Error::instance()->error_(__FILE__,__LINE__,FUNCTION,MESSAGE)
 
 /// @def      INCOMPLETE_MESSAGE
 /// @brief    Placeholder for code that is incomplete
 #define INCOMPLETE_MESSAGE(FUNCTION,MESSAGE) \
-  Error::instance()->incomplete(__FILE__,__LINE__,FUNCTION,MESSAGE)
+  Error::instance()->incomplete_(__FILE__,__LINE__,FUNCTION,MESSAGE)
 
 /// @def      TRACE
 /// @brief    Trace file name and location to stdout
 #define TRACE					\
-  Error::instance()->trace(__FILE__,__LINE__)
+  Error::instance()->trace_(__FILE__,__LINE__)
+
+/// @def      ASSERT
+/// @brief    Equivalent to assert(), but with parallel support
+#define ASSERT(FUNCTION,MESSAGE,ASSERTION) \
+  Error::instance()->assert_(__FILE__,__LINE__,FUNCTION,MESSAGE,ASSERTION)
 
 //----------------------------------------------------------------------
 
@@ -49,56 +54,75 @@ public: // functions
   static Error * instance() throw ()
   { return & instance_; };
 
-  /// Warning message
+  /// Set whether to trace on this processor
+  void set_tracing (bool tracing) 
+  { tracing_ = tracing; };
 
-  void warning (const char * file,
-		int          line,
-		const char * function,
-		const char * message)
+public: // functions
+
+  //----------------------------------------------------------------------
+  /// Warning message
+  void warning_ (const char * file,
+		 int          line,
+		 const char * function,
+		 const char * message)
   {
     message_(stdout,"WARNING",file,line,function,message);
   };
 
+  //----------------------------------------------------------------------
   /// Incomplete message
-
-  void incomplete (const char * file,
-		   int          line,
-		   const char * function,
-		   const char * message)
+  void incomplete_ (const char * file,
+		    int          line,
+		    const char * function,
+		    const char * message)
   {
     message_(stdout,"INCOMPLETE",file,line,function,message);
   };
 
+  //----------------------------------------------------------------------
   /// Error message
-
-  void error (const char * file,
-	      int          line,
-	      const char * function,
-	      const char * message)
+  void error_ (const char * file,
+	       int          line,
+	       const char * function,
+	       const char * message)
   {
     message_(stderr,"ERROR",file,line,function,message);
     exit(1);
   };
 
-  void trace (const char * file,
-	      int          line)
+  //----------------------------------------------------------------------
+  void trace_ (const char * file,
+	       int          line)
   {
-    if (trace_) {
+    if (tracing_) {
       printf ("TRACE %s:%d\n",__FILE__,__LINE__); 
       fflush(stdout);
     }
   };
 
-  void tracing (bool trace) 
-  { trace_ = trace; };
+  //----------------------------------------------------------------------
+  void assert_ (const char * file,
+		int          line,
+		const char * function,
+		const char * message,
+		bool         assertion)
+  {
+    if (!assertion) {
+      message_(stderr,"ASSERT",file,line,function,message);
+      exit(1);
+    }
+  };
 
 private: // functions
 
+  //----------------------------------------------------------------------
   /// Initialize the Error object (singleton design pattern)
   Error() 
-    : trace_(true)
+    : tracing_(true)
   {};
 
+  //----------------------------------------------------------------------
   /// Delete the Error object (singleton design pattern)
   ~Error()
   {};
@@ -127,7 +151,7 @@ private: // attributes
   static Error instance_;
 
   /// Whether tracing is on or off
-  bool trace_;
+  bool tracing_;
 
 };
 
