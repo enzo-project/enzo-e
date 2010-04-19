@@ -1,5 +1,10 @@
 Import('env')
 
+components = ['error','parallel']
+
+env = env.Clone(LIBS=components)
+
+
 includes = [Glob('array*hpp')]
 
 env.Alias('install-inc',env.Install ('#/include',includes))
@@ -10,9 +15,12 @@ libraries = env.Library ('array', [sources])
 
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 
+
 test_array   = env.Program (['test_array.cpp',   sources])
 test_block   = env.Program (['test_block.cpp',   sources])
-env.Alias('install-bin', env.Install ('$BINPATH', [test_array,test_block]))
+test_layout   = env.Program (['test_layout.cpp',   sources])
+tests = [test_array,test_block,test_layout]
+env.Alias('install-bin', env.Install ('$BINPATH', tests))
 
 
 

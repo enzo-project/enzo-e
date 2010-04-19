@@ -11,5 +11,6 @@
 
 #include "array_array.hpp"
 #include "array_block.hpp"
+#include "array_layout.hpp"
 
 #endif /* ARRAY_HPP */
