@@ -7,10 +7,14 @@ sources    = [Glob('parallel*cpp')]
 env = env.Clone(LIBS=[libraries])
 
 libraries = env.Library ('parallel', [sources])
-binaries  = env.Program (['test_parallel_mpi.cpp', sources])
+
+test_mpi      = env.Program (['test_mpi.cpp', sources])
+test_affinity = env.Program (['test_affinity.cpp', sources])
+
+tests = [test_mpi, test_affinity];
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-env.Alias('install-bin',env.Install ('$BINPATH', [binaries]))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('$BINPATH', tests))
 
 

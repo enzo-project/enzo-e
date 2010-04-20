@@ -11,6 +11,7 @@
 
 #include "parallel_parallel.hpp"
 #include "parallel_mpi.hpp"
+#include "parallel_affinity.hpp"
 
 #endif /* PARALLEL_HPP */
 

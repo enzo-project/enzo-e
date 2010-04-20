@@ -8,8 +8,8 @@
 
 #include <stdio.h>
 
+#include "cello.h"
 #include "error.hpp"
-
 #include "disk_ifrit.hpp"
  
 //----------------------------------------------------------------------
@@ -23,8 +23,8 @@ void Ifrit::read_bin
 ///
 {
   FILE * fp = fopen (name.c_str(), "r");
-  assert (sizeof(int)==4);
-  assert (sizeof(float)==4);
+  ASSERT ("Ifrit::read_bin","int or float size in unexpected",
+	  sizeof(int)==4 && sizeof(float)==4);
   fread (nx,4,1,fp);
   fread (ny,4,1,fp);
   fread (nz,4,1,fp);
@@ -42,8 +42,8 @@ void Ifrit::write_bin
 ///
 {
   FILE * fp = fopen (name.c_str(), "w");
-  assert (sizeof(int)==4);
-  assert (sizeof(float)==4);
+  ASSERT ("Ifrit::read_bin","int or float size in unexpected",
+	  sizeof(int)==4 && sizeof(float)==4);
   fwrite (&nx,4,1,fp);
   fwrite (&ny,4,1,fp);
   fwrite (&nz,4,1,fp);

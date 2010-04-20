@@ -13,27 +13,29 @@ class Affinity {
 
   /// @class    Affinity
   /// @ingroup  Parallel
-  /// @brief    Generalization of MPI rank for MPI + OMP + UPC
+  /// @brief    Generalization of MPI rank for hierarchical parallelism
 
 public: // interface
 
   /// Initialize the Affinity object
-  Affinity();
+  Affinity(int process_rank = 0,
+	   int thread_rank  = 0) throw()
+    : process_rank_ (process_rank),
+      thread_rank_ (thread_rank)
+  {}
 
-  /// Delete the Affinity object
-  ~Affinity();
+  /// Equality operator
 
-private: // functions
-
+  bool operator == (const Affinity & affinity) throw()
+  {
+    return (process_rank_ == affinity.process_rank_ &&
+	    thread_rank_  == affinity.thread_rank_);
+  }
 
 private: // attributes
 
-  int mpi_size_;
-  int mpi_rank_;
-  int omp_size_;
-  int omp_rank_;
-  int upc_size_;
-  int upc_rank_;
+  int process_rank_;
+  int thread_rank_;
 
 };
 

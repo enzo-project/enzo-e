@@ -8,32 +8,34 @@
 ///
 /// Detailed description of file filename.cpp
 
-Classname::Classname()
-
-/// @param         Parameter
-/// @return        Return value
-///
-/// Detailed description of function Classname::Classname() in filename.cpp
-
+Classname::Classname() throw ()
 {
 }
 
-Classname::~Classname()
+//----------------------------------------------------------------------
 
-/// @param         Parameter
-/// @return        Return value
-/// 
-/// Detailed description of function Classname::~Classname() in filename.cpp
-
+Classname::~Classname() throw ()
 {
 }
+
+//----------------------------------------------------------------------
+
+Classname::Classname(const Classname & classname) throw ()
+/// @param     classname  Object being copied
+{
+}
+
+//----------------------------------------------------------------------
+
+Classname & Classname::operator= (const Classname & classname) throw ()
+/// @param     classname  Source object of the assignment
+/// @return    The target assigned object
+{
+  return *this;
+}
+
+//======================================================================
 
 Classname::private_function_()
-
-/// @param         Parameter
-/// @return        Return value
-/// 
-/// Detailed description of function Classname::private_function_() in filename.cpp
-
 {
 }

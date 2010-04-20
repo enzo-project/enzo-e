@@ -9,7 +9,6 @@
 /// @date     2008-03-18
 /// @brief    Include file for the Error component
 
-#include <assert.h>
 #include "cello.h"
 #include "error_exception.hpp"
 #include "error_error.hpp"

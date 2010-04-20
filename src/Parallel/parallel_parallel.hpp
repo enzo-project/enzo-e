@@ -9,12 +9,15 @@
 /// @date     2009-10-16
 /// @brief    Interface for the Parallel class
 
+#include <string>
+
 class Parallel {
 
   /// @class    Parallel
   /// @ingroup  Parallel
   /// @todo     Split into ParallelProcesses and ParallelThreads or similar
-  /// @brief    Class for encapsulating different, possibly multiple, parallel technologies
+  /// @brief    Class for encapsulating different, possibly multiple,
+  /// parallel technologies
 
 public: // interface
 

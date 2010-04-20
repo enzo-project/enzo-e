@@ -25,7 +25,7 @@ namespace unit {
   /// @brief     Current class name, function name, and test results
        
   char class_name[UNIT_MAX_NAME_LEN] = {0};
-  char func_name[UNIT_MAX_NAME_LEN] = {0};
+  char func_name [UNIT_MAX_NAME_LEN] = {0};
 
   int test_num = 1;
 
@@ -34,6 +34,18 @@ namespace unit {
   //const char * pass_string = " [ Pass ]";
   //const char * fail_string = " [ FAIL ]";
 
+  int process_rank  = 0;
+  int process_count = 1;
+
+}
+
+/// @brief Initialize unit testing.  Used to set is_root for parallel runs
+void unit_init (int process_rank = 0, int process_count = 1)
+{
+  unit::process_rank  = process_rank;
+  unit::process_count = process_count;
+  unit::class_name[0] = 0;
+  unit::func_name[0]  = 0;
 }
 
 /// @brief Set the current unit testing class name
@@ -47,15 +59,24 @@ void unit_func (const char * f)
 {
   strncpy (unit::func_name,f,UNIT_MAX_NAME_LEN);
 }
+
 /// @brief Assert result of test; macro used for FILE and LINE expansion
 #define unit_assert(RESULT) unit_assert_(RESULT, __FILE__,__LINE__);
 
 /// @brief Assert result of test macro; called by unit_assert macro
 void unit_assert_ (bool result, const char * file, int line)
 {
-  printf ("%s %s:%d  %s::%s() %d\n",
+  
+  printf ("%s %d/%d %s:%d %s::%s() %d\n",
 	  (result)? unit::pass_string : unit::fail_string,
-	  file,line,unit::class_name,unit::func_name,unit::test_num);
+	  unit::process_rank, 
+	  unit::process_count,
+	  file, 
+	  line, 
+	  unit::class_name,
+	  unit::func_name,
+	  unit::test_num);
+  fflush(stdout);
   unit::test_num++;
 }
 

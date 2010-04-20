@@ -73,7 +73,7 @@ int main(int argc, char ** argv)
       usage(argc,argv);
     }
 
-    assert (fp != 0);
+    ASSERT ("cello", "File pointer NULL", fp != 0);
 
     // READ PARAMETERS
 

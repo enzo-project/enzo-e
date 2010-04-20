@@ -3,23 +3,28 @@
 
 unit       = Builder(action = "$SOURCE > $TARGET")
 unit_parse = Builder(action = "bin/test_parse < $SOURCE > $TARGET")
-test_cello = Builder(action = "mpirun -np 4 bin/cello $SOURCE > $TARGET")
+unit_mpi   = Builder(action = "mpirun -np 8 $SOURCE > $TARGET")
+test_cello = Builder(action = "mpirun -np 8 bin/cello $SOURCE > $TARGET")
 
 env = Environment(BUILDERS = {
-	'Unit': unit, 
+	'Unit':       unit, 
+	'UnitMpi' :   unit_mpi,
 	'UnitParse' : unit_parse,
 	'TestCello' : test_cello})
 
 env.Unit('test_array.out',       '#/bin/test_array')
 env.Unit('test_block.out',       '#/bin/test_block')
 env.Unit('test_data.out',        '#/bin/test_data')
-env.Unit('test_disk_hdf5.out',   '#/bin/test_disk_hdf5')
+env.Unit('test_hdf5.out',        '#/bin/test_hdf5')
 env.Unit('test_error.out',       '#/bin/test_error')
 env.Unit('test_memory.out',      '#/bin/test_memory')
 env.Unit('test_monitor.out',     '#/bin/test_monitor')
 env.Unit('test_parameters.out',  '#/bin/test_parameters')
 env.Unit('test_schedule.out',    '#/bin/test_schedule')
 env.Unit('test_performance.out', '#/bin/test_performance')
+
+env.UnitMpi('test_layout.out',   '#/bin/test_layout')
+env.UnitMpi('test_affinity.out', '#/bin/test_affinity')
 
 env.UnitParse('parse_groups.out',     'parse_groups.in')
 env.UnitParse('parse_integer.out',    'parse_integer.in')
@@ -31,6 +36,7 @@ env.UnitParse('parse_implosion.out',  'parse_implosion.in')
 env.UnitParse('parse_shock-pool.out', 'parse_shock-pool.in')
 
 env.TestCello('cello_implosion.out',  'parse_implosion.in')
+
 
 
 # env.Unit('Array.unit','test_enzo_method_ppm')

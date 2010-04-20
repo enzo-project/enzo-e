@@ -17,16 +17,22 @@ class Classname {
 
 public: // interface
 
-  /// Initialize the Classname object
-  Classname();
+  /// Constructor
+  Classname() throw();
 
-  /// Delete the Classname object
-  ~Classname();
+  /// Destructor
+  ~Classname() throw();
+
+  /// Copy constructor
+  Classname(const Classname & classname) throw();
+
+  /// Assignment operator
+  Classname & operator= (const Classname & classname) throw();
 
 private: // functions
 
   /// Brief description of Classname::private_function_() in filename.hpp
-  private_function_();
+  private_function_() throw();
 
 private: // attributes
 

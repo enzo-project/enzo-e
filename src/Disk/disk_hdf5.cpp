@@ -140,7 +140,7 @@ void Hdf5::dataset_open_write (std::string name,
     
     if (nz == 1) { d--;  if (ny == 1) { d--; }}
 
-    assert (1 <= d && d <= 3);
+    ASSERT ("dataset_open_write","d is out of range",1 <= d && d <= 3);
 
     hsize_t n[3];
 

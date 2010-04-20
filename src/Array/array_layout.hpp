@@ -30,10 +30,12 @@ public: // interface
   // Array level 
   //----------------------------------------------------------------------
 
-  /// (*) Set the size of arrays (dimension used only for checking array bounds)
+  /// (*) Set the size of arrays (dimension used only for checking
+  /// array bounds)
   void set_array ( int dimension, int array_size[] );
 
-  /// (*) Return the size of arrays (dimension used only for checking array bounds)
+  /// (*) Return the size of arrays (dimension used only for checking
+  /// array bounds)
   void array_size ( int dimension, int array_size[] );
 
   //----------------------------------------------------------------------
@@ -69,11 +71,11 @@ public: // interface
   /// (*) Set virtual process partitioning of the array
   void set_process_blocks (int dimension, int process_block_count[]);
 
-  /// (*) Return the number of process blocks
+  /// (*) Return the number of local process blocks
   int process_block_count ( ) const;
 
-  /// ( ) Return the index of the process block for the given block index
-  int process_block_indices
+  /// ( ) Return the index of the local process block for the given block index
+  void process_block_indices
   (
    int index_process_block, 
    int dimension, 
@@ -98,12 +100,13 @@ public: // interface
    int thread_block_indices[]
    );
 
-private: // functions
-
 private: // attributes
 
   ///  dimensionality of the `Array`  
   int dimension_;
+
+  ///  rank of this process
+  int process_rank_;
 
   ///  first physical process 
   int process_first_;
@@ -120,13 +123,17 @@ private: // attributes
   ///  Size of the entire array
   int * array_size_;
 
+  /// Product of process_blocks_ elements
+  int process_block_count_;
+
   /// Process partitioning of array
-  int * process_block_count_;
+  int * process_blocks_;
+
+  /// Product of thread_blocks_ elements
+  int thread_block_count_;
 
   /// Thread partitioning of process blocks
-  int * thread_block_count_;
+  int * thread_blocks_;
 
 };
-
 #endif /* ARRAY_LAYOUT_HPP */
-
