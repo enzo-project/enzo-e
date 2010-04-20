@@ -36,11 +36,11 @@ void Simulation::initialize ()
   parameters->set_group("Domain");
   
   int extent_length = parameters->list_length("extent");
-  if (extent_length % 2 != 0) {
+  if (extent_length==2 || extent_length==4 || extent_length==6) {
     ERROR_MESSAGE ("Simulation::initialize",
-		   "List parameter 'Domain extent' should have an even length");
+		   "List parameter 'Domain extent' must have length 2, 4, or 6");
   }
-  assert (extent_length % 2 == 0);
+
   for (int i=0; i<extent_length/2; i++) {
     lower_.push_back(parameters->list_value_integer(i,  "extent",0));
     upper_.push_back(parameters->list_value_integer(i+1,"extent",1));

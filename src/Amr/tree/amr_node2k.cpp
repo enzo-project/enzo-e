@@ -10,7 +10,6 @@
 /// @brief    Declaration of the Node16 class 
 
 #include <stdio.h>
-#include <assert.h>
 
 #include "cello.h"
 

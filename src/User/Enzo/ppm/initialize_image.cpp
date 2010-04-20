@@ -12,7 +12,6 @@
 ///    compiling.
 
 #include "cello_hydro.h"
-#include "assert.h"
 #include "image.h"
 
 inline float color_value 
@@ -27,8 +26,7 @@ inline float color_value
   size_t iy = height*(y - lower[1]) / (upper[1] - lower[1]);
   if (ix == width) ix--;
   if (iy == height) iy--;
-  assert (ix < width);
-  assert (iy < height);
+  ASSERT ("color_value","ix or iy out of range",ix < width && iy < height);
   return (image[ix + width*iy]);
 } 
 
@@ -121,7 +119,9 @@ void initialize_image (int cycles_param)
 
   NumberOfBaryonFields = k;
 
-  assert (NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
+  ASSERT ("initialize_implosion",
+	  "MAX_NUMBER_OF_BARYON_FIELDS is too small",
+	  NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
 
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
 

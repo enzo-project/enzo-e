@@ -37,7 +37,9 @@ public: // interface
   /// Return the dimension 1 <= d <= 3, of the simulation
   int dimension() 
   {
-    assert (lower_.size() == upper_.size()); 
+    ASSERT ("Simulation::dimension",
+	    "lower_ and upper_ vectors are different sizes",
+	    lower_.size() == upper_.size()); 
     return lower_.size(); 
   };
 

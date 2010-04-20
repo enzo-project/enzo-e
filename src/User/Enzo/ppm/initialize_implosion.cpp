@@ -90,7 +90,9 @@ void initialize_implosion (int size_param, int cycles_param)
 
   NumberOfBaryonFields = k;
 
-  assert (NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
+  ASSERT ("initialize_implosion",
+	  "MAX_NUMBER_OF_BARYON_FIELDS is too small",
+	  NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
   
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
 

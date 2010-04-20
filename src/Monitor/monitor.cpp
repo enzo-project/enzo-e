@@ -6,7 +6,6 @@
 /// @date      Thu Feb 21 12:45:56 PST 2009
 /// @brief     Routines for simple output of text, plots, and graphs
 
-#include <assert.h>
 #include "cello.h"
 #include "pngwriter.h"
 #include "parallel.hpp"
@@ -144,7 +143,7 @@ void Monitor::image
       // should be in bounds, but force if not due to rounding error
       if (v < lo) v = lo;
       if (v > hi) v = hi;
-      assert (lo <= v && v <= hi);
+      ASSERT ("Montor::image","v is out of range",lo <= v && v <= hi);
 
       double ratio = (v - lo) / (hi-lo);
       double r = (1-ratio)*map[3*index+0] + ratio*map[3*(index+1)+0];

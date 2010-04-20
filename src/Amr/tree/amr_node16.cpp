@@ -7,7 +7,6 @@
 /// @brief    Node class for 4^2-trees Tree16
 
 #include <stdio.h>
-#include <assert.h>
 
 #include "cello.h"
 

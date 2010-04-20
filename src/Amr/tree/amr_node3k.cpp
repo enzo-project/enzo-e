@@ -7,7 +7,6 @@
 /// @brief    Implementation for Node3K node class
 
 #include <stdio.h>
-#include <assert.h>
 
 #include "cello.h"
 
