@@ -19,8 +19,9 @@ enum action_field {
   action_field_method    // Retry with alternate method if range exceeded
 };
 
+
 enum precision_type {
-  precision_unknown,  //  32-bit field data
+  precision_unknown,  //  unknown precision
   precision_32bit,    //  32-bit field data
   precision_64bit,    //  64-bit field data
 };
@@ -63,10 +64,10 @@ private: // attributes
   /// Cell centered = (.5,.5,.5)
   float * centering_;
 
-  /// Minimum allowed value for the Field (double for range not precision)
+  /// Minimum allowed value for the Field
   double min_;
 
-  /// Maximum allowed value for the Field (double for range not precision)
+  /// Maximum allowed value for the Field
   double max_;
 
   /// Action to perform if Field values go below min_

@@ -35,11 +35,11 @@ public: // interface
   void finalize();
 
   /// Get MPI size
-  int size() 
+  int process_count() 
   { return size_; }
 
   /// Get MPI rank
-  int rank() 
+  int process_rank() 
   { return rank_; }
 
   /// Get rank

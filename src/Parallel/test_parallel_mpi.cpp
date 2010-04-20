@@ -31,12 +31,12 @@ int main(int argc, char ** argv)
   mpi->initialize(&argc,&argv);
   unit_assert(true);
 
-  unit_func("size");
-  printf ("size = %d\n",mpi->size());
+  unit_func("process_count");
+  printf ("process_count = %d\n",mpi->process_count());
   unit_assert(true);
 
-  unit_func("rank");
-  printf ("rank = %d\n",mpi->rank());
+  unit_func("process_rank");
+  printf ("process_rank = %d\n",mpi->process_rank());
   unit_assert(true);
 
   unit_func("set_send_blocking");

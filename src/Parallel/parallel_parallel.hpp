@@ -13,8 +13,8 @@ class Parallel {
 
   /// @class    Parallel
   /// @ingroup  Parallel
-  /// @todo     Use singleton design pattern with variations: Mpi, Omp, etc.
-  /// @brief    Class for encapsulating different parallel technologies
+  /// @todo     Split into ParallelProcesses and ParallelThreads or similar
+  /// @brief    Class for encapsulating different, possibly multiple, parallel technologies
 
 public: // interface
 
@@ -26,12 +26,20 @@ public: // interface
   virtual void finalize()
   { initialized_ = false; }
 
-  /// Get size
-  virtual int size()
+  /// Get total number of processors
+  virtual int process_count()
   { return 1; }
 
-  /// Get rank
-  virtual int rank()
+  /// Get rank of this process
+  virtual int process_rank()
+  { return 0; }
+
+  /// Get total number of threads in this node
+  virtual int thread_count()
+  { return 1; }
+
+  /// Get rank of this thread
+  virtual int thread_rank()
   { return 0; }
 
   /// Get rank

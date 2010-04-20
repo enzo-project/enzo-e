@@ -13,11 +13,6 @@
 
 //----------------------------------------------------------------------
 
-/// Create a new uninitialized Array object
-
-/**
- */
-
 Array::Array() throw()
   : nx_(0),
     ny_(0),
@@ -30,11 +25,6 @@ Array::Array() throw()
 
 //----------------------------------------------------------------------
 
-/// Create an initialized array
-
-/**
- */
-
 Array::Array(Scalar * a,int nx,int ny,int nz) throw()
 {
   nx_ = nx;
@@ -46,11 +36,6 @@ Array::Array(Scalar * a,int nx,int ny,int nz) throw()
 
 //----------------------------------------------------------------------
 
-/// Deallocate the array
-
-/**
- */
-
 Array::~Array() throw()
 {
   if (is_allocated_) {
@@ -61,11 +46,6 @@ Array::~Array() throw()
 
 //----------------------------------------------------------------------
 
-/// Copy an array into this one, deallocating any existing data
-
-/**
- */
- 
 Array::Array (const Array &array) throw()
 {
   reallocate_(array.nx_,array.ny_,array.nz_);
@@ -74,11 +54,6 @@ Array::Array (const Array &array) throw()
 
 //----------------------------------------------------------------------
 
-/// Assign an array to this one, deallocating any existing data
-
-/**
- */
- 
 Array & Array::operator = (const Array &array) throw()
 {
   reallocate_(array.nx_,array.ny_,array.nz_);
@@ -87,11 +62,6 @@ Array & Array::operator = (const Array &array) throw()
 }
 
 //----------------------------------------------------------------------
-
-/// Resize the array, deallocating any existing data
-
-/**
- */
 
 void Array::resize (int nx, int ny, int nz) throw()
 {
@@ -105,11 +75,6 @@ void Array::resize (int nx, int ny, int nz) throw()
 
 //----------------------------------------------------------------------
 
-/// Return the size of the array
-
-/**
- */
-
 void Array::size (int * nx, int * ny, int * nz) const throw()
 {
   if (nx) *nx = nx_;
@@ -119,11 +84,6 @@ void Array::size (int * nx, int * ny, int * nz) const throw()
 
 
 //----------------------------------------------------------------------
-
-/// Return the total length of the array
-
-/**
- */
 
 int Array::length () const throw()
 {
@@ -135,21 +95,11 @@ int Array::length () const throw()
 
 Scalar * Array::values () const throw()
 
-/// Return a pointer to the array values
-
-/**
- */
-
 {
   return a_;
 }
 
 //----------------------------------------------------------------------
-
-/// Return the given array element
-
-/**
- */
 
 Scalar & Array::operator () (int i0, int i1, int i2) throw()
 {
@@ -158,11 +108,6 @@ Scalar & Array::operator () (int i0, int i1, int i2) throw()
 
 //----------------------------------------------------------------------
 
-/// Set all values to 0, or to the given value if supplied
-
-/**
- */
-
 void Array::clear(Scalar value) throw()
 {
   int i;
@@ -170,9 +115,6 @@ void Array::clear(Scalar value) throw()
 }
 
 //======================================================================
-
-/**
- */
 
 void Array::deallocate_() throw (ExceptionBadArrayDeallocation)
 {
@@ -187,9 +129,6 @@ void Array::deallocate_() throw (ExceptionBadArrayDeallocation)
 }
 
 //----------------------------------------------------------------------
-
-/**
- */
 
 void Array::allocate_(int nx, int ny, int nz) throw(ExceptionBadArrayAllocation)
 {
@@ -208,9 +147,6 @@ void Array::allocate_(int nx, int ny, int nz) throw(ExceptionBadArrayAllocation)
 
 //----------------------------------------------------------------------
 
-/**
- */
-
 void Array::reallocate_(int nx, int ny, int nz) throw()
 {
   deallocate_();
@@ -218,9 +154,6 @@ void Array::reallocate_(int nx, int ny, int nz) throw()
 }
 
 //----------------------------------------------------------------------
-
-/**
- */
 
 void Array::copy_(Scalar * a) throw()
 {

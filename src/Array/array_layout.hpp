@@ -66,10 +66,10 @@ public: // interface
   // Process block level
   //----------------------------------------------------------------------
 
-  /// ( ) Set virtual process partitioning of the array
+  /// (*) Set virtual process partitioning of the array
   void set_process_blocks (int dimension, int process_block_count[]);
 
-  /// ( ) Return the number of process blocks
+  /// (*) Return the number of process blocks
   int process_block_count ( ) const;
 
   /// ( ) Return the index of the process block for the given block index
