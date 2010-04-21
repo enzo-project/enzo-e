@@ -42,6 +42,8 @@ int main(int argc, char ** argv)
 
   unit_class ("Layout");
 
+  unit_size<Layout> ();
+
   // Initialize test-independent problem parameters
 
   int dim = 3;             // Problem dimension dim = 3

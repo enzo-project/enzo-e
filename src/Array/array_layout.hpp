@@ -23,8 +23,18 @@ public: // interface
   /// (*) Create a Layout of the given dimensionality, defaulting to serial
   Layout(int dimension);
 
-  /// ( ) Delete the Layout object
+  //----------------------------------------------------------------------
+  // Big Three
+  //----------------------------------------------------------------------
+
+  /// ( ) Destructor
   ~Layout();
+
+  /// ( ) Copy constructor
+  Layout(const Layout & layout) throw();
+
+  /// ( ) Assignment operator
+  Layout & operator= (const Layout & layout) throw();
 
   //----------------------------------------------------------------------
   // Array level 
@@ -43,7 +53,8 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// (*) Set first physical process and number of physical processes
-  void set_processes(int process_first, int process_count);
+  void set_processes(int process_first, int process_count)
+  { process_first_ = process_first;  process_count_ = process_count;  };
 
   /// (*) Return the first physical process assigned to this layout
   int process_first () { return process_first_; };
@@ -56,7 +67,8 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// (*) Set first physical thread and number of physical threads
-  void set_threads(int thread_first, int thread_count);
+  void set_threads(int thread_first, int thread_count)
+  { thread_first_ = thread_first; thread_count_ = thread_count;  };
 
   /// (*) Return the first physical thread assigned to this layout
   int thread_first() { return thread_first_; };
@@ -104,9 +116,6 @@ private: // attributes
 
   ///  dimensionality of the `Array`  
   int dimension_;
-
-  ///  rank of this process
-  int process_rank_;
 
   ///  first physical process 
   int process_first_;

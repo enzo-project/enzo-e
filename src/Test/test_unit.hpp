@@ -54,6 +54,13 @@ void unit_class (const char * c)
   strncpy (unit::class_name,c,UNIT_MAX_NAME_LEN);
 }
 
+/// @brief Write the size of the class in bytes
+template <typename T>
+void unit_size ()
+{
+  printf ("sizeof (%s) = %d\n",unit::class_name,sizeof(T));
+}
+
 /// @brief Set the current unit testing function name
 void unit_func (const char * f)
 {

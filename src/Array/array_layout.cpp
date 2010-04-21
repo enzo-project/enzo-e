@@ -36,14 +36,58 @@ Layout::Layout(int dimension)
     process_blocks_[i] = 1;
     thread_blocks_[i]  = 1;
   }
-  Parallel * parallel = Parallel::instance();
-  process_rank_ = parallel->process_rank();
 }
 
 //----------------------------------------------------------------------
 
 Layout::~Layout()
 {
+  delete [] array_size_;
+  delete [] process_blocks_;
+  delete [] thread_blocks_;
+}
+
+//----------------------------------------------------------------------
+
+Layout::Layout(const Layout & layout) throw()
+  : dimension_(layout.dimension_),
+    process_first_(layout.process_first_),
+    process_count_(layout.process_count_),
+    thread_first_(layout.thread_first_),
+    thread_count_(layout.thread_count_)
+{
+  array_size_     = new int [dimension_];
+  process_blocks_ = new int [dimension_];
+  thread_blocks_  = new int [dimension_];
+
+  for (int i=0; i<dimension_; i++) {
+    array_size_[i]     = layout.array_size_[i];
+    process_blocks_[i] = layout.process_blocks_[i];
+    thread_blocks_[i]  = layout.thread_blocks_[i];
+  }
+}
+
+//----------------------------------------------------------------------
+
+Layout & Layout::operator= (const Layout & layout) throw()
+{
+  dimension_     = layout.dimension_;
+  process_first_ = layout.process_first_;
+  process_count_ = layout.process_count_;
+  thread_first_  = layout.thread_first_;
+  thread_count_  = layout.thread_count_;
+
+  array_size_     = new int [dimension_];
+  process_blocks_ = new int [dimension_];
+  thread_blocks_  = new int [dimension_];
+
+  for (int i=0; i<dimension_; i++) {
+    array_size_[i]     = layout.array_size_[i];
+    process_blocks_[i] = layout.process_blocks_[i];
+    thread_blocks_[i]  = layout.thread_blocks_[i];
+  }
+
+  return *this;
 }
 
 //----------------------------------------------------------------------
@@ -90,32 +134,6 @@ void Layout::array_size
 
 //----------------------------------------------------------------------
 
-/// Set the range process_first to process_max+1 of processors
-void Layout::set_processes
-(
- int process_first, 
- int process_count
- )
-{
-  process_first_ = process_first;
-  process_count_ = process_count;
-}
-
-//----------------------------------------------------------------------
-
-/// Set the range thread_first to thread_max+1 of threads
-void Layout::set_threads
-(
- int thread_first, 
- int thread_count
- )
-{
-  thread_first_ = thread_first;
-  thread_count_ = thread_count;
-}
-
-//----------------------------------------------------------------------
-
 void Layout::set_process_blocks 
 (
  int dimension, 
@@ -123,10 +141,8 @@ void Layout::set_process_blocks
  )
 {
   int i;
-  process_block_count_ = 1;
   for (i=0; i<MIN(dimension,dimension_); i++) {
     process_blocks_[i] = process_blocks[i];
-    process_block_count_ *= process_blocks[i];
   }
   // Fill any extra elements of output process_blocks[] with 1's
   for (i=MIN(dimension,dimension_); i<dimension_; i++) {
@@ -142,6 +158,7 @@ int Layout::process_block_count () const
 /// @todo store global process block count (nvp)
 {
 
+  int process_rank_ = Parallel::instance()->process_rank();
   int process_rank_local = process_rank_ - process_first_;
 
   int block_count;
@@ -151,11 +168,14 @@ int Layout::process_block_count () const
 
     // compute process block range on this process
 
+    int process_block_count = 1;
+    for (int i=0; i<dimension_; i++) process_block_count *= process_blocks_[i];
+
     int block_index_first 
-      = process_rank_local     * process_block_count_ / process_count_;
+      = process_rank_local     * process_block_count / process_count_;
 
     int block_index_last  
-      = (process_rank_local + 1) * process_block_count_ / process_count_;
+      = (process_rank_local + 1) * process_block_count / process_count_;
 
     block_count = block_index_last - block_index_first;
     
@@ -175,11 +195,14 @@ void Layout::process_block_indices
  int dimension, 
  int process_block_index[] )
 {
+  int process_block_count = 1;
+  for (int i=0; i<dimension; i++) process_block_count *= process_blocks_[i];
   ASSERT ("Layout::process_block_indices",
 	  "block_offset out of range",
 	  0 <= block_offset &&
-	  block_offset < process_block_count_);
+	  block_offset < process_block_count);
 
+  int process_rank_ = Parallel::instance()->process_rank();
   int process_rank_local = process_rank_ - process_first_;
 
   if (0 <= process_rank_local && 
@@ -188,7 +211,7 @@ void Layout::process_block_indices
     // compute process block range on this process
 
     int block_index_first 
-      = process_rank_local * process_block_count_ / process_count_;
+      = process_rank_local * process_block_count / process_count_;
 
     int block_index = block_index_first + block_offset;
 
