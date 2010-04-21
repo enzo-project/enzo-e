@@ -6,7 +6,8 @@ defines    = "-D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX"
 
 env = env.Clone(LIBS = [components,libraries], CPPFLAGS = defines)
 
-env.SetOption('warn', 'no-fortran-cxx-mix')
+# not supported by older scons
+# env.SetOption('warn', 'no-fortran-cxx-mix')
 
 sources  = [
 	'cello_hydro.cpp',

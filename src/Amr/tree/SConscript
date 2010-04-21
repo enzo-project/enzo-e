@@ -33,3 +33,7 @@ test_tree_k = env.Program (['test_tree_k.cpp', sources])
 
 env.Alias('install-bin', env.Install ('$BINPATH', [test_tree, test_tree_k]))
 
+link = Builder(action = Copy("$TARGET","$SOURCE"))
+env = Environment(BUILDERS = {'Link': link})
+env.Link('image.h','circle2.h')
+
