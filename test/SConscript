@@ -24,6 +24,8 @@ env.Unit('test_monitor.out',     '#/bin/test_monitor')
 env.Unit('test_parameters.out',  '#/bin/test_parameters')
 env.Unit('test_schedule.out',    '#/bin/test_schedule')
 env.Unit('test_performance.out', '#/bin/test_performance')
+env.Unit('test_tree_k.out',      '#/bin/test_tree_k')
+env.Unit('test_tree.out',        '#/bin/test_tree')
 
 env.UnitEnzo('test_ppml_implosion.out', '#/bin/test_ppml', ARGS='implosion3 32 1')
 env.UnitEnzo('test_ppml_blast.out',     '#/bin/test_ppml', ARGS='blast      32 1')
@@ -33,15 +35,16 @@ env.UnitEnzo('test_ppm_implosion3.out', '#/bin/test_ppm',  ARGS='implosion3 32 3
 
 env.UnitMpi('test_layout.out',   '#/bin/test_layout')
 env.UnitMpi('test_affinity.out', '#/bin/test_affinity')
+env.UnitMpi('test_mpi.out',      '#/bin/test_mpi')
 
-env.UnitParse('parse_groups.out',     'parse_groups.in')
-env.UnitParse('parse_integer.out',    'parse_integer.in')
-env.UnitParse('parse_list.out',       'parse_list.in')
-env.UnitParse('parse_logical.out',    'parse_logical.in')
-env.UnitParse('parse_scalar.out',     'parse_scalar.in')
+env.UnitParse('test_parse_groups.out',     'parse_groups.in')
+env.UnitParse('test_parse_integer.out',    'parse_integer.in')
+env.UnitParse('test_parse_list.out',       'parse_list.in')
+env.UnitParse('test_parse_logical.out',    'parse_logical.in')
+env.UnitParse('test_parse_scalar.out',     'parse_scalar.in')
 
-env.UnitParse('parse_implosion.out',  'parse_implosion.in')
-env.UnitParse('parse_shock-pool.out', 'parse_shock-pool.in')
+env.UnitParse('test_parse_implosion.out',  'parse_implosion.in')
+env.UnitParse('test_parse_shock-pool.out', 'parse_shock-pool.in')
 
 env.TestCello('cello_implosion.out',  'parse_implosion.in')
 
