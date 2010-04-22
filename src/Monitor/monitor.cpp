@@ -4,6 +4,7 @@
 /// @file      monitor.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 12:45:56 PST 2009
+/// @todo      simplify image call
 /// @brief     Routines for simple output of text, plots, and graphs
 
 #include "cello.h"
@@ -44,6 +45,8 @@ void Monitor::image
  *********************************************************************
  */
 {
+
+  if (! active_) return;
 
   // Array size
   int n3[3] = {1, nx, nx*ny}; // Array multipliers
@@ -124,6 +127,7 @@ void Monitor::image
 
   pngwriter png (mx,my,0,name.c_str());
 
+  // loop over pixels (jx,jy)
   for (int jx = 0; jx<mx; jx++) {
     for (int jy = 0; jy<my; jy++) {
 
@@ -137,7 +141,7 @@ void Monitor::image
       if (index > map_length - 2) index = map_length-2;
 
       // linear interpolate colormap values
-      double lo = min + index*(max-min)/(map_length-1);
+      double lo = min +  index   *(max-min)/(map_length-1);
       double hi = min + (index+1)*(max-min)/(map_length-1);
 
       // should be in bounds, but force if not due to rounding error

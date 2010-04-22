@@ -7,9 +7,11 @@
 /// @brief     Program implementing unit tests for hydrodynamics
 
 #include "cello.h" 
+
 #include "string.h"
 #include "cello_hydro.h"
 #include "test_ppml.h"
+#include "parallel.hpp"
 #include "performance.hpp"
 
 //----------------------------------------------------------------------
@@ -25,6 +27,10 @@ void print_usage(const char * name)
 
 int main(int argc, char * argv[])
 {
+
+  // Initialize parallelism
+
+  Parallel::instance()->initialize(&argc,&argv);
 
   enum type_problem problem_type = problem_unknown;
 

@@ -25,7 +25,6 @@ void image_dump(const char * file_root,
 
   // Open hdf5 file dump for cycle
   char filename[80];
-  
 
   // color map
   double map[] = {1,1,1, 0,0,0};

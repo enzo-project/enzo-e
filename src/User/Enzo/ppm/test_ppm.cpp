@@ -6,6 +6,8 @@
 /// @date      Fri Mar  7 17:11:14 PST 2008
 /// @brief     Program implementing unit tests for hydrodynamics
 
+#include "cello.h"
+
 #include "string.h"
 #include "cello_hydro.h"
 #include "test_ppm.h"
@@ -27,9 +29,7 @@ int main(int argc, char ** argv)
 
   // Initialize parallelism
 
-  Parallel * parallel = Parallel::instance();
-
-  parallel->initialize(&argc,&argv);
+  Parallel::instance()->initialize(&argc,&argv);
 
   // Check command line arguments
 
