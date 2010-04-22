@@ -27,8 +27,14 @@ public: // interface
   /// Create a new leaf node
   Node2K( int k,  int level_adjust = 0  );
 
-  /// Delete a node and all descedents
+  /// Destructor
   ~Node2K();
+
+  /// Copy constructor
+  Node2K(const Node2K & node2k) throw();
+
+  /// Assignment operator
+  Node2K & operator= (const Node2K & node2k) throw();
 
   /// return the specified child
   Node2K * child (int ix, int iy);

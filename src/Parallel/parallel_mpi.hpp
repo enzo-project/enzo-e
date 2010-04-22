@@ -111,10 +111,6 @@ protected: // functions
       send_type_(send_type_standard)
   {};
 
-  /// Delete an ParallelMpi object (singleton design pattern)
-  ~ParallelMpi()
-  {};
-
 private: // static functions
 
   /// Single instance of the Parallel object (singleton design pattern)

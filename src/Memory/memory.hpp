@@ -101,14 +101,11 @@ private: // functions
   /// Create the (single) Memory object (singleton design pattern)
   Memory() throw () { initialize_(); };
 
-  /// Delete the (single) Memory object (singleton design pattern)
-  ~Memory() throw () {};
-
   /// Copy the (single) Memory object (singleton design pattern)
-  Memory (const Memory &) {};
+  Memory (const Memory &);
 
   /// Assign the (single) Memory object (singleton design pattern)
-  Memory & operator = (const Memory & memory) { return *this; };
+  Memory & operator = (const Memory & memory);
 
   /// Initialize the memory component
   void initialize_() throw ();

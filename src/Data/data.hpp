@@ -26,9 +26,6 @@ public: // interface
       particles_(0)
   { };
 
-  /// Delete the Data object
-  ~Data() { };
-
   /// Set fields
   void set_fields (Field * field)
   { field_ = field; };

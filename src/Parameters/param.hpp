@@ -14,6 +14,8 @@
 #include <vector>
 #include <string>
 
+#include "error.hpp"
+
 //----------------------------------------------------------------------
 
 /// @fun print_expression
@@ -45,7 +47,17 @@ public: // interface
   Param () {};
 
   /// Delete a Param object
-  ~Param () { dealloc_(); };
+  ~Param () 
+  { dealloc_(); };
+
+  /// Copy constructor
+  Param(const Param & param) throw()
+  { INCOMPLETE_MESSAGE("Param::Param",""); };
+
+  /// Assignment operator
+  Param & operator= (const Param & param) throw()
+  { INCOMPLETE_MESSAGE("Param::operator =","");
+    return *this; };
 
   /// Evaluate a scalar expression given vectos x,y,z,t
   void evaluate_scalar  

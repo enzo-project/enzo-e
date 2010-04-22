@@ -14,6 +14,7 @@
 #include "cello.h"
 
 #include "amr_node2k.hpp"
+#include "error.hpp"
 
 //----------------------------------------------------------------------
 
@@ -63,6 +64,21 @@ Node2K::~Node2K()
   }
 
   parent_ = NULL;
+}
+
+//----------------------------------------------------------------------
+
+Node2K::Node2K(const Node2K & node2k) throw()
+{
+  INCOMPLETE_MESSAGE("Node2K::Node2K","");
+}
+
+//----------------------------------------------------------------------
+
+Node2K & Node2K::operator= (const Node2K & node2k) throw()
+{
+  INCOMPLETE_MESSAGE("Node2K::operator =","");
+  return *this;
 }
 
 //----------------------------------------------------------------------

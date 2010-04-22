@@ -10,6 +10,8 @@
 /// @bug      Implementations of Tree4 and Tree16 are essentially identical
 /// @brief    Declaration of the Tree16 class 
 
+#include "error.hpp"
+
 /// @def      MAX_LEVELS
 /// @brief    Maximum number of tree levels
 #define MAX_LEVELS 64
@@ -25,8 +27,18 @@ public: // interface
   /// Initialize the  Tree16 object
   Tree16();
 
-  /// Deallocate the Tree16 object
-  ~Tree16() { delete root_; };
+  /// Destructor
+  ~Tree16() 
+  { delete root_; };
+
+  /// Copy constructor
+  Tree16(const Tree16 & tree16) throw()
+  { INCOMPLETE_MESSAGE("Tree16::Tree16",""); };
+
+  /// Assignment operator
+  Tree16 & operator= (const Tree16 & tree16) throw()
+  { INCOMPLETE_MESSAGE("Tree16::operator =",""); 
+    return *this; };
 
   /// Refine down to array
   void refine

@@ -10,6 +10,8 @@
 /// @todo     Decide on either k or r as refinement factor variable name
 /// @brief    Interface for the Tree2K class
 
+#include "error.hpp"
+
 #include "amr_treek.hpp"
 
 class Tree2K : public TreeK {
@@ -23,8 +25,18 @@ public: // interface
   /// Initialize a Tree2K with given refinement factor k
   Tree2K(int k);
 
-  /// Delete a Tree2K object
-  ~Tree2K() { delete root_; };
+  /// Destructor
+  ~Tree2K() 
+  { delete root_; };
+
+  /// Copy constructor
+  Tree2K(const Tree2K & tree2k) throw()
+  { INCOMPLETE_MESSAGE("Tree2K::Tree2K",""); };
+
+  /// Assignment operator
+  Tree2K & operator= (const Tree2K & tree2k) throw()
+  { INCOMPLETE_MESSAGE("Tree2K::operator =",""); 
+    return *this; };
 
   /// Refine down to array
   void refine

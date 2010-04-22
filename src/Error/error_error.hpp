@@ -7,7 +7,6 @@
 /// @file     error_error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Add Parallel support
-/// @todo     Use singleton design pattern
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Declaration of the Error class
 
@@ -36,7 +35,7 @@
   Error::instance()->trace_(__FILE__,__LINE__)
 
 /// @def      ASSERT
-/// @brief    Equivalent to assert(), but with parallel support
+/// @brief    Equivalent to assert()
 #define ASSERT(FUNCTION,MESSAGE,ASSERTION) \
   Error::instance()->assert_(__FILE__,__LINE__,FUNCTION,MESSAGE,ASSERTION)
 
@@ -120,11 +119,6 @@ private: // functions
   /// Initialize the Error object (singleton design pattern)
   Error() 
     : tracing_(true)
-  {};
-
-  //----------------------------------------------------------------------
-  /// Delete the Error object (singleton design pattern)
-  ~Error()
   {};
 
 private: // functions

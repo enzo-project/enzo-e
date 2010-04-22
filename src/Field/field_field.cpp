@@ -6,6 +6,7 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Brief description of file field_field.cpp
 
+#include "error.hpp"
 #include "field.hpp"
 
 //----------------------------------------------------------------------
@@ -30,4 +31,19 @@ Field::Field()
 Field::~Field()
 {
   if (centering_) delete [] centering_;
+}
+
+//----------------------------------------------------------------------
+
+Field::Field(const Field & field) throw()
+{
+  INCOMPLETE_MESSAGE("Field::Field","");
+}
+
+//----------------------------------------------------------------------
+
+Field & Field::operator= (const Field & field) throw()
+{
+  INCOMPLETE_MESSAGE("Field::operator =","");
+  return *this;
 }

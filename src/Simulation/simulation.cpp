@@ -18,11 +18,6 @@ Simulation::Simulation()
 {
 }
 
-Simulation::~Simulation()
-{
-  INCOMPLETE_MESSAGE("Simulation::~Simulation()","");
-}
-    
 /// Initialize from parameters
 void Simulation::initialize ()
 {

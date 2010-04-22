@@ -10,6 +10,8 @@
 /// @bug      Implementations of Tree4 and Tree16 are essentially identical
 /// @brief    Declaration of the Tree4 class
 
+#include "error.hpp"
+
 /// @def      MAX_LEVELS
 /// @brief    Maximum number of tree levels
 #define MAX_LEVELS 64
@@ -27,6 +29,15 @@ public: // interface
 
   /// Deallocate the Tree4 object
   ~Tree4() { delete root_; };
+
+  /// Copy constructor
+  Tree4(const Tree4 & tree4) throw()
+  { INCOMPLETE_MESSAGE("Tree4::Tree4",""); };
+
+  /// Assignment operator
+  Tree4 & operator= (const Tree4 & tree4) throw()
+  { INCOMPLETE_MESSAGE("Tree4::operator =",""); 
+    return *this; };
 
   /// Refine down to array
   void refine

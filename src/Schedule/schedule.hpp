@@ -25,9 +25,6 @@ public: // interface
   /// Initialize a Schedule object
   Schedule();
 
-  /// Delete a Schedule object
-  ~Schedule();
-
   /// Create the simulation
   void create_simulation();
 

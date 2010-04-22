@@ -10,6 +10,8 @@
 
 #include "cello.h"
 
+#include "error.hpp"
+
 #include "amr_node4.hpp"
 
 const bool debug = false;
@@ -70,6 +72,24 @@ Node4::~Node4()
 
   parent_ = NULL;
 }
+
+//----------------------------------------------------------------------
+
+Node4::Node4(const Node4 & node4) throw()
+{
+  INCOMPLETE_MESSAGE("Node4::Node4","");
+}
+
+//----------------------------------------------------------------------
+
+Node4 & Node4::operator= (const Node4 & node4) throw()
+{
+  INCOMPLETE_MESSAGE("Node4::operator =","");
+  return *this;
+}
+
+
+//----------------------------------------------------------------------
 
 inline Node4 * Node4::child (corner_type corner) 
 /// @param    corner     Corner [UL|DL|UR|DR] of the child node to return

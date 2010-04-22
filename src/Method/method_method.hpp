@@ -40,10 +40,6 @@ public: // interface
 
   Method() throw();
 
-  /// Delete a Method
-
-  ~Method () throw();
-
 public: // virtual functions
 
   /// Perform any method-specific initialization

@@ -148,6 +148,13 @@ private: // functions
   /// Create an empty Parameters object (singleton design pattern)
   Parameters() throw();
 
+  /// Copy constructor
+  Parameters(const Parameters & parameters) throw();
+
+  /// Assignment operator
+
+  Parameters & operator= (const Parameters & parameters) throw();
+
   /// Delete a Parameters object (singleton design pattern)
   ~Parameters();
 

@@ -20,9 +20,6 @@ public: // public
   /// Initialize a Particles object
   Particles() { };
 
-  /// Delete a Particles object
-  ~Particles() { };
-
 };
 
 #endif /* PARTICLES_PARTICLES_HPP */

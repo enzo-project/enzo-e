@@ -31,7 +31,11 @@ public: // interface
       memory->end_group(component_performance);
     }
 
-  /// Delete a Counters object
+  //----------------------------------------------------------------------
+  // Big Three
+  //----------------------------------------------------------------------
+
+  /// Destructor
   ~Counters()
     {
       Memory * memory = Memory::instance();
@@ -42,6 +46,18 @@ public: // interface
       memory->end_group(component_performance);
     }
 
+  /// Copy constructor
+  Counters(const Counters & classname) throw()
+  {
+    INCOMPLETE_MESSAGE("Counters::Counters","");
+  }
+
+  /// Assignment operator
+  Counters & operator= (const Counters & classname) throw()
+  {
+    INCOMPLETE_MESSAGE("Counters::operator =","");
+    return *this;
+  }
 
 private: // attributes
 

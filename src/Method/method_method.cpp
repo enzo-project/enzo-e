@@ -20,14 +20,6 @@ Method::Method() throw ()
 
 //----------------------------------------------------------------------
 
-Method::~Method() throw ()
-///
-{
-  INCOMPLETE_MESSAGE("~Method",""); 
-}
-
-//----------------------------------------------------------------------
-
 void Method::add_argument_
 (
  argument_type argument_type,

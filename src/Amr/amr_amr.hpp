@@ -26,9 +26,16 @@ public: // interface
 
   /// Delet an Amr object
   ~Amr() 
-  {
-    delete tree_;
-  };
+  { delete tree_; };
+
+  /// Copy constructor
+  Amr(const Amr & amr) throw()
+  { INCOMPLETE_MESSAGE("Amr::Amr",""); };
+
+  /// Assignment operator
+  Amr & operator= (const Amr & amr) throw()
+  { INCOMPLETE_MESSAGE("Amr::operator =",""); };
+
 
 private: // attributes
 

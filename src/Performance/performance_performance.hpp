@@ -43,6 +43,12 @@ public: // interface
   /// Delete a Performance object
   ~Performance();
 
+  /// Copy constructor
+  Performance(const Performance & classname) throw();
+
+  /// Assignment operator
+  Performance & operator= (const Performance & classname) throw();
+
   //--------------------------------------------------
 
   ///  	Create a new attribute

@@ -5,10 +5,10 @@ print TOPDIR + '/include'
 
 env = Environment (
 	CXX     = 'mpiCC',	
+	CPPFLAGS = '-Wall -g',
 	CPPPATH = '#/include',
 	LIBPATH = '#/lib',
-	BINPATH = '#/bin',
-	CPPFLAGS = '-Wall -g'
+	BINPATH = '#/bin'
          )
 
 Export('env')

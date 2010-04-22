@@ -28,8 +28,28 @@ public: // interface
   /// Initialize the Simulation object
   Simulation();
 
-  /// Delete the Simulation object
-  ~Simulation();
+  //----------------------------------------------------------------------
+  // Big Three
+  //----------------------------------------------------------------------
+
+  /// Destructor
+  ~Simulation() throw()
+  {
+    INCOMPLETE_MESSAGE("Simulation::~Simulation","");
+  }
+
+  /// Copy constructor
+  Simulation(const Simulation & classname) throw()
+  {
+    INCOMPLETE_MESSAGE("Simulation::Simulation","");
+  }
+
+  /// Assignment operator
+  Simulation & operator= (const Simulation & classname) throw()
+  {
+    INCOMPLETE_MESSAGE("Simulation::operator =","");
+    return *this;
+  }
 
   /// Initialize from parameters
   void initialize ();

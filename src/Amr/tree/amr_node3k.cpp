@@ -12,6 +12,8 @@
 
 #include "amr_node3k.hpp"
 
+#include "error.hpp"
+
 //----------------------------------------------------------------------
 
 Node3K::Node3K(int k, int level_adjust) 
@@ -62,6 +64,21 @@ Node3K::~Node3K()
   }
 
   parent_ = NULL;
+}
+
+//----------------------------------------------------------------------
+
+Node3K::Node3K(const Node3K & node3k) throw()
+{
+  INCOMPLETE_MESSAGE("Node3K::Node3K","");
+}
+
+//----------------------------------------------------------------------
+
+Node3K & Node3K::operator= (const Node3K & node3k) throw()
+{
+  INCOMPLETE_MESSAGE("Node3K::operator =","");
+  return *this;
 }
 
 //----------------------------------------------------------------------

@@ -25,9 +25,6 @@ public: /// interface
   /// Initialize the Ifrit object
   Ifrit() {};
 
-  /// Delete the Ifrit object
-  ~Ifrit() {};
-
   /// Read a 3d array from an ifrit file
   void read_bin  (std::string name, 
 		  Scalar *    buffer, 

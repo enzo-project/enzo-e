@@ -67,10 +67,6 @@ protected: // functions
   Parallel() 
   {};
 
-  /// Delete a Parallel object (singleton design pattern)
-  ~Parallel() 
-  {};
-
   void set_initialized_ (bool initialized)
   { initialized_ = initialized; }
 

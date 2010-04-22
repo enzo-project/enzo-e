@@ -11,6 +11,7 @@
 #include "cello.h"
 
 #include "amr_node16.hpp"
+#include "error.hpp"
 
 const bool debug = false;
 
@@ -67,6 +68,23 @@ Node16::~Node16()
 
   parent_ = NULL;
 }
+
+//----------------------------------------------------------------------
+
+Node16::Node16(const Node16 & node16) throw()
+{
+  INCOMPLETE_MESSAGE("Node16::Node16","");
+}
+
+//----------------------------------------------------------------------
+
+Node16 & Node16::operator= (const Node16 & node16) throw()
+{
+  INCOMPLETE_MESSAGE("Node16::operator =","");
+  return *this;
+}
+
+//----------------------------------------------------------------------
 
 inline Node16 * Node16::child (int ix, int iy) 
 /// @param    ix        Index 0 <= ix < 3 of cell in grid block

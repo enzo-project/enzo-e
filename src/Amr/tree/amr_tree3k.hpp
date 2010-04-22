@@ -10,6 +10,8 @@
 /// @todo     Decide on either k or r as refinement factor variable name
 /// @brief    Interface for the Tree3K class
 
+#include "error.hpp"
+
 #include "amr_treek.hpp"
 
 class Tree3K : public TreeK {
@@ -23,8 +25,22 @@ public: // interface
   /// Initialize a Tree3K with given refinement factor k
   Tree3K(int k);
 
-  /// Delete a Tree3K object
-  ~Tree3K() { delete root_; };
+  //----------------------------------------------------------------------
+  // Big Three
+  //----------------------------------------------------------------------
+
+  /// Destructor
+  ~Tree3K() 
+  { delete root_; };
+
+  /// Copy constructor
+  Tree3K(const Tree3K & tree3k) throw()
+  { INCOMPLETE_MESSAGE("Tree3K::Tree3K",""); }
+
+  /// Assignment operator
+  Tree3K & operator= (const Tree3K & tree3k) throw()
+  { INCOMPLETE_MESSAGE("Tree3K::operator =",""); 
+    return *this; }
 
   /// Refine down to array
   void refine

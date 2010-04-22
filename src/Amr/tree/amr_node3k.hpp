@@ -30,6 +30,12 @@ public: // interface
   /// Delete a node and all descedents
   ~Node3K();
 
+  /// Copy constructor
+  Node3K(const Node3K & node3k) throw();
+
+  /// Assignment operator
+  Node3K & operator= (const Node3K & node3k) throw();
+
   /// return the specified child
   Node3K * child (int ix, int iy, int iz);
 

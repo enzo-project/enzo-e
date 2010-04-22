@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['field']
+components = ['field','error']
 
 env = env.Clone(LIBS=[components])
 

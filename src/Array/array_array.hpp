@@ -27,14 +27,20 @@ public: // interface
 	 int      ny=1,
 	 int      nz=1) throw();
 
-  /// Deallocate the Array object
+  //----------------------------------------------------------------------
+  // Big Three
+  //----------------------------------------------------------------------
+
+  /// Destructor
   ~Array() throw();
 
-  /// Initialize the Array as a copy of another
+  /// Copy constructor
   Array(const Array &) throw();
 
-  /// Copy an array into this one, deallocating any existing data
+  /// Assignment operator
   Array & operator = (const Array &) throw();
+
+  //----------------------------------------------------------------------
 
   /// Resize the array, deallocating any existing data
   virtual void resize (int n0, 

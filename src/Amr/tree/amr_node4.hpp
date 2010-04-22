@@ -32,6 +32,12 @@ public: // interface
   /// Delete a node and all descedents
   ~Node4();
 
+  /// Copy constructor
+  Node4(const Node4 & node4) throw();
+
+  /// Assignment operator
+  Node4 & operator= (const Node4 & node4) throw();
+
   /// return the specified child
   Node4 * child (corner_type corner);
 

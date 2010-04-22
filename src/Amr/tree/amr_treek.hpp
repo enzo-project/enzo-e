@@ -18,10 +18,24 @@ class TreeK {
 public: // interface
 
   /// Initialize a TreeK with refinement factor r
-  TreeK(int r) : r_(r), levels_(0) {};
+  TreeK() 
+  {};
+
+  /// Initialize a TreeK with refinement factor r
+  TreeK(int r) : r_(r), levels_(0) 
+  {};
 
   /// Delete a TreeK object
-  virtual ~TreeK() {};
+  virtual ~TreeK() 
+  {};
+
+  /// Copy constructor
+  TreeK(const TreeK & treek) throw()
+  {};
+
+  /// Assignment operator
+  virtual TreeK & operator= (const TreeK & treek) throw()
+  { return *this; };
 
   /// Refine down to array
   virtual  void refine

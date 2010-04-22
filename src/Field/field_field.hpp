@@ -39,8 +39,14 @@ public: // public
   /// Initialize a Field object
   Field();
 
-  /// Delete a Field object
+  /// Destructor
   ~Field();
+
+  /// Copy constructor
+  Field(const Field & field) throw();
+
+  /// Assignment operator
+  Field & operator= (const Field & field) throw();
 
 private: // attributes
 
