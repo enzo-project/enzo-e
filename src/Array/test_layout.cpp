@@ -8,12 +8,17 @@
 ///
 /// Run with mpirun -np 4
 
+
+#include <mpi.h>
+
 #include "cello.h"
 
 #include "error.hpp"
 #include "test.hpp"
 #include "parallel.hpp"
 #include "array.hpp"
+
+#define INDEX3(I,N) I[0] + N[0]*(I[1] + N[1]*I[2])
 
 int main(int argc, char ** argv)
 {
@@ -28,11 +33,11 @@ int main(int argc, char ** argv)
   if (process_count != 4) {
     printf ("mpirun -np 4 required\n");
     parallel->finalize();
-    exit(1);
+    parallel->abort();
   }
 
-  // unit_note("mpirun -np 4 required");
-  // unit_assert(process_count == 4);
+  // unit_note("mpirun -np 8 required");
+  // unit_assert(process_count == 8);
 
   // Initialize unit testing for parallel runs
 
@@ -109,27 +114,31 @@ int main(int argc, char ** argv)
   int computed_index;
   int process_index[3];
 
-#define INDEX3(I,N) I[0] + N[0]*(I[1] + N[1]*I[2])
-
   bool success = true;
-  for (test_index = 0; test_index<expected_process_block_count; test_index ++) {
+  for (test_index = 0; 
+       test_index < expected_process_block_count; 
+       test_index ++) 
+    {
 
-    // Get process_index[] array
-    layout_serial ->process_block_indices(test_index, 3, process_index);
-    // back-compute index from array
-    computed_index = INDEX3(process_index,np3);
-    if (! computed_index == test_index) {
-      unit_assert (success=false);
-    }
-    // ensure that back-computed index is the same as the test index
+      // Get process_index[] array
+      layout_serial ->process_block_indices(test_index, 3, process_index);
+
+      // back-compute index from array
+      computed_index = INDEX3(process_index,np3);
+
+      // ensure that back-computed index is the same as the test index
+      if (! computed_index == test_index) {
+	unit_assert (success=false);
+      }
     
-  }
+    }
 
   unit_assert (success);
 
   unit_func("~Layout");
-  
   delete layout_serial;
+  unit_assert (true);
+  
 
   // TEST 2:  One (P=8,T=1) [MPI parallel]
 

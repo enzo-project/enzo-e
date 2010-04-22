@@ -153,13 +153,12 @@ void Layout::set_process_blocks
 
 //----------------------------------------------------------------------
 
-int Layout::process_block_count () const
+int Layout::process_block_count (int process_rank) const
 /// @todo store local process block count result
 /// @todo store global process block count (nvp)
 {
 
-  int process_rank_ = Parallel::instance()->process_rank();
-  int process_rank_local = process_rank_ - process_first_;
+  int process_rank_local = process_rank - process_first_;
 
   int block_count;
 
@@ -191,19 +190,19 @@ int Layout::process_block_count () const
 
 void Layout::process_block_indices
 (
- int block_offset, 
  int dimension, 
+ int process_rank,
+ int process_block_number, 
  int process_block_index[] )
 {
   int process_block_count = 1;
   for (int i=0; i<dimension; i++) process_block_count *= process_blocks_[i];
   ASSERT ("Layout::process_block_indices",
-	  "block_offset out of range",
-	  0 <= block_offset &&
-	  block_offset < process_block_count);
+	  "process_block_number out of range",
+	  0 <= process_block_number &&
+	  process_block_number < process_block_count);
 
-  int process_rank_ = Parallel::instance()->process_rank();
-  int process_rank_local = process_rank_ - process_first_;
+  int process_rank_local = process_rank - process_first_;
 
   if (0 <= process_rank_local && 
       process_rank_local < process_count_) {
@@ -213,7 +212,7 @@ void Layout::process_block_indices
     int block_index_first 
       = process_rank_local * process_block_count / process_count_;
 
-    int block_index = block_index_first + block_offset;
+    int block_index = block_index_first + process_block_number;
 
     for (int i=0; i<MIN(dimension,dimension_); i++) {
       int index = block_index % process_blocks_[i];
@@ -227,6 +226,25 @@ void Layout::process_block_indices
   } else {
     WARNING_MESSAGE("process_block_indices","Process out of range--ignoring");
   }
+}
+
+//----------------------------------------------------------------------
+
+void Layout::process_block_number
+(
+ int dimension, 
+ int * process_rank,
+ int * process_block_number, 
+ int process_block_index[] )
+{
+  int virtual_process_rank = 0;
+  int multiplier = 1;
+  for (int i=0; i<MIN(dimension,dimension_); i++) {
+    process_rank_local += multiplier * i;
+    multiplier *= process_blocks_[i];
+  }
+@@@
+  * process_rank = 
 }
 
 //----------------------------------------------------------------------

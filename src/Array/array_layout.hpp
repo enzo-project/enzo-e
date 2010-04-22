@@ -23,10 +23,6 @@ public: // interface
   /// (*) Create a Layout of the given dimensionality, defaulting to serial
   Layout(int dimension);
 
-  //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
-
   /// ( ) Destructor
   ~Layout();
 
@@ -84,13 +80,23 @@ public: // interface
   void set_process_blocks (int dimension, int process_block_count[]);
 
   /// (*) Return the number of local process blocks
-  int process_block_count ( ) const;
+  int process_block_count (int process_rank) const;
 
   /// ( ) Return the index of the local process block for the given block index
   void process_block_indices
   (
-   int index_process_block, 
    int dimension, 
+   int process_rank, 
+   int process_block_number, 
+   int process_block_indices[] );
+
+  /// ( ) Return the process rank and process block number for the given
+  /// process block indices (invers of process_block_indices())
+  void process_block_number
+  (
+   int dimension, 
+   int * process_rank, 
+   int * process_block_number, 
    int process_block_indices[] );
 
   //----------------------------------------------------------------------
