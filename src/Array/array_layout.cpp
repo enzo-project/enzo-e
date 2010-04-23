@@ -237,14 +237,33 @@ void Layout::process_block_number
  int * process_block_number, 
  int process_block_index[] )
 {
-  int virtual_process_rank = 0;
-  int multiplier = 1;
+  // int(ip*nv/np) <= iv < int((ip+1)*nv/np)
+  //
+  // lower:  floor ( 0*nv/np)     <=  0     < floor (nv/np)    [ 0 <=    0 < ... ]
+  // upper:  floor ((np-1)*nv/np) <= (nv-1) < floor (np*nv/np) [      nv-1 < nv  ]
+  //
+  //  nv >= np
+  //
+  // i: index
+  // n: number
+  // p: physical process
+  // v: virtual process (block)
+
+  int iv = 0;
+  int m = 1;
   for (int i=0; i<MIN(dimension,dimension_); i++) {
-    process_rank_local += multiplier * i;
-    multiplier *= process_blocks_[i];
+    iv += m * process_block_index[i];
+    m  *= process_blocks_[i];
   }
-@@@
-  * process_rank = 
+
+  // compute *process_rank
+  // process_block_number, 
+
+  ASSERT ("Layout::process_block_number",
+	  "process block out of range",
+	  0 <= iv && iv < process_block_count(*process_rank));
+
+  INCOMPLETE_MESSAGE ("Layout::process_block_number","");
 }
 
 //----------------------------------------------------------------------

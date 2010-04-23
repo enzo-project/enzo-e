@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
   if (process_count != 4) {
     printf ("mpirun -np 4 required\n");
     parallel->finalize();
-    parallel->abort();
+    // @@@ parallel->abort();
   }
 
   // unit_note("mpirun -np 8 required");
@@ -105,7 +105,7 @@ int main(int argc, char ** argv)
   unit_func("process_block_count");
   int expected_process_block_count = process_block_count;
 
-  unit_assert (layout_serial -> process_block_count() == 
+  unit_assert (layout_serial -> process_block_count(process_rank) == 
 	       expected_process_block_count);
   
   // confirm indices of process blocks assigned to this process
@@ -121,7 +121,7 @@ int main(int argc, char ** argv)
     {
 
       // Get process_index[] array
-      layout_serial ->process_block_indices(test_index, 3, process_index);
+      layout_serial ->process_block_indices(3, process_rank,test_index, process_index);
 
       // back-compute index from array
       computed_index = INDEX3(process_index,np3);
