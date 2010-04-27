@@ -1,0 +1,24 @@
+
+TOPDIR  = GetLaunchDir()
+
+print TOPDIR + '/include'
+
+env = Environment (
+	CC      = 'mpcc',	
+	CXX     = 'mpCC',	
+	CPPFLAGS = '-O0 -q64 -D H5_USE_16_API',
+	FCFLAGS = '-O0 -q64',
+        LINKFLAGS  = '-q64',
+	CPPPATH = ['#/include','/home/bordner/include'],
+	LIBPATH = ['#/lib','/home/bordner/lib'],
+	BINPATH = '#/bin',
+        DEFINES = ''
+         )
+
+Export('env')
+
+SConscript('src/SConscript')
+SConscript('test/SConscript')
+
+
+
