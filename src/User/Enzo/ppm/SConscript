@@ -1,10 +1,15 @@
 Import('env')
 
-# not supported by older scons
-# env.SetOption('warn', 'no-fortran-cxx-mix')
 components = ['error','disk','memory','monitor','parallel','method']
-libraries  = ['hdf5', 'gfortran', 'png']
-defines    = ' -D NO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX'
+libraries  = ['xlf90','hdf5', 'png']
+
+defines_cpp  = ' -DNO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX'
+defines_fortran = ' -WF,-DNO_OPTIMIZE_CELL_WIDTH -WF,-Dp8 -WF,-Dr8 -WF,-DSMALL_INTS -WF,-DLINUX'
+
+env = env.Clone (LIBS = [components,libraries])
+env.Append(CCFLAGS = defines_cpp)
+env.Append(FORTRAN  = defines_fortran)
+
 includes   = ['enzo_ppm.hpp']
 sources  = [Glob('initialize*cpp'),
             Glob('Cosmology*.cpp'),
@@ -19,10 +24,6 @@ sources  = [Glob('initialize*cpp'),
            'SetExternalBoundary.cpp',
            'sum_field.cpp']
 
-env = env.Clone (LIBS = [components,libraries])
-env.Append(CPPFLAGS = defines)
-
-
 env.Alias('install-inc',env.Install ('#/include',includes))
 
 
@@ -32,9 +33,3 @@ binaries = [env.Program (['test_ppm.cpp',      sources]),
             env.Program (['test_enzo_ppm.cpp', sources])]
 
 env.Alias('install-bin', env.Install ('$BINPATH', binaries))
-
-
-
-
-
-

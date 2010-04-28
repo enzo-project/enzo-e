@@ -6,11 +6,14 @@ print TOPDIR + '/include'
 env = Environment (
 	CC      = 'mpcc',	
 	CXX     = 'mpCC',	
-	CPPFLAGS = '-O0 -q64 -D H5_USE_16_API',
-	FCFLAGS = '-O0 -q64',
+#        FORTRAN = 'gfortran',
+        FORTRAN = 'mpfort',
+	FORTRANFLAGS = '-O3 -qhot -q64 -qextname',
+	CCFLAGS = '-O3 -qhot -q64 -D H5_USE_16_API',
         LINKFLAGS  = '-q64',
-	CPPPATH = ['#/include','/home/bordner/include'],
-	LIBPATH = ['#/lib','/home/bordner/lib'],
+        ARFLAGS  = 'r',
+	CPPPATH = ['/home/bordner/include', '#/include'],
+	LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
 	BINPATH = '#/bin',
         DEFINES = ''
          )
