@@ -7,8 +7,11 @@ env = Environment (
 	CXX     = 'mpiCC',	
 	CPPFLAGS = '-Wall -g',
 	CPPPATH = '#/include',
+	FORTRANPATH = '#/include',
+        FORTRAN = 'gfortran',
+        FORTRANLIBS = 'gfortran',
 	LIBPATH = '#/lib',
-	BINPATH = '#/bin'
+	BINPATH = '#/bin',
          )
 
 Export('env')

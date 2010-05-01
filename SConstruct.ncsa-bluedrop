@@ -9,13 +9,16 @@ env = Environment (
 #        FORTRAN = 'gfortran',
         FORTRAN = 'mpfort',
 	FORTRANFLAGS = '-O3 -qhot -q64 -qextname',
+        FORTRANLIBS = 'xlf90',
 	CCFLAGS = '-O3 -qhot -q64 -D H5_USE_16_API',
         LINKFLAGS  = '-q64',
+# 'xlf90'
         ARFLAGS  = 'r',
 	CPPPATH = ['/home/bordner/include', '#/include'],
 	LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
 	BINPATH = '#/bin',
-        DEFINES = ''
+        DEFINES = '',
+        CPPDEFPREFIX = '-WF,-D'
          )
 
 Export('env')
