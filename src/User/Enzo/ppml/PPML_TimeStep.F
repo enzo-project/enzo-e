@@ -1,14 +1,15 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
+#include "config.def"
 #include "fortran.def"
 
       Subroutine calc_dt_ppml
-     1     (nx,ny,nz,
-     1     i1,i2,j1,j2,k1,k2,
-     1     dx,dy,dz,
-     1     dn,vx,vy,vz,bx,by,bz,
-     1     dt)
+     &     (nx,ny,nz,
+     &     i1,i2,j1,j2,k1,k2,
+     &     dx,dy,dz,
+     &     dn,vx,vy,vz,bx,by,bz,
+     &     dt)
       
       Implicit NONE
 

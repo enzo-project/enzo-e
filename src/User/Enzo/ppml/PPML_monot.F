@@ -85,7 +85,7 @@ c     enddo
          Do m=1,7  
 
             if((b1(m)-c1(m))**2.gt.1e-12.or.(b2(m)-c2(m))**2.
-     1           gt.1e-12) imd=1
+     &             gt.1e-12) imd=1
             
          enddo
          
@@ -126,11 +126,11 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                WJ3 = (     -VX5 + 5.E0*VX4 + 2.E0*VX3)*o6
 
                IS1 = 13.E0*o12*(VX3 - 2.E0*VX2 + VX1)**2 
-     1              + (3.E0*VX3 - 4.E0*VX2 + VX1)**2*o4
+     &                + (3.E0*VX3 - 4.E0*VX2 + VX1)**2*o4
                IS2 = 13.E0*o12*(VX4 - 2.E0*VX3 + VX2)**2 
-     1              + (VX4 - VX2)**2*o4
+     &                + (VX4 - VX2)**2*o4
                IS3 = 13.E0*o12*(VX5 - 2.E0*VX4 + VX3)**2 
-     1              + (VX5 - 4.E0*VX4 + 3.E0*VX3)**2*o4
+     &                + (VX5 - 4.E0*VX4 + 3.E0*VX3)**2*o4
 
                AJ1 = WS1/(IS1+DELTA)**2   
                AJ2 = WS2/(IS2+DELTA)**2   
@@ -162,11 +162,11 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                WJ3 = (     -VX1 + 5.E0*VX2 + 2.E0*VX3)*o6
 
                IS1 = 13.E0*o12*(VX3 - 2.E0*VX4 + VX5)**2 
-     1              + (3.E0*VX3 - 4.E0*VX4 + VX5)**2*o4
+     &                + (3.E0*VX3 - 4.E0*VX4 + VX5)**2*o4
                IS2 = 13.E0*o12*(VX2 - 2.E0*VX3 + VX4)**2 
-     1              + (VX2 - VX4)**2*o4
+     &                + (VX2 - VX4)**2*o4
                IS3 = 13.E0*o12*(VX1 - 2.E0*VX2 + VX3)**2 
-     1              + (VX1 - 4.E0*VX2 + 3.E0*VX3)**2*o4
+     &                + (VX1 - 4.E0*VX2 + 3.E0*VX3)**2*o4
 
                AJ1 = WS1/(IS1+DELTA)**2   
                AJ2 = WS2/(IS2+DELTA)**2   
@@ -201,7 +201,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
             Do m=1,7
 
                If((b1(m)-u3(m))**2.lt.1e-12.and.(b2(m)-u3(m))**2.
-     1              lt.1.e-12)then
+     &                lt.1.e-12)then
 
                   dml = Xmedian(u3(m),vl(m),c1(m))
                   dmr = Xmedian(u3(m),vr(m),c2(m))
@@ -275,7 +275,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                uwr=q3(m)-q2(m)
 
                u1(m)=0.5e0*(SIGN(1.e0,uwl)+SIGN(1.e0,uwr))*
-     1              min(abs(uwl),abs(uwr))
+     &                min(abs(uwl),abs(uwr))
 
             Enddo
             
@@ -305,7 +305,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                uwr=q3(m)-q2(m)
 
                u1(m)=0.5e0*(SIGN(1.e0,uwl)+SIGN(1.e0,uwr))*
-     1              min(abs(uwl),abs(uwr))
+     &                min(abs(uwl),abs(uwr))
 
             Enddo
             
@@ -328,7 +328,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
          Endif
 
          if(abs(q4(1)-q3(1))/max(q4(1),q3(1)).gt.0.8e0.
-     1        and.dv2(i).lt.0.)then
+     &          and.dv2(i).lt.0.)then
 
             do m=1,7
                qxr(i,m)=q3(m)
@@ -337,7 +337,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
          endif
 
          if(abs(q2(1)-q3(1))/max(q2(1),q3(1)).gt.0.8e0.
-     1        and.dv1(i).lt.0.)then
+     &          and.dv1(i).lt.0.)then
 
             do m=1,7
                qxl(i,m)=q3(m)

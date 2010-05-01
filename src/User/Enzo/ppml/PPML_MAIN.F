@@ -4,17 +4,17 @@ c     See LICENSE_ENZO file for license and copyright information
       /* #include "error.def" */
 
       Subroutine PPML(dn,vx,vy,vz,bx,by,bz,
-     1     dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,         
-     1     dnry,vxry,vyry,vzry,bxry,byry,bzry,         
-     1     dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,
-     1     dt, dx,dy,dz,
-     1     nx, ny, nz,
-     1     GridStartIndex, GridEndIndex,
-     1     nsubgrids, lface, rface,
-     1     fistart, fiend, fjstart, fjend,
-     1     array, dnindex,
-     1     vxindex, vyindex, vzindex,
-     1     bxindex, byindex, bzindex)         
+     &       dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,         
+     &       dnry,vxry,vyry,vzry,bxry,byry,bzry,         
+     &       dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz,
+     &       dt, dx,dy,dz,
+     &       nx, ny, nz,
+     &       GridStartIndex, GridEndIndex,
+     &       nsubgrids, lface, rface,
+     &       fistart, fiend, fjstart, fjend,
+     &       array, dnindex,
+     &       vxindex, vyindex, vzindex,
+     &       bxindex, byindex, bzindex)         
 
       Implicit NONE
 
@@ -37,12 +37,12 @@ c     h1,h2,h3,h4,h5,h6,h7               - z-fluxes
       Integer m1,m2,m3
       
       integer fistart(nsubgrids*3), fiend(nsubgrids*3),
-     1     fjstart(nsubgrids*3), fjend(nsubgrids*3), 
-     1     lface(nsubgrids*3)  , rface(nsubgrids*3)
+     &     fjstart(nsubgrids*3), fjend(nsubgrids*3), 
+     &     lface(nsubgrids*3)  , rface(nsubgrids*3)
       integer dnindex(nsubgrids*6), vxindex(nsubgrids*6),
-     1     vyindex(nsubgrids*6), vzindex(nsubgrids*6),
-     1     bxindex(nsubgrids*6), byindex(nsubgrids*6),
-     1     bzindex(nsubgrids*6)
+     &     vyindex(nsubgrids*6), vzindex(nsubgrids*6),
+     &     bxindex(nsubgrids*6), byindex(nsubgrids*6),
+     &     bzindex(nsubgrids*6)
       
       real    array(1)         
       
@@ -1287,8 +1287,8 @@ c-------------------------------------------------------------------
             Do i=i1-1,i2
 
                bxrx(i,j,k)=bxrx(I,J,K)-Dt/Dx*
-     1              (ez(I,J,K)-ez(I,J-1,K)+
-     1              ey(I,J,K-1)-ey(I,J,K))
+     &              (ez(I,J,K)-ez(I,J-1,K)+
+     &              ey(I,J,K-1)-ey(I,J,K))
 
             Enddo
          Enddo
@@ -1299,8 +1299,8 @@ c-------------------------------------------------------------------
             Do i=i1,i2
 
                byry(i,j,k)=byry(I,J,K)-Dt/Dy*
-     1              (ex(I,J,K)-ex(I,J,K-1)+
-     1              ez(I-1,J,K)-ez(I,J,K))
+     &              (ex(I,J,K)-ex(I,J,K-1)+
+     &              ez(I-1,J,K)-ez(I,J,K))
 
             Enddo
          Enddo
@@ -1311,8 +1311,8 @@ c-------------------------------------------------------------------
             Do i=i1,i2
 
                bzrz(i,j,k)=bzrz(I,J,K)-Dt/Dz*
-     1              (ex(I,J-1,K)-ex(I,J,K)+
-     1              ey(I,J,K)-ey(I-1,J,K))
+     &              (ex(I,J-1,K)-ex(I,J,K)+
+     &              ey(I,J,K)-ey(I-1,J,K))
 
             Enddo
          Enddo
@@ -1331,32 +1331,32 @@ c     enddo
 c     close(10)
 
       Call Conserv(nxp,nyp,nzp,dn,vx,vy,vz,bx,by,bz,
-     1     qu1,qu2,qu3,qu4,qu5,qu6,qu7)           
+     &     qu1,qu2,qu3,qu4,qu5,qu6,qu7)           
 
       Do k=k1,k2
          Do j=j1,j2
             Do i=i1,i2
                
                QH(1)=QU1(I,J,K)-Dt/Dx*(F1(I,J,K)-F1(I-1,J,K)
-     1              +G1(I,J,K)-G1(I,J-1,K)+H1(I,J,K)-H1(I,J,K-1))
+     &              +G1(I,J,K)-G1(I,J-1,K)+H1(I,J,K)-H1(I,J,K-1))
 
                QH(2)=QU2(I,J,K)-Dt/Dx*(F2(I,J,K)-F2(I-1,J,K)
-     1              +G2(I,J,K)-G2(I,J-1,K)+H2(I,J,K)-H2(I,J,K-1))
+     &              +G2(I,J,K)-G2(I,J-1,K)+H2(I,J,K)-H2(I,J,K-1))
 
                QH(3)=QU3(I,J,K)-Dt/Dx*(F3(I,J,K)-F3(I-1,J,K)
-     1              +G3(I,J,K)-G3(I,J-1,K)+H3(I,J,K)-H3(I,J,K-1))
+     &              +G3(I,J,K)-G3(I,J-1,K)+H3(I,J,K)-H3(I,J,K-1))
 
                QH(4)=QU4(I,J,K)-Dt/Dx*(F4(I,J,K)-F4(I-1,J,K)
-     1              +G4(I,J,K)-G4(I,J-1,K)+H4(I,J,K)-H4(I,J,K-1))
+     &              +G4(I,J,K)-G4(I,J-1,K)+H4(I,J,K)-H4(I,J,K-1))
 
                QH(5)=QU5(I,J,K)-Dt/Dx*(F5(I,J,K)-F5(I-1,J,K)
-     1              +G5(I,J,K)-G5(I,J-1,K)+H5(I,J,K)-H5(I,J,K-1))
+     &              +G5(I,J,K)-G5(I,J-1,K)+H5(I,J,K)-H5(I,J,K-1))
 
                QH(6)=QU6(I,J,K)-Dt/Dx*(F6(I,J,K)-F6(I-1,J,K)
-     1              +G6(I,J,K)-G6(I,J-1,K)+H6(I,J,K)-H6(I,J,K-1))
+     &              +G6(I,J,K)-G6(I,J-1,K)+H6(I,J,K)-H6(I,J,K-1))
 
                QH(7)=QU7(I,J,K)-Dt/Dx*(F7(I,J,K)-F7(I-1,J,K)
-     1              +G7(I,J,K)-G7(I,J-1,K)+H7(I,J,K)-H7(I,J,K-1))
+     &              +G7(I,J,K)-G7(I,J-1,K)+H7(I,J,K)-H7(I,J,K-1))
 
                qh(5)=0.5*(bxrx(i,j,k)+bxrx(i-1,j,k))  
                qh(6)=0.5*(byry(i,j,k)+byry(i,j-1,k))  
@@ -1375,7 +1375,7 @@ c     close(10)
       Enddo
       
       Call Primitiv(nxp,nyp,nzp,qu1,qu2,qu3,qu4,qu5,qu6,qu7,
-     1     dn,vx,vy,vz,bx,by,bz)           
+     &     dn,vx,vy,vz,bx,by,bz)           
 
       
 c     

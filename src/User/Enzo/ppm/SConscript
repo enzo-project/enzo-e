@@ -1,14 +1,9 @@
 Import('env')
 
 components = ['error','disk','memory','monitor','parallel','method']
-libraries  = ['xlf90','hdf5', 'png']
-
-defines_cpp  = ' -DNO_OPTIMIZE_CELL_WIDTH -Dp8 -Dr8 -DSMALL_INTS -DLINUX'
-defines_fortran = ' -WF,-DNO_OPTIMIZE_CELL_WIDTH -WF,-Dp8 -WF,-Dr8 -WF,-DSMALL_INTS -WF,-DLINUX'
+libraries  = ['hdf5', 'png', '$FORTRANLIBS']
 
 env = env.Clone (LIBS = [components,libraries])
-env.Append(CCFLAGS = defines_cpp)
-env.Append(FORTRAN  = defines_fortran)
 
 includes   = ['enzo_ppm.hpp']
 sources  = [Glob('initialize*cpp'),

@@ -1337,11 +1337,11 @@ c     See LICENSE_CELLO file for license and copyright information
       WJ3 = (     -VP5 + 5.E0*VP4 + 2.E0*VP3)/6.E0
 
       IS1 = 13.E0/12.E0*(VP3 - 2.E0*VP2 + VP1)**2 
-     1     + (3.E0*VP3 - 4.E0*VP2 + VP1)**2/4.E0
+     &       + (3.E0*VP3 - 4.E0*VP2 + VP1)**2/4.E0
       IS2 = 13.E0/12.E0*(VP4 - 2.E0*VP3 + VP2)**2 
-     1     + (VP4 - VP2)**2/4.E0
+     &       + (VP4 - VP2)**2/4.E0
       IS3 = 13.E0/12.E0*(VP5 - 2.E0*VP4 + VP3)**2 
-     1     + (VP5 - 4.E0*VP4 + 3.E0*VP3)**2/4.E0
+     &       + (VP5 - 4.E0*VP4 + 3.E0*VP3)**2/4.E0
 
       AJ1 = WS1/(IS1+DELTA)**2   
       AJ2 = WS2/(IS2+DELTA)**2   
@@ -1354,11 +1354,11 @@ c     See LICENSE_CELLO file for license and copyright information
       WM3 = AJ3/AJS
 
       AJ1 = WM1*(WS1 + WS1*WS1 - 3.E0*WS1*WM1 + WM1*WM1)/(WS1*WS1 
-     1     + WM1*(1.E0 - 2.E0*WS1)) 
+     &       + WM1*(1.E0 - 2.E0*WS1)) 
       AJ2 = WM2*(WS2 + WS2*WS2 - 3.E0*WS2*WM2 + WM2*WM2)/(WS2*WS2 
-     1     + WM2*(1.E0 - 2.E0*WS2)) 
+     &       + WM2*(1.E0 - 2.E0*WS2)) 
       AJ3 = WM3*(WS3 + WS3*WS3 - 3.E0*WS3*WM3 + WM3*WM3)/(WS3*WS3 
-     1     + WM3*(1.E0 - 2.E0*WS3)) 
+     &       + WM3*(1.E0 - 2.E0*WS3)) 
 
       AJS = AJ1 + AJ2 +AJ3 
 
@@ -1373,11 +1373,11 @@ c     See LICENSE_CELLO file for license and copyright information
       WJ3 = (     -VP1 + 5.E0*VP2 + 2.E0*VP3)/6.E0
 
       IS1 = 13.E0/12.E0*(VP3 - 2.E0*VP4 + VP5)**2 
-     1     + (3.E0*VP3 - 4.E0*VP4 + VP5)**2/4.E0
+     &       + (3.E0*VP3 - 4.E0*VP4 + VP5)**2/4.E0
       IS2 = 13.E0/12.E0*(VP2 - 2.E0*VP3 + VP4)**2 
-     1     + (VP2 - VP4)**2/4.E0
+     &       + (VP2 - VP4)**2/4.E0
       IS3 = 13.E0/12.E0*(VP1 - 2.E0*VP2 + VP3)**2 
-     1     + (VP1 - 4.E0*VP2 + 3.E0*VP3)**2/4.E0
+     &       + (VP1 - 4.E0*VP2 + 3.E0*VP3)**2/4.E0
 
       AJ1 = WS1/(IS1+DELTA)**2   
       AJ2 = WS2/(IS2+DELTA)**2   
@@ -1390,11 +1390,11 @@ c     See LICENSE_CELLO file for license and copyright information
       WM3 = AJ3/AJS
 
       AJ1 = WM1*(WS1 + WS1*WS1 - 3.E0*WS1*WM1 + WM1*WM1)/(WS1*WS1 
-     1     + WM1*(1.E0 - 2.E0*WS1)) 
+     &       + WM1*(1.E0 - 2.E0*WS1)) 
       AJ2 = WM2*(WS2 + WS2*WS2 - 3.E0*WS2*WM2 + WM2*WM2)/(WS2*WS2 
-     1     + WM2*(1.E0 - 2.E0*WS2)) 
+     &       + WM2*(1.E0 - 2.E0*WS2)) 
       AJ3 = WM3*(WS3 + WS3*WS3 - 3.E0*WS3*WM3 + WM3*WM3)/(WS3*WS3 
-     1     + WM3*(1.E0 - 2.E0*WS3)) 
+     &       + WM3*(1.E0 - 2.E0*WS3)) 
 
       AJS = AJ1 + AJ2 +AJ3 
 
