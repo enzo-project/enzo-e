@@ -19,11 +19,7 @@ int main(int argc, char ** argv)
 
   unit_func("ParallelMpi");
 
-  // @@@@@@@@@@@@@@@@
-  // WARNING: downcasting (Parallel *) to (ParallelMpi *)
-  // @@@@@@@@@@@@@@@@
-
-  ParallelMpi * mpi = (ParallelMpi *) Parallel::instance();
+  ParallelMpi * mpi = ParallelMpi::instance();
 
   unit_assert(true);
 

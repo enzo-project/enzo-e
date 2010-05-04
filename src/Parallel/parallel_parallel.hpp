@@ -9,6 +9,7 @@
 /// @date     2009-10-16
 /// @brief    Interface for the Parallel class
 
+#include <stdlib.h>
 #include <string>
 
 class Parallel {
@@ -29,6 +30,14 @@ public: // interface
   virtual void finalize()
   { initialized_ = false; }
 
+  /// Abort execution abruptly
+  virtual void abort()
+  { exit (1); }
+
+  /// Exit the program
+  virtual void halt()
+  { exit (0); }
+
   /// Get total number of processors
   virtual int process_count()
   { return 1; }
@@ -42,6 +51,9 @@ public: // interface
   { return 1; }
 
   /// Get rank of this thread
+  /// @@@ CALLING  ParallelMpi::thread_rank() should revert to
+  /// virtual function Parallel::thread_rank(), but instead it
+  /// seems to really mess things up
   virtual int thread_rank()
   { return 0; }
 
@@ -65,6 +77,7 @@ protected: // functions
 
   /// Initialize a Parallel object (singleton design pattern)
   Parallel() 
+    : initialized_(false)
   {};
 
   void set_initialized_ (bool initialized)

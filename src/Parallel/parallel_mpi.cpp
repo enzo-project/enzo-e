@@ -9,9 +9,8 @@
 #include <sstream>
 
 #include <mpi.h>
-#include "cello.h"
 
-#include <mpi.h>
+#include "cello.h"
 #include "parallel.hpp"
 
 ParallelMpi ParallelMpi::instance_; // (singleton design pattern)
@@ -31,9 +30,27 @@ void ParallelMpi::initialize(int * argc, char ***argv)
   set_initialized_(true);
 };
 
+//----------------------------------------------------------------------
+
 void ParallelMpi::finalize()
 {
   MPI_Finalize();
 
   set_initialized_(false);
 }
+
+//----------------------------------------------------------------------
+
+void ParallelMpi::abort()
+{
+  MPI_Abort(MPI_COMM_WORLD,1);
+}
+
+//----------------------------------------------------------------------
+
+void ParallelMpi::halt()
+{
+  finalize();
+  exit (0);
+}
+

@@ -34,6 +34,12 @@ public: // interface
   /// Finalize MPI
   void finalize();
 
+  /// Abort execution abruptly
+  void abort();
+
+  /// Exit the program
+  void halt();
+
   /// Get MPI size
   int process_count() 
   { return size_; }
@@ -42,7 +48,6 @@ public: // interface
   int process_rank() 
   { return rank_; }
 
-  /// Get rank
   virtual std::string name()
   { return name_; }
 
