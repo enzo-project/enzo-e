@@ -4,14 +4,14 @@ TOPDIR  = GetLaunchDir()
 print TOPDIR + '/include'
 
 env = Environment (
-	CXX     = '/home/bordner/charm/charm-cvs/bin/ampicxx',
-	CPPFLAGS = '-Wall -g',
-	CPPPATH = '#/include',
+	CXX         = '/home/bordner/charm/charm-cvs/bin/ampicxx',
+	CPPFLAGS    = '-Wall -g',
+	CPPPATH     = '#/include',
 	FORTRANPATH = '#/include',
-        FORTRAN = 'gfortran',
+        FORTRAN     = 'gfortran',
         FORTRANLIBS = 'gfortran',
-	LIBPATH = '#/lib',
-	BINPATH = '#/bin',
+	LIBPATH     = '#/lib',
+	BINPATH     = '#/bin',
          )
 
 Export('env')
