@@ -2,11 +2,10 @@ import os
 
 TOPDIR  = GetLaunchDir()
 
-PLATFORM = ARGUMENTS.get('platform',Platform())
+platform = ARGUMENTS.get('platform',Platform())
 
-if (PLATFORM == 'linux-mpi'):
+if (platform == 'linux-mpi'):
    env = Environment (
-      PLATFORM    = '$PLATFORM',
       CXX         = 'mpiCC',	
       CPPFLAGS    = '-Wall -g',
       CPPPATH     = '#/include',
@@ -16,9 +15,8 @@ if (PLATFORM == 'linux-mpi'):
       LIBPATH     = '#/lib',
       BINPATH     = '#/bin',
    )
-elif (PLATFORM == 'linux-ampi'):
+elif (platform == 'linux-ampi'):
    env = Environment(
-      PLATFORM    = '$PLATFORM',
       CXX         = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
       CPPFLAGS    = '-Wall -g',
       CPPPATH     = '#/include',
@@ -28,9 +26,8 @@ elif (PLATFORM == 'linux-ampi'):
       LIBPATH     = '#/lib',
       BINPATH     = '#/bin',
    )
-elif (PLATFORM == 'triton'):
+elif (platform == 'triton'):
    env = Environment (
-      PLATFORM    = '$PLATFORM',
       ENV = {'PATH' : os.environ['PATH'],
 	       'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
       CXX     = 'mpicxx',	
@@ -44,7 +41,6 @@ elif (PLATFORM == 'triton'):
    )
 else:
    env = Environment (
-      PLATFORM    = '$PLATFORM',
       CPPPATH = ['#/include'],
       LIBPATH = ['#/lib'],
       BINPATH = '#/bin'
@@ -52,7 +48,7 @@ else:
 
 
 Export('env')
-
+Export('platform')
 SConscript('src/SConscript')
 SConscript('test/SConscript')
 
