@@ -4,7 +4,7 @@ TOPDIR  = GetLaunchDir()
 print TOPDIR + '/include'
 
 env = Environment(
-	CXX         = '/home/bordner/charm/charm-cvs/bin/charmc -language ampi',
+	CXX         = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
 	CPPFLAGS    = '-Wall -g',
 	CPPPATH     = '#/include',
 	FORTRANPATH = '#/include',
