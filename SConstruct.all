@@ -2,10 +2,23 @@ import os
 
 TOPDIR  = GetLaunchDir()
 
-platform = ARGUMENTS.get('platform',Platform())
+PLATFORM = ARGUMENTS.get('platform',Platform())
 
-if (platform == 'linux'):
+if (PLATFORM == 'linux-mpi'):
+   env = Environment (
+      PLATFORM    = '$PLATFORM',
+      CXX         = 'mpiCC',	
+      CPPFLAGS    = '-Wall -g',
+      CPPPATH     = '#/include',
+      FORTRANPATH = '#/include',
+      FORTRAN     = 'gfortran',
+      FORTRANLIBS = 'gfortran',
+      LIBPATH     = '#/lib',
+      BINPATH     = '#/bin',
+   )
+elif (PLATFORM == 'linux-ampi'):
    env = Environment(
+      PLATFORM    = '$PLATFORM',
       CXX         = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
       CPPFLAGS    = '-Wall -g',
       CPPPATH     = '#/include',
@@ -15,8 +28,9 @@ if (platform == 'linux'):
       LIBPATH     = '#/lib',
       BINPATH     = '#/bin',
    )
-elif (platform == 'triton'):
+elif (PLATFORM == 'triton'):
    env = Environment (
+      PLATFORM    = '$PLATFORM',
       ENV = {'PATH' : os.environ['PATH'],
 	       'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
       CXX     = 'mpicxx',	
@@ -24,10 +38,13 @@ elif (platform == 'triton'):
       LIBPATH = ['#/lib', '/opt/pgi/hdf5_pgi/lib'],
       BINPATH = '#/bin',
       CPPFLAGS = '-g -DH5_USE_16_API',
-      LINKFLAGS = '-pgf90libs'
+      FORTRAN = 'mpif90',
+      FORTRANPATH = '#/include',
+      LINKFLAGS = '-pgf90libs',
    )
 else:
    env = Environment (
+      PLATFORM    = '$PLATFORM',
       CPPPATH = ['#/include'],
       LIBPATH = ['#/lib'],
       BINPATH = '#/bin'

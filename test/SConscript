@@ -1,11 +1,25 @@
+Import('env')
 
 # Define a test for running unit tests
-
 unit       = Builder(action = "$SOURCE > $TARGET")
 unit_enzo  = Builder(action = "$SOURCE $ARGS > $TARGET")
 unit_parse = Builder(action = "bin/test_parse < $SOURCE > $TARGET")
-unit_mpi   = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun -n 4 $SOURCE > $TARGET")
-test_cello = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun -n 4 bin/cello $SOURCE > $TARGET")
+
+if ('$PLATFORM' == 'linux-mpi'):
+   unit_mpi   = Builder(action = "mpirun -np 4 $SOURCE > $TARGET")
+   test_cello = Builder(action = "mpirun -np 4 bin/cello $SOURCE > $TARGET")
+elif ('$PLATFORM' == 'linux-ampi'):
+   unit_mpi   = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun -n 4 $SOURCE > $TARGET")
+   test_cello = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun -n 4 bin/cello $SOURCE > $TARGET")
+elif ('$PLATFORM' == 'triton'):
+   unit_mpi = Builder(action = "/opt/openmpi_pgimx/bin/mpirun -np 4 $SOURCE > $TARGET")
+   test_cello = Builder(action = "/opt/openmpi_pgimx/bin/mpirun -np 4 bin/cello $SOURCE > $TARGET")
+else:
+   unit_mpi = Builder(action = "$SOURCE > $TARGET")
+   test_cello = Builder(action = "bin/cello $SOURCE > $TARGET")
+
+
+
 
 #unit_mpi   = Builder(action = "mpirun -np 4 $SOURCE > $TARGET")
 #test_cello = Builder(action = "mpirun -np 4 bin/cello $SOURCE > $TARGET")
