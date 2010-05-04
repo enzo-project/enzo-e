@@ -1,10 +1,15 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
+/// @file test_monitor.cpp
+/// @bug test_monitor crashes with AMPI in pngwriter close()
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string>
+
+#include "pngwriter.h"
 
 #include "test.hpp"
 #include "parallel.hpp"
@@ -22,6 +27,8 @@ int main(int argc, char ** argv)
   int n = 128;
 
   // Allocate array
+
+  printf ("pngwriter version = %g\n",pngwriter::version());
 
   float * array = new float [n*n*n];
   for (int i=0; i<n*n*n; i++) array[i]=0;

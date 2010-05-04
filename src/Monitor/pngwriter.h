@@ -3,14 +3,15 @@
 //
 //  Email:                     individual61@users.sourceforge.net
 //
-//  Version:                   0.5.3   (24 / I / 2005)
+//  Version:                   0.5.4   (19 / II / 2009)
 //
 //  Description:               Library that allows plotting a 48 bit
 //                             PNG image pixel by pixel, which can 
 //                             then be opened with a graphics program.
 //  
 //  License:                   GNU General Public License
-//                             © 2002, 2003, 2004, 2005 Paul Blackburn
+//                             Copyright 2002, 2003, 2004, 2005, 2006, 2007,
+//                             2008, 2009 Paul Blackburn
 //                             
 //  Website: Main:             http://pngwriter.sourceforge.net/
 //           Sourceforge.net:  http://sourceforge.net/projects/pngwriter/
@@ -43,9 +44,9 @@
 #ifndef PNGWRITER_H
 #define PNGWRITER_H 1
 
-#define PNGWRITER_VERSION 0.53
+#define PNGWRITER_VERSION 0.54
 
-#include "png.h"
+#include <png.h>
 
 // REMEMBER TO ADD -DNO_FREETYPE TO YOUR COMPILATION FLAGS IF PNGwriter WAS
 // COMPILED WITHOUT FREETYPE SUPPORT!!!
@@ -106,6 +107,8 @@ class pngwriter
    int rowbytes_;
    int colortype_;
    int compressionlevel_;
+   bool transformation_; // Required by Mikkel's patch
+   
    unsigned char * * graph_;
    double filegamma_;
    double screengamma_;
@@ -332,12 +335,17 @@ class pngwriter
 
    
    /* Read From File
-    * Open the existing PNG image, and copy it into this instance of the class. Now you can access
-    * that image's pixels with read(x, y, colour), you can change the image, or whatever you want.
-    * It can be called like this, also: readfromfile("image.png"). It is important to mention that 
-    * not all colour types and bit depths are supported. Try and make sure that your PNG image is
-    * of bit depth 8 or 16.
+    * Open the existing PNG image, and copy it into this instance of the class. It is important to mention 
+    * that PNG variants are supported. Very generally speaking, most PNG files can now be read (as of version 0.5.4), 
+    * but if they have an alpha channel it will be completely stripped. If the PNG file uses GIF-style transparency 
+    * (where one colour is chosen to be transparent), PNGwriter will not read the image properly, but will not 
+    * complain. Also, if any ancillary chunks are included in the PNG file (chroma, filter, etc.), it will render 
+    * with a slightly different tonality. For the vast majority of PNGs, this should not be an issue. Note: 
+    * If you read an 8-bit PNG, the internal representation of that instance of PNGwriter will be 8-bit (PNG 
+    * files of less than 8 bits will be upscaled to 8 bits). To convert it to 16-bit, just loop over all pixels, 
+    * reading them into a new instance of PNGwriter. New instances of PNGwriter are 16-bit by default.
     * */
+
    void readfromfile(char * name);  
    void readfromfile(const char * name); 
 
@@ -387,7 +395,7 @@ class pngwriter
    double getgamma(void);
 
    /* Bezier Curve
-    * (After Frenchman Pierre BÂŽzier from Regie Renault)
+    * (After Frenchman Pierre BŽzier from Regie Renault)
     * A collection of formulae for describing curved lines 
     * and surfaces, first used in 1972 to model automobile surfaces. 
     *             (from the The Free On-line Dictionary of Computing)
@@ -470,7 +478,8 @@ class pngwriter
     * Plots the colour given by red, green blue, but blended with the existing pixel
     * value at that position. opacity is a double that goes from 0.0 to 1.0. 
     * 0.0 will not change the pixel at all, and 1.0 will plot the given colour. 
-    * Anything in between will be a blend of both pixel levels.
+    * Anything in between will be a blend of both pixel levels. Please note: This is neither 
+	* alpha channel nor PNG transparency chunk support. This merely blends the plotted pixels.
     * */
    
    void plot_blend(int x, int y, double opacity, int red, int green, int blue);
@@ -564,7 +573,7 @@ class pngwriter
     * a double from 0.0 to 1.0 and represents how much of the original pixel value is retained when plotting the 
     * new pixel. In other words, if opacity is 0.7, then after plotting, the new pixel will be 30% of the
     * original colour the pixel was, and 70% of the new colour, whatever that may be. As usual, each function
-    * is available in int or double versions.
+    * is available in int or double versions.  Please note: This is neither alpha channel nor PNG transparency chunk support. This merely blends the plotted pixels.
     * */
   
    // Start Blended Functions
