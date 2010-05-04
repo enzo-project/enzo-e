@@ -1,9 +1,6 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file test_monitor.cpp
-/// @bug test_monitor crashes with AMPI in pngwriter close()
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
