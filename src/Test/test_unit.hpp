@@ -58,7 +58,7 @@ void unit_class (const char * c)
 template <typename T>
 void unit_size ()
 {
-  printf ("sizeof (%s) = %d\n",unit::class_name,sizeof(T));
+  printf ("sizeof (%s) = %lu\n",unit::class_name,sizeof(T));
 }
 
 /// @brief Set the current unit testing function name

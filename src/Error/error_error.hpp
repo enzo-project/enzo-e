@@ -95,7 +95,7 @@ public: // functions
 	       int          line)
   {
     if (tracing_) {
-      printf ("TRACE %s:%d\n",__FILE__,__LINE__); 
+      printf ("TRACE %s:%d\n",file,line); 
       fflush(stdout);
     }
   };

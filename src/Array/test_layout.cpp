@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
   if (process_count != 4) {
     printf ("mpirun -np 4 required\n");
     parallel->finalize();
-    // @@@ parallel->abort();
+    parallel->abort();
   }
 
   // unit_note("mpirun -np 8 required");
