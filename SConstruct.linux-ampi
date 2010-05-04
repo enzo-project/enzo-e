@@ -3,8 +3,8 @@ TOPDIR  = GetLaunchDir()
 
 print TOPDIR + '/include'
 
-env = Environment (
-	CXX         = '/home/bordner/charm/charm-cvs/bin/ampicxx',
+env = Environment(
+	CXX         = '/home/bordner/charm/charm-cvs/bin/charmc -language ampi',
 	CPPFLAGS    = '-Wall -g',
 	CPPPATH     = '#/include',
 	FORTRANPATH = '#/include',

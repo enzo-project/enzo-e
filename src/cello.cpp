@@ -6,6 +6,8 @@
 /// @date      Mon Oct  5 15:10:56 PDT 2009
 /// @brief     Cello main
 
+#include <mpi.h>
+
 #include "cello.h"
 
 #include "parallel.hpp"
