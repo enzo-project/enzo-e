@@ -1,5 +1,6 @@
 #!/bin/tcsh -f
 
+set suffix = 
 
 
 foreach opt (yes)
