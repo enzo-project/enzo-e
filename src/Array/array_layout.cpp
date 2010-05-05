@@ -160,7 +160,7 @@ int Layout::process_block_count (int process_rank) const
 
   int process_rank_local = process_rank - process_first_;
 
-  int block_count;
+  int block_count = 0;
 
   if (0 <= process_rank_local && 
       process_rank_local < process_count_) {
@@ -178,9 +178,6 @@ int Layout::process_block_count (int process_rank) const
 
     block_count = block_index_last - block_index_first;
     
-  } else {
-    // Array does not belong on this process
-    block_count = 0;
   }
 
   return block_count;
@@ -237,33 +234,43 @@ void Layout::process_block_number
  int * process_block_number, 
  int process_block_index[] )
 {
-  // int(ip*nv/np) <= iv < int((ip+1)*nv/np)
-  //
-  // lower:  floor ( 0*nv/np)     <=  0     < floor (nv/np)    [ 0 <=    0 < ... ]
-  // upper:  floor ((np-1)*nv/np) <= (nv-1) < floor (np*nv/np) [      nv-1 < nv  ]
-  //
-  //  nv >= np
-  //
-  // i: index
-  // n: number
-  // p: physical process
-  // v: virtual process (block)
-
-  int iv = 0;
-  int m = 1;
-  for (int i=0; i<MIN(dimension,dimension_); i++) {
-    iv += m * process_block_index[i];
-    m  *= process_blocks_[i];
+  int d = MIN(dimension,dimension_)-1;
+  int block_index = process_block_index[d];
+  for (int i=d-1; i>=0; i--) {
+    block_index = block_index * process_blocks_[i] + process_block_index[i];
   }
 
+  // compute process_block_count
+  int process_block_count = 1;
+  for (int i=0; i<dimension; i++) process_block_count *= process_blocks_[i];
+
   // compute *process_rank
-  // process_block_number, 
 
-  ASSERT ("Layout::process_block_number",
-	  "process block out of range",
-	  0 <= iv && iv < process_block_count(*process_rank));
+  int process_rank_local
+    = block_index * process_count_ / process_block_count;
 
-  INCOMPLETE_MESSAGE ("Layout::process_block_number","");
+  int block_index_first =
+    (process_rank_local + 1) * process_block_count / process_count_;
+
+  while ( block_index >= block_index_first) {
+    ++ process_rank_local;
+    block_index_first =
+      (process_rank_local + 1) * process_block_count / process_count_;
+  }
+
+  *process_rank         = process_rank_local + process_first_;
+
+  block_index_first =
+    process_rank_local * process_block_count / process_count_;
+  *process_block_number = block_index - block_index_first;
+
+  printf ("%d %d %d  %d   %d  %d\n",
+	  process_block_index[0],
+	  process_block_index[1],
+	  process_block_index[2],
+	  block_index,
+	  *process_rank,
+	  *process_block_number);
 }
 
 //----------------------------------------------------------------------

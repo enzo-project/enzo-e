@@ -82,7 +82,7 @@ public: // interface
   /// (*) Return the number of local process blocks
   int process_block_count (int process_rank) const;
 
-  /// ( ) Return the index of the local process block for the given block index
+  /// (*) Return the index of the local process block for the given block index
   void process_block_indices
   (
    int dimension, 
@@ -91,7 +91,7 @@ public: // interface
    int process_block_indices[] );
 
   /// ( ) Return the process rank and process block number for the given
-  /// process block indices (invers of process_block_indices())
+  /// process block indices (inverse of process_block_indices())
   void process_block_number
   (
    int dimension, 
