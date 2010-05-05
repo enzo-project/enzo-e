@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     
+/// @file     test_data.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     
-/// @brief    
+/// @date     2010-04-02
+/// @brief    Test program for the Data class
 
 #include "cello.h"
 
