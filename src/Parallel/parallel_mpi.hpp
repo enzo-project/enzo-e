@@ -1,14 +1,13 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_MPI_HPP
-#define PARALLEL_MPI_HPP
-
-/// @file     mpi.hpp
+/// @file     parallel_mpi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Oct 15 10:40:37 PDT 2009 
-/// @bugs     Should use the Singleton design pattern
 /// @brief    Interface for the ParallelMpi class
+
+#ifndef PARALLEL_MPI_HPP
+#define PARALLEL_MPI_HPP
 
 enum enum_send_type {
   send_type_standard,

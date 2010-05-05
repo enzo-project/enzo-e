@@ -1,6 +1,11 @@
 // $Id: method.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
+/// @file     method_method.hpp 
+/// @author   James Bordner (jobordner@ucsd.edu) 
+/// @date     Mon Jul 13 11:11:47 PDT 2009 
+/// @brief    Declaration for the Method component
+
 #ifndef METHOD_METHOD_HPP
 #define METHOD_METHOD_HPP
 
@@ -22,11 +27,6 @@ enum access_type {
   access_type_read_write
 };
 
-
-/// @file     method.hpp 
-/// @author   James Bordner (jobordner@ucsd.edu) 
-/// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the Method component
 
 class Method {
 

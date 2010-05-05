@@ -9,6 +9,8 @@
 #ifndef DATA_HPP
 #define DATA_HPP
 
+#include <vector>
+
 #include "particles.hpp"
 #include "field.hpp"
 
@@ -22,30 +24,73 @@ public: // interface
 
   /// Initialize the Data object
   Data()
-    : field_(0),
-      particles_(0)
+    : field_(),
+      particles_()
   { };
 
-  /// Set fields
-  void set_fields (Field * field)
-  { field_ = field; };
+  //----------------------------------------------------------------------
+  // Fields
+  //----------------------------------------------------------------------
 
-  /// Get fields
-  void get_fields (Field ** field)
-  { *field = field_; };
+  /// Add field
+  void add_field (Field * field)
+  { field_.push_back (field); };
 
-  /// Set particles
-  void set_particles (Particles * particles)
-  { particles_ = particles; };
+  /// Return the number of fields
+  int field_count ()
+  { return field_.size(); };
 
-  /// Get particles
-  void get_particles (Particles ** particles)
-  { *particles = particles_; };
+  /// Return the ith field
+  Field * field (int i)
+  {
+    return (0 <= i && i < field_count()) ? field_.at(i) : 0;
+  }
+
+  /// Return the named field
+  Field * field (std::string name)
+  {
+    for (int i=0; i<field_count(); i++) {
+      if (field(i)->name() == name) {
+	return field_.at(i); 
+      };
+    }
+    return 0;
+  }
+
+  //----------------------------------------------------------------------
+  // Particles
+  //----------------------------------------------------------------------
+
+  /// Add particles
+  void add_particles (Particles * particles)
+  { particles_.push_back (particles); };
+
+  /// Return the number of particless
+  int particles_count ()
+  { return particles_.size(); };
+
+  /// Return the ith particles
+  Particles * particles (int i)
+  { 
+    return (0 <= i && i < particles_count()) ? particles_.at(i) : 0;
+  }
+
+  /// Return the named particles
+  Particles * particles (std::string name)
+  {
+    for (int i=0; i<particles_count(); i++) {
+      if (particles(i)->name() == name) {
+	return particles_.at(i); 
+      };
+    }
+    return 0;
+  }
+
 
 private: // attributes
 
-  Field     * field_;
-  Particles * particles_;
+  std::vector<Field *>     field_;
+  std::vector<Particles *> particles_;
 
 };
 

@@ -4,7 +4,7 @@
 #ifndef PERFORMANCE_PERFORMANCE_HPP
 #define PERFORMANCE_PERFORMANCE_HPP
 
-/// @file     performance.hpp
+/// @file     performance_performance.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Oct 14 23:40:13 PDT 2009
 /// @todo     Complete detailed description of Performance class

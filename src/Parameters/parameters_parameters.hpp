@@ -4,7 +4,7 @@
 #ifndef PARAMETERS_PARAMETERS_HPP
 #define PARAMETERS_PARAMETERS_HPP
 
-/// @file     parameters.hpp
+/// @file     parameters_parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
 /// @brief    Declaration for the Parameters class

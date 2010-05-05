@@ -1,13 +1,13 @@
 // $Id: monitor.hpp 1261 2010-03-03 00:14:11Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MONITOR_MONITOR_HPP
-#define MONITOR_MONITOR_HPP
-
-/// @file     monitor.hpp
+/// @file     monitor_monitor.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-05
 /// @brief    Declaration of the Monitor class
+
+#ifndef MONITOR_MONITOR_HPP
+#define MONITOR_MONITOR_HPP
 
 #include "parallel.hpp"
 #include "error.hpp"

@@ -18,7 +18,22 @@ class Particles {
 public: // public
 
   /// Initialize a Particles object
-  Particles() { };
+  Particles()
+    : name_()
+  { };
+
+  /// Set Particles name
+  void set_name (std::string name)
+  { name_ = name; };
+
+  /// Get Particles name
+  std::string name ()
+  { return name_; };
+
+private: // attributes
+
+  /// String defining the field's name
+  std::string name_;
 
 };
 

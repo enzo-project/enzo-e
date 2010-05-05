@@ -26,24 +26,3 @@ Field::Field()
 {
 }
 
-//----------------------------------------------------------------------
-
-Field::~Field()
-{
-  if (centering_) delete [] centering_;
-}
-
-//----------------------------------------------------------------------
-
-Field::Field(const Field & field) throw()
-{
-  INCOMPLETE_MESSAGE("Field::Field","");
-}
-
-//----------------------------------------------------------------------
-
-Field & Field::operator= (const Field & field) throw()
-{
-  INCOMPLETE_MESSAGE("Field::operator =","");
-  return *this;
-}

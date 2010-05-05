@@ -4,7 +4,7 @@ Import('platform')
 # Define a test for running unit tests
 unit       = Builder(action = "$SOURCE > $TARGET")
 unit_enzo  = Builder(action = "$SOURCE $ARGS > $TARGET")
-unit_parse = Builder(action = "bin/test_parse < $SOURCE > $TARGET")
+unit_parse = Builder(action = "$SOURCE < $ARGS > $TARGET")
 
 if (platform == 'linux-mpi'):
    unit_mpi   = Builder(action = "mpirun -np 4 $SOURCE > $TARGET")
@@ -25,16 +25,16 @@ else:
 #unit_mpi   = Builder(action = "mpirun -np 4 $SOURCE > $TARGET")
 #test_cello = Builder(action = "mpirun -np 4 bin/cello $SOURCE > $TARGET")
 
-env = Environment(BUILDERS = {
-	'Unit':       unit, 
-	'UnitEnzo':   unit_enzo, 
-	'UnitMpi' :   unit_mpi,
-	'UnitParse' : unit_parse,
-	'TestCello' : test_cello})
+env.Append(BUILDERS = { 'Unit': unit } )
+env.Append(BUILDERS = { 'UnitEnzo':   unit_enzo } ) 
+env.Append(BUILDERS = { 'UnitMpi' :   unit_mpi } )
+env.Append(BUILDERS = { 'UnitParse' : unit_parse } )
+env.Append(BUILDERS = { 'TestCello' : test_cello } )
 
 env.Unit('test_array.out',       '#/bin/test_array')
 env.Unit('test_block.out',       '#/bin/test_block')
 env.Unit('test_data.out',        '#/bin/test_data')
+env.Unit('test_field.out',       '#/bin/test_field')
 env.Unit('test_hdf5.out',        '#/bin/test_hdf5')
 env.Unit('test_error.out',       '#/bin/test_error')
 env.Unit('test_memory.out',      '#/bin/test_memory')
@@ -55,14 +55,13 @@ env.UnitMpi('test_layout.out',   '#/bin/test_layout')
 env.UnitMpi('test_affinity.out', '#/bin/test_affinity')
 env.UnitMpi('test_mpi.out',      '#/bin/test_mpi')
 
-env.UnitParse('test_parse_groups.out',     'parse_groups.in')
-env.UnitParse('test_parse_integer.out',    'parse_integer.in')
-env.UnitParse('test_parse_list.out',       'parse_list.in')
-env.UnitParse('test_parse_logical.out',    'parse_logical.in')
-env.UnitParse('test_parse_scalar.out',     'parse_scalar.in')
-
-env.UnitParse('test_parse_implosion.out',  'parse_implosion.in')
-env.UnitParse('test_parse_shock-pool.out', 'parse_shock-pool.in')
+env.UnitParse('test_parse_groups.out',     '#/bin/test_parse', ARGS='test/parse_groups.in')
+env.UnitParse('test_parse_integer.out',    '#/bin/test_parse', ARGS='test/parse_integer.in')
+env.UnitParse('test_parse_list.out',       '#/bin/test_parse', ARGS='test/parse_list.in')
+env.UnitParse('test_parse_logical.out',    '#/bin/test_parse', ARGS='test/parse_logical.in')
+env.UnitParse('test_parse_scalar.out',     '#/bin/test_parse', ARGS='test/parse_scalar.in')
+env.UnitParse('test_parse_implosion.out',  '#/bin/test_parse', ARGS='test/parse_implosion.in')
+env.UnitParse('test_parse_shock-pool.out', '#/bin/test_parse', ARGS='test/parse_shock-pool.in')
 
 env.TestCello('cello_implosion.out',  'parse_implosion.in')
 
@@ -78,7 +77,3 @@ env.TestCello('cello_implosion.out',  'parse_implosion.in')
 #	./test_parse < test_logical.in > test_logical.out
 #	./test_parse < test_scalar.in > test_scalar.out
 #	-grep -i -l error *.out
-#
-#
-#
-#

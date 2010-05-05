@@ -27,6 +27,7 @@ enum precision_type {
 };
 
 #include <string>
+#include <memory>
 
 class Field {
 
@@ -39,14 +40,13 @@ public: // public
   /// Initialize a Field object
   Field();
 
-  /// Destructor
-  ~Field();
+  /// Set Field name
+  void set_name (std::string name)
+  { name_ = name; };
 
-  /// Copy constructor
-  Field(const Field & field) throw();
-
-  /// Assignment operator
-  Field & operator= (const Field & field) throw();
+  /// Get Field name
+  std::string name ()
+  { return name_; };
 
 private: // attributes
 
@@ -68,7 +68,7 @@ private: // attributes
 
   /// Cell centering, defined as (0,0,0) <= (px,py,pz) <= (1,1,1)
   /// Cell centered = (.5,.5,.5)
-  float * centering_;
+  std::auto_ptr<float> centering_;
 
   /// Minimum allowed value for the Field
   double min_;

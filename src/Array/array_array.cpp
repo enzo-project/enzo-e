@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     
+/// @file     array_array.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     
-/// @brief    
+/// @date     2008-02-20
+/// @brief    Implementation of the Array class
  
 #include "cello.h"
 

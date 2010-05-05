@@ -1,13 +1,13 @@
 // $Id: array.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ARRAY_ARRAY_HPP
-#define ARRAY_ARRAY_HPP
-
-/// @file     array.hpp
+/// @file     array_array.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Jul  8 16:01:10 PDT 2009
 /// @brief    Declaration of the Array class
+
+#ifndef ARRAY_ARRAY_HPP
+#define ARRAY_ARRAY_HPP
 
 class Array {
 

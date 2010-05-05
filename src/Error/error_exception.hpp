@@ -1,13 +1,13 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ERROR_EXCEPTION_HPP
-#define ERROR_EXCEPTION_HPP
-
-/// @file     exception.hpp
+/// @file     error_exception.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Sun Jul 12 13:12:09 PDT 2009
 /// @brief    Declaration of Exception classes
+
+#ifndef ERROR_EXCEPTION_HPP
+#define ERROR_EXCEPTION_HPP
 
 /// @class    Exception
 /// @ingroup  Error
