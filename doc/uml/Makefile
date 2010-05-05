@@ -1,4 +1,4 @@
-FIGS = array arrays amr core-components task
+FIGS = array arrays amr task
 PS   = $(patsubst %,%.ps, $(FIGS))
 OBJS = $(patsubst %,%.1, $(FIGS))
 SRC  = $(patsubst %,%.mp,$(FIGS))
