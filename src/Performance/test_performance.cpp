@@ -86,9 +86,9 @@ int main(int argc, char ** argv)
   // Add groups
 
   performance->new_group(component_amr,"amr");
-  performance->new_group(component_analysis,"analysis");
   performance->new_group(component_array,"array");
   performance->new_group(component_control,"control");
+  performance->new_group(component_control,"data");
   performance->new_group(component_disk,"disk");
   performance->new_group(component_error,"error");
   performance->new_group(component_field,"field");

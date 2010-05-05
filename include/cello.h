@@ -106,9 +106,9 @@ enum type_perf_functions {
 enum type_component {
   component_undefined,
   component_amr,
-  component_analysis,
   component_array,
   component_control,
+  component_data,
   component_disk,
   component_error,
   component_field,
@@ -135,5 +135,7 @@ enum type_component {
 #include <vector>
 #include <map>
 #include <stack>
+
+#include "strict_auto_ptr.h"
 
 #endif /* CELLO_DEF */

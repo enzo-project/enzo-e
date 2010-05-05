@@ -1,13 +1,15 @@
 // $Id: amr.hpp 1259 2010-03-02 03:12:08Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef AMR_AMR_HPP
-#define AMR_AMR_HPP
-
 /// @file     amr_amr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Nov 10 15:38:40 PST 2009
 /// @brief    Declaration of the Amr class
+
+#ifndef AMR_AMR_HPP
+#define AMR_AMR_HPP
+
+#include <memory>
 
 class Amr {
 
@@ -24,19 +26,6 @@ public: // interface
     tree_(0)
   {};
 
-  /// Delet an Amr object
-  ~Amr() 
-  { delete tree_; };
-
-  /// Copy constructor
-  Amr(const Amr & amr) throw()
-  { INCOMPLETE_MESSAGE("Amr::Amr",""); };
-
-  /// Assignment operator
-  Amr & operator= (const Amr & amr) throw()
-  { INCOMPLETE_MESSAGE("Amr::operator =",""); };
-
-
 private: // attributes
 
   /// Maximum level for the hierarchy (0 = unigrid)
@@ -46,7 +35,7 @@ private: // attributes
   int nx0_, ny0_, nz0_;
 
   /// Tree defining the AMR hierarchy topology
-  TreeK * tree_;
+  strict_auto_ptr<TreeK> tree_;
 
 
 };
