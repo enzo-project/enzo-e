@@ -2,34 +2,37 @@ prologues := 2
 input metauml;
 beginfig(1)
   Class.A("Amr")()();
-  Class.Ca("Patch")()();
-  Class.Cb("Tree")()();
-  Class.Da("Layout")()();
-  Class.Db("Box")()();
-  Class.Dc("Node")()();
+  Class.P("Patch")()();
+  Class.T("Tree")()();
+  Class.N("Node")()();
 
   A.info.iName.iFont.scale := 1.5;
-  Ca.info.iName.iFont.scale := 1.5;
-  Cb.info.iName.iFont.scale := 1.5;
-  Da.info.iName.iFont.scale := 1.5;
-  Db.info.iName.iFont.scale := 1.5;
-  Dc.info.iName.iFont.scale := 1.5;
+  P.info.iName.iFont.scale := 1.5;
+  T.info.iName.iFont.scale := 1.5;
+  N.info.iName.iFont.scale := 1.5;
 
-  Ca.n = A.s + (0,-30);
-  Db.n = Ca.s + (0, -40);
-  Cb.n = Ca.n + (60, 0);
-  Da.n = Db.n + (-60,0);
-  Dc.n = Db.n + (60,0);
-  drawObjects(A,Ca,Cb,Da,Db,Dc);
-  link(dashedLink)(Db.e -- Dc.w);
-  link(aggregation)(Ca.n -- A.s);
-  link(aggregation)
-	(pathStepY(Da.n, Ca.s, 15));
-  link(aggregation)
-	(pathStepY(Db.n, Ca.s, 15));
-  link(aggregation)
-	(pathStepY(Dc.n, Ca.s , 15));
-  link(composition)(Dc.n -- Cb.s );
+  P.n = A.n + (80, 0);
+  T.n = A.s + (0, -40);
+  N.n = T.n + (80, 0);
+  
+  drawObjects(A,P,T,N);
+  
+  item(iAssoc)("1")(obj.sw = A.e + (10,0));
+  item(iAssoc)("1")(obj.sw = T.e + (10,0));
+  item(iAssoc)("1..*")(obj.se = P.w );
+  item(iAssoc)("1..*")(obj.se = N.w );
+  item(iAssoc)("1")(obj.nw = A.s);
+  item(iAssoc)("1")(obj.nw = P.s);
+  item(iAssoc)("1")(obj.sw = T.n);
+  item(iAssoc)("1")(obj.sw = N.n);
+
+
+ 
+  link(composition)(P.w -- A.e);
+  link(association)(A.s -- T.n);
+  link(association)(P.s -- N.n);
+  link(composition)(N.w -- T.e);
 	
+  
 endfig;
 end
