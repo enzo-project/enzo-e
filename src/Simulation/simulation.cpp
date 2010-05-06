@@ -12,7 +12,6 @@ Simulation::Simulation()
   : lower_(),
     upper_(),
     amr_(NULL),
-    parallel_(NULL),
     fields_(NULL),
     methods_(NULL)
 {
@@ -59,12 +58,6 @@ void Simulation::initialize ()
   //  coalesce  = true;      # whether to coalesce small patches to one big one
   //  patch_min = 4;         # minimum patch size
   //  patch_max = 128;       # maximum patch size
-
-  // --------------------------------------------------
-  // Initialize parallel object
-  // --------------------------------------------------
-
-  parallel_ = Parallel::instance ();
 
   // --------------------------------------------------
   // Initiazize methods

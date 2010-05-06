@@ -21,59 +21,150 @@
 %=======================================================================
 
 
+%=======================================================================
 \chapter{Use Case View}
+%=======================================================================
 
+%=======================================================================
 \chapter{Design View}
+%=======================================================================
 
 
+%=======================================================================
 \section{Amr}
- 	 Adaptive mesh refinement infrastructure, built on top of Array
+%=======================================================================
+
+Adaptive mesh refinement infrastructure, built on top of Array
 
 \centerline{\includegraphics{uml/amr.ps}}
 
+%=======================================================================
 \section{Array}
- 	Fortran-like array, which may be parallelized or vectorized in various ways
+%=======================================================================
+
+Fortran-like array, which may be parallelized or vectorized in various
+ways
 
 \centerline{\includegraphics{uml/array.ps}}
 
+%=======================================================================
 \section{Disk}
- 	Provides functions for writing and reading data to and from disk storage
-\section{Distribute}
- 	Distribute (and dynamically redistribute) Tasks among nodes and processes
-\section{Error}
- 	Error prevention (including check-pointing), error detection and recovery
-\section{Field}
- 	Scalar fields on an Array or Amr hierarchy
-\section{Memory}
- 	Manage dynamic memory allocation and deallocation
-\section{Method}
- 	Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and visualization
-\section{Monitor}
- 	User interface to monitor the status of a running simulation
-\section{Parallel}
- 	Low-level functions for facilitating data distribution, communication, and load balancing
-\section{Parameters}
- 	Input, parse, store, and access run-time parameters
-\section{Particles}
- 	Efficiently represent groups of distributed particles
-\section{Performance}
- 	Measure, and provide functions to access, run-time performance
-\section{Portal}
- 	Interface with other applications, including querying state, modifying parameters, and post-visualization
-\section{Schedule}
- 	Schedules Tasks to advance the Simulation in time [was Control]
+%=======================================================================
 
-\
+Provides functions for writing and reading data to and from disk
+storage
+
+%=======================================================================
+\section{Distribute}
+%=======================================================================
+
+Distribute (and dynamically redistribute) Tasks among nodes and
+processes
+
+%=======================================================================
+\section{Error}
+%=======================================================================
+
+Error prevention (including check-pointing), error detection and
+recovery
+
+%=======================================================================
+\section{Field}
+%=======================================================================
+
+Scalar fields on an Array or Amr hierarchy
+
+%=======================================================================
+\section{Memory}
+%=======================================================================
+
+Manage dynamic memory allocation and deallocation
+
+%=======================================================================
+\section{Method}
+%=======================================================================
+
+Modularized hyperbolic, elliptic, or local physics algorithms,
+analysis, and visualization
+
+%=======================================================================
+\section{Monitor}
+%=======================================================================
+
+User interface to monitor the status of a running simulation
+
+%=======================================================================
+\section{Parallel}
+%=======================================================================
+
+Low-level functions for facilitating data distribution, communication,
+and load balancing
+
+%=======================================================================
+\section{Parameters}
+%=======================================================================
+
+Input, parse, store, and access run-time parameters
+
+%=======================================================================
+\section{Particles}
+%=======================================================================
+
+Efficiently represent groups of distributed particles
+
+%=======================================================================
+\section{Performance}
+%=======================================================================
+
+Measure, and provide functions to access, run-time performance
+
+%=======================================================================
+\section{Portal}
+%=======================================================================
+
+Interface with other applications, including querying state, modifying
+parameters, and post-visualization
+
+%=======================================================================
+\section{Schedule}
+%=======================================================================
+Schedules Tasks to advance the Simulation in time [was Control]
+
+%=======================================================================
 \section{Simulation}
- 	Specifies the problem(s) to run
+%=======================================================================
+
+Specifies the problem(s) to run
+
+%=======================================================================
 \section{Task}
- 	Encapsulates Methods and data on an Array for a single process / thread 
+%=======================================================================
+
+Encapsulates Methods and data on an Array for a single process /
+thread
+
+%=======================================================================
+\section{Test}
+%=======================================================================
+
+%=======================================================================
+\section{User}
+%=======================================================================
 
 \centerline{\includegraphics{uml/task.ps}}
 
+%=======================================================================
 \chapter{Process View}
+%=======================================================================
+
+%=======================================================================
 \chapter{Implementation View}
+%=======================================================================
+
+%=======================================================================
 \chapter{Deployment View}
+%=======================================================================
+
 
 \end{document}
 

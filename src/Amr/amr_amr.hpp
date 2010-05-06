@@ -22,7 +22,6 @@ public: // interface
   /// Initialize an Amr object
   Amr() :
     max_level_(0),
-    nx0_(0),ny0_(0),nz0_(0),
     tree_(0)
   {};
 
@@ -30,9 +29,6 @@ private: // attributes
 
   /// Maximum level for the hierarchy (0 = unigrid)
   int max_level_;
-
-  /// Size of the root grid
-  int nx0_, ny0_, nz0_;
 
   /// Tree defining the AMR hierarchy topology
   strict_auto_ptr<TreeK> tree_;

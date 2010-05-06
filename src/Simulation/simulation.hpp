@@ -15,7 +15,6 @@
 #include "amr.hpp"
 #include "field.hpp"
 #include "method.hpp"
-#include "parallel.hpp"
 
 class Simulation {
 
@@ -86,9 +85,6 @@ public: // interface
   /// Return the ith method
   Method * method (int i) { return methods_[i]; };
 
-  /// Return the parallel object
-  Parallel * parallel () { return parallel_; };
-
   /// Return the Amr object
   Amr * amr () { return amr_; };
 
@@ -100,9 +96,6 @@ private: // attributes
 
   /// AMR grid
   Amr * amr_;
-
-  /// Parallelization
-  Parallel * parallel_;
 
   /// Fields
   std::vector<Field *> fields_;

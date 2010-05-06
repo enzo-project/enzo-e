@@ -1,13 +1,19 @@
 Import('env')
 
 includes = [Glob('simulation*hpp')]
+sources  = [Glob("simulation*cpp")]
+libraries  = ['error','parameters']
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-
-sources  = [Glob("*.cpp")]
+env = env.Clone(LIBS=[libraries])
 
 libraries = env.Library ('simulation', [sources])
 
+test_simulation = env.Program (['test_simulation.cpp',sources])
+tests = [test_simulation];
+
+
+env.Alias('install-bin',env.Install ('$BINPATH', tests))
+env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 

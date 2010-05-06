@@ -6,11 +6,6 @@ beginfig(1)
   Class.T("Tree")()();
   Class.N("Node")()();
 
-  A.info.iName.iFont.scale := 1.5;
-  P.info.iName.iFont.scale := 1.5;
-  T.info.iName.iFont.scale := 1.5;
-  N.info.iName.iFont.scale := 1.5;
-
   P.n = A.n + (80, 0);
   T.n = A.s + (0, -40);
   N.n = T.n + (80, 0);

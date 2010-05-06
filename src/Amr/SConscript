@@ -2,7 +2,11 @@ Import('env')
 
 includes = ['amr.hpp', 'amr_amr.hpp']
 
+test_amr = env.Program (['test_amr.cpp'])
+tests = [test_amr];
+
 env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-bin',env.Install ('$BINPATH', tests))
 
 SConscript('tree/SConscript')
 
