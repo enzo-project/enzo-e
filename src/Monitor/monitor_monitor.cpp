@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      monitor.cpp
+/// @file      monitor_monitor.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 12:45:56 PST 2009
 /// @todo      simplify image call

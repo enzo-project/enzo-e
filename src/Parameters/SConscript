@@ -11,7 +11,7 @@ includes = [
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 
-sources  = ['parse.tab.c', 'lex.yy.c', 'parameters.cpp', 'param.cpp']
+sources  = ['parse.tab.c', 'lex.yy.c', 'param.cpp', Glob('parameters*cpp') ]
 
 # env.CFile(target = ['parse.tab.c', 'parse.tab.h'], 
 #           source = 'parse.y',

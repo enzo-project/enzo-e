@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      schedule.cpp
+/// @file      schedule_schedule.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      
 /// @brief     

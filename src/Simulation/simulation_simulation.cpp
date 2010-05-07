@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      simulation.cpp
+/// @file      simulation_simulation.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      
 /// @brief     
