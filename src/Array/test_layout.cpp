@@ -172,9 +172,10 @@ int main(int argc, char ** argv)
   layout_mpi->set_processes(0,process_count);
 
   unit_func("process_first");
-  unit_assert (layout_serial -> process_first() == 0);
+  unit_assert (layout_mpi -> process_first() == 0);
+
   unit_func("process_count");
-  unit_assert (layout_serial -> process_count() == process_count);
+  unit_assert (layout_mpi -> process_count() == process_count);
 
   // set the layout's thread range and confirm
 
@@ -197,7 +198,7 @@ int main(int argc, char ** argv)
     (process_rank + 1) * process_block_count / process_count -
     (process_rank + 0) * process_block_count / process_count;
     
-  unit_assert (layout_serial -> process_block_count(process_rank) == 
+  unit_assert (layout_mpi -> process_block_count(process_rank) == 
 	       expected_mpi);
   
   // confirm indices of process blocks assigned to this process
