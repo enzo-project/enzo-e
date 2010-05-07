@@ -6,6 +6,7 @@ Below is the list of Cello components:
 
 || ( ) || [NotesComponentAmr         Amr] || Adaptive mesh refinement infrastructure, built on top of `Array` || 
 || ( ) || [NotesComponentArray       Array] || Fortran-like array, which may be parallelized or vectorized in various ways || 
+|| ( ) || [NotesComponentData Data] || Represent, store and access data, e.g. `Field`s, `Particles`, etc.  ||
 || ( ) || [NotesComponentDisk        Disk] || Provides functions for writing and reading data to and from disk storage  || 
 || ( ) || [NotesComponentDistribute  Distribute] || Distribute (and dynamically redistribute) `Task`s among nodes and processes || 
 || ( ) || [NotesComponentError       Error] || Error prevention (including check-pointing), error detection and recovery || 
@@ -18,14 +19,23 @@ Below is the list of Cello components:
 || ( ) || [NotesComponentParticles   Particles] || Efficiently represent groups of distributed particles ||
 || ( ) || [NotesComponentPerformance Performance] || Measure, and provide functions to access, run-time performance ||
 || ( ) || [NotesComponentPortal      Portal] || Interface with other applications, including querying state, modifying parameters, and post-visualization ||
-|| ( ) || [NotesComponentControl     Schedule] || Schedules `Task`s to  advance the `Simulation` in time [was `Control`] ||
+|| ( ) || [NotesComponentSchedule     Schedule] || Schedules `Task`s to  advance the `Simulation` in  time ||
 || ( ) || [NotesComponentSimulation  Simulation] || Specifies the problem(s) to run ||
 || ( ) || [NotesComponentTask Task] || Encapsulates `Methods` and data on an `Array` for a single process / thread ||
-
+|| ( ) || [NotesComponentTest Test] || Support for testing other components ||
+|| ( ) || [NotesComponentUser User] || Stores all user-contributed code, in particular implementations of `Method`s ||
 
 Code for components are organized into separate directories.
 
 == Software Component Dependencies ==
 
 Software components necessarily depend on one another, but their dependencies should be well-defined and kept minimal.  There should be no loops in the dependency graph.  Dependencies are represented in the code using "#include" statements.  In general, "fan out" is bad (when one component depends on many other components), but fan-in is ok (when many other components depend on one component).
+
+== Component Systems ==
+
+Components work together in different ways to perform different tasks.  For example, `Schedule`, `Task`, `Distribute`, `Layout`, and `Parallel` are collectively used to represent and run parallel tasks.  Such a collection is called a ''system''.  Different systems may involve the same components, but in different ways. Systems are listed below:
+
+|| ( ) || [NotesSystemData Data]           || Store and access data, e.g. fields and particles  ||
+|| ( ) || [NotesSystemParallel Parallel]   || Represent distributed data and run parallel tasks ||
+|| ( ) || [NotesSystemStructure Structure] || Framework for storing multilevel distributed data   ||
 

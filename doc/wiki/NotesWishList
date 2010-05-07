@@ -1,53 +1,116 @@
 = Cello Wish List =
 
-The purpose of this page is to get feedback from future users of Cello as early as possible to help direct development in a useful direction.  Meta-feedback about better ways to get feed back is also welcome.
-Feel free to add new "wish" items or comment on existing items.  If you add a new wish item, please include a new unique identifier "W###" so it can be referenced easily, as well as your initials in case clarification is needed.
+The purpose of this page is to get feedback from future users of Cello
+as early as possible to help direct development in a useful direction.
+Meta-feedback about better ways to get feed back is also welcome.
+Feel free to add new "wish" items or comment on existing items.  If
+you add a new wish item, please include a new unique identifier "W###"
+so it can be referenced easily.
 
-|| '''ID''' || '''User''' || '''Component(s)''' || '''Suggestion''' ||
-|| W001 || jbordner || `Method` || Integrate "inits" functionality into the main code||
-|| W002 || jbordner || `Simulation` ||Support ensembles within a single run, including inline-analysis||
-|| W003 || jbordner || `Parallel` ||Support multiple (hybrid) and flexible parallelization strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided get/put), OMP, and optionally UPC and GPU.||
-|| W004 || jbordner || `Control` ||Reduce implicit dependencies by dynamically allocating parallel tasks, ala CHARM++.(e.g. currently Enzo loops through patches within a level, but a given patch can proceed as soon as it has all its boundary data)||
-|| W005 || jbordner || || Auto-tune where possible--automatically optimize for cache-, parallel-, vector-, solver-, etc. parameters||
-|| W006 || jbordner || ||Use object-oriented design, organize into components (subdirectories) of classes (*.hpp/*.cpp files)||
-|| W007 || jbordner || ||Require more rigorous coding standards compared to Enzo development||
-|| W008 || jbordner ||`Disk` ||Enforce strict control over data storage formats (e.g. files) (see W0009)||
-|| W009 || jbordner ||`Disk`|| Require that all stored data be accessed through standard interface functions that are independent of specific file formats (i.e., stored datasets are conceptually treated as objects)||
-|| W010 || mnorman ||`Amr`|| Support both structured AMR (Enzo-like) and tree-based AMR||
+ W001:: Integrate "inits" functionality into the main code
 
-|| W011 || jbordner || `Particles` ||Store particle positions in single precision as -1 <= x,y,z <= 1 relative to their containing patch. [[BR]] [To reduce storage, improve performance, and address precision issues with deep AMR.]||
+ W002:: Support ensembles within a single run, including
+ inline-analysis
 
-|| W012 || jbordner ||`Amr` ||Do not store a patch's global position, only local position relative to immediate neighbors, parent, and children.  [[BR]][Toward distributed AMR data-structure, and to address precision issues with deep AMR.  Potential issues: boundary and initial conditions.] (see W013)||
+ W003:: Support multiple (hybrid) and flexible parallelization
+ strategies, including MPI-1 (2-sided send/recv), MPI-2 (1-sided
+ get/put), OMP, and optionally UPC and GPU.
 
-|| W013 || jbordner ||`Amr`|| Represent patch extents with (small) integer values relative to parent. [[BR]][To reduce memory usage with deep AMR runs.] (see W012) ||
+ W004:: Reduce implicit dependencies by dynamically allocating
+ parallel tasks, ala CHARM++.(e.g. currently Enzo loops through
+ patches within a level, but a given patch can proceed as soon as it
+ has all its boundary data)
 
-|| W014 || jbordner ||`Amr` / `Parallel` ||Provide (or notify) neighboring patches with updated ghost zone data as soon as it's available.||
+ W005:: Auto-tune where possible--automatically optimize for cache-,
+ parallel-, vector-, solver-, etc. parameters
 
-|| W015 || jbordner ||`Control` ||Support optional variable timestep sizes within each level. [[BR]][To reduce synchronization costs when computing global CFL condition.]||
+ W006:: Use object-oriented design, organize into components (subdirectories)
+ of classes (*.hpp/*.cpp files)
 
-|| W016 || jbordner ||`Control` ||Support optional uniform timesteps across all levels. [[BR]] [To improve parallel efficiency.]||
+ W007:: Require more rigorous coding standards compared to Enzo
+ development
 
-|| W017 || jbordner || `Field` ||User-controlled optional floor/ceiling limits on individual `Field`s (ala "tiny_number" in Enzo), with user-specified `Error` behavior (warning, error, ignore, reset to given floor/ceiling, etc.)||
+ W008:: Enforce strict control over data storage formats (e.g. files)
+ (see W009)
 
-|| W018 || jbordner || `Array` / `Parallel` ||Allow multiple root-level patches per MPI task.  [[BR]][To improve cache use for unigrid problems, and improve load-balancing for AMR.]||
+ W009:: Require that all stored data be accessed through standard
+ interface functions that are independent of specific file formats
+ (i.e., stored datasets are conceptually treated as objects)
 
-|| W019 || mnorman ||`Particles` ||Use a binary tree data-structure to recursively partition the bounding boxes of particles.||
+ W010:: Support both structured AMR (Enzo-like) and tree-based AMR
 
-|| W020 || jbordner ||`Amr` || For very deep AMR where coarser levels never complete their timestep, delete coarse levels to free storage.||
+ W011:: Store particle positions in single precision as -1 <= x,y,z <=
+ 1 relative to their containing patch. ''To reduce storage,
+ improve performance, and address precision issues with deep AMR.''
 
-|| W021 || jbordner ||`Amr` || Relax rigid refinement criteria to inhibit excessive changes in octree-like tree refinement. ||
+ W012:: Do not store a patch's global position, only local position
+ relative to immediate neighbors, parent, and children.  ''Toward
+ distributed AMR data-structure, and to address precision issues with
+ deep AMR.  Potential issues: boundary and initial conditions (see
+ W013)''
 
-|| W022 || akritsuk ||`Parameters` || Support for user-supplied code for problem initialization. ||
+ W013:: Represent patch extents with (small) integer values relative
+ to parent. ''To reduce memory usage with deep AMR runs (see
+ W012)''
 
-|| W023 || jbordner ||`Parallel` || Load-balance by having over-loaded processors reassign tasks to random processes. [[BR]][To reduce global communication for determining which processes are under-loaded] ||
+ W014:: Provide (or notify) neighboring patches with updated ghost
+ zone data as soon as it's available.
 
-|| W024 || jbordner ||`Parallel` || Load-balance using "over-compensation", since heavily-loaded processes tend to continue to become more heavily loaded (cosmology / star-formation application-dependent). ||
+ W015:: Support optional variable timestep sizes within each
+ level. ''To reduce synchronization costs when computing global
+ CFL condition.''
 
-|| W025 || jbordner || `Amr` || Reduce tree-AMR node size by only storing parent, single neighbor, and single child. [[BR]][Assuming one pointer for field data and SAMR patches indexed by single-precision offsets into parent patches, 32 bytes / tree-AMR and 48 bytes / patch-AMR] ||
+ W016:: Support optional uniform timesteps across all levels.  ''To
+ improve parallel efficiency.''
 
-|| W026 || jbordner || `Amr` || Support flexible node types: memory-efficient versus compute-efficient. ||
+ W017:: User-controlled optional floor/ceiling limits on individual
+ `Field`s (ala "tiny_number" in Enzo), with user-specified `Error`
+ behavior (warning, error, ignore, reset to given floor/ceiling, etc.)
 
-|| W027 || jbordner ||`Amr` / `Parallel` || Support temporary "allocate as-needed" ghost zones in addition to "permanent" ones||
+ W018:: Allow multiple root-level patches per MPI task.  ''To improve
+ cache use for unigrid problems, and improve load-balancing for AMR.''
 
-|| W028 || jbordner ||`Parallel` || Only use inter-core, inter-cpu, inter-node, etc. level-communicators to bound communicator size and manage communication nonuniformity. ||
+ W019:: Use a binary tree data-structure to recursively partition the
+ bounding boxes of particles.
 
+ W020:: For very deep AMR where coarser levels never complete their
+ timestep, delete coarse levels to free storage.
+
+ W021:: Relax rigid refinement criteria to inhibit excessive changes
+ in octree-like tree refinement.
+
+ W022:: Support for user-supplied code for problem initialization.
+
+ W023:: Load-balance by having over-loaded processors reassign tasks
+ to random processes. ''To reduce global communication for
+ determining which processes are under-loaded''
+
+ W024:: Load-balance using "over-compensation", since heavily-loaded
+ processes tend to continue to become more heavily loaded (cosmology /
+ star-formation application-dependent).
+
+ W025:: Reduce tree-AMR node size by only storing parent, single
+ neighbor, and single child. ''Assuming one pointer for field data and
+ SAMR patches indexed by single-precision offsets into parent patches,
+ 32 bytes / tree-AMR and 48 bytes / patch-AMR''
+
+ W026:: Support flexible node types: memory-efficient versus
+ compute-efficient.
+
+ W027:: Support temporary "allocate as-needed" ghost zones in addition
+ to "permanent" ones
+
+ W028:: Only use inter-core, inter-cpu, inter-node,
+ etc. level-communicators to bound communicator size and manage
+ communication nonuniformity.
+
+ W029:: Delayed particle / field creation
+
+ W030:: If a numerical error occurs, backtrack with a smaller timestep
+
+ W031:: If a numerical error occurs, backtrack with an alternate solver
+
+ W032:: Support mixing `Field`s of different precision, to save
+ storage, or for extended precision or range on select fields.  Issue:
+ low-level routines must support mixed precisions, or field data must
+ be converted to uniformly highest precision.

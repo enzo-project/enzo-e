@@ -1,30 +1,32 @@
-([NotesComponentTask Task] < [NotesComponents index] > [NotesComponentAnalysis Analysis])
+([NotesComponentUser User] < [NotesComponents index] > [NotesComponentArray Array])
 
-= Amr Component =
+= `Amr` Component =
 
 [[TOC]]
 
-The adaptive mesh refinement component `Amr` is built on top of the [NotesComponentArray Array] distributed array component.  The `Amr` component uses `Array`s, but `Array`s do not reference `Amr`.
+The adaptive mesh refinement component `Amr` is built on top of the [NotesComponentArray Array] distributed array component.  The `Amr` component uses `Array`s, but `Array`s do not reference `Amr`.  The `Amr` patches may be distributed, and `Array`s on each patch may themselves be distributed.
  
 Tentative features of `Amr` support in Cello include the following:
 
- * '''Octree-like AMR'''.  We want to eliminate the need for heuristic grid placement algorithms and neighbor searches, to simplify load balancing, eliminate the need for persistent ghost zones, and to improve the scalability of representing the data-structure in a distributed memory.  (Caveat: "Wish" W010 by Norman is to include structured AMR capability).
- * '''Full unilevel efficiency'''.  A single-level `Amr` "hierarchy" should reduce to a single `Array`.  This is different from `Enzo`, which allocates O(P) `grid` patches per MPI-process, and involves costly and unnecessary neighbor searches.
- * '''Partitioned "inter-resolution" and "intra-resolution" management'''.  The `Amr` component defines and manages the inter-refinement structure, whereas the `Array` component defines and manages the intra-resolution structures.
- * '''Flexibility between levels'''.  Supports refinement-by-two (octree), refinement-by-four (64-tree), refinement-by-7 (343-tree), etc.  Also perhaps "in-between" ( e.g. (2 x 4 x 4)-tree ) with corresponding rectangular arrays.  Restricting to, e.g., only 4^3^ grid patches could be helpful for highly-tuned numerical methods, cache sizes, or to maintain uniform parallel task sizes.
- * '''Flexibility within levels'''.  Flexibility in array sizes, for example, 4^3^, 7^3^, etc., to match flexibility of AMR tree shapes, and allow refinement by `Array` arrays instead of by `Amr` trees.
- * '''"Smooth" refinement'''.  Intermediate "pseudo-levels", implemented by introducing a "bridge of `Array`'s, can be introduced between existing hierarchy levels to maintain smooth resolution transitions.  This should enable using high refinement ratios (e.g. 16^3^-trees) for more efficient targeting of features, but without introducing undue grid resolution effects.
- * '''Optimized `Amr` - `Array` data-structure partitioning'''. Efficiency can be improved by optimizing `Array`s versus the `Amr` refinement tree.  For example, if a domain is flagged to be refined everywhere, then the `Amr` data-structure detects this and collapses back to a single but larger `Array`.
- * '''Scalable depth'''.  We want to allow "massively deep" `Amr` hierarchies without limits based on floating point      precision or limited integer range.  For example, positions of particles associated with an `Amr` `Patch`, are stored      with positions normalized between -1.0 and 1.0.  This enables more than sufficient accuracy, even with single precision.   Also, positions defining the extents of a `Patch` are also stored only relative to neighboring `Patch`es, or the domain boundary.
+ * '''Octree-like AMR'''.  We want to eliminate the need for heuristic grid placement algorithms and neighbor searches, to simplify load balancing, eliminate the need for persistent ghost zones, and to improve the scalability of representing the data-structure in a distributed memory.
+ * '''Full unilevel efficiency'''.  A single-level `Amr` "hierarchy" should reduce to a single `Array`.  This is different from how `Enzo` treats "unigrid" problems, which allocates O(P) `grid` patches per MPI-process, and involves costly and unnecessary searches to find patch neighbors.
+ * '''Partitioned "inter-resolution" and "intra-resolution" management'''.  The `Amr` component defines and manages the inter-refinement structure (regions where the resolution changes), whereas the `Array` component defines and manages the intra-resolution structures (regions where the resolution is uniform).
+ * '''Flexibility between levels'''.  Supports refinement-by-two (octree), refinement-by-four (4^3^-tree), refinement-by-8 (8^3^-tree), etc.  Restricting to, e.g., only 4^3^ grid patches could be helpful for highly-tuned numerical methods, cache sizes, or to maintain uniform parallel task sizes.
+ * '''Flexibility within levels'''.  Flexibility in array sizes, for example, 4^3^, 8^3^, etc., to match flexibility of AMR tree shapes, and allow refinement by `Array` arrays instead of by `Amr` trees.
+ * '''"Smooth" refinement'''.  Intermediate "backfill levels" for refinement ratios r=4 and r=8, implemented using a "bridge" of `Array`'s between hierarchy levels, to maintain smooth r=2 resolution transitions.  This should allow efficient targeted refinement, but without introducing undue grid resolution effects.
+ * '''Optimized `Amr` - `Array` data-structure partitioning'''. Efficiency can be improved by optimizing `Array`s versus the `Amr` refinement tree.  For example, if a domain is flagged to be refined everywhere, then the `Amr` data-structure detects this and collapses back to a single but larger `Array`.  An efficiency parameter is used to determine the tradeoff between more `Amr` structure versus larger `Array` overrefinement.
+ * '''Scalable depth'''.  We want to allow "massively deep" `Amr` hierarchies without limits based on floating point precision or limited integer range.  For example, positions of particles associated with an `Amr` `Patch`, are stored using a coordinate system centered at the grid patch corner.  This enables more than sufficient accuracy, even with single precision.   Also, positions defining the extents of a `Patch` are also stored only relative to neighboring `Patch`es or the domain boundary.
 
 == Issues ==
 
  * How to decide tradeoffs between `Array` and `Amr` refinement?
- * What support is needed for `Particles`?
+ * What support is needed for `Particles` and `Rays`?
  * How to handle remeshing?
+ * How to implement distributed `Amr` meshes?
+ * How to control hierarchical parallelism between `Amr` and constituent `Array`s
  * How to dynamically adjust tree size (2^3^,4^3^, 8^3^, etc.) ("adaptive adaptivity")
  * How to deal with ghost zones
- * What operations needed for load balancing
+ * What operations are needed to enable efficient and flexiblue load balancing
 
 == Refinement criteria ==
 
@@ -56,28 +58,32 @@ Refine if (density) / (cell volume) >  MinimumMassForRefinement*r ^ (level*Minim
 [[Image(htdocs:uml-amr.png)]]
 
  * `Amr`: ''Distributed AMR hierarchy data-structure''
- * `Level`: ''Uniresolution partition of an `Amr` hierarchy''
- * `Patch`: ''A basic rectangular uniresolution section of an `Amr` hierarchy''
+ * `Patch`: ''A basic rectangular (square) section of an `Amr` hierarchy with constant resolution''
  * `Tree`: ''The k^d^ tree, which may be distributed''.
  * `Node`: ''A node of the `Tree` that defines local inter-relationships with other nodes''
- * `Layout`: ''Description of a Fortran-style array, which may be distributed''
- * `Box`: ''A physical box with a size and position, either absolute or relative to neighboring `Box`es''
+ * `Layout`: ''Description of how to parallelize a 3D patch.  Includes MPI, OMP, etc., and may be nested.  Part of the `Parallel` component''
+ * `Box`: ''A physical box with a size and position, either absolute or relative to adjacent `Box`es''
+ * `Block`: ''The smallest serialized (single thread on a single process) component of a `Patch`.  Typically corresponds to 4^3^ or similar array of `Field` data.
+ * `Data`: ''The data "payload" for a given `Block`''
 
 === `Amr` class ===
 ==== `Amr` attributes ====
-|| `nx0_, ny0_, nz0_` || Size of the root grid ||
+|| `root_[]` || Size of the root grid ||
 || `max_level_` || Maximum level for the hierarchy (0 = unigrid) ||
-|| `tree_` || Tree defining the AMR hierarchy topology ||
+||  `refine_`    || ''refinement factor = 2, 4, etc.'' ||
+||  `backfill_`  || ''whether to backfill for refine > 2'' ||
+||  `patch_min` || ''minimum patch size'' ||
+||  `patch_max` || ''maximum patch size'' ||
+|| || ||
+|| `tree_` || Tree defining the first k levels of the AMR hierarchy topology.  Finer levels may be distributed. ||
 
 ==== `Amr` functions ====
 ==== `Amr` parameters ====
 
-||  `root`      || ''size of the root grid, e.g. ![400,400]'' ||
-||  `max_level` || ''maximum level (with root = 0), assuming refinement by two ||
-||  `refine`    || ''refinement factor = 2, 4, etc.'' ||
-||  `full_tree` || ''whether tree is full (ala Flash) or not'' ||
-||  `backfill`  || ''whether to backfill for refinement > 2'' ||
-||  `coalesce`  || ''whether to coalesce small patches to one big one'' ||
-||  `patch_min` || ''minimum patch size'' ||
-||  `patch_max` || ''maximum patch size'' ||
+||  `Amr { root }`      || ''size of the root grid, e.g. ![400,400]'' ||
+||  `Amr { max_level }` || ''maximum level (with root = 0), assuming refinement by two ||
+||  `Amr { refine }`    || ''refinement factor = 2, 4, etc.'' ||
+||  `Amr { backfill }`  || ''whether to backfill for refine > 2'' ||
+||  `Amr { patch_min }` || ''minimum patch size'' ||
+||  `Amr { patch_max }` || ''maximum patch size'' ||
 

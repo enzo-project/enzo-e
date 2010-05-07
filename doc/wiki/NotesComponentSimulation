@@ -1,4 +1,4 @@
-([NotesComponentProblem Problem] < [NotesComponents index] > [NotesComponentTask Task])
+([NotesComponentSchedule Schedule] < [NotesComponents index] > [NotesComponentTask Task])
 
 = Simulation Component =
 

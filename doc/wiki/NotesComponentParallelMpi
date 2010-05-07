@@ -4,18 +4,7 @@
 
 == `ParallelMpi` class ==
 
- === Attributes === 
-
- ||  || `enum` || `ParallelMpi::sided_`          || ''Type of MPI: : `one_sided` for get/put, `two_sided` for send/recv'' ||
- ||  || || ||
- ||  || `enum` || `ParallelMpi::send_type_` || ''MPI Send type: standard, buffered, synchronous, or ready'' ||
- ||  || `bool` || `ParallelMpi::send_is_immediate_` || ''Whether sends are immediate'' ||
- ||  || `bool` || `ParallelMpi::recv_is_immediate_` || ''Whether receives are immediate'' ||
- ||  || || ||
- ||  || `enum` || `ParallelMpi::type_get_`  || ''Type of get'' ||
- ||  || `enum` || `ParallelMpi::type_put_`  || ''Type of put'' ||
-
- === Functions === 
+=== Functions === 
 
  ||  || `ParallelMpi::initialize()` || ''Initialize MPI'' ||
  ||  || `ParallelMpi::finalize()` || ''Finalize MPI'' ||
@@ -29,15 +18,34 @@
  ||  || `ParallelMpi::recv_begin()` || ''Initiate receiving an array'' ||
  ||  || `ParallelMpi::recv_end()` || ''Complete receiving an array'' ||
  ||  || || ||
+ ||  || `ParallelMpi::get_send_blocking()` || ''Get send blocking mode'' ||
+ ||  || `ParallelMpi::set_send_blocking()` || ''Set send blocking mode'' ||
+ ||  || `ParallelMpi::get_recv_blocking()` || ''Get receive blocking mode'' ||
+ ||  || `ParallelMpi::set_recv_blocking()` || ''Set receive blocking mode'' ||
+ ||  || `ParallelMpi::get_send_type()` || ''Get send type: standard, buffered, synchronous, ready'' ||
+ ||  || `ParallelMpi::set_send_type()` || ''Set send type: standard, buffered, synchronous, ready'' ||
+ ||  || || ||
  ||  || `ParallelMpi::barrier()` || Barrier in a communicator||
 
+ === Attributes === 
+
+ ||  || `enum` || `ParallelMpi::sided_`          || ''Type of MPI: : `one_sided` for get/put, `two_sided` for send/recv'' ||
+ ||  || || ||
+ ||  || `enum` || `ParallelMpi::send_type_` || ''MPI Send type: standard, buffered, synchronous, or ready'' ||
+ ||  || `bool` || `ParallelMpi::send_blocking_` || ''Whether sends are blocking or immediate'' ||
+ ||  || `bool` || `ParallelMpi::recv_blocking_` || ''Whether receives are blocking immediate'' ||
+ ||  || || ||
+ ||  || `enum` || `ParallelMpi::type_get_`  || ''Type of get'' ||
+ ||  || `enum` || `ParallelMpi::type_put_`  || ''Type of put'' ||
+
+ 
  === Usage === 
 
  === Parameters === 
 
- ||  || `Parallel:mpi:sided` || `["one"|"two"]` || ''Type of MPI: one-sided (get/put) or two-sided (send/receive) ||
+ ||  || `Parallel:mpi:sided` || `mpi_sided_[one|two]` || ''Type of MPI: one-sided (get/put) or two-sided (send/receive) ||
  ||  || || ||
- ||  || `Parallel:mpi:send_type` || `["standard","buffered","synchronous","ready"]` || ''MPI send variations'' ||
+ ||  || `Parallel:mpi:send_type` || `send_type_[standard|buffered|synchronous|ready]` || ''MPI send variations'' ||
  ||  || `Parallel:mpi:immediate` || `[true|false]` || MPI recv variations ||
  ||  || || ||
  || || `Parallel:mpi:get` || [...] || ''MPI get variations'' ||

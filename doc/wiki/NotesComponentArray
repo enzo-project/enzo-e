@@ -1,4 +1,4 @@
-([NotesComponentAnalysis Analysis] < [NotesComponents index] > [NotesComponentControl Control])
+([NotesComponentAmr Amr] < [NotesComponents index] > [NotesComponentData Data])
 
 = `Array` Component =
 
@@ -23,26 +23,39 @@ data distributed or threaded in various ways.  Tentative functionality includes 
  * Optional ''blocked'' storage for improved cache use or vector behavior
  * Optional ''padding'' for low-associativity caches
 
-To implement `Array`'s, other related classes are used to share implementation responsibilities.  These classes are described in separate pages.
+To implement `Array`'s, other related classes are used to share implementation responsibilities (in particular, an `Array` is composed of a `Layout` and a set of `Block`'s).  These classes are described in separate pages.
 
- * [NotesComponentArrayLayout Layout] The `Layout` class is used to define an `Array`'s configuration, but does not allocate any data.  `Array`'s that share the same `Layout` object are said to be conforming.  An `Array`'s `Layout` describes how to distribute an `Array`'s data over MPI processes, between OpenMP threads, etc.  For unigrid problems, only one `Layout` is used.  For `Amr` problems, typically several `Layout`s are used.
+ * [NotesComponentArrayLayout Layout] The `Layout` class is used to define an `Array`'s parallel configuration, but does not allocate any data.  `Array`'s that share the same `Layout` object are said to be conforming.  An `Array`'s `Layout` describes how to distribute an `Array`'s data over MPI processes, between OpenMP threads, etc.  For unigrid problems, only a single `Layout` is required.  For `Amr` problems, typically several `Layout`s are used, one for each patch.
 
- * [NotesComponentArrayBlock Block ] The `Block` class is a lightweight wrapper for portions of an `Array` to be actively computed by a single thread.  It represents a Fortran-style array, together with offset, stride, dimension, and size.
+ * [NotesComponentArrayBlock Block ] The `Block` class is a lightweight wrapper for portions of an `Array` to be actively computed by a single thread.  It represents a Fortran-style array, together with offset, stride, dimension, and size.  
 
- * [NotesComponentArrayItBlock ItBlock] The `ItBlock` class is used to iterate over `Block`'s of `Array`'s that share conforming `Layout`'s.
+ * [NotesComponentArrayItBlock ItBlock] The `ItBlock` class is used to iterate over `Block`'s of an `Array`.
 
 == Issues ==
 
 Issues with `Array`s and supporting classes include the following:
 
  * How to handle iterators in a way that the calling code doesn't know what `Layout` varieties are used
+   * Only have a single `Layout` for all `Array`s.
  * How to handle nested iterators in calling code for hybrid parallelization `Layout`s
- * How to handle load balancing
+   * Flatten loops to only loop over lowest-level threaded blocks
+ * How to handle, or facilitate the handling of, load balancing
+   * Assign each `Array` (i.e. `Layout`) an interval of processes / threads
+   * Add functions to relocate an `Array` to a different starting (process,thread)
  * How to communicate between array blocks to refresh ghost zones
- * How to communicate between arrary blocks for interpolation
+   * block-by-block
+   * process-pair by process-pair
+   * get ghosts when needed; put ghosts when available (generalize for MPI_Isend / MPI_Irecv)
+   * threading either assumes thread-boundary blocks share data, or copied to a compute register
+ * How to communicate between array blocks for interpolation
+   * not needed if `Amr` hierarchy is a single mesh
  * How to handle permanent versus temporary ghost zones
+   * copy process blocks  between `Array` and compute registers
+   * copy ghost zones between compute registers and communicate registers
  * How to support cell-, face-, edge-centered variables in same layout
- * How to control layout within a `Layout`, e.g. interleave range of arrays but not others.
+   * variable centering is handled exclusively within `Block`s
+ * How to control layout within a `Layout`, e.g. interleave range of arrays but not others
+   * array ranges (for different centering) and interleaving handled within a `Block`
 
 == Operations ==
 

@@ -3,6 +3,11 @@ SHELL = /bin/tcsh
 
 TRAC_PATH = /usr/local/trac-cello
 WIKI_FILES = \
+	NotesComponentData \
+	NotesComponentSchedule \
+	NotesComponentTest \
+	NotesComponentUser \
+
 	NotesCodingStandards \
 	NotesComponentAmr \
 	NotesComponentAnalysis \

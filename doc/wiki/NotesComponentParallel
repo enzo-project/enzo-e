@@ -2,7 +2,7 @@
 
 [[TOC]]
 
-= Parallel Component =
+= `Parallel` Component =
 
 The `Parallel` component provides services to aid in the efficient data distribution, dynamic load balancing, and task management on hierarchical parallel platforms.  This is done using one or more parallelization languages or libraries, including MPI, OpenMP, or UPC.  The `Parallel` component keeps track of data assigned to processors in a hierarchical manner, which helps both to efficiently map data to the physical hardware, and reduce the amount of storage and communication required for load balancing.
 

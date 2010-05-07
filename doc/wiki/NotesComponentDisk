@@ -1,11 +1,17 @@
-([NotesComponentArray Array] < [NotesComponents index] > [NotesComponentDistribute Distribute])
+([NotesComponentData Data] < [NotesComponents index] > [NotesComponentDistribute Distribute])
 
 [[TOC]]
 
 = `Disk` Component =
 
-The `Disk` component provides low-level functions for writing and reading data to and from disk storage.  It handles disk
-`File`s, self-describing 
+The `Disk` component provides low-level functions for writing and reading data to and from disk storage in various formats.
+
+General guidelines for efficient use of parallel filesystems include the following:
+
+ * Disk access sizes should be multiples of the system page size
+ * Disk accesses should be sequential
+ * Concurrent meta-data traffic (create, unlink, flock, etc) to common filesystem objects should be minimized
+
 
 == `Disk` classes ==
 
@@ -15,6 +21,12 @@ The `Disk` component provides low-level functions for writing and reading data t
  ||  ||  `Ifrit` || ''IIFrIT (Ionization FRont Interactive Tool)  files'' ||
 
 === `Hdf5` class ===
+
+The `Hdf5` class provides an interface layer of functions between Cello and the HDF5 parallel file library.
+It includes functions to aid the writing and reading of arrays and particles defined on an AMR hierarchy,
+but does not depend on any other Cello component, including the `Array`, `Particles`, or `Amr` components.
+
+
 
    ==== `Hdf5` attributes ====
 
