@@ -1,0 +1,14 @@
+Import('env')
+
+includes = ['mesh.hpp', 'mesh_mesh.hpp']
+
+test_mesh = env.Program (['test_mesh.cpp'])
+tests = [test_mesh];
+
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-bin',env.Install ('$BINPATH', tests))
+
+SConscript('tree/SConscript')
+
+
+
