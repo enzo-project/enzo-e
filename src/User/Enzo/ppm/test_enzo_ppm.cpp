@@ -11,7 +11,7 @@
 #include "user.hpp"
 #include "test.hpp"
 
-main ()
+int main (int argc, char ** argv)
 {
   unit_class ("MethodEnzoPpm");
   MethodEnzoPpm ppm;
