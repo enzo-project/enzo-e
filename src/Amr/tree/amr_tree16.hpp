@@ -40,6 +40,10 @@ public: // interface
   { INCOMPLETE_MESSAGE("Tree16::operator =",""); 
     return *this; };
 
+  /// Return the number of nodes in the tree
+  int num_nodes()
+  { return root_->num_nodes(); };
+
   /// Refine down to array
   void refine
     (const int * level_array, 
@@ -70,4 +74,4 @@ public: // interface
 
 };
 
-#endif
+#endif /* AMR_TREE16_HPP */

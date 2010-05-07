@@ -3,15 +3,14 @@
 
 /// @file     amr_node3k.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     
-/// @brief    Implementation for Node3K node class
+/// @date     2009-10-29
+/// @brief    Implementation of the Node3K class
 
 #include <stdio.h>
 
 #include "cello.h"
 
 #include "amr_node3k.hpp"
-
 #include "error.hpp"
 
 //----------------------------------------------------------------------
@@ -22,27 +21,21 @@ Node3K::Node3K(int k, int level_adjust)
     neighbor_(0),
     parent_(0),
     level_adjust_(level_adjust)
-    /// @param k            Refinement factor   
+    /// @param    k            refinement factor   
     /// @param    level_adjust difference: actual mesh level - tree level
 { 
-  ++Node3K::num_nodes_;
-
   allocate_neighbors_();
 
-  allocate_children_();
+  //  allocate_children_();
 
   parent_ = NULL;
 }
 
 //----------------------------------------------------------------------
 
-// Delete the node and all descendents
-
 Node3K::~Node3K()
 ///
 { 
-  --Node3K::num_nodes_;
-
   deallocate_children_();
 
   // update neighbor's neighbors
@@ -79,6 +72,24 @@ Node3K & Node3K::operator= (const Node3K & node3k) throw()
 {
   INCOMPLETE_MESSAGE("Node3K::operator =","");
   return *this;
+}
+
+//----------------------------------------------------------------------
+
+int Node3K::num_nodes()
+{
+  int node_count = 0;
+  for (int iz=0; iz<k_; iz++) {
+    for (int iy=0; iy<k_; iy++) {
+      for (int ix=0; ix<k_; ix++) {
+	if (child(ix,iy,iz)) {
+	  node_count += child(ix,iy,iz)->num_nodes();
+	}
+      }
+    }
+  }
+
+  return (1 + node_count);
 }
 
 //----------------------------------------------------------------------
@@ -123,7 +134,6 @@ inline Node3K * Node3K::parent ()
   return parent_; 
 }
 
-// Set two nodes to be neighbors.  Friend function since nodes may be NULL
 inline void make_neighbors 
 (
  Node3K * node_1, 
@@ -969,8 +979,3 @@ void Node3K::deallocate_children_ ()
     child_ = NULL;
   }
 }
-
-//----------------------------------------------------------------------
-
-int Node3K::num_nodes_ = 0;
-

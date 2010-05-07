@@ -14,14 +14,16 @@
 
 #include "amr_node4.hpp"
 
+//----------------------------------------------------------------------
+
 const bool debug = false;
 
-Node4::Node4(int level_adjust) 
-  : level_adjust_(level_adjust)
-    /// @param    level_adjust difference: actual mesh level - tree level
-{ 
-  ++Node4::num_nodes_;
+//----------------------------------------------------------------------
 
+Node4::Node4(int level_adjust) 
+    /// @param    level_adjust difference: actual mesh level - tree level
+  : level_adjust_(level_adjust)
+{ 
   child_[0] = NULL;
   child_[1] = NULL;
   child_[2] = NULL;
@@ -37,11 +39,11 @@ Node4::Node4(int level_adjust)
 
 // Delete the node and all descendents
 
+//----------------------------------------------------------------------
+
 Node4::~Node4()
 ///
 { 
-  --Node4::num_nodes_;
-
   // recursively delete children
 
   if (child_[UL]) delete child_[UL];
@@ -91,17 +93,33 @@ Node4 & Node4::operator= (const Node4 & node4) throw()
 
 //----------------------------------------------------------------------
 
+int Node4::num_nodes()
+{
+  int node_count = 0;
+  if (child(UL)) node_count += child(UL)->num_nodes();
+  if (child(DL)) node_count += child(DL)->num_nodes();
+  if (child(UR)) node_count += child(UR)->num_nodes();
+  if (child(DR)) node_count += child(DR)->num_nodes();
+  return (1 + node_count);
+}
+
+//----------------------------------------------------------------------
+
 inline Node4 * Node4::child (corner_type corner) 
 /// @param    corner     Corner [UL|DL|UR|DR] of the child node to return
 { 
   return child_[corner]; 
 }
 
+//----------------------------------------------------------------------
+
 inline Node4 * Node4::neighbor (face_type face) 
 /// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
 { 
   return neighbor_[face]; 
 }
+
+//----------------------------------------------------------------------
 
 inline Node4 * Node4::cousin (face_type face, corner_type corner)
 /// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
@@ -114,11 +132,15 @@ inline Node4 * Node4::cousin (face_type face, corner_type corner)
   }
 }
 
+//----------------------------------------------------------------------
+
 inline Node4 * Node4::parent ()
 ///
 { 
   return parent_; 
 }
+
+//----------------------------------------------------------------------
 
 // Set two nodes to be neighbors.  Friend function since nodes may be NULL
 inline void make_neighbors 
@@ -135,6 +157,7 @@ inline void make_neighbors
   if (node_2 != NULL) node_2->neighbor_[(face_1+2)%4] = node_1;
 }
 
+//----------------------------------------------------------------------
 int Node4::refine 
 (
  const int * level_array, 
@@ -270,6 +293,8 @@ int Node4::refine
   return depth;
 }
 
+//----------------------------------------------------------------------
+
 void Node4::create_children_()
 ///
 {
@@ -278,6 +303,8 @@ void Node4::create_children_()
   create_child_(UR);
   create_child_(DR);
 }
+
+//----------------------------------------------------------------------
 
 void Node4::update_children_()
 ///
@@ -288,11 +315,15 @@ void Node4::update_children_()
   update_child_ (DR);
 }
 
+//----------------------------------------------------------------------
+
 void Node4::create_child_(corner_type corner)
 /// @param    corner     Corner [UL|DL|UR|DR] of the child node to return
 {
   child_[corner] = new Node4();
 }
+
+//----------------------------------------------------------------------
 
 void Node4::update_child_ (corner_type corner)
 /// @param    corner     Corner [UL|DL|UR|DR] of the child node to return
@@ -334,6 +365,8 @@ void Node4::update_child_ (corner_type corner)
 }
 
 // Perform a pass of trying to remove level-jumps 
+//----------------------------------------------------------------------
+
 void Node4::balance_pass(bool & refined_tree, bool full_nodes)
 {
 
@@ -492,6 +525,8 @@ void Node4::balance_pass(bool & refined_tree, bool full_nodes)
 }
 
 // Perform a pass of trying to optimize uniformly-refined nodes
+//----------------------------------------------------------------------
+
 void Node4::optimize_pass(bool & refined_tree)
 {
 
@@ -524,6 +559,8 @@ void Node4::optimize_pass(bool & refined_tree)
 }
 
 // Fill the image region with values
+//----------------------------------------------------------------------
+
 void Node4::fill_image
 (
  float * image,
@@ -594,6 +631,4 @@ void Node4::fill_image
       (image,nd0,nd1,mid0,high0,mid1,high1,level + 1, num_levels,line_width);
   }
 }
-
-int Node4::num_nodes_ = 0;
 

@@ -26,4 +26,4 @@ enum corner_type {
   UR = 2,
   DR = 3 };
 
-#endif
+#endif /* AMR_NODE_H */

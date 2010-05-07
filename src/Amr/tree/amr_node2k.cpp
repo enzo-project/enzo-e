@@ -4,10 +4,7 @@
 /// @file     amr_node2k.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-27
-/// @todo     Rename lowx, etc. for integer arguments as e.g. ix_min, etc
-/// @todo     Rename lowx, etc. for double arguments as e.g. x_min, etc.
-/// @todo     Remove static for thread safety
-/// @brief    Declaration of the Node16 class 
+/// @brief    Implementation of the Node16 class 
 
 #include <stdio.h>
 
@@ -24,14 +21,12 @@ Node2K::Node2K(int k, int level_adjust)
     neighbor_(0),
     parent_(0),
     level_adjust_(level_adjust)
-    /// @param    k            refinement factor, typically 2 or 4
+    /// @param    k            refinement factor
     /// @param    level_adjust difference: actual mesh level - tree level
 { 
-  ++Node2K::num_nodes_;
-
-  allocate_neighbors_ ();
+  allocate_neighbors_();
   
-//   allocate_children_ ();
+//   allocate_children_();
 
   parent_ = NULL;
 }
@@ -41,8 +36,6 @@ Node2K::Node2K(int k, int level_adjust)
 Node2K::~Node2K() 
 ///
 { 
-  --Node2K::num_nodes_;
-
   deallocate_children_();
 
   // update neighbor's neighbors
@@ -79,6 +72,22 @@ Node2K & Node2K::operator= (const Node2K & node2k) throw()
 {
   INCOMPLETE_MESSAGE("Node2K::operator =","");
   return *this;
+}
+
+//----------------------------------------------------------------------
+
+int Node2K::num_nodes()
+{
+  int node_count = 0;
+  for (int iy=0; iy<k_; iy++) {
+    for (int ix=0; ix<k_; ix++) {
+      if (child(ix,iy)) {
+	node_count += child(ix,iy)->num_nodes();
+      }
+    }
+  }
+
+  return (1 + node_count);
 }
 
 //----------------------------------------------------------------------
@@ -121,13 +130,15 @@ inline Node2K * Node2K::parent ()
   return parent_; 
 }
 
-// Set two nodes to be neighbors.  Friend function since nodes may be NULL
 inline void make_neighbors 
 (
  Node2K * node_1, 
  Node2K * node_2, 
  face_type face_1
  )
+/// @param    node_1    First neighbor node pointer 
+/// @param    node_2    Second neighbor node pointer
+/// @param    face_1    Face 0 <= face_1 < 4 of node_1 that is adjacent to node_2
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
   if (node_2 != NULL) {
@@ -136,15 +147,14 @@ inline void make_neighbors
   }
 }
 
-
 //----------------------------------------------------------------------
 
 int Node2K::refine 
 (
  const int * level_array, 
  int ndx,  int ndy,
- int lowx, int upx,  
- int lowy, int upy,
+ int nxm, int nxp,  
+ int nym, int nyp,
  int level, 
  int max_level,
  bool full_nodes
@@ -152,10 +162,10 @@ int Node2K::refine
 /// @param    level_array Array of levels to refine to
 /// @param    ndx       x-dimension of level_array[]
 /// @param    ndy       y-dimension of level_array[]
-/// @param    lowx      Lowest x-index of array for this node
-/// @param    upx       Upper bound on x-index of array for this node
-/// @param    lowy      Lowest y-index of array for this node
-/// @param    upy       Upper bound on y-index of array for this node
+/// @param    nxm       Lowest x-index of array for this node
+/// @param    nxp       Upper bound on x-index of array for this node
+/// @param    nym       Lowest y-index of array for this node
+/// @param    nyp       Upper bound on y-index of array for this node
 /// @param    level     Level of this node
 /// @param    max_level Maximum refinement level
 /// @param    full_nodes Whether nodes always have a full complement of children
@@ -165,20 +175,20 @@ int Node2K::refine
   int increment = level_increment_();
 
   if ( level < max_level && 
-       lowx < upx-1 && 
-       lowy < upy-1 ) {
+       nxm < nxp-1 && 
+       nym < nyp-1 ) {
 
     // determine whether to refine the node
 
-    int dx = (upx - lowx)/k_;
-    int dy = (upy - lowy)/k_;
+    int dx = (nxp - nxm)/k_;
+    int dy = (nyp - nym)/k_;
 
     int * ixk = new int [k_+1];
     int * iyk = new int [k_+1];
 
     for (int i=0; i<=k_; i++) {
-      ixk[i] = lowx + i*dx;
-      iyk[i] = lowy + i*dy;
+      ixk[i] = nxm + i*dx;
+      iyk[i] = nym + i*dy;
     }
 
     int * depth_child = new int [num_children_()];
@@ -193,8 +203,8 @@ int Node2K::refine
 
       bool refine_node = false;
 
-      for (int iy=lowy; iy<upy && !refine_node; iy++) {
-	for (int ix=lowx; ix<upx && !refine_node; ix++) {
+      for (int iy=nym; iy<nyp && !refine_node; iy++) {
+	for (int ix=nxm; ix<nxp && !refine_node; ix++) {
 	  if (level_array[ix + ndx*iy] >= level) {
 	    refine_node = true;
 	  }
@@ -610,8 +620,8 @@ void Node2K::fill_image
 (
  float * image,
  int ndx,  int ndy,
- int lowx, int upx,  
- int lowy, int upy,
+ int nxm, int nxp,  
+ int nym, int nyp,
  int level,
  int num_levels,
  int line_width
@@ -619,10 +629,10 @@ void Node2K::fill_image
 /// @param    image     Array of colormap indices
 /// @param    ndx       x-dimension of image[]
 /// @param    ndy       y-dimension of image[]
-/// @param    lowx      Lowest x-index of image[] for this node
-/// @param    upx       Upper bound on x-index of image[] for this node
-/// @param    lowy      Lowest y-index of image[] for this node
-/// @param    upy       Upper bound on y-index of image[] for this node
+/// @param    nxm      Lowest x-index of image[] for this node
+/// @param    nxp       Upper bound on x-index of image[] for this node
+/// @param    nym      Lowest y-index of image[] for this node
+/// @param    nyp       Upper bound on y-index of image[] for this node
 /// @param    level     Level of this node
 /// @param    num_levels Total number of levels
 /// @param    line_width Width of lines bounding nodes
@@ -633,31 +643,31 @@ void Node2K::fill_image
 
   // Fill interior
 
-  for (iy=lowy; iy<=upy; iy++) {
-    for (ix=lowx; ix<=upx; ix++) {
+  for (iy=nym; iy<=nyp; iy++) {
+    for (ix=nxm; ix<=nxp; ix++) {
       i = ix + ndx * iy;
       image[i] = 2*num_levels - level; 
     }
   }
 
   // Draw border
-  for (ix=lowx; ix<=upx; ix++) {
-    iy = lowy;
+  for (ix=nxm; ix<=nxp; ix++) {
+    iy = nym;
     for (int k=0; k < line_width; k++) {
       image[ix + ndx*(iy+k)] = 0;
     }
-    iy = upy;
+    iy = nyp;
     for (int k=0; k < line_width; k++) {
       image[ix + ndx*(iy+k)] = 0;
     }
   }
 
-  for (iy=lowy; iy<=upy; iy++) {
-    ix = lowx;
+  for (iy=nym; iy<=nyp; iy++) {
+    ix = nxm;
     for (int k=0; k < line_width; k++) {
       image[(ix+k) + ndx*iy] = 0;
     }
-    ix = upx;
+    ix = nxp;
     for (int k=0; k < line_width; k++) {
       image[(ix+k) + ndx*iy] = 0;
     }
@@ -665,14 +675,14 @@ void Node2K::fill_image
 
   // Recurse
 
-  int dx = (upx - lowx)/k_;
-  int dy = (upy - lowy)/k_;
+  int dx = (nxp - nxm)/k_;
+  int dy = (nyp - nym)/k_;
 
   int * ixk = new int [k_+1];
   int * iyk = new int [k_+1];
   for (int i=0; i<=k_; i++) {
-    ixk[i] = lowx + i*dx;
-    iyk[i] = lowy + i*dy;
+    ixk[i] = nxm + i*dx;
+    iyk[i] = nym + i*dy;
   }
 
   for (int ix=0; ix<k_; ix++) {
@@ -690,17 +700,17 @@ void Node2K::fill_image
 void Node2K::geomview
 (
  FILE * fpr,
- double lowx, double upx,  
- double lowy, double upy,
+ double nxm, double nxp,  
+ double nym, double nyp,
  double lowz, double upz,
  bool full )
 /// @param    fpr       File pointer of geomview file opened for output
-/// @param    lowx      Lowest x-index of this node
-/// @param    upx       Upper bound on x-index of this node (warning: different meanings)
-/// @param    lowy      Lowest y-index of this node (warning: different meanings)
-/// @param    upy       Upper bound on y-index of this node (warning: different meanings)
-/// @param    lowy      Lowest y-index of this node (warning: different meanings)
-/// @param    upy       Upper bound on y-index of this node (warning: different meanings)
+/// @param    nxm      Lowest x-index of this node
+/// @param    nxp       Upper bound on x-index of this node (warning: different meanings)
+/// @param    nym      Lowest y-index of this node (warning: different meanings)
+/// @param    nyp       Upper bound on y-index of this node (warning: different meanings)
+/// @param    nym      Lowest y-index of this node (warning: different meanings)
+/// @param    nyp       Upper bound on y-index of this node (warning: different meanings)
 /// @param    level     Level of this node
 /// @param    num_levels Total number of levels
 /// @param    line_width Width of lines bounding nodes
@@ -718,22 +728,22 @@ void Node2K::geomview
     fprintf (fpr,"1 1 1\n");
 
   }
-  fprintf (fpr,"%g %g %g\n",lowx,lowy,lowz);
-  fprintf (fpr,"%g %g %g\n",upx,lowy,lowz);
-  fprintf (fpr,"%g %g %g\n",upx,upy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,upy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,lowy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,lowy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,lowy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,lowy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,upy,lowz);
-  fprintf (fpr,"%g %g %g\n",lowx,upy,upz);
-  fprintf (fpr,"%g %g %g\n",lowx,lowy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,upy,lowz);
-  fprintf (fpr,"%g %g %g\n",upx,upy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,lowy,upz);
-  fprintf (fpr,"%g %g %g\n",lowx,upy,upz);
-  fprintf (fpr,"%g %g %g\n",upx,upy,upz);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,lowz);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,lowz);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,lowz);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,lowz);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,lowz);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,upz);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,upz);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,lowz);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,lowz);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,upz);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,upz);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,lowz);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,upz);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,upz);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,upz);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,upz);
 
   if (full) {
     fprintf (fpr,"1 1 1 1\n");
@@ -742,12 +752,12 @@ void Node2K::geomview
 
   double * xk = new double [k_+1];
   double * yk = new double [k_+1];
-  double hx = (upx-lowx) / k_;
-  double hy = (upy-lowy) / k_;
+  double hx = (nxp-nxm) / k_;
+  double hy = (nyp-nym) / k_;
 
   for (int i=0; i<k_+1; i++) {
-    xk[i] = lowx + hx*i;
-    yk[i] = lowy + hy*i;
+    xk[i] = nxm + hx*i;
+    yk[i] = nym + hy*i;
   }
   for (int iy=0; iy<k_; iy++) {
     for (int ix=0; ix<k_; ix++) {
@@ -807,7 +817,4 @@ void Node2K::deallocate_children_ ()
     child_ = NULL;
   }
 }
-
-/// @@@ Number of nodes allocated
-int Node2K::num_nodes_ = 0;
 

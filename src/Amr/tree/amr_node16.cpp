@@ -13,14 +13,16 @@
 #include "amr_node16.hpp"
 #include "error.hpp"
 
+//----------------------------------------------------------------------
+
 const bool debug = false;
 
-Node16::Node16(int level_adjust) 
-  : level_adjust_(level_adjust)
-    /// @param    level_adjust difference: actual mesh level - tree level
-{ 
-  ++Node16::num_nodes_;
+//----------------------------------------------------------------------
 
+Node16::Node16(int level_adjust) 
+  /// @param    level_adjust difference: actual mesh level - tree level
+  : level_adjust_(level_adjust)
+{ 
   for (int ix=0; ix<4; ix++) {
     neighbor_[ix] = NULL;
     for (int iy=0; iy<4; iy++) {
@@ -31,11 +33,11 @@ Node16::Node16(int level_adjust)
   parent_ = NULL;
 }
 
+//----------------------------------------------------------------------
+
 Node16::~Node16() 
 ///
 { 
-  --Node16::num_nodes_;
-
   // recursively delete children
 
   for (int ix=0; ix<4; ix++) {
@@ -86,6 +88,19 @@ Node16 & Node16::operator= (const Node16 & node16) throw()
 
 //----------------------------------------------------------------------
 
+int Node16::num_nodes()
+{
+  int node_count = 0;
+  for (int ix=0; ix<4; ix++) {
+    for (int iy=0; iy<4; iy++) {
+      if (child(ix,iy)) node_count += child(ix,iy)->num_nodes();
+    }
+  }
+  return (1 + node_count);
+}
+
+//----------------------------------------------------------------------
+
 inline Node16 * Node16::child (int ix, int iy) 
 /// @param    ix        Index 0 <= ix < 3 of cell in grid block
 /// @param    iy        Index 0 <= iy < 3 of cell in grid block
@@ -93,11 +108,15 @@ inline Node16 * Node16::child (int ix, int iy)
   return child_[ix][iy]; 
 }
 
+//----------------------------------------------------------------------
+
 inline Node16 * Node16::neighbor (face_type face) 
 /// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
 { 
   return neighbor_[face]; 
 }
+
+//----------------------------------------------------------------------
 
 inline Node16 * Node16::cousin (face_type face, int ix, int iy) 
 /// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
@@ -111,12 +130,15 @@ inline Node16 * Node16::cousin (face_type face, int ix, int iy)
   }
 }
 
+//----------------------------------------------------------------------
+
 inline Node16 * Node16::parent () 
 ///
 { 
   return parent_; 
 }
 
+//----------------------------------------------------------------------
 // Set two nodes to be neighbors.  Friend function since nodes may be NULL
 inline void make_neighbors 
 (
@@ -132,6 +154,7 @@ inline void make_neighbors
   if (node_2 != NULL) node_2->neighbor_[(face_1+2)%4] = node_1;
 }
 
+//----------------------------------------------------------------------
 int Node16::refine 
 (
  const int * level_array, 
@@ -248,6 +271,7 @@ int Node16::refine
   return depth;
 }
 
+//----------------------------------------------------------------------
 void Node16::create_children_()
 ///
 {
@@ -258,6 +282,7 @@ void Node16::create_children_()
   }
 }
 
+//----------------------------------------------------------------------
 void Node16::update_children_()
 ///
 {
@@ -268,6 +293,7 @@ void Node16::update_children_()
   }
 }
 
+//----------------------------------------------------------------------
 void Node16::create_child_(int ix, int iy)
 /// @param    ix        Index 0 <= ix < 3 of cell in grid block
 /// @param    iy        Index 0 <= iy < 3 of cell in grid block
@@ -275,6 +301,7 @@ void Node16::create_child_(int ix, int iy)
   child_[ix][iy] = new Node16();
 }
 
+//----------------------------------------------------------------------
 void Node16::update_child_ (int ix, int iy)
 /// @param    ix        Index 0 <= ix < 3 of cell in grid block
 /// @param    iy        Index 0 <= iy < 3 of cell in grid block
@@ -318,6 +345,7 @@ void Node16::update_child_ (int ix, int iy)
 }
 
 // Perform a pass of trying to remove level-jumps 
+//----------------------------------------------------------------------
 void Node16::balance_pass(bool & refined_tree, bool full_nodes)
 /// @param    refined_tree Whether tree has been refined
 /// @param    full_nodes   Whether nodes always have a full complement of children
@@ -446,6 +474,7 @@ void Node16::balance_pass(bool & refined_tree, bool full_nodes)
     //  }
 }
   // Perform a pass of trying to optimize uniformly-refined nodes
+//----------------------------------------------------------------------
 void Node16::optimize_pass(bool & refined_tree)
 /// @param    refined_tree Whether tree has been refined
 {
@@ -504,6 +533,7 @@ void Node16::optimize_pass(bool & refined_tree)
 }
 
 // Fill the image region with values
+//----------------------------------------------------------------------
 void Node16::fill_image
 (
  float * image,
@@ -580,6 +610,3 @@ void Node16::fill_image
     }
   }
 }
-
-int Node16::num_nodes_ = 0;
-

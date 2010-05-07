@@ -39,6 +39,10 @@ public: // interface
   { INCOMPLETE_MESSAGE("Tree4::operator =",""); 
     return *this; };
 
+  /// Return the number of nodes in the tree
+  int num_nodes()
+  { return root_->num_nodes(); };
+
   /// Refine down to array
   void refine
     (const int * level_array, 
@@ -69,4 +73,4 @@ private: // attributes
 
 };
 
-#endif
+#endif /* AMR_TREE4_HPP */

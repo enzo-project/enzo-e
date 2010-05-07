@@ -265,7 +265,6 @@ void create_tree
   if (d==2) tree = new Tree2K(k);
   if (d==3) tree = new Tree3K(k);
 
-  int num_nodes;
   float mem_per_node;
 
   Memory * memory = Memory::instance();
@@ -307,9 +306,8 @@ void create_tree
   }
   if (geomview) tree->geomview(name + "-0.gv");
 
-  num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
-  mem_per_node = (float) memory->bytes(0) / num_nodes;
-  printf ("nodes      = %d\n",num_nodes);
+  mem_per_node = (float) memory->bytes(0) / tree->num_nodes();
+  printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
 
@@ -331,9 +329,8 @@ void create_tree
   write_image(name + "-1",image,image_size,image_size,1);
   if (geomview) tree->geomview(name + "-1.gv");
 
-  num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
-  mem_per_node = (float) memory->bytes(0) / num_nodes;
-  printf ("nodes      = %d\n",num_nodes);
+  mem_per_node = (float) memory->bytes(0) / tree->num_nodes();
+  printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
 
@@ -355,9 +352,7 @@ void create_tree
   write_image(name + "-2",image,image_size,image_size,1);
   if (geomview) tree->geomview(name + "-2.gv");
 
-  num_nodes = (d==2) ? Node2K::num_nodes() : Node3K::num_nodes();
-  mem_per_node = (float) memory->bytes(0) / num_nodes;
-  printf ("nodes      = %d\n",num_nodes);
+  printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
 

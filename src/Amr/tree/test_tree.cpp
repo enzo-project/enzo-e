@@ -98,10 +98,11 @@ void write_image(float * image, int nx, int ny, int k, int full, int step)
 
 void write_stats (int num_nodes, int num_levels)
 {
+  Memory * memory = Memory::instance();
   printf ("nodes  = %d\n",num_nodes);
   printf ("levels = %d\n",num_levels);
-  //  printf ("bytes/node = %g\n",
-  //	  (float) Memory::bytes(0) / num_nodes);
+  printf ("bytes/node = %g\n",
+	  (float) memory->bytes(0) / num_nodes);
 }
 
 //----------------------------------------------------------------------
@@ -163,18 +164,18 @@ int main(int argc, char ** argv)
 
     printf ("\nINITIAL\n");
     tree4->refine(level_array,n0,n1,max_level,full_nodes);
-    write_stats (Node4::num_nodes(), tree4->levels());
+    write_stats (tree4->num_nodes(), tree4->levels());
     n = image_size(cell_size,line_width, tree4->levels());
     write_image(tree4->create_image(n,line_width),n,n,2,full_nodes,0);
 
     printf ("\nBALANCED\n");
     tree4->balance(full_nodes);
-    write_stats (Node4::num_nodes(), tree4->levels());
+    write_stats (tree4->num_nodes(), tree4->levels());
     write_image(tree4->create_image(n,line_width),n,n,2,full_nodes,1);
 
     printf ("\nCOALESCED\n");
     tree4->optimize();
-    write_stats (Node4::num_nodes(), tree4->levels());
+    write_stats (tree4->num_nodes(), tree4->levels());
     write_image(tree4->create_image(n,line_width),n,n,2,full_nodes,2);
 
     delete tree4;
@@ -192,18 +193,18 @@ int main(int argc, char ** argv)
 
     printf ("\nINITIAL\n");
     tree16->refine(level_array,n0,n1,max_level,full_nodes);
-    write_stats (Node16::num_nodes(), tree16->levels());
+    write_stats (tree16->num_nodes(), tree16->levels());
     n = image_size(cell_size,line_width, tree16->levels());
     write_image(tree16->create_image(n,line_width),n,n,4,full_nodes,0);
 
     printf ("\nBALANCED\n");
     tree16->balance(full_nodes);
-    write_stats (Node16::num_nodes(), tree16->levels());
+    write_stats (tree16->num_nodes(), tree16->levels());
     write_image(tree16->create_image(n,line_width),n,n,4,full_nodes,1);
 
     printf ("\nCOALESCED\n");
     tree16->optimize();
-    write_stats (Node16::num_nodes(), tree16->levels());
+    write_stats (tree16->num_nodes(), tree16->levels());
     write_image(tree16->create_image(n,line_width),n,n,4,full_nodes,2);
 
     delete tree16;

@@ -6,7 +6,6 @@
 
 /// @file     amr_node4.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Remove static for thread safety
 /// @date     Tue Oct 27 12:32:07 PDT 2009  
 /// @brief    Interface for the Node4 class
 
@@ -37,6 +36,9 @@ public: // interface
 
   /// Assignment operator
   Node4 & operator= (const Node4 & node4) throw();
+
+  /// Number of nodes in subtree rooted at this node
+  int num_nodes();
 
   /// return the specified child
   Node4 * child (corner_type corner);
@@ -104,9 +106,6 @@ public: // interface
        (child_[3]));
   };
 
-  /// @@@ Return the number of nodes
-  static int num_nodes() { return num_nodes_; };
-
 private: // functions
 
   /// Create child nodes
@@ -137,9 +136,6 @@ private: // attributes
 
   /// Relative level for coalesced nodes
   int level_adjust_;
-
-  /// @@@ Number of nodes allocated
-  static int num_nodes_;
 
 };
 

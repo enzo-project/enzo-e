@@ -30,13 +30,14 @@ public: // interface
   { delete root_; };
 
   /// Copy constructor
-  Tree2K(const Tree2K & tree2k) throw()
-  { INCOMPLETE_MESSAGE("Tree2K::Tree2K",""); };
+  Tree2K(const Tree2K & tree2k) throw();
 
   /// Assignment operator
-  Tree2K & operator= (const Tree2K & tree2k) throw()
-  { INCOMPLETE_MESSAGE("Tree2K::operator =",""); 
-    return *this; };
+  Tree2K & operator= (const Tree2K & tree2k) throw();
+
+  /// Return the number of nodes in the tree
+  int num_nodes()
+  { return root_->num_nodes(); };
 
   /// Refine down to array
   void refine
@@ -62,7 +63,6 @@ private: // attributes
 
   /// Root of the tree
   Node2K * root_;
-
 };
 
 #endif /* TREE_K_HPP */

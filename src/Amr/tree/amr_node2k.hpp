@@ -6,7 +6,6 @@
 
 /// @file     amr_node2k.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Remove static for thread safety
 /// @date     Tue Oct 27 12:32:07 PDT 2009
 /// @brief    Interface for Node2K class
 
@@ -35,6 +34,9 @@ public: // interface
 
   /// Assignment operator
   Node2K & operator= (const Node2K & node2k) throw();
+
+  /// Number of nodes in subtree rooted at this node
+  int num_nodes();
 
   /// return the specified child
   Node2K * child (int ix, int iy);
@@ -114,9 +116,6 @@ public: // interface
 
   };
 
-  /// @@@ Return the number of nodes
-  static int num_nodes() { return num_nodes_; };
-
 private: // functions
 
   /// Create child nodes
@@ -182,9 +181,6 @@ private: // attributes
   /// Relative level for coalesced nodes
   int level_adjust_;
 
-  /// @@@ Number of nodes allocated
-  static int num_nodes_;
-
 };
 
-#endif /* NODE_K_HPP */
+#endif /* AMR_NODE2K_HPP */
