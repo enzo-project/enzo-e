@@ -1,13 +1,13 @@
-// $Id: data.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: data_data.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     data.hpp
+/// @file     data_data.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    Declaration of the Data class
 
-#ifndef DATA_HPP
-#define DATA_HPP
+#ifndef DATA_DATA_HPP
+#define DATA_DATA_HPP
 
 #include <vector>
 
@@ -94,5 +94,5 @@ private: // attributes
 
 };
 
-#endif /* DATA_HPP */
+#endif /* DATA_DATA_HPP */
 

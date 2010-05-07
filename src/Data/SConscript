@@ -1,20 +1,17 @@
 Import('env')
 
 components = ['field','error']
+includes   = [Glob('data*hpp')]
+sources    = [Glob('data*cpp')]
 
 env = env.Clone(LIBS=[components])
 
-includes = [Glob('data*hpp')]
-
-env.Alias('install-inc',env.Install ('#/include',includes))
-
-sources  = [Glob('data*cpp')]
-
 libraries = env.Library ('data', [sources])
 
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-
 test_data   = env.Program (['test_data.cpp',   sources])
+
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',libraries))
 env.Alias('install-bin', env.Install ('$BINPATH', test_data))
 
 
