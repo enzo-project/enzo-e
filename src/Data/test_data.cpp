@@ -4,7 +4,7 @@
 /// @file     test_data.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
-/// @brief    Test program for the Data class
+/// @brief    Test program for the DataBlock class
 
 #include "cello.h"
 
@@ -17,9 +17,9 @@
 int main()
 {
 
-  unit_class ("Data");
+  unit_class ("DataDescr");
 
-  Data data;
+  DataDescr data;
 
   //----------------------------------------------------------------------
   // Particles

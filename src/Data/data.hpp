@@ -9,7 +9,7 @@
 /// @date     Thu Jul  9 15:44:21 PDT 2009
 /// @brief    Include file for the Data component
 
-#include "data_data.hpp"
+#include "data_DataDescr.hpp"
 
 #endif /* DATA_HPP */
 

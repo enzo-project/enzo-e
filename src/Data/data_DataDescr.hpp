@@ -4,7 +4,7 @@
 /// @file     data_data.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
-/// @brief    Declaration of the Data class
+/// @brief    Declaration of the DataDescr class
 
 #ifndef DATA_DATA_HPP
 #define DATA_DATA_HPP
@@ -14,16 +14,16 @@
 #include "particles.hpp"
 #include "field.hpp"
 
-class Data {
+class DataDescr {
 
-  /// @class    Data
+  /// @class    DataDescr
   /// @ingroup  Data
   /// @brief    Container class for Particles and Fields
 
 public: // interface
 
-  /// Initialize the Data object
-  Data()
+  /// Initialize the DataDescr object
+  DataDescr()
     : field_(),
       particles_()
   { };
