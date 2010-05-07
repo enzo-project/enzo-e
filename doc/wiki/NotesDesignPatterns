@@ -18,7 +18,7 @@ The abstract factory pattern may be useful for interfacing multiple parallelizat
 
 ''Specify the kinds of objects to create using a prototypical instance, and create new objects by copying this prototype.''
 
-This could be used for `Amr` `Patch`es, et al, so that run-time parameters are only required when creating the initial root AMR node.  We may want to change or adapt AMR parameters, however.
+This could be used for `Mesh` `Patch`es, et al, so that run-time parameters are only required when creating the initial root AMR node.  We may want to change or adapt AMR parameters, however.
 
 === [http://en.wikipedia.org/wiki/Singleton_pattern Singleton pattern] ===
 
@@ -85,7 +85,7 @@ The command pattern will likely be useful for implementing `Schedule` and `Task`
 
 ''Provide a way to access the elements of an aggregate object sequentially without exposing its underlying representation.''
 
-The iterator pattern will likely be useful in many components, e.g. iterating over `Patches` in an `Amr` hierarchy, `Block`s in a `Layout`, etc.
+The iterator pattern will likely be useful in many components, e.g. iterating over `Patches` in a `Mesh`, `Block`s in a `Layout`, etc.
 
 === [http://en.wikipedia.org/wiki/Memento_pattern Memento pattern] ===
 

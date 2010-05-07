@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef AMR_NODE4_HPP
-#define AMR_NODE4_HPP
+#ifndef MESH_NODE4_HPP
+#define MESH_NODE4_HPP
 
-/// @file     amr_node4.hpp
+/// @file     mesh_node4.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Oct 27 12:32:07 PDT 2009  
 /// @brief    Interface for the Node4 class
@@ -13,14 +13,14 @@
 
 #include "cello.h"
 
-#include "amr_node.hpp"
+#include "mesh_node.hpp"
 
 class Tree4;
 
 class Node4 {
 
   /// @class    Node4
-  /// @ingroup  Amr
+  /// @ingroup  Mesh
   /// @brief    Node class for 2^2-trees
 
 public: // interface

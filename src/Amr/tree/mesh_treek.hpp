@@ -1,18 +1,18 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef AMR_TREEK_HPP
-#define AMR_TREEK_HPP
+#ifndef MESH_TREEK_HPP
+#define MESH_TREEK_HPP
 
-/// @file     amr_treek.hpp
+/// @file     mesh_treek.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-30
-/// @brief    Include file for amr_tree[23]k.hpp
+/// @brief    Include file for mesh_tree[23]k.hpp
 
 class TreeK {
 
   /// @class    TreeK
-  /// @ingroup  Amr
+  /// @ingroup  Mesh
   /// @brief    Base class for Tree[23]K classes
 
 public: // interface

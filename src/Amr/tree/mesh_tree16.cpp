@@ -1,26 +1,26 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     amr_tree4.cpp
+/// @file     mesh_tree16.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2009-09-12
-/// @brief    Implementation of Tree4 class for generalized quadtrees
+/// @date     2009-09-18
+/// @brief    Implementation of the Tree16 class
 
 #include <stdio.h>
 #include "cello.h"
-#include "amr_node4.hpp"
-#include "amr_tree4.hpp"
+#include "mesh_node16.hpp"
+#include "mesh_tree16.hpp"
 
 const bool debug = false;
 
-Tree4::Tree4()
+Tree16::Tree16()
+  ///   
   : levels_(0),
-    root_(new Node4())
-    ///
+    root_(new Node16())
 {
 }
 
-void Tree4::refine
+void Tree16::refine
 (
  const int * level_array, 
  int nd0, int nd1, 
@@ -37,7 +37,7 @@ void Tree4::refine
   if (debug) printf ("%d\n",levels_);
 }
 
-void Tree4::balance(bool is_full)
+void Tree16::balance(bool is_full)
 /// @param    is_full   Whether nodes always have a full complement of children
 {
   // Repeatedly balance
@@ -52,7 +52,7 @@ void Tree4::balance(bool is_full)
   printf ("passes = %d\n",pass);
 }
 
-void Tree4::optimize()
+void Tree16::optimize()
 ///
 {
   // Repeatedly optimize
@@ -67,7 +67,7 @@ void Tree4::optimize()
   printf ("passes = %d\n",pass);
 }
 
-float * Tree4::create_image (int n,int line_width)
+float * Tree16::create_image (int n,int line_width)
 /// @param    n         Size of the image along each dimension
 /// @param    line_width Width of lines bounding nodes
 {

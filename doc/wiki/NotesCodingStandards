@@ -11,7 +11,7 @@
 
 == Components ==
 
- * Component names are CamelCase, preferably a single word, e.g. `Amr`, `Disk`, `Error`
+ * Component names are CamelCase, preferably a single word, e.g. `Mesh`, `Disk`, `Error`
  * There is exactly one subdirectory in the source tree for each component
  * Each component subdirectory `foo/` contains a `foo.dir` file: see `TEMPLATE/template.dir` for format
  * Components consist of one or more closely-related classes
@@ -59,7 +59,7 @@
 
 === Dynamically allocated variables ===
 
- * Before allocating or deallocating memory, define the component using, e.g., `memory->set_group(component_amr)`
+ * Before allocating or deallocating memory, define the component using, e.g., `memory->set_group(component_mesh)`
  * Access the memory allocation object using `Memory * memory = Memory::get_instance()`
  * Allocate or deallocate memory only using `new()` and `delete()`, not `malloc()` or `free`
 

@@ -8,23 +8,23 @@ libraries  = 'hdf5'
 env = env.Clone(LIBS=[components,libraries])
 
 includes = [
-	'amr_node16.hpp',
-	'amr_node2k.hpp',
-	'amr_node3k.hpp',
-	'amr_node4.hpp',
-	'amr_node.hpp',
-	'amr_nodek.hpp',
-	'amr_tree16.hpp',
-	'amr_tree2k.hpp',
-	'amr_tree3k.hpp',
-	'amr_tree4.hpp',
-	'amr_treek.hpp']
+	'mesh_node16.hpp',
+	'mesh_node2k.hpp',
+	'mesh_node3k.hpp',
+	'mesh_node4.hpp',
+	'mesh_node.hpp',
+	'mesh_nodek.hpp',
+	'mesh_tree16.hpp',
+	'mesh_tree2k.hpp',
+	'mesh_tree3k.hpp',
+	'mesh_tree4.hpp',
+	'mesh_treek.hpp']
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 
-sources  = [Glob('amr*cpp')]
+sources  = [Glob('mesh*cpp')]
 
-libraries = env.Library ('amr', [sources])
+libraries = env.Library ('mesh', [sources])
 
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 

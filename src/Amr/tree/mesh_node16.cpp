@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     amr_node16.cpp
+/// @file     mesh_node16.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-09-18
 /// @brief    Node class for 4^2-trees Tree16
@@ -10,7 +10,7 @@
 
 #include "cello.h"
 
-#include "amr_node16.hpp"
+#include "mesh_node16.hpp"
 #include "error.hpp"
 
 //----------------------------------------------------------------------

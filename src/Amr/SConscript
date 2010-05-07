@@ -1,9 +1,9 @@
 Import('env')
 
-includes = ['amr.hpp', 'amr_amr.hpp']
+includes = ['mesh.hpp', 'mesh_mesh.hpp']
 
-test_amr = env.Program (['test_amr.cpp'])
-tests = [test_amr];
+test_mesh = env.Program (['test_mesh.cpp'])
+tests = [test_mesh];
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-bin',env.Install ('$BINPATH', tests))

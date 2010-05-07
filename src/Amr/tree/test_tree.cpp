@@ -17,10 +17,10 @@
 #include "error.hpp"
 #include "memory.hpp"
 #include "disk.hpp"
-#include "amr_node4.hpp"
-#include "amr_tree4.hpp"
-#include "amr_node16.hpp"
-#include "amr_tree16.hpp"
+#include "mesh_node4.hpp"
+#include "mesh_tree4.hpp"
+#include "mesh_node16.hpp"
+#include "mesh_tree16.hpp"
 
 #include "image.h"
 

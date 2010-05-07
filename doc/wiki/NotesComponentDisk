@@ -23,8 +23,8 @@ General guidelines for efficient use of parallel filesystems include the followi
 === `Hdf5` class ===
 
 The `Hdf5` class provides an interface layer of functions between Cello and the HDF5 parallel file library.
-It includes functions to aid the writing and reading of arrays and particles defined on an AMR hierarchy,
-but does not depend on any other Cello component, including the `Array`, `Particles`, or `Amr` components.
+It includes functions to aid the writing and reading of arrays and particles defined on a `Mesh`.
+but does not depend on any other Cello component, including the `Array`, `Particles`, or `Mesh` components.
 
 
 

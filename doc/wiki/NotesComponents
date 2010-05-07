@@ -4,13 +4,13 @@
 
 Below is the list of Cello components:
 
-|| ( ) || [NotesComponentAmr         Amr] || Adaptive mesh refinement infrastructure, built on top of `Array` || 
+|| ( ) || [NotesComponentMesh         Mesh] || Adaptive mesh refinement infrastructure, built on top of `Array` || 
 || ( ) || [NotesComponentArray       Array] || Fortran-like array, which may be parallelized or vectorized in various ways || 
 || ( ) || [NotesComponentData Data] || Represent, store and access data, e.g. `Field`s, `Particles`, etc.  ||
 || ( ) || [NotesComponentDisk        Disk] || Provides functions for writing and reading data to and from disk storage  || 
 || ( ) || [NotesComponentDistribute  Distribute] || Distribute (and dynamically redistribute) `Task`s among nodes and processes || 
 || ( ) || [NotesComponentError       Error] || Error prevention (including check-pointing), error detection and recovery || 
-|| ( ) || [NotesComponentField       Field] || Scalar fields on an `Array` or `Amr` hierarchy ||
+|| ( ) || [NotesComponentField       Field] || Scalar fields on a `Mesh` ||
 || ( ) || [NotesComponentMemory      Memory] || Manage dynamic memory allocation and deallocation ||
 || ( ) || [NotesComponentMethod      Method] || Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and visualization ||
 || ( ) || [NotesComponentMonitor     Monitor] || User interface to monitor the status of a running simulation ||

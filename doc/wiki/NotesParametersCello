@@ -7,14 +7,14 @@
 
 
  || || || || || ||
- || ||  '''Amr''' || '''root'''      || `list` || ''size of the root grid, e.g. ![400,400]'' ||
- || ||  '''Amr''' || '''max_level''' || `int` || ''maximum level (with root = 0), assuming refinement by two ||
- || ||  '''Amr''' || '''refine'''    || `int` || ''refinement factor = 2, 4, etc.'' ||
- || ||  '''Amr''' || '''balanced''' ||  `logical` ||  ''whether the tree is balanced or "full" (ala Flash) or not'' ||
- || ||  '''Amr''' || '''backfill'''  || `logical` || ''whether to backfill for refine > 2'' ||
- || ||  '''Amr''' || '''coalesce''' ||  `logical` ||  ''whether to coalesce small patches into one big one'' ||
- || || '''Amr''' || '''min_patch_size''' ||  `integer` ||  ''minimum allowed patch size'' ||
- || || '''Amr''' || '''max_patch_size''' ||  `integer` ||  ''maximum allowed patch size'' ||
+ || ||  '''Mesh''' || '''root'''      || `list` || ''size of the root grid, e.g. ![400,400]'' ||
+ || ||  '''Mesh''' || '''max_level''' || `int` || ''maximum level (with root = 0), assuming refinement by two ||
+ || ||  '''Mesh''' || '''refine'''    || `int` || ''refinement factor = 2, 4, etc.'' ||
+ || ||  '''Mesh''' || '''balanced''' ||  `logical` ||  ''whether the tree is balanced or "full" (ala Flash) or not'' ||
+ || ||  '''Mesh''' || '''backfill'''  || `logical` || ''whether to backfill for refine > 2'' ||
+ || ||  '''Mesh''' || '''coalesce''' ||  `logical` ||  ''whether to coalesce small patches into one big one'' ||
+ || || '''Mesh''' || '''min_patch_size''' ||  `integer` ||  ''minimum allowed patch size'' ||
+ || || '''Mesh''' || '''max_patch_size''' ||  `integer` ||  ''maximum allowed patch size'' ||
  || || || || ||
  || || '''Boundary''' || '''type''' ||  `string` ||  ''type of boundary condition, one of "reflecting",  "inflow", "outflow", "periodic", "dirichlet", "neumann"'' ||
  || || || || ||

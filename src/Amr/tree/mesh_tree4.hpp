@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef AMR_TREE4_HPP
-#define AMR_TREE4_HPP
+#ifndef MESH_TREE4_HPP
+#define MESH_TREE4_HPP
 
-/// @file     amr_tree4.hpp
+/// @file     mesh_tree4.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-09-12
 /// @bug      Implementations of Tree4 and Tree16 are essentially identical
@@ -19,7 +19,7 @@
 class Tree4 {
 
   /// @class    Tree4
-  /// @ingroup  Amr
+  /// @ingroup  Mesh
   /// @brief    Generalized 2^2-tree (quadtree)
 
 public: // interface
@@ -73,4 +73,4 @@ private: // attributes
 
 };
 
-#endif /* AMR_TREE4_HPP */
+#endif /* MESH_TREE4_HPP */

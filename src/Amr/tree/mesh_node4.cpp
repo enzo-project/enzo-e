@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     amr_node4.cpp
+/// @file     mesh_node4.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     
 /// @brief    Node class for 2^2-trees Tree4
@@ -12,7 +12,7 @@
 
 #include "error.hpp"
 
-#include "amr_node4.hpp"
+#include "mesh_node4.hpp"
 
 //----------------------------------------------------------------------
 

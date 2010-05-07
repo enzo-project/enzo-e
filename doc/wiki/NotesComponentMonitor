@@ -24,12 +24,12 @@ Information output by `Monitor` can include the following:
 
  == Dependencies ==
 
-Since `Monitor` is for monitoring numerous aspects about the running simulation, it must have access to many components such as `Performance`, `Field`, `Amr`, `Particles`, `Method`, `Memory`, and `Parallel`.  To prevent loops in the dependency graph, `Monitor` services are only called by `Control`.
+Since `Monitor` is for monitoring numerous aspects about the running simulation, it must have access to many components such as `Performance`, `Field`, `Mesh`, `Particles`, `Method`, `Memory`, and `Parallel`.  To prevent loops in the dependency graph, `Monitor` services are only called by `Control`.
 
  == Output data ==
 
   || ||
-  || '''Amr''' || 
+  || '''Mesh''' || 
   || ||
   ||  `level_count` || integer[mpi] ||
   ||  `patch_count` || integer[level][mpi] ||

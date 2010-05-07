@@ -13,11 +13,11 @@
 
 \begin{description}
 %
- \item [\todo Amr (\S\ref{s:component-amr}): ]
+ \item [\todo Mesh (\S\ref{s:component-amr}): ]
 %
-        The \code{Amr} component includes classes for representing
+        The \code{Mesh} component includes classes for representing
         multi-resolution data on a hierarchy of grid patches of
-        varying spacial resolutions.  The \code{Amr} data
+        varying spacial resolutions.  The \code{Mesh} data
         structures can have multiple levels of data distribution and
         parallelism.  Uses the \code{Parallel} component for
         controlling the parallel communication, synchronization, and
@@ -50,7 +50,7 @@
         A \code{Field} is used to represent a specific continuous
         scalar or vector field.  The actual \code{Field} is
         represented either using adaptive mesh refinement via
-        \code{Amr}, or as a collection of particles using
+        \code{Mesh}, or as a collection of particles using
         \code{Particles}.  Includes \code{Units} to define the problem
         units, as well as scaling amount to improve numerics, and
         scaling quantization to avoid precision loss.

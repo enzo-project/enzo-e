@@ -31,7 +31,7 @@ env.Append(BUILDERS = { 'UnitMpi' :   unit_mpi } )
 env.Append(BUILDERS = { 'UnitParse' : unit_parse } )
 env.Append(BUILDERS = { 'TestCello' : test_cello } )
 
-env.Unit('test_amr.out',         '#/bin/test_amr')
+env.Unit('test_mesh.out',        '#/bin/test_mesh')
 env.Unit('test_array.out',       '#/bin/test_array')
 env.Unit('test_block.out',       '#/bin/test_block')
 env.Unit('test_data.out',        '#/bin/test_data')

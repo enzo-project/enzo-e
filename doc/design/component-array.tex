@@ -28,7 +28,7 @@ various ways. Tentative functionality includes the following:
   iterators
 \item Support for both permanent and allocate-when-needed ghost zones
 \item Efficient resizing / combining / merging functions for
-  integration with Amr
+  integration with Mesh
 \item Efficient transposing / permuting of axes, e.g. for PPM to
   compute with stride-1 along all axes
 \item Efficient ghost-zone refresh
@@ -49,7 +49,7 @@ To implement Array's, other related classes are used to share implementation res
   the same Layout object are said to be conforming. An Array's Layout
   describes how to distribute an Array's data over MPI processes,
   between OpenMP threads, etc. For unigrid problems, only one Layout
-  is used. For Amr problems, typically several Layouts are used.
+  is used. For AMR problems, typically several Layouts are used.
 
 \item [Block] The Block class is a lightweight wrapper for portions of
   an Array to be actively computed by a single thread. It represents a
@@ -84,7 +84,7 @@ Issues with Arrays and supporting classes include the following:
 \begin{itemize}
 \item Allocation and deallocation functions (Memory)
 \item Copy functions
-\item Merge / split functions (for Amr)
+\item Merge / split functions (for AMR)
 \item Universal properties functions for obtaining information about
   the array (dimensions, etc.)
 \item Layout-dependent properties (MPI task distribution, cache block

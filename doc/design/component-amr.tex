@@ -2,16 +2,16 @@
 \section{AMR Component} \label{s:component-amr}
 %=======================================================================
 
-The \code{Amr} component defines the data structures and associated
+The \code{Mesh} component defines the data structures and associated
 parameters for the ``inter-resolution'' aspect of data fields on
 distributed AMR hierarchies.  The ``intra-resolution'' aspects are
 defined using the closely related \code{Array} component.  Both
 patch-based AMR, ala \enzo, and octree-like-based AMR datastructures
 are supported.  Support for associating \code{Particle} groups with
-\code{Array}'s in an \code{Amr} hierarchy is also included in the
-\code{Amr} component.
+\code{Array}'s in an AMR hierarchy is also included in the
+\code{Mesh} component.
 
-Tentative features of \code{Amr} support in Cello include the following: 
+Tentative features of \code{Mesh} support in Cello include the following: 
 
 \begin{itemize}
 %
@@ -22,13 +22,13 @@ Tentative features of \code{Amr} support in Cello include the following:
       data-structure in a distributed memory. (Caveat: ``Wish'' W010
       by Norman is to include structured AMR capability).
 %
-    \item Full unilevel efficiency. A single-level \code{Amr} ``hierarchy''
+    \item Full unilevel efficiency. A single-level AMR ``hierarchy''
       should reduce to a single \code{Array}. This is different from Enzo,
       which allocates O(P) grid patches per MPI-process, and involves
       costly and unnecessary neighbor searches.
 %
     \item Partitioned ``inter-resolution'' and ``intra-resolution''
-      management. The \code{Amr} component defines and manages the
+      management. The \code{Mesh} component defines and manages the
       inter-refinement structure, whereas the \code{Array} component
       defines and manages the intra-resolution structures.
 %
@@ -43,7 +43,7 @@ Tentative features of \code{Amr} support in Cello include the following:
     \item Flexibility within levels. Flexibility in array sizes, for
       example, $4^3$, $7^3$, etc., to match flexibility of AMR tree
       shapes, and allow refinement by \code{Array} arrays instead of
-      by \code{Amr} trees.
+      by \code{Mesh} tree structure.
 %
     \item ``Smooth'' refinement. Intermediate ``pseudo-levels'',
       implemented by introducing a ``bridge of \code{Array}'s, can be
@@ -52,17 +52,17 @@ Tentative features of \code{Amr} support in Cello include the following:
       ratios (e.g. $16^3$-trees) for more efficient targeting of
       features, but without introducing undue grid resolution effects.
 %
-    \item Optimized \code{Amr} - \code{Array} data-structure
+    \item Optimized \code{Mesh} - \code{Array} data-structure
       partitioning. Efficiency can be improved by optimizing
-      \code{Array}s versus the \code{Amr} refinement tree. For
+      \code{Array}s versus the \code{Mesh} refinement tree. For
       example, if a domain is flagged to be refined everywhere, then
-      the \code{Amr} data-structure detects this and collapses back to
+      the \code{Mesh} data-structure detects this and collapses back to
       a single but larger \code{Array}.
 %
     \item Scalable depth. We want to allow ``massively deep''
-      \code{Amr} hierarchies without limits based on floating point
+      AMR hierarchies without limits based on floating point
       precision or limited integer range.  For example, positions of
-      particles associated with an \code{Amr} \code{Patch} are stored
+      particles associated with a \code{Mesh} \code{Patch} are stored
       with particle positions normalized between $-1.0 < x < 1.0$ to
       enable more than sufficient precision, even with single precision.
 \end{itemize}
@@ -70,7 +70,7 @@ Tentative features of \code{Amr} support in Cello include the following:
 \subsection{Design issues}
 
 \begin{itemize}
-    \item How to decide tradeoffs between \code{Array} and \code{Amr}
+    \item How to decide tradeoffs between \code{Array} resolution and \code{Mesh}
       refinement?
     \item What support is needed for Particles?
     \item How to handle remeshing?
@@ -80,10 +80,10 @@ Tentative features of \code{Amr} support in Cello include the following:
     \item What operations needed for load balancing
 \end{itemize}
 
-\subsection{\code{Amr} supporting classes}
+\subsection{\code{Mesh} supporting classes}
 
 \begin{itemize}
-    \item \code{Amr}
+    \item \code{Mesh}
     \begin{itemize}
           \item \code{Array}
           \item \code{Particles}
@@ -92,13 +92,13 @@ Tentative features of \code{Amr} support in Cello include the following:
     \end{itemize}
 \end{itemize}
 
-\code{Amr} operations
+\code{Mesh} operations
 
-\code{Amr} class hierarchy
+\code{Mesh} class hierarchy
 
 Operations
 
-The \code{\code{Amr}} component accesses the \code{Array} component to
+The \code{\code{Mesh}} component accesses the \code{Array} component to
 define the ``intra-resolution'' aspect of field data on an AMR
 hierarchy, and the \code{Particles} component to define particles on
 the AMR hierarchy.  

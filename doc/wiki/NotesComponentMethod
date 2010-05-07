@@ -6,8 +6,8 @@
 
 The `Method` components defines the interface to user-written numerical methods.  
 Specifically, `MethodHyperbolic` defines the interface for hyperbolic methods applied for one timestep on a uniform grid patch, 
-and `MethodElliptic` defines the interface for elliptic problems applied for one timestep on an `Amr` hierarchy.  Functions supporting 
-applying the method on an AMR hierarchy are included, such as method-specific handling of
+and `MethodElliptic` defines the interface for elliptic problems applied for one timestep on a `Mesh`.  Functions supporting 
+applying the method on a `Mesh` are included, such as method-specific handling of
 boundary conditions, and functions applied to level boundaries, such as flux-correction.n
 
 [[Image(htdocs:gedeckt-ppm-ppml-rate.png)]]

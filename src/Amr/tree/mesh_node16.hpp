@@ -1,24 +1,24 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef AMR_NODE16_HPP
-#define AMR_NODE16_HPP
+#ifndef MESH_NODE16_HPP
+#define MESH_NODE16_HPP
 
-/// @file     amr_node16.hpp
+/// @file     mesh_node16.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Oct 27 12:32:07 PDT 2009
 /// @brief    Declaration of the Node16 class 
 
 #include <stdlib.h>
 #include "cello.h"
-#include "amr_node.hpp"
+#include "mesh_node.hpp"
 
 class Tree16;
 
 class Node16 {
 
   /// @class    Node16
-  /// @ingroup  Amr
+  /// @ingroup  Mesh
   /// @brief    Node class for 4^2-trees
 
 public: // interface

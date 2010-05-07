@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     amr_node2k.cpp
+/// @file     mesh_node2k.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-27
 /// @brief    Implementation of the Node16 class 
@@ -10,7 +10,7 @@
 
 #include "cello.h"
 
-#include "amr_node2k.hpp"
+#include "mesh_node2k.hpp"
 #include "error.hpp"
 
 //----------------------------------------------------------------------

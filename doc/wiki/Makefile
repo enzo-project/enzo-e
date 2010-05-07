@@ -7,9 +7,7 @@ WIKI_FILES = \
 	NotesComponentSchedule \
 	NotesComponentTest \
 	NotesComponentUser \
-
 	NotesCodingStandards \
-	NotesComponentAmr \
 	NotesComponentAnalysis \
 	NotesComponentArray \
 	NotesComponentArrayBlock \
@@ -21,6 +19,7 @@ WIKI_FILES = \
 	NotesComponentError \
 	NotesComponentField \
 	NotesComponentMemory \
+	NotesComponentMesh \
 	NotesComponentMethod \
 	NotesComponentMonitor \
 	NotesComponentParallel \
@@ -56,7 +55,7 @@ help:
 	-@echo
 
 .PHONY: read write-%
-write: $(patsubst %,import-%,$(WIKI_FILES))
+write: $(patsubst %,write-%,$(WIKI_FILES))
 write-%:
 	-@echo "importing import/$*"
 	-@(trac-admin $(TRAC_PATH) wiki import $* write/$*)

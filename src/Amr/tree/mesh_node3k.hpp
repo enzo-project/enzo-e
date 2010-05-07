@@ -1,67 +1,68 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef AMR_NODE2K_HPP
-#define AMR_NODE2K_HPP
+#ifndef MESH_NODE3K_HPP
+#define MESH_NODE3K_HPP
 
-/// @file     amr_node2k.hpp
-/// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Tue Oct 27 12:32:07 PDT 2009
-/// @brief    Interface for Node2K class
+/// @file     mesh_node3k.hpp
+/// @author   James Bordner (jobordner@ucsd.edu) 
+/// @date     Tue Oct 27 12:32:07 PDT 2009 
+/// @brief    Declaration of Node3K
 
 #include <stdlib.h>
 #include "cello.h"
-#include "amr_nodek.hpp"
+#include "mesh_nodek.hpp"
 
-class Tree2K;
+class Tree3K;
 
-class Node2K {
+class Node3K {
 
-  /// @class    Node2K
-  /// @brief    Node class for 2D k^2-trees
-  /// @ingroup  Amr
+  /// @class    Node3K
+  /// @ingroup  Mesh
+  /// @brief    Node class for 3D k^3-trees
 
 public: // interface
 
   /// Create a new leaf node
-  Node2K( int k,  int level_adjust = 0  );
+  Node3K( int k, int level_adjust = 0 );
 
-  /// Destructor
-  ~Node2K();
+  /// Delete a node and all descedents
+  ~Node3K();
 
   /// Copy constructor
-  Node2K(const Node2K & node2k) throw();
+  Node3K(const Node3K & node3k) throw();
 
   /// Assignment operator
-  Node2K & operator= (const Node2K & node2k) throw();
+  Node3K & operator= (const Node3K & node3k) throw();
 
   /// Number of nodes in subtree rooted at this node
   int num_nodes();
 
   /// return the specified child
-  Node2K * child (int ix, int iy);
+  Node3K * child (int ix, int iy, int iz);
 
   /// return the specified neighbor
-  Node2K * neighbor (face_type face);
+  Node3K * neighbor (face_type face);
 
   /// make the two nodes neighbors.  friend function since either can be NULL
   friend void make_neighbors 
-  (Node2K * node_1, Node2K * node_2, face_type face_1);
+  (Node3K * node_1, Node3K * node_2, face_type face_1);
 
   /// get the child's cousin
-  Node2K * cousin (face_type face, int ix, int iy);
+  Node3K * cousin (face_type face, int ix, int iy, int iz);
 
   /// return the parent
-  Node2K * parent ();
+  Node3K * parent ();
 
   /// Refine if any elements in the array are true and recurse
   /// return the level
   int refine 
     (
      const int * level_array, 
-     int ndx,  int ndy,
+     int ndx,  int ndy, int ndz,
      int lowx, int upx,
      int lowy, int upy,
+     int lowz, int upz,
      int level, 
      int max_level,
      bool is_full = true
@@ -77,12 +78,14 @@ public: // interface
   void fill_image
     (
      float * image,
-     int ndx,  int ndy,
+     int ndx,  int ndy, int ndz,
      int lowx, int upx,  
      int lowy, int upy,
+     int lowz, int upz,
      int level,
      int num_levels,
-     int line_width
+     int line_width,
+     int axis
      );
 
   /// Write a geomview file
@@ -94,12 +97,13 @@ public: // interface
    double lowz, double upz,
    bool full = true);
 
-
   /// Return whether node has all children
   bool all_children () {
-    for (int iy=0; iy<k_; iy++) {
-      for (int ix=0; ix<k_; ix++) {
-	if (! child(ix,iy)) return false;
+    for (int iz=0; iz<k_; iz++) {
+      for (int iy=0; iy<k_; iy++) {
+	for (int ix=0; ix<k_; ix++) {
+	  if (! child(ix,iy,iz)) return false;
+	}
       }
     }
     return true;
@@ -107,9 +111,14 @@ public: // interface
 
   /// Return whether node has any children
   bool any_children () { 
-    for (int iy=0; iy<k_; iy++) {
-      for (int ix=0; ix<k_; ix++) {
-	if (child(ix,iy)) return true;
+
+    if (!child_) return false;
+
+    for (int iz=0; iz<k_; iz++) {
+      for (int iy=0; iy<k_; iy++) {
+	for (int ix=0; ix<k_; ix++) {
+	  if (child(ix,iy,iz)) return true;
+	}
       }
     }
     return false;
@@ -128,22 +137,22 @@ private: // functions
   void delete_children_();
 
   /// Update neighbors for a child
-  void update_child_ (int ix, int iy);
+  void update_child_ (int ix, int iy, int iz);
 
   /// Create a child
-  void create_child_ (int ix, int iy);
+  void create_child_ (int ix, int iy, int iz);
 
   /// Index into child[] for ix,iy, iz
-  int index_(int ix, int iy) { return (ix + k_*iy); };
+  int index_(int ix, int iy, int iz) { return ix + k_*(iy + k_*iz); };
 
   /// Return index of opposite face
   int opposite_face_ (face_type face) { return int(face) ^ 1; };
 
   /// Return number of faces
-  int num_faces_() { return 4; };
+  int num_faces_() { return 6; };
 
   /// Return maximum number of children
-  int num_children_() { return k_*k_; };
+  int num_children_() { return k_*k_*k_; };
 
   /// Return the level increment log2(k_)
   int level_increment_() { 
@@ -153,15 +162,22 @@ private: // functions
     case 8:  return ( 3 ); break;
     case 16: return ( 4 ); break;
     default:
-      fprintf (stderr,"Invalid k=%d for Node2K\n",k_);
+      fprintf (stderr,"Invalid k=%d for Node3K\n",k_);
       exit(1);
       break;
     }
   }
 
+  /// Allocate neighbor pointers
   void allocate_neighbors_ ();
+
+  /// Deallocate neighbor pointers
   void deallocate_neighbors_ ();
+
+  /// Allocate children pointers
   void allocate_children_ ();
+
+  /// Deallocate children pointers
   void deallocate_children_ ();
 
 private: // attributes
@@ -170,17 +186,17 @@ private: // attributes
   char k_;
 
   /// Child nodes in edge_type x edge_type ordering
-  Node2K ** child_;
+  Node3K ** child_;
 
   /// Neighbor nodes in edge_type ordering
-  Node2K ** neighbor_;
+  Node3K ** neighbor_;
 
   /// Parent node
-  Node2K * parent_;
+  Node3K * parent_;
 
   /// Relative level for coalesced nodes
   int level_adjust_;
 
 };
 
-#endif /* AMR_NODE2K_HPP */
+#endif /* NODE3K_HPP */

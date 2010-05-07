@@ -17,6 +17,6 @@ A `Simulation` defines a computational astrophysics [NotesComponentProblem Probl
   || `num_methods()` || ''Return the number of methods'' ||
   || `method()` || ''Return the nth method '' ||
   || `parallel()` || ''Return the `Parallel` object'' ||
-  || `amr()` || ''Return the `Amr` object'' ||
+  || `mesh()` || ''Return the `Mesh` object'' ||
 
  

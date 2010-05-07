@@ -4,11 +4,11 @@
 
 [[TOC]]
 
-A `Field` represents a discretized scalar field.  A `Field` is typically discretized on an `Amr` hierarchy, but can be accessed at the `Array` or a `Block` levels as well.  In addition to the array of elements, a `Field` includes an identifier for the field, the location of the field values with respect to computational cells (cell centered, face-centered, etc.), the index into the `Block` or `Array` of the field, optional minimum or maximum allowed values, units, and user-defined tags.
+A `Field` represents a discretized scalar field.  A `Field` is typically discretized on a `Mesh`, but can be accessed at the `Array` or a `Block` levels as well.  In addition to the array of elements, a `Field` includes an identifier for the field, the location of the field values with respect to computational cells (cell centered, face-centered, etc.), the index into the `Block` or `Array` of the field, optional minimum or maximum allowed values, units, and user-defined tags.
 
 A set of `Field`s defined on a `Block`, along with groups of `Particles` associated with the block, are the main input to (and output from) `Method`s.  `Method`s have access to the `Field`'s values, size, cell position, units, tags, limits, etc. 
 
-Actual `Field` objects are stored in the `Amr` `Patch` object.  `Patch` objects also contain associated `Particle` objects, and a `Box` object defining the `Patch`'s extents and position.
+Actual `Field` objects are stored in the `Mesh` `Patch` object.  `Patch` objects also contain associated `Particle` objects, and a `Box` object defining the `Patch`'s extents and position.
 
 == Enzo Fields ==
 

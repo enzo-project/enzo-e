@@ -85,10 +85,10 @@ Scalar and vector fields for each material, such as
 
 
 \subsection{ Field  Component}
-Scalar fields on an Array or Amr hierarchy
+Scalar fields on an Array or Mesh hierarchy
 
 A Field represents a discretized scalar field. A Field is typically
-discretized on an Amr hierarchy, but can be accessed at the Array or a
+discretized on an AMR hierarchy, but can be accessed at the Array or a
 Block levels as well. In addition to the array of elements, a Field
 includes an identifier for the field, the location of the field values
 with respect to computational cells (cell centered, face-centered,
@@ -114,7 +114,7 @@ associated with the block, are the main input to (and output from)
 Methods. Methods have access to the Field's values, size, cell
 position, units, tags, limits, etc.
 
-Actual Field objects are stored in the Amr Patch object. Patch objects
+Actual Field objects are stored in the Mesh Patch object. Patch objects
 also contain associated Particle objects, and a Box object defining
 the Patch's extents and position.  List of fields
 
