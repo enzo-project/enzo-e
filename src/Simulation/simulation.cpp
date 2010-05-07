@@ -12,7 +12,7 @@ Simulation::Simulation()
   : lower_(),
     upper_(),
     amr_(NULL),
-    fields_(NULL),
+    data_(),
     methods_(NULL)
 {
 }
@@ -72,7 +72,7 @@ void Simulation::initialize ()
   INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Amr");
   
   // --------------------------------------------------
-  // Initialize data fields
+  // Initialize data 
   // --------------------------------------------------
 
   INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Fields");

@@ -13,7 +13,7 @@
 #include "cello.h"
 #include "parameters.hpp"
 #include "amr.hpp"
-#include "field.hpp"
+#include "data.hpp"
 #include "method.hpp"
 
 class Simulation {
@@ -73,12 +73,6 @@ public: // interface
     upper[2] = upper_[2];
   };
 
-  /// Return the number of fields
-  int num_fields () { return fields_.size(); };
-
-  /// Return the ith field
-  Field * field (int i) { return fields_[i]; };
-
   /// Return the number of methods
   int num_methods () { return methods_.size(); };
 
@@ -97,8 +91,8 @@ private: // attributes
   /// AMR grid
   Amr * amr_;
 
-  /// Fields
-  std::vector<Field *> fields_;
+  /// Data descriptions
+  Data data_;
 
   /// Methods
   std::vector<Method *> methods_;
