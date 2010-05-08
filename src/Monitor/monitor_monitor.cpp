@@ -14,6 +14,27 @@
 
 Monitor * Monitor::instance_; // (singleton design pattern)
 
+void Monitor::header ()
+{
+  //    print ("");
+  //    print ("     The Laboratory for Computational Astrophysics proudly presents:");
+  print ("");
+  print ("    =================================================================");
+  print ("");
+  print ("    oooooooooooo                                          ooooo ooooo ");
+  print ("    `888'     `8                                          `888' `888' ");
+  print ("     888         ooo. .oo.     oooooooo  .ooooo.           888   888  ");
+  print ("     888oooo8    `888P\"Y88b   d'\"\"7d8P  d88' `88b          888   888  ");
+  print ("     888    \"     888   888     .d8P'   888   888 8888888  888   888  ");
+  print ("     888       o  888   888   .d8P'  .P 888   888          888   888  ");
+  print ("    o888ooooood8 o888o o888o d8888888P  `Y8bod8P'         o888o o888o");
+  print ("");
+  print ("    =================================================================");
+  print ("              E N Z O : T H E   N E X T  G E N E R A T I O N");
+  print ("    =================================================================");
+  print ("");
+}
+
 //----------------------------------------------------------------------
 
 void Monitor::image

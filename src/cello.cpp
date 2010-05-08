@@ -1,10 +1,14 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
+//----------------------------------------------------------------------
+
 /// @file      cello.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Mon Oct  5 15:10:56 PDT 2009
 /// @brief     Cello main
+
+//----------------------------------------------------------------------
 
 #include <mpi.h>
 
@@ -15,20 +19,11 @@
 #include "monitor.hpp"
 #include "parameters.hpp"
 
-void usage(int argc, char ** argv) 
-{
-  Parallel * parallel = Parallel::instance();
+//----------------------------------------------------------------------
 
-  if (parallel->is_root()) {
-#ifdef CONFIG_USE_MPI
-    fprintf (stderr,"Usage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
-#else
-    fprintf (stderr,"Usage: %s <parameter-file>\n\n",argv[0]);
-#endif
-  }
-  parallel->finalize();
-  exit(1);
-}
+void usage(int argc, char ** argv);
+
+//----------------------------------------------------------------------
 
 int main(int argc, char ** argv)
 {
@@ -107,4 +102,19 @@ int main(int argc, char ** argv)
     printf ("CELLO ERROR: Bad pointer.\n");
   }
 
+}
+
+void usage(int argc, char ** argv)
+{
+  Parallel * parallel = Parallel::instance();
+
+  if (parallel->is_root()) {
+#ifdef CONFIG_USE_MPI
+    fprintf (stderr,"Usage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
+#else
+    fprintf (stderr,"Usage: %s <parameter-file>\n\n",argv[0]);
+#endif
+  }
+  parallel->finalize();
+  exit(1);
 }

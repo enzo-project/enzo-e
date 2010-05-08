@@ -56,6 +56,9 @@ public: // interface
     return instance_;
   };
 
+  /// Print the Cello header 
+  void header ();
+
   /// Print a message to stdout
   void print (std::string message, FILE * fp = stdout)
   {

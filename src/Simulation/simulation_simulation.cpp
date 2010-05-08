@@ -3,8 +3,8 @@
 
 /// @file      simulation_simulation.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
-/// @date      
-/// @brief     
+/// @date      2010-11-10
+/// @brief     Implementation of the Simulation class
  
 #include "simulation.hpp"
 
