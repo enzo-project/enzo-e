@@ -85,23 +85,23 @@ int main(int argc, char ** argv)
 
   // Add groups
 
-  performance->new_group(component_amr,"amr");
-  performance->new_group(component_array,"array");
-  performance->new_group(component_control,"control");
-  performance->new_group(component_control,"data");
-  performance->new_group(component_disk,"disk");
-  performance->new_group(component_error,"error");
-  performance->new_group(component_field,"field");
-  performance->new_group(component_memory,"memory");
-  performance->new_group(component_method,"method");
-  performance->new_group(component_monitor,"monitor");
-  performance->new_group(component_parallel,"parallel");
-  performance->new_group(component_parameters,"parameters");
-  performance->new_group(component_particles,"particles");
+  performance->new_group(component_amr,        "amr");
+  performance->new_group(component_array,      "array");
+  performance->new_group(component_control,    "control");
+  performance->new_group(component_control,    "data");
+  performance->new_group(component_disk,       "disk");
+  performance->new_group(component_error,      "error");
+  performance->new_group(component_field,      "field");
+  performance->new_group(component_memory,     "memory");
+  performance->new_group(component_method,     "method");
+  performance->new_group(component_monitor,    "monitor");
+  performance->new_group(component_parallel,   "parallel");
+  performance->new_group(component_parameters, "parameters");
+  performance->new_group(component_particle,   "particle");
   performance->new_group(component_performance,"performance");
-  performance->new_group(component_portal,"portal");
-  performance->new_group(component_problem,"problem");
-  performance->new_group(component_simulation,"simulation");
+  performance->new_group(component_portal,     "portal");
+  performance->new_group(component_problem,    "problem");
+  performance->new_group(component_simulation, "simulation");
   
   // Add functions
 

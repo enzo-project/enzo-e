@@ -17,7 +17,7 @@
 enum argument_type {
   argument_type_unknown,
   argument_type_field,
-  argument_type_particles
+  argument_type_particle
 };
 
 enum access_type {

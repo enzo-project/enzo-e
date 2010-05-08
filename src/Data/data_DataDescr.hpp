@@ -11,7 +11,7 @@
 
 #include <vector>
 
-#include "particles.hpp"
+#include "particle.hpp"
 #include "field.hpp"
 
 class DataDescr {
@@ -25,7 +25,7 @@ public: // interface
   /// Initialize the DataDescr object
   DataDescr()
     : field_(),
-      particles_()
+      particle_()
   { };
 
   //----------------------------------------------------------------------
@@ -58,29 +58,29 @@ public: // interface
   }
 
   //----------------------------------------------------------------------
-  // Particles
+  // Particle
   //----------------------------------------------------------------------
 
-  /// Add particles
-  void add_particles (Particles * particles)
-  { particles_.push_back (particles); };
+  /// Add particle
+  void add_particle (ParticleDescr * particle)
+  { particle_.push_back (particle); };
 
-  /// Return the number of particless
-  int particles_count ()
-  { return particles_.size(); };
+  /// Return the number of particles
+  int particle_count ()
+  { return particle_.size(); };
 
-  /// Return the ith particles
-  Particles * particles (int i)
+  /// Return the ith particle
+  ParticleDescr * particle (int i)
   { 
-    return (0 <= i && i < particles_count()) ? particles_.at(i) : 0;
+    return (0 <= i && i < particle_count()) ? particle_.at(i) : 0;
   }
 
-  /// Return the named particles
-  Particles * particles (std::string name)
+  /// Return the named particle
+  ParticleDescr * particle (std::string name)
   {
-    for (int i=0; i<particles_count(); i++) {
-      if (particles(i)->name() == name) {
-	return particles_.at(i); 
+    for (int i=0; i<particle_count(); i++) {
+      if (particle(i)->name() == name) {
+	return particle_.at(i); 
       };
     }
     return 0;
@@ -89,8 +89,8 @@ public: // interface
 
 private: // attributes
 
-  std::vector<Field *>     field_;
-  std::vector<Particles *> particles_;
+  std::vector<Field *>    field_;
+  std::vector<ParticleDescr *> particle_;
 
 };
 

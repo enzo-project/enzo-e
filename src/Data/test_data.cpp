@@ -11,7 +11,7 @@
 #include "error.hpp"
 #include "test.hpp"
 #include "data.hpp"
-#include "particles.hpp"
+#include "particle.hpp"
 #include "field.hpp"
 
 int main()
@@ -22,35 +22,35 @@ int main()
   DataDescr data;
 
   //----------------------------------------------------------------------
-  // Particles
+  // Particle
   //----------------------------------------------------------------------
 
-  Particles p0, p1, p2;
+  ParticleDescr p0, p1, p2;
 
   p0.set_name("particle_0");
   p1.set_name("particle_1");
   p2.set_name("particle_2");
 
-  unit_func("add_particles");
-  data.add_particles(&p0);
-  data.add_particles(&p1);
-  data.add_particles(&p2);
+  unit_func("add_particle");
+  data.add_particle(&p0);
+  data.add_particle(&p1);
+  data.add_particle(&p2);
   unit_assert(true);
 
   unit_func("particle_count");
-  unit_assert(data.particles_count() == 3);
+  unit_assert(data.particle_count() == 3);
 
   unit_func("particle(int)");
-  unit_assert(data.particles(0) == &p0);
-  unit_assert(data.particles(1) == &p1);
-  unit_assert(data.particles(2) == &p2);
-  unit_assert(data.particles(3) == 0);
+  unit_assert(data.particle(0) == &p0);
+  unit_assert(data.particle(1) == &p1);
+  unit_assert(data.particle(2) == &p2);
+  unit_assert(data.particle(3) == 0);
   
   unit_func("particle(string)");
-  unit_assert(data.particles("particle_0") == &p0);
-  unit_assert(data.particles("particle_1") == &p1);
-  unit_assert(data.particles("particle_2") == &p2);
-  unit_assert(data.particles("nonexistent particles") == 0);
+  unit_assert(data.particle("particle_0") == &p0);
+  unit_assert(data.particle("particle_1") == &p1);
+  unit_assert(data.particle("particle_2") == &p2);
+  unit_assert(data.particle("nonexistent particle") == 0);
 
   //----------------------------------------------------------------------
   // Fields

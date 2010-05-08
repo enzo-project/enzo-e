@@ -27,7 +27,7 @@ void Method::add_argument_
  std::string   argument_name,
  access_type   access_type
  ) throw()
-/// @param         argument_type  Type of argument, field or particles
+/// @param         argument_type  Type of argument, field or particle
 /// @param         argument_name  Name of the argument, e.g. "Density"
 /// @param         access_type    Access type of the argument, e.g. read, write
 {

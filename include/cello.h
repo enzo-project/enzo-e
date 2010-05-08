@@ -117,7 +117,7 @@ enum type_component {
   component_monitor,
   component_parallel,
   component_parameters,
-  component_particles,
+  component_particle,
   component_performance,
   component_portal,
   component_problem,

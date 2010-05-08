@@ -11,7 +11,7 @@
 Simulation::Simulation()
   : lower_(),
     upper_(),
-    amr_(NULL),
+    mesh_(NULL),
     data_(),
     methods_(NULL)
 {
@@ -46,7 +46,7 @@ void Simulation::initialize ()
 
   parameters->set_group("Grid");
 
-  amr_ = new Amr();
+  mesh_ = new Mesh();
 
   
   //  root      = [400,400]; # size of the root grid
@@ -66,10 +66,10 @@ void Simulation::initialize ()
   INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Methods");
 
   // --------------------------------------------------
-  // Initialize Amr / Arrays
+  // Initialize Mesh / Arrays
   // --------------------------------------------------
 
-  INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Amr");
+  INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Mesh");
   
   // --------------------------------------------------
   // Initialize data 

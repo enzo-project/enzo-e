@@ -12,7 +12,7 @@
 #include <vector>
 #include "cello.h"
 #include "parameters.hpp"
-#include "amr.hpp"
+#include "mesh.hpp"
 #include "data.hpp"
 #include "method.hpp"
 
@@ -79,8 +79,8 @@ public: // interface
   /// Return the ith method
   Method * method (int i) { return methods_[i]; };
 
-  /// Return the Amr object
-  Amr * amr () { return amr_; };
+  /// Return the Mesh object
+  Mesh * mesh () { return mesh_; };
 
 private: // attributes
 
@@ -89,7 +89,7 @@ private: // attributes
   std::vector<double> upper_;
 
   /// AMR grid
-  Amr * amr_;
+  Mesh * mesh_;
 
   /// Data descriptions
   DataDescr data_;
