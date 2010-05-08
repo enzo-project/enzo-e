@@ -1,5 +1,0 @@
-// $Id$
-// See LICENSE_CELLO file for license and copyright information
-
-/// @defgroup  Mesh
-/// @brief     Adaptive mesh refinement infrastructure, built on top of Array 
