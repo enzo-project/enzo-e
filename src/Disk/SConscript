@@ -1,6 +1,6 @@
 Import('env')
 
-libraries  = ['hdf5', 'array']
+libraries  = ['hdf5', 'field']
 components = ['error']
 
 env = env.Clone(LIBS=[components,libraries])

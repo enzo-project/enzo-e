@@ -12,7 +12,7 @@
 
 #include "error.hpp"
 #include "test.hpp"
-#include "array.hpp"
+#include "field_Array.hpp"
 #include "disk.hpp"
 
 int main(int argc, char ** argv)
