@@ -1,7 +1,7 @@
-// $Id: array_layout.cpp 1262 2010-03-03 15:44:05Z bordner $
+// $Id: parallel_layout.cpp 1262 2010-03-03 15:44:05Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     array_layout.cpp
+/// @file     parallel_layout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Implementation of the Layout class

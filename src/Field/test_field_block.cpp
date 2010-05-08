@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_block.cpp
+/// @file     test_field_block.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2008-02-20
-/// @brief    Unit tests for the Block class
+/// @brief    Unit tests for the FieldBlock class
 
 #include "cello.h"
 
@@ -15,7 +15,7 @@
 int main()
 {
 
-  unit_class ("Block");
+  unit_class ("FieldBlock");
 
   {
 
@@ -30,7 +30,7 @@ int main()
     a.resize(n0,n1,n2);
 
     a.size(&m0,&m1,&m2);
-    Block b (a.values(),NULL,m0,m1,m2);
+    FieldBlock b (a.values(),NULL,m0,m1,m2);
 
     unit_func("get_size");
     b.get_size(&nx,&ny,&nz,&na);
@@ -72,7 +72,7 @@ int main()
     // Test treating as two interleaved arrays
     m0 /= 2;
     int p[] = {3,0,1,2};
-    Block b2 (a.values(),p,m0,m1,m2,2);
+    FieldBlock b2 (a.values(),p,m0,m1,m2,2);
 
     unit_func("get_size");
     b2.get_size(&nx,&ny,&nz,&na);

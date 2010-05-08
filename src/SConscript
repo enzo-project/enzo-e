@@ -6,7 +6,6 @@ Import('env')
 # env = Environment(BUILDERS = {'Cccc': cccc})
 # env.Cccc("cccc");
 
-SConscript('Array/SConscript')
 SConscript('Data/SConscript')
 SConscript('Disk/SConscript')
 SConscript('Distribute/SConscript')

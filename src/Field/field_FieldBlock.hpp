@@ -1,19 +1,19 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ARRAY_BLOCK_HPP
-#define ARRAY_BLOCK_HPP
+#ifndef FIELD_BLOCK_HPP
+#define FIELD_BLOCK_HPP
 
-/// @file     array_block.hpp
+/// @file     field_block.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
 /// @brief    Fortran-style array class.
 
-class Block {
+class FieldBlock {
 
-  /// @class    Block
+  /// @class    FieldBlock
   /// @ingroup  Field
-  /// @brief    Interface between Array and low-level (C/fortran) routines.
+  /// @brief    Interface between field arrays and low-level (C/fortran) routines.
   ///
   /// Defines up to a 4-D fortran-like array for storing 1 or more 3D
   /// arrays.  Axes can be permuted, including the index selecting the
@@ -21,11 +21,11 @@ class Block {
 
 public: // interface
 
-  /// Create a new uninitialized Block object
-  Block() throw() {};
+  /// Create a new uninitialized FieldBlock object
+  FieldBlock() throw() {};
 
-  /// Create a new initialized Block object
-  Block(Scalar * values, 
+  /// Create a new initialized FieldBlock object
+  FieldBlock(Scalar * values, 
 	int *    permute,
 	int      ndx,  
 	int      ndy,
@@ -130,4 +130,4 @@ private: // attributes
 
 };   
 
-#endif /* ARRAY_BLOCK_HPP */
+#endif /* FIELD_BLOCK_HPP */

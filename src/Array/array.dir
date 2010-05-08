@@ -1,5 +1,0 @@
-// $Id$
-// See LICENSE_CELLO file for license and copyright information
-
-/// @defgroup Array
-/// @brief    Fortran-like arrays, which may be distributed, threaded, and blocked in various ways

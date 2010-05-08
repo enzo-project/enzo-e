@@ -1,10 +1,10 @@
-// $Id: array_layout.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: parallel_layout.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ARRAY_LAYOUT_HPP
-#define ARRAY_LAYOUT_HPP
+#ifndef PARALLEL_LAYOUT_HPP
+#define PARALLEL_LAYOUT_HPP
 
-/// @file     array_layout.hpp
+/// @file     parallel_layout.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Declaration of the Layout class
@@ -15,7 +15,7 @@ class Layout {
 
   /// @class    Layout
   /// @ingroup  Layout
-  /// @brief Specify how the Array Block s are distributed across
+  /// @brief Specify how the Parallel Block s are distributed across
   /// processes and threads
 
 public: // interface
@@ -151,4 +151,4 @@ private: // attributes
   int * thread_blocks_;
 
 };
-#endif /* ARRAY_LAYOUT_HPP */
+#endif /* PARALLEL_LAYOUT_HPP */
