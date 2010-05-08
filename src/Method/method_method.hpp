@@ -51,7 +51,7 @@ public: // virtual functions
 
 protected: // functions
 
-  /// Specify a Field or Particle type and its access type
+  /// Specify a field or particle type and its access type
 
   void add_argument_(argument_type argument_type,
 		     std::string   argument_name,

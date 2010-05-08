@@ -1,13 +1,13 @@
-// $Id: field.hpp 1261 2010-03-03 00:14:11Z bordner $
+// $Id: field_FieldDescr.hpp 1261 2010-03-03 00:14:11Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef FIELD_FIELD_HPP
-#define FIELD_FIELD_HPP
+#ifndef FIELD_FIELD_DESCR_HPP
+#define FIELD_FIELD_DESCR_HPP
 
-/// @file     field_field.hpp
+/// @file     field_FieldDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-17
-/// @brief    Declaration for the Field class
+/// @brief    Declaration for the FieldDescr class
 
 enum action_field {
   action_field_unknown,  // Uninitialized action
@@ -29,16 +29,16 @@ enum precision_type {
 #include <string>
 #include <memory>
 
-class Field {
+class FieldDescr {
 
-  /// @class    Field
+  /// @class    FieldDescr
   /// @ingroup  Field
-  /// @brief    Interface for the Field class
+  /// @brief    Interface for the FieldDescr class
 
 public: // public
 
-  /// Initialize a Field object
-  Field();
+  /// Initialize a FieldDescr object
+  FieldDescr();
 
   /// Set Field name
   void set_name (std::string name)
@@ -87,5 +87,5 @@ private: // attributes
 
 };
 
-#endif /* FIELD_FIELD_HPP */
+#endif /* FIELD_FIELD_DESCR_HPP */
 

@@ -32,7 +32,7 @@ public: // public
 
 private: // attributes
 
-  /// String defining the field's name
+  /// String defining the Particle's name
   std::string name_;
 
 };

@@ -9,7 +9,7 @@
 /// @date     2009-11-17
 /// @brief    Include file for the Field component
 
-#include "field_field.hpp"
+#include "field_FieldDescr.hpp"
 
 #endif /* FIELD_HPP */
 

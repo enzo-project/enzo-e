@@ -56,7 +56,7 @@ int main()
   // Fields
   //----------------------------------------------------------------------
 
-  Field f0, f1, f2;
+  FieldDescr f0, f1, f2;
 
   f0.set_name("field_0");
   f1.set_name("field_1");

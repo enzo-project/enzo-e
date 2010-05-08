@@ -4,7 +4,7 @@
 /// @file     test_field.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
-/// @brief    Test program for the Field class
+/// @brief    Test program for the FieldDescr class
 
 #include "cello.h"
 
@@ -16,7 +16,7 @@ int main()
 
   unit_class ("Field");
   unit_func ("Field");
-  Field * field = new Field;
+  FieldDescr * field = new FieldDescr;
   unit_assert(field != 0);
 
 }

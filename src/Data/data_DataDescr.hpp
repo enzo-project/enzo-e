@@ -33,7 +33,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Add field
-  void add_field (Field * field)
+  void add_field (FieldDescr * field)
   { field_.push_back (field); };
 
   /// Return the number of fields
@@ -41,13 +41,13 @@ public: // interface
   { return field_.size(); };
 
   /// Return the ith field
-  Field * field (int i)
+  FieldDescr * field (int i)
   {
     return (0 <= i && i < field_count()) ? field_.at(i) : 0;
   }
 
   /// Return the named field
-  Field * field (std::string name)
+  FieldDescr * field (std::string name)
   {
     for (int i=0; i<field_count(); i++) {
       if (field(i)->name() == name) {
@@ -89,7 +89,7 @@ public: // interface
 
 private: // attributes
 
-  std::vector<Field *>    field_;
+  std::vector<FieldDescr *>    field_;
   std::vector<ParticleDescr *> particle_;
 
 };

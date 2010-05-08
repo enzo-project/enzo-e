@@ -1,17 +1,17 @@
-// $Id: field_field.cpp 1262 2010-03-03 15:44:05Z bordner $
+// $Id: field_FieldDescr.cpp 1262 2010-03-03 15:44:05Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_field.cpp
+/// @file     field_FieldDescr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file field_field.cpp
+/// @brief    Implementation of the FieldDescr class
 
 #include "error.hpp"
 #include "field.hpp"
 
 //----------------------------------------------------------------------
 
-Field::Field()
+FieldDescr::FieldDescr()
   : name_(),
     id_(0),
     dim_(0),
