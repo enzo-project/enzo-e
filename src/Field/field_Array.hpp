@@ -12,7 +12,7 @@
 class Array {
 
   /// @class    Array
-  /// @ingroup  Array
+  /// @ingroup  Field
   /// @todo     Add commented-out functions at bottom
   /// @brief    Defines the interface for arrays
 

@@ -12,7 +12,7 @@
 class Block {
 
   /// @class    Block
-  /// @ingroup  Array
+  /// @ingroup  Field
   /// @brief    Interface between Array and low-level (C/fortran) routines.
   ///
   /// Defines up to a 4-D fortran-like array for storing 1 or more 3D

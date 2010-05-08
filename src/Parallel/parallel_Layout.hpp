@@ -14,7 +14,7 @@
 class Layout {
 
   /// @class    Layout
-  /// @ingroup  Array
+  /// @ingroup  Layout
   /// @brief Specify how the Array Block s are distributed across
   /// processes and threads
 
