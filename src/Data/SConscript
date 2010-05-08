@@ -12,7 +12,7 @@ test_data   = env.Program (['test_data.cpp',   sources])
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',libraries))
-env.Alias('install-bin', env.Install ('$BINPATH', test_data))
+env.Alias('install-bin',env.Install ('$BINPATH', test_data))
 
 
 
