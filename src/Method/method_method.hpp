@@ -37,7 +37,6 @@ class Method {
 public: // interface
 
   /// Create a new Method
-
   Method() throw();
 
 public: // virtual functions
@@ -60,16 +59,16 @@ protected: // functions
 
 protected: // attributes
 
-  /// List of argument types, e.g. argument_type_field
+  /// Method name
+  std::string method_name_;
 
+  /// List of argument types, e.g. argument_type_field
   std::vector<argument_type> argument_types_;
 
   /// List of argument names, e.g. "Density", "Velocity-X", etc.
-
   std::vector<std::string>   argument_names_;
 
   /// List of argument access types, e.g. access_type_read_write
-
   std::vector<access_type>   access_types_;
 
 };

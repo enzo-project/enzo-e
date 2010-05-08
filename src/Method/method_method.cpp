@@ -9,6 +9,7 @@
 #include <string>
 
 #include "method_method.hpp"
+#include "monitor.hpp"
 
 //----------------------------------------------------------------------
 
@@ -30,5 +31,16 @@ void Method::add_argument_
 /// @param         argument_name  Name of the argument, e.g. "Density"
 /// @param         access_type    Access type of the argument, e.g. read, write
 {
-  INCOMPLETE_MESSAGE("add_argument","");
+
+  // Monitor output
+  Monitor * monitor = Monitor::instance();
+  char buffer[100];
+  sprintf (buffer,"Method %s: adding %s", method_name_.c_str(), argument_name.c_str());
+  monitor->print (buffer);
+
+  // Add method argument information
+  argument_types_.push_back(argument_type);
+  argument_names_.push_back(argument_name);
+  access_types_.push_back  (access_type);
+
 }

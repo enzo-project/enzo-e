@@ -10,7 +10,7 @@
 /// @ingroup  User
 /// @brief    Include file for the Enzo User component
 
-#include "enzo_ppm.hpp"
+#include "method_MethodEnzoPpm.hpp"
 
 #endif /* USER_ENZO_HPP */
 

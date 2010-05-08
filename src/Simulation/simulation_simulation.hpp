@@ -92,7 +92,7 @@ private: // attributes
   Amr * amr_;
 
   /// Data descriptions
-  Data data_;
+  DataDescr data_;
 
   /// Methods
   std::vector<Method *> methods_;

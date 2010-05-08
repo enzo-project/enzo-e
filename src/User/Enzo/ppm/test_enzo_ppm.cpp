@@ -8,17 +8,23 @@
 
 #include <stdio.h>
 
+#include "parallel.hpp"
 #include "user.hpp"
 #include "test.hpp"
 
 int main (int argc, char ** argv)
 {
+
+  // Initialize parallelism
+
+  Parallel::instance()->initialize(&argc,&argv);
+
   unit_class ("MethodEnzoPpm");
   MethodEnzoPpm ppm;
 
   unit_func("initialize");
   ppm.initialize("PPM");
-  unit_assert(false);
+  unit_assert(true);
 
   unit_func("apply");
   ppm.apply();
