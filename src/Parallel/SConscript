@@ -2,7 +2,7 @@ Import('env')
 
 includes   = [Glob('parallel*hpp')]
 sources    = [Glob('parallel*cpp')]
-libraries  = ['png']
+libraries  = ['error','png']
 
 env = env.Clone(LIBS=[libraries])
 
