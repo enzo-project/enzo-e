@@ -16,7 +16,6 @@
 #include "error.hpp"
 #include "test.hpp"
 #include "parallel.hpp"
-#include "array.hpp"
 
 #define INDEX3(I,N) I[0] + N[0]*(I[1] + N[1]*I[2])
 

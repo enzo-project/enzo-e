@@ -10,7 +10,6 @@
 
 #include "error.hpp"
 #include "parallel.hpp"
-#include "array_layout.hpp"
 
 //----------------------------------------------------------------------
 
