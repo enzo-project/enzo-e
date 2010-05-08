@@ -11,11 +11,10 @@ sources  = [Glob('array*cpp')]
 
 libraries = env.Library ('array', [sources])
 
-test_array  = env.Program (['test_array.cpp',  sources])
 test_block  = env.Program (['test_block.cpp',  sources])
 test_layout = env.Program (['test_layout.cpp', sources])
 
-tests = [test_array, test_block, test_layout]
+tests = [test_block, test_layout]
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
