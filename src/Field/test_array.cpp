@@ -10,7 +10,7 @@
 
 #include "error.hpp"
 #include "test.hpp"
-#include "array.hpp"
+#include "field.hpp"
 
 int main()
 {

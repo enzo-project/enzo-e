@@ -11,13 +11,8 @@ sources  = [Glob('array*cpp')]
 
 libraries = env.Library ('array', [sources])
 
-test_layout = env.Program (['test_layout.cpp', sources])
-
-tests = [test_layout]
-
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('$BINPATH', tests))
 
 
 

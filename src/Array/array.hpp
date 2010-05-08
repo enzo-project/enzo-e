@@ -9,8 +9,4 @@
 /// @date     Wed Jul  8 16:01:10 PDT 2009
 /// @brief    Include file for the Array component
 
-#include "array_array.hpp"
-#include "array_block.hpp"
-#include "array_layout.hpp"
-
 #endif /* ARRAY_HPP */

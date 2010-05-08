@@ -10,8 +10,9 @@ libraries = env.Library ('parallel', [sources])
 
 test_mpi      = env.Program (['test_mpi.cpp', sources])
 test_affinity = env.Program (['test_affinity.cpp', sources])
+test_layout   = env.Program (['test_layout.cpp', sources])
 
-tests = [test_mpi, test_affinity];
+tests = [test_mpi, test_affinity, test_layout];
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
