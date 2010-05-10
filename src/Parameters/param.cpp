@@ -10,9 +10,8 @@
 #include "stdio.h"
 #include "stdlib.h"
 
-#include "parse.h"
-#include "param.hpp"
 #include "error.hpp"
+#include "parameters.hpp"
 
 void Param::set (struct param_type * node)
 /// @param   node  The node from which to copy the type and value

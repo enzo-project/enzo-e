@@ -3,8 +3,8 @@ Import('env')
 env = env.Clone(LIBS=['error','memory','monitor','parallel','png'])
 
 sources  = [Glob('mesh*cpp')]
-test_mesh = env.Program (['test_mesh.cpp',  sources])
-test_tree = env.Program (['test_tree_k.cpp',sources])
+test_mesh = env.Program (['test_Mesh.cpp',  sources])
+test_tree = env.Program (['test_TreeK.cpp',sources])
 
 includes  = [Glob('mesh*hpp')]
 libraries = env.Library ('mesh', [sources])

@@ -1,43 +1,39 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef MESH_TREE3K_HPP
-#define MESH_TREE3K_HPP
+#ifndef MESH_TREE2K_HPP
+#define MESH_TREE2K_HPP
 
-/// @file     mesh_tree3k.hpp
+/// @file     mesh_tree2k.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     2009-10-29
+/// @date     2009-10-27 
 /// @todo     Decide on either k or r as refinement factor variable name
-/// @brief    Interface for the Tree3K class
+/// @brief    Interface for the Tree2K class
 
 #include "error.hpp"
 
-#include "mesh_treek.hpp"
+#include "mesh_TreeK.hpp"
 
-class Tree3K : public TreeK {
+class Tree2K : public TreeK {
 
-  /// @class    Tree3K
+  /// @class    Tree2K
   /// @ingroup  Mesh
-  /// @brief    Generalized k^3-tree
+  /// @brief    Generalized k^2-tree
 
 public: // interface
 
-  /// Initialize a Tree3K with given refinement factor k
-  Tree3K(int k);
-
-  //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
+  /// Initialize a Tree2K with given refinement factor k
+  Tree2K(int k);
 
   /// Destructor
-  ~Tree3K() 
+  ~Tree2K() 
   { delete root_; };
 
   /// Copy constructor
-  Tree3K(const Tree3K & tree3k) throw();
+  Tree2K(const Tree2K & tree2k) throw();
 
   /// Assignment operator
-  Tree3K & operator= (const Tree3K & tree3k) throw();
+  Tree2K & operator= (const Tree2K & tree2k) throw();
 
   /// Return the number of nodes in the tree
   int num_nodes()
@@ -58,15 +54,15 @@ public: // interface
   void optimize();
 
   /// Create an image of levels
-  float * create_image (int n, int line_width, int axis);
+  float * create_image (int n, int line_width,int axis=0);
 
-  /// Create an image of levels
+  /// Create a geomview file
   void geomview (std::string filename);
 
 private: // attributes
 
   /// Root of the tree
-  Node3K * root_;
+  Node2K * root_;
 };
 
 #endif /* TREE_K_HPP */

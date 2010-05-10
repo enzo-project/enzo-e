@@ -16,9 +16,8 @@
 #include "cello.h"
 #include "error.hpp"
 #include "parse.h"
-#include "param.hpp"
-
-#include "parameters_parameters.hpp"
+#include "parameters_Param.hpp"
+#include "parameters_Parameters.hpp"
 
 #endif /* PARAMETERS_HPP */
 

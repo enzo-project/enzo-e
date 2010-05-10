@@ -8,7 +8,7 @@ env = env.Clone(LIBS=[libraries])
 
 libraries = env.Library ('simulation', [sources])
 
-test_simulation = env.Program (['test_simulation.cpp',sources])
+test_simulation = env.Program (['test_Simulation.cpp',sources])
 tests = [test_simulation];
 
 

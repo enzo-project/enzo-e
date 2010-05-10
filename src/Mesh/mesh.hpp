@@ -9,8 +9,8 @@
 /// @date     Thu Mar 11 17:20:03 PST 2010
 /// @brief    Include file for the Mesh package 
 
-#include "mesh_treek.hpp"
-#include "mesh_mesh.hpp"
+#include "mesh_TreeK.hpp"
+#include "mesh_Mesh.hpp"
 #include "mesh_Patch.hpp"
 #endif /* MESH_HPP */
 

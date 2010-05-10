@@ -3,11 +3,7 @@ Import('env')
 components = ['error']
 env = env.Clone(LIBS=[components])
 
-includes = [
-	'parameters.hpp',
-	'parameters_parameters.hpp',
-	'param.hpp',
-	'parse.h']
+includes = [Glob('parameters*hpp'),'parse.h']
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 
@@ -23,8 +19,8 @@ libraries = env.Library ('parameters', [sources])
 
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 
-test_parameters = env.Program (['test_parameters.cpp', sources])
-test_parse      = env.Program (['test_parse.cpp', sources])
+test_parameters = env.Program (['test_Parameters.cpp', sources])
+test_parse      = env.Program (['test_Parse.cpp', sources])
 inputs          = Glob('*.in')
 env.Alias('install-bin', env.Install ('$BINPATH', 
 	[test_parameters, test_parse, inputs]))

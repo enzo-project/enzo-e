@@ -10,8 +10,8 @@
 /// @brief    Include file for the Error component
 
 #include "cello.h"
-#include "error_exception.hpp"
-#include "error_error.hpp"
+#include "error_Exception.hpp"
+#include "error_Error.hpp"
 
 #endif /* ERROR_HPP */
 

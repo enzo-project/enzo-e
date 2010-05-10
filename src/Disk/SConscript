@@ -15,7 +15,7 @@ env.Alias('install-lib',env.Install ('#/lib',libraries))
 
 sources  = Glob('disk*cpp')
 
-test_hdf5 = env.Program (['test_hdf5.cpp', sources])
+test_hdf5 = env.Program (['test_Hdf5.cpp', sources])
 
 env.Alias('install-bin', env.Install ('$BINPATH', test_hdf5))
 

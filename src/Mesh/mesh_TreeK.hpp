@@ -39,9 +39,10 @@ public: // interface
   virtual TreeK & operator= (const TreeK & treek) throw()
   { return *this; };
 
-  /// Return the number of nodes in the tree (@@@ should not be virtual)
+  /// Return the number of nodes in the tree (@@@ should not be
+  /// virtual, but is due to Node2K and Node3K not having a common
+  /// base class)
   virtual int num_nodes() = 0;
-
 
   /// Refine down to array
   virtual  void refine

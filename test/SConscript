@@ -31,23 +31,21 @@ env.Append(BUILDERS = { 'UnitMpi' :   unit_mpi } )
 env.Append(BUILDERS = { 'UnitParse' : unit_parse } )
 env.Append(BUILDERS = { 'TestCello' : test_cello } )
 
-env.Unit('test_mesh.out',        '#/bin/test_mesh')
-env.Unit('test_array.out',       '#/bin/test_array')
-env.Unit('test_data.out',        '#/bin/test_data')
-env.Unit('test_field.out',       '#/bin/test_field')
-env.Unit('test_field_block.out', '#/bin/test_field_block')
-env.Unit('test_hdf5.out',        '#/bin/test_hdf5')
-env.Unit('test_error.out',       '#/bin/test_error')
-env.Unit('test_memory.out',      '#/bin/test_memory')
-env.Unit('test_mesh.out',        '#/bin/test_mesh')
-env.Unit('test_tree_k.out',      '#/bin/test_tree_k')
-env.Unit('test_monitor.out',     '#/bin/test_monitor')
-env.Unit('test_parameters.out',  '#/bin/test_parameters')
-env.Unit('test_schedule.out',    '#/bin/test_schedule')
-env.Unit('test_simulation.out',  '#/bin/test_simulation')
-env.Unit('test_performance.out', '#/bin/test_performance')
-env.Unit('test_tree_k.out',      '#/bin/test_tree_k')
-env.Unit('test_tree.out',        '#/bin/test_tree')
+env.Unit('test_Mesh.out',        '#/bin/test_Mesh')
+env.Unit('test_Array.out',       '#/bin/test_Array')
+env.Unit('test_Data.out',        '#/bin/test_Data')
+env.Unit('test_Field.out',       '#/bin/test_Field')
+env.Unit('test_Block.out',       '#/bin/test_Block')
+env.Unit('test_Hdf5.out',        '#/bin/test_Hdf5')
+env.Unit('test_Error.out',       '#/bin/test_Error')
+env.Unit('test_Memory.out',      '#/bin/test_Memory')
+env.Unit('test_Mesh.out',        '#/bin/test_Mesh')
+env.Unit('test_Monitor.out',     '#/bin/test_Monitor')
+env.Unit('test_Parameters.out',  '#/bin/test_Parameters')
+env.Unit('test_Performance.out', '#/bin/test_Performance')
+env.Unit('test_Schedule.out',    '#/bin/test_Schedule')
+env.Unit('test_Simulation.out',  '#/bin/test_Simulation')
+env.Unit('test_TreeK.out',       '#/bin/test_TreeK')
 
 env.UnitEnzo('test_ppml_implosion.out', '#/bin/test_ppml', ARGS='implosion3 32 1')
 env.UnitEnzo('test_ppml_blast.out',     '#/bin/test_ppml', ARGS='blast      32 1')
@@ -55,17 +53,17 @@ env.UnitEnzo('test_ppm_image.out',      '#/bin/test_ppm',  ARGS='image     100 1
 env.UnitEnzo('test_ppm_implosion.out',  '#/bin/test_ppm',  ARGS='implosion 100 3')
 env.UnitEnzo('test_ppm_implosion3.out', '#/bin/test_ppm',  ARGS='implosion3 32 3')
 
-env.UnitMpi('test_layout.out',   '#/bin/test_layout')
-env.UnitMpi('test_affinity.out', '#/bin/test_affinity')
-env.UnitMpi('test_mpi.out',      '#/bin/test_mpi')
+env.UnitMpi('test_layout.out',   '#/bin/test_Layout')
+env.UnitMpi('test_affinity.out', '#/bin/test_Affinity')
+env.UnitMpi('test_mpi.out',      '#/bin/test_Mpi')
 
-env.UnitParse('test_parse_groups.out',     '#/bin/test_parse', ARGS='test/parse_groups.in')
-env.UnitParse('test_parse_integer.out',    '#/bin/test_parse', ARGS='test/parse_integer.in')
-env.UnitParse('test_parse_list.out',       '#/bin/test_parse', ARGS='test/parse_list.in')
-env.UnitParse('test_parse_logical.out',    '#/bin/test_parse', ARGS='test/parse_logical.in')
-env.UnitParse('test_parse_scalar.out',     '#/bin/test_parse', ARGS='test/parse_scalar.in')
-env.UnitParse('test_parse_implosion.out',  '#/bin/test_parse', ARGS='test/parse_implosion.in')
-env.UnitParse('test_parse_shock-pool.out', '#/bin/test_parse', ARGS='test/parse_shock-pool.in')
+env.UnitParse('test_parse_groups.out',     '#/bin/test_Parse', ARGS='test/parse_groups.in')
+env.UnitParse('test_parse_integer.out',    '#/bin/test_Parse', ARGS='test/parse_integer.in')
+env.UnitParse('test_parse_list.out',       '#/bin/test_Parse', ARGS='test/parse_list.in')
+env.UnitParse('test_parse_logical.out',    '#/bin/test_Parse', ARGS='test/parse_logical.in')
+env.UnitParse('test_parse_scalar.out',     '#/bin/test_Parse', ARGS='test/parse_scalar.in')
+env.UnitParse('test_parse_implosion.out',  '#/bin/test_Parse', ARGS='test/parse_implosion.in')
+env.UnitParse('test_parse_shock-pool.out', '#/bin/test_Parse', ARGS='test/parse_shock-pool.in')
 
 env.TestCello('cello_implosion.out',  'parse_implosion.in')
 
@@ -74,10 +72,10 @@ env.TestCello('cello_implosion.out',  'parse_implosion.in')
 # env.Unit('Array.unit','test_enzo_method_ppm')
 # env.Unit('Array.unit','test_tree')
 # env.Unit('Array.unit','test_tree_k')
-#	./test_parse < shock-pool.in > shock-pool.out
-#	./test_parse < test_groups.in > test_groups.out
-#	./test_parse < test.in > test.out
-#	./test_parse < test_list.in > test_list.out
-#	./test_parse < test_logical.in > test_logical.out
-#	./test_parse < test_scalar.in > test_scalar.out
+#	./test_Parse < shock-pool.in > shock-pool.out
+#	./test_Parse < test_groups.in > test_groups.out
+#	./test_Parse < test.in > test.out
+#	./test_Parse < test_list.in > test_list.out
+#	./test_Parse < test_logical.in > test_logical.out
+#	./test_Parse < test_scalar.in > test_scalar.out
 #	-grep -i -l error *.out

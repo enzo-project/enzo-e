@@ -14,7 +14,7 @@ libraries = env.Library ('performance', [sources])
 
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 
-test_performance = env.Program(['test_performance.cpp', sources])
+test_performance = env.Program(['test_Performance.cpp', sources])
 time_matvec      = env.Program(['time_matvec.cpp',      sources])
 
 env.Alias('install-bin', env.Install ('$BINPATH', [test_performance,time_matvec]))

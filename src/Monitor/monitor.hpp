@@ -13,9 +13,9 @@
 
 #include "cello.h"
 
-#include "performance_timer.hpp"
+#include "performance_Timer.hpp"
 
-#include "monitor_monitor.hpp"
+#include "monitor_Monitor.hpp"
 
 #endif /* MONITOR_HPP */
 

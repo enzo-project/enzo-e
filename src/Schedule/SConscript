@@ -8,7 +8,7 @@ sources    = [Glob('schedule*cpp')]
 env = env.Clone(LIBS=[components,libraries])
 
 libraries = env.Library ('schedule', [sources])
-binaries  = env.Program (['test_schedule.cpp', sources])
+binaries  = env.Program (['test_Schedule.cpp', sources])
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',libraries))

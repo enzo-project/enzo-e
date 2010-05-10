@@ -13,7 +13,7 @@ libraries = env.Library ('memory', [sources])
 
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 
-test_memory   = env.Program (['test_memory.cpp', sources])
+test_memory   = env.Program (['test_Memory.cpp', sources])
 env.Alias('install-bin', env.Install ('$BINPATH', test_memory))
 
 

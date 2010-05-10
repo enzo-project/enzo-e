@@ -18,7 +18,7 @@ libraries = env.Library ('monitor', [sources])
 
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 
-test_monitor = env.Program (['test_monitor.cpp', sources])
+test_monitor = env.Program (['test_Monitor.cpp', sources])
 env.Alias('install-bin', env.Install ('$BINPATH', test_monitor))
 
 

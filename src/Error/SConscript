@@ -10,7 +10,7 @@ libraries = env.Library ('error', [sources])
 
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 
-test_error   = env.Program (['test_error.cpp',  sources])
+test_error   = env.Program (['test_Error.cpp',  sources])
 env.Alias('install-bin', env.Install ('$BINPATH', test_error))
 
 

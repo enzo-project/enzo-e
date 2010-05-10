@@ -9,6 +9,6 @@
 /// @date     Thu Mar 11 17:20:03 PST 2010
 /// @brief    Include file for the Memory package 
 
-#include "memory_memory.hpp"
+#include "memory_Memory.hpp"
 #endif /* MEMORY_HPP */
 

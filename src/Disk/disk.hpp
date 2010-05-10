@@ -10,6 +10,7 @@
 /// @brief    Include file for the Disk component
 
 #include "cello.h"
-#include "disk_hdf5.hpp"
+#include "disk_Hdf5.hpp"
+#include "disk_Ifrit.hpp"
 
 #endif /* DISK_HPP */

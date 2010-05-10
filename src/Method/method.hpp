@@ -9,6 +9,6 @@
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
 /// @brief    Include file for the Method component
 
-#include "method_method.hpp"
+#include "method_Method.hpp"
 
 #endif /* METHOD_HPP */

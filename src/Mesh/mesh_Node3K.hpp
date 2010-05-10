@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 #include "cello.h"
-#include "mesh_nodek.hpp"
+#include "mesh_NodeK.hpp"
 
 class Tree3K;
 

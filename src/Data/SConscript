@@ -8,7 +8,7 @@ env = env.Clone(LIBS=[components])
 
 libraries = env.Library ('data', [sources])
 
-test_data   = env.Program (['test_data.cpp',   sources])
+test_data   = env.Program (['test_Data.cpp',   sources])
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',libraries))

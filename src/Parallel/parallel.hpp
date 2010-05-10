@@ -9,10 +9,10 @@
 /// @date     2009-10-16
 /// @brief    Include file for the Parallel component
 
-#include "parallel_parallel.hpp"
+#include "parallel_Parallel.hpp"
 #include "parallel_Layout.hpp"
-#include "parallel_mpi.hpp"
-#include "parallel_affinity.hpp"
+#include "parallel_Mpi.hpp"
+#include "parallel_Affinity.hpp"
 
 #endif /* PARALLEL_HPP */
 

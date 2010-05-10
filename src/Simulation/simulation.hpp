@@ -9,6 +9,6 @@
 /// @date     Thu Mar 11 17:20:03 PST 2010
 /// @brief    Include file for the Simulation package 
 
-#include "simulation_simulation.hpp"
+#include "simulation_Simulation.hpp"
 #endif /* SIMULATION_HPP */
 
