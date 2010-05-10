@@ -11,5 +11,6 @@
 
 #include "mesh_treek.hpp"
 #include "mesh_mesh.hpp"
+#include "mesh_Patch.hpp"
 #endif /* MESH_HPP */
 

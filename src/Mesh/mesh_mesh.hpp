@@ -10,6 +10,7 @@
 #define MESH_MESH_HPP
 
 #include <memory>
+#include "strict_auto_ptr.h"
 
 class Mesh {
 

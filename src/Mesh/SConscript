@@ -1,14 +1,20 @@
 Import('env')
 
-includes = ['mesh.hpp', 'mesh_mesh.hpp']
+env = env.Clone(LIBS=['error','memory','monitor','parallel','png'])
 
-test_mesh = env.Program (['test_mesh.cpp'])
-tests = [test_mesh];
+sources  = [Glob('mesh*cpp')]
+test_mesh = env.Program (['test_mesh.cpp',  sources])
+test_tree = env.Program (['test_tree_k.cpp',sources])
+
+includes  = [Glob('mesh*hpp')]
+libraries = env.Library ('mesh', [sources])
+tests     = [test_mesh, test_tree];
 
 env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
 env.Alias('install-bin',env.Install ('$BINPATH', tests))
 
-SConscript('tree/SConscript')
+# SConscript('tree/SConscript')
 
 
 

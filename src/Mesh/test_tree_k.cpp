@@ -8,15 +8,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <hdf5.h>
+//#include <hdf5.h>
 
 #include <string>
 
 #include "cello.h"
 
 #include "error.hpp"
+#include "monitor.hpp"
 #include "memory.hpp"
-#include "disk.hpp"
+//#include "disk.hpp"
 #include "mesh_node2k.hpp"
 #include "mesh_node3k.hpp"
 #include "mesh_tree2k.hpp"
@@ -50,6 +51,9 @@ void create_tree ( int * level_array, int nx, int ny, int nz, int k,  int d,
 
 int main(int argc, char ** argv)
 {
+
+  Parallel * parallel = Parallel::instance();
+  parallel->initialize(&argc,&argv);
 
   // read in the gimp image into level
 
@@ -227,23 +231,28 @@ void write_image(std::string filename, float * image, int nx, int ny, int nz)
     printf ("%s:%d (nx,ny,nz) = (%d,%d,%d)\n",__FILE__,__LINE__,nx,ny,nz);
     exit(1);
   }
-  Hdf5 hdf5;
-  hdf5.file_open((filename+".hdf5").c_str(),"w");
-  printf ("write_image %d %d %d\n",nx,ny,nz);
-  hdf5.dataset_open_write ("tree_image",nx,ny,nz);
-  hdf5.write(image);
-  hdf5.dataset_close ();
-  hdf5.file_close();
+  // Write HDF5 file
 
+  // Hdf5 hdf5;
+  // hdf5.file_open((filename+".hdf5").c_str(),"w");
+  // printf ("write_image %d %d %d\n",nx,ny,nz);
+  // hdf5.dataset_open_write ("tree_image",nx,ny,nz);
+  // hdf5.write(image);
+  // hdf5.dataset_close ();
+  // hdf5.file_close();
+
+  // Write PNG image
+
+  Monitor * monitor = Monitor::instance();
   float min=image[0];
   float max=image[0];
   for (int i=0; i<nx*ny*nz; i++) {
     if (min > image[i]) min = image[i];
     if (max < image[i]) max = image[i];
   }
-
-//   int color_map[] = {0,0,0,1,1,1};
-//   monitor->plot_png ((filename+".png").c_str(),image,nx,ny,min,max,color_map, 2);
+  double color_map[] = {0,0,0,1,1,1};
+  monitor->image ((filename+".png").c_str(),image,nx,ny,1,0,0,0,nx,ny,1,2,reduce_sum,
+		  min,max,color_map, 2);
 
 }
 

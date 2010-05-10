@@ -40,8 +40,6 @@ int main(int argc, char ** argv)
 
     Monitor * monitor = Monitor::instance();
 
-    monitor->print ("CELLO BEGIN");
-
     //    monitor->print ("");
     //    monitor->print ("     The Laboratory for Computational Astrophysics proudly presents:");
     monitor->print ("");
@@ -92,8 +90,6 @@ int main(int argc, char ** argv)
 
     schedule.terminate_simulation();
 
-    monitor->print ("CELLO END");
-
     parallel->finalize();
 
   }
@@ -110,9 +106,9 @@ void usage(int argc, char ** argv)
 
   if (parallel->is_root()) {
 #ifdef CONFIG_USE_MPI
-    fprintf (stderr,"Usage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
+    fprintf (stderr,"\nUsage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
 #else
-    fprintf (stderr,"Usage: %s <parameter-file>\n\n",argv[0]);
+    fprintf (stderr,"\nUsage: %s <parameter-file>\n\n",argv[0]);
 #endif
   }
   parallel->finalize();

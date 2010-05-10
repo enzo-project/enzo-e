@@ -9,6 +9,8 @@
 /// @date     2009-10-30
 /// @brief    Include file for mesh_tree[23]k.hpp
 
+#include <string>
+
 class TreeK {
 
   /// @class    TreeK
