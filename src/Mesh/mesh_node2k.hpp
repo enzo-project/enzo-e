@@ -54,6 +54,14 @@ public: // interface
   /// return the parent
   Node2K * parent ();
 
+  /// set data pointer
+  void set_data (void * data)
+  { data_ = data; };
+
+  /// get data pointer
+  void * data ()
+  { return data_; };
+
   /// Refine if any elements in the array are true and recurse
   /// return the level
   int refine 
@@ -180,6 +188,9 @@ private: // attributes
 
   /// Relative level for coalesced nodes
   int level_adjust_;
+
+  /// Pointer to data contained in the node
+  void * data_;
 
 };
 

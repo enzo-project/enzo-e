@@ -20,7 +20,8 @@ Node3K::Node3K(int k, int level_adjust)
     child_(0),
     neighbor_(0),
     parent_(0),
-    level_adjust_(level_adjust)
+    level_adjust_(level_adjust),
+    data_(0)
     /// @param    k            refinement factor   
     /// @param    level_adjust difference: actual mesh level - tree level
 { 
@@ -99,8 +100,7 @@ inline Node3K * Node3K::child (int ix, int iy, int iz)
 /// @param    iy        Index 0 <= iy < k of cell in grid block
 /// @param    iz        Index 0 <= iz < k of cell in grid block
 { 
-  if (child_==NULL) return NULL;
-  return child_[index_(ix,iy,iz)]; 
+  return (child_ == NULL) ? NULL : child_[index_(ix,iy,iz)];
 }
 
 //----------------------------------------------------------------------

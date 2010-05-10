@@ -20,7 +20,8 @@ Node2K::Node2K(int k, int level_adjust)
     child_(0),
     neighbor_(0),
     parent_(0),
-    level_adjust_(level_adjust)
+    level_adjust_(level_adjust),
+    data_(0)
     /// @param    k            refinement factor
     /// @param    level_adjust difference: actual mesh level - tree level
 { 
@@ -96,8 +97,7 @@ inline Node2K * Node2K::child (int ix, int iy)
 /// @param    ix        Index 0 <= ix < k of cell in grid block
 /// @param    iy        Index 0 <= iy < k of cell in grid block
 {
-  if (child_==NULL) return NULL;
-  return child_[index_(ix,iy)];
+  return (child_ == NULL) ? NULL : child_[index_(ix,iy)];
 }
 
 //----------------------------------------------------------------------
