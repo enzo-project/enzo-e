@@ -66,34 +66,13 @@ void Simulation::initialize ()
   root_size.push_back(parameters->list_value_integer(1,"root_size",1));
   root_size.push_back(parameters->list_value_integer(2,"root_size",1));
 
-  mesh_->set_root_size(root_size);
-
-  // Mesh::max_level
-
-  mesh_->set_max_level(parameters->value_integer("max_level",0));
-
-  // Mesh::refine
-
-  mesh_->set_refine(parameters->value_integer("refine",2));
-
-  // Mesh::balanced
-
-  mesh_->set_balanced(parameters->value_logical("balanced",true));
-
-  // Mesh::backfill
-
-  mesh_->set_backfill(parameters->value_logical("backfill",true));
-
-  // Mesh::coalesce
-
-  mesh_->set_coalesce(parameters->value_logical("coalesce",true));
-
-  // Mesh::min_patch_size
-
+  mesh_->set_root_size     (root_size);
+  mesh_->set_max_level     (parameters->value_integer("max_level",     0));
+  mesh_->set_refine        (parameters->value_integer("refine",        2));
+  mesh_->set_balanced      (parameters->value_logical("balanced",      true));
+  mesh_->set_backfill      (parameters->value_logical("backfill",      true));
+  mesh_->set_coalesce      (parameters->value_logical("coalesce",      true));
   mesh_->set_min_patch_size(parameters->value_integer("min_patch_size",0));
-
-  // Mesh::max_patch_size
-
   mesh_->set_max_patch_size(parameters->value_integer("max_patch_size",0));
 
   // --------------------------------------------------
@@ -104,10 +83,8 @@ void Simulation::initialize ()
 
   int num_methods = parameters->subgroup_count();
   for (int i=0; i<num_methods; i++) {
-    
-
+    printf ("%s\n",parameters->subgroup(i).c_str());
   }
-  INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Methods");
 
   // --------------------------------------------------
   // Initialize Mesh
