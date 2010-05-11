@@ -25,12 +25,17 @@
   Field pressure { min = 1.0e-6 }
   Field density  { min = 1.0e-6 }
 
-  Method ppm {
-      gamma     = 1.4;
-      courant   = 0.8;
-      diffusion = true;
-      flattening = true;
-      steepening = true;
+  Method {
+
+     sequence = ["ppm"];
+
+     ppm {
+        gamma     = 1.4;
+        courant   = 0.8;
+        diffusion = true;
+        flattening = true;
+        steepening = true;
+    }
   }
 
   Initial {

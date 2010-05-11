@@ -1,7 +1,10 @@
-Group_1 { blah_a = 1.6 }
-Group_2 one { blah_b = 3.2 }
-Group_2 two { blah_c = 6.2 }
 Group_3 {
-   three { blah_d = 1.6 };
-   four  { blah_e = 3.0 + 3.2 }
+   blah_1 = 10;
+   subgroup_1 { 
+     blah_2 = 10
+   };
+   subgroup_2 { 
+     blah_2 = 10
+   };
+   blah_3 = 10;
 }
