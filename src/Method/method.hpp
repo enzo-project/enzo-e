@@ -10,5 +10,7 @@
 /// @brief    Include file for the Method component
 
 #include "method_Method.hpp"
+#include "method_MethodDescr.hpp"
+#include "method_MethodHyperbolic.hpp"
 
 #endif /* METHOD_HPP */
