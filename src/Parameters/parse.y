@@ -18,6 +18,8 @@
 #include <string.h>
 #include <malloc.h>
 
+#define YYDEBUG 1
+
   /* Quiet a few -Wall errors */
 
 int yylex (void);
@@ -55,6 +57,7 @@ const char * op_name[] = {
   const char * parameter_name[]  = {
     "unknown",
     "sentinel",
+    "subgroup",
     "integer",
     "scalar",
     "string",
@@ -62,7 +65,8 @@ const char * op_name[] = {
     "logical",
     "list",
     "scalar_expr",
-    "logical_expr" };
+    "logical_expr",
+    "function" };
 
   /* Structure for storing a single parameter / value pair in a linked list */
 
@@ -140,37 +144,56 @@ const char * op_name[] = {
   /* The current group, subgroup, and parameter type */
 
   char *              current_parameter = NULL;
+  char *              current_group     = NULL;
+  char *              current_subgroup  = NULL;
   enum enum_parameter current_type      = enum_parameter_sentinel;
 
   /* Function to update parameter's groups once the group is known */
 
-  void update_group (char * group)
-    {
-      struct param_type * p = param_curr;
-      while (p->next->type  != enum_parameter_sentinel && 
-	     p->next->group == NULL) {
-	p->next->group = strdup(group);
-        p = p -> next;
-      }
-    }
+/*   void update_group (char * group) */
+/*     { */
+/*       struct param_type * p = param_curr; */
+/*       while (p->next->type  != enum_parameter_sentinel &&  */
+/* 	     p->next->group == NULL) { */
+/* 	p->next->group = strdup(group); */
+/*         p = p -> next; */
+/*       } */
+/*     } */
 
-  /* Function to update parameter's subgroups once the subgroup is known */
-
-  void update_subgroup (char * subgroup)
-    {
-      struct param_type * p = param_curr;
-      while (p->next->type     != enum_parameter_sentinel && 
-	     p->next->subgroup == NULL) {
-	p->next->subgroup = strdup(subgroup);
-        p = p -> next;
-      }
-    }
+  /* Insert a parameter into the list */
 
   void insert_param(struct param_type * head, struct param_type * new)
   {
      new->next  = head->next;
      head->next = new;
   }
+
+  /* Delete a parameter from the list given a pointer to the previous element */
+
+  void delete_param(struct param_type * previous)
+  {
+    struct param_type * item = previous->next;
+    previous->next = item->next;
+    free (item);     
+  }
+
+  /* Function to update parameter's subgroups once the subgroup is known */
+
+/*   void update_subgroup (char * subgroup) */
+/*     { */
+/*       struct param_type * p = param_curr; */
+/*       int inside_subgroup = 1; */
+/*       while (p->next->type     != enum_parameter_sentinel &&  */
+/* 	     p->next->subgroup == NULL) { */
+/* 	if (p->next->type == enum_parameter_subgroup) { */
+/* 	  inside_subgroup = 0; */
+/*           delete_param(p); */
+/*         } else if (inside_subgroup) { */
+/*           p->next->subgroup = strdup(subgroup); */
+/*           p = p -> next; */
+/*         } */
+/*       } */
+/*     } */
 
   struct param_type * reverse_param(struct param_type * old_head)
   {
@@ -209,9 +232,10 @@ const char * op_name[] = {
 
    /* Fill in the non-type-specific values for the new node */
 
-     p->group     = NULL; /* Initialized in update_group() */
-     p->subgroup  = NULL; /* Initialized in update_subgroup() */
-     p->parameter = strdup(current_parameter);
+     p->group    = (current_group) ?    strdup(current_group) : 0;
+     p->subgroup = (current_subgroup) ? strdup(current_subgroup) : 0;
+     p->parameter = (current_parameter) ? strdup(current_parameter) : 0;
+
      /* THIS FREE MESSES THINGS UP FOR STRINGS */
      /*     free (current_parameter); */
      current_type = enum_parameter_unknown;
@@ -259,6 +283,14 @@ const char * op_name[] = {
     p->string_value = strdup(value);
   }
 
+  /* New subgroup  */
+  void new_param_subgroup (char * value)
+  {
+    struct param_type * p = new_param();
+    p->type         = enum_parameter_subgroup;
+    p->string_value = strdup(value);
+  }
+
   /* New empty parameter assignment: FIRST NODE IN LIST IS A SENTINEL  */
   struct param_type * new_param_sentinel ()
   {
@@ -297,6 +329,9 @@ const char * op_name[] = {
   void new_parameter()
   {
      switch (current_type) {
+     case enum_parameter_subgroup:
+       new_param_subgroup(yylval.subgroup_type);
+       break;
      case enum_parameter_integer:
        new_param_integer(yylval.integer_type);
        break;
@@ -350,6 +385,7 @@ const char * op_name[] = {
   int integer_type; 
   double scalar_type;  
   char * string_type; 
+  char * subgroup_type;
   struct node_expr * node_type;
   }
 
@@ -428,43 +464,42 @@ file : /* nothing */
  ;
 
 group: 
-   GROUP_NAME '{' parameter_list '}'               { update_group($1);
-                                                     free($1);
-                                                     update_subgroup(""); }
- | GROUP_NAME '{' parameter_list ';' '}'           { update_group($1);
-                                                     free($1);
-                                                     update_subgroup(""); }
- | GROUP_NAME IDENTIFIER '{' parameter_list '}'    { update_group($1); 
-                                                     free($1);
-                                                     update_subgroup($2);
-                                                     free($2);
- }
- | GROUP_NAME IDENTIFIER '{' parameter_list ';' '}'{ update_group($1); 
-                                                     free($1);
-                                                     update_subgroup($2);
-                                                     free($2);
- }
+  group_name parameter_group                { current_group = ""; 
+                                              current_subgroup = "";  }
+| group_name named_parameter_group          { current_group = "";
+                                              current_subgroup = "";  }
 
-subgroup : 
-   IDENTIFIER  '{' parameter_list '}'      { update_subgroup($1); free ($1); }
-|  IDENTIFIER  '{' parameter_list ';' '}'  { update_subgroup($1); free ($1); }
+named_parameter_group : 
+   subgroup_name parameter_group           { current_subgroup = "";}
+
+parameter_group :
+  '{' parameter_list '}'                   { current_subgroup = ""; }
+| '{' parameter_list ';' '}'               { current_subgroup = ""; }
 
 parameter_list : 
-   parameter_assignment                     { }
- | subgroup                                 {  }
- | parameter_list ';' parameter_assignment  {  }
- | parameter_list ';' subgroup              {  } 
- ;
+                      parameter_item       {  }
+ | parameter_list ';' parameter_item       {  }
 
-parameter :
-  IDENTIFIER { current_parameter = $1;} 
+parameter_item: 
+  parameter_assignment                     {  }
+| named_parameter_group                    {  }
+ 
+group_name :
+  GROUP_NAME                               { current_group = $1;
+                                             current_subgroup = ""; } 
+
+subgroup_name:
+   IDENTIFIER                              { current_subgroup = $1; } 
+
+parameter_name :
+  IDENTIFIER                               { current_parameter = $1;} 
 
 parameter_assignment : 
- parameter '=' parameter_value { new_parameter(); }
+  parameter_name '=' parameter_value { new_parameter(); }
  ;
 
 parameter_value : 
-STRING { current_type = enum_parameter_string;       yylval.string_type = strdup($1); }
+ STRING { current_type = enum_parameter_string;       yylval.string_type = strdup($1); }
  | cie  { current_type = enum_parameter_integer;      yylval.integer_type = $1;}
  | cse  { current_type = enum_parameter_scalar;       yylval.scalar_type = $1;}
  | cle  { current_type = enum_parameter_logical;      yylval.logical_type = $1; }
@@ -487,7 +522,7 @@ LIST_END:
 
 
 list_elements:
-  parameter_value { new_parameter();  }
+                      parameter_value    { new_parameter(); }
  | list_elements  ',' parameter_value    { new_parameter(); }
 
 { }
@@ -644,6 +679,8 @@ cello_parameters_read(FILE * fp)
 {
   /* initialize the linked list with an initial sentinel (sentinel) node */
   param_head = param_curr = new_param_sentinel();
+
+  /*   yydebug=1; */
   
   yyrestart(fp);
   yyparse();
@@ -769,6 +806,9 @@ void cello_parameters_print_list(struct param_type * head, int level)
       break;
     case enum_parameter_string:  
       printf ("%s\n",p->string_value); 
+      break;
+    case enum_parameter_subgroup:  
+      printf ("Uh oh: SUBGROUP %s (should be deleted)\n",p->string_value);
       break;
     case enum_parameter_logical:
       printf ("%s\n",p->logical_value ? "true" : "false");
