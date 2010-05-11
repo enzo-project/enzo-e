@@ -17,6 +17,7 @@
 #include "error.hpp"
 #include "parse.h"
 #include "parameters_Param.hpp"
+#include "parameters_ParamNode.hpp"
 #include "parameters_Parameters.hpp"
 
 #endif /* PARAMETERS_HPP */

@@ -8,22 +8,20 @@ unit_parse = Builder(action = "$SOURCE < $ARGS > $TARGET")
 
 if (platform == 'linux-mpi'):
    unit_mpi   = Builder(action = "mpirun -np 4 $SOURCE > $TARGET")
-   test_cello = Builder(action = "mpirun -np 4 bin/cello $SOURCE > $TARGET")
+   test_cello = Builder(action = "mpirun -np 4 $SOURCE $ARGS > $TARGET")
 elif (platform == 'linux-ampi'):
    unit_mpi   = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun -n 4 $SOURCE > $TARGET")
-   test_cello = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun -n 4 bin/cello $SOURCE > $TARGET")
+   test_cello = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun -n 4 $SOURCE $ARGS > $TARGET")
 elif (platform == 'triton'):
    unit_mpi = Builder(action = "/opt/openmpi_pgimx/bin/mpirun -np 4 $SOURCE > $TARGET")
-   test_cello = Builder(action = "/opt/openmpi_pgimx/bin/mpirun -np 4 bin/cello $SOURCE > $TARGET")
+   test_cello = Builder(action = "/opt/openmpi_pgimx/bin/mpirun -np 4 $SOURCE $ARGS> $TARGET")
 else:
    unit_mpi = Builder(action = "$platform $SOURCE > $TARGET")
-   test_cello = Builder(action = "bin/cello $SOURCE > $TARGET")
+   test_cello = Builder(action = "$SOURCE $ARGS> $TARGET")
 
+# BUG: bin/cello does not necessarily get built before running test_cello, e.g.
+# BUG: from inside test directory after a clean
 
-
-
-#unit_mpi   = Builder(action = "mpirun -np 4 $SOURCE > $TARGET")
-#test_cello = Builder(action = "mpirun -np 4 bin/cello $SOURCE > $TARGET")
 
 env.Append(BUILDERS = { 'Unit': unit } )
 env.Append(BUILDERS = { 'UnitEnzo':   unit_enzo } ) 
@@ -65,7 +63,7 @@ env.UnitParse('test_parse_scalar.out',     '#/bin/test_Parse', ARGS='test/parse_
 env.UnitParse('test_parse_implosion.out',  '#/bin/test_Parse', ARGS='test/parse_implosion.in')
 env.UnitParse('test_parse_shock-pool.out', '#/bin/test_Parse', ARGS='test/parse_shock-pool.in')
 
-env.TestCello('cello_implosion.out',  'parse_implosion.in')
+env.TestCello('cello_implosion.out',  '#/bin/cello', ARGS='test/parse_implosion.in')
 
 
 

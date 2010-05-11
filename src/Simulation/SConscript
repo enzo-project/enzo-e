@@ -2,7 +2,7 @@ Import('env')
 
 includes = [Glob('simulation*hpp')]
 sources  = [Glob("simulation*cpp")]
-libraries  = ['error','parameters']
+libraries  = ['error','parameters','parallel', 'monitor', 'png']
 
 env = env.Clone(LIBS=[libraries])
 

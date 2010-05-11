@@ -702,6 +702,48 @@ void print_expression (struct node_expr * node,
 
 }
 
+void sprintf_expression (char * buffer,
+			 struct node_expr * node)
+/* WARNING: buffer is assumed to be big enough to hold the expression */
+{
+  if (node == NULL) {
+    sprintf (buffer,"NULL");
+  } else {
+    char left,right;
+    switch (node->type) {
+    case enum_node_integer:
+      sprintf (buffer,"%d",node->integer_value);
+      break;
+    case enum_node_scalar:
+      sprintf (buffer,"%g",node->scalar_value);
+      break;
+    case enum_node_variable:
+      sprintf (buffer,"%c",node->var_value);
+      break;
+    case enum_node_function:
+      sprintf (buffer,"%s(",node->function_name);
+      sprintf_expression(buffer+strlen(buffer),node->left);
+      sprintf (buffer,")");
+      break;
+    case enum_node_operation:
+      left  = (node->left->type == enum_node_operation) ? '(' : ' ';
+      right = (node->left->type == enum_node_operation) ? ')' : ' ';
+      sprintf (buffer,"%c",left);
+      sprintf_expression(buffer+strlen(buffer),node->left);
+      sprintf (buffer,"%c",right);
+      sprintf (buffer," %s ",op_name[node->op_value]);
+      left  = (node->right->type == enum_node_operation) ? '(' : ' ';
+      right = (node->right->type == enum_node_operation) ? ')' : ' ';
+      sprintf (buffer,"%c",left);
+      sprintf_expression(buffer+strlen(buffer),node->right);
+      sprintf (buffer,"%c",right);
+      break;
+    default:
+      break;
+    }
+  }
+}
+
 void cello_parameters_print_list(struct param_type * head, int level)
 {
   struct param_type * p = head->next;

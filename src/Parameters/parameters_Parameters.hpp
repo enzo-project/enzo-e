@@ -7,11 +7,14 @@
 /// @file     parameters_parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
+/// @todo     Add output support for individual parameters, e.g. for Monitor output
 /// @brief    Declaration for the Parameters class
 
 /// @def      MAX_PARAMETER_FILE_WIDTH
 /// @brief    Maximum allowed width of a line in a parameter file
 #define MAX_PARAMETER_FILE_WIDTH 255
+
+#include "parameters_Param.hpp"
 
 class Parameters {
 
@@ -122,25 +125,37 @@ public: // interface
    )    
     throw(ExceptionParametersBadType);
 
-  /// Set the current group
-  void set_group  (std::string group, std::string subgroup = "") throw ()
+  /// Get number of groups
+  int group_count() throw ();
+
+  /// Get number of groups
+  std::string group(int i) throw ();
+
+  /// Get number of subgroups
+  int subgroup_count() throw ();
+
+  /// Get number of subgroups
+  std::string subgroup(int i) throw ();
+
+  /// Set the current group.  Clears current subgroup
+  void set_current_group  (std::string group, std::string subgroup = "") throw ()
   { 
     current_group_    = group;
     current_subgroup_ = "";
   };
 
   /// Set the current subgroup
-  void set_subgroup  (std::string subgroup) throw ()
+  void set_current_subgroup  (std::string subgroup) throw ()
   {
     current_subgroup_ = subgroup;
   }
 
   /// Get the current group
-  std::string get_group () throw ()
+  std::string current_group () throw ()
   { return current_group_; };
 
   /// Get the current subgroup
-  std::string get_subgroup () throw ()
+  std::string current_subgroup () throw ()
   { return current_subgroup_; };
 
 private: // functions
@@ -179,6 +194,8 @@ private: // functions
     return param;
   }
 
+  void monitor_log (std::string parameter) throw();
+
 private: // attributes
 
   /// Single instance of the Parameters object (singleton design pattern)
@@ -187,8 +204,8 @@ private: // attributes
   std::string current_group_;
   std::string current_subgroup_;
 
-  std::map<std::string, Param *> parameter_map_;
-  struct param_type * parameter_list_;
+  std::map<std::string, Param *>  parameter_map_;
+  ParamNode                     * parameter_tree_;
 
 };
 

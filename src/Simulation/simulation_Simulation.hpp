@@ -11,7 +11,6 @@
 
 #include <vector>
 #include "cello.h"
-#include "parameters.hpp"
 #include "mesh.hpp"
 #include "data.hpp"
 #include "method.hpp"
@@ -62,16 +61,22 @@ public: // interface
     return lower_.size(); 
   };
 
-  /// Return extents
+  /// Return extents.  Assumes lower[] and upper[] are allocated to at least dimension()
   void domain_extents (int lower[], int upper[])
   {
-    lower[0] = lower_[0];
-    lower[1] = lower_[1];
-    lower[2] = lower_[2];
-    upper[0] = upper_[0];
-    upper[1] = upper_[1];
-    upper[2] = upper_[2];
-  };
+    if (dimension() >= 1) {
+      lower[0] = lower_[0];
+      upper[0] = upper_[0];
+    }
+    if (dimension() >= 2) {
+      lower[1] = lower_[1];
+      upper[1] = upper_[1];
+    }
+    if (dimension() >= 3) {
+      lower[2] = lower_[2];
+      upper[2] = upper_[2];
+    }
+  }
 
   /// Return the number of methods
   int num_methods () { return methods_.size(); };

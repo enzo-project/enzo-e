@@ -25,6 +25,13 @@ extern "C" {
 		      FILE * fp = stdout);
 }
 
+/// @fun print_expression
+/// @brief Print a parameter expression
+extern "C" { 
+  void sprintf_expression(char * buffer,
+			  struct node_expr * node);
+}
+
 /// @fun cello_parameters_print_list
 /// @brief Print a parameter list
 extern "C" { 
@@ -122,6 +129,9 @@ public: // interface
   /// Get a string parameter (note that string is aliased)
   std::string get_string () 
   { value_accessed_ = true; return value_string_; }
+
+  /// Convert the parameter value into a string
+  std::string value_to_string ();
 
 private: // attributes
 

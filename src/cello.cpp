@@ -14,6 +14,7 @@
 
 #include "cello.h"
 
+#include "error.hpp"
 #include "parallel.hpp"
 #include "schedule.hpp"
 #include "monitor.hpp"

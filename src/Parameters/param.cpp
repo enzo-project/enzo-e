@@ -86,43 +86,44 @@ void Param::write(FILE * file_pointer,
   fprintf (file_pointer,"%s ",parameter.c_str());
 
   // Write the parameter value
+  fprintf (file_pointer,"%s", value_to_string().c_str());
+}
+
+
+std::string Param::value_to_string ()
+/// @param buffer Character string to contain the expression.  
+///               MUST BE SUFFICIENTLY LONG--NO CHECKING IS PERFORMED
+/// @param node   Head node of the tree defining the scalar expression
+{
+  char string_buffer[80];
   switch (type_) {
   case type_string_: 
-    fprintf (file_pointer,"%s\n",value_string_);
+    sprintf (string_buffer,"%s\n",value_string_);
     break;
   case type_list_:
-    fprintf (file_pointer,"LIST\n");
+    sprintf (string_buffer,"LIST\n");
     INCOMPLETE_MESSAGE("Param::write","Writing lists is not implemented yet");
     break;
   case type_logical_expr_:
   case type_scalar_expr_:
-    write_scalar_expr_(file_pointer,value_expr_);
-    fprintf (file_pointer,"\n");
+    sprintf_expression(string_buffer,value_expr_);
     break;
   case type_integer_:
-    fprintf (file_pointer,"%d\n",value_integer_);
+    sprintf (string_buffer,"%d",value_integer_);
     break;
   case type_scalar_:
-    fprintf (file_pointer,"%g\n",value_scalar_);
+    sprintf (string_buffer,"%g",value_scalar_);
     break;
   case type_logical_:
-    fprintf (file_pointer,"%s\n",value_logical_ ? "true" : "false");
+    sprintf (string_buffer,"%s",value_logical_ ? "true" : "false");
     break;
   case type_unknown_:
-    fprintf (file_pointer,"UNKNOWN\n");
+    sprintf (string_buffer,"UNKNOWN\n");
     break;
-  }
+  }  
+  return string_buffer;
 }
-
-
-void Param::write_scalar_expr_(FILE * fp,
-			       struct node_expr * node)
-/// @param fp Pointer to an open file to which the expression is to be written
-/// @param node Head node of the tree defining the scalar expression
-{
-  print_expression(node,fp);
-}
-
+ 
 void Param::evaluate_scalar
 (struct node_expr * node, 
  int                n, 

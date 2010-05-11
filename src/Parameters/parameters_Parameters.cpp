@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "error.hpp"
+#include "monitor.hpp"
 #include "parameters.hpp"
 
 Parameters Parameters::instance_; // (singleton design pattern)
@@ -23,7 +24,7 @@ Parameters::Parameters()
   current_group_(""),
   current_subgroup_(""),
   parameter_map_(),
-  parameter_list_()
+  parameter_tree_(new ParamNode("Parameters"))
   ///
 {
 }
@@ -40,30 +41,38 @@ Parameters::~Parameters()
 
     delete it_param->second;
   }
+
 }
 
 void Parameters::read ( FILE * file_pointer )
 /// @param    file_pointer An opened input parameter file or stdin
 {
-  parameter_list_ = cello_parameters_read(file_pointer);
+  struct param_type * parameter_list = cello_parameters_read(file_pointer);
 
-  struct param_type * node = parameter_list_ -> next; // skip sentinel
+  struct param_type * node = parameter_list -> next; // skip sentinel
   struct param_type * prev = node;
 
   while (node->type != enum_parameter_sentinel) {
 
     std::string parameter_name = 
-      std::string(node->group) + ":" +
+      std::string(node->group)    + ":" +
       std::string(node->subgroup) + ":" +
       std::string(node->parameter);
 
-    Param * param;
-
-    param = new Param;
+    Param * param = new Param;
 
     param->set(node);
 
+    // Insert parameter into the parameter mapping "Group:subgroup:parameter" -> "Value"
+
     parameter_map_     [parameter_name] = param;
+
+    // Insert parameter into the parameter tree "Group" -> "subgroup" -> "parameter"
+
+    ParamNode * param_node = parameter_tree_;
+    param_node = param_node->new_subnode(node->group);
+    param_node = param_node->new_subnode(node->subgroup);
+    param_node = param_node->new_subnode(node->parameter);
 
     node = node->next;
     
@@ -109,6 +118,7 @@ int Parameters::value_integer
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_integer()) throw ExceptionParametersBadType();
+  monitor_log(parameter);
   return (param != NULL) ? param->get_integer() : deflt;
 }
 
@@ -122,6 +132,7 @@ double Parameters::value_scalar
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
+  monitor_log(parameter);
   return (param != NULL) ? param->get_scalar() : deflt;
 }
 
@@ -134,6 +145,7 @@ bool Parameters::value_logical
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_logical()) throw ExceptionParametersBadType();
+  monitor_log(parameter);
   return (param != NULL) ? param->get_logical() : deflt;
 }
 
@@ -146,6 +158,7 @@ std::string Parameters::value_string
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_string()) throw ExceptionParametersBadType();
+  monitor_log(parameter);
   return (param != NULL) ? param->get_string() : deflt;
 }
 
@@ -175,6 +188,7 @@ void Parameters::evaluate_scalar
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
+
 }
 
 void Parameters::evaluate_logical 
@@ -329,6 +343,55 @@ void Parameters::list_evaluate_logical
   }
 }
 
+//----------------------------------------------------------------------
+
+void Parameters::monitor_log (std::string parameter) throw()
+{
+  Param * param = parameter_(parameter);
+  char buffer[80];
+  sprintf (buffer,"Parameter %s:%s:%s = %s",
+	   current_group_.c_str(),
+	   current_subgroup_.c_str(),
+	   parameter.c_str(),
+	   param ? param->value_to_string().c_str() : "undefined");
+  Monitor::instance()->print(buffer);
+}
+//----------------------------------------------------------------------
+
+int Parameters::group_count() throw ()
+{
+  return parameter_tree_->size();
+}
+
+//----------------------------------------------------------------------
+
+std::string Parameters::group(int group_index) throw ()
+{
+  return parameter_tree_->subgroup(group_index);
+}
+
+//----------------------------------------------------------------------
+
+int Parameters::subgroup_count() throw ()
+{
+  if (parameter_tree_->subnode(current_group_) != 0) {
+    return parameter_tree_->subnode(current_group_)->size();
+  }
+  return 0;
+}
+
+//----------------------------------------------------------------------
+
+std::string Parameters::subgroup(int group_index) throw ()
+{
+  if (parameter_tree_->subnode(current_group_) != 0) {
+    return parameter_tree_->subnode(current_group_)->subgroup(group_index);
+  }
+  return "";
+}
+
+
+//----------------------------------------------------------------------
 
 int Parameters::readline_ 
 ( FILE*  file_pointer, 

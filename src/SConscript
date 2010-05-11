@@ -27,7 +27,7 @@ SConscript('Test/SConscript')
 SConscript('User/SConscript')
 
 
-components = ['schedule','error','monitor','parallel','parameters','simulation']
+components = ['schedule','error','parallel','monitor','parameters','simulation']
 libraries  = ['png']
 
 

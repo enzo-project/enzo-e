@@ -11,6 +11,7 @@
 #include <math.h>
 
 #include "error.hpp"
+#include "parallel.hpp"
 #include "test.hpp"
 #include "parameters.hpp"
 
@@ -22,6 +23,10 @@ void generate_input();
 
 int main(int argc, char **argv)
 {
+
+  Parallel * parallel = Parallel::instance();
+
+  parallel->initialize(&argc, &argv);
 
   unit_class ("Parameters");
 
@@ -42,31 +47,31 @@ int main(int argc, char **argv)
   FILE * fpin = fopen ("test.in","r");
   parameters->read ( fpin );
 
-  // set_group()
+  // set_current_group()
 
-  unit_func("set_group");
-  parameters->set_group("Group");
-  unit_assert(parameters->get_group() == "Group");
+  unit_func("set_current_group");
+  parameters->set_current_group("Group");
+  unit_assert(parameters->current_group() == "Group");
 
-  // set_subgroup()
-  unit_func("set_subgroup");
-  parameters->set_subgroup("subgroup_1");
-  unit_assert(parameters->get_subgroup() == "subgroup_1");
-  parameters->set_subgroup("subgroup_2");
-  unit_assert(parameters->get_subgroup() == "subgroup_2");
+  // set_current_subgroup()
+  unit_func("set_current_subgroup");
+  parameters->set_current_subgroup("subgroup_1");
+  unit_assert(parameters->current_subgroup() == "subgroup_1");
+  parameters->set_current_subgroup("subgroup_2");
+  unit_assert(parameters->current_subgroup() == "subgroup_2");
 
-  // set_group() without set_subgroup() clears subgroup to ""
+  // set_current_group() without set_current_subgroup() clears subgroup to ""
 
-  unit_func("set_group");
-  parameters->set_group("Group2");
-  unit_assert(parameters->get_group() == "Group2");
-  unit_assert(parameters->get_subgroup() == "");
+  unit_func("set_current_group");
+  parameters->set_current_group("Group2");
+  unit_assert(parameters->current_group() == "Group2");
+  unit_assert(parameters->current_subgroup() == "");
 
   // value_logical()
 
   unit_func("value_logical");
 
-  parameters->set_group("Logical");
+  parameters->set_current_group("Logical");
   
   unit_assert (parameters->value_logical("test_true")  == true);
   unit_assert (parameters->value_logical("test_false") == false);
@@ -77,7 +82,7 @@ int main(int argc, char **argv)
 
   unit_func("value_integer");
 
-  parameters->set_group("Integer");
+  parameters->set_current_group("Integer");
   
   unit_assert (parameters->value_integer("test_1")  == 1);
   unit_assert (parameters->value_integer("test_37") == 37);
@@ -87,7 +92,7 @@ int main(int argc, char **argv)
   
   unit_func("value_scalar");
 
-  parameters->set_group("Scalar");
+  parameters->set_current_group("Scalar");
   
   unit_assert (parameters->value_scalar("test_1_5")  == 1.5);
   unit_assert (parameters->value_scalar("test_37_25") == 37.25);
@@ -98,16 +103,16 @@ int main(int argc, char **argv)
 
   unit_func("value_scalar");
 
-  parameters->set_group("Scalar");
+  parameters->set_current_group("Scalar");
 
-  parameters->set_subgroup("const_scalar_1");
+  parameters->set_current_subgroup("const_scalar_1");
 
   unit_assert(parameters->value_scalar("num1") == 30.625);
   unit_assert(parameters->value_scalar("num2") == 18.375);
   unit_assert(parameters->value_scalar("num3") == 150.0625);
   unit_assert(parameters->value_scalar("num4") == 4.0000000000);
 
-  parameters->set_subgroup("const_scalar_2");
+  parameters->set_current_subgroup("const_scalar_2");
 
   unit_assert(parameters->value_scalar("num1") == 36.750);
   unit_assert(parameters->value_scalar("num2") == 67.375);
@@ -117,7 +122,7 @@ int main(int argc, char **argv)
 
   unit_func("value_string");
 
-  parameters->set_group("String");
+  parameters->set_current_group("String");
   unit_assert(parameters->value_string("str1") == "testing");
   unit_assert(parameters->value_string("str2","blah") == "one");
   unit_assert(parameters->value_string("none","blah") == "blah");
@@ -133,9 +138,9 @@ int main(int argc, char **argv)
   double values_scalar[] = {0,0,0};
   double deflts_scalar[] = {-1,-2,-3};
 
-  parameters->set_group("Scalar_expr");
+  parameters->set_current_group("Scalar_expr");
 
-  parameters->set_subgroup("var_scalar_1");
+  parameters->set_current_subgroup("var_scalar_1");
 
   parameters->evaluate_scalar("num1",3,values_scalar,deflts_scalar,x,y,z,t);
   unit_assert (values_scalar[0]==x[0]);
@@ -153,7 +158,7 @@ int main(int argc, char **argv)
   unit_assert (values_scalar[1]==x[1]+y[1]+z[1]+t[1]);
   unit_assert (values_scalar[2]==x[2]+y[2]+z[2]+t[2]);
 
-  parameters->set_subgroup("var_scalar_2");
+  parameters->set_current_subgroup("var_scalar_2");
 
   parameters->evaluate_scalar("num1",3,values_scalar,deflts_scalar,x,y,z,t);
   unit_assert (CLOSE(values_scalar[0],sin(x[0])));
@@ -172,8 +177,8 @@ int main(int argc, char **argv)
   bool values_logical[] = {false, false, false};
   bool deflts_logical[] = {true, false,true};
 
-  parameters->set_group("Logical_expr");
-  parameters->set_subgroup("var_logical_1");
+  parameters->set_current_group("Logical_expr");
+  parameters->set_current_subgroup("var_logical_1");
 
   parameters->evaluate_logical("num1",3,values_logical,deflts_logical,x,y,z,t);
   unit_assert (values_logical[0] == (x[0] < y[0]));
@@ -192,7 +197,7 @@ int main(int argc, char **argv)
 
   // Lists
 
-  parameters->set_group("List");
+  parameters->set_current_group("List");
 
   unit_func("list_length");
   unit_assert(parameters->list_length("num1") == 6);
@@ -222,6 +227,39 @@ int main(int argc, char **argv)
   unit_assert (values_logical[1] == (x[1]+y[1]+t[1] > 0 ));
   unit_assert (values_logical[2] == (x[2]+y[2]+t[2] > 0 ));
 
+  // group_count(), group(i)
+
+  unit_func("group_count");
+
+  int num_groups = parameters->group_count();
+  // Groups:
+  //  Integer
+  //  List
+  //  Logical
+  //  Logical_expr
+  //  Scalar
+  //  Scalar_expr
+  //  String
+  unit_assert (num_groups == 7); 
+
+  unit_func("subgroup_count");
+  std::map <std::string,int> num_subgroups;
+  num_subgroups["Integer"]      = 1; // ""
+  num_subgroups["List"]         = 1; // ""
+  num_subgroups["Logical"]      = 1; // "var_logical_1"
+  num_subgroups["Logical_expr"] = 1; // ""
+  num_subgroups["Scalar"]       = 3; // "","const_scalar_1","const_scalar_2"
+  num_subgroups["Scalar_expr"]  = 2; // "var_scalar_1","var_scalar_2"
+  num_subgroups["String"]       = 1; // ""
+
+  printf ("num_groups = %d\n",num_groups);
+  for (int i=0; i<num_groups; i++) {
+    std::string group = parameters->group(i);
+    parameters->set_current_group(group);
+    printf ("subgroups: %d %d\n",num_subgroups[group],parameters->subgroup_count());
+    unit_assert (num_subgroups[group] == parameters->subgroup_count());
+  }
+  
   // Write
 
   unit_func("write");
@@ -234,22 +272,35 @@ void generate_input()
 {
   FILE * fp = fopen ("test.in","w");
 
+  // Groups
+  // 
+  //  Integer::
+  //  List
+  //  Logical::
+  //  Logical_expr::var_logical_1
+  //  Scalar::
+  //  Scalar::const_scalar_1
+  //  Scalar::const_scalar_2
+  //  Scalar_expr::var_scalar_1
+  //  Scalar_expr::var_scalar_2
+  //  String
+
   fprintf (fp, "Logical {\n");
-  fprintf (fp, "  test_true = true;\n");
+  fprintf (fp, "  test_true  = true;\n");
   fprintf (fp, "  test_false = false;\n");
   fprintf (fp, "}\n");
   fprintf (fp, "   \n");
   fprintf (fp, "Integer {\n");
   fprintf (fp, "  test_1 = 1;\n");
-  fprintf (fp, "test_37 = 37\n");
-  fprintf (fp, "  }\n");
+  fprintf (fp, "  test_37 = 37\n");
+  fprintf (fp, "}\n");
 
-  fprintf (fp, " Scalar {\n");
+  fprintf (fp, "Scalar {\n");
   fprintf (fp, "  test_1_5 = 1.5;\n");
   fprintf (fp, "  test_37_25 = 37.25;\n");
   fprintf (fp, "}\n");
 
-  fprintf (fp, " Scalar {\n");
+  fprintf (fp, "Scalar {\n");
   fprintf (fp, "  const_scalar_1 {\n");
   fprintf (fp, "    num1 = 24.5 + 6.125;\n");
   fprintf (fp, "    num2 = 24.5 - 6.125;\n");
@@ -263,12 +314,12 @@ void generate_input()
   fprintf (fp, "  }\n");
   fprintf (fp, "}\n");
 
-  fprintf (fp, " String {\n");
+  fprintf (fp, "String {\n");
   fprintf (fp, "  str1 = \"testing\";\n");
   fprintf (fp, "  str2 = \"one\";\n");
   fprintf (fp, "}\n");
 
-  fprintf (fp, " Scalar_expr {\n");
+  fprintf (fp, "Scalar_expr {\n");
   fprintf (fp, "  var_scalar_1 {\n");
   fprintf (fp, "    num1 = x;\n");
   fprintf (fp, "    num2 = x + 3.0;\n");
