@@ -7,12 +7,12 @@
 /// @brief     Program implementing unit tests for hydrodynamics
 
 #include "cello.h"
-
-#include "string.h"
 #include "cello_hydro.h"
 #include "test_ppm.h"
+
+#include "string.h"
 #include "parallel.hpp"
-#include "performance_timer.hpp"
+#include "performance.hpp"
 
 //----------------------------------------------------------------------
 

@@ -8,8 +8,8 @@
 
 #include <stdio.h>
 #include "cello.h"
-#include "mesh_node3k.hpp"
-#include "mesh_tree3k.hpp"
+#include "mesh_Node3K.hpp"
+#include "mesh_Tree3K.hpp"
 
 //----------------------------------------------------------------------
 

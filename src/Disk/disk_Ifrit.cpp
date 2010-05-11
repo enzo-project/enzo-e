@@ -10,7 +10,7 @@
 
 #include "cello.h"
 #include "error.hpp"
-#include "disk_ifrit.hpp"
+#include "disk.hpp"
  
 //----------------------------------------------------------------------
 

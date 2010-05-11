@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "method_method.hpp"
+#include "method.hpp"
 #include "monitor.hpp"
 
 //----------------------------------------------------------------------

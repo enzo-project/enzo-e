@@ -10,7 +10,7 @@
 
 #include "cello.h"
 
-#include "mesh_node2k.hpp"
+#include "mesh_Node2K.hpp"
 #include "error.hpp"
 
 //----------------------------------------------------------------------

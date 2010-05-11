@@ -13,8 +13,8 @@
 
 #include "cello.h"
 
-#include "performance_timer.hpp"
 #include "error.hpp"
+#include "performance.hpp"
 #include "memory.hpp"
 #include "test.hpp"
 
