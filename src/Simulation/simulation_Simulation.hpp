@@ -78,14 +78,11 @@ public: // interface
     }
   }
 
-  /// Return the number of methods
-  int num_methods () { return methods_.size(); };
-
-  /// Return the ith method
-  Method * method (int i) { return methods_[i]; };
-
   /// Return the Mesh object
   Mesh * mesh () { return mesh_; };
+
+  /// Return the Method descriptor
+  MethodDescr * methods () { return methods_; };
 
 private: // attributes
 
@@ -96,11 +93,11 @@ private: // attributes
   /// AMR grid
   Mesh * mesh_;
 
+  /// Methods
+  MethodDescr * methods_;
+
   /// Data descriptions
   DataDescr data_;
-
-  /// Methods
-  std::vector<Method *> methods_;
 
 };
 

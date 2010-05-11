@@ -15,8 +15,8 @@ Simulation::Simulation()
   : lower_(),
     upper_(),
     mesh_(NULL),
-    data_(),
-    methods_(NULL)
+    methods_(NULL),
+    data_()
 {
 }
 
@@ -43,7 +43,8 @@ void Simulation::initialize ()
 		   "List parameter 'Domain extent' must have length 2, 4, or 6");
   }
 
-  for (int i=0; i<extent_length; i+=2) {
+  int i;
+  for (i=0; i<extent_length; i+=2) {
     lower_.push_back(parameters->list_value_scalar(i,  "extent",0));
     upper_.push_back(parameters->list_value_scalar(i+1,"extent",1));
   }
@@ -81,10 +82,20 @@ void Simulation::initialize ()
 
   parameters->set_current_group("Method");
 
-  int num_methods = parameters->subgroup_count();
-  for (int i=0; i<num_methods; i++) {
-    printf ("%s\n",parameters->subgroup(i).c_str());
+  int method_count = parameters->list_length("sequence");
+
+  if (method_count == 0) {
+    ERROR_MESSAGE ("Simulation::initialize",
+		   "List parameter 'Method sequence' must have length greater than zero");
   }
+
+  methods_ = new MethodDescr;
+
+  for (i=0; i<method_count; i++) {
+    std::string method_name = parameters->list_value_string(i,"sequence", "");
+    printf ("method = %s\n",method_name.c_str());
+  }
+
 
   // --------------------------------------------------
   // Initialize Mesh
