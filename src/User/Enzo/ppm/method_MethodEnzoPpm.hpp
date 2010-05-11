@@ -6,14 +6,14 @@
 /// @date     Thu Apr  1 16:14:38 PDT 2010
 /// @brief    Implementation of Enzo PPM hydro method
 
-#ifndef ENZO_PPM_HPP
-#define ENZO_PPM_HPP
+#ifndef METHOD_ENZO_PPM_HPP
+#define METHOD_ENZO_PPM_HPP
 
 #include <vector>
 #include <string>
 #include "method.hpp"
 
-class MethodEnzoPpm : public Method {
+class MethodEnzoPpm : public MethodHyperbolic {
 
   /// @class    MethodEnzoPpm
   /// @ingroup  Enzo
@@ -31,4 +31,4 @@ public: // interface
 
 };
 
-#endif /* ENZO_PPM_HPP */
+#endif /* METHOD_ENZO_PPM_HPP */
