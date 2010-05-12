@@ -38,126 +38,81 @@ class FieldDescr {
 public: // public
 
   /// Initialize a FieldDescr object
-  FieldDescr(int dim) throw();
+  FieldDescr(std::string name,
+	     int dim = 3) throw();
 
-  /// Add a new field to the list of known fields
-  int add_field (std::string name) throw()
-  { 
-    int index = field_count();
-    name_.push_back(name); 
-    bool * centering = new bool [dim_];
-    for (int i=0; i < dim_; i++) centering[i] = true;
-    centering_. push_back(centering);
-    min_value_. push_back(0);
-    max_value_. push_back(0);
-    min_action_.push_back(field_action_none);
-    max_action_.push_back(field_action_none);
-    precision_. push_back(default_precision_());
-    return index;
-  };
-
-  /// Return the number of Fields
-  int field_count() const throw()
-  { return name_.size(); }
-
-  /// Return indexed Field's name
-  std::string name (int i) const throw()
-  { return (0 <= i && i < field_count()) ? 
-      name_[i] : ""; };
-
-  /// Return named Field's index
-  int index (std::string name) const throw()
-  { 
-    for (int index=0; index < field_count(); index++) {
-      if (this->name(index) == name) return index;
+  /// Set dimension
+  void set_dimension (int dim)
+  { if (1 <= dim && dim <= 3) {
+      dim_ = dim;
+    } else {
+      ERROR_MESSAGE("FieldDescr::set_dimension","dim out of range");
     }
-    return -1; // Uh oh
-  }
+  };
+      
+  /// Return dimensionality
+  int dimension () const throw() { return dim_;  };
+      
+  /// Return Field's name
+  std::string name () const throw()
+  { return name_; }
 
   /// Return centering of Field.  Assumes vector length is at least dim_
-  const bool * centering (int index) const throw()
+  const bool * centering () const throw()
   {
-    return (0 <= index && index < field_count()) ? 
-      centering_[index] : 0; 
+    return centering_;
   };
 
-  /// Return centering of Field for the given axis.  Assumes index and axis are in range.
-  void set_centering (int index,int axis, bool value) throw()
+  /// Return centering of Field for the given axis
+  void set_centering (int axis, bool value) throw()
   {
-    if (0 <= index && index < field_count() && 0 <= axis && axis < dim_) 
-      centering_[index][axis] = value; 
+    if (0 <= axis && axis < dim_) 
+      centering_[axis] = value; 
   };
 
-  /// Return ith Field minimum value
-  double min_value (int index) const throw()
-  { return (0 <= index && index < field_count()) ? 
-      min_value_[index] : 0.0; };
+  /// Return Field minimum value
+  double min_value () const throw()
+  { return min_value_; };
 
-  /// Set ith Field minimum value
-  void set_min_value (int index,double value) throw()
+  /// Set Field minimum value
+  void set_min_value (double value) throw()
+  { min_value_ = value; };
+
+  /// Return Field maximum value
+  double max_value () const throw()
+  { return max_value_; };
+
+  /// Set Field maximum value
+  void set_max_value (double value) throw()
+  { max_value_ = value; };
+
+  /// Return action on violating Field minimum value
+  field_action min_action () const throw()
+  { return min_action_; };
+
+  /// Set action on violating Field minimum value
+  void set_min_action (field_action action) throw()
+  { min_action_ = action;  };
+
+  /// Return action on violating Field maximum value
+  field_action max_action () const throw()
+  { return max_action_; };
+
+  /// Set action on violating Field maximum value
+  void set_max_action (field_action action) throw()
+  { max_action_ = action;  };
+
+  /// Return precision of Field
+  precision_type precision () const throw()
+  { return precision_; };
+
+  /// Set precision of Field
+  void set_precision (precision_type precision) throw()
   { 
-    if (0 <= index && index < field_count()) {
-      min_value_[index] = value;
-    }
+    precision_ = (precision == precision_default) ? 
+      default_precision_() : precision;
   };
 
-  /// Return ith Field maximum value
-  double max_value (int index) const throw()
-  { return (0 <= index && index < field_count()) ? 
-      max_value_[index] : 0.0; };
-
-  /// Set ith Field maximum value
-  void set_max_value (int index,double value) throw()
-  { 
-    if (0 <= index && index < field_count()) {
-      max_value_[index] = value;
-    }
-  };
-
-  /// Return action on violating ith Field minimum value
-  field_action min_action (int index) const throw()
-  { return (0 <= index && index < field_count()) ? 
-      min_action_[index] : field_action_unknown; };
-
-  /// Set action on violating ith Field minimum value
-  void set_min_action (int index,field_action action) throw()
-  { 
-    if (0 <= index && index < field_count()) {
-      min_action_[index] = action;
-    }
-  };
-
-  /// Return action on violating ith Field maximum value
-  field_action max_action (int index) const throw()
-  { return (0 <= index && index < field_count()) ? 
-      max_action_[index] : field_action_unknown; };
-
-  /// Set action on violating ith Field maximum value
-  void set_max_action (int index,field_action action) throw()
-  { 
-    if (0 <= index && index < field_count()) {
-      max_action_[index] = action;
-    }
-  };
-
-  /// Return precision of ith Field
-  precision_type precision (int index) const throw()
-  {
-    return (0 <= index && index < field_count()) ? 
-      precision_[index] : precision_unknown; };
-
-  /// Set precision of ith Field
-  void set_precision (int index, precision_type precision) throw()
-  { 
-    if (precision == precision_default) {
-      precision = default_precision_();
-    }
-    if (0 <= index && index < field_count()) {
-      precision_[index] = precision;
-    }
-  };
-
-  /// 
 private: // functions
 
   precision_type default_precision_ () {
@@ -172,29 +127,29 @@ private: // functions
 
 private: // attributes
 
-  /// Dimension of Fields
+  /// Dimension of Field
   int dim_;
 
   /// String defining the field's name
-  std::vector < std::string> name_;
+  std::string name_;
 
   /// Cell centering
-  std::vector < bool *> centering_;
+  bool * centering_;
 
   /// Minimum allowed value for the Field
-  std::vector < double> min_value_;
+  double min_value_;
 
   /// Maximum allowed value for the Field
-  std::vector < double> max_value_;
+  double max_value_;
 
   /// Action to perform if Field values go below min_
-  std::vector < field_action> min_action_ ;
+  field_action min_action_ ;
 
   /// Action to perform if Field values go above max_
-  std::vector < field_action> max_action_ ;
+  field_action max_action_ ;
 
   /// Precision of the Field data
-  std::vector < precision_type> precision_;
+  precision_type precision_;
 
 };
 

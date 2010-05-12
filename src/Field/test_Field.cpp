@@ -16,63 +16,51 @@ int main()
 
   unit_class ("Field");
   unit_func ("Field");
-  FieldDescr * field = new FieldDescr(2);
-  unit_assert(field != 0);
-
-  unit_func ("add_field");
-  unit_assert(field->field_count() == 0);
-  int index_density    = field->add_field("density");
-  unit_assert(field->field_count() == 1);
-  int index_velocity_x = field->add_field("velocity_x");
-  unit_assert(field->field_count() == 2);
-  int index_velocity_y = field->add_field("velocity_y");
-  unit_assert(field->field_count() == 3);
+  FieldDescr density    ("density");
+  FieldDescr velocity_x ("velocity_x");
+  FieldDescr velocity_y ("velocity_y");
+  unit_assert(true);
 
   unit_func ("name");
-  unit_assert(field->name(index_density)    == "density");
-  unit_assert(field->name(index_velocity_x) == "velocity_x");
-  unit_assert(field->name(index_velocity_y) == "velocity_y");
-
-  unit_func ("index");
-  unit_assert(field->index("density") == index_density);
-  unit_assert(field->index("velocity_x") == index_velocity_x);
-  unit_assert(field->index("velocity_y") == index_velocity_y);
+  unit_assert(density.name() == "density");
+  unit_assert(velocity_x.name() == "velocity_x");
+  unit_assert(velocity_y.name() == "velocity_y");
 
   unit_func ("centering");
-  field->set_centering(index_velocity_x,1,false);
-  field->set_centering(index_velocity_y,0,false);  // Is this the right way around?
+  velocity_x.set_centering(1,false);  // Is this the right way around?
+  velocity_y.set_centering(0,false);
 
-  unit_assert (field->centering(index_density)[0] && 
-	       field->centering(index_density)[1]);
-  unit_assert (field->centering(index_velocity_x)[0] && 
-	       ! field->centering(index_velocity_x)[1]);
-  unit_assert (! field->centering(index_velocity_y)[0] && 
-	       field->centering(index_velocity_y)[1]);
+  unit_assert (density.centering()[0] == true && 
+	       density.centering()[1] == true );
+  unit_assert (velocity_x.centering()[0] == true && 
+	       velocity_x.centering()[1] == false);
+  unit_assert (velocity_y.centering()[0] == false && 
+	       velocity_y.centering()[1] == true);
 
   unit_func ("min_value");
-  field->set_min_value (index_density,1.0);
-  unit_assert (field->min_value (index_density) == 1.0);
+  density.set_min_value (1.0);
+  unit_assert (density.min_value () == 1.0);
 
   unit_func ("max_value");
-  field->set_max_value (index_velocity_x,1.0e6);
-  field->set_max_value (index_velocity_y,1.0e6);
-  unit_assert (field->max_value (index_velocity_x) == 1.0e6);
-  unit_assert (field->max_value (index_velocity_y) == 1.0e6);
+  velocity_x.set_max_value (1.0e6);
+  velocity_y.set_max_value (1.0e6);
+  unit_assert (velocity_x.max_value () == 1.0e6);
+  unit_assert (velocity_y.max_value () == 1.0e6);
 
   unit_func("min_action");
-  field->set_min_action(index_density,field_action_set);
-  unit_assert (field->min_action(index_density) == field_action_set);
+  density.set_min_action(field_action_set);
+  unit_assert (density.min_action() == field_action_set);
 
   unit_func("max_action");
-  field->set_max_action(index_velocity_x,field_action_warning);
-  field->set_max_action(index_velocity_y,field_action_error);
-  unit_assert (field->max_action(index_velocity_x) == field_action_warning);
-  unit_assert (field->max_action(index_velocity_y) == field_action_error);
+  velocity_x.set_max_action(field_action_warning);
+  velocity_y.set_max_action(field_action_error);
+  unit_assert (velocity_x.max_action() == field_action_warning);
+  unit_assert (velocity_y.max_action() == field_action_error);
 
   unit_func("precision");
-  field->set_precision(index_density,   precision_default);
-  field->set_precision(index_velocity_x,precision_32bit);
-  field->set_precision(index_velocity_y,precision_64bit);
+  density.set_precision(precision_default);
+  velocity_x.set_precision(precision_32bit);
+  velocity_y.set_precision(precision_64bit);
   int default_precision = precision_unknown;
 #ifdef CONFIG_PRECISION_SINGLE
   default_precision = precision_32bit;
@@ -80,8 +68,8 @@ int main()
 #ifdef CONFIG_PRECISION_DOUBLE
   default_precision = precision_64bit;
 #endif
-  unit_assert (field->precision(index_density)    == default_precision);
-  unit_assert (field->precision(index_velocity_x) == precision_32bit);
-  unit_assert (field->precision(index_velocity_y) == precision_64bit);
+  unit_assert (density.precision()    == default_precision);
+  unit_assert (velocity_x.precision() == precision_32bit);
+  unit_assert (velocity_y.precision() == precision_64bit);
 
 }
