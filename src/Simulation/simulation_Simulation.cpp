@@ -92,8 +92,11 @@ void Simulation::initialize ()
   methods_ = new MethodDescr;
 
   for (i=0; i<method_count; i++) {
-    std::string method_name = parameters->list_value_string(i,"sequence", "");
-    printf ("method = %s\n",method_name.c_str());
+    std::string method_name = parameters->list_value_string(i,"sequence");
+    // 
+    // given "ppm" create MethodEnzoPpm
+    //
+    methods_->add_method(method_name);
   }
 
 

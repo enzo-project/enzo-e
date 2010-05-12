@@ -1,17 +1,6 @@
 Import('env')
 
-includes     = [Glob('*hpp')]
-sources_enzo = [Glob('method*cpp')]
 
 
-env.Alias('install-inc',env.Install ('#/include',includes))
 
-SConscript('ppm/SConscript')
-SConscript('ppml/SConscript')
 
-Import(['sources_ppm','sources_ppml'])
-
-sources = [sources_enzo, sources_ppm, sources_ppml]
-
-libraries = env.Library ('user', sources)
-env.Alias('install-lib',env.Install ('#/lib',    libraries))

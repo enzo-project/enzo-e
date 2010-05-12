@@ -188,8 +188,9 @@ private: // functions
   {
     Param * list = parameter_(parameter);
     Param * param = NULL;
-    if (list != NULL) {
-      param = (*(list->value_list_))[index];
+    int list_length = list->value_list_->size();
+    if (list != NULL && 0 <= index && index < list_length ) {
+      param =  (*(list->value_list_))[index];
     }
     return param;
   }

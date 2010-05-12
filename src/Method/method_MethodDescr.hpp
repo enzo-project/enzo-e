@@ -19,20 +19,27 @@ public: // interface
 
   /// Constructor
   MethodDescr() throw()
-  : methods_(0)
+  : sequence_(0)
   {};
 
   /// Add a method
-  void add_method (Method * method)
-  { methods_.push_back(method); };
+  void add_method (std::string method_name)
+  { Method * method = create_method_(method_name);
+    if (method) sequence_.push_back(method); 
+  };
 
   /// Get ith method
   Method * method (int i)
-  { return methods_.at(i); };
+  { return sequence_.at(i); };
+
+private: // functions
+
+  /// Create named method.  IMPLEMENTATION IN USER SPACE
+  Method * create_method_ (std::string method_name);
 
 private: // attributes
 
-  std::vector<Method *> methods_;
+  std::vector<Method *> sequence_;
 
 };
 

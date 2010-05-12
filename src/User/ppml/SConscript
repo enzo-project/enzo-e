@@ -8,7 +8,7 @@ env = env.Clone(LIBS = [components,libraries])
 # not supported by older scons
 # env.SetOption('warn', 'no-fortran-cxx-mix')
 
-sources_ppml  = [
+sources = [
 	'cello_hydro.cpp',
         Glob('Cosmology*cpp'),
 	'data_dump.cpp',
@@ -27,11 +27,11 @@ sources_ppml  = [
 	'PPML_TimeStep.F',
 	'SetExternalBoundary.cpp']
 
-Export('sources_ppml')
-
-binaries  = env.Program (['test_ppml.cpp', sources_ppml])
+binaries  = env.Program (['test_ppml.cpp', sources])
+libraries = env.Library ('user-ppml', sources)
 
 env.Alias('install-bin', env.Install ('$BINPATH', binaries))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
 
 
 
