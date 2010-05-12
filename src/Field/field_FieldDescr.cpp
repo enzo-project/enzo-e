@@ -11,18 +11,15 @@
 
 //----------------------------------------------------------------------
 
-FieldDescr::FieldDescr()
-  : name_(),
-    id_(0),
-    dim_(0),
-    block_number_(0),
-    block_offset_(0),
-    centering_(0),
-    min_(0),
-    max_(0),
-    min_action_ (action_field_unknown),
-    max_action_ (action_field_unknown),
-    precision_  (precision_unknown)
+FieldDescr::FieldDescr(int dim) throw ()
+  : dim_(dim),
+    name_(),
+    centering_(),
+    min_value_(),
+    max_value_(),
+    min_action_ (),
+    max_action_ (),
+    precision_  ()
 {
 }
 
