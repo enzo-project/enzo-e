@@ -15,6 +15,9 @@ elif (platform == 'linux-ampi'):
 elif (platform == 'triton'):
    unit_mpi = Builder(action = "/opt/openmpi_pgimx/bin/mpirun -np 4 $SOURCE > $TARGET")
    test_cello = Builder(action = "/opt/openmpi_pgimx/bin/mpirun -np 4 $SOURCE $ARGS> $TARGET")
+elif (platform == 'ncsa-bd'):
+   unit_mpi = Builder(action = "")
+   test_cello = Builder(action = "")
 else:
    unit_mpi = Builder(action = "$platform $SOURCE > $TARGET")
    test_cello = Builder(action = "$SOURCE $ARGS> $TARGET")

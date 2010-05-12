@@ -2,6 +2,7 @@
 
 set suffix = 
 
+setenv LD_LIBRARY_PATH $HOME/lib:/opt/ibmcmp/xlf/13.1/lib64
 
 foreach opt (yes)
    set n = 3

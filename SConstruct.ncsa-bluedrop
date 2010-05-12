@@ -9,7 +9,7 @@ env = Environment (
 #        FORTRAN = 'gfortran',
         FORTRAN = 'mpfort',
 	FORTRANFLAGS = '-O3 -qhot -q64 -qextname',
-        FORTRANLIBS = 'xlf90',
+        FORTRANLIBS = ['xlf90','xlfmath'],
 	CCFLAGS = '-O3 -qhot -q64 -D H5_USE_16_API',
         LINKFLAGS  = '-q64',
 # 'xlf90'
@@ -17,11 +17,11 @@ env = Environment (
 	CPPPATH = ['/home/bordner/include', '#/include'],
 	LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
 	BINPATH = '#/bin',
-        DEFINES = '',
-        CPPDEFPREFIX = '-WF,-D'
+        DEFINES = ''
          )
 
-Export('env')
+platform = 'ncsa-bd'
+Export('env','platform')
 
 SConscript('src/SConscript')
 SConscript('test/SConscript')

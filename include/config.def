@@ -26,8 +26,7 @@
 /* Enzo define*/
 /*---------------------------------------------------------------------*/
 
-# define NO_OPTIMIZE_CELL_WIDTH
-# define p8
-# define r8
-# define SMALL_INTS
-# define LINUX
+#define NO_OPTIMIZE_CELL_WIDTH
+#define p8
+#define r8
+#define SMALL_INTS

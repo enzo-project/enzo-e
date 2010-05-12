@@ -39,6 +39,22 @@ elif (platform == 'triton'):
       FORTRANPATH = '#/include',
       LINKFLAGS = '-pgf90libs',
    )
+elif (platform == 'ncsa-bd'):
+   env = Environment (
+      ARFLAGS  = 'r',
+      BINPATH = '#/bin',
+      CCFLAGS = '-O3 -qhot -q64 -D H5_USE_16_API',
+      CC      = 'mpcc',	
+#      CPPDEFPREFIX = '-WF,-D',
+      CPPPATH = ['/home/bordner/include', '#/include'],
+      CXX     = 'mpCC',	
+      DEFINES = '',
+      FORTRANFLAGS = '-O3 -qhot -q64 -qextname',
+      FORTRANLIBS = 'xlf90',
+      FORTRAN = 'mpfort',
+      LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
+      LINKFLAGS  = '-q64'
+   )
 else:
    env = Environment (
       CPPPATH = ['#/include'],
