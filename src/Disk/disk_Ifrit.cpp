@@ -16,26 +16,27 @@
 
 void Ifrit::read_bin
 (std::string name, 
- Scalar *    buffer, 
- int *       nx, 
- int *       ny, 
- int *       nz) throw()
+ float *     buffer, 
+ int *       pnx, 
+ int *       pny, 
+ int *       pnz) throw()
 ///
 {
   FILE * fp = fopen (name.c_str(), "r");
   ASSERT ("Ifrit::read_bin","int or float size in unexpected",
 	  sizeof(int)==4 && sizeof(float)==4);
-  fread (nx,4,1,fp);
-  fread (ny,4,1,fp);
-  fread (nz,4,1,fp);
-  fread (buffer,4,(*nx)*(*ny)*(*nz),fp);
+  fread (pnx,4,1,fp);
+  fread (pny,4,1,fp);
+  fread (pnz,4,1,fp);
+  fread (buffer,4,(*pnx)*(*pny)*(*pnz),fp);
+  fclose (fp);
 }
 
 //----------------------------------------------------------------------
 
 void Ifrit::write_bin 
 (std::string name, 
- Scalar *    buffer, 
+ float  *    buffer, 
  int         nx, 
  int         ny, 
  int         nz) throw()
@@ -48,5 +49,6 @@ void Ifrit::write_bin
   fwrite (&ny,4,1,fp);
   fwrite (&nz,4,1,fp);
   fwrite (buffer,4,nx*ny*nz,fp);
+  fclose (fp);
 }
 

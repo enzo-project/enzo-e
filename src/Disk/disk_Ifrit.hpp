@@ -27,14 +27,14 @@ public: /// interface
 
   /// Read a 3d array from an ifrit file
   void read_bin  (std::string name, 
-		  Scalar *    buffer, 
+		  float *     buffer, 
 		  int *       nx, 
 		  int *       ny, 
 		  int *       nz) throw ();
 
   /// Write a 3d array to an ifrit file
   void write_bin (std::string name, 
-		  Scalar *    buffer, 
+		  float *     buffer, 
 		  int         nx, 
 		  int         ny, 
 		  int         nz) throw();
