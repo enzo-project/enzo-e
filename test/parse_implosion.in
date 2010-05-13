@@ -33,8 +33,8 @@
         gamma     = 1.4;
         courant   = 0.8;
         diffusion = true;
-        flattening = true;
-        steepening = true;
+        flattening = false;
+#        steepening = true;
     }
   }
 
