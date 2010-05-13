@@ -12,7 +12,7 @@
 enum field_action {
   field_action_unknown,  // Uninitialized action
   field_action_none,     // Do nothing if range exceeded
-  field_action_set,      // Set field values to min / max if range exceeded
+  field_action_assign,      // Assign field values to min / max if range exceeded
   field_action_warning,  // Issue warning if range exceeded
   field_action_error,    // Issue error if range exceeded
   field_action_timestep, // Retry with reduced timestep if range exceeded

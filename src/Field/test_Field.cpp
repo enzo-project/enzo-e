@@ -48,8 +48,8 @@ int main()
   unit_assert (velocity_y.max_value () == 1.0e6);
 
   unit_func("min_action");
-  density.set_min_action(field_action_set);
-  unit_assert (density.min_action() == field_action_set);
+  density.set_min_action(field_action_assign);
+  unit_assert (density.min_action() == field_action_assign);
 
   unit_func("max_action");
   velocity_x.set_max_action(field_action_warning);
