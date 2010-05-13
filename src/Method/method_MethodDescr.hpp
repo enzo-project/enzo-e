@@ -29,7 +29,7 @@ public: // interface
   };
 
   /// Get ith method
-  Method * method (int i)
+  Method * operator [] (int i)
   { return sequence_.at(i); };
 
 private: // functions

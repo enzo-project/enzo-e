@@ -43,7 +43,7 @@ public: // virtual functions
 
   /// Perform any method-specific initialization
 
-  virtual void initialize(std::string method_name) throw() = 0;
+  virtual void initialize() throw() = 0;
 
   /// Apply the method
 
