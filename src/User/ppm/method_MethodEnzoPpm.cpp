@@ -8,12 +8,13 @@
 
 #include "method_MethodEnzoPpm.hpp"
 #include "error.hpp"
+#include "parameters.hpp"
 
-void MethodEnzoPpm::initialize(std::string method_name) throw()
+void MethodEnzoPpm::initialize() throw()
 {
   // Register method name
 
-  method_name_ = method_name;
+  method_name_ = "ppm";
 
   // Specify arguments
 
@@ -26,7 +27,13 @@ void MethodEnzoPpm::initialize(std::string method_name) throw()
 
   // Initialize from parameters
 
-  
+  Parameters * parameters = Parameters::instance();
+
+  parameters->set_current_group ("Method","ppm");
+
+  diffusion_  = parameters->value_logical ("diffusion", "false");
+  steepening_ = parameters->value_logical ("steepening", "false");
+  flattening_ = parameters->value_logical ("flattening", "false");
 }
 
 void MethodEnzoPpm::apply() throw()

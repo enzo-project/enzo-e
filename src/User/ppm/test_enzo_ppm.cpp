@@ -23,7 +23,7 @@ int main (int argc, char ** argv)
   MethodEnzoPpm ppm;
 
   unit_func("initialize");
-  ppm.initialize("PPM");
+  ppm.initialize();
   unit_assert(true);
 
   unit_func("apply");

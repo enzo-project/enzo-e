@@ -22,12 +22,17 @@ class MethodEnzoPpm : public MethodHyperbolic {
 public: // interface
 
   /// Perform any method-specific initialization
-  void initialize(std::string method_name) throw();
+  void initialize() throw();
 
   /// Apply the method
 
   void apply() throw();
 
+private: // attributes
+
+  bool diffusion_;
+  bool flattening_;
+  bool steepening_; 
 
 };
 
