@@ -141,7 +141,7 @@ public: // interface
   void set_current_group  (std::string group, std::string subgroup = "") throw ()
   { 
     current_group_    = group;
-    current_subgroup_ = "";
+    current_subgroup_ = subgroup;
   };
 
   /// Set the current subgroup
