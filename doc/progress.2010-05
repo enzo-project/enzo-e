@@ -1,0 +1,23 @@
+Work on the Cello project has made much progress on the design phase
+over the past year.  Most work has been on
+developing and prototyping a new "Extreme AMR" approach, which is expected
+to increase parallel and data-structure scalability by several orders of
+magnitude over existing approaches.  Key components include using a new
+$r^d-tree$ generalization of octrees for highly efficient targeted refinement on
+"deep" AMR problems such as star formation, decoupling  computational
+kernel sizes from AMR patch sizes to improve performance,
+$cK^d$-tree
+
+serial core performance, software resilience and fault tolerance, ,
+sensitivity to 
+parallel scalability and performance of applications such as Enzo-P built with Cello.
+Preliminary tests 
+Emphasis has been placed on improving parallel data-structure scaling in terms of
+
+
+greatly imp
+
+The project has been decoupled
+into the a new "extreme AMR" approach has been designed and
+prototyped, which will have greatly increased scalability and
+performance compared to existing AMR
