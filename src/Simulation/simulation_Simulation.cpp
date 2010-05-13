@@ -97,6 +97,7 @@ void Simulation::initialize ()
     // given "ppm" create MethodEnzoPpm
     //
     methods_->add_method(method_name);
+    (*methods_)[i]->initialize();
   }
 
 
