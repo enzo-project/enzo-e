@@ -18,79 +18,82 @@ class DataDescr {
 
   /// @class    DataDescr
   /// @ingroup  Data
-  /// @brief    Container class for Particles and Fields
+  /// @brief    Container class for Particle and Field descriptors
 
 public: // interface
 
   /// Initialize the DataDescr object
   DataDescr()
-    : field_(),
-      particle_()
+    : dim_(3),
+      field_descr_(),
+      particle_descr_()
   { };
 
-  //----------------------------------------------------------------------
-  // Fields
-  //----------------------------------------------------------------------
 
-  /// Add field
-  void add_field (FieldDescr * field)
-  { field_.push_back (field); };
-
-  /// Return the number of fields
-  int field_count ()
-  { return field_.size(); };
-
-  /// Return the ith field
-  FieldDescr * field (int i)
+  /// Set dimensions
+  void set_dimension (int dim)
   {
-    return (0 <= i && i < field_count()) ? field_.at(i) : 0;
-  }
-
-  /// Return the named field
-  FieldDescr * field (std::string name)
-  {
-    for (int i=0; i<field_count(); i++) {
-      if (field(i)->name() == name) {
-	return field_.at(i); 
-      };
+    if (1 <= dim && dim <= 3) {
+      dim_ = dim;
+    } else {
+      ERROR_MESSAGE("DataDescr::set_dimension","dim out of range");
     }
-    return 0;
   }
 
+  int dimension () const throw ()
+  { return dim_; }
+
   //----------------------------------------------------------------------
-  // Particle
+  // Field functions
   //----------------------------------------------------------------------
 
-  /// Add particle
-  void add_particle (ParticleDescr * particle)
-  { particle_.push_back (particle); };
-
-  /// Return the number of particles
-  int particle_count ()
-  { return particle_.size(); };
-
-  /// Return the ith particle
-  ParticleDescr * particle (int i)
+  /// Return the ith Field descriptor
+  FieldDescr * field_descr (int index)
   { 
-    return (0 <= i && i < particle_count()) ? particle_.at(i) : 0;
-  }
+    return (0 <= index && index < field_count()) ? 
+      field_descr_[index] : 0;
+  };
 
-  /// Return the named particle
-  ParticleDescr * particle (std::string name)
-  {
-    for (int i=0; i<particle_count(); i++) {
-      if (particle(i)->name() == name) {
-	return particle_.at(i); 
-      };
+  /// Add a new field to the list of known fields
+  int field_insert (std::string name) throw()
+  { 
+    int index = field_count();
+    FieldDescr * field = new FieldDescr(name,dim_);
+    field_descr_.push_back(field); 
+    return index;
+  };
+
+  /// Return the number of Fields
+  int field_count() const throw()
+  { return field_descr_.size(); }
+
+
+  /// Return named Field's index
+  int field_index (std::string name) const throw()
+  { 
+    for (int index=0; index < field_count(); index++) {
+      if (field_descr_[index]->name() == name) return index;
     }
-    return 0;
+    return -1; // Uh oh
   }
 
+  /// Return indexed Field's name
+  std::string field_name (int index) const throw()
+  { 
+    return (0 <= index && index < field_count()) ? 
+      field_descr_[index]->name() : "";
+  }
+
+  //----------------------------------------------------------------------
+  // Particle functions
+  //----------------------------------------------------------------------
 
 private: // attributes
 
-  std::vector<FieldDescr *>    field_;
-  std::vector<ParticleDescr *> particle_;
+  int           dim_;
+
+  std::vector<FieldDescr *>    field_descr_;
+  std::vector<ParticleDescr *> particle_descr_;
 
 };
 
