@@ -19,15 +19,19 @@ int main(int argc, char ** argv)
   int n1 = 64;
   int n2 = 64;
 
+  const char filename[] = "Ifrit_test.bin";
   int n = n0*n1*n2;
 
   float * a = new float[n];
 
   for (int i2=0; i2<n2; i2++) {
+    double x2 = 1.0*i2/(n2-1);
     for (int i1=0; i1<n1; i1++) {
+      double x1 = 1.0*i1/(n1-1);
       for (int i0=0; i0<n0; i0++) {
+	double x0 = 1.0*i0/(n0-1);
 	int i = i0 + n0*(i1 + n1*i2);
-	a[i] = i0*3 + i1*5;
+	a[i] = (x0-0.5)*(x0-0.5) + (x1-0.5)*(x1-0.5) + (x2-0.5)*(x2-0.5);
       }
     }
   }
@@ -37,13 +41,13 @@ int main(int argc, char ** argv)
   Ifrit ifrit;
 
   unit_func("write_bin");
-  ifrit.write_bin("file_write_test.ifrit",a,n0,n1,n2);
+  ifrit.write_bin(filename,a,n0,n1,n2);
   unit_assert(true);
 
   unit_func("read_bin");
   float * b = new float[n];
   int m0,m1,m2;
-  ifrit.read_bin("file_write_test.ifrit",b,&m0,&m1,&m2);
+  ifrit.read_bin(filename,b,&m0,&m1,&m2);
   unit_assert (m0 == n0);
   unit_assert (m1 == n1);
   unit_assert (m2 == n2);
