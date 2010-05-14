@@ -11,6 +11,27 @@
 
 #include <vector>
 
+/// @def index_3_to_1
+/// @brief compute index i as a function of indices ix,iy,iz
+#define index_3_to_1(i,ix,iy,iz,nx,ny,nz) \
+  i=(ix+nx*(iy+ny*iz))
+
+/// @def index_1_to_3
+/// @brief compute indices ix,iy,izas a function of index i 
+#define index_1_to_3(i,ix,iy,iz,nx,ny,nz) \
+  iz=((((i-i%nx)/nx)-(iy=((i-(ix=i%nx))/nx)%ny))/ny)%nz
+
+  //  iz=((((i-i%nx)/nx)-(iy=((i-ix=(i%nx))/nx)%ny))/ny)%nz
+
+enum axis_type {
+  axis_x,
+  axis_y,
+  axis_z };
+
+enum face_type {
+  face_lower = -1,
+  face_upper = +1 };
+
 class Layout {
 
   /// @class    Layout
@@ -79,20 +100,32 @@ public: // interface
     return thread_count() * data_blocks_per_thread();
   };
 
+  // Neighbor functions
+
+  /// Return whether the given neighbor is inside the layout or outside 
+  bool neighbor_is_internal (int process, int thread, int block,
+			     axis_type axis, face_type face);
+//   {
+//     if (periodic_[axis]) {
+//       return true;
+//     } else {
+//       return (0 <= process + if (blockreturn 
+//   };
+
   /// Return the relative process block in the given direction from
   //  the given (process,thread,data) block
   int neighbor_process_block (int process, int thread, int block,
-			      int axis, int dir)  throw();
+			      axis_type axis, face_type face)  throw();
 
   /// Return the relative thead block in the given direction from the
   /// given (process,thread,data) block
   int neighbor_thread_block (int process, int thread, int block,
-			     int axis, int dir) throw(); 
+			     axis_type axis, face_type face) throw(); 
 
   /// Return the relative data block in the given direction from the
   /// given (process,thread,data) block
   int neighbor_data_block (int process, int thread, int block,
-			   int axis, int dir) throw(); 
+			   axis_type axis, face_type face) throw(); 
 
   /// Return the bounds associated with the given
   /// (process,thread,block) relative to the Patch block 0 < x,y,z < 1
@@ -106,6 +139,16 @@ public: // interface
 		      int lower_index[3],
 		      int upper_index[3]) throw ();
 
+  // Periodic functions
+
+  /// Set whether each axis is periodic or not 
+  void set_periodic (axis_type axis, bool periodic)
+  { periodic_[axis] = periodic; };
+
+  /// Return whether each axis is periodic or not 
+  bool is_periodic (axis_type axis)
+  { return periodic_[axis]; };
+
 private: // attributes
 
   ///  number of distributed memory processes
@@ -116,6 +159,9 @@ private: // attributes
 
   /// number of compute blocks per thread
   int data_blocks_[3];
+
+  /// periodic
+  bool periodic_[3];
 
 };
 #endif /* PARALLEL_LAYOUT_HPP */
