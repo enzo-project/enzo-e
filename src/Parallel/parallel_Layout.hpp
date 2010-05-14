@@ -15,140 +15,107 @@ class Layout {
 
   /// @class    Layout
   /// @ingroup  Layout
-  /// @brief Specify how the Parallel Block s are distributed across
-  /// processes and threads
+  /// @brief Specify how a Patch is partitioned into process, thread, and computational blacks
 
 public: // interface
 
   /// (*) Create a Layout of the given dimensionality, defaulting to serial
-  Layout(int dimension);
+  Layout() throw();
 
   /// ( ) Destructor
-  ~Layout();
+  //  ~Layout() throw();
 
   /// ( ) Copy constructor
-  Layout(const Layout & layout) throw();
+  //  Layout(const Layout & layout) throw() throw();
 
   /// ( ) Assignment operator
-  Layout & operator= (const Layout & layout) throw();
+  //  Layout & operator= (const Layout & layout) throw() throw();
 
-  //----------------------------------------------------------------------
-  // Array level 
-  //----------------------------------------------------------------------
+  /// Set how many process blocks the Layout will be partitioned into 
+  void set_process_blocks(int p0, int p1, int p2) throw()
+  { process_blocks_[0] = p0;
+    process_blocks_[1] = p1;
+    process_blocks_[2] = p2; };
+    
 
-  /// (*) Set the size of arrays (dimension used only for checking
-  /// array bounds)
-  void set_array ( int dimension, int array_size[] );
+  /// Set how thread blocks each process block is partitioned into 
+  void set_thread_blocks(int t0, int t1, int t2) throw()
+  { thread_blocks_[0] = t0;
+    thread_blocks_[1] = t1;
+    thread_blocks_[2] = t2; };
 
-  /// (*) Return the size of arrays (dimension used only for checking
-  /// array bounds)
-  void array_size ( int dimension, int array_size[] );
+  /// Set how many compute blocks each thread block is partitioned into  
+  void set_data_blocks(int d0, int d1, int d2) throw()
+  { data_blocks_[0] = d0;
+    data_blocks_[1] = d1;
+    data_blocks_[2] = d2; };
 
-  //----------------------------------------------------------------------
-  // Physical processes
-  //----------------------------------------------------------------------
+  /// Return the number of processes in the Layout 
+  int process_count () throw()
+  { return 
+      process_blocks_[0]*
+      process_blocks_[1]*
+      process_blocks_[2]; };
 
-  /// (*) Set first physical process and number of physical processes
-  void set_processes(int process_first, int process_count)
-  { process_first_ = process_first;  process_count_ = process_count;  };
+  /// Return the number of threads per process in the Layout 
+  int thread_count () throw()
+  { return 
+      thread_blocks_[0]*
+      thread_blocks_[1]*
+      thread_blocks_[2]; };
 
-  /// (*) Return the first physical process assigned to this layout
-  int process_first () { return process_first_; };
+  /// Return the number of data blocks per thread in the Layout  
+  int data_blocks_per_thread () throw()
+  {
+    return 
+      data_blocks_[0]*
+      data_blocks_[1]*
+      data_blocks_[2];
+  }
 
-  /// (*) Return the number of physical processes assigned to this layout
-  int process_count () { return process_count_; };
+  /// Return the number of data blocks per process in the Layout  
+  int data_blocks_per_process () throw()
+  {
+    return thread_count() * data_blocks_per_thread();
+  };
 
-  //----------------------------------------------------------------------
-  // Physical threads
-  //----------------------------------------------------------------------
+  /// Return the relative process block in the given direction from
+  //  the given (process,thread,data) block
+  int neighbor_process_block (int process, int thread, int block,
+			      int axis, int dir)  throw();
 
-  /// (*) Set first physical thread and number of physical threads
-  void set_threads(int thread_first, int thread_count)
-  { thread_first_ = thread_first; thread_count_ = thread_count;  };
+  /// Return the relative thead block in the given direction from the
+  /// given (process,thread,data) block
+  int neighbor_thread_block (int process, int thread, int block,
+			     int axis, int dir) throw(); 
 
-  /// (*) Return the first physical thread assigned to this layout
-  int thread_first() { return thread_first_; };
+  /// Return the relative data block in the given direction from the
+  /// given (process,thread,data) block
+  int neighbor_data_block (int process, int thread, int block,
+			   int axis, int dir) throw(); 
 
-  /// (*) Return the number of physical threads assigned to this layout
-  int thread_count() { return thread_count_; };
+  /// Return the bounds associated with the given
+  /// (process,thread,block) relative to the Patch block 0 < x,y,z < 1
+  void box_extent (int process, int thread, int block,
+		   double lower_extent[3],    
+		   double upper_extent[3]) ;
 
-  //----------------------------------------------------------------------
-  // Process block level
-  //----------------------------------------------------------------------
-
-  /// (*) Set virtual process partitioning of the array
-  void set_process_blocks (int dimension, int process_block_count[]);
-
-  /// (*) Return the number of local process blocks
-  int process_block_count (int process_rank) const;
-
-  /// (*) Return the index of the local process block for the given block index
-  void process_block_indices
-  (
-   int dimension, 
-   int process_rank, 
-   int process_block_number, 
-   int process_block_indices[] );
-
-  /// ( ) Return the process rank and process block number for the given
-  /// process block indices (inverse of process_block_indices())
-  void process_block_number
-  (
-   int dimension, 
-   int * process_rank, 
-   int * process_block_number, 
-   int process_block_indices[] );
-
-  //----------------------------------------------------------------------
-  // Thread block level
-  //----------------------------------------------------------------------
-
-  /// ( ) Set virtual thread partitioning of a process block
-  void set_thread_blocks (int dimension, int thread_block_count[]);
-
-  /// ( ) Return the number of thread blocks
-  int thread_block_count ( int index_process_block ) const;
-
-  /// ( ) Return the index of the thread block for the given thread block index
-  int thread_block_indices
-  (
-   int index_process_block, 
-   int index_thread_block, 
-   int dimension, 
-   int thread_block_indices[]
-   );
+  /// Return the index range assigned to the given
+  /// (process,thread,block) given a Patch array size
+  void array_indices (int process, int thread, int block,
+		      int lower_index[3],
+		      int upper_index[3]) throw ();
 
 private: // attributes
 
-  ///  dimensionality of the `Array`  
-  int dimension_;
+  ///  number of distributed memory processes
+  int process_blocks_[3];
 
-  ///  first physical process 
-  int process_first_;
+  /// number of shared memory threads per process
+  int thread_blocks_[3];
 
-  ///  last physical process 
-  int process_count_;
-
-  ///  first physical thread 
-  int thread_first_;
-
-  ///  last physical thread 
-  int thread_count_;
-
-  ///  Size of the entire array
-  int * array_size_;
-
-  /// Product of process_blocks_ elements
-  int process_block_count_;
-
-  /// Process partitioning of array
-  int * process_blocks_;
-
-  /// Product of thread_blocks_ elements
-  int thread_block_count_;
-
-  /// Thread partitioning of process blocks
-  int * thread_blocks_;
+  /// number of compute blocks per thread
+  int data_blocks_[3];
 
 };
 #endif /* PARALLEL_LAYOUT_HPP */
