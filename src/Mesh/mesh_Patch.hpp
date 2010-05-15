@@ -33,6 +33,11 @@ public: // interface
   /// Assignment operator
   Patch & operator= (const Patch & patch) throw();
 
+private: // attributes
+
+  class Layout;
+  Layout * layout_;
+
 };
 
 #endif /* MESH_PATCH_HPP */
