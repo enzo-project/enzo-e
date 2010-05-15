@@ -46,8 +46,8 @@ public: // interface
   { 
     // Delayed creation since Parallel must be initialized
     if (Monitor::instance_ == 0) {
-      Parallel * parallel = Parallel::instance();
-      if (parallel->is_initialized()) {
+      if (Parallel::instance()->is_initialized()) {
+	printf ("Creating monitor\n");
 	instance_ = new Monitor(Parallel::instance());
       } else {
 	ERROR_MESSAGE("Monitor::instance","Monitor::instance() called before Parallel::initialize()");
@@ -62,9 +62,8 @@ public: // interface
   /// Print a message to stdout
   void print (std::string message, FILE * fp = stdout)
   {
-    Parallel * parallel = Parallel::instance();
     if (active_) fprintf (fp,"%s %6.1f %s\n",
-			  parallel->name().c_str(),
+			  Parallel::instance()->name().c_str(),
 			  timer_.value(),message.c_str());
   };
 
@@ -88,6 +87,7 @@ private: // functions
     : parallel_(parallel),
       active_(parallel->is_root())
   {  
+    printf ("DEBUG Monitor::Monitor()\n"); fflush(stdout);
     timer_.start(); 
   }
 
