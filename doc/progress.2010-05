@@ -1,23 +1,44 @@
-Work on the Cello project has made much progress on the design phase
-over the past year.  Most work has been on
-developing and prototyping a new "Extreme AMR" approach, which is expected
-to increase parallel and data-structure scalability by several orders of
-magnitude over existing approaches.  Key components include using a new
-$r^d-tree$ generalization of octrees for highly efficient targeted refinement on
-"deep" AMR problems such as star formation, decoupling  computational
-kernel sizes from AMR patch sizes to improve performance,
-$cK^d$-tree
+Over the past year, much progress has been made in the design phase of
+Enzo-P/Cello.  Most work has been on developing and prototyping a new
+"extreme AMR" approach, which is expected to increase parallel and
+data-structure scalability by orders of magnitude over existing
+approaches.  Key new design developments include 1) using a new
+``$r^d$-tree'' generalization of octrees ($2^3$-trees) for highly
+efficient targeted refinement on "deep" AMR problems such as galaxy
+and star formation; 2) decoupling computational kernel data blocks
+from AMR refinement patches, which greatly reduces the AMR mesh
+overhead on "shallow" AMR problems, and allows flexibility for
+optimizing the parallel task grain size to the underlying hardware
+platform; and 3) storing relative (local) rather than absolute
+(global) representations of the AMR mesh topology and particle
+positions, which addresses data-structure scaling issues with Enzo and
+other AMR applications related to limited floating-point precision and
+integer ranges.
 
-serial core performance, software resilience and fault tolerance, ,
-sensitivity to 
-parallel scalability and performance of applications such as Enzo-P built with Cello.
-Preliminary tests 
-Emphasis has been placed on improving parallel data-structure scaling in terms of
+Currently an AMPI/Charm++ parallelized unigrid version of
+Enzo-P/Cello, with Enzo's PPM hydrodynamics kernel, is being prepared
+for a public release targeted at the end of May 2010.  Advantages of
+the Enzo-P/Cello unigrid implementation compared to the existing Enzo
+implementation will include improved problem initialization through a
+more powerful parameter file syntax and grammar, increased scalability
+due to $o(P)$ storage per process rather than Enzo's $O(P)$, and
+improved physics kernel performance due to patch subblocking for
+optimizing task granularity.  Additional advantages will be gained
+through the use of AMPI/CHARM++, including overlapped computation and
+communication through dynamic task scheduling, load balancing and
+fault-tolerance through automated task migration, support for
+checkpointing to disk or memory, and integrated performance
+measurement and visualization.
 
-
-greatly imp
-
-The project has been decoupled
-into the a new "extreme AMR" approach has been designed and
-prototyped, which will have greatly increased scalability and
-performance compared to existing AMR
+Over the next year, this preliminary release of unigrid PPM
+Enzo-P/Cello will be followed in quick succession by releases
+supporting unigrid PPML MHD, and unigrid self-gravity using 3D FFT's.
+Work will then continue on implementing the extreme AMR approach,
+which is where the scaling and performance advantages over Enzo are
+expected to really become apparent.  We plan on continued periodic
+releases of Enzo-P/Cello as AMR functionality is implemented, and also
+plan on publications describing the novel AMR methods developed over
+the previous year.  The final source code release in May 2011 is
+expected to include a bulk of the extreme AMR method, plus support for
+particle dynamics with self-gravity computed on the AMR $r^d$-tree
+using a fast and accurate $P^3M$-type method.

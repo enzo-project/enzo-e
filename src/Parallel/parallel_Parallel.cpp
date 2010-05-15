@@ -14,12 +14,12 @@ Parallel * Parallel::instance_; // (singleton design pattern)
 
 Parallel * Parallel::instance() throw ()
 {
-  if (instance_ == 0) {
+  if (Parallel::instance_ == 0) {
 #ifdef CONFIG_USE_MPI
-    instance_ = ParallelMpi::instance();
+    Parallel::instance_ = ParallelMpi::instance();
 #else
-    instance_ = new Parallel;
+    Parallel::instance_ = new Parallel;
 #endif
   }
-  return instance_;
+  return Parallel::instance_;
 }

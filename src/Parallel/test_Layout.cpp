@@ -22,6 +22,48 @@
 int main(int argc, char ** argv)
 {
   unit_class("Layout");
+
+  //----------------------------------------------------------------------
+  // index conversions
+  //----------------------------------------------------------------------
+
+  unit_func("index_*");
+
+  int nx=5, ny=3, nz=4;
+  bool passed = true;
+  for (int iz=0; iz<nz && passed; iz++) {
+    for (int iy=0; iy<ny && passed; iy++) {
+      for (int ix=0; ix<nx && passed; ix++) {
+
+	int i,j,jx,jy,jz,kx,ky,kz;
+
+	// ix,iy,iz -> i
+	j = index_3_to_1(ix,iy,iz,nx,ny,nz);
+	index_1_to_3(j,jx,jy,jz,nx,ny,nz);
+	passed = passed && (ix==jx && iy==jy && iz==jz);
+
+	// i -> ix, i -> iy, i -> iz
+	kx = index_1_to_x(j,nx,ny,nz);
+	ky = index_1_to_y(j,nx,ny,nz);
+	kz = index_1_to_z(j,nx,ny,nz);
+	passed = passed && (ix==kx && iy==ky && iz==kz);
+
+	i = ix + nx*(iy + ny*iz);
+
+	// i -> ix,iy,iz
+	index_1_to_3(i,jx,jy,jz,nx,ny,nz);
+	j = index_3_to_1(jx,jy,jz,nx,ny,nz);
+	passed = passed && (i == j);
+	
+      }
+    }
+  }
+  unit_assert (passed);
+
+  //----------------------------------------------------------------------
+  // serial layout: (processes,threads,data blocks) = (1,1,1)
+  //----------------------------------------------------------------------
+
   unit_func("Layout");
   Layout layout_serial;
   unit_assert (true);
@@ -43,34 +85,12 @@ int main(int argc, char ** argv)
   unit_assert (layout_serial.is_periodic(axis_y) == true);
   unit_assert (layout_serial.is_periodic(axis_z) == true);
 
-//   unit_assert (neighbor_is_internal(0,0,0,axis_x,face_upper);
-//   unit_assert (neighbor_is_internal(0,0,0,axis_x,face_lower);
-//   unit_assert (neighbor_is_internal(0,0,0,axis_y,face_upper);
-//   unit_assert (neighbor_is_internal(0,0,0,axis_y,face_lower);
-//   unit_assert (neighbor_is_internal(0,0,0,axis_z,face_upper);
-//   unit_assert (neighbor_is_internal(0,0,0,axis_z,face_lower);
+  // periodic, so all neighbors should be internal
+  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_x,+1));
+  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_x,-1));
+  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_y,+1));
+  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_y,-1));
+  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_z,+1));
+  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_z,-1));
 
-  int nx=5, ny=3, nz=1;
-  bool passed = true;
-  for (int iz=0; iz<nz && passed; iz++) {
-    for (int iy=0; iy<ny && passed; iy++) {
-      for (int ix=0; ix<nx && passed; ix++) {
-
-	int i,j,jx,jy,jz;
-
-	index_3_to_1(j,ix,iy,iz,nx,ny,nz);
-	//	jz=(((((j-j%nx)/nx)-(jy=((j-jx=(j%nx))/nx)%ny))/ny)%nz);
-	index_1_to_3(j,jx,jy,jz,nx,ny,nz);
-	passed = passed && (ix==jx && iy==jy && iz==jz);
-
-	i = ix + nx*(iy + ny*iz);
-
-	index_1_to_3(i,jx,jy,jz,nx,ny,nz);
-	index_3_to_1(j,jx,jy,jz,nx,ny,nz);
-	passed = passed && (i == j);
-	
-      }
-    }
-  }
-  unit_assert (passed);
 }

@@ -94,7 +94,7 @@ public: // static functions
 
   /// Get single instance of the Parallel object
   static ParallelMpi * instance() throw ()
-  { return & ParallelMpi::instance_; }
+  { return & ParallelMpi::instance_mpi_; }
 
 public: // virtual
 
@@ -118,7 +118,7 @@ protected: // functions
 private: // static functions
 
   /// Single instance of the Parallel object (singleton design pattern)
-  static ParallelMpi instance_;
+  static ParallelMpi instance_mpi_;
 
 private: // attributes
 

@@ -5,12 +5,14 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Affinity
- 
+
+#include "mpi.h" 
 #include "parallel.hpp"
 #include "test.hpp"
 
 int main(int argc, char ** argv)
 {
+  printf ("%p %p\n",&argc,&argv);
   Parallel * parallel = Parallel::instance();
 
   parallel->initialize(&argc,&argv);

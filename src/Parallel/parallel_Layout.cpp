@@ -15,15 +15,15 @@
 
 Layout::Layout() throw()
 {
-  process_blocks_[0] = 1;
-  process_blocks_[1] = 1;
-  process_blocks_[2] = 1;
-  thread_blocks_[0] = 1;
-  thread_blocks_[1] = 1;
-  thread_blocks_[2] = 1;
-  data_blocks_[0] = 1;
-  data_blocks_[1] = 1;
-  data_blocks_[2] = 1;
+  np_[0] = 1;
+  np_[1] = 1;
+  np_[2] = 1;
+  nt_[0] = 1;
+  nt_[1] = 1;
+  nt_[2] = 1;
+  nd_[0] = 1;
+  nd_[1] = 1;
+  nd_[2] = 1;
 }
     
 // {
