@@ -93,8 +93,10 @@ public: // interface
 public: // static functions
 
   /// Get single instance of the Parallel object
+  /// @@@ NOT THREAD SAFE @@@
   static ParallelMpi * instance() throw ()
-  { return & ParallelMpi::instance_mpi_; }
+  { return (ParallelMpi::instance_mpi_ == 0) ?
+      instance_mpi_ = new ParallelMpi : instance_mpi_; }
 
 public: // virtual
 
@@ -118,7 +120,7 @@ protected: // functions
 private: // static functions
 
   /// Single instance of the Parallel object (singleton design pattern)
-  static ParallelMpi instance_mpi_;
+  static ParallelMpi * instance_mpi_;
 
 private: // attributes
 

@@ -13,7 +13,7 @@
 #include "cello.h"
 #include "parallel.hpp"
 
-ParallelMpi ParallelMpi::instance_mpi_; // (singleton design pattern)
+ParallelMpi * ParallelMpi::instance_mpi_ = 0; // (singleton design pattern)
 
 void ParallelMpi::initialize(int * argc, char ***argv)
 {
