@@ -6,12 +6,14 @@ unit       = Builder(action = "$SOURCE > $TARGET")
 unit_enzo  = Builder(action = "$SOURCE $ARGS > $TARGET")
 unit_parse = Builder(action = "$SOURCE < $ARGS > $TARGET")
 
+# @@@ MOVE PLATFORM-DEPENDENT CODE TO TOP LEVEL
+
 if (platform == 'linux-mpi'):
    unit_mpi   = Builder(action = "mpirun -np 4 $SOURCE > $TARGET")
    test_cello = Builder(action = "mpirun -np 4 $SOURCE $ARGS > $TARGET")
 elif (platform == 'linux-ampi'):
-   unit_mpi   = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun -n 4 $SOURCE > $TARGET")
-   test_cello = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun -n 4 $SOURCE $ARGS > $TARGET")
+   unit_mpi   = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun ++p 4 $SOURCE > $TARGET")
+   test_cello = Builder(action = "/home/bordner/charm/charm-6.2.0/bin/charmrun ++p 4 $SOURCE $ARGS > $TARGET")
 elif (platform == 'triton'):
    unit_mpi = Builder(action = "/opt/openmpi_pgimx/bin/mpirun -np 4 $SOURCE > $TARGET")
    test_cello = Builder(action = "/opt/openmpi_pgimx/bin/mpirun -np 4 $SOURCE $ARGS> $TARGET")
@@ -43,7 +45,6 @@ env.Unit('test_Error.out',       '#/bin/test_Error')
 env.Unit('test_Layout.out',      '#/bin/test_Layout')
 env.Unit('test_Memory.out',      '#/bin/test_Memory')
 env.Unit('test_Mesh.out',        '#/bin/test_Mesh')
-env.Unit('test_Monitor.out',     '#/bin/test_Monitor')
 env.Unit('test_Parameters.out',  '#/bin/test_Parameters')
 env.Unit('test_Performance.out', '#/bin/test_Performance')
 env.Unit('test_Schedule.out',    '#/bin/test_Schedule')
@@ -59,6 +60,7 @@ env.UnitEnzo('test_ppm_implosion3.out', '#/bin/test_ppm',  ARGS='implosion3 32 3
 env.UnitMpi('test_affinity.out', '#/bin/test_Affinity')
 env.UnitMpi('test_mpi.out',      '#/bin/test_Mpi')
 
+env.UnitMpi('test_Monitor.out',  '#/bin/test_Monitor')
 env.UnitParse('test_parse_groups.out',     '#/bin/test_Parse', ARGS='test/parse_groups.in')
 env.UnitParse('test_parse_integer.out',    '#/bin/test_Parse', ARGS='test/parse_integer.in')
 env.UnitParse('test_parse_list.out',       '#/bin/test_Parse', ARGS='test/parse_list.in')
