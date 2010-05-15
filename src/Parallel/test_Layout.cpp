@@ -85,6 +85,7 @@ int main(int argc, char ** argv)
   unit_assert (layout_serial.is_periodic(axis_y) == true);
   unit_assert (layout_serial.is_periodic(axis_z) == true);
 
+  unit_func("neighbor_is_internal");
   // periodic, so all neighbors should be internal
   unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_x,+1));
   unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_x,-1));
@@ -92,5 +93,9 @@ int main(int argc, char ** argv)
   unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_y,-1));
   unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_z,+1));
   unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_z,-1));
+
+  unit_func("neighbor_process");
+  unit_func("neighbor_thread");
+  
 
 }
