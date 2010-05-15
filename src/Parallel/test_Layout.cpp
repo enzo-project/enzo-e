@@ -27,75 +27,115 @@ int main(int argc, char ** argv)
   // index conversions
   //----------------------------------------------------------------------
 
-  unit_func("index_*");
+  {
+    unit_func("index_*");
 
-  int nx=5, ny=3, nz=4;
-  bool passed = true;
-  for (int iz=0; iz<nz && passed; iz++) {
-    for (int iy=0; iy<ny && passed; iy++) {
-      for (int ix=0; ix<nx && passed; ix++) {
+    int nx=5, ny=3, nz=4;
+    bool passed = true;
+    for (int iz=0; iz<nz && passed; iz++) {
+      for (int iy=0; iy<ny && passed; iy++) {
+	for (int ix=0; ix<nx && passed; ix++) {
 
-	int i,j,jx,jy,jz,kx,ky,kz;
+	  int i,j,jx,jy,jz,kx,ky,kz;
 
-	// ix,iy,iz -> i
-	j = index_3_to_1(ix,iy,iz,nx,ny,nz);
-	index_1_to_3(j,jx,jy,jz,nx,ny,nz);
-	passed = passed && (ix==jx && iy==jy && iz==jz);
+	  // ix,iy,iz -> i
+	  j = index_3_to_1(ix,iy,iz,nx,ny,nz);
+	  index_1_to_3(j,jx,jy,jz,nx,ny,nz);
+	  passed = passed && (ix==jx && iy==jy && iz==jz);
 
-	// i -> ix, i -> iy, i -> iz
-	kx = index_1_to_x(j,nx,ny,nz);
-	ky = index_1_to_y(j,nx,ny,nz);
-	kz = index_1_to_z(j,nx,ny,nz);
-	passed = passed && (ix==kx && iy==ky && iz==kz);
+	  // i -> ix, i -> iy, i -> iz
+	  kx = index_1_to_x(j,nx,ny,nz);
+	  ky = index_1_to_y(j,nx,ny,nz);
+	  kz = index_1_to_z(j,nx,ny,nz);
+	  passed = passed && (ix==kx && iy==ky && iz==kz);
 
-	i = ix + nx*(iy + ny*iz);
+	  i = ix + nx*(iy + ny*iz);
 
-	// i -> ix,iy,iz
-	index_1_to_3(i,jx,jy,jz,nx,ny,nz);
-	j = index_3_to_1(jx,jy,jz,nx,ny,nz);
-	passed = passed && (i == j);
+	  // i -> ix,iy,iz
+	  index_1_to_3(i,jx,jy,jz,nx,ny,nz);
+	  j = index_3_to_1(jx,jy,jz,nx,ny,nz);
+	  passed = passed && (i == j);
 	
+	}
       }
     }
+    unit_assert (passed);
   }
-  unit_assert (passed);
 
   //----------------------------------------------------------------------
   // serial layout: (processes,threads,data blocks) = (1,1,1)
   //----------------------------------------------------------------------
 
-  unit_func("Layout");
-  Layout layout_serial;
-  unit_assert (true);
+  {
+    
+    unit_func("Layout");
+    Layout layout_serial;
+    unit_assert (true);
 
-  layout_serial.set_periodic(axis_x,true);
-  layout_serial.set_periodic(axis_y,true);
-  layout_serial.set_periodic(axis_z,true);
+    layout_serial.set_periodic(axis_x,true);
+    layout_serial.set_periodic(axis_y,true);
+    layout_serial.set_periodic(axis_z,true);
 
-  unit_func("process_count");
-  unit_assert (layout_serial.process_count() == 1);
-  unit_func("thread_count");
-  unit_assert (layout_serial.thread_count()  == 1);
-  unit_func("data_blocks_per_process");
-  unit_assert (layout_serial.data_blocks_per_process()  == 1);
-  unit_func("data_blocks_per_thread");
-  unit_assert (layout_serial.data_blocks_per_thread()  == 1);
-  unit_func("is_periodic");
-  unit_assert (layout_serial.is_periodic(axis_x) == true);
-  unit_assert (layout_serial.is_periodic(axis_y) == true);
-  unit_assert (layout_serial.is_periodic(axis_z) == true);
+    unit_func("process_count");
+    unit_assert (layout_serial.process_count() == 1);
+    unit_func("thread_count");
+    unit_assert (layout_serial.thread_count()  == 1);
+    unit_func("data_blocks_per_process");
+    unit_assert (layout_serial.data_blocks_per_process()  == 1);
+    unit_func("data_blocks_per_thread");
+    unit_assert (layout_serial.data_blocks_per_thread()  == 1);
+    unit_func("is_periodic");
+    unit_assert (layout_serial.is_periodic(axis_x) == true);
+    unit_assert (layout_serial.is_periodic(axis_y) == true);
+    unit_assert (layout_serial.is_periodic(axis_z) == true);
 
-  unit_func("neighbor_is_internal");
-  // periodic, so all neighbors should be internal
-  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_x,+1));
-  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_x,-1));
-  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_y,+1));
-  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_y,-1));
-  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_z,+1));
-  unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_z,-1));
+    unit_func("neighbor_is_internal");
+    // periodic, so all neighbors should be internal
+    unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_x,+1));
+    unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_x,-1));
+    unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_y,+1));
+    unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_y,-1));
+    unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_z,+1));
+    unit_assert (layout_serial.neighbor_is_internal(0,0,0,axis_z,-1));
 
-  unit_func("neighbor_process");
-  unit_func("neighbor_thread");
-  
+    unit_func("neighbor_process");
+    unit_assert(layout_serial.neighbor_process(0,0,0,axis_x,-1) == 0);
+    unit_assert(layout_serial.neighbor_process(0,0,0,axis_x,+1) == 0);
+    unit_assert(layout_serial.neighbor_process(0,0,0,axis_y,-1) == 0);
+    unit_assert(layout_serial.neighbor_process(0,0,0,axis_y,+1) == 0);
+    unit_assert(layout_serial.neighbor_process(0,0,0,axis_z,-1) == 0);
+    unit_assert(layout_serial.neighbor_process(0,0,0,axis_z,+1) == 0);
+
+    unit_func("neighbor_thread");
+    unit_assert(layout_serial.neighbor_thread(0,0,0,axis_x,-1) == 0);
+    unit_assert(layout_serial.neighbor_thread(0,0,0,axis_x,+1) == 0);
+    unit_assert(layout_serial.neighbor_thread(0,0,0,axis_y,-1) == 0);
+    unit_assert(layout_serial.neighbor_thread(0,0,0,axis_y,+1) == 0);
+    unit_assert(layout_serial.neighbor_thread(0,0,0,axis_z,-1) == 0);
+    unit_assert(layout_serial.neighbor_thread(0,0,0,axis_z,+1) == 0);
+
+    unit_func("box_extent");
+    double lower_extent[3],upper_extent[3];
+    layout_serial.box_extent(0,0,0,lower_extent,upper_extent);
+    unit_assert(lower_extent[axis_x] == 0.0);
+    unit_assert(lower_extent[axis_y] == 0.0);
+    unit_assert(lower_extent[axis_z] == 0.0);
+    unit_assert(upper_extent[axis_x] == 1.0);
+    unit_assert(upper_extent[axis_y] == 1.0);
+    unit_assert(upper_extent[axis_z] == 1.0);
+
+    unit_func("array_indices");
+    int index_lower[3],index_upper[3];
+    int nx = 13;
+    int ny = 7;
+    int nz = 15;
+    layout_serial.array_indices(0,0,0,nx,ny,nz,index_lower,index_upper);
+    unit_assert(index_lower[axis_x] == 0);
+    unit_assert(index_lower[axis_y] == 0);
+    unit_assert(index_lower[axis_z] == 0);
+    unit_assert(index_upper[axis_x] == nx);
+    unit_assert(index_upper[axis_y] == ny);
+    unit_assert(index_upper[axis_z] == nz);
+  }  
 
 }

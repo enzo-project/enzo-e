@@ -14,16 +14,16 @@
 /// @def index_3_to_1
 /// @brief compute index i as a function of indices ix,iy,iz.  Inverse
 /// operation of index_3_to_1
-#define index_3_to_1(ix,iy,iz,nx,ny,nz) \
+#define index_3_to_1(ix,iy,iz,nx,ny,nz)		\
   (ix+nx*(iy+ny*iz))
 
 /// @def index_1_to_3
 /// @brief compute indices ix,iy,iz as a function of index i.  Inverse
 /// operation of index_3_to_1
-#define index_1_to_3(i,ix,iy,iz,nx,ny,nz) \
-   ix = i % nx; \
-   iy = (i / nx) % ny; \
-   iz = i / (nx*ny);
+#define index_1_to_3(i,ix,iy,iz,nx,ny,nz)	\
+  ix = i % nx;					\
+  iy = (i / nx) % ny;				\
+  iz = i / (nx*ny);
 
 #define index_1_to_x(i,nx,ny,nz) (i%nx)
 #define index_1_to_y(i,nx,ny,nz) ((i/nx)%ny)
@@ -60,7 +60,7 @@ public: // interface
   { np_[0] = p0;
     np_[1] = p1;
     np_[2] = p2; };
-    
+
 
   /// Set how thread blocks each process block is partitioned into 
   void set_thread_blocks(int t0, int t1, int t2) throw()
@@ -96,66 +96,94 @@ public: // interface
   bool neighbor_is_internal (int ip, int it, int id,
 			     axis_type axis, int face)
   {
-     if (periodic_[axis]) {
-        return true;
-     } else {
 
-
-       int ipa,ita,ida;
-       neighbor_project_(ip,it,id,axis,&ipa,&ita,&ida);
-       ida += face;
-
-       int k;
-
-       k = index_3_to_1(ida,ita,ipa,nd_[face],nt_[face],np_[face]);
-
-       return (0 <= k && k < nd_[face] * nt_[face] * np_[face]);
-     }
-   };
+    int k = neighbor_project_(ip,it,id,axis,face);
+    return (0 <= k && k < nd_[face] * nt_[face] * np_[face]);
+  };
 
   /// Return the relative process block in the given direction from
   //  the given (ip,thread,data) block
   int neighbor_process (int ip, int it, int id,
 			axis_type axis, int face)  throw()
   {
-    
-    int ipa,ita,ida;
 
-    // Project block indices along axis of interest
-    neighbor_project_(ip,it,id,axis,&ipa,&ita,&ida);
+    // Project indices along axis of interest and return updated block index
+    int i = neighbor_project_(ip,it,id,axis,face);
 
-    // Move "face" blocks (could be < 0) along axis
-    ida += face;
+    // convert blocks to process blocks, and return relative change
+    return index_1_to_z(i,nd_[axis],nt_[axis],np_[axis]) - ip;
 
-    // Convert to total data blocks
-    int i = index_3_to_1(ida,ita,ipa,nd_[axis],nt_[axis],pt_[axis]);
-
-    // convert blocks to process block, and return relative change
-    return index_1_to_z(i,nd_[axis],nt_[axis],pt_[axis]) - ip;
-       
   }
 
   /// Return the relative thead block in the given direction from the
   /// given (process,thread,data) block
   int neighbor_thread (int ip, int it, int id,
-		       axis_type axis, int face) throw(); 
+		       axis_type axis, int face) throw()
+  {
 
-  /// Return the relative data block in the given direction from the
-  /// given (process,thread,data) block
-  int neighbor_data_block (int ip, int it, int id,
-			   axis_type axis, int face) throw(); 
+
+    // Project indices along axis of interest and return updated block index
+    int i = neighbor_project_(ip,it,id,axis,face);
+
+    // convert blocks to thread block, and return relative change
+    return index_1_to_y(i,nd_[axis],nt_[axis],np_[axis]) - it;
+
+  }
 
   /// Return the bounds associated with the given
   /// (process,thread,block) relative to the Patch block 0 < x,y,z < 1
   void box_extent (int ip, int it, int id,
 		   double lower_extent[3],    
-		   double upper_extent[3]) ;
+		   double upper_extent[3])
+  {
+
+    // Project block id's along each axis
+    int ip3[3],it3[3],id3[3];
+
+    index_1_to_3(ip,ip3[0],ip3[1],ip3[2],np_[0],np_[1],np_[2]);
+    index_1_to_3(it,it3[0],it3[1],it3[2],nt_[0],nt_[1],nt_[2]);
+    index_1_to_3(id,id3[0],id3[1],id3[2],nd_[0],nd_[1],nd_[2]);
+
+    // Convert from (ip,it,id) relative blocks to absolute data blocks
+    int kdx,kdy,kdz;
+    kdx = index_3_to_1(id3[0],it3[0],ip3[0],nd_[0],nt_[0],np_[0]);
+    kdy = index_3_to_1(id3[1],it3[1],ip3[1],nd_[1],nt_[1],np_[1]);
+    kdz = index_3_to_1(id3[2],it3[2],ip3[2],nd_[2],nt_[2],np_[2]);
+
+    double hdx = 1.0 / (np_[0]*nt_[0]*nd_[0]);
+    double hdy = 1.0 / (np_[1]*nt_[1]*nd_[1]);
+    double hdz = 1.0 / (np_[2]*nt_[2]*nd_[2]);
+
+    lower_extent[0] = kdx*hdx;
+    lower_extent[1] = kdy*hdy;
+    lower_extent[2] = kdz*hdz;
+
+    upper_extent[0] = (kdx+1)*hdx;
+    upper_extent[1] = (kdy+1)*hdy;
+    upper_extent[2] = (kdz+1)*hdz;
+
+  };
 
   /// Return the index range assigned to the given
   /// (process,thread,block) given a Patch array size
   void array_indices (int ip, int it, int id,
+		      int nx, int ny, int nz,
 		      int lower_index[3],
-		      int upper_index[3]) throw ();
+		      int upper_index[3]) throw ()
+ 
+  {
+    double lower_extent[3];
+    double upper_extent[3];
+    box_extent(ip,it,id,lower_extent,upper_extent);
+
+    lower_index[0] = lower_extent[0]*nx;
+    lower_index[1] = lower_extent[1]*ny;
+    lower_index[2] = lower_extent[2]*nz;
+    upper_index[0] = upper_extent[0]*nx;
+    upper_index[1] = upper_extent[1]*ny;
+    upper_index[2] = upper_extent[2]*nz;
+
+  };
 
   // Periodic functions
 
@@ -185,28 +213,42 @@ private: // functions
 
   /// Project block indices ip,it,id along given axis
 
-  void neighbor_project_(int ip, int it, int id, axis_type axis,
-			 int * ipa, int * ita, int * ida)
+  int neighbor_project_(int ip, int it, int id, axis_type axis, int face)
   {
+    int ipa,ita,ida;
     switch (axis) {
     case axis_x:
-      *ipa = index_1_to_x(ip,np_[0],np_[1],np_[2]);
-      *ita = index_1_to_x(it,nt_[0],nt_[1],nt_[2]);
-      *ida = index_1_to_x(id,nd_[0],nd_[1],nd_[2]);
+      ipa = index_1_to_x(ip,np_[0],np_[1],np_[2]);
+      ita = index_1_to_x(it,nt_[0],nt_[1],nt_[2]);
+      ida = index_1_to_x(id,nd_[0],nd_[1],nd_[2]);
       break;
     case axis_y:
-      *ipa = index_1_to_y(ip,np_[0],np_[1],np_[2]);
-      *ita = index_1_to_y(it,nt_[0],nt_[1],nt_[2]);
-      *ida = index_1_to_y(id,nd_[0],nd_[1],nd_[2]);
+      ipa = index_1_to_y(ip,np_[0],np_[1],np_[2]);
+      ita = index_1_to_y(it,nt_[0],nt_[1],nt_[2]);
+      ida = index_1_to_y(id,nd_[0],nd_[1],nd_[2]);
       break;
     case axis_z:
-      *ipa = index_1_to_z(ip,np_[0],np_[1],np_[2]);
-      *ita = index_1_to_z(it,nt_[0],nt_[1],nt_[2]);
-      *ida = index_1_to_z(id,nd_[0],nd_[1],nd_[2]);
+      ipa = index_1_to_z(ip,np_[0],np_[1],np_[2]);
+      ita = index_1_to_z(it,nt_[0],nt_[1],nt_[2]);
+      ida = index_1_to_z(id,nd_[0],nd_[1],nd_[2]);
       break;
     default:
       break;
     }
-  }
+
+    // Move "face" blocks (could be < 0) along axis
+    ida += face;
+
+    // Convert to total data blocks
+    int i = index_3_to_1(ida,ita,ipa,nd_[axis],nt_[axis],np_[axis]);
+
+    // Wrap if periodic
+    if (periodic_[axis]) {
+      int n = nd_[axis]*nt_[axis]*np_[axis];
+      i = (i + n) % n;
+    }
+    return i;
+
+  };
 };
 #endif /* PARALLEL_LAYOUT_HPP */
