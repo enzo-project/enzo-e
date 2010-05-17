@@ -10,10 +10,15 @@
  
 #include "parallel.hpp"
 
-Parallel * Parallel::instance_; // (singleton design pattern)
+#include <boost/thread/mutex.hpp>
+boost::mutex instance_mutex;
+
+Parallel * Parallel::instance_ = 0; // (singleton design pattern)
 
 Parallel * Parallel::instance() throw ()
 {
+  // Should be thread-safe, but inefficient
+  boost::mutex::scoped_lock lock(instance_mutex);
   if (Parallel::instance_ == 0) {
 #ifdef CONFIG_USE_MPI
     Parallel::instance_ = ParallelMpi::instance();

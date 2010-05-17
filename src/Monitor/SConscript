@@ -1,7 +1,7 @@
 Import('env')
 
 components = ['parallel', 'error']
-libraries  = ['png']
+libraries  = ['png','boost_thread-mt']
 
 env = env.Clone(
 	CPPDEFINES = ['NO_FREETYPE'],

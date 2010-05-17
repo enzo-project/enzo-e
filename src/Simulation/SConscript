@@ -2,9 +2,10 @@ Import('env')
 
 includes = [Glob('simulation*hpp')]
 sources  = [Glob("simulation*cpp")]
-libraries  = ['error','parameters','parallel', 'monitor', 'user', 'user-ppm', 'method', 'png']
+components = ['error','parameters','parallel', 'monitor', 'user', 'user-ppm', 'method']
+libraries = ['png','boost_thread-mt']
 
-env = env.Clone(LIBS=[libraries])
+env = env.Clone(LIBS=[components,libraries])
 
 libraries = env.Library ('simulation', [sources])
 

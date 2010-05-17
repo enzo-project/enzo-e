@@ -1,7 +1,9 @@
 Import('env')
 
-components = ['error','parallel', 'monitor', 'png']
-env = env.Clone(LIBS=[components])
+components = ['error','parallel', 'monitor']
+libraries  = ['png','boost_thread-mt']
+
+env = env.Clone(LIBS=[components,libraries])
 
 includes = [Glob('parameters*hpp'),'parse.h']
 

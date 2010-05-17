@@ -6,6 +6,8 @@
 /// @date     Thu Oct 15 10:40:37 PDT 2009 
 /// @brief    Interface for the ParallelMpi class
 
+#include <stdio.h>
+
 #ifndef PARALLEL_MPI_HPP
 #define PARALLEL_MPI_HPP
 
@@ -93,10 +95,7 @@ public: // interface
 public: // static functions
 
   /// Get single instance of the Parallel object
-  /// @@@ NOT THREAD SAFE @@@
-  static ParallelMpi * instance() throw ()
-  { return (ParallelMpi::instance_mpi_ == 0) ?
-      instance_mpi_ = new ParallelMpi : instance_mpi_; }
+  static ParallelMpi * instance() throw ();
 
 public: // virtual
 

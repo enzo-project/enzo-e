@@ -9,7 +9,7 @@ components = ['error',
               'method', 
               'monitor' ]
 
-libraries  = ['png']
+libraries  = ['png','boost_thread-mt']
 includes   = [Glob('schedule*hpp')]
 sources    = [Glob('schedule*cpp')]
 

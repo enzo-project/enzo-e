@@ -9,6 +9,7 @@
 #ifndef PARALLEL_PARALLEL_HPP
 #define PARALLEL_PARALLEL_HPP
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string>
 
@@ -24,7 +25,10 @@ public: // interface
 
   /// Initialize
   virtual void initialize(int * argc = 0, char ***argv = 0) 
-  { initialized_ = true; }
+  { 
+      printf ("Parallel::initialize() this = %p\n",this);
+      initialized_ = true; 
+  }
 
   /// Finalize
   virtual void finalize()
@@ -87,7 +91,7 @@ private: // static attributes
 
   /// Single instance of the Parallel object (singleton design pattern)
   static Parallel * instance_;
-
+  
 private: // attributes
 
   bool initialized_;

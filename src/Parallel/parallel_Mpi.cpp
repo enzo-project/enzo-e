@@ -9,11 +9,13 @@
 #include <sstream>
 
 #include <mpi.h>
-
 #include "cello.h"
 
 #include "error.hpp"
 #include "parallel.hpp"
+
+#include <boost/thread/mutex.hpp>
+boost::mutex instance_mpi_mutex;
 
 ParallelMpi * ParallelMpi::instance_mpi_ = 0; // (singleton design pattern)
 
@@ -59,3 +61,13 @@ void ParallelMpi::halt()
   exit (0);
 }
 
+//----------------------------------------------------------------------
+ParallelMpi * ParallelMpi::instance() throw ()
+{ 
+  // Should be thread-safe, but inefficient
+  boost::mutex::scoped_lock lock(instance_mpi_mutex);
+  if (ParallelMpi::instance_mpi_ == 0) {
+    ParallelMpi::instance_mpi_ = new ParallelMpi;
+  }
+  return ParallelMpi::instance_mpi_; 
+}
