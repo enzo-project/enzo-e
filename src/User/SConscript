@@ -1,7 +1,7 @@
 Import('env')
 
-includes = [Glob('*hpp')]
-sources  = [Glob('method*cpp')]
+includes = [Glob('user*hpp')]
+sources  = [Glob('user*cpp')]
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 

@@ -9,7 +9,7 @@
 /// @date     2010-04-02
 /// @brief    Include file for the User component
 
-#include "method_MethodEnzoPpm.hpp"
+#include "user_MethodEnzoPpm.hpp"
 
 #endif /* USER_HPP */
 
