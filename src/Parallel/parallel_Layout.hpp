@@ -98,7 +98,7 @@ public: // interface
   {
 
     int k = neighbor_project_(ip,it,id,axis,face);
-    return (0 <= k && k < nd_[face] * nt_[face] * np_[face]);
+    return (0 <= k && k < nd_[axis] * nt_[axis] * np_[axis]);
   };
 
   /// Return the relative process block in the given direction from
@@ -150,17 +150,17 @@ public: // interface
     kdy = index_3_to_1(id3[1],it3[1],ip3[1],nd_[1],nt_[1],np_[1]);
     kdz = index_3_to_1(id3[2],it3[2],ip3[2],nd_[2],nt_[2],np_[2]);
 
-    double hdx = 1.0 / (np_[0]*nt_[0]*nd_[0]);
-    double hdy = 1.0 / (np_[1]*nt_[1]*nd_[1]);
-    double hdz = 1.0 / (np_[2]*nt_[2]*nd_[2]);
+    int nx = np_[0]*nt_[0]*nd_[0];
+    int ny = np_[1]*nt_[1]*nd_[1];
+    int nz = np_[2]*nt_[2]*nd_[2];
 
-    lower_extent[0] = kdx*hdx;
-    lower_extent[1] = kdy*hdy;
-    lower_extent[2] = kdz*hdz;
+    lower_extent[0] = 1.0*kdx/nx;
+    lower_extent[1] = 1.0*kdy/ny;
+    lower_extent[2] = 1.0*kdz/nz;
 
-    upper_extent[0] = (kdx+1)*hdx;
-    upper_extent[1] = (kdy+1)*hdy;
-    upper_extent[2] = (kdz+1)*hdz;
+    upper_extent[0] = 1.0*(kdx+1)/nx;
+    upper_extent[1] = 1.0*(kdy+1)/ny;
+    upper_extent[2] = 1.0*(kdz+1)/nz;
 
   };
 

@@ -5,19 +5,13 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-19
 /// @brief    Unit tests for the Layout class
-///
-/// Run with mpirun -np 4
 
-
-#include <mpi.h>
-
+#include <math.h>
 #include "cello.h"
 
 #include "error.hpp"
 #include "test.hpp"
 #include "parallel.hpp"
-
-#define INDEX3(I,N) I[0] + N[0]*(I[1] + N[1]*I[2])
 
 int main(int argc, char ** argv)
 {
@@ -136,6 +130,605 @@ int main(int argc, char ** argv)
     unit_assert(index_upper[axis_x] == nx);
     unit_assert(index_upper[axis_y] == ny);
     unit_assert(index_upper[axis_z] == nz);
+  }  
+
+  //----------------------------------------------------------------------
+  // parallel layout: (processes,threads,data blocks) = (NP,1,1)
+  //----------------------------------------------------------------------
+
+  {
+
+    int pb3[3] = {5,3,7};  // processor blocks
+    int npb = pb3[0]*pb3[1]*pb3[2];
+
+    unit_func("Layout");
+    Layout layout_parallel;
+    unit_assert (true);
+
+    layout_parallel.set_periodic(axis_x,false);
+    layout_parallel.set_periodic(axis_y,false);
+    layout_parallel.set_periodic(axis_z,false);
+
+    layout_parallel.set_process_blocks(pb3[0],pb3[1],pb3[2]);
+
+    unit_func("process_count");
+    unit_assert (layout_parallel.process_count() == npb);
+    unit_func("thread_count");
+    unit_assert (layout_parallel.thread_count()  == 1);
+    unit_func("data_blocks_per_process");
+    unit_assert (layout_parallel.data_blocks_per_process()  == 1);
+    unit_func("data_blocks_per_thread");
+    unit_assert (layout_parallel.data_blocks_per_thread()  == 1);
+    unit_func("is_periodic");
+    unit_assert (layout_parallel.is_periodic(axis_x) == false);
+    unit_assert (layout_parallel.is_periodic(axis_y) == false);
+    unit_assert (layout_parallel.is_periodic(axis_z) == false);
+
+    //----------------------------------------------------------------------
+
+    unit_func("neighbor_is_internal");
+
+    // periodic, so all neighbors should be internal
+
+    bool passed = true;
+
+    for (int ipz=0; ipz<pb3[2]; ipz++) {
+      for (int ipy=0; ipy<pb3[1]; ipy++) {
+	for (int ipx=0; ipx<pb3[0]; ipx++) {
+	  int ip = ipx + pb3[0]*(ipy + pb3[1]*ipz);
+	  bool lxm = layout_parallel.neighbor_is_internal(ip,0,0,axis_x,-1);
+	  bool lxp = layout_parallel.neighbor_is_internal(ip,0,0,axis_x,+1);
+	  bool lym = layout_parallel.neighbor_is_internal(ip,0,0,axis_y,-1);
+	  bool lyp = layout_parallel.neighbor_is_internal(ip,0,0,axis_y,+1);
+	  bool lzm = layout_parallel.neighbor_is_internal(ip,0,0,axis_z,-1);
+	  bool lzp = layout_parallel.neighbor_is_internal(ip,0,0,axis_z,+1);
+	  passed = passed && (lxp == (ipx != pb3[0]-1));
+ 	  passed = passed && (lxm == (ipx != 0));
+ 	  passed = passed && (lyp == (ipy != pb3[1]-1));
+ 	  passed = passed && (lym == (ipy != 0));
+ 	  passed = passed && (lzp == (ipz != pb3[2]-1));
+ 	  passed = passed && (lzm == (ipz != 0));
+	}
+      }
+    }
+
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("neighbor_process");
+
+    passed = true;
+
+    for (int ipz=0; ipz<pb3[2]; ipz++) {
+      for (int ipy=0; ipy<pb3[1]; ipy++) {
+	for (int ipx=0; ipx<pb3[0]; ipx++) {
+	  int ip = ipx + pb3[0]*(ipy + pb3[1]*ipz);
+	  bool lxm = layout_parallel.neighbor_is_internal(ip,0,0,axis_x,-1);
+	  bool lxp = layout_parallel.neighbor_is_internal(ip,0,0,axis_x,+1);
+	  bool lym = layout_parallel.neighbor_is_internal(ip,0,0,axis_y,-1);
+	  bool lyp = layout_parallel.neighbor_is_internal(ip,0,0,axis_y,+1);
+	  bool lzm = layout_parallel.neighbor_is_internal(ip,0,0,axis_z,-1);
+	  bool lzp = layout_parallel.neighbor_is_internal(ip,0,0,axis_z,+1);
+	  int ipxm = layout_parallel.neighbor_process(ip,0,0,axis_x,-1);
+	  int ipxp = layout_parallel.neighbor_process(ip,0,0,axis_x,+1);
+	  int ipym = layout_parallel.neighbor_process(ip,0,0,axis_y,-1);
+	  int ipyp = layout_parallel.neighbor_process(ip,0,0,axis_y,+1);
+	  int ipzm = layout_parallel.neighbor_process(ip,0,0,axis_z,-1);
+	  int ipzp = layout_parallel.neighbor_process(ip,0,0,axis_z,+1);
+	  if (lxm) passed = passed && (ip+ipxm == (pb3[0]+ipx-1)%pb3[0]);
+ 	  if (lxp) passed = passed && (ip+ipxp == (pb3[0]+ipx+1)%pb3[0]);
+ 	  if (lym) passed = passed && (ip+ipym == (pb3[1]+ipy-1)%pb3[1]);
+ 	  if (lyp) passed = passed && (ip+ipyp == (pb3[1]+ipy+1)%pb3[1]);
+ 	  if (lzm) passed = passed && (ip+ipzm == (pb3[2]+ipz-1)%pb3[2]);
+ 	  if (lzp) passed = passed && (ip+ipzp == (pb3[2]+ipz+1)%pb3[2]);
+	}
+      }
+    }
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("neighbor_thread");
+
+    passed = true;
+
+    for (int ipz=0; ipz<pb3[2]; ipz++) {
+      for (int ipy=0; ipy<pb3[1]; ipy++) {
+	for (int ipx=0; ipx<pb3[0]; ipx++) {
+	  int ip = ipx + pb3[0]*(ipy + pb3[1]*ipz);
+	  int itxm = layout_parallel.neighbor_thread(ip,0,0,axis_x,-1);
+	  int itxp = layout_parallel.neighbor_thread(ip,0,0,axis_x,+1);
+	  int itym = layout_parallel.neighbor_thread(ip,0,0,axis_y,-1);
+	  int ityp = layout_parallel.neighbor_thread(ip,0,0,axis_y,+1);
+	  int itzm = layout_parallel.neighbor_thread(ip,0,0,axis_z,-1);
+	  int itzp = layout_parallel.neighbor_thread(ip,0,0,axis_z,+1);
+	  passed = passed && (itxm == 0);
+	  passed = passed && (itxp == 0);
+	  passed = passed && (itym == 0);
+	  passed = passed && (ityp == 0);
+	  passed = passed && (itzm == 0);
+	  passed = passed && (itzp == 0);
+	}
+      }
+    }
+
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("box_extent");
+    passed = true;
+
+    for (int ipz=0; ipz<pb3[2]; ipz++) {
+      for (int ipy=0; ipy<pb3[1]; ipy++) {
+	for (int ipx=0; ipx<pb3[0]; ipx++) {
+	  int ip = ipx + pb3[0]*(ipy + pb3[1]*ipz);
+	  double lower_extent[3],upper_extent[3];
+	  layout_parallel.box_extent(ip,0,0,lower_extent,upper_extent);
+ 	  passed = passed && (lower_extent[axis_x] == 1.0*ipx/pb3[0]);
+ 	  passed = passed && (lower_extent[axis_y] == 1.0*ipy/pb3[1]);
+  	  passed = passed && (lower_extent[axis_z] == 1.0*ipz/pb3[2]);
+	  passed = passed && (upper_extent[axis_x] == 1.0*(ipx+1)/pb3[0]);
+	  passed = passed && (upper_extent[axis_y] == 1.0*(ipy+1)/pb3[1]);
+	  passed = passed && (upper_extent[axis_z] == 1.0*(ipz+1)/pb3[2]);
+	}
+      }
+    }
+    // NOTE: results sensitive to roundoff
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("array_indices");
+
+    // array size
+
+    int nx = 158;
+    int ny = 720;
+    int nz = 48;
+
+    passed = true;
+
+    for (int ipz=0; ipz<pb3[2]; ipz++) {
+      for (int ipy=0; ipy<pb3[1]; ipy++) {
+	for (int ipx=0; ipx<pb3[0]; ipx++) {
+	  int ip = ipx + pb3[0]*(ipy + pb3[1]*ipz);
+	  int index_lower[3],index_upper[3];
+	  layout_parallel.array_indices(ip,0,0,nx,ny,nz,index_lower,index_upper);
+	  passed = passed && (index_lower[axis_x] == nx * ipx/pb3[0]);
+ 	  passed = passed && (index_lower[axis_y] == ny * ipy/pb3[1]);
+ 	  passed = passed && (index_lower[axis_z] == nz * ipz/pb3[2]);
+ 	  passed = passed && (index_upper[axis_x] == nx * (ipx+1)/pb3[0]);
+ 	  passed = passed && (index_upper[axis_y] == ny * (ipy+1)/pb3[1]);
+ 	  passed = passed && (index_upper[axis_z] == nz * (ipz+1)/pb3[2]);
+	}
+      }
+    }
+
+    unit_assert (passed);
+
+  }  
+
+  //----------------------------------------------------------------------
+  // blocked layout: (processes,threads,data blocks) = (1,1,NB)
+  //----------------------------------------------------------------------
+
+  {
+
+    int db3[3] = {4,1,9};  // data blocks
+    int ndb = db3[0]*db3[1]*db3[2];
+
+    unit_func("Layout");
+    Layout layout_blocked;
+    unit_assert (true);
+
+    layout_blocked.set_periodic(axis_x,false);
+    layout_blocked.set_periodic(axis_y,false);
+    layout_blocked.set_periodic(axis_z,false);
+
+    layout_blocked.set_data_blocks(db3[0],db3[1],db3[2]);
+
+    unit_func("process_count");
+    unit_assert (layout_blocked.process_count() == 1);
+    unit_func("thread_count");
+    unit_assert (layout_blocked.thread_count()  == 1);
+    unit_func("data_blocks_per_process");
+    unit_assert (layout_blocked.data_blocks_per_process()  == ndb);
+    unit_func("data_blocks_per_thread");
+    unit_assert (layout_blocked.data_blocks_per_thread()  == ndb);
+    unit_func("is_periodic");
+    unit_assert (layout_blocked.is_periodic(axis_x) == false);
+    unit_assert (layout_blocked.is_periodic(axis_y) == false);
+    unit_assert (layout_blocked.is_periodic(axis_z) == false);
+
+    //----------------------------------------------------------------------
+
+    unit_func("neighbor_is_internal");
+
+    // periodic, so all neighbors should be internal
+
+    bool passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+	  bool lxm = layout_blocked.neighbor_is_internal(0,0,idb,axis_x,-1);
+	  bool lxp = layout_blocked.neighbor_is_internal(0,0,idb,axis_x,+1);
+	  bool lym = layout_blocked.neighbor_is_internal(0,0,idb,axis_y,-1);
+	  bool lyp = layout_blocked.neighbor_is_internal(0,0,idb,axis_y,+1);
+	  bool lzm = layout_blocked.neighbor_is_internal(0,0,idb,axis_z,-1);
+	  bool lzp = layout_blocked.neighbor_is_internal(0,0,idb,axis_z,+1);
+	  passed = passed && (lxp == (idbx != db3[0]-1));
+ 	  passed = passed && (lxm == (idbx != 0));
+ 	  passed = passed && (lyp == (idby != db3[1]-1));
+ 	  passed = passed && (lym == (idby != 0));
+ 	  passed = passed && (lzp == (idbz != db3[2]-1));
+ 	  passed = passed && (lzm == (idbz != 0));
+	}
+      }
+    }
+
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("neighbor_process");
+
+    passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+	  bool lxm = layout_blocked.neighbor_is_internal(0,0,idb,axis_x,-1);
+	  bool lxp = layout_blocked.neighbor_is_internal(0,0,idb,axis_x,+1);
+	  bool lym = layout_blocked.neighbor_is_internal(0,0,idb,axis_y,-1);
+	  bool lyp = layout_blocked.neighbor_is_internal(0,0,idb,axis_y,+1);
+	  bool lzm = layout_blocked.neighbor_is_internal(0,0,idb,axis_z,-1);
+	  bool lzp = layout_blocked.neighbor_is_internal(0,0,idb,axis_z,+1);
+	  int ipbxm = layout_blocked.neighbor_process(0,0,idb,axis_x,-1);
+	  int ipbxp = layout_blocked.neighbor_process(0,0,idb,axis_x,+1);
+	  int ipbym = layout_blocked.neighbor_process(0,0,idb,axis_y,-1);
+	  int ipbyp = layout_blocked.neighbor_process(0,0,idb,axis_y,+1);
+	  int ipbzm = layout_blocked.neighbor_process(0,0,idb,axis_z,-1);
+	  int ipbzp = layout_blocked.neighbor_process(0,0,idb,axis_z,+1);
+	  if (lxm) passed = passed && (ipbxm == 0);
+ 	  if (lxp) passed = passed && (ipbxp == 0);
+ 	  if (lym) passed = passed && (ipbym == 0);
+ 	  if (lyp) passed = passed && (ipbyp == 0);
+ 	  if (lzm) passed = passed && (ipbzm == 0);
+ 	  if (lzp) passed = passed && (ipbzp == 0);
+	}
+      }
+    }
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("neighbor_thread");
+
+    passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+	  int itxm = layout_blocked.neighbor_thread(0,0,idb,axis_x,-1);
+	  int itxp = layout_blocked.neighbor_thread(0,0,idb,axis_x,+1);
+	  int itym = layout_blocked.neighbor_thread(0,0,idb,axis_y,-1);
+	  int ityp = layout_blocked.neighbor_thread(0,0,idb,axis_y,+1);
+	  int itzm = layout_blocked.neighbor_thread(0,0,idb,axis_z,-1);
+	  int itzp = layout_blocked.neighbor_thread(0,0,idb,axis_z,+1);
+	  passed = passed && (itxm == 0);
+	  passed = passed && (itxp == 0);
+	  passed = passed && (itym == 0);
+	  passed = passed && (ityp == 0);
+	  passed = passed && (itzm == 0);
+	  passed = passed && (itzp == 0);
+	}
+      }
+    }
+
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("box_extent");
+    passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+	  double lower_extent[3],upper_extent[3];
+	  layout_blocked.box_extent(0,0,idb,lower_extent,upper_extent);
+ 	  passed = passed && (lower_extent[axis_x] == 1.0*idbx/db3[0]);
+ 	  passed = passed && (lower_extent[axis_y] == 1.0*idby/db3[1]);
+  	  passed = passed && (lower_extent[axis_z] == 1.0*idbz/db3[2]);
+	  passed = passed && (upper_extent[axis_x] == 1.0*(idbx+1)/db3[0]);
+	  passed = passed && (upper_extent[axis_y] == 1.0*(idby+1)/db3[1]);
+	  passed = passed && (upper_extent[axis_z] == 1.0*(idbz+1)/db3[2]);
+	}
+      }
+    }
+    // NOTE: results sensitive to roundoff
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("array_indices");
+
+    // array size
+
+    int nx = 158;
+    int ny = 720;
+    int nz = 48;
+
+    passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+	  int index_lower[3],index_upper[3];
+	  layout_blocked.array_indices(0,0,idb,nx,ny,nz,index_lower,index_upper);
+	  passed = passed && (index_lower[axis_x] == nx * idbx/db3[0]);
+ 	  passed = passed && (index_lower[axis_y] == ny * idby/db3[1]);
+ 	  passed = passed && (index_lower[axis_z] == nz * idbz/db3[2]);
+ 	  passed = passed && (index_upper[axis_x] == nx * (idbx+1)/db3[0]);
+ 	  passed = passed && (index_upper[axis_y] == ny * (idby+1)/db3[1]);
+ 	  passed = passed && (index_upper[axis_z] == nz * (idbz+1)/db3[2]);
+	}
+      }
+    }
+
+    unit_assert (passed);
+
+  }  
+
+  //----------------------------------------------------------------------
+  // parallel blocked layout: (processes,threads,data blocks) = (NP,1,NB)
+  //----------------------------------------------------------------------
+
+  {
+
+    int pb3[3] = {5,3,7};  // processor blocks
+    int db3[3] = {4,1,9};  // data blocks
+
+    int npb = pb3[0]*pb3[1]*pb3[2];
+    int ndb = db3[0]*db3[1]*db3[2];
+
+    unit_func("Layout");
+    Layout layout_parallel_blocked;
+    unit_assert (true);
+
+    layout_parallel_blocked.set_periodic(axis_x,false);
+    layout_parallel_blocked.set_periodic(axis_y,false);
+    layout_parallel_blocked.set_periodic(axis_z,false);
+
+    layout_parallel_blocked.set_process_blocks(pb3[0],pb3[1],pb3[2]);
+    layout_parallel_blocked.set_data_blocks   (db3[0],db3[1],db3[2]);
+
+    unit_func("process_count");
+    unit_assert (layout_parallel_blocked.process_count() == npb);
+    unit_func("thread_count");
+    unit_assert (layout_parallel_blocked.thread_count()  == 1);
+    unit_func("data_blocks_per_process");
+    unit_assert (layout_parallel_blocked.data_blocks_per_process()  == ndb);
+    unit_func("data_blocks_per_thread");
+    unit_assert (layout_parallel_blocked.data_blocks_per_thread()  == ndb);
+    unit_func("is_periodic");
+    unit_assert (layout_parallel_blocked.is_periodic(axis_x) == false);
+    unit_assert (layout_parallel_blocked.is_periodic(axis_y) == false);
+    unit_assert (layout_parallel_blocked.is_periodic(axis_z) == false);
+
+    //----------------------------------------------------------------------
+
+    unit_func("neighbor_is_internal");
+
+    // periodic, so all neighbors should be internal
+
+    bool passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+    for (int ipbz=0; ipbz<pb3[2]; ipbz++) {
+      for (int ipby=0; ipby<pb3[1]; ipby++) {
+	for (int ipbx=0; ipbx<pb3[0]; ipbx++) {
+	  int ipb = ipbx + pb3[0]*(ipby + pb3[1]*ipbz);
+	  bool lxm = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_x,-1);
+	  bool lxp = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_x,+1);
+	  bool lym = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_y,-1);
+	  bool lyp = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_y,+1);
+	  bool lzm = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_z,-1);
+	  bool lzp = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_z,+1);
+	  passed = passed && (lxp == ! (idbx == db3[0]-1 && ipbx == pb3[0]-1));
+	  passed = passed && (lxm == ! (idbx == 0 && ipbx == 0));
+	  passed = passed && (lyp == ! (idby == db3[1]-1 && ipby == pb3[1]-1));
+	  passed = passed && (lym == ! (idby == 0 && ipby == 0));
+	  passed = passed && (lzp == ! (idbz == db3[2]-1 && ipbz == pb3[2]-1));
+	  passed = passed && (lzm == ! (idbz == 0 && ipbz == 0));
+	}
+      }
+    }
+	}
+      }
+    }
+
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("neighbor_process");
+
+    passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+    for (int ipbz=0; ipbz<pb3[2]; ipbz++) {
+      for (int ipby=0; ipby<pb3[1]; ipby++) {
+	for (int ipbx=0; ipbx<pb3[0]; ipbx++) {
+	  int ipb = ipbx + pb3[0]*(ipby + pb3[1]*ipbz);
+	  bool lxm = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_x,-1);
+	  bool lxp = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_x,+1);
+	  bool lym = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_y,-1);
+	  bool lyp = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_y,+1);
+	  bool lzm = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_z,-1);
+	  bool lzp = layout_parallel_blocked.neighbor_is_internal(ipb,0,idb,axis_z,+1);
+	  int ipbxm = layout_parallel_blocked.neighbor_process(ipb,0,idb,axis_x,-1);
+	  int ipbxp = layout_parallel_blocked.neighbor_process(ipb,0,idb,axis_x,+1);
+	  int ipbym = layout_parallel_blocked.neighbor_process(ipb,0,idb,axis_y,-1);
+	  int ipbyp = layout_parallel_blocked.neighbor_process(ipb,0,idb,axis_y,+1);
+	  int ipbzm = layout_parallel_blocked.neighbor_process(ipb,0,idb,axis_z,-1);
+	  int ipbzp = layout_parallel_blocked.neighbor_process(ipb,0,idb,axis_z,+1);
+	  if (lxm) passed = passed && 
+		     (((idbx == 0) && (ipb+ipbxm == ipbx - 1)) ||
+		      ((idbx != 0) && (ipb+ipbxm == ipbx)));
+	  if (lxp) passed = passed && 
+		     (((idbx == db3[0]-1) && (ipb+ipbxp == ipbx + 1)) ||
+		       ((idbx != db3[0]-1) && (ipb+ipbxp == ipbx)));
+	  if (lym) passed = passed && 
+		     (((idby == 0) && (ipb+ipbym == ipby - 1)) ||
+		       ((idby != 0) && (ipb+ipbym == ipby)));
+	  if (lyp) passed = passed && 
+		     (((idby == db3[1]-1) && (ipb+ipbyp == ipby + 1)) ||
+		       ((idby != db3[1]-1) && (ipb+ipbyp == ipby)));
+	  if (lzm) passed = passed && 
+		     (((idbz == 0) && (ipb+ipbzm == ipbz - 1)) ||
+		       ((idbz != 0) && (ipb+ipbzm == ipbz)));
+	  if (lzp) passed = passed && 
+		     (((idbz == db3[2]-1) && (ipb+ipbzp == ipbz + 1)) ||
+		       ((idbz != db3[2]-1) && (ipb+ipbzp == ipbz)));
+	}
+      }
+    }
+	}
+      }
+    }
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("neighbor_thread");
+
+    passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+    for (int ipbz=0; ipbz<pb3[2]; ipbz++) {
+      for (int ipby=0; ipby<pb3[1]; ipby++) {
+	for (int ipbx=0; ipbx<pb3[0]; ipbx++) {
+	  int ipb = ipbx + pb3[0]*(ipby + pb3[1]*ipbz);
+	  int itxm = layout_parallel_blocked.neighbor_thread(ipb,0,idb,axis_x,-1);
+	  int itxp = layout_parallel_blocked.neighbor_thread(ipb,0,idb,axis_x,+1);
+	  int itym = layout_parallel_blocked.neighbor_thread(ipb,0,idb,axis_y,-1);
+	  int ityp = layout_parallel_blocked.neighbor_thread(ipb,0,idb,axis_y,+1);
+	  int itzm = layout_parallel_blocked.neighbor_thread(ipb,0,idb,axis_z,-1);
+	  int itzp = layout_parallel_blocked.neighbor_thread(ipb,0,idb,axis_z,+1);
+	  passed = passed && (itxm == 0);
+	  passed = passed && (itxp == 0);
+	  passed = passed && (itym == 0);
+	  passed = passed && (ityp == 0);
+	  passed = passed && (itzm == 0);
+	  passed = passed && (itzp == 0);
+	}
+      }
+    }
+	}
+      }
+    }
+
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("box_extent");
+    passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+    for (int ipbz=0; ipbz<pb3[2]; ipbz++) {
+      for (int ipby=0; ipby<pb3[1]; ipby++) {
+	for (int ipbx=0; ipbx<pb3[0]; ipbx++) {
+	  int ipb = ipbx + pb3[0]*(ipby + pb3[1]*ipbz);
+	  double lower_extent[3],upper_extent[3];
+	  layout_parallel_blocked.box_extent(ipb,0,idb,lower_extent,upper_extent);
+  	  passed = passed && (fabs(lower_extent[axis_x]-
+ 				   1.0*(idbx + db3[0]*ipbx)/(pb3[0]*db3[0]))<2e-16);
+  	  passed = passed && (fabs(lower_extent[axis_y]-
+ 				   1.0*(idby + db3[1]*ipby)/(pb3[1]*db3[1]))<2e-16);
+  	  passed = passed && (fabs(lower_extent[axis_z]-
+ 				   1.0*(idbz + db3[2]*ipbz)/(pb3[2]*db3[2]))<2e-16);
+
+  	  passed = passed && (fabs(upper_extent[axis_x]-
+ 				   1.0*((idbx+1) + db3[0]*ipbx)/(pb3[0]*db3[0]))<2e-16);
+  	  passed = passed && (fabs(upper_extent[axis_y]-
+ 				   1.0*((idby+1) + db3[1]*ipby)/(pb3[1]*db3[1]))<2e-16);
+  	  passed = passed && (fabs(upper_extent[axis_z]-
+ 				   1.0*((idbz+1) + db3[2]*ipbz)/(pb3[2]*db3[2]))<2e-16);
+	}
+      }
+    }
+	}
+      }
+    }
+    // NOTE: results sensitive to roundoff
+    unit_assert(passed);
+
+    //----------------------------------------------------------------------
+
+    unit_func("array_indices");
+
+    // array size
+
+    int nx = 158;
+    int ny = 720;
+    int nz = 48;
+
+    passed = true;
+
+    for (int idbz=0; idbz<db3[2]; idbz++) {
+      for (int idby=0; idby<db3[1]; idby++) {
+	for (int idbx=0; idbx<db3[0]; idbx++) {
+	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
+    for (int ipbz=0; ipbz<pb3[2]; ipbz++) {
+      for (int ipby=0; ipby<pb3[1]; ipby++) {
+	for (int ipbx=0; ipbx<pb3[0]; ipbx++) {
+	  int ipb = ipbx + pb3[0]*(ipby + pb3[1]*ipbz);
+	  int index_lower[3],index_upper[3];
+	  layout_parallel_blocked.array_indices(ipb,0,idb,nx,ny,nz,index_lower,index_upper);
+  	  passed = passed && (index_lower[axis_x] == 
+			      nx*(idbx + db3[0]*ipbx)/(pb3[0]*db3[0]));
+ 	  passed = passed && (index_lower[axis_y] == 
+ 			      ny*(idby + db3[1]*ipby)/(pb3[1]*db3[1]));
+   	  passed = passed && (index_lower[axis_z] == 
+ 			      nz*(idbz + db3[2]*ipbz)/(pb3[2]*db3[2]));
+
+ 	  passed = passed && (index_upper[axis_x] == 
+ 			      nx*((idbx+1) + db3[0]*ipbx)/(pb3[0]*db3[0]));
+   	  passed = passed && (index_upper[axis_y] == 
+ 			      ny*((idby+1) + db3[1]*ipby)/(pb3[1]*db3[1]));
+   	  passed = passed && (index_upper[axis_z] == 
+ 			      nz*((idbz+1) + db3[2]*ipbz)/(pb3[2]*db3[2]));
+	}
+      }
+    }
+	}
+      }
+    }
+
+    unit_assert (passed);
+
   }  
 
 }
