@@ -15,6 +15,8 @@
 
 int main(int argc, char ** argv)
 {
+  unit_init();
+
   unit_class("Layout");
 
   //----------------------------------------------------------------------
@@ -731,4 +733,5 @@ int main(int argc, char ** argv)
 
   }  
 
+  unit_finalize();
 }

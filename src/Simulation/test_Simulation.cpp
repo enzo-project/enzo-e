@@ -15,8 +15,10 @@
 
 int main(int argc, char ** argv)
 {
+  unit_init();
   unit_class ("Simulation");
   unit_func("Simulation");
   Simulation simulation;
   unit_assert(false);
+  unit_finalize();
 }

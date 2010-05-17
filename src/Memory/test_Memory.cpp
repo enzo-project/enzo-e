@@ -21,6 +21,8 @@
 int main(int argc, char ** argv)
 {
 
+  unit_init();
+
   Memory * memory = Memory::instance();
 
   printf ("start\n"); fflush(stdout);
@@ -208,4 +210,5 @@ int main(int argc, char ** argv)
 
   memory->print();
 
+  unit_finalize();
 }

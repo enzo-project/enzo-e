@@ -96,6 +96,7 @@ void Monitor::image
   // Loop over array subsection
 
   // image x-axis
+
   for (int jx=0; jx<mx; jx++) {
 
     int ix = jx + mx0;

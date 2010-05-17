@@ -17,6 +17,8 @@
 
 int main(int argc, char ** argv)
 {
+  unit_init();
+
   Array A;
   A.resize(50,100);
 
@@ -68,5 +70,7 @@ int main(int argc, char ** argv)
 
   unit_func("read,write");
   unit_assert(passed);
+
+  unit_finalize();
 
 }

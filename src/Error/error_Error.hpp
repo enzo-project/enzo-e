@@ -7,6 +7,7 @@
 /// @file     error_error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Add Parallel support
+/// @bug      exit() is called instead of MPI_Abort(), etc.
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Declaration of the Error class
 
@@ -31,7 +32,7 @@
 
 /// @def      TRACE
 /// @brief    Trace file name and location to stdout
-#define TRACE					\
+#define TRACE_MESSAGE					\
   Error::instance()->trace_(__FILE__,__LINE__)
 
 /// @def      ASSERT
@@ -54,8 +55,36 @@ public: // functions
   { return & instance_; };
 
   /// Set whether to trace on this processor
-  void set_tracing (bool tracing) 
-  { tracing_ = tracing; };
+  void set_traces_active (bool traces_active) 
+  { traces_active_ = traces_active; };
+
+  /// Return whether to trace on this processor
+  bool traces_active ()
+  { return traces_active_; };
+
+  /// Set whether to trace on this processor
+  void set_warnings_active (bool warnings_active) 
+  { warnings_active_ = warnings_active; };
+
+  /// Return whether to trace on this processor
+  bool warnings_active ()
+  { return warnings_active_; };
+
+  /// Set whether to trace on this processor
+  void set_errors_active (bool errors_active) 
+  { errors_active_ = errors_active; };
+
+  /// Return whether to trace on this processor
+  bool errors_active ()
+  { return errors_active_; };
+
+  /// Set whether to trace on this processor
+  void set_incompletes_active (bool incompletes_active) 
+  { incompletes_active_ = incompletes_active; };
+
+  /// Return whether to trace on this processor
+  bool incompletes_active ()
+  { return incompletes_active_; };
 
 public: // functions
 
@@ -66,7 +95,9 @@ public: // functions
 		 const char * function,
 		 const char * message)
   {
-    message_(stdout,"WARNING",file,line,function,message);
+    if (warnings_active_) {
+      message_(stdout,"WARNING",file,line,function,message);
+    }
   };
 
   //----------------------------------------------------------------------
@@ -76,7 +107,9 @@ public: // functions
 		    const char * function,
 		    const char * message)
   {
-    message_(stdout,"INCOMPLETE",file,line,function,message);
+    if (incompletes_active_) {
+      message_(stdout,"INCOMPLETE",file,line,function,message);
+    }
   };
 
   //----------------------------------------------------------------------
@@ -86,15 +119,17 @@ public: // functions
 	       const char * function,
 	       const char * message)
   {
-    message_(stderr,"ERROR",file,line,function,message);
-    exit(1);
+    if (errors_active_) {
+      message_(stderr,"ERROR",file,line,function,message);
+      exit(1);
+    }
   };
 
   //----------------------------------------------------------------------
   void trace_ (const char * file,
 	       int          line)
   {
-    if (tracing_) {
+    if (traces_active_) {
       printf ("TRACE %s:%d\n",file,line); 
       fflush(stdout);
     }
@@ -108,7 +143,7 @@ public: // functions
 		bool         assertion)
   {
     if (!assertion) {
-      message_(stderr,"ASSERT",file,line,function,message);
+      printf(file,line,"ASSERT",file,line,function,message);
       exit(1);
     }
   };
@@ -118,7 +153,11 @@ private: // functions
   //----------------------------------------------------------------------
   /// Initialize the Error object (singleton design pattern)
   Error() 
-    : tracing_(true)
+    : errors_active_(true),
+      incompletes_active_(true),
+      traces_active_(true),
+      warnings_active_(true)
+      
   {};
 
 private: // functions
@@ -144,8 +183,17 @@ private: // attributes
   /// Single instance of the Error object (singleton design pattern)
   static Error instance_;
 
+  /// Whether to display error messages
+  bool errors_active_;
+
+  /// Whether to display "incomplete" messages
+  bool incompletes_active_;
+
   /// Whether tracing is on or off
-  bool tracing_;
+  bool traces_active_;
+
+  /// Whether to display warning messages
+  bool warnings_active_;
 
 };
 

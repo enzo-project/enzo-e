@@ -11,6 +11,8 @@
 #include <mpi.h>
 
 #include "cello.h"
+
+#include "error.hpp"
 #include "parallel.hpp"
 
 ParallelMpi * ParallelMpi::instance_mpi_ = 0; // (singleton design pattern)
@@ -26,6 +28,9 @@ void ParallelMpi::initialize(int * argc, char ***argv)
   std::stringstream out;
   out << rank_;
   name_ = out.str();
+
+  Error::instance()->set_warnings_active(rank_==0);
+  Error::instance()->set_incompletes_active(rank_==0);
 
   set_initialized_(true);
 };

@@ -16,6 +16,8 @@
 int main(int argc, char ** argv)
 {
 
+  unit_init();
+
   unit_class ("Error");
 
   //----------------------------------------------------------------------
@@ -36,6 +38,7 @@ int main(int argc, char ** argv)
 
   unit_assert (true);
 
+  unit_finalize();
   //----------------------------------------------------------------------
 //   printf ("Error message:\n");
 

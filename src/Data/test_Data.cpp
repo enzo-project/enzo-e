@@ -17,6 +17,8 @@
 int main()
 {
 
+  unit_init();
+
   unit_class ("DataDescr");
 
   DataDescr data;
@@ -57,5 +59,7 @@ int main()
   unit_assert(density->   dimension()==2);
   unit_assert(velocity_x->dimension()==2);
   unit_assert(velocity_y->dimension()==2);
+
+  unit_finalize();
 
 }

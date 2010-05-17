@@ -17,6 +17,9 @@
 
 int main(int argc, char ** argv)
 {
+
+  unit_init();
+
   Timer timer;
   const double time_tolerance = 0.05;
 
@@ -207,5 +210,7 @@ int main(int argc, char ** argv)
   delete performance;
 
   Memory::instance()->print();
+
+  unit_finalize();
 
 }

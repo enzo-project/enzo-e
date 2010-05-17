@@ -47,7 +47,6 @@ public: // interface
     // Delayed creation since Parallel must be initialized
     if (Monitor::instance_ == 0) {
       if (Parallel::instance()->is_initialized()) {
-	printf ("Creating monitor\n");
 	instance_ = new Monitor(Parallel::instance());
       } else {
 	ERROR_MESSAGE("Monitor::instance","Monitor::instance() called before Parallel::initialize()");
@@ -87,7 +86,6 @@ private: // functions
     : parallel_(parallel),
       active_(parallel->is_root())
   {  
-    printf ("DEBUG Monitor::Monitor()\n"); fflush(stdout);
     timer_.start(); 
   }
 

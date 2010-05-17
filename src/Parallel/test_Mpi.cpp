@@ -15,50 +15,49 @@
 
 int main(int argc, char ** argv)
 {
-  unit_class ("ParallelMpi");
+  ParallelMpi * parallel = ParallelMpi::instance();
 
-  unit_func("ParallelMpi");
-
-  ParallelMpi * mpi = ParallelMpi::instance();
-
-  unit_assert(true);
-
+  parallel->initialize(&argc,&argv);
+  unit_init (parallel->process_rank(), parallel->process_count());
   unit_func("initialize");
-  mpi->initialize(&argc,&argv);
+  unit_class ("ParallelMpi");
   unit_assert(true);
 
   unit_func("process_count");
-  printf ("process_count = %d\n",mpi->process_count());
-  unit_assert(true);
+  int np = parallel->process_count();
+  unit_assert(np > 1);
 
   unit_func("process_rank");
-  printf ("process_rank = %d\n",mpi->process_rank());
-  unit_assert(true);
+  int ip = parallel->process_rank();
+  unit_assert(ip < np);
+  unit_assert(ip >= 0);
 
   unit_func("set_send_blocking");
-  mpi->set_send_blocking(true);
-  unit_assert (mpi->get_send_blocking() == true);
+  parallel->set_send_blocking(true);
+  unit_assert (parallel->get_send_blocking() == true);
   unit_func("get_send_blocking");
-  mpi->set_send_blocking(false);
-  unit_assert (mpi->get_send_blocking() == false);
+  parallel->set_send_blocking(false);
+  unit_assert (parallel->get_send_blocking() == false);
 
   unit_func("set_recv_blocking");
-  mpi->set_recv_blocking(true);
-  unit_assert (mpi->get_recv_blocking() == true);
+  parallel->set_recv_blocking(true);
+  unit_assert (parallel->get_recv_blocking() == true);
   unit_func("get_recv_blocking");
-  mpi->set_recv_blocking(false);
-  unit_assert (mpi->get_recv_blocking() == false);
+  parallel->set_recv_blocking(false);
+  unit_assert (parallel->get_recv_blocking() == false);
 
   unit_func("set_send_type");
-  mpi->set_send_type(send_type_standard);
-  unit_assert (mpi->get_send_type() == send_type_standard);
+  parallel->set_send_type(send_type_standard);
+  unit_assert (parallel->get_send_type() == send_type_standard);
   unit_func("get_send_type");
-  mpi->set_send_type(send_type_buffered);
-  unit_assert (mpi->get_send_type() == send_type_buffered);
-  mpi->set_send_type(send_type_ready);
-  unit_assert (mpi->get_send_type() == send_type_ready);
+  parallel->set_send_type(send_type_buffered);
+  unit_assert (parallel->get_send_type() == send_type_buffered);
+  parallel->set_send_type(send_type_ready);
+  unit_assert (parallel->get_send_type() == send_type_ready);
 
   unit_func("finalize");
-  mpi->finalize();
+  parallel->finalize();
   unit_assert(true);
+
+  unit_finalize();
 }

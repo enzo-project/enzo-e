@@ -14,6 +14,7 @@
 int main()
 {
 
+  unit_init();
   unit_class ("Field");
   unit_func ("Field");
   FieldDescr density    ("density");
@@ -72,4 +73,5 @@ int main()
   unit_assert (velocity_x.precision() == precision_32bit);
   unit_assert (velocity_y.precision() == precision_64bit);
 
+  unit_finalize();
 }

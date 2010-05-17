@@ -15,6 +15,8 @@
 
 int main(int argc, char ** argv)
 {
+  unit_init();
+
   int n0 = 64;
   int n1 = 64;
   int n2 = 64;
@@ -63,5 +65,7 @@ int main(int argc, char ** argv)
   }
 
   unit_assert(passed);
+
+  unit_finalize();
 
 }

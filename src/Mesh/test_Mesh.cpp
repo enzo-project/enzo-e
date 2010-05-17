@@ -15,8 +15,10 @@
 
 int main(int argc, char ** argv)
 {
+  unit_init();
   unit_class ("Mesh");
   unit_func("Mesh");
   Mesh mesh;
   unit_assert(false);
+  unit_finalize();
 }

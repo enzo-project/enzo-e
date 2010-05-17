@@ -13,6 +13,8 @@
 
 int main(int argc, char ** argv)
 {
+  unit_init();
+
   bool passed = false;
 
   unit_class ("Schedule");
@@ -22,4 +24,7 @@ int main(int argc, char ** argv)
 
   //FAILS
   unit_assert(passed);
+
+  unit_finalize();
+
 }

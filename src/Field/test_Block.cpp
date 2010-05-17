@@ -15,6 +15,8 @@
 int main()
 {
 
+  unit_init();
+
   unit_class ("FieldBlock");
 
   {
@@ -112,4 +114,5 @@ int main()
     unit_assert (is_same);
   }
   
+  unit_finalize();
 }

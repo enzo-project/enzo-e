@@ -23,10 +23,11 @@ void generate_input();
 
 int main(int argc, char **argv)
 {
-
   Parallel * parallel = Parallel::instance();
 
   parallel->initialize(&argc, &argv);
+
+  unit_init (parallel->process_rank(), parallel->process_count());
 
   unit_class ("Parameters");
 
@@ -213,7 +214,6 @@ int main(int argc, char **argv)
 
   unit_func("list_value_string");
   unit_assert(parameters->list_value_string(3,"num1") == "string");
-  printf ("%s\n",parameters->list_value_string(3,"num1").c_str());
 
   unit_func("list_evaluate_scalar");
   parameters->list_evaluate_scalar(4,"num1",3,values_scalar,deflts_scalar,x,y,z,t);
@@ -252,11 +252,9 @@ int main(int argc, char **argv)
   num_subgroups["Scalar_expr"]  = 2; // "var_scalar_1","var_scalar_2"
   num_subgroups["String"]       = 1; // ""
 
-  printf ("num_groups = %d\n",num_groups);
   for (int i=0; i<num_groups; i++) {
     std::string group = parameters->group(i);
     parameters->set_current_group(group);
-    printf ("subgroups: %d %d\n",num_subgroups[group],parameters->subgroup_count());
     unit_assert (num_subgroups[group] == parameters->subgroup_count());
   }
   
@@ -266,6 +264,10 @@ int main(int argc, char **argv)
   FILE * fpout = fopen ("test.out","w");
   parameters->write ( fpout );
   unit_assert(0); //FAILS
+
+  parallel->finalize();
+
+  unit_finalize();
 }
 
 void generate_input()

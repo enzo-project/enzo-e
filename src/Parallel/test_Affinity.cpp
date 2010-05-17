@@ -12,10 +12,11 @@
 
 int main(int argc, char ** argv)
 {
-  printf ("%p %p\n",&argc,&argv);
   Parallel * parallel = Parallel::instance();
 
   parallel->initialize(&argc,&argv);
+
+  unit_init(parallel->process_rank(),parallel->process_count());
 
   int process_count = parallel->process_count();
   int process_rank  = parallel->process_rank();
@@ -42,4 +43,5 @@ int main(int argc, char ** argv)
 		(process_rank == 0) );
 
   parallel->finalize();
+  unit_finalize();
 }
