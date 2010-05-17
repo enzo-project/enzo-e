@@ -45,61 +45,88 @@ void write_image(std::string filename, float * image, int nx, int ny, int nz=0);
 
 void create_tree ( int * level_array, int nx, int ny, int nz, int k,  int d, 
 		   std::string name, bool full_nodes );
-
+void print_usage();
 //----------------------------------------------------------------------
 
 int main(int argc, char ** argv)
 {
 
+  // Required for Monitor
+
   Parallel * parallel = Parallel::instance();
   parallel->initialize(&argc,&argv);
 
-  // read in the gimp image into level
+  // Parse command line
 
-  int nx,ny,nz=1;
+  if (argc != 4) {
+    print_usage();
+  }
 
-  int * level_array = create_level_array(&nx,&ny,max_level);
+  // Check arguments
 
-  //--------------------------------------------------
-  // 2D tests
-  //--------------------------------------------------
+  int dimension  = atoi(argv[1]);
+  int refinement = atoi(argv[2]);
+  int balanced   = atoi(argv[3]);
 
-  int k,d;
-  create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-2-f0", false);
-  create_tree (level_array, nx, ny, nz, k=2, d=2, "tree2-2-f1", true);
-  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree2-4-f1", true);
-  create_tree (level_array, nx, ny, nz, k=4, d=2, "tree2-4-f0", false);
-  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree2-8-f1", true);
-  create_tree (level_array, nx, ny, nz, k=8, d=2, "tree2-8-f0", false);
-  create_tree (level_array, nx, ny, nz, k=16, d=2, "tree2-16-f1", true);
-  create_tree (level_array, nx, ny, nz, k=16, d=2, "tree2-16-f0", false);
+  if (dimension != 2 && 
+      dimension != 3) print_usage();
+  
+  if (refinement != 2 && 
+      refinement != 4 &&
+      refinement != 8 &&
+      refinement != 16) print_usage();
+  
+  if (balanced != 0 && 
+      balanced != 1) print_usage();
 
-  delete [] level_array;
+  char filename[80];
+  sprintf (filename,"TreeK-d=%d-r=%d-b=%d",dimension,refinement,balanced);
 
-  //--------------------------------------------------
-  // 3D tests
-  //--------------------------------------------------
+  int nx,ny,nz;
+  int * level_array;
 
-  int n3;
-  level_array = create_sphere(n3 = sphere_size,max_level);
+  if (dimension == 2) {
 
-  // level_array = create_level_array3(&n3,max_level);
+    nx = 1;
+    ny = 1;
+    nz = 1;
+    level_array = create_level_array(&nx,&ny,max_level);
 
-  create_tree (level_array, n3, n3, n3, k=2, d=3, "tree3-2-f1", true);
-  create_tree (level_array, n3, n3, n3, k=2, d=3, "tree3-2-f0", false);
-  create_tree (level_array, n3, n3, n3, k=4, d=3, "tree3-4-f1", true);
-  create_tree (level_array, n3, n3, n3, k=4, d=3, "tree3-4-f0", false);
-  create_tree (level_array, n3, n3, n3, k=8, d=3, "tree3-8-f1", true);
-  create_tree (level_array, n3, n3, n3, k=8, d=3, "tree3-8-f0", false);
-//   create_tree (level_array, n3, n3, n3, k=16, d=3, "tree3-16-f1", true);
-//   create_tree (level_array, n3, n3, n3, k=16, d=3, "tree3-16-f0", false);
+  } else {
+
+    nx = sphere_size;
+    ny = sphere_size;
+    nz = sphere_size;
+    level_array = create_sphere(sphere_size,max_level);
+  }
+
+  create_tree (level_array, nx, ny, nz, refinement, dimension, filename, balanced);
 
   delete [] level_array;
 
   Memory::instance()->print();
 
+  parallel->finalize();
+
 }
 
+//----------------------------------------------------------------------
+void print_usage()
+{
+  Parallel * parallel = Parallel::instance();
+
+  fprintf (stderr,"\n");
+  fprintf (stderr,"Usage: %s <dimension> <refinement> <balanced>\n");
+  fprintf (stderr,"\n");
+  fprintf (stderr,"   where \n");
+  fprintf (stderr,"\n");
+  fprintf (stderr,"         <dimension>  = [2|3]\n");
+  fprintf (stderr,"         <refinement> = [2|4|8|16]\n");
+  fprintf (stderr,"         <balanced>   = [0|1]\n");
+  fprintf (stderr,"\n");
+
+  parallel->abort();
+}
 //----------------------------------------------------------------------
 
 // read in the gimp-generated image data into a level array
@@ -267,8 +294,6 @@ void create_tree
  )
 {
 
-  float * image;
-
   TreeK * tree = 0;
   if (d==2) tree = new Tree2K(k);
   if (d==3) tree = new Tree3K(k);
@@ -295,31 +320,12 @@ void create_tree
   memory->set_active(false);
 
 
-  // Determine image size
-  int image_size = cell_size + 2*line_width;
-  for (int i=0; i<tree->levels(); i++) {
-    image_size = 2*image_size - line_width;
-  }
-
-  if (d==2) {
-    image = tree->create_image(image_size,line_width);
-    write_image(name + "-0",image,image_size,image_size,1);
-  } else {
-    image = tree->create_image(image_size,line_width,0);
-    write_image(name + "-0-x",image,image_size,image_size,1);
-    image = tree->create_image(image_size,line_width,1);
-    write_image(name + "-0-y",image,image_size,image_size,1);
-    image = tree->create_image(image_size,line_width,2);
-    write_image(name + "-0-z",image,image_size,image_size,1);
-  }
   if (geomview) tree->geomview(name + "-0.gv");
 
   mem_per_node = (float) memory->bytes(0) / tree->num_nodes();
   printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
-
-  delete [] image;
 
   //--------------------------------------------------
   // Balance the tree
@@ -332,18 +338,12 @@ void create_tree
   memory->print();
   memory->set_active(false);
 
-
-  image = tree->create_image(image_size,line_width);
-  write_image(name + "-1",image,image_size,image_size,1);
   if (geomview) tree->geomview(name + "-1.gv");
 
   mem_per_node = (float) memory->bytes(0) / tree->num_nodes();
   printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
-
-  delete image;
-
 
   //--------------------------------------------------
   // Optimize the tree
@@ -356,15 +356,34 @@ void create_tree
   memory->print();
   memory->set_active(false);
 
-  image = tree->create_image(image_size,line_width);
-  write_image(name + "-2",image,image_size,image_size,1);
+  // Determine image size
+  int image_size = cell_size + 2*line_width;
+  for (int i=0; i<tree->levels(); i++) {
+    image_size = 2*image_size - line_width;
+  }
+
+  float * image;
+  if (d==2) {
+    image = tree->create_image(image_size,line_width);
+    write_image(name,image,image_size,image_size,1);
+    delete [] image;
+  } else {
+    image = tree->create_image(image_size,line_width,0);
+    write_image(name + "-x",image,image_size,image_size,1);
+    delete [] image;
+    image = tree->create_image(image_size,line_width,1);
+    write_image(name + "-y",image,image_size,image_size,1);
+    delete [] image;
+    image = tree->create_image(image_size,line_width,2);
+    write_image(name + "-z",image,image_size,image_size,1);
+    delete [] image;
+  }
+
   if (geomview) tree->geomview(name + "-2.gv");
 
   printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
   printf ("bytes/node = %g\n",mem_per_node);
-
-  delete image;
 
   delete tree;
 
