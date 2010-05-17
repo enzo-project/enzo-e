@@ -3,6 +3,7 @@
 
 /// @file     test_affinity.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Affinity
 

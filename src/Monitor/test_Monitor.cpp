@@ -4,7 +4,7 @@
 /// @file     test_Monitor.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-18
-/// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI when enough auto variables are declared in main(), even if they are declared after initialize() is called.  Didn't crash earlier because it wasn't called with mpirun earlier.
+/// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI
 /// @brief    Program implementing unit tests for the Monitor class
 
 #include <stdio.h>
