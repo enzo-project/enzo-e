@@ -2,17 +2,17 @@ const int num_problems = 4;
 const int num_ghosts   = 3;
 
 enum type_problem {  
-  problem_unknown, 
-  problem_image,  
-  problem_implosion,  
-  problem_implosion3
+  problem_ppm_unknown, 
+  problem_ppm_image,  
+  problem_ppm_implosion,  
+  problem_ppm_implosion3
 };
 
 const char * problem_name[] = {
   "",
-  "image",
-  "implosion",
-  "implosion3"
+  "ppm-image",
+  "ppm-implosion",
+  "ppm-implosion3"
 };
 
 const int problem_size [] = {

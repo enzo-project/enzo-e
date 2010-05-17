@@ -34,7 +34,6 @@ int main(int argc, char ** argv)
 
   // Check command line arguments
 
-  enum type_problem problem_type = problem_unknown;
 
   if (argc < 2) {
     print_usage(argv[0]);
@@ -43,6 +42,8 @@ int main(int argc, char ** argv)
   int argi = 0;
 
   // Parse command line arguments
+
+  enum type_problem problem_type = problem_ppm_unknown;
 
   if (argc > ++argi) {
     for (int i=0; i<num_problems; i++) {
@@ -70,13 +71,13 @@ int main(int argc, char ** argv)
   // Initialize for specific problem type
 
   switch (problem_type) {
-  case problem_image:
+  case problem_ppm_image:
     initialize_image(cycles);
     break;
-  case problem_implosion:
+  case problem_ppm_implosion:
     initialize_implosion(size,cycles);
     break;
-  case problem_implosion3:
+  case problem_ppm_implosion3:
     initialize_implosion3(size,cycles);
     break;
   default:

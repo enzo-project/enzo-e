@@ -9,8 +9,8 @@ enum type_problem {
 
 const char * problem_name[] = {
   "",
-  "blast",
-  "implosion3"
+  "ppml-blast",
+  "ppml-implosion3"
 };
 
 const int problem_size [] = {

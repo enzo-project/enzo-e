@@ -22,11 +22,12 @@ class MethodEnzoPpm : public MethodHyperbolic {
 public: // interface
 
   /// Perform any method-specific initialization
+
   void initialize() throw();
 
-  /// Apply the method
+  /// Apply the method to advance one timestep
 
-  void apply() throw();
+  void advance() throw();
 
 private: // attributes
 

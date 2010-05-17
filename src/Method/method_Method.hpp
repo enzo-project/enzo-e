@@ -45,9 +45,9 @@ public: // virtual functions
 
   virtual void initialize() throw() = 0;
 
-  /// Apply the method
+  /// Apply the method to advance one timestep
 
-  virtual void apply() throw() = 0; 
+  virtual void advance() throw() = 0; 
 
 protected: // functions
 

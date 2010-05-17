@@ -51,11 +51,12 @@ env.Unit('test_Schedule.out',    '#/bin/test_Schedule')
 env.Unit('test_Simulation.out',  '#/bin/test_Simulation')
 env.Unit('test_TreeK.out',       '#/bin/test_TreeK')
 
-env.UnitEnzo('test_ppml_implosion.out', '#/bin/test_ppml', ARGS='implosion3 32 1')
-env.UnitEnzo('test_ppml_blast.out',     '#/bin/test_ppml', ARGS='blast      32 1')
-env.UnitEnzo('test_ppm_image.out',      '#/bin/test_ppm',  ARGS='image     100 10')
-env.UnitEnzo('test_ppm_implosion.out',  '#/bin/test_ppm',  ARGS='implosion 100 3')
-env.UnitEnzo('test_ppm_implosion3.out', '#/bin/test_ppm',  ARGS='implosion3 32 3')
+env.UnitEnzo('test_ppml_implosion.out', '#/bin/test_ppml', ARGS='ppml-implosion3 32 1')
+env.UnitEnzo('test_ppml_blast.out',     '#/bin/test_ppml', ARGS='ppml-blast      32 1')
+
+env.UnitEnzo('test_ppm_image.out',      '#/bin/test_ppm',  ARGS='ppm-image     100 10')
+env.UnitEnzo('test_ppm_implosion.out',  '#/bin/test_ppm',  ARGS='ppm-implosion 100 3')
+env.UnitEnzo('test_ppm_implosion3.out', '#/bin/test_ppm',  ARGS='ppm-implosion3 32 3')
 
 env.UnitMpi('test_affinity.out', '#/bin/test_Affinity')
 env.UnitMpi('test_mpi.out',      '#/bin/test_Mpi')

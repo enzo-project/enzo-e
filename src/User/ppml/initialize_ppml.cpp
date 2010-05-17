@@ -87,7 +87,6 @@ void initialize_ppml (int size_param, int cycles_param)
   GridLeftEdge[1]    = 0.0;
   GridLeftEdge[2]    = 0.0;
 
-
   for (int dim=0; dim<GridRank; dim++) {
     CellWidth[dim] = new ENZO_FLOAT[GridDimension[dim]];
     float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
@@ -99,7 +98,6 @@ void initialize_ppml (int size_param, int cycles_param)
 
   // Grid variables
   
-
   int k = 0;
 
   FieldType[field_density      = k] = k; k++;
@@ -134,10 +132,6 @@ void initialize_ppml (int size_param, int cycles_param)
   FieldType[field_magnetic_y_zp = k] = k; k++;
   FieldType[field_magnetic_z_zp = k] = k; k++;
 
-
-
-  //  FieldType[field_internal_energy = k++] = InternalEnergy;
-
   NumberOfBaryonFields = k;
   
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
@@ -155,8 +149,6 @@ void initialize_ppml (int size_param, int cycles_param)
   float hy = CellWidth[1][0];
   float hz = CellWidth[2][0];
 
-  if (debug) printf ("Size = %d %d %d\n",ndx,ndy,ndz);
-
   // Clear all fields
 
   for (int field=0; field<NumberOfBaryonFields; field++) {
@@ -166,6 +158,7 @@ void initialize_ppml (int size_param, int cycles_param)
   }
 
   // Initializize background density and magnetic_x
+
   for (int i=0; i<nd; i++) {
     BaryonField[field_density   ][i] = density_out;
     BaryonField[field_density_xp][i] = density_out;
@@ -177,8 +170,6 @@ void initialize_ppml (int size_param, int cycles_param)
     BaryonField[field_magnetic_x_yp][i] = magnetic_out;
     BaryonField[field_magnetic_x_zp][i] = magnetic_out;
   }
-
-
 
   const float x0 = DomainLeftEdge[0];
   const float y0 = DomainLeftEdge[1];
@@ -201,13 +192,10 @@ void initialize_ppml (int size_param, int cycles_param)
 
 	int i = ix + ndx * (iy + ndy * iz);
 
-
 	float r2   = xc*xc + yc*yc + zc*zc;
 	float rxp2 = xp*xp + yc*yc + zc*zc;
 	float ryp2 = xc*xc + yp*yp + zc*zc;
 	float rzp2 = xc*xc + yc*yc + zp*zp;
-
-	// Initialize fields
 
 	// cell-centered density and magnetic
 
@@ -284,6 +272,4 @@ void initialize_ppml (int size_param, int cycles_param)
       }
     }
   }
-
 }
-    

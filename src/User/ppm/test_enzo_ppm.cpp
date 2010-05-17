@@ -26,8 +26,8 @@ int main (int argc, char ** argv)
   ppm.initialize();
   unit_assert(true);
 
-  unit_func("apply");
-  ppm.apply();
+  unit_func("advance");
+  ppm.advance();
   unit_assert(false);
 
 }
