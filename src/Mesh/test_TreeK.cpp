@@ -32,7 +32,6 @@ const bool geomview = false;
 const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
-const int  max_level = 6;
 const int sphere_size = 128;
 
 
@@ -44,8 +43,8 @@ int * create_sphere (int n3, int max_levels);
 void write_image(std::string filename, float * image, int nx, int ny, int nz=0);
 
 void create_tree ( int * level_array, int nx, int ny, int nz, int k,  int d, 
-		   std::string name, bool full_nodes );
-void print_usage();
+		   std::string name, int max_level);
+void print_usage(int, char**);
 //----------------------------------------------------------------------
 
 int main(int argc, char ** argv)
@@ -59,28 +58,27 @@ int main(int argc, char ** argv)
   // Parse command line
 
   if (argc != 4) {
-    print_usage();
+    print_usage(argc,argv);
   }
 
   // Check arguments
 
   int dimension  = atoi(argv[1]);
   int refinement = atoi(argv[2]);
-  int balanced   = atoi(argv[3]);
+  int max_level  = atoi(argv[3]);
 
   if (dimension != 2 && 
-      dimension != 3) print_usage();
+      dimension != 3) print_usage(argc,argv);
   
   if (refinement != 2 && 
       refinement != 4 &&
       refinement != 8 &&
-      refinement != 16) print_usage();
+      refinement != 16) print_usage(argc,argv);
   
-  if (balanced != 0 && 
-      balanced != 1) print_usage();
+  if (! (0 < max_level && max_level <= 12)) print_usage(argc,argv);
 
   char filename[80];
-  sprintf (filename,"TreeK-d=%d-r=%d-b=%d",dimension,refinement,balanced);
+  sprintf (filename,"TreeK-D=%d-R=%d-L=%d",dimension,refinement,max_level);
 
   int nx,ny,nz;
   int * level_array;
@@ -100,7 +98,7 @@ int main(int argc, char ** argv)
     level_array = create_sphere(sphere_size,max_level);
   }
 
-  create_tree (level_array, nx, ny, nz, refinement, dimension, filename, balanced);
+  create_tree (level_array, nx, ny, nz, refinement, dimension, filename,max_level);
 
   delete [] level_array;
 
@@ -111,21 +109,19 @@ int main(int argc, char ** argv)
 }
 
 //----------------------------------------------------------------------
-void print_usage()
+void print_usage(int argc, char **argv)
 {
   Parallel * parallel = Parallel::instance();
 
   fprintf (stderr,"\n");
-  fprintf (stderr,"Usage: %s <dimension> <refinement> <balanced>\n");
+  fprintf (stderr,"Usage: %s <dimension> <refinement> <levels>\n",argv[0]);
   fprintf (stderr,"\n");
   fprintf (stderr,"   where \n");
   fprintf (stderr,"\n");
   fprintf (stderr,"         <dimension>  = [2|3]\n");
   fprintf (stderr,"         <refinement> = [2|4|8|16]\n");
-  fprintf (stderr,"         <balanced>   = [0|1]\n");
   fprintf (stderr,"\n");
-
-  parallel->abort();
+  exit(1);
 }
 //----------------------------------------------------------------------
 
@@ -289,8 +285,8 @@ void create_tree
  int * level_array, 
  int nx, int ny, int nz,
  int k,  int d, 
- std::string name, 
- bool full_nodes
+ std::string name,
+ int max_level
  )
 {
 
@@ -305,8 +301,10 @@ void create_tree
   memory->reset();
 
   printf ("--------------------------------------------------\n");
-  printf ("k=%d d=%d full=%d\n",k,d,full_nodes);
+  printf ("k=%d d=%d\n",k,d);
   printf ("--------------------------------------------------\n");
+
+  int full_nodes;
 
   //--------------------------------------------------
   // Refine the tree
@@ -315,7 +313,7 @@ void create_tree
   printf ("\nINITIAL TREE\n");
 
   memory->set_active(true);
-  tree->refine(level_array,nx,ny,nz,max_level,full_nodes);
+  tree->refine(level_array,nx,ny,nz,max_level,(full_nodes=true));
   memory->print();
   memory->set_active(false);
 
@@ -334,7 +332,7 @@ void create_tree
   printf ("\nBALANCED TREE\n");
 
   memory->set_active(true);
-  tree->balance(full_nodes);
+  tree->balance((full_nodes = true));
   memory->print();
   memory->set_active(false);
 
