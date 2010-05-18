@@ -304,7 +304,7 @@ void create_tree
   printf ("k=%d d=%d\n",k,d);
   printf ("--------------------------------------------------\n");
 
-  int full_nodes;
+  int full_nodes = true;
 
   //--------------------------------------------------
   // Refine the tree
@@ -313,7 +313,7 @@ void create_tree
   printf ("\nINITIAL TREE\n");
 
   memory->set_active(true);
-  tree->refine(level_array,nx,ny,nz,max_level,(full_nodes=true));
+  tree->refine(level_array,nx,ny,nz,max_level,full_nodes);
   memory->print();
   memory->set_active(false);
 
@@ -329,14 +329,37 @@ void create_tree
   // Balance the tree
   //--------------------------------------------------
 
+  // Determine image size
+  float * image;
+  int image_size = cell_size + 2*line_width;
+  for (int i=0; i<tree->levels(); i++) {
+    image_size = 2*image_size - line_width;
+  }
+
   printf ("\nBALANCED TREE\n");
 
   memory->set_active(true);
-  tree->balance((full_nodes = true));
+  tree->balance(full_nodes);
   memory->print();
   memory->set_active(false);
 
-  if (geomview) tree->geomview(name + "-1.gv");
+  if (d==2) {
+    image = tree->create_image(image_size,line_width);
+    write_image(name + "-0",image,image_size,image_size,1);
+    delete [] image;
+  } else {
+    image = tree->create_image(image_size,line_width,0);
+    write_image(name + "-x" + "-0",image,image_size,image_size,1);
+    delete [] image;
+    image = tree->create_image(image_size,line_width,1);
+    write_image(name + "-y" + "-0",image,image_size,image_size,1);
+    delete [] image;
+    image = tree->create_image(image_size,line_width,2);
+    write_image(name + "-z" + "-0",image,image_size,image_size,1);
+    delete [] image;
+  }
+
+  if (geomview) tree->geomview(name + "-0" + "-1.gv");
 
   mem_per_node = (float) memory->bytes(0) / tree->num_nodes();
   printf ("nodes      = %d\n",tree->num_nodes());
@@ -344,40 +367,33 @@ void create_tree
   printf ("bytes/node = %g\n",mem_per_node);
 
   //--------------------------------------------------
-  // Optimize the tree
+  // Coalesce Patches In the tree
   //--------------------------------------------------
 
-  printf ("\nOPTIMIZED TREE\n");
+  printf ("\nCOALESCED TREE\n");
 
   memory->set_active(true);
   tree->optimize();
   memory->print();
   memory->set_active(false);
 
-  // Determine image size
-  int image_size = cell_size + 2*line_width;
-  for (int i=0; i<tree->levels(); i++) {
-    image_size = 2*image_size - line_width;
-  }
-
-  float * image;
   if (d==2) {
     image = tree->create_image(image_size,line_width);
-    write_image(name,image,image_size,image_size,1);
+    write_image(name + "-1",image,image_size,image_size,1);
     delete [] image;
   } else {
     image = tree->create_image(image_size,line_width,0);
-    write_image(name + "-x",image,image_size,image_size,1);
+    write_image(name + "-x" + "-1",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,1);
-    write_image(name + "-y",image,image_size,image_size,1);
+    write_image(name + "-y" + "-1",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,2);
-    write_image(name + "-z",image,image_size,image_size,1);
+    write_image(name + "-z" + "-1",image,image_size,image_size,1);
     delete [] image;
   }
 
-  if (geomview) tree->geomview(name + "-2.gv");
+  if (geomview) tree->geomview(name + "1" + "-2.gv");
 
   printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
