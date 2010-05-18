@@ -9,6 +9,7 @@
 #ifndef PARALLEL_LAYOUT_HPP
 #define PARALLEL_LAYOUT_HPP
 
+#include <math.h>
 #include <vector>
 
 /// @def index_3_to_1
@@ -137,30 +138,16 @@ public: // interface
 		   double upper_extent[3])
   {
 
-    // Project block id's along each axis
-    int ip3[3],it3[3],id3[3];
+    int block_index[3];
+    block_indices_(ip,it,id,block_index);
 
-    index_1_to_3(ip,ip3[0],ip3[1],ip3[2],np_[0],np_[1],np_[2]);
-    index_1_to_3(it,it3[0],it3[1],it3[2],nt_[0],nt_[1],nt_[2]);
-    index_1_to_3(id,id3[0],id3[1],id3[2],nd_[0],nd_[1],nd_[2]);
+    lower_extent[0] = 1.0 * block_index[0] / (nd_[0]*nt_[0]*np_[0]);
+    lower_extent[1] = 1.0 * block_index[1] / (nd_[1]*nt_[1]*np_[1]);
+    lower_extent[2] = 1.0 * block_index[2] / (nd_[2]*nt_[2]*np_[2]);
 
-    // Convert from (ip,it,id) relative blocks to absolute data blocks
-    int kdx,kdy,kdz;
-    kdx = index_3_to_1(id3[0],it3[0],ip3[0],nd_[0],nt_[0],np_[0]);
-    kdy = index_3_to_1(id3[1],it3[1],ip3[1],nd_[1],nt_[1],np_[1]);
-    kdz = index_3_to_1(id3[2],it3[2],ip3[2],nd_[2],nt_[2],np_[2]);
-
-    int nx = np_[0]*nt_[0]*nd_[0];
-    int ny = np_[1]*nt_[1]*nd_[1];
-    int nz = np_[2]*nt_[2]*nd_[2];
-
-    lower_extent[0] = 1.0*kdx/nx;
-    lower_extent[1] = 1.0*kdy/ny;
-    lower_extent[2] = 1.0*kdz/nz;
-
-    upper_extent[0] = 1.0*(kdx+1)/nx;
-    upper_extent[1] = 1.0*(kdy+1)/ny;
-    upper_extent[2] = 1.0*(kdz+1)/nz;
+    upper_extent[0] = 1.0 * (block_index[0] + 1) / (nd_[0]*nt_[0]*np_[0]);
+    upper_extent[1] = 1.0 * (block_index[1] + 1) / (nd_[1]*nt_[1]*np_[1]);
+    upper_extent[2] = 1.0 * (block_index[2] + 1) / (nd_[2]*nt_[2]*np_[2]);
 
   };
 
@@ -170,21 +157,18 @@ public: // interface
 		      int nx, int ny, int nz,
 		      int lower_index[3],
 		      int upper_index[3]) throw ()
- 
   {
-    double lower_extent[3];
-    double upper_extent[3];
-    box_extent(ip,it,id,lower_extent,upper_extent);
+    int block_index[3];
+    block_indices_(ip,it,id,block_index);
 
-    lower_index[0] = lower_extent[0]*nx;
-    lower_index[1] = lower_extent[1]*ny;
-    lower_index[2] = lower_extent[2]*nz;
-    upper_index[0] = upper_extent[0]*nx;
-    upper_index[1] = upper_extent[1]*ny;
-    upper_index[2] = upper_extent[2]*nz;
+    lower_index[0] = block_index[0] * nx /(nd_[0]*nt_[0]*np_[0]);
+    lower_index[1] = block_index[1] * ny /(nd_[1]*nt_[1]*np_[1]);
+    lower_index[2] = block_index[2] * nz /(nd_[2]*nt_[2]*np_[2]);
 
-  };
-
+    upper_index[0] = (block_index[0]+1) * nx / (nd_[0]*nt_[0]*np_[0]);
+    upper_index[1] = (block_index[1]+1) * ny / (nd_[1]*nt_[1]*np_[1]);
+    upper_index[2] = (block_index[2]+1) * nz / (nd_[2]*nt_[2]*np_[2]);
+  }
   // Periodic functions
 
   /// Set whether each axis is periodic or not 
@@ -250,5 +234,25 @@ private: // functions
     return i;
 
   };
+  /// Return the absolute block indices for the given
+  /// (process,thread,block)
+  void block_indices_ (int ip, int it, int id, int block_index[3]) throw ()
+ 
+  {
+    // Project block id's along each axis
+    int ip3[3],it3[3],id3[3];
+
+    index_1_to_3(ip,ip3[0],ip3[1],ip3[2],np_[0],np_[1],np_[2]);
+    index_1_to_3(it,it3[0],it3[1],it3[2],nt_[0],nt_[1],nt_[2]);
+    index_1_to_3(id,id3[0],id3[1],id3[2],nd_[0],nd_[1],nd_[2]);
+
+    // Convert from (ip,it,id) relative blocks to absolute data blocks
+
+    block_index[0] = index_3_to_1(id3[0],it3[0],ip3[0],nd_[0],nt_[0],np_[0]);
+    block_index[1] = index_3_to_1(id3[1],it3[1],ip3[1],nd_[1],nt_[1],np_[1]);
+    block_index[2] = index_3_to_1(id3[2],it3[2],ip3[2],nd_[2],nt_[2],np_[2]);
+
+  };
+
 };
 #endif /* PARALLEL_LAYOUT_HPP */

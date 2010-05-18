@@ -13,6 +13,7 @@
 #include "test.hpp"
 #include "parallel.hpp"
 
+#define TOL 2e-16
 int main(int argc, char ** argv)
 {
   unit_init();
@@ -268,12 +269,12 @@ int main(int argc, char ** argv)
 	  int ip = ipx + pb3[0]*(ipy + pb3[1]*ipz);
 	  double lower_extent[3],upper_extent[3];
 	  layout_parallel.box_extent(ip,0,0,lower_extent,upper_extent);
- 	  passed = passed && (lower_extent[axis_x] == 1.0*ipx/pb3[0]);
- 	  passed = passed && (lower_extent[axis_y] == 1.0*ipy/pb3[1]);
-  	  passed = passed && (lower_extent[axis_z] == 1.0*ipz/pb3[2]);
-	  passed = passed && (upper_extent[axis_x] == 1.0*(ipx+1)/pb3[0]);
-	  passed = passed && (upper_extent[axis_y] == 1.0*(ipy+1)/pb3[1]);
-	  passed = passed && (upper_extent[axis_z] == 1.0*(ipz+1)/pb3[2]);
+ 	  passed = passed && (fabs(lower_extent[axis_x] - 1.0*ipx/pb3[0])<TOL);
+ 	  passed = passed && (fabs(lower_extent[axis_y] - 1.0*ipy/pb3[1])<TOL);
+  	  passed = passed && (fabs(lower_extent[axis_z] - 1.0*ipz/pb3[2])<TOL);
+	  passed = passed && (fabs(upper_extent[axis_x] - 1.0*(ipx+1)/pb3[0])<TOL);
+	  passed = passed && (fabs(upper_extent[axis_y] - 1.0*(ipy+1)/pb3[1])<TOL);
+	  passed = passed && (fabs(upper_extent[axis_z] - 1.0*(ipz+1)/pb3[2])<TOL);
 	}
       }
     }
@@ -299,11 +300,12 @@ int main(int argc, char ** argv)
 	  int index_lower[3],index_upper[3];
 	  layout_parallel.array_indices(ip,0,0,nx,ny,nz,index_lower,index_upper);
 	  passed = passed && (index_lower[axis_x] == nx * ipx/pb3[0]);
- 	  passed = passed && (index_lower[axis_y] == ny * ipy/pb3[1]);
- 	  passed = passed && (index_lower[axis_z] == nz * ipz/pb3[2]);
- 	  passed = passed && (index_upper[axis_x] == nx * (ipx+1)/pb3[0]);
- 	  passed = passed && (index_upper[axis_y] == ny * (ipy+1)/pb3[1]);
- 	  passed = passed && (index_upper[axis_z] == nz * (ipz+1)/pb3[2]);
+
+	  passed = passed && (index_lower[axis_y] == ny * ipy/pb3[1]);
+	  passed = passed && (index_lower[axis_z] == nz * ipz/pb3[2]);
+	  passed = passed && (index_upper[axis_x] == nx * (ipx+1)/pb3[0]);
+	  passed = passed && (index_upper[axis_y] == ny * (ipy+1)/pb3[1]);
+	  passed = passed && (index_upper[axis_z] == nz * (ipz+1)/pb3[2]);
 	}
       }
     }
@@ -446,12 +448,12 @@ int main(int argc, char ** argv)
 	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
 	  double lower_extent[3],upper_extent[3];
 	  layout_blocked.box_extent(0,0,idb,lower_extent,upper_extent);
- 	  passed = passed && (lower_extent[axis_x] == 1.0*idbx/db3[0]);
- 	  passed = passed && (lower_extent[axis_y] == 1.0*idby/db3[1]);
-  	  passed = passed && (lower_extent[axis_z] == 1.0*idbz/db3[2]);
-	  passed = passed && (upper_extent[axis_x] == 1.0*(idbx+1)/db3[0]);
-	  passed = passed && (upper_extent[axis_y] == 1.0*(idby+1)/db3[1]);
-	  passed = passed && (upper_extent[axis_z] == 1.0*(idbz+1)/db3[2]);
+ 	  passed = passed && (fabs(lower_extent[axis_x] - 1.0*idbx/db3[0])<TOL);
+ 	  passed = passed && (fabs(lower_extent[axis_y] - 1.0*idby/db3[1])<TOL);
+  	  passed = passed && (fabs(lower_extent[axis_z] - 1.0*idbz/db3[2])<TOL);
+	  passed = passed && (fabs(upper_extent[axis_x] - 1.0*(idbx+1)/db3[0])<TOL);
+	  passed = passed && (fabs(upper_extent[axis_y] - 1.0*(idby+1)/db3[1])<TOL);
+	  passed = passed && (fabs(upper_extent[axis_z] - 1.0*(idbz+1)/db3[2])<TOL);
 	}
       }
     }
@@ -666,18 +668,18 @@ int main(int argc, char ** argv)
 	  double lower_extent[3],upper_extent[3];
 	  layout_parallel_blocked.box_extent(ipb,0,idb,lower_extent,upper_extent);
   	  passed = passed && (fabs(lower_extent[axis_x]-
- 				   1.0*(idbx + db3[0]*ipbx)/(pb3[0]*db3[0]))<2e-16);
+ 				   1.0*(idbx + db3[0]*ipbx)/(pb3[0]*db3[0]))<TOL);
   	  passed = passed && (fabs(lower_extent[axis_y]-
- 				   1.0*(idby + db3[1]*ipby)/(pb3[1]*db3[1]))<2e-16);
+ 				   1.0*(idby + db3[1]*ipby)/(pb3[1]*db3[1]))<TOL);
   	  passed = passed && (fabs(lower_extent[axis_z]-
- 				   1.0*(idbz + db3[2]*ipbz)/(pb3[2]*db3[2]))<2e-16);
+ 				   1.0*(idbz + db3[2]*ipbz)/(pb3[2]*db3[2]))<TOL);
 
   	  passed = passed && (fabs(upper_extent[axis_x]-
- 				   1.0*((idbx+1) + db3[0]*ipbx)/(pb3[0]*db3[0]))<2e-16);
+ 				   1.0*((idbx+1) + db3[0]*ipbx)/(pb3[0]*db3[0]))<TOL);
   	  passed = passed && (fabs(upper_extent[axis_y]-
- 				   1.0*((idby+1) + db3[1]*ipby)/(pb3[1]*db3[1]))<2e-16);
+ 				   1.0*((idby+1) + db3[1]*ipby)/(pb3[1]*db3[1]))<TOL);
   	  passed = passed && (fabs(upper_extent[axis_z]-
- 				   1.0*((idbz+1) + db3[2]*ipbz)/(pb3[2]*db3[2]))<2e-16);
+ 				   1.0*((idbz+1) + db3[2]*ipbz)/(pb3[2]*db3[2]))<TOL);
 	}
       }
     }
