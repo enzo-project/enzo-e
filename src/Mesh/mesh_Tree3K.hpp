@@ -4,7 +4,7 @@
 #ifndef MESH_TREE3K_HPP
 #define MESH_TREE3K_HPP
 
-/// @file     mesh_tree3k.hpp
+/// @file     mesh_Tree3K.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-29
 /// @todo     Decide on either k or r as refinement factor variable name

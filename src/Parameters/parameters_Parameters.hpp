@@ -4,7 +4,7 @@
 #ifndef PARAMETERS_PARAMETERS_HPP
 #define PARAMETERS_PARAMETERS_HPP
 
-/// @file     parameters_parameters.hpp
+/// @file     parameters_Parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
 /// @todo     Add output support for individual parameters, e.g. for Monitor output

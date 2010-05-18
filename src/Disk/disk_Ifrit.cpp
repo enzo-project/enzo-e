@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      disk_ifrit.cpp
+/// @file      disk_Ifrit.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 16:11:36 PST 2008
 /// @brief     Implementation of the Ifrit class

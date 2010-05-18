@@ -1,5 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
+/// @file     portal.dir
+/// @brief    Interface with other applications, including querying state, modifying parameters, and post-visualization 
 /// @defgroup Portal
 /// @brief    Interface with other applications, including querying state, modifying parameters, and post-visualization 

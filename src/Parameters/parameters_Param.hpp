@@ -4,7 +4,7 @@
 #ifndef PARAM_HPP
 #define PARAM_HPP
 
-/// @file     param.hpp
+/// @file     parameters_Param.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Sun Oct 11 14:55:25 PDT 2009
 /// @todo     Rename print_expression to match cello_parameters_print_list

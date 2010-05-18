@@ -1,5 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @defgroup  Method
+/// @file     method.dir
+/// @brief    Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and visualization
+/// @defgroup Method
 /// @brief    Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and visualization

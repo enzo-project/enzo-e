@@ -4,7 +4,7 @@
 #ifndef SIMULATION_SIMULATION_HPP
 #define SIMULATION_SIMULATION_HPP
 
-/// @file     simulation.hpp
+/// @file     simulation_Simulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class

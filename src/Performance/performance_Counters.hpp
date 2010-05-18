@@ -4,7 +4,7 @@
 #ifndef PERFORMANCE_COUNTERS_HPP
 #define PERFORMANCE_COUNTERS_HPP
 
-/// @file     performance_counters.hpp
+/// @file     performance_Counters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-19 12:55:54
 /// @brief    Interface for the Counters class

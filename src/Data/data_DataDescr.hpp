@@ -1,7 +1,7 @@
 // $Id: data_data.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     data_data.hpp
+/// @file     data_DataDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    Declaration of the DataDescr class

@@ -4,7 +4,7 @@
 #ifndef MESH_NODEK_HPP
 #define MESH_NODEK_HPP
 
-/// @file     mesh_nodek.hpp
+/// @file     mesh_NodeK.hpp
 /// @brief    Include file for mesh_node[23].hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-30

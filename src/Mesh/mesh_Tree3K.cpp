@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_tree3k.cpp
+/// @file     mesh_Tree3K.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-29
 /// @brief    Implementation of Tree3K class for K^3-trees

@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      parallel_mpi.cpp
+/// @file      parallel_Mpi.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Oct 15 10:41:28 PDT 2009
 /// @brief     MPI helper functions

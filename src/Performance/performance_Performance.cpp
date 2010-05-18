@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      performance_performance.cpp
+/// @file      performance_Performance.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      2009-10-15
 /// @brief     Implementation of the Performance class

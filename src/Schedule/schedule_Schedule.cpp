@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      schedule_schedule.cpp
+/// @file      schedule_Schedule.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
-/// @date      
-/// @brief     
+/// @date      2009-11-10
+/// @brief     Implementation of the Schedule class
 
 #include "parameters.hpp"
 #include "simulation.hpp"

@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_tree2k.cpp
+/// @file     mesh_Tree2K.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-27
 /// @brief    Implementation of Tree2K class for K^2-trees

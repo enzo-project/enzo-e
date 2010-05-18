@@ -1,7 +1,7 @@
 // $Id: test_parallel_mpi.cpp 1302 2010-03-17 00:16:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_mpi.cpp
+/// @file     test_Mpi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 11:29:22 PDT 2010
 /// @brief    Program implementing unit tests for the ParallelMpi class

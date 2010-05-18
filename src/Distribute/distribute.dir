@@ -1,5 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
+/// @file     distribute.dir
+/// @brief    Distribute (and dynamically redistribute) Tasks among nodes and processes 
 /// @defgroup Distribute
 /// @brief    Distribute (and dynamically redistribute) Tasks among nodes and processes 

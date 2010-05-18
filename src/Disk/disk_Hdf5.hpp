@@ -4,7 +4,7 @@
 #ifndef DISK_HDF5_HPP
 #define DISK_HDF5_HPP
 
-/// @file     disk_hdf5.hpp
+/// @file     disk_Hdf5.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
 /// @todo     Refactor interface to be hdf5-independent (groups, datasets, etc.)

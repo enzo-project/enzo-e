@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      test_error.cpp
+/// @file      test_Error.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Wed Aug 20 11:24:14 PDT 2008
 /// @brief     Program implementing unit tests for error classes

@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      test_performance.cpp
+/// @file      test_Performance.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Wed Apr 23 12:25:18 PDT 2008
 /// @brief     Program implementing unit tests for performance classes

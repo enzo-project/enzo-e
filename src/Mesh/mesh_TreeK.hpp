@@ -4,7 +4,7 @@
 #ifndef MESH_TREEK_HPP
 #define MESH_TREEK_HPP
 
-/// @file     mesh_treek.hpp
+/// @file     mesh_TreeK.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-30
 /// @brief    Include file for mesh_tree[23]k.hpp

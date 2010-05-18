@@ -4,7 +4,7 @@
 #ifndef AFFINITY_HPP
 #define AFFINITY_HPP
 
-/// @file     parallel_affinity.hpp
+/// @file     parallel_Affinity.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 16:40:35 PDT 2010
 /// @brief    Declaration of the Affinity class

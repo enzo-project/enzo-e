@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_data.cpp
+/// @file     test_Data.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
 /// @brief    Test program for the DataBlock class

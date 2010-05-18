@@ -22,20 +22,27 @@
 # UNPARSED PARAMETERS
 # ======================================================================
 
-  Field pressure { min = 1.0e-6 }
-  Field density  { min = 1.0e-6 }
+  Field {
+
+      courant   = 0.8;
+
+      pressure { min_value = 1.0e-6 };
+      density  { min_value = 1.0e-6 }
+  }
 
   Method {
 
      sequence = ["ppm"];
 
      ppm {
-        gamma     = 1.4;
-        courant   = 0.8;
         diffusion = true;
         flattening = false;
 #        steepening = true;
     }
+  }
+
+  Physics {
+     gamma     = 1.4;
   }
 
   Initial {

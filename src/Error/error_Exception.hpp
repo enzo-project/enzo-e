@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     error_exception.hpp
+/// @file     error_Exception.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Sun Jul 12 13:12:09 PDT 2009
 /// @brief    Declaration of Exception classes

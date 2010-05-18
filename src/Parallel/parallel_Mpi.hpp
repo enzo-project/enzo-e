@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     parallel_mpi.hpp
+/// @file     parallel_Mpi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Oct 15 10:40:37 PDT 2009 
 /// @brief    Interface for the ParallelMpi class

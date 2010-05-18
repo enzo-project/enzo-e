@@ -1,7 +1,7 @@
 // $Id: method_method.cpp 1262 2010-03-03 15:44:05Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_method.cpp
+/// @file     method_Method.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Jul 13 11:12:25 PDT 2009
 /// @brief    Implements the Method base class

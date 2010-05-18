@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     param.cpp
+/// @file     parameters_Param.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Sun Oct 11 15:02:08 PDT 2009
 /// @bug      Probable memory leaks

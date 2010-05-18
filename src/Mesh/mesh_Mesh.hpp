@@ -1,7 +1,7 @@
 // $Id: mesh_mesh.hpp 1259 2010-03-02 03:12:08Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_mesh.hpp
+/// @file     mesh_Mesh.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Nov 10 15:38:40 PST 2009
 /// @brief    Declaration of the Mesh class

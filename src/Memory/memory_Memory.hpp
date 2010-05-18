@@ -4,7 +4,7 @@
 #ifndef MEMORY_MEMORY_HPP
 #define MEMORY_MEMORY_HPP
 
-/// @file     memory_memory.hpp
+/// @file     memory_Memory.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
 /// @brief    Interface for the Memory class.  Uses the Singleton design pattern.

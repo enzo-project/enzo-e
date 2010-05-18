@@ -4,7 +4,7 @@
 #ifndef ERROR_ERROR_HPP
 #define ERROR_ERROR_HPP
 
-/// @file     error_error.hpp
+/// @file     error_Error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Add Parallel support
 /// @bug      exit() is called instead of MPI_Abort(), etc.

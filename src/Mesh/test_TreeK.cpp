@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_tree_k.cpp
+/// @file     test_TreeK.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-28
 /// @brief    Test program for Tree2K and Tree3K classes

@@ -1,5 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
+/// @file     simulation.dir
+/// @brief    Specifies the problem(s) to run 
 /// @defgroup Simulation
 /// @brief    Specifies the problem(s) to run 

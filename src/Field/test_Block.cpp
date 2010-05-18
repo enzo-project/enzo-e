@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_field_block.cpp
+/// @file     test_Block.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2008-02-20
 /// @brief    Unit tests for the FieldBlock class

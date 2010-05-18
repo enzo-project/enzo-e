@@ -4,7 +4,7 @@
 #ifndef MESH_NODE2K_HPP
 #define MESH_NODE2K_HPP
 
-/// @file     mesh_node2k.hpp
+/// @file     mesh_Node2K.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Oct 27 12:32:07 PDT 2009
 /// @brief    Interface for Node2K class

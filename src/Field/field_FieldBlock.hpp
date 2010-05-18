@@ -4,7 +4,7 @@
 #ifndef FIELD_BLOCK_HPP
 #define FIELD_BLOCK_HPP
 
-/// @file     field_block.hpp
+/// @file     field_FieldBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
 /// @brief    Fortran-style array class.

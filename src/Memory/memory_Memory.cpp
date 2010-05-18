@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      memory.cpp
+/// @file      memory_Memory.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Sep  3 16:44:18 PDT 2009
 /// @brief     Functions for dynamic memory management
