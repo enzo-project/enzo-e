@@ -45,9 +45,13 @@ public: // virtual functions
 
   virtual void initialize() throw() = 0;
 
-  /// Apply the method to advance one timestep
+  /// Apply the method to advance a block one timestep 
 
-  virtual void advance() throw() = 0; 
+  virtual void advance_block() throw() = 0; 
+
+  /// Refresh a block face's boundary / ghost zones given neighboring block face(s) 
+
+  virtual void refresh_face() throw() = 0;
 
 protected: // functions
 

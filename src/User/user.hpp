@@ -10,6 +10,7 @@
 /// @brief    Include file for the User component
 
 #include "user_MethodEnzoPpm.hpp"
+#include "user_MethodEnzoPpml.hpp"
 
 #endif /* USER_HPP */
 

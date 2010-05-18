@@ -17,7 +17,10 @@ int main (int argc, char ** argv)
 
   // Initialize parallelism
 
-  Parallel::instance()->initialize(&argc,&argv);
+  Parallel * parallel = Parallel::instance();
+  parallel->initialize(&argc,&argv);
+
+  unit_init(parallel->process_rank(), parallel->process_count());
 
   unit_class ("MethodEnzoPpm");
   MethodEnzoPpm ppm;
@@ -26,8 +29,14 @@ int main (int argc, char ** argv)
   ppm.initialize();
   unit_assert(true);
 
-  unit_func("advance");
-  ppm.advance();
+  unit_func("advance_block");
+  ppm.advance_block();
   unit_assert(false);
+
+  unit_func("refresh_face");
+  ppm.refresh_face();
+  unit_assert(false);
+
+  unit_finalize();
 
 }

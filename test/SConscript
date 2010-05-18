@@ -87,7 +87,9 @@ env.TestCello('cello_implosion.out',  '#/bin/cello', ARGS='test/parse_implosion.
 
 
 
-# env.Unit('Array.unit','test_enzo_method_ppm')
+env.Unit('test_EnzoPpm.out', '#/bin/test_enzo_ppm')
+env.Unit('test_EnzoPpml.out','#/bin/test_enzo_ppml')
+
 # env.Unit('Array.unit','test_tree')
 # env.Unit('Array.unit','test_tree_k')
 #	./test_Parse < shock-pool.in > shock-pool.out

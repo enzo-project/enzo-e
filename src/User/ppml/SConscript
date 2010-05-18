@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['error', 'disk', 'memory', 'monitor', 'parallel']
+components = ['user','parameters', 'error','disk','memory','monitor','parallel','method']
 libraries  = ['hdf5', 'png','boost_thread-mt', '$FORTRANLIBS']
 
 env = env.Clone(LIBS = [components,libraries])
@@ -27,7 +27,9 @@ sources = [
 	'PPML_TimeStep.F',
 	'SetExternalBoundary.cpp']
 
-binaries  = env.Program (['test_ppml.cpp', sources])
+binaries  = [env.Program (['test_ppml.cpp',      sources]),	
+             env.Program (['test_enzo_ppml.cpp', sources])]
+
 libraries = env.Library ('user-ppml', sources)
 
 env.Alias('install-bin', env.Install ('$BINPATH', binaries))

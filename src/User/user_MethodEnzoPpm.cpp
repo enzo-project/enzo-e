@@ -36,7 +36,13 @@ void MethodEnzoPpm::initialize() throw()
   flattening_ = parameters->value_logical ("flattening", "false");
 }
 
-void MethodEnzoPpm::advance() throw()
+void MethodEnzoPpm::advance_block() throw()
 {
-  INCOMPLETE_MESSAGE("MethodEnzoPpm::advance","");
+  INCOMPLETE_MESSAGE("MethodEnzoPpm::advance_block","");
 }
+
+void MethodEnzoPpm::refresh_face() throw()
+{
+  INCOMPLETE_MESSAGE("MethodEnzoPpm::refresh_face","");
+}
+

@@ -25,9 +25,13 @@ public: // interface
 
   void initialize() throw();
 
-  /// Apply the method to advance one timestep
+  /// Apply the method to advance a block one timestep 
 
-  void advance() throw();
+  void advance_block() throw();
+
+  /// Refresh a block face's boundary / ghost zones given neighboring block face(s) 
+
+  void refresh_face() throw();
 
 private: // attributes
 
