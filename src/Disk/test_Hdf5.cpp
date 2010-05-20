@@ -12,24 +12,20 @@
 
 #include "error.hpp"
 #include "test.hpp"
-#include "field_Array.hpp"
 #include "disk.hpp"
 
 int main(int argc, char ** argv)
 {
   unit_init();
 
-  Array A;
-  A.resize(50,100);
+  int nx = 100;
+  int ny = 50;
+  Scalar * a = new Scalar[nx*ny];
 
-  Scalar * a = A.values();
-  int n0,n1;
-  A.size(&n0,&n1);
-
-  for (int i1=0; i1<100; i1++) {
-    for (int i0=0; i0<50; i0++) {
-      int i = i0 + n0*(i1);
-      a[i] = i0*3 + i1*5;
+  for (int iy=0; iy<ny; iy++) {
+    for (int ix=0; ix<nx; ix++) {
+      int i = ix + nx*(iy);
+      a[i] = ix*3 + iy*5;
     }
   }
 
@@ -39,32 +35,32 @@ int main(int argc, char ** argv)
 
   Hdf5 hdf5;
 
-  int n[3];
-
+  int mx,my,mz;
   hdf5.file_open("file_open_test.hdf5","w");
-  A.size(&n[0],&n[1],&n[2]);
-  hdf5.dataset_open_write ("dataset",n[0],n[1],n[2]);
-  hdf5.write(A.values());
+  mx = nx;
+  my = ny;
+  mz = 1;
+
+  hdf5.dataset_open_write ("dataset",mx,my,mz);
+  hdf5.write(a);
   hdf5.dataset_close ();
   hdf5.file_close();
 
-  Array B;
 
   hdf5.file_open("file_open_test.hdf5","r");
-  hdf5.dataset_open_read ("dataset",&n[0],&n[1],&n[2]);
-  B.resize(n[0],n[1],n[2]);
-  hdf5.read(B.values());
+  hdf5.dataset_open_read ("dataset",&mx,&my,&mz);
+
+  Scalar * b = new Scalar[nx*ny];
+  
+  hdf5.read(b);
   hdf5.dataset_close ();
   hdf5.file_close();
 
-  Scalar * b = B.values();
-
   bool passed = true;
-  for (int i1=0; i1<100 && passed; i1++) {
-    for (int i0=0; i0<50 && passed; i0++) {
-      int i = i0 + n0*(i1);
-      if (a[i] != B(i0,i1)) passed = false;
-      if (b[i] != A(i0,i1)) passed = false;
+  for (int iy=0; iy<ny && passed; iy++) {
+    for (int ix=0; ix<nx && passed; ix++) {
+      int i = ix + nx*(iy);
+      if (a[i] != b[i]) passed = false;
     }
   }
 
