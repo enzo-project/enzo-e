@@ -29,6 +29,8 @@ enum precision_type {
 #include <string>
 #include <memory>
 
+#include "error.hpp"
+
 class FieldDescr {
 
   /// @class    FieldDescr

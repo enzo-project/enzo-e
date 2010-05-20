@@ -10,11 +10,10 @@ env.Alias('install-inc',env.Install ('#/include',includes))
 
 libraries = env.Library ('field', [sources])
 
-test_array       = env.Program (['test_Array.cpp',  sources])
-test_field_block = env.Program (['test_Block.cpp',  sources])
-test_field       = env.Program (['test_Field.cpp',  sources])
+test_field_block = env.Program (['test_FieldBlock.cpp',  sources])
+test_field_descr = env.Program (['test_FieldDescr.cpp',  sources])
 
-tests      = [test_array, test_field_block, test_field]
+tests      = [test_field_block, test_field_descr]
 
 env.Alias('install-lib',env.Install ('#/lib',libraries))
 env.Alias('install-bin',env.Install ('$BINPATH', tests))

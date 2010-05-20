@@ -7,6 +7,10 @@
 /// @file     field_FieldBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
+/// @todo     Add allocation and deallocation
+/// @todo     Implement and test merge(),split()
+/// @todo     Implement and test grow(),shrink()
+/// @todo     Implement and test read(),write()
 /// @brief    Fortran-style array class.
 
 class FieldBlock {
@@ -22,94 +26,85 @@ class FieldBlock {
 public: // interface
 
   /// Create a new uninitialized FieldBlock object
-  FieldBlock() throw() {};
+  FieldBlock() throw();
 
   /// Create a new initialized FieldBlock object
   FieldBlock(Scalar * values, 
-	int *    permute,
-	int      ndx,  
-	int      ndy,
-	int      ndz,
-	int      nda=1,
-	int      nx=0,
-	int      ny=0,
-	int      nz=0,
-	int      na=0) throw() :
-    values_(values)
-  { 
-    if (permute) {
-      p_[permute[0]] = 0; // default 1 = x
-      p_[permute[1]] = 1; // default 2 = y
-      p_[permute[2]] = 2; // default 3 = z
-      p_[permute[3]] = 3; // default 4 = a
-    } else {
-      p_[0] = 0;
-      p_[1] = 1;
-      p_[2] = 2;
-      p_[3] = 3;
-    }
+	     int *    permute,
+	     int      ndx,  
+	     int      ndy,
+	     int      ndz,
+	     int      nda = 1,
+	     int      nx  = 0,
+	     int      ny  = 0,
+	     int      nz  = 0,
+	     int      na  = 0) throw();
 
-    nd_[p_[0]] = ndx;
-    nd_[p_[1]] = ndy;
-    nd_[p_[2]] = ndz;
-    nd_[p_[3]] = nda;
+  /// Deconstructor
+  ~FieldBlock() throw();
 
-    n_[p_[0]] = nx ? nx : ndx;
-    n_[p_[1]] = ny ? ny : ndy;
-    n_[p_[2]] = nz ? nz : ndz;
-    n_[p_[3]] = na ? na : nda;
+  /// Copy constructor
+  FieldBlock(const FieldBlock & classname) throw ();
 
-    m_[p_[0]] = n_[p_[3]];
-    m_[p_[1]] = n_[p_[0]]*m_[p_[0]];
-    m_[p_[2]] = n_[p_[1]]*m_[p_[1]];
-    m_[p_[3]] = n_[p_[2]]*m_[p_[2]];
-
-  }
+  /// Assignment operator
+  FieldBlock & operator= (const FieldBlock & classname) throw ();
 
   /// Return a pointer to the ith array
-  Scalar * values(int i=0) const throw()
-  {
-    return & values_[i*m_[3]];
-  }
+  Scalar * values(int i=0) const throw();
 
   /// Return allocated block dimensions
   void get_dim 
   (int * ndx, 
    int * ndy = 0,
-   int * ndz = 0) const throw()
-  { 
-    if (ndx) *ndx = nd_[p_[0]];
-    if (ndy) *ndy = nd_[p_[1]];
-    if (ndz) *ndz = nd_[p_[2]];
-  }
+   int * ndz = 0) const throw();
 
   /// Return the array size
   void get_size 
   (int * nx,
    int * ny = 0,
    int * nz = 0, 
-   int  *na = 0) const throw()
-  {
-    if (nx) *nx = n_[p_[0]];
-    if (ny) *ny = n_[p_[1]];
-    if (nz) *nz = n_[p_[2]];
-    if (na) *na = n_[p_[3]];
-  }
+   int  *na = 0) const throw();
 
   /// Return increments for loop index calculations
   void get_inc 
   (int * mx, 
    int * my = 0,
    int * mz = 0,
-   int * ma = 0) const throw () 	
-  {
-    if (mx) *mx = m_[p_[0]];
-    if (my) *my = m_[p_[1]];
-    if (mz) *mz = m_[p_[2]];
-    if (ma) *ma = m_[p_[3]];
-  }
+   int * ma = 0) const throw ();
 
-private: // functions
+  // /// Resize the array, deallocating any existing data
+  // void resize (int n0, 
+  // 		       int n1=1,
+  // 		       int n2=1) throw();
+
+  /// Return the total length of the array
+  int length() const throw();
+
+  /// Set all values to 0, or to the given value if supplied
+  void clear(Scalar value = 0.0) throw();
+
+  //  /// Shrink the Array by some number of zones along each axis.  Used
+  //  /// for deallocating ghost or boundary zones
+  //   void shrink();
+
+  //  /// Enlarge the Array by some number of zones along each axis. Used
+  //  /// for allocating ghost or boundary zones.
+  //   void grow();
+
+  //   /// Split Block into multiple blocks along some subset of axes.  Used for AMR.
+  //   void split();
+
+  //   ///  Merge Blocks into a single one along some subset of axes.  Used for AMR.
+  //   void merge();
+
+  //   /// Return a subarray of the given block.  Used for accessing ghost or boundary zones.
+  //   void subarray();
+
+  //   /// Write the Array to disk
+  //   write();
+
+  //   /// Read the Array from disk
+  //   read();
 
 private: // attributes
 

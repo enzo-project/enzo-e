@@ -11,7 +11,6 @@
 
 #include "field_FieldDescr.hpp"
 #include "field_FieldBlock.hpp"
-#include "field_Array.hpp"
 
 #endif /* FIELD_HPP */
 
