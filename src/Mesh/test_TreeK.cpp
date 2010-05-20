@@ -317,9 +317,6 @@ void create_tree
   memory->print();
   memory->set_active(false);
 
-
-  if (geomview) tree->geomview(name + "-0.gv");
-
   mem_per_node = (float) memory->bytes(0) / tree->num_nodes();
   printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
@@ -359,8 +356,6 @@ void create_tree
     delete [] image;
   }
 
-  if (geomview) tree->geomview(name + "-0" + "-1.gv");
-
   mem_per_node = (float) memory->bytes(0) / tree->num_nodes();
   printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
@@ -393,7 +388,7 @@ void create_tree
     delete [] image;
   }
 
-  if (geomview) tree->geomview(name + "1" + "-2.gv");
+  if (geomview) tree->geomview(name + ".gv");
 
   printf ("nodes      = %d\n",tree->num_nodes());
   printf ("levels     = %d\n",tree->levels());
