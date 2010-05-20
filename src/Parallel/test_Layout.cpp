@@ -300,7 +300,6 @@ int main(int argc, char ** argv)
 	  int index_lower[3],index_upper[3];
 	  layout_parallel.array_indices(ip,0,0,nx,ny,nz,index_lower,index_upper);
 	  passed = passed && (index_lower[axis_x] == nx * ipx/pb3[0]);
-
 	  passed = passed && (index_lower[axis_y] == ny * ipy/pb3[1]);
 	  passed = passed && (index_lower[axis_z] == nz * ipz/pb3[2]);
 	  passed = passed && (index_upper[axis_x] == nx * (ipx+1)/pb3[0]);

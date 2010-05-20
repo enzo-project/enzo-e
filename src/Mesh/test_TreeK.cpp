@@ -249,7 +249,7 @@ int * create_sphere (int n3, int max_levels)
 
 void write_image(std::string filename, float * image, int nx, int ny, int nz)
 {
-  if (nx > 8192 || ny > 8192 || nz > 8192) {
+  if (nx > 8194 || ny > 8194 || nz > 8194) {
     printf ("%s:%d (nx,ny,nz) = (%d,%d,%d)\n",__FILE__,__LINE__,nx,ny,nz);
     exit(1);
   }
