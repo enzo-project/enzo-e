@@ -40,26 +40,13 @@ class FieldDescr {
 public: // public
 
   /// Initialize a FieldDescr object
-  FieldDescr(std::string name,
-	     int dim = 3) throw();
+  FieldDescr(std::string name) throw();
 
-  /// Set dimension
-  void set_dimension (int dim)
-  { if (1 <= dim && dim <= 3) {
-      dim_ = dim;
-    } else {
-      ERROR_MESSAGE("FieldDescr::set_dimension","dim out of range");
-    }
-  };
-      
-  /// Return dimensionality
-  int dimension () const throw() { return dim_;  };
-      
   /// Return Field's name
   std::string name () const throw()
   { return name_; }
 
-  /// Return centering of Field.  Assumes vector length is at least dim_
+  /// Return centering of Field
   const bool * centering () const throw()
   {
     return centering_;
@@ -68,7 +55,7 @@ public: // public
   /// Return centering of Field for the given axis
   void set_centering (int axis, bool value) throw()
   {
-    if (0 <= axis && axis < dim_) 
+    if (0 <= axis && axis < 3) 
       centering_[axis] = value; 
   };
 
@@ -128,9 +115,6 @@ private: // functions
   };
 
 private: // attributes
-
-  /// Dimension of Field
-  int dim_;
 
   /// String defining the field's name
   std::string name_;

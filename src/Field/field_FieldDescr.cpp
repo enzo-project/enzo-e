@@ -13,11 +13,9 @@
 
 FieldDescr::FieldDescr
 (
- std::string name,
- int dim
+ std::string name
  ) throw ()
-  : dim_(dim),
-    name_(name),
+  : name_(name),
     centering_(0),
     min_value_(0),
     max_value_(0),
@@ -25,7 +23,7 @@ FieldDescr::FieldDescr
     max_action_ (field_action_none),
     precision_  (default_precision_())
 {
-  centering_ = new bool [dim_];
-  for (int i=0; i < dim_; i++) centering_[i] = true;
+  centering_ = new bool [3];
+  for (int i=0; i < 3; i++) centering_[i] = true;
 }
 
