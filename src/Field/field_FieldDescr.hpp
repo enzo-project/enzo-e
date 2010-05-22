@@ -12,7 +12,7 @@
 enum field_action {
   field_action_unknown,  // Uninitialized action
   field_action_none,     // Do nothing if range exceeded
-  field_action_assign,      // Assign field values to min / max if range exceeded
+  field_action_assign,   // Assign field values to min / max if range exceeded
   field_action_warning,  // Issue warning if range exceeded
   field_action_error,    // Issue error if range exceeded
   field_action_timestep, // Retry with reduced timestep if range exceeded
@@ -20,10 +20,13 @@ enum field_action {
 };
 
 enum precision_type {
-  precision_unknown,  //  unknown precision
-  precision_default,  //  default precision, based on CONFIG_PRECISION_[SINGLE|DOUBLE]
-  precision_32bit,    //  32-bit field data
-  precision_64bit     //  64-bit field data
+  precision_unknown,   //  unknown precision
+  precision_default,   //  default precision, based on CONFIG_PRECISION_[SINGLE|DOUBLE]
+  precision_half,      //  16-bit field data
+  precision_single,    //  32-bit field data
+  precision_double,    //  64-bit field data
+  precision_extended,  //  80-bit (ala Intel) field data
+  pricision_quadruple  // 128-bit field data
 };
 
 #include <string>
@@ -40,103 +43,176 @@ class FieldDescr {
 public: // public
 
   /// Initialize a FieldDescr object
-  FieldDescr(std::string name) throw();
+  FieldDescr() throw();
 
-  /// Return Field's name
-  std::string name () const throw()
-  { return name_; }
+  /// Destructor
+  ~FieldDescr() throw();
 
-  /// Return centering of Field
-  const bool * centering () const throw()
-  {
-    return centering_;
-  };
+  /// Copy constructor
+  FieldDescr(const FieldDescr & field_descr) throw();
 
-  /// Return centering of Field for the given axis
-  void set_centering (int axis, bool value) throw()
-  {
-    if (0 <= axis && axis < 3) 
-      centering_[axis] = value; 
-  };
+  /// Assignment operator
+  FieldDescr & operator= (const FieldDescr & field_descr) throw();
 
-  /// Return Field minimum value
-  double min_value () const throw()
-  { return min_value_; };
+  /// Return the number of fields
+  int field_count() const throw();
 
-  /// Set Field minimum value
-  void set_min_value (double value) throw()
-  { min_value_ = value; };
+  /// Return the integer handle for the named field
+  int field_id(const std::string name) const throw();
 
-  /// Return Field maximum value
-  double max_value () const throw()
-  { return max_value_; };
+  /// Return name of the ith field
+  std::string field_name(size_t id_field) const throw()
+  { return (id_field < field_name_.size()) ? field_name_[id_field] : ""; };
 
-  /// Set Field maximum value
-  void set_max_value (double value) throw()
-  { max_value_ = value; };
+  /// Return the number of groups
+  int group_count() const throw()
+  { return group_name_.size(); };
 
-  /// Return action on violating Field minimum value
-  field_action min_action () const throw()
-  { return min_action_; };
+  /// Return the integer handle for the named group
+  int group_id(const std::string name) const throw();
 
-  /// Set action on violating Field minimum value
-  void set_min_action (field_action action) throw()
-  { min_action_ = action;  };
+  /// Return name of the ith group
+  std::string group_name(int id_group) const throw();
 
-  /// Return action on violating Field maximum value
-  field_action max_action () const throw()
-  { return max_action_; };
+  /// Return whether the given field is in the given group
+  bool in_group(int id_field) const throw();
 
-  /// Set action on violating Field maximum value
-  void set_max_action (field_action action) throw()
-  { max_action_ = action;  };
+  /// alignment in bytes of fields in memory
+  int alignment() const throw();
 
-  /// Return precision of Field
-  precision_type precision () const throw()
-  { return precision_; };
+  /// padding in bytes between fields in memory
+  int padding() const throw();
 
-  /// Set precision of Field
-  void set_precision (precision_type precision) throw()
-  { 
-    precision_ = (precision == precision_default) ? 
-      default_precision_() : precision;
-  };
+  /// centering of given field
+  void centering(bool * cx, bool * cy, bool * cz) const throw();
+
+  /// depth of ghost zones of given field
+  void ghosts(int * gx, int * gy, int * gz) const throw();
+
+  /// precision of given field
+  precision_type precision() const throw();
+
+  //----------------------------------------------------------------------
+
+  // /// Return Field's name
+  // std::string name () const throw();
+
+  // /// Return centering of Field
+  // const bool * centering () const throw();
+
+  // /// Return centering of Field for the given axis
+  // void set_centering (int axis, bool value) throw()
+  // {
+  //   if (0 <= axis && axis < 3) 
+  //     centering_[axis] = value; 
+  // };
+
+  // /// Return Field minimum value
+  // double min_value () const throw()
+  // { return min_value_; };
+
+  // /// Set Field minimum value
+  // void set_min_value (double value) throw()
+  // { min_value_ = value; };
+
+  // /// Return Field maximum value
+  // double max_value () const throw()
+  // { return max_value_; };
+
+  // /// Set Field maximum value
+  // void set_max_value (double value) throw()
+  // { max_value_ = value; };
+
+  // /// Return action on violating Field minimum value
+  // field_action min_action () const throw()
+  // { return min_action_; };
+
+  // /// Set action on violating Field minimum value
+  // void set_min_action (field_action action) throw()
+  // { min_action_ = action;  };
+
+  // /// Return action on violating Field maximum value
+  // field_action max_action () const throw()
+  // { return max_action_; };
+
+  // /// Set action on violating Field maximum value
+  // void set_max_action (field_action action) throw()
+  // { max_action_ = action;  };
+
+  // /// Return precision of Field
+  // precision_type precision () const throw()
+  // { return precision_; };
+
+  // /// Set precision of Field
+  // void set_precision (precision_type precision) throw()
+  // { 
+  //   precision_ = (precision == precision_default) ? 
+  //     default_precision_() : precision;
+  // };
 
 private: // functions
 
   precision_type default_precision_ () {
-#ifdef CONFIG_PRECISION_SINGLE
-    return precision_32bit;
-#endif
-#ifdef CONFIG_PRECISION_DOUBLE
-    return precision_64bit;
-#endif
+
+#if defined CONFIG_PRECISION_HALF
+    return precision_half;
+#elif defined CONFIG_PRECISION_SINGLE
+    return precision_single;
+#elif defined CONFIG_PRECISION_DOUBLE
+    return precision_double;
+#elif defined CONFIG_PRECISION_EXTENDED
+    return precision_extended;
+#elif defined CONFIG_PRECISION_QUADRUPLE
+    return precision_quadruple;
+#else
     return precision_unknown;
+#endif
+
   };
 
 private: // attributes
 
-  /// String defining the field's name
-  std::string name_;
+  /// Number of fields
+  int field_count_;
 
-  /// Cell centering
-  bool * centering_;
+  /// Number of field groups
+  int group_count_;
 
-  /// Minimum allowed value for the Field
-  double min_value_;
+  /// alignment of start of each field in bytes
+  int alignment_;
 
-  /// Maximum allowed value for the Field
-  double max_value_;
+  /// padding between fields in bytes
+  int padding_;
 
-  /// Action to perform if Field values go below min_
-  field_action min_action_ ;
+  /// Courant number for fields
+  double courant_;
 
-  /// Action to perform if Field values go above max_
-  field_action max_action_ ;
+  /// String defining each field
+  std::vector<std::string> field_name_;
 
-  /// Precision of the Field data
-  precision_type precision_;
+  /// String defining each group
+  std::vector<std::string> group_name_;
 
+  /// Precision of each field
+  std::vector<precision_type> precision_;
+
+  /// cell centering for each field
+  std::vector<bool[3]> centering_;
+
+  /// Ghost depth of each field
+  std::vector<int[3]> ghosts_;
+
+  /// minimum allowed value for each field
+  std::vector<double> min_value_;
+
+  /// maximum allowed value for each field
+  std::vector<double> max_value_;
+
+  /// what should be done if a field violates its minimum value
+  std::vector<field_action> min_action_;
+
+  /// what should be done if a field violates its maximum value
+  std::vector<field_action> max_action_;
 };
 
 #endif /* FIELD_FIELD_DESCR_HPP */

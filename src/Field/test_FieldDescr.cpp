@@ -60,18 +60,18 @@ int main()
 
   unit_func("precision");
   density.set_precision(precision_default);
-  velocity_x.set_precision(precision_32bit);
-  velocity_y.set_precision(precision_64bit);
+  velocity_x.set_precision(precision_single);
+  velocity_y.set_precision(precision_double);
   int default_precision = precision_unknown;
 #ifdef CONFIG_PRECISION_SINGLE
-  default_precision = precision_32bit;
+  default_precision = precision_single;
 #endif
 #ifdef CONFIG_PRECISION_DOUBLE
-  default_precision = precision_64bit;
+  default_precision = precision_double;
 #endif
   unit_assert (density.precision()    == default_precision);
-  unit_assert (velocity_x.precision() == precision_32bit);
-  unit_assert (velocity_y.precision() == precision_64bit);
+  unit_assert (velocity_x.precision() == precision_single);
+  unit_assert (velocity_y.precision() == precision_double);
 
   unit_finalize();
 }

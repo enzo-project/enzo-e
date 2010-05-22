@@ -12,18 +12,21 @@
 //----------------------------------------------------------------------
 
 FieldDescr::FieldDescr
-(
- std::string name
- ) throw ()
-  : name_(name),
-    centering_(0),
-    min_value_(0),
-    max_value_(0),
-    min_action_ (field_action_none),
-    max_action_ (field_action_none),
-    precision_  (default_precision_())
+() throw ()
+  : field_count_(0),
+    group_count_(0),
+    alignment_(0),
+    padding_(0),
+    courant_(1),
+    field_name_(),
+    group_name_(),
+    precision_(),
+    centering_(),
+    ghosts_(),
+    min_value_(),
+    max_value_(),
+    min_action_(),
+    max_action_()
 {
-  centering_ = new bool [3];
-  for (int i=0; i < 3; i++) centering_[i] = true;
 }
 
