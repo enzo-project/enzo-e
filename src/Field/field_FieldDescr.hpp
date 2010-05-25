@@ -31,6 +31,7 @@ enum precision_type {
 
 #include <string>
 #include <memory>
+#include <set>
 
 #include "error.hpp"
 
@@ -40,42 +41,40 @@ class FieldDescr {
   /// @ingroup  Field
   /// @brief    Interface for the FieldDescr class
 
-public: // public
+public: // functions
 
   /// Initialize a FieldDescr object
   FieldDescr() throw();
 
-  /// Destructor
-  ~FieldDescr() throw();
+  // /// Destructor
+  // ~FieldDescr() throw();
 
-  /// Copy constructor
-  FieldDescr(const FieldDescr & field_descr) throw();
+  // /// Copy constructor
+  // FieldDescr(const FieldDescr & field_descr) throw();
 
-  /// Assignment operator
-  FieldDescr & operator= (const FieldDescr & field_descr) throw();
+  // /// Assignment operator
+  // FieldDescr & operator= (const FieldDescr & field_descr) throw();
 
   /// Return the number of fields
   int field_count() const throw();
 
+  /// Return name of the ith field
+  std::string field_name(size_t id_field) const throw();
+
   /// Return the integer handle for the named field
   int field_id(const std::string name) const throw();
 
-  /// Return name of the ith field
-  std::string field_name(size_t id_field) const throw()
-  { return (id_field < field_name_.size()) ? field_name_[id_field] : ""; };
-
   /// Return the number of groups
-  int group_count() const throw()
-  { return group_name_.size(); };
-
-  /// Return the integer handle for the named group
-  int group_id(const std::string name) const throw();
+  int group_count() const throw();
 
   /// Return name of the ith group
   std::string group_name(int id_group) const throw();
 
+  /// Return the integer handle for the named group
+  int group_id(const std::string name) const throw();
+
   /// Return whether the given field is in the given group
-  bool in_group(int id_field) const throw();
+  bool field_in_group(int id_field, int id_group) const throw();
 
   /// alignment in bytes of fields in memory
   int alignment() const throw();
@@ -84,13 +83,13 @@ public: // public
   int padding() const throw();
 
   /// centering of given field
-  void centering(bool * cx, bool * cy, bool * cz) const throw();
+  void centering(int id_field, bool * cx, bool * cy, bool * cz) const throw();
 
   /// depth of ghost zones of given field
-  void ghosts(int * gx, int * gy, int * gz) const throw();
+  void ghosts(int id_field, int * gx, int * gy, int * gz) const throw();
 
   /// precision of given field
-  precision_type precision() const throw();
+  precision_type precision(int id_field) const throw();
 
   //----------------------------------------------------------------------
 
@@ -172,12 +171,6 @@ private: // functions
 
 private: // attributes
 
-  /// Number of fields
-  int field_count_;
-
-  /// Number of field groups
-  int group_count_;
-
   /// alignment of start of each field in bytes
   int alignment_;
 
@@ -190,8 +183,18 @@ private: // attributes
   /// String defining each field
   std::vector<std::string> field_name_;
 
+  /// Integer id for each field.  Inverse mapping of field_name_
+  std::map<std::string,int> field_id_;
+
   /// String defining each group
   std::vector<std::string> group_name_;
+
+  /// Integer id for each group.  Inverse mapping of group_name_
+  std::map<std::string,int> group_id_;
+
+  typedef std::set<int> set_int_type;
+  /// Set of groups containing each field.  field_in_group_[field][group]
+  std::vector<set_int_type> field_in_group_;
 
   /// Precision of each field
   std::vector<precision_type> precision_;

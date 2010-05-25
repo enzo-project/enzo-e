@@ -23,66 +23,15 @@ class DataDescr {
 public: // interface
 
   /// Initialize the DataDescr object
-  DataDescr()
-    : dim_(3),
-      field_descr_(),
-      particle_descr_()
-  { };
-
-
-  /// Set dimensions
-  void set_dimension (int dim)
-  {
-    if (1 <= dim && dim <= 3) {
-      dim_ = dim;
-    } else {
-      ERROR_MESSAGE("DataDescr::set_dimension","dim out of range");
-    }
-  }
-
-  int dimension () const throw ()
-  { return dim_; }
+  DataDescr() throw();
 
   //----------------------------------------------------------------------
   // Field functions
   //----------------------------------------------------------------------
 
-  /// Return the ith Field descriptor
-  FieldDescr * field_descr (int index)
-  { 
-    return (0 <= index && index < field_count()) ? 
-      field_descr_[index] : 0;
-  };
+  /// Return the Field descriptor
 
-  /// Add a new field to the list of known fields
-  int field_insert (std::string name) throw()
-  { 
-    int index = field_count();
-    FieldDescr * field = new FieldDescr(name,dim_);
-    field_descr_.push_back(field); 
-    return index;
-  };
-
-  /// Return the number of Fields
-  int field_count() const throw()
-  { return field_descr_.size(); }
-
-
-  /// Return named Field's index
-  int field_index (std::string name) const throw()
-  { 
-    for (int index=0; index < field_count(); index++) {
-      if (field_descr_[index]->name() == name) return index;
-    }
-    return -1; // Uh oh
-  }
-
-  /// Return indexed Field's name
-  std::string field_name (int index) const throw()
-  { 
-    return (0 <= index && index < field_count()) ? 
-      field_descr_[index]->name() : "";
-  }
+  FieldDescr * field_descr ();
 
   //----------------------------------------------------------------------
   // Particle functions
@@ -92,8 +41,8 @@ private: // attributes
 
   int           dim_;
 
-  std::vector<FieldDescr *>    field_descr_;
-  std::vector<ParticleDescr *> particle_descr_;
+  FieldDescr    field_descr_;
+  ParticleDescr particle_descr_;
 
 };
 
