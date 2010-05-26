@@ -190,7 +190,6 @@ int main()
 
   field_descr->centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
   unit_assert(  info.cx &&   info.cy && ! info.cz);
-  printf ("centering = %d %d %d\n",info.cx,info.cy,info.cz);
   
   // Ghost zone depth
 
@@ -252,6 +251,21 @@ int main()
   // Assign
   FieldDescr field_descr_assign = *field_descr;
 
+  // Copy
+  FieldDescr field_descr_copy (*field_descr);
+
+  // Delete original to check for deep copy
+
+  unit_func("~FieldDescr");
+  delete field_descr;
+  field_descr = 0;
+
+  int * fill_heap = new int [sizeof(FieldDescr)];
+  for (size_t i=0; i<sizeof(FieldDescr); i++) {
+    fill_heap[i] = 0;
+  }
+
+
   unit_assert(field_descr_assign.field_count()==5);
 
   unit_assert(field_descr_assign.field_id("density")      == info.field_density);
@@ -301,7 +315,6 @@ int main()
 
   field_descr_assign.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
   unit_assert(  info.cx &&   info.cy && ! info.cz);
-  printf ("centering = %d %d %d\n",info.cx,info.cy,info.cz);
 
   field_descr_assign.ghosts(info.field_density, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==3 && info.gy==3 && info.gz==3);
@@ -330,9 +343,7 @@ int main()
   unit_assert(field_descr_assign.maximum_value  (info.field_velocity_z) == 300.0);
   unit_assert(field_descr_assign.maximum_action (info.field_velocity_z) == field_action_timestep);
 
-  // Copy
-  FieldDescr field_descr_copy (*field_descr);
-
+  unit_func("copy constructor");
   unit_assert(field_descr_copy.field_count()==5);
 
   unit_assert(field_descr_copy.field_id("density")      == info.field_density);
@@ -382,7 +393,6 @@ int main()
 
   field_descr_copy.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
   unit_assert(  info.cx &&   info.cy && ! info.cz);
-  printf ("centering = %d %d %d\n",info.cx,info.cy,info.cz);
 
   field_descr_copy.ghosts(info.field_density, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==3 && info.gy==3 && info.gz==3);
@@ -411,11 +421,6 @@ int main()
   unit_assert(field_descr_copy.maximum_value  (info.field_velocity_z) == 300.0);
   unit_assert(field_descr_copy.maximum_action (info.field_velocity_z) == field_action_timestep);
 
-
-  // Delete original to check for deep copy
-  unit_func("~FieldDescr");
-  delete field_descr;
-  field_descr = 0;
 
   // Check assignment operator
 
