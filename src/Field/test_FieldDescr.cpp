@@ -29,6 +29,8 @@ int main()
 
   field_descr = new FieldDescr;
 
+  // Fields
+
   unit_func("insert_field");
   unit_assert(field_descr->field_count()==0);
   field_descr->insert_field("density");
@@ -45,18 +47,28 @@ int main()
   unit_assert(field_descr->field_count()==5);
 
   unit_func("field_id");
-  unit_assert(field_descr->field_id("density")      == 0);
-  unit_assert(field_descr->field_id("velocity_x")   == 1);
-  unit_assert(field_descr->field_id("velocity_y")   == 2);
-  unit_assert(field_descr->field_id("velocity_z")   == 3);
-  unit_assert(field_descr->field_id("total_energy") == 4);
+
+  int field_density      = field_descr->field_id("density");
+  int field_velocity_x   = field_descr->field_id("velocity_x");
+  int field_velocity_y   = field_descr->field_id("velocity_y");
+  int field_velocity_z   = field_descr->field_id("velocity_z");
+  int field_total_energy = field_descr->field_id("total_energy");
+
+  unit_assert(field_descr->field_id("density")      == field_density);
+  unit_assert(field_descr->field_id("velocity_x")   == field_velocity_x);
+  unit_assert(field_descr->field_id("velocity_y")   == field_velocity_y);
+  unit_assert(field_descr->field_id("velocity_z")   == field_velocity_z);
+  unit_assert(field_descr->field_id("total_energy") == field_total_energy);
 
   unit_func("field_name");
-  unit_assert(field_descr->field_name(0) == "density");
-  unit_assert(field_descr->field_name(1) == "velocity_x");
-  unit_assert(field_descr->field_name(2) == "velocity_y");
-  unit_assert(field_descr->field_name(3) == "velocity_z");
-  unit_assert(field_descr->field_name(4) == "total_energy");
+
+  unit_assert(field_descr->field_name(field_density)      == "density");
+  unit_assert(field_descr->field_name(field_velocity_x)   == "velocity_x");
+  unit_assert(field_descr->field_name(field_velocity_y)   == "velocity_y");
+  unit_assert(field_descr->field_name(field_velocity_z)   == "velocity_z");
+  unit_assert(field_descr->field_name(field_total_energy) == "total_energy");
+
+  // Groups
 
   unit_func("insert_group");
   unit_assert(field_descr->group_count()==0);
@@ -65,6 +77,26 @@ int main()
   field_descr->insert_group("color");
   unit_func("group_count");
   unit_assert(field_descr->group_count()==2);
+
+  unit_func("group_id");
+
+  int group_centered = field_descr->group_id("centered");
+  int group_color    = field_descr->group_id("color");
+
+  unit_assert(field_descr->group_id("centered") == group_centered);
+  unit_assert(field_descr->group_id("color")    == group_color);
+
+  unit_func("group_name");
+
+  unit_assert(field_descr->group_name(group_centered) == "centered");
+  unit_assert(field_descr->group_name(group_color)    == "color");
+
+  // Fields and groups
+
+  unit_func("set_field_in_group");
+  field_descr->set_field_in_group(field_density,group_centered);
+  
+  
 
   // void insert_field(std::string name_field) throw();
   // void insert_group(std::string name_group) throw();

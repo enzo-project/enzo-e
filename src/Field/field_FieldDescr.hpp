@@ -102,7 +102,7 @@ public: // functions
   void insert_group(std::string name_group) throw();
 
   /// Insert a new group
-  void set_field_in_group(int id_field, int id_group) throw();
+  void set_field_in_group(int id_field, int id_group) throw(std::out_of_range);
 
   /// Set alignment
   void set_alignment(int alignment) throw();
@@ -114,19 +114,21 @@ public: // functions
   void set_courant(double courant) throw();
 
   /// Set precision for a field
-  void set_precision(int id_field, precision_type precision) throw();
+  void set_precision(int id_field, precision_type precision) throw(std::out_of_range);
 
   /// Set centering for a field
-  void set_centering(int id_field, bool cx, bool cy, bool cz) throw();
+  void set_centering(int id_field, bool cx, bool cy, bool cz) throw(std::out_of_range);
 
   /// Set ghosts for a field
-  void set_ghosts(int id_field, int gx, int gy, int gz) throw();
+  void set_ghosts(int id_field, int gx, int gy, int gz) throw(std::out_of_range);
 
   /// Set minimum bound and action
-  void set_minimum (int id_field, double min_value, field_action min_action) throw();
+  void set_minimum (int id_field, double min_value, field_action min_action) 
+    throw(std::out_of_range);
 
   /// Set maximum bound and action
-  void set_maximum (int id_field, double max_value, field_action max_action) throw();
+  void set_maximum (int id_field, double max_value, field_action max_action) 
+    throw(std::out_of_range);
 
 private: // functions
 

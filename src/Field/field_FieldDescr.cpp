@@ -236,6 +236,8 @@ void FieldDescr::insert_field(std::string field_name) throw()
   ghosts[1] = 1;
   ghosts[2] = 1;
 
+  set_int_type a;
+  field_in_group_.push_back(a);
   precision_. push_back(precision);
   centering_. push_back(centered);
   ghosts_.    push_back(ghosts);
@@ -247,14 +249,18 @@ void FieldDescr::insert_field(std::string field_name) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::insert_group(std::string name_group) throw()
+void FieldDescr::insert_group(std::string group_name) throw()
 {
+  int id = group_count();
+  group_name_.push_back(group_name);
+  group_id_[group_name] = id;
 }
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_field_in_group(int id_field, int id_group) throw()
+void FieldDescr::set_field_in_group(int id_field, int id_group) throw(std::out_of_range)
 {
+  field_in_group_.at(id_field).insert(id_group);
 }
 
 //----------------------------------------------------------------------
@@ -267,40 +273,53 @@ void FieldDescr::set_alignment(int alignment) throw()
 
 void FieldDescr::set_padding(int padding) throw()
 {
+  padding_ = padding;
 }
 
 //----------------------------------------------------------------------
 
 void FieldDescr::set_courant(double courant) throw()
 {
+  courant_ = courant;
 }
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_precision(int id_field, precision_type precision) throw()
+void FieldDescr::set_precision(int id_field, precision_type precision) throw(std::out_of_range)
 {
+  precision_.at(id_field) = precision;
 }
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_centering(int id_field, bool cx, bool cy, bool cz) throw()
+void FieldDescr::set_centering(int id_field, bool cx, bool cy, bool cz) throw(std::out_of_range)
 {
+  centering_.at(id_field)[0] = cx;
+  centering_.at(id_field)[1] = cy;
+  centering_.at(id_field)[2] = cz;
 }
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz) throw()
+void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz) throw(std::out_of_range)
 {
+  ghosts_.at(id_field)[0] = gx;
+  ghosts_.at(id_field)[1] = gy;
+  ghosts_.at(id_field)[2] = gz;
 }
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_minimum (int id_field, double min_value, field_action min_action) throw()
+void FieldDescr::set_minimum (int id_field, double min_value, field_action min_action) throw(std::out_of_range)
 {
+  min_value_.at(id_field)  = min_value;
+  min_action_.at(id_field) = min_action;
 }
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_maximum (int id_field, double max_value, field_action max_action) throw()
+void FieldDescr::set_maximum (int id_field, double max_value, field_action max_action) throw(std::out_of_range)
 {
+  max_value_.at(id_field)  = max_value;
+  max_action_.at(id_field) = max_action;
 }
