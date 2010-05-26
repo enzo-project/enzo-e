@@ -7,6 +7,7 @@
 /// @file     field_FieldDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-17
+/// @todo     Replace ghosts/centering dynamic allocated arrays with vector to avoid big three
 /// @brief    Declaration for the FieldDescr class
 
 enum field_action {
@@ -29,6 +30,7 @@ enum precision_type {
   pricision_quadruple  // 128-bit field data
 };
 
+#include <stdexcept>
 #include <string>
 #include <memory>
 #include <set>
@@ -46,35 +48,35 @@ public: // functions
   /// Initialize a FieldDescr object
   FieldDescr() throw();
 
-  // /// Destructor
-  // ~FieldDescr() throw();
+  /// Destructor
+  ~FieldDescr() throw();
 
-  // /// Copy constructor
-  // FieldDescr(const FieldDescr & field_descr) throw();
+  /// Copy constructor
+  FieldDescr(const FieldDescr & field_descr) throw();
 
-  // /// Assignment operator
-  // FieldDescr & operator= (const FieldDescr & field_descr) throw();
+  /// Assignment operator
+  FieldDescr & operator= (const FieldDescr & field_descr) throw();
 
   /// Return the number of fields
   int field_count() const throw();
 
   /// Return name of the ith field
-  std::string field_name(size_t id_field) const throw();
+  std::string field_name(size_t id_field) const throw(std::out_of_range);
 
   /// Return the integer handle for the named field
-  int field_id(const std::string name) const throw();
+  int field_id(const std::string name) const throw(std::out_of_range);
 
   /// Return the number of groups
   int group_count() const throw();
 
   /// Return name of the ith group
-  std::string group_name(int id_group) const throw();
+  std::string group_name(int id_group) const throw(std::out_of_range);
 
   /// Return the integer handle for the named group
-  int group_id(const std::string name) const throw();
+  int group_id(const std::string name) const throw(std::out_of_range);
 
   /// Return whether the given field is in the given group
-  bool field_in_group(int id_field, int id_group) const throw();
+  bool field_in_group(int id_field, int id_group) const throw(std::out_of_range);
 
   /// alignment in bytes of fields in memory
   int alignment() const throw();
@@ -83,71 +85,48 @@ public: // functions
   int padding() const throw();
 
   /// centering of given field
-  void centering(int id_field, bool * cx, bool * cy, bool * cz) const throw();
+  void centering(int id_field, bool * cx, bool * cy, bool * cz) const throw(std::out_of_range);
 
   /// depth of ghost zones of given field
-  void ghosts(int id_field, int * gx, int * gy, int * gz) const throw();
+  void ghosts(int id_field, int * gx, int * gy, int * gz) const throw(std::out_of_range);
 
   /// precision of given field
-  precision_type precision(int id_field) const throw();
+  precision_type precision(int id_field) const throw(std::out_of_range);
 
   //----------------------------------------------------------------------
 
-  // /// Return Field's name
-  // std::string name () const throw();
+  /// Insert a new field
+  void insert_field(std::string name_field) throw();
 
-  // /// Return centering of Field
-  // const bool * centering () const throw();
+  /// Insert a new group
+  void insert_group(std::string name_group) throw();
 
-  // /// Return centering of Field for the given axis
-  // void set_centering (int axis, bool value) throw()
-  // {
-  //   if (0 <= axis && axis < 3) 
-  //     centering_[axis] = value; 
-  // };
+  /// Insert a new group
+  void set_field_in_group(int id_field, int id_group) throw();
 
-  // /// Return Field minimum value
-  // double min_value () const throw()
-  // { return min_value_; };
+  /// Set alignment
+  void set_alignment(int alignment) throw();
 
-  // /// Set Field minimum value
-  // void set_min_value (double value) throw()
-  // { min_value_ = value; };
+  /// Set padding
+  void set_padding(int padding) throw();
 
-  // /// Return Field maximum value
-  // double max_value () const throw()
-  // { return max_value_; };
+  /// Set courant
+  void set_courant(double courant) throw();
 
-  // /// Set Field maximum value
-  // void set_max_value (double value) throw()
-  // { max_value_ = value; };
+  /// Set precision for a field
+  void set_precision(int id_field, precision_type precision) throw();
 
-  // /// Return action on violating Field minimum value
-  // field_action min_action () const throw()
-  // { return min_action_; };
+  /// Set centering for a field
+  void set_centering(int id_field, bool cx, bool cy, bool cz) throw();
 
-  // /// Set action on violating Field minimum value
-  // void set_min_action (field_action action) throw()
-  // { min_action_ = action;  };
+  /// Set ghosts for a field
+  void set_ghosts(int id_field, int gx, int gy, int gz) throw();
 
-  // /// Return action on violating Field maximum value
-  // field_action max_action () const throw()
-  // { return max_action_; };
+  /// Set minimum bound and action
+  void set_minimum (int id_field, double min_value, field_action min_action) throw();
 
-  // /// Set action on violating Field maximum value
-  // void set_max_action (field_action action) throw()
-  // { max_action_ = action;  };
-
-  // /// Return precision of Field
-  // precision_type precision () const throw()
-  // { return precision_; };
-
-  // /// Set precision of Field
-  // void set_precision (precision_type precision) throw()
-  // { 
-  //   precision_ = (precision == precision_default) ? 
-  //     default_precision_() : precision;
-  // };
+  /// Set maximum bound and action
+  void set_maximum (int id_field, double max_value, field_action max_action) throw();
 
 private: // functions
 
@@ -200,10 +179,10 @@ private: // attributes
   std::vector<precision_type> precision_;
 
   /// cell centering for each field
-  std::vector<bool[3]> centering_;
+  std::vector<bool *> centering_;
 
   /// Ghost depth of each field
-  std::vector<int[3]> ghosts_;
+  std::vector<int *> ghosts_;
 
   /// minimum allowed value for each field
   std::vector<double> min_value_;
@@ -216,6 +195,7 @@ private: // attributes
 
   /// what should be done if a field violates its maximum value
   std::vector<field_action> max_action_;
+
 };
 
 #endif /* FIELD_FIELD_DESCR_HPP */

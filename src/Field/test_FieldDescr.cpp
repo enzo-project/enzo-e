@@ -15,9 +15,86 @@ int main()
 {
 
   unit_init();
-  unit_class ("Field");
-  unit_func ("Field");
-  unit_assert(false);
+  unit_class ("FieldDescr");
+
+  FieldDescr * field_descr = 0;
+
+  unit_func ("FieldDescr");
+  field_descr = new FieldDescr;
+  unit_assert(field_descr != 0);
+
+  unit_func("~FieldDescr");
+  delete field_descr;
+  unit_assert(true);
+
+  field_descr = new FieldDescr;
+
+  unit_func("insert_field");
+  unit_assert(field_descr->field_count()==0);
+  field_descr->insert_field("density");
+  unit_assert(field_descr->field_count()==1);
+  field_descr->insert_field("velocity_x");
+  unit_assert(field_descr->field_count()==2);
+  field_descr->insert_field("velocity_y");
+  unit_assert(field_descr->field_count()==3);
+  field_descr->insert_field("velocity_z");
+  unit_assert(field_descr->field_count()==4);
+  field_descr->insert_field("total_energy");
+
+  unit_func("field_count");
+  unit_assert(field_descr->field_count()==5);
+
+  unit_func("field_id");
+  unit_assert(field_descr->field_id("density")      == 0);
+  unit_assert(field_descr->field_id("velocity_x")   == 1);
+  unit_assert(field_descr->field_id("velocity_y")   == 2);
+  unit_assert(field_descr->field_id("velocity_z")   == 3);
+  unit_assert(field_descr->field_id("total_energy") == 4);
+
+  unit_func("field_name");
+  unit_assert(field_descr->field_name(0) == "density");
+  unit_assert(field_descr->field_name(1) == "velocity_x");
+  unit_assert(field_descr->field_name(2) == "velocity_y");
+  unit_assert(field_descr->field_name(3) == "velocity_z");
+  unit_assert(field_descr->field_name(4) == "total_energy");
+
+  unit_func("insert_group");
+  unit_assert(field_descr->group_count()==0);
+  field_descr->insert_group("centered");
+  unit_assert(field_descr->group_count()==1);
+  field_descr->insert_group("color");
+  unit_func("group_count");
+  unit_assert(field_descr->group_count()==2);
+
+  // void insert_field(std::string name_field) throw();
+  // void insert_group(std::string name_group) throw();
+  // void set_field_in_group(int id_field, int id_group) throw();
+  // void set_alignment(int alignment) throw();
+  // void set_padding(int padding) throw();
+  // void set_courant(double courant) throw();
+  // void set_precision(int id_field, precision_type precision) throw();
+  // void set_centering(int id_field, bool cx, bool cy, bool cz) throw();
+  // void set_ghosts(int id_field, int gx, int gy, int gz) throw();
+  // void set_minimum (int id_field, double min_value, field_action min_action) throw();
+  // void set_maximum (int id_field, double max_value, field_action max_action) throw();
+
+  // FieldDescr(const FieldDescr & field_descr) throw();
+  // FieldDescr & operator= (const FieldDescr & field_descr) throw();
+  // int field_count() const throw();
+  // std::string field_name(size_t id_field) const throw(std::out_of_range);
+  // int field_id(const std::string name) const throw(std::out_of_range);
+  // int group_count() const throw();
+  // std::string group_name(int id_group) const throw(std::out_of_range);
+  // int group_id(const std::string name) const throw(std::out_of_range);
+  // bool field_in_group(int id_field, int id_group) const throw(std::out_of_range);
+  // int alignment() const throw();
+  // int padding() const throw();
+  // void centering(int id_field, bool * cx, bool * cy, bool * cz) const throw(std::out_of_range);
+  // void ghosts(int id_field, int * gx, int * gy, int * gz) const throw(std::out_of_range);
+  // precision_type precision(int id_field) const throw(std::out_of_range);
+
+  //======================================================================
+
 //   FieldDescr density    ("density");
 //   FieldDescr velocity_x ("velocity_x");
 //   FieldDescr velocity_y ("velocity_y");
