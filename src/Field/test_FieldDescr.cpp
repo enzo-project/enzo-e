@@ -72,116 +72,166 @@ int main()
 
   unit_func("insert_group");
   unit_assert(field_descr->group_count()==0);
-  field_descr->insert_group("centered");
+  field_descr->insert_group("density");
   unit_assert(field_descr->group_count()==1);
-  field_descr->insert_group("color");
+  field_descr->insert_group("vector");
   unit_func("group_count");
   unit_assert(field_descr->group_count()==2);
 
   unit_func("group_id");
 
-  int group_centered = field_descr->group_id("centered");
-  int group_color    = field_descr->group_id("color");
+  int group_density = field_descr->group_id("density");
+  int group_vector   = field_descr->group_id("vector");
 
-  unit_assert(field_descr->group_id("centered") == group_centered);
-  unit_assert(field_descr->group_id("color")    == group_color);
+  unit_assert(field_descr->group_id("density") == group_density);
+  unit_assert(field_descr->group_id("vector")   == group_vector);
 
   unit_func("group_name");
 
-  unit_assert(field_descr->group_name(group_centered) == "centered");
-  unit_assert(field_descr->group_name(group_color)    == "color");
+  unit_assert(field_descr->group_name(group_density) == "density");
+  unit_assert(field_descr->group_name(group_vector)    == "vector");
 
   // Fields and groups
 
   unit_func("set_field_in_group");
-  field_descr->set_field_in_group(field_density,group_centered);
+  field_descr->set_field_in_group(field_density,  group_density);
+  field_descr->set_field_in_group(field_velocity_x,group_vector);
+  field_descr->set_field_in_group(field_velocity_y,group_vector);
+  field_descr->set_field_in_group(field_velocity_z,group_vector);
+
+  unit_assert(field_descr->field_in_group(field_density,   group_density));
+  unit_assert(field_descr->field_in_group(field_velocity_x,group_vector));
+  unit_assert(field_descr->field_in_group(field_velocity_y,group_vector));
+  unit_assert(! field_descr->field_in_group(field_velocity_y,  group_density));
+  unit_assert(! field_descr->field_in_group(field_total_energy,group_density));
+  unit_assert(! field_descr->field_in_group(field_density,     group_vector));
+  unit_assert(! field_descr->field_in_group(field_total_energy,group_vector));
+
+
+  //----------------------------------------------------------------------
+  // Global attributes
+  //----------------------------------------------------------------------
+
+  // (set and reset in case test value is a default)
+
+  field_descr->set_alignment(8);
+  field_descr->set_padding(64);
+  field_descr->set_courant(0.5);
   
+  unit_func("alignment");
+  unit_assert(field_descr->alignment() == 8);
+  unit_func("padding");
+  unit_assert(field_descr->padding() == 64);
+  unit_func("courant");
+  unit_assert(field_descr->courant() == 0.5);
+
+  field_descr->set_alignment(4);
+  field_descr->set_padding(32);
+  field_descr->set_courant(0.75);
   
+  unit_func("alignment");
+  unit_assert(field_descr->alignment() == 4);
+  unit_func("padding");
+  unit_assert(field_descr->padding() == 32);
+  unit_func("courant");
+  unit_assert(field_descr->courant() == 0.75);
+  
+  //----------------------------------------------------------------------
+  // Field attributes
+  //----------------------------------------------------------------------
 
-  // void insert_field(std::string name_field) throw();
-  // void insert_group(std::string name_group) throw();
-  // void set_field_in_group(int id_field, int id_group) throw();
-  // void set_alignment(int alignment) throw();
-  // void set_padding(int padding) throw();
-  // void set_courant(double courant) throw();
-  // void set_precision(int id_field, precision_type precision) throw();
-  // void set_centering(int id_field, bool cx, bool cy, bool cz) throw();
-  // void set_ghosts(int id_field, int gx, int gy, int gz) throw();
-  // void set_minimum (int id_field, double min_value, field_action min_action) throw();
-  // void set_maximum (int id_field, double max_value, field_action max_action) throw();
+  // Precision
 
-  // FieldDescr(const FieldDescr & field_descr) throw();
-  // FieldDescr & operator= (const FieldDescr & field_descr) throw();
-  // int field_count() const throw();
-  // std::string field_name(size_t id_field) const throw(std::out_of_range);
-  // int field_id(const std::string name) const throw(std::out_of_range);
-  // int group_count() const throw();
-  // std::string group_name(int id_group) const throw(std::out_of_range);
-  // int group_id(const std::string name) const throw(std::out_of_range);
-  // bool field_in_group(int id_field, int id_group) const throw(std::out_of_range);
-  // int alignment() const throw();
-  // int padding() const throw();
-  // void centering(int id_field, bool * cx, bool * cy, bool * cz) const throw(std::out_of_range);
-  // void ghosts(int id_field, int * gx, int * gy, int * gz) const throw(std::out_of_range);
-  // precision_type precision(int id_field) const throw(std::out_of_range);
+  unit_func("precision");
 
-  //======================================================================
+  field_descr->set_precision(field_density,    precision_single);
+  field_descr->set_precision(field_velocity_x, precision_double);
+  field_descr->set_precision(field_velocity_y, precision_double);
+  field_descr->set_precision(field_velocity_z, precision_double);
 
-//   FieldDescr density    ("density");
-//   FieldDescr velocity_x ("velocity_x");
-//   FieldDescr velocity_y ("velocity_y");
-//   unit_assert(true);
+  unit_assert(field_descr->precision(field_density)      == precision_single);
+  unit_assert(field_descr->precision(field_velocity_x)   == precision_double);
+  unit_assert(field_descr->precision(field_velocity_y)   == precision_double);
+  unit_assert(field_descr->precision(field_velocity_z)   == precision_double);
+  unit_assert(field_descr->precision(field_total_energy) == precision_default);
 
-//   unit_func ("name");
-//   unit_assert(density.name() == "density");
-//   unit_assert(velocity_x.name() == "velocity_x");
-//   unit_assert(velocity_y.name() == "velocity_y");
+  // Centering
 
-//   unit_func ("centering");
-//   velocity_x.set_centering(1,false);  // Is this the right way around?
-//   velocity_y.set_centering(0,false);
+  unit_func("centering");
 
-//   unit_assert (density.centering()[0] == true && 
-// 	       density.centering()[1] == true );
-//   unit_assert (velocity_x.centering()[0] == true && 
-// 	       velocity_x.centering()[1] == false);
-//   unit_assert (velocity_y.centering()[0] == false && 
-// 	       velocity_y.centering()[1] == true);
+  field_descr->set_centering(field_velocity_x, false, true, true);
+  field_descr->set_centering(field_velocity_y, true, false, true);
+  field_descr->set_centering(field_velocity_z, true,  true, false);
 
-//   unit_func ("min_value");
-//   density.set_min_value (1.0);
-//   unit_assert (density.min_value () == 1.0);
+  bool cx, cy, cz;
 
-//   unit_func ("max_value");
-//   velocity_x.set_max_value (1.0e6);
-//   velocity_y.set_max_value (1.0e6);
-//   unit_assert (velocity_x.max_value () == 1.0e6);
-//   unit_assert (velocity_y.max_value () == 1.0e6);
+  field_descr->centering(field_density, &cx, &cy, &cz);
+  unit_assert(cx && cy && cz);
 
-//   unit_func("min_action");
-//   density.set_min_action(field_action_assign);
-//   unit_assert (density.min_action() == field_action_assign);
+  field_descr->centering(field_velocity_x, &cx, &cy, &cz);
+  unit_assert(! cx &&   cy &&   cz);
 
-//   unit_func("max_action");
-//   velocity_x.set_max_action(field_action_warning);
-//   velocity_y.set_max_action(field_action_error);
-//   unit_assert (velocity_x.max_action() == field_action_warning);
-//   unit_assert (velocity_y.max_action() == field_action_error);
+  field_descr->centering(field_velocity_y, &cx, &cy, &cz);
+  unit_assert(  cx && ! cy &&   cz);
 
-//   unit_func("precision");
-//   density.set_precision(precision_default);
-//   velocity_x.set_precision(precision_single);
-//   velocity_y.set_precision(precision_double);
-//   int default_precision = precision_unknown;
-// #ifdef CONFIG_PRECISION_SINGLE
-//   default_precision = precision_single;
-// #endif
-// #ifdef CONFIG_PRECISION_DOUBLE
-//   default_precision = precision_double;
-// #endif
-//   unit_assert (density.precision()    == default_precision);
-//   unit_assert (velocity_x.precision() == precision_single);
-//   unit_assert (velocity_y.precision() == precision_double);
+  field_descr->centering(field_velocity_z, &cx, &cy, &cz);
+  unit_assert(  cx &&   cy && ! cz);
+  
+  // Ghost zone depth
+
+  unit_func("ghosts");
+
+  field_descr->set_ghosts(field_density, 3, 3, 3);
+  field_descr->set_ghosts(field_velocity_x, 1, 0, 0);
+  field_descr->set_ghosts(field_velocity_y, 0, 1, 0);
+  field_descr->set_ghosts(field_velocity_z, 0, 0, 1);
+
+  int gx, gy, gz;
+
+  field_descr->ghosts(field_density, &gx, &gy, &gz);
+  unit_assert(gx==3 && gy==3 && gz==3);
+  field_descr->ghosts(field_velocity_x, &gx, &gy, &gz);
+  unit_assert(gx==1 && gy==0 && gz==0);
+  field_descr->ghosts(field_velocity_y, &gx, &gy, &gz);
+  unit_assert(gx==0 && gy==1 && gz==0);
+  field_descr->ghosts(field_velocity_z, &gx, &gy, &gz);
+  unit_assert(gx==0 && gy==0 && gz==1);
+
+
+  // Minimum value and action
+
+
+  field_descr->set_minimum (field_density,    1.0, field_action_error);
+  field_descr->set_minimum (field_velocity_x, -100.0, field_action_warning);
+  field_descr->set_minimum (field_velocity_y, -200.0, field_action_method);
+  field_descr->set_minimum (field_velocity_z, -300.0, field_action_timestep);
+
+  field_descr->set_maximum (field_density,    2.0, field_action_error);
+  field_descr->set_maximum (field_velocity_x, 100.0, field_action_warning);
+  field_descr->set_maximum (field_velocity_y, 200.0, field_action_method);
+  field_descr->set_maximum (field_velocity_z, 300.0, field_action_timestep);
+
+  unit_func("min_value");
+
+  unit_assert(field_descr->minimum_value  (field_density)    == 1.0);
+  unit_assert(field_descr->minimum_action (field_density)    == field_action_error);
+  unit_assert(field_descr->minimum_value  (field_velocity_x) == -100.0);
+  unit_assert(field_descr->minimum_action (field_velocity_x) == field_action_warning);
+  unit_assert(field_descr->minimum_value  (field_velocity_y) == -200.0);
+  unit_assert(field_descr->minimum_action (field_velocity_y) == field_action_method);
+  unit_assert(field_descr->minimum_value  (field_velocity_z) == -300.0);
+  unit_assert(field_descr->minimum_action (field_velocity_z) == field_action_timestep);
+
+  unit_func("max_value");
+
+  unit_assert(field_descr->maximum_value  (field_density)    == 2.0);
+  unit_assert(field_descr->maximum_action (field_density)    == field_action_error);
+  unit_assert(field_descr->maximum_value  (field_velocity_x) == 100.0);
+  unit_assert(field_descr->maximum_action (field_velocity_x) == field_action_warning);
+  unit_assert(field_descr->maximum_value  (field_velocity_y) == 200.0);
+  unit_assert(field_descr->maximum_action (field_velocity_y) == field_action_method);
+  unit_assert(field_descr->maximum_value  (field_velocity_z) == 300.0);
+  unit_assert(field_descr->maximum_action (field_velocity_z) == field_action_timestep);
 
   unit_finalize();
 }

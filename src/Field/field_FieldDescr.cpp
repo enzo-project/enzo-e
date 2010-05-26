@@ -174,6 +174,13 @@ int FieldDescr::padding() const throw()
 
 //----------------------------------------------------------------------
 
+double FieldDescr::courant() const throw()
+{
+  return courant_;
+}
+
+//----------------------------------------------------------------------
+
 void FieldDescr::centering
 (
  int id_field,
@@ -207,6 +214,34 @@ void FieldDescr::ghosts
 precision_type FieldDescr::precision(int id_field) const throw(std::out_of_range)
 {
   return precision_.at(id_field);
+}
+
+//----------------------------------------------------------------------
+
+double FieldDescr::minimum_value(int id_field) const throw(std::out_of_range)
+{
+  return min_value_.at(id_field);
+}
+
+//----------------------------------------------------------------------
+
+field_action FieldDescr::minimum_action(int id_field) const throw(std::out_of_range)
+{
+  return min_action_.at(id_field);
+}
+
+//----------------------------------------------------------------------
+
+double FieldDescr::maximum_value(int id_field) const throw(std::out_of_range)
+{
+  return max_value_.at(id_field);
+}
+
+//----------------------------------------------------------------------
+
+field_action FieldDescr::maximum_action(int id_field) const throw(std::out_of_range)
+{
+  return max_action_.at(id_field);
 }
 
 //----------------------------------------------------------------------
@@ -267,6 +302,7 @@ void FieldDescr::set_field_in_group(int id_field, int id_group) throw(std::out_o
 
 void FieldDescr::set_alignment(int alignment) throw()
 {
+  alignment_ = alignment;
 }
 
 //----------------------------------------------------------------------

@@ -84,6 +84,9 @@ public: // functions
   /// padding in bytes between fields in memory
   int padding() const throw();
 
+  /// courant number for fields
+  double courant() const throw();
+
   /// centering of given field
   void centering(int id_field, bool * cx, bool * cy, bool * cz) const throw(std::out_of_range);
 
@@ -92,6 +95,18 @@ public: // functions
 
   /// precision of given field
   precision_type precision(int id_field) const throw(std::out_of_range);
+
+  /// minimum value for the field
+  double minimum_value(int id_field) const throw(std::out_of_range);
+
+  /// minimum action for the field
+  field_action minimum_action(int id_field) const throw(std::out_of_range);
+
+  /// maximum value for the field
+  double maximum_value(int id_field) const throw(std::out_of_range);
+
+  /// maximum action for the field
+  field_action maximum_action(int id_field) const throw(std::out_of_range);
 
   //----------------------------------------------------------------------
 
