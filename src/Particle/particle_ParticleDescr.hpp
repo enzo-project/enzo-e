@@ -9,6 +9,8 @@
 /// @date     2009-11-17
 /// @brief    Declaration for the ParticleDescr class
 
+#include <string>
+
 class ParticleDescr {
 
   /// @class    ParticleDescr
