@@ -8,6 +8,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-17
 /// @todo     Replace ghosts/centering dynamic allocated arrays with vector to avoid big three
+/// @todo     Split into "global" and "field-specific" attributes to reduce class size
 /// @brief    Declaration for the FieldDescr class
 
 enum field_action {
@@ -116,7 +117,7 @@ public: // functions
   /// Insert a new group
   void insert_group(std::string name_group) throw();
 
-  /// Insert a new group
+  /// Set membership of a field in a group
   void set_field_in_group(int id_field, int id_group) throw(std::out_of_range);
 
   /// Set alignment
@@ -128,14 +129,14 @@ public: // functions
   /// Set courant
   void set_courant(double courant) throw();
 
-  /// Set precision for a field
-  void set_precision(int id_field, precision_type precision) throw(std::out_of_range);
-
   /// Set centering for a field
   void set_centering(int id_field, bool cx, bool cy, bool cz) throw(std::out_of_range);
 
   /// Set ghosts for a field
   void set_ghosts(int id_field, int gx, int gy, int gz) throw(std::out_of_range);
+
+  /// Set precision for a field
+  void set_precision(int id_field, precision_type precision) throw(std::out_of_range);
 
   /// Set minimum bound and action
   void set_minimum (int id_field, double min_value, field_action min_action) 

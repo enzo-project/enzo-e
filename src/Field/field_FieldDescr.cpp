@@ -34,8 +34,12 @@ FieldDescr::FieldDescr () throw ()
 
 FieldDescr::~FieldDescr() throw()
 {
-  for (size_t i=0; i<centering_.size(); i++)  delete centering_[i];
-  for (size_t i=0; i<ghosts_.size();    i++)  delete ghosts_[i];
+  for (size_t i=0; i<centering_.size(); i++) {
+    delete centering_[i];
+  }
+  for (size_t i=0; i<ghosts_.size();    i++) {
+    delete ghosts_[i];
+  }
 }
 
 //----------------------------------------------------------------------
@@ -53,18 +57,17 @@ FieldDescr::FieldDescr(const FieldDescr & field_descr) throw()
   precision_      = field_descr.precision_;
   for (size_t i=0; i<field_descr.centering_.size(); i++) {
     centering_.push_back(new bool[3]);
-    centering_[0] = field_descr.centering_[0];
-    centering_[1] = field_descr.centering_[1];
-    centering_[2] = field_descr.centering_[2];
+    centering_.at(i)[0] = field_descr.centering_.at(i)[0];
+    centering_.at(i)[1] = field_descr.centering_.at(i)[1];
+    centering_.at(i)[2] = field_descr.centering_.at(i)[2];
   }
+  printf ("%d %d %d\n",centering_[0],centering_[1],centering_[2]);
   for (size_t i=0; i<field_descr.ghosts_.size(); i++) {
     ghosts_.push_back(new int[3]);
-    ghosts_[0] = field_descr.ghosts_[0];
-    ghosts_[1] = field_descr.ghosts_[1];
-    ghosts_[2] = field_descr.ghosts_[2];
+    ghosts_.at(i)[0] = field_descr.ghosts_.at(i)[0];
+    ghosts_.at(i)[1] = field_descr.ghosts_.at(i)[1];
+    ghosts_.at(i)[2] = field_descr.ghosts_.at(i)[2];
   }
-  centering_      = field_descr.centering_;
-  ghosts_         = field_descr.ghosts_;
   min_value_      = field_descr.min_value_;
   max_value_      = field_descr.max_value_;
   min_action_     = field_descr.min_action_;
@@ -87,19 +90,17 @@ FieldDescr & FieldDescr::operator= (const FieldDescr & field_descr) throw()
   centering_.clear();
   for (size_t i=0; i<field_descr.centering_.size(); i++) {
     centering_.push_back(new bool[3]);
-    centering_[0] = field_descr.centering_[0];
-    centering_[1] = field_descr.centering_[1];
-    centering_[2] = field_descr.centering_[2];
+    centering_.at(i)[0] = field_descr.centering_.at(i)[0];
+    centering_.at(i)[1] = field_descr.centering_.at(i)[1];
+    centering_.at(i)[2] = field_descr.centering_.at(i)[2];
   }
   ghosts_.clear();
   for (size_t i=0; i<field_descr.ghosts_.size(); i++) {
     ghosts_.push_back(new int[3]);
-    ghosts_[0] = field_descr.ghosts_[0];
-    ghosts_[1] = field_descr.ghosts_[1];
-    ghosts_[2] = field_descr.ghosts_[2];
+    ghosts_.at(i)[0] = field_descr.ghosts_.at(i)[0];
+    ghosts_.at(i)[1] = field_descr.ghosts_.at(i)[1];
+    ghosts_.at(i)[2] = field_descr.ghosts_.at(i)[2];
   }
-  centering_      = field_descr.centering_;
-  ghosts_         = field_descr.ghosts_;
   min_value_      = field_descr.min_value_;
   max_value_      = field_descr.max_value_;
   min_action_     = field_descr.min_action_;
