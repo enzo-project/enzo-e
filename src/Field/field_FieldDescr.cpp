@@ -61,7 +61,6 @@ FieldDescr::FieldDescr(const FieldDescr & field_descr) throw()
     centering_.at(i)[1] = field_descr.centering_.at(i)[1];
     centering_.at(i)[2] = field_descr.centering_.at(i)[2];
   }
-  printf ("%d %d %d\n",centering_[0],centering_[1],centering_[2]);
   for (size_t i=0; i<field_descr.ghosts_.size(); i++) {
     ghosts_.push_back(new int[3]);
     ghosts_.at(i)[0] = field_descr.ghosts_.at(i)[0];
