@@ -7,11 +7,11 @@ TOPDIR  = GetLaunchDir()
 
 platform='unknown'
 
-if ("CELLO_PLATFORM" in os.environ):
+platform = ARGUMENTS.get('platform','unknown')
+
+if (platform == 'unknown' and "CELLO_PLATFORM" in os.environ):
      platform = os.environ["CELLO_PLATFORM"]
 
-if (platform == 'unknown'):
-     platform = ARGUMENTS.get('platform','unknown')
 
 # Initialize environment according to platform
 
