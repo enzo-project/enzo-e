@@ -54,13 +54,39 @@ int main()
   unit_assert(dimensions[0]==5 && dimensions[1]==3 && dimensions[2]==4);
 
   //----------------------------------------------------------------------
+  // allocate / deallocate
+  //----------------------------------------------------------------------
 
-  unit_func("allocate");
+  unit_func("array_allocated");
+  unit_assert( ! field_block.array_allocated());
 
+  // Allocate
+
+  unit_func("allocate_array");
   field_block.allocate_array();
+  unit_assert(field_block.array() != 0);
 
-  unit_assert(field_block.field_values(0) != 0);
+  unit_func("array_allocated");
+  unit_assert( field_block.array_allocated());
+
+  // Deallocate
+
+  unit_func("deallocate_array");
+  field_block.deallocate_array();
+  unit_assert(field_block.array() == 0);
+
+  unit_func("array_allocate");
+  unit_assert( ! field_block.array_allocated());
+
+  // Allocate
+
+  unit_func("allocate_array");
+  field_block.allocate_array();
+  unit_assert(field_block.array() != 0);
   
+  unit_func("array_allocated");
+  unit_assert( field_block.array_allocated());
+
   //----------------------------------------------------------------------
   unit_func("index_range");
   unit_assert(false);

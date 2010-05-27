@@ -331,7 +331,7 @@ void FieldDescr::set_precision(int id_field, precision_type precision) throw(std
 
 //----------------------------------------------------------------------
 
-int FieldDescr::precision_size(int id_field) 
+int FieldDescr::bytes_per_element(int id_field) const throw()
 {
   int size = 0;
   switch (precision(id_field)) {

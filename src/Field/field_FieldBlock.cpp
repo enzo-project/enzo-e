@@ -20,8 +20,8 @@ FieldBlock::FieldBlock() throw()
 {
   for (int i=0; i<3; i++) {
     dimensions_[i] = 0.0;
-    box_lower_[i] = 0.0;
-    box_upper_[i] = 0.0;
+    box_lower_[i]  = 0.0;
+    box_upper_[i]  = 0.0;
   }
 }
 
@@ -55,7 +55,7 @@ void FieldBlock::dimensions( int * nx, int * ny, int * nz ) const throw()
 
 //----------------------------------------------------------------------
 
-void * FieldBlock::field_values ( int id_field ) throw (std::out_of_range)
+char * FieldBlock::field_values ( int id_field ) throw (std::out_of_range)
 {
   return field_values_.at(id_field);
 }
@@ -67,6 +67,9 @@ void FieldBlock::index_range
  int * lower_x, int * lower_y, int *lower_z,
  int * upper_x, int * upper_y, int *upper_z ) const throw ()
 {
+  if (ghosts_allocated() ) {
+    
+  }
 }
 
 //----------------------------------------------------------------------
@@ -116,6 +119,13 @@ void FieldBlock::clear
 
 void FieldBlock::allocate_array() throw()
 {
+  if (! (dimensions_[0] > 0 &&
+	 dimensions_[1] > 0 &&
+	 dimensions_[2] > 0) ) {
+    ERROR_MESSAGE ("FieldBlock::allocate_array",
+		   "Allocate called with zero field size");
+  }
+
   if ( ! array_allocated() ) {
     
     int padding   = field_descr_->padding();
@@ -123,38 +133,12 @@ void FieldBlock::allocate_array() throw()
 
     int array_size = 0;
 
-    int  gx,gy,gz;
-    bool cx,cy,cz;
-
     for (int id_field=0; id_field<field_descr_->field_count(); id_field++) {
-
-      // Adjust memory usage due to ghosts if needed
-
-      if ( ghosts_allocated() ) {
-	field_descr_->ghosts(id_field,&gx,&gy,&gz);
-      } else {
-	gx = gy = gz =0;
-      }
-
-      // Adjust memory usage due to field centering if needed
-
-      field_descr_->centering(id_field,&cx,&cy,&cz);
-
-      // Determine array size
-
-      int nx = dimensions_[0] + (cx ? 0 : 1) + 2*gx;
-      int ny = dimensions_[1] + (cy ? 0 : 1) + 2*gy;
-      int nz = dimensions_[2] + (cz ? 0 : 1) + 2*gz;
-
-      // Determine field precision size
-
-      int precision_size = field_descr_->precision_size(id_field);
 
       // Increment array_size, including padding and alignment adjustment
 
-      array_size += precision_size*(nx*ny*nz) + padding;
-      int alignment_adjust = alignment_adjust_((long long) array_size,alignment);
-      array_size += alignment_adjust;
+      int size = field_size_(id_field);
+      array_size += field_size_adjust_(size,padding,alignment);
 
     }
 
@@ -162,13 +146,13 @@ void FieldBlock::allocate_array() throw()
 
     array_size += alignment - 1;
 
-    // Allocate array
+    // Allocate the array
 
-    array_ = new void * [array_size];
+    array_ = new char [array_size];
 
-    // Initialize 
+    // Initialize field_begin
 
-    void * field_begin = array_ + alignment_adjust_((long long)array_,alignment);
+    char * field_begin = array_ + align_padding_(array_,alignment);
 
     int field_offset = 0;
 
@@ -176,40 +160,24 @@ void FieldBlock::allocate_array() throw()
 
       field_values_.push_back(field_begin + field_offset);
 
-      // Adjust memory usage due to ghosts if needed
+      // Increment array_size, including padding and alignment adjustment
 
+      int size = field_size_(id_field);
 
-      if ( ghosts_allocated() ) {
-	field_descr_->ghosts(id_field,&gx,&gy,&gz);
-      } else {
-	gx = gy = gz = 0;
-      }
-
-      // Adjust memory usage due to field centering if needed
-
-      field_descr_->centering(id_field,&cx,&cy,&cz);
-
-      // Determine array size
-
-      int nx = dimensions_[0] + (cx ? 0 : 1) + 2*gx;
-      int ny = dimensions_[1] + (cy ? 0 : 1) + 2*gy;
-      int nz = dimensions_[2] + (cz ? 0 : 1) + 2*gz;
-
-      // Determine field precision size
-
-      int precision_size = field_descr_->precision_size(id_field);
-
-      // Increment field_begin
-
-      field_offset += precision_size*(nx*ny*nz) + padding;
-      int alignment_adjust = alignment_adjust_(field_offset,alignment);
-      field_offset += alignment_adjust;
+      field_offset += field_size_adjust_(size,padding,alignment);
     }
 
-    assert (array_size >= (field_offset + alignment - 1));
+    // check if array_size is too big or too small
+
+    if ( ! ( 0 <= (array_size - field_offset)
+	     &&   (array_size - field_offset) < alignment)) {
+      ERROR_MESSAGE ("FieldBlock::allocate_array",
+		     "Code error: array size was computed incorrectly");
+    };
 
   } else {
-    // WARNING/ERROR allocating array when already allocated
+    ERROR_MESSAGE ("FieldBlock::allocate_array",
+		   "Allocate called with array already allocated");
   }
 }
 
@@ -218,8 +186,14 @@ void FieldBlock::allocate_array() throw()
 void FieldBlock::deallocate_array () throw()
 {
   if ( array_allocated() ) {
+
+    delete [] array_;
+    array_ = 0;
+    field_values_.clear();
+
   } else {
-    // WARNING/ERROR: deallocating preallocated array
+    WARNING_MESSAGE ("FieldBlock::deallocate_array",
+		     "Deallocate called with array already deallocated");
   }
 }
 
@@ -242,6 +216,17 @@ bool FieldBlock::ghosts_allocated() const throw ()
 void FieldBlock::allocate_ghosts() throw ()
 {
   if (! ghosts_allocated() ) {
+
+    // allocate new_array with ghosts
+    // create new_field_values
+    // copy array_ to new_array
+    // deallocate array_
+    // assign new_array to array_
+    // assign new_field_values to field_values_
+
+  } else {
+    WARNING_MESSAGE("FieldBlock::allocate_ghosts",
+		    "Allocate called with ghosts already allocated");
   }
 }
 
@@ -250,6 +235,15 @@ void FieldBlock::allocate_ghosts() throw ()
 void FieldBlock::deallocate_ghosts() throw ()
 {
   if (ghosts_allocated() ) {
+    // allocate new_array without ghosts
+    // create new_field_values
+    // copy array_ to new_array
+    // deallocate array_
+    // assign new_array to array_
+    // assign new_field_values to field_values_
+  } else {
+    WARNING_MESSAGE("FieldBlock::deallocate_ghosts",
+		    "Deallocate called with ghosts already deallocated");
   }
 }
 
@@ -313,7 +307,7 @@ void FieldBlock::set_dimensions(int nx, int ny, int nz) throw()
 void FieldBlock::set_field_values 
 (
  int    id_field, 
- void * field_values) throw()
+ char * field_values) throw()
 {
 }
 
@@ -341,5 +335,46 @@ void FieldBlock::set_box_extent
   box_upper_[2] = upper_z;
 }
 
+//======================================================================
+
+
+int FieldBlock::field_size_adjust_
+(
+ int size, 
+ int padding, 
+ int alignment) const throw ()
+{
+  int field_size = size + padding;
+  field_size += (alignment - (field_size % alignment)) % alignment;
+  return field_size;
+}
+
 //----------------------------------------------------------------------
 
+int FieldBlock::field_size_ ( int id_field ) const throw()
+{
+
+  // Adjust memory usage due to ghosts if needed
+
+  int  gx,gy,gz;
+  if ( ghosts_allocated() ) {
+    field_descr_->ghosts(id_field,&gx,&gy,&gz);
+  } else {
+    gx = gy = gz =0;
+  }
+
+  // Adjust memory usage due to field centering if needed
+
+  bool cx,cy,cz;
+  field_descr_->centering(id_field,&cx,&cy,&cz);
+
+  // Compute array dimensions
+
+  int nx = dimensions_[0] + (cx ? 0 : 1) + 2*gx;
+  int ny = dimensions_[1] + (cy ? 0 : 1) + 2*gy;
+  int nz = dimensions_[2] + (cz ? 0 : 1) + 2*gz;
+
+  // Return array size in bytes
+
+  return (nx * ny * nz) * field_descr_->bytes_per_element(id_field);
+}

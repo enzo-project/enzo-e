@@ -98,7 +98,7 @@ public: // functions
   precision_type precision(int id_field) const throw(std::out_of_range);
 
   /// Number of bytes per element required by the given field
-  int precision_size(int id_field);
+  int bytes_per_element(int id_field) const throw();
 
   /// minimum value for the field
   double minimum_value(int id_field) const throw(std::out_of_range);

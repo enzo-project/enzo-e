@@ -45,8 +45,13 @@ public: // interface
   /// Return dimensions of fields on the block, assuming centered
   void dimensions(int * nx, int * ny, int * nz) const throw();
 
-  /// Return array for the corresponding field, which may or may not contain ghosts
-  void * field_values (int id_field) throw (std::out_of_range);
+  /// Return array for the corresponding field, which may or may not
+  /// contain ghosts
+  char * field_values (int id_field) throw (std::out_of_range);
+
+  /// Return raw pointer to the array of fields.  Const since otherwise
+  /// dangerous due to varying field sizes and padding and alignment
+  const char * array ()  const throw () { return array_; };
 
   /// Return lower and upper+1 index ranges (excluding ghosts)
   void index_range(int * lower_x, int * lower_y, int *lower_z, 
@@ -104,7 +109,7 @@ public: // interface
   void set_dimensions(int nx, int ny, int nz) throw();
 
   /// Set array values for a given field
-  void set_field_values (int id_field, void * values) throw();
+  void set_field_values (int id_field, char * values) throw();
 
   /// Set the associated field descriptor
   void set_field_descr(FieldDescr * field_descr) throw();
@@ -115,10 +120,15 @@ public: // interface
 
 private: // functions
 
-  long long alignment_adjust_(long long value, int align)
+  /// Given field size, padding, and alignment, compute offset to start of
+  /// the next field
+  int field_size_adjust_ (int size, int padding, int alignment) const throw();
+  int align_padding_ (char * start, int alignment) const throw()
   { 
-    return ((value % align == 0) ? 0 : (align - (value % align))); 
+    return (alignment - (reinterpret_cast<long unsigned>(start) % alignment))%alignment; 
   };
+
+  int field_size_ (int id_field) const throw();
 
 private: // attributes
 
@@ -129,10 +139,10 @@ private: // attributes
   int dimensions_[3];
 
   /// Allocated array of field values
-  void * array_;
+  char * array_;
   
   /// Pointers into values_ of the first element of each field
-  std::vector<void *> field_values_;
+  std::vector<char *> field_values_;
 
   /// Extent of the box associated with the block
   /// WARNING: should not be used for deep AMR due to precision / range issues
