@@ -113,6 +113,13 @@ public: // interface
   void set_box_extent( double lower_x, double lower_y, double lower_z,
 		       double upper_x, double upper_y, double upper_z ) throw();
 
+private: // functions
+
+  long long alignment_adjust_(long long value, int align)
+  { 
+    return ((value % align == 0) ? 0 : (align - (value % align))); 
+  };
+
 private: // attributes
 
   /// Corresponding Field descriptor

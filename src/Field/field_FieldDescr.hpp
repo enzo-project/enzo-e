@@ -28,7 +28,7 @@ enum precision_type {
   precision_single,    //  32-bit field data
   precision_double,    //  64-bit field data
   precision_extended,  //  80-bit (ala Intel) field data
-  pricision_quadruple  // 128-bit field data
+  precision_quadruple  // 128-bit field data
 };
 
 #include <stdexcept>
@@ -96,6 +96,9 @@ public: // functions
 
   /// precision of given field
   precision_type precision(int id_field) const throw(std::out_of_range);
+
+  /// Number of bytes per element required by the given field
+  int precision_size(int id_field);
 
   /// minimum value for the field
   double minimum_value(int id_field) const throw(std::out_of_range);
@@ -165,6 +168,7 @@ private: // functions
 #endif
 
   };
+
 
 private: // attributes
 

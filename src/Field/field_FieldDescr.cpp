@@ -6,6 +6,8 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Implementation of the FieldDescr class
 
+#include <assert.h>
+
 #include "error.hpp"
 #include "field.hpp"
 
@@ -259,7 +261,7 @@ void FieldDescr::insert_field(std::string field_name) throw()
 
   // Initialize attributes with default values
 
-  precision_type precision = precision_default;
+  precision_type precision = default_precision_();
 
   bool * centered = new bool[3];
   centered[0] = true;
@@ -323,7 +325,40 @@ void FieldDescr::set_courant(double courant) throw()
 
 void FieldDescr::set_precision(int id_field, precision_type precision) throw(std::out_of_range)
 {
-  precision_.at(id_field) = precision;
+  precision_.at(id_field) = 
+    (precision == precision_default) ? default_precision_() : precision;
+}
+
+//----------------------------------------------------------------------
+
+int FieldDescr::precision_size(int id_field) 
+{
+  int size = 0;
+  switch (precision(id_field)) {
+  case precision_unknown:
+    break;
+  case precision_default:
+    assert (0);
+    break;
+  case precision_half:
+    size = 2;
+    break;
+  case precision_single:
+    size = 4;
+    break;
+  case precision_double:
+    size = 8;
+    break;
+  case precision_extended:
+    size = 10;
+    break;
+  case precision_quadruple:
+    size = 16;
+    break;
+  default:
+    break;
+  }
+  return size;
 }
 
 //----------------------------------------------------------------------

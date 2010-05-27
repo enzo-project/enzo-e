@@ -4,6 +4,8 @@
 /// @file     field_FieldBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed May 19 18:17:50 PDT 2010
+/// @todo     Avoid void * arithmetic in allocate_array() if possible
+/// @todo     hand-check allocate()
 /// @brief    Implementation of the FieldBlock class
 
 #include "assert.h"
@@ -112,49 +114,100 @@ void FieldBlock::clear
 
 //----------------------------------------------------------------------
 
-void FieldBlock::allocate_array () throw()
+void FieldBlock::allocate_array() throw()
 {
   if ( ! array_allocated() ) {
     
-    int array_size = 0;
     int padding   = field_descr_->padding();
     int alignment = field_descr_->alignment();
 
+    int array_size = 0;
+
+    int  gx,gy,gz;
+    bool cx,cy,cz;
+
     for (int id_field=0; id_field<field_descr_->field_count(); id_field++) {
 
-      // Determine memory usage due to ghosts
-
-      int gx = 0 , gy = 0 , gz =0;
+      // Adjust memory usage due to ghosts if needed
 
       if ( ghosts_allocated() ) {
 	field_descr_->ghosts(id_field,&gx,&gy,&gz);
+      } else {
+	gx = gy = gz =0;
       }
 
-      // Determine memory usage due to field centering
-
-      bool cx = true , cy = true , cz = true;
+      // Adjust memory usage due to field centering if needed
 
       field_descr_->centering(id_field,&cx,&cy,&cz);
 
       // Determine array size
 
       int nx = dimensions_[0] + (cx ? 0 : 1) + 2*gx;
-      int ny = dimensions_[1] + (cx ? 0 : 1) + 2*gx;
-      int nz = dimensions_[2] + (cx ? 0 : 1) + 2*gx;
+      int ny = dimensions_[1] + (cy ? 0 : 1) + 2*gy;
+      int nz = dimensions_[2] + (cz ? 0 : 1) + 2*gz;
 
-      array_size += (nx * ny * nz);
+      // Determine field precision size
 
-      // Adjust array size for padding
+      int precision_size = field_descr_->precision_size(id_field);
 
-      array_size += padding;
+      // Increment array_size, including padding and alignment adjustment
 
-      // Adjust array size for alignment
-
-      int alignment_adjust = -(-array_size % alignment);
-      assert (alignment_adjust >= 0);
+      array_size += precision_size*(nx*ny*nz) + padding;
+      int alignment_adjust = alignment_adjust_((long long) array_size,alignment);
       array_size += alignment_adjust;
 
     }
+
+    // Adjust for possible initial misalignment
+
+    array_size += alignment - 1;
+
+    // Allocate array
+
+    array_ = new void * [array_size];
+
+    // Initialize 
+
+    void * field_begin = array_ + alignment_adjust_((long long)array_,alignment);
+
+    int field_offset = 0;
+
+    for (int id_field=0; id_field<field_descr_->field_count(); id_field++) {
+
+      field_values_.push_back(field_begin + field_offset);
+
+      // Adjust memory usage due to ghosts if needed
+
+
+      if ( ghosts_allocated() ) {
+	field_descr_->ghosts(id_field,&gx,&gy,&gz);
+      } else {
+	gx = gy = gz = 0;
+      }
+
+      // Adjust memory usage due to field centering if needed
+
+      field_descr_->centering(id_field,&cx,&cy,&cz);
+
+      // Determine array size
+
+      int nx = dimensions_[0] + (cx ? 0 : 1) + 2*gx;
+      int ny = dimensions_[1] + (cy ? 0 : 1) + 2*gy;
+      int nz = dimensions_[2] + (cz ? 0 : 1) + 2*gz;
+
+      // Determine field precision size
+
+      int precision_size = field_descr_->precision_size(id_field);
+
+      // Increment field_begin
+
+      field_offset += precision_size*(nx*ny*nz) + padding;
+      int alignment_adjust = alignment_adjust_(field_offset,alignment);
+      field_offset += alignment_adjust;
+    }
+
+    assert (array_size >= (field_offset + alignment - 1));
+
   } else {
     // WARNING/ERROR allocating array when already allocated
   }

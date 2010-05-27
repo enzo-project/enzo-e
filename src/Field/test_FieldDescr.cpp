@@ -170,6 +170,9 @@ int main()
   unit_assert(field_descr->precision(info.field_velocity_z)   == precision_double);
   unit_assert(field_descr->precision(info.field_total_energy) == precision_default);
 
+  unit_func("precision_size");
+  unit_assert(false);
+
   // Centering
 
   unit_func("centering");
