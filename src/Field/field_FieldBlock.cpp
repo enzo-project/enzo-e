@@ -150,8 +150,9 @@ void FieldBlock::allocate_array () throw()
 
       // Adjust array size for alignment
 
-      assert (-(-array_size % alignment) >= 0);
-      array_size -= (-array_size % alignment);
+      int alignment_adjust = -(-array_size % alignment);
+      assert (alignment_adjust >= 0);
+      array_size += alignment_adjust;
 
     }
   } else {

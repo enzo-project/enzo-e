@@ -12,5 +12,6 @@
 #include "cello.h"
 #include "disk_Hdf5.hpp"
 #include "disk_Ifrit.hpp"
+#include "disk_DiskFile.hpp"
 
 #endif /* DISK_HPP */
