@@ -15,104 +15,91 @@
 int main()
 {
 
+  //----------------------------------------------------------------------
   unit_init();
+  //----------------------------------------------------------------------
 
+  FieldDescr field_descr;
+
+  field_descr.insert_field("density");
+  field_descr.insert_field("velocity_x");
+  field_descr.insert_field("velocity_y");
+  field_descr.insert_field("velocity_z");
+  field_descr.insert_field("total_energy");
+
+  //----------------------------------------------------------------------
   unit_class ("FieldBlock");
-  unit_assert(false);
-  // {
+  //----------------------------------------------------------------------
 
-  //   int n0=10,n1=15,n2=20;
-  //   Array a;
-  //   int m0,m1,m2;
-  //   int nx,ny,nz,na;
-  //   int mx,my,mz,ma;
-  //   int i,j,k;
-  //   bool is_same = true;
+  FieldBlock field_block;
 
-  //   a.resize(n0,n1,n2);
+  //----------------------------------------------------------------------
 
-  //   a.size(&m0,&m1,&m2);
-  //   FieldBlock b (a.values(),NULL,m0,m1,m2);
+  unit_func("field_descr");
 
-  //   unit_func("get_size");
-  //   b.get_size(&nx,&ny,&nz,&na);
-  //   printf ("(nx ny nz na) = %d %d %d %d\n",nx,ny,nz,na);
-  //   unit_assert (nx == 10 && ny == 15 && nz == 20);
+  field_block.set_field_descr(&field_descr);
+  unit_assert (field_block.field_descr() == & field_descr);
 
-  //   Scalar * bv = b.values(0);
-  //   for (int iz=0; iz<nz; iz++) {
-  //     for (int iy=0; iy<ny; iy++) {
-  // 	for (int ix=0; ix<nx; ix++) {
-  // 	  i = ix + nx*(iy + ny*iz);
-  // 	  bv[i] = ix + 7*iy + 19*iz;
-  // 	}
-  //     }
-  //   }
+  //----------------------------------------------------------------------
 
-  //   unit_func("get_inc");
-  //   b.get_inc(&mx,&my,&mz,&ma);
-  //   printf ("(mx my mz ma) = %d %d %d %d\n",mx,my,mz,ma);
-  //   unit_assert (mx == 1 && my == m0 && mz == m0*m1);
-  //   is_same = true;
-  //   i = 0;
-  //   for (int iz=0; iz<nz; iz++) {
-  //     for (int iy=0; iy<ny; iy++) {
-  // 	for (int ix=0; ix<nx; ix++) {
-  // 	  j = ix + nx*(iy + ny*iz);
-  // 	  if (i != j) is_same = false;
-  // 	  k = ix*mx + iy*my + iz*mz;
-  // 	  if (j != k) is_same = false;
-  // 	  bv[i] = ix + 7*iy + 19*iz;
-  // 	  i += mx;
-  // 	}
-  // 	i += my - nx*mx;
-  //     }
-  //     i += mz - ny*my;
-  //   }
-  //   unit_assert (is_same);
+  unit_func("dimensions");
 
-  //   // Test treating as two interleaved arrays
-  //   m0 /= 2;
-  //   int p[] = {3,0,1,2};
-  //   FieldBlock b2 (a.values(),p,m0,m1,m2,2);
+  field_block.set_dimensions(4,5,6);
+  int dimensions[3];
+  field_block.dimensions(&dimensions[0],&dimensions[1],&dimensions[2]);
+  unit_assert(dimensions[0]==4 && dimensions[1]==5 && dimensions[2]==6);
 
-  //   unit_func("get_size");
-  //   b2.get_size(&nx,&ny,&nz,&na);
-  //   printf ("(nx ny nz na) = %d %d %d %d\n",nx,ny,nz,na);
-  //   unit_assert (nx == m0 && ny == m1 && nz == m2);
+  field_block.set_dimensions(5,3,4);
+  field_block.dimensions(&dimensions[0],&dimensions[1],&dimensions[2]);
+  unit_assert(dimensions[0]==5 && dimensions[1]==3 && dimensions[2]==4);
 
-  //   bv = b2.values(0);
-  //   for (int iz=0; iz<nz; iz++) {
-  //     for (int iy=0; iy<ny; iy++) {
-  // 	for (int ix=0; ix<nx; ix++) {
-  // 	  i = na*(ix + nx*(iy + ny*iz));
-  // 	  bv[i] = ix + 7*iy + 19*iz;
-  // 	}
-  //     }
-  //   }
+  //----------------------------------------------------------------------
 
-  //   unit_func("get_inc");
-  //   b2.get_inc(&mx,&my,&mz,&ma);
-  //   printf ("(mx my mz ma) = %d %d %d %d\n",mx,my,mz,ma);
-  //   unit_assert (mx == na && my == na*nx && mz == na*nx*ny);
-  //   i = 0;
-  //   is_same = true;
-  //   for (int iz=0; iz<nz; iz++) {
-  //     for (int iy=0; iy<ny; iy++) {
-  // 	for (int ix=0; ix<nx; ix++) {
-  // 	  int j = na*(ix + nx*(iy + ny*iz));
-  // 	  if (i != j) is_same = false;
-  // 	  k = ix*mx + iy*my + iz*mz;
-  // 	  if (i != k) is_same = false;
-  // 	  bv[i] = ix + 7*iy + 19*iz;
-  // 	  i += mx;
-  // 	}
-  // 	i += my - nx*mx;
-  //     }
-  //     i += mz-ny*my;
-  //   }
-  //   unit_assert (is_same);
-  // }
+  unit_func("allocate");
+
+  field_block.allocate_array();
+
+  unit_assert(field_block.field_values(0) != 0);
   
+  //----------------------------------------------------------------------
+  unit_func("index_range");
+  unit_assert(false);
+  //----------------------------------------------------------------------
+  unit_func("box_extent");
+  unit_assert(false);
+  //----------------------------------------------------------------------
+  unit_func("cell_width");
+  unit_assert(false);
+	
+  //----------------------------------------------------------------------
+  unit_func("clear");
+  unit_assert(false);
+	
+  //----------------------------------------------------------------------
+  unit_func("ghosts_allocated");
+  unit_assert(false);
+  //----------------------------------------------------------------------
+  unit_func("allocate_ghosts");
+  unit_assert(false);
+  //----------------------------------------------------------------------
+  unit_func("deallocate_ghosts");
+  unit_assert(false);
+	
+  //----------------------------------------------------------------------
+  unit_func("split");
+  unit_assert(false);
+  //----------------------------------------------------------------------
+  unit_func("merge");
+  unit_assert(false);
+	
+  //----------------------------------------------------------------------
+  unit_func("read");
+  unit_assert(false);
+  //----------------------------------------------------------------------
+  unit_func("write");
+  unit_assert(false);
+	
+  //----------------------------------------------------------------------
   unit_finalize();
+  //----------------------------------------------------------------------
 }

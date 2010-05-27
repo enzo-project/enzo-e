@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 
 FieldDescr::FieldDescr () throw ()
-  : alignment_(0),
+  : alignment_(1),
     padding_(0),
     courant_(1),
     field_name_(),
