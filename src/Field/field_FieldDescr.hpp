@@ -77,7 +77,8 @@ public: // functions
   int group_id(const std::string name) const throw(std::out_of_range);
 
   /// Return whether the given field is in the given group
-  bool field_in_group(int id_field, int id_group) const throw(std::out_of_range);
+  bool field_in_group(int id_field, int id_group) 
+    const throw(std::out_of_range);
 
   /// alignment in bytes of fields in memory
   int alignment() const throw();
@@ -89,13 +90,16 @@ public: // functions
   double courant() const throw();
 
   /// centering of given field
-  void centering(int id_field, bool * cx, bool * cy, bool * cz) const throw(std::out_of_range);
+  void centering(int id_field, bool * cx, bool * cy, bool * cz) 
+    const throw(std::out_of_range);
 
   /// depth of ghost zones of given field
-  void ghosts(int id_field, int * gx, int * gy, int * gz) const throw(std::out_of_range);
+  void ghosts(int id_field, int * gx, int * gy, int * gz)
+    const throw(std::out_of_range);
 
   /// precision of given field
-  precision_type precision(int id_field) const throw(std::out_of_range);
+  precision_type precision(int id_field) 
+    const throw(std::out_of_range);
 
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
