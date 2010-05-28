@@ -11,6 +11,8 @@
 
 #include <stack>
 
+#include "error.hpp"
+
 /// @def      MEMORY_MAX_NUM_GROUPS
 /// @brief    Maximum number of groups for memory allocation tracking
 #define MEMORY_MAX_NUM_GROUPS 20

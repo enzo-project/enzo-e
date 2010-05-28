@@ -55,21 +55,23 @@ void FieldBlock::dimensions( int * nx, int * ny, int * nz ) const throw()
 
 //----------------------------------------------------------------------
 
-char * FieldBlock::field_values ( int id_field ) throw (std::out_of_range)
+void * FieldBlock::field_values ( int id_field ) throw (std::out_of_range)
 {
   return field_values_.at(id_field);
 }
 
 //----------------------------------------------------------------------
-	
-void FieldBlock::index_range
-(
- int * lower_x, int * lower_y, int *lower_z,
- int * upper_x, int * upper_y, int *upper_z ) const throw ()
+
+void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
 {
-  if (ghosts_allocated() ) {
-    
-  }
+  char * field_unknowns = field_values_.at(id_field);
+
+  if ( ghosts_allocated() ) {
+    int dx,dy,dz;
+    int gx,gy,gz;
+  } 
+
+  return field_unknowns;
 }
 
 //----------------------------------------------------------------------
@@ -137,7 +139,10 @@ void FieldBlock::allocate_array() throw()
 
       // Increment array_size, including padding and alignment adjustment
 
-      int size = field_size_(id_field);
+      int nx,ny,nz;       // not needed
+
+      int size = field_size_(id_field, &nx,&ny,&nz);
+
       array_size += field_size_adjust_(size,padding,alignment);
 
     }
@@ -162,7 +167,9 @@ void FieldBlock::allocate_array() throw()
 
       // Increment array_size, including padding and alignment adjustment
 
-      int size = field_size_(id_field);
+      int nx,ny,nz;       // not needed
+
+      int size = field_size_(id_field,&nx,&ny,&nz);
 
       field_offset += field_size_adjust_(size,padding,alignment);
     }
@@ -351,7 +358,13 @@ int FieldBlock::field_size_adjust_
 
 //----------------------------------------------------------------------
 
-int FieldBlock::field_size_ ( int id_field ) const throw()
+int FieldBlock::field_size_ 
+(
+ int id_field,
+ int * nx,
+ int * ny,
+ int * nz
+ ) const throw()
 {
 
   // Adjust memory usage due to ghosts if needed
@@ -370,11 +383,11 @@ int FieldBlock::field_size_ ( int id_field ) const throw()
 
   // Compute array dimensions
 
-  int nx = dimensions_[0] + (cx ? 0 : 1) + 2*gx;
-  int ny = dimensions_[1] + (cy ? 0 : 1) + 2*gy;
-  int nz = dimensions_[2] + (cz ? 0 : 1) + 2*gz;
+  *nx = dimensions_[0] + (cx ? 0 : 1) + 2*gx;
+  *ny = dimensions_[1] + (cy ? 0 : 1) + 2*gy;
+  *nz = dimensions_[2] + (cz ? 0 : 1) + 2*gz;
 
   // Return array size in bytes
 
-  return (nx * ny * nz) * field_descr_->bytes_per_element(id_field);
+  return (*nx) * (*ny) * (*nz) * field_descr_->bytes_per_element(id_field);
 }

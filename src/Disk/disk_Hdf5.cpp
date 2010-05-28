@@ -6,6 +6,10 @@
 /// @date      Thu Feb 21 16:11:36 PST 2008
 /// @brief     Implementation of the Hdf5 class
 
+#include <hdf5.h>
+
+#include <string>
+
 #include "error.hpp"
 #include "disk.hpp"
  

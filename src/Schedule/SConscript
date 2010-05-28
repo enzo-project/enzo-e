@@ -9,7 +9,8 @@ components = ['error',
               'user', 
               'user-ppm', 
               'method', 
-              'monitor' ]
+              'monitor',
+              'cello' ]
 
 libraries  = ['png','boost_thread-mt']
 includes   = [Glob('schedule*hpp')]

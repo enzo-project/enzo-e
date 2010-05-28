@@ -21,11 +21,32 @@ int main()
 
   FieldDescr field_descr;
 
-  field_descr.insert_field("density");
-  field_descr.insert_field("velocity_x");
-  field_descr.insert_field("velocity_y");
-  field_descr.insert_field("velocity_z");
-  field_descr.insert_field("total_energy");
+  int index_density      = field_descr.insert_field("density");
+  int index_velocity_x   = field_descr.insert_field("velocity_x");
+  int index_velocity_y   = field_descr.insert_field("velocity_y");
+  int index_velocity_z   = field_descr.insert_field("velocity_z");
+  int index_total_energy = field_descr.insert_field("total_energy");
+
+  field_descr.set_precision(index_density,     precision_single);
+  field_descr.set_precision(index_velocity_x,  precision_double);
+  field_descr.set_precision(index_velocity_y,  precision_quadruple);
+  field_descr.set_precision(index_velocity_z,  precision_double);
+  field_descr.set_precision(index_total_energy,precision_half);
+
+  field_descr.set_ghosts(index_density,      1,1,1);
+  field_descr.set_ghosts(index_velocity_x,   2,2,2);
+  field_descr.set_ghosts(index_velocity_y,   3,2,1);
+  field_descr.set_ghosts(index_velocity_z,   1,2,3);
+  field_descr.set_ghosts(index_total_energy, 5,5,5);
+
+  field_descr.set_centering(index_velocity_x, false, true, true);
+  field_descr.set_centering(index_velocity_y, true, false, true);
+  field_descr.set_centering(index_velocity_z, true, true,  false);
+
+  //  printf ("sizeof(half) = %d\n",sizeof(float16));
+  printf ("sizeof(single) = %d\n",sizeof(float));
+  printf ("sizeof(double) = %d\n",sizeof(double));
+  printf ("sizeof(extended) = %d\n",sizeof(long double));
 
   //----------------------------------------------------------------------
   unit_class ("FieldBlock");
@@ -87,9 +108,18 @@ int main()
   unit_func("array_allocated");
   unit_assert( field_block.array_allocated());
 
+  
   //----------------------------------------------------------------------
-  unit_func("index_range");
+
+  unit_func("field_values");
+  
+  float * values_density = (float *) field_block.field_values(index_density);
+  
+
   unit_assert(false);
+  unit_func("field_unknowns");
+  unit_assert(false);
+
   //----------------------------------------------------------------------
   unit_func("box_extent");
   unit_assert(false);

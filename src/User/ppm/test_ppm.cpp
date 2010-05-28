@@ -7,13 +7,19 @@
 /// @date      Fri Mar  7 17:11:14 PST 2008
 /// @brief     Program implementing unit tests for hydrodynamics
 
+
 #include "cello.h"
 #include "cello_hydro.h"
-#include "test_ppm.h"
 
+#include "test_ppm.h"
 #include "string.h"
+
 #include "parallel.hpp"
 #include "performance.hpp"
+
+
+
+
 
 //----------------------------------------------------------------------
 
@@ -99,7 +105,7 @@ int main(int argc, char ** argv)
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
-    dt =  min(ComputeTimeStep(), time_stop - time);
+    dt =  MIN(ComputeTimeStep(), time_stop - time);
 
     SetExternalBoundaryValues();
 

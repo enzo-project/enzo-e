@@ -213,7 +213,7 @@ int SolveHydroEquations
  
 //     for (dim = 0; dim < GridRank; dim++)
 //       GridGlobalStart[dim] =
-// 	nint((GridLeftEdge[dim] - DomainLeftEdge[dim])/(*(CellWidth[dim]))) -
+// 	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/(*(CellWidth[dim]))) -
 // 	GridStartIndex[dim];
  
     /* fix grid quantities so they are defined to at least 3 dims */
@@ -228,7 +228,7 @@ int SolveHydroEquations
     /* allocate temporary space for solver (enough to fit 31 of the largest
        possible 2d slices plus 4*NumberOfColours). */
  
-    int tempsize = max(max(GridDimension[0]*GridDimension[1],
+    int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
                            GridDimension[1]*GridDimension[2]),
 		           GridDimension[2]*GridDimension[0]  );
     float *temp = new float[tempsize*(31+NumberOfColours*4)];

@@ -8,6 +8,8 @@
 
 #include <stdio.h>
 
+#include <string>
+
 #include "cello.h"
 #include "error.hpp"
 #include "disk.hpp"

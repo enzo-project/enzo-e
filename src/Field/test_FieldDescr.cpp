@@ -57,6 +57,9 @@ int main()
   field_descr->insert_field("velocity_z");
   unit_assert(field_descr->field_count()==4);
   field_descr->insert_field("total_energy");
+  unit_assert(field_descr->field_count()==5);
+  field_descr->insert_field("total_energy");
+  unit_assert(field_descr->field_count()==5);
 
   unit_func("field_count");
   unit_assert(field_descr->field_count()==5);
@@ -168,10 +171,11 @@ int main()
   unit_assert(field_descr->precision(info.field_velocity_x)   == precision_double);
   unit_assert(field_descr->precision(info.field_velocity_y)   == precision_double);
   unit_assert(field_descr->precision(info.field_velocity_z)   == precision_double);
-  unit_assert(field_descr->precision(info.field_total_energy) == precision_default);
+  unit_assert(field_descr->precision(info.field_total_energy) == default_precision);
+  
 
-  unit_func("precision_size");
-  unit_assert(false);
+  unit_func("bytes_per_element");
+  unit_assert(field_descr->bytes_per_element(info.field_density)==4);
 
   // Centering
 
@@ -305,7 +309,7 @@ int main()
   unit_assert(field_descr_assign.precision(info.field_velocity_x)   == precision_double);
   unit_assert(field_descr_assign.precision(info.field_velocity_y)   == precision_double);
   unit_assert(field_descr_assign.precision(info.field_velocity_z)   == precision_double);
-  unit_assert(field_descr_assign.precision(info.field_total_energy) == precision_default);
+  unit_assert(field_descr_assign.precision(info.field_total_energy) == default_precision);
 
   field_descr_assign.centering(info.field_density, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx && info.cy && info.cz);
@@ -383,7 +387,7 @@ int main()
   unit_assert(field_descr_copy.precision(info.field_velocity_x)   == precision_double);
   unit_assert(field_descr_copy.precision(info.field_velocity_y)   == precision_double);
   unit_assert(field_descr_copy.precision(info.field_velocity_z)   == precision_double);
-  unit_assert(field_descr_copy.precision(info.field_total_energy) == precision_default);
+  unit_assert(field_descr_copy.precision(info.field_total_energy) == default_precision);
 
   field_descr_copy.centering(info.field_density, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx && info.cy && info.cz);

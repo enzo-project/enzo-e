@@ -24,10 +24,12 @@
 #define MAX_DIMENSION                       3 // for array declarations and loops in SolveHydro
 #define MAX_NUMBER_OF_BARYON_FIELDS         28 // for array declarations and loops in SolveHydro
 
-#define sign(A)   ((A) >  0  ?  1  : -1 )     // upper-case inline function
-#define nint(A)   ((int) ((A) + 0.5*sign(A)) ) // rename to round(), upper-case inline function
-#define min(A,B)  ((A) < (B) ? (A) : (B))      // upper-case inline function
-#define max(A,B)  ((A) > (B) ? (A) : (B))      // upper-case inline function
+// #define SIGN(A)   ((A) >  0  ?  1  : -1 )     // upper-case inline function
+#define NINT(A)   ((int) ((A) + 0.5*sign(A)) ) // rename to round(), upper-case inline function
+
+// defined in cello.h
+// #define MIN(A,B)  ((A) < (B) ? (A) : (B))      // upper-case inline function
+// #define MAX(A,B)  ((A) > (B) ? (A) : (B))      // upper-case inline function
 
 // #define FORTRAN_NAME(NAME) NAME
 #define FORTRAN_NAME(NAME) NAME##_

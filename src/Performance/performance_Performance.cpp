@@ -6,6 +6,8 @@
 /// @date      2009-10-15
 /// @brief     Implementation of the Performance class
 
+#include <string>
+
 #include "cello.h"
 
 #include "error.hpp" 

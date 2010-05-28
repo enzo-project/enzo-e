@@ -14,6 +14,7 @@
 /// @brief    Fortran-style array class.
 
 #include <stdexcept>
+#include <vector>
 
 #include "field_FieldDescr.hpp"
 #include "disk_DiskFile.hpp"
@@ -46,8 +47,12 @@ public: // interface
   void dimensions(int * nx, int * ny, int * nz) const throw();
 
   /// Return array for the corresponding field, which may or may not
-  /// contain ghosts
-  char * field_values (int id_field) throw (std::out_of_range);
+  /// contain ghosts depending on if they're allocated
+  void * field_values (int id_field) throw (std::out_of_range);
+
+  /// Return array for the corresponding field, which does not contain
+  /// ghosts whether they're allocated or not
+  void * field_unknowns (int id_field) throw (std::out_of_range);
 
   /// Return raw pointer to the array of fields.  Const since otherwise
   /// dangerous due to varying field sizes and padding and alignment
@@ -128,7 +133,7 @@ private: // functions
     return (alignment - (reinterpret_cast<long unsigned>(start) % alignment))%alignment; 
   };
 
-  int field_size_ (int id_field) const throw();
+  int field_size_ (int id_field, int *nx, int *ny, int *nz) const throw();
 
 private: // attributes
 

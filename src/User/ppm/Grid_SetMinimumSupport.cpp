@@ -58,13 +58,13 @@ int SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
  
     if (DualEnergyFormalism == TRUE) {
       for (i = 0; i < size; i++)
-	BaryonField[GENum][i] = max(BaryonField[GENum][i],
+	BaryonField[GENum][i] = MAX(BaryonField[GENum][i],
 				    MinimumSupportEnergyCoefficient *
 				    BaryonField[DensNum][i]);
       if (GridRank != 3) return ENZO_FAIL;
       for (i = 0; i < size; i++)
 	BaryonField[TENum][i] = 
-	  max(BaryonField[GENum][i] + 0.5*
+	  MAX(BaryonField[GENum][i] + 0.5*
 	      (BaryonField[Vel1Num][i]*BaryonField[Vel1Num][i] +
 	       BaryonField[Vel2Num][i]*BaryonField[Vel2Num][i] +
 	       BaryonField[Vel3Num][i]*BaryonField[Vel3Num][i]),

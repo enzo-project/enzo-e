@@ -11,6 +11,9 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Declaration of the Error class
 
+#include <stdio.h>
+#include <stdlib.h>
+
 /// @def      ERROR_MESSAGE_LENGTH
 /// @brief    Maximum length of error and warning messages
 #define ERROR_MESSAGE_LENGTH 255

@@ -5,31 +5,8 @@
 
 #include "config.def"
 
-/*********************************************************************
- * PRECISION DECLARATIONS
- *********************************************************************/
+#include "cello_precision.h"
 
-#ifdef CONFIG_PRECISION_SINGLE
-#   define Scalar float
-#   define SCALAR_SCANF  "%f"
-#   define SCALAR_PRINTF "%e "
-#   define SCALAR_MPI     MPI_FLOAT
-#   define SCALAR_HDF5    H5T_NATIVE_FLOAT
-#   define SCALAR_DEFINED
-#endif
-
-#ifdef CONFIG_PRECISION_DOUBLE
-#   define Scalar double
-#   define SCALAR_SCANF  "%lf"
-#   define SCALAR_PRINTF "%le "
-#   define SCALAR_MPI     MPI_DOUBLE
-#   define SCALAR_HDF5    H5T_NATIVE_DOUBLE
-#   define SCALAR_DEFINED /* if error here, then both single and double defined */
-#endif
-
-#ifndef SCALAR_DEFINED
-@@@ Error: CONFIG_PRECISION_* not defined
-#endif
 
 /*********************************************************************
  * PERFORMANCE DECLARATIONS
@@ -96,8 +73,8 @@ enum type_perf_functions {
  * GLOBAL FUNCTIONS
  **********************************************************************/
 
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
+/* #define MIN(X,Y) ((X) < (Y) ? (X) : (Y)) */
+/* #define MAX(X,Y) ((X) > (Y) ? (X) : (Y)) */
 
 /*********************************************************************
  * COMPONENTS
@@ -124,18 +101,5 @@ enum type_component {
   component_simulation,
   num_components
 };
-
-
-/* System includes */
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <string>
-#include <vector>
-#include <map>
-#include <stack>
-
-#include "strict_auto_ptr.h"
 
 #endif /* CELLO_DEF */

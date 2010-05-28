@@ -172,7 +172,7 @@ int ComputePressure(ENZO_FLOAT time, float *pressure)
  
       if (number_density == 0)
 	number_density = number_density_floor;
-      temp = max(TemperatureUnits*pressure[i]/(number_density + nH2), 1);
+      temp = MAX(TemperatureUnits*pressure[i]/(number_density + nH2), 1);
  
       /* Only do full computation if there is a reasonable amount of H2.
 	 The second term in GammaH2Inverse accounts for the vibrational
@@ -204,7 +204,7 @@ int ComputePressure(ENZO_FLOAT time, float *pressure)
   float Gamma1 = Gamma;
   if ((ProblemType == 60 || ProblemType == 61) && GravityOn == TRUE)
     for (i=0; i<size; i++) {
-      Gamma1 = min(Gamma + (log10(BaryonField[DensNum][i])-8.0)*0.3999/2.5, 1.4);
+      Gamma1 = MIN(Gamma + (log10(BaryonField[DensNum][i])-8.0)*0.3999/2.5, 1.4);
       pressure[i] *= (Gamma1 - 1.0)/(Gamma - 1.0);
     }
 

@@ -21,20 +21,12 @@ enum field_action {
   field_action_method    // Retry with alternate method if range exceeded
 };
 
-enum precision_type {
-  precision_unknown,   //  unknown precision
-  precision_default,   //  default precision, based on CONFIG_PRECISION_[SINGLE|DOUBLE]
-  precision_half,      //  16-bit field data
-  precision_single,    //  32-bit field data
-  precision_double,    //  64-bit field data
-  precision_extended,  //  80-bit (ala Intel) field data
-  precision_quadruple  // 128-bit field data
-};
-
 #include <stdexcept>
 #include <string>
 #include <memory>
 #include <set>
+#include <map>
+#include <vector>
 
 #include "error.hpp"
 
@@ -119,7 +111,7 @@ public: // functions
   //----------------------------------------------------------------------
 
   /// Insert a new field
-  void insert_field(std::string name_field) throw();
+  int insert_field(std::string name_field) throw();
 
   /// Insert a new group
   void insert_group(std::string name_group) throw();
@@ -155,23 +147,6 @@ public: // functions
 
 private: // functions
 
-  precision_type default_precision_ () {
-
-#if defined CONFIG_PRECISION_HALF
-    return precision_half;
-#elif defined CONFIG_PRECISION_SINGLE
-    return precision_single;
-#elif defined CONFIG_PRECISION_DOUBLE
-    return precision_double;
-#elif defined CONFIG_PRECISION_EXTENDED
-    return precision_extended;
-#elif defined CONFIG_PRECISION_QUADRUPLE
-    return precision_quadruple;
-#else
-    return precision_unknown;
-#endif
-
-  };
 
 
 private: // attributes

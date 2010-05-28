@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['error']
+components = ['cello','error']
 env = env.Clone(LIBS=components)
 
 includes = [Glob('field*hpp')]

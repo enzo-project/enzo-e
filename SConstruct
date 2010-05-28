@@ -20,7 +20,7 @@ if (platform == 'linux-mpi'):
 #--------------------------------------------------
    env = Environment (
       CXX         = 'mpiCC',	
-      CPPFLAGS    = '-Wall -g',
+      CPPFLAGS    = '-Wall -g -m128bit-long-double',
       CPPPATH     = '#/include',
       FORTRANPATH = '#/include',
       FORTRAN     = 'gfortran',
@@ -34,7 +34,7 @@ elif (platform == 'linux-ampi'):
    env = Environment(
       ENV         = os.environ,
       CXX         = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
-      CPPFLAGS    = '-Wall -g',
+      CPPFLAGS    = '-Wall -g -m128bit-long-double',
       CPPPATH     = '#/include',
       FORTRANPATH = '#/include',
       FORTRAN     = 'gfortran',

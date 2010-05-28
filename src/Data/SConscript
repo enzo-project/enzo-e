@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['field','error']
+components = ['field','error','cello']
 includes   = [Glob('data*hpp')]
 sources    = [Glob('data*cpp')]
 

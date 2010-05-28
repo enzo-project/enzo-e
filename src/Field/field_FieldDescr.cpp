@@ -8,6 +8,8 @@
 
 #include <assert.h>
 
+#include "cello.h"
+
 #include "error.hpp"
 #include "field.hpp"
 
@@ -248,11 +250,20 @@ field_action FieldDescr::maximum_action(int id_field) const throw(std::out_of_ra
 
 //----------------------------------------------------------------------
 
-void FieldDescr::insert_field(std::string field_name) throw()
+int FieldDescr::insert_field(std::string field_name) throw()
 {
 
   int id = field_count();
 
+  // Check if field has already been inserted
+
+  for (int i=0; i<id; i++) {
+    if (field_name_[i] == field_name) {
+      WARNING_MESSAGE("FieldDescr::insert_field",
+		      "Insert field called multiple times with same field");
+      return i;
+    }
+  }
   // Insert field name and id
 
   field_name_.push_back(field_name);
@@ -261,7 +272,7 @@ void FieldDescr::insert_field(std::string field_name) throw()
 
   // Initialize attributes with default values
 
-  precision_type precision = default_precision_();
+  precision_type precision = default_precision;
 
   bool * centered = new bool[3];
   centered[0] = true;
@@ -282,6 +293,8 @@ void FieldDescr::insert_field(std::string field_name) throw()
   max_value_. push_back(0);
   min_action_.push_back(field_action_none);
   max_action_.push_back(field_action_none);
+
+  return id;
 }
 
 //----------------------------------------------------------------------
@@ -326,39 +339,14 @@ void FieldDescr::set_courant(double courant) throw()
 void FieldDescr::set_precision(int id_field, precision_type precision) throw(std::out_of_range)
 {
   precision_.at(id_field) = 
-    (precision == precision_default) ? default_precision_() : precision;
+    (precision == precision_default) ? default_precision : precision;
 }
 
 //----------------------------------------------------------------------
 
 int FieldDescr::bytes_per_element(int id_field) const throw()
 {
-  int size = 0;
-  switch (precision(id_field)) {
-  case precision_unknown:
-    break;
-  case precision_default:
-    assert (0);
-    break;
-  case precision_half:
-    size = 2;
-    break;
-  case precision_single:
-    size = 4;
-    break;
-  case precision_double:
-    size = 8;
-    break;
-  case precision_extended:
-    size = 10;
-    break;
-  case precision_quadruple:
-    size = 16;
-    break;
-  default:
-    break;
-  }
-  return size;
+  return precision_size (precision(id_field));
 }
 
 //----------------------------------------------------------------------

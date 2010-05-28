@@ -124,8 +124,8 @@ int ComputeTemperatureField(float *temperature)
        Compute temperature T = p/d and assume mu = DEFAULT_MU. */
  
     for (i = 0; i < size; i++)
-      temperature[i] = max((TemperatureUnits*temperature[i]*mol_weight
-		         /max(BaryonField[DensNum][i], density_floor)),
+      temperature[i] = MAX((TemperatureUnits*temperature[i]*mol_weight
+		         /MAX(BaryonField[DensNum][i], density_floor)),
 			 min_temperature);
   else {
  
@@ -155,8 +155,8 @@ int ComputeTemperatureField(float *temperature)
  
       /* Ignore deuterium. */
  
-      temperature[i] *= TemperatureUnits/max(number_density, number_density_floor);
-      temperature[i] = max(temperature[i], MINIMUM_TEMPERATURE);
+      temperature[i] *= TemperatureUnits/MAX(number_density, number_density_floor);
+      temperature[i] = MAX(temperature[i], MINIMUM_TEMPERATURE);
     }
   }
  
