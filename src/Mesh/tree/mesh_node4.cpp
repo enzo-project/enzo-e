@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 
-#include "cello.h"
+#include "cello.hpp"
 
 #include "error.hpp"
 

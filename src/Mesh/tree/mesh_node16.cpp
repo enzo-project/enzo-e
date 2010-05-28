@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 
-#include "cello.h"
+#include "cello.hpp"
 
 #include "mesh_node16.hpp"
 #include "error.hpp"

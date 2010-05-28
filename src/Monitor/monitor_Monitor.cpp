@@ -7,7 +7,7 @@
 /// @todo      simplify image call
 /// @brief     Routines for simple output of text, plots, and graphs
 
-#include "cello.h"
+#include "cello.hpp"
 #include "pngwriter.h"
 #include "parallel.hpp"
 #include "monitor.hpp" 

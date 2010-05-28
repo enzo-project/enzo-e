@@ -13,7 +13,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
-#include "cello.h"
+#include "cello.hpp"
 #include "error.hpp"
 #include "parse.h"
 #include "parameters_Param.hpp"

@@ -12,7 +12,7 @@
 
 #include <mpi.h>
 
-#include "cello.h"
+#include "cello.hpp"
 
 #include "error.hpp"
 #include "parallel.hpp"

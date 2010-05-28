@@ -6,7 +6,7 @@
 /// @date      Wed Nov 18 2009
 /// @brief     Project fields to images
 
-#include "cello.h"
+#include "cello.hpp"
 #include "cello_hydro.h"
 
 #include <string>

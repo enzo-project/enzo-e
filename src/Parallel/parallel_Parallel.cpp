@@ -6,7 +6,7 @@
 /// @date      Wed Oct 14 11:23:14 PDT 2009
 /// @brief     Implementation of the Parallel class
 
-#include "cello.h"
+#include "cello.hpp"
  
 #include "parallel.hpp"
 

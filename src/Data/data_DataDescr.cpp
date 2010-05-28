@@ -6,7 +6,9 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Implementation of the DataDescr class
 
-#include "data_DataDescr.hpp"
+#include "cello.hpp"
+
+#include "data.hpp"
 
 DataDescr::DataDescr() throw ()
   : field_descr_(),

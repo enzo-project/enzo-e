@@ -7,7 +7,7 @@
 /// @brief    Implementation of Tree2K class for K^2-trees
 
 #include <stdio.h>
-#include "cello.h"
+#include "cello.hpp"
 #include "mesh_Node2K.hpp"
 #include "mesh_Tree2K.hpp"
 

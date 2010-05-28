@@ -10,7 +10,7 @@
 /// @brief    Declaration of the Node16 class 
 
 #include <stdlib.h>
-#include "cello.h"
+#include "cello.hpp"
 #include "mesh_node.hpp"
 
 class Tree16;

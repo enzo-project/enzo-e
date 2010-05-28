@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <sys/time.h>
-#include "cello.h"
+#include "cello.hpp"
 #include "performance_Counters.hpp"
 #include "performance_Performance.hpp"
 #include "performance_Timer.hpp"

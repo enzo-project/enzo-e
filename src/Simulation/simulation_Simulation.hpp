@@ -10,7 +10,7 @@
 /// @brief    Interface file for the Simulation class
 
 #include <vector>
-#include "cello.h"
+#include "cello.hpp"
 #include "mesh.hpp"
 #include "data.hpp"
 #include "method.hpp"

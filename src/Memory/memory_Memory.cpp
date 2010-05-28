@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <new>
 
-#include "cello.h"
+#include "cello.hpp"
 
 #include "error.hpp"
 #include "memory.hpp"

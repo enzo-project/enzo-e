@@ -9,7 +9,7 @@
 /// @date     2008-03-18 17:48:36
 /// @brief    Include file for the Disk component
 
-#include "cello.h"
+#include "cello.hpp"
 #include "disk_Hdf5.hpp"
 #include "disk_Ifrit.hpp"
 #include "disk_DiskFile.hpp"

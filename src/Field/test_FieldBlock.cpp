@@ -6,7 +6,7 @@
 /// @date     2008-02-20
 /// @brief    Unit tests for the FieldBlock class
 
-#include "cello.h"
+#include "cello.hpp"
 
 #include "error.hpp"
 #include "test.hpp"

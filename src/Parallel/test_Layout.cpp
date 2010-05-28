@@ -7,7 +7,7 @@
 /// @brief    Unit tests for the Layout class
 
 #include <math.h>
-#include "cello.h"
+#include "cello.hpp"
 
 #include "error.hpp"
 #include "test.hpp"

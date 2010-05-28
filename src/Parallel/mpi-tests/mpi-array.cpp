@@ -52,7 +52,7 @@
 #include <stdio.h>
 #include <mpi.h>
 
-#include "cello.h"
+#include "cello.hpp"
 
 #include "error.hpp"
 #include "parameters.hpp"

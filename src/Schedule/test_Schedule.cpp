@@ -6,7 +6,7 @@
 /// @date      Thu Feb 21 16:47:35 PST 2008
 /// @brief     Program implementing unit tests for the Schedule class
  
-#include "cello.h"
+#include "cello.hpp"
 
 #include "error.hpp"
 #include "test.hpp"

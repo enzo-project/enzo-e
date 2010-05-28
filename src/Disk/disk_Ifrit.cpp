@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include "cello.h"
+#include "cello.hpp"
 #include "error.hpp"
 #include "disk.hpp"
  

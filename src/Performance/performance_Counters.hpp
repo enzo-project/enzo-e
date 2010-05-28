@@ -9,7 +9,7 @@
 /// @date     2009-10-19 12:55:54
 /// @brief    Interface for the Counters class
 
-#include "cello.h"
+#include "cello.hpp"
 #include "memory.hpp"
 
 class Counters {

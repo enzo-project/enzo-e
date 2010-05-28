@@ -10,7 +10,7 @@
 /// @brief    Interface for Node2K class
 
 #include <stdlib.h>
-#include "cello.h"
+#include "cello.hpp"
 #include "mesh_NodeK.hpp"
 
 class Tree2K;

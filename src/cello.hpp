@@ -5,7 +5,7 @@
 
 #include "config.def"
 
-#include "cello_precision.h"
+#include "cello_precision.hpp"
 
 
 /*********************************************************************
@@ -73,8 +73,8 @@ enum type_perf_functions {
  * GLOBAL FUNCTIONS
  **********************************************************************/
 
-/* #define MIN(X,Y) ((X) < (Y) ? (X) : (Y)) */
-/* #define MAX(X,Y) ((X) > (Y) ? (X) : (Y)) */
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
 /*********************************************************************
  * COMPONENTS

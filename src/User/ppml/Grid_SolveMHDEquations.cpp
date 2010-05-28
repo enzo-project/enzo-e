@@ -188,7 +188,7 @@ int SolveMHDEquations(int cycle, float dt)
  
     for (dim = 0; dim < GridRank; dim++)
       GridGlobalStart[dim] =
-	nint((GridLeftEdge[dim] - DomainLeftEdge[dim])/(*(CellWidth[dim]))) -
+	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/(*(CellWidth[dim]))) -
 	GridStartIndex[dim];
  
     /* fix grid quantities so they are defined to at least 3 dims */
@@ -204,7 +204,7 @@ int SolveMHDEquations(int cycle, float dt)
        possible 2d slices plus 4*NumberOfColours). */
     // no colours here for now !AK 
 
-    int tempsize = max(max(GridDimension[0]*GridDimension[1],
+    int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
                            GridDimension[1]*GridDimension[2]),
 		           GridDimension[2]*GridDimension[0]  );
     float *temp = new float[tempsize*(31)];

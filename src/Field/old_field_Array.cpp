@@ -6,7 +6,7 @@
 /// @date     2008-02-20
 /// @brief    Implementation of the Array class
  
-#include "cello.h"
+#include "cello.hpp"
 
 #include "error.hpp"
 #include "field.hpp" 

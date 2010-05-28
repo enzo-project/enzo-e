@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string>
 
-#include "cello.h"
+#include "cello.hpp"
 #include "parallel.hpp"
 #include "test.hpp"
 

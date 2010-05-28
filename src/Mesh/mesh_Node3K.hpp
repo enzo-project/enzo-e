@@ -10,7 +10,7 @@
 /// @brief    Declaration of Node3K
 
 #include <stdlib.h>
-#include "cello.h"
+#include "cello.hpp"
 #include "mesh_NodeK.hpp"
 
 class Tree3K;

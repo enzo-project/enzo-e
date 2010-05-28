@@ -7,7 +7,7 @@
 /// @brief    Implementation of the Tree16 class
 
 #include <stdio.h>
-#include "cello.h"
+#include "cello.hpp"
 #include "mesh_node16.hpp"
 #include "mesh_tree16.hpp"
 

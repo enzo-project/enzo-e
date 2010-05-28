@@ -165,8 +165,8 @@ float ComputeTimeStep()
 //     for (dim = 0; dim < GridRank; dim++) {
 //       float dCell = CellWidth[dim][0]*a;
 //       for (i = 0; i < NumberOfParticles; i++) {
-//         dtTemp = dCell/max(fabs(ParticleVelocity[dim][i]), tiny_number);
-// 	dtParticles = min(dtParticles, dtTemp);
+//         dtTemp = dCell/MAX(fabs(ParticleVelocity[dim][i]), tiny_number);
+// 	dtParticles = MIN(dtParticles, dtTemp);
 //       }
 //     }
  
@@ -192,7 +192,7 @@ float ComputeTimeStep()
 // 	for (i = 0; i < size; i++) {
 // 	  dtTemp = sqrt(CellWidth[dim][0]/
 // 			fabs(AccelerationField[dim][i])+tiny_number);
-// 	  dtAcceleration = min(dtAcceleration, dtTemp);
+// 	  dtAcceleration = MIN(dtAcceleration, dtTemp);
 // 	}
 //     if (dtAcceleration != HUGE_VAL)
 //       dtAcceleration *= 0.5;
@@ -200,10 +200,10 @@ float ComputeTimeStep()
  
   /* 5) calculate minimum timestep */
  
-  dt = min(dtBaryons, dtParticles);
-  dt = min(dt, dtViscous);
-  dt = min(dt, dtAcceleration);
-  dt = min(dt, dtExpansion);
+  dt = MIN(dtBaryons, dtParticles);
+  dt = MIN(dt, dtViscous);
+  dt = MIN(dt, dtAcceleration);
+  dt = MIN(dt, dtExpansion);
  
   /* Debugging info. */
  

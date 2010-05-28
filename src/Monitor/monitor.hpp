@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include "cello.h"
+#include "cello.hpp"
 
 #include "performance_Timer.hpp"
 

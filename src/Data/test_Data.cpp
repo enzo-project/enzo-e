@@ -6,7 +6,7 @@
 /// @date     2010-04-02
 /// @brief    Test program for the DataBlock class
 
-#include "cello.h"
+#include "cello.hpp"
 
 #include "error.hpp"
 #include "test.hpp"

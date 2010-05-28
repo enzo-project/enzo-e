@@ -29,7 +29,7 @@ int SetExternalBoundaryValues()
   int GridOffset[MAX_DIMENSION];
   for (dim = 0; dim < MAX_DIMENSION; dim++)
     if (dim < GridRank)
-      GridOffset[dim] = nint((GridLeftEdge[dim] - DomainLeftEdge[dim])/
+      GridOffset[dim] = NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/
 			     CellWidth[dim][0]);
     else
       GridOffset[dim] = 0;

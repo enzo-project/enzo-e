@@ -7,7 +7,7 @@
 /// @brief    Implementation of Tree3K class for K^3-trees
 
 #include <stdio.h>
-#include "cello.h"
+#include "cello.hpp"
 #include "mesh_Node3K.hpp"
 #include "mesh_Tree3K.hpp"
 

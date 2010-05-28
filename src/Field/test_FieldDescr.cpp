@@ -6,7 +6,7 @@
 /// @date     2010-05-11
 /// @brief    Test program for the FieldDescr class
 
-#include "cello.h"
+#include "cello.hpp"
 
 #include "test.hpp"
 #include "field.hpp"
