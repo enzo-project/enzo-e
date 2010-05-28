@@ -18,9 +18,10 @@ if (platform == 'unknown' and "CELLO_PLATFORM" in os.environ):
 #--------------------------------------------------
 if (platform == 'linux-mpi'):
 #--------------------------------------------------
+   parallel_run = "mpirun -np 4"
    env = Environment (
       CXX         = 'mpiCC',	
-      CPPFLAGS    = '-Wall -g -m128bit-long-double',
+      CPPFLAGS    = '-Wall -g  -m128bit-long-double',
       CPPPATH     = '#/include',
       FORTRANPATH = '#/include',
       FORTRAN     = 'gfortran',
@@ -31,10 +32,11 @@ if (platform == 'linux-mpi'):
 #--------------------------------------------------
 elif (platform == 'linux-ampi'):
 #--------------------------------------------------
+   parallel_run = "/home/bordner/charm/charm-6.2.0/bin/charmrun ++p 4 "
    env = Environment(
       ENV         = os.environ,
       CXX         = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
-      CPPFLAGS    = '-Wall -g -m128bit-long-double',
+      CPPFLAGS    = '-Wall -g',
       CPPPATH     = '#/include',
       FORTRANPATH = '#/include',
       FORTRAN     = 'gfortran',
@@ -45,6 +47,7 @@ elif (platform == 'linux-ampi'):
 #--------------------------------------------------
 elif (platform == 'triton'):
 #--------------------------------------------------
+   parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    env = Environment (
       ENV = {'PATH' : os.environ['PATH'],
 	       'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
@@ -60,6 +63,7 @@ elif (platform == 'triton'):
 #--------------------------------------------------
 elif (platform == 'ncsa-bd'):
 #--------------------------------------------------
+   parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    env = Environment (
       ARFLAGS  = 'r',
       BINPATH = '#/bin',
@@ -106,6 +110,8 @@ elif (platform == 'unknown'):
 
 Export('env')
 Export('platform')
+Export('parallel_run')
+
 SConscript('src/SConscript')
 SConscript('test/SConscript')
 

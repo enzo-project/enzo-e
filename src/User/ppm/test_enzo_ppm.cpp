@@ -7,10 +7,12 @@
 /// @brief    Unit tests for the EnzoMethodPpm class
 
 #include <stdio.h>
+#include <mpi.h>
 
 #include "parallel.hpp"
 #include "user.hpp"
 #include "test.hpp"
+#include "error.hpp"
 
 int main (int argc, char ** argv)
 {
@@ -38,5 +40,7 @@ int main (int argc, char ** argv)
   unit_assert(false);
 
   unit_finalize();
+
+  parallel->finalize();
 
 }

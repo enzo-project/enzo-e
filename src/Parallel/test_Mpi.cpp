@@ -5,7 +5,8 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 11:29:22 PDT 2010
 /// @brief    Program implementing unit tests for the ParallelMpi class
- 
+
+#include <mpi.h> 
 #include <stdio.h>
 #include <string>
 

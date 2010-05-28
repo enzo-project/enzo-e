@@ -1,3 +1,4 @@
+
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
@@ -6,6 +7,7 @@
 /// @date     Thu Feb 21 16:04:03 PST 2008
 /// @brief    Program implementing unit tests for the Parameters class
 
+#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
