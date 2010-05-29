@@ -34,8 +34,13 @@ enum precision_type {
 #   error CONFIG_PRECISION_* not defined
 #endif
 
-int precision_size(enum precision_type);
+namespace cello {
 
-int precision_have(enum precision_type);
+  int precision_size     (enum precision_type);
+  int precision_supported(enum precision_type);
+
+  extern const char * precision_name[8];
+
+};
 
 

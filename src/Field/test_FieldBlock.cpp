@@ -31,7 +31,7 @@ int main()
   field_descr.set_precision(index_velocity_x,  precision_double);
   field_descr.set_precision(index_velocity_y,  precision_quadruple);
   field_descr.set_precision(index_velocity_z,  precision_double);
-  field_descr.set_precision(index_total_energy,precision_half);
+  field_descr.set_precision(index_total_energy,precision_extended96);
 
   field_descr.set_ghosts(index_density,      1,1,1);
   field_descr.set_ghosts(index_velocity_x,   2,2,2);
@@ -39,14 +39,14 @@ int main()
   field_descr.set_ghosts(index_velocity_z,   1,2,3);
   field_descr.set_ghosts(index_total_energy, 5,5,5);
 
-  field_descr.set_centering(index_velocity_x, false, true, true);
-  field_descr.set_centering(index_velocity_y, true, false, true);
-  field_descr.set_centering(index_velocity_z, true, true,  false);
+  field_descr.set_centering(index_velocity_x, false, true,  true);
+  field_descr.set_centering(index_velocity_y, true,  false, true);
+  field_descr.set_centering(index_velocity_z, true,  true,  false);
 
   //  printf ("sizeof(half) = %d\n",sizeof(float16));
-  printf ("sizeof(single) = %d\n",sizeof(float));
-  printf ("sizeof(double) = %d\n",sizeof(double));
-  printf ("sizeof(extended) = %d\n",sizeof(long double));
+  printf ("sizeof(single) = %lu\n",sizeof(float));
+  printf ("sizeof(double) = %lu\n",sizeof(double));
+  printf ("sizeof(extended) = %lu\n",sizeof(long double));
 
   //----------------------------------------------------------------------
   unit_class ("FieldBlock");
@@ -115,8 +115,8 @@ int main()
   
   float * values_density = (float *) field_block.field_values(index_density);
   
+  unit_assert(values_density != 0);
 
-  unit_assert(false);
   unit_func("field_unknowns");
   unit_assert(false);
 

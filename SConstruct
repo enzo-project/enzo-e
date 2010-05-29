@@ -22,6 +22,7 @@ if (platform == 'linux-mpi'):
    env = Environment (
       CXX         = 'mpiCC',	
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
+#      CPPFLAGS    = '-Wall -g  -m96bit-long-double',
       CPPPATH     = '#/include',
       FORTRANPATH = '#/include',
       FORTRAN     = 'gfortran',

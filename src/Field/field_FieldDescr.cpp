@@ -338,6 +338,13 @@ void FieldDescr::set_courant(double courant) throw()
 
 void FieldDescr::set_precision(int id_field, precision_type precision) throw(std::out_of_range)
 {
+  if ( ! cello::precision_supported (precision) ) {
+    char buffer[80];
+    sprintf (buffer,"precision \"%s\" is not supported",
+	     cello::precision_name[precision]);
+    WARNING_MESSAGE("FieldDescr::set_precision",
+		    buffer);
+  }
   precision_.at(id_field) = 
     (precision == precision_default) ? default_precision : precision;
 }
@@ -346,7 +353,7 @@ void FieldDescr::set_precision(int id_field, precision_type precision) throw(std
 
 int FieldDescr::bytes_per_element(int id_field) const throw()
 {
-  return precision_size (precision(id_field));
+  return cello::precision_size (precision(id_field));
 }
 
 //----------------------------------------------------------------------

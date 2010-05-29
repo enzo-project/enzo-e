@@ -67,8 +67,23 @@ void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
   char * field_unknowns = field_values_.at(id_field);
 
   if ( ghosts_allocated() ) {
-    int dx,dy,dz;
+
     int gx,gy,gz;
+    field_descr_->ghosts(id_field,&gx,&gy,&gz);
+
+    bool cx,cy,cz;
+    field_descr_->centering(id_field,&cx,&cy,&cz);
+
+    int nx,ny,nz;
+    dimensions(&nx,&ny,&nz);
+
+    nx += 2*gx + cx?0:1;
+    ny += 2*gy + cy?0:1;
+    nz += 2*gz + cz?0:1;
+    
+    precision_type precision = field_descr_->precision(id_field);
+    int bytes_per_element = cello::precision_size (precision);
+    field_unknowns += bytes_per_element * (gx + nx*(gy + ny*gz));
   } 
 
   return field_unknowns;
@@ -389,5 +404,7 @@ int FieldBlock::field_size_
 
   // Return array size in bytes
 
-  return (*nx) * (*ny) * (*nz) * field_descr_->bytes_per_element(id_field);
+  precision_type precision = field_descr_->precision(id_field);
+  int bytes_per_element = cello::precision_size (precision);
+  return (*nx) * (*ny) * (*nz) * bytes_per_element;
 }

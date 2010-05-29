@@ -1,37 +1,19 @@
 #include "cello.hpp"
 
-int precision_have(enum precision_type precision)
-{
-  switch (precision) {
-  case precision_unknown:
-    return 0;
-    break;
-  case precision_default:
-    return precision_have(default_precision);
-    break;
-  case precision_half:
-    return 0;
-    break;
-  case precision_single:
-    return (sizeof(float)==4);
-    break;
-  case precision_double:
-    return (sizeof(double)==8);
-    break;
-  case precision_extended80:
-    return (sizeof(long double)==10);
-    break;
-  case precision_extended96:
-    return (sizeof(long double)==12);
-    break;
-  case precision_quadruple:
-    return (sizeof(long double)==16);
-    break;
-  default:
-    return 0;
-    break;
-  }
-}
+//----------------------------------------------------------------------
+
+namespace cello {
+
+const char * precision_name[8] = {
+  "unknown",
+  "default",
+  "half",
+  "single",
+  "double",
+  "extended80",
+  "extended96",
+  "quadruple"
+};
 
 int precision_size(enum precision_type precision)
 {
@@ -64,4 +46,41 @@ int precision_size(enum precision_type precision)
     break;
   }
   return size;
+}
+
+//----------------------------------------------------------------------
+
+int precision_supported(enum precision_type precision)
+{
+  switch (precision) {
+  case precision_unknown:
+    return 0;
+    break;
+  case precision_default:
+    return precision_supported(default_precision);
+    break;
+  case precision_half:
+    return 0;
+    break;
+  case precision_single:
+    return (sizeof(float)==4);
+    break;
+  case precision_double:
+    return (sizeof(double)==8);
+    break;
+  case precision_extended80:
+    return (sizeof(long double)==10);
+    break;
+  case precision_extended96:
+    return (sizeof(long double)==12);
+    break;
+  case precision_quadruple:
+    return (sizeof(long double)==16);
+    break;
+  default:
+    return 0;
+    break;
+  }
+}
+
 }

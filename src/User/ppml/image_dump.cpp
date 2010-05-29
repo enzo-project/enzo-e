@@ -10,7 +10,6 @@
 #include "cello_hydro.h"
 
 #include <string>
-#include <hdf5.h>
 
 #include "monitor.hpp"
 
@@ -24,9 +23,7 @@ void image_dump(const char * file_root,
   int ny = GridDimension[1];
   int nz = GridDimension[2];
 
-  // Open hdf5 file dump for cycle
   char filename[80];
-  
 
   // color map
   double map[] = {1,1,1, 0,0,0};
@@ -35,9 +32,10 @@ void image_dump(const char * file_root,
 
   // slice
   sprintf (filename,"slice-%s-%06d-z.png",file_root,cycle);
+
   monitor->image(filename,
 		BaryonField[field_density],nx,ny,nz,
-		3,3,3,nx-3,ny-3,4,
+		3,3,0,nx-3,ny-3,1,
 		2,reduce_sum, lower/nx, upper/nx, map,2);
   
   if (nz > 1) {

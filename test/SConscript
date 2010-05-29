@@ -44,12 +44,17 @@ env.RunSerial('test_TreeK-D3-R4-L6.out', '#/bin/test_TreeK', ARGS='3 4 6')
 env.RunSerial('test_TreeK-D3-R4-L7.out', '#/bin/test_TreeK', ARGS='3 4 7')
 env.RunSerial('test_TreeK-D3-R4-L8.out', '#/bin/test_TreeK', ARGS='3 4 8')
 
-env.RunSerial('test_ppml_implosion.out', '#/bin/test_ppml', ARGS='ppml-implosion3 32 1')
-env.RunSerial('test_ppml_blast.out',     '#/bin/test_ppml', ARGS='ppml-blast      32 1')
+env.RunSerial('test_ppml_implosion.out', '#/bin/test_ppml', 
+               ARGS='ppml-implosion3  32 10 10')
+env.RunSerial('test_ppml_blast.out',     '#/bin/test_ppml', 
+               ARGS='ppml-blast       32 10 10')
 
-env.RunSerial('test_ppm_image.out',      '#/bin/test_ppm',  ARGS='ppm-image     100 10')
-env.RunSerial('test_ppm_implosion.out',  '#/bin/test_ppm',  ARGS='ppm-implosion 100 3')
-env.RunSerial('test_ppm_implosion3.out', '#/bin/test_ppm',  ARGS='ppm-implosion3 32 3')
+env.RunSerial('test_ppm_image.out',      '#/bin/test_ppm',  
+               ARGS='ppm-image       100 10 10')
+env.RunSerial('test_ppm_implosion.out',  '#/bin/test_ppm',  
+               ARGS='ppm-implosion   100 10 10')
+env.RunSerial('test_ppm_implosion3.out', '#/bin/test_ppm',  
+               ARGS='ppm-implosion3   32 10 10')
 
 env.RunParallel('test_affinity.out', '#/bin/test_Affinity')
 env.RunParallel('test_mpi.out',      '#/bin/test_Mpi')
