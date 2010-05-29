@@ -150,7 +150,6 @@ void Monitor::image
 
   pngwriter png (mx,my,0,name.c_str());
 
-  TRACE_MESSAGE;
   // loop over pixels (jx,jy)
   for (int jx = 0; jx<mx; jx++) {
     for (int jy = 0; jy<my; jy++) {
@@ -181,7 +180,6 @@ void Monitor::image
     }
   }      
 
-  TRACE_MESSAGE;
   png.close();
 
   delete [] image;

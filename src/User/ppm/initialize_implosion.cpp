@@ -21,7 +21,7 @@ void initialize_implosion (int size_param, int cycles_param)
   float pressure_in  = 0.14;
   float velocity_x = 0.0;
   float velocity_y = 0.0;
-  int cutoff = 0.1517;
+  float cutoff = 0.1517;
 
   // Physics
 
@@ -156,19 +156,7 @@ void initialize_implosion (int size_param, int cycles_param)
     }
   }
 
-  double min,max;
-  min = max = BaryonField[field_density][3 + ndx*3];
-  for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
-    for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
-    int i = ix + ndx*iy;
-    double value = BaryonField[field_density][i];
-    min = MIN(min,value);
-    max = MAX(max,value);
-  }
-  }
-  printf ("%s:%d Min = %g  Max = %g\n",__FILE__,__LINE__,min,max);
 
-  if (debug) printf ("density(3,3) = %g\n",BaryonField[field_density][1221]);
   AccelerationField[0] = NULL;
   AccelerationField[1] = NULL;
   AccelerationField[2] = NULL;
