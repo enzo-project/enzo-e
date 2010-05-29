@@ -37,7 +37,20 @@ void image_dump(const char * file_root,
 		BaryonField[field_density],nx,ny,nz,
 		3,3,0,nx-3,ny-3,1,
 		2,reduce_sum, lower/nx, upper/nx, map,2);
-  
+
+  double min,max;
+  min = max = BaryonField[field_density][3 + nx*3];
+  for (int ix=3; ix<nx-3; ix++) {
+  for (int iy=3; iy<ny-3; iy++) {
+    int i = ix + nx*iy;
+    double value = BaryonField[field_density][i];
+    min = MIN(min,value);
+    max = MAX(max,value);
+  }
+  }
+  printf ("Min = %g  Max = %g\n",min,max);
+    
+
   if (nz > 1) {
     // projection
     sprintf (filename,"project-%s-%06d-z.png",file_root,cycle);

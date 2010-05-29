@@ -136,12 +136,8 @@ void initialize_image (int cycles_param)
 //   }
 
   int ndx = GridDimension[0];
-//   int ndy = GridDimension[1];
+  int ndy = GridDimension[1];
 
-//   float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
-//   float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
-//   int  ixg = (GridEndIndex[0] - GridStartIndex[0] + 1);
-//   int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];
 

@@ -109,29 +109,16 @@ void initialize_implosion (int size_param, int cycles_param)
   int ndx = GridDimension[0];
   int ndy = GridDimension[1];
 
-  float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
-  float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
-  int  ixg = (GridEndIndex[0] - GridStartIndex[0] + 1);
-  int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];
 
-  if (debug) printf ("Size = %d %d \n",ndx,ndy);
-  if (debug) printf ("%g  %g %g  %g %g\n",
-	  Gamma, 
-	  pressure_out,density_out,
-	  pressure_in,density_in);
-  if (debug) printf ("total energy: %g %g\n",
-	  pressure_out / ((Gamma - 1.0)*density_out),
-	  pressure_in / ((Gamma - 1.0)*density_in));
-
   for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
-    float y = 0.5*hy + (iy - GridStartIndex[1]) * yd / iyg;
+    float y = (iy - GridStartIndex[1] + 0.5)*hy;
 
     for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
 
-      float x = 0.5*hx + (ix - GridStartIndex[0]) * xd / ixg;
+      float x = (ix - GridStartIndex[0] + 0.5)*hx;
 
       int i = ix + ndx * iy;
 
@@ -169,6 +156,18 @@ void initialize_implosion (int size_param, int cycles_param)
     }
   }
 
+  double min,max;
+  min = max = BaryonField[field_density][3 + ndx*3];
+  for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
+    for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
+    int i = ix + ndx*iy;
+    double value = BaryonField[field_density][i];
+    min = MIN(min,value);
+    max = MAX(max,value);
+  }
+  }
+  printf ("%s:%d Min = %g  Max = %g\n",__FILE__,__LINE__,min,max);
+
   if (debug) printf ("density(3,3) = %g\n",BaryonField[field_density][1221]);
   AccelerationField[0] = NULL;
   AccelerationField[1] = NULL;
@@ -185,7 +184,7 @@ void initialize_implosion (int size_param, int cycles_param)
   temperature_floor               = 1e-6;
 
   // boundary
-
+ 
   BoundaryRank = 2;
   BoundaryDimension[0] = GridDimension[0];
   BoundaryDimension[1] = GridDimension[1];
