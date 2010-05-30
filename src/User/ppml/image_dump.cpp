@@ -31,15 +31,25 @@ void image_dump(const char * file_root,
   Monitor * monitor = Monitor::instance();
 
   // slice
-  sprintf (filename,"slice-%s-%06d-z.png",file_root,cycle);
+  sprintf (filename,"slice-%s-%06d.png",file_root,cycle);
 
   monitor->image(filename,
 		BaryonField[field_density],nx,ny,nz,
 		3,3,0,nx-3,ny-3,1,
 		2,reduce_sum, lower/nx, upper/nx, map,2);
-  
+
   if (nz > 1) {
     // projection
+    sprintf (filename,"project-%s-%06d-x.png",file_root,cycle);
+    monitor->image(filename,
+		  BaryonField[field_density],nx,ny,nz,
+		  3,3,3,nx-3,ny-3,nz-3,
+		  0,reduce_sum,lower, upper, map,2);
+    sprintf (filename,"project-%s-%06d-y.png",file_root,cycle);
+    monitor->image(filename,
+		  BaryonField[field_density],nx,ny,nz,
+		  3,3,3,nx-3,ny-3,nz-3,
+		  1,reduce_sum,lower, upper, map,2);
     sprintf (filename,"project-%s-%06d-z.png",file_root,cycle);
     monitor->image(filename,
 		  BaryonField[field_density],nx,ny,nz,
