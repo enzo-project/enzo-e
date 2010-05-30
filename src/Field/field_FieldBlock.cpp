@@ -16,7 +16,7 @@ FieldBlock::FieldBlock() throw()
   : field_descr_(0),
     array_(0),
     field_values_(),
-    ghosts_allocated_(true)
+    ghosts_allocated_(false)
 {
   for (int i=0; i<3; i++) {
     dimensions_[i] = 0.0;
@@ -77,12 +77,13 @@ void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
     int nx,ny,nz;
     dimensions(&nx,&ny,&nz);
 
-    nx += 2*gx + cx?0:1;
-    ny += 2*gy + cy?0:1;
-    nz += 2*gz + cz?0:1;
-    
+    nx += 2*gx + (cx?0:1);
+    ny += 2*gy + (cy?0:1);
+    nz += 2*gz + (cz?0:1);
+
     precision_type precision = field_descr_->precision(id_field);
     int bytes_per_element = cello::precision_size (precision);
+
     field_unknowns += bytes_per_element * (gx + nx*(gy + ny*gz));
   } 
 
@@ -239,6 +240,28 @@ void FieldBlock::allocate_ghosts() throw ()
 {
   if (! ghosts_allocated() ) {
 
+    // save old array_
+
+    char * old_array = array_;
+
+    array_ = 0;
+
+    // save old field_values_
+
+    std::vector<char *> old_field_values;
+
+    for (unsigned i=0; i<field_values_.size(); i++) {
+      old_field_values.push_back(field_values_[i]);
+    }
+
+    field_values_.clear();
+
+    // reallocate array_ and field_values_ with ghosts
+
+    ghosts_allocated_ = true;
+
+    allocate_array();
+    
     // allocate new_array with ghosts
     // create new_field_values
     // copy array_ to new_array
