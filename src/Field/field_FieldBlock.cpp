@@ -110,6 +110,9 @@ void FieldBlock::box_extent
 
 void FieldBlock::cell_width( double * hx, double * hy, double * hz ) const throw ()
 {
+  *hx = (box_upper_[0] - box_lower_[0]) / dimensions_[0];
+  *hy = (box_upper_[1] - box_lower_[1]) / dimensions_[1];
+  *hz = (box_upper_[2] - box_lower_[2]) / dimensions_[2];
 }
 
 //----------------------------------------------------------------------
@@ -123,13 +126,50 @@ FieldDescr * FieldBlock::field_descr() throw ()
 
 void FieldBlock::clear
 (
- double value,
+ float value,
  int id_field_first,
- int id_field_last_plus ) throw()
+ int id_field_last) throw()
 {
   if ( array_allocated() ) {
+    if (id_field_first == -1) {
+      id_field_first = 0;
+      id_field_last  = field_descr_->field_count() - 1;
+    } else if (id_field_last == -1) {
+      id_field_last  = id_field_first;
+    }
+    for (int id_field = id_field_first;
+	 id_field <= id_field_last;
+	 id_field++) {
+      int nx,ny,nz;
+      field_size_(id_field,&nx,&ny,&nz);
+      precision_type precision = field_descr_->precision(id_field);
+      switch (precision) {
+      case precision_single:
+	for (int i=0; i<nx*ny*nz; i++) {
+	  ((float *)field_values_[id_field])[i] = (float) value;
+	}
+	break;
+      case precision_double:
+	for (int i=0; i<nx*ny*nz; i++) {
+	  ((double *)field_values_[id_field])[i] = (double) value;
+	}
+	break;
+      case precision_quadruple:
+	for (int i=0; i<nx*ny*nz; i++) {
+	  ((long double *)field_values_[id_field])[i] = (long double) value;
+	}
+	break;
+      default:
+	char buffer[80];
+	sprintf (buffer,"Clear called with unsupported precision %s" , 
+		 cello::precision_name[precision]);
+	ERROR_MESSAGE("FieldBlock::clear", buffer);
+      }
+
+    }
   } else {
-    // WARNING/ERROR clearing non-allocated array
+    ERROR_MESSAGE("FieldBlock::clear",
+		  "Called clear with unallocated arrays");
   }
 }
 
@@ -261,7 +301,10 @@ void FieldBlock::allocate_ghosts() throw ()
     ghosts_allocated_ = true;
 
     allocate_array();
-    
+
+    INCOMPLETE_MESSAGE("FieldBlock::allocate_ghosts",
+		       "old array not copied to new and deallocated");
+
     // allocate new_array with ghosts
     // create new_field_values
     // copy array_ to new_array
@@ -279,13 +322,25 @@ void FieldBlock::allocate_ghosts() throw ()
 
 void FieldBlock::deallocate_ghosts() throw ()
 {
-  if (ghosts_allocated() ) {
+  if ( ghosts_allocated() ) {
+
+    ghosts_allocated_ = false;
+
+    std::vector<char *> old_field_values;
+    char * old_array;
+
+    reallocate_array_ (old_field_values, &old_array);
+
+    INCOMPLETE_MESSAGE("FieldBlock::deallocate_ghosts",
+		       "old array not copied to new and deallocated");
     // allocate new_array without ghosts
     // create new_field_values
     // copy array_ to new_array
     // deallocate array_
     // assign new_array to array_
     // assign new_field_values to field_values_
+    // save old array_
+
   } else {
     WARNING_MESSAGE("FieldBlock::deallocate_ghosts",
 		    "Deallocate called with ghosts already deallocated");
@@ -430,4 +485,28 @@ int FieldBlock::field_size_
   precision_type precision = field_descr_->precision(id_field);
   int bytes_per_element = cello::precision_size (precision);
   return (*nx) * (*ny) * (*nz) * bytes_per_element;
+}
+
+void FieldBlock::reallocate_array_ 
+(
+ std::vector<char *> old_field_values,
+ char **            old_array
+ )
+{
+  // save old array_
+
+  *old_array  = array_;
+  array_ = 0;
+
+  // save old field_values_
+
+  for (unsigned i=0; i<field_values_.size(); i++) {
+    old_field_values.push_back(field_values_[i]);
+  }
+  field_values_.clear();
+
+  // reallocate array_ and field_values_
+
+  allocate_array();
+
 }

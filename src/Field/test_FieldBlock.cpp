@@ -6,6 +6,8 @@
 /// @date     2008-02-20
 /// @brief    Unit tests for the FieldBlock class
 
+#include <math.h>
+
 #include "cello.hpp"
 
 #include "error.hpp"
@@ -21,32 +23,36 @@ int main()
 
   FieldDescr field_descr;
 
-  int index_density      = field_descr.insert_field("density");
-  int index_velocity_x   = field_descr.insert_field("velocity_x");
-  int index_velocity_y   = field_descr.insert_field("velocity_y");
-  int index_velocity_z   = field_descr.insert_field("velocity_z");
-  int index_total_energy = field_descr.insert_field("total_energy");
+  int index_f1 = field_descr.insert_field("f1");
+  int index_f2 = field_descr.insert_field("f2");
+  int index_f3 = field_descr.insert_field("f3");
+  int index_f4 = field_descr.insert_field("f4");
+  int index_f5 = field_descr.insert_field("f5");
 
-  field_descr.set_precision(index_density,     precision_single);
-  field_descr.set_precision(index_velocity_x,  precision_double);
-  field_descr.set_precision(index_velocity_y,  precision_double);
-  field_descr.set_precision(index_velocity_z,  precision_double);
-  field_descr.set_precision(index_total_energy,precision_single);
+  field_descr.set_precision(index_f1, precision_single);
+  field_descr.set_precision(index_f2, precision_double);
+  field_descr.set_precision(index_f3, precision_double);
+  field_descr.set_precision(index_f4, precision_double);
+  field_descr.set_precision(index_f5, precision_quadruple);
 
-  field_descr.set_ghosts(index_density,      1,1,1);
-  field_descr.set_ghosts(index_velocity_x,   2,2,2);
-  field_descr.set_ghosts(index_velocity_y,   3,2,1);
-  field_descr.set_ghosts(index_velocity_z,   1,2,3);
-  field_descr.set_ghosts(index_total_energy, 0,1,2);
+  int g1[3] = {1,1,1};
+  int g2[3] = {2,2,2};
+  int g3[3] = {1,0,2};
+  int g4[3] = {0,0,0};
+  int g5[3] = {3,3,3};
+  field_descr.set_ghosts(index_f1, g1[0],g1[1],g1[2]);
+  field_descr.set_ghosts(index_f2, g2[0],g2[1],g2[2]);
+  field_descr.set_ghosts(index_f3, g3[0],g3[1],g3[2]);
+  field_descr.set_ghosts(index_f4, g4[0],g4[1],g4[2]);
+  field_descr.set_ghosts(index_f5, g5[0],g5[1],g5[2]);
 
-  field_descr.set_centering(index_velocity_x, false, true,  true);
-  field_descr.set_centering(index_velocity_y, true,  false, true);
-  field_descr.set_centering(index_velocity_z, true,  true,  false);
+  field_descr.set_centering(index_f2, false, true,  true);
+  field_descr.set_centering(index_f3, true,  false, true);
+  field_descr.set_centering(index_f4, true,  true,  false);
 
-  //  printf ("sizeof(half) = %d\n",sizeof(float16));
-  printf ("sizeof(single) = %lu\n",sizeof(float));
-  printf ("sizeof(double) = %lu\n",sizeof(double));
-  printf ("sizeof(extended) = %lu\n",sizeof(long double));
+  printf ("sizeof(single)   = %u\n",sizeof(float));
+  printf ("sizeof(double)   = %u\n",sizeof(double));
+  printf ("sizeof(extended) = %u\n",sizeof(long double));
 
   //----------------------------------------------------------------------
   unit_class ("FieldBlock");
@@ -114,181 +120,150 @@ int main()
   
   //----------------------------------------------------------------------
 
-  float *  values_density;
-  double * values_velocity_x;
-  double * values_velocity_y;
-  double * values_velocity_z;
-  float * values_total_energy;
+  float  *      values_f1;
+  double *      values_f2;
+  double *      values_f3;
+  double *      values_f4;
+  long double * values_f5;
 
-  float *  unknowns_density;
-  double * unknowns_velocity_x;
-  double * unknowns_velocity_y;
-  double * unknowns_velocity_z;
-  float * unknowns_total_energy;
+  float *      unknowns_f1;
+  double *     unknowns_f2;
+  double *     unknowns_f3;
+  double *     unknowns_f4;
+  long double * unknowns_f5;
 
-  int bytes_density;
-  int bytes_velocity_x;
-  int bytes_velocity_y;
-  int bytes_velocity_z;
-
+  int bytes_f1;
+  int bytes_f2;
+  int bytes_f3;
+  int bytes_f4;
 
   unit_func("field_values");  // without ghosts
   
-  values_density    = 
-    (float *) field_block.field_values(index_density);
-  values_velocity_x = 
-    (double *) field_block.field_values(index_velocity_x);
-  values_velocity_y = 
-    (double *) field_block.field_values(index_velocity_y);
-  values_velocity_z = 
-    (double *) field_block.field_values(index_velocity_z);
-  values_total_energy =
-    (float *) field_block.field_values(index_total_energy);
+  unit_assert((values_f1 = (float *)      field_block.field_values(index_f1)));
+  unit_assert((values_f2 = (double *)     field_block.field_values(index_f2)));
+  unit_assert((values_f3 = (double *)     field_block.field_values(index_f3)));
+  unit_assert((values_f4 = (double *)     field_block.field_values(index_f4)));
+  unit_assert((values_f5 = (long double *) field_block.field_values(index_f5)));
   
-  unit_assert(values_density != 0);
-  unit_assert(values_velocity_x != 0);
-  unit_assert(values_velocity_y != 0);
-  unit_assert(values_velocity_z != 0);
-  unit_assert(values_total_energy != 0);
-
-  bytes_density =    (char *)values_velocity_x - (char *)values_density;
-  bytes_velocity_x = (char *)values_velocity_y - (char *)values_velocity_x;
-  bytes_velocity_y = (char *)values_velocity_z - (char *)values_velocity_y;
-  bytes_velocity_z = (char *)values_total_energy-(char *)values_velocity_z;
-
-  // ghost zone depths
-  int gdnx = 1, gdny = 1, gdnz = 1;
-  int gvxx = 2, gvxy = 2, gvxz = 2;
-  int gvyx = 3, gvyy = 2, gvyz = 1;
-  int gvzx = 1, gvzy = 2, gvzz = 3;
-  int gtex = 0, gtey = 1, gtez = 2;
+  bytes_f1 = (char *)values_f2 - (char *)values_f1;
+  bytes_f2 = (char *)values_f3 - (char *)values_f2;
+  bytes_f3 = (char *)values_f4 - (char *)values_f3;
+  bytes_f4 = (char *)values_f5 - (char *)values_f4;
 
   // field sizes without ghosts
-  int num_unknowns_density      = (nx)*(ny)*(nz);
-  int num_unknowns_velocity_x   = (nx+1)*(ny)*(nz);
-  int num_unknowns_velocity_y   = (nx)*(ny+1)*(nz);
-  int num_unknowns_velocity_z   = (nx)*(ny)*(nz+1);
+  int num_unknowns_f1  = (nx)*(ny)*(nz);
+  int num_unknowns_f2  = (nx+1)*(ny)*(nz);
+  int num_unknowns_f3  = (nx)*(ny+1)*(nz);
+  int num_unknowns_f4  = (nx)*(ny)*(nz+1);
 
   // field sizes with ghosts
 
-  int num_values_density      = (nx+2*gdnx)*(ny+2*gdny)*(nz+2*gdnz);
-  int num_values_velocity_x   = (nx+1+2*gvxx)*(ny+2*gvxy)*(nz+2*gvxz);
-  int num_values_velocity_y   = (nx+2*gvyx)*(ny+1+2*gvyy)*(nz+2*gvyz);
-  int num_values_velocity_z   = (nx+2*gvzx)*(ny+2*gvzy)*(nz+1+2*gvzz);
+  int num_values_f1  = (nx+2*g1[0])  *(ny+2*g1[1])  *(nz+2*g1[2]);
+  int num_values_f2  = (nx+2*g2[0]+1)*(ny+2*g2[1])  *(nz+2*g2[2]);
+  int num_values_f3   = (nx+2*g3[0])  *(ny+2*g3[1]+1)*(nz+2*g3[2]);
+  int num_values_f4   = (nx+2*g4[0])  *(ny+2*g4[1])  *(nz+2*g4[2]+1);
   
-  field_descr.set_ghosts(index_density,      gdnx,gdny,gdnz);
-  field_descr.set_ghosts(index_velocity_x,   gvxx,gvxy,gvxz);
-  field_descr.set_ghosts(index_velocity_y,   gvyx,gvyy,gvyz);
-  field_descr.set_ghosts(index_velocity_z,   gvzx,gvzy,gvzz);
-  field_descr.set_ghosts(index_total_energy, gtex,gtey,gtez);
-
-  unit_assert (bytes_density    == 
-	       (int)sizeof (float) * num_unknowns_density);
-  unit_assert (bytes_velocity_x == 
-	       (int)sizeof (double)* num_unknowns_velocity_x);
-  unit_assert (bytes_velocity_y == 
-	       (int)sizeof (double)* num_unknowns_velocity_y);
-  unit_assert (bytes_velocity_z == 
-	       (int)sizeof (double)* num_unknowns_velocity_z);
+  unit_assert (bytes_f1 == (int)sizeof (float) * num_unknowns_f1);
+  unit_assert (bytes_f2 == (int)sizeof (double)* num_unknowns_f2);
+  unit_assert (bytes_f3 == (int)sizeof (double)* num_unknowns_f3);
+  unit_assert (bytes_f4 == (int)sizeof (double)* num_unknowns_f4);
 
   //----------------------------------------------------------------------
 
   unit_func("field_unknowns");  // without ghosts
 
-  unknowns_density    = 
-    (float *) field_block.field_unknowns(index_density);
-  unknowns_velocity_x = 
-    (double *) field_block.field_unknowns(index_velocity_x);
-  unknowns_velocity_y = 
-    (double *) field_block.field_unknowns(index_velocity_y);
-  unknowns_velocity_z = 
-    (double *) field_block.field_unknowns(index_velocity_z);
-  unknowns_total_energy =
-    (float *) field_block.field_unknowns(index_total_energy);
+  typedef float type_f1;
+  unknowns_f1 = (type_f1 *)      field_block.field_unknowns(index_f1);
+  unknowns_f2 = (double *)     field_block.field_unknowns(index_f2);
+  unknowns_f3 = (double *)     field_block.field_unknowns(index_f3);
+  unknowns_f4 = (double *)     field_block.field_unknowns(index_f4);
+  unknowns_f5 = (long double *) field_block.field_unknowns(index_f5);
 
-  unit_assert(unknowns_density != 0);
-  unit_assert(unknowns_velocity_x != 0);
-  unit_assert(unknowns_velocity_y != 0);
-  unit_assert(unknowns_velocity_z != 0);
-  unit_assert(unknowns_total_energy != 0);
+  unit_assert(unknowns_f1 != 0);
+  unit_assert(unknowns_f2 != 0);
+  unit_assert(unknowns_f3 != 0);
+  unit_assert(unknowns_f4 != 0);
+  unit_assert(unknowns_f5 != 0);
 
-  bytes_density =    (char *)unknowns_velocity_x - (char *)unknowns_density;
-  bytes_velocity_x = (char *)unknowns_velocity_y - (char *)unknowns_velocity_x;
-  bytes_velocity_y = (char *)unknowns_velocity_z - (char *)unknowns_velocity_y;
-  bytes_velocity_z = (char *)unknowns_total_energy-(char *)unknowns_velocity_z;
+  bytes_f1 = (char *)unknowns_f2 - (char *)unknowns_f1;
+  bytes_f2 = (char *)unknowns_f3 - (char *)unknowns_f2;
+  bytes_f3 = (char *)unknowns_f4 - (char *)unknowns_f3;
+  bytes_f4 = (char *)unknowns_f5-(char *)unknowns_f4;
 
-  unit_assert (bytes_density    == 
-	       (int)sizeof (float) * num_unknowns_density);
-  unit_assert (bytes_velocity_x == 
-	       (int)sizeof (double)* num_unknowns_velocity_x);
-  unit_assert (bytes_velocity_y == 
-	       (int)sizeof (double)* num_unknowns_velocity_y);
-  unit_assert (bytes_velocity_z == 
-	       (int)sizeof (double)* num_unknowns_velocity_z);
+  unit_assert (bytes_f1    == 
+	       (int)sizeof (float) * num_unknowns_f1);
+  unit_assert (bytes_f2 == 
+	       (int)sizeof (double)* num_unknowns_f2);
+  unit_assert (bytes_f3 == 
+	       (int)sizeof (double)* num_unknowns_f3);
+  unit_assert (bytes_f4 == 
+	       (int)sizeof (double)* num_unknowns_f4);
 
 
   //----------------------------------------------------------------------
 
   unit_func("allocate_ghosts");  // with ghosts
 
+  unit_assert ( ! field_block.ghosts_allocated());
   field_block.allocate_ghosts();
+  unit_assert ( field_block.ghosts_allocated());
   
-  values_density    = 
-    (float *) field_block.field_values(index_density);
+  values_f1    = 
+    (float *) field_block.field_values(index_f1);
 
-  values_velocity_x = 
-    (double *) field_block.field_values(index_velocity_x);
-  values_velocity_y = 
-    (double *) field_block.field_values(index_velocity_y);
-  values_velocity_z = 
-    (double *) field_block.field_values(index_velocity_z);
-  values_total_energy =
-    (float *) field_block.field_values(index_total_energy);
+  values_f2 = 
+    (double *) field_block.field_values(index_f2);
+  values_f3 = 
+    (double *) field_block.field_values(index_f3);
+  values_f4 = 
+    (double *) field_block.field_values(index_f4);
+  values_f5 =
+    (long double *) field_block.field_values(index_f5);
   
-  unit_assert(values_density != 0);
-  unit_assert(values_velocity_x != 0);
-  unit_assert(values_velocity_y != 0);
-  unit_assert(values_velocity_z != 0);
-  unit_assert(values_total_energy != 0);
+  unit_assert(values_f1 != 0);
+  unit_assert(values_f2 != 0);
+  unit_assert(values_f3 != 0);
+  unit_assert(values_f4 != 0);
+  unit_assert(values_f5 != 0);
 
-  bytes_density =    (char *)values_velocity_x - (char *)values_density;
-  bytes_velocity_x = (char *)values_velocity_y - (char *)values_velocity_x;
-  bytes_velocity_y = (char *)values_velocity_z - (char *)values_velocity_y;
-  bytes_velocity_z = (char *)values_total_energy-(char *)values_velocity_z;
+  bytes_f1 = (char *)values_f2 - (char *)values_f1;
+  bytes_f2 = (char *)values_f3 - (char *)values_f2;
+  bytes_f3 = (char *)values_f4 - (char *)values_f3;
+  bytes_f4 = (char *)values_f5-(char *)values_f4;
 
-  unit_assert (bytes_density    == 
-	       (int)sizeof (float) * num_values_density);
-  unit_assert (bytes_velocity_x == 
-	       (int)sizeof (double)* num_values_velocity_x);
-  unit_assert (bytes_velocity_y == 
-	       (int)sizeof (double)* num_values_velocity_y);
-  unit_assert (bytes_velocity_z == 
-	       (int)sizeof (double)* num_values_velocity_z);
+  unit_assert (bytes_f1    == 
+	       (int)sizeof (float) * num_values_f1);
+  unit_assert (bytes_f2 == 
+	       (int)sizeof (double)* num_values_f2);
+  unit_assert (bytes_f3 == 
+	       (int)sizeof (double)* num_values_f3);
+  unit_assert (bytes_f4 == 
+	       (int)sizeof (double)* num_values_f4);
 
   unit_func("field_unknowns");  // with ghosts
 
-  unknowns_density    = 
-    (float *) field_block.field_unknowns(index_density);
+  unknowns_f1    = 
+    (float *) field_block.field_unknowns(index_f1);
 
-  unknowns_velocity_x = 
-    (double *) field_block.field_unknowns(index_velocity_x);
-  unknowns_velocity_y = 
-    (double *) field_block.field_unknowns(index_velocity_y);
-  unknowns_velocity_z = 
-    (double *) field_block.field_unknowns(index_velocity_z);
-  unknowns_total_energy =
-    (float *) field_block.field_unknowns(index_total_energy);
+  unknowns_f2 = 
+    (double *) field_block.field_unknowns(index_f2);
+  unknowns_f3 = 
+    (double *) field_block.field_unknowns(index_f3);
+  unknowns_f4 = 
+    (double *) field_block.field_unknowns(index_f4);
+  unknowns_f5 =
+    (long double *) field_block.field_unknowns(index_f5);
 
-  unit_assert(unknowns_density != 0);
-  unit_assert(unknowns_velocity_x != 0);
-  unit_assert(unknowns_velocity_y != 0);
-  unit_assert(unknowns_velocity_z != 0);
-  unit_assert(unknowns_total_energy != 0);
+  unit_assert(unknowns_f1 != 0);
+  unit_assert(unknowns_f2 != 0);
+  unit_assert(unknowns_f3 != 0);
+  unit_assert(unknowns_f4 != 0);
+  unit_assert(unknowns_f5 != 0);
 
-  bytes_density =    (char *)unknowns_velocity_x - (char *)unknowns_density;
-  bytes_velocity_x = (char *)unknowns_velocity_y - (char *)unknowns_velocity_x;
-  bytes_velocity_y = (char *)unknowns_velocity_z - (char *)unknowns_velocity_y;
-  bytes_velocity_z = (char *)unknowns_total_energy-(char *)unknowns_velocity_z;
+  bytes_f1 =    (char *)unknowns_f2 - (char *)unknowns_f1;
+  bytes_f2 = (char *)unknowns_f3 - (char *)unknowns_f2;
+  bytes_f3 = (char *)unknowns_f4 - (char *)unknowns_f3;
+  bytes_f4 = (char *)unknowns_f5-(char *)unknowns_f4;
 
   // a,b fields  u unknowns  v values  g ghosts
   // bu - au = (bv + bg) - (av + ag) 
@@ -296,50 +271,229 @@ int main()
   //         = (bv - av) + (bu-bv) - (au-av)
 
 
-  
-  int ghost_offset_density    = 
-    (int)sizeof (float) * (gdnx + (nx+2*gdnx) *(gdny + (ny+2*gdny)*gdnz));
-  int ghost_offset_velocity_x = 
-    (int)sizeof (double) * (gvxx + (nx+1+2*gvxx)*(gvxy + (ny+2*gvxy)*gvxz));
-  int ghost_offset_velocity_y = 
-    (int)sizeof (double) * (gvyx + (nx+2*gvyx)*(gvyy + (ny+1+2*gvyy)*gvyz));
-  int ghost_offset_velocity_z = 
-    (int)sizeof (double) * (gvzx + (nx+2*gvzx)*(gvzy + (ny+2*gvzy)*gvzz));
-  int ghost_offset_total_energy = 
-    (int)sizeof (float) * (gtex + (nx+2*gtex)*(gtey + (ny+2*gtey)*gtez));
+  int n1[3] = { nx+2*g1[0],   ny+2*g1[1],   nz+2*g1[2]};
+  int n2[3] = { nx+2*g2[0]+1, ny+2*g2[1],   nz+2*g2[2]};
+  int n3[3] = { nx+2*g3[0],   ny+2*g3[1]+1, nz+2*g3[2]};
+  int n4[3] = { nx+2*g4[0],   ny+2*g4[1],   nz+2*g4[2]+1};
+  int n5[3] = { nx+2*g5[0],   ny+2*g5[1],   nz+2*g5[2]};
 
-  unit_assert (bytes_density    == 
-	       (int)sizeof (float) * num_values_density + 
-	       ghost_offset_velocity_x - ghost_offset_density);
-  unit_assert (bytes_velocity_x == 
-	       (int)sizeof (double)* num_values_velocity_x +
-	       ghost_offset_velocity_y - ghost_offset_velocity_x);
-  unit_assert (bytes_velocity_y == 
-	       (int)sizeof (double)* num_values_velocity_y +
-	       ghost_offset_velocity_z - ghost_offset_velocity_y);
-  unit_assert (bytes_velocity_z == 
-	       (int)sizeof (double)* num_values_velocity_z +
-	       ghost_offset_total_energy - ghost_offset_velocity_z);
+  int go_f1 = (int)sizeof (float)      * (g1[0] + n1[0] *(g1[1] + n1[1]*g1[2]));
+  int go_f2 = (int)sizeof (double)     * (g2[0] + n2[0] *(g2[1] + n2[1]*g2[2]));
+  int go_f3 = (int)sizeof (double)     * (g3[0] + n3[0] *(g3[1] + n3[1]*g3[2]));
+  int go_f4 = (int)sizeof (double)     * (g4[0] + n4[0] *(g4[1] + n4[1]*g4[2]));
+  int go_f5 = (int)sizeof (long double)* (g5[0] + n5[0] *(g5[1] + n5[1]*g5[2]));
+
+  unit_assert (bytes_f1 == (int)sizeof (float) * num_values_f1 + go_f2 - go_f1);
+  unit_assert (bytes_f2 == (int)sizeof (double)* num_values_f2 + go_f3 - go_f2);
+  unit_assert (bytes_f3 == (int)sizeof (double)* num_values_f3 + go_f4 - go_f3);
+  unit_assert (bytes_f4 == (int)sizeof (double)* num_values_f4 + go_f5 - go_f4);
+
+  int passed;
+
+  for (int iz=0; iz<n1[2]; iz++) {
+    for (int iy=0; iy<n1[1]; iy++) {
+      for (int ix=0; ix<n1[0]; ix++) {
+	int i = ix + n1[0]*(iy + n1[1]*iz);
+	values_f1[i] = 
+	  (g1[0] <= ix && ix < n1[0]-g1[0] &&
+	   g1[1] <= iy && iy < n1[1]-g1[1] &&
+	   g1[2] <= iz && iz < n1[2]-g1[2]) ?
+	  10 : -10;
+
+      }
+    }
+  }
+  passed = true;
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+	int i = ix + n1[0]*(iy + n1[1]*iz);
+	if (unknowns_f1[i] != 10) passed = false;
+      }
+    }
+  }
+  unit_assert(passed);
+
+  for (int iz=0; iz<n2[2]; iz++) {
+    for (int iy=0; iy<n2[1]; iy++) {
+      for (int ix=0; ix<n2[0]; ix++) {
+	int i = ix + n2[0]*(iy + n2[1]*iz);
+	values_f2[i] = 
+	  (g2[0] <= ix && ix < n2[0]-g2[0] &&
+	   g2[1] <= iy && iy < n2[1]-g2[1] &&
+	   g2[2] <= iz && iz < n2[2]-g2[2]) ?
+	  20 : -20;
+
+      }
+    }
+  }
+
+  passed = true;
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+	int i = ix + n2[0]*(iy + n2[1]*iz);
+	if (unknowns_f2[i] != 20) passed = false;
+      }
+    }
+  }
+  unit_assert(passed);
+
+  for (int iz=0; iz<n3[2]; iz++) {
+    for (int iy=0; iy<n3[1]; iy++) {
+      for (int ix=0; ix<n3[0]; ix++) {
+	int i = ix + n3[0]*(iy + n3[1]*iz);
+	values_f3[i] = 
+	  (g3[0] <= ix && ix < n3[0]-g3[0] &&
+	   g3[1] <= iy && iy < n3[1]-g3[1] &&
+	   g3[2] <= iz && iz < n3[2]-g3[2]) ?
+	  30 : -30;
+
+      }
+    }
+  }
+
+  passed = true;
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+	int i = ix + n3[0]*(iy + n3[1]*iz);
+	if (unknowns_f3[i] != 30) passed = false;
+      }
+    }
+  }
+
+  unit_assert(passed);
+
+  for (int iz=0; iz<n4[2]; iz++) {
+    for (int iy=0; iy<n4[1]; iy++) {
+      for (int ix=0; ix<n4[0]; ix++) {
+	int i = ix + n4[0]*(iy + n4[1]*iz);
+	values_f4[i] = 
+	  (g4[0] <= ix && ix < n4[0]-g4[0] &&
+	   g4[1] <= iy && iy < n4[1]-g4[1] &&
+	   g4[2] <= iz && iz < n4[2]-g4[2]) ?
+	  40 : -40;
+
+      }
+    }
+  }
+
+  passed = true;
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+	int i = ix + n4[0]*(iy + n4[1]*iz);
+	if (unknowns_f4[i] != 40) passed = false;
+      }
+    }
+  }
+  unit_assert(passed);
+
+  for (int iz=0; iz<n5[2]; iz++) {
+    for (int iy=0; iy<n5[1]; iy++) {
+      for (int ix=0; ix<n5[0]; ix++) {
+	int i = ix + n5[0]*(iy + n5[1]*iz);
+	values_f5[i] = 
+	  (g5[0] <= ix && ix < n5[0]-g5[0] &&
+	   g5[1] <= iy && iy < n5[1]-g5[1] &&
+	   g5[2] <= iz && iz < n5[2]-g5[2]) ?
+	  50 : -50;
+
+      }
+    }
+  }
+
+  passed = true;
+  for (int iz=0; iz<nz; iz++) {
+    for (int iy=0; iy<ny; iy++) {
+      for (int ix=0; ix<nx; ix++) {
+	int i = ix + n5[0]*(iy + n5[1]*iz);
+	if (unknowns_f5[i] != 50) passed = false;
+      }
+    }
+  }
+  unit_assert(passed);
+
+  // test that first value after f1 is f2 ghost, etc.
+
+  unit_assert(*((double *)(values_f1+n1[0]*n1[1]*n1[2]))     == -20);
+  unit_assert(*((double *)(values_f2+n2[0]*n2[1]*n2[2]))     == -30);
+  unit_assert(*((double *)(values_f3+n3[0]*n3[1]*n3[2]))     ==  40);  // g4 has no ghosts
+  unit_assert(*((long double *)(values_f4+n4[0]*n4[1]*n4[2])) == -50);
+
+  unit_assert(*((float *) (values_f2-1)) == -10);
+  unit_assert(*((double *) (values_f3-1)) == -20);
+  unit_assert(*((double *) (values_f4-1)) == -30);
+  unit_assert(*((double *) (values_f5-1)) ==  40); // g4 has no ghosts
 
   //----------------------------------------------------------------------
   unit_func("box_extent");
-  unit_assert(false);
+
+  field_block.set_box_extent(-1, -2, -3, 1, 2, 3);
+  double box_lower[3];
+  double box_upper[3];
+  field_block.box_extent(&box_lower[0],&box_lower[1],&box_lower[2],
+			 &box_upper[0],&box_upper[1],&box_upper[2]);
+
+  unit_assert(box_lower[0] == -1.0);
+  unit_assert(box_lower[1] == -2.0);
+  unit_assert(box_lower[2] == -3.0);
+  unit_assert(box_upper[0] == 1.0);
+  unit_assert(box_upper[1] == 2.0);
+  unit_assert(box_upper[2] == 3.0);
+
   //----------------------------------------------------------------------
   unit_func("cell_width");
-  unit_assert(false);
+
+  double hx=0,hy=0,hz=0;
+
+  field_block.cell_width(&hx,&hy,&hz);
+
+  unit_assert(fabs(hx-2.0/nx) < 1e-6);
+  unit_assert(fabs(hy-4.0/ny) < 1e-6);
+  unit_assert(fabs(hz-6.0/nz) < 1e-6);
+
 	
   //----------------------------------------------------------------------
   unit_func("clear");
-  unit_assert(false);
+
+  field_block.clear(2.0);
+
+  unit_assert(2.0 == values_f1[0]);
+  unit_assert(2.0 == values_f5[n5[0]*n5[1]*n5[2]-1]);
+
+  field_block.clear(3.0, 1 );
+  
+  unit_assert(2.0 == values_f1[n1[0]*n1[1]*n1[2]-1]);
+  unit_assert(3.0 == values_f2[0] );
+  unit_assert(3.0 == values_f2[n2[0]*n2[1]*n2[2]-1]);
+  unit_assert(2.0 == values_f3[0] );
 	
-  //----------------------------------------------------------------------
-  unit_func("ghosts_allocated");
-  unit_assert(false);
-  //----------------------------------------------------------------------
-  unit_func("allocate_ghosts");
-  unit_assert(false);
+  field_block.clear(4.0, 2, 3 );
+
+  unit_assert(3.0 == values_f2[n2[0]*n2[1]*n2[2]-1]);
+  unit_assert(4.0 == values_f3[0] );
+  unit_assert(4.0 == values_f3[n3[0]*n3[1]*n3[2]-1]);
+  unit_assert(4.0 == values_f4[0] );
+  unit_assert(4.0 == values_f4[n4[0]*n4[1]*n4[2]-1]);
+  unit_assert(2.0 == values_f5[0] );
+
   //----------------------------------------------------------------------
   unit_func("deallocate_ghosts");
+  unit_assert( field_block.ghosts_allocated());
+  field_block.deallocate_ghosts();
+
+  unit_assert( ! field_block.ghosts_allocated());
+
+  unit_assert(3.0 == values_f2[(nx+1)*ny*nz-1]);
+  unit_assert(4.0 == values_f2[(nx+1)*ny*nz]);
+  unit_assert(4.0 == values_f3[0] );
+  unit_assert(4.0 == values_f3[nx*(ny+1)*nz-1]);
+  unit_assert(4.0 == values_f4[0] );
+  unit_assert(4.0 == values_f4[nx*ny*(nz+1)-1]);
+  unit_assert(2.0 == values_f5[0] );
+  
   unit_assert(false);
 	
   //----------------------------------------------------------------------

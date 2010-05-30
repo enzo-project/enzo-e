@@ -73,9 +73,9 @@ public: // interface
   FieldDescr * field_descr() throw ();
 
   /// Clear specified array(s) to specified value
-  void clear(double value = 0.0, 
-	     int id_field_first      = -1, 
-	     int id_field_last_plus  = -1) throw();
+  void clear(float value = 0.0, 
+	     int id_field_first = -1, 
+	     int id_field_last  = -1) throw();
  
   /// Return whether array is allocated or not
   bool array_allocated() const throw();
@@ -134,6 +134,12 @@ private: // functions
   };
 
   int field_size_ (int id_field, int *nx, int *ny, int *nz) const throw();
+
+  void reallocate_array_ 
+  (
+   std::vector<char *> old_field_values,
+   char **            old_array
+   );
 
 private: // attributes
 
