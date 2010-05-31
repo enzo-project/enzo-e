@@ -210,7 +210,6 @@ int main()
   
   values_f1    = 
     (float *) field_block.field_values(index_f1);
-
   values_f2 = 
     (double *) field_block.field_values(index_f2);
   values_f3 = 
@@ -484,10 +483,21 @@ int main()
   unit_assert( field_block.ghosts_allocated());
   field_block.deallocate_ghosts();
 
+  values_f1    = 
+    (float *) field_block.field_values(index_f1);
+  values_f2 = 
+    (double *) field_block.field_values(index_f2);
+  values_f3 = 
+    (double *) field_block.field_values(index_f3);
+  values_f4 = 
+    (double *) field_block.field_values(index_f4);
+  values_f5 =
+    (long double *) field_block.field_values(index_f5);
+
   unit_assert( ! field_block.ghosts_allocated());
 
+  printf ("%p %d\n",&values_f2[0],(nx+1)*ny*nz-1);
   unit_assert(3.0 == values_f2[(nx+1)*ny*nz-1]);
-  unit_assert(4.0 == values_f2[(nx+1)*ny*nz]);
   unit_assert(4.0 == values_f3[0] );
   unit_assert(4.0 == values_f3[nx*(ny+1)*nz-1]);
   unit_assert(4.0 == values_f4[0] );

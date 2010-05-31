@@ -1,12 +1,13 @@
 Import('env')
 Import('platform')
 Import('parallel_run')
+Import('serial_run')
 
 # Define a test for running unit tests
 
-run_parse    = Builder(action = "$SOURCE < $ARGS > $TARGET")
-run_serial   = Builder(action = "$SOURCE $ARGS > $TARGET")
-run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS> $TARGET")
+run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS > $TARGET")
+run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET")
+run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET")
 
 env.Append(BUILDERS = { 'RunSerial':   run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' :   run_parallel } )

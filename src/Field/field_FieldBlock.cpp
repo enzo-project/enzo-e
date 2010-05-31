@@ -206,6 +206,7 @@ void FieldBlock::allocate_array() throw()
     // Allocate the array
 
     array_ = new char [array_size];
+    printf ("new %p\n",array_);
 
     // Initialize field_begin
 
@@ -246,6 +247,7 @@ void FieldBlock::deallocate_array () throw()
 {
   if ( array_allocated() ) {
 
+    printf ("delete %p\n",array_);
     delete [] array_;
     array_ = 0;
     field_values_.clear();
@@ -525,23 +527,27 @@ void FieldBlock::restore_array_
 
     offset1 *= precision_size;
     offset2 *= precision_size;
-    nx      *= precision_size;
-    ny      *= precision_size;
-    nz      *= precision_size;
 
     // determine array start
 
-    char * array2 = field_values_.at(id_field) + offset2;
     char * array1 = field_values_from.at(id_field) + offset1;
+    char * array2 = field_values_.at(id_field)     + offset2;
 
     // copy values
 
+    printf ("n1 %d %d %d\n",nx1,ny1,nz1);
+    printf ("n2 %d %d %d\n",nx2,ny2,nz2);
+    printf ("n %d %d %d\n",nx,ny,nz);
+    printf ("o1 %d\n",offset1);
+    printf ("o2 %d\n",offset2);
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
-	  int i1 = ix + nx1*(iy + ny1*iz);
-	  int i2 = ix + nx2*(iy + ny2*iz);
-	  array2[i2] = array1[i1];
+	  for (int ip=0; ip<precision_size; ip++) {
+	    int i1 = ip + precision_size*(ix + nx1*(iy + ny1*iz));
+	    int i2 = ip + precision_size*(ix + nx2*(iy + ny2*iz));
+	    array2[i2] = array1[i1];
+	  }
 	}
       }
     }
