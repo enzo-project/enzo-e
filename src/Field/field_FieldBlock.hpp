@@ -123,25 +123,36 @@ public: // interface
   void set_box_extent( double lower_x, double lower_y, double lower_z,
 		       double upper_x, double upper_y, double upper_z ) throw();
 
+  //----------------------------------------------------------------------
+
 private: // functions
 
-  /// Given field size, padding, and alignment, compute offset to start of
-  /// the next field
+  /// Given field size, padding, and alignment, compute offset to
+  /// start of the next field
   int field_size_adjust_ (int size, int padding, int alignment) const throw();
+
+  /// Given array start and alignment, return first address that is
+  /// aligned
   int align_padding_ (char * start, int alignment) const throw()
   { 
-    return (alignment - (reinterpret_cast<long unsigned>(start) % alignment))%alignment; 
+    long unsigned start_long = reinterpret_cast<long unsigned>(start);
+    return ( alignment - (start_long % alignment) ) % alignment; 
   };
 
-  /// Return the size of the given field, both as (nx,ny,nz) and return n
+  /// Return the size of the given field, both as (nx,ny,nz) and
+  /// return n
   int field_size_ (int id_field, int *nx, int *ny, int *nz) const throw();
 
-  /// Move (not copy) array_ to array and field_values_ to field_values
+  /// Move (not copy) array_ to array and field_values_ to
+  /// field_values
   void backup_array_  ( std::vector<char *> & field_values );
 
-  /// Move (not copy) array to array_ and field_values to field_values_
+  /// Move (not copy) array to array_ and field_values to
+  /// field_values_
   void restore_array_ ( std::vector<char *> & field_values )
     throw (std::out_of_range);
+
+  //----------------------------------------------------------------------
 
 private: // attributes
 
@@ -158,11 +169,13 @@ private: // attributes
   std::vector<char *> field_values_;
 
   /// Extent of the box associated with the block
-  /// WARNING: should not be used for deep AMR due to precision / range issues
+  /// WARNING: should not be used for deep AMR due to precision /
+  /// range issues
   double box_lower_[3];
   double box_upper_[3];
 
-  /// Whether ghost values are allocated or not (make [3] for directionally split?)
+  /// Whether ghost values are allocated or not (make [3] for
+  /// directionally split?)
   bool ghosts_allocated_;
 
 };   

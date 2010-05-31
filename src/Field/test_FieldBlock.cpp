@@ -50,9 +50,9 @@ int main()
   field_descr.set_centering(index_f3, true,  false, true);
   field_descr.set_centering(index_f4, true,  true,  false);
 
-  printf ("sizeof(single)   = %u\n",sizeof(float));
-  printf ("sizeof(double)   = %u\n",sizeof(double));
-  printf ("sizeof(extended) = %u\n",sizeof(long double));
+  printf ("sizeof(single)   = %lu\n",(long unsigned) sizeof(float));
+  printf ("sizeof(double)   = %lu\n",(long unsigned) sizeof(double));
+  printf ("sizeof(extended) = %lu\n",(long unsigned) sizeof(long double));
 
   //----------------------------------------------------------------------
   unit_class ("FieldBlock");
@@ -289,6 +289,9 @@ int main()
 
   int passed;
 
+  //--------------------------------------------------
+  // Fill values interior then test against unknowns
+
   for (int iz=0; iz<n1[2]; iz++) {
     for (int iy=0; iy<n1[1]; iy++) {
       for (int ix=0; ix<n1[0]; ix++) {
@@ -296,13 +299,14 @@ int main()
 	values_f1[i] = 
 	  (g1[0] <= ix && ix < n1[0]-g1[0] &&
 	   g1[1] <= iy && iy < n1[1]-g1[1] &&
-	   g1[2] <= iz && iz < n1[2]-g1[2]) ?
-	  10 : -10;
+	   g1[2] <= iz && iz < n1[2]-g1[2]) ? 10 : -10;
 
       }
     }
   }
+
   passed = true;
+
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
@@ -311,7 +315,10 @@ int main()
       }
     }
   }
+
   unit_assert(passed);
+
+  //--------------------------------------------------
 
   for (int iz=0; iz<n2[2]; iz++) {
     for (int iy=0; iy<n2[1]; iy++) {
@@ -320,14 +327,14 @@ int main()
 	values_f2[i] = 
 	  (g2[0] <= ix && ix < n2[0]-g2[0] &&
 	   g2[1] <= iy && iy < n2[1]-g2[1] &&
-	   g2[2] <= iz && iz < n2[2]-g2[2]) ?
-	  20 : -20;
+	   g2[2] <= iz && iz < n2[2]-g2[2]) ? 20 : -20;
 
       }
     }
   }
 
   passed = true;
+
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
@@ -336,7 +343,10 @@ int main()
       }
     }
   }
+
   unit_assert(passed);
+
+  //--------------------------------------------------
 
   for (int iz=0; iz<n3[2]; iz++) {
     for (int iy=0; iy<n3[1]; iy++) {
@@ -345,14 +355,14 @@ int main()
 	values_f3[i] = 
 	  (g3[0] <= ix && ix < n3[0]-g3[0] &&
 	   g3[1] <= iy && iy < n3[1]-g3[1] &&
-	   g3[2] <= iz && iz < n3[2]-g3[2]) ?
-	  30 : -30;
+	   g3[2] <= iz && iz < n3[2]-g3[2]) ? 30 : -30;
 
       }
     }
   }
 
   passed = true;
+
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
@@ -364,6 +374,8 @@ int main()
 
   unit_assert(passed);
 
+  //--------------------------------------------------
+
   for (int iz=0; iz<n4[2]; iz++) {
     for (int iy=0; iy<n4[1]; iy++) {
       for (int ix=0; ix<n4[0]; ix++) {
@@ -371,14 +383,14 @@ int main()
 	values_f4[i] = 
 	  (g4[0] <= ix && ix < n4[0]-g4[0] &&
 	   g4[1] <= iy && iy < n4[1]-g4[1] &&
-	   g4[2] <= iz && iz < n4[2]-g4[2]) ?
-	  40 : -40;
+	   g4[2] <= iz && iz < n4[2]-g4[2]) ? 40 : -40;
 
       }
     }
   }
 
   passed = true;
+
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
@@ -387,7 +399,11 @@ int main()
       }
     }
   }
+
   unit_assert(passed);
+
+  //--------------------------------------------------
+
 
   for (int iz=0; iz<n5[2]; iz++) {
     for (int iy=0; iy<n5[1]; iy++) {
@@ -396,14 +412,14 @@ int main()
 	values_f5[i] = 
 	  (g5[0] <= ix && ix < n5[0]-g5[0] &&
 	   g5[1] <= iy && iy < n5[1]-g5[1] &&
-	   g5[2] <= iz && iz < n5[2]-g5[2]) ?
-	  50 : -50;
+	   g5[2] <= iz && iz < n5[2]-g5[2]) ? 50 : -50;
 
       }
     }
   }
 
   passed = true;
+
   for (int iz=0; iz<nz; iz++) {
     for (int iy=0; iy<ny; iy++) {
       for (int ix=0; ix<nx; ix++) {
@@ -412,7 +428,10 @@ int main()
       }
     }
   }
+
   unit_assert(passed);
+
+  //--------------------------------------------------
 
   // test that first value after f1 is f2 ghost, etc.
 
@@ -496,7 +515,6 @@ int main()
 
   unit_assert( ! field_block.ghosts_allocated());
 
-  printf ("%p %d\n",&values_f2[0],(nx+1)*ny*nz-1);
   unit_assert(3.0 == values_f2[(nx+1)*ny*nz-1]);
   unit_assert(4.0 == values_f3[0] );
   unit_assert(4.0 == values_f3[nx*(ny+1)*nz-1]);
