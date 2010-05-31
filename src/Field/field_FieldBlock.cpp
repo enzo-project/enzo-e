@@ -4,8 +4,6 @@
 /// @file     field_FieldBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed May 19 18:17:50 PDT 2010
-/// @todo     Avoid void * arithmetic in allocate_array() if possible
-/// @todo     hand-check allocate()
 /// @brief    Implementation of the FieldBlock class
 
 #include "assert.h"
@@ -28,19 +26,17 @@ FieldBlock::FieldBlock() throw()
 //----------------------------------------------------------------------
 
 FieldBlock::~FieldBlock() throw()
-{
-}
+{  INCOMPLETE_MESSAGE("FieldBlock::~FieldBlock",""); }
 
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( const FieldBlock & field_block ) throw ()
-{
-}
+{  INCOMPLETE_MESSAGE("FieldBlock::FieldBlock",""); }
 
 //----------------------------------------------------------------------
 
 FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
-{
+{  INCOMPLETE_MESSAGE("FieldBlock::operator=","");
   return *this;
 }
 
@@ -280,37 +276,21 @@ void FieldBlock::allocate_ghosts() throw ()
 {
   if (! ghosts_allocated() ) {
 
-    // save old array_
+    std::vector<char *> old_field_values;
+    char *              old_array;
 
-    char * old_array = array_;
-
+    old_array = array_;
     array_ = 0;
 
-    // save old field_values_
-
-    std::vector<char *> old_field_values;
-
-    for (unsigned i=0; i<field_values_.size(); i++) {
-      old_field_values.push_back(field_values_[i]);
-    }
-
-    field_values_.clear();
-
-    // reallocate array_ and field_values_ with ghosts
+    backup_array_ (old_field_values);
 
     ghosts_allocated_ = true;
 
     allocate_array();
 
-    INCOMPLETE_MESSAGE("FieldBlock::allocate_ghosts",
-		       "old array not copied to new and deallocated");
+    restore_array_ (old_field_values);
 
-    // allocate new_array with ghosts
-    // create new_field_values
-    // copy array_ to new_array
-    // deallocate array_
-    // assign new_array to array_
-    // assign new_field_values to field_values_
+    delete [] old_array;
 
   } else {
     WARNING_MESSAGE("FieldBlock::allocate_ghosts",
@@ -324,22 +304,21 @@ void FieldBlock::deallocate_ghosts() throw ()
 {
   if ( ghosts_allocated() ) {
 
+    std::vector<char *> old_field_values;
+    char *              old_array;
+
+    old_array = array_;
+    array_ = 0;
+
+    backup_array_ (old_field_values);
+
     ghosts_allocated_ = false;
 
-    std::vector<char *> old_field_values;
-    char * old_array;
+    allocate_array();
 
-    reallocate_array_ (old_field_values, &old_array);
+    restore_array_ (old_field_values);
 
-    INCOMPLETE_MESSAGE("FieldBlock::deallocate_ghosts",
-		       "old array not copied to new and deallocated");
-    // allocate new_array without ghosts
-    // create new_field_values
-    // copy array_ to new_array
-    // deallocate array_
-    // assign new_array to array_
-    // assign new_field_values to field_values_
-    // save old array_
+    delete [] old_array;
 
   } else {
     WARNING_MESSAGE("FieldBlock::deallocate_ghosts",
@@ -487,26 +466,86 @@ int FieldBlock::field_size_
   return (*nx) * (*ny) * (*nz) * bytes_per_element;
 }
 
-void FieldBlock::reallocate_array_ 
-(
- std::vector<char *> old_field_values,
- char **            old_array
- )
+//----------------------------------------------------------------------
+
+void FieldBlock::backup_array_ 
+( std::vector<char *> & old_field_values )
 {
-  // save old array_
-
-  *old_array  = array_;
-  array_ = 0;
-
   // save old field_values_
 
-  for (unsigned i=0; i<field_values_.size(); i++) {
+  for (int i=0; i<field_descr_->field_count(); i++) {
     old_field_values.push_back(field_values_[i]);
   }
   field_values_.clear();
 
-  // reallocate array_ and field_values_
+}
 
-  allocate_array();
+//----------------------------------------------------------------------
 
+void FieldBlock::restore_array_ 
+( std::vector<char *> & field_values_from) throw (std::out_of_range)
+{
+  // copy values
+  for (int id_field=0; 
+       id_field < field_descr_->field_count();
+       id_field++) {
+
+    // get "to" field size
+
+    int nx2,ny2,nz2;
+    field_size_(id_field, &nx2,&ny2,&nz2);
+
+    // get "from" field size
+
+    ghosts_allocated_ = ! ghosts_allocated_;
+
+    int nx1,ny1,nz1;
+    field_size_(id_field, &nx1,&ny1,&nz1);
+
+    ghosts_allocated_ = ! ghosts_allocated_;
+
+    // determine offsets to unknowns if ghosts allocated
+
+    int offset1 = (nx1-nx2)/2 + nx1* ( (ny1-ny2)/2 + ny1 * (nz1-nz2)/2 );
+    offset1 = MAX (offset1, 0);
+
+    int offset2 = (nx2-nx1)/2 + nx2* ( (ny2-ny1)/2 + ny2 * (nz2-nz1)/2 );
+    offset2 = MAX (offset2, 0);
+
+    // determine unknowns size
+
+    int nx = MIN(nx1,nx2);
+    int ny = MIN(ny1,ny2);
+    int nz = MIN(nz1,nz2);
+
+    // adjust for precision
+
+    int precision_size = 
+      cello::precision_size(field_descr_->precision(id_field));
+
+    offset1 *= precision_size;
+    offset2 *= precision_size;
+    nx      *= precision_size;
+    ny      *= precision_size;
+    nz      *= precision_size;
+
+    // determine array start
+
+    char * array2 = field_values_.at(id_field) + offset2;
+    char * array1 = field_values_from.at(id_field) + offset1;
+
+    // copy values
+
+    for (int iz=0; iz<nz; iz++) {
+      for (int iy=0; iy<ny; iy++) {
+	for (int ix=0; ix<nx; ix++) {
+	  int i1 = ix + nx1*(iy + ny1*iz);
+	  int i2 = ix + nx2*(iy + ny2*iz);
+	  array2[i2] = array1[i1];
+	}
+      }
+    }
+  }
+
+  field_values_from.clear();
 }

@@ -133,13 +133,15 @@ private: // functions
     return (alignment - (reinterpret_cast<long unsigned>(start) % alignment))%alignment; 
   };
 
+  /// Return the size of the given field, both as (nx,ny,nz) and return n
   int field_size_ (int id_field, int *nx, int *ny, int *nz) const throw();
 
-  void reallocate_array_ 
-  (
-   std::vector<char *> old_field_values,
-   char **            old_array
-   );
+  /// Move (not copy) array_ to array and field_values_ to field_values
+  void backup_array_  ( std::vector<char *> & field_values );
+
+  /// Move (not copy) array to array_ and field_values to field_values_
+  void restore_array_ ( std::vector<char *> & field_values )
+    throw (std::out_of_range);
 
 private: // attributes
 
