@@ -69,6 +69,7 @@ c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
+c     UNUSED only: eta1
       integer gravity, i1, i2, idim, idual, ipresfree, j1, j2, jdim
       real    dt, eta1, gamma, pmin
       real      dls(idim,jdim),     drs(idim,jdim),    pbar(idim,jdim),

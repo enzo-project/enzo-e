@@ -67,6 +67,7 @@ void Param::dealloc_()
   case type_integer_:
   case type_scalar_:
   case type_logical_:
+  case type_subgroup_:
     break;
   }
 } 
@@ -91,9 +92,6 @@ void Param::write(FILE * file_pointer,
 
 
 std::string Param::value_to_string ()
-/// @param buffer Character string to contain the expression.  
-///               MUST BE SUFFICIENTLY LONG--NO CHECKING IS PERFORMED
-/// @param node   Head node of the tree defining the scalar expression
 {
   char string_buffer[80];
   switch (type_) {

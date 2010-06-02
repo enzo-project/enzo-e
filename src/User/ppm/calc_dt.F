@@ -36,7 +36,7 @@ c    ipfree  - pressure free flag (1 = on, 0 = off)
 c    aye     - expansion factor (or 1 if not using comoving coordinates)
 c    d,p     - density and pressure fields
 c    u,v,w   - velocity fields (x,y,z)
-c    dtviscous - viscous time for stability (if used)
+c    dtviscous - viscous time for stability (NOT ACCESSED)
 c
 c  OUTPUTS:
 c    dt      - minimum allowed dt (without Courant safety factor)

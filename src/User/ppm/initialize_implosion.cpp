@@ -107,7 +107,7 @@ void initialize_implosion (int size_param, int cycles_param)
 //   }
 
   int ndx = GridDimension[0];
-  int ndy = GridDimension[1];
+  //  int ndy = GridDimension[1];
 
   float hx = CellWidth[0][0];
   float hy = CellWidth[1][0];

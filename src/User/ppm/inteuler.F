@@ -77,6 +77,7 @@ c-----------------------------------------------------------------------
 c
 c  argument declarations
 c
+c     NOT ACCESSED: eta1
       integer gravity, i1, i2, idim, idual, iflatten, ipresfree, isteep,
      &        j1, j2, jdim, ncolor
       real    dt, eta1, eta2, gamma

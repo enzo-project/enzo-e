@@ -102,6 +102,10 @@ c
 c  local declarations
 c
       integer i, j, n
+c     NOT ACCESSED: alpha, dele, delu, eta2, uadvect, uleft, uright
+c     RAREFACTION1 only: cb
+c     GRAVITY_SECOND_ORDER_CORRECTION only: dadx, dddx
+c     UNUSED only: eta1
       real      alpha      ,    c0(ijkn),    cb(ijkn),  cbar(ijkn),
      &             d0(ijkn),    db(ijkn),  dbar(ijkn),   dnu(ijkn),
      &            dub(ijkn),  duub(ijkn),  duvb(ijkn),  duwb(ijkn),
