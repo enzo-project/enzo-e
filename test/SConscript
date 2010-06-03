@@ -67,10 +67,11 @@ env.RunParse('test_parse_integer.out',    '#/bin/test_Parse', ARGS='test/parse_i
 env.RunParse('test_parse_list.out',       '#/bin/test_Parse', ARGS='test/parse_list.in')
 env.RunParse('test_parse_logical.out',    '#/bin/test_Parse', ARGS='test/parse_logical.in')
 env.RunParse('test_parse_scalar.out',     '#/bin/test_Parse', ARGS='test/parse_scalar.in')
-env.RunParse('test_parse_implosion.out',  '#/bin/test_Parse', ARGS='test/parse_implosion.in')
-env.RunParse('test_parse_shock-pool.out', '#/bin/test_Parse', ARGS='test/parse_shock-pool.in')
 
-env.RunParallel('cello_implosion.out',  '#/bin/cello', ARGS='test/parse_implosion.in')
+env.RunParse('test_parse_implosion.out',  '#/bin/test_Parse', ARGS='input/implosion.in')
+env.RunParse('test_parse_shock-pool.out', '#/bin/test_Parse', ARGS='input/shock-pool.in')
+
+env.RunParallel('cello_implosion.out',    '#/bin/cello',      ARGS='input/implosion.in')
 
 
 

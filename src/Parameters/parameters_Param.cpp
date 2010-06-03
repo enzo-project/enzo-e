@@ -45,6 +45,7 @@ void Param::set (struct param_type * node)
   case enum_parameter_sentinel:
   case enum_parameter_identifier:
   case enum_parameter_function:
+  case enum_parameter_subgroup:
     break;
   }
 }
@@ -67,7 +68,6 @@ void Param::dealloc_()
   case type_integer_:
   case type_scalar_:
   case type_logical_:
-  case type_subgroup_:
     break;
   }
 } 
