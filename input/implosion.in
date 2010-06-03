@@ -80,8 +80,8 @@
          # issue an error if the pressure falls below 1.0e-6 anywhere
          # issue an error if the density goes negative
 
-         min_value  = [1.0e-6,    0.0   ];
-         min_action = ["warning", "error];
+         min_value  = [1.0e-6,    0.0    ];
+         min_action = ["warning", "error"];
 
          # pressure is computed not evolved
 
@@ -98,11 +98,13 @@
          alias = ["rho"];
 
          # issue a warning if the density falls below 1.0e-6 anywhere
-         # issue an error if the density goes negative [could consolidate
-         # into a single list lower_bound [ 1.0e-6, "warning", 0.0, "error" ]
+         # issue an error if the density goes negative 
 
-         min_value =  [ 1.0e-6,     0.0 ];
-         min_action = [ "warning" "error"];
+         # [could consolidate into a single list [ 1.0e-6, "warning",
+         # 0.0, "error" ] since value and action are closely related
+
+         min_value =  [ 1.0e-6,       0.0 ];
+         min_action = [ "warning", "error"];
 
          # for fun, use double precision for density even if default is single
          # (implemented: single double extended80 extended96 quadruple)
