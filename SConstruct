@@ -14,17 +14,19 @@ if (platform == 'unknown' and "CELLO_PLATFORM" in os.environ):
 
 # Get the SVN code revision numbers
 
-revision_new = os.popen("svn info svn+ssh://client65-88.sdsc.edu/usr/local/svn/cello/trunk | awk '/Revision:/ {print $2}'").read()
+repository = "svn info svn+ssh://client65-88.sdsc.edu/usr/local/svn/cello/trunk"
+get_revision = "| awk '/Revision:/ {print $2}'"
+revision_new = int(os.popen(repository + get_revision).read())
 
-revision_current = os.popen("svn info | awk '/Revision:/ {print $2}'").read()
+revision_current = int(os.popen("svn info " + get_revision).read())
 
-revision_changes = os.popen("svn status | grep -v '?' | wc -l").read()
+revision_changes = int(os.popen("svn status | grep -v '?' | wc -l").read())
 
-if (revision_changes != "0"):
-   print "\nWARNING: Working directory has local modifications!\n"
+if (revision_changes != 0):
+   print "\nWARNING: Working directory has local modifications\n"
 
 if (revision_new != revision_current):
-   print "WARNING: Working directory is not up-to-date with the repository!"
+   print "WARNING: Working directory is not up-to-date with the repository"
 
 
 # Initialize environment according to platform
