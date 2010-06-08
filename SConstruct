@@ -25,9 +25,11 @@ revision_changes = int(os.popen("svn status | grep -v '?' | wc -l").read())
 
 if (revision_changes != 0):
    print "\nWARNING: Working directory has local modifications\n"
-
-if (revision_new != revision_current):
+elif (revision_new != revision_current):
    print "\nWARNING: Working directory is not up-to-date with the repository\n"
+else:
+   print "\nWorking directory synched with repository\n"
+
 # --------------------------------------------------
 
 #==================================================
