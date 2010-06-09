@@ -29,6 +29,8 @@ Parameters::Parameters()
 {
 }
 
+//----------------------------------------------------------------------
+
 Parameters::~Parameters()
 ///
 {
@@ -43,6 +45,8 @@ Parameters::~Parameters()
   }
 
 }
+
+//----------------------------------------------------------------------
 
 void Parameters::read ( FILE * file_pointer )
 /// @param    file_pointer An opened input parameter file or stdin
@@ -87,6 +91,8 @@ void Parameters::read ( FILE * file_pointer )
   }
 }
 
+//----------------------------------------------------------------------
+
 void Parameters::write ( FILE * file_pointer )
 /// @param    file_pointer An opened output parameter file or stdout
 {
@@ -109,6 +115,78 @@ void Parameters::write ( FILE * file_pointer )
   }
 }
 
+//----------------------------------------------------------------------
+
+void Parameters::value 
+(
+ std::string    parameter, 
+ parameter_type type, 
+ void *         value, 
+ void *         deflt
+)
+/// @param   parameter Parameter name
+/// @param   type      Parameter type
+/// @param   value     parameter value if it exists, deflt if not
+/// @param   deflt     Default parameter value
+{
+  Param * param = parameter_(parameter);
+  // Check type of parameter if it's set
+  if (param) {
+    bool correct_type;
+    switch (type) {
+    case parameter_integer:      correct_type = param->is_integer();      break;
+    case parameter_scalar:       correct_type = param->is_scalar();       break;
+    case parameter_logical:      correct_type = param->is_logical();      break;
+    case parameter_string:       correct_type = param->is_string();       break;
+    case parameter_list:         correct_type = param->is_list();         break;
+    case parameter_scalar_expr:  correct_type = param->is_scalar_expr();  break;
+    case parameter_logical_expr: correct_type = param->is_logical_expr(); break;
+    }
+    if (! correct_type) throw ExceptionParametersBadType();
+  }
+  if (param != NULL) {
+    switch (type) {
+    case parameter_integer:
+      *((int *)   value) = param->get_integer();
+      break;
+    case parameter_scalar:
+      *((double *)value) = param->get_scalar();
+      break;
+    case parameter_logical:
+      *((bool *)  value) = param->get_logical();
+      break;
+    case parameter_string:
+      *((const char **) value) = param->get_string();
+      break;
+    case parameter_list:         
+    case parameter_scalar_expr:  
+    case parameter_logical_expr: 
+      break;
+    }
+  } else if (deflt) {
+    switch (type) {
+    case parameter_integer:
+      *((int *)value) = *((int *)deflt);
+      break;
+    case parameter_scalar:
+      *((double *)value) = *((double *)deflt);
+      break;
+    case parameter_logical:
+      *((bool *)value) = *((bool *)deflt);
+      break;
+    case parameter_string:
+      *((const char **)value) = *((const char **)deflt);
+      break;
+    }
+  } else {
+    char buffer[ERROR_MESSAGE_LENGTH];
+    sprintf (buffer,"Required parameter %s not defined",parameter.c_str());
+    ERROR_MESSAGE ("Parameters::value",buffer);
+  }
+  monitor_log(parameter);
+}
+//----------------------------------------------------------------------
+
 int Parameters::value_integer 
 ( std::string parameter,
   int         deflt ) throw(ExceptionParametersBadType)
@@ -122,6 +200,7 @@ int Parameters::value_integer
   return (param != NULL) ? param->get_integer() : deflt;
 }
 
+//----------------------------------------------------------------------
 
 double Parameters::value_scalar 
 ( std::string parameter,
@@ -136,6 +215,8 @@ double Parameters::value_scalar
   return (param != NULL) ? param->get_scalar() : deflt;
 }
 
+//----------------------------------------------------------------------
+
 bool Parameters::value_logical 
 ( std::string parameter,
   bool        deflt ) throw(ExceptionParametersBadType)
@@ -149,9 +230,11 @@ bool Parameters::value_logical
   return (param != NULL) ? param->get_logical() : deflt;
 }
 
-std::string Parameters::value_string 
-( std::string parameter,
-  std::string deflt ) throw(ExceptionParametersBadType)
+//----------------------------------------------------------------------
+
+const char * Parameters::value_string 
+( std::string  parameter,
+  const char * deflt ) throw(ExceptionParametersBadType)
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
 /// @return  Return string parameter value if it exists, deflt if not
@@ -161,6 +244,8 @@ std::string Parameters::value_string
   monitor_log(parameter);
   return (param != NULL) ? param->get_string() : deflt;
 }
+
+//----------------------------------------------------------------------
 
 void Parameters::evaluate_scalar 
   (
@@ -191,6 +276,8 @@ void Parameters::evaluate_scalar
 
 }
 
+//----------------------------------------------------------------------
+
 void Parameters::evaluate_logical 
   (
    std::string parameter,
@@ -219,6 +306,8 @@ void Parameters::evaluate_logical
   }
 }
 
+//----------------------------------------------------------------------
+
 int Parameters::list_length(std::string parameter)
 /// @param   parameter Parameter name
 {
@@ -226,6 +315,8 @@ int Parameters::list_length(std::string parameter)
   if (param && ! param->is_list()) throw ExceptionParametersBadType();
   return (param != NULL) ? (param->value_list_)->size() : 0;
 }
+
+//----------------------------------------------------------------------
 
 int Parameters::list_value_integer 
 ( int index,
@@ -241,6 +332,8 @@ int Parameters::list_value_integer
   return (param != NULL) ? param->value_integer_ : deflt;
 }
 
+//----------------------------------------------------------------------
+
 double Parameters::list_value_scalar 
 ( int index,
   std::string parameter,
@@ -254,6 +347,8 @@ double Parameters::list_value_scalar
   if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
   return (param != NULL) ? param->value_scalar_ : deflt;
 }
+
+//----------------------------------------------------------------------
 
 bool Parameters::list_value_logical 
 ( int index,
@@ -269,10 +364,12 @@ bool Parameters::list_value_logical
   return (param != NULL) ? param->value_logical_ : deflt;
 }
 
-std::string Parameters::list_value_string 
+//----------------------------------------------------------------------
+
+const char * Parameters::list_value_string 
 ( int index,
-  std::string parameter,
-  std::string deflt ) throw(ExceptionParametersBadType)
+  std::string   parameter,
+  const char *  deflt ) throw(ExceptionParametersBadType)
 /// @param   index     Index of the string list parameter element
 /// @param   parameter Parameter name
 /// @param   deflt     Default parameter value
@@ -282,6 +379,8 @@ std::string Parameters::list_value_string
   if (param && ! param->is_string()) throw (ExceptionParametersBadType());
   return (param != NULL) ? param->value_string_ : deflt;
 }
+
+//----------------------------------------------------------------------
 
 void Parameters::list_evaluate_scalar 
 (
@@ -313,6 +412,8 @@ void Parameters::list_evaluate_scalar
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
 }
+
+//----------------------------------------------------------------------
 
 void Parameters::list_evaluate_logical 
   (

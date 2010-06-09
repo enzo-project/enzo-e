@@ -14,6 +14,18 @@
 /// @brief    Maximum allowed width of a line in a parameter file
 #define MAX_PARAMETER_FILE_WIDTH 255
 
+/// @enum     parameter_type
+/// @brief    Parameter data type
+enum parameter_type {
+  parameter_integer,
+  parameter_scalar,
+  parameter_string,
+  parameter_logical,
+  parameter_list,
+  parameter_scalar_expr,
+  parameter_logical_expr
+};
+
 #include "parameters_Param.hpp"
 
 class Parameters {
@@ -34,6 +46,11 @@ public: // interface
   /// Write parameters to a file
   void write (FILE * file_pointer);
 
+  /// Return the parameter value of specified type
+  void value (std::string, parameter_type type, 
+	      void * value, 
+	      void * deflt = 0);
+
   /// Return the integer-valued parameter
   int value_integer (std::string , int deflt = 0) 
     throw(ExceptionParametersBadType);
@@ -47,7 +64,7 @@ public: // interface
     throw(ExceptionParametersBadType);
 
   /// Return the string-valued parameter
-  std::string value_string ( std::string , std::string deflt = "") 
+  const char * value_string ( std::string , const char * deflt = "") 
     throw(ExceptionParametersBadType);
 
   /// Evaluate the scalar-valued parameter expression
@@ -92,7 +109,7 @@ public: // interface
     throw(ExceptionParametersBadType);
 
   /// Access a string list element
-  std::string list_value_string (int ,std::string , std::string deflt = "")    
+  const char * list_value_string (int ,std::string , const char * deflt = "")    
     throw(ExceptionParametersBadType);
 
   /// Evaluate the scalar-valued list element expression

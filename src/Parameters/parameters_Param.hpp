@@ -127,7 +127,7 @@ public: // interface
   { value_accessed_ = true; return value_logical_; }
 
   /// Get a string parameter (note that string is aliased)
-  std::string get_string () 
+  const char * get_string () 
   { value_accessed_ = true; return value_string_; }
 
   /// Convert the parameter value into a string

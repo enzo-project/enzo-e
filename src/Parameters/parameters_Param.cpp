@@ -43,7 +43,6 @@ void Param::set (struct param_type * node)
     break;
   case enum_parameter_unknown:
   case enum_parameter_sentinel:
-  case enum_parameter_identifier:
   case enum_parameter_function:
   case enum_parameter_subgroup:
     break;

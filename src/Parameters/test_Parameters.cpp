@@ -81,6 +81,22 @@ int main(int argc, char **argv)
   unit_assert (parameters->value_logical("none",true) == true);
   unit_assert (parameters->value_logical("none",false) == false);
 
+  bool l,ld;
+
+  parameters->value("test_true",parameter_logical,&l);
+  unit_assert (l == true);
+
+  parameters->value("test_false",parameter_logical,&l);
+  unit_assert (l == false);
+
+  ld = true;
+  parameters->value("none",parameter_logical,&l,&ld);
+  unit_assert (l == ld);
+
+  ld = false;
+  parameters->value("none",parameter_logical,&l,&ld);
+  unit_assert (l == ld);
+
   // value_integer()
 
   unit_func("value_integer");
@@ -91,6 +107,15 @@ int main(int argc, char **argv)
   unit_assert (parameters->value_integer("test_37") == 37);
   unit_assert (parameters->value_integer("none",58) == 58);
 
+  int i,id;
+  parameters->value("test_1",parameter_integer,&i);
+  unit_assert (i == 1);
+  parameters->value("test_37",parameter_integer,&i);
+  unit_assert (i == 37);
+  id = 58;
+  parameters->value("none",parameter_integer,&i,&id);
+  unit_assert (i == id);
+
   // value_scalar()
   
   unit_func("value_scalar");
@@ -100,6 +125,17 @@ int main(int argc, char **argv)
   unit_assert (parameters->value_scalar("test_1_5")  == 1.5);
   unit_assert (parameters->value_scalar("test_37_25") == 37.25);
   unit_assert (parameters->value_scalar("none",58.75) == 58.75);
+
+  double d,dd;
+  
+  parameters->value("test_1_5",parameter_scalar,&d);
+  unit_assert (d  == 1.5);
+  parameters->value("test_37_25",parameter_scalar,&d);
+  unit_assert (d == 37.25);
+  dd = 58.75;
+  parameters->value("none",parameter_scalar,&d,&dd);
+  unit_assert (d == dd);
+  printf ("%g %g\n",d,dd);
 
   // Constant scalar expressions
   // subgroups
@@ -126,9 +162,17 @@ int main(int argc, char **argv)
   unit_func("value_string");
 
   parameters->set_current_group("String");
-  unit_assert(parameters->value_string("str1") == "testing");
-  unit_assert(parameters->value_string("str2","blah") == "one");
-  unit_assert(parameters->value_string("none","blah") == "blah");
+  unit_assert(strcmp(parameters->value_string("str1"),"testing")==0);
+  unit_assert(strcmp(parameters->value_string("str2","blah"),"one")==0);
+  unit_assert(strcmp(parameters->value_string("none","blah"),"blah")==0);
+
+  const char *s, *sd = "blah";
+  parameters->value("str1",parameter_string,&s);
+  unit_assert(strcmp(s,"testing")==0);
+  parameters->value("str2",parameter_string,&s,&sd);
+  unit_assert(strcmp(s,"one")==0);
+  parameters->value("none",parameter_string,&s,&sd);
+  unit_assert(strcmp(s,"blah")==0);
 
   // Variable scalar expressions
 
@@ -215,7 +259,7 @@ int main(int argc, char **argv)
   unit_assert(parameters->list_value_integer(2,"num1") == 37);
 
   unit_func("list_value_string");
-  unit_assert(parameters->list_value_string(3,"num1") == "string");
+  unit_assert(strcmp(parameters->list_value_string(3,"num1"),"string")==0);
 
   unit_func("list_evaluate_scalar");
   parameters->list_evaluate_scalar(4,"num1",3,values_scalar,deflts_scalar,x,y,z,t);
