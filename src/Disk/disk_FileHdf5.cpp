@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file      disk_Hdf5.cpp
+/// @file      disk_FileHdf5.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 16:11:36 PST 2008
-/// @brief     Implementation of the Hdf5 class
+/// @brief     Implementation of the FileHdf5 class
 
 #include <hdf5.h>
 
@@ -15,7 +15,7 @@
  
 //----------------------------------------------------------------------
 
-Hdf5::Hdf5()
+FileHdf5::FileHdf5()
 /**
  */
  :file_(0),
@@ -31,7 +31,7 @@ Hdf5::Hdf5()
 
 //----------------------------------------------------------------------
     
-int Hdf5::file_open  (std::string name, std::string mode)
+int FileHdf5::file_open  (std::string name, std::string mode)
 /**
  * @param name  Name of the file to create or open
  * @param mode  How the file is to be created or opened:
@@ -44,7 +44,7 @@ int Hdf5::file_open  (std::string name, std::string mode)
 
     char warning_message[ERROR_MESSAGE_LENGTH];
     sprintf (warning_message,"Attempting to open an open file %s",name.c_str());
-    WARNING_MESSAGE("Hdf5::file_open",warning_message);
+    WARNING_MESSAGE("FileHdf5::file_open",warning_message);
 
   } else {
 
@@ -58,7 +58,7 @@ int Hdf5::file_open  (std::string name, std::string mode)
     } else {
       char error_message[ERROR_MESSAGE_LENGTH];
       sprintf (error_message,"Unrecognized mode: %s",mode.c_str());
-      ERROR_MESSAGE("Hdf5::file_open",error_message);
+      ERROR_MESSAGE("FileHdf5::file_open",error_message);
     }
 
     if (file_ >= 0) {
@@ -68,7 +68,7 @@ int Hdf5::file_open  (std::string name, std::string mode)
       sprintf (warning_message,
 	       "Return value %d opening file %s",
 	       file_,file_name_.c_str());
-      WARNING_MESSAGE("Hdf5::file_open",warning_message);
+      WARNING_MESSAGE("FileHdf5::file_open",warning_message);
     }
   }
 
@@ -78,7 +78,7 @@ int Hdf5::file_open  (std::string name, std::string mode)
 
 //----------------------------------------------------------------------
 
-void Hdf5::file_close ()
+void FileHdf5::file_close ()
 /**
  */
 {
@@ -87,7 +87,7 @@ void Hdf5::file_close ()
     sprintf (warning_message,
 	     "Attempting to close a closed file %s",
 	     this->file_name_.c_str());
-    WARNING_MESSAGE("Hdf5::file_close",warning_message);
+    WARNING_MESSAGE("FileHdf5::file_close",warning_message);
   } else {
     int retval = H5Fclose (file_);
     if (retval >= 0) {
@@ -97,14 +97,14 @@ void Hdf5::file_close ()
       sprintf (warning_message,
 	       "Return value %d closing file %s",
 	       retval,file_name_.c_str());
-      WARNING_MESSAGE("Hdf5::file_close",warning_message);
+      WARNING_MESSAGE("FileHdf5::file_close",warning_message);
     }
   }
 }
 
 //----------------------------------------------------------------------
 
-void Hdf5::group_open (std::string name)
+void FileHdf5::group_open (std::string name)
 /**
  */
 {
@@ -112,7 +112,7 @@ void Hdf5::group_open (std::string name)
 
 //----------------------------------------------------------------------
 
-void Hdf5::group_close ()
+void FileHdf5::group_close ()
 /**
  */
 {
@@ -120,7 +120,7 @@ void Hdf5::group_close ()
 
 //----------------------------------------------------------------------
 
-void Hdf5::dataset_open_write (std::string name, 
+void FileHdf5::dataset_open_write (std::string name, 
 			       int nx,  int ny,  int nz)
 			       //			       int ix0, int iy0, int iz0,  /// unused
 			       //			       int mx,  int my,  int mz)   /// unused
@@ -129,7 +129,7 @@ void Hdf5::dataset_open_write (std::string name,
 
     char error_message[ERROR_MESSAGE_LENGTH];
     sprintf (error_message, "Expecting dataset_open_read()");
-    ERROR_MESSAGE("Hdf5::dataset_open_write",error_message);
+    ERROR_MESSAGE("FileHdf5::dataset_open_write",error_message);
 
   } else {
 
@@ -180,14 +180,14 @@ void Hdf5::dataset_open_write (std::string name,
       sprintf (warning_message,
 	       "Return value %d opening dataset %s",
 	       dataset_,name.c_str());
-      WARNING_MESSAGE("Hdf5::dataset_open_write",warning_message);
+      WARNING_MESSAGE("FileHdf5::dataset_open_write",warning_message);
     }
   }
 }
 
 //----------------------------------------------------------------------
 
-void Hdf5::dataset_open_read (std::string name, 
+void FileHdf5::dataset_open_read (std::string name, 
 			      int *       nx,
 			      int *       ny,
 			      int *       nz)
@@ -199,7 +199,7 @@ void Hdf5::dataset_open_read (std::string name,
 
     char error_message[ERROR_MESSAGE_LENGTH];
     sprintf (error_message, "Expecting dataset_open_write()");
-    ERROR_MESSAGE("Hdf5::dataset_open_read",error_message);
+    ERROR_MESSAGE("FileHdf5::dataset_open_read",error_message);
 
   } else {
 
@@ -218,7 +218,7 @@ void Hdf5::dataset_open_read (std::string name,
       if (d > 3) {
 	char error_message[ERROR_MESSAGE_LENGTH];
 	sprintf (error_message, "Dataset has too many dimensions %d",d);
-	ERROR_MESSAGE("Hdf5::dataset_open",error_message);
+	ERROR_MESSAGE("FileHdf5::dataset_open",error_message);
       }
 
       H5Sget_simple_extent_dims(dataspace_,n,0);
@@ -241,14 +241,14 @@ void Hdf5::dataset_open_read (std::string name,
       sprintf (warning_message,
 	       "Return value %d opening dataset %s",
 	       dataset_,name.c_str());
-      WARNING_MESSAGE("Hdf5::dataset_open_read",warning_message);
+      WARNING_MESSAGE("FileHdf5::dataset_open_read",warning_message);
     }
   }
 }
 
 //----------------------------------------------------------------------
 
-// void Hdf5::dataset_set_hyperslab ()
+// void FileHdf5::dataset_set_hyperslab ()
 // {
 //   hsize_t offset[3] = {ix0,iy0,iz0};
 //   hsize_t count[3]  = {mx,my,mz};
@@ -258,7 +258,7 @@ void Hdf5::dataset_open_read (std::string name,
 
 //----------------------------------------------------------------------
 
-void Hdf5::dataset_close ()
+void FileHdf5::dataset_close ()
 /**
  */
 {
@@ -267,7 +267,7 @@ void Hdf5::dataset_close ()
 
 //----------------------------------------------------------------------
 
-void Hdf5::read  (Scalar * buffer)
+void FileHdf5::read  (Scalar * buffer)
 /**
  */
 {
@@ -276,7 +276,7 @@ void Hdf5::read  (Scalar * buffer)
 
 //----------------------------------------------------------------------
 
-void Hdf5::write (Scalar * buffer)
+void FileHdf5::write (Scalar * buffer)
 /**
  */
 {

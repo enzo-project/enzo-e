@@ -1,33 +1,41 @@
-// $Id: disk_DiskFile.hpp 1394 2010-04-22 20:52:54Z bordner $
+// $Id: disk_File.hpp 1394 2010-04-22 20:52:54Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef DISK_DISKFILE_HPP
 #define DISK_DISKFILE_HPP
 
-/// @file     disk_DiskFile.hpp
+/// @file     disk_File.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Declaration of the DiskFile class
+/// @brief    Declaration of the File class
 
-class DiskFile {
+#include <string>
 
-  /// @class    DiskFile
+class File {
+
+  /// @class    File
   /// @ingroup  Disk
   /// @brief    Internal representation of a file on disk
 
 public: // interface
 
   /// Constructor
-  DiskFile() throw();
+  File() throw();
 
 //   /// Destructor
-//   ~DiskFile() throw();
+//   ~File() throw();
 
 //   /// Copy constructor
-//   DiskFile(const DiskFile & diskfile) throw();
+//   File(const File & diskfile) throw();
 
 //   /// Assignment operator
-//   DiskFile & operator= (const DiskFile & diskfile) throw();
+//   File & operator= (const File & diskfile) throw();
+
+  void open(std::string filename) throw();
+  void close() throw();
+  void read() throw();
+  void write() throw();
+  void flush() throw();
 
 private: // functions
 

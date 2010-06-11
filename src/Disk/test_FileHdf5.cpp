@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Hdf5.cpp
+/// @file     test_FileHdf5.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:47:35 PST 2008
-/// @brief    Program implementing unit tests for the Hdf5 class
+/// @brief    Program implementing unit tests for the FileHdf5 class
  
 #include <stdio.h>
 #include <string>
@@ -29,11 +29,11 @@ int main(int argc, char ** argv)
     }
   }
 
-  unit_class ("Hdf5");
+  unit_class ("FileHdf5");
 
   unit_func("file_open");
 
-  Hdf5 hdf5;
+  FileHdf5 hdf5;
 
   int mx,my,mz;
   hdf5.file_open("file_open_test.hdf5","w");

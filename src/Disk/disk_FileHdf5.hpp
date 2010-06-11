@@ -4,29 +4,29 @@
 #ifndef DISK_HDF5_HPP
 #define DISK_HDF5_HPP
 
-/// @file     disk_Hdf5.hpp
+/// @file     disk_FileHdf5.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
 /// @todo     Refactor interface to be hdf5-independent (groups, datasets, etc.)
 /// @todo     Rename to, e.g., FileHdf5
 /// @todo     Add support for relative/absolute directory / group
 /// @todo     Add unit tests for group operations to test_disk_hdf5
-/// @brief    Interface for the Hdf5 class
+/// @brief    Interface for the FileHdf5 class
 
 #include <hdf5.h>
 
-class Hdf5 {
+class FileHdf5 {
 
-  /// @class    Hdf5
+  /// @class    FileHdf5
   /// @ingroup  Disk
   /// @brief    Class for writing and reading HDF5 files
   ///
-  /// An Hdf5 object currently corresponds to a single HDF5 file / group
+  /// An FileHdf5 object currently corresponds to a single HDF5 file / group
 
 public: // interface
 
-  /// Initialize the Hdf5 object
-  Hdf5();
+  /// Initialize the FileHdf5 object
+  FileHdf5();
 
   /// Open the file with the given mode
   int file_open  (std::string name, std::string mode);
