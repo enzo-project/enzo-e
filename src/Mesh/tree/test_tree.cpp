@@ -83,7 +83,7 @@ void write_image(float * image, int nx, int ny, int k, int full, int step)
 /// @param    filename  Name of HDF5 file to write
 
 {
-  Hdf5 hdf5;
+  FileHdf5 hdf5;
   char filename[40];
   sprintf (filename,"tree%d-f%d-%d-old.hdf5",k,full,step);
   hdf5.file_open(filename,"w");

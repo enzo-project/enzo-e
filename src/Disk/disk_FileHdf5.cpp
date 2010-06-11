@@ -40,6 +40,8 @@ int FileHdf5::file_open  (std::string name, std::string mode)
  * @return      True iff opening the file was successful
  */
 {
+  name = name + ".hdf5";
+
   if (is_file_open_) {
 
     char warning_message[ERROR_MESSAGE_LENGTH];

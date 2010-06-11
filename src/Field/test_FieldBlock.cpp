@@ -522,8 +522,6 @@ int main()
   unit_assert(4.0 == values_f4[nx*ny*(nz+1)-1]);
   unit_assert(2.0 == values_f5[0] );
   
-  unit_assert(false);
-	
   //----------------------------------------------------------------------
   unit_func("split");
   unit_assert(false);

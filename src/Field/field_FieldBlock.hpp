@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "field_FieldDescr.hpp"
-#include "disk_DiskFile.hpp"
+#include "disk.hpp"
 
 class FieldBlock {
 
@@ -105,10 +105,10 @@ public: // interface
  
   /// Read a block from disk.  Create new FieldDescr if not supplied or different.
   /// return NULL iff no new field_descr is created
-  FieldDescr * read(DiskFile * disk_file, FieldDescr * field_descr = 0) throw ();
+  FieldDescr * read(File * file, FieldDescr * field_descr = 0) throw ();
 
   /// Write a block from disk, and optionally associated descriptor
-  void write(DiskFile * disk_file, FieldDescr * field_descr = 0) const throw ();
+  void write(File * file, FieldDescr * field_descr = 0) const throw ();
 
   /// Set dimensions of the array block
   void set_dimensions(int nx, int ny, int nz) throw();

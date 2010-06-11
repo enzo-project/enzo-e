@@ -350,8 +350,9 @@ FieldBlock * FieldBlock::merge
 	
 FieldDescr * FieldBlock::read
 (
- DiskFile   * disk_file, 
- FieldDescr * field_descr ) throw ()
+ File       * file, 
+ FieldDescr * field_descr 
+ ) throw ()
 {
   FieldDescr * new_field_descr = 0;
 
@@ -362,8 +363,9 @@ FieldDescr * FieldBlock::read
 
 void FieldBlock::write
 (
- DiskFile   * disk_file,
- FieldDescr * field_descr ) const throw ()
+ File       * file,
+ FieldDescr * field_descr 
+ ) const throw ()
 {
   
 }

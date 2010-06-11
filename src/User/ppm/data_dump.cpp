@@ -20,15 +20,15 @@ void data_dump(const char * file_root, int cycle)
   int ny = GridDimension[1];
   int nz = GridDimension[2];
 
-  Hdf5 hdf5;
+  FileHdf5 file;
 
   // Open hdf5 file dump for cycle
   char filename[80];
 
-  sprintf (filename,"%s-%06d.hdf5",file_root,cycle);
-  hdf5.file_open(filename,"w");
-  hdf5.dataset_open_write ("density",nx,ny,nz);
-  hdf5.write(BaryonField[field_density]);
-  hdf5.dataset_close ();
-  hdf5.file_close();
+  sprintf (filename,"%s-%06d",file_root,cycle);
+  file.file_open(filename,"w");
+  file.dataset_open_write ("density",nx,ny,nz);
+  file.write(BaryonField[field_density]);
+  file.dataset_close ();
+  file.file_close();
 }

@@ -36,7 +36,7 @@ int main(int argc, char ** argv)
   FileHdf5 hdf5;
 
   int mx,my,mz;
-  hdf5.file_open("file_open_test.hdf5","w");
+  hdf5.file_open("file_open_test","w");
   mx = nx;
   my = ny;
   mz = 1;
@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
   hdf5.file_close();
 
 
-  hdf5.file_open("file_open_test.hdf5","r");
+  hdf5.file_open("file_open_test","r");
   hdf5.dataset_open_read ("dataset",&mx,&my,&mz);
 
   Scalar * b = new Scalar[nx*ny];

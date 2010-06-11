@@ -16,17 +16,19 @@ if (platform == 'unknown' and "CELLO_PLATFORM" in os.environ):
 # Check code for revision updates and local modifications
 #==================================================
 
-repository = "svn info svn+ssh://client65-88.sdsc.edu/usr/local/svn/cello/trunk"
+repository = "svn+ssh://client65-88.sdsc.edu/usr/local/svn/cello/trunk"
 get_revision = "| awk '/Revision:/ {print $2}'"
 
-revision_new     = int(os.popen(repository + get_revision).read())
-revision_current = int(os.popen("svn info" + get_revision).read())
+# TODO: TEST FOR INTERNET CONNECTION
+
+# revision_new     = int(os.popen("svn info " + repository + get_revision).read())
+revision_current = int(os.popen("svn info " + get_revision).read())
 revision_changes = int(os.popen("svn status | grep -v '?' | wc -l").read())
 
 if (revision_changes != 0):
    print "\nWARNING: Working directory has local modifications\n"
-elif (revision_new != revision_current):
-   print "\nWARNING: Working directory is not up-to-date with the repository\n"
+# elif (revision_new != revision_current):
+#    print "\nWARNING: Working directory is not up-to-date with the repository\n"
 else:
    print "\nWorking directory synched with repository\n"
 
