@@ -5,6 +5,7 @@
 \documentclass{article}
 %=======================================================================
 
+\usepackage{color}
 \include{include}
 
 %=======================================================================
@@ -22,6 +23,119 @@
 %=======================================================================
 \section{Parameters}
 %=======================================================================
+
+
+\newcommand{\Parameter}[6]
+{\subsubsection{\code{#1}}
+\begin{tabular}{|lr|}  \hline & \\ [-1.5ex]
+   \textcolor{red}{\code{#1} : \code{#2} : \textbf{\code{#3}}} & #4 \\ [1ex] \hline & \\ [-1.5ex]
+   \textcolor{magenta}{ #5 }& \\ [1ex] \hline & \\ [-1.5ex]
+  \multicolumn{2}{|l|}{\parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{blue}{#6}}}}} \\  [-1.5ex] & \\ \hline  
+\end{tabular}}
+
+\Parameter
+{Boundary}
+%
+{[ lower $|$ upper $|$ $\emptyset$ ]}
+%
+{type}
+%
+{string $|$ list(string) }
+%
+{ [ \code{"reflecting"} $|$ \code{"inflow"}$|$ \code{"outflow"}$|$
+  \code{"periodic"}$|$ \code{"dirichlet"}$|$ \code{"neumann"} ] }
+%
+{ Type of boundary condition.  Corresponds to \enzo\ parameters
+  \code{LeftFaceBoundaryCondition} and
+  \code{RightFaceBoundaryCondition}, whose allowed values are 0 = reflecting, 1 = outflow, 2 = inflow, 3 = periodic.}
+
+\begin{verbatim}
+Boundary {
+   type = "periodic";
+   lower { 
+      type = [ "reflecting" , "reflecting" , "reflecting"]
+   }
+   upper { type = "reflecting"}
+}
+\end{verbatim}
+
+
+% Boundary 	[face] 	value 	scalar expression 	value for the boundary condition, which may be time-varying
+% Boundary 	[face] 	file 	string 	file from which to read the boundary conditions
+% 				
+% Domain 		extent 	list 	extent of the domain, [xmin, xmax], [xmin, xmax, ymin, ymax], or [xmin, xmax, ymin, ymax, zmin, zmax]
+% 				
+% Field 		courant 	scalar 	Courant condition for fields
+% Field 		fields 	list 	List of field names [implicit?] [optional (e.g. for ordering)?]
+% Field 		groups 	list 	List of group names [implicit?] [optional?]
+% Field 		precision 	string 	default precision for all fields
+% Field 		alignment 	integer 	Alignment of start of each field's array in bytes
+% Field 		padding 	integer 	Padding between field arrays in bytes
+% Field 	field_name 	minimum 	list 	minimum value(s) and actions ["none", "assign", "warning", "error"]
+% Field 	field_name 	maximum 	list 	maximum value(s) and actions ["none", "assign", "warning", "error"]
+% Field 	field_name 	centering 	list 	list of logicals specifying whether the variable is centered on the corresponding axis
+% Field 	field_name 	precision 	string 	precision of the field
+% Field 	field_name 	groups 	list 	string list of group names [e.g. "color"]
+% Field 	field_name 	alias 	list 	string list of other names this field goes by
+% Initial 	field_name	value 	list 	list of scalar-expression / logical-expression pairs
+% Initial 	field_name	file 	string 	file containing the initial conditions for the field
+% Initial 		time 	scalar 	initial time in code units
+% Initial 		redshift 	scalar 	initial redshift for cosmological runs
+% Initial 		cycle 	list 	initial cycle number, or list of cycle numbers for each AMR level
+% 				
+% Memory 		limit 	integer 	Set limit on the number of local bytes available for dynamic memory
+% Memory 		warning 	scalar 	Set efficiency threshold before displaying a warning message
+% Memory 		fill 	list 	List of strings to fill memory after being allocated, and before being deallocated
+% Memory 		tracking 	logical 	Set memory tracking on or off. Turning off resorts to native new[]/delete[].'
+% 				
+% Mesh 		root_size 	list 	size of the root grid, e.g. [400,400]
+% Mesh 		max_levels 	integer 	maximum levels (with root = 1), assuming refinement by two
+% Mesh 		refinement 	integer 	refinement factor = 2, 4, etc.
+% Mesh 		balanced 	logical 	whether the tree is balanced or "full" (ala Flash) or not
+% Mesh 		backfill 	logical 	whether to backfill for refine > 2
+% Mesh 		coalesce 	logical 	whether to coalesce small patches into one big one
+% Mesh 		patch_size 	list 	minimum and maximum allowed patch sizes
+% Mesh 		block_size 	list 	minimum and maximum allowed block sizes
+% 				
+% Method 		sequence 	list 	sequence of numerical methods to apply
+% Method 	ppm 	diffusion 	logical 	PPM diffusion parameter
+% Method 	ppm 	flattening 	logical 	PPM flattening parameter
+% Method 	ppm 	steepening 	logical 	PPM steepening parameter
+% Method 	ppm 	dual_energy 	logical 	whether to use dual-energy formalism
+% Method 	ppm 	dual_energy_eta_1 	scalar 	dual-energy formalism parameter
+% Method 	ppm 	dual_energy_eta_2 	scalar 	dual-energy formalism parameter
+% Method 	ppm 	pressure_free 	logical 	"pressure free flag"
+% 				
+% Output 	file_name 	name 	list 	name for the output files, where the first element is a format string (ala printf()), and remaining elements are scalar expressions. E.g. ["wave_pool-t=%3.1f.data", t]
+% Output 	file_name	times 	list 	start, stop, and interval times to output
+% Output 	file_name	redshifts 	list 	start, stop, and interval redshifts to output
+% Output 	file_name	cycles 	list 	start, stop, and interval cycles to output [what about fine vs coarse?]
+% 				
+% Parallel 	balance 	frequency 	list 	list of load balancing timesteps for each level, e.g. [1,8,64]
+% Parallel 	balance 	method 	string 	method to use for load balancing. Default is "none".
+% Parallel 	schedule 	method 	string 	method for scheduling parallel tasks
+% Parallel 		levels 	list 	E.g. [8,32] for 8 cores/cpu, 32 cpu's/node, and any number of nodes
+% Parallel 		type 	list 	E.g. ["omp","upc","mpi"] for OMP within cpu, UPC within node, and MPI between nodes
+% Parallel 	mpi 	sided 	integer 	Type of MPI: 1 (single-sided get/put) or 2 (double-sided send/receive)
+% Parallel 	mpi 	send_type 	list 	List of MPI send variations: "immediate", "blocking", "standard","buffered","synchronous","ready"
+% Parallel 	mpi 	recv_type 	list 	List [sic] of MPI recv variations: immediate", "blocking"
+% Parallel 	mpi 	get_type 	string 	MPI get variations (...)
+% Parallel 	mpi 	put_type 	string 	MPI put variations (...)
+% Parallel 	mpi 	permute 	list 	Specification of reordering of MPI tasks
+% 				
+% Physics 		gamma 	scalar 	ideal gas law constant
+% Physics 		cosmology 	logical 	turn on or off comoving coordinates
+% Physics 	cosmology	hubble_constant_now 	scalar 	
+% Physics 	cosmology	omega_lamda_now 	scalar 	
+% Physics 	cosmology	omega_matter_now 	scalar 	
+% Physics 	cosmology	max_expansion_rate 	scalar 	
+% Physics 		gravity 	logical 	whether gravity is included
+% Physics 	gravity	constant 	scalar 	"used only in SetMinimumSupport"
+% Physics 		multi_species 	integer 	
+% 				
+% Stopping 		time 	scalar 	stopping time
+% Stopping 		redshift 	scalar 	stopping redshift
+% Stopping 		cycle 	list 	stopping cycle, or list of stopping cycles for AMR levels
 
 %=======================================================================
 \section{Publishing \cello-derived Results}
