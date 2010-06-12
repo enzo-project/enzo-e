@@ -27,37 +27,38 @@
 
 \newcommand{\Parameter}[6]
 {\subsubsection{\code{#1}}
-\begin{tabular}{|lr|}  \hline & \\ [-1.5ex]
-   \textcolor{red}{\code{#1} : \code{#2} : \textbf{\code{#3}}} & #4 \\ [1ex] \hline & \\ [-1.5ex]
-   \textcolor{magenta}{ #5 }& \\ [1ex] \hline & \\ [-1.5ex]
-  \multicolumn{2}{|l|}{\parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{blue}{#6}}}}} \\  [-1.5ex] & \\ \hline  
+\begin{tabular}{|l|l|l|}  \hline & & \\ [-1.5ex]
+   \textcolor{red}{\code{#1}} & 
+   \textcolor{red}{\code{#2}} &
+   \textcolor{red}{\textbf{\code{#3}}} \\ [1ex] \hline 
+   \multicolumn{3}{|l|}{} \\ [-1.5ex]
+   \multicolumn{3}{|l|}{\textcolor{magenta}{#4}  \textcolor{magenta}{ #5 } } \\     \multicolumn{3}{|l|}{} \\ [-1.5ex] \hline 
+   \multicolumn{3}{|l|}{} \\ [-1.5ex]
+  \multicolumn{3}{|l|}{\parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{blue}{#6}}}}} \\[-1.5ex]
+   \multicolumn{3}{|l|}{} \\ \hline  
 \end{tabular}}
 
 \Parameter
 {Boundary}
-%
 {[ lower $|$ upper $|$ $\emptyset$ ]}
-%
 {type}
-%
 {string $|$ list(string) }
-%
 { [ \code{"reflecting"} $|$ \code{"inflow"}$|$ \code{"outflow"}$|$
   \code{"periodic"}$|$ \code{"dirichlet"}$|$ \code{"neumann"} ] }
-%
 { Type of boundary condition.  Corresponds to \enzo\ parameters
   \code{LeftFaceBoundaryCondition} and
   \code{RightFaceBoundaryCondition}, whose allowed values are 0 = reflecting, 1 = outflow, 2 = inflow, 3 = periodic.}
 
-\begin{verbatim}
-Boundary {
-   type = "periodic";
-   lower { 
-      type = [ "reflecting" , "reflecting" , "reflecting"]
-   }
-   upper { type = "reflecting"}
-}
-\end{verbatim}
+\begin{tabbing}
+xxx\=xxx\=xxx\=xxx\kill
+\> \code{Boundary \{} \\
+\>\>\code{\textbf{type} = "periodic";} \\
+\>\>   \code{lower \{ } \\
+\>\>\>      \code{\textbf{type} = [ "reflecting" , "reflecting" , "reflecting" ]} \\
+\>\>   \code{\}} \\
+\>\>   \code{upper \{ \textbf{type} = "reflecting"\}} \\
+\>\code{\}}
+\end{tabbing}
 
 
 % Boundary 	[face] 	value 	scalar expression 	value for the boundary condition, which may be time-varying
