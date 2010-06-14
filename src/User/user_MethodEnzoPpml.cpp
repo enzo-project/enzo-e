@@ -22,34 +22,34 @@ void MethodEnzoPpml::initialize() throw()
 
   // Specify arguments
 
-  add_argument_(argument_type_field, "density",    access_type_read_write);
-  add_argument_(argument_type_field, "velocity_x", access_type_read_write);
-  add_argument_(argument_type_field, "velocity_y", access_type_read_write);
-  add_argument_(argument_type_field, "velocity_z", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_x", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_y", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_z", access_type_read_write);
+  add_argument_(argument_field, "density",    access_read_write);
+  add_argument_(argument_field, "velocity_x", access_read_write);
+  add_argument_(argument_field, "velocity_y", access_read_write);
+  add_argument_(argument_field, "velocity_z", access_read_write);
+  add_argument_(argument_field, "magnetic_x", access_read_write);
+  add_argument_(argument_field, "magnetic_y", access_read_write);
+  add_argument_(argument_field, "magnetic_z", access_read_write);
 
-  add_argument_(argument_type_field, "velocity_x_face_x", access_type_read_write);
-  add_argument_(argument_type_field, "velocity_y_face_x", access_type_read_write);
-  add_argument_(argument_type_field, "velocity_z_face_x", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_x_face_x", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_y_face_x", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_z_face_x", access_type_read_write);
+  add_argument_(argument_field, "velocity_x_face_x", access_read_write);
+  add_argument_(argument_field, "velocity_y_face_x", access_read_write);
+  add_argument_(argument_field, "velocity_z_face_x", access_read_write);
+  add_argument_(argument_field, "magnetic_x_face_x", access_read_write);
+  add_argument_(argument_field, "magnetic_y_face_x", access_read_write);
+  add_argument_(argument_field, "magnetic_z_face_x", access_read_write);
 
-  add_argument_(argument_type_field, "velocity_x_face_y", access_type_read_write);
-  add_argument_(argument_type_field, "velocity_y_face_y", access_type_read_write);
-  add_argument_(argument_type_field, "velocity_z_face_y", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_x_face_y", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_y_face_y", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_z_face_y", access_type_read_write);
+  add_argument_(argument_field, "velocity_x_face_y", access_read_write);
+  add_argument_(argument_field, "velocity_y_face_y", access_read_write);
+  add_argument_(argument_field, "velocity_z_face_y", access_read_write);
+  add_argument_(argument_field, "magnetic_x_face_y", access_read_write);
+  add_argument_(argument_field, "magnetic_y_face_y", access_read_write);
+  add_argument_(argument_field, "magnetic_z_face_y", access_read_write);
 
-  add_argument_(argument_type_field, "velocity_x_face_z", access_type_read_write);
-  add_argument_(argument_type_field, "velocity_y_face_z", access_type_read_write);
-  add_argument_(argument_type_field, "velocity_z_face_z", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_x_face_z", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_y_face_z", access_type_read_write);
-  add_argument_(argument_type_field, "magnetic_z_face_z", access_type_read_write);
+  add_argument_(argument_field, "velocity_x_face_z", access_read_write);
+  add_argument_(argument_field, "velocity_y_face_z", access_read_write);
+  add_argument_(argument_field, "velocity_z_face_z", access_read_write);
+  add_argument_(argument_field, "magnetic_x_face_z", access_read_write);
+  add_argument_(argument_field, "magnetic_y_face_z", access_read_write);
+  add_argument_(argument_field, "magnetic_z_face_z", access_read_write);
 
   // Initialize from parameters
 

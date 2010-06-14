@@ -59,52 +59,54 @@ int main(int argc, char ** argv)
   
   // Add counters
 
-  performance->new_counter(time_real,          "time_real");
-  performance->new_counter(time_sim,           "time_sim");
-  performance->new_counter(mem_curr_bytes,     "mem_curr_bytes");
-  performance->new_counter(mem_high_bytes,     "mem_high_bytes");
-  performance->new_counter(mem_new_count,      "mem_new_count");
-  performance->new_counter(mem_delete_count,   "mem_delete_count");
-  performance->new_counter(mem_new_bytes,      "mem_new_bytes");
-  performance->new_counter(mem_delete_bytes,   "mem_delete_bytes");
-  performance->new_counter(disk_read_bytes,    "disk_read_bytes");
-  performance->new_counter(disk_write_bytes,   "disk_write_bytes");
-  performance->new_counter(disk_read_time,     "disk_read_time");
-  performance->new_counter(disk_write_time,    "disk_write_time");
-  performance->new_counter(user_patch_count,   "user_patch_count");
-  performance->new_counter(user_cell_count,    "user_cell_count");
-  performance->new_counter(user_particle_count,"user_particle_count");
+  performance->new_counter(counter_time_real,          "time_real");
+  performance->new_counter(counter_time_sim,           "time_sim");
+  performance->new_counter(counter_mem_curr_bytes,     "mem_curr_bytes");
+  performance->new_counter(counter_mem_high_bytes,     "mem_high_bytes");
+  performance->new_counter(counter_mem_new_count,      "mem_new_count");
+  performance->new_counter(counter_mem_delete_count,   "mem_delete_count");
+  performance->new_counter(counter_mem_new_bytes,      "mem_new_bytes");
+  performance->new_counter(counter_mem_delete_bytes,   "mem_delete_bytes");
+  performance->new_counter(counter_disk_read_bytes,    "disk_read_bytes");
+  performance->new_counter(counter_disk_write_bytes,   "disk_write_bytes");
+  performance->new_counter(counter_disk_read_time,     "disk_read_time");
+  performance->new_counter(counter_disk_write_time,    "disk_write_time");
+  performance->new_counter(counter_user_patch_count,   "user_patch_count");
+  performance->new_counter(counter_user_cell_count,    "user_cell_count");
+  performance->new_counter(counter_user_particle_count,"user_particle_count");
 
 #ifdef CONFIG_USE_MPI
-  performance->new_counter(comm_send_bytes,    "comm_send_bytes");
-  performance->new_counter(comm_recv_bytes,    "comm_recv_bytes");
-  performance->new_counter(comm_send_time,     "comm_send_time");
-  performance->new_counter(comm_recv_time,     "comm_recv_time");
-  performance->new_counter(comm_global_time,   "comm_global_time");
-  performance->new_counter(comm_send_count,    "comm_send_count");
-  performance->new_counter(comm_recv_count,    "comm_recv_count");
-  performance->new_counter(comm_global_count,  "comm_global_count");
+  performance->new_counter(counter_comm_send_bytes,    "comm_send_bytes");
+  performance->new_counter(counter_comm_recv_bytes,    "comm_recv_bytes");
+  performance->new_counter(counter_comm_send_time,     "comm_send_time");
+  performance->new_counter(counter_comm_recv_time,     "comm_recv_time");
+  performance->new_counter(counter_comm_global_time,   "comm_global_time");
+  performance->new_counter(counter_comm_send_count,    "comm_send_count");
+  performance->new_counter(counter_comm_recv_count,    "comm_recv_count");
+  performance->new_counter(counter_comm_global_count,  "comm_global_count");
 #endif /* CONFIG_USE_MPI */
 
   // Add groups
 
-  performance->new_group(component_amr,        "amr");
-  performance->new_group(component_array,      "array");
-  performance->new_group(component_control,    "control");
-  performance->new_group(component_control,    "data");
-  performance->new_group(component_disk,       "disk");
-  performance->new_group(component_error,      "error");
-  performance->new_group(component_field,      "field");
-  performance->new_group(component_memory,     "memory");
-  performance->new_group(component_method,     "method");
-  performance->new_group(component_monitor,    "monitor");
-  performance->new_group(component_parallel,   "parallel");
-  performance->new_group(component_parameters, "parameters");
-  performance->new_group(component_particle,   "particle");
-  performance->new_group(component_performance,"performance");
-  performance->new_group(component_portal,     "portal");
-  performance->new_group(component_problem,    "problem");
-  performance->new_group(component_simulation, "simulation");
+  performance->new_group(component_data,         "data");
+  performance->new_group(component_disk,         "disk");
+  performance->new_group(component_distribute,   "distribute");
+  performance->new_group(component_error,        "error");
+  performance->new_group(component_field,        "field");
+  performance->new_group(component_memory,       "memory");
+  performance->new_group(component_mesh,         "mesh");
+  performance->new_group(component_method,       "method");
+  performance->new_group(component_monitor,      "monitor");
+  performance->new_group(component_parallel,     "parallel");
+  performance->new_group(component_parameters,   "parameters");
+  performance->new_group(component_particles,    "particles");
+  performance->new_group(component_performance,  "performance");
+  performance->new_group(component_portal,       "portal");
+  performance->new_group(component_schedule,     "schedule");
+  performance->new_group(component_simulation,   "simulation");
+  performance->new_group(component_task,         "task");
+  performance->new_group(component_test,         "test");
+  performance->new_group(component_user,         "user");
   
   // Add functions
 

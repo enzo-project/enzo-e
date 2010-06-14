@@ -44,7 +44,7 @@ void Monitor::image
  int nx, int ny, int nz,
  int nx0, int ny0, int nz0,
  int nx1, int ny1, int nz1,
- int axis, enum_reduce op_reduce,
+ int axis, reduce_type op_reduce,
  Scalar min, Scalar max, 
  const double * map, 
  int map_length)

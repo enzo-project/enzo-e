@@ -23,12 +23,12 @@ class Performance {
   /// Performance data is organized into attributes, counters, groups, and
   /// regions. @@@
 
-  enum enum_item_type {
-    item_type_unknown,
-    item_type_attribute,
-    item_type_counter,
-    item_type_group,
-    item_type_region
+  enum item_type {
+    item_unknown,
+    item_attribute,
+    item_counter,
+    item_group,
+    item_region
   };
 
 
@@ -143,7 +143,7 @@ private: // functions
 
   void new_item_ 
   (
-   enum_item_type  item_type,
+   enum item_type  item_type,
    std::string item_type_name,
    unsigned id_item, 
    std::string item_name,

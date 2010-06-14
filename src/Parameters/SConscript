@@ -11,10 +11,10 @@ env.Alias('install-inc',env.Install ('#/include',includes))
 
 sources  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
 
-# env.CFile(target = 'lex.yy.c', source = 'parse.l')
-# env.CFile(target = ['parse.tab.c', 'parse.tab.h'], 
-#           source = 'parse.y',
-#           YACCFLAGS='-d -t')
+env.CFile(target = 'lex.yy.c', source = 'parse.l')
+env.CFile(target = ['parse.tab.c', 'parse.tab.h'], 
+          source = 'parse.y',
+          YACCFLAGS='-d -t')
 
 
 libraries = env.Library ('parameters', [sources])

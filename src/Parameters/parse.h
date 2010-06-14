@@ -52,7 +52,7 @@ struct node_expr {
   char * function_name;
 };
 
-struct param_type {
+struct param_struct {
   char * group;
   char * subgroup;
   char * parameter;
@@ -62,9 +62,9 @@ struct param_type {
     int                 integer_value; 
     double              scalar_value; 
     char *              string_value;
-    struct param_type * list_value;
+    struct param_struct * list_value;
     struct node_expr    * op_value;    /* expression tree */
   };
-  struct param_type *   next;
+  struct param_struct *   next;
 };
 

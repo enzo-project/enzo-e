@@ -1,7 +1,7 @@
 const int num_problems = 4;
 const int num_ghosts   = 3;
 
-enum type_problem {  
+enum problem_ppm_type {  
   problem_ppm_unknown, 
   problem_ppm_image,  
   problem_ppm_implosion,  

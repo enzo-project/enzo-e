@@ -14,57 +14,57 @@
 
 /* Performance attributes */
 
-enum type_perf_attribute {
+enum attribute_type {
   attribute_undefined, // 0 is an undefined attribute
   attribute_timestep,  // Simulation timesteps [monotonic]
   attribute_level,     // AMR hierarchy level
   attribute_component, // software component [memory]
   attribute_function,  // code function
-  num_attributes = attribute_function
+  num_attributes = attribute_function // Number of attribute types
 };
 
 /* Performance counters */
 
-enum type_perf_counter {
+enum counter_type {
   counter_undefined, // 0 is an undefined counter
 #ifdef CONFIG_USE_MPI
-  comm_send_bytes,     // Amount of data sent from this thread
-  comm_recv_bytes,     // Amount of data sent from this thread
-  comm_send_time,      // Time spent sending data
-  comm_recv_time,      // Time spent receiving data
-  comm_global_time,    // Time spent in collective communication
-  comm_send_count,     // Number of sends
-  comm_recv_count,     // Number of receives
-  comm_global_count,   // Number of barriers/reductions
+  counter_comm_send_bytes,     // Amount of data sent from this thread
+  counter_comm_recv_bytes,     // Amount of data sent from this thread
+  counter_comm_send_time,      // Time spent sending data
+  counter_comm_recv_time,      // Time spent receiving data
+  counter_comm_global_time,    // Time spent in collective communication
+  counter_comm_send_count,     // Number of sends
+  counter_comm_recv_count,     // Number of receives
+  counter_comm_global_count,   // Number of barriers/reductions
 #endif /* CONFIG_USE_MPI */
 
 #ifdef CONFIG_USE_PAPI
-  time_user,           // CPU time in user code of region
-  time_sys,            // CPU time in system of region
-  cpu_flop_count,      // Number of floating point operations
+  counter_time_user,           // CPU time in user code of region
+  counter_time_sys,            // CPU time in system of region
+  counter_cpu_flop_count,      // Number of floating point operations
   mem_count,           // Number of memory accesses
 #endif /* CONFIG_USE_PAPI */
-  time_real,           // Wallclock time of region
-  time_sim,            // Simulation time
-  mem_curr_bytes,      // Current number of bytes allocated
-  mem_high_bytes,      // Maximum number of bytes allocated
-  mem_new_count,       // Number of calls to allocate memory
-  mem_delete_count,    // Number of calls to deallocate memory
-  mem_new_bytes,       // Number of bytes allocated
-  mem_delete_bytes,    // Number of bytes deallocated
-  disk_read_bytes,     // Number of bytes read from disk
-  disk_write_bytes,    // Number of bytes written to disk
-  disk_read_time,      // Time spent reading from disk
-  disk_write_time,     // Time spent writing to disk
-  user_patch_count,    // Number of grid patches in each level
-  user_cell_count,     // Number of grid cells in each level
-  user_particle_count, // Number of particles
-  num_counters = user_particle_count
+  counter_time_real,           // Wallclock time of region
+  counter_time_sim,            // Simulation time
+  counter_mem_curr_bytes,      // Current number of bytes allocated
+  counter_mem_high_bytes,      // Maximum number of bytes allocated
+  counter_mem_new_count,       // Number of calls to allocate memory
+  counter_mem_delete_count,    // Number of calls to deallocate memory
+  counter_mem_new_bytes,       // Number of bytes allocated
+  counter_mem_delete_bytes,    // Number of bytes deallocated
+  counter_disk_read_bytes,     // Number of bytes read from disk
+  counter_disk_write_bytes,    // Number of bytes written to disk
+  counter_disk_read_time,      // Time spent reading from disk
+  counter_disk_write_time,     // Time spent writing to disk
+  counter_user_patch_count,    // Number of grid patches in each level
+  counter_user_cell_count,     // Number of grid cells in each level
+  counter_user_particle_count, // Number of particles
+  num_counters = counter_user_particle_count
 };
 
 /* Performance functions */
 
-enum type_perf_functions {
+enum function_type {
   function_undefined, // 0 is an undefined function
   num_functions = function_undefined
 };
@@ -80,26 +80,28 @@ enum type_perf_functions {
  * COMPONENTS
  **********************************************************************/
 
-enum type_component {
+enum component_type {
   component_undefined,
-  component_amr,
-  component_array,
-  component_control,
   component_data,
   component_disk,
+  component_distribute,
   component_error,
   component_field,
   component_memory,
+  component_mesh,
   component_method,
   component_monitor,
   component_parallel,
   component_parameters,
-  component_particle,
+  component_particles,
   component_performance,
   component_portal,
-  component_problem,
+  component_schedule,
   component_simulation,
-  num_components
+  component_task,
+  component_test,
+  component_user,
+  num_components = component_user
 };
 
 #endif /* CELLO_DEF */

@@ -15,16 +15,16 @@
 #include "error.hpp"
 
 enum argument_type {
-  argument_type_unknown,
-  argument_type_field,
-  argument_type_particle
+  argument_unknown,
+  argument_field,
+  argument_particle
 };
 
 enum access_type {
-  access_type_unknown,
-  access_type_read,
-  access_type_write,
-  access_type_read_write
+  access_unknown,
+  access_read,
+  access_write,
+  access_read_write
 };
 
 
@@ -57,8 +57,8 @@ protected: // functions
 
   /// Specify a field or particle type and its access type
 
-  void add_argument_(argument_type argument_type,
-		     std::string   argument_name,
+  void add_argument_(argument_type type,
+		     std::string   name,
 		     access_type   access_type) throw();
 
 protected: // attributes
@@ -72,7 +72,7 @@ protected: // attributes
   /// List of argument names, e.g. "Density", "Velocity-X", etc.
   std::vector<std::string>   argument_names_;
 
-  /// List of argument access types, e.g. access_type_read_write
+  /// List of argument access types, e.g. access_read_write
   std::vector<access_type>   access_types_;
 
 };

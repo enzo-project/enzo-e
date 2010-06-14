@@ -13,7 +13,7 @@
 #include "error.hpp"
 #include "parameters.hpp"
 
-void Param::set (struct param_type * node)
+void Param::set (struct param_struct * node)
 /// @param   node  The node from which to copy the type and value
 {
 
@@ -53,20 +53,20 @@ void Param::dealloc_()
 ///
 { 
   switch (type_) {
-  case type_string_: 
+  case param_string_: 
     dealloc_string_(); 
     break;
-  case type_list_:   
+  case param_list_:   
     dealloc_list_(value_list_); 
     break;
-  case type_logical_expr_:
-  case type_scalar_expr_:
+  case param_logical_expr_:
+  case param_scalar_expr_:
     dealloc_node_expr_(value_expr_);
     break;
-  case type_unknown_:
-  case type_integer_:
-  case type_scalar_:
-  case type_logical_:
+  case param_unknown_:
+  case param_integer_:
+  case param_scalar_:
+  case param_logical_:
     break;
   }
 } 
@@ -94,27 +94,27 @@ std::string Param::value_to_string ()
 {
   char string_buffer[80];
   switch (type_) {
-  case type_string_: 
+  case param_string_: 
     sprintf (string_buffer,"%s\n",value_string_);
     break;
-  case type_list_:
+  case param_list_:
     sprintf (string_buffer,"LIST\n");
     INCOMPLETE_MESSAGE("Param::write","Writing lists is not implemented yet");
     break;
-  case type_logical_expr_:
-  case type_scalar_expr_:
+  case param_logical_expr_:
+  case param_scalar_expr_:
     sprintf_expression(string_buffer,value_expr_);
     break;
-  case type_integer_:
+  case param_integer_:
     sprintf (string_buffer,"%d",value_integer_);
     break;
-  case type_scalar_:
+  case param_scalar_:
     sprintf (string_buffer,"%g",value_scalar_);
     break;
-  case type_logical_:
+  case param_logical_:
     sprintf (string_buffer,"%s",value_logical_ ? "true" : "false");
     break;
-  case type_unknown_:
+  case param_unknown_:
     sprintf (string_buffer,"UNKNOWN\n");
     break;
   }  
@@ -321,7 +321,7 @@ void Param::dealloc_list_ (list_type * value)
 /// @param value List to be deallocated
 {
   for (unsigned i=0; i<(*value).size(); i++) {
-    if ((*value)[i]->type_ == type_list_) {
+    if ((*value)[i]->type_ == param_list_) {
       dealloc_list_ ((*value)[i]->value_list_);
     } else {
       delete ( (*value)[i] );

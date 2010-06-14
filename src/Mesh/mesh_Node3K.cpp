@@ -390,49 +390,49 @@ void Node3K::update_child_ (int ix, int iy, int iz)
     // XM-face neighbors
 
     if (ix > 0) {
-      make_neighbors (child (ix,iy,iz), child (ix-1,iy,iz),XM);
+      make_neighbors (child (ix,iy,iz), child (ix-1,iy,iz),face_XM);
     } else {
-      make_neighbors (child (ix,iy,iz), cousin (XM,nx-1,iy,iz),XM);
+      make_neighbors (child (ix,iy,iz), cousin (face_XM,nx-1,iy,iz),face_XM);
     }
 
     // XP-face neighbors
 
     if (ix < nx-1) {
-      make_neighbors (child (ix,iy,iz), child (ix+1,iy,iz), XP);
+      make_neighbors (child (ix,iy,iz), child (ix+1,iy,iz), face_XP);
     } else {
-      make_neighbors (child (ix,iy,iz), cousin (XP,0,iy,iz), XP);
+      make_neighbors (child (ix,iy,iz), cousin (face_XP,0,iy,iz), face_XP);
     }
 
     // YM-face neighbor
 
     if (iy > 0) {
-      make_neighbors (child (ix,iy,iz), child (ix,iy-1,iz),YM);
+      make_neighbors (child (ix,iy,iz), child (ix,iy-1,iz),face_YM);
     } else {
-      make_neighbors (child (ix,iy,iz), cousin (YM,ix,ny-1,iz),YM);
+      make_neighbors (child (ix,iy,iz), cousin (face_YM,ix,ny-1,iz),face_YM);
     }
 
     // YP-face neighbor
 
     if (iy < ny-1) {
-      make_neighbors (child (ix,iy,iz), child (ix,iy+1,iz),YP);
+      make_neighbors (child (ix,iy,iz), child (ix,iy+1,iz),face_YP);
     } else {
-      make_neighbors (child (ix,iy,iz), cousin (YP,ix,0,iz),YP);
+      make_neighbors (child (ix,iy,iz), cousin (face_YP,ix,0,iz),face_YP);
     }
 
     // ZM-face neighbor
 
     if (iz > 0) {
-      make_neighbors (child (ix,iy,iz), child (ix,iy,iz-1),ZM);
+      make_neighbors (child (ix,iy,iz), child (ix,iy,iz-1),face_ZM);
     } else {
-      make_neighbors (child (ix,iy,iz), cousin (ZM,ix,iy,nz-1),ZM);
+      make_neighbors (child (ix,iy,iz), cousin (face_ZM,ix,iy,nz-1),face_ZM);
     }
 
     // ZP-face neighbor
 
     if (iz < nz-1) {
-      make_neighbors (child (ix,iy,iz), child (ix,iy,iz+1),ZP);
+      make_neighbors (child (ix,iy,iz), child (ix,iy,iz+1),face_ZP);
     } else {
-      make_neighbors (child (ix,iy,iz), cousin (ZP,ix,iy,0),ZP);
+      make_neighbors (child (ix,iy,iz), cousin (face_ZP,ix,iy,0),face_ZP);
     }
   }
 }
@@ -464,10 +464,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
       for (int iz=0; iz<nz; iz++) {
 	for (int iy=0; iy<ny; iy++) {
 	  refine_node = refine_node ||
-	    (cousin(XP,   0,iy,iz) && 
-	     cousin(XP,   0,iy,iz)->any_children() ) ||
-	    (cousin(XM,nx-1,iy,iz) && 
-	     cousin(XM,nx-1,iy,iz)->any_children() );
+	    (cousin(face_XP,   0,iy,iz) && 
+	     cousin(face_XP,   0,iy,iz)->any_children() ) ||
+	    (cousin(face_XM,nx-1,iy,iz) && 
+	     cousin(face_XM,nx-1,iy,iz)->any_children() );
 	}
       }
 
@@ -476,10 +476,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
       for (int iz=0; iz<nz; iz++) {
 	for (int ix=0; ix<nx; ix++) {
 	  refine_node = refine_node ||
-	    (cousin(YP,ix,   0,iz) && 
-	     cousin(YP,ix,   0,iz)->any_children() ) ||
-	    (cousin(YM,ix,ny-1,iz) && 
-	     cousin(YM,ix,ny-1,iz)->any_children() );
+	    (cousin(face_YP,ix,   0,iz) && 
+	     cousin(face_YP,ix,   0,iz)->any_children() ) ||
+	    (cousin(face_YM,ix,ny-1,iz) && 
+	     cousin(face_YM,ix,ny-1,iz)->any_children() );
 	}
       }
 
@@ -488,10 +488,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
 	  refine_node = refine_node ||
-	    (cousin(ZP,ix,iy,   0) && 
-	     cousin(ZP,ix,iy,   0)->any_children() ) ||
-	    (cousin(ZM,ix,iy,nz-1) && 
-	     cousin(ZM,ix,iy,nz-1)->any_children() );
+	    (cousin(face_ZP,ix,iy,   0) && 
+	     cousin(face_ZP,ix,iy,   0)->any_children() ) ||
+	    (cousin(face_ZM,ix,iy,nz-1) && 
+	     cousin(face_ZM,ix,iy,nz-1)->any_children() );
 	}
       }
 
@@ -544,10 +544,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
 		    r = r || child(ix-1,iy,iz)->child(nx-1,ky,kz);
 		  }
 		}
-	      } else if (ix == 0 && cousin(XM,nx-1,iy,iz)) {
+	      } else if (ix == 0 && cousin(face_XM,nx-1,iy,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int ky=0; ky<ny; ky++) {
-		    r = r || cousin(XM,nx-1,iy,iz)->child(nx-1,ky,kz);
+		    r = r || cousin(face_XM,nx-1,iy,iz)->child(nx-1,ky,kz);
 		  }
 		}
 	      }
@@ -560,10 +560,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
 		    r = r || child(ix+1,iy,iz)->child(0,ky,kz);
 		  }
 		}
-	      } else if (ix == nx-1 && cousin(XP,0,iy,iz)) {
+	      } else if (ix == nx-1 && cousin(face_XP,0,iy,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int ky=0; ky<ny; ky++) {
-		    r = r || cousin(XP,0,iy,iz)->child(0,ky,kz);
+		    r = r || cousin(face_XP,0,iy,iz)->child(0,ky,kz);
 		  }
 		}
 	      }
@@ -576,10 +576,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
 		    r = r || child(ix,iy-1,iz)->child(kx,ny-1,kz);
 		  }
 		}
-	      } else if (iy == 0 && cousin(YM,ix,ny-1,iz)) {
+	      } else if (iy == 0 && cousin(face_YM,ix,ny-1,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int kx=0; kx<nx; kx++) {
-		    r = r || cousin(YM,ix,ny-1,iz)->child(kx,ny-1,kz);
+		    r = r || cousin(face_YM,ix,ny-1,iz)->child(kx,ny-1,kz);
 		  }
 		}
 	      }
@@ -593,10 +593,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
 		  }
 		}
 
-	      } else if (iy == ny-1 && cousin(YP,ix,0,iz)) {
+	      } else if (iy == ny-1 && cousin(face_YP,ix,0,iz)) {
 		for (int kz=0; kz<nz; kz++) {
 		  for (int kx=0; kx<nx; kx++) {
-		    r = r || cousin(YP,ix,0,iz)->child(kx,0,kz);
+		    r = r || cousin(face_YP,ix,0,iz)->child(kx,0,kz);
 		  }
 		}
 	      }
@@ -609,10 +609,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
 		    r = r || child(ix,iy,iz-1)->child(kx,ky,nz-1);
 		  }
 		}
-	      } else if (iz == 0 && cousin(ZM,ix,iy,nz-1)) {
+	      } else if (iz == 0 && cousin(face_ZM,ix,iy,nz-1)) {
 		for (int ky=0; ky<ny; ky++) {
 		  for (int kx=0; kx<nx; kx++) {
-		    r = r || cousin(ZM,ix,iy,nz-1)->child(kx,ky,nz-1);
+		    r = r || cousin(face_ZM,ix,iy,nz-1)->child(kx,ky,nz-1);
 		  }
 		}
 	      }
@@ -625,10 +625,10 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
 		    r = r || child(ix,iy,iz+1)->child(kx,ky,0);
 		  }
 		}
-	      } else if (iz == nz-1 && cousin(ZP,ix,iy,0)) {
+	      } else if (iz == nz-1 && cousin(face_ZP,ix,iy,0)) {
 		for (int ky=0; ky<ny; ky++) {
 		  for (int kx=0; kx<nx; kx++) {
-		    r = r || cousin(ZP,ix,iy,0)->child(kx,ky,0);
+		    r = r || cousin(face_ZP,ix,iy,0)->child(kx,ky,0);
 		  }
 		}
 	      }

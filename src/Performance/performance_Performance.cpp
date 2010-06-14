@@ -106,7 +106,7 @@ void Performance::new_attribute(unsigned    id_attribute,
 /// @param    attribute_name
 /// @param    is_monotonic
 {
-  new_item_ (item_type_attribute, 
+  new_item_ (item_attribute, 
 	     "attribute", 
 	     id_attribute, 
 	     attribute_name,
@@ -135,7 +135,7 @@ void Performance::set_attribute(unsigned id_attribute)
 void Performance::new_group(unsigned    id_group, 
 			    std::string group_name)
 {
-  new_item_ (item_type_group, 
+  new_item_ (item_group, 
 	     "group", 
 	     id_group, 
 	     group_name,
@@ -192,7 +192,7 @@ void Performance::end_group(unsigned id_group)
 void Performance::new_region(unsigned    id_region, 
 			     std::string region_name)
 {
-  new_item_ (item_type_region, 
+  new_item_ (item_region, 
 	     "region", 
 	     id_region, 
 	     region_name,
@@ -230,7 +230,7 @@ void Performance::stop_region(unsigned region_id)
 void Performance::new_counter(unsigned    id_counter,
 			      std::string counter_name)
 {
-  new_item_ (item_type_counter, 
+  new_item_ (item_counter, 
 	     "counter", 
 	     id_counter, 
 	     counter_name,
@@ -270,7 +270,7 @@ void Performance::flush()
 
 void Performance::new_item_ 
 (
- enum_item_type item_type,
+ enum item_type type,
  std::string    item_type_name,
  unsigned       id_item, 
  std::string    item_name,

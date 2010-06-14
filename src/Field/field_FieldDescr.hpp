@@ -11,7 +11,7 @@
 /// @todo     Split into "global" and "field-specific" attributes to reduce class size
 /// @brief    Declaration for the FieldDescr class
 
-enum field_action {
+enum field_action_type {
   field_action_unknown,  // Uninitialized action
   field_action_none,     // Do nothing if range exceeded
   field_action_assign,   // Assign field values to min / max if range exceeded
@@ -100,13 +100,13 @@ public: // functions
   double minimum_value(int id_field) const throw(std::out_of_range);
 
   /// minimum action for the field
-  field_action minimum_action(int id_field) const throw(std::out_of_range);
+  enum field_action_type minimum_action(int id_field) const throw(std::out_of_range);
 
   /// maximum value for the field
   double maximum_value(int id_field) const throw(std::out_of_range);
 
   /// maximum action for the field
-  field_action maximum_action(int id_field) const throw(std::out_of_range);
+  enum field_action_type maximum_action(int id_field) const throw(std::out_of_range);
 
   //----------------------------------------------------------------------
 
@@ -138,11 +138,11 @@ public: // functions
   void set_precision(int id_field, precision_type precision) throw(std::out_of_range);
 
   /// Set minimum bound and action
-  void set_minimum (int id_field, double min_value, field_action min_action) 
+  void set_minimum (int id_field, double min_value, enum field_action_type min_action) 
     throw(std::out_of_range);
 
   /// Set maximum bound and action
-  void set_maximum (int id_field, double max_value, field_action max_action) 
+  void set_maximum (int id_field, double max_value, enum field_action_type max_action) 
     throw(std::out_of_range);
 
 private: // functions
@@ -192,10 +192,10 @@ private: // attributes
   std::vector<double> max_value_;
 
   /// what should be done if a field violates its minimum value
-  std::vector<field_action> min_action_;
+  std::vector<enum field_action_type> min_action_;
 
   /// what should be done if a field violates its maximum value
-  std::vector<field_action> max_action_;
+  std::vector<enum field_action_type> max_action_;
 
 };
 

@@ -14,7 +14,7 @@
 
 /// @enum     enum_reduce
 /// @brief    Reduction operator, used for image projections
-enum enum_reduce {
+enum reduce_type {
   reduce_unknown, /// Unknown reduction
   reduce_min,     /// Minimal value along the axis
   reduce_max,     /// Maximal value along the axis
@@ -73,7 +73,7 @@ public: // interface
 	      int nx0, int ny0, int nz0,  // lower inclusive subarray indices
 	      int nx1, int ny1, int nz1,  // upper exclusive subarray indices
 	      int         axis,           // Axis along which to project
-	      enum_reduce op_reduce,      // Reduction operation along axis
+	      reduce_type op_reduce,      // Reduction operation along axis
 	      Scalar min, Scalar max,     // Limits for color map
 	      const double * color_map,   // color map [r0 g0 b0 r1 g1 b1 ...]
 	      int            color_length // length of color map / 3

@@ -10,20 +10,20 @@
 /// @brief    Include file for mesh_node[4|2k|3k|16].hpp files
 
 /// @enum face_type
-/// @brief Faces for 2D nodes: R, U, L, D
+/// @brief Faces for 2D nodes
 enum face_type {
-  R = 0,
-  U = 1,
-  L = 2,
-  D = 3,
-  num_faces };
+  face_R = 0,
+  face_U = 1,
+  face_L = 2,
+  face_D = 3,
+  face_count };
 
 /// @enum corner_type
-/// @brief Corners for 2D nodes: UL, DL, UR, DR
+/// @brief Corners for 2D nodes
 enum corner_type {
-  UL = 0,
-  DL = 1,
-  UR = 2,
-  DR = 3 };
+  corner_UL = 0,
+  corner_DL = 1,
+  corner_UR = 2,
+  corner_DR = 3 };
 
 #endif /* MESH_NODE_H */

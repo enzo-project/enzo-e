@@ -1,10 +1,10 @@
-const int num_problems = 3;
 const int num_ghosts   = 3;
 
-enum type_problem {
-  problem_unknown,
-  problem_blast,
-  problem_implosion3
+enum problem_ppml_type {
+  problem_ppml_unknown,
+  problem_ppml_blast,
+  problem_ppml_implosion3,
+  num_problems
 };
 
 const char * problem_name[] = {

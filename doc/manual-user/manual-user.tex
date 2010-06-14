@@ -26,31 +26,6 @@
 
 \definecolor{darkgreen}{rgb}{0.0,0.5,0.0}
 
-% \newcommand{\Parameter}[8]
-% 1 Group
-% 2 subgroup
-% 3 parameter
-% 4 type
-% 5 type restrictions
-% 6 description
-% 7 example
-% 8 default
-% {\subsubsection{\code{#3}}
-% \begin{tabular}{|l|l|l|l|}  \hline & & & \\ [-1.5ex]
-%    \textcolor{red}{\code{#1}} & 
-%    \textcolor{red}{\code{#2}} &
-%    \textcolor{black}{\textbf{\code{#3}}} & \\ [1ex] \hline 
-%    \multicolumn{4}{|l|}{} \\ [-1.5ex]
-%    \multicolumn{4}{|l|}{\textcolor{darkgreen}{#4}  \textcolor{blue}{#5} } \\
-%    \multicolumn{4}{|l|}{} \\ [-1.5ex] \hline 
-%    \multicolumn{4}{|l|}{} \\ [-0.5ex] 
-%   \multicolumn{4}{|l|}{\parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{magenta}{#6}}}}} \\ [-1.5ex]
-%    \multicolumn{4}{|l|}{} \\ [1ex]  \hline
-%   \multicolumn{4}{l}{\parbox[l]{5.75in}{#7}} \\ [-2.5ex]
-%    \multicolumn{4}{l}{} \\
-% \end{tabular}}
-
-
 \newcommand{\Parameter}[8]
 % 1 Group
 % 2 subgroup
@@ -60,18 +35,43 @@
 % 6 description
 % 7 example
 % 8 default
-{\subsubsection{\code{#3}} 
-\begin{tabbing}
-xxxxxxxxxxxxxxxxx\=\kill
-Parameter: \> \textbf{\code{#3}} \\
-Full parameter: \> \code{#1} : #2 : \textbf{\code{#3}} \\
-Type: \> #4 \\
-Restrictions: \> #5 \\
-Description: \> \parbox[t]{5.75in}{\raggedright #6} \\
-Examples: \> \parbox[t]{5.75in}{\raggedright #7} \\
-Default: \> #8
-\end{tabbing}
-}
+{\subsubsection{\code{#3}}
+\begin{tabular}{|l|l|l|l|}  \hline & & & \\ [-1.5ex]
+   \textcolor{red}{\code{#1}} & 
+   \textcolor{red}{\code{#2}} &
+   \textcolor{black}{\textbf{\code{#3}}} & \\ [1ex] \hline 
+   \multicolumn{4}{|l|}{} \\ [-1.5ex]
+   \multicolumn{4}{|l|}{\textcolor{darkgreen}{#4}  \textcolor{blue}{#5} } \\
+   \multicolumn{4}{|l|}{} \\ [-1.5ex] \hline 
+   \multicolumn{4}{|l|}{} \\ [-0.5ex] 
+  \multicolumn{4}{|l|}{\parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{magenta}{#6}}}}} \\ [-1.5ex]
+   \multicolumn{4}{|l|}{} \\ [1ex]  \hline
+  \multicolumn{4}{l}{\parbox[l]{5.75in}{#7}} \\ [-2.5ex]
+   \multicolumn{4}{l}{} \\
+\end{tabular}}
+
+
+% \newcommand{\Parameter}[8]
+% % 1 Group
+% % 2 subgroup
+% % 3 parameter
+% % 4 type
+% % 5 type restrictions
+% % 6 description
+% % 7 example
+% % 8 default
+% {\subsubsection{\code{#1}: \code{#3}} 
+% \begin{tabbing}
+% xxxxxxxxxxxxxx\=\kill
+% Parameter: \> \textbf{\code{#3}} \\
+% Full parameter: \> \code{#1} : #2 : \textbf{\code{#3}} \\
+% Type: \> #4 \\
+% Restrictions: \> #5 \\
+% Description: \> \parbox[t]{5.75in}{\raggedright #6} \\
+% Examples: \> \parbox[t]{5.75in}{\raggedright #7} \\
+% Default: \> #8
+% \end{tabbing}
+% }
 
 \subsection{\code{Boundary}}
 

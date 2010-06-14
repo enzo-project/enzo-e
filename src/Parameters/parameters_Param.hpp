@@ -35,7 +35,7 @@ extern "C" {
 /// @fun cello_parameters_print_list
 /// @brief Print a parameter list
 extern "C" { 
-  void cello_parameters_print_list(struct param_type * head, int level);
+  void cello_parameters_print_list(struct param_struct * head, int level);
 }
 
 //----------------------------------------------------------------------
@@ -87,32 +87,32 @@ public: // interface
     double *           t);
 
   /// Set the parameter type and value
-  void set(struct param_type * param);
+  void set(struct param_struct * param);
 
   /// Write the parameter to the file
   void write(FILE * file_pointer,
 	     std::string parameter);
 
   /// Return whether the parameter is an integer
-  bool is_integer()      { return type_ == type_integer_; };
+  bool is_integer()      { return type_ == param_integer_; };
 
   /// Return whether the parameter is a scalar
-  bool is_scalar()       { return type_ == type_scalar_; };
+  bool is_scalar()       { return type_ == param_scalar_; };
 
   /// Return whether the parameter is a logical
-  bool is_logical()      { return type_ == type_logical_; };
+  bool is_logical()      { return type_ == param_logical_; };
 
   /// Return whether the parameter is a string
-  bool is_string()       { return type_ == type_string_; };
+  bool is_string()       { return type_ == param_string_; };
 
   /// Return whether the parameter is a list
-  bool is_list()         { return type_ == type_list_; };
+  bool is_list()         { return type_ == param_list_; };
 
   /// Return whether the parameter is a scalar expression
-  bool is_scalar_expr()  { return type_ == type_scalar_expr_; };
+  bool is_scalar_expr()  { return type_ == param_scalar_expr_; };
 
   /// Return whether the parameter is a logical expression
-  bool is_logical_expr() { return type_ == type_logical_expr_; };
+  bool is_logical_expr() { return type_ == param_logical_expr_; };
 
   /// Get an integer parameter
   int get_integer () 
@@ -135,21 +135,21 @@ public: // interface
 
 private: // attributes
 
-  /// @enum type_param
+  /// @enum param_type
   /// @brief Parameter type 
-  enum type_param {
-    type_unknown_,
-    type_integer_,
-    type_scalar_,
-    type_logical_,
-    type_string_,
-    type_list_,
-    type_scalar_expr_,
-    type_logical_expr_
+  enum param_type {
+    param_unknown_,
+    param_integer_,
+    param_scalar_,
+    param_logical_,
+    param_string_,
+    param_list_,
+    param_scalar_expr_,
+    param_logical_expr_
   };
 
   /// Parameter type
-  enum type_param type_;
+  enum param_type type_;
 
   /// Whether parameter value has been accessed
   bool value_accessed_;
@@ -172,28 +172,28 @@ private: // functions
   /// Set an integer parameter
   void set_integer_ (int value)
   { 
-    type_ = type_integer_; 
+    type_ = param_integer_; 
     value_integer_ = value; 
   };
 
   /// Set a scalar parameter (note that scalar parameters are doubles)
   void set_scalar_  (double value) 
   { 
-    type_ = type_scalar_; 
+    type_ = param_scalar_; 
     value_scalar_ = value; 
   };
 
   /// Set a logical parameter
   void set_logical_ (int value)    
   { 
-    type_ = type_logical_; 
+    type_ = param_logical_; 
     value_logical_ = (value != 0); 
   };
 
   /// Set a string parameter (note that string is aliased)
   void set_string_ (char * value) 
   { 
-    type_ = type_string_; 
+    type_ = param_string_; 
     value_string_ = value;
   };
 
@@ -201,9 +201,9 @@ private: // functions
   ///
   /// Lists are bounded by "sentinel" types: the list values are
   /// taken to be between the first sentinel and the next sentinel
-  void set_list_ (struct param_type * value) 
+  void set_list_ (struct param_struct * value) 
   { 
-    type_ = type_list_; 
+    type_ = param_list_; 
     value_list_ = new list_type;
     value = value->next; // Skip sentinel
     while (value->type != enum_parameter_sentinel) {
@@ -217,14 +217,14 @@ private: // functions
   /// Set a scalar expression parameter
   void set_scalar_expr_ (struct node_expr * value)
   { 
-    type_ = type_scalar_expr_;
+    type_ = param_scalar_expr_;
     value_expr_     = value; 
   };
 
   /// Set a logical expression parameter
   void set_logical_expr_ (struct node_expr * value)
   { 
-    type_ = type_logical_expr_;
+    type_ = param_logical_expr_;
     value_expr_     = value; 
   };
 

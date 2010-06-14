@@ -11,15 +11,15 @@
 #ifndef PARALLEL_MPI_HPP
 #define PARALLEL_MPI_HPP
 
-enum enum_send_type {
-  send_type_standard,
-  send_type_buffered,
-  send_type_synchronous,
-  send_type_ready };
+enum send_type {
+  send_standard,
+  send_buffered,
+  send_synchronous,
+  send_ready };
 
-enum enum_data_type {
-  data_type_single,
-  data_type_double };
+enum data_type {
+  data_single,
+  data_double };
 
 class ParallelMpi : public Parallel {
 
@@ -55,12 +55,12 @@ public: // interface
 public: // interface
 
   /// Initiate sending an array
-  void send_begin(char *         array, 
-		  enum_data_type data_type,
-		  int            dim,
-		  int            * nd,
-		  int            * n,
-		  int            * ns = 0);
+  void send_begin(char *    array, 
+		  data_type data,
+		  int       dim,
+		  int       * nd,
+		  int       * n,
+		  int       * ns = 0);
   /// Complete sending an array
   void send_end();
   /// Initiate receiving an array
@@ -85,11 +85,11 @@ public: // interface
   { return recv_blocking_; }
 
   /// Set send type: standard, buffered, synchronous, or ready
-  void set_send_type (enum_send_type send_type) 
-  { send_type_ = send_type; }
+  void set_send_type (enum send_type send) 
+  { send_type_ = send; }
 
   /// Get send type: standard, buffered, synchronous, or ready
-  enum_send_type get_send_type () 
+  enum send_type get_send_type () 
   { return send_type_; }
 
 public: // static functions
@@ -113,7 +113,7 @@ protected: // functions
       name_("0"),
       send_blocking_(true),
       recv_blocking_(true),
-      send_type_(send_type_standard)
+      send_type_(send_standard)
   {};
 
 private: // static functions
@@ -139,7 +139,7 @@ private: // attributes
   bool recv_blocking_;
 
   /// Whether to use standard, buffered, synchronous, or ready sends
-  enum_send_type send_type_;
+  enum send_type send_type_;
 
 protected: // static attributes
 

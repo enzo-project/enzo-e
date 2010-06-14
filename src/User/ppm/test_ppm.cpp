@@ -49,26 +49,26 @@ int main(int argc, char ** argv)
 
   // Parse command line arguments
 
-  enum type_problem problem_type = problem_ppm_unknown;
+  enum problem_ppm_type problem = problem_ppm_unknown;
 
   if (argc > ++argi) {
     for (int i=0; i<num_problems; i++) {
       if (strcmp(argv[argi],problem_name[i]) == 0) {
-	problem_type = type_problem(i);
+	problem = problem_ppm_type(i);
       }
     }
   }
-  if (problem_type == 0) print_usage(argv[0]);
+  if (problem == 0) print_usage(argv[0]);
 
-  int size = problem_size[problem_type];
+  int size = problem_size[problem];
   if (argc > ++argi) size = atoi(argv[argi]);
-  int cycles = problem_cycles[problem_type];
+  int cycles = problem_cycles[problem];
   if (argc > ++argi) cycles = atoi(argv[argi]);
   int dump_frequency = 10;
   if (argc > ++argi) dump_frequency = atoi(argv[argi]);
 
   printf ("problem = %s  size = %d  cycles = %d  dump_frequency = %d\n",
-	  problem_name[problem_type], size, cycles, dump_frequency);
+	  problem_name[problem], size, cycles, dump_frequency);
 
   // Initialize for generic hydrodynamics
 
@@ -76,7 +76,7 @@ int main(int argc, char ** argv)
 
   // Initialize for specific problem type
 
-  switch (problem_type) {
+  switch (problem) {
   case problem_ppm_image:
     initialize_image(cycles);
     break;
@@ -113,7 +113,7 @@ int main(int argc, char ** argv)
       printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
 	      cycle,timer.value(),time,dt);
       fflush(stdout);
-      image_dump(problem_name[problem_type],cycle,lower,upper);
+      image_dump(problem_name[problem],cycle,lower,upper);
     }
 
     SolveHydroEquations(cycle, dt);
@@ -125,7 +125,7 @@ int main(int argc, char ** argv)
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     SetExternalBoundaryValues();
-    image_dump(problem_name[problem_type],cycle,lower,upper);
+    image_dump(problem_name[problem],cycle,lower,upper);
   }
   parallel->finalize();
 }

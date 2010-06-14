@@ -229,7 +229,7 @@ double FieldDescr::minimum_value(int id_field) const throw(std::out_of_range)
 
 //----------------------------------------------------------------------
 
-field_action FieldDescr::minimum_action(int id_field) const throw(std::out_of_range)
+field_action_type FieldDescr::minimum_action(int id_field) const throw(std::out_of_range)
 {
   return min_action_.at(id_field);
 }
@@ -243,7 +243,7 @@ double FieldDescr::maximum_value(int id_field) const throw(std::out_of_range)
 
 //----------------------------------------------------------------------
 
-field_action FieldDescr::maximum_action(int id_field) const throw(std::out_of_range)
+field_action_type FieldDescr::maximum_action(int id_field) const throw(std::out_of_range)
 {
   return max_action_.at(id_field);
 }
@@ -376,7 +376,7 @@ void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz) throw(std::out
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_minimum (int id_field, double min_value, field_action min_action) throw(std::out_of_range)
+void FieldDescr::set_minimum (int id_field, double min_value, field_action_type min_action) throw(std::out_of_range)
 {
   min_value_.at(id_field)  = min_value;
   min_action_.at(id_field) = min_action;
@@ -384,7 +384,7 @@ void FieldDescr::set_minimum (int id_field, double min_value, field_action min_a
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_maximum (int id_field, double max_value, field_action max_action) throw(std::out_of_range)
+void FieldDescr::set_maximum (int id_field, double max_value, field_action_type max_action) throw(std::out_of_range)
 {
   max_value_.at(id_field)  = max_value;
   max_action_.at(id_field) = max_action;

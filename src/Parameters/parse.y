@@ -138,8 +138,8 @@ const char * op_name[] = {
 
   /* The head of the linked list of parameter / value pairs */
 
-  struct param_type * param_head = NULL; /* head of entire list */
-  struct param_type * param_curr = NULL; /* head of current list */
+  struct param_struct * param_head = NULL; /* head of entire list */
+  struct param_struct * param_curr = NULL; /* head of current list */
 
   /* The current group, subgroup, and parameter type */
 
@@ -152,7 +152,7 @@ const char * op_name[] = {
 
 /*   void update_group (char * group) */
 /*     { */
-/*       struct param_type * p = param_curr; */
+/*       struct param_struct * p = param_curr; */
 /*       while (p->next->type  != enum_parameter_sentinel &&  */
 /* 	     p->next->group == NULL) { */
 /* 	p->next->group = strdup(group); */
@@ -162,7 +162,7 @@ const char * op_name[] = {
 
   /* Insert a parameter into the list */
 
-  void insert_param(struct param_type * head, struct param_type * new)
+  void insert_param(struct param_struct * head, struct param_struct * new)
   {
      new->next  = head->next;
      head->next = new;
@@ -170,9 +170,9 @@ const char * op_name[] = {
 
   /* Delete a parameter from the list given a pointer to the previous element */
 
-  void delete_param(struct param_type * previous)
+  void delete_param(struct param_struct * previous)
   {
-    struct param_type * item = previous->next;
+    struct param_struct * item = previous->next;
     previous->next = item->next;
     free (item);     
   }
@@ -181,7 +181,7 @@ const char * op_name[] = {
 
 /*   void update_subgroup (char * subgroup) */
 /*     { */
-/*       struct param_type * p = param_curr; */
+/*       struct param_struct * p = param_curr; */
 /*       int inside_subgroup = 1; */
 /*       while (p->next->type     != enum_parameter_sentinel &&  */
 /* 	     p->next->subgroup == NULL) { */
@@ -195,15 +195,15 @@ const char * op_name[] = {
 /*       } */
 /*     } */
 
-  struct param_type * reverse_param(struct param_type * old_head)
+  struct param_struct * reverse_param(struct param_struct * old_head)
   {
     /* Keep sentinel the same */
 
-    struct param_type * new_head = old_head;
+    struct param_struct * new_head = old_head;
 
-    struct param_type * p = old_head;
-    struct param_type * c = p->next;
-    struct param_type * n = c->next;
+    struct param_struct * p = old_head;
+    struct param_struct * c = p->next;
+    struct param_struct * n = c->next;
 
     do {
       /* If parameter is a list, recursively reverse it as well */
@@ -223,12 +223,12 @@ const char * op_name[] = {
   /* Function for creating and inserting a new parameter / value pair */
   /* in the linked list */
 
-  struct param_type * new_param ()
+  struct param_struct * new_param ()
   {
     /* Create the new node */
 
-     struct param_type * p = 
-       (struct param_type *) malloc (sizeof (struct param_type));
+     struct param_struct * p = 
+       (struct param_struct *) malloc (sizeof (struct param_struct));
 
    /* Fill in the non-type-specific values for the new node */
 
@@ -251,7 +251,7 @@ const char * op_name[] = {
 
   void new_param_integer (int value)
   {
-    struct param_type * p = new_param();
+    struct param_struct * p = new_param();
     p->type          = enum_parameter_integer;
     p->integer_value = value;
   }
@@ -261,7 +261,7 @@ const char * op_name[] = {
 
   void new_param_scalar (double value)
   {
-    struct param_type * p = new_param();
+    struct param_struct * p = new_param();
     p->type         = enum_parameter_scalar;
     p->scalar_value = value;
   }
@@ -270,7 +270,7 @@ const char * op_name[] = {
 
   void new_param_logical (int value)
   {
-    struct param_type * p = new_param();
+    struct param_struct * p = new_param();
     p->type          = enum_parameter_logical;
     p->logical_value = value;
   }
@@ -278,7 +278,7 @@ const char * op_name[] = {
   /* New string parameter assignment */
   void new_param_string (char * value)
   {
-    struct param_type * p = new_param();
+    struct param_struct * p = new_param();
     p->type         = enum_parameter_string;
     p->string_value = strdup(value);
   }
@@ -286,16 +286,16 @@ const char * op_name[] = {
   /* New subgroup  */
   void new_param_subgroup (char * value)
   {
-    struct param_type * p = new_param();
+    struct param_struct * p = new_param();
     p->type         = enum_parameter_subgroup;
     p->string_value = strdup(value);
   }
 
   /* New empty parameter assignment: FIRST NODE IN LIST IS A SENTINEL  */
-  struct param_type * new_param_sentinel ()
+  struct param_struct * new_param_sentinel ()
   {
-    struct param_type * p = 
-      (struct param_type *) malloc (sizeof (struct param_type));
+    struct param_struct * p = 
+      (struct param_struct *) malloc (sizeof (struct param_struct));
 
     p->group     = NULL;
     p->subgroup  = NULL;
@@ -309,9 +309,9 @@ const char * op_name[] = {
 
   /* New list parameter assignment */
 
-  void new_param_list (struct param_type * curr)
+  void new_param_list (struct param_struct * curr)
   {
-    struct param_type * p = new_param();
+    struct param_struct * p = new_param();
     p->type       = enum_parameter_list;
     p->list_value = curr;
   }
@@ -321,7 +321,7 @@ const char * op_name[] = {
   void new_param_expr (enum enum_parameter type,
 		       struct node_expr * value)
   {
-    struct param_type * p = new_param();
+    struct param_struct * p = new_param();
     p->type     = type;
     p->op_value = value;
   }
@@ -512,7 +512,7 @@ list: LIST_BEGIN list_elements LIST_END {  }
 
 LIST_BEGIN:
  '[' { 
-   struct param_type * p = new_param_sentinel();
+   struct param_struct * p = new_param_sentinel();
    p->list_value = param_curr;
    new_param_list(p);
    param_curr = p;
@@ -674,7 +674,7 @@ vle:
 
 %%
 
-struct param_type * 
+struct param_struct * 
 cello_parameters_read(FILE * fp)
 {
   /* initialize the linked list with an initial sentinel (sentinel) node */
@@ -781,9 +781,9 @@ void sprintf_expression (char * buffer,
   }
 }
 
-void cello_parameters_print_list(struct param_type * head, int level)
+void cello_parameters_print_list(struct param_struct * head, int level)
 {
-  struct param_type * p = head->next;
+  struct param_struct * p = head->next;
   int count = 0;
   while (p && p->type != enum_parameter_sentinel && count++ < 100) {
 /*     printf ("%p %s\n",p,type_name[p->type]); */

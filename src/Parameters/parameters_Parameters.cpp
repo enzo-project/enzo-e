@@ -51,10 +51,10 @@ Parameters::~Parameters()
 void Parameters::read ( FILE * file_pointer )
 /// @param    file_pointer An opened input parameter file or stdin
 {
-  struct param_type * parameter_list = cello_parameters_read(file_pointer);
+  struct param_struct * parameter_list = cello_parameters_read(file_pointer);
 
-  struct param_type * node = parameter_list -> next; // skip sentinel
-  struct param_type * prev = node;
+  struct param_struct * node = parameter_list -> next; // skip sentinel
+  struct param_struct * prev = node;
 
   while (node->type != enum_parameter_sentinel) {
 
@@ -138,11 +138,12 @@ void Parameters::value
     case parameter_scalar:       correct_type = param->is_scalar();       break;
     case parameter_logical:      correct_type = param->is_logical();      break;
     case parameter_string:       correct_type = param->is_string();       break;
-    case parameter_list:         correct_type = param->is_list();         break;
-    case parameter_scalar_expr:  correct_type = param->is_scalar_expr();  break;
-    case parameter_logical_expr: correct_type = param->is_logical_expr(); break;
+    case parameter_list:
+    case parameter_scalar_expr:
+    case parameter_logical_expr:
+      throw ExceptionParametersBadType();
+      break;
     }
-    if (! correct_type) throw ExceptionParametersBadType();
   }
   if (param != NULL) {
     switch (type) {
@@ -161,6 +162,7 @@ void Parameters::value
     case parameter_list:         
     case parameter_scalar_expr:  
     case parameter_logical_expr: 
+      ERROR_MESSAGE ("Parameters::value","Switch case should never be reached");
       break;
     }
   } else if (deflt) {
@@ -176,6 +178,11 @@ void Parameters::value
       break;
     case parameter_string:
       *((const char **)value) = *((const char **)deflt);
+      break;
+    case parameter_list:         
+    case parameter_scalar_expr:  
+    case parameter_logical_expr: 
+      ERROR_MESSAGE ("Parameters::value","Switch case should never be reached");
       break;
     }
   } else {

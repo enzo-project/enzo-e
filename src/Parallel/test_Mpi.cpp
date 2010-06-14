@@ -48,13 +48,13 @@ int main(int argc, char ** argv)
   unit_assert (parallel->get_recv_blocking() == false);
 
   unit_func("set_send_type");
-  parallel->set_send_type(send_type_standard);
-  unit_assert (parallel->get_send_type() == send_type_standard);
+  parallel->set_send_type(send_standard);
+  unit_assert (parallel->get_send_type() == send_standard);
   unit_func("get_send_type");
-  parallel->set_send_type(send_type_buffered);
-  unit_assert (parallel->get_send_type() == send_type_buffered);
-  parallel->set_send_type(send_type_ready);
-  unit_assert (parallel->get_send_type() == send_type_ready);
+  parallel->set_send_type(send_buffered);
+  unit_assert (parallel->get_send_type() == send_buffered);
+  parallel->set_send_type(send_ready);
+  unit_assert (parallel->get_send_type() == send_ready);
 
   unit_func("finalize");
   parallel->finalize();

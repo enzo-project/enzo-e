@@ -62,50 +62,50 @@
 // ENUMERATIONS
 //----------------------------------------------------------------------
 
-enum enum_mpi_type {
-  mpi_type_unknown,
-  mpi_type_B,
-  mpi_type_I,
-  mpi_type_BB,
-  mpi_type_BI,
-  mpi_type_GF,
-  mpi_type_G4,
-  mpi_type_GL,
-  mpi_type_PF,
-  mpi_type_P4,
-  mpi_type_PL,
-  mpi_type_maximum = mpi_type_PL
+enum mpi_type {
+  mpi_unknown,
+  mpi_B,
+  mpi_I,
+  mpi_BB,
+  mpi_BI,
+  mpi_GF,
+  mpi_G4,
+  mpi_GL,
+  mpi_PF,
+  mpi_P4,
+  mpi_PL,
+  mpi_maximum = mpi_PL
 };
 
-const char * mpi_type_names[] = {
-  "mpi_type_B",
-  "mpi_type_I",
-  "mpi_type_BB",
-  "mpi_type_BI",
-  "mpi_type_GF",
-  "mpi_type_G4",
-  "mpi_type_GL",
-  "mpi_type_PF",
-  "mpi_type_P4",
-  "mpi_type_PL"
+const char * mpi_names[] = {
+  "mpi_B",
+  "mpi_I",
+  "mpi_BB",
+  "mpi_BI",
+  "mpi_GF",
+  "mpi_G4",
+  "mpi_GL",
+  "mpi_PF",
+  "mpi_P4",
+  "mpi_PL"
 };
   
-enum enum_data_type {
-  data_type_unknown,
-  data_type_alias,
-  data_type_copy,
-  data_type_alias_packed,
-  data_type_copy_ghost,
-  data_type_copy_ghost_packed,
-  data_type_maximum = data_type_copy_ghost_packed
+enum data_type {
+  data_unknown,
+  data_alias,
+  data_copy,
+  data_alias_packed,
+  data_copy_ghost,
+  data_copy_ghost_packed,
+  data_maximum = data_copy_ghost_packed
 };
 
-const char * data_type_names[] = {
-  "data_type_alias",
-  "data_type_copy",
-  "data_type_alias_packed",
-  "data_type_copy_ghost",
-  "data_type_copy_ghost_packed"
+const char * data_names[] = {
+  "data_alias",
+  "data_copy",
+  "data_alias_packed",
+  "data_copy_ghost",
+  "data_copy_ghost_packed"
 };
   
 //----------------------------------------------------------------------
@@ -121,7 +121,7 @@ void  init_block
 
 void compute_B 
 (
- enum_data_type data_type,
+ data_type data,
  Scalar ** task_blocks,
  int ndx,int ndy,int ndz,
  int sx, int sy, int sz,
@@ -149,7 +149,7 @@ void check_range
 Scalar * ghost_exchange_task 
 (
  Scalar * task_block,
- enum_data_type data_type,
+ data_type data,
  int bx, int by, int bz,
  int gx, int gy, int gz
  );
@@ -178,7 +178,7 @@ Scalar * ghost_exchange_task_copy_ghost
 void ghost_exchange_all 
 (
  Scalar ** task_blocks,
- enum_data_type data_type,
+ data_type data,
  int sx, int sy, int sz,
  int bx, int by, int bz,
  int gx, int gy, int gz
@@ -203,7 +203,7 @@ void ghost_exchange_all_copy
 void recv 
 (
  int ip_to,
- enum_mpi_type mpi_type,
+ mpi_type mpi,
  Scalar * buffer,
  int ndx, int ndy, int ndz,
  int nx, int ny, int nz
@@ -234,8 +234,8 @@ void recv
 
   MPI_Status status;
 
-  switch (mpi_type) {
-  case mpi_type_B:
+  switch (mpi) {
+  case mpi_B:
     for (int iy = 0; iy < cy; iy++) {
       for (int iz = 0; iz < cz; iz++) {
 	int i = ndx * (iy + ndy * iz);
@@ -243,18 +243,18 @@ void recv
       }
     }
     break;
-  case mpi_type_I:
-  case mpi_type_BB:
-  case mpi_type_BI:
-  case mpi_type_GF:
-  case mpi_type_G4:
-  case mpi_type_GL:
-  case mpi_type_PF:
-  case mpi_type_P4:
-  case mpi_type_PL:
+  case mpi_I:
+  case mpi_BB:
+  case mpi_BI:
+  case mpi_GF:
+  case mpi_G4:
+  case mpi_GL:
+  case mpi_PF:
+  case mpi_P4:
+  case mpi_PL:
     INCOMPLETE_MESSAGE("recv","");
     break;
-  case mpi_type_unknown:
+  case mpi_unknown:
   default:
     ERROR_MESSAGE("recv","Bad mpi_type");
   }
@@ -310,9 +310,9 @@ int main (int argc, char ** argv)
   // Declare parameters
   //--------------------------------------------------
 
-  int mpi_type;
+  int mpi;
 
-  int  data_type;
+  int  data;
 
   int         nx,ny,nz;  // grid size
   int         bx,by,bz;  // block size
@@ -327,8 +327,8 @@ int main (int argc, char ** argv)
   //--------------------------------------------------
 
   parameters.set_group ("Mpi_array");
-  mpi_type   = parameters.value_integer ("mpi_type",0);
-  data_type  = parameters.value_integer ("data_type",0);
+  mpi   = parameters.value_integer ("mpi_type",0);
+  data  = parameters.value_integer ("data_type",0);
   nx         = parameters.list_value_integer (0,"grid_size",16);
   ny         = parameters.list_value_integer (1,"grid_size",16);
   nz         = parameters.list_value_integer (2,"grid_size",16);
@@ -346,8 +346,8 @@ int main (int argc, char ** argv)
   // Check parameters
   //--------------------------------------------------
 
-  check_range (ip,"mpi_type",mpi_type,1,mpi_type_maximum);
-  check_range (ip,"data_type",data_type,1,data_type_maximum);
+  check_range (ip,"mpi_type",mpi,1,mpi_maximum);
+  check_range (ip,"data_type",data,1,data_maximum);
   check_range (ip,"nx",nx,4,256);
   check_range (ip,"ny",ny,4,256);
   check_range (ip,"nz",nz,4,256);
@@ -418,8 +418,8 @@ int main (int argc, char ** argv)
   //--------------------------------------------------
   
   if (ip==0) {
-    printf ("mpi_type   = %s\n",mpi_type_names[mpi_type]);
-    printf ("data_type  = %s\n",data_type_names[data_type]);
+    printf ("mpi_type   = %s\n",mpi_names[mpi]);
+    printf ("data_type  = %s\n",data_names[data]);
     printf ("problem size nx,ny,nz   = [%d %d %d]\n",nx,ny,nz);
     printf ("block size   bx,by,bz   = [%d %d %d]\n",bx,by,bz);
     printf ("processors   px,py,pz   = [%d %d %d]\n",px,py,pz);
@@ -436,8 +436,8 @@ int main (int argc, char ** argv)
   // Allocate processor-local array
 
   int ndx,ndy,ndz;
-  bool is_aliased = (data_type == data_type_alias || 
-		     data_type == data_type_alias_packed);
+  bool is_aliased = (data == data_alias || 
+		     data == data_alias_packed);
 
   if (is_aliased) {
     // Don't store ghosts
@@ -480,11 +480,11 @@ int main (int argc, char ** argv)
     init_block (task_blocks[is],ndx,ndy,ndz,bx,by,bz);
   }
 
-  switch (mpi_type) {
+  switch (mpi) {
 
-  case mpi_type_B:
+  case mpi_B:
 
-    compute_B ((enum_data_type)data_type,
+    compute_B ((data_type)data,
 	       task_blocks,
 	       ndx,ndy,ndz,
 	       sx,sy,sz,
@@ -498,7 +498,7 @@ int main (int argc, char ** argv)
     if (ip==0) {
       fprintf (stderr,
 	       "%s:%d Error: unknown mpi_type %d\n\n",
-	       __FILE__,__LINE__,mpi_type);
+	       __FILE__,__LINE__,mpi);
     }
     MPI_Abort (MPI_COMM_WORLD,1);
 
@@ -552,7 +552,7 @@ void  init_block (Scalar * task_block,
 
 //----------------------------------------------------------------------
 
-void compute_B (enum_data_type data_type,
+void compute_B (data_type data,
 		Scalar ** task_blocks,
 		int ndx,int ndy,int ndz,
 		int sx, int sy, int sz,
@@ -560,12 +560,12 @@ void compute_B (enum_data_type data_type,
 		int gx, int gy, int gz)
 {
 
-//   bool is_aliased = (data_type == data_type_alias || 
-// 		     data_type == data_type_alias_packed);
+//   bool is_aliased = (data == data_alias || 
+// 		     data == data_alias_packed);
 
   // exchange ghost zones for all tasks
 
-  ghost_exchange_all (task_blocks, data_type, sx,sy,sz, bx,by,bz, gx,gy,gz);
+  ghost_exchange_all (task_blocks, data, sx,sy,sz, bx,by,bz, gx,gy,gz);
 
   // loop over blocks (isx,isy,isz)
 
@@ -579,7 +579,7 @@ void compute_B (enum_data_type data_type,
 	// since task data may be either a copy or aliased
 
 	Scalar * buffer = 
-	  ghost_exchange_task (task_blocks[is],data_type,bx,by,bz,gx,gy,gz);
+	  ghost_exchange_task (task_blocks[is],data,bx,by,bz,gx,gy,gz);
 
 	// update the block
 
@@ -627,7 +627,7 @@ void update_block (Scalar * task_block,
 Scalar * ghost_exchange_task 
 (
  Scalar * task_block,
- enum_data_type data_type,
+ data_type data,
  int bx, int by, int bz,
  int gx, int gy, int gz
  )
@@ -635,21 +635,21 @@ Scalar * ghost_exchange_task
 
   Scalar * buffer;
 
-  switch (data_type) {
-  case data_type_alias:
+  switch (data) {
+  case data_alias:
     buffer = ghost_exchange_task_alias(task_block,bx,by,bz,gx,gy,gz);
     break;
-  case data_type_copy:
+  case data_copy:
     buffer = ghost_exchange_task_copy(task_block,bx,by,bz,gx,gy,gz);
     break;
-  case data_type_copy_ghost:
+  case data_copy_ghost:
     buffer = ghost_exchange_task_copy_ghost(task_block,bx,by,bz,gx,gy,gz);
     break;
-  case data_type_alias_packed:
-  case data_type_copy_ghost_packed:
+  case data_alias_packed:
+  case data_copy_ghost_packed:
     // Skip
     break;
-  case data_type_unknown:
+  case data_unknown:
   default:
     // Error
     break;
@@ -662,24 +662,24 @@ Scalar * ghost_exchange_task
 void ghost_exchange_all 
 (
  Scalar ** task_blocks,
- enum_data_type data_type,
+ data_type data,
  int sx, int sy, int sz,
  int bx, int by, int bz,
  int gx, int gy, int gz)
 {
-  switch (data_type) {
-  case data_type_alias_packed:
+  switch (data) {
+  case data_alias_packed:
     ghost_exchange_all_alias(task_blocks,sx,sy,sz,bx,by,bz,gx,gy,gz);
     break;
-  case data_type_copy_ghost_packed:
+  case data_copy_ghost_packed:
     ghost_exchange_all_copy(task_blocks,sx,sy,sz,bx,by,bz,gx,gy,gz);
     break;
-  case data_type_alias:
-  case data_type_copy:
-  case data_type_copy_ghost:
+  case data_alias:
+  case data_copy:
+  case data_copy_ghost:
     // Skip
     break;
-  case data_type_unknown:
+  case data_unknown:
   default:
     // Error
     break;

@@ -33,7 +33,7 @@ int main(int argc, char * argv[])
 
   Parallel::instance()->initialize(&argc,&argv);
 
-  enum type_problem problem_type = problem_unknown;
+  enum problem_ppml_type problem = problem_ppml_unknown;
 
   if (argc < 2) {
     print_usage(argv[0]);
@@ -46,30 +46,30 @@ int main(int argc, char * argv[])
   if (argc > ++argi) {
     for (int i=0; i<num_problems; i++) {
       if (strcmp(argv[argi],problem_name[i]) == 0) {
-	problem_type = type_problem(i);
+	problem = problem_ppml_type(i);
       }
     }
   }
-  if (problem_type == 0) print_usage(argv[0]);
+  if (problem == 0) print_usage(argv[0]);
 
-  int size = problem_size[problem_type];
+  int size = problem_size[problem];
   if (argc > ++argi) size = atoi(argv[argi]);
-  int cycles = problem_cycles[problem_type];
+  int cycles = problem_cycles[problem];
   if (argc > ++argi) cycles = atoi(argv[argi]);
   int dump_frequency = 10;
   if (argc > ++argi) dump_frequency = atoi(argv[argi]);
 
   printf ("problem = %s  size = %d  cycles = %d  dump_frequency = %d\n",
-	  problem_name[problem_type], size, cycles, dump_frequency);
+	  problem_name[problem], size, cycles, dump_frequency);
 
   initialize_hydro ();
 
 
-  switch (problem_type) {
-  case problem_blast:
+  switch (problem) {
+  case problem_ppml_blast:
     initialize_ppml(size,cycles);
     break;
-  case problem_implosion3:
+  case problem_ppml_implosion3:
     initialize_ppml_implosion3(size,cycles);
     break;
   default:
@@ -99,7 +99,7 @@ int main(int argc, char * argv[])
       printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
 	      cycle,timer.value(),time,dt);
       fflush(stdout);
-      image_dump(problem_name[problem_type],cycle,lower,upper);
+      image_dump(problem_name[problem],cycle,lower,upper);
     }
 
     SolveMHDEquations(cycle, dt);
@@ -111,7 +111,7 @@ int main(int argc, char * argv[])
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     SetExternalBoundaryValues();
-    image_dump(problem_name[problem_type],cycle,lower,upper);
+    image_dump(problem_name[problem],cycle,lower,upper);
   }
 }
 
