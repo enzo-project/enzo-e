@@ -11,7 +11,7 @@
 %=======================================================================
 
 \begin{document}
-
+\tableofcontents
 %=======================================================================
 \TITLE{\cello\ User Manual}{James Bordner}{$Rev$}
 %=======================================================================
@@ -24,119 +24,1268 @@
 \section{Parameters}
 %=======================================================================
 
+\definecolor{darkgreen}{rgb}{0.0,0.5,0.0}
 
-\newcommand{\Parameter}[6]
-{\subsubsection{\code{#1}}
-\begin{tabular}{|l|l|l|}  \hline & & \\ [-1.5ex]
-   \textcolor{red}{\code{#1}} & 
-   \textcolor{red}{\code{#2}} &
-   \textcolor{red}{\textbf{\code{#3}}} \\ [1ex] \hline 
-   \multicolumn{3}{|l|}{} \\ [-1.5ex]
-   \multicolumn{3}{|l|}{\textcolor{magenta}{#4}  \textcolor{magenta}{ #5 } } \\     \multicolumn{3}{|l|}{} \\ [-1.5ex] \hline 
-   \multicolumn{3}{|l|}{} \\ [-1.5ex]
-  \multicolumn{3}{|l|}{\parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{blue}{#6}}}}} \\[-1.5ex]
-   \multicolumn{3}{|l|}{} \\ \hline  
-\end{tabular}}
+% \newcommand{\Parameter}[8]
+% 1 Group
+% 2 subgroup
+% 3 parameter
+% 4 type
+% 5 type restrictions
+% 6 description
+% 7 example
+% 8 default
+% {\subsubsection{\code{#3}}
+% \begin{tabular}{|l|l|l|l|}  \hline & & & \\ [-1.5ex]
+%    \textcolor{red}{\code{#1}} & 
+%    \textcolor{red}{\code{#2}} &
+%    \textcolor{black}{\textbf{\code{#3}}} & \\ [1ex] \hline 
+%    \multicolumn{4}{|l|}{} \\ [-1.5ex]
+%    \multicolumn{4}{|l|}{\textcolor{darkgreen}{#4}  \textcolor{blue}{#5} } \\
+%    \multicolumn{4}{|l|}{} \\ [-1.5ex] \hline 
+%    \multicolumn{4}{|l|}{} \\ [-0.5ex] 
+%   \multicolumn{4}{|l|}{\parbox[l]{5.75in}{\raggedright\textsf{\textit{\textcolor{magenta}{#6}}}}} \\ [-1.5ex]
+%    \multicolumn{4}{|l|}{} \\ [1ex]  \hline
+%   \multicolumn{4}{l}{\parbox[l]{5.75in}{#7}} \\ [-2.5ex]
+%    \multicolumn{4}{l}{} \\
+% \end{tabular}}
+
+
+\newcommand{\Parameter}[8]
+% 1 Group
+% 2 subgroup
+% 3 parameter
+% 4 type
+% 5 type restrictions
+% 6 description
+% 7 example
+% 8 default
+{\subsubsection{\code{#3}} 
+\begin{tabbing}
+xxxxxxxxxxxxxxxxx\=\kill
+Parameter: \> \textbf{\code{#3}} \\
+Full parameter: \> \code{#1} : #2 : \textbf{\code{#3}} \\
+Type: \> #4 \\
+Restrictions: \> #5 \\
+Description: \> \parbox[t]{5.75in}{\raggedright #6} \\
+Examples: \> \parbox[t]{5.75in}{\raggedright #7} \\
+Default: \> #8
+\end{tabbing}
+}
+
+\subsection{\code{Boundary}}
 
 \Parameter
 {Boundary}
-{[ lower $|$ upper $|$ $\emptyset$ ]}
+{[ \code{lower} $|$ \code{upper} ]}
 {type}
-{string $|$ list(string) }
+{string $|$ list(string)}
 { [ \code{"reflecting"} $|$ \code{"inflow"}$|$ \code{"outflow"}$|$
   \code{"periodic"}$|$ \code{"dirichlet"}$|$ \code{"neumann"} ] }
 { Type of boundary condition.  Corresponds to \enzo\ parameters
   \code{LeftFaceBoundaryCondition} and
   \code{RightFaceBoundaryCondition}, whose allowed values are 0 = reflecting, 1 = outflow, 2 = inflow, 3 = periodic.}
-
+{
 \begin{tabbing}
-xxx\=xxx\=xxx\=xxx\kill
-\> \code{Boundary \{} \\
-\>\>\code{\textbf{type} = "periodic";} \\
-\>\>   \code{lower \{ } \\
-\>\>\>      \code{\textbf{type} = [ "reflecting" , "reflecting" , "reflecting" ]} \\
-\>\>   \code{\}} \\
-\>\>   \code{upper \{ \textbf{type} = "reflecting"\}} \\
-\>\code{\}}
+xxx\=xxx\=xxx\kill
+ \code{Boundary \{} \\
+\>\code{\textbf{type} = "periodic";} \\
+\>   \code{lower \{ } \\
+\>\>      \code{\textbf{type} = [ "reflecting" , "reflecting" , "reflecting" ]} \\
+\>   \code{\}} \\
+\>   \code{upper \{ \textbf{type} = "reflecting"\}} \\
+\code{\}}
 \end{tabbing}
+}
+{}
 
+\Parameter
+{Boundary}
+{[ \code{lower} $|$ \code{upper} ]}
+{value}
+{scalar expression $|$ list(scalar expression) }
+{}
+{ Value for the boundary inflow, outflow, neumann, or dirichlet
+  boundary condition.  \incomplete{how to handle both ``lower'' and
+    ``upper'', and field names} .}
+{}
 
-% Boundary 	[face] 	value 	scalar expression 	value for the boundary condition, which may be time-varying
-% Boundary 	[face] 	file 	string 	file from which to read the boundary conditions
-% 				
-% Domain 		extent 	list 	extent of the domain, [xmin, xmax], [xmin, xmax, ymin, ymax], or [xmin, xmax, ymin, ymax, zmin, zmax]
-% 				
-% Field 		courant 	scalar 	Courant condition for fields
-% Field 		fields 	list 	List of field names [implicit?] [optional (e.g. for ordering)?]
-% Field 		groups 	list 	List of group names [implicit?] [optional?]
-% Field 		precision 	string 	default precision for all fields
-% Field 		alignment 	integer 	Alignment of start of each field's array in bytes
-% Field 		padding 	integer 	Padding between field arrays in bytes
-% Field 	field_name 	minimum 	list 	minimum value(s) and actions ["none", "assign", "warning", "error"]
-% Field 	field_name 	maximum 	list 	maximum value(s) and actions ["none", "assign", "warning", "error"]
-% Field 	field_name 	centering 	list 	list of logicals specifying whether the variable is centered on the corresponding axis
-% Field 	field_name 	precision 	string 	precision of the field
-% Field 	field_name 	groups 	list 	string list of group names [e.g. "color"]
-% Field 	field_name 	alias 	list 	string list of other names this field goes by
-% Initial 	field_name	value 	list 	list of scalar-expression / logical-expression pairs
-% Initial 	field_name	file 	string 	file containing the initial conditions for the field
-% Initial 		time 	scalar 	initial time in code units
-% Initial 		redshift 	scalar 	initial redshift for cosmological runs
-% Initial 		cycle 	list 	initial cycle number, or list of cycle numbers for each AMR level
-% 				
-% Memory 		limit 	integer 	Set limit on the number of local bytes available for dynamic memory
-% Memory 		warning 	scalar 	Set efficiency threshold before displaying a warning message
-% Memory 		fill 	list 	List of strings to fill memory after being allocated, and before being deallocated
-% Memory 		tracking 	logical 	Set memory tracking on or off. Turning off resorts to native new[]/delete[].'
-% 				
-% Mesh 		root_size 	list 	size of the root grid, e.g. [400,400]
-% Mesh 		max_levels 	integer 	maximum levels (with root = 1), assuming refinement by two
-% Mesh 		refinement 	integer 	refinement factor = 2, 4, etc.
-% Mesh 		balanced 	logical 	whether the tree is balanced or "full" (ala Flash) or not
-% Mesh 		backfill 	logical 	whether to backfill for refine > 2
-% Mesh 		coalesce 	logical 	whether to coalesce small patches into one big one
-% Mesh 		patch_size 	list 	minimum and maximum allowed patch sizes
-% Mesh 		block_size 	list 	minimum and maximum allowed block sizes
-% 				
-% Method 		sequence 	list 	sequence of numerical methods to apply
-% Method 	ppm 	diffusion 	logical 	PPM diffusion parameter
-% Method 	ppm 	flattening 	logical 	PPM flattening parameter
-% Method 	ppm 	steepening 	logical 	PPM steepening parameter
-% Method 	ppm 	dual_energy 	logical 	whether to use dual-energy formalism
-% Method 	ppm 	dual_energy_eta_1 	scalar 	dual-energy formalism parameter
-% Method 	ppm 	dual_energy_eta_2 	scalar 	dual-energy formalism parameter
-% Method 	ppm 	pressure_free 	logical 	"pressure free flag"
-% 				
-% Output 	file_name 	name 	list 	name for the output files, where the first element is a format string (ala printf()), and remaining elements are scalar expressions. E.g. ["wave_pool-t=%3.1f.data", t]
-% Output 	file_name	times 	list 	start, stop, and interval times to output
-% Output 	file_name	redshifts 	list 	start, stop, and interval redshifts to output
-% Output 	file_name	cycles 	list 	start, stop, and interval cycles to output [what about fine vs coarse?]
-% 				
-% Parallel 	balance 	frequency 	list 	list of load balancing timesteps for each level, e.g. [1,8,64]
-% Parallel 	balance 	method 	string 	method to use for load balancing. Default is "none".
-% Parallel 	schedule 	method 	string 	method for scheduling parallel tasks
-% Parallel 		levels 	list 	E.g. [8,32] for 8 cores/cpu, 32 cpu's/node, and any number of nodes
-% Parallel 		type 	list 	E.g. ["omp","upc","mpi"] for OMP within cpu, UPC within node, and MPI between nodes
-% Parallel 	mpi 	sided 	integer 	Type of MPI: 1 (single-sided get/put) or 2 (double-sided send/receive)
-% Parallel 	mpi 	send_type 	list 	List of MPI send variations: "immediate", "blocking", "standard","buffered","synchronous","ready"
-% Parallel 	mpi 	recv_type 	list 	List [sic] of MPI recv variations: immediate", "blocking"
-% Parallel 	mpi 	get_type 	string 	MPI get variations (...)
-% Parallel 	mpi 	put_type 	string 	MPI put variations (...)
-% Parallel 	mpi 	permute 	list 	Specification of reordering of MPI tasks
-% 				
-% Physics 		gamma 	scalar 	ideal gas law constant
-% Physics 		cosmology 	logical 	turn on or off comoving coordinates
-% Physics 	cosmology	hubble_constant_now 	scalar 	
-% Physics 	cosmology	omega_lamda_now 	scalar 	
-% Physics 	cosmology	omega_matter_now 	scalar 	
-% Physics 	cosmology	max_expansion_rate 	scalar 	
-% Physics 		gravity 	logical 	whether gravity is included
-% Physics 	gravity	constant 	scalar 	"used only in SetMinimumSupport"
-% Physics 		multi_species 	integer 	
-% 				
-% Stopping 		time 	scalar 	stopping time
-% Stopping 		redshift 	scalar 	stopping redshift
-% Stopping 		cycle 	list 	stopping cycle, or list of stopping cycles for AMR levels
+\Parameter
+% Group
+{Boundary} 
+% subgroup
+{[ \code{lower} $|$ \code{upper} ]} 
+% parameter
+{file} 
+% type
+{string $|$ list(string)} 
+% type restrictions
+{} 
+% description
+{File from which to read boundary conditions. \incomplete{how to
+    handle both ``lower'' and ``upper'', and field names} } 
+% example
+{} 
+% default
+{}
+
+\subsection{\code{Domain}}
+
+\Parameter
+% Group
+{Domain} 
+% subgroup
+{} 
+% parameter
+{extent} 
+% type
+{list(scalar)} 
+{[xmin, xmax \{, ymin, ymax \{, zmin,zmax\}\}]}
+% description
+{Extent of the domain} 
+% example
+{} 
+% default
+{}
+
+\subsection{\code{Field}}
+
+\Parameter
+% Group
+{Field} 
+% subgroup
+{} 
+% parameter
+{courant} 
+% type
+{scalar} 
+% type restrictions
+{} 
+% description
+{Courant condition for fields} 
+% example
+{} 
+% default
+{}
+
+\Parameter
+% Group
+{Field} 
+% subgroup
+{} 
+% parameter
+{fields} 
+% type
+{list(string)} 
+% type restrictions
+{} 
+% description
+{List of field names} 
+% example
+{} 
+% default
+{}
+
+\Parameter
+% Group
+{Field} 
+% subgroup
+{} 
+% parameter
+{groups} 
+% type
+{list(string)} 
+% type restrictions
+{} 
+% description
+{List of group names} 
+% example
+{} 
+% default
+{}
+
+\Parameter
+% Group
+{Field} 
+% subgroup
+{[ \textit{field-name} ]} 
+% parameter
+{precision} 
+% type
+{string} 
+% type restrictions
+{[  \code{"single"} 
+$|$ \code{"double"} 
+$|$ \code{"extended72"}
+$|$ \code{"extended80"}
+$|$ \code{"quadruple"} ] } 
+% description
+{Precision for the field if specified, or default precision for all fields if not.} 
+% example
+{} 
+% default
+{}
+
+\Parameter
+% Group
+{Field}
+% subgroup
+{}
+% parameter
+{alignment}
+% type
+{integer}
+% type restrictions
+{}
+% description
+{Alignment of start of each field's array in bytes}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Field}
+% subgroup
+{}
+% parameter
+{padding}
+% type
+{integer}
+% type restrictions
+{}
+% description
+{Padding between field arrays in bytes}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Field}
+% subgroup
+{\textit{field-name}}
+% parameter
+{minimum}
+% type
+{list(scalar,string)}
+% type restrictions
+{\code{"none"} $|$ \code{"assign"} $|$ \code{"warning"} $|$ \code{"error"}}
+% description
+{minimum value(s) and actions }
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Field}
+% subgroup
+{\textit{field-name}}
+% parameter
+{maximum}
+% type
+{list(scalar,string)}
+% type restrictions
+{\code{"none"} $|$ \code{"assign"} $|$ \code{"warning"} $|$ \code{"error"}}
+% description
+{maximum value(s) and actions }
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Field}
+% subgroup
+{\textit{field-name}}
+% parameter
+{centering}
+% type
+{list(logical)}
+% type restrictions
+{}
+% description
+{Whether the variable is centered on the corresponding axis.}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Field}
+% subgroup
+{\textit{field-name}}
+% parameter
+{alias}
+% type
+{list(string)}
+% type restrictions
+{}
+% description
+{List of other names this field may be referred to}
+% example
+{}
+% default
+{}
+
+\subsection{\code{Initial}}
+
+\Parameter
+% Group
+{Initial}
+% subgroup
+{\textit{field-name}}
+% parameter
+{value}
+% type
+{list(scalar,logical-expression)}
+% type restrictions
+{}
+% description
+{Initial value for the field}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Initial}
+% subgroup
+{\textit{field-name}}
+% parameter
+{file}
+% type
+{string}
+% type restrictions
+{}
+% description
+{File containing the initial conditions for the field}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Initial}
+% subgroup
+{}
+% parameter
+{time}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{Initial time in code units}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Initial}
+% subgroup
+{}
+% parameter
+{redshift}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{initial redshift for cosmological runs}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Initial}
+% subgroup
+{}
+% parameter
+{cycle}
+% type
+{integer $|$ list(integer)}
+% type restrictions
+{}
+% description
+{initial cycle number, or list of cycle numbers for each AMR level}
+% example
+{}
+% default
+{}
+
+\subsection{\code{Memory}}
+
+\Parameter
+% Group
+{Memory}
+% subgroup
+{}
+% parameter
+{limit}
+% type
+{integer}
+% type restrictions
+{}
+% description
+{Set limit on the number of local bytes available for dynamic memory}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Memory}
+% subgroup
+{}
+% parameter
+{threshold}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{Set efficiency threshold before displaying a warning message}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Memory}
+% subgroup
+{}
+% parameter
+{fill}
+% type
+{list(string)}
+% type restrictions
+{}
+% description
+{List of strings to fill memory after being allocated, and before being deallocated}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Memory}
+% subgroup
+{}
+% parameter
+{tracking}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{Set memory tracking on or off. Turning off resorts to native new[]/delete[].'}
+% example
+{}
+% default
+{}
+
+\subsection{\code{Mesh}}
+
+\Parameter
+% Group
+{Mesh}
+% subgroup
+{}
+% parameter
+{root\_size}
+% type
+{list(integer)}
+% type restrictions
+{}
+% description
+{Size of the root grid, e.g. [400,400]}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Mesh}
+% subgroup
+{}
+% parameter
+{max\_levels}
+% type
+{integer}
+% type restrictions
+{}
+% description
+{Maximum AMR mesh levels (with root = 1), assuming refinement by two}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Mesh}
+% subgroup
+{}
+% parameter
+{refinement}
+% type
+{integer}
+% type restrictions
+{[2 $|$ 4 $|$ 8]}
+% description
+{Refinement factor.}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Mesh}
+% subgroup
+{}
+% parameter
+{balanced}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{Whether the tree is balanced or "full" (ala Flash) or not}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Mesh}
+% subgroup
+{}
+% parameter
+{backfill}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{Whether to backfill for \code{refine} $>$ 2}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Mesh}
+% subgroup
+{}
+% parameter
+{coalesce}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{whether to coalesce small patches into one big one}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Mesh}
+% subgroup
+{}
+% parameter
+{patch\_size}
+% type
+{list(integer)}
+% type restrictions
+{}
+% description
+{minimum and maximum allowed patch sizes}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Mesh}
+% subgroup
+{}
+% parameter
+{block\_size}
+% type
+{list}
+% type restrictions
+{}
+% description
+{Minimum and maximum allowed block sizes}
+% example
+{}
+% default
+{}
+
+\subsection{\code{Method}}
+
+\Parameter
+% Group
+{Method}
+% subgroup
+{}
+% parameter
+{sequence}
+% type
+{list(string)}
+% type restrictions
+{}
+% description
+{Sequence of numerical methods to apply}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{diffusion}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{PPM diffusion parameter}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{flattening}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{PPM flattening parameter}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{steepening}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{PPM steepening parameter}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{dual\_energy}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{Whether to use dual-energy formalism}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{dual\_energy\_eta\_1}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{Dual-energy formalism parameter}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{dual\_energy\_eta\_2}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{Dual-energy formalism parameter}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{pressure\_free}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{``pressure free flag''}
+% example
+{}
+% default
+{}
+
+\subsection{\code{Output}}
+
+\Parameter
+% Group
+{Output}
+% subgroup
+{\textit{file-group}}
+% parameter
+{name}
+% type
+{list(string,variable)}
+% type restrictions
+{}
+% description
+{Name for the output files, where the first element is a format string (ala printf()), and remaining elements are scalar expressions. E.g. \code{["wave\_pool-t=\%3.1f.data", t]}}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Output}
+% subgroup
+{\textit{file-group}}
+% parameter
+{times}
+% type
+{list(scalar)}
+% type restrictions
+{}
+% description
+{Start, stop, and interval times to output}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Output}
+% subgroup
+{\textit{file-group}}
+% parameter
+{redshifts}
+% type
+{list(scalar)}
+% type restrictions
+{}
+% description
+{Start, stop, and interval redshifts to output}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Output}
+% subgroup
+{\textit{file-group}}
+% parameter
+{cycles}
+% type
+{list(integer}
+% type restrictions
+{}
+% description
+{start, stop, and interval cycles to output. \incomplete{what about fine vs coarse?}}
+% example
+{}
+% default
+{}
+
+\subsection{\code{Parallel}}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{balance}
+% parameter
+{frequency}
+% type
+{list(integer)}
+% type restrictions
+{}
+% description
+{List of load balancing timesteps for each level, e.g. [1,8,64]}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{balance}
+% parameter
+{method}
+% type
+{string}
+% type restrictions
+{}
+% description
+{Method to use for load balancing. Default is "none".}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{schedule}
+% parameter
+{method}
+% type
+{string}
+% type restrictions
+{}
+% description
+{Method for scheduling parallel tasks}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{}
+% parameter
+{levels}
+% type
+{list(integer)}
+% type restrictions
+{}
+% description
+{List of parallelization levels, e.g.~[8,32] for 8 cores/cpu, 32 cpu's/node, and any number of nodes.}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{}
+% parameter
+{type}
+% type
+{list(string)}
+% type restrictions
+{\code{"mpi"} $|$ \code{"omp"} $|$ \code{"upc"} $|$ \code{"serial"}}
+% description
+{List of parallelization types, E.g. ["omp","upc","mpi"] for OMP within cpu, UPC within node, and MPI between nodes.}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{mpi}
+% parameter
+{sided}
+% type
+{integer}
+% type restrictions
+{}
+% description
+{Type of MPI: 1 (single-sided get/put) or 2 (double-sided send/receive). \incomplete{what about multiple mpi levels?}}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{mpi}
+% parameter
+{send\_type}
+% type
+{list(string)}
+% type restrictions
+{ \code{"immediate"} $|$ \code{"blocking"} $|$ \code{"standard"} $|$ \code{"buffered"} $|$ \code{"synchronous"} $|$ \code{"ready"}}
+% description
+{List of MPI send variations}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{mpi}
+% parameter
+{recv\_type}
+% type
+{list(string)} 	
+% type restrictions
+{\code{"immediate"} $|$ \code{"blocking"}}
+% description
+{List [sic] of MPI recv variations.} 
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{mpi}
+% parameter
+{get\_type}
+% type
+{list(string)}
+% type restrictions
+{}
+% description
+{MPI get variations}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{mpi}
+% parameter
+{put\_type}
+% type
+{list(string)}
+% type restrictions
+{}
+% description
+{MPI put variations}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{mpi}
+% parameter
+{permute}
+% type
+{list(integer)}
+% type restrictions
+{}
+% description
+{Specification of reordering of MPI tasks. \incomplete{how to specify reordering?  automatic/dynamic reordering?}}
+% example
+{}
+% default
+{}
+
+\subsection{\code{Physics}}
+
+\Parameter
+% Group
+{Physics}
+% subgroup
+{}
+% parameter
+{gamma}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{ideal gas law constant}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Physics}
+% subgroup
+{}
+% parameter
+{cosmology}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{Turn on or off comoving coordinates}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Physics}
+% subgroup
+{cosmology}
+% parameter
+{hubble\_constant\_now}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{Hubble constant}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Physics}
+% subgroup
+{cosmology}
+% parameter
+{omega\_lamda\_now}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Physics}
+% subgroup
+{cosmology}
+% parameter
+{omega\_matter\_now}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Physics}
+% subgroup
+{cosmology}
+% parameter
+{max\_expansion\_rate}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Physics}
+% subgroup
+{}
+% parameter
+{gravity}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{Whether gravity is enabled}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Physics}
+% subgroup
+{}
+% parameter
+{gravity\_constant}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{``used only in SetMinimumSupport''}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Physics}
+% subgroup
+{}
+% parameter
+{multi\_species}
+% type
+{integer}
+% type restrictions
+{}
+% description
+{}
+% example
+{}
+% default
+{}
+
+\subsection{\code{Stopping}}
+
+\Parameter
+% Group
+{Stopping}
+% subgroup
+{}
+% parameter
+{time}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{stopping time}
+% example
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Stopping}
+% subgroup
+{}
+% parameter
+{redshift}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{stopping redshift}
+% example
+{}
+% default
+{}
+% default
+{}
+
+\Parameter
+% Group
+{Stopping}
+% subgroup
+{}
+% parameter
+{cycle}
+% type
+{integer $|$ list(integer)}
+% type restrictions
+{}
+% description
+{stopping cycle, or list of stopping cycles for AMR levels}
+% example
+{}
+
 
 %=======================================================================
 \section{Publishing \cello-derived Results}
