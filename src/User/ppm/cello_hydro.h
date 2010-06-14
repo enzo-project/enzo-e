@@ -142,6 +142,7 @@ extern int    GridStartIndex[MAX_DIMENSION];
 extern int    GridEndIndex[MAX_DIMENSION];
 extern ENZO_FLOAT  GridLeftEdge[MAX_DIMENSION];
 extern ENZO_FLOAT *CellWidth[MAX_DIMENSION];
+extern int    ghost_depth[MAX_DIMENSION];
 
 // Fields
 
@@ -203,6 +204,11 @@ extern int      BoundaryDimension[MAX_DIMENSION];
 extern int      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 extern bc_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
 extern float   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];  
+
+// problem
+
+extern int   CycleNumber;
+extern float dt;
 
 //----------------------------------------------------------------------
 // FUNCTION PROTOTYPES

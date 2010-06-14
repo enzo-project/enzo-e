@@ -10,6 +10,7 @@
 /// @brief    Include file for the Data component
 
 #include "data_DataDescr.hpp"
+#include "data_DataBlock.hpp"
 
 #endif /* DATA_HPP */
 

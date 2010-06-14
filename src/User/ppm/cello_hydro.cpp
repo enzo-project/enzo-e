@@ -113,6 +113,7 @@ int    GridStartIndex[MAX_DIMENSION];  // starting index of the active region
 int    GridEndIndex[MAX_DIMENSION];    // stoping index of the active region
 ENZO_FLOAT  GridLeftEdge[MAX_DIMENSION];    // starting pos (active problem space)
 ENZO_FLOAT *CellWidth[MAX_DIMENSION];
+int    ghost_depth[MAX_DIMENSION];
 
 // Fields
 
@@ -128,6 +129,11 @@ int      BoundaryDimension[MAX_DIMENSION];
 int      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 bc_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
 float   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];  
+
+// problem
+
+int   CycleNumber;
+float dt;
 
 
 

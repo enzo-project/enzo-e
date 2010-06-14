@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include "method.hpp"
+#include "data.hpp"
 
 class MethodEnzoPpm : public MethodHyperbolic {
 
@@ -27,17 +28,34 @@ public: // interface
 
   /// Apply the method to advance a block one timestep 
 
-  void advance_block() throw();
+  void advance_block(const DataDescr & data_descr,
+		     DataBlock       * data_block) throw();
 
-  /// Refresh a block face's boundary / ghost zones given neighboring block face(s) 
+  /// Refresh a block face's boundary / ghost zones given neighboring
+  /// block face(s)
 
   void refresh_face() throw();
 
-private: // attributes
+private: // functions
 
-  bool diffusion_;
-  bool flattening_;
-  bool steepening_; 
+  /// Initialize PPM variables that are constant for each timestep.
+  /// Called once per process.
+
+  void initialize_simulation_(DataDescr * data_descr) throw();
+
+  /// Initialize fields given problem initial conditions.  Called once
+  /// per mesh block.
+
+  void initialize_data_(DataDescr * data_descr,
+			DataBlock * data_block) throw();
+
+  /// Initialize PPM variable that may change.  Called once per
+  /// block per timestep.
+
+  void initialize_problem_ (DataDescr * data_descr,
+			    DataBlock * data_block) throw();
+
+private: // attributes
 
 };
 
