@@ -27,7 +27,21 @@ SConscript('Test/SConscript')
 SConscript('User/SConscript')
 
 
-components = ['schedule','error','parallel','monitor','parameters','simulation','data','field','user','user-ppm', 'user-ppml', 'method', 'cello']
+components = ['schedule',
+              'error',
+              'parallel',
+              'monitor',
+              'parameters',
+              'simulation', 
+              'user',
+              'method', 
+              'data',
+              'field',
+              'user-ppm', 
+              'user-ppml',
+              'cello', 
+              '$FORTRANLIBS']
+
 libraries  = ['png','boost_thread-mt']
 
 

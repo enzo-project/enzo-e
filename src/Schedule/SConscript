@@ -2,15 +2,16 @@ Import('env')
 
 components = ['error', 
               'simulation', 
+              'user', 
+              'method', 
               'data',
               'field',
               'parameters', 
               'parallel', 
-              'user', 
               'user-ppm', 
-              'method', 
               'monitor',
-              'cello' ]
+              'cello',
+	      '$FORTRANLIBS' ]
 
 libraries  = ['png','boost_thread-mt']
 includes   = [Glob('schedule*hpp')]

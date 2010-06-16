@@ -14,7 +14,7 @@
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::initialize_method() throw()
+void MethodEnzoPpml::initialize_method(DataDescr * data_descr) throw()
 {
   // Register method name
 
@@ -61,7 +61,7 @@ void MethodEnzoPpml::initialize_method() throw()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::finalize_method() throw()
+void MethodEnzoPpml::finalize_method(DataDescr * data_descr) throw()
 {}
 
 //----------------------------------------------------------------------

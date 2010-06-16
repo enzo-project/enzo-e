@@ -15,6 +15,12 @@ class MethodHyperbolic : public Method {
   /// @ingroup  Method
   /// @brief    Encapsulate hyperbolic algorithms
 
+public:
+
+  MethodHyperbolic()
+    : Method() {};
+
+  ~MethodHyperbolic() {};
 };
 
 #endif /* METHOD_METHOD_HYPERBOLIC_HPP */

@@ -26,14 +26,13 @@ int main (int argc, char ** argv)
 
   
   DataDescr * data_descr = new DataDescr;
-
   DataBlock * data_block = new DataBlock;
 
   unit_class ("MethodEnzoPpm");
-  MethodEnzoPpm ppm(data_descr);
+  MethodEnzoPpm ppm;
 
   unit_func("initialize_method");
-  ppm.initialize_method();
+  ppm.initialize_method(data_descr);
   unit_assert(true);
 
   unit_func("initialize_block");
@@ -56,7 +55,7 @@ int main (int argc, char ** argv)
   unit_assert(false);
 
   unit_func("finalize_method");
-  ppm.finalize_method();
+  ppm.finalize_method(data_descr);
   unit_assert(false);
 
   unit_finalize();

@@ -6,6 +6,7 @@
 /// @date      2010-11-10
 /// @brief     Implementation of the Simulation class
 
+#include "data.hpp" 
 #include "error.hpp" 
 #include "monitor.hpp"
 #include "simulation.hpp"
@@ -16,7 +17,7 @@ Simulation::Simulation()
     upper_(),
     mesh_(NULL),
     methods_(NULL),
-    data_()
+    data_descr_()
 {
 }
 
@@ -55,7 +56,7 @@ void Simulation::initialize ()
 
   parameters->set_current_group("Mesh");
 
-  mesh_ = new Mesh();
+  mesh_ = new Mesh;
 
   mesh_->set_dimension(extent_length / 2);
 
@@ -75,6 +76,12 @@ void Simulation::initialize ()
   mesh_->set_coalesce      (parameters->value_logical("coalesce",      true));
   mesh_->set_min_patch_size(parameters->value_integer("min_patch_size",0));
   mesh_->set_max_patch_size(parameters->value_integer("max_patch_size",0));
+
+  // --------------------------------------------------
+  // Initiazize data
+  // --------------------------------------------------
+
+  data_descr_ = new DataDescr;
 
   // --------------------------------------------------
   // Initiazize methods
@@ -97,7 +104,7 @@ void Simulation::initialize ()
     // given "ppm" create MethodEnzoPpm
     //
     methods_->add_method(method_name);
-    (*methods_)[i]->initialize();
+    (*methods_)[i]->initialize_method(data_descr_);
   }
 
 

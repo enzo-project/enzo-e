@@ -6,6 +6,7 @@
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the MethodEnzoPpm class
 
+#include "data.hpp"
 #include "parallel.hpp"
 #include "error.hpp"
 #include "parameters.hpp"
@@ -15,7 +16,7 @@
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpm::initialize_method() throw()
+void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
 {
   // Register method name
 
@@ -155,7 +156,8 @@ void MethodEnzoPpm::initialize_method() throw()
   ghost_depth[1] = (GridRank >= 2) ? p->list_value_integer(1,"ghosts",3) : 0;
   ghost_depth[2] = (GridRank >= 3) ? p->list_value_integer(2,"ghosts",3) : 0;
 
-  NumberOfBaryonFields = data_descr_->field_descr()->field_count();
+  FieldDescr * field_descr = data_descr->field_descr();
+  NumberOfBaryonFields = field_descr->field_count();
 
   ASSERT ("initialize_implosion",
 	  "MAX_NUMBER_OF_BARYON_FIELDS is too small",
@@ -165,7 +167,7 @@ void MethodEnzoPpm::initialize_method() throw()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpm::finalize_method (  ) throw ()
+void MethodEnzoPpm::finalize_method ( DataDescr * data_descr ) throw ()
 {
 }
 

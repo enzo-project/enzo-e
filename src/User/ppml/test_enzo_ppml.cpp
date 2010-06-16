@@ -23,19 +23,33 @@ int main (int argc, char ** argv)
 
   unit_init(parallel->process_rank(), parallel->process_count());
 
+  DataDescr * data_descr = new DataDescr;
+  DataBlock * data_block = new DataBlock;
+
   unit_class ("MethodEnzoPpml");
   MethodEnzoPpml ppml;
 
-  unit_func("initialize");
-  ppml.initialize();
+  unit_func("initialize_block");
+  ppml.initialize_block(data_block);
   unit_assert(true);
 
+  double t = 0;
+  double dt = 0.1;
+
   unit_func("advance_block");
-  ppml.advance_block();
+  ppml.advance_block(data_block,t,dt);
+  unit_assert(false);
+
+  unit_func("finalize_block");
+  ppml.finalize_block(data_block);
   unit_assert(false);
 
   unit_func("refresh_face");
   ppml.refresh_face();
+  unit_assert(false);
+
+  unit_func("finalize_method");
+  ppml.finalize_method(data_descr);
   unit_assert(false);
 
   unit_finalize();

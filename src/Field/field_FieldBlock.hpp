@@ -54,8 +54,9 @@ public: // interface
   /// ghosts whether they're allocated or not
   void * field_unknowns (int id_field) throw (std::out_of_range);
 
-  /// Return raw pointer to the array of fields.  Const since otherwise
-  /// dangerous due to varying field sizes and padding and alignment
+  /// Return raw pointer to the array of all fields.  Const since
+  /// otherwise dangerous due to varying field sizes, precisions,
+  /// padding and alignment
   const char * array ()  const throw () { return array_; };
 
   /// Return lower and upper+1 index ranges (excluding ghosts)

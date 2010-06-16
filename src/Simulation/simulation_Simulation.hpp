@@ -97,7 +97,7 @@ private: // attributes
   MethodDescr * methods_;
 
   /// Data descriptions
-  DataDescr data_;
+  DataDescr * data_descr_;
 
 };
 

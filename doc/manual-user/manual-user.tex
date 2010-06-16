@@ -35,7 +35,7 @@
 % 6 description
 % 7 example
 % 8 default
-{\subsubsection{\code{#3}}
+{\subsubsection{\code{#2} \code{#3}}
 \begin{tabular}{|l|l|l|l|}  \hline & & & \\ [-1.5ex]
    \textcolor{red}{\code{#1}} & 
    \textcolor{red}{\code{#2}} &
@@ -73,7 +73,11 @@
 % \end{tabbing}
 % }
 
+
+
+%-----------------------------------------------------------------------
 \subsection{\code{Boundary}}
+%-----------------------------------------------------------------------
 
 \Parameter
 {Boundary}
@@ -89,16 +93,17 @@
 \begin{tabbing}
 xxx\=xxx\=xxx\kill
  \code{Boundary \{} \\
-\>\code{\textbf{type} = "periodic";} \\
-\>   \code{lower \{ } \\
-\>\>      \code{\textbf{type} = [ "reflecting" , "reflecting" , "reflecting" ]} \\
+\>\code{\textbf{type} = "reflecting";} \\
+\>   \code{lower \{ \textbf{type} = "inflow"\}} \\
+\>   \code{upper \{ } \\
+\>\>      \code{\textbf{type} = [ "reflecting" , "outflow" , "reflecting" ]} \\
 \>   \code{\}} \\
-\>   \code{upper \{ \textbf{type} = "reflecting"\}} \\
 \code{\}}
 \end{tabbing}
 }
 {}
 
+%--------------------------------------------------
 \Parameter
 {Boundary}
 {[ \code{lower} $|$ \code{upper} ]}
@@ -110,6 +115,7 @@ xxx\=xxx\=xxx\kill
     ``upper'', and field names} .}
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Boundary} 
@@ -129,7 +135,9 @@ xxx\=xxx\=xxx\kill
 % default
 {}
 
+%-----------------------------------------------------------------------
 \subsection{\code{Domain}}
+%-----------------------------------------------------------------------
 
 \Parameter
 % Group
@@ -148,7 +156,9 @@ xxx\=xxx\=xxx\kill
 % default
 {}
 
+%-----------------------------------------------------------------------
 \subsection{\code{Field}}
+%-----------------------------------------------------------------------
 
 \Parameter
 % Group
@@ -168,6 +178,7 @@ xxx\=xxx\=xxx\kill
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Field} 
@@ -186,6 +197,7 @@ xxx\=xxx\=xxx\kill
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Field} 
@@ -204,28 +216,7 @@ xxx\=xxx\=xxx\kill
 % default
 {}
 
-\Parameter
-% Group
-{Field} 
-% subgroup
-{[ \textit{field-name} ]} 
-% parameter
-{precision} 
-% type
-{string} 
-% type restrictions
-{[  \code{"single"} 
-$|$ \code{"double"} 
-$|$ \code{"extended72"}
-$|$ \code{"extended80"}
-$|$ \code{"quadruple"} ] } 
-% description
-{Precision for the field if specified, or default precision for all fields if not.} 
-% example
-{} 
-% default
-{}
-
+%--------------------------------------------------
 \Parameter
 % Group
 {Field}
@@ -244,6 +235,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Field}
@@ -266,7 +258,49 @@ $|$ \code{"quadruple"} ] }
 % Group
 {Field}
 % subgroup
-{\textit{field-name}}
+{[ \textit{field-name} ]} 
+% parameter
+{ghosts}
+% type
+{list(int)}
+% type restrictions
+{}
+% description
+{List of ghost zone depths per axis for field if specified, default for all fields if not}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Field} 
+% subgroup
+{[ \textit{field-name} ]} 
+% parameter
+{precision} 
+% type
+{string} 
+% type restrictions
+{[  \code{"single"} 
+$|$ \code{"double"} 
+$|$ \code{"extended72"}
+$|$ \code{"extended80"}
+$|$ \code{"quadruple"} ] } 
+% description
+{Precision for the field if specified, or default precision for all fields if not.} 
+% example
+{} 
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Field}
+% subgroup
+{[ \textit{field-name} ]} 
 % parameter
 {minimum}
 % type
@@ -280,11 +314,12 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Field}
 % subgroup
-{\textit{field-name}}
+{[ \textit{field-name} ]} 
 % parameter
 {maximum}
 % type
@@ -298,11 +333,12 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Field}
 % subgroup
-{\textit{field-name}}
+{[ \textit{field-name} ]} 
 % parameter
 {centering}
 % type
@@ -316,6 +352,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Field}
@@ -334,7 +371,9 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%-----------------------------------------------------------------------
 \subsection{\code{Initial}}
+%-----------------------------------------------------------------------
 
 \Parameter
 % Group
@@ -354,6 +393,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Initial}
@@ -372,6 +412,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Initial}
@@ -390,6 +431,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Initial}
@@ -408,6 +450,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Initial}
@@ -426,7 +469,70 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%-----------------------------------------------------------------------
+\subsection{\code{Stopping}}
+%-----------------------------------------------------------------------
+
+\Parameter
+% Group
+{Stopping}
+% subgroup
+{}
+% parameter
+{time}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{stopping time}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Stopping}
+% subgroup
+{}
+% parameter
+{redshift}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{stopping redshift}
+% example
+{}
+% default
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Stopping}
+% subgroup
+{}
+% parameter
+{cycle}
+% type
+{integer $|$ list(integer)}
+% type restrictions
+{}
+% description
+{stopping cycle, or list of stopping cycles for AMR levels}
+% example
+{}
+
+
+%-----------------------------------------------------------------------
 \subsection{\code{Memory}}
+%-----------------------------------------------------------------------
 
 \Parameter
 % Group
@@ -446,6 +552,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Memory}
@@ -464,6 +571,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Memory}
@@ -482,6 +590,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Memory}
@@ -500,7 +609,9 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%-----------------------------------------------------------------------
 \subsection{\code{Mesh}}
+%-----------------------------------------------------------------------
 
 \Parameter
 % Group
@@ -520,6 +631,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Mesh}
@@ -538,6 +650,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Mesh}
@@ -556,6 +669,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Mesh}
@@ -574,6 +688,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Mesh}
@@ -592,6 +707,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Mesh}
@@ -610,6 +726,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Mesh}
@@ -628,6 +745,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Mesh}
@@ -646,7 +764,9 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%-----------------------------------------------------------------------
 \subsection{\code{Method}}
+%-----------------------------------------------------------------------
 
 \Parameter
 % Group
@@ -672,6 +792,119 @@ $|$ \code{"quadruple"} ] }
 % subgroup
 {ppm}
 % parameter
+{use\_minimum\_pressure\_support}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{Enzo \code{UseMinimumPressureSupport}}
+% example
+{}
+% default
+{}
+ 	 	 	 	
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{minimum\_pressure\_support\_parameter}
+% type
+{integer}
+% type restrictions
+{}
+% description
+{Enzo MinimumPressureSupportParameter}
+% example
+{}
+% default
+{}
+
+ 	 	 	 	
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{temperature\_floor}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{Temperature floor, was "tiny\_number"}
+% example
+{}
+% default
+{}
+
+ 	 	 	 	
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{pressure\_floor}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{Pressure floor, was "tiny\_number"}
+% example
+{}
+% default
+{}
+
+ 	 	 	 	
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{density\_floor}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{Density floor, was "tiny\_number"}
+% example
+{}
+% default
+{}
+
+ 	 	 	 	
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
+{number\_density\_floor}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{Number density floor, was "tiny\_number"}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Method}
+% subgroup
+{ppm}
+% parameter
 {diffusion}
 % type
 {logical}
@@ -684,6 +917,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Method}
@@ -702,6 +936,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Method}
@@ -720,6 +955,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Method}
@@ -738,6 +974,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Method}
@@ -756,6 +993,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Method}
@@ -774,6 +1012,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Method}
@@ -792,7 +1031,9 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%-----------------------------------------------------------------------
 \subsection{\code{Output}}
+%-----------------------------------------------------------------------
 
 \Parameter
 % Group
@@ -812,6 +1053,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Output}
@@ -830,6 +1072,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Output}
@@ -848,6 +1091,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Output}
@@ -866,62 +1110,11 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%-----------------------------------------------------------------------
 \subsection{\code{Parallel}}
+%-----------------------------------------------------------------------
 
-\Parameter
-% Group
-{Parallel}
-% subgroup
-{balance}
-% parameter
-{frequency}
-% type
-{list(integer)}
-% type restrictions
-{}
-% description
-{List of load balancing timesteps for each level, e.g. [1,8,64]}
-% example
-{}
-% default
-{}
-
-\Parameter
-% Group
-{Parallel}
-% subgroup
-{balance}
-% parameter
-{method}
-% type
-{string}
-% type restrictions
-{}
-% description
-{Method to use for load balancing. Default is "none".}
-% example
-{}
-% default
-{}
-
-\Parameter
-% Group
-{Parallel}
-% subgroup
-{schedule}
-% parameter
-{method}
-% type
-{string}
-% type restrictions
-{}
-% description
-{Method for scheduling parallel tasks}
-% example
-{}
-% default
-{}
-
+%--------------------------------------------------
 \Parameter
 % Group
 {Parallel}
@@ -940,6 +1133,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Parallel}
@@ -958,6 +1152,64 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{balance}
+% parameter
+{frequency}
+% type
+{list(integer)}
+% type restrictions
+{}
+% description
+{List of load balancing timesteps for each level, e.g. [1,8,64]}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{balance}
+% parameter
+{method}
+% type
+{string}
+% type restrictions
+{}
+% description
+{Method to use for load balancing. Default is "none".}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{schedule}
+% parameter
+{method}
+% type
+{string}
+% type restrictions
+{}
+% description
+{Method for scheduling parallel tasks}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
 \Parameter
 % Group
 {Parallel}
@@ -976,6 +1228,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Parallel}
@@ -994,6 +1247,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Parallel}
@@ -1012,6 +1266,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Parallel}
@@ -1030,6 +1285,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Parallel}
@@ -1048,6 +1304,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Parallel}
@@ -1066,7 +1323,28 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%-----------------------------------------------------------------------
 \subsection{\code{Physics}}
+%-----------------------------------------------------------------------
+
+ 	 	 	 	
+\Parameter
+% Group
+{Physics}
+% subgroup
+{}
+% parameter
+{dimensions}
+% type
+{integer}
+% type restrictions
+{}
+% description
+{Number of physical dimensions in the problem, 1, 2, or 3}
+% example
+{}
+% default
+{}
 
 \Parameter
 % Group
@@ -1086,96 +1364,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
-\Parameter
-% Group
-{Physics}
-% subgroup
-{}
-% parameter
-{cosmology}
-% type
-{logical}
-% type restrictions
-{}
-% description
-{Turn on or off comoving coordinates}
-% example
-{}
-% default
-{}
-
-\Parameter
-% Group
-{Physics}
-% subgroup
-{cosmology}
-% parameter
-{hubble\_constant\_now}
-% type
-{scalar}
-% type restrictions
-{}
-% description
-{Hubble constant}
-% example
-{}
-% default
-{}
-
-\Parameter
-% Group
-{Physics}
-% subgroup
-{cosmology}
-% parameter
-{omega\_lamda\_now}
-% type
-{scalar}
-% type restrictions
-{}
-% description
-{}
-% example
-{}
-% default
-{}
-
-\Parameter
-% Group
-{Physics}
-% subgroup
-{cosmology}
-% parameter
-{omega\_matter\_now}
-% type
-{scalar}
-% type restrictions
-{}
-% description
-{}
-% example
-{}
-% default
-{}
-
-\Parameter
-% Group
-{Physics}
-% subgroup
-{cosmology}
-% parameter
-{max\_expansion\_rate}
-% type
-{scalar}
-% type restrictions
-{}
-% description
-{}
-% example
-{}
-% default
-{}
-
+%--------------------------------------------------
 \Parameter
 % Group
 {Physics}
@@ -1194,6 +1383,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Physics}
@@ -1212,6 +1402,7 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
+%--------------------------------------------------
 \Parameter
 % Group
 {Physics}
@@ -1230,62 +1421,138 @@ $|$ \code{"quadruple"} ] }
 % default
 {}
 
-\subsection{\code{Stopping}}
-
+%--------------------------------------------------
 \Parameter
 % Group
-{Stopping}
+{Physics}
 % subgroup
 {}
 % parameter
-{time}
+{cosmology}
+% type
+{logical}
+% type restrictions
+{}
+% description
+{Turn on or off comoving coordinates}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Physics}
+% subgroup
+{cosmology}
+% parameter
+{comoving\_box\_size}
 % type
 {scalar}
 % type restrictions
 {}
 % description
-{stopping time}
+{Enzo CosmologyComovingBoxSize}
 % example
 {}
 % default
 {}
-
+ 	 	 	 	
+%--------------------------------------------------
 \Parameter
 % Group
-{Stopping}
+{Physics}
 % subgroup
-{}
+{cosmology}
 % parameter
-{redshift}
+{initial\_redshift}
 % type
 {scalar}
 % type restrictions
 {}
 % description
-{stopping redshift}
+{Enzo CosmologyInitialRedshift}
 % example
 {}
 % default
 {}
-% default
-{}
-
+ 		 	 	
+%--------------------------------------------------
 \Parameter
 % Group
-{Stopping}
+{Physics}
 % subgroup
-{}
+{cosmology}
 % parameter
-{cycle}
+{hubble\_constant\_now}
 % type
-{integer $|$ list(integer)}
+{scalar}
 % type restrictions
 {}
 % description
-{stopping cycle, or list of stopping cycles for AMR levels}
+{Hubble constant}
 % example
 {}
+% default
+{}
 
+%--------------------------------------------------
+\Parameter
+% Group
+{Physics}
+% subgroup
+{cosmology}
+% parameter
+{omega\_lamda\_now}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Physics}
+% subgroup
+{cosmology}
+% parameter
+{omega\_matter\_now}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Physics}
+% subgroup
+{cosmology}
+% parameter
+{max\_expansion\_rate}
+% type
+{scalar}
+% type restrictions
+{}
+% description
+{}
+% example
+{}
+% default
+{}
 
 %=======================================================================
 \section{Publishing \cello-derived Results}

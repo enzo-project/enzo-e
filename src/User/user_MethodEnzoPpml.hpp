@@ -23,12 +23,12 @@ public: // interface
 
   /// Perform any method-specific initialization
 
-  void initialize_method() throw();
+  void initialize_method(DataDescr * data_descr) throw();
 
   /// Perform any method-specific finalizations steps, e.g. to
   /// deallocate any dynamically-allocated memory
 
-  void finalize_method() throw();
+  void finalize_method(DataDescr * data_descr) throw();
 
   /// Initialize PPM variable that may change.  Called once per
   /// block per timestep.
