@@ -17,10 +17,10 @@ SConscript('ppml/SConscript')
 libraries = env.Library ('user', sources)
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
 
-test_method_enzo_ppm = env.Program (['test_MethodEnzoPpm.cpp', sources])
+test_enzo_ppm = env.Program (['test_MethodEnzoPpm.cpp', sources])
 
 env.Alias('install-bin', env.Install ('$BINPATH', 
-	[test_method_enzo_ppm]))
+	[test_enzo_ppm]))
 
 
 

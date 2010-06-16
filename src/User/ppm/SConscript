@@ -19,8 +19,7 @@ sources  = [Glob('initialize*cpp'),
 
 
 
-binaries = [env.Program (['test_ppm.cpp',      sources]),
-	    env.Program (['test_enzo_ppm.cpp', sources])]
+binaries = [env.Program (['test_ppm.cpp',      sources])]
 
 libraries = env.Library ('user-ppm', sources)
 

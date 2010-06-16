@@ -1,20 +1,24 @@
-// $Id: test_enzo_method_ppm.cpp 1262 2010-03-03 15:44:05Z bordner $
-// See LICENSE_ENZO file for license and copyright information
 
-/// @file     test_enzo_method_ppm.cpp
+// $Id: test_MethodEnzoPpm.cpp 1552 2010-06-09 02:50:30Z bordner $
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     test_MethodEnzoPpm.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Apr  1 16:19:18 PDT 2010
-/// @brief    Unit tests for the EnzoMethodPpm class
+/// @date     Thu Feb 21 16:04:03 PST 2008
+/// @brief    Program implementing unit tests for the MethodEnzoPpm class
 
-#include <stdio.h>
 #include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
-#include "parallel.hpp"
 #include "user.hpp"
-#include "test.hpp"
 #include "error.hpp"
+#include "data.hpp"
+#include "parallel.hpp"
+#include "test.hpp"
 
-int main (int argc, char ** argv)
+int main(int argc, char **argv)
 {
 
   // Initialize parallelism
@@ -62,3 +66,4 @@ int main (int argc, char ** argv)
 
   parallel->finalize();
 }
+
