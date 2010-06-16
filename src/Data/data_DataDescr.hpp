@@ -3,7 +3,6 @@
 
 /// @file     data_DataDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Prohibit DataDescr with empty FieldDescr--leads to bugs
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    Declaration of the DataDescr class
 
@@ -11,8 +10,7 @@
 #define DATA_DATA_DESCR_HPP
 
 #include <vector>
-
-#include "particle.hpp"
+#include "error.hpp"
 #include "field.hpp"
 
 class DataDescr {
@@ -24,18 +22,15 @@ class DataDescr {
 public: // interface
 
   /// Initialize the DataDescr object
-  DataDescr() throw()
-  : field_descr_()
-  {}
+  DataDescr(FieldDescr * field_descr) throw()
+  : field_descr_(field_descr)
+  {
+    ASSERT("DataDescr()","field_descr must be non-null",field_descr != NULL);
+  }
 
   //----------------------------------------------------------------------
   // Field functions
   //----------------------------------------------------------------------
-
-  /// Set the Field descriptor
-
-  void set_field_descr (FieldDescr * field_descr) throw()
-  { field_descr_ = field_descr; };
 
   /// Return the Field descriptor
 

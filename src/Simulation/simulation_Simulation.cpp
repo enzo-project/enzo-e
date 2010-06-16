@@ -81,12 +81,9 @@ void Simulation::initialize ()
   // Initiazize data
   // --------------------------------------------------
 
-  data_descr_ = new DataDescr;
-
   // initialize fields
 
   FieldDescr * field_descr = new FieldDescr;
-  data_descr_->set_field_descr(field_descr);
 
   parameters->set_current_group("Field");
 
@@ -109,6 +106,8 @@ void Simulation::initialize ()
   }
 
   methods_ = new MethodDescr;
+
+  data_descr_ = new DataDescr(field_descr);
 
   for (i=0; i<method_count; i++) {
     std::string method_name = parameters->list_value_string(i,"sequence");

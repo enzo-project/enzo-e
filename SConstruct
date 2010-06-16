@@ -163,17 +163,17 @@ SConscript('test/SConscript')
 
 # Build tarball
 
-% creates cello-#.#.#.tar.gz with (bin include lib)
+# creates cello-#.#.#.tar.gz with (bin include lib)
 
-% env = Environment(tools=['default', 'packaging'])
-% env.Package( NAME           = 'cello',
-%              VERSION        = '0.1.0',
-%              PACKAGEVERSION = 0,
-%              PACKAGETYPE    = 'targz',
-%              LICENSE        = 'New BSD',
-%              SUMMARY        = 'Cello Extreme AMR Framework',
-%              DESCRIPTION    = 'Cello Extreme AMR Framework'
-%         )
+# env = Environment(tools=['default', 'packaging'])
+# env.Package( NAME           = 'cello',
+#              VERSION        = '0.1.0',
+#              PACKAGEVERSION = 0,
+#              PACKAGETYPE    = 'targz',
+#              LICENSE        = 'New BSD',
+#              SUMMARY        = 'Cello Extreme AMR Framework',
+#              DESCRIPTION    = 'Cello Extreme AMR Framework'
+#         )
 
 
 

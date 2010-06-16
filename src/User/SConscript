@@ -3,6 +3,12 @@ Import('env')
 includes = [Glob('user*hpp')]
 sources  = [Glob('user*cpp')]
 
+components = ['user', 'user-ppm', 'method', 'data', 'field', 'error','parallel', 'monitor', 'parameters', 'cello']
+libraries  = ['png', 'boost_thread-mt', '$FORTRANLIBS']
+
+env = env.Clone(LIBS=[components,libraries])
+
+
 env.Alias('install-inc',env.Install ('#/include',includes))
 
 SConscript('ppm/SConscript')
@@ -10,6 +16,11 @@ SConscript('ppml/SConscript')
 
 libraries = env.Library ('user', sources)
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
+
+test_method_enzo_ppm = env.Program (['test_MethodEnzoPpm.cpp', sources])
+
+env.Alias('install-bin', env.Install ('$BINPATH', 
+	[test_method_enzo_ppm]))
 
 
 

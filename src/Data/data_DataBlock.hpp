@@ -11,7 +11,7 @@
 
 #include <vector>
 
-#include "particle.hpp"
+#include "error.hpp"
 #include "field.hpp"
 
 class DataBlock {
@@ -23,18 +23,15 @@ class DataBlock {
 public: // interface
 
   /// Initialize the DataBlock object
-  DataBlock() throw()
-    : field_block_(0)
-  {};
+  DataBlock(FieldBlock * field_block) throw()
+    : field_block_(field_block)
+  {
+    ASSERT("DataBlock()","field_block must be non-null",field_block != NULL);
+  };
 
   //----------------------------------------------------------------------
   // Field functions
   //----------------------------------------------------------------------
-
-  /// Set the Field block
-
-  void set_field_block (FieldBlock * field_block) 
-  { field_block_ = field_block;};
 
   /// Return the Field block
 
