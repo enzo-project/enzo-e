@@ -50,14 +50,19 @@ public: // functions
   /// Assignment operator
   FieldDescr & operator= (const FieldDescr & field_descr) throw();
 
+
   /// Return the number of fields
   int field_count() const throw();
 
   /// Return name of the ith field
   std::string field_name(size_t id_field) const throw(std::out_of_range);
 
+  /// Return whether the field has been inserted
+  bool is_field(const std::string name) const throw();
+
   /// Return the integer handle for the named field
   int field_id(const std::string name) const throw(std::out_of_range);
+
 
   /// Return the number of groups
   int group_count() const throw();
@@ -65,12 +70,17 @@ public: // functions
   /// Return name of the ith group
   std::string group_name(int id_group) const throw(std::out_of_range);
 
+  /// Return whether the group has been inserted
+  bool is_group(const std::string name) const throw();
+
   /// Return the integer handle for the named group
   int group_id(const std::string name) const throw(std::out_of_range);
+
 
   /// Return whether the given field is in the given group
   bool field_in_group(int id_field, int id_group) 
     const throw(std::out_of_range);
+
 
   /// alignment in bytes of fields in memory
   int alignment() const throw();

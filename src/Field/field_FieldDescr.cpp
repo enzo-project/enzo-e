@@ -15,7 +15,8 @@
 
 //----------------------------------------------------------------------
 
-FieldDescr::FieldDescr () throw ()
+FieldDescr::FieldDescr () 
+  throw ()
   : alignment_(1),
     padding_(0),
     courant_(1),
@@ -36,7 +37,8 @@ FieldDescr::FieldDescr () throw ()
 
 //----------------------------------------------------------------------
 
-FieldDescr::~FieldDescr() throw()
+FieldDescr::~FieldDescr() 
+  throw()
 {
   for (size_t i=0; i<centering_.size(); i++) {
     delete centering_[i];
@@ -48,7 +50,8 @@ FieldDescr::~FieldDescr() throw()
 
 //----------------------------------------------------------------------
 
-FieldDescr::FieldDescr(const FieldDescr & field_descr) throw()
+FieldDescr::FieldDescr(const FieldDescr & field_descr) 
+  throw()
 {
   alignment_      = field_descr.alignment_;
   padding_        = field_descr.padding_;
@@ -79,7 +82,8 @@ FieldDescr::FieldDescr(const FieldDescr & field_descr) throw()
 
 //----------------------------------------------------------------------
 
-FieldDescr & FieldDescr::operator= (const FieldDescr & field_descr) throw()
+FieldDescr & FieldDescr::operator= (const FieldDescr & field_descr) 
+  throw()
 {
   alignment_      = field_descr.alignment_;
   padding_        = field_descr.padding_;
@@ -114,49 +118,72 @@ FieldDescr & FieldDescr::operator= (const FieldDescr & field_descr) throw()
 
 //----------------------------------------------------------------------
 
-int FieldDescr::field_count() const throw()
+int FieldDescr::field_count() const 
+  throw()
 {
   return field_name_.size();
 }
 
 //----------------------------------------------------------------------
 
-std::string FieldDescr::field_name(size_t id_field) const throw(std::out_of_range)
+std::string FieldDescr::field_name(size_t id_field) const 
+  throw(std::out_of_range)
 { 
   return field_name_.at(id_field);
 }
 
 //----------------------------------------------------------------------
 
-int FieldDescr::field_id(const std::string name) const throw(std::out_of_range)
+bool FieldDescr::is_field(const std::string name) const 
+  throw()
+{ 
+  return (field_id_.find(name) != field_id_.end());
+}
+
+//----------------------------------------------------------------------
+
+int FieldDescr::field_id(const std::string name) const 
+  throw(std::out_of_range)
 {
   return field_id_.at(name);
 }
 
 //----------------------------------------------------------------------
 
-int FieldDescr::group_count() const throw()
+int FieldDescr::group_count() const 
+  throw()
 {
   return group_name_.size(); 
 }
 
 //----------------------------------------------------------------------
 
-std::string FieldDescr::group_name(int id_group) const throw(std::out_of_range)
+std::string FieldDescr::group_name(int id_group) const 
+  throw(std::out_of_range)
 {
   return group_name_.at(id_group);
 }
 
 //----------------------------------------------------------------------
 
-int FieldDescr::group_id(const std::string name) const throw(std::out_of_range)
+bool FieldDescr::is_group(const std::string name) const 
+  throw()
+{ 
+  return (group_id_.find(name) != group_id_.end());
+}
+
+//----------------------------------------------------------------------
+
+int FieldDescr::group_id(const std::string name) const 
+  throw(std::out_of_range)
 {
   return group_id_.at(name);
 }
 
 //----------------------------------------------------------------------
 
-bool FieldDescr::field_in_group(int id_field, int id_group) const throw(std::out_of_range)
+bool FieldDescr::field_in_group(int id_field, int id_group) const 
+  throw(std::out_of_range)
 {
   set_int_type t = field_in_group_.at(id_field);
   return t.find(id_group) != t.end();
@@ -215,35 +242,40 @@ void FieldDescr::ghosts
 
 //----------------------------------------------------------------------
 
-precision_type FieldDescr::precision(int id_field) const throw(std::out_of_range)
+precision_type FieldDescr::precision(int id_field) const 
+  throw(std::out_of_range)
 {
   return precision_.at(id_field);
 }
 
 //----------------------------------------------------------------------
 
-double FieldDescr::minimum_value(int id_field) const throw(std::out_of_range)
+double FieldDescr::minimum_value(int id_field) const 
+  throw(std::out_of_range)
 {
   return min_value_.at(id_field);
 }
 
 //----------------------------------------------------------------------
 
-field_action_type FieldDescr::minimum_action(int id_field) const throw(std::out_of_range)
+field_action_type FieldDescr::minimum_action(int id_field) const 
+  throw(std::out_of_range)
 {
   return min_action_.at(id_field);
 }
 
 //----------------------------------------------------------------------
 
-double FieldDescr::maximum_value(int id_field) const throw(std::out_of_range)
+double FieldDescr::maximum_value(int id_field) const 
+  throw(std::out_of_range)
 {
   return max_value_.at(id_field);
 }
 
 //----------------------------------------------------------------------
 
-field_action_type FieldDescr::maximum_action(int id_field) const throw(std::out_of_range)
+field_action_type FieldDescr::maximum_action(int id_field) const 
+  throw(std::out_of_range)
 {
   return max_action_.at(id_field);
 }
@@ -308,7 +340,8 @@ void FieldDescr::insert_group(std::string group_name) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_field_in_group(int id_field, int id_group) throw(std::out_of_range)
+void FieldDescr::set_field_in_group(int id_field, int id_group) 
+  throw(std::out_of_range)
 {
   field_in_group_.at(id_field).insert(id_group);
 }
@@ -336,7 +369,8 @@ void FieldDescr::set_courant(double courant) throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_precision(int id_field, precision_type precision) throw(std::out_of_range)
+void FieldDescr::set_precision(int id_field, precision_type precision) 
+  throw(std::out_of_range)
 {
   if ( ! cello::precision_supported (precision) ) {
     char buffer[80];
@@ -358,7 +392,8 @@ int FieldDescr::bytes_per_element(int id_field) const throw()
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_centering(int id_field, bool cx, bool cy, bool cz) throw(std::out_of_range)
+void FieldDescr::set_centering(int id_field, bool cx, bool cy, bool cz) 
+  throw(std::out_of_range)
 {
   centering_.at(id_field)[0] = cx;
   centering_.at(id_field)[1] = cy;
@@ -367,7 +402,8 @@ void FieldDescr::set_centering(int id_field, bool cx, bool cy, bool cz) throw(st
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz) throw(std::out_of_range)
+void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz) 
+  throw(std::out_of_range)
 {
   ghosts_.at(id_field)[0] = gx;
   ghosts_.at(id_field)[1] = gy;
@@ -376,7 +412,12 @@ void FieldDescr::set_ghosts(int id_field, int gx, int gy, int gz) throw(std::out
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_minimum (int id_field, double min_value, field_action_type min_action) throw(std::out_of_range)
+void FieldDescr::set_minimum 
+(
+ int               id_field, 
+ double            min_value, 
+ field_action_type min_action
+ ) throw(std::out_of_range)
 {
   min_value_.at(id_field)  = min_value;
   min_action_.at(id_field) = min_action;
@@ -384,7 +425,12 @@ void FieldDescr::set_minimum (int id_field, double min_value, field_action_type 
 
 //----------------------------------------------------------------------
 
-void FieldDescr::set_maximum (int id_field, double max_value, field_action_type max_action) throw(std::out_of_range)
+void FieldDescr::set_maximum 
+(
+ int               id_field, 
+ double            max_value, 
+ field_action_type max_action
+ ) throw(std::out_of_range)
 {
   max_value_.at(id_field)  = max_value;
   max_action_.at(id_field) = max_action;

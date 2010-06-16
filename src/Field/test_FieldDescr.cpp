@@ -78,6 +78,11 @@ int main()
   unit_assert(field_descr->field_id("velocity_z")   == info.field_velocity_z);
   unit_assert(field_descr->field_id("total_energy") == info.field_total_energy);
 
+  unit_func("is_field");
+
+  unit_assert(field_descr->is_field("density"));
+  unit_assert(! field_descr->is_field("not_a_field"));
+
   unit_func("field_name");
 
   unit_assert(field_descr->field_name(info.field_density)      == "density");
@@ -103,6 +108,11 @@ int main()
 
   unit_assert(field_descr->group_id("density") == info.group_density);
   unit_assert(field_descr->group_id("vector")   == info.group_vector);
+
+  unit_func("is_group");
+
+  unit_assert(field_descr->is_group("vector"));
+  unit_assert(! field_descr->is_group("not_a_group"));
 
   unit_func("group_name");
 
