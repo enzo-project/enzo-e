@@ -205,9 +205,17 @@ private: // functions
   {
     Param * list = parameter_(parameter);
     Param * param = NULL;
-    int list_length = list->value_list_->size();
-    if (list != NULL && 0 <= index && index < list_length ) {
-      param =  (*(list->value_list_))[index];
+    if (list == NULL) {
+      char message [ ERROR_MESSAGE_LENGTH ];
+      sprintf (message, 
+	       "uninitialized parameter %s accessed\n",
+	       parameter.c_str());
+      WARNING_MESSAGE("Parameters::list_element_",message);
+    } else {
+      int list_length = list->value_list_->size();
+      if (list != NULL && 0 <= index && index < list_length ) {
+	param =  (*(list->value_list_))[index];
+      }
     }
     return param;
   }

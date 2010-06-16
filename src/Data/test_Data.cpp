@@ -21,35 +21,37 @@ int main()
 
   unit_class ("DataDescr");
 
-  DataDescr data;
+  DataDescr data_descr;
 
-  unit_assert(data.field_descr()->field_count() == 0);
+  data_descr.set_field_descr(new FieldDescr);
+
+  unit_assert(data_descr.field_descr()->field_count() == 0);
   unit_assert(0);
-  // int index_density = data.field_insert("density");
-  // unit_assert(data.field_descr()->field_count() == 1);
-  // int index_velocity_x = data.field_descr()->field_insert("velocity_x");
-  // unit_assert(data.field_descr()->field_count() == 2);
-  // int index_velocity_y = data.field_descr()->field_insert("velocity_y");
-  // unit_assert(data.field_descr()->field_count() == 3);
+  // int index_density = data_descr.field_insert("density");
+  // unit_assert(data_descr.field_descr()->field_count() == 1);
+  // int index_velocity_x = data_descr.field_descr()->field_insert("velocity_x");
+  // unit_assert(data_descr.field_descr()->field_count() == 2);
+  // int index_velocity_y = data_descr.field_descr()->field_insert("velocity_y");
+  // unit_assert(data_descr.field_descr()->field_count() == 3);
 
   // unit_func("field_descr");
-  // FieldDescr * density    = data.field_descr()->field_descr (index_density);
-  // FieldDescr * velocity_x = data.field_descr (index_velocity_x);
-  // FieldDescr * velocity_y = data.field_descr (index_velocity_y);
+  // FieldDescr * density    = data_descr.field_descr()->field_descr (index_density);
+  // FieldDescr * velocity_x = data_descr.field_descr (index_velocity_x);
+  // FieldDescr * velocity_y = data_descr.field_descr (index_velocity_y);
 
   // unit_assert(density->name()    == "density");
   // unit_assert(velocity_x->name() == "velocity_x");
   // unit_assert(velocity_y->name() == "velocity_y");
 
   // unit_func ("field_index");
-  // unit_assert(data.field_index("density")    == index_density);
-  // unit_assert(data.field_index("velocity_x") == index_velocity_x);
-  // unit_assert(data.field_index("velocity_y") == index_velocity_y);
+  // unit_assert(data_descr.field_index("density")    == index_density);
+  // unit_assert(data_descr.field_index("velocity_x") == index_velocity_x);
+  // unit_assert(data_descr.field_index("velocity_y") == index_velocity_y);
 
   // unit_func ("field_name");
-  // unit_assert(data.field_name(index_density)    == "density");
-  // unit_assert(data.field_name(index_velocity_x) == "velocity_x");
-  // unit_assert(data.field_name(index_velocity_y) == "velocity_y");
+  // unit_assert(data_descr.field_name(index_density)    == "density");
+  // unit_assert(data_descr.field_name(index_velocity_x) == "velocity_x");
+  // unit_assert(data_descr.field_name(index_velocity_y) == "velocity_y");
 
   // unit_func("set_dimension");
   // unit_assert(density->   dimension()==2);

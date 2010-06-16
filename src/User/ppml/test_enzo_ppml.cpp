@@ -26,6 +26,9 @@ int main (int argc, char ** argv)
   DataDescr * data_descr = new DataDescr;
   DataBlock * data_block = new DataBlock;
 
+  data_descr->set_field_descr(new FieldDescr); 
+  data_block->set_field_block(new FieldBlock); 
+
   unit_class ("MethodEnzoPpml");
   MethodEnzoPpml ppml;
 

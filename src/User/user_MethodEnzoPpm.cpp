@@ -157,6 +157,7 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
   ghost_depth[2] = (GridRank >= 3) ? p->list_value_integer(2,"ghosts",3) : 0;
 
   FieldDescr * field_descr = data_descr->field_descr();
+
   NumberOfBaryonFields = field_descr->field_count();
 
   ASSERT ("initialize_implosion",

@@ -83,6 +83,18 @@ void Simulation::initialize ()
 
   data_descr_ = new DataDescr;
 
+  // initialize fields
+
+  FieldDescr * field_descr = new FieldDescr;
+  data_descr_->set_field_descr(field_descr);
+
+  parameters->set_current_group("Field");
+
+  for (i=0; i<parameters->list_length("fields"); i++) {
+    field_descr->insert_field
+      (parameters->list_value_string(i, "fields", "unknown"));
+  }
+
   // --------------------------------------------------
   // Initiazize methods
   // --------------------------------------------------
@@ -104,6 +116,7 @@ void Simulation::initialize ()
     // given "ppm" create MethodEnzoPpm
     //
     methods_->add_method(method_name);
+
     (*methods_)[i]->initialize_method(data_descr_);
   }
 

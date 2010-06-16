@@ -3,6 +3,7 @@
 
 /// @file     data_DataDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @todo     Prohibit DataDescr with empty FieldDescr--leads to bugs
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    Declaration of the DataDescr class
 

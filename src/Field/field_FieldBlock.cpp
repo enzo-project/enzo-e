@@ -19,7 +19,7 @@ FieldBlock::FieldBlock() throw()
   for (int i=0; i<3; i++) {
     dimensions_[i] = 0.0;
     box_lower_[i]  = 0.0;
-    box_upper_[i]  = 0.0;
+    box_upper_[i]  = 1.0;
   }
 }
 
@@ -367,7 +367,7 @@ void FieldBlock::write
  FieldDescr * field_descr 
  ) const throw ()
 {
-  
+  INCOMPLETE_MESSAGE("FieldBlock::write","");
 }
 
 //----------------------------------------------------------------------
@@ -390,6 +390,7 @@ void FieldBlock::set_field_values
  int    id_field, 
  char * field_values) throw()
 {
+  INCOMPLETE_MESSAGE("FieldBlock::set_field_values","");
 }
 
 //----------------------------------------------------------------------
