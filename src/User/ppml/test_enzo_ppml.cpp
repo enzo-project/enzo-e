@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <mpi.h>
 
+#include "data.hpp"
 #include "parallel.hpp"
 #include "user.hpp"
 #include "test.hpp"

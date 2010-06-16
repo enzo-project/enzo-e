@@ -107,7 +107,7 @@ int main(int argc, char ** argv)
 
     dt =  MIN(ComputeTimeStep(), time_stop - time);
 
-    //    SetExternalBoundaryValues();
+    SetExternalBoundaryValues();
 
     if (dump_frequency && (cycle % dump_frequency) == 0) {
       printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
@@ -124,7 +124,7 @@ int main(int argc, char ** argv)
   fflush(stdout);
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
-    //    SetExternalBoundaryValues();
+    SetExternalBoundaryValues();
     image_dump(problem_name[problem],cycle,lower,upper);
   }
   parallel->finalize();

@@ -14,7 +14,7 @@ sources  = [Glob('initialize*cpp'),
            'data_dump.cpp',
 	   'image_dump.cpp',
 	   'FindField.cpp',
-#           'SetExternalBoundary.cpp',
+           'SetExternalBoundary.cpp',
            'sum_field.cpp']
 
 

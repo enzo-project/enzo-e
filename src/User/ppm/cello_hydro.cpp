@@ -124,11 +124,11 @@ int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
 // Boundary
 
-//int      BoundaryRank;
-//int      BoundaryDimension[MAX_DIMENSION];
-//int      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-//bc_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
-//float   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];  
+int      BoundaryRank;
+int      BoundaryDimension[MAX_DIMENSION];
+int      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+bc_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+float   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];  
 
 // problem
 
