@@ -58,25 +58,11 @@ void Parameters::read ( FILE * file_pointer )
 
   while (node->type != enum_parameter_sentinel) {
 
-    std::string parameter_name = 
-      std::string(node->group)    + ":" +
-      std::string(node->subgroup) + ":" +
-      std::string(node->parameter);
-
     Param * param = new Param;
 
     param->set(node);
 
-    // Insert parameter into the parameter mapping "Group:subgroup:parameter" -> "Value"
-
-    parameter_map_     [parameter_name] = param;
-
-    // Insert parameter into the parameter tree "Group" -> "subgroup" -> "parameter"
-
-    ParamNode * param_node = parameter_tree_;
-    param_node = param_node->new_subnode(node->group);
-    param_node = param_node->new_subnode(node->subgroup);
-    param_node = param_node->new_subnode(node->parameter);
+    new_param_(node->group,node->subgroup,node->parameter,param);
 
     node = node->next;
     
@@ -205,6 +191,28 @@ int Parameters::value_integer
   if (param && ! param->is_integer()) throw ExceptionParametersBadType();
   monitor_log(parameter);
   return (param != NULL) ? param->get_integer() : deflt;
+}
+
+//----------------------------------------------------------------------
+
+void Parameters::set_integer 
+( std::string parameter,
+  int         value ) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   value     Value to set the parameter
+{
+  Param * param = parameter_(parameter);
+  if (param) {
+    if (! param->is_integer()) throw ExceptionParametersBadType();
+  } else {
+    
+    param = new Param;
+
+    new_param_ (current_group_,current_subgroup_,parameter,param);
+
+  }
+  param->set_integer_(value);
+  monitor_log(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -544,4 +552,53 @@ int Parameters::readline_
 
   return (c != EOF);
 
+}
+
+//----------------------------------------------------------------------
+
+Param * Parameters::list_element_ (std::string parameter, int index) throw()
+{
+  Param * list = parameter_(parameter);
+  Param * param = NULL;
+  if (list == NULL) {
+    char message [ ERROR_MESSAGE_LENGTH ];
+    sprintf (message, 
+	     "uninitialized parameter %s accessed\n",
+	     parameter.c_str());
+    WARNING_MESSAGE("Parameters::list_element_",message);
+  } else {
+    int list_length = list->value_list_->size();
+    if (list != NULL && 0 <= index && index < list_length ) {
+      param =  (*(list->value_list_))[index];
+    }
+  }
+  return param;
+}
+
+//----------------------------------------------------------------------
+
+void Parameters::new_param_
+(
+ std::string group,
+ std::string subgroup,
+ std::string parameter,
+ Param * param
+ ) throw()
+{
+
+  std::string full_parameter = 
+    group + ":" + subgroup + ":" + parameter;
+
+  // Insert parameter into the parameter mapping
+  // "Group:subgroup:parameter" -> "Value"
+
+  parameter_map_     [full_parameter] = param;
+    
+  // Insert parameter into the parameter tree "Group" -> "subgroup"
+  // -> "parameter"
+
+  ParamNode * param_node = parameter_tree_;
+  param_node = param_node->new_subnode(group);
+  param_node = param_node->new_subnode(subgroup);
+  param_node = param_node->new_subnode(parameter);
 }

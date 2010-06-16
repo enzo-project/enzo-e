@@ -48,10 +48,27 @@ class Param {
 
   friend class Parameters;
 
+  /// @enum param_type
+  /// @brief Parameter type 
+  enum param_type {
+    param_unknown_,
+    param_integer_,
+    param_scalar_,
+    param_logical_,
+    param_string_,
+    param_list_,
+    param_scalar_expr_,
+    param_logical_expr_
+  };
+
+
 public: // interface
 
   /// Initialize a Param object
-  Param () {};
+  Param () 
+    : type_(param_unknown_),
+      value_accessed_(false)
+  {};
 
   /// Delete a Param object
   ~Param () 
@@ -134,19 +151,6 @@ public: // interface
   std::string value_to_string ();
 
 private: // attributes
-
-  /// @enum param_type
-  /// @brief Parameter type 
-  enum param_type {
-    param_unknown_,
-    param_integer_,
-    param_scalar_,
-    param_logical_,
-    param_string_,
-    param_list_,
-    param_scalar_expr_,
-    param_logical_expr_
-  };
 
   /// Parameter type
   enum param_type type_;

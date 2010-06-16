@@ -55,6 +55,9 @@ public: // interface
   int value_integer (std::string , int deflt = 0) 
     throw(ExceptionParametersBadType);
 
+  void set_integer ( std::string parameter, int value ) 
+    throw(ExceptionParametersBadType);
+
   /// Return the scalar-valued parameter
   double value_scalar (std::string, double deflt = 0.0) 
     throw(ExceptionParametersBadType);
@@ -201,26 +204,14 @@ private: // functions
   };
 
   /// Return the Param pointer for the specified list parameter element
-  Param * list_element_ (std::string parameter, int index)
-  {
-    Param * list = parameter_(parameter);
-    Param * param = NULL;
-    if (list == NULL) {
-      char message [ ERROR_MESSAGE_LENGTH ];
-      sprintf (message, 
-	       "uninitialized parameter %s accessed\n",
-	       parameter.c_str());
-      WARNING_MESSAGE("Parameters::list_element_",message);
-    } else {
-      int list_length = list->value_list_->size();
-      if (list != NULL && 0 <= index && index < list_length ) {
-	param =  (*(list->value_list_))[index];
-      }
-    }
-    return param;
-  }
+  Param * list_element_ (std::string parameter, int index) throw();
 
   void monitor_log (std::string parameter) throw();
+
+  void new_param_ ( std::string group,
+		    std::string subgroup,
+		    std::string parameter,
+		    Param * param ) throw();
 
 private: // attributes
 

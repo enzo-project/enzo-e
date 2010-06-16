@@ -116,6 +116,18 @@ int main(int argc, char **argv)
   parameters->value("none",parameter_integer,&i,&id);
   unit_assert (i == id);
 
+  // set_integer()
+
+  unit_func("set_integer");
+
+  parameters->set_integer("test_1",2);
+  unit_assert (parameters->value_integer("test_1") == 2);
+  parameters->set_integer("none",3);
+  unit_assert (parameters->value_integer("none") == 3);
+  parameters->set_integer("none2",4);
+  unit_assert (parameters->value_integer("none2") == 4);
+
+
   // value_scalar()
   
   unit_func("value_scalar");
