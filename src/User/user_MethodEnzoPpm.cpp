@@ -18,20 +18,42 @@
 
 void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
 {
+
+  // Extract field descriptor from data descriptor
+
+  FieldDescr * field_descr = data_descr->field_descr();
+
   // Register method name
 
   method_name_ = "ppm";
 
-  // Specify arguments
-
-  add_argument_(argument_field, "density",        access_read_write);
-  add_argument_(argument_field, "energy_total",   access_read_write);
-  add_argument_(argument_field, "energy_internal",access_read_write);
-  add_argument_(argument_field, "velocity_x",     access_read_write);
-  add_argument_(argument_field, "velocity_y",     access_read_write);
-  add_argument_(argument_field, "velocity_z",     access_read_write);
+  // Initialize parameters
 
   Parameters * p = Parameters::instance();
+
+  // Specify arguments
+
+  add_argument_(argument_field, "density", access_read_write, data_descr);
+  add_argument_(argument_field, "total_energy",	access_read_write, data_descr);
+  add_argument_(argument_field, "internal_energy",
+		access_read_write, data_descr);
+
+  // (get GridRank to only add required velocity fields)
+
+  p->set_current_group("Physics");
+  GridRank = p->value_integer ("dimensions",0);
+
+  if (GridRank >= 1) {
+    add_argument_(argument_field, "velocity_x", access_read_write, data_descr);
+  }
+  if (GridRank >= 2) {  
+    add_argument_(argument_field, "velocity_y", access_read_write, data_descr);
+  }
+  if (GridRank >= 3) {
+    add_argument_(argument_field, "velocity_z", access_read_write, data_descr);
+  }
+
+  // Initialize Method parameters
 
   p->set_current_group ("Method","ppm");
 
@@ -40,7 +62,6 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
 
   p->set_current_group ("Physics");
 
-  GridRank             = p->value_integer ("dimensions",0);
   ComovingCoordinates  = p->value_logical ("cosmology",false);
   Gamma                = p->value_scalar  ("gamma",5.0/3.0);
 
@@ -67,7 +88,7 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
 
   p->set_current_group ("Field");
   
-  CourantSafetyNumber    = p->value_scalar ("courant",0.6);
+  CourantSafetyNumber = p->value_scalar ("courant",0.6);
 
   int k = 0;
 
@@ -100,7 +121,7 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
 
   p->set_current_group ("Method","ppm");
 
-  PressureFree              = p->value_scalar("pressure_free",false);
+  PressureFree = p->value_scalar("pressure_free",false);
   UseMinimumPressureSupport 
     =              p->value_logical("use_minimum_pressure_support",false);
   MinimumPressureSupportParameter 
@@ -155,8 +176,6 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
   ghost_depth[0] = (GridRank >= 1) ? p->list_value_integer(0,"ghosts",3) : 0;
   ghost_depth[1] = (GridRank >= 2) ? p->list_value_integer(1,"ghosts",3) : 0;
   ghost_depth[2] = (GridRank >= 3) ? p->list_value_integer(2,"ghosts",3) : 0;
-
-  FieldDescr * field_descr = data_descr->field_descr();
 
   NumberOfBaryonFields = field_descr->field_count();
 

@@ -28,9 +28,18 @@ int main(int argc, char **argv)
 
   unit_init(parallel->process_rank(), parallel->process_count());
 
-  
-  DataDescr * data_descr = new DataDescr (new FieldDescr);
-  DataBlock * data_block = new DataBlock (new FieldBlock);
+  FieldDescr * field_descr = new FieldDescr;
+  FieldBlock * field_block = new FieldBlock;
+
+  DataDescr * data_descr = new DataDescr (field_descr);
+  DataBlock * data_block = new DataBlock (field_block);
+
+  field_descr->insert_field("density");
+  field_descr->insert_field("total_energy");
+  field_descr->insert_field("internal_energy");
+  field_descr->insert_field("velocity_x");
+  field_descr->insert_field("velocity_x");
+  field_descr->insert_field("density");
 
   unit_class ("MethodEnzoPpm");
   MethodEnzoPpm ppm;

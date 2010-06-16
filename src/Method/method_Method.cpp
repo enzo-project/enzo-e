@@ -9,6 +9,7 @@
 #include <string>
 
 #include "method.hpp"
+#include "field.hpp"
 #include "monitor.hpp"
 
 //----------------------------------------------------------------------
@@ -21,11 +22,12 @@ Method::Method() throw ()
 
 void Method::add_argument_
 (
- argument_type argument_type,
+ argument_type argument,
  std::string   argument_name,
- access_type   access_type
+ access_type   access_type,
+ DataDescr   * data_descr
  ) throw()
-/// @param         argument_type  Type of argument, field or particle
+/// @param         argument  Type of argument, field or particle
 /// @param         argument_name  Name of the argument, e.g. "Density"
 /// @param         access_type    Access type of the argument, e.g. read, write
 {
@@ -37,8 +39,26 @@ void Method::add_argument_
   monitor->print (buffer);
 
   // Add method argument information
-  argument_types_.push_back(argument_type);
+  argument_types_.push_back(argument);
   argument_names_.push_back(argument_name);
   access_types_.push_back  (access_type);
+
+  // If data_descr is passed in (default = 0), then verify that the argument
+  // is defined
+  if (data_descr) {
+    char buffer [ ERROR_MESSAGE_LENGTH ];
+    switch (argument) {
+    case argument_field:
+      sprintf (buffer, 
+	       "Required Field %s is not defined in the field descriptor",
+	       argument_name.c_str());
+      ASSERT("MethodEnzoPpm::initialize_method",
+	     buffer, data_descr->field_descr()->is_field(argument_name));
+      break;
+    case argument_particle:
+    case argument_unknown:
+      break;
+    }
+  }
 
 }

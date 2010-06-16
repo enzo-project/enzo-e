@@ -291,8 +291,11 @@ int FieldDescr::insert_field(std::string field_name) throw()
 
   for (int i=0; i<id; i++) {
     if (field_name_[i] == field_name) {
-      WARNING_MESSAGE("FieldDescr::insert_field",
-		      "Insert field called multiple times with same field");
+      char buffer [ ERROR_MESSAGE_LENGTH ];
+      sprintf (buffer,
+	       "Insert field called multiple times with same field %s",
+	       field_name.c_str());
+      WARNING_MESSAGE("FieldDescr::insert_field", buffer);
       return i;
     }
   }

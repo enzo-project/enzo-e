@@ -46,7 +46,15 @@
    # well as individual fields
    
    Field {
- 
+
+      fields = [
+	"density",	
+	"total_energy",
+	"internal_energy",
+	"velocity_x",
+	"velocity_y"
+      ] ;
+
       # courant condition for fields
 
       courant   = 0.8;

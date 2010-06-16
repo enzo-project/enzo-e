@@ -146,7 +146,7 @@ public: // functions
 		bool         assertion)
   {
     if (!assertion) {
-      printf(file,line,"ASSERT",file,line,function,message);
+      message_(stderr,"ASSERT",file,line,function,message);
       exit(1);
     }
   };

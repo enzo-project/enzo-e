@@ -77,7 +77,8 @@ protected: // functions
 
   void add_argument_(argument_type type,
 		     std::string   name,
-		     access_type   access_type) throw();
+		     access_type   access_type,
+		     DataDescr   * data_descr = 0) throw();
 
 protected: // attributes
 
