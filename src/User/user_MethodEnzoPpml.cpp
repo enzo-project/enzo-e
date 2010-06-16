@@ -14,7 +14,7 @@
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::initialize() throw()
+void MethodEnzoPpml::initialize_method() throw()
 {
   // Register method name
 
@@ -61,7 +61,24 @@ void MethodEnzoPpml::initialize() throw()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::advance_block() throw()
+void MethodEnzoPpml::finalize_method() throw()
+{}
+
+//----------------------------------------------------------------------
+
+void MethodEnzoPpml::initialize_block (DataBlock * data_block) throw()
+{
+}
+
+//----------------------------------------------------------------------
+
+void MethodEnzoPpml::finalize_block (DataBlock * data_block) throw()
+{}
+
+//----------------------------------------------------------------------
+
+void MethodEnzoPpml::advance_block(DataBlock * data_block,
+				   double t,double dt) throw()
 {
   INCOMPLETE_MESSAGE("MethodEnzoPpml::advance_block","");
 }

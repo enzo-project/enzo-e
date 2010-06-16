@@ -23,13 +23,30 @@ public: // interface
 
   /// Perform any method-specific initialization
 
-  void initialize() throw();
+  void initialize_method() throw();
+
+  /// Perform any method-specific finalizations steps, e.g. to
+  /// deallocate any dynamically-allocated memory
+
+  void finalize_method() throw();
+
+  /// Initialize PPM variable that may change.  Called once per
+  /// block per timestep.
+
+  void initialize_block (DataBlock * data_block) throw();
+
+  /// Finalize PPM after advancing a block a timestep, e.g. to deallocate
+  /// any dynamically-allocated variables
+
+  void finalize_block (DataBlock * data_block) throw();
 
   /// Apply the method to advance a block one timestep 
 
-  void advance_block() throw();
+  void advance_block( DataBlock * data_block,
+			      double t, double dt ) throw(); 
 
-  /// Refresh a block face's boundary / ghost zones given neighboring block face(s) 
+  /// Refresh a block face's boundary / ghost zones given neighboring
+  /// block face(s)
 
   void refresh_face() throw();
 

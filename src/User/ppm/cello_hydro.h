@@ -190,20 +190,20 @@ extern int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
 // Boundary
 
-enum bc_type 
-  {
-    bc_unknown    = 0, 
-    bc_reflecting = 1, 
-    bc_outflow    = 2, 
-    bc_inflow     = 3, 
-    bc_periodic   = 4
-  };
+// enum bc_type 
+//   {
+//     bc_unknown    = 0, 
+//    bc_reflecting = 1, 
+//    bc_outflow    = 2, 
+//    bc_inflow     = 3, 
+//    bc_periodic   = 4
+//  };
 
-extern int      BoundaryRank;
-extern int      BoundaryDimension[MAX_DIMENSION];
-extern int      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-extern bc_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
-extern float   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];  
+// extern int      BoundaryRank;
+// extern int      BoundaryDimension[MAX_DIMENSION];
+// extern int      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+// extern bc_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+// extern float   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];  
 
 // problem
 
@@ -236,14 +236,14 @@ int SolveHydroEquations(int cycle, float dt);
 int SolveMHDEquations(int cycle, float dt);
 
 float ComputeTimeStep();
-int SetExternalBoundaryValues();
-int SetExternalBoundary(int FieldRank, 
-			     int GridDims[],
-			     int GridOffset[],
-			     int StartIndex[], 
-			     int EndIndex[],
-			     float *Field, 
-			     int FieldType);
+// int SetExternalBoundaryValues();
+// int SetExternalBoundary(int FieldRank, 
+//			     int GridDims[],
+//			     int GridOffset[],
+//			     int StartIndex[], 
+//			     int EndIndex[],
+//			     float *Field, 
+//			     int FieldType);
 
 
 

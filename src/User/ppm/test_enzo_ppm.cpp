@@ -24,23 +24,42 @@ int main (int argc, char ** argv)
 
   unit_init(parallel->process_rank(), parallel->process_count());
 
-  unit_class ("MethodEnzoPpm");
-  MethodEnzoPpm ppm;
+  
+  DataDescr * data_descr = new DataDescr;
 
-  unit_func("initialize");
-  ppm.initialize();
+  DataBlock * data_block = new DataBlock;
+
+  unit_class ("MethodEnzoPpm");
+  MethodEnzoPpm ppm(data_descr);
+
+  unit_func("initialize_method");
+  ppm.initialize_method();
   unit_assert(true);
 
+  unit_func("initialize_block");
+  ppm.initialize_block(data_block);
+  unit_assert(true);
+
+  double t = 0;
+  double dt = 0.1;
+
   unit_func("advance_block");
-  ppm.advance_block();
+  ppm.advance_block(data_block,t,dt);
+  unit_assert(false);
+
+  unit_func("finalize_block");
+  ppm.finalize_block(data_block);
   unit_assert(false);
 
   unit_func("refresh_face");
   ppm.refresh_face();
   unit_assert(false);
 
+  unit_func("finalize_method");
+  ppm.finalize_method();
+  unit_assert(false);
+
   unit_finalize();
 
   parallel->finalize();
-
 }

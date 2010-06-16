@@ -22,40 +22,37 @@ class MethodEnzoPpm : public MethodHyperbolic {
 
 public: // interface
 
+  MethodEnzoPpm(DataDescr * data_descr)
+    : MethodHyperbolic(data_descr)
+  {};
+
   /// Perform any method-specific initialization
 
-  void initialize() throw();
+  void initialize_method () throw();
 
+  /// Perform any method-specific finalizations steps, e.g. to
+  /// deallocate any dynamically-allocated memory
+
+  void finalize_method() throw();
+
+  /// Initialize PPM variable that may change.  Called once per
+  /// block per timestep.
+
+  void initialize_block (DataBlock * data_block) throw();
+
+  /// Finalize PPM after advancing a block a timestep, e.g. to deallocate
+  /// any dynamically-allocated variables
+
+  void finalize_block (DataBlock * data_block) throw();
   /// Apply the method to advance a block one timestep 
 
-  void advance_block(const DataDescr & data_descr,
-		     DataBlock       * data_block) throw();
+  void advance_block(DataBlock * data_block,
+		     double t, double dt) throw();
 
   /// Refresh a block face's boundary / ghost zones given neighboring
   /// block face(s)
 
   void refresh_face() throw();
-
-private: // functions
-
-  /// Initialize PPM variables that are constant for each timestep.
-  /// Called once per process.
-
-  void initialize_simulation_(DataDescr * data_descr) throw();
-
-  /// Initialize fields given problem initial conditions.  Called once
-  /// per mesh block.
-
-  void initialize_data_(DataDescr * data_descr,
-			DataBlock * data_block) throw();
-
-  /// Initialize PPM variable that may change.  Called once per
-  /// block per timestep.
-
-  void initialize_problem_ (DataDescr * data_descr,
-			    DataBlock * data_block) throw();
-
-private: // attributes
 
 };
 
