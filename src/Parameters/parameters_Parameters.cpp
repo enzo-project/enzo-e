@@ -205,11 +205,8 @@ void Parameters::set_integer
   if (param) {
     if (! param->is_integer()) throw ExceptionParametersBadType();
   } else {
-    
     param = new Param;
-
     new_param_ (current_group_,current_subgroup_,parameter,param);
-
   }
   param->set_integer_(value);
   monitor_log(parameter);
@@ -232,6 +229,25 @@ double Parameters::value_scalar
 
 //----------------------------------------------------------------------
 
+void Parameters::set_scalar
+( std::string parameter,
+  double      value ) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   value     Value to set the parameter
+{
+  Param * param = parameter_(parameter);
+  if (param) {
+    if (! param->is_scalar()) throw ExceptionParametersBadType();
+  } else {
+    param = new Param;
+    new_param_ (current_group_,current_subgroup_,parameter,param);
+  }
+  param->set_scalar_(value);
+  monitor_log(parameter);
+}
+
+//----------------------------------------------------------------------
+
 bool Parameters::value_logical 
 ( std::string parameter,
   bool        deflt ) throw(ExceptionParametersBadType)
@@ -247,6 +263,25 @@ bool Parameters::value_logical
 
 //----------------------------------------------------------------------
 
+void Parameters::set_logical
+( std::string parameter,
+  bool        value ) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   value     Value to set the parameter
+{
+  Param * param = parameter_(parameter);
+  if (param) {
+    if (! param->is_logical()) throw ExceptionParametersBadType();
+  } else {
+    param = new Param;
+    new_param_ (current_group_,current_subgroup_,parameter,param);
+  }
+  param->set_logical_(value);
+  monitor_log(parameter);
+}
+
+//----------------------------------------------------------------------
+
 const char * Parameters::value_string 
 ( std::string  parameter,
   const char * deflt ) throw(ExceptionParametersBadType)
@@ -258,6 +293,25 @@ const char * Parameters::value_string
   if (param && ! param->is_string()) throw ExceptionParametersBadType();
   monitor_log(parameter);
   return (param != NULL) ? param->get_string() : deflt;
+}
+
+//----------------------------------------------------------------------
+
+void Parameters::set_string
+( std::string  parameter,
+  const char * value ) throw(ExceptionParametersBadType)
+/// @param   parameter Parameter name
+/// @param   value     Value to set the parameter
+{
+  Param * param = parameter_(parameter);
+  if (param) {
+    if (! param->is_string()) throw ExceptionParametersBadType();
+  } else {
+    param = new Param;
+    new_param_ (current_group_,current_subgroup_,parameter,param);
+  }
+  param->set_string_(strdup(value));
+  monitor_log(parameter);
 }
 
 //----------------------------------------------------------------------

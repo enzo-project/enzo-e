@@ -97,6 +97,19 @@ int main(int argc, char **argv)
   parameters->value("none",parameter_logical,&l,&ld);
   unit_assert (l == ld);
 
+  // set_logical()
+
+  unit_func("set_logical");
+
+  parameters->set_logical("test_true",false);
+  unit_assert (parameters->value_logical("test_true") == false);
+  parameters->set_logical("none",true);
+  unit_assert (parameters->value_logical("none") == true);
+  parameters->set_logical("none_l1",true);
+  unit_assert (parameters->value_logical("none_l1") == true);
+  parameters->set_logical("none_l2",false);
+  unit_assert (parameters->value_logical("none_l2") == false);
+
   // value_integer()
 
   unit_func("value_integer");
@@ -149,6 +162,15 @@ int main(int argc, char **argv)
   unit_assert (d == dd);
   printf ("%g %g\n",d,dd);
 
+  // set_scalar()
+
+  unit_func("set_scalar");
+
+  parameters->set_scalar("test_1_5",27.0);
+  unit_assert (parameters->value_scalar("test_1_5") == 27.0);
+  parameters->set_scalar("none_s",1.5);
+  unit_assert (parameters->value_scalar("none_s") == 1.5);
+
   // Constant scalar expressions
   // subgroups
 
@@ -185,6 +207,15 @@ int main(int argc, char **argv)
   unit_assert(strcmp(s,"one")==0);
   parameters->value("none",parameter_string,&s,&sd);
   unit_assert(strcmp(s,"blah")==0);
+
+  // set_string()
+
+  unit_func("set_string");
+
+  parameters->set_string("str1","yahoo");
+  unit_assert (strcmp(parameters->value_string("str1"),"yahoo")==0);
+  parameters->set_string("none_str","hello");
+  unit_assert (strcmp(parameters->value_string("none_str"),"hello")==0);
 
   // Variable scalar expressions
 

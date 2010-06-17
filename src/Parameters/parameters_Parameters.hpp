@@ -62,12 +62,21 @@ public: // interface
   double value_scalar (std::string, double deflt = 0.0) 
     throw(ExceptionParametersBadType);
 
+  void set_scalar ( std::string parameter, double value ) 
+    throw(ExceptionParametersBadType);
+
   /// Return the logical-valued parameter
   bool value_logical (std::string , bool deflt = false) 
     throw(ExceptionParametersBadType);
 
+  void set_logical ( std::string parameter, bool value ) 
+    throw(ExceptionParametersBadType);
+
   /// Return the string-valued parameter
   const char * value_string ( std::string , const char * deflt = "") 
+    throw(ExceptionParametersBadType);
+
+  void set_string ( std::string parameter, const char * value ) 
     throw(ExceptionParametersBadType);
 
   /// Evaluate the scalar-valued parameter expression
