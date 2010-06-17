@@ -118,11 +118,6 @@ extern float  density_floor;
 extern float  number_density_floor;
 extern float  temperature_floor;
 
-// Control
-
-extern float  time_stop;   // stop after this simulation time
-extern int    cycle_stop;  // stop after this number of cycles
-
 extern float  CourantSafetyNumber;
 extern ENZO_FLOAT  InitialRedshift;
 extern ENZO_FLOAT  InitialTimeInCodeUnits;
@@ -251,9 +246,9 @@ void initialize_hydro ();
 
 // PPM
 
-void initialize_implosion (int size, int cycles);
-void initialize_implosion3 (int size, int cycles);
-void initialize_image (int cycles);
+void initialize_implosion (int size);
+void initialize_implosion3 (int size);
+void initialize_image ();
 
 // PPML
 

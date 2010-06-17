@@ -30,7 +30,7 @@ inline float color_value
   return (image[ix + width*iy]);
 } 
 
-void initialize_image (int cycles_param)
+void initialize_image ()
 
 {
 
@@ -61,11 +61,6 @@ void initialize_image (int cycles_param)
   PPMFlatteningParameter = 3;
   PPMDiffusionParameter  = 1;
   PPMSteepeningParameter = 1;
-
-  // Control
-
-  time_stop              = 2.5;
-  cycle_stop             = cycles_param;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;

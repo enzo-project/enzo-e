@@ -62,13 +62,13 @@ int main(int argc, char ** argv)
 
   int size = problem_size[problem];
   if (argc > ++argi) size = atoi(argv[argi]);
-  int cycles = problem_cycles[problem];
-  if (argc > ++argi) cycles = atoi(argv[argi]);
+  int cycle_stop = problem_cycles[problem];
+  if (argc > ++argi) cycle_stop = atoi(argv[argi]);
   int dump_frequency = 10;
   if (argc > ++argi) dump_frequency = atoi(argv[argi]);
 
-  printf ("problem = %s  size = %d  cycles = %d  dump_frequency = %d\n",
-	  problem_name[problem], size, cycles, dump_frequency);
+  printf ("problem = %s  size = %d  cycle_stop = %d  dump_frequency = %d\n",
+	  problem_name[problem], size, cycle_stop, dump_frequency);
 
   // Initialize for generic hydrodynamics
 
@@ -76,15 +76,17 @@ int main(int argc, char ** argv)
 
   // Initialize for specific problem type
 
+  float  time_stop  = 2.5;
+
   switch (problem) {
   case problem_ppm_image:
-    initialize_image(cycles);
+    initialize_image();
     break;
   case problem_ppm_implosion:
-    initialize_implosion(size,cycles);
+    initialize_implosion(size);
     break;
   case problem_ppm_implosion3:
-    initialize_implosion3(size,cycles);
+    initialize_implosion3(size);
     break;
   default:
     print_usage(argv[0]);
@@ -120,7 +122,7 @@ int main(int argc, char ** argv)
 
   }
 
-  printf ("%d %d %g\n",size+6,cycles,timer.value());
+  printf ("%d %d %g\n",size+6,cycle_stop,timer.value());
   fflush(stdout);
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {

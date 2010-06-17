@@ -41,6 +41,11 @@ int main(int argc, char **argv)
   field_descr->insert_field("velocity_x");
   field_descr->insert_field("density");
 
+  field_block->set_field_descr(field_descr);
+  field_block->set_dimensions(16,16,16);
+  field_block->set_box_extent(0.0,1.0,0.0,1.0,0.0,1.0);
+  
+
   unit_class ("MethodEnzoPpm");
   MethodEnzoPpm ppm;
 

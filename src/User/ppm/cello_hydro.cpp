@@ -53,11 +53,6 @@ float density_floor;
 float number_density_floor;
 float temperature_floor;
 
-// Control
-
-float  time_stop;   // stop after this simulation time
-int    cycle_stop;  // stop after this number of cycles
-
 float  CourantSafetyNumber;
 ENZO_FLOAT  InitialRedshift;
 ENZO_FLOAT  InitialTimeInCodeUnits;

@@ -64,8 +64,9 @@ public: // interface
 		   int * upper_x, int * upper_y, int *upper_z) const throw ();
 
   /// Return lower values of the block (excluding ghosts)
-  void box_extent(double * lower_x, double * lower_y, double *lower_z, 
-		  double * upper_x, double * upper_y, double *upper_z) const throw ();
+  void box_extent(double * lower_x = 0, double * upper_x = 0, 
+		  double * lower_y = 0, double * upper_y = 0,
+		  double * lower_z = 0, double * upper_z = 0) const throw ();
 
   /// Return width of cells along each dimension
   void cell_width(double * hx, double * hy, double * hz) const throw ();
@@ -121,8 +122,9 @@ public: // interface
   void set_field_descr(FieldDescr * field_descr) throw();
 
   /// Set the box extent
-  void set_box_extent( double lower_x, double lower_y, double lower_z,
-		       double upper_x, double upper_y, double upper_z ) throw();
+  void set_box_extent(double lower_x = 0.0, double upper_x = 1.0, 
+		      double lower_y = 0.0, double upper_y = 1.0,
+		      double lower_z = 0.0, double upper_z = 1.0) throw();
 
   //----------------------------------------------------------------------
 

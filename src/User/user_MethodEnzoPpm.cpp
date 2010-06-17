@@ -77,13 +77,6 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
     ComovingBoxSize   = p->value_scalar ("comoving_box_size", 64.0);
   }
 
-  // Control parameters
-
-  p->set_current_group ("Stopping");
-
-  time_stop  = p->value_scalar ("time",0.0);
-  cycle_stop = p->value_integer("cycle",0);
-
   // Field parameters
 
   p->set_current_group ("Field");
@@ -116,6 +109,8 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
   p->set_current_group ("Initial");
 
   InitialTimeInCodeUnits = p->value_scalar ("time",0.0);
+  Time = InitialTimeInCodeUnits;
+  OldTime = Time;
 
   // PPM parameters
 
@@ -200,7 +195,7 @@ void MethodEnzoPpm::initialize_block ( DataBlock * data_block ) throw ()
   
   double xm,xp,ym,yp,zm,zp;
 
-  field_block->box_extent(&xm,&ym,&zm,&xp,&yp,&zp);
+  field_block->box_extent(&xm,&xp,&ym,&yp,&zm,&zp);
 
   GridLeftEdge[0]    = xm;
   GridLeftEdge[1]    = ym;
@@ -213,12 +208,6 @@ void MethodEnzoPpm::initialize_block ( DataBlock * data_block ) throw ()
 
   CycleNumber = 0;
   dt          = 1;
-
-
-  // Control
-
-  Time                   = 0;
-  OldTime                = 0;
 
   // Grid dimensions
 
@@ -272,6 +261,8 @@ void MethodEnzoPpm::advance_block
  ) throw()
 {
   INCOMPLETE_MESSAGE("MethodEnzoPpm::advance_block","");
+
+  Time                   = 0;
 
   SolveHydroEquations (CycleNumber, dt);
 }

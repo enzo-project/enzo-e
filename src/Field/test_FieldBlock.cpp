@@ -448,17 +448,18 @@ int main()
   //----------------------------------------------------------------------
   unit_func("box_extent");
 
-  field_block.set_box_extent(-1, -2, -3, 1, 2, 3);
+  field_block.set_box_extent(-1, 1, -2, 2, -3, 3);
   double box_lower[3];
   double box_upper[3];
-  field_block.box_extent(&box_lower[0],&box_lower[1],&box_lower[2],
-			 &box_upper[0],&box_upper[1],&box_upper[2]);
+  field_block.box_extent(&box_lower[0],&box_upper[0],
+			 &box_lower[1],&box_upper[1],
+			 &box_lower[2],&box_upper[2]);
 
   unit_assert(box_lower[0] == -1.0);
-  unit_assert(box_lower[1] == -2.0);
-  unit_assert(box_lower[2] == -3.0);
   unit_assert(box_upper[0] == 1.0);
+  unit_assert(box_lower[1] == -2.0);
   unit_assert(box_upper[1] == 2.0);
+  unit_assert(box_lower[2] == -3.0);
   unit_assert(box_upper[2] == 3.0);
 
   //----------------------------------------------------------------------

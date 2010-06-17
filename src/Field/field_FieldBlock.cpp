@@ -90,16 +90,17 @@ void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
 
 void FieldBlock::box_extent
 (
- double * lower_x, double * lower_y, double *lower_z,
- double * upper_x, double * upper_y, double *upper_z ) const throw ()
+ double * lower_x, double * upper_x, 
+ double * lower_y, double * upper_y,
+ double * lower_z, double * upper_z ) const throw ()
 {
-  *lower_x = box_lower_[0];
-  *lower_y = box_lower_[1];
-  *lower_z = box_lower_[2];
+  if (lower_x) *lower_x = box_lower_[0];
+  if (lower_y) *lower_y = box_lower_[1];
+  if (lower_z) *lower_z = box_lower_[2];
 
-  *upper_x = box_upper_[0];
-  *upper_y = box_upper_[1];
-  *upper_z = box_upper_[2];
+  if (upper_x) *upper_x = box_upper_[0];
+  if (upper_y) *upper_y = box_upper_[1];
+  if (upper_z) *upper_z = box_upper_[2];
 }
 
 //----------------------------------------------------------------------
@@ -404,8 +405,9 @@ void FieldBlock::set_field_descr(FieldDescr * field_descr) throw()
 
 void FieldBlock::set_box_extent
 (
- double lower_x, double lower_y, double lower_z,
- double upper_x, double upper_y, double upper_z ) throw ()
+ double lower_x, double upper_x,
+ double lower_y, double upper_y,
+ double lower_z, double upper_z ) throw ()
 
 {
   box_lower_[0] = lower_x;

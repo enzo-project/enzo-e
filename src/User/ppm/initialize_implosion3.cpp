@@ -10,7 +10,7 @@
 
 const bool debug = false;
  
-void initialize_implosion3 (int size_param, int cycles_param)
+void initialize_implosion3 (int size_param)
 
 {
 
@@ -30,11 +30,6 @@ void initialize_implosion3 (int size_param, int cycles_param)
   PPMFlatteningParameter = 3;
   PPMDiffusionParameter  = 1;
   PPMSteepeningParameter = 1;
-
-  // Control
-
-  time_stop              = 10000;
-  cycle_stop             = cycles_param;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;
