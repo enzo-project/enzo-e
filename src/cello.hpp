@@ -70,6 +70,33 @@ enum function_type {
 };
 
 /*********************************************************************
+ * PROBLEM DECLARATIONS
+ **********************************************************************/
+
+/// @enum     boundary_type
+/// @brief    External boundary condition types
+enum boundary_type {
+  boundary_undefined,   // 0 is an undefined boundary
+  boundary_reflecting,  // 
+  boundary_outflow,  // 
+  boundary_inflow,  // 
+  boundary_periodic,  // 
+  boundary_dirichlet, //
+  boundary_neumann,
+  num_boundaries = boundary_neumann // Number of attribute types
+};
+
+/// @enum     face_type
+/// @brief    Cell faces [lower|upper][x|y|z]
+enum face_type {
+  face_lower_x = 0,
+  face_upper_x = 1,
+  face_lower_y = 2,
+  face_upper_y = 3,
+  face_lower_z = 4,
+  face_upper_z = 5};
+
+/*********************************************************************
  * GLOBAL FUNCTIONS
  **********************************************************************/
 
