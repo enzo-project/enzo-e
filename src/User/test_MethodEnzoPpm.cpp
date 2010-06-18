@@ -81,12 +81,16 @@ int main(int argc, char **argv)
   double hx = 0.3 / nx;
   double hy = 0.3 / ny;
 
-  for (int iy=0+gy; iy<ny+gy; iy++) {
+  int mx = nx + 2*gx;
+  int my = ny + 2*gy;
+  int mz = nz + 2*gz;
+
+  for (int iy=gy; iy<ny+gy; iy++) {
     double y = (iy - gy + 0.5)*hy;
-    for (int ix=0+gy; ix<nx+gx; ix++) {
+    for (int ix=gy; ix<nx+gx; ix++) {
       double x = (ix - gx + 0.5)*hx;
-      int i = ix + nx * iy;
-      if (x + y < 0.1517*(nx+ny)) {
+      int i = INDEX(ix,iy,0,mx,my);
+      if (x + y < 0.1517) {
 	d[i]  = 0.125;
 	vx[i] = 0;
 	vy[i] = 0;
@@ -116,12 +120,14 @@ int main(int argc, char **argv)
 
   double map1[] = {0,0,0, 1,1,1};
 
-  monitor->image ("ppm-density-0",
-		  field_block->field_unknowns(index_density),
+  field_block->enforce_boundary(boundary_reflecting);
+
+  monitor->image ("ppm-density-0.png",
+		  field_block->field_values(index_density),
 		  default_precision,
-		  100,100,1,
+		  mx,my,mz,
 		  0,  0,  0,
-		  100,100,1,
+		  mx,my,mz,
 		  2,
 		  reduce_sum,
 		  0.0,1.0,
@@ -132,7 +138,7 @@ int main(int argc, char **argv)
   unit_assert(true);
 
   double t = 0;
-  double dt = 0.1;
+  double dt = 0.000239579;
 
   unit_func("advance_block");
   ppm.advance_block(data_block,t,dt);
@@ -142,12 +148,12 @@ int main(int argc, char **argv)
   ppm.finalize_block(data_block);
   unit_assert(false);
 
-  monitor->image ("ppm-density-1",
-		  field_block->field_unknowns(index_density),
+  monitor->image ("ppm-density-1.png",
+		  field_block->field_values(index_density),
 		  default_precision,
-		  100,100,1,
+		  mx,my,mz,
 		  0,  0,  0,
-		  100,100,1,
+		  mx,my,mz,
 		  2,
 		  reduce_sum,
 		  0.0,1.0,

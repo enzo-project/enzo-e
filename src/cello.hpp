@@ -94,7 +94,8 @@ enum face_type {
   face_lower_y = 2,
   face_upper_y = 3,
   face_lower_z = 4,
-  face_upper_z = 5};
+  face_upper_z = 5,
+  face_all};
 
 /*********************************************************************
  * GLOBAL FUNCTIONS
@@ -102,6 +103,8 @@ enum face_type {
 
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
+
+#define INDEX(ix,iy,iz,nx,ny) ((ix)+(nx)*((iy)+(ny)*(iz)))
 
 /*********************************************************************
  * COMPONENTS

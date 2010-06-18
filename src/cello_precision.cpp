@@ -99,9 +99,6 @@ namespace cello {
     case precision_default:
       return ((Scalar *)(array))[index];
       break;
-    case precision_half:
-      return 0;
-      break;
     case precision_single:
       return ((float *)(array))[index];
       break;
@@ -109,17 +106,15 @@ namespace cello {
       return ((double *)(array))[index];
       break;
     case precision_extended80:
-      return ((long double *)(array))[index];
-      break;
     case precision_extended96:
-      return ((long double *)(array))[index];
-      break;
     case precision_quadruple:
       return ((long double *)(array))[index];
       break;
+    case precision_half:
     default:
       return 0;
       break;
     }
   }
+
 }

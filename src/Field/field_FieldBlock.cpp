@@ -323,8 +323,231 @@ void FieldBlock::deallocate_ghosts() throw ()
 
   } else {
     WARNING_MESSAGE("FieldBlock::deallocate_ghosts",
-		    "Deallocate called with ghosts already deallocated");
+		    "Function called with ghosts not allocated");
   }
+}
+
+//----------------------------------------------------------------------
+void FieldBlock::refresh_ghosts() throw()
+{
+  INCOMPLETE_MESSAGE("FieldBlock::refresh_ghosts","");
+  if ( ghosts_allocated() ) {
+  } else {
+    WARNING_MESSAGE("FieldBlock::refresh_ghosts",
+		    "Function called with ghosts not allocated");
+  }
+}
+
+//----------------------------------------------------------------------
+void FieldBlock::enforce_boundary
+(
+ boundary_type boundary,
+ face_type     face 
+ ) throw()
+{
+  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary","");
+  if ( ghosts_allocated() ) {
+    if (face == face_all) {
+      enforce_boundary(boundary,face_lower_x);
+      enforce_boundary(boundary,face_upper_x);
+      enforce_boundary(boundary,face_lower_y);
+      enforce_boundary(boundary,face_upper_y);
+      enforce_boundary(boundary,face_lower_z);
+      enforce_boundary(boundary,face_upper_z);
+    } else {
+      switch (boundary) {
+      case boundary_reflecting:
+	enforce_boundary_reflecting_(face);
+	break;
+      case boundary_outflow:
+	enforce_boundary_outflow_(face);
+	break;
+      case boundary_inflow:
+	enforce_boundary_inflow_(face);
+	break;
+      case boundary_periodic:
+	enforce_boundary_periodic_(face);
+	break;
+      case boundary_dirichlet:
+	enforce_boundary_dirichlet_(face);
+	break;
+      case boundary_neumann:
+	enforce_boundary_neumann_(face);
+	break;
+      default:
+	ERROR_MESSAGE("FieldBlock::enforce_boundary",
+		      "Undefined boundary type");
+	break;
+      }
+    }
+  } else {
+    ERROR_MESSAGE("FieldBlock::enforce_boundary",
+		  "Function called with ghosts not allocated");
+  }
+}
+
+//----------------------------------------------------------------------
+void FieldBlock::enforce_boundary_reflecting_(face_type face) throw()
+{
+  int nx,ny,nz;
+  int gx,gy,gz;
+  dimensions(&nx,&ny,&nz);
+  for (int field = 0; field < field_descr_->field_count(); field++) {
+    field_descr_->ghosts(field,&gx,&gy,&gz);
+    void * array = field_values(field);
+    precision_type precision = field_descr_->precision(field);
+    switch (precision) {
+    case precision_single:
+      enforce_boundary_reflecting_precision_(face,(float *)array,
+					     nx,ny,nz,
+					     gx,gy,gz);
+      break;
+    case precision_double:
+      enforce_boundary_reflecting_precision_(face,(double *)array,
+					     nx,ny,nz,
+					     gx,gy,gz);
+      break;
+    case precision_extended80:
+    case precision_extended96:
+    case precision_quadruple:
+      enforce_boundary_reflecting_precision_(face,(long double *)array,
+					     nx,ny,nz,
+					     gx,gy,gz);
+      break;
+    case precision_half:
+    default:
+      break;
+    }
+  }
+}
+
+template<class T>
+void FieldBlock::enforce_boundary_reflecting_precision_
+(face_type face, T * array,
+ int nx,int ny,int nz,
+ int gx,int gy,int gz)
+{
+  int mx = nx + 2*gx;
+  int my = ny + 2*gy;
+  int mz = nz + 2*gz;
+
+  int ix,iy,iz,ig;
+  switch (face) {
+  case face_lower_x:
+    if (nx > 1) {
+      ix = gx;
+      for (ig=0; ig<gx; ig++) {
+	for (iy=0; iy<my; iy++) {
+	  for (iz=0; iz<mz; iz++) {
+	    int i_internal = INDEX(ix+ig,  iy,iz,mx,my);
+	    int i_external = INDEX(ix-ig-1,iy,iz,mx,my);
+	    array[i_external] = array[i_internal];
+	  }
+	}
+      }
+    }
+    break;
+  case face_upper_x:
+    if (nx > 1) {
+      ix = nx+gx-1;
+      for (ig=0; ig<gx; ig++) {
+	for (iy=0; iy<my; iy++) {
+	  for (iz=gz; iz<mz; iz++) {
+	    int i_internal = INDEX(ix-ig,  iy,iz,mx,my);
+	    int i_external = INDEX(ix+ig+1,iy,iz,mx,my);
+	    array[i_external] = array[i_internal];
+	  }
+	}
+      }
+    }
+    break;
+  case face_lower_y:
+    if (ny > 1) {
+      iy = gy;
+      for (ig=0; ig<gy; ig++) {
+	for (ix=0; ix<mx; ix++) {
+	  for (iz=gz; iz<mz; iz++) {
+	    int i_internal = INDEX(ix,iy+ig,  iz,mx,my);
+	    int i_external = INDEX(ix,iy-ig-1,iz,mx,my);
+	    array[i_external] = array[i_internal];
+	  }
+	}
+      }
+    }
+    break;
+  case face_upper_y:
+    if (ny > 1) {
+      iy = ny+gy-1;
+      for (ig=0; ig<gy; ig++) {
+	for (ix=0; ix<mx; ix++) {
+	  for (iz=gz; iz<mz; iz++) {
+	    int i_internal = INDEX(ix,iy-ig,  iz,mx,my);
+	    int i_external = INDEX(ix,iy+ig+1,iz,mx,my);
+	    array[i_external] = array[i_internal];
+	  }
+	}
+      }
+    }
+    break;
+  case face_lower_z:
+    if (nz > 1) {
+      iz = gz;
+      for (ig=0; ig<gz; ig++) {
+	for (ix=0; ix<mx; ix++) {
+	  for (iy=0; iy<my; iy++) {
+	    int i_internal = INDEX(ix,iy,iz+ig,  mx,my);
+	    int i_external = INDEX(ix,iy,iz-ig-1,mx,my);
+	    array[i_external] = array[i_internal];
+	  }
+	}
+      }
+    }
+    break;
+  case face_upper_z:
+    if (nz > 1) {
+      iz = nz+gz-1;
+      for (ig=0; ig<gz; ig++) {
+	for (ix=0; ix<mx; ix++) {
+	  for (iy=0; iy<my; iy++) {
+	    int i_internal = INDEX(ix,iy,iz-ig,  mx,my);
+	    int i_external = INDEX(ix,iy,iz+ig+1,mx,my);
+	    array[i_external] = array[i_internal];
+	  }
+	}
+      }
+    }
+    break;
+  }
+}
+
+//----------------------------------------------------------------------
+void FieldBlock::enforce_boundary_outflow_(face_type face) throw()
+{
+  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_outflow","");
+}
+
+//----------------------------------------------------------------------
+void FieldBlock::enforce_boundary_inflow_(face_type face) throw()
+{
+  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_inflow","");
+}
+
+//----------------------------------------------------------------------
+void FieldBlock::enforce_boundary_periodic_(face_type face) throw()
+{
+  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_periodic","");
+}
+
+//----------------------------------------------------------------------
+void FieldBlock::enforce_boundary_dirichlet_(face_type face) throw()
+{
+  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_dirichlet","");
+}
+
+//----------------------------------------------------------------------
+void FieldBlock::enforce_boundary_neumann_(face_type face) throw()
+{
+  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_neumann","");
 }
 
 //----------------------------------------------------------------------
