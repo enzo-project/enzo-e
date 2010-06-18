@@ -17,7 +17,7 @@ FieldBlock::FieldBlock() throw()
     ghosts_allocated_(false)
 {
   for (int i=0; i<3; i++) {
-    dimensions_[i] = 0.0;
+    dimensions_[i] = 1;
     box_lower_[i]  = 0.0;
     box_upper_[i]  = 1.0;
   }

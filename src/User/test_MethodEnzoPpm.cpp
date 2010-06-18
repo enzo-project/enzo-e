@@ -12,8 +12,11 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "cello.hpp"
 #include "user.hpp"
 #include "error.hpp"
+#include "monitor.hpp"
+#include "parameters.hpp"
 #include "data.hpp"
 #include "parallel.hpp"
 #include "test.hpp"
@@ -26,7 +29,11 @@ int main(int argc, char **argv)
   Parallel * parallel = Parallel::instance();
   parallel->initialize(&argc,&argv);
 
+  Parameters * parameters = Parameters::instance();
+
   unit_init(parallel->process_rank(), parallel->process_count());
+
+  // Create data and field descriptors and blocks
 
   FieldDescr * field_descr = new FieldDescr;
   FieldBlock * field_block = new FieldBlock;
@@ -34,17 +41,69 @@ int main(int argc, char **argv)
   DataDescr * data_descr = new DataDescr (field_descr);
   DataBlock * data_block = new DataBlock (field_block);
 
-  field_descr->insert_field("density");
-  field_descr->insert_field("total_energy");
-  field_descr->insert_field("internal_energy");
-  field_descr->insert_field("velocity_x");
-  field_descr->insert_field("velocity_x");
-  field_descr->insert_field("density");
+  // Insert required fields
 
+  int index_density         = field_descr->insert_field("density");
+  int index_total_energy    = field_descr->insert_field("total_energy");
+  int index_internal_energy = field_descr->insert_field("internal_energy");
+  int index_velocity_x      = field_descr->insert_field("velocity_x");
+  int index_velocity_y      = field_descr->insert_field("velocity_y");
+
+  // Initialize field_block
+
+  int nx,ny,nz;
+  nx=100;
+  ny=100;
+  nz=1;
   field_block->set_field_descr(field_descr);
-  field_block->set_dimensions(16,16,16);
-  field_block->set_box_extent(0.0,1.0,0.0,1.0,0.0,1.0);
+  field_block->set_dimensions(nx,ny);
+  field_block->set_box_extent(0.0,0.3,0.0,0.3);
+
+  int gx,gy,gz;
+  gx=3;
+  gy=3;
+  gz=0;
+  field_descr->set_ghosts (0,gx,gy,gz);
+  field_descr->set_ghosts (1,gx,gy,gz);
+  field_descr->set_ghosts (2,gx,gy,gz);
+  field_descr->set_ghosts (3,gx,gy,gz);
+  field_descr->set_ghosts (4,gx,gy,gz);
   
+  field_block->allocate_array();
+  field_block->allocate_ghosts();
+  field_block->clear();
+
+  Scalar * d = (Scalar * ) field_block->field_values(index_density);
+  Scalar * vx = (Scalar * ) field_block->field_values(index_velocity_x);
+  Scalar * vy = (Scalar * ) field_block->field_values(index_velocity_y);
+  Scalar * te = (Scalar * ) field_block->field_values(index_internal_energy);
+
+  double hx = 0.3 / nx;
+  double hy = 0.3 / ny;
+
+  for (int iy=0+gy; iy<ny+gy; iy++) {
+    double y = (iy - gy + 0.5)*hy;
+    for (int ix=0+gy; ix<nx+gx; ix++) {
+      double x = (ix - gx + 0.5)*hx;
+      int i = ix + nx * iy;
+      if (x + y < 0.1517*(nx+ny)) {
+	d[i]  = 0.125;
+	vx[i] = 0;
+	vy[i] = 0;
+	te[i] = 0.14 / ((1.4 - 1.0) * d[i]);
+      } else {
+	d[i]  = 1.0;
+	vx[i] = 0;
+	vy[i] = 0;
+	te[i] = 1.0 / ((1.4 - 1.0) * d[i]);
+      }
+    }
+  }
+
+  // Set necessary parameters for MethodEnzoPpm
+
+  parameters->set_current_group("Physics");
+  parameters->set_integer ("dimensions",2);
 
   unit_class ("MethodEnzoPpm");
   MethodEnzoPpm ppm;
@@ -52,6 +111,21 @@ int main(int argc, char **argv)
   unit_func("initialize_method");
   ppm.initialize_method(data_descr);
   unit_assert(true);
+
+  Monitor * monitor = Monitor::instance();
+
+  double map1[] = {0,0,0, 1,1,1};
+
+  monitor->image ("ppm-density-0",
+		  field_block->field_unknowns(index_density),
+		  default_precision,
+		  100,100,1,
+		  0,  0,  0,
+		  100,100,1,
+		  2,
+		  reduce_sum,
+		  0.0,1.0,
+		  map1,2);
 
   unit_func("initialize_block");
   ppm.initialize_block(data_block);
@@ -67,6 +141,17 @@ int main(int argc, char **argv)
   unit_func("finalize_block");
   ppm.finalize_block(data_block);
   unit_assert(false);
+
+  monitor->image ("ppm-density-1",
+		  field_block->field_unknowns(index_density),
+		  default_precision,
+		  100,100,1,
+		  0,  0,  0,
+		  100,100,1,
+		  2,
+		  reduce_sum,
+		  0.0,1.0,
+		  map1,2);
 
   unit_func("refresh_face");
   ppm.refresh_face();

@@ -113,7 +113,7 @@ public: // interface
   void write(File * file, FieldDescr * field_descr = 0) const throw ();
 
   /// Set dimensions of the array block
-  void set_dimensions(int nx, int ny, int nz) throw();
+  void set_dimensions(int nx, int ny=1, int nz=1) throw();
 
   /// Set array values for a given field
   void set_field_values (int id_field, char * values) throw();

@@ -38,6 +38,9 @@ namespace cello {
 
   int precision_size     (enum precision_type);
   int precision_supported(enum precision_type);
+  int precision_supported(enum precision_type);
+  long double precision_array_value 
+  ( void * array, int index, enum precision_type precision );
 
   extern const char * precision_name[8];
 

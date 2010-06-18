@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['error','parallel', 'monitor']
+components = ['error','parallel', 'monitor', 'cello']
 libraries  = ['png','boost_thread-mt']
 
 env = env.Clone(LIBS=[components,libraries])

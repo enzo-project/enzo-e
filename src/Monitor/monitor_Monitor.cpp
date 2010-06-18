@@ -40,12 +40,13 @@ void Monitor::header ()
 
 void Monitor::image
 (std::string name, 
- Scalar * array, 
+ void * array, 
+ precision_type precision,
  int nx, int ny, int nz,
  int nx0, int ny0, int nz0,
  int nx1, int ny1, int nz1,
  int axis, reduce_type op_reduce,
- Scalar min, Scalar max, 
+ double min, double max, 
  const double * map, 
  int map_length)
 /**
@@ -53,6 +54,7 @@ void Monitor::image
  *
  * @param  name         File name
  * @param  array        Array of values to plot
+ * @param  precision    Precision of array elements
  * @param  nx,ny,nz     Size of the array
  * @param  nx0,ny0,nz0  Lower corner of the sub-array
  * @param  nx1,ny1,nz1  Upper bound on the sub-array
@@ -98,6 +100,8 @@ void Monitor::image
 
   // image x-axis
 
+  int imax = 0;
+  int imin = n3[0]*n3[1]*n3[2];
   for (int jx=0; jx<mx; jx++) {
 
     int ix = jx + mx0;
@@ -112,10 +116,12 @@ void Monitor::image
 
       // reduction axis
 
+      long double value = cello::precision_array_value(array,i,precision);
+
       // initialize reduction
       switch (op_reduce) {
-      case reduce_min: image[j] = array[i]; break;
-      case reduce_max: image[j] = array[i]; break;
+      case reduce_min: image[j] = value; break;
+      case reduce_max: image[j] = value; break;
       case reduce_avg: image[j] = 0; break;
       case reduce_sum: image[j] = 0; break;
       default:         image[j] = 0; break;
@@ -124,12 +130,13 @@ void Monitor::image
       for (int jz=0; jz<mz; jz++) {
 	int iz = jz + mz0;
 	i = n3[iax]*ix + n3[iay]*iy + n3[iaz]*iz;
+	long double value = cello::precision_array_value(array,i,precision);
 	// reduce along iaz axis
 	switch (op_reduce) {
-	case reduce_min: image[j] = MIN(array[i],image[j]); break;
-	case reduce_max: image[j] = MAX(array[i],image[j]); break;
-	case reduce_avg: image[j] += array[i]; break;
-	case reduce_sum: image[j] += array[i]; break;
+	case reduce_min: image[j] = MIN(value,image[j]); break;
+	case reduce_max: image[j] = MAX(value,image[j]); break;
+	case reduce_avg: image[j] += value; break;
+	case reduce_sum: image[j] += value; break;
 	default:         break;
 	}
       }
@@ -170,7 +177,11 @@ void Monitor::image
       // should be in bounds, but force if not due to rounding error
       if (v < lo) v = lo;
       if (v > hi) v = hi;
-      ASSERT ("Montor::image","v is out of range",lo <= v && v <= hi);
+      if ( ! (lo <= v && v <= hi)) {
+	char buffer [ ERROR_MESSAGE_LENGTH ];
+	sprintf (buffer,"v = %g is out of range [%g,%g]",v,lo,hi);
+	ERROR_MESSAGE("Montor::image",buffer);
+      }
 
       double ratio = (v - lo) / (hi-lo);
       double r = (1-ratio)*map[3*index+0] + ratio*map[3*(index+1)+0];

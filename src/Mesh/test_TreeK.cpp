@@ -122,7 +122,8 @@ void print_usage(int argc, char **argv)
   fprintf (stderr,"         <dimension>  = [2|3]\n");
   fprintf (stderr,"         <refinement> = [2|4|8|16]\n");
   fprintf (stderr,"\n");
-  exit(1);
+
+  parallel->abort();
 }
 //----------------------------------------------------------------------
 
@@ -274,7 +275,8 @@ void write_image(std::string filename, float * image, int nx, int ny, int nz)
     if (max < image[i]) max = image[i];
   }
   double color_map[] = {0,0,0,1,1,1};
-  monitor->image ((filename+".png").c_str(),image,nx,ny,1,0,0,0,nx,ny,1,2,reduce_sum,
+  monitor->image ((filename+".png").c_str(),image,precision_single,
+		  nx,ny,1,0,0,0,nx,ny,1,2,reduce_sum,
 		  min,max,color_map, 2);
 
 }

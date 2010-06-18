@@ -237,6 +237,7 @@ void MethodEnzoPpm::initialize_block ( DataBlock * data_block ) throw ()
 
   for (int field = 0; field < NumberOfBaryonFields; field++) {
     BaryonField[field] = (float *)field_block->field_values(field);
+    printf ("field %d %g\n",field,BaryonField[field][0]);
   }
 
 }
