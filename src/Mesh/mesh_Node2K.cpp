@@ -360,33 +360,33 @@ void Node2K::update_child_ (int ix, int iy)
     // XM-face neighbors
 
     if (ix > 0) {
-      make_neighbors (child (ix,iy), child (ix-1,iy),face_XM);
+      make_neighbors (child (ix,iy), child (ix-1,iy),face_lower_x);
     } else {
-      make_neighbors (child (ix,iy), cousin (face_XM,nx-1,iy),face_XM);
+      make_neighbors (child (ix,iy), cousin (face_lower_x,nx-1,iy),face_lower_x);
     }
 
-    // XP-face neighbors
+    // upper_x-face neighbors
 
     if (ix < nx-1) {
-      make_neighbors (child (ix,iy), child (ix+1,iy), face_XP);
+      make_neighbors (child (ix,iy), child (ix+1,iy), face_upper_x);
     } else {
-      make_neighbors (child (ix,iy), cousin (face_XP,0,iy), face_XP);
+      make_neighbors (child (ix,iy), cousin (face_upper_x,0,iy), face_upper_x);
     }
 
-    // YM-face neighbor
+    // lower_y-face neighbor
 
     if (iy > 0) {
-      make_neighbors (child (ix,iy), child (ix,iy-1),face_YM);
+      make_neighbors (child (ix,iy), child (ix,iy-1),face_lower_y);
     } else {
-      make_neighbors (child (ix,iy), cousin (face_YM,ix,ny-1),face_YM);
+      make_neighbors (child (ix,iy), cousin (face_lower_y,ix,ny-1),face_lower_y);
     }
 
-    // YP-face neighbor
+    // upper_y-face neighbor
 
     if (iy < ny-1) {
-      make_neighbors (child (ix,iy), child (ix,iy+1),face_YP);
+      make_neighbors (child (ix,iy), child (ix,iy+1),face_upper_y);
     } else {
-      make_neighbors (child (ix,iy), cousin (face_YP,ix,0),face_YP);
+      make_neighbors (child (ix,iy), cousin (face_upper_y,ix,0),face_upper_y);
     }
 
   }
@@ -417,20 +417,20 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
       for (int iy=0; iy<ny; iy++) {
 	refine_node = refine_node ||
-	  (cousin(face_XP,   0,iy) && 
-	   cousin(face_XP,   0,iy)->any_children() ) ||
-	  (cousin(face_XM,nx-1,iy) && 
-	   cousin(face_XM,nx-1,iy)->any_children() );
+	  (cousin(face_upper_x,   0,iy) && 
+	   cousin(face_upper_x,   0,iy)->any_children() ) ||
+	  (cousin(face_lower_x,nx-1,iy) && 
+	   cousin(face_lower_x,nx-1,iy)->any_children() );
       }
 
       // Y faces
 
       for (int ix=0; ix<nx; ix++) {
 	refine_node = refine_node ||
-	  (cousin(face_YP,ix,   0) && 
-	   cousin(face_YP,ix,   0)->any_children() ) ||
-	  (cousin(face_YM,ix,ny-1) && 
-	   cousin(face_YM,ix,ny-1)->any_children() );
+	  (cousin(face_upper_y,ix,   0) && 
+	   cousin(face_upper_y,ix,   0)->any_children() ) ||
+	  (cousin(face_lower_y,ix,ny-1) && 
+	   cousin(face_lower_y,ix,ny-1)->any_children() );
       }
 
       if (refine_node) {
@@ -471,51 +471,51 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
 	  if (! child(ix,iy)) {
 
-	    // XM-face neighbor
+	    // lower_x-face neighbor
 
 	    if (ix > 0 && child(ix-1,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
 		r = r || child(ix-1,iy)->child(nx-1,ky);
 	      }
-	    } else if (ix == 0 && cousin(face_XM,nx-1,iy)) {
+	    } else if (ix == 0 && cousin(face_lower_x,nx-1,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		r = r || cousin(face_XM,nx-1,iy)->child(nx-1,ky);
+		r = r || cousin(face_lower_x,nx-1,iy)->child(nx-1,ky);
 	      }
 	    }
 
-	    // XP-face neighbor
+	    // upper_x-face neighbor
 
 	    if (ix < nx-1 && child(ix+1,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
 		r = r || child(ix+1,iy)->child(0,ky);
 	      }
-	    } else if (ix == nx-1 && cousin(face_XP,0,iy)) {
+	    } else if (ix == nx-1 && cousin(face_upper_x,0,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		r = r || cousin(face_XP,0,iy)->child(0,ky);
+		r = r || cousin(face_upper_x,0,iy)->child(0,ky);
 	      }
 	    }
 
-	    // YM-face neighbor
+	    // lower_y-face neighbor
 
 	    if (iy > 0 && child(ix,iy-1)) {
 	      for (int kx=0; kx<nx; kx++) {
 		r = r || child(ix,iy-1)->child(kx,ny-1);
 	      }
-	    } else if (iy == 0 && cousin(face_YM,ix,ny-1)) {
+	    } else if (iy == 0 && cousin(face_lower_y,ix,ny-1)) {
 	      for (int kx=0; kx<nx; kx++) {
-		r = r || cousin(face_YM,ix,ny-1)->child(kx,ny-1);
+		r = r || cousin(face_lower_y,ix,ny-1)->child(kx,ny-1);
 	      }
 	    }
 
-	    // YP-face neighbor
+	    // upper_y-face neighbor
 
 	    if (iy < ny-1 && child(ix,iy+1)) {
 	      for (int kx=0; kx<nx; kx++) {
 		r = r || child(ix,iy+1)->child(kx,0);
 	      }
-	    } else if (iy == ny-1 && cousin(face_YP,ix,0)) {
+	    } else if (iy == ny-1 && cousin(face_upper_y,ix,0)) {
 	      for (int kx=0; kx<nx; kx++) {
-		r = r || cousin(face_YP,ix,0)->child(kx,0);
+		r = r || cousin(face_upper_y,ix,0)->child(kx,0);
 	      }
 	    }
 
