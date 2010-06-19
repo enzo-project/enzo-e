@@ -45,6 +45,7 @@ if (platform == 'linux-mpi'):
    serial_run   = ""
    env = Environment (
       CXX         = 'mpiCC',	
+      CPPDEFINES = ['NO_FREETYPE'],
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
 #      CPPFLAGS    = '-Wall -g  -m96bit-long-double',
       CPPPATH     = '#/include',
@@ -61,6 +62,7 @@ elif (platform == 'linux-mpi-valgrind'):
    serial_run   = "valgrind "
    env = Environment (
       CXX         = 'mpiCC',	
+      CPPDEFINES = ['NO_FREETYPE'],
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
 #      CPPFLAGS    = '-Wall -g  -m96bit-long-double',
       CPPPATH     = '#/include',
@@ -79,6 +81,7 @@ elif (platform == 'linux-ampi'):
    env = Environment(
       ENV         = os.environ,
       CXX         = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
+      CPPDEFINES = ['NO_FREETYPE'],
       CPPFLAGS    = '-Wall -g',
       CPPPATH     = '#/include',
       FORTRANPATH = '#/include',
@@ -96,6 +99,7 @@ elif (platform == 'triton'):
       ENV = {'PATH' : os.environ['PATH'],
 	       'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
       CXX     = 'mpicxx',	
+      CPPDEFINES = ['NO_FREETYPE'],
       CPPPATH = ['#/include', '/opt/pgi/hdf5_pgi/include'],
       LIBPATH = ['#/lib', '/opt/pgi/hdf5_pgi/lib'],
       BINPATH = '#/bin',
@@ -114,6 +118,7 @@ elif (platform == 'ncsa-bd'):
       BINPATH = '#/bin',
       CCFLAGS = '-O3 -qhot -q64 -D H5_USE_16_API',
       CC      = 'mpcc',	
+      CPPDEFINES = ['NO_FREETYPE'],
 #      CPPDEFPREFIX = '-WF,-D',
       CPPPATH = ['/home/bordner/include', '#/include'],
       CXX     = 'mpCC',	

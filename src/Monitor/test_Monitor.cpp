@@ -57,19 +57,6 @@ int main(int argc, char ** argv)
     }
   }
 
-  float test_single[3] = {0.5,1.5,2.5};
-  printf ("%Lf %Lf %Lf\n",
-	  cello::precision_array_value(test_single,0,precision_single),
-	  cello::precision_array_value(test_single,1,precision_single),
-	  cello::precision_array_value(test_single,2,precision_single));
-
-
-  double test_double[3] = {0.5,1.5,2.5};
-  printf ("%Lf %Lf %Lf\n",
-	  cello::precision_array_value(test_double,0,precision_double),
-	  cello::precision_array_value(test_double,1,precision_double),
-	  cello::precision_array_value(test_double,2,precision_double));
-
   unit_func("Monitor");
   unit_assert(true);
 
@@ -81,19 +68,19 @@ int main(int argc, char ** argv)
   array[n] = 1.0;
   array[n*n] = 1.0;
   array[n*n*n-1] = 1.0;
-  Monitor::instance()->image("test1.png",array,precision_single,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map1,2);
+  monitor->image("test1.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map1,2);
   unit_assert(true);
 
   double map2[] = {0,0,0, 1,0,0, 1,1,1};
-  Monitor::instance()->image("test2.png",array,precision_single,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map2,3);
+  monitor->image("test2.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map2,3);
   unit_assert(true);
 
   double map3[] = {0,0,0, 1,0,0, 0,1,0, 0,0,1, 1,1,1};
-  Monitor::instance()->image("test3.png",array,precision_single,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map3,5);
+  monitor->image("test3.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map3,5);
   unit_assert(true);
 
   double map4[] = {1,0,0, 1,1,0, 0,1,0, 0,1,1, 0,0,1, 1,0,1};
-  Monitor::instance()->image("test4.png",array,precision_single,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map4,6);
+  monitor->image("test4.png",array,n,n,n,0,0,0,n,n,n,0,reduce_sum,0,1,map4,6);
   unit_assert(true);
 
   parallel->finalize();

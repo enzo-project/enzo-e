@@ -15,6 +15,8 @@ namespace cello {
     "quadruple"
   };
 
+  //----------------------------------------------------------------------
+
   int precision_size(enum precision_type precision)
   {
     int size = 0;
@@ -77,40 +79,6 @@ namespace cello {
     case precision_quadruple:
       return (sizeof(long double)==16);
       break;
-    default:
-      return 0;
-      break;
-    }
-  }
-
-  //----------------------------------------------------------------------
-
-  long double precision_array_value 
-  (
-   void *              array, 
-   int                 index, 
-   enum precision_type precision
-   )
-  {
-    switch (precision) {
-    case precision_unknown:
-      return 0;
-      break;
-    case precision_default:
-      return ((Scalar *)(array))[index];
-      break;
-    case precision_single:
-      return ((float *)(array))[index];
-      break;
-    case precision_double:
-      return ((double *)(array))[index];
-      break;
-    case precision_extended80:
-    case precision_extended96:
-    case precision_quadruple:
-      return ((long double *)(array))[index];
-      break;
-    case precision_half:
     default:
       return 0;
       break;

@@ -123,8 +123,7 @@ int main(int argc, char **argv)
   field_block->enforce_boundary(boundary_reflecting);
 
   monitor->image ("ppm-density-0.png",
-		  field_block->field_values(index_density),
-		  default_precision,
+		  (Scalar *)field_block->field_values(index_density),
 		  mx,my,mz,
 		  0,  0,  0,
 		  mx,my,mz,
@@ -149,8 +148,7 @@ int main(int argc, char **argv)
   unit_assert(false);
 
   monitor->image ("ppm-density-1.png",
-		  field_block->field_values(index_density),
-		  default_precision,
+		  (Scalar *)field_block->field_values(index_density),
 		  mx,my,mz,
 		  0,  0,  0,
 		  mx,my,mz,
