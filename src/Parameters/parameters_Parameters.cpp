@@ -463,6 +463,7 @@ void Parameters::list_evaluate_scalar
  double    * z, 
  double    * t
  ) throw(ExceptionParametersBadType)
+/// @param   index     Index into the list
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
 /// @param   result    Output array of evaluated scalar expression list parameter element values if it exists, or deflt if not
@@ -495,6 +496,7 @@ void Parameters::list_evaluate_logical
    double    * y, 
    double    * z, 
    double    * t) throw(ExceptionParametersBadType)
+/// @param   index     Index into the list
 /// @param   parameter Parameter name
 /// @param   n         Length of variable arrays
 /// @param   result    Output array of evaluated logical expression list parameter element values if it exists, or deflt if not

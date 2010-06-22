@@ -12,7 +12,7 @@
 #include "parameters.hpp"
 #include "user_MethodEnzoPpm.hpp"
 
-#include "ppm/cello_hydro.h"
+#include "cello_hydro.h"
 
 //----------------------------------------------------------------------
 

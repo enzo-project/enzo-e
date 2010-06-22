@@ -14,6 +14,14 @@
 /// @brief    Counter value type
 typedef unsigned long long type_counter;
 
+enum item_type {
+  item_unknown,
+  item_attribute,
+  item_counter,
+  item_group,
+  item_region
+};
+
 class Performance {
 
   /// @class    Performance
@@ -22,15 +30,6 @@ class Performance {
   ///
   /// Performance data is organized into attributes, counters, groups, and
   /// regions. @@@
-
-  enum item_type {
-    item_unknown,
-    item_attribute,
-    item_counter,
-    item_group,
-    item_region
-  };
-
 
 public: // interface
 
@@ -143,7 +142,7 @@ private: // functions
 
   void new_item_ 
   (
-   enum item_type  item_type,
+   enum item_type  type,
    std::string item_type_name,
    unsigned id_item, 
    std::string item_name,

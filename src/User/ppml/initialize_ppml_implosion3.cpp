@@ -10,7 +10,7 @@
 
 const bool debug = false;
  
-void initialize_ppml_implosion3 (int size_param, int cycles_param)
+void initialize_ppml_implosion3 (int size_param)
 
 {
 
@@ -32,9 +32,6 @@ void initialize_ppml_implosion3 (int size_param, int cycles_param)
   PPMSteepeningParameter = 1;
 
   // Control
-
-  time_stop              = 10000;
-  cycle_stop             = cycles_param;
 
   CourantSafetyNumber    = 0.8;
   InitialRedshift        = 20;

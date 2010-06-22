@@ -3,5 +3,5 @@
 
 /// @file     particle.dir
 /// @brief    Efficiently represent groups of distributed particles on an Amr hierarchy 
-/// @defgroup Particle
+/// @defgroup Particle Particle
 /// @brief    Efficiently represent groups of distributed particles on an Amr hierarchy 

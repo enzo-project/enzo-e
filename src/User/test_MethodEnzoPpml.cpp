@@ -1,7 +1,7 @@
-// $Id: test_enzo_method_ppml.cpp 1262 2010-03-03 15:44:05Z bordner $
+// $Id: test_MethodEnzoPpml.cpp 1262 2010-03-03 15:44:05Z bordner $
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file     test_enzo_method_ppml.cpp
+/// @file     test_MethodEnzoPpml.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Apr  1 16:19:18 PDT 2010
 /// @brief    Unit tests for the EnzoMethodPpml class

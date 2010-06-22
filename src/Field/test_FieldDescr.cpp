@@ -1,7 +1,7 @@
 // $Id: test_field.cpp 1412 2010-05-05 00:10:09Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Field.cpp
+/// @file     test_FieldDescr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
 /// @brief    Test program for the FieldDescr class

@@ -3,5 +3,5 @@
 
 /// @file     portal.dir
 /// @brief    Interface with other applications, including querying state, modifying parameters, and post-visualization 
-/// @defgroup Portal
+/// @defgroup Portal Portal
 /// @brief    Interface with other applications, including querying state, modifying parameters, and post-visualization 

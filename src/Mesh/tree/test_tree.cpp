@@ -37,7 +37,6 @@ const int  max_level = 10;
 //----------------------------------------------------------------------
 
 int * create_level_array (int * n0, int * n1, int max_levels)
-/// @func     create_level_array
 /// @brief    Read the gimp-generated image data in "image.h" into a level array with values 0 <= x < max_levels
 /// @param    n0        Output width parameter (equals n1)
 /// @param    n1        Output height parameter (equals n0)
@@ -80,7 +79,9 @@ void write_image(float * image, int nx, int ny, int k, int full, int step)
 /// @param    image     Image array to write to file
 /// @param    nx        Image width
 /// @param    ny        Image height
-/// @param    filename  Name of HDF5 file to write
+/// @param    k         Refinement factor
+/// @param    full      Whether all tree nodes are fully refined
+/// @param    step      Step in the refinement process
 
 {
   FileHdf5 hdf5;

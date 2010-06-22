@@ -3,5 +3,5 @@
 
 /// @file     task.dir
 /// @brief    Encapsulates Methods and data on an Array for a single process / thread 
-/// @defgroup Task
+/// @defgroup Task Task
 /// @brief    Encapsulates Methods and data on an Array for a single process / thread 

@@ -702,18 +702,16 @@ void Node2K::geomview
  FILE * fpr,
  double nxm, double nxp,  
  double nym, double nyp,
- double lowz, double upz,
+ double nzm, double nzp,
  bool full )
 /// @param    fpr       File pointer of geomview file opened for output
-/// @param    nxm      Lowest x-index of this node
+/// @param    nxm       Lowest x-index of this node
 /// @param    nxp       Upper bound on x-index of this node (warning: different meanings)
-/// @param    nym      Lowest y-index of this node (warning: different meanings)
+/// @param    nym       Lowest y-index of this node (warning: different meanings)
 /// @param    nyp       Upper bound on y-index of this node (warning: different meanings)
-/// @param    nym      Lowest y-index of this node (warning: different meanings)
-/// @param    nyp       Upper bound on y-index of this node (warning: different meanings)
-/// @param    level     Level of this node
-/// @param    num_levels Total number of levels
-/// @param    line_width Width of lines bounding nodes
+/// @param    nzm       Lowest z-index of this node (warning: different meanings)
+/// @param    nzp       Upper bound on z-index of this node (warning: different meanings)
+/// @param    full      Whether a refined node is always fully refined
 {
 
   if (full) {
@@ -728,22 +726,22 @@ void Node2K::geomview
     fprintf (fpr,"1 1 1\n");
 
   }
-  fprintf (fpr,"%g %g %g\n",nxm,nym,lowz);
-  fprintf (fpr,"%g %g %g\n",nxp,nym,lowz);
-  fprintf (fpr,"%g %g %g\n",nxp,nyp,lowz);
-  fprintf (fpr,"%g %g %g\n",nxm,nyp,lowz);
-  fprintf (fpr,"%g %g %g\n",nxm,nym,lowz);
-  fprintf (fpr,"%g %g %g\n",nxm,nym,upz);
-  fprintf (fpr,"%g %g %g\n",nxp,nym,upz);
-  fprintf (fpr,"%g %g %g\n",nxp,nym,lowz);
-  fprintf (fpr,"%g %g %g\n",nxm,nyp,lowz);
-  fprintf (fpr,"%g %g %g\n",nxm,nyp,upz);
-  fprintf (fpr,"%g %g %g\n",nxm,nym,upz);
-  fprintf (fpr,"%g %g %g\n",nxp,nyp,lowz);
-  fprintf (fpr,"%g %g %g\n",nxp,nyp,upz);
-  fprintf (fpr,"%g %g %g\n",nxp,nym,upz);
-  fprintf (fpr,"%g %g %g\n",nxm,nyp,upz);
-  fprintf (fpr,"%g %g %g\n",nxp,nyp,upz);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,nzm);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,nzm);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,nzm);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,nzp);
+  fprintf (fpr,"%g %g %g\n",nxm,nym,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,nzm);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nym,nzp);
+  fprintf (fpr,"%g %g %g\n",nxm,nyp,nzp);
+  fprintf (fpr,"%g %g %g\n",nxp,nyp,nzp);
 
   if (full) {
     fprintf (fpr,"1 1 1 1\n");
@@ -766,7 +764,7 @@ void Node2K::geomview
 	  (fpr,
 	   xk[ix],xk[ix+1], 
 	   yk[iy],yk[iy+1],
-	   lowz+0.25,upz+0.25,false);
+	   nzm+0.25,nzp+0.25,false);
       }
     }
   }

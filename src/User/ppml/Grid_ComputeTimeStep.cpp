@@ -29,23 +29,6 @@ void my_exit(int status);
 
 int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);
 int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
-extern "C" void FORTRAN_NAME(calc_dt)(
-                  int *rank, int *idim, int *jdim, int *kdim,
-                  int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
-			     int *ihydro, float *C2,
-                  ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz, float *vgx, float *vgy,
-                             float *vgz, float *gamma, int *ipfree, float *aye,
-                  float *d, float *p, float *u, float *v, float *w,
-			     float *dt, float *dtviscous);
- 
-extern "C" void FORTRAN_NAME(calc_dt_ppml)(
-                  int *idim, int *jdim, int *kdim,
-                  int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
-                  ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz,
-                  float *dn, float *vx, float *vy, float *vz, 
-                             float *bx, float *by, float *bz, 
-			     float *dt);
- 
  
 float ComputeTimeStep()
 {

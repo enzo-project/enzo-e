@@ -1,16 +1,18 @@
 // $Id$
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file      test_hydro.cpp
+/// @file      test_ppml.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @todo      Replace image_dump() with Monitor::image()
 /// @date      Fri Mar  7 17:11:14 PST 2008
 /// @brief     Program implementing unit tests for hydrodynamics
 
+#include <mpi.h>
+
 #include "cello.hpp" 
+#include "cello_hydro.h"
 
 #include "string.h"
-#include "cello_hydro.h"
 #include "test_ppml.h"
 #include "parallel.hpp"
 #include "performance.hpp"
@@ -19,7 +21,7 @@
 
 void print_usage(const char * name)
 {
-  printf ("Usage: %s <blast|implosion3> [size] [cycles] [dump-frequency]\n",
+  printf ("usage: %s <ppml-blast|ppml-implosion3> [size] [cycles] [dump-frequency]\n",
 	  name);
   exit(1);
 }
@@ -29,11 +31,13 @@ void print_usage(const char * name)
 int main(int argc, char * argv[])
 {
 
-  // Initialize parallelism
+  // initialize parallelism
 
-  Parallel::instance()->initialize(&argc,&argv);
+  Parallel * parallel = Parallel::instance();
 
-  enum problem_ppml_type problem = problem_ppml_unknown;
+  parallel->initialize(&argc,&argv);
+
+  // Check command line arguments
 
   if (argc < 2) {
     print_usage(argv[0]);
@@ -41,7 +45,9 @@ int main(int argc, char * argv[])
 
   int argi = 0;
 
-  // Problem type
+  // Parse command line arguments
+
+  enum problem_ppml_type problem = problem_ppml_unknown;
 
   if (argc > ++argi) {
     for (int i=0; i<num_problems; i++) {
@@ -54,23 +60,28 @@ int main(int argc, char * argv[])
 
   int size = problem_size[problem];
   if (argc > ++argi) size = atoi(argv[argi]);
-  int cycles = problem_cycles[problem];
-  if (argc > ++argi) cycles = atoi(argv[argi]);
+  int cycle_stop = problem_cycles[problem];
+  if (argc > ++argi) cycle_stop = atoi(argv[argi]);
   int dump_frequency = 10;
   if (argc > ++argi) dump_frequency = atoi(argv[argi]);
 
   printf ("problem = %s  size = %d  cycles = %d  dump_frequency = %d\n",
-	  problem_name[problem], size, cycles, dump_frequency);
+	  problem_name[problem], size, cycle_stop, dump_frequency);
+
+  // Initialize for generic hydrodynamics
 
   initialize_hydro ();
 
+  // Initialize for specific problem type
+
+  float  time_stop  = 2.5;
 
   switch (problem) {
   case problem_ppml_blast:
-    initialize_ppml(size,cycles);
+    initialize_ppml(size);
     break;
   case problem_ppml_implosion3:
-    initialize_ppml_implosion3(size,cycles);
+    initialize_ppml_implosion3(size);
     break;
   default:
     print_usage(argv[0]);
@@ -91,7 +102,7 @@ int main(int argc, char * argv[])
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
-    dt =  MIN (ComputeTimeStep(), time_stop - time);
+    dt =  MIN(ComputeTimeStep(), time_stop - time);
 
     SetExternalBoundaryValues();
 
@@ -106,12 +117,13 @@ int main(int argc, char * argv[])
 
   }
 
-  printf ("%d %d %g\n",size+6,cycles,timer.value());
+  printf ("%d %d %g\n",size+6,cycle_stop,timer.value());
   fflush(stdout);
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     SetExternalBoundaryValues();
     image_dump(problem_name[problem],cycle,lower,upper);
   }
+  parallel->finalize();
 }
 

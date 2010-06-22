@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file      sum_grid.cpp
+/// @file      sum_field.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Sat Aug 29 23:45:03 PDT 2009
 /// @brief     Return the sum of the internal values of the grid array

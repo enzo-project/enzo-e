@@ -10,7 +10,7 @@
 #include "method.hpp"
 #include "user.hpp"
 #include "error.hpp"
-#include "ppm/cello_hydro.h"
+#include "cello_hydro.h"
 
 //----------------------------------------------------------------------
 

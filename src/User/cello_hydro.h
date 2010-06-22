@@ -252,8 +252,8 @@ void initialize_image ();
 
 // PPML
 
-void initialize_ppml (int size, int cycles);
-void initialize_ppml_implosion3 (int size, int cycles);
+void initialize_ppml (int size);
+void initialize_ppml_implosion3 (int size);
 
 float sum_field (int field);
 float print_field (int field);
@@ -267,6 +267,7 @@ void image_dump (const char * file_root,
 // timestep
 int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);
 int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
+
 extern "C" void FORTRAN_NAME(calc_dt)(
                   int *rank, int *idim, int *jdim, int *kdim,
                   int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
@@ -274,4 +275,13 @@ extern "C" void FORTRAN_NAME(calc_dt)(
 		  float *gamma, int *ipfree, float *aye,
                   float *d, float *p, float *u, float *v, float *w,
 			     float *dt, float *dtviscous);
+ 
+ 
+extern "C" void FORTRAN_NAME(calc_dt_ppml)(
+                  int *idim, int *jdim, int *kdim,
+                  int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
+                  ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz,
+                  float *dn, float *vx, float *vy, float *vz, 
+                             float *bx, float *by, float *bz, 
+			     float *dt);
  

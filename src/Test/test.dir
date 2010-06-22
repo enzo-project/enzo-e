@@ -3,5 +3,5 @@
 
 /// @file     test.dir
 /// @brief    Unit testing framework 
-/// @defgroup Test
+/// @defgroup Test Test
 /// @brief    Unit testing framework 

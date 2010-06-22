@@ -3,5 +3,5 @@
 
 /// @file      monitor.dir
 /// @brief     User interface to monitor the status of a running simulation 
-/// @defgroup  Monitor
+/// @defgroup  Monitor Monitor
 /// @brief     User interface to monitor the status of a running simulation 

@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file      test_hydro.cpp
+/// @file      test_ppm.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @todo      Replace image_dump() with Monitor::image()
 /// @date      Fri Mar  7 17:11:14 PST 2008
@@ -12,9 +12,8 @@
 #include "cello.hpp"
 #include "cello_hydro.h"
 
-#include "test_ppm.h"
 #include "string.h"
-
+#include "test_ppm.h"
 #include "parallel.hpp"
 #include "performance.hpp"
 
@@ -23,7 +22,7 @@
 
 void print_usage(const char * name)
 {
-  printf ("Usage: %s <image|implosion|implosion3> [size] [cycles] [dump-frequency]\n",name);
+  printf ("Usage: %s <ppm-image|ppm-implosion|ppm-implosion3> [size] [cycles] [dump-frequency]\n",name);
   exit(1);
 }
 
@@ -39,7 +38,6 @@ int main(int argc, char ** argv)
   parallel->initialize(&argc,&argv);
 
   // Check command line arguments
-
 
   if (argc < 2) {
     print_usage(argv[0]);
@@ -67,7 +65,7 @@ int main(int argc, char ** argv)
   int dump_frequency = 10;
   if (argc > ++argi) dump_frequency = atoi(argv[argi]);
 
-  printf ("problem = %s  size = %d  cycle_stop = %d  dump_frequency = %d\n",
+  printf ("problem = %s  size = %d  cycles = %d  dump_frequency = %d\n",
 	  problem_name[problem], size, cycle_stop, dump_frequency);
 
   // Initialize for generic hydrodynamics

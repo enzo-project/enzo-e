@@ -13,7 +13,7 @@
 #include "pngwriter.h"
 #include "error.hpp"
 
-/// @enum     enum_reduce
+/// @enum     reduce_type
 /// @brief    Reduction operator, used for image projections
 enum reduce_type {
   reduce_unknown, /// Unknown reduction

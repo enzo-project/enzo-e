@@ -3,5 +3,5 @@
 
 /// @file     distribute.dir
 /// @brief    Distribute (and dynamically redistribute) Tasks among nodes and processes 
-/// @defgroup Distribute
+/// @defgroup Distribute Distribute
 /// @brief    Distribute (and dynamically redistribute) Tasks among nodes and processes 

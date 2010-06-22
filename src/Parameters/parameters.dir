@@ -3,5 +3,5 @@
 
 /// @file     parameters.dir
 /// @brief    Input, parse, store, and access run-time parameters
-/// @defgroup Parameters
+/// @defgroup Parameters Parameters
 /// @brief    Input, parse, store, and access run-time parameters

@@ -21,9 +21,10 @@ void MethodUser::add_argument_
  access_type   access_type,
  DataDescr   * data_descr
  ) throw()
-/// @param         argument  Type of argument, field or particle
-/// @param         argument_name  Name of the argument, e.g. "Density"
-/// @param         access_type    Access type of the argument, e.g. read, write
+/// @param    argument       Type of argument, field or particle
+/// @param    argument_name  Name of the argument, e.g. "Density"
+/// @param    access_type    Access type of the argument, e.g. read, write
+/// @param    data_descr     The data descriptor
 {
 
   // Monitor output

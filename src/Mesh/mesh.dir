@@ -3,5 +3,5 @@
 
 /// @file      mesh.dir
 /// @brief     Adaptive mesh refinement infrastructure, built on top of Array 
-/// @defgroup  Mesh
+/// @defgroup  Mesh Mesh
 /// @brief     Adaptive mesh refinement infrastructure, built on top of Array 

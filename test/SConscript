@@ -76,8 +76,8 @@ env.RunParallel('cello_implosion.out',    '#/bin/cello',      ARGS='input/implos
 
 env.RunSerial('test_MethodEnzoPpm.out', '#/bin/test_MethodEnzoPpm')
 
-env.RunSerial('test_enzo_ppm.out', '#/bin/test_enzo_ppm')
-env.RunSerial('test_enzo_ppml.out','#/bin/test_enzo_ppml')
+# env.RunSerial('test_enzo_ppm.out', '#/bin/test_enzo_ppm')
+# env.RunSerial('test_enzo_ppml.out','#/bin/test_enzo_ppml')
 
 # env.RunSerial('Array.unit','test_tree')
 # env.RunSerial('Array.unit','test_tree_k')

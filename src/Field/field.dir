@@ -3,5 +3,5 @@
 
 /// @file     field.dir
 /// @brief    Scalar fields on an Array or Amr hierarchy  
-/// @defgroup Field
+/// @defgroup Field Field
 /// @brief    Scalar fields on an Array or Amr hierarchy  

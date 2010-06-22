@@ -3,5 +3,5 @@
 
 /// @file     method.dir
 /// @brief    Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and visualization
-/// @defgroup Method
+/// @defgroup Method Method
 /// @brief    Modularized hyperbolic, elliptic, or local physics algorithms, analysis, and visualization

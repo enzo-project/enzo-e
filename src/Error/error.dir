@@ -3,5 +3,5 @@
 
 /// @file     error.dir
 /// @brief    Error prevention (including check-pointing), error detection and recovery 
-/// @defgroup Error
+/// @defgroup Error Error
 /// @brief    Error prevention (including check-pointing), error detection and recovery 

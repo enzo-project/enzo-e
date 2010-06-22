@@ -33,7 +33,7 @@
 #define INCOMPLETE_MESSAGE(FUNCTION,MESSAGE) \
   Error::instance()->incomplete_(__FILE__,__LINE__,FUNCTION,MESSAGE)
 
-/// @def      TRACE
+/// @def      TRACE_MESSAGE
 /// @brief    Trace file name and location to stdout
 #define TRACE_MESSAGE					\
   Error::instance()->trace_(__FILE__,__LINE__)

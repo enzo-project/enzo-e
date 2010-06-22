@@ -3,5 +3,5 @@
 
 /// @file     memory.dir
 /// @brief    Manage dynamic memory allocation and deallocation 
-/// @defgroup Memory
+/// @defgroup Memory Memory
 /// @brief    Manage dynamic memory allocation and deallocation 

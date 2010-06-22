@@ -3,5 +3,5 @@
 
 /// @file     simulation.dir
 /// @brief    Specifies the problem(s) to run 
-/// @defgroup Simulation
+/// @defgroup Simulation Simulation
 /// @brief    Specifies the problem(s) to run 

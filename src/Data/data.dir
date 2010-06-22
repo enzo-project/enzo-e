@@ -3,6 +3,6 @@
 
 /// @file     data.dir
 /// @brief    Container for all data types (Particles, Arrays, etc.)
-/// @defgroup Data
+/// @defgroup Data Data
 /// @brief    Container for all data types (Particles, Arrays, etc.)
 

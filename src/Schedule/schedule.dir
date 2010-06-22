@@ -3,5 +3,5 @@
 
 /// @file     schedule.dir
 /// @brief    Schedules Tasks to advance the Simulation in time
-/// @defgroup Schedule
+/// @defgroup Schedule Schedule
 /// @brief    Schedules Tasks to advance the Simulation in time

@@ -18,21 +18,18 @@
 
 //----------------------------------------------------------------------
 
-/// @fun print_expression
 /// @brief Print a parameter expression
 extern "C" { 
   void print_expression(struct node_expr * node,
 		      FILE * fp = stdout);
 }
 
-/// @fun print_expression
 /// @brief Print a parameter expression
 extern "C" { 
   void sprintf_expression(char * buffer,
 			  struct node_expr * node);
 }
 
-/// @fun cello_parameters_print_list
 /// @brief Print a parameter list
 extern "C" { 
   void cello_parameters_print_list(struct param_struct * head, int level);

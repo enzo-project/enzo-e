@@ -11,8 +11,9 @@ env = env.Clone(LIBS = [components,libraries])
 sources = [
 	'cello_hydro.cpp',
         Glob('Cosmology*cpp'),
-	'data_dump.cpp',
-	'image_dump.cpp',
+	'../data_dump.cpp',
+	'../image_dump.cpp',
+        '../initialize_hydro.cpp',
         Glob('Grid_*cpp'),
         Glob('initialize_*cpp'),
 	'PPML_Conservative.F',

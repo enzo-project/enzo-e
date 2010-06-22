@@ -3,5 +3,5 @@
 
 /// @file     parallel.dir
 /// @brief    Low-level functions for facilitating data distribution, communication, and load balancing
-/// @defgroup  Parallel
+/// @defgroup  Parallel Parallel
 /// @brief    Low-level functions for facilitating data distribution, communication, and load balancing

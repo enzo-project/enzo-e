@@ -9,25 +9,25 @@
 ///
 ///     Returns the cosmology units:
 ///     
-///              time:        utim = 1 / sqrt(4 * \pi * G * \rho_0 * (1+zri)^3)
-///              density:     urho = \rho_0 * (1+z)^3
+///              time:        utim = 1 / sqrt(4 * pi * G * rho_0 * (1+zri)^3)
+///              density:     urho = rho_0 * (1+z)^3
 ///              length:      uxyz = (1 Mpc) * box / h  (1+z)
 ///              velocity:    uvel = uaye * uxyz / utim  (since u = a * dx/dt)
-///         (*)  temperature: utem = m_H * \mu / k * uvel**2
+///         (*)  temperature: utem = m_H * mu / k * uvel**2
 ///              a(t):        uaye = 1 / (1 + zri)
 ///
 ///                where:
 ///                  box     - size of simulation box in Mpc/h
 ///                  zri     - initial redshift (start of simulation)
-///                  \rho_0  = 3*\Omega_0*H_0^2/(8*\pi*G)
+///                  rho_0  = 3*Omega_0*H_0^2/(8*pi*G)
 ///                  Omega_0 - the fraction of non-relativistic matter at z=0
 ///     
 ///                Note that two definitions are dependent on redshift (urho
 ///                  and uxyz) so make sure to call this routine immediately
 ///                  before writing.
 ///
-///                * - the utem given below assumes that \mu = 1, so you must
-///                    multiply the resulting temperature field by \mu.
+///                * - the utem given below assumes that mu = 1, so you must
+///                    multiply the resulting temperature field by mu.
  
 #include "cello_hydro.h"
 
