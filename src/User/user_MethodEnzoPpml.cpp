@@ -14,12 +14,8 @@
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::initialize_method(DataDescr * data_descr) throw()
+void MethodEnzoPpml::initialize(DataDescr * data_descr) throw()
 {
-  // Register method name
-
-  method_name_ = "ppml";
-
   // Specify arguments
 
   add_argument_(argument_field, "density",    access_read_write);
@@ -61,7 +57,7 @@ void MethodEnzoPpml::initialize_method(DataDescr * data_descr) throw()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::finalize_method(DataDescr * data_descr) throw()
+void MethodEnzoPpml::finalize(DataDescr * data_descr) throw()
 {}
 
 //----------------------------------------------------------------------
@@ -81,13 +77,6 @@ void MethodEnzoPpml::advance_block(DataBlock * data_block,
 				   double t,double dt) throw()
 {
   INCOMPLETE_MESSAGE("MethodEnzoPpml::advance_block","");
-}
-
-//----------------------------------------------------------------------
-
-void MethodEnzoPpml::refresh_face() throw()
-{
-  INCOMPLETE_MESSAGE("MethodEnzoPpml::refresh_face","");
 }
 
 //----------------------------------------------------------------------

@@ -13,7 +13,7 @@
 #include <string>
 #include "method.hpp"
 
-class MethodEnzoPpml : public MethodHyperbolic {
+class MethodEnzoPpml : public MethodUserHyperbolic {
 
   /// @class    MethodEnzoPpml
   /// @ingroup  Enzo
@@ -23,12 +23,12 @@ public: // interface
 
   /// Perform any method-specific initialization
 
-  void initialize_method(DataDescr * data_descr) throw();
+  void initialize(DataDescr * data_descr) throw();
 
   /// Perform any method-specific finalizations steps, e.g. to
   /// deallocate any dynamically-allocated memory
 
-  void finalize_method(DataDescr * data_descr) throw();
+  void finalize(DataDescr * data_descr) throw();
 
   /// Initialize PPM variable that may change.  Called once per
   /// block per timestep.
@@ -45,11 +45,11 @@ public: // interface
   void advance_block( DataBlock * data_block,
 			      double t, double dt ) throw(); 
 
-  /// Refresh a block face's boundary / ghost zones given neighboring
-  /// block face(s)
+  /// Return the name of the method
 
-  void refresh_face() throw();
-
+  virtual std::string method_name() const throw() 
+  { return "ppm"; };
+  
 private: // attributes
 
 

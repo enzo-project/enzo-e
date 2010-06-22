@@ -13,6 +13,7 @@
 #include <math.h>
 
 #include "cello.hpp"
+#include "method.hpp"
 #include "user.hpp"
 #include "error.hpp"
 #include "monitor.hpp"
@@ -109,11 +110,18 @@ int main(int argc, char **argv)
   parameters->set_current_group("Physics");
   parameters->set_integer ("dimensions",2);
 
-  unit_class ("MethodEnzoPpm");
-  MethodEnzoPpm ppm;
+  MethodDescr method_descr;
 
-  unit_func("initialize_method");
-  ppm.initialize_method(data_descr);
+  method_descr.add_method_user("ppm");
+  MethodUser * ppm = method_descr.method_user(0);
+
+  method_descr.set_method_control("ignored");
+  method_descr.set_method_timestep("ignored");
+
+  unit_class ("MethodEnzoPpm");
+
+  unit_func("initialize");
+  ppm->initialize(data_descr);
   unit_assert(true);
 
   Monitor * monitor = Monitor::instance();
@@ -133,18 +141,18 @@ int main(int argc, char **argv)
 		  map1,2);
 
   unit_func("initialize_block");
-  ppm.initialize_block(data_block);
+  ppm->initialize_block(data_block);
   unit_assert(true);
 
   double t = 0;
   double dt = 0.000239579;
 
   unit_func("advance_block");
-  ppm.advance_block(data_block,t,dt);
+  ppm->advance_block(data_block,t,dt);
   unit_assert(false);
 
   unit_func("finalize_block");
-  ppm.finalize_block(data_block);
+  ppm->finalize_block(data_block);
   unit_assert(false);
 
   monitor->image ("ppm-density-1.png",
@@ -157,12 +165,11 @@ int main(int argc, char **argv)
 		  0.0,1.0,
 		  map1,2);
 
-  unit_func("refresh_face");
-  ppm.refresh_face();
+  unit_func("refresh_block");
   unit_assert(false);
 
-  unit_func("finalize_method");
-  ppm.finalize_method(data_descr);
+  unit_func("finalize");
+  ppm->finalize(data_descr);
   unit_assert(false);
 
   unit_finalize();

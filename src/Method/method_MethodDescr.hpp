@@ -9,6 +9,8 @@
 /// @date     2010-05-11
 /// @brief    Declaration of the MethodDescr class
 
+#include "error.hpp"
+
 class MethodDescr {
 
   /// @class    MethodDescr
@@ -19,27 +21,62 @@ public: // interface
 
   /// Constructor
   MethodDescr() throw()
-  : sequence_(0)
+    : method_control_(0),
+      method_timestep_(0),
+      method_user_(0)
   {};
 
-  /// Add a method
-  void add_method (std::string method_name)
-  { Method * method = create_method_(method_name);
-    if (method) sequence_.push_back(method); 
+  /// Add a user method
+  void add_method_user (std::string method_name)
+  { MethodUser * method = create_method_user_(method_name);
+    if (method) method_user_.push_back(method); 
   };
 
-  /// Get ith method
-  Method * operator [] (int i)
-  { return sequence_.at(i); };
+  /// Return the ith user method
+  MethodUser * method_user (int i)
+  { return method_user_.at(i); };
+
+
+  /// Set the control method
+  void set_method_control (std::string name_method_control)
+  {
+    ASSERT("MethodDescr::set_method_control",
+	   "",method_control_ != 0);
+    method_control_ = create_method_control_(name_method_control);
+  };
+
+  /// Return the control method
+  MethodControl * method_control (int i)
+  { return method_control_; };
+
+  /// Return the timestep method
+  void set_method_timestep (std::string name_method_timestep)
+  {
+    ASSERT("MethodDescr::set_method_timestep",
+	   "",method_timestep_ != 0);
+    method_timestep_ = create_method_timestep_(name_method_timestep);
+  };
+
+  /// Return the timestep method
+  MethodTimestep * method_timestep (int i)
+  { return method_timestep_; };
 
 private: // functions
 
-  /// Create named method.  IMPLEMENTATION IN USER SPACE
-  Method * create_method_ (std::string method_name);
+  /// Create named control method.  IMPLEMENTATION IN USER SPACE
+  MethodControl * create_method_control_ (std::string name_method_control);
+
+  /// Create named timestep method.  IMPLEMENTATION IN USER SPACE
+  MethodTimestep * create_method_timestep_ (std::string name_method_timestep);
+
+  /// Create named user method.  IMPLEMENTATION IN USER SPACE
+  MethodUser * create_method_user_ (std::string name_method_user);
 
 private: // attributes
 
-  std::vector<Method *> sequence_;
+  MethodControl *           method_control_;
+  MethodTimestep *          method_timestep_;
+  std::vector<MethodUser *> method_user_;
 
 };
 

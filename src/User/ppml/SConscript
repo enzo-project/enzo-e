@@ -27,8 +27,7 @@ sources = [
 	'PPML_TimeStep.F',
 	'SetExternalBoundary.cpp']
 
-binaries  = [env.Program (['test_ppml.cpp',      sources]),	
-             env.Program (['test_enzo_ppml.cpp', sources])]
+binaries  = [env.Program (['test_ppml.cpp',      sources])]
 
 libraries = env.Library ('user-ppml', sources)
 

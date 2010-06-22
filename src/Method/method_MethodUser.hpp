@@ -1,10 +1,10 @@
-// $Id: method.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: method_MethodUser.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_Method.hpp 
+/// @file     method_MethodUser.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the Method component
+/// @brief    Declaration for the MethodUser component
 
 #ifndef METHOD_METHOD_HPP
 #define METHOD_METHOD_HPP
@@ -29,27 +29,30 @@ enum access_type {
 };
 
 
-class Method {
+class MethodUser {
 
-  /// @class    Method
+  /// @class    MethodUser
   /// @ingroup  Method
   /// @brief    Encapsulate external method / analysis / visualization function.
 
 public: // interface
 
-  /// Create a new Method
-  Method() throw();
+  /// Create a new MethodUser
+  MethodUser() throw()
+  {};
+
+  /// Return the corresponding MethodControl pointer
 
 public: // virtual functions
 
   /// Perform any method-specific initialization
 
-  virtual void initialize_method(DataDescr * data_descr) throw() = 0;
+  virtual void initialize (DataDescr * data_descr) throw() = 0;
 
   /// Perform any method-specific finalizations steps, e.g. to
   /// deallocate any dynamically-allocated memory
 
-  virtual void finalize_method(DataDescr * data_descr) throw() = 0;
+  virtual void finalize (DataDescr * data_descr) throw() = 0;
 
   /// Initialize PPM variable that may change.  Called once per
   /// block per timestep.
@@ -66,10 +69,9 @@ public: // virtual functions
   virtual void advance_block( DataBlock * data_block,
 			      double t, double dt ) throw() = 0; 
 
-  /// Refresh a block face's boundary / ghost zones given neighboring
-  /// block face(s)
+  /// Return the name of the method
 
-  virtual void refresh_face() throw() = 0;
+  virtual std::string method_name() const throw() = 0;
 
 protected: // functions
 
@@ -81,9 +83,6 @@ protected: // functions
 		     DataDescr   * data_descr = 0) throw();
 
 protected: // attributes
-
-  /// Method name
-  std::string method_name_;
 
   /// List of argument types, e.g. argument_type_field
   std::vector<argument_type> argument_types_;

@@ -82,7 +82,7 @@ public: // interface
   Mesh * mesh () { return mesh_; };
 
   /// Return the Method descriptor
-  MethodDescr * methods () { return methods_; };
+  MethodDescr * methods () { return method_descr_; };
 
 private: // attributes
 
@@ -94,7 +94,7 @@ private: // attributes
   Mesh * mesh_;
 
   /// Methods
-  MethodDescr * methods_;
+  MethodDescr * method_descr_;
 
   /// Data descriptions
   DataDescr * data_descr_;

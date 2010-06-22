@@ -6,15 +6,15 @@
 /// @date     Thu Apr  1 16:14:38 PDT 2010
 /// @brief    Implementation of Enzo PPM hydro method
 
-#ifndef USER_ENZO_PPM_HPP
-#define USER_ENZO_PPM_HPP
+#ifndef USER_METHOD_ENZO_PPM_HPP
+#define USER_METHOD_ENZO_PPM_HPP
 
 #include <vector>
 #include <string>
 #include "method.hpp"
 #include "data.hpp"
 
-class MethodEnzoPpm : public MethodHyperbolic {
+class MethodEnzoPpm : public MethodUserHyperbolic {
 
   /// @class    MethodEnzoPpm
   /// @ingroup  Enzo
@@ -23,17 +23,16 @@ class MethodEnzoPpm : public MethodHyperbolic {
 public: // interface
 
   MethodEnzoPpm()
-    : MethodHyperbolic()
   {};
 
   /// Perform any method-specific initialization
 
-  void initialize_method (DataDescr * data_descr) throw();
+  void initialize (DataDescr * data_descr) throw();
 
   /// Perform any method-specific finalizations steps, e.g. to
   /// deallocate any dynamically-allocated memory
 
-  void finalize_method(DataDescr * data_descr) throw();
+  void finalize (DataDescr * data_descr) throw();
 
   /// Initialize PPM variable that may change.  Called once per
   /// block per timestep.
@@ -53,7 +52,12 @@ public: // interface
   /// block face(s)
 
   void refresh_face() throw();
+  
+  /// Return the name of the method
 
+  virtual std::string method_name() const throw() 
+  { return "ppm"; };
+  
 };
 
-#endif /* USER_ENZO_PPM_HPP */
+#endif /* USER_METHOD_ENZO_PPM_HPP */

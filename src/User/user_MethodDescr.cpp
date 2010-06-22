@@ -8,10 +8,26 @@
 /// @brief    Implementation of MethodDescr user-dependent class member functions
 
 #include "method.hpp"
+#include "user.hpp"
 #include "error.hpp"
-#include "user_MethodEnzoPpm.hpp"
 
-Method * MethodDescr::create_method_ (std::string method_name)
+//----------------------------------------------------------------------
+
+MethodControl * MethodDescr::create_method_control_ (std::string method_name)
+{
+  return new MethodEnzoControl;
+}
+
+//----------------------------------------------------------------------
+
+MethodTimestep * MethodDescr::create_method_timestep_ (std::string method_name)
+{
+  return new MethodEnzoTimestep;
+}
+
+//----------------------------------------------------------------------
+
+MethodUser * MethodDescr::create_method_user_ (std::string method_name)
 /// @param method_name   Name of the method to create
 {
   if (method_name == "ppm") {

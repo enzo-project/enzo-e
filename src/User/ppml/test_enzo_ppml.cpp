@@ -46,11 +46,11 @@ int main (int argc, char ** argv)
   unit_assert(false);
 
   unit_func("refresh_face");
-  ppml.refresh_face();
+  ppml.refresh_block();
   unit_assert(false);
 
   unit_func("finalize_method");
-  ppml.finalize_method(data_descr);
+  ppml.finalize(data_descr);
   unit_assert(false);
 
   unit_finalize();

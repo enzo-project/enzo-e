@@ -9,6 +9,8 @@
 /// @date     2010-04-02
 /// @brief    Include file for the User component
 
+#include "user_MethodEnzoControl.hpp"
+#include "user_MethodEnzoTimestep.hpp"
 #include "user_MethodEnzoPpm.hpp"
 #include "user_MethodEnzoPpml.hpp"
 

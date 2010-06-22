@@ -44,16 +44,16 @@ if (platform == 'linux-mpi'):
    parallel_run = "mpirun -np 4"
    serial_run   = ""
    env = Environment (
-      CXX         = 'mpiCC',	
+      BINPATH     = '#/bin',
+      CC          = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE'],
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
-#      CPPFLAGS    = '-Wall -g  -m96bit-long-double',
       CPPPATH     = '#/include',
-      FORTRANPATH = '#/include',
+      CXX         = 'mpiCC',	
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
+      FORTRANPATH = '#/include',
       LIBPATH     = '#/lib',
-      BINPATH     = '#/bin',
    )
 #--------------------------------------------------
 elif (platform == 'linux-mpi-valgrind'):
@@ -61,16 +61,16 @@ elif (platform == 'linux-mpi-valgrind'):
    parallel_run = "mpirun -np 4 valgrind"
    serial_run   = "valgrind "
    env = Environment (
-      CXX         = 'mpiCC',	
+      BINPATH     = '#/bin',
+      CC          = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE'],
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
-#      CPPFLAGS    = '-Wall -g  -m96bit-long-double',
       CPPPATH     = '#/include',
-      FORTRANPATH = '#/include',
+      CXX         = 'mpiCC',	
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
+      FORTRANPATH = '#/include',
       LIBPATH     = '#/lib',
-      BINPATH     = '#/bin',
    )
 #--------------------------------------------------
 elif (platform == 'linux-ampi'):
@@ -79,16 +79,17 @@ elif (platform == 'linux-ampi'):
    serial_run   = ""
   
    env = Environment(
-      ENV         = os.environ,
-      CXX         = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
+      BINPATH     = '#/bin',
+      CC          = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
       CPPDEFINES = ['NO_FREETYPE'],
       CPPFLAGS    = '-Wall -g',
       CPPPATH     = '#/include',
-      FORTRANPATH = '#/include',
+      CXX         = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
+      ENV         = os.environ,
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
+      FORTRANPATH = '#/include',
       LIBPATH     = '#/lib',
-      BINPATH     = '#/bin',
    )
 #--------------------------------------------------
 elif (platform == 'triton'):
@@ -96,16 +97,17 @@ elif (platform == 'triton'):
    parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    serial_run   = ""
    env = Environment (
-      ENV = {'PATH' : os.environ['PATH'],
-	       'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
-      CXX     = 'mpicxx',	
-      CPPDEFINES = ['NO_FREETYPE'],
-      CPPPATH = ['#/include', '/opt/pgi/hdf5_pgi/include'],
-      LIBPATH = ['#/lib', '/opt/pgi/hdf5_pgi/lib'],
       BINPATH = '#/bin',
+      CC      = 'mpicc',	
+      CPPDEFINES = ['NO_FREETYPE'],
       CPPFLAGS = '-g -DH5_USE_16_API',
+      CPPPATH = ['#/include', '/opt/pgi/hdf5_pgi/include'],
+      CXX     = 'mpicxx',	
+      ENV = {'PATH' : os.environ['PATH'], 
+	'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
       FORTRAN = 'mpif90',
       FORTRANPATH = '#/include',
+      LIBPATH = ['#/lib', '/opt/pgi/hdf5_pgi/lib'],
       LINKFLAGS = '-pgf90libs',
    )
 #--------------------------------------------------

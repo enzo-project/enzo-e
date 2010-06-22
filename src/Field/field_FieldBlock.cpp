@@ -433,6 +433,14 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 
   int ix,iy,iz,ig;
   switch (face) {
+  case face_all:
+    enforce_boundary_reflecting_precision_(face_lower_x,array,nx,ny,nz,gx,gy,gz);
+    enforce_boundary_reflecting_precision_(face_lower_y,array,nx,ny,nz,gx,gy,gz);
+    enforce_boundary_reflecting_precision_(face_lower_z,array,nx,ny,nz,gx,gy,gz);
+    enforce_boundary_reflecting_precision_(face_upper_x,array,nx,ny,nz,gx,gy,gz);
+    enforce_boundary_reflecting_precision_(face_upper_y,array,nx,ny,nz,gx,gy,gz);
+    enforce_boundary_reflecting_precision_(face_upper_z,array,nx,ny,nz,gx,gy,gz);
+    break;
   case face_lower_x:
     if (nx > 1) {
       ix = gx;

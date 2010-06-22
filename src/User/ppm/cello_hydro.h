@@ -263,3 +263,15 @@ void image_dump (const char * file_root,
 		 int          cycle, 
 		 double       lower, 
 		 double       upper);
+
+// timestep
+int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);
+int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
+extern "C" void FORTRAN_NAME(calc_dt)(
+                  int *rank, int *idim, int *jdim, int *kdim,
+                  int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
+                  ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz, 
+		  float *gamma, int *ipfree, float *aye,
+                  float *d, float *p, float *u, float *v, float *w,
+			     float *dt, float *dtviscous);
+ 

@@ -165,8 +165,6 @@ void Monitor::image
 
   // image x-axis
 
-  int imax = 0;
-  int imin = n3[0]*n3[1]*n3[2];
   for (int jx=0; jx<mx; jx++) {
 
     int ix = jx + mx0;

@@ -1,10 +1,10 @@
 // $Id: method_method.cpp 1262 2010-03-03 15:44:05Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_Method.cpp
+/// @file     method_MethodUser.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Jul 13 11:12:25 PDT 2009
-/// @brief    Implements the Method base class
+/// @brief    Implements the MethodUser base class
 
 #include <string>
 
@@ -14,13 +14,7 @@
 
 //----------------------------------------------------------------------
 
-Method::Method() throw ()
-{
-}
-
-//----------------------------------------------------------------------
-
-void Method::add_argument_
+void MethodUser::add_argument_
 (
  argument_type argument,
  std::string   argument_name,
@@ -35,7 +29,9 @@ void Method::add_argument_
   // Monitor output
   Monitor * monitor = Monitor::instance();
   char buffer[100];
-  sprintf (buffer,"Method %s: adding %s", method_name_.c_str(), argument_name.c_str());
+  sprintf (buffer,"Method %s: adding %s", 
+	   method_name().c_str(), 
+	   argument_name.c_str());
   monitor->print (buffer);
 
   // Add method argument information
@@ -52,7 +48,7 @@ void Method::add_argument_
       sprintf (buffer, 
 	       "Required Field %s is not defined in the field descriptor",
 	       argument_name.c_str());
-      ASSERT("MethodEnzoPpm::initialize_method",
+      ASSERT("MethodUser::initialize_method",
 	     buffer, data_descr->field_descr()->is_field(argument_name));
       break;
     case argument_particle:

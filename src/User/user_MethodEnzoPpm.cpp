@@ -16,16 +16,12 @@
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
+void MethodEnzoPpm::initialize (DataDescr * data_descr) throw()
 {
 
   // Extract field descriptor from data descriptor
 
   FieldDescr * field_descr = data_descr->field_descr();
-
-  // Register method name
-
-  method_name_ = "ppm";
 
   // Initialize parameters
 
@@ -77,15 +73,9 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
     ComovingBoxSize   = p->value_scalar ("comoving_box_size", 64.0);
   }
 
-  // Field parameters
-
-  p->set_current_group ("Field");
-  
-  CourantSafetyNumber = p->value_scalar ("courant",0.6);
-
   int k = 0;
 
-  WARNING_MESSAGE("MethodEnzoPpm::initialize_simulation_",
+  WARNING_MESSAGE("MethodEnzoPpm::initialize",
 		  "Fixed fields");
   FieldType[field_density      = k++] = Density;
   FieldType[field_total_energy = k++] = TotalEnergy;
@@ -137,14 +127,14 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
 
   // Chemistry parameters
 
-  WARNING_MESSAGE("MethodEnzoPpm::initialize_simulation_",
+  WARNING_MESSAGE("MethodEnzoPpm::initialize",
 		  "MultiSpecies parameters initialized to 0");
   
   MultiSpecies = 0;    // 0:0 1:6 2:9 3:12
 
   // Gravity parameters
 
-  WARNING_MESSAGE("MethodEnzoPpm::initialize_simulation_",
+  WARNING_MESSAGE("MethodEnzoPpm::initialize",
 		  "Gravity parameters initialized to 0");
 
   GravityOn                       = 0;    // Whether gravity is included
@@ -155,7 +145,7 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
 
   //Problem specific parameter
 
-  WARNING_MESSAGE("MethodEnzoPpm::initialize_simulation_",
+  WARNING_MESSAGE("MethodEnzoPpm::initialize",
 		  "ProblemType parameter set to 0");
 
   ProblemType = 0;
@@ -174,7 +164,7 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
 
   NumberOfBaryonFields = field_descr->field_count();
 
-  ASSERT ("initialize_implosion",
+  ASSERT ("initialize",
 	  "MAX_NUMBER_OF_BARYON_FIELDS is too small",
 	  NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
 
@@ -182,7 +172,7 @@ void MethodEnzoPpm::initialize_method(DataDescr * data_descr) throw()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpm::finalize_method ( DataDescr * data_descr ) throw ()
+void MethodEnzoPpm::finalize ( DataDescr * data_descr ) throw ()
 {
 }
 
