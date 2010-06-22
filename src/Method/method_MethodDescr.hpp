@@ -41,7 +41,7 @@ public: // interface
   void set_method_control (std::string name_method_control)
   {
     ASSERT("MethodDescr::set_method_control",
-	   "",method_control_ != 0);
+	   "",method_control_ == 0);
     method_control_ = create_method_control_(name_method_control);
   };
 
@@ -53,7 +53,7 @@ public: // interface
   void set_method_timestep (std::string name_method_timestep)
   {
     ASSERT("MethodDescr::set_method_timestep",
-	   "",method_timestep_ != 0);
+	   "",method_timestep_ == 0);
     method_timestep_ = create_method_timestep_(name_method_timestep);
   };
 

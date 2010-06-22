@@ -74,6 +74,7 @@ env.RunParse('test_parse_shock-pool.out', '#/bin/test_Parse', ARGS='input/shock-
 env.RunParallel('cello_implosion.out',    '#/bin/cello',      ARGS='input/implosion.in')
 
 
+env.RunSerial('test_MethodEnzoPpm.out', '#/bin/test_MethodEnzoPpm')
 
 env.RunSerial('test_enzo_ppm.out', '#/bin/test_enzo_ppm')
 env.RunSerial('test_enzo_ppml.out','#/bin/test_enzo_ppml')

@@ -147,7 +147,7 @@ elif (platform == 'unknown'):
    print
    print "   linux-mpi    Linux with MPI"
    print "   linux-ampi   Linux with AMPI (Charm++)"
-   print "   triton:      SCSD Triton Resource"
+   print "   triton       SCSD Triton Resource"
    print "   ncsa-bd      NCSA Blue Drop"
    print
    print "**********************************************************************"
