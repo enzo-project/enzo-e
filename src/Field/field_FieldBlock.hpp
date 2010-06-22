@@ -11,6 +11,7 @@
 /// @todo     Implement and test merge(),split()
 /// @todo     Implement and test grow(),shrink()
 /// @todo     Implement and test read(),write()
+/// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    Fortran-style array class.
 
 #include <stdexcept>

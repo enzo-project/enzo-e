@@ -3,6 +3,8 @@
 
 /// @file     parallel_Parallel.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
+/// @todo     Rename Parallel  ParallelSerial
+/// @todo     Add ParallelCharm (for CkExit(), etc.)
 /// @date     2009-10-16
 /// @brief    Interface for the Parallel class
 
