@@ -32,6 +32,10 @@ int main(int argc, char **argv)
 
   Parameters * parameters = Parameters::instance();
 
+  
+  parameters->set_current_group("Physics");
+  parameters->set_scalar("gamma",1.4);
+
   unit_init(parallel->process_rank(), parallel->process_count());
 
   // Create data and field descriptors and blocks
@@ -46,9 +50,9 @@ int main(int argc, char **argv)
 
   int index_density         = field_descr->insert_field("density");
   int index_total_energy    = field_descr->insert_field("total_energy");
-  int index_internal_energy = field_descr->insert_field("internal_energy");
   int index_velocity_x      = field_descr->insert_field("velocity_x");
   int index_velocity_y      = field_descr->insert_field("velocity_y");
+  int index_internal_energy = field_descr->insert_field("internal_energy");
 
   // Initialize field_block
 
@@ -74,10 +78,11 @@ int main(int argc, char **argv)
   field_block->allocate_ghosts();
   field_block->clear();
 
-  Scalar * d = (Scalar * ) field_block->field_values(index_density);
+  Scalar *  d = (Scalar * ) field_block->field_values(index_density);
   Scalar * vx = (Scalar * ) field_block->field_values(index_velocity_x);
   Scalar * vy = (Scalar * ) field_block->field_values(index_velocity_y);
-  Scalar * te = (Scalar * ) field_block->field_values(index_internal_energy);
+  Scalar * te = (Scalar * ) field_block->field_values(index_total_energy);
+  Scalar * ie = (Scalar * ) field_block->field_values(index_internal_energy);
 
   double hx = 0.3 / nx;
   double hy = 0.3 / ny;
@@ -130,22 +135,33 @@ int main(int argc, char **argv)
 
   field_block->enforce_boundary(boundary_reflecting);
 
-  monitor->image ("ppm-density-0.png",
-		  (Scalar *)field_block->field_values(index_density),
-		  mx,my,mz,
-		  0,  0,  0,
-		  mx,my,mz,
-		  2,
-		  reduce_sum,
-		  0.0,1.0,
-		  map1,2);
-
   unit_func("initialize_block");
   ppm->initialize_block(data_block);
   unit_assert(true);
 
   double t = 0;
-  double dt = 0.000239579;
+  MethodTimestep * method_timestep = method_descr.method_timestep();
+  
+  monitor->image ("ppm-density-0.png",
+		  (Scalar *)field_block->field_values(index_density),
+		  mx,my,mz, 0,0,0,  mx,my,mz,  2, reduce_sum, 0.0,1.0, map1,2);
+  monitor->image ("ppm-velocity_x-0.png",
+		  (Scalar *)field_block->field_values(index_velocity_x),
+		  mx,my,mz, 0,0,0,  mx,my,mz,  2, reduce_sum, 0.0,1.0, map1,2);
+  monitor->image ("ppm-velocity_y-0.png",
+		  (Scalar *)field_block->field_values(index_velocity_y),
+		  mx,my,mz, 0,0,0,  mx,my,mz,  2, reduce_sum, 0.0,1.0, map1,2);
+  monitor->image ("ppm-total_energy-0.png",
+		  (Scalar *)field_block->field_values(index_total_energy),
+		  mx,my,mz, 0,0,0,  mx,my,mz,  2, reduce_sum, 0.0,1.0, map1,2);
+
+  printf ("velocity_x = %p\n",(Scalar *)field_block->field_values(index_velocity_y));
+  method_timestep->initialize_block(data_block);
+  double dt = method_timestep->compute_block(data_block);
+
+  printf ("Timestep = %g\n", dt );
+
+  dt = 0.000239579;
 
   unit_func("advance_block");
   ppm->advance_block(data_block,t,dt);

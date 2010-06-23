@@ -77,11 +77,46 @@ void MethodEnzoPpm::initialize (DataDescr * data_descr) throw()
 
   WARNING_MESSAGE("MethodEnzoPpm::initialize",
 		  "Fixed fields");
-  FieldType[field_density      = k++] = Density;
-  FieldType[field_total_energy = k++] = TotalEnergy;
-  FieldType[field_velocity_x   = k++] = Velocity1;
-  FieldType[field_velocity_y   = k++] = Velocity2;
-  FieldType[field_velocity_z   = k++] = Velocity3;
+
+  field_density         = field_descr->insert_field("density");
+  k = MAX(k,field_density);
+  FieldType[field_density]      = Density;
+  printf ("%d %d\n",field_density,FieldType[field_density]);
+
+  field_total_energy    = field_descr->insert_field("total_energy");
+  k = MAX(k,field_total_energy);
+  FieldType[field_total_energy] = TotalEnergy;
+  printf ("%d %d\n",field_total_energy,FieldType[field_total_energy]);
+
+  if (DualEnergyFormalism) {
+    field_internal_energy = field_descr->insert_field("internal_energy");
+    k = MAX(k,field_internal_energy);
+    FieldType[field_internal_energy] = InternalEnergy;
+  }    
+
+  if (GridRank >= 1) {
+    field_velocity_x      = field_descr->insert_field("velocity_x");
+    k = MAX(k,field_velocity_x);
+    FieldType[field_velocity_x] = Velocity1;
+    printf ("%d %d\n",field_velocity_x,FieldType[field_velocity_x]);
+  }
+
+  if (GridRank >= 2) {
+    field_velocity_y      = field_descr->insert_field("velocity_y");
+    k = MAX(k,field_velocity_y);
+    FieldType[field_velocity_y] = Velocity2;
+    printf ("%d %d\n",field_velocity_y,FieldType[field_velocity_y]);
+  }
+
+  if (GridRank >= 3) {
+    field_velocity_z      = field_descr->insert_field("velocity_z");
+    k = MAX(k,field_velocity_z);
+    FieldType[field_velocity_z] = Velocity3;
+    printf ("%d %d\n",field_velocity_z,FieldType[field_velocity_z]);
+  }
+
+  printf ("k=%d\n",k);
+  //  printf ("%d %d\n",field_velocity_z,FieldType[field_velocity_z]);
 
   // Domain parameters
 

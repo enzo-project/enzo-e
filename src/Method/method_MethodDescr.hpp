@@ -46,7 +46,7 @@ public: // interface
   };
 
   /// Return the control method
-  MethodControl * method_control (int i)
+  MethodControl * method_control ()
   { return method_control_; };
 
   /// Return the timestep method
@@ -58,7 +58,7 @@ public: // interface
   };
 
   /// Return the timestep method
-  MethodTimestep * method_timestep (int i)
+  MethodTimestep * method_timestep ()
   { return method_timestep_; };
 
 private: // functions
