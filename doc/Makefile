@@ -12,6 +12,7 @@ DOCS = \
       proposal-ascr \
       requirements \
       talk-intro \
+      talk-2010-06 \
       testing \
       vision
 
@@ -69,6 +70,9 @@ paper-tree:
 talk-intro: 
 	cd talk-intro; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C talk-intro pdf2
+talk-2010-06: 
+	cd talk-2010-06; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C talk-2010-06 pdf2
 
 #-----------------------------------------------------------------------
 
