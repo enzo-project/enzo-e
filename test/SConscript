@@ -57,9 +57,6 @@ env.RunSerial('test_ppm_implosion.out',  '#/bin/test_ppm',
 env.RunSerial('test_ppm_implosion3.out', '#/bin/test_ppm',  
                ARGS='ppm-implosion3   32 10 10')
 
-env.RunParallel('test_affinity.out', '#/bin/test_Affinity')
-env.RunParallel('test_mpi.out',      '#/bin/test_Mpi')
-
 env.RunSerial('test_Monitor.out',  '#/bin/test_Monitor')
 
 env.RunParse('test_parse_groups.out',     '#/bin/test_Parse', ARGS='test/parse_groups.in')
@@ -71,20 +68,18 @@ env.RunParse('test_parse_scalar.out',     '#/bin/test_Parse', ARGS='test/parse_s
 env.RunParse('test_parse_implosion.out',  '#/bin/test_Parse', ARGS='input/implosion.in')
 env.RunParse('test_parse_shock-pool.out', '#/bin/test_Parse', ARGS='input/shock-pool.in')
 
-env.RunParallel('cello_implosion.out',    '#/bin/cello',      ARGS='input/implosion.in')
-
-
 env.RunSerial('test_MethodEnzoPpm.out', '#/bin/test_MethodEnzoPpm')
 
-# env.RunSerial('test_enzo_ppm.out', '#/bin/test_enzo_ppm')
-# env.RunSerial('test_enzo_ppml.out','#/bin/test_enzo_ppml')
+env.RunParallel('test_affinity.out',   '#/bin/test_Affinity')
+env.RunParallel('test_mpi.out',        '#/bin/test_Mpi')
+env.RunParallel('cello_implosion.out', '#/bin/cello', ARGS='input/implosion.in')
 
-# env.RunSerial('Array.unit','test_tree')
-# env.RunSerial('Array.unit','test_tree_k')
-#	./test_Parse < shock-pool.in > shock-pool.out
-#	./test_Parse < test_groups.in > test_groups.out
-#	./test_Parse < test.in > test.out
-#	./test_Parse < test_list.in > test_list.out
-#	./test_Parse < test_logical.in > test_logical.out
-#	./test_Parse < test_scalar.in > test_scalar.out
-#	-grep -i -l error *.out
+# Prevent concurrent running of parallel jobs
+
+SideEffect('log.txt', 
+     [ 'test_affinity.out',
+       'test_mpi.out', 
+       'cello_implosion.out'])
+
+
+
