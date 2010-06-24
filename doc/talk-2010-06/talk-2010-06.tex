@@ -137,8 +137,64 @@
 % * Parameters?
 % * Is framework sufficient for Enzo-P development?
 % 
+% Features
+%
+%   parameters: hierarchical
+%   parameters: expressive data types
+%   parameters: easy to add new parameters: just use [API example]
+%   parameters: compare parameter files with Enzo [implosion]
+%   AMR:        totally new AMR approach: generalization of octrees--rationale
+%   AMR:        additional level of refinement: patches + blocks
+%   AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
+%   AMR:        new [currently proprietary] enhancement for "deep, targeted" AMR
+%   AMR:        no level jumps, symmetric refinement for symmetric problems
+%   AMR:        ghost zones optionally allocated only when needed
+%   AMR:        octree node memory footprint is light: 3 pointers (24 bytes) per patch
+%   AMR:        optional fully distributed AMR hierarchy
+%   Field:      data layout controlable from parameter file: ordering, padding, alignment, [interleaving]
+%   Field:      default precision specified in parameter file, can be overridden for individual fields (may require promoting before passing to computational kernals)
+%   Field:      ghost zone depth  specified in parameter file, can be overridden for individual fields
+%   Field:      minimum/maximum values for fields optionally specified in input file, including action (warning, error, reduce time step, alternate method)
+%   
+%   Field:      fields explicitly specified in parameter file
+%   Field:      field groups specified in parameter file (e.g. "color", etc.)
+%   Output:     Currently HDF5 and IFrit files supported
+%   Output:     Different output 'types', restart, data, visualization, analysis, etc.
+%
+%   Enzo-P:     All Enzo physics code in User component
+%   Enzo-P:     Includes methods (block advance, face update), timestep determination, control (ala EvolveLevel)
+%   
+%   parallel:   hierarchical: distributed-memory, shared-memory [GPU level]
+%   parallel:   any level can be parallelized with different parallel technology (MPI,UPC,etc.)
+%   parallel:   load balancing approach specified in parameter file, may be user-defined.  Initially space-filling curve, ultimately hierarchical diffusion
+%   parallel:   fully distributed data structures (no / fixed global metadata)
 %  
-
+%   scalability: Only adjacent block communication--no parent/child communication
+%   scalability: Optional fully-distributed hierarchy (local patch + neighboring "ghost" patches)
+%   scalability: dynamic task scheduling (a block can advance when it has its boundary data, regardless of level)
+%   scalability: "problem" scaling: integer index ranges addressed
+%   scalability: "problem" scaling: positional floating point precision problems addressed
+%   scalability: allow local timestepping: no global synchronization 
+%   performance: block sizes can be fixed (or at least quantized, e.g. $4^3$ $8^3$ or $16^3$), reducing memory fragmentation, improving cache utilization
+%   performance: AMR enhancements will greatly reduce metadata
+%   roadmap:    available now: Fields, Parameters, serial unigrid PPM
+%   roadmap:    available imminently: parallel unigrid MPI-[12] PPM, PPML, gravity (FFT or MG)
+%   roadmap:    available next: basic AMR (octree), local physics 
+%   roadmap:    longer-term: particles, cosmology, enhanced AMR
+%   roadmap:    papers: AMR enhancements
+%   roadmap:    
+%   development: extensive unit tests built into build
+%   development: scons instead of make: advantages [disadvanteges]
+%   development: currently subversion is sufficient--no branching
+%   development: "physics" part separate from parallelism and data structures
+%   problem support: Deep: integer range and floating point precision
+%   problem support: Deep: "level windows" to reduce memory usage
+%   problem support: AMR enhancements for targeted refinement by 4 or 8 ["backfill" to maintain level jumps at most 2]
+%   feedback:  parameters
+%   feedback:  functionality
+%   feedback:  
+%   
+%   
 \documentclass{beamer}
 
 \usetheme{Copenhagen}
