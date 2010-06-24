@@ -30,12 +30,6 @@ int main(int argc, char **argv)
   Parallel * parallel = Parallel::instance();
   parallel->initialize(&argc,&argv);
 
-  Parameters * parameters = Parameters::instance();
-
-  
-  parameters->set_current_group("Physics");
-  parameters->set_scalar("gamma",1.4);
-
   unit_init(parallel->process_rank(), parallel->process_count());
 
   // Create data and field descriptors and blocks
@@ -112,8 +106,11 @@ int main(int argc, char **argv)
 
   // Set necessary parameters for MethodEnzoPpm
 
+  Parameters * parameters = Parameters::instance();
+
   parameters->set_current_group("Physics");
   parameters->set_integer ("dimensions",2);
+  parameters->set_scalar  ("gamma",1.4);
 
   MethodDescr method_descr;
 
@@ -144,20 +141,23 @@ int main(int argc, char **argv)
   
   monitor->image ("ppm-density-0.png",
 		  (Scalar *)field_block->field_values(index_density),
-		  mx,my,mz, 0,0,0,  mx,my,mz,  2, reduce_sum, 0.0,1.0, map1,2);
+		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
   monitor->image ("ppm-velocity_x-0.png",
 		  (Scalar *)field_block->field_values(index_velocity_x),
-		  mx,my,mz, 0,0,0,  mx,my,mz,  2, reduce_sum, 0.0,1.0, map1,2);
+		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
   monitor->image ("ppm-velocity_y-0.png",
 		  (Scalar *)field_block->field_values(index_velocity_y),
-		  mx,my,mz, 0,0,0,  mx,my,mz,  2, reduce_sum, 0.0,1.0, map1,2);
+		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
   monitor->image ("ppm-total_energy-0.png",
 		  (Scalar *)field_block->field_values(index_total_energy),
-		  mx,my,mz, 0,0,0,  mx,my,mz,  2, reduce_sum, 0.0,1.0, map1,2);
+		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
 
   printf ("velocity_x = %p\n",(Scalar *)field_block->field_values(index_velocity_y));
+  method_timestep->initialize(data_descr);
   method_timestep->initialize_block(data_block);
   double dt = method_timestep->compute_block(data_block);
+  method_timestep->finalize_block(data_block);
+  method_timestep->finalize(data_descr);
 
   printf ("Timestep = %g\n", dt );
 
@@ -173,13 +173,7 @@ int main(int argc, char **argv)
 
   monitor->image ("ppm-density-1.png",
 		  (Scalar *)field_block->field_values(index_density),
-		  mx,my,mz,
-		  0,  0,  0,
-		  mx,my,mz,
-		  2,
-		  reduce_sum,
-		  0.0,1.0,
-		  map1,2);
+		  mx,my,mz,  2,  reduce_sum, 0.0,1.0, map1,2);
 
   unit_func("refresh_block");
   unit_assert(false);

@@ -31,7 +31,6 @@ MethodUser * MethodDescr::create_method_user_ (std::string method_name)
 /// @param method_name   Name of the method to create
 {
   if (method_name == "ppm") {
-    printf ("DEBUG Creating MethodEnzoPpm %s:%d\n",__FILE__,__LINE__);
     return new MethodEnzoPpm;
   } else {
     char buffer[80];

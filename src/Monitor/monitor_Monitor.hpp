@@ -72,8 +72,6 @@ public: // interface
   void image (std::string name, 
 	      T * array,
 	      int nx,  int ny,  int nz,   // Array dimensions
-	      int nx0, int ny0, int nz0,  // lower inclusive subarray indices
-	      int nx1, int ny1, int nz1,  // upper exclusive subarray indices
 	      int         axis,           // Axis along which to project
 	      reduce_type op_reduce,      // Reduction operation along axis
 	      double min, double max,     // Limits for color map
@@ -109,8 +107,6 @@ void Monitor::image
 (std::string name, 
  T * array, 
  int nx, int ny, int nz,
- int nx0, int ny0, int nz0,
- int nx1, int ny1, int nz1,
  int axis, reduce_type op_reduce,
  double min, double max, 
  const double * map, 
@@ -121,8 +117,6 @@ void Monitor::image
  * @param  name         File name
  * @param  array        Array of values to plot
  * @param  nx,ny,nz     Size of the array
- * @param  nx0,ny0,nz0  Lower corner of the sub-array
- * @param  nx1,ny1,nz1  Upper bound on the sub-array
  * @param  axis         Which axis to reduce
  * @param  op_reduce    Reduction operator
  * @param  min,max      Bounds for color map values
@@ -136,6 +130,19 @@ void Monitor::image
 {
 
   if (! active_) return;
+
+  // Use full array
+
+
+  int nx0, ny0, nz0;
+  int nx1, ny1, nz1;
+
+  nx0 = 0;
+  nx1 = nx;
+  ny0 = 0;
+  ny1 = ny;
+  nz0 = 0;
+  nz1 = nz;
 
   // Array size
   int n3[3] = {1, nx, nx*ny}; // Array multipliers

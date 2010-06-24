@@ -33,7 +33,6 @@ void MethodEnzoTimestep::initialize (DataDescr * data_descr) throw()
   parameters->set_current_group ("Field");
   
   CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
-
 }
 
 //----------------------------------------------------------------------
@@ -144,7 +143,7 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
 			velocity_z_field, 
 			&dtBaryons_, &dtViscous_);
  
- 
+  printf ("%g %g\n",dtBaryons_, CourantSafetyNumber);
   dtBaryons_ *= CourantSafetyNumber;
  
   /* 2) Calculate dt from particles. */

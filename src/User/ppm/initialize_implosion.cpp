@@ -33,7 +33,7 @@ void initialize_implosion (int size_param)
   PPMDiffusionParameter  = 1;
   PPMSteepeningParameter = 1;
 
-  CourantSafetyNumber    = 0.8;
+  CourantSafetyNumber    = 0.6;
   InitialRedshift        = 20;
   InitialTimeInCodeUnits = 0;
   Time                   = 0;

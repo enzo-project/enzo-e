@@ -54,6 +54,7 @@ const char * op_name[] = {
     "&&",
     "||"};
 
+  /* ANY CHANGES HERE MUST BE REFLECTED IN parse.h enum_parameter[] */
   const char * parameter_name[]  = {
     "unknown",
     "sentinel",

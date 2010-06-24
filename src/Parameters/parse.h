@@ -1,3 +1,4 @@
+/* ANY CHANGES HERE MUST BE REFLECTED IN parse.y parameter_name[] */
 enum enum_parameter {
   enum_parameter_unknown,
   enum_parameter_sentinel,
@@ -5,7 +6,7 @@ enum enum_parameter {
   enum_parameter_integer,
   enum_parameter_scalar,
   enum_parameter_string,
-  //  enum_parameter_identifier,
+  enum_parameter_identifier,
   enum_parameter_logical,
   enum_parameter_list,
   enum_parameter_scalar_expr,

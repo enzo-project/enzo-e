@@ -276,7 +276,7 @@ void write_image(std::string filename, float * image, int nx, int ny, int nz)
   }
   double color_map[] = {0,0,0,1,1,1};
   monitor->image ((filename+".png").c_str(),image,
-		  nx,ny,1,0,0,0,nx,ny,1,2,reduce_sum,
+		  nx,ny,1,2,reduce_sum,
 		  min,max,color_map, 2);
 
 }
