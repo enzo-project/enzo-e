@@ -11,9 +11,9 @@
 
 #include <vector>
 #include <string>
-#include "method.hpp"
+#include "user.hpp"
 
-class MethodEnzoPpml : public MethodUserHyperbolic {
+class MethodEnzoPpml : public UserMethod {
 
   /// @class    MethodEnzoPpml
   /// @ingroup  Enzo

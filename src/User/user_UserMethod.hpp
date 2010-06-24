@@ -1,13 +1,13 @@
-// $Id: method_MethodUser.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: user_UserMethod.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_MethodUser.hpp 
+/// @file     user_UserMethod.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the MethodUser component
+/// @brief    Declaration for the UserMethod component
 
-#ifndef METHOD_METHOD_HPP
-#define METHOD_METHOD_HPP
+#ifndef USER_METHOD_HPP
+#define USER_METHOD_HPP
 
 #include <vector>
 #include <string>
@@ -29,19 +29,17 @@ enum access_type {
 };
 
 
-class MethodUser {
+class UserMethod {
 
-  /// @class    MethodUser
-  /// @ingroup  Method
+  /// @class    UserMethod
+  /// @ingroup  User
   /// @brief    Encapsulate external method / analysis / visualization function.
 
 public: // interface
 
-  /// Create a new MethodUser
-  MethodUser() throw()
+  /// Create a new UserMethod
+  UserMethod() throw()
   {};
-
-  /// Return the corresponding MethodControl pointer
 
 public: // virtual functions
 
@@ -95,4 +93,4 @@ protected: // attributes
 
 };
 
-#endif /* METHOD_METHOD_HPP */
+#endif /* USER_METHOD_HPP */

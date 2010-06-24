@@ -4,17 +4,17 @@
 /// @file     user_MethodEnzoControl.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Apr  1 16:14:38 PDT 2010
-/// @brief    Implementation of Enzo's MethodControl
+/// @brief    Implementation of Enzo's UserControl
 
 #ifndef USER_METHOD_ENZO_CONTROL_HPP
 #define USER_METHOD_ENZO_CONTROL_HPP
 
 #include <vector>
 #include <string>
-#include "method.hpp"
+#include "user.hpp"
 #include "data.hpp"
 
-class MethodEnzoControl : public MethodControl {
+class MethodEnzoControl : public UserControl {
 
   /// @class    MethodEnzoControl
   /// @ingroup  Enzo

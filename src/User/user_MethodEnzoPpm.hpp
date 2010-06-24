@@ -11,10 +11,10 @@
 
 #include <vector>
 #include <string>
-#include "method.hpp"
+#include "user.hpp"
 #include "data.hpp"
 
-class MethodEnzoPpm : public MethodUserHyperbolic {
+class MethodEnzoPpm : public UserMethod {
 
   /// @class    MethodEnzoPpm
   /// @ingroup  Enzo

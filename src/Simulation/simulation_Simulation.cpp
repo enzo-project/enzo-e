@@ -17,7 +17,7 @@ Simulation::Simulation()
   : lower_(),
     upper_(),
     mesh_(NULL),
-    method_descr_(NULL),
+    user_descr_(NULL),
     data_descr_()
 {
 }
@@ -106,7 +106,7 @@ void Simulation::initialize ()
 		   "List parameter 'Method sequence' must have length greater than zero");
   }
 
-  method_descr_ = new MethodDescr;
+  user_descr_ = new UserDescr;
 
   data_descr_ = new DataDescr(field_descr);
 
@@ -115,13 +115,13 @@ void Simulation::initialize ()
     // 
     // given "ppm" create MethodEnzoPpm
     //
-    method_descr_->add_method_user(method_name);
+    UserMethod * user_method = user_descr_->add_user_method(method_name);
 
-    method_descr_->method_user(i)->initialize(data_descr_);
+    user_method->initialize(data_descr_);
   }
 
-  method_descr_ -> set_method_control("ignored");
-  method_descr_ -> set_method_timestep("ignored");
+  user_descr_ -> set_user_control("ignored");
+  user_descr_ -> set_user_timestep("ignored");
 
   // --------------------------------------------------
   // Initialize Mesh

@@ -1,23 +1,21 @@
-// $Id: method_MethodControl.hpp 1394 2010-04-22 20:52:54Z bordner $
+// $Id: method_UserControl.hpp 1394 2010-04-22 20:52:54Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef METHOD_METHOD_CONTROL_HPP
-#define METHOD_METHOD_CONTROL_HPP
+#ifndef USER_USER_CONTROL_HPP
+#define USER_USER_CONTROL_HPP
 
-/// @file     method_MethodControl.hpp
+/// @file     method_UserControl.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
-/// @brief    Declaration of the MethodControl class
+/// @brief    Declaration of the UserControl class
 
 #include <string>
 #include "data.hpp"
 
-class MethodUser;
+class UserControl {
 
-class MethodControl {
-
-  /// @class    MethodControl
-  /// @ingroup  Method
+  /// @class    UserControl
+  /// @ingroup  User
   /// @brief    Top-level control and description of user methods
   ///
   /// This class is not meant to be inherited from, but some functions
@@ -28,7 +26,7 @@ class MethodControl {
 public: // interface
 
   /// Constructor
-  MethodControl() throw()
+  UserControl() throw()
   {};
 
   /// Perform any global initialization independent of specific method
@@ -59,5 +57,5 @@ public: // interface
 
 };
 
-#endif /* METHOD_METHOD_CONTROL_HPP */
+#endif /* USER_USER_CONTROL_HPP */
 

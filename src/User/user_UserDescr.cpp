@@ -1,33 +1,32 @@
-// $Id: user_MethodDescr.cpp 1388 2010-04-20 23:57:46Z bordner $
+// $Id: user_UserDescr.cpp 1388 2010-04-20 23:57:46Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     user_MethodDescr.cpp
+/// @file     user_UserDescr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @date     Tue May 11 18:06:50 PDT 2010
-/// @brief    Implementation of MethodDescr user-dependent class member functions
+/// @brief    Implementation of UserDescr user-dependent class member functions
 
-#include "method.hpp"
 #include "user.hpp"
 #include "error.hpp"
 
 //----------------------------------------------------------------------
 
-MethodControl * MethodDescr::create_method_control_ (std::string method_name)
+UserControl * UserDescr::create_user_control_ (std::string control_name)
 {
   return new MethodEnzoControl;
 }
 
 //----------------------------------------------------------------------
 
-MethodTimestep * MethodDescr::create_method_timestep_ (std::string method_name)
+UserTimestep * UserDescr::create_user_timestep_ (std::string timestep_name)
 {
   return new MethodEnzoTimestep;
 }
 
 //----------------------------------------------------------------------
 
-MethodUser * MethodDescr::create_method_user_ (std::string method_name)
+UserMethod * UserDescr::create_user_method_ (std::string method_name)
 /// @param method_name   Name of the method to create
 {
   if (method_name == "ppm") {
@@ -35,7 +34,7 @@ MethodUser * MethodDescr::create_method_user_ (std::string method_name)
   } else {
     char buffer[80];
     sprintf (buffer,"Unknown method %s",method_name.c_str());
-    WARNING_MESSAGE ("MethodDescr::create_method",
+    WARNING_MESSAGE ("UserDescr::create_method",
 		     buffer);
     return 0;
   }

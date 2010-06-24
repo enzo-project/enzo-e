@@ -13,7 +13,6 @@
 #include <math.h>
 
 #include "cello.hpp"
-#include "method.hpp"
 #include "user.hpp"
 #include "error.hpp"
 #include "monitor.hpp"
@@ -112,13 +111,11 @@ int main(int argc, char **argv)
   parameters->set_integer ("dimensions",2);
   parameters->set_scalar  ("gamma",1.4);
 
-  MethodDescr method_descr;
+  UserDescr user_descr;
 
-  method_descr.add_method_user("ppm");
-  MethodUser * ppm = method_descr.method_user(0);
-
-  method_descr.set_method_control("ignored");
-  method_descr.set_method_timestep("ignored");
+  UserMethod     * ppm = user_descr.add_user_method("ppm");
+  UserControl  * user_control  = user_descr.set_user_control("ignored");
+  UserTimestep * user_timestep = user_descr.set_user_timestep("ignored");
 
   unit_class ("MethodEnzoPpm");
 
@@ -137,7 +134,6 @@ int main(int argc, char **argv)
   unit_assert(true);
 
   double t = 0;
-  MethodTimestep * method_timestep = method_descr.method_timestep();
   
   monitor->image ("ppm-density-0.png",
 		  (Scalar *)field_block->field_values(index_density),
@@ -153,11 +149,11 @@ int main(int argc, char **argv)
 		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
 
   printf ("velocity_x = %p\n",(Scalar *)field_block->field_values(index_velocity_y));
-  method_timestep->initialize(data_descr);
-  method_timestep->initialize_block(data_block);
-  double dt = method_timestep->compute_block(data_block);
-  method_timestep->finalize_block(data_block);
-  method_timestep->finalize(data_descr);
+  user_timestep->initialize(data_descr);
+  user_timestep->initialize_block(data_block);
+  double dt = user_timestep->compute_block(data_block);
+  user_timestep->finalize_block(data_block);
+  user_timestep->finalize(data_descr);
 
   printf ("Timestep = %g\n", dt );
 

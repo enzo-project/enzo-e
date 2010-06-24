@@ -13,7 +13,7 @@
 #include "cello.hpp"
 #include "mesh.hpp"
 #include "data.hpp"
-#include "method.hpp"
+#include "user.hpp"
 
 class Simulation {
 
@@ -81,8 +81,8 @@ public: // interface
   /// Return the Mesh object
   Mesh * mesh () { return mesh_; };
 
-  /// Return the Method descriptor
-  MethodDescr * methods () { return method_descr_; };
+  /// Return the User code descriptor
+  UserDescr * user_descr () { return user_descr_; };
 
 private: // attributes
 
@@ -93,8 +93,8 @@ private: // attributes
   /// AMR grid
   Mesh * mesh_;
 
-  /// Methods
-  MethodDescr * method_descr_;
+  /// Method descriptor
+  UserDescr * user_descr_;
 
   /// Data descriptions
   DataDescr * data_descr_;

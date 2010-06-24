@@ -1,20 +1,20 @@
-// $Id: method_method.cpp 1262 2010-03-03 15:44:05Z bordner $
+// $Id: method_UserMethod.cpp 1262 2010-03-03 15:44:05Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_MethodUser.cpp
+/// @file     method_UserMethod.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Jul 13 11:12:25 PDT 2009
-/// @brief    Implements the MethodUser base class
+/// @brief    Implements the UserMethod base class
 
 #include <string>
 
-#include "method.hpp"
+#include "user.hpp"
 #include "field.hpp"
 #include "monitor.hpp"
 
 //----------------------------------------------------------------------
 
-void MethodUser::add_argument_
+void UserMethod::add_argument_
 (
  argument_type argument,
  std::string   argument_name,
@@ -49,7 +49,7 @@ void MethodUser::add_argument_
       sprintf (buffer, 
 	       "Required Field %s is not defined in the field descriptor",
 	       argument_name.c_str());
-      ASSERT("MethodUser::initialize_method",
+      ASSERT("UserMethod::initialize_method",
 	     buffer, data_descr->field_descr()->is_field(argument_name));
       break;
     case argument_particle:

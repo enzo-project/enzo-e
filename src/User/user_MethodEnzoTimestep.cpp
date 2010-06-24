@@ -7,7 +7,7 @@
 /// @brief    Implements the MethodEnzoTimestep class
 
 #include "data.hpp"
-#include "method.hpp"
+#include "user.hpp"
 #include "parameters.hpp"
 
 #include "user_MethodEnzoTimestep.hpp"
