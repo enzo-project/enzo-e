@@ -13,7 +13,7 @@ SConscript('Error/SConscript')
 SConscript('Field/SConscript')
 SConscript('Memory/SConscript')
 SConscript('Mesh/SConscript')
-SConscript('Method/SConscript')
+# SConscript('Method/SConscript')
 SConscript('Monitor/SConscript')
 SConscript('Parallel/SConscript')
 SConscript('Parameters/SConscript')
@@ -34,7 +34,7 @@ components = ['schedule',
               'parameters',
               'simulation', 
               'user',
-              'method', 
+#              'method', 
               'data',
               'field',
               'user-ppm', 

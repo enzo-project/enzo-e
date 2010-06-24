@@ -3,7 +3,6 @@ Import('env')
 components = ['error', 
               'simulation', 
               'user', 
-              'method', 
               'data',
               'field',
               'parameters', 

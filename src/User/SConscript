@@ -3,7 +3,7 @@ Import('env')
 includes = [Glob('user*hpp'), Glob('*.h')]
 sources  = [Glob('user*cpp')]
 
-components = ['user', 'user-ppm', 'method', 'data', 'field', 'error','parallel', 'monitor', 'parameters', 'cello']
+components = ['user', 'user-ppm', 'data', 'field', 'error','parallel', 'monitor', 'parameters', 'cello']
 libraries  = ['png', 'boost_thread-mt', '$FORTRANLIBS']
 
 env = env.Clone(LIBS=[components,libraries])

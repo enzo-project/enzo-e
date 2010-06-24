@@ -1,6 +1,6 @@
 Import('env')
 
-components = ['user','field', 'parameters', 'error','disk','memory','monitor','parallel','method','cello']
+components = ['user','field', 'parameters', 'error','disk','memory','monitor','parallel','cello']
 libraries  = ['hdf5', 'png','boost_thread-mt', '$FORTRANLIBS']
 
 env = env.Clone(LIBS = [components,libraries])
