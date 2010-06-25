@@ -8,17 +8,15 @@ libraries  = ['png', 'boost_thread-mt', '$FORTRANLIBS']
 
 env = env.Clone(LIBS=[components,libraries])
 
-
-env.Alias('install-inc',env.Install ('#/include',includes))
-
 SConscript('ppm/SConscript')
 SConscript('ppml/SConscript')
 
 libraries = env.Library ('user', sources)
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
 
 test_enzo_ppm = env.Program (['test_MethodEnzoPpm.cpp', sources])
 
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
 env.Alias('install-bin', env.Install ('$BINPATH', 
 	[test_enzo_ppm]))
 
