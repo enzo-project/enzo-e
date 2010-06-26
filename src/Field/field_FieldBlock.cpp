@@ -345,7 +345,6 @@ void FieldBlock::enforce_boundary
  face_type     face 
  ) throw()
 {
-  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary","");
   if ( ghosts_allocated() ) {
     if (face == face_all) {
       enforce_boundary(boundary,face_lower_x);
@@ -395,24 +394,30 @@ void FieldBlock::enforce_boundary_reflecting_(face_type face) throw()
   for (int field = 0; field < field_descr_->field_count(); field++) {
     field_descr_->ghosts(field,&gx,&gy,&gz);
     void * array = field_values(field);
+    bool vx = field_descr_->field_name(field) == "velocity_x";
+    bool vy = field_descr_->field_name(field) == "velocity_y";
+    bool vz = field_descr_->field_name(field) == "velocity_z";
     precision_type precision = field_descr_->precision(field);
     switch (precision) {
     case precision_single:
       enforce_boundary_reflecting_precision_(face,(float *)array,
 					     nx,ny,nz,
-					     gx,gy,gz);
+					     gx,gy,gz,
+					     vx,vy,vz);
       break;
     case precision_double:
       enforce_boundary_reflecting_precision_(face,(double *)array,
 					     nx,ny,nz,
-					     gx,gy,gz);
+					     gx,gy,gz,
+					     vx,vy,vz);
       break;
     case precision_extended80:
     case precision_extended96:
     case precision_quadruple:
       enforce_boundary_reflecting_precision_(face,(long double *)array,
 					     nx,ny,nz,
-					     gx,gy,gz);
+					     gx,gy,gz,
+					     vx,vy,vz);
       break;
     case precision_half:
     default:
@@ -425,31 +430,34 @@ template<class T>
 void FieldBlock::enforce_boundary_reflecting_precision_
 (face_type face, T * array,
  int nx,int ny,int nz,
- int gx,int gy,int gz)
+ int gx,int gy,int gz,
+ bool vx,bool vy,bool vz)
 {
   int mx = nx + 2*gx;
   int my = ny + 2*gy;
   int mz = nz + 2*gz;
 
   int ix,iy,iz,ig;
+  T sign;
   switch (face) {
   case face_all:
-    enforce_boundary_reflecting_precision_(face_lower_x,array,nx,ny,nz,gx,gy,gz);
-    enforce_boundary_reflecting_precision_(face_lower_y,array,nx,ny,nz,gx,gy,gz);
-    enforce_boundary_reflecting_precision_(face_lower_z,array,nx,ny,nz,gx,gy,gz);
-    enforce_boundary_reflecting_precision_(face_upper_x,array,nx,ny,nz,gx,gy,gz);
-    enforce_boundary_reflecting_precision_(face_upper_y,array,nx,ny,nz,gx,gy,gz);
-    enforce_boundary_reflecting_precision_(face_upper_z,array,nx,ny,nz,gx,gy,gz);
+    enforce_boundary_reflecting_precision_(face_lower_x,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_(face_lower_y,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_(face_lower_z,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_(face_upper_x,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_(face_upper_y,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_(face_upper_z,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
     break;
   case face_lower_x:
     if (nx > 1) {
       ix = gx;
+      sign = vx ? -1.0 : 1.0;
       for (ig=0; ig<gx; ig++) {
 	for (iy=0; iy<my; iy++) {
 	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix+ig,  iy,iz,mx,my);
 	    int i_external = INDEX(ix-ig-1,iy,iz,mx,my);
-	    array[i_external] = array[i_internal];
+	    array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -458,12 +466,13 @@ void FieldBlock::enforce_boundary_reflecting_precision_
   case face_upper_x:
     if (nx > 1) {
       ix = nx+gx-1;
+      sign = vx ? -1.0 : 1.0;
       for (ig=0; ig<gx; ig++) {
 	for (iy=0; iy<my; iy++) {
 	  for (iz=gz; iz<mz; iz++) {
 	    int i_internal = INDEX(ix-ig,  iy,iz,mx,my);
 	    int i_external = INDEX(ix+ig+1,iy,iz,mx,my);
-	    array[i_external] = array[i_internal];
+	    array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -472,12 +481,13 @@ void FieldBlock::enforce_boundary_reflecting_precision_
   case face_lower_y:
     if (ny > 1) {
       iy = gy;
+      sign = vy ? -1.0 : 1.0;
       for (ig=0; ig<gy; ig++) {
 	for (ix=0; ix<mx; ix++) {
 	  for (iz=gz; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,iy+ig,  iz,mx,my);
 	    int i_external = INDEX(ix,iy-ig-1,iz,mx,my);
-	    array[i_external] = array[i_internal];
+	    array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -486,12 +496,13 @@ void FieldBlock::enforce_boundary_reflecting_precision_
   case face_upper_y:
     if (ny > 1) {
       iy = ny+gy-1;
+      sign = vy ? -1.0 : 1.0;
       for (ig=0; ig<gy; ig++) {
 	for (ix=0; ix<mx; ix++) {
 	  for (iz=gz; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,iy-ig,  iz,mx,my);
 	    int i_external = INDEX(ix,iy+ig+1,iz,mx,my);
-	    array[i_external] = array[i_internal];
+	    array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -500,12 +511,13 @@ void FieldBlock::enforce_boundary_reflecting_precision_
   case face_lower_z:
     if (nz > 1) {
       iz = gz;
+      sign = vz ? -1.0 : 1.0;
       for (ig=0; ig<gz; ig++) {
 	for (ix=0; ix<mx; ix++) {
 	  for (iy=0; iy<my; iy++) {
 	    int i_internal = INDEX(ix,iy,iz+ig,  mx,my);
 	    int i_external = INDEX(ix,iy,iz-ig-1,mx,my);
-	    array[i_external] = array[i_internal];
+	    array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -514,12 +526,13 @@ void FieldBlock::enforce_boundary_reflecting_precision_
   case face_upper_z:
     if (nz > 1) {
       iz = nz+gz-1;
+      sign = vz ? -1.0 : 1.0;
       for (ig=0; ig<gz; ig++) {
 	for (ix=0; ix<mx; ix++) {
 	  for (iy=0; iy<my; iy++) {
 	    int i_internal = INDEX(ix,iy,iz-ig,  mx,my);
 	    int i_external = INDEX(ix,iy,iz+ig+1,mx,my);
-	    array[i_external] = array[i_internal];
+	    array[i_external] = sign*array[i_internal];
 	  }
 	}
       }
@@ -783,4 +796,36 @@ void FieldBlock::restore_array_
   }
 
   field_values_from.clear();
+}
+
+void FieldBlock::debug () const throw()
+{
+  // Print sums of all fields
+
+  int field_count = field_descr_->field_count();
+
+  for (int id_field = 0; id_field < field_count; id_field++) {
+    precision_type precision = field_descr_->precision(id_field);
+    int bytes_per_element = cello::precision_size (precision);
+    int  gx,gy,gz;
+    if ( ghosts_allocated() ) {
+      field_descr_->ghosts(id_field,&gx,&gy,&gz);
+    } else {
+      gx = gy = gz =0;
+    }
+    int nx = dimensions_[0] + 2*gx;
+    int ny = dimensions_[1] + 2*gy;
+    int nz = dimensions_[2] + 2*gz;
+    double sum = 0.0;
+    if (bytes_per_element==4) {
+      float * array = (float *) field_values_[id_field];
+      for (int i=0; i<nx*ny*nz; i++) sum += array[i];
+    } else if (bytes_per_element==8) {
+      double * array = (double *) field_values_[id_field];
+      for (int i=0; i<nx*ny*nz; i++) sum += array[i];
+    } else {
+      WARNING_MESSAGE("FieldBlock::debug_sum","Unsupported precision");
+    }
+    printf ("Field %d sum %22.16g\n",id_field,sum);
+  }
 }

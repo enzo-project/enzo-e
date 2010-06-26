@@ -133,6 +133,8 @@ public: // interface
 		      double lower_y = 0.0, double upper_y = 1.0,
 		      double lower_z = 0.0, double upper_z = 1.0) throw();
 
+  void debug () const throw();
+  
   //----------------------------------------------------------------------
 
 private: // functions
@@ -169,7 +171,8 @@ private: // functions
   ( face_type face,
     T * array,
     int nx,int ny,int nz,
-    int gx,int gy,int gz);
+    int gx,int gy,int gz,
+    bool vx,bool vy,bool vz);
   /// Enforce outflow boundary conditions on a boundary face
   void enforce_boundary_outflow_(face_type face) throw();
   /// Enforce inflow boundary conditions on a boundary face
