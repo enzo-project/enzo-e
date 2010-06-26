@@ -8,6 +8,8 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
 /// @todo     Add output support for individual parameters, e.g. for Monitor output
+/// @todo     set_list(), etc functions for lists and expressions
+/// @todo     set_value() using string values for all types
 /// @brief    Declaration for the Parameters class
 
 /// @def      MAX_PARAMETER_FILE_WIDTH
