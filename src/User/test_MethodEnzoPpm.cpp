@@ -157,8 +157,6 @@ int main(int argc, char **argv)
 
   printf ("Timestep = %g\n", dt );
 
-  dt = 0.000239579;
-
   unit_func("advance_block");
   ppm->advance_block(data_block,t,dt);
   unit_assert(false);
