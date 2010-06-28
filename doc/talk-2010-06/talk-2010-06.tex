@@ -105,16 +105,33 @@
 %
 %   Components
 %   Component summary
-%     - organized into "component" subdirectories
-%       - e.g. Mesh, Field, Particles, Parameters
-%       - Enzo-P code goes in User component
+%   - organized into "component" subdirectories
+%   - e.g. Mesh, Field, Particles, Parameters
+%   - Enzo-P code goes in User component
+%   - data structures only manipulated directly from own class
+%     - standard iterator functions for traversing complicated data structures
+%       - [ hypre-solve code ]
+%   
+%
 %
 % --------------------------------------------------
 % 
 % AMR COMPONENT
 %
-%   * AMR
-%     - Enzo: "patch-based" structured AMR (SAMR)
+%  * AMR variants
+%    - "Structured" AMR
+%      - e.g.~Enzo, Chombo, SAMRAI
+%    - "Octree-based" AMR
+%      - e.g.~Flash, ...
+%  * Scalable AMR is an unsolved problem
+%      - SAMR has scalablity issues
+%        - gridding algorithm has scaling issues
+%        - parent-child communication 
+%        - scheduling/balancing variable-sized tasks
+%      - Octree-AMR has scalability issues
+%         - fixed-size patches inefficient for "shallow" AMR
+%         - refining a single point involves entire root-level patch
+%         - octree refinement inefficient for "deep" AMR
 %     - Enzo-P: modified "octree-based" AMR
 %       - similar to e.g. Flash, but with several (currently proprietary) enhancements
 %       - improved scalability:
@@ -137,6 +154,22 @@
 %            - still maintain smooth level jumps by 2 everywhere
 %         - will address integer index range issues
 %         - will address floating point positional precision issues
+%       - reduced operations for physics modules compared to SAMR
+%         - cubical typically small blocks
+%         - limited inter-block configurations [ figure ]
+%   * Cello AMR philosophy
+%     - "AMR hierarchy" defines changes in resolution
+%     - "AMR patch" defines areas of uniform resolution
+%     - hierarchy size should be proportional to "amount" of resolution change
+%       - not true of standard octree AMR (Flash) due to fixed-size patches
+%       - not strictly true of Enzo AMR due to unigrid level (hierarchy = O(P^2)[?])
+%     - Cello adds a new "level" to AMR
+%       - "AMR block" defines task size
+%       - typically small, e.g. $4^3$ to $8^3$
+%       - a patch is composed of one or more blocks
+%       - unigrid problem is single patch
+%       - decouples "uniform resolution" requirements from "parallel task size"
+%     - AMR 
 %   AMR:        totally new AMR approach: generalization of octrees--rationale
 %   AMR:        additional level of refinement: patches + blocks
 %   AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
@@ -201,12 +234,33 @@
 %
 % PORTAL COMPONENT
 %
-%  - interact with external utilities
+%  * interact with external utilities
 %    - yt, jacques, etc.
 %  - inter-application communication using Parameters-like API
 %    - probably XML
 %    - read commands to retrieve data
 %    - write commands to control simulation
+%  * Example uses
+%    - control
+%      - modify simulation parameters as it progresses
+%      - maintain log so results can be reproduced
+%    - locate
+%      - dynamically look for and track features
+%    - analyse
+%    - visualize
+%      - e.g. contral a dynamic camera position, direction, frequency sensitivity, etc.
+%    - performance
+%      - find performance problems
+%      - dynamically modify parameters to correct
+%
+%  * user-driven dynamic analysis
+%    - more efficient than a posteriori analysis
+%      - no large disk dumps
+%    - more flexible than inline analysis
+%      - discover and analyse features at run time
+%      - all data available
+%    - can dynamically change what data to store for later analysis
+%      - useful if analysis would otherwise slow the computation
 %
 % --------------------------------------------------
 %
