@@ -9,17 +9,46 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\documentclass{beamer}
 
+% --------------------------------------------------
 %
-% Introduction: ENZO-P / Cello
+% INTRODUCTION: ENZO-P / CELLO
 %    
 %   * Goals
-%     - petascalable
-%       - fault-tolerant
-%       - dynamic parallel task creation / migration
-%     - improved software development
+%     - scalable to O(10^6) and beyond
+%       [ redesign data structures to be highly-scalable from the start ]
+%     - software resiliency
+%       [ hardware components *will* fail ]
+%     - dynamic parallel task creation / scheduling / migration
+%     - improved user experience [ compilation, parameter files ]
+%     - improved developer experience
+%       - design is component-based: one directory per component
+%       - loosely-coupled ``physics'' and ``computer science'' components
+%         - Enzo-P: physics part
+%         - Cello: computer science part
+%     - quality control
+%       - improved software development process
 %       - requirements, design, implement, test
-%       - partition code into ``physics'' and ``computer science''
-%   * Cello
+%     - enhanced capabilities
+%       - AMR enhancements for both "deep" and "wide" problems
+%       - built-in interface to interact with external applications
+%         - visualization, analysis
+%
+%   * Capabilities
+%   * Scalability and performance
+%     - parallel scaling
+%       - dynamic task scheduling
+%         - allow patch-local timestepping: no global synchronization 
+%     - data structure scaling
+%       - positional floating point precision problems addressed
+%         - local (patch) coordinate systems only
+%       - integer index ranges addressed
+%         - relative (neighbor) indices only
+%       - global indices or positions computed (log N) when required
+%         - analysis, visualization
+%       - reduces code complexity, memory usage
+%       
+%   
+%   * Cello Extreme AMR Framework
 %     - Framework for extreme AMR
 %     - supports hyperbolic and elliptic methods
 %     - Hierarchical parallelism
@@ -29,17 +58,12 @@
 %     - just the framework, no actual physics routines
 %   * Enzo-P
 %     - Enzo physics built on Cello AMR framework
-%     - 
+%       - UserMethod
 %
-% Comparing Enzo with Enzo-P
+% --------------------------------------------------
 %
-%   * Compiling
-%     - scons not make
-%     - unit tests integrated with code build
-%   * Source code
-%     - organized into "component" subdirectories
-%       - e.g. Mesh, Field, Particles, Parameters
-%       - Enzo-P code goes in User component
+% PARAMETERS
+%
 %   * Problem definition
 %     - Enzo:  problem definition in code ("problem_type") and parameter file
 %     - Enzo-P problem definition in parameter file
@@ -49,6 +73,46 @@
 %       - more difficult to implement
 %       - flex for lexical analysis, bison for parsing
 %         - generates C-code, which is thoroughly tested
+%   * Parameter files
+%     * parameters organized into "groups" and "subgroups"
+%     * parameter types much more flexible than Enzo
+%     * Enzo-P developers can trivially add new parameters:
+%        parameters->set_current_group("Physics");
+%        bool physics_on = parameters->("enable_physics",true);
+%   * Parameter file example: Implosion problem
+%   * Parameter file example: Collapse test
+%   * Parameter file data types
+%
+%     - integer
+%     - scalar
+%     - logical
+%     - string
+%     - list
+%     - scalar expression, 
+%     - logical expression
+%   parameters: hierarchical
+%   parameters: expressive data types
+%   parameters: easy to add new parameters: just use [API example]
+%   parameters: compare parameter files with Enzo [implosion]
+%   - initial conditions
+%     - scalar expression "if-else" list
+%     - input file
+%     - user "initial" method
+%
+% --------------------------------------------------
+%
+% CODE DESIGN
+%
+%   Components
+%   Component summary
+%     - organized into "component" subdirectories
+%       - e.g. Mesh, Field, Particles, Parameters
+%       - Enzo-P code goes in User component
+%
+% --------------------------------------------------
+% 
+% AMR COMPONENT
+%
 %   * AMR
 %     - Enzo: "patch-based" structured AMR (SAMR)
 %     - Enzo-P: modified "octree-based" AMR
@@ -73,7 +137,128 @@
 %            - still maintain smooth level jumps by 2 everywhere
 %         - will address integer index range issues
 %         - will address floating point positional precision issues
-%      
+%   AMR:        totally new AMR approach: generalization of octrees--rationale
+%   AMR:        additional level of refinement: patches + blocks
+%   AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
+%   AMR:        new [currently proprietary] enhancement for "deep, targeted" AMR
+%   AMR:        no level jumps, symmetric refinement for symmetric problems
+%   AMR:        ghost zones optionally allocated only when needed
+%   AMR:        octree node memory footprint is light: 3 pointers (24 bytes) per patch
+%   AMR:        optional fully distributed AMR hierarchy
+%   scalability: Only adjacent block communication--no parent/child communication
+%   scalability: Optional fully-distributed hierarchy (local patch + neighboring "ghost" patches)
+%   performance: block sizes can be fixed (or at least quantized, e.g. $4^3$ $8^3$ or $16^3$), reducing memory fragmentation, improving cache utilization
+%   performance: AMR enhancements will greatly reduce metadata
+%   problem support: Deep: integer range and floating point precision
+%   problem support: Deep: "level windows" to reduce memory usage
+%   problem support: AMR enhancements for targeted refinement by 4 or 8 ["backfill" to maintain level jumps at most 2]
+%
+% --------------------------------------------------
+%
+% FIELD COMPONENT
+%
+%   Field:      data layout controlable from parameter file: ordering, padding, alignment, [interleaving]
+%   Field:      default precision specified in parameter file, can be overridden for individual fields (may require promoting before passing to computational kernals)
+%   Field:      ghost zone depth  specified in parameter file, can be overridden for individual fields
+%   Field:      minimum/maximum values for fields optionally specified in input file, including action (warning, error, reduce time step, alternate method)
+%   
+%   Field:      fields explicitly specified in parameter file
+%   Field:      field groups specified in parameter file (e.g. "color", etc.)
+%   Issue: units?
+%
+% --------------------------------------------------
+%
+% USER COMPONENT
+%
+%  - Cello is designed to be a general-purpose "extreme AMR" framework
+%  - "User" component is designed to hold application-specific
+%   Enzo-P:     All Enzo physics code in User component
+%   Enzo-P:     Includes methods (block advance, face update), timestep determination, control (ala EvolveLevel)
+%      UserMethod:     basic method, initialization, analysis functions
+%      UserCorrect:  "flux-correction" type operations at level interface boundaries
+%      UserBoundary:  user-defined boundary conditions
+%      UserTimestep:  user-defined timestep control (ala EvolveLevel)
+%      UserRefinement user-defined refinement criteria
+%      UserBalance    user-defined load balancing
+%      UserSchedule   user-defined task scheduling
+%      User????       other functions required?
+
+% --------------------------------------------------
+%
+% MEMORY COMPONENT
+%
+%  - optionally fill memory with NaN after allocate
+%    - help catch access of uninitialized data
+%  - optionally fill memory with Nan before deallocate
+%    - help catch access of unallocated data
+%  - optionally track current / high memory per process
+%  - optionally warn when memory threshold reached
+%  - fixed (quantized) field (particle) block sizes
+%    - should help reduce memory fragmentation
+%  - can wrap other memory management libraries
+%
+% --------------------------------------------------
+%
+% PORTAL COMPONENT
+%
+%  - interact with external utilities
+%    - yt, jacques, etc.
+%  - inter-application communication using Parameters-like API
+%    - probably XML
+%    - read commands to retrieve data
+%    - write commands to control simulation
+%
+% --------------------------------------------------
+%
+% SOFTWARE ENGINEERING AND QUALITY CONTROL
+%
+% - prototyping
+%   - proof-of-concept
+%   - iron out design issues
+%   - proven technique
+% - testing
+%   - unit testing integrated with code build (scons not make)
+%   - integration tests how classes/components interact
+%   - system tests entire application
+%   - regression testing
+%   - test for previously-found bugs to prevent their reappearance
+% - code reviewing
+%   - goal: every line of code is proof-read
+%   - proven effective
+% - combining techniques more effective than individual
+%   - computers tend to find different kinds of bugs than people
+
+% --------------------------------------------------
+%
+% OUTPUT
+%
+%   Output:     Currently HDF5 and IFrit files supported
+%   Output:     Different output 'types', restart, data, visualization, analysis, etc.
+%
+% --------------------------------------------------
+%
+% ERROR
+%
+%   Fault-tolerant design
+% --------------------------------------------------
+%
+% PARALLELISM
+%
+%   parallel:   hierarchical: distributed-memory, shared-memory [GPU level]
+%   parallel:   any level can be parallelized with different parallel technology (MPI,UPC,etc.)
+%   parallel:   load balancing approach specified in parameter file, may be user-defined.  Initially space-filling curve, ultimately hierarchical diffusion
+%   parallel:   fully distributed data structures (no / fixed global metadata)
+%   Schedule, Balance, Task [ uml ]
+%  
+%     - dynamic parallel task creation / scheduling / migration
+%       [ enzo is more static ]
+%       [ remove unnecessary synchronization, e.g. between levels ]
+%
+% --------------------------------------------------
+%
+% FEEDBACK
+%
+%   % Limitations
 %   * Enzo-P limitations
 %     - cubical domains
 %       - may be able to bypass
@@ -82,29 +267,10 @@
 %         - need to refine along physical boundary for accuracy
 %         - mask-out unused patches / blocks
 %
-% User-perspective
+% --------------------------------------------------
 %
-%   * Parameter files
-%     * parameters organized into "groups" and "subgroups"
-%     * parameter types much more flexible than Enzo
-%     * Enzo-P developers can trivially add new parameters:
-%        parameters->set_current_group("Physics");
-%        bool physics_on = parameters->("enable_physics",true);
-%   * Parameter file example: Implosion problem
-%   * Parameter file data types
+% CURRENT STATUS AND ROADMAP
 %
-%     - integer
-%     - scalar
-%     - logical
-%     - string
-%     - list
-%     - scalar expression, 
-%     - logical expression
-%
-%   * 
-% Fields
-%
-%   * 
 % Initial Unigrid Release "Soon"
 %
 %   * Pre-release
@@ -124,59 +290,7 @@
 %   + gravity (FFT(Harkness) or multigrid)
 %   + PPML (with Kritsuk and Ustyugov
 %   + AMR (after development and paper)
-%   
 %
-% Information
-%
-%   * Public website
-%   * Developer website (LCA has accounts) (make developer accounts)
-%
-% Feedback desired
-%
-% * Fundamental missing functionality?
-% * Parameters?
-% * Is framework sufficient for Enzo-P development?
-% 
-% Features
-%
-%   parameters: hierarchical
-%   parameters: expressive data types
-%   parameters: easy to add new parameters: just use [API example]
-%   parameters: compare parameter files with Enzo [implosion]
-%   AMR:        totally new AMR approach: generalization of octrees--rationale
-%   AMR:        additional level of refinement: patches + blocks
-%   AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
-%   AMR:        new [currently proprietary] enhancement for "deep, targeted" AMR
-%   AMR:        no level jumps, symmetric refinement for symmetric problems
-%   AMR:        ghost zones optionally allocated only when needed
-%   AMR:        octree node memory footprint is light: 3 pointers (24 bytes) per patch
-%   AMR:        optional fully distributed AMR hierarchy
-%   Field:      data layout controlable from parameter file: ordering, padding, alignment, [interleaving]
-%   Field:      default precision specified in parameter file, can be overridden for individual fields (may require promoting before passing to computational kernals)
-%   Field:      ghost zone depth  specified in parameter file, can be overridden for individual fields
-%   Field:      minimum/maximum values for fields optionally specified in input file, including action (warning, error, reduce time step, alternate method)
-%   
-%   Field:      fields explicitly specified in parameter file
-%   Field:      field groups specified in parameter file (e.g. "color", etc.)
-%   Output:     Currently HDF5 and IFrit files supported
-%   Output:     Different output 'types', restart, data, visualization, analysis, etc.
-%
-%   Enzo-P:     All Enzo physics code in User component
-%   Enzo-P:     Includes methods (block advance, face update), timestep determination, control (ala EvolveLevel)
-%   
-%   parallel:   hierarchical: distributed-memory, shared-memory [GPU level]
-%   parallel:   any level can be parallelized with different parallel technology (MPI,UPC,etc.)
-%   parallel:   load balancing approach specified in parameter file, may be user-defined.  Initially space-filling curve, ultimately hierarchical diffusion
-%   parallel:   fully distributed data structures (no / fixed global metadata)
-%  
-%   scalability: Only adjacent block communication--no parent/child communication
-%   scalability: Optional fully-distributed hierarchy (local patch + neighboring "ghost" patches)
-%   scalability: dynamic task scheduling (a block can advance when it has its boundary data, regardless of level)
-%   scalability: "problem" scaling: integer index ranges addressed
-%   scalability: "problem" scaling: positional floating point precision problems addressed
-%   scalability: allow local timestepping: no global synchronization 
-%   performance: block sizes can be fixed (or at least quantized, e.g. $4^3$ $8^3$ or $16^3$), reducing memory fragmentation, improving cache utilization
-%   performance: AMR enhancements will greatly reduce metadata
 %   roadmap:    available now: Fields, Parameters, serial unigrid PPM
 %   roadmap:    available imminently: parallel unigrid MPI-[12] PPM, PPML, gravity (FFT or MG)
 %   roadmap:    available next: basic AMR (octree), local physics 
@@ -200,6 +314,21 @@
 %   
 % * Why Enzo-P?
 %    
+% --------------------------------------------------
+%
+% CONCLUSIONS
+%
+%   - Public website
+%   - Developer website
+%   - MPI-parallel unigrid Enzo PPM hydro "soon"
+%   - Feedback desired
+%     - parameters
+%     - missing functionality?
+%     - unnecessary functionality?
+%     - easy of physics method development?
+%
+% --------------------------------------------------
+
 \documentclass{beamer}
 
 \usetheme{Copenhagen}
