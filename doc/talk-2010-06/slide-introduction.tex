@@ -1,0 +1,67 @@
+\begin{frame}[fragile] 
+%--------------------------------------------------
+\frametitle{Project Motivation}
+%--------------------------------------------------
+\begin{itemize}
+  \item Enzo development began around 1994
+  \item Largest machine in 6/1994 had 3680 processors
+  \item \textcolor{white}{Largest machine in}  6/2010 has 294912 cores
+  \item \textcolor{white}{Largest machine in}  6/2026 will have 20000000 quorlets
+  \item What will \enzo\ look like in 2026?
+    \begin{itemize}
+      \item let's not go there...
+    \end{itemize}
+  \item \enzo-P is being designed to be the next generation of \enzo
+    \begin{itemize}
+      \item Long-range goals to complement \enzo's shorter-range goals
+      \item Maintain \enzo's beloved physics capabilities
+       \item Redesign distributed AMR infrastructure
+       \item Implemented on a general ``extreme-AMR'' framework: \cello
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile] 
+%--------------------------------------------------
+\frametitle{Project Goals}
+%--------------------------------------------------
+\enzop\ / \cello\ design goals:
+\begin{itemize}
+  \item Highly scalable
+    \begin{itemize}
+      \item\enhance{2} parallel scalability (nodes, processors, cores)
+      \item\enhance{3} data structure scalability (zones, grids, levels)
+    \end{itemize}
+  \item\enhance{4} Easy to use
+    \begin{itemize}
+      \item\enhance{5} simplified build system
+      \item\enhance{6} enhanced parameter file grammar and syntax
+    \end{itemize}
+  \item\enhance{4} Easy to modify and enhance
+    \begin{itemize}
+      \item\enhance{5} object-oriented design
+      \item\enhance{6} losely-coupled components
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------------------------------
+\begin{frame}[fragile] \frametitle{Extreme Scaling Issues}
+   \begin{itemize}
+      \item \enhance{1}Parallel task size control
+      \begin{itemize}
+          \item \enhance{1}Large enough for efficiency
+          \item \enhance{1}Small enough for sufficient parallelism
+      \end{itemize}
+      \item \enhance{1}Global synchronization
+      \begin{itemize}
+          \item \enhance{1}Integration is level-by-level
+          \item \enhance{1}Timestep determination
+      \end{itemize}
+      \item \enhance{2}SAMR gridding algorithm
+      \item \enhance{3}Load balancing (nodes, processors, cores)
+      \item \enhance{5}Software resiliency / fault tolerance
+      \item \enhance{6}Checkpoint / restart
+      \item \enhance{7}Numerical issues (index ranges, position precisions)
+   \end{itemize}
+\end{frame}
