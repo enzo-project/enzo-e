@@ -107,12 +107,20 @@
 %--------------------------------------------------
 \frametitle{Cello AMR enchancement: patch coalescing}
 %--------------------------------------------------
-%       - enhancements for "wide" problems (large regions at same level)
-%         - Basic octree with fixed-sized blocks refines too much
-%           - Flash patch count proportional to refinement area * $8^{level}$
-%           - Enzo-P patch count proportional to refinement-change area $8^{level}$
-%           - [figure]
-%           - Enzo patch count good, but smaller patches at finer levels
+\begin{minipage}{2.2in}
+\includegraphics<1>[width=2.2in]{dots.png}
+\includegraphics<2>[width=2.2in]{dots-4-1.png}
+\includegraphics<3>[width=2.2in]{dots-16-5.png}
+\end{minipage}
+\begin{minipage}{1.6in}
+\footnotesize
+      \begin{itemize}
+        \item \ENHANCE{1}begin with a collection of point sources
+        \item \ENHANCE{2}octree refinement with $r=2$ has 2137 nodes (L=10)
+        \item \ENHANCE{3}targeted refinement with $r=4$ has 158 nodes
+      \end{itemize}
+\end{minipage}
+
 \end{frame}
 
 
