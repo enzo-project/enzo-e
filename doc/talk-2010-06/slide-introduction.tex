@@ -65,3 +65,50 @@
       \item \enhance{7}Numerical issues (index ranges, position precisions)
    \end{itemize}
 \end{frame}
+%   * Goals
+%     - scalable to O(10^6) and beyond
+%       [ redesign data structures to be highly-scalable from the start ]
+%     - software resiliency
+%       [ hardware components *will* fail ]
+%     - dynamic parallel task creation / scheduling / migration
+%     - improved user experience [ compilation, parameter files ]
+%     - improved developer experience
+%       - design is component-based: one directory per component
+%       - loosely-coupled ``physics'' and ``computer science'' components
+%         - Enzo-P: physics part
+%         - Cello: computer science part
+%     - quality control
+%       - improved software development process
+%       - requirements, design, implement, test
+%     - enhanced capabilities
+%       - AMR enhancements for both "deep" and "wide" problems
+%       - built-in interface to interact with external applications
+%         - visualization, analysis
+%
+%   * Capabilities
+%   * Scalability and performance
+%     - parallel scaling
+%       - dynamic task scheduling
+%         - allow patch-local timestepping: no global synchronization 
+%     - data structure scaling
+%       - positional floating point precision problems addressed
+%         - local (patch) coordinate systems only
+%       - integer index ranges addressed
+%         - relative (neighbor) indices only
+%       - global indices or positions computed (log N) when required
+%         - analysis, visualization
+%       - reduces code complexity, memory usage
+%       
+%   
+%   * Cello Extreme AMR Framework
+%     - Framework for extreme AMR
+%     - supports hyperbolic and elliptic methods
+%     - Hierarchical parallelism
+%       - distributed memory (MPI-1, MPI-2, UPC, charm++)
+%       - shared memory (OpenMP, UPC, charm++)
+%       - dynamic task generation and 
+%     - just the framework, no actual physics routines
+%   * Enzo-P
+%     - Enzo physics built on Cello AMR framework
+%       - UserMethod
+%
