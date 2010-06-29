@@ -1,0 +1,26 @@
+\begin{frame}[fragile] 
+%--------------------------------------------------
+\frametitle{Dynamic scheduling}
+%--------------------------------------------------
+\begin{itemize}
+\item\enzo\ grid patches proceed level-by-level
+\begin{itemize}
+\item   Static scheduling based on W-cycle through levels
+\item   Bryan: ``refined patches work to catch up to their neighbors''
+\item   Introduces artificial data dependencies
+\end{itemize}
+\begin{itemize}
+\item      e.g. at first step, \textit{all} grids could advance
+\item      slow localized region of domain can slow down entire simulation
+\end{itemize}
+\item\cello: patches advance dynamically
+\begin{itemize}
+\item   Bordner: ``patches work to get ahead of their neighbors''
+\item   Dynamic scheduling based on data dependencies with neighbors
+\begin{itemize}
+\item     a patch can advance when all of its neighbors have caught up
+\item     more forgiving for large processor counts
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\end{frame}
