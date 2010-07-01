@@ -138,6 +138,7 @@ int main(int argc, char **argv)
   monitor->image ("ppm-density-0.png",
 		  (Scalar *)field_block->field_values(index_density),
 		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
+
   monitor->image ("ppm-velocity_x-0.png",
 		  (Scalar *)field_block->field_values(index_velocity_x),
 		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
