@@ -16,8 +16,8 @@
 \end{itemize}
  \enhance{2}\item Enhancements to address other issues
 \begin{itemize}
- \enhance{2}\item   coalesce patches to reduce AMR overhead
- \enhance{2}\item   targeted refinement for deep AMR problems
+ \enhance{2}\item   \textbf{patch coalescing} to reduce AMR overhead
+ \enhance{2}\item   \textbf{targeted refinement} for deep AMR problems
 \end{itemize}
 \end{itemize}
 \end{frame}
@@ -75,7 +75,7 @@
 \centerline{\includegraphics[width=3.5in]{coalesce2.png}}
 \begin{itemize}
 \enhance{2}\item Coalesce patches into larger one when possible
-\enhance{3}\item Split patches into smaller ones when necessary
+\enhance{3}\item Split a patch into smaller ones when necessary
 \enhance{4}\item Maintain task size control using ``blocks''
 \end{itemize}
 \end{frame}
@@ -109,7 +109,7 @@
 \centerline{\includegraphics[width=3.5in]{kd-backfill.png}}
 \begin{itemize}
 \enhance{1}\item Refine by $r=4$ instead of $r=2$
-\enhance{2}\item More ``targeted'' refinement
+\enhance{2}\item Refinement is more localized
 \enhance{3}\item Can restore $r=2$ jumps by ``backfilling'' levels
 \enhance{4}\item Backfill patch locations known implicitly---nominal storage
 \end{itemize}
@@ -131,7 +131,7 @@
       \begin{itemize}
         \item \ENHANCE{1}Assume you want to refine on point sources
         \item \ENHANCE{2} quadtree refinement with $r=2$ has 2137 patches
-        \item \ENHANCE{3} targeted refinement with $r=4$ has 158 nodes
+        \item \ENHANCE{3} targeted refinement with $r=4$ has 158 patches
       \end{itemize}
 \end{minipage}
 
