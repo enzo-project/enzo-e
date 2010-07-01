@@ -1,0 +1,62 @@
+\begin{frame}[fragile] 
+%--------------------------------------------------
+\frametitle{\cello\ Features}
+\framesubtitle{Precision and range issues}
+%--------------------------------------------------
+\begin{itemize}
+\item\enhance{1} Numerical issues arise for ``wide'' or ``deep'' problems
+\item\enhance{2} Particle position precision
+\begin{itemize}
+\item\enhance{2} store positions using patch-local coordinates
+\item\enhance{2} global positions computed quickly if needed
+\end{itemize}
+\item\enhance{3} Global index ranges
+\begin{itemize}
+\item\enhance{3} indices known implicitly from octree-like data structure
+\item\enhance{3} global indices computed quickly if needed
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile] 
+%--------------------------------------------------
+\frametitle{\cello\ Features}
+\framesubtitle{Adaptive timestepping}
+%--------------------------------------------------
+\begin{itemize}
+\item\enhance{1} Uniform timestepping: $dt(cycle)$
+\begin{itemize}
+\item\enhance{1}[$+$] high parallel efficiency
+\item\enhance{1}[$-$] extra timesteps on coarse levels
+\end{itemize}
+\item\enhance{2} Level-adaptive timestepping: $dt(cycle,level)$
+\begin{itemize}
+\item\enhance{2} [$-$]  reduced parallel efficiency 
+\item\enhance{2} [$+$]  less overall work
+\end{itemize}
+\item\enhance{3} Patch-adaptive timestepping: $dt(cycle,patch)$
+\begin{itemize}
+\item\enhance{3} [$+$] no global synchronization
+\item\enhance{3} [$-$]  interpolation required between patches in same level
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile] 
+%--------------------------------------------------
+\frametitle{\cello\ Features}
+\framesubtitle{Dynamic parallel scheduling}
+%--------------------------------------------------
+\begin{itemize}
+\item\enhance{1}\enzo: patches proceed level-by-level
+\begin{itemize}
+\item\enhance{1}   ``refined patches work to catch up to their neighbors''
+\item\enhance{1}   synchronization between levels
+\end{itemize}
+\item\enhance{2}\cello: patches can advance dynamically
+\begin{itemize}
+\item\enhance{2}   ``patches work to get one step ahead of their neighbors''
+\item\enhance{2}     advance patch when neighbors have caught up
+\end{itemize}
+\end{itemize}
+\end{frame}
