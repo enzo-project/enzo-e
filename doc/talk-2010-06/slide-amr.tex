@@ -1,228 +1,138 @@
 \begin{frame}[fragile] 
 %--------------------------------------------------
-\frametitle{AMR Variants}
+\frametitle{\cello\ AMR approach}
 %--------------------------------------------------
+%  AMR:        additional level of refinement: patches + blocks
+%  AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
+%  AMR:        new [currently proprietary] enhancement for "deep, targeted" AMR
+%  AMR:        no level jumps, symmetric refinement for symmetric problems
+%  AMR:        ghost zones optionally allocated only when needed
+\centerline{\includegraphics[width=2.5in]{paramesh2.png}}
 \begin{itemize}
-\item "Structured" AMR
+ \enhance{1}\item  Based on octrees rather than SAMR for scalability
 \begin{itemize}
-\item   e.g.~\enzo, Chombo, SAMRAI
+ \enhance{1}\item    octree AMR has scaled to $>$32K cores
+ \enhance{1}\item    mesh data associated with leaf nodes only
 \end{itemize}
-\item "Octree-based" AMR
+ \enhance{2}\item Enhancements to address other issues
 \begin{itemize}
-\item   e.g.~Flash, ...
+ \enhance{2}\item   coalesce patches to reduce AMR overhead
+ \enhance{2}\item   targeted refinement for deep AMR problems
 \end{itemize}
-\item Each approach has scalability issues
 \end{itemize}
 \end{frame}
 
+% \begin{frame}[fragile] 
+% %--------------------------------------------------
+% \frametitle{Scalability of AMR variants}
+% \framesubtitle{Structured AMR}
+% %--------------------------------------------------
+% \includegraphics<1>[width=1.2in]{chombo.png}
+% \begin{itemize}
+% \item \enhance{1}  regridding algorithm
+% \begin{itemize}
+% \item \enhance{1}     tradeoff between mesh quality and scaling
+% \item \enhance{1}     \enzo\ favors speed
+% \end{itemize}
+% \item \enhance{1}  variable-sized task sizes
+% \begin{itemize}
+% \item \enhance{1}     scheduling and load balancing
+% \item \enhance{1}     performance versus parallelism
+% \end{itemize}
+% \item \enhance{1} neighbor searches
+% \end{itemize}
+% \end{frame}
+% 
+% \begin{frame}[fragile] 
+% %--------------------------------------------------
+% \frametitle{Scalability of AMR variants}
+% \framesubtitle{Octree-based AMR}
+% %--------------------------------------------------
+% \includegraphics<1>[width=1.2in]{paramesh.png}
+% \begin{itemize}
+% \item \enhance{1} fixed-size patches inefficient for "shallow" AMR
+% \begin{itemize}
+% \item \enhance{1}  refining a single point involves entire root-level patch
+% \end{itemize}
+% \item \enhance{1} octree refinement inefficient for "deep" AMR
+% \end{itemize}
+% %       - reduced operations for physics modules compared to SAMR
+% %         - cubical typically small blocks
+% %         - limited inter-block configurations [ figure ]
+% \end{frame}
+% 
+% %     - "AMR hierarchy" defines changes in resolution
+% %     - "AMR patch" defines areas of uniform resolution
+% %     - hierarchy size should be proportional to "amount" of resolution change
+
+%------------------------------------------------------------------------
 
 \begin{frame}[fragile] 
 %--------------------------------------------------
-\frametitle{Structured AMR scalability issues}
+\frametitle{\cello\ AMR}
+\framesubtitle{Enhancement 1: Patch coalescing}
 %--------------------------------------------------
+\centerline{\includegraphics[width=3.5in]{coalesce2.png}}
 \begin{itemize}
-\item  gridding placement algorithm
-\begin{itemize}
-\item tradeoff between mesh quality and scaling
-\item \enzo\ favors speed
-\end{itemize}
-\item  complicated hierarchy structure
-\begin{itemize}
-\item     variable number of children
-\item     variable number of siblings
-\item     complicated communication
-\end{itemize}
-\item  variable-sized task sizes
-\begin{itemize}
-\item     scheduling
-\item     load balancing
-\end{itemize}
-\item  load balancing 
-\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile] 
-%--------------------------------------------------
-\frametitle{Octree AMR scalability issues}
-%--------------------------------------------------
-\begin{itemize}
-\item fixed-size patches inefficient for "shallow" AMR
-\begin{itemize}
-\item  refining a single point involves entire root-level patch
-\end{itemize}
-\item octree refinement inefficient for "deep" AMR
-\end{itemize}
-%       - reduced operations for physics modules compared to SAMR
-%         - cubical typically small blocks
-%         - limited inter-block configurations [ figure ]
-\end{frame}
-
-%     - "AMR hierarchy" defines changes in resolution
-%     - "AMR patch" defines areas of uniform resolution
-%     - hierarchy size should be proportional to "amount" of resolution change
-\begin{frame}[fragile] 
-%--------------------------------------------------
-\frametitle{Cello AMR solution}
-%--------------------------------------------------
-%   AMR:        totally new AMR approach: generalization of octrees--rationale
-%   AMR:        additional level of refinement: patches + blocks
-%   AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
-%   AMR:        new [currently proprietary] enhancement for "deep, targeted" AMR
-%   AMR:        no level jumps, symmetric refinement for symmetric problems
-%   AMR:        ghost zones optionally allocated only when needed
-\begin{itemize}
-\item  Based on octree since most scalable
-\begin{itemize}
-\item    e.g.~ALPS framework has scaled to >32K cores
-\begin{itemize}
-\item      (uniform time-stepping helps)
-\end{itemize}
-\end{itemize}
-\item Mesh data associated with leaf nodes only
-\begin{itemize}
-\item   sibling data transfer only
-\begin{itemize}
-\item     no parent-child data transfer
-\end{itemize}
-\end{itemize}
-\item Quantized number of siblings
-\begin{itemize}
-\item   ``1/4'', 1, or 4 per face
-\end{itemize}
-\item Enhancements to address other issues
-\begin{itemize}
-\item   Coalesce patches in same refinement level to reduce AMR overhead
-\begin{itemize}
-\item     ...but still maintain fixed task sizes
-\end{itemize}
-\item   Targeted refinement for deep AMR problems
-\begin{itemize}
-\item      ...but still maintain $r=2$ refinement everywhere
-\end{itemize}
-\end{itemize}
+\enhance{2}\item Coalesce patches into larger one when possible
+\enhance{3}\item Split patches into smaller ones when necessary
+\enhance{4}\item Maintain task size control using ``blocks''
 \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile] 
 %--------------------------------------------------
-\frametitle{Cello AMR enchancement: patch coalescing}
+\frametitle{\cello\ AMR}
+\framesubtitle{Enhancement 1: Patch coalescing}
 %--------------------------------------------------
 \begin{minipage}{2.2in}
-\includegraphics<1>[width=2.2in]{dots.png}
-\includegraphics<2>[width=2.2in]{dots-4-1.png}
-\includegraphics<3>[width=2.2in]{dots-16-5.png}
+\includegraphics<1>[width=2.2in]{circle.png}
+\includegraphics<2>[width=2.2in]{circle-1.png}
+\includegraphics<3>[width=2.2in]{circle-2.png}
 \end{minipage}
 \begin{minipage}{1.6in}
 \footnotesize
       \begin{itemize}
-        \item \ENHANCE{1}begin with a collection of point sources
-        \item \ENHANCE{2}octree refinement with $r=2$ has 2137 nodes (L=10)
-        \item \ENHANCE{3}targeted refinement with $r=4$ has 158 nodes
+        \item \ENHANCE{1}Assume you want to refine on a circle
+        \item \ENHANCE{2}quadtree refinement has 18517 patches
+        \item \ENHANCE{3}coalescing patches reduces to 789 patches
       \end{itemize}
 \end{minipage}
 
 \end{frame}
 
-
 \begin{frame}[fragile] 
 %--------------------------------------------------
-\frametitle{Cello AMR enchancement: targeted refinement}
+\frametitle{\cello\ AMR}
+\framesubtitle{Enhancement 2: Targeted refinement}
 %--------------------------------------------------
-%       - enhancements for "deep" problems (many refinement levels)
-%         - octree refinment not "targeted": single point involves entire domain
-%         - we will allow refinement by 4 and possibly 8
-%            - still maintain smooth level jumps by 2 everywhere
-%         - will address integer index range issues
-%         - will address floating point positional precision issues
-\end{frame}
-
-\begin{frame}[fragile] 
-%--------------------------------------------------
-\frametitle{Cello AMR enhancements: precision and ranges}
-%--------------------------------------------------
+\centerline{\includegraphics[width=3.5in]{kd-backfill.png}}
 \begin{itemize}
-\item Precision and range issues arise for ``wide'' or ``deep'' problems
-\item    Global position precision
-\begin{itemize}
-\item store positions using patch-local coordinates
-\item eliminates ``catostraphic cancellation''
-\item single-precision probably sufficient
-\item coordinate changes between patches is trivial
-\item global positions computed quickly if needed
-\end{itemize}
-\item Global index range
-\begin{itemize}
-\item indices known implicitly from octree-like data structure
-\item global indices computed quickly if needed
-\end{itemize}
+\enhance{1}\item Refine by $r=4$ instead of $r=2$
+\enhance{2}\item More ``targeted'' refinement
+\enhance{3}\item Can restore $r=2$ jumps by ``backfilling'' levels
+\enhance{4}\item Backfill patch locations known implicitly---nominal storage
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile] 
-%--------------------------------------------------
-\frametitle{Cello AMR enhancements: distributed patches}
-%--------------------------------------------------
-%     - Cello adds a new "level" to AMR
-%       - "AMR block" defines task size
-%       - typically small, e.g. $4^3$ to $8^3$
-%       - a patch is composed of one or more blocks
-%       - unigrid problem is single patch
-%       - decouples "uniform resolution" requirements from "parallel task size"
-\begin{itemize}
-\item Subdivide AMR patches into regular ``blocks''
-\begin{itemize}
-\item   a block represents a parallel task
-\begin{itemize}
-\item     large patches are distributed
-\item     unigrid problem is single large distributed AMR patch
-\end{itemize}
-\item   sizes can be fixed / quantized ($4^3$, $8^3$, etc.)
-\begin{itemize}
-\item     simplifies load balancing
-\item     reduces memory fragmentation
-\item     size optimizable for performance
-\end{itemize}
-\end{itemize}
-\item Fully or partially distributed hierarchy metadata
-\begin{itemize}
-\item   Can go far with non-distributed tree
-\begin{itemize}
-\item     octree node overhead: 24 bytes per node
-\item     \enzo\ grid overhead: 1500 bytes per grid
-\end{itemize}
-\item   All AMR blocks connected to neighbors and children
-\begin{itemize}
-\item     ``ghost blocks'' analagous to ghost zones
-\end{itemize}
-\item Load balancing 
-\end{itemize}
-\end{itemize}
-\end{frame}
 
 \begin{frame}[fragile] 
 %--------------------------------------------------
-\frametitle{Cello AMR enhancements: adaptive timestepping}
+\frametitle{\cello\ AMR}
+\framesubtitle{Enhancement 2: Targeted refinement}
 %--------------------------------------------------
-\begin{itemize}
-\item Uniform timestepping: $dt(cycle)$
-\begin{itemize}
-\item   highest parallel efficiency
-\item   involves extra timesteps on coarse levels
-\item   not feasible for deep problems
-\item   computing timestep requires global synchronization
-\end{itemize}
-\item Level-adaptive timestepping: $dt(cycle,level)$
-\begin{itemize}
-\item   reduced parallel efficiency 
-\item   interpolation required at level boundaries
-\item   computing timestep requires global synchronization
-\end{itemize}
-\item Patch-adaptive timestepping: $dt(cycle,level)$
-\begin{itemize}
-\item   computing timestep does not require global synchronization
-\item   slow localized regions will not impact global performance as much
-\item   interpolation may be required between patches in same level
-\end{itemize}
-\end{itemize}
-\end{frame}
+\begin{minipage}{2.2in}
+\includegraphics<1>[width=2.2in]{dots-invert.png}
+\includegraphics<2>[width=2.2in]{dots-4-1-inv.png}
+\includegraphics<3>[width=2.2in]{dots-16-5-inv.png}
+\end{minipage}
+\begin{minipage}{1.6in}
+\footnotesize
+      \begin{itemize}
+        \item \ENHANCE{1}Assume you want to refine on point sources
+        \item \ENHANCE{2} quadtree refinement with $r=2$ has 2137 patches
+        \item \ENHANCE{3} targeted refinement with $r=4$ has 158 nodes
+      \end{itemize}
+\end{minipage}
 
+\end{frame}

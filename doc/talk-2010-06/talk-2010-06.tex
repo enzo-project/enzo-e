@@ -1,8 +1,10 @@
 \includeonly{
   slide-title,
   slide-introduction,
+  slide-parameters,
+  slide-design,
   slide-amr,
-  slide-parallel,
+  slide-features,
   slide-conclusions
 }
 
@@ -16,6 +18,105 @@
 %                                    http://outlinebeamer.sourceforge.net/ %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\documentclass{beamer}
+
+
+\documentclass{beamer}
+
+\usetheme{Copenhagen}
+\usecolortheme{default}
+
+\newcommand{\Code}[1]{\textsf{#1}}
+\newcommand{\cello}{\textsf{Cello}}
+\newcommand{\enzo}{\textsf{Enzo}}
+\newcommand{\enzop}{\textsf{Enzo-P}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\us}[1]{\color{blue}{#1}}
+\newcommand{\them}[1]{\color{red}{#1}}
+\newcommand{\newus}[1]{\color{magenta}{#1}}
+\newcommand{\good}{\textcolor{green}{\smiley}}
+\newcommand{\bad}{\textcolor{red}{\frownie}}
+\newcommand{\colorcode}[1]{\textcolor{blue}{\code{#1}}}
+\newcommand{\itemnum}[1]{\item<#1>}
+
+%========================================================================
+% UNCOMMENT TO PRINT
+%========================================================================
+
+  \newcommand{\enhance}[1]{}
+  \newcommand{\enhancebf}[2]{\textbf{#2}}
+  \newcommand{\enhanceus}[1]{\color{blue}}
+  \newcommand{\enhancenewus}[1]{\color{magenta}}
+  \newcommand{\enhancethem}[1]{\color{red}}
+ \newcommand{\ENHANCE}[1]{
+  \temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
+
+%========================================================================
+% UNCOMMENT FOR TALK:
+%========================================================================
+
+%\newcommand{\enhance}[1]{\temporal<#1>{\color{lightgray}}{\color{black}}{\color{black}}}
+% \newcommand{\enhancebf}[2]{\enhance{#1}\textbf{#2}}
+% \newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
+% \newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
+% \newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
+%\newcommand{\ENHANCE}[1]{
+% \temporal<#1>{\color{lightgray}}{\color{black}}{\color{black}}}
+%========================================================================
+
+
+% \def\enhanceus<#1>{%
+%  \temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
+% \def\enhancenewus<#1>{%
+%  \temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
+% \def\enhancethem<#1>{%
+%  \temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
+
+
+\author{James Bordner}
+\date{\today}
+%======================================================================
+\begin{document}
+
+\include{slide-title}
+
+%========================================================================
+% SECTION PAGES [ COMMENT FOR PRINT ]
+%========================================================================
+% \frame{\footnotesize
+% \tableofcontents
+% }
+%  \AtBeginSection[]
+% {
+% \begin{frame}<beamer>
+% \footnotesize
+%    \tableofcontents[currentsection]
+% \end{frame}
+% }
+%========================================================================
+
+\section{Introduction}
+
+  \include{slide-introduction}
+
+\section{Parameters}
+
+  \include{slide-parameters}
+
+\section{Design}
+
+  \include{slide-design}
+
+  \include{slide-amr}
+
+\section{Features}
+
+  \include{slide-features}
+
+\section{Conclusions}
+
+  \include{slide-conclusions}
+
+\end{document}
 
 % --------------------------------------------------
 %
@@ -148,17 +249,6 @@
 %   problem support: AMR enhancements for targeted refinement by 4 or 8 ["backfill" to maintain level jumps at most 2]
 %
 % --------------------------------------------------
-%
-% FIELD COMPONENT
-%
-%   Field:      data layout controlable from parameter file: ordering, padding, alignment, [interleaving]
-%   Field:      default precision specified in parameter file, can be overridden for individual fields (may require promoting before passing to computational kernals)
-%   Field:      ghost zone depth  specified in parameter file, can be overridden for individual fields
-%   Field:      minimum/maximum values for fields optionally specified in input file, including action (warning, error, reduce time step, alternate method)
-%   
-%   Field:      fields explicitly specified in parameter file
-%   Field:      field groups specified in parameter file (e.g. "color", etc.)
-%   Issue: units?
 %
 % --------------------------------------------------
 %
@@ -335,89 +425,3 @@
 %
 %
 % --------------------------------------------------
-
-\documentclass{beamer}
-
-\usetheme{Copenhagen}
-\usecolortheme{default}
-
-\newcommand{\Code}[1]{\textsf{#1}}
-\newcommand{\cello}{\textsf{Cello}}
-\newcommand{\enzo}{\textsf{Enzo}}
-\newcommand{\enzop}{\textsf{Enzo-P}}
-\newcommand{\code}[1]{\texttt{#1}}
-\newcommand{\us}[1]{\color{blue}{#1}}
-\newcommand{\them}[1]{\color{red}{#1}}
-\newcommand{\newus}[1]{\color{magenta}{#1}}
-\newcommand{\good}{\textcolor{green}{\smiley}}
-\newcommand{\bad}{\textcolor{red}{\frownie}}
-\newcommand{\colorcode}[1]{\textcolor{blue}{\code{#1}}}
-\newcommand{\itemnum}[1]{\item<#1>}
-
-%========================================================================
-% UNCOMMENT TO PRINT
-%========================================================================
-
- \newcommand{\enhance}[1]{}
- \newcommand{\enhancebf}[2]{\textbf{#2}}
- \newcommand{\enhanceus}[1]{\color{blue}}
- \newcommand{\enhancenewus}[1]{\color{magenta}}
- \newcommand{\enhancethem}[1]{\color{red}}
-\newcommand{\ENHANCE}[1]{
- \temporal<#1>{\color{lightgray}}{\color{black}}{\color{gray}}}
-
-%========================================================================
-% UNCOMMENT FOR TALK:
-%========================================================================
-
-% \newcommand{\enhance}[1]{\temporal<#1>{\color{lightgray}}{\color{black}}{\color{black}}}
-%  \newcommand{\enhancebf}[2]{\enhance{#1}\textbf{#2}}
-%  \newcommand{\enhanceus}[1]{\temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
-%  \newcommand{\enhancenewus}[1]{\temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
-%  \newcommand{\enhancethem}[1]{\temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
-% \newcommand{\ENHANCE}[1]{
-%  \temporal<#1>{\color{lightgray}}{\color{black}}{\color{black}}}
-%========================================================================
-
-
-% \def\enhanceus<#1>{%
-%  \temporal<#1>{\color{lightgray}}{\color{blue}}{\color{blue}}}
-% \def\enhancenewus<#1>{%
-%  \temporal<#1>{\color{lightgray}}{\color{magenta}}{\color{magenta}}}
-% \def\enhancethem<#1>{%
-%  \temporal<#1>{\color{lightgray}}{\color{red}}{\color{red}}}
-
-
-\author{James Bordner}
-\date{June 28, 2010}
-%======================================================================
-\begin{document}
-
-\include{slide-title}
-
-%========================================================================
-% SECTION PAGES [ COMMENT FOR PRINT ]
-%========================================================================
-%\frame{\footnotesize
-%\tableofcontents
-%}
-% \AtBeginSection[]
-%{
-%------------------------------------------------------------------------
-%  \begin{frame}<beamer>
-%\footnotesize
-%   \tableofcontents[currentsection]
-%  \end{frame}
-%}
-%========================================================================
-
-\section{Introduction}
-  \include{slide-introduction}
-\section{AMR}
-  \include{slide-amr}
-\section{Parallelization}
-  \include{slide-parallel}
-\section{Conclusions}
-  \include{slide-conclusions}
-
-\end{document}
