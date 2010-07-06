@@ -22,13 +22,14 @@
 
 int main(int argc, char ** argv)
 {
-  Parallel * parallel = Parallel::instance();
+  ParallelCreate parallel_create;
+  Parallel * parallel = parallel_create.create(parallel_mpi);
   parallel->initialize(&argc,&argv);
-  Monitor  * monitor  = Monitor::instance();
+
+  Monitor  * monitor  = new Monitor(parallel);
 
   unit_init(parallel->process_rank(),parallel->process_count());
 
-  monitor  = Monitor::instance();
   unit_class ("Monitor");
 
   int n = 128;
@@ -83,7 +84,8 @@ int main(int argc, char ** argv)
   monitor->image("test4.png",array,n,n,n,0,reduce_sum,0,1,map4,6);
   unit_assert(true);
 
+  unit_finalize();
+
   parallel->finalize();
 
-  unit_finalize();
 }

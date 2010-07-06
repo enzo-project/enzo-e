@@ -102,9 +102,12 @@ install-include:   $(patsubst %,%-install-include,$(DIR))
 
 #-----------------------------------------------------------------------
 
-.PHONY: doc
-doc:
-	doxygen
+.PHONY: doc doc-html doc-latex
+doc: doc-html doc-latex
+doc-html:
+		doxygen Doxyfile-html
+doc-latex:
+		doxygen Doxyfile-latex
 
 #-----------------------------------------------------------------------
 

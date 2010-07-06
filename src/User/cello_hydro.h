@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "defines.h"
-#include "error.hpp"
+#include "monitor.hpp"
 
 //----------------------------------------------------------------------
 // DEFINES
@@ -262,7 +262,8 @@ void data_dump (const char * file_root, int cycle);
 void image_dump (const char * file_root, 
 		 int          cycle, 
 		 double       lower, 
-		 double       upper);
+		 double       upper,
+		 Monitor *    monitor);
 
 // timestep
 int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);

@@ -10,19 +10,19 @@
 
 //----------------------------------------------------------------------
 
+#include <string>
+
 #include <mpi.h>
 
 #include "cello.hpp"
 
-#include "error.hpp"
 #include "parallel.hpp"
-#include "schedule.hpp"
-#include "monitor.hpp"
-#include "parameters.hpp"
+#include "simulation.hpp"
+#include "global.hpp"
 
 //----------------------------------------------------------------------
 
-void usage(int argc, char ** argv);
+void usage(int argc, char ** argv, Parallel * parallel);
 
 //----------------------------------------------------------------------
 
@@ -33,14 +33,18 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
-    Parallel * parallel = Parallel::instance();
+    ParallelCreate parallel_create;
+    Parallel * parallel = parallel_create.create(parallel_mpi);
 
     parallel->initialize(&argc, &argv);
 
-    // INITALIZE MONITOR
+    // INITALIZE "GLOBALS" (Parameters, Error, Monitor)
 
-    Monitor * monitor = Monitor::instance();
+    Global * global = new Global(parallel);
 
+    Monitor    * monitor    = global->monitor();
+    Parameters * parameters = global->parameters();
+    
     monitor->print ("CELLO BEGIN");
 
     monitor->header();
@@ -50,32 +54,20 @@ int main(int argc, char ** argv)
     FILE *fp = 0;
     if (argc == 2) {
       fp = fopen(argv[1],"r");
-      if ( !fp ) usage(argc,argv);
+      if ( !fp ) usage(argc,argv,parallel);
     } else {
-      usage(argc,argv);
+      usage(argc,argv,parallel);
     }
 
     ASSERT ("cello", "File pointer NULL", fp != 0);
 
     // READ PARAMETERS
 
-    Parameters * parameters = Parameters::instance();
-
     parameters->read(fp);
 
     // INITIALIZE SIMULATION
 
-    Schedule schedule;
-
-    schedule.initialize_simulation();
-
-    // RUN SIMULATION
-
-    schedule.execute_simulation();
-
-    // FINALIZE SIMULATION
-
-    schedule.terminate_simulation();
+    Simulation simulation (global);
 
     monitor->print ("CELLO END");
 
@@ -89,10 +81,8 @@ int main(int argc, char ** argv)
 
 }
 
-void usage(int argc, char ** argv)
+void usage(int argc, char ** argv, Parallel * parallel)
 {
-  Parallel * parallel = Parallel::instance();
-
   if (parallel->is_root()) {
 #ifdef CONFIG_USE_MPI
     fprintf (stderr,"Usage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);

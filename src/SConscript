@@ -11,6 +11,7 @@ SConscript('Disk/SConscript')
 SConscript('Distribute/SConscript')
 SConscript('Error/SConscript')
 SConscript('Field/SConscript')
+SConscript('Global/SConscript')
 SConscript('Memory/SConscript')
 SConscript('Mesh/SConscript')
 # SConscript('Method/SConscript')
@@ -30,6 +31,7 @@ SConscript('User/SConscript')
 components = ['schedule',
               'error',
               'parallel',
+              'memory',
               'monitor',
               'parameters',
               'simulation', 
@@ -37,6 +39,7 @@ components = ['schedule',
 #              'method', 
               'data',
               'field',
+              'global',
               'user-ppm', 
               'user-ppml',
               'cello', 

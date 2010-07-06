@@ -498,7 +498,7 @@ c     &      qc*(dueb(i)-dueb(i+1)+upb(i)-upb(i+1)) .lt. 0.0) then
      &        write (6,*) 'e2',grslice(i-1,j), grslice(i,j), 
      &                   grslice(i+1,j)
              write(6,*) 'e3', dub(i), dub(i+1)
-             ERROR_MESSAGE
+             stop
 c
           endif
 c           A small cheat: if idual is on, assume a cosmo sim, and institute
@@ -591,7 +591,7 @@ c             if (geslice(i,j) .lt. tiny) geslice(i,j) = tiny
      &                     pls(i,j),prs(i,j),pls(i+1,j),prs(i+1,j)
                 write(6,*) ub(i),ub(i+1),geb(i),geb(i+1),
      &                     db(i),db(i+1),dub(i),dub(i+1)
-                ERROR_MESSAGE
+                stop
              endif
           enddo
        endif

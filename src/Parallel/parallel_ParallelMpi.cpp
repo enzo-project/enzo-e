@@ -17,7 +17,7 @@
 #include <boost/thread/mutex.hpp>
 boost::mutex instance_mpi_mutex;
 
-ParallelMpi * ParallelMpi::instance_mpi_ = 0; // (singleton design pattern)
+// ParallelMpi * ParallelMpi::instance_mpi_ = 0; // (singleton design pattern)
 
 void ParallelMpi::initialize(int * argc, char ***argv)
 {
@@ -31,8 +31,8 @@ void ParallelMpi::initialize(int * argc, char ***argv)
   out << rank_;
   name_ = out.str();
 
-  Error::instance()->set_warnings_active(rank_==0);
-  Error::instance()->set_incompletes_active(rank_==0);
+//   Error::instance()->set_warnings_active(rank_==0);
+//   Error::instance()->set_incompletes_active(rank_==0);
 
   set_initialized_(true);
 };
@@ -62,12 +62,12 @@ void ParallelMpi::halt()
 }
 
 //----------------------------------------------------------------------
-ParallelMpi * ParallelMpi::instance() throw ()
-{ 
-  // Should be thread-safe, but inefficient
-  boost::mutex::scoped_lock lock(instance_mpi_mutex);
-  if (ParallelMpi::instance_mpi_ == 0) {
-    ParallelMpi::instance_mpi_ = new ParallelMpi;
-  }
-  return ParallelMpi::instance_mpi_; 
-}
+// ParallelMpi * ParallelMpi::instance() throw ()
+// { 
+//   // Should be thread-safe, but inefficient
+//   boost::mutex::scoped_lock lock(instance_mpi_mutex);
+//   if (ParallelMpi::instance_mpi_ == 0) {
+//     ParallelMpi::instance_mpi_ = new ParallelMpi;
+//   }
+//   return ParallelMpi::instance_mpi_; 
+// }

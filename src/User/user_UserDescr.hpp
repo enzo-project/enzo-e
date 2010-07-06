@@ -10,6 +10,7 @@
 /// @brief    Declaration of the UserDescr class
 
 #include "error.hpp"
+#include "global.hpp"
 
 class UserDescr {
 
@@ -20,10 +21,11 @@ class UserDescr {
 public: // interface
 
   /// Constructor
-  UserDescr() throw()
+  UserDescr(Global * global) throw()
     : user_control_(0),
       user_timestep_(0),
-      user_method_(0)
+      user_method_(0),
+      global_ (global)
   {};
 
   /// Add a user method
@@ -80,6 +82,7 @@ private: // attributes
   UserControl *             user_control_;
   UserTimestep *            user_timestep_;
   std::vector<UserMethod *> user_method_;
+  Global     *              global_;
 
 };
 

@@ -41,11 +41,12 @@ const int sphere_size = 128;
 int * create_level_array (int * n0, int * ny, int max_levels);
 int * create_level_array3 (int * n3, int max_levels);
 int * create_sphere (int n3, int max_levels);
-void write_image(std::string filename, float * image, int nx, int ny, int nz=0);
+void write_image(Monitor * monitor, std::string filename, 
+		 float * image, int nx, int ny, int nz=0 );
 
-void create_tree ( int * level_array, int nx, int ny, int nz, int k,  int d, 
-		   std::string name, int max_level);
-void print_usage(int, char**);
+void create_tree ( Memory * memory, int * level_array, int nx, int ny, int nz, int k,  int d, 
+		   std::string name, int max_level, Parallel * parallel);
+void print_usage(Parallel * parallel, int, char**);
 //----------------------------------------------------------------------
 
 int main(int argc, char ** argv)
@@ -53,13 +54,15 @@ int main(int argc, char ** argv)
 
   // Required for Monitor
 
-  Parallel * parallel = Parallel::instance();
+  ParallelCreate parallel_create;
+  Parallel * parallel = parallel_create.create(parallel_mpi);
   parallel->initialize(&argc,&argv);
 
+  Memory * memory = new Memory();
   // Parse command line
 
   if (argc != 4) {
-    print_usage(argc,argv);
+    print_usage(parallel, argc,argv);
   }
 
   // Check arguments
@@ -69,14 +72,14 @@ int main(int argc, char ** argv)
   int max_level  = atoi(argv[3]);
 
   if (dimension != 2 && 
-      dimension != 3) print_usage(argc,argv);
+      dimension != 3) print_usage(parallel,argc,argv);
   
   if (refinement != 2 && 
       refinement != 4 &&
       refinement != 8 &&
-      refinement != 16) print_usage(argc,argv);
+      refinement != 16) print_usage(parallel,argc,argv);
   
-  if (! (0 < max_level && max_level <= 12)) print_usage(argc,argv);
+  if (! (0 < max_level && max_level <= 12)) print_usage(parallel,argc,argv);
 
   char filename[80];
   sprintf (filename,"TreeK-D=%d-R=%d-L=%d",dimension,refinement,max_level);
@@ -99,21 +102,20 @@ int main(int argc, char ** argv)
     level_array = create_sphere(sphere_size,max_level);
   }
 
-  create_tree (level_array, nx, ny, nz, refinement, dimension, filename,max_level);
+  create_tree (memory,level_array, nx, ny, nz, refinement, dimension, filename,max_level,parallel);
 
   delete [] level_array;
 
-  Memory::instance()->print();
+  memory->print();
 
+  delete memory;
   parallel->finalize();
 
 }
 
 //----------------------------------------------------------------------
-void print_usage(int argc, char **argv)
+void print_usage(Parallel * parallel,int argc, char **argv)
 {
-  Parallel * parallel = Parallel::instance();
-
   fprintf (stderr,"\n");
   fprintf (stderr,"Usage: %s <dimension> <refinement> <levels>\n",argv[0]);
   fprintf (stderr,"\n");
@@ -249,7 +251,7 @@ int * create_sphere (int n3, int max_levels)
 
 //----------------------------------------------------------------------
 
-void write_image(std::string filename, float * image, int nx, int ny, int nz)
+void write_image(Monitor * monitor,std::string filename, float * image, int nx, int ny, int nz)
 {
   if (nx > 8194 || ny > 8194 || nz > 8194) {
     printf ("%s:%d (nx,ny,nz) = (%d,%d,%d)\n",__FILE__,__LINE__,nx,ny,nz);
@@ -267,7 +269,6 @@ void write_image(std::string filename, float * image, int nx, int ny, int nz)
 
   // Write PNG image
 
-  Monitor * monitor = Monitor::instance();
   float min=image[0];
   float max=image[0];
   for (int i=0; i<nx*ny*nz; i++) {
@@ -285,11 +286,13 @@ void write_image(std::string filename, float * image, int nx, int ny, int nz)
 
 void create_tree 
 (
+ Memory * memory,
  int * level_array, 
  int nx, int ny, int nz,
  int k,  int d, 
  std::string name,
- int max_level
+ int max_level,
+ Parallel * parallel
  )
 {
 
@@ -298,8 +301,6 @@ void create_tree
   if (d==3) tree = new Tree3K(k);
 
   float mem_per_node;
-
-  Memory * memory = Memory::instance();
 
   memory->reset();
 
@@ -343,19 +344,20 @@ void create_tree
   memory->print();
   memory->set_active(false);
 
+  Monitor * monitor = new Monitor (parallel);
   if (d==2) {
     image = tree->create_image(image_size,line_width);
-    write_image(name + "-0",image,image_size,image_size,1);
+    write_image(monitor,name + "-0",image,image_size,image_size,1);
     delete [] image;
   } else {
     image = tree->create_image(image_size,line_width,0);
-    write_image(name + "-x" + "-0",image,image_size,image_size,1);
+    write_image(monitor,name + "-x" + "-0",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,1);
-    write_image(name + "-y" + "-0",image,image_size,image_size,1);
+    write_image(monitor,name + "-y" + "-0",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,2);
-    write_image(name + "-z" + "-0",image,image_size,image_size,1);
+    write_image(monitor,name + "-z" + "-0",image,image_size,image_size,1);
     delete [] image;
   }
 
@@ -377,20 +379,21 @@ void create_tree
 
   if (d==2) {
     image = tree->create_image(image_size,line_width);
-    write_image(name + "-1",image,image_size,image_size,1);
+    write_image(monitor,name + "-1",image,image_size,image_size,1);
     delete [] image;
   } else {
     image = tree->create_image(image_size,line_width,0);
-    write_image(name + "-x" + "-1",image,image_size,image_size,1);
+    write_image(monitor,name + "-x" + "-1",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,1);
-    write_image(name + "-y" + "-1",image,image_size,image_size,1);
+    write_image(monitor,name + "-y" + "-1",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,2);
-    write_image(name + "-z" + "-1",image,image_size,image_size,1);
+    write_image(monitor,name + "-z" + "-1",image,image_size,image_size,1);
     delete [] image;
   }
 
+  delete monitor;
   if (geomview) tree->geomview(name + ".gv");
 
   printf ("nodes      = %d\n",tree->num_nodes());

@@ -1,0 +1,18 @@
+Import('env')
+
+components = ['field','error','cello']
+includes   = [Glob('global*hpp')]
+sources    = [Glob('global*cpp')]
+
+env = env.Clone(LIBS=[components])
+
+libraries = env.Library ('global', [sources])
+
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',libraries))
+
+
+
+
+
+

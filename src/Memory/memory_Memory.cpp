@@ -16,7 +16,9 @@
 #include "error.hpp"
 #include "memory.hpp"
 
+#ifdef CONFIG_USE_MEMORY
 Memory Memory::instance_; // (singleton design pattern)
+#endif
 
 //======================================================================
 // FUNCTIONS

@@ -16,7 +16,8 @@
 void image_dump(const char * file_root, 
 		int cycle, 
 		double lower, 
-		double upper)
+		double upper,
+		Monitor * monitor)
 { 
 
   int nx = GridDimension[0];
@@ -27,8 +28,6 @@ void image_dump(const char * file_root,
 
   // color map
   double map[] = {1,1,1, 0,0,0};
-
-  Monitor * monitor = Monitor::instance();
 
   // slice
   sprintf (filename,"slice-%s-%06d.png",file_root,cycle);

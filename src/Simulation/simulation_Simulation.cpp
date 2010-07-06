@@ -7,14 +7,12 @@
 /// @brief     Implementation of the Simulation class
 
 #include "data.hpp" 
-#include "error.hpp" 
 #include "user.hpp" 
-#include "monitor.hpp"
 #include "simulation.hpp"
-#include "parameters.hpp"
 
-Simulation::Simulation()
-  : lower_(),
+Simulation::Simulation(Global * global)
+  : global_(global),
+    lower_(),
     upper_(),
     mesh_(NULL),
     user_descr_(NULL),
@@ -26,13 +24,13 @@ Simulation::Simulation()
 void Simulation::initialize ()
 {
 
-  Parameters * parameters = Parameters::instance();
-
   // --------------------------------------------------
   // Initialize Domain
   // --------------------------------------------------
 
   // Parameter Domain::extent
+
+  Parameters * parameters = global_->parameters();
 
   parameters->set_current_group("Domain");
   
@@ -106,7 +104,7 @@ void Simulation::initialize ()
 		   "List parameter 'Method sequence' must have length greater than zero");
   }
 
-  user_descr_ = new UserDescr;
+  user_descr_ = new UserDescr(global_);
 
   data_descr_ = new DataDescr(field_descr);
 

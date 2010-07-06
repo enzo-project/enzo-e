@@ -10,7 +10,7 @@
 
 #include "user_MethodEnzoPpml.hpp"
 #include "error.hpp"
-#include "parameters.hpp"
+#include "global.hpp"
 
 //----------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ void MethodEnzoPpml::initialize(DataDescr * data_descr) throw()
 
   // Initialize from parameters
 
-  Parameters * parameters = Parameters::instance();
+  Parameters * parameters = global_->parameters();
 
   parameters->set_current_group ("Method","ppml");
 

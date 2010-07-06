@@ -111,7 +111,7 @@ c
       if (max(in,jn,kn) .gt. MAX_ANY_SINGLE_DIRECTION) then
          write(6,*) 'PPM_DE: A grid dimension is too long.'
          write(6,*) '   (increase MAX_ANY_SINGLE_DIRECTION.)'
-         ERROR_MESSAGE
+         stop 
       endif
 c
 c  Convert arguments to usable form

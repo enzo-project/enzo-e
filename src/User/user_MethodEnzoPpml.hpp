@@ -11,15 +11,21 @@
 
 #include <vector>
 #include <string>
+#include "parameters.hpp"
 #include "user.hpp"
 
 class MethodEnzoPpml : public UserMethod {
 
   /// @class    MethodEnzoPpml
-  /// @ingroup  Enzo
-  /// @brief    Encapsulate Enzo's PPML hydro method
+/// @ingroup  Enzo
+/// @brief    Encapsulate Enzo's PPML hydro method
 
 public: // interface
+
+/// Creae a new MethodEnzoPpml object
+MethodEnzoPpml(Global * global)
+  : UserMethod (global)
+  {};
 
   /// Perform any method-specific initialization
 

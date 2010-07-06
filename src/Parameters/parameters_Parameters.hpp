@@ -28,6 +28,7 @@ enum parameter_type {
   parameter_logical_expr
 };
 
+#include "monitor.hpp"
 #include "parameters_Param.hpp"
 
 class Parameters {
@@ -38,9 +39,23 @@ class Parameters {
 
 public: // interface
 
+
+  /// Create an empty Parameters object (singleton design pattern)
+  Parameters(Monitor * monitor) throw();
+
+  /// Copy constructor
+  Parameters(const Parameters & parameters) throw();
+
+  /// Assignment operator
+
+  Parameters & operator= (const Parameters & parameters) throw();
+
+  /// Delete a Parameters object (singleton design pattern)
+  ~Parameters();
+
   /// Get single instance of the Parameters object
-  static Parameters * instance() throw ()
-  { return & instance_; }
+//   static Parameters * instance() throw ()
+//   { return & instance_; }
 
   /// Read in parameters from a file
   void read (FILE * file_pointer);
@@ -191,19 +206,6 @@ public: // interface
 
 private: // functions
 
-  /// Create an empty Parameters object (singleton design pattern)
-  Parameters() throw();
-
-  /// Copy constructor
-  Parameters(const Parameters & parameters) throw();
-
-  /// Assignment operator
-
-  Parameters & operator= (const Parameters & parameters) throw();
-
-  /// Delete a Parameters object (singleton design pattern)
-  ~Parameters();
-
   /// Read in the next line of the input file
   int readline_ (FILE* fp, char * buffer, int n) throw();
 
@@ -227,8 +229,10 @@ private: // functions
 private: // attributes
 
   /// Single instance of the Parameters object (singleton design pattern)
-  static Parameters instance_;
+//   static Parameters instance_;
 
+  /// Monitor object
+  Monitor * monitor_; 
   std::string current_group_;
   std::string current_subgroup_;
 

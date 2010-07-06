@@ -21,27 +21,27 @@
 /// @def      WARNING_MESSAGE
 /// @brief    Handle a (non-lethal) warning message
 #define WARNING_MESSAGE(FUNCTION,MESSAGE) \
-  Error::instance()->warning_(__FILE__,__LINE__,FUNCTION,MESSAGE)
+  { Error error; error.warning_(__FILE__,__LINE__,FUNCTION,MESSAGE); }
 
 /// @def      ERROR_MESSAGE
 /// @brief    Handle a (lethal) error message
 #define ERROR_MESSAGE(FUNCTION,MESSAGE) \
-  Error::instance()->error_(__FILE__,__LINE__,FUNCTION,MESSAGE)
+  { Error error; error.error_(__FILE__,__LINE__,FUNCTION,MESSAGE); }
 
 /// @def      INCOMPLETE_MESSAGE
 /// @brief    Placeholder for code that is incomplete
 #define INCOMPLETE_MESSAGE(FUNCTION,MESSAGE) \
-  Error::instance()->incomplete_(__FILE__,__LINE__,FUNCTION,MESSAGE)
+  { Error error; error.incomplete_(__FILE__,__LINE__,FUNCTION,MESSAGE); }
 
 /// @def      TRACE_MESSAGE
 /// @brief    Trace file name and location to stdout
 #define TRACE_MESSAGE					\
-  Error::instance()->trace_(__FILE__,__LINE__)
+  { Error error; error.trace_(__FILE__,__LINE__); }
 
 /// @def      ASSERT
 /// @brief    Equivalent to assert()
 #define ASSERT(FUNCTION,MESSAGE,ASSERTION) \
-  Error::instance()->assert_(__FILE__,__LINE__,FUNCTION,MESSAGE,ASSERTION)
+  { Error error; error.assert_(__FILE__,__LINE__,FUNCTION,MESSAGE,ASSERTION); }
 
 //----------------------------------------------------------------------
 
@@ -53,9 +53,19 @@ class Error {
 
 public: // functions
 
+  //----------------------------------------------------------------------
+  /// Initialize the Error object (singleton design pattern)
+  Error() 
+    : errors_active_(true),
+      incompletes_active_(true),
+      traces_active_(true),
+      warnings_active_(true)
+      
+  {};
+
   /// Get single instance of the Error object
-  static Error * instance() throw ()
-  { return & instance_; };
+//   static Error * instance() throw ()
+//   { return & instance_; };
 
   /// Set whether to trace on this processor
   void set_traces_active (bool traces_active) 
@@ -151,17 +161,6 @@ public: // functions
     }
   };
 
-private: // functions
-
-  //----------------------------------------------------------------------
-  /// Initialize the Error object (singleton design pattern)
-  Error() 
-    : errors_active_(true),
-      incompletes_active_(true),
-      traces_active_(true),
-      warnings_active_(true)
-      
-  {};
 
 private: // functions
 
@@ -184,7 +183,7 @@ private: // functions
 private: // attributes
 
   /// Single instance of the Error object (singleton design pattern)
-  static Error instance_;
+//   static Error instance_;
 
   /// Whether to display error messages
   bool errors_active_;

@@ -7,18 +7,20 @@
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Affinity
 
+#include "cello.hpp"
 #include "mpi.h" 
 #include "parallel.hpp"
 #include "test.hpp"
 
 int main(int argc, char ** argv)
 {
-  Parallel * parallel = Parallel::instance();
-
+  ParallelCreate parallel_create;
+  Parallel * parallel = parallel_create.create(parallel_mpi);
   parallel->initialize(&argc,&argv);
 
   unit_init(parallel->process_rank(),parallel->process_count());
 
+  printf ("%s\n",parallel->name().c_str());
   int process_count = parallel->process_count();
   int process_rank  = parallel->process_rank();
   int thread_rank   = parallel->thread_rank();
@@ -43,6 +45,6 @@ int main(int argc, char ** argv)
   unit_assert ( (affinity_root == affinity_this) ==
 		(process_rank == 0) );
 
-  parallel->finalize();
   unit_finalize();
+  parallel->finalize();
 }

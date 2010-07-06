@@ -29,10 +29,6 @@ MethodEnzoTimestep::MethodEnzoTimestep () throw()
 
 void MethodEnzoTimestep::initialize (DataDescr * data_descr) throw()
 {
-  Parameters * parameters = Parameters::instance();
-  parameters->set_current_group ("Field");
-  
-  CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
 }
 
 //----------------------------------------------------------------------
@@ -45,33 +41,45 @@ void MethodEnzoTimestep::finalize ( DataDescr * data_descr ) throw ()
 
 void MethodEnzoTimestep::initialize_block ( DataBlock * data_block ) throw ()
 {
+}
 
+//----------------------------------------------------------------------
 
+void MethodEnzoTimestep::finalize_block ( DataBlock * data_block ) throw ()
+{
+ 
+  delete [] pressure_field_;
+  pressure_field_ = 0;
+ 
+}
+
+//----------------------------------------------------------------------
+
+double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
+{
+
+  FieldBlock * field_block = data_block->field_block();
+  float * density_field    = (float *)field_block->field_values(field_density);
+  float * velocity_x_field = (float *)field_block->field_values(field_velocity_x);
+  float * velocity_y_field = (float *)field_block->field_values(field_velocity_y);
+  float * velocity_z_field = (float *)field_block->field_values(field_velocity_z);
+
+  ENZO_FLOAT a = 1, dadt;
+  if (ComovingCoordinates)
+    CosmologyComputeExpansionFactor(Time, &a, &dadt);
+  afloat_ = float(a);
   //  float dt, dtTemp;
   dtBaryons_      = HUGE_VALF;
   dtViscous_      = HUGE_VALF;
   //  float dtParticles    = HUGE_VALF;
   dtExpansion_    = HUGE_VALF;
   //  float dtAcceleration = HUGE_VALF;
-  //  int dim
-  int  result;
- 
-  /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
-     set it to one. */
- 
-  ENZO_FLOAT a = 1, dadt;
-  if (ComovingCoordinates)
-    CosmologyComputeExpansionFactor(Time, &a, &dadt);
-  afloat_ = float(a);
 
-  /* 1) Compute Courant condition for baryons. */
- 
+
   /* Compute the pressure. */
 
-  FieldBlock * field_block = data_block -> field_block();
-
   int nx,ny,nz;
-  field_block->dimensions(&nx,&ny,&nz);
+  field_block -> dimensions (&nx,&ny,&nz);
   int gx,gy,gz;
   field_block->field_descr()->ghosts(field_density,&gx,&gy,&gz);
   int mx,my,mz;
@@ -92,6 +100,7 @@ void MethodEnzoTimestep::initialize_block ( DataBlock * data_block ) throw ()
 	 pressure_field_ == NULL);
   pressure_field_ = new float[size];
 
+  int  result;
   if (DualEnergyFormalism)
     result = ComputePressureDualEnergyFormalism(Time, pressure_field_);
   else
@@ -102,50 +111,7 @@ void MethodEnzoTimestep::initialize_block ( DataBlock * data_block ) throw ()
     exit(EXIT_FAILURE);
   }
  
-#ifdef UNUSED
-  int Zero[3] = {0,0,0}, TempInt[3] = {0,0,0};
-  for (dim = 0; dim < GridRank; dim++)
-    TempInt[dim] = GridDimension[dim]-1;
-#endif /* UNUSED */
-
-}
-
-//----------------------------------------------------------------------
-
-void MethodEnzoTimestep::finalize_block ( DataBlock * data_block ) throw ()
-{
- 
-  delete [] pressure_field_;
- 
-}
-
-//----------------------------------------------------------------------
-
-double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
-{
-
-  FieldBlock * field_block = data_block->field_block();
-  float * density_field    = (float *)field_block->field_values(field_density);
-  float * velocity_x_field = (float *)field_block->field_values(field_velocity_x);
-  float * velocity_y_field = (float *)field_block->field_values(field_velocity_y);
-  float * velocity_z_field = (float *)field_block->field_values(field_velocity_z);
-
-  FORTRAN_NAME(calc_dt)(&GridRank, GridDimension, GridDimension+1,
-			GridDimension+2,
-			GridStartIndex, GridEndIndex,
-			GridStartIndex+1, GridEndIndex+1,
-			GridStartIndex+2, GridEndIndex+2,
-			CellWidth[0], CellWidth[1], CellWidth[2],
-			&Gamma, &PressureFree, &afloat_,
-			density_field, pressure_field_,
-			velocity_x_field, 
-			velocity_y_field, 
-			velocity_z_field, 
-			&dtBaryons_, &dtViscous_);
- 
-  printf ("%g %g\n",dtBaryons_, CourantSafetyNumber);
-  dtBaryons_ *= CourantSafetyNumber;
- 
+  
   /* 2) Calculate dt from particles. */
  
 //   if (NumberOfParticles > 0) {
@@ -189,6 +155,21 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
   //   }
  
   /* 5) calculate minimum timestep */
+
+  FORTRAN_NAME(calc_dt)(&GridRank, GridDimension, GridDimension+1,
+			GridDimension+2,
+			GridStartIndex, GridEndIndex,
+			GridStartIndex+1, GridEndIndex+1,
+			GridStartIndex+2, GridEndIndex+2,
+			CellWidth[0], CellWidth[1], CellWidth[2],
+			&Gamma, &PressureFree, &afloat_,
+			density_field, pressure_field_,
+			velocity_x_field, 
+			velocity_y_field, 
+			velocity_z_field, 
+			&dtBaryons_, &dtViscous_);
+
+  dtBaryons_ *= CourantSafetyNumber;
  
   double dt = dtBaryons_;
   //  dt = MIN(dtBaryons, dtParticles);

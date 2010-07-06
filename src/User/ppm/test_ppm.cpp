@@ -15,8 +15,8 @@
 #include "string.h"
 #include "test_ppm.h"
 #include "parallel.hpp"
+#include "monitor.hpp"
 #include "performance.hpp"
-
 
 //----------------------------------------------------------------------
 
@@ -33,9 +33,12 @@ int main(int argc, char ** argv)
 
   // Initialize parallelism
 
-  Parallel * parallel = Parallel::instance();
+  ParallelCreate parallel_create;
+  Parallel * parallel = parallel_create.create(parallel_mpi);
 
   parallel->initialize(&argc,&argv);
+
+  Monitor * monitor = new Monitor (parallel);
 
   // Check command line arguments
 
@@ -105,15 +108,14 @@ int main(int argc, char ** argv)
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
+    SetExternalBoundaryValues();
     dt =  MIN(ComputeTimeStep(), time_stop - time);
 
-    SetExternalBoundaryValues();
-
     if (dump_frequency && (cycle % dump_frequency) == 0) {
-      printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
+      printf ("cycle = %6d seconds = %5.0f sim-time = %22.16g dt = %22.16g\n",
 	      cycle,timer.value(),time,dt);
       fflush(stdout);
-      image_dump(problem_name[problem],cycle,lower,upper);
+      image_dump(problem_name[problem],cycle,lower,upper,monitor);
     }
 
     SolveHydroEquations(cycle, dt);
@@ -125,8 +127,10 @@ int main(int argc, char ** argv)
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     SetExternalBoundaryValues();
-    image_dump(problem_name[problem],cycle,lower,upper);
+    image_dump(problem_name[problem],cycle,lower,upper,monitor);
   }
+
+  delete monitor;
   parallel->finalize();
 }
 

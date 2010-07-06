@@ -1,8 +1,8 @@
 // $Id: parallel_affinity.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef AFFINITY_HPP
-#define AFFINITY_HPP
+#ifndef PARALLEL_AFFINITY_HPP
+#define PARALLEL_AFFINITY_HPP
 
 /// @file     parallel_Affinity.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -39,5 +39,5 @@ private: // attributes
 
 };
 
-#endif /* AFFINITY_HPP */
+#endif /* PARALLEL_AFFINITY_HPP */
 

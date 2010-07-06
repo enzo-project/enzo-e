@@ -93,7 +93,7 @@ int ComputePressure(ENZO_FLOAT time, float *pressure)
  
       if (pressure[i] < pressure_floor)
 	pressure[i] = pressure_floor;
- 
+
     } // end of loop
  
   else

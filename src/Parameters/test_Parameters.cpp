@@ -14,6 +14,7 @@
 
 #include "error.hpp"
 #include "parallel.hpp"
+#include "monitor.hpp"
 #include "test.hpp"
 #include "parameters.hpp"
 
@@ -25,7 +26,9 @@ void generate_input();
 
 int main(int argc, char **argv)
 {
-  Parallel * parallel = Parallel::instance();
+  ParallelCreate parallel_create;
+
+  Parallel * parallel = parallel_create.create(parallel_mpi);
 
   parallel->initialize(&argc, &argv);
 
@@ -37,7 +40,8 @@ int main(int argc, char **argv)
   // test parameter
   //----------------------------------------------------------------------
 
-  Parameters * parameters = Parameters::instance();
+  Monitor * monitor = new Monitor(parallel);
+  Parameters * parameters = new Parameters(monitor);
 
   // Generate test.in to make sure it exists
 

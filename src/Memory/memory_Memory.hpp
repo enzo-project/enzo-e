@@ -29,9 +29,20 @@ class Memory {
 
 public: // interface
 
+#ifdef CONFIG_USE_MEMORY
   /// Get single instance of the Memory object
   static Memory * instance() throw ()
   { return & instance_; }
+#endif
+
+  /// Create the (single) Memory object (singleton design pattern)
+  Memory() throw () { initialize_(); };
+
+  /// Copy the (single) Memory object (singleton design pattern)
+  Memory (const Memory &);
+
+  /// Assign the (single) Memory object (singleton design pattern)
+  Memory & operator = (const Memory & memory);
 
   /// Allocate memory
   void * allocate ( size_t size ) 
@@ -100,15 +111,6 @@ public: // interface
 
 private: // functions
 
-  /// Create the (single) Memory object (singleton design pattern)
-  Memory() throw () { initialize_(); };
-
-  /// Copy the (single) Memory object (singleton design pattern)
-  Memory (const Memory &);
-
-  /// Assign the (single) Memory object (singleton design pattern)
-  Memory & operator = (const Memory & memory);
-
   /// Initialize the memory component
   void initialize_() throw ();
 
@@ -125,8 +127,10 @@ private: // functions
   
 private: // attributes
 
+#ifdef CONFIG_USE_MEMORY
   /// Single instance of the Memory object (singleton design pattern)
-  static Memory instance_;
+static Memory instance_;
+#endif
 
 #ifdef CONFIG_USE_MEMORY
 

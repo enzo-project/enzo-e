@@ -42,19 +42,26 @@ class Monitor {
 
 public: // interface
 
-  /// Get single instance of the Monitor object
-  static Monitor * instance() throw ()
-  { 
-    // Delayed creation since Parallel must be initialized
-    if (Monitor::instance_ == 0) {
-      if (Parallel::instance()->is_initialized()) {
-	instance_ = new Monitor(Parallel::instance());
-      } else {
-	ERROR_MESSAGE("Monitor::instance","Monitor::instance() called before Parallel::initialize()");
-      }
-    }
-    return instance_;
-  };
+  /// Initialize the Monitor object (singleton design pattern)
+  Monitor(Parallel * parallel) 
+    : parallel_(parallel),
+      active_(parallel->is_root())
+  {  
+    timer_.start(); 
+  }
+//   /// Get single instance of the Monitor object
+//   static Monitor * instance() throw ()
+//   { 
+//     // Delayed creation since Parallel must be initialized
+//     if (Monitor::instance_ == 0) {
+//       if (Parallel::instance()->is_initialized()) {
+// 	instance_ = new Monitor(Parallel::instance());
+//       } else {
+// 	ERROR_MESSAGE("Monitor::instance","Monitor::instance() called before Parallel::initialize()");
+//       }
+//     }
+//     return instance_;
+//   };
 
   /// Print the Cello header 
   void header ();
@@ -63,7 +70,7 @@ public: // interface
   void print (std::string message, FILE * fp = stdout)
   {
     if (active_) fprintf (fp,"%s %6.1f %s\n",
-			  Parallel::instance()->name().c_str(),
+			  parallel_->name().c_str(),
 			  timer_.value(),message.c_str());
   };
 
@@ -81,13 +88,6 @@ public: // interface
   
 private: // functions
 
-  /// Initialize the Monitor object (singleton design pattern)
-  Monitor(Parallel * parallel) 
-    : parallel_(parallel),
-      active_(parallel->is_root())
-  {  
-    timer_.start(); 
-  }
 
 private: // attributes
 
@@ -95,8 +95,8 @@ private: // attributes
   bool   active_;  // Whether monitoring is activated.  Used for e.g. ip != 0.
   Timer  timer_;   // Timer from Performance
   
-  /// Single instance of the Monitor object (singleton design pattern)
-  static Monitor * instance_;
+//   /// Single instance of the Monitor object (singleton design pattern)
+//   static Monitor * instance_;
 
 };
 

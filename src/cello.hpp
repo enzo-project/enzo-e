@@ -117,6 +117,7 @@ enum component_type {
   component_distribute,
   component_error,
   component_field,
+  component_global,
   component_memory,
   component_mesh,
   component_method,

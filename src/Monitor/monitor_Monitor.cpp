@@ -12,7 +12,7 @@
 #include "monitor.hpp" 
 #include "error.hpp" 
 
-Monitor * Monitor::instance_ = 0; // (singleton design pattern)
+// Monitor * Monitor::instance_ = 0; // (singleton design pattern)
 
 void Monitor::header ()
 {

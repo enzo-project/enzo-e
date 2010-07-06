@@ -10,7 +10,7 @@
 
 #include "user.hpp"
 #include "field.hpp"
-#include "monitor.hpp"
+#include "global.hpp"
 
 //----------------------------------------------------------------------
 
@@ -28,12 +28,12 @@ void UserMethod::add_argument_
 {
 
   // Monitor output
-  Monitor * monitor = Monitor::instance();
+
   char buffer[100];
   sprintf (buffer,"Method %s: adding %s", 
 	   method_name().c_str(), 
 	   argument_name.c_str());
-  monitor->print (buffer);
+  global_->monitor()->print (buffer);
 
   // Add method argument information
   argument_types_.push_back(argument);

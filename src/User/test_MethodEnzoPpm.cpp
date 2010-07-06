@@ -1,4 +1,3 @@
-
 // $Id: test_MethodEnzoPpm.cpp 1552 2010-06-09 02:50:30Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
@@ -21,15 +20,73 @@
 #include "parallel.hpp"
 #include "test.hpp"
 
+#include "cello_hydro.h"
+
+void print_fields(int mx, int my);
+
+void output_fields(FieldBlock * field_block,
+		   int write_count,
+		   int field_count,
+		   int field_index[],
+		   Monitor * monitor)
+{
+  double map1[] = {1,1,1, 0,0,0};
+  FieldDescr * field_descr = field_block->field_descr();
+  int nx,ny,nz;
+  int gx,gy,gz;
+  int mx,my,mz;
+  field_block->enforce_boundary(boundary_reflecting);
+  field_block->dimensions(&nx,&ny,&nz);
+  for (int i = 0; i < field_count; i++) {
+    field_descr->ghosts(i,&gx,&gy,&gz);
+    mx=nx+2*gx;
+    my=ny+2*gy;
+    mz=nz+2*gz;
+    int index = field_index[i];
+    char filename[80];
+    std::string field_name = field_descr->field_name(index);
+    Scalar * field_values = (Scalar *)field_block->field_values(index);
+    sprintf (filename,"ppm-%s-%d.png",field_name.c_str(),write_count);
+    monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
+  }
+  
+}
+
 int main(int argc, char **argv)
 {
 
   // Initialize parallelism
 
-  Parallel * parallel = Parallel::instance();
+  ParallelCreate parallel_create;
+  Parallel * parallel = parallel_create.create(parallel_mpi);
   parallel->initialize(&argc,&argv);
 
+  Global * global = new Global (parallel);
+
   unit_init(parallel->process_rank(), parallel->process_count());
+
+  // Set necessary parameters for MethodEnzoPpm
+
+  Monitor    * monitor    = global->monitor();
+  Parameters * parameters = global->parameters();
+
+  parameters->set_current_group("Physics");
+  parameters->set_integer ("dimensions",2);
+  parameters->set_scalar  ("gamma",1.4);
+
+  // Set missing cello_hydro.h parameters
+  BoundaryRank = 2;
+  BoundaryDimension[0] = 106;
+  BoundaryDimension[1] = 106;
+  BoundaryDimension[2] = 1;
+
+  FILE * fp = fopen ("test_MethodEnzoPpm.in","r");
+  if (fp) {
+    parameters->read(fp);
+    fclose(fp);
+  } else {
+    ERROR_MESSAGE("main","test_MethodEnzoPpm.in file does not exist");
+  }
 
   // Create data and field descriptors and blocks
 
@@ -46,6 +103,19 @@ int main(int argc, char **argv)
   int index_velocity_x      = field_descr->insert_field("velocity_x");
   int index_velocity_y      = field_descr->insert_field("velocity_y");
   int index_internal_energy = field_descr->insert_field("internal_energy");
+
+  UserDescr user_descr(global);
+
+  UserMethod     * user_method = user_descr.add_user_method("ppm");
+  UserControl  * user_control  = user_descr.set_user_control("ignored");
+  UserTimestep * user_timestep = user_descr.set_user_timestep("ignored");
+
+  unit_class ("MethodEnzoPpm");
+
+  unit_func("initialize");
+  user_control->initialize(data_descr);
+  user_method->initialize(data_descr);
+  user_timestep->initialize(data_descr);
 
   // Initialize field_block
 
@@ -75,14 +145,13 @@ int main(int argc, char **argv)
   Scalar * vx = (Scalar * ) field_block->field_values(index_velocity_x);
   Scalar * vy = (Scalar * ) field_block->field_values(index_velocity_y);
   Scalar * te = (Scalar * ) field_block->field_values(index_total_energy);
-  Scalar * ie = (Scalar * ) field_block->field_values(index_internal_energy);
+  //  Scalar * ie = (Scalar * ) field_block->field_values(index_internal_energy);
 
   double hx = 0.3 / nx;
   double hy = 0.3 / ny;
 
   int mx = nx + 2*gx;
   int my = ny + 2*gy;
-  int mz = nz + 2*gz;
 
   for (int iy=gy; iy<ny+gy; iy++) {
     double y = (iy - gy + 0.5)*hy;
@@ -93,89 +162,59 @@ int main(int argc, char **argv)
 	d[i]  = 0.125;
 	vx[i] = 0;
 	vy[i] = 0;
-	te[i] = 0.14 / ((1.4 - 1.0) * d[i]);
+	te[i] = 0.14 / ((Gamma - 1.0) * d[i]);
       } else {
 	d[i]  = 1.0;
 	vx[i] = 0;
 	vy[i] = 0;
-	te[i] = 1.0 / ((1.4 - 1.0) * d[i]);
+	te[i] = 1.0 / ((Gamma - 1.0) * d[i]);
       }
     }
   }
 
-  // Set necessary parameters for MethodEnzoPpm
+  printf ("Initial\n");
 
-  Parameters * parameters = Parameters::instance();
+  int indices[] = {index_density,index_velocity_x,index_velocity_y,index_total_energy};
 
-  parameters->set_current_group("Physics");
-  parameters->set_integer ("dimensions",2);
-  parameters->set_scalar  ("gamma",1.4);
+  // Set stopping criteria
 
-  UserDescr user_descr;
+  parameters->set_current_group ("Stopping");
+  double time_final = parameters->value_scalar("time",2.5);
+  int   cycle_final = parameters->value_integer("cycle",1000);
+  int  cycle_output = 100;
 
-  UserMethod     * ppm = user_descr.add_user_method("ppm");
-  UserControl  * user_control  = user_descr.set_user_control("ignored");
-  UserTimestep * user_timestep = user_descr.set_user_timestep("ignored");
+  double time = 0;
+  int cycle = 0;
+  //  initialize_implosion(nx+gx);
+    user_method  ->initialize_block(data_block);
+  while (time < time_final && cycle <= cycle_final) {
 
-  unit_class ("MethodEnzoPpm");
+    user_control ->initialize_block(data_block);
+    user_timestep->initialize_block(data_block);
 
-  unit_func("initialize");
-  ppm->initialize(data_descr);
-  unit_assert(true);
+    field_block->enforce_boundary(boundary_reflecting);
 
-  Monitor * monitor = Monitor::instance();
+    double dt = user_timestep->compute_block(data_block);
 
-  double map1[] = {0,0,0, 1,1,1};
+    printf ("cycle = %d  sim-time = %22.16g dt = %22.16g\n",
+	    cycle,time,dt );
 
-  field_block->enforce_boundary(boundary_reflecting);
+    user_method->advance_block(data_block,time,dt);
 
-  unit_func("initialize_block");
-  ppm->initialize_block(data_block);
-  unit_assert(true);
+    user_timestep->finalize_block(data_block);
+    user_control ->finalize_block(data_block);
+    user_method  ->finalize_block(data_block);
 
-  double t = 0;
-  
-  monitor->image ("ppm-density-0.png",
-		  (Scalar *)field_block->field_values(index_density),
-		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
+    ++cycle;
+    time += MIN(dt,time_final-time);
 
-  monitor->image ("ppm-velocity_x-0.png",
-		  (Scalar *)field_block->field_values(index_velocity_x),
-		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
-  monitor->image ("ppm-velocity_y-0.png",
-		  (Scalar *)field_block->field_values(index_velocity_y),
-		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
-  monitor->image ("ppm-total_energy-0.png",
-		  (Scalar *)field_block->field_values(index_total_energy),
-		  mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
-
-  printf ("velocity_x = %p\n",(Scalar *)field_block->field_values(index_velocity_y));
-  user_timestep->initialize(data_descr);
-  user_timestep->initialize_block(data_block);
-  double dt = user_timestep->compute_block(data_block);
-  user_timestep->finalize_block(data_block);
-  user_timestep->finalize(data_descr);
-
-  printf ("Timestep = %g\n", dt );
-
-  unit_func("advance_block");
-  ppm->advance_block(data_block,t,dt);
-  unit_assert(false);
-
-  unit_func("finalize_block");
-  ppm->finalize_block(data_block);
-  unit_assert(false);
-
-  monitor->image ("ppm-density-1.png",
-		  (Scalar *)field_block->field_values(index_density),
-		  mx,my,mz,  2,  reduce_sum, 0.0,1.0, map1,2);
-
-  unit_func("refresh_block");
-  unit_assert(false);
-
-  unit_func("finalize");
-  ppm->finalize(data_descr);
-  unit_assert(false);
+    if (cycle % cycle_output == 0) {
+      output_fields(field_block,cycle,4,indices,monitor);
+    }
+    user_timestep->finalize(data_descr);
+    user_control ->finalize(data_descr);
+  }
+  user_method  ->finalize(data_descr);
 
   unit_finalize();
 

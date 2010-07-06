@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <string>
+#include "parameters.hpp"
 #include "user.hpp"
 #include "data.hpp"
 
@@ -22,7 +23,8 @@ class MethodEnzoPpm : public UserMethod {
 
 public: // interface
 
-  MethodEnzoPpm()
+  MethodEnzoPpm(Global * global):
+    UserMethod(global)
   {};
 
   /// Perform any method-specific initialization

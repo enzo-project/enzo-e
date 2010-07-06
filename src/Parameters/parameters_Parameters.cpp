@@ -14,13 +14,14 @@
 #include "monitor.hpp"
 #include "parameters.hpp"
 
-Parameters Parameters::instance_; // (singleton design pattern)
+// Parameters Parameters::instance_; // (singleton design pattern)
 
 //----------------------------------------------------------------------
 
-Parameters::Parameters() 
+Parameters::Parameters(Monitor * monitor) 
   throw()
   :
+  monitor_(monitor),
   current_group_(""),
   current_subgroup_(""),
   parameter_map_(),
@@ -526,7 +527,7 @@ void Parameters::monitor_log (std::string parameter) throw()
 	   current_subgroup_.c_str(),
 	   parameter.c_str(),
 	   param ? param->value_to_string().c_str() : "undefined");
-  Monitor::instance()->print(buffer);
+  monitor_->print(buffer);
 }
 //----------------------------------------------------------------------
 

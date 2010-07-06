@@ -12,8 +12,8 @@
 #include <vector>
 #include <string>
 
-#include "error.hpp"
 #include "data.hpp"
+#include "global.hpp"
 
 enum argument_type {
   argument_unknown,
@@ -38,7 +38,8 @@ class UserMethod {
 public: // interface
 
   /// Create a new UserMethod
-  UserMethod() throw()
+  UserMethod(Global * global) throw()
+    : global_(global)
   {};
 
 public: // virtual functions
@@ -81,6 +82,9 @@ protected: // functions
 		     DataDescr   * data_descr = 0) throw();
 
 protected: // attributes
+
+  /// Global
+  Global * global_;
 
   /// List of argument types, e.g. argument_type_field
   std::vector<argument_type> argument_types_;

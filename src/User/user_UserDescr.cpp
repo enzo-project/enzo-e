@@ -8,13 +8,13 @@
 /// @brief    Implementation of UserDescr user-dependent class member functions
 
 #include "user.hpp"
-#include "error.hpp"
+#include "global.hpp"
 
 //----------------------------------------------------------------------
 
 UserControl * UserDescr::create_user_control_ (std::string control_name)
 {
-  return new MethodEnzoControl;
+  return new MethodEnzoControl(global_);
 }
 
 //----------------------------------------------------------------------
@@ -30,12 +30,12 @@ UserMethod * UserDescr::create_user_method_ (std::string method_name)
 /// @param method_name   Name of the method to create
 {
   if (method_name == "ppm") {
-    return new MethodEnzoPpm;
+    return new MethodEnzoPpm (global_);
   } else {
     char buffer[80];
     sprintf (buffer,"Unknown method %s",method_name.c_str());
-    WARNING_MESSAGE ("UserDescr::create_method",
-		     buffer);
+    global_->error()->error_ (__FILE__,__LINE__,"UserDescr::create_method",
+				       buffer);
     return 0;
   }
 }

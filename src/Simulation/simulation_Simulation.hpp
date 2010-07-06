@@ -11,6 +11,7 @@
 
 #include <vector>
 #include "cello.hpp"
+#include "global.hpp"
 #include "mesh.hpp"
 #include "data.hpp"
 #include "user.hpp"
@@ -24,7 +25,7 @@ class Simulation {
 public: // interface
 
   /// Initialize the Simulation object
-  Simulation();
+  Simulation(Global * global);
 
   //----------------------------------------------------------------------
   // Big Three
@@ -86,7 +87,12 @@ public: // interface
 
 private: // attributes
 
+  /// Global
+
+  Global * global_;
+
   /// Domain extents
+
   std::vector<double> lower_;
   std::vector<double> upper_;
 

@@ -17,8 +17,10 @@
 #define CONFIG_USE_MPI
 
 /*---------------------------------------------------------------------*/
-/* Whether to track memory usag*/
+/* Whether to track memory usage */
 /*---------------------------------------------------------------------*/
+
+/* REQUIRES SINGLETON PATTERN WITH STATIC: NOT USABLE WITH AMPI / CHARM++ */
 
 #define CONFIG_USE_MEMORY
 

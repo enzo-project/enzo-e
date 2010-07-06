@@ -7,9 +7,10 @@
 /// @brief    Interface for the ParallelMpi class
 
 #include <stdio.h>
+#include <string>
 
-#ifndef PARALLEL_MPI_HPP
-#define PARALLEL_MPI_HPP
+#ifndef PARALLEL_PARALLEL_MPI_HPP
+#define PARALLEL_PARALLEL_MPI_HPP
 
 enum send_type {
   send_standard,
@@ -28,6 +29,17 @@ class ParallelMpi : public Parallel {
   /// @brief    MPI helper functions
 
 public: // interface
+
+  /// Initialize an ParallelMpi object (singleton design pattern)
+  ParallelMpi()
+    : Parallel(),
+      size_(1),
+      rank_(0),
+      name_("0"),
+      send_blocking_(true),
+      recv_blocking_(true),
+      send_type_(send_standard)
+  {};
 
   /// Initialize MPI (virtual)
   void initialize(int * argc, char ***argv);
@@ -48,6 +60,14 @@ public: // interface
   /// Get MPI rank
   int process_rank() 
   { return rank_; }
+
+  /// Get total number of threads in this node
+  int thread_count()
+  { return 1; };
+
+  /// Get rank of this thread
+  int thread_rank()
+  { return 0; };
 
   virtual std::string name()
   { return name_; }
@@ -92,10 +112,10 @@ public: // interface
   enum send_type get_send_type () 
   { return send_type_; }
 
-public: // static functions
+// public: // static functions
 
-  /// Get single instance of the Parallel object
-  static ParallelMpi * instance() throw ();
+//   /// Get single instance of the Parallel object
+//   static ParallelMpi * instance() throw ();
 
 public: // virtual
 
@@ -105,21 +125,10 @@ public: // virtual
 
 protected: // functions
 
-  /// Initialize an ParallelMpi object (singleton design pattern)
-  ParallelMpi()
-    : Parallel(),
-      size_(1),
-      rank_(0),
-      name_("0"),
-      send_blocking_(true),
-      recv_blocking_(true),
-      send_type_(send_standard)
-  {};
-
 private: // static functions
 
   /// Single instance of the Parallel object (singleton design pattern)
-  static ParallelMpi * instance_mpi_;
+//   static ParallelMpi * instance_mpi_;
 
 private: // attributes
 
@@ -145,5 +154,5 @@ protected: // static attributes
 
 };
 
-#endif /* PARALLEL_MPI_HPP */
+#endif /* PARALLEL_PARALLEL_MPI_HPP */
 

@@ -7,26 +7,25 @@
 /// @file     method_UserControl.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
+/// @todo     consolidate initialize() and initialize_block()
 /// @brief    Declaration of the UserControl class
 
 #include <string>
+
 #include "data.hpp"
+#include "global.hpp"
 
 class UserControl {
 
   /// @class    UserControl
   /// @ingroup  User
-  /// @brief    Top-level control and description of user methods
-  ///
-  /// This class is not meant to be inherited from, but some functions
-  /// must be implemented for user application:
-  /// 
-  /// 
+  /// @brief    Encapsulate top-level control and description of user methods
 
 public: // interface
 
   /// Constructor
-  UserControl() throw()
+  UserControl(Global * global) throw()
+    : global_(global)
   {};
 
   /// Perform any global initialization independent of specific method
@@ -54,6 +53,11 @@ public: // interface
 
   virtual void refresh_block(DataBlock * data_block) throw()
   {};
+
+protected:
+
+  /// Global objects
+  Global * global_;
 
 };
 

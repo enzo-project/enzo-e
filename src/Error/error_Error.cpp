@@ -8,5 +8,5 @@
 
 #include "error.hpp"
 
-Error Error::instance_; // (singleton design pattern)
+// Error Error::instance_; // (singleton design pattern)
 

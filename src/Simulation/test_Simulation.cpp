@@ -15,10 +15,15 @@
 
 int main(int argc, char ** argv)
 {
+  ParallelCreate parallel_create;
+  Parallel * parallel = parallel_create.create(parallel_mpi);
+  parallel->initialize(&argc,&argv);
+
   unit_init();
   unit_class ("Simulation");
   unit_func("Simulation");
-  Simulation simulation;
+  Global * global = new Global(parallel);
+  Simulation simulation(global);
   unit_assert(false);
   unit_finalize();
 }

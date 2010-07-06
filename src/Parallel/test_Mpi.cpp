@@ -16,7 +16,7 @@
 
 int main(int argc, char ** argv)
 {
-  ParallelMpi * parallel = ParallelMpi::instance();
+  ParallelMpi * parallel = new ParallelMpi;
 
   parallel->initialize(&argc,&argv);
   unit_init (parallel->process_rank(), parallel->process_count());

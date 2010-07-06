@@ -13,6 +13,7 @@
 #include <string>
 #include "user.hpp"
 #include "data.hpp"
+#include "global.hpp"
 
 class MethodEnzoControl : public UserControl {
 
@@ -22,7 +23,10 @@ class MethodEnzoControl : public UserControl {
 
 public: // interface
 
-  MethodEnzoControl()
+  /// Create a new MethodEnzoControl
+
+  MethodEnzoControl(Global * global)
+    : UserControl(global)
   {};
 
   /// Perform any global initialization independent of specific method
