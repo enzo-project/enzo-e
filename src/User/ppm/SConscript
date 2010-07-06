@@ -5,7 +5,7 @@ libraries  = ['hdf5', 'png','boost_thread-mt', '$FORTRANLIBS']
 
 env = env.Clone (LIBS = [components,libraries])
 
-sources_extra = ['write_hydro.cpp', 'print_fields.cpp']
+sources_extra = ['../write_hydro.cpp', '../print_fields.cpp']
 sources  = [Glob('initialize*cpp'),
             Glob('Cosmology*.cpp'),
             Glob('Grid_*cpp'),
