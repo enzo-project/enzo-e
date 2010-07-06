@@ -9,6 +9,7 @@ DOCS = \
       performance \
       project \
       proposal-nsf \
+      report-nsf \
       proposal-ascr \
       requirements \
       talk-intro \
@@ -39,6 +40,10 @@ proposal-nsf:
 #       use own Makefile
 	cd proposal-nsf; ln -sf ../papers.bib .
 	$(MAKE) -C proposal-nsf
+report-nsf:
+#       use own Makefile
+	cd report-nsf; ln -sf ../papers.bib .
+	$(MAKE) -C report-nsf
 proposal-ascr:
 	cd proposal-ascr; ln -sf ../Makefile.1 makefile
 	cd proposal-ascr; ln -sf ../papers.bib .
