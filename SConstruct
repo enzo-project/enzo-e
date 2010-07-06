@@ -75,16 +75,17 @@ elif (platform == 'linux-mpi-valgrind'):
 #--------------------------------------------------
 elif (platform == 'linux-ampi'):
 #--------------------------------------------------
-   parallel_run = "/home/bordner/charm/charm-6.2.0/bin/charmrun ++p 4 "
+   charm_path = '/home/bordner/charm/charm-6.2'
+   parallel_run = charm_path + "/bin/charmrun ++p 4 "
    serial_run   = ""
   
    env = Environment(
       BINPATH     = '#/bin',
-      CC          = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
+      CC          = charm_path + '/bin/charmc -language ampi',
       CPPDEFINES = ['NO_FREETYPE'],
       CPPFLAGS    = '-Wall -g',
       CPPPATH     = '#/include',
-      CXX         = '/home/bordner/charm/charm-6.2.0/bin/charmc -language ampi',
+      CXX         = charm_path + '/bin/charmc -language ampi',
       ENV         = os.environ,
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
