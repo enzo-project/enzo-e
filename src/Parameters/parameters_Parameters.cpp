@@ -20,13 +20,12 @@
 
 Parameters::Parameters(Monitor * monitor) 
   throw()
-  :
-  monitor_(monitor),
-  current_group_(""),
-  current_subgroup_(""),
-  parameter_map_(),
-  parameter_tree_(new ParamNode("Parameters"))
-  ///
+  :  monitor_(monitor),
+     current_group_(""),
+     current_subgroup_(""),
+     parameter_map_(),
+     parameter_tree_(new ParamNode("Parameters"))
+     ///
 {
 }
 
