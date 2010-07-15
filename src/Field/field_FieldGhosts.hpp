@@ -33,6 +33,29 @@ public: // interface
   /// Assignment operator
   FieldGhosts & operator= (const FieldGhosts & FieldGhosts) throw();
 
+  ///  	Initiate a put of ghost zones to another block patch, which
+  ///  	may be remote. Nonblocking.
+  void get();
+
+  ///  	Complete a put of ghost zones to another block patch, which
+  ///  	may be remote. Blocking.
+  void get_wait();
+
+  ///  	Initiate a get of ghost zones from another block patch, which
+  ///  	may be remote. Nonblocking.
+  void put();
+
+  ///  	Complete a get of ghost zones from another block patch, which
+  ///  	may be remote. Blocking.
+  void put_wait();
+
+  ///  	Initiate an exchange of ghost zones associated with a
+  ///  	patch. Nonblocking.
+  void swap();
+
+  ///  	Complete an exchange of ghost zones associated with a patch. 
+  void swap_wait();
+
 private: // functions
 
 
