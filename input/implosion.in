@@ -9,13 +9,8 @@
 
    Cello {
 
-      code_version_major = 0;
-      code_version_minor = 3;
-      code_version_patch = 2;
+      version = [ 0, 3, 2];
 
-      # implementations built on Cello may have independent versioning
-
-      enzo_ppm { code_version_major = 1 }
    }
 
    # Domain is the two dimensional box 0 < x,y < 0.3
@@ -29,15 +24,14 @@
 
    Mesh { 
       root_size      = [400,400];
-      min_block_size = 8;
-      max_block_size = 8;
+      block_size     = [8,8];
       max_level      = 0; 
 
       # remaining mesh parameters are ignored if max_level == 0
 
       backfill       = false;
-      refine         = 2;
-      balanced       = true;
+      refinement     = 2;
+      balance        = true;
       backfill       = true;
       coalesce       = true;
    }
@@ -55,6 +49,13 @@
 	"velocity_y"
       ] ;
 
+      # List of user-defined groups, which may be accessed by applications
+      # built on Cello to process different groups of fields in different
+      # ways.  E.g. "color" fields for Enzo PPM, or "computed" fields that
+      # are not permanently stored (like pressure)
+
+      groups = ["computed", "color"];
+
       # courant condition for fields
 
       courant   = 0.8;
@@ -70,26 +71,12 @@
 
       alignment = 8;    
 
-      # Specifying names also specifies ordering of field storage,
-      # which may affect performance.  Note fields may be different
-      # sizes if not cell-centered
-    
-      names = ["density", "velocity_x", "velocity_y", "total_energy"];
-
-      # List of user-defined groups, which may be accessed by applications
-      # built on Cello to process different groups of fields in different
-      # ways.  E.g. "color" fields for Enzo PPM, or "computed" fields that
-      # are not permanently stored (like pressure)
-
-      groups = ["computed", "color"];
-
       pressure { 
 
          # issue an error if the pressure falls below 1.0e-6 anywhere
          # issue an error if the density goes negative
 
-         min_value  = [1.0e-6,    0.0    ];
-         min_action = ["warning", "error"];
+         minimum  = [1.0e-6, "warning", 0.0, "error"    ];
 
          # pressure is computed not evolved
 
@@ -111,8 +98,7 @@
          # [could consolidate into a single list [ 1.0e-6, "warning",
          # 0.0, "error" ] since value and action are closely related
 
-         min_value =  [ 1.0e-6,       0.0 ];
-         min_action = [ "warning", "error"];
+         minimum =  [ 1.0e-6, "warning", 0.0, "error" ];
 
          # for fun, use double precision for density even if default is single
          # (implemented: single double extended80 extended96 quadruple)
@@ -121,11 +107,6 @@
          precision = "double"
       };
 
-      # Velocity is face-centered not cell-centered
-      # default is centered [true, true, true]
-
-      velocity_x { centering = [false, true];  };
-      velocity_y { centering = [true, false];  }
    }
 
    Method {
@@ -154,15 +135,20 @@
    }
 
    Initial {
+      fields {
 
-      # equivalent to density(x,y) = (x + y < 0.15) ? 0.125 : 1.0
+         # equivalent to density(x,y) = (x + y < 0.15) ? 0.125 : 1.0
 
-      density  = [ 0.125, x + y < 0.15, 1.0 ];  
+         density  = [ 0.125, x + y < 0.15, 1.0 ];
+         pressure = [ 0.14,  x + y < 0.15, 1.0 ];
 
-      pressure = [ 0.14,  x + y < 0.15, 1.0 ];
+         # density = ["initial.hdf5", "Density"]; # read initial density from an hdf5 file
+	 # read density from a PNG image with given scaling of 0<=r,g,b,a <=1
+         # density = ["density-0.png", (r+g+b)*1.4/3.0]; 
 
-      velocity_x = [0.0];
-      velocity_y = [0.0];
+         velocity_x = 0.0;
+         velocity_y = 0.0;
+      }
    }
 
    Boundary { type = "reflecting" }
