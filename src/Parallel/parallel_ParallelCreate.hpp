@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parallel.hpp"
+#include "error.hpp"
 
 class ParallelCreate {
 
@@ -35,7 +36,8 @@ public: // interface
 #ifdef CONFIG_USE_MPI
       parallel = new ParallelMpi;
 #else
-      parallel = new ParallelSerial;
+      ERROR_MESSAGE("Parallel::create",
+		    "Attempting to create ParallelMpi without CONFIG_USE_MPI");
 #endif
       break;
     case parallel_serial:

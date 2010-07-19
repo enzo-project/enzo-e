@@ -15,296 +15,217 @@
 
 Layout::Layout() throw()
 {
-  np_[0] = 1;
-  np_[1] = 1;
-  np_[2] = 1;
-  nt_[0] = 1;
-  nt_[1] = 1;
-  nt_[2] = 1;
-  nd_[0] = 1;
-  nd_[1] = 1;
-  nd_[2] = 1;
+  for (int i=0; i<3; i++) {
+    np_[i] = 1;
+    nt_[i] = 1;
+    nd_[i] = 1;
+  }
 }
     
-// {
+//----------------------------------------------------------------------
 
-//   ASSERT ("Layout::Layout",
-// 	  "No funny dimensions allowed",
-// 	  1 <= dimension && dimension <= 3);
-  
-//   array_size_     = new int [dimension_];
-//   process_blocks_ = new int [dimension_];
-//   thread_blocks_  = new int [dimension_];
+void Layout::set_process_blocks(int p0, int p1, int p2) throw()
+{
+  np_[0] = p0;
+  np_[1] = p1;
+  np_[2] = p2; 
+}
 
-//   for (int i=0; i<dimension; i++) {
-//     array_size_[i]     = 1;
-//     process_blocks_[i] = 1;
-//     thread_blocks_[i]  = 1;
-//   }
-// }
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// Layout::~Layout()
-// {
-//   delete [] array_size_;
-//   delete [] process_blocks_;
-//   delete [] thread_blocks_;
-// }
+void Layout::set_thread_blocks(int t0, int t1, int t2) throw()
+{ 
+  nt_[0] = t0;
+  nt_[1] = t1;
+  nt_[2] = t2; 
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// Layout::Layout(const Layout & layout) throw()
-//   : dimension_(layout.dimension_),
-//     process_first_(layout.process_first_),
-//     process_count_(layout.process_count_),
-//     thread_first_(layout.thread_first_),
-//     thread_count_(layout.thread_count_)
-// {
-//   array_size_     = new int [dimension_];
-//   process_blocks_ = new int [dimension_];
-//   thread_blocks_  = new int [dimension_];
+void Layout::set_data_blocks(int d0, int d1, int d2) throw()
+{ 
+  nd_[0] = d0;
+  nd_[1] = d1;
+  nd_[2] = d2; 
+}
 
-//   for (int i=0; i<dimension_; i++) {
-//     array_size_[i]     = layout.array_size_[i];
-//     process_blocks_[i] = layout.process_blocks_[i];
-//     thread_blocks_[i]  = layout.thread_blocks_[i];
-//   }
-// }
+//----------------------------------------------------------------------
 
-// //----------------------------------------------------------------------
+int Layout::process_count () throw()
+{ 
+  return np_[0]*np_[1]*np_[2]; 
+}
 
-// Layout & Layout::operator= (const Layout & layout) throw()
-// {
-//   dimension_     = layout.dimension_;
-//   process_first_ = layout.process_first_;
-//   process_count_ = layout.process_count_;
-//   thread_first_  = layout.thread_first_;
-//   thread_count_  = layout.thread_count_;
+//----------------------------------------------------------------------
 
-//   array_size_     = new int [dimension_];
-//   process_blocks_ = new int [dimension_];
-//   thread_blocks_  = new int [dimension_];
+int Layout::thread_count () throw()
+{
+  return  nt_[0]*nt_[1]*nt_[2]; 
+}
 
-//   for (int i=0; i<dimension_; i++) {
-//     array_size_[i]     = layout.array_size_[i];
-//     process_blocks_[i] = layout.process_blocks_[i];
-//     thread_blocks_[i]  = layout.thread_blocks_[i];
-//   }
+//----------------------------------------------------------------------
 
-//   return *this;
-// }
+int Layout::data_blocks_per_process () throw()
+{ 
+  return thread_count() * data_blocks_per_thread(); 
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// void Layout::set_array
-// (
-//  int dimension, 
-//  int array_size[]
-//  )
-// {
-//   if (dimension > dimension_) {
-//     WARNING_MESSAGE("Layout::set_array","dimension > dimension_");
-//   }
-//   int i;
-//   for (i=0; i<MIN(dimension,dimension_); i++) {
-//     array_size_[i] = array_size[i];
-//   }
-//   // Fill any extra elements of Layout's array size with 1's
-//   for (i=MIN(dimension,dimension_); i<dimension_; i++) {
-//     array_size_[i] = 1;
-//   }
-// }
+int Layout::data_blocks_per_thread () throw()
+{
+  return nd_[0]*nd_[1]* nd_[2]; 
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// void Layout::array_size 
-// (
-//  int dimension, 
-//  int array_size[]
-//  )
-// {
-//   if (dimension > dimension_) {
-//     WARNING_MESSAGE("Layout::array_size","dimension > dimension_");
-//   }
-//   int i;
-//   for (i=0; i<MIN(dimension,dimension_); i++) {
-//     array_size[i] = array_size_[i];
-//   }
-//   // Fill any extra elements of output array_size[] with 1's
-//   for (i=MIN(dimension,dimension_); i<dimension; i++) {
-//     array_size[i] = 1;
-//   }
-// }
+bool Layout::neighbor_is_internal (int ip, int it, int id,
+				   axis_type axis, int face)
+{
+  int k = neighbor_project_(ip,it,id,axis,face);
+  return (0 <= k && k < nd_[axis] * nt_[axis] * np_[axis]);
+}
 
-// //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
-// void Layout::set_process_blocks 
-// (
-//  int dimension, 
-//  int process_blocks[]
-//  )
-// {
-//   int i;
-//   for (i=0; i<MIN(dimension,dimension_); i++) {
-//     process_blocks_[i] = process_blocks[i];
-//   }
-//   // Fill any extra elements of output process_blocks[] with 1's
-//   for (i=MIN(dimension,dimension_); i<dimension_; i++) {
-//     process_blocks_[i] = 1;
-//   }
+int Layout::neighbor_process (int ip, int it, int id,
+			      axis_type axis, int face)  throw()
+{
+
+  // Project indices along axis of interest and return updated block index
+  int i = neighbor_project_(ip,it,id,axis,face);
+
+  // convert blocks to process blocks, and return relative change
+  return index_1_to_z(i,nd_[axis],nt_[axis],np_[axis]) - ip;
+
+}
+
+//----------------------------------------------------------------------
+
+int Layout::neighbor_thread (int ip, int it, int id,
+			     axis_type axis, int face) throw()
+{
+
+  // Project indices along axis of interest and return updated block index
+  int i = neighbor_project_(ip,it,id,axis,face);
+
+  // convert blocks to thread block, and return relative change
+  return index_1_to_y(i,nd_[axis],nt_[axis],np_[axis]) - it;
+
+}
+
+//----------------------------------------------------------------------
+
+void Layout::box_extent (int ip, int it, int id,
+			 double lower_extent[3],    
+			 double upper_extent[3])
+{
+
+  int block_index[3];
+  block_indices_(ip,it,id,block_index);
+
+  lower_extent[0] = 1.0 * block_index[0] / (nd_[0]*nt_[0]*np_[0]);
+  lower_extent[1] = 1.0 * block_index[1] / (nd_[1]*nt_[1]*np_[1]);
+  lower_extent[2] = 1.0 * block_index[2] / (nd_[2]*nt_[2]*np_[2]);
+
+  upper_extent[0] = 1.0 * (block_index[0] + 1) / (nd_[0]*nt_[0]*np_[0]);
+  upper_extent[1] = 1.0 * (block_index[1] + 1) / (nd_[1]*nt_[1]*np_[1]);
+  upper_extent[2] = 1.0 * (block_index[2] + 1) / (nd_[2]*nt_[2]*np_[2]);
+
+}
+
+//----------------------------------------------------------------------
+
+void Layout::array_indices (int ip, int it, int id,
+			    int nx, int ny, int nz,
+			    int lower_index[3],
+			    int upper_index[3]) throw ()
+{
+
+  int block_index[3];
+  block_indices_(ip,it,id,block_index);
+
+  lower_index[0] = block_index[0] * nx /(nd_[0]*nt_[0]*np_[0]);
+  lower_index[1] = block_index[1] * ny /(nd_[1]*nt_[1]*np_[1]);
+  lower_index[2] = block_index[2] * nz /(nd_[2]*nt_[2]*np_[2]);
+
+  upper_index[0] = (block_index[0]+1) * nx / (nd_[0]*nt_[0]*np_[0]);
+  upper_index[1] = (block_index[1]+1) * ny / (nd_[1]*nt_[1]*np_[1]);
+  upper_index[2] = (block_index[2]+1) * nz / (nd_[2]*nt_[2]*np_[2]);
+
+}
+
+//----------------------------------------------------------------------
+
+void Layout::set_periodic (axis_type axis, bool periodic)
+{
+  periodic_[axis] = periodic; 
+}
+
+//----------------------------------------------------------------------
+
+bool Layout::is_periodic (axis_type axis)
+{
+  return periodic_[axis]; 
+}
+
+//----------------------------------------------------------------------
+
+int Layout::neighbor_project_(int ip, int it, int id, axis_type axis, int face)
+{
+  int ipa,ita,ida;
+  switch (axis) {
+  case axis_x:
+    ipa = index_1_to_x(ip,np_[0],np_[1],np_[2]);
+    ita = index_1_to_x(it,nt_[0],nt_[1],nt_[2]);
+    ida = index_1_to_x(id,nd_[0],nd_[1],nd_[2]);
+    break;
+  case axis_y:
+    ipa = index_1_to_y(ip,np_[0],np_[1],np_[2]);
+    ita = index_1_to_y(it,nt_[0],nt_[1],nt_[2]);
+    ida = index_1_to_y(id,nd_[0],nd_[1],nd_[2]);
+    break;
+  case axis_z:
+    ipa = index_1_to_z(ip,np_[0],np_[1],np_[2]);
+    ita = index_1_to_z(it,nt_[0],nt_[1],nt_[2]);
+    ida = index_1_to_z(id,nd_[0],nd_[1],nd_[2]);
+    break;
+  default:
+    break;
+  }
+
+  // Move "face" blocks (could be < 0) along axis
+  ida += face;
+
+  // Convert to total data blocks
+  int i = index_3_to_1(ida,ita,ipa,nd_[axis],nt_[axis],np_[axis]);
+
+  // Wrap if periodic
+  if (periodic_[axis]) {
+    int n = nd_[axis]*nt_[axis]*np_[axis];
+    i = (i + n) % n;
+  }
+  return i;
+}
+
+//----------------------------------------------------------------------
+
+void Layout::block_indices_ 
+(int ip, int it, int id, int block_index[3]) throw ()
  
-// }
+{
+  // Project block id's along each axis
+  int ip3[3],it3[3],id3[3];
 
-// //----------------------------------------------------------------------
+  index_1_to_3(ip,ip3[0],ip3[1],ip3[2],np_[0],np_[1],np_[2]);
+  index_1_to_3(it,it3[0],it3[1],it3[2],nt_[0],nt_[1],nt_[2]);
+  index_1_to_3(id,id3[0],id3[1],id3[2],nd_[0],nd_[1],nd_[2]);
 
-// int Layout::process_block_count (int process_rank) const
-// /// @todo store local process block count result
-// /// @todo store global process block count (nvp)
-// {
+  // Convert from (ip,it,id) relative blocks to absolute data blocks
 
-//   int process_rank_local = process_rank - process_first_;
+  block_index[0] = index_3_to_1(id3[0],it3[0],ip3[0],nd_[0],nt_[0],np_[0]);
+  block_index[1] = index_3_to_1(id3[1],it3[1],ip3[1],nd_[1],nt_[1],np_[1]);
+  block_index[2] = index_3_to_1(id3[2],it3[2],ip3[2],nd_[2],nt_[2],np_[2]);
 
-//   int block_count = 0;
-
-//   if (0 <= process_rank_local && 
-//       process_rank_local < process_count_) {
-
-//     // compute process block range on this process
-
-//     int process_block_count = 1;
-//     for (int i=0; i<dimension_; i++) process_block_count *= process_blocks_[i];
-
-//     int block_index_first 
-//       = process_rank_local     * process_block_count / process_count_;
-
-//     int block_index_last  
-//       = (process_rank_local + 1) * process_block_count / process_count_;
-
-//     block_count = block_index_last - block_index_first;
-    
-//   }
-
-//   return block_count;
-// }
-
-// //----------------------------------------------------------------------
-
-// void Layout::process_block_indices
-// (
-//  int dimension, 
-//  int process_rank,
-//  int process_block_number, 
-//  int process_block_index[] )
-// {
-//   int process_block_count = 1;
-//   for (int i=0; i<dimension; i++) process_block_count *= process_blocks_[i];
-//   ASSERT ("Layout::process_block_indices",
-// 	  "process_block_number out of range",
-// 	  0 <= process_block_number &&
-// 	  process_block_number < process_block_count);
-
-//   int process_rank_local = process_rank - process_first_;
-
-//   if (0 <= process_rank_local && 
-//       process_rank_local < process_count_) {
-
-//     // compute process block range on this process
-
-//     int block_index_first 
-//       = process_rank_local * process_block_count / process_count_;
-
-//     int block_index = block_index_first + process_block_number;
-
-//     for (int i=0; i<MIN(dimension,dimension_); i++) {
-//       int index = block_index % process_blocks_[i];
-//       block_index = (block_index - index) / process_blocks_[i];
-//       process_block_index[i] = index;
-//     }
-//     // pad any extra indices with 0's
-//     for (int i=MIN(dimension,dimension_)+1; i<dimension; i++) {
-//       process_block_index[i] = 0;
-//     }
-//   } else {
-//     WARNING_MESSAGE("process_block_indices","Process out of range--ignoring");
-//   }
-// }
-
-// //----------------------------------------------------------------------
-
-// void Layout::process_block_number
-// (
-//  int dimension, 
-//  int * process_rank,
-//  int * process_block_number, 
-//  int process_block_index[] )
-// {
-//   int d = MIN(dimension,dimension_)-1;
-//   int block_index = process_block_index[d];
-//   for (int i=d-1; i>=0; i--) {
-//     block_index = block_index * process_blocks_[i] + process_block_index[i];
-//   }
-
-//   // compute process_block_count
-//   int process_block_count = 1;
-//   for (int i=0; i<dimension; i++) process_block_count *= process_blocks_[i];
-
-//   // compute *process_rank
-
-//   int process_rank_local
-//     = block_index * process_count_ / process_block_count;
-
-//   int block_index_first =
-//     (process_rank_local + 1) * process_block_count / process_count_;
-
-//   while ( block_index >= block_index_first) {
-//     ++ process_rank_local;
-//     block_index_first =
-//       (process_rank_local + 1) * process_block_count / process_count_;
-//   }
-
-//   *process_rank         = process_rank_local + process_first_;
-
-//   block_index_first =
-//     process_rank_local * process_block_count / process_count_;
-//   *process_block_number = block_index - block_index_first;
-
-//   printf ("%d %d %d  %d   %d  %d\n",
-// 	  process_block_index[0],
-// 	  process_block_index[1],
-// 	  process_block_index[2],
-// 	  block_index,
-// 	  *process_rank,
-// 	  *process_block_number);
-// }
-
-// //----------------------------------------------------------------------
-
-// void Layout::set_thread_blocks (int dimension, int thread_blocks[])
-// {
-//   INCOMPLETE_MESSAGE("Layout::set_thread_blocks","");
-// }
-
-// //----------------------------------------------------------------------
-
-// int Layout::thread_block_count ( int index_process_block ) const
-// {
-//   INCOMPLETE_MESSAGE("Layout::thread_block_count","");
-//   return 0;
-// }
-
-// //----------------------------------------------------------------------
-
-// int Layout::thread_block_indices
-// (
-//  int index_process_block, 
-//  int index_thread_block, 
-//  int dimension, 
-//  int thread_block_indices[]
-//  )
-// {
-//   INCOMPLETE_MESSAGE("Layout::thread_block_indices","");
-//   return 0;
-// }
-
-// //----------------------------------------------------------------------
+}
