@@ -5,28 +5,37 @@ beginfig(1)
   Class.P("Patch")()();
   Class.T("Tree")()();
   Class.N("Node")()();
+  Class.L("Layout")()();
+  Class.D("DataBlock")()();
 
-  P.n = M.n + (80, 0);
-  T.n = M.s + (0, -40);
-  N.n = T.n + (80, 0);
+  P.e = M.e + (0, -60);
+  T.n = M.n + (60, 0);
+  N.e = T.e + (0, -60);
+  L.n = P.s + (-30, -40);
+  D.n = P.s + (30, -40);
   
-  drawObjects(M,P,T,N);
+  drawObjects(M,P,T,N,L,D);
   
-  item(iAssoc)("1")(obj.sw = M.e + (10,0));
-  item(iAssoc)("1")(obj.sw = T.e + (10,0));
-  item(iAssoc)("1..*")(obj.se = P.w );
-  item(iAssoc)("1..*")(obj.se = N.w );
-  item(iAssoc)("1")(obj.nw = M.s);
-  item(iAssoc)("1")(obj.nw = P.s);
-  item(iAssoc)("1")(obj.sw = T.n);
-  item(iAssoc)("1")(obj.sw = N.n);
+  link(composition)(P.n -- M.s);
+  link(association)(M.e -- T.w);
+  link(association)(P.e -- N.w);
+  link(composition)(N.n -- T.s);
+  link(aggregation)(pathStepY(L.n, P.s, 15));
+  link(aggregation)(pathStepY(D.n, P.s, 15));
 
+  item(iAssoc)("1")(obj.ne = M.s + (-5,0));
+  item(iAssoc)("1")(obj.ne = T.s + (-5,0));
+  item(iAssoc)("1..*")(obj.se = P.n );
+  item(iAssoc)("1..*")(obj.se = N.n );
+  item(iAssoc)("1")(obj.sw = M.e);
+  item(iAssoc)("1")(obj.sw = P.e);
+  item(iAssoc)("1")(obj.se = T.w);
+  item(iAssoc)("1")(obj.se = N.w);
+  item(iAssoc)("1")(obj.se = L.n);
+  item(iAssoc)("1..*")(obj.se = D.n);
 
- 
-  link(composition)(P.w -- M.e);
-  link(association)(M.s -- T.n);
-  link(association)(P.s -- N.n);
-  link(composition)(N.w -- T.e);
+  
+
 	
   
 endfig;

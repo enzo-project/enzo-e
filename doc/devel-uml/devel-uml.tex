@@ -31,23 +31,6 @@
 
 
 %=======================================================================
-\section{Mesh}
-%=======================================================================
-
-Adaptive mesh refinement infrastructure, built on top of Array
-
-\centerline{\includegraphics{uml/amr.ps}}
-
-%=======================================================================
-\section{Array}
-%=======================================================================
-
-Fortran-like array, which may be parallelized or vectorized in various
-ways
-
-\centerline{\includegraphics{uml/array.ps}}
-
-%=======================================================================
 \section{Disk}
 %=======================================================================
 
@@ -79,6 +62,14 @@ Scalar fields on an Array or AMR hierarchy
 %=======================================================================
 
 Manage dynamic memory allocation and deallocation
+
+%=======================================================================
+\section{Mesh}
+%=======================================================================
+
+Adaptive mesh refinement infrastructure.
+
+\centerline{\includegraphics{uml/amr.ps}}
 
 %=======================================================================
 \section{Method}
