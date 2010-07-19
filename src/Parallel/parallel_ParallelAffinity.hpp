@@ -22,9 +22,9 @@ public: // interface
 	   int thread_rank  = 0) throw()
     : process_rank_ (process_rank),
       thread_rank_ (thread_rank),
-      parallel_process_(0),
-      parallel_thread_(0),
-      parallel_group_(0)
+      processes_(0),
+      threads_(0),
+      group_(0)
   {}
 
   /// Equality operator
@@ -45,25 +45,25 @@ public: // interface
 
   /// Return the Parallel class for distributed parallelism
 
-  const Parallel * parallel_process() { return parallel_process_; };
+  const Parallel * processes() { return processes_; };
 
   /// Return the Parallel class for threaded parallelism
 
-  const Parallel * parallel_thread() { return parallel_thread_; };
+  const Parallel * threads() { return threads_; };
 
   /// Return the Parallel group
 
-  const ParallelGroup * parallel_group() { return parallel_group_; };
+  const ParallelGroup * group() { return group_; };
 
 private: // attributes
 
   int process_rank_;
   int thread_rank_;
 
-  Parallel * parallel_process_;
-  Parallel * parallel_thread_;
+  Parallel * processes_;
+  Parallel * threads_;
 
-  ParallelGroup * parallel_group_;
+  ParallelGroup * group_;
 
 };
 

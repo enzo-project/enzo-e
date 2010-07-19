@@ -20,7 +20,6 @@ int main(int argc, char ** argv)
 
   unit_init(parallel->process_rank(),parallel->process_count());
 
-  printf ("%s\n",parallel->name().c_str());
   int process_count = parallel->process_count();
   int process_rank  = parallel->process_rank();
   int thread_rank   = parallel->thread_rank();
@@ -44,6 +43,21 @@ int main(int argc, char ** argv)
   
   unit_assert ( (affinity_root == affinity_this) ==
 		(process_rank == 0) );
+
+  unit_func("process_rank");
+  unit_assert(false);
+
+  unit_func("thread_rank");
+  unit_assert(false);
+
+  unit_func("processes");
+  unit_assert(false);
+
+  unit_func("threads");
+  unit_assert(false);
+
+  unit_func("group");
+  unit_assert(false);
 
   unit_finalize();
   parallel->finalize();
