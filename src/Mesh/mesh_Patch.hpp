@@ -9,6 +9,9 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Declaration of the interface for the Patch class
 
+#include "data.hpp"
+#include "parallel.hpp"
+
 class Patch {
 
   /// @class    Patch
@@ -35,8 +38,11 @@ public: // interface
 
 private: // attributes
 
-  class Layout;
-  Layout * layout_;
+  /// Parallel layout descriptor
+  ParallelLayout * layout_;
+
+  /// Array of local data blocks associated with the patch
+  DataBlock * data_block_;
 
 };
 

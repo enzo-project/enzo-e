@@ -22,7 +22,8 @@
 
 //----------------------------------------------------------------------
 
-void usage(int argc, char ** argv, Parallel * parallel);
+void usage(int argc, char ** argv);
+void exit(Monitor *,Parallel *);
 
 //----------------------------------------------------------------------
 
@@ -54,9 +55,13 @@ int main(int argc, char ** argv)
     FILE *fp = 0;
     if (argc == 2) {
       fp = fopen(argv[1],"r");
-      if ( !fp ) usage(argc,argv,parallel);
+      if ( !fp ) {
+	if (parallel->is_root()) usage(argc,argv);
+	exit(monitor,parallel);
+      }
     } else {
-      usage(argc,argv,parallel);
+      if (parallel->is_root()) usage(argc,argv);
+      exit(monitor,parallel);
     }
 
     ASSERT ("cello", "File pointer NULL", fp != 0);
@@ -69,27 +74,28 @@ int main(int argc, char ** argv)
 
     Simulation simulation (global);
 
-    monitor->print ("CELLO END");
-
-    parallel->finalize();
-
+    exit(monitor,parallel);
   }
 
   catch (ExceptionBadPointer) {
     printf ("CELLO ERROR: Bad pointer.\n");
+    exit(1);
   }
-
 }
 
-void usage(int argc, char ** argv, Parallel * parallel)
+void usage(int argc, char ** argv)
 {
-  if (parallel->is_root()) {
 #ifdef CONFIG_USE_MPI
-    fprintf (stderr,"Usage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
+    fprintf (stderr,"\nUsage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
 #else
-    fprintf (stderr,"Usage: %s <parameter-file>\n\n",argv[0]);
+    fprintf (stderr,"\nUsage: %s <parameter-file>\n\n",argv[0]);
 #endif
-  }
-  parallel->finalize();
-  exit(1);
 }
+
+void exit(Monitor * monitor, Parallel * parallel)
+{
+  monitor->print ("CELLO END");
+  parallel->finalize();
+  exit(0);
+}
+

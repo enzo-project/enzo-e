@@ -45,6 +45,7 @@ void Param::set (struct param_struct * node)
   case enum_parameter_sentinel:
   case enum_parameter_function:
   case enum_parameter_subgroup:
+  case enum_parameter_identifier:
     break;
   }
 }

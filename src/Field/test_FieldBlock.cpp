@@ -50,9 +50,9 @@ int main()
   field_descr.set_centering(index_f3, true,  false, true);
   field_descr.set_centering(index_f4, true,  true,  false);
 
-  printf ("sizeof(single)   = %lu\n",(long unsigned) sizeof(float));
-  printf ("sizeof(double)   = %lu\n",(long unsigned) sizeof(double));
-  printf ("sizeof(extended) = %lu\n",(long unsigned) sizeof(long double));
+  unit_assert (sizeof(float)       == 4);
+  unit_assert (sizeof(double)      == 8);
+  unit_assert (sizeof(long double) == 16);
 
   //----------------------------------------------------------------------
   unit_class ("FieldBlock");

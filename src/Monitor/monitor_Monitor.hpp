@@ -69,8 +69,7 @@ public: // interface
   /// Print a message to stdout
   void print (std::string message, FILE * fp = stdout)
   {
-    if (active_) fprintf (fp,"%s %6.1f %s\n",
-			  parallel_->name().c_str(),
+    if (active_) fprintf (fp,"%06.1f %s\n",
 			  timer_.value(),message.c_str());
   };
 
