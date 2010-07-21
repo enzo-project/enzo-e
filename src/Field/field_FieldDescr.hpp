@@ -21,15 +21,6 @@ enum field_action_type {
   field_action_method    // Retry with alternate method if range exceeded
 };
 
-#include <stdexcept>
-#include <string>
-#include <memory>
-#include <set>
-#include <map>
-#include <vector>
-
-#include "error.hpp"
-
 class FieldDescr {
 
   /// @class    FieldDescr

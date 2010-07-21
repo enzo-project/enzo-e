@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "cello.hpp"
+
 #include "error.hpp"
 #include "parallel.hpp"
 #include "monitor.hpp"

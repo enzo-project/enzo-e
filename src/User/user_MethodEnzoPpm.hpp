@@ -9,12 +9,6 @@
 #ifndef USER_METHOD_ENZO_PPM_HPP
 #define USER_METHOD_ENZO_PPM_HPP
 
-#include <vector>
-#include <string>
-#include "parameters.hpp"
-#include "user.hpp"
-#include "data.hpp"
-
 class MethodEnzoPpm : public UserMethod {
 
   /// @class    MethodEnzoPpm

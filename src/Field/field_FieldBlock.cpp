@@ -8,7 +8,7 @@
 
 #include "assert.h"
 
-#include "field_FieldBlock.hpp"
+#include "field.hpp"
 
 FieldBlock::FieldBlock() throw()
   : field_descr_(0),

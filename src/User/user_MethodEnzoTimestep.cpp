@@ -10,7 +10,6 @@
 #include "user.hpp"
 #include "parameters.hpp"
 
-#include "user_MethodEnzoTimestep.hpp"
 #include "cello_hydro.h"
 
 //----------------------------------------------------------------------

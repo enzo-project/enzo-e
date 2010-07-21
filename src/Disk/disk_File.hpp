@@ -9,8 +9,6 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Declaration of the File class
 
-#include <string>
-
 class File {
 
   /// @class    File

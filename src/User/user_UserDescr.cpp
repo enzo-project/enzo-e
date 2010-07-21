@@ -7,8 +7,10 @@
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of UserDescr user-dependent class member functions
 
-#include "user.hpp"
+#include "cello.hpp"
 #include "global.hpp"
+
+#include "user.hpp"
 
 //----------------------------------------------------------------------
 

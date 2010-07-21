@@ -9,7 +9,9 @@
 /// @date     2008-03-18
 /// @brief    Include file for the Error component
 
-#include "cello.hpp"
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "error_Exception.hpp"
 #include "error_Error.hpp"
 

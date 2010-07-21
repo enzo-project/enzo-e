@@ -9,9 +9,6 @@
 /// @date     2010-05-11
 /// @brief    Declaration of the UserDescr class
 
-#include "error.hpp"
-#include "global.hpp"
-
 class UserDescr {
 
   /// @class    UserDescr

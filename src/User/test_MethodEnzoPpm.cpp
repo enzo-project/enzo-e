@@ -90,11 +90,11 @@ int main(int argc, char **argv)
 
   // Create data and field descriptors and blocks
 
-  FieldDescr * field_descr = new FieldDescr;
-  FieldBlock * field_block = new FieldBlock;
+  DataDescr * data_descr = new DataDescr;
+  DataBlock * data_block = new DataBlock;
 
-  DataDescr * data_descr = new DataDescr (field_descr);
-  DataBlock * data_block = new DataBlock (field_block);
+  FieldDescr * field_descr = data_descr->field_descr();
+  FieldBlock * field_block = data_block->field_block();
 
   // Insert required fields
 

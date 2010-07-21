@@ -9,13 +9,6 @@
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
 
-#include <vector>
-#include "cello.hpp"
-#include "global.hpp"
-#include "mesh.hpp"
-#include "data.hpp"
-#include "user.hpp"
-
 class Simulation {
 
   /// @class    Simulation
@@ -50,11 +43,16 @@ public: // interface
     return *this;
   }
 
-  /// Initialize from parameters
-  void initialize ();
+  /// Initialize the Simulation's data fields
+
+  void initialize() throw();
+
+  /// Advance the simulation a specified amount
+
+  void advance(double stop_time, int stop_cycle)  throw();
 
   /// Return the dimension 1 <= d <= 3, of the simulation
-  int dimension() 
+  int dimension()  throw()
   {
     ASSERT ("Simulation::dimension",
 	    "lower_ and upper_ vectors are different sizes",
@@ -63,7 +61,7 @@ public: // interface
   };
 
   /// Return extents.  Assumes lower[] and upper[] are allocated to at least dimension()
-  void domain_extents (int lower[], int upper[])
+  void extents (int lower[], int upper[]) throw()
   {
     if (dimension() >= 1) {
       lower[0] = lower_[0];
@@ -79,25 +77,42 @@ public: // interface
     }
   }
 
+  /// Return the Global object
+  Global * global ()  throw() 
+  { return global_; };
+
   /// Return the Mesh object
-  Mesh * mesh () { return mesh_; };
+  Mesh * mesh ()  throw() 
+  { return mesh_; };
+
+  /// Return the Schedule object
+  Schedule * schedule ()  throw() 
+  { return schedule_; };
 
   /// Return the User code descriptor
-  UserDescr * user_descr () { return user_descr_; };
+  UserDescr * user_descr () throw() 
+  { return user_descr_; };
+
+  /// Return the Data code descriptor
+  DataDescr * data_descr () throw() 
+  { return data_descr_; };
 
 private: // attributes
-
-  /// Global
-
-  Global * global_;
 
   /// Domain extents
 
   std::vector<double> lower_;
   std::vector<double> upper_;
 
-  /// AMR grid
+  /// "global" data, including parameters, monitor, error, parallel, etc.
+
+  Global * global_;
+
+  /// AMR mesh
   Mesh * mesh_;
+
+  /// Parallel task scheduler
+  Schedule * schedule_;
 
   /// Method descriptor
   UserDescr * user_descr_;

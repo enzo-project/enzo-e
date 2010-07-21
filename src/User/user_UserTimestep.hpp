@@ -9,7 +9,6 @@
 #ifndef USER_USER_TIMESTEP_HPP
 #define USER_USER_TIMESTEP_HPP
 
-#include "data.hpp"
 
 class UserTimestep {
 

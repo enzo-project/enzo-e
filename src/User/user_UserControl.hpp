@@ -10,11 +10,6 @@
 /// @todo     consolidate initialize() and initialize_block()
 /// @brief    Declaration of the UserControl class
 
-#include <string>
-
-#include "data.hpp"
-#include "global.hpp"
-
 class UserControl {
 
   /// @class    UserControl

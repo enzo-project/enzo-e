@@ -23,7 +23,27 @@ int main(int argc, char ** argv)
   unit_class ("Simulation");
   unit_func("Simulation");
   Global * global = new Global(parallel);
+
+  // Read parameter file
+
+  FILE * fp = fopen("input/implosion.in","r");
+  global->parameters()->read(fp);
+
+  // Create simulation object
+
   Simulation simulation(global);
+
+  // Initialize data fields
+
+  simulation.initialize();
+
+  double stop_time  = 1.0;
+  int    stop_cycle = 1000;
+
+  // Advance the simulation to the given time or cycle limit
+
+  simulation.advance(stop_time,stop_cycle);
+  
   unit_assert(false);
   unit_finalize();
 }

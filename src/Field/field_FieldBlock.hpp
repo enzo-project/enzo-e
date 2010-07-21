@@ -14,12 +14,6 @@
 /// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    Fortran-style array class.
 
-#include <stdexcept>
-#include <vector>
-
-#include "field_FieldDescr.hpp"
-#include "disk.hpp"
-
 class FieldBlock {
 
   /// @class    FieldBlock

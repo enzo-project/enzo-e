@@ -9,7 +9,12 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2008-03-18
 
+#include <string.h>
+
 #include "cello.hpp"
+
+#include "error.hpp"
+
 #include "test_unit.hpp"
 
 #endif /* TEST_HPP */

@@ -9,6 +9,7 @@
 /// @date     2009-11-10 16:12:58
 /// @brief    Interface for the Schedule class
 
+#include "schedule_Schedule.hpp"
 
 #endif /* SCHEDULE_HPP */
 

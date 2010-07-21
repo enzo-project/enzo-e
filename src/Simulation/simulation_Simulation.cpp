@@ -6,22 +6,20 @@
 /// @date      2010-11-10
 /// @brief     Implementation of the Simulation class
 
+#include "cello.hpp"
+
+#include "simulation.hpp"
 #include "data.hpp" 
 #include "user.hpp" 
-#include "simulation.hpp"
 
 Simulation::Simulation(Global * global)
-  : global_(global),
-    lower_(),
+  : lower_(),
     upper_(),
-    mesh_(NULL),
+    global_    (global),
+    mesh_      (NULL),
+    schedule_  (NULL),
     user_descr_(NULL),
     data_descr_()
-{
-}
-
-/// Initialize from parameters
-void Simulation::initialize ()
 {
 
   // --------------------------------------------------
@@ -77,12 +75,14 @@ void Simulation::initialize ()
   mesh_->set_max_patch_size(parameters->value_integer("max_patch_size",0));
 
   // --------------------------------------------------
-  // Initiazize data
+  // Initiazize data descriptors
   // --------------------------------------------------
 
-  // initialize fields
+  // Initialize field descriptor
 
-  FieldDescr * field_descr = new FieldDescr;
+  data_descr_ = new DataDescr();
+
+  FieldDescr * field_descr = data_descr_->field_descr();
 
   parameters->set_current_group("Field");
 
@@ -92,7 +92,7 @@ void Simulation::initialize ()
   }
 
   // --------------------------------------------------
-  // Initiazize methods
+  // Initiazize user method descriptors
   // --------------------------------------------------
 
   parameters->set_current_group("Method");
@@ -106,13 +106,10 @@ void Simulation::initialize ()
 
   user_descr_ = new UserDescr(global_);
 
-  data_descr_ = new DataDescr(field_descr);
-
   for (i=0; i<method_count; i++) {
+
     std::string method_name = parameters->list_value_string(i,"sequence");
-    // 
-    // given "ppm" create MethodEnzoPpm
-    //
+
     UserMethod * user_method = user_descr_->add_user_method(method_name);
 
     user_method->initialize(data_descr_);
@@ -122,15 +119,21 @@ void Simulation::initialize ()
   user_descr_ -> set_user_timestep("ignored");
 
   // --------------------------------------------------
-  // Initialize Mesh
+  // Initiazize the scheduler
   // --------------------------------------------------
 
-  INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Mesh");
-  
-  // --------------------------------------------------
-  // Initialize data 
-  // --------------------------------------------------
+  schedule_ = new Schedule;
+}
 
-  INCOMPLETE_MESSAGE("Simulation::initialize","Initializing Fields");
+//----------------------------------------------------------------------
 
+void Simulation::initialize() throw()
+{
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::advance(double stop_time, int stop_cycle) throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::advance","Not implemented");
 }

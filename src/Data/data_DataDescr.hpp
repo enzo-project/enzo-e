@@ -9,10 +9,6 @@
 #ifndef DATA_DATA_DESCR_HPP
 #define DATA_DATA_DESCR_HPP
 
-#include <vector>
-#include "error.hpp"
-#include "field.hpp"
-
 class DataDescr {
 
   /// @class    DataDescr
@@ -22,18 +18,15 @@ class DataDescr {
 public: // interface
 
   /// Initialize the DataDescr object
-  DataDescr(FieldDescr * field_descr) throw()
-  : field_descr_(field_descr)
-  {
-    ASSERT("DataDescr()","field_descr must be non-null",field_descr != NULL);
-  }
+  DataDescr() throw()
+  : field_descr_(new FieldDescr)
+  { }
 
-  //----------------------------------------------------------------------
-  // Field functions
-  //----------------------------------------------------------------------
+  /// Initialize the DataDescr object
+  ~DataDescr() throw()
+  { delete field_descr_; }
 
   /// Return the Field descriptor
-
   FieldDescr * field_descr () throw()
   { return field_descr_; };
 

@@ -13,8 +13,6 @@
 /// @todo     Add unit tests for group operations to test_disk_hdf5
 /// @brief    Interface for the FileHdf5 class
 
-#include <hdf5.h>
-
 class FileHdf5 {
 
   /// @class    FileHdf5

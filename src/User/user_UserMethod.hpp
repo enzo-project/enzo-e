@@ -9,12 +9,6 @@
 #ifndef USER_METHOD_HPP
 #define USER_METHOD_HPP
 
-#include <vector>
-#include <string>
-
-#include "data.hpp"
-#include "global.hpp"
-
 enum argument_type {
   argument_unknown,
   argument_field,

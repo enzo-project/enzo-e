@@ -9,8 +9,6 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Interface for the FieldGhosts class
 
-#include "parallel.hpp"
-
 class FieldGhosts {
 
   /// @class    FieldGhosts

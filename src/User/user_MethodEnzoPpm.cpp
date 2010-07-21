@@ -6,10 +6,12 @@
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the MethodEnzoPpm class
 
+#include "cello.hpp"
+
 #include "data.hpp"
 #include "error.hpp"
 #include "global.hpp"
-#include "user_MethodEnzoPpm.hpp"
+#include "user.hpp"
 
 #include "cello_hydro.h"
 

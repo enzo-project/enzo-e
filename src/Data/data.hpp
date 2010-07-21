@@ -9,6 +9,10 @@
 /// @date     Thu Jul  9 15:44:21 PDT 2009
 /// @brief    Include file for the Data component
 
+#include "cello.hpp"
+
+#include "field.hpp"
+
 #include "data_DataDescr.hpp"
 #include "data_DataBlock.hpp"
 

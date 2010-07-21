@@ -9,11 +9,6 @@
 #ifndef USER_METHOD_ENZO_CONTROL_HPP
 #define USER_METHOD_ENZO_CONTROL_HPP
 
-#include <vector>
-#include <string>
-#include "user.hpp"
-#include "data.hpp"
-#include "global.hpp"
 
 class MethodEnzoControl : public UserControl {
 

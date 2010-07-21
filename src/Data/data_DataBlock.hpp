@@ -9,11 +9,6 @@
 #ifndef DATA_DATA_BLOCK_HPP
 #define DATA_DATA_BLOCK_HPP
 
-#include <vector>
-
-#include "error.hpp"
-#include "field.hpp"
-
 class DataBlock {
 
   /// @class    DataBlock
@@ -23,15 +18,14 @@ class DataBlock {
 public: // interface
 
   /// Initialize the DataBlock object
-  DataBlock(FieldBlock * field_block) throw()
-    : field_block_(field_block)
-  {
-    ASSERT("DataBlock()","field_block must be non-null",field_block != NULL);
-  };
+  DataBlock() throw()
+    : field_block_(new FieldBlock)
+  {  };
 
-  //----------------------------------------------------------------------
-  // Field functions
-  //----------------------------------------------------------------------
+  /// Delete DataBlock
+
+  ~DataBlock() throw()
+  { delete field_block_; }
 
   /// Return the Field block
 

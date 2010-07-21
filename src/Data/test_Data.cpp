@@ -21,11 +21,9 @@ int main()
 
   unit_class ("DataDescr");
 
-  FieldDescr * field_descr = new FieldDescr;
+  DataDescr data_descr;
 
-  DataDescr data_descr(field_descr);
-
-  unit_assert(data_descr.field_descr() == field_descr);
+  unit_assert (data_descr.field_descr() != NULL)
 
   unit_finalize();
 
