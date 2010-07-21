@@ -1,8 +1,8 @@
 // $Id: parallel_group.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_GROUP_HPP
-#define PARALLEL_GROUP_HPP
+#ifndef PARALLEL_PARALLEL_GROUP_HPP
+#define PARALLEL_PARALLEL_GROUP_HPP
 
 /// @file     parallel_Group.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -61,5 +61,5 @@ private: // attributes
 
 };
 
-#endif /* PARALLEL_GROUP_HPP */
+#endif /* PARALLEL_PARALLEL_GROUP_HPP */
 

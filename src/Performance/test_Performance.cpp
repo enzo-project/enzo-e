@@ -12,7 +12,6 @@
 
 #include "error.hpp"
 #include "test.hpp"
-#include "memory.hpp"
 #include "performance.hpp"
 
 int main(int argc, char ** argv)
@@ -210,8 +209,6 @@ int main(int argc, char ** argv)
   unit_assert (false); //FAILS
 
   delete performance;
-
-  Memory::instance()->print();
 
   unit_finalize();
 

@@ -9,11 +9,6 @@
 /// @date     Wed Apr 23 12:40:04 PDT 2008
 /// @brief    Interface and implementation of the Timer class
 
-#include <sys/time.h>
-#ifdef __linux__
-#include <unistd.h>
-#endif
-
 class Timer {
 
   /// @class    Timer

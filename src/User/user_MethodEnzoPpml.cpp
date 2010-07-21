@@ -8,9 +8,10 @@
 
 //----------------------------------------------------------------------
 
-#include "error.hpp"
 #include "global.hpp"
+#include "error.hpp"
 #include "user.hpp"
+#include "parameters.hpp"
 
 //----------------------------------------------------------------------
 

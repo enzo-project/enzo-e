@@ -10,10 +10,13 @@
 /// @brief    Include file for the Monitor component
 
 #include <string>
+#include "pngwriter.h"
 
 #include "cello.hpp"
 
-#include "performance_Timer.hpp"
+#include "parallel.hpp"
+#include "error.hpp"
+#include "performance.hpp"
 
 #include "monitor_Monitor.hpp"
 

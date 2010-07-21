@@ -6,8 +6,8 @@
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
 /// @brief    Declaration for the UserMethod component
 
-#ifndef USER_METHOD_HPP
-#define USER_METHOD_HPP
+#ifndef USER_USER_METHOD_HPP
+#define USER_USER_METHOD_HPP
 
 enum argument_type {
   argument_unknown,
@@ -91,4 +91,4 @@ protected: // attributes
 
 };
 
-#endif /* USER_METHOD_HPP */
+#endif /* USER_USER_METHOD_HPP */

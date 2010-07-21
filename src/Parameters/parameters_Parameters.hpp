@@ -28,9 +28,6 @@ enum parameter_type {
   parameter_logical_expr
 };
 
-#include "monitor.hpp"
-#include "parameters_Param.hpp"
-
 class Parameters {
 
   /// @class    Parameters

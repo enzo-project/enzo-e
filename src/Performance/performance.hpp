@@ -11,7 +11,14 @@
 
 #include <vector>
 #include <sys/time.h>
+#ifdef __linux__
+#include <unistd.h>
+#endif
+
 #include "cello.hpp"
+
+#include "memory.hpp"
+
 #include "performance_Counters.hpp"
 #include "performance_Performance.hpp"
 #include "performance_Timer.hpp"

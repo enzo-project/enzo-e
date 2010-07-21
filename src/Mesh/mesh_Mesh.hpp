@@ -9,10 +9,6 @@
 #ifndef MESH_MESH_HPP
 #define MESH_MESH_HPP
 
-#include <memory>
-#include <vector>
-#include "memory.hpp"
-
 /// strict_auto_ptr class
 template<class T>
 class strict_auto_ptr : public std::auto_ptr<T> {

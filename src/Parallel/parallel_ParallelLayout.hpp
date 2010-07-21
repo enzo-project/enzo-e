@@ -9,9 +9,6 @@
 #ifndef PARALLEL_PARALLEL_LAYOUT_HPP
 #define PARALLEL_PARALLEL_LAYOUT_HPP
 
-#include <math.h>
-#include <vector>
-
 /// @def index_3_to_1
 /// @brief compute index i as a function of indices ix,iy,iz.  Inverse
 /// operation of index_3_to_1

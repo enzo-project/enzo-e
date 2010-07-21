@@ -6,9 +6,6 @@
 /// @date     Thu Oct 15 10:40:37 PDT 2009 
 /// @brief    Interface for the ParallelMpi class
 
-#include <stdio.h>
-#include <string>
-
 #ifndef PARALLEL_PARALLEL_MPI_HPP
 #define PARALLEL_PARALLEL_MPI_HPP
 

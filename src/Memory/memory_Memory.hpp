@@ -9,10 +9,6 @@
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
 /// @brief    Interface for the Memory class.  Uses the Singleton design pattern.
 
-#include <stack>
-
-#include "error.hpp"
-
 /// @def      MEMORY_MAX_NUM_GROUPS
 /// @brief    Maximum number of groups for memory allocation tracking
 #define MEMORY_MAX_NUM_GROUPS 20
@@ -30,7 +26,7 @@ class Memory {
 public: // interface
 
 #ifdef CONFIG_USE_MEMORY
-  /// Get single instance of the Memory object
+/// Get single instance of the Memory object
   static Memory * instance() throw ()
   { return & instance_; }
 #endif
@@ -129,7 +125,7 @@ private: // attributes
 
 #ifdef CONFIG_USE_MEMORY
   /// Single instance of the Memory object (singleton design pattern)
-static Memory instance_;
+  static Memory instance_;
 #endif
 
 #ifdef CONFIG_USE_MEMORY

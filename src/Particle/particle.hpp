@@ -9,6 +9,8 @@
 /// @date     2010-04-02
 /// @brief    Include file for the Particle component
 
+#include <string>
+
 #include "particle_ParticleDescr.hpp"
 
 #endif /* PARTICLE_HPP */

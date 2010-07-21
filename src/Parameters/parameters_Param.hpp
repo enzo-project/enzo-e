@@ -1,8 +1,8 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARAM_HPP
-#define PARAM_HPP
+#ifndef PARAMETERS_PARAM_HPP
+#define PARAMETERS_PARAM_HPP
 
 /// @file     parameters_Param.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -10,11 +10,6 @@
 /// @todo     Rename print_expression to match cello_parameters_print_list
 /// @todo     Keep track of unaccessed parameters
 /// @brief    Interface for the Param class
-
-#include <vector>
-#include <string>
-
-#include "error.hpp"
 
 //----------------------------------------------------------------------
 
@@ -248,4 +243,5 @@ private: // functions
 
 //----------------------------------------------------------------------
 
-#endif
+#endif /* PARAMETERS_PARAM_HPP */
+

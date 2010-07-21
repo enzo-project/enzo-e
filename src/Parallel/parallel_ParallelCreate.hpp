@@ -11,11 +11,6 @@
 #ifndef PARALLEL_PARALLEL_CREATE_HPP
 #define PARALLEL_PARALLEL_CREATE_HPP
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "parallel.hpp"
-#include "error.hpp"
-
 class ParallelCreate {
 
   /// @class    ParallelCreate

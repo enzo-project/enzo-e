@@ -10,10 +10,6 @@
 #ifndef PARALLEL_PARALLEL_HPP
 #define PARALLEL_PARALLEL_HPP
 
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-
 class Parallel {
 
   /// @class    Parallel

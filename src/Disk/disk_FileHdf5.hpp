@@ -1,8 +1,8 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef DISK_HDF5_HPP
-#define DISK_HDF5_HPP
+#ifndef DISK_FILE_HDF5_HPP
+#define DISK_FILE_HDF5_HPP
 
 /// @file     disk_FileHdf5.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -85,5 +85,5 @@ private: // attributes
 
 };
 
-#endif /* DISK_HDF5_HPP */
+#endif /* DISK_FILE_HDF5_HPP */
 

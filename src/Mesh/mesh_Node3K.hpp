@@ -9,9 +9,6 @@
 /// @date     Tue Oct 27 12:32:07 PDT 2009 
 /// @brief    Declaration of Node3K
 
-#include <stdlib.h>
-#include "cello.hpp"
-
 class Tree3K;
 
 class Node3K {

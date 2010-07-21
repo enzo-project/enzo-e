@@ -23,11 +23,12 @@ int main(int argc, char ** argv)
 
   unit_init();
 
+  unit_class ("Memory");
+
+#ifdef CONFIG_USE_MEMORY
   Memory * memory = Memory::instance();
 
   printf ("start\n"); fflush(stdout);
-
-  unit_class ("Memory");
 
   //----------------------------------------------------------------------
   // allocate()
@@ -209,6 +210,8 @@ int main(int argc, char ** argv)
   unit_assert(0); //FAILS
 
   memory->print();
-
+#else /* CONFIG_USE_MEMORY */
+  unit_assert(true);
+#endif/* CONFIG_USE_MEMORY */
   unit_finalize();
 }

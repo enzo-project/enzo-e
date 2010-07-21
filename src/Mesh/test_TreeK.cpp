@@ -17,11 +17,7 @@
 #include "error.hpp"
 #include "monitor.hpp"
 #include "memory.hpp"
-//#include "disk.hpp"
-#include "mesh_Node2K.hpp"
-#include "mesh_Node3K.hpp"
-#include "mesh_Tree2K.hpp"
-#include "mesh_Tree3K.hpp"
+#include "mesh.hpp"
 
 #include "image.h"
 

@@ -14,6 +14,15 @@ enum parallel_type {
   parallel_mpi
 };
 
+#include <string>
+#include <vector>
+#include <string>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "error.hpp"
+
 #include "parallel_Parallel.hpp"
 #include "parallel_ParallelMpi.hpp"
 #include "parallel_ParallelSerial.hpp"

@@ -1,8 +1,8 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef FIELD_BLOCK_HPP
-#define FIELD_BLOCK_HPP
+#ifndef FIELD_FIELD_BLOCK_HPP
+#define FIELD_FIELD_BLOCK_HPP
 
 /// @file     field_FieldBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -206,4 +206,4 @@ private: // attributes
 
 };   
 
-#endif /* FIELD_BLOCK_HPP */
+#endif /* FIELD_FIELD_BLOCK_HPP */

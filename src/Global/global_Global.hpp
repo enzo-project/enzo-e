@@ -9,12 +9,6 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Brief description of file global_Global.hpp
 
-#include "error.hpp"
-#include "memory.hpp"
-#include "monitor.hpp"
-#include "parameters.hpp"
-#include "parallel.hpp"
-
 class Global {
 
   /// @class    Global

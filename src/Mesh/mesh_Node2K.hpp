@@ -9,9 +9,6 @@
 /// @date     Tue Oct 27 12:32:07 PDT 2009
 /// @brief    Interface for Node2K class
 
-#include <stdlib.h>
-#include "cello.hpp"
-
 class Tree2K;
 
 class Node2K {

@@ -1,8 +1,8 @@
 // $Id: disk_File.hpp 1394 2010-04-22 20:52:54Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef DISK_DISKFILE_HPP
-#define DISK_DISKFILE_HPP
+#ifndef DISK_FILE_HPP
+#define DISK_FILE_HPP
 
 /// @file     disk_File.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -43,5 +43,5 @@ private: // attributes
 
 };
 
-#endif /* FILENAME_HPP */
+#endif /* DISK_FILE_HPP */
 

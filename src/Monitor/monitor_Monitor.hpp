@@ -9,10 +9,6 @@
 #ifndef MONITOR_MONITOR_HPP
 #define MONITOR_MONITOR_HPP
 
-#include "parallel.hpp"
-#include "pngwriter.h"
-#include "error.hpp"
-
 /// @enum     reduce_type
 /// @brief    Reduction operator, used for image projections
 enum reduce_type {

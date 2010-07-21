@@ -6,8 +6,8 @@
 /// @date     Mon May 17 14:16:01 PDT 2010
 /// @brief    Implementation of Enzo PPML method
 
-#ifndef USER_ENZO_PPML_HPP
-#define USER_ENZO_PPML_HPP
+#ifndef USER_METHOD_ENZO_PPML_HPP
+#define USER_METHOD_ENZO_PPML_HPP
 
 class MethodEnzoPpml : public UserMethod {
 
@@ -56,4 +56,4 @@ private: // attributes
 
 };
 
-#endif /* USER_ENZO_PPML_HPP */
+#endif /* USER_METHOD_ENZO_PPML_HPP */

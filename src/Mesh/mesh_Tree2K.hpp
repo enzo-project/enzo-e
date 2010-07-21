@@ -10,10 +10,6 @@
 /// @todo     Decide on either k or r as refinement factor variable name
 /// @brief    Interface for the Tree2K class
 
-#include "error.hpp"
-
-#include "mesh_TreeK.hpp"
-
 class Tree2K : public TreeK {
 
   /// @class    Tree2K

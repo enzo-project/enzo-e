@@ -9,12 +9,18 @@
 /// @date     Thu Jul  9 15:44:21 PDT 2009
 /// @brief    Include file for the Parameters component
 
-#include <map>
-#include <string>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <map>
+#include <string>
+#include <vector>
+
 #include "cello.hpp"
+
 #include "error.hpp"
+#include "monitor.hpp"
+
 #include "parse.h"
 #include "parameters_Param.hpp"
 #include "parameters_ParamNode.hpp"

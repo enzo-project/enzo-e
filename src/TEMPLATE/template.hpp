@@ -1,13 +1,13 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef FILENAME_HPP
-#define FILENAME_HPP
+#ifndef TEMPLATE_HPP
+#define TEMPLATE_HPP
 
-/// @file     filename.hpp
+/// @file     template.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file filename.hpp
+/// @brief    Brief description of file template.hpp
 
 class Classname {
 
@@ -35,15 +35,15 @@ public: // interface
 
 private: // functions
 
-  /// Brief description of Classname::private_function_() in filename.hpp
+  /// Brief description of Classname::private_function_() in template.hpp
   private_function_() throw();
 
 private: // attributes
 
-  /// Brief description of Classname::private_attribute_ in filename.hpp
+  /// Brief description of Classname::private_attribute_ in template.hpp
   int private_attribute_;
 
 };
 
-#endif /* FILENAME_HPP */
+#endif /* TEMPLATE_HPP */
 

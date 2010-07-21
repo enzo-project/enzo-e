@@ -11,10 +11,6 @@
 #ifndef PARALLEL_PARALLEL_SERIAL_HPP
 #define PARALLEL_PARALLEL_SERIAL_HPP
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-
 class ParallelSerial : public Parallel {
 
   /// @class    ParallelSerial
