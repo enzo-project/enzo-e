@@ -23,11 +23,16 @@ enum parallel_type {
 
 #include "error.hpp"
 
-#include "parallel_Mpi.hpp"
+#ifdef CONFIG_USE_MPI
+#  include <mpi.h>
+#  include "parallel_Mpi.hpp"
+#endif
 
 #include "parallel_Group.hpp"
 #include "parallel_GroupProcess.hpp"
-#include "parallel_GroupProcessMpi.hpp"
+#ifdef CONFIG_USE_MPI
+// #include "parallel_GroupProcessMpi.hpp"
+#endif
 #include "parallel_Layout.hpp"
 #include "parallel_Affinity.hpp"
 

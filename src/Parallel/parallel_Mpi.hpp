@@ -9,17 +9,7 @@
 #ifndef PARALLEL_MPI_HPP
 #define PARALLEL_MPI_HPP
 
-enum send_type {
-  send_standard,
-  send_buffered,
-  send_synchronous,
-  send_ready };
-
-enum data_type {
-  data_single,
-  data_double };
-
-class Mpi : public Parallel {
+class Mpi {
 
   /// @class    Mpi
   /// @ingroup  Parallel

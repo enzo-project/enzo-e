@@ -19,25 +19,14 @@ public: // interface
 
   /// Initialize the GroupProcess object
   GroupProcess(int process_first, int process_count)
-    : Group(process_max_plus - process_min)
+    : Group(process_count),
+      process_first_(process_first)
   {
-    process_range_[0] = process_min;
-    process_range_[1] = process_max;
   }
-
-  /// Return process rank
-
-  void process_range (int * min, int * max) 
-  { 
-    *min = process_range_[0];
-    *max = process_range_[1];
-  }
-
-  /// Return thread rank
 
 private: // attributes
 
-  int process_range_[2];
+  int process_first_;
 
 };
 

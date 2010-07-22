@@ -18,16 +18,15 @@ class Group {
 public: // interface
 
   /// Initialize the Group object
-  Group(int size=1, int rank=0):
-    size_(size),
-    rank_(rank)
+  Group(int size=1):
+    size_(size)
   { };
 
   /// Number of compute elements in the Group
   int size() { return size_; };
 
   /// Rank of the compute element in the Group
-  int rank() { return rank_; };
+  virtual int rank() { return 0; };
 
   /// Synchronize between all compute elements in the Group
   virtual void barrier() { };
@@ -39,9 +38,6 @@ private: // attributes
 
   /// Number of compute elements in the Group
   int size_;
-
-  /// Rank of the compute element in the Group
-  int rank_;
 
 };
 

@@ -19,7 +19,7 @@ enum data_type {
   data_single,
   data_double };
 
-class ParallelMpi : public Parallel {
+class GroupProcessMpi : public GroupProcess {
 
   /// @class    ParallelMpi
   /// @ingroup  Parallel
