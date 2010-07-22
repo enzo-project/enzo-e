@@ -1,10 +1,10 @@
 // $Id: test_block.cpp 1369 2010-04-08 01:38:06Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_ParallelLayout.cpp
+/// @file     test_Layout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-19
-/// @brief    Unit tests for the ParallelLayout class
+/// @brief    Unit tests for the Layout class
 
 #include <math.h>
 #include "cello.hpp"
@@ -18,7 +18,7 @@ int main(int argc, char ** argv)
 {
   unit_init();
 
-  unit_class("ParallelLayout");
+  unit_class("Layout");
 
   //----------------------------------------------------------------------
   // index conversions
@@ -65,8 +65,8 @@ int main(int argc, char ** argv)
 
   {
     
-    unit_func("ParallelLayout");
-    ParallelLayout layout_serial;
+    unit_func("Layout");
+    Layout layout_serial;
     unit_assert (true);
 
     layout_serial.set_periodic(axis_x,true);
@@ -144,8 +144,8 @@ int main(int argc, char ** argv)
     int pb3[3] = {5,3,7};  // processor blocks
     int npb = pb3[0]*pb3[1]*pb3[2];
 
-    unit_func("ParallelLayout");
-    ParallelLayout layout_parallel;
+    unit_func("Layout");
+    Layout layout_parallel;
     unit_assert (true);
 
     layout_parallel.set_periodic(axis_x,false);
@@ -322,8 +322,8 @@ int main(int argc, char ** argv)
     int db3[3] = {4,1,9};  // data blocks
     int ndb = db3[0]*db3[1]*db3[2];
 
-    unit_func("ParallelLayout");
-    ParallelLayout layout_blocked;
+    unit_func("Layout");
+    Layout layout_blocked;
     unit_assert (true);
 
     layout_blocked.set_periodic(axis_x,false);
@@ -503,8 +503,8 @@ int main(int argc, char ** argv)
     int npb = pb3[0]*pb3[1]*pb3[2];
     int ndb = db3[0]*db3[1]*db3[2];
 
-    unit_func("ParallelLayout");
-    ParallelLayout layout_parallel_blocked;
+    unit_func("Layout");
+    Layout layout_parallel_blocked;
     unit_assert (true);
 
     layout_parallel_blocked.set_periodic(axis_x,false);

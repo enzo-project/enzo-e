@@ -1,11 +1,11 @@
 // $Id: test_affinity.cpp 1372 2010-04-08 05:36:42Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_ParallelAffinity.cpp
+/// @file     test_Affinity.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI
 /// @date     Tue Apr 20 14:19:04 PDT 2010
-/// @brief    Program implementing unit tests for the ParallelAffinity
+/// @brief    Program implementing unit tests for the Affinity
 
 #include "cello.hpp"
 #include "mpi.h" 
@@ -30,12 +30,12 @@ int main(int argc, char ** argv)
     exit(1);
   }
 
-  unit_class("ParallelAffinity");
+  unit_class("Affinity");
 
-  unit_func("ParallelAffinity");
+  unit_func("Affinity");
 
-  ParallelAffinity affinity_root (0,0);
-  ParallelAffinity affinity_this (process_rank,thread_rank);
+  Affinity affinity_root (0,0);
+  Affinity affinity_this (process_rank,thread_rank);
 
   unit_assert(true);
 

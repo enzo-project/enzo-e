@@ -1,24 +1,24 @@
-// $Id: parallel_ParallelAffinity.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: parallel_Affinity.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_PARALLEL_AFFINITY_HPP
-#define PARALLEL_PARALLEL_AFFINITY_HPP
+#ifndef PARALLEL_AFFINITY_HPP
+#define PARALLEL_AFFINITY_HPP
 
-/// @file     parallel_ParallelAffinity.hpp
+/// @file     parallel_Affinity.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 16:40:35 PDT 2010
-/// @brief    Declaration of the ParallelAffinity class
+/// @brief    Declaration of the Affinity class
 
-class ParallelAffinity {
+class Affinity {
 
-  /// @class    ParallelAffinity
+  /// @class    Affinity
   /// @ingroup  Parallel
   /// @brief    Generalization of MPI rank for hierarchical parallelism
 
 public: // interface
 
-  /// Initialize the ParallelAffinity object
-  ParallelAffinity(int process_rank = 0,
+  /// Initialize the Affinity object
+  Affinity(int process_rank = 0,
 	   int thread_rank  = 0) throw()
     : process_rank_ (process_rank),
       thread_rank_ (thread_rank),
@@ -29,7 +29,7 @@ public: // interface
 
   /// Equality operator
 
-  bool operator == (const ParallelAffinity & affinity) throw()
+  bool operator == (const Affinity & affinity) throw()
   {
     return (process_rank_ == affinity.process_rank_ &&
 	    thread_rank_  == affinity.thread_rank_);
@@ -45,11 +45,11 @@ public: // interface
 
   /// Return the Parallel class for distributed parallelism
 
-  const Parallel * processes() { return processes_; };
+  const GroupProcess * processes() { return processes_; };
 
   /// Return the Parallel class for threaded parallelism
 
-  const Parallel * threads() { return threads_; };
+  const GroupThread * threads() { return threads_; };
 
   /// Return the Parallel group
 
@@ -60,12 +60,10 @@ private: // attributes
   int process_rank_;
   int thread_rank_;
 
-  Parallel * processes_;
-  Parallel * threads_;
-
-  ParallelGroup * group_;
+  GroupProcess * processes_;
+  GroupThread * threads_;
 
 };
 
-#endif /* PARALLEL_PARALLEL_AFFINITY_HPP */
+#endif /* PARALLEL_AFFINITY_HPP */
 

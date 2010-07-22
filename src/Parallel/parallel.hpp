@@ -23,14 +23,13 @@ enum parallel_type {
 
 #include "error.hpp"
 
-#include "parallel_Parallel.hpp"
-#include "parallel_ParallelMpi.hpp"
-#include "parallel_ParallelSerial.hpp"
-#include "parallel_ParallelCreate.hpp"
+#include "parallel_Mpi.hpp"
 
-#include "parallel_ParallelGroup.hpp"
-#include "parallel_ParallelLayout.hpp"
-#include "parallel_ParallelAffinity.hpp"
+#include "parallel_Group.hpp"
+#include "parallel_GroupProcess.hpp"
+#include "parallel_GroupProcessMpi.hpp"
+#include "parallel_Layout.hpp"
+#include "parallel_Affinity.hpp"
 
 #endif /* PARALLEL_HPP */
 
