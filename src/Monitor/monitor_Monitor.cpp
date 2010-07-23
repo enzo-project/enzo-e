@@ -8,7 +8,6 @@
 /// @brief     Routines for simple output of text, plots, and graphs
 
 #include "cello.hpp"
-#include "parallel.hpp"
 #include "monitor.hpp" 
 #include "error.hpp" 
 

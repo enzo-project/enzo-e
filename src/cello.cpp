@@ -34,9 +34,6 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
-    ParallelCreate parallel_create;
-    Parallel * parallel = parallel_create.create(parallel_mpi);
-
     parallel->initialize(&argc, &argv);
 
     // INITALIZE "GLOBALS" (Parameters, Error, Monitor)

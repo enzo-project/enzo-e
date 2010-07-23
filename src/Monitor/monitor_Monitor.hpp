@@ -39,25 +39,15 @@ class Monitor {
 public: // interface
 
   /// Initialize the Monitor object (singleton design pattern)
-  Monitor(Parallel * parallel) 
-    : parallel_(parallel),
-      active_(parallel->is_root())
+  Monitor() 
+    : active_(true)
   {  
     timer_.start(); 
   }
-//   /// Get single instance of the Monitor object
-//   static Monitor * instance() throw ()
-//   { 
-//     // Delayed creation since Parallel must be initialized
-//     if (Monitor::instance_ == 0) {
-//       if (Parallel::instance()->is_initialized()) {
-// 	instance_ = new Monitor(Parallel::instance());
-//       } else {
-// 	ERROR_MESSAGE("Monitor::instance","Monitor::instance() called before Parallel::initialize()");
-//       }
-//     }
-//     return instance_;
-//   };
+
+  /// Set whether the monitor is active for text output.  Useful for
+  /// parallel.
+  void set_active(bool active) { active_ = active; };
 
   /// Print the Cello header 
   void header ();
@@ -86,7 +76,6 @@ private: // functions
 
 private: // attributes
 
-  Parallel * parallel_; // Parallel object, used for is_root()
   bool   active_;  // Whether monitoring is activated.  Used for e.g. ip != 0.
   Timer  timer_;   // Timer from Performance
   

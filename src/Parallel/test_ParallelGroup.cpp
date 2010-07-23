@@ -14,10 +14,9 @@
 
 int main(int argc, char ** argv)
 {
-  ParallelMpi::initialize(int argc, char ** argv);
+  Mpi::initialize(int argc, char ** argv);
 
-  Group * group_process_mpi = new GroupProcessMpi(&argc,&argv)
-  parallel->initialize(&argc,&argv);
+  Group * group_process_mpi = new GroupProcessMpi();
 
   unit_init(parallel->process_rank(),parallel->process_count());
 

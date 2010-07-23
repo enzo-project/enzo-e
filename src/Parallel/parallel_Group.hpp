@@ -6,7 +6,7 @@
 
 /// @file     parallel_Group.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Fri Apr  2 16:40:35 PDT 2010
+/// @date     Thu Jul 22 12:36:27 PDT 2010
 /// @brief    Declaration of the Group class
 
 class Group {

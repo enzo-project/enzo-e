@@ -18,12 +18,11 @@ class Global {
 public: // interface
 
   /// Constructor
-  Global(Parallel * parallel) throw()
+  Global() throw()
   {
-    parallel_   = parallel;
     error_      = new Error;
     memory_     = new Memory;
-    monitor_    = new Monitor(parallel);
+    monitor_    = new Monitor();
     parameters_ = new Parameters(monitor_);
   }
 
@@ -50,10 +49,6 @@ private: // prohibit assignment
 
 public:
 
-  /// Access parallel object
-
-  Parallel * parallel() { return parallel_; };
-
   /// Access error object
 
   Error * error() { return error_; };
@@ -72,9 +67,6 @@ public:
 
 
 private: // attributes
-
-  /// Parallel object
-  Parallel * parallel_;
 
   /// Error object
   Error * error_;

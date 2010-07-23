@@ -18,50 +18,64 @@ class Affinity {
 public: // interface
 
   /// Initialize the Affinity object
-  Affinity(int process_rank = 0,
-	   int thread_rank  = 0) throw()
-    : process_rank_ (process_rank),
-      thread_rank_ (thread_rank),
-      processes_(0),
-      threads_(0),
-      group_(0)
-  {}
+  Affinity(GroupProcess * processes = 0,
+	   GroupThread  * threads   = 0) throw()
+    : processes_(processes),
+      threads_(threads),
+      process_rank_(processes ? processes->rank() : 0),
+      process_size_(processes ? processes->size() : 1)
+  { }
 
   /// Equality operator
 
   bool operator == (const Affinity & affinity) throw()
   {
-    return (process_rank_ == affinity.process_rank_ &&
-	    thread_rank_  == affinity.thread_rank_);
+    return (process_rank() == affinity.process_rank() &&
+	    thread_rank()  == affinity.thread_rank());
   }
 
   /// Return process rank
 
-  int process_rank () { return process_rank_; };
+  int process_rank () throw()
+  { return process_rank_; };
+
+  /// Return process rank
+
+  int process_size () throw()
+  { return process_size_; };
 
   /// Return thread rank
 
-  int thread_rank () { return process_rank_; };
+  int thread_rank () throw()
+  { return threads_ ? threads_->rank() : 0; };
+
+  /// Return thread rank
+
+  int thread_size () throw()
+  { return threads_ ? threads_->size() : 0; };
 
   /// Return the Parallel class for distributed parallelism
 
-  const GroupProcess * processes() { return processes_; };
+  const GroupProcess * processes() throw()
+  { return processes_; };
 
   /// Return the Parallel class for threaded parallelism
 
-  const GroupThread * threads() { return threads_; };
+  const GroupThread * threads() throw()
+  { return threads_; };
 
-  /// Return the Parallel group
+  /// Whether this is the root process / thread
 
-  const ParallelGroup * group() { return group_; };
+  bool is_root() throw()
+  {return process_rank() == 0 && thread_rank() == 0; } ;
 
 private: // attributes
 
-  int process_rank_;
-  int thread_rank_;
-
   GroupProcess * processes_;
   GroupThread * threads_;
+
+  int process_rank_;
+  int process_size_;
 
 };
 
