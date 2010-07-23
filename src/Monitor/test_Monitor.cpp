@@ -22,13 +22,12 @@
 
 int main(int argc, char ** argv)
 {
-  ParallelCreate parallel_create;
-  Parallel * parallel = parallel_create.create(parallel_mpi);
+  GroupProcess * parallel = new GroupProcessMpi;
   parallel->initialize(&argc,&argv);
 
-  Monitor  * monitor  = new Monitor(parallel);
+  Monitor  * monitor  = new Monitor;
 
-  unit_init(parallel->process_rank(),parallel->process_count());
+  unit_init(parallel->rank(),parallel->size());
 
   unit_class ("Monitor");
 
@@ -36,7 +35,7 @@ int main(int argc, char ** argv)
 
   // Allocate array
 
-  if (parallel->is_root()) {
+  if (parallel->rank()==0) {
     printf ("pngwriter version = %g\n",pngwriter::version());
   }
 

@@ -10,8 +10,3 @@
  
 #include "parallel.hpp"
 
-// #include <boost/thread/mutex.hpp>
-// boost::mutex instance_mutex;
-
-// Parallel * Parallel::instance_ = 0; // (singleton design pattern)
-

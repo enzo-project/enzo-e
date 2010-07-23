@@ -28,13 +28,12 @@ void generate_input();
 
 int main(int argc, char **argv)
 {
-  ParallelCreate parallel_create;
-
-  Parallel * parallel = parallel_create.create(parallel_mpi);
+  
+  GroupProcess * parallel = new GroupProcessMpi;
 
   parallel->initialize(&argc, &argv);
 
-  unit_init (parallel->process_rank(), parallel->process_count());
+  unit_init (parallel->rank(), parallel->size());
 
   unit_class ("Parameters");
 
@@ -42,7 +41,7 @@ int main(int argc, char **argv)
   // test parameter
   //----------------------------------------------------------------------
 
-  Monitor * monitor = new Monitor(parallel);
+  Monitor * monitor = new Monitor;
   Parameters * parameters = new Parameters(monitor);
 
   // Generate test.in to make sure it exists

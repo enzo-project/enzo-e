@@ -74,7 +74,7 @@ private: // attributes
   char *** ghosts_;
 
   /// Process affinities (e.g. MPI rank, thread id, etc.) of neighbors
-  ParallelAffinity ** affinity_;
+  Affinity ** affinity_;
 
 };
 

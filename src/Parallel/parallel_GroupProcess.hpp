@@ -18,26 +18,30 @@ class GroupProcess : public Group {
 public: // interface
 
   /// Initialize the GroupProcess object
-  GroupProcess(int process_first, int process_count) throw()
-    : Group(process_count),
-      process_first_(process_first)
-  {
-  }
+  GroupProcess(int size = 1, int rank = 0) throw()
+    : Group(size,rank)
+  {  }
+
+  /// Abort program execution immediately
+  virtual void abort() { exit(1); };
+
+  /// Exit the program gracefully if possible
+  virtual void halt() { exit(0); };
 
   /// Initiate sending an array
-  virtual int send(int rank_dest, char * buffer, int size) throw() = 0;
+  virtual int send(int rank_dest, char * buffer, int size, int tag=0) throw() = 0;
 
   /// Complete sending an array
   virtual void send_wait(int handle) throw() = 0;
 
   /// Initiate receiving an array
-  virtual int recv(int rank_source, char * buffer, int size) throw() = 0;
+  virtual int recv(int rank_source, char * buffer, int size, int tag=0) throw() = 0;
 
   /// Complete receiving an array
   virtual void recv_wait(int handle) throw() = 0;
 
   /// Add an array to a list of arrays to send in bulk
-  virtual void bulk_send_add(int rank_dest, char * buffer, int size) throw() = 0;
+  virtual void bulk_send_add(int rank_dest, char * buffer, int size, int tag=0) throw() = 0;
 
   /// Initiate a bulk send of multiple arrays
   virtual int bulk_send() throw() = 0;
@@ -46,7 +50,7 @@ public: // interface
   virtual void bulk_send_wait(int handle) throw() = 0;
 
   /// Add an array to a list of arrays to receive in bulk
-  virtual void bulk_recv_add(int rank_source, char * buffer, int size) throw() = 0;
+  virtual void bulk_recv_add(int rank_source, char * buffer, int size, int tag=0) throw() = 0;
 
   /// Initiate a bulk receive of multiple arrays
   virtual int bulk_recv() throw() = 0;

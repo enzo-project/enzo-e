@@ -41,8 +41,8 @@ void write_image(Monitor * monitor, std::string filename,
 		 float * image, int nx, int ny, int nz=0 );
 
 void create_tree ( Memory * memory, int * level_array, int nx, int ny, int nz, int k,  int d, 
-		   std::string name, int max_level, Parallel * parallel);
-void print_usage(Parallel * parallel, int, char**);
+		   std::string name, int max_level);
+void print_usage(int, char**);
 //----------------------------------------------------------------------
 
 int main(int argc, char ** argv)
@@ -50,15 +50,11 @@ int main(int argc, char ** argv)
 
   // Required for Monitor
 
-  ParallelCreate parallel_create;
-  Parallel * parallel = parallel_create.create(parallel_mpi);
-  parallel->initialize(&argc,&argv);
-
-  Memory * memory = new Memory();
+  Memory * memory = new Memory;
   // Parse command line
 
   if (argc != 4) {
-    print_usage(parallel, argc,argv);
+    print_usage(argc,argv);
   }
 
   // Check arguments
@@ -68,14 +64,14 @@ int main(int argc, char ** argv)
   int max_level  = atoi(argv[3]);
 
   if (dimension != 2 && 
-      dimension != 3) print_usage(parallel,argc,argv);
+      dimension != 3) print_usage(argc,argv);
   
   if (refinement != 2 && 
       refinement != 4 &&
       refinement != 8 &&
-      refinement != 16) print_usage(parallel,argc,argv);
+      refinement != 16) print_usage(argc,argv);
   
-  if (! (0 < max_level && max_level <= 12)) print_usage(parallel,argc,argv);
+  if (! (0 < max_level && max_level <= 12)) print_usage(argc,argv);
 
   char filename[80];
   sprintf (filename,"TreeK-D=%d-R=%d-L=%d",dimension,refinement,max_level);
@@ -98,19 +94,18 @@ int main(int argc, char ** argv)
     level_array = create_sphere(sphere_size,max_level);
   }
 
-  create_tree (memory,level_array, nx, ny, nz, refinement, dimension, filename,max_level,parallel);
+  create_tree (memory,level_array, nx, ny, nz, refinement, dimension, filename,max_level);
 
   delete [] level_array;
 
   memory->print();
 
   delete memory;
-  parallel->finalize();
 
 }
 
 //----------------------------------------------------------------------
-void print_usage(Parallel * parallel,int argc, char **argv)
+void print_usage(int argc, char **argv)
 {
   fprintf (stderr,"\n");
   fprintf (stderr,"Usage: %s <dimension> <refinement> <levels>\n",argv[0]);
@@ -120,8 +115,6 @@ void print_usage(Parallel * parallel,int argc, char **argv)
   fprintf (stderr,"         <dimension>  = [2|3]\n");
   fprintf (stderr,"         <refinement> = [2|4|8|16]\n");
   fprintf (stderr,"\n");
-
-  parallel->abort();
 }
 //----------------------------------------------------------------------
 
@@ -287,8 +280,7 @@ void create_tree
  int nx, int ny, int nz,
  int k,  int d, 
  std::string name,
- int max_level,
- Parallel * parallel
+ int max_level
  )
 {
 
@@ -340,7 +332,7 @@ void create_tree
   memory->print();
   memory->set_active(false);
 
-  Monitor * monitor = new Monitor (parallel);
+  Monitor * monitor = new Monitor;
   if (d==2) {
     image = tree->create_image(image_size,line_width);
     write_image(monitor,name + "-0",image,image_size,image_size,1);

@@ -14,7 +14,6 @@
 
 #include "string.h"
 #include "test_ppm.h"
-#include "parallel.hpp"
 #include "monitor.hpp"
 #include "performance.hpp"
 
@@ -33,12 +32,7 @@ int main(int argc, char ** argv)
 
   // Initialize parallelism
 
-  ParallelCreate parallel_create;
-  Parallel * parallel = parallel_create.create(parallel_mpi);
-
-  parallel->initialize(&argc,&argv);
-
-  Monitor * monitor = new Monitor (parallel);
+  Monitor * monitor = new Monitor;
 
   // Check command line arguments
 
@@ -131,6 +125,5 @@ int main(int argc, char ** argv)
   }
 
   delete monitor;
-  parallel->finalize();
 }
 

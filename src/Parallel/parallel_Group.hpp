@@ -18,15 +18,27 @@ class Group {
 public: // interface
 
   /// Initialize the Group object
-  Group(int size=1):
-    size_(size)
+  Group(int size=1, int rank=0):
+    size_(size),
+    rank_(rank)
+  { 
+  }
+
+  /// Perform any required initialization of the Group
+  virtual void initialize(int * argc = 0, char *** argv = 0)
+  { };
+
+  /// Perform any required finalization of the Group
+  virtual void finalize()
   { };
 
   /// Number of compute elements in the Group
-  int size() { return size_; };
+  int size() 
+  { return size_; };
 
   /// Rank of the compute element in the Group
-  virtual int rank() { return 0; };
+  int rank() 
+  {  return rank_; };
 
   /// Synchronize between all compute elements in the Group
   virtual void barrier() { };
@@ -34,10 +46,13 @@ public: // interface
   /// Synchronize between two compute elements in the Group
   virtual void wait() { };
 
-private: // attributes
+protected: // attributes
 
   /// Number of compute elements in the Group
   int size_;
+
+  /// Rank of this compute element in the Group
+  int rank_;
 
 };
 

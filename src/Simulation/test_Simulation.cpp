@@ -15,14 +15,13 @@
 
 int main(int argc, char ** argv)
 {
-  ParallelCreate parallel_create;
-  Parallel * parallel = parallel_create.create(parallel_mpi);
+  GroupProcess * parallel = new GroupProcessMpi;
   parallel->initialize(&argc,&argv);
 
   unit_init();
   unit_class ("Simulation");
   unit_func("Simulation");
-  Global * global = new Global(parallel);
+  Global * global = new Global;
 
   // Read parameter file
 

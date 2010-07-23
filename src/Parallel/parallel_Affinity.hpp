@@ -20,62 +20,57 @@ public: // interface
   /// Initialize the Affinity object
   Affinity(GroupProcess * processes = 0,
 	   GroupThread  * threads   = 0) throw()
-    : processes_(processes),
-      threads_(threads),
-      process_rank_(processes ? processes->rank() : 0),
-      process_size_(processes ? processes->size() : 1)
+    : process_rank_(processes ? processes->rank() : 0),
+      process_size_(processes ? processes->size() : 1),
+      thread_rank_(threads ? threads->rank() : 0),
+      thread_size_(threads ? threads->size() : 0)
   { }
 
   /// Equality operator
 
-  bool operator == (const Affinity & affinity) throw()
+  bool operator == (const Affinity & affinity) const throw()
   {
     return (process_rank() == affinity.process_rank() &&
 	    thread_rank()  == affinity.thread_rank());
   }
 
+  /// Whether this is the root process / thread
+
+  bool is_root() const throw()
+  {return process_rank() == 0 && thread_rank() == 0; } ;
+
   /// Return process rank
 
-  int process_rank () throw()
+  int process_rank () const throw()
   { return process_rank_; };
 
   /// Return process rank
 
-  int process_size () throw()
+  int process_size () const throw()
   { return process_size_; };
 
   /// Return thread rank
 
-  int thread_rank () throw()
-  { return threads_ ? threads_->rank() : 0; };
+  int thread_rank () const throw()
+  { return thread_rank_; };
 
   /// Return thread rank
 
-  int thread_size () throw()
-  { return threads_ ? threads_->size() : 0; };
-
-  /// Return the Parallel class for distributed parallelism
-
-  const GroupProcess * processes() throw()
-  { return processes_; };
-
-  /// Return the Parallel class for threaded parallelism
-
-  const GroupThread * threads() throw()
-  { return threads_; };
-
-  /// Whether this is the root process / thread
-
-  bool is_root() throw()
-  {return process_rank() == 0 && thread_rank() == 0; } ;
+  int thread_size () const throw()
+  { return thread_size_; };
 
 private: // attributes
 
-  GroupProcess * processes_;
-  GroupThread * threads_;
-
+  /// Rank in the process group
   int process_rank_;
+
+  /// Size of the process group
   int process_size_;
+
+  /// Rank in the thread group
+  int thread_rank_;
+  /// Size of the thread group
+  int thread_size_;
 
 };
 

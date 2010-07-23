@@ -21,6 +21,8 @@ enum parallel_type {
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cello.hpp"
+
 #include "error.hpp"
 
 #ifdef CONFIG_USE_MPI
@@ -30,7 +32,9 @@ enum parallel_type {
 
 #include "parallel_Group.hpp"
 #include "parallel_GroupProcess.hpp"
+#include "parallel_GroupProcessMpi.hpp"
 #include "parallel_GroupThread.hpp"
+#include "parallel_Parallel.hpp"
 #ifdef CONFIG_USE_MPI
 // #include "parallel_GroupProcessMpi.hpp"
 #endif

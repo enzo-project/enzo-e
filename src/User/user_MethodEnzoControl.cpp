@@ -160,9 +160,9 @@ void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
 
   // Parallel parameters
 
-  Parallel * parallel = global_ -> parallel();
+  GroupProcessMpi parallel;
 
-  ProcessorNumber = parallel->process_rank();
+  ProcessorNumber = parallel.rank();
 
   parameters->set_current_group ("Field");
   

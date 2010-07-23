@@ -26,13 +26,11 @@ public: // interface
   /// Initialize MPI (virtual)
   static void initialize(int * argc, char ***argv)
   {
-    MPI_Init(argc,argv);
   };
 
   /// Finalize MPI
   static void finalize()
   {
-    MPI_Finalize();
   }
 
   /// Abort execution abruptly

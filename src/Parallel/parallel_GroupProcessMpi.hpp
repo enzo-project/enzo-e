@@ -27,39 +27,48 @@ class GroupProcessMpi : public GroupProcess {
 
 public: // interface
 
-  /// Initialize an GroupProcessMpi object (singleton design pattern)
-  GroupProcessMpi() throw();
+  /// Initialize an GroupProcessMpi object
+  GroupProcessMpi(int process_first     = 0,
+		  int process_last_plus = -1,
+		  int process_stride    = 1) throw();
 
 public: // interface (Group)
 
-  /// Number of compute elements in the Group
-  int size() { return size_; };
+  /// Perform any required initialization of the Group
+  void initialize(int * argc, char *** argv) throw();
 
-  /// Rank of the compute element in the Group
-  virtual int rank() { return 0; };
+  /// Perform any required finalization of the Group
+  void finalize()
+  { MPI_Finalize(); };
+
+  /// Abort program execution immediately
+  void abort()
+  { MPI_Abort(MPI_COMM_WORLD,1); exit (1); }
+
+  /// Exit the program gracefully if possible
+  void halt()
+  { finalize(); exit (0); }
 
   /// Synchronize between all compute elements in the Group
-  virtual void barrier() { };
+  void barrier() { };
 
   /// Synchronize between two compute elements in the Group
-  virtual void wait() { };
-
-public: // interface (Group)
+  void wait() { };
 
   /// Initiate sending an array
-  int send(int rank_dest, char * buffer, int size) throw();
+  int send(int rank_dest, char * buffer, int size, int tag=0) throw();
 
   /// Complete sending an array
   void send_wait(int handle) throw();
 
   /// Initiate receiving an array
-  int recv(int rank_source, char * buffer, int size) throw();
+  int recv(int rank_source, char * buffer, int size, int tag=0) throw();
 
   /// Complete receiving an array
   void recv_wait(int handle) throw();
 
   /// Add an array to a list of arrays to send in bulk
-  void bulk_send_add(int rank_dest, char * buffer, int size) throw();
+  void bulk_send_add(int rank_dest, char * buffer, int size, int tag=0) throw();
 
   /// Initiate a bulk send of multiple arrays
   int bulk_send() throw();
@@ -68,7 +77,7 @@ public: // interface (Group)
   void bulk_send_wait(int handle) throw();
 
   /// Add an array to a list of arrays to receive in bulk
-  void bulk_recv_add(int rank_source, char * buffer, int size) throw();
+  void bulk_recv_add(int rank_source, char * buffer, int size, int tag=0) throw();
 
   /// Initiate a bulk receive of multiple arrays
   int bulk_recv() throw();
@@ -77,6 +86,19 @@ public: // interface (Group)
   void bulk_recv_wait(int handle) throw();
 
 private: // attributes
+
+  /// Whether initialized() has been called
+  bool initialized_;
+
+  /// First process in the group
+  int process_first_;
+
+  /// Last process (plus one) in the group 
+  int process_last_plus_;
+
+  /// Stride of processes in the group
+  int process_stride_;
+
 
   /// Whether to use blocking sends
   bool send_blocking_;

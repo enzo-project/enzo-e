@@ -8,11 +8,12 @@ env = env.Clone(LIBS=[libraries])
 
 libraries = env.Library ('parallel', [sources])
 
-test_mpi      = env.Program (['test_Mpi.cpp',      sources])
+test_Parallel =  env.Program (['test_Parallel.cpp',      sources])
+# test_mpi      = env.Program (['test_Mpi.cpp',      sources])
 # test_ParallelAffinity = env.Program (['test_ParallelAffinity.cpp', sources])
 # test_ParallelLayout   = env.Program (['test_ParallelLayout.cpp',   sources])
 
-tests = [test_mpi];
+tests = [test_Parallel];
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))

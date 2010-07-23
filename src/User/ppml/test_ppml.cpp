@@ -32,14 +32,7 @@ void print_usage(const char * name)
 int main(int argc, char * argv[])
 {
 
-  // initialize parallelism
-
-  ParallelCreate parallel_create;
-  Parallel * parallel = parallel_create.create(parallel_mpi);
-
-  parallel->initialize(&argc,&argv);
-
-  Monitor * monitor = new Monitor(parallel);
+  Monitor * monitor = new Monitor;
 
   // Check command line arguments
 
@@ -128,6 +121,5 @@ int main(int argc, char * argv[])
     SetExternalBoundaryValues();
     image_dump(problem_name[problem],cycle,lower,upper,monitor);
   }
-  parallel->finalize();
 }
 

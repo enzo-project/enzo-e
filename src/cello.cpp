@@ -23,7 +23,7 @@
 //----------------------------------------------------------------------
 
 void usage(int argc, char ** argv);
-void exit(Monitor *,Parallel *);
+void exit(Monitor *,GroupProcess *);
 
 //----------------------------------------------------------------------
 
@@ -34,14 +34,18 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
+    GroupProcess * parallel = new GroupProcessMpi;
     parallel->initialize(&argc, &argv);
 
     // INITALIZE "GLOBALS" (Parameters, Error, Monitor)
 
-    Global * global = new Global(parallel);
+    Global * global = new Global;
 
     Monitor    * monitor    = global->monitor();
     Parameters * parameters = global->parameters();
+
+    monitor->set_active(parallel->rank()==0);
+
     
     monitor->print ("CELLO BEGIN");
 
@@ -53,11 +57,11 @@ int main(int argc, char ** argv)
     if (argc == 2) {
       fp = fopen(argv[1],"r");
       if ( !fp ) {
-	if (parallel->is_root()) usage(argc,argv);
+	if (parallel->rank()==0) usage(argc,argv);
 	exit(monitor,parallel);
       }
     } else {
-      if (parallel->is_root()) usage(argc,argv);
+      if (parallel->rank()==0) usage(argc,argv);
       exit(monitor,parallel);
     }
 
@@ -89,7 +93,7 @@ void usage(int argc, char ** argv)
 #endif
 }
 
-void exit(Monitor * monitor, Parallel * parallel)
+void exit(Monitor * monitor, GroupProcess * parallel)
 {
   monitor->print ("CELLO END");
   parallel->finalize();

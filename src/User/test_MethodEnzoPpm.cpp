@@ -57,13 +57,13 @@ int main(int argc, char **argv)
 
   // Initialize parallelism
 
-  ParallelCreate parallel_create;
-  Parallel * parallel = parallel_create.create(parallel_mpi);
+  GroupProcess * parallel = new GroupProcessMpi;
+
   parallel->initialize(&argc,&argv);
 
-  Global * global = new Global (parallel);
+  Global * global = new Global;
 
-  unit_init(parallel->process_rank(), parallel->process_count());
+  unit_init(parallel->rank(), parallel->size());
 
   // Set necessary parameters for MethodEnzoPpm
 

@@ -18,15 +18,12 @@ class GroupThread : public Group {
 public: // interface
 
   /// Initialize the GroupThread object
-  GroupThread(int thread_first, int thread_count)
-    : Group(thread_count),
-      thread_first_(thread_first)
-  {
-  }
+  GroupThread(int size = 1, int rank = 0)
+    : Group(size,rank)
+  {  }
 
 private: // attributes
 
-  int thread_first_;
 
 };
 

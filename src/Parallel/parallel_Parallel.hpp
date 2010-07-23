@@ -14,58 +14,45 @@ class Parallel {
 
   /// @class    Parallel
   /// @ingroup  Parallel
-  /// @brief    Base class for Parallel objects, e.g. ParallelMpi, ParallelSerial
+  /// @brief Container group for hierarchical Parallel objects,
+  /// e.g. GroupProcessMpi, GroupThreadOmp, etc.
 
 public: // interface
 
   /// Initialize a Parallel object (singleton design pattern)
-  Parallel() :
-    initialized_(false)
-  {};
+  Parallel(GroupProcess * process_group = 0,
+	   GroupThread  * thread_group = 0)
+    : process_group_(process_group),
+      thread_group_(thread_group)
+  { };
 
   /// Initialize
-  virtual void initialize(int * argc = 0, char ***argv = 0) = 0;
+  void initialize(int * argc = 0, char ***argv = 0)
+  {
+    if (process_group_) process_group_->initialize(argc,argv);
+    if (thread_group_)  thread_group_->initialize();
+  }
 
   /// Finalize
-  virtual void finalize() = 0;
-
-  /// Abort execution abruptly
-  virtual void abort() = 0;
-
-  /// Exit the program
-  virtual void halt() = 0;
+  void finalize()
+  {
+    if (process_group_) process_group_->finalize();
+    if (thread_group_)  thread_group_->finalize();
+  }
 
   /// Get total number of processors
-  virtual int process_count() = 0;
+  GroupProcess * process_group() { return process_group_; };
 
   /// Get rank of this process
-  virtual int process_rank() = 0;
-
-  /// Get total number of threads in this node
-  virtual int thread_count() = 0;
-
-  /// Get rank of this thread
-  virtual int thread_rank() = 0;
-
-  /// Get rank
-  virtual std::string name() = 0;
-
-  /// Return whether this is the root process
-  virtual bool is_root() = 0;
-
-protected:
-
-  /// Set whether class is initialized
-  void set_initialized_(bool initialized)
-  {initialized_ = initialized; };
-
-  /// Return whether class is initialized
-  bool is_initialized_()
-  { return initialized_ ; };
+  GroupThread * thread_group() { return thread_group_; };
 
 private: // attributes
 
-  bool initialized_;
+  /// Pointer to a group of distributed-memory processes
+  GroupProcess * process_group_;
+
+  /// Pointer to a group of shared-memory threads
+  GroupThread * thread_group_;
 
 };
 
