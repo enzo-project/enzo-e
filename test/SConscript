@@ -19,7 +19,7 @@ env.RunSerial('test_FieldBlock.out',  '#/bin/test_FieldBlock')
 env.RunSerial('test_FieldDescr.out',  '#/bin/test_FieldDescr')
 env.RunSerial('test_FileHdf5.out',    '#/bin/test_FileHdf5')
 env.RunSerial('test_Ifrit.out',       '#/bin/test_Ifrit')
-env.RunSerial('test_Layout.out',      '#/bin/test_Layout')
+# env.RunSerial('test_Layout.out',      '#/bin/test_Layout')
 env.RunSerial('test_Memory.out',      '#/bin/test_Memory')
 env.RunSerial('test_Mesh.out',        '#/bin/test_Mesh')
 env.RunSerial('test_Parameters.out',  '#/bin/test_Parameters')
@@ -70,9 +70,10 @@ env.RunParse('test_parse_shock-pool.out', '#/bin/test_Parse', ARGS='input/shock-
 
 env.RunSerial('test_MethodEnzoPpm.out', '#/bin/test_MethodEnzoPpm')
 
-env.RunParallel('test_affinity.out',   '#/bin/test_Affinity')
-env.RunParallel('test_mpi.out',        '#/bin/test_Mpi')
+# env.RunParallel('test_affinity.out',   '#/bin/test_Affinity')
+# env.RunParallel('test_mpi.out',        '#/bin/test_Mpi')
 env.RunParallel('cello_implosion.out', '#/bin/cello', ARGS='input/implosion.in')
+env.RunParallel('test_parallel.out',        '#/bin/test_Parallel')
 
 # Prevent concurrent running of parallel jobs
 
