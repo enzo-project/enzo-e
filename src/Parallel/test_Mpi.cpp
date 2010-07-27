@@ -16,26 +16,27 @@
 
 int main(int argc, char ** argv)
 {
-  Mpi::initialize(&argc,&argv);
-  unit_init (Mpi::rank(), Mpi::size());
+  GroupProcessMpi process_group;
+  process_group.initialize(&argc,&argv);
+  unit_init (process_group.rank(), process_group.size());
   unit_class ("Mpi");
   unit_func("initialize");
   unit_assert(true);
 
   unit_func("size");
-  int np = Mpi::size();
+  int np = process_group.size();
   unit_assert(np > 1);
 
   unit_func("rank");
-  int ip = Mpi::rank();
+  int ip = process_group.rank();
   unit_assert(ip < np);
   unit_assert(ip >= 0);
 
   unit_func("is_root");
-  unit_assert(Mpi::is_root() == (mpi::rank()==0));
+  unit_assert(process_group.is_root() == (process_group.rank()==0));
 
   unit_func("finalize");
-  Mpi::finalize();
+  process_group.finalize();
   unit_assert(true);
 
   unit_finalize();

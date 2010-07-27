@@ -40,6 +40,10 @@ public: // interface
   int rank() 
   {  return rank_; };
 
+  /// True iff rank() is 0
+  bool is_root() 
+  {  return rank_==0; };
+
   /// Synchronize between all compute elements in the Group
   virtual void barrier() { };
 
