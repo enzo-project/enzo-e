@@ -22,12 +22,6 @@ public: // interface
     : Group(size,rank)
   {  }
 
-  /// Abort program execution immediately
-  virtual void abort() { exit(1); };
-
-  /// Exit the program gracefully if possible
-  virtual void halt() { exit(0); };
-
   /// Initiate sending an array
   virtual int send(int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
 

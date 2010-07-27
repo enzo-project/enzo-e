@@ -34,24 +34,8 @@ public: // interface
 
 public: // interface (Group)
 
-  /// Perform any required initialization of the Group
-  void initialize(int * argc, char *** argv) throw();
-
-  /// Perform any required finalization of the Group
-  void finalize() throw()
-  { MPI_Finalize(); };
-
-  /// Abort program execution immediately
-  void abort() throw()
-  { MPI_Abort(comm_,1); exit (1); }
-
-  /// Exit the program gracefully if possible
-  void halt() throw()
-  { finalize(); exit (0); }
-
   /// Synchronize between all compute elements in the Group
-  void barrier()  throw()
-  { MPI_Barrier (comm_); };
+  void barrier()  throw();
 
   /// Synchronize between two compute elements in the Group
   void wait(int rank, int tag=0) throw();
@@ -103,9 +87,6 @@ private: // attributes
 
   /// Communicator for the group
   MPI_Comm comm_;
-
-  /// Whether initialized() has been called
-  bool initialized_;
 
   /// First process in the group
   int process_first_;

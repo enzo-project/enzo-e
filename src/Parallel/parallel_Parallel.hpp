@@ -26,20 +26,6 @@ public: // interface
       thread_group_(thread_group)
   { };
 
-  /// Initialize
-  void initialize(int * argc = 0, char ***argv = 0) throw()
-  {
-    if (process_group_) process_group_->initialize(argc,argv);
-    if (thread_group_)  thread_group_->initialize();
-  }
-
-  /// Finalize
-  void finalize() throw()
-  {
-    if (process_group_) process_group_->finalize();
-    if (thread_group_)  thread_group_->finalize();
-  }
-
   /// Get total number of processors
   GroupProcess * process_group() const throw()
   { return process_group_; };

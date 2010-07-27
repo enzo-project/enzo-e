@@ -32,12 +32,11 @@ enum parallel_type {
 
 #include "parallel_Group.hpp"
 #include "parallel_GroupProcess.hpp"
-#include "parallel_GroupProcessMpi.hpp"
+#ifdef CONFIG_USE_MPI
+#   include "parallel_GroupProcessMpi.hpp"
+#endif
 #include "parallel_GroupThread.hpp"
 #include "parallel_Parallel.hpp"
-#ifdef CONFIG_USE_MPI
-// #include "parallel_GroupProcessMpi.hpp"
-#endif
 #include "parallel_Layout.hpp"
 #include "parallel_Affinity.hpp"
 
