@@ -21,30 +21,36 @@ public: // interface
 
   /// Initialize a Parallel object (singleton design pattern)
   Parallel(GroupProcess * process_group = 0,
-	   GroupThread  * thread_group = 0)
+	   GroupThread  * thread_group = 0) throw()
     : process_group_(process_group),
       thread_group_(thread_group)
   { };
 
   /// Initialize
-  void initialize(int * argc = 0, char ***argv = 0)
+  void initialize(int * argc = 0, char ***argv = 0) throw()
   {
     if (process_group_) process_group_->initialize(argc,argv);
     if (thread_group_)  thread_group_->initialize();
   }
 
   /// Finalize
-  void finalize()
+  void finalize() throw()
   {
     if (process_group_) process_group_->finalize();
     if (thread_group_)  thread_group_->finalize();
   }
 
   /// Get total number of processors
-  GroupProcess * process_group() { return process_group_; };
+  GroupProcess * process_group() const throw()
+  { return process_group_; };
 
   /// Get rank of this process
-  GroupThread * thread_group() { return thread_group_; };
+  GroupThread * thread_group() const throw()
+  { return thread_group_; };
+
+  /// Return whether this is the root or not
+  bool is_root() const throw() 
+  { return process_group_->is_root() && thread_group_->is_root(); };
 
 private: // attributes
 

@@ -38,22 +38,23 @@ public: // interface (Group)
   void initialize(int * argc, char *** argv) throw();
 
   /// Perform any required finalization of the Group
-  void finalize()
+  void finalize() throw()
   { MPI_Finalize(); };
 
   /// Abort program execution immediately
-  void abort()
-  { MPI_Abort(MPI_COMM_WORLD,1); exit (1); }
+  void abort() throw()
+  { MPI_Abort(comm_,1); exit (1); }
 
   /// Exit the program gracefully if possible
-  void halt()
+  void halt() throw()
   { finalize(); exit (0); }
 
   /// Synchronize between all compute elements in the Group
-  void barrier() { };
+  void barrier()  throw()
+  { MPI_Barrier (comm_); };
 
   /// Synchronize between two compute elements in the Group
-  void wait() { };
+  void wait(int rank, int tag=0) throw();
 
   /// Initiate sending an array
   int send(int rank_dest, void * buffer, int size, int tag=0) throw();
@@ -85,7 +86,23 @@ public: // interface (Group)
   /// Complete a bulk receive of multiple arrays
   void bulk_recv_wait(int handle) throw();
 
+private: // functions
+
+  void check_mpi_err_(const char * function, int ierr)
+  {
+    if (ierr != 0) {
+      char message[ERROR_MESSAGE_LENGTH];
+      char function[ERROR_MESSAGE_LENGTH];
+      sprintf (message,"%d: MPI error %d",rank_,ierr);
+      sprintf (function,"GroupProcessMpi::%s",function);
+      ERROR_MESSAGE(function,message);
+    }
+  }
+
 private: // attributes
+
+  /// Communicator for the group
+  MPI_Comm comm_;
 
   /// Whether initialized() has been called
   bool initialized_;
