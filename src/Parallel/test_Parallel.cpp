@@ -82,58 +82,56 @@ int main(int argc, char ** argv)
 
   //  for (int i=0; i<500; i++) if (buffer[i] != 0) printf ("X: %d %d\n",i,buffer[i]); 
 
-  MPI_Finalize();
-  exit(0);
-  //  int i,j;
+    int i,j;
 
-//   process_group.recv_wait(handle_recv);
-//  process_group.send_wait(handle_send);
+   process_group.recv_wait(handle_recv);
+  process_group.send_wait(handle_send);
 
-//   unit_assert(test_array(array_source,n+1,rank,rank));
-//   unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+   unit_assert(test_array(array_source,n+1,rank,rank));
+   unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
 
-//   unit_func("barrier");
-//   process_group.barrier();
+   unit_func("barrier");
+   process_group.barrier();
   
-//   unit_func("wait");
-//   switch (rank) {
-//   case 0:
-//     process_group.wait(1); // 0 - 1
-//     process_group.wait(2); // 0 - 2
-//     process_group.wait(3); // 0 - 3
-//     break;
-//   case 1:
-//     process_group.wait(0); // 0 - 1
-//     process_group.wait(3); // 1 - 3
-//     process_group.wait(2); // 1 - 2
-//     break;
-//   case 2:
-//     process_group.wait(3); // 2 - 3
-//     process_group.wait(0); // 0 - 2
-//     process_group.wait(1); // 1 - 2
-//     break;
-//   case 3:
-//     process_group.wait(2); // 2 - 3
-//     process_group.wait(1); // 1 - 3
-//     process_group.wait(0); // 0 - 3
-//     break;
-//   }
-//   unit_assert(true);
+   unit_func("wait");
+   switch (rank) {
+   case 0:
+     process_group.wait(1); // 0 - 1
+     process_group.wait(2); // 0 - 2
+     process_group.wait(3); // 0 - 3
+     break;
+   case 1:
+     process_group.wait(0); // 0 - 1
+     process_group.wait(3); // 1 - 3
+     process_group.wait(2); // 1 - 2
+     break;
+   case 2:
+     process_group.wait(3); // 2 - 3
+     process_group.wait(0); // 0 - 2
+     process_group.wait(1); // 1 - 2
+     break;
+   case 3:
+     process_group.wait(2); // 2 - 3
+     process_group.wait(1); // 1 - 3
+     process_group.wait(0); // 0 - 3
+     break;
+   }
+   unit_assert(true);
 
-//   unit_func("bulk_send_add");
-//   unit_assert(false);
-//   unit_func("bulk_send");
-//   unit_assert(false);
-//   unit_func("bulk_send_wait");
-//   unit_assert(false);
-//   unit_func("bulk_recv_add");
-//   unit_assert(false);
-//   unit_func("bulk_recv");
-//   unit_assert(false);
-//   unit_func("bulk_recv_wait");
-//   unit_assert(false);
+   unit_func("bulk_send_add");
+   unit_assert(false);
+   unit_func("bulk_send");
+   unit_assert(false);
+   unit_func("bulk_send_wait");
+   unit_assert(false);
+   unit_func("bulk_recv_add");
+   unit_assert(false);
+   unit_func("bulk_recv");
+   unit_assert(false);
+   unit_func("bulk_recv_wait");
+   unit_assert(false);
   
-//   unit_finalize();
-//   Mpi::finalize();
+   unit_finalize();
+   Mpi::finalize();
 
 }
