@@ -57,9 +57,9 @@ int main(int argc, char **argv)
 
   // Initialize parallelism
 
-  GroupProcess * parallel = new GroupProcessMpi;
+  Mpi::initialize(&argc,&argv);
 
-  parallel->initialize(&argc,&argv);
+  GroupProcess * parallel = new GroupProcessMpi;
 
   Global * global = new Global;
 
@@ -218,6 +218,6 @@ int main(int argc, char **argv)
 
   unit_finalize();
 
-  parallel->finalize();
+  Mpi::finalize();
 }
 

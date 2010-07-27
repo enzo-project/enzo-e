@@ -34,8 +34,9 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
+    Mpi::initialize(&argc, &argv);
+
     GroupProcess * parallel = new GroupProcessMpi;
-    parallel->initialize(&argc, &argv);
 
     // INITALIZE "GLOBALS" (Parameters, Error, Monitor)
 
@@ -96,7 +97,7 @@ void usage(int argc, char ** argv)
 void exit(Monitor * monitor, GroupProcess * parallel)
 {
   monitor->print ("CELLO END");
-  parallel->finalize();
+  Mpi::finalize();
   exit(0);
 }
 

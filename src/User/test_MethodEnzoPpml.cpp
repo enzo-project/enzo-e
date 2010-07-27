@@ -19,8 +19,9 @@ int main (int argc, char ** argv)
 
   // Initialize parallelism
 
+  Mpi::initialize(&argc,&argv);
+
   Parallel * parallel = Parallel::instance();
-  parallel->initialize(&argc,&argv);
 
   unit_init(parallel->process_rank(), parallel->process_count());
 
@@ -54,5 +55,7 @@ int main (int argc, char ** argv)
   unit_assert(false);
 
   unit_finalize();
+
+  Mpi::finalize();
 
 }

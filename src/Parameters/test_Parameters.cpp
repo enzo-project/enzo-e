@@ -29,9 +29,9 @@ void generate_input();
 int main(int argc, char **argv)
 {
   
-  GroupProcess * parallel = new GroupProcessMpi;
+  Mpi::initialize(&argc, &argv);
 
-  parallel->initialize(&argc, &argv);
+  GroupProcess * parallel = new GroupProcessMpi;
 
   unit_init (parallel->rank(), parallel->size());
 
@@ -359,9 +359,9 @@ int main(int argc, char **argv)
   parameters->write ( fpout );
   unit_assert(0); //FAILS
 
-  parallel->finalize();
-
   unit_finalize();
+
+  Mpi::finalize();
 }
 
 void generate_input()

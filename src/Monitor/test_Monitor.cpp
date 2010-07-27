@@ -22,8 +22,9 @@
 
 int main(int argc, char ** argv)
 {
+  Mpi::initialize(&argc,&argv);
+
   GroupProcess * parallel = new GroupProcessMpi;
-  parallel->initialize(&argc,&argv);
 
   Monitor  * monitor  = new Monitor;
 
@@ -85,6 +86,6 @@ int main(int argc, char ** argv)
 
   unit_finalize();
 
-  parallel->finalize();
+  Mpi::finalize();
 
 }
