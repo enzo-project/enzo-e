@@ -78,8 +78,8 @@ int main(int argc, char ** argv)
   init_array(array_dest,  n+1,rank);
   unit_assert(test_array(array_source,n+1,rank,rank));
 
-  for (bool blocking_send = 0; blocking_send <= 1; blocking_send++) {
-    for (bool blocking_recv = 0; blocking_recv <= 1; blocking_recv++) {
+  for (int blocking_send = 0; blocking_send <= 1; blocking_send++) {
+    for (int blocking_recv = 0; blocking_recv <= 1; blocking_recv++) {
 
       GroupProcessMpi * process_group_mpi 
 	= dynamic_cast<GroupProcessMpi*> (process_group);
