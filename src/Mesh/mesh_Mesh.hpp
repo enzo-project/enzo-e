@@ -57,10 +57,11 @@ public: // interface
   void set_max_level(int max_level) 
   {max_level_ = max_level; };
 
-  /// Return max_level
+  /// Return refinement factor
   int refine() 
   {return refine_; };
 
+  /// Set refinement factor
   void set_refine(int refine) 
   {refine_ = refine; }; 
 
@@ -68,6 +69,7 @@ public: // interface
   std::vector<int> root_size()
   { return root_size_; };
 
+  /// Set root size
   void set_root_size(std::vector<int> root_size) 
   { root_size_ = root_size; };
 
@@ -75,6 +77,7 @@ public: // interface
   int min_patch_size()
   {return min_patch_size_; };
 
+  /// Set minimum patch size
   void set_min_patch_size(int min_patch_size)
   { min_patch_size_ = min_patch_size; };
 
@@ -82,27 +85,31 @@ public: // interface
   int max_patch_size()
   {return max_patch_size_; };
 
+  /// Set maximum patch size
   void set_max_patch_size(int max_patch_size)
   { max_patch_size_ = max_patch_size; };
 
-  /// Return balanced
+  /// Return whether to avoid level jumps
   bool balanced()
   {return balanced_; };
 
+  /// Set whether to avoid level jumps
   void set_balanced(bool balanced)
   { balanced_ = balanced; };
 
-  /// Return backfill
+  /// Return whether to backfill levels
   bool backfill()
   {return backfill_; };
 
+  /// Set whether to backfill levels
   void set_backfill(bool backfill)
   { backfill_ = backfill; };
 
-  /// Return coalesce
+  /// Return whether to coalesce patches
   bool coalesce()
   {return coalesce_; };
 
+  /// Set whether to coalesce patches
   void set_coalesce(bool coalesce)
   { coalesce_ = coalesce; };
   
