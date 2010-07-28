@@ -38,16 +38,25 @@ bool test_array(double * array, int length, int rank, int value)
 
 int main(int argc, char ** argv)
 {
-  MPI_Init(&argc,&argv);
 
-  //  int buffer[500];
-  //  for (int i=0; i<500; i++) buffer[i] = 0; 
+  // WARNING: Sometimes(?) replacing MPI_Init() with Mpi::init()
+  // crashes in LAM MPI WARNING: on gedeckt (r1650)
 
-  GroupProcessMpi process_group;
+  //--------------------------------------------------
+  Mpi::init(&argc,&argv); // BREAKS SOMETIMES
+  //  MPI_Init(&argc,&argv);
+  //--------------------------------------------------
 
+  // WARNING: Replacing dynamically allocated process_group with
+  // WARNING: automatic crashes in LAM MPI on gedeckt (r1650)
 
-  int rank = process_group.rank();
-  int size = process_group.size();
+  //--------------------------------------------------
+  GroupProcess * process_group = new GroupProcessMpi; // WORKS
+  //  GroupProcessMpi process_group; // BREAKS (convert . to ->)
+  //--------------------------------------------------
+
+  int rank = process_group->rank();
+  int size = process_group->size();
 
   unit_init(rank,size);
 
@@ -60,7 +69,7 @@ int main(int argc, char ** argv)
   unit_assert(0 <= rank && rank < 4);
 
   unit_func("is_root");
-  unit_assert(process_group.is_root() == (rank == 0));
+  unit_assert(process_group->is_root() == (rank == 0));
 
   // Test that init_array() and test_array() work independently of Parallel
   const int n = 4;
@@ -77,61 +86,57 @@ int main(int argc, char ** argv)
 
   printf ("%d %d %d %d\n",rank,size,rank_source,rank_dest);
 
-  int handle_send = process_group.send(rank_source, array_source, array_size);
-  int handle_recv = process_group.recv(rank_dest,   array_dest,   array_size);
+  int handle_send = process_group->send(rank_source, array_source, array_size);
+  int handle_recv = process_group->recv(rank_dest,   array_dest,   array_size);
 
-  //  for (int i=0; i<500; i++) if (buffer[i] != 0) printf ("X: %d %d\n",i,buffer[i]); 
+  process_group->recv_wait(handle_recv);
+  process_group->send_wait(handle_send);
 
-    int i,j;
+  unit_assert(test_array(array_source,n+1,rank,rank));
+  unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
 
-   process_group.recv_wait(handle_recv);
-  process_group.send_wait(handle_send);
-
-   unit_assert(test_array(array_source,n+1,rank,rank));
-   unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
-
-   unit_func("barrier");
-   process_group.barrier();
+  unit_func("barrier");
+  process_group->barrier();
   
-   unit_func("wait");
-   switch (rank) {
-   case 0:
-     process_group.wait(1); // 0 - 1
-     process_group.wait(2); // 0 - 2
-     process_group.wait(3); // 0 - 3
-     break;
-   case 1:
-     process_group.wait(0); // 0 - 1
-     process_group.wait(3); // 1 - 3
-     process_group.wait(2); // 1 - 2
-     break;
-   case 2:
-     process_group.wait(3); // 2 - 3
-     process_group.wait(0); // 0 - 2
-     process_group.wait(1); // 1 - 2
-     break;
-   case 3:
-     process_group.wait(2); // 2 - 3
-     process_group.wait(1); // 1 - 3
-     process_group.wait(0); // 0 - 3
-     break;
-   }
-   unit_assert(true);
+  unit_func("wait");
+  switch (rank) {
+  case 0:
+    process_group->wait(1); // 0 - 1
+    process_group->wait(2); // 0 - 2
+    process_group->wait(3); // 0 - 3
+    break;
+  case 1:
+    process_group->wait(0); // 0 - 1
+    process_group->wait(3); // 1 - 3
+    process_group->wait(2); // 1 - 2
+    break;
+  case 2:
+    process_group->wait(3); // 2 - 3
+    process_group->wait(0); // 0 - 2
+    process_group->wait(1); // 1 - 2
+    break;
+  case 3:
+    process_group->wait(2); // 2 - 3
+    process_group->wait(1); // 1 - 3
+    process_group->wait(0); // 0 - 3
+    break;
+  }
+  unit_assert(true);
 
-   unit_func("bulk_send_add");
-   unit_assert(false);
-   unit_func("bulk_send");
-   unit_assert(false);
-   unit_func("bulk_send_wait");
-   unit_assert(false);
-   unit_func("bulk_recv_add");
-   unit_assert(false);
-   unit_func("bulk_recv");
-   unit_assert(false);
-   unit_func("bulk_recv_wait");
-   unit_assert(false);
+  unit_func("bulk_send_add");
+  unit_assert(false);
+  unit_func("bulk_send");
+  unit_assert(false);
+  unit_func("bulk_send_wait");
+  unit_assert(false);
+  unit_func("bulk_recv_add");
+  unit_assert(false);
+  unit_func("bulk_recv");
+  unit_assert(false);
+  unit_func("bulk_recv_wait");
+  unit_assert(false);
   
-   unit_finalize();
-   Mpi::finalize();
-
+  Mpi::barrier();
+  unit_finalize();
+  Mpi::finalize();
 }

@@ -34,7 +34,7 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
-    Mpi::initialize(&argc, &argv);
+    Mpi::init(&argc, &argv);
 
     GroupProcess * parallel = new GroupProcessMpi;
 

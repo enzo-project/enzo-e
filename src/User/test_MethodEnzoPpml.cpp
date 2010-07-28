@@ -19,7 +19,7 @@ int main (int argc, char ** argv)
 
   // Initialize parallelism
 
-  Mpi::initialize(&argc,&argv);
+  Mpi::init(&argc,&argv);
 
   Parallel * parallel = Parallel::instance();
 

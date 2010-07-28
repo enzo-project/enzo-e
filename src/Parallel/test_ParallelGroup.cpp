@@ -14,7 +14,7 @@
 
 int main(int argc, char ** argv)
 {
-  Mpi::initialize(int argc, char ** argv);
+  Mpi::init(int argc, char ** argv);
 
   Group * group_process_mpi = new GroupProcessMpi();
 

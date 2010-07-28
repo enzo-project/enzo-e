@@ -24,7 +24,7 @@ private:
 public: // interface
 
   /// Initialize MPI (virtual)
-  static void initialize(int * argc, char ***argv)
+  static void init(int * argc, char ***argv)
   {
     MPI_Init(argc,argv);
   }
@@ -63,6 +63,12 @@ public: // interface
     MPI_Comm_rank(MPI_COMM_WORLD, &rank); 
     return rank; 
   };
+
+  /// Exit the program
+  static void barrier()
+  {
+    MPI_Barrier(MPI_COMM_WORLD);
+  }
 
   /// Return whether this is the root process
   static bool is_root() 

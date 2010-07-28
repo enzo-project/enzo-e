@@ -16,7 +16,8 @@
 
 int main(int argc, char ** argv)
 {
-  Mpi::initialize(&argc,&argv);
+
+  Mpi::init(&argc,&argv);
 
   unit_init (Mpi::rank(), Mpi::size());
   unit_class ("Mpi");

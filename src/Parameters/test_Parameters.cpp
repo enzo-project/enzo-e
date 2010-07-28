@@ -29,7 +29,7 @@ void generate_input();
 int main(int argc, char **argv)
 {
   
-  Mpi::initialize(&argc, &argv);
+  Mpi::init(&argc, &argv);
 
   GroupProcess * parallel = new GroupProcessMpi;
 

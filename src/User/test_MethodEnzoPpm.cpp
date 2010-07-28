@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
   // Initialize parallelism
 
-  Mpi::initialize(&argc,&argv);
+  Mpi::init(&argc,&argv);
 
   GroupProcess * parallel = new GroupProcessMpi;
 
