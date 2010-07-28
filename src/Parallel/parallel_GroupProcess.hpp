@@ -23,34 +23,34 @@ public: // interface
   {  }
 
   /// Initiate sending an array
-  virtual int send(int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
+  virtual void * send(int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
 
   /// Complete sending an array
-  virtual void send_wait(int handle) throw() = 0;
+  virtual void send_wait(void * handle) throw() = 0;
 
   /// Initiate receiving an array
-  virtual int recv(int rank_source, void * buffer, int size, int tag=0) throw() = 0;
+  virtual void * recv(int rank_source, void * buffer, int size, int tag=0) throw() = 0;
 
   /// Complete receiving an array
-  virtual void recv_wait(int handle) throw() = 0;
+  virtual void recv_wait(void * handle) throw() = 0;
 
   /// Add an array to a list of arrays to send in bulk
   virtual void bulk_send_add(int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
 
   /// Initiate a bulk send of multiple arrays
-  virtual int bulk_send() throw() = 0;
+  virtual void * bulk_send() throw() = 0;
 
   /// Complete a bulk send of multiple arrays
-  virtual void bulk_send_wait(int handle) throw() = 0;
+  virtual void bulk_send_wait(void * handle) throw() = 0;
 
   /// Add an array to a list of arrays to receive in bulk
   virtual void bulk_recv_add(int rank_source, void * buffer, int size, int tag=0) throw() = 0;
 
   /// Initiate a bulk receive of multiple arrays
-  virtual int bulk_recv() throw() = 0;
+  virtual void * bulk_recv() throw() = 0;
 
   /// Complete a bulk receive of multiple arrays
-  virtual void bulk_recv_wait(int handle) throw() = 0;
+  virtual void bulk_recv_wait(void * handle) throw() = 0;
 
 
 private: // attributes

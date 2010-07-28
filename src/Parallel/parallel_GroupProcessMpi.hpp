@@ -41,34 +41,34 @@ public: // interface (Group)
   void wait(int rank, int tag=0) throw();
 
   /// Initiate sending an array
-  int send(int rank_dest, void * buffer, int size, int tag=0) throw();
+  void * send(int rank_dest, void * buffer, int size, int tag=0) throw();
 
   /// Complete sending an array
-  void send_wait(int handle) throw();
+  void send_wait(void * handle) throw();
 
   /// Initiate receiving an array
-  int recv(int rank_source, void * buffer, int size, int tag=0) throw();
+  void * recv(int rank_source, void * buffer, int size, int tag=0) throw();
 
   /// Complete receiving an array
-  void recv_wait(int handle) throw();
+  void recv_wait(void * handle) throw();
 
   /// Add an array to a list of arrays to send in bulk
   void bulk_send_add(int rank_dest, void * buffer, int size, int tag=0) throw();
 
   /// Initiate a bulk send of multiple arrays
-  int bulk_send() throw();
+  void * bulk_send() throw();
 
   /// Complete a bulk send of multiple arrays
-  void bulk_send_wait(int handle) throw();
+  void bulk_send_wait(void * handle) throw();
 
   /// Add an array to a list of arrays to receive in bulk
   void bulk_recv_add(int rank_source, void * buffer, int size, int tag=0) throw();
 
   /// Initiate a bulk receive of multiple arrays
-  int bulk_recv() throw();
+  void * bulk_recv() throw();
 
   /// Complete a bulk receive of multiple arrays
-  void bulk_recv_wait(int handle) throw();
+  void bulk_recv_wait(void * handle) throw();
 
   /// Set whether send is blocking or non-blocking
   void set_type_send (send_type type)  throw()

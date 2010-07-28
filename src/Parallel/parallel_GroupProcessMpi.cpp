@@ -84,27 +84,38 @@ void GroupProcessMpi::wait(int rank, int tag) throw()
 
 //----------------------------------------------------------------------
 
-int GroupProcessMpi::send(int rank_dest, void * buffer, int size, int tag) throw()
+void * GroupProcessMpi::send(int rank_dest, void * buffer, int size, int tag) throw()
 {
-  int handle = 0;
-
-  int ierr = MPI_Send (buffer, size, MPI_BYTE, rank_dest, tag, comm_);
+  int ierr;
+  MPI_Request * handle = 0;
+  if (send_blocking_) {
+    ierr = MPI_Send (buffer, size, MPI_BYTE, rank_dest, tag, comm_);
+  } else {
+    handle = new MPI_Request;
+    ierr = MPI_Isend (buffer, size, MPI_BYTE, rank_dest, tag, comm_,handle);
+  }
   check_mpi_err_("send",ierr);
-  return handle;
+  return (void *)handle;
 }
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::send_wait(int handle) throw()
+void GroupProcessMpi::send_wait(void * handle) throw()
 {
+  if (! send_blocking_) {
+    MPI_Status status;
+    int ierr = MPI_Wait((MPI_Request*)handle, &status);
+    check_mpi_err_("send_wait",ierr);
+    delete handle;
+  }
 }
 
 //----------------------------------------------------------------------
 
-int GroupProcessMpi::recv(int rank_source, void * buffer, int size, int tag) throw()
+void * GroupProcessMpi::recv(int rank_source, void * buffer, int size, int tag) throw()
 {
   MPI_Status status;
-  int handle = 0;
+  MPI_Request * handle = 0;
   int ierr = MPI_Recv (buffer, size, MPI_BYTE, rank_source, tag, comm_, &status);
   check_mpi_err_("recv",ierr);
   return handle;
@@ -112,7 +123,7 @@ int GroupProcessMpi::recv(int rank_source, void * buffer, int size, int tag) thr
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::recv_wait(int handle) throw()
+void GroupProcessMpi::recv_wait(void * handle) throw()
 {
 }
 
@@ -124,14 +135,14 @@ void GroupProcessMpi::bulk_send_add(int rank_dest, void * buffer, int size, int 
 
 //----------------------------------------------------------------------
 
-int GroupProcessMpi::bulk_send() throw()
+void * GroupProcessMpi::bulk_send() throw()
 {
   return 0;
 }
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::bulk_send_wait(int handle) throw()
+void GroupProcessMpi::bulk_send_wait(void * handle) throw()
 {
 }
 
@@ -143,14 +154,14 @@ void GroupProcessMpi::bulk_recv_add(int rank_source, void * buffer, int size, in
 
 //----------------------------------------------------------------------
 
-int GroupProcessMpi::bulk_recv() throw()
+void * GroupProcessMpi::bulk_recv() throw()
 {
   return 0;
 }
 
 //----------------------------------------------------------------------
 
-void GroupProcessMpi::bulk_recv_wait(int handle) throw()
+void GroupProcessMpi::bulk_recv_wait(void * handle) throw()
 {
 }
 

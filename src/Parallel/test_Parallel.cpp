@@ -95,8 +95,8 @@ int main(int argc, char ** argv)
 
       printf ("%d %d %d %d\n",rank,size,rank_source,rank_dest);
 
-      int handle_send = process_group->send(rank_source, array_source, array_size);
-      int handle_recv = process_group->recv(rank_dest,   array_dest,   array_size);
+      void * handle_send = process_group->send(rank_source, array_source, array_size);
+      void * handle_recv = process_group->recv(rank_dest,   array_dest,   array_size);
 
       process_group->recv_wait(handle_recv);
       process_group->send_wait(handle_send);
