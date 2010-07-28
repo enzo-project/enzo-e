@@ -20,9 +20,9 @@ GroupProcessMpi::GroupProcessMpi(int process_first,
     process_first_    (process_first),
     process_last_plus_(process_last_plus),
     process_stride_   (process_stride),
+    send_type_        (send_standard),
     send_blocking_    (true),
-    recv_blocking_    (true),
-    send_type_        (send_standard)
+    recv_blocking_    (true)
 {
   int size;
   MPI_Comm_size(MPI_COMM_WORLD,&size);

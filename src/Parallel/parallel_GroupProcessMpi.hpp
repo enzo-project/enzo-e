@@ -70,6 +70,30 @@ public: // interface (Group)
   /// Complete a bulk receive of multiple arrays
   void bulk_recv_wait(int handle) throw();
 
+  /// Set whether send is blocking or non-blocking
+  void set_type_send (send_type type)  throw()
+  { send_type_ = type; };
+
+  /// Set whether send is type or non-type
+  send_type type_send ()  throw()
+  { return send_type_; };
+
+  /// Set whether send is blocking or non-blocking
+  void set_send_blocking (bool blocking)  throw()
+  { send_blocking_ = blocking; };
+
+  /// Set whether send is blocking or non-blocking
+  bool send_blocking ()  throw()
+  { return send_blocking_; };
+
+  /// Set whether recv is blocking or non-blocking
+  void set_recv_blocking (bool blocking)  throw()
+  { recv_blocking_ = blocking; };
+
+  /// Set whether recv is blocking or non-blocking
+  bool recv_blocking ()  throw()
+  { return recv_blocking_; };
+
 private: // functions
 
   void check_mpi_err_(const char * function, int ierr)
@@ -98,14 +122,14 @@ private: // attributes
   int process_stride_;
 
 
+  /// Whether to use standard, buffered, synchronous, or ready sends
+  enum send_type send_type_;
+
   /// Whether to use blocking sends
   bool send_blocking_;
   
   /// Whether to use blocking receives
   bool recv_blocking_;
-
-  /// Whether to use standard, buffered, synchronous, or ready sends
-  enum send_type send_type_;
 
 };
 

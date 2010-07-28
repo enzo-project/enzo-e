@@ -78,26 +78,35 @@ int main(int argc, char ** argv)
   init_array(array_dest,  n+1,rank);
   unit_assert(test_array(array_source,n+1,rank,rank));
 
-  unit_func("send");
+  for (bool blocking_send = 0; blocking_send <= 1; blocking_send++) {
+    for (bool blocking_recv = 0; blocking_recv <= 1; blocking_recv++) {
 
-  int rank_source = (rank+1)%size;
-  int rank_dest   = (rank-1+size)%size;
-  int array_size  = n*sizeof(double);
+      GroupProcessMpi * process_group_mpi 
+	= dynamic_cast<GroupProcessMpi*> (process_group);
 
-  printf ("%d %d %d %d\n",rank,size,rank_source,rank_dest);
+      process_group_mpi->set_send_blocking(blocking_send);
+      process_group_mpi->set_recv_blocking(blocking_recv);
 
-  int handle_send = process_group->send(rank_source, array_source, array_size);
-  int handle_recv = process_group->recv(rank_dest,   array_dest,   array_size);
+      unit_func("send");
 
-  process_group->recv_wait(handle_recv);
-  process_group->send_wait(handle_send);
+      int rank_source = (rank+1)%size;
+      int rank_dest   = (rank-1+size)%size;
+      int array_size  = n*sizeof(double);
 
-  unit_assert(test_array(array_source,n+1,rank,rank));
-  unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+      printf ("%d %d %d %d\n",rank,size,rank_source,rank_dest);
 
-  unit_func("barrier");
-  process_group->barrier();
-  
+      int handle_send = process_group->send(rank_source, array_source, array_size);
+      int handle_recv = process_group->recv(rank_dest,   array_dest,   array_size);
+
+      process_group->recv_wait(handle_recv);
+      process_group->send_wait(handle_send);
+
+      unit_assert(test_array(array_source,n+1,rank,rank));
+      unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+
+    }
+  }
+
   unit_func("wait");
   switch (rank) {
   case 0:
@@ -123,6 +132,10 @@ int main(int argc, char ** argv)
   }
   unit_assert(true);
 
+  // --------------------------------------------------
+  unit_func("barrier");
+  process_group->barrier();
+  
   unit_func("bulk_send_add");
   unit_assert(false);
   unit_func("bulk_send");
