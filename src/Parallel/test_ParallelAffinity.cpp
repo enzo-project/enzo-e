@@ -1,7 +1,7 @@
-// $Id: test_affinity.cpp 1372 2010-04-08 05:36:42Z bordner $
+// $Id: test_ParallelAffinity.cpp 1372 2010-04-08 05:36:42Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Affinity.cpp
+/// @file     test_ParallelAffinity.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI
 /// @date     Tue Apr 20 14:19:04 PDT 2010

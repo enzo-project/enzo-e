@@ -1,7 +1,7 @@
-// $Id: method_UserMethod.cpp 1262 2010-03-03 15:44:05Z bordner $
+// $Id: user_UserMethod.cpp 1262 2010-03-03 15:44:05Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_UserMethod.cpp
+/// @file     user_UserMethod.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Jul 13 11:12:25 PDT 2009
 /// @brief    Implements the UserMethod base class

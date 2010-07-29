@@ -1,7 +1,7 @@
-// $Id: method_UserTimestep.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: user_UserTimestep.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_UserTimestep.hpp 
+/// @file     user_UserTimestep.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
 /// @brief    Declaration for the UserTimestep component

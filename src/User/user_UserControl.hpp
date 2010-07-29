@@ -1,10 +1,10 @@
-// $Id: method_UserControl.hpp 1394 2010-04-22 20:52:54Z bordner $
+// $Id: user_UserControl.hpp 1394 2010-04-22 20:52:54Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef USER_USER_CONTROL_HPP
 #define USER_USER_CONTROL_HPP
 
-/// @file     method_UserControl.hpp
+/// @file     user_UserControl.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
 /// @todo     consolidate initialize() and initialize_block()

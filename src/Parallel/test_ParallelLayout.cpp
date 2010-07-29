@@ -1,7 +1,7 @@
-// $Id: test_block.cpp 1369 2010-04-08 01:38:06Z bordner $
+// $Id: test_ParallelLayout.cpp 1369 2010-04-08 01:38:06Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Layout.cpp
+/// @file     test_ParallelLayout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-19
 /// @brief    Unit tests for the Layout class

@@ -77,7 +77,7 @@ elif (platform == 'linux-mpi-valgrind'):
 elif (platform == 'linux-ampi'):
 #--------------------------------------------------
    charm_path = '/home/bordner/charm/charm-6.2'
-   parallel_run = charm_path + "/bin/charmrun ++p 4 "
+   parallel_run = charm_path + "/bin/charmrun +p4 "
    serial_run   = ""
   
    env = Environment(
