@@ -54,6 +54,7 @@ if (platform == 'linux-mpi'):
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
       LIBPATH     = '#/lib',
+      ENV         = os.environ
    )
 #--------------------------------------------------
 elif (platform == 'linux-mpi-valgrind'):
@@ -132,7 +133,7 @@ elif (platform == 'ncsa-bd'):
       LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
       LINKFLAGS  = '-q64'
    )
-elif (platform == 'unknown'):
+else:
    print
    print "**********************************************************************"
    print
@@ -159,6 +160,7 @@ elif (platform == 'unknown'):
       LIBPATH = ['#/lib'],
       BINPATH = '#/bin'
    )
+
 
 
 Export('env')

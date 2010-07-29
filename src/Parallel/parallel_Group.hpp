@@ -40,7 +40,7 @@ public: // interface
   virtual void barrier() throw() { };
 
   /// Synchronize between two compute elements in the Group
-  virtual void wait(int rank) throw() { };
+  virtual void sync(int rank) throw() { };
 
 protected: // attributes
 

@@ -78,8 +78,7 @@ env.RunParallel('test_parallel.out',        '#/bin/test_Parallel')
 # Prevent concurrent running of parallel jobs
 
 SideEffect('log.txt', 
-     [ 'test_affinity.out',
-       'test_mpi.out', 
+     [ 'test_parallel.out', 
        'cello_implosion.out'])
 
 

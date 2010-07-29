@@ -28,10 +28,13 @@ bool test_array(double * array, int length, int rank, int value)
   }
   valid = valid && (array[length-1] == -1.0*rank);
   if (!valid) {
-    printf ("%d expected [%g %g %g %g %g]; actual [%g %g %g %g %g]\n",
-	    rank,
-	    1.0*value,1.0*value,1.0*value,1.0*value,-1.0*rank,
-	    array[0], array[1], array[2], array[3], array[4]);
+    char message[ERROR_MESSAGE_LENGTH];
+    sprintf (message,
+	     "%d expected [%g %g %g %g %g]; actual [%g %g %g %g %g]\n",
+	     rank,
+	     1.0*value,1.0*value,1.0*value,1.0*value,-1.0*rank,
+	     array[0], array[1], array[2], array[3], array[4]);
+    WARNING_MESSAGE("test_array",message);
   }
   return valid;
 }
@@ -93,13 +96,16 @@ int main(int argc, char ** argv)
       int rank_dest   = (rank-1+size)%size;
       int array_size  = n*sizeof(double);
 
-      printf ("%d %d %d %d\n",rank,size,rank_source,rank_dest);
-
-      void * handle_send = process_group->send(rank_source, array_source, array_size);
-      void * handle_recv = process_group->recv(rank_dest,   array_dest,   array_size);
+      void * handle_send = process_group->send_begin
+	(rank_source, array_source, array_size);
+      void * handle_recv = process_group->recv_begin
+	(rank_dest,   array_dest,   array_size);
 
       process_group->recv_wait(handle_recv);
       process_group->send_wait(handle_send);
+
+      process_group->send_end(handle_send);
+      process_group->recv_end(handle_recv);
 
       unit_assert(test_array(array_source,n+1,rank,rank));
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
@@ -107,27 +113,27 @@ int main(int argc, char ** argv)
     }
   }
 
-  unit_func("wait");
+  unit_func("sync");
   switch (rank) {
   case 0:
-    process_group->wait(1); // 0 - 1
-    process_group->wait(2); // 0 - 2
-    process_group->wait(3); // 0 - 3
+    process_group->sync(1); // 0 - 1
+    process_group->sync(2); // 0 - 2
+    process_group->sync(3); // 0 - 3
     break;
   case 1:
-    process_group->wait(0); // 0 - 1
-    process_group->wait(3); // 1 - 3
-    process_group->wait(2); // 1 - 2
+    process_group->sync(0); // 0 - 1
+    process_group->sync(3); // 1 - 3
+    process_group->sync(2); // 1 - 2
     break;
   case 2:
-    process_group->wait(3); // 2 - 3
-    process_group->wait(0); // 0 - 2
-    process_group->wait(1); // 1 - 2
+    process_group->sync(3); // 2 - 3
+    process_group->sync(0); // 0 - 2
+    process_group->sync(1); // 1 - 2
     break;
   case 3:
-    process_group->wait(2); // 2 - 3
-    process_group->wait(1); // 1 - 3
-    process_group->wait(0); // 0 - 3
+    process_group->sync(2); // 2 - 3
+    process_group->sync(1); // 1 - 3
+    process_group->sync(0); // 0 - 3
     break;
   }
   unit_assert(true);
@@ -135,6 +141,7 @@ int main(int argc, char ** argv)
   // --------------------------------------------------
   unit_func("barrier");
   process_group->barrier();
+  delete process_group;
   
   unit_func("bulk_send_add");
   unit_assert(false);

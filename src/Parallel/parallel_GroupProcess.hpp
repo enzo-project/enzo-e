@@ -11,28 +11,49 @@
 
 class GroupProcess : public Group {
 
-  /// @class    GroupProcess
-  /// @ingroup  Parallel
-  /// @brief    Group of distributed memory processes
+  /// @class    Group Process
+/// @ingroup  Parallel  
+/// @
+/// @brief    Group of distributed memory processes
 
 public: // interface
 
-  /// Initialize the GroupProcess object
-  GroupProcess(int size = 1, int rank = 0) throw()
-    : Group(size,rank)
+/// Initialize the GroupProcess object
+GroupProcess(int size = 1, int rank = 0) throw()
+  : Group(size,rank),
+    send_blocking_    (true),
+    recv_blocking_    (true)
   {  }
 
+  //--------------------------------------------------
+
   /// Initiate sending an array
-  virtual void * send(int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
+  virtual void * send_begin
+  (int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
+
+  /// Test completeness of sending an array
+  virtual bool send_test(void * handle) throw() = 0;
 
   /// Complete sending an array
   virtual void send_wait(void * handle) throw() = 0;
 
+  /// Clean up after sending an array
+  virtual void send_end(void * handle) throw() = 0;
+
   /// Initiate receiving an array
-  virtual void * recv(int rank_source, void * buffer, int size, int tag=0) throw() = 0;
+  virtual void * recv_begin
+  (int rank_source, void * buffer, int size, int tag=0) throw() = 0;
 
   /// Complete receiving an array
   virtual void recv_wait(void * handle) throw() = 0;
+
+  /// Test completeness of receiving an array
+  virtual bool recv_test (void * handle) throw() = 0;
+
+  /// Clean up after receiving an array
+  virtual void recv_end(void * handle) throw() = 0;
+
+  //--------------------------------------------------
 
   /// Add an array to a list of arrays to send in bulk
   virtual void bulk_send_add(int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
@@ -52,8 +73,32 @@ public: // interface
   /// Complete a bulk receive of multiple arrays
   virtual void bulk_recv_wait(void * handle) throw() = 0;
 
+  //--------------------------------------------------
 
-private: // attributes
+  /// Set whether send is blocking or non-blocking
+  void set_send_blocking (bool blocking)  throw()
+  { send_blocking_ = blocking; };
+
+  /// Set whether send is blocking or non-blocking
+  bool send_blocking ()  throw()
+  { return send_blocking_; };
+
+  /// Set whether recv is blocking or non-blocking
+  void set_recv_blocking (bool blocking)  throw()
+  { recv_blocking_ = blocking; };
+
+  /// Set whether recv is blocking or non-blocking
+  bool recv_blocking ()  throw()
+  { return recv_blocking_; };
+
+protected: // attributes
+
+  /// Whether to use blocking sends
+  bool send_blocking_;
+  
+  /// Whether to use blocking receives
+  bool recv_blocking_;
+
 
 };
 

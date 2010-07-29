@@ -38,19 +38,37 @@ public: // interface (Group)
   void barrier()  throw();
 
   /// Synchronize between two compute elements in the Group
-  void wait(int rank, int tag=0) throw();
+  void sync (int rank, int tag=0) throw();
+
+  //--------------------------------------------------
 
   /// Initiate sending an array
-  void * send(int rank_dest, void * buffer, int size, int tag=0) throw();
+  void * send_begin
+  (int rank_dest, void * buffer, int size, int tag=0) throw();
+
+  /// Test completeness of sending an array
+  bool send_test(void * handle) throw();
 
   /// Complete sending an array
   void send_wait(void * handle) throw();
 
+  /// Clean up after sending an array
+  void send_end(void * handle) throw();
+
   /// Initiate receiving an array
-  void * recv(int rank_source, void * buffer, int size, int tag=0) throw();
+  void * recv_begin
+  (int rank_source, void * buffer, int size, int tag=0) throw();
 
   /// Complete receiving an array
   void recv_wait(void * handle) throw();
+
+  /// Test completeness of receiving an array
+  bool recv_test (void * handle) throw();
+
+  /// Clean up after receiving an array
+  void recv_end(void * handle) throw();
+
+  //--------------------------------------------------
 
   /// Add an array to a list of arrays to send in bulk
   void bulk_send_add(int rank_dest, void * buffer, int size, int tag=0) throw();
@@ -77,22 +95,6 @@ public: // interface (Group)
   /// Set whether send is type or non-type
   send_type type_send ()  throw()
   { return send_type_; };
-
-  /// Set whether send is blocking or non-blocking
-  void set_send_blocking (bool blocking)  throw()
-  { send_blocking_ = blocking; };
-
-  /// Set whether send is blocking or non-blocking
-  bool send_blocking ()  throw()
-  { return send_blocking_; };
-
-  /// Set whether recv is blocking or non-blocking
-  void set_recv_blocking (bool blocking)  throw()
-  { recv_blocking_ = blocking; };
-
-  /// Set whether recv is blocking or non-blocking
-  bool recv_blocking ()  throw()
-  { return recv_blocking_; };
 
 private: // functions
 
@@ -124,12 +126,6 @@ private: // attributes
 
   /// Whether to use standard, buffered, synchronous, or ready sends
   enum send_type send_type_;
-
-  /// Whether to use blocking sends
-  bool send_blocking_;
-  
-  /// Whether to use blocking receives
-  bool recv_blocking_;
 
 };
 
