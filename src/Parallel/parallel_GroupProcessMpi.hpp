@@ -46,12 +46,6 @@ public: // interface (Group)
   void * send_begin
   (int rank_dest, void * buffer, int size, int tag=0) throw();
 
-  /// Test completeness of sending an array
-  bool send_test(void * handle) throw();
-
-  /// Complete sending an array
-  void send_wait(void * handle) throw();
-
   /// Clean up after sending an array
   void send_end(void * handle) throw();
 
@@ -59,14 +53,14 @@ public: // interface (Group)
   void * recv_begin
   (int rank_source, void * buffer, int size, int tag=0) throw();
 
-  /// Complete receiving an array
-  void recv_wait(void * handle) throw();
-
-  /// Test completeness of receiving an array
-  bool recv_test (void * handle) throw();
-
   /// Clean up after receiving an array
   void recv_end(void * handle) throw();
+
+  /// Complete sending or receiving an array
+  void wait(void * handle) throw();
+
+  /// Test completeness of sending or receiving an array
+  bool test (void * handle) throw();
 
   //--------------------------------------------------
 
@@ -76,17 +70,16 @@ public: // interface (Group)
   /// Initiate a bulk send of multiple arrays
   void * bulk_send() throw();
 
-  /// Complete a bulk send of multiple arrays
-  void bulk_send_wait(void * handle) throw();
-
   /// Add an array to a list of arrays to receive in bulk
   void bulk_recv_add(int rank_source, void * buffer, int size, int tag=0) throw();
 
   /// Initiate a bulk receive of multiple arrays
   void * bulk_recv() throw();
 
-  /// Complete a bulk receive of multiple arrays
-  void bulk_recv_wait(void * handle) throw();
+  /// Complete a bulk send or receive of multiple arrays
+  void bulk_wait(void * handle) throw();
+
+  //--------------------------------------------------
 
   /// Set whether send is blocking or non-blocking
   void set_type_send (send_type type)  throw()

@@ -12,9 +12,9 @@
 class GroupProcess : public Group {
 
   /// @class    Group Process
-/// @ingroup  Parallel  
-/// @
-/// @brief    Group of distributed memory processes
+  /// @ingroup  Parallel  
+  /// @todo     Support more flexible process subsets
+  /// @brief    Group of distributed memory processes
 
 public: // interface
 
@@ -31,12 +31,6 @@ GroupProcess(int size = 1, int rank = 0) throw()
   virtual void * send_begin
   (int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
 
-  /// Test completeness of sending an array
-  virtual bool send_test(void * handle) throw() = 0;
-
-  /// Complete sending an array
-  virtual void send_wait(void * handle) throw() = 0;
-
   /// Clean up after sending an array
   virtual void send_end(void * handle) throw() = 0;
 
@@ -44,14 +38,14 @@ GroupProcess(int size = 1, int rank = 0) throw()
   virtual void * recv_begin
   (int rank_source, void * buffer, int size, int tag=0) throw() = 0;
 
-  /// Complete receiving an array
-  virtual void recv_wait(void * handle) throw() = 0;
-
-  /// Test completeness of receiving an array
-  virtual bool recv_test (void * handle) throw() = 0;
-
   /// Clean up after receiving an array
   virtual void recv_end(void * handle) throw() = 0;
+
+  /// Wait until the send or receive operation completes
+  virtual void wait(void * handle) throw() = 0;
+
+  /// Test completeness of sending or receiving an array
+  virtual bool test (void * handle) throw() = 0;
 
   //--------------------------------------------------
 
@@ -61,17 +55,14 @@ GroupProcess(int size = 1, int rank = 0) throw()
   /// Initiate a bulk send of multiple arrays
   virtual void * bulk_send() throw() = 0;
 
-  /// Complete a bulk send of multiple arrays
-  virtual void bulk_send_wait(void * handle) throw() = 0;
-
   /// Add an array to a list of arrays to receive in bulk
   virtual void bulk_recv_add(int rank_source, void * buffer, int size, int tag=0) throw() = 0;
 
   /// Initiate a bulk receive of multiple arrays
   virtual void * bulk_recv() throw() = 0;
 
-  /// Complete a bulk receive of multiple arrays
-  virtual void bulk_recv_wait(void * handle) throw() = 0;
+  /// Complete a bulk send or receive of multiple arrays
+  virtual void bulk_wait(void * handle) throw() = 0;
 
   //--------------------------------------------------
 

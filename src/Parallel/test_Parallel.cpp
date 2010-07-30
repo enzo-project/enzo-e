@@ -102,8 +102,8 @@ int main(int argc, char ** argv)
       void * handle_recv = 
 	process_group->recv_begin (rank_dest,   array_dest,   array_size);
 
-      process_group->recv_wait(handle_recv);
-      process_group->send_wait(handle_send);
+      process_group->wait(handle_recv);
+      process_group->wait(handle_send);
 
       process_group->send_end(handle_send);
       process_group->recv_end(handle_recv);
@@ -142,8 +142,8 @@ int main(int argc, char ** argv)
 	process_group->recv_begin (rank_dest,   array_dest,   array_size);
 
       int counter = 0;
-      while ( ! process_group->recv_test(handle_recv) ||
-	      ! process_group->send_test(handle_send) ) {
+      while ( ! process_group->test(handle_recv) ||
+	      ! process_group->test(handle_send) ) {
 	// spinwait
 	++ counter;
       }
