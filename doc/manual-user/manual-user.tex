@@ -1117,16 +1117,9 @@ $|$ \code{"quadruple"} ] }
 
 %--------------------------------------------------
 \Parameter
-% Group
-{Parallel}
-% subgroup
-{}
-% parameter
-{levels}
+{Parallel}{}{size}
 % type
-{list(integer)}
-% type restrictions
-{}
+{list(integer)}{}
 % description
 {List of parallelization levels, e.g.~[8,32] for 8 cores/cpu, 32 cpu's/node, and any number of nodes.}
 % example
@@ -1137,17 +1130,27 @@ $|$ \code{"quadruple"} ] }
 %--------------------------------------------------
 \Parameter
 % Group
-{Parallel}
-% subgroup
-{}
-% parameter
-{type}
+{Parallel}{}{type}
 % type
 {list(string)}
 % type restrictions
+{\code{"shared"} $|$ \code{"distributed"}}
+% description
+{List of parallelization types, either \code{"shared"}-memory or \code{"distributed"}-memory. Other types may be added later, such as \code{"gpu"} for GPU's, or \code{"virtual"} for CHARM++}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Parallel}{}{method}
+% type
+{list(string)}
 {\code{"mpi"} $|$ \code{"omp"} $|$ \code{"upc"} $|$ \code{"serial"}}
 % description
-{List of parallelization types, E.g. ["omp","upc","mpi"] for OMP within cpu, UPC within node, and MPI between nodes.}
+{List of parallelization methods, e.g. ["omp","upc","mpi"] for OMP within cpu, UPC within node, and MPI between nodes.}
 % example
 {}
 % default
