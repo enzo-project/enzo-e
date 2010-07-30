@@ -149,12 +149,16 @@ int main(int argc, char ** argv)
 	++ counter;
       }
 
+      // COUNTER ALWAYS 0
+
+      // assert recv completed and send completed
+
       process_group->send_end(handle_send);
       process_group->recv_end(handle_recv);
 
       unit_func("test-1");
 
-      // SOMETIMES FAILS FOR NONBLOCKING RECEIVE!!
+      // SOMETIMES FAILS FOR NONBLOCKING RECEIVE
       unit_assert(test_array(array_source,n+1,rank,rank));
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
 
@@ -167,7 +171,6 @@ int main(int argc, char ** argv)
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
 
       // spinwait counter is 0 for mpich since it doesn't do non-blocking(?)
-      printf ("%d counter = %d\n",rank,counter);
 
     }
   }
