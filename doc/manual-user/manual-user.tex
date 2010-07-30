@@ -1121,7 +1121,7 @@ $|$ \code{"quadruple"} ] }
 % type
 {list(integer)}{}
 % description
-{List of parallelization levels, e.g.~[8,32] for 8 cores/cpu, 32 cpu's/node, and any number of nodes.}
+{Size of the hierarchical parallelism groups, e.g.~[8,32] for 8 cores/cpu, 32 cpu's/node, and any number of nodes.}
 % example
 {}
 % default
@@ -1148,9 +1148,9 @@ $|$ \code{"quadruple"} ] }
 {Parallel}{}{method}
 % type
 {list(string)}
-{\code{"mpi"} $|$ \code{"omp"} $|$ \code{"upc"} $|$ \code{"serial"}}
+{\code{"mpi"} $|$ \code{"omp"} $|$ \code{"upc"}}
 % description
-{List of parallelization methods, e.g. ["omp","upc","mpi"] for OMP within cpu, UPC within node, and MPI between nodes.}
+{List of parallelization methods for communicating and synchronizing within parallel groups, e.g. ["omp","upc","mpi"] for OMP within cpu, UPC within node, and MPI between nodes.}
 % example
 {}
 % default
@@ -1218,7 +1218,45 @@ $|$ \code{"quadruple"} ] }
 % Group
 {Parallel}
 % subgroup
-{mpi}
+{process}
+% parameter
+{send\_blocking}
+% type
+{list(logical)}
+% type restrictions
+{}
+% description
+{ Whether sends between processes are blocking or not}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{process}
+% parameter
+{recv\_blocking}
+% type
+{list(logical)}
+% type restrictions
+{}
+% description
+{ Whether receives between processes are blocking or not}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{process}
 % parameter
 {sided}
 % type
@@ -1226,49 +1264,12 @@ $|$ \code{"quadruple"} ] }
 % type restrictions
 {}
 % description
-{Type of MPI: 1 (single-sided get/put) or 2 (double-sided send/receive). \incomplete{what about multiple mpi levels?}}
+{Type of communication: 1-sided (get/put) or 2-sided (send/receive). \incomplete{what about multiple mpi levels?}}
 % example
 {}
 % default
 {}
 
-%--------------------------------------------------
-\Parameter
-% Group
-{Parallel}
-% subgroup
-{mpi}
-% parameter
-{send\_type}
-% type
-{list(string)}
-% type restrictions
-{ \code{"immediate"} $|$ \code{"blocking"} $|$ \code{"standard"} $|$ \code{"buffered"} $|$ \code{"synchronous"} $|$ \code{"ready"}}
-% description
-{List of MPI send variations}
-% example
-{}
-% default
-{}
-
-%--------------------------------------------------
-\Parameter
-% Group
-{Parallel}
-% subgroup
-{mpi}
-% parameter
-{recv\_type}
-% type
-{list(string)} 	
-% type restrictions
-{\code{"immediate"} $|$ \code{"blocking"}}
-% description
-{List [sic] of MPI recv variations.} 
-% example
-{}
-% default
-{}
 
 %--------------------------------------------------
 \Parameter
@@ -1322,6 +1323,25 @@ $|$ \code{"quadruple"} ] }
 {}
 % description
 {Specification of reordering of MPI tasks. \incomplete{how to specify reordering?  automatic/dynamic reordering?}}
+% example
+{}
+% default
+{}
+
+%--------------------------------------------------
+\Parameter
+% Group
+{Parallel}
+% subgroup
+{process}
+% parameter
+{send\_type}
+% type
+{list(logical)}
+% type restrictions
+{ [ \code{"standard"},\code{"buffered"},\code{"synchronous"},\code{"ready"} ]}
+% description
+{ Whether sends between processes are blocking or not}
 % example
 {}
 % default
