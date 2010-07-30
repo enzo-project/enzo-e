@@ -4,7 +4,6 @@
 /// @file     test_Parallel.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI
-/// @bug      MPI_test() does not seem to work for non-blocking receive, but MPI_wait() does
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Parallel class
 
@@ -149,28 +148,15 @@ int main(int argc, char ** argv)
 	++ counter;
       }
 
-      // COUNTER ALWAYS 0
-
       // assert recv completed and send completed
 
       process_group->send_end(handle_send);
       process_group->recv_end(handle_recv);
 
-      unit_func("test-1");
+      unit_func("test");
 
-      // SOMETIMES FAILS FOR NONBLOCKING RECEIVE
       unit_assert(test_array(array_source,n+1,rank,rank));
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
-
-      Mpi::barrier();
-
-      unit_func("test-2");
-
-      // Never fails for nonblocking receive (because of barrier)
-      unit_assert(test_array(array_source,n+1,rank,rank));
-      unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
-
-      // spinwait counter is 0 for mpich since it doesn't do non-blocking(?)
 
     }
   }

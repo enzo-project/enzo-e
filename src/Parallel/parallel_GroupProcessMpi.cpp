@@ -100,7 +100,6 @@ bool GroupProcessMpi::send_test (void * handle) throw()
 {
   int result = 1;
   if (! send_blocking_) {
-    result = 0;
     int ierr = MPI_Test((MPI_Request*)handle, & result, MPI_STATUS_IGNORE);
     check_mpi_err_("send_test",ierr);
   }
@@ -150,7 +149,7 @@ bool GroupProcessMpi::recv_test (void * handle) throw()
     int ierr = MPI_Test((MPI_Request*)handle, &result, MPI_STATUS_IGNORE);
     check_mpi_err_("recv_test",ierr);
   }
-  return (result != 0);
+  return result;
 }
 
 //----------------------------------------------------------------------
