@@ -72,8 +72,7 @@ void GroupProcessMpi::sync (int rank, int tag) throw()
     int ierr = MPI_Send (&buffer, 1, MPI_BYTE, rank, tag, comm_);
     check_mpi_err_("sync",ierr);
   } else if (rank_ > rank) {
-    MPI_Status status;
-    int ierr = MPI_Recv (&buffer, 1, MPI_BYTE, rank, tag, comm_, &status);
+    int ierr = MPI_Recv (&buffer, 1, MPI_BYTE, rank, tag, comm_, MPI_STATUS_IGNORE);
     check_mpi_err_("sync",ierr);
   }
 }
@@ -102,7 +101,6 @@ bool GroupProcessMpi::send_test (void * handle) throw()
   WARNING_MESSAGE("send_test","Does not seem to work: check test_Parallel tests");
   int result = 1;
   if (! send_blocking_) {
-    MPI_Status status;
     result = 0;
     int ierr = MPI_Test((MPI_Request*)handle, & result, MPI_STATUS_IGNORE);
     check_mpi_err_("send_test",ierr);
@@ -115,8 +113,7 @@ bool GroupProcessMpi::send_test (void * handle) throw()
 void GroupProcessMpi::send_wait (void * handle) throw()
 {
   if (! send_blocking_) {
-    MPI_Status status;
-    int ierr = MPI_Wait((MPI_Request*)handle, &status);
+    int ierr = MPI_Wait((MPI_Request*)handle, MPI_STATUS_IGNORE);
     check_mpi_err_("send_wait",ierr);
   }
 }
@@ -136,8 +133,7 @@ void * GroupProcessMpi::recv_begin
   int ierr;
   MPI_Request * handle = 0;
   if (recv_blocking_) {
-    MPI_Status status;
-    ierr = MPI_Recv (buffer, size, MPI_BYTE, rank_source, tag, comm_, &status);
+    ierr = MPI_Recv (buffer, size, MPI_BYTE, rank_source, tag, comm_, MPI_STATUS_IGNORE);
   } else {
     handle = new MPI_Request;
     ierr = MPI_Irecv (buffer, size, MPI_BYTE, rank_source, tag, comm_, handle);
@@ -152,9 +148,8 @@ bool GroupProcessMpi::recv_test (void * handle) throw()
 {
   int result = true;
   if (! recv_blocking_) {
-    MPI_Status status;
     int result;
-    int ierr = MPI_Test((MPI_Request*)handle, &result, &status);
+    int ierr = MPI_Test((MPI_Request*)handle, &result, MPI_STATUS_IGNORE);
     check_mpi_err_("recv_test",ierr);
   }
   return result;
@@ -165,8 +160,7 @@ bool GroupProcessMpi::recv_test (void * handle) throw()
 void GroupProcessMpi::recv_wait(void * handle) throw()
 {
   if (! recv_blocking_) {
-    MPI_Status status;
-    int ierr = MPI_Wait((MPI_Request*) handle, &status);
+    int ierr = MPI_Wait((MPI_Request*) handle, MPI_STATUS_IGNORE);
     check_mpi_err_("recv_wait",ierr);
   }
 }

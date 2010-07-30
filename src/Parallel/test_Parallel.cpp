@@ -4,7 +4,7 @@
 /// @file     test_Parallel.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI
-/// @bug      MPI_test() does not seem to work for non-blocking, but MPI_wait() does
+/// @bug      MPI_test() does not seem to work for non-blocking receive, but MPI_wait() does
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Parallel class
 
@@ -117,7 +117,10 @@ int main(int argc, char ** argv)
 
   for (int blocking_send = 0; blocking_send <= 1; blocking_send++) {
     for (int blocking_recv = 0; blocking_recv <= 1; blocking_recv++) {
-
+      // MPI_Isend MPI_Irecv
+      // MPI_Isend MPI_Recv
+      // MPI_Send  MPI_Irecv
+      // MPI_Send  MPI_Recv
       unit_func("test");
 
       init_array(array_source,n+1,rank);
@@ -140,8 +143,8 @@ int main(int argc, char ** argv)
 	process_group->recv_begin (rank_dest,   array_dest,   array_size);
 
       int counter = 0;
-      while (! process_group->recv_test(handle_recv) || 
-	     ! process_group->send_test(handle_send) ) {
+      while ( ! process_group->recv_test(handle_recv) ||
+	      ! process_group->send_test(handle_send) ) {
 	// spinwait
 	++ counter;
       }
@@ -151,6 +154,7 @@ int main(int argc, char ** argv)
 
       unit_func("test-1");
 
+      // SOMETIMES FAILS FOR NONBLOCKING RECEIVE!!
       unit_assert(test_array(array_source,n+1,rank,rank));
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
 
@@ -158,6 +162,7 @@ int main(int argc, char ** argv)
 
       unit_func("test-2");
 
+      // Never fails for nonblocking receive (because of barrier)
       unit_assert(test_array(array_source,n+1,rank,rank));
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
 
