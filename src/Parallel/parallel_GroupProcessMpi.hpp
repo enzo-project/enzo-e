@@ -100,7 +100,7 @@ private: // functions
 
   void check_mpi_err_(const char * function, int ierr)
   {
-    if (ierr != 0) {
+    if (ierr != MPI_SUCCESS) {
       char message[ERROR_MESSAGE_LENGTH];
       char function[ERROR_MESSAGE_LENGTH];
       sprintf (message,"%d: MPI error %d",rank_,ierr);

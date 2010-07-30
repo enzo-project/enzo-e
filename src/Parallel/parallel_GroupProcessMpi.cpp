@@ -99,14 +99,15 @@ void * GroupProcessMpi::send_begin
 
 bool GroupProcessMpi::send_test (void * handle) throw()
 {
-  int result = true;
+  WARNING_MESSAGE("send_test","Does not seem to work: check test_Parallel tests");
+  int result = 1;
   if (! send_blocking_) {
     MPI_Status status;
-    int result;
-    int ierr = MPI_Test((MPI_Request*)handle, & result, &status);
+    result = 0;
+    int ierr = MPI_Test((MPI_Request*)handle, & result, MPI_STATUS_IGNORE);
     check_mpi_err_("send_test",ierr);
   }
-  return result;
+  return (result != 0);
 }
 
 //----------------------------------------------------------------------

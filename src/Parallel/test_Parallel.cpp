@@ -4,6 +4,7 @@
 /// @file     test_Parallel.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI
+/// @bug      MPI_test() does not seem to work for non-blocking, but MPI_wait() does
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Parallel class
 
@@ -77,12 +78,15 @@ int main(int argc, char ** argv)
   // Test that init_array() and test_array() work independently of Parallel
   const int n = 4;
   double array_source[n+1], array_dest[n+1];
-  init_array(array_source,n+1,rank);
-  init_array(array_dest,  n+1,rank);
-  unit_assert(test_array(array_source,n+1,rank,rank));
+
+  unit_func("wait");
 
   for (int blocking_send = 0; blocking_send <= 1; blocking_send++) {
     for (int blocking_recv = 0; blocking_recv <= 1; blocking_recv++) {
+
+      init_array(array_source,n+1,rank);
+      init_array(array_dest,  n+1,rank);
+      unit_assert(test_array(array_source,n+1,rank,rank));
 
       GroupProcessMpi * process_group_mpi 
 	= dynamic_cast<GroupProcessMpi*> (process_group);
@@ -90,16 +94,14 @@ int main(int argc, char ** argv)
       process_group_mpi->set_send_blocking(blocking_send);
       process_group_mpi->set_recv_blocking(blocking_recv);
 
-      unit_func("send");
-
       int rank_source = (rank+1)%size;
       int rank_dest   = (rank-1+size)%size;
       int array_size  = n*sizeof(double);
 
-      void * handle_send = process_group->send_begin
-	(rank_source, array_source, array_size);
-      void * handle_recv = process_group->recv_begin
-	(rank_dest,   array_dest,   array_size);
+      void * handle_send = 
+	process_group->send_begin (rank_source, array_source, array_size);
+      void * handle_recv = 
+	process_group->recv_begin (rank_dest,   array_dest,   array_size);
 
       process_group->recv_wait(handle_recv);
       process_group->send_wait(handle_send);
@@ -109,6 +111,58 @@ int main(int argc, char ** argv)
 
       unit_assert(test_array(array_source,n+1,rank,rank));
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+
+    }
+  }
+
+  for (int blocking_send = 0; blocking_send <= 1; blocking_send++) {
+    for (int blocking_recv = 0; blocking_recv <= 1; blocking_recv++) {
+
+      unit_func("test");
+
+      init_array(array_source,n+1,rank);
+      init_array(array_dest,  n+1,rank);
+      unit_assert(test_array(array_source,n+1,rank,rank));
+
+      GroupProcessMpi * process_group_mpi 
+	= dynamic_cast<GroupProcessMpi*> (process_group);
+
+      process_group_mpi->set_send_blocking(blocking_send);
+      process_group_mpi->set_recv_blocking(blocking_recv);
+
+      int rank_source = (rank+1)%size;
+      int rank_dest   = (rank-1+size)%size;
+      int array_size  = n*sizeof(double);
+
+      void * handle_send = 
+	process_group->send_begin (rank_source, array_source, array_size);
+      void * handle_recv = 
+	process_group->recv_begin (rank_dest,   array_dest,   array_size);
+
+      int counter = 0;
+      while (! process_group->recv_test(handle_recv) || 
+	     ! process_group->send_test(handle_send) ) {
+	// spinwait
+	++ counter;
+      }
+
+      process_group->send_end(handle_send);
+      process_group->recv_end(handle_recv);
+
+      unit_func("test-1");
+
+      unit_assert(test_array(array_source,n+1,rank,rank));
+      unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+
+      Mpi::barrier();
+
+      unit_func("test-2");
+
+      unit_assert(test_array(array_source,n+1,rank,rank));
+      unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
+
+      // spinwait counter is 0 for mpich since it doesn't do non-blocking(?)
+      printf ("%d counter = %d\n",rank,counter);
 
     }
   }
