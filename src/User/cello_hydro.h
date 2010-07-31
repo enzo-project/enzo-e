@@ -34,6 +34,7 @@
 // #define FORTRAN_NAME(NAME) NAME
 #define FORTRAN_NAME(NAME) NAME##_
 
+//----------------------------------------------------------------------
 
 const int Density         = 0;  // Field identifiers: use Field's instead
 const int TotalEnergy     = 1;
@@ -68,8 +69,6 @@ typedef long long unsigned  global_index; //
 // EXTERNS
 //----------------------------------------------------------------------
 
-// Cosmology
-
 extern int    ComovingCoordinates;
 extern int    UseMinimumPressureSupport;
 extern float  MinimumPressureSupportParameter;
@@ -79,36 +78,36 @@ extern float  OmegaLambdaNow;
 extern float  OmegaMatterNow;
 extern float  MaxExpansionRate;
 
-// Chemistry
+  // Chemistry
 
 extern int    MultiSpecies;
 
-// Gravity
+  // Gravity
 
 extern int    GravityOn;
 extern float *AccelerationField[MAX_DIMENSION];
 
-// Physics
+  // Physics
 
 extern int    PressureFree;
 extern float  Gamma;
 extern float  GravitationalConstant;
 
-// Problem-specific
+  // Problem-specific
 
 extern int    ProblemType;
 
-// Method PPM
+  // Method PPM
 
 extern int    PPMFlatteningParameter;
 extern int    PPMDiffusionParameter;
 extern int    PPMSteepeningParameter;
 
-// Parallel
+  // Parallel
 
 extern int    ProcessorNumber;
 
-// Numerics
+  // Numerics
 
 extern int    DualEnergyFormalism;
 extern float  DualEnergyFormalismEta1;
@@ -124,12 +123,12 @@ extern ENZO_FLOAT  InitialTimeInCodeUnits;
 extern ENZO_FLOAT  Time;
 extern ENZO_FLOAT  OldTime;
 
-// Domain
+  // Domain
 
 extern ENZO_FLOAT  DomainLeftEdge [MAX_DIMENSION];
 extern ENZO_FLOAT  DomainRightEdge[MAX_DIMENSION];
 
-// Grid
+  // Grid
 
 extern int    GridRank;
 extern int    GridDimension[MAX_DIMENSION];
@@ -139,7 +138,7 @@ extern ENZO_FLOAT  GridLeftEdge[MAX_DIMENSION];
 extern ENZO_FLOAT *CellWidth[MAX_DIMENSION];
 extern int    ghost_depth[MAX_DIMENSION];
 
-// Fields
+  // Fields
 
 extern int field_density;
 extern int field_total_energy;
@@ -183,16 +182,16 @@ extern float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
 extern float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
 extern int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
-// Boundary
+  // Boundary
 
-enum bc_type 
-  {
-    bc_unknown    = 0, 
-    bc_reflecting = 1, 
-    bc_outflow    = 2, 
-    bc_inflow     = 3, 
-    bc_periodic   = 4
-  };
+  enum bc_type 
+    {
+      bc_unknown    = 0, 
+      bc_reflecting = 1, 
+      bc_outflow    = 2, 
+      bc_inflow     = 3, 
+      bc_periodic   = 4
+    };
 
 extern int      BoundaryRank;
 extern int      BoundaryDimension[MAX_DIMENSION];
@@ -200,10 +199,141 @@ extern int      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 extern bc_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
 extern float   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];  
 
-// problem
+  // problem
 
 extern int   CycleNumber;
 extern float dt;
+
+
+struct enzo_data_struct {
+  int    ComovingCoordinates;
+  int    UseMinimumPressureSupport;
+  float  MinimumPressureSupportParameter;
+  float  ComovingBoxSize;
+  float  HubbleConstantNow;
+  float  OmegaLambdaNow;
+  float  OmegaMatterNow;
+  float  MaxExpansionRate;
+
+  // Chemistry
+
+  int    MultiSpecies;
+
+  // Gravity
+
+  int    GravityOn;
+  float *AccelerationField[MAX_DIMENSION];
+
+  // Physics
+
+  int    PressureFree;
+  float  Gamma;
+  float  GravitationalConstant;
+
+  // Problem-specific
+
+  int    ProblemType;
+
+  // Method PPM
+
+  int    PPMFlatteningParameter;
+  int    PPMDiffusionParameter;
+  int    PPMSteepeningParameter;
+
+  // Parallel
+
+  int    ProcessorNumber;
+
+  // Numerics
+
+  int    DualEnergyFormalism;
+  float  DualEnergyFormalismEta1;
+  float  DualEnergyFormalismEta2;
+  float  pressure_floor;
+  float  density_floor;
+  float  number_density_floor;
+  float  temperature_floor;
+
+  float  CourantSafetyNumber;
+  ENZO_FLOAT  InitialRedshift;
+  ENZO_FLOAT  InitialTimeInCodeUnits;
+  ENZO_FLOAT  Time;
+  ENZO_FLOAT  OldTime;
+
+  // Domain
+
+  ENZO_FLOAT  DomainLeftEdge [MAX_DIMENSION];
+  ENZO_FLOAT  DomainRightEdge[MAX_DIMENSION];
+
+  // Grid
+
+  int    GridRank;
+  int    GridDimension[MAX_DIMENSION];
+  int    GridStartIndex[MAX_DIMENSION];
+  int    GridEndIndex[MAX_DIMENSION];
+  ENZO_FLOAT  GridLeftEdge[MAX_DIMENSION];
+  ENZO_FLOAT *CellWidth[MAX_DIMENSION];
+  int    ghost_depth[MAX_DIMENSION];
+
+  // Fields
+
+  int field_density;
+  int field_total_energy;
+  int field_internal_energy;
+  int field_velocity_x;
+  int field_velocity_y;
+  int field_velocity_z;
+  int field_color;
+
+  int field_magnetic_x;
+  int field_magnetic_y;
+  int field_magnetic_z;
+
+  int field_density_xp;
+  int field_velocity_x_xp;
+  int field_velocity_y_xp;
+  int field_velocity_z_xp;
+  int field_magnetic_x_xp;
+  int field_magnetic_y_xp;
+  int field_magnetic_z_xp;
+
+  int field_density_yp;
+  int field_velocity_x_yp;
+  int field_velocity_y_yp;
+  int field_velocity_z_yp;
+  int field_magnetic_x_yp;
+  int field_magnetic_y_yp;
+  int field_magnetic_z_yp;
+
+  int field_density_zp;
+  int field_velocity_x_zp;
+  int field_velocity_y_zp;
+  int field_velocity_z_zp;
+  int field_magnetic_x_zp;
+  int field_magnetic_y_zp;
+  int field_magnetic_z_zp;
+
+
+  int    NumberOfBaryonFields;
+  float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
+  float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS];
+  int    FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+
+  // Boundary
+
+  int      BoundaryRank;
+  int      BoundaryDimension[MAX_DIMENSION];
+  int      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
+  bc_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+  float   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];  
+
+  // problem
+
+  int   CycleNumber;
+  float dt;
+
+};
+
 
 //----------------------------------------------------------------------
 // FUNCTION PROTOTYPES

@@ -24,12 +24,19 @@
 
 void print_fields(int mx, int my);
 
+
 void output_fields(FieldBlock * field_block,
 		   int write_count,
 		   int field_count,
 		   int field_index[],
 		   Monitor * monitor)
 {
+
+  // Create a struct of enzo data (won't work as global data for CHARM++, threading, etc)
+
+  enzo_data_struct enzo_data;
+
+
   double map1[] = {1,1,1, 0,0,0};
   FieldDescr * field_descr = field_block->field_descr();
   int nx,ny,nz;
