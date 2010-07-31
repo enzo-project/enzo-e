@@ -46,7 +46,10 @@ public: // interface
   /// Refresh a block face's boundary / ghost zones given neighboring
   /// block face(s)
 
-  virtual void refresh_block(DataBlock * data_block) throw()
+  virtual void refresh_ghost(DataBlock * data_block,
+			     bool xm=true, bool xp=true, 
+			     bool ym=true, bool yp=true, 
+			     bool zm=true, bool zp=true) throw()
   {};
 
 protected:

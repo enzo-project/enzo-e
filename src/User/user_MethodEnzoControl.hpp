@@ -40,11 +40,12 @@ public: // interface
 
   void finalize_block (DataBlock * data_block) throw();
 
-  /// Refresh a block face's boundary / ghost zones given neighboring
-  /// block face(s)
+  /// Refresh a subset of ghost zones given neighboring block face(s)
 
-  void refresh_block(DataBlock * data_block) throw();
-
+  void refresh_ghost(DataBlock * data_block, 
+		     bool xm=true, bool xp=true, 
+		     bool ym=true, bool yp=true, 
+		     bool zm=true, bool zp=true) throw();
 };
 
 #endif /* USER_METHOD_ENZO_CONTROL_HPP */

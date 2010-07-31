@@ -123,13 +123,16 @@ void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
 
   ProblemType = 0;
 
-  // Mesh parameters
+  // Field parameters
 
-  parameters->set_current_group ("Mesh");
+  parameters->set_current_group ("Field");
 
-  ghost_depth[0] = (GridRank >= 1) ? parameters->list_value_integer(0,"ghosts",3) : 0;
-  ghost_depth[1] = (GridRank >= 2) ? parameters->list_value_integer(1,"ghosts",3) : 0;
-  ghost_depth[2] = (GridRank >= 3) ? parameters->list_value_integer(2,"ghosts",3) : 0;
+  ghost_depth[0] = (GridRank >= 1) ? 
+    parameters->list_value_integer(0,"ghosts",3) : 0;
+  ghost_depth[1] = (GridRank >= 2) ? 
+    parameters->list_value_integer(1,"ghosts",3) : 0;
+  ghost_depth[2] = (GridRank >= 3) ? 
+    parameters->list_value_integer(2,"ghosts",3) : 0;
 
   NumberOfBaryonFields = field_descr->field_count();
 
@@ -272,7 +275,10 @@ void MethodEnzoControl::finalize_block ( DataBlock * data_block ) throw ()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoControl::refresh_block(DataBlock * data_block) throw()
+void MethodEnzoControl::refresh_ghost(DataBlock * data_block, 
+				      bool xm, bool xp, 
+				      bool ym, bool yp, 
+				      bool zm, bool zp) throw()
 {
 
 }

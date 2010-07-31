@@ -83,10 +83,3 @@ void MethodEnzoPpm::advance_block
   SolveHydroEquations (CycleNumber, dt);
 }
 
-//----------------------------------------------------------------------
-
-void MethodEnzoPpm::refresh_face() throw()
-{
-  INCOMPLETE_MESSAGE("MethodEnzoPpm::refresh_face","");
-}
-

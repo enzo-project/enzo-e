@@ -44,14 +44,9 @@ public: // interface
   void advance_block(DataBlock * data_block,
 		     double t, double dt) throw();
 
-  /// Refresh a block face's boundary / ghost zones given neighboring
-  /// block face(s)
-
-  void refresh_face() throw();
-  
   /// Return the name of the method
 
-  virtual std::string method_name() const throw() 
+  std::string method_name() const throw() 
   { return "ppm"; };
   
 };
