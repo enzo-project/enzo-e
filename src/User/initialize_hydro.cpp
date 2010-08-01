@@ -9,13 +9,13 @@
 #include "cello_hydro.h"
 #include "enzo.hpp"
 
-void initialize_hydro (Enzo * enzo)
+void Enzo::initialize_hydro ()
 
 {
 
   // Cosmology
 
-  enzo->ComovingCoordinates             = 0;    // Physics: Cosmology
+  ComovingCoordinates             = 0;    // Physics: Cosmology
   UseMinimumPressureSupport       = 0;    // call UseMinimumPressureSupport() ?
   MinimumPressureSupportParameter = 100;  // SetMinimumSupport() Enzo parameter
   ComovingBoxSize                 = 64;   // Physics cosmology: Mpc/h at z=0

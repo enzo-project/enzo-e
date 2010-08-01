@@ -14,8 +14,9 @@
 /  RETURNS: ENZO_SUCCESS or ENZO_FAIL
 /
 ************************************************************************/
- 
+
 #include "cello_hydro.h"
+#include "enzo.hpp"
  
 // This is used to set the corners (which are not really used) of the
 //   grid to something reasonable in the case of periodic B.C.'s
@@ -27,7 +28,7 @@
 //   field type in the list of boundary's and apply that boundary value/type.
 //   Returns: 0 on failure
 //
-int SetExternalBoundary(int FieldRank, 
+int Enzo::SetExternalBoundary(int FieldRank, 
 			int GridDims[],
 			int GridOffset[],
 			int StartIndex[], 

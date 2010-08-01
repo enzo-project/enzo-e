@@ -19,7 +19,7 @@
 // Solve the MHD equations with the solver, saving the subgrid fluxes
 
 #include "cello_hydro.h"
- 
+#include "enzo.hpp" 
   
 /* function prototypes */
  
@@ -74,7 +74,7 @@ extern "C" void FORTRAN_NAME(ppml)(float *dn,   float *vx,   float *vy,   float 
                           int *ncolour, float *colourpt, int *coloff,
                             int colindex[]);
 */
-int SolveMHDEquations(int cycle, float dt)
+int Enzo::SolveMHDEquations(int cycle, float dt)
 {
  
   /* exit if not 3D */

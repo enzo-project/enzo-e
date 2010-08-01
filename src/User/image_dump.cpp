@@ -8,16 +8,17 @@
 
 #include "cello.hpp"
 #include "cello_hydro.h"
+#include "enzo.hpp"
 
 #include <string>
 
 #include "monitor.hpp"
 
-void image_dump(const char * file_root, 
-		int cycle, 
-		double lower, 
-		double upper,
-		Monitor * monitor)
+void Enzo::image_dump(const char * file_root, 
+		      int cycle, 
+		      double lower, 
+		      double upper,
+		      Monitor * monitor)
 { 
 
   int nx = GridDimension[0];

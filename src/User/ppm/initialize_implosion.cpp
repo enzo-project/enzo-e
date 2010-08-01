@@ -7,10 +7,11 @@
 /// @brief     Initialize variables in cello_hydro.h
 
 #include "cello_hydro.h"
+#include "enzo.hpp"
 
 const bool debug = false;
  
-void initialize_implosion (int size_param)
+void Enzo::initialize_implosion (int size_param)
 {
 
   int grid_size [] = { size_param, size_param };

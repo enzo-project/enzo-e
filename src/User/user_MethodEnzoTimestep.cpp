@@ -61,14 +61,14 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
 {
 
   FieldBlock * field_block = data_block->field_block();
-  float * density_field    = (float *)field_block->field_values(field_density);
-  float * velocity_x_field = (float *)field_block->field_values(field_velocity_x);
-  float * velocity_y_field = (float *)field_block->field_values(field_velocity_y);
-  float * velocity_z_field = (float *)field_block->field_values(field_velocity_z);
+  float * density_field    = (float *)field_block->field_values(enzo_->field_density);
+  float * velocity_x_field = (float *)field_block->field_values(enzo_->field_velocity_x);
+  float * velocity_y_field = (float *)field_block->field_values(enzo_->field_velocity_y);
+  float * velocity_z_field = (float *)field_block->field_values(enzo_->field_velocity_z);
 
   ENZO_FLOAT a = 1, dadt;
   if (enzo_->ComovingCoordinates)
-    enzo_->CosmologyComputeExpansionFactor(Time, &a, &dadt);
+    enzo_->CosmologyComputeExpansionFactor(enzo_->Time, &a, &dadt);
   afloat_ = float(a);
   //  float dt, dtTemp;
   dtBaryons_      = HUGE_VALF;
@@ -83,7 +83,7 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
   int nx,ny,nz;
   field_block -> dimensions (&nx,&ny,&nz);
   int gx,gy,gz;
-  field_block->field_descr()->ghosts(field_density,&gx,&gy,&gz);
+  field_block->field_descr()->ghosts(enzo_->field_density,&gx,&gy,&gz);
   int mx,my,mz;
   mx = nx + 2*gx;
   my = ny + 2*gx;
@@ -103,10 +103,10 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
   pressure_field_ = new float[size];
 
   int  result;
-  if (DualEnergyFormalism)
-    result = enzo_->ComputePressureDualEnergyFormalism(Time, pressure_field_);
+  if (enzo_->DualEnergyFormalism)
+    result = enzo_->ComputePressureDualEnergyFormalism(enzo_->Time, pressure_field_);
   else
-    result = enzo_->ComputePressure(Time, pressure_field_);
+    result = enzo_->ComputePressure(enzo_->Time, pressure_field_);
  
   if (result == ENZO_FAIL) {
     fprintf(stderr, "Error in grid->ComputePressure.\n");
@@ -137,7 +137,7 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
   /* 3) Find dt from expansion. */
  
   if (enzo_->ComovingCoordinates)
-    if (enzo_->CosmologyComputeExpansionTimestep(Time, &dtExpansion_) == ENZO_FAIL) {
+    if (enzo_->CosmologyComputeExpansionTimestep(enzo_->Time, &dtExpansion_) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }
@@ -158,20 +158,20 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
  
   /* 5) calculate minimum timestep */
 
-  FORTRAN_NAME(calc_dt)(&GridRank, GridDimension, GridDimension+1,
-			GridDimension+2,
-			GridStartIndex, GridEndIndex,
-			GridStartIndex+1, GridEndIndex+1,
-			GridStartIndex+2, GridEndIndex+2,
-			CellWidth[0], CellWidth[1], CellWidth[2],
-			&Gamma, &PressureFree, &afloat_,
+  FORTRAN_NAME(calc_dt)(&enzo_->GridRank, enzo_->GridDimension, enzo_->GridDimension+1,
+			enzo_->GridDimension+2,
+			enzo_->GridStartIndex, enzo_->GridEndIndex,
+			enzo_->GridStartIndex+1, enzo_->GridEndIndex+1,
+			enzo_->GridStartIndex+2, enzo_->GridEndIndex+2,
+			enzo_->CellWidth[0], enzo_->CellWidth[1], enzo_->CellWidth[2],
+			&enzo_->Gamma, &enzo_->PressureFree, &afloat_,
 			density_field, pressure_field_,
 			velocity_x_field, 
 			velocity_y_field, 
 			velocity_z_field, 
 			&dtBaryons_, &dtViscous_);
 
-  dtBaryons_ *= CourantSafetyNumber;
+  dtBaryons_ *= enzo_->CourantSafetyNumber;
  
   double dt = dtBaryons_;
   //  dt = MIN(dtBaryons, dtParticles);

@@ -7,10 +7,11 @@
 /// @brief    Initialize variables in cello_hydro.h
 
 #include "cello_hydro.h"
+#include "enzo.hpp"
 
 const bool debug = false;
  
-void initialize_ppml_implosion3 (int size_param)
+void Enzo::initialize_ppml_implosion3 (int size_param)
 
 {
 

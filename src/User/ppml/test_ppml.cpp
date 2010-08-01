@@ -70,7 +70,7 @@ int main(int argc, char * argv[])
 
   Enzo enzo;
 
-  initialize_hydro (&enzo);
+  enzo.initialize_hydro ();
 
   // Initialize for specific problem type
 
@@ -78,10 +78,10 @@ int main(int argc, char * argv[])
 
   switch (problem) {
   case problem_ppml_blast:
-    initialize_ppml(size);
+    enzo.initialize_ppml(size);
     break;
   case problem_ppml_implosion3:
-    initialize_ppml_implosion3(size);
+    enzo.initialize_ppml_implosion3(size);
     break;
   default:
     print_usage(argv[0]);
@@ -110,10 +110,10 @@ int main(int argc, char * argv[])
       printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
 	      cycle,timer.value(),time,dt);
       fflush(stdout);
-      image_dump(problem_name[problem],cycle,lower,upper,monitor);
+      enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
     }
 
-    SolveMHDEquations(cycle, dt);
+    enzo.SolveMHDEquations(cycle, dt);
 
   }
 
@@ -122,7 +122,7 @@ int main(int argc, char * argv[])
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     enzo.SetExternalBoundaryValues();
-    image_dump(problem_name[problem],cycle,lower,upper,monitor);
+    enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
   }
 }
 

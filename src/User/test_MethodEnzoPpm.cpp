@@ -19,11 +19,9 @@
 #include "data.hpp"
 #include "parallel.hpp"
 #include "test.hpp"
+#include "enzo.hpp"
 
 #include "cello_hydro.h"
-
-void print_fields(int mx, int my);
-
 
 void output_fields(FieldBlock * field_block,
 		   int write_count,
@@ -79,20 +77,14 @@ int main(int argc, char **argv)
   parameters->set_scalar  ("gamma",1.4);
 
   int nx,ny,nz;
-  nx=400;
-  ny=400;
+  nx=100;
+  ny=100;
   nz=1;
 
   int gx,gy,gz;
   gx=3;
   gy=3;
   gz=0;
-
-  // Set missing cello_hydro.h parameters
-  BoundaryRank = 2;
-  BoundaryDimension[0] = nx + 2*gx;
-  BoundaryDimension[1] = ny + 2*gy;
-  BoundaryDimension[2] = nz + 2*gz;
 
   FILE * fp = fopen ("test_MethodEnzoPpm.in","r");
   if (fp) {
@@ -120,10 +112,18 @@ int main(int argc, char **argv)
 
   EnzoUserDescr user_descr(global);
   
-  UserMethod     * user_method = user_descr.add_user_method("ppm");
+  UserMethod   * user_method   = user_descr.add_user_method("ppm");
   UserControl  * user_control  = user_descr.set_user_control("ignored");
   UserTimestep * user_timestep = user_descr.set_user_timestep("ignored");
 
+  // Set missing cello_hydro.h parameters
+  Enzo * enzo = user_descr.enzo();
+  enzo->BoundaryRank = 2;
+  enzo->BoundaryDimension[0] = nx + 2*gx;
+  enzo->BoundaryDimension[1] = ny + 2*gy;
+  enzo->BoundaryDimension[2] = nz + 2*gz;
+
+  
   unit_class ("MethodEnzoPpm");
 
   unit_func("initialize");
@@ -168,12 +168,12 @@ int main(int argc, char **argv)
 	d[i]  = 0.125;
 	vx[i] = 0;
 	vy[i] = 0;
-	te[i] = 0.14 / ((Gamma - 1.0) * d[i]);
+	te[i] = 0.14 / ((enzo->Gamma - 1.0) * d[i]);
       } else {
 	d[i]  = 1.0;
 	vx[i] = 0;
 	vy[i] = 0;
-	te[i] = 1.0 / ((Gamma - 1.0) * d[i]);
+	te[i] = 1.0 / ((enzo->Gamma - 1.0) * d[i]);
       }
     }
   }

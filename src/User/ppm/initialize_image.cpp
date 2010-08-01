@@ -12,6 +12,8 @@
 ///    compiling.
 
 #include "cello_hydro.h"
+#include "enzo.hpp"
+
 #include "image.h"
 
 inline float color_value 
@@ -30,7 +32,7 @@ inline float color_value
   return (image[ix + width*iy]);
 } 
 
-void initialize_image ()
+void Enzo::initialize_image ()
 
 {
 

@@ -69,7 +69,7 @@ int main(int argc, char ** argv)
   // Initialize for generic hydrodynamics
 
   Enzo enzo;
-  initialize_hydro (&enzo);
+  enzo.initialize_hydro ();
 
   // Initialize for specific problem type
 
@@ -77,13 +77,13 @@ int main(int argc, char ** argv)
 
   switch (problem) {
   case problem_ppm_image:
-    initialize_image();
+    enzo.initialize_image();
     break;
   case problem_ppm_implosion:
-    initialize_implosion(size);
+    enzo.initialize_implosion(size);
     break;
   case problem_ppm_implosion3:
-    initialize_implosion3(size);
+    enzo.initialize_implosion3(size);
     break;
   default:
     print_usage(argv[0]);
@@ -111,7 +111,7 @@ int main(int argc, char ** argv)
       printf ("cycle = %6d seconds = %5.0f sim-time = %22.16g dt = %22.16g\n",
 	      cycle,timer.value(),time,dt);
       fflush(stdout);
-      image_dump(problem_name[problem],cycle,lower,upper,monitor);
+      enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
     }
 
     enzo.SolveHydroEquations(cycle, dt);
@@ -123,7 +123,7 @@ int main(int argc, char ** argv)
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     enzo.SetExternalBoundaryValues();
-    image_dump(problem_name[problem],cycle,lower,upper,monitor);
+    enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
   }
 
   delete monitor;

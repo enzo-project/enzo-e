@@ -23,6 +23,13 @@ public: // interface
       enzo_(new Enzo)
   {};
 
+  ~EnzoUserDescr() throw()
+  { delete enzo_; }
+
+  /// Return the Enzo object created in EnzoUserDescr's constructor
+  Enzo * enzo()
+  { return enzo_; };
+
 protected: // functions
 
   /// Create named control method.

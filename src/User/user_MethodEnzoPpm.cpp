@@ -15,8 +15,6 @@
 
 #include "cello_hydro.h"
 
-void print_fields(int mx,int my);
-
 //----------------------------------------------------------------------
 
 void MethodEnzoPpm::initialize (DataDescr * data_descr) throw()
@@ -33,22 +31,22 @@ void MethodEnzoPpm::initialize (DataDescr * data_descr) throw()
 
   Parameters * parameters = global_->parameters();
   parameters->set_current_group("Physics");
-  GridRank = parameters->value_integer ("dimensions",0);
+  enzo_->GridRank = parameters->value_integer ("dimensions",0);
 
-  if (GridRank >= 1) {
+  if (enzo_->GridRank >= 1) {
     add_argument_(argument_field, "velocity_x", access_read_write, data_descr);
   }
-  if (GridRank >= 2) {  
+  if (enzo_->GridRank >= 2) {  
     add_argument_(argument_field, "velocity_y", access_read_write, data_descr);
   }
-  if (GridRank >= 3) {
+  if (enzo_->GridRank >= 3) {
     add_argument_(argument_field, "velocity_z", access_read_write, data_descr);
   }
 
   parameters->set_current_group("Method","ppm");
-  PPMFlatteningParameter = parameters->value_logical("flattening",true);
-  PPMDiffusionParameter  = parameters->value_logical("diffusion",true);
-  PPMSteepeningParameter = parameters->value_logical("steepening",true);
+  enzo_->PPMFlatteningParameter = parameters->value_logical("flattening",true);
+  enzo_->PPMDiffusionParameter  = parameters->value_logical("diffusion",true);
+  enzo_->PPMSteepeningParameter = parameters->value_logical("steepening",true);
 }
 
 //----------------------------------------------------------------------
@@ -80,6 +78,6 @@ void MethodEnzoPpm::advance_block
  ) throw()
 {
 
-  enzo_->SolveHydroEquations (CycleNumber, dt);
+  enzo_->SolveHydroEquations (enzo_->CycleNumber, dt);
 }
 
