@@ -10,29 +10,7 @@
 #include "enzo.hpp"
 #include "cello_hydro.h"
 
-/* function prototypes */
- 
-// int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
-// int FindField(int f, int farray[], int n);
-extern "C" void FORTRAN_NAME(ppm_de)(
-			  float *d, float *E, float *u, float *v, float *w,
-			    float *ge,
-                          int *grav, float *gr_ax, float *gr_ay, float *gr_az,
-			  float *gamma, float *dt, int *cycle_number,
-                            float dx[], float dy[], float dz[],
-			  int *rank, int *in, int *jn, int *kn,
-                            int is[], int ie[],
-			  int *flatten, int *ipresfree,
-			  int *diff, int *steepen, int *idual,
-                            float *eta1, float *eta2,
-			  int *num_subgrids, int leftface[], int rightface[],
-			  int istart[], int iend[], int jstart[], int jend[],
-			  float *standard, int dindex[], int Eindex[],
-			  int uindex[], int vindex[], int windex[],
-			    int geindex[], float *temp,
-                          int *ncolour, float *colourpt, int *coloff,
-                            int colindex[]);
- 
+
 int Enzo::SolveHydroEquations (int CycleNumber, float dt)
 {
 

@@ -68,22 +68,5 @@ typedef long long      long_int;   // use long long
 typedef long long int  Elong_int;  // use long long
 typedef long long unsigned  global_index; // 
 
-extern "C" void FORTRAN_NAME(calc_dt)(
-                  int *rank, int *idim, int *jdim, int *kdim,
-                  int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
-                  ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz, 
-		  float *gamma, int *ipfree, float *aye,
-                  float *d, float *p, float *u, float *v, float *w,
-			     float *dt, float *dtviscous);
- 
- 
-extern "C" void FORTRAN_NAME(calc_dt_ppml)(
-                  int *idim, int *jdim, int *kdim,
-                  int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
-                  ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz,
-                  float *dn, float *vx, float *vy, float *vz, 
-                             float *bx, float *by, float *bz, 
-			     float *dt);
- 
 #endif /* CELLO_HYDRO_H */
 

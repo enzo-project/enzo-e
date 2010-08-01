@@ -21,59 +21,6 @@
 #include "cello_hydro.h"
 #include "enzo.hpp" 
   
-/* function prototypes */
- 
-void my_exit(int status);
-
-/*
-!        i1,j1,k1 - initial point of grid
-!        i2,j2,k2 - last point of grid
-!    ihost,jhost,khost - number of host zones    
-!    dn,vx,vy,vz,bx,by,bz - central primitive variables
-!    dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx - x-right primitive variables
-!    dnry,vxry,vyry,vzry,bxry,byry,bzry - y-right primitive variables
-!    dnrz,vxrz,vyrz,vzrz,bxrz,byrz,bzrz - z-right primitive variables 
-!    f1,f2,f3,f4,f5,f6,f7 - x-fluxes
-!        g1,g2,g3,g4,g5,g6,g7 - y-fluxes
-!    h1,h2,h3,h4,h5,h6,h7 - z-fluxes 
-*/
-
-extern "C" void FORTRAN_NAME(ppml)(float *dn,   float *vx,   float *vy,   float *vz,
-			           float *bx,   float *by,   float *bz,
-			           float *dnrx, float *vxrx, float *vyrx, float *vzrx,
-			           float *bxrx, float *byrx, float *bzrx,
-			           float *dnry, float *vxry, float *vyry, float *vzry,
-			           float *bxry, float *byry, float *bzry,
-			           float *dnrz, float *vxrz, float *vyrz, float *vzrz,
-			           float *bxrz, float *byrz, float *bzrz,
-                                   float *dt, float dx[], float dy[], float dz[],
-                                   int *in, int *jn, int *kn,
-				   int is[], int ie[],
-                                   int *num_subgrids, int leftface[], int rightface[],
-                                   int istart[], int iend[], int jstart[], int jend[],
-                                   float *standard, int dnindex[], 
-                                   int vxindex[], int vyindex[], int vzindex[],
-                                   int bxindex[], int byindex[], int bzindex[]);
-
-/*extern "C" void FORTRAN_NAME(ppm_de)(
-			  float *d, float *E, float *u, float *v, float *w,
-			    float *ge,
-                          int *grav, float *gr_ax, float *gr_ay, float *gr_az,
-			  float *gamma, float *dt,
-                            float dx[], float dy[], float dz[],
-			  int *rank, int *in, int *jn, int *kn,
-                            int is[], int ie[],
-			  float gridvel[], int *flatten, int *ipresfree,
-			  int *diff, int *steepen, int *idual,
-                            float *eta1, float *eta2,
-			  int *num_subgrids, int leftface[], int rightface[],
-			  int istart[], int iend[], int jstart[], int jend[],
-			  float *standard, int dindex[], int Eindex[],
-			  int uindex[], int vindex[], int windex[],
-			    int geindex[], float *temp,
-                          int *ncolour, float *colourpt, int *coloff,
-                            int colindex[]);
-*/
 int Enzo::SolveMHDEquations(int cycle, float dt)
 {
  

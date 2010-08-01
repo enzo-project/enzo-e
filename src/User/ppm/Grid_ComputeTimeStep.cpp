@@ -23,29 +23,6 @@
 
 #include "enzo.hpp"
 #include "cello_hydro.h" 
-// #include <stdlib.h>
-// #include <stdio.h>
-// #include <math.h>
-// #include "macros_and_parameters.h"
-// #include "typedefs.h"
-// #include "global_data.h"
-// #include "Fluxes.h"
-// #include "GridList.h"
-// #include "ExternalBoundary.h"
-// #include "Grid.h"
- 
-/* function prototypes */
- 
-// int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);
-// int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
-extern "C" void FORTRAN_NAME(calc_dt)(
-                  int *rank, int *idim, int *jdim, int *kdim,
-                  int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
-                  ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz, 
-		  float *gamma, int *ipfree, float *aye,
-                  float *d, float *p, float *u, float *v, float *w,
-			     float *dt, float *dtviscous);
- 
  
 float Enzo::ComputeTimeStep()
 {

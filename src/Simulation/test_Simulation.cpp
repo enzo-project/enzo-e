@@ -17,6 +17,7 @@ int main(int argc, char ** argv)
 {
   Mpi::init(&argc,&argv);
 
+  // Warning: unused
   GroupProcess * parallel = new GroupProcessMpi;
 
   unit_init();
