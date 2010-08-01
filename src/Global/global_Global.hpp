@@ -80,6 +80,9 @@ private: // attributes
   /// Parameters object
   Parameters * parameters_;
 
+  ///  Performance object
+  // Performance * performance_;
+
 };
 
 #endif /* GLOBAL_GLOBAL_HPP */

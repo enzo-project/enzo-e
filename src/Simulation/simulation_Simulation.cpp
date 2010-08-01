@@ -104,7 +104,9 @@ Simulation::Simulation(Global * global)
 		   "List parameter 'Method sequence' must have length greater than zero");
   }
 
-  user_descr_ = new UserDescr(global_);
+  // CREATE ENZO DESCRIPTOR OBJECT
+
+  user_descr_ = new EnzoUserDescr(global_);
 
   for (i=0; i<method_count; i++) {
 
