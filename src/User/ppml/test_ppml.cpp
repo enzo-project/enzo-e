@@ -12,6 +12,7 @@
 #include "cello.hpp" 
 #include "cello_hydro.h"
 
+#include "enzo.hpp"
 #include "string.h"
 #include "test_ppml.h"
 #include "parallel.hpp"
@@ -67,7 +68,9 @@ int main(int argc, char * argv[])
 
   // Initialize for generic hydrodynamics
 
-  initialize_hydro ();
+  Enzo enzo;
+
+  initialize_hydro (&enzo);
 
   // Initialize for specific problem type
 
@@ -99,9 +102,9 @@ int main(int argc, char * argv[])
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
-    dt =  MIN(ComputeTimeStep(), time_stop - time);
+    dt =  MIN(enzo.ComputeTimeStep(), time_stop - time);
 
-    SetExternalBoundaryValues();
+    enzo.SetExternalBoundaryValues();
 
     if (dump_frequency && (cycle % dump_frequency) == 0) {
       printf ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
@@ -118,7 +121,7 @@ int main(int argc, char * argv[])
   fflush(stdout);
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
-    SetExternalBoundaryValues();
+    enzo.SetExternalBoundaryValues();
     image_dump(problem_name[problem],cycle,lower,upper,monitor);
   }
 }

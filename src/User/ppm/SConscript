@@ -5,7 +5,7 @@ libraries  = ['hdf5', 'png','boost_thread-mt', '$FORTRANLIBS']
 
 env = env.Clone (LIBS = [components,libraries])
 
-sources_extra = ['../write_hydro.cpp', '../print_fields.cpp']
+sources_extra = ['../print_fields.cpp']
 sources  = [Glob('initialize*cpp'),
             Glob('Cosmology*.cpp'),
             Glob('Grid_*cpp'),
@@ -13,14 +13,13 @@ sources  = [Glob('initialize*cpp'),
            '../cello_hydro.cpp',
            '../data_dump.cpp',
 	   '../image_dump.cpp',
-	   '../initialize_hydro.cpp',
            '../SetExternalBoundary.cpp',
-           'c_message.cpp',
 	   'FindField.cpp',
            'sum_field.cpp',
+	   '../initialize_hydro.cpp',
 	   sources_extra]
 
-
+#'../write_hydro.cpp', 
 
 binaries = [env.Program (['test_ppm.cpp',      sources])]
 

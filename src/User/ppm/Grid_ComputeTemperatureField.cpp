@@ -18,6 +18,7 @@
 // Compute the pressure at the requested time.  The pressure here is
 //   just the ideal-gas equation-of-state.
 
+#include "enzo.hpp"
 #include "cello_hydro.h"
  
 /* Set the mean molecular mass. */
@@ -30,13 +31,13 @@
  
 /* function prototypes */
  
-int FindField(int f, int farray[], int n);
-int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
-		      float *TemperatureUnits, float *TimeUnits,
-		      float *VelocityUnits, ENZO_FLOAT Time);
+// int FindField(int f, int farray[], int n);
+// int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
+// 		      float *TemperatureUnits, float *TimeUnits,
+// 		      float *VelocityUnits, ENZO_FLOAT Time);
  
  
-int ComputeTemperatureField(float *temperature)
+int Enzo::ComputeTemperatureField(float *temperature)
 {
  
   int DensNum, result;

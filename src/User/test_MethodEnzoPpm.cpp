@@ -32,11 +32,6 @@ void output_fields(FieldBlock * field_block,
 		   Monitor * monitor)
 {
 
-  // Create a struct of enzo data (won't work as global data for CHARM++, threading, etc)
-
-  enzo_data_struct enzo_data;
-
-
   double map1[] = {1,1,1, 0,0,0};
   FieldDescr * field_descr = field_block->field_descr();
   int nx,ny,nz;
@@ -53,7 +48,7 @@ void output_fields(FieldBlock * field_block,
     char filename[80];
     std::string field_name = field_descr->field_name(index);
     Scalar * field_values = (Scalar *)field_block->field_values(index);
-    sprintf (filename,"ppm-%s-%d.png",field_name.c_str(),write_count);
+    sprintf (filename,"ppm-%s-%05d.png",field_name.c_str(),write_count);
     monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
   }
   
@@ -68,6 +63,8 @@ int main(int argc, char **argv)
 
   GroupProcess * parallel = new GroupProcessMpi;
 
+  // Create a struct of enzo data (won't work as global data for CHARM++, threading, etc)
+
   Global * global = new Global;
 
   unit_init(parallel->rank(), parallel->size());
@@ -81,11 +78,21 @@ int main(int argc, char **argv)
   parameters->set_integer ("dimensions",2);
   parameters->set_scalar  ("gamma",1.4);
 
+  int nx,ny,nz;
+  nx=400;
+  ny=400;
+  nz=1;
+
+  int gx,gy,gz;
+  gx=3;
+  gy=3;
+  gz=0;
+
   // Set missing cello_hydro.h parameters
   BoundaryRank = 2;
-  BoundaryDimension[0] = 106;
-  BoundaryDimension[1] = 106;
-  BoundaryDimension[2] = 1;
+  BoundaryDimension[0] = nx + 2*gx;
+  BoundaryDimension[1] = ny + 2*gy;
+  BoundaryDimension[2] = nz + 2*gz;
 
   FILE * fp = fopen ("test_MethodEnzoPpm.in","r");
   if (fp) {
@@ -111,8 +118,8 @@ int main(int argc, char **argv)
   int index_velocity_y      = field_descr->insert_field("velocity_y");
   int index_internal_energy = field_descr->insert_field("internal_energy");
 
-  UserDescr user_descr(global);
-
+  EnzoUserDescr user_descr(global);
+  
   UserMethod     * user_method = user_descr.add_user_method("ppm");
   UserControl  * user_control  = user_descr.set_user_control("ignored");
   UserTimestep * user_timestep = user_descr.set_user_timestep("ignored");
@@ -126,18 +133,10 @@ int main(int argc, char **argv)
 
   // Initialize field_block
 
-  int nx,ny,nz;
-  nx=100;
-  ny=100;
-  nz=1;
   field_block->set_field_descr(field_descr);
   field_block->set_dimensions(nx,ny);
   field_block->set_box_extent(0.0,0.3,0.0,0.3);
 
-  int gx,gy,gz;
-  gx=3;
-  gy=3;
-  gz=0;
   field_descr->set_ghosts (0,gx,gy,gz);
   field_descr->set_ghosts (1,gx,gy,gz);
   field_descr->set_ghosts (2,gx,gy,gz);
@@ -188,7 +187,7 @@ int main(int argc, char **argv)
   parameters->set_current_group ("Stopping");
   double time_final = parameters->value_scalar("time",2.5);
   int   cycle_final = parameters->value_integer("cycle",1000);
-  int  cycle_output = 100;
+  int  cycle_output = 10;
 
   double time = 0;
   int cycle = 0;

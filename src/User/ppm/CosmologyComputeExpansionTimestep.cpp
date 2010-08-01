@@ -15,15 +15,16 @@
 /
 ************************************************************************/
  
+#include "enzo.hpp"
 #include "cello_hydro.h"
  
 /* Function prototypes */
  
-int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
+// int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
  
  
  
-int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion)
+int Enzo::CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion)
 {
  
   /* Error check. */

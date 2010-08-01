@@ -16,6 +16,7 @@
 #include "test_ppm.h"
 #include "monitor.hpp"
 #include "performance.hpp"
+#include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
@@ -67,7 +68,8 @@ int main(int argc, char ** argv)
 
   // Initialize for generic hydrodynamics
 
-  initialize_hydro ();
+  Enzo enzo;
+  initialize_hydro (&enzo);
 
   // Initialize for specific problem type
 
@@ -102,8 +104,8 @@ int main(int argc, char ** argv)
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
 
-    SetExternalBoundaryValues();
-    dt =  MIN(ComputeTimeStep(), time_stop - time);
+    enzo.SetExternalBoundaryValues();
+    dt =  MIN(enzo.ComputeTimeStep(), time_stop - time);
 
     if (dump_frequency && (cycle % dump_frequency) == 0) {
       printf ("cycle = %6d seconds = %5.0f sim-time = %22.16g dt = %22.16g\n",
@@ -112,7 +114,7 @@ int main(int argc, char ** argv)
       image_dump(problem_name[problem],cycle,lower,upper,monitor);
     }
 
-    SolveHydroEquations(cycle, dt);
+    enzo.SolveHydroEquations(cycle, dt);
 
   }
 
@@ -120,7 +122,7 @@ int main(int argc, char ** argv)
   fflush(stdout);
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
-    SetExternalBoundaryValues();
+    enzo.SetExternalBoundaryValues();
     image_dump(problem_name[problem],cycle,lower,upper,monitor);
   }
 

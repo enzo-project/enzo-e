@@ -22,6 +22,7 @@
 //
  
 #include "cello_hydro.h"
+#include "enzo.hpp"
  
 /* function prototypes */
  
@@ -30,7 +31,7 @@ void my_exit(int status);
 int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);
 int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
  
-float ComputeTimeStep()
+float Enzo::ComputeTimeStep()
 {
  
   /* initialize */

@@ -29,13 +29,14 @@
 ///                * - the utem given below assumes that mu = 1, so you must
 ///                    multiply the resulting temperature field by mu.
  
+#include "enzo.hpp"
 #include "cello_hydro.h"
 
 /* function prototypes */
  
-int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
+//int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
  
-int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
+int Enzo::CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
 		      float *TemperatureUnits, float *TimeUnits,
 		      float *VelocityUnits, ENZO_FLOAT Time)
 {

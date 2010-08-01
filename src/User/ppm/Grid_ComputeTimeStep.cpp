@@ -21,6 +21,7 @@
 // Somebody fix the error handling in this routine! please.
 //
 
+#include "enzo.hpp"
 #include "cello_hydro.h" 
 // #include <stdlib.h>
 // #include <stdio.h>
@@ -35,8 +36,8 @@
  
 /* function prototypes */
  
-int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);
-int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
+// int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);
+// int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
 extern "C" void FORTRAN_NAME(calc_dt)(
                   int *rank, int *idim, int *jdim, int *kdim,
                   int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
@@ -46,7 +47,7 @@ extern "C" void FORTRAN_NAME(calc_dt)(
 			     float *dt, float *dtviscous);
  
  
-float ComputeTimeStep()
+float Enzo::ComputeTimeStep()
 {
  
   /* initialize */

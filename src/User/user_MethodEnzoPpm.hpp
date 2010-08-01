@@ -17,8 +17,10 @@ class MethodEnzoPpm : public UserMethod {
 
 public: // interface
 
-  MethodEnzoPpm(Global * global):
-    UserMethod(global)
+  MethodEnzoPpm(Global * global,
+		Enzo * enzo):
+    UserMethod(global),
+    enzo_(enzo)
   {};
 
   /// Perform any method-specific initialization
@@ -48,7 +50,11 @@ public: // interface
 
   std::string method_name() const throw() 
   { return "ppm"; };
-  
+
+private:
+
+  Enzo * enzo_;
+
 };
 
 #endif /* USER_METHOD_ENZO_PPM_HPP */

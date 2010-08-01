@@ -18,10 +18,11 @@
 // Find field type field in array field_type, returning the index into the
 //   field array or -1 if it is not there.
 
+#include "enzo.hpp"
 #include "cello_hydro.h"
  
  
-int FindField(int field, int farray[], int numfields)
+int Enzo::FindField(int field, int farray[], int numfields)
 {
   for (int i = 0; i < numfields; i++)
     if (field == farray[i])

@@ -14,7 +14,8 @@
 /  NOTE:
 /
 ************************************************************************/
- 
+
+#include "enzo.hpp" 
 #include "cello_hydro.h"
 
 #define OMEGA_TOLERANCE 1.0e-5
@@ -31,7 +32,7 @@
  
 // function prototypes
  
-int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt)
+int Enzo::CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt)
 {
  
   /* Error check. */

@@ -17,13 +17,12 @@
  
 // Compute the ratio of specific heats.
 
+#include "enzo.hpp"
 #include "cello_hydro.h"
  
 /* function prototypes */
- 
- 
- 
-int ComputeGammaField(float *GammaField)
+
+int Enzo::ComputeGammaField(float *GammaField)
 {
  
   int DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum, HMNum, H2INum, H2IINum,

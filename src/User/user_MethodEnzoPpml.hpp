@@ -18,8 +18,10 @@ class MethodEnzoPpml : public UserMethod {
 public: // interface
 
 /// Creae a new MethodEnzoPpml object
-MethodEnzoPpml(Global * global)
-  : UserMethod (global)
+MethodEnzoPpml(Global * global,
+	       Enzo * enzo)
+  : UserMethod (global),
+    enzo_(enzo)
   {};
 
   /// Perform any method-specific initialization
@@ -53,6 +55,7 @@ MethodEnzoPpml(Global * global)
   
 private: // attributes
 
+  Enzo * enzo_;
 
 };
 

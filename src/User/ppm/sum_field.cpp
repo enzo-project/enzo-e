@@ -6,10 +6,10 @@
 /// @date      Sat Aug 29 23:45:03 PDT 2009
 /// @brief     Return the sum of the internal values of the grid array
 
+#include "enzo.hpp"
 #include "cello_hydro.h"
  
-float sum_field (int field)
-
+float Enzo::sum_field (int field)
 {
   if (BaryonField[field] == NULL) return -1;
   float sum = 0.0;

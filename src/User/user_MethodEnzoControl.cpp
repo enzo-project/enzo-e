@@ -28,7 +28,7 @@ void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
 
   parameters->set_current_group ("Physics");
 
-  ComovingCoordinates  = parameters->value_logical ("cosmology",false);
+  enzo_->ComovingCoordinates  = parameters->value_logical ("cosmology",false);
   Gamma                = parameters->value_scalar  ("gamma",5.0/3.0);
 
   //  if (ComovingCoordinates) {

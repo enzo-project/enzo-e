@@ -7,14 +7,15 @@
 /// @brief     Initialize variables in cello_hydro.h
 
 #include "cello_hydro.h"
- 
-void initialize_hydro ()
+#include "enzo.hpp"
+
+void initialize_hydro (Enzo * enzo)
 
 {
 
   // Cosmology
 
-  ComovingCoordinates             = 0;    // Physics: Cosmology
+  enzo->ComovingCoordinates             = 0;    // Physics: Cosmology
   UseMinimumPressureSupport       = 0;    // call UseMinimumPressureSupport() ?
   MinimumPressureSupportParameter = 100;  // SetMinimumSupport() Enzo parameter
   ComovingBoxSize                 = 64;   // Physics cosmology: Mpc/h at z=0

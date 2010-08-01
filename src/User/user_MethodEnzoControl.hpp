@@ -20,8 +20,10 @@ public: // interface
 
   /// Create a new MethodEnzoControl
 
-  MethodEnzoControl(Global * global)
-    : UserControl(global)
+  MethodEnzoControl(Global * global,
+		    Enzo * enzo)
+    : UserControl(global),
+      enzo_(enzo)
   {};
 
   /// Perform any global initialization independent of specific method
@@ -46,6 +48,10 @@ public: // interface
 		     bool xm=true, bool xp=true, 
 		     bool ym=true, bool yp=true, 
 		     bool zm=true, bool zp=true) throw();
+
+private:
+  
+  Enzo * enzo_;
 };
 
 #endif /* USER_METHOD_ENZO_CONTROL_HPP */

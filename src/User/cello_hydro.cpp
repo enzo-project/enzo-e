@@ -5,7 +5,7 @@
 
 // Cosmology
 
-int   ComovingCoordinates;
+// int   ComovingCoordinates;
 int   UseMinimumPressureSupport;
 float MinimumPressureSupportParameter;
 float ComovingBoxSize;

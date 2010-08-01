@@ -7,14 +7,15 @@
 /// @ingroup   Enzo
 /// @brief     Set the energy to provide minimal pressure support
 
+#include "enzo.hpp"
 #include "cello_hydro.h"
  
 /* function prototypes */
  
-int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
+// int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
  
  
-int SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
+int Enzo::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
 {
   if (NumberOfBaryonFields > 0) {
  

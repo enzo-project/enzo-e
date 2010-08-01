@@ -11,7 +11,6 @@
 const bool debug = false;
  
 void initialize_implosion (int size_param)
-
 {
 
   int grid_size [] = { size_param, size_param };

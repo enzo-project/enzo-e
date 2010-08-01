@@ -6,9 +6,10 @@
 /// @date      Sat Aug 29 23:45:03 PDT 2009
 /// @brief     Print the active values of the grid field
 
+#include "enzo.hpp"
 #include "cello_hydro.h"
  
-void print_field (int field)
+void Enzo::print_field (int field)
 
 {
   if (BaryonField[field] == NULL) return -1;

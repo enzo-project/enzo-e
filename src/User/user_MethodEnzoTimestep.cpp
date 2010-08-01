@@ -6,6 +6,7 @@
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the MethodEnzoTimestep class
 
+#include "enzo.hpp"
 #include "data.hpp"
 #include "user.hpp"
 #include "parameters.hpp"
@@ -14,12 +15,14 @@
 
 //----------------------------------------------------------------------
 
-MethodEnzoTimestep::MethodEnzoTimestep () throw()
-  : pressure_field_(0),
+MethodEnzoTimestep::MethodEnzoTimestep (Enzo * enzo) throw()
+  : UserTimestep(),
+    pressure_field_(0),
     afloat_(0),
     dtBaryons_(0),
     dtViscous_(0),
-    dtExpansion_(0)
+    dtExpansion_(0),
+    enzo_(enzo)
 {
 
 }
@@ -64,8 +67,8 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
   float * velocity_z_field = (float *)field_block->field_values(field_velocity_z);
 
   ENZO_FLOAT a = 1, dadt;
-  if (ComovingCoordinates)
-    CosmologyComputeExpansionFactor(Time, &a, &dadt);
+  if (enzo_->ComovingCoordinates)
+    enzo_->CosmologyComputeExpansionFactor(Time, &a, &dadt);
   afloat_ = float(a);
   //  float dt, dtTemp;
   dtBaryons_      = HUGE_VALF;
@@ -101,9 +104,9 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
 
   int  result;
   if (DualEnergyFormalism)
-    result = ComputePressureDualEnergyFormalism(Time, pressure_field_);
+    result = enzo_->ComputePressureDualEnergyFormalism(Time, pressure_field_);
   else
-    result = ComputePressure(Time, pressure_field_);
+    result = enzo_->ComputePressure(Time, pressure_field_);
  
   if (result == ENZO_FAIL) {
     fprintf(stderr, "Error in grid->ComputePressure.\n");
@@ -133,8 +136,8 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
  
   /* 3) Find dt from expansion. */
  
-  if (ComovingCoordinates)
-    if (CosmologyComputeExpansionTimestep(Time, &dtExpansion_) == ENZO_FAIL) {
+  if (enzo_->ComovingCoordinates)
+    if (enzo_->CosmologyComputeExpansionTimestep(Time, &dtExpansion_) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }

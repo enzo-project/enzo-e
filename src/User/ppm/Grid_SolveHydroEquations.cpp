@@ -7,12 +7,13 @@
 /// @ingroup   Enzo
 /// @brief     Solve the hydro equations, saving subgrid fluxes
  
+#include "enzo.hpp"
 #include "cello_hydro.h"
 
 /* function prototypes */
  
-int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
-int FindField(int f, int farray[], int n);
+// int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
+// int FindField(int f, int farray[], int n);
 extern "C" void FORTRAN_NAME(ppm_de)(
 			  float *d, float *E, float *u, float *v, float *w,
 			    float *ge,
@@ -32,10 +33,7 @@ extern "C" void FORTRAN_NAME(ppm_de)(
                           int *ncolour, float *colourpt, int *coloff,
                             int colindex[]);
  
-int SolveHydroEquations
-(
- int   CycleNumber, 
- float dt)
+int Enzo::SolveHydroEquations (int CycleNumber, float dt)
 {
 
   int NumberOfSubgrids = 0;

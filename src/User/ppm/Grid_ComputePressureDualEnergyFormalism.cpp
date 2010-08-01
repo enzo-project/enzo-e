@@ -10,15 +10,16 @@
 /// Compute the pressure at the requested time.  The pressure here is
 /// just the ideal-gas equation-of-state (dual energy version).
 
+#include "enzo.hpp"
 #include "cello_hydro.h"
  
 /* function prototypes */
  
-int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
-		      float *TemperatureUnits, float *TimeUnits,
-		      float *VelocityUnits, ENZO_FLOAT Time);
+// int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
+// 		      float *TemperatureUnits, float *TimeUnits,
+// 		      float *VelocityUnits, ENZO_FLOAT Time);
  
-int ComputePressureDualEnergyFormalism(ENZO_FLOAT time, float *pressure)
+int Enzo::ComputePressureDualEnergyFormalism(ENZO_FLOAT time, float *pressure)
 {
  
   /* declarations */

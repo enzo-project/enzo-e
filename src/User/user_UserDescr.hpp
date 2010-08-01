@@ -63,24 +63,23 @@ public: // interface
   UserTimestep * user_timestep ()
   { return user_timestep_; };
 
-private: // functions
+protected: // functions
 
-  /// Create named control method.  IMPLEMENTATION IN USER SPACE
-  UserControl * create_user_control_ (std::string name_user_control);
+  /// Create named control method.
+  virtual UserControl * create_user_control_ (std::string name_user_control) = 0;
 
-  /// Create named timestep method.  IMPLEMENTATION IN USER SPACE
-  UserTimestep * create_user_timestep_ (std::string name_user_timestep);
+  /// Create named timestep method.
+  virtual UserTimestep * create_user_timestep_ (std::string name_user_timestep) = 0;
 
-  /// Create named user method.  IMPLEMENTATION IN USER SPACE
-  UserMethod * create_user_method_ (std::string name_user_method);
+  /// Create named user method.
+  virtual UserMethod * create_user_method_ (std::string name_user_method) = 0;
 
-private: // attributes
+protected: // attributes
 
   UserControl *             user_control_;
   UserTimestep *            user_timestep_;
   std::vector<UserMethod *> user_method_;
   Global     *              global_;
-
 };
 
 #endif /* USER_USER_DESCR_HPP */
