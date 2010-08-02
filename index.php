@@ -2,6 +2,10 @@
 <body>
   <h1>Cello</h1>
 
+<?php
+    echo "Hello World";
+?>
+
 <h3>test_Affinity</h3>
 <h3>test_Array</h3>
 <h3>test_Block</h3>
@@ -15,6 +19,7 @@
 <h3>test_Memory</h3>
 <h3>test_Mesh</h3>
 <h3>test_Monitor</h3>
+
 
 <img src="test1.png"></img>
 <img src="test2.png"></img>
@@ -30,6 +35,7 @@
 <img width=320  src="slice-ppm-image-000010-z.png"></img>
 <h4>2D implosion</h4>
 <img width=320 src="slice-ppm-implosion-000000-z.png"></img>
+<img src="ppm-density.gif"></img>
 <h4>3D implosion</h4>
 <img width=320 src="project-ppm-implosion3-000000-z.png"></img>
 

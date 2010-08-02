@@ -192,7 +192,11 @@ int main(int argc, char **argv)
   double time = 0;
   int cycle = 0;
   //  initialize_implosion(nx+gx);
-    user_method  ->initialize_block(data_block);
+  user_method  ->initialize_block(data_block);
+
+  // Initial data dump
+  output_fields(field_block,cycle,4,indices,monitor);
+
   while (time < time_final && cycle <= cycle_final) {
 
     user_control ->initialize_block(data_block);
@@ -214,6 +218,7 @@ int main(int argc, char **argv)
     ++cycle;
     time += MIN(dt,time_final-time);
 
+    // data dump
     if (cycle % cycle_output == 0) {
       output_fields(field_block,cycle,4,indices,monitor);
     }

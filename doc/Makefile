@@ -29,7 +29,7 @@ notes:
 	$(MAKE) -C notes
 vision:
 	cd vision; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C vision
+	$(MAKE) -C vision pdf
 performance:
 	cd performance; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C performance

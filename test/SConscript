@@ -8,10 +8,14 @@ Import('serial_run')
 run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS > $TARGET")
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET")
+run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS")
+make_gif     = Builder(action = "convert ${ARGS}*png > $TARGET")
 
-env.Append(BUILDERS = { 'RunSerial':   run_serial } ) 
-env.Append(BUILDERS = { 'RunParallel' :   run_parallel } )
-env.Append(BUILDERS = { 'RunParse' : run_parse } )
+env.Append(BUILDERS = { 'RunSerial':    run_serial } ) 
+env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
+env.Append(BUILDERS = { 'RunParse' :    run_parse } )
+env.Append(BUILDERS = { 'MakeGif' :     make_gif } )
+env.Append(BUILDERS = { 'RunMethod' :   run_method } )
 
 env.RunSerial('test_Data.out',        '#/bin/test_Data')
 env.RunSerial('test_Error.out',       '#/bin/test_Error')
@@ -68,7 +72,8 @@ env.RunParse('test_parse_scalar.out',     '#/bin/test_Parse', ARGS='test/parse_s
 env.RunParse('test_parse_implosion.out',  '#/bin/test_Parse', ARGS='input/implosion.in')
 env.RunParse('test_parse_shock-pool.out', '#/bin/test_Parse', ARGS='input/shock-pool.in')
 
-env.RunSerial('test_MethodEnzoPpm.out', '#/bin/test_MethodEnzoPpm')
+env.RunMethod('density-ppm-00000.png', '#/bin/test_MethodEnzoPpm', ARGS='test_MethodEnzoPpm.out')
+env.MakeGif('../density-ppm.gif', '#/ppm-density-00000.png', ARGS='density-ppm')
 
 # env.RunParallel('test_affinity.out',   '#/bin/test_Affinity')
 # env.RunParallel('test_mpi.out',        '#/bin/test_Mpi')
