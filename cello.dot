@@ -1,0 +1,29 @@
+digraph cello {
+   Data -> {Field Error};
+
+   Data        [ shape=box];
+   Disk        [ shape=box];
+   Distribute  [ shape=box];
+   Enzo        [ shape=box];
+   Error       [ shape=box];
+   Field       [ shape=box];
+   Global      [ shape=box];
+   Makefile    [ shape=box];
+   Memory      [ shape=box];
+   Mesh        [ shape=box];
+   Method      [ shape=box];
+   Monitor     [ shape=box];
+   Parallel    [ shape=box];
+   Parameters  [ shape=box];
+   Particle    [ shape=box];
+   Particles   [ shape=box];
+   Performance [ shape=box];
+   Portal      [ shape=box];
+   Schedule    [ shape=box];
+   SConscript  [ shape=box];
+   Simulation  [ shape=box];
+   Task        [ shape=box];
+   Test        [ shape=box];
+   User        [ shape=box];
+
+}
