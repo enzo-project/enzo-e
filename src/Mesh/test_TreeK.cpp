@@ -29,14 +29,13 @@ const bool geomview = false;
 const int  cell_size = 1;
 const int  line_width = 1;
 const int  gray_threshold = 127;
-const int sphere_size = 128;
 
 
 //----------------------------------------------------------------------
 
-int * create_level_array (int * n0, int * ny, int max_levels);
+int * create_image_array (int * nx, int * ny, int max_levels);
 int * create_level_array3 (int * n3, int max_levels);
-int * create_sphere (int n3, int max_levels);
+int * create_sphere_array (int * n, int max_levels);
 void write_image(Monitor * monitor, std::string filename, 
 		 float * image, int nx, int ny, int nz=0 );
 
@@ -84,14 +83,13 @@ int main(int argc, char ** argv)
     nx = 1;
     ny = 1;
     nz = 1;
-    level_array = create_level_array(&nx,&ny,max_level);
+    level_array = create_image_array(&nx,&ny,max_level);
 
   } else {
 
-    nx = sphere_size;
-    ny = sphere_size;
-    nz = sphere_size;
-    level_array = create_sphere(sphere_size,max_level);
+    level_array = create_sphere_array(&nx,max_level);
+    ny = nx;
+    nz = nx;
   }
 
   create_tree (memory,level_array, nx, ny, nz, refinement, dimension, filename,max_level);
@@ -121,7 +119,7 @@ void print_usage(int argc, char **argv)
 // read in the gimp-generated image data into a level array
 // values are set to [0:max_levels)
 
-int * create_level_array (int * nx, int * ny, int max_levels)
+int * create_image_array (int * nx, int * ny, int max_levels)
 {
 
   int size = (width > height) ? width: height;
@@ -203,35 +201,39 @@ int * create_level_array3 (int * n3, int max_levels)
 
 //----------------------------------------------------------------------
 
-int * create_sphere (int n3, int max_levels)
+int * create_sphere_array (int * n3, int max_levels)
 {
 
-  int * level_array = new int [n3*n3*n3];
+  *n3 = int(exp(max_levels * log (2.0)) + 0.5) * 2;
+  int n = *n3;
 
-  for (int i=0; i<n3*n3*n3; i++) level_array[i] = 0;
+  printf ("%d %d\n",max_levels,n);
+  int * level_array = new int [n*n*n];
+
+  for (int i=0; i<n*n*n; i++) level_array[i] = 0;
 
   const double R = 0.3;  // radius
   double R2 = R*R;
   
   double x,y,z;
 
-  for (int iz=0; iz<n3/2; iz++) {
-    z = double(iz) / n3 - 0.5;
-    for (int iy=0; iy<n3/2; iy++) {
-      y = double(iy) / n3 - 0.5;
-      for (int ix=0; ix<n3/2; ix++) {
-	x = double(ix) / n3 - 0.5;
+  for (int iz=0; iz<n/2; iz++) {
+    z = double(iz) / n - 0.5;
+    for (int iy=0; iy<n/2; iy++) {
+      y = double(iy) / n - 0.5;
+      for (int ix=0; ix<n/2; ix++) {
+	x = double(ix) / n - 0.5;
 	double r2 = x*x + y*y + z*z;
 	double v = r2 < R2 ? max_levels : 0;
 
-	level_array[index(     ix,     iy,     iz,n3)] = v;
-	level_array[index(n3-ix-1,     iy,     iz,n3)] = v;
-	level_array[index(     ix,n3-iy-1,     iz,n3)] = v;
-	level_array[index(n3-ix-1,n3-iy-1,     iz,n3)] = v;
-	level_array[index(     ix,     iy,n3-iz-1,n3)] = v;
-	level_array[index(n3-ix-1,     iy,n3-iz-1,n3)] = v;
-	level_array[index(     ix,n3-iy-1,n3-iz-1,n3)] = v;
-	level_array[index(n3-ix-1,n3-iy-1,n3-iz-1,n3)] = v;
+	level_array[index(     ix,     iy,     iz,n)] = v;
+	level_array[index(n-ix-1,     iy,     iz,n)] = v;
+	level_array[index(     ix,n-iy-1,     iz,n)] = v;
+	level_array[index(n-ix-1,n-iy-1,     iz,n)] = v;
+	level_array[index(     ix,     iy,n-iz-1,n)] = v;
+	level_array[index(n-ix-1,     iy,n-iz-1,n)] = v;
+	level_array[index(     ix,n-iy-1,n-iz-1,n)] = v;
+	level_array[index(n-ix-1,n-iy-1,n-iz-1,n)] = v;
       }
     }
   }

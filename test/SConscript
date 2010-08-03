@@ -9,13 +9,15 @@ run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS > $TARGET")
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET")
 run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS")
-make_gif     = Builder(action = "convert ${ARGS} $TARGET")
+run_tree     = Builder(action = serial_run   + " $SOURCE $ARGS > $OUT")
+make_movie   = Builder(action = "convert ${ARGS} $TARGET; chmod a+r $TARGET; rm ${ARGS}")
 
-env.Append(BUILDERS = { 'RunSerial':    run_serial } ) 
+env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
 env.Append(BUILDERS = { 'RunParallel' : run_parallel } )
-env.Append(BUILDERS = { 'RunParse' :    run_parse } )
-env.Append(BUILDERS = { 'MakeGif' :     make_gif } )
-env.Append(BUILDERS = { 'RunMethod' :   run_method } )
+env.Append(BUILDERS = { 'RunParse'    : run_parse } )
+env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
+env.Append(BUILDERS = { 'RunMethod'   : run_method } )
+env.Append(BUILDERS = { 'RunTree'     : run_tree } )
 
 env.RunSerial('test_Data.out',        '#/bin/test_Data')
 env.RunSerial('test_Error.out',       '#/bin/test_Error')
@@ -32,21 +34,23 @@ env.RunSerial('test_Schedule.out',    '#/bin/test_Schedule')
 env.RunSerial('test_Simulation.out',  '#/bin/test_Simulation')
 
 env.RunSerial('test_TreeK-D2-R2-L6.out', '#/bin/test_TreeK', ARGS='2 2 6')
+env.RunSerial('test_TreeK-D2-R2-L7.out', '#/bin/test_TreeK', ARGS='2 2 7')
 env.RunSerial('test_TreeK-D2-R2-L8.out', '#/bin/test_TreeK', ARGS='2 2 8')
+env.RunSerial('test_TreeK-D2-R2-L9.out', '#/bin/test_TreeK', ARGS='2 2 9')
 env.RunSerial('test_TreeK-D2-R2-L10.out','#/bin/test_TreeK', ARGS='2 2 10')
-env.RunSerial('test_TreeK-D2-R2-L11.out','#/bin/test_TreeK', ARGS='2 2 11')
-env.RunSerial('test_TreeK-D2-R2-L12.out','#/bin/test_TreeK', ARGS='2 2 12')
+
 env.RunSerial('test_TreeK-D2-R4-L6.out', '#/bin/test_TreeK', ARGS='2 4 6')
 env.RunSerial('test_TreeK-D2-R4-L8.out', '#/bin/test_TreeK', ARGS='2 4 8')
 env.RunSerial('test_TreeK-D2-R4-L10.out','#/bin/test_TreeK', ARGS='2 4 10')
-env.RunSerial('test_TreeK-D2-R4-L11.out','#/bin/test_TreeK', ARGS='2 4 11')
-env.RunSerial('test_TreeK-D2-R4-L12.out','#/bin/test_TreeK', ARGS='2 4 12')
 
+env.RunSerial('test_TreeK-D3-R2-L4.out', '#/bin/test_TreeK', ARGS='3 2 4')
+env.RunSerial('test_TreeK-D3-R2-L5.out', '#/bin/test_TreeK', ARGS='3 2 5')
 env.RunSerial('test_TreeK-D3-R2-L6.out', '#/bin/test_TreeK', ARGS='3 2 6')
 env.RunSerial('test_TreeK-D3-R2-L7.out', '#/bin/test_TreeK', ARGS='3 2 7')
 env.RunSerial('test_TreeK-D3-R2-L8.out', '#/bin/test_TreeK', ARGS='3 2 8')
+
+env.RunSerial('test_TreeK-D3-R4-L4.out', '#/bin/test_TreeK', ARGS='3 4 4')
 env.RunSerial('test_TreeK-D3-R4-L6.out', '#/bin/test_TreeK', ARGS='3 4 6')
-env.RunSerial('test_TreeK-D3-R4-L7.out', '#/bin/test_TreeK', ARGS='3 4 7')
 env.RunSerial('test_TreeK-D3-R4-L8.out', '#/bin/test_TreeK', ARGS='3 4 8')
 
 env.RunSerial('test_ppml_implosion.out', '#/bin/test_ppml', 
@@ -72,8 +76,10 @@ env.RunParse('test_parse_scalar.out',     '#/bin/test_Parse', ARGS='test/parse_s
 env.RunParse('test_parse_implosion.out',  '#/bin/test_Parse', ARGS='input/implosion.in')
 env.RunParse('test_parse_shock-pool.out', '#/bin/test_Parse', ARGS='input/shock-pool.in')
 
-env.RunMethod('density-ppm-00000.png', '#/bin/test_MethodEnzoPpm', ARGS='test_MethodEnzoPpm.out')
-env.MakeGif('../density-ppm.gif', '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
+
+env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS='test_MethodEnzoPpm.out')
+
+# env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
 
 # env.RunParallel('test_affinity.out',   '#/bin/test_Affinity')
 # env.RunParallel('test_mpi.out',        '#/bin/test_Mpi')
