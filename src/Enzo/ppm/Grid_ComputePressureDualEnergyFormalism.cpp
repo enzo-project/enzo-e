@@ -4,7 +4,6 @@
 /// @file      Grid_ComputePressureDualEnergyFormalism.cpp
 /// @author    Greg Bryan
 /// @date      November, 1994
-/// @ingroup   Enzo
 /// @brief     (COMPUTE THE PRESSURE FIELD AT THE GIVEN TIME) - DUAL ENERGY
 ///
 /// Compute the pressure at the requested time.  The pressure here is

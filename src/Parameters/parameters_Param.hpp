@@ -35,7 +35,7 @@ extern "C" {
 class Param {
 
   /// @class    Param
-  /// @ingroup  Parameter
+  /// @ingroup  Parameters
   /// @brief    Represents and evaluates various parameter types and expressions
 
   friend class Parameters;

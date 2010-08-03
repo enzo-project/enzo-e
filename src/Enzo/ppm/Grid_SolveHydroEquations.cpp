@@ -4,7 +4,6 @@
 /// @file      Grid_SolveHydroEquations.cpp
 /// @author    Greg Bryan
 /// @date      November, 1994
-/// @ingroup   Enzo
 /// @brief     Solve the hydro equations, saving subgrid fluxes
  
 #include "enzo.hpp"

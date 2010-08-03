@@ -12,7 +12,7 @@
 class EnzoUserDescr : public UserDescr {
 
   /// @class    EnzoUserDescr
-  /// @ingroup  User
+  /// @ingroup  Enzo
   /// @brief    Top-level description of user-implemented components
 
 public: // interface

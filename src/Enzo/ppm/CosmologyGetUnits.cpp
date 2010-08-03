@@ -4,7 +4,6 @@
 /// @file      CosmologyGetUnits.cpp
 /// @author    Greg Bryan
 /// @date      April, 1995
-/// @ingroup   Enzo
 /// @brief     Compute and return the cosmology units
 ///
 ///     Returns the cosmology units:

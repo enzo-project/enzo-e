@@ -13,7 +13,7 @@
 class UserTimestep {
 
   /// @class    UserTimestep
-  /// @ingroup  Method
+  /// @ingroup  User
   /// @brief    Encapsulate determination of timestep
 
 public: // interface

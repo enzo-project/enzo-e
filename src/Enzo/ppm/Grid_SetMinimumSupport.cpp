@@ -4,7 +4,6 @@
 /// @file      Grid_SetMinimumSupport.cpp
 /// @author    Greg Bryan
 /// @date      November, 1998
-/// @ingroup   Enzo
 /// @brief     Set the energy to provide minimal pressure support
 
 #include "enzo.hpp"
