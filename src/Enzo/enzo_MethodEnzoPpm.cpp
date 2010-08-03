@@ -1,7 +1,7 @@
-// $Id: user_MethodEnzoPpm.cpp 1262 2010-03-03 15:44:05Z bordner $
+// $Id: enzo_MethodEnzoPpm.cpp 1262 2010-03-03 15:44:05Z bordner $
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file     user_MethodEnzoPpm.cpp
+/// @file     enzo_MethodEnzoPpm.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 17:05:23 PDT 2010
 /// @brief    Implements the MethodEnzoPpm class

@@ -1,13 +1,13 @@
-// $Id: user_MethodEnzoControl.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: enzo_MethodEnzoControl.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file     user_MethodEnzoControl.hpp
+/// @file     enzo_MethodEnzoControl.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Apr  1 16:14:38 PDT 2010
 /// @brief    Implementation of Enzo's UserControl
 
-#ifndef USER_METHOD_ENZO_CONTROL_HPP
-#define USER_METHOD_ENZO_CONTROL_HPP
+#ifndef ENZO_METHOD_ENZO_CONTROL_HPP
+#define ENZO_METHOD_ENZO_CONTROL_HPP
 
 
 class MethodEnzoControl : public UserControl {
@@ -54,4 +54,4 @@ private:
   EnzoDescr * enzo_;
 };
 
-#endif /* USER_METHOD_ENZO_CONTROL_HPP */
+#endif /* ENZO_METHOD_ENZO_CONTROL_HPP */

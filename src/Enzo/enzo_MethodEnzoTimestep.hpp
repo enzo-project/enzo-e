@@ -1,13 +1,13 @@
-// $Id: user_MethodEnzoTimestep.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: enzo_MethodEnzoTimestep.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     user_MethodEnzoTimestep.hpp 
+/// @file     enzo_MethodEnzoTimestep.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
 /// @brief    Declaration for the MethodEnzoTimestep component
 
-#ifndef USER_METHOD_ENZO_TIMESTEP_HPP
-#define USER_METHOD_ENZO_TIMESTEP_HPP
+#ifndef ENZO_METHOD_ENZO_TIMESTEP_HPP
+#define ENZO_METHOD_ENZO_TIMESTEP_HPP
 
 class MethodEnzoTimestep : public UserTimestep {
 
@@ -56,4 +56,4 @@ protected: // functions
   EnzoDescr * enzo_;
 };
 
-#endif /* USER_METHOD_ENZO_TIMESTEP_HPP */
+#endif /* ENZO_METHOD_ENZO_TIMESTEP_HPP */

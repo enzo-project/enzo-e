@@ -1,13 +1,13 @@
-// $Id: user_MethodEnzoPpml.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: enzo_MethodEnzoPpml.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file     user_MethodEnzoPpml.hpp
+/// @file     enzo_MethodEnzoPpml.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon May 17 14:16:01 PDT 2010
 /// @brief    Implementation of Enzo PPML method
 
-#ifndef USER_METHOD_ENZO_PPML_HPP
-#define USER_METHOD_ENZO_PPML_HPP
+#ifndef ENZO_METHOD_ENZO_PPML_HPP
+#define ENZO_METHOD_ENZO_PPML_HPP
 
 class MethodEnzoPpml : public UserMethod {
 
@@ -59,4 +59,4 @@ private: // attributes
 
 };
 
-#endif /* USER_METHOD_ENZO_PPML_HPP */
+#endif /* ENZO_METHOD_ENZO_PPML_HPP */

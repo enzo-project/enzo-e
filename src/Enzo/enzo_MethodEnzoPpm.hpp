@@ -1,13 +1,13 @@
-// $Id: user_MethodEnzoPpm.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id: enzo_MethodEnzoPpm.hpp 1258 2010-03-02 01:07:36Z bordner $
 // See LICENSE_ENZO file for license and copyright information
 
-/// @file     user_MethodEnzoPpm.hpp
+/// @file     enzo_MethodEnzoPpm.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Apr  1 16:14:38 PDT 2010
 /// @brief    Implementation of Enzo PPM hydro method
 
-#ifndef USER_METHOD_ENZO_PPM_HPP
-#define USER_METHOD_ENZO_PPM_HPP
+#ifndef ENZO_METHOD_ENZO_PPM_HPP
+#define ENZO_METHOD_ENZO_PPM_HPP
 
 class MethodEnzoPpm : public UserMethod {
 
@@ -57,4 +57,4 @@ private:
 
 };
 
-#endif /* USER_METHOD_ENZO_PPM_HPP */
+#endif /* ENZO_METHOD_ENZO_PPM_HPP */

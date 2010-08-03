@@ -1,13 +1,13 @@
-// $Id: parallel_ParallelMpi.hpp 1633 2010-07-21 18:47:53Z bordner $
+// $Id: parallel_GroupProcessMpi.hpp 1633 2010-07-21 18:47:53Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     parallel_Mpi.hpp
+/// @file     parallel_GroupProcessMpi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Oct 15 10:40:37 PDT 2009 
-/// @brief    Interface for the ParallelMpi class
+/// @brief    Interface for the GroupProcessMpi class
 
-#ifndef PARALLEL_PARALLEL_MPI_HPP
-#define PARALLEL_PARALLEL_MPI_HPP
+#ifndef PARALLEL_GROUP_PROCESS_MPI_HPP
+#define PARALLEL_GROUP_PROCESS_MPI_HPP
 
 enum send_type {
   send_standard,
@@ -122,5 +122,5 @@ private: // attributes
 
 };
 
-#endif /* PARALLEL_PARALLEL_MPI_HPP */
+#endif /* PARALLEL_GROUP_PROCESS_MPI_HPP */
 

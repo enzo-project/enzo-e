@@ -23,5 +23,5 @@
 #include "enzo_MethodEnzoPpml.hpp"
 #include "enzo_EnzoUserDescr.hpp"
 
-#endif /* USER_HPP */
+#endif /* ENZO_HPP */
 

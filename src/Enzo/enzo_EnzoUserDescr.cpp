@@ -1,7 +1,7 @@
-// $Id: user_EnzoUserDescr.cpp 1388 2010-04-20 23:57:46Z bordner $
+// $Id: enzo_EnzoUserDescr.cpp 1388 2010-04-20 23:57:46Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     user_EnzoUserDescr.cpp
+/// @file     enzo_EnzoUserDescr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @date     Tue May 11 18:06:50 PDT 2010
