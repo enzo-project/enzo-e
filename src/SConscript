@@ -6,6 +6,8 @@ Import('env')
 # env = Environment(BUILDERS = {'Cccc': cccc})
 # env.Cccc("cccc");
 
+SConscript('Enzo/SConscript')
+
 SConscript('Data/SConscript')
 SConscript('Disk/SConscript')
 SConscript('Distribute/SConscript')
@@ -35,8 +37,8 @@ components = ['schedule',
               'monitor',
               'parameters',
               'simulation', 
+              'enzo',
               'user',
-#              'method', 
               'data',
               'field',
               'global',
