@@ -206,14 +206,14 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <th>velocity_y</th>
 <th>total_energy</th></tr>
 <tr>
-<td>cycle = 0</td>
+<th>cycle = 0</th>
 <td><img width=200 src="ppm-density-00000.png"></img></td>
 <td><img width=200 src="ppm-velocity_x-00000.png"></img></td>
 <td><img width=200 src="ppm-velocity_y-00000.png"></img></td>
 <td><img width=200 src="ppm-total_energy-00000.png"></img></td>
 </tr>
 <tr>
-<td>cycle = 100</td>
+<th>cycle = 100</th>
 <td><img width=200 src="ppm-density-00100.png"></img></td>
 <td><img width=200 src="ppm-velocity_x-00100.png"></img></td>
 <td><img width=200 src="ppm-velocity_y-00100.png"></img></td>
@@ -233,7 +233,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <th>levels = 10</th>
 </tr>
 <tr>
-<td>coalesce = false</td>
+<th>coalesce = false</th>
 <td><img width=257 src="TreeK-D=2-R=2-L=6-0.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=2-L=7-0.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=2-L=8-0.png"></img></td>
@@ -241,7 +241,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <td><img width=257 src="TreeK-D=2-R=2-L=10-0.png"></img></td>
 </tr>
 <tr>
-<td>coalesce = true</td>
+<th>coalesce = true</th>
 <td><img width=257 src="TreeK-D=2-R=2-L=6-1.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=2-L=7-1.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=2-L=8-1.png"></img></td>
@@ -260,13 +260,13 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <th>levels = 10</th>
 </tr>
 <tr>
-<td>coalesce = false</td>
+<th>coalesce = false</th>
 <td><img width=257 src="TreeK-D=2-R=4-L=6-0.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=4-L=8-0.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=4-L=10-0.png"></img></td>
 </tr>
 <tr>
-<td>coalesce = true</td>
+<th>coalesce = true</th>
 <td><img width=257 src="TreeK-D=2-R=4-L=6-1.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=4-L=8-1.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=4-L=10-1.png"></img></td>
@@ -285,7 +285,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <th>levels = 8</th>
 </tr>
 <tr>
-<td>project = X</td>
+<th>project = X</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-x-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-x-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-x-0.png"></img></td>
@@ -293,7 +293,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <td><img width=129 src="TreeK-D=3-R=2-L=8-x-0.png"></img></td>
 </tr>
 <tr>
-<td>project = Y</td>
+<th>project = Y</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-y-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-y-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-y-0.png"></img></td>
@@ -301,7 +301,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <td><img width=129 src="TreeK-D=3-R=2-L=8-y-0.png"></img></td>
 </tr>
 <tr>
-<td>project = Z</td>
+<th>project = Z</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-z-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-z-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-z-0.png"></img></td>
@@ -322,7 +322,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <th>levels = 8</th>
 </tr>
 <tr>
-<td>project = X</td>
+<th>project = X</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-x-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-x-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-x-1.png"></img></td>
@@ -330,7 +330,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <td><img width=129 src="TreeK-D=3-R=2-L=8-x-1.png"></img></td>
 </tr>
 <tr>
-<td>project = Y</td>
+<th>project = Y</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-y-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-y-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-y-1.png"></img></td>
@@ -338,7 +338,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <td><img width=129 src="TreeK-D=3-R=2-L=8-y-1.png"></img></td>
 </tr>
 <tr>
-<td>project = Z</td>
+<th>project = Z</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-z-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-z-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-z-1.png"></img></td>
@@ -366,7 +366,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <th>levels = 8</th>
 </tr>
 <tr>
-<td>project = X</td>
+<th>project = X</th>
 <td><img width=129 src="TreeK-D=3-R=4-L=4-x-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=6-x-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=8-x-0.png"></img></td>
@@ -375,7 +375,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <td><img width=129 src="TreeK-D=3-R=4-L=8-x-1.png"></img></td>
 </tr>
 <tr>
-<td>project =  Y</td>
+<th>project =  Y</th>
 <td><img width=129 src="TreeK-D=3-R=4-L=4-y-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=6-y-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=8-y-0.png"></img></td>
@@ -384,7 +384,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <td><img width=129 src="TreeK-D=3-R=4-L=8-y-1.png"></img></td>
 </tr>
 <tr>
-<td>project = Z</td>
+<th>project = Z</th>
 <td><img width=129 src="TreeK-D=3-R=4-L=4-z-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=6-z-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=8-z-0.png"></img></td>
