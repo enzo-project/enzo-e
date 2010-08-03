@@ -1,4 +1,4 @@
-// $Id: parallel_GroupProcessMpi.hpp 1633 2010-07-21 18:47:53Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     parallel_GroupProcessMpi.hpp

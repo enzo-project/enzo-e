@@ -1,4 +1,4 @@
-// $Id: user_UserMethod.cpp 1262 2010-03-03 15:44:05Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     user_UserMethod.cpp

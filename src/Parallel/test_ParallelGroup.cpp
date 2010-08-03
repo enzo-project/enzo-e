@@ -1,4 +1,4 @@
-// $Id: test_ParallelGroup.cpp 1372 2010-04-08 05:36:42Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_ParallelGroup.cpp

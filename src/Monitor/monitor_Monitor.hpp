@@ -1,4 +1,4 @@
-// $Id: monitor.hpp 1261 2010-03-03 00:14:11Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     monitor_Monitor.hpp

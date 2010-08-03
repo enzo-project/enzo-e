@@ -1,4 +1,4 @@
-// $Id: simulation.hpp 1306 2010-03-23 03:52:37Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef SIMULATION_HPP

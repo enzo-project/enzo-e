@@ -1,4 +1,4 @@
-// $Id: enzo_EnzoDescr.hpp 1394 2010-04-22 20:52:54Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef ENZO_ENZO_DESCR_HPP

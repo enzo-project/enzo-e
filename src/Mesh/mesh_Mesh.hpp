@@ -1,4 +1,4 @@
-// $Id: mesh_mesh.hpp 1259 2010-03-02 03:12:08Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     mesh_Mesh.hpp

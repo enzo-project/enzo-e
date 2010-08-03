@@ -1,4 +1,4 @@
-// $Id: parameters.hpp 1272 2010-03-08 20:07:32Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef PARAMETERS_PARAMETERS_HPP

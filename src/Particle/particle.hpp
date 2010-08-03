@@ -1,4 +1,4 @@
-// $Id: particle.hpp 1300 2010-03-13 03:22:50Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef PARTICLE_HPP

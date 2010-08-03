@@ -1,4 +1,4 @@
-// $Id: parallel_GroupProcess.hpp 1258 2010-03-02 01:07:36Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef PARALLEL_GROUP_PROCESS_HPP

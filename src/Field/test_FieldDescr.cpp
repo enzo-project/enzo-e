@@ -1,4 +1,4 @@
-// $Id: test_field.cpp 1412 2010-05-05 00:10:09Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_FieldDescr.cpp

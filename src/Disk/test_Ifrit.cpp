@@ -1,4 +1,4 @@
-// $Id: test_Ifrit.cpp 1451 2010-05-10 18:23:30Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_Ifrit.cpp
