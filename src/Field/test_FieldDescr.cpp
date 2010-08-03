@@ -266,9 +266,12 @@ int main()
   //======================================================================
 
   // Assign
-  FieldDescr field_descr_assign = *field_descr;
+  printf ("assign\n");
+  FieldDescr field_descr_assign;
+  field_descr_assign = *field_descr;
 
   // Copy
+  printf ("copy\n");
   FieldDescr field_descr_copy (*field_descr);
 
   // Delete original to check for deep copy
@@ -283,26 +286,32 @@ int main()
   }
 
 
+  unit_func("assign:field_count");
   unit_assert(field_descr_assign.field_count()==5);
 
+  unit_func("assign:field_id");
   unit_assert(field_descr_assign.field_id("density")      == info.field_density);
   unit_assert(field_descr_assign.field_id("velocity_x")   == info.field_velocity_x);
   unit_assert(field_descr_assign.field_id("velocity_y")   == info.field_velocity_y);
   unit_assert(field_descr_assign.field_id("velocity_z")   == info.field_velocity_z);
   unit_assert(field_descr_assign.field_id("total_energy") == info.field_total_energy);
 
+  unit_func("assign:field_name");
   unit_assert(field_descr_assign.field_name(info.field_density)      == "density");
   unit_assert(field_descr_assign.field_name(info.field_velocity_x)   == "velocity_x");
   unit_assert(field_descr_assign.field_name(info.field_velocity_y)   == "velocity_y");
   unit_assert(field_descr_assign.field_name(info.field_velocity_z)   == "velocity_z");
   unit_assert(field_descr_assign.field_name(info.field_total_energy) == "total_energy");
 
+  unit_func("assign:group_id");
   unit_assert(field_descr_assign.group_id("density") == info.group_density);
   unit_assert(field_descr_assign.group_id("vector")   == info.group_vector);
 
+  unit_func("assign:group_name");
   unit_assert(field_descr_assign.group_name(info.group_density) == "density");
   unit_assert(field_descr_assign.group_name(info.group_vector)    == "vector");
 
+  unit_func("assign:field_in_group");
   unit_assert(field_descr_assign.field_in_group(info.field_density,   info.group_density));
   unit_assert(field_descr_assign.field_in_group(info.field_velocity_x,info.group_vector));
   unit_assert(field_descr_assign.field_in_group(info.field_velocity_y,info.group_vector));
@@ -311,9 +320,14 @@ int main()
   unit_assert(! field_descr_assign.field_in_group(info.field_density,     info.group_vector));
   unit_assert(! field_descr_assign.field_in_group(info.field_total_energy,info.group_vector));
 
+  unit_func("assign:alignment");
   unit_assert(field_descr_assign.alignment() == 4);
+  unit_func("assign:padding");
   unit_assert(field_descr_assign.padding() == 32);
+  unit_func("assign:courant");
   unit_assert(field_descr_assign.courant() == 0.75);
+
+  unit_func("assign:precision");
 
   unit_assert(field_descr_assign.precision(info.field_density)      == precision_single);
   unit_assert(field_descr_assign.precision(info.field_velocity_x)   == precision_double);
@@ -321,6 +335,7 @@ int main()
   unit_assert(field_descr_assign.precision(info.field_velocity_z)   == precision_double);
   unit_assert(field_descr_assign.precision(info.field_total_energy) == default_precision);
 
+  unit_func("assign:centering");
   field_descr_assign.centering(info.field_density, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx && info.cy && info.cz);
 
@@ -333,6 +348,8 @@ int main()
   field_descr_assign.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
   unit_assert(  info.cx &&   info.cy && ! info.cz);
 
+  unit_func("assign:ghosts");
+
   field_descr_assign.ghosts(info.field_density, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==3 && info.gy==3 && info.gz==3);
   field_descr_assign.ghosts(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
@@ -342,6 +359,7 @@ int main()
   field_descr_assign.ghosts(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
+  unit_func("assign:minimum");
   unit_assert(field_descr_assign.minimum_value  (info.field_density)    == 1.0);
   unit_assert(field_descr_assign.minimum_action (info.field_density)    == field_action_error);
   unit_assert(field_descr_assign.minimum_value  (info.field_velocity_x) == -100.0);
@@ -351,6 +369,7 @@ int main()
   unit_assert(field_descr_assign.minimum_value  (info.field_velocity_z) == -300.0);
   unit_assert(field_descr_assign.minimum_action (info.field_velocity_z) == field_action_timestep);
 
+  unit_func("assign:maximum");
   unit_assert(field_descr_assign.maximum_value  (info.field_density)    == 2.0);
   unit_assert(field_descr_assign.maximum_action (info.field_density)    == field_action_error);
   unit_assert(field_descr_assign.maximum_value  (info.field_velocity_x) == 100.0);
@@ -360,20 +379,24 @@ int main()
   unit_assert(field_descr_assign.maximum_value  (info.field_velocity_z) == 300.0);
   unit_assert(field_descr_assign.maximum_action (info.field_velocity_z) == field_action_timestep);
 
-  unit_func("FieldDescr(FieldDescr)");
+  unit_func("copy:FieldDescr(FieldDescr)");
   unit_assert(field_descr_copy.field_count()==5);
 
+  unit_func("copy:field_id");
   unit_assert(field_descr_copy.field_id("density")      == info.field_density);
   unit_assert(field_descr_copy.field_id("velocity_x")   == info.field_velocity_x);
   unit_assert(field_descr_copy.field_id("velocity_y")   == info.field_velocity_y);
   unit_assert(field_descr_copy.field_id("velocity_z")   == info.field_velocity_z);
   unit_assert(field_descr_copy.field_id("total_energy") == info.field_total_energy);
 
+  unit_func("copy:field_name");
   unit_assert(field_descr_copy.field_name(info.field_density)      == "density");
   unit_assert(field_descr_copy.field_name(info.field_velocity_x)   == "velocity_x");
   unit_assert(field_descr_copy.field_name(info.field_velocity_y)   == "velocity_y");
   unit_assert(field_descr_copy.field_name(info.field_velocity_z)   == "velocity_z");
   unit_assert(field_descr_copy.field_name(info.field_total_energy) == "total_energy");
+
+  unit_func("copy:group_id");
 
   unit_assert(field_descr_copy.group_id("density") == info.group_density);
   unit_assert(field_descr_copy.group_id("vector")   == info.group_vector);
@@ -389,15 +412,22 @@ int main()
   unit_assert(! field_descr_copy.field_in_group(info.field_density,     info.group_vector));
   unit_assert(! field_descr_copy.field_in_group(info.field_total_energy,info.group_vector));
 
+  unit_func("copy:alignment");
   unit_assert(field_descr_copy.alignment() == 4);
+  unit_func("copy:padding");
   unit_assert(field_descr_copy.padding() == 32);
+  unit_func("copy:courant");
   unit_assert(field_descr_copy.courant() == 0.75);
+
+  unit_func("copy:precision");
 
   unit_assert(field_descr_copy.precision(info.field_density)      == precision_single);
   unit_assert(field_descr_copy.precision(info.field_velocity_x)   == precision_double);
   unit_assert(field_descr_copy.precision(info.field_velocity_y)   == precision_double);
   unit_assert(field_descr_copy.precision(info.field_velocity_z)   == precision_double);
   unit_assert(field_descr_copy.precision(info.field_total_energy) == default_precision);
+
+  unit_func("copy:centering");
 
   field_descr_copy.centering(info.field_density, &info.cx, &info.cy, &info.cz);
   unit_assert(info.cx && info.cy && info.cz);
@@ -411,6 +441,8 @@ int main()
   field_descr_copy.centering(info.field_velocity_z, &info.cx, &info.cy, &info.cz);
   unit_assert(  info.cx &&   info.cy && ! info.cz);
 
+  unit_func("copy:ghosts");
+
   field_descr_copy.ghosts(info.field_density, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==3 && info.gy==3 && info.gz==3);
   field_descr_copy.ghosts(info.field_velocity_x, &info.gx, &info.gy, &info.gz);
@@ -420,6 +452,7 @@ int main()
   field_descr_copy.ghosts(info.field_velocity_z, &info.gx, &info.gy, &info.gz);
   unit_assert(info.gx==0 && info.gy==0 && info.gz==1);
 
+  unit_func("copy:minimum");
   unit_assert(field_descr_copy.minimum_value  (info.field_density)    == 1.0);
   unit_assert(field_descr_copy.minimum_action (info.field_density)    == field_action_error);
   unit_assert(field_descr_copy.minimum_value  (info.field_velocity_x) == -100.0);
@@ -429,6 +462,7 @@ int main()
   unit_assert(field_descr_copy.minimum_value  (info.field_velocity_z) == -300.0);
   unit_assert(field_descr_copy.minimum_action (info.field_velocity_z) == field_action_timestep);
 
+  unit_func("copy:maximum");
   unit_assert(field_descr_copy.maximum_value  (info.field_density)    == 2.0);
   unit_assert(field_descr_copy.maximum_action (info.field_density)    == field_action_error);
   unit_assert(field_descr_copy.maximum_value  (info.field_velocity_x) == 100.0);
@@ -437,17 +471,6 @@ int main()
   unit_assert(field_descr_copy.maximum_action (info.field_velocity_y) == field_action_method);
   unit_assert(field_descr_copy.maximum_value  (info.field_velocity_z) == 300.0);
   unit_assert(field_descr_copy.maximum_action (info.field_velocity_z) == field_action_timestep);
-
-
-  // Check assignment operator
-
-  unit_func("operator =");
-
-
-  // Check copy constructor
-
-  unit_func("FieldDescr(FieldDescr)");
-
 
   unit_finalize();
 }

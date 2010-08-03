@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include "pngwriter.h"
 
 #include <string>
 
@@ -19,9 +20,10 @@
 #include "memory.hpp"
 #include "mesh.hpp"
 
-#include "image.h"
+// #include "image.h"
 
 #define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
+#define png_file "Enzo-P-2048.png"
 
 const bool debug    = false;
 const bool geomview = false;
@@ -33,8 +35,8 @@ const int  gray_threshold = 127;
 
 //----------------------------------------------------------------------
 
-int * create_image_array (int * nx, int * ny, int max_levels);
-int * create_level_array3 (int * n3, int max_levels);
+int * create_image_array (const char * filename, int * nx, int * ny, int max_levels);
+//int * create_level_array3 (int * n3, int max_levels);
 int * create_sphere_array (int * n, int max_levels);
 void write_image(Monitor * monitor, std::string filename, 
 		 float * image, int nx, int ny, int nz=0 );
@@ -83,7 +85,7 @@ int main(int argc, char ** argv)
     nx = 1;
     ny = 1;
     nz = 1;
-    level_array = create_image_array(&nx,&ny,max_level);
+    level_array = create_image_array(png_file,&nx,&ny,max_level);
 
   } else {
 
@@ -113,14 +115,23 @@ void print_usage(int argc, char **argv)
   fprintf (stderr,"         <dimension>  = [2|3]\n");
   fprintf (stderr,"         <refinement> = [2|4|8|16]\n");
   fprintf (stderr,"\n");
+  exit(1);
 }
 //----------------------------------------------------------------------
 
 // read in the gimp-generated image data into a level array
 // values are set to [0:max_levels)
 
-int * create_image_array (int * nx, int * ny, int max_levels)
+int * create_image_array (const char * pngfile, 
+			  int * nx, int * ny, int max_levels)
 {
+
+  pngwriter png;
+
+  png.readfromfile(pngfile);
+
+  int width  = png.getwidth();
+  int height = png.getheight();
 
   int size = (width > height) ? width: height;
 
@@ -131,21 +142,18 @@ int * create_image_array (int * nx, int * ny, int max_levels)
   *nx = size;
   *ny = size;
 
-  int pixel[3];
-  char * data = header_data;
-
   int ix0 = (size - width) / 2;
   int iy0 = (size - height) / 2;
 
   int max = 0;
-  for (size_t iy=0; iy<height; iy++) {
-    for (size_t ix=0; ix<width; ix++) {
-      HEADER_PIXEL(data,pixel);
-      int i = (iy+iy0) + size*(ix+ix0);
-      float r = 1.0*pixel[0]/256;
-      float g = 1.0*pixel[1]/256;
-      float b = 1.0*pixel[2]/256;
-      level_array[i] = max_levels * (r + g + b) / 3;
+  for (int iy=0; iy<height; iy++) {
+    for (int ix=0; ix<width; ix++) {
+      int pixel = png.read(ix+1,iy+1);
+      int i = (ix+ix0) + size*(iy+iy0);
+//       float r = 1.0*pixel[0]/256;
+//       float g = 1.0*pixel[1]/256;
+//       float b = 1.0*pixel[2]/256;
+      level_array[i] = max_levels * 1.0*pixel / 256;
       if (level_array[i] > max) max = level_array[i];
     }
   }
@@ -156,48 +164,48 @@ int * create_image_array (int * nx, int * ny, int max_levels)
 // read in the gimp-generated image data into a level array
 // values are set to [0:max_levels)
 
-int * create_level_array3 (int * n3, int max_levels)
-{
+//int * create_level_array3 (int * n3, int max_levels)
+//{
 
-  if (width != height) {
-    printf ("%s:%d width = %d  height = %d\n",__FILE__,__LINE__,width, height);
-    exit(1);
-  }
+//   if (width != height) {
+//     printf ("%s:%d width = %d  height = %d\n",__FILE__,__LINE__,width, height);
+//     exit(1);
+//   }
 
-  *n3 = width;
-  int n = *n3;
+//  *n3 = width;
+//  int n = *n3;
 
-  int * level_array = new int [n*n*n];
+//  int * level_array = new int [n*n*n];
 
-  for (int i=0; i<n*n*n; i++) level_array[i] = 0;
+//   for (int i=0; i<n*n*n; i++) level_array[i] = 0;
 
-  int pixel[3];
-  char * data = header_data;
+//   int pixel[3];
+//   char * data = header_data;
  
-  float r = 0.125;  // width of the 2D image in the 3D cube
-  int nxm = n*(1.0-r)/2;
-  int nxp = n*(1.0+r)/2;
+//   float r = 0.125;  // width of the 2D image in the 3D cube
+//   int nxm = n*(1.0-r)/2;
+//   int nxp = n*(1.0+r)/2;
 
-  for (int iz=0; iz<n; iz++) {
-    for (int iy=0; iy<n; iy++) {
-      HEADER_PIXEL(data,pixel);
-      for (int ix=0; ix<nxm; ix++) {
-	level_array[index(iz,iy,ix,n)] = 0;
-      }
-      for (int ix=nxm; ix<nxp; ix++) {
-	float r = 1.0*pixel[0]/256;
-	float g = 1.0*pixel[1]/256;
-	float b = 1.0*pixel[2]/256;
-	int value = max_levels * (r + g + b) / 3;
-	level_array[index(iz,iy,ix,n)] = value;
-      }
-      for (int ix=nxp; ix<n; ix++) {
-	level_array[index(iz,iy,ix,n)] = 0;
-      }
-    }
-  }
-  return level_array;
-}
+//   for (int iz=0; iz<n; iz++) {
+//     for (int iy=0; iy<n; iy++) {
+//       HEADER_PIXEL(data,pixel);
+//       for (int ix=0; ix<nxm; ix++) {
+// 	level_array[index(iz,iy,ix,n)] = 0;
+//       }
+//       for (int ix=nxm; ix<nxp; ix++) {
+// 	float r = 1.0*pixel[0]/256;
+// 	float g = 1.0*pixel[1]/256;
+// 	float b = 1.0*pixel[2]/256;
+// 	int value = max_levels * (r + g + b) / 3;
+// 	level_array[index(iz,iy,ix,n)] = value;
+//       }
+//       for (int ix=nxp; ix<n; ix++) {
+// 	level_array[index(iz,iy,ix,n)] = 0;
+//       }
+//     }
+//   }
+//  return level_array;
+//}
 
 //----------------------------------------------------------------------
 

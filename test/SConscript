@@ -3,6 +3,35 @@ Import('platform')
 Import('parallel_run')
 Import('serial_run')
 
+
+# O test_FieldBlockFaces.cpp
+# O test_MethodEnzoPpml.cpp
+# O test_Mpi.cpp
+# O test_ParallelAffinity.cpp
+# O test_ParallelGroup.cpp
+# O test_ParallelLayout.cpp
+# O test_tree.cpp
+
+# X test_Data.cpp
+# X test_Error.cpp
+# X test_FieldBlock.cpp
+# X test_FieldDescr.cpp
+# X test_FileHdf5.cpp
+# X test_Ifrit.cpp
+# X test_Memory.cpp
+# X test_Mesh.cpp
+# X test_MethodEnzoPpm.cpp
+# X test_Monitor.cpp
+# X test_Parallel.cpp
+# X test_Parameters.cpp
+# X test_Parse.cpp
+# X test_Performance.cpp
+# X test_ppm.cpp
+# X test_ppml.cpp
+# X test_Schedule.cpp
+# X test_Simulation.cpp
+# X test_TreeK.cpp
+
 # Define a test for running unit tests
 
 run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS > $TARGET")
@@ -22,6 +51,7 @@ env.Append(BUILDERS = { 'RunTree'     : run_tree } )
 env.RunSerial('test_Data.unit',        '#/bin/test_Data')
 env.RunSerial('test_Error.unit',       '#/bin/test_Error')
 env.RunSerial('test_FieldBlock.unit',  '#/bin/test_FieldBlock')
+# env.RunSerial('test_FieldBlockFaces.unit','#/bin/test_FieldBlockFaces')
 env.RunSerial('test_FieldDescr.unit',  '#/bin/test_FieldDescr')
 env.RunSerial('test_FileHdf5.unit',    '#/bin/test_FileHdf5')
 env.RunSerial('test_Ifrit.unit',       '#/bin/test_Ifrit')
@@ -33,39 +63,79 @@ env.RunSerial('test_Performance.unit', '#/bin/test_Performance')
 env.RunSerial('test_Schedule.unit',    '#/bin/test_Schedule')
 env.RunSerial('test_Simulation.unit',  '#/bin/test_Simulation')
 
-env.RunSerial('test_TreeK-D2-R2-L6.unit', '#/bin/test_TreeK', ARGS='2 2 6')
-env.RunSerial('test_TreeK-D2-R2-L7.unit', '#/bin/test_TreeK', ARGS='2 2 7')
-env.RunSerial('test_TreeK-D2-R2-L8.unit', '#/bin/test_TreeK', ARGS='2 2 8')
-env.RunSerial('test_TreeK-D2-R2-L9.unit', '#/bin/test_TreeK', ARGS='2 2 9')
-env.RunSerial('test_TreeK-D2-R2-L10.unit','#/bin/test_TreeK', ARGS='2 2 10')
+Clean(env.RunSerial
+  ('test_TreeK-D2-R2-L6.unit', '#/bin/test_TreeK', ARGS='2 2 6'),
+Glob('../TreeK-D=2-R=2-L=6*png'))
+Clean(env.RunSerial
+('test_TreeK-D2-R2-L7.unit', '#/bin/test_TreeK', ARGS='2 2 7'),
+Glob('../TreeK-D=2-R=2-L=7*png'))
+Clean(env.RunSerial
+('test_TreeK-D2-R2-L8.unit', '#/bin/test_TreeK', ARGS='2 2 8'),
+Glob('../TreeK-D=2-R=2-L=8*png'))
+Clean(env.RunSerial
+('test_TreeK-D2-R2-L9.unit', '#/bin/test_TreeK', ARGS='2 2 9'),
+Glob('../TreeK-D=2-R=2-L=9*png'))
+Clean(env.RunSerial
+('test_TreeK-D2-R2-L10.unit','#/bin/test_TreeK', ARGS='2 2 10'),
+Glob('../TreeK-D=2-R=2-L=10*png'))
 
-env.RunSerial('test_TreeK-D2-R4-L6.unit', '#/bin/test_TreeK', ARGS='2 4 6')
-env.RunSerial('test_TreeK-D2-R4-L8.unit', '#/bin/test_TreeK', ARGS='2 4 8')
-env.RunSerial('test_TreeK-D2-R4-L10.unit','#/bin/test_TreeK', ARGS='2 4 10')
+Clean(env.RunSerial
+('test_TreeK-D2-R4-L6.unit', '#/bin/test_TreeK', ARGS='2 4 6'),
+Glob('../TreeK-D=2-R=4-L=6*png'))
+Clean(env.RunSerial
+('test_TreeK-D2-R4-L8.unit', '#/bin/test_TreeK', ARGS='2 4 8'),
+Glob('../TreeK-D=2-R=4-L=8*png'))
+Clean(env.RunSerial
+('test_TreeK-D2-R4-L10.unit','#/bin/test_TreeK', ARGS='2 4 10'),
+Glob('../TreeK-D=2-R=4-L=10*png'))
 
-env.RunSerial('test_TreeK-D3-R2-L4.unit', '#/bin/test_TreeK', ARGS='3 2 4')
-env.RunSerial('test_TreeK-D3-R2-L5.unit', '#/bin/test_TreeK', ARGS='3 2 5')
-env.RunSerial('test_TreeK-D3-R2-L6.unit', '#/bin/test_TreeK', ARGS='3 2 6')
-env.RunSerial('test_TreeK-D3-R2-L7.unit', '#/bin/test_TreeK', ARGS='3 2 7')
-env.RunSerial('test_TreeK-D3-R2-L8.unit', '#/bin/test_TreeK', ARGS='3 2 8')
+Clean(env.RunSerial
+('test_TreeK-D3-R2-L4.unit', '#/bin/test_TreeK', ARGS='3 2 4'),
+Glob('../TreeK-D=3-R=2-L=4*png'))
+Clean(env.RunSerial
+('test_TreeK-D3-R2-L5.unit', '#/bin/test_TreeK', ARGS='3 2 5'),
+Glob('../TreeK-D=3-R=2-L=5*png'))
+Clean(env.RunSerial
+('test_TreeK-D3-R2-L6.unit', '#/bin/test_TreeK', ARGS='3 2 6'),
+Glob('../TreeK-D=3-R=2-L=6*png'))
+Clean(env.RunSerial
+('test_TreeK-D3-R2-L7.unit', '#/bin/test_TreeK', ARGS='3 2 7'),
+Glob('../TreeK-D=3-R=2-L=7*png'))
+Clean(env.RunSerial
+('test_TreeK-D3-R2-L8.unit', '#/bin/test_TreeK', ARGS='3 2 8'),
+Glob('../TreeK-D=3-R=2-L=8*png'))
 
-env.RunSerial('test_TreeK-D3-R4-L4.unit', '#/bin/test_TreeK', ARGS='3 4 4')
-env.RunSerial('test_TreeK-D3-R4-L6.unit', '#/bin/test_TreeK', ARGS='3 4 6')
-env.RunSerial('test_TreeK-D3-R4-L8.unit', '#/bin/test_TreeK', ARGS='3 4 8')
+Clean(env.RunSerial
+('test_TreeK-D3-R4-L4.unit', '#/bin/test_TreeK', ARGS='3 4 4'),
+Glob('../TreeK-D=3-R=4-L=4*png'))
+Clean(env.RunSerial
+('test_TreeK-D3-R4-L6.unit', '#/bin/test_TreeK', ARGS='3 4 6'),
+Glob('../TreeK-D=3-R=4-L=6*png'))
 
-env.RunSerial('test_ppml_implosion.unit', '#/bin/test_ppml', 
-               ARGS='ppml-implosion3  32 10 10')
-env.RunSerial('test_ppml_blast.unit',     '#/bin/test_ppml', 
-               ARGS='ppml-blast       32 10 10')
+Clean(env.RunSerial	
+('test_TreeK-D3-R4-L8.unit', '#/bin/test_TreeK', ARGS='3 4 8'),
+Glob('../TreeK-D=3-R=4-L=8*png'))
+	
 
-env.RunSerial('test_ppm_image.unit',      '#/bin/test_ppm',  
-               ARGS='ppm-image       100 10 10')
-env.RunSerial('test_ppm_implosion.unit',  '#/bin/test_ppm',  
-               ARGS='ppm-implosion   100 10 10')
-env.RunSerial('test_ppm_implosion3.unit', '#/bin/test_ppm',  
-               ARGS='ppm-implosion3   32 10 10')
+Clean(env.RunSerial('test_ppml_implosion.unit', '#/bin/test_ppml', 
+               ARGS='ppml-implosion3  32 10 10'),
+	Glob('../*-ppml-implosion3-*png'))
+Clean(env.RunSerial('test_ppml_blast.unit',     '#/bin/test_ppml', 
+               ARGS='ppml-blast       32 10 10'),
+	Glob('../*-ppml-blast-*png'))
 
-env.RunSerial('test_Monitor.unit',  '#/bin/test_Monitor')
+Clean(env.RunSerial('test_ppm_image.unit',      '#/bin/test_ppm',  
+               ARGS='ppm-image       100 10 10'),
+	Glob('../*-ppm-image-*png'))
+Clean(env.RunSerial('test_ppm_implosion.unit',  '#/bin/test_ppm',  
+               ARGS='ppm-implosion   100 10 10'),
+	Glob('../*-ppm-implosion-*png'))
+Clean(env.RunSerial('test_ppm_implosion3.unit', '#/bin/test_ppm',  
+               ARGS='ppm-implosion3   32 10 10'),
+	Glob('../*-ppm-implosion3-*png'))
+
+Clean(env.RunSerial('test_Monitor.unit',  '#/bin/test_Monitor'),
+	Glob('../monitor_image_*png'))
 
 env.RunParse('test_parse_groups.unit',     '#/bin/test_Parse', ARGS='test/parse_groups.in')
 env.RunParse('test_parse_integer.unit',    '#/bin/test_Parse', ARGS='test/parse_integer.in')
@@ -77,7 +147,7 @@ env.RunParse('test_parse_implosion.unit',  '#/bin/test_Parse', ARGS='input/implo
 env.RunParse('test_parse_shock-pool.unit', '#/bin/test_Parse', ARGS='input/shock-pool.in')
 
 
-env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS='test_MethodEnzoPpm.unit')
+Clean(env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS='test_MethodEnzoPpm.unit'),Glob('../ppm-*-00???.png'))
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
 

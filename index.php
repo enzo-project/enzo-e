@@ -37,6 +37,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <?php tests("Data"); ?>
 <?php tests("FieldBlock"); ?>
+<!-- <?php tests("FieldBlockFaces"); ?> -->
 <?php tests("FieldDescr"); ?>
 
 <h2>Disk</h2>
@@ -72,10 +73,10 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <h2>Monitor</h2>
 
 <?php tests("Monitor"); ?>
-<img src="test1.png"></img>
-<img src="test2.png"></img>
-<img src="test3.png"></img>
-<img src="test4.png"></img>
+<img src="monitor_image_1.png"></img>
+<img src="monitor_image_2.png"></img>
+<img src="monitor_image_3.png"></img>
+<img src="monitor_image_4.png"></img>
 
 
 <h2>Parallel</h2>
