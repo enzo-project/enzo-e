@@ -1,4 +1,8 @@
 <html>
+  <head>
+    <title>Cello Test Page</title>
+    <link href="cello.css" rel="stylesheet" type="text/css">
+  </head>
 <body>
   <h1>Cello Test Page</h1>
 

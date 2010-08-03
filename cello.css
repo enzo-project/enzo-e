@@ -1,0 +1,54 @@
+/*
+  Copyright (C) 2009
+  Dr. James Bordner
+  University of California, San Diego
+*/
+
+BODY {
+/*  background: #c1520a; */
+/*  color: #faa; */
+/*  background-image: url("cello-tile.png"); */
+  background-image: url("cello-bg-1.png");
+/*  background-attachment:fixed; */
+
+/*   font-family: "Gill sans", sans-serif;  */
+/*  font-family: Times; */
+}
+
+/* header { background: #fff url(cello-hr.png) no-repeat;
+  
+} */
+
+
+hr {background: #fff url(cello-hr.png); height: 6px}
+
+tr {background-color: #aaa}
+
+/* A:link    { color: #7f7; } */
+/* A:visited { color: #ff7; } */
+/* A:active  { color: #fff; } */
+/* A:hover   { color: #77f; } */
+
+/* div.code { */
+/*     background: #fff; */
+/*    color: #000;  */
+/*  } */
+
+/* pre.wiki { */
+/*     background: #fff; */
+/*    color: #000;  */
+/*  } */
+
+/* div.wiki-toc { */
+/*   background: #000; */
+/*    color: #fff;  */
+/*  } */
+
+/* table { */
+/*   background: #000; */
+/* } */
+
+/* td { */
+/*   background: #000; */
+/* }   */
+

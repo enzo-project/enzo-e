@@ -3,36 +3,27 @@ SHELL = /bin/tcsh
 
 TRAC_PATH = /usr/local/trac-cello
 WIKI_FILES = \
-	NotesComponentData \
-	NotesComponentSchedule \
-	NotesComponentTest \
-	NotesComponentUser \
 	NotesCodingStandards \
-	NotesComponentAnalysis \
-	NotesComponentArray \
-	NotesComponentArrayBlock \
-	NotesComponentArrayItBlock \
-	NotesComponentArrayLayout \
 	NotesComponentControl \
+	NotesComponentData \
 	NotesComponentDisk \
 	NotesComponentDistribute \
 	NotesComponentError \
 	NotesComponentField \
 	NotesComponentMemory \
 	NotesComponentMesh \
-	NotesComponentMethod \
 	NotesComponentMonitor \
 	NotesComponentParallel \
-	NotesComponentParallelMpi \
-	NotesComponentTask \
 	NotesComponentParameters \
 	NotesComponentParticles \
 	NotesComponentPerformance \
 	NotesComponentPortal \
-	NotesComponentProblem \
-	NotesComponentRegion \
 	NotesComponents \
+	NotesComponentSchedule \
 	NotesComponentSimulation \
+	NotesComponentTask \
+	NotesComponentTest \
+	NotesComponentUser \
 	NotesDesignPatterns \
 	NotesEnzoTestProblems \
 	NotesParameters \
@@ -43,9 +34,72 @@ WIKI_FILES = \
 	NotesTestProblemShockPool \
 	NotesTestProblemWavePool \
 	NotesWishList \
+	NotesFieldsEnzo \
+	NotesOpenIssues  \
+	NotesTestProblemDoubleMach  \
+	NotesTestProblemNoh  \
+	NotesTestProblemSedovBlast  \
 	WikiStart
 
+# BOOK ORDER
+#
+#	WikiStart
+#           NotesWishList
+#           NotesParameters
+#               NotesParametersEnzo
+#               NotesParametersCello
+#           NotesComponents
+#               NotesComponentControl
+#               NotesComponentData
+#               NotesComponentDisk
+#               NotesComponentDistribute
+#               NotesComponentError
+#               NotesComponentField
+#               NotesComponentMemory
+#               NotesComponentMesh
+#               NotesComponentMethod
+#               NotesComponentMonitor
+#               NotesComponentParallel
+#               NotesComponentParameters
+#               NotesComponentParticles
+#               NotesComponentPerformance
+#               NotesComponentPortal
+#               NotesComponentSchedule
+#               NotesComponentSimulation
+#               NotesComponentTask
+#               NotesComponentTest
+#               NotesComponentUser
+#           NotesCodingStandards
+#           NotesTestProblems
+#               NotesTestProblemDoubleMach
+#               NotesTestProblemImplosion
+#               NotesTestProblemNoh
+#               NotesTestProblemSedovBlast
+#               NotesTestProblemShockPool
+#               NotesTestProblemWavePool
+
+# NOT IN BOOK
+
+#       NotesOpenIssues
+#       NotesDesignPatterns
+
+
+# OBSOLETE
+#
+#       NotesFieldsEnzo
+#	NotesComponentAmr
+#	NotesComponentAnalysis
+#	NotesComponentArrayBlock
+#	NotesComponentArrayItBlock
+#	NotesComponentArrayLayout
+#	NotesComponentArray
+#	NotesComponentMethod
+#	NotesComponentParallelMpi
+#	NotesComponentProblem
+#	NotesComponentRegion
+#	NotesEnzoTestProblems
 # 	NotesParametersEnzoPoll
+
 help:
 	-@echo
 	-@echo "help:    Display this help summary"
