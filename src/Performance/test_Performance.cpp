@@ -35,6 +35,7 @@ int main(int argc, char ** argv)
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 
+  unit_func("start");
   unit_assert((timer.value() - 1.0) < time_tolerance);
 
   timer.start();
@@ -43,6 +44,7 @@ int main(int argc, char ** argv)
 
   printf ("Initial timer value = %24.16f\n",timer.value());
 
+  unit_func("stop");
   unit_assert((timer.value() - 2.0) < time_tolerance);
 
   unit_class ("Performance");

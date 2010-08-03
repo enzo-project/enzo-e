@@ -50,8 +50,12 @@ int main()
   field_descr.set_centering(index_f3, true,  false, true);
   field_descr.set_centering(index_f4, true,  true,  false);
 
+  unit_class ("[precision]");
+  unit_func ("sizeof(float)");
   unit_assert (sizeof(float)       == 4);
+  unit_func ("sizeof(double)");
   unit_assert (sizeof(double)      == 8);
+  unit_func ("sizeof(long-double)");
   unit_assert (sizeof(long double) == 16);
 
   //----------------------------------------------------------------------

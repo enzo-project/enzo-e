@@ -28,8 +28,8 @@ namespace unit {
 
   //const char * pass_string = "\033[01;32mPass\033[00m";
   //const char * fail_string = "\033[01;31mFAIL\033[00m";
-  const char * pass_string = " [ pass ]";
-  const char * fail_string = " [*FAIL*]";
+  const char * pass_string = " pass ";
+  const char * fail_string = " FAIL ";
 
   int process_rank  = 0;
   int process_count = 1;
@@ -83,7 +83,7 @@ void unit_func (const char * f)
 void unit_assert_ (bool result, const char * file, int line)
 {
   if (unit::process_rank == 0 || ! result) {
-    printf ("%s %d/%d %s:%d %s::%s() %d\n",
+    printf ("%s %d/%d %s %d %s %s() %d\n",
 	    (result)? unit::pass_string : unit::fail_string,
 	    unit::process_rank, 
 	    unit::process_count,

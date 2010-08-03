@@ -18,7 +18,7 @@ int main(int argc, char ** argv)
   bool passed = false;
 
   unit_class ("Schedule");
-  unit_func ("null");
+  unit_func ("Schedule");
 
   //  Schedule schedule;
 

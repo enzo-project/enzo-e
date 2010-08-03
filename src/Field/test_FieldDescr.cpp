@@ -360,7 +360,7 @@ int main()
   unit_assert(field_descr_assign.maximum_value  (info.field_velocity_z) == 300.0);
   unit_assert(field_descr_assign.maximum_action (info.field_velocity_z) == field_action_timestep);
 
-  unit_func("copy constructor");
+  unit_func("FieldDescr(FieldDescr)");
   unit_assert(field_descr_copy.field_count()==5);
 
   unit_assert(field_descr_copy.field_id("density")      == info.field_density);

@@ -27,6 +27,7 @@ int main(int argc, char ** argv)
   sprintf (warning_message,"Warning message test");
   WARNING_MESSAGE("main",warning_message);
 
+  unit_func("WARNING_MESSAGE");
   unit_assert (true);
 
   //----------------------------------------------------------------------
@@ -36,6 +37,7 @@ int main(int argc, char ** argv)
   sprintf (incomplete_message,"Incomplete message test");
   INCOMPLETE_MESSAGE("main",incomplete_message);
 
+  unit_func("INCOMPLETE_MESSAGE");
   unit_assert (true);
 
   unit_finalize();

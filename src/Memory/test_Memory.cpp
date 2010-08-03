@@ -211,6 +211,7 @@ int main(int argc, char ** argv)
 
   memory->print();
 #else /* CONFIG_USE_MEMORY */
+  unit_func("[disabled]");
   unit_assert(true);
 #endif/* CONFIG_USE_MEMORY */
   unit_finalize();
