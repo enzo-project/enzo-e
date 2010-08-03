@@ -2,19 +2,10 @@ Import('env')
 
 includes = [Glob('simulation*hpp')]
 sources  = [Glob("simulation*cpp")]
-components = ['error',
-              'parameters',
-              'parallel', 
-              'monitor', 
-              'memory', 
-              'enzo',
-              'user', 
-              'user-ppm', 
-              'data', 
-              'field', 
-              'cello',
-	      '$FORTRANLIBS']
-libraries = ['png','boost_thread-mt']
+
+components = ['error','parameters','parallel','monitor','memory','enzo','user','enzo-ppm','data','field','cello']
+
+libraries = ['png','boost_thread-mt','$FORTRANLIBS']
 
 env = env.Clone(LIBS=[components,libraries])
 

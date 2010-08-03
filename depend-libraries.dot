@@ -1,0 +1,40 @@
+digraph includes {
+
+
+   data        -> {field error};
+   disk        -> {error};
+   enzo        -> {user data field error parallel monitor parameters memory};
+   field       -> {error};
+   global      -> {field error};
+   memory      -> {error};
+   mesh        -> {error memory parallel monitor};
+   monitor     -> {parallel  error};
+   parameters  -> {error parallel  monitor};
+   performance -> {error memory};
+   schedule    -> {error simulation user data field parameters parallel enzo monitor};
+   simulation  -> {error parameters parallel monitor memory enzo user data field};
+   user        -> {user  data  field  error parallel  monitor  parameters  memory};
+
+
+   data        [ shape=box ];
+   disk        [ shape=box ];
+   distribute  [ shape=box ];
+   enzo        [ shape=box ];
+   error       [ shape=box ];
+   field       [ shape=box ];
+   global      [ shape=box ];
+   memory      [ shape=box ];
+   mesh        [ shape=box ];
+   monitor     [ shape=box ];
+   parallel    [ shape=box ];
+   parameters  [ shape=box ];
+   particle    [ shape=box ];
+   performance [ shape=box ];
+   portal      [ shape=box ];
+   schedule    [ shape=box ];
+   simulation  [ shape=box ];
+   task        [ shape=box ];
+   test        [ shape=box ];
+   user        [ shape=box ];
+
+}

@@ -1,18 +1,8 @@
 Import('env')
 
-components = ['error', 
-              'simulation', 
-              'user', 
-              'data',
-              'field',
-              'parameters', 
-              'parallel', 
-              'user-ppm', 
-              'monitor',
-              'cello',
-	      '$FORTRANLIBS' ]
+components = ['error', 'simulation', 'user', 'data','field','parameters','parallel','enzo-ppm','monitor','cello']
 
-libraries  = ['png','boost_thread-mt']
+libraries  = ['png','boost_thread-mt','$FORTRANLIBS' ]
 includes   = [Glob('schedule*hpp')]
 sources    = [Glob('schedule*cpp')]
 
