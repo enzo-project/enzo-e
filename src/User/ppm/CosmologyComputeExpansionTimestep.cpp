@@ -24,7 +24,8 @@
  
  
  
-int Enzo::CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion)
+int EnzoDescr::CosmologyComputeExpansionTimestep
+(ENZO_FLOAT time, float *dtExpansion)
 {
  
   /* Error check. */

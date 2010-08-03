@@ -21,7 +21,7 @@ public: // interface
   /// Create a new MethodEnzoControl
 
   MethodEnzoControl(Global * global,
-		    Enzo * enzo)
+		    EnzoDescr * enzo)
     : UserControl(global),
       enzo_(enzo)
   {};
@@ -51,7 +51,7 @@ public: // interface
 
 private:
   
-  Enzo * enzo_;
+  EnzoDescr * enzo_;
 };
 
 #endif /* USER_METHOD_ENZO_CONTROL_HPP */

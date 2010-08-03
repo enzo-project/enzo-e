@@ -22,7 +22,7 @@
 #include "cello_hydro.h"
  
  
-int Enzo::FindField(int field, int farray[], int numfields)
+int EnzoDescr::FindField(int field, int farray[], int numfields)
 {
   for (int i = 0; i < numfields; i++)
     if (field == farray[i])

@@ -1,6 +1,6 @@
 Import('env')
 
-includes = [Glob('user*hpp'), 'enzo.hpp', Glob('*.h')]
+includes = [Glob('user*hpp'), Glob('enzo*hpp'), Glob('*.h')]
 sources  = [Glob('user*cpp')]
 
 components = ['user', 'user-ppm', 'data', 'field', 'error','parallel', 'monitor', 'parameters', 'memory', 'cello']

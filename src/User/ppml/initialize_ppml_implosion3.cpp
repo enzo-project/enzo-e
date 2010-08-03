@@ -11,7 +11,7 @@
 
 const bool debug = false;
  
-void Enzo::initialize_ppml_implosion3 (int size_param)
+void EnzoDescr::initialize_ppml_implosion3 (int size_param)
 
 {
 

@@ -117,7 +117,7 @@ int main(int argc, char **argv)
   UserTimestep * user_timestep = user_descr.set_user_timestep("ignored");
 
   // Set missing cello_hydro.h parameters
-  Enzo * enzo = user_descr.enzo();
+  EnzoDescr * enzo = user_descr.enzo();
   enzo->BoundaryRank = 2;
   enzo->BoundaryDimension[0] = nx + 2*gx;
   enzo->BoundaryDimension[1] = ny + 2*gy;

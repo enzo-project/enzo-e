@@ -37,7 +37,7 @@
 // 		      float *VelocityUnits, ENZO_FLOAT Time);
  
  
-int Enzo::ComputeTemperatureField(float *temperature)
+int EnzoDescr::ComputeTemperatureField(float *temperature)
 {
  
   int DensNum, result;

@@ -11,6 +11,7 @@
 #include "global.hpp"
 #include "error.hpp"
 #include "user.hpp"
+#include "enzo.hpp"
 #include "parameters.hpp"
 
 //----------------------------------------------------------------------

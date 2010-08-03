@@ -24,7 +24,7 @@
 #include "enzo.hpp"
 #include "cello_hydro.h" 
  
-float Enzo::ComputeTimeStep()
+float EnzoDescr::ComputeTimeStep()
 {
  
   /* initialize */

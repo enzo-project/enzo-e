@@ -19,7 +19,7 @@
 // 		      float *TemperatureUnits, float *TimeUnits,
 // 		      float *VelocityUnits, ENZO_FLOAT Time);
  
-int Enzo::ComputePressureDualEnergyFormalism(ENZO_FLOAT time, float *pressure)
+int EnzoDescr::ComputePressureDualEnergyFormalism(ENZO_FLOAT time, float *pressure)
 {
  
   /* declarations */

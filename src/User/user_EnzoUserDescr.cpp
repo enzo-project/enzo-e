@@ -11,6 +11,7 @@
 #include "global.hpp"
 
 #include "user.hpp"
+#include "enzo.hpp"
 
 //----------------------------------------------------------------------
 

@@ -15,7 +15,7 @@
 
 //----------------------------------------------------------------------
 
-MethodEnzoTimestep::MethodEnzoTimestep (Enzo * enzo) throw()
+MethodEnzoTimestep::MethodEnzoTimestep (EnzoDescr * enzo) throw()
   : UserTimestep(),
     pressure_field_(0),
     afloat_(0),

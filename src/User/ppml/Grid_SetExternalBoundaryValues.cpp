@@ -21,7 +21,7 @@
 #include "enzo.hpp" 
 #include "cello_hydro.h"
  
-int Enzo::SetExternalBoundaryValues()
+int EnzoDescr::SetExternalBoundaryValues()
 {
   int dim, field;
  

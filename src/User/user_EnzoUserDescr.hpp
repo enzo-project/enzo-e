@@ -20,14 +20,14 @@ public: // interface
   /// Constructor
   EnzoUserDescr(Global * global) throw()
     : UserDescr(global),
-      enzo_(new Enzo)
+      enzo_(new EnzoDescr)
   {};
 
   ~EnzoUserDescr() throw()
   { delete enzo_; }
 
   /// Return the Enzo object created in EnzoUserDescr's constructor
-  Enzo * enzo()
+  EnzoDescr * enzo()
   { return enzo_; };
 
 protected: // functions
@@ -43,7 +43,7 @@ protected: // functions
 
 private: // attributes
 
-  Enzo * enzo_;
+  EnzoDescr * enzo_;
 
 };
 

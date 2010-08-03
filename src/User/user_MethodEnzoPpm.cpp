@@ -12,6 +12,7 @@
 #include "error.hpp"
 #include "global.hpp"
 #include "user.hpp"
+#include "enzo.hpp"
 
 #include "cello_hydro.h"
 

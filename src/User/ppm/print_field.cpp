@@ -9,7 +9,7 @@
 #include "enzo.hpp"
 #include "cello_hydro.h"
  
-void Enzo::print_field (int field)
+void EnzoDescr::print_field (int field)
 
 {
   if (BaryonField[field] == NULL) return -1;

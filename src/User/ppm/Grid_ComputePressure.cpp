@@ -27,7 +27,7 @@
 // 		      float *TemperatureUnits, float *TimeUnits,
 // 		      float *VelocityUnits, ENZO_FLOAT Time);
  
-int Enzo::ComputePressure(ENZO_FLOAT time, float *pressure)
+int EnzoDescr::ComputePressure(ENZO_FLOAT time, float *pressure)
 {
  
   /* declarations */

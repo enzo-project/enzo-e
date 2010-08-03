@@ -8,6 +8,7 @@
 /// @brief    Implementation of MethodEnzoControl user-dependent class member functions
 
 #include "user.hpp"
+#include "enzo.hpp"
 #include "error.hpp"
 #include "parameters.hpp"
 #include "parallel.hpp"

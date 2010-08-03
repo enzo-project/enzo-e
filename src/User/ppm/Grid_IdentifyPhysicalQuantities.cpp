@@ -24,8 +24,10 @@
  
  
  
-int Enzo::IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num,
-				     int &Vel2Num, int &Vel3Num, int &TENum)
+int EnzoDescr::IdentifyPhysicalQuantities
+(
+ int &DensNum, int &GENum, int &Vel1Num,
+ int &Vel2Num, int &Vel3Num, int &TENum )
 {
  
   DensNum = GENum = Vel1Num = Vel2Num = Vel3Num = TENum = 0;

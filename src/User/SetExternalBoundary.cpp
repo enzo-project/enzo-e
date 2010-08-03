@@ -28,13 +28,15 @@
 //   field type in the list of boundary's and apply that boundary value/type.
 //   Returns: 0 on failure
 //
-int Enzo::SetExternalBoundary(int FieldRank, 
-			int GridDims[],
-			int GridOffset[],
-			int StartIndex[], 
-			int EndIndex[],
-			float *Field, 
-			int FieldType)
+int EnzoDescr::SetExternalBoundary
+(
+ int FieldRank, 
+ int GridDims[],
+ int GridOffset[],
+ int StartIndex[], 
+ int EndIndex[],
+ float *Field, 
+ int FieldType )
 {
  
   /* declarations */

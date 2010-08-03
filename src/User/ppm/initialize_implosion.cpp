@@ -11,7 +11,7 @@
 
 const bool debug = false;
  
-void Enzo::initialize_implosion (int size_param)
+void EnzoDescr::initialize_implosion (int size_param)
 {
 
   int grid_size [] = { size_param, size_param };

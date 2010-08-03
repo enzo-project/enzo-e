@@ -68,7 +68,7 @@ int main(int argc, char * argv[])
 
   // Initialize for generic hydrodynamics
 
-  Enzo enzo;
+  EnzoDescr enzo;
 
   enzo.initialize_hydro ();
 

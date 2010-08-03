@@ -19,7 +19,7 @@ public: // interface
 
 /// Creae a new MethodEnzoPpml object
 MethodEnzoPpml(Global * global,
-	       Enzo * enzo)
+	       EnzoDescr * enzo)
   : UserMethod (global),
     enzo_(enzo)
   {};
@@ -55,7 +55,7 @@ MethodEnzoPpml(Global * global,
   
 private: // attributes
 
-  Enzo * enzo_;
+  EnzoDescr * enzo_;
 
 };
 

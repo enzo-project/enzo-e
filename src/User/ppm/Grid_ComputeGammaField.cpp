@@ -22,7 +22,7 @@
  
 /* function prototypes */
 
-int Enzo::ComputeGammaField(float *GammaField)
+int EnzoDescr::ComputeGammaField(float *GammaField)
 {
  
   int DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum, HMNum, H2INum, H2IINum,

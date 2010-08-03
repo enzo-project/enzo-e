@@ -11,7 +11,7 @@
 
 const bool debug = false;
  
-void Enzo::initialize_implosion3 (int size_param)
+void EnzoDescr::initialize_implosion3 (int size_param)
 
 {
 

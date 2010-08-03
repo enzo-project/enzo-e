@@ -18,7 +18,7 @@ class MethodEnzoTimestep : public UserTimestep {
 public: // interface
 
   /// Create a new MethodEnzoTimestep
-  MethodEnzoTimestep(Enzo * enzo) throw();
+  MethodEnzoTimestep(EnzoDescr * enzo) throw();
 
 public: // virtual functions
 
@@ -53,7 +53,7 @@ protected: // functions
   float dtViscous_;
   float dtExpansion_;
 
-  Enzo * enzo_;
+  EnzoDescr * enzo_;
 };
 
 #endif /* USER_METHOD_ENZO_TIMESTEP_HPP */

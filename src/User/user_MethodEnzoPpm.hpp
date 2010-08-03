@@ -18,7 +18,7 @@ class MethodEnzoPpm : public UserMethod {
 public: // interface
 
   MethodEnzoPpm(Global * global,
-		Enzo * enzo):
+		EnzoDescr * enzo):
     UserMethod(global),
     enzo_(enzo)
   {};
@@ -53,7 +53,7 @@ public: // interface
 
 private:
 
-  Enzo * enzo_;
+  EnzoDescr * enzo_;
 
 };
 

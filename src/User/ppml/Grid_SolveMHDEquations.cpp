@@ -21,7 +21,7 @@
 #include "cello_hydro.h"
 #include "enzo.hpp" 
   
-int Enzo::SolveMHDEquations(int cycle, float dt)
+int EnzoDescr::SolveMHDEquations(int cycle, float dt)
 {
  
   /* exit if not 3D */

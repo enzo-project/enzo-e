@@ -9,7 +9,7 @@
 #include "cello_hydro.h"
 #include "enzo.hpp"
 
-void Enzo::initialize_hydro ()
+void EnzoDescr::initialize_hydro ()
 
 {
 

@@ -15,7 +15,7 @@
 // int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
  
  
-int Enzo::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
+int EnzoDescr::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
 {
   if (NumberOfBaryonFields > 0) {
  

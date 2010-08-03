@@ -9,7 +9,7 @@
 #include "enzo.hpp"
 #include "cello_hydro.h"
  
-float Enzo::sum_field (int field)
+float EnzoDescr::sum_field (int field)
 {
   if (BaryonField[field] == NULL) return -1;
   float sum = 0.0;

@@ -1,32 +1,32 @@
-// $Id: Enzo.hpp 1394 2010-04-22 20:52:54Z bordner $
+// $Id: enzo_EnzoDescr.hpp 1394 2010-04-22 20:52:54Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_HPP
-#define ENZO_HPP
+#ifndef ENZO_ENZO_DESCR_HPP
+#define ENZO_ENZO_DESCR_HPP
 
-/// @file     Enzo.hpp
+/// @file     enzo_EnzoDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file Enzo.hpp
+/// @brief    Brief description of file enzo_EnzoDescr.hpp
 
 #include "global.hpp"
 #include "cello_hydro.h"
 
-class Enzo {
+class EnzoDescr {
 
-  /// @class    Enzo
-  /// @ingroup  User
+  /// @class    EnzoDescr
+  /// @ingroup  Enzo
   /// @brief    Object for storing cross-cutting objects, including monitor, error, parameters
 
 public: // interface
 
   /// Constructor
-  Enzo() throw()
+  EnzoDescr() throw()
   {
   }
 
   /// Destructor
-  ~Enzo() throw()
+  ~EnzoDescr() throw()
   {
   }
 
@@ -62,14 +62,14 @@ public: // interface
 private: // prohibit copy constructor
 
   /// Copy constructor
-  Enzo(const Enzo & enzo) throw()
+  EnzoDescr(const EnzoDescr & enzo) throw()
   {
   }
 
 private: // prohibit assignment
 
   /// Assignment operator
-  Enzo & operator= (const Enzo & enzo) throw();
+  EnzoDescr & operator= (const EnzoDescr & enzo) throw();
 
 public: // public attributes (!!)
 
@@ -263,5 +263,5 @@ extern "C" void FORTRAN_NAME(ppml)
    int vxindex[], int vyindex[], int vzindex[],
    int bxindex[], int byindex[], int bzindex[]);
 
-#endif /* ENZO_HPP */
+#endif /* ENZO_ENZO_DESCR_HPP */
 

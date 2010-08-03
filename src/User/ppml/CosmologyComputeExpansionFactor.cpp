@@ -32,7 +32,7 @@
  
 // function prototypes
  
-int Enzo::CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt)
+int EnzoDescr::CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt)
 {
  
   /* Error check. */

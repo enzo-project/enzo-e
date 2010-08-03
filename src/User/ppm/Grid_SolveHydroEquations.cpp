@@ -11,7 +11,7 @@
 #include "cello_hydro.h"
 
 
-int Enzo::SolveHydroEquations (int CycleNumber, float dt)
+int EnzoDescr::SolveHydroEquations (int CycleNumber, float dt)
 {
 
   int NumberOfSubgrids = 0;

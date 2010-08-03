@@ -32,7 +32,7 @@ inline float color_value
   return (image[ix + width*iy]);
 } 
 
-void Enzo::initialize_image ()
+void EnzoDescr::initialize_image ()
 
 {
 

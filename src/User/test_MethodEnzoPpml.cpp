@@ -27,8 +27,6 @@ int main (int argc, char ** argv)
 
   // Create a struct of enzo data (won't work as global data for CHARM++, threading, etc)
 
-  Enzo enzo;
-
   DataDescr * data_descr = new DataDescr(new FieldDescr);
   DataBlock * data_block = new DataBlock(new FieldBlock);
 

@@ -14,11 +14,13 @@
 
 #include "monitor.hpp"
 
-void Enzo::image_dump(const char * file_root, 
-		      int cycle, 
-		      double lower, 
-		      double upper,
-		      Monitor * monitor)
+void EnzoDescr::image_dump
+(
+ const char * file_root, 
+ int cycle, 
+ double lower, 
+ double upper,
+ Monitor * monitor )
 { 
 
   int nx = GridDimension[0];

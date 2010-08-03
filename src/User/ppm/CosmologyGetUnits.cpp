@@ -36,9 +36,11 @@
  
 //int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
  
-int Enzo::CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
-		      float *TemperatureUnits, float *TimeUnits,
-		      float *VelocityUnits, ENZO_FLOAT Time)
+int EnzoDescr::CosmologyGetUnits
+(
+ float *DensityUnits, float *LengthUnits,
+ float *TemperatureUnits, float *TimeUnits,
+ float *VelocityUnits, ENZO_FLOAT Time)
 {
  
   /* From the time, compute the current redshift. */

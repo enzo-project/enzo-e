@@ -1,6 +1,6 @@
 #include "cello_hydro.h"
 
-void Enzo::write_hydro()
+void EnzoDescr::write_hydro()
 {
   printf ("write_hydro: ComovingCoordinates %d\n",    ComovingCoordinates);
   printf ("write_hydro: UseMinimumPressureSupport %d\n",    UseMinimumPressureSupport);
