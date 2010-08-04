@@ -11,30 +11,27 @@ function tests($component,$testrun) {
   
    echo "<a href=\"src/$component/test_$testrun.cpp\"><strong><code>src/$component/test_$testrun.cpp</code></strong></a></br/>";
 
-   fail($testrun);
-   pass($testrun);
+   test($testrun,"FAIL",$component);
+   test($testrun,"pass",$component);
  };
 
-function pass($testrun) {
+function test($testrun,$type,$component) {
 
-  $type = "pass";
+  if ($type == "pass") {
+    $cols = "$4,$6";
+    $itemtext  = "";
+    $rowtext = "</tr><tr>";
+  } else {
+    $cols = "\"src/$component/test_$testrun.cpp\",$4,$6";
+    $itemtext  = "</tr><tr>";
+    $rowtext = "";
+  }
 
-  echo "<blockquote><table><tr>";
-  system ("awk '/ $type /{split($3,a,\"\/\"); print \"<strong class=$type>\",$4 , \"</strong>&nbsp;\"}' < test/test_$testrun.unit");
-  echo "</tr></table></blockquote>";
+ echo "<table><tr>";
+  system ("awk 'BEGIN {c=0}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> $type:\",$cols , \"</td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < test/test_$testrun.unit");
+  echo "</tr></table>";
      
 };
-
-function fail($testrun) {
-
-  $type = "FAIL";
-
-  echo "<blockquote><table><tr>";
-  system ("awk '/ $type /{split($3,a,\"\/\"); print \"<strong class=$type>\",$4 ,$6, \"</strong>&nbsp;\"}' < test/test_$testrun.unit");
-  echo "</tr></table></blockquote>";
-     
-}
-
 
 ?>
 

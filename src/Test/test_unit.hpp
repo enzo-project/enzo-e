@@ -83,7 +83,7 @@ void unit_func (const char * f)
 void unit_assert_ (bool result, const char * file, int line)
 {
   if (unit::process_rank == 0 || ! result) {
-    printf ("%s %d/%d %s %d %s %s() %d\n",
+    printf ("%s %d/%d %s %d %s %s %d\n",
 	    (result)? unit::pass_string : unit::fail_string,
 	    unit::process_rank, 
 	    unit::process_count,
