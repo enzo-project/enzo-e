@@ -1,0 +1,24 @@
+Import('env')
+
+includes = [Glob('enzo*hpp'), Glob('*.h')]
+sources  = [Glob('enzo*cpp')]
+
+components = ['user', 'enzo-ppm', 'data', 'field', 'error','parallel', 'monitor', 'parameters', 'memory', 'cello']
+libraries  = ['png', '$FORTRANLIBS']
+
+env = env.Clone(LIBS=[components,libraries])
+
+SConscript('ppm/SConscript')
+SConscript('ppml/SConscript')
+
+libraries = env.Library ('enzo', sources)
+
+test_enzo_ppm = env.Program (['test_MethodEnzoPpm.cpp', sources])
+
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin', env.Install ('$BINPATH', 
+	[test_enzo_ppm]))
+
+
+
