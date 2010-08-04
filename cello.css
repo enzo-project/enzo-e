@@ -24,8 +24,10 @@ hr {background: #fff url(cello-hr.png); height: 6px}
 
 tr {background-color: #aaa}
 
+td {background-color: #ccc; }
 td.pass {  color: #00f;  background-color: #fff; }
 td.FAIL {  color: #f00;   background-color: #fff; }
+td.inverse {  color: #fff;   background-color: #000; }
 
 /* A:link    { color: #7f7; } */
 /* A:visited { color: #ff7; } */

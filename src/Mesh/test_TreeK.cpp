@@ -23,7 +23,9 @@
 // #include "image.h"
 
 #define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
-#define png_file "Enzo-P-2048.png"
+
+const char * png_dir  = "input";
+const char * png_file = "Enzo-P-2048.png";
 
 const bool debug    = false;
 const bool geomview = false;
@@ -72,7 +74,7 @@ int main(int argc, char ** argv)
       refinement != 8 &&
       refinement != 16) print_usage(argc,argv);
   
-  if (! (0 < max_level && max_level <= 12)) print_usage(argc,argv);
+  if (! (0 < max_level && max_level <= 14)) print_usage(argc,argv);
 
   char filename[80];
   sprintf (filename,"TreeK-D=%d-R=%d-L=%d",dimension,refinement,max_level);
@@ -85,7 +87,12 @@ int main(int argc, char ** argv)
     nx = 1;
     ny = 1;
     nz = 1;
+    // Change to input subdirectory
+    chdir(png_dir);
+    // Read png image file
     level_array = create_image_array(png_file,&nx,&ny,max_level);
+    // Change back to parent directory
+    chdir("..");
 
   } else {
 

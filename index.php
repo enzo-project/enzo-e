@@ -9,20 +9,21 @@
 <?php
 function tests($testrun) {
   
-  echo "<table><tr><th>status</th><th>file</th><th>line</th><th>component</th><th>class</th><th>function</th></tr>";
-  test($testrun,"FAIL","red");
-  test($testrun,"pass","blue");
+  echo "<table><tr><th>component</th><th>file</th><th>line</th><th>class</th><th>function</th><th>status</th></tr>";
+  test($testrun,"FAIL");
+  echo "<tr><td class=inverse colspan=6></td></tr>";
+  test($testrun,"pass");
   echo "</table>";
 }
-function test($testrun,$type,$color) {
+function test($testrun,$type) {
 
    system ("awk '/ $type /{split($3,a,\"\/\"); print \"<tr>" .
-           " <td class=$type>$type </td>" .
-           " <td class=$type>\",a[3],\"</td>" . 
-           " <td class=$type>\",$4,\"</td>" .
-           " <td class=$type>\",a[2],\"</td>" .
-           " <td class=$type>\",$5,\"</td>" .
-           " <td class=$type>\",$6,\"</td>" .
+           " <td>\",a[2],\"</td>" .
+           " <td>\",a[3],\"</td>" . 
+           " <td align=right>\",$4,\"</td>" .
+           " <td>\",$5,\"</td>" .
+           " <td>\",$6,\"</td>" .
+           " <td align=center class=$type><strong>$type</strong></td>" .
            "</tr>\"}' < test/test_$testrun.unit");
 
 }
@@ -36,9 +37,6 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <h3>Data</h3>
 
 <?php tests("Data"); ?>
-<?php tests("FieldBlock"); ?>
-<!-- <?php tests("FieldBlockFaces"); ?> -->
-<?php tests("FieldDescr"); ?>
 
 <h2>Disk</h2>
 
@@ -56,6 +54,9 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <h2>Field</h2>
 
+<?php tests("FieldBlock"); ?>
+<!-- <?php tests("FieldBlockFaces"); ?> -->
+<?php tests("FieldDescr"); ?>
 
 <h2>Global</h2>
 

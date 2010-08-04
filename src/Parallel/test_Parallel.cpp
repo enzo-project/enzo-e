@@ -203,7 +203,8 @@ int main(int argc, char ** argv)
   unit_assert(false);
   unit_func("bulk_recv_wait");
   unit_assert(false);
-  
+
+  fflush(stdout);
   Mpi::barrier();
   unit_finalize();
   Mpi::finalize();
