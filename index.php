@@ -7,26 +7,34 @@
   <h1>Cello Unit Test Page</h1>
 
 <?php
-function tests($testrun) {
+function tests($component,$testrun) {
   
-  echo "<table><tr><th>component</th><th>file</th><th>line</th><th>class</th><th>function</th><th>status</th></tr>";
-  test($testrun,"FAIL");
-  echo "<tr><td class=inverse colspan=6></td></tr>";
-  test($testrun,"pass");
-  echo "</table>";
-}
-function test($testrun,$type) {
+   echo "<a href=\"src/$component/test_$testrun.cpp\"><strong><code>src/$component/test_$testrun.cpp</code></strong></a></br/>";
 
-   system ("awk '/ $type /{split($3,a,\"\/\"); print \"<tr>" .
-           " <td>\",a[2],\"</td>" .
-           " <td>\",a[3],\"</td>" . 
-           " <td align=right>\",$4,\"</td>" .
-           " <td>\",$5,\"</td>" .
-           " <td>\",$6,\"</td>" .
-           " <td align=center class=$type><strong>$type</strong></td>" .
-           "</tr>\"}' < test/test_$testrun.unit");
+   fail($testrun);
+   pass($testrun);
+ };
 
+function pass($testrun) {
+
+  $type = "pass";
+
+  echo "<blockquote><table><tr>";
+  system ("awk '/ $type /{split($3,a,\"\/\"); print \"<strong class=$type>\",$4 , \"</strong>&nbsp;\"}' < test/test_$testrun.unit");
+  echo "</tr></table></blockquote>";
+     
+};
+
+function fail($testrun) {
+
+  $type = "FAIL";
+
+  echo "<blockquote><table><tr>";
+  system ("awk '/ $type /{split($3,a,\"\/\"); print \"<strong class=$type>\",$4 ,$6, \"</strong>&nbsp;\"}' < test/test_$testrun.unit");
+  echo "</tr></table></blockquote>";
+     
 }
+
 
 ?>
 
@@ -36,12 +44,12 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <h3>Data</h3>
 
-<?php tests("Data"); ?>
+<?php tests("Data","Data"); ?>
 
 <h2>Disk</h2>
 
-<?php tests("FileHdf5"); ?>
-<?php tests("Ifrit"); ?>
+<?php tests("Disk","FileHdf5"); ?>
+<?php tests("Disk","Ifrit"); ?>
 
 <h2>Distribute</h2>
 
@@ -50,20 +58,20 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <h2>Error</h2>
 
-<?php tests("Error"); ?>
+<?php tests("Error","Error"); ?>
 
 <h2>Field</h2>
 
-<?php tests("FieldBlock"); ?>
+<?php tests("Field","FieldBlock"); ?>
 <!-- <?php tests("FieldBlockFaces"); ?> -->
-<?php tests("FieldDescr"); ?>
+<?php tests("Field","FieldDescr"); ?>
 
 <h2>Global</h2>
 
 
 <h2>Memory</h2>
 
-<?php tests("Memory"); ?>
+<?php tests("Memory","Memory"); ?>
 
 <h2>Mesh</h2>
 
@@ -73,7 +81,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <h2>Monitor</h2>
 
-<?php tests("Monitor"); ?>
+<?php tests("Monitor","Monitor"); ?>
 <img src="monitor_image_1.png"></img>
 <img src="monitor_image_2.png"></img>
 <img src="monitor_image_3.png"></img>
@@ -82,30 +90,30 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <h2>Parallel</h2>
 
-<?php tests("parallel"); ?>
+<?php tests("Parallel","parallel"); ?>
 
 <h2>Parameters</h2>
 
-<?php tests("Parameters"); ?>
+<?php tests("Parameters","Parameters"); ?>
 
 <h2>Particles</h2>
 
 
 <h2>Performance</h2>
 
-<?php tests("Performance"); ?>
+<?php tests("Performance","Performance"); ?>
 
 <h2>Portal</h2>
 
 
 <h2>Schedule</h2>
 
-<?php tests("Schedule"); ?>
+<?php tests("Schedule","Schedule"); ?>
 
 
 <h2>Simulation</h2>
 
-<?php tests("Simulation"); ?>
+<?php tests("Simulation","Simulation"); ?>
 
 <h2>Task</h2>
 
