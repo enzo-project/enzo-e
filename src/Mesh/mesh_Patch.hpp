@@ -36,10 +36,10 @@ public: // interface
 private: // attributes
 
   /// Parallel layout descriptor
-  Layout * layout_;
+  class Layout * layout_;
 
   /// Array of local data blocks associated with the patch
-  DataBlock * data_block_;
+  class DataBlock * data_block_;
 
 };
 

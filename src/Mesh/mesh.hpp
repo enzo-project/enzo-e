@@ -16,10 +16,8 @@
 
 #include "cello.hpp"
 
-#include "data.hpp"
 #include "error.hpp"
 #include "memory.hpp"
-#include "parallel.hpp"
 
 #include "mesh_Node2K.hpp"
 #include "mesh_Node3K.hpp"
