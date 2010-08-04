@@ -11,7 +11,6 @@
 #include "error.hpp"
 #include "test.hpp"
 #include "data.hpp"
-#include "particle.hpp"
 #include "field.hpp"
 
 int main()
