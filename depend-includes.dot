@@ -1,7 +1,7 @@
 digraph includes {
 
 
-   data        -> {error field particle test};
+   data        -> {error field test};
    disk        -> {error test};
    distribute  -> {};
    enzo        -> {user data field error parallel monitor parameters memory};
@@ -9,7 +9,7 @@ digraph includes {
    field       -> {disk error parallel test};
    global      -> {error memory monitor parallel parameters};
    memory      -> {error memory performance};
-   mesh        -> {data error memory monitor parallel test};
+   mesh        -> {error memory monitor test};
    monitor     -> {error parallel performance test};
    parallel    -> {error test};
    parameters  -> {error monitor parallel test};
