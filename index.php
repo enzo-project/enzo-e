@@ -12,14 +12,16 @@ function tests($component,$testrun) {
    $file = "src/$component/test_$testrun.cpp";
    $output = "test/test_$testrun.unit";
 
-   echo "<hr>";
-   echo "<table>";
-   echo "<tr><td>Test program</td><td><a href=\"$file\">$file</a></td></tr>";
-   echo "<tr><td>Test output</td><td><a href=\"$output\">$output</a></td></tr>";
-   echo "</table>";
-
-   system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<strong class=fail>TEST DOES NOT COMPLETE\!</strong>\"}' < $output");
+   echo "</br/>\n";
+   echo "<table><tr>\n";
+   echo "<td ><a href=\"$file\">$file</a> &gt; <a href=\"$output\">$output</a></td></tr>\n";
+   echo "</table>\n";
+   echo "</br/>\n";
+   system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<strong class=fail>TEST PROGRAM DID NOT COMPLETE\!</strong>\"; if (c!=0) print \"<strong class=pass>Test program completed normally</strong>\"}' < $output");
+   echo "</br/>\n";
+   echo "</br/>\n";
    test($testrun,"FAIL",$component,$file);
+   echo "</br/>\n";
    test($testrun,"pass",$component,$file);
  };
 
@@ -36,8 +38,9 @@ function test($testrun,$type,$component) {
   }
 
   $output = "test/test_$testrun.unit";
+  echo "${type}ed tests: </br/>";
   echo "<table><tr>";
-  system ("awk 'BEGIN {c=0}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> $type:\",$cols , \"</td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
+  system ("awk 'BEGIN {c=0}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
   echo "</tr></table>";
      
 };

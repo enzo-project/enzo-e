@@ -27,6 +27,8 @@ tr {background-color: #aaa}
 td {background-color: #ccc; }
 td.pass {  color: #00f;  background-color: #fff; }
 td.FAIL {  color: #f00;   background-color: #fff; }
+th.pass {  color: #00f;  background-color: #fff; }
+th.FAIL {  color: #f00;   background-color: #fff; }
 td.inverse {  color: #fff;   background-color: #000; }
 strong.pass {  color: #00f;  background-color: #fff; }
 strong.FAIL {  color: #f00;   background-color: #fff; }
