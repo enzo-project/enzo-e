@@ -9,10 +9,11 @@
 <?php
 function tests($component,$testrun) {
   
-   echo "<a href=\"src/$component/test_$testrun.cpp\"><strong><code>src/$component/test_$testrun.cpp</code></strong></a></br/>";
+   $file = "src/$component/test_$testrun.cpp";
 
-   test($testrun,"FAIL",$component);
-   test($testrun,"pass",$component);
+   system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<strong class=fail>TEST DOES NOT COMPLETE\!</strong>\"}' < test/test_$testrun.unit");
+   test($testrun,"FAIL",$component,$file);
+   test($testrun,"pass",$component,$file);
  };
 
 function test($testrun,$type,$component) {
@@ -22,7 +23,7 @@ function test($testrun,$type,$component) {
     $itemtext  = "";
     $rowtext = "</tr><tr>";
   } else {
-    $cols = "\"src/$component/test_$testrun.cpp\",$4,$6";
+    $cols = "\"$file\",$4,$6";
     $itemtext  = "</tr><tr>";
     $rowtext = "";
   }
