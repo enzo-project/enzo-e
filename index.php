@@ -10,8 +10,15 @@
 function tests($component,$testrun) {
   
    $file = "src/$component/test_$testrun.cpp";
+   $output = "test/test_$testrun.unit";
 
-   system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<strong class=fail>TEST DOES NOT COMPLETE\!</strong>\"}' < test/test_$testrun.unit");
+   echo "<hr>";
+   echo "<table>";
+   echo "<tr><td>Test program</td><td><a href=\"$file\">$file</a></td></tr>";
+   echo "<tr><td>Test output</td><td><a href=\"$output\">$output</a></td></tr>";
+   echo "</table>";
+
+   system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<strong class=fail>TEST DOES NOT COMPLETE\!</strong>\"}' < $output");
    test($testrun,"FAIL",$component,$file);
    test($testrun,"pass",$component,$file);
  };
@@ -28,8 +35,9 @@ function test($testrun,$type,$component) {
     $rowtext = "";
   }
 
- echo "<table><tr>";
-  system ("awk 'BEGIN {c=0}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> $type:\",$cols , \"</td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < test/test_$testrun.unit");
+  $output = "test/test_$testrun.unit";
+  echo "<table><tr>";
+  system ("awk 'BEGIN {c=0}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> $type:\",$cols , \"</td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
   echo "</tr></table>";
      
 };
@@ -122,6 +130,10 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 
 <h4>test_ppm ppm_image</h4>
+
+<p>TODO: Add separate program and test output files</p>
+
+<?php tests("Enzo","ppm_image"); ?>
 
 <table>
 <tr><th>cycle = 0</th><th>cycle=10</th></tr>
