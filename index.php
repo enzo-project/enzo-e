@@ -38,6 +38,7 @@ function test($testrun,$type,$component) {
   }
 
   $output = "test/test_$testrun.unit";
+  echo exec("wc -l $type $output);
   echo "${type}ed tests: </br/>";
   echo "<table><tr>";
   system ("awk 'BEGIN {c=0}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
