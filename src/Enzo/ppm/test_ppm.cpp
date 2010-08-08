@@ -17,6 +17,7 @@
 #include "monitor.hpp"
 #include "performance.hpp"
 #include "enzo.hpp"
+#include "test.hpp"
 
 //----------------------------------------------------------------------
 
@@ -31,7 +32,10 @@ void print_usage(const char * name)
 int main(int argc, char ** argv)
 {
 
-  // Initialize parallelism
+  unit_init();
+
+
+  // Initialize monitor
 
   Monitor * monitor = new Monitor;
 
@@ -100,6 +104,9 @@ int main(int argc, char ** argv)
   double lower = 0.125*size;
   double upper =   1.0*size;
 
+  unit_class ("enzo");
+  unit_func ("SolveHydroEquations");
+
   for (cycle = 0, time = 0.0;
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
@@ -118,6 +125,8 @@ int main(int argc, char ** argv)
 
   }
 
+  unit_assert(cycle >=cycle_stop || time >= time_stop);
+
   printf ("%d %d %g\n",size+6,cycle_stop,timer.value());
   fflush(stdout);
 
@@ -126,6 +135,9 @@ int main(int argc, char ** argv)
     enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
   }
 
+
   delete monitor;
+  unit_finalize();
+
 }
 

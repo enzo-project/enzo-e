@@ -1,48 +1,53 @@
 <html>
   <head>
-    <title>Cello Unit Test Page</title>
+    <title>Cello Unit Tests</title>
     <link href="cello.css" rel="stylesheet" type="text/css">
   </head>
 <body>
-  <h1>Cello Unit Test Page</h1>
+  <h1>Cello Unit Tests</h1>
 
 <?php
-function tests($component,$testrun) {
+function tests($component,$testrun,$output) {
   
-   $file = "src/$component/test_$testrun.cpp";
-   $output = "test/test_$testrun.unit";
+   $test_file = "src/$component/test_$testrun.cpp";
+   $output_file = "test/test_$output.unit";
 
-   echo "</br/>\n";
-   echo "<table><tr>\n";
-   echo "<td ><a href=\"$file\">$file</a> &gt; <a href=\"$output\">$output</a></td></tr>\n";
-   echo "</table>\n";
-   echo "</br/>\n";
-   system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<strong class=fail>TEST PROGRAM DID NOT COMPLETE\!</strong>\"; if (c!=0) print \"<strong class=pass>Test program completed normally</strong>\"}' < $output");
-   echo "</br/>\n";
-   echo "</br/>\n";
-   test($testrun,"FAIL",$component,$file);
-   echo "</br/>\n";
-   test($testrun,"pass",$component,$file);
+   if (! file_exists($test_file)) {
+     echo "<p><strong class=fail>$test_file does not exist</strong></p>";
+   }
+   if (file_exists($output_file)) {
+     echo "<h3><a href=\"$test_file\">$test_file</a> &gt; <a href=\"$output_file\">$output_file</a></h3>\n";
+     system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<strong class=fail>TEST PROGRAM DID NOT COMPLETE\!</strong>\"; if (c!=0) print \"<strong class=pass>Test program completed normally</strong></br/></br/>\"}' < $output_file");
+     test($testrun,"FAIL");
+     test($testrun,"pass");
+   } else {
+     echo "<strong class=fail>$output_file does not exist</strong></br/>";
+   }
  };
 
-function test($testrun,$type,$component) {
+function test($testrun,$type) {
 
+  $ltype = strtolower($type);
   if ($type == "pass") {
     $cols = "$4,$6";
     $itemtext  = "";
     $rowtext = "</tr><tr>";
   } else {
     $cols = "\"$file\",$4,$6";
-    $itemtext  = "</tr><tr>";
-    $rowtext = "";
+    $itemtext  = "";
+    $rowtext = "</tr><tr>";
   }
 
   $output = "test/test_$testrun.unit";
-  echo exec("wc -l $type $output);
-  echo "${type}ed tests: </br/>";
-  echo "<table><tr>";
-  system ("awk 'BEGIN {c=0}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
-  echo "</tr></table>";
+  $count = exec("grep $type $output | wc -l");
+  if ($count == 0) {
+#     echo "<strong >no ${ltype}ed tests</strong></br/>";
+  } else {
+     echo "<strong class=$type>${ltype}ed tests:</strong></br/>";
+     echo "<blockquote><table><tr>";
+     system ("awk 'BEGIN {c=0}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
+     echo "</tr></table></blockquote>";
+  }
      
 };
 
@@ -52,92 +57,113 @@ function test($testrun,$type,$component) {
 Test data shown on this page is automatically generated whenever <code>Cello</code> is compiled.  FAIL status usually indicates that the corresponding function has not been implemented yet.  Empty tables indicate that the unit test files have been deleted, probably with "<code>scons -c</code>" (<code>scons</code> version of "<code>make clean</code>").
 </p>
 
-<h3>Data</h3>
+<hr>
+<h2>Data Component</h2>
 
-<?php tests("Data","Data"); ?>
+<?php tests("Data","Data","Data"); ?>
 
-<h2>Disk</h2>
+<hr>
+<h2>Disk Component</h2>
 
-<?php tests("Disk","FileHdf5"); ?>
-<?php tests("Disk","Ifrit"); ?>
+<?php tests("Disk","FileHdf5","FileHdf5"); ?>
+<?php tests("Disk","Ifrit","Ifrit"); ?>
 
-<h2>Distribute</h2>
-
-
-
-
-<h2>Error</h2>
-
-<?php tests("Error","Error"); ?>
-
-<h2>Field</h2>
-
-<?php tests("Field","FieldBlock"); ?>
-<!-- <?php tests("FieldBlockFaces"); ?> -->
-<?php tests("Field","FieldDescr"); ?>
-
-<h2>Global</h2>
+<hr>
+<h2>Distribute Component</h2>
 
 
-<h2>Memory</h2>
-
-<?php tests("Memory","Memory"); ?>
-
-<h2>Mesh</h2>
 
 
-<h2>Method</h2>
+<hr>
+<h2>Error Component</h2>
+
+<?php tests("Error","Error","Error"); ?>
+
+<hr>
+<h2>Field Component</h2>
+
+<?php tests("Field","FieldBlock","FieldBlock"); ?>
+<?php tests("FieldBlockFaces","BlockFaces","BlockFaces"); ?>
+<?php tests("Field","FieldDescr","FieldDescr"); ?>
+
+<hr>
+<h2>Global Component</h2>
 
 
-<h2>Monitor</h2>
+<hr>
+<h2>Memory Component</h2>
 
-<?php tests("Monitor","Monitor"); ?>
+<?php tests("Memory","Memory","Memory"); ?>
+
+<hr>
+<h2>Mesh Component</h2>
+
+
+<hr>
+<h2>Method Component</h2>
+
+
+<hr>
+<h2>Monitor Component</h2>
+
+<?php tests("Monitor","Monitor","Monitor"); ?>
+
 <img src="monitor_image_1.png"></img>
 <img src="monitor_image_2.png"></img>
 <img src="monitor_image_3.png"></img>
 <img src="monitor_image_4.png"></img>
 
 
-<h2>Parallel</h2>
+<hr>
+<h2>Parallel Component</h2>
 
-<?php tests("Parallel","parallel"); ?>
+<?php tests("Parallel","Parallel","Parallel"); ?>
 
-<h2>Parameters</h2>
+<hr>
+<h2>Parameters Component</h2>
 
-<?php tests("Parameters","Parameters"); ?>
+<?php tests("Parameters","Parameters","Parameters"); ?>
 
-<h2>Particles</h2>
-
-
-<h2>Performance</h2>
-
-<?php tests("Performance","Performance"); ?>
-
-<h2>Portal</h2>
+<hr>
+<h2>Particles Component</h2>
 
 
-<h2>Schedule</h2>
+<hr>
+<h2>Performance Component</h2>
 
-<?php tests("Schedule","Schedule"); ?>
+<?php tests("Performance","Performance","Performance"); ?>
 
-
-<h2>Simulation</h2>
-
-<?php tests("Simulation","Simulation"); ?>
-
-<h2>Task</h2>
+<hr>
+<h2>Portal Component</h2>
 
 
-<h2>Test</h2>
+<hr>
+<h2>Schedule Component</h2>
 
-<h2>User</h2>
+<?php tests("Schedule","Schedule","Schedule"); ?>
+
+
+<hr>
+<h2>Simulation Component</h2>
+
+<?php tests("Simulation","Simulation","Simulation"); ?>
+
+<hr>
+<h2>Task Component</h2>
+
+
+<hr>
+<h2>Test Component</h2>
+
+<hr>
+<h2>User Component</h2>
 
 
 <h4>test_ppm ppm_image</h4>
 
 <p>TODO: Add separate program and test output files</p>
 
-<?php tests("Enzo","ppm_image"); ?>
+<?php tests("Enzo/ppm","ppm","ppm_image"); ?>
 
 <table>
 <tr><th>cycle = 0</th><th>cycle=10</th></tr>
@@ -149,6 +175,8 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <h4>test_ppm ppm_implosion</h4>
 
+<?php tests("Enzo/ppm","ppm","ppm_implosion"); ?>
+
 <table>
 <tr><th>cycle = 0</th><th>cycle=10</th></tr>
 <tr>
@@ -158,6 +186,8 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 </table>
 
 <h4>test_ppm ppm_implosion3</h4>
+
+<?php tests("Enzo/ppm","ppm","ppm_implosion3"); ?>
 
 <table>
 <tr>
@@ -180,6 +210,8 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <h3>test_ppml ppml_blast</h3>
 
+<?php tests("Enzo/ppml","ppml","ppml_blast"); ?>
+
 <table>
 <tr>
 <th>cycle = 0 project = X</th>
@@ -201,6 +233,8 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <h3>test_ppml ppml_implosion</h3>
 
+<?php tests("Enzo/ppml","ppml","ppml_implosion"); ?>
+
 <table>
 <tr>
 <th>cycle = 0 project = X</th>
@@ -221,6 +255,8 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 </table>
 
 <h3>MethodEnzoPpm</h3>
+
+<?php tests("Enzo","MethodEnzoPpm","MethodEnzoPpm"); ?>
 
 <table>
 <tr>
@@ -246,6 +282,12 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 </table>
 
 <h3>TreeK-D2-R2-L?</h3>
+
+<?php tests("Mesh","TreeK","TreeK-D2-R2-L6"); ?>
+<?php tests("Mesh","TreeK","TreeK-D2-R2-L7"); ?>
+<?php tests("Mesh","TreeK","TreeK-D2-R2-L8"); ?>
+<?php tests("Mesh","TreeK","TreeK-D2-R2-L9"); ?>
+<?php tests("Mesh","TreeK","TreeK-D2-R2-L10"); ?>
 
 <table>
 <tr>
@@ -276,6 +318,10 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <h3>TreeK-D2-R4-L?</h3>
 
+<?php tests("Mesh","TreeK","TreeK-D2-R4-L6"); ?>
+<?php tests("Mesh","TreeK","TreeK-D2-R4-L8"); ?>
+<?php tests("Mesh","TreeK","TreeK-D2-R4-L10"); ?>
+
 <table>
 <tr>
 <th></th>
@@ -298,6 +344,12 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 </table>
 
 <h3>TreeK-D3-R2-L?</h3>
+
+<?php tests("Mesh","TreeK","TreeK-D3-R2-L4"); ?>
+<?php tests("Mesh","TreeK","TreeK-D3-R2-L5"); ?>
+<?php tests("Mesh","TreeK","TreeK-D3-R2-L6"); ?>
+<?php tests("Mesh","TreeK","TreeK-D3-R2-L7"); ?>
+<?php tests("Mesh","TreeK","TreeK-D3-R2-L8"); ?>
 
 <table>
 <tr>
@@ -373,6 +425,10 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 
 <h3>TreeK-D3-R4-L?</h3>
+
+<?php tests("Mesh","TreeK","TreeK-D3-R4-L4"); ?>
+<?php tests("Mesh","TreeK","TreeK-D3-R4-L6"); ?>
+<?php tests("Mesh","TreeK","TreeK-D3-R4-L8"); ?>
 
 <table>
 <tr>

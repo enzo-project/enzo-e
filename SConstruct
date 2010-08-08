@@ -76,7 +76,7 @@ elif (platform == 'linux-mpi-valgrind'):
 #--------------------------------------------------
 elif (platform == 'linux-ampi'):
 #--------------------------------------------------
-   charm_path = '/home/bordner/charm/charm-6.2'
+   charm_path = '/home/bordner/charm/charm-6.2.1'
    parallel_run = charm_path + "/bin/charmrun +p4 "
    serial_run   = ""
   
@@ -84,7 +84,7 @@ elif (platform == 'linux-ampi'):
       BINPATH     = '#/bin',
       CC          = charm_path + '/bin/charmc -language ampi',
       CPPDEFINES = ['NO_FREETYPE'],
-      CPPFLAGS    = '-Wall -g',
+      CPPFLAGS    = '-g',
       CPPPATH     = '#/include',
       CXX         = charm_path + '/bin/charmc -language ampi',
       ENV         = os.environ,

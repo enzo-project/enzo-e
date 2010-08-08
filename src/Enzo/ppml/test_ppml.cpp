@@ -12,9 +12,11 @@
 #include "cello.hpp" 
 #include "cello_hydro.h"
 
-#include "enzo.hpp"
 #include "string.h"
 #include "test_ppml.h"
+
+#include "test.hpp"
+#include "enzo.hpp"
 #include "parallel.hpp"
 #include "performance.hpp"
 #include "monitor.hpp"
@@ -32,6 +34,8 @@ void print_usage(const char * name)
 
 int main(int argc, char * argv[])
 {
+
+  unit_init();
 
   Monitor * monitor = new Monitor;
 
@@ -98,6 +102,9 @@ int main(int argc, char * argv[])
   double lower = 0.125*size;
   double upper =   1.0*size;
 
+  unit_class("enzo");
+  unit_func("SolveMHDEquations");
+
   for (cycle = 0, time = 0.0;
        (cycle < cycle_stop) && (time < time_stop);
        ++cycle, time += dt) {
@@ -116,6 +123,7 @@ int main(int argc, char * argv[])
     enzo.SolveMHDEquations(cycle, dt);
 
   }
+  unit_assert(cycle >= cycle_stop || time >= time_stop);
 
   printf ("%d %d %g\n",size+6,cycle_stop,timer.value());
   fflush(stdout);
@@ -124,5 +132,6 @@ int main(int argc, char * argv[])
     enzo.SetExternalBoundaryValues();
     enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
   }
+  unit_finalize();
 }
 

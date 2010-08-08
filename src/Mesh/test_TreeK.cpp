@@ -16,6 +16,7 @@
 #include "cello.hpp"
 
 #include "error.hpp"
+#include "test.hpp"
 #include "monitor.hpp"
 #include "memory.hpp"
 #include "mesh.hpp"
@@ -50,6 +51,8 @@ void print_usage(int, char**);
 
 int main(int argc, char ** argv)
 {
+
+  unit_init();
 
   // Required for Monitor
 
@@ -88,11 +91,11 @@ int main(int argc, char ** argv)
     ny = 1;
     nz = 1;
     // Change to input subdirectory
-    chdir(png_dir);
+    if (chdir(png_dir)) unit_assert(false);
     // Read png image file
     level_array = create_image_array(png_file,&nx,&ny,max_level);
     // Change back to parent directory
-    chdir("..");
+    if (chdir("..")) unit_assert(false);
 
   } else {
 
@@ -108,6 +111,7 @@ int main(int argc, char ** argv)
   memory->print();
 
   delete memory;
+  unit_finalize();
 
 }
 
