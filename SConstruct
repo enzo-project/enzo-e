@@ -39,14 +39,32 @@ else:
 #==================================================
 
 #--------------------------------------------------
-if (platform == 'linux-mpi'):
+if (platform == 'linux-serial'):
+#--------------------------------------------------
+   parallel_run = ""
+   serial_run   = ""
+   env = Environment (
+      BINPATH     = '#/bin',
+      CC          = 'gcc',	
+      CPPDEFINES = ['NO_FREETYPE'],
+      CPPFLAGS    = '-Wall -g  -m128bit-long-double',
+      CPPPATH     = '#/include',
+      CXX         = 'g++',	
+      FORTRAN     = 'gfortran',
+      FORTRANLIBS = 'gfortran',
+      FORTRANPATH = '#/include',
+      LIBPATH     = '#/lib',
+      ENV         = os.environ
+   )
+#--------------------------------------------------
+elif (platform == 'linux-mpi'):
 #--------------------------------------------------
    parallel_run = "mpirun -np 4"
    serial_run   = ""
    env = Environment (
       BINPATH     = '#/bin',
       CC          = 'mpicc',	
-      CPPDEFINES = ['NO_FREETYPE'],
+      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
       CPPPATH     = '#/include',
       CXX         = 'mpiCC',	
@@ -64,7 +82,7 @@ elif (platform == 'linux-mpi-valgrind'):
    env = Environment (
       BINPATH     = '#/bin',
       CC          = 'mpicc',	
-      CPPDEFINES = ['NO_FREETYPE'],
+      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
       CPPPATH     = '#/include',
       CXX         = 'mpiCC',	
@@ -83,10 +101,30 @@ elif (platform == 'linux-ampi'):
    env = Environment(
       BINPATH     = '#/bin',
       CC          = charm_path + '/bin/charmc -language ampi',
-      CPPDEFINES = ['NO_FREETYPE'],
+      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
       CPPFLAGS    = '-g',
       CPPPATH     = '#/include',
       CXX         = charm_path + '/bin/charmc -language ampi',
+      ENV         = os.environ,
+      FORTRAN     = 'gfortran',
+      FORTRANLIBS = 'gfortran',
+      FORTRANPATH = '#/include',
+      LIBPATH     = '#/lib',
+   )
+#--------------------------------------------------
+elif (platform == 'linux-charm'):
+#--------------------------------------------------
+   charm_path = '/home/bordner/charm/charm-6.2.1'
+   parallel_run = charm_path + "/bin/charmrun +p4 "
+   serial_run   = ""
+  
+   env = Environment(
+      BINPATH     = '#/bin',
+      CC          = charm_path + '/bin/charmc -language charm++',
+      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_CHARM'],
+      CPPFLAGS    = '-g',
+      CPPPATH     = '#/include',
+      CXX         = charm_path + '/bin/charmc -language charm++',
       ENV         = os.environ,
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
@@ -101,7 +139,7 @@ elif (platform == 'triton'):
    env = Environment (
       BINPATH = '#/bin',
       CC      = 'mpicc',	
-      CPPDEFINES = ['NO_FREETYPE'],
+      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
       CPPFLAGS = '-g -DH5_USE_16_API',
       CPPPATH = ['#/include', '/opt/pgi/hdf5_pgi/include'],
       CXX     = 'mpicxx',	
@@ -122,7 +160,7 @@ elif (platform == 'ncsa-bd'):
       BINPATH = '#/bin',
       CCFLAGS = '-O3 -qhot -q64 -D H5_USE_16_API',
       CC      = 'mpcc',	
-      CPPDEFINES = ['NO_FREETYPE'],
+      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
 #      CPPDEFPREFIX = '-WF,-D',
       CPPPATH = ['/home/bordner/include', '#/include'],
       CXX     = 'mpCC',	

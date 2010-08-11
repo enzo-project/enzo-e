@@ -17,6 +17,8 @@ enum parallel_type {
 #include <string>
 #include <vector>
 #include <string>
+#include <map>
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +37,7 @@ enum parallel_type {
 #ifdef CONFIG_USE_MPI
 #   include "parallel_GroupProcessMpi.hpp"
 #endif
+#include "parallel_GroupProcessSerial.hpp"
 #include "parallel_GroupThread.hpp"
 #include "parallel_Parallel.hpp"
 #include "parallel_Layout.hpp"

@@ -164,9 +164,21 @@ void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
 
   // Parallel parameters
 
-  GroupProcessMpi parallel;
+  parameters->set_current_group ("Parallel");
+  std::string parallel_method = 
+    parameters->list_value_string(0,"method","serial");
 
-  enzo_->ProcessorNumber = parallel.rank();
+  GroupProcess * parallel = 0;
+
+  if (parallel_method == "mpi") {
+    parallel = GroupProcess::create(group_process_mpi);
+  } else if (parallel_method == "charm") {
+    parallel = GroupProcess::create(group_process_charm);
+  } else if (parallel_method == "serial") {
+    parallel = GroupProcess::create(group_process_serial);
+  }
+
+  enzo_->ProcessorNumber = parallel->rank();
 
   parameters->set_current_group ("Field");
   

@@ -9,6 +9,13 @@
 /// @date     Thu Jul 22 12:36:38 PDT 2010
 /// @brief    Declaration of the GroupProcess class
 
+enum group_process_type {
+  group_process_mpi,
+  group_process_charm,
+  group_process_serial
+};
+
+
 class GroupProcess : public Group {
 
   /// @class    Group Process
@@ -16,14 +23,24 @@ class GroupProcess : public Group {
   /// @todo     Support more flexible process subsets
   /// @brief    Group of distributed memory processes
 
-public: // interface
+public: // static interface
 
-/// Initialize the GroupProcess object
+  static GroupProcess * create (group_process_type group_process,
+				int process_first     = 0,
+				int process_last_plus = -1,
+				int process_stride    = 1) throw();
+
+protected: // interface
+
+/// Protected since GroupProcess objects must be created with create()
 GroupProcess(int size = 1, int rank = 0) throw()
   : Group(size,rank),
     send_blocking_    (true),
     recv_blocking_    (true)
   {  }
+
+
+public: // interface
 
   //--------------------------------------------------
 

@@ -117,7 +117,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <hr>
 <h2>Parallel Component</h2>
 
-<?php tests("Parallel","Parallel","Parallel"); ?>
+<?php tests("GroupProcessMpi","GroupProcessMpi","GroupProcessMpi"); ?>
 
 <hr>
 <h2>Parameters Component</h2>

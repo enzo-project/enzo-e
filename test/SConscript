@@ -154,12 +154,12 @@ Clean(env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS
 # env.RunParallel('test_affinity.unit',   '#/bin/test_Affinity')
 # env.RunParallel('test_mpi.unit',        '#/bin/test_Mpi')
 env.RunParallel('cello_implosion.unit', '#/bin/cello', ARGS='input/implosion.in')
-env.RunParallel('test_Parallel.unit',        '#/bin/test_Parallel')
+env.RunParallel('test_GroupProcessMpi.unit',        '#/bin/test_GroupProcessMpi')
 
 # Prevent concurrent running of parallel jobs
 
 SideEffect('log.txt', 
-     [ 'test_parallel.unit', 
+     [ 'test_GroupProcessMpi.unit', 
        'cello_implosion.unit'])
 
 

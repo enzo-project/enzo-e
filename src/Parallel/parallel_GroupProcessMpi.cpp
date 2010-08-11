@@ -6,6 +6,9 @@
 /// @date     Fri Jul 23 11:11:07 PDT 2010
 /// @brief    Implementation of the GroupProcessMpi class
 
+
+#ifdef CONFIG_USE_MPI
+
 //----------------------------------------------------------------------
 
 #include "parallel.hpp"
@@ -181,3 +184,4 @@ void GroupProcessMpi::bulk_wait(void * handle) throw()
 
 //----------------------------------------------------------------------
 
+#endif /* CONFIG_USE_MPI */

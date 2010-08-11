@@ -7,10 +7,14 @@
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Parallel class
 
-#include "mpi.h" 
+#ifdef CONFIG_USE_MPI
+
+#include <mpi.h> 
+
 #include "cello.hpp"
-#include "parallel.hpp"
+
 #include "test.hpp"
+#include "parallel.hpp"
 
 void init_array(double * array, int length, int rank)
 {
@@ -46,7 +50,9 @@ int main(int argc, char ** argv)
   // crashes in LAM MPI WARNING: on gedeckt (r1650)
 
   //--------------------------------------------------
+#ifdef CONFIG_USE_MPI
   Mpi::init(&argc,&argv); // BREAKS SOMETIMES
+#endif
   //  MPI_Init(&argc,&argv);
   //--------------------------------------------------
 
@@ -54,8 +60,7 @@ int main(int argc, char ** argv)
   // WARNING: automatic crashes in LAM MPI on gedeckt (r1650)
 
   //--------------------------------------------------
-  GroupProcess * process_group = new GroupProcessMpi; // WORKS
-  //  GroupProcessMpi process_group; // BREAKS (convert . to ->)
+  GroupProcess * process_group = GroupProcess::create(group_process_mpi);
   //--------------------------------------------------
 
   int rank = process_group->rank();
@@ -63,7 +68,7 @@ int main(int argc, char ** argv)
 
   unit_init(rank,size);
 
-  unit_class("GroupProcessMpi");
+  unit_class("GroupProcess");
 
   unit_func("size");
   unit_assert(size == 4);
@@ -209,3 +214,17 @@ int main(int argc, char ** argv)
   unit_finalize();
   Mpi::finalize();
 }
+
+#else
+
+#include "test.hpp"
+
+int main(int argc, char ** argv)
+{
+  unit_init(1,0);
+  unit_class("GroupProcessMpi");
+  unit_assert(false);
+  unit_finalize();
+}
+
+#endif

@@ -14,7 +14,8 @@
 /* Use MPI or no*/
 /*---------------------------------------------------------------------*/
 
-#define CONFIG_USE_MPI
+/* MOVED TO SCONSTRUCT */
+/* #define CONFIG_USE_MPI */
 
 /*---------------------------------------------------------------------*/
 /* Whether to track memory usage */

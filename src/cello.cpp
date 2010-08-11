@@ -12,7 +12,9 @@
 
 #include <string>
 
-#include <mpi.h>
+#ifdef CONFIG_USE_MPI
+#   include <mpi.h>
+#endif
 
 #include "cello.hpp"
 
@@ -34,9 +36,17 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
+#ifdef CONFIG_USE_MPI
     Mpi::init(&argc, &argv);
+#endif
 
-    GroupProcess * parallel = new GroupProcessMpi;
+    GroupProcess * parallel = 0;
+
+#ifdef CONFIG_USE_MPI
+    parallel = new GroupProcessMpi;
+#else
+    parallel = new GroupProcessSerial;
+#endif
 
     // INITALIZE "GLOBALS" (Parameters, Error, Monitor)
 
@@ -97,7 +107,9 @@ void usage(int argc, char ** argv)
 void exit(Monitor * monitor, GroupProcess * parallel)
 {
   monitor->print ("CELLO END");
+#ifdef CONFIG_USE_MPI
   Mpi::finalize();
+#endif
   exit(0);
 }
 

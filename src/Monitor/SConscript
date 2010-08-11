@@ -3,9 +3,7 @@ Import('env')
 components = ['parallel', 'error', 'cello']
 libraries  = ['png','boost_thread-mt']
 
-env = env.Clone(
-	CPPDEFINES = ['NO_FREETYPE'],
-	LIBS=[components,libraries])
+env = env.Clone(LIBS=[components,libraries])
 
 
 includes = [Glob('monitor*hpp'), Glob('png*h')]
