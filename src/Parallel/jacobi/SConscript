@@ -1,0 +1,25 @@
+Import('env')
+
+includes   = [Glob('jacobi*hpp')]
+sources    = [Glob('jacobi*cpp')]
+libraries  = []
+
+env = env.Clone(LIBS=[libraries])
+
+libraries = env.Library ([sources])
+
+test_jacobi =  env.Program (['test_jacobi.cpp',      sources])
+
+tests = [test_jacobi];
+
+charm_builder = Builder(action="${CXX} $SOURCE -o $TARGET")
+
+env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
+
+env.CharmBuilder('jacobi.decl.h','jacobi.ci')
+
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('$BINPATH', tests))
+
+

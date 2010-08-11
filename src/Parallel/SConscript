@@ -1,8 +1,11 @@
 Import('env')
 
+SConscript('jacobi/SConscript')
+
 includes   = [Glob('parallel*hpp')]
 sources    = [Glob('parallel*cpp')]
-libraries  = ['error','png','boost_thread-mt']
+# libraries  = ['error','png','boost_thread-mt']
+libraries  = ['error','png']
 
 env = env.Clone(LIBS=[libraries])
 

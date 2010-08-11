@@ -1,0 +1,3 @@
+~/charm/charm-6.2.1/bin/charmc jacobi.ci
+~/charm/charm-6.2.1/bin/charmc test_jacobi.cpp
+~/charm/charm-6.2.1/bin/charmc -language charm++ test_jacobi.o -o test_jacobi
