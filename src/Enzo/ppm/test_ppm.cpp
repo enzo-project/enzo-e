@@ -7,8 +7,6 @@
 /// @date      Fri Mar  7 17:11:14 PST 2008
 /// @brief     Program implementing unit tests for hydrodynamics
 
-#include <mpi.h>
-
 #include "cello.hpp"
 #include "cello_hydro.h"
 

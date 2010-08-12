@@ -50,9 +50,7 @@ int main(int argc, char ** argv)
   // crashes in LAM MPI WARNING: on gedeckt (r1650)
 
   //--------------------------------------------------
-#ifdef CONFIG_USE_MPI
   Mpi::init(&argc,&argv); // BREAKS SOMETIMES
-#endif
   //  MPI_Init(&argc,&argv);
   //--------------------------------------------------
 

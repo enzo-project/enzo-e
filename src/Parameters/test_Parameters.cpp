@@ -7,7 +7,6 @@
 /// @date     Thu Feb 21 16:04:03 PST 2008
 /// @brief    Program implementing unit tests for the Parameters class
 
-#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -28,10 +27,10 @@ void generate_input();
 
 int main(int argc, char **argv)
 {
-  
+
   Mpi::init(&argc, &argv);
 
-  GroupProcess * parallel = new GroupProcessMpi;
+  GroupProcess * parallel = GroupProcess::create(group_process_mpi);
 
   unit_init (parallel->rank(), parallel->size());
 

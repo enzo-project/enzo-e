@@ -36,9 +36,7 @@ int main(int argc, char ** argv)
 
     // INITIALIZE PARALLEL
 
-#ifdef CONFIG_USE_MPI
     Mpi::init(&argc, &argv);
-#endif
 
     GroupProcess * parallel = 0;
 
@@ -107,9 +105,7 @@ void usage(int argc, char ** argv)
 void exit(Monitor * monitor, GroupProcess * parallel)
 {
   monitor->print ("CELLO END");
-#ifdef CONFIG_USE_MPI
   Mpi::finalize();
-#endif
   exit(0);
 }
 

@@ -18,7 +18,7 @@ int main(int argc, char ** argv)
   Mpi::init(&argc,&argv);
 
   // Warning: unused
-  GroupProcess * parallel = new GroupProcessMpi;
+  GroupProcess * parallel = GroupProcess::create (group_process_mpi);
 
   unit_init();
   unit_class ("Simulation");

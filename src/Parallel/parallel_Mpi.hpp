@@ -26,19 +26,27 @@ public: // interface
   /// Initialize MPI (virtual)
   static void init(int * argc, char ***argv)
   {
+#ifdef CONFIG_USE_MPI
     MPI_Init(argc,argv);
+#endif
   }
 
   /// Finalize MPI
   static void finalize()
   {
+#ifdef CONFIG_USE_MPI
     MPI_Finalize();
+#endif
   };
 
   /// Abort execution abruptly
   static void abort()
   {
+#ifdef CONFIG_USE_MPI
     MPI_Abort(MPI_COMM_WORLD,1);
+#else
+    exit(1);
+#endif
   }
 
   /// Exit the program
@@ -52,7 +60,11 @@ public: // interface
   static int size()
   {
     int size; 
+#ifdef CONFIG_USE_MPI
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+#else
+    size = 1;
+#endif
     return size;
   };
 
@@ -60,14 +72,20 @@ public: // interface
   static int rank()
   { 
     int rank; 
+#ifdef CONFIG_USE_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &rank); 
+#else
+    rank = 0;
+#endif
     return rank; 
   };
 
   /// Exit the program
   static void barrier()
   {
+#ifdef CONFIG_USE_MPI
     MPI_Barrier(MPI_COMM_WORLD);
+#endif
   }
 
   /// Return whether this is the root process

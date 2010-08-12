@@ -6,7 +6,6 @@
 /// @date     Thu Feb 21 16:04:03 PST 2008
 /// @brief    Program implementing unit tests for the MethodEnzoPpm class
 
-#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -59,7 +58,7 @@ int main(int argc, char **argv)
 
   Mpi::init(&argc,&argv);
 
-  GroupProcess * parallel = new GroupProcessMpi;
+  GroupProcess * parallel = GroupProcess::create(group_process_mpi);
 
   // Create a struct of enzo data (won't work as global data for CHARM++, threading, etc)
 
