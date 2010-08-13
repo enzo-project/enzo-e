@@ -1,21 +1,46 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
 
-libraries  = ['hdf5']
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+
 components = ['error']
+libraries  = ['hdf5']
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
 
 env = env.Clone(LIBS=[components,libraries])
+
+#------------------------------
+# SOURCE
+#------------------------------
 
 includes = [Glob('disk*hpp')]
 sources  = [Glob('disk*cpp')]
 
-libraries = env.Library ('disk', sources)
+#------------------------------
+# TARGETS
+#------------------------------
 
+libraries = env.Library ('disk', sources)
 test_hdf5  = env.Program (['test_FileHdf5.cpp', sources])
 test_ifrit = env.Program (['test_Ifrit.cpp', sources])
 
+tests = [test_hdf5,test_ifrit]
+
+#------------------------------
+# INSTALL
+#------------------------------
+
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-bin',env.Install ('$BINPATH', [test_hdf5,test_ifrit]))
 env.Alias('install-lib',env.Install ('#/lib',libraries))
+env.Alias('install-bin',env.Install ('#/bin',tests))
 
 
 

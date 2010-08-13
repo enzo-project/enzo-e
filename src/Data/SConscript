@@ -1,19 +1,42 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
 
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+
 components = ['field','error','cello']
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components])
+
+#------------------------------
+# SOURCE
+#------------------------------
 
 includes   = [Glob('data*hpp')]
 sources    = [Glob('data*cpp')]
 
-env = env.Clone(LIBS=[components])
+#------------------------------
+# TARGETS
+#------------------------------
 
 libraries = env.Library ('data', [sources])
+test_data = env.Program (['test_Data.cpp',   sources])
 
-test_data   = env.Program (['test_Data.cpp',   sources])
+#------------------------------
+# INSTALL
+#------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-env.Alias('install-bin',env.Install ('$BINPATH', test_data))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('#/bin',    test_data))
 
 
 

@@ -31,6 +31,8 @@ enum parallel_type {
 #  include <mpi.h>
 #endif
 
+#include "parallel.def"
+
 #include "parallel_Mpi.hpp"
 
 #include "parallel_Group.hpp"

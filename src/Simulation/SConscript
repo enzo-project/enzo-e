@@ -1,23 +1,45 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
 
-includes = [Glob('simulation*hpp')]
-sources  = [Glob("simulation*cpp")]
+#------------------------------
+# DEPENDENCIES
+#------------------------------
 
 components = ['error','parameters','monitor','memory','enzo','parallel','user','enzo-ppm','data','field','cello']
 
 libraries = ['png','boost_thread-mt','$FORTRANLIBS']
 
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
 env = env.Clone(LIBS=[components,libraries])
 
-libraries = env.Library ('simulation', [sources])
+#------------------------------
+# SOURCE
+#------------------------------
 
+includes = [Glob('simulation*hpp')]
+sources  = [Glob("simulation*cpp")]
+
+#------------------------------
+# TARGETS
+#------------------------------
+
+libraries       = env.Library ('simulation', [sources])
 test_simulation = env.Program (['test_Simulation.cpp',sources])
-tests = [test_simulation];
+tests           = [test_simulation];
 
+#------------------------------
+# INSTALL
+#------------------------------
 
-env.Alias('install-bin',env.Install ('$BINPATH', tests))
+env.Alias('install-bin',env.Install ('#/bin', tests))
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',libraries))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
 
 
 

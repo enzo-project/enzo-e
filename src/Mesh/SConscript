@@ -1,21 +1,50 @@
-Import('env')
-components = ['error','memory','parallel','monitor', 'cello']
-libraries  = ['png','boost_thread-mt']
-env = env.Clone(LIBS=[components,libraries])
-
-sources  = [Glob('mesh*cpp')]
-test_mesh = env.Program (['test_Mesh.cpp',  sources])
-test_tree = env.Program (['test_TreeK.cpp',sources])
-
-includes  = [Glob('mesh*hpp')]
-libraries = env.Library ('mesh', [sources])
-tests     = [test_mesh, test_tree];
-
-env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('$BINPATH', tests))
 
 # SConscript('tree/SConscript')
 
+#------------------------------
+# IMPORTS
+#------------------------------
 
+Import('env')
+Import('parallel_type')
 
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+
+components = ['error','memory','monitor', 'cello']
+libraries  = ['png','boost_thread-mt']
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
+#------------------------------
+# SOURCE
+#------------------------------
+
+includes = [Glob('mesh*hpp')]
+sources  = [Glob('mesh*cpp')]
+
+#------------------------------
+# TARGETS
+#------------------------------
+
+if ("charm" in parallel_type):
+	env.CharmBuilder('TreeK.decl.h','TreeK.ci',ARG='TreeK')
+
+libraries = env.Library ('mesh', [sources])
+test_mesh = env.Program (['test_Mesh.cpp',  sources])
+test_tree = env.Program (['test_TreeK.cpp',sources])
+
+tests     = [test_mesh, test_tree];
+
+#------------------------------
+# INSTALL
+#------------------------------
+
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('#/bin', tests))

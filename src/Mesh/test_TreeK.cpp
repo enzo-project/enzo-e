@@ -10,6 +10,10 @@
 #include <stdlib.h>
 #include "pngwriter.h"
 
+#include "parallel.def"
+
+#include CHARM_INCLUDE(TreeK.decl.h)
+
 #include <string>
 
 #include "cello.hpp"
@@ -23,9 +27,6 @@
 // #include "image.h"
 
 #define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
-
-const char * png_dir  = "input";
-const char * png_file = "Enzo-P-2048.png";
 
 const bool debug    = false;
 const bool geomview = false;
@@ -48,8 +49,12 @@ void create_tree ( Memory * memory, int * level_array, int nx, int ny, int nz, i
 void print_usage(int, char**);
 //----------------------------------------------------------------------
 
-int main(int argc, char ** argv)
+
+PARALLEL_MAIN_BEGIN
+
 {
+
+  PARALLEL_INIT;
 
   unit_init();
 
@@ -58,25 +63,27 @@ int main(int argc, char ** argv)
   Memory * memory = new Memory;
   // Parse command line
 
-  if (argc != 4) {
-    print_usage(argc,argv);
+  if (PARALLEL_ARGC != 5 && PARALLEL_ARGC != 4) {
+    print_usage(PARALLEL_ARGC,PARALLEL_ARGV);
   }
 
   // Check arguments
 
-  int dimension  = atoi(argv[1]);
-  int refinement = atoi(argv[2]);
-  int max_level  = atoi(argv[3]);
+  int dimension  = atoi(PARALLEL_ARGV[1]);
+  int refinement = atoi(PARALLEL_ARGV[2]);
+  int max_level  = atoi(PARALLEL_ARGV[3]);
+  const char * png_file = 0;
+  if (PARALLEL_ARGC == 5) png_file = PARALLEL_ARGV[4];
 
   if (dimension != 2 && 
-      dimension != 3) print_usage(argc,argv);
+      dimension != 3) print_usage(PARALLEL_ARGC,PARALLEL_ARGV);
   
   if (refinement != 2 && 
       refinement != 4 &&
       refinement != 8 &&
-      refinement != 16) print_usage(argc,argv);
+      refinement != 16) print_usage(PARALLEL_ARGC,PARALLEL_ARGV);
   
-  if (! (0 < max_level && max_level <= 14)) print_usage(argc,argv);
+  if (! (0 < max_level && max_level <= 14)) print_usage(PARALLEL_ARGC,PARALLEL_ARGV);
 
   char filename[80];
   sprintf (filename,"TreeK-D=%d-R=%d-L=%d",dimension,refinement,max_level);
@@ -89,8 +96,6 @@ int main(int argc, char ** argv)
     nx = 1;
     ny = 1;
     nz = 1;
-    // Change to input subdirectory
-    if (chdir(png_dir)) unit_assert(false);
     // Read png image file
     level_array = create_image_array(png_file,&nx,&ny,max_level);
     // Change back to parent directory
@@ -112,18 +117,22 @@ int main(int argc, char ** argv)
   delete memory;
   unit_finalize();
 
+  PARALLEL_EXIT;
 }
+
+PARALLEL_MAIN_END
 
 //----------------------------------------------------------------------
 void print_usage(int argc, char **argv)
 {
   fprintf (stderr,"\n");
-  fprintf (stderr,"Usage: %s <dimension> <refinement> <levels>\n",argv[0]);
+  fprintf (stderr,"Usage: %s <dimension> <refinement> <levels> [file]\n",argv[0]);
   fprintf (stderr,"\n");
   fprintf (stderr,"   where \n");
   fprintf (stderr,"\n");
   fprintf (stderr,"         <dimension>  = [2|3]\n");
   fprintf (stderr,"         <refinement> = [2|4|8|16]\n");
+  fprintf (stderr,"         [file]       = filename if dimension is 2\n");
   fprintf (stderr,"\n");
   exit(1);
 }
@@ -160,62 +169,12 @@ int * create_image_array (const char * pngfile,
     for (int ix=0; ix<width; ix++) {
       int pixel = png.read(ix+1,iy+1);
       int i = (ix+ix0) + size*(iy+iy0);
-//       float r = 1.0*pixel[0]/256;
-//       float g = 1.0*pixel[1]/256;
-//       float b = 1.0*pixel[2]/256;
       level_array[i] = max_levels * 1.0*pixel / 256;
       if (level_array[i] > max) max = level_array[i];
     }
   }
   return level_array;
 }
-
-//----------------------------------------------------------------------
-// read in the gimp-generated image data into a level array
-// values are set to [0:max_levels)
-
-//int * create_level_array3 (int * n3, int max_levels)
-//{
-
-//   if (width != height) {
-//     printf ("%s:%d width = %d  height = %d\n",__FILE__,__LINE__,width, height);
-//     exit(1);
-//   }
-
-//  *n3 = width;
-//  int n = *n3;
-
-//  int * level_array = new int [n*n*n];
-
-//   for (int i=0; i<n*n*n; i++) level_array[i] = 0;
-
-//   int pixel[3];
-//   char * data = header_data;
- 
-//   float r = 0.125;  // width of the 2D image in the 3D cube
-//   int nxm = n*(1.0-r)/2;
-//   int nxp = n*(1.0+r)/2;
-
-//   for (int iz=0; iz<n; iz++) {
-//     for (int iy=0; iy<n; iy++) {
-//       HEADER_PIXEL(data,pixel);
-//       for (int ix=0; ix<nxm; ix++) {
-// 	level_array[index(iz,iy,ix,n)] = 0;
-//       }
-//       for (int ix=nxm; ix<nxp; ix++) {
-// 	float r = 1.0*pixel[0]/256;
-// 	float g = 1.0*pixel[1]/256;
-// 	float b = 1.0*pixel[2]/256;
-// 	int value = max_levels * (r + g + b) / 3;
-// 	level_array[index(iz,iy,ix,n)] = value;
-//       }
-//       for (int ix=nxp; ix<n; ix++) {
-// 	level_array[index(iz,iy,ix,n)] = 0;
-//       }
-//     }
-//   }
-//  return level_array;
-//}
 
 //----------------------------------------------------------------------
 
@@ -225,7 +184,7 @@ int * create_sphere_array (int * n3, int max_levels)
   *n3 = int(exp(max_levels * log (2.0)) + 0.5) * 2;
   int n = *n3;
 
-  printf ("%d %d\n",max_levels,n);
+  PARALLEL_PRINTF ("%d %d\n",max_levels,n);
   int * level_array = new int [n*n*n];
 
   for (int i=0; i<n*n*n; i++) level_array[i] = 0;
@@ -263,14 +222,14 @@ int * create_sphere_array (int * n3, int max_levels)
 void write_image(Monitor * monitor,std::string filename, float * image, int nx, int ny, int nz)
 {
   if (nx > 8194 || ny > 8194 || nz > 8194) {
-    printf ("%s:%d (nx,ny,nz) = (%d,%d,%d)\n",__FILE__,__LINE__,nx,ny,nz);
+    PARALLEL_PRINTF ("%s:%d (nx,ny,nz) = (%d,%d,%d)\n",__FILE__,__LINE__,nx,ny,nz);
     exit(1);
   }
   // Write HDF5 file
 
   // Hdf5 hdf5;
   // hdf5.file_open((filename+".hdf5").c_str(),"w");
-  // printf ("write_image %d %d %d\n",nx,ny,nz);
+  // PARALLEL_PRINTF ("write_image %d %d %d\n",nx,ny,nz);
   // hdf5.dataset_open_write ("tree_image",nx,ny,nz);
   // hdf5.write(image);
   // hdf5.dataset_close ();
@@ -312,9 +271,9 @@ void create_tree
 
   memory->reset();
 
-  printf ("--------------------------------------------------\n");
-  printf ("k=%d d=%d\n",k,d);
-  printf ("--------------------------------------------------\n");
+  PARALLEL_PRINTF ("--------------------------------------------------\n");
+  PARALLEL_PRINTF ("k=%d d=%d\n",k,d);
+  PARALLEL_PRINTF ("--------------------------------------------------\n");
 
   int full_nodes = true;
 
@@ -322,7 +281,7 @@ void create_tree
   // Refine the tree
   //--------------------------------------------------
 
-  printf ("\nINITIAL TREE\n");
+  PARALLEL_PRINTF ("\nINITIAL TREE\n");
 
   memory->set_active(true);
   tree->refine(level_array,nx,ny,nz,max_level,full_nodes);
@@ -330,9 +289,9 @@ void create_tree
   memory->set_active(false);
 
   mem_per_node = (float) memory->bytes(0) / tree->num_nodes();
-  printf ("nodes      = %d\n",tree->num_nodes());
-  printf ("levels     = %d\n",tree->levels());
-  printf ("bytes/node = %g\n",mem_per_node);
+  PARALLEL_PRINTF ("nodes      = %d\n",tree->num_nodes());
+  PARALLEL_PRINTF ("levels     = %d\n",tree->levels());
+  PARALLEL_PRINTF ("bytes/node = %g\n",mem_per_node);
 
   //--------------------------------------------------
   // Balance the tree
@@ -345,7 +304,7 @@ void create_tree
     image_size = 2*image_size - line_width;
   }
 
-  printf ("\nBALANCED TREE\n");
+  PARALLEL_PRINTF ("\nBALANCED TREE\n");
 
   memory->set_active(true);
   tree->balance(full_nodes);
@@ -370,15 +329,15 @@ void create_tree
   }
 
   mem_per_node = (float) memory->bytes(0) / tree->num_nodes();
-  printf ("nodes      = %d\n",tree->num_nodes());
-  printf ("levels     = %d\n",tree->levels());
-  printf ("bytes/node = %g\n",mem_per_node);
+  PARALLEL_PRINTF ("nodes      = %d\n",tree->num_nodes());
+  PARALLEL_PRINTF ("levels     = %d\n",tree->levels());
+  PARALLEL_PRINTF ("bytes/node = %g\n",mem_per_node);
 
   //--------------------------------------------------
   // Coalesce Patches In the tree
   //--------------------------------------------------
 
-  printf ("\nCOALESCED TREE\n");
+  PARALLEL_PRINTF ("\nCOALESCED TREE\n");
 
   memory->set_active(true);
   tree->optimize();
@@ -404,10 +363,12 @@ void create_tree
   delete monitor;
   if (geomview) tree->geomview(name + ".gv");
 
-  printf ("nodes      = %d\n",tree->num_nodes());
-  printf ("levels     = %d\n",tree->levels());
-  printf ("bytes/node = %g\n",mem_per_node);
+  PARALLEL_PRINTF ("nodes      = %d\n",tree->num_nodes());
+  PARALLEL_PRINTF ("levels     = %d\n",tree->levels());
+  PARALLEL_PRINTF ("bytes/node = %g\n",mem_per_node);
 
   delete tree;
 
 }
+
+#include CHARM_INCLUDE(TreeK.def.h)

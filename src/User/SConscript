@@ -1,17 +1,40 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
 
-includes = [Glob('user*hpp'), Glob('*.h')]
-sources  = [Glob('user*cpp')]
+#------------------------------
+# DEPENDENCIES
+#------------------------------
 
 components = ['user', 'data', 'field', 'error','parallel', 'monitor', 'parameters', 'memory', 'cello']
 libraries  = ['png', 'boost_thread-mt', '$FORTRANLIBS']
 
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
 env = env.Clone(LIBS=[components,libraries])
-
+#------------------------------
+# SOURCE
+#------------------------------
+includes = [Glob('user*hpp'), Glob('*.h')]
+sources  = [Glob('user*cpp')]
+#------------------------------
+# TARGETS
+#------------------------------
 libraries = env.Library ('user', sources)
+#------------------------------
+# INSTALL
+#------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
+
+
+
+
+
 
 
 

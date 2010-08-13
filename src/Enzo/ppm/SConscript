@@ -23,5 +23,5 @@ binaries = [env.Program (['test_ppm.cpp',      sources])]
 
 libraries = env.Library ('enzo-ppm', sources)
 
-env.Alias('install-bin', env.Install ('$BINPATH', binaries))
+env.Alias('install-bin', env.Install ('#/bin', binaries))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))

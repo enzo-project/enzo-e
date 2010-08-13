@@ -1,25 +1,45 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
 
-components = ['parallel', 'error', 'cello']
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+
+components = ['error', 'cello']
+testing    = ['parallel']
 libraries  = ['png','boost_thread-mt']
 
-env = env.Clone(LIBS=[components,libraries])
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
 
+env        = env.Clone(LIBS=[components,libraries])
+env_test   = env.Clone(LIBS=[components,libraries,testing])
 
-includes = [Glob('monitor*hpp'), Glob('png*h')]
+#------------------------------
+# SOURCE
+#------------------------------
+
+includes   = [Glob('monitor*hpp'), Glob('png*h')]
+sources    = [Glob('monitor*cpp'), Glob('png*cpp')]
+
+#------------------------------
+# TARGETS
+#------------------------------
+
+libraries    = env.Library      ('monitor', [sources])
+test_monitor = env_test.Program (['test_Monitor.cpp', sources])
+
+#------------------------------
+# INSTALL
+#------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-
-sources  = [Glob('monitor*cpp'), Glob('png*cpp')]
-
-libraries = env.Library ('monitor', [sources])
-
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-
-test_monitor = env.Program (['test_Monitor.cpp', sources])
-env.Alias('install-bin', env.Install ('$BINPATH', test_monitor))
-
-
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('#/bin', test_monitor))
 
 
 

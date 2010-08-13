@@ -1,20 +1,42 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
 
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+
 components = ['error']
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
 env = env.Clone(LIBS=[components])
 
+#------------------------------
+# SOURCE
+#------------------------------
+
 includes = [Glob('*hpp')]
-
-env.Alias('install-inc',env.Install ('#/include',includes))
-
 sources  = [Glob('memory*cpp')]
 
-libraries = env.Library ('memory', [sources])
+#------------------------------
+# TARGETS
+#------------------------------
 
+libraries   = env.Library ('memory', [sources])
+test_memory = env.Program (['test_Memory.cpp', sources])
+
+#------------------------------
+# INSTALL
+#------------------------------
+
+env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',libraries))
-
-test_memory   = env.Program (['test_Memory.cpp', sources])
-env.Alias('install-bin', env.Install ('$BINPATH', test_memory))
+env.Alias('install-bin',env.Install ('#/bin', test_memory))
 
 
 

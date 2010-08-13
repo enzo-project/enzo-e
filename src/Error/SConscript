@@ -1,17 +1,36 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
 
-includes   = [Glob('*hpp')]
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+#------------------------------
+# SOURCE
+#------------------------------
 
-env.Alias('install-inc',env.Install ('#/include',includes))
-
+includes = [Glob('*hpp')]
 sources  = [Glob('error*cpp')]
 
-libraries = env.Library ('error', [sources])
+#------------------------------
+# TARGETS
+#------------------------------
 
-env.Alias('install-lib',env.Install ('#/lib',libraries))
+libraries  = env.Library ('error', [sources])
+test_error = env.Program (['test_Error.cpp',  sources])
 
-test_error   = env.Program (['test_Error.cpp',  sources])
-env.Alias('install-bin', env.Install ('$BINPATH', test_error))
+#------------------------------
+# INSTALL
+#------------------------------
+
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin', env.Install ('#/bin',   test_error))
 
 
 

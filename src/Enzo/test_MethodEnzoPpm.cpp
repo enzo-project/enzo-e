@@ -51,12 +51,13 @@ void output_fields(FieldBlock * field_block,
   
 }
 
-int main(int argc, char **argv)
+PARALLEL_MAIN_BEGIN
+
 {
 
   // Initialize parallelism
 
-  Mpi::init(&argc,&argv);
+  PARALLEL_INIT;
 
   GroupProcess * parallel = GroupProcess::create(group_process_mpi);
 
@@ -228,6 +229,9 @@ int main(int argc, char **argv)
 
   unit_finalize();
 
-  Mpi::finalize();
+  PARALLEL_EXIT;
 }
+
+PARALLEL_MAIN_END;
+
 

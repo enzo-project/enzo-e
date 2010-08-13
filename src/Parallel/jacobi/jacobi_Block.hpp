@@ -19,7 +19,7 @@ public:
     : n_(n),
       cycle_values_(0)
   {
-    PRINTF ("Creating Block(%d)\n",n);
+    PARALLEL_PRINTF ("Creating Block(%d)\n",n);
     values_ = new double [n*n*n];
     for (int k=0; k<n*n*n; k++) values_[k] = 0.0;
     for (int i=0; i<6; i++) {
@@ -37,7 +37,7 @@ public:
 
   ~Block()
   {
-    PRINTF ("Deleting Block(%d)\n",n_);
+    PARALLEL_PRINTF ("Deleting Block(%d)\n",n_);
     delete [] values_;
     for (int i=0; i<6; i++) {
       delete ghosts_[i];
@@ -46,7 +46,7 @@ public:
 
   Block (const Block & block)
   {
-    PRINTF ("Creating Block(Block(%d))\n",block.n_);
+    PARALLEL_PRINTF ("Creating Block(Block(%d))\n",block.n_);
     int n3 = n_*n_*n_; 
     n_ = block.n_;
     values_ = new double [n_*n_*n_];
@@ -67,7 +67,7 @@ public:
 
   Block & operator= (const Block & block)
   {
-    PRINTF ("Assigning Block = Block(%d))\n",block.n_);
+    PARALLEL_PRINTF ("Assigning Block = Block(%d))\n",block.n_);
     int n3 = n_*n_*n_; 
     n_ = block.n_;
     values_ = new double [n_*n_*n_];

@@ -1,34 +1,53 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
+
+#------------------------------
+# DEPENDENCIES
+#------------------------------
 
 components = ['error','parallel', 'monitor', 'cello']
 libraries  = ['png','boost_thread-mt']
 
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
 env = env.Clone(LIBS=[components,libraries])
 
+#------------------------------
+# SOURCE
+#------------------------------
+
 includes = [Glob('parameters*hpp'),'parse.h']
-
-env.Alias('install-inc',env.Install ('#/include',includes))
-
-# Uncomment when parse.l or parse.y change
-#
-# 
-# env.CFile(target = 'lex.yy.c', source = 'parse.l')
-# env.CFile(target = ['parse.tab.c', 'parse.tab.h'], 
-#           source = 'parse.y',
-#           YACCFLAGS='-d -t')
-
 sources  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
 
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# Uncomment when parse.l or parse.y change
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# env.CFile(target = 'lex.yy.c', source = 'parse.l')
+# env.CFile(target = ['parse.tab.c', 'parse.tab.h'], source = 'parse.y', YACCFLAGS='-d -t')
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+#------------------------------
+# TARGETS
+#------------------------------
+
 libraries = env.Library ('parameters', [sources])
-
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-
 test_parameters = env.Program (['test_Parameters.cpp', sources])
 test_parse      = env.Program (['test_Parse.cpp', sources])
-inputs          = Glob('*.in')
-env.Alias('install-bin', env.Install ('$BINPATH', 
-	[test_parameters, test_parse, inputs]))
 
+tests = [test_parameters, test_parse]
+
+#------------------------------
+# INSTALL
+#------------------------------
+
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',libraries))
+env.Alias('install-bin',env.Install ('#/bin', tests))
 
 
 

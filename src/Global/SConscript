@@ -1,15 +1,40 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
 
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+
 components = ['field','error','cello']
-includes   = [Glob('global*hpp')]
-sources    = [Glob('global*cpp')]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
 
 env = env.Clone(LIBS=[components])
 
+#------------------------------
+# SOURCE
+#------------------------------
+
+includes   = [Glob('global*hpp')]
+sources    = [Glob('global*cpp')]
+
+#------------------------------
+# TARGETS
+#------------------------------
+
 libraries = env.Library ('global', [sources])
 
+#------------------------------
+# INSTALL
+#------------------------------
+
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',libraries))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
 
 
 

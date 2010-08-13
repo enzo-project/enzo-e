@@ -63,31 +63,23 @@ env.RunSerial('test_Performance.unit', '#/bin/test_Performance')
 env.RunSerial('test_Schedule.unit',    '#/bin/test_Schedule')
 env.RunSerial('test_Simulation.unit',  '#/bin/test_Simulation')
 
-Clean(env.RunSerial
-  ('test_TreeK-D2-R2-L6.unit', '#/bin/test_TreeK', ARGS='2 2 6'),
-Glob('../TreeK-D=2-R=2-L=6*png'))
-Clean(env.RunSerial
-('test_TreeK-D2-R2-L7.unit', '#/bin/test_TreeK', ARGS='2 2 7'),
-Glob('../TreeK-D=2-R=2-L=7*png'))
-Clean(env.RunSerial
-('test_TreeK-D2-R2-L8.unit', '#/bin/test_TreeK', ARGS='2 2 8'),
-Glob('../TreeK-D=2-R=2-L=8*png'))
-Clean(env.RunSerial
-('test_TreeK-D2-R2-L9.unit', '#/bin/test_TreeK', ARGS='2 2 9'),
-Glob('../TreeK-D=2-R=2-L=9*png'))
-Clean(env.RunSerial
-('test_TreeK-D2-R2-L10.unit','#/bin/test_TreeK', ARGS='2 2 10'),
-Glob('../TreeK-D=2-R=2-L=10*png'))
+Clean(env.RunSerial ('test_TreeK-D2-R2-L6.unit', '#/bin/test_TreeK', 
+	ARGS='2 2 6 input/Enzo-P-2048.png'),Glob('../TreeK-D=2-R=2-L=6*png'))
+Clean(env.RunSerial('test_TreeK-D2-R2-L7.unit', '#/bin/test_TreeK', 
+	ARGS='2 2 7 input/Enzo-P-2048.png'),Glob('../TreeK-D=2-R=2-L=7*png'))
+Clean(env.RunSerial('test_TreeK-D2-R2-L8.unit', '#/bin/test_TreeK', 
+	ARGS='2 2 8 input/Enzo-P-2048.png'),Glob('../TreeK-D=2-R=2-L=8*png'))
+Clean(env.RunSerial('test_TreeK-D2-R2-L9.unit', '#/bin/test_TreeK', 
+	ARGS='2 2 9 input/Enzo-P-2048.png'),Glob('../TreeK-D=2-R=2-L=9*png'))
+Clean(env.RunSerial('test_TreeK-D2-R2-L10.unit','#/bin/test_TreeK', 
+	ARGS='2 2 10 input/Enzo-P-2048.png'),Glob('../TreeK-D=2-R=2-L=10*png'))
 
-Clean(env.RunSerial
-('test_TreeK-D2-R4-L6.unit', '#/bin/test_TreeK', ARGS='2 4 6'),
-Glob('../TreeK-D=2-R=4-L=6*png'))
-Clean(env.RunSerial
-('test_TreeK-D2-R4-L8.unit', '#/bin/test_TreeK', ARGS='2 4 8'),
-Glob('../TreeK-D=2-R=4-L=8*png'))
-Clean(env.RunSerial
-('test_TreeK-D2-R4-L10.unit','#/bin/test_TreeK', ARGS='2 4 10'),
-Glob('../TreeK-D=2-R=4-L=10*png'))
+Clean(env.RunSerial('test_TreeK-D2-R4-L6.unit', '#/bin/test_TreeK', 
+	ARGS='2 4 6 input/Enzo-P-2048.png'),Glob('../TreeK-D=2-R=4-L=6*png'))
+Clean(env.RunSerial('test_TreeK-D2-R4-L8.unit', '#/bin/test_TreeK', 
+	ARGS='2 4 8 input/Enzo-P-2048.png'),Glob('../TreeK-D=2-R=4-L=8*png'))
+Clean(env.RunSerial('test_TreeK-D2-R4-L10.unit','#/bin/test_TreeK', 
+	ARGS='2 4 10 input/Enzo-P-2048.png'),Glob('../TreeK-D=2-R=4-L=10*png'))
 
 Clean(env.RunSerial
 ('test_TreeK-D3-R2-L4.unit', '#/bin/test_TreeK', ARGS='3 2 4'),
@@ -155,6 +147,7 @@ Clean(env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS
 # env.RunParallel('test_mpi.unit',        '#/bin/test_Mpi')
 env.RunParallel('cello_implosion.unit', '#/bin/cello', ARGS='input/implosion.in')
 env.RunParallel('test_GroupProcessMpi.unit',        '#/bin/test_GroupProcessMpi')
+# env.RunParallel('test_jacobi.unit',        '#/bin/test_jacobi')
 
 # Prevent concurrent running of parallel jobs
 

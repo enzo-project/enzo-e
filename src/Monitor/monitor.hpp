@@ -14,7 +14,6 @@
 
 #include "cello.hpp"
 
-#include "parallel.hpp"
 #include "error.hpp"
 #include "performance.hpp"
 

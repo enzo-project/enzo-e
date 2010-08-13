@@ -53,6 +53,16 @@ function test($testrun,$type) {
 
 ?>
 
+<?php 
+   if (file_exists('CELLO_PLATFORM')) {
+     echo "<h2>Platform tested: ";
+     system ("cat 'CELLO_PLATFORM'");
+     echo "</h2>\n";
+   } else {
+     echo "<h2>Unknown platform</h2>\n";
+   }
+?>
+
 <p>
 Test data shown on this page is automatically generated whenever <code>Cello</code> is compiled.  FAIL status usually indicates that the corresponding function has not been implemented yet.  Empty tables indicate that the unit test files have been deleted, probably with "<code>scons -c</code>" (<code>scons</code> version of "<code>make clean</code>").
 </p>
@@ -118,6 +128,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <h2>Parallel Component</h2>
 
 <?php tests("GroupProcessMpi","GroupProcessMpi","GroupProcessMpi"); ?>
+<!-- <?php tests("jacobi","jacobi","jacobi"); ?> -->
 
 <hr>
 <h2>Parameters Component</h2>

@@ -42,9 +42,9 @@ else:
 if (platform == 'linux-serial'):
 #--------------------------------------------------
    parallel_run = ""
+   parallel_type = ["serial"]
    serial_run   = ""
    env = Environment (
-      BINPATH     = '#/bin',
       CC          = 'gcc',	
       CPPDEFINES = ['NO_FREETYPE'],
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
@@ -61,8 +61,8 @@ elif (platform == 'linux-mpi'):
 #--------------------------------------------------
    parallel_run = "mpirun -np 4"
    serial_run   = ""
+   parallel_type = ["mpi"]
    env = Environment (
-      BINPATH     = '#/bin',
       CC          = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
@@ -79,8 +79,8 @@ elif (platform == 'linux-mpi-valgrind'):
 #--------------------------------------------------
    parallel_run = "mpirun -np 4 valgrind"
    serial_run   = "valgrind "
+   parallel_type = ["mpi"]
    env = Environment (
-      BINPATH     = '#/bin',
       CC          = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
       CPPFLAGS    = '-Wall -g  -m128bit-long-double',
@@ -97,9 +97,9 @@ elif (platform == 'linux-ampi'):
    charm_path = '/home/bordner/charm/charm-6.2.1'
    parallel_run = charm_path + "/bin/charmrun +p4 "
    serial_run   = ""
+   parallel_type = ["mpi"]
   
    env = Environment(
-      BINPATH     = '#/bin',
       CC          = charm_path + '/bin/charmc -language ampi',
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
       CPPFLAGS    = '-g',
@@ -116,10 +116,10 @@ elif (platform == 'linux-charm'):
 #--------------------------------------------------
    charm_path = '/home/bordner/charm/charm-6.2.1'
    parallel_run = charm_path + "/bin/charmrun +p4 "
+   parallel_type = ["charm"]
    serial_run   = ""
   
    env = Environment(
-      BINPATH     = '#/bin',
       CC          = charm_path + '/bin/charmc -language charm++',
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_CHARM'],
       CPPFLAGS    = '-g',
@@ -136,8 +136,8 @@ elif (platform == 'triton'):
 #--------------------------------------------------
    parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    serial_run   = ""
+   parallel_type = ["mpi"]
    env = Environment (
-      BINPATH = '#/bin',
       CC      = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
       CPPFLAGS = '-g -DH5_USE_16_API',
@@ -155,9 +155,9 @@ elif (platform == 'ncsa-bd'):
 #--------------------------------------------------
    parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    serial_run   = ""
+   parallel_type = ["mpi"]
    env = Environment (
       ARFLAGS  = 'r',
-      BINPATH = '#/bin',
       CCFLAGS = '-O3 -qhot -q64 -D H5_USE_16_API',
       CC      = 'mpcc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
@@ -196,13 +196,18 @@ else:
    env = Environment (
       CPPPATH = ['#/include'],
       LIBPATH = ['#/lib'],
-      BINPATH = '#/bin'
    )
 
+# Generate the CELLO_PLATFORM file (should be a target)
+
+f = open('CELLO_PLATFORM','w')
+f.write(platform + '\n')
+f.close()
 
 
 Export('env')
 Export('platform')
+Export('parallel_type')
 Export('parallel_run')
 Export('serial_run')
 
@@ -223,5 +228,10 @@ SConscript('test/SConscript')
 #              DESCRIPTION    = 'Cello Extreme AMR Framework'
 #         )
 
+#------------------------------
+# BUILDERS
+#------------------------------
 
-
+if ("charm" in parallel_type):
+    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.def.h ${ARG}.decl.h include")
+    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })

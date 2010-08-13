@@ -1,0 +1,41 @@
+#if defined(CONFIG_USE_CHARM)
+
+#  define PARALLEL_INIT      /* BLANK */
+#  define PARALLEL_EXIT      CkExit()
+#  define PARALLEL_PRINTF    CkPrintf
+#  define PARALLEL_ARGC      main->argc
+#  define PARALLEL_ARGV      main->argv
+#  define PARALLEL_MAIN_BEGIN  \
+      CProxy_Main mainProxy; \
+         class Main : public CBase_Main { \
+            public:\
+               Main(CkArgMsg* main)
+#  define PARALLEL_MAIN_END };
+
+#  define CHARM_INCLUDE(FILE) #FILE
+
+#elif defined(CONFIG_USE_MPI)
+
+#include <mpi.h>
+
+#  define PARALLEL_INIT      MPI_Init(&PARALLEL_ARGC,&PARALLEL_ARGV)
+#  define PARALLEL_EXIT      MPI_Finalize(); exit(0);
+#  define PARALLEL_PRINTF    printf
+#  define PARALLEL_ARGC      argc
+#  define PARALLEL_ARGV      argv
+#  define PARALLEL_MAIN_BEGIN int main(int argc, char ** argv)
+#  define PARALLEL_MAIN_END   /* BLANK */
+#  define CHARM_INCLUDE(FILE) "/dev/null"
+
+#else /* serial */
+
+#  define PARALLEL_INIT      /* BLANK */
+#  define PARALLEL_EXIT      exit(0)
+#  define PARALLEL_PRINTF    printf
+#  define PARALLEL_ARGC      argc
+#  define PARALLEL_ARGV      argv
+#  define PARALLEL_MAIN_BEGIN int main(int argc, char ** argv)
+#  define PARALLEL_MAIN_END   /* BLANK */
+#  define CHARM_INCLUDE(FILE) "/dev/null"
+
+#endif

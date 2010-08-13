@@ -1,23 +1,45 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
+
+#------------------------------
+# DEPENDENCIES
+#------------------------------
 
 components = ['error','memory']
 
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
 env = env.Clone(LIBS=[components])
 
+#------------------------------
+# SOURCE
+#------------------------------
+
 includes = [Glob('performance*hpp')]
-
-env.Alias('install-inc',env.Install ('#/include',includes))
-
 sources  = [Glob('performance*cpp')]
 
-libraries = env.Library ('performance', [sources])
+#------------------------------
+# TARGETS
+#------------------------------
 
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-
+libraries        = env.Library ('performance', [sources])
 test_performance = env.Program(['test_Performance.cpp', sources])
 time_matvec      = env.Program(['time_matvec.cpp',      sources])
 
-env.Alias('install-bin', env.Install ('$BINPATH', [test_performance,time_matvec]))
+tests = [test_performance,time_matvec]
+
+#------------------------------
+# INSTALL
+#------------------------------
+
+env.Alias('install-inc',env.Install ('#/include',includes))
+env.Alias('install-lib',env.Install ('#/lib',libraries))
+env.Alias('install-bin',env.Install ('#/bin', tests))
 
 
 

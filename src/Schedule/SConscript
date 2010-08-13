@@ -1,19 +1,43 @@
+#------------------------------
+# IMPORTS
+#------------------------------
+
 Import('env')
 
-components = ['error', 'simulation', 'user', 'data','field','parameters','parallel','enzo-ppm','monitor','cello']
+#------------------------------
+# DEPENDENCIES
+#------------------------------
 
+components = ['error', 'simulation', 'user', 'data','field','parameters','parallel','enzo-ppm','monitor','cello']
 libraries  = ['png','boost_thread-mt','$FORTRANLIBS' ]
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
+
+env = env.Clone(LIBS=[components,libraries])
+
+#------------------------------
+# SOURCE
+#------------------------------
+
 includes   = [Glob('schedule*hpp')]
 sources    = [Glob('schedule*cpp')]
 
-env = env.Clone(LIBS=[components,libraries])
+#------------------------------
+# TARGETS
+#------------------------------
 
 libraries = env.Library ('schedule', [sources])
 binaries  = env.Program (['test_Schedule.cpp', sources])
 
+#------------------------------
+# INSTALL
+#------------------------------
+
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-env.Alias('install-bin',env.Install ('$BINPATH', binaries))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('#/bin', binaries))
 
 
 

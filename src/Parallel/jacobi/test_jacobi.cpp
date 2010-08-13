@@ -7,15 +7,19 @@
 /// @brief    Prototype test program for combining charm++, MPI, and OMP
 
 
-// #include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
+
+#include "parallel.def"
+
+#include CHARM_INCLUDE(jacobi.decl.h)
 
 #include "jacobi.hpp"
 
 
 // ------------------------------ MAIN ------------------------------
 
-MAIN
+PARALLEL_MAIN_BEGIN
 
   {
 
@@ -27,21 +31,18 @@ MAIN
   // Determine actual comm rank and size
 
 #ifdef CONFIG_USE_MPI
-  MPI_Init (&ARGC,&ARGV);
+  MPI_Init (&PARALLEL_ARGC,&PARALLEL_ARGV);
   MPI_Comm_rank (MPI_COMM_WORLD,&ip);
   MPI_Comm_size (MPI_COMM_WORLD,&np);
 #endif
 
-#ifdef CONFIG_USE_CHARM
-#endif
-
   // Initialize problem parameters
 
-  if (ARGC != 3) {
+  if (PARALLEL_ARGC != 3) {
     if (ip==0) {
-      PRINTF ("\nUsage: %s N M\n\n",ARGV[0]);
-      PRINTF ("   N: problem size = N*N*N\n");
-      PRINTF ("   M: block size   = M*M*M\n\n");
+      PARALLEL_PRINTF ("\nUsage: %s N M\n\n",PARALLEL_ARGV[0]);
+      PARALLEL_PRINTF ("   N: problem size = N*N*N\n");
+      PARALLEL_PRINTF ("   M: block size   = M*M*M\n\n");
     }
 #ifdef CONFIG_USE_MPI
     MPI_Abort(MPI_COMM_WORLD,0);
@@ -51,16 +52,16 @@ MAIN
 #endif
   }    
 
-  PRINTF ("(ip,np) = (%d,%d)\n",ip,np);
+  PARALLEL_PRINTF ("(ip,np) = (%d,%d)\n",ip,np);
 
-  int n = atoi(ARGV[1]);  // Problem size = n*n*n
-  int m = atoi(ARGV[2]);  // Block size = m*m*m
+  int n = atoi(PARALLEL_ARGV[1]);  // Problem size = n*n*n
+  int m = atoi(PARALLEL_ARGV[2]);  // Block size = m*m*m
   int nb = n/m;           // Number of blocks
   int n3 = n*n*n;
   int m3 = m*m*m;
   int nb3 = nb*nb*nb;
 
-  PRINTF ("n=%d\n",n);
+  PARALLEL_PRINTF ("n=%d\n",n);
 
   // Create data blocks
 
@@ -79,13 +80,10 @@ MAIN
     delete block[i];
   }
 
-#ifdef CONFIG_USE_MPI
-  MPI_Finalize();
-#endif
-#ifdef CONFIG_USE_CHARM
-    CkExit();
-#endif
+  PARALLEL_EXIT;
 
   };
 
-#include "jacobi_end.hpp"
+PARALLEL_MAIN_END
+
+#include CHARM_INCLUDE(jacobi.def.h)

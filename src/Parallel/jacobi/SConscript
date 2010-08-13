@@ -13,14 +13,15 @@ test_jacobi =  env.Program (['test_jacobi.cpp',      sources])
 tests = [test_jacobi];
 
 Import ('parallel_type')
+print "parallel_type = ",parallel_type
 if ("charm" in parallel_type):
 	charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.def.h ${ARG}.decl.h include")
 	env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
-	env.CharmBuilder(['jacobi.decl.h','jacobi.def.h'],'jacobi.ci',ARG='jacobi')
+	env.CharmBuilder('jacobi.decl.h','jacobi.ci',ARG='jacobi')
 
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('$BINPATH', tests))
+env.Alias('install-bin',env.Install ('#/bin',    tests))
 
 
