@@ -8,33 +8,14 @@
 
 
 // #include <stdio.h>
-// #include <stdlib.h>
+#include <stdlib.h>
 
 #include "jacobi.hpp"
 
-// ------------------------------ INCLUDES ------------------------------
-#ifdef CONFIG_USE_MPI
-#   include <mpi.h>
-#endif
-
-#ifdef CONFIG_USE_CHARM
-#   include "jacobi.decl.h"
-#endif
-
-#include "jacobi_Block.hpp"
 
 // ------------------------------ MAIN ------------------------------
 
-#ifdef CONFIG_USE_CHARM
-CProxy_Main mainProxy;
-
-class Main : public CBase_Main
-{
-public:
-  Main(CkArgMsg* main) 
-#else
-    int main(int argc, char ** argv)
-#endif
+MAIN
 
   {
 
@@ -107,7 +88,4 @@ public:
 
   };
 
-#ifdef CONFIG_USE_CHARM
-};
-#   include "jacobi.def.h"
-#endif
+#include "jacobi_end.hpp"
