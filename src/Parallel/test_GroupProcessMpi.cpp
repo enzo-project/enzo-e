@@ -58,7 +58,7 @@ int main(int argc, char ** argv)
   // WARNING: automatic crashes in LAM MPI on gedeckt (r1650)
 
   //--------------------------------------------------
-  GroupProcess * process_group = GroupProcess::create(group_process_mpi);
+  GroupProcess * process_group = GroupProcess::create();
   //--------------------------------------------------
 
   int rank = process_group->rank();

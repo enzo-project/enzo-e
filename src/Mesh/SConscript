@@ -32,8 +32,14 @@ sources  = [Glob('mesh*cpp')]
 # TARGETS
 #------------------------------
 
+#------------------------------
+# BUILDERS
+#------------------------------
+
 if ("charm" in parallel_type):
-	env.CharmBuilder('TreeK.decl.h','TreeK.ci',ARG='TreeK')
+    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.def.h ${ARG}.decl.h include")
+    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
+    env.CharmBuilder('TreeK.decl.h','TreeK.ci',ARG='TreeK')
 
 libraries = env.Library ('mesh', [sources])
 test_mesh = env.Program (['test_Mesh.cpp',  sources])

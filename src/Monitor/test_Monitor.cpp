@@ -23,7 +23,7 @@ int main(int argc, char ** argv)
 {
   Mpi::init(&argc,&argv);
 
-  GroupProcess * parallel = GroupProcess::create(group_process_mpi);
+  GroupProcess * parallel = GroupProcess::create();
 
   Monitor  * monitor  = new Monitor;
 

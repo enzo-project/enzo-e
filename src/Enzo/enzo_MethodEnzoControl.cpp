@@ -170,13 +170,7 @@ void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
 
   GroupProcess * parallel = 0;
 
-  if (parallel_method == "mpi") {
-    parallel = GroupProcess::create(group_process_mpi);
-  } else if (parallel_method == "charm") {
-    parallel = GroupProcess::create(group_process_charm);
-  } else if (parallel_method == "serial") {
-    parallel = GroupProcess::create(group_process_serial);
-  }
+  parallel = GroupProcess::create();
 
   enzo_->ProcessorNumber = parallel->rank();
 

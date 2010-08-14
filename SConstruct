@@ -228,10 +228,3 @@ SConscript('test/SConscript')
 #              DESCRIPTION    = 'Cello Extreme AMR Framework'
 #         )
 
-#------------------------------
-# BUILDERS
-#------------------------------
-
-if ("charm" in parallel_type):
-    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.def.h ${ARG}.decl.h include")
-    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })

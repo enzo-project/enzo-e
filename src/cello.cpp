@@ -38,13 +38,7 @@ int main(int argc, char ** argv)
 
     Mpi::init(&argc, &argv);
 
-    GroupProcess * parallel = 0;
-
-#ifdef CONFIG_USE_MPI
-    parallel = new GroupProcessMpi;
-#else
-    parallel = new GroupProcessSerial;
-#endif
+    GroupProcess * parallel = GroupProcess::create();
 
     // INITALIZE "GLOBALS" (Parameters, Error, Monitor)
 

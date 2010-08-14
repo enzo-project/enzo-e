@@ -59,7 +59,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  GroupProcess * parallel = GroupProcess::create(group_process_mpi);
+  GroupProcess * parallel = GroupProcess::create();
 
   // Create a struct of enzo data (won't work as global data for CHARM++, threading, etc)
 
