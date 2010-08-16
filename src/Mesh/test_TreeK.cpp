@@ -8,23 +8,21 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
+
+#include "cello.hpp"
+
 #include "pngwriter.h"
 
 #include "parallel.def"
 
-#include CHARM_INCLUDE(TreeK.decl.h)
-
-#include <string>
-
-#include "cello.hpp"
+#include PARALLEL_CHARM_INCLUDE(TreeK.decl.h)
 
 #include "error.hpp"
 #include "test.hpp"
 #include "monitor.hpp"
 #include "memory.hpp"
 #include "mesh.hpp"
-
-// #include "image.h"
 
 #define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
 
@@ -99,7 +97,6 @@ PARALLEL_MAIN_BEGIN
     // Read png image file
     level_array = create_image_array(png_file,&nx,&ny,max_level);
     // Change back to parent directory
-    if (chdir("..")) unit_assert(false);
 
   } else {
 
@@ -371,4 +368,4 @@ void create_tree
 
 }
 
-#include CHARM_INCLUDE(TreeK.def.h)
+#include PARALLEL_CHARM_INCLUDE(TreeK.def.h)
