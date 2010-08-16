@@ -12,7 +12,7 @@
                Main(CkArgMsg* main)
 #  define PARALLEL_MAIN_END };
 
-#  define CHARM_INCLUDE(FILE) #FILE
+#  define PARALLEL_CHARM_INCLUDE(FILE) #FILE
 
 #elif defined(CONFIG_USE_MPI)
 
@@ -25,7 +25,7 @@
 #  define PARALLEL_ARGV      argv
 #  define PARALLEL_MAIN_BEGIN int main(int argc, char ** argv)
 #  define PARALLEL_MAIN_END   /* BLANK */
-#  define CHARM_INCLUDE(FILE) "/dev/null"
+#  define PARALLEL_CHARM_INCLUDE(FILE) "/dev/null"
 
 #else /* serial */
 
@@ -36,6 +36,6 @@
 #  define PARALLEL_ARGV      argv
 #  define PARALLEL_MAIN_BEGIN int main(int argc, char ** argv)
 #  define PARALLEL_MAIN_END   /* BLANK */
-#  define CHARM_INCLUDE(FILE) "/dev/null"
+#  define PARALLEL_CHARM_INCLUDE(FILE) "/dev/null"
 
 #endif

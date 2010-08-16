@@ -35,7 +35,8 @@ enum parallel_type {
 
 #include "parallel_Mpi.hpp"
 
-#include "parallel_Group.hpp"
+#include "parallel_ParallelGroup.hpp" 
+
 #include "parallel_GroupProcess.hpp"
 #ifdef CONFIG_USE_MPI
 #   include "parallel_GroupProcessMpi.hpp"

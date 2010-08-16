@@ -12,16 +12,15 @@
 
 #include "parallel.def"
 
-#include CHARM_INCLUDE(jacobi.decl.h)
+#include PARALLEL_CHARM_INCLUDE(jacobi.decl.h)
 
 #include "jacobi.hpp"
-
 
 // ------------------------------ MAIN ------------------------------
 
 PARALLEL_MAIN_BEGIN
 
-  {
+{
 
   // Initialize default comm rank and size
 
@@ -44,12 +43,8 @@ PARALLEL_MAIN_BEGIN
       PARALLEL_PRINTF ("   N: problem size = N*N*N\n");
       PARALLEL_PRINTF ("   M: block size   = M*M*M\n\n");
     }
-#ifdef CONFIG_USE_MPI
-    MPI_Abort(MPI_COMM_WORLD,0);
-#endif
-#ifdef CONFIG_USE_CHARM
-    CkExit();
-#endif
+    
+    PARALLEL_EXIT;
   }    
 
   PARALLEL_PRINTF ("(ip,np) = (%d,%d)\n",ip,np);
@@ -82,8 +77,8 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_EXIT;
 
-  };
+};
 
 PARALLEL_MAIN_END
 
-#include CHARM_INCLUDE(jacobi.def.h)
+#include PARALLEL_CHARM_INCLUDE(jacobi.def.h)

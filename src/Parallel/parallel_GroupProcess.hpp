@@ -9,12 +9,12 @@
 /// @date     Thu Jul 22 12:36:38 PDT 2010
 /// @brief    Declaration of the GroupProcess class
 
-class GroupProcess : public Group {
+class GroupProcess : public ParallelGroup {
 
-  /// @class    Group Process
+  /// @class    GroupProcess
   /// @ingroup  Parallel  
   /// @todo     Support more flexible process subsets
-  /// @brief    Group of distributed memory processes
+  /// @brief    ParallelGroup of distributed memory processes
 
 public: // static interface
 
@@ -26,7 +26,7 @@ protected: // interface
 
 /// Protected since GroupProcess objects must be created with create()
 GroupProcess(int size = 1, int rank = 0) throw()
-  : Group(size,rank),
+  : ParallelGroup(size,rank),
     send_blocking_    (true),
     recv_blocking_    (true)
   {  }

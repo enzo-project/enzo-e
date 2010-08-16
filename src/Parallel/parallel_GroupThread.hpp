@@ -9,17 +9,17 @@
 /// @date     Thu Jul 22 12:36:17 PDT 2010
 /// @brief    Declaration of the GroupThread class
 
-class GroupThread : public Group {
+class GroupThread : public ParallelGroup {
 
   /// @class    GroupThread
   /// @ingroup  Parallel
-  /// @brief    Group of shared memory threads
+  /// @brief    ParallelGroup of shared memory threads
 
 public: // interface
 
   /// Initialize the GroupThread object
   GroupThread(int size = 1, int rank = 0)
-    : Group(size,rank)
+    : ParallelGroup(size,rank)
   {  }
 
 private: // attributes
