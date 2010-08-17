@@ -38,9 +38,9 @@ test_enzo_ppm = env.Program (['test_MethodEnzoPpm.cpp', sources])
 tests = [test_enzo_ppm]
 
 if ("charm" in parallel_type):
-	charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.def.h ${ARG}.decl.h include")
-	env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
-	env.CharmBuilder('MethodEnzoPpm.decl.h','MethodEnzoPpm.ci',ARG='MethodEnzoPpm')
+	test = 'test_MethodEnzoPpm'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 #------------------------------
 # INSTALL
