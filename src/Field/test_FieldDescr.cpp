@@ -25,11 +25,21 @@ struct field_info_type {
   bool cx, cy, cz;
 };
 
-int main()
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(test_FieldDescr.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
 
+  PARALLEL_INIT;
+
+  //----------------------------------------------------------------------
   unit_init();
+  //----------------------------------------------------------------------
+
+  //----------------------------------------------------------------------
   unit_class ("FieldDescr");
+  //----------------------------------------------------------------------
 
   FieldDescr * field_descr = 0;
   struct field_info_type info;
@@ -266,12 +276,10 @@ int main()
   //======================================================================
 
   // Assign
-  printf ("assign\n");
   FieldDescr field_descr_assign;
   field_descr_assign = *field_descr;
 
   // Copy
-  printf ("copy\n");
   FieldDescr field_descr_copy (*field_descr);
 
   // Delete original to check for deep copy
@@ -472,7 +480,12 @@ int main()
   unit_assert(field_descr_copy.maximum_value  (info.field_velocity_z) == 300.0);
   unit_assert(field_descr_copy.maximum_action (info.field_velocity_z) == field_action_timestep);
 
+  //----------------------------------------------------------------------
   unit_finalize();
+  //----------------------------------------------------------------------
+
+  PARALLEL_EXIT;
 }
+PARALLEL_MAIN_END
 
-
+#include PARALLEL_CHARM_INCLUDE(test_FieldDescr.def.h)

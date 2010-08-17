@@ -129,8 +129,10 @@ elif (platform == 'linux-charm'):
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
-      LIBPATH     = '#/lib',
-   )
+      LIBPATH     = '#/lib' )
+   charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
+   env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
+
 #--------------------------------------------------
 elif (platform == 'triton'):
 #--------------------------------------------------

@@ -16,7 +16,7 @@
 
 #include "parallel.def"
 
-#include PARALLEL_CHARM_INCLUDE(TreeK.decl.h)
+#include PARALLEL_CHARM_INCLUDE(test_TreeK.decl.h)
 
 #include "error.hpp"
 #include "test.hpp"
@@ -368,4 +368,4 @@ void create_tree
 
 }
 
-#include PARALLEL_CHARM_INCLUDE(TreeK.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_TreeK.def.h)

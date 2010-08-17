@@ -23,12 +23,92 @@
 /// @brief    Local definition for testing whether two scalars are close
 #define CLOSE(a,b) ((((a) - (b)) / (fabs(a) + fabs(b))) < 1e-16)
 
-void generate_input();
+void generate_input()
+{
+  FILE * fp = fopen ("test.in","w");
 
-int main(int argc, char **argv)
+  // Groups
+  // 
+  //  Integer::
+  //  List
+  //  Logical::
+  //  Logical_expr::var_logical_1
+  //  Scalar::
+  //  Scalar::const_scalar_1
+  //  Scalar::const_scalar_2
+  //  Scalar_expr::var_scalar_1
+  //  Scalar_expr::var_scalar_2
+  //  String
+
+  fprintf (fp, "Logical {\n");
+  fprintf (fp, "  test_true  = true;\n");
+  fprintf (fp, "  test_false = false;\n");
+  fprintf (fp, "}\n");
+  fprintf (fp, "   \n");
+  fprintf (fp, "Integer {\n");
+  fprintf (fp, "  test_1 = 1;\n");
+  fprintf (fp, "  test_37 = 37\n");
+  fprintf (fp, "}\n");
+
+  fprintf (fp, "Scalar {\n");
+  fprintf (fp, "  test_1_5 = 1.5;\n");
+  fprintf (fp, "  test_37_25 = 37.25;\n");
+  fprintf (fp, "}\n");
+
+  fprintf (fp, "Scalar {\n");
+  fprintf (fp, "  const_scalar_1 {\n");
+  fprintf (fp, "    num1 = 24.5 + 6.125;\n");
+  fprintf (fp, "    num2 = 24.5 - 6.125;\n");
+  fprintf (fp, "    num3 = 24.5 * 6.125;\n");
+  fprintf (fp, "    num4 = 24.5 / 6.125;\n");
+  fprintf (fp, "  };\n");
+  fprintf (fp, "  const_scalar_2 {\n");
+  fprintf (fp, "    num1 = 24.5 + 6.125*2.0;\n");
+  fprintf (fp, "    num2 = 24.5*3.0 - 6.125;\n");
+  fprintf (fp, "    num3 = (24.5 + 6.125*2.0) - (24.5*3.0 - 6.125);\n");
+  fprintf (fp, "  }\n");
+  fprintf (fp, "}\n");
+
+  fprintf (fp, "String {\n");
+  fprintf (fp, "  str1 = \"testing\";\n");
+  fprintf (fp, "  str2 = \"one\";\n");
+  fprintf (fp, "}\n");
+
+  fprintf (fp, "Scalar_expr {\n");
+  fprintf (fp, "  var_scalar_1 {\n");
+  fprintf (fp, "    num1 = x;\n");
+  fprintf (fp, "    num2 = x + 3.0;\n");
+  fprintf (fp, "    num3 = x+y+z+t;\n");
+  fprintf (fp, "  }\n");
+  fprintf (fp, "}\n");
+
+  fprintf (fp, " Scalar_expr var_scalar_2 {\n");
+  fprintf (fp, "  num1 = sin(x);\n");
+  fprintf (fp, "  num2 = atan(y/3.0+3.0*t);\n");
+  fprintf (fp, "}\n");
+
+  fprintf (fp, " Logical_expr {\n");
+  fprintf (fp, "  var_logical_1 {\n");
+  fprintf (fp, "    num1 = x < y;\n");
+  fprintf (fp, "    num2 = x + y >= t + 3.0;\n");
+  fprintf (fp, "    num3 = x == y;\n");
+  fprintf (fp, "  }\n");
+  fprintf (fp, "}\n");
+
+  fprintf (fp, " List {\n");
+  fprintf (fp, "  num1 = [1.0, true, 37, \"string\", x-y+2.0*z, x+y+t > 0.0 ];\n");
+  fprintf (fp, "}\n");
+  fclose(fp);
+
+}
+
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(test_Parameters.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
 
-  Mpi::init(&argc, &argv);
+  PARALLEL_INIT;
 
   GroupProcess * parallel = GroupProcess::create();
 
@@ -46,7 +126,6 @@ int main(int argc, char **argv)
   // Generate test.in to make sure it exists
 
   generate_input();
-
 
   // Read
 
@@ -164,7 +243,7 @@ int main(int argc, char **argv)
   dd = 58.75;
   parameters->value("none",parameter_scalar,&d,&dd);
   unit_assert (d == dd);
-  printf ("%g %g\n",d,dd);
+  PARALLEL_PRINTF ("%g %g\n",d,dd);
 
   // set_scalar()
 
@@ -361,82 +440,10 @@ int main(int argc, char **argv)
   unit_finalize();
 
   Mpi::finalize();
+  PARALLEL_EXIT;
 }
 
-void generate_input()
-{
-  FILE * fp = fopen ("test.in","w");
+PARALLEL_MAIN_END
 
-  // Groups
-  // 
-  //  Integer::
-  //  List
-  //  Logical::
-  //  Logical_expr::var_logical_1
-  //  Scalar::
-  //  Scalar::const_scalar_1
-  //  Scalar::const_scalar_2
-  //  Scalar_expr::var_scalar_1
-  //  Scalar_expr::var_scalar_2
-  //  String
+#include PARALLEL_CHARM_INCLUDE(test_Parameters.def.h)
 
-  fprintf (fp, "Logical {\n");
-  fprintf (fp, "  test_true  = true;\n");
-  fprintf (fp, "  test_false = false;\n");
-  fprintf (fp, "}\n");
-  fprintf (fp, "   \n");
-  fprintf (fp, "Integer {\n");
-  fprintf (fp, "  test_1 = 1;\n");
-  fprintf (fp, "  test_37 = 37\n");
-  fprintf (fp, "}\n");
-
-  fprintf (fp, "Scalar {\n");
-  fprintf (fp, "  test_1_5 = 1.5;\n");
-  fprintf (fp, "  test_37_25 = 37.25;\n");
-  fprintf (fp, "}\n");
-
-  fprintf (fp, "Scalar {\n");
-  fprintf (fp, "  const_scalar_1 {\n");
-  fprintf (fp, "    num1 = 24.5 + 6.125;\n");
-  fprintf (fp, "    num2 = 24.5 - 6.125;\n");
-  fprintf (fp, "    num3 = 24.5 * 6.125;\n");
-  fprintf (fp, "    num4 = 24.5 / 6.125;\n");
-  fprintf (fp, "  };\n");
-  fprintf (fp, "  const_scalar_2 {\n");
-  fprintf (fp, "    num1 = 24.5 + 6.125*2.0;\n");
-  fprintf (fp, "    num2 = 24.5*3.0 - 6.125;\n");
-  fprintf (fp, "    num3 = (24.5 + 6.125*2.0) - (24.5*3.0 - 6.125);\n");
-  fprintf (fp, "  }\n");
-  fprintf (fp, "}\n");
-
-  fprintf (fp, "String {\n");
-  fprintf (fp, "  str1 = \"testing\";\n");
-  fprintf (fp, "  str2 = \"one\";\n");
-  fprintf (fp, "}\n");
-
-  fprintf (fp, "Scalar_expr {\n");
-  fprintf (fp, "  var_scalar_1 {\n");
-  fprintf (fp, "    num1 = x;\n");
-  fprintf (fp, "    num2 = x + 3.0;\n");
-  fprintf (fp, "    num3 = x+y+z+t;\n");
-  fprintf (fp, "  }\n");
-  fprintf (fp, "}\n");
-
-  fprintf (fp, " Scalar_expr var_scalar_2 {\n");
-  fprintf (fp, "  num1 = sin(x);\n");
-  fprintf (fp, "  num2 = atan(y/3.0+3.0*t);\n");
-  fprintf (fp, "}\n");
-
-  fprintf (fp, " Logical_expr {\n");
-  fprintf (fp, "  var_logical_1 {\n");
-  fprintf (fp, "    num1 = x < y;\n");
-  fprintf (fp, "    num2 = x + y >= t + 3.0;\n");
-  fprintf (fp, "    num3 = x == y;\n");
-  fprintf (fp, "  }\n");
-  fprintf (fp, "}\n");
-
-  fprintf (fp, " List {\n");
-  fprintf (fp, "  num1 = [1.0, true, 37, \"string\", x-y+2.0*z, x+y+t > 0.0 ];\n");
-  fprintf (fp, "}\n");
-  fclose(fp);
-}

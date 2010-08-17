@@ -13,8 +13,15 @@
 #include "test.hpp"
 #include "disk.hpp"
 
-int main(int argc, char ** argv)
+#include "parallel.def"
+
+#include PARALLEL_CHARM_INCLUDE(test_Ifrit.decl.h)
+
+PARALLEL_MAIN_BEGIN
+
 {
+  PARALLEL_INIT;
+
   unit_init();
 
   int n0 = 64;
@@ -68,4 +75,8 @@ int main(int argc, char ** argv)
 
   unit_finalize();
 
+  PARALLEL_EXIT;
 }
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Ifrit.def.h)

@@ -11,8 +11,15 @@
 #include "error.hpp"
 #include "test.hpp"
 
-int main(int argc, char ** argv)
+#include "parallel.def"
+
+#include PARALLEL_CHARM_INCLUDE(test_Schedule.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
+
+  PARALLEL_INIT;
+
   unit_init();
 
   bool passed = false;
@@ -27,4 +34,9 @@ int main(int argc, char ** argv)
 
   unit_finalize();
 
+  PARALLEL_EXIT;
+
 }
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Schedule.def.h)

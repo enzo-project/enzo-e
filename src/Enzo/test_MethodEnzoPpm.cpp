@@ -22,6 +22,7 @@
 
 #include "cello_hydro.h"
 
+#include "parallel.def"
 #include PARALLEL_CHARM_INCLUDE(MethodEnzoPpm.decl.h)
 
 void output_fields(FieldBlock * field_block,

@@ -14,8 +14,14 @@
 #include "test.hpp"
 #include "performance.hpp"
 
-int main(int argc, char ** argv)
+#include "parallel.def"
+
+#include PARALLEL_CHARM_INCLUDE(test_Performance.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
+
+  PARALLEL_INIT;
 
   unit_init();
 
@@ -26,14 +32,14 @@ int main(int argc, char ** argv)
 
   unit_class ("Timer");
 
-  printf ("Initial timer value = %24.16f\n",timer.value());
+  PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
 
   timer.start();
 
   system("sleep 1");
   timer.stop();
 
-  printf ("Initial timer value = %24.16f\n",timer.value());
+  PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
 
   unit_func("start");
   unit_assert((timer.value() - 1.0) < time_tolerance);
@@ -42,7 +48,7 @@ int main(int argc, char ** argv)
   system("sleep 1");
   timer.stop();
 
-  printf ("Initial timer value = %24.16f\n",timer.value());
+  PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
 
   unit_func("stop");
   unit_assert((timer.value() - 2.0) < time_tolerance);
@@ -214,4 +220,8 @@ int main(int argc, char ** argv)
 
   unit_finalize();
 
+  PARALLEL_EXIT;
 }
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Performance.def.h)

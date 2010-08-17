@@ -3,6 +3,7 @@
 #------------------------------
 
 Import('env')
+Import('parallel_type')
 
 #------------------------------
 # DEPENDENCIES
@@ -32,6 +33,11 @@ sources    = [Glob('monitor*cpp'), Glob('png*cpp')]
 
 libraries    = env.Library      ('monitor', [sources])
 test_monitor = env_test.Program (['test_Monitor.cpp', sources])
+
+if ("charm" in parallel_type):
+	test = 'test_Monitor'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 #------------------------------
 # INSTALL

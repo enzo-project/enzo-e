@@ -3,6 +3,7 @@
 #------------------------------
 
 Import('env')
+Import('parallel_type')
 
 #------------------------------
 # DEPENDENCIES
@@ -20,7 +21,7 @@ env = env.Clone(LIBS=[components])
 # SOURCE
 #------------------------------
 
-includes   = [Glob('data*hpp')]
+includes   = [Glob('data*hpp'),'test_Data.decl.h','test_Data.def.h']
 sources    = [Glob('data*cpp')]
 
 #------------------------------
@@ -30,6 +31,11 @@ sources    = [Glob('data*cpp')]
 libraries = env.Library ('data', [sources])
 test_data = env.Program (['test_Data.cpp',   sources])
 
+if ("charm" in parallel_type):
+	test = 'test_Data'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
+
 #------------------------------
 # INSTALL
 #------------------------------
@@ -37,9 +43,3 @@ test_data = env.Program (['test_Data.cpp',   sources])
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
 env.Alias('install-bin',env.Install ('#/bin',    test_data))
-
-
-
-
-
-

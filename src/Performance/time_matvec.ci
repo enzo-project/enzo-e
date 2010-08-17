@@ -1,0 +1,7 @@
+mainmodule time_matvec {
+  readonly CProxy_Main mainProxy;
+
+  mainchare Main {
+    entry Main(CkArgMsg *m);
+  };
+};

@@ -3,6 +3,7 @@
 #------------------------------
 
 Import('env')
+Import('parallel_type')
 
 #------------------------------
 # DEPENDENCIES
@@ -30,6 +31,14 @@ sources  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
 # env.CFile(target = 'lex.yy.c', source = 'parse.l')
 # env.CFile(target = ['parse.tab.c', 'parse.tab.h'], source = 'parse.y', YACCFLAGS='-d -t')
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+if ("charm" in parallel_type):
+	test = 'test_Parameters'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
+	test = 'test_Parse'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 #------------------------------
 # TARGETS

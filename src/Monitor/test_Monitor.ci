@@ -1,0 +1,7 @@
+mainmodule test_Monitor {
+  readonly CProxy_Main mainProxy;
+
+  mainchare Main {
+    entry Main(CkArgMsg *m);
+  };
+};

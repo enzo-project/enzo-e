@@ -14,8 +14,15 @@
 #include "error.hpp"
 #include "performance.hpp"
 
-int main(int argc, char ** argv)
+#include "parallel.def"
+
+#include PARALLEL_CHARM_INCLUDE(time_matvec.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
+
+  PARALLEL_INIT;
+
   Timer time_overhead;
   Timer time_const;
   Timer time_symm;
@@ -29,21 +36,21 @@ int main(int argc, char ** argv)
 
   int kbegin,kend;
 
-  if (argc >= 1) {
+  if (PARALLEL_ARGC >= 1) {
     kbegin = 8;
     kend   = 192;
   }
-  if (argc >= 2) {
-    kbegin = atoi(argv[1]);
-    kend   = atoi(argv[1]);
+  if (PARALLEL_ARGC >= 2) {
+    kbegin = atoi(PARALLEL_ARGV[1]);
+    kend   = atoi(PARALLEL_ARGV[1]);
   }
-  if (argc >= 3) {
-    kend   = atoi(argv[2]);
+  if (PARALLEL_ARGC >= 3) {
+    kend   = atoi(PARALLEL_ARGV[2]);
   }
 
   Scalar * array = new Scalar [(kend+2)*(kend+2)*(kend+2)*9];
 
-  printf ("size  mflop-const mflop-symm mflop-full mflop-block\n");
+  PARALLEL_PRINTF ("size  mflop-const mflop-symm mflop-full mflop-block\n");
 
   for (k=kbegin; k<=kend; k++) {
 
@@ -211,7 +218,7 @@ int main(int argc, char ** argv)
     }
 
     int num_flops = count*k*k*k*13+int(cache[0]);
-    printf ("%d %10.2f %10.2f %10.2f %10.2f\n",
+    PARALLEL_PRINTF ("%d %10.2f %10.2f %10.2f %10.2f\n",
 	    k,
 	    1e-6*num_flops/(time_const.value()-time_overhead.value()),
 	    1e-6*num_flops/(time_symm.value()-time_overhead.value()),
@@ -227,4 +234,10 @@ int main(int argc, char ** argv)
     time_overhead.clear();
 
   } // for
+
+  PARALLEL_EXIT;
+
 }
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(time_matvec.def.h)

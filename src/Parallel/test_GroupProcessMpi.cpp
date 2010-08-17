@@ -9,10 +9,7 @@
 
 #ifdef CONFIG_USE_MPI
 
-#include <mpi.h> 
-
 #include "cello.hpp"
-
 #include "test.hpp"
 #include "parallel.hpp"
 

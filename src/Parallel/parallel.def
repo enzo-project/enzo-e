@@ -1,3 +1,14 @@
+// $Id: parallel.def 1711 2010-08-16 18:51:52Z bordner $
+// See LICENSE_CELLO file for license and copyright information
+
+#ifndef PARALLEL_DEF
+#define PARALLEL_DEF
+
+/// @file     parallel.def
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Mon Aug 13 2010
+/// @brief    Macro definitions for the Parallel component
+
 #if defined(CONFIG_USE_CHARM)
 
 #  define PARALLEL_INIT      /* BLANK */
@@ -39,3 +50,5 @@
 #  define PARALLEL_CHARM_INCLUDE(FILE) "/dev/null"
 
 #endif
+
+#endif /* PARALLEL_HPP */

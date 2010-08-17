@@ -18,8 +18,13 @@
 #include "memory.hpp"
 #include "test.hpp"
 
-int main(int argc, char ** argv)
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(test_Memory.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
+
+  PARALLEL_INIT;
 
   unit_init();
 
@@ -28,7 +33,7 @@ int main(int argc, char ** argv)
 #ifdef CONFIG_USE_MEMORY
   Memory * memory = Memory::instance();
 
-  printf ("start\n"); fflush(stdout);
+  PARALLEL_PRINTF ("start\n"); fflush(stdout);
 
   //----------------------------------------------------------------------
   // allocate()
@@ -97,7 +102,7 @@ int main(int argc, char ** argv)
     delete [] f1;
   }
   timer.stop();
-  printf ("alloc/dealloc per sec = %g\n",num_alloc/timer.value());
+  PARALLEL_PRINTF ("alloc/dealloc per sec = %g\n",num_alloc/timer.value());
 
   timer.clear();
   timer.start();
@@ -106,7 +111,7 @@ int main(int argc, char ** argv)
     free(f1);
   }
   timer.stop();
-  printf ("  new/delete  per sec = %g\n",num_alloc/timer.value());
+  PARALLEL_PRINTF ("  new/delete  per sec = %g\n",num_alloc/timer.value());
   
 
   unit_assert (memory->bytes() == size);
@@ -214,5 +219,14 @@ int main(int argc, char ** argv)
   unit_func("[disabled]");
   unit_assert(true);
 #endif/* CONFIG_USE_MEMORY */
+
   unit_finalize();
+
+  PARALLEL_EXIT;
+
 }
+
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Memory.def.h)
+

@@ -8,13 +8,20 @@
 
 #include "cello.hpp"
 
+#include "parallel.def"
+
 #include "error.hpp"
 #include "test.hpp"
 #include "data.hpp"
 #include "field.hpp"
 
-int main()
+#include PARALLEL_CHARM_INCLUDE(test_Data.decl.h)
+
+PARALLEL_MAIN_BEGIN
+
 {
+
+  PARALLEL_INIT;
 
   unit_init();
 
@@ -26,4 +33,9 @@ int main()
 
   unit_finalize();
 
+  PARALLEL_EXIT;
 }
+
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Data.def.h)

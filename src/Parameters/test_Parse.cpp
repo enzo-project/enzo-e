@@ -8,9 +8,18 @@
 
 #include "parameters.hpp"
 
-int main(int argc, char **argv)
+#include "parallel.def"
+
+#include PARALLEL_CHARM_INCLUDE(test_Parse.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
+  PARALLEL_INIT;
   cello_parameters_read(stdin);
   cello_parameters_print();
-  return 0;
+  PARALLEL_EXIT;
 }
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Parse.def.h)
+

@@ -3,6 +3,7 @@
 #------------------------------
 
 Import('env')
+Import('parallel_type')
 
 #------------------------------
 # DEPENDENCIES
@@ -23,6 +24,11 @@ sources  = [Glob('error*cpp')]
 
 libraries  = env.Library ('error', [sources])
 test_error = env.Program (['test_Error.cpp',  sources])
+
+if ("charm" in parallel_type):
+	test = 'test_Error'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 #------------------------------
 # INSTALL

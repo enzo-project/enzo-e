@@ -13,8 +13,14 @@
 #include "error.hpp"
 #include "test.hpp"
 
-int main(int argc, char ** argv)
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(test_Error.decl.h)
+
+PARALLEL_MAIN_BEGIN
+
 {
+
+  PARALLEL_INIT;
 
   unit_init();
 
@@ -41,15 +47,11 @@ int main(int argc, char ** argv)
   unit_assert (true);
 
   unit_finalize();
-  //----------------------------------------------------------------------
-//   printf ("Error message:\n");
 
-//   char error_message[ERROR_MESSAGE_LENGTH];
-//   sprintf (error_message,"Error message test");
-//   ERROR_MESSAGE("main",error_message);
-  
-//   // Errors should abort, so all following lines should not be executed
-//   exit(1);
-  //----------------------------------------------------------------------
+  PARALLEL_EXIT;
 
 }
+
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Error.def.h)

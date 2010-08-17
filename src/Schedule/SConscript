@@ -3,6 +3,7 @@
 #------------------------------
 
 Import('env')
+Import('parallel_type')
 
 #------------------------------
 # DEPENDENCIES
@@ -30,6 +31,11 @@ sources    = [Glob('schedule*cpp')]
 
 libraries = env.Library ('schedule', [sources])
 binaries  = env.Program (['test_Schedule.cpp', sources])
+
+if ("charm" in parallel_type):
+	test = 'test_Schedule'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 #------------------------------
 # INSTALL

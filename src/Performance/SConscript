@@ -3,6 +3,7 @@
 #------------------------------
 
 Import('env')
+Import('parallel_type')
 
 #------------------------------
 # DEPENDENCIES
@@ -32,6 +33,14 @@ test_performance = env.Program(['test_Performance.cpp', sources])
 time_matvec      = env.Program(['time_matvec.cpp',      sources])
 
 tests = [test_performance,time_matvec]
+
+if ("charm" in parallel_type):
+	test = 'test_Performance'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
+	test = 'time_matvec'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 #------------------------------
 # INSTALL

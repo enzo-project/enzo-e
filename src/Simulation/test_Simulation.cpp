@@ -13,9 +13,14 @@
 #include "test.hpp"
 #include "simulation.hpp"
 
-int main(int argc, char ** argv)
+#include "parallel.def"
+
+#include PARALLEL_CHARM_INCLUDE(test_Simulation.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
-  Mpi::init(&argc,&argv);
+
+  PARALLEL_INIT;
 
   // Warning: unused
   GroupProcess * parallel = GroupProcess::create();
@@ -48,5 +53,10 @@ int main(int argc, char ** argv)
   unit_assert(false);
   unit_finalize();
 
-  Mpi::finalize();
+
+  PARALLEL_EXIT;
+
 }
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Simulation.def.h)

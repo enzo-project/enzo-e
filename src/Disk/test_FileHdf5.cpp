@@ -14,8 +14,15 @@
 #include "test.hpp"
 #include "disk.hpp"
 
-int main(int argc, char ** argv)
+#include "parallel.def"
+
+#include PARALLEL_CHARM_INCLUDE(test_FileHdf5.decl.h)
+
+PARALLEL_MAIN_BEGIN
+
 {
+  PARALLEL_INIT;
+
   unit_init();
 
   int nx = 100;
@@ -68,5 +75,9 @@ int main(int argc, char ** argv)
   unit_assert(passed);
 
   unit_finalize();
+  PARALLEL_EXIT;
 
 }
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_FileHdf5.def.h)

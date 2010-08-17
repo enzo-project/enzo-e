@@ -19,9 +19,14 @@
 #include "parallel.hpp"
 #include "monitor.hpp"
 
-int main(int argc, char ** argv)
+
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(test_Monitor.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
-  Mpi::init(&argc,&argv);
+  
+  PARALLEL_INIT;
 
   GroupProcess * parallel = GroupProcess::create();
 
@@ -36,7 +41,7 @@ int main(int argc, char ** argv)
   // Allocate array
 
   if (parallel->rank()==0) {
-    printf ("pngwriter version = %g\n",pngwriter::version());
+    PARALLEL_PRINTF ("pngwriter version = %g\n",pngwriter::version());
   }
 
   float * array = new float [n*n*n];
@@ -85,6 +90,9 @@ int main(int argc, char ** argv)
 
   unit_finalize();
 
-  Mpi::finalize();
-
+  PARALLEL_EXIT;
 }
+
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Monitor.def.h)

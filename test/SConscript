@@ -139,7 +139,7 @@ env.RunParse('test_parse_implosion.unit',  '#/bin/test_Parse', ARGS='input/implo
 env.RunParse('test_parse_shock-pool.unit', '#/bin/test_Parse', ARGS='input/shock-pool.in')
 
 
-Clean(env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS='test/test_MethodEnzoPpm.unit'),Glob('../ppm-*-00???.png'))
+Clean(env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS='test/test_MethodEnzoPpm.unit'),[Glob('../ppm-*-00???.png'),'test_MethodEnzoPpm.unit'])
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
 

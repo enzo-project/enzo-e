@@ -17,18 +17,25 @@
 #include "enzo.hpp"
 #include "test.hpp"
 
+#include "parallel.def"
+
+#include PARALLEL_CHARM_INCLUDE(test_ppm.decl.h)
+
 //----------------------------------------------------------------------
 
 void print_usage(const char * name)
 {
-  printf ("Usage: %s <ppm-image|ppm-implosion|ppm-implosion3> [size] [cycles] [dump-frequency]\n",name);
+  PARALLEL_PRINTF ("Usage: %s <ppm-image|ppm-implosion|ppm-implosion3> [size] [cycles] [dump-frequency]\n",name);
   exit(1);
 }
 
 //----------------------------------------------------------------------
 
-int main(int argc, char ** argv)
+PARALLEL_MAIN_BEGIN
+
 {
+
+  PARALLEL_INIT;
 
   unit_init();
 
@@ -39,8 +46,8 @@ int main(int argc, char ** argv)
 
   // Check command line arguments
 
-  if (argc < 2) {
-    print_usage(argv[0]);
+  if (PARALLEL_ARGC < 2) {
+    print_usage(PARALLEL_ARGV[0]);
   }
 
   int argi = 0;
@@ -49,23 +56,23 @@ int main(int argc, char ** argv)
 
   enum problem_ppm_type problem = problem_ppm_unknown;
 
-  if (argc > ++argi) {
+  if (PARALLEL_ARGC > ++argi) {
     for (int i=0; i<num_problems; i++) {
-      if (strcmp(argv[argi],problem_name[i]) == 0) {
+      if (strcmp(PARALLEL_ARGV[argi],problem_name[i]) == 0) {
 	problem = problem_ppm_type(i);
       }
     }
   }
-  if (problem == 0) print_usage(argv[0]);
+  if (problem == 0) print_usage(PARALLEL_ARGV[0]);
 
   int size = problem_size[problem];
-  if (argc > ++argi) size = atoi(argv[argi]);
+  if (PARALLEL_ARGC > ++argi) size = atoi(PARALLEL_ARGV[argi]);
   int cycle_stop = problem_cycles[problem];
-  if (argc > ++argi) cycle_stop = atoi(argv[argi]);
+  if (PARALLEL_ARGC > ++argi) cycle_stop = atoi(PARALLEL_ARGV[argi]);
   int dump_frequency = 10;
-  if (argc > ++argi) dump_frequency = atoi(argv[argi]);
+  if (PARALLEL_ARGC > ++argi) dump_frequency = atoi(PARALLEL_ARGV[argi]);
 
-  printf ("problem = %s  size = %d  cycles = %d  dump_frequency = %d\n",
+  PARALLEL_PRINTF ("problem = %s  size = %d  cycles = %d  dump_frequency = %d\n",
 	  problem_name[problem], size, cycle_stop, dump_frequency);
 
   // Initialize for generic hydrodynamics
@@ -88,7 +95,7 @@ int main(int argc, char ** argv)
     enzo.initialize_implosion3(size);
     break;
   default:
-    print_usage(argv[0]);
+    print_usage(PARALLEL_ARGV[0]);
   }
 
   float dt;
@@ -113,7 +120,7 @@ int main(int argc, char ** argv)
     dt =  MIN(enzo.ComputeTimeStep(), time_stop - time);
 
     if (dump_frequency && (cycle % dump_frequency) == 0) {
-      printf ("cycle = %6d seconds = %5.0f sim-time = %22.16g dt = %22.16g\n",
+      PARALLEL_PRINTF ("cycle = %6d seconds = %5.0f sim-time = %22.16g dt = %22.16g\n",
 	      cycle,timer.value(),time,dt);
       fflush(stdout);
       enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
@@ -125,7 +132,7 @@ int main(int argc, char ** argv)
 
   unit_assert(cycle >=cycle_stop || time >= time_stop);
 
-  printf ("%d %d %g\n",size+6,cycle_stop,timer.value());
+  PARALLEL_PRINTF ("%d %d %g\n",size+6,cycle_stop,timer.value());
   fflush(stdout);
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
@@ -135,7 +142,13 @@ int main(int argc, char ** argv)
 
 
   delete monitor;
+
   unit_finalize();
+
+  PARALLEL_EXIT;
 
 }
 
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_ppm.def.h)

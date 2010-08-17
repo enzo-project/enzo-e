@@ -13,12 +13,24 @@
 #include "test.hpp"
 #include "mesh.hpp"
 
-int main(int argc, char ** argv)
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(test_Mesh.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
+
+  PARALLEL_INIT;
+
   unit_init();
   unit_class ("Mesh");
   unit_func("Mesh");
   Mesh mesh;
   unit_assert(false);
   unit_finalize();
+
+  PARALLEL_EXIT;
 }
+
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_Mesh.def.h)

@@ -14,8 +14,13 @@
 #include "test.hpp"
 #include "field.hpp"
 
-int main()
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(test_FieldBlock.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
+
+  PARALLEL_INIT;
 
   //----------------------------------------------------------------------
   unit_init();
@@ -544,4 +549,9 @@ int main()
   //----------------------------------------------------------------------
   unit_finalize();
   //----------------------------------------------------------------------
+
+  PARALLEL_EXIT;
 }
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_FieldBlock.def.h)
