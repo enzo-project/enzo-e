@@ -14,15 +14,18 @@ set p = 1
 foreach platform ($platforms)
 
    set platform = linux-$platform
-   echo $platform
+   printf "${platform}: "
    setenv CELLO_PLATFORM $platform
    # clear
    scons -c >& /dev/null
    # compile
    scons -j$p >& out.scons.$platform
    # count fails
-   grep FAIL test/*unit > fail.scons.$platform
-   wc fail.scons.$platform
+   grep FAIL test/*unit |sort > fail.$platform
+   grep pass test/*unit |sort > pass.$platform
+   set p = `cat pass.$platform | wc -l`
+   set f = `cat fail.$platform | wc -l`
+   printf "FAIL: %d  Pass: %d\n" $f $p
    # check if any tests didn't finish
    grep "UNIT TEST" test/*unit | sed 's/BEGIN/END/' | uniq -u
 
