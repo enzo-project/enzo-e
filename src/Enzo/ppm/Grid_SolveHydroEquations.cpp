@@ -10,18 +10,23 @@
 #include "cello_hydro.h"
 
 
-int EnzoDescr::SolveHydroEquations (int CycleNumber, float dt)
+int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
+				    int CycleNumber, float dt)
 {
 
+  if (data_block) {
+    WARNING_MESSAGE("EnzoDescr::SolveHydroEquations",
+		    "Ignoring data_block input parameter");
+  }
   int NumberOfSubgrids = 0;
 
   if (NumberOfBaryonFields > 0) {
  
     /* initialize */
  
-    int dim, i,  size;
+    int dim, i,j,  size;
     int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num, coloff[MAX_COLOR];
-//     long long GridGlobalStart[MAX_DIMENSION];
+    long long GridGlobalStart[MAX_DIMENSION];
     ENZO_FLOAT a = 1, dadt;
  
     float *colourpt = NULL;
@@ -131,65 +136,70 @@ int EnzoDescr::SolveHydroEquations (int CycleNumber, float dt)
 	return ENZO_FAIL;
       }
  
-//     /* allocate space for fluxes */
+    /* allocate space for fluxes */
+
+    SubgridFluxes = new fluxes *[NumberOfSubgrids];
+
+    for (i = 0; i < NumberOfSubgrids; i++) {
+      SubgridFluxes[i] = new fluxes;
+      
+      for (dim = 0; dim < GridRank; dim++)  {
  
-//     for (i = 0; i < NumberOfSubgrids; i++) {
-//       for (dim = 0; dim < GridRank; dim++)  {
+	/* compute size (in floats) of flux storage */
  
-// 	/* compute size (in floats) of flux storage */
+        size = 1;
+        for (j = 0; j < GridRank; j++)
+          size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
+                  SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
+	printf ("size = %d\n");
  
-//         size = 1;
-//         for (j = 0; j < GridRank; j++)
-//           size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
-//                   SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
+	/* set unused dims (for the solver, which is hardwired for 3d). */
  
-// 	/* set unused dims (for the solver, which is hardwired for 3d). */
+        for (j = GridRank; j < 3; j++) {
+          SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] = 0;
+          SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] = 0;
+          SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
+          SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j] = 0;
+        }
  
-//         for (j = GridRank; j < 3; j++) {
-//           SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] = 0;
-//           SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] = 0;
-//           SubgridFluxes[i]->RightFluxStartGlobalIndex[dim][j] = 0;
-//           SubgridFluxes[i]->RightFluxEndGlobalIndex[dim][j] = 0;
-//         }
+	/* Allocate space (if necessary). */
  
-// 	/* Allocate space (if necessary). */
+        for (int field = 0; field < NumberOfBaryonFields; field++) {
+	  if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
+	    SubgridFluxes[i]->LeftFluxes[field][dim]  = new float[size];
+	  if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
+	    SubgridFluxes[i]->RightFluxes[field][dim] = new float[size];
+	  for (int n = 0; n < size; n++) {
+	    SubgridFluxes[i]->LeftFluxes[field][dim][n] = 0;
+	    SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
+	  }
+        }
  
-//         for (field = 0; field < NumberOfBaryonFields; field++) {
-// 	  if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
-// 	    SubgridFluxes[i]->LeftFluxes[field][dim]  = new float[size];
-// 	  if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
-// 	    SubgridFluxes[i]->RightFluxes[field][dim] = new float[size];
-// 	  for (n = 0; n < size; n++) {
-// 	    SubgridFluxes[i]->LeftFluxes[field][dim][n] = 0;
-// 	    SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
-// 	  }
-//         }
+	for (int field = NumberOfBaryonFields; field < MAX_NUMBER_OF_BARYON_FIELDS;
+	     field++) {
+          SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
+          SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
+	}
  
-// 	for (field = NumberOfBaryonFields; field < MAX_NUMBER_OF_BARYON_FIELDS;
-// 	     field++) {
-//           SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
-//           SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-// 	}
+      }  // next dimension
  
-//       }  // next dimension
+      /* make things pretty */
  
-//       /* make things pretty */
+      for (dim = GridRank; dim < 3; dim++)
+        for (int field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
+          SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
+          SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
+	}
  
-//       for (dim = GridRank; dim < 3; dim++)
-//         for (field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
-//           SubgridFluxes[i]->LeftFluxes[field][dim] = NULL;
-//           SubgridFluxes[i]->RightFluxes[field][dim] = NULL;
-// 	}
- 
-//     } // end of loop over subgrids
+    } // end of loop over subgrids
  
     /* compute global start index for left edge of entire grid
        (including boundary zones) */
  
-//     for (dim = 0; dim < GridRank; dim++)
-//       GridGlobalStart[dim] =
-// 	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/(*(CellWidth[dim]))) -
-// 	GridStartIndex[dim];
+    for (dim = 0; dim < GridRank; dim++)
+      GridGlobalStart[dim] =
+	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/(*(CellWidth[dim]))) -
+	GridStartIndex[dim];
  
     /* fix grid quantities so they are defined to at least 3 dims */
  
@@ -224,8 +234,9 @@ int EnzoDescr::SolveHydroEquations (int CycleNumber, float dt)
     int *windex    = leftface + NumberOfSubgrids*3*14;
     int *geindex   = leftface + NumberOfSubgrids*3*16;
     int *colindex  = leftface + NumberOfSubgrids*3*18;
-    float *standard = NULL;
-//     if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
+
+    float standard[1];
+    //    float *standard = SubgridFluxes[0]->LeftFluxes[0][0];
  
 //     for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
 //       for (dim = 0; dim < GridRank; dim++) {
@@ -368,7 +379,6 @@ int EnzoDescr::SolveHydroEquations (int CycleNumber, float dt)
        &NumberOfColours, colourpt, coloff, colindex
        );
  
- 
     /* deallocate temporary space for solver */
  
     delete [] temp;
@@ -377,6 +387,11 @@ int EnzoDescr::SolveHydroEquations (int CycleNumber, float dt)
  
     delete [] leftface;
     delete [] GammaField;
+
+    for (int i=0; i<NumberOfSubgrids; i++) {
+      delete SubgridFluxes[i];
+    }
+    delete [] SubgridFluxes;
  
     for (dim = 0; dim < MAX_DIMENSION; dim++)
       delete [] CellWidthTemp[dim];

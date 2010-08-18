@@ -12,6 +12,16 @@
 #include "global.hpp"
 #include "cello_hydro.h"
 
+struct fluxes
+{
+  long_int LeftFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
+  long_int LeftFluxEndGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
+  long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
+  long_int RightFluxEndGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
+  float *LeftFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
+  float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
+};
+
 class EnzoDescr {
 
   /// @class    EnzoDescr
@@ -45,7 +55,7 @@ public: // interface
   int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum, int &HeINum, int &HeIINum, int &HeIIINum, int &HMNum, int &H2INum, int &H2IINum, int &DINum, int &DIINum, int &HDINum);
   int SetExternalBoundaryValues();
   int SetMinimumSupport(float &MinimumSupportEnergyCoefficient);
-  int SolveHydroEquations ( int CycleNumber, float dt);
+  int SolveHydroEquations (DataBlock * data_block, int CycleNumber, float dt);
   void print_field (int field);
   int SetExternalBoundary(int FieldRank, int GridDims[], int GridOffset[], int StartIndex[], int EndIndex[], float *Field, int FieldType);
   void image_dump(const char * file_root, int cycle, double lower, double upper, Monitor * monitor);
@@ -56,7 +66,7 @@ public: // interface
   void initialize_implosion (int size_param);
   void initialize_ppml_implosion3 (int size_param);
 
-  int SolveMHDEquations(int cycle, float dt);
+  int SolveMHDEquations(DataBlock * data_block, int cycle, float dt);
   void initialize_ppml (int size_param);
 
 private: // prohibit copy constructor
@@ -206,6 +216,9 @@ public: // public attributes (!!)
 
   int CycleNumber;
   float dt;
+
+  // Fluxes
+  fluxes ** SubgridFluxes;
 
 };
 

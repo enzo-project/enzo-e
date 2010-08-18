@@ -78,7 +78,6 @@ void MethodEnzoPpm::advance_block
  double dt
  ) throw()
 {
-
-  enzo_->SolveHydroEquations (enzo_->CycleNumber, dt);
+  enzo_->SolveHydroEquations (data_block, enzo_->CycleNumber, dt);
 }
 

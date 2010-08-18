@@ -21,9 +21,15 @@
 #include "cello_hydro.h"
 #include "enzo.hpp" 
   
-int EnzoDescr::SolveMHDEquations(int cycle, float dt)
+int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
+				 int cycle, float dt)
 {
  
+  if (data_block) {
+    WARNING_MESSAGE("EnzoDescr::SolveHydroEquations",
+		    "Ignoring data_block input parameter");
+  }
+
   /* exit if not 3D */
 
   // @@ assert GridRank == 3

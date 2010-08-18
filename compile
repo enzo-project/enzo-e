@@ -8,26 +8,32 @@ else
   set platforms = (charm serial mpi ampi)
 endif
 
-echo "$platforms"
+printf "\n[ $platforms ]\n\n"
 set p = 1
 
-foreach platform ($platforms)
+# clear
 
-   set platform = linux-$platform
-   printf "${platform}: "
-   setenv CELLO_PLATFORM $platform
-   # clear
+printf "cleaning..."
+foreach platform ($platforms)
+   setenv CELLO_PLATFORM linux-$platform
    scons -c >& /dev/null
+end
+printf "\n\n"
+
+foreach platform ($platforms)
+   setenv CELLO_PLATFORM linux-$platform
+
+   printf "${platform}: "
    # compile
-   scons -j$p >& out.scons.$platform
+   scons -k -j$p >& out.scons.$platform
    # count fails
-   grep FAIL test/*unit |sort > fail.$platform
-   grep pass test/*unit |sort > pass.$platform
+   grep FAIL test/$platform-*unit |sort > fail.$platform
+   grep pass test/$platform-*unit |sort > pass.$platform
    set p = `cat pass.$platform | wc -l`
    set f = `cat fail.$platform | wc -l`
    printf "FAIL: %d  Pass: %d\n" $f $p
    # check if any tests didn't finish
-   grep "UNIT TEST" test/*unit | sed 's/BEGIN/END/' | uniq -u
+   grep "UNIT TEST" test/$platform-*unit | sed 's/BEGIN/END/' | uniq -u
 
 end
 

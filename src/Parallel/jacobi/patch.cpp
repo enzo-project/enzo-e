@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "patch.hpp"
 #include "parallel.def"
 

@@ -126,7 +126,7 @@ PARALLEL_MAIN_BEGIN
       enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
     }
 
-    enzo.SolveHydroEquations(cycle, dt);
+    enzo.SolveHydroEquations(NULL,cycle, dt);
 
   }
 

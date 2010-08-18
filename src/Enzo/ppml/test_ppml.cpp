@@ -125,7 +125,7 @@ PARALLEL_MAIN_BEGIN
       enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
     }
 
-    enzo.SolveMHDEquations(cycle, dt);
+    enzo.SolveMHDEquations(NULL, cycle, dt);
 
   }
   unit_assert(cycle >= cycle_stop || time >= time_stop);

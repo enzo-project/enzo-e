@@ -43,12 +43,27 @@ function tests($component,$testrun,$output) {
 
      echo "<tr>\n";
      //--------------------------------------------------
-     echo "<th>Complete</th>";
+     echo "<th>Date</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
        $output_file = "test/$parallel_types[$i]-test_$output.unit";
        if (file_exists($output_file)) {
-	 system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail>Incomplete</td>\"; if (c!=0) print \"<td class=pass>complete</td>\"}' < $output_file");
+	 $output_html = date ("Y-m-d H:i:s", filemtime($output_file));
+	 echo "<td class=pass>$output_html</td>";
+       } else {
+	 echo "<td class=pass></td>";
+       }
+     }
+     echo "</tr>\n";
+
+     echo "<tr>\n";
+     //--------------------------------------------------
+     echo "<th>Status</th>";
+     //--------------------------------------------------
+     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       if (file_exists($output_file)) {
+	 system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail>Incomplete</td>\"; if (c!=0) print \"<td class=pass>completed</td>\"}' < $output_file");
        } else {
 	 echo "<td class=pass></td>";
        }
@@ -164,7 +179,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <h2>Field Component</h2>
 
 <?php tests("Field","FieldBlock","FieldBlock"); ?>
-<?php tests("FieldBlockFaces","BlockFaces","BlockFaces"); ?>
+<!-- <?php tests("FieldBlockFaces","BlockFaces","BlockFaces"); ?> -->
 <?php tests("Field","FieldDescr","FieldDescr"); ?>
 
 <hr>
@@ -198,7 +213,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <hr>
 <h2>Parallel Component</h2>
 
-<?php tests("GroupProcessMpi","GroupProcessMpi","GroupProcessMpi"); ?>
+<?php tests("Parallel","GroupProcessMpi","GroupProcessMpi"); ?>
 <!-- <?php tests("jacobi","jacobi","jacobi"); ?> -->
 
 <hr>

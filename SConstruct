@@ -97,7 +97,7 @@ elif (platform == 'linux-ampi'):
    charm_path = '/home/bordner/charm/charm-6.2.1'
    parallel_run = charm_path + "/bin/charmrun +p4 "
    serial_run   = ""
-   parallel_type = "mpi"
+   parallel_type = "ampi"
   
    env = Environment(
       CC          = charm_path + '/bin/charmc -language ampi',
