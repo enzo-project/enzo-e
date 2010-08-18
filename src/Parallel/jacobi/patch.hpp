@@ -1,9 +1,10 @@
 #ifndef PATCH_HPP
 #define PATCH_HPP
 
-#include "test_jacobi.decl.h"
-
-class Patch : public CBase_Patch {
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(test_jacobi.decl.h)
+PARALLEL_CLASS_DECL(Patch) 
+{
  public:
   Patch() ;
   Patch(CkMigrateMessage *) ;

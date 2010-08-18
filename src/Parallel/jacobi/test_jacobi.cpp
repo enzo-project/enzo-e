@@ -12,9 +12,8 @@
 
 #include "parallel.def"
 
-#include "patch.hpp"
-
 #include PARALLEL_CHARM_INCLUDE(test_jacobi.decl.h)
+#include "patch.hpp"
 
 #include "jacobi.hpp"
 
@@ -62,7 +61,7 @@ PARALLEL_MAIN_BEGIN
 
   // Create data blocks
 
-  CProxy_Patch patch = CProxy_Patch::ckNew(nb,nb,nb);
+  PARALLEL_CLASS_TYPE(Patch) patch = PARALLEL_CLASS_NEW_ARRAY_3D(Patch,nb,nb,nb);
 
   Block * block[nb3];
   for (int iz=0; iz<nb; iz++) {

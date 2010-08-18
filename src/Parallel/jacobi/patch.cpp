@@ -1,15 +1,15 @@
-#include "test_jacobi.decl.h"
 #include "patch.hpp"
+#include "parallel.def"
 
 Patch::Patch() 
 {
-  CkPrintf ("Patch()\n"); 
+  PARALLEL_PRINTF ("Patch()\n"); 
 }
 Patch::Patch(CkMigrateMessage *) 
 {
-  CkPrintf ("Patch(migrate)\n"); 
+  PARALLEL_PRINTF ("Patch(migrate)\n"); 
 }
 void Patch::advance() 
 {
-  CkPrintf ("advance()\n"); 
+  PARALLEL_PRINTF ("advance()\n"); 
 }
