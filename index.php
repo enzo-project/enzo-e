@@ -8,25 +8,96 @@
 
 <?php
 function tests($component,$testrun,$output) {
-  
-   $test_file = "src/$component/test_$testrun.cpp";
-   $output_file = "test/test_$output.unit";
 
-   if (! file_exists($test_file)) {
-     echo "<p><strong class=fail>$test_file does not exist</strong></p>";
-   }
-   if (file_exists($output_file)) {
-     echo "<h3><a href=\"$test_file\">$test_file</a> &gt; <a href=\"$output_file\">$output_file</a></h3>\n";
-     system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<strong class=fail>TEST PROGRAM DID NOT COMPLETE\!</strong>\"; if (c!=0) print \"<strong class=pass>Test program completed normally</strong></br/></br/>\"}' < $output_file");
-     test($testrun,"FAIL");
-     test($testrun,"pass");
+   $parallel_types = array("serial","mpi","charm","ampi");
+
+   $source_file = "src/$component/test_$testrun.cpp";
+   $source_html = "<a href=\"$source_file\">test_$testrun.cpp</a>";
+
+   echo "<h3>Test: $source_html</h3>\n";
+   if (! file_exists($source_file)) {
+     echo "<p><strong class=fail>$source_file does not exist</strong></p>";
    } else {
-     echo "<strong class=fail>$output_file does not exist</strong></br/>";
+     echo "<table>\n";
+     echo "<tr>\n";
+     echo "<th></th>";
+     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+       echo "<th>$parallel_types[$i]</th>";
+     }
+     echo "</tr>\n";
+
+     echo "<tr>\n";
+     //--------------------------------------------------
+     echo "<th>Output</th>";
+     //--------------------------------------------------
+     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       if (file_exists($output_file)) {
+	 $output_html = "<a href=\"$output_file\">test_$output.unit</a>";
+	 echo "<td class=pass>$output_html</td>";
+       } else {
+	 echo "<td class=pass></td>";
+       }
+     }
+     echo "</tr>\n";
+
+     echo "<tr>\n";
+     //--------------------------------------------------
+     echo "<th>Complete</th>";
+     //--------------------------------------------------
+     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       if (file_exists($output_file)) {
+	 system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail>Incomplete</td>\"; if (c!=0) print \"<td class=pass>complete</td>\"}' < $output_file");
+       } else {
+	 echo "<td class=pass></td>";
+       }
+     }
+     echo "</tr>\n";
+
+     echo "<tr>\n";
+     //--------------------------------------------------
+     echo "<th>Passed</th>";
+     //--------------------------------------------------
+     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       if (file_exists($output_file)) {
+	 echo "<td class=pass>";
+	 system("grep pass $output_file | wc -l");
+	 echo "</td>";
+       } else {
+	 echo "<td class=pass></td>";
+       }
+     }
+     echo "</tr>\n";
+
+     echo "<tr>\n";
+     //--------------------------------------------------
+     echo "<th>Failed</th>";
+     //--------------------------------------------------
+     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       if (file_exists($output_file)) {
+	 system("awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass></td>\"}' < $output_file");
+       } else {
+	 echo "<td class=pass></td>";
+       }
+     }
+     echo "</tr>\n";
+
+     echo "</tr></table></br/>\n";
+
+     for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+       $parallel_type = $parallel_types[$i];
+       $output_file = "test/$parallel_type-test_$output.unit";
+       if (file_exists($output_file)) {
+	 test($parallel_type,$testrun,"FAIL");
+       }
+     }
    }
  };
 
-function test($testrun,$type) {
-
+function test($parallel_type,$testrun,$type) {
   $ltype = strtolower($type);
   if ($type == "pass") {
     $cols = "$4,$6";
@@ -38,22 +109,22 @@ function test($testrun,$type) {
     $rowtext = "</tr><tr>";
   }
 
-  $output = "test/test_$testrun.unit";
+  $output = "test/$parallel_type-test_$testrun.unit";
   $count = exec("grep $type $output | wc -l");
   if ($count == 0) {
 #     echo "<strong >no ${ltype}ed tests</strong></br/>";
   } else {
-     echo "<strong class=$type>${ltype}ed tests:</strong></br/>";
-     echo "<blockquote><table><tr>";
-     system ("awk 'BEGIN {c=0}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
-     echo "</tr></table></blockquote>";
+     echo "<table><tr>";
+     echo "<th class=$type><strong>$parallel_type ${ltype}ed</strong></th> ";
+     system ("awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
+     echo "</tr></table></br/>";
   }
      
 };
 
 ?>
 
-<?php 
+<!-- <?php 
    if (file_exists('CELLO_PLATFORM')) {
      echo "<h2>Platform tested: ";
      system ("cat 'CELLO_PLATFORM'");
@@ -61,7 +132,7 @@ function test($testrun,$type) {
    } else {
      echo "<h2>Unknown platform</h2>\n";
    }
-?>
+?> -->
 
 <p>
 Test data shown on this page is automatically generated whenever <code>Cello</code> is compiled.  FAIL status usually indicates that the corresponding function has not been implemented yet.  Empty tables indicate that the unit test files have been deleted, probably with "<code>scons -c</code>" (<code>scons</code> version of "<code>make clean</code>").

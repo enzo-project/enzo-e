@@ -34,7 +34,7 @@ time_matvec      = env.Program(['time_matvec.cpp',      sources])
 
 tests = [test_performance,time_matvec]
 
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'test_Performance'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')

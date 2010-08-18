@@ -439,7 +439,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_finalize();
 
-  Mpi::finalize();
   PARALLEL_EXIT;
 }
 

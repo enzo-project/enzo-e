@@ -34,7 +34,7 @@ sources    = [Glob('monitor*cpp'), Glob('png*cpp')]
 libraries    = env.Library      ('monitor', [sources])
 test_monitor = env_test.Program (['test_Monitor.cpp', sources])
 
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'test_Monitor'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')

@@ -40,7 +40,7 @@ env = env.Clone(LIBS=[components,libraries])
 
 
 binaries = env.Program(['cello.cpp'])
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'cello'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')

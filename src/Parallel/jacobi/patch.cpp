@@ -4,6 +4,12 @@
 Patch::Patch() 
 {
   PARALLEL_PRINTF ("Patch()\n"); 
+  lower_[0] = 0.0;
+  lower_[0] = 0.0;
+  lower_[0] = 0.0;
+  upper_[0] = 1.0;
+  upper_[0] = 1.0;
+  upper_[0] = 1.0;
 }
 Patch::Patch(CkMigrateMessage *) 
 {
@@ -12,4 +18,12 @@ Patch::Patch(CkMigrateMessage *)
 void Patch::advance() 
 {
   PARALLEL_PRINTF ("advance()\n"); 
+}
+void Patch::set_bounds
+(
+ double xm, double xp,
+ double ym, double yp,
+ double zm, double zp 
+ )
+{
 }

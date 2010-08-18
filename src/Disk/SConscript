@@ -33,7 +33,7 @@ libraries = env.Library ('disk', sources)
 test_hdf5  = env.Program (['test_FileHdf5.cpp', sources])
 test_ifrit = env.Program (['test_Ifrit.cpp', sources])
 
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'test_FileHdf5'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')

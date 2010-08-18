@@ -31,7 +31,7 @@ sources  = [Glob('memory*cpp')]
 libraries   = env.Library ('memory', [sources])
 test_memory = env.Program (['test_Memory.cpp', sources])
 
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'test_Memory'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')

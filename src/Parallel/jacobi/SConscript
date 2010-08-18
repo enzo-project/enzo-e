@@ -32,7 +32,7 @@ libraries = env.Library ([sources])
 test_jacobi =  env.Program (['test_jacobi.cpp',      sources])
 tests = [test_jacobi];
 
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'test_jacobi'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')

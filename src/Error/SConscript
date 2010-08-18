@@ -25,7 +25,7 @@ sources  = [Glob('error*cpp')]
 libraries  = env.Library ('error', [sources])
 test_error = env.Program (['test_Error.cpp',  sources])
 
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'test_Error'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')

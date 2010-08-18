@@ -42,7 +42,7 @@ else:
 if (platform == 'linux-serial'):
 #--------------------------------------------------
    parallel_run = ""
-   parallel_type = ["serial"]
+   parallel_type = "serial"
    serial_run   = ""
    env = Environment (
       CC          = 'gcc',	
@@ -61,7 +61,7 @@ elif (platform == 'linux-mpi'):
 #--------------------------------------------------
    parallel_run = "mpirun -np 4"
    serial_run   = ""
-   parallel_type = ["mpi"]
+   parallel_type = "mpi"
    env = Environment (
       CC          = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
@@ -79,7 +79,7 @@ elif (platform == 'linux-mpi-valgrind'):
 #--------------------------------------------------
    parallel_run = "mpirun -np 4 valgrind"
    serial_run   = "valgrind "
-   parallel_type = ["mpi"]
+   parallel_type = "mpi"
    env = Environment (
       CC          = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
@@ -97,7 +97,7 @@ elif (platform == 'linux-ampi'):
    charm_path = '/home/bordner/charm/charm-6.2.1'
    parallel_run = charm_path + "/bin/charmrun +p4 "
    serial_run   = ""
-   parallel_type = ["mpi"]
+   parallel_type = "mpi"
   
    env = Environment(
       CC          = charm_path + '/bin/charmc -language ampi',
@@ -116,7 +116,7 @@ elif (platform == 'linux-charm'):
 #--------------------------------------------------
    charm_path = '/home/bordner/charm/charm-6.2.1'
    parallel_run = charm_path + "/bin/charmrun +p4 "
-   parallel_type = ["charm"]
+   parallel_type = "charm"
    serial_run   = ""
   
    env = Environment(
@@ -138,7 +138,7 @@ elif (platform == 'triton'):
 #--------------------------------------------------
    parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    serial_run   = ""
-   parallel_type = ["mpi"]
+   parallel_type = "mpi"
    env = Environment (
       CC      = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
@@ -157,7 +157,7 @@ elif (platform == 'ncsa-bd'):
 #--------------------------------------------------
    parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    serial_run   = ""
-   parallel_type = ["mpi"]
+   parallel_type = "mpi"
    env = Environment (
       ARFLAGS  = 'r',
       CCFLAGS = '-O3 -qhot -q64 -D H5_USE_16_API',

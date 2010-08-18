@@ -42,7 +42,7 @@ sources  = [Glob('initialize*cpp'),
 binaries = [env.Program (['test_ppm.cpp',      sources])]
 libraries = env.Library ('enzo-ppm', sources)
 
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'test_ppm'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')

@@ -31,7 +31,7 @@ sources    = [Glob('data*cpp')]
 libraries = env.Library ('data', [sources])
 test_data = env.Program (['test_Data.cpp',   sources])
 
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'test_Data'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')

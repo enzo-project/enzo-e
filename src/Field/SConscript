@@ -35,7 +35,7 @@ test_field_block_faces = env.Program (['test_FieldBlockFaces.cpp',  sources])
 
 tests = [test_field_block, test_field_descr, test_field_block_faces]
 
-if ("charm" in parallel_type):
+if (parallel_type == "charm"):
 	test = 'test_FieldBlock'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
