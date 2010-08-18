@@ -12,7 +12,9 @@
 
 #include "parallel.def"
 
-#include PARALLEL_CHARM_INCLUDE(jacobi.decl.h)
+#include "patch.hpp"
+
+#include PARALLEL_CHARM_INCLUDE(test_jacobi.decl.h)
 
 #include "jacobi.hpp"
 
@@ -29,8 +31,8 @@ PARALLEL_MAIN_BEGIN
 
   // Determine actual comm rank and size
 
+  PARALLEL_INIT;
 #ifdef CONFIG_USE_MPI
-  MPI_Init (&PARALLEL_ARGC,&PARALLEL_ARGV);
   MPI_Comm_rank (MPI_COMM_WORLD,&ip);
   MPI_Comm_size (MPI_COMM_WORLD,&np);
 #endif
@@ -51,7 +53,7 @@ PARALLEL_MAIN_BEGIN
 
   int n = atoi(PARALLEL_ARGV[1]);  // Problem size = n*n*n
   int m = atoi(PARALLEL_ARGV[2]);  // Block size = m*m*m
-  int nb = n/m;           // Number of blocks
+  int nb = n/m;           // Number of blocks per dimension
   int n3 = n*n*n;
   int m3 = m*m*m;
   int nb3 = nb*nb*nb;
@@ -60,15 +62,22 @@ PARALLEL_MAIN_BEGIN
 
   // Create data blocks
 
-  Block * block[nb];
-  for (int i=0; i<nb; i++) {
-    double xm = 0.0;
-    double xp = 1.0;
-    double ym = 0.0;
-    double yp = 1.0;
-    double zm = 0.0;
-    double zp = 1.0;
-    block[i] = new Block(m, xm,xp,ym,yp,zm,zp);
+  CProxy_Patch patch = CProxy_Patch::ckNew(nb,nb,nb);
+
+  Block * block[nb3];
+  for (int iz=0; iz<nb; iz++) {
+    double zm = 1.0* iz   /nb;
+    double zp = 1.0*(iz+1)/nb;
+    for (int iy=0; iy<nb; iy++) {
+      double ym = 1.0* iy   /nb;
+      double yp = 1.0*(iy+1)/nb;
+      for (int ix=0; ix<nb; ix++) {
+	double xm = 1.0* ix   /nb;
+	double xp = 1.0*(ix+1)/nb;
+	int i = ix + nb*(iy + nb*iz);
+	block[i] = new Block(m, xm,xp,ym,yp,zm,zp);
+      }
+    }
   }
 
   for (int i=0; i<nb; i++) {
@@ -81,4 +90,4 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(jacobi.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_jacobi.def.h)

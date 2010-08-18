@@ -1,24 +1,45 @@
-Import('env')
+#------------------------------
+# IMPORTS
+#------------------------------
 
-includes   = [Glob('jacobi*hpp')]
-sources    = [Glob('jacobi*cpp')]
+Import('env')
+Import ('parallel_type')
+
+#------------------------------
+# DEPENDENCIES
+#------------------------------
+
 libraries  = []
+
+#------------------------------
+# ENVIRONMENTS
+#------------------------------
 
 env = env.Clone(LIBS=[libraries])
 
+#------------------------------
+# SOURCE
+#------------------------------
+
+includes   = [Glob('jacobi*hpp')]
+sources    = [Glob('jacobi*cpp'), 'patch.cpp']
+
+#------------------------------
+# TARGETS
+#------------------------------
+
 libraries = env.Library ([sources])
-
 test_jacobi =  env.Program (['test_jacobi.cpp',      sources])
-
 tests = [test_jacobi];
 
-Import ('parallel_type')
-print "parallel_type = ",parallel_type
 if ("charm" in parallel_type):
-	charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.def.h ${ARG}.decl.h include")
-	env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
-	env.CharmBuilder('jacobi.decl.h','jacobi.ci',ARG='jacobi')
+	test = 'test_jacobi'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
+#------------------------------
+# INSTALL
+#------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))

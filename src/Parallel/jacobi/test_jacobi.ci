@@ -1,0 +1,13 @@
+mainmodule test_jacobi {
+  readonly CProxy_Main mainProxy;
+
+  mainchare Main {
+    entry Main(CkArgMsg *m);
+  };
+
+  array [3D] Patch {
+     entry Patch();
+     entry void advance();
+  };
+
+};

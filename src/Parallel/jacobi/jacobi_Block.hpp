@@ -19,7 +19,8 @@ public:
     : n_(n),
       cycle_values_(0)
   {
-    PARALLEL_PRINTF ("Creating Block(%d)\n",n);
+    PARALLEL_PRINTF ("Creating Block(%d  %g %g  %g %g  %g %g)\n",n,
+		     xm,xp,ym,yp,zm,zp);
     values_ = new double [n*n*n];
     for (int k=0; k<n*n*n; k++) values_[k] = 0.0;
     for (int i=0; i<6; i++) {

@@ -1,6 +1,7 @@
 Import('env')
 Import('platform')
 Import('parallel_run')
+Import('parallel_type')
 Import('serial_run')
 
 
@@ -144,9 +145,10 @@ Clean(env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
 
 # env.RunParallel('test_affinity.unit',   '#/bin/test_Affinity')
-# env.RunParallel('test_mpi.unit',        '#/bin/test_Mpi')
 env.RunParallel('cello_implosion.unit', '#/bin/cello', ARGS='input/implosion.in')
-env.RunParallel('test_GroupProcessMpi.unit',        '#/bin/test_GroupProcessMpi')
+if ("mpi" in parallel_type):
+	env.RunParallel('test_GroupProcessMpi.unit',        '#/bin/test_GroupProcessMpi')
+	# env.RunParallel('test_mpi.unit',        '#/bin/test_Mpi')
 # env.RunParallel('test_jacobi.unit',        '#/bin/test_jacobi')
 
 # Prevent concurrent running of parallel jobs

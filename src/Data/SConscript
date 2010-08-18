@@ -21,7 +21,7 @@ env = env.Clone(LIBS=[components])
 # SOURCE
 #------------------------------
 
-includes   = [Glob('data*hpp'),'test_Data.decl.h','test_Data.def.h']
+includes   = [Glob('data*hpp')]
 sources    = [Glob('data*cpp')]
 
 #------------------------------

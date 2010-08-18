@@ -31,59 +31,51 @@ PARALLEL_MAIN_BEGIN
 
 {
 
-  try {
+  // Initialize parallelism
 
-    // Initialize parallelism
+  PARALLEL_INIT;
 
-    PARALLEL_INIT;
+  GroupProcess * parallel = GroupProcess::create();
 
-    GroupProcess * parallel = GroupProcess::create();
+  // INITALIZE "GLOBALS" (Parameters, Error, Monitor)
 
-    // INITALIZE "GLOBALS" (Parameters, Error, Monitor)
+  Global * global = new Global;
 
-    Global * global = new Global;
+  Monitor    * monitor    = global->monitor();
+  Parameters * parameters = global->parameters();
 
-    Monitor    * monitor    = global->monitor();
-    Parameters * parameters = global->parameters();
-
-    monitor->set_active(parallel->rank()==0);
+  monitor->set_active(parallel->rank()==0);
 
     
-    monitor->print ("CELLO BEGIN");
+  monitor->print ("CELLO BEGIN");
 
-    monitor->header();
+  monitor->header();
 
-    // INPUT PARAMETERS
+  // INPUT PARAMETERS
 
-    FILE *fp = 0;
-    if (PARALLEL_ARGC == 2) {
-      fp = fopen(PARALLEL_ARGV[1],"r");
-      if ( !fp ) {
-	if (parallel->rank()==0) usage(PARALLEL_ARGC,PARALLEL_ARGV);
-	exit(monitor,parallel);
-      }
-    } else {
+  FILE *fp = 0;
+  if (PARALLEL_ARGC == 2) {
+    fp = fopen(PARALLEL_ARGV[1],"r");
+    if ( !fp ) {
       if (parallel->rank()==0) usage(PARALLEL_ARGC,PARALLEL_ARGV);
-      exit(monitor,parallel);
+      PARALLEL_EXIT;
     }
-
-    ASSERT ("cello", "File pointer NULL", fp != 0);
-
-    // READ PARAMETERS
-
-    parameters->read(fp);
-
-    // INITIALIZE SIMULATION
-
-    Simulation simulation (global);
-
-    exit(monitor,parallel);
-  }
-
-  catch (ExceptionBadPointer) {
-    printf ("CELLO ERROR: Bad pointer.\n");
+  } else {
+    if (parallel->rank()==0) usage(PARALLEL_ARGC,PARALLEL_ARGV);
     PARALLEL_EXIT;
   }
+
+  ASSERT ("cello", "File pointer NULL", fp != 0);
+
+  // READ PARAMETERS
+
+  parameters->read(fp);
+
+  // INITIALIZE SIMULATION
+
+  Simulation simulation (global);
+
+  PARALLEL_EXIT;
 }
 
 PARALLEL_MAIN_END;
@@ -99,10 +91,4 @@ void usage(int argc, char ** argv)
 #endif
 }
 
-void exit(Monitor * monitor, GroupProcess * parallel)
-{
-  monitor->print ("CELLO END");
-  Mpi::finalize();
-  exit(0);
-}
 
