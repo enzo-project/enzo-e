@@ -19,6 +19,8 @@
 
 void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
 {
+
+
   // Extract field descriptor from data descriptor
 
   FieldDescr * field_descr = data_descr->field_descr();
@@ -31,6 +33,7 @@ void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
 
   enzo_->ComovingCoordinates  = parameters->value_logical ("cosmology",false);
   enzo_->Gamma                = parameters->value_scalar  ("gamma",5.0/3.0);
+  enzo_->CycleNumber = 0;
 
   //  if (ComovingCoordinates) {
 

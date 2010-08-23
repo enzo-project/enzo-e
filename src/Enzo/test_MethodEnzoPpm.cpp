@@ -89,7 +89,7 @@ PARALLEL_MAIN_BEGIN
   gy=3;
   gz=0;
 
-  FILE * fp = fopen ("test_MethodEnzoPpm.in","r");
+  FILE * fp = fopen ("input/test_MethodEnzoPpm.in","r");
   if (fp) {
     parameters->read(fp);
     fclose(fp);
