@@ -3,7 +3,7 @@
 rm -f out.scons.* fail.scons.*
 
 if ($#argv >= 1) then
-  set platforms = $argv[1]
+  set platforms = ($argv)
 else
   set platforms = (charm serial mpi ampi)
 endif
@@ -23,7 +23,9 @@ printf "\n\n"
 foreach platform ($platforms)
    setenv CELLO_PLATFORM linux-$platform
 
-   printf "${platform}: "
+   set time = `date +"%Y-%m-%d %H:%M:%S"`
+   printf "$time "
+   printf "%10s" "${platform}: "
    # compile
    scons -k -j$p >& out.scons.$platform
    # count fails
@@ -37,6 +39,10 @@ foreach platform ($platforms)
 
 end
 
+echo
+
 grep Segmentation out.*
+
+echo
 
 
