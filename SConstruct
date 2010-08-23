@@ -47,14 +47,14 @@ if (platform == 'linux-serial'):
    env = Environment (
       CC          = 'gcc',	
       CPPDEFINES = ['NO_FREETYPE'],
-      CPPFLAGS    = '-Wall -g  -m128bit-long-double',
       CPPPATH     = '#/include',
+      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
       CXX         = 'g++',	
+      ENV         = os.environ,
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
       LIBPATH     = '#/lib',
-      ENV         = os.environ
    )
 #--------------------------------------------------
 elif (platform == 'linux-mpi'):
@@ -65,14 +65,14 @@ elif (platform == 'linux-mpi'):
    env = Environment (
       CC          = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
-      CPPFLAGS    = '-Wall -g  -m128bit-long-double',
       CPPPATH     = '#/include',
+      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
       CXX         = 'mpiCC',	
+      ENV         = os.environ,
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
       LIBPATH     = '#/lib',
-      ENV         = os.environ
    )
 #--------------------------------------------------
 elif (platform == 'linux-mpi-valgrind'):
@@ -83,8 +83,8 @@ elif (platform == 'linux-mpi-valgrind'):
    env = Environment (
       CC          = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
-      CPPFLAGS    = '-Wall -g  -m128bit-long-double',
       CPPPATH     = '#/include',
+      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
       CXX         = 'mpiCC',	
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
@@ -102,18 +102,32 @@ elif (platform == 'linux-ampi'):
    env = Environment(
       CC          = charm_path + '/bin/charmc -language ampi',
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
-      CPPFLAGS    = '-g',
       CPPPATH     = '#/include',
       CXX         = charm_path + '/bin/charmc -language ampi',
+      CXXFLAGS    = '-g',
       ENV         = os.environ,
+      FORTRANFLAGS  = '-g',
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
+      LINKFLAGS     = '-g',
       LIBPATH     = '#/lib',
    )
 #--------------------------------------------------
-elif (platform == 'linux-charm'):
+elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
 #--------------------------------------------------
+
+   opt_flags = '-g '
+
+#   debug_flags = '-memory charmdebug'
+   debug_flags = ''
+
+   if (platform == 'linux-charm-perf'):
+	perf_flags = '-tracemode projections'
+   else:
+	perf_flags = ''
+
+   flags = opt_flags + ' ' + debug_flags + ' ' + perf_flags
    charm_path = '/home/bordner/charm/charm-6.2.1'
    parallel_run = charm_path + "/bin/charmrun +p4 "
    parallel_type = "charm"
@@ -122,13 +136,15 @@ elif (platform == 'linux-charm'):
    env = Environment(
       CC          = charm_path + '/bin/charmc -language charm++',
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_CHARM'],
-      CPPFLAGS    = '-g',
       CPPPATH     = '#/include',
       CXX         = charm_path + '/bin/charmc -language charm++',
+      CXXFLAGS    = flags,
       ENV         = os.environ,
       FORTRAN     = 'gfortran',
+      FORTRANFLAGS = flags,
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
+      LDFLAGS     = flags,
       LIBPATH     = '#/lib' )
    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
@@ -142,15 +158,14 @@ elif (platform == 'triton'):
    env = Environment (
       CC      = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
-      CPPFLAGS = '-g -DH5_USE_16_API',
       CPPPATH = ['#/include', '/opt/pgi/hdf5_pgi/include'],
+      CXXFLAGS = '-g -DH5_USE_16_API',
       CXX     = 'mpicxx',	
-      ENV = {'PATH' : os.environ['PATH'], 
-	'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
       FORTRAN = 'mpif90',
       FORTRANPATH = '#/include',
       LIBPATH = ['#/lib', '/opt/pgi/hdf5_pgi/lib'],
       LINKFLAGS = '-pgf90libs',
+      ENV = {'PATH' : os.environ['PATH'], 'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
    )
 #--------------------------------------------------
 elif (platform == 'ncsa-bd'):
