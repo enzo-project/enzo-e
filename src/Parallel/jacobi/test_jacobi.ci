@@ -1,4 +1,5 @@
 mainmodule test_jacobi {
+
   readonly CProxy_Main mainProxy;
 
   mainchare Main {
@@ -7,7 +8,7 @@ mainmodule test_jacobi {
 
   array [3D] Patch {
      entry Patch();
-     entry void advance();
+     entry void advance(int n);
   };
 
 };

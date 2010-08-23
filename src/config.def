@@ -11,19 +11,12 @@
 /* #define CONFIG_PRECISION_DOUBLE */
 
 /*---------------------------------------------------------------------*/
-/* Use MPI or no*/
-/*---------------------------------------------------------------------*/
-
-/* MOVED TO SCONSTRUCT */
-/* #define CONFIG_USE_MPI */
-
-/*---------------------------------------------------------------------*/
 /* Whether to track memory usage */
 /*---------------------------------------------------------------------*/
 
 /* REQUIRES SINGLETON PATTERN WITH STATIC: NOT USABLE WITH AMPI / CHARM++ */
 
-/* #define CONFIG_USE_MEMORY */
+#define CONFIG_USE_MEMORY
 
 /*---------------------------------------------------------------------*/
 /* Enzo define*/
