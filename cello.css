@@ -5,10 +5,10 @@
 */
 
 BODY {
-/*  background: #c1520a; */
+/*  background: #c1520a;  */
 /*  color: #faa; */
 /*  background-image: url("cello-tile.png"); */
-  background-image: url("cello-bg-1.png");
+  background-image: url("cello-bg-1.png"); 
 /*  background-attachment:fixed; */
 
 /*   font-family: "Gill sans", sans-serif;  */
@@ -26,12 +26,13 @@ tr {background-color: #aaa}
 
 td {
     border: solid;
-    border-width: 1px;
+    border-width: 2px;
     background-color: #ccc; 
     padding: 2px 5px;   
+    text-align: center;
 }
 td.pass {  color: #00f;  background-color: #fff; }
-td.FAIL {  color: #f00;   background-color: #fff; }
+td.FAIL {  color: #f00;   background-color: #faa; color: black;}
 th.pass {  color: #00f;  background-color: #fff; }
 th.FAIL {  color: #f00;   background-color: #fff; }
 td.inverse {  color: #fff;   background-color: #000; }
@@ -60,9 +61,9 @@ strong.FAIL {  color: #f00;   background-color: #fff; }
 /*    color: #fff;  */
 /*  } */
 
-/* table { */
-/*   background: #000; */
-/* } */
+table {
+  background: #fff;
+}
 
 /* td { */
 /*   background: #000; */

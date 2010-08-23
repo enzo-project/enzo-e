@@ -34,9 +34,9 @@ function tests($component,$testrun,$output) {
        $output_file = "test/$parallel_types[$i]-test_$output.unit";
        if (file_exists($output_file)) {
 	 $output_html = "<a href=\"$output_file\">test_$output.unit</a>";
-	 echo "<td class=pass>$output_html</td>";
+	 system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$output_file'>incomplete</a></td>\"; if (c!=0) print \"<td class=pass><a href='$output_file'>complete</a></td>\"}' < $output_file");
        } else {
-	 echo "<td class=pass></td>";
+	 echo "<td class=fail>missing</td>";
        }
      }
      echo "</tr>\n";
@@ -48,7 +48,7 @@ function tests($component,$testrun,$output) {
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
        $output_file = "test/$parallel_types[$i]-test_$output.unit";
        if (file_exists($output_file)) {
-	 $output_html = date ("Y-m-d H:i:s", filemtime($output_file));
+	 $output_html = date ("Y-m-d", filemtime($output_file));
 	 echo "<td class=pass>$output_html</td>";
        } else {
 	 echo "<td class=pass></td>";
@@ -58,12 +58,13 @@ function tests($component,$testrun,$output) {
 
      echo "<tr>\n";
      //--------------------------------------------------
-     echo "<th>Status</th>";
+     echo "<th>Time</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
        $output_file = "test/$parallel_types[$i]-test_$output.unit";
        if (file_exists($output_file)) {
-	 system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail>Incomplete</td>\"; if (c!=0) print \"<td class=pass>completed</td>\"}' < $output_file");
+	 $output_html = date ("H:i:s", filemtime($output_file));
+	 echo "<td class=pass>$output_html</td>";
        } else {
 	 echo "<td class=pass></td>";
        }
@@ -102,6 +103,7 @@ function tests($component,$testrun,$output) {
 
      echo "</tr></table></br/>\n";
 
+     echo "<table><tr>";
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
        $parallel_type = $parallel_types[$i];
        $output_file = "test/$parallel_type-test_$output.unit";
@@ -109,6 +111,7 @@ function tests($component,$testrun,$output) {
 	 test($parallel_type,$testrun,"FAIL");
        }
      }
+     echo "</tr></table></br/>";
    }
  };
 
@@ -129,10 +132,9 @@ function test($parallel_type,$testrun,$type) {
   if ($count == 0) {
 #     echo "<strong >no ${ltype}ed tests</strong></br/>";
   } else {
-     echo "<table><tr>";
      echo "<th class=$type><strong>$parallel_type ${ltype}ed</strong></th> ";
      system ("awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
-     echo "</tr></table></br/>";
+     echo "</tr><tr></tr>";
   }
      
 };
