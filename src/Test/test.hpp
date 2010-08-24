@@ -11,8 +11,6 @@
 
 #include <string.h>
 
-#include "cello.hpp"
-
 #include "error.hpp"
 
 #include "test_unit.hpp"
