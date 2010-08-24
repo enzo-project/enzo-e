@@ -209,7 +209,7 @@ PARALLEL_MAIN_BEGIN
 
     double dt = user_timestep->compute_block(data_block);
 
-    printf ("cycle = %d  sim-time = %22.16g dt = %22.16g\n",
+    printf ("cycle = %d  sim-time = %10g dt = %10g\n",
 	    cycle,time,dt );
 
     user_method->advance_block(data_block,time,dt);

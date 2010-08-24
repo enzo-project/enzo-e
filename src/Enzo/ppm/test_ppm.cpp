@@ -120,7 +120,7 @@ PARALLEL_MAIN_BEGIN
     dt =  MIN(enzo.ComputeTimeStep(), time_stop - time);
 
     if (dump_frequency && (cycle % dump_frequency) == 0) {
-      PARALLEL_PRINTF ("cycle = %6d seconds = %5.0f sim-time = %22.16g dt = %22.16g\n",
+      PARALLEL_PRINTF ("cycle = %6d seconds = %5.0f sim-time = %10g dt = %10g\n",
 	      cycle,timer.value(),time,dt);
       fflush(stdout);
       enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
