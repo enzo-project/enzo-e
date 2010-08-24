@@ -9,7 +9,7 @@
 <?php
 function tests($component,$testrun,$output) {
 
-   $parallel_types = array("serial","mpi","charm","ampi");
+   $parallel_types = array("serial","mpi","charm");
 
    $source_file = "src/$component/test_$testrun.cpp";
    $source_html = "<a href=\"$source_file\">test_$testrun.cpp</a>";
