@@ -36,21 +36,28 @@ public:
       PARALLEL_EXIT;
     }    
  
-    int n = atoi(PARALLEL_ARGV[1]);  // Problem size = n*n*n
-    int m = atoi(PARALLEL_ARGV[2]);  // Block size = m*m*m
-    int nb = n/m;           // Number of blocks per dimension
+    // Problem size = n*n*n
+    int problem_size = atoi(PARALLEL_ARGV[1]);  
+
+    // Block size = m*m*m
+    int block_size   = atoi(PARALLEL_ARGV[2]);  
+
+    // Number of blocks per dimension
+    int block_count  = problem_size/block_size;
 
     PARALLEL_INIT;
 
-    CProxy_Patch patch = CProxy_Patch::ckNew(nb,nb,nb);
+    CProxy_Patch patch = 
+      CProxy_Patch::ckNew(block_count,block_count,block_count);
 
-    patch.advance(m);
+    patch.p_evolve(block_count,block_size);
 
 
     //    patch.print();
 
 
     //    PARALLEL_EXIT;
+    CkPrintf ("MAIN EXIT\n");
 
   };
 };

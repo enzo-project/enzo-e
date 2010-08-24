@@ -8,7 +8,8 @@ mainmodule test_jacobi {
 
   array [3D] Patch {
      entry Patch();
-     entry void advance(int n);
+     entry void p_evolve(int block_count, int block_size);
+     entry void p_receive(int dir, int n, double buffer[n*n]);
   };
 
 };

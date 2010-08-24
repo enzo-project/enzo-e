@@ -3,13 +3,13 @@
 
 #include "parallel.def"
 
-enum neighbor_type {
-  neighbor_xm,
-  neighbor_xp,
-  neighbor_ym,
-  neighbor_yp,
-  neighbor_zm,
-  neighbor_zp
+enum face_type {
+  face_xm,
+  face_xp,
+  face_ym,
+  face_yp,
+  face_zm,
+  face_zp
 };
 
 #include "test_jacobi.decl.h"
@@ -24,32 +24,36 @@ public:
 
   Patch(CkMigrateMessage *) ;
 
-  void advance(int n);
-  void allocate(int n);
-  void neighbors (CProxy_Patch xm, CProxy_Patch xp,
-		  CProxy_Patch ym, CProxy_Patch yp,
-		  CProxy_Patch zm, CProxy_Patch zp);
+public: // entry methods
 
-  void receive(int n, double * values);
-  void initialize();
+  void p_evolve(int patch_count, int patch_size);
+  void p_receive(int face, int n, double * buffer);
 
-  void receive(int type, int n, double * buffer);
-  void prepare_(int type, double * buffer);
-  void unpack_(int type, double * buffer);
+private: // functions
 
-private:
-
+  void initialize_();
   double initial_(double x, double y, double z);
 
-  int n_;
+  void allocate_(int n);
+
+  void face_to_buffer_ (int face, double * buffer);
+  void buffer_to_ghost_(int face, double * buffer);
+  void print_ ();
+
+
+private: // attributes
+
+  int block_count_;
+  int block_size_;
 
   double * values_;
   double * ghosts_[6];
 
   int cycle_values_;
-  int cycle_ghosts_;
+  int cycle_ghosts_[6];
 
-  CProxy_Patch neighbor_[6];
+  int count_receive_;
+
 };
 
 #endif /* PATCH_HPP */
