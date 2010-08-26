@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "counter.hpp"
 #include "jacobi.hpp"
 
 // ------------------------------ MAIN ------------------------------
@@ -26,14 +27,14 @@ private:
   int iteration_max_;
 
   int iteration_;
-  int block_counter_;
+  Counter * blocks_;
   int block_count_;
   CProxy_Patch patches_;
 
 public:
 	   
   Main(CkArgMsg* main)
-
+    
   {
     if (main->argc != 1 + 3) {
 
@@ -47,13 +48,14 @@ public:
     iteration_max_ = atoi(main->argv[3]);
 
     iteration_     = 0;
-    block_counter_ = 0;
     block_count_   = problem_size_/block_size_;
+    blocks_        = new Counter (block_count_*block_count_*block_count_);
 
     patches_       = 
       CProxy_Patch::ckNew(block_count_,block_size_,thisProxy,
 			  block_count_,block_count_,block_count_);
 
+    CkPrintf ("Evolve(%d)\n",iteration_);
     patches_.p_evolve();
 
 
@@ -63,13 +65,15 @@ public:
 
   void p_next()
   {
-    if (block_counter_++ >= block_count_) {
-      block_counter_ = 0;
-      ++ iteration_;
-      if (iteration_ > iteration_max_) {
-	CkPrintf ("Done!\n");
-	CkExit();
+    CkPrintf ("p_next 2\n");
+    // Execution doesn't always reach here from call
+    if (blocks_->next()) {
+      CkPrintf ("End iteration %02d\n",iteration_);
+      if (++iteration_ >= iteration_max_) {
+	CkPrintf ("End computation\n");
+	CkExitAfterQuiescence();
       } else {
+	CkPrintf ("Evolve(%d)\n",iteration_);
 	patches_.p_evolve();
       }
     }

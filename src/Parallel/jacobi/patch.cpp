@@ -11,9 +11,9 @@ Patch::Patch(int block_count, int block_size, CProxy_Main main_proxy)
   : main_proxy_ (main_proxy),
     block_count_(block_count),
     block_size_ (block_size),
-    count_receive_(6),
     values_(0),
-    cycle_values_(0)
+    cycle_values_(0),
+    receives_(6)
 {
   allocate_(block_size);
   for (int i=0; i<6; i++) {
@@ -32,6 +32,7 @@ Patch::~Patch()
 //----------------------------------------------------------------------
 
 Patch::Patch(CkMigrateMessage *) 
+  : receives_(6)
 {
 }
 
@@ -43,6 +44,11 @@ void Patch::allocate_(int n)
   int n1 = n+1;
   values_ = new double [n1*n1*n1];
 }
+
+int Patch::id_()
+{
+  return thisIndex.x + block_count_*(thisIndex.y + block_count_*thisIndex.z); 
+};
 
 //----------------------------------------------------------------------
 
@@ -78,21 +84,18 @@ void Patch::p_receive(int axis, int face, int n, double * buffer_ghost)
 
   buffer_to_ghost_(axis, face, buffer_ghost);
 
-  compute_();
+  if (receives_.next()) {
+    ++ cycle_values_;
+    CkPrintf ("%d Compute\n",id_());
+    compute_();
+  }
 }
 
 //----------------------------------------------------------------------
 void Patch::compute_()
 {
-  if (--count_receive_ <= 0) {
-    CkPrintf ("Compute %d %d\n",CkMyPe(),cycle_values_);
-    ++ cycle_values_;
-    count_receive_ = 6;
-
-
-    main_proxy_.p_next();
-  }
-  
+  CkPrintf ("p_next 1 %d\n");
+  main_proxy_.p_next();
 }
 
 //----------------------------------------------------------------------

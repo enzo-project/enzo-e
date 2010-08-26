@@ -2,15 +2,7 @@
 #define PATCH_HPP
 
 #include "parallel.def"
-
-enum face_type {
-  face_xm,
-  face_xp,
-  face_ym,
-  face_yp,
-  face_zm,
-  face_zp
-};
+#include "counter.hpp"
 
 #include "test_jacobi.decl.h"
 
@@ -39,7 +31,7 @@ private: // functions
   void face_to_buffer_ (int axis, int face, double * buffer);
   void buffer_to_ghost_(int axis, int face, double * buffer);
   void print_ ();
-
+  int id_();
 
 private: // attributes
 
@@ -53,7 +45,7 @@ private: // attributes
   int cycle_values_;
   int cycle_ghosts_[6];
 
-  int count_receive_;
+  Counter receives_;
 
 };
 
