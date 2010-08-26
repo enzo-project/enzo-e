@@ -13,12 +13,8 @@ public:
   int next()
   {
     count_--;
-    if (count_ == 0) {
-      count_ = count_max_;
-      return 1;
-    } else {
-      return 0;
-    }
+    if (count_ == 0) count_ = count_max_;
+    return count_ == count_max_;
   }
 };
 
