@@ -10,8 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "parallel.def"
-
 #include "jacobi.hpp"
 
 // ------------------------------ MAIN ------------------------------
@@ -20,46 +18,63 @@ CProxy_Main mainProxy;
 
 class Main : public CBase_Main {
 
+private:
+
+  // command line parameters
+  int problem_size_;
+  int block_size_;
+  int iteration_max_;
+
+  int iteration_;
+  int block_counter_;
+  int block_count_;
+  CProxy_Patch patches_;
+
 public:
 	   
   Main(CkArgMsg* main)
 
-
   {
+    if (main->argc != 1 + 3) {
 
-    if (PARALLEL_ARGC != 3) {
-
-      PARALLEL_PRINTF ("\nUsage: %s N M\n\n",PARALLEL_ARGV[0]);
-      PARALLEL_PRINTF ("   N: problem size = N*N*N\n");
-      PARALLEL_PRINTF ("   M: block size   = M*M*M\n\n");
+      CkPrintf ("\nUsage: %s problem_size  block_size  iterations\n\n",PARALLEL_ARGV[0]);
     
-      PARALLEL_EXIT;
+      CkExit();
     }    
  
-    // Problem size = n*n*n
-    int problem_size = atoi(PARALLEL_ARGV[1]);  
+    problem_size_  = atoi(main->argv[1]);
+    block_size_    = atoi(main->argv[2]);
+    iteration_max_ = atoi(main->argv[3]);
 
-    // Block size = m*m*m
-    int block_size   = atoi(PARALLEL_ARGV[2]);  
+    iteration_     = 0;
+    block_counter_ = 0;
+    block_count_   = problem_size_/block_size_;
 
-    // Number of blocks per dimension
-    int block_count  = problem_size/block_size;
+    patches_       = 
+      CProxy_Patch::ckNew(block_count_,block_size_,thisProxy,
+			  block_count_,block_count_,block_count_);
 
-    PARALLEL_INIT;
-
-    CProxy_Patch patch = 
-      CProxy_Patch::ckNew(block_count,block_count,block_count);
-
-    patch.p_evolve(block_count,block_size);
+    patches_.p_evolve();
 
 
-    //    patch.print();
-
-
-    //    PARALLEL_EXIT;
     CkPrintf ("MAIN EXIT\n");
 
   };
+
+  void p_next()
+  {
+    if (block_counter_++ >= block_count_) {
+      block_counter_ = 0;
+      ++ iteration_;
+      if (iteration_ > iteration_max_) {
+	CkPrintf ("Done!\n");
+	CkExit();
+      } else {
+	patches_.p_evolve();
+      }
+    }
+    
+  }
 };
 
 #include "test_jacobi.def.h"
