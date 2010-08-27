@@ -22,6 +22,8 @@ class Main : public CBase_Main {
 private:
 
   // command line parameters
+  double norm_;
+
   int problem_size_;
   int block_size_;
   int iteration_max_;
@@ -43,6 +45,7 @@ public:
       CkExit();
     }    
  
+    norm_ = 0.0;
     problem_size_  = atoi(main->argv[1]);
     block_size_    = atoi(main->argv[2]);
     iteration_max_ = atoi(main->argv[3]);
@@ -63,14 +66,16 @@ public:
 
   };
 
-  void p_next()
+  void p_next(double s2)
   {
+    norm_ += s2;
     if (blocks_->wait()) {
       if (++iteration_ >= iteration_max_) {
-	CkPrintf ("End computation\n");
+	CkPrintf ("End computation %g\n",norm_);
 	CkExitAfterQuiescence();
       } else {
-	CkPrintf ("Evolve(%d)\n",iteration_);
+	CkPrintf ("Evolve(%d) %g\n",iteration_,norm_);
+	norm_ = 0.0;
 	patches_.p_evolve();
       }
     }

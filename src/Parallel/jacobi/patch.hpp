@@ -25,23 +25,40 @@ private: // functions
 
   void initialize_();
 
-  void allocate_(int n);
+  void allocate_();
   void compute_();
 
   void face_to_buffer_ (int axis, int face, double * buffer);
   void buffer_to_ghost_(int axis, int face, double * buffer);
   void print_ ();
   void store_ ();
+  double norm_ ();
   int id_();
 
 private: // attributes
 
   CProxy_Main main_proxy_;
 
-  int block_count_;
-  int block_size_;
+  /// Number of blocks along each axis
+  int nbx_,nby_,nbz_;
+  /// Depth of ghost zone layer along each block face
+  int ngx_,ngy_,ngz_;  
+  /// Number of values along each block axis
+  int nvx_,nvy_,nvz_;
+  /// Allocated array size along each block axis
+  int nax_,nay_,naz_;
+  /// Lower indices for block values
+  int ilvx_,ilvy_,ilvz_;
+  /// Upper indices for block values
+  int iuvx_,iuvy_,iuvz_;
+  /// Lower indices for block ghosts
+  int ilgx_,ilgy_,ilgz_;
+  /// Upper indices for block ghosts
+  int iugx_,iugy_,iugz_;
 
   double * values_;
+  double * buffer_[3][2];
+
 
   int cycle_store_;
   int cycle_values_;

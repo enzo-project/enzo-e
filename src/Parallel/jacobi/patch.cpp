@@ -11,17 +11,66 @@
 
 Patch::Patch(int block_count, int block_size, CProxy_Main main_proxy) 
   : main_proxy_ (main_proxy),
-    block_count_(block_count),
-    block_size_ (block_size),
     values_(0),
     cycle_store_(10),
     cycle_values_(0),
     receives_(6)
 {
-  allocate_(block_size);
+
+  // Number of blocks along each axis
+
+  nbx_ = block_count;
+  nby_ = block_count;
+  nbz_ = block_count;
+
+  // Depth of ghost zone layer along each block face
+
+  ngx_ = 1;
+  ngy_ = 1;
+  ngz_ = 1;
+
+  // Number of values along each block axis
+
+  nvx_ = block_size;
+  nvy_ = block_size;
+  nvz_ = block_size;
+
+  // Allocated array size along each block axis
+
+  nax_ = nvx_ + 2*ngx_;
+  nay_ = nvy_ + 2*ngy_;
+  naz_ = nvz_ + 2*ngz_;
+  
+  // Lower indices for block values
+
+  ilvx_ = ngx_;
+  ilvy_ = ngy_;
+  ilvz_ = ngz_;
+
+  // Upper indices for block values
+
+  iuvx_ = nvx_ + ngx_;
+  iuvy_ = nvy_ + ngy_;
+  iuvz_ = nvz_ + ngz_;
+
+  // Lower indices for block ghosts
+
+  ilgx_ = 0;
+  ilgy_ = 0;
+  ilgz_ = 0;
+
+  // Upper indices for block ghosts
+
+  iugx_ = nax_;
+  iugy_ = nay_;
+  iugz_ = naz_;
+
+  allocate_();
+
   for (int i=0; i<6; i++) {
     cycle_ghosts_[i] = 0;
   }
+
   initialize_();
 }
 
@@ -30,6 +79,12 @@ Patch::Patch(int block_count, int block_size, CProxy_Main main_proxy)
 Patch::~Patch()
 {
   delete [] values_;
+  delete [] buffer_[0][0];
+  delete [] buffer_[0][1];
+  delete [] buffer_[1][0];
+  delete [] buffer_[1][1];
+  delete [] buffer_[2][0];
+  delete [] buffer_[2][1];
 }
 
 //----------------------------------------------------------------------
@@ -41,38 +96,56 @@ Patch::Patch(CkMigrateMessage *)
 
 //----------------------------------------------------------------------
 
-void Patch::allocate_(int n) 
+void Patch::allocate_() 
 {
-  block_size_ = n;
-  int n1 = n+1;
-  values_ = new double [n1*n1*n1];
+  values_       = new double [nax_*nay_*naz_];
+  buffer_[0][0] = new double [ngx_*nay_*naz_];
+  buffer_[0][1] = new double [ngx_*nay_*naz_];
+  buffer_[1][0] = new double [nax_*ngy_*naz_];
+  buffer_[1][1] = new double [nax_*ngy_*naz_];
+  buffer_[2][0] = new double [nax_*nay_*ngz_];
+  buffer_[2][1] = new double [nax_*nay_*ngz_];
 }
+
+//----------------------------------------------------------------------
 
 int Patch::id_()
 {
-  return thisIndex.x + block_count_*(thisIndex.y + block_count_*thisIndex.z); 
+  return thisIndex.x + nbx_*(thisIndex.y + nby_*thisIndex.z); 
 };
 
 //----------------------------------------------------------------------
 
 void Patch::initialize_()
 {
-  double xm = 1.0 * thisIndex.x / block_count_;
-  double ym = 1.0 * thisIndex.y / block_count_;
-  double zm = 1.0 * thisIndex.z / block_count_;
-  double xp = 1.0 * (thisIndex.x + 1)/ block_count_;
-  double yp = 1.0 * (thisIndex.y + 1) / block_count_;
-  double zp = 1.0 * (thisIndex.z + 1) / block_count_;
+  const double radius = 0.25*0.25;
+  double xm = 1.0 * thisIndex.x / nbx_;
+  double ym = 1.0 * thisIndex.y / nby_;
+  double zm = 1.0 * thisIndex.z / nbz_;
+  double xp = 1.0 * (thisIndex.x + 1)/ nbx_;
+  double yp = 1.0 * (thisIndex.y + 1) / nby_;
+  double zp = 1.0 * (thisIndex.z + 1) / nbz_;
 
-  for (int iz=1; iz<block_size_-1; iz++) {
-    double z = zm + (iz+0.5)/block_size_*(zp-zm);
-    for (int iy=1; iy<block_size_-1; iy++) {
-      double y = ym + (iy+0.5)/block_size_*(yp-ym);
-      for (int ix=1; ix<block_size_-1; ix++) {
-	double x = xm + (ix+0.5)/block_size_*(xp-xm);
-	int i = ix + block_size_*(iy + block_size_*iz);
-	double r2 = (x-0.5)*(x-0.5) + (y-0.5)*(y-0.5) + (z-0.5)*(z-0.5);
-	values_[i] = (r2 < 0.125) ? 1.0 : 0.0;
+  for (int iz=ilvz_; iz<iuvz_; iz++) {
+
+    double z  = zm + (iz-ilvz_+0.5)/nvz_*(zp-zm);
+    double z2 = (z-0.5)*(z-0.5);
+
+    for (int iy=ilvy_; iy<iuvy_; iy++) {
+
+      double y  = ym + (iy-ilvy_+0.5)/nvy_*(yp-ym);
+      double y2 = (y-0.5)*(y-0.5);
+
+      for (int ix=ilvx_; ix<iuvx_; ix++) {
+
+	double x  = xm + (ix-ilvx_+0.5)/nvx_*(xp-xm);
+	double x2 = (x-0.5)*(x-0.5);
+
+	int i = ix + nax_*(iy + nay_*iz);
+	
+	double r2 = x2 + y2 + z2;
+
+	values_[i] = (r2 < radius) ? 1.0 : 0.0;
       }
     }
   }
@@ -95,23 +168,23 @@ void Patch::p_receive(int axis, int face, int n, double * buffer_ghost)
 //----------------------------------------------------------------------
 void Patch::compute_()
 {
-  
   int dx = 1;
-  int dy = block_size_;
-  int dz = block_size_*block_size_;
-  for (int iz=1; iz<block_size_-1; iz++) {
-    for (int iy=1; iy<block_size_-1; iy++) {
-      for (int ix=1; ix<block_size_-1; ix++) {
-	int i = ix + block_size_*(iy + block_size_*iz);
+  int dy = nax_;
+  int dz = nax_*nay_;
+  for (int iz=ilvz_; iz<iuvz_; iz++) {
+    for (int iy=ilvy_; iy<iuvy_; iy++) {
+      for (int ix=ilvx_; ix<iuvx_; ix++) {
+	int i = ix + nax_*(iy + nay_*iz);
 	values_[i] = 0.125*(values_[i-dx] + values_[i+dx] +
 			    values_[i-dy] + values_[i+dy] +
 			    values_[i-dz] + values_[i+dz]);
       }
     }
   }
+  print_();
   store_();
   ++ cycle_values_;
-  main_proxy_.p_next();
+  main_proxy_.p_next(norm_());
 }
 
 //----------------------------------------------------------------------
@@ -121,40 +194,37 @@ void Patch::p_evolve()
 
   // Update ghost zones
 
-  double * buffer_face[3][2];
 
-  int n3[3]  = { block_size_, block_size_, block_size_ };
-  int ng3[3] = { 1,1,1 };
-
-  for (int axis=0; axis<3; axis++) {
-    int ng = ng3[axis];
-    int n1 = n3[(axis+1)%3];
-    int n2 = n3[(axis+2)%3];
-    for (int face=0; face<2; face++) {
-      buffer_face[axis][face] = new double [ng*n1*n2];
-      face_to_buffer_(axis,face,buffer_face[axis][face]);
-    }
-  }
-
+  face_to_buffer_(0,0,buffer_[0][0]);
+  face_to_buffer_(0,1,buffer_[0][1]);
+  face_to_buffer_(1,0,buffer_[1][0]);
+  face_to_buffer_(1,1,buffer_[1][1]);
+  face_to_buffer_(2,0,buffer_[2][0]);
+  face_to_buffer_(2,1,buffer_[2][1]);
+      
   CProxy_Patch patch = thisProxy;
 
   int ix = thisIndex.x;
   int iy = thisIndex.y;
   int iz = thisIndex.z;
 
-  int ixm = (ix - 1 + block_count_) % block_count_;
-  int iym = (iy - 1 + block_count_) % block_count_;
-  int izm = (iz - 1 + block_count_) % block_count_;
-  int ixp = (ix + 1) % block_count_;
-  int iyp = (iy + 1) % block_count_;
-  int izp = (iz + 1) % block_count_;
+  int ixm = (ix - 1 + nbx_) % nbx_;
+  int iym = (iy - 1 + nby_) % nby_;
+  int izm = (iz - 1 + nbz_) % nbz_;
+  int ixp = (ix + 1) % nbx_;
+  int iyp = (iy + 1) % nby_;
+  int izp = (iz + 1) % nbz_;
 
-  patch(ixp,iy,iz).p_receive(0,0,block_size_,buffer_face[0][1]);
-  patch(ixm,iy,iz).p_receive(0,1,block_size_,buffer_face[0][0]);
-  patch(ix,iyp,iz).p_receive(1,0,block_size_,buffer_face[1][1]);
-  patch(ix,iym,iz).p_receive(1,1,block_size_,buffer_face[1][0]);
-  patch(ix,iy,izp).p_receive(2,0,block_size_,buffer_face[2][1]);
-  patch(ix,iy,izm).p_receive(2,1,block_size_,buffer_face[2][0]);
+  int nx = ngx_*nay_*naz_;
+  int ny = nax_*ngy_*naz_;
+  int nz = nax_*nay_*ngz_;
+
+  patch(ixp,iy,iz).p_receive(0,0,nx,buffer_[0][1]);
+  patch(ixm,iy,iz).p_receive(0,1,nx,buffer_[0][0]);
+  patch(ix,iyp,iz).p_receive(1,0,ny,buffer_[1][1]);
+  patch(ix,iym,iz).p_receive(1,1,ny,buffer_[1][0]);
+  patch(ix,iy,izp).p_receive(2,0,nz,buffer_[2][1]);
+  patch(ix,iy,izm).p_receive(2,1,nz,buffer_[2][0]);
 
   // (...execution continued in last receive executed locally)
 }
@@ -165,92 +235,51 @@ void Patch::face_to_buffer_(int axis, int face, double * buffer)
 {
   // TEST BOUNDARY
 
-  // Generalize block size
+  int n  = nax_*nay_*naz_;
 
-  int nx = block_size_;
-  int ny = block_size_;
-  int nz = block_size_;
+  int nx = ngx_*nay_*naz_;
+  int ny = nax_*ngy_*naz_;
+  int nz = nax_*nay_*ngz_;
 
-  // Generalize number of ghost zones
+  int kdx = face*(nvx_-ngx_) + ngx_;
+  int kdy = face*(nvy_-ngy_) + ngy_;
+  int kdz = face*(nvz_-ngz_) + ngz_;
 
-  int ngx = 1;
-  int ngy = 1;
-  int ngz = 1;
-
-  if (axis == 0 && face == 0) {
-    for (int iz=0; iz<nz; iz++) {
-      for (int iy=0; iy<ny; iy++) {
-	for (int ix=0; ix<ngx; ix++) {
-	  int k = ix+ngx;
-	  int iv =  k + nx*(iy + ny*iz);
-	  int ig = iy + ny*(iz + nz*ix);
-	  assert(0 <= ig && ig < ngx*ny*nz);
+  if (axis == 0) {
+    for (int iz=0; iz<naz_; iz++) {
+      for (int iy=0; iy<nay_; iy++) {
+	for (int ix=0; ix<ngx_; ix++) {
+	  int kx = kdx +ix;
+	  int iv = kx + nax_*(iy + nay_*iz);
+	  int ig = iy + nay_*(iz + naz_*ix);
+	  assert(0 <= ig && ig < nx);
+	  assert(0 <= iv && iv < n);
+	  buffer[ig] = values_[iv];
+	}
+      }
+    }
+  } else if (axis == 1) {
+    for (int iz=0; iz<naz_; iz++) {
+      for (int iy=0; iy<ngy_; iy++) {
+	for (int ix=0; ix<nax_; ix++) {
+	  int ky = kdy + iy;
+	  int iv = ix + nax_*(ky + nay_*iz);
+	  int ig = iz + naz_*(ix + nax_*iy);
+	  assert(0 <= ig && ig < nx*ngy_*nz);
 	  assert(0 <= iv && iv < nx*ny*nz);
 	  buffer[ig] = values_[iv];
 	}
       }
     }
-  } else if (axis == 0 && face == 1) {
-    for (int iz=0; iz<nz; iz++) {
-      for (int iy=0; iy<ny; iy++) {
-	for (int ix=0; ix<ngx; ix++) {
-	  int k = ix+nx-2*ngx;
-	  int iv =  k + nx*(iy + ny*iz);
-	  int ig = iy + ny*(iz + nz*ix);
-	  assert(0 <= ig && ig < ngx*ny*nz);
-	  assert(0 <= iv && iv < nx*ny*nz);
-	  buffer[ig] = values_[iv];
-	}
-      }
-    }
-  } else if (axis == 1 && face == 0) {
-    for (int iz=0; iz<nz; iz++) {
-      for (int iy=0; iy<ngy; iy++) {
-	for (int ix=0; ix<nx; ix++) {
-	  int k = iy+ngy;
-	  int iv = ix + nx*( k + ny*iz);
-	  int ig = iz + nz*(ix + nx*iy);
-	  assert(0 <= ig && ig < nx*ngy*nz);
-	  assert(0 <= iv && iv < nx*ny*nz);
-	  buffer[ig] = values_[iv];
-	}
-      }
-    }
-  } else if (axis == 1 && face == 1) {
-    for (int iz=0; iz<nz; iz++) {
-      for (int iy=0; iy<ngy; iy++) {
-	for (int ix=0; ix<nx; ix++) {
-	  int k = iy+ny-2*ngy;
-	  int iv = ix + nx*( k + ny*iz);
-	  int ig = iz + nz*(ix + nx*iy);
-	  assert(0 <= ig && ig < nx*ngy*nz);
-	  assert(0 <= iv && iv < nx*ny*nz);
-	  buffer[ig] = values_[iv];
-	}
-      }
-    }
-  } else if (axis == 2 && face == 0) {
-    for (int iz=0; iz<ngz; iz++) {
-      for (int iy=0; iy<ny; iy++) {
-	for (int ix=0; ix<nx; ix++) {
-	  int k = iz+ngz;
-	  int iv = ix + nx*(iy + ny* k);
-	  int ig = ix + nx*(iy + ny*iz);
-	  assert(0 <= ig && ig < nx*ny*ngz);
-	  assert(0 <= iv && iv < nx*ny*nz);
-	  buffer[ig] = values_[iv];
-	}
-      }
-    }
-  } else if (axis == 2 && face == 1) {
-    for (int iz=0; iz<ngz; iz++) {
-      for (int iy=0; iy<ny; iy++) {
-	for (int ix=0; ix<nx; ix++) {
-	  int k = iz+nz-2*ngz;
-	  int iv = ix + nx*(iy + ny* k);
-	  int ig = ix + nx*(iy + ny*iz);
-	  assert(0 <= ig && ig < nx*ny*ngz);
-	  assert(0 <= iv && iv < nx*ny*nz);
+  } else if (axis == 2) {
+    for (int iz=0; iz<ngz_; iz++) {
+      for (int iy=0; iy<nay_; iy++) {
+	for (int ix=0; ix<nax_; ix++) {
+	  int kz = kdz + iz;
+	  int iv = ix + nax_*(iy + nay_*kz);
+	  int ig = ix + nax_*(iy + nay_*iz);
+	  assert(0 <= ig && ig < nz);
+	  assert(0 <= iv && iv < n);
 	  buffer[ig] = values_[iv];
 	}
       }
@@ -264,53 +293,51 @@ void Patch::buffer_to_ghost_(int axis, int face, double * buffer)
 {
   // TEST BOUNDARY
 
-  // Generalize block size
+  int n  = nax_*nay_*naz_;
 
-  int nx = block_size_;
-  int ny = block_size_;
-  int nz = block_size_;
+  int nx = ngx_*nay_*naz_;
+  int ny = nax_*ngy_*naz_;
+  int nz = nax_*nay_*ngz_;
 
-  // Generalize number of ghost zones
-
-  int ngx = 1;
-  int ngy = 1;
-  int ngz = 1;
+  int kdx = face*(nax_-ngx_);
+  int kdy = face*(nay_-ngy_);
+  int kdz = face*(naz_-ngz_);
 
   if (axis == 0) {
-    for (int iz=0; iz<nz; iz++) {
-      for (int iy=0; iy<ny; iy++) {
-	for (int ix=0; ix<ngx; ix++) {
-	  int k = ix + face*(nx-ngx);
-	  int iv = k  + nx*(iy + ny*iz);
-	  int ig = iy + ny*(iz + nz*ix);
-	  assert(0 <= ig && ig < ngx*ny*nz);
-	  assert(0 <= iv && iv < nx*ny*nz);
+    for (int iz=0; iz<naz_; iz++) {
+      for (int iy=0; iy<nay_; iy++) {
+	for (int ix=0; ix<ngx_; ix++) {
+	  int kx = kdx + ix;
+	  int iv = kx + nax_*(iy + nay_*iz);
+	  int ig = iy + nay_*(iz + naz_*ix);
+	  assert(0 <= ig && ig < nx);
+	  assert(0 <= iv && iv < n);
 	  values_[iv] = buffer[ig];
 	}
       }
     }
   } else if (axis == 1) {
-    for (int iz=0; iz<nz; iz++) {
-      for (int iy=0; iy<ngy; iy++) {
-	for (int ix=0; ix<nx; ix++) {
-	  int k = iy + face*(ny-ngy);
-	  int iv = ix + nx*( k + ny*iz);
-	  int ig = iz + nz*(ix + nx*iy);
-	  assert(0 <= ig && ig < nx*ngy*nz);
-	  assert(0 <= iv && iv < nx*ny*nz);
+    for (int iz=0; iz<naz_; iz++) {
+      for (int iy=0; iy<ngy_; iy++) {
+	for (int ix=0; ix<nax_; ix++) {
+	  int ky = kdy + iy;
+	  int iv = ix + nax_*(ky + nay_*iz);
+	  int ig = iz + naz_*(ix + nax_*iy);
+	  assert(0 <= ig && ig < ny);
+	  assert(0 <= iv && iv < n);
 	  values_[iv] = buffer[ig];
 	}
       }
     }
   } else if (axis == 2) {
-    for (int iz=0; iz<ngz; iz++) {
-      for (int iy=0; iy<ny; iy++) {
-	for (int ix=0; ix<nx; ix++) {
-	  int k = iz + face*(nz-ngz);
-	  int iv = ix + nx*(iy + ny* k);
-	  int ig = ix + nx*(iy + ny*iz);
-	  assert(0 <= ig && ig < nx*ny*ngz);
-	  assert(0 <= iv && iv < nx*ny*nz);
+    for (int iz=0; iz<ngz_; iz++) {
+      for (int iy=0; iy<nay_; iy++) {
+	for (int ix=0; ix<nax_; ix++) {
+	  int kz = kdz + iz;
+	  int iv = ix + nax_*(iy + nay_*kz);
+	  int ig = ix + nax_*(iy + nay_*iz);
+	  assert(0 <= ig && ig < nz);
+	  assert(0 <= iv && iv < n);
 	  values_[iv] = buffer[ig];
 	}
       }
@@ -322,19 +349,13 @@ void Patch::buffer_to_ghost_(int axis, int face, double * buffer)
 
 void Patch::print_ ()
 {
-  double xm = 1.0 * thisIndex.x / block_count_;
-  double ym = 1.0 * thisIndex.y / block_count_;
-  double zm = 1.0 * thisIndex.z / block_count_;
-  double xp = 1.0 * (thisIndex.x + 1)/ block_count_;
-  double yp = 1.0 * (thisIndex.y + 1) / block_count_;
-  double zp = 1.0 * (thisIndex.z + 1) / block_count_;
-  int ix0 = thisIndex.x * block_size_;
-  int iy0 = thisIndex.y * block_size_;
-  int iz0 = thisIndex.z * block_size_;
-  for (int iz=1; iz<block_size_-1; iz++) {
-    for (int iy=1; iy<block_size_-1; iy++) {
-      for (int ix=1; ix<block_size_-1; ix++) {
-	int i = ix + block_size_*(iy + block_size_*iz);
+  int ix0 = thisIndex.x * nvx_;
+  int iy0 = thisIndex.y * nvy_;
+  int iz0 = thisIndex.z * nvz_;
+  for (int iz=ilvz_; iz<iuvz_; iz++) {
+    for (int iy=ilvy_; iy<iuvy_; iy++) {
+      for (int ix=ilvx_; ix<iuvx_; ix++) {
+	int i = ix + nax_*(iy + nay_*iz);
 	CkPrintf ("%03d %03d %03d %g\n",ix+ix0,iy+iy0,iz+iz0,values_[i]);
       }
     }
@@ -343,16 +364,33 @@ void Patch::print_ ()
 
 //----------------------------------------------------------------------
 
+double Patch::norm_ ()
+{
+  double s2 = 0.0;
+  for (int iz=ilvz_; iz<iuvz_; iz++) {
+    for (int iy=ilvy_; iy<iuvy_; iy++) {
+      for (int ix=ilvx_; ix<iuvx_; ix++) {
+	int i = ix + nax_*(iy + nay_*iz);
+	s2 += values_[i]*values_[i];
+      }
+    }
+  }
+  return s2;
+}
+
+//----------------------------------------------------------------------
+
 void Patch::store_ ()
 {
   if (cycle_values_ % cycle_store_ == 0) {
-    printf ("store_ %d %d\n",cycle_values_, cycle_store_);
 
     hid_t file;
     hid_t dataset;
     hid_t dataspace;
     hid_t datatype;
-    const hsize_t n3[3] = {block_size_,block_size_,block_size_};
+    const hsize_t nv[3] = {nax_,nay_,naz_};
+    const hsize_t na[3] = {nax_,nay_,naz_};
+    int i0 = ngx_ + nax_*(ngy_ + nay_*ngz_);
 
     datatype = H5T_NATIVE_DOUBLE;
     char filename[80];
@@ -360,11 +398,15 @@ void Patch::store_ ()
     sprintf(filename,"jacobi-%05d-%02d-%02d-%02d.hdf5",
 	    cycle_values_,thisIndex.x,thisIndex.y,thisIndex.z);
     file      = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    dataspace = H5Screate_simple (3,n3,0);
+    assert (file > 0);
+    dataspace = H5Screate_simple (3,nv,na);
+    assert (dataspace > 0);
     dataset   = H5Dcreate( file, "dataset",datatype,dataspace, 
 			   H5P_DEFAULT );
-    H5Dwrite (dataset, datatype, dataspace, H5S_ALL, H5P_DEFAULT, values_);
+    assert (dataset > 0);
+    H5Dwrite (dataset, datatype, dataspace, H5S_ALL, H5P_DEFAULT, values_+i0);
     H5Dclose( dataset);
+    H5Sclose (dataspace);
     H5Fclose (file);
   }
 }
