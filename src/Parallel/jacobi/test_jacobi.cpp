@@ -65,10 +65,7 @@ public:
 
   void p_next()
   {
-    CkPrintf ("p_next 2\n");
-    // Execution doesn't always reach here from call
-    if (blocks_->next()) {
-      CkPrintf ("End iteration %02d\n",iteration_);
+    if (blocks_->wait()) {
       if (++iteration_ >= iteration_max_) {
 	CkPrintf ("End computation\n");
 	CkExitAfterQuiescence();

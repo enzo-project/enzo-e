@@ -10,7 +10,7 @@ public:
     : count_max_(count_max),
       count_(count_max)
   {}
-  int next()
+  int wait()
   {
     count_--;
     if (count_ == 0) count_ = count_max_;

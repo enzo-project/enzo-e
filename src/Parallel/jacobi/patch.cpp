@@ -1,6 +1,8 @@
+
 #include <stdio.h>
 #include <assert.h>
 
+#include "hdf5.h"
 #include "patch.hpp"
 #include "parallel.def"
 
@@ -12,6 +14,7 @@ Patch::Patch(int block_count, int block_size, CProxy_Main main_proxy)
     block_count_(block_count),
     block_size_ (block_size),
     values_(0),
+    cycle_store_(10),
     cycle_values_(0),
     receives_(6)
 {
@@ -84,9 +87,7 @@ void Patch::p_receive(int axis, int face, int n, double * buffer_ghost)
 
   buffer_to_ghost_(axis, face, buffer_ghost);
 
-  if (receives_.next()) {
-    ++ cycle_values_;
-    CkPrintf ("%d Compute\n",id_());
+  if (receives_.wait()) {
     compute_();
   }
 }
@@ -94,7 +95,22 @@ void Patch::p_receive(int axis, int face, int n, double * buffer_ghost)
 //----------------------------------------------------------------------
 void Patch::compute_()
 {
-  CkPrintf ("p_next 1 %d\n");
+  
+  int dx = 1;
+  int dy = block_size_;
+  int dz = block_size_*block_size_;
+  for (int iz=1; iz<block_size_-1; iz++) {
+    for (int iy=1; iy<block_size_-1; iy++) {
+      for (int ix=1; ix<block_size_-1; ix++) {
+	int i = ix + block_size_*(iy + block_size_*iz);
+	values_[i] = 0.125*(values_[i-dx] + values_[i+dx] +
+			    values_[i-dy] + values_[i+dy] +
+			    values_[i-dz] + values_[i+dz]);
+      }
+    }
+  }
+  store_();
+  ++ cycle_values_;
   main_proxy_.p_next();
 }
 
@@ -315,15 +331,40 @@ void Patch::print_ ()
   int ix0 = thisIndex.x * block_size_;
   int iy0 = thisIndex.y * block_size_;
   int iz0 = thisIndex.z * block_size_;
-  for (int iz=0; iz<block_size_; iz++) {
-    double z = zm + (iz+0.5)/block_size_*(zp-zm);
-    for (int iy=0; iy<block_size_; iy++) {
-      double y = ym + (iy+0.5)/block_size_*(yp-ym);
-      for (int ix=0; ix<block_size_; ix++) {
-	double x = xm + (ix+0.5)/block_size_*(xp-xm);
+  for (int iz=1; iz<block_size_-1; iz++) {
+    for (int iy=1; iy<block_size_-1; iy++) {
+      for (int ix=1; ix<block_size_-1; ix++) {
 	int i = ix + block_size_*(iy + block_size_*iz);
 	CkPrintf ("%03d %03d %03d %g\n",ix+ix0,iy+iy0,iz+iz0,values_[i]);
       }
     }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Patch::store_ ()
+{
+  if (cycle_values_ % cycle_store_ == 0) {
+    printf ("store_ %d %d\n",cycle_values_, cycle_store_);
+
+    hid_t file;
+    hid_t dataset;
+    hid_t dataspace;
+    hid_t datatype;
+    const hsize_t n3[3] = {block_size_,block_size_,block_size_};
+
+    datatype = H5T_NATIVE_DOUBLE;
+    char filename[80];
+
+    sprintf(filename,"jacobi-%05d-%02d-%02d-%02d.hdf5",
+	    cycle_values_,thisIndex.x,thisIndex.y,thisIndex.z);
+    file      = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    dataspace = H5Screate_simple (3,n3,0);
+    dataset   = H5Dcreate( file, "dataset",datatype,dataspace, 
+			   H5P_DEFAULT );
+    H5Dwrite (dataset, datatype, dataspace, H5S_ALL, H5P_DEFAULT, values_);
+    H5Dclose( dataset);
+    H5Fclose (file);
   }
 }

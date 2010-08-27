@@ -31,6 +31,7 @@ private: // functions
   void face_to_buffer_ (int axis, int face, double * buffer);
   void buffer_to_ghost_(int axis, int face, double * buffer);
   void print_ ();
+  void store_ ();
   int id_();
 
 private: // attributes
@@ -42,6 +43,7 @@ private: // attributes
 
   double * values_;
 
+  int cycle_store_;
   int cycle_values_;
   int cycle_ghosts_[6];
 

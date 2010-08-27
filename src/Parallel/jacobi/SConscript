@@ -9,7 +9,7 @@ Import ('parallel_type')
 # DEPENDENCIES
 #------------------------------
 
-libraries  = []
+libraries  = ['hdf5']
 
 #------------------------------
 # ENVIRONMENTS
