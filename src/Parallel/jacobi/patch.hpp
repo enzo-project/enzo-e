@@ -49,13 +49,9 @@ private: // attributes
   /// Allocated array size along each block axis
   int nax_,nay_,naz_;
   /// Lower indices for block values
-  int ilvx_,ilvy_,ilvz_;
+  int ixl_,iyl_,izl_;
   /// Upper indices for block values
-  int iuvx_,iuvy_,iuvz_;
-  /// Lower indices for block ghosts
-  int ilgx_,ilgy_,ilgz_;
-  /// Upper indices for block ghosts
-  int iugx_,iugy_,iugz_;
+  int ixu_,iyu_,izu_;
 
   double * values_;
   double * buffer_[3][2];
@@ -63,7 +59,6 @@ private: // attributes
 
   int cycle_store_;
   int cycle_values_;
-  int cycle_ghosts_[6];
 
   Counter receives_;
 

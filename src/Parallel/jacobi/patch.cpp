@@ -44,33 +44,17 @@ Patch::Patch(int block_count, int block_size, CProxy_Main main_proxy)
   
   // Lower indices for block values
 
-  ilvx_ = ngx_;
-  ilvy_ = ngy_;
-  ilvz_ = ngz_;
+  ixl_ = ngx_;
+  iyl_ = ngy_;
+  izl_ = ngz_;
 
   // Upper indices for block values
 
-  iuvx_ = nvx_ + ngx_;
-  iuvy_ = nvy_ + ngy_;
-  iuvz_ = nvz_ + ngz_;
-
-  // Lower indices for block ghosts
-
-  ilgx_ = 0;
-  ilgy_ = 0;
-  ilgz_ = 0;
-
-  // Upper indices for block ghosts
-
-  iugx_ = nax_;
-  iugy_ = nay_;
-  iugz_ = naz_;
+  ixu_ = ngx_ + nvx_;
+  iyu_ = ngy_ + nvy_;
+  izu_ = ngz_ + nvz_;
 
   allocate_();
-
-  for (int i=0; i<6; i++) {
-    cycle_ghosts_[i] = 0;
-  }
 
   initialize_();
 }
@@ -119,34 +103,34 @@ int Patch::id_()
 
 void Patch::initialize_()
 {
-  const double radius = 0.25*0.25;
+  const double R2 = 0.25*0.25;
   double xm = 1.0 * thisIndex.x / nbx_;
   double ym = 1.0 * thisIndex.y / nby_;
   double zm = 1.0 * thisIndex.z / nbz_;
-  double xp = 1.0 * (thisIndex.x + 1)/ nbx_;
+  double xp = 1.0 * (thisIndex.x + 1) / nbx_;
   double yp = 1.0 * (thisIndex.y + 1) / nby_;
   double zp = 1.0 * (thisIndex.z + 1) / nbz_;
 
-  for (int iz=ilvz_; iz<iuvz_; iz++) {
+  for (int iz=izl_; iz<izu_; iz++) {
 
-    double z  = zm + (iz-ilvz_+0.5)/nvz_*(zp-zm);
+    double z  = zm + (iz-izl_+0.5)/nvz_*(zp-zm);
     double z2 = (z-0.5)*(z-0.5);
 
-    for (int iy=ilvy_; iy<iuvy_; iy++) {
+    for (int iy=iyl_; iy<iyu_; iy++) {
 
-      double y  = ym + (iy-ilvy_+0.5)/nvy_*(yp-ym);
+      double y  = ym + (iy-iyl_+0.5)/nvy_*(yp-ym);
       double y2 = (y-0.5)*(y-0.5);
 
-      for (int ix=ilvx_; ix<iuvx_; ix++) {
+      for (int ix=ixl_; ix<ixu_; ix++) {
 
-	double x  = xm + (ix-ilvx_+0.5)/nvx_*(xp-xm);
+	double x  = xm + (ix-ixl_+0.5)/nvx_*(xp-xm);
 	double x2 = (x-0.5)*(x-0.5);
 
 	int i = ix + nax_*(iy + nay_*iz);
 	
 	double r2 = x2 + y2 + z2;
 
-	values_[i] = (r2 < radius) ? 1.0 : 0.0;
+	values_[i] = (r2 < R2) ? 1.0 : 0.0;
       }
     }
   }
@@ -169,20 +153,27 @@ void Patch::p_receive(int axis, int face, int n, double * buffer_ghost)
 //----------------------------------------------------------------------
 void Patch::compute_()
 {
-  int dx = 1;
-  int dy = nax_;
-  int dz = nax_*nay_;
-  for (int iz=ilvz_; iz<iuvz_; iz++) {
-    for (int iy=ilvy_; iy<iuvy_; iy++) {
-      for (int ix=ilvx_; ix<iuvx_; ix++) {
+  const int dx = 1;
+  const int dy = nax_;
+  const int dz = nax_*nay_;
+
+  const double o6 = 1.0 / 6.0;
+
+  double * values_old = new double [nax_*nay_*naz_];
+  for (int i=0; i<nax_*nay_*naz_; i++) values_old[i] = values_[i];
+
+  for (int iz=izl_; iz<izu_; iz++) {
+    for (int iy=iyl_; iy<iyu_; iy++) {
+      for (int ix=ixl_; ix<ixu_; ix++) {
 	int i = ix + nax_*(iy + nay_*iz);
-	values_[i] = 0.125*(values_[i-dx] + values_[i+dx] +
-			    values_[i-dy] + values_[i+dy] +
-			    values_[i-dz] + values_[i+dz]);
+	values_[i] = values_old[i] - o6*(values_old[i-dx] + values_old[i+dx] +
+				      values_old[i-dy] + values_old[i+dy] +
+				      values_old[i-dz] + values_old[i+dz]);
       }
     }
   }
   //  print_();
+  delete [] values_old;
   store_();
   ++ cycle_values_;
   main_proxy_.p_next(norm_());
@@ -233,27 +224,27 @@ void Patch::p_evolve()
 
 bool Patch::clear_boundary_(int axis, int face, double * buffer)
 {
-  if (axis == 0 && face == 0 && thisIndex.x == 0 ||
-      axis == 0 && face == 1 && thisIndex.x == nbx_-1) {
-    for (int i=0; i<ngx_*nay_*naz_; i++) {
-      buffer[i] = 0.0;
-    }
-    return true;
-  } else if (axis == 1 && face == 0 && thisIndex.y == 0 ||
-	     axis == 1 && face == 1 && thisIndex.y == nby_-1) {
-    for (int i=0; i<nax_*ngy_*naz_; i++) {
-      buffer[i] = 0.0;
-    }
-    return true;
-  } else if (axis == 2 && face == 0 && thisIndex.z== 0 ||
-	     axis == 2 && face == 1 && thisIndex.z == nbz_-1) {
-    for (int i=0; i<nax_*nay_*ngz_; i++) {
-      buffer[i] = 0.0;
-    }
-    return true;
-  } else {
+//   if ((axis == 0 && face == 0 && thisIndex.x == 0) ||
+//       (axis == 0 && face == 1 && thisIndex.x == nbx_-1)) {
+//     for (int i=0; i<ngx_*nay_*naz_; i++) {
+//       buffer[i] = 0.0;
+//     }
+//     return true;
+//   } else if ((axis == 1 && face == 0 && thisIndex.y == 0) ||
+// 	     (axis == 1 && face == 1 && thisIndex.y == nby_-1)) {
+//     for (int i=0; i<nax_*ngy_*naz_; i++) {
+//       buffer[i] = 0.0;
+//     }
+//     return true;
+//   } else if ((axis == 2 && face == 0 && thisIndex.z== 0) ||
+// 	     (axis == 2 && face == 1 && thisIndex.z == nbz_-1)) {
+//     for (int i=0; i<nax_*nay_*ngz_; i++) {
+//       buffer[i] = 0.0;
+//     }
+//     return true;
+//   } else {
     return false;
-  }
+//   }
 }
 
 //======================================================================
@@ -380,9 +371,9 @@ void Patch::print_ ()
   int ix0 = thisIndex.x * nvx_;
   int iy0 = thisIndex.y * nvy_;
   int iz0 = thisIndex.z * nvz_;
-  for (int iz=ilvz_; iz<iuvz_; iz++) {
-    for (int iy=ilvy_; iy<iuvy_; iy++) {
-      for (int ix=ilvx_; ix<iuvx_; ix++) {
+  for (int iz=izl_; iz<izu_; iz++) {
+    for (int iy=iyl_; iy<iyu_; iy++) {
+      for (int ix=ixl_; ix<ixu_; ix++) {
 	int i = ix + nax_*(iy + nay_*iz);
 	CkPrintf ("%03d %03d %03d %g\n",ix+ix0,iy+iy0,iz+iz0,values_[i]);
       }
@@ -395,9 +386,9 @@ void Patch::print_ ()
 double Patch::norm_ ()
 {
   double s2 = 0.0;
-  for (int iz=ilvz_; iz<iuvz_; iz++) {
-    for (int iy=ilvy_; iy<iuvy_; iy++) {
-      for (int ix=ilvx_; ix<iuvx_; ix++) {
+  for (int iz=izl_; iz<izu_; iz++) {
+    for (int iy=iyl_; iy<iyu_; iy++) {
+      for (int ix=ixl_; ix<ixu_; ix++) {
 	int i = ix + nax_*(iy + nay_*iz);
 	s2 += values_[i]*values_[i];
       }
@@ -418,7 +409,8 @@ void Patch::store_ ()
     hid_t datatype;
     const hsize_t nv[3] = {nax_,nay_,naz_};
     const hsize_t na[3] = {nax_,nay_,naz_};
-    int i0 = ngx_ + nax_*(ngy_ + nay_*ngz_);
+    //    int i0 = ngx_ + nax_*(ngy_ + nay_*ngz_);
+    int i0 = 0;
 
     datatype = H5T_NATIVE_DOUBLE;
     char filename[80];
