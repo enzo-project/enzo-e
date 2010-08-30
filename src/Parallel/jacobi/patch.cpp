@@ -6,13 +6,14 @@
 #include "patch.hpp"
 #include "parallel.def"
 
+#define _TRACE_   CkPrintf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout);
 
 //----------------------------------------------------------------------
 
 Patch::Patch(int block_count, int block_size, CProxy_Main main_proxy) 
   : main_proxy_ (main_proxy),
     values_(0),
-    cycle_store_(10),
+    cycle_store_(1),
     cycle_values_(0),
     receives_(6)
 {
@@ -181,7 +182,7 @@ void Patch::compute_()
       }
     }
   }
-  print_();
+  //  print_();
   store_();
   ++ cycle_values_;
   main_proxy_.p_next(norm_());
@@ -193,7 +194,6 @@ void Patch::p_evolve()
 {
 
   // Update ghost zones
-
 
   face_to_buffer_(0,0,buffer_[0][0]);
   face_to_buffer_(0,1,buffer_[0][1]);
@@ -231,9 +231,37 @@ void Patch::p_evolve()
 
 //======================================================================
 
+bool Patch::clear_boundary_(int axis, int face, double * buffer)
+{
+  if (axis == 0 && face == 0 && thisIndex.x == 0 ||
+      axis == 0 && face == 1 && thisIndex.x == nbx_-1) {
+    for (int i=0; i<ngx_*nay_*naz_; i++) {
+      buffer[i] = 0.0;
+    }
+    return true;
+  } else if (axis == 1 && face == 0 && thisIndex.y == 0 ||
+	     axis == 1 && face == 1 && thisIndex.y == nby_-1) {
+    for (int i=0; i<nax_*ngy_*naz_; i++) {
+      buffer[i] = 0.0;
+    }
+    return true;
+  } else if (axis == 2 && face == 0 && thisIndex.z== 0 ||
+	     axis == 2 && face == 1 && thisIndex.z == nbz_-1) {
+    for (int i=0; i<nax_*nay_*ngz_; i++) {
+      buffer[i] = 0.0;
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+//======================================================================
+
 void Patch::face_to_buffer_(int axis, int face, double * buffer)
 {
-  // TEST BOUNDARY
+
+  if (clear_boundary_(axis,face,buffer)) return;
 
   int n  = nax_*nay_*naz_;
 
@@ -291,7 +319,7 @@ void Patch::face_to_buffer_(int axis, int face, double * buffer)
 
 void Patch::buffer_to_ghost_(int axis, int face, double * buffer)
 {
-  // TEST BOUNDARY
+  clear_boundary_(axis,face,buffer);
 
   int n  = nax_*nay_*naz_;
 

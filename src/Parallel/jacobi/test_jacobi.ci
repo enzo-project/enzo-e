@@ -10,7 +10,7 @@ mainmodule test_jacobi {
   array [3D] Patch {
     entry Patch(int block_count, int block_size, CProxy_Main main_proxy);
     entry void p_evolve();
-    entry void p_receive(int axis, int face, int n, double buffer[n*n]);
+    entry void p_receive(int axis, int face, int n, double buffer[n]);
   };
 
 };

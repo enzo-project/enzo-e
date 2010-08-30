@@ -1,0 +1,14 @@
+#!/bin/csh -f
+
+rm *.hdf5 *.png
+
+test_jacobi 16 8 2
+
+foreach f (*hdf5)
+   set i = 0
+   while ($i < 10)
+      h5topng -x $i -S 10 $f
+      mv $f.png $f:r-$i.$f:e.png
+      @ i = $i + 1
+   end
+end

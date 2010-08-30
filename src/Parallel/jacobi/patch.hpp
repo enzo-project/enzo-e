@@ -28,6 +28,7 @@ private: // functions
   void allocate_();
   void compute_();
 
+  bool clear_boundary_ (int axis, int face, double * buffer);
   void face_to_buffer_ (int axis, int face, double * buffer);
   void buffer_to_ghost_(int axis, int face, double * buffer);
   void print_ ();
