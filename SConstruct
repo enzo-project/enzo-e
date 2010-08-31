@@ -2,6 +2,8 @@ import os
 import sys
 
 TOPDIR  = GetLaunchDir()
+# charm_path = '/home/bordner/charm/charm-6.2.1'
+charm_path = '/home/bordner/charm/charm'
 
 # Initialize platform
 
@@ -94,7 +96,6 @@ elif (platform == 'linux-mpi-valgrind'):
 #--------------------------------------------------
 elif (platform == 'linux-ampi'):
 #--------------------------------------------------
-   charm_path = '/home/bordner/charm/charm-6.2.1'
    parallel_run = charm_path + "/bin/charmrun +p4 "
    serial_run   = ""
    parallel_type = "ampi"
@@ -117,7 +118,7 @@ elif (platform == 'linux-ampi'):
 elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
 #--------------------------------------------------
 
-   opt_flags = '-g '
+   opt_flags = '-O3 '
 
 #   debug_flags = '-memory charmdebug'
    debug_flags = ''
@@ -127,24 +128,24 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
    else:
 	perf_flags = ''
 
-   flags = opt_flags + ' ' + debug_flags + ' ' + perf_flags
-   charm_path = '/home/bordner/charm/charm-6.2.1'
+   flags = opt_flags + ' ' + debug_flags + ' ' + perf_flags + ' '
+   print flags
    parallel_run = charm_path + "/bin/charmrun +p4 "
    parallel_type = "charm"
    serial_run   = ""
   
    env = Environment(
-      CC          = charm_path + '/bin/charmc -language charm++',
+      CC          = charm_path + '/bin/charmc -language charm++ '+flags,
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_CHARM'],
       CPPPATH     = '#/include',
-      CXX         = charm_path + '/bin/charmc -language charm++',
+      CXX         = charm_path + '/bin/charmc -language charm++ '+flags,
       CXXFLAGS    = flags,
       ENV         = os.environ,
       FORTRAN     = 'gfortran',
       FORTRANFLAGS = flags,
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
-      LDFLAGS     = flags,
+      LIBFLAGS     = flags,
       LIBPATH     = '#/lib' )
    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
