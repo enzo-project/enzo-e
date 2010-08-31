@@ -60,14 +60,16 @@ tree-based
 \section{Patch Coalescing} \label{s:intro}
 %=======================================================================
 
+\begin{verbatim}
 % 
-% Issue: octtree has too many nodes for refinement requirements
+% Issue: octree has too many nodes for refinement requirements
 % Solution: coalesce uniformly refined patches into a single larger patch
-
+% Viewpoint: use AMR machinery only when necessary; use "unigrid" when possible
+%
 % properties:
 %
 %   greatest advantage in extended regions of shallow refinement
-%   underlying refinement area remains unchanged
+%   note underlying refinement area remains unchanged
 %   + no changes required for octree data structure
 %   
 %   -: parallel load balancing
@@ -75,13 +77,62 @@ tree-based
 %     solution 2: hierarchical load balancing
 %     
 %   +: "unigrid" degenerates into a single large patch (assuming cubical domains)
+%   Compare coalescing with non-coalescing
+%      storage 
+%        savings versus overhead
+%      patch count
+%        savings
+%      
 
+\end{verbatim}
 
 %=======================================================================
 \section{Targeted Refinement} \label{s:intro}
 %=======================================================================
 
-%   greatest advantage in localized regions of deep refinement
+\begin{verbatim}
+%   Motivate targeted refinement
+%      greatest advantage in localized regions of deep refinement
+%      reduces scope of refinement on coarser levels when rebalancing
+%        [note octree effect is global]
+%      fewer patches
+%      patch size control: helps prevent "dust patches" at fine levels
+%   Describe targeted refinement
+%   Describe backfill
+%   Refinement criteria
+%      must be such that backfill is effective
+%   Compare 2, 4, 8, with and without backfill
+%       take into account refinement criteria issues
+%       Storage requirements
+%          reduced patch count versus
+%          increased storage requirement per patch
+%       Computation savings
+%       
+%          
+%       
+\end{verbatim}
+
+
+%=======================================================================
+\section{Localization} \label{s:intro}
+%=======================================================================
+
+\begin{verbatim}
+%   [consider separate paper]
+%   Store tree as individual patches with immediate neighbors
+%   Can replicate coarser levels globally for efficiency
+%      not necessarily "top K levels"
+%      can have "limited replication", e.g. within a node, of further levels
+%   Can still use octree data structure
+%      skip over intermediate levels
+%      allows code reuse
+%   Issues
+%      Load balancing issues
+%         locality versus distribution
+%      Coarsening / Refinement
+%         prevent tree patch overlap [proof]
+%      
+\end{verbatim}
 
 \end{document}
 
