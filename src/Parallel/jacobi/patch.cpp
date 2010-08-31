@@ -10,11 +10,13 @@
 
 //----------------------------------------------------------------------
 
-Patch::Patch(int block_count, int block_size, CProxy_Main main_proxy) 
+Patch::Patch(int block_count, int block_size, int cycle_max,
+	     CProxy_Main main_proxy) 
   : main_proxy_ (main_proxy),
     values_(0),
     cycle_store_(1),
     cycle_values_(0),
+    cycle_max_(cycle_max),
     receives_(6)
 {
 
@@ -162,21 +164,26 @@ void Patch::compute_()
   double * values_old = new double [nax_*nay_*naz_];
   for (int i=0; i<nax_*nay_*naz_; i++) values_old[i] = values_[i];
 
+  //  int count = (thisIndex.x + thisIndex.y + thisIndex.z == 0) ? 10000 : 0;
+  //  int count = 0;
+  //  for (int c=count; c>=0; c--) {
   for (int iz=izl_; iz<izu_; iz++) {
     for (int iy=iyl_; iy<iyu_; iy++) {
       for (int ix=ixl_; ix<ixu_; ix++) {
 	int i = ix + nax_*(iy + nay_*iz);
-	values_[i] = values_old[i] - o6*(values_old[i-dx] + values_old[i+dx] +
-				      values_old[i-dy] + values_old[i+dy] +
-				      values_old[i-dz] + values_old[i+dz]);
+	values_[i] = o6*(values_old[i-dx] + values_old[i+dx] +
+			 values_old[i-dy] + values_old[i+dy] +
+			 values_old[i-dz] + values_old[i+dz]);
       }
     }
+    //  }
   }
   //  print_();
   delete [] values_old;
   store_();
-  ++ cycle_values_;
-  main_proxy_.p_next(norm_());
+  main_proxy_.p_next(thisIndex.x,thisIndex.y,thisIndex.z,norm_());
+
+  // 
 }
 
 //----------------------------------------------------------------------
@@ -284,8 +291,8 @@ void Patch::face_to_buffer_(int axis, int face, double * buffer)
 	  int ky = kdy + iy;
 	  int iv = ix + nax_*(ky + nay_*iz);
 	  int ig = iz + naz_*(ix + nax_*iy);
-	  assert(0 <= ig && ig < nx*ngy_*nz);
-	  assert(0 <= iv && iv < nx*ny*nz);
+	  assert(0 <= ig && ig < ny);
+	  assert(0 <= iv && iv < n);
 	  buffer[ig] = values_[iv];
 	}
       }

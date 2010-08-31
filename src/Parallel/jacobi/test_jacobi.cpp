@@ -13,6 +13,8 @@
 #include "counter.hpp"
 #include "jacobi.hpp"
 
+#define BLOCK_CYCLE
+
 // ------------------------------ MAIN ------------------------------
 
 CProxy_Main mainProxy;
@@ -55,7 +57,7 @@ public:
     blocks_        = new Counter (block_count_*block_count_*block_count_);
 
     patches_       = 
-      CProxy_Patch::ckNew(block_count_,block_size_,thisProxy,
+      CProxy_Patch::ckNew(block_count_,block_size_,iteration_max_,thisProxy,
 			  block_count_,block_count_,block_count_);
 
     CkPrintf ("Evolve(%d)\n",iteration_);
@@ -66,12 +68,13 @@ public:
 
   };
 
-  void p_next(double s2)
+  void p_next(int ix, int iy, int iz, double s2)
   {
     norm_ += s2;
+#ifdef BLOCK_CYCLE
     if (blocks_->wait()) {
       if (++iteration_ >= iteration_max_) {
-	CkPrintf ("End computation %g\n",norm_);
+	CkPrintf ("End computation %g time = %g\n",norm_,CkWallTimer());
 	CkExitAfterQuiescence();
       } else {
 	CkPrintf ("Evolve(%d) %g\n",iteration_,norm_);
@@ -79,8 +82,20 @@ public:
 	patches_.p_evolve();
       }
     }
-    
+#else
+    if (blocks_->wait()) {
+      ++iteration_;
+      CkPrintf ("Evolve(%d) %g\n",iteration_,norm_);
+      norm_ = 0.0;
+    }
+    if (iteration_ >= iteration_max_) {
+      CkPrintf ("End computation %g time = %g\n",norm_,CkWallTimer());
+      CkExit();
+    } 
+    patches_(ix,iy,iz).p_evolve();
+#endif
   }
+    
 };
 
 #include "test_jacobi.def.h"

@@ -11,7 +11,8 @@ class Patch : public CBase_Patch
   
 public:
 
-  Patch(int patch_count, int patch_size, CProxy_Main main_proxy) ;
+  Patch(int patch_count, int patch_size, int cycles_max,
+	CProxy_Main main_proxy) ;
   ~Patch() ;
 
   Patch(CkMigrateMessage *) ;
@@ -59,6 +60,7 @@ private: // attributes
 
   int cycle_store_;
   int cycle_values_;
+  int cycle_max_;
 
   Counter receives_;
 

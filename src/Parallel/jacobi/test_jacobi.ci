@@ -4,11 +4,12 @@ mainmodule test_jacobi {
 
   mainchare Main {
     entry Main(CkArgMsg *m);
-    entry void p_next(double norm);
+    entry void p_next(int ix, int iy, int iz, double norm);
   };
 
   array [3D] Patch {
-    entry Patch(int block_count, int block_size, CProxy_Main main_proxy);
+    entry Patch(int block_count, int block_size, int cycles_max,
+	CProxy_Main main_proxy);
     entry void p_evolve();
     entry void p_receive(int axis, int face, int n, double buffer[n]);
   };
