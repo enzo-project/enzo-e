@@ -25,6 +25,16 @@ public: // interface
       global_ (global)
   {};
 
+  /// Destructor
+  ~UserDescr() throw()
+  {
+    delete user_control_;
+    delete user_timestep_;
+    for (int i=0; i<user_method_.size(); i++) {
+      delete user_method_[i];
+    }
+  }
+
   /// Add a user method
   UserMethod * add_user_method (std::string method_name)
   { UserMethod * method = create_user_method_(method_name);
