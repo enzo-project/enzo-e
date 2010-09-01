@@ -29,8 +29,6 @@ void Memory::initialize_() throw ()
 #ifdef CONFIG_USE_MEMORY
   curr_group_.push(0);
   is_active_ = true;
-  group_names_[0] = strdup("");
-  group_names_[1] = strdup("memory");
 
   for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
     group_names_ [i] = 0;
@@ -40,7 +38,22 @@ void Memory::initialize_() throw ()
     new_calls_   [i] = 0;
     delete_calls_[i] = 0;
   }
+  group_names_[0] = strdup("");
+  group_names_[1] = strdup("memory");
 
+#endif
+}
+
+//----------------------------------------------------------------------
+
+void Memory::delete_() throw ()
+{
+#ifdef CONFIG_USE_MEMORY
+  for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
+    printf ("%d\n",i);
+    delete [] group_names_[i];
+  }
+  printf ("done\n");
 #endif
 }
 

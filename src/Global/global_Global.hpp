@@ -21,18 +21,18 @@ public: // interface
   Global() throw()
   {
     error_      = new Error;
-    memory_     = new Memory;
     monitor_    = new Monitor();
     parameters_ = new Parameters(monitor_);
+    //    memory_     = new Memory;
   }
 
   /// Destructor
   ~Global() throw()
   {
-    delete [] error_;
-    delete [] memory_;
-    delete [] parameters_;
-    delete [] monitor_;
+    delete error_;
+    delete parameters_;
+    delete monitor_;
+    //    delete [] memory_;
   }
 
 private: // prohibit copy constructor
@@ -53,10 +53,6 @@ public:
 
   Error * error() { return error_; };
 
-  /// Access memory object
-
-  Memory * memory() { return memory_; };
-
   /// Access monitor object
 
   Monitor * monitor() { return monitor_; };
@@ -65,20 +61,24 @@ public:
 
   Parameters * parameters() { return parameters_; };
 
+//   /// Access memory object
+
+//   Memory * memory() { return memory_; };
+
 
 private: // attributes
 
   /// Error object
   Error * error_;
 
-  /// Memory object
-  Memory * memory_;
-
   /// Monitor object
   Monitor * monitor_;
 
   /// Parameters object
   Parameters * parameters_;
+
+//   /// Memory object
+//   Memory * memory_;
 
   ///  Performance object
   // Performance * performance_;

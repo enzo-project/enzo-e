@@ -31,6 +31,7 @@ public: // interface
   { return & instance_; }
 #endif
 
+private: // interface
   /// Create the (single) Memory object (singleton design pattern)
   Memory() throw () { initialize_(); };
 
@@ -39,6 +40,11 @@ public: // interface
 
   /// Assign the (single) Memory object (singleton design pattern)
   Memory & operator = (const Memory & memory);
+
+  /// Delete the Memory object
+  ~Memory() throw () { };
+
+public: // interface
 
   /// Allocate memory
   void * allocate ( size_t size ) 
@@ -109,6 +115,9 @@ private: // functions
 
   /// Initialize the memory component
   void initialize_() throw ();
+
+  /// Finalize the memory component
+  void delete_() throw ();
 
   ///  Check the group handle, and throw an exception if bad
   void check_handle_(memory_group_handle group_handle) 
