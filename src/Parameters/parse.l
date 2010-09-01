@@ -89,11 +89,11 @@ rint   { return RINT; }
 
 false     { yylval.logical_type = 0; return LOGICAL; } 
 true      { yylval.logical_type = 1; return LOGICAL; } 
-{LU}{LN}+ { yylval.string_type = strdup (yytext);
+{LU}{LN}+ { yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return GROUP_NAME; } /* Group names begin with upper-case */
 [xyzt]    { yylval.string_type = strdup (yytext);
             return VARIABLE; }
-{LL}{LN}* { yylval.string_type = strdup (yytext);
+{LL}{LN}* { yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return IDENTIFIER; } /* group, parameter, and variables */
                                  /* begin with lower-case */
 

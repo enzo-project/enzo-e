@@ -1050,7 +1050,7 @@ YY_RULE_SETUP
 case 34:
 YY_RULE_SETUP
 #line 92 "src/Parameters/parse.l"
-{ yylval.string_type = strdup (yytext);
+{ yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return GROUP_NAME; } /* Group names begin with upper-case */
 	YY_BREAK
 case 35:
@@ -1062,7 +1062,7 @@ YY_RULE_SETUP
 case 36:
 YY_RULE_SETUP
 #line 96 "src/Parameters/parse.l"
-{ yylval.string_type = strdup (yytext);
+{ yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return IDENTIFIER; } /* group, parameter, and variables */
 	YY_BREAK
 /* begin with lower-case */

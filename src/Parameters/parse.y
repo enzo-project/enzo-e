@@ -237,8 +237,6 @@ const char * op_name[] = {
      p->subgroup = (current_subgroup) ? strdup(current_subgroup) : 0;
      p->parameter = (current_parameter) ? strdup(current_parameter) : 0;
 
-     /* THIS FREE MESSES THINGS UP FOR STRINGS */
-     /*     free (current_parameter); */
      current_type = enum_parameter_unknown;
 
      insert_param(param_curr,p);
@@ -296,7 +294,8 @@ const char * op_name[] = {
   struct param_struct * new_param_sentinel ()
   {
     struct param_struct * p = 
-      (struct param_struct *) malloc (sizeof (struct param_struct));
+      (struct param_struct *) malloc (sizeof (struct param_struct));  // MEMORY LEAK
+    printf ("DEBUG: %s:%d new sentinel\n",__FILE__,__LINE__);
 
     p->group     = NULL;
     p->subgroup  = NULL;
@@ -341,6 +340,8 @@ const char * op_name[] = {
        break;
      case enum_parameter_string: 
        new_param_string(yylval.string_type);
+       free (yylval.string_type);
+       yylval.string_type = 0;
        break;
      case enum_parameter_logical:
        new_param_logical(yylval.logical_type);
@@ -683,7 +684,8 @@ cello_parameters_read(FILE * fp)
 
   /*   yydebug=1; */
   
-  yyrestart(fp);
+  yyrestart(fp);    // MEMORY LEAK: yy_create_buffer()
+
   yyparse();
   param_head = reverse_param(param_head);
   return param_head;

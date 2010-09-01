@@ -93,7 +93,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 383 "src/Parameters/parse.y"
+#line 385 "src/Parameters/parse.y"
  
   int logical_type;  
   int integer_type; 

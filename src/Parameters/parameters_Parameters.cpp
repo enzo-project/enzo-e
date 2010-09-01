@@ -40,10 +40,9 @@ Parameters::~Parameters()
   for (it_param =  parameter_map_.begin();
        it_param != parameter_map_.end();
        ++it_param) {
-
     delete it_param->second;
   }
-
+  delete parameter_tree_;
 }
 
 //----------------------------------------------------------------------
