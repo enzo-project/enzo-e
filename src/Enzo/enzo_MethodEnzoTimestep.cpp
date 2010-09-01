@@ -61,10 +61,18 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
 {
 
   FieldBlock * field_block = data_block->field_block();
-  float * density_field    = (float *)field_block->field_values(enzo_->field_density);
-  float * velocity_x_field = (float *)field_block->field_values(enzo_->field_velocity_x);
-  float * velocity_y_field = (float *)field_block->field_values(enzo_->field_velocity_y);
-  float * velocity_z_field = (float *)field_block->field_values(enzo_->field_velocity_z);
+  float * density_field    = 0;
+  float * velocity_x_field = 0;
+  float * velocity_y_field = 0;
+  float * velocity_z_field = 0;
+
+  density_field    = (float *)field_block->field_values(enzo_->field_density);
+  if (enzo_->GridRank >= 1)   velocity_x_field = 
+    (float *)field_block->field_values(enzo_->field_velocity_x);
+  if (enzo_->GridRank >= 2) velocity_y_field = 
+    (float *)field_block->field_values(enzo_->field_velocity_y);
+  if (enzo_->GridRank >= 3) velocity_z_field = 
+    (float *)field_block->field_values(enzo_->field_velocity_z);
 
   ENZO_FLOAT a = 1, dadt;
   if (enzo_->ComovingCoordinates)

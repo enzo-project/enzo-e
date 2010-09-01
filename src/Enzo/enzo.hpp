@@ -23,5 +23,7 @@
 #include "enzo_MethodEnzoPpml.hpp"
 #include "enzo_EnzoUserDescr.hpp"
 
+#include "enzo_fortran.hpp"
+
 #endif /* ENZO_HPP */
 

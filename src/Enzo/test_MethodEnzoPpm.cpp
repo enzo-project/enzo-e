@@ -91,7 +91,7 @@ PARALLEL_MAIN_BEGIN
 
   FILE * fp = fopen ("input/test_MethodEnzoPpm.in","r");
   if (fp) {
-    parameters->read(fp);
+    parameters->read(fp); // MEMORY LEAK
     fclose(fp);
   } else {
     ERROR_MESSAGE("main","test_MethodEnzoPpm.in file does not exist");
@@ -113,14 +113,16 @@ PARALLEL_MAIN_BEGIN
   int index_velocity_y      = field_descr->insert_field("velocity_y");
   int index_internal_energy = field_descr->insert_field("internal_energy");
 
-  EnzoUserDescr user_descr(global);
+  EnzoUserDescr    * user_descr = new EnzoUserDescr(global);
   
-  UserMethod   * user_method   = user_descr.add_user_method("ppm");
-  UserControl  * user_control  = user_descr.set_user_control("ignored");
-  UserTimestep * user_timestep = user_descr.set_user_timestep("ignored");
+  UserMethod   * user_method   = user_descr->add_user_method("ppm");
+  UserControl  * user_control  = user_descr->set_user_control("ignored");
+  UserTimestep * user_timestep = user_descr->set_user_timestep("ignored");
 
-  // Set missing cello_hydro.h parameters
-  EnzoDescr * enzo = user_descr.enzo();
+  // Set missing Enzo parameters
+
+  EnzoDescr * enzo = user_descr->enzo();
+
   enzo->BoundaryRank = 2;
   enzo->BoundaryDimension[0] = nx + 2*gx;
   enzo->BoundaryDimension[1] = ny + 2*gy;
@@ -130,8 +132,9 @@ PARALLEL_MAIN_BEGIN
   unit_class ("MethodEnzoPpm");
 
   unit_func("initialize");
-  user_control->initialize(data_descr);
-  user_method->initialize(data_descr);
+
+  user_control ->initialize(data_descr);
+  user_method  ->initialize(data_descr);
   user_timestep->initialize(data_descr);
 
   // Initialize field_block
@@ -231,6 +234,12 @@ PARALLEL_MAIN_BEGIN
   user_method  ->finalize(data_descr);
 
   unit_finalize();
+
+  delete user_descr;
+  delete data_descr;
+  delete data_block;
+  delete global;
+  delete parallel;
 
   PARALLEL_EXIT;
 }
