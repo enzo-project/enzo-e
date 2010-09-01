@@ -12,7 +12,7 @@ Import('parallel_type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['user','field', 'parameters', 'error','disk','memory','monitor','parallel','cello']
+components = ['user','field', 'parameters', 'error','disk','memory','monitor','parallel','cello','enzo']
 libraries  = ['hdf5', 'png','boost_thread-mt', '$FORTRANLIBS']
 
 #------------------------------

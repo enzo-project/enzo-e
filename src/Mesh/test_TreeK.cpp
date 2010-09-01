@@ -58,7 +58,7 @@ PARALLEL_MAIN_BEGIN
 
   // Required for Monitor
 
-  Memory * memory = new Memory;
+  Memory * memory = Memory::instance();
   // Parse command line
 
   if (PARALLEL_ARGC != 5 && PARALLEL_ARGC != 4) {
@@ -111,7 +111,6 @@ PARALLEL_MAIN_BEGIN
 
   memory->print();
 
-  delete memory;
   unit_finalize();
 
   PARALLEL_EXIT;
