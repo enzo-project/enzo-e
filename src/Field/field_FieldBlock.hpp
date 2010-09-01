@@ -18,7 +18,8 @@ class FieldBlock {
 
   /// @class    FieldBlock
   /// @ingroup  Field
-  /// @brief    Interface between field arrays and low-level (C/fortran) routines.
+  /// @brief Interface between field arrays and low-level (C/fortran)
+  /// routines.
   /// 
   /// Defines up to a 4-D fortran-like array for storing 1 or more 3D
   /// arrays.  Axes can be permuted, including the index selecting the

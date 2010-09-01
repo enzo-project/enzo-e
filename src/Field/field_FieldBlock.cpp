@@ -26,7 +26,9 @@ FieldBlock::FieldBlock() throw()
 //----------------------------------------------------------------------
 
 FieldBlock::~FieldBlock() throw()
-{  INCOMPLETE_MESSAGE("FieldBlock::~FieldBlock",""); }
+{  
+  delete [] array_;
+}
 
 //----------------------------------------------------------------------
 
@@ -53,7 +55,8 @@ void FieldBlock::dimensions( int * nx, int * ny, int * nz ) const throw()
 
 void * FieldBlock::field_values ( int id_field ) throw (std::out_of_range)
 {
-  return field_values_.at(id_field);
+  return (unsigned(id_field) < field_values_.size()) ? 
+    field_values_.at(id_field) : NULL;
 }
 
 //----------------------------------------------------------------------

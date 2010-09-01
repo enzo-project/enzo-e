@@ -9,6 +9,7 @@
 /// @date     2009-11-17
 /// @todo     Replace ghosts/centering dynamic allocated arrays with vector to avoid big three
 /// @todo     Split into "global" and "field-specific" attributes to reduce class size
+/// @todo     Support temporary fields, e.g. temperature or gravitational potential
 /// @brief    Declaration for the FieldDescr class
 
 enum field_action_type {
