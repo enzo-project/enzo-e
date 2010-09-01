@@ -11,31 +11,60 @@ class Patch : public CBase_Patch
   
 public:
 
-  Patch(int patch_count, int patch_size, int cycles_max,
+  /// Create a Patch object
+  Patch(int patch_count, 
+	int patch_size, 
+	int cycles_max, 
 	CProxy_Main main_proxy) ;
+
+  /// Delete a Patch object
   ~Patch() ;
 
+  /// Migrate a Patch object
   Patch(CkMigrateMessage *) ;
 
-public: // entry methods
+public: // parallel methods
 
+  /// Initial patch advance, ending with receive_()
   void p_evolve();
+
+  /// Perform one time step of the computation, ending with main::p_next()
+  void compute_();
+
+  /// [FORK] Calls p_receive() for each face
+  void receive_ ();
+
+  /// [JOIN] Receive a single face, the last continues with compute_()
   void p_receive(int axis, int face, int n, double * buffer);
 
 private: // functions
 
+  /// Allocate values and buffers, called from constructor
+  void allocate_();
+
+  /// Set initial conditions, called from constructor
   void initialize_();
 
-  void allocate_();
-  void compute_();
-
+  /// Clear boundary values
   bool clear_boundary_ (int axis, int face, double * buffer);
+
+  /// Copy values from a face to a buffer
   void face_to_buffer_ (int axis, int face, double * buffer);
+
+  /// Copy values from a buffer to ghosts
   void buffer_to_ghost_(int axis, int face, double * buffer);
+
+  /// Display values to stdout
   void print_ ();
+
+  /// Write data to an HDF5 file
   void store_ ();
+
+  /// Return the local sum-of-squares
   double norm_ ();
-  int id_();
+
+//   /// Return the Patch ID
+//   int id_();
 
 private: // attributes
 

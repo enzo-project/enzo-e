@@ -94,12 +94,12 @@ void Patch::allocate_()
   buffer_[2][1] = new double [nax_*nay_*ngz_];
 }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-int Patch::id_()
-{
-  return thisIndex.x + nbx_*(thisIndex.y + nby_*thisIndex.z); 
-};
+// int Patch::id_()
+// {
+//   return thisIndex.x + nbx_*(thisIndex.y + nby_*thisIndex.z); 
+// };
 
 //----------------------------------------------------------------------
 
@@ -147,6 +147,7 @@ void Patch::p_receive(int axis, int face, int n, double * buffer_ghost)
 
   buffer_to_ghost_(axis, face, buffer_ghost);
 
+  
   if (receives_.wait()) {
     compute_();
   }
@@ -164,9 +165,6 @@ void Patch::compute_()
   double * values_old = new double [nax_*nay_*naz_];
   for (int i=0; i<nax_*nay_*naz_; i++) values_old[i] = values_[i];
 
-  //  int count = (thisIndex.x + thisIndex.y + thisIndex.z == 0) ? 10000 : 0;
-  //  int count = 0;
-  //  for (int c=count; c>=0; c--) {
   for (int iz=izl_; iz<izu_; iz++) {
     for (int iy=iyl_; iy<iyu_; iy++) {
       for (int ix=ixl_; ix<ixu_; ix++) {
@@ -176,11 +174,12 @@ void Patch::compute_()
 			 values_old[i-dz] + values_old[i+dz]);
       }
     }
-    //  }
   }
-  //  print_();
+
   delete [] values_old;
+
   store_();
+
   main_proxy_.p_next(thisIndex.x,thisIndex.y,thisIndex.z,norm_());
 
   // 
@@ -200,6 +199,15 @@ void Patch::p_evolve()
   face_to_buffer_(2,0,buffer_[2][0]);
   face_to_buffer_(2,1,buffer_[2][1]);
       
+  receive_();
+
+  // (...execution continued in last receive executed locally)
+}
+
+//======================================================================
+
+void Patch::receive_()
+{
   CProxy_Patch patch = thisProxy;
 
   int ix = thisIndex.x;
@@ -223,35 +231,33 @@ void Patch::p_evolve()
   patch(ix,iym,iz).p_receive(1,1,ny,buffer_[1][0]);
   patch(ix,iy,izp).p_receive(2,0,nz,buffer_[2][1]);
   patch(ix,iy,izm).p_receive(2,1,nz,buffer_[2][0]);
-
-  // (...execution continued in last receive executed locally)
 }
 
 //======================================================================
 
 bool Patch::clear_boundary_(int axis, int face, double * buffer)
 {
-//   if ((axis == 0 && face == 0 && thisIndex.x == 0) ||
-//       (axis == 0 && face == 1 && thisIndex.x == nbx_-1)) {
-//     for (int i=0; i<ngx_*nay_*naz_; i++) {
-//       buffer[i] = 0.0;
-//     }
-//     return true;
-//   } else if ((axis == 1 && face == 0 && thisIndex.y == 0) ||
-// 	     (axis == 1 && face == 1 && thisIndex.y == nby_-1)) {
-//     for (int i=0; i<nax_*ngy_*naz_; i++) {
-//       buffer[i] = 0.0;
-//     }
-//     return true;
-//   } else if ((axis == 2 && face == 0 && thisIndex.z== 0) ||
-// 	     (axis == 2 && face == 1 && thisIndex.z == nbz_-1)) {
-//     for (int i=0; i<nax_*nay_*ngz_; i++) {
-//       buffer[i] = 0.0;
-//     }
-//     return true;
-//   } else {
+  if ((axis == 0 && face == 0 && thisIndex.x == 0) ||
+      (axis == 0 && face == 1 && thisIndex.x == nbx_-1)) {
+    for (int i=0; i<ngx_*nay_*naz_; i++) {
+      buffer[i] = 0.0;
+    }
+    return true;
+  } else if ((axis == 1 && face == 0 && thisIndex.y == 0) ||
+ 	     (axis == 1 && face == 1 && thisIndex.y == nby_-1)) {
+    for (int i=0; i<nax_*ngy_*naz_; i++) {
+      buffer[i] = 0.0;
+    }
+    return true;
+  } else if ((axis == 2 && face == 0 && thisIndex.z== 0) ||
+ 	     (axis == 2 && face == 1 && thisIndex.z == nbz_-1)) {
+    for (int i=0; i<nax_*nay_*ngz_; i++) {
+      buffer[i] = 0.0;
+    }
+    return true;
+  } else {
     return false;
-//   }
+   }
 }
 
 //======================================================================
