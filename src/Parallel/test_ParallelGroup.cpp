@@ -8,7 +8,6 @@
 /// @brief    Program implementing unit tests for the Group hierarchy of classes
 
 #include "cello.hpp"
-#include "mpi.h" 
 #include "parallel.hpp"
 #include "test.hpp"
 

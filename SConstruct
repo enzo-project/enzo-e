@@ -133,7 +133,6 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
 	perf_flags = ''
 
    flags = opt_flags + ' ' + debug_flags + ' ' + perf_flags + ' '
-   print flags
    parallel_run = charm_path + "/bin/charmrun +p4 "
    parallel_type = "charm"
    serial_run   = ""
@@ -177,23 +176,58 @@ elif (platform == 'triton'):
 #--------------------------------------------------
 elif (platform == 'ncsa-bd'):
 #--------------------------------------------------
-   parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
-   serial_run   = ""
-   parallel_type = "mpi"
+   parallel_run = charm_path + "/bin/charmrun +p4 "
+   opt_flags = '-O3 -qhot -q64'
+   debug_flags = ''
+
+   flags = opt_flags + ' ' + debug_flags + ' '
+   serial_run    = ""
+   cc = '/opt/ibmcmp/vac/11.1/bin/xlc_r'
+   fc = '/opt/ibmcmp/xlf/13.1/bin/xlf_r'
+
+   parallel_type = "charm"
    env = Environment (
       ARFLAGS  = 'r',
-      CCFLAGS = '-O3 -qhot -q64 -D H5_USE_16_API',
-      CC      = 'mpcc',	
-      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
+      CCFLAGS = flags,
+      CC      = cc,
+      CPPDEFINES = ['NO_FREETYPE','H5_USE_16_API'],
 #      CPPDEFPREFIX = '-WF,-D',
       CPPPATH = ['/home/bordner/include', '#/include'],
-      CXX     = 'mpCC',	
+      CXX     = cc,	
       DEFINES = '',
-      FORTRANFLAGS = '-O3 -qhot -q64 -qextname',
+      FORTRANFLAGS = flags + '-I include',
       FORTRANLIBS = 'xlf90',
-      FORTRAN = 'mpfort',
+      FORTRAN = fc,
       LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
-      LINKFLAGS  = '-q64'
+      LINKFLAGS  = flags
+   )
+#--------------------------------------------------
+elif (platform == 'ncsa-bd-serial'):
+#--------------------------------------------------
+   opt_flags = '-O3 -qhot -q64'
+   debug_flags = ''
+   defines = '-D NO_FREETYPE -DH5_USE_16_API'
+   flags = opt_flags + ' ' + debug_flags + ' '
+   parallel_run = ""
+   serial_run    = ""
+   cc = '/opt/ibmcmp/vac/11.1/bin/xlc'
+   fc = '/opt/ibmcmp/xlf/13.1/bin/xlf'
+
+   parallel_type = "serial"
+   env = Environment (
+      ARFLAGS  = 'r',
+      CCFLAGS = flags + defines,
+      CC      = cc,
+#      CPPDEFINES = ['NO_FREETYPE','H5_USE_16_API'],
+#      CPPDEFPREFIX = '-WF,-D',
+      CPPPATH = ['/home/bordner/include', '#/include'],
+      CXX     = cc,	
+      DEFINES = '',
+      FORTRANFLAGS = flags + '-I include',
+      FORTRANLIBS = 'xlf90',
+      FORTRAN = fc,
+      LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
+      LINKFLAGS  = flags
    )
 else:
    print
