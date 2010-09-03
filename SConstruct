@@ -160,7 +160,7 @@ elif (platform == 'triton'):
    parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    serial_run   = ""
    parallel_type = "mpi"
-   path_hdf5 = '/opt/pgi/hdf5_pgi'
+   path_hdf5 = '/opt/hdf5/pgi'
    env = Environment (
       CC      = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],

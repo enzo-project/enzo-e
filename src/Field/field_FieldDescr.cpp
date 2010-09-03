@@ -143,9 +143,9 @@ bool FieldDescr::is_field(const std::string name) const
 //----------------------------------------------------------------------
 
 int FieldDescr::field_id(const std::string name) const 
-  throw(std::out_of_range)
+  throw()
 {
-  return field_id_.at(name);
+  return field_id_[name];
 }
 
 //----------------------------------------------------------------------
@@ -175,9 +175,9 @@ bool FieldDescr::is_group(const std::string name) const
 //----------------------------------------------------------------------
 
 int FieldDescr::group_id(const std::string name) const 
-  throw(std::out_of_range)
+  throw()
 {
-  return group_id_.at(name);
+  return group_id_[name];
 }
 
 //----------------------------------------------------------------------
