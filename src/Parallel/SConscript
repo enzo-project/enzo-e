@@ -1,12 +1,18 @@
 
-SConscript('jacobi/SConscript')
-
 #------------------------------
 # IMPORTS
 #------------------------------
 
 Import('env')
 Import('parallel_type')
+
+
+#------------------------------
+# DIRECTORIES
+#------------------------------
+
+if (parallel_type == "charm"):
+	SConscript('jacobi/SConscript')
 
 #------------------------------
 # DEPENDENCIES
