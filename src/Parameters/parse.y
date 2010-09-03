@@ -25,6 +25,7 @@
 int yylex (void);
 void yyrestart  (FILE * input_file );
 void yyerror(char *s);
+void yylex_destroy();
 
 #include "parse.tab.h"
 
@@ -228,14 +229,15 @@ const char * op_name[] = {
   {
     /* Create the new node */
 
+    // MEMORY LEAK
      struct param_struct * p = 
        (struct param_struct *) malloc (sizeof (struct param_struct));
 
    /* Fill in the non-type-specific values for the new node */
 
-     p->group    = (current_group) ?    strdup(current_group) : 0;
-     p->subgroup = (current_subgroup) ? strdup(current_subgroup) : 0;
-     p->parameter = (current_parameter) ? strdup(current_parameter) : 0;
+     p->group     = (current_group)     ? strdup(current_group)     : 0;     // MEMORY LEAK
+     p->subgroup  = (current_subgroup)  ? strdup(current_subgroup)  : 0;     // MEMORY LEAK
+     p->parameter = (current_parameter) ? strdup(current_parameter) : 0;     // MEMORY LEAK
 
      current_type = enum_parameter_unknown;
 
@@ -293,9 +295,9 @@ const char * op_name[] = {
   /* New empty parameter assignment: FIRST NODE IN LIST IS A SENTINEL  */
   struct param_struct * new_param_sentinel ()
   {
+
     struct param_struct * p = 
-      (struct param_struct *) malloc (sizeof (struct param_struct));  // MEMORY LEAK
-    printf ("DEBUG: %s:%d new sentinel\n",__FILE__,__LINE__);
+      (struct param_struct *) malloc (sizeof (struct param_struct));
 
     p->group     = NULL;
     p->subgroup  = NULL;
@@ -684,9 +686,10 @@ cello_parameters_read(FILE * fp)
 
   /*   yydebug=1; */
   
-  yyrestart(fp);    // MEMORY LEAK: yy_create_buffer()
+  yyrestart(fp);
 
   yyparse();
+  yylex_destroy();
   param_head = reverse_param(param_head);
   return param_head;
 }
