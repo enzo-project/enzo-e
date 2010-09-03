@@ -38,8 +38,8 @@ void Memory::initialize_() throw ()
     new_calls_   [i] = 0;
     delete_calls_[i] = 0;
   }
-  group_names_[0] = strdup("");
-  group_names_[1] = strdup("memory");
+  group_names_[0] = strdup("");       // MEMORY LEAK
+  group_names_[1] = strdup("memory"); // MEMORY LEAK
 
 #endif
 }
