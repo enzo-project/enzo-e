@@ -122,17 +122,17 @@ elif (platform == 'linux-ampi'):
 elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
 #--------------------------------------------------
 
-   opt_flags = '-O3 '
+   flags_opt = '-O3 '
 
-#   debug_flags = '-memory charmdebug'
-   debug_flags = ''
+#   flags_debug = '-memory charmdebug'
+   flags_debug = ''
 
    if (platform == 'linux-charm-perf'):
 	perf_flags = '-tracemode projections'
    else:
 	perf_flags = ''
 
-   flags = opt_flags + ' ' + debug_flags + ' ' + perf_flags + ' '
+   flags = flags_opt + ' ' + flags_debug + ' ' + perf_flags + ' '
    parallel_run = charm_path + "/bin/charmrun +p4 "
    parallel_type = "charm"
    serial_run   = ""
@@ -160,76 +160,71 @@ elif (platform == 'triton'):
    parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    serial_run   = ""
    parallel_type = "mpi"
+   path_hdf5 = '/opt/pgi/hdf5_pgi'
    env = Environment (
       CC      = 'mpicc',	
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
-      CPPPATH = ['#/include', '/opt/pgi/hdf5_pgi/include'],
+      CPPPATH = ['#/include', path_hdf5 + '/include'],
       CXXFLAGS = '-g -DH5_USE_16_API',
       CFLAGS   = '-g -DH5_USE_16_API',
       CXX     = 'mpicxx',	
       FORTRAN = 'mpif90',
       FORTRANPATH = '#/include',
-      LIBPATH = ['#/lib', '/opt/pgi/hdf5_pgi/lib'],
+      LIBPATH = ['#/lib', path_hdf5 + '/lib'],
       LINKFLAGS = '-pgf90libs',
       ENV = {'PATH' : os.environ['PATH'], 'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
    )
 #--------------------------------------------------
-elif (platform == 'ncsa-bd'):
+elif (platform == 'ncsa-bd' or platform == 'ncsa-bd-serial'):
 #--------------------------------------------------
-   opt_flags = '-O3 -qhot -q64'
-   debug_flags = ''
 
-   flags = opt_flags + ' ' + debug_flags + ' '
-   parallel_run = charm_path + "/bin/charmrun +p4 "
+   if (platform == 'ncsa-bd'):
+      parallel_run = charm_path + "/bin/charmrun +p4 "
+      parallel_type = "charm"
+   elif (platform == 'ncsa-bd-serial'):
+      parallel_run = ""
+      parallel_type = "serial"
+
    serial_run    = ""
-   cc = '/opt/ibmcmp/vac/11.1/bin/xlc_r'
-   fc = '/opt/ibmcmp/xlf/13.1/bin/xlf_r'
-   cxx = '/opt/ibmcmp/vacpp/11.1/bin/xlC_r'
 
-   parallel_type = "charm"
-   env = Environment (
-      ARFLAGS  = 'r',
-      CCFLAGS = flags,
-      CC      = cc,
-      CPPDEFINES = ['NO_FREETYPE','H5_USE_16_API'],
-#      CPPDEFPREFIX = '-WF,-D',
-      CPPPATH = ['/home/bordner/include', '#/include'],
-      CXX     = cxx,	
-      DEFINES = '',
-      FORTRANFLAGS = flags + '-I include',
-      FORTRANLIBS = 'xlf90',
-      FORTRAN = fc,
-      LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
-      LINKFLAGS  = flags
-   )
-#--------------------------------------------------
-elif (platform == 'ncsa-bd-serial'):
-#--------------------------------------------------
-   opt_flags = '-O3 -qhot -q64'
-   debug_flags = ''
+   flags_opt = '-O3 -qhot -q64'
+   flags_debug = ''
+   flags_fort = '-qextname -I include'
+   flags = flags_opt + ' ' + flags_debug + ' '
+
    defines = '-D NO_FREETYPE -DH5_USE_16_API '
-   flags = opt_flags + ' ' + debug_flags + ' '
-   parallel_run = ""
-   serial_run    = ""
-   cc = '/opt/ibmcmp/vac/11.1/bin/xlc_r'
-   fc = '/opt/ibmcmp/xlf/13.1/bin/xlf_r'
 
-   parallel_type = "serial"
+   # Compilers
+
+   path_fc   = '/opt/ibmcmp/xlf/13.1'
+   path_cc   = '/opt/ibmcmp/vac/11.1'
+   path_cxx  = '/opt/ibmcmp/vacpp/11.1'
+
+   cc = path_cc + '/bin/xlc_r'
+   fc = path_fc + '/bin/xlf_r'
+   cxx = path_cxx + '/bin/xlC_r'
+
+   lib_fc = path_fc + '/lib64'
+
+   # HDF5 
+
+   path_hdf5 = '/opt/hdf5-1.8.4-patch1-64bit'
+   lib_hdf5 = path_hdf5 + '/lib'
+   inc_hdf5 = path_hdf5 + '/include'
+
    env = Environment (
       ARFLAGS  = 'r',
-      CCFLAGS = flags + defines ,
+      CCFLAGS = flags + defines,
       CC      = cc,
-#      CPPDEFINES = ['NO_FREETYPE','H5_USE_16_API'],
-#      CPPDEFPREFIX = '-WF,-D',
-      CPPPATH = ['/home/bordner/include', '#/include'],
-      CXX     = cc,	
-      CXXFLAGS = flags + defines + '-qsourcetype=c++ ',
+      CPPPATH = ['/home/bordner/include', '#/include', inc_hdf5],
+      CXX     = cxx,	
+      CXXFLAGS = flags + defines,
       DEFINES = '',
-      FORTRANFLAGS = flags + '-I include',
+      FORTRANFLAGS = flags + flags_fort,
       FORTRANLIBS = 'xlf90',
       FORTRAN = fc,
-      LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
-      LINKFLAGS  = flags + '-qsourcetype=c++ '
+      LIBPATH = ['#/lib','/home/bordner/lib',lib_fc,lib_hdf5],
+      LINKFLAGS  = flags
    )
 else:
    print

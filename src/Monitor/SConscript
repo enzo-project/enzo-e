@@ -11,7 +11,7 @@ Import('parallel_type')
 
 components = ['error', 'cello']
 testing    = ['parallel']
-libraries  = ['png','boost_thread-mt']
+libraries  = ['png']
 
 #------------------------------
 # ENVIRONMENTS

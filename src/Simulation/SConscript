@@ -11,7 +11,7 @@ Import('parallel_type')
 
 components = ['error','parameters','monitor','memory','enzo','parallel','user','enzo-ppm','data','field','cello']
 
-libraries = ['png','boost_thread-mt','$FORTRANLIBS']
+libraries = ['png','$FORTRANLIBS']
 
 #------------------------------
 # ENVIRONMENTS

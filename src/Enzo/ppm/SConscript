@@ -13,7 +13,7 @@ Import('parallel_type')
 #------------------------------
 
 components = ['user','field', 'parameters', 'error','disk','memory','monitor','parallel','cello','enzo']
-libraries  = ['hdf5', 'png','boost_thread-mt', '$FORTRANLIBS']
+libraries  = ['hdf5', 'png', '$FORTRANLIBS']
 
 #------------------------------
 # ENVIRONMENTS

@@ -9,7 +9,7 @@ Import('env')
 #------------------------------
 
 components = ['user', 'data', 'field', 'error','parallel', 'monitor', 'parameters', 'memory', 'cello']
-libraries  = ['png', 'boost_thread-mt', '$FORTRANLIBS']
+libraries  = ['png', '$FORTRANLIBS']
 
 #------------------------------
 # ENVIRONMENTS
