@@ -128,20 +128,20 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
    flags_debug = ''
 
    if (platform == 'linux-charm-perf'):
-	perf_flags = '-tracemode projections'
+	flags_charm = '-tracemode projections'
    else:
-	perf_flags = ''
+	flags_charm = ''
 
-   flags = flags_opt + ' ' + flags_debug + ' ' + perf_flags + ' '
+   flags = flags_opt + ' ' + flags_debug + ' '
    parallel_run = charm_path + "/bin/charmrun +p4 "
    parallel_type = "charm"
    serial_run   = ""
   
    env = Environment(
-      CC          = charm_path + '/bin/charmc -language charm++ '+flags,
+      CC          = charm_path + '/bin/charmc -language charm++ '+flags+flags_charm,
       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_CHARM'],
       CPPPATH     = '#/include',
-      CXX         = charm_path + '/bin/charmc -language charm++ '+flags,
+      CXX         = charm_path + '/bin/charmc -language charm++ '+flags+flags_charm,
       CXXFLAGS    = flags,
       CFLAGS      = flags,
       ENV         = os.environ,

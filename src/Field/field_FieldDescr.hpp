@@ -53,7 +53,7 @@ public: // functions
   bool is_field(const std::string name) const throw();
 
   /// Return the integer handle for the named field
-  int field_id(const std::string name) const throw();
+  int field_id(const std::string name) throw();
 
 
   /// Return the number of groups
@@ -66,7 +66,7 @@ public: // functions
   bool is_group(const std::string name) const throw();
 
   /// Return the integer handle for the named group
-  int group_id(const std::string name) const throw();
+  int group_id(const std::string name) throw();
 
 
   /// Return whether the given field is in the given group

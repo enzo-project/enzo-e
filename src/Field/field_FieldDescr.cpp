@@ -142,7 +142,7 @@ bool FieldDescr::is_field(const std::string name) const
 
 //----------------------------------------------------------------------
 
-int FieldDescr::field_id(const std::string name) const 
+int FieldDescr::field_id(const std::string name)
   throw()
 {
   return field_id_[name];
@@ -166,7 +166,7 @@ std::string FieldDescr::group_name(int id_group) const
 
 //----------------------------------------------------------------------
 
-bool FieldDescr::is_group(const std::string name) const 
+bool FieldDescr::is_group(const std::string name) const
   throw()
 { 
   return (group_id_.find(name) != group_id_.end());
@@ -174,7 +174,7 @@ bool FieldDescr::is_group(const std::string name) const
 
 //----------------------------------------------------------------------
 
-int FieldDescr::group_id(const std::string name) const 
+int FieldDescr::group_id(const std::string name)
   throw()
 {
   return group_id_[name];

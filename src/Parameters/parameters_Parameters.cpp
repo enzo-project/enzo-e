@@ -618,8 +618,8 @@ Param * Parameters::list_element_ (std::string parameter, int index) throw()
   if (list == NULL) {
     char message [ ERROR_MESSAGE_LENGTH ];
     sprintf (message, 
-	     "uninitialized parameter %s accessed\n",
-	     parameter.c_str());
+	     "uninitialized parameter %s[%d] accessed\n",
+	     parameter.c_str(),index);
     WARNING_MESSAGE("Parameters::list_element_",message);
   } else {
     int list_length = list->value_list_->size();

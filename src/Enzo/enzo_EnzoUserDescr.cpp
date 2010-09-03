@@ -44,11 +44,12 @@ UserMethod *
 EnzoUserDescr::create_user_method_ ( std::string method_name ) throw ()
 /// @param method_name   Name of the method to create
 {
+  printf ("%s:%d '%s'\n",__FILE__,__LINE__,method_name.c_str());
   if (method_name == "ppm") {
     return new MethodEnzoPpm (global_,enzo_);
   } else {
     char buffer[80];
-    sprintf (buffer,"Unknown method %s",method_name.c_str());
+    sprintf (buffer,"Unknown method '%s'",method_name.c_str());
     global_->error()->error_ (__FILE__,__LINE__,"EnzoUserDescr::create_method",
 				       buffer);
     return 0;

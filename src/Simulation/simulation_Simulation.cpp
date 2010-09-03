@@ -92,12 +92,17 @@ Simulation::Simulation(Global * global)
       (parameters->list_value_string(i, "fields", "unknown"));
   }
 
+
+  // CREATE ENZO DESCRIPTOR OBJECT
+
+  user_descr_ = new EnzoUserDescr(global_);
+  // WARNING: EnzoUserDescr constructor changes parameters subgroup!!
+
   // --------------------------------------------------
   // Initiazize user method descriptors
   // --------------------------------------------------
 
   parameters->set_current_group("Method");
-
   int method_count = parameters->list_length("sequence");
 
   if (method_count == 0) {
@@ -105,14 +110,12 @@ Simulation::Simulation(Global * global)
 		   "List parameter 'Method sequence' must have length greater than zero");
   }
 
-  // CREATE ENZO DESCRIPTOR OBJECT
-
-  user_descr_ = new EnzoUserDescr(global_);
 
   for (i=0; i<method_count; i++) {
 
     std::string method_name = parameters->list_value_string(i,"sequence");
 
+    printf ("%s:%d '%s'\n",__FILE__,__LINE__,method_name.c_str());
     UserMethod * user_method = user_descr_->add_user_method(method_name);
 
     user_method->initialize(data_descr_);

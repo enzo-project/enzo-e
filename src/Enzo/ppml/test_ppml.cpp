@@ -42,7 +42,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
-  Monitor * monitor = new Monitor;
+  // Create global objects
+
+  Global     * global = new Global;
+
+  Monitor * monitor = global->monitor();
 
   // Check command line arguments
 
@@ -77,7 +81,7 @@ PARALLEL_MAIN_BEGIN
 
   // Initialize for generic hydrodynamics
 
-  EnzoDescr enzo;
+  EnzoDescr enzo(global);
 
   enzo.initialize_hydro ();
 
