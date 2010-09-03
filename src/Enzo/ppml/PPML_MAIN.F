@@ -1,8 +1,6 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
-      /* #include "error.def" */
-
       Subroutine PPML(dn,vx,vy,vz,bx,by,bz,
      &       dnrx,vxrx,vyrx,vzrx,bxrx,byrx,bzrx,         
      &       dnry,vxry,vyry,vzry,bxry,byry,bzry,         

@@ -176,14 +176,15 @@ elif (platform == 'triton'):
 #--------------------------------------------------
 elif (platform == 'ncsa-bd'):
 #--------------------------------------------------
-   parallel_run = charm_path + "/bin/charmrun +p4 "
    opt_flags = '-O3 -qhot -q64'
    debug_flags = ''
 
    flags = opt_flags + ' ' + debug_flags + ' '
+   parallel_run = charm_path + "/bin/charmrun +p4 "
    serial_run    = ""
    cc = '/opt/ibmcmp/vac/11.1/bin/xlc_r'
    fc = '/opt/ibmcmp/xlf/13.1/bin/xlf_r'
+   cxx = '/opt/ibmcmp/vacpp/11.1/bin/xlC_r'
 
    parallel_type = "charm"
    env = Environment (
@@ -193,7 +194,7 @@ elif (platform == 'ncsa-bd'):
       CPPDEFINES = ['NO_FREETYPE','H5_USE_16_API'],
 #      CPPDEFPREFIX = '-WF,-D',
       CPPPATH = ['/home/bordner/include', '#/include'],
-      CXX     = cc,	
+      CXX     = cxx,	
       DEFINES = '',
       FORTRANFLAGS = flags + '-I include',
       FORTRANLIBS = 'xlf90',
@@ -206,28 +207,29 @@ elif (platform == 'ncsa-bd-serial'):
 #--------------------------------------------------
    opt_flags = '-O3 -qhot -q64'
    debug_flags = ''
-   defines = '-D NO_FREETYPE -DH5_USE_16_API'
+   defines = '-D NO_FREETYPE -DH5_USE_16_API '
    flags = opt_flags + ' ' + debug_flags + ' '
    parallel_run = ""
    serial_run    = ""
-   cc = '/opt/ibmcmp/vac/11.1/bin/xlc'
-   fc = '/opt/ibmcmp/xlf/13.1/bin/xlf'
+   cc = '/opt/ibmcmp/vac/11.1/bin/xlc_r'
+   fc = '/opt/ibmcmp/xlf/13.1/bin/xlf_r'
 
    parallel_type = "serial"
    env = Environment (
       ARFLAGS  = 'r',
-      CCFLAGS = flags + defines,
+      CCFLAGS = flags + defines ,
       CC      = cc,
 #      CPPDEFINES = ['NO_FREETYPE','H5_USE_16_API'],
 #      CPPDEFPREFIX = '-WF,-D',
       CPPPATH = ['/home/bordner/include', '#/include'],
       CXX     = cc,	
+      CXXFLAGS = flags + defines + '-qsourcetype=c++ ',
       DEFINES = '',
       FORTRANFLAGS = flags + '-I include',
       FORTRANLIBS = 'xlf90',
       FORTRAN = fc,
       LIBPATH = ['#/lib','/home/bordner/lib','/opt/ibmcmp/xlf/13.1/lib64'],
-      LINKFLAGS  = flags
+      LINKFLAGS  = flags + '-qsourcetype=c++ '
    )
 else:
    print
