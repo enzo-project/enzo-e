@@ -63,31 +63,16 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_INIT;
 
   GroupProcess * parallel = GroupProcess::create();
-
-  // Create a struct of enzo data (won't work as global data for CHARM++, threading, etc)
-
-  Global * global = new Global;
-
   unit_init(parallel->rank(), parallel->size());
+
+
 
   // Set necessary parameters for MethodEnzoPpm
 
+  Global     * global = new Global;
+
   Monitor    * monitor    = global->monitor();
   Parameters * parameters = global->parameters();
-
-  parameters->set_current_group("Physics");
-  parameters->set_integer ("dimensions",2);
-  parameters->set_scalar  ("gamma",1.4);
-
-  int nx,ny,nz;
-  nx=100;
-  ny=100;
-  nz=1;
-
-  int gx,gy,gz;
-  gx=3;
-  gy=3;
-  gz=0;
 
   FILE * fp = fopen ("input/test_MethodEnzoPpm.in","r");
   if (fp) {
@@ -119,9 +104,25 @@ PARALLEL_MAIN_BEGIN
   UserControl  * user_control  = user_descr->set_user_control("ignored");
   UserTimestep * user_timestep = user_descr->set_user_timestep("ignored");
 
+  unit_class ("UserDescr");
+
+  unit_func("initialize");
+
+  user_descr -> initialize(data_descr);
+
   // Set missing Enzo parameters
 
   EnzoDescr * enzo = user_descr->enzo();
+
+  int nx,ny,nz;
+  nx=100;
+  ny=100;
+  nz=1;
+
+  int gx,gy,gz;
+  gx=3;
+  gy=3;
+  gz=0;
 
   enzo->BoundaryRank = 2;
   enzo->BoundaryDimension[0] = nx + 2*gx;
@@ -129,15 +130,10 @@ PARALLEL_MAIN_BEGIN
   enzo->BoundaryDimension[2] = nz + 2*gz;
 
   
-  unit_class ("MethodEnzoPpm");
-
-  unit_func("initialize");
-
-  user_control ->initialize(data_descr);
-  user_method  ->initialize(data_descr);
-  user_timestep->initialize(data_descr);
-
   // Initialize field_block
+
+  unit_class ("FieldBlock");
+  unit_func("initialize");
 
   field_block->set_field_descr(field_descr);
   field_block->set_dimensions(nx,ny);
@@ -186,7 +182,10 @@ PARALLEL_MAIN_BEGIN
 
   printf ("Initial\n");
 
-  int indices[] = {index_density,index_velocity_x,index_velocity_y,index_total_energy};
+  int indices[] = {index_density,
+		   index_velocity_x,
+		   index_velocity_y,
+		   index_total_energy};
 
   // Set stopping criteria
 
@@ -198,15 +197,13 @@ PARALLEL_MAIN_BEGIN
   double time = 0;
   int cycle = 0;
   //  initialize_implosion(nx+gx);
-  user_method  ->initialize_block(data_block);
 
   // Initial data dump
   output_fields(field_block,cycle,4,indices,monitor);
 
   while (time < time_final && cycle <= cycle_final) {
 
-    user_control ->initialize_block(data_block);
-    user_timestep->initialize_block(data_block);
+    user_descr ->initialize_block(data_block);
 
     field_block->enforce_boundary(boundary_reflecting);
 
@@ -217,9 +214,7 @@ PARALLEL_MAIN_BEGIN
 
     user_method->advance_block(data_block,time,dt);
 
-    user_timestep->finalize_block(data_block);
-    user_control ->finalize_block(data_block);
-    user_method  ->finalize_block(data_block);
+    user_descr->finalize_block(data_block);
 
     ++cycle;
     time += MIN(dt,time_final-time);
@@ -228,10 +223,9 @@ PARALLEL_MAIN_BEGIN
     if (cycle % cycle_output == 0) {
       output_fields(field_block,cycle,4,indices,monitor);
     }
-    user_timestep->finalize(data_descr);
-    user_control ->finalize(data_descr);
   }
-  user_method  ->finalize(data_descr);
+
+  user_descr->finalize(data_descr);
 
   unit_finalize();
 

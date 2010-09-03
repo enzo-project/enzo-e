@@ -1,13 +1,19 @@
 Domain {
    extent = [0.0, 0.3, 0.0, 0.3];
-   dimension = 2;
 }
 Stopping {
   time = 2.5;
   cycle = 100;
 }
-
+Mesh {
+   root_size = [100, 100];
+}
+Field {
+   ghosts = [3,3];
+}
 Physics {
+   dimensions = 2;
+   gamma = 1.4;
    cosmology = false;
 #    cosmology {
 #        comoving_box_size = 64.0;

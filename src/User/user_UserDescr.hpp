@@ -30,7 +30,7 @@ public: // interface
   {
     delete user_control_;
     delete user_timestep_;
-    for (int i=0; i<user_method_.size(); i++) {
+    for (unsigned i=0; i<user_method_.size(); i++) {
       delete user_method_[i];
     }
   }
@@ -50,8 +50,9 @@ public: // interface
   /// Set the control method
   UserControl * set_user_control (std::string name_user_control)
   {
-    ASSERT("UserDescr::set_user_control",
-	   "",user_control_ == 0);
+    if (user_control_ != 0) {
+      WARNING_MESSAGE("UserDescr::set_user_control","Resetting user control");
+    }
     user_control_ = create_user_control_(name_user_control);
     return user_control_;
   };
@@ -63,8 +64,9 @@ public: // interface
   /// Return the timestep method
   UserTimestep * set_user_timestep (std::string name_user_timestep)
   {
-    ASSERT("UserDescr::set_user_timestep",
-	   "",user_timestep_ == 0);
+    if (user_timestep_ != 0) {
+      WARNING_MESSAGE("UserDescr::set_user_timestep","Resetting user timestep");
+    }
     user_timestep_ = create_user_timestep_(name_user_timestep);
     return user_timestep_;
   };
@@ -72,6 +74,84 @@ public: // interface
   /// Return the timestep method
   UserTimestep * user_timestep ()
   { return user_timestep_; };
+
+
+  /// Initialize user classes before a simulation
+  void initialize(DataDescr * data_descr)
+  {
+    ASSERT("UserDescr::initialize()","user_control_ == NULL",
+	   user_control_!=0);
+    ASSERT("UserDescr::initialize()","user_timestep_ == NULL",
+	   user_timestep_!=0);
+    ASSERT("UserDescr::initialize()","user_method_.size()==0",
+	   user_method_.size()>0);
+    user_control_ ->initialize(data_descr);
+    user_timestep_->initialize(data_descr);
+    for (int i=0; i<user_method_.size(); i++) {
+      user_method_[i]->initialize(data_descr);
+    }
+  }
+
+  /// Finalize user classes after a simulation
+  void finalize(DataDescr * data_descr)
+  {
+    ASSERT("UserDescr::finalize()","user_control_ == NULL",
+	   user_control_!=0);
+    ASSERT("UserDescr::finalize()","user_timestep_ == NULL",
+	   user_timestep_!=0);
+    ASSERT("UserDescr::finalize()","user_method_.size()==0",
+	   user_method_.size()>0);
+    for (int i=0; i<user_method_.size(); i++) {
+      user_method_[i]->finalize(data_descr);
+    }
+    user_timestep_->finalize(data_descr);
+    user_control_ ->finalize(data_descr);
+  }
+
+  /// Initialize user classes before advancing all blocks one cycle
+  void initialize_cycle(DataDescr * data_descr)
+  {
+    INCOMPLETE_MESSAGE("UserDescr::initialize_cycle","Not implemented");
+  }
+
+  /// Finalize user classes after advancing all blocks one cycle
+  void finalize_cycle(DataDescr * data_descr)
+  {
+    INCOMPLETE_MESSAGE("UserDescr::finalize_cycle","Not implemented");
+  }
+
+  /// Initialize user classes before advancing a block
+  void initialize_block(DataBlock * data_block)
+  {
+    ASSERT("UserDescr::initialize_block()","user_control_ == NULL",
+	   user_control_!=0);
+    ASSERT("UserDescr::initialize_block()","user_timestep_ == NULL",
+	   user_timestep_!=0);
+    ASSERT("UserDescr::initialize_block()","user_method_.size()==0",
+	   user_method_.size()>0);
+    user_control_ ->initialize_block(data_block);
+    user_timestep_->initialize_block(data_block);
+    for (int i=0; i<user_method_.size(); i++) {
+      user_method_[i]->initialize_block(data_block);
+    }
+  }
+
+  /// Finalize user classes after advancing a block
+  void finalize_block(DataBlock * data_block)
+  {
+    ASSERT("UserDescr::finalize_block()","user_control_ == NULL",
+	   user_control_!=0);
+    ASSERT("UserDescr::finalize_block()","user_timestep_ == NULL",
+	   user_timestep_!=0);
+    ASSERT("UserDescr::finalize_block()","user_method_.size()==0",
+	   user_method_.size()>0);
+    for (int i=0; i<user_method_.size(); i++) {
+      user_method_[i]->finalize_block(data_block);
+    }
+    user_timestep_->finalize_block(data_block);
+    user_control_ ->finalize_block(data_block);
+  }
+
 
 protected: // functions
 

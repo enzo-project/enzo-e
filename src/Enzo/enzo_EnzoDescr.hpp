@@ -31,11 +31,13 @@ class EnzoDescr {
 public: // interface
 
   /// Constructor
-  EnzoDescr() throw();
+  EnzoDescr(Global * global) throw();
 
   /// Destructor
   ~EnzoDescr() throw();
 
+  /// read_parameters();
+  void read_parameters(Parameters * parameters) throw();
 
   float ComputeTimeStep();
   float sum_field (int field);

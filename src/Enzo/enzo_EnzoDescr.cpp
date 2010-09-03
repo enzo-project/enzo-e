@@ -6,12 +6,13 @@
 /// @date     Tue Aug 31 15:38:36 PDT 2010
 /// @brief    Implementation of EnzoDescr methods
 
-
+#include "global.hpp"
+#include "parameters.hpp"
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
-EnzoDescr::EnzoDescr() throw ()
+EnzoDescr::EnzoDescr(Global * global) throw ()
   : ComovingCoordinates(0),
     UseMinimumPressureSupport(0),
     MinimumPressureSupportParameter(0),
@@ -112,6 +113,61 @@ EnzoDescr::EnzoDescr() throw ()
       }
     }
   }
+
+  read_parameters(global->parameters());
+
+}
+
+//----------------------------------------------------------------------
+
+void
+EnzoDescr::read_parameters(Parameters * parameters) throw ()
+{
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Physics");
+  //--------------------------------------------------
+
+  ComovingCoordinates  = parameters->value_logical ("cosmology",false);
+  Gamma                = parameters->value_scalar  ("gamma",5.0/3.0);
+  CycleNumber = 0;
+
+  // PPM parameters
+
+  //--------------------------------------------------
+  parameters->set_current_subgroup ("cosmology");
+  //--------------------------------------------------
+
+  InitialRedshift   = parameters->value_scalar ("initial_redshift",  20.0);
+  HubbleConstantNow = parameters->value_scalar ("hubble_constant_now",0.701);
+  OmegaLambdaNow    = parameters->value_scalar ("omega_lambda_now",   0.721);
+  OmegaMatterNow    = parameters->value_scalar ("omega_matter_now",   0.279);
+  MaxExpansionRate  = parameters->value_scalar ("max_expansion_rate", 0.01);
+  ComovingBoxSize   = parameters->value_scalar ("comoving_box_size", 64.0);
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Method","ppm");
+  //--------------------------------------------------
+
+  PressureFree = parameters->value_scalar("pressure_free",false);
+  UseMinimumPressureSupport 
+    =              parameters->value_logical("use_minimum_pressure_support",false);
+  MinimumPressureSupportParameter 
+    =              parameters->value_integer("minimum_pressure_support_parameter",100);
+  PPMFlatteningParameter = parameters->value_logical ("flattening", false);
+  PPMDiffusionParameter  = parameters->value_logical ("diffusion",  false);
+  PPMSteepeningParameter = parameters->value_logical ("steepening", false);
+
+  double floor_default = 1e-6;
+  pressure_floor       = parameters->value_scalar("pressure_floor",      floor_default);
+  density_floor        = parameters->value_scalar("density_floor",       floor_default);
+  temperature_floor    = parameters->value_scalar("temperature_floor",   floor_default);
+  number_density_floor = parameters->value_scalar("number_density_floor",floor_default);
+
+  DualEnergyFormalism     = parameters->value_logical ("dual_energy",false);
+  DualEnergyFormalismEta1 = parameters->value_scalar  ("dual_energy_eta_1",0.001);
+  DualEnergyFormalismEta2 = parameters->value_scalar  ("dual_energy_eta_1",0.1);
+
 }
 
 //----------------------------------------------------------------------

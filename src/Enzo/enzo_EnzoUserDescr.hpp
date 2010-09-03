@@ -18,28 +18,28 @@ class EnzoUserDescr : public UserDescr {
 public: // interface
 
   /// Constructor
-  EnzoUserDescr(Global * global) throw()
-    : UserDescr(global),
-      enzo_(new EnzoDescr)
-  {};
+  EnzoUserDescr(Global * global) throw();
 
   ~EnzoUserDescr() throw()
   { delete enzo_; }
 
   /// Return the Enzo object created in EnzoUserDescr's constructor
-  EnzoDescr * enzo()
+  EnzoDescr * enzo() throw ()
   { return enzo_; };
 
 protected: // functions
 
+  /// Read parameters
+  void read_parameters_(Parameters * parameters) throw ();
+
   /// Create named control method.
-  UserControl * create_user_control_ (std::string name_user_control);
+  UserControl * create_user_control_ (std::string name_user_control) throw ();
 
   /// Create named timestep method.
-  UserTimestep * create_user_timestep_ (std::string name_user_timestep);
+  UserTimestep * create_user_timestep_ (std::string name_user_timestep) throw ();
 
   /// Create named user method.
-  UserMethod * create_user_method_ (std::string name_user_method);
+  UserMethod * create_user_method_ (std::string name_user_method) throw ();
 
 private: // attributes
 

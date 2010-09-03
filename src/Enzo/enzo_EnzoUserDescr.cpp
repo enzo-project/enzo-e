@@ -9,27 +9,39 @@
 
 #include "cello.hpp"
 #include "global.hpp"
+#include "parameters.hpp"
 
 #include "user.hpp"
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
-UserControl * EnzoUserDescr::create_user_control_ (std::string control_name)
+EnzoUserDescr::EnzoUserDescr(Global * global) throw ()
+  : UserDescr(global),
+    enzo_(new EnzoDescr(global))
+{
+  enzo_->read_parameters(global->parameters());
+}
+//----------------------------------------------------------------------
+
+UserControl * 
+EnzoUserDescr::create_user_control_ (std::string control_name) throw ()
 {
   return new MethodEnzoControl(global_,enzo_);
 }
 
 //----------------------------------------------------------------------
 
-UserTimestep * EnzoUserDescr::create_user_timestep_ (std::string timestep_name)
+UserTimestep * 
+EnzoUserDescr::create_user_timestep_ ( std::string timestep_name ) throw ()
 {
   return new MethodEnzoTimestep(enzo_);
 }
 
 //----------------------------------------------------------------------
 
-UserMethod * EnzoUserDescr::create_user_method_ (std::string method_name)
+UserMethod * 
+EnzoUserDescr::create_user_method_ ( std::string method_name ) throw ()
 /// @param method_name   Name of the method to create
 {
   if (method_name == "ppm") {

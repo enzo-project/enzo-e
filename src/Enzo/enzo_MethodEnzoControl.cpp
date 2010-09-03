@@ -29,50 +29,6 @@ void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
 
   Parameters * parameters = global_ -> parameters();
 
-  //--------------------------------------------------
-  parameters->set_current_group ("Physics");
-  //--------------------------------------------------
-
-  enzo_->ComovingCoordinates  = parameters->value_logical ("cosmology",false);
-  enzo_->Gamma                = parameters->value_scalar  ("gamma",5.0/3.0);
-  enzo_->CycleNumber = 0;
-
-  // PPM parameters
-
-
-  //--------------------------------------------------
-  parameters->set_current_subgroup ("cosmology");
-  //--------------------------------------------------
-
-  enzo_->InitialRedshift   = parameters->value_scalar ("initial_redshift",  20.0);
-  enzo_->HubbleConstantNow = parameters->value_scalar ("hubble_constant_now",0.701);
-  enzo_->OmegaLambdaNow    = parameters->value_scalar ("omega_lambda_now",   0.721);
-  enzo_->OmegaMatterNow    = parameters->value_scalar ("omega_matter_now",   0.279);
-  enzo_->MaxExpansionRate  = parameters->value_scalar ("max_expansion_rate", 0.01);
-  enzo_->ComovingBoxSize   = parameters->value_scalar ("comoving_box_size", 64.0);
-
-  //--------------------------------------------------
-  parameters->set_current_group ("Method","ppm");
-  //--------------------------------------------------
-
-  enzo_->PressureFree = parameters->value_scalar("pressure_free",false);
-  enzo_->UseMinimumPressureSupport 
-    =              parameters->value_logical("use_minimum_pressure_support",false);
-  enzo_->MinimumPressureSupportParameter 
-    =              parameters->value_integer("minimum_pressure_support_parameter",100);
-  enzo_->PPMFlatteningParameter = parameters->value_logical ("flattening", false);
-  enzo_->PPMDiffusionParameter  = parameters->value_logical ("diffusion",  false);
-  enzo_->PPMSteepeningParameter = parameters->value_logical ("steepening", false);
-
-  double floor_default = 1e-6;
-  enzo_->pressure_floor       = parameters->value_scalar("pressure_floor",      floor_default);
-  enzo_->density_floor        = parameters->value_scalar("density_floor",       floor_default);
-  enzo_->temperature_floor    = parameters->value_scalar("temperature_floor",   floor_default);
-  enzo_->number_density_floor = parameters->value_scalar("number_density_floor",floor_default);
-
-  enzo_->DualEnergyFormalism     = parameters->value_logical ("dual_energy",false);
-  enzo_->DualEnergyFormalismEta1 = parameters->value_scalar  ("dual_energy_eta_1",0.001);
-  enzo_->DualEnergyFormalismEta2 = parameters->value_scalar  ("dual_energy_eta_1",0.1);
 
   int k = 0;
 
