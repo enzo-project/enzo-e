@@ -187,8 +187,9 @@ elif (platform == 'ncsa-bd' or platform == 'ncsa-bd-serial'):
 
    serial_run    = ""
 
-   flags_opt = '-O3 -qhot -q64'
-   flags_debug = ''
+#     flags_opt = '-O3 -qhot -q64'
+   flags_opt = '-q64'
+   flags_debug = '-g'
    flags_fort = '-qextname -I include'
    flags = flags_opt + ' ' + flags_debug + ' '
 
@@ -218,10 +219,11 @@ elif (platform == 'ncsa-bd' or platform == 'ncsa-bd-serial'):
       CC      = cc,
       CPPPATH = ['/home/bordner/include', '#/include', inc_hdf5],
       CXX     = cxx,	
+      ENV         = os.environ,
       CXXFLAGS = flags + defines,
       DEFINES = '',
       FORTRANFLAGS = flags + flags_fort,
-      FORTRANLIBS = 'xlf90',
+      FORTRANLIBS = ['xlf90','xlfmath'],
       FORTRAN = fc,
       LIBPATH = ['#/lib','/home/bordner/lib',lib_fc,lib_hdf5],
       LINKFLAGS  = flags
