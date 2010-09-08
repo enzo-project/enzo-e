@@ -153,22 +153,26 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
       LIBPATH     = '#/lib' )
    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
+#--------------------------------------------------
+elif (platform == 'sdsc-triton' or platform == 'sdsc-triton-serial'):
+#--------------------------------------------------
+   if (platform == 'sdsc-triton'):
+      parallel_run = charm_path + "/bin/charmrun +p4 "
+      parallel_type = "charm"
+   elif (platform == 'sdsc-triton-serial'):
+      parallel_run = ""
+      parallel_type = "serial"
 
-#--------------------------------------------------
-elif (platform == 'triton'):
-#--------------------------------------------------
-   parallel_run = "/opt/openmpi_pgimx/bin/mpirun -np 4 "
    serial_run   = ""
-   parallel_type = "mpi"
    path_hdf5 = '/opt/hdf5/pgi'
    env = Environment (
-      CC      = 'mpicc',	
-      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
+      CC      = 'pgcc',	
+      CPPDEFINES = ['NO_FREETYPE'],
       CPPPATH = ['#/include', path_hdf5 + '/include'],
       CXXFLAGS = '-g -DH5_USE_16_API',
       CFLAGS   = '-g -DH5_USE_16_API',
-      CXX     = 'mpicxx',	
-      FORTRAN = 'mpif90',
+      CXX     = 'pgCC',	
+      FORTRAN = 'pgf77',
       FORTRANPATH = '#/include',
       LIBPATH = ['#/lib', path_hdf5 + '/lib'],
       LINKFLAGS = '-pgf90libs',
