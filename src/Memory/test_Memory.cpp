@@ -33,6 +33,8 @@ PARALLEL_MAIN_BEGIN
 #ifdef CONFIG_USE_MEMORY
   Memory * memory = Memory::instance();
 
+  memory->reset();
+
   PARALLEL_PRINTF ("start\n"); fflush(stdout);
 
   //----------------------------------------------------------------------
