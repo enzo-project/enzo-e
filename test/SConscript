@@ -125,7 +125,7 @@ Clean(env.RunSerial(parallel_type + '-test_ppml_blast.unit',     '#/bin/test_ppm
 	Glob('../*-ppml-blast-*png'))
 
 Clean(env.RunSerial(parallel_type + '-test_ppm_image.unit',      '#/bin/test_ppm',  
-               ARGS='ppm-image       100 10 10'),
+               ARGS='ppm-image       100 100 10'),
 	Glob('../*-ppm-image-*png'))
 Clean(env.RunSerial(parallel_type + '-test_ppm_implosion.unit',  '#/bin/test_ppm',  
                ARGS='ppm-implosion   100 10 10'),

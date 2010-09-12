@@ -265,10 +265,12 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 <?php tests("Enzo/ppm","ppm","ppm_image"); ?>
 
 <table>
-<tr><th>cycle = 0</th><th>cycle=10</th></tr>
+<tr><th>cycle = 0</th><th>cycle=10</th><th>cycle=30</th><th>cycle=100</th></tr>
 <tr>
 <td><img width=320 src="slice-ppm-image-000000.png"></img></td>
 <td><img width=320  src="slice-ppm-image-000010.png"></img></td>
+<td><img width=320  src="slice-ppm-image-000030.png"></img></td>
+<td><img width=320  src="slice-ppm-image-000100.png"></img></td>
 </tr>
 </table>
 
