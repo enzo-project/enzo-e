@@ -8,9 +8,10 @@ DOCS = \
       paper-tree \
       performance \
       project \
-      proposal-nsf \
-      report-nsf \
       proposal-ascr \
+      proposal-nsf \
+      proposal-nsf-phy \
+      report-nsf \
       requirements \
       talk-intro \
       talk-2010-06 \
@@ -40,14 +41,18 @@ proposal-nsf:
 #       use own Makefile
 	cd proposal-nsf; ln -sf ../papers.bib .
 	$(MAKE) -C proposal-nsf
-report-nsf:
+proposal-nsf-phy:
 #       use own Makefile
-	cd report-nsf; ln -sf ../papers.bib .
-	$(MAKE) -C report-nsf
+	cd proposal-nsf-phy; ln -sf ../papers.bib .
+	$(MAKE) -C proposal-nsf-phy
 proposal-ascr:
 	cd proposal-ascr; ln -sf ../Makefile.1 makefile
 	cd proposal-ascr; ln -sf ../papers.bib .
 	$(MAKE) -C proposal-ascr
+report-nsf:
+#       use own Makefile
+	cd report-nsf; ln -sf ../papers.bib .
+	$(MAKE) -C report-nsf
 requirements: 
 	cd requirements; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C requirements
