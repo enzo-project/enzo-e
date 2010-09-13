@@ -73,7 +73,7 @@ void EnzoDescr::initialize_image ()
 #ifdef USE_PPM_IMAGE_PNG
   pngwriter png;
 
-  png.readfromfile("ppm-image.png");
+  png.readfromfile("input/ppm-image.png");
   int width  = png.getwidth();
   int height = png.getheight();
 #endif
