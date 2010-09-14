@@ -87,9 +87,9 @@ void EnzoDescr::initialize_image ()
   float pressure_in  = 0.14;
   float velocity_x = 0.0;
   float velocity_y = 0.0;
-  int pixel[3];
 
 #ifdef USE_IMAGE_H
+  int pixel[3];
   const char * data = header_data;
   float * image = new float [width*height];
   for (size_t iy=0; iy<height; iy++) {

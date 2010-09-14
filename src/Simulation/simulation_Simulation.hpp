@@ -61,7 +61,7 @@ public: // interface
   };
 
   /// Return extents.  Assumes lower[] and upper[] are allocated to at least dimension()
-  void extents (int lower[], int upper[]) throw()
+  int domain (int lower[], int upper[]) throw()
   {
     if (dimension() >= 1) {
       lower[0] = lower_[0];
@@ -75,6 +75,7 @@ public: // interface
       lower[2] = lower_[2];
       upper[2] = upper_[2];
     }
+    return dimension();
   }
 
   /// Return the Global object

@@ -32,7 +32,6 @@ void output_fields(FieldBlock * field_block,
 		   Monitor * monitor)
 {
 
-  double map1[] = {1,1,1, 0,0,0};
   FieldDescr * field_descr = field_block->field_descr();
   int nx,ny,nz;
   int gx,gy,gz;
@@ -49,7 +48,7 @@ void output_fields(FieldBlock * field_block,
     std::string field_name = field_descr->field_name(index);
     Scalar * field_values = (Scalar *)field_block->field_values(index);
     sprintf (filename,"ppm-%s-%05d.png",field_name.c_str(),write_count);
-    monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 0.0,1.0, map1,2);
+    monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 0.0, 1.0);
   }
   
 }
@@ -64,8 +63,6 @@ PARALLEL_MAIN_BEGIN
 
   GroupProcess * parallel = GroupProcess::create();
   unit_init(parallel->rank(), parallel->size());
-
-
 
   // Set necessary parameters for MethodEnzoPpm
 
@@ -82,15 +79,19 @@ PARALLEL_MAIN_BEGIN
     ERROR_MESSAGE("main","test_MethodEnzoPpm.in file does not exist");
   }
 
-  // Create data and field descriptors and blocks
+  // create and initialize Enzo user descriptor object
+
+  EnzoUserDescr * user_descr = new EnzoUserDescr(global);
+
+  user_descr->add_user_method("ppm");
+  user_descr->set_user_control("ignored");
+  user_descr->set_user_timestep("ignored");
+
+  // Create and initialize data descriptor
 
   DataDescr * data_descr = new DataDescr;
-  DataBlock * data_block = new DataBlock;
 
   FieldDescr * field_descr = data_descr->field_descr();
-  FieldBlock * field_block = data_block->field_block();
-
-  // Insert required fields
 
   int index_density         = field_descr->insert_field("density");
   int index_total_energy    = field_descr->insert_field("total_energy");
@@ -98,17 +99,13 @@ PARALLEL_MAIN_BEGIN
   int index_velocity_y      = field_descr->insert_field("velocity_y");
   int index_internal_energy = field_descr->insert_field("internal_energy");
 
-  EnzoUserDescr    * user_descr = new EnzoUserDescr(global);
-  
-  UserMethod   * user_method   = user_descr->add_user_method("ppm");
-  UserControl  * user_control  = user_descr->set_user_control("ignored");
-  UserTimestep * user_timestep = user_descr->set_user_timestep("ignored");
-
-  unit_class ("UserDescr");
-
-  unit_func("initialize");
-
   user_descr -> initialize(data_descr);
+
+  // Create and initialize data block
+
+  DataBlock * data_block = new DataBlock;
+
+  FieldBlock * field_block = data_block->field_block();
 
   // Set missing Enzo parameters
 
@@ -207,12 +204,12 @@ PARALLEL_MAIN_BEGIN
 
     field_block->enforce_boundary(boundary_reflecting);
 
-    double dt = user_timestep->compute_block(data_block);
+    double dt = user_descr->user_timestep()->compute_block(data_block);
 
     printf ("cycle = %d  sim-time = %10g dt = %10g\n",
 	    cycle,time,dt );
 
-    user_method->advance_block(data_block,time,dt);
+    user_descr->user_method(0)->advance_block(data_block,time,dt);
 
     user_descr->finalize_block(data_block);
 

@@ -30,7 +30,7 @@ public: // interface
 protected: // functions
 
   /// Read parameters
-  void read_parameters_(Parameters * parameters) throw ();
+  void read_parameters_() throw ();
 
   /// Create named control method.
   UserControl * create_user_control_ (std::string name_user_control) throw ();

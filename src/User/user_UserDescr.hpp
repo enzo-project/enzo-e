@@ -30,7 +30,7 @@ public: // interface
   {
     delete user_control_;
     delete user_timestep_;
-    for (unsigned i=0; i<user_method_.size(); i++) {
+    for (size_t i=0; i<user_method_.size(); i++) {
       delete user_method_[i];
     }
   }
@@ -87,7 +87,7 @@ public: // interface
 	   user_method_.size()>0);
     user_control_ ->initialize(data_descr);
     user_timestep_->initialize(data_descr);
-    for (int i=0; i<user_method_.size(); i++) {
+    for (size_t i=0; i<user_method_.size(); i++) {
       user_method_[i]->initialize(data_descr);
     }
   }
@@ -101,7 +101,7 @@ public: // interface
 	   user_timestep_!=0);
     ASSERT("UserDescr::finalize()","user_method_.size()==0",
 	   user_method_.size()>0);
-    for (int i=0; i<user_method_.size(); i++) {
+    for (size_t i=0; i<user_method_.size(); i++) {
       user_method_[i]->finalize(data_descr);
     }
     user_timestep_->finalize(data_descr);
@@ -131,7 +131,7 @@ public: // interface
 	   user_method_.size()>0);
     user_control_ ->initialize_block(data_block);
     user_timestep_->initialize_block(data_block);
-    for (int i=0; i<user_method_.size(); i++) {
+    for (size_t i=0; i<user_method_.size(); i++) {
       user_method_[i]->initialize_block(data_block);
     }
   }
@@ -145,7 +145,7 @@ public: // interface
 	   user_timestep_!=0);
     ASSERT("UserDescr::finalize_block()","user_method_.size()==0",
 	   user_method_.size()>0);
-    for (int i=0; i<user_method_.size(); i++) {
+    for (size_t i=0; i<user_method_.size(); i++) {
       user_method_[i]->finalize_block(data_block);
     }
     user_timestep_->finalize_block(data_block);

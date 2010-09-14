@@ -20,8 +20,16 @@ EnzoUserDescr::EnzoUserDescr(Global * global) throw ()
   : UserDescr(global),
     enzo_(new EnzoDescr(global))
 {
-  enzo_->read_parameters(global->parameters());
+  read_parameters_();
 }
+
+//----------------------------------------------------------------------
+
+void EnzoUserDescr::read_parameters_ () throw ()
+{
+  enzo_->read_parameters(global_->parameters());
+}
+
 //----------------------------------------------------------------------
 
 UserControl * 

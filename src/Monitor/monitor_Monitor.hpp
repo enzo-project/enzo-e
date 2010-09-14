@@ -67,8 +67,8 @@ public: // interface
 	      int         axis,           // Axis along which to project
 	      reduce_type op_reduce,      // Reduction operation along axis
 	      double min, double max,     // Limits for color map
-	      const double * color_map,   // color map [r0 g0 b0 r1 g1 b1 ...]
-	      int            color_length // length of color map / 3
+	      const double * color_map = 0, // color map [r0 g0 b0 r1 g1 b1...]
+	      int            color_length=2 // length of color map / 3
 	      );
   
 private: // functions
@@ -93,7 +93,7 @@ void Monitor::image
  int nx, int ny, int nz,
  int axis, reduce_type op_reduce,
  double min, double max, 
- const double * map, 
+ const double * map_in, 
  int map_length)
 /**
  *********************************************************************
@@ -115,8 +115,10 @@ void Monitor::image
 
   if (! active_) return;
 
-  // Use full array
+  const double map_default[] = {0,0,0,1,1,1};
+  const double * map = map_in ? map_in : map_default;
 
+  // Use full array
 
   int nx0, ny0, nz0;
   int nx1, ny1, nz1;
@@ -208,6 +210,7 @@ void Monitor::image
 
   pngwriter png (mx,my,0,name.c_str());
 
+    
   // loop over pixels (jx,jy)
   for (int jx = 0; jx<mx; jx++) {
     for (int jy = 0; jy<my; jy++) {

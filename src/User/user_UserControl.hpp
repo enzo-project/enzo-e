@@ -20,7 +20,9 @@ public: // interface
 
   /// Constructor
   UserControl(Global * global) throw()
-    : global_(global)
+    : global_(global),
+      time_stop_(-1),
+      cycle_stop_(-1)
   {};
 
   /// Perform any global initialization independent of specific method
@@ -52,10 +54,36 @@ public: // interface
 			     bool zm=true, bool zp=true) throw()
   {};
 
+  /// Return whether the simulation is complete
+
+  bool done (int cycle, double time) throw()
+  {
+    bool cycle_converged = (cycle != -1) ? (cycle >= cycle_stop_) : false;
+    bool time_converged  = (time != -1)  ? (time  >= time_stop_)  : false;
+
+    return (cycle_converged || time_converged);
+  }
+
+  /// Set stop cycle; default is to not check time
+
+  void set_cycle_stop(int cycle) throw()
+  { cycle_stop_ = cycle; }
+
+  /// Set stop time; default is to not check time
+
+  void set_time_stop(int time) throw()
+  { time_stop_ = time; }
+
 protected:
 
   /// Global objects
   Global * global_;
+
+  /// Stopping time
+  double time_stop_;
+
+  /// Stopping cycle (root-level)
+  int cycle_stop_;
 
 };
 
