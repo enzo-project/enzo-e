@@ -122,7 +122,7 @@ elif (platform == 'linux-ampi'):
 elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
 #--------------------------------------------------
 
-   flags_opt = '-O3 '
+   flags_opt = '-g '
 
 #   flags_debug = '-memory charmdebug'
    flags_debug = ''
