@@ -6,10 +6,17 @@ Stopping {
   cycle = 100;
 }
 Mesh {
-   root_size = [100, 100];
+   root_size  = [400, 400];  # 400 x 400
+   patch_size = [400, 400];  # 400 <= mp <= 400
+   block_size = [400, 400];  # 400 <= mb <= 400
 }
 Field {
    ghosts = [3,3];
+   fields = ["density","total_energy","velocity_x",
+	"velocity_y","internal_energy"];
+}
+Method {
+   sequence = ["ppm"];
 }
 Physics {
    dimensions = 2;
