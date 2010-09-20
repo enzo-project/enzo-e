@@ -1,0 +1,206 @@
+Some Random Thoughts on Developing Parallel Programs for Petascale Platforms
+
+As far as individual software tools, I really don't know what is
+needed.  But *something* is needed.  I've rambled on a bit about
+parallel programming in general.  Most is in outline form since I've
+taken too long on this, and didn't really address software tools much
+anyway.
+
+The underlying issue in software development in general is complexity.
+Software can be very large and complicated, but humans have a limited
+amount of information they can think about at any one time.  Parallel
+application data structures, algorithms, and the HPC platforms they
+run on, are all getting more complicated; but human software
+developer's brains are not.  This complexity must be dealt with in
+some way or other.
+
+Fortunately, several techniques have been developed over the years to
+deal with (non-parallel) software complexity, mostly by "separating a
+computer program into distinct features that overlap in functionality
+as little as possible" [ definition of "separation of concerns",
+wikipedia].  For example, procedural programming does this though
+splitting complex procedures into sequences of simpler, relatively
+independent procedures.  Object-oriented programming does this through
+grouping data structures with functions that operate on the data,
+forming simple and relatively independent objects.  And
+aspect-oriented programming languages or techniques can be used to
+modularize cross-cutting concerns that defy modularization using these
+other approaches.
+
+The difficulty with *parallel* software development is that it is
+inherently much more complicated to tell P > 1 processors what to do
+than it is to tell one processor what to do, just like it's more
+difficult to tell a group of people what to do than just one.  Data
+must be communicated between processors, and code must by synchronized
+so that it is not executed until all the data it requires is
+available.  Other issues arise as well, such as load-balancing to keep
+processors busy and data evenly distributed among nodes.  The added
+complexity of parallel programming is handled primarily through
+software technologies, such as software libraries (e.g. MPI), compiler
+directives (e.g. OpenMP), parallel programming languages (e.g. PGAS
+languages such as UPC and Co-array Fortran), and general parallel
+frameworks (e.g. CHARM++).
+
+The difficulty with *petascale* parallel programming is scalability
+and new emerging issues: it's inherently more complicated to tell
+1,000,000 processors what to do than it is to tell 1000 processors
+what to do, just like it's more difficult to instruct a city of people
+what to do than it is to instruct a single organization of people what
+to do.  Existing issues such as load balancing may require more
+complicated approaches (e.g. hierarchical load balancing), and new
+issues come to the forefront, e.g. fault-tolerance and software
+resilience.  And finding enough parallelism in the problem domain to
+keep 1M processors happy of course becomes more difficult.  The added
+complexity of massive parallelism is still handled primarily through
+the same programming languages, software libraries, compiler
+directives, and general parallel frameworks: MPI, OpenMP, PGAS
+languages, and CHARM++, etc.  
+
+HPC hardware parallelism is out-running the ability of application
+software to keep up.  Throwing more software libraries and tools at
+the problem is helpful in the short-term, but ultimately more is
+needed.
+
+---------------
+
+   MAIN ISSUE: CONTROLING PARALLEL APPLICATION COMPLEXITY
+
+      HPC platforms are complex and getting more so 
+          more components in deeper levels
+             e.g. BW: supernodes, drawers, modules, chips, cores
+      Software applications are complex and getting even more sophisticated
+             more scalable algorithms
+             more sophisticated distributed data structures
+      Mapping applications onto HPC hardware is thus getting much more complex
+      Innumerable conflicting issues to deal with
+          performance, scaling, disk IO, memory management, load balancing,
+          task scheduling, locality / memory hierarchies, fault tolerance /
+          software resiliency, etc.
+      Multiple general areas of knowledge required
+          Scientific application domain
+	      physics, chemistry, weather, etc.
+          Software development 
+              writing large applications much more difficult than small programs
+              bigger software projects require more disciplined development
+                  requirements, design, testing, debugging
+          High performance computing
+               parallel disk IO, memory hierarchies, interconnect topologies, etc.
+      Few software development groups have all the required knowledge in-house
+
+   CURRENT APPROACHES AND ISSUES
+
+      parallelization strategies are available at multiple levels
+         compiler directives (e.g. OpenMP)
+         software libraries (e.g. MPI)
+         programming languages (e.g. UPC)
+         general frameworks (e.g. CHARM++)
+      frameworks and languages
+          historically less general adoption
+          steeper learning curve
+          fear of obsolescence
+      libraries and compiler directives
+          historically more general adoption
+          easier to learn and use
+          but not as powerful in general
+             limited by restrictions of the underlying serial computer language
+      MPI has historically been most popular approach--why?
+          optimizes ease-of-use versus powerful features
+          but complexity is growing beyond MPI's power
+          many issues of growing importance not handled directly by MPI
+             load balancing, process virtualization, 
+             task scheduling, fault tolerance
+          too much is left to the application developer
+
+      Complexity not always effectively hidden in lower software
+      levels; but applications, being at the top of the software
+      stack, must deal with everything that lower software levels miss
+
+   SOLUTION APPROACHES
+
+      Improve usability and quality of existing strategies
+      Focus more on languages and frameworks compared to libraries like MPI
+         Outgrowing the limits of existing serial languages
+         Can provide more comprehensive parallel support to the developer
+      But still maintain libraries and directives
+         MPI and OpenMP approaches will always have their place
+      Need multidisciplinary teams to develop parallel frameworks/languages
+         Just C.S. experts not sufficient
+         HPC experts required
+             help ensure language/framework maps to HPC platforms
+         Application scientists 
+             help ensure data structures / algorithms map to language/framework
+      Need better ways to componentize / modularize parallelism in applications
+         Process groups becoming much more important
+            too difficult to parallelize across 1M cores
+            working with hierarchical groups of processes seems more scalable
+         New paradigm for hiding parallism complexity would be really helpful
+             e.g something analagous to procedural / object-oriented / aspect-oriented programming
+      Improve interoperability of parallel technologies
+         E.g. allow mixing CHARM++, MPI, PGAS, OpenMP in same application
+         Must support all types of parallelism (loop-, data-, task-, etc.)
+         Different problems best solved using different parallel technologies
+         Unifying framework + language + libraries may converge 
+            result a single meta-language for massively-parallel programming
+            Analogous to perl language (C + shell scripts + awk + sed, etc.)
+            No need for developers to choose MPI or UPC or CHARM++, etc.
+            
+---------------
+
+What makes developing parallel application software difficult?
+
+  Viewing the entire software stack, different software layers are
+  used to solve different issues, such as parallel disk IO,
+  inter-process communication, memory management, load balancing,
+  fault tolerance, etc.  The OS is at the bottom, then various
+  middleware layers, and the parallel application is on top.
+
+  In this context, there are several things that make application
+  programming difficult:
+
+     *Any* software defects ("bugs") in *any* of the lower layers can lead to
+     failure of the software application on top.
+
+     *Any* performance or parallel scaling issues in *any* of the
+     lower layers can affect application scalability.
+     (E.g. scalability of MPI itself, parallel file systems, etc.)
+
+     All functionality required by the parallel application not
+     handled by any of the lower layers must be handled by the
+     application, e.g. parallel subtask scheduling, load balancing,
+     fault tolerance, checkpointing, etc.
+
+         
+   Much algorithm development in C.S. community
+   Need better transfer of research ideas into usable products by
+      application developers
+
+   Large parallel software centers should concentrate on what small groups cannot
+      Need large-scale sophisticated science applications
+      Science groups generally write their own applications out of necessity
+          requires in-depth knowledge of the application domain
+          who else will do it in an academic setting?
+          a few open source science applications (ZEUS, Enzo, etc. ;-) )
+          but requires depth and breadth of knowledge not common in small groups
+      Need to bring people together
+          HPC hardware experts
+          Computer scientists
+          Software development experts
+          Application scientists
+      All required for building large-scale science applications
+      Approach should be holistic
+          HPC hardware enabled
+          Science application driven
+          computer scientists design O.S. / middleware in between
+             must map efficiently onto hardware
+             must be efficiently usable by applications
+      Parallel application training
+          different parallelization methodologies 
+             MPI, OpenMP, PGAS, CHARM++, CACTUS, etc.
+          types of problems suited for each
+          how to use them collectively
+      CHARM++ closest to what is ultimately needed, but currently has issues
+          + load balancing, task scheduling, integrated performance analyser and debugger
+          + maps well to hardware
+          - but doesn't seem efficiently usable by applications
+               forces functions involving communication to be split into multiple functions
+               violates procedural programming paradigm
