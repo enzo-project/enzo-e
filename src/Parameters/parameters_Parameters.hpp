@@ -10,8 +10,8 @@
 /// @todo     Add output support for individual parameters, e.g. for Monitor output
 /// @todo     set_list(), etc functions for lists and expressions
 /// @todo     set_value() using string values for all types
+/// @todo     assert_required() to make given parameter required (don't exit since more than one required parameter may be missing)
 /// @brief    Declaration for the Parameters class
-
 /// @def      MAX_PARAMETER_FILE_WIDTH
 /// @brief    Maximum allowed width of a line in a parameter file
 #define MAX_PARAMETER_FILE_WIDTH 255
@@ -168,16 +168,16 @@ public: // interface
    )    
     throw(ExceptionParametersBadType);
 
-  /// Get number of groups
+  /// Return the number of groups
   int group_count() throw ();
 
-  /// Get number of groups
+  /// Return the name of the ith group
   std::string group(int i) throw ();
 
-  /// Get number of subgroups
+  /// Return the number of subgroups in the current group
   int subgroup_count() throw ();
 
-  /// Get number of subgroups
+  /// Return the ith subgroup in the current group
   std::string subgroup(int i) throw ();
 
   /// Set the current group.  Clears current subgroup

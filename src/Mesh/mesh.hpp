@@ -24,8 +24,8 @@
 #include "mesh_TreeK.hpp"
 #include "mesh_Tree2K.hpp"
 #include "mesh_Tree3K.hpp"
-#include "mesh_Mesh.hpp"
 #include "mesh_Patch.hpp"
+#include "mesh_Mesh.hpp"
 
 #endif /* MESH_HPP */
 

@@ -168,6 +168,32 @@ EnzoDescr::read_parameters(Parameters * parameters) throw ()
   DualEnergyFormalismEta1 = parameters->value_scalar  ("dual_energy_eta_1",0.001);
   DualEnergyFormalismEta2 = parameters->value_scalar  ("dual_energy_eta_1",0.1);
 
+  //--------------------------------------------------
+  parameters->set_current_group ("Physics");
+  //--------------------------------------------------
+
+  BoundaryRank = parameters->value_integer("dimensions",0);
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Mesh");
+  //--------------------------------------------------
+
+  int nx = parameters->list_value_integer(0,"block_size",1);
+  int ny = parameters->list_value_integer(1,"block_size",1);
+  int nz = parameters->list_value_integer(2,"block_size",1);
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Field");
+  //--------------------------------------------------
+
+  int gx = parameters->list_value_integer(0,"ghosts",0);
+  int gy = parameters->list_value_integer(1,"ghosts",0);
+  int gz = parameters->list_value_integer(2,"ghosts",0);
+
+  BoundaryDimension[0] = nx + 2*gx;
+  BoundaryDimension[1] = ny + 2*gy;
+  BoundaryDimension[2] = nz + 2*gz;
+
 }
 
 //----------------------------------------------------------------------

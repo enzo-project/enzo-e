@@ -36,6 +36,8 @@ public: // interface
     root_size_(),
     min_patch_size_(4),
     max_patch_size_(-1),
+    min_block_size_(4),
+    max_block_size_(-1),
     balanced_(true),
     backfill_(true),
     coalesce_(true)
@@ -89,6 +91,22 @@ public: // interface
   void set_max_patch_size(int max_patch_size)
   { max_patch_size_ = max_patch_size; };
 
+  /// Return min_block_size
+  int min_block_size()
+  {return min_block_size_; };
+
+  /// Set minimum block size
+  void set_min_block_size(int min_block_size)
+  { min_block_size_ = min_block_size; };
+
+  /// Return max_block_size
+  int max_block_size()
+  {return max_block_size_; };
+
+  /// Set maximum block size
+  void set_max_block_size(int max_block_size)
+  { max_block_size_ = max_block_size; };
+
   /// Return whether to avoid level jumps
   bool balanced()
   {return balanced_; };
@@ -118,6 +136,10 @@ private: // attributes
   /// Tree defining the MESH hierarchy topology
   strict_auto_ptr<TreeK> tree_;
 
+  /// Local Patches
+
+  std::vector<Patch *> patch_;
+
   /// Spacial dimensions of the Mesh: 1, 2, or 3
   /// Determined from Domain::extent
   int dimension_;
@@ -130,17 +152,25 @@ private: // attributes
   /// Parameter Mesh::refine
   int refine_;
 
-  /// Size of root-level mesh.  Move to Field?
+  /// Size of root-level mesh
   /// Parameter Mesh::root_size
   std::vector<int> root_size_; 
 
-  /// Minimum allowed patch size (Move to Field?)
+  /// Minimum allowed patch size
   /// Parameter Mesh::min_patch_size
   int min_patch_size_;
 
-  /// Maximum allowed patch size (Move to Field?)
+  /// Maximum allowed patch size
   /// Parameter Mesh::max_patch_size
   int max_patch_size_;
+
+  /// Minimum allowed block size
+  /// Parameter Mesh::min_block_size
+  int min_block_size_;
+
+  /// Maximum allowed block size
+  /// Parameter Mesh::max_block_size
+  int max_block_size_;
 
   /// Whether the tree is balanced or "full"
   /// Parameter Mesh::balanced

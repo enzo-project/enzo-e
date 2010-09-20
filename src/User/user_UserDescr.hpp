@@ -23,7 +23,11 @@ public: // interface
       user_timestep_(0),
       user_method_(0),
       global_ (global)
-  {};
+  {
+
+    // Set "default" user control and timestepping routines
+
+  };
 
   /// Destructor
   ~UserDescr() throw()
@@ -51,9 +55,14 @@ public: // interface
   UserControl * set_user_control (std::string name_user_control)
   {
     if (user_control_ != 0) {
-      WARNING_MESSAGE("UserDescr::set_user_control","Resetting user control");
+      WARNING_MESSAGE("UserDescr::set_user_control",
+		      "Resetting user control; deleting old one");
+      delete user_control_;
+      user_control_ = 0;
     }
+
     user_control_ = create_user_control_(name_user_control);
+
     return user_control_;
   };
 
@@ -65,9 +74,14 @@ public: // interface
   UserTimestep * set_user_timestep (std::string name_user_timestep)
   {
     if (user_timestep_ != 0) {
-      WARNING_MESSAGE("UserDescr::set_user_timestep","Resetting user timestep");
+      WARNING_MESSAGE("UserDescr::set_user_timestep",
+		      "Resetting user timestep; deleting old one");
+      delete user_timestep_;
+      user_timestep_ = 0;
     }
+
     user_timestep_ = create_user_timestep_(name_user_timestep);
+
     return user_timestep_;
   };
 
@@ -155,13 +169,13 @@ public: // interface
 
 protected: // functions
 
-  /// Create named control method.
+  /// APPLICATION INHERITENCE OVERRIDE: Create named control method.
   virtual UserControl * create_user_control_ (std::string name_user_control) = 0;
 
-  /// Create named timestep method.
+  /// APPLICATION INHERITENCE OVERRIDE: Create named timestep method.
   virtual UserTimestep * create_user_timestep_ (std::string name_user_timestep) = 0;
 
-  /// Create named user method.
+  /// APPLICATION INHERITENCE OVERRIDE: Create named user method.
   virtual UserMethod * create_user_method_ (std::string name_user_method) = 0;
 
 protected: // attributes

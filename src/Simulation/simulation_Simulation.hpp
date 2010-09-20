@@ -86,10 +86,6 @@ public: // interface
   Mesh * mesh ()  throw() 
   { return mesh_; };
 
-  /// Return the Schedule object
-  Schedule * schedule ()  throw() 
-  { return schedule_; };
-
   /// Return the User code descriptor
   UserDescr * user_descr () throw() 
   { return user_descr_; };
@@ -111,9 +107,6 @@ private: // attributes
 
   /// AMR mesh
   Mesh * mesh_;
-
-  /// Parallel task scheduler
-  Schedule * schedule_;
 
   /// Method descriptor
   UserDescr * user_descr_;

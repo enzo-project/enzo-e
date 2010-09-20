@@ -21,6 +21,8 @@ EnzoUserDescr::EnzoUserDescr(Global * global) throw ()
     enzo_(new EnzoDescr(global))
 {
   read_parameters_();
+  set_user_control("default");
+  set_user_timestep("default");
 }
 
 //----------------------------------------------------------------------

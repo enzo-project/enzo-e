@@ -19,6 +19,7 @@
 #include "parallel.hpp"
 #include "test.hpp"
 #include "enzo.hpp"
+#include "simulation.hpp"
 
 #include "cello_hydro.h"
 
@@ -64,12 +65,14 @@ PARALLEL_MAIN_BEGIN
   GroupProcess * parallel = GroupProcess::create();
   unit_init(parallel->rank(), parallel->size());
 
-  // Set necessary parameters for MethodEnzoPpm
+  // Initialize cross-cutting components
 
   Global     * global = new Global;
 
   Monitor    * monitor    = global->monitor();
   Parameters * parameters = global->parameters();
+
+  // Read in parameters
 
   FILE * fp = fopen ("input/test_MethodEnzoPpm.in","r");
   if (fp) {
@@ -79,13 +82,16 @@ PARALLEL_MAIN_BEGIN
     ERROR_MESSAGE("main","test_MethodEnzoPpm.in file does not exist");
   }
 
+  // Create top-level Simulation object
+
+  Simulation simulation(global);
+
   // create and initialize Enzo user descriptor object
+  // (EnzoUserDescr), which includes an EnzoDescr object
 
   EnzoUserDescr * user_descr = new EnzoUserDescr(global);
 
   user_descr->add_user_method("ppm");
-  user_descr->set_user_control("ignored");
-  user_descr->set_user_timestep("ignored");
 
   // Create and initialize data descriptor
 
@@ -101,30 +107,53 @@ PARALLEL_MAIN_BEGIN
 
   user_descr -> initialize(data_descr);
 
-  // Create and initialize data block
+  // Create and initialize data blocks
 
-  DataBlock * data_block = new DataBlock;
+  // WARNING: ONLY ONE DATA BLOCK CURRENTLY IMPLEMENTED
+
+  parameters->set_current_group ("Physics");
+  int rank = parameters->value_integer("dimensions",0);
+
+  ASSERT ("main()",
+	  "Physics::dimensions parameter must be defined and non-zero",
+	  rank);
+
+  parameters->set_current_group ("Mesh");
+
+  // Mesh size
+
+  int nx = parameters->list_value_integer(0,"root_size",1);
+  int ny = parameters->list_value_integer(1,"root_size",1);
+  int nz = parameters->list_value_integer(2,"root_size",1);
+
+  // Block size
+
+  int mx = parameters->list_value_integer(0,"block_size",1);
+  int my = parameters->list_value_integer(1,"block_size",1);
+  int mz = parameters->list_value_integer(2,"block_size",1);
+
+  // Block count
+
+  printf ("%d %d %d  %d %d %d\n",nx,ny,nz,mx,my,mz);
+
+  int kx = int (ceil (1.0*nx/mx));
+  int ky = int (ceil (1.0*ny/my));
+  int kz = int (ceil (1.0*nz/mz));
+
+  DataBlock ** data_block_array = new DataBlock * [kx*ky*kz];
+  for (int k=0; k<kx*ky*kz; k++) {
+    data_block_array[k] = new DataBlock;
+  }
+
+  ASSERT("main","Assuming only one data_block",kx*ky*kz == 1);
+
+  DataBlock * data_block = data_block_array[0];
 
   FieldBlock * field_block = data_block->field_block();
 
   // Set missing Enzo parameters
 
   EnzoDescr * enzo = user_descr->enzo();
-
-  int nx,ny,nz;
-  nx=100;
-  ny=100;
-  nz=1;
-
-  int gx,gy,gz;
-  gx=3;
-  gy=3;
-  gz=0;
-
-  enzo->BoundaryRank = 2;
-  enzo->BoundaryDimension[0] = nx + 2*gx;
-  enzo->BoundaryDimension[1] = ny + 2*gy;
-  enzo->BoundaryDimension[2] = nz + 2*gz;
 
   
   // Initialize field_block
@@ -136,6 +165,7 @@ PARALLEL_MAIN_BEGIN
   field_block->set_dimensions(nx,ny);
   field_block->set_box_extent(0.0,0.3,0.0,0.3);
 
+  int gx=3,gy=3,gz=0;
   field_descr->set_ghosts (0,gx,gy,gz);
   field_descr->set_ghosts (1,gx,gy,gz);
   field_descr->set_ghosts (2,gx,gy,gz);
@@ -155,14 +185,14 @@ PARALLEL_MAIN_BEGIN
   double hx = 0.3 / nx;
   double hy = 0.3 / ny;
 
-  int mx = nx + 2*gx;
-  int my = ny + 2*gy;
+  int ngx = nx + 2*gx;
+  int ngy = ny + 2*gy;
 
   for (int iy=gy; iy<ny+gy; iy++) {
     double y = (iy - gy + 0.5)*hy;
     for (int ix=gy; ix<nx+gx; ix++) {
       double x = (ix - gx + 0.5)*hx;
-      int i = INDEX(ix,iy,0,mx,my);
+      int i = INDEX(ix,iy,0,ngx,ngy);
       if (x + y < 0.1517) {
 	d[i]  = 0.125;
 	vx[i] = 0;
