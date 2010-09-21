@@ -179,11 +179,9 @@ function test_summary($component,$test_output)
       $output = $test_output[$test];
       $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
     }
-    printf ("<td class=pass>");
-    system("grep pass $output_files | wc -l");
-    printf ("</td>\n");
-    printf ("<td class=FAIL>");
-    system("grep FAIL $output_files | wc -l");
+    system("cat $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
+
+    system("cat $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
     printf ("</td>\n");
   }
   printf ("</tr>\n");
