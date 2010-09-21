@@ -7,6 +7,11 @@
   <h1>Cello Unit Tests</h1>
 
 <?php
+
+function component($component) {
+   printf ("<hr><h2>$component Component</h2><a name=\"$component\">");
+}
+
 function tests($component,$testrun,$output) {
 
    $parallel_types = array("serial","mpi","charm");
@@ -156,106 +161,132 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 </p>
 
 <hr>
-<h2>Data Component</h2>
 
-<?php tests("Data","Data","Data"); ?>
+<h2>Summary</h2>
 
-<hr>
-<h2>Disk Component</h2>
+<?php
 
-<?php tests("Disk","FileHdf5","FileHdf5"); ?>
-<?php tests("Disk","Ifrit","Ifrit"); ?>
+function test_summary($component,$test_output)
+{
+  printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
 
-<hr>
-<h2>Distribute Component</h2>
+  $parallel_types = array("serial","mpi","charm");
 
+  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
-
-
-<hr>
-<h2>Error Component</h2>
-
-<?php tests("Error","Error","Error"); ?>
-
-<hr>
-<h2>Field Component</h2>
-
-<?php tests("Field","FieldBlock","FieldBlock"); ?>
-<!-- <?php tests("FieldBlockFaces","BlockFaces","BlockFaces"); ?> -->
-<?php tests("Field","FieldDescr","FieldDescr"); ?>
-
-<hr>
-<h2>Global Component</h2>
+    $output_files = "";
+    for ($test = 0; $test<sizeof($test_output); ++$test) {
+      $output = $test_output[$test];
+      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
+    }
+    printf ("<td class=pass>");
+    system("grep pass $output_files | wc -l");
+    printf ("</td>\n");
+    printf ("<td class=FAIL>");
+    system("grep FAIL $output_files | wc -l");
+    printf ("</td>\n");
+  }
+  printf ("</tr>\n");
+}
+?>
 
 
-<hr>
-<h2>Memory Component</h2>
+<table>
 
-<?php tests("Memory","Memory","Memory"); ?>
+<tr>
 
-<hr>
-<h2>Mesh Component</h2>
+<?php test_summary("Data",array("Data")); ?>
+<?php test_summary("Disk",array("FileHdf5","Ifrit")); ?>
+<?php test_summary("Distribute",array("")); ?>
+<?php test_summary("Error",array("Error")); ?>
+<?php test_summary("Enzo",array("ppm_image")); ?>
+<?php test_summary("Field",array("FieldBlock","FieldDescr")); ?>
+<?php test_summary("Global",array("")); ?>
+<?php test_summary("Memory",array("Memory")); ?>
+<?php test_summary("Mesh",array("")); ?>
+<?php test_summary("Method",array("")); ?>
+<?php test_summary("Monitor",array("Monitor")); ?>
+<?php test_summary("Parallel",array("GroupProcessMpi")); ?>
+<?php test_summary("Parameters",array("Parameters")); ?>
+<?php test_summary("Particles",array("")); ?>
+<?php test_summary("Performance",array("Performance")); ?>
+<?php test_summary("Portal",array("")); ?>
+<?php test_summary("Schedule",array("Schedule")); ?>
+<?php test_summary("Simulation",array("Simulation")); ?>
+<?php test_summary("Task",array("")); ?>
+<?php test_summary("Test",array("")); ?>
+<?php test_summary("User",array("")); ?>
+</tr></table>
 
-
-<hr>
-<h2>Method Component</h2>
-
-
-<hr>
-<h2>Monitor Component</h2>
-
-<?php tests("Monitor","Monitor","Monitor"); ?>
-
-<img src="monitor_image_1.png"></img>
-<img src="monitor_image_2.png"></img>
-<img src="monitor_image_3.png"></img>
-<img src="monitor_image_4.png"></img>
-
-
-<hr>
-<h2>Parallel Component</h2>
-
-<?php tests("Parallel","GroupProcessMpi","GroupProcessMpi"); ?>
-<!-- <?php tests("jacobi","jacobi","jacobi"); ?> -->
-
-<hr>
-<h2>Parameters Component</h2>
-
-<?php tests("Parameters","Parameters","Parameters"); ?>
-
-<hr>
-<h2>Particles Component</h2>
+</ul>
 
 
-<hr>
-<h2>Performance Component</h2>
-
-<?php tests("Performance","Performance","Performance"); ?>
-
-<hr>
-<h2>Portal Component</h2>
 
 
-<hr>
-<h2>Schedule Component</h2>
+<?php
+component("Data");
+tests("Data","Data","Data"); 
 
-<?php tests("Schedule","Schedule","Schedule"); ?>
+component("Disk");
+
+tests("Disk","FileHdf5","FileHdf5");
+tests("Disk","Ifrit","Ifrit");
+
+component("Distribute");
+
+component("Error");
+tests("Error","Error","Error");
 
 
-<hr>
-<h2>Simulation Component</h2>
+component("Field");
+tests("Field","FieldBlock","FieldBlock");
+// tests("FieldBlockFaces","BlockFaces","BlockFaces");
+tests("Field","FieldDescr","FieldDescr");
 
-<?php tests("Simulation","Simulation","Simulation"); ?>
+component("Global");
 
-<hr>
-<h2>Task Component</h2>
+component("Memory");
+tests("Memory","Memory","Memory");
 
 
-<hr>
-<h2>Test Component</h2>
+component("Mesh");
 
-<hr>
-<h2>User Component</h2>
+component("Method");
+
+component("Monitor");
+tests("Monitor","Monitor","Monitor");
+printf ("<img src=\"monitor_image_1.png\"></img>\n");
+printf ("<img src=\"monitor_image_2.png\"></img>\n");
+printf ("<img src=\"monitor_image_3.png\"></img>\n");
+printf ("<img src=\"monitor_image_4.png\"></img>\n");
+
+component("Parallel");
+tests("Parallel","GroupProcessMpi","GroupProcessMpi");
+
+
+component("Parameters");
+tests("Parameters","Parameters","Parameters");
+
+component("Particles");
+
+component("Performance");
+tests("Performance","Performance","Performance");
+
+component("Portal");
+
+component("Schedule");
+tests("Schedule","Schedule","Schedule");
+
+component("Simulation");
+tests("Simulation","Simulation","Simulation");
+
+component("Task");
+
+component("Test");
+
+component("User");
+
+?>
 
 
 <h4>test_ppm ppm_image</h4>

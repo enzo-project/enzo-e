@@ -14,11 +14,13 @@
 #include "user.hpp" 
 
 Simulation::Simulation(Global * global)
-  : lower_(),
-    upper_(),
+  : domain_lower_(),
+    domain_upper_(),
     global_    (global),
     mesh_      (NULL),
-    user_descr_(NULL),
+    user_control_(NULL),
+    user_timestep_(NULL),
+    user_method_(),
     data_descr_()
 {
 
@@ -43,11 +45,11 @@ Simulation::Simulation(Global * global)
 
   int i;
   for (i=0; i<extent_length; i+=2) {
-    lower_.push_back(parameters->list_value_scalar(i,  "extent",0));
-    upper_.push_back(parameters->list_value_scalar(i+1,"extent",1));
-    if ( ! (lower_[i] < upper_[i]) ) {
+    domain_lower_.push_back(parameters->list_value_scalar(i,  "extent",0));
+    domain_upper_.push_back(parameters->list_value_scalar(i+1,"extent",1));
+    if ( ! (domain_lower_[i/2] < domain_upper_[i/2]) ) {
       ERROR_MESSAGE ("Simulation::Simulation",
-		     "'Domain extent' lower value not lower than upper value");
+		     "'domain_lower_[] not lower than domain_upper_[]");
     }
   }
 
@@ -90,29 +92,6 @@ Simulation::Simulation(Global * global)
   mesh_->set_coalesce      (parameters->value_logical("coalesce",  true));
 
   // --------------------------------------------------
-  // Initiazize user descriptors
-  // --------------------------------------------------
-
-  // @@@ ASSUME ENZO-P APPLICATION
-
-  user_descr_ = new EnzoUserDescr(global_);
-
-  // WARNING: EnzoUserDescr constructor changes parameters subgroup!!
-
-  // --------------------------------------------------
-  // Initiazize user method descriptors
-  // --------------------------------------------------
-
-  parameters->set_current_group("Method");
-  int method_count = parameters->list_length("sequence");
-
-  if (method_count == 0) {
-    ERROR_MESSAGE ("Simulation::initialize",
-		   "List parameter 'Method sequence' must have length greater than zero");
-  }
-
-
-  // --------------------------------------------------
   // Initiazize data descriptors
   // --------------------------------------------------
 
@@ -129,20 +108,9 @@ Simulation::Simulation(Global * global)
       (parameters->list_value_string(i, "fields", "unknown"));
   }
 
+  // INITIALIZE USER METHODS
 
-
-  for (i=0; i<method_count; i++) {
-
-    std::string method_name = parameters->list_value_string(i,"sequence");
-
-    printf ("%s:%d '%s'\n",__FILE__,__LINE__,method_name.c_str());
-    UserMethod * user_method = user_descr_->add_user_method(method_name);
-
-    user_method->initialize(data_descr_);
-  }
-
-  user_descr_ -> set_user_control("ignored");
-  user_descr_ -> set_user_timestep("ignored");
+  user_initialize_();
 
 }
 

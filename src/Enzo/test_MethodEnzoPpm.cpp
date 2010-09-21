@@ -84,16 +84,19 @@ PARALLEL_MAIN_BEGIN
 
   // Create top-level Simulation object
 
-  Simulation simulation(global);
+  EnzoSimulation simulation(global);
 
-  // create and initialize Enzo user descriptor object
-  // (EnzoUserDescr), which includes an EnzoDescr object
+  // ADDED IN PARAMETER FILE
 
-  EnzoUserDescr * user_descr = new EnzoUserDescr(global);
+//   // create and initialize Enzo user descriptor object
+//   // (EnzoUserDescr), which includes an EnzoDescr object
 
-  user_descr->add_user_method("ppm");
+//   EnzoUserDescr * user_descr = new EnzoUserDescr(global);
+
+//   user_descr->add_user_method("ppm");
 
   // Create and initialize data descriptor
+
 
   DataDescr * data_descr = new DataDescr;
 
@@ -105,7 +108,7 @@ PARALLEL_MAIN_BEGIN
   int index_velocity_y      = field_descr->insert_field("velocity_y");
   int index_internal_energy = field_descr->insert_field("internal_energy");
 
-  user_descr -> initialize(data_descr);
+  //  user_descr -> initialize(data_descr);
 
   // Create and initialize data blocks
 
@@ -153,9 +156,8 @@ PARALLEL_MAIN_BEGIN
 
   // Set missing Enzo parameters
 
-  EnzoDescr * enzo = user_descr->enzo();
+  EnzoDescr * enzo = simulation.enzo();
 
-  
   // Initialize field_block
 
   unit_class ("FieldBlock");
@@ -226,22 +228,24 @@ PARALLEL_MAIN_BEGIN
   //  initialize_implosion(nx+gx);
 
   // Initial data dump
+
+
   output_fields(field_block,cycle,4,indices,monitor);
 
   while (time < time_final && cycle <= cycle_final) {
 
-    user_descr ->initialize_block(data_block);
+    simulation.initialize_block(data_block);
 
     field_block->enforce_boundary(boundary_reflecting);
 
-    double dt = user_descr->user_timestep()->compute_block(data_block);
+    double dt = simulation.user_timestep()->compute_block(data_block);
 
     printf ("cycle = %d  sim-time = %10g dt = %10g\n",
 	    cycle,time,dt );
 
-    user_descr->user_method(0)->advance_block(data_block,time,dt);
+    simulation.user_method(0)->advance_block(data_block,time,dt);
 
-    user_descr->finalize_block(data_block);
+    simulation.finalize_block(data_block);
 
     ++cycle;
     time += MIN(dt,time_final-time);
@@ -252,11 +256,10 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  user_descr->finalize(data_descr);
+  simulation.finalize(data_descr);
 
   unit_finalize();
 
-  delete user_descr;
   delete data_descr;
   delete data_block;
   delete global;
