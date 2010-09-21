@@ -108,6 +108,7 @@ PARALLEL_MAIN_BEGIN
   int index_velocity_y      = field_descr->insert_field("velocity_y");
   int index_internal_energy = field_descr->insert_field("internal_energy");
 
+  simulation.initialize(data_descr);
   //  user_descr -> initialize(data_descr);
 
   // Create and initialize data blocks

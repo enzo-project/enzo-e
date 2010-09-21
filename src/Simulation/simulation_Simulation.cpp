@@ -108,10 +108,6 @@ Simulation::Simulation(Global * global)
       (parameters->list_value_string(i, "fields", "unknown"));
   }
 
-  // INITIALIZE USER METHODS
-
-  user_initialize_();
-
 }
 
 //----------------------------------------------------------------------
