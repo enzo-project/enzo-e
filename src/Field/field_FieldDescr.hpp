@@ -147,10 +147,6 @@ public: // functions
   void set_maximum (int id_field, double max_value, enum field_action_type max_action) 
     throw(std::out_of_range);
 
-private: // functions
-
-
-
 private: // attributes
 
   /// alignment of start of each field in bytes

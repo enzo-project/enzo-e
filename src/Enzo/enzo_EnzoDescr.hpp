@@ -36,9 +36,6 @@ public: // interface
   /// Destructor
   ~EnzoDescr() throw();
 
-  /// read_parameters();
-  void read_parameters(Parameters * parameters) throw();
-
   float ComputeTimeStep();
   float sum_field (int field);
   int ComputeGammaField(float *GammaField);
@@ -78,6 +75,11 @@ private: // prohibit assignment
 
   /// Assignment operator
   EnzoDescr & operator= (const EnzoDescr & enzo) throw();
+
+private:
+
+  /// read_parameters();
+  void read_parameters_(Parameters * parameters) throw();
 
 public: // public attributes (!!)
 

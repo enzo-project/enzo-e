@@ -9,7 +9,6 @@
 #include "enzo.hpp"
 #include "data.hpp"
 #include "user.hpp"
-#include "parameters.hpp"
 
 #include "cello_hydro.h"
 

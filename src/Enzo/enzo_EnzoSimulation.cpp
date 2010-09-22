@@ -29,8 +29,6 @@ void EnzoSimulation::user_initialize_ () throw ()
 {
   Parameters * parameters = global_->parameters();
 
-  enzo_->read_parameters(parameters);
-
   // --------------------------------------------------
   // Initiazize user descriptors
   // --------------------------------------------------

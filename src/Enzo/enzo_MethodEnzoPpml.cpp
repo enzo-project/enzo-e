@@ -49,12 +49,6 @@ void MethodEnzoPpml::initialize(DataDescr * data_descr) throw()
   add_argument_(argument_field, "magnetic_y_face_z", access_read_write);
   add_argument_(argument_field, "magnetic_z_face_z", access_read_write);
 
-  // Initialize from parameters
-
-  Parameters * parameters = global_->parameters();
-
-  parameters->set_current_group ("Method","ppml");
-
 }
 
 //----------------------------------------------------------------------

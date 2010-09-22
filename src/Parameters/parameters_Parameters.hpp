@@ -184,7 +184,6 @@ public: // interface
   /// Set the current group.  Clears current subgroup
   void set_current_group  (std::string group, std::string subgroup = "") throw ()
   { 
-    printf ("set_current_group %s:%s\n",group.c_str(),subgroup.c_str());
     current_group_    = group;
     current_subgroup_ = subgroup;
   };
@@ -192,7 +191,6 @@ public: // interface
   /// Set the current subgroup
   void set_current_subgroup  (std::string subgroup) throw ()
   {
-    printf ("set_current_subgroup %s\n",subgroup.c_str());
     current_subgroup_ = subgroup;
   }
 
@@ -213,7 +211,6 @@ private: // functions
   Param * parameter_ (std::string parameter)
   {
     std::string p = current_group_ + ":" + current_subgroup_ + ":" + parameter;
-    printf ("parameter_ '%s'\n",p.c_str());
     return parameter_map_[p];
   };
 

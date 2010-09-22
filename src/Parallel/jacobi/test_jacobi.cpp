@@ -23,7 +23,7 @@ class Main : public CBase_Main {
 
 private:
 
-  // command line parameters
+  // command line options
   double norm_;
 
   int problem_size_;

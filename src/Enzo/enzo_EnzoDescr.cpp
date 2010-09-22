@@ -114,14 +114,14 @@ EnzoDescr::EnzoDescr(Global * global) throw ()
     }
   }
 
-  read_parameters(global->parameters());
+  read_parameters_(global->parameters());
 
 }
 
 //----------------------------------------------------------------------
 
 void
-EnzoDescr::read_parameters(Parameters * parameters) throw ()
+EnzoDescr::read_parameters_(Parameters * parameters) throw ()
 {
 
   //--------------------------------------------------

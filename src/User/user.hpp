@@ -17,7 +17,6 @@
 #include "data.hpp"
 #include "error.hpp"
 #include "global.hpp"
-#include "parameters.hpp"
 
 #include "user_UserControl.hpp"
 #include "user_UserTimestep.hpp"
