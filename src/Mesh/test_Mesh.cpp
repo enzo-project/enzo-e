@@ -28,7 +28,8 @@ PARALLEL_MAIN_BEGIN
   
   DataDescr data_descr;
 
-  Mesh mesh(&global,&data_descr);
+  Mesh mesh(&data_descr);
+
   unit_assert(false);
   unit_finalize();
 

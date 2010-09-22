@@ -28,8 +28,7 @@ class Mesh {
 public: // interface
 
   /// Initialize an Mesh object
-  Mesh(Global * global,
-       DataDescr * data_descr) throw ();
+  Mesh(DataDescr * data_descr) throw ();
 
   //----------------------------------------------------------------------
   // Big Three
@@ -46,14 +45,52 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-//   /// Return dimension
-//   int dimension() throw ()
-//   { return dimension_; };
+  /// Return dimension
+  int dimension() throw ()
+  { return dimension_; };
 
-//   /// Set dimension
-//   void set_dimension(int dimension) throw ()
-//   {dimension_ = dimension; };
+  /// Set dimension
+  void set_dimension(int dimension) throw ()
+  {dimension_ = dimension; };
 
+  //
+
+  /// Return domain lower extent
+  void lower(double * nx, double * ny, double * nz) throw ()
+  {
+    *nx = lower_[0];
+    *ny = lower_[1];
+    *nz = lower_[2];
+  }
+
+  /// Set domain lower extent
+  void set_lower(double nx, double ny, double nz) throw ()
+  {
+    lower_[0] = nx;
+    lower_[1] = ny;
+    lower_[2] = nz;
+  };
+
+  //
+
+  /// Return domain upper extent
+  void upper(double * nx, double * ny, double * nz) throw ()
+  {
+    *nx = upper_[0];
+    *ny = upper_[1];
+    *nz = upper_[2];
+  }
+
+  /// Set domain upper extent
+  void set_upper(double nx, double ny, double nz) throw ()
+  {
+    upper_[0] = nx;
+    upper_[1] = ny;
+    upper_[2] = nz;
+  };
+
+  //
+  
   /// Return max_level
   int max_level() throw ()
   { return max_level_; };
@@ -70,13 +107,21 @@ public: // interface
   void set_refine(int refine) throw ()
   {refine_ = refine; }; 
 
-//   /// Return root_size
-//   std::vector<int> root_size() throw ()
-//   { return root_size_; };
+  /// Return root_size
+  void root_size(int * nx, int * ny, int * nz) throw ()
+  {
+    *nx = root_size_[0];
+    *ny = root_size_[1];
+    *nz = root_size_[2];
+  }
 
-//   /// Set root size
-//   void set_root_size(std::vector<int> root_size) throw ()
-//   { root_size_ = root_size; };
+  /// Set root size
+  void set_root_size(int nx, int ny, int nz) throw ()
+  {
+    root_size_[0] = nx;
+    root_size_[1] = ny;
+    root_size_[2] = nz;
+  };
 
   /// Return min_patch_size
   int min_patch_size() throw ()
@@ -110,6 +155,15 @@ public: // interface
   void set_max_block_size(int max_block_size) throw ()
   { max_block_size_ = max_block_size; };
 
+  /// Pointer to the root Patch
+  Patch * root_patch() throw ()
+  {return root_patch_; };
+
+  /// Set pointer to the root Patch
+  void set_root_patch(Patch * root_patch) throw ()
+  { root_patch_ = root_patch; };
+  
+
   /// Return whether to avoid level jumps
   bool balanced() throw ()
   {return balanced_; };
@@ -136,10 +190,6 @@ public: // interface
   
 private: // attributes
 
-  /// Global object
-
-  Global * global_;
-
   /// Tree defining the MESH hierarchy topology
   //  strict_auto_ptr<TreeK> tree_;
   TreeK * tree_;
@@ -148,6 +198,13 @@ private: // attributes
   /// Spacial dimensions of the Mesh: 1, 2, or 3
 
   int dimension_;
+
+  /// Lower extent of the patch
+  double lower_[3];
+
+  /// Upper extent of the patch
+  double upper_[3];
+
 
   /// Minimum allowed patch size
   /// Parameter Mesh::min_patch_size

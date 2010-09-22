@@ -25,54 +25,23 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Destructor
-  ~Simulation() throw()
-  {
-    INCOMPLETE_MESSAGE("Simulation::~Simulation","");
-  }
+  ~Simulation() throw();
 
   /// Copy constructor
-  Simulation(const Simulation & classname) throw()
-  {
-    INCOMPLETE_MESSAGE("Simulation::Simulation","");
-  }
+  Simulation(const Simulation & classname) throw();
 
   /// Assignment operator
-  Simulation & operator= (const Simulation & classname) throw()
-  {
-    INCOMPLETE_MESSAGE("Simulation::operator =","");
-    return *this;
-  }
+  Simulation & operator= (const Simulation & classname) throw();
 
   /// Advance the simulation a specified amount
 
   void advance(double stop_time, int stop_cycle)  throw();
 
   /// Return the dimension 1 <= d <= 3, of the simulation
-  int dimension()  throw()
-  {
-    ASSERT ("Simulation::dimension",
-	    "domain_lower_ and domain_upper_ vectors are different sizes",
-	    domain_lower_.size() == domain_upper_.size()); 
-    return domain_lower_.size(); 
-  };
+  int dimension() const throw(); 
 
   /// Return extents.  Assumes domain_lower[] and domain_upper[] are allocated to at least dimension()
-  int domain (int domain_lower[], int domain_upper[]) throw()
-  {
-    if (dimension() >= 1) {
-      domain_lower[0] = domain_lower_[0];
-      domain_upper[0] = domain_upper_[0];
-    }
-    if (dimension() >= 2) {
-      domain_lower[1] = domain_lower_[1];
-      domain_upper[1] = domain_upper_[1];
-    }
-    if (dimension() >= 3) {
-      domain_lower[2] = domain_lower_[2];
-      domain_upper[2] = domain_upper_[2];
-    }
-    return dimension();
-  }
+  int domain (int domain_lower[], int domain_upper[]) throw();
 
   /// Return the Global object
   Global * global ()  throw() 
@@ -254,12 +223,22 @@ protected: // virtual functions
     return NULL;
   };
 
+private: // functions
+
+  /// Initialize the mesh
+
+  void initialize_mesh_() throw ();
+
 protected: // attributes
+
+  /// Dimension or rank of the simulation
+
+  int dimension_;
 
   /// Domain extents
 
-  std::vector<double> domain_lower_;
-  std::vector<double> domain_upper_;
+  double domain_lower_[3];
+  double domain_upper_[3];
 
   /// "global" data, including parameters, monitor, error, parallel, etc.
 
