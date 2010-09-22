@@ -11,6 +11,7 @@
 
 #include "cello.hpp"
 #include "test.hpp"
+#include "enzo.hpp"
 #include "simulation.hpp"
 
 #include "parallel.def"
@@ -37,10 +38,11 @@ PARALLEL_MAIN_BEGIN
 
   // Create simulation object
 
-  Simulation simulation(global);
+  EnzoSimulation simulation(global);
 
   // Initialize data fields
 
+  simulation.set_user_control("default");
   simulation.initialize();
 
   double stop_time  = 1.0;

@@ -50,6 +50,10 @@ Parameters::~Parameters()
 void Parameters::read ( FILE * file_pointer )
 /// @param    file_pointer An opened input parameter file or stdin
 {
+  if ( file_pointer == NULL) {
+    ERROR_MESSAGE("Parameters::read","file pointer is NULL");
+  }
+  
   struct param_struct * parameter_list = cello_parameters_read(file_pointer);
 
   struct param_struct * node = parameter_list -> next; // skip sentinel

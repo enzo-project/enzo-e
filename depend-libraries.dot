@@ -11,7 +11,7 @@ digraph includes {
    monitor     -> {parallel  error};
    parameters  -> {error parallel  monitor};
    performance -> {error memory};
-   schedule    -> {error simulation user data field parameters parallel enzo monitor};
+   schedule    -> {error};
    simulation  -> {error parameters parallel monitor memory enzo user data field};
    user        -> {user  data  field  error parallel  monitor  parameters  memory};
 

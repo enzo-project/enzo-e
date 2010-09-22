@@ -53,43 +53,19 @@ Simulation::Simulation(Global * global)
     }
   }
 
-  // --------------------------------------------------
-  // Initialize AMR grid
-  // --------------------------------------------------
-
-  parameters->set_current_group("Mesh");
-
-  mesh_ = new Mesh;
-
-  // assert extent_length = 2 | 4 | 6
-  mesh_->set_dimension(extent_length / 2);
+//   // assert extent_length = 2 | 4 | 6
+//   mesh_->set_dimension(extent_length / 2);
 
   // Parameter Mesh::root_size
 
-  std::vector<int> root_size;
-  root_size.push_back(parameters->list_value_integer(0,"root_size",1));
-  root_size.push_back(parameters->list_value_integer(1,"root_size",1));
-  root_size.push_back(parameters->list_value_integer(2,"root_size",1));
+//   std::vector<int> root_size;
+//   root_size.push_back(parameters->list_value_integer(0,"root_size",1));
+//   root_size.push_back(parameters->list_value_integer(1,"root_size",1));
+//   root_size.push_back(parameters->list_value_integer(2,"root_size",1));
 
-  mesh_->set_root_size (root_size);
+//   mesh_->set_root_size (root_size);
 
   // Parameter Mesh::patch_size
-
-  mesh_->set_min_patch_size(parameters->list_value_integer(0,"patch_size",4));
-  mesh_->set_max_patch_size(parameters->list_value_integer(1,"patch_size",128));
-
-  // Parameter Mesh::block_size
-
-  mesh_->set_min_block_size(parameters->list_value_integer(0,"block_size",4));
-  mesh_->set_max_block_size(parameters->list_value_integer(1,"block_size",128));
-
-  // Parameter Mesh::[AMR settings]
-
-  mesh_->set_max_level     (parameters->value_integer("max_level", 0));
-  mesh_->set_refine        (parameters->value_integer("refine",    2));
-  mesh_->set_balanced      (parameters->value_logical("balanced",  true));
-  mesh_->set_backfill      (parameters->value_logical("backfill",  true));
-  mesh_->set_coalesce      (parameters->value_logical("coalesce",  true));
 
   // --------------------------------------------------
   // Initiazize data descriptors
@@ -108,12 +84,14 @@ Simulation::Simulation(Global * global)
       (parameters->list_value_string(i, "fields", "unknown"));
   }
 
-}
+  // --------------------------------------------------
+  // Initialize AMR grid
+  // --------------------------------------------------
 
-//----------------------------------------------------------------------
+  parameters->set_current_group("Mesh");
 
-void Simulation::initialize() throw()
-{
+  mesh_ = new Mesh(global,data_descr_);
+
 }
 
 //----------------------------------------------------------------------

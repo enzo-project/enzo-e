@@ -18,7 +18,11 @@ class Patch {
 public: // interface
 
   /// Constructor
-  Patch() throw();
+  Patch(DataDescr * data_descr,
+	int patch_size[3], 
+	int block_size,
+	double lower[3],
+	double upper[3]) ;
 
   //----------------------------------------------------------------------
   // Big Three
@@ -33,13 +37,38 @@ public: // interface
   /// Assignment operator
   Patch & operator= (const Patch & patch) throw();
 
+  //--------------------------------------------------
+
+  /// Initial patch advance, ending with receive_()
+  void p_evolve();
+
+  /// Return the number of local data blocks
+  int num_data_blocks()  throw()
+  { return block_count_[0]*block_count_[1]*block_count_[2]; };
+
+  /// Return the ith local data block
+  DataBlock * data_block(int ix, int iy, int iz) throw()
+  { return data_block_[ix + block_count_[0] * (iy + block_count_[1] * iz)]; };
+
 private: // attributes
 
-  /// Parallel layout descriptor
-  class Layout * layout_;
-
   /// Array of local data blocks associated with the patch
-  class DataBlock * data_block_;
+  DataBlock ** data_block_;
+
+  /// Size of the patch
+  int patch_size_[3];
+
+  /// Number of blocks
+  int block_count_[3];
+
+  /// Size of each block
+  int block_size_;
+
+  /// Lower extent of the patch
+  double lower_[3];
+
+  /// Upper extent of the patch
+  double upper_[3];
 
 };
 

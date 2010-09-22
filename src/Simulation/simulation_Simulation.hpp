@@ -43,10 +43,6 @@ public: // interface
     return *this;
   }
 
-  /// Initialize the Simulation's data fields
-
-  void initialize() throw();
-
   /// Advance the simulation a specified amount
 
   void advance(double stop_time, int stop_cycle)  throw();
@@ -138,7 +134,7 @@ public: // interface
 
 
   /// Initialize user classes before a simulation
-  void initialize(DataDescr * data_descr)
+  void initialize()
   {
     ASSERT("UserDescr::initialize()","user_control_ == NULL",
 	   user_control_!=0);
@@ -146,15 +142,15 @@ public: // interface
 	   user_timestep_!=0);
     ASSERT("UserDescr::initialize()","user_method_.size()==0",
 	   user_method_.size()>0);
-    user_control_ ->initialize(data_descr);
-    user_timestep_->initialize(data_descr);
+    user_control_ ->initialize(data_descr_);
+    user_timestep_->initialize(data_descr_);
     for (size_t i=0; i<user_method_.size(); i++) {
-      user_method_[i]->initialize(data_descr);
+      user_method_[i]->initialize(data_descr_);
     }
   }
 
   /// Finalize user classes after a simulation
-  void finalize(DataDescr * data_descr)
+  void finalize()
   {
     ASSERT("UserDescr::finalize()","user_control_ == NULL",
 	   user_control_!=0);
@@ -163,10 +159,10 @@ public: // interface
     ASSERT("UserDescr::finalize()","user_method_.size()==0",
 	   user_method_.size()>0);
     for (size_t i=0; i<user_method_.size(); i++) {
-      user_method_[i]->finalize(data_descr);
+      user_method_[i]->finalize(data_descr_);
     }
-    user_timestep_->finalize(data_descr);
-    user_control_ ->finalize(data_descr);
+    user_timestep_->finalize(data_descr_);
+    user_control_ ->finalize(data_descr_);
   }
 
   /// Return the timestep method
@@ -174,13 +170,13 @@ public: // interface
   { return user_timestep_; };
 
   /// Initialize user classes before advancing all blocks one cycle
-  void initialize_cycle(DataDescr * data_descr)
+  void initialize_cycle()
   {
     INCOMPLETE_MESSAGE("UserDescr::initialize_cycle","Not implemented");
   }
 
   /// Finalize user classes after advancing all blocks one cycle
-  void finalize_cycle(DataDescr * data_descr)
+  void finalize_cycle()
   {
     INCOMPLETE_MESSAGE("UserDescr::finalize_cycle","Not implemented");
   }

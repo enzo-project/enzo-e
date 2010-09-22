@@ -24,7 +24,11 @@ PARALLEL_MAIN_BEGIN
   unit_init();
   unit_class ("Mesh");
   unit_func("Mesh");
-  Mesh mesh;
+  Global global;
+  
+  DataDescr data_descr;
+
+  Mesh mesh(&global,&data_descr);
   unit_assert(false);
   unit_finalize();
 

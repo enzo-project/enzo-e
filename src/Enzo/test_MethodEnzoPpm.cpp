@@ -74,71 +74,41 @@ PARALLEL_MAIN_BEGIN
 
   // Read in parameters
 
-  FILE * fp = fopen ("input/test_MethodEnzoPpm.in","r");
-  if (fp) {
-    parameters->read(fp); // MEMORY LEAK
-    fclose(fp);
-  } else {
-    ERROR_MESSAGE("main","test_MethodEnzoPpm.in file does not exist");
-  }
+  FILE * file_pointer;
+  file_pointer = fopen ("input/test_MethodEnzoPpm.in","r");
+  parameters->read(file_pointer); // MEMORY LEAK
+  fclose(file_pointer);
 
   // Create top-level Simulation object
 
   EnzoSimulation simulation(global);
 
-  // ADDED IN PARAMETER FILE
+  simulation.initialize();
 
-//   // create and initialize Enzo user descriptor object
-//   // (EnzoUserDescr), which includes an EnzoDescr object
-
-//   EnzoUserDescr * user_descr = new EnzoUserDescr(global);
-
-//   user_descr->add_user_method("ppm");
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   // Create and initialize data descriptor
 
-
-  DataDescr * data_descr = new DataDescr;
-
-  FieldDescr * field_descr = data_descr->field_descr();
-
-  int index_density         = field_descr->insert_field("density");
-  int index_total_energy    = field_descr->insert_field("total_energy");
-  int index_velocity_x      = field_descr->insert_field("velocity_x");
-  int index_velocity_y      = field_descr->insert_field("velocity_y");
-  int index_internal_energy = field_descr->insert_field("internal_energy");
-
-  simulation.initialize(data_descr);
-  //  user_descr -> initialize(data_descr);
-
-  // Create and initialize data blocks
-
-  // WARNING: ONLY ONE DATA BLOCK CURRENTLY IMPLEMENTED
-
-  parameters->set_current_group ("Physics");
-  int rank = parameters->value_integer("dimensions",0);
-
-  ASSERT ("main()",
-	  "Physics::dimensions parameter must be defined and non-zero",
-	  rank);
-
+  // Mesh::Mesh()
   parameters->set_current_group ("Mesh");
 
   // Mesh size
 
+  // Mesh::Mesh()
   int nx = parameters->list_value_integer(0,"root_size",1);
   int ny = parameters->list_value_integer(1,"root_size",1);
   int nz = parameters->list_value_integer(2,"root_size",1);
 
   // Block size
 
+  // Mesh::Mesh()
   int mx = parameters->list_value_integer(0,"block_size",1);
   int my = parameters->list_value_integer(1,"block_size",1);
   int mz = parameters->list_value_integer(2,"block_size",1);
 
   // Block count
 
-  printf ("%d %d %d  %d %d %d\n",nx,ny,nz,mx,my,mz);
+//   printf ("%d %d %d  %d %d %d\n",nx,ny,nz,mx,my,mz);
 
   int kx = int (ceil (1.0*nx/mx));
   int ky = int (ceil (1.0*ny/my));
@@ -164,6 +134,9 @@ PARALLEL_MAIN_BEGIN
   unit_class ("FieldBlock");
   unit_func("initialize");
 
+  DataDescr  * data_descr  = simulation.data_descr();
+  FieldDescr * field_descr = data_descr->field_descr();
+
   field_block->set_field_descr(field_descr);
   field_block->set_dimensions(nx,ny);
   field_block->set_box_extent(0.0,0.3,0.0,0.3);
@@ -179,6 +152,12 @@ PARALLEL_MAIN_BEGIN
   field_block->allocate_ghosts();
   field_block->clear();
 
+  int index_density = 0;
+  int index_velocity_x = 1;
+  int index_velocity_y = 2;
+  int index_total_energy = 3;
+  int index_internal_energy = 4;
+  
   Scalar *  d = (Scalar * ) field_block->field_values(index_density);
   Scalar * vx = (Scalar * ) field_block->field_values(index_velocity_x);
   Scalar * vy = (Scalar * ) field_block->field_values(index_velocity_y);
@@ -257,11 +236,10 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  simulation.finalize(data_descr);
+  simulation.finalize();
 
   unit_finalize();
 
-  delete data_descr;
   delete data_block;
   delete global;
   delete parallel;
