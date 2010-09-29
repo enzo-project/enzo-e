@@ -1,0 +1,52 @@
+Enzo-P versus Cello
+   Cello:  general reusable AMR framework
+   Enzo-P: specific to cosmology and astrophysical flows
+Physics
+Usability (parameters)
+Enzo history
+Improvements over Enzo
+   methods
+   data structures
+
+
+
+   Introduction
+         History and motivation
+         Scalability issues
+         Approach and solutions
+   Project Team and Institutional Commitment
+   Review of related software
+         \samrai
+         \chombo
+         \paramesh
+         \alps
+         \gadget
+   Software Design
+      Adaptive mesh refinement
+         Patch coalescing
+         Targeted refinement
+         Level windows
+         Implicit global indices
+         Patch-local adaptive time steps
+         Distributed AMR data structure
+         Mesh data
+         Particle data
+      Parallelism
+         Dynamic task scheduling
+         Load balancing
+         Parallel implementation
+      Other components
+         Application functions
+         Disk I/O
+         Performance measurement
+         Software resilience and self-management
+   Software Implementation
+   Software Testing
+   Development Plan
+         Quality control
+         Sustainability
+         Education and Outreach Plan
+   Results from prior NSF support
+   Milestones and Deliverables
+         Metrics of success
+         Software license

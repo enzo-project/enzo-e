@@ -2,7 +2,7 @@ import os
 import sys
 
 TOPDIR  = GetLaunchDir()
-# charm_path = '/home/bordner/charm/charm-6.2.1'
+
 charm_path = '/home/bordner/charm/charm'
 
 # Initialize platform
@@ -15,30 +15,44 @@ if (platform == 'unknown' and "CELLO_PLATFORM" in os.environ):
      platform = os.environ["CELLO_PLATFORM"]
 
 #==================================================
-# Check code for revision updates and local modifications
-#==================================================
-
-repository = "svn+ssh://client65-88.sdsc.edu/usr/local/svn/cello/trunk"
-get_revision = "| awk '/Revision:/ {print $2}'"
-
-# TODO: TEST FOR INTERNET CONNECTION
-
-# revision_new     = int(os.popen("svn info " + repository + get_revision).read())
-revision_current = int(os.popen("svn info " + get_revision).read())
-revision_changes = int(os.popen("svn status | grep -v '?' | wc -l").read())
-
-if (revision_changes != 0):
-   print "\nWARNING: Working directory has local modifications\n"
-# elif (revision_new != revision_current):
-#    print "\nWARNING: Working directory is not up-to-date with the repository\n"
-else:
-   print "\nWorking directory synched with repository\n"
-
-# --------------------------------------------------
-
-#==================================================
 # Initialize environment according to platform
 #==================================================
+
+platform_list = [
+	      'linux-ampi',
+	      'linux-charm',
+	      'linux-charm-perf',
+	      'linux-serial',
+	      'ncsa-bd',
+	      'ncsa-bd-serial'
+	      'sdsc-triton',
+	      'sdsc-triton-serial',
+	    ]
+
+ok = 0
+for check in platform_list:
+    if (platform == check):
+       ok = 1
+if (ok == 0):
+   print "**********************************************************************"
+   print
+   print "Platform '",platform,"' is not recognized.  To specify the platform, either:"
+   print
+   print "1) Set the 'CELLO_PLATFORM' environment variable,"
+   print
+   print "   or"
+   print
+   print "2) Use the 'platform=<platform>' scons argument"
+   print
+   print "Recognized platforms are:"
+   print
+   for p in platform_list:
+      print "   ",p
+   print
+   print "**********************************************************************"
+   print
+   sys.exit()
+       
 
 #--------------------------------------------------
 if (platform == 'linux-serial'):
@@ -60,42 +74,42 @@ if (platform == 'linux-serial'):
       LIBPATH     = '#/lib',
    )
 #--------------------------------------------------
-elif (platform == 'linux-mpi'):
+# elif (platform == 'linux-mpi'):
 #--------------------------------------------------
-   parallel_run = "mpirun -np 4"
-   serial_run   = ""
-   parallel_type = "mpi"
-   env = Environment (
-      CC          = 'mpicc',	
-      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
-      CPPPATH     = '#/include',
-      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
-      CFLAGS      = '-Wall -g  -m128bit-long-double',
-      CXX         = 'mpiCC',	
-      ENV         = os.environ,
-      FORTRAN     = 'gfortran',
-      FORTRANLIBS = 'gfortran',
-      FORTRANPATH = '#/include',
-      LIBPATH     = '#/lib',
-   )
-#--------------------------------------------------
-elif (platform == 'linux-mpi-valgrind'):
-#--------------------------------------------------
-   parallel_run = "mpirun -np 4 valgrind"
-   serial_run   = "valgrind "
-   parallel_type = "mpi"
-   env = Environment (
-      CC          = 'mpicc',	
-      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
-      CPPPATH     = '#/include',
-      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
-      CFLAGS      = '-Wall -g  -m128bit-long-double',
-      CXX         = 'mpiCC',	
-      FORTRAN     = 'gfortran',
-      FORTRANLIBS = 'gfortran',
-      FORTRANPATH = '#/include',
-      LIBPATH     = '#/lib',
-   )
+#    parallel_run = "mpirun -np 4"
+#    serial_run   = ""
+#    parallel_type = "mpi"
+#    env = Environment (
+#       CC          = 'mpicc',	
+#       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
+#       CPPPATH     = '#/include',
+#       CXXFLAGS    = '-Wall -g  -m128bit-long-double',
+#       CFLAGS      = '-Wall -g  -m128bit-long-double',
+#       CXX         = 'mpiCC',	
+#       ENV         = os.environ,
+#       FORTRAN     = 'gfortran',
+#       FORTRANLIBS = 'gfortran',
+#       FORTRANPATH = '#/include',
+#       LIBPATH     = '#/lib',
+#    )
+# #--------------------------------------------------
+# elif (platform == 'linux-mpi-valgrind'):
+# #--------------------------------------------------
+#    parallel_run = "mpirun -np 4 valgrind"
+#    serial_run   = "valgrind "
+#    parallel_type = "mpi"
+#    env = Environment (
+#       CC          = 'mpicc',	
+#       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
+#       CPPPATH     = '#/include',
+#       CXXFLAGS    = '-Wall -g  -m128bit-long-double',
+#       CFLAGS      = '-Wall -g  -m128bit-long-double',
+#       CXX         = 'mpiCC',	
+#       FORTRAN     = 'gfortran',
+#       FORTRANLIBS = 'gfortran',
+#       FORTRANPATH = '#/include',
+#       LIBPATH     = '#/lib',
+#    )
 #--------------------------------------------------
 elif (platform == 'linux-ampi'):
 #--------------------------------------------------
@@ -231,32 +245,6 @@ elif (platform == 'ncsa-bd' or platform == 'ncsa-bd-serial'):
       FORTRAN = fc,
       LIBPATH = ['#/lib','/home/bordner/lib',lib_fc,lib_hdf5],
       LINKFLAGS  = flags
-   )
-else:
-   print
-   print "**********************************************************************"
-   print
-   print "Platform '",platform,"' is not recognized.  To specify the platform, either:"
-   print
-   print "1) Set the 'CELLO_PLATFORM' environment variable,"
-   print
-   print "   or"
-   print
-   print "2) Use the 'platform=<platform>' scons argument"
-   print
-   print "Recognized platforms are:"
-   print
-   print "   linux-mpi    Linux with MPI"
-   print "   linux-ampi   Linux with AMPI (Charm++)"
-   print "   triton       SCSD Triton Resource"
-   print "   ncsa-bd      NCSA Blue Drop"
-   print
-   print "**********************************************************************"
-   print
-   sys.exit()
-   env = Environment (
-      CPPPATH = ['#/include'],
-      LIBPATH = ['#/lib'],
    )
 
 # Generate the CELLO_PLATFORM file (should be a target)

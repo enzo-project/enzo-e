@@ -39,11 +39,11 @@ sources    = [Glob('parallel*cpp')]
 
 libraries = env.Library ('parallel', [sources])
 tests = []
-if (parallel_type == "mpi" or parallel_type == "ampi"):
-	test_GroupProcessMpi  =  env.Program (['test_GroupProcessMpi.cpp',    sources])
-	tests.append(test_GroupProcessMpi)
-	test_Mpi              = env.Program (['test_Mpi.cpp',      sources])
-	tests.append(test_Mpi)
+# if (parallel_type == "mpi" or parallel_type == "ampi"):
+# 	test_GroupProcessMpi  =  env.Program (['test_GroupProcessMpi.cpp',    sources])
+# 	tests.append(test_GroupProcessMpi)
+# 	test_Mpi              = env.Program (['test_Mpi.cpp',      sources])
+# 	tests.append(test_Mpi)
 
 # test_ParallelAffinity = env.Program (['test_ParallelAffinity.cpp', sources])
 # test_ParallelLayout   = env.Program (['test_ParallelLayout.cpp',   sources])
