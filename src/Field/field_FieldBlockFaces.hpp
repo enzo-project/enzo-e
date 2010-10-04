@@ -33,6 +33,8 @@ public: // interface
   /// Assignment operator
   FieldBlockFaces & operator= (const FieldBlockFaces & FieldBlockFaces) throw();
 
+  //----------------------------------------------------------------------
+
   /// Copy ghost zones from FieldBlock to FieldBlockFaces
   void copy_from_block();
 
@@ -67,16 +69,12 @@ private: // functions
 
 private: // attributes
 
-  /// Pointer to the associated FieldBlock
-  FieldBlock * field_block;
+  /// Size of the arrays
+  int n_;
 
   /// Allocated arrays [xm,xp,xm,xp,zm,zp] of ghost values (0 if none)
   char * faces_[6];
 
-  /// Process affinities (e.g. MPI rank, thread id, etc.) of neighbors
-  Affinity ** affinity_;
-
 };
 
 #endif /* FIELD_FIELDBLOCKFACES_HPP */
-

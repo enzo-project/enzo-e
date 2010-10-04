@@ -8,16 +8,21 @@
 ///
 /// Detailed description of file field_FieldBlockFaces.cpp
 
+#include "cello.hpp"
 #include "field.hpp"
 
 FieldBlockFaces::FieldBlockFaces() throw ()
 {
+  for (int i=0; i<6; i++) {
+    faces_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
 
 FieldBlockFaces::~FieldBlockFaces() throw ()
 {
+  for (int i=0; i<6; i++) delete [] faces_[i];
 }
 
 //----------------------------------------------------------------------
@@ -25,6 +30,7 @@ FieldBlockFaces::~FieldBlockFaces() throw ()
 FieldBlockFaces::FieldBlockFaces(const FieldBlockFaces & field_block_faces) throw ()
 /// @param     FieldBlockFaces  Object being copied
 {
+  INCOMPLETE_MESSAGE("FieldBlockFaces::FieldBlockFaces","");
 }
 
 //----------------------------------------------------------------------
@@ -33,7 +39,57 @@ FieldBlockFaces & FieldBlockFaces::operator= (const FieldBlockFaces & field_bloc
 /// @param     FieldBlockFaces  Source object of the assignment
 /// @return    The target assigned object
 {
+  INCOMPLETE_MESSAGE("FieldBlockFaces::operator =","");
   return *this;
 }
 
 //======================================================================
+
+void FieldBlockFaces::copy_from_block()
+{
+  INCOMPLETE_MESSAGE("FieldBlockFaces::copy_from_block","");
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlockFaces::copy_to_block()
+{
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlockFaces::send_begin()
+{
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlockFaces::send_end()
+{
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlockFaces::recv_begin()
+{
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlockFaces::recv_end()
+{
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlockFaces::exchange_begin()
+{
+}
+
+//----------------------------------------------------------------------
+
+void FieldBlockFaces::exchange_end()
+{
+}
+
+//----------------------------------------------------------------------

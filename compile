@@ -5,7 +5,7 @@ rm -f out.scons.* fail.scons.*
 if ($#argv >= 1) then
   set platforms = ($argv)
 else
-  set platforms = (charm serial mpi)
+  set platforms = (charm serial ampi)
 endif
 
 printf "\n[ $platforms ]\n\n"

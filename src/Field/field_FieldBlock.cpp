@@ -707,9 +707,9 @@ int FieldBlock::field_size_
 
   // Compute array dimensions
 
-  *nx = dimensions_[0] + (cx ? 0 : 1) + 2*gx;
-  *ny = dimensions_[1] + (cy ? 0 : 1) + 2*gy;
-  *nz = dimensions_[2] + (cz ? 0 : 1) + 2*gz;
+  *nx = dimensions_[0] + (1-cx) + 2*gx;
+  *ny = dimensions_[1] + (1-cy) + 2*gy;
+  *nz = dimensions_[2] + (1-cz) + 2*gz;
 
   // Return array size in bytes
 

@@ -14,7 +14,7 @@ function component($component) {
 
 function tests($component,$testrun,$output) {
 
-   $parallel_types = array("serial","mpi","charm");
+   $parallel_types = array("serial","ampi","charm");
 
    $source_file = "src/$component/test_$testrun.cpp";
    $source_html = "<a href=\"$source_file\">test_$testrun.cpp</a>";
@@ -170,7 +170,7 @@ function test_summary($component,$test_output)
 {
   printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
 
-  $parallel_types = array("serial","mpi","charm");
+  $parallel_types = array("serial","ampi","charm");
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
@@ -189,31 +189,34 @@ function test_summary($component,$test_output)
 ?>
 
 
-<table>
+<?php
+printf ("<table><tr><th></th>\n");
+$parallel_types = array("serial","ampi","charm");
+for ($i = 0; $i < sizeof($parallel_types); ++$i) {
+  printf ("<th colspan=2> $parallel_types[$i] </th>");
+ }
 
-<tr>
-
-<?php test_summary("Data",array("Data")); ?>
-<?php test_summary("Disk",array("FileHdf5","Ifrit")); ?>
-<?php test_summary("Distribute",array("")); ?>
-<?php test_summary("Error",array("Error")); ?>
-<?php test_summary("Enzo",array("ppm_image")); ?>
-<?php test_summary("Field",array("FieldBlock","FieldDescr")); ?>
-<?php test_summary("Global",array("")); ?>
-<?php test_summary("Memory",array("Memory")); ?>
-<?php test_summary("Mesh",array("")); ?>
-<?php test_summary("Method",array("")); ?>
-<?php test_summary("Monitor",array("Monitor")); ?>
-<?php test_summary("Parallel",array("GroupProcessMpi")); ?>
-<?php test_summary("Parameters",array("Parameters")); ?>
-<?php test_summary("Particles",array("")); ?>
-<?php test_summary("Performance",array("Performance")); ?>
-<?php test_summary("Portal",array("")); ?>
-<?php test_summary("Schedule",array("Schedule")); ?>
-<?php test_summary("Simulation",array("Simulation")); ?>
-<?php test_summary("Task",array("")); ?>
-<?php test_summary("Test",array("")); ?>
-<?php test_summary("User",array("")); ?>
+test_summary("Data",array("Data")); 
+test_summary("Disk",array("FileHdf5","Ifrit")); 
+test_summary("Distribute",array("")); 
+test_summary("Error",array("Error")); 
+test_summary("Enzo",array("ppm_image")); 
+test_summary("Field",array("FieldBlock","FieldDescr")); 
+test_summary("Global",array("")); 
+test_summary("Memory",array("Memory")); 
+test_summary("Mesh",array("")); 
+test_summary("Method",array("")); 
+test_summary("Monitor",array("Monitor")); 
+test_summary("Parallel",array("GroupProcessMpi")); 
+test_summary("Parameters",array("Parameters")); 
+test_summary("Particles",array("")); 
+test_summary("Performance",array("Performance")); 
+test_summary("Portal",array("")); 
+test_summary("Schedule",array("Schedule")); 
+test_summary("Simulation",array("Simulation")); 
+test_summary("Task",array("")); 
+test_summary("Test",array("")); 
+test_summary("User",array("")); ?>
 </tr></table>
 
 </ul>
