@@ -20,6 +20,7 @@ if (platform == 'unknown' and "CELLO_PLATFORM" in os.environ):
 
 platform_list = [
 	      'linux-ampi',
+	      'linux-mpi',
 	      'linux-charm',
 	      'linux-charm-perf',
 	      'linux-serial',
@@ -74,42 +75,42 @@ if (platform == 'linux-serial'):
       LIBPATH     = '#/lib',
    )
 #--------------------------------------------------
-# elif (platform == 'linux-mpi'):
+elif (platform == 'linux-mpi'):
 #--------------------------------------------------
-#    parallel_run = "mpirun -np 4"
-#    serial_run   = ""
-#    parallel_type = "mpi"
-#    env = Environment (
-#       CC          = 'mpicc',	
-#       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
-#       CPPPATH     = '#/include',
-#       CXXFLAGS    = '-Wall -g  -m128bit-long-double',
-#       CFLAGS      = '-Wall -g  -m128bit-long-double',
-#       CXX         = 'mpiCC',	
-#       ENV         = os.environ,
-#       FORTRAN     = 'gfortran',
-#       FORTRANLIBS = 'gfortran',
-#       FORTRANPATH = '#/include',
-#       LIBPATH     = '#/lib',
-#    )
-# #--------------------------------------------------
-# elif (platform == 'linux-mpi-valgrind'):
-# #--------------------------------------------------
-#    parallel_run = "mpirun -np 4 valgrind"
-#    serial_run   = "valgrind "
-#    parallel_type = "mpi"
-#    env = Environment (
-#       CC          = 'mpicc',	
-#       CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
-#       CPPPATH     = '#/include',
-#       CXXFLAGS    = '-Wall -g  -m128bit-long-double',
-#       CFLAGS      = '-Wall -g  -m128bit-long-double',
-#       CXX         = 'mpiCC',	
-#       FORTRAN     = 'gfortran',
-#       FORTRANLIBS = 'gfortran',
-#       FORTRANPATH = '#/include',
-#       LIBPATH     = '#/lib',
-#    )
+   parallel_run = "mpirun -np 4"
+   serial_run   = ""
+   parallel_type = "mpi"
+   env = Environment (
+      CC          = 'mpicc',	
+      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
+      CPPPATH     = '#/include',
+      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
+      CFLAGS      = '-Wall -g  -m128bit-long-double',
+      CXX         = 'mpic++',	
+      ENV         = os.environ,
+      FORTRAN     = 'gfortran',
+      FORTRANLIBS = 'gfortran',
+      FORTRANPATH = '#/include',
+      LIBPATH     = '#/lib',
+   )
+#--------------------------------------------------
+elif (platform == 'linux-mpi-valgrind'):
+#--------------------------------------------------
+   parallel_run = "mpirun -np 4 valgrind"
+   serial_run   = "valgrind "
+   parallel_type = "mpi"
+   env = Environment (
+      CC          = 'mpicc',	
+      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
+      CPPPATH     = '#/include',
+      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
+      CFLAGS      = '-Wall -g  -m128bit-long-double',
+      CXX         = 'mpic++',	
+      FORTRAN     = 'gfortran',
+      FORTRANLIBS = 'gfortran',
+      FORTRANPATH = '#/include',
+      LIBPATH     = '#/lib',
+   )
 #--------------------------------------------------
 elif (platform == 'linux-ampi'):
 #--------------------------------------------------
