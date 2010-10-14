@@ -6,6 +6,11 @@
 <body>
   <h1>Cello Unit Tests</h1>
 
+<ul>
+  <li><a href="http://lca.ucsd.edu/projects/cello/">Cello User Site</a></li>
+  <li><a href="http://client65-88.sdsc.edu/projects/cello/">Cello Developer Site</a></li>
+
+</ul>
 <?php
 
 function component($component) {
