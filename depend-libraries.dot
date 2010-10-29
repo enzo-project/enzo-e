@@ -1,40 +1,46 @@
-digraph includes {
+digraph libraries {
 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "7.0,1.0"] enzo;
+   node [ shape=component,fixedsize=true, width=1.4, pos= "6.0,1.0"] simulation;
+   node [ shape=component,fixedsize=true, width=1.4, pos= "6.0,2.0"] method; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "5.0,1.0"] mesh;
+   node [ shape=component,fixedsize=true, width=1.4, pos= "5.0,2.0"]  field; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "5.0,3.0"] particle; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "4.0,1.0"] task; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "4.0,2.0"] distribute; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "4.0,3.0"] schedule; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "3.0,1.0"] disk; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "3.0,2.0"] memory; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "3.0,3.0"] parallel; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "2.0,1.0"] parameters; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "2.0,2.0"] monitor; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "2.0,3.0"] portal; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "1.0,1.0"] performance; 
+   node [ shape=component,fixedsize=true, width=1.4, pos= "1.0,2.0" ] error;
 
-   data        -> {field error};
-   disk        -> {error};
-   enzo        -> {user data field error parallel monitor parameters memory};
-   field       -> {error};
-   global      -> {field error};
-   memory      -> {error};
+   enzo        -> {field error parallel monitor parameters memory};
+
+   simulation  -> {error parameters parallel monitor memory enzo field};
+   method      -> {};
+   
    mesh        -> {error memory parallel monitor};
-   monitor     -> {parallel  error};
-   parameters  -> {error parallel  monitor};
-   performance -> {error memory};
+   field       -> {error};
+   particle    -> {};
+
+   task        -> {};
+   distribute  -> {};
    schedule    -> {error};
-   simulation  -> {error parameters parallel monitor memory enzo user data field};
-   user        -> {user  data  field  error parallel  monitor  parameters  memory};
 
+   disk        -> {error};
+   memory      -> {error};
+   parallel    -> {error};
 
-   data        [ shape=box ];
-   disk        [ shape=box ];
-   distribute  [ shape=box ];
-   enzo        [ shape=box ];
-   error       [ shape=box ];
-   field       [ shape=box ];
-   global      [ shape=box ];
-   memory      [ shape=box ];
-   mesh        [ shape=box ];
-   monitor     [ shape=box ];
-   parallel    [ shape=box ];
-   parameters  [ shape=box ];
-   particle    [ shape=box ];
-   performance [ shape=box ];
-   portal      [ shape=box ];
-   schedule    [ shape=box ];
-   simulation  [ shape=box ];
-   task        [ shape=box ];
-   test        [ shape=box ];
-   user        [ shape=box ];
+   parameters  -> {error parallel  monitor};
+   monitor     -> {parallel  error};
+   portal      -> {};
+
+   performance -> {error memory};
+   error       -> {};
+
 
 }

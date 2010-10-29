@@ -1,46 +1,35 @@
 digraph includes {
 
+   node [ shape=component,fixedsize=true, width=1.4 ] 
+    enzo; simulation; method; 
+    mesh; field; particle; 
+    task; distribute; schedule; 
+    disk; memory; parallel; 
+    parameters; monitor; portal; 
+    performance; error;
 
-   data        -> {error field test};
-   disk        -> {error test};
-   distribute  -> {};
-   enzo        -> {user data field error parallel monitor parameters memory};
-   error       -> {test};
-   field       -> {disk error parallel test};
-   global      -> {error memory monitor parallel parameters};
-   memory      -> {error memory performance};
-   mesh        -> {error memory monitor test};
-   monitor     -> {error parallel performance test};
-   parallel    -> {error test};
-   parameters  -> {error monitor parallel test};
+   enzo        -> {field error parallel monitor parameters memory};
+
+   method      -> {};
+   simulation  -> {enzo mesh schedule};
+
+   mesh        -> {error memory monitor};
+   field       -> {disk error parallel};
    particle    -> {};
-   performance -> {error memory test};
-   portal      -> {};
-   schedule    -> {error test};
-   simulation  -> {data enzo global mesh schedule test user};
-   task        -> {};
-   test        -> {error};
-   user        -> {data error field global parameters};
 
-   data        [ shape=box ];
-   disk        [ shape=box ];
-   distribute  [ shape=box ];
-   enzo        [ shape=box ];
-   error       [ shape=box ];
-   field       [ shape=box ];
-   global      [ shape=box ];
-   memory      [ shape=box ];
-   mesh        [ shape=box ];
-   monitor     [ shape=box ];
-   parallel    [ shape=box ];
-   parameters  [ shape=box ];
-   particle    [ shape=box ];
-   performance [ shape=box ];
-   portal      [ shape=box ];
-   schedule    [ shape=box ];
-   simulation  [ shape=box ];
-   task        [ shape=box ];
-   test        [ shape=box ];
-   user        [ shape=box ];
+   task        -> {};
+   distribute  -> {};
+   schedule    -> {error};
+
+   disk        -> {error};
+   memory      -> {error memory performance};
+   parallel    -> {error};
+
+   parameters  -> {error monitor parallel};
+   monitor     -> {error parallel performance};
+   portal      -> {};
+
+   performance -> {error memory};
+   error       -> {};
 
 }
