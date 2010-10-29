@@ -11,38 +11,14 @@
 ///    format.  This file is sym-linked or copied to image.h before
 ///    compiling.
 
-#define USE_PPM_IMAGE_PNG
-/* #define USE_IMAGE_H */
+#include "pngwriter.h"
+
+#include "cello.hpp"
 
 #include "cello_hydro.h"
 #include "enzo.hpp"
 
-#ifdef USE_PPM_IMAGE_PNG
-#   include "pngwriter.h"
-#endif
-#ifdef USE_IMAGE_H
-#   include "image.h"
-#endif
 
-#ifdef USE_IMAGE_H
-inline float color_value 
-(float * image, size_t nx, size_t ny,
- float x, float y, double lower[2], double upper[2])
-// Return boolean flag whether point is inside the text "Enzo"
-{
-  if (x < lower[0] || x > upper[0]) return false;
-  if (y < lower[1] || y > upper[1]) return false;
-
-  size_t ix = width*(x - lower[0]) / (upper[0] - lower[0]);
-  size_t iy = height*(y - lower[1]) / (upper[1] - lower[1]);
-  if (ix == width) ix--;
-  if (iy == height) iy--;
-  ASSERT ("color_value","ix or iy out of range",ix < width && iy < height);
-  return (image[ix + width*iy]);
-} 
-#endif
-
-#ifdef USE_PPM_IMAGE_PNG
 inline float color_value_png
 (size_t nx, size_t ny,
  float x, float y, double lower[2], double upper[2],
@@ -64,19 +40,16 @@ inline float color_value_png
 
   return (1.0*png->read(ix+1,iy+1)/256);
 } 
-#endif
 
 void EnzoDescr::initialize_image ()
 
 {
 
-#ifdef USE_PPM_IMAGE_PNG
   pngwriter png;
 
   png.readfromfile("input/ppm-image.png");
   int width  = png.getwidth();
   int height = png.getheight();
-#endif
 
   
   int grid_size [] = { width, height };
@@ -87,19 +60,6 @@ void EnzoDescr::initialize_image ()
   float pressure_in  = 0.14;
   float velocity_x = 0.0;
   float velocity_y = 0.0;
-
-#ifdef USE_IMAGE_H
-  int pixel[3];
-  const char * data = header_data;
-  float * image = new float [width*height];
-  for (size_t iy=0; iy<height; iy++) {
-    for (size_t ix=0; ix<width; ix++) {
-      HEADER_PIXEL(data,pixel);
-      int i=ix + width*iy;
-      image [i] = 1.0*(pixel[0] + pixel[1] + pixel[2])/(255*3);
-    }
-  }
-#endif
 
   Gamma                           = 1.4;
 
@@ -196,14 +156,9 @@ void EnzoDescr::initialize_image ()
       // Initialize density and total energy
 
       float a;
-#ifdef USE_IMAGE_H
-      a = color_value(image, width,height,x,y,			    
-		      DomainLeftEdge,DomainRightEdge);
-#endif
-#ifdef USE_PPM_IMAGE_PNG
+
       a = color_value_png(width,height,x,y,DomainLeftEdge,DomainRightEdge,
 			  &png);
-#endif
 
       float density  = a*density_in  + (1-a)*density_out;
       float pressure = a*pressure_in + (1-a)*pressure_out;

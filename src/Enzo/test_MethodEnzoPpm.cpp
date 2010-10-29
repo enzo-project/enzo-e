@@ -11,6 +11,8 @@
 #include <math.h>
 
 #include "cello.hpp"
+#include "cello_hydro.h"
+
 #include "user.hpp"
 #include "error.hpp"
 #include "monitor.hpp"
@@ -20,10 +22,8 @@
 #include "test.hpp"
 #include "enzo.hpp"
 #include "simulation.hpp"
-
-#include "cello_hydro.h"
-
 #include "parallel.def"
+
 #include PARALLEL_CHARM_INCLUDE(test_MethodEnzoPpm.decl.h)
 
 void output_fields(FieldBlock * field_block,

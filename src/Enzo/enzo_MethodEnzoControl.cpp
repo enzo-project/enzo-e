@@ -7,13 +7,14 @@
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of MethodEnzoControl user-dependent class member functions
 
+#include "cello.hpp"
+#include "cello_hydro.h"
+
 #include "user.hpp"
 #include "enzo.hpp"
 #include "error.hpp"
 #include "parameters.hpp"
 #include "parallel.hpp"
-
-#include "cello_hydro.h"
 
 //----------------------------------------------------------------------
 

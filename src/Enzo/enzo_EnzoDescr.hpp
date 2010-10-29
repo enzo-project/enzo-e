@@ -9,7 +9,6 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Brief description of file enzo_EnzoDescr.hpp
 
-#include "global.hpp"
 #include "cello_hydro.h"
 
 struct fluxes

@@ -6,6 +6,8 @@
 /// @date     2009-10-06
 /// @brief    Test program for reading in parameters then displaying them
 
+#include "cello.hpp"
+
 #include "parameters.hpp"
 
 #include "parallel.def"

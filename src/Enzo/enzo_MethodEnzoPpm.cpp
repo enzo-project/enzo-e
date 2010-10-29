@@ -10,7 +10,6 @@
 
 #include "data.hpp"
 #include "error.hpp"
-#include "global.hpp"
 #include "user.hpp"
 #include "enzo.hpp"
 

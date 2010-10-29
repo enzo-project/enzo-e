@@ -13,7 +13,6 @@
 
 #include "cello.hpp"
 
-#include "global.hpp"
 #include "mesh.hpp"
 #include "schedule.hpp"
 #include "data.hpp"

@@ -8,11 +8,10 @@
 /// @brief    Implementation of EnzoSimulation user-dependent class member functions
 
 #include "cello.hpp"
-#include "global.hpp"
+#include "enzo.hpp"
+
 #include "parameters.hpp"
 #include "simulation.hpp"
-
-#include "enzo.hpp"
 
 //----------------------------------------------------------------------
 

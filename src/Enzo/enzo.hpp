@@ -12,6 +12,8 @@
 #include <vector>
 #include <string>
 
+#include "cello.hpp"
+
 #include "user.hpp"
 #include "simulation.hpp"
 

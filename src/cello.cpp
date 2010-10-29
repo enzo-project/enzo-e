@@ -16,7 +16,6 @@
 
 #include "parallel.hpp"
 #include "simulation.hpp"
-#include "global.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(cello.decl.h)
 

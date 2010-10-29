@@ -18,8 +18,10 @@
  
 // Solve the MHD equations with the solver, saving the subgrid fluxes
 
-#include "cello_hydro.h"
 #include "enzo.hpp" 
+
+#include "cello_hydro.h"
+
   
 int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
 				 int cycle, float dt)

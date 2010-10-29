@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <string>
 
+#include "cello.hpp"
+
 #include "error.hpp"
 #include "test.hpp"
 #include "performance.hpp"
-
 #include "parallel.def"
 
 #include PARALLEL_CHARM_INCLUDE(test_Performance.decl.h)

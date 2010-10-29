@@ -8,7 +8,8 @@
 
 //----------------------------------------------------------------------
 
-#include "global.hpp"
+#include "cello.hpp"
+
 #include "error.hpp"
 #include "user.hpp"
 #include "enzo.hpp"

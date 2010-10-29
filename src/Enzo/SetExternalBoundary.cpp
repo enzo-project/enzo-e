@@ -15,6 +15,8 @@
 /
 ************************************************************************/
 
+#include "cello.hpp"
+
 #include "cello_hydro.h"
 #include "enzo.hpp"
  

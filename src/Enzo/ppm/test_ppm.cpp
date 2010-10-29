@@ -10,7 +10,6 @@
 #include "cello.hpp"
 #include "cello_hydro.h"
 
-#include "string.h"
 #include "test_ppm.h"
 #include "monitor.hpp"
 #include "performance.hpp"

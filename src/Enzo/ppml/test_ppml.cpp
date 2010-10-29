@@ -10,7 +10,6 @@
 #include "cello.hpp" 
 #include "cello_hydro.h"
 
-#include "string.h"
 #include "test_ppml.h"
 
 #include "test.hpp"
@@ -18,7 +17,6 @@
 #include "parallel.hpp"
 #include "performance.hpp"
 #include "monitor.hpp"
-
 #include "parallel.def"
 
 #include PARALLEL_CHARM_INCLUDE(test_ppml.decl.h)

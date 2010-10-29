@@ -14,7 +14,7 @@ SConscript('Disk/SConscript')
 SConscript('Distribute/SConscript')
 SConscript('Error/SConscript')
 SConscript('Field/SConscript')
-SConscript('Global/SConscript')
+# SConscript('Global/SConscript')
 SConscript('Memory/SConscript')
 SConscript('Mesh/SConscript')
 # SConscript('Method/SConscript')
@@ -31,7 +31,7 @@ SConscript('Test/SConscript')
 SConscript('User/SConscript')
 
 
-components = ['schedule','error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','user','data','field','global','cello']
+components = ['schedule','error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','user','data','field','cello']
 
 libraries  = ['png', '$FORTRANLIBS','m']
 

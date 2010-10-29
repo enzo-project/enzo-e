@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cello.hpp"
+
 #include "error.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"

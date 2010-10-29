@@ -5,7 +5,9 @@
 
 #include "config.def"
 
+#include "cello_functions.hpp"
 #include "cello_precision.hpp"
+#include "cello_global.hpp"
 
 
 /*********************************************************************
@@ -96,15 +98,6 @@ enum face_type {
   face_lower_z = 4,
   face_upper_z = 5,
   face_all};
-
-/*********************************************************************
- * GLOBAL FUNCTIONS
- **********************************************************************/
-
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
-
-#define INDEX(ix,iy,iz,nx,ny) ((ix)+(nx)*((iy)+(ny)*(iz)))
 
 /*********************************************************************
  * COMPONENTS

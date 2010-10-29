@@ -16,7 +16,6 @@
 
 #include "cello.hpp"
 
-#include "global.hpp"
 #include "data.hpp"
 #include "error.hpp"
 #include "memory.hpp"

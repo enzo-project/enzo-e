@@ -8,9 +8,10 @@
 
 #include <string>
 
+#include "cello.hpp"
+
 #include "user.hpp"
 #include "field.hpp"
-#include "global.hpp"
 
 //----------------------------------------------------------------------
 

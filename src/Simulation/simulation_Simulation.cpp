@@ -10,7 +10,6 @@
 
 #include "simulation.hpp"
 #include "data.hpp" 
-// #include "enzo.hpp"
 #include "user.hpp" 
 
 Simulation::Simulation(Global * global)

@@ -10,6 +10,8 @@
 #include "stdio.h"
 #include "stdlib.h"
 
+#include "cello.hpp"
+
 #include "error.hpp"
 #include "parameters.hpp"
 

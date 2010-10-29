@@ -6,7 +6,8 @@
 /// @date     Tue Aug 31 15:38:36 PDT 2010
 /// @brief    Implementation of EnzoDescr methods
 
-#include "global.hpp"
+#include "cello.hpp"
+
 #include "parameters.hpp"
 #include "enzo.hpp"
 

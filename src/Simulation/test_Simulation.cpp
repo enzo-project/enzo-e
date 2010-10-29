@@ -10,10 +10,10 @@
 #include <string>
 
 #include "cello.hpp"
+
 #include "test.hpp"
 #include "enzo.hpp"
 #include "simulation.hpp"
-
 #include "parallel.def"
 
 #include PARALLEL_CHARM_INCLUDE(test_Simulation.decl.h)
