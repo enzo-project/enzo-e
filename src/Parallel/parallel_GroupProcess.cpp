@@ -1,4 +1,4 @@
-// $Id: parallel_GroupProcess.cpp 1688 2010-08-03 22:34:22Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     parallel_GroupProcess.cpp

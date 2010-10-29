@@ -1,4 +1,4 @@
-// $Id: cello_global.hpp 1746 2010-09-01 00:29:25Z bordner $
+// $Id$
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef CELLO_GLOBAL_HPP
