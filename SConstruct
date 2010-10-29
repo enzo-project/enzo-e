@@ -25,7 +25,7 @@ platform_list = [
 	      'linux-charm-perf',
 	      'linux-serial',
 	      'ncsa-bd',
-	      'ncsa-bd-serial'
+	      'ncsa-bd-serial',
 	      'sdsc-triton',
 	      'sdsc-triton-serial',
 	    ]
@@ -191,7 +191,8 @@ elif (platform == 'sdsc-triton' or platform == 'sdsc-triton-serial'):
       FORTRANPATH = '#/include',
       LIBPATH = ['#/lib', path_hdf5 + '/lib'],
       LINKFLAGS = '-pgf90libs',
-      ENV = {'PATH' : os.environ['PATH'], 'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']},
+      ENV = { 'PATH' : os.environ['PATH'], 
+              'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']}
    )
 #--------------------------------------------------
 elif (platform == 'ncsa-bd' or platform == 'ncsa-bd-serial'):
@@ -206,9 +207,10 @@ elif (platform == 'ncsa-bd' or platform == 'ncsa-bd-serial'):
 
    serial_run    = ""
 
-#     flags_opt = '-O3 -qhot -q64'
-   flags_opt = '-q64'
-   flags_debug = '-g'
+   flags_opt = '-O3 -qhot -q64'
+#   flags_opt = '-q64'
+#   flags_debug = '-g'
+   flags_debug = ''
    flags_fort = '-qextname -I include'
    flags = flags_opt + ' ' + flags_debug + ' '
 
@@ -242,7 +244,7 @@ elif (platform == 'ncsa-bd' or platform == 'ncsa-bd-serial'):
       CXXFLAGS = flags + defines,
       DEFINES = '',
       FORTRANFLAGS = flags + flags_fort,
-      FORTRANLIBS = ['xlf90','xlfmath'],
+      FORTRANLIBS = ['xlf90','xlfmath','xl'],
       FORTRAN = fc,
       LIBPATH = ['#/lib','/home/bordner/lib',lib_fc,lib_hdf5],
       LINKFLAGS  = flags

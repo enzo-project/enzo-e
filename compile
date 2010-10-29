@@ -5,7 +5,7 @@ rm -f out.scons.* fail.scons.*
 if ($#argv >= 1) then
   set platforms = ($argv)
 else
-  set platforms = (charm serial ampi mpi)
+  set platforms = (linux-charm linux-serial linux-ampi linux-mpi)
 endif
 
 printf "\n[ $platforms ]\n\n"
@@ -15,7 +15,7 @@ set p = 1
 
 printf "cleaning..."
 foreach platform ($platforms)
-   setenv CELLO_PLATFORM linux-$platform
+   setenv CELLO_PLATFORM $platform
    scons -c >& /dev/null
 end
 printf "\n\n"

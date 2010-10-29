@@ -33,7 +33,7 @@ SConscript('User/SConscript')
 
 components = ['schedule','error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','user','data','field','global','cello']
 
-libraries  = ['png', '$FORTRANLIBS']
+libraries  = ['png', '$FORTRANLIBS','m']
 
 
 env = env.Clone(LIBS=[components,libraries])
