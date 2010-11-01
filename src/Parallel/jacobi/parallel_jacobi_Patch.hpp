@@ -2,9 +2,8 @@
 #define PATCH_HPP
 
 #include "parallel.def"
-#include "counter.hpp"
 
-#include "test_jacobi.decl.h"
+#include "test_parallel_jacobi.decl.h"
 
 class Patch : public CBase_Patch
 {

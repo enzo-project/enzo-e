@@ -21,19 +21,19 @@ env = env.Clone(LIBS=[libraries])
 # SOURCE
 #------------------------------
 
-includes   = [Glob('jacobi*hpp')]
-sources    = [Glob('jacobi*cpp'), 'patch.cpp']
+includes   = [Glob('parallel_jacobi*hpp')]
+sources    = [Glob('parallel_jacobi*cpp')]
 
 #------------------------------
 # TARGETS
 #------------------------------
 
 libraries = env.Library ([sources])
-test_jacobi =  env.Program (['test_jacobi.cpp',      sources])
-tests = [test_jacobi];
+test_parallel_jacobi =  env.Program (['test_parallel_jacobi.cpp',      sources])
+tests = [test_parallel_jacobi];
 
 if (parallel_type == "charm"):
-	test = 'test_jacobi'
+	test = 'test_parallel_jacobi'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 

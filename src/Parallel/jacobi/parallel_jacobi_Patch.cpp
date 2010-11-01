@@ -1,9 +1,10 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <hdf5.h>
 
-#include "hdf5.h"
-#include "patch.hpp"
+#include "parallel_jacobi.hpp"
+
 #include "parallel.def"
 
 #define _TRACE_   CkPrintf ("%s:%d\n",__FILE__,__LINE__); fflush(stdout);

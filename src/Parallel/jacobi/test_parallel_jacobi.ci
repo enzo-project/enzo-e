@@ -1,4 +1,4 @@
-mainmodule test_jacobi {
+mainmodule test_parallel_jacobi {
 
   readonly CProxy_Main mainProxy;
 

@@ -10,8 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "counter.hpp"
-#include "jacobi.hpp"
+#include "parallel_jacobi.hpp"
 
 #define BLOCK_CYCLE
 
@@ -98,4 +97,4 @@ public:
     
 };
 
-#include "test_jacobi.def.h"
+#include "test_parallel_jacobi.def.h"
