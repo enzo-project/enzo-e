@@ -24,7 +24,7 @@
 
 #include "field_FieldDescr.hpp"
 #include "field_FieldBlock.hpp"
-#include "field_FieldBlockFaces.hpp"
+#include "field_FieldFaces.hpp"
 
 #endif /* FIELD_HPP */
 

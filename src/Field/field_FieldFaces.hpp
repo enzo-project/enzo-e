@@ -1,44 +1,44 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef FIELD_FIELDBLOCKFACES_HPP
-#define FIELD_FIELDBLOCKFACES_HPP
+#ifndef FIELD_FIELDFACES_HPP
+#define FIELD_FIELDFACES_HPP
 
-/// @file     field_FieldBlockFaces.hpp
+/// @file     field_FieldFaces.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Interface for the FieldBlockFaces class
+/// @brief    Interface for the FieldFaces class
 
-class FieldBlockFaces {
+class FieldFaces {
 
-  /// @class    FieldBlockFaces
+  /// @class    FieldFaces
   /// @ingroup  Field
   /// @brief    Class for representing and operating on ghost zones
 
 public: // interface
 
   /// Constructor
-  FieldBlockFaces() throw();
+  FieldFaces() throw();
 
   //----------------------------------------------------------------------
   // Big Three
   //----------------------------------------------------------------------
 
   /// Destructor
-  ~FieldBlockFaces() throw();
+  ~FieldFaces() throw();
 
   /// Copy constructor
-  FieldBlockFaces(const FieldBlockFaces & FieldBlockFaces) throw();
+  FieldFaces(const FieldFaces & FieldFaces) throw();
 
   /// Assignment operator
-  FieldBlockFaces & operator= (const FieldBlockFaces & FieldBlockFaces) throw();
+  FieldFaces & operator= (const FieldFaces & FieldFaces) throw();
 
   //----------------------------------------------------------------------
 
-  /// Copy ghost zones from FieldBlock to FieldBlockFaces
+  /// Copy ghost zones from FieldBlock to FieldFaces
   void copy_from_block();
 
-  /// Copy ghost zones from FieldBlockFaces to FieldBlock
+  /// Copy ghost zones from FieldFaces to FieldBlock
   void copy_to_block();
 
   ///  	Initiate a send of ghost zones to another block patch, which
@@ -77,4 +77,4 @@ private: // attributes
 
 };
 
-#endif /* FIELD_FIELDBLOCKFACES_HPP */
+#endif /* FIELD_FIELDFACES_HPP */

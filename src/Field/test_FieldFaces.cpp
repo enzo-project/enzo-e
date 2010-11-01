@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_FieldBlockFaces.cpp
+/// @file     test_FieldFaces.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2008-02-20
-/// @brief    Unit tests for the FieldBlockFaces class
+/// @brief    Unit tests for the FieldFaces class
 
 #include <math.h>
 
@@ -15,7 +15,7 @@
 #include "field.hpp"
 
 #include "parallel.def"
-#include PARALLEL_CHARM_INCLUDE(test_FieldBlockFaces.decl.h)
+#include PARALLEL_CHARM_INCLUDE(test_FieldFaces.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -26,7 +26,7 @@ PARALLEL_MAIN_BEGIN
   unit_init();
   //----------------------------------------------------------------------
 
-  // Set up FieldDescr, FieldBlock, and FieldBlockFaces (copied from
+  // Set up FieldDescr, FieldBlock, and FieldFaces (copied from
   // test_FieldBlock)
 
   //----------------------------------------------------------------------
@@ -557,4 +557,4 @@ PARALLEL_MAIN_BEGIN
 }
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_FieldBlockFaces.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_FieldFaces.def.h)

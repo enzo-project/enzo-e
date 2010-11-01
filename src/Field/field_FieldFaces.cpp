@@ -1,17 +1,17 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     field_FieldBlockFaces.cpp
+/// @file     field_FieldFaces.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file field_FieldBlockFaces.cpp
+/// @brief    Brief description of file field_FieldFaces.cpp
 ///
-/// Detailed description of file field_FieldBlockFaces.cpp
+/// Detailed description of file field_FieldFaces.cpp
 
 #include "cello.hpp"
 #include "field.hpp"
 
-FieldBlockFaces::FieldBlockFaces() throw ()
+FieldFaces::FieldFaces() throw ()
 {
   for (int i=0; i<6; i++) {
     faces_[i] = 0;
@@ -20,75 +20,75 @@ FieldBlockFaces::FieldBlockFaces() throw ()
 
 //----------------------------------------------------------------------
 
-FieldBlockFaces::~FieldBlockFaces() throw ()
+FieldFaces::~FieldFaces() throw ()
 {
   for (int i=0; i<6; i++) delete [] faces_[i];
 }
 
 //----------------------------------------------------------------------
 
-FieldBlockFaces::FieldBlockFaces(const FieldBlockFaces & field_block_faces) throw ()
-/// @param     FieldBlockFaces  Object being copied
+FieldFaces::FieldFaces(const FieldFaces & field_block_faces) throw ()
+/// @param     FieldFaces  Object being copied
 {
-  INCOMPLETE_MESSAGE("FieldBlockFaces::FieldBlockFaces","");
+  INCOMPLETE_MESSAGE("FieldFaces::FieldFaces","");
 }
 
 //----------------------------------------------------------------------
 
-FieldBlockFaces & FieldBlockFaces::operator= (const FieldBlockFaces & field_block_faces) throw ()
-/// @param     FieldBlockFaces  Source object of the assignment
+FieldFaces & FieldFaces::operator= (const FieldFaces & field_block_faces) throw ()
+/// @param     FieldFaces  Source object of the assignment
 /// @return    The target assigned object
 {
-  INCOMPLETE_MESSAGE("FieldBlockFaces::operator =","");
+  INCOMPLETE_MESSAGE("FieldFaces::operator =","");
   return *this;
 }
 
 //======================================================================
 
-void FieldBlockFaces::copy_from_block()
+void FieldFaces::copy_from_block()
 {
-  INCOMPLETE_MESSAGE("FieldBlockFaces::copy_from_block","");
+  INCOMPLETE_MESSAGE("FieldFaces::copy_from_block","");
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlockFaces::copy_to_block()
-{
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlockFaces::send_begin()
+void FieldFaces::copy_to_block()
 {
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlockFaces::send_end()
+void FieldFaces::send_begin()
 {
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlockFaces::recv_begin()
+void FieldFaces::send_end()
 {
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlockFaces::recv_end()
+void FieldFaces::recv_begin()
 {
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlockFaces::exchange_begin()
+void FieldFaces::recv_end()
 {
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlockFaces::exchange_end()
+void FieldFaces::exchange_begin()
+{
+}
+
+//----------------------------------------------------------------------
+
+void FieldFaces::exchange_end()
 {
 }
 

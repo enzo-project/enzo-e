@@ -5,7 +5,7 @@ Import('parallel_type')
 Import('serial_run')
 
 
-# O test_FieldBlockFaces.cpp
+# O test_FieldFaces.cpp
 # O test_MethodEnzoPpml.cpp
 # O test_Mpi.cpp
 # O test_ParallelAffinity.cpp
@@ -52,7 +52,7 @@ env.Append(BUILDERS = { 'RunTree'     : run_tree } )
 env.RunSerial(parallel_type + '-test_Data.unit',        '#/bin/test_Data')
 env.RunSerial(parallel_type + '-test_Error.unit',       '#/bin/test_Error')
 env.RunSerial(parallel_type + '-test_FieldBlock.unit',  '#/bin/test_FieldBlock')
-# env.RunSerial(parallel_type + '-test_FieldBlockFaces.unit','#/bin/test_FieldBlockFaces')
+# env.RunSerial(parallel_type + '-test_FieldFaces.unit','#/bin/test_FieldFaces')
 env.RunSerial(parallel_type + '-test_FieldDescr.unit',  '#/bin/test_FieldDescr')
 env.RunSerial(parallel_type + '-test_FileHdf5.unit',    '#/bin/test_FileHdf5')
 env.RunSerial(parallel_type + '-test_Ifrit.unit',       '#/bin/test_Ifrit')
