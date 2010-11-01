@@ -209,6 +209,207 @@ http://wilma.vub.ac.be/~se4/papers/codingconventions.html
 
    
 %==================================================================
+\section{\cello\ Classes}
+%==================================================================
+
+This section describes \cello's classes, organized by component and
+their intended use (\cello\ created, application-created,
+application-inherited, private, etc.)
+
+\begin{tabular}{|ll|} \hline
+\code{Enzo-P} &	\parbox[t]{4in}{Component defining the Enzo-P application} \\  \hline
+\code{Simulation} & 	\parbox[t]{4in}{Encapsulates the problem(s) to run} \\
+\code{Method} &	\parbox[t]{4in}{Component for defining methods, including hyperbolic, elliptic, analysis, visualization, and initialization} \\ \hline
+\code{Mesh} &	\parbox[t]{4in}{Distributed adaptive mesh refinement data structures} \\
+\code{Field} &	\parbox[t]{4in}{Scalar fields on a Mesh} \\
+\code{Particles} &	\parbox[t]{4in}{Particle data on a Mesh} \\ \hline
+\code{Task} &	\parbox[t]{4in}{Encapsulates Methods and Data on a Mesh patch block for a single process / thread} \\
+\code{Distribute} &	\parbox[t]{4in}{Distribute, and dynamically redistribute, Tasks among nodes and processes} \\
+\code{Schedule} &	\parbox[t]{4in}{Dynamically schedules Tasks to advance the Simulation in time} \\ \hline
+\code{Disk} &	\parbox[t]{4in}{Provides functions for writing and reading data to and from disk storage} \\
+\code{Memory} &	\parbox[t]{4in}{Manages dynamic memory allocation and deallocation} \\
+\code{Parallel} &	\parbox[t]{4in}{Functions for facilitating data communication, task migration, and synchronization} \\ \hline
+\code{Parameters} &	\parbox[t]{4in}{Input, parse, store, and access run-time parameters in both Cello and User space} \\
+\code{Monitor} &	\parbox[t]{4in}{User interface to monitor the status of a running simulation} \\
+\code{Portal} &	\parbox[t]{4in}{Interface with other applications, such as querying state and dynamically controlling parameters} \\ \hline
+\code{Performance} &	\parbox[t]{4in}{Measure, and provide functions to access, run-time performance} \\
+\code{Error} &	\parbox[t]{4in}{Fault tolerance through error detection and recovery} \\ \hline
+\end{tabular}
+
+
+
+%-----------------------------------------------------------------------
+\subsection{\code{Enzo-P}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Simulation}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Method}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Mesh}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Field}}
+%-----------------------------------------------------------------------
+
+%--------------------------------------------------
+\subsubsection{\code{FieldDescr}}
+
+% \newcommand{classdescr}
+
+FieldDescr::FieldDescr () throw ()
+ 	Initialize a FieldDescr object.
+
+FieldDescr::FieldDescr () throw ()
+ 	Initialize a FieldDescr object.
+
+FieldDescr::~FieldDescr () throw ()
+ 	Destructor.
+FieldDescr::FieldDescr (const FieldDescr \&field\_descr) throw ()
+ 	Copy constructor.
+FieldDescr \& 	FieldDescr::operator= (const FieldDescr \&field\_descr) throw ()
+ 	Assignment operator.
+int 	FieldDescr::field\_count () const throw ()
+ 	Return the number of fields.
+std::string 	FieldDescr::field\_name (size\_t id\_field) const throw (std::out\_of\_range)
+ 	Return name of the ith field.
+
+bool 	FieldDescr::is\_field (const std::string name) const throw ()
+ 	Return whether the field has been inserted.
+
+int 	FieldDescr::field\_id (const std::string name) throw ()
+ 	Return the integer handle for the named field.
+
+int 	FieldDescr::group\_count () const throw ()
+ 	Return the number of groups.
+
+std::string 	FieldDescr::group\_name (int id\_group) const throw (std::out\_of\_range)
+ 	Return name of the ith group.
+
+bool 	FieldDescr::is\_group (const std::string name) const throw ()
+ 	Return whether the group has been inserted.
+
+int 	FieldDescr::group\_id (const std::string name) throw ()
+ 	Return the integer handle for the named group.
+
+bool 	FieldDescr::field\_in\_group (int id\_field, int id\_group) const throw (std::out\_of\_range)
+ 	Return whether the given field is in the given group.
+
+int 	FieldDescr::alignment () const throw ()
+ 	alignment in bytes of fields in memory
+
+int 	FieldDescr::padding () const throw ()
+ 	padding in bytes between fields in memory
+
+double 	FieldDescr::courant () const throw ()
+ 	courant number for fields
+
+void 	FieldDescr::centering (int id\_field, bool *cx, bool *cy, bool *cz) const throw (std::out\_of\_range)
+ 	centering of given field
+
+void 	FieldDescr::ghosts (int id\_field, int *gx, int *gy, int *gz) const throw (std::out\_of\_range)
+ 	depth of ghost zones of given field
+
+precision\_type 	FieldDescr::precision (int id\_field) const throw (std::out\_of\_range)
+ 	precision of given field
+
+int 	FieldDescr::bytes\_per\_element (int id\_field) const throw ()
+ 	Number of bytes per element required by the given field.
+
+double 	FieldDescr::minimum\_value (int id\_field) const throw (std::out\_of\_range)
+ 	minimum value for the field
+
+enum field\_action\_type 	FieldDescr::minimum\_action (int id\_field) const throw (std::out\_of\_range)
+ 	minimum action for the field
+
+double 	FieldDescr::maximum\_value (int id\_field) const throw (std::out\_of\_range)
+ 	maximum value for the field
+
+enum field\_action\_type 	FieldDescr::maximum\_action (int id\_field) const throw (std::out\_of\_range)
+ 	maximum action for the field
+
+int 	FieldDescr::insert\_field (std::string name\_field) throw ()
+ 	Insert a new field.
+
+void 	FieldDescr::insert\_group (std::string name\_group) throw ()
+ 	Insert a new group.
+
+void 	FieldDescr::set\_field\_in\_group (int id\_field, int id\_group) throw (std::out\_of\_range)
+ 	Set membership of a field in a group.
+
+void 	FieldDescr::set\_alignment (int alignment) throw ()
+ 	Set alignment.
+
+void 	FieldDescr::set\_padding (int padding) throw ()
+ 	Set padding.
+
+void 	FieldDescr::set\_courant (double courant) throw ()
+ 	Set courant.
+
+void 	FieldDescr::set\_centering (int id\_field, bool cx, bool cy, bool cz) throw (std::out\_of\_range)
+ 	Set centering for a field.
+
+void 	FieldDescr::set\_ghosts (int id\_field, int gx, int gy, int gz) throw (std::out\_of\_range)
+ 	Set ghosts for a field.
+
+void 	FieldDescr::set\_precision (int id\_field, precision\_type precision) throw (std::out\_of\_range)
+ 	Set precision for a field.
+
+void 	FieldDescr::set\_minimum (int id\_field, double min\_value, enum field\_action\_type min\_action) throw (std::out\_of\_range)
+ 	Set minimum bound and action.
+
+void 	FieldDescr::set\_maximum (int id\_field, double max\_value, enum field\_action\_type max\_action) throw (std::out\_of\_range)
+ 	Set maximum bound and action. 
+
+
+
+%--------------------------------------------------
+\subsubsection{\code{FieldBlock}}
+
+%--------------------------------------------------
+\subsubsection{\code{FieldFaces}}
+
+%-----------------------------------------------------------------------
+\subsection{\code{Particles}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Task}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Distribute}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Schedule}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Disk}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Memory}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Parallel}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Parameters}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Monitor}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Portal}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Performance}}
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+\subsection{\code{Error}}
+%-----------------------------------------------------------------------
+
+
+%==================================================================
 \section{Procedures for common coding tasks}
 %==================================================================
 
@@ -235,8 +436,9 @@ Coding tasks
 \pargraph{adding new data members to the grid class}
 
 
-
+%-----------------------------------------------------------------------
 \subsection{Commiting new code to the repository}
+%-----------------------------------------------------------------------
 
 The following checklist should be used when updating the \cello\ CVS repository:
 
@@ -429,14 +631,18 @@ containers (e.g. std::list, std::stack, std::vector) and types
 \section{Header comment templates}
 %==================================================================
 
+%-----------------------------------------------------------------------
 \subsection{File header comment}
+%-----------------------------------------------------------------------
 
 \pargraph{Each file should start with a comment which includes your name, the
 date you wrote the file, the name of the file.}
 
 Make it doxygen-readable.
 
+%-----------------------------------------------------------------------
 \subsection{Function header comment}
+%-----------------------------------------------------------------------
 
 C++
 \begin{verbatim}
@@ -459,7 +665,9 @@ C++
 \section{File naming conventions}
 %==================================================================
 
+%-----------------------------------------------------------------------
 \subsection{Prefixes and Suffixes}
+%-----------------------------------------------------------------------
 
 \begin{verbatim}
 *.hpp
