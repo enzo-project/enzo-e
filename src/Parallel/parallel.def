@@ -70,7 +70,7 @@
 #  define PARALLEL_ARGV      argv
 #  define PARALLEL_MAIN_BEGIN int main(int argc, char ** argv)
 #  define PARALLEL_MAIN_END   /* BLANK */
-#  define PARALLEL_CHARM_INCLUDE(FILE) <stdio.h>
+#  define PARALLEL_CHARM_INCLUDE(FILE) <stdio.h> /* dummy include */
 #  define PARALLEL_CLASS_DECL(CLASS) class CLASS 
 #  define PARALLEL_CLASS_TYPE(CLASS) CLASS 
 #  define PARALLEL_CLASS_NEW_ARRAY_1D(CLASS,NX)       new class CLASS [NX];

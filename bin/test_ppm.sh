@@ -1,8 +1,8 @@
 #!/bin/tcsh -f
 
-set suffix = 
+set suffix = $1
 
-setenv LD_LIBRARY_PATH $HOME/lib:/opt/ibmcmp/xlf/13.1/lib64
+# setenv LD_LIBRARY_PATH $HOME/lib:/opt/ibmcmp/xlf/13.1/lib64
 
 foreach opt (yes)
    set n = 3
@@ -13,7 +13,7 @@ foreach opt (yes)
      else
         set cycles = 10
      endif
-     ./test_ppm implosion3 $n $cycles 0 >> out.test_ppm${suffix}
+     ./test_ppm ppm-implosion3 $n $cycles 0 | grep time >> out.test_ppm${suffix}
 
      @ n = $n + 1
    end
