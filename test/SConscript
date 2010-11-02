@@ -137,11 +137,11 @@ Clean(env.RunSerial(parallel_type + '-test_ppm_implosion3.unit', '#/bin/test_ppm
 Clean(env.RunSerial(parallel_type + '-test_Monitor.unit',  '#/bin/test_Monitor'),
 	Glob('../monitor_image_*png'))
 
-env.RunParse(parallel_type + '-test_parse_groups.unit',     '#/bin/test_Parse', ARGS='test/parse_groups.in')
-env.RunParse(parallel_type + '-test_parse_integer.unit',    '#/bin/test_Parse', ARGS='test/parse_integer.in')
-env.RunParse(parallel_type + '-test_parse_list.unit',       '#/bin/test_Parse', ARGS='test/parse_list.in')
-env.RunParse(parallel_type + '-test_parse_logical.unit',    '#/bin/test_Parse', ARGS='test/parse_logical.in')
-env.RunParse(parallel_type + '-test_parse_scalar.unit',     '#/bin/test_Parse', ARGS='test/parse_scalar.in')
+env.RunParse(parallel_type + '-test_parse_groups.unit',     '#/bin/test_Parse', ARGS='input/parse_groups.in')
+env.RunParse(parallel_type + '-test_parse_integer.unit',    '#/bin/test_Parse', ARGS='input/parse_integer.in')
+env.RunParse(parallel_type + '-test_parse_list.unit',       '#/bin/test_Parse', ARGS='input/parse_list.in')
+env.RunParse(parallel_type + '-test_parse_logical.unit',    '#/bin/test_Parse', ARGS='input/parse_logical.in')
+env.RunParse(parallel_type + '-test_parse_scalar.unit',     '#/bin/test_Parse', ARGS='input/parse_scalar.in')
 
 env.RunParse(parallel_type + '-test_parse_implosion.unit',  '#/bin/test_Parse', ARGS='input/implosion.in')
 env.RunParse(parallel_type + '-test_parse_shock-pool.unit', '#/bin/test_Parse', ARGS='input/shock-pool.in')
