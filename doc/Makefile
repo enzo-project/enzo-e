@@ -1,4 +1,5 @@
 DOCS = \
+      depend \
       design \
       devel-uml \
       manual-devel \
@@ -56,6 +57,8 @@ report-nsf:
 requirements: 
 	cd requirements; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C requirements
+depend: 
+	$(MAKE) -C depend
 design: 
 	cd design; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C design pdf

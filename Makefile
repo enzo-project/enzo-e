@@ -7,14 +7,7 @@ all:
 	$(MAKE) -C src doc
 
 .PHONY: dot dot-png dot-eps
-depend: depend-png depend-eps
 
-depend-eps:
-	dot -Teps depend-libraries.dot > depend-libraries.eps
-	dot -Teps depend-includes.dot > depend-includes.eps
-depend-png:
-	dot -Tpng depend-libraries.dot > depend-libraries.png
-	dot -Tpng depend-includes.dot > depend-includes.png
 
 .PHONY: clean
 
