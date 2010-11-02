@@ -5,14 +5,17 @@ TOPDIR  = GetLaunchDir()
 
 charm_path = '/home/bordner/charm/charm'
 
-# Initialize platform
+# Initialize architecture and parallel type
 
-platform='unknown'
+arch = ARGUMENTS.get('arch','unknown')
+type = ARGUMENTS.get('type','unknown')
 
-platform = ARGUMENTS.get('platform','unknown')
+if (arch == 'unknown' and "CELLO_ARCH" in os.environ):
+     arch = os.environ["CELLO_ARCH"]
+if (type == 'unknown' and "CELLO_TYPE" in os.environ):
+     type = os.environ["CELLO_TYPE"]
 
-if (platform == 'unknown' and "CELLO_PLATFORM" in os.environ):
-     platform = os.environ["CELLO_PLATFORM"]
+platform = arch + '-' + type
 
 #==================================================
 # Initialize environment according to platform
@@ -24,9 +27,9 @@ platform_list = [
 	      'linux-charm',
 	      'linux-charm-perf',
 	      'linux-serial',
-	      'ncsa-bd',
+	      'ncsa-bd-charm',
 	      'ncsa-bd-serial',
-	      'sdsc-triton',
+	      'sdsc-triton-charm',
 	      'sdsc-triton-serial',
 	    ]
 
@@ -169,9 +172,9 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 #--------------------------------------------------
-elif (platform == 'sdsc-triton' or platform == 'sdsc-triton-serial'):
+elif (platform == 'sdsc-triton-charm' or platform == 'sdsc-triton-serial'):
 #--------------------------------------------------
-   if (platform == 'sdsc-triton'):
+   if (platform == 'sdsc-triton-charm'):
       parallel_run = charm_path + "/bin/charmrun +p4 "
       parallel_type = "charm"
    elif (platform == 'sdsc-triton-serial'):
@@ -195,10 +198,10 @@ elif (platform == 'sdsc-triton' or platform == 'sdsc-triton-serial'):
               'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']}
    )
 #--------------------------------------------------
-elif (platform == 'ncsa-bd' or platform == 'ncsa-bd-serial'):
+elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
 #--------------------------------------------------
 
-   if (platform == 'ncsa-bd'):
+   if (platform == 'ncsa-bd-charm'):
       parallel_run = charm_path + "/bin/charmrun +p4 "
       parallel_type = "charm"
    elif (platform == 'ncsa-bd-serial'):
