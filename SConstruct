@@ -22,36 +22,39 @@ platform = arch + '-' + type
 #==================================================
 
 platform_list = [
-	      'linux-ampi',
-	      'linux-mpi',
-	      'linux-charm',
-	      'linux-charm-perf',
-	      'linux-serial',
-	      'ncsa-bd-charm',
-	      'ncsa-bd-serial',
-	      'sdsc-triton-charm',
-	      'sdsc-triton-serial',
+	      ['linux','ampi'],
+	      ['linux','mpi'],
+	      ['linux','charm'],
+	      ['linux','charm-perf'],
+	      ['linux','serial'],
+	      ['ncsa-bd','charm'],
+	      ['ncsa-bd','serial'],
+	      ['sdsc-triton','charm'],
+	      ['sdsc-triton','serial'],
 	    ]
 
 ok = 0
 for check in platform_list:
-    if (platform == check):
+    if (platform == check[0] + '-' + check[1]):
        ok = 1
 if (ok == 0):
    print "**********************************************************************"
    print
-   print "Platform '",platform,"' is not recognized.  To specify the platform, either:"
+   print "Platform (<arch>-<type>) '",platform,"' is not recognized.  To specify the platform, either:"
    print
-   print "1) Set the 'CELLO_PLATFORM' environment variable,"
+   print "1) Set the 'CELLO_ARCH' and 'CELLO_TYPE' environment variables,"
    print
    print "   or"
    print
-   print "2) Use the 'platform=<platform>' scons argument"
+   print "2) Use the 'arch=<arch>' and 'type=<type>' scons arguments"
    print
-   print "Recognized platforms are:"
+   print "Recognized <arch> and <type> combinations are:"
    print
+   print "       ARCH           TYPE "
+   print "   ------------   ------------"
    for p in platform_list:
-      print "   ",p
+      print "   %(arch)-12s   %(type)-12s" % \
+              {'arch': p[0],     'type':p[1]}
    print
    print "**********************************************************************"
    print
