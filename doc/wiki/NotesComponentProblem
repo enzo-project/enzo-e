@@ -1,5 +1,0 @@
-([NotesComponentPortal Portal] < [NotesComponents index] > [NotesComponentSimulation Simulation])
-
-= Problem Component =
-
-A `Problem` defines and manages an astrophysics problem, including defining physics parameters, the domain, initial conditions, boundary conditions, discretization, and numerical methods.

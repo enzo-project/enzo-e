@@ -5,7 +5,6 @@ DOCS = \
       manual-devel \
       manual-reference \
       manual-user \
-      notes \
       paper-tree \
       performance \
       project \
@@ -14,7 +13,7 @@ DOCS = \
       proposal-nsf-phy \
       report-nsf \
       requirements \
-      talk-intro \
+      talk-2009-09 \
       talk-2010-06 \
       testing \
       vision
@@ -26,9 +25,6 @@ all: $(DOCS)
 
 .PHONY: $(DOCS)
 
-notes:
-	cd notes; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C notes
 vision:
 	cd vision; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C vision pdf
@@ -80,9 +76,9 @@ manual-reference:
 paper-tree: 
 	cd paper-tree; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C paper-tree
-talk-intro: 
-	cd talk-intro; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C talk-intro pdf2
+talk-2009-09: 
+	cd talk-2009-09; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C talk-2009-09 pdf2
 talk-2010-06: 
 	cd talk-2010-06; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C talk-2010-06 pdf2
