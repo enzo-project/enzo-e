@@ -3,25 +3,26 @@ PAPER = `pwd | awk 'BEGIN{FS="/"}{print $$NF}'`
 
 ps:dvi
 	dvips -o $(PAPER).ps $(PAPER).dvi
-ps2:ps
-	a2ps -2 $(PAPER).ps -o $(PAPER)2.ps
-2up: ps
-	a2ps -M Letter -2 -o $(PAPER)2.ps $(PAPER).ps
+	$(MAKE) install-ps
 html:
 	tth -e2 $(PAPER).tex > $(PAPER).html
+	$(MAKE) install-html
 pdf:dvi
 	dvipdf $(PAPER).dvi $(PAPER).pdf
+	$(MAKE) install-pdf
+
 pdf2: include.tex uml figures
-#	pdflatex $(PAPER).tex
 	pdflatex $(PAPER).tex
+	$(MAKE) install-pdf
+
 dvi: include.tex uml figures
-	make -C uml
+	$(MAKE) -C uml
 	-latex $(PAPER)
 bib: 
 	bibtex $(PAPER)
 
 pdfimg: include.tex uml figures
-	make -C uml
+	$(MAKE) -C uml
 	-pdflatex $(PAPER)
 uml:
 	ln -s ../uml .
@@ -34,6 +35,15 @@ include.tex:
 
 glo:
 	makeindex $(PAPER).glo -s $(PAPER).ist -t $(PAPER).glg -o $(PAPER).gls
+
+.PHONY: install-%
+
+install-pdf:
+	cp $(PAPER).pdf ../pdf
+install-ps:
+	cp $(PAPER).ps ../ps
+install-html:
+	cp $(PAPER).html ../html
 
 clean:
 	-@rm -f *~ *.aux \
