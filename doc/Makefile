@@ -1,22 +1,19 @@
 DOCS = \
-      depend \
-      design \
+      devel-depend \
       devel-uml \
+      doc-design \
+      doc-project \
+      doc-requirements \
+      doc-testing \
+      doc-vision \
       manual-devel \
       manual-reference \
       manual-user \
       paper-tree \
       performance \
-      project \
-      proposal-ascr \
-      proposal-nsf \
-      proposal-nsf-phy \
       report-nsf \
-      requirements \
       talk-2009-09 \
-      talk-2010-06 \
-      testing \
-      vision
+      talk-2010-06
 
 DIRS = $(DOCS) uml
 
@@ -25,45 +22,33 @@ all: $(DOCS)
 
 .PHONY: $(DOCS)
 
-vision:
-	cd vision; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C vision pdf
+doc-vision:
+	cd doc-vision; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C doc-vision pdf
 performance:
 	cd performance; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C performance
-project:
-	cd project; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C project
-proposal-nsf:
-#       use own Makefile
-	cd proposal-nsf; ln -sf ../papers.bib .
-	$(MAKE) -C proposal-nsf
-proposal-nsf-phy:
-#       use own Makefile
-	cd proposal-nsf-phy; ln -sf ../papers.bib .
-	$(MAKE) -C proposal-nsf-phy
-proposal-ascr:
-	cd proposal-ascr; ln -sf ../Makefile.1 makefile
-	cd proposal-ascr; ln -sf ../papers.bib .
-	$(MAKE) -C proposal-ascr
+doc-project:
+	cd doc-project; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C doc-project
 report-nsf:
 #       use own Makefile
 	cd report-nsf; ln -sf ../papers.bib .
 	$(MAKE) -C report-nsf
-requirements: 
-	cd requirements; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C requirements
-depend: 
-	$(MAKE) -C depend
-design: 
-	cd design; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C design pdf
+doc-requirements: 
+	cd doc-requirements; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C doc-requirements
+devel-depend: 
+	$(MAKE) -C devel-depend
+doc-design: 
+	cd doc-design; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C doc-design pdf
 devel-uml: 
 	cd devel-uml; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C devel-uml pdf
-testing: 
-	cd testing; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C testing
+doc-testing: 
+	cd doc-testing; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C doc-testing
 manual-devel: 
 	cd manual-devel; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C manual-devel
