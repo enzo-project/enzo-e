@@ -1,11 +1,11 @@
 DOCS = \
-      devel-depend \
-      devel-uml \
-      doc-design \
-      doc-project \
-      doc-requirements \
-      doc-testing \
-      doc-vision \
+      doc-depend \
+      doc-uml \
+      devel-design \
+      devel-project \
+      devel-requirements \
+      devel-testing \
+      devel-vision \
       manual-devel \
       manual-reference \
       manual-user \
@@ -22,33 +22,33 @@ all: $(DOCS)
 
 .PHONY: $(DOCS)
 
-doc-vision:
-	cd doc-vision; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C doc-vision pdf
+devel-vision:
+	cd devel-vision; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C devel-vision pdf
 performance:
 	cd performance; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C performance
-doc-project:
-	cd doc-project; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C doc-project
+devel-project:
+	cd devel-project; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C devel-project
 report-nsf:
 #       use own Makefile
 	cd report-nsf; ln -sf ../papers.bib .
 	$(MAKE) -C report-nsf
-doc-requirements: 
-	cd doc-requirements; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C doc-requirements
-devel-depend: 
-	$(MAKE) -C devel-depend
-doc-design: 
-	cd doc-design; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C doc-design pdf
-devel-uml: 
-	cd devel-uml; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C devel-uml pdf
-doc-testing: 
-	cd doc-testing; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C doc-testing
+devel-requirements: 
+	cd devel-requirements; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C devel-requirements
+doc-depend: 
+	$(MAKE) -C doc-depend
+devel-design: 
+	cd devel-design; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C devel-design pdf
+doc-uml: 
+	cd doc-uml; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C doc-uml pdf
+devel-testing: 
+	cd devel-testing; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C devel-testing
 manual-devel: 
 	cd manual-devel; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C manual-devel

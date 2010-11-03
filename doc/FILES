@@ -1,8 +1,12 @@
 $Id$
 
-depend             Generate graphs of component dependencies
-design             Cello Software Design Description
-devel-uml          Cello UML Diagrams
+devel-design       Cello Software Design Description
+devel-project      Cello Software Project Management Plan
+devel-requirements Cello Software Requirements Specification
+devel-testing      Cello Software Test Document
+devel-vision       Cello Vision and Scope Document
+doc-depend         Generate graphs of component dependencies
+doc-uml            Cello UML Diagrams
 enzo               Enzo notes
 figures            All figures used in all documents
 FILES              File and subdirectory descriptions
@@ -14,11 +18,7 @@ manual-reference   Cello Reference Manual
 manual-user        Cello User Manual
 papers.bib         Bibliography file
 paper-tree         Scalable AMR paper
-project            Cello Software Project Management Plan
 report-nsf         Report version of NSF ASCI proposal
-requirements       Cello Software Requirements Specification
 talk-2009-09       Cello presentation to LCA
 talk-2010-06       Cello presentation at 2010 Enzo Workshop
-testing            Cello Software Test Document
 uml                directory of uml diagrams
-vision             Cello Vision and Scope Document
