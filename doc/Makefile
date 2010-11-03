@@ -1,16 +1,16 @@
 DOCS = \
-      doc-depend \
-      doc-uml \
       devel-design \
       devel-project \
       devel-requirements \
       devel-testing \
       devel-vision \
+      doc-depend \
+      doc-performance \
+      doc-uml \
       manual-devel \
       manual-reference \
       manual-user \
       paper-tree \
-      performance \
       report-nsf \
       talk-2009-09 \
       talk-2010-06
@@ -25,9 +25,9 @@ all: $(DOCS)
 devel-vision:
 	cd devel-vision; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C devel-vision pdf
-performance:
-	cd performance; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C performance
+doc-performance:
+	cd doc-performance; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C doc-performance
 devel-project:
 	cd devel-project; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C devel-project
@@ -74,6 +74,9 @@ talk-2010-06:
 clean: $(patsubst %,%-clean,$(DIRS))
 	-rm `find . -type l`
 	-rm -f *~
+	-rm pdf/*.pdf
+	-rm ps/*.ps
+	-rm html/*.html
 
 %-clean:
 	$(MAKE) -C $* clean
