@@ -134,7 +134,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(cycle >=cycle_stop || time >= time_stop);
 
-  PARALLEL_PRINTF ("(size+6,cycles,time) = %d %d %g\n",size+6,cycle_stop,timer.value());
+  PARALLEL_PRINTF ("(size+6,cycles,time) = %d %d %g\n",
+		   size+6,cycle_stop,timer.value());
   fflush(stdout);
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
