@@ -1,49 +1,52 @@
-current:pdf2 html
+current:pdf html
+
 PAPER = `pwd | awk 'BEGIN{FS="/"}{print $$NF}'`
 
-ps:dvi
-	dvips -o $(PAPER).ps $(PAPER).dvi
-	$(MAKE) install-ps
+#-----------------------------------------------------------------------
+# BUILD
+#-----------------------------------------------------------------------
+
+pdf: include.tex uml figures
+	pdflatex $(PAPER).tex
+	$(MAKE) install-pdf
 html:
 	tth -e2 $(PAPER).tex > $(PAPER).html
 	$(MAKE) install-html
-pdf:dvi
-	dvipdf $(PAPER).dvi $(PAPER).pdf
-	$(MAKE) install-pdf
 
-pdf2: include.tex uml figures
-	pdflatex $(PAPER).tex
-	$(MAKE) install-pdf
 
-dvi: include.tex uml figures
-	$(MAKE) -C uml
-	-latex $(PAPER)
+#-----------------------------------------------------------------------
+# BIBLIOGRAPHY
+#-----------------------------------------------------------------------
+
 bib: 
 	bibtex $(PAPER)
 
-pdfimg: include.tex uml figures
-	$(MAKE) -C uml
-	-pdflatex $(PAPER)
-uml:
-	ln -s ../uml .
+#-----------------------------------------------------------------------
+# LINKS
+#-----------------------------------------------------------------------
+
 .PHONY: figures
 figures:
 	-@ln -s ../figures/* .
-
+uml:
+	ln -s ../uml .
 include.tex:
 	ln -s ../include.tex .
 
-glo:
-	makeindex $(PAPER).glo -s $(PAPER).ist -t $(PAPER).glg -o $(PAPER).gls
+#-----------------------------------------------------------------------
+# INSTALL
+#-----------------------------------------------------------------------
 
 .PHONY: install-%
 
 install-pdf:
 	cp $(PAPER).pdf ../pdf
-install-ps:
-	cp $(PAPER).ps ../ps
 install-html:
 	cp $(PAPER).html ../html
+
+#-----------------------------------------------------------------------
+# CLEAN
+#-----------------------------------------------------------------------
 
 clean:
 	-@rm -f *~ *.aux \
@@ -56,6 +59,7 @@ clean:
         $(PAPER).nav \
         $(PAPER).out \
         $(PAPER).toc
+
 distclean: clean
 	-@rm uml include.tex 
-	-@rm makefile # Must be last!
+#	-@rm makefile # Must be last!

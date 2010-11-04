@@ -24,7 +24,7 @@ all: $(DOCS)
 
 devel-vision:
 	cd devel-vision; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C devel-vision pdf
+	$(MAKE) -C devel-vision
 doc-performance:
 	cd doc-performance; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C doc-performance
@@ -42,10 +42,10 @@ doc-depend:
 	$(MAKE) -C doc-depend
 devel-design: 
 	cd devel-design; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C devel-design pdf
+	$(MAKE) -C devel-design
 doc-uml: 
 	cd doc-uml; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C doc-uml pdf
+	$(MAKE) -C doc-uml
 devel-testing: 
 	cd devel-testing; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C devel-testing
@@ -63,10 +63,10 @@ paper-tree:
 	$(MAKE) -C paper-tree
 talk-2009-09: 
 	cd talk-2009-09; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C talk-2009-09 pdf2
+	$(MAKE) -C talk-2009-09
 talk-2010-06: 
 	cd talk-2010-06; ln -sf ../Makefile.1 makefile
-	$(MAKE) -C talk-2010-06 pdf2
+	$(MAKE) -C talk-2010-06
 
 #-----------------------------------------------------------------------
 
@@ -75,7 +75,6 @@ clean: $(patsubst %,%-clean,$(DIRS))
 	-rm `find . -type l`
 	-rm -f *~
 	-rm pdf/*.pdf
-	-rm ps/*.ps
 	-rm html/*.html
 
 %-clean:
