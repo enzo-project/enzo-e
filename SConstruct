@@ -256,13 +256,6 @@ elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
       LINKFLAGS  = flags
    )
 
-# Generate the CELLO_PLATFORM file (should be a target)
-
-f = open('CELLO_PLATFORM','w')
-f.write(platform + '\n')
-f.close()
-
-
 Export('env')
 Export('platform')
 Export('parallel_type')
