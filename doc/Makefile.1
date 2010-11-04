@@ -8,6 +8,7 @@ PAPER = `pwd | awk 'BEGIN{FS="/"}{print $$NF}'`
 
 pdf: include.tex uml figures
 	pdflatex $(PAPER).tex
+	pdflatex $(PAPER).tex
 	$(MAKE) install-pdf
 html:
 	tth -e2 $(PAPER).tex > $(PAPER).html
