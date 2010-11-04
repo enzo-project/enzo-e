@@ -30,6 +30,7 @@ figures:
 	-@ln -s ../figures/* .
 uml:
 	ln -s ../uml .
+	$(MAKE) -C uml
 include.tex:
 	ln -s ../include.tex .
 
@@ -50,15 +51,18 @@ install-html:
 
 clean:
 	-@rm -f *~ *.aux \
+        $(PAPER).bbl \
+        $(PAPER).blg \
         $(PAPER).dvi \
-        $(PAPER).log \
-        $(PAPER).ps \
-        $(PAPER).pdf \
         $(PAPER).html \
-        $(PAPER).snm \
+        $(PAPER).log \
         $(PAPER).nav \
         $(PAPER).out \
-        $(PAPER).toc
+        $(PAPER).pdf \
+        $(PAPER).ps \
+        $(PAPER).snm \
+        $(PAPER).toc \
+        $(PAPER).vrb
 
 distclean: clean
 	-@rm uml include.tex 

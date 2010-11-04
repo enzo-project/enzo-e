@@ -85,6 +85,9 @@ clean: $(patsubst %,%-clean,$(DIRS))
 .PHONY: distclean
 distclean: $(patsubst %,%-distclean,$(DIRS))
 	-@rm -f *~
+	-@rm `find . -type l`
+	$(MAKE) -C html distclean
+	$(MAKE) -C pdf distclean
 %-distclean:
 	$(MAKE) -C $* distclean
 

@@ -3,10 +3,6 @@ PAPER = report-nsf
 .PHONY: all
 all: $(PAPER).pdf 
 
-.PHONY: clean
-clean:
-	rm -f $(PAPER).pdf
-
 .PHONY: bibliography
 bibliography: $(PAPER).pdf
 	bibtex $(PAPER)
@@ -21,3 +17,22 @@ figures:
 
 %.pdf: figures %.tex newcommand.tex
 	pdflatex $*
+
+.PHONY: clean
+clean:
+	-@rm -f *~ *.aux \
+        $(PAPER).dvi \
+        $(PAPER).log \
+        $(PAPER).ps \
+        $(PAPER).pdf \
+        $(PAPER).html \
+        $(PAPER).snm \
+        $(PAPER).nav \
+        $(PAPER).out \
+        $(PAPER).blg \
+        $(PAPER).bbl \
+        $(PAPER).toc
+
+.PHONY: distclean
+distclean: clean
+

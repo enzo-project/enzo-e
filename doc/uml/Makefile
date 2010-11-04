@@ -20,6 +20,6 @@ all: $(PDF)
 clean:
 	-@rm -rf *.log *~ 
 distclean: clean
-	-@rm -rf *.1  *.ps *.pdf
+	-@rm -rf *.1  *.ps *.pdf *.png
 
 
