@@ -1,0 +1,85 @@
+( ) EnzoDescr                     Update description]
+( ) field_info_type	  [???]
+( ) fluxes	        ???
+( ) Main	        In jacobi test problem; integrate with Cello
+( ) strict_auto_ptr< T >  Strict_auto_ptr class
+
+( ) Affinity: rename e.g. ParallelAffinity
+( ) Counter: move to Parallel and rename e.g. ParallelCharm.counter()
+( ) Counters: rename e.g. PerformanceCounters
+( ) DataBlock: move to Mesh
+( ) DataDescr: move to Mesh
+( ) EnzoSimulation: Rename SimulationEnzo?
+( ) error handling: ERROR_MESSAGE or throw Exceptions??
+( ) ExceptionBadArrayAllocation   rename to shorten / remove?
+( ) ExceptionBadArrayDeallocation rename to shorten / remove?
+
+
+
+
+Affinity            Generalization of MPI rank for hierarchical parallelism
+Counter             CHARM++ convenience class
+Counters            Performance counters container
+DataBlock           Container class for all block data
+DataDescr           Container class for all block descriptors
+EnzoDescr           Enzo-related "global" variables
+EnzoSimulation      Simulation object for EnzoP
+Error               Singleton class for reporting errors and warnings
+Exception                     Base class for the Exception class hierarchy
+ExceptionBadArrayAllocation   Array exception class for bad allocation
+ExceptionBadArrayDeallocation Array exception class for bad deallocation
+ExceptionBadPointer           Global exception class for encountering a bad pointer
+ExceptionMemoryBadAllocate    Memory exception class for bad allocation
+ExceptionMemoryBadDeallocate  Memory exception class for bad deallocation
+ExceptionMemoryBadGroupHandle Memory exception class for a bad group handle
+ExceptionParametersBadType    Parameters exception class for bad parameter type
+FieldBlock                    Interface between field arrays and low-level (C/fortran) routines
+FieldDescr                    Interface for the FieldDescr class
+FieldFaces                    Class for representing and operating on ghost zones
+field_info_type	  [???]
+FileHdf5                      Class for writing and reading HDF5 files
+File                          Internal representation of a file on disk
+fluxes	        ???
+Global                        Cross-cutting object container, including monitor, error, parameters
+GroupProcessMpi               MPI helper functions
+GroupProcess                  ParallelGroup of distributed memory processes
+GroupProcessSerial            Serial implementation of GroupProcess
+GroupThread                   ParallelGroup of shared memory threads
+Ifrit                         Class for writing and reading IFRIT files
+Layout                        Specify how a Patch is partitioned into process, thread, and computational blacks
+Main	        In jacobi test problem; integrate with Cello
+Memory                        Maintains memory allocation and deallocation statistics
+Mesh                          Adaptive mesh refinement hierarchy
+MethodEnzoControl             Method control class MethodEnzoControl for Enzo-P
+MethodEnzoPpm                 Encapsulate Enzo's PPM hydro method
+MethodEnzoPpml	
+MethodEnzoTimestep            Encapsulate determination of timestep
+Monitor                       Functions for user monitoring of the execution status
+Mpi                          
+Node16                        Node class for 4^2-trees
+Node2K                        Node class for 2D k^2-trees
+Node3K                        Node class for 3D k^3-trees
+Node4                         Node class for 2^2-trees
+Parallel                      Container group for hierarchical Parallel objects
+ParallelCreate                Factory class for creating Parallel* objects
+ParallelGroup                 Generalization of MPI rank for hierarchical parallelism
+ParallelSerial                Class for encapsulating different, possibly multiple, parallel technologies
+Parameters                    Read in a parameter file and access parameter values
+ParamNode                     Node representing a subtree of parameters
+Param                         Represents and evaluates various parameter types and expressions
+ParticleDescr                 Interface for the ParticleDescr class
+Patch                         Brief description of class Patch
+Performance                   Measuring and allow access to run-time parallel performance
+Schedule                      Brief description of class Schedule
+Simulation                    Class specifying a simulation to run
+strict_auto_ptr< T >  Strict_auto_ptr class
+Timer                         Simple class for timing code sections
+Tree16                        Generalized 4^2-tree
+Tree2K                        Generalized k^2-tree
+Tree3K                        Generalized k^3-tree
+Tree4                         Generalized 2^2-tree (quadtree)
+TreeK                         Base class for Tree[23]K classes
+UserControl                   Encapsulate top-level control and description of user methods
+UserDescr                     Top-level description of user-implemented components
+UserMethod                    Encapsulate external method / analysis / visualization function
+UserTimestep                  Encapsulate determination of timestep 
