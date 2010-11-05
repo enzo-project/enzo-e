@@ -45,7 +45,7 @@ enum parallel_type {
 #include "parallel_GroupThread.hpp"
 #include "parallel_Parallel.hpp"
 #include "parallel_Layout.hpp"
-#include "parallel_Affinity.hpp"
+#include "parallel_ParallelAffinity.hpp"
 
 #endif /* PARALLEL_HPP */
 

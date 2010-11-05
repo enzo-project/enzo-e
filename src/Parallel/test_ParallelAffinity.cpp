@@ -5,7 +5,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI
 /// @date     Tue Apr 20 14:19:04 PDT 2010
-/// @brief    Program implementing unit tests for the Affinity
+/// @brief    Program implementing unit tests for the ParallelAffinity
 
 #include "cello.hpp"
 #include "mpi.h" 
@@ -30,12 +30,12 @@ int main(int argc, char ** argv)
     exit(1);
   }
 
-  unit_class("Affinity");
+  unit_class("ParallelAffinity");
 
-  unit_func("Affinity");
+  unit_func("ParallelAffinity");
 
-  Affinity affinity_root (0,0);
-  Affinity affinity_this (process_rank,thread_rank);
+  ParallelAffinity affinity_root (0,0);
+  ParallelAffinity affinity_this (process_rank,thread_rank);
 
   unit_assert(true);
 

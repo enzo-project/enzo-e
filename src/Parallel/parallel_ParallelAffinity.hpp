@@ -1,24 +1,24 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARALLEL_AFFINITY_HPP
-#define PARALLEL_AFFINITY_HPP
+#ifndef PARALLEL_PARALLEL_AFFINITY_HPP
+#define PARALLEL_PARALLEL_AFFINITY_HPP
 
-/// @file     parallel_Affinity.hpp
+/// @file     parallel_ParallelAffinity.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 16:40:35 PDT 2010
-/// @brief    Declaration of the Affinity class
+/// @brief    Declaration of the ParallelAffinity class
 
-class Affinity {
+class ParallelAffinity {
 
-  /// @class    Affinity
+  /// @class    ParallelAffinity
   /// @ingroup  Parallel
   /// @brief    Generalization of MPI rank for hierarchical parallelism
 
 public: // interface
 
-  /// Initialize the Affinity object
-  Affinity(GroupProcess * processes = 0,
+  /// Initialize the ParallelAffinity object
+  ParallelAffinity(GroupProcess * processes = 0,
 	   GroupThread  * threads   = 0) throw()
     : process_rank_(processes ? processes->rank() : 0),
       process_size_(processes ? processes->size() : 1),
@@ -28,7 +28,7 @@ public: // interface
 
   /// Equality operator
 
-  bool operator == (const Affinity & affinity) const throw()
+  bool operator == (const ParallelAffinity & affinity) const throw()
   {
     return (process_rank() == affinity.process_rank() &&
 	    thread_rank()  == affinity.thread_rank());
@@ -74,5 +74,5 @@ private: // attributes
 
 };
 
-#endif /* PARALLEL_AFFINITY_HPP */
+#endif /* PARALLEL_PARALLEL_AFFINITY_HPP */
 

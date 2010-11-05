@@ -4,7 +4,6 @@
 ( ) Main	        In jacobi test problem; integrate with Cello
 ( ) strict_auto_ptr< T >  Strict_auto_ptr class
 
-( ) Affinity: rename e.g. ParallelAffinity
 ( ) Counter: move to Parallel and rename e.g. ParallelCharm.counter()
 ( ) Counters: rename e.g. PerformanceCounters
 ( ) DataBlock: move to Mesh
@@ -15,9 +14,7 @@
 ( ) ExceptionBadArrayDeallocation rename to shorten / remove?
 
 
-
-
-Affinity            Generalization of MPI rank for hierarchical parallelism
+ParallelAffinity    Generalization of MPI rank for hierarchical parallelism
 Counter             CHARM++ convenience class
 Counters            Performance counters container
 DataBlock           Container class for all block data
