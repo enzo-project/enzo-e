@@ -96,25 +96,11 @@ PARALLEL_MAIN_BEGIN
 
   // Add groups
 
-  performance->new_group(component_data,         "data");
-  performance->new_group(component_disk,         "disk");
-  performance->new_group(component_distribute,   "distribute");
-  performance->new_group(component_error,        "error");
-  performance->new_group(component_field,        "field");
-  performance->new_group(component_memory,       "memory");
-  performance->new_group(component_mesh,         "mesh");
-  performance->new_group(component_method,       "method");
-  performance->new_group(component_monitor,      "monitor");
-  performance->new_group(component_parallel,     "parallel");
-  performance->new_group(component_parameters,   "parameters");
-  performance->new_group(component_particles,    "particles");
-  performance->new_group(component_performance,  "performance");
-  performance->new_group(component_portal,       "portal");
-  performance->new_group(component_schedule,     "schedule");
-  performance->new_group(component_simulation,   "simulation");
-  performance->new_group(component_task,         "task");
-  performance->new_group(component_test,         "test");
-  performance->new_group(component_user,         "user");
+  for (int component = component_first;
+       component <= num_components;
+       component++) {
+    performance->new_group(component, component_name[component]);
+  }
   
   // Add functions
 

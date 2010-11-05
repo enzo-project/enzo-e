@@ -49,11 +49,15 @@ env.Append(BUILDERS = { 'MakeMovie'   : make_movie } )
 env.Append(BUILDERS = { 'RunMethod'   : run_method } )
 env.Append(BUILDERS = { 'RunTree'     : run_tree } )
 
+
 env.RunSerial(parallel_type + '-test_Data.unit',        '#/bin/test_Data')
+
 env.RunSerial(parallel_type + '-test_Error.unit',       '#/bin/test_Error')
-env.RunSerial(parallel_type + '-test_FieldBlock.unit',  '#/bin/test_FieldBlock')
-# env.RunSerial(parallel_type + '-test_FieldFaces.unit','#/bin/test_FieldFaces')
-env.RunSerial(parallel_type + '-test_FieldDescr.unit',  '#/bin/test_FieldDescr')
+
+env.RunSerial(parallel_type + '-test_FieldBlock.unit','#/bin/test_FieldBlock')
+env.RunSerial(parallel_type + '-test_FieldFaces.unit','#/bin/test_FieldFaces')
+env.RunSerial(parallel_type + '-test_FieldDescr.unit','#/bin/test_FieldDescr')
+
 env.RunSerial(parallel_type + '-test_FileHdf5.unit',    '#/bin/test_FileHdf5')
 env.RunSerial(parallel_type + '-test_Ifrit.unit',       '#/bin/test_Ifrit')
 # env.RunSerial(parallel_type + '-test_Layout.unit',      '#/bin/test_Layout')

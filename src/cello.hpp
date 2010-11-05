@@ -104,13 +104,14 @@ enum face_type {
  **********************************************************************/
 
 enum component_type {
+  // !!! EDIT component_type AND component_name TOGETHER !!!
   component_undefined,
-  component_data,
+  component_enzop,
+  component_first = component_enzop,
   component_disk,
   component_distribute,
   component_error,
   component_field,
-  component_global,
   component_memory,
   component_mesh,
   component_method,
@@ -123,9 +124,9 @@ enum component_type {
   component_schedule,
   component_simulation,
   component_task,
-  component_test,
-  component_user,
-  num_components = component_user
+  num_components = component_task
 };
+
+extern const char * component_name [];
 
 #endif /* CELLO_DEF */

@@ -206,7 +206,7 @@ test_summary("Disk",array("FileHdf5","Ifrit"));
 test_summary("Distribute",array("")); 
 test_summary("Error",array("Error")); 
 test_summary("Enzo",array("ppm_image")); 
-test_summary("Field",array("FieldBlock","FieldDescr")); 
+test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces")); 
 test_summary("Global",array("")); 
 test_summary("Memory",array("Memory")); 
 test_summary("Mesh",array("")); 
@@ -245,9 +245,9 @@ tests("Error","Error","Error");
 
 
 component("Field");
-tests("Field","FieldBlock","FieldBlock");
-// tests("FieldBlockFaces","BlockFaces","BlockFaces");
 tests("Field","FieldDescr","FieldDescr");
+tests("Field","FieldBlock","FieldBlock");
+tests("Field","FieldFaces","FieldFaces");
 
 component("Global");
 
