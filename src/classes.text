@@ -14,7 +14,6 @@
 ( ) ExceptionBadArrayDeallocation rename to shorten / remove?
 
 
-ParallelAffinity    Generalization of MPI rank for hierarchical parallelism
 Counter             CHARM++ convenience class
 Counters            Performance counters container
 DataBlock           Container class for all block data
@@ -60,6 +59,7 @@ Node4                         Node class for 2^2-trees
 Parallel                      Container group for hierarchical Parallel objects
 ParallelCreate                Factory class for creating Parallel* objects
 ParallelGroup                 Generalization of MPI rank for hierarchical parallelism
+ParallelAffinity    Generalization of MPI rank for hierarchical parallelism
 ParallelSerial                Class for encapsulating different, possibly multiple, parallel technologies
 Parameters                    Read in a parameter file and access parameter values
 ParamNode                     Node representing a subtree of parameters

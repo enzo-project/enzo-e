@@ -2,15 +2,21 @@
 
 rm -f out.scons.* fail.scons.*
 
-setenv CELLO_ARCH linux
-
-if ($#argv >= 1) then
+if ($#argv >= 2) then
+  set arch = ($argv[1])
+  set types = ($argv[2-])
+else if ($#argv == 1) then
+  set arch = $CELLO_ARCH
   set types = ($argv)
 else
+  set arch = $CELLO_ARCH
   set types = (charm serial ampi mpi)
 endif
 
-printf "\n[ $types ]\n\n"
+echo
+echo "arch  = $arch"
+echo "types = ( $types )"
+echo
 set p = 1
 
 # clear
@@ -24,9 +30,7 @@ printf "\n\n"
 
 foreach type ($types)
 
-   setenv CELLO_TYPE $type
-
-   set platform = ${CELLO_ARCH}-${CELLO_TYPE}
+   set platform = $arch-$type
 
    set time = `date +"%Y-%m-%d %H:%M:%S"`
    printf "$time "
@@ -44,7 +48,9 @@ foreach type ($types)
 
 end
 
-echo
+set time = `date +"%Y-%m-%d %H:%M:%S"`
+
+echo "$time"
 
 grep Segmentation out.*
 
