@@ -21,8 +21,8 @@ env = env.Clone(LIBS=[libraries])
 # SOURCE
 #------------------------------
 
-includes   = [Glob('parallel_jacobi*hpp')]
-sources    = [Glob('parallel_jacobi*cpp')]
+includes   = [Glob('parallel_*hpp')]
+sources    = [Glob('parallel_*cpp')]
 
 #------------------------------
 # TARGETS

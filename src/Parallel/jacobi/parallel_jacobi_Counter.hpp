@@ -5,8 +5,8 @@ namespace jacobi
 {
   class Counter {
   private:
-    int count_;
     int count_max_;
+    int count_;
   public:
     Counter (int count_max)
       : count_max_(count_max),
