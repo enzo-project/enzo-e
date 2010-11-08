@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-Patch::Patch(int block_count, int block_size, int cycle_max,
+CharmPatch::CharmPatch(int block_count, int block_size, int cycle_max,
 	     CProxy_Main main_proxy) 
   : main_proxy_ (main_proxy),
     values_(0),
@@ -64,7 +64,7 @@ Patch::Patch(int block_count, int block_size, int cycle_max,
 
 //----------------------------------------------------------------------
 
-Patch::~Patch()
+CharmPatch::~CharmPatch()
 {
   delete [] values_;
   delete [] buffer_[0][0];
@@ -77,14 +77,14 @@ Patch::~Patch()
 
 //----------------------------------------------------------------------
 
-Patch::Patch(CkMigrateMessage *) 
+CharmPatch::CharmPatch(CkMigrateMessage *) 
   : receives_(6)
 {
 }
 
 //----------------------------------------------------------------------
 
-void Patch::allocate_() 
+void CharmPatch::allocate_() 
 {
   values_       = new double [nax_*nay_*naz_];
   buffer_[0][0] = new double [ngx_*nay_*naz_];
@@ -97,14 +97,14 @@ void Patch::allocate_()
 
 // //----------------------------------------------------------------------
 
-// int Patch::id_()
+// int CharmPatch::id_()
 // {
 //   return thisIndex.x + nbx_*(thisIndex.y + nby_*thisIndex.z); 
 // };
 
 //----------------------------------------------------------------------
 
-void Patch::initialize_()
+void CharmPatch::initialize_()
 {
   const double R2 = 0.25*0.25;
   double xm = 1.0 * thisIndex.x / nbx_;
@@ -142,7 +142,7 @@ void Patch::initialize_()
 
 //----------------------------------------------------------------------
 
-void Patch::p_receive(int axis, int face, int n, double * buffer_ghost)
+void CharmPatch::p_receive(int axis, int face, int n, double * buffer_ghost)
 {
   // Update ghosts on given face from buffer
 
@@ -155,7 +155,7 @@ void Patch::p_receive(int axis, int face, int n, double * buffer_ghost)
 }
 
 //----------------------------------------------------------------------
-void Patch::compute_()
+void CharmPatch::compute_()
 {
   const int dx = 1;
   const int dy = nax_;
@@ -188,7 +188,7 @@ void Patch::compute_()
 
 //----------------------------------------------------------------------
 
-void Patch::p_evolve() 
+void CharmPatch::p_evolve() 
 {
 
   // Update ghost zones
@@ -207,9 +207,9 @@ void Patch::p_evolve()
 
 //======================================================================
 
-void Patch::receive_()
+void CharmPatch::receive_()
 {
-  CProxy_Patch patch = thisProxy;
+  CProxy_CharmPatch patch = thisProxy;
 
   int ix = thisIndex.x;
   int iy = thisIndex.y;
@@ -236,7 +236,7 @@ void Patch::receive_()
 
 //======================================================================
 
-bool Patch::clear_boundary_(int axis, int face, double * buffer)
+bool CharmPatch::clear_boundary_(int axis, int face, double * buffer)
 {
   if ((axis == 0 && face == 0 && thisIndex.x == 0) ||
       (axis == 0 && face == 1 && thisIndex.x == nbx_-1)) {
@@ -245,25 +245,25 @@ bool Patch::clear_boundary_(int axis, int face, double * buffer)
     }
     return true;
   } else if ((axis == 1 && face == 0 && thisIndex.y == 0) ||
- 	     (axis == 1 && face == 1 && thisIndex.y == nby_-1)) {
+	     (axis == 1 && face == 1 && thisIndex.y == nby_-1)) {
     for (int i=0; i<nax_*ngy_*naz_; i++) {
       buffer[i] = 0.0;
     }
     return true;
   } else if ((axis == 2 && face == 0 && thisIndex.z== 0) ||
- 	     (axis == 2 && face == 1 && thisIndex.z == nbz_-1)) {
+	     (axis == 2 && face == 1 && thisIndex.z == nbz_-1)) {
     for (int i=0; i<nax_*nay_*ngz_; i++) {
       buffer[i] = 0.0;
     }
     return true;
   } else {
     return false;
-   }
+  }
 }
 
 //======================================================================
 
-void Patch::face_to_buffer_(int axis, int face, double * buffer)
+void CharmPatch::face_to_buffer_(int axis, int face, double * buffer)
 {
 
   if (clear_boundary_(axis,face,buffer)) return;
@@ -322,7 +322,7 @@ void Patch::face_to_buffer_(int axis, int face, double * buffer)
 
 //----------------------------------------------------------------------
 
-void Patch::buffer_to_ghost_(int axis, int face, double * buffer)
+void CharmPatch::buffer_to_ghost_(int axis, int face, double * buffer)
 {
   clear_boundary_(axis,face,buffer);
 
@@ -380,7 +380,7 @@ void Patch::buffer_to_ghost_(int axis, int face, double * buffer)
 
 //----------------------------------------------------------------------
 
-void Patch::print_ ()
+void CharmPatch::print_ ()
 {
   int ix0 = thisIndex.x * nvx_;
   int iy0 = thisIndex.y * nvy_;
@@ -397,7 +397,7 @@ void Patch::print_ ()
 
 //----------------------------------------------------------------------
 
-double Patch::norm_ ()
+double CharmPatch::norm_ ()
 {
   double s2 = 0.0;
   for (int iz=izl_; iz<izu_; iz++) {
@@ -413,7 +413,7 @@ double Patch::norm_ ()
 
 //----------------------------------------------------------------------
 
-void Patch::store_ ()
+void CharmPatch::store_ ()
 {
   if (cycle_values_ % cycle_store_ == 0) {
 

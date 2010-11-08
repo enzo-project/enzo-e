@@ -30,9 +30,9 @@ private:
   int iteration_max_;
 
   int iteration_;
-  Counter * blocks_;
+  jacobi::Counter * blocks_;
   int block_count_;
-  CProxy_Patch patches_;
+  CProxy_CharmPatch patches_;
 
 public:
 	   
@@ -53,11 +53,12 @@ public:
 
     iteration_     = 0;
     block_count_   = problem_size_/block_size_;
-    blocks_        = new Counter (block_count_*block_count_*block_count_);
+    blocks_        = new jacobi::Counter (block_count_*block_count_*block_count_);
 
     patches_       = 
-      CProxy_Patch::ckNew(block_count_,block_size_,iteration_max_,thisProxy,
-			  block_count_,block_count_,block_count_);
+      CProxy_CharmPatch::ckNew
+      (block_count_,block_size_,iteration_max_, thisProxy, 
+       block_count_,block_count_,block_count_);
 
     CkPrintf ("Evolve(%d)\n",iteration_);
     patches_.p_evolve();
@@ -97,4 +98,5 @@ public:
     
 };
 
+using namespace jacobi;
 #include "test_parallel_jacobi.def.h"

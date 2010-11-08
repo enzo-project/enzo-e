@@ -1,26 +1,35 @@
-#ifndef PATCH_HPP
-#define PATCH_HPP
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+#ifndef CHARM_PATCH_HPP
+#define CHARM_PATCH_HPP
+
+/// @file     parallel_charm_Patch.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Thu Feb 25 16:20:17 PST 2010
+/// @brief    CHARM++ chare for representing a patch of data
+
 
 #include "parallel.def"
-
 #include "test_parallel_jacobi.decl.h"
 
-class Patch : public CBase_Patch
+
+class CharmPatch : public CBase_CharmPatch
 {
   
 public:
 
-  /// Create a Patch object
-  Patch(int patch_count, 
+  /// Create a CharmPatch object
+  CharmPatch(int patch_count, 
 	int patch_size, 
 	int cycles_max, 
 	CProxy_Main main_proxy) ;
 
-  /// Delete a Patch object
-  ~Patch() ;
+  /// Delete a CharmPatch object
+  ~CharmPatch() ;
 
-  /// Migrate a Patch object
-  Patch(CkMigrateMessage *) ;
+  /// Migrate a CharmPatch object
+  CharmPatch(CkMigrateMessage *) ;
 
 public: // parallel methods
 
@@ -62,8 +71,8 @@ private: // functions
   /// Return the local sum-of-squares
   double norm_ ();
 
-//   /// Return the Patch ID
-//   int id_();
+  //   /// Return the CharmPatch ID
+  //   int id_();
 
 private: // attributes
 
@@ -90,8 +99,8 @@ private: // attributes
   int cycle_values_;
   int cycle_max_;
 
-  Counter receives_;
+  jacobi::Counter receives_;
 
 };
 
-#endif /* PATCH_HPP */
+#endif /* CHARM_PATCH_HPP */

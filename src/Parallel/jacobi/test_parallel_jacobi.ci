@@ -7,8 +7,8 @@ mainmodule test_parallel_jacobi {
     entry void p_next(int ix, int iy, int iz, double norm);
   };
 
-  array [3D] Patch {
-    entry Patch(int block_count, int block_size, int cycles_max,
+  array [3D] CharmPatch {
+    entry CharmPatch(int block_count, int block_size, int cycles_max,
 	CProxy_Main main_proxy);
     entry void p_evolve();
     entry void p_receive(int axis, int face, int n, double buffer[n]);
