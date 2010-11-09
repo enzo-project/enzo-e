@@ -13,7 +13,7 @@
 #include "cello.hpp"
 #include "cello_hydro.h"
 
-#include "user.hpp"
+#include "method.hpp"
 #include "error.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"
@@ -218,12 +218,12 @@ PARALLEL_MAIN_BEGIN
 
     field_block->enforce_boundary(boundary_reflecting);
 
-    double dt = simulation.user_timestep()->compute_block(data_block);
+    double dt = simulation.method_timestep()->compute_block(data_block);
 
     printf ("cycle = %d  sim-time = %10g dt = %10g\n",
 	    cycle,time,dt );
 
-    simulation.user_method(0)->advance_block(data_block,time,dt);
+    simulation.method_method(0)->advance_block(data_block,time,dt);
 
     simulation.finalize_block(data_block);
 

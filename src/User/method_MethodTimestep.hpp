@@ -1,25 +1,25 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     user_UserTimestep.hpp 
+/// @file     method_MethodTimestep.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the UserTimestep component
+/// @brief    Declaration for the MethodTimestep component
 
-#ifndef USER_USER_TIMESTEP_HPP
-#define USER_USER_TIMESTEP_HPP
+#ifndef METHOD_METHOD_TIMESTEP_HPP
+#define METHOD_METHOD_TIMESTEP_HPP
 
 
-class UserTimestep {
+class MethodTimestep {
 
-  /// @class    UserTimestep
-  /// @ingroup  User
+  /// @class    MethodTimestep
+  /// @ingroup  Method
   /// @brief    Encapsulate determination of timestep
 
 public: // interface
 
-  /// Create a new UserTimestep
-  UserTimestep() throw()
+  /// Create a new MethodTimestep
+  MethodTimestep() throw()
   {};
 
 public: // virtual functions
@@ -49,4 +49,4 @@ public: // virtual functions
 
 };
 
-#endif /* USER_USER_TIMESTEP_HPP */
+#endif /* METHOD_METHOD_TIMESTEP_HPP */

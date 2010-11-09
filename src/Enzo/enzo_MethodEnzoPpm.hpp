@@ -9,7 +9,7 @@
 #ifndef ENZO_METHOD_ENZO_PPM_HPP
 #define ENZO_METHOD_ENZO_PPM_HPP
 
-class MethodEnzoPpm : public UserMethod {
+class MethodEnzoPpm : public MethodMethod {
 
   /// @class    MethodEnzoPpm
   /// @ingroup  Enzo
@@ -19,7 +19,7 @@ public: // interface
 
   MethodEnzoPpm(Global * global,
 		EnzoDescr * enzo):
-    UserMethod(global),
+    MethodMethod(global),
     enzo_(enzo)
   {};
 

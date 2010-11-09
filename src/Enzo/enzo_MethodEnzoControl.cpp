@@ -10,7 +10,7 @@
 #include "cello.hpp"
 #include "cello_hydro.h"
 
-#include "user.hpp"
+#include "method.hpp"
 #include "enzo.hpp"
 #include "error.hpp"
 #include "parameters.hpp"

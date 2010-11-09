@@ -1,8 +1,8 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_ENZO_USER_DESCR_HPP
-#define ENZO_ENZO_USER_DESCR_HPP
+#ifndef ENZO_ENZO_SIMULATION_HPP
+#define ENZO_ENZO_SIMULATION_HPP
 
 /// @file     enzo_EnzoSimulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -33,13 +33,13 @@ protected: // functions
   void user_initialize_() throw ();
 
   /// Create named control method.
-  UserControl * create_user_control_ (std::string name_user_control) throw ();
+  MethodControl * create_method_control_ (std::string name_method_control) throw ();
 
   /// Create named timestep method.
-  UserTimestep * create_user_timestep_ (std::string name_user_timestep) throw ();
+  MethodTimestep * create_method_timestep_ (std::string name_method_timestep) throw ();
 
-  /// Create named user method.
-  UserMethod * create_user_method_ (std::string name_user_method) throw ();
+  /// Create named method method.
+  MethodMethod * create_method_method_ (std::string name_method_method) throw ();
 
 private: // attributes
 
@@ -47,5 +47,5 @@ private: // attributes
 
 };
 
-#endif /* ENZO_ENZO_USER_DESCR_HPP */
+#endif /* ENZO_ENZO_SIMULATION_HPP */
 

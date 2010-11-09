@@ -51,7 +51,7 @@ protected: // functions
   virtual MethodTimestep * create_method_timestep_ (std::string name_method_timestep) = 0;
 
   /// APPLICATION INHERITENCE OVERRIDE: Create named hyperbolic method.
-  virtual MethodHyperbolic * create_method_hyperbolic_ (std::string name_method_method) = 0;
+  virtual MethodMethod * create_method_method_ (std::string name_method_method) = 0;
 
 protected: // attributes
 

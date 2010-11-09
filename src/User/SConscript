@@ -8,7 +8,7 @@ Import('env')
 # DEPENDENCIES
 #------------------------------
 
-components = ['user', 'data', 'field', 'error','parallel', 'monitor', 'parameters', 'memory', 'cello']
+components = ['method', 'data', 'field', 'error','parallel', 'monitor', 'parameters', 'memory', 'cello']
 libraries  = ['png', '$FORTRANLIBS']
 
 #------------------------------
@@ -18,12 +18,12 @@ env = env.Clone(LIBS=[components,libraries])
 #------------------------------
 # SOURCE
 #------------------------------
-includes = [Glob('user*hpp'), Glob('*.h')]
-sources  = [Glob('user*cpp')]
+includes = [Glob('method*hpp'), Glob('*.h')]
+sources  = [Glob('method*cpp')]
 #------------------------------
 # TARGETS
 #------------------------------
-libraries = env.Library ('user', sources)
+libraries = env.Library ('method', sources)
 #------------------------------
 # INSTALL
 #------------------------------

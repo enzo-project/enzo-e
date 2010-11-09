@@ -4,10 +4,10 @@
 #ifndef METHOD_HPP
 #define METHOD_HPP
 
-/// @file     user.hpp
+/// @file     method.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
-/// @brief    Include file for the User component
+/// @brief    Include file for the Method component
 
 #include <vector>
 #include <string>
@@ -17,19 +17,10 @@
 #include "data.hpp"
 #include "error.hpp"
 
-#include "method_UserControl.hpp"
-#include "method_UserTimestep.hpp"
-#include "method_UserMethod.hpp"
-#include "method_UserDescr.hpp"
-
-// // Enzo
-
-// #include "enzo_descr.hpp"
-// #include "method_MethodEnzoControl.hpp"
-// #include "method_MethodEnzoTimestep.hpp"
-// #include "method_MethodEnzoPpm.hpp"
-// #include "method_MethodEnzoPpml.hpp"
-// #include "method_EnzoUserDescr.hpp"
+#include "method_MethodControl.hpp"
+#include "method_MethodTimestep.hpp"
+#include "method_MethodMethod.hpp"
+#include "method_MethodDescr.hpp"
 
 #endif /* METHOD_HPP */
 

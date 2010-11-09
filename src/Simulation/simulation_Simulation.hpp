@@ -56,130 +56,130 @@ public: // interface
   { return data_descr_; };
 
   /// Add a user method
-  UserMethod * add_user_method (std::string method_name)
-  { UserMethod * method = create_user_method_(method_name);
-    if (method) user_method_.push_back(method); 
+  MethodMethod * add_method_method (std::string method_name)
+  { MethodMethod * method = create_method_method_(method_name);
+    if (method) method_method_.push_back(method); 
     return method;
   };
 
-  /// Return the ith user method
-  UserMethod * user_method (int i)
-  { return user_method_.at(i); };
+  /// Return the ith method method
+  MethodMethod * method_method (int i)
+  { return method_method_.at(i); };
 
 
   /// Set the control method
-  UserControl * set_user_control (std::string name_user_control)
+  MethodControl * set_method_control (std::string name_method_control)
   {
-    if (user_control_ != 0) {
-      WARNING_MESSAGE("UserDescr::set_user_control",
-		      "Resetting user control; deleting old one");
-      delete user_control_;
-      user_control_ = 0;
+    if (method_control_ != 0) {
+      WARNING_MESSAGE("MethodDescr::set_method_control",
+		      "Resetting method control; deleting old one");
+      delete method_control_;
+      method_control_ = 0;
     }
 
-    user_control_ = create_user_control_(name_user_control);
+    method_control_ = create_method_control_(name_method_control);
 
-    return user_control_;
+    return method_control_;
   };
 
   /// Return the control method
-  UserControl * user_control ()
-  { return user_control_; };
+  MethodControl * method_control ()
+  { return method_control_; };
 
   /// Return the timestep method
-  UserTimestep * set_user_timestep (std::string name_user_timestep)
+  MethodTimestep * set_method_timestep (std::string name_method_timestep)
   {
-    if (user_timestep_ != 0) {
-      WARNING_MESSAGE("UserDescr::set_user_timestep",
-		      "Resetting user timestep; deleting old one");
-      delete user_timestep_;
-      user_timestep_ = 0;
+    if (method_timestep_ != 0) {
+      WARNING_MESSAGE("MethodDescr::set_method_timestep",
+		      "Resetting method timestep; deleting old one");
+      delete method_timestep_;
+      method_timestep_ = 0;
     }
 
-    user_timestep_ = create_user_timestep_(name_user_timestep);
+    method_timestep_ = create_method_timestep_(name_method_timestep);
 
-    return user_timestep_;
+    return method_timestep_;
   };
 
 
-  /// Initialize user classes before a simulation
+  /// Initialize method classes before a simulation
   void initialize()
   {
-    ASSERT("UserDescr::initialize()","user_control_ == NULL",
-	   user_control_!=0);
-    ASSERT("UserDescr::initialize()","user_timestep_ == NULL",
-	   user_timestep_!=0);
-    ASSERT("UserDescr::initialize()","user_method_.size()==0",
-	   user_method_.size()>0);
-    user_control_ ->initialize(data_descr_);
-    user_timestep_->initialize(data_descr_);
-    for (size_t i=0; i<user_method_.size(); i++) {
-      user_method_[i]->initialize(data_descr_);
+    ASSERT("MethodDescr::initialize()","method_control_ == NULL",
+	   method_control_!=0);
+    ASSERT("MethodDescr::initialize()","method_timestep_ == NULL",
+	   method_timestep_!=0);
+    ASSERT("MethodDescr::initialize()","method_method_.size()==0",
+	   method_method_.size()>0);
+    method_control_ ->initialize(data_descr_);
+    method_timestep_->initialize(data_descr_);
+    for (size_t i=0; i<method_method_.size(); i++) {
+      method_method_[i]->initialize(data_descr_);
     }
   }
 
-  /// Finalize user classes after a simulation
+  /// Finalize method classes after a simulation
   void finalize()
   {
-    ASSERT("UserDescr::finalize()","user_control_ == NULL",
-	   user_control_!=0);
-    ASSERT("UserDescr::finalize()","user_timestep_ == NULL",
-	   user_timestep_!=0);
-    ASSERT("UserDescr::finalize()","user_method_.size()==0",
-	   user_method_.size()>0);
-    for (size_t i=0; i<user_method_.size(); i++) {
-      user_method_[i]->finalize(data_descr_);
+    ASSERT("MethodDescr::finalize()","method_control_ == NULL",
+	   method_control_!=0);
+    ASSERT("MethodDescr::finalize()","method_timestep_ == NULL",
+	   method_timestep_!=0);
+    ASSERT("MethodDescr::finalize()","method_method_.size()==0",
+	   method_method_.size()>0);
+    for (size_t i=0; i<method_method_.size(); i++) {
+      method_method_[i]->finalize(data_descr_);
     }
-    user_timestep_->finalize(data_descr_);
-    user_control_ ->finalize(data_descr_);
+    method_timestep_->finalize(data_descr_);
+    method_control_ ->finalize(data_descr_);
   }
 
   /// Return the timestep method
-  UserTimestep * user_timestep ()
-  { return user_timestep_; };
+  MethodTimestep * method_timestep ()
+  { return method_timestep_; };
 
-  /// Initialize user classes before advancing all blocks one cycle
+  /// Initialize method classes before advancing all blocks one cycle
   void initialize_cycle()
   {
-    INCOMPLETE_MESSAGE("UserDescr::initialize_cycle","Not implemented");
+    INCOMPLETE_MESSAGE("MethodDescr::initialize_cycle","Not implemented");
   }
 
-  /// Finalize user classes after advancing all blocks one cycle
+  /// Finalize method classes after advancing all blocks one cycle
   void finalize_cycle()
   {
-    INCOMPLETE_MESSAGE("UserDescr::finalize_cycle","Not implemented");
+    INCOMPLETE_MESSAGE("MethodDescr::finalize_cycle","Not implemented");
   }
 
-  /// Initialize user classes before advancing a block
+  /// Initialize method classes before advancing a block
   void initialize_block(DataBlock * data_block)
   {
-    ASSERT("UserDescr::initialize_block()","user_control_ == NULL",
-	   user_control_!=0);
-    ASSERT("UserDescr::initialize_block()","user_timestep_ == NULL",
-	   user_timestep_!=0);
-    ASSERT("UserDescr::initialize_block()","user_method_.size()==0",
-	   user_method_.size()>0);
-    user_control_ ->initialize_block(data_block);
-    user_timestep_->initialize_block(data_block);
-    for (size_t i=0; i<user_method_.size(); i++) {
-      user_method_[i]->initialize_block(data_block);
+    ASSERT("MethodDescr::initialize_block()","method_control_ == NULL",
+	   method_control_!=0);
+    ASSERT("MethodDescr::initialize_block()","method_timestep_ == NULL",
+	   method_timestep_!=0);
+    ASSERT("MethodDescr::initialize_block()","method_method_.size()==0",
+	   method_method_.size()>0);
+    method_control_ ->initialize_block(data_block);
+    method_timestep_->initialize_block(data_block);
+    for (size_t i=0; i<method_method_.size(); i++) {
+      method_method_[i]->initialize_block(data_block);
     }
   }
 
-  /// Finalize user classes after advancing a block
+  /// Finalize method classes after advancing a block
   void finalize_block(DataBlock * data_block)
   {
-    ASSERT("UserDescr::finalize_block()","user_control_ == NULL",
-	   user_control_!=0);
-    ASSERT("UserDescr::finalize_block()","user_timestep_ == NULL",
-	   user_timestep_!=0);
-    ASSERT("UserDescr::finalize_block()","user_method_.size()==0",
-	   user_method_.size()>0);
-    for (size_t i=0; i<user_method_.size(); i++) {
-      user_method_[i]->finalize_block(data_block);
+    ASSERT("MethodDescr::finalize_block()","method_control_ == NULL",
+	   method_control_!=0);
+    ASSERT("MethodDescr::finalize_block()","method_timestep_ == NULL",
+	   method_timestep_!=0);
+    ASSERT("MethodDescr::finalize_block()","method_method_.size()==0",
+	   method_method_.size()>0);
+    for (size_t i=0; i<method_method_.size(); i++) {
+      method_method_[i]->finalize_block(data_block);
     }
-    user_timestep_->finalize_block(data_block);
-    user_control_ ->finalize_block(data_block);
+    method_timestep_->finalize_block(data_block);
+    method_control_ ->finalize_block(data_block);
   }
 
 
@@ -187,39 +187,39 @@ protected: // virtual functions
 
 
   /// APPLICATION INHERITENCE OVERRIDE
-  /// Read user parameters and initialize user objects
-  virtual void user_initialize_() throw ()
+  /// Read method parameters and initialize method objects
+  virtual void method_initialize_() throw ()
   { 
-    WARNING_MESSAGE ("Simulation::user_initialize_",
-		     "No user_initialize_() implementation!");
+    WARNING_MESSAGE ("Simulation::method_initialize_",
+		     "No method_initialize_() implementation!");
   };
 
 
   /// APPLICATION INHERITENCE OVERRIDE
   /// Create named control method.
-  virtual UserControl * create_user_control_ (std::string name_user_control)
+  virtual MethodControl * create_method_control_ (std::string name_method_control)
   { 
-    WARNING_MESSAGE ("Simulation::create_user_control",
-		     "No create_user_control() implementation!");
+    WARNING_MESSAGE ("Simulation::create_method_control",
+		     "No create_method_control() implementation!");
     return NULL;
   };
 
   /// APPLICATION INHERITENCE OVERRIDE
   /// Create named timestep method.
-  virtual UserTimestep * create_user_timestep_ (std::string name_user_timestep)
+  virtual MethodTimestep * create_method_timestep_ (std::string name_method_timestep)
   { 
-    WARNING_MESSAGE ("Simulation::create_user_timestep",
-		     "No create_user_timestep() implementation!");
+    WARNING_MESSAGE ("Simulation::create_method_timestep",
+		     "No create_method_timestep() implementation!");
     return NULL;
   };
 
 
   /// APPLICATION INHERITENCE OVERRIDE
-  /// Create named user method.
-  virtual UserMethod * create_user_method_ (std::string name_user_method)
+  /// Create named method method.
+  virtual MethodMethod * create_method_method_ (std::string name_method_method)
   { 
-    WARNING_MESSAGE ("Simulation::create_user_method",
-		     "No create_user_method() implementation!");
+    WARNING_MESSAGE ("Simulation::create_method_method",
+		     "No create_method_method() implementation!");
     return NULL;
   };
 
@@ -247,17 +247,17 @@ protected: // attributes
   /// AMR mesh
   Mesh * mesh_;
 
-  /// User control
+  /// Method control
 
-  UserControl *             user_control_;
+  MethodControl *             method_control_;
 
-  /// User time-step computation
+  /// Method time-step computation
 
-  UserTimestep *            user_timestep_;
+  MethodTimestep *            method_timestep_;
 
-  /// User methods
+  /// Method methods
 
-  std::vector<UserMethod *> user_method_;
+  std::vector<MethodMethod *> method_method_;
 
   /// Data descriptions
   DataDescr * data_descr_;

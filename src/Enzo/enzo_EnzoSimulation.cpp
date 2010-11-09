@@ -49,46 +49,46 @@ void EnzoSimulation::user_initialize_ () throw ()
 
     std::string method_name = parameters->list_value_string(i,"sequence");
 
-    UserMethod * user_method = add_user_method(method_name);
+    MethodMethod * method_method = add_method_method(method_name);
 
-    user_method->initialize(data_descr_);
+    method_method->initialize(data_descr_);
   }
 
 
   // --------------------------------------------------
-  // Initialize user control
+  // Initialize method control
   // --------------------------------------------------
 
-  set_user_control("ignored");
+  set_method_control("ignored");
 
   // --------------------------------------------------
-  // Initialize user timestep
+  // Initialize method timestep
   // --------------------------------------------------
 
-  set_user_timestep("ignored");
+  set_method_timestep("ignored");
 
 }
 
 //----------------------------------------------------------------------
 
-UserControl * 
-EnzoSimulation::create_user_control_ (std::string control_name) throw ()
+MethodControl * 
+EnzoSimulation::create_method_control_ (std::string control_name) throw ()
 {
   return new MethodEnzoControl(global_,enzo_);
 }
 
 //----------------------------------------------------------------------
 
-UserTimestep * 
-EnzoSimulation::create_user_timestep_ ( std::string timestep_name ) throw ()
+MethodTimestep * 
+EnzoSimulation::create_method_timestep_ ( std::string timestep_name ) throw ()
 {
   return new MethodEnzoTimestep(enzo_);
 }
 
 //----------------------------------------------------------------------
 
-UserMethod * 
-EnzoSimulation::create_user_method_ ( std::string method_name ) throw ()
+MethodMethod * 
+EnzoSimulation::create_method_method_ ( std::string method_name ) throw ()
 /// @param method_name   Name of the method to create
 {
   printf ("%s:%d '%s'\n",__FILE__,__LINE__,method_name.c_str());

@@ -42,7 +42,7 @@ PARALLEL_MAIN_BEGIN
 
   // Initialize data fields
 
-  simulation.set_user_control("default");
+  simulation.set_method_control("default");
   simulation.initialize();
 
   double stop_time  = 1.0;

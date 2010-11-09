@@ -14,7 +14,7 @@
 
 #include "cello.hpp"
 
-#include "user.hpp"
+#include "method.hpp"
 #include "simulation.hpp"
 
 // Enzo

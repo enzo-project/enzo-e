@@ -9,7 +9,7 @@
 #ifndef ENZO_METHOD_ENZO_TIMESTEP_HPP
 #define ENZO_METHOD_ENZO_TIMESTEP_HPP
 
-class MethodEnzoTimestep : public UserTimestep {
+class MethodEnzoTimestep : public MethodTimestep {
 
   /// @class    MethodEnzoTimestep
   /// @ingroup  Enzo

@@ -10,7 +10,7 @@
 
 #include "data.hpp"
 #include "parallel.hpp"
-#include "user.hpp"
+#include "method.hpp"
 #include "test.hpp"
 
 int main (int argc, char ** argv)

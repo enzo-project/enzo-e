@@ -10,7 +10,7 @@
 
 #include "simulation.hpp"
 #include "data.hpp" 
-#include "user.hpp" 
+#include "method.hpp" 
 
 Simulation::Simulation(Global * global)
   : dimension_(0),
@@ -18,9 +18,9 @@ Simulation::Simulation(Global * global)
     domain_upper_(),
     global_    (global),
     mesh_      (NULL),
-    user_control_(NULL),
-    user_timestep_(NULL),
-    user_method_(),
+    method_control_(NULL),
+    method_timestep_(NULL),
+    method_method_(),
     data_descr_()
 {
 
@@ -108,8 +108,8 @@ Simulation::Simulation(Global * global)
 Simulation::~Simulation() throw()
 {
   delete mesh_;
-  delete user_control_;
-  delete user_timestep_;
+  delete method_control_;
+  delete method_timestep_;
   delete data_descr_;
 }
 

@@ -1,21 +1,21 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     user_UserMethod.cpp
+/// @file     method_MethodMethod.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Jul 13 11:12:25 PDT 2009
-/// @brief    Implements the UserMethod base class
+/// @brief    Implements the MethodMethod base class
 
 #include <string>
 
 #include "cello.hpp"
 
-#include "user.hpp"
+#include "method.hpp"
 #include "field.hpp"
 
 //----------------------------------------------------------------------
 
-void UserMethod::add_argument_
+void MethodMethod::add_argument_
 (
  argument_type argument,
  std::string   argument_name,
@@ -50,7 +50,7 @@ void UserMethod::add_argument_
       sprintf (buffer, 
 	       "Required Field %s is not defined in the field descriptor",
 	       argument_name.c_str());
-      ASSERT("UserMethod::initialize_method",
+      ASSERT("MethodMethod::initialize_method",
 	     buffer, data_descr->field_descr()->is_field(argument_name));
       break;
     case argument_particle:

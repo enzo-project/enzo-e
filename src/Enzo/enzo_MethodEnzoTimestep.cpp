@@ -8,14 +8,14 @@
 
 #include "enzo.hpp"
 #include "data.hpp"
-#include "user.hpp"
+#include "method.hpp"
 
 #include "cello_hydro.h"
 
 //----------------------------------------------------------------------
 
 MethodEnzoTimestep::MethodEnzoTimestep (EnzoDescr * enzo) throw()
-  : UserTimestep(),
+  : MethodTimestep(),
     pressure_field_(0),
     afloat_(0),
     dtBaryons_(0),

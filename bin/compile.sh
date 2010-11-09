@@ -21,10 +21,9 @@ set p = 1
 
 # clear
 
-printf "cleaning..."
+printf "cleaning all..."
 foreach type ($types)
-   setenv CELLO_TYPE $type
-   scons -c >& /dev/null
+   scons arch=$arch type=$type -c >& /dev/null
 end
 printf "\n\n"
 
@@ -34,17 +33,44 @@ foreach type ($types)
 
    set time = `date +"%Y-%m-%d %H:%M:%S"`
    printf "$time "
-   printf "%10s" "${platform}: "
-   # compile
-   scons -k -j$p >& out.scons.$platform
-   # count fails
+   printf "%14s" "${platform}: "
+
+   # COMPILE
+
+   scons arch=$arch type=$type -c >& /dev/null
+
+   set start_hour = `date +"%H"`
+   set start_min  = `date +"%M"`
+   set start_sec  = `date +"%S"`
+
+   scons -k -j$p arch=$arch type=$type >& out.scons.$platform
+
+   @ hours = `date +"%H"` - $start_hour
+   @ mins  = `date +"%M"` - $start_min
+   @ secs  = `date +"%S"` - $start_sec
+
+   @ total_secs = $secs + 60 * ( $mins + 60 * $hours )
+
+   printf "%4d s  " $total_secs
+
+   # count crashes
+
    grep FAIL test/$type-*unit |sort > fail.$platform
    grep pass test/$type-*unit |sort > pass.$platform
    set p = `cat pass.$platform | wc -l`
    set f = `cat fail.$platform | wc -l`
-   printf "FAIL: %d  Pass: %d\n" $f $p
+
+   printf "FAIL: %d  Pass: %d  " $f $p
+
    # check if any tests didn't finish
-   grep "UNIT TEST" test/$type-*unit | sed 's/BEGIN/END/' | uniq -u
+
+   set crash = `grep "UNIT TEST" test/$type-*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
+
+   printf "crash: %d\n" $crash
+   if ($crash != 0) then
+      grep "UNIT TEST" test/$type-*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1}'
+   endif
+
 
 end
 

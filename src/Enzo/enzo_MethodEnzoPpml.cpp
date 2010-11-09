@@ -11,7 +11,7 @@
 #include "cello.hpp"
 
 #include "error.hpp"
-#include "user.hpp"
+#include "method.hpp"
 #include "enzo.hpp"
 #include "parameters.hpp"
 

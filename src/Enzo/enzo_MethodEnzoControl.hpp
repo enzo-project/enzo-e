@@ -10,7 +10,7 @@
 #define ENZO_METHOD_ENZO_CONTROL_HPP
 
 
-class MethodEnzoControl : public UserControl {
+class MethodEnzoControl : public MethodControl {
 
   /// @class    MethodEnzoControl
   /// @ingroup  Enzo
@@ -22,7 +22,7 @@ public: // interface
 
   MethodEnzoControl(Global * global,
 		    EnzoDescr * enzo)
-    : UserControl(global),
+    : MethodControl(global),
       enzo_(enzo)
   {};
 

@@ -1,13 +1,13 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     user_UserMethod.hpp 
+/// @file     method_MethodMethod.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the UserMethod component
+/// @brief    Declaration for the MethodMethod component
 
-#ifndef USER_USER_METHOD_HPP
-#define USER_USER_METHOD_HPP
+#ifndef METHOD_METHOD_METHOD_HPP
+#define METHOD_METHOD_METHOD_HPP
 
 enum argument_type {
   argument_unknown,
@@ -23,16 +23,16 @@ enum access_type {
 };
 
 
-class UserMethod {
+class MethodMethod {
 
-  /// @class    UserMethod
-  /// @ingroup  User
+  /// @class    MethodMethod
+  /// @ingroup  Method
   /// @brief    Encapsulate external method / analysis / visualization function.
 
 public: // interface
 
-  /// Create a new UserMethod
-  UserMethod(Global * global) throw()
+  /// Create a new MethodMethod
+  MethodMethod(Global * global) throw()
     : global_(global)
   {};
 
@@ -91,4 +91,4 @@ protected: // attributes
 
 };
 
-#endif /* USER_USER_METHOD_HPP */
+#endif /* METHOD_METHOD_METHOD_HPP */
