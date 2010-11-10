@@ -39,7 +39,7 @@ protected: // functions
   MethodTimestep * create_method_timestep_ (std::string name_method_timestep) throw ();
 
   /// Create named method method.
-  MethodMethod * create_method_method_ (std::string name_method_method) throw ();
+  MethodHyperbolic * create_method_hyperbolic_ (std::string name_method_hyperbolic) throw ();
 
 private: // attributes
 

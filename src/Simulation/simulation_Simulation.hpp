@@ -56,15 +56,15 @@ public: // interface
   { return data_descr_; };
 
   /// Add a user method
-  MethodMethod * add_method_method (std::string method_name)
-  { MethodMethod * method = create_method_method_(method_name);
-    if (method) method_method_.push_back(method); 
+  MethodHyperbolic * add_method_hyperbolic (std::string method_name)
+  { MethodHyperbolic * method = create_method_hyperbolic_(method_name);
+    if (method) method_hyperbolic_.push_back(method); 
     return method;
   };
 
-  /// Return the ith method method
-  MethodMethod * method_method (int i)
-  { return method_method_.at(i); };
+  /// Return the ith method hyperbolic
+  MethodHyperbolic * method_hyperbolic (int i)
+  { return method_hyperbolic_.at(i); };
 
 
   /// Set the control method
@@ -109,12 +109,12 @@ public: // interface
 	   method_control_!=0);
     ASSERT("MethodDescr::initialize()","method_timestep_ == NULL",
 	   method_timestep_!=0);
-    ASSERT("MethodDescr::initialize()","method_method_.size()==0",
-	   method_method_.size()>0);
+    ASSERT("MethodDescr::initialize()","method_hyperbolic_.size()==0",
+	   method_hyperbolic_.size()>0);
     method_control_ ->initialize(data_descr_);
     method_timestep_->initialize(data_descr_);
-    for (size_t i=0; i<method_method_.size(); i++) {
-      method_method_[i]->initialize(data_descr_);
+    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
+      method_hyperbolic_[i]->initialize(data_descr_);
     }
   }
 
@@ -125,10 +125,10 @@ public: // interface
 	   method_control_!=0);
     ASSERT("MethodDescr::finalize()","method_timestep_ == NULL",
 	   method_timestep_!=0);
-    ASSERT("MethodDescr::finalize()","method_method_.size()==0",
-	   method_method_.size()>0);
-    for (size_t i=0; i<method_method_.size(); i++) {
-      method_method_[i]->finalize(data_descr_);
+    ASSERT("MethodDescr::finalize()","method_hyperbolic_.size()==0",
+	   method_hyperbolic_.size()>0);
+    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
+      method_hyperbolic_[i]->finalize(data_descr_);
     }
     method_timestep_->finalize(data_descr_);
     method_control_ ->finalize(data_descr_);
@@ -157,12 +157,12 @@ public: // interface
 	   method_control_!=0);
     ASSERT("MethodDescr::initialize_block()","method_timestep_ == NULL",
 	   method_timestep_!=0);
-    ASSERT("MethodDescr::initialize_block()","method_method_.size()==0",
-	   method_method_.size()>0);
+    ASSERT("MethodDescr::initialize_block()","method_hyperbolic_.size()==0",
+	   method_hyperbolic_.size()>0);
     method_control_ ->initialize_block(data_block);
     method_timestep_->initialize_block(data_block);
-    for (size_t i=0; i<method_method_.size(); i++) {
-      method_method_[i]->initialize_block(data_block);
+    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
+      method_hyperbolic_[i]->initialize_block(data_block);
     }
   }
 
@@ -173,10 +173,10 @@ public: // interface
 	   method_control_!=0);
     ASSERT("MethodDescr::finalize_block()","method_timestep_ == NULL",
 	   method_timestep_!=0);
-    ASSERT("MethodDescr::finalize_block()","method_method_.size()==0",
-	   method_method_.size()>0);
-    for (size_t i=0; i<method_method_.size(); i++) {
-      method_method_[i]->finalize_block(data_block);
+    ASSERT("MethodDescr::finalize_block()","method_hyperbolic_.size()==0",
+	   method_hyperbolic_.size()>0);
+    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
+      method_hyperbolic_[i]->finalize_block(data_block);
     }
     method_timestep_->finalize_block(data_block);
     method_control_ ->finalize_block(data_block);
@@ -216,10 +216,10 @@ protected: // virtual functions
 
   /// APPLICATION INHERITENCE OVERRIDE
   /// Create named method method.
-  virtual MethodMethod * create_method_method_ (std::string name_method_method)
+  virtual MethodHyperbolic* create_method_hyperbolic_ (std::string name_method_hyperbolic)
   { 
-    WARNING_MESSAGE ("Simulation::create_method_method",
-		     "No create_method_method() implementation!");
+    WARNING_MESSAGE ("Simulation::create_method_hyperbolic",
+		     "No create_method_hyperbolic() implementation!");
     return NULL;
   };
 
@@ -257,7 +257,7 @@ protected: // attributes
 
   /// Method methods
 
-  std::vector<MethodMethod *> method_method_;
+  std::vector<MethodHyperbolic *> method_hyperbolic_;
 
   /// Data descriptions
   DataDescr * data_descr_;

@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_MethodMethod.cpp
+/// @file     method_MethodHyperbolic.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Jul 13 11:12:25 PDT 2009
-/// @brief    Implements the MethodMethod base class
+/// @brief    Implements the MethodHyperbolic base class
 
 #include <string>
 
@@ -15,7 +15,7 @@
 
 //----------------------------------------------------------------------
 
-void MethodMethod::add_argument_
+void MethodHyperbolic::add_argument_
 (
  argument_type argument,
  std::string   argument_name,
@@ -50,7 +50,7 @@ void MethodMethod::add_argument_
       sprintf (buffer, 
 	       "Required Field %s is not defined in the field descriptor",
 	       argument_name.c_str());
-      ASSERT("MethodMethod::initialize_method",
+      ASSERT("MethodHyperbolic::initialize_method",
 	     buffer, data_descr->field_descr()->is_field(argument_name));
       break;
     case argument_particle:

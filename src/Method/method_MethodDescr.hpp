@@ -23,7 +23,7 @@ public: // interface
   MethodDescr(Global * global) throw()
     : method_control_(0),
       method_timestep_(0),
-      method_method_(0),
+      method_hyperbolic_(0),
       global_ (global)
   {
 
@@ -36,8 +36,8 @@ public: // interface
   {
     delete method_control_;
     delete method_timestep_;
-    for (size_t i=0; i<method_method_.size(); i++) {
-      delete method_method_[i];
+    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
+      delete method_hyperbolic_[i];
     }
   }
 
@@ -51,13 +51,13 @@ protected: // functions
   virtual MethodTimestep * create_method_timestep_ (std::string name_method_timestep) = 0;
 
   /// APPLICATION INHERITENCE OVERRIDE: Create named hyperbolic method.
-  virtual MethodMethod * create_method_method_ (std::string name_method_method) = 0;
+  virtual MethodHyperbolic * create_method_hyperbolic_ (std::string name_method_hyperbolic) = 0;
 
 protected: // attributes
 
   MethodControl *             method_control_;
   MethodTimestep *            method_timestep_;
-  std::vector<MethodMethod *> method_method_;
+  std::vector<MethodHyperbolic *> method_hyperbolic_;
   Global     *              global_;
 };
 

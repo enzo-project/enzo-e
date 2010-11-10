@@ -1,13 +1,13 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_MethodMethod.hpp 
+/// @file     method_MethodHyperbolic.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the MethodMethod component
+/// @brief    Declaration for the MethodHyperbolic component
 
-#ifndef METHOD_METHOD_METHOD_HPP
-#define METHOD_METHOD_METHOD_HPP
+#ifndef METHOD_METHOD_HYPERBOLIC_HPP
+#define METHOD_METHOD_HYPERBOLIC_HPP
 
 enum argument_type {
   argument_unknown,
@@ -23,16 +23,16 @@ enum access_type {
 };
 
 
-class MethodMethod {
+class MethodHyperbolic {
 
-  /// @class    MethodMethod
+  /// @class    MethodHyperbolic
   /// @ingroup  Method
   /// @brief    Encapsulate external method / analysis / visualization function.
 
 public: // interface
 
-  /// Create a new MethodMethod
-  MethodMethod(Global * global) throw()
+  /// Create a new MethodHyperbolic
+  MethodHyperbolic(Global * global) throw()
     : global_(global)
   {};
 

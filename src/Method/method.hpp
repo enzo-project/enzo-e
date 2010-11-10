@@ -19,7 +19,7 @@
 
 #include "method_MethodControl.hpp"
 #include "method_MethodTimestep.hpp"
-#include "method_MethodMethod.hpp"
+#include "method_MethodHyperbolic.hpp"
 #include "method_MethodDescr.hpp"
 
 #endif /* METHOD_HPP */

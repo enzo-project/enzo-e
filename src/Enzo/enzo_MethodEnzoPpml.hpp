@@ -9,7 +9,7 @@
 #ifndef ENZO_METHOD_ENZO_PPML_HPP
 #define ENZO_METHOD_ENZO_PPML_HPP
 
-class MethodEnzoPpml : public MethodMethod {
+class MethodEnzoPpml : public MethodHyperbolic {
 
   /// @class    MethodEnzoPpml
 /// @ingroup  Enzo
@@ -20,7 +20,7 @@ public: // interface
 /// Creae a new MethodEnzoPpml object
 MethodEnzoPpml(Global * global,
 	       EnzoDescr * enzo)
-  : MethodMethod (global),
+  : MethodHyperbolic (global),
     enzo_(enzo)
   {};
 

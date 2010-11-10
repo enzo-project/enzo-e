@@ -49,9 +49,9 @@ void EnzoSimulation::user_initialize_ () throw ()
 
     std::string method_name = parameters->list_value_string(i,"sequence");
 
-    MethodMethod * method_method = add_method_method(method_name);
+    MethodHyperbolic * method_hyperbolic = add_method_hyperbolic(method_name);
 
-    method_method->initialize(data_descr_);
+    method_hyperbolic->initialize(data_descr_);
   }
 
 
@@ -87,8 +87,8 @@ EnzoSimulation::create_method_timestep_ ( std::string timestep_name ) throw ()
 
 //----------------------------------------------------------------------
 
-MethodMethod * 
-EnzoSimulation::create_method_method_ ( std::string method_name ) throw ()
+MethodHyperbolic * 
+EnzoSimulation::create_method_hyperbolic_ ( std::string method_name ) throw ()
 /// @param method_name   Name of the method to create
 {
   printf ("%s:%d '%s'\n",__FILE__,__LINE__,method_name.c_str());

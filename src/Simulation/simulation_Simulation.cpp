@@ -20,7 +20,7 @@ Simulation::Simulation(Global * global)
     mesh_      (NULL),
     method_control_(NULL),
     method_timestep_(NULL),
-    method_method_(),
+    method_hyperbolic_(),
     data_descr_()
 {
 
