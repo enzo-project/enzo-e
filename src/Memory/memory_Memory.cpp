@@ -16,6 +16,8 @@
 #include "error.hpp"
 #include "memory.hpp"
 
+namespace memory {
+
 #ifdef CONFIG_USE_MEMORY
 Memory Memory::instance_; // (singleton design pattern)
 #endif
@@ -366,46 +368,4 @@ void Memory::reset() throw()
 #endif
 }
 
-//======================================================================
-
-#ifdef CONFIG_USE_MEMORY
-void *operator new (size_t bytes) throw (std::bad_alloc)
-{
-  size_t p = (size_t) Memory::instance()->allocate(bytes);
-
-  // Return pointer to new storage
-
-  return (void *) p;
 }
-
-//----------------------------------------------------------------------
-
-void *operator new [] (size_t bytes) throw (std::bad_alloc)
-{
-  size_t p = (size_t) Memory::instance()->allocate(bytes);
-
-  // Return pointer to new storage
-
-  return (void *)(p);
-
-}
-
-//----------------------------------------------------------------------
-
-void operator delete (void *p) throw ()
-{
-  if (p==0) return;
-
-  Memory::instance()->deallocate(p);
-
-}
-
-//----------------------------------------------------------------------
-
-void operator delete [] (void *p) throw ()
-{
-  if (p==0) return;
-
-  Memory::instance()->deallocate(p);
-}
-#endif /* CONFIG_USE_MEMORY */

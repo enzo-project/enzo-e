@@ -42,7 +42,7 @@ int * create_sphere_array (int * n, int max_levels);
 void write_image(Monitor * monitor, std::string filename, 
 		 float * image, int nx, int ny, int nz=0 );
 
-void create_tree ( Memory * memory, int * level_array, int nx, int ny, int nz, int k,  int d, 
+void create_tree ( memory::Memory * memory, int * level_array, int nx, int ny, int nz, int k,  int d, 
 		   std::string name, int max_level);
 void print_usage(int, char**);
 //----------------------------------------------------------------------
@@ -58,7 +58,7 @@ PARALLEL_MAIN_BEGIN
 
   // Required for Monitor
 
-  Memory * memory = Memory::instance();
+  memory::Memory * memory = memory::Memory::instance();
   // Parse command line
 
   if (PARALLEL_ARGC != 5 && PARALLEL_ARGC != 4) {
@@ -250,7 +250,7 @@ void write_image(Monitor * monitor,std::string filename, float * image, int nx, 
 
 void create_tree 
 (
- Memory * memory,
+ memory::Memory * memory,
  int * level_array, 
  int nx, int ny, int nz,
  int k,  int d, 

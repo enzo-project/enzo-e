@@ -1,18 +1,18 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     data_DataDescr.hpp
+/// @file     mesh_DataDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    Declaration of the DataDescr class
 
-#ifndef DATA_DATA_DESCR_HPP
-#define DATA_DATA_DESCR_HPP
+#ifndef MESH_DATA_DESCR_HPP
+#define MESH_DATA_DESCR_HPP
 
 class DataDescr {
 
   /// @class    DataDescr
-  /// @ingroup  Data
+  /// @ingroup  Mesh
   /// @brief    Container class for all data descriptors (currently just fields)
 
 public: // interface
@@ -36,5 +36,5 @@ private: // attributes
 
 };
 
-#endif /* DATA_DATA_DESCR_HPP */
+#endif /* MESH_DATA_DESCR_HPP */
 

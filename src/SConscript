@@ -9,7 +9,6 @@ Import('parallel_type')
 
 SConscript('Enzo/SConscript')
 
-SConscript('Data/SConscript')
 SConscript('Disk/SConscript')
 SConscript('Distribute/SConscript')
 SConscript('Error/SConscript')
@@ -31,7 +30,7 @@ SConscript('Test/SConscript')
 SConscript('Method/SConscript')
 
 
-components = ['schedule','error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','method','data','field','cello']
+components = ['schedule','error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','method','field','cello']
 
 libraries  = ['png', '$FORTRANLIBS','m']
 

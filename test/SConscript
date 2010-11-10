@@ -13,7 +13,7 @@ Import('serial_run')
 # O test_ParallelLayout.cpp
 # O test_tree.cpp
 
-# X test_Data.cpp
+# X test_DataDescr.cpp
 # X test_Error.cpp
 # X test_FieldBlock.cpp
 # X test_FieldDescr.cpp
@@ -50,7 +50,6 @@ env.Append(BUILDERS = { 'RunMethod'   : run_method } )
 env.Append(BUILDERS = { 'RunTree'     : run_tree } )
 
 
-env.RunSerial(parallel_type + '-test_Data.unit',        '#/bin/test_Data')
 
 env.RunSerial(parallel_type + '-test_Error.unit',       '#/bin/test_Error')
 
@@ -62,7 +61,10 @@ env.RunSerial(parallel_type + '-test_FileHdf5.unit',    '#/bin/test_FileHdf5')
 env.RunSerial(parallel_type + '-test_Ifrit.unit',       '#/bin/test_Ifrit')
 # env.RunSerial(parallel_type + '-test_Layout.unit',      '#/bin/test_Layout')
 env.RunSerial(parallel_type + '-test_Memory.unit',      '#/bin/test_Memory')
+
 env.RunSerial(parallel_type + '-test_Mesh.unit',        '#/bin/test_Mesh')
+env.RunSerial(parallel_type + '-test_DataDescr.unit',   '#/bin/test_DataDescr')
+
 env.RunSerial(parallel_type + '-test_Parameters.unit',  '#/bin/test_Parameters')
 env.RunSerial(parallel_type + '-test_Performance.unit', '#/bin/test_Performance')
 env.RunSerial(parallel_type + '-test_Schedule.unit',    '#/bin/test_Schedule')
@@ -157,7 +159,7 @@ Clean(env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS
 
 # env.RunParallel(parallel_type + '-test_affinity.unit',   '#/bin/test_Affinity')
 env.RunParallel('cello_implosion.unit', '#/bin/cello', ARGS='input/implosion.in')
-if (parallel_type == "mpi"):
+if (parallel_type == "mpi" or parallel_type == "ampi"):
 	env.RunParallel(parallel_type + '-test_GroupProcessMpi.unit',        '#/bin/test_GroupProcessMpi')
 	# env.RunParallel(parallel_type + '-test_mpi.unit',        '#/bin/test_Mpi')
 # env.RunParallel(parallel_type + '-test_jacobi.unit',        '#/bin/test_jacobi')

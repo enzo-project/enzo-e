@@ -1,13 +1,13 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     data_DataBlock.hpp
+/// @file     mesh_DataBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @brief    Declaration of the DataBlock class
 
-#ifndef DATA_DATA_BLOCK_HPP
-#define DATA_DATA_BLOCK_HPP
+#ifndef MESH_DATA_BLOCK_HPP
+#define MESH_DATA_BLOCK_HPP
 
 class DataBlock {
 
@@ -38,5 +38,5 @@ private: // attributes
 
 };
 
-#endif /* DATA_DATA_BLOCK_HPP */
+#endif /* MESH_DATA_BLOCK_HPP */
 
