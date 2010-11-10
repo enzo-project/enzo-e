@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/tcsh -f
 
 rm -f out.scons.* fail.scons.*
 
@@ -10,7 +10,7 @@ else if ($#argv == 1) then
   set types = ($argv)
 else
   set arch = $CELLO_ARCH
-  set types = (charm serial ampi mpi)
+  set types = (serial mpi charm ampi )
 endif
 
 echo
@@ -31,27 +31,19 @@ foreach type ($types)
 
    set platform = $arch-$type
 
-   set time = `date +"%Y-%m-%d %H:%M:%S"`
-   printf "$time "
+   set d = `date +"%Y-%m-%d %H:%M:%S"`
+   printf "$d "
    printf "%14s" "${platform}: "
 
    # COMPILE
 
    scons arch=$arch type=$type -c >& /dev/null
 
-   set start_hour = `date +"%H"`
-   set start_min  = `date +"%M"`
-   set start_sec  = `date +"%S"`
+   set t = `(time scons arch=$arch type=$type -k -j$p >& out.scons.$platform)`
+  
+   set secs = `echo $t | awk '{print $3}'`
 
-   scons -k -j$p arch=$arch type=$type >& out.scons.$platform
-
-   @ hours = `date +"%H"` - $start_hour
-   @ mins  = `date +"%M"` - $start_min
-   @ secs  = `date +"%S"` - $start_sec
-
-   @ total_secs = $secs + 60 * ( $mins + 60 * $hours )
-
-   printf "%4d s  " $total_secs
+   printf "%4s s  " $secs
 
    # count crashes
 
