@@ -10,7 +10,7 @@ else if ($#argv == 1) then
   set types = ($argv)
 else
   set arch = $CELLO_ARCH
-  set types = (serial mpi charm ampi )
+  set types = (serial mpi ampi charm )
 endif
 
 echo
