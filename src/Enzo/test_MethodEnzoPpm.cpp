@@ -223,7 +223,7 @@ PARALLEL_MAIN_BEGIN
     printf ("cycle = %d  sim-time = %10g dt = %10g\n",
 	    cycle,time,dt );
 
-    simulation.method_method(0)->advance_block(data_block,time,dt);
+    simulation.method_hyperbolic(0)->advance_block(data_block,time,dt);
 
     simulation.finalize_block(data_block);
 

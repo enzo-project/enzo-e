@@ -10,6 +10,7 @@
 /// @brief    Include file for the Memory package 
 
 #include <stack>
+#include <memory>
 
 #include "error.hpp"
 
