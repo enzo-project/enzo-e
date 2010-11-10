@@ -17,7 +17,7 @@ echo
 echo "arch  = $arch"
 echo "types = ( $types )"
 echo
-set p = 1
+set procs = 1
 
 # clear
 
@@ -39,7 +39,7 @@ foreach type ($types)
 
    scons arch=$arch type=$type -c >& /dev/null
 
-   set t = `(time scons arch=$arch type=$type -k -j$p >& out.scons.$platform)`
+   set t = `(time scons arch=$arch type=$type -k -j$procs >& out.scons.$platform)`
   
    set secs = `echo $t | awk '{print $3}'`
 
