@@ -28,10 +28,10 @@ SConscript('Schedule/SConscript')
 SConscript('Simulation/SConscript')
 SConscript('Task/SConscript')
 SConscript('Test/SConscript')
-SConscript('User/SConscript')
+SConscript('Method/SConscript')
 
 
-components = ['schedule','error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','user','data','field','cello']
+components = ['schedule','error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','method','data','field','cello']
 
 libraries  = ['png', '$FORTRANLIBS','m']
 
