@@ -39,7 +39,7 @@ digraph libraries {
    monitor     -> {parallel  error};
    portal      -> {};
 
-   performance -> {error memory};
+   performance -> {error};
    error       -> {};
 
 

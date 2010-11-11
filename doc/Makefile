@@ -86,8 +86,7 @@ clean: $(patsubst %,%-clean,$(DIRS))
 distclean: $(patsubst %,%-distclean,$(DIRS))
 	-@rm -f *~
 	-@rm `find . -type l`
-	$(MAKE) -C html distclean
-	$(MAKE) -C pdf distclean
+	rm -rf html pdf eps png
 %-distclean:
 	$(MAKE) -C $* distclean
 

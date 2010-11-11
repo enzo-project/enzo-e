@@ -29,7 +29,7 @@ digraph includes {
    monitor     -> {error parallel performance};
    portal      -> {};
 
-   performance -> {error memory};
+   performance -> {error};
    error       -> {};
 
 }

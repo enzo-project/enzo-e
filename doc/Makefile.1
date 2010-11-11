@@ -42,8 +42,10 @@ include.tex:
 .PHONY: install-%
 
 install-pdf:
+	if [ ! -e ../pdf ]; then mkdir ../pdf; fi
 	cp $(PAPER).pdf ../pdf
 install-html:
+	if [ ! -e ../html ]; then mkdir ../html; fi
 	cp $(PAPER).html ../html
 
 #-----------------------------------------------------------------------
