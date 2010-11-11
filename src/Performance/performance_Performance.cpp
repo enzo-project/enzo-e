@@ -11,7 +11,6 @@
 #include "cello.hpp"
 
 #include "error.hpp" 
-#include "memory.hpp"
 #include "performance.hpp"
 
 Performance::Performance 
@@ -34,9 +33,6 @@ Performance::Performance
     region_names_              (NULL),
     current_region_            (0)
 {
-  //  memory->new_group (component_performance, "Performance");
-  //  memory->begin_group(component_performance);
-
   attribute_names_              = new std::string [ num_attributes_ + 1];
   counter_names_                = new std::string [ num_counters_ + 1];
   group_names_                  = new std::string [ num_groups_ + 1];
@@ -54,16 +50,12 @@ Performance::Performance
 
   counters_.push_back(new Counters(num_attributes,num_counters));
 
-  //  memory->end_group(component_performance);
 }
 
 //----------------------------------------------------------------------
 
 Performance::~Performance()
 {
-  //  Memory * memory = Memory::instance();
-
-  //  memory->begin_group(component_performance);
 
   delete [] attribute_names_;
   delete [] counter_names_;
@@ -75,8 +67,6 @@ Performance::~Performance()
   for (unsigned i=0; i<counters_.size(); i++) {
     delete counters_.at(i);
   }
-
-  //  memory->end_group(component_performance);
 
 }
 

@@ -20,12 +20,9 @@ public: // interface
   /// Initialize a Counters object
   Counters(size_t num_attributes, size_t num_counters)
     {
-      //      Memory * memory = Memory::instance();
-      //      memory->begin_group(component_performance);
       a_  = new int       [num_attributes];
       c_  = new long long [num_counters];
       dc_ = new long long [num_counters];
-      //      memory->end_group(component_performance);
     }
 
   //----------------------------------------------------------------------
@@ -35,12 +32,9 @@ public: // interface
   /// Destructor
   ~Counters()
     {
-      //      Memory * memory = Memory::instance();
-      //      memory->begin_group(component_performance);
       delete [] a_;
       delete [] c_;
       delete [] dc_;
-      //      memory->end_group(component_performance);
     }
 
   /// Copy constructor
