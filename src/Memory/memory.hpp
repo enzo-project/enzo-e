@@ -14,10 +14,8 @@
 
 #include "error.hpp"
 
-namespace memory {
-#  include "memory_Memory.hpp"
-#  include "memory_strict_auto_pointer.hpp"
-}
+#include "memory_Memory.hpp"
+#include "memory_strict_auto_pointer.hpp"
 
 #endif /* MEMORY_HPP */
 

@@ -31,7 +31,7 @@ PARALLEL_MAIN_BEGIN
   unit_class ("Memory");
 
 #ifdef CONFIG_USE_MEMORY
-  memory::Memory * memory = memory::Memory::instance();
+  Memory * memory = Memory::instance();
 
   memory->reset();
 

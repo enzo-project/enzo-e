@@ -16,8 +16,6 @@
 #include "error.hpp"
 #include "memory.hpp"
 
-namespace memory {
-
 #ifdef CONFIG_USE_MEMORY
 Memory Memory::instance_; // (singleton design pattern)
 #endif
@@ -366,6 +364,4 @@ void Memory::reset() throw()
     delete_calls_[i] = 0;
   }
 #endif
-}
-
 }
