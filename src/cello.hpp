@@ -1,7 +1,13 @@
-#ifndef CELLO_DEF
-#define CELLO_DEF
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
 
-/* Include configuration settings */
+#ifndef CELLO_HPP
+#define CELLO_HPP
+
+/// @file     cello.hpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Thu Nov 11 17:08:38 PST 2010
+/// @brief    Include Cello global configuration settings
 
 #include "config.def"
 
@@ -128,4 +134,4 @@ enum component_type {
 
 extern const char * component_name [];
 
-#endif /* CELLO_DEF */
+#endif /* CELLO_HPP */

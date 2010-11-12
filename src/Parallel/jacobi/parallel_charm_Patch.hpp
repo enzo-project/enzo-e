@@ -1,8 +1,8 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef CHARM_PATCH_HPP
-#define CHARM_PATCH_HPP
+#ifndef PARALLEL_CHARM_PATCH_HPP
+#define PARALLEL_CHARM_PATCH_HPP
 
 /// @file     parallel_charm_Patch.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -103,4 +103,4 @@ private: // attributes
 
 };
 
-#endif /* CHARM_PATCH_HPP */
+#endif /* PARALLEL_CHARM_PATCH_HPP */

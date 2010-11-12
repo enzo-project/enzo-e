@@ -1,8 +1,8 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef FIELD_FIELDFACES_HPP
-#define FIELD_FIELDFACES_HPP
+#ifndef FIELD_FIELD_FACES_HPP
+#define FIELD_FIELD_FACES_HPP
 
 /// @file     field_FieldFaces.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -77,4 +77,4 @@ private: // attributes
 
 };
 
-#endif /* FIELD_FIELDFACES_HPP */
+#endif /* FIELD_FIELD_FACES_HPP */

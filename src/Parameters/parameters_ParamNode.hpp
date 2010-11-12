@@ -1,8 +1,8 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef PARAMETERS_PARAMNODE_HPP
-#define PARAMETERS_PARAMNODE_HPP
+#ifndef PARAMETERS_PARAM_NODE_HPP
+#define PARAMETERS_PARAM_NODE_HPP
 
 /// @file     parameters_ParamNode.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -99,5 +99,4 @@ private: // attributes
 
 };
 
-#endif /* PARAMETERS_PARAMNODE_HPP */
-
+#endif /* PARAMETERS_PARAM_NODE_HPP */

@@ -1,5 +1,5 @@
-#ifndef COUNTER_HPP
-#define COUNTER_HPP
+#ifndef PARALLEL_JACOBI_COUNTER_HPP
+#define PARALLEL_JACOBI_COUNTER_HPP
 
 namespace jacobi
 {
@@ -20,4 +20,5 @@ namespace jacobi
     }
   };
 }
-#endif
+#endif /* PARALLEL_JACOBI_COUNTER_HPP */
+

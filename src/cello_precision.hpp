@@ -1,3 +1,13 @@
+// $Id$
+// See LICENSE_CELLO file for license and copyright information
+
+#ifndef CELLO_PRECISION_HPP
+#define CELLO_PRECISION_HPP
+
+/// @file     cello_precisionhpp
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Thu Nov 11 17:08:38 PST 2010
+/// @brief    Include Cello precision types
 
 enum precision_type {
   precision_unknown,     //  unknown precision
@@ -27,11 +37,14 @@ enum precision_type {
 #   define SCALAR_PRINTF "%le "
 #   define SCALAR_MPI     MPI_DOUBLE
 #   define SCALAR_HDF5    H5T_NATIVE_DOUBLE
-#   define SCALAR_DEFINED /* if error here, then both single and double defined */
+#   ifdef SCALAR_DEFINED
+#      error Both CONFIG_PRECISION_SINGLE and CONFIG_PRECISION_DOUBLE defined
+#   endif
+#   define SCALAR_DEFINED
 #endif
 
 #ifndef SCALAR_DEFINED
-#   error CONFIG_PRECISION_* not defined
+#   error Neither CONFIG_PRECISION_SINGLE nor CONFIG_PRECISION_DOUBLE defined
 #endif
 
 namespace cello {
@@ -43,4 +56,4 @@ namespace cello {
 
 };
 
-
+#endif /* CELLO_PRECISION_HPP */

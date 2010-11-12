@@ -15,7 +15,7 @@ Import('parallel_type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','memory','monitor', 'parallel', 'parameters', 'data', 'field', 'cello']
+components = ['error','memory','monitor', 'parallel', 'parameters', 'field', 'cello']
 libraries  = ['png']
 
 #------------------------------

@@ -15,6 +15,7 @@
 #include "cello.hpp"
 
 #include "error.hpp"
+#include "mesh.hpp"
 
 #include "method_MethodControl.hpp"
 #include "method_MethodTimestep.hpp"

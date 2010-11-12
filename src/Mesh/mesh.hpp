@@ -18,13 +18,18 @@
 
 #include "error.hpp"
 #include "memory.hpp"
+#include "field.hpp"
 
 #include "mesh_Node2K.hpp"
 #include "mesh_Node3K.hpp"
 #include "mesh_TreeK.hpp"
 #include "mesh_Tree2K.hpp"
 #include "mesh_Tree3K.hpp"
+
+#include "mesh_DataDescr.hpp"
+#include "mesh_DataBlock.hpp"
 #include "mesh_Patch.hpp"
+
 #include "mesh_Mesh.hpp"
 
 #endif /* MESH_HPP */
