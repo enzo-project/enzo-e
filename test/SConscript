@@ -158,7 +158,7 @@ Clean(env.RunMethod('../ppm-density-00000.png', '#/bin/test_MethodEnzoPpm', ARGS
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
 
 # env.RunParallel(parallel_type + '-test_affinity.unit',   '#/bin/test_Affinity')
-env.RunParallel('cello_implosion.unit', '#/bin/cello', ARGS='input/implosion.in')
+env.RunParallel('enzo-p_implosion.unit', '#/bin/enzo-p', ARGS='input/implosion.in')
 if (parallel_type == "mpi" or parallel_type == "ampi"):
 	env.RunParallel(parallel_type + '-test_GroupProcessMpi.unit',        '#/bin/test_GroupProcessMpi')
 	# env.RunParallel(parallel_type + '-test_mpi.unit',        '#/bin/test_Mpi')
@@ -168,7 +168,7 @@ if (parallel_type == "mpi" or parallel_type == "ampi"):
 
 SideEffect('log.txt', 
      [ parallel_type + '-test_GroupProcessMpi.unit', 
-       parallel_type + '-cello_implosion.unit'])
+       parallel_type + '-enzo-p_implosion.unit'])
 
 
 

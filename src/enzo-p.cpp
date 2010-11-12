@@ -17,7 +17,7 @@
 #include "parallel.hpp"
 #include "simulation.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(cello.decl.h)
+#include PARALLEL_CHARM_INCLUDE(enzo_p.decl.h)
 
 //----------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ PARALLEL_MAIN_BEGIN
   monitor->set_active(parallel->rank()==0);
 
     
-  monitor->print ("CELLO BEGIN");
+  monitor->print ("ENZO-P BEGIN");
 
   monitor->header();
 
@@ -64,7 +64,7 @@ PARALLEL_MAIN_BEGIN
     PARALLEL_EXIT;
   }
 
-  ASSERT ("cello", "File pointer NULL", fp != 0);
+  ASSERT ("enzo-p", "File pointer NULL", fp != 0);
 
   // READ PARAMETERS
 
@@ -79,7 +79,7 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END;
 
-#include PARALLEL_CHARM_INCLUDE(cello.def.h)
+#include PARALLEL_CHARM_INCLUDE(enzo_p.def.h)
 
 void usage(int argc, char ** argv)
 {
