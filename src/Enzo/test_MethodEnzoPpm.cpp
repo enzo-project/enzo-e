@@ -17,7 +17,6 @@
 #include "error.hpp"
 #include "monitor.hpp"
 #include "parameters.hpp"
-#include "data.hpp"
 #include "parallel.hpp"
 #include "test.hpp"
 #include "enzo.hpp"

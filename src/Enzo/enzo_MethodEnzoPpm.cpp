@@ -8,7 +8,6 @@
 
 #include "cello.hpp"
 
-#include "data.hpp"
 #include "error.hpp"
 #include "method.hpp"
 #include "enzo.hpp"

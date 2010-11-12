@@ -15,7 +15,6 @@
 
 #include "mesh.hpp"
 #include "schedule.hpp"
-#include "data.hpp"
 #include "method.hpp"
 
 #include "simulation_Simulation.hpp"

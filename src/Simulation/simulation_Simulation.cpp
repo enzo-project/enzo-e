@@ -9,7 +9,7 @@
 #include "cello.hpp"
 
 #include "simulation.hpp"
-#include "data.hpp" 
+#include "mesh.hpp"
 #include "method.hpp" 
 
 Simulation::Simulation(Global * global)

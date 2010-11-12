@@ -7,7 +7,6 @@
 /// @brief    Implements the MethodEnzoTimestep class
 
 #include "enzo.hpp"
-#include "data.hpp"
 #include "method.hpp"
 
 #include "cello_hydro.h"
@@ -28,7 +27,7 @@ MethodEnzoTimestep::MethodEnzoTimestep (EnzoDescr * enzo) throw()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoTimestep::initialize (DataDescr * data_descr) throw()
+void MethodEnzoTimestep::initialize (DatasDescr * data_descr) throw()
 {
 }
 

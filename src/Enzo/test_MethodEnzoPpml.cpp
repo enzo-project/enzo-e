@@ -8,7 +8,6 @@
 
 #include <stdio.h>
 
-#include "data.hpp"
 #include "parallel.hpp"
 #include "method.hpp"
 #include "test.hpp"

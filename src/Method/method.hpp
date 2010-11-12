@@ -14,7 +14,6 @@
 
 #include "cello.hpp"
 
-#include "data.hpp"
 #include "error.hpp"
 
 #include "method_MethodControl.hpp"
