@@ -45,51 +45,65 @@ FieldFaces & FieldFaces::operator= (const FieldFaces & field_block_faces) throw 
 
 //======================================================================
 
-void FieldFaces::copy_from_block()
+void send_init() throw()
 {
-  INCOMPLETE_MESSAGE("FieldFaces::copy_from_block","");
+  INCOMPLETE_MESSAGE("FieldFaces::send_init()","");
+}
+//----------------------------------------------------------------------
+void send_begin() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::send_begin()","");
+}
+//----------------------------------------------------------------------
+void send_end() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::send_end()","");
+}
+//----------------------------------------------------------------------
+void send_final() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::send_final()","");
+}
+	
+//----------------------------------------------------------------------
+void recv_init() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::recv_init()","");
+}
+//----------------------------------------------------------------------
+void recv_begin() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::recv_begin()","");
+}
+//----------------------------------------------------------------------
+void recv_end() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::recv_end()","");
+}
+//----------------------------------------------------------------------
+void recv_final() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::recv_final()","");
+}
+	
+//----------------------------------------------------------------------
+void sendrecv_init() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::sendrecv_init()","");
+}
+//----------------------------------------------------------------------
+void sendrecv_begin() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::sendrecv_begin()","");
+}
+//----------------------------------------------------------------------
+void sendrecv_end() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::sendrecv_end()","");
+}
+//----------------------------------------------------------------------
+void sendrecv_final() throw()
+{
+  INCOMPLETE_MESSAGE("FieldFaces::sendrecv_final()","");
 }
 
-//----------------------------------------------------------------------
-
-void FieldFaces::copy_to_block()
-{
-}
-
-//----------------------------------------------------------------------
-
-void FieldFaces::send_begin()
-{
-}
-
-//----------------------------------------------------------------------
-
-void FieldFaces::send_end()
-{
-}
-
-//----------------------------------------------------------------------
-
-void FieldFaces::recv_begin()
-{
-}
-
-//----------------------------------------------------------------------
-
-void FieldFaces::recv_end()
-{
-}
-
-//----------------------------------------------------------------------
-
-void FieldFaces::exchange_begin()
-{
-}
-
-//----------------------------------------------------------------------
-
-void FieldFaces::exchange_end()
-{
-}
-
-//----------------------------------------------------------------------

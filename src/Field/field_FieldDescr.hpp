@@ -84,16 +84,16 @@ public: // functions
   double courant() const throw();
 
   /// centering of given field
-  void centering(int id_field, bool * cx, bool * cy, bool * cz) 
-    const throw(std::out_of_range);
+  void centering(int id_field, bool * cx, bool * cy, bool * cz) const 
+    throw(std::out_of_range);
 
   /// depth of ghost zones of given field
-  void ghosts(int id_field, int * gx, int * gy, int * gz)
-    const throw(std::out_of_range);
+  void ghosts(int id_field, int * gx, int * gy, int * gz) const 
+    throw(std::out_of_range);
 
   /// precision of given field
-  precision_type precision(int id_field) 
-    const throw(std::out_of_range);
+  precision_type precision(int id_field) const 
+    throw(std::out_of_range);
 
   /// Number of bytes per element required by the given field
   int bytes_per_element(int id_field) const throw();
@@ -102,13 +102,15 @@ public: // functions
   double minimum_value(int id_field) const throw(std::out_of_range);
 
   /// minimum action for the field
-  enum field_action_type minimum_action(int id_field) const throw(std::out_of_range);
+  enum field_action_type minimum_action(int id_field) const
+    throw(std::out_of_range);
 
   /// maximum value for the field
-  double maximum_value(int id_field) const throw(std::out_of_range);
+  double maximum_value(int id_field) const  throw(std::out_of_range);
 
   /// maximum action for the field
-  enum field_action_type maximum_action(int id_field) const throw(std::out_of_range);
+  enum field_action_type maximum_action(int id_field) const 
+    throw(std::out_of_range);
 
   //----------------------------------------------------------------------
 
@@ -119,7 +121,8 @@ public: // functions
   void insert_group(std::string name_group) throw();
 
   /// Set membership of a field in a group
-  void set_field_in_group(int id_field, int id_group) throw(std::out_of_range);
+  void set_field_in_group(int id_field, int id_group) 
+    throw(std::out_of_range);
 
   /// Set alignment
   void set_alignment(int alignment) throw();
@@ -131,32 +134,28 @@ public: // functions
   void set_courant(double courant) throw();
 
   /// Set centering for a field
-  void set_centering(int id_field, bool cx, bool cy, bool cz) throw(std::out_of_range);
+  void set_centering(int id_field, bool cx, bool cy, bool cz) 
+    throw(std::out_of_range);
 
   /// Set ghosts for a field
-  void set_ghosts(int id_field, int gx, int gy, int gz) throw(std::out_of_range);
+  void set_ghosts(int id_field, int gx, int gy, int gz) 
+    throw(std::out_of_range);
 
   /// Set precision for a field
-  void set_precision(int id_field, precision_type precision) throw(std::out_of_range);
+  void set_precision(int id_field, precision_type precision) 
+    throw(std::out_of_range);
 
   /// Set minimum bound and action
-  void set_minimum (int id_field, double min_value, enum field_action_type min_action) 
+  void set_minimum (int id_field, double min_value,
+		    enum field_action_type min_action) 
     throw(std::out_of_range);
 
   /// Set maximum bound and action
-  void set_maximum (int id_field, double max_value, enum field_action_type max_action) 
+  void set_maximum (int id_field, double max_value, 
+		    enum field_action_type max_action) 
     throw(std::out_of_range);
 
 private: // attributes
-
-  /// alignment of start of each field in bytes
-  int alignment_;
-
-  /// padding between fields in bytes
-  int padding_;
-
-  /// Courant number for fields
-  double courant_;
 
   /// String defining each field
   std::vector<std::string> field_name_;
@@ -174,6 +173,17 @@ private: // attributes
   /// Set of groups containing each field.  field_in_group_[field][group]
   std::vector<set_int_type> field_in_group_;
 
+
+  /// alignment of start of each field in bytes
+  int alignment_;
+
+  /// padding between fields in bytes
+  int padding_;
+
+  /// Courant number for fields
+  double courant_;
+
+
   /// Precision of each field
   std::vector<precision_type> precision_;
 
@@ -183,16 +193,17 @@ private: // attributes
   /// Ghost depth of each field
   std::vector<int *> ghosts_;
 
+
   /// minimum allowed value for each field
   std::vector<double> min_value_;
 
   /// maximum allowed value for each field
   std::vector<double> max_value_;
 
-  /// what should be done if a field violates its minimum value
+  /// what to do if a field violates its minimum value
   std::vector<enum field_action_type> min_action_;
 
-  /// what should be done if a field violates its maximum value
+  /// what to do if a field violates its maximum value
   std::vector<enum field_action_type> max_action_;
 
 };

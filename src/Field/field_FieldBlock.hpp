@@ -128,8 +128,6 @@ public: // interface
 		      double lower_y = 0.0, double upper_y = 1.0,
 		      double lower_z = 0.0, double upper_z = 1.0) throw();
 
-  void debug () const throw();
-  
   //----------------------------------------------------------------------
 
 private: // functions

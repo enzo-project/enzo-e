@@ -17,14 +17,14 @@
 
 FieldDescr::FieldDescr () 
   throw ()
-  : alignment_(1),
-    padding_(0),
-    courant_(1),
-    field_name_(),
+  : field_name_(),
     field_id_(),
     group_name_(),
     group_id_(),
     field_in_group_(),
+    alignment_(1),
+    padding_(0),
+    courant_(1),
     precision_(),
     centering_(),
     ghosts_(),

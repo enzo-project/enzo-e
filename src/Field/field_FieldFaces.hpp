@@ -35,34 +35,33 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Copy ghost zones from FieldBlock to FieldFaces
-  void copy_from_block();
+  /// 	Initialize sending face zones to another block patch
+  void send_init() throw();
+  /// 	Begin sending face zones to another block patch
+  void send_begin() throw();
+  /// 	End sending face zones to another block patch
+  void send_end() throw();
+  /// 	Finalize sending face zones to another block patch
+  void send_final() throw();
+	
+  /// 	Initialize receiving ghost zones from another block patch
+  void recv_init() throw();
+  /// 	Begin receiving ghost zones from another block patch
+  void recv_begin() throw();
+  /// 	End receiving ghost zones from another block patch
+  void recv_end() throw();
+  /// 	Finalize receiving ghost zones from another block patch
+  void recv_final() throw();
+	
+  /// 	Initialize sending/receiving face/ghost zones from another block patch
+  void sendrecv_init() throw();
+  /// 	Begin sending/receiving face/ghost zones from another block patch
+  void sendrecv_begin() throw();
+  /// 	End sending/receiving face/ghost zones from another block patch
+  void sendrecv_end() throw();
+  /// 	Finalize sending/receiving face/ghost zones from another block patch
+  void sendrecv_final() throw();
 
-  /// Copy ghost zones from FieldFaces to FieldBlock
-  void copy_to_block();
-
-  ///  	Initiate a send of ghost zones to another block patch, which
-  ///  	may be remote. Nonblocking.
-  void send_begin();
-
-  ///  	Complete a send of ghost zones to another block patch, which
-  ///  	may be remote. Blocking.
-  void send_end();
-
-  ///  	Initiate a receive of ghost zones from another block patch, which
-  ///  	may be remote. Nonblocking.
-  void recv_begin();
-
-  ///  	Complete a receive of ghost zones from another block patch, which
-  ///  	may be remote. Blocking.
-  void recv_end();
-
-  ///  	Initiate an exchange of ghost zones associated with a
-  ///  	patch. Nonblocking.
-  void exchange_begin();
-
-  ///  	Complete an exchange of ghost zones associated with a patch. 
-  void exchange_end();
 
 private: // functions
 

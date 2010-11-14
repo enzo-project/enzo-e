@@ -800,35 +800,3 @@ void FieldBlock::restore_array_
 
   field_values_from.clear();
 }
-
-void FieldBlock::debug () const throw()
-{
-  // Print sums of all fields
-
-  int field_count = field_descr_->field_count();
-
-  for (int id_field = 0; id_field < field_count; id_field++) {
-    precision_type precision = field_descr_->precision(id_field);
-    int bytes_per_element = cello::precision_size (precision);
-    int  gx,gy,gz;
-    if ( ghosts_allocated() ) {
-      field_descr_->ghosts(id_field,&gx,&gy,&gz);
-    } else {
-      gx = gy = gz =0;
-    }
-    int nx = dimensions_[0] + 2*gx;
-    int ny = dimensions_[1] + 2*gy;
-    int nz = dimensions_[2] + 2*gz;
-    double sum = 0.0;
-    if (bytes_per_element==4) {
-      float * array = (float *) field_values_[id_field];
-      for (int i=0; i<nx*ny*nz; i++) sum += array[i];
-    } else if (bytes_per_element==8) {
-      double * array = (double *) field_values_[id_field];
-      for (int i=0; i<nx*ny*nz; i++) sum += array[i];
-    } else {
-      WARNING_MESSAGE("FieldBlock::debug_sum","Unsupported precision");
-    }
-    printf ("Field %d sum %22.16g\n",id_field,sum);
-  }
-}
