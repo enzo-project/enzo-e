@@ -1,3 +1,12 @@
+// $Id: test_Template.ci 1696 2010-08-04 05:56:36Z bordner $
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     test_Template.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     2010-04-02
+/// @brief    CHARM++ template file
+
+
 mainmodule test_Template {
   readonly CProxy_Main mainProxy;
 
