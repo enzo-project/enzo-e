@@ -6,6 +6,7 @@
 /// @file      cello.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Mon Oct  5 15:10:56 PDT 2009
+/// @todo      support multiple input files
 /// @brief     Cello main
 
 //----------------------------------------------------------------------
@@ -53,14 +54,18 @@ PARALLEL_MAIN_BEGIN
   // INPUT PARAMETERS
 
   FILE *fp = 0;
+
+  // read parameter file(s)
+
   if (PARALLEL_ARGC == 2) {
     fp = fopen(PARALLEL_ARGV[1],"r");
-    if ( !fp ) {
-      if (parallel->rank()==0) usage(PARALLEL_ARGC,PARALLEL_ARGV);
-      PARALLEL_EXIT;
-    }
-  } else {
-    if (parallel->rank()==0) usage(PARALLEL_ARGC,PARALLEL_ARGV);
+  }
+
+  // print usage if invalid
+
+  if ((PARALLEL_ARGC == 2 && !fp) || 
+      (PARALLEL_ARGC != 2)) {
+    if (parallel->is_root()) usage(PARALLEL_ARGC,PARALLEL_ARGV);
     PARALLEL_EXIT;
   }
 
