@@ -4,6 +4,7 @@
 /// @file     field_FieldDescr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
+/// @todo     Allow id_field == -1 (== e.g. all_fields) for set_*(id_field,...)
 /// @brief    Implementation of the FieldDescr class
 
 #include <assert.h>

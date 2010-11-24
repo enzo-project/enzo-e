@@ -11,10 +11,13 @@
 #include "cello.hpp"
 #include "field.hpp"
 
-FieldFaces::FieldFaces() throw ()
+FieldFaces::FieldFaces(FieldBlock * field_block) throw ()
+  : field_block_(field_block)
 {
+
   for (int i=0; i<6; i++) {
-    faces_[i] = 0;
+    ghost_[i] = 0;
+    face_ [i] = 0;
   }
 }
 
@@ -22,7 +25,8 @@ FieldFaces::FieldFaces() throw ()
 
 FieldFaces::~FieldFaces() throw ()
 {
-  for (int i=0; i<6; i++) delete [] faces_[i];
+  for (int i=0; i<6; i++) delete [] face_[i];
+  for (int i=0; i<6; i++) delete [] ghost_[i];
 }
 
 //----------------------------------------------------------------------

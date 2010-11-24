@@ -18,7 +18,7 @@ class FieldFaces {
 public: // interface
 
   /// Constructor
-  FieldFaces() throw();
+  FieldFaces(FieldBlock * field_block) throw();
 
   //----------------------------------------------------------------------
   // Big Three
@@ -65,14 +65,17 @@ public: // interface
 
 private: // functions
 
-
+  
 private: // attributes
 
-  /// Size of the arrays
-  int n_;
+  /// Pointer to the corresponding FieldBlock
+  FieldBlock * field_block_;
 
-  /// Allocated arrays [xm,xp,xm,xp,zm,zp] of ghost values (0 if none)
-  char * faces_[6];
+  /// Allocated arrays [xm,xp,ym,yp,zm,zp] of ghost values (0 if none)
+  char * ghost_[6];
+
+  /// Allocated arrays [xm,xp,ym,yp,zm,zp] of inner-face values (0 if none)
+  char * face_[6];
 
 };
 

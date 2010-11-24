@@ -18,8 +18,8 @@ FieldBlock::FieldBlock() throw()
 {
   for (int i=0; i<3; i++) {
     dimensions_[i] = 1;
-    box_lower_[i]  = 0.0;
-    box_upper_[i]  = 1.0;
+    lower_[i]      = 0.0;
+    upper_[i]      = 1.0;
   }
 }
 
@@ -91,28 +91,28 @@ void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
 
 //----------------------------------------------------------------------
 
-void FieldBlock::box_extent
+void FieldBlock::extent
 (
  double * lower_x, double * upper_x, 
  double * lower_y, double * upper_y,
  double * lower_z, double * upper_z ) const throw ()
 {
-  if (lower_x) *lower_x = box_lower_[0];
-  if (lower_y) *lower_y = box_lower_[1];
-  if (lower_z) *lower_z = box_lower_[2];
+  if (lower_x) *lower_x = lower_[0];
+  if (lower_y) *lower_y = lower_[1];
+  if (lower_z) *lower_z = lower_[2];
 
-  if (upper_x) *upper_x = box_upper_[0];
-  if (upper_y) *upper_y = box_upper_[1];
-  if (upper_z) *upper_z = box_upper_[2];
+  if (upper_x) *upper_x = upper_[0];
+  if (upper_y) *upper_y = upper_[1];
+  if (upper_z) *upper_z = upper_[2];
 }
 
 //----------------------------------------------------------------------
 
 void FieldBlock::cell_width( double * hx, double * hy, double * hz ) const throw ()
 {
-  *hx = (box_upper_[0] - box_lower_[0]) / dimensions_[0];
-  *hy = (box_upper_[1] - box_lower_[1]) / dimensions_[1];
-  *hz = (box_upper_[2] - box_lower_[2]) / dimensions_[2];
+  *hx = (upper_[0] - lower_[0]) / dimensions_[0];
+  *hy = (upper_[1] - lower_[1]) / dimensions_[1];
+  *hz = (upper_[2] - lower_[2]) / dimensions_[2];
 }
 
 //----------------------------------------------------------------------
@@ -444,12 +444,18 @@ void FieldBlock::enforce_boundary_reflecting_precision_
   T sign;
   switch (face) {
   case face_all:
-    enforce_boundary_reflecting_precision_(face_lower_x,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_(face_lower_y,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_(face_lower_z,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_(face_upper_x,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_(face_upper_y,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_(face_upper_z,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_
+      (face_lower_x,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_
+      (face_lower_y,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_
+      (face_lower_z,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_
+      (face_upper_x,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_
+      (face_upper_y,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
+    enforce_boundary_reflecting_precision_
+      (face_upper_z,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
     break;
   case face_lower_x:
     if (nx > 1) {
@@ -650,20 +656,20 @@ void FieldBlock::set_field_descr(FieldDescr * field_descr) throw()
 
 //----------------------------------------------------------------------
 
-void FieldBlock::set_box_extent
+void FieldBlock::set_extent
 (
  double lower_x, double upper_x,
  double lower_y, double upper_y,
  double lower_z, double upper_z ) throw ()
 
 {
-  box_lower_[0] = lower_x;
-  box_lower_[1] = lower_y;
-  box_lower_[2] = lower_z;
+  lower_[0] = lower_x;
+  lower_[1] = lower_y;
+  lower_[2] = lower_z;
 
-  box_upper_[0] = upper_x;
-  box_upper_[1] = upper_y;
-  box_upper_[2] = upper_z;
+  upper_[0] = upper_x;
+  upper_[1] = upper_y;
+  upper_[2] = upper_z;
 }
 
 //======================================================================

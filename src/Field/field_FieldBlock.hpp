@@ -60,7 +60,7 @@ public: // interface
 		   int * upper_x, int * upper_y, int *upper_z) const throw ();
 
   /// Return lower values of the block (excluding ghosts)
-  void box_extent(double * lower_x = 0, double * upper_x = 0, 
+  void extent(double * lower_x = 0, double * upper_x = 0, 
 		  double * lower_y = 0, double * upper_y = 0,
 		  double * lower_z = 0, double * upper_z = 0) const throw ();
 
@@ -124,9 +124,9 @@ public: // interface
   void set_field_descr(FieldDescr * field_descr) throw();
 
   /// Set the box extent
-  void set_box_extent(double lower_x = 0.0, double upper_x = 1.0, 
-		      double lower_y = 0.0, double upper_y = 1.0,
-		      double lower_z = 0.0, double upper_z = 1.0) throw();
+  void set_extent(double lower_x = 0.0, double upper_x = 1.0, 
+		  double lower_y = 0.0, double upper_y = 1.0,
+		  double lower_z = 0.0, double upper_z = 1.0) throw();
 
   //----------------------------------------------------------------------
 
@@ -196,8 +196,8 @@ private: // attributes
   /// Extent of the box associated with the block
   /// WARNING: should not be used for deep AMR due to precision /
   /// range issues
-  double box_lower_[3];
-  double box_upper_[3];
+  double lower_[3];
+  double upper_[3];
 
   /// Whether ghost values are allocated or not (make [3] for
   /// directionally split?)
