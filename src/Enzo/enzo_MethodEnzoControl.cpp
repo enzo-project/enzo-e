@@ -176,7 +176,7 @@ void MethodEnzoControl::initialize_block ( DataBlock * data_block ) throw ()
   
   double xm,xp,ym,yp,zm,zp;
 
-  field_block->box_extent(&xm,&xp,&ym,&yp,&zm,&zp);
+  field_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
 
   enzo_->GridLeftEdge[0]    = xm;
   enzo_->GridLeftEdge[1]    = ym;

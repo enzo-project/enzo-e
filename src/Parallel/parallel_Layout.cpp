@@ -117,7 +117,7 @@ int Layout::neighbor_thread (int ip, int it, int id,
 
 //----------------------------------------------------------------------
 
-void Layout::box_extent (int ip, int it, int id,
+void Layout::extent (int ip, int it, int id,
 			 double lower_extent[3],    
 			 double upper_extent[3])
 {

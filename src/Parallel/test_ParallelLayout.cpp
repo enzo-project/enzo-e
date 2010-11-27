@@ -111,9 +111,9 @@ int main(int argc, char ** argv)
     unit_assert(layout_serial.neighbor_thread(0,0,0,axis_z,-1) == 0);
     unit_assert(layout_serial.neighbor_thread(0,0,0,axis_z,+1) == 0);
 
-    unit_func("box_extent");
+    unit_func("extent");
     double lower_extent[3],upper_extent[3];
-    layout_serial.box_extent(0,0,0,lower_extent,upper_extent);
+    layout_serial.extent(0,0,0,lower_extent,upper_extent);
     unit_assert(lower_extent[axis_x] == 0.0);
     unit_assert(lower_extent[axis_y] == 0.0);
     unit_assert(lower_extent[axis_z] == 0.0);
@@ -260,7 +260,7 @@ int main(int argc, char ** argv)
 
     //----------------------------------------------------------------------
 
-    unit_func("box_extent");
+    unit_func("extent");
     passed = true;
 
     for (int ipz=0; ipz<pb3[2]; ipz++) {
@@ -268,7 +268,7 @@ int main(int argc, char ** argv)
 	for (int ipx=0; ipx<pb3[0]; ipx++) {
 	  int ip = ipx + pb3[0]*(ipy + pb3[1]*ipz);
 	  double lower_extent[3],upper_extent[3];
-	  layout_parallel.box_extent(ip,0,0,lower_extent,upper_extent);
+	  layout_parallel.extent(ip,0,0,lower_extent,upper_extent);
  	  passed = passed && (fabs(lower_extent[axis_x] - 1.0*ipx/pb3[0])<TOL);
  	  passed = passed && (fabs(lower_extent[axis_y] - 1.0*ipy/pb3[1])<TOL);
   	  passed = passed && (fabs(lower_extent[axis_z] - 1.0*ipz/pb3[2])<TOL);
@@ -438,7 +438,7 @@ int main(int argc, char ** argv)
 
     //----------------------------------------------------------------------
 
-    unit_func("box_extent");
+    unit_func("extent");
     passed = true;
 
     for (int idbz=0; idbz<db3[2]; idbz++) {
@@ -446,7 +446,7 @@ int main(int argc, char ** argv)
 	for (int idbx=0; idbx<db3[0]; idbx++) {
 	  int idb = idbx + db3[0]*(idby + db3[1]*idbz);
 	  double lower_extent[3],upper_extent[3];
-	  layout_blocked.box_extent(0,0,idb,lower_extent,upper_extent);
+	  layout_blocked.extent(0,0,idb,lower_extent,upper_extent);
  	  passed = passed && (fabs(lower_extent[axis_x] - 1.0*idbx/db3[0])<TOL);
  	  passed = passed && (fabs(lower_extent[axis_y] - 1.0*idby/db3[1])<TOL);
   	  passed = passed && (fabs(lower_extent[axis_z] - 1.0*idbz/db3[2])<TOL);
@@ -653,7 +653,7 @@ int main(int argc, char ** argv)
 
     //----------------------------------------------------------------------
 
-    unit_func("box_extent");
+    unit_func("extent");
     passed = true;
 
     for (int idbz=0; idbz<db3[2]; idbz++) {
@@ -665,7 +665,7 @@ int main(int argc, char ** argv)
 	for (int ipbx=0; ipbx<pb3[0]; ipbx++) {
 	  int ipb = ipbx + pb3[0]*(ipby + pb3[1]*ipbz);
 	  double lower_extent[3],upper_extent[3];
-	  layout_parallel_blocked.box_extent(ipb,0,idb,lower_extent,upper_extent);
+	  layout_parallel_blocked.extent(ipb,0,idb,lower_extent,upper_extent);
   	  passed = passed && (fabs(lower_extent[axis_x]-
  				   1.0*(idbx + db3[0]*ipbx)/(pb3[0]*db3[0]))<TOL);
   	  passed = passed && (fabs(lower_extent[axis_y]-

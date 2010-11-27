@@ -83,7 +83,7 @@ public: // interface
 
   /// Return the bounds associated with the given
   /// (process,thread,block) relative to the Patch block 0 < x,y,z < 1
-  void box_extent (int ip, int it, int id,
+  void extent (int ip, int it, int id,
 		   double lower_extent[3],    
 		   double upper_extent[3]);
 

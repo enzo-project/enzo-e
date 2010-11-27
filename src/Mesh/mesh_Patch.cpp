@@ -81,9 +81,9 @@ Patch::Patch(DataDescr * data_descr,
 				    block_size_,
 				    block_size_);
 
-	field_block->set_box_extent(x,x+block_width[0],
-				    y,y+block_width[1],
-				    z,z+block_width[2]);
+	field_block->set_extent(x,x+block_width[0],
+				y,y+block_width[1],
+				z,z+block_width[2]);
       }
     }
   }

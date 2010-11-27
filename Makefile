@@ -1,11 +1,11 @@
-.PHONY: all
-all:
-	$(MAKE) -C src install-include
-	$(MAKE) -C src dep
-	$(MAKE) -C src
-	$(MAKE) -C doc
-	$(MAKE) -C src doc
+.PHONY: all src doc
 
+all: src
+src:
+	scons -u
+
+doc:
+	$(MAKE) -C doc
 .PHONY: dot dot-png dot-eps
 
 

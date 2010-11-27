@@ -138,7 +138,7 @@ PARALLEL_MAIN_BEGIN
 
   field_block->set_field_descr(field_descr);
   field_block->set_dimensions(nx,ny);
-  field_block->set_box_extent(0.0,0.3,0.0,0.3);
+  field_block->set_extent(0.0,0.3,0.0,0.3);
 
   int gx=3,gy=3,gz=0;
   field_descr->set_ghosts (0,gx,gy,gz);
