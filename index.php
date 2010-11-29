@@ -8,7 +8,7 @@
 
 <ul>
   <li><a href="http://lca.ucsd.edu/projects/cello/">Cello User Site</a></li>
-  <li><a href="http://client65-88.sdsc.edu/projects/cello/">Cello Developer Site</a></li>
+  <li><a href="http://client65-77.sdsc.edu/projects/cello/">Cello Developer Site</a></li>
 
 </ul>
 <?php
@@ -219,9 +219,6 @@ test_summary("Performance",array("Performance"));
 test_summary("Portal",array("")); 
 test_summary("Schedule",array("Schedule")); 
 test_summary("Simulation",array("Simulation")); 
-test_summary("Task",array("")); 
-test_summary("Test",array("")); 
-test_summary("User",array("")); ?>
 </tr></table>
 
 </ul>
@@ -290,7 +287,7 @@ component("Task");
 
 component("Test");
 
-component("User");
+component("Enzo");
 
 ?>
 
