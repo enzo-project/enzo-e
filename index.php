@@ -218,7 +218,7 @@ test_summary("Particles",array(""));
 test_summary("Performance",array("Performance")); 
 test_summary("Portal",array("")); 
 test_summary("Schedule",array("Schedule")); 
-test_summary("Simulation",array("Simulation")); 
+test_summary("Simulation",array("Simulation")); ?>
 </tr></table>
 
 </ul>
