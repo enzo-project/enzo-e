@@ -201,15 +201,13 @@ for ($i = 0; $i < sizeof($parallel_types); ++$i) {
   printf ("<th colspan=2> $parallel_types[$i] </th>");
  }
 
-test_summary("Data",array("Data")); 
 test_summary("Disk",array("FileHdf5","Ifrit")); 
 test_summary("Distribute",array("")); 
 test_summary("Error",array("Error")); 
-test_summary("Enzo",array("ppm_image")); 
+test_summary("Enzo",array("ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion")); 
 test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces")); 
-test_summary("Global",array("")); 
 test_summary("Memory",array("Memory")); 
-test_summary("Mesh",array("")); 
+test_summary("Mesh",array("DataDescr","Mesh")); 
 test_summary("Method",array("")); 
 test_summary("Monitor",array("Monitor")); 
 test_summary("Parallel",array("GroupProcessMpi")); 
@@ -227,8 +225,6 @@ test_summary("Simulation",array("Simulation")); ?>
 
 
 <?php
-component("Data");
-tests("Data","Data","Data"); 
 
 component("Disk");
 
@@ -246,13 +242,14 @@ tests("Field","FieldDescr","FieldDescr");
 tests("Field","FieldBlock","FieldBlock");
 tests("Field","FieldFaces","FieldFaces");
 
-component("Global");
-
 component("Memory");
 tests("Memory","Memory","Memory");
 
 
 component("Mesh");
+
+tests("Mesh","DataDescr","DataDescr"); 
+tests("Mesh","Mesh","Mesh"); 
 
 component("Method");
 
@@ -293,8 +290,6 @@ component("Enzo");
 
 
 <h4>test_ppm ppm_image</h4>
-
-<p>TODO: Add separate program and test output files</p>
 
 <?php tests("Enzo/ppm","ppm","ppm_image"); ?>
 
