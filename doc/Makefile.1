@@ -6,14 +6,25 @@ PAPER = `pwd | awk 'BEGIN{FS="/"}{print $$NF}'`
 # BUILD
 #-----------------------------------------------------------------------
 
+.PHONY: pdf
 pdf: include.tex uml figures
 	pdflatex $(PAPER).tex
 	pdflatex $(PAPER).tex
 	$(MAKE) install-pdf
+
+.PHONY: html
 html:
 	tth -e2 $(PAPER).tex > $(PAPER).html
 	$(MAKE) install-html
 
+
+# For splitting proposal and bibliography in NSF grants
+
+.PHONY: nsf
+nsf: pdf
+	pdftk $(PAPER).pdf cat 1-15   output $(PAPER)2.pdf
+	pdftk $(PAPER).pdf cat 16-end output bibliography.pdf
+	mv $(PAPER)2.pdf $(PAPER).pdf
 
 #-----------------------------------------------------------------------
 # BIBLIOGRAPHY
@@ -26,12 +37,13 @@ bib:
 # LINKS
 #-----------------------------------------------------------------------
 
-.PHONY: figures
 figures:
 	-@ln -s ../figures/* .
+
 uml:
 	ln -s ../uml .
 	$(MAKE) -C uml
+
 include.tex:
 	ln -s ../include.tex .
 
@@ -52,6 +64,8 @@ install-html:
 # CLEAN
 #-----------------------------------------------------------------------
 
+.PHONY: clean
+
 clean:
 	-@rm -f *~ *.aux \
         $(PAPER).bbl \
@@ -66,6 +80,10 @@ clean:
         $(PAPER).snm \
         $(PAPER).toc \
         $(PAPER).vrb
+
+#-----------------------------------------------------------------------
+
+.PHONY: distclean
 
 distclean: clean
 	-@rm uml include.tex 

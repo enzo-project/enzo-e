@@ -13,7 +13,8 @@ DOCS = \
       paper-tree \
       report-nsf \
       talk-2009-09 \
-      talk-2010-06
+      talk-2010-06 \
+      uml
 
 DIRS = $(DOCS) uml
 
@@ -32,8 +33,8 @@ devel-project:
 	cd devel-project; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C devel-project
 report-nsf:
-#       use own Makefile
-	cd report-nsf; ln -sf ../papers.bib .
+	cd report-nsf;  ln -sf ../Makefile.1 makefile
+	cd report-nsf;  ln -sf ../papers.bib .
 	$(MAKE) -C report-nsf
 devel-requirements: 
 	cd devel-requirements; ln -sf ../Makefile.1 makefile
@@ -74,8 +75,6 @@ talk-2010-06:
 clean: $(patsubst %,%-clean,$(DIRS))
 	-rm `find . -type l`
 	-rm -f *~
-	-rm pdf/*.pdf
-	-rm html/*.html
 
 %-clean:
 	$(MAKE) -C $* clean
