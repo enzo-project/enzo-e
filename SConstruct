@@ -1,11 +1,9 @@
 import os
 import sys
 
-TOPDIR  = GetLaunchDir()
-
 charm_path = '/home/bordner/charm/charm'
 
-# Initialize architecture and parallel type
+# PARSE ARGUMENTS
 
 arch = ARGUMENTS.get('arch','unknown')
 type = ARGUMENTS.get('type','unknown')
@@ -37,6 +35,7 @@ ok = 0
 for check in platform_list:
     if (platform == check[0] + '-' + check[1]):
        ok = 1
+
 if (ok == 0):
    print "**********************************************************************"
    print
@@ -117,9 +116,11 @@ elif (platform == 'linux-mpi-valgrind'):
       FORTRANPATH = '#/include',
       LIBPATH     = '#/lib',
    )
+
 #--------------------------------------------------
 elif (platform == 'linux-ampi'):
 #--------------------------------------------------
+
    parallel_run = charm_path + "/bin/charmrun +p4 "
    serial_run   = ""
    parallel_type = "ampi"
@@ -174,9 +175,11 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
       LIBPATH     = '#/lib' )
    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
+
 #--------------------------------------------------
 elif (platform == 'sdsc-triton-charm' or platform == 'sdsc-triton-serial'):
 #--------------------------------------------------
+
    if (platform == 'sdsc-triton-charm'):
       parallel_run = charm_path + "/bin/charmrun +p4 "
       parallel_type = "charm"
@@ -200,6 +203,7 @@ elif (platform == 'sdsc-triton-charm' or platform == 'sdsc-triton-serial'):
       ENV = { 'PATH' : os.environ['PATH'], 
               'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']}
    )
+
 #--------------------------------------------------
 elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
 #--------------------------------------------------
@@ -214,8 +218,6 @@ elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
    serial_run    = ""
 
    flags_opt = '-O3 -qhot -q64'
-#   flags_opt = '-q64'
-#   flags_debug = '-g'
    flags_debug = ''
    flags_fort = '-qextname -I include'
    flags = flags_opt + ' ' + flags_debug + ' '
