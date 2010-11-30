@@ -1,11 +1,12 @@
 .PHONY: all src doc
 
 all: src
-src:
-	scons -u
 
+src:
+	$(MAKE) -C src
 doc:
 	$(MAKE) -C doc
+
 .PHONY: dot dot-png dot-eps
 
 

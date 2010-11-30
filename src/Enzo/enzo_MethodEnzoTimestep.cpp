@@ -88,7 +88,7 @@ double MethodEnzoTimestep::compute_block ( DataBlock * data_block ) throw()
   /* Compute the pressure. */
 
   int nx,ny,nz;
-  field_block -> dimensions (&nx,&ny,&nz);
+  field_block -> size (&nx,&ny,&nz);
   int gx,gy,gz;
   field_block->field_descr()->ghosts(enzo_->field_density,&gx,&gy,&gz);
   int mx,my,mz;

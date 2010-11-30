@@ -77,9 +77,9 @@ Patch::Patch(DataDescr * data_descr,
 
 	field_block->set_field_descr(field_descr);
 
-	field_block->set_dimensions(block_size_,
-				    block_size_,
-				    block_size_);
+	field_block->set_size(block_size_,
+			      block_size_,
+			      block_size_);
 
 	field_block->set_extent(x,x+block_width[0],
 				y,y+block_width[1],

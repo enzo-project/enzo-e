@@ -18,6 +18,11 @@
 #
 #-----------------------------------------------------------------------
 
+all:
+	scons -u
+
+#-----------------------------------------------------------------------
+
 DIR = \
       Amr \
       Array \
@@ -42,10 +47,10 @@ DIR = \
 # TARGETS
 #=======================================================================
 
-.PHONY: all %-component
-all: install-include dep $(patsubst %,%-component,$(DIR))
-%-component:  %-DEP
-	-@($(MAKE)  -C $*)
+#.PHONY: all %-component
+#all: install-include dep $(patsubst %,%-component,$(DIR))
+#%-component:  %-DEP
+#	-@($(MAKE)  -C $*)
 
 #-----------------------------------------------------------------------
 

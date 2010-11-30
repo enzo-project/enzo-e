@@ -37,7 +37,7 @@ void output_fields(FieldBlock * field_block,
   int gx,gy,gz;
   int mx,my,mz;
   field_block->enforce_boundary(boundary_reflecting);
-  field_block->dimensions(&nx,&ny,&nz);
+  field_block->size(&nx,&ny,&nz);
   for (int i = 0; i < field_count; i++) {
     field_descr->ghosts(i,&gx,&gy,&gz);
     mx=nx+2*gx;
@@ -137,7 +137,7 @@ PARALLEL_MAIN_BEGIN
   FieldDescr * field_descr = data_descr->field_descr();
 
   field_block->set_field_descr(field_descr);
-  field_block->set_dimensions(nx,ny);
+  field_block->set_size(nx,ny);
   field_block->set_extent(0.0,0.3,0.0,0.3);
 
   int gx=3,gy=3,gz=0;

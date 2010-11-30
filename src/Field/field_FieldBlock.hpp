@@ -39,8 +39,8 @@ public: // interface
   /// Assignment operator
   FieldBlock & operator= (const FieldBlock & field_block) throw ();
 
-  /// Return dimensions of fields on the block, assuming centered
-  void dimensions(int * nx, int * ny, int * nz) const throw();
+  /// Return size of fields on the block, assuming centered
+  void size(int * nx, int * ny, int * nz) const throw();
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
@@ -114,8 +114,8 @@ public: // interface
   /// Write a block from disk, and optionally associated descriptor
   void write(File * file, FieldDescr * field_descr = 0) const throw ();
 
-  /// Set dimensions of the array block
-  void set_dimensions(int nx, int ny=1, int nz=1) throw();
+  /// Set size of the array block
+  void set_size(int nx, int ny=1, int nz=1) throw();
 
   /// Set array values for a given field
   void set_field_values (int id_field, char * values) throw();
@@ -184,8 +184,8 @@ private: // attributes
   /// Corresponding Field descriptor
   FieldDescr * field_descr_;
 
-  /// Dimensions of fields on the block, assuming centered
-  int dimensions_[3];
+  /// Size of fields on the block, assuming centered
+  int size_[3];
 
   /// Allocated array of field values
   char * array_;

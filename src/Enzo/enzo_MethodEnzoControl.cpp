@@ -185,7 +185,7 @@ void MethodEnzoControl::initialize_block ( DataBlock * data_block ) throw ()
   // Grid dimensions
 
   int nx,ny,nz;
-  field_block -> dimensions (&nx,&ny,&nz);
+  field_block -> size (&nx,&ny,&nz);
 
   enzo_->GridDimension[0]  = nx + 2*enzo_->ghost_depth[0];
   enzo_->GridDimension[1]  = ny + 2*enzo_->ghost_depth[1];

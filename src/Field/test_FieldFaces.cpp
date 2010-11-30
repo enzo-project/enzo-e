@@ -17,6 +17,120 @@
 #include "parallel.def"
 #include PARALLEL_CHARM_INCLUDE(test_FieldFaces.decl.h)
 
+//----------------------------------------------------------------------
+
+bool is_ghost(int ix,int iy,int iz,
+	      int gx,int gy,int gz,
+	      int mdx,int mdy,int mdz)
+{
+  return (gx <= ix && ix < mdx - gx && 
+	  gy <= iy && iy < mdy - gy && 
+	  gz <= iz && iz < mdz - gz);
+}
+
+//----------------------------------------------------------------------
+
+void init_field_1(FieldBlock * fb,
+		  int k, int i, 
+		  int mx, int my, int mz,
+		  int M3, int N3)
+{
+
+  FieldDescr * fd = fb[k].field_descr();
+
+  int gx, gy, gz;
+
+  fd->ghosts(i, &gx, &gy, &gz);
+
+  int mdx, mdy, mdz;
+
+  mdx = mx + 2*gx;
+  mdy = my + 2*gy;
+  mdz = mz + 2*gz;
+
+  float * v = (float *) fb[k].field_values(i);
+
+  for (int iz = 0; iz < mdz; iz++) {
+    for (int iy = 0; iy < mdy; iy++) {
+      for (int ix = 0; ix < mdx; ix++) {
+	int i = ix + mdx * (iy + mdy * iz);
+	double value = i + M3 * (k + N3*0);
+	v[i] = is_ghost(ix,iy,iz,gx,gy,gz,mdx,mdy,mdz) ? value : -value;
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void init_field_2(FieldBlock * fb,
+		  int k, int i, 
+		  int mx, int my, int mz,
+		  int M3, int N3)
+{
+
+  FieldDescr * fd = fb[k].field_descr();
+
+  int gx, gy, gz;
+
+  fd->ghosts(i, &gx, &gy, &gz);
+
+  int mdx, mdy, mdz;
+
+  mdx = mx + 2*gx;
+  mdy = my + 2*gy;
+  mdz = mz + 2*gz;
+
+  double * v = (double *) fb[k].field_values(i);
+
+  for (int iz = 0; iz < mdz; iz++) {
+    for (int iy = 0; iy < mdy; iy++) {
+      for (int ix = 0; ix < mdx; ix++) {
+	int i = ix + mdx * (iy + mdy * iz);
+	double value = i + M3 * (k + N3*1);
+	v[i] =  is_ghost(ix,iy,iz,gx,gy,gz,mdx,mdy,mdz) ? value : -value;
+      }
+    }
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void init_field_3(FieldBlock * fb,
+		  int k, int i, 
+		  int mx, int my, int mz,
+		  int M3, int N3)
+{
+
+  FieldDescr * fd = fb[k].field_descr();
+
+  int gx, gy, gz;
+
+  fd->ghosts(i, &gx, &gy, &gz);
+
+  int mdx, mdy, mdz;
+
+  mdx = mx + 2*gx;
+  mdy = my + 2*gy;
+  mdz = mz + 2*gz;
+
+  long double * v = (long double *) fb[k].field_values(i);
+
+  for (int iz = 0; iz < mdz; iz++) {
+    for (int iy = 0; iy < mdy; iy++) {
+      for (int ix = 0; ix < mdx; ix++) {
+	int i = ix + mdx * (iy + mdy * iz);
+	double value = i + M3 * (k + N3*2);
+	v[i] = is_ghost(ix,iy,iz,gx,gy,gz,mdx,mdy,mdz) ? value : -value;
+      }
+    }
+  }
+
+}
+
+//======================================================================
+
 PARALLEL_MAIN_BEGIN
 {
 
@@ -25,16 +139,16 @@ PARALLEL_MAIN_BEGIN
   unit_init();
 
   //--------------------------------------------------
-  // Initialize the field descriptor object fd
+  // Initialize the global field descriptor object fd
   //--------------------------------------------------
 
   FieldDescr fd;
 
   // insert fields
 
-  int i1 = fd.insert_field("f1");
-  int i2 = fd.insert_field("f2");
-  int i3 = fd.insert_field("f3");
+  int i1 = fd.insert_field("field_1");
+  int i2 = fd.insert_field("field_2");
+  int i3 = fd.insert_field("field_3");
 
   // initialize field precisions
 
@@ -48,139 +162,98 @@ PARALLEL_MAIN_BEGIN
   fd.set_ghosts(i2, 0,1,2);
   fd.set_ghosts(i3, 1,0,3);
 
+  const int mx = 4, my = 5, mz = 6;
+
+  const int M3 = (mx+2*1)*(my+2*1)*(mz+2*3);  // maximum size with ghosts
+
   //--------------------------------------------------
-  // Initialize the field blocks fb[0:6]
+  // Initialize the field blocks in 4 x 4 x 4 array
   //--------------------------------------------------
 
-  // Seven field blocks in 7-point stencil pattern
+  const int N  = 4;
+  const int N3 = N*N*N;
 
-  FieldBlock fb[7];
+  FieldBlock fb[N3];
 
-  float       *v1[7];
-  double      *v2[7];
-  long double *v3[7];
+  for (int kz = 0; kz < N; kz++) {
+    for (int ky = 0; ky < N; ky++) {
+      for (int kx = 0; kx < N; kx++) {
 
-  const int XM=1,XP=2,YM=3,YP=4,ZM=5,ZP=6;
+	int k = kx + N * (ky + N * kz);
 
-  for (int ib=0; ib<7; ib++) {
+	// Set field blocks' field descriptors
 
-    // Set field blocks' field descriptors
+	fb[k].set_field_descr(&fd);
 
-    fb[ib].set_field_descr(&fd);
+	// Set field blocks' dimensions
 
-    // Set field blocks' dimensions
+	fb[k].set_size(mx, my, mz);
 
-    const int nx=4, ny=5, nz=6;
+	// Allocate field blocks including ghosts
 
-    fb[ib].set_dimensions(nx,ny,nz);
+	fb[k].allocate_array();
+	fb[k].allocate_ghosts();
 
-    // Allocate field blocks including ghosts
+	// Initialize fields
+	// (each field initialized separately since each has different
+	// ghost zone depth)
 
-    fb[ib].allocate_array();
-    fb[ib].allocate_ghosts();
+	init_field_1(fb,k,i1,mx,my,mz,M3,N3);
+	init_field_2(fb,k,i2,mx,my,mz,M3,N3);
+	init_field_3(fb,k,i3,mx,my,mz,M3,N3);
 
-    // Get aliases for each field
-
-    v1[ib]   = (float *)       fb[ib].field_values(i1);
-    v2[ib]   = (double *)      fb[ib].field_values(i2);
-    v3[ib]   = (long double *) fb[ib].field_values(i3);
-
-    // Initialize fields
-    // (each field initialized separately since each has different
-    // ghost zone depth)
-
-    int ndx,ndy,ndz;
-    int gx,gy,gz;
-
-    // field 1
-
-    fd.ghosts(i1,&gx,&gy,&gz);
-
-    ndx = nx + 2*gx;
-    ndy = ny + 2*gy;
-    ndz = nz + 2*gz;
-
-    for (int iz=0; iz<ndz; iz++) {
-      for (int iy=0; iy<ndy; iy++) {
-	for (int ix=0; ix<ndx; ix++) {
-	  int    i = ix + ndx*(iy + ndy*iz);
-	  double v = i + 1000*(ib + 10*(1));
-	  v1[ib][i] = 
-	    (gx <= ix && ix < ndx-gx &&
-	     gy <= iy && iy < ndy-gy &&
-	     gz <= iz && iz < ndz-gz) ? v : -v;
-	}
-      }
-    }
-
-    // field 2
-
-    fd.ghosts(i2,&gx,&gy,&gz);
-
-    ndx = nx + 2*gx;
-    ndy = ny + 2*gy;
-    ndz = nz + 2*gz;
-
-    for (int iz=0; iz<ndz; iz++) {
-      for (int iy=0; iy<ndy; iy++) {
-	for (int ix=0; ix<ndx; ix++) {
-	  int i = ix + ndx*(iy + ndy*iz);
-	  double v = i + 1000*(ib + 10*(2));
-	  v2[ib][i] = 
-	    (gx <= ix && ix < ndx-gx &&
-	     gy <= iy && iy < ndy-gy &&
-	     gz <= iz && iz < ndz-gz) ? v : -v;
-	}
-      }
-    }
-
-    // field 3
-
-    fd.ghosts(i3,&gx,&gy,&gz);
-
-    ndx = nx + 2*gx;
-    ndy = ny + 2*gy;
-    ndz = nz + 2*gz;
-
-    for (int iz=0; iz<ndz; iz++) {
-      for (int iy=0; iy<ndy; iy++) {
-	for (int ix=0; ix<ndx; ix++) {
-	  int i = ix + ndx*(iy + ndy*iz);
-	  double v = i + 1000*(ib + 10*(3));
-	  v3[ib][i] = 
-	    (gx <= ix && ix < ndx-gx &&
-	     gy <= iy && iy < ndy-gy &&
-	     gz <= iz && iz < ndz-gz) ? v : -v;
-
-	}
       }
     }
   }
 
+  // Send/recv faces in xp direction
 
-  //----------------------------------------------------------------------
-  // PASS if ghosts allocated
-  //----------------------------------------------------------------------
+  //  FacesGroup fg;
+  FieldBlock ff[N3];
 
-  // Send faces in xp direction
+  // send xp faces
 
-  
+  for (int kz = 0; kz < N; kz++) {
+    for (int ky = 0; ky < N; ky++) {
+      for (int kx = 0; kx < N-1; kx++) {
+      }
+    }
+  }
+
+  // receive xm ghosts
+	
+  for (int kz = 0; kz < N; kz++) {
+    for (int ky = 0; ky < N; ky++) {
+      for (int kx = 1; kx < N; kx++) {
+      }
+    }
+  }
+
+  // Test values
+
+  for (int kz = 0; kz < N; kz++) {
+    for (int ky = 0; ky < N; ky++) {
+      for (int kx = 1; kx < N; kx++) {
+      }
+    }
+  }
+
   // Send all faces
 
-//   send_init();
-//   send_begin();
-//   send_end();
-//   send_final();
+  //   send_init();
+  //   send_begin();
+  //   send_end();
+  //   send_final();
 	
-//   recv_init();
-//   recv_begin();
-//   recv_end();
-//   recv_final();
+  //   recv_init();
+  //   recv_begin();
+  //   recv_end();
+  //   recv_final();
 	
-//   sendrecv_init();
-//   sendrecv_begin();
-//   sendrecv_end();
-//   sendrecv_final();
+  //   sendrecv_init();
+  //   sendrecv_begin();
+  //   sendrecv_end();
+  //   sendrecv_final();
 
   unit_finalize();
   //----------------------------------------------------------------------

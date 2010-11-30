@@ -17,7 +17,7 @@ FieldBlock::FieldBlock() throw()
     ghosts_allocated_(false)
 {
   for (int i=0; i<3; i++) {
-    dimensions_[i] = 1;
+    size_[i] = 1;
     lower_[i]      = 0.0;
     upper_[i]      = 1.0;
   }
@@ -44,11 +44,11 @@ FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
 
 //----------------------------------------------------------------------
 
-void FieldBlock::dimensions( int * nx, int * ny, int * nz ) const throw()
+void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 {
-  *nx = dimensions_[0];
-  *ny = dimensions_[1];
-  *nz = dimensions_[2];
+  *nx = size_[0];
+  *ny = size_[1];
+  *nz = size_[2];
 }
 
 //----------------------------------------------------------------------
@@ -74,7 +74,7 @@ void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
     field_descr_->centering(id_field,&cx,&cy,&cz);
 
     int nx,ny,nz;
-    dimensions(&nx,&ny,&nz);
+    size(&nx,&ny,&nz);
 
     nx += 2*gx + (cx?0:1);
     ny += 2*gy + (cy?0:1);
@@ -110,9 +110,9 @@ void FieldBlock::extent
 
 void FieldBlock::cell_width( double * hx, double * hy, double * hz ) const throw ()
 {
-  *hx = (upper_[0] - lower_[0]) / dimensions_[0];
-  *hy = (upper_[1] - lower_[1]) / dimensions_[1];
-  *hz = (upper_[2] - lower_[2]) / dimensions_[2];
+  *hx = (upper_[0] - lower_[0]) / size_[0];
+  *hy = (upper_[1] - lower_[1]) / size_[1];
+  *hz = (upper_[2] - lower_[2]) / size_[2];
 }
 
 //----------------------------------------------------------------------
@@ -177,9 +177,9 @@ void FieldBlock::clear
 
 void FieldBlock::allocate_array() throw()
 {
-  if (! (dimensions_[0] > 0 &&
-	 dimensions_[1] > 0 &&
-	 dimensions_[2] > 0) ) {
+  if (! (size_[0] > 0 &&
+	 size_[1] > 0 &&
+	 size_[2] > 0) ) {
     ERROR_MESSAGE ("FieldBlock::allocate_array",
 		   "Allocate called with zero field size");
   }
@@ -393,7 +393,7 @@ void FieldBlock::enforce_boundary_reflecting_(face_type face) throw()
 {
   int nx,ny,nz;
   int gx,gy,gz;
-  dimensions(&nx,&ny,&nz);
+  size(&nx,&ny,&nz);
   for (int field = 0; field < field_descr_->field_count(); field++) {
     field_descr_->ghosts(field,&gx,&gy,&gz);
     void * array = field_values(field);
@@ -626,14 +626,14 @@ void FieldBlock::write
 
 //----------------------------------------------------------------------
 
-void FieldBlock::set_dimensions(int nx, int ny, int nz) throw()
+void FieldBlock::set_size(int nx, int ny, int nz) throw()
 {
   if ( ! array_allocated() ) {
-    dimensions_[0] = nx;
-    dimensions_[1] = ny;
-    dimensions_[2] = nz;
+    size_[0] = nx;
+    size_[1] = ny;
+    size_[2] = nz;
   } else {
-    // WARNING/ERROR: changing dimensions of allocated array
+    // WARNING/ERROR: changing size of allocated array
   }
 }
 
@@ -711,11 +711,11 @@ int FieldBlock::field_size_
   bool cx,cy,cz;
   field_descr_->centering(id_field,&cx,&cy,&cz);
 
-  // Compute array dimensions
+  // Compute array size
 
-  *nx = dimensions_[0] + (1-cx) + 2*gx;
-  *ny = dimensions_[1] + (1-cy) + 2*gy;
-  *nz = dimensions_[2] + (1-cz) + 2*gz;
+  *nx = size_[0] + (1-cx) + 2*gx;
+  *ny = size_[1] + (1-cy) + 2*gy;
+  *nz = size_[2] + (1-cz) + 2*gz;
 
   // Return array size in bytes
 

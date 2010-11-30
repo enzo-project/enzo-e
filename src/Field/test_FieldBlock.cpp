@@ -87,23 +87,23 @@ PARALLEL_MAIN_BEGIN
 
   //----------------------------------------------------------------------
 
-  unit_func("dimensions");
+  unit_func("size");
 
   int nx,ny,nz;
   nx=4; ny=5; nz=6;
 
-  field_block.set_dimensions(nx,ny,nz);
+  field_block.set_size(nx,ny,nz);
 
-  int dimensions[3];
+  int size[3];
 
-  field_block.dimensions(&dimensions[0],&dimensions[1],&dimensions[2]);
+  field_block.size(&size[0],&size[1],&size[2]);
 
-  unit_assert(dimensions[0]==nx && dimensions[1]==ny && dimensions[2]==nz);
+  unit_assert(size[0]==nx && size[1]==ny && size[2]==nz);
 
   nx=5; ny=3; nz=4;
-  field_block.set_dimensions(nx,ny,nz);
-  field_block.dimensions(&dimensions[0],&dimensions[1],&dimensions[2]);
-  unit_assert(dimensions[0]==nx && dimensions[1]==ny && dimensions[2]==nz);
+  field_block.set_size(nx,ny,nz);
+  field_block.size(&size[0],&size[1],&size[2]);
+  unit_assert(size[0]==nx && size[1]==ny && size[2]==nz);
 
   //----------------------------------------------------------------------
   // allocate / deallocate

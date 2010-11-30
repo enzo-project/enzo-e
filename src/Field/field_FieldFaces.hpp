@@ -15,6 +15,12 @@ class FieldFaces {
   /// @ingroup  Field
   /// @brief    Class for representing and operating on ghost zones
 
+private:
+
+  /// FieldFaces must be allocated with field_block argument
+
+  FieldFaces() throw();
+
 public: // interface
 
   /// Constructor
