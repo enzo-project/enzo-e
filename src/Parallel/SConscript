@@ -33,6 +33,11 @@ env = env.Clone(LIBS=[libraries])
 includes   = [Glob('parallel*hpp'),'parallel.def']
 sources    = [Glob('parallel*cpp')]
 
+if (parallel_type == "charm"):
+	test = 'test_ParallelLayout'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
+
 #------------------------------
 # TARGETS
 #------------------------------
@@ -46,9 +51,9 @@ if (parallel_type == "mpi" or parallel_type == "ampi"):
 	tests.append(test_Mpi)
 
 # test_ParallelAffinity = env.Program (['test_ParallelAffinity.cpp', sources])
-# test_ParallelLayout   = env.Program (['test_ParallelLayout.cpp',   sources])
+test_ParallelLayout   = env.Program (['test_ParallelLayout.cpp',   sources])
 
-# tests.append()
+tests.append(test_ParallelLayout)
 
 #------------------------------
 # INSTALL

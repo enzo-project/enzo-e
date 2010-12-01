@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     parallel_Layout.cpp
+/// @file     parallel_ParallelLayout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Implementation of the Layout class
+/// @brief    Implementation of the ParallelLayout class
 
 //----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
 
 //----------------------------------------------------------------------
 
-Layout::Layout() throw()
+ParallelLayout::ParallelLayout() throw()
 {
   for (int i=0; i<3; i++) {
     np_[i] = 1;
@@ -24,7 +24,7 @@ Layout::Layout() throw()
     
 //----------------------------------------------------------------------
 
-void Layout::set_process_blocks(int p0, int p1, int p2) throw()
+void ParallelLayout::set_processes(int p0, int p1, int p2) throw()
 {
   np_[0] = p0;
   np_[1] = p1;
@@ -34,7 +34,7 @@ void Layout::set_process_blocks(int p0, int p1, int p2) throw()
 
 //----------------------------------------------------------------------
 
-void Layout::set_thread_blocks(int t0, int t1, int t2) throw()
+void ParallelLayout::set_threads(int t0, int t1, int t2) throw()
 { 
   nt_[0] = t0;
   nt_[1] = t1;
@@ -43,7 +43,7 @@ void Layout::set_thread_blocks(int t0, int t1, int t2) throw()
 
 //----------------------------------------------------------------------
 
-void Layout::set_data_blocks(int d0, int d1, int d2) throw()
+void ParallelLayout::set_blocks(int d0, int d1, int d2) throw()
 { 
   nd_[0] = d0;
   nd_[1] = d1;
@@ -52,35 +52,35 @@ void Layout::set_data_blocks(int d0, int d1, int d2) throw()
 
 //----------------------------------------------------------------------
 
-int Layout::process_count () throw()
+int ParallelLayout::process_count () throw()
 { 
   return np_[0]*np_[1]*np_[2]; 
 }
 
 //----------------------------------------------------------------------
 
-int Layout::thread_count () throw()
+int ParallelLayout::thread_count () throw()
 {
   return  nt_[0]*nt_[1]*nt_[2]; 
 }
 
 //----------------------------------------------------------------------
 
-int Layout::data_blocks_per_process () throw()
+int ParallelLayout::blocks_per_process () throw()
 { 
-  return thread_count() * data_blocks_per_thread(); 
+  return thread_count() * blocks_per_thread(); 
 }
 
 //----------------------------------------------------------------------
 
-int Layout::data_blocks_per_thread () throw()
+int ParallelLayout::blocks_per_thread () throw()
 {
   return nd_[0]*nd_[1]* nd_[2]; 
 }
 
 //----------------------------------------------------------------------
 
-bool Layout::neighbor_is_internal (int ip, int it, int id,
+bool ParallelLayout::neighbor_is_internal (int ip, int it, int id,
 				   axis_type axis, int face)
 {
   int k = neighbor_project_(ip,it,id,axis,face);
@@ -89,7 +89,7 @@ bool Layout::neighbor_is_internal (int ip, int it, int id,
 
 //----------------------------------------------------------------------
 
-int Layout::neighbor_process (int ip, int it, int id,
+int ParallelLayout::neighbor_process (int ip, int it, int id,
 			      axis_type axis, int face)  throw()
 {
 
@@ -103,7 +103,7 @@ int Layout::neighbor_process (int ip, int it, int id,
 
 //----------------------------------------------------------------------
 
-int Layout::neighbor_thread (int ip, int it, int id,
+int ParallelLayout::neighbor_thread (int ip, int it, int id,
 			     axis_type axis, int face) throw()
 {
 
@@ -117,9 +117,9 @@ int Layout::neighbor_thread (int ip, int it, int id,
 
 //----------------------------------------------------------------------
 
-void Layout::extent (int ip, int it, int id,
-			 double lower_extent[3],    
-			 double upper_extent[3])
+void ParallelLayout::extent (int ip, int it, int id,
+		     double lower_extent[3],    
+		     double upper_extent[3])
 {
 
   int block_index[3];
@@ -137,7 +137,7 @@ void Layout::extent (int ip, int it, int id,
 
 //----------------------------------------------------------------------
 
-void Layout::array_indices (int ip, int it, int id,
+void ParallelLayout::array_indices (int ip, int it, int id,
 			    int nx, int ny, int nz,
 			    int lower_index[3],
 			    int upper_index[3]) throw ()
@@ -158,21 +158,21 @@ void Layout::array_indices (int ip, int it, int id,
 
 //----------------------------------------------------------------------
 
-void Layout::set_periodic (axis_type axis, bool periodic)
+void ParallelLayout::set_periodic (axis_type axis, bool periodic)
 {
   periodic_[axis] = periodic; 
 }
 
 //----------------------------------------------------------------------
 
-bool Layout::is_periodic (axis_type axis)
+bool ParallelLayout::is_periodic (axis_type axis)
 {
   return periodic_[axis]; 
 }
 
 //----------------------------------------------------------------------
 
-int Layout::neighbor_project_(int ip, int it, int id, axis_type axis, int face)
+int ParallelLayout::neighbor_project_(int ip, int it, int id, axis_type axis, int face)
 {
   int ipa,ita,ida;
   switch (axis) {
@@ -211,7 +211,7 @@ int Layout::neighbor_project_(int ip, int it, int id, axis_type axis, int face)
 
 //----------------------------------------------------------------------
 
-void Layout::block_indices_ 
+void ParallelLayout::block_indices_ 
 (int ip, int it, int id, int block_index[3]) throw ()
  
 {

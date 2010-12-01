@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     parallel_Layout.hpp
+/// @file     parallel_ParallelLayout.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Declaration of the Layout class
+/// @brief    Declaration of the ParallelLayout class
 
 #ifndef PARALLEL_LAYOUT_HPP
 #define PARALLEL_LAYOUT_HPP
@@ -33,41 +33,41 @@ enum axis_type {
   axis_z };
 
 
-class Layout {
+class ParallelLayout {
 
-  /// @class    Layout
+  /// @class    ParallelLayout
   /// @ingroup  Parallel
-  /// @brief Specify how a Patch is partitioned into process, thread, and computational blacks
+  /// @brief Specify how a Patch is partitioned into process, thread, and computational blocks
 
 public: // interface
 
-  /// (*) Create a Layout of the given dimensionality, defaulting to serial
-  Layout() throw();
+  /// Create a ParallelLayout of the given dimensionality, defaulting to serial
+  ParallelLayout() throw();
 
-  /// Set how many process blocks the Layout will be partitioned into 
-  void set_process_blocks(int p0, int p1, int p2) throw();
+  /// Set how many process blocks the ParallelLayout will be partitioned into 
+  void set_processes(int p0, int p1, int p2) throw();
 
   /// Set how thread blocks each process block is partitioned into 
-  void set_thread_blocks(int t0, int t1, int t2) throw();
+  void set_threads(int t0, int t1, int t2) throw();
 
   /// Set how many compute blocks each thread block is partitioned into  
-  void set_data_blocks(int d0, int d1, int d2) throw();
+  void set_blocks(int d0, int d1, int d2) throw();
 
-  /// Return the number of processes in the Layout 
+  /// Return the number of processes in the ParallelLayout 
   int process_count () throw();
 
-  /// Return the number of threads per process in the Layout 
+  /// Return the number of threads per process in the ParallelLayout 
   int thread_count () throw();
 
-  /// Return the number of data blocks per process in the Layout  
-  int data_blocks_per_process () throw();
+  /// Return the number of data blocks per process in the ParallelLayout  
+  int blocks_per_process () throw();
 
-  /// Return the number of data blocks per thread in the Layout  
-  int data_blocks_per_thread () throw();
+  /// Return the number of data blocks per thread in the ParallelLayout  
+  int blocks_per_thread () throw();
 
   // Neighbor functions
 
-  /// Return whether the given neighbor is inside the Layout or outside 
+  /// Return whether the given neighbor is inside the ParallelLayout or outside 
   bool neighbor_is_internal (int ip, int it, int id,
 			     axis_type axis, int face);
 

@@ -4,7 +4,7 @@
 /// @file     test_ParallelLayout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-19
-/// @brief    Unit tests for the Layout class
+/// @brief    Unit tests for the ParallelLayout class
 
 #include <math.h>
 #include "cello.hpp"
@@ -14,11 +14,20 @@
 #include "parallel.hpp"
 
 #define TOL 2e-16
-int main(int argc, char ** argv)
-{
-  unit_init();
 
-  unit_class("Layout");
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(test_ParallelLayout.decl.h)
+
+PARALLEL_MAIN_BEGIN
+{
+
+  PARALLEL_INIT;
+
+  GroupProcess * parallel = GroupProcess::create();
+
+  unit_init (parallel->rank(), parallel->size());
+
+  unit_class("ParallelLayout");
 
   //----------------------------------------------------------------------
   // index conversions
@@ -65,8 +74,8 @@ int main(int argc, char ** argv)
 
   {
     
-    unit_func("Layout");
-    Layout layout_serial;
+    unit_func("ParallelLayout");
+    ParallelLayout layout_serial;
     unit_assert (true);
 
     layout_serial.set_periodic(axis_x,true);
@@ -77,10 +86,10 @@ int main(int argc, char ** argv)
     unit_assert (layout_serial.process_count() == 1);
     unit_func("thread_count");
     unit_assert (layout_serial.thread_count()  == 1);
-    unit_func("data_blocks_per_process");
-    unit_assert (layout_serial.data_blocks_per_process()  == 1);
-    unit_func("data_blocks_per_thread");
-    unit_assert (layout_serial.data_blocks_per_thread()  == 1);
+    unit_func("blocks_per_process");
+    unit_assert (layout_serial.blocks_per_process()  == 1);
+    unit_func("blocks_per_thread");
+    unit_assert (layout_serial.blocks_per_thread()  == 1);
     unit_func("is_periodic");
     unit_assert (layout_serial.is_periodic(axis_x) == true);
     unit_assert (layout_serial.is_periodic(axis_y) == true);
@@ -144,24 +153,24 @@ int main(int argc, char ** argv)
     int pb3[3] = {5,3,7};  // processor blocks
     int npb = pb3[0]*pb3[1]*pb3[2];
 
-    unit_func("Layout");
-    Layout layout_parallel;
+    unit_func("ParallelLayout");
+    ParallelLayout layout_parallel;
     unit_assert (true);
 
     layout_parallel.set_periodic(axis_x,false);
     layout_parallel.set_periodic(axis_y,false);
     layout_parallel.set_periodic(axis_z,false);
 
-    layout_parallel.set_process_blocks(pb3[0],pb3[1],pb3[2]);
+    layout_parallel.set_processes(pb3[0],pb3[1],pb3[2]);
 
     unit_func("process_count");
     unit_assert (layout_parallel.process_count() == npb);
     unit_func("thread_count");
     unit_assert (layout_parallel.thread_count()  == 1);
-    unit_func("data_blocks_per_process");
-    unit_assert (layout_parallel.data_blocks_per_process()  == 1);
-    unit_func("data_blocks_per_thread");
-    unit_assert (layout_parallel.data_blocks_per_thread()  == 1);
+    unit_func("blocks_per_process");
+    unit_assert (layout_parallel.blocks_per_process()  == 1);
+    unit_func("blocks_per_thread");
+    unit_assert (layout_parallel.blocks_per_thread()  == 1);
     unit_func("is_periodic");
     unit_assert (layout_parallel.is_periodic(axis_x) == false);
     unit_assert (layout_parallel.is_periodic(axis_y) == false);
@@ -322,24 +331,24 @@ int main(int argc, char ** argv)
     int db3[3] = {4,1,9};  // data blocks
     int ndb = db3[0]*db3[1]*db3[2];
 
-    unit_func("Layout");
-    Layout layout_blocked;
+    unit_func("ParallelLayout");
+    ParallelLayout layout_blocked;
     unit_assert (true);
 
     layout_blocked.set_periodic(axis_x,false);
     layout_blocked.set_periodic(axis_y,false);
     layout_blocked.set_periodic(axis_z,false);
 
-    layout_blocked.set_data_blocks(db3[0],db3[1],db3[2]);
+    layout_blocked.set_blocks(db3[0],db3[1],db3[2]);
 
     unit_func("process_count");
     unit_assert (layout_blocked.process_count() == 1);
     unit_func("thread_count");
     unit_assert (layout_blocked.thread_count()  == 1);
-    unit_func("data_blocks_per_process");
-    unit_assert (layout_blocked.data_blocks_per_process()  == ndb);
-    unit_func("data_blocks_per_thread");
-    unit_assert (layout_blocked.data_blocks_per_thread()  == ndb);
+    unit_func("blocks_per_process");
+    unit_assert (layout_blocked.blocks_per_process()  == ndb);
+    unit_func("blocks_per_thread");
+    unit_assert (layout_blocked.blocks_per_thread()  == ndb);
     unit_func("is_periodic");
     unit_assert (layout_blocked.is_periodic(axis_x) == false);
     unit_assert (layout_blocked.is_periodic(axis_y) == false);
@@ -503,25 +512,25 @@ int main(int argc, char ** argv)
     int npb = pb3[0]*pb3[1]*pb3[2];
     int ndb = db3[0]*db3[1]*db3[2];
 
-    unit_func("Layout");
-    Layout layout_parallel_blocked;
+    unit_func("ParallelLayout");
+    ParallelLayout layout_parallel_blocked;
     unit_assert (true);
 
     layout_parallel_blocked.set_periodic(axis_x,false);
     layout_parallel_blocked.set_periodic(axis_y,false);
     layout_parallel_blocked.set_periodic(axis_z,false);
 
-    layout_parallel_blocked.set_process_blocks(pb3[0],pb3[1],pb3[2]);
-    layout_parallel_blocked.set_data_blocks   (db3[0],db3[1],db3[2]);
+    layout_parallel_blocked.set_processes(pb3[0],pb3[1],pb3[2]);
+    layout_parallel_blocked.set_blocks   (db3[0],db3[1],db3[2]);
 
     unit_func("process_count");
     unit_assert (layout_parallel_blocked.process_count() == npb);
     unit_func("thread_count");
     unit_assert (layout_parallel_blocked.thread_count()  == 1);
-    unit_func("data_blocks_per_process");
-    unit_assert (layout_parallel_blocked.data_blocks_per_process()  == ndb);
-    unit_func("data_blocks_per_thread");
-    unit_assert (layout_parallel_blocked.data_blocks_per_thread()  == ndb);
+    unit_func("blocks_per_process");
+    unit_assert (layout_parallel_blocked.blocks_per_process()  == ndb);
+    unit_func("blocks_per_thread");
+    unit_assert (layout_parallel_blocked.blocks_per_thread()  == ndb);
     unit_func("is_periodic");
     unit_assert (layout_parallel_blocked.is_periodic(axis_x) == false);
     unit_assert (layout_parallel_blocked.is_periodic(axis_y) == false);
@@ -735,4 +744,10 @@ int main(int argc, char ** argv)
   }  
 
   unit_finalize();
+
+  PARALLEL_EXIT;
 }
+
+PARALLEL_MAIN_END
+
+#include PARALLEL_CHARM_INCLUDE(test_ParallelLayout.def.h)
