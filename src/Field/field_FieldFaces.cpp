@@ -12,34 +12,46 @@
 #include "field.hpp"
 
 FieldFaces::FieldFaces(FieldBlock * field_block) throw ()
-  : field_block_(field_block)
+  : field_block_(field_block),
+    ghosts_(0),
+    faces_(0),
+    array_(0)
 {
-
-  for (int i=0; i<6; i++) {
-    ghost_[i] = 0;
-    face_ [i] = 0;
-  }
+  allocate_();
 }
 
 //----------------------------------------------------------------------
 
 FieldFaces::~FieldFaces() throw ()
 {
-  for (int i=0; i<6; i++) delete [] face_[i];
-  for (int i=0; i<6; i++) delete [] ghost_[i];
+  deallocate_();
 }
 
 //----------------------------------------------------------------------
 
-FieldFaces::FieldFaces(const FieldFaces & field_block_faces) throw ()
+FieldFaces::FieldFaces(const FieldFaces & field_faces) throw ()
+  : field_block_(field_faces.field_block_),
+    ghosts_(0),
+    faces_(0),
+    array_(0)
 /// @param     FieldFaces  Object being copied
 {
-  INCOMPLETE_MESSAGE("FieldFaces::FieldFaces","");
+
+  INCOMPLETE_MESSAGE("FieldFaces::FieldFaces(FieldFaces &)","");
+
+  // Reallocate storage for new FieldBlock
+
+  deallocate_();
+
+  field_block_ = field_faces.field_block_;
+
+  allocate_();
+
 }
 
 //----------------------------------------------------------------------
 
-FieldFaces & FieldFaces::operator= (const FieldFaces & field_block_faces) throw ()
+FieldFaces & FieldFaces::operator= (const FieldFaces & field_faces) throw ()
 /// @param     FieldFaces  Source object of the assignment
 /// @return    The target assigned object
 {
@@ -49,65 +61,75 @@ FieldFaces & FieldFaces::operator= (const FieldFaces & field_block_faces) throw 
 
 //======================================================================
 
-void send_init() throw()
+void FieldFaces::load() throw()
 {
-  INCOMPLETE_MESSAGE("FieldFaces::send_init()","");
+  INCOMPLETE_MESSAGE("FieldFaces::load()","");
 }
+
 //----------------------------------------------------------------------
-void send_begin() throw()
+
+void FieldFaces::save() throw()
 {
-  INCOMPLETE_MESSAGE("FieldFaces::send_begin()","");
+  INCOMPLETE_MESSAGE("FieldFaces::save()","");
 }
+
 //----------------------------------------------------------------------
-void send_end() throw()
+
+void FieldFaces::allocate_() throw()
 {
-  INCOMPLETE_MESSAGE("FieldFaces::send_end()","");
+  FieldDescr * field_descr = field_block_->field_descr();
+
+  int num_fields = field_descr->field_count();
+
+  faces_.reserve (6*num_fields);
+  ghosts_.reserve(6*num_fields);
+
+  // Determine array_ size
+
+  int array_size = 0;
+
+  for (int field = 0; field < num_fields; field++) {
+
+    // Need element size for alignment adjust below
+
+    int element_size = cello::precision_size(field_descr->precision(field));
+
+    // Get field block dimensions n3[]
+    // Get field_size, which includes ghosts and precision adjustments
+
+    int n3[3];
+    int field_size = field_block_->field_size_(field,&n3[0],&n3[1],&n3[2]);
+
+    // Get ghost depth
+
+    int g3[3];
+    field_descr->ghosts(field,&g3[0],&g3[1],&g3[2]);
+
+    for (int axis=0; axis<3; axis++) {
+
+      // Get size of one face for given axis
+
+      int face_size = g3[axis] * field_size / n3[axis];
+
+      face_size += field_block_->adjust_alignment_(face_size,element_size);
+
+      // 4: lower, upper, ghost, faces
+
+      array_size += 4 * face_size;
+
+    }
+  }
+
+  array_ = new char [ array_size ];
+
 }
+
 //----------------------------------------------------------------------
-void send_final() throw()
+
+void FieldFaces::deallocate_() throw()
 {
-  INCOMPLETE_MESSAGE("FieldFaces::send_final()","");
+  delete [] array_;
 }
-	
+
 //----------------------------------------------------------------------
-void recv_init() throw()
-{
-  INCOMPLETE_MESSAGE("FieldFaces::recv_init()","");
-}
-//----------------------------------------------------------------------
-void recv_begin() throw()
-{
-  INCOMPLETE_MESSAGE("FieldFaces::recv_begin()","");
-}
-//----------------------------------------------------------------------
-void recv_end() throw()
-{
-  INCOMPLETE_MESSAGE("FieldFaces::recv_end()","");
-}
-//----------------------------------------------------------------------
-void recv_final() throw()
-{
-  INCOMPLETE_MESSAGE("FieldFaces::recv_final()","");
-}
-	
-//----------------------------------------------------------------------
-void sendrecv_init() throw()
-{
-  INCOMPLETE_MESSAGE("FieldFaces::sendrecv_init()","");
-}
-//----------------------------------------------------------------------
-void sendrecv_begin() throw()
-{
-  INCOMPLETE_MESSAGE("FieldFaces::sendrecv_begin()","");
-}
-//----------------------------------------------------------------------
-void sendrecv_end() throw()
-{
-  INCOMPLETE_MESSAGE("FieldFaces::sendrecv_end()","");
-}
-//----------------------------------------------------------------------
-void sendrecv_final() throw()
-{
-  INCOMPLETE_MESSAGE("FieldFaces::sendrecv_final()","");
-}
 

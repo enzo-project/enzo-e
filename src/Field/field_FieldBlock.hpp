@@ -25,6 +25,8 @@ class FieldBlock {
   /// arrays.  Axes can be permuted, including the index selecting the
   /// array for storing interleaved arrays.
 
+  friend class FieldFaces;
+
 public: // interface
 
   /// Create a new uninitialized FieldBlock object
@@ -69,6 +71,9 @@ public: // interface
 
   /// Return the associated field descriptor
   FieldDescr * field_descr() throw ();
+
+  /// Return the ossociated field faces object
+  FieldFaces * field_faces() throw ();
 
   /// Clear specified array(s) to specified value
   void clear(float value = 0.0, 
@@ -132,9 +137,11 @@ public: // interface
 
 private: // functions
 
-  /// Given field size, padding, and alignment, compute offset to
-  /// start of the next field
-  int field_size_adjust_ (int size, int padding, int alignment) const throw();
+  /// Given field size and padding, compute offset to start of the next field
+  int adjust_padding_ (int size, int padding) const throw();
+
+  /// Given field size and alignment, compute offset to start of the next field
+  int adjust_alignment_ (int size, int alignment) const throw();
 
   /// Given array start and alignment, return first address that is
   /// aligned
@@ -183,6 +190,9 @@ private: // attributes
 
   /// Corresponding Field descriptor
   FieldDescr * field_descr_;
+
+  /// Corresponding Field faces
+  FieldFaces * field_faces_;
 
   /// Size of fields on the block, assuming centered
   int size_[3];

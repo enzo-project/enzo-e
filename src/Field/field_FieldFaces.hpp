@@ -41,47 +41,36 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// 	Initialize sending face zones to another block patch
-  void send_init() throw();
-  /// 	Begin sending face zones to another block patch
-  void send_begin() throw();
-  /// 	End sending face zones to another block patch
-  void send_end() throw();
-  /// 	Finalize sending face zones to another block patch
-  void send_final() throw();
-	
-  /// 	Initialize receiving ghost zones from another block patch
-  void recv_init() throw();
-  /// 	Begin receiving ghost zones from another block patch
-  void recv_begin() throw();
-  /// 	End receiving ghost zones from another block patch
-  void recv_end() throw();
-  /// 	Finalize receiving ghost zones from another block patch
-  void recv_final() throw();
-	
-  /// 	Initialize sending/receiving face/ghost zones from another block patch
-  void sendrecv_init() throw();
-  /// 	Begin sending/receiving face/ghost zones from another block patch
-  void sendrecv_begin() throw();
-  /// 	End sending/receiving face/ghost zones from another block patch
-  void sendrecv_end() throw();
-  /// 	Finalize sending/receiving face/ghost zones from another block patch
-  void sendrecv_final() throw();
+  /// Copy in face zones from a field block
+  void load() throw();
+
+  /// Copy out ghost zones to a field block
+  void save() throw();
 
 
 private: // functions
 
-  
+  /// Allocate array_ storage
+
+  void allocate_() throw();
+
+  /// Deallocate array_ storage
+
+  void deallocate_() throw();
+
 private: // attributes
 
   /// Pointer to the corresponding FieldBlock
   FieldBlock * field_block_;
 
-  /// Allocated arrays [xm,xp,ym,yp,zm,zp] of ghost values (0 if none)
-  char * ghost_[6];
+  /// Arrays [field][axis][dir] of ghost values
+  std::vector<char *> ghosts_;
 
-  /// Allocated arrays [xm,xp,ym,yp,zm,zp] of inner-face values (0 if none)
-  char * face_[6];
+  /// Arrays [field][axis][dir] of inner-face values
+  std::vector<char *> faces_;
+
+  /// Allocated array used for storing all ghosts and faces
+  char * array_;
 
 };
 

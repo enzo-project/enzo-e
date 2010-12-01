@@ -12,6 +12,7 @@
 
 FieldBlock::FieldBlock() throw()
   : field_descr_(0),
+    field_faces_(0),
     array_(0),
     field_values_(),
     ghosts_allocated_(false)
@@ -124,6 +125,16 @@ FieldDescr * FieldBlock::field_descr() throw ()
 
 //----------------------------------------------------------------------
 
+FieldFaces * FieldBlock::field_faces() throw ()
+{
+  if (field_faces_ == NULL) {
+    field_faces_ = new FieldFaces(this);
+  }
+  return field_faces_;
+}
+
+//----------------------------------------------------------------------
+
 void FieldBlock::clear
 (
  float value,
@@ -199,7 +210,8 @@ void FieldBlock::allocate_array() throw()
 
       int size = field_size_(id_field, &nx,&ny,&nz);
 
-      array_size += field_size_adjust_(size,padding,alignment);
+      array_size += adjust_padding_   (size,padding);
+      array_size += adjust_alignment_ (size,alignment);
 
     }
 
@@ -217,6 +229,8 @@ void FieldBlock::allocate_array() throw()
 
     int field_offset = 0;
 
+    field_values_.reserve(field_descr_->field_count());
+
     for (int id_field=0; id_field<field_descr_->field_count(); id_field++) {
 
       field_values_.push_back(field_begin + field_offset);
@@ -227,7 +241,8 @@ void FieldBlock::allocate_array() throw()
 
       int size = field_size_(id_field,&nx,&ny,&nz);
 
-      field_offset += field_size_adjust_(size,padding,alignment);
+      field_offset += adjust_padding_  (size,padding);
+      field_offset += adjust_alignment_(size,alignment);
     }
 
     // check if array_size is too big or too small
@@ -675,15 +690,22 @@ void FieldBlock::set_extent
 //======================================================================
 
 
-int FieldBlock::field_size_adjust_
+int FieldBlock::adjust_padding_
 (
  int size, 
- int padding, 
+ int padding) const throw ()
+{
+  return size + padding;
+}
+
+//----------------------------------------------------------------------
+
+int FieldBlock::adjust_alignment_
+(
+ int size, 
  int alignment) const throw ()
 {
-  int field_size = size + padding;
-  field_size += (alignment - (field_size % alignment)) % alignment;
-  return field_size;
+  return (alignment - (size % alignment)) % alignment;
 }
 
 //----------------------------------------------------------------------
