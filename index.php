@@ -8,7 +8,7 @@
 
 <ul>
   <li><a href="http://lca.ucsd.edu/projects/cello/">Cello User Site</a></li>
-  <li><a href="http://client65-77.sdsc.edu/projects/cello/">Cello Developer Site</a></li>
+  <li><a href="http://client65-77.sdsc.edu/cello/">Cello Developer Site</a></li>
 
 </ul>
 <?php
