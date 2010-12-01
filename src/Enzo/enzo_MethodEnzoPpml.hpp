@@ -1,5 +1,5 @@
 // $Id$
-// See LICENSE_ENZO file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
 
 /// @file     enzo_MethodEnzoPpml.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
@@ -11,7 +11,7 @@
 
 class MethodEnzoPpml : public MethodHyperbolic {
 
-  /// @class    MethodEnzoPpml
+/// @class    MethodEnzoPpml
 /// @ingroup  Enzo
 /// @brief    Encapsulate Enzo's PPML hydro method
 

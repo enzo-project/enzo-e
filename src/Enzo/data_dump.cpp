@@ -1,5 +1,5 @@
 // $Id$
-// See LICENSE_ENZO file for license and copyright information
+// See LICENSE_CELLO file for license and copyright information
 
 /// @file      data_dump.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
