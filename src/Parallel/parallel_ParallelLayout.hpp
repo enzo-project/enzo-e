@@ -54,16 +54,16 @@ public: // interface
   void set_blocks(int d0, int d1, int d2) throw();
 
   /// Return the number of processes in the ParallelLayout 
-  int process_count () throw();
+  int processes (int *p0, int *p1, int *p2) throw();
 
   /// Return the number of threads per process in the ParallelLayout 
-  int thread_count () throw();
+  int threads (int *t0, int *t1, int *t2) throw();
 
   /// Return the number of data blocks per process in the ParallelLayout  
-  int blocks_per_process () throw();
+  int blocks_per_process (int *b0, int *b1, int *b2) throw();
 
   /// Return the number of data blocks per thread in the ParallelLayout  
-  int blocks_per_thread () throw();
+  int blocks_per_thread (int *b0, int *b1, int *b2) throw();
 
   // Neighbor functions
 

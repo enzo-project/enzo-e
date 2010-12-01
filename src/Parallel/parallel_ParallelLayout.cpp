@@ -52,30 +52,42 @@ void ParallelLayout::set_blocks(int d0, int d1, int d2) throw()
 
 //----------------------------------------------------------------------
 
-int ParallelLayout::process_count () throw()
+int ParallelLayout::processes (int *p0, int *p1, int *p2) throw()
 { 
-  return np_[0]*np_[1]*np_[2]; 
+  *p0 = np_[0];
+  *p1 = np_[1];
+  *p2 = np_[2];
+  return (*p0)*(*p1)*(*p2); 
 }
 
 //----------------------------------------------------------------------
 
-int ParallelLayout::thread_count () throw()
+int ParallelLayout::threads (int *t0, int *t1, int *t2) throw()
 {
-  return  nt_[0]*nt_[1]*nt_[2]; 
+  *t0 = nt_[0];
+  *t1 = nt_[1];
+  *t2 = nt_[2];
+  return  (*t0)*(*t1)*(*t2); 
 }
 
 //----------------------------------------------------------------------
 
-int ParallelLayout::blocks_per_process () throw()
+int ParallelLayout::blocks_per_process (int *bp0, int *bp1, int *bp2) throw()
 { 
-  return thread_count() * blocks_per_thread(); 
+  *bp0 = nt_[0]*nd_[0];
+  *bp1 = nt_[1]*nd_[1];
+  *bp2 = nt_[2]*nd_[2];
+  return (*bp0)*(*bp1)*(*bp2);
 }
 
 //----------------------------------------------------------------------
 
-int ParallelLayout::blocks_per_thread () throw()
+int ParallelLayout::blocks_per_thread (int *bt0, int *bt1, int *bt2) throw()
 {
-  return nd_[0]*nd_[1]* nd_[2]; 
+  *bt0 = nd_[0];
+  *bt1 = nd_[1];
+  *bt2 = nd_[2];
+  return (*bt0)*(*bt1)* (*bt2); 
 }
 
 //----------------------------------------------------------------------
