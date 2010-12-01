@@ -1,12 +1,8 @@
 
-( ) Data          Move to Mesh
-( ) Method        Create
 ( ) Particle      Rename Particles
 ( ) Test          Integrate 
-( ) User          Move to Method / Enzo
 
 
-Data
 Disk          
 Distribute    
 Enzo          
@@ -25,5 +21,4 @@ Schedule
 Simulation    
 Task          
 Test
-User
 
