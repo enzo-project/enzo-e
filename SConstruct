@@ -5,6 +5,11 @@ charm_path = '/home/bordner/charm/charm'
 
 # PARSE ARGUMENTS
 
+cpp_papi = ['CONFIG_USE_PAPI'];
+cpp_mpi  = ['CONFIG_USE_MPI'];
+
+cpp_config = cpp_papi + cpp_mpi
+
 arch = ARGUMENTS.get('arch','unknown')
 type = ARGUMENTS.get('type','unknown')
 
@@ -87,7 +92,7 @@ elif (platform == 'linux-mpi'):
    parallel_type = "mpi"
    env = Environment (
       CC          = 'mpicc',	
-      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
+      CPPDEFINES = ['NO_FREETYPE'] + cpp_config,
       CPPPATH     = '#/include',
       CXXFLAGS    = '-Wall -g  -m128bit-long-double',
       CFLAGS      = '-Wall -g  -m128bit-long-double',

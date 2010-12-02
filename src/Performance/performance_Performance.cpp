@@ -10,8 +10,8 @@
 
 #include "cello.hpp"
 
-#include "error.hpp" 
 #include "performance.hpp"
+#include "error.hpp" 
 
 Performance::Performance 
 (

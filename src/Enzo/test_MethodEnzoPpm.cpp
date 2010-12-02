@@ -211,6 +211,11 @@ PARALLEL_MAIN_BEGIN
 
   output_fields(field_block,cycle,4,indices,monitor);
 
+  Papi papi;
+  Timer timer;
+  
+  timer.start();
+  papi.start();
   while (time < time_final && cycle <= cycle_final) {
 
     simulation.initialize_block(data_block);
@@ -234,6 +239,16 @@ PARALLEL_MAIN_BEGIN
       output_fields(field_block,cycle,4,indices,monitor);
     }
   }
+
+  papi.stop();
+  timer.stop();
+
+  printf ("Time real = %f\n",papi.time_real());
+  printf ("Time proc = %f\n",papi.time_proc());
+  printf ("flop count = %lld\n",papi.flop_count());
+  printf ("MFlop rate = %f\n",papi.mflop_rate());
+
+  printf ("Timer time = %f\n",timer.value());
 
   simulation.finalize();
 

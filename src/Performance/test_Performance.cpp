@@ -205,6 +205,28 @@ PARALLEL_MAIN_BEGIN
 
   delete performance;
 
+
+  Papi papi;
+
+  papi.start();
+  system("sleep 1");
+  papi.stop();
+
+  printf ("time_real = %f\n",papi.time_real());
+  printf ("time_proc = %f\n",papi.time_proc());
+
+  papi.start();
+  float a=1.0,b=2.5,c=0;
+  c = a*b+3.5;
+  papi.stop();
+
+  printf ("c=%f\n",c);
+  printf ("time_real  = %f\n",papi.time_real());
+  printf ("time_proc  = %f\n",papi.time_proc());
+  printf ("flop_count = %lld\n",papi.flop_count());
+  printf ("mflop_rate = %f\n",papi.mflop_rate());
+
+
   unit_finalize();
 
   PARALLEL_EXIT;

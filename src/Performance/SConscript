@@ -9,7 +9,7 @@ Import('parallel_type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','cello']
+components = ['error','cello','papi','pfm']
 
 #------------------------------
 # ENVIRONMENTS

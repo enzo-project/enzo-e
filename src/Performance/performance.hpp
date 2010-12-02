@@ -17,8 +17,13 @@
 
 #include "cello.hpp"
 
+#ifdef CONFIG_USE_PAPI
+#  include "papi.h"
+#endif
+
 #include "performance_Counters.hpp"
 #include "performance_Performance.hpp"
 #include "performance_Timer.hpp"
+#include "performance_Papi.hpp"
 
 #endif /* PERFORMANCE_HPP */
