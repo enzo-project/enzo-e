@@ -32,7 +32,7 @@ void Memory::initialize_() throw ()
 
   for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
     group_names_ [i] = 0;
-    available_   [i] = 0;
+    limit_       [i] = 0;
     bytes_       [i] = 0;
     bytes_high_  [i] = 0;
     new_calls_   [i] = 0;
@@ -75,14 +75,14 @@ void * Memory::allocate ( size_t bytes ) throw (ExceptionMemoryBadAllocate())
 
     ++ new_calls_[0] ;
     bytes_[0] += bytes;
-    bytes_high_[0] = bytes_[0];
+    bytes_high_[0] = MAX(bytes_high_[0],bytes_[0]);
 
     memory_group_handle current = curr_group_.top();
 
     if (current != 0) {
       ++ new_calls_[current] ;
       bytes_[current] += bytes;
-      bytes_high_[current] = bytes_[current];
+      bytes_high_[current] = MAX(bytes_high_[current],bytes_[current]);
     }
 
   } else {
@@ -214,7 +214,7 @@ void Memory::end_group ( memory_group_handle group_id ) throw ()
 
 //----------------------------------------------------------------------
 
-const char * Memory::current_group () throw ()
+memory_group_handle Memory::current_group (const char ** group_name) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
 
@@ -226,20 +226,14 @@ const char * Memory::current_group () throw ()
     group_names_[current] = strdup("");
   }
 
-  return group_names_[current];
-#else
-  return "";
-#endif
-}
+  *group_name = group_names_[current];
+  return current;
 
-//----------------------------------------------------------------------
-
-memory_group_handle Memory::current_handle () throw ()
-{
-#ifdef CONFIG_USE_MEMORY
-  return curr_group_.top();
 #else
+
+  *group_name = 0;
   return 0;
+
 #endif
 }
 
@@ -259,9 +253,11 @@ long long Memory::bytes ( memory_group_handle group_handle ) throw ()
 long long Memory::available ( memory_group_handle group_handle ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::available()","");
-  return 0;
+  if (limit_[group_handle] != 0) {
+    return limit_[group_handle] - bytes_[group_handle];
+  } else {
+    return 0;
+  }
 #else
   return 0;
 #endif
@@ -272,11 +268,15 @@ long long Memory::available ( memory_group_handle group_handle ) throw ()
 float Memory::efficiency ( memory_group_handle group_handle ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::efficiency()","");
-  return 0.0;
+
+  if (limit_[group_handle] != 0) {
+    return (float) bytes_[group_handle] / limit_[group_handle];
+  } else {
+    return 0.0;
+  }
+
 #else
-  return 0;
+  return 0.0;
 #endif
 }
 
@@ -285,9 +285,7 @@ float Memory::efficiency ( memory_group_handle group_handle ) throw ()
 long long Memory::highest ( memory_group_handle group_handle ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::highest(group)","");
-  return 0;
+  return bytes_high_[group_handle];
 #else
   return 0;
 #endif
@@ -299,8 +297,18 @@ void Memory::set_limit ( long long size, memory_group_handle group_handle )
   throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  check_handle_(group_handle);
-  available_[group_handle] = size;
+  limit_[group_handle] = size;
+#endif
+}
+
+//----------------------------------------------------------------------
+
+long long Memory::limit ( memory_group_handle group_handle ) throw ()
+{
+#ifdef CONFIG_USE_MEMORY
+  return limit_[group_handle];
+#else
+  return 0;
 #endif
 }
 
@@ -309,9 +317,7 @@ void Memory::set_limit ( long long size, memory_group_handle group_handle )
 int Memory::num_new ( memory_group_handle group_handle ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::num_new()","");
-  return 0;
+  return new_calls_[group_handle];
 #else
   return 0;
 #endif
@@ -322,9 +328,7 @@ int Memory::num_new ( memory_group_handle group_handle ) throw ()
 int Memory::num_delete ( memory_group_handle group_handle ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
-  check_handle_(group_handle);
-  INCOMPLETE_MESSAGE("Memory::num_delete()","");
-  return 0;
+  return delete_calls_[group_handle];
 #else
   return 0;
 #endif
@@ -338,7 +342,7 @@ void Memory::print () throw ()
   for (memory_group_handle i=0; i<= MEMORY_MAX_NUM_GROUPS; i++) {
     if (i == 0 || group_names_[i] != NULL) {
       printf ("Group %s\n",i ? group_names_[i]: "Total");
-      if (available_[i]) printf ("   available_    = %ld\n",long(available_[i]));
+      printf ("   limit_        = %ld\n",long(limit_[i]));
       printf ("   bytes_        = %ld\n",long(bytes_[i]));
       printf ("   bytes_high_   = %ld\n",long(bytes_high_[i]));
       printf ("   new_calls_    = %ld\n",long(new_calls_[i]));

@@ -47,15 +47,19 @@ PARALLEL_MAIN_BEGIN
   double *f1;
   float  *f2;
   int    *f3;
+  int new_count = 0;
+  int del_count = 0;
 
-#define NEW(VAR,TYPE,SIZE,COUNT)			\
+#define NEW(VAR,TYPE,SIZE,COUNT) \
   VAR = new TYPE[SIZE]; \
-  COUNT += sizeof(TYPE[SIZE]);			\
-  for (i=0; i<SIZE; i++) VAR[i] = 17;
+  COUNT += sizeof(TYPE[SIZE]); \
+  for (i=0; i<SIZE; i++) VAR[i] = 17; \
+  new_count++;
 
-#define DEL(VAR,TYPE,SIZE,COUNT)			\
+#define DEL(VAR,TYPE,SIZE,COUNT) \
   delete [] VAR; \
-  COUNT -= sizeof(TYPE[SIZE]);
+  COUNT -= sizeof(TYPE[SIZE]); \
+  del_count++;
 
 #define NEW_F1(SIZE) NEW(f1,double,10,SIZE);
 #define NEW_F2(SIZE) NEW(f2,float, 17,SIZE);
@@ -98,23 +102,25 @@ PARALLEL_MAIN_BEGIN
   Timer timer;
   timer.start();
   const int num_alloc = 10000;
-  const int size_alloc = 1000000;
+  const int size_alloc = 1000;
   for (int j=0; j<num_alloc; j++) {
     f1 = new double[size_alloc];
+    new_count++;
     delete [] f1;
+    del_count++;
   }
   timer.stop();
-  PARALLEL_PRINTF ("alloc/dealloc per sec = %g\n",num_alloc/timer.value());
+  PARALLEL_PRINTF ("new/delete  per sec = %g\n",num_alloc/timer.value());
 
   timer.clear();
+
   timer.start();
   for (int j=0; j<num_alloc; j++) {
     f1 = (double*)malloc(sizeof(double[size_alloc]));
     free(f1);
   }
   timer.stop();
-  PARALLEL_PRINTF ("  new/delete  per sec = %g\n",num_alloc/timer.value());
-  
+  PARALLEL_PRINTF ("malloc/free per sec = %g\n",num_alloc/timer.value());
 
   unit_assert (memory->bytes() == size);
 
@@ -135,9 +141,10 @@ PARALLEL_MAIN_BEGIN
 
   memory->begin_group(group_test_1);
 
-  unit_assert (strcmp(memory->current_group(),"Test_1") == 0);
+  const char * name_1;
+  int handle_1 = memory->current_group(&name_1);
 
-  int handle_1 = memory->current_handle();
+  unit_assert (strcmp(name_1,"Test_1") == 0);
 
   NEW_F1(size_test_1);
   NEW_F3(size_test_1);
@@ -157,9 +164,10 @@ PARALLEL_MAIN_BEGIN
 
   memory->begin_group(group_test_2);
 
-  unit_assert (strcmp(memory->current_group(),"Test_2") == 0);
+  const char * name_2;
+  int handle_2 = memory->current_group(&name_2);
 
-  int handle_2 = memory->current_handle();
+  unit_assert (strcmp(name_2,"Test_2") == 0);
 
   NEW_F2(size_test_2);
   NEW_F3(size_test_2);
@@ -170,51 +178,61 @@ PARALLEL_MAIN_BEGIN
   
   memory->end_group(group_test_2);
 
-  unit_assert (strcmp(memory->current_group(),"\0") == 0);
+  const char * name_0;
+  int handle_0 = memory->current_group(&name_0);
+
+  unit_assert (strcmp(name_0,"\0") == 0);
 
   DEL_F2(size_test_2);
   DEL_F3(size_test_2);
- 
+
   unit_assert (memory->bytes(handle_1) == size_test_1);
   unit_assert (memory->bytes(handle_2) == size_test_2);
   unit_assert (memory->bytes() == size);
 
-
-  // curr_group()
-  unit_func ("curr_group()");
-  unit_assert(0);  //FAILS
-
-  // bytes()
-  unit_func ("bytes()");
-  unit_assert(0); //FAILS
-
   // available()
-  unit_func ("available()");
-  unit_assert(0); //FAILS
+
+  memory->set_limit(1000000);
+  memory->set_limit(10000,1);
+
+  unit_func ("set_limit()");
+  unit_assert(memory->limit()  == 1000000);
+  unit_func ("limit()");
+  unit_assert(memory->limit(1) == 10000);
 
   // efficiency()
+
+  
   unit_func ("efficiency()");
-  unit_assert(0); //FAILS
+
+  char * temp_0 = new char [10000];
+  new_count++;
+  unit_assert (fabs(memory->efficiency() - 0.01) < 1e-7);
+  delete [] temp_0;
+  del_count++;
+
+  memory->begin_group(1);
+  char * temp_1 = new char [1000];
+  new_count++;
+  unit_assert (fabs(memory->efficiency(1) - 0.1) < 1e-7);
+  memory->end_group(1);
+
+  delete [] temp_1;
+  del_count++;
 
   // highest()
   unit_func ("highest()");
-  unit_assert(0); //FAILS
 
-  // set_limit()
-  unit_func ("set_limit()");
-  unit_assert(0); //FAILS
-
-  // get_limit()
-  unit_func ("get_limit()");
-  unit_assert(0); //FAILS
+  unit_assert(memory->highest() == 10000);
+  unit_assert(memory->highest(1) == 1000);
 
   // num_new()
   unit_func ("num_new()");
-  unit_assert(0); //FAILS
+  unit_assert(memory->num_new() == new_count);
 
   // num_delete()
   unit_func ("num_delete()");
-  unit_assert(0); //FAILS
+  unit_assert(memory->num_delete() == del_count);
 
   memory->print();
 #else /* CONFIG_USE_MEMORY */

@@ -64,31 +64,27 @@ public: // interface
   /// End allocating memory associated with the specified group
   void end_group ( memory_group_handle group_id ) throw ();
 
-  /// Return name of the current group
-  const char * current_group () throw ();
-
-  /// Return handle for the current group
-  memory_group_handle current_handle () throw ();
+  /// Return handle and name of the current group
+  memory_group_handle current_group (const char ** ) throw ();
 
   /// Current number of bytes allocated
   long long bytes ( memory_group_handle group_handle = 0 ) throw ();
   
-  /// Estimate of amount of local memory available
-  long long available ( memory_group_handle group_handle = 0 ) throw ();
-
   /// Estimate of used / available memory
   float efficiency ( memory_group_handle group_handle = 0 ) throw ();
 
   /// Maximum number of bytes allocated
   long long highest ( memory_group_handle group_handle = 0 ) throw ();
 
-
   /// Specify the maximum number of bytes to use
   void set_limit ( long long           size, 
-			  memory_group_handle group_handle = 0) throw ();
+		   memory_group_handle group_handle = 0) throw ();
 
-  /// Query the maximum number of bytes to use
-  long long get_limit ( memory_group_handle group_handle = 0 ) throw ();
+  /// Return the maximum number of bytes to use
+  long long limit ( memory_group_handle group_handle = 0) throw ();
+
+  /// Query the maximum number of bytes left to use, 0 if unknown
+  long long available ( memory_group_handle group_handle = 0 ) throw ();
 
 
   /// Return the number of calls to allocate for the group
@@ -148,8 +144,8 @@ private: // attributes
   /// Array of known group names
   char * group_names_ [MEMORY_MAX_NUM_GROUPS + 1];
 
-  /// Hardware parameters
-  long long available_   [MEMORY_MAX_NUM_GROUPS + 1];
+  /// Limit on number of bytes to allocate.  Currently not checked.
+  long long limit_   [MEMORY_MAX_NUM_GROUPS + 1];
 
   /// Current bytes allocated for different groups
   long long bytes_       [MEMORY_MAX_NUM_GROUPS + 1];
