@@ -3,21 +3,28 @@ import sys
 
 charm_path = '/home/bordner/charm/charm'
 
+# CONFIGURATION
+
+use_papi = 0
+
 # DEFINES
 
 define_papi  = ['CONFIG_USE_PAPI'];
 define_hdf5  = ['H5_USE_16_API'];
 define_png   = ['NO_FREETYPE'];
 
-defines      = define_papi + define_hdf5 + define_png;
+defines      = define_hdf5 + define_png;
 define_mpi   = ['CONFIG_USE_MPI'];
 define_charm = ['CONFIG_USE_CHARM']
 
-defines_string   = ' -D' + define_papi[0] + \
-		   ' -D' + define_hdf5[0] + \
+defines_string   = ' -D' + define_hdf5[0] + \
 		   ' -D' + define_png[0]
 define_mpi_string   = ' -D' + define_mpi[0]
 define_charm_string = ' -D' + define_charm[0]
+
+if (use_papi != 0): 
+	defines = defines + define_papi
+	defines_string = defines_string + ' -D' + define_papi[0]
 
 # PARSE ARGUMENTS
 
@@ -260,9 +267,15 @@ elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
    # PAPI
 
    path_papi = '/opt/usersoft/papi/4.1.0'
-   lib_papi = path_papi + '/lib64'
-   inc_papi = path_papi + '/include'
 
+   if (use_papi != 0):
+      lib_papi = path_papi + '/lib64'
+      inc_papi = path_papi + '/include'
+   else:
+      lib_papi = ''
+      inc_papi = ''
+      
+   
    # DEFINES 
    # (handled differently since xlC expects -Ddoh but xlf expects -D doh)
 

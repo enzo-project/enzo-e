@@ -20,9 +20,9 @@ public: // interface
   /// Initialize a Counters object
   Counters(size_t num_attributes, size_t num_counters)
     {
-      a_  = new int       [num_attributes];
-      c_  = new long long [num_counters];
-      dc_ = new long long [num_counters];
+      attributes_     = new int       [num_attributes];
+      counters_start_ = new long long [num_counters];
+      counters_stop_  = new long long [num_counters];
     }
 
   //----------------------------------------------------------------------
@@ -32,9 +32,9 @@ public: // interface
   /// Destructor
   ~Counters()
     {
-      delete [] a_;
-      delete [] c_;
-      delete [] dc_;
+      delete [] attributes_;
+      delete [] counters_start_;
+      delete [] counters_stop_;
     }
 
   /// Copy constructor
@@ -53,13 +53,13 @@ public: // interface
 private: // attributes
 
   /// Array of attribute values
-  int       * a_;
+  int       * attributes_;
 
   /// Array of the current counter values at the start of the region
-  long long * c_;
+  long long * counters_start_;
 
   /// Array of changes to the counter values
-  long long * dc_;
+  long long * counters_stop_;
 
 };
 

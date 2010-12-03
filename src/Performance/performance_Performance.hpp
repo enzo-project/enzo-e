@@ -142,12 +142,9 @@ private: // functions
 
   void new_item_ 
   (
-   enum item_type  type,
-   std::string item_type_name,
-   unsigned id_item, 
-   std::string item_name,
-   std::string * item_names,
-   unsigned num_items_
+   std::vector<std::string> item_names,
+   unsigned                 id_item, 
+   std::string              item_name
    );
 
 private: // attributes
@@ -159,7 +156,7 @@ private: // attributes
   unsigned num_attributes_;
 
   /// Attribute names
-  std::string * attribute_names_;
+  std::vector<std::string> attribute_names_;
 
   /// Which attributes are monotonic
   bool * monotonic_attributes_;
@@ -171,7 +168,7 @@ private: // attributes
   unsigned num_counters_;
 
   /// Counter names
-  std::string * counter_names_;
+  std::vector<std::string> counter_names_;
 
   /// Number of groups
   unsigned num_groups_;
@@ -180,13 +177,10 @@ private: // attributes
   unsigned current_group_;
 
   /// Group names
-  std::string * group_names_;
-
-  /// Number of regions
-  unsigned num_regions_;
+  std::vector<std::string> group_names_;
 
   /// Region names
-  std::string * region_names_;
+  std::vector<std::string> region_names_;
 
   /// Current region; 0 if none
   unsigned current_region_;

@@ -29,14 +29,13 @@ Performance::Performance
     num_groups_                (num_groups),
     current_group_             (0),
     group_names_               (NULL),
-    num_regions_               (num_regions),
     region_names_              (NULL),
     current_region_            (0)
 {
-  attribute_names_              = new std::string [ num_attributes_ + 1];
-  counter_names_                = new std::string [ num_counters_ + 1];
-  group_names_                  = new std::string [ num_groups_ + 1];
-  region_names_                 = new std::string [ num_regions_ + 1];
+  attribute_names_.reserve(num_attributes + 1);
+  counter_names_.reserve(num_counters + 1);
+  group_names_.reserve(num_groups + 1);
+  region_names_.reserve(num_regions + 1);
   monotonic_attributes_         = new bool [num_attributes + 1];
   for (unsigned i=0; i<=num_attributes; i++) {
     monotonic_attributes_[i]       = false;
@@ -60,7 +59,6 @@ Performance::~Performance()
   delete [] attribute_names_;
   delete [] counter_names_;
   delete [] group_names_;
-  delete [] region_names_;
   delete [] monotonic_attributes_;
   delete [] monotonic_attribute_values_;
 
@@ -94,12 +92,9 @@ void Performance::new_attribute(unsigned    id_attribute,
 /// @param    attribute_name
 /// @param    is_monotonic
 {
-  new_item_ (item_attribute, 
-	     "attribute", 
+  new_item_ (attribute_names_, 
 	     id_attribute, 
-	     attribute_name,
-	     attribute_names_, 
-	     num_attributes_);
+	     attribute_name);
 
   monotonic_attributes_[id_attribute] = true;
 
@@ -123,12 +118,9 @@ void Performance::set_attribute(unsigned id_attribute)
 void Performance::new_group(unsigned    id_group, 
 			    std::string group_name)
 {
-  new_item_ (item_group, 
-	     "group", 
+  new_item_ (group_names_,
 	     id_group, 
-	     group_name,
-	     group_names_, 
-	     num_groups_);
+	     group_name);
 }
 
 //----------------------------------------------------------------------
@@ -180,12 +172,9 @@ void Performance::end_group(unsigned id_group)
 void Performance::new_region(unsigned    id_region, 
 			     std::string region_name)
 {
-  new_item_ (item_region, 
-	     "region", 
+  new_item_ (region_names_,
 	     id_region, 
-	     region_name,
-	     region_names_, 
-	     num_regions_);
+	     region_name);
 }
 
 //----------------------------------------------------------------------
@@ -218,12 +207,9 @@ void Performance::stop_region(unsigned region_id)
 void Performance::new_counter(unsigned    id_counter,
 			      std::string counter_name)
 {
-  new_item_ (item_counter, 
-	     "counter", 
+  new_item_ (counter_names_, 
 	     id_counter, 
-	     counter_name,
-	     counter_names_, 
-	     num_counters_);
+	     counter_name);
 }
 
 //----------------------------------------------------------------------
@@ -258,25 +244,11 @@ void Performance::flush()
 
 void Performance::new_item_ 
 (
- enum item_type type,
- std::string    item_type_name,
+ std::vector<std::string>  item_names
  unsigned       id_item, 
  std::string    item_name,
- std::string *  item_names,
- unsigned       num_items_
 )
 {
-  if ( ! (1 <= id_item && id_item <= num_items_)) {
-
-    char message [ ERROR_MESSAGE_LENGTH ];
-    sprintf (message, "id_item = %d out of range [0,%d] for item %s",
-	     id_item, num_items_, item_name.c_str());
-    WARNING_MESSAGE("Performance::start_item",message);
-
-  } else {
-
-    item_names[id_item] = item_name;
-
-  }
+  item_names[id_item] = item_name;
 }
 
