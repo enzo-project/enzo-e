@@ -30,5 +30,9 @@ Physics {
 #        max_expansion_rate = 0.01;
 #   }
 }
+Output {
+   cycle = 0;
+}
+
 
      

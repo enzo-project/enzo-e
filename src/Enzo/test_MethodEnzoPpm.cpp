@@ -25,12 +25,15 @@
 
 #include PARALLEL_CHARM_INCLUDE(test_MethodEnzoPpm.decl.h)
 
-void output_fields(FieldBlock * field_block,
-		   int write_count,
+void output_images(Monitor * monitor,
+		   int cycle,
+		   FieldBlock * field_block,
 		   int field_count,
 		   int field_index[],
-		   Monitor * monitor)
+		   int cycle_image = 1)
 {
+
+  if (! (cycle_image && cycle % cycle_image == 0)) return;
 
   FieldDescr * field_descr = field_block->field_descr();
   int nx,ny,nz;
@@ -47,10 +50,23 @@ void output_fields(FieldBlock * field_block,
     char filename[80];
     std::string field_name = field_descr->field_name(index);
     Scalar * field_values = (Scalar *)field_block->field_values(index);
-    sprintf (filename,"ppm-%s-%05d.png",field_name.c_str(),write_count);
+    sprintf (filename,"ppm-%s-%05d.png",field_name.c_str(),cycle);
     monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 0.0, 1.0);
   }
-  
+}
+
+void output_progress (Monitor * monitor,
+		      int cycle,
+		      double time,
+		      double dt,
+		      int cycle_progress = 1
+		      )
+{
+  if (! (cycle_progress && cycle % cycle_progress == 0)) return;
+  char buffer[100];
+  sprintf (buffer," cycle = %05d  sim-time = %10.8f  dt = %10.8f",
+	   cycle,time,dt);
+  monitor->print (buffer);
 }
 
 PARALLEL_MAIN_BEGIN
@@ -149,10 +165,6 @@ PARALLEL_MAIN_BEGIN
   upper[1] = parameters->list_value_scalar(3,"extent",1.0);
   upper[2] = parameters->list_value_scalar(5,"extent",1.0);
 
-  printf ("Extent = %g %g %g  %g %g %g\n",
-	  lower[0],lower[1],lower[2],
-	  upper[0],upper[1],upper[2]);
-
   field_block->set_field_descr(field_descr);
   field_block->set_size(nx,ny);
   field_block->set_extent(0.0,0.3,0.0,0.3);
@@ -205,28 +217,33 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  printf ("Initial\n");
-
   int indices[] = {index_density,
 		   index_velocity_x,
 		   index_velocity_y,
 		   index_total_energy};
 
-  // Set stopping criteria
+  // Initialize stopping criteria
 
   parameters->set_current_group ("Stopping");
+
   double time_final = parameters->value_scalar("time",2.5);
   int   cycle_final = parameters->value_integer("cycle",1000);
-  int  cycle_output = 10;
 
   double time = 0;
+  double dt = 0;
   int cycle = 0;
-  //  initialize_implosion(nx+gx);
 
-  // Initial data dump
+  // Initialize monitoring parameters
 
+  parameters->set_current_group ("Monitor");
 
-  output_fields(field_block,cycle,4,indices,monitor);
+  int  cycle_image    = parameters->value_integer("cycle_image",10);
+  int  cycle_progress = parameters->value_integer("cycle_progress",1);
+
+  // Initial progress and image monitoring
+
+  output_progress(monitor,cycle,time,dt);
+  output_images(monitor,cycle,field_block,4,indices);
 
   Papi papi;
   Timer timer;
@@ -239,10 +256,10 @@ PARALLEL_MAIN_BEGIN
 
     field_block->enforce_boundary(boundary_reflecting);
 
-    double dt = simulation.method_timestep()->compute_block(data_block);
+    dt = simulation.method_timestep()->compute_block(data_block);
 
-    printf ("cycle = %d  sim-time = %10g dt = %10g\n",
-	    cycle,time,dt );
+    output_images  (monitor,cycle,field_block,4,indices,cycle_image);
+    output_progress(monitor,cycle,time,dt,cycle_progress);
 
     simulation.method_hyperbolic(0)->advance_block(data_block,time,dt);
 
@@ -251,14 +268,13 @@ PARALLEL_MAIN_BEGIN
     ++cycle;
     time += MIN(dt,time_final-time);
 
-    // data dump
-    if (cycle % cycle_output == 0) {
-      output_fields(field_block,cycle,4,indices,monitor);
-    }
   }
 
   papi.stop();
   timer.stop();
+
+  output_images  (monitor,cycle_final,field_block,4,indices);
+  output_progress(monitor,cycle_final,time,dt);
 
   printf ("Time real = %f\n",papi.time_real());
   printf ("Time proc = %f\n",papi.time_proc());

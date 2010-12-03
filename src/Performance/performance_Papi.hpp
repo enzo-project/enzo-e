@@ -36,16 +36,16 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Destructor
-  ~Papi() throw()
-  {};
+  // ~Papi() throw()
+  // {};
 
-  /// Copy constructor
-  Papi(const Papi & papi) throw()
-  {};
+  // /// Copy constructor
+  // Papi(const Papi & papi) throw()
+  // {};
 
-  /// Assignment operator
-  Papi & operator= (const Papi & papi) throw()
-  {};
+  // /// Assignment operator
+  // Papi & operator= (const Papi & papi) throw()
+  // {return *this};
 
   //----------------------------------------------------------------------
   // global control

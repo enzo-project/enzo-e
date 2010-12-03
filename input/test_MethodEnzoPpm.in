@@ -6,9 +6,9 @@ Stopping {
   cycle = 100;
 }
 Mesh {
-   root_size  = [100, 100];  # 100 x 100
-   patch_size = [100, 100];  # 100 <= mp <= 100
-   block_size = [100, 100];  # 100 <= mb <= 100
+   root_size  = [100, 100];  # N x N
+   patch_size = [100, 100];  # N <= mp <= N
+   block_size = [100, 100];  # N <= mb <= N
 }
 Field {
    ghosts = [3,3];
@@ -16,6 +16,10 @@ Field {
 }
 Method {
    sequence = ["ppm"];
+}
+Monitor {
+   cycle_progress = 0;  # How many cycles between progress display; 0 for none
+   cycle_image    = 0;  # How many cycles between image dumps; 0 for none
 }
 Physics {
    dimensions = 2;
@@ -30,5 +34,6 @@ Physics {
 #        max_expansion_rate = 0.01;
 #   }
 }
+
 
      

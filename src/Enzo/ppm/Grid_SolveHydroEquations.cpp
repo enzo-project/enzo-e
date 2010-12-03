@@ -7,14 +7,16 @@
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
 #include "enzo.hpp"
+#include "error.hpp"
 #include "cello_hydro.h"
 
+static bool first_time = true;
 
 int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
 				    int CycleNumber, float dt)
 {
-
-  if (data_block) {
+  if (first_time && data_block) {
+    first_time = false;
     WARNING_MESSAGE("EnzoDescr::SolveHydroEquations",
 		    "Ignoring data_block input parameter");
   }
