@@ -5,6 +5,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:38:43 PDT 2009
 /// @bug      Probable memory leaks
+/// @todo     Add more info to Exception messages, e.g. parameter, expected type and actual type
 /// @brief    Read in a parameter file and access parameter values
 
 #include <stdlib.h>

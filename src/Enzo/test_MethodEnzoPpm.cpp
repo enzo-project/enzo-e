@@ -136,6 +136,23 @@ PARALLEL_MAIN_BEGIN
   DataDescr  * data_descr  = simulation.data_descr();
   FieldDescr * field_descr = data_descr->field_descr();
 
+  parameters->set_current_group ("Domain");
+  
+  double lower[3];
+  double upper[3];
+
+  lower[0] = parameters->list_value_scalar(0,"extent",0.0);
+  lower[1] = parameters->list_value_scalar(2,"extent",0.0);
+  lower[2] = parameters->list_value_scalar(4,"extent",0.0);
+
+  upper[0] = parameters->list_value_scalar(1,"extent",1.0);
+  upper[1] = parameters->list_value_scalar(3,"extent",1.0);
+  upper[2] = parameters->list_value_scalar(5,"extent",1.0);
+
+  printf ("Extent = %g %g %g  %g %g %g\n",
+	  lower[0],lower[1],lower[2],
+	  upper[0],upper[1],upper[2]);
+
   field_block->set_field_descr(field_descr);
   field_block->set_size(nx,ny);
   field_block->set_extent(0.0,0.3,0.0,0.3);

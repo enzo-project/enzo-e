@@ -3,12 +3,23 @@ import sys
 
 charm_path = '/home/bordner/charm/charm'
 
+# DEFINES
+
+define_papi  = ['CONFIG_USE_PAPI'];
+define_hdf5  = ['H5_USE_16_API'];
+define_png   = ['NO_FREETYPE'];
+
+defines      = define_papi + define_hdf5 + define_png;
+define_mpi   = ['CONFIG_USE_MPI'];
+define_charm = ['CONFIG_USE_CHARM']
+
+defines_string   = ' -D' + define_papi[0] + \
+		   ' -D' + define_hdf5[0] + \
+		   ' -D' + define_png[0]
+define_mpi_string   = ' -D' + define_mpi[0]
+define_charm_string = ' -D' + define_charm[0]
+
 # PARSE ARGUMENTS
-
-cpp_papi = ['CONFIG_USE_PAPI'];
-cpp_mpi  = ['CONFIG_USE_MPI'];
-
-cpp_config = cpp_papi + cpp_mpi
 
 arch = ARGUMENTS.get('arch','unknown')
 type = ARGUMENTS.get('type','unknown')
@@ -73,7 +84,7 @@ if (platform == 'linux-serial'):
    serial_run   = ""
    env = Environment (
       CC          = 'gcc',	
-      CPPDEFINES = ['NO_FREETYPE'],
+      CPPDEFINES  = defines,
       CPPPATH     = '#/include',
       CXXFLAGS    = '-Wall -g  -m128bit-long-double',
       CFLAGS      = '-Wall -g  -m128bit-long-double',
@@ -92,7 +103,7 @@ elif (platform == 'linux-mpi'):
    parallel_type = "mpi"
    env = Environment (
       CC          = 'mpicc',	
-      CPPDEFINES = ['NO_FREETYPE'] + cpp_config,
+      CPPDEFINES  = defines + define_mpi,
       CPPPATH     = '#/include',
       CXXFLAGS    = '-Wall -g  -m128bit-long-double',
       CFLAGS      = '-Wall -g  -m128bit-long-double',
@@ -111,7 +122,7 @@ elif (platform == 'linux-mpi-valgrind'):
    parallel_type = "mpi"
    env = Environment (
       CC          = 'mpicc',	
-      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
+      CPPDEFINES  = defines + define_mpi,
       CPPPATH     = '#/include',
       CXXFLAGS    = '-Wall -g  -m128bit-long-double',
       CFLAGS      = '-Wall -g  -m128bit-long-double',
@@ -132,7 +143,7 @@ elif (platform == 'linux-ampi'):
   
    env = Environment(
       CC          = charm_path + '/bin/charmc -language ampi',
-      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_MPI'],
+      CPPDEFINES  = defines + define_mpi,
       CPPPATH     = '#/include',
       CXX         = charm_path + '/bin/charmc -language ampi',
       CXXFLAGS    = '-g',
@@ -166,7 +177,7 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
   
    env = Environment(
       CC          = charm_path + '/bin/charmc -language charm++ '+flags+flags_charm,
-      CPPDEFINES = ['NO_FREETYPE','CONFIG_USE_CHARM'],
+      CPPDEFINES  = defines + define_charm,
       CPPPATH     = '#/include',
       CXX         = charm_path + '/bin/charmc -language charm++ '+flags+flags_charm,
       CXXFLAGS    = flags,
@@ -196,7 +207,7 @@ elif (platform == 'sdsc-triton-charm' or platform == 'sdsc-triton-serial'):
    path_hdf5 = '/opt/hdf5/pgi'
    env = Environment (
       CC      = 'pgcc',	
-      CPPDEFINES = ['NO_FREETYPE'],
+      CPPDEFINES = defines + define_charm,
       CPPPATH = ['#/include', path_hdf5 + '/include'],
       CXXFLAGS = '-g -DH5_USE_16_API',
       CFLAGS   = '-g -DH5_USE_16_API',
@@ -227,8 +238,6 @@ elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
    flags_fort = '-qextname -I include'
    flags = flags_opt + ' ' + flags_debug + ' '
 
-   defines = '-D NO_FREETYPE -DH5_USE_16_API '
-
    # Compilers
 
    path_fc   = '/opt/ibmcmp/xlf/13.1'
@@ -247,19 +256,29 @@ elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
    lib_hdf5 = path_hdf5 + '/lib'
    inc_hdf5 = path_hdf5 + '/include'
 
+   # PAPI
+
+   path_papi = '/opt/usersoft/papi/4.1.0'
+   lib_papi = path_papi + '/lib64'
+   inc_papi = path_papi + '/include'
+
+   # DEFINES 
+   # (handled differently since xlC expects -Ddoh but xlf expects -D doh)
+
+
    env = Environment (
       ARFLAGS  = 'r',
-      CCFLAGS = flags + defines,
-      CC      = cc,
-      CPPPATH = ['/home/bordner/include', '#/include', inc_hdf5],
-      CXX     = cxx,	
+      CCFLAGS = flags,
+      CC      = cc + defines_string,
+      CPPPATH = ['/home/bordner/include', '#/include', inc_hdf5, inc_papi],
+      CXX     = cxx + defines_string,	
+      CXXFLAGS = flags,
       ENV         = os.environ,
-      CXXFLAGS = flags + defines,
       DEFINES = '',
       FORTRANFLAGS = flags + flags_fort,
       FORTRANLIBS = ['xlf90','xlfmath','xl'],
       FORTRAN = fc,
-      LIBPATH = ['#/lib','/home/bordner/lib',lib_fc,lib_hdf5],
+      LIBPATH = ['#/lib','/home/bordner/lib',lib_fc,lib_hdf5,lib_papi],
       LINKFLAGS  = flags
    )
 
