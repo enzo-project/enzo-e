@@ -93,7 +93,7 @@ int ParallelLayout::blocks_per_thread (int *bt0, int *bt1, int *bt2) throw()
 //----------------------------------------------------------------------
 
 bool ParallelLayout::neighbor_is_internal (int ip, int it, int id,
-				   axis_type axis, int face)
+					   axis_enum axis, int face)
 {
   int k = neighbor_project_(ip,it,id,axis,face);
   return (0 <= k && k < nd_[axis] * nt_[axis] * np_[axis]);
@@ -102,7 +102,7 @@ bool ParallelLayout::neighbor_is_internal (int ip, int it, int id,
 //----------------------------------------------------------------------
 
 int ParallelLayout::neighbor_process (int ip, int it, int id,
-			      axis_type axis, int face)  throw()
+				      axis_enum axis, int face)  throw()
 {
 
   // Project indices along axis of interest and return updated block index
@@ -116,7 +116,7 @@ int ParallelLayout::neighbor_process (int ip, int it, int id,
 //----------------------------------------------------------------------
 
 int ParallelLayout::neighbor_thread (int ip, int it, int id,
-			     axis_type axis, int face) throw()
+				     axis_enum axis, int face) throw()
 {
 
   // Project indices along axis of interest and return updated block index
@@ -170,21 +170,22 @@ void ParallelLayout::array_indices (int ip, int it, int id,
 
 //----------------------------------------------------------------------
 
-void ParallelLayout::set_periodic (axis_type axis, bool periodic)
+void ParallelLayout::set_periodic (axis_enum axis, bool periodic)
 {
   periodic_[axis] = periodic; 
 }
 
 //----------------------------------------------------------------------
 
-bool ParallelLayout::is_periodic (axis_type axis)
+bool ParallelLayout::is_periodic (axis_enum axis)
 {
   return periodic_[axis]; 
 }
 
 //----------------------------------------------------------------------
 
-int ParallelLayout::neighbor_project_(int ip, int it, int id, axis_type axis, int face)
+int ParallelLayout::neighbor_project_(int ip, int it, int id, 
+				      axis_enum axis, int face)
 {
   int ipa,ita,ida;
   switch (axis) {

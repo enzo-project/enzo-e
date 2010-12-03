@@ -9,13 +9,13 @@
 #ifndef METHOD_METHOD_HYPERBOLIC_HPP
 #define METHOD_METHOD_HYPERBOLIC_HPP
 
-enum argument_type {
+enum argument_enum {
   argument_unknown,
   argument_field,
   argument_particle
 };
 
-enum access_type {
+enum access_enum {
   access_unknown,
   access_read,
   access_write,
@@ -70,9 +70,9 @@ protected: // functions
 
   /// Specify a field or particle type and its access type
 
-  void add_argument_(argument_type type,
+  void add_argument_(argument_enum type,
 		     std::string   name,
-		     access_type   access_type,
+		     access_enum   access_type,
 		     DataDescr   * data_descr = 0) throw();
 
 protected: // attributes
@@ -81,13 +81,13 @@ protected: // attributes
   Global * global_;
 
   /// List of argument types, e.g. argument_type_field
-  std::vector<argument_type> argument_types_;
+  std::vector<argument_enum> argument_types_;
 
   /// List of argument names, e.g. "Density", "Velocity-X", etc.
   std::vector<std::string>   argument_names_;
 
   /// List of argument access types, e.g. access_read_write
-  std::vector<access_type>   access_types_;
+  std::vector<access_enum>   access_types_;
 
 };
 

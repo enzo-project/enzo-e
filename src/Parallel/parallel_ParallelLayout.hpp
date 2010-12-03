@@ -27,7 +27,7 @@
 #define index_1_to_y(i,nx,ny,nz) ((i/nx)%ny)
 #define index_1_to_z(i,nx,ny,nz) (i/(nx*ny))
 
-enum axis_type {
+enum axis_enum {
   axis_x,
   axis_y,
   axis_z };
@@ -69,17 +69,17 @@ public: // interface
 
   /// Return whether the given neighbor is inside the ParallelLayout or outside 
   bool neighbor_is_internal (int ip, int it, int id,
-			     axis_type axis, int face);
+			     axis_enum axis, int face);
 
   /// Return the relative process block in the given direction from
   //  the given (ip,thread,data) block
   int neighbor_process (int ip, int it, int id,
-			axis_type axis, int face)  throw();
+			axis_enum axis, int face)  throw();
 
   /// Return the relative thead block in the given direction from the
   /// given (process,thread,data) block
   int neighbor_thread (int ip, int it, int id,
-		       axis_type axis, int face) throw();
+		       axis_enum axis, int face) throw();
 
   /// Return the bounds associated with the given
   /// (process,thread,block) relative to the Patch block 0 < x,y,z < 1
@@ -96,10 +96,10 @@ public: // interface
   // Periodic functions
 
   /// Set whether each axis is periodic or not 
-  void set_periodic (axis_type axis, bool periodic);
+  void set_periodic (axis_enum axis, bool periodic);
 
   /// Return whether each axis is periodic or not 
-  bool is_periodic (axis_type axis);
+  bool is_periodic (axis_enum axis);
 
 private: // attributes
 
@@ -118,7 +118,7 @@ private: // attributes
 private: // functions
 
   /// Project block indices ip,it,id along given axis
-  int neighbor_project_(int ip, int it, int id, axis_type axis, int face);
+  int neighbor_project_(int ip, int it, int id, axis_enum axis, int face);
 
   /// Return the absolute block indices for the given
   /// (process,thread,block)

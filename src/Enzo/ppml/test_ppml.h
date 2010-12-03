@@ -1,6 +1,6 @@
 const int num_ghosts   = 3;
 
-enum problem_ppml_type {
+enum problem_ppml_enum {
   problem_ppml_unknown,
   problem_ppml_blast,
   problem_ppml_implosion3,

@@ -102,7 +102,8 @@ public: // interface
   void refresh_ghosts() throw();
 
   /// Enforce boundary conditions on a boundary face
-  void enforce_boundary(boundary_type boundary, face_type face = face_all) throw();
+  void enforce_boundary(enum boundary_enum boundary, 
+			face_enum face = face_all) throw();
 
   /// Split a block into 2, 4, or 8 subblocks; does not delete self
   void split(bool split_x, bool split_y, bool split_z, 
@@ -165,24 +166,24 @@ private: // functions
     throw (std::out_of_range);
 
   /// Enforce reflecting boundary conditions on a boundary face
-  void enforce_boundary_reflecting_(face_type face) throw();
+  void enforce_boundary_reflecting_(face_enum face) throw();
   template<class T>
   void enforce_boundary_reflecting_precision_
-  ( face_type face,
+  ( face_enum face,
     T * array,
     int nx,int ny,int nz,
     int gx,int gy,int gz,
     bool vx,bool vy,bool vz);
   /// Enforce outflow boundary conditions on a boundary face
-  void enforce_boundary_outflow_(face_type face) throw();
+  void enforce_boundary_outflow_(face_enum face) throw();
   /// Enforce inflow boundary conditions on a boundary face
-  void enforce_boundary_inflow_(face_type face) throw();
+  void enforce_boundary_inflow_(face_enum face) throw();
   /// Enforce periodic boundary conditions on a boundary face
-  void enforce_boundary_periodic_(face_type face) throw();
+  void enforce_boundary_periodic_(face_enum face) throw();
   /// Enforce dirichlet boundary conditions on a boundary face
-  void enforce_boundary_dirichlet_(face_type face) throw();
+  void enforce_boundary_dirichlet_(face_enum face) throw();
   /// Enforce neumann boundary conditions on a boundary face
-  void enforce_boundary_neumann_(face_type face) throw();
+  void enforce_boundary_neumann_(face_enum face) throw();
 
   //----------------------------------------------------------------------
 

@@ -4,12 +4,16 @@
 
 Import('env')
 Import('parallel_type')
+Import('use_papi')
 
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','cello','papi','pfm']
+
+components = ['error','cello']
+if (use_papi):
+	components = components = ['papi','pfm']
 
 #------------------------------
 # ENVIRONMENTS

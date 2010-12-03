@@ -22,8 +22,7 @@ Performance::Performance
   : counters_(),
     num_attributes_            (num_attributes),
     attribute_names_           (NULL),
-    monotonic_attributes_      (NULL),
-    monotonic_attribute_values_(NULL),
+    attribute_types_           (NULL),
     num_counters_              (num_counters),
     counter_names_             (NULL),
     num_groups_                (num_groups),
@@ -32,18 +31,14 @@ Performance::Performance
     region_names_              (NULL),
     current_region_            (0)
 {
-  attribute_names_.reserve(num_attributes + 1);
-  counter_names_.reserve(num_counters + 1);
-  group_names_.reserve(num_groups + 1);
-  region_names_.reserve(num_regions + 1);
-  monotonic_attributes_         = new bool [num_attributes + 1];
-  for (unsigned i=0; i<=num_attributes; i++) {
-    monotonic_attributes_[i]       = false;
-  }
-  monotonic_attribute_values_   = new int [num_attributes + 1];
-  for (unsigned i=0; i<=num_attributes; i++) {
-    monotonic_attribute_values_[i] = 0;
-  }
+  attribute_names_.resize(num_attributes + 1);
+  attribute_types_.resize(num_attributes + 1);
+
+  counter_names_.resize(num_counters + 1);
+
+  group_names_.resize(num_groups + 1);
+
+  region_names_.resize(num_regions + 1);
 
   // Create initial Counters object
 
@@ -55,12 +50,6 @@ Performance::Performance
 
 Performance::~Performance()
 {
-
-  delete [] attribute_names_;
-  delete [] counter_names_;
-  delete [] group_names_;
-  delete [] monotonic_attributes_;
-  delete [] monotonic_attribute_values_;
 
   for (unsigned i=0; i<counters_.size(); i++) {
     delete counters_.at(i);
@@ -85,19 +74,18 @@ Performance & Performance::operator= (const Performance & classname) throw()
 
 //----------------------------------------------------------------------
 
-void Performance::new_attribute(unsigned    id_attribute, 
-				std::string attribute_name,
-				bool        is_monotonic)
+void Performance::new_attribute(unsigned            id_attribute, 
+				std::string         attribute_name,
+				attribute_type_enum type)
 /// @param    id_attribute
 /// @param    attribute_name
-/// @param    is_monotonic
+/// @param    type
 {
   new_item_ (attribute_names_, 
 	     id_attribute, 
 	     attribute_name);
 
-  monotonic_attributes_[id_attribute] = true;
-
+  attribute_types_[id_attribute] = type;
 }
 
 //----------------------------------------------------------------------
@@ -244,9 +232,9 @@ void Performance::flush()
 
 void Performance::new_item_ 
 (
- std::vector<std::string>  item_names
+ std::vector<std::string> & item_names,
  unsigned       id_item, 
- std::string    item_name,
+ std::string    item_name
 )
 {
   item_names[id_item] = item_name;

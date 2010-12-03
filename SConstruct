@@ -298,9 +298,12 @@ elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
 
 Export('env')
 Export('platform')
+
 Export('parallel_type')
 Export('parallel_run')
 Export('serial_run')
+
+Export('use_papi')
 
 SConscript('src/SConscript')
 SConscript('test/SConscript')

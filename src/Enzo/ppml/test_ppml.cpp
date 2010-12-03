@@ -56,12 +56,12 @@ PARALLEL_MAIN_BEGIN
 
   // Parse command line arguments
 
-  enum problem_ppml_type problem = problem_ppml_unknown;
+  enum problem_ppml_enum problem = problem_ppml_unknown;
 
   if (PARALLEL_ARGC > ++argi) {
     for (int i=0; i<num_problems; i++) {
       if (strcmp(PARALLEL_ARGV[argi],problem_name[i]) == 0) {
-	problem = problem_ppml_type(i);
+	problem = problem_ppml_enum(i);
       }
     }
   }

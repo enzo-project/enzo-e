@@ -21,7 +21,7 @@
 
 /* Performance attributes */
 
-enum attribute_type {
+enum attribute_enum {
   attribute_undefined, // 0 is an undefined attribute
   attribute_timestep,  // Simulation timesteps [monotonic]
   attribute_level,     // AMR hierarchy level
@@ -32,7 +32,7 @@ enum attribute_type {
 
 /* Performance counters */
 
-enum counter_type {
+enum counter_enum {
   counter_undefined, // 0 is an undefined counter
 #ifdef CONFIG_USE_MPI
   counter_comm_send_bytes,     // Amount of data sent from this thread
@@ -71,7 +71,7 @@ enum counter_type {
 
 /* Performance functions */
 
-enum function_type {
+enum function_enum {
   function_undefined, // 0 is an undefined function
   num_functions = function_undefined
 };
@@ -80,9 +80,9 @@ enum function_type {
  * PROBLEM DECLARATIONS
  **********************************************************************/
 
-/// @enum     boundary_type
+/// @enum     boundary_enum
 /// @brief    External boundary condition types
-enum boundary_type {
+enum boundary_enum {
   boundary_undefined,   // 0 is an undefined boundary
   boundary_reflecting,  // 
   boundary_outflow,  // 
@@ -93,9 +93,9 @@ enum boundary_type {
   num_boundaries = boundary_neumann // Number of attribute types
 };
 
-/// @enum     face_type
+/// @enum     face_enum
 /// @brief    Cell faces [lower|upper][x|y|z]
-enum face_type {
+enum face_enum {
   face_lower_x = 0,
   face_upper_x = 1,
   face_lower_y = 2,
@@ -108,8 +108,8 @@ enum face_type {
  * COMPONENTS
  **********************************************************************/
 
-enum component_type {
-  // !!! EDIT component_type AND component_name TOGETHER !!!
+enum component_enum {
+  // !!! EDIT component_enum AND component_name TOGETHER !!!
   component_undefined,
   component_enzop,
   component_first = component_enzop,

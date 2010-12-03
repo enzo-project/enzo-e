@@ -7,12 +7,17 @@ SConscript('ppml/SConscript')
 
 Import('env')
 Import('parallel_type')
+Import('use_papi')
 
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
-components = ['method', 'enzo-ppm', 'field', 'error','parallel', 'monitor', 'parameters', 'simulation', 'mesh', 'cello','papi','pfm']
+components = ['method', 'enzo-ppm', 'field', 'error','parallel', 'monitor', 'parameters', 'simulation', 'mesh', 'cello']
+
+if (use_papi):
+	components = components = ['papi','pfm']
+
 libraries  = ['png', '$FORTRANLIBS']
 
 #------------------------------

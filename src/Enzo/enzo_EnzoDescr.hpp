@@ -200,7 +200,7 @@ public: // public attributes (!!)
   int  BoundaryRank;
   int  BoundaryDimension[MAX_DIMENSION];
   int  BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-  enum bc_type 
+  enum bc_enum 
     { // explicitly enumerated to match what Enzo expects
       bc_unknown    = 0, 
       bc_reflecting = 1, 
@@ -208,7 +208,7 @@ public: // public attributes (!!)
       bc_inflow     = 3, 
       bc_periodic   = 4 
     };
-  bc_type *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
+  bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
   float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
 
   // problem

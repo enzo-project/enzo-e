@@ -40,9 +40,9 @@ class Param {
 
   friend class Parameters;
 
-  /// @enum param_type
+  /// @enum param_enum
   /// @brief Parameter type 
-  enum param_type {
+  enum param_enum {
     param_unknown_,
     param_integer_,
     param_scalar_,
@@ -145,7 +145,7 @@ public: // interface
 private: // attributes
 
   /// Parameter type
-  enum param_type type_;
+  enum param_enum type_;
 
   /// Whether parameter value has been accessed
   bool value_accessed_;

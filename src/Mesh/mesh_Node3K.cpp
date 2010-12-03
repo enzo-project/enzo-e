@@ -42,7 +42,7 @@ Node3K::~Node3K()
   // update neighbor's neighbors
 
   for (int i=0; i<num_faces_(); i++) {
-    int io = opposite_face_(face_type(i));
+    int io = opposite_face_(face_enum(i));
     if (neighbor_[i]) neighbor_[i]->neighbor_[io] = NULL;
     neighbor_[i] = NULL;
   }
@@ -105,7 +105,7 @@ inline Node3K * Node3K::child (int ix, int iy, int iz)
 
 //----------------------------------------------------------------------
 
-inline Node3K * Node3K::neighbor (face_type face) 
+inline Node3K * Node3K::neighbor (face_enum face) 
 /// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
 { 
   return neighbor_[face]; 
@@ -113,7 +113,7 @@ inline Node3K * Node3K::neighbor (face_type face)
 
 //----------------------------------------------------------------------
 
-inline Node3K * Node3K::cousin (face_type face, int ix, int iy, int iz) 
+inline Node3K * Node3K::cousin (face_enum face, int ix, int iy, int iz) 
 /// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
 /// @param    ix        Index 0 <= ix < k of cell in grid block
 /// @param    iy        Index 0 <= iy < k of cell in grid block
@@ -138,7 +138,7 @@ inline void make_neighbors
 (
  Node3K * node_1, 
  Node3K * node_2, 
- face_type face_1
+ face_enum face_1
  )
 /// @param    node_1    First neighbor node pointer 
 /// @param    node_2    Second neighbor node pointer
@@ -146,7 +146,7 @@ inline void make_neighbors
 {
   if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
   if (node_2 != NULL) {
-    face_type face_2 = face_type(node_2->opposite_face_(face_1));
+    face_enum face_2 = face_enum(node_2->opposite_face_(face_1));
     node_2->neighbor_[face_2] = node_1;
   }
 }

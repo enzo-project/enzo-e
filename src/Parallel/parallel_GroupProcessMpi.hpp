@@ -9,13 +9,13 @@
 #ifndef PARALLEL_GROUP_PROCESS_MPI_HPP
 #define PARALLEL_GROUP_PROCESS_MPI_HPP
 
-enum send_type {
+enum send_enum {
   send_standard,
   send_buffered,
   send_synchronous,
   send_ready };
 
-enum data_type {
+enum data_enum {
   data_single,
   data_double };
 
@@ -82,11 +82,11 @@ public: // interface (Group)
   //--------------------------------------------------
 
   /// Set whether send is blocking or non-blocking
-  void set_type_send (send_type type)  throw()
+  void set_type_send (send_enum type)  throw()
   { send_type_ = type; };
 
   /// Set whether send is type or non-type
-  send_type type_send ()  throw()
+  send_enum type_send ()  throw()
   { return send_type_; };
 
 private: // functions
@@ -118,7 +118,7 @@ private: // attributes
 
 
   /// Whether to use standard, buffered, synchronous, or ready sends
-  enum send_type send_type_;
+  enum send_enum send_type_;
 
 };
 

@@ -9,7 +9,7 @@
 /// @date     2009-10-16
 /// @brief    Include file for the Parallel component
 
-enum parallel_type {
+enum parallel_enum {
   parallel_serial,
   parallel_mpi
 };

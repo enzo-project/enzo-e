@@ -57,12 +57,14 @@ PARALLEL_MAIN_BEGIN
   unit_class ("Performance");
 
   unit_func("Performance");
+
   Performance * performance = new Performance
-    ( num_attributes, num_counters, num_components, 3 );
+	  ( num_attributes, num_counters, num_components, 3 );
 
   // Add attributes
 
-  performance->new_attribute(attribute_timestep, "timestep", true);
+  performance->new_attribute(attribute_timestep, "timestep", 
+			     attribute_type_monotonic);
   performance->new_attribute(attribute_level,    "level");
   
   // Add counters

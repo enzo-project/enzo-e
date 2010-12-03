@@ -17,9 +17,9 @@
 /// @brief    Maximum allowed width of a line in a parameter file
 #define MAX_PARAMETER_FILE_WIDTH 255
 
-/// @enum     parameter_type
+/// @enum     parameter_enum
 /// @brief    Parameter data type
-enum parameter_type {
+enum parameter_enum {
   parameter_integer,
   parameter_scalar,
   parameter_string,
@@ -62,7 +62,7 @@ public: // interface
   void write (FILE * file_pointer);
 
   /// Return the parameter value of specified type
-  void value (std::string, parameter_type type, 
+  void value (std::string, parameter_enum type, 
 	      void * value, 
 	      void * deflt = 0);
 

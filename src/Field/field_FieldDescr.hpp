@@ -12,7 +12,7 @@
 /// @todo     Support temporary fields, e.g. temperature or gravitational potential
 /// @brief    Declaration for the FieldDescr class
 
-enum field_action_type {
+enum field_action_enum {
   field_action_unknown,  // Uninitialized action
   field_action_none,     // Do nothing if range exceeded
   field_action_assign,   // Assign field values to min / max if range exceeded
@@ -92,7 +92,7 @@ public: // functions
     throw(std::out_of_range);
 
   /// precision of given field
-  precision_type precision(int id_field) const 
+  precision_enum precision(int id_field) const 
     throw(std::out_of_range);
 
   /// Number of bytes per element required by the given field
@@ -102,14 +102,14 @@ public: // functions
   double minimum_value(int id_field) const throw(std::out_of_range);
 
   /// minimum action for the field
-  enum field_action_type minimum_action(int id_field) const
+  enum field_action_enum minimum_action(int id_field) const
     throw(std::out_of_range);
 
   /// maximum value for the field
   double maximum_value(int id_field) const  throw(std::out_of_range);
 
   /// maximum action for the field
-  enum field_action_type maximum_action(int id_field) const 
+  enum field_action_enum maximum_action(int id_field) const 
     throw(std::out_of_range);
 
   //----------------------------------------------------------------------
@@ -142,17 +142,17 @@ public: // functions
     throw(std::out_of_range);
 
   /// Set precision for a field
-  void set_precision(int id_field, precision_type precision) 
+  void set_precision(int id_field, precision_enum precision) 
     throw(std::out_of_range);
 
   /// Set minimum bound and action
   void set_minimum (int id_field, double min_value,
-		    enum field_action_type min_action) 
+		    enum field_action_enum min_action) 
     throw(std::out_of_range);
 
   /// Set maximum bound and action
   void set_maximum (int id_field, double max_value, 
-		    enum field_action_type max_action) 
+		    enum field_action_enum max_action) 
     throw(std::out_of_range);
 
 private: // attributes
@@ -169,9 +169,9 @@ private: // attributes
   /// Integer id for each group.  Inverse mapping of group_name_
   std::map<std::string,int> group_id_;
 
-  typedef std::set<int> set_int_type;
+  typedef std::set<int> int_set_type;
   /// Set of groups containing each field.  field_in_group_[field][group]
-  std::vector<set_int_type> field_in_group_;
+  std::vector<int_set_type> field_in_group_;
 
 
   /// alignment of start of each field in bytes
@@ -185,7 +185,7 @@ private: // attributes
 
 
   /// Precision of each field
-  std::vector<precision_type> precision_;
+  std::vector<precision_enum> precision_;
 
   /// cell centering for each field
   std::vector<bool *> centering_;
@@ -201,10 +201,10 @@ private: // attributes
   std::vector<double> max_value_;
 
   /// what to do if a field violates its minimum value
-  std::vector<enum field_action_type> min_action_;
+  std::vector<enum field_action_enum> min_action_;
 
   /// what to do if a field violates its maximum value
-  std::vector<enum field_action_type> max_action_;
+  std::vector<enum field_action_enum> max_action_;
 
 };
 

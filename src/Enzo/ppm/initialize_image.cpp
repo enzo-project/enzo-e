@@ -210,7 +210,7 @@ void EnzoDescr::initialize_image ()
 	int n1 = GridDimension[(dim+2)%3];
 	int n2 = GridDimension[(dim+1)%3];
 	int size = n1*n2;
-	BoundaryType [field][dim][face] = new bc_type [size];
+	BoundaryType [field][dim][face] = new bc_enum [size];
 	BoundaryValue[field][dim][face] = NULL;
 	for (int i2 = 0; i2<n2; i2++) {
 	  for (int i1 = 0; i1<n1; i1++) {

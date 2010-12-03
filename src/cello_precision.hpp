@@ -9,7 +9,7 @@
 /// @date     Thu Nov 11 17:08:38 PST 2010
 /// @brief    Include Cello precision types
 
-enum precision_type {
+enum precision_enum {
   precision_unknown,     //  unknown precision
   precision_default,     //  default precision, based on CONFIG_PRECISION_[SINGLE|DOUBLE]
   precision_half,       //   16-bit field data
@@ -49,8 +49,8 @@ enum precision_type {
 
 namespace cello {
 
-  int precision_size     (enum precision_type);
-  int precision_supported(enum precision_type);
+  int precision_size     (enum precision_enum);
+  int precision_supported(enum precision_enum);
 
   extern const char * precision_name[8];
 

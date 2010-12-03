@@ -112,7 +112,7 @@ void Parameters::write ( FILE * file_pointer )
 void Parameters::value 
 (
  std::string    parameter, 
- parameter_type type, 
+ parameter_enum type, 
  void *         value, 
  void *         deflt
 )

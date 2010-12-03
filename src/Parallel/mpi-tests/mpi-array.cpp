@@ -12,7 +12,7 @@
 //
 // PARAMETERS
 //
-// mpi_type
+// mpi_enum
 //    
 //      1   B    Blocking send/receive
 //      2   I    Non-blocking send/receive
@@ -25,7 +25,7 @@
 //      9   P4   One-sided get with start / complete / post / wait
 //     10   PL   One-sided get with lock synchronization
 //
-// data_type          int
+// data_enum          int
 //
 //      1   In-place full exchange   comm comp comm comp ...
 //      1   In-place x-y-z exchange  comm-x comp-x comm-y comp-y ...
@@ -62,7 +62,7 @@
 // ENUMERATIONS
 //----------------------------------------------------------------------
 
-enum mpi_type {
+enum mpi_enum {
   mpi_unknown,
   mpi_B,
   mpi_I,
@@ -90,7 +90,7 @@ const char * mpi_names[] = {
   "mpi_PL"
 };
   
-enum data_type {
+enum data_enum {
   data_unknown,
   data_alias,
   data_copy,
@@ -121,7 +121,7 @@ void  init_block
 
 void compute_B 
 (
- data_type data,
+ data_enum data,
  Scalar ** task_blocks,
  int ndx,int ndy,int ndz,
  int sx, int sy, int sz,
@@ -149,7 +149,7 @@ void check_range
 Scalar * ghost_exchange_task 
 (
  Scalar * task_block,
- data_type data,
+ data_enum data,
  int bx, int by, int bz,
  int gx, int gy, int gz
  );
@@ -178,7 +178,7 @@ Scalar * ghost_exchange_task_copy_ghost
 void ghost_exchange_all 
 (
  Scalar ** task_blocks,
- data_type data,
+ data_enum data,
  int sx, int sy, int sz,
  int bx, int by, int bz,
  int gx, int gy, int gz
@@ -203,7 +203,7 @@ void ghost_exchange_all_copy
 void recv 
 (
  int ip_to,
- mpi_type mpi,
+ mpi_enum mpi,
  Scalar * buffer,
  int ndx, int ndy, int ndz,
  int nx, int ny, int nz
@@ -256,7 +256,7 @@ void recv
     break;
   case mpi_unknown:
   default:
-    ERROR_MESSAGE("recv","Bad mpi_type");
+    ERROR_MESSAGE("recv","Bad mpi_enum");
   }
 }
 //======================================================================
@@ -327,8 +327,8 @@ int main (int argc, char ** argv)
   //--------------------------------------------------
 
   parameters.set_group ("Mpi_array");
-  mpi   = parameters.value_integer ("mpi_type",0);
-  data  = parameters.value_integer ("data_type",0);
+  mpi   = parameters.value_integer ("mpi_enum",0);
+  data  = parameters.value_integer ("data_enum",0);
   nx         = parameters.list_value_integer (0,"grid_size",16);
   ny         = parameters.list_value_integer (1,"grid_size",16);
   nz         = parameters.list_value_integer (2,"grid_size",16);
@@ -346,8 +346,8 @@ int main (int argc, char ** argv)
   // Check parameters
   //--------------------------------------------------
 
-  check_range (ip,"mpi_type",mpi,1,mpi_maximum);
-  check_range (ip,"data_type",data,1,data_maximum);
+  check_range (ip,"mpi_enum",mpi,1,mpi_maximum);
+  check_range (ip,"data_enum",data,1,data_maximum);
   check_range (ip,"nx",nx,4,256);
   check_range (ip,"ny",ny,4,256);
   check_range (ip,"nz",nz,4,256);
@@ -418,8 +418,8 @@ int main (int argc, char ** argv)
   //--------------------------------------------------
   
   if (ip==0) {
-    printf ("mpi_type   = %s\n",mpi_names[mpi]);
-    printf ("data_type  = %s\n",data_names[data]);
+    printf ("mpi_enum   = %s\n",mpi_names[mpi]);
+    printf ("data_enum  = %s\n",data_names[data]);
     printf ("problem size nx,ny,nz   = [%d %d %d]\n",nx,ny,nz);
     printf ("block size   bx,by,bz   = [%d %d %d]\n",bx,by,bz);
     printf ("processors   px,py,pz   = [%d %d %d]\n",px,py,pz);
@@ -484,7 +484,7 @@ int main (int argc, char ** argv)
 
   case mpi_B:
 
-    compute_B ((data_type)data,
+    compute_B ((data_enum)data,
 	       task_blocks,
 	       ndx,ndy,ndz,
 	       sx,sy,sz,
@@ -497,7 +497,7 @@ int main (int argc, char ** argv)
 
     if (ip==0) {
       fprintf (stderr,
-	       "%s:%d Error: unknown mpi_type %d\n\n",
+	       "%s:%d Error: unknown mpi_enum %d\n\n",
 	       __FILE__,__LINE__,mpi);
     }
     MPI_Abort (MPI_COMM_WORLD,1);
@@ -552,7 +552,7 @@ void  init_block (Scalar * task_block,
 
 //----------------------------------------------------------------------
 
-void compute_B (data_type data,
+void compute_B (data_enum data,
 		Scalar ** task_blocks,
 		int ndx,int ndy,int ndz,
 		int sx, int sy, int sz,
@@ -627,7 +627,7 @@ void update_block (Scalar * task_block,
 Scalar * ghost_exchange_task 
 (
  Scalar * task_block,
- data_type data,
+ data_enum data,
  int bx, int by, int bz,
  int gx, int gy, int gz
  )
@@ -662,7 +662,7 @@ Scalar * ghost_exchange_task
 void ghost_exchange_all 
 (
  Scalar ** task_blocks,
- data_type data,
+ data_enum data,
  int sx, int sy, int sz,
  int bx, int by, int bz,
  int gx, int gy, int gz)

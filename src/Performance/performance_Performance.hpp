@@ -14,12 +14,17 @@
 /// @brief    Counter value type
 typedef unsigned long long type_counter;
 
-enum item_type {
+enum item_enum {
   item_unknown,
   item_attribute,
   item_counter,
   item_group,
   item_region
+};
+
+enum attribute_type_enum {
+  attribute_type_default,
+  attribute_type_monotonic
 };
 
 class Performance {
@@ -53,7 +58,7 @@ public: // interface
   ///  	Create a new attribute
   void new_attribute(unsigned    id_attribute, 
 		     std::string attribute_name,
-		     bool        is_monotonic    = false);
+		     attribute_type_enum type = attribute_type_default);
 
   /// Return the value of an attribute
   int get_attribute(unsigned id_attribute);
@@ -142,7 +147,7 @@ private: // functions
 
   void new_item_ 
   (
-   std::vector<std::string> item_names,
+   std::vector<std::string> & item_names,
    unsigned                 id_item, 
    std::string              item_name
    );
@@ -159,10 +164,7 @@ private: // attributes
   std::vector<std::string> attribute_names_;
 
   /// Which attributes are monotonic
-  bool * monotonic_attributes_;
-
-  /// Values of monotonic attributes; 0 for non-monotonic
-  int  * monotonic_attribute_values_;
+  std::vector<attribute_type_enum> attribute_types_;
 
   /// Number of counters
   unsigned num_counters_;

@@ -17,9 +17,9 @@
 
 void MethodHyperbolic::add_argument_
 (
- argument_type argument,
+ argument_enum argument,
  std::string   argument_name,
- access_type   access_type,
+ access_enum   access_type,
  DataDescr   * data_descr
  ) throw()
 /// @param    argument       Type of argument, field or particle

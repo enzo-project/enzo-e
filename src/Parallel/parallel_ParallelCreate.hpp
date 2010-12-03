@@ -23,7 +23,7 @@ public: // interface
   ParallelCreate() 
   {};
 
-  Parallel * create (enum parallel_type type)
+  Parallel * create (enum parallel_enum type)
   { 
     Parallel * parallel;
     switch (type) {

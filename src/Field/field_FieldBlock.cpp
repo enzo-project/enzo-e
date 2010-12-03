@@ -81,7 +81,7 @@ void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
     ny += 2*gy + (cy?0:1);
     nz += 2*gz + (cz?0:1);
 
-    precision_type precision = field_descr_->precision(id_field);
+    precision_enum precision = field_descr_->precision(id_field);
     int bytes_per_element = cello::precision_size (precision);
 
     field_unknowns += bytes_per_element * (gx + nx*(gy + ny*gz));
@@ -153,7 +153,7 @@ void FieldBlock::clear
 	 id_field++) {
       int nx,ny,nz;
       field_size_(id_field,&nx,&ny,&nz);
-      precision_type precision = field_descr_->precision(id_field);
+      precision_enum precision = field_descr_->precision(id_field);
       switch (precision) {
       case precision_single:
 	for (int i=0; i<nx*ny*nz; i++) {
@@ -359,8 +359,8 @@ void FieldBlock::refresh_ghosts() throw()
 //----------------------------------------------------------------------
 void FieldBlock::enforce_boundary
 (
- boundary_type boundary,
- face_type     face 
+ boundary_enum boundary,
+ face_enum     face 
  ) throw()
 {
   if ( ghosts_allocated() ) {
@@ -404,7 +404,7 @@ void FieldBlock::enforce_boundary
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_reflecting_(face_type face) throw()
+void FieldBlock::enforce_boundary_reflecting_(face_enum face) throw()
 {
   int nx,ny,nz;
   int gx,gy,gz;
@@ -415,7 +415,7 @@ void FieldBlock::enforce_boundary_reflecting_(face_type face) throw()
     bool vx = field_descr_->field_name(field) == "velocity_x";
     bool vy = field_descr_->field_name(field) == "velocity_y";
     bool vz = field_descr_->field_name(field) == "velocity_z";
-    precision_type precision = field_descr_->precision(field);
+    precision_enum precision = field_descr_->precision(field);
     switch (precision) {
     case precision_single:
       enforce_boundary_reflecting_precision_(face,(float *)array,
@@ -446,7 +446,7 @@ void FieldBlock::enforce_boundary_reflecting_(face_type face) throw()
 
 template<class T>
 void FieldBlock::enforce_boundary_reflecting_precision_
-(face_type face, T * array,
+(face_enum face, T * array,
  int nx,int ny,int nz,
  int gx,int gy,int gz,
  bool vx,bool vy,bool vz)
@@ -566,31 +566,31 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_outflow_(face_type face) throw()
+void FieldBlock::enforce_boundary_outflow_(face_enum face) throw()
 {
   INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_outflow","");
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_inflow_(face_type face) throw()
+void FieldBlock::enforce_boundary_inflow_(face_enum face) throw()
 {
   INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_inflow","");
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_periodic_(face_type face) throw()
+void FieldBlock::enforce_boundary_periodic_(face_enum face) throw()
 {
   INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_periodic","");
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_dirichlet_(face_type face) throw()
+void FieldBlock::enforce_boundary_dirichlet_(face_enum face) throw()
 {
   INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_dirichlet","");
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_neumann_(face_type face) throw()
+void FieldBlock::enforce_boundary_neumann_(face_enum face) throw()
 {
   INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_neumann","");
 }
@@ -741,7 +741,7 @@ int FieldBlock::field_size_
 
   // Return array size in bytes
 
-  precision_type precision = field_descr_->precision(id_field);
+  precision_enum precision = field_descr_->precision(id_field);
   int bytes_per_element = cello::precision_size (precision);
   return (*nx) * (*ny) * (*nz) * bytes_per_element;
 }

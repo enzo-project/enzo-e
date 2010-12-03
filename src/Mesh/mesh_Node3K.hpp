@@ -38,14 +38,14 @@ public: // interface
   Node3K * child (int ix, int iy, int iz);
 
   /// return the specified neighbor
-  Node3K * neighbor (face_type face);
+  Node3K * neighbor (face_enum face);
 
   /// make the two nodes neighbors.  friend function since either can be NULL
   friend void make_neighbors 
-  (Node3K * node_1, Node3K * node_2, face_type face_1);
+  (Node3K * node_1, Node3K * node_2, face_enum face_1);
 
   /// get the child's cousin
-  Node3K * cousin (face_type face, int ix, int iy, int iz);
+  Node3K * cousin (face_enum face, int ix, int iy, int iz);
 
   /// return the parent
   Node3K * parent ();
@@ -150,7 +150,7 @@ private: // functions
   int index_(int ix, int iy, int iz) { return ix + k_*(iy + k_*iz); };
 
   /// Return index of opposite face
-  int opposite_face_ (face_type face) { return int(face) ^ 1; };
+  int opposite_face_ (face_enum face) { return int(face) ^ 1; };
 
   /// Return number of faces
   int num_faces_() { return 6; };
@@ -189,10 +189,10 @@ private: // attributes
   /// Number of cells per node axis, e.g. 2, 4, etc.
   char k_;
 
-  /// Child nodes in edge_type x edge_type ordering
+  /// Child nodes in edge_enum x edge_enum ordering
   Node3K ** child_;
 
-  /// Neighbor nodes in edge_type ordering
+  /// Neighbor nodes in edge_enum ordering
   Node3K ** neighbor_;
 
   /// Parent node

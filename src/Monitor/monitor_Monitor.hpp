@@ -9,9 +9,9 @@
 #ifndef MONITOR_MONITOR_HPP
 #define MONITOR_MONITOR_HPP
 
-/// @enum     reduce_type
+/// @enum     reduce_enum
 /// @brief    Reduction operator, used for image projections
-enum reduce_type {
+enum reduce_enum {
   reduce_unknown, /// Unknown reduction
   reduce_min,     /// Minimal value along the axis
   reduce_max,     /// Maximal value along the axis
@@ -65,7 +65,7 @@ public: // interface
 	      T * array,
 	      int nx,  int ny,  int nz,   // Array dimensions
 	      int         axis,           // Axis along which to project
-	      reduce_type op_reduce,      // Reduction operation along axis
+	      reduce_enum op_reduce,      // Reduction operation along axis
 	      double min, double max,     // Limits for color map
 	      const double * color_map = 0, // color map [r0 g0 b0 r1 g1 b1...]
 	      int            color_length=2 // length of color map / 3
@@ -91,7 +91,7 @@ void Monitor::image
 (std::string name, 
  T * array, 
  int nx, int ny, int nz,
- int axis, reduce_type op_reduce,
+ int axis, reduce_enum op_reduce,
  double min, double max, 
  const double * map_in, 
  int map_length)
