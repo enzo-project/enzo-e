@@ -54,6 +54,11 @@ public: // interface
   /// Write the current dataset from the buffer
   void write (Scalar * buffer);
 
+private: // functions
+
+  /// Return the HDF5 data type for the given precision
+  int precision_hdf5_(enum precision_enum precision);
+
 private: // attributes
 
   /// HDF5 file descriptor
@@ -76,9 +81,6 @@ private: // attributes
 
   /// HDF5 dataspace descriptor
   hid_t dataspace_;
-
-  /// HDF5 data type
-  hid_t datatype_;
 
   /// Last error
   herr_t      status_;

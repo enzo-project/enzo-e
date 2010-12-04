@@ -25,6 +25,8 @@
 
 #include PARALLEL_CHARM_INCLUDE(test_MethodEnzoPpm.decl.h)
 
+//----------------------------------------------------------------------
+
 void output_images(Monitor * monitor,
 		   int cycle,
 		   FieldBlock * field_block,
@@ -55,6 +57,54 @@ void output_images(Monitor * monitor,
   }
 }
 
+//----------------------------------------------------------------------
+
+void output_dump(FileHdf5 * hdf5,
+		 int cycle,
+		 FieldBlock * field_block,
+		 int field_count,
+		 int field_index[],
+		 int cycle_dump = 1)
+{
+
+  // Exit if we don't dump data this cycle
+  if (! (cycle_dump && cycle % cycle_dump == 0)) return;
+
+  // Refresh boundary conditions 
+  // (should have check to not do it more than once)
+
+  FieldDescr * field_descr = field_block->field_descr();
+  field_block->enforce_boundary(boundary_reflecting);
+
+  // Open file
+
+  char filename[80];
+  Scalar * field_values = (Scalar *)field_block->field_values(index);
+  sprintf (filename,"ppm-%05d.h5",cycle);
+
+  int nx,ny,nz;
+  field_block->size(&nx,&ny,&nz);
+
+  for (int i = 0; i < field_count; i++) {
+    field_descr->ghosts(i,&gx,&gy,&gz);
+    mx=nx+2*gx;
+    my=ny+2*gy;
+    mz=nz+2*gz;
+    int index = field_index[i];
+    std::string field_name = field_descr->field_name(index);
+    // Write data_block, including ghosts
+    // (should include option to omit ghosts)
+    // (what if ghosts aren't allocated in general?)
+    hdf5->dataset_open_write (field_name,mx,my,mz);
+    hdf5->write(field_block->field_values(index),a);
+    hdf5->dataset_close ();
+  }
+
+  hdf5->file_close();
+}
+
+//----------------------------------------------------------------------
+
 void output_progress (Monitor * monitor,
 		      int cycle,
 		      double time,
@@ -68,6 +118,7 @@ void output_progress (Monitor * monitor,
 	   cycle,time,dt);
   monitor->print (buffer);
 }
+
 
 PARALLEL_MAIN_BEGIN
 
@@ -233,6 +284,12 @@ PARALLEL_MAIN_BEGIN
   double dt = 0;
   int cycle = 0;
 
+  // Initialize Output parameters
+
+  parameters->set_current_group ("Output");
+
+  int  cycle_dump    = parameters->value_integer("cycle_dump",10);
+
   // Initialize monitoring parameters
 
   parameters->set_current_group ("Monitor");
@@ -260,6 +317,7 @@ PARALLEL_MAIN_BEGIN
 
     output_images  (monitor,cycle,field_block,4,indices,cycle_image);
     output_progress(monitor,cycle,time,dt,cycle_progress);
+    output_dump    (disk,cycle,field_block,4,indices,cycle_dump);
 
     simulation.method_hyperbolic(0)->advance_block(data_block,time,dt);
 

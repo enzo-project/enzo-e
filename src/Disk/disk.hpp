@@ -9,7 +9,10 @@
 /// @date     2008-03-18 17:48:36
 /// @brief    Include file for the Disk component
 
-#include <hdf5.h>
+#ifdef CONFIG_USE_HDF5
+#  include <hdf5.h>
+#endif
+
 #include <string>
 
 #include "cello.hpp"

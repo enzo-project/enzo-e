@@ -26,7 +26,6 @@ enum precision_enum {
 #   define SCALAR_SCANF  "%f"
 #   define SCALAR_PRINTF "%e "
 #   define SCALAR_MPI     MPI_FLOAT
-#   define SCALAR_HDF5    H5T_NATIVE_FLOAT
 #   define SCALAR_DEFINED
 #endif
 
@@ -36,7 +35,6 @@ enum precision_enum {
 #   define SCALAR_SCANF  "%lf"
 #   define SCALAR_PRINTF "%le "
 #   define SCALAR_MPI     MPI_DOUBLE
-#   define SCALAR_HDF5    H5T_NATIVE_DOUBLE
 #   ifdef SCALAR_DEFINED
 #      error Both CONFIG_PRECISION_SINGLE and CONFIG_PRECISION_DOUBLE defined
 #   endif

@@ -6,8 +6,6 @@
 /// @date      Thu Feb 21 16:11:36 PST 2008
 /// @brief     Implementation of the FileHdf5 class
 
-#include <hdf5.h>
-
 #include <string>
 
 #include "error.hpp"
@@ -24,9 +22,10 @@ FileHdf5::FileHdf5()
   is_file_open_(false),
   dataset_(0),
   dataset_name_(),
-  dataspace_(0),
-  datatype_(SCALAR_HDF5)
+  dataspace_(0)
 {
+#ifdef CONFIG_USE_HDF5
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -40,6 +39,7 @@ int FileHdf5::file_open  (std::string name, std::string mode)
  * @return      True iff opening the file was successful
  */
 {
+#ifdef CONFIG_USE_HDF5
   name = name + ".hdf5";
 
   if (is_file_open_) {
@@ -75,7 +75,9 @@ int FileHdf5::file_open  (std::string name, std::string mode)
   }
 
   return is_file_open_;
-
+#else
+  return 0;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -84,6 +86,7 @@ void FileHdf5::file_close ()
 /**
  */
 {
+#ifdef CONFIG_USE_HDF5
   if (! is_file_open_) {
     char warning_message[ERROR_MESSAGE_LENGTH];
     sprintf (warning_message,
@@ -102,6 +105,7 @@ void FileHdf5::file_close ()
       WARNING_MESSAGE("FileHdf5::file_close",warning_message);
     }
   }
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -110,6 +114,8 @@ void FileHdf5::group_open (std::string name)
 /**
  */
 {
+#ifdef CONFIG_USE_HDF5
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -118,6 +124,8 @@ void FileHdf5::group_close ()
 /**
  */
 {
+#ifdef CONFIG_USE_HDF5
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -127,6 +135,7 @@ void FileHdf5::dataset_open_write (std::string name,
 			       //			       int ix0, int iy0, int iz0,  /// unused
 			       //			       int mx,  int my,  int mz)   /// unused
 {
+#ifdef CONFIG_USE_HDF5
   if (file_mode_ != "w") {
 
     char error_message[ERROR_MESSAGE_LENGTH];
@@ -168,7 +177,7 @@ void FileHdf5::dataset_open_write (std::string name,
     
     dataset_   = H5Dcreate( file_, 
 			    name.c_str(), 
-			    datatype_, 
+			    datatype, 
 			    dataspace_,  
 			    H5P_DEFAULT );
 
@@ -185,6 +194,7 @@ void FileHdf5::dataset_open_write (std::string name,
       WARNING_MESSAGE("FileHdf5::dataset_open_write",warning_message);
     }
   }
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -197,6 +207,7 @@ void FileHdf5::dataset_open_read (std::string name,
 /**
  */
 {
+#ifdef CONFIG_USE_HDF5
   if (file_mode_ != "r") {
 
     char error_message[ERROR_MESSAGE_LENGTH];
@@ -246,6 +257,7 @@ void FileHdf5::dataset_open_read (std::string name,
       WARNING_MESSAGE("FileHdf5::dataset_open_read",warning_message);
     }
   }
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -264,7 +276,9 @@ void FileHdf5::dataset_close ()
 /**
  */
 {
+#ifdef CONFIG_USE_HDF5
   H5Dclose( dataset_);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -273,15 +287,60 @@ void FileHdf5::read  (Scalar * buffer)
 /**
  */
 {
-  H5Dread (dataset_, datatype_, dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
+#ifdef CONFIG_USE_HDF5
+  H5Dread (dataset_, datatype, dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
+#endif
 }
 
 //----------------------------------------------------------------------
 
-void FileHdf5::write (Scalar * buffer)
+void FileHdf5::write (Scalar * buffer,)
 /**
  */
 {
-  H5Dwrite (dataset_, datatype_, dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
+#ifdef CONFIG_USE_HDF5
+  H5Dwrite (dataset_, datatype, dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
+#endif
 }
 
+
+  //----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_HDF5
+  int precision_hdf5_(enum precision_enum precision)
+  {
+#   define SCALAR_HDF5    H5T_NATIVE_FLOAT
+#   define SCALAR_HDF5    H5T_NATIVE_DOUBLE
+    // NATIVE   X    FLOAT DOUBLE LDOUBLE
+    // IEEE     X    F32BE F64BE
+    // STD     B16BE B32BE B64BE 
+    switch (precision) {
+    case precision_unknown:
+      return 0;
+      break;
+    case precision_default:
+      return precision_hdf5(default_precision);
+      break;
+    case precision_half:
+      return H5T_STD_B16BE; // 16-bit bit field (big-endian)
+      break;
+    case precision_single:
+      return H5T_IEEE_F32BE; // 32-bit IEEE float (big-endian)
+      break;
+    case precision_double:
+      return H5T_IEEE_F64BE; // 64-bit IEEE float (big-endian)
+      break;
+    case precision_extended80:
+      return (sizeof(long double)==10);
+      break;
+    case precision_extended96:
+      return (sizeof(long double)==12);
+      break;
+    case precision_quadruple:
+      return (sizeof(long double)==16);
+      break;
+    default:
+      return 0;
+      break;
+    }
+  }

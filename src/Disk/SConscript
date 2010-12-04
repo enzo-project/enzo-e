@@ -3,6 +3,7 @@
 #------------------------------
 
 Import('env')
+Import('use_hdf5')
 Import('parallel_type')
 
 #------------------------------
@@ -10,13 +11,16 @@ Import('parallel_type')
 #------------------------------
 
 components = ['error']
-libraries  = ['hdf5']
+
+if (use_hdf5 != 0):
+	components = components + ['hdf5']
+
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=[components,libraries])
+env = env.Clone(LIBS=[components])
 
 #------------------------------
 # SOURCE
@@ -29,7 +33,7 @@ sources  = [Glob('disk*cpp')]
 # TARGETS
 #------------------------------
 
-libraries = env.Library ('disk', sources)
+libraries  = env.Library ('disk', sources)
 test_hdf5  = env.Program (['test_FileHdf5.cpp', sources])
 test_ifrit = env.Program (['test_Ifrit.cpp', sources])
 

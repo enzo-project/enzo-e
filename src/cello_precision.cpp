@@ -84,5 +84,4 @@ namespace cello {
       break;
     }
   }
-
 }

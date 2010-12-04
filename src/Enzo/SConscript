@@ -8,6 +8,7 @@ SConscript('ppml/SConscript')
 Import('env')
 Import('parallel_type')
 Import('use_papi')
+Import('use_hdf5')
 
 #------------------------------
 # DEPENDENCIES
@@ -17,6 +18,8 @@ components = ['method', 'enzo-ppm', 'field', 'error','parallel', 'monitor', 'par
 
 if (use_papi):
 	components = components = ['papi','pfm']
+if (use_hdf5):
+	components = components = ['hdf5']
 
 libraries  = ['png', '$FORTRANLIBS']
 

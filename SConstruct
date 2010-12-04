@@ -6,6 +6,7 @@ charm_path = '/home/bordner/charm/charm'
 # CONFIGURATION
 
 use_papi = 0
+use_hdf5 = 1
 
 # DEFINES
 
@@ -13,18 +14,21 @@ define_papi  = ['CONFIG_USE_PAPI'];
 define_hdf5  = ['H5_USE_16_API'];
 define_png   = ['NO_FREETYPE'];
 
-defines      = define_hdf5 + define_png;
+defines      = define_png;
 define_mpi   = ['CONFIG_USE_MPI'];
 define_charm = ['CONFIG_USE_CHARM']
 
-defines_string   = ' -D' + define_hdf5[0] + \
-		   ' -D' + define_png[0]
+defines_string      = ' -D' + define_png[0]
 define_mpi_string   = ' -D' + define_mpi[0]
 define_charm_string = ' -D' + define_charm[0]
 
 if (use_papi != 0): 
 	defines = defines + define_papi
 	defines_string = defines_string + ' -D' + define_papi[0]
+
+if (use_hdf5 != 0):
+	defines = defines + define_hdf5
+	defines_string = defines_string + ' -D' + define_hdf5[0]
 
 # PARSE ARGUMENTS
 
@@ -304,6 +308,7 @@ Export('parallel_run')
 Export('serial_run')
 
 Export('use_papi')
+Export('use_hdf5')
 
 SConscript('src/SConscript')
 SConscript('test/SConscript')
