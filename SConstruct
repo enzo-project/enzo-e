@@ -11,7 +11,7 @@ use_hdf5 = 1
 # DEFINES
 
 define_papi  = ['CONFIG_USE_PAPI'];
-define_hdf5  = ['H5_USE_16_API'];
+define_hdf5  = ['CONFIG_USE_HDF5','H5_USE_16_API'];
 define_png   = ['NO_FREETYPE'];
 
 defines      = define_png;
@@ -318,12 +318,13 @@ SConscript('test/SConscript')
 # creates cello-#.#.#.tar.gz with (bin include lib)
 
 # env = Environment(tools=['default', 'packaging'])
+# title = 'Enzo-P / Cello Extreme AMR Astrophysics and Cosmology'
 # env.Package( NAME           = 'cello',
 #              VERSION        = '0.1.0',
 #              PACKAGEVERSION = 0,
 #              PACKAGETYPE    = 'targz',
 #              LICENSE        = 'New BSD',
-#              SUMMARY        = 'Cello Extreme AMR Framework',
-#              DESCRIPTION    = 'Cello Extreme AMR Framework'
+#              SUMMARY        = title,
+#              DESCRIPTION    = title
 #         )
 

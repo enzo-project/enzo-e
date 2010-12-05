@@ -4,6 +4,7 @@
 /// @file      disk_FileHdf5.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Thu Feb 21 16:11:36 PST 2008
+/// @todo      parameters: std, native, ieee
 /// @brief     Implementation of the FileHdf5 class
 
 #include <string>
@@ -40,7 +41,6 @@ int FileHdf5::file_open  (std::string name, std::string mode)
  */
 {
 #ifdef CONFIG_USE_HDF5
-  name = name + ".hdf5";
 
   if (is_file_open_) {
 
@@ -87,6 +87,7 @@ void FileHdf5::file_close ()
  */
 {
 #ifdef CONFIG_USE_HDF5
+
   if (! is_file_open_) {
     char warning_message[ERROR_MESSAGE_LENGTH];
     sprintf (warning_message,
@@ -130,10 +131,12 @@ void FileHdf5::group_close ()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::dataset_open_write (std::string name, 
-			       int nx,  int ny,  int nz)
-			       //			       int ix0, int iy0, int iz0,  /// unused
-			       //			       int mx,  int my,  int mz)   /// unused
+void FileHdf5::dataset_open_write 
+(
+ std::string         name,
+ enum precision_enum precision,
+ int nx,  int ny,  int nz
+)
 {
 #ifdef CONFIG_USE_HDF5
   if (file_mode_ != "w") {
@@ -177,7 +180,7 @@ void FileHdf5::dataset_open_write (std::string name,
     
     dataset_   = H5Dcreate( file_, 
 			    name.c_str(), 
-			    datatype, 
+			    datatype_(precision), 
 			    dataspace_,  
 			    H5P_DEFAULT );
 
@@ -200,9 +203,9 @@ void FileHdf5::dataset_open_write (std::string name,
 //----------------------------------------------------------------------
 
 void FileHdf5::dataset_open_read (std::string name, 
-			      int *       nx,
-			      int *       ny,
-			      int *       nz)
+				  int *       nx,
+				  int *       ny,
+				  int *       nz)
 
 /**
  */
@@ -283,64 +286,75 @@ void FileHdf5::dataset_close ()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::read  (Scalar * buffer)
+void FileHdf5::read  (char              * buffer,
+		      enum precision_enum precision)
 /**
  */
 {
 #ifdef CONFIG_USE_HDF5
-  H5Dread (dataset_, datatype, dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
+  H5Dread (dataset_, datatype_(precision), dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
 #endif
 }
 
 //----------------------------------------------------------------------
 
-void FileHdf5::write (Scalar * buffer,)
+void FileHdf5::write (char              * buffer,
+		      enum precision_enum precision)
 /**
  */
 {
 #ifdef CONFIG_USE_HDF5
-  H5Dwrite (dataset_, datatype, dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
+  H5Dwrite (dataset_, datatype_(precision), dataspace_, H5S_ALL, H5P_DEFAULT, buffer);
 #endif
 }
 
 
-  //----------------------------------------------------------------------
+//----------------------------------------------------------------------
 
+int FileHdf5::datatype_(enum precision_enum precision)
+{
+  // (*) NATIVE    -   FLOAT DOUBLE LDOUBLE
+  // ( ) IEEE      -   F32BE F64BE     -
+  // ( ) STD     B16BE B32BE B64BE     -
 #ifdef CONFIG_USE_HDF5
-  int precision_hdf5_(enum precision_enum precision)
-  {
-#   define SCALAR_HDF5    H5T_NATIVE_FLOAT
-#   define SCALAR_HDF5    H5T_NATIVE_DOUBLE
-    // NATIVE   X    FLOAT DOUBLE LDOUBLE
-    // IEEE     X    F32BE F64BE
-    // STD     B16BE B32BE B64BE 
-    switch (precision) {
-    case precision_unknown:
-      return 0;
-      break;
-    case precision_default:
-      return precision_hdf5(default_precision);
-      break;
-    case precision_half:
-      return H5T_STD_B16BE; // 16-bit bit field (big-endian)
-      break;
-    case precision_single:
-      return H5T_IEEE_F32BE; // 32-bit IEEE float (big-endian)
-      break;
-    case precision_double:
-      return H5T_IEEE_F64BE; // 64-bit IEEE float (big-endian)
-      break;
-    case precision_extended80:
-      return (sizeof(long double)==10);
-      break;
-    case precision_extended96:
-      return (sizeof(long double)==12);
-      break;
-    case precision_quadruple:
-      return (sizeof(long double)==16);
-      break;
-    default:
-      return 0;
-      break;
-    }
+  switch (precision) {
+  case precision_unknown:
+    ERROR_MESSAGE("FileHdf5::datatype_",
+		  "precision_unknown not implemented");
+    return 0;
+    break;
+  case precision_default:
+    return datatype_(default_precision);
+    break;
+  case precision_half:
+    ERROR_MESSAGE("FileHdf5::datatype_",
+		  "precision_half not implemented");
+    return 0;
+    break;
+  case precision_single:
+    return H5T_NATIVE_FLOAT;
+    break;
+  case precision_double:
+    return H5T_NATIVE_DOUBLE;
+    break;
+  case precision_extended80:
+    ERROR_MESSAGE("FileHdf5::datatype_",
+		  "precision_extended80 not implemented");
+    return 0;
+    break;
+  case precision_extended96:
+    ERROR_MESSAGE("FileHdf5::datatype_",
+		  "precision_extended96 not implemented");
+    return 0;
+    break;
+  case precision_quadruple:
+    return H5T_NATIVE_LDOUBLE;
+    break;
+  default:
+    return 0;
+    break;
   }
+#else
+  return 0;
+#endif
+}

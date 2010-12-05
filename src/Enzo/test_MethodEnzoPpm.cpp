@@ -59,7 +59,7 @@ void output_images(Monitor * monitor,
 
 //----------------------------------------------------------------------
 
-void output_dump(FileHdf5 * hdf5,
+void output_dump(FileHdf5 & hdf5,
 		 int cycle,
 		 FieldBlock * field_block,
 		 int field_count,
@@ -79,28 +79,58 @@ void output_dump(FileHdf5 * hdf5,
   // Open file
 
   char filename[80];
-  Scalar * field_values = (Scalar *)field_block->field_values(index);
   sprintf (filename,"ppm-%05d.h5",cycle);
+  hdf5.file_open (filename,"w");
 
+  // Get block size
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
 
+  // Loop over fields in block
   for (int i = 0; i < field_count; i++) {
+
+    // Get field's ghost zone depth
+    int gx,gy,gz;
     field_descr->ghosts(i,&gx,&gy,&gz);
+
+    // Get field's total size including ghosts
+
+    int mx,my,mz;
     mx=nx+2*gx;
     my=ny+2*gy;
     mz=nz+2*gz;
+
+    // Get field's index
+
     int index = field_index[i];
+
+    // Get field's name for filename
+
     std::string field_name = field_descr->field_name(index);
+
     // Write data_block, including ghosts
     // (should include option to omit ghosts)
     // (what if ghosts aren't allocated in general?)
-    hdf5->dataset_open_write (field_name,mx,my,mz);
-    hdf5->write(field_block->field_values(index),a);
-    hdf5->dataset_close ();
+
+    // prepare to write the field to the file
+
+    hdf5.dataset_open_write (field_name,
+			     field_descr->precision(index),
+			     mx,my,mz);
+
+    // write the field to the file
+
+    hdf5.write((char *)field_block->field_values(index),
+		field_descr->precision(index));
+
+    // close the field in the file
+    hdf5.dataset_close ();
   }
 
-  hdf5->file_close();
+  // close the file
+
+  hdf5.file_close();
+
 }
 
 //----------------------------------------------------------------------
@@ -137,6 +167,7 @@ PARALLEL_MAIN_BEGIN
 
   Monitor    * monitor    = global->monitor();
   Parameters * parameters = global->parameters();
+  FileHdf5   hdf5;
 
   // Read in parameters
 
@@ -317,7 +348,7 @@ PARALLEL_MAIN_BEGIN
 
     output_images  (monitor,cycle,field_block,4,indices,cycle_image);
     output_progress(monitor,cycle,time,dt,cycle_progress);
-    output_dump    (disk,cycle,field_block,4,indices,cycle_dump);
+    output_dump    (hdf5,cycle,field_block,4,indices,cycle_dump);
 
     simulation.method_hyperbolic(0)->advance_block(data_block,time,dt);
 

@@ -4,6 +4,7 @@
 /// @file     test_FileHdf5.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:47:35 PST 2008
+/// @todo     Multiple datasets with different precisions
 /// @brief    Program implementing unit tests for the FileHdf5 class
  
 #include <stdio.h>
@@ -43,23 +44,23 @@ PARALLEL_MAIN_BEGIN
   FileHdf5 hdf5;
 
   int mx,my,mz;
-  hdf5.file_open("file_open_test","w");
+  hdf5.file_open("file_open_test.h5","w");
   mx = nx;
   my = ny;
   mz = 1;
 
-  hdf5.dataset_open_write ("dataset",mx,my,mz);
-  hdf5.write(a);
+  hdf5.dataset_open_write ("dataset",precision_default,mx,my,mz);
+  hdf5.write((char *)a,precision_default);
   hdf5.dataset_close ();
   hdf5.file_close();
 
 
-  hdf5.file_open("file_open_test","r");
+  hdf5.file_open("file_open_test.h5","r");
   hdf5.dataset_open_read ("dataset",&mx,&my,&mz);
 
   Scalar * b = new Scalar[nx*ny];
   
-  hdf5.read(b);
+  hdf5.read((char *)b,precision_default);
   hdf5.dataset_close ();
   hdf5.file_close();
 

@@ -22,7 +22,7 @@ enum precision_enum {
 
 #ifdef CONFIG_PRECISION_SINGLE
 #   define default_precision precision_single
-#   define Scalar float
+typedef float Scalar;
 #   define SCALAR_SCANF  "%f"
 #   define SCALAR_PRINTF "%e "
 #   define SCALAR_MPI     MPI_FLOAT
@@ -31,7 +31,7 @@ enum precision_enum {
 
 #ifdef CONFIG_PRECISION_DOUBLE
 #   define default_precision precision_double
-#   define Scalar double
+typedef double Scalar;
 #   define SCALAR_SCANF  "%lf"
 #   define SCALAR_PRINTF "%le "
 #   define SCALAR_MPI     MPI_DOUBLE

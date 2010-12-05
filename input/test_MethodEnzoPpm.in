@@ -12,15 +12,24 @@ Mesh {
 }
 Field {
    ghosts = [3,3];
-   fields = ["density","velocity_x","velocity_y","total_energy","internal_energy"];
+   fields = ["density","velocity_x",
+             "velocity_y","total_energy",
+             "internal_energy"];
 }
+
 Method {
    sequence = ["ppm"];
 }
+
+Output {
+   cycle_dump     = 10; # How many cycles between data dumps
+}
+
 Monitor {
    cycle_progress = 0;  # How many cycles between progress display; 0 for none
    cycle_image    = 0;  # How many cycles between image dumps; 0 for none
 }
+
 Physics {
    dimensions = 2;
    gamma = 1.4;

@@ -8,9 +8,9 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
 /// @todo     Refactor interface to be hdf5-independent (groups, datasets, etc.)
-/// @todo     Rename to, e.g., FileHdf5
 /// @todo     Add support for relative/absolute directory / group
 /// @todo     Add unit tests for group operations to test_disk_hdf5
+/// @todo     Add state checks for file open before adding dataset, etc.
 /// @brief    Interface for the FileHdf5 class
 
 class FileHdf5 {
@@ -39,25 +39,32 @@ public: // interface
   void group_close ();
 
   /// Open the given dataset with given size for reading
-  void dataset_open_read (std::string name, int * nx, int * ny, int * nz);
+  void dataset_open_read (std::string name, 
+			  int * nx, int * ny, int * nz);
 
   /// Open the given dataset with the given size for writing
+  /// @@@ datatype: H5Dcreate
   void dataset_open_write (std::string name, 
+			   enum precision_enum precision,
 			   int nx, int ny, int nz);
 
   /// Close the current dataset
   void dataset_close ();
 
   /// Read the current dataset into the buffer
-  void read  (Scalar * buffer);
+  /// @@@ datatype: H5Dread
+  void read  (char              * buffer,
+	      enum precision_enum precision);
 
   /// Write the current dataset from the buffer
-  void write (Scalar * buffer);
+  /// @@@ datatype: H5Dwrite
+  void write (char              * buffer,
+	      enum precision_enum precision);
 
 private: // functions
 
-  /// Return the HDF5 data type for the given precision
-  int precision_hdf5_(enum precision_enum precision);
+  /// Return the HDF5 datatype for the given precision
+  int datatype_(enum precision_enum precision);
 
 private: // attributes
 

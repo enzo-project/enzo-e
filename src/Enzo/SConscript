@@ -14,12 +14,12 @@ Import('use_hdf5')
 # DEPENDENCIES
 #------------------------------
 
-components = ['method', 'enzo-ppm', 'field', 'error','parallel', 'monitor', 'parameters', 'simulation', 'mesh', 'cello']
+components = ['disk','method', 'enzo-ppm', 'field', 'error','parallel', 'monitor', 'parameters', 'simulation', 'mesh', 'cello']
 
 if (use_papi):
-	components = components = ['papi','pfm']
+	components = components + ['papi','pfm']
 if (use_hdf5):
-	components = components = ['hdf5']
+	components = components + ['hdf5']
 
 libraries  = ['png', '$FORTRANLIBS']
 
