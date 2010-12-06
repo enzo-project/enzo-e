@@ -46,7 +46,7 @@ function tests($component,$testrun,$output) {
 	 $output_html = "<a href=\"$output_file\">test_$output.unit</a>";
 	 system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$output_file'>incomplete</a></td>\"; if (c!=0) print \"<td class=pass><a href='$output_file'>complete</a></td>\"}' < $output_file");
        } else {
-	 echo "<td class=fail>missing</td>";
+	 echo "<td></td>";
        }
      }
      echo "</tr>\n";
