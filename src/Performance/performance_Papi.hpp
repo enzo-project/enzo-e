@@ -51,17 +51,6 @@ public: // interface
   // global control
   //----------------------------------------------------------------------
 
-  /// Initialize counters
-  void init() throw()
-  {
-#ifdef CONFIG_USE_PAPI
-    PAPI_flops(&time_real_total_, 
-	       &time_proc_total_, 
-	       &flop_count_total_,
-	       &mflop_rate_);
-#endif
-  }
-
   /// Start counters
   void start() throw()
   {
