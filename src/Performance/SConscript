@@ -13,7 +13,7 @@ Import('use_papi')
 
 components = ['error','cello']
 if (use_papi):
-	components = components = ['papi','pfm']
+	components = components + ['papi','pfm']
 
 #------------------------------
 # ENVIRONMENTS

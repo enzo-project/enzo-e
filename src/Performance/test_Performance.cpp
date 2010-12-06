@@ -226,7 +226,7 @@ PARALLEL_MAIN_BEGIN
   printf ("time_real  = %f\n",papi.time_real());
   printf ("time_proc  = %f\n",papi.time_proc());
   printf ("flop_count = %lld\n",papi.flop_count());
-  printf ("mflop_rate = %f\n",papi.mflop_rate());
+  printf ("flop_rate = %f\n",papi.flop_rate());
 
 
   unit_finalize();

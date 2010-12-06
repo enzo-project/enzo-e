@@ -24,7 +24,7 @@ public: // interface
       time_real_total_(0),
       time_proc_total_(0),
       flop_count_total_(0),
-      mflop_rate_(0),
+      flop_rate_(0),
       time_real_(0),
       time_proc_(0),
       flop_count_(0)
@@ -60,10 +60,12 @@ public: // interface
 		      "Counters already started");
     } else {
       is_started_ = true;
+      float mflop_rate;
       PAPI_flops(&time_real_total_, 
 		 &time_proc_total_, 
 		 &flop_count_total_,
-		 &mflop_rate_);
+		 &mflop_rate);
+      flop_rate_ = mflop_rate * 1e6;
     }
 #endif
   }
@@ -77,10 +79,12 @@ public: // interface
 		      "Counters already stopped");
     } else {
       is_started_ = false;
+      float mflop_rate;
       PAPI_flops(&time_real_, 
 		 &time_proc_, 
 		 &flop_count_,
-		 &mflop_rate_);
+		 &mflop_rate);
+      flop_rate_ = mflop_rate * 1e6;
 
       time_real_  = time_real_  - time_real_total_;
       time_proc_  = time_proc_  - time_proc_total_;
@@ -138,16 +142,16 @@ public: // interface
 #endif
   }
 
-  /// Return MFlop rate between start() and stop()
-  float mflop_rate() throw()
+  /// Return flop rate between start() and stop()
+  float flop_rate() throw()
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
-      WARNING_MESSAGE("Papi::mflop_rate",
+      WARNING_MESSAGE("Papi::flop_rate",
 		      "Counters must be stopped");
       return 0.0;
     } else {
-      return mflop_rate_;
+      return flop_rate_;
     }
 #else
     return 0.0;
@@ -169,8 +173,8 @@ private: // attributes
   /// Argument 3 to PAPI_flops(): floating point operations
   long long flop_count_total_;
 
-  /// Argument 4 to PAPI_flops(): floating point rate in MFlops
-  float mflop_rate_;
+  /// Argument 4 to PAPI_flops(): floating point rate in flops/s
+  float flop_rate_;
 
   /// Real time since last start
   float time_real_;
