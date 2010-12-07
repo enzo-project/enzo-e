@@ -21,7 +21,8 @@ set procs = 1
 
 # clear
 
-printf "cleaning all..."
+set d = `date +"%Y-%m-%d %H:%M:%S"`
+printf "$d cleaning all..."
 foreach type ($types)
    scons arch=$arch type=$type -c >& /dev/null
 end
@@ -32,8 +33,7 @@ foreach type ($types)
    set platform = $arch-$type
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
-   printf "$d "
-   printf "%14s" "${platform}: "
+   printf "$d %14s" "${platform}: "
 
    # COMPILE
 
@@ -66,9 +66,8 @@ foreach type ($types)
 
 end
 
-set time = `date +"%Y-%m-%d %H:%M:%S"`
-
-echo "$time"
+set d = `date +"%Y-%m-%d %H:%M:%S"`
+echo "$d"
 
 grep Segmentation out.*
 
