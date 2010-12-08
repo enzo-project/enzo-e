@@ -2,7 +2,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 
 %=======================================================================
-\documentclass{article}
+\documentclass{book}
 %=======================================================================
 
 \include{include}
@@ -18,7 +18,7 @@
 \tableofcontents
 
 %=======================================================================
-\section{Introduction} \label{s:intro}
+\chapter{Introduction} \label{s:intro}
 %=======================================================================
 
 The purpose of this document is to specify guidelines and procedures
@@ -31,7 +31,7 @@ that, if followed, can greatly improve the quality of code and reduce
 the time spent writing, debugging, and maintaining code.
 
 %==================================================================
-\section{General guidelines for software devopment}
+\chapter{General guidelines for software devopment}
 %==================================================================
 
 First, some software development philosophy.  There are two competing
@@ -105,7 +105,7 @@ should also update the design accordingly, then update the
 implementation, and then retest.
 
 %==================================================================
-\section{Coding standards}
+\chapter{Coding standards}
 %==================================================================
 
 
@@ -187,7 +187,7 @@ http://wilma.vub.ac.be/~se4/papers/codingconventions.html
 \end{verbatim}
 
 %==================================================================
-\section{\cello\ Software Development Organization}
+\chapter{\cello\ Software Development Organization}
 %==================================================================
 
 
@@ -209,7 +209,7 @@ http://wilma.vub.ac.be/~se4/papers/codingconventions.html
 
    
 %==================================================================
-\section{\cello\ Classes}
+\chapter{\cello\ Classes}
 %==================================================================
 
 This section describes \cello's classes, organized by component and
@@ -239,23 +239,23 @@ application-inherited, private, etc.)
 
 
 %-----------------------------------------------------------------------
-\subsection{\code{Enzo-P}}
+\section{\code{Enzo-P}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Simulation}}
+\section{\code{Simulation}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Method}}
+\section{\code{Method}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Mesh}}
+\section{\code{Mesh}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Field}}
+\section{\code{Field}}
 %-----------------------------------------------------------------------
 
 %--------------------------------------------------
-\subsubsection{\code{FieldDescr}}
+\subsection{\code{FieldDescr}}
 
 % \newcommand{classdescr}
 
@@ -366,51 +366,51 @@ void 	FieldDescr::set\_maximum (int id\_field, double max\_value, enum field\_ac
 
 
 %--------------------------------------------------
-\subsubsection{\code{FieldBlock}}
+\subsection{\code{FieldBlock}}
 
 %--------------------------------------------------
-\subsubsection{\code{FieldFaces}}
+\subsection{\code{FieldFaces}}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Particles}}
+\section{\code{Particles}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Task}}
+\section{\code{Task}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Distribute}}
+\section{\code{Distribute}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Schedule}}
+\section{\code{Schedule}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Disk}}
+\section{\code{Disk}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Memory}}
+\section{\code{Memory}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Parallel}}
+\section{\code{Parallel}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Parameters}}
+\section{\code{Parameters}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Monitor}}
+\section{\code{Monitor}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Portal}}
+\section{\code{Portal}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Performance}}
+\section{\code{Performance}}
 %-----------------------------------------------------------------------
 %-----------------------------------------------------------------------
-\subsection{\code{Error}}
+\section{\code{Error}}
 %-----------------------------------------------------------------------
 
 
 %==================================================================
-\section{Procedures for common coding tasks}
+\chapter{Procedures for common coding tasks}
 %==================================================================
 
 \note{Include how to document, who to tell, who to consult with}
@@ -437,7 +437,7 @@ Coding tasks
 
 
 %-----------------------------------------------------------------------
-\subsection{Commiting new code to the repository}
+\section{Commiting new code to the repository}
 %-----------------------------------------------------------------------
 
 The following checklist should be used when updating the \cello\ CVS repository:
@@ -598,7 +598,7 @@ containers (e.g. std::list, std::stack, std::vector) and types
 
 
 %==================================================================
-\section{Bad Code Smells}
+\chapter{Bad Code Smells}
 %==================================================================
 
 (From  ``\textit{Refactoring: Improving the Design of Existing Code},'' Martin Fowler and Kent Beck.)
@@ -628,11 +628,11 @@ containers (e.g. std::list, std::stack, std::vector) and types
 
 
 %==================================================================
-\section{Header comment templates}
+\chapter{Header comment templates}
 %==================================================================
 
 %-----------------------------------------------------------------------
-\subsection{File header comment}
+\section{File header comment}
 %-----------------------------------------------------------------------
 
 \pargraph{Each file should start with a comment which includes your name, the
@@ -641,7 +641,7 @@ date you wrote the file, the name of the file.}
 Make it doxygen-readable.
 
 %-----------------------------------------------------------------------
-\subsection{Function header comment}
+\section{Function header comment}
 %-----------------------------------------------------------------------
 
 C++
@@ -662,11 +662,11 @@ C++
 
 
 %==================================================================
-\section{File naming conventions}
+\chapter{File naming conventions}
 %==================================================================
 
 %-----------------------------------------------------------------------
-\subsection{Prefixes and Suffixes}
+\section{Prefixes and Suffixes}
 %-----------------------------------------------------------------------
 
 \begin{verbatim}
