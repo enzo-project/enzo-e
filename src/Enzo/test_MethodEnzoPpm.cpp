@@ -367,8 +367,8 @@ PARALLEL_MAIN_BEGIN
 
   printf ("Time real = %f\n",papi.time_real());
   printf ("Time proc = %f\n",papi.time_proc());
-  printf ("flop count = %lld\n",papi.flop_count());
-  printf ("MFlop rate = %f\n",papi.mflop_rate());
+  printf ("Flop count = %lld\n",papi.flop_count());
+  printf ("GFlop rate = %f\n",papi.flop_rate()*1e-9);
 
   printf ("Timer time = %f\n",timer.value());
 
