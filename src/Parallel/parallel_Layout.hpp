@@ -12,34 +12,20 @@
 /// @def index_3_to_1
 /// @brief compute index i as a function of indices ix,iy,iz.  Inverse
 /// operation of index_3_to_1
-// #define index_3_to_1(ix,iy,iz,nx,ny,nz)		\
+// #define index_3_to_1(ix,iy,iz,nx,ny,nz)	       
 //   (ix+nx*(iy+ny*iz))
 
 /// @def index_1_to_3
 /// @brief compute indices ix,iy,iz as a function of index i.  Inverse
 /// operation of index_3_to_1
-// #define index_1_to_3(i,ix,iy,iz,nx,ny,nz)	\
-//   ix = i % nx;					\
-//   iy = (i / nx) % ny;				\
+// #define index_1_to_3(i,ix,iy,iz,nx,ny,nz)	
+//   ix = i % nx;					
+//   iy = (i / nx) % ny;				
 //   iz = i / (nx*ny);
 
 // #define index_1_to_x(i,nx,ny,nz) (i%nx)
 // #define index_1_to_y(i,nx,ny,nz) ((i/nx)%ny)
 // #define index_1_to_z(i,nx,ny,nz) (i/(nx*ny))
-
-enum axis_enum {
-  axis_x,
-  axis_y,
-  axis_z };
-
-enum face_enum {
-  face_xm,
-  face_xp,
-  face_ym,
-  face_yp,
-  face_zm,
-  face_zp };
-
 
 class Layout {
 
@@ -69,10 +55,7 @@ public: // interface
   // Operations
 
   /// Return the process assigned to the given block
-  int process (face_enum face,
-	       int ibx, int iby, int ibz)  throw();
-
-@@@@@@@@@@    
+  int process (int ibx, int iby, int ibz)  throw();
 
 private: // attributes
 

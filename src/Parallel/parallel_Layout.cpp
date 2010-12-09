@@ -14,8 +14,8 @@
 //----------------------------------------------------------------------
 
 Layout::Layout() throw()
- : process_offset_ (0)
-   process_count_ (1)
+  : process_offset_ (0),
+    process_count_ (1)
 {
 
   for (int i=0; i<3; i++) {
@@ -62,9 +62,9 @@ void Layout::processors(int * process_offset, int * process_count) throw()
 
 int Layout::process (int ibx, int iby, int ibz)  throw()
 {
-  int ib = ibx + iby*(block_count_[0] + ibz*block_count_[1]);
+  int ib = ibx + block_count_[0]*(iby + block_count_[1]*ibz);
   int nb = block_count_[0] * block_count_[1] * block_count_[2];
-@@@  
-  return process_offset_ + process_count_*(ib / nb);
+
+  return process_offset_ + process_count_*ib / nb;
     
 }
