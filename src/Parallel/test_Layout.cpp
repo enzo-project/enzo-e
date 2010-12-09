@@ -37,13 +37,13 @@ PARALLEL_MAIN_BEGIN
   int nb,nbx,nby,nbz;
 
   //--------------------------------------------------
-  // offset 0  count 1  blocks (1,1,1)
+  // first 0  count 1  blocks (1,1,1)
   //--------------------------------------------------
 
-  unit_func("processors");
+  unit_func("range");
 
-  layout.set_processors(0,1);
-  layout.processors(&p0,&np);
+  layout.set_range(0,1);
+  layout.range(&p0,&np);
 
   unit_assert (p0 == 0);
   unit_assert (np == 1);
@@ -63,14 +63,14 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout.process (0,0,0) == 0);
 
   //--------------------------------------------------
-  // offset 0  count 1  blocks (5,3,2)
+  // first 0  count 1  blocks (5,3,2)
   //--------------------------------------------------
 
   
-  unit_func("processors");
+  unit_func("range");
 
-  layout.set_processors(0,1);
-  layout.processors(&p0,&np);
+  layout.set_range(0,1);
+  layout.range(&p0,&np);
 
   unit_assert (p0 == 0);
   unit_assert (np == 1);
@@ -92,13 +92,13 @@ PARALLEL_MAIN_BEGIN
 
 
   //--------------------------------------------------
-  // offset 0  count 30  blocks (5,3,2)
+  // first 0  count 30  blocks (5,3,2)
   //--------------------------------------------------
   
-  unit_func("processors");
+  unit_func("range");
 
-  layout.set_processors(0,30);
-  layout.processors(&p0,&np);
+  layout.set_range(0,30);
+  layout.range(&p0,&np);
 
   unit_assert (p0 == 0);
   unit_assert (np == 30);
@@ -119,13 +119,13 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout.process (5-1,3-1,2-1) == 30-1);
 
   //--------------------------------------------------
-  // offset 7  count 30  blocks (5,3,2)
+  // first 7  count 30  blocks (5,3,2)
   //--------------------------------------------------
   
-  unit_func("processors");
+  unit_func("range");
 
-  layout.set_processors(7,30);
-  layout.processors(&p0,&np);
+  layout.set_range(7,30);
+  layout.range(&p0,&np);
 
   unit_assert (p0 == 7);
   unit_assert (np == 30);

@@ -14,7 +14,7 @@
 //----------------------------------------------------------------------
 
 Layout::Layout() throw()
-  : process_offset_ (0),
+  : process_first_ (0),
     process_count_ (1)
 {
 
@@ -25,9 +25,9 @@ Layout::Layout() throw()
 
 //----------------------------------------------------------------------
 
-void Layout::set_processors(int process_offset, int process_count) throw()
+void Layout::set_range(int process_first, int process_count) throw()
 {
-  process_offset_ = process_offset;
+  process_first_ = process_first;
   process_count_  = process_count;
 }
 
@@ -52,9 +52,9 @@ int Layout::blocks (int *nb0, int *nb1, int *nb2) throw()
 
 //----------------------------------------------------------------------
 
-void Layout::processors(int * process_offset, int * process_count) throw()
+void Layout::range(int * process_first, int * process_count) throw()
 {
-  *process_offset = process_offset_;
+  *process_first = process_first_;
   *process_count  = process_count_;
 }
 
@@ -65,6 +65,6 @@ int Layout::process (int ibx, int iby, int ibz)  throw()
   int ib = ibx + block_count_[0]*(iby + block_count_[1]*ibz);
   int nb = block_count_[0] * block_count_[1] * block_count_[2];
 
-  return process_offset_ + process_count_*ib / nb;
+  return process_first_ + process_count_*ib / nb;
     
 }

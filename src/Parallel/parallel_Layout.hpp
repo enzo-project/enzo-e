@@ -9,58 +9,38 @@
 #ifndef PARALLEL_LAYOUT_HPP
 #define PARALLEL_LAYOUT_HPP
 
-/// @def index_3_to_1
-/// @brief compute index i as a function of indices ix,iy,iz.  Inverse
-/// operation of index_3_to_1
-// #define index_3_to_1(ix,iy,iz,nx,ny,nz)	       
-//   (ix+nx*(iy+ny*iz))
-
-/// @def index_1_to_3
-/// @brief compute indices ix,iy,iz as a function of index i.  Inverse
-/// operation of index_3_to_1
-// #define index_1_to_3(i,ix,iy,iz,nx,ny,nz)	
-//   ix = i % nx;					
-//   iy = (i / nx) % ny;				
-//   iz = i / (nx*ny);
-
-// #define index_1_to_x(i,nx,ny,nz) (i%nx)
-// #define index_1_to_y(i,nx,ny,nz) ((i/nx)%ny)
-// #define index_1_to_z(i,nx,ny,nz) (i/(nx*ny))
 
 class Layout {
 
   /// @class    Layout
   /// @ingroup  Parallel
-  /// @brief Specify how a Patch or block is partitioned into blocks or subblocks.
+  /// @brief Specify how a Patch is partitioned into blocks, and how
+  /// blocks are assigned to generic processes
 
 public: // interface
 
-  /// Create a Layout with given "process" start and count
+  /// Create a Layout with the default one process and one block
   Layout() throw();
 
-  // initialize / access
+  /// Set first process id and number of processes
+  void set_range (int process_first=0, int process_count=1) throw();
 
-  /// Set processor offset and count for the layout
-  void set_processors(int process_offset, int process_count) throw();
+  /// Set how many blocks are in the layout
+  void set_blocks (int nb0, int nb1=1, int nb2=1) throw();
 
-  /// Set how many blocks in the layout
-  void set_blocks(int nb0, int nb1, int nb2) throw();
-
-  /// Return the processor offset and count for the layout
-  void processors(int * process_offset, int * process_count) throw();
+  /// Return the first process id and number of processes
+  void range (int * process_first, int * process_count) throw();
 
   /// Return the number of blocks in the layout
   int blocks (int *b0, int *b1, int *b2) throw();
 
-  // Operations
-
-  /// Return the process assigned to the given block
+  /// Return the process id assigned to the given block
   int process (int ibx, int iby, int ibz)  throw();
 
 private: // attributes
 
   /// Starting process id
-  int process_offset_;
+  int process_first_;
 
   /// Number of processes
   int process_count_;
