@@ -7,6 +7,7 @@
 /// @file     parallel_ParallelAffinity.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 16:40:35 PDT 2010
+/// @todo     Make abstract base class
 /// @brief    Declaration of the ParallelAffinity class
 
 class ParallelAffinity {

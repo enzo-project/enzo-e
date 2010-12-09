@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_ParallelLayout.cpp
+/// @file     test_Layout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-19
-/// @brief    Unit tests for the ParallelLayout class
+/// @brief    Unit tests for the Layout class
 
 #include <math.h>
 #include "cello.hpp"
@@ -16,7 +16,7 @@
 #define TOL 2e-16
 
 #include "parallel.def"
-#include PARALLEL_CHARM_INCLUDE(test_ParallelLayout.decl.h)
+#include PARALLEL_CHARM_INCLUDE(test_Layout.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -27,7 +27,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_init (parallel->rank(), parallel->size());
 
-  unit_class("ParallelLayout");
+  unit_class("Layout");
 
   //----------------------------------------------------------------------
   // index conversions
@@ -74,8 +74,8 @@ PARALLEL_MAIN_BEGIN
 
   {
     
-    unit_func("ParallelLayout");
-    ParallelLayout layout;
+    unit_func("Layout");
+    Layout layout;
     unit_assert (true);
 
     layout.set_periodic(axis_x,true);
@@ -168,8 +168,8 @@ PARALLEL_MAIN_BEGIN
     int pb3[3] = {5,3,7};  // processor blocks
     int npb = pb3[0]*pb3[1]*pb3[2];
 
-    unit_func("ParallelLayout");
-    ParallelLayout layout;
+    unit_func("Layout");
+    Layout layout;
     unit_assert (true);
 
     layout.set_periodic(axis_x,false);
@@ -360,8 +360,8 @@ PARALLEL_MAIN_BEGIN
     int db3[3] = {4,1,9};  // data blocks
     int ndb = db3[0]*db3[1]*db3[2];
 
-    unit_func("ParallelLayout");
-    ParallelLayout layout;
+    unit_func("Layout");
+    Layout layout;
     unit_assert (true);
 
     layout.set_periodic(axis_x,false);
@@ -554,8 +554,8 @@ PARALLEL_MAIN_BEGIN
     int npb = pb3[0]*pb3[1]*pb3[2];
     int ndb = db3[0]*db3[1]*db3[2];
 
-    unit_func("ParallelLayout");
-    ParallelLayout layout;
+    unit_func("Layout");
+    Layout layout;
     unit_assert (true);
 
     layout.set_periodic(axis_x,false);
@@ -806,4 +806,4 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_ParallelLayout.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_Layout.def.h)
