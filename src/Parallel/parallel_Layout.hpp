@@ -23,19 +23,29 @@ public: // interface
   Layout() throw();
 
   /// Set first process id and number of processes
-  void set_range (int process_first=0, int process_count=1) throw();
+  void set_process_range (int process_first=0, int process_count=1) throw();
 
   /// Set how many blocks are in the layout
-  void set_blocks (int nb0, int nb1=1, int nb2=1) throw();
+  void set_block_count (int nb0, int nb1=1, int nb2=1) throw();
 
   /// Return the first process id and number of processes
-  void range (int * process_first, int * process_count) throw();
+  void process_range (int * process_first, int * process_count) throw();
 
   /// Return the number of blocks in the layout
-  int blocks (int *b0, int *b1, int *b2) throw();
+  int block_count (int *nb0, int *nb1, int *nb2) throw();
+
+  /// Return the number of local blocks in the layout for given process
+  int local_count (int ip) throw();
 
   /// Return the process id assigned to the given block
-  int process (int ibx, int iby, int ibz)  throw();
+  int process (int ib)  throw();
+
+  /// Return the 3D indices for the given block 1D index
+  void block_indices (int ib, int * ibx, int * iby, int * ibz) throw();
+
+  /// Return the 1D index for the given block 3D indices
+  int block_index (int ibx, int iby, int ibz) throw();
+
 
 private: // attributes
 

@@ -164,22 +164,30 @@ void Simulation::initialize_mesh_() throw()
 
   parameters->set_current_group ("Mesh");
 
-  // Patch size range
+  // Block sizes
 
-  int min_patch_size = parameters->list_value_integer(0,"patch_size",4);
-  int max_patch_size = parameters->list_value_integer(1,"patch_size",128);
+  int block_size[3];
 
-  mesh_->set_min_patch_size (min_patch_size);
-  mesh_->set_max_patch_size (max_patch_size);
+  parameters->list_value_integer(0,"block_size",4);
+  parameters->list_value_integer(1,"block_size",4);
+  parameters->list_value_integer(2,"block_size",4);
 
-  // Block size range
-
-  int min_block_size = parameters->list_value_integer(0,"block_size",4);
-  int max_block_size = parameters->list_value_integer(1,"block_size",128);
+  // assume constant block size
+  mesh_->set_min_block_size (block_size[0]);
+  mesh_->set_max_block_size (block_size[0]);
   
-  mesh_->set_min_block_size (min_block_size);
-  mesh_->set_max_block_size (max_block_size);
-  
+  // Patch sizes
+
+  int patch_size[3];
+
+  patch_size[0] = parameters->list_value_integer(0,"patch_size",128);
+  patch_size[1] = parameters->list_value_integer(1,"patch_size",128);
+  patch_size[2] = parameters->list_value_integer(1,"patch_size",128);
+
+  // minimum patch size is one block
+  mesh_->set_min_patch_size (block_size[0]);
+  mesh_->set_max_patch_size (patch_size[0]);
+
   // Mesh size
 
   int root_size[3];
@@ -214,12 +222,39 @@ void Simulation::initialize_mesh_() throw()
 		   domain_upper[1],
 		   domain_upper[2]);
 
-    // Create the root patch
+  // Parallel layout of the root mesh patch
 
-  mesh_->set_root_patch(new Patch (data_descr_,
-				   root_size,
-				   max_block_size,
-				   domain_lower,domain_upper));
+  
+  Layout * layout = new Layout;
+
+  parameters->set_current_group("Mesh");
+
+  int process_first = parameters->value_integer("root_process_first",0);
+  int process_count = parameters->value_integer("root_process_count",1);
+
+  layout->set_process_range(process_first, process_count);
+
+  int block_count[3];
+
+  block_count[0] = parameters->list_value_integer(0,"root_blocks",1);
+  block_count[1] = parameters->list_value_integer(1,"root_blocks",1);
+  block_count[2] = parameters->list_value_integer(2,"root_blocks",1);
+
+  layout->set_block_count(block_count[0],block_count[1],block_count[2]);
+    
+
+  // Create the root patch
+
+  Patch * root_patch = new Patch;
+
+  root_patch->set_data_descr(data_descr_);
+  root_patch->set_patch_size(root_size[0],root_size[1],root_size[2]);
+  root_patch->set_layout(layout);
+  root_patch->set_extents(domain_lower[0],domain_upper[0],
+			  domain_lower[1],domain_upper[1],
+			  domain_lower[2],domain_upper[2]);
+
+  mesh_->set_root_patch(root_patch);
 
   // Mesh AMR settings
 

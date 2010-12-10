@@ -18,11 +18,7 @@ class Patch {
 public: // interface
 
   /// Constructor
-  Patch(DataDescr * data_descr,
-	int patch_size[3], 
-	int block_size,
-	double lower[3],
-	double upper[3]) ;
+  Patch() throw();
 
   //----------------------------------------------------------------------
   // Big Three
@@ -37,38 +33,82 @@ public: // interface
   /// Assignment operator
   Patch & operator= (const Patch & patch) throw();
 
+  //----------------------------------------------------------------------
+
+  /// Set the data descriptor
+  void set_data_descr (DataDescr * data_descr) throw();
+
+  /// Return the data descriptor
+  DataDescr * data_descr () const throw();
+
+  /// Set the size of the patch in number of cells
+  void set_patch_size (int npx, int npy, int npz) throw();
+
+  /// Return the size of the patch in number of cells
+  void patch_size (int * npx, int * npy=0, int * npz=0) const throw();
+
+  /// Set the layout of the patch, describing processes and blocking
+  void set_layout (Layout * layout) throw();
+
+  /// Return the layout of the patch, describing processes and blocking
+  Layout * layout () const throw();
+
+  /// Set lower and upper extents of the Patch
+  void set_extents (double xm, double xp,
+		    double ym, double yp,
+		    double zm, double zp) throw();
+
+  /// Return the lower and upper extents of the Patch
+  void extents (double * xm,   double * xp,
+		double * ym=0, double * yp=0,
+		double * zm=0, double * zp=0) const throw();
+
+  
   //--------------------------------------------------
+
+  /// Allocate blocks for given process number
+  void allocate(int ip=0) throw();
+
+  /// Deallocate blocks for given process number
+  void deallocate(int ip=0) throw();
+
+  /// Whether blocks are allocated for given process number
+  bool is_allocated(int ip=0) const throw();
+
+  /// Return the number of data blocks for given process number
+  int block_count(int ip=0) const throw();
+
+  /// Return the ith data block for the given process number
+  DataBlock * block(int i, int ip=0) const throw();
+
+  //--------------------------------------------------
+
+public: // entry functions
 
   /// Initial patch advance, ending with receive_()
   void p_evolve();
 
-  /// Return the number of local data blocks
-  int num_data_blocks()  throw()
-  { return block_count_[0]*block_count_[1]*block_count_[2]; };
-
-  /// Return the ith local data block
-  DataBlock * data_block(int ix, int iy, int iz) throw()
-  { return data_block_[ix + block_count_[0] * (iy + block_count_[1] * iz)]; };
+  //--------------------------------------------------
 
 private: // attributes
 
-  /// Array of local data blocks associated with the patch
-  DataBlock ** data_block_;
+  /// Data descriptor
+  DataDescr * data_descr_;
+
+  /// Array of data blocks associated with process numbers in the patch
+  /// data_block[ip][ib]
+  typedef std::vector<DataBlock *> data_block_vector;
+  std::vector<data_block_vector> data_block_;
 
   /// Size of the patch
   int patch_size_[3];
 
-  /// Number of blocks
-  int block_count_[3];
+  /// Layout: describes blocking, processor range, and block-processor mapping 
+  Layout * layout_;
 
-  /// Size of each block
-  int block_size_;
+  /// Extent of the patch: xm, xp, ym, yp, zm, zp
+  double extents_[6];
 
-  /// Lower extent of the patch
-  double lower_[3];
-
-  /// Upper extent of the patch
-  double upper_[3];
 
 };
 

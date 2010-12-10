@@ -37,21 +37,21 @@ PARALLEL_MAIN_BEGIN
   int nb,nbx,nby,nbz;
 
   //--------------------------------------------------
-  // first 0  count 1  blocks (1,1,1)
+  // first 0  count 1  block_count (1,1,1)
   //--------------------------------------------------
 
-  unit_func("range");
+  unit_func("process_range");
 
-  layout.set_range(0,1);
-  layout.range(&p0,&np);
+  layout.set_process_range(0,1);
+  layout.process_range(&p0,&np);
 
   unit_assert (p0 == 0);
   unit_assert (np == 1);
   
-  unit_func("blocks");
+  unit_func("block_count");
 
-  layout.set_blocks (1,1,1);
-  nb = layout.blocks(&nbx,&nby,&nbz);
+  layout.set_block_count (1,1,1);
+  nb = layout.block_count(&nbx,&nby,&nbz);
 
   unit_assert (nb == nbx*nby*nbz);
   unit_assert (nbx == 1);
@@ -60,25 +60,32 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("process");
 
-  unit_assert(layout.process (0,0,0) == 0);
+  unit_assert(layout.process (layout.block_index(0,0,0)) == 0);
+
+  unit_func("local_count");
+  unit_assert(false);
+  unit_func("block_indices");
+  unit_assert(false);
+  unit_func("block_index");
+  unit_assert(false);
 
   //--------------------------------------------------
-  // first 0  count 1  blocks (5,3,2)
+  // first 0  count 1  block_count (5,3,2)
   //--------------------------------------------------
 
   
-  unit_func("range");
+  unit_func("process_range");
 
-  layout.set_range(0,1);
-  layout.range(&p0,&np);
+  layout.set_process_range(0,1);
+  layout.process_range(&p0,&np);
 
   unit_assert (p0 == 0);
   unit_assert (np == 1);
   
-  unit_func("blocks");
+  unit_func("block_count");
 
-  layout.set_blocks (5,3,2);
-  nb = layout.blocks(&nbx,&nby,&nbz);
+  layout.set_block_count (5,3,2);
+  nb = layout.block_count(&nbx,&nby,&nbz);
 
   unit_assert (nb == nbx*nby*nbz);
   unit_assert (nbx == 5);
@@ -87,26 +94,32 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("process");
 
-  unit_assert(layout.process (0,0,0) == 0);
-  unit_assert(layout.process (5-1,3-1,2-1) == 0);
+  unit_assert(layout.process (layout.block_index(0,0,0)) == 0);
+  unit_assert(layout.process (layout.block_index(5-1,3-1,2-1)) == 0);
 
+  unit_func("local_count");
+  unit_assert(false);
+  unit_func("block_indices");
+  unit_assert(false);
+  unit_func("block_index");
+  unit_assert(false);
 
   //--------------------------------------------------
-  // first 0  count 30  blocks (5,3,2)
+  // first 0  count 30  block_count (5,3,2)
   //--------------------------------------------------
   
-  unit_func("range");
+  unit_func("process_range");
 
-  layout.set_range(0,30);
-  layout.range(&p0,&np);
+  layout.set_process_range(0,30);
+  layout.process_range(&p0,&np);
 
   unit_assert (p0 == 0);
   unit_assert (np == 30);
   
-  unit_func("blocks");
+  unit_func("block_count");
 
-  layout.set_blocks (5,3,2);
-  nb = layout.blocks(&nbx,&nby,&nbz);
+  layout.set_block_count (5,3,2);
+  nb = layout.block_count(&nbx,&nby,&nbz);
 
   unit_assert (nb == nbx*nby*nbz);
   unit_assert (nbx == 5);
@@ -115,25 +128,32 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("process");
 
-  unit_assert(layout.process (0,0,0)       == 0);
-  unit_assert(layout.process (5-1,3-1,2-1) == 30-1);
+  unit_assert(layout.process (layout.block_index(0,0,0))       == 0);
+  unit_assert(layout.process (layout.block_index(5-1,3-1,2-1)) == 30-1);
+
+  unit_func("local_count");
+  unit_assert(false);
+  unit_func("block_indices");
+  unit_assert(false);
+  unit_func("block_index");
+  unit_assert(false);
 
   //--------------------------------------------------
-  // first 7  count 30  blocks (5,3,2)
+  // first 7  count 30  block_count (5,3,2)
   //--------------------------------------------------
   
-  unit_func("range");
+  unit_func("process_range");
 
-  layout.set_range(7,30);
-  layout.range(&p0,&np);
+  layout.set_process_range(7,30);
+  layout.process_range(&p0,&np);
 
   unit_assert (p0 == 7);
   unit_assert (np == 30);
   
-  unit_func("blocks");
+  unit_func("block_count");
 
-  layout.set_blocks (5,3,2);
-  nb = layout.blocks(&nbx,&nby,&nbz);
+  layout.set_block_count (5,3,2);
+  nb = layout.block_count(&nbx,&nby,&nbz);
 
   unit_assert (nb == nbx*nby*nbz);
   unit_assert (nbx == 5);
@@ -142,9 +162,17 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("process");
 
-  unit_assert(layout.process (0,0,0)       == 7);
-  unit_assert(layout.process (5-1,3-1,2-1) == 7+30-1);
+  unit_assert(layout.process (layout.block_index(0,0,0))       == 7);
+  unit_assert(layout.process (layout.block_index(5-1,3-1,2-1)) == 7+30-1);
 
+  unit_func("local_count");
+  unit_assert(false);
+  unit_func("block_indices");
+  unit_assert(false);
+  unit_func("block_index");
+  unit_assert(false);
+
+  //--------------------------------------------------
 
   unit_finalize();
 

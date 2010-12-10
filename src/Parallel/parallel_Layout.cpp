@@ -25,7 +25,7 @@ Layout::Layout() throw()
 
 //----------------------------------------------------------------------
 
-void Layout::set_range(int process_first, int process_count) throw()
+void Layout::set_process_range(int process_first, int process_count) throw()
 {
   process_first_ = process_first;
   process_count_  = process_count;
@@ -33,7 +33,7 @@ void Layout::set_range(int process_first, int process_count) throw()
 
 //----------------------------------------------------------------------
 
-void Layout::set_blocks(int nb0, int nb1, int nb2) throw()
+void Layout::set_block_count(int nb0, int nb1, int nb2) throw()
 {
   block_count_[0] = nb0;
   block_count_[1] = nb1;
@@ -42,7 +42,7 @@ void Layout::set_blocks(int nb0, int nb1, int nb2) throw()
 
 //----------------------------------------------------------------------
 
-int Layout::blocks (int *nb0, int *nb1, int *nb2) throw()
+int Layout::block_count (int *nb0, int *nb1, int *nb2) throw()
 { 
   *nb0 = block_count_[0];
   *nb1 = block_count_[1];
@@ -52,7 +52,7 @@ int Layout::blocks (int *nb0, int *nb1, int *nb2) throw()
 
 //----------------------------------------------------------------------
 
-void Layout::range(int * process_first, int * process_count) throw()
+void Layout::process_range(int * process_first, int * process_count) throw()
 {
   *process_first = process_first_;
   *process_count  = process_count_;
@@ -60,11 +60,34 @@ void Layout::range(int * process_first, int * process_count) throw()
 
 //----------------------------------------------------------------------
 
-int Layout::process (int ibx, int iby, int ibz)  throw()
+int Layout::local_count (int ip) throw()
 {
-  int ib = ibx + block_count_[0]*(iby + block_count_[1]*ibz);
-  int nb = block_count_[0] * block_count_[1] * block_count_[2];
+  int block_count = block_count_[0] * block_count_[1] * block_count_[2];
+  return ((ip-1)*block_count)/process_count_ - (ip*block_count)/process_count_;
+  
+}
 
-  return process_first_ + process_count_*ib / nb;
-    
+//----------------------------------------------------------------------
+
+int Layout::process (int ib)  throw()
+{
+  int block_count = block_count_[0] * block_count_[1] * block_count_[2];
+
+  return process_first_ + process_count_*ib / block_count;
+}
+
+//----------------------------------------------------------------------
+
+int Layout::block_index (int ibx, int iby, int ibz) throw()
+{
+  return ibx + block_count_[0]*(iby + block_count_[1]*ibz);
+}
+
+//----------------------------------------------------------------------
+
+void Layout::block_indices (int ib, int * ibx, int * iby, int * ibz) throw()
+{
+  *ibx = ib % block_count_[0];
+  *iby = (ib / block_count_[0]) % block_count_[1];
+  *ibz = ib / (block_count_[0]*block_count_[1]);
 }
