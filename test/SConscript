@@ -63,6 +63,7 @@ env.RunSerial(parallel_type + '-test_Layout.unit',      '#/bin/test_Layout')
 env.RunSerial(parallel_type + '-test_Memory.unit',      '#/bin/test_Memory')
 
 env.RunSerial(parallel_type + '-test_Mesh.unit',        '#/bin/test_Mesh')
+env.RunSerial(parallel_type + '-test_Patch.unit',       '#/bin/test_Patch')
 env.RunSerial(parallel_type + '-test_DataDescr.unit',   '#/bin/test_DataDescr')
 
 env.RunSerial(parallel_type + '-test_Parameters.unit',  '#/bin/test_Parameters')

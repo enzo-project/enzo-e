@@ -1,10 +1,10 @@
-// $Id: test_Mesh.cpp 1791 2010-10-29 22:54:06Z bordner $
+// $Id: test_Patch.cpp 1791 2010-10-29 22:54:06Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Mesh.cpp
+/// @file     test_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-06
-/// @brief    Program implementing unit tests for the Mesh class
+/// @brief    Program implementing unit tests for the Patch class
  
 #include <stdio.h>
 #include <string>
@@ -15,7 +15,7 @@
 
 #include "parallel.def"
 
-#include PARALLEL_CHARM_INCLUDE(test_Mesh.decl.h)
+#include PARALLEL_CHARM_INCLUDE(test_Patch.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -23,52 +23,52 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_INIT;
 
   unit_init();
-  unit_class ("Mesh");
-  unit_func("Mesh");
+  unit_class ("Patch");
+  unit_func("Patch");
 
 
-  void set_data_descr (DataDescr * data_descr) throw();
+//   void set_data_descr (DataDescr * data_descr) throw();
 
 
-  DataDescr * data_descr () throw();
-
-
-
-  void set_patch_size (int npx, int npy, int npz) throw();
+//   DataDescr * data_descr () throw();
 
 
 
-  void patch_size (int * npx, int * npy=1, int * npz=1) throw();
+//   void set_patch_size (int npx, int npy, int npz) throw();
 
 
 
-  void set_layout (Layout * layout) throw();
+//   void patch_size (int * npx, int * npy=1, int * npz=1) throw();
 
 
 
-  Layout * layout () throw();
+//   void set_layout (Layout * layout) throw();
 
 
 
-  void set_extents (double xm, double xp,
-		    double ym, double yp,
-		    double zm, double zp) throw();
+//   Layout * layout () throw();
 
 
 
-  void extents (double * xm, double * xp,
-		double * ym=0, double * yp=0,
-		double * zm=0, double * zp=0) throw();
+//   void set_extents (double xm, double xp,
+// 		    double ym, double yp,
+// 		    double zm, double zp) throw();
 
-  
-  void p_evolve();
 
+
+//   void extents (double * xm, double * xp,
+// 		double * ym=0, double * yp=0,
+// 		double * zm=0, double * zp=0) throw();
 
   
-void allocate_blocks() ();
+//   void p_evolve();
 
-/// Deallocate local blocks
-void deallocate_blocks() ();
+
+  
+// void allocate_blocks() ();
+
+// /// Deallocate local blocks
+// void deallocate_blocks() ();
 
 
   int block_count()  throw();
@@ -83,4 +83,4 @@ void deallocate_blocks() ();
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_Mesh.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_Patch.def.h)

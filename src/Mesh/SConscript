@@ -42,6 +42,9 @@ if (parallel_type == "charm"):
 	test = 'test_Mesh'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
+	test = 'test_Patch'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 	test = 'test_DataDescr'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
@@ -49,10 +52,11 @@ if (parallel_type == "charm"):
 libraries = env.Library ('mesh', [sources])
 
 test_mesh       = env.Program (['test_Mesh.cpp',     sources])
+test_patch      = env.Program (['test_Patch.cpp',    sources])
 test_tree       = env.Program (['test_TreeK.cpp',    sources])
 test_data_descr = env.Program (['test_DataDescr.cpp',sources])
 
-tests     = [test_mesh, test_tree, test_data_descr];
+tests     = [test_mesh, test_patch, test_tree, test_data_descr];
 
 #------------------------------
 # INSTALL
