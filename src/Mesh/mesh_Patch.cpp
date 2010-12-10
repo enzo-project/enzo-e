@@ -18,9 +18,9 @@ Patch::Patch() throw()
     layout_(0)
 
 {
-  patch_size_[0] = 1;
-  patch_size_[1] = 1;
-  patch_size_[2] = 1;
+  size_[0] = 1;
+  size_[1] = 1;
+  size_[2] = 1;
 
   extents_[0] = 0.0;
   extents_[1] = 1.0;
@@ -72,20 +72,20 @@ DataDescr * Patch::data_descr () const throw()
 
 //----------------------------------------------------------------------
 
-void Patch::set_patch_size (int npx, int npy, int npz) throw()
+void Patch::set_size (int npx, int npy, int npz) throw()
 {
-  patch_size_[0] = npx;
-  patch_size_[1] = npy;
-  patch_size_[2] = npz;
+  size_[0] = npx;
+  size_[1] = npy;
+  size_[2] = npz;
 }
 
 //----------------------------------------------------------------------
 
-void Patch::patch_size (int * npx, int * npy, int * npz) const throw()
+void Patch::size (int * npx, int * npy, int * npz) const throw()
 {
-  if (npx) *npx = patch_size_[0];
-  if (npy) *npy = patch_size_[1];
-  if (npz) *npz = patch_size_[2];
+  if (npx) *npx = size_[0];
+  if (npy) *npy = size_[1];
+  if (npz) *npz = size_[2];
 }
 
 //----------------------------------------------------------------------
@@ -182,15 +182,15 @@ DataBlock * Patch::block(int i, int ip) const throw()
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 // Patch::Patch(DataDescr * data_descr,
-// 	     int patch_size[3], 
+// 	     int size[3], 
 // 	     int block_size,
 // 	     double lower[3],
 // 	     double upper[3]) 
 //   : block_size_(block_size)
 // {
-//   patch_size_[0] = patch_size[0];
-//   patch_size_[1] = patch_size[1];
-//   patch_size_[2] = patch_size[2];
+//   size_[0] = size[0];
+//   size_[1] = size[1];
+//   size_[2] = size[2];
 
 //   lower_[0] = lower[0];
 //   lower_[1] = lower[1];
@@ -200,22 +200,22 @@ DataBlock * Patch::block(int i, int ip) const throw()
 //   upper_[1] = upper[1];
 //   upper_[2] = upper[2];
 
-//   // Make sure patch_size is evenly divisible by block_size
+//   // Make sure size is evenly divisible by block_size
 //   bool is_valid[3];
-//   is_valid[0] = patch_size[0] == (patch_size[0]/block_size_)*block_size_;
-//   is_valid[1] = patch_size[1] == (patch_size[1]/block_size_)*block_size_;
-//   is_valid[2] = patch_size[2] == (patch_size[2]/block_size_)*block_size_;
+//   is_valid[0] = size[0] == (size[0]/block_size_)*block_size_;
+//   is_valid[1] = size[1] == (size[1]/block_size_)*block_size_;
+//   is_valid[2] = size[2] == (size[2]/block_size_)*block_size_;
 
-//   printf ("%d %d %d  %d\n",patch_size[0],patch_size[1],patch_size[2],
+//   printf ("%d %d %d  %d\n",size[0],size[1],size[2],
 // 	  block_size_);
 //   ASSERT("Patch::Patch","patch size must be evenly divisible by block size",
 // 	 is_valid[0] && 
-// 	 (is_valid[1] || patch_size[1] == 1) && 
-// 	 (is_valid[2] || patch_size[2] == 1));
+// 	 (is_valid[1] || size[1] == 1) && 
+// 	 (is_valid[2] || size[2] == 1));
 	 
-//   block_count_[0] = MAX(1,patch_size[0] / block_size_);
-//   block_count_[1] = MAX(1,patch_size[1] / block_size_);
-//   block_count_[2] = MAX(1,patch_size[2] / block_size_);
+//   block_count_[0] = MAX(1,size[0] / block_size_);
+//   block_count_[1] = MAX(1,size[1] / block_size_);
+//   block_count_[2] = MAX(1,size[2] / block_size_);
 
 //   // Create local data blocks
 
@@ -231,9 +231,9 @@ DataBlock * Patch::block(int i, int ip) const throw()
 
 //   double block_width[3];
 
-//   block_width[0] = block_size_ * (upper_[0] - lower_[0]) / patch_size[0];
-//   block_width[1] = block_size_ * (upper_[1] - lower_[1]) / patch_size[1];
-//   block_width[2] = block_size_ * (upper_[2] - lower_[2]) / patch_size[2];
+//   block_width[0] = block_size_ * (upper_[0] - lower_[0]) / size[0];
+//   block_width[1] = block_size_ * (upper_[1] - lower_[1]) / size[1];
+//   block_width[2] = block_size_ * (upper_[2] - lower_[2]) / size[2];
 
 //   FieldDescr * field_descr = data_descr->field_descr();
 

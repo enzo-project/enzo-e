@@ -9,6 +9,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Convert namespace to class
 /// @todo     Address need to edit code to use pass/fail string colors or not
+/// @todo     Use all uppercase for visibility, e.g. UNIT_ASSERT(...)
 /// @date     Sat Feb 23 15:22:59 PST 2008
 
 /// @def      UNIT_MAX_NAME_LEN

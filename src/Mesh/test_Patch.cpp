@@ -24,42 +24,45 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
   unit_class ("Patch");
+
   unit_func("Patch");
 
+  DataDescr data_descr;
+  Patch * patch = new Patch;
+  unit_assert(patch != NULL);
 
-//   void set_data_descr (DataDescr * data_descr) throw();
+  unit_func("set_data_descr");
 
+  patch->set_data_descr(&data_descr);
+  unit_assert(patch->data_descr()==&data_descr);
 
-//   DataDescr * data_descr () throw();
+  unit_func("set_size");
 
+  patch->set_size(7,3,2);
+  int npx,npy,npz;
+  patch->size(&npx,&npy,&npz);
+  unit_assert(npx==7 && npy==3 && npz==2);
 
+  unit_func("set_layout");
 
-//   void set_patch_size (int npx, int npy, int npz) throw();
+  Layout * layout = new Layout;
+  layout->set_process_range(0,1);
+  layout->set_block_count(1,1,1);
 
+  patch->set_layout (layout);
+  unit_assert(patch->layout() == layout);
 
+  unit_func("set_extents");
 
-//   void patch_size (int * npx, int * npy=1, int * npz=1) throw();
+  patch->set_extents(0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
 
+  double xm,xp,ym,yp,zm,zp;
 
+  patch->extents(&xm,&xp,&ym,&yp,&zm,&zp);
 
-//   void set_layout (Layout * layout) throw();
-
-
-
-//   Layout * layout () throw();
-
-
-
-//   void set_extents (double xm, double xp,
-// 		    double ym, double yp,
-// 		    double zm, double zp) throw();
-
-
-
-//   void extents (double * xm, double * xp,
-// 		double * ym=0, double * yp=0,
-// 		double * zm=0, double * zp=0) throw();
-
+  unit_assert(xm==0.0 && xp==1.0 &&
+	      ym==0.0 && yp==1.0 &&
+	      zm==0.0 && zp==1.0);
   
 //   void p_evolve();
 

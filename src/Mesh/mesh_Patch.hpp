@@ -42,10 +42,10 @@ public: // interface
   DataDescr * data_descr () const throw();
 
   /// Set the size of the patch in number of cells
-  void set_patch_size (int npx, int npy, int npz) throw();
+  void set_size (int npx, int npy, int npz) throw();
 
   /// Return the size of the patch in number of cells
-  void patch_size (int * npx, int * npy=0, int * npz=0) const throw();
+  void size (int * npx, int * npy=0, int * npz=0) const throw();
 
   /// Set the layout of the patch, describing processes and blocking
   void set_layout (Layout * layout) throw();
@@ -101,7 +101,7 @@ private: // attributes
   std::vector<data_block_vector> data_block_;
 
   /// Size of the patch
-  int patch_size_[3];
+  int size_[3];
 
   /// Layout: describes blocking, processor range, and block-processor mapping 
   Layout * layout_;
