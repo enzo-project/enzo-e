@@ -105,8 +105,10 @@ PARALLEL_MAIN_BEGIN
   int   cycle;
   float time;
 
+  Papi papi;
   Timer timer;
   timer.start();
+  papi.start();
 
   double lower = 0.125*size;
   double upper =   1.0*size;
@@ -131,8 +133,10 @@ PARALLEL_MAIN_BEGIN
     enzo.SolveHydroEquations(NULL,cycle, dt);
 
   }
-
   unit_assert(cycle >=cycle_stop || time >= time_stop);
+
+  timer.stop();
+  papi.stop();
 
   PARALLEL_PRINTF ("(size+6,cycles,time) = %d %d %g\n",
 		   size+6,cycle_stop,timer.value());
@@ -143,6 +147,10 @@ PARALLEL_MAIN_BEGIN
     enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
   }
 
+  printf ("Time real = %f\n",papi.time_real());
+  printf ("Time proc = %f\n",papi.time_proc());
+  printf ("Flop count = %lld\n",papi.flop_count());
+  printf ("GFlop rate = %f\n",papi.flop_rate()*1e-9);
 
   delete monitor;
 

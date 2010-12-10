@@ -7,13 +7,21 @@
 
 Import('env')
 Import('parallel_type')
+Import('use_papi')
+Import('use_hdf5')
 
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
 components = ['method','field', 'parameters', 'error','disk','memory','monitor','parallel','cello','enzo']
-libraries  = ['hdf5', 'png', '$FORTRANLIBS']
+
+if (use_papi):
+	components = components + ['papi','pfm']
+if (use_hdf5):
+	components = components + ['hdf5']
+
+libraries  = ['png', '$FORTRANLIBS']
 
 #------------------------------
 # ENVIRONMENTS
