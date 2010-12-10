@@ -35,6 +35,7 @@ PARALLEL_MAIN_BEGIN
 
   int p0,np;
   int nb,nbx,nby,nbz;
+  int ib,ibx,iby,ibz;
 
   //--------------------------------------------------
   // first 0  count 1  block_count (1,1,1)
@@ -60,14 +61,32 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("process");
 
-  unit_assert(layout.process (layout.block_index(0,0,0)) == 0);
+  unit_assert(layout.process (0) == 0);
+
+  unit_assert(layout.process (-1) == PROCESS_NULL);
+  unit_assert(layout.process (nb) == PROCESS_NULL);
 
   unit_func("local_count");
-  unit_assert(false);
+
+  unit_assert(layout.local_count(0)==nb);
+
+  unit_assert(layout.local_count(-1)==0);
+  unit_assert(layout.local_count(np)==0);
+
   unit_func("block_indices");
-  unit_assert(false);
+
+  ibx = iby = ibz = -1;
+
+  layout.block_indices(0,&ibx,&iby,&ibz);
+
+  unit_assert(ibx == 0);
+  unit_assert(iby == 0);
+  unit_assert(ibz == 0);
+
   unit_func("block_index");
-  unit_assert(false);
+
+  unit_assert(layout.block_index(ibx,iby,ibz) == 0);
+
 
   //--------------------------------------------------
   // first 0  count 1  block_count (5,3,2)
@@ -97,12 +116,44 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout.process (layout.block_index(0,0,0)) == 0);
   unit_assert(layout.process (layout.block_index(5-1,3-1,2-1)) == 0);
 
+  unit_assert(layout.process (-1) == PROCESS_NULL);
+  unit_assert(layout.process (nb) == PROCESS_NULL);
+
   unit_func("local_count");
-  unit_assert(false);
+
+  unit_assert(layout.local_count(0)==nb);
+
+  unit_assert(layout.local_count(-1)==0);
+  unit_assert(layout.local_count(np)==0);
+
   unit_func("block_indices");
-  unit_assert(false);
+
+  ibx = iby = ibz = -1;
+
+  layout.block_indices(0,&ibx,&iby,&ibz);
+
+  unit_assert(ibx == 0);
+  unit_assert(iby == 0);
+  unit_assert(ibz == 0);
+
   unit_func("block_index");
-  unit_assert(false);
+
+  unit_assert(layout.block_index(ibx,iby,ibz) == 0);
+
+  unit_func("block_indices");
+
+  ibx = iby = ibz = -1;
+
+  layout.block_indices(nb-1,&ibx,&iby,&ibz);
+
+  unit_assert(ibx == 5-1);
+  unit_assert(iby == 3-1);
+  unit_assert(ibz == 2-1);
+
+  unit_func("block_index");
+
+  unit_assert(layout.block_index(ibx,iby,ibz) == nb-1);
+
 
   //--------------------------------------------------
   // first 0  count 30  block_count (5,3,2)
@@ -131,12 +182,42 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout.process (layout.block_index(0,0,0))       == 0);
   unit_assert(layout.process (layout.block_index(5-1,3-1,2-1)) == 30-1);
 
+  unit_assert(layout.process (-1) == PROCESS_NULL);
+  unit_assert(layout.process (nb) == PROCESS_NULL);
+
   unit_func("local_count");
-  unit_assert(false);
+
+  unit_assert(layout.local_count(0)==1);
+  unit_assert(layout.local_count(np-1)==1);
+
+  unit_assert(layout.local_count(-1)==0);
+  unit_assert(layout.local_count(np)==0);
+
   unit_func("block_indices");
-  unit_assert(false);
+
+  ibx = iby = ibz = -1;
+
+  layout.block_indices(0,&ibx,&iby,&ibz);
+
+  unit_assert(ibx == 0);
+  unit_assert(iby == 0);
+  unit_assert(ibz == 0);
+
   unit_func("block_index");
-  unit_assert(false);
+
+  unit_assert(layout.block_index(ibx,iby,ibz) == 0);
+
+  ibx = iby = ibz = -1;
+
+  layout.block_indices(nb-1,&ibx,&iby,&ibz);
+
+  unit_assert(ibx == 5-1);
+  unit_assert(iby == 3-1);
+  unit_assert(ibz == 2-1);
+
+  unit_func("block_index");
+
+  unit_assert(layout.block_index(ibx,iby,ibz) == nb-1);
 
   //--------------------------------------------------
   // first 7  count 30  block_count (5,3,2)
@@ -165,12 +246,42 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout.process (layout.block_index(0,0,0))       == 7);
   unit_assert(layout.process (layout.block_index(5-1,3-1,2-1)) == 7+30-1);
 
+  unit_assert(layout.process (-1) == PROCESS_NULL);
+  unit_assert(layout.process (nb) == PROCESS_NULL);
+
   unit_func("local_count");
-  unit_assert(false);
+
+  unit_assert(layout.local_count(p0)==1);
+  unit_assert(layout.local_count(p0+np-1)==1);
+
+  unit_assert(layout.local_count(p0-1)==0);
+  unit_assert(layout.local_count(p0+np)==0);
+
   unit_func("block_indices");
-  unit_assert(false);
+
+  ibx = iby = ibz = -1;
+
+  layout.block_indices(0,&ibx,&iby,&ibz);
+
+  unit_assert(ibx == 0);
+  unit_assert(iby == 0);
+  unit_assert(ibz == 0);
+
   unit_func("block_index");
-  unit_assert(false);
+
+  unit_assert(layout.block_index(ibx,iby,ibz) == 0);
+
+  ibx = iby = ibz = -1;
+
+  layout.block_indices(nb-1,&ibx,&iby,&ibz);
+
+  unit_assert(ibx == 5-1);
+  unit_assert(iby == 3-1);
+  unit_assert(ibz == 2-1);
+
+  unit_func("block_index");
+
+  unit_assert(layout.block_index(ibx,iby,ibz) == nb-1);
 
   //--------------------------------------------------
 

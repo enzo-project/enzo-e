@@ -63,7 +63,11 @@ void Layout::process_range(int * process_first, int * process_count) throw()
 int Layout::local_count (int ip) throw()
 {
   int block_count = block_count_[0] * block_count_[1] * block_count_[2];
-  return ((ip-1)*block_count)/process_count_ - (ip*block_count)/process_count_;
+  if (process_first_ <= ip && ip < process_first_ + process_count_) {
+    return (ip*block_count)/process_count_ - ((ip-1)*block_count)/process_count_;
+  } else {
+    return 0;
+  }
   
 }
 
@@ -72,8 +76,11 @@ int Layout::local_count (int ip) throw()
 int Layout::process (int ib)  throw()
 {
   int block_count = block_count_[0] * block_count_[1] * block_count_[2];
-
-  return process_first_ + process_count_*ib / block_count;
+  if (0 <= ib && ib < block_count) {
+    return process_first_ + process_count_*ib / block_count;
+  } else {
+    return PROCESS_NULL;
+  }
 }
 
 //----------------------------------------------------------------------

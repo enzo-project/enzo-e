@@ -14,6 +14,8 @@ enum parallel_enum {
   parallel_mpi
 };
 
+#define PROCESS_NULL -1
+
 #include <string>
 #include <vector>
 #include <string>
