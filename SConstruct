@@ -18,6 +18,8 @@ defines      = define_png;
 define_mpi   = ['CONFIG_USE_MPI'];
 define_charm = ['CONFIG_USE_CHARM']
 
+# (define*_string used for IBM)
+
 defines_string      = ' -D' + define_png[0]
 define_mpi_string   = ' -D' + define_mpi[0]
 define_charm_string = ' -D' + define_charm[0]
