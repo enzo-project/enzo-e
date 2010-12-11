@@ -12,7 +12,8 @@ foreach opt (yes)
    set n = $nmin
    while ($n <= $nmax)
 
-     ./test_ppml ppml-implosion3 $n $cycles 0 | grep time >> out.test_ppml${suffix}
+     ./test_ppml ppml-implosion3 $n $cycles 0 | grep time >> out.time-ppml.${suffix}
+     ./test_ppml ppml-implosion3 $n $cycles 0 | grep GFlop >> out.gflop-ppml.${suffix}
 
      @ n = $n + 1
    end
