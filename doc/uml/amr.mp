@@ -28,15 +28,15 @@ beginfig(1)
   link(composition)(P.n -- M.s);
   link(composition)(B.n -- P.s);
   link(composition)(N.n -- T.s);
-  link(aggregation)(T.w -- M.e);
-  link(aggregation)(N.w -- P.e);
+  link(association)(T.w -- M.e);
+  link(association)(N.w -- P.e);
   link(association)(L.e -- P.w);
 
   link(association)(pathStepX(B.w, F.e, -10));
   link(association)(pathStepX(B.w, R.e, -10));
 
   item(iAssoc)("1")(obj.ne = M.s + (-5,0));
-  item(iAssoc)("1")(obj.sw = M.e + (0,3));
+  item(iAssoc)("1")(obj.sw = M.e );
 
   item(iAssoc)("1")(obj.ne = T.s + (-5,0));
   item(iAssoc)("1")(obj.se = T.w);
@@ -46,7 +46,7 @@ beginfig(1)
   item(iAssoc)("1")(obj.se = P.w);
   item(iAssoc)("1..*")(obj.se = P.n );
   item(iAssoc)("1")(obj.ne = P.s + (-5,0));
-  item(iAssoc)("1")(obj.sw = P.e + (0,3));
+  item(iAssoc)("0..1")(obj.sw = P.e );
 
   item(iAssoc)("1..*")(obj.se = N.n );
   item(iAssoc)("1")(obj.se = N.w);
