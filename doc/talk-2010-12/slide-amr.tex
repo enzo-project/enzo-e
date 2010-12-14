@@ -1,7 +1,7 @@
 \begin{frame}[fragile] 
 %--------------------------------------------------
 \frametitle{\cello\ Mesh data structure}
-\framesubtitle{Design philosophy}
+\framesubtitle{AMR design philosophy}
 %--------------------------------------------------
 %  AMR:        additional level of refinement: patches + blocks
 %  AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
@@ -14,10 +14,10 @@
   \begin{itemize}
   \item in Enzo,   \code{grid} $=$ parallel task 
   \item in Cello,  \code{Patch} $\supseteq$ \code{Block} $=$ parallel task
-  \item \code{Block} size can be optimized, e.g~$4^3$
+  \item \code{Block} size can be optimized independently of \code{Patch} size
        \begin{itemize}
+       \item target specialized computational kernels
        \item increased parallelism
-       \item specialized computational kernels
        \item improved load balancing
        \item reduced memory fragmentation
        \end{itemize}
@@ -35,7 +35,7 @@
 \begin{frame}[fragile] 
 %--------------------------------------------------
 \frametitle{\cello\ Mesh data structure}
-\framesubtitle{\code{Mesh} component classes}
+\framesubtitle{Core \code{Mesh} classes}
 %--------------------------------------------------
 %  AMR:        additional level of refinement: patches + blocks
 %  AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
@@ -56,7 +56,7 @@
 \begin{frame}[fragile] 
 %--------------------------------------------------
 \frametitle{\cello\ Mesh data structure}
-\framesubtitle{\code{Mesh} component classes}
+\framesubtitle{\code{Mesh} related classes}
 %--------------------------------------------------
 %  AMR:        additional level of refinement: patches + blocks
 %  AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
@@ -70,6 +70,7 @@
 \begin{frame}[fragile] 
 %--------------------------------------------------
 \frametitle{\cello\ Mesh data structure}
+\framesubtitle{\code{Mesh} related classes}
 %--------------------------------------------------
 %  AMR:        additional level of refinement: patches + blocks
 %  AMR:        new [currently proprietary] enhancement for "large, shallow" AMR
@@ -99,8 +100,8 @@
   \begin{itemize}
   \item \code{Node}s are only objects replicated across machine
     \begin{itemize}
-    \item small nodes: $\le 24$ bytes ($>1500$ bytes for Enzo)
-    \item fewer nodes: e.g.~$1$ instead of $P$ for unigrid
+    \item small nodes: $\le 24$ bytes ($>1500$ bytes/\code{grid} for Enzo)
+    \item fewer nodes: e.g.~$1$ instead of $P$ for unigrid case
     \end{itemize}
   \end{itemize}
 \end{itemize}
