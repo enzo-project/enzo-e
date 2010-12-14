@@ -14,6 +14,7 @@ DOCS = \
       report-nsf \
       talk-2009-09 \
       talk-2010-06 \
+      talk-2010-12 \
       uml
 
 DIRS = $(DOCS) uml
@@ -68,6 +69,9 @@ talk-2009-09:
 talk-2010-06: 
 	cd talk-2010-06; ln -sf ../Makefile.1 makefile
 	$(MAKE) -C talk-2010-06
+talk-2010-12: 
+	cd talk-2010-12; ln -sf ../Makefile.1 makefile
+	$(MAKE) -C talk-2010-12
 
 #-----------------------------------------------------------------------
 
