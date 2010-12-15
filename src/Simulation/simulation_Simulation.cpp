@@ -248,7 +248,7 @@ void Simulation::initialize_mesh_() throw()
   Patch * root_patch = new Patch;
 
   root_patch->set_data_descr(data_descr_);
-  root_patch->set_patch_size(root_size[0],root_size[1],root_size[2]);
+  root_patch->set_size(root_size[0],root_size[1],root_size[2]);
   root_patch->set_layout(layout);
   root_patch->set_extents(domain_lower[0],domain_upper[0],
 			  domain_lower[1],domain_upper[1],
