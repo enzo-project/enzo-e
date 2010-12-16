@@ -169,18 +169,11 @@ PARALLEL_MAIN_BEGIN
   Parameters * parameters = global->parameters();
   FileHdf5   hdf5;
 
-  // Read in parameters
-
-  FILE * file_pointer;
-  file_pointer = fopen ("input/test_MethodEnzoPpm.in","r");
-  parameters->read(file_pointer); // MEMORY LEAK
-  fclose(file_pointer);
-
   // Create top-level Simulation object
 
   EnzoSimulation simulation(global);
 
-  simulation.initialize();
+  simulation.initialize("input/test_MethodEnzoPpm.in");
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

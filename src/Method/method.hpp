@@ -17,8 +17,26 @@
 #include "error.hpp"
 #include "mesh.hpp"
 
+/// @enum argument_enum
+/// @brief type of Method argument
+enum argument_enum {
+  argument_unknown,
+  argument_field,
+  argument_particle
+};
+
+/// @enum access_enum
+/// @brief access restrictions for Method argument
+enum access_enum {
+  access_unknown,
+  access_read,
+  access_write,
+  access_read_write
+};
+
 #include "method_MethodControl.hpp"
 #include "method_MethodTimestep.hpp"
+#include "method_MethodInitial.hpp"
 #include "method_MethodHyperbolic.hpp"
 #include "method_MethodDescr.hpp"
 

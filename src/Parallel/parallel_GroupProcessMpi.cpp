@@ -16,13 +16,11 @@
 //----------------------------------------------------------------------
 
 GroupProcessMpi::GroupProcessMpi(int process_first,
-				 int process_last_plus,
-				 int process_stride) throw ()
+				 int process_last_plus) throw ()
   : GroupProcess(),
     comm_             (MPI_COMM_WORLD),
     process_first_    (process_first),
     process_last_plus_(process_last_plus),
-    process_stride_   (process_stride),
     send_type_        (send_standard)
 {
   int size;
@@ -42,20 +40,11 @@ GroupProcessMpi::GroupProcessMpi(int process_first,
 
   if (process_last_plus_ == -1) process_last_plus_ = size;
 
-  ASSERT("GroupProcessMpi::GroupProcessMpi",
-	 "process_stride",
-	 1 <= process_stride_ &&
-	 process_stride_ <= (process_last_plus_ - process_first_));
-
   // Compute size_
 
-  size_ = (process_last_plus_ - process_first_) / process_stride_;
+  size_ = process_last_plus_ - process_first_ ;
 
-  // Update process_last_plus for tight upper-bound
-
-  process_last_plus_ = process_first_ + size_*process_stride_;
-  
-  rank_ = (rank - process_first_) / process_stride_;
+  rank_ = rank - process_first_;
 
 }
 

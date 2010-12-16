@@ -23,13 +23,9 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  // Warning: unused
-  GroupProcess * parallel = GroupProcess::create();
-
   unit_init();
+
   unit_class ("Simulation");
-  unit_func("Simulation");
-  Global * global = new Global;
 
   // Read parameter file
 
@@ -38,21 +34,37 @@ PARALLEL_MAIN_BEGIN
 
   // Create simulation object
 
-  EnzoSimulation simulation(global);
+  Global * global = new Global;
 
-  // Initialize data fields
+  // Create the simulation
 
-  simulation.set_method_control("default");
+  unit_func("Simulation");
+  Simulation simulation(global);
+  unit_assert(true);
+
+  // Initialize the simulation
+
+  unit_func("initialize");
   simulation.initialize();
+  unit_assert(true);
 
-  double stop_time  = 1.0;
-  int    stop_cycle = 1000;
+  // Run the simulation
 
-  // Advance the simulation to the given time or cycle limit
-
-  simulation.advance(stop_time,stop_cycle);
-  
+  unit_func("execute");
+  simulation.execute();
   unit_assert(false);
+  
+  // Load the simulation
+
+  unit_func("load");
+  simulation.load();
+
+  // Save the simulation
+
+  unit_func("save");
+  simulation.save();
+  unit_assert(false);
+
   unit_finalize();
 
 

@@ -14,15 +14,13 @@
 //----------------------------------------------------------------------
 
 GroupProcess * GroupProcess::create (int process_first,
-				     int process_last_plus,
-				     int process_stride) throw()
+				     int process_last_plus) throw()
 {
   GroupProcess * group = 0;
 
 #if defined(CONFIG_USE_MPI)
 
-  group = new GroupProcessMpi
-    (process_first, process_last_plus, process_stride);
+  group = new GroupProcessMpi (process_first, process_last_plus);
 
 #elif defined(CONFIG_USE_CHARM)
 

@@ -28,239 +28,114 @@ public: // interface
   ~Simulation() throw();
 
   /// Copy constructor
-  Simulation(const Simulation & classname) throw();
+  Simulation(const Simulation & simulation) throw();
 
   /// Assignment operator
-  Simulation & operator= (const Simulation & classname) throw();
+  Simulation & operator= (const Simulation & simulation) throw();
 
-  /// Advance the simulation a specified amount
+  //----------------------------------------------------------------------
 
-  void advance(double stop_time, int stop_cycle)  throw();
+  /// initialize the Simulation given a parameter file
+  void initialize(std::string parameter_file) throw();
 
-  /// Return the dimension 1 <= d <= 3, of the simulation
-  int dimension() const throw(); 
+  /// Run the simulation
+  void execute() throw();
 
-  /// Return extents.  Assumes domain_lower[] and domain_upper[] are allocated to at least dimension()
-  int domain (int domain_lower[], int domain_upper[]) throw();
+  /// Finalize the Simulation after running it
+  void finalize() throw();
 
-  /// Return the Global object
-  Global * global ()  throw() 
-  { return global_; };
+  /// Write a Simulation state to disk
+  void write() throw();
 
-  /// Return the Mesh object
-  Mesh * mesh ()  throw() 
-  { return mesh_; };
+  /// Load a Simulation from disk
+  void read() throw();
 
-  /// Return the Data code descriptor
-  DataDescr * data_descr () throw() 
-  { return data_descr_; };
+protected: // functions
 
-  /// Add a user method
-  MethodHyperbolic * add_method_hyperbolic (std::string method_name)
-  { MethodHyperbolic * method = create_method_hyperbolic_(method_name);
-    if (method) method_hyperbolic_.push_back(method); 
-    return method;
-  };
+  /// Initialize parameters
+  void initialize_parameters_ (Parameters * parameters) throw();
 
-  /// Return the ith method hyperbolic
-  MethodHyperbolic * method_hyperbolic (int i)
-  { return method_hyperbolic_.at(i); };
+  /// Initialize the mesh component
+  void initialize_mesh_       (Parameters * parameters) throw();
 
+  /// Initialize the data component
+  void initialize_data_       (Parameters * parameters) throw();
 
-  /// Set the control method
-  MethodControl * set_method_control (std::string name_method_control)
-  {
-    if (method_control_ != 0) {
-      WARNING_MESSAGE("MethodDescr::set_method_control",
-		      "Resetting method control; deleting old one");
-      delete method_control_;
-      method_control_ = 0;
-    }
+  /// Initialize the control component
+  void initialize_control_    (Parameters * parameters) throw();
 
-    method_control_ = create_method_control_(name_method_control);
+  /// Initialize the timestep component
+  void initialize_timestep_   (Parameters * parameters) throw();
 
-    return method_control_;
-  };
+  /// Initialize the initialization method component
+  void initialize_initial_    (Parameters * parameters) throw();
 
-  /// Return the control method
-  MethodControl * method_control ()
-  { return method_control_; };
+  /// Initialize the method components
+  void initialize_methods_    (Parameters * parameters) throw();
 
-  /// Return the timestep method
-  MethodTimestep * set_method_timestep (std::string name_method_timestep)
-  {
-    if (method_timestep_ != 0) {
-      WARNING_MESSAGE("MethodDescr::set_method_timestep",
-		      "Resetting method timestep; deleting old one");
-      delete method_timestep_;
-      method_timestep_ = 0;
-    }
+  /// Add a named hyperbolic method
+  MethodHyperbolic * add_method (std::string method_name) throw();
 
-    method_timestep_ = create_method_timestep_(name_method_timestep);
+  /// Set the named control method
+  MethodControl * set_control (std::string control_name) throw();
 
-    return method_timestep_;
-  };
+  /// Set the named timestep method
+  MethodTimestep * set_timestep (std::string timestep_name) throw();
+  
+protected: // abstract virtual functions
 
-
-  /// Initialize method classes before a simulation
-  void initialize()
-  {
-    ASSERT("MethodDescr::initialize()","method_control_ == NULL",
-	   method_control_!=0);
-    ASSERT("MethodDescr::initialize()","method_timestep_ == NULL",
-	   method_timestep_!=0);
-    ASSERT("MethodDescr::initialize()","method_hyperbolic_.size()==0",
-	   method_hyperbolic_.size()>0);
-    method_control_ ->initialize(data_descr_);
-    method_timestep_->initialize(data_descr_);
-    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
-      method_hyperbolic_[i]->initialize(data_descr_);
-    }
-  }
-
-  /// Finalize method classes after a simulation
-  void finalize()
-  {
-    ASSERT("MethodDescr::finalize()","method_control_ == NULL",
-	   method_control_!=0);
-    ASSERT("MethodDescr::finalize()","method_timestep_ == NULL",
-	   method_timestep_!=0);
-    ASSERT("MethodDescr::finalize()","method_hyperbolic_.size()==0",
-	   method_hyperbolic_.size()>0);
-    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
-      method_hyperbolic_[i]->finalize(data_descr_);
-    }
-    method_timestep_->finalize(data_descr_);
-    method_control_ ->finalize(data_descr_);
-  }
-
-  /// Return the timestep method
-  MethodTimestep * method_timestep ()
-  { return method_timestep_; };
-
-  /// Initialize method classes before advancing all blocks one cycle
-  void initialize_cycle()
-  {
-    INCOMPLETE_MESSAGE("MethodDescr::initialize_cycle","Not implemented");
-  }
-
-  /// Finalize method classes after advancing all blocks one cycle
-  void finalize_cycle()
-  {
-    INCOMPLETE_MESSAGE("MethodDescr::finalize_cycle","Not implemented");
-  }
-
-  /// Initialize method classes before advancing a block
-  void initialize_block(DataBlock * data_block)
-  {
-    ASSERT("MethodDescr::initialize_block()","method_control_ == NULL",
-	   method_control_!=0);
-    ASSERT("MethodDescr::initialize_block()","method_timestep_ == NULL",
-	   method_timestep_!=0);
-    ASSERT("MethodDescr::initialize_block()","method_hyperbolic_.size()==0",
-	   method_hyperbolic_.size()>0);
-    method_control_ ->initialize_block(data_block);
-    method_timestep_->initialize_block(data_block);
-    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
-      method_hyperbolic_[i]->initialize_block(data_block);
-    }
-  }
-
-  /// Finalize method classes after advancing a block
-  void finalize_block(DataBlock * data_block)
-  {
-    ASSERT("MethodDescr::finalize_block()","method_control_ == NULL",
-	   method_control_!=0);
-    ASSERT("MethodDescr::finalize_block()","method_timestep_ == NULL",
-	   method_timestep_!=0);
-    ASSERT("MethodDescr::finalize_block()","method_hyperbolic_.size()==0",
-	   method_hyperbolic_.size()>0);
-    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
-      method_hyperbolic_[i]->finalize_block(data_block);
-    }
-    method_timestep_->finalize_block(data_block);
-    method_control_ ->finalize_block(data_block);
-  }
-
-
-protected: // virtual functions
-
-
-  /// APPLICATION INHERITENCE OVERRIDE
-  /// Read method parameters and initialize method objects
-  virtual void method_initialize_() throw ()
-  { 
-    WARNING_MESSAGE ("Simulation::method_initialize_",
-		     "No method_initialize_() implementation!");
-  };
-
-
-  /// APPLICATION INHERITENCE OVERRIDE
   /// Create named control method.
-  virtual MethodControl * create_method_control_ (std::string name_method_control)
-  { 
-    WARNING_MESSAGE ("Simulation::create_method_control",
-		     "No create_method_control() implementation!");
-    return NULL;
-  };
+  virtual MethodControl * 
+  create_control_ (std::string name_control) throw () = 0;
 
-  /// APPLICATION INHERITENCE OVERRIDE
   /// Create named timestep method.
-  virtual MethodTimestep * create_method_timestep_ (std::string name_method_timestep)
-  { 
-    WARNING_MESSAGE ("Simulation::create_method_timestep",
-		     "No create_method_timestep() implementation!");
-    return NULL;
-  };
+  virtual MethodTimestep * 
+  create_timestep_ (std::string name_timestep) throw () = 0;
 
-
-  /// APPLICATION INHERITENCE OVERRIDE
   /// Create named method method.
-  virtual MethodHyperbolic* create_method_hyperbolic_ (std::string name_method_hyperbolic)
-  { 
-    WARNING_MESSAGE ("Simulation::create_method_hyperbolic",
-		     "No create_method_hyperbolic() implementation!");
-    return NULL;
-  };
+  virtual MethodHyperbolic * 
+  create_method_ (std::string name_hyperbolic) throw () = 0;
 
-private: // functions
-
-  /// Initialize the mesh
-
-  void initialize_mesh_() throw ();
+  /// Create named method method.
+  virtual MethodInitial * 
+  create_initial_ (std::string name_initial) throw () = 0;
 
 protected: // attributes
 
-  /// Dimension or rank of the simulation
+  //----------------------------------------------------------------------
+  // PARAMETERS
+  //----------------------------------------------------------------------
 
-  int dimension_;
+  /// Dimension or rank of the simulation.
+  int    dimension_; 
 
-  /// Domain extents
+  /// Lower and upper domain extents
+  double extent_[6];
 
-  double domain_lower_[3];
-  double domain_upper_[3];
+  //----------------------------------------------------------------------
+  // SIMULATION COMPONENTS
+  //----------------------------------------------------------------------
 
   /// "global" data, including parameters, monitor, error, parallel, etc.
-
   Global * global_;
 
   /// AMR mesh
   Mesh * mesh_;
+  
+  /// Data descriptor
+  DataDescr * data_;
 
-  /// Method control
+  /// Method for overall control of the simulation
+  MethodControl * control_;
 
-  MethodControl *             method_control_;
+  /// Method for time-step computation
+  MethodTimestep * timestep_;
 
-  /// Method time-step computation
+  /// List of initialization routines
+  std::vector<MethodInitial *> initialize_list_;
 
-  MethodTimestep *            method_timestep_;
-
-  /// Method methods
-
-  std::vector<MethodHyperbolic *> method_hyperbolic_;
-
-  /// Data descriptions
-  DataDescr * data_descr_;
+  /// List of numerical methods to apply at each timestep
+  std::vector<MethodHyperbolic *> method_list_;
 
 };
 

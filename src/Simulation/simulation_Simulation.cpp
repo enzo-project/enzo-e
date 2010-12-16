@@ -12,27 +12,130 @@
 #include "mesh.hpp"
 #include "method.hpp" 
 
+/// Initialize the Simulation object
 Simulation::Simulation(Global * global)
   : dimension_(0),
-    domain_lower_(),
-    domain_upper_(),
-    global_    (global),
-    mesh_      (NULL),
-    method_control_(NULL),
-    method_timestep_(NULL),
-    method_hyperbolic_(),
-    data_descr_()
+    global_(global),
+    //
+    mesh_(0),
+    data_(0),
+    control_(0),
+    timestep_(0),
+    initialize_list_(),
+    method_list_()
 {
+  // Initialize parameter defaults
 
+  dimension_ = 1;
+
+  extent_[0] = 0.0;
+  extent_[1] = 1.0;
+  extent_[2] = 0.0;
+  extent_[3] = 1.0;
+  extent_[4] = 0.0;
+  extent_[5] = 1.0;
+
+  // Initialize simulation component defaults
+
+  data_ = new DataDescr;
+
+  mesh_ = new Mesh(data_);
+
+}
+
+//----------------------------------------------------------------------
+
+Simulation::~Simulation() throw()
+{
+  delete data_;
+}
+
+//----------------------------------------------------------------------
+
+Simulation::Simulation(const Simulation & simulation) throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::Simulation(simulation)","");
+}
+
+//----------------------------------------------------------------------
+
+
+Simulation & Simulation::operator= (const Simulation & simulation) throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::operatior = (simulation)","");
+  return (*this);
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize(std::string parameter_file) throw()
+{
   Parameters * parameters = global_->parameters();
 
-  // Initialize dimension_
+  // Read in parameters
+
+  FILE * file_pointer;
+  file_pointer = fopen (parameter_file.c_str(),"r");
+  parameters->read(file_pointer); // MEMORY LEAK
+  fclose(file_pointer);
+
+  // Initialize parameters
+
+  initialize_parameters_(parameters);
+
+  // Initialize simulation components
+
+  initialize_mesh_(parameters);
+  initialize_data_(parameters);
+  initialize_control_(parameters);
+  initialize_timestep_(parameters);
+  initialize_initial_(parameters);
+  initialize_methods_(parameters);
+
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::execute() throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::execute","");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::finalize() throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::finalize","");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::read() throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::read","");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::write() throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::write","");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize_parameters_(Parameters * parameters) throw()
+{
+
+  //--------------------------------------------------
+  // Physics parameters
+  //   dimensions
+  //--------------------------------------------------
 
   parameters->set_current_group("Physics");
 
   dimension_ = parameters->value_integer("dimensions",0);
 
-  // Initialize domain extents
 
   parameters->set_current_group("Domain");
 
@@ -43,134 +146,43 @@ Simulation::Simulation(Global * global)
   bool valid_extent_length = ((extent_length == 2) ||
 			      (extent_length == 4) ||
 			      (extent_length == 6));
-  ASSERT ("Simulation::Simulation",
+  ASSERT ("Simulation::initialize_parameters_",
 	  "Parameter Domain:extent list must have length 2, 4, or 6",
 	  valid_extent_length);
 
-  ASSERT ("Simulation::Simulation",
+  ASSERT ("Simulation::initialize_parameters_",
 	  "Parameter mismatch between Physics:dimensions and Domain:extent",
 	  (dimension_ == extent_length / 2));
 
-  // initialize domain_lower_[] and domain_upper_[]
+  for (int i=0; i<extent_length; i++) {
 
-  for (int i=0; i<extent_length; i+=2) {
+    double extent_default = (i % 2 == 0) ? 0.0 : 1.0;
 
-    int k = i/2;
+    extent_[i] = parameters->list_value_scalar(i, "extent", extent_default);
 
-    domain_lower_[k] = parameters->list_value_scalar(i,  "extent",0.0);
-    domain_upper_[k] = parameters->list_value_scalar(i+1,"extent",1.0);
-
-    ASSERT ("Simulation::Simulation",
-	    "Parameter Domain:lower not lower than Domain:upper",
-	    (domain_lower_[k] < domain_upper_[k]));
+    if (i % 2 == 1) {
+      char error_message[100];
+      sprintf (error_message,
+	       "Parameter Domain:extent[%g] not lower than Domain:extent[%g]",
+	       extent_[i-1],extent_[i]);
+      ASSERT ("Simulation::Simulation", error_message, (extent_[i-1] < extent_[i]));
+    }
   }
-
-//   // assert extent_length = 2 | 4 | 6
-//   mesh_->set_dimension(extent_length / 2);
-
-  // Parameter Mesh::root_size
-
-//   std::vector<int> root_size;
-//   root_size.push_back(parameters->list_value_integer(0,"root_size",1));
-//   root_size.push_back(parameters->list_value_integer(1,"root_size",1));
-//   root_size.push_back(parameters->list_value_integer(2,"root_size",1));
-
-//   mesh_->set_root_size (root_size);
-
-  // Parameter Mesh::patch_size
-
-  // --------------------------------------------------
-  // Initiazize data descriptors
-  // --------------------------------------------------
-
-  // Initialize field descriptor
-
-  data_descr_ = new DataDescr;
-
-  FieldDescr * field_descr = data_descr_->field_descr();
-
-  parameters->set_current_group("Field");
-
-  for (int i=0; i<parameters->list_length("fields"); i++) {
-    field_descr->insert_field
-      (parameters->list_value_string(i, "fields", "unknown"));
-  }
-
-  // --------------------------------------------------
-  // Initialize AMR grid
-  // --------------------------------------------------
-
-  initialize_mesh_();
 }
 
 //----------------------------------------------------------------------
 
-Simulation::~Simulation() throw()
+void Simulation::initialize_mesh_(Parameters * parameters) throw()
 {
-  delete mesh_;
-  delete method_control_;
-  delete method_timestep_;
-  delete data_descr_;
-}
-
-//----------------------------------------------------------------------
-Simulation::Simulation(const Simulation & classname) throw()
-{
-  INCOMPLETE_MESSAGE("Simulation::Simulation","");
-}
-
-//----------------------------------------------------------------------
-
-Simulation & Simulation::operator= (const Simulation & classname) throw()
-{
-  INCOMPLETE_MESSAGE("Simulation::operator =","");
-  return *this;
-}
-
-//----------------------------------------------------------------------
-
-int Simulation::dimension() const throw()
-{
-  return dimension_; 
-};
-
-//----------------------------------------------------------------------
-
-int Simulation::domain (int domain_lower[], int domain_upper[]) throw()
-{
-  if (dimension_ >= 1) {
-    domain_lower[0] = domain_lower_[0];
-    domain_upper[0] = domain_upper_[0];
-  }
-  if (dimension_ >= 2) {
-    domain_lower[1] = domain_lower_[1];
-    domain_upper[1] = domain_upper_[1];
-  }
-  if (dimension_ >= 3) {
-    domain_lower[2] = domain_lower_[2];
-    domain_upper[2] = domain_upper_[2];
-  }
-  return dimension_;
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::initialize_mesh_() throw()
-{
-
-  mesh_ = new Mesh(data_descr_);
-
-  Parameters * parameters = global_->parameters();
-
   parameters->set_current_group ("Mesh");
 
   // Block sizes
 
   int block_size[3];
 
-  parameters->list_value_integer(0,"block_size",4);
-  parameters->list_value_integer(1,"block_size",4);
-  parameters->list_value_integer(2,"block_size",4);
+  block_size[0] = parameters->list_value_integer(0,"block_size",4);
+  block_size[1] = parameters->list_value_integer(1,"block_size",4);
+  block_size[2] = parameters->list_value_integer(2,"block_size",4);
 
   // assume constant block size
   mesh_->set_min_block_size (block_size[0]);
@@ -197,8 +209,6 @@ void Simulation::initialize_mesh_() throw()
   root_size[2] = parameters->list_value_integer(2,"root_size",1);
 
   mesh_->set_root_size(root_size[0],root_size[1],root_size[2]);
-
-  // Lower and upper domain extents
 
   parameters->set_current_group("Domain");
 
@@ -247,7 +257,7 @@ void Simulation::initialize_mesh_() throw()
 
   Patch * root_patch = new Patch;
 
-  root_patch->set_data_descr(data_descr_);
+  root_patch->set_data_descr(data_);
   root_patch->set_size(root_size[0],root_size[1],root_size[2]);
   root_patch->set_layout(layout);
   root_patch->set_extents(domain_lower[0],domain_upper[0],
@@ -265,9 +275,54 @@ void Simulation::initialize_mesh_() throw()
   mesh_->set_coalesce  (parameters->value_logical("coalesce",  true));
 
 }
+
 //----------------------------------------------------------------------
 
-void Simulation::advance(double stop_time, int stop_cycle) throw()
+void Simulation::initialize_data_(Parameters * parameters) throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::advance","Not implemented");
+  FieldDescr * field_descr = data_->field_descr();
+
+  parameters->set_current_group("Field");
+
+  for (int i=0; i<parameters->list_length("fields"); i++) {
+    field_descr->insert_field
+      (parameters->list_value_string(i, "fields", "unknown"));
+  }
 }
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize_control_(Parameters * parameters) throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::initialize_control_","");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize_timestep_(Parameters * parameters) throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::initialize_timestep_","");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize_initial_(Parameters * parameters) throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::initialize_initial_","");
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize_methods_(Parameters * parameters) throw()
+{
+  INCOMPLETE_MESSAGE("Simulation::initialize_methods_","");
+}
+
+//----------------------------------------------------------------------
+
+MethodHyperbolic * Simulation::add_method (std::string method_name) throw()
+{
+  MethodHyperbolic * method = create_method_(method_name);
+  if (method) method_list_.push_back(method); 
+  return method;
+};

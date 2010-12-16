@@ -19,8 +19,7 @@ class GroupProcess : public ParallelGroup {
 public: // static interface
 
   static GroupProcess * create (int process_first     = 0,
-				int process_last_plus = -1,
-				int process_stride    = 1) throw();
+				int process_last_plus = -1) throw();
 
 protected: // interface
 

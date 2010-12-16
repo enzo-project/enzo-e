@@ -4,24 +4,11 @@
 /// @file     method_MethodHyperbolic.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
+/// @todo     Common ABC for MethodInitial and MethodHyperbolic
 /// @brief    Declaration for the MethodHyperbolic component
 
 #ifndef METHOD_METHOD_HYPERBOLIC_HPP
 #define METHOD_METHOD_HYPERBOLIC_HPP
-
-enum argument_enum {
-  argument_unknown,
-  argument_field,
-  argument_particle
-};
-
-enum access_enum {
-  access_unknown,
-  access_read,
-  access_write,
-  access_read_write
-};
-
 
 class MethodHyperbolic {
 

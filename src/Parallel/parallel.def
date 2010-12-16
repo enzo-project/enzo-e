@@ -9,15 +9,15 @@
 /// @date     Mon Aug 13 2010
 /// @brief    Macro definitions for the Parallel component
 
+#if defined(CONFIG_USE_CHARM)
 
 //--------------------------------------------------
 // USING CHARM
 //--------------------------------------------------
 
-#if defined(CONFIG_USE_CHARM)
-
 #  define PARALLEL_INIT      /* BLANK */
 #  define PARALLEL_EXIT      CkExit()
+#  define PARALLEL_RUN       "charmrun [ +p<processors> ] "
 #  define PARALLEL_PRINTF    CkPrintf
 #  define PARALLEL_ARGC      main->argc
 #  define PARALLEL_ARGV      main->argv
@@ -30,11 +30,11 @@
 
 #  define PARALLEL_CHARM_INCLUDE(FILE) #FILE
 
-#  define PARALLEL_CLASS_DECL(CLASS) class CLASS : public CBase_##CLASS
-#  define PARALLEL_CLASS_TYPE(CLASS) CProxy_##CLASS
-#  define PARALLEL_CLASS_NEW_ARRAY_1D(CLASS,NX)       CProxy_##CLASS::ckNew(NX)
-#  define PARALLEL_CLASS_NEW_ARRAY_2D(CLASS,NX,NY)    CProxy_##CLASS::ckNew(NX,NY)
-#  define PARALLEL_CLASS_NEW_ARRAY_3D(CLASS,NX,NY,NZ) CProxy_##CLASS::ckNew(NX,NY,NZ)
+#  define PARALLEL_DECL(CLASS) class CLASS : public CBase_##CLASS
+#  define PARALLEL_TYPE(CLASS) CProxy_##CLASS
+#  define PARALLEL_NEW_ARRAY_1D(CLASS,NX)       CProxy_##CLASS::ckNew(NX)
+#  define PARALLEL_NEW_ARRAY_2D(CLASS,NX,NY)    CProxy_##CLASS::ckNew(NX,NY)
+#  define PARALLEL_NEW_ARRAY_3D(CLASS,NX,NY,NZ) CProxy_##CLASS::ckNew(NX,NY,NZ)
 
 #elif defined(CONFIG_USE_MPI)
 
@@ -46,11 +46,12 @@
 
 #  define PARALLEL_INIT      MPI_Init(&PARALLEL_ARGC,&PARALLEL_ARGV)
 #  define PARALLEL_EXIT      MPI_Finalize(); exit(0);
+#  define PARALLEL_RUN       "mpirun [ -n<processors> ] "
 
 #else /* serial */
 
 //--------------------------------------------------
-// NOT USING CHARM OR MPI
+// NOT USING CHARM NOR MPI
 //--------------------------------------------------
 
 #  define PARALLEL_INIT      /* BLANK */
@@ -70,12 +71,14 @@
 #  define PARALLEL_ARGV      argv
 #  define PARALLEL_MAIN_BEGIN int main(int argc, char ** argv)
 #  define PARALLEL_MAIN_END   /* BLANK */
+
 #  define PARALLEL_CHARM_INCLUDE(FILE) <stdio.h> /* dummy include */
-#  define PARALLEL_CLASS_DECL(CLASS) class CLASS 
-#  define PARALLEL_CLASS_TYPE(CLASS) CLASS 
-#  define PARALLEL_CLASS_NEW_ARRAY_1D(CLASS,NX)       new class CLASS [NX];
-#  define PARALLEL_CLASS_NEW_ARRAY_2D(CLASS,NX,NY)    new class CLASS [NX*NY];
-#  define PARALLEL_CLASS_NEW_ARRAY_3D(CLASS,NX,NY,NZ) new class CLASS [NX*NY*NZ];
+
+#  define PARALLEL_DECL(CLASS) class CLASS 
+#  define PARALLEL_TYPE(CLASS) CLASS 
+#  define PARALLEL_NEW_ARRAY_1D(CLASS,NX)       new class CLASS [NX];
+#  define PARALLEL_NEW_ARRAY_2D(CLASS,NX,NY)    new class CLASS [NX*NY];
+#  define PARALLEL_NEW_ARRAY_3D(CLASS,NX,NY,NZ) new class CLASS [NX*NY*NZ];
 #endif
 
 #endif /* PARALLEL_HPP */

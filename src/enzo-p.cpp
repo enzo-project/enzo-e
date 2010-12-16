@@ -15,10 +15,13 @@
 
 #include "cello.hpp"
 
+#include "enzo.hpp"
 #include "parallel.hpp"
 #include "simulation.hpp"
 
+//**********************************************************************
 #include PARALLEL_CHARM_INCLUDE(enzo_p.decl.h)
+//**********************************************************************
 
 //----------------------------------------------------------------------
 
@@ -31,18 +34,29 @@ PARALLEL_MAIN_BEGIN
 
 {
 
-  // Initialize parallelism
+  //==================================================
+  // INITIALIZE
+  //==================================================
+
+  //-------------------------
+  // initialize parallelism
+  //-------------------------
 
   PARALLEL_INIT;
 
   GroupProcess * parallel = GroupProcess::create();
 
-  // INITALIZE "GLOBALS" (Parameters, Error, Monitor)
+  //-------------------------
+  // create globals
+  //-------------------------
 
   Global * global = new Global;
 
+  //-------------------------
+  // initialize monitor
+  //-------------------------
+
   Monitor    * monitor    = global->monitor();
-  Parameters * parameters = global->parameters();
 
   monitor->set_active(parallel->rank()==0);
 
@@ -51,11 +65,15 @@ PARALLEL_MAIN_BEGIN
 
   monitor->header();
 
-  // INPUT PARAMETERS
+  //-------------------------
+  // input parameters
+  //-------------------------
+
+  Parameters * parameters = global->parameters();
 
   FILE *fp = 0;
 
-  // read parameter file(s)
+  // open parameter file
 
   if (PARALLEL_ARGC == 2) {
     fp = fopen(PARALLEL_ARGV[1],"r");
@@ -71,13 +89,21 @@ PARALLEL_MAIN_BEGIN
 
   ASSERT ("enzo-p", "File pointer NULL", fp != 0);
 
-  // READ PARAMETERS
+  // read parameter file
 
   parameters->read(fp);
 
-  // INITIALIZE SIMULATION
+  //-------------------------
+  // initialize simulation
+  //-------------------------
 
-  Simulation simulation (global);
+  EnzoSimulation simulation (global);
+  
+  //==================================================
+  // FINALIZE
+  //==================================================
+
+  monitor->print ("ENZO-P END");
 
   PARALLEL_EXIT;
 }
@@ -88,11 +114,8 @@ PARALLEL_MAIN_END;
 
 void usage(int argc, char ** argv)
 {
-#ifdef CONFIG_USE_MPI
-    fprintf (stderr,"\nUsage: mpirun [ options ] %s <parameter-file>\n\n",argv[0]);
-#else
-    fprintf (stderr,"\nUsage: %s <parameter-file>\n\n",argv[0]);
-#endif
+  fprintf (stderr,"\nUsage: %s %s <parameter-file>\n\n",
+	   PARALLEL_RUN,argv[0]);
 }
 
 

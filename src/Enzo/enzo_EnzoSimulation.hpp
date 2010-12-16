@@ -27,19 +27,22 @@ public: // interface
   EnzoDescr * enzo() throw ()
   { return enzo_; };
 
-protected: // functions
+  /// Initialize Enzo-specific parameters
+  void initialize_enzo() throw ();
 
-  /// Read user parameters and initialize user objects
-  void user_initialize_() throw ();
+protected: // virtual functions
 
   /// Create named control method.
-  MethodControl * create_method_control_ (std::string name_method_control) throw ();
+  MethodControl * create_control_ (std::string name_control) throw ();
 
   /// Create named timestep method.
-  MethodTimestep * create_method_timestep_ (std::string name_method_timestep) throw ();
+  MethodTimestep * create_timestep_ (std::string name_timestep) throw ();
 
   /// Create named method method.
-  MethodHyperbolic * create_method_hyperbolic_ (std::string name_method_hyperbolic) throw ();
+  MethodHyperbolic * create_method_ (std::string name_method) throw ();
+
+  /// Create named method method.
+  MethodInitial * create_initial_ (std::string name_initial) throw ();
 
 private: // attributes
 
