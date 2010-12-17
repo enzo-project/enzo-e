@@ -97,7 +97,7 @@ private: // attributes
   /// Data descriptor
   DataDescr * data_descr_;
 
-  /// Array of data blocks associated with process numbers in the patch
+  /// Array of data blocks ib associated with process ip in the patch
   /// data_block[ip][ib]
   typedef std::vector<DataBlock *> data_block_vector;
   std::vector<data_block_vector> data_block_;

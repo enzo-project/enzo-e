@@ -4,7 +4,6 @@
 /// @file     mesh_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @todo     Need Parallel functionality to determine if ip is local or not
 /// @brief    Implementation of the Patch class
 
 #include "parallel.hpp"
