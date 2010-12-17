@@ -28,6 +28,12 @@ PARALLEL_MAIN_BEGIN
   unit_func("Patch");
 
   DataDescr data_descr;
+
+  //--------------------------------------------------
+  // np = 1
+  // ip = 0 [default]
+  //--------------------------------------------------
+
   Patch * patch = new Patch;
   unit_assert(patch != NULL);
 
@@ -38,6 +44,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("set_size");
 
+  // Patch = (7,3,2) cells
+
   patch->set_size(7,3,2);
   int npx,npy,npz;
   patch->size(&npx,&npy,&npz);
@@ -45,11 +53,15 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("set_layout");
 
+  // Layout: (1,1,1) blocks
+
   Layout * layout = new Layout;
+
   layout->set_process_range(0,1);
   layout->set_block_count(1,1,1);
 
   patch->set_layout (layout);
+
   unit_assert(patch->layout() == layout);
 
   unit_func("set_extents");
@@ -64,20 +76,41 @@ PARALLEL_MAIN_BEGIN
 	      ym==0.0 && yp==1.0 &&
 	      zm==0.0 && zp==1.0);
   
-//   void p_evolve();
+  unit_func("is_allocated");
 
-
+  unit_assert(patch->is_allocated() == false);
   
-// void allocate_blocks() ();
+  unit_func("allocate");
 
-// /// Deallocate local blocks
-// void deallocate_blocks() ();
+  patch->allocate();
 
+  unit_assert(patch->is_allocated() == true);
 
-  int block_count()  throw();
+  unit_func("block_count");
+
+  unit_assert(patch->block_count()==1);
   
+  unit_func("block");
 
-  DataBlock * block(int i) throw();
+  unit_assert(patch->block(0) != 0);
+
+  // TEST BLOCK PROPERTIES
+  unit_assert(false);
+
+  // Deallocate local blocks
+
+  unit_func("deallocate");
+
+  patch->deallocate();
+
+  unit_assert(patch->is_allocated() == false);
+
+  // TEST MEMORY SIZE RESTORED--NO MEMORY LEAKS
+  unit_assert(false)
+
+
+  //--------------------------------------------------
+
 
   unit_finalize();
 

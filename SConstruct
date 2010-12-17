@@ -160,21 +160,21 @@ elif (platform == 'linux-ampi'):
       CPPDEFINES  = defines + define_mpi,
       CPPPATH     = '#/include',
       CXX         = charm_path + '/bin/charmc -language ampi',
-      CXXFLAGS    = '-g',
-      CFLAGS      = '-g',
+      CXXFLAGS    = '-g -O3 -m128bit-long-double',
+      CFLAGS      = '-g -O3 -m128bit-long-double',
       ENV         = os.environ,
       FORTRANFLAGS  = '-g',
       FORTRAN     = 'gfortran',
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
-      LINKFLAGS     = '-g',
+      LINKFLAGS     = '-g -O3 -m128bit-long-double',
       LIBPATH     = '#/lib',
    )
 #--------------------------------------------------
 elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
 #--------------------------------------------------
 
-   flags_opt = '-g '
+   flags_opt = '-g -O3 '
 
 #   flags_debug = '-memory charmdebug'
    flags_debug = ''
@@ -184,7 +184,7 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
    else:
 	flags_charm = ''
 
-   flags = flags_opt + ' ' + flags_debug + ' '
+   flags = flags_opt + ' ' + flags_debug + ' -m128bit-long-double '
    parallel_run = charm_path + "/bin/charmrun +p4 "
    parallel_type = "charm"
    serial_run   = ""

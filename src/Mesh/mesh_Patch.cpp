@@ -4,6 +4,7 @@
 /// @file     mesh_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
+/// @todo     Need Parallel functionality to determine if ip is local or not
 /// @brief    Implementation of the Patch class
 
 #include "parallel.hpp"
@@ -145,13 +146,16 @@ void Patch::allocate(int ip) throw()
 
   // determine local block count nb
   
-  int nbl = layout_->local_count(ip);
+  int nbl = block_count(ip);
 
   // create local blocks
 
   data_block_[ip].resize(nbl);
 
-  for (int i=0; i<nbl; i++) {
+  INCOMPLETE_MESSAGE("Patch::allocate","");
+  for (int ib=0; ib<nbl; ib++) {
+    // ENSURE VECTORS ARE ALLOCATED
+    //    data_block_[ip][ib] = new DataBlock;
   }
 }
 
@@ -159,24 +163,30 @@ void Patch::allocate(int ip) throw()
 
 void Patch::deallocate(int ip) throw()
 {
+  INCOMPLETE_MESSAGE("Patch::deallocate","");
 }
 
 //----------------------------------------------------------------------
 
 bool Patch::is_allocated(int ip) const throw() 
 {
+  INCOMPLETE_MESSAGE("Patch::is_allocated","");
+  return false;
 }
 
 //----------------------------------------------------------------------
 
 int Patch::block_count(int ip) const  throw()
 {
+  return layout_->local_count(ip);
 }
 
 //----------------------------------------------------------------------
 
 DataBlock * Patch::block(int i, int ip) const throw()
 {
+  INCOMPLETE_MESSAGE("Patch::block","");
+  return 0;
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

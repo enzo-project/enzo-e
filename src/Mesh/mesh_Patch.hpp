@@ -7,13 +7,14 @@
 /// @file     mesh_Patch.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
+/// @todo     Move "size" to DataBlock's, since that's Field-centric
 /// @brief    Declaration of the interface for the Patch class
 
 class Patch {
 
   /// @class    Patch
   /// @ingroup  Mesh
-  /// @brief    Brief description of class Patch.
+  /// @brief    Represent a distributed box of uniform (non-adaptive) data
 
 public: // interface
 
@@ -41,10 +42,10 @@ public: // interface
   /// Return the data descriptor
   DataDescr * data_descr () const throw();
 
-  /// Set the size of the patch in number of cells
+  /// Set the size of the patch in number of grid cells
   void set_size (int npx, int npy, int npz) throw();
 
-  /// Return the size of the patch in number of cells
+  /// Return the size of the patch in number of grid cells
   void size (int * npx, int * npy=0, int * npz=0) const throw();
 
   /// Set the layout of the patch, describing processes and blocking
@@ -79,6 +80,7 @@ public: // interface
   int block_count(int ip=0) const throw();
 
   /// Return the ith data block for the given process number
+  /// WARNING: pointer can only be dereferenced if ip is local
   DataBlock * block(int i, int ip=0) const throw();
 
   //--------------------------------------------------
