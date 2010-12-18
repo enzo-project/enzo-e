@@ -19,12 +19,24 @@ EnzoSimulation::EnzoSimulation(Global * global) throw ()
   : Simulation(global),
     enzo_(new EnzoDescr(global))
 {
-  initialize_enzo();
+  TRACE_MESSAGE;
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::initialize(std::string parameter_file) throw()
+{
+  // Call initialize for Simulation base class
+
+  Simulation::initialize(parameter_file);
+
+  // Call initialize for Enzo-specific Simulation
+  initialize_enzo_();
 }
 
 //======================================================================
 
-void EnzoSimulation::initialize_enzo () throw ()
+void EnzoSimulation::initialize_enzo_() throw ()
 {
   Parameters * parameters = global_->parameters();
 
@@ -49,23 +61,10 @@ void EnzoSimulation::initialize_enzo () throw ()
 
     std::string method_name = parameters->list_value_string(i,"sequence");
 
-    MethodHyperbolic * method_hyperbolic = add_method(method_name);
+    MethodHyperbolic * method_hyperbolic = add_method_(method_name);
 
-    method_hyperbolic->initialize(data_);
+    method_hyperbolic->initialize(data_descr_);
   }
-
-
-  // --------------------------------------------------
-  // Initialize method control
-  // --------------------------------------------------
-
-  set_control("ignored");
-
-  // --------------------------------------------------
-  // Initialize method timestep
-  // --------------------------------------------------
-
-  set_timestep("ignored");
 
 }
 
@@ -93,15 +92,36 @@ MethodHyperbolic *
 EnzoSimulation::create_method_ ( std::string method_name ) throw ()
 /// @param method_name   Name of the method to create
 {
-  printf ("%s:%d '%s'\n",__FILE__,__LINE__,method_name.c_str());
-  if (method_name == "ppm") {
-    return new MethodEnzoPpm (global_,enzo_);
-  } else {
+
+  MethodHyperbolic * method = 0;
+
+  if (method_name == "ppm")  method = new MethodEnzoPpm  (global_,enzo_);
+  if (method_name == "ppml") method = new MethodEnzoPpml (global_,enzo_);
+
+  if (method == 0) {
     char buffer[80];
-    sprintf (buffer,"Unknown method '%s'",method_name.c_str());
-    global_->error()->error_ (__FILE__,__LINE__,"EnzoSimulation::create_method",
-				       buffer);
-    return 0;
+    sprintf (buffer,"Cannot create Method '%s'",method_name.c_str());
+    ERROR_MESSAGE("EnzoSimulation::create_method", buffer);
   }
+
+  return method;
+}
+
+//----------------------------------------------------------------------
+
+MethodInitial * 
+EnzoSimulation::create_initial_ ( std::string initial_name ) throw ()
+/// @param initial_name   Name of the initialization method to create
+{
+  
+  MethodInitial * initial = 0;
+
+  if (initial == 0) {
+    char buffer[80];
+    sprintf (buffer,"Cannot create Initialization '%s'",initial_name.c_str());
+    ERROR_MESSAGE("EnzoSimulation::create_initial", buffer);
+  }
+
+  return initial;
 }
 

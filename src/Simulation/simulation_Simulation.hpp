@@ -8,6 +8,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
+/// @note     2010-12-17: code-wiki interface review
 
 class Simulation {
 
@@ -38,17 +39,17 @@ public: // interface
   /// initialize the Simulation given a parameter file
   void initialize(std::string parameter_file) throw();
 
-  /// Run the simulation
-  void execute() throw();
-
   /// Finalize the Simulation after running it
   void finalize() throw();
 
-  /// Write a Simulation state to disk
-  void write() throw();
+  /// Run the simulation
+  void run() throw();
 
   /// Load a Simulation from disk
   void read() throw();
+
+  /// Write a Simulation state to disk
+  void write() throw();
 
 protected: // functions
 
@@ -59,7 +60,7 @@ protected: // functions
   void initialize_mesh_       (Parameters * parameters) throw();
 
   /// Initialize the data component
-  void initialize_data_       (Parameters * parameters) throw();
+  void initialize_data_descr_ (Parameters * parameters) throw();
 
   /// Initialize the control component
   void initialize_control_    (Parameters * parameters) throw();
@@ -73,32 +74,36 @@ protected: // functions
   /// Initialize the method components
   void initialize_methods_    (Parameters * parameters) throw();
 
-  /// Add a named hyperbolic method
-  MethodHyperbolic * add_method (std::string method_name) throw();
+
+  /// Add the named initialization method
+  MethodInitial * add_initial_ (std::string method_name) throw();
+
+  /// Add a named hyperbolic numerical method
+  MethodHyperbolic * add_method_ (std::string method_name) throw();
 
   /// Set the named control method
-  MethodControl * set_control (std::string control_name) throw();
+  MethodControl * set_control_ (std::string control_name) throw();
 
   /// Set the named timestep method
-  MethodTimestep * set_timestep (std::string timestep_name) throw();
+  MethodTimestep * set_timestep_ (std::string timestep_name) throw();
   
 protected: // abstract virtual functions
 
-  /// Create named control method.
-  virtual MethodControl * 
-  create_control_ (std::string name_control) throw () = 0;
+  /// Create named initialization method.
+  virtual MethodInitial * 
+  create_initial_ (std::string name_initial) throw () = 0;
+
+  /// Create named hyperbolic method.
+  virtual MethodHyperbolic * 
+  create_method_ (std::string name_hyperbolic) throw () = 0;
 
   /// Create named timestep method.
   virtual MethodTimestep * 
   create_timestep_ (std::string name_timestep) throw () = 0;
 
-  /// Create named method method.
-  virtual MethodHyperbolic * 
-  create_method_ (std::string name_hyperbolic) throw () = 0;
-
-  /// Create named method method.
-  virtual MethodInitial * 
-  create_initial_ (std::string name_initial) throw () = 0;
+  /// Create named control method.
+  virtual MethodControl * 
+  create_control_ (std::string name_control) throw () = 0;
 
 protected: // attributes
 
@@ -123,19 +128,21 @@ protected: // attributes
   Mesh * mesh_;
   
   /// Data descriptor
-  DataDescr * data_;
+  DataDescr * data_descr_;
 
-  /// Method for overall control of the simulation
-  MethodControl * control_;
-
-  /// Method for time-step computation
-  MethodTimestep * timestep_;
 
   /// List of initialization routines
   std::vector<MethodInitial *> initialize_list_;
 
   /// List of numerical methods to apply at each timestep
   std::vector<MethodHyperbolic *> method_list_;
+
+  /// Method for time-step computation
+  MethodTimestep * timestep_;
+
+  /// Method for overall control of the simulation
+  MethodControl * control_;
+
 
 };
 

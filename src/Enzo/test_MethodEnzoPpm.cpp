@@ -4,6 +4,7 @@
 /// @file     test_MethodEnzoPpm.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:04:03 PST 2008
+/// @todo     Move initialization into Simulation / EnzoSimulation
 /// @brief    Program implementing unit tests for the MethodEnzoPpm class
 
 #include <stdio.h>
@@ -171,9 +172,9 @@ PARALLEL_MAIN_BEGIN
 
   // Create top-level Simulation object
 
-  EnzoSimulation simulation(global);
+  Simulation * simulation = new EnzoSimulation(global);
 
-  simulation.initialize("input/test_MethodEnzoPpm.in");
+  simulation->initialize("input/test_MethodEnzoPpm.in");
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -215,16 +216,16 @@ PARALLEL_MAIN_BEGIN
 
   FieldBlock * field_block = data_block->field_block();
 
-  // Set missing Enzo parameters
+  // Set missing Enzo parameters.  Yucky downcasting
 
-  EnzoDescr * enzo = simulation.enzo();
+  EnzoDescr * enzo = ((EnzoSimulation *)simulation)->enzo();
 
   // Initialize field_block
 
   unit_class ("FieldBlock");
   unit_func("initialize");
 
-  DataDescr  * data_descr  = simulation.data_descr();
+  DataDescr  * data_descr  = simulation->data_descr();
   FieldDescr * field_descr = data_descr->field_descr();
 
   parameters->set_current_group ("Domain");
@@ -331,21 +332,22 @@ PARALLEL_MAIN_BEGIN
   
   timer.start();
   papi.start();
+
   while (time < time_final && cycle <= cycle_final) {
 
-    simulation.initialize_block(data_block);
+    simulation->initialize_block(data_block);
 
     field_block->enforce_boundary(boundary_reflecting);
 
-    dt = simulation.method_timestep()->compute_block(data_block);
+    dt = simulation->method_timestep()->compute_block(data_block);
 
     output_images  (monitor,cycle,field_block,4,indices,cycle_image);
     output_progress(monitor,cycle,time,dt,cycle_progress);
     output_dump    (hdf5,cycle,field_block,4,indices,cycle_dump);
 
-    simulation.method_hyperbolic(0)->advance_block(data_block,time,dt);
+    simulation->method_hyperbolic(0)->advance_block(data_block,time,dt);
 
-    simulation.finalize_block(data_block);
+    simulation->finalize_block(data_block);
 
     ++cycle;
     time += MIN(dt,time_final-time);
@@ -365,13 +367,14 @@ PARALLEL_MAIN_BEGIN
 
   printf ("Timer time = %f\n",timer.value());
 
-  simulation.finalize();
+  simulation->finalize();
 
   unit_finalize();
 
   delete data_block;
   delete global;
   delete parallel;
+  delete simulation;
 
   PARALLEL_EXIT;
 }

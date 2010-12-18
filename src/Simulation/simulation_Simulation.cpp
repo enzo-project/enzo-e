@@ -18,12 +18,14 @@ Simulation::Simulation(Global * global)
     global_(global),
     //
     mesh_(0),
-    data_(0),
-    control_(0),
-    timestep_(0),
+    data_descr_(0),
     initialize_list_(),
-    method_list_()
+    method_list_(),
+    timestep_(0),
+    control_(0)
 {
+  TRACE_MESSAGE;
+
   // Initialize parameter defaults
 
   dimension_ = 1;
@@ -37,9 +39,9 @@ Simulation::Simulation(Global * global)
 
   // Initialize simulation component defaults
 
-  data_ = new DataDescr;
+  data_descr_ = new DataDescr;
 
-  mesh_ = new Mesh(data_);
+  mesh_ = new Mesh(data_descr_);
 
 }
 
@@ -47,7 +49,7 @@ Simulation::Simulation(Global * global)
 
 Simulation::~Simulation() throw()
 {
-  delete data_;
+  delete data_descr_;
 }
 
 //----------------------------------------------------------------------
@@ -76,6 +78,7 @@ void Simulation::initialize(std::string parameter_file) throw()
 
   FILE * file_pointer;
   file_pointer = fopen (parameter_file.c_str(),"r");
+  TRACE_MESSAGE;
   parameters->read(file_pointer); // MEMORY LEAK
   fclose(file_pointer);
 
@@ -86,7 +89,7 @@ void Simulation::initialize(std::string parameter_file) throw()
   // Initialize simulation components
 
   initialize_mesh_(parameters);
-  initialize_data_(parameters);
+  initialize_data_descr_(parameters);
   initialize_control_(parameters);
   initialize_timestep_(parameters);
   initialize_initial_(parameters);
@@ -96,16 +99,16 @@ void Simulation::initialize(std::string parameter_file) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::execute() throw()
+void Simulation::finalize() throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::execute","");
+  INCOMPLETE_MESSAGE("Simulation::finalize","");
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::finalize() throw()
+void Simulation::run() throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::finalize","");
+  INCOMPLETE_MESSAGE("Simulation::run","");
 }
 
 //----------------------------------------------------------------------
@@ -257,7 +260,7 @@ void Simulation::initialize_mesh_(Parameters * parameters) throw()
 
   Patch * root_patch = new Patch;
 
-  root_patch->set_data_descr(data_);
+  root_patch->set_data_descr(data_descr_);
   root_patch->set_size(root_size[0],root_size[1],root_size[2]);
   root_patch->set_layout(layout);
   root_patch->set_extents(domain_lower[0],domain_upper[0],
@@ -278,9 +281,9 @@ void Simulation::initialize_mesh_(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_data_(Parameters * parameters) throw()
+void Simulation::initialize_data_descr_(Parameters * parameters) throw()
 {
-  FieldDescr * field_descr = data_->field_descr();
+  FieldDescr * field_descr = data_descr_->field_descr();
 
   parameters->set_current_group("Field");
 
@@ -320,7 +323,7 @@ void Simulation::initialize_methods_(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-MethodHyperbolic * Simulation::add_method (std::string method_name) throw()
+MethodHyperbolic * Simulation::add_method_ (std::string method_name) throw()
 {
   MethodHyperbolic * method = create_method_(method_name);
   if (method) method_list_.push_back(method); 

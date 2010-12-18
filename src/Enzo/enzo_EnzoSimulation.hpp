@@ -27,10 +27,14 @@ public: // interface
   EnzoDescr * enzo() throw ()
   { return enzo_; };
 
-  /// Initialize Enzo-specific parameters
-  void initialize_enzo() throw ();
+  /// Override Simulation initialize
+  void initialize(std::string parameter_file) throw ();
 
 protected: // virtual functions
+
+  /// Initialize Enzo-specific parameters
+  void initialize_enzo_() throw ();
+
 
   /// Create named control method.
   MethodControl * create_control_ (std::string name_control) throw ();

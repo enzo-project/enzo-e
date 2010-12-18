@@ -27,11 +27,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_class ("Simulation");
 
-  // Read parameter file
-
-  FILE * fp = fopen("input/implosion.in","r");
-  global->parameters()->read(fp);
-
   // Create simulation object
 
   Global * global = new Global;
@@ -39,31 +34,47 @@ PARALLEL_MAIN_BEGIN
   // Create the simulation
 
   unit_func("Simulation");
-  Simulation simulation(global);
+
+  TRACE_MESSAGE;
+  // NOTE: Need concrete EnzoSimulation class since Simulation is 
+  //       an abstract base class
+
+  Simulation * simulation = new EnzoSimulation (global);
+
   unit_assert(true);
 
   // Initialize the simulation
 
   unit_func("initialize");
-  simulation.initialize();
+  TRACE_MESSAGE;
+  simulation->initialize("input/implosion.in");
+  TRACE_MESSAGE;
   unit_assert(true);
 
   // Run the simulation
 
-  unit_func("execute");
-  simulation.execute();
+  unit_func("run");
+  simulation->run();
   unit_assert(false);
   
   // Load the simulation
 
-  unit_func("load");
-  simulation.load();
+  unit_func("read");
+  simulation->read();
 
   // Save the simulation
 
-  unit_func("save");
-  simulation.save();
+  unit_func("write");
+  simulation->write();
   unit_assert(false);
+
+  // Finalize the simulation
+
+  unit_func("finalize");
+  simulation->finalize();
+  unit_assert(false);
+
+  delete simulation;
 
   unit_finalize();
 
