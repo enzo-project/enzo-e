@@ -53,26 +53,27 @@ public: // interface
 
 protected: // functions
 
-  /// Initialize parameters
-  void initialize_parameters_ (Parameters * parameters) throw();
+  /// Initialize global simulation parameters
+  void initialize_simulation_ (Parameters * parameters) throw();
 
   /// Initialize the mesh component
-  void initialize_mesh_       (Parameters * parameters) throw();
+  void initialize_mesh_ (Parameters * parameters) throw();
 
   /// Initialize the data component
-  void initialize_data_descr_ (Parameters * parameters) throw();
+  void initialize_data_ (Parameters * parameters) throw();
+
+
+  /// Initialize the initialization method component
+  void initialize_initial_    (Parameters * parameters) throw();
+
+  /// Initialize the method components
+  void initialize_method_    (Parameters * parameters) throw();
 
   /// Initialize the control component
   void initialize_control_    (Parameters * parameters) throw();
 
   /// Initialize the timestep component
   void initialize_timestep_   (Parameters * parameters) throw();
-
-  /// Initialize the initialization method component
-  void initialize_initial_    (Parameters * parameters) throw();
-
-  /// Initialize the method components
-  void initialize_methods_    (Parameters * parameters) throw();
 
 
   /// Add the named initialization method
@@ -97,13 +98,13 @@ protected: // abstract virtual functions
   virtual MethodHyperbolic * 
   create_method_ (std::string name_hyperbolic) throw () = 0;
 
-  /// Create named timestep method.
-  virtual MethodTimestep * 
-  create_timestep_ (std::string name_timestep) throw () = 0;
-
   /// Create named control method.
   virtual MethodControl * 
   create_control_ (std::string name_control) throw () = 0;
+
+  /// Create named timestep method.
+  virtual MethodTimestep * 
+  create_timestep_ (std::string name_timestep) throw () = 0;
 
 protected: // attributes
 

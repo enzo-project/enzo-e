@@ -84,16 +84,17 @@ void Simulation::initialize(std::string parameter_file) throw()
 
   // Initialize parameters
 
-  initialize_parameters_(parameters);
+  initialize_simulation_(parameters);
 
   // Initialize simulation components
 
   initialize_mesh_(parameters);
-  initialize_data_descr_(parameters);
+  initialize_data_(parameters);
+
+  initialize_initial_(parameters);
+  initialize_method_(parameters);
   initialize_control_(parameters);
   initialize_timestep_(parameters);
-  initialize_initial_(parameters);
-  initialize_methods_(parameters);
 
 }
 
@@ -127,7 +128,7 @@ void Simulation::write() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_parameters_(Parameters * parameters) throw()
+void Simulation::initialize_simulation_(Parameters * parameters) throw()
 {
 
   //--------------------------------------------------
@@ -149,11 +150,11 @@ void Simulation::initialize_parameters_(Parameters * parameters) throw()
   bool valid_extent_length = ((extent_length == 2) ||
 			      (extent_length == 4) ||
 			      (extent_length == 6));
-  ASSERT ("Simulation::initialize_parameters_",
+  ASSERT ("Simulation::initialize_simulation_",
 	  "Parameter Domain:extent list must have length 2, 4, or 6",
 	  valid_extent_length);
 
-  ASSERT ("Simulation::initialize_parameters_",
+  ASSERT ("Simulation::initialize_simulation_",
 	  "Parameter mismatch between Physics:dimensions and Domain:extent",
 	  (dimension_ == extent_length / 2));
 
@@ -281,7 +282,7 @@ void Simulation::initialize_mesh_(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_data_descr_(Parameters * parameters) throw()
+void Simulation::initialize_data_(Parameters * parameters) throw()
 {
   FieldDescr * field_descr = data_descr_->field_descr();
 
@@ -316,9 +317,9 @@ void Simulation::initialize_initial_(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_methods_(Parameters * parameters) throw()
+void Simulation::initialize_method_(Parameters * parameters) throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::initialize_methods_","");
+  INCOMPLETE_MESSAGE("Simulation::initialize_method_","");
 }
 
 //----------------------------------------------------------------------
