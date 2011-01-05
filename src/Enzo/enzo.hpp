@@ -26,6 +26,7 @@
 #include "enzo_MethodEnzoTimestep.hpp"
 #include "enzo_MethodEnzoPpm.hpp"
 #include "enzo_MethodEnzoPpml.hpp"
+#include "enzo_MethodInitialImplosion2.hpp"
 
 #include "enzo_fortran.hpp"
 

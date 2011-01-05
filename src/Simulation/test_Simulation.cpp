@@ -51,6 +51,40 @@ PARALLEL_MAIN_BEGIN
   TRACE_MESSAGE;
   unit_assert(true);
 
+  // Test accessor functions
+
+  unit_func("global");
+  unit_assert (simulation->global() == global);
+
+  unit_func("mesh");
+  unit_assert (simulation->mesh() != NULL);
+
+  unit_func("mesh");
+  unit_assert (simulation->mesh() != NULL);
+  
+  unit_func("num_initial");
+  unit_assert (simulation->num_initial() > 0);
+
+  int i;
+  unit_func("initial");
+  for (i=0; i<simulation->num_initial(); i++) {
+    unit_assert (simulation->initial(i) != NULL);
+  }
+
+  unit_func("num_method");
+  unit_assert (simulation->num_method() > 0);
+
+  unit_func("method");
+  for (i=0; i<simulation->num_method(); i++) {
+    unit_assert (simulation->method(i) != NULL);
+  }
+
+  unit_func("control");
+  unit_assert (simulation->control() != NULL);
+
+  unit_func("timestep");
+  unit_assert (simulation->timestep() != NULL);
+
   // Run the simulation
 
   unit_func("run");

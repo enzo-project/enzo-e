@@ -17,7 +17,7 @@
 
 EnzoSimulation::EnzoSimulation(Global * global) throw ()
   : Simulation(global),
-    enzo_(new EnzoDescr(global))
+    enzo_descr_(new EnzoDescr(global))
 {
   TRACE_MESSAGE;
 }
@@ -74,7 +74,7 @@ MethodControl *
 EnzoSimulation::create_control_ (std::string control_name) throw ()
 /// @param control_name   Name of the control method to create
 {
-  return new MethodEnzoControl(global_,enzo_);
+  return new MethodEnzoControl(global_,enzo_descr_);
 }
 
 //----------------------------------------------------------------------
@@ -83,7 +83,7 @@ MethodTimestep *
 EnzoSimulation::create_timestep_ ( std::string timestep_name ) throw ()
 /// @param timestep_name   Name of the timestep method to create
 {
-  return new MethodEnzoTimestep(enzo_);
+  return new MethodEnzoTimestep(enzo_descr_);
 }
 
 //----------------------------------------------------------------------
@@ -95,8 +95,10 @@ EnzoSimulation::create_method_ ( std::string method_name ) throw ()
 
   MethodHyperbolic * method = 0;
 
-  if (method_name == "ppm")  method = new MethodEnzoPpm  (global_,enzo_);
-  if (method_name == "ppml") method = new MethodEnzoPpml (global_,enzo_);
+  if (method_name == "ppm")
+    method = new MethodEnzoPpm  (global_,enzo_descr_);
+  if (method_name == "ppml")
+    method = new MethodEnzoPpml (global_,enzo_descr_);
 
   if (method == 0) {
     char buffer[80];
@@ -115,6 +117,9 @@ EnzoSimulation::create_initial_ ( std::string initial_name ) throw ()
 {
   
   MethodInitial * initial = 0;
+
+  if (initial_name == "implosion2")  
+    initial = new MethodInitialImplosion2 (global_,enzo_descr_);
 
   if (initial == 0) {
     char buffer[80];

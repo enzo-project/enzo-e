@@ -4,7 +4,6 @@
 /// @file     method_MethodInitial.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @todo     Common ABC for MethodInitial and MethodHyperbolic
 /// @brief    Declaration for the MethodInitial component
 
 #ifndef METHOD_METHOD_INITIAL_HPP

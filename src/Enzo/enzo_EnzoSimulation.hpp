@@ -21,11 +21,11 @@ public: // interface
   EnzoSimulation(Global * global) throw();
 
   ~EnzoSimulation() throw()
-  { delete enzo_; }
+  { delete enzo_descr_; }
 
   /// Return the Enzo object created in EnzoSimulation's constructor
   EnzoDescr * enzo() throw ()
-  { return enzo_; };
+  { return enzo_descr_; };
 
   /// Override Simulation initialize
   void initialize(std::string parameter_file) throw ();
@@ -50,7 +50,7 @@ protected: // virtual functions
 
 private: // attributes
 
-  EnzoDescr * enzo_;
+  EnzoDescr * enzo_descr_;
 
 };
 

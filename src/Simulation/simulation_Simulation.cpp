@@ -128,6 +128,90 @@ void Simulation::write() throw()
 
 //----------------------------------------------------------------------
 
+int Simulation::dimension() throw()
+{
+  return dimension_;
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::extents (double * xmin, double *xmax,
+			  double * ymin, double *ymax,
+			  double * zmin, double *zmax) throw()
+{
+  *xmin = extent_[0];
+  *xmax = extent_[1];
+  if (ymin) *ymin = extent_[2];
+  if (ymax) *ymax = extent_[3];
+  if (zmin) *zmin = extent_[4];
+  if (zmax) *zmax = extent_[5];
+}
+
+//----------------------------------------------------------------------
+
+Global * Simulation::global() const throw()
+{
+  return global_;
+}
+
+//----------------------------------------------------------------------
+
+Mesh * Simulation::mesh() const throw()
+{
+  return mesh_;
+}
+  
+//----------------------------------------------------------------------
+
+DataDescr * Simulation::data_descr() const throw()
+{
+  return data_descr_;
+}
+
+//----------------------------------------------------------------------
+
+int Simulation::num_initial() const throw()
+{
+  return initialize_list_.size();
+}
+
+//----------------------------------------------------------------------
+
+MethodInitial * Simulation::initial(int i) const throw()
+{
+  return initialize_list_[i];
+}
+
+//----------------------------------------------------------------------
+
+int Simulation::num_method() const throw()
+{
+  return method_list_.size();
+}
+
+//----------------------------------------------------------------------
+
+MethodHyperbolic * Simulation::method(int i) const throw()
+{
+  return method_list_[i];
+}
+
+//----------------------------------------------------------------------
+
+MethodTimestep * Simulation::timestep() const throw()
+{
+  return timestep_;
+}
+
+//----------------------------------------------------------------------
+
+MethodControl * Simulation::control() const throw()
+{
+  return control_;
+}
+
+//======================================================================
+
 void Simulation::initialize_simulation_(Parameters * parameters) throw()
 {
 
@@ -288,10 +372,27 @@ void Simulation::initialize_data_(Parameters * parameters) throw()
 
   parameters->set_current_group("Field");
 
-  for (int i=0; i<parameters->list_length("fields"); i++) {
+  // Add data fields
+
+  int i;
+  for (i=0; i<parameters->list_length("fields"); i++) {
     field_descr->insert_field
       (parameters->list_value_string(i, "fields", "unknown"));
   }
+
+  // Define default ghost zone depth for all fields, default value of 1
+
+  int gx = parameters->list_value_integer(0,"ghosts",1);
+  int gy = parameters->list_value_integer(1,"ghosts",1);
+  int gz = parameters->list_value_integer(2,"ghosts",1);
+
+  if (dimension_ < 2) gy = 0;
+  if (dimension_ < 3) gz = 0;
+
+  for (i=0; i<field_descr->field_count(); i++) {
+    field_descr->set_ghosts(i,gx,gy,gz);
+  }
+
 }
 
 //----------------------------------------------------------------------
