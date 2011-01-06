@@ -115,173 +115,12 @@ EnzoDescr::EnzoDescr(Global * global) throw ()
       }
     }
   }
-
-
-  // --------------------------------------------------
-  // Initiazize user descriptors
-  // --------------------------------------------------
-
-  // --------------------------------------------------
-  // Initiazize user method descriptors
-  // --------------------------------------------------
-
-  Parameters * parameters = global->parameters();
-
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-  // Initialize Enzo field-related attributes
-
-  //--------------------------------------------------
-  parameters->set_current_group("Field");
-  //--------------------------------------------------
-
-  NumberOfBaryonFields = parameters->list_length("fields");
-
-  if (NumberOfBaryonFields == 0) {
-    ERROR_MESSAGE ("EnzoDescr::EnzoDescr",
-		   "List parameter 'Field fields' must have length greater than zero");
-  }
-
-  for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
-
-    std::string method_name = 
-      parameters->list_value_string(field_index,"fields");
-
-    if        (method_name == "density") {
-      field_density          = field_index;
-      FieldType[field_index] = Density;
-    } else if (method_name == "velocity_x") {
-      field_velocity_x       = field_index;
-      FieldType[field_index] = Velocity1;
-    } else if (method_name == "velocity_y") {
-      field_velocity_y       = field_index;
-      FieldType[field_index] = Velocity2;
-    } else if (method_name == "velocity_z") {
-      field_velocity_z       = field_index;
-      FieldType[field_index] = Velocity3;
-    } else if (method_name == "total_energy") {
-      field_total_energy     = field_index;
-      FieldType[field_index] = TotalEnergy;
-    } else if (method_name == "internal_energy") {
-      field_internal_energy  = field_index;
-      FieldType[field_index] = InternalEnergy;
-    } else if (method_name == "electron_density") {
-      field_color            = field_index;
-      FieldType[field_index] = ElectronDensity;
-    } else {
-      char error_message[ERROR_MESSAGE_LENGTH];
-      sprintf (error_message,"Unknown field %s",method_name.c_str());
-      ERROR_MESSAGE ("EnzoDescr::EnzoDescr", error_message);
-    }
-  }
-
-  //--------------------------------------------------
-  parameters->set_current_group("Physics");
-  //--------------------------------------------------
-
-  GridRank = parameters->value_integer ("dimensions",0);
-
-  if (GridRank >= 1) {
-  }
-
-  if (GridRank >= 2) {
-  }
-
-  if (GridRank >= 3) {
-  }
-
-
-  // Chemistry parameters
-
-  MultiSpecies = 0;    // 0:0 1:6 2:9 3:12
-
-  // Gravity parameters
-
-  GravityOn                       = 0;    // Whether gravity is included
-  GravitationalConstant           = 1.0;  // used only in SetMinimumSupport()
-  AccelerationField[0]            = NULL;
-  AccelerationField[1]            = NULL;
-  AccelerationField[2]            = NULL;
-
-  //Problem specific parameter
-
-  ProblemType = 0;
-
-  // Field parameters
-
-  //--------------------------------------------------
-  parameters->set_current_group ("Field");
-  //--------------------------------------------------
-
-  ghost_depth[0] = (GridRank >= 1) ? 
-    parameters->list_value_integer(0,"ghosts",3) : 0;
-  ghost_depth[1] = (GridRank >= 2) ? 
-    parameters->list_value_integer(1,"ghosts",3) : 0;
-  ghost_depth[2] = (GridRank >= 3) ? 
-    parameters->list_value_integer(2,"ghosts",3) : 0;
-
-  ASSERT ("initialize",
-	  "MAX_NUMBER_OF_BARYON_FIELDS is too small",
-	  NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
-
-  Time                   = 0;
-
-  // Domain parameters
-
-  //--------------------------------------------------
-  parameters->set_current_group ("Domain");
-  //--------------------------------------------------
-  
-  DomainLeftEdge [0] = parameters->list_value_scalar(0,"extent",0.0);
-  DomainRightEdge[0] = parameters->list_value_scalar(1,"extent",1.0);
-  DomainLeftEdge [1] = parameters->list_value_scalar(2,"extent",0.0);
-  DomainRightEdge[1] = parameters->list_value_scalar(3,"extent",1.0);
-  DomainLeftEdge [2] = parameters->list_value_scalar(4,"extent",0.0);
-  DomainRightEdge[2] = parameters->list_value_scalar(5,"extent",1.0);
-
-  // Initial conditions
-
-  //--------------------------------------------------
-  parameters->set_current_group ("Initial");
-  //--------------------------------------------------
-
-  InitialTimeInCodeUnits = parameters->value_scalar ("time",0.0);
-  Time = InitialTimeInCodeUnits;
-  OldTime = Time;
-
-  // Parallel parameters
-
-  //--------------------------------------------------
-  parameters->set_current_group ("Parallel");
-  //--------------------------------------------------
-
-  std::string parallel_method = 
-    parameters->list_value_string(0,"method","serial");
-
-  GroupProcess * parallel = 0;
-
-  parallel = GroupProcess::create();
-
-  ProcessorNumber = parallel->rank();
-
-  delete parallel;
-
-  //--------------------------------------------------
-  parameters->set_current_group ("Field");
-  //--------------------------------------------------
-  
-  CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
-
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  // END: Moved from Enzo MethodControl::initialize
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
 }
 
 //----------------------------------------------------------------------
 
 void
-EnzoDescr::read_parameters_(Parameters * parameters) throw ()
+EnzoDescr::initialize(Parameters * parameters) throw ()
 {
 
   //--------------------------------------------------
@@ -353,6 +192,148 @@ EnzoDescr::read_parameters_(Parameters * parameters) throw ()
   BoundaryDimension[0] = nx + 2*gx;
   BoundaryDimension[1] = ny + 2*gy;
   BoundaryDimension[2] = nz + 2*gz;
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // BEGIN Moved from Enzo MethodControl::initialize
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  // Initialize Enzo field-related attributes
+
+  //--------------------------------------------------
+  parameters->set_current_group("Field");
+  //--------------------------------------------------
+
+  NumberOfBaryonFields = parameters->list_length("fields");
+
+  if (NumberOfBaryonFields == 0) {
+    ERROR_MESSAGE ("EnzoDescr::EnzoDescr",
+		   "List parameter 'Field fields' must have length greater than zero");
+  }
+
+  for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
+
+    std::string method_name = 
+      parameters->list_value_string(field_index,"fields");
+
+    if        (method_name == "density") {
+      field_density          = field_index;
+      FieldType[field_index] = Density;
+    } else if (method_name == "velocity_x") {
+      field_velocity_x       = field_index;
+      FieldType[field_index] = Velocity1;
+    } else if (method_name == "velocity_y") {
+      field_velocity_y       = field_index;
+      FieldType[field_index] = Velocity2;
+    } else if (method_name == "velocity_z") {
+      field_velocity_z       = field_index;
+      FieldType[field_index] = Velocity3;
+    } else if (method_name == "total_energy") {
+      field_total_energy     = field_index;
+      FieldType[field_index] = TotalEnergy;
+    } else if (method_name == "internal_energy") {
+      field_internal_energy  = field_index;
+      FieldType[field_index] = InternalEnergy;
+    } else if (method_name == "electron_density") {
+      field_color            = field_index;
+      FieldType[field_index] = ElectronDensity;
+    } else {
+      char error_message[ERROR_MESSAGE_LENGTH];
+      sprintf (error_message,"Unknown field %s",method_name.c_str());
+      ERROR_MESSAGE ("EnzoDescr::EnzoDescr", error_message);
+    }
+  }
+
+  //--------------------------------------------------
+  parameters->set_current_group("Physics");
+  //--------------------------------------------------
+
+  GridRank = parameters->value_integer ("dimensions",0);
+
+  // Chemistry parameters
+
+  MultiSpecies = 0;    // 0:0 1:6 2:9 3:12
+
+  // Gravity parameters
+
+  GravityOn                       = 0;    // Whether gravity is included
+  GravitationalConstant           = 1.0;  // used only in SetMinimumSupport()
+  AccelerationField[0]            = NULL;
+  AccelerationField[1]            = NULL;
+  AccelerationField[2]            = NULL;
+
+  //Problem specific parameter
+
+  ProblemType = 0;
+
+  // Field parameters
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Field");
+  //--------------------------------------------------
+
+  ghost_depth[0] = (GridRank >= 1) ? 
+    parameters->list_value_integer(0,"ghosts",3) : 0;
+  ghost_depth[1] = (GridRank >= 2) ? 
+    parameters->list_value_integer(1,"ghosts",3) : 0;
+  ghost_depth[2] = (GridRank >= 3) ? 
+    parameters->list_value_integer(2,"ghosts",3) : 0;
+
+  printf ("NumberOfBaryonFields = %d\n",NumberOfBaryonFields );
+  ASSERT ("initialize",
+	  "MAX_NUMBER_OF_BARYON_FIELDS is too small",
+	  NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
+
+  Time                   = 0;
+
+  // Domain parameters
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Domain");
+  //--------------------------------------------------
+  
+  DomainLeftEdge [0] = parameters->list_value_scalar(0,"extent",0.0);
+  DomainRightEdge[0] = parameters->list_value_scalar(1,"extent",1.0);
+  DomainLeftEdge [1] = parameters->list_value_scalar(2,"extent",0.0);
+  DomainRightEdge[1] = parameters->list_value_scalar(3,"extent",1.0);
+  DomainLeftEdge [2] = parameters->list_value_scalar(4,"extent",0.0);
+  DomainRightEdge[2] = parameters->list_value_scalar(5,"extent",1.0);
+
+  // Initial conditions
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Initial");
+  //--------------------------------------------------
+
+  InitialTimeInCodeUnits = parameters->value_scalar ("time",0.0);
+  Time = InitialTimeInCodeUnits;
+  OldTime = Time;
+
+  // Parallel parameters
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Parallel");
+  //--------------------------------------------------
+
+  std::string parallel_method = 
+    parameters->list_value_string(0,"method","serial");
+
+  GroupProcess * parallel = 0;
+
+  parallel = GroupProcess::create();
+
+  ProcessorNumber = parallel->rank();
+
+  delete parallel;
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Field");
+  //--------------------------------------------------
+  
+  CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
+
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // END: Moved from Enzo MethodControl::initialize
+  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 }
 

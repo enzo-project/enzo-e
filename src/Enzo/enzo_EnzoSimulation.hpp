@@ -20,6 +20,7 @@ public: // interface
   /// Constructor
   EnzoSimulation(Global * global) throw();
 
+  /// Destructor
   ~EnzoSimulation() throw()
   { delete enzo_descr_; }
 

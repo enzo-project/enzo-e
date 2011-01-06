@@ -8,6 +8,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
+/// @todo     Remove unnecessary Parameters * from function parameters
 /// @note     2010-12-17: code-wiki interface review
 
 class Simulation {

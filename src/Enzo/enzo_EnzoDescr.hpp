@@ -7,6 +7,7 @@
 /// @file     enzo_EnzoDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
+/// @todo     Comment Enzo functions / attributes
 /// @brief    Brief description of file enzo_EnzoDescr.hpp
 
 #include "cello_hydro.h"
@@ -34,6 +35,13 @@ public: // interface
 
   /// Destructor
   ~EnzoDescr() throw();
+
+  /// Initialize EnzoDescr values from parameter file
+  void initialize(Parameters * parameters) throw();
+
+  //----------------------------------------------------------------------
+  // Original Enzo functions
+  //----------------------------------------------------------------------
 
   float ComputeTimeStep();
   float sum_field (int field);
@@ -74,11 +82,6 @@ private: // prohibit assignment
 
   /// Assignment operator
   EnzoDescr & operator= (const EnzoDescr & enzo) throw();
-
-private:
-
-  /// read_parameters();
-  void read_parameters_(Parameters * parameters) throw();
 
 public: // PUBLIC ATTRIBUTES (!!)
 
