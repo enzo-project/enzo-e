@@ -173,52 +173,8 @@ PARALLEL_MAIN_BEGIN
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-
-  // Set missing Enzo parameters.  Yucky downcasting
-
-  EnzoDescr * enzo = ((EnzoSimulation *)simulation)->enzo();
-
-
-  // Initialize stopping criteria
-
-  unit_func("stopping");
-  unit_assert(false);
-
-  // parameters->set_current_group ("Stopping");
-
-  // double time_final = parameters->value_scalar("time",2.5);
-  // int   cycle_final = parameters->value_integer("cycle",1000);
-
-  // double time = 0;
-  // double dt = 0;
-  // int cycle = 0;
-
-  // // Initialize Output parameters
-
-  unit_func("output");
-  unit_assert(false);
-
-  // parameters->set_current_group ("Output");
-
-  // int  cycle_dump    = parameters->value_integer("cycle_dump",10);
-
-  // // Initialize monitoring parameters
-
-  unit_func("monitor");
-  unit_assert(false);
-
-  // parameters->set_current_group ("Monitor");
-
-  // int  cycle_image    = parameters->value_integer("cycle_image",10);
-  // int  cycle_progress = parameters->value_integer("cycle_progress",1);
-
-  // // Initial progress and image monitoring
-
   // output_progress(monitor,cycle,time,dt);
   // output_images(monitor,cycle,field_block);
-
-  unit_func("performance");
-  unit_assert(false);
 
   // Papi papi;
   // Timer timer;
@@ -226,8 +182,6 @@ PARALLEL_MAIN_BEGIN
   // timer.start();
   // papi.start();
 
-  unit_func("control");
-  unit_assert(false);
   // while (time < time_final && cycle <= cycle_final) {
 
   //   simulation->initialize_block(data_block);

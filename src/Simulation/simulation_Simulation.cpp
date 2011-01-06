@@ -28,8 +28,6 @@ Simulation::Simulation(Global * global)
 
   // Initialize parameter defaults
 
-  dimension_ = 1;
-
   extent_[0] = 0.0;
   extent_[1] = 1.0;
   extent_[2] = 0.0;
@@ -139,8 +137,8 @@ void Simulation::extents (double * xmin, double *xmax,
 			  double * ymin, double *ymax,
 			  double * zmin, double *zmax) throw()
 {
-  *xmin = extent_[0];
-  *xmax = extent_[1];
+  if (xmin) *xmin = extent_[0];
+  if (xmax) *xmax = extent_[1];
   if (ymin) *ymin = extent_[2];
   if (ymax) *ymax = extent_[3];
   if (zmin) *zmin = extent_[4];
@@ -377,7 +375,7 @@ void Simulation::initialize_data_(Parameters * parameters) throw()
   int i;
   for (i=0; i<parameters->list_length("fields"); i++) {
     field_descr->insert_field
-      (parameters->list_value_string(i, "fields", "unknown"));
+      (parameters->list_value_string(i, "fields"));
   }
 
   // Define default ghost zone depth for all fields, default value of 1
@@ -399,7 +397,30 @@ void Simulation::initialize_data_(Parameters * parameters) throw()
 
 void Simulation::initialize_control_(Parameters * parameters) throw()
 {
+  // Initialize stopping criteria paramaters
+
+  parameters->set_current_group ("Stopping");
+
+  double time_final = parameters->value_scalar("time",2.5);
+  int   cycle_final = parameters->value_integer("cycle",1000);
+
+  // Initialize output parameters
+
+  parameters->set_current_group ("Output");
+
+  int  cycle_dump    = parameters->value_integer("cycle_dump",10);
+
+  // Initialize monitor parameters
+
+  parameters->set_current_group ("Monitor");
+
+  int  cycle_image    = parameters->value_integer("cycle_image",10);
+  int  cycle_progress = parameters->value_integer("cycle_progress",1);
+
+  // // Initial progress and image monitoring
+
   INCOMPLETE_MESSAGE("Simulation::initialize_control_","");
+
 }
 
 //----------------------------------------------------------------------
@@ -420,14 +441,28 @@ void Simulation::initialize_initial_(Parameters * parameters) throw()
 
 void Simulation::initialize_method_(Parameters * parameters) throw()
 {
+  //--------------------------------------------------
+  parameters->set_current_group("Method");
+  //--------------------------------------------------
+
+  int method_count = parameters->list_length("sequence");
+
+  if (method_count == 0) {
+    ERROR_MESSAGE ("Simulation::initialize",
+		   "List parameter 'Method sequence' must have length greater than zero");
+  }
+
+  for (int i=0; i<method_count; i++) {
+
+    std::string method_name = parameters->list_value_string(i,"sequence");
+
+    MethodHyperbolic * method = create_method_(method_name);
+    if (method) method_list_.push_back(method); 
+
+    method->initialize(data_descr_);
+  }
+
+
   INCOMPLETE_MESSAGE("Simulation::initialize_method_","");
 }
 
-//----------------------------------------------------------------------
-
-MethodHyperbolic * Simulation::add_method_ (std::string method_name) throw()
-{
-  MethodHyperbolic * method = create_method_(method_name);
-  if (method) method_list_.push_back(method); 
-  return method;
-};

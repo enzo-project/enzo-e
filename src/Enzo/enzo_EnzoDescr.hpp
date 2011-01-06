@@ -80,7 +80,7 @@ private:
   /// read_parameters();
   void read_parameters_(Parameters * parameters) throw();
 
-public: // public attributes (!!)
+public: // PUBLIC ATTRIBUTES (!!)
 
  
   int ComovingCoordinates;

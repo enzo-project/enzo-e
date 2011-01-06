@@ -116,18 +116,6 @@ protected: // functions
   void initialize_timestep_   (Parameters * parameters) throw();
 
 
-  /// Add the named initialization method
-  MethodInitial * add_initial_ (std::string method_name) throw();
-
-  /// Add a named hyperbolic numerical method
-  MethodHyperbolic * add_method_ (std::string method_name) throw();
-
-  /// Set the named control method
-  MethodControl * set_control_ (std::string control_name) throw();
-
-  /// Set the named timestep method
-  MethodTimestep * set_timestep_ (std::string timestep_name) throw();
-  
 protected: // abstract virtual functions
 
   /// Create named initialization method.

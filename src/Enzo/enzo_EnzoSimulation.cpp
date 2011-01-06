@@ -17,7 +17,7 @@
 
 EnzoSimulation::EnzoSimulation(Global * global) throw ()
   : Simulation(global),
-    enzo_descr_(new EnzoDescr(global))
+    enzo_descr_(0)
 {
   TRACE_MESSAGE;
 }
@@ -38,34 +38,7 @@ void EnzoSimulation::initialize(std::string parameter_file) throw()
 
 void EnzoSimulation::initialize_enzo_() throw ()
 {
-  Parameters * parameters = global_->parameters();
-
-  // --------------------------------------------------
-  // Initiazize user descriptors
-  // --------------------------------------------------
-
-  // --------------------------------------------------
-  // Initiazize user method descriptors
-  // --------------------------------------------------
-
-  parameters->set_current_group("Method");
-
-  int method_count = parameters->list_length("sequence");
-
-  if (method_count == 0) {
-    ERROR_MESSAGE ("Simulation::initialize",
-		   "List parameter 'Method sequence' must have length greater than zero");
-  }
-
-  for (int i=0; i<method_count; i++) {
-
-    std::string method_name = parameters->list_value_string(i,"sequence");
-
-    MethodHyperbolic * method_hyperbolic = add_method_(method_name);
-
-    method_hyperbolic->initialize(data_descr_);
-  }
-
+  enzo_descr_ = new EnzoDescr(global_);
 }
 
 //----------------------------------------------------------------------
