@@ -7,7 +7,6 @@
 /// @brief     Print the active values of the grid field
 
 #include "enzo.hpp"
-#include "cello_hydro.h"
  
 void EnzoDescr::print_field (int field)
 

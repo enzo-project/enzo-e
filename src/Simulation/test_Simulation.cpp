@@ -35,7 +35,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("Simulation");
 
-  TRACE_MESSAGE;
   // NOTE: Need concrete EnzoSimulation class since Simulation is 
   //       an abstract base class
 
@@ -46,9 +45,7 @@ PARALLEL_MAIN_BEGIN
   // Initialize the simulation
 
   unit_func("initialize");
-  TRACE_MESSAGE;
   simulation->initialize("input/implosion.in");
-  TRACE_MESSAGE;
   unit_assert(true);
 
   // Test accessor functions

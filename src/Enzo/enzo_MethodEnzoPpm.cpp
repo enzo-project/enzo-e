@@ -12,8 +12,6 @@
 #include "method.hpp"
 #include "enzo.hpp"
 
-#include "cello_hydro.h"
-
 //----------------------------------------------------------------------
 
 void MethodEnzoPpm::initialize (DataDescr * data_descr) throw()

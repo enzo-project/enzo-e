@@ -7,7 +7,6 @@
 /// @brief     Project fields to images
 
 #include "cello.hpp"
-#include "cello_hydro.h"
 #include "enzo.hpp"
 
 #include <string>

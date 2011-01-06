@@ -33,10 +33,6 @@ public: // interface
 
 protected: // virtual functions
 
-  /// Initialize Enzo-specific parameters
-  void initialize_enzo_() throw ();
-
-
   /// Create named control method.
   MethodControl * create_control_ (std::string name_control) throw ();
 

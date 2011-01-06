@@ -29,7 +29,6 @@
 ///                    multiply the resulting temperature field by mu.
  
 #include "enzo.hpp"
-#include "cello_hydro.h"
 
 /* function prototypes */
  

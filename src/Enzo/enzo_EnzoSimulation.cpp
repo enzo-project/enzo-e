@@ -19,7 +19,6 @@ EnzoSimulation::EnzoSimulation(Global * global) throw ()
   : Simulation(global),
     enzo_descr_(new EnzoDescr(global_))
 {
-  TRACE_MESSAGE;
 }
 
 //----------------------------------------------------------------------
@@ -27,24 +26,13 @@ EnzoSimulation::EnzoSimulation(Global * global) throw ()
 void EnzoSimulation::initialize(std::string parameter_file) throw()
 {
   // Call initialize for Simulation base class
-
-  TRACE_MESSAGE;
   Simulation::initialize(parameter_file);
-  TRACE_MESSAGE;
 
   // Call initialize for Enzo-specific Simulation
-  initialize_enzo_();
-  TRACE_MESSAGE;
-}
-
-//======================================================================
-
-void EnzoSimulation::initialize_enzo_() throw ()
-{
   enzo_descr_->initialize(global_->parameters());
 }
 
-//----------------------------------------------------------------------
+//======================================================================
 
 MethodControl * 
 EnzoSimulation::create_control_ (std::string control_name) throw ()

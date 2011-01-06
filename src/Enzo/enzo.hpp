@@ -19,6 +19,9 @@
 
 // Enzo
 
+#include "enzo_defines.hpp"
+#include "enzo_typedefs.hpp"
+
 #include "enzo_EnzoDescr.hpp"
 #include "enzo_EnzoSimulation.hpp"
 

@@ -20,9 +20,6 @@
 
 #include "enzo.hpp" 
 
-#include "cello_hydro.h"
-
-  
 int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
 				 int cycle, float dt)
 {

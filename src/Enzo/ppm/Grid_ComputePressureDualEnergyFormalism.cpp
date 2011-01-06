@@ -10,7 +10,6 @@
 /// just the ideal-gas equation-of-state (dual energy version).
 
 #include "enzo.hpp"
-#include "cello_hydro.h"
  
 /* function prototypes */
  

@@ -7,7 +7,6 @@
 /// @brief    Implements the MethodEnzoTimestep class
 
 #include "cello.hpp"
-#include "cello_hydro.h"
 
 #include "method.hpp"
 #include "enzo.hpp"

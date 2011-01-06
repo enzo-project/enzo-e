@@ -18,7 +18,6 @@
 // Compute the ratio of specific heats.
 
 #include "enzo.hpp"
-#include "cello_hydro.h"
  
 /* function prototypes */
 

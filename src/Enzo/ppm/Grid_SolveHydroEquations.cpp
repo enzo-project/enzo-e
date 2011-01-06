@@ -8,7 +8,6 @@
 
 #include "enzo.hpp"
 #include "error.hpp"
-#include "cello_hydro.h"
 
 static bool first_time = true;
 

@@ -19,7 +19,6 @@
 //   just the ideal-gas equation-of-state.
 
 #include "enzo.hpp"
-#include "cello_hydro.h"
  
 /* Set the mean molecular mass. */
  

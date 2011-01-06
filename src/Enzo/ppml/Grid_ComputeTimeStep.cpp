@@ -23,8 +23,6 @@
  
 #include "enzo.hpp"
 
-#include "cello_hydro.h"
- 
 float EnzoDescr::ComputeTimeStep()
 {
  

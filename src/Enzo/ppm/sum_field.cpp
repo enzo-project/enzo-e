@@ -7,7 +7,6 @@
 /// @brief     Return the sum of the internal values of the grid array
 
 #include "enzo.hpp"
-#include "cello_hydro.h"
  
 float EnzoDescr::sum_field (int field)
 {

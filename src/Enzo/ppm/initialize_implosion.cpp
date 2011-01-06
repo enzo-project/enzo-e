@@ -9,8 +9,6 @@
 #include "cello.hpp"
 #include "enzo.hpp"
 
-#include "cello_hydro.h"
-
 const bool debug = false;
  
 void EnzoDescr::initialize_implosion (int size_param)

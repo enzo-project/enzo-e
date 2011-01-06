@@ -17,7 +17,6 @@
 
 #include "cello.hpp"
 
-#include "cello_hydro.h"
 #include "enzo.hpp"
  
 // This is used to set the corners (which are not really used) of the

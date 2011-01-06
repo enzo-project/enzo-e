@@ -8,7 +8,6 @@
 /// @brief     Program implementing unit tests for hydrodynamics
 
 #include "cello.hpp"
-#include "cello_hydro.h"
 
 #include "test_ppm.h"
 #include "monitor.hpp"

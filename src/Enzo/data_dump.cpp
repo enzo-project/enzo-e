@@ -6,7 +6,6 @@
 /// @date      Sun Aug 30 14:16:29 PDT 2009
 /// @brief     Write BaryonField's to disk
 
-#include "cello_hydro.h"
 
 #include <string>
 #include <hdf5.h>

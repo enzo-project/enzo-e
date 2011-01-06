@@ -8,8 +8,6 @@
 
 #include "enzo.hpp"
 
-#include "cello_hydro.h"
-
 void EnzoDescr::initialize_hydro ()
 
 {

@@ -24,8 +24,6 @@ Simulation::Simulation(Global * global)
     timestep_(0),
     control_(0)
 {
-  TRACE_MESSAGE;
-
   // Initialize parameter defaults
 
   extent_[0] = 0.0;
@@ -76,7 +74,6 @@ void Simulation::initialize(std::string parameter_file) throw()
 
   FILE * file_pointer;
   file_pointer = fopen (parameter_file.c_str(),"r");
-  TRACE_MESSAGE;
   parameters->read(file_pointer); // MEMORY LEAK
   fclose(file_pointer);
 

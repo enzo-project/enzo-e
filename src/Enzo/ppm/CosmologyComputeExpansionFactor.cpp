@@ -16,7 +16,6 @@
 ************************************************************************/
  
 #include "enzo.hpp"
-#include "cello_hydro.h"
 
 #define OMEGA_TOLERANCE 1.0e-5
  

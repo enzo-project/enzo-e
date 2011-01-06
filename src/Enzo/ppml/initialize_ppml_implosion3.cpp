@@ -8,8 +8,6 @@
 
 #include "enzo.hpp"
 
-#include "cello_hydro.h"
-
 const bool debug = false;
  
 void EnzoDescr::initialize_ppml_implosion3 (int size_param)

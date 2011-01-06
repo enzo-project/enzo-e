@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "cello_hydro.h"
+#include "enzo.hpp"
 
 void print_fields(int mx, int my)
 {

@@ -8,7 +8,6 @@
 /// @brief    Implementation of MethodEnzoControl user-dependent class member functions
 
 #include "cello.hpp"
-#include "cello_hydro.h"
 
 #include "method.hpp"
 #include "enzo.hpp"

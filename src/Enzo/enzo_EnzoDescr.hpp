@@ -10,8 +10,6 @@
 /// @todo     Comment Enzo functions / attributes
 /// @brief    Brief description of file enzo_EnzoDescr.hpp
 
-#include "cello_hydro.h"
-
 struct fluxes
 {
   long_int LeftFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];

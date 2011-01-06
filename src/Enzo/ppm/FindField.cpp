@@ -19,7 +19,6 @@
 //   field array or -1 if it is not there.
 
 #include "enzo.hpp"
-#include "cello_hydro.h"
  
  
 int EnzoDescr::FindField(int field, int farray[], int numfields)

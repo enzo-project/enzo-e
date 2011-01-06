@@ -12,7 +12,6 @@
 #include <math.h>
 
 #include "cello.hpp"
-#include "cello_hydro.h"
 
 #include "method.hpp"
 #include "error.hpp"

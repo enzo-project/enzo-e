@@ -7,7 +7,6 @@
 /// @brief     Set the energy to provide minimal pressure support
 
 #include "enzo.hpp"
-#include "cello_hydro.h"
  
 /* function prototypes */
  
