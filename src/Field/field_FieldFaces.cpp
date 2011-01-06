@@ -52,7 +52,8 @@ FieldFaces::FieldFaces(const FieldFaces & field_faces) throw ()
 //----------------------------------------------------------------------
 
 FieldFaces & FieldFaces::operator= (const FieldFaces & field_faces) throw ()
-/// @param     FieldFaces  Source object of the assignment
+/// @param     field_faces  Source object of the assignment
+///
 /// @return    The target assigned object
 {
   INCOMPLETE_MESSAGE("FieldFaces::operator =","");

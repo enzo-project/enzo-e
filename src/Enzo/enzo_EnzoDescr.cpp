@@ -337,10 +337,138 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
 
 }
 
-//----------------------------------------------------------------------
-
 EnzoDescr::~EnzoDescr() throw ()
 {
+}
+
+//----------------------------------------------------------------------
+
+void EnzoDescr::write(FILE * fp) throw ()
+{
+  fprintf (fp,"write_hydro: ComovingCoordinates %d\n",    ComovingCoordinates);
+  fprintf (fp,"write_hydro: UseMinimumPressureSupport %d\n",    UseMinimumPressureSupport);
+  fprintf (fp,"write_hydro: MinimumPressureSupportParameter %g\n",  MinimumPressureSupportParameter);
+  fprintf (fp,"write_hydro: ComovingBoxSize %g\n",  ComovingBoxSize);
+  fprintf (fp,"write_hydro: HubbleConstantNow %g\n",  HubbleConstantNow);
+  fprintf (fp,"write_hydro: OmegaLambdaNow %g\n",  OmegaLambdaNow);
+  fprintf (fp,"write_hydro: OmegaMatterNow %g\n",  OmegaMatterNow);
+  fprintf (fp,"write_hydro: MaxExpansionRate %g\n",  MaxExpansionRate);
+
+  // Chemistry
+
+  fprintf (fp,"write_hydro: MultiSpecies %d\n",    MultiSpecies);
+
+  // Gravity
+
+  fprintf (fp,"write_hydro: GravityOn %d\n",    GravityOn);
+  //  fprintf (fp,"write_hydro: *AccelerationField %g\n", *AccelerationField[MAX_DIMENSION)];
+
+  // Physics
+
+  fprintf (fp,"write_hydro: PressureFree %d\n",    PressureFree);
+  fprintf (fp,"write_hydro: Gamma %g\n",  Gamma);
+  fprintf (fp,"write_hydro: GravitationalConstant %g\n",  GravitationalConstant);
+
+  // Problem-specific
+
+  fprintf (fp,"write_hydro: ProblemType %d\n",    ProblemType);
+
+  // Method PPM
+
+  fprintf (fp,"write_hydro: PPMFlatteningParameter %d\n",    PPMFlatteningParameter);
+  fprintf (fp,"write_hydro: PPMDiffusionParameter %d\n",    PPMDiffusionParameter);
+  fprintf (fp,"write_hydro: PPMSteepeningParameter %d\n",    PPMSteepeningParameter);
+
+  // Parallel
+
+  fprintf (fp,"write_hydro: ProcessorNumber %d\n",    ProcessorNumber);
+
+  // Numerics
+
+  fprintf (fp,"write_hydro: DualEnergyFormalism %d\n",    DualEnergyFormalism);
+  fprintf (fp,"write_hydro: DualEnergyFormalismEta1 %g\n",  DualEnergyFormalismEta1);
+  fprintf (fp,"write_hydro: DualEnergyFormalismEta2 %g\n",  DualEnergyFormalismEta2);
+  fprintf (fp,"write_hydro: pressure %g\n",  pressure_floor);
+  fprintf (fp,"write_hydro: density %g\n",  density_floor);
+  fprintf (fp,"write_hydro: number %g\n",  number_density_floor);
+  fprintf (fp,"write_hydro: temperature %g\n",  temperature_floor);
+
+  fprintf (fp,"write_hydro: CourantSafetyNumber %g\n",  CourantSafetyNumber);
+  fprintf (fp,"write_hydro: InitialRedshift %g\n",  InitialRedshift);
+  fprintf (fp,"write_hydro: InitialTimeInCodeUnits %g\n",  InitialTimeInCodeUnits);
+  fprintf (fp,"write_hydro: Time %g\n",  Time);
+  fprintf (fp,"write_hydro: OldTime %g\n",  OldTime);
+
+  // Domain
+
+  fprintf (fp,"write_hydro: DomainLeftEdge %g %g %g\n",  DomainLeftEdge [0],DomainLeftEdge [0],DomainLeftEdge [0]);
+  fprintf (fp,"write_hydro: %g %g %g\n",  DomainRightEdge[0],DomainRightEdge[1],DomainRightEdge[2]);
+
+  // Grid
+
+  fprintf (fp,"write_hydro: GridRank %d\n",    GridRank);
+  fprintf (fp,"write_hydro: GridDimension %d %d %d\n",    GridDimension[0],GridDimension[1],GridDimension[2]);
+  fprintf (fp,"write_hydro: GridStartIndex %d %d %d\n",    GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
+  fprintf (fp,"write_hydro: GridEndIndex %d %d %d\n",    GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
+  fprintf (fp,"write_hydro: GridLeftEdge %g %g %g\n",  GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
+  //  fprintf (fp,"write_hydro: *CellWidth %g\n", *CellWidth[MAX_DIMENSION)];
+  fprintf (fp,"write_hydro: ghost %d %d %d\n",    ghost_depth[0],ghost_depth[1],ghost_depth[2]);
+
+  // Fields
+
+  fprintf (fp,"write_hydro: field %d\n", field_density);
+  fprintf (fp,"write_hydro: field %d\n", field_total_energy);
+  fprintf (fp,"write_hydro: field %d\n", field_internal_energy);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_x);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_y);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_z);
+  fprintf (fp,"write_hydro: field %d\n", field_color);
+
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_x);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_y);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_z);
+
+  fprintf (fp,"write_hydro: field %d\n", field_density_xp);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_x_xp);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_y_xp);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_z_xp);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_x_xp);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_y_xp);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_z_xp);
+
+  fprintf (fp,"write_hydro: field %d\n", field_density_yp);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_x_yp);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_y_yp);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_z_yp);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_x_yp);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_y_yp);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_z_yp);
+
+  fprintf (fp,"write_hydro: field %d\n", field_density_zp);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_x_zp);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_y_zp);
+  fprintf (fp,"write_hydro: field %d\n", field_velocity_z_zp);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_x_zp);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_y_zp);
+  fprintf (fp,"write_hydro: field %d\n", field_magnetic_z_zp);
+
+
+  fprintf (fp,"write_hydro: NumberOfBaryonFields %d\n",    NumberOfBaryonFields);
+  //  fprintf (fp,"write_hydro: *BaryonField %g\n", *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS)];
+  //  fprintf (fp,"write_hydro: *OldBaryonField %g\n", *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS)];
+  //  fprintf (fp,"write_hydro: FieldType %d\n",    FieldType[MAX_NUMBER_OF_BARYON_FIELDS)];
+
+  fprintf (fp,"write_hydro: BoundaryRank %d\n",      BoundaryRank);
+  fprintf (fp,"write_hydro: BoundaryDimension %d %d %d\n",      BoundaryDimension[0],BoundaryDimension[1],BoundaryDimension[2]);
+  //  fprintf (fp,"write_hydro: BoundaryFieldType %d\n",      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS)];
+  //  fprintf (fp,"write_hydro: *BoundaryType bc\n", *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2)];
+  //  fprintf (fp,"write_hydro: *BoundaryValue %g\n",   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2)];  
+
+  // problem
+
+  fprintf (fp,"write_hydro: CycleNumber %d\n",   CycleNumber);
+  fprintf (fp,"write_hydro: dt %g\n", dt);
+
 }
 
 //----------------------------------------------------------------------

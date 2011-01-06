@@ -104,7 +104,7 @@ void Monitor::image
  * @param  axis         Which axis to reduce
  * @param  op_reduce    Reduction operator
  * @param  min,max      Bounds for color map values
- * @param  map          Color map [r0, g0, b0, r1, g1, b1, ...]
+ * @param  map_in       Color map [r0, g0, b0, r1, g1, b1, ...]
  * @param  map_length   Length of color map / 3
  *
  * Plot an array as a png file

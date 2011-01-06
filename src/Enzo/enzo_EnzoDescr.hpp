@@ -37,6 +37,8 @@ public: // interface
   /// Initialize EnzoDescr values from parameter file
   void initialize(Parameters * parameters) throw();
 
+  void write(FILE *fp) throw ();
+
   //----------------------------------------------------------------------
   // Original Enzo functions
   //----------------------------------------------------------------------

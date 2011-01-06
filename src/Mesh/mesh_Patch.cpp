@@ -54,6 +54,7 @@ Patch & Patch::operator= (const Patch & patch) throw()
   deallocate();
   data_descr_ = patch.data_descr();
   allocate();
+  return *this;
 }
 
 //----------------------------------------------------------------------
