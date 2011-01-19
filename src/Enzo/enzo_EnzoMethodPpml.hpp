@@ -1,24 +1,24 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_MethodEnzoPpml.hpp
+/// @file     enzo_EnzoMethodPpml.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon May 17 14:16:01 PDT 2010
 /// @brief    Implementation of Enzo PPML method
 
-#ifndef ENZO_METHOD_ENZO_PPML_HPP
-#define ENZO_METHOD_ENZO_PPML_HPP
+#ifndef ENZO_ENZO_METHOD_PPML_HPP
+#define ENZO_ENZO_METHOD_PPML_HPP
 
-class MethodEnzoPpml : public MethodHyperbolic {
+class EnzoMethodPpml : public MethodHyperbolic {
 
-/// @class    MethodEnzoPpml
+/// @class    EnzoMethodPpml
 /// @ingroup  Enzo
 /// @brief    Encapsulate Enzo's PPML hydro method
 
 public: // interface
 
-/// Creae a new MethodEnzoPpml object
-MethodEnzoPpml(Global * global,
+/// Creae a new EnzoMethodPpml object
+EnzoMethodPpml(Global * global,
 	       EnzoDescr * enzo)
   : MethodHyperbolic (global),
     enzo_(enzo)
@@ -59,4 +59,4 @@ private: // attributes
 
 };
 
-#endif /* ENZO_METHOD_ENZO_PPML_HPP */
+#endif /* ENZO_ENZO_METHOD_PPML_HPP */

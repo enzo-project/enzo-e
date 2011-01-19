@@ -1,24 +1,24 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_MethodEnzoTimestep.hpp 
+/// @file     enzo_EnzoMethodTimestep.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the MethodEnzoTimestep component
+/// @brief    Declaration for the EnzoMethodTimestep component
 
-#ifndef ENZO_METHOD_ENZO_TIMESTEP_HPP
-#define ENZO_METHOD_ENZO_TIMESTEP_HPP
+#ifndef ENZO_ENZO_METHOD_TIMESTEP_HPP
+#define ENZO_ENZO_METHOD_TIMESTEP_HPP
 
-class MethodEnzoTimestep : public MethodTimestep {
+class EnzoMethodTimestep : public MethodTimestep {
 
-  /// @class    MethodEnzoTimestep
+  /// @class    EnzoMethodTimestep
   /// @ingroup  Enzo
   /// @brief    Encapsulate determination of timestep
 
 public: // interface
 
-  /// Create a new MethodEnzoTimestep
-  MethodEnzoTimestep(EnzoDescr * enzo) throw();
+  /// Create a new EnzoMethodTimestep
+  EnzoMethodTimestep(EnzoDescr * enzo) throw();
 
 public: // virtual functions
 
@@ -56,4 +56,4 @@ protected: // functions
   EnzoDescr * enzo_;
 };
 
-#endif /* ENZO_METHOD_ENZO_TIMESTEP_HPP */
+#endif /* ENZO_ENZO_METHOD_TIMESTEP_HPP */

@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_MethodEnzoPpml.cpp
+/// @file     enzo_EnzoMethodPpml.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 17:05:23 PDT 2010
-/// @brief    Implements the MethodEnzoPpml class
+/// @brief    Implements the EnzoMethodPpml class
 
 //----------------------------------------------------------------------
 
@@ -17,7 +17,7 @@
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::initialize(DataDescr * data_descr) throw()
+void EnzoMethodPpml::initialize(DataDescr * data_descr) throw()
 {
   // Specify arguments
 
@@ -54,26 +54,26 @@ void MethodEnzoPpml::initialize(DataDescr * data_descr) throw()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::finalize(DataDescr * data_descr) throw()
+void EnzoMethodPpml::finalize(DataDescr * data_descr) throw()
 {}
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::initialize_block (DataBlock * data_block) throw()
+void EnzoMethodPpml::initialize_block (DataBlock * data_block) throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::finalize_block (DataBlock * data_block) throw()
+void EnzoMethodPpml::finalize_block (DataBlock * data_block) throw()
 {}
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpml::advance_block(DataBlock * data_block,
+void EnzoMethodPpml::advance_block(DataBlock * data_block,
 				   double t,double dt) throw()
 {
-  INCOMPLETE_MESSAGE("MethodEnzoPpml::advance_block","");
+  INCOMPLETE_MESSAGE("EnzoMethodPpml::advance_block","");
 }
 
 //----------------------------------------------------------------------

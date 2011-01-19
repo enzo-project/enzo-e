@@ -1,25 +1,25 @@
-// $Id: enzo_MethodInitialImplosion2.hpp 1877 2010-11-30 01:20:27Z bordner $
+// $Id: enzo_EnzoMethodImplosion2.hpp 1877 2010-11-30 01:20:27Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_METHODINITIALIMPLOSION2_HPP
-#define ENZO_METHODINITIALIMPLOSION2_HPP
+#ifndef ENZO_ENZO_METHOD_IMPLOSION2_HPP
+#define ENZO_ENZO_METHOD_IMPLOSION2_HPP
 
-/// @file     enzo_MethodInitialImplosion2.hpp
+/// @file     enzo_MethodImplosion2.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:26:38 PST 2011
 /// @brief    Initialization routine for 2D implosion problem
 
-class MethodInitialImplosion2 : public MethodInitial {
+class EnzoMethodImplosion2 : public MethodInitial {
 
-  /// @class    MethodInitialImplosion2
+  /// @class    EnzoMethodImplosion2
   /// @ingroup  Enzo
   /// @brief    Initialization routine for 2D implosion problem
 
 public: // interface
 
   /// Constructor
-  MethodInitialImplosion2(Global    * global,
-			  EnzoDescr * enzo_descr) throw();
+  EnzoMethodImplosion2(Global    * global,
+			      EnzoDescr * enzo_descr) throw();
 
   /// Perform any method-specific initialization
 
@@ -50,5 +50,5 @@ private: // attributes
   
 };
 
-#endif /* ENZO_METHODINITIALIMPLOSION2_HPP */
+#endif /* ENZO_ENZO_METHOD_IMPLOSION2_HPP */
 

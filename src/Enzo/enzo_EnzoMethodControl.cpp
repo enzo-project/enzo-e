@@ -1,11 +1,11 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_MethodEnzoControl.cpp
+/// @file     enzo_EnzoMethodControl.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @date     Tue May 11 18:06:50 PDT 2010
-/// @brief    Implementation of MethodEnzoControl user-dependent class member functions
+/// @brief    Implementation of EnzoMethodControl user-dependent class member functions
 
 #include "cello.hpp"
 
@@ -17,7 +17,7 @@
 
 //----------------------------------------------------------------------
 
-void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
+void EnzoMethodControl::initialize (DataDescr * data_descr) throw()
 {
 
 
@@ -26,13 +26,13 @@ void MethodEnzoControl::initialize (DataDescr * data_descr) throw()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoControl::finalize (DataDescr * data_descr) throw()
+void EnzoMethodControl::finalize (DataDescr * data_descr) throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void MethodEnzoControl::initialize_block ( DataBlock * data_block ) throw ()
+void EnzoMethodControl::initialize_block ( DataBlock * data_block ) throw ()
 {
 
   FieldBlock * field_block = data_block->field_block();
@@ -115,7 +115,7 @@ void MethodEnzoControl::initialize_block ( DataBlock * data_block ) throw ()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoControl::finalize_block ( DataBlock * data_block ) throw ()
+void EnzoMethodControl::finalize_block ( DataBlock * data_block ) throw ()
 {
   ++ enzo_->CycleNumber;
   for (int dim=0; dim < enzo_->GridRank; dim++) {
@@ -125,7 +125,7 @@ void MethodEnzoControl::finalize_block ( DataBlock * data_block ) throw ()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoControl::refresh_ghost(DataBlock * data_block, 
+void EnzoMethodControl::refresh_ghost(DataBlock * data_block, 
 				      bool xm, bool xp, 
 				      bool ym, bool yp, 
 				      bool zm, bool zp) throw()

@@ -1,7 +1,7 @@
-// $Id: enzo_MethodInitialImplosion2.cpp 1877 2010-11-30 01:20:27Z bordner $
+// $Id: enzo_EnzoMethodImplosion2.cpp 1877 2010-11-30 01:20:27Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_MethodInitialImplosion2.cpp
+/// @file     enzo_EnzoMethodImplosion2.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:30:35 PST 2011
 /// @brief    Implementation of Enzo 2D Implosion problem initialization
@@ -13,7 +13,7 @@
 
 //----------------------------------------------------------------------
 
-MethodInitialImplosion2::MethodInitialImplosion2
+EnzoMethodImplosion2::EnzoMethodImplosion2
 (
  Global    * global,
  EnzoDescr * enzo_descr
@@ -24,27 +24,27 @@ MethodInitialImplosion2::MethodInitialImplosion2
 
 //----------------------------------------------------------------------
 
-void MethodInitialImplosion2::initialize (DataDescr * data_descr) throw()
+void EnzoMethodImplosion2::initialize (DataDescr * data_descr) throw()
 {
   // Intentionally blank
 }
 
 //----------------------------------------------------------------------
 
-void MethodInitialImplosion2::finalize (DataDescr * data_descr) throw()
+void EnzoMethodImplosion2::finalize (DataDescr * data_descr) throw()
 {
   // Intentionally blank
 }
 
 //----------------------------------------------------------------------
 
-void MethodInitialImplosion2::initialize_block (DataBlock * data_block) throw()
+void EnzoMethodImplosion2::initialize_block (DataBlock * data_block) throw()
 
 {
   FieldBlock * field_block = data_block->field_block();
   FieldDescr * field_descr = data_block->field_block()->field_descr();
 
-  ASSERT("MethodInitialImplosion2",
+  ASSERT("EnzoMethodImplosion2",
 	 "Insufficient number of fields",
 	 field_descr->field_count() >= 4);
 
@@ -67,7 +67,7 @@ void MethodInitialImplosion2::initialize_block (DataBlock * data_block) throw()
  int gx,gy,gz;
   field_descr->ghosts(index_density,&gx,&gy,&gz);
 
-  // WARNING_MESSAGE("MethodInitialImplosion2",
+  // WARNING_MESSAGE("EnzoMethodImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");
 
   int ngx = nx + 2*gx;
@@ -96,14 +96,14 @@ void MethodInitialImplosion2::initialize_block (DataBlock * data_block) throw()
 
 //----------------------------------------------------------------------
 
-void MethodInitialImplosion2::finalize_block (DataBlock * data_block) throw()
+void EnzoMethodImplosion2::finalize_block (DataBlock * data_block) throw()
 {
   // Intentionally blank
 }
 
 //----------------------------------------------------------------------
 
-std::string MethodInitialImplosion2::method_name() const throw()
+std::string EnzoMethodImplosion2::method_name() const throw()
 {
   return "implosion_2d";
 }

@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_MethodEnzoPpm.cpp
+/// @file     enzo_EnzoMethodPpm.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 17:05:23 PDT 2010
-/// @brief    Implements the MethodEnzoPpm class
+/// @brief    Implements the EnzoMethodPpm class
 
 #include "cello.hpp"
 
@@ -14,7 +14,7 @@
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpm::initialize (DataDescr * data_descr) throw()
+void EnzoMethodPpm::initialize (DataDescr * data_descr) throw()
 {
 
   // Specify arguments
@@ -50,26 +50,26 @@ void MethodEnzoPpm::initialize (DataDescr * data_descr) throw()
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpm::finalize ( DataDescr * data_descr ) throw ()
+void EnzoMethodPpm::finalize ( DataDescr * data_descr ) throw ()
 {
 }
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpm::initialize_block ( DataBlock * data_block ) throw ()
+void EnzoMethodPpm::initialize_block ( DataBlock * data_block ) throw ()
 {
 
 }
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpm::finalize_block ( DataBlock * data_block ) throw ()
+void EnzoMethodPpm::finalize_block ( DataBlock * data_block ) throw ()
 {
 }
 
 //----------------------------------------------------------------------
 
-void MethodEnzoPpm::advance_block
+void EnzoMethodPpm::advance_block
 (
  DataBlock * data_block,
  double t,
