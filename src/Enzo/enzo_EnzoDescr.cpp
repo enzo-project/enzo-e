@@ -45,37 +45,37 @@ EnzoDescr::EnzoDescr(Global * global) throw ()
     InitialTimeInCodeUnits(0),
     Time(0),
     OldTime(0),
-    field_density(0),
-    field_total_energy(0),
-    field_internal_energy(0),
-    field_velocity_x(0),
-    field_velocity_y(0),
-    field_velocity_z(0),
-    field_color(0),
-    field_magnetic_x(0),
-    field_magnetic_y(0),
-    field_magnetic_z(0),
-    field_density_xp(0),
-    field_velocity_x_xp(0),
-    field_velocity_y_xp(0),
-    field_velocity_z_xp(0),
-    field_magnetic_x_xp(0),
-    field_magnetic_y_xp(0),
-    field_magnetic_z_xp(0),
-    field_density_yp(0),
-    field_velocity_x_yp(0),
-    field_velocity_y_yp(0),
-    field_velocity_z_yp(0),
-    field_magnetic_x_yp(0),
-    field_magnetic_y_yp(0),
-    field_magnetic_z_yp(0),
-    field_density_zp(0),
-    field_velocity_x_zp(0),
-    field_velocity_y_zp(0),
-    field_velocity_z_zp(0),
-    field_magnetic_x_zp(0),
-    field_magnetic_y_zp(0),
-    field_magnetic_z_zp(0),
+    field_density(-1),
+    field_total_energy(-1),
+    field_internal_energy(-1),
+    field_velocity_x(-1),
+    field_velocity_y(-1),
+    field_velocity_z(-1),
+    field_color(-1),
+    field_magnetic_x(-1),
+    field_magnetic_y(-1),
+    field_magnetic_z(-1),
+    field_density_xp(-1),
+    field_velocity_x_xp(-1),
+    field_velocity_y_xp(-1),
+    field_velocity_z_xp(-1),
+    field_magnetic_x_xp(-1),
+    field_magnetic_y_xp(-1),
+    field_magnetic_z_xp(-1),
+    field_density_yp(-1),
+    field_velocity_x_yp(-1),
+    field_velocity_y_yp(-1),
+    field_velocity_z_yp(-1),
+    field_magnetic_x_yp(-1),
+    field_magnetic_y_yp(-1),
+    field_magnetic_z_yp(-1),
+    field_density_zp(-1),
+    field_velocity_x_zp(-1),
+    field_velocity_y_zp(-1),
+    field_velocity_z_zp(-1),
+    field_magnetic_x_zp(-1),
+    field_magnetic_y_zp(-1),
+    field_magnetic_z_zp(-1),
     GridRank(0),
     NumberOfBaryonFields(0),
     BoundaryRank(0),
@@ -416,41 +416,72 @@ void EnzoDescr::write(FILE * fp) throw ()
 
   // Fields
 
-  fprintf (fp,"write_hydro: field %d\n", field_density);
-  fprintf (fp,"write_hydro: field %d\n", field_total_energy);
-  fprintf (fp,"write_hydro: field %d\n", field_internal_energy);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_x);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_y);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_z);
-  fprintf (fp,"write_hydro: field %d\n", field_color);
+  if (field_density != -1) 
+    fprintf (fp,"write_hydro: field_density %d\n", field_density);
+  if (field_total_energy != -1) 
+    fprintf (fp,"write_hydro: field_total_energy %d\n", field_total_energy);
+  if (field_internal_energy != -1) 
+    fprintf (fp,"write_hydro: field_internal_energy %d\n", field_internal_energy);
+  if (field_velocity_x != -1) 
+    fprintf (fp,"write_hydro: field_velocity_x %d\n", field_velocity_x);
+  if (field_velocity_y != -1) 
+    fprintf (fp,"write_hydro: field_velocity_y %d\n", field_velocity_y);
+  if (field_velocity_z != -1) 
+    fprintf (fp,"write_hydro: field_velocity_z %d\n", field_velocity_z);
+  if (field_color != -1) 
+    fprintf (fp,"write_hydro: field_color %d\n", field_color);
 
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_x);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_y);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_z);
+  if (field_magnetic_x != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_x %d\n", field_magnetic_x);
+  if (field_magnetic_y != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_y %d\n", field_magnetic_y);
+  if (field_magnetic_z != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_z %d\n", field_magnetic_z);
 
-  fprintf (fp,"write_hydro: field %d\n", field_density_xp);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_x_xp);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_y_xp);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_z_xp);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_x_xp);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_y_xp);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_z_xp);
+  if (field_density_xp != -1) 
+    fprintf (fp,"write_hydro: field_density_xp %d\n", field_density_xp);
+  if (field_velocity_x_xp != -1) 
+    fprintf (fp,"write_hydro: field_velocity_x_xp %d\n", field_velocity_x_xp);
+  if (field_velocity_y_xp != -1) 
+    fprintf (fp,"write_hydro: field_velocity_y_xp %d\n", field_velocity_y_xp);
+  if (field_velocity_z_xp != -1) 
+    fprintf (fp,"write_hydro: field_velocity_z_xp %d\n", field_velocity_z_xp);
+  if (field_magnetic_x_xp != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_x_xp %d\n", field_magnetic_x_xp);
+  if (field_magnetic_y_xp != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_y_xp %d\n", field_magnetic_y_xp);
+  if (field_magnetic_z_xp != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_z_xp %d\n", field_magnetic_z_xp);
 
-  fprintf (fp,"write_hydro: field %d\n", field_density_yp);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_x_yp);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_y_yp);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_z_yp);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_x_yp);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_y_yp);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_z_yp);
+  if (field_density_yp != -1) 
+    fprintf (fp,"write_hydro: field_density_yp %d\n", field_density_yp);
+  if (field_velocity_x_yp != -1) 
+    fprintf (fp,"write_hydro: field_velocity_x_yp %d\n", field_velocity_x_yp);
+  if (field_velocity_y_yp != -1) 
+    fprintf (fp,"write_hydro: field_velocity_y_yp %d\n", field_velocity_y_yp);
+  if (field_velocity_z_yp != -1) 
+    fprintf (fp,"write_hydro: field_velocity_z_yp %d\n", field_velocity_z_yp);
+  if (field_magnetic_x_yp != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_x_yp %d\n", field_magnetic_x_yp);
+  if (field_magnetic_y_yp != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_y_yp %d\n", field_magnetic_y_yp);
+  if (field_magnetic_z_yp != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_z_yp %d\n", field_magnetic_z_yp);
 
-  fprintf (fp,"write_hydro: field %d\n", field_density_zp);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_x_zp);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_y_zp);
-  fprintf (fp,"write_hydro: field %d\n", field_velocity_z_zp);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_x_zp);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_y_zp);
-  fprintf (fp,"write_hydro: field %d\n", field_magnetic_z_zp);
+  if (field_density_zp != -1) 
+    fprintf (fp,"write_hydro: field_density_zp %d\n", field_density_zp);
+  if (field_velocity_x_zp != -1) 
+    fprintf (fp,"write_hydro: field_velocity_x_zp %d\n", field_velocity_x_zp);
+  if (field_velocity_y_zp != -1) 
+    fprintf (fp,"write_hydro: field_velocity_y_zp %d\n", field_velocity_y_zp);
+  if (field_velocity_z_zp != -1) 
+    fprintf (fp,"write_hydro: field_velocity_z_zp %d\n", field_velocity_z_zp);
+  if (field_magnetic_x_zp != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_x_zp %d\n", field_magnetic_x_zp);
+  if (field_magnetic_y_zp != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_y_zp %d\n", field_magnetic_y_zp);
+  if (field_magnetic_z_zp != -1) 
+    fprintf (fp,"write_hydro: field_magnetic_z_zp %d\n", field_magnetic_z_zp);
 
 
   fprintf (fp,"write_hydro: NumberOfBaryonFields %d\n",    NumberOfBaryonFields);

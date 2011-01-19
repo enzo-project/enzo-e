@@ -8,6 +8,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @todo     Comment Enzo functions / attributes
+/// @todo     Decouple block-dependent and block-independent attributes
 /// @brief    Brief description of file enzo_EnzoDescr.hpp
 
 struct fluxes

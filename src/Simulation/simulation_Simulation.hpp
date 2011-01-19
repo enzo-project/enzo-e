@@ -38,7 +38,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// initialize the Simulation given a parameter file
-  void initialize(std::string parameter_file) throw();
+  virtual void initialize(std::string parameter_file) throw();
 
   /// Finalize the Simulation after running it
   void finalize() throw();
