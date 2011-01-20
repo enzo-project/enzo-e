@@ -7,7 +7,7 @@
 /// @file     disk.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2008-03-18 17:48:36
-/// @brief    Include file for the Disk component
+/// @brief    Include file for the \ref Disk component
 
 #ifdef CONFIG_USE_HDF5
 #  include <hdf5.h>

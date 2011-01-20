@@ -5,12 +5,12 @@
 #define TEST_UNIT_HPP
 
 /// @file     test_unit.hpp
-/// @brief    Define the unit namespace and unit testing functions
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Convert namespace to class
 /// @todo     Address need to edit code to use pass/fail string colors or not
 /// @todo     Use all uppercase for visibility, e.g. UNIT_ASSERT(...)
 /// @date     Sat Feb 23 15:22:59 PST 2008
+/// @brief    [\ref Test] Define the unit namespace and unit testing functions
 
 /// @def      UNIT_MAX_NAME_LEN
 /// @brief    Maximum length of a class or function name
@@ -20,7 +20,7 @@ namespace unit {
 
   /// @namespace unit
   /// @ingroup   Test
-  /// @brief     Current class name, function name, and test results
+  /// @brief     [\ref Test] Current class name, function name, and test results
        
   char class_name[UNIT_MAX_NAME_LEN] = {0};
   char func_name [UNIT_MAX_NAME_LEN] = {0};

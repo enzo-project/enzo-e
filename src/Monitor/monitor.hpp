@@ -7,7 +7,7 @@
 /// @file     monitor.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-05
-/// @brief    Include file for the Monitor component
+/// @brief    Include file for the \ref Monitor component
 
 #include <string>
 #include "pngwriter.h"

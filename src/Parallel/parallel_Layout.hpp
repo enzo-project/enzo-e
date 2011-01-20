@@ -4,7 +4,7 @@
 /// @file     parallel_Layout.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Declaration of the Layout class
+/// @brief    [\ref Parallel] Declaration of the Layout class
 
 #ifndef PARALLEL_LAYOUT_HPP
 #define PARALLEL_LAYOUT_HPP
@@ -14,8 +14,8 @@ class Layout {
 
   /// @class    Layout
   /// @ingroup  Parallel
-  /// @brief Specify how a Patch is partitioned into blocks, and how
-  /// blocks are assigned to generic processes
+  /// @brief    [\ref Parallel] Specify how a Patch is partitioned into
+  /// blocks, and how blocks are assigned to generic processes
 
 public: // interface
 

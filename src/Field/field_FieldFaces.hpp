@@ -7,13 +7,13 @@
 /// @file     field_FieldFaces.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Interface for the FieldFaces class
+/// @brief    [\ref Field] Interface for the FieldFaces class
 
 class FieldFaces {
 
   /// @class    FieldFaces
   /// @ingroup  Field
-  /// @brief    Class for representing and operating on ghost zones
+  /// @brief    [\ref Field] Class for representing and operating on ghost zones
 
 private:
 

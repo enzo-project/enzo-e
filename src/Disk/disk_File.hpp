@@ -7,13 +7,13 @@
 /// @file     disk_File.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Declaration of the File class
+/// @brief    [\ref Disk] Declaration of the File class
 
 class File {
 
   /// @class    File
   /// @ingroup  Disk
-  /// @brief    Internal representation of a file on disk
+  /// @brief    [\ref Disk] Internal representation of a file on disk
 
 public: // interface
 

@@ -4,7 +4,7 @@
 /// @file     monitor_Monitor.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-05
-/// @brief    Declaration of the Monitor class
+/// @brief    [\ref Monitor] Declaration of the Monitor class
 
 #ifndef MONITOR_MONITOR_HPP
 #define MONITOR_MONITOR_HPP
@@ -24,7 +24,7 @@ class Monitor {
   /// @class    Monitor
   /// @ingroup  Monitor
   /// @todo     Make calling image() easier
-  /// @brief    Functions for user monitoring of the execution status
+  /// @brief    [\ref Monitor] Functions for user monitoring of the execution status
   ///
   /// The Monitor component is used to communicate information about
   /// the running simulation to the user. Information can be output in

@@ -7,7 +7,7 @@
 /// @file     parallel.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-16
-/// @brief    Include file for the Parallel component
+/// @brief    Include file for the \ref Parallel component
 
 enum parallel_enum {
   parallel_serial,

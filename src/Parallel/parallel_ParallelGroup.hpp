@@ -7,13 +7,13 @@
 /// @file     parallel_ParallelGroup.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul 22 12:36:27 PDT 2010
-/// @brief    Declaration of the ParallelGroup class
+/// @brief    [\ref Parallel] Declaration of the ParallelGroup class
 
 class ParallelGroup {
 
   /// @class    ParallelGroup
   /// @ingroup  Parallel
-  /// @brief    Generalization of MPI rank for hierarchical parallelism
+  /// @brief    [\ref Parallel] Generalization of MPI rank for hierarchical parallelism
 
 public: // interface
 

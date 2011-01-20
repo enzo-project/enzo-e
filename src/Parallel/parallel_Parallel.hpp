@@ -5,7 +5,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Add ParallelCharm (for CkExit(), etc.)
 /// @date     2009-10-16
-/// @brief    Interface for the Parallel class
+/// @brief    [\ref Parallel] Interface for the Parallel class
 
 #ifndef PARALLEL_PARALLEL_HPP
 #define PARALLEL_PARALLEL_HPP
@@ -14,7 +14,7 @@ class Parallel {
 
   /// @class    Parallel
   /// @ingroup  Parallel
-  /// @brief Container group for hierarchical Parallel objects,
+  /// @brief    [\ref Parallel] Container group for hierarchical Parallel objects,
   /// e.g. GroupProcessMpi, GroupThreadOmp, etc.
 
 public: // interface

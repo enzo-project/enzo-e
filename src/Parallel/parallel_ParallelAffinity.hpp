@@ -8,13 +8,13 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 16:40:35 PDT 2010
 /// @todo     Make abstract base class
-/// @brief    Declaration of the ParallelAffinity class
+/// @brief    [\ref Parallel] Declaration of the ParallelAffinity class
 
 class ParallelAffinity {
 
   /// @class    ParallelAffinity
   /// @ingroup  Parallel
-  /// @brief    Generalization of MPI rank for hierarchical parallelism
+  /// @brief    [\ref Parallel] Generalization of MPI rank for hierarchical parallelism
 
 public: // interface
 

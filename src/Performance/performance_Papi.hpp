@@ -7,14 +7,14 @@
 /// @file     performance_Papi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Dec  2 11:22:30 PST 2010
-/// @brief    Interface to the PAPI library
+/// @brief    [\ref Performance] Interface to the PAPI library
 
 
 class Papi {
 
   /// @class    Papi
   /// @ingroup  Groupname
-  /// @brief    Brief description of class Papi.
+  /// @brief    [\ref Performance] Class for accessing PAPI counters
 
 public: // interface
 

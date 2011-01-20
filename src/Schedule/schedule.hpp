@@ -7,7 +7,7 @@
 /// @file     schedule.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:12:58
-/// @brief    Interface for the Schedule class
+/// @brief    Include file for the \ref Schedule component
 
 #include "schedule_Schedule.hpp"
 

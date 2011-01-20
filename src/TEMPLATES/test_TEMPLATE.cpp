@@ -1,7 +1,7 @@
 // $Id: test_Template.cpp 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Template.cpp
+/// @file     test_TEMPLATE.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
 /// @brief    Test program for the Template class

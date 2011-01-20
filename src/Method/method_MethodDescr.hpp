@@ -9,13 +9,13 @@
 /// @date     2010-05-11
 /// @todo     consolidate different method types into one Method* list
 /// @todo     add accessor functions
-/// @brief    Declaration of the MethodDescr class
+/// @brief    [\ref Method] Declaration of the MethodDescr class
 
 class MethodDescr {
 
   /// @class    MethodDescr
   /// @ingroup  Method
-  /// @brief    Top-level container for user-implemented numerical components
+  /// @brief    [\ref Method] Top-level container for user-implemented numerical components
 
 public: // interface
 

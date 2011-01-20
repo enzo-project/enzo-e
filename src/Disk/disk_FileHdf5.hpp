@@ -11,13 +11,13 @@
 /// @todo     Add support for relative/absolute directory / group
 /// @todo     Add unit tests for group operations to test_disk_hdf5
 /// @todo     Add state checks for file open before adding dataset, etc.
-/// @brief    Interface for the FileHdf5 class
+/// @brief    [\ref Disk] Interface for the FileHdf5 class
 
 class FileHdf5 {
 
   /// @class    FileHdf5
   /// @ingroup  Disk
-  /// @brief    Class for writing and reading HDF5 files
+  /// @brief    [\ref Disk] Class for writing and reading HDF5 files
   ///
   /// An FileHdf5 object currently corresponds to a single HDF5 file / group
 

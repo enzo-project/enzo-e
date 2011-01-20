@@ -7,13 +7,13 @@
 /// @file     field_FacesGroup.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Nov 30 16:15:31 PST 2010
-/// @brief    Class for storing collections of faces for communication
+/// @brief    [\ref Field] Class for storing collections of faces for communication
 
 class FacesGroup {
 
   /// @class    FacesGroup
   /// @ingroup  Field
-  /// @brief    Class for storing collections of faces for communication
+  /// @brief    [\ref Field] Class for storing collections of faces for communication
 
 public: // interface
 

@@ -12,14 +12,14 @@
 /// @todo     Implement and test grow(),shrink()
 /// @todo     Implement and test read(),write()
 /// @todo     Clean allocate_array() and allocate_ghosts() usage
-/// @brief    Fortran-style array class.
+/// @brief    [\ref Field] Fortran-style array class.
 
 class FieldBlock {
 
   /// @class    FieldBlock
   /// @ingroup  Field
-  /// @brief Interface between field arrays and low-level (C/fortran)
-  /// routines.
+  /// @brief [\ref Field] Interface between field arrays and low-level
+  /// (C/fortran) routines.
   /// 
   /// Defines up to a 4-D fortran-like array for storing 1 or more 3D
   /// arrays.  Axes can be permuted, including the index selecting the

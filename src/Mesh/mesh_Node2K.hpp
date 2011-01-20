@@ -7,15 +7,15 @@
 /// @file     mesh_Node2K.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Oct 27 12:32:07 PDT 2009
-/// @brief    Interface for Node2K class
+/// @brief    [\ref Mesh] Interface for Node2K class
 
 class Tree2K;
 
 class Node2K {
 
   /// @class    Node2K
-  /// @brief    Node class for 2D k^2-trees
   /// @ingroup  Mesh
+  /// @brief    [\ref Mesh] Node class for 2D k^2-trees
 
 public: // interface
 

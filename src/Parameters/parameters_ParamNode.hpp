@@ -7,14 +7,14 @@
 /// @file     parameters_ParamNode.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon May 10 12:43:27 PDT 2010
-/// @brief    Node for representing parameters in a tree of groups /
-///           subgroups /parameters /values
+/// @brief    [\ref Parameters] Node for representing parameters in a
+///           tree of groups / subgroups /parameters /values
 
 class ParamNode {
 
   /// @class    ParamNode
   /// @ingroup  Parameters
-  /// @brief    Node representing a subtree of parameters
+  /// @brief    [\ref Parameters] Node representing a subtree of parameters
 
 public: // interface
 

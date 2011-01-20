@@ -7,7 +7,7 @@
 /// @file     mesh_node4.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Oct 27 12:32:07 PDT 2009  
-/// @brief    Interface for the Node4 class
+/// @brief    [\ref Mesh] Interface for the Node4 class
 
 #include <stdlib.h>
 
@@ -21,7 +21,7 @@ class Node4 {
 
   /// @class    Node4
   /// @ingroup  Mesh
-  /// @brief    Node class for 2^2-trees
+  /// @brief    [\ref Mesh] Node class for 2^2-trees
 
 public: // interface
 

@@ -7,13 +7,13 @@
 /// @file     mesh_TreeK.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-30
-/// @brief    Include file for mesh_tree[23]k.hpp
+/// @brief    [\ref Mesh] Include file for mesh_tree[23]k.hpp
 
 class TreeK {
 
   /// @class    TreeK
   /// @ingroup  Mesh
-  /// @brief    Base class for Tree[23]K classes
+  /// @brief    [\ref Mesh] Base class for Tree[23]K classes
 
 public: // interface
 

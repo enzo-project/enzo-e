@@ -7,13 +7,13 @@
 /// @file     particle_ParticleDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-17
-/// @brief    Declaration for the ParticleDescr class
+/// @brief    [\ref Particle] Declaration for the ParticleDescr class
 
 class ParticleDescr {
 
   /// @class    ParticleDescr
   /// @ingroup  Particle
-  /// @brief    Interface for the ParticleDescr class
+  /// @brief    [\ref Particle] Interface for the ParticleDescr class
 
 public: // public
 

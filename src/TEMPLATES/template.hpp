@@ -7,13 +7,13 @@
 /// @file     template.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file template.hpp
+/// @brief    [\ref Groupname] Brief description of file template.hpp
 
 class Classname {
 
   /// @class    Classname
   /// @ingroup  Groupname
-  /// @brief    Brief description of class Classname.
+  /// @brief    [\ref Groupname] Brief description of class Classname.
 
 public: // interface
 

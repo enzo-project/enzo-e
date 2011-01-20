@@ -4,7 +4,7 @@
 /// @file     method_MethodHyperbolic.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the MethodHyperbolic component
+/// @brief    [\ref Method] Declaration for the MethodHyperbolic class
 
 #ifndef METHOD_METHOD_HYPERBOLIC_HPP
 #define METHOD_METHOD_HYPERBOLIC_HPP
@@ -13,7 +13,7 @@ class MethodHyperbolic {
 
   /// @class    MethodHyperbolic
   /// @ingroup  Method
-  /// @brief    Encapsulate external method / analysis / visualization function.
+  /// @brief    [\ref Method] Encapsulate external method / analysis / visualization function.
 
 public: // interface
 

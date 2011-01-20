@@ -7,7 +7,7 @@
 /// @file     global.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Include file for "global" object container class.
+/// @brief    Include file for the \ref Global component
 
 #include "error.hpp"
 #include "memory.hpp"

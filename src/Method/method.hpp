@@ -7,7 +7,7 @@
 /// @file     method.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
-/// @brief    Include file for the Method component
+/// @brief    Include file for the \ref Method component
 
 #include <vector>
 #include <string>

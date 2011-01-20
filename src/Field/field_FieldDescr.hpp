@@ -10,7 +10,7 @@
 /// @todo     Replace ghosts/centering dynamic allocated arrays with vector to avoid big three
 /// @todo     Split into "global" and "field-specific" attributes to reduce class size
 /// @todo     Support temporary fields, e.g. temperature or gravitational potential
-/// @brief    Declaration for the FieldDescr class
+/// @brief    [\ref Field] Declaration for the FieldDescr class
 
 enum field_action_enum {
   field_action_unknown,  // Uninitialized action
@@ -26,7 +26,7 @@ class FieldDescr {
 
   /// @class    FieldDescr
   /// @ingroup  Field
-  /// @brief    Interface for the FieldDescr class
+  /// @brief    [\ref Field] Interface for the FieldDescr class
 
 public: // functions
 

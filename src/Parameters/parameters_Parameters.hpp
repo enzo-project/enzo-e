@@ -12,7 +12,8 @@
 /// @todo     set_value() using string values for all types
 /// @todo     assert_required() to make given parameter required (don't exit since more than one required parameter may be missing)
 /// @todo     Add "check()" function to check individual parameters, or all
-/// @brief    Declaration for the Parameters class
+/// @brief    [\ref Parameters] Declaration for the Parameters class
+
 /// @def      MAX_PARAMETER_FILE_WIDTH
 /// @brief    Maximum allowed width of a line in a parameter file
 #define MAX_PARAMETER_FILE_WIDTH 255
@@ -33,7 +34,8 @@ class Parameters {
 
   /// @class    Parameters
   /// @ingroup  Parameters
-  /// @brief    Read in a parameter file and access parameter values
+  /// @brief    [\ref Parameters] Read in a parameter file and access
+  /// parameter values
 
 public: // interface
 

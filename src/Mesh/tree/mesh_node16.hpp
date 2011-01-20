@@ -7,7 +7,7 @@
 /// @file     mesh_node16.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Oct 27 12:32:07 PDT 2009
-/// @brief    Declaration of the Node16 class 
+/// @brief    [\ref Mesh] Declaration of the Node16 class 
 
 #include <stdlib.h>
 #include "cello.hpp"
@@ -19,7 +19,7 @@ class Node16 {
 
   /// @class    Node16
   /// @ingroup  Mesh
-  /// @brief    Node class for 4^2-trees
+  /// @brief    [\ref Mesh] Node class for 4^2-trees
 
 public: // interface
 

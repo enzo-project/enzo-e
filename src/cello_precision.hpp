@@ -4,7 +4,7 @@
 #ifndef CELLO_PRECISION_HPP
 #define CELLO_PRECISION_HPP
 
-/// @file     cello_precisionhpp
+/// @file     cello_precision.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Nov 11 17:08:38 PST 2010
 /// @brief    Include Cello precision types

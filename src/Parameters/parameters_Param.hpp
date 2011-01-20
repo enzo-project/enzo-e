@@ -9,7 +9,7 @@
 /// @date     Sun Oct 11 14:55:25 PDT 2009
 /// @todo     Rename print_expression to match cello_parameters_print_list
 /// @todo     Keep track of unaccessed parameters
-/// @brief    Interface for the Param class
+/// @brief    [\ref Parameters] Interface for the Param class
 
 //----------------------------------------------------------------------
 
@@ -36,7 +36,8 @@ class Param {
 
   /// @class    Param
   /// @ingroup  Parameters
-  /// @brief    Represents and evaluates various parameter types and expressions
+  /// @brief    [\ref Parameters] Represent and evaluate various
+  /// parameter types and expressions
 
   friend class Parameters;
 

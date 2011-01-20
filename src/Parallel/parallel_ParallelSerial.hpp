@@ -6,7 +6,7 @@
 /// @todo     Rename Parallel  ParallelSerial
 /// @todo     Add ParallelCharm (for CkExit(), etc.)
 /// @date     2009-10-16
-/// @brief    Interface for the Parallel class
+/// @brief    [\ref Parallel] Interface for the Parallel class
 
 #ifndef PARALLEL_PARALLEL_SERIAL_HPP
 #define PARALLEL_PARALLEL_SERIAL_HPP
@@ -16,8 +16,8 @@ class ParallelSerial : public Parallel {
   /// @class    ParallelSerial
   /// @ingroup  Parallel
   /// @todo     Split into ParallelProcesses and ParallelThreads or similar
-  /// @brief    Class for encapsulating different, possibly multiple,
-  /// parallel technologies
+  /// @brief    [\ref Parallel] Class for encapsulating different,
+  /// possibly multiple, parallel technologies
 
 public: // interface
 

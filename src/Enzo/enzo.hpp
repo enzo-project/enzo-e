@@ -7,7 +7,7 @@
 /// @file     enzo.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
-/// @brief    Include file for the Enzo component
+/// @brief    Include file for the \ref Enzo component
 
 #include <vector>
 #include <string>

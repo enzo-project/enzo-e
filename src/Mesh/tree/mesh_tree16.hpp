@@ -8,7 +8,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-09-18
 /// @bug      Implementations of Tree4 and Tree16 are essentially identical
-/// @brief    Declaration of the Tree16 class 
+/// @brief    [\ref Mesh] Declaration of the Tree16 class 
 
 #include "error.hpp"
 
@@ -20,7 +20,7 @@ class Tree16 {
 
   /// @class    Tree16
   /// @ingroup  Mesh
-  /// @brief    Generalized 4^2-tree
+  /// @brief    [\ref Mesh] Generalized 4^2-tree
 
 public: // interface
 

@@ -7,13 +7,13 @@
 /// @file     parallel_GroupThread.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul 22 12:36:17 PDT 2010
-/// @brief    Declaration of the GroupThread class
+/// @brief    [\ref Parallel] Declaration of the GroupThread class
 
 class GroupThread : public ParallelGroup {
 
   /// @class    GroupThread
   /// @ingroup  Parallel
-  /// @brief    ParallelGroup of shared memory threads
+  /// @brief    [\ref Parallel] ParallelGroup of shared memory threads
 
 public: // interface
 

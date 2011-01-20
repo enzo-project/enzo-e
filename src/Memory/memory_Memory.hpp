@@ -7,7 +7,8 @@
 /// @file     memory_Memory.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
-/// @brief    Interface for the Memory class.  Uses the Singleton design pattern.
+/// @brief    [\ref Memory] Interface for the Memory class.  Uses the
+/// Singleton design pattern.
 
 /// @def      MEMORY_MAX_NUM_GROUPS
 /// @brief    Maximum number of groups for memory allocation tracking
@@ -21,7 +22,7 @@ class Memory {
 
   /// @class    Memory
   /// @ingroup  Memory
-  /// @brief    Maintains memory allocation and deallocation statistics
+  /// @brief    [\ref Memory] Manage memory allocation and deallocation
 
 public: // interface
 

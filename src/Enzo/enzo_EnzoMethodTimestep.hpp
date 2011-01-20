@@ -4,7 +4,7 @@
 /// @file     enzo_EnzoMethodTimestep.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the EnzoMethodTimestep component
+/// @brief    [\ref Enzo] Declaration for the EnzoMethodTimestep component
 
 #ifndef ENZO_ENZO_METHOD_TIMESTEP_HPP
 #define ENZO_ENZO_METHOD_TIMESTEP_HPP
@@ -13,7 +13,7 @@ class EnzoMethodTimestep : public MethodTimestep {
 
   /// @class    EnzoMethodTimestep
   /// @ingroup  Enzo
-  /// @brief    Encapsulate determination of timestep
+  /// @brief    [\ref Enzo] Encapsulate determination of timestep
 
 public: // interface
 

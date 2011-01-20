@@ -4,16 +4,16 @@
 #ifndef ENZO_ENZO_METHOD_IMPLOSION2_HPP
 #define ENZO_ENZO_METHOD_IMPLOSION2_HPP
 
-/// @file     enzo_MethodImplosion2.hpp
+/// @file     enzo_EnzoMethodImplosion2.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Jan  4 19:26:38 PST 2011
-/// @brief    Initialization routine for 2D implosion problem
+/// @brief    [\ref Enzo] Initialization routine for 2D implosion problem
 
 class EnzoMethodImplosion2 : public MethodInitial {
 
   /// @class    EnzoMethodImplosion2
   /// @ingroup  Enzo
-  /// @brief    Initialization routine for 2D implosion problem
+  /// @brief    [\ref Enzo] Initialization routine for 2D implosion problem
 
 public: // interface
 

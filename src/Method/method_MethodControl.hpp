@@ -9,13 +9,13 @@
 /// @date     2010-05-11
 /// @todo     consolidate initialize() and initialize_block()
 /// @todo     move control functionality from Method to application
-/// @brief    Declaration of the MethodControl class
+/// @brief    [\ref Method] Declaration of the MethodControl class
 
 class MethodControl {
 
   /// @class    MethodControl
   /// @ingroup  Method
-  /// @brief    Encapsulate top-level control and description of method methods
+  /// @brief    [\ref Method] Encapsulate top-level control and description of method methods
 
 public: // interface
 

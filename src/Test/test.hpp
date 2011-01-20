@@ -5,9 +5,9 @@
 #define TEST_HPP
 
 /// @file     test.hpp
-/// @brief    Include file for the Test component 
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2008-03-18
+/// @brief    Include file for the \ref Test component 
 
 #include <string.h>
 

@@ -7,13 +7,14 @@
 /// @file     global_Global.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file global_Global.hpp
+/// @brief    [\ref Global] Interface for the Global class
 
 class Global {
 
   /// @class    Global
   /// @ingroup  Global
-  /// @brief    Object for storing cross-cutting objects, including monitor, error, parameters
+  /// @brief [\ref Global] Object for storing cross-cutting objects,
+  /// including monitor, error, parameters
 
 public: // interface
 

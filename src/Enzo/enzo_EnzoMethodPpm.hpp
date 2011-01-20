@@ -4,7 +4,7 @@
 /// @file     enzo_EnzoMethodPpm.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Apr  1 16:14:38 PDT 2010
-/// @brief    Implementation of Enzo PPM hydro method
+/// @brief    [\ref Enzo] Implementation of Enzo PPM hydro method
 
 #ifndef ENZO_ENZO_METHOD_PPM_HPP
 #define ENZO_ENZO_METHOD_PPM_HPP
@@ -13,7 +13,7 @@ class EnzoMethodPpm : public MethodHyperbolic {
 
   /// @class    EnzoMethodPpm
   /// @ingroup  Enzo
-  /// @brief    Encapsulate Enzo's PPM hydro method
+  /// @brief    [\ref Enzo] Encapsulate Enzo's PPM hydro method
 
 public: // interface
 

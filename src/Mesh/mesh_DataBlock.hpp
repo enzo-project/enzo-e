@@ -4,7 +4,7 @@
 /// @file     mesh_DataBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
-/// @brief    Declaration of the DataBlock class
+/// @brief    [\ref Mesh] Declaration of the DataBlock class
 
 #ifndef MESH_DATA_BLOCK_HPP
 #define MESH_DATA_BLOCK_HPP
@@ -13,7 +13,7 @@ class DataBlock {
 
   /// @class    DataBlock
   /// @ingroup  Data
-  /// @brief    Container class for all data blocks (currently just fields)
+  /// @brief    [\ref Mesh] Container class for all data blocks (currently just fields)
 
 public: // interface
 

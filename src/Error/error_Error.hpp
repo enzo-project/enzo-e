@@ -46,7 +46,7 @@ class Error {
 
   /// @class    Error
   /// @ingroup  Error
-  /// @brief    Singleton class for reporting errors and warnings
+  /// @brief    [\ref Error] Singleton class for reporting errors and warnings
 
 public: // functions
 

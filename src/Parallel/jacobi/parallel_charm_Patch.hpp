@@ -7,7 +7,7 @@
 /// @file     parallel_charm_Patch.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    CHARM++ chare for representing a patch of data
+/// @brief    [\ref Parallel] CHARM++ chare for representing a patch of data
 
 
 #include "parallel.def"

@@ -9,7 +9,7 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @todo     Comment Enzo functions / attributes
 /// @todo     Decouple block-dependent and block-independent attributes
-/// @brief    Brief description of file enzo_EnzoDescr.hpp
+/// @brief    [\ref Enzo] Interface for the Enzo descriptor class
 
 struct fluxes
 {
@@ -25,7 +25,8 @@ class EnzoDescr {
 
   /// @class    EnzoDescr
   /// @ingroup  Enzo
-  /// @brief    Object for storing cross-cutting objects, including monitor, error, parameters
+  /// @brief    [\ref Enzo] Object for storing cross-cutting objects,
+  /// including monitor, error, parameters
 
 public: // interface
 

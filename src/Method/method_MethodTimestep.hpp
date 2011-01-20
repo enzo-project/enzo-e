@@ -4,7 +4,7 @@
 /// @file     method_MethodTimestep.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the MethodTimestep component
+/// @brief    [\ref Method] Declaration for the MethodTimestep component
 
 #ifndef METHOD_METHOD_TIMESTEP_HPP
 #define METHOD_METHOD_TIMESTEP_HPP
@@ -14,7 +14,7 @@ class MethodTimestep {
 
   /// @class    MethodTimestep
   /// @ingroup  Method
-  /// @brief    Encapsulate determination of timestep
+  /// @brief    [\ref Method] Encapsulate the computation of a timestep
 
 public: // interface
 

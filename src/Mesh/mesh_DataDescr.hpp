@@ -4,7 +4,7 @@
 /// @file     mesh_DataDescr.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
-/// @brief    Declaration of the DataDescr class
+/// @brief    [\ref Mesh] Declaration of the DataDescr class
 
 #ifndef MESH_DATA_DESCR_HPP
 #define MESH_DATA_DESCR_HPP
@@ -13,7 +13,7 @@ class DataDescr {
 
   /// @class    DataDescr
   /// @ingroup  Mesh
-  /// @brief    Container class for all data descriptors (currently just fields)
+  /// @brief    [\ref Mesh] Container class for all data descriptors (currently just fields)
 
 public: // interface
 

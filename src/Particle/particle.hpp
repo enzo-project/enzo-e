@@ -7,7 +7,7 @@
 /// @file     particle.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
-/// @brief    Include file for the Particle component
+/// @brief    Include file for the \ref Particle component
 
 #include <string>
 

@@ -7,13 +7,13 @@
 /// @file     enzo_EnzoSimulation.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
-/// @brief    Declaration of the EnzoSimulation class
+/// @brief    [\ref Enzo] Declaration of the EnzoSimulation class
 
 class EnzoSimulation : public Simulation {
 
   /// @class    EnzoSimulation
   /// @ingroup  Enzo
-  /// @brief    Top-level description of user-implemented components
+  /// @brief    [\ref Enzo] Simulation class for Enzo
 
 public: // interface
 

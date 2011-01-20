@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_combine.cpp
+/// @file     test_parallel_jacobi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Aug  9 10:14:56 PDT 2010
 /// @brief    Prototype test program for combining charm++, MPI, and OMP

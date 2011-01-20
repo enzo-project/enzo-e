@@ -1,7 +1,7 @@
 // $Id: memory_override.cpp 1688 2010-08-03 22:34:22Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     memory_override.cpp
+/// @file     memory_new_delete.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Nov 10 12:01:51 PST 2010
 /// @brief    Override C++ new[] and delete[]

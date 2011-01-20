@@ -7,14 +7,14 @@
 /// @file     parallel_GroupProcess.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul 22 12:36:38 PDT 2010
-/// @brief    Declaration of the GroupProcess class
+/// @brief    [\ref Parallel] Declaration of the GroupProcess class
 
 class GroupProcess : public ParallelGroup {
 
   /// @class    GroupProcess
   /// @ingroup  Parallel  
   /// @todo     Support more flexible process subsets
-  /// @brief    ParallelGroup of distributed memory processes
+  /// @brief    [\ref Parallel] ParallelGroup of distributed memory processes
 
 public: // static interface
 

@@ -7,13 +7,13 @@
 /// @file     performance_Timer.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Apr 23 12:40:04 PDT 2008
-/// @brief    Interface and implementation of the Timer class
+/// @brief    [\ref Performance] Interface and implementation of the Timer class
 
 class Timer {
 
   /// @class    Timer
   /// @ingroup  Performance
-  /// @brief    Simple class for timing code sections
+  /// @brief    [\ref Performance] Simple class for timing code sections
 
 public: // interface
 

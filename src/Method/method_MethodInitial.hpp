@@ -4,7 +4,7 @@
 /// @file     method_MethodInitial.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    Declaration for the MethodInitial component
+/// @brief    [\ref Method] Declaration for the MethodInitial component
 
 #ifndef METHOD_METHOD_INITIAL_HPP
 #define METHOD_METHOD_INITIAL_HPP
@@ -13,7 +13,7 @@ class MethodInitial {
 
   /// @class    MethodInitial
   /// @ingroup  Method
-  /// @brief    Encapsulate external method / analysis / visualization function.
+  /// @brief    [\ref Method] Encapsulate an initial conditions generator
 
 public: // interface
 

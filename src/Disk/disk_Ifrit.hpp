@@ -7,13 +7,13 @@
 /// @file     disk_Ifrit.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
-/// @brief    Interface for the Ifrit class
+/// @brief    [\ref Disk] Interface for the Ifrit class
  
 class Ifrit {
 
   /// @class    Ifrit
   /// @ingroup  Disk
-  /// @brief    Class for writing and reading IFRIT files
+  /// @brief    [\ref Disk] Class for writing and reading IFRIT files
   ///
   /// An Ifrit object currently corresponds to a single IFRIT file /
   /// group dataset.  "IFrIT is a powerful tool that can be used to

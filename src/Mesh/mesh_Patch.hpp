@@ -8,13 +8,13 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @todo     Move "size" to DataBlock's, since that's Field-centric
-/// @brief    Declaration of the interface for the Patch class
+/// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 
 class Patch {
 
   /// @class    Patch
   /// @ingroup  Mesh
-  /// @brief    Represent a distributed box of uniform (non-adaptive) data
+  /// @brief    [\ref Mesh] Represent a distributed box of uniform (non-adaptive) data
 
 public: // interface
 

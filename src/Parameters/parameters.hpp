@@ -7,7 +7,7 @@
 /// @file     parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
-/// @brief    Include file for the Parameters component
+/// @brief    Include file for the \ref Parameters component
 
 #include <stdio.h>
 #include <stdlib.h>

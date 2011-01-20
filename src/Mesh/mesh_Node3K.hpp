@@ -7,7 +7,7 @@
 /// @file     mesh_Node3K.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Tue Oct 27 12:32:07 PDT 2009 
-/// @brief    Declaration of Node3K
+/// @brief    [\ref Mesh] Declaration of Node3K
 
 class Tree3K;
 
@@ -15,7 +15,7 @@ class Node3K {
 
   /// @class    Node3K
   /// @ingroup  Mesh
-  /// @brief    Node class for 3D k^3-trees
+  /// @brief    [\ref Mesh] Node class for 3D k^3-trees
 
 public: // interface
 

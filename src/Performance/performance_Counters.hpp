@@ -7,13 +7,14 @@
 /// @file     performance_Counters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-19 12:55:54
-/// @brief    Interface for the Counters class
+/// @brief    [\ref Performance] Interface for the Counters class
 
 class Counters {
 
   /// @class    Counters
   /// @ingroup  Performance
-  /// @brief    Represent counter values for a single set of attributes
+  /// @brief    [\ref Performance] Represent counter values for a single
+  /// set of attributes
 
 public: // interface
 

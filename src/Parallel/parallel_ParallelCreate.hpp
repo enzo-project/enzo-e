@@ -6,7 +6,7 @@
 /// @todo     Rename Parallel  ParallelSerial
 /// @todo     Add ParallelCharm (for CkExit(), etc.)
 /// @date     2009-10-16
-/// @brief    Interface for the Parallel class
+/// @brief    [\ref Parallel] Interface for the Parallel class
 
 #ifndef PARALLEL_PARALLEL_CREATE_HPP
 #define PARALLEL_PARALLEL_CREATE_HPP
@@ -15,7 +15,7 @@ class ParallelCreate {
 
   /// @class    ParallelCreate
   /// @ingroup  Parallel
-  /// @brief    Factory class for creating Parallel* objects
+  /// @brief    [\ref Parallel] Factory class for creating Parallel* objects
 
 public: // interface
 

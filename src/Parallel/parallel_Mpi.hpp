@@ -4,7 +4,7 @@
 /// @file     parallel_Mpi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Oct 15 10:40:37 PDT 2009 
-/// @brief    Interface for the Mpi class
+/// @brief    [\ref Parallel] Interface for the Mpi class
 
 #ifndef PARALLEL_MPI_HPP
 #define PARALLEL_MPI_HPP
@@ -13,7 +13,7 @@ class Mpi {
 
   /// @class    Mpi
   /// @ingroup  Parallel
-  /// @brief    MPI helper functions
+  /// @brief    [\ref Parallel] MPI helper functions
 
 private:
 

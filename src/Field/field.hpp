@@ -7,7 +7,7 @@
 /// @file     field.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-17
-/// @brief    Include file for the Field component
+/// @brief    Include file for the \ref Field component
 
 #include <map>
 #include <memory>

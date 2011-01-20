@@ -8,13 +8,13 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-29
 /// @todo     Decide on either k or r as refinement factor variable name
-/// @brief    Interface for the Tree3K class
+/// @brief    [\ref Mesh] Interface for the Tree3K class
 
 class Tree3K : public TreeK {
 
   /// @class    Tree3K
   /// @ingroup  Mesh
-  /// @brief    Generalized k^3-tree
+  /// @brief    [\ref Mesh] Generalized k^3-tree
 
 public: // interface
 

@@ -8,7 +8,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Oct 14 23:40:13 PDT 2009
 /// @todo     Complete detailed description of Performance class
-/// @brief    Interface for Performance class
+/// @brief    [\ref Performance] Interface for Performance class
 
 /// @def      type_counter
 /// @brief    Counter value type
@@ -31,7 +31,8 @@ class Performance {
 
   /// @class    Performance
   /// @ingroup  Performance
-  /// @brief    Measuring and allow access to run-time parallel performance
+  /// @brief    [\ref Performance] Measuring and allow access to run-time
+  /// parallel performance
   ///
   /// Performance data is organized into attributes, counters, groups, and
   /// regions. @@@

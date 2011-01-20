@@ -4,7 +4,7 @@
 /// @file     parallel_GroupProcessSerial.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed Aug 11 12:34:18 PDT 2010
-/// @brief    Interface for the GroupProcessSerial class
+/// @brief    [\ref Parallel] Interface for the GroupProcessSerial class
 
 #ifndef PARALLEL_GROUP_PROCESS_SERIAL_HPP
 #define PARALLEL_GROUP_PROCESS_SERIAL_HPP
@@ -14,7 +14,7 @@ class GroupProcessSerial : public GroupProcess {
 
   /// @class    GroupProcessSerial
   /// @ingroup  Parallel
-  /// @brief    Serial implementation of GroupProcess
+  /// @brief    [\ref Parallel] Serial implementation of GroupProcess
 
 public: // interface
 

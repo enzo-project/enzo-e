@@ -15,7 +15,7 @@ class Simulation {
 
   /// @class    Simulation
   /// @ingroup  Simulation
-  /// @brief    Class specifying a simulation to run
+  /// @brief    [\ref Simulation] Class specifying a simulation to run
 
 public: // interface
 

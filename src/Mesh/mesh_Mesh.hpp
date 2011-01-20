@@ -4,7 +4,7 @@
 /// @file     mesh_Mesh.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Nov 10 15:38:40 PST 2009
-/// @brief    Declaration of the Mesh class
+/// @brief    [\ref Mesh] Declaration of the Mesh class
 
 #ifndef MESH_MESH_HPP
 #define MESH_MESH_HPP
@@ -24,7 +24,7 @@ class Mesh {
 
   /// @class    Mesh
   /// @ingroup  Mesh
-  /// @brief    Adaptive mesh refinement hierarchy
+  /// @brief    [\ref Mesh] Adaptive mesh refinement hierarchy
 
 public: // interface
 
