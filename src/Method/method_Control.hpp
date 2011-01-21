@@ -1,8 +1,8 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef METHOD_METHOD_CONTROL_HPP
-#define METHOD_METHOD_CONTROL_HPP
+#ifndef METHOD_CONTROL_HPP
+#define METHOD_CONTROL_HPP
 
 /// @file     method_Control.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -88,5 +88,5 @@ protected:
 
 };
 
-#endif /* METHOD_METHOD_CONTROL_HPP */
+#endif /* METHOD_CONTROL_HPP */
 

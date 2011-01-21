@@ -18,7 +18,7 @@ EnzoInitialImplosion2::EnzoInitialImplosion2
  Global    * global,
  EnzoDescr * enzo_descr
  ) throw ()
-  : MethodInitial(global),
+  : Initial(global),
     enzo_descr_(enzo_descr)
 {}
 

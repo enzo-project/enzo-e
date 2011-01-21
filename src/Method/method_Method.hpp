@@ -1,24 +1,24 @@
-// $Id: method_Initial.hpp 1896 2010-12-03 23:54:08Z bordner $
+// $Id: method_Method.hpp 1942 2011-01-20 00:53:45Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_Initial.hpp 
+/// @file     method_Method.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    [\ref Method] Declaration for the Initial component
+/// @brief    [\ref Method] Declaration for the Method class
 
-#ifndef METHOD_INITIAL_HPP
-#define METHOD_INITIAL_HPP
+#ifndef METHOD_METHOD_HPP
+#define METHOD_METHOD_HPP
 
-class Initial {
+class Method {
 
-  /// @class    Initial
+  /// @class    Method
   /// @ingroup  Method
-  /// @brief    [\ref Method] Encapsulate an initial conditions generator
+  /// @brief    [\ref Method] Interface to an application method / analysis / visualization function.
 
 public: // interface
 
-  /// Create a new Initial
-  Initial(Global * global) throw()
+  /// Create a new Method
+  Method(Global * global) throw()
     : global_(global)
   {};
 
@@ -42,6 +42,11 @@ public: // virtual functions
   /// any dynamically-allocated variables
 
   virtual void finalize_block (DataBlock * data_block) throw() = 0;
+
+  /// Apply the method to advance a block one timestep 
+
+  virtual void advance_block( DataBlock * data_block,
+			      double t, double dt ) throw() = 0; 
 
   /// Return the name of the method
 
@@ -72,4 +77,4 @@ protected: // attributes
 
 };
 
-#endif /* METHOD_INITIAL_HPP */
+#endif /* METHOD_METHOD_METHOD_HPP */

@@ -34,13 +34,15 @@ enum access_enum {
   access_read_write
 };
 
-#include "method_MethodDescr.hpp"
-
 #include "method_Control.hpp"
 #include "method_Timestep.hpp"
 #include "method_Initial.hpp"
 
+#include "method_Method.hpp"
 #include "method_MethodHyperbolic.hpp"
+
+#include "method_MethodDescr.hpp"
+
 
 
 #endif /* METHOD_HPP */

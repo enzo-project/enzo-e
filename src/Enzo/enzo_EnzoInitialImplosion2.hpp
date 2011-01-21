@@ -9,7 +9,7 @@
 /// @date     Tue Jan  4 19:26:38 PST 2011
 /// @brief    [\ref Enzo] Initialization routine for 2D implosion problem
 
-class EnzoInitialImplosion2 : public MethodInitial {
+class EnzoInitialImplosion2 : public Initial {
 
   /// @class    EnzoInitialImplosion2
   /// @ingroup  Enzo
@@ -19,7 +19,7 @@ public: // interface
 
   /// Constructor
   EnzoInitialImplosion2(Global    * global,
-			      EnzoDescr * enzo_descr) throw();
+                        EnzoDescr * enzo_descr) throw();
 
   /// Perform any method-specific initialization
 

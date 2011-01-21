@@ -19,7 +19,6 @@ EnzoSimulation::EnzoSimulation(Global * global) throw ()
   : Simulation(global),
     enzo_descr_(new EnzoDescr(global_))
 {
-  TRACE_MESSAGE;
 }
 
 //----------------------------------------------------------------------
@@ -31,13 +30,14 @@ void EnzoSimulation::initialize(std::string parameter_file) throw()
 
   // Call initialize for Enzo-specific Simulation
   enzo_descr_->initialize(global_->parameters());
-  TRACE_MESSAGE;
+
+  // @@@ WRITE OUT ENZO DESCRIPTION FOR DEBUGGING
   enzo_descr_->write(stdout);
 }
 
 //======================================================================
 
-MethodControl * 
+Control * 
 EnzoSimulation::create_control_ (std::string control_name) throw ()
 /// @param control_name   Name of the control method to create
 {
@@ -46,11 +46,32 @@ EnzoSimulation::create_control_ (std::string control_name) throw ()
 
 //----------------------------------------------------------------------
 
-MethodTimestep * 
+Timestep * 
 EnzoSimulation::create_timestep_ ( std::string timestep_name ) throw ()
 /// @param timestep_name   Name of the timestep method to create
 {
   return new EnzoTimestep(enzo_descr_);
+}
+
+//----------------------------------------------------------------------
+
+Initial * 
+EnzoSimulation::create_initial_ ( std::string initial_name ) throw ()
+/// @param initial_name   Name of the initialization method to create
+{
+  
+  Initial * initial = 0;
+
+  if (initial_name == "implosion2")  
+    initial = new EnzoInitialImplosion2 (global_,enzo_descr_);
+
+  if (initial == 0) {
+    char buffer[80];
+    sprintf (buffer,"Cannot create Initialization '%s'",initial_name.c_str());
+    ERROR_MESSAGE("EnzoSimulation::create_initial", buffer);
+  }
+
+  return initial;
 }
 
 //----------------------------------------------------------------------
@@ -77,23 +98,3 @@ EnzoSimulation::create_method_ ( std::string method_name ) throw ()
 }
 
 //----------------------------------------------------------------------
-
-MethodInitial * 
-EnzoSimulation::create_initial_ ( std::string initial_name ) throw ()
-/// @param initial_name   Name of the initialization method to create
-{
-  
-  MethodInitial * initial = 0;
-
-  if (initial_name == "implosion2")  
-    initial = new EnzoInitialImplosion2 (global_,enzo_descr_);
-
-  if (initial == 0) {
-    char buffer[80];
-    sprintf (buffer,"Cannot create Initialization '%s'",initial_name.c_str());
-    ERROR_MESSAGE("EnzoSimulation::create_initial", buffer);
-  }
-
-  return initial;
-}
-

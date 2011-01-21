@@ -19,10 +19,10 @@ Simulation::Simulation(Global * global)
     //
     mesh_(0),
     data_descr_(0),
-    initialize_list_(),
-    method_list_(),
     timestep_(0),
-    control_(0)
+    control_(0),
+    initial_list_(),
+    method_list_()
 {
   // Initialize parameter defaults
 
@@ -86,10 +86,10 @@ void Simulation::initialize(std::string parameter_file) throw()
   initialize_mesh_(parameters);
   initialize_data_(parameters);
 
-  initialize_initial_(parameters);
-  initialize_method_(parameters);
   initialize_control_(parameters);
   initialize_timestep_(parameters);
+  initialize_initial_(parameters);
+  initialize_method_(parameters);
 
 }
 
@@ -165,45 +165,33 @@ DataDescr * Simulation::data_descr() const throw()
 
 //----------------------------------------------------------------------
 
-int Simulation::num_initial() const throw()
-{
-  return initialize_list_.size();
-}
+Control * Simulation::control() const throw() 
+{ return control_; }
 
 //----------------------------------------------------------------------
 
-MethodInitial * Simulation::initial(int i) const throw()
-{
-  return initialize_list_[i];
-}
+Timestep * Simulation::timestep() const throw() 
+{ return timestep_; }
+
+//----------------------------------------------------------------------
+
+int Simulation::num_initial() const throw() 
+{ return initial_list_.size(); }
+
+//----------------------------------------------------------------------
+
+Initial * Simulation::initial(int i) const throw() 
+{ return initial_list_[i]; }
 
 //----------------------------------------------------------------------
 
 int Simulation::num_method() const throw()
-{
-  return method_list_.size();
-}
+{ return method_list_.size(); }
 
 //----------------------------------------------------------------------
 
-MethodHyperbolic * Simulation::method(int i) const throw()
-{
-  return method_list_[i];
-}
-
-//----------------------------------------------------------------------
-
-MethodTimestep * Simulation::timestep() const throw()
-{
-  return timestep_;
-}
-
-//----------------------------------------------------------------------
-
-MethodControl * Simulation::control() const throw()
-{
-  return control_;
-}
+Method * Simulation::method(int i) const throw()
+{ return method_list_[i]; }
 
 //======================================================================
 
@@ -244,7 +232,7 @@ void Simulation::initialize_simulation_(Parameters * parameters) throw()
     extent_[i] = parameters->list_value_scalar(i, "extent", extent_default);
 
     if (i % 2 == 1) {
-      char error_message[100];
+      char error_message[ERROR_MESSAGE_LENGTH];
       sprintf (error_message,
 	       "Parameter Domain:extent[%g] not lower than Domain:extent[%g]",
 	       extent_[i-1],extent_[i]);
@@ -458,10 +446,17 @@ void Simulation::initialize_method_(Parameters * parameters) throw()
 
     std::string method_name = parameters->list_value_string(i,"sequence");
 
-    MethodHyperbolic * method = create_method_(method_name);
-    if (method) method_list_.push_back(method); 
+    Method * method = create_method_(method_name);
+    if (method) {
 
-    method->initialize(data_descr_);
+      method_list_.push_back(method); 
+      method->initialize(data_descr_);
+    } else {
+      char error_message[ERROR_MESSAGE_LENGTH];
+      sprintf ("Unknown method %s",method_name.c_str());
+      ERROR_MESSAGE ("Simulation::initialize_method_",
+		     error_message);
+    }
   }
 
 

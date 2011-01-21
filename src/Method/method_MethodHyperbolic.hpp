@@ -9,18 +9,18 @@
 #ifndef METHOD_METHOD_HYPERBOLIC_HPP
 #define METHOD_METHOD_HYPERBOLIC_HPP
 
-class MethodHyperbolic {
+class MethodHyperbolic : public Method {
 
   /// @class    MethodHyperbolic
   /// @ingroup  Method
-  /// @brief    [\ref Method] Encapsulate external method / analysis / visualization function.
+  /// @brief    [\ref Method] Interface to a hyperbolic method
 
 public: // interface
 
   /// Create a new MethodHyperbolic
   MethodHyperbolic(Global * global) throw()
-    : global_(global)
-  {};
+    : Method(global)
+  { }
 
 public: // virtual functions
 
@@ -63,18 +63,18 @@ protected: // functions
 
 protected: // attributes
 
-  /// Global
-  Global * global_;
+//   /// Global
+//   Global * global_;
 
-  /// List of argument types, e.g. argument_type_field
-  std::vector<argument_enum> argument_types_;
+//   /// List of argument types, e.g. argument_type_field
+//   std::vector<argument_enum> argument_types_;
 
-  /// List of argument names, e.g. "Density", "Velocity-X", etc.
-  std::vector<std::string>   argument_names_;
+//   /// List of argument names, e.g. "Density", "Velocity-X", etc.
+//   std::vector<std::string>   argument_names_;
 
-  /// List of argument access types, e.g. access_read_write
-  std::vector<access_enum>   access_types_;
+//   /// List of argument access types, e.g. access_read_write
+//   std::vector<access_enum>   access_types_;
 
 };
 
-#endif /* METHOD_METHOD_METHOD_HPP */
+#endif /* METHOD_METHOD_HYPERBOLIC_HPP */

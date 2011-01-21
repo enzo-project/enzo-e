@@ -14,7 +14,7 @@
 //----------------------------------------------------------------------
 
 EnzoTimestep::EnzoTimestep (EnzoDescr * enzo) throw()
-  : MethodTimestep(),
+  : Timestep(),
     pressure_field_(0),
     afloat_(0),
     dtBaryons_(0),

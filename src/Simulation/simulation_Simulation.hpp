@@ -64,7 +64,7 @@ public: // interface
 		double * ymin = 0, double *ymax = 0,
 		double * zmin = 0, double *zmax = 0) throw();
 
-  /// Return the Global class, including parameters, monitor, error, parallel, etc.
+  /// Return the Global class (parameters, monitor, error, parallel, etc.)
   Global * global() const throw();
 
 
@@ -74,24 +74,24 @@ public: // interface
   /// Data descriptor
   DataDescr * data_descr() const throw();
 
+  /// Return the control method
+  Control * control() const throw();
+  
+  /// Return the time-stepping method
+  Timestep * timestep() const throw();
+
   /// Return the number of initialization routines
   int num_initial() const throw();
 
   /// Return the ith initialization routine
-  MethodInitial * initial(int i) const throw();
+  Initial * initial(int i) const throw();
 
-  /// Return the number of hyperbolic methods
+  /// Return the number of numerical methods
   int num_method() const throw();
 
-  /// Return the ith hyperbolic method
-  MethodHyperbolic * method(int i) const throw();
+  /// Return the ith method
+  Method * method(int i) const throw();
 
-  /// Return the timestepping method
-  MethodTimestep * timestep() const throw();
-
-  /// Return the control method
-  MethodControl * control() const throw();
-  
 protected: // functions
 
   /// Initialize global simulation parameters
@@ -104,36 +104,36 @@ protected: // functions
   void initialize_data_ (Parameters * parameters) throw();
 
 
-  /// Initialize the initialization method component
-  void initialize_initial_    (Parameters * parameters) throw();
-
-  /// Initialize the method components
-  void initialize_method_    (Parameters * parameters) throw();
-
   /// Initialize the control component
   void initialize_control_    (Parameters * parameters) throw();
 
   /// Initialize the timestep component
   void initialize_timestep_   (Parameters * parameters) throw();
 
+  /// Initialize the initialization method component
+  void initialize_initial_    (Parameters * parameters) throw();
+
+  /// Initialize the method components
+  void initialize_method_    (Parameters * parameters) throw();
+
 
 protected: // abstract virtual functions
 
-  /// Create named initialization method.
-  virtual MethodInitial * 
-  create_initial_ (std::string name_initial) throw () = 0;
-
-  /// Create named hyperbolic method.
-  virtual MethodHyperbolic * 
-  create_method_ (std::string name_hyperbolic) throw () = 0;
-
-  /// Create named control method.
-  virtual MethodControl * 
+  /// Create named control method
+  virtual Control * 
   create_control_ (std::string name_control) throw () = 0;
 
-  /// Create named timestep method.
-  virtual MethodTimestep * 
+  /// Create named timestep method
+  virtual Timestep * 
   create_timestep_ (std::string name_timestep) throw () = 0;
+
+  /// Create named initialization method
+  virtual Initial * 
+  create_initial_ (std::string name_initial) throw () = 0;
+
+  /// Create named numerical method
+  virtual Method * 
+  create_method_ (std::string name_method) throw () = 0;
 
 protected: // attributes
 
@@ -141,7 +141,7 @@ protected: // attributes
   // SIMULATION PARAMETERS
   //----------------------------------------------------------------------
 
-  /// Dimension or rank of the simulation.
+  /// Dimension or rank of the simulation
   int    dimension_; 
 
   /// Lower and upper domain extents
@@ -151,7 +151,7 @@ protected: // attributes
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
 
-  /// "global" data, including parameters, monitor, error, parallel, etc.
+  /// "global" data (parameters, monitor, error, parallel, etc.)
   Global * global_;
 
   /// AMR mesh
@@ -161,17 +161,17 @@ protected: // attributes
   DataDescr * data_descr_;
 
 
-  /// List of initialization routines
-  std::vector<MethodInitial *> initialize_list_;
-
-  /// List of numerical methods to apply at each timestep
-  std::vector<MethodHyperbolic *> method_list_;
+  /// Method for overall control of the simulation
+  Control * control_;
 
   /// Method for time-step computation
-  MethodTimestep * timestep_;
+  Timestep * timestep_;
 
-  /// Method for overall control of the simulation
-  MethodControl * control_;
+  /// List of initialization routines
+  std::vector<Initial *> initial_list_;
+
+  /// List of numerical methods to apply at each timestep
+  std::vector<Method *> method_list_;
 
 
 };
