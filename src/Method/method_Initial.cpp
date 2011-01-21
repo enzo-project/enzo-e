@@ -1,10 +1,10 @@
-// $Id: method_MethodInitial.cpp 1896 2010-12-03 23:54:08Z bordner $
+// $Id: method_Initial.cpp 1896 2010-12-03 23:54:08Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_MethodInitial.cpp
+/// @file     method_Initial.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Jul 13 11:12:25 PDT 2009
-/// @brief    Implements the MethodInitial base class
+/// @brief    Implements the Initial base class
 
 #include <string>
 
@@ -15,7 +15,7 @@
 
 //----------------------------------------------------------------------
 
-void MethodInitial::add_argument_
+void Initial::add_argument_
 (
  argument_enum argument,
  std::string   argument_name,
@@ -50,7 +50,7 @@ void MethodInitial::add_argument_
       sprintf (buffer, 
 	       "Required Field %s is not defined in the field descriptor",
 	       argument_name.c_str());
-      ASSERT("MethodInitial::initialize_method",
+      ASSERT("Initial::initialize_method",
 	     buffer, data_descr->field_descr()->is_field(argument_name));
       break;
     case argument_particle:

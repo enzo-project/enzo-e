@@ -4,23 +4,23 @@
 #ifndef METHOD_METHOD_CONTROL_HPP
 #define METHOD_METHOD_CONTROL_HPP
 
-/// @file     method_MethodControl.hpp
+/// @file     method_Control.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
 /// @todo     consolidate initialize() and initialize_block()
 /// @todo     move control functionality from Method to application
-/// @brief    [\ref Method] Declaration of the MethodControl class
+/// @brief    [\ref Method] Declaration of the Control class
 
-class MethodControl {
+class Control {
 
-  /// @class    MethodControl
+  /// @class    Control
   /// @ingroup  Method
   /// @brief    [\ref Method] Encapsulate top-level control and description of method methods
 
 public: // interface
 
   /// Constructor
-  MethodControl(Global * global) throw()
+  Control(Global * global) throw()
     : global_(global),
       time_stop_(-1),
       cycle_stop_(-1)

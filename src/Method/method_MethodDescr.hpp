@@ -45,20 +45,20 @@ public: // interface
 protected: // functions
 
   /// APPLICATION INHERITENCE OVERRIDE: Create named control method.
-  virtual MethodControl * create_method_control_ (std::string name_method_control) = 0;
+  virtual Control * create_method_control_ (std::string name_method_control) = 0;
 
   /// APPLICATION INHERITENCE OVERRIDE: Create named timestep method.
-  virtual MethodTimestep * create_method_timestep_ (std::string name_method_timestep) = 0;
+  virtual Timestep * create_method_timestep_ (std::string name_method_timestep) = 0;
 
   /// APPLICATION INHERITENCE OVERRIDE: Create named hyperbolic method.
   virtual MethodHyperbolic * create_method_hyperbolic_ (std::string name_method_hyperbolic) = 0;
 
 protected: // attributes
 
-  MethodControl *             method_control_;
-  MethodTimestep *            method_timestep_;
+  Control *                       method_control_;
+  Timestep *                      method_timestep_;
   std::vector<MethodHyperbolic *> method_hyperbolic_;
-  Global     *              global_;
+  Global *                        global_;
 };
 
 #endif /* METHOD_METHOD_DESCR_HPP */
