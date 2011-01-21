@@ -175,7 +175,7 @@ function test_summary($component,$test_output)
 {
   printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
 
-  $parallel_types = array("serial","mpi","ampi","charm");
+  $parallel_types  = array("serial","mpi","ampi","charm");
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
@@ -186,9 +186,20 @@ function test_summary($component,$test_output)
     }
     system("cat $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
 
-    system("cat $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
-    printf ("</td>\n");
   }
+
+
+  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+
+    $output_files = "";
+    for ($test = 0; $test<sizeof($test_output); ++$test) {
+      $output = $test_output[$test];
+      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
+    }
+
+    system("cat $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
+  }
+
   printf ("</tr>\n");
 }
 ?>
@@ -196,9 +207,11 @@ function test_summary($component,$test_output)
 
 <?php
 printf ("<table><tr><th></th>\n");
-$parallel_types = array("serial","mpi","ampi","charm");
-for ($i = 0; $i < sizeof($parallel_types); ++$i) {
-  printf ("<th colspan=2> $parallel_types[$i] </th>");
+$parallel_labels = array("serial", "mpi",  "ampi",   "charm");
+for ($k = 0; $k < 2; $k ++) {
+  for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
+    printf ("<th> $parallel_labels[$i] </th>");
+  }
  }
 
 test_summary("Disk",array("FileHdf5","Ifrit")); 
