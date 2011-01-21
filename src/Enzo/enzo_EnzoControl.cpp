@@ -1,11 +1,11 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodControl.cpp
+/// @file     enzo_EnzoControl.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @date     Tue May 11 18:06:50 PDT 2010
-/// @brief    Implementation of EnzoMethodControl user-dependent class member functions
+/// @brief    Implementation of EnzoControl user-dependent class member functions
 
 #include "cello.hpp"
 
@@ -17,7 +17,7 @@
 
 //----------------------------------------------------------------------
 
-void EnzoMethodControl::initialize (DataDescr * data_descr) throw()
+void EnzoControl::initialize (DataDescr * data_descr) throw()
 {
 
 
@@ -26,13 +26,13 @@ void EnzoMethodControl::initialize (DataDescr * data_descr) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodControl::finalize (DataDescr * data_descr) throw()
+void EnzoControl::finalize (DataDescr * data_descr) throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodControl::initialize_block ( DataBlock * data_block ) throw ()
+void EnzoControl::initialize_block ( DataBlock * data_block ) throw ()
 {
 
   FieldBlock * field_block = data_block->field_block();
@@ -79,43 +79,43 @@ void EnzoMethodControl::initialize_block ( DataBlock * data_block ) throw ()
   }
 
  
-//   // Boundary
-//   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
-//      set it to one. */
+  //   // Boundary
+  //   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
+  //      set it to one. */
  
-//   /* 1) Compute Courant condition for baryons. */
+  //   /* 1) Compute Courant condition for baryons. */
  
-//    // boundary
+  //    // boundary
  
-//    BoundaryRank = 2;
-//    BoundaryDimension[0] = GridDimension[0];
-//    BoundaryDimension[1] = GridDimension[1];
+  //    BoundaryRank = 2;
+  //    BoundaryDimension[0] = GridDimension[0];
+  //    BoundaryDimension[1] = GridDimension[1];
 
-//    for (int field=0; field<NumberOfBaryonFields; field++) {
-//      BoundaryFieldType[field] = enzo_->FieldType[field];
-//      for (int dim = 0; dim < 3; dim++) {
-//        for (int face = 0; face < 2; face++) {
-//  	int n1 = GridDimension[(dim+1)%3];
-//  	int n2 = GridDimension[(dim+2)%3];
-//  	int size = n1*n2;
-//  	BoundaryType [field][dim][face] = new bc_type [size];
-//  	BoundaryValue[field][dim][face] = NULL;
-//  	for (int i2 = 0; i2<n2; i2++) {
-//  	  for (int i1 = 0; i1<n1; i1++) {
-//  	    int i = i1 + n1*i2;
-//  	    BoundaryType[field][dim][face][i] = bc_reflecting;
-//  	  }
-//  	}
-//        }
-//      }
-//    }
+  //    for (int field=0; field<NumberOfBaryonFields; field++) {
+  //      BoundaryFieldType[field] = enzo_->FieldType[field];
+  //      for (int dim = 0; dim < 3; dim++) {
+  //        for (int face = 0; face < 2; face++) {
+  //  	int n1 = GridDimension[(dim+1)%3];
+  //  	int n2 = GridDimension[(dim+2)%3];
+  //  	int size = n1*n2;
+  //  	BoundaryType [field][dim][face] = new bc_type [size];
+  //  	BoundaryValue[field][dim][face] = NULL;
+  //  	for (int i2 = 0; i2<n2; i2++) {
+  //  	  for (int i1 = 0; i1<n1; i1++) {
+  //  	    int i = i1 + n1*i2;
+  //  	    BoundaryType[field][dim][face][i] = bc_reflecting;
+  //  	  }
+  //  	}
+  //        }
+  //      }
+  //    }
 
 }
 
 
 //----------------------------------------------------------------------
 
-void EnzoMethodControl::finalize_block ( DataBlock * data_block ) throw ()
+void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
 {
   ++ enzo_->CycleNumber;
   for (int dim=0; dim < enzo_->GridRank; dim++) {
@@ -125,10 +125,10 @@ void EnzoMethodControl::finalize_block ( DataBlock * data_block ) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodControl::refresh_ghost(DataBlock * data_block, 
-				      bool xm, bool xp, 
-				      bool ym, bool yp, 
-				      bool zm, bool zp) throw()
+void EnzoControl::refresh_ghost(DataBlock * data_block, 
+				bool xm, bool xp, 
+				bool ym, bool yp, 
+				bool zm, bool zp) throw()
 {
 
 }

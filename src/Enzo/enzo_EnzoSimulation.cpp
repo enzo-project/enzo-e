@@ -41,7 +41,7 @@ MethodControl *
 EnzoSimulation::create_control_ (std::string control_name) throw ()
 /// @param control_name   Name of the control method to create
 {
-  return new EnzoMethodControl(global_,enzo_descr_);
+  return new EnzoControl(global_,enzo_descr_);
 }
 
 //----------------------------------------------------------------------
@@ -50,7 +50,7 @@ MethodTimestep *
 EnzoSimulation::create_timestep_ ( std::string timestep_name ) throw ()
 /// @param timestep_name   Name of the timestep method to create
 {
-  return new EnzoMethodTimestep(enzo_descr_);
+  return new EnzoTimestep(enzo_descr_);
 }
 
 //----------------------------------------------------------------------
@@ -86,7 +86,7 @@ EnzoSimulation::create_initial_ ( std::string initial_name ) throw ()
   MethodInitial * initial = 0;
 
   if (initial_name == "implosion2")  
-    initial = new EnzoMethodImplosion2 (global_,enzo_descr_);
+    initial = new EnzoInitialImplosion2 (global_,enzo_descr_);
 
   if (initial == 0) {
     char buffer[80];

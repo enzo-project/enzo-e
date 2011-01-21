@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodTimestep.cpp
+/// @file     enzo_EnzoTimestep.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 17:05:23 PDT 2010
-/// @brief    Implements the EnzoMethodTimestep class
+/// @brief    Implements the EnzoTimestep class
 
 #include "cello.hpp"
 
@@ -13,7 +13,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoMethodTimestep::EnzoMethodTimestep (EnzoDescr * enzo) throw()
+EnzoTimestep::EnzoTimestep (EnzoDescr * enzo) throw()
   : MethodTimestep(),
     pressure_field_(0),
     afloat_(0),
@@ -27,25 +27,25 @@ EnzoMethodTimestep::EnzoMethodTimestep (EnzoDescr * enzo) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodTimestep::initialize (DataDescr * data_descr) throw()
+void EnzoTimestep::initialize (DataDescr * data_descr) throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodTimestep::finalize ( DataDescr * data_descr ) throw ()
+void EnzoTimestep::finalize ( DataDescr * data_descr ) throw ()
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodTimestep::initialize_block ( DataBlock * data_block ) throw ()
+void EnzoTimestep::initialize_block ( DataBlock * data_block ) throw ()
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoMethodTimestep::finalize_block ( DataBlock * data_block ) throw ()
+void EnzoTimestep::finalize_block ( DataBlock * data_block ) throw ()
 {
  
   delete [] pressure_field_;
@@ -55,7 +55,7 @@ void EnzoMethodTimestep::finalize_block ( DataBlock * data_block ) throw ()
 
 //----------------------------------------------------------------------
 
-double EnzoMethodTimestep::compute_block ( DataBlock * data_block ) throw()
+double EnzoTimestep::compute_block ( DataBlock * data_block ) throw()
 {
 
   FieldBlock * field_block = data_block->field_block();
@@ -103,7 +103,7 @@ double EnzoMethodTimestep::compute_block ( DataBlock * data_block ) throw()
   // @@@ WARNING: is called before previous finalize.  ASSERT should
   // @@@ WARNING: prevent this from happening, but is overly restrictive
 
-  ASSERT("EnzoMethodTimestep::initialize_block",
+  ASSERT("EnzoTimestep::initialize_block",
 	 "new pressure field allocated before previous was deallocated",
 	 pressure_field_ == NULL);
   pressure_field_ = new float[size];

@@ -1,27 +1,27 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoMethodControl.hpp
+/// @file     enzo_EnzoControl.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Apr  1 16:14:38 PDT 2010
 /// @brief    [\ref Enzo] Implementation of Enzo's UserControl
 
-#ifndef ENZO_ENZO_METHOD_CONTROL_HPP
-#define ENZO_ENZO_METHOD_CONTROL_HPP
+#ifndef ENZO_ENZO_CONTROL_HPP
+#define ENZO_ENZO_CONTROL_HPP
 
 
-class EnzoMethodControl : public MethodControl {
+class EnzoControl : public MethodControl {
 
-  /// @class    EnzoMethodControl
+  /// @class    EnzoControl
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Method control class EnzoMethodControl for Enzo-P
+  /// @brief    [\ref Enzo] Method control class EnzoControl for Enzo-P
 
 public: // interface
 
-  /// Create a new EnzoMethodControl
+  /// Create a new EnzoControl
 
-  EnzoMethodControl(Global * global,
-		    EnzoDescr * enzo)
+  EnzoControl(Global * global,
+	      EnzoDescr * enzo)
     : MethodControl(global),
       enzo_(enzo)
   {};
@@ -54,4 +54,4 @@ private:
   EnzoDescr * enzo_;
 };
 
-#endif /* ENZO_ENZO_METHOD_CONTROL_HPP */
+#endif /* ENZO_ENZO_CONTROL_HPP */

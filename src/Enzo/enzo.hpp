@@ -25,11 +25,12 @@
 #include "enzo_EnzoDescr.hpp"
 #include "enzo_EnzoSimulation.hpp"
 
-#include "enzo_EnzoMethodControl.hpp"
-#include "enzo_EnzoMethodTimestep.hpp"
+#include "enzo_EnzoControl.hpp"
+#include "enzo_EnzoTimestep.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
-#include "enzo_EnzoMethodImplosion2.hpp"
+
+#include "enzo_EnzoInitialImplosion2.hpp"
 
 #include "enzo_fortran.hpp"
 
