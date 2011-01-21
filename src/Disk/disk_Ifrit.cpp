@@ -29,19 +29,27 @@ void Ifrit::read_bin
 	  sizeof(int)==4 && sizeof(float)==4);
   int bound;
   // read header
+  // @@@ WARNING: ignoring return value
   fread (&bound,4,1,fp);
   if (bound != 12) WARNING_MESSAGE("Ifrit::read_bin","incorrect format");
+  // @@@ WARNING: ignoring return value
   fread (pnx,4,1,fp);
+  // @@@ WARNING: ignoring return value
   fread (pny,4,1,fp);
+  // @@@ WARNING: ignoring return value
   fread (pnz,4,1,fp);
+  // @@@ WARNING: ignoring return value
   fread (&bound,4,1,fp);
   if (bound != 12) WARNING_MESSAGE("Ifrit::read_bin","incorrect format");
 
   // Read scalar field
   int n = (*pnx)*(*pny)*(*pnz);
+  // @@@ WARNING: ignoring return value
   fread (&bound,4,1,fp);
   if (bound != 4*n) WARNING_MESSAGE("Ifrit::read_bin","incorrect format");
+  // @@@ WARNING: ignoring return value
   fread (buffer,4,(*pnx)*(*pny)*(*pnz),fp);
+  // @@@ WARNING: ignoring return value
   fread (&bound,4,1,fp);
   if (bound != 4*n) WARNING_MESSAGE("Ifrit::read_bin","incorrect format");
 

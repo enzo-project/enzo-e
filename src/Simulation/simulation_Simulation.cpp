@@ -398,20 +398,25 @@ void Simulation::initialize_control_(Parameters * parameters) throw()
 
   parameters->set_current_group ("Stopping");
 
+  // @@@ WARNING: IGNORED
   double time_final = parameters->value_scalar("time",2.5);
+  // @@@ WARNING: IGNORED
   int   cycle_final = parameters->value_integer("cycle",1000);
 
   // Initialize output parameters
 
   parameters->set_current_group ("Output");
 
+  // @@@ WARNING: IGNORED
   int  cycle_dump    = parameters->value_integer("cycle_dump",10);
 
   // Initialize monitor parameters
 
   parameters->set_current_group ("Monitor");
 
+  // @@@ WARNING: IGNORED
   int  cycle_image    = parameters->value_integer("cycle_image",10);
+  // @@@ WARNING: IGNORED
   int  cycle_progress = parameters->value_integer("cycle_progress",1);
 
   // // Initial progress and image monitoring

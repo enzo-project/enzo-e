@@ -34,8 +34,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert(true);
 
   int p0,np;
-  int nb,nbx,nby,nbz;
-  int ib,ibx,iby,ibz;
+  int nbx,nby,nbz,nb;
+  int ibx,iby,ibz;
 
   //--------------------------------------------------
   // first 0  count 1  block_count (1,1,1)
