@@ -4,26 +4,26 @@
 #ifndef DISK_IFRIT_HPP
 #define DISK_IFRIT_HPP
 
-/// @file     disk_Ifrit.hpp
+/// @file     disk_FileIfrit.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:05:34 PST 2008
-/// @brief    [\ref Disk] Interface for the Ifrit class
+/// @brief    [\ref Disk] Interface for the FileIfrit class
  
-class Ifrit {
+class FileIfrit {
 
-  /// @class    Ifrit
+  /// @class    FileIfrit
   /// @ingroup  Disk
   /// @brief    [\ref Disk] Class for writing and reading IFRIT files
   ///
-  /// An Ifrit object currently corresponds to a single IFRIT file /
+  /// An FileIfrit object currently corresponds to a single IFRIT file /
   /// group dataset.  "IFrIT is a powerful tool that can be used to
   /// visualize 3-dimensional data sets."
   /// http://sites.google.com/site/ifrithome/
 
 public: /// interface
 
-  /// Initialize the Ifrit object
-  Ifrit() {};
+  /// Initialize the FileIfrit object
+  FileIfrit() {};
 
   /// Read a 3d array from an ifrit file
   void read_bin  (std::string name, 

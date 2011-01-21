@@ -34,18 +34,18 @@ sources  = [Glob('disk*cpp')]
 #------------------------------
 
 libraries  = env.Library ('disk', sources)
-test_hdf5  = env.Program (['test_FileHdf5.cpp', sources])
-test_ifrit = env.Program (['test_Ifrit.cpp', sources])
+test_FileHdf5  = env.Program (['test_FileHdf5.cpp', sources])
+test_FileIfrit = env.Program (['test_FileIfrit.cpp', sources])
 
 if (parallel_type == "charm"):
 	test = 'test_FileHdf5'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-	test = 'test_Ifrit'
+	test = 'test_FileIfrit'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
-tests = [test_hdf5,test_ifrit]
+tests = [test_FileHdf5,test_FileIfrit]
 
 #------------------------------
 # INSTALL

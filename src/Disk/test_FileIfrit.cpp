@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_Ifrit.cpp
+/// @file     test_FileIfrit.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:47:35 PST 2008
-/// @brief    Program implementing unit tests for the Ifrit class
+/// @brief    Program implementing unit tests for the FileIfrit class
  
 #include <stdio.h>
 #include <string>
@@ -15,7 +15,7 @@
 
 #include "parallel.def"
 
-#include PARALLEL_CHARM_INCLUDE(test_Ifrit.decl.h)
+#include PARALLEL_CHARM_INCLUDE(test_FileIfrit.decl.h)
 
 PARALLEL_MAIN_BEGIN
 
@@ -28,7 +28,7 @@ PARALLEL_MAIN_BEGIN
   int n1 = 64;
   int n2 = 64;
 
-  const char filename[] = "Ifrit_test.bin";
+  const char filename[] = "FileIfrit_test.bin";
   int n = n0*n1*n2;
 
   float * a = new float[n];
@@ -45,9 +45,9 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_class ("Ifrit");
+  unit_class ("FileIfrit");
 
-  Ifrit ifrit;
+  FileIfrit ifrit;
 
   unit_func("write_bin");
   ifrit.write_bin(filename,a,n0,n1,n2);
@@ -79,4 +79,4 @@ PARALLEL_MAIN_BEGIN
 }
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_Ifrit.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_FileIfrit.def.h)
