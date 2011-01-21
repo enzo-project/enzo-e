@@ -18,7 +18,7 @@ Import('serial_run')
 # X test_FieldBlock.cpp
 # X test_FieldDescr.cpp
 # X test_FileHdf5.cpp
-# X test_Ifrit.cpp
+# X test_FileIfrit.cpp
 # X test_Memory.cpp
 # X test_Mesh.cpp
 # X test_MethodEnzoPpm.cpp
@@ -58,7 +58,7 @@ env.RunSerial(parallel_type + '-test_FieldFaces.unit','#/bin/test_FieldFaces')
 env.RunSerial(parallel_type + '-test_FieldDescr.unit','#/bin/test_FieldDescr')
 
 env.RunSerial(parallel_type + '-test_FileHdf5.unit',    '#/bin/test_FileHdf5')
-env.RunSerial(parallel_type + '-test_Ifrit.unit',       '#/bin/test_Ifrit')
+env.RunSerial(parallel_type + '-test_FileIfrit.unit',   '#/bin/test_FileIfrit')
 env.RunSerial(parallel_type + '-test_Layout.unit',      '#/bin/test_Layout')
 env.RunSerial(parallel_type + '-test_Memory.unit',      '#/bin/test_Memory')
 

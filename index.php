@@ -214,7 +214,7 @@ for ($k = 0; $k < 2; $k ++) {
   }
  }
 
-test_summary("Disk",array("FileHdf5","Ifrit")); 
+test_summary("Disk",array("FileHdf5","FileIfrit")); 
 test_summary("Distribute",array("")); 
 test_summary("Error",array("Error")); 
 test_summary("Enzo",array("ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion")); 
@@ -241,8 +241,8 @@ test_summary("Simulation",array("Simulation")); ?>
 
 component("Disk");
 
-tests("Disk","FileHdf5","FileHdf5");
-tests("Disk","Ifrit","Ifrit");
+tests("Disk","FileHdf5", "FileHdf5");
+tests("Disk","FileIfrit","FileIfrit");
 
 component("Distribute");
 
