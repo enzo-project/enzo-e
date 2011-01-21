@@ -150,13 +150,13 @@ PARALLEL_MAIN_BEGIN
   NEW_F3(size_test_1);
 
   unit_assert (memory->bytes(handle_1) == size_test_1);
-  unit_assert (memory->bytes() == size + size_test_1);
+  unit_assert (memory->bytes()         == size_test_1 + size);
   
   DEL_F1(size_test_1);
   DEL_F3(size_test_1);
 
   unit_assert (memory->bytes(handle_1) == size_test_1);
-  unit_assert (memory->bytes() == size);
+  unit_assert (memory->bytes()         == size_test_1 + size);
 
   memory->end_group(group_test_1);
 
@@ -173,8 +173,8 @@ PARALLEL_MAIN_BEGIN
   NEW_F3(size_test_2);
 
   unit_assert (memory->bytes(handle_1) == size_test_1);
-  unit_assert (memory->bytes(handle_2) == size_test_2);
-  unit_assert (memory->bytes() == size + size_test_1 + size_test_2);
+  unit_assert (memory->bytes(handle_2) ==               size_test_2);
+  unit_assert (memory->bytes()         == size_test_1 + size_test_2 + size);
   
   memory->end_group(group_test_2);
 
@@ -182,13 +182,14 @@ PARALLEL_MAIN_BEGIN
   int handle_0 = memory->current_group(&name_0);
 
   unit_assert (strcmp(name_0,"\0") == 0);
+  unit_assert (handle_0 == 0);
 
   DEL_F2(size_test_2);
   DEL_F3(size_test_2);
 
   unit_assert (memory->bytes(handle_1) == size_test_1);
-  unit_assert (memory->bytes(handle_2) == size_test_2);
-  unit_assert (memory->bytes() == size);
+  unit_assert (memory->bytes(handle_2) ==               size_test_2);
+  unit_assert (memory->bytes()         == size_test_1 + size_test_2 + size);
 
   // available()
 
