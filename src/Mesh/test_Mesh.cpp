@@ -5,14 +5,12 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-06
 /// @brief    Program implementing unit tests for the Mesh class
- 
-#include <stdio.h>
-#include <string>
+
+#include "cello.hpp" 
 
 #include "mesh.hpp"
 
 #include "test.hpp"
-#include "parallel.def"
 
 #include PARALLEL_CHARM_INCLUDE(test_Mesh.decl.h)
 

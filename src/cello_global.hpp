@@ -10,36 +10,21 @@
 /// @brief    Container for global objects
 
 #include "error.hpp"
-#include "memory.hpp"
 #include "monitor.hpp"
-#include "parameters.hpp"
-#include "parallel.hpp"
 
 class Global {
 
   /// @class    Global
   /// @ingroup  Global
-  /// @brief    [\ref Global] Object for storing cross-cutting objects, including monitor, error, parameters
+  /// @brief    [\ref Global] Object for storing cross-cutting objects, including monitor, error
 
 public: // interface
 
   /// Constructor
-  Global() throw()
-  {
-    error_      = new Error;
-    monitor_    = new Monitor();
-    parameters_ = new Parameters(monitor_);
-    //    memory_     = new Memory;
-  }
+  Global() throw();
 
   /// Destructor
-  ~Global() throw()
-  {
-    delete error_;
-    delete parameters_;
-    delete monitor_;
-    //    delete [] memory_;
-  }
+  ~Global() throw();
 
 private: // prohibit copy constructor
 
@@ -57,15 +42,18 @@ public:
 
   /// Access error object
 
-  Error * error() { return error_; };
+  Error * error() 
+  { return error_; };
 
   /// Access monitor object
 
-  Monitor * monitor() { return monitor_; };
+  Monitor * monitor() 
+  { return monitor_; };
 
-  /// Access parameters object
+//   /// Access parameters object
 
-  Parameters * parameters() { return parameters_; };
+//   Parameters * parameters() 
+//   { return parameters_; };
 
 //   /// Access memory object
 
@@ -80,8 +68,8 @@ private: // attributes
   /// Monitor object
   Monitor * monitor_;
 
-  /// Parameters object
-  Parameters * parameters_;
+//   /// Parameters object
+//   Parameters * parameters_;
 
 //   /// Memory object
 //   Memory * memory_;

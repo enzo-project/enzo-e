@@ -9,14 +9,25 @@
 /// @date     Thu Mar 11 17:20:03 PST 2010
 /// @brief    Include file for the \ref Mesh component 
 
+//----------------------------------------------------------------------
+// System includes
+//----------------------------------------------------------------------
+
 #include <stdlib.h>
 #include <string>
 #include <vector>
 #include <memory>
 
-#include "cello.hpp"
+//----------------------------------------------------------------------
+// Component dependencies
+//----------------------------------------------------------------------
 
 #include "field.hpp"
+#include "parallel.hpp"
+
+//----------------------------------------------------------------------
+// Component class includes
+//----------------------------------------------------------------------
 
 #include "mesh_Node2K.hpp"
 #include "mesh_Node3K.hpp"
@@ -26,8 +37,8 @@
 
 #include "mesh_DataDescr.hpp"
 #include "mesh_DataBlock.hpp"
-#include "mesh_Patch.hpp"
 
+#include "mesh_Patch.hpp"
 #include "mesh_Mesh.hpp"
 
 #endif /* MESH_HPP */

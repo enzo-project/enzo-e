@@ -9,6 +9,8 @@
 #ifndef PARALLEL_GROUP_PROCESS_MPI_HPP
 #define PARALLEL_GROUP_PROCESS_MPI_HPP
 
+#ifdef CONFIG_USE_MPI
+
 enum send_enum {
   send_standard,
   send_buffered,
@@ -116,6 +118,8 @@ private: // attributes
   enum send_enum send_type_;
 
 };
+
+#endif /* CONFIG_USE_MPI */
 
 #endif /* PARALLEL_GROUP_PROCESS_MPI_HPP */
 

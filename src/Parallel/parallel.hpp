@@ -16,6 +16,10 @@ enum parallel_enum {
 
 #define PROCESS_NULL -1
 
+//----------------------------------------------------------------------
+// System includes
+//----------------------------------------------------------------------
+
 #include <string>
 #include <vector>
 #include <string>
@@ -24,25 +28,26 @@ enum parallel_enum {
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "cello.hpp"
-
-#include "error.hpp"
-
 #ifdef CONFIG_USE_MPI
 #  include <mpi.h>
 #endif
 
+//----------------------------------------------------------------------
+// Component dependencies
+//----------------------------------------------------------------------
+
+#include "error.hpp"
+
+//----------------------------------------------------------------------
+// Component class includes
+//----------------------------------------------------------------------
+
+
 #include "parallel.def"
-
 #include "parallel_Mpi.hpp"
-
 #include "parallel_ParallelGroup.hpp" 
-
 #include "parallel_GroupProcess.hpp"
-#ifdef CONFIG_USE_MPI
-#   include "parallel_GroupProcessMpi.hpp"
-#endif
+#include "parallel_GroupProcessMpi.hpp"
 #include "parallel_GroupProcessSerial.hpp"
 #include "parallel_GroupThread.hpp"
 #include "parallel_Parallel.hpp"

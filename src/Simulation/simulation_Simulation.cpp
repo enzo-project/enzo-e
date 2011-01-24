@@ -16,6 +16,7 @@
 Simulation::Simulation(Global * global)
   : dimension_(0),
     global_(global),
+    parameters_ ( new Parameters (global->monitor()),
     //
     mesh_(0),
     data_descr_(0),
@@ -46,6 +47,7 @@ Simulation::Simulation(Global * global)
 Simulation::~Simulation() throw()
 {
   delete data_descr_;
+  delete parameters_;
 }
 
 //----------------------------------------------------------------------
@@ -66,30 +68,26 @@ Simulation & Simulation::operator= (const Simulation & simulation) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize(std::string parameter_file) throw()
+void Simulation::initialize(FILE * fp) throw()
 {
-  Parameters * parameters = global_->parameters();
 
   // Read in parameters
 
-  FILE * file_pointer;
-  file_pointer = fopen (parameter_file.c_str(),"r");
-  parameters->read(file_pointer); // MEMORY LEAK
-  fclose(file_pointer);
+  parameters_->read(fp); // MEMORY LEAK
 
   // Initialize parameters
 
-  initialize_simulation_(parameters);
+  initialize_simulation_();
 
   // Initialize simulation components
 
-  initialize_mesh_(parameters);
-  initialize_data_(parameters);
+  initialize_mesh_();
+  initialize_data_();
 
-  initialize_control_(parameters);
-  initialize_timestep_(parameters);
-  initialize_initial_(parameters);
-  initialize_method_(parameters);
+  initialize_control_();
+  initialize_timestep_();
+  initialize_initial_();
+  initialize_method_();
 
 }
 
@@ -195,7 +193,7 @@ Method * Simulation::method(int i) const throw()
 
 //======================================================================
 
-void Simulation::initialize_simulation_(Parameters * parameters) throw()
+void Simulation::initialize_simulation_() throw()
 {
 
   //--------------------------------------------------
@@ -203,16 +201,16 @@ void Simulation::initialize_simulation_(Parameters * parameters) throw()
   //   dimensions
   //--------------------------------------------------
 
-  parameters->set_current_group("Physics");
+  parameters_->set_current_group("Physics");
 
-  dimension_ = parameters->value_integer("dimensions",0);
+  dimension_ = parameters_->value_integer("dimensions",0);
 
 
-  parameters->set_current_group("Domain");
+  parameters_->set_current_group("Domain");
 
   // get extent_length and check consistency
 
-  int extent_length = parameters->list_length("extent");
+  int extent_length = parameters_->list_length("extent");
 
   bool valid_extent_length = ((extent_length == 2) ||
 			      (extent_length == 4) ||
@@ -229,7 +227,7 @@ void Simulation::initialize_simulation_(Parameters * parameters) throw()
 
     double extent_default = (i % 2 == 0) ? 0.0 : 1.0;
 
-    extent_[i] = parameters->list_value_scalar(i, "extent", extent_default);
+    extent_[i] = parameters_->list_value_scalar(i, "extent", extent_default);
 
     if (i % 2 == 1) {
       char error_message[ERROR_MESSAGE_LENGTH];
@@ -243,17 +241,17 @@ void Simulation::initialize_simulation_(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_mesh_(Parameters * parameters) throw()
+void Simulation::initialize_mesh_() throw()
 {
-  parameters->set_current_group ("Mesh");
+  parameters_->set_current_group ("Mesh");
 
   // Block sizes
 
   int block_size[3];
 
-  block_size[0] = parameters->list_value_integer(0,"block_size",4);
-  block_size[1] = parameters->list_value_integer(1,"block_size",4);
-  block_size[2] = parameters->list_value_integer(2,"block_size",4);
+  block_size[0] = parameters_->list_value_integer(0,"block_size",4);
+  block_size[1] = parameters_->list_value_integer(1,"block_size",4);
+  block_size[2] = parameters_->list_value_integer(2,"block_size",4);
 
   // assume constant block size
   mesh_->set_min_block_size (block_size[0]);
@@ -263,9 +261,9 @@ void Simulation::initialize_mesh_(Parameters * parameters) throw()
 
   int patch_size[3];
 
-  patch_size[0] = parameters->list_value_integer(0,"patch_size",128);
-  patch_size[1] = parameters->list_value_integer(1,"patch_size",128);
-  patch_size[2] = parameters->list_value_integer(1,"patch_size",128);
+  patch_size[0] = parameters_->list_value_integer(0,"patch_size",128);
+  patch_size[1] = parameters_->list_value_integer(1,"patch_size",128);
+  patch_size[2] = parameters_->list_value_integer(1,"patch_size",128);
 
   // minimum patch size is one block
   mesh_->set_min_patch_size (block_size[0]);
@@ -275,19 +273,19 @@ void Simulation::initialize_mesh_(Parameters * parameters) throw()
 
   int root_size[3];
 
-  root_size[0] = parameters->list_value_integer(0,"root_size",1);
-  root_size[1] = parameters->list_value_integer(1,"root_size",1);
-  root_size[2] = parameters->list_value_integer(2,"root_size",1);
+  root_size[0] = parameters_->list_value_integer(0,"root_size",1);
+  root_size[1] = parameters_->list_value_integer(1,"root_size",1);
+  root_size[2] = parameters_->list_value_integer(2,"root_size",1);
 
   mesh_->set_root_size(root_size[0],root_size[1],root_size[2]);
 
-  parameters->set_current_group("Domain");
+  parameters_->set_current_group("Domain");
 
   double domain_lower[3];
 
-  domain_lower[0] = parameters->list_value_scalar(0,"extent",0.0);
-  domain_lower[1] = parameters->list_value_scalar(2,"extent",0.0);
-  domain_lower[2] = parameters->list_value_scalar(4,"extent",0.0);
+  domain_lower[0] = parameters_->list_value_scalar(0,"extent",0.0);
+  domain_lower[1] = parameters_->list_value_scalar(2,"extent",0.0);
+  domain_lower[2] = parameters_->list_value_scalar(4,"extent",0.0);
 
   mesh_->set_lower(domain_lower[0],
 		   domain_lower[1],
@@ -295,9 +293,9 @@ void Simulation::initialize_mesh_(Parameters * parameters) throw()
 
   double domain_upper[3];
 
-  domain_upper[0] = parameters->list_value_scalar(1,"extent",1.0);
-  domain_upper[1] = parameters->list_value_scalar(3,"extent",1.0);
-  domain_upper[2] = parameters->list_value_scalar(5,"extent",1.0);
+  domain_upper[0] = parameters_->list_value_scalar(1,"extent",1.0);
+  domain_upper[1] = parameters_->list_value_scalar(3,"extent",1.0);
+  domain_upper[2] = parameters_->list_value_scalar(5,"extent",1.0);
 
   mesh_->set_upper(domain_upper[0],
 		   domain_upper[1],
@@ -308,18 +306,18 @@ void Simulation::initialize_mesh_(Parameters * parameters) throw()
   
   Layout * layout = new Layout;
 
-  parameters->set_current_group("Mesh");
+  parameters_->set_current_group("Mesh");
 
-  int process_first = parameters->value_integer("root_process_first",0);
-  int process_count = parameters->value_integer("root_process_count",1);
+  int process_first = parameters_->value_integer("root_process_first",0);
+  int process_count = parameters_->value_integer("root_process_count",1);
 
   layout->set_process_range(process_first, process_count);
 
   int block_count[3];
 
-  block_count[0] = parameters->list_value_integer(0,"root_blocks",1);
-  block_count[1] = parameters->list_value_integer(1,"root_blocks",1);
-  block_count[2] = parameters->list_value_integer(2,"root_blocks",1);
+  block_count[0] = parameters_->list_value_integer(0,"root_blocks",1);
+  block_count[1] = parameters_->list_value_integer(1,"root_blocks",1);
+  block_count[2] = parameters_->list_value_integer(2,"root_blocks",1);
 
   layout->set_block_count(block_count[0],block_count[1],block_count[2]);
     
@@ -339,35 +337,35 @@ void Simulation::initialize_mesh_(Parameters * parameters) throw()
 
   // Mesh AMR settings
 
-  mesh_->set_refine    (parameters->value_integer("refine",    2));
-  mesh_->set_max_level (parameters->value_integer("max_level", 0));
-  mesh_->set_balanced  (parameters->value_logical("balanced",  true));
-  mesh_->set_backfill  (parameters->value_logical("backfill",  true));
-  mesh_->set_coalesce  (parameters->value_logical("coalesce",  true));
+  mesh_->set_refine    (parameters_->value_integer("refine",    2));
+  mesh_->set_max_level (parameters_->value_integer("max_level", 0));
+  mesh_->set_balanced  (parameters_->value_logical("balanced",  true));
+  mesh_->set_backfill  (parameters_->value_logical("backfill",  true));
+  mesh_->set_coalesce  (parameters_->value_logical("coalesce",  true));
 
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_data_(Parameters * parameters) throw()
+void Simulation::initialize_data_() throw()
 {
   FieldDescr * field_descr = data_descr_->field_descr();
 
-  parameters->set_current_group("Field");
+  parameters_->set_current_group("Field");
 
   // Add data fields
 
   int i;
-  for (i=0; i<parameters->list_length("fields"); i++) {
+  for (i=0; i<parameters_->list_length("fields"); i++) {
     field_descr->insert_field
-      (parameters->list_value_string(i, "fields"));
+      (parameters_->list_value_string(i, "fields"));
   }
 
   // Define default ghost zone depth for all fields, default value of 1
 
-  int gx = parameters->list_value_integer(0,"ghosts",1);
-  int gy = parameters->list_value_integer(1,"ghosts",1);
-  int gz = parameters->list_value_integer(2,"ghosts",1);
+  int gx = parameters_->list_value_integer(0,"ghosts",1);
+  int gy = parameters_->list_value_integer(1,"ghosts",1);
+  int gz = parameters_->list_value_integer(2,"ghosts",1);
 
   if (dimension_ < 2) gy = 0;
   if (dimension_ < 3) gz = 0;
@@ -380,32 +378,32 @@ void Simulation::initialize_data_(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_control_(Parameters * parameters) throw()
+void Simulation::initialize_control_() throw()
 {
   // Initialize stopping criteria paramaters
 
-  parameters->set_current_group ("Stopping");
+  parameters_->set_current_group ("Stopping");
 
   // @@@ WARNING: IGNORED
-  double time_final = parameters->value_scalar("time",2.5);
+  double time_final = parameters_->value_scalar("time",2.5);
   // @@@ WARNING: IGNORED
-  int   cycle_final = parameters->value_integer("cycle",1000);
+  int   cycle_final = parameters_->value_integer("cycle",1000);
 
   // Initialize output parameters
 
-  parameters->set_current_group ("Output");
+  parameters_->set_current_group ("Output");
 
   // @@@ WARNING: IGNORED
-  int  cycle_dump    = parameters->value_integer("cycle_dump",10);
+  int  cycle_dump    = parameters_->value_integer("cycle_dump",10);
 
   // Initialize monitor parameters
 
-  parameters->set_current_group ("Monitor");
+  parameters_->set_current_group ("Monitor");
 
   // @@@ WARNING: IGNORED
-  int  cycle_image    = parameters->value_integer("cycle_image",10);
+  int  cycle_image    = parameters_->value_integer("cycle_image",10);
   // @@@ WARNING: IGNORED
-  int  cycle_progress = parameters->value_integer("cycle_progress",1);
+  int  cycle_progress = parameters_->value_integer("cycle_progress",1);
 
   // // Initial progress and image monitoring
 
@@ -415,27 +413,27 @@ void Simulation::initialize_control_(Parameters * parameters) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_timestep_(Parameters * parameters) throw()
+void Simulation::initialize_timestep_() throw()
 {
   INCOMPLETE_MESSAGE("Simulation::initialize_timestep_","");
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_initial_(Parameters * parameters) throw()
+void Simulation::initialize_initial_() throw()
 {
   INCOMPLETE_MESSAGE("Simulation::initialize_initial_","");
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_method_(Parameters * parameters) throw()
+void Simulation::initialize_method_() throw()
 {
   //--------------------------------------------------
-  parameters->set_current_group("Method");
+  parameters_->set_current_group("Method");
   //--------------------------------------------------
 
-  int method_count = parameters->list_length("sequence");
+  int method_count = parameters_->list_length("sequence");
 
   if (method_count == 0) {
     ERROR_MESSAGE ("Simulation::initialize",
@@ -444,7 +442,7 @@ void Simulation::initialize_method_(Parameters * parameters) throw()
 
   for (int i=0; i<method_count; i++) {
 
-    std::string method_name = parameters->list_value_string(i,"sequence");
+    std::string method_name = parameters_->list_value_string(i,"sequence");
 
     Method * method = create_method_(method_name);
     if (method) {

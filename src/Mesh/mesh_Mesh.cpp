@@ -6,6 +6,8 @@
 /// @date     Tue Sep 21 16:12:22 PDT 2010
 /// @brief    Brief description of file mesh_Mesh.cpp
 
+#include "cello.hpp"
+
 #include "mesh.hpp"
 
 //----------------------------------------------------------------------

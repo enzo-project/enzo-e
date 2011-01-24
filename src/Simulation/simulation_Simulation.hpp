@@ -38,7 +38,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// initialize the Simulation given a parameter file
-  virtual void initialize(std::string parameter_file) throw();
+  virtual void initialize(FILE * parameter_file) throw();
 
   /// Finalize the Simulation after running it
   void finalize() throw();
@@ -95,26 +95,26 @@ public: // interface
 protected: // functions
 
   /// Initialize global simulation parameters
-  void initialize_simulation_ (Parameters * parameters) throw();
+  void initialize_simulation_ () throw();
 
   /// Initialize the mesh component
-  void initialize_mesh_ (Parameters * parameters) throw();
+  void initialize_mesh_ () throw();
 
   /// Initialize the data component
-  void initialize_data_ (Parameters * parameters) throw();
+  void initialize_data_ () throw();
 
 
   /// Initialize the control component
-  void initialize_control_    (Parameters * parameters) throw();
+  void initialize_control_    () throw();
 
   /// Initialize the timestep component
-  void initialize_timestep_   (Parameters * parameters) throw();
+  void initialize_timestep_   () throw();
 
   /// Initialize the initialization method component
-  void initialize_initial_    (Parameters * parameters) throw();
+  void initialize_initial_    () throw();
 
   /// Initialize the method components
-  void initialize_method_    (Parameters * parameters) throw();
+  void initialize_method_    () throw();
 
 
 protected: // abstract virtual functions
@@ -153,6 +153,9 @@ protected: // attributes
 
   /// "global" data (parameters, monitor, error, parallel, etc.)
   Global * global_;
+
+  /// Parameters associated with this simulation
+  Parameters * parameters_;
 
   /// AMR mesh
   Mesh * mesh_;

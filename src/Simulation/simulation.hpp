@@ -9,13 +9,25 @@
 /// @date     Thu Mar 11 17:20:03 PST 2010
 /// @brief    Include file for the \ref Simulation component
 
+//----------------------------------------------------------------------
+// System includes
+//----------------------------------------------------------------------
+
+#include <stdio.h>
 #include <vector>
 
-#include "cello.hpp"
+//----------------------------------------------------------------------
+// Component dependencies
+//----------------------------------------------------------------------
 
 #include "mesh.hpp"
 #include "schedule.hpp"
 #include "method.hpp"
+#include "parameters.hpp"
+
+//----------------------------------------------------------------------
+// Component class includes
+//----------------------------------------------------------------------
 
 #include "simulation_Simulation.hpp"
 

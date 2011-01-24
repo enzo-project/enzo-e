@@ -46,7 +46,7 @@ if (parallel_type == "charm"):
 	env.Depends(env.Object(test + '.cpp'),testc + '.decl.h')
 
 
-includes = [Glob('cello*hpp'), 'config.def']
+includes = [Glob('cello*hpp'), Glob('cello*def')]
 sources  = [Glob('cello*cpp')]
 
 libraries = env.Library ('cello', [sources])

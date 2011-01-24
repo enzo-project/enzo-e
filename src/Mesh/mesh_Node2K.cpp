@@ -6,6 +6,8 @@
 /// @date     2009-10-27
 /// @brief    Implementation of the Node16 class 
 
+#include "cello.hpp"
+
 #include "mesh.hpp"
 
 //----------------------------------------------------------------------

@@ -9,7 +9,7 @@
 /// @date     Thu Nov 11 17:08:38 PST 2010
 /// @brief    Include Cello global configuration settings
 
-#include "config.def"
+#include "cello_config.def"
 
 #include "cello_functions.hpp"
 #include "cello_precision.hpp"

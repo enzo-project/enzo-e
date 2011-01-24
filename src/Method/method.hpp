@@ -9,14 +9,6 @@
 /// @date     2010-04-02
 /// @brief    Include file for the \ref Method component
 
-#include <vector>
-#include <string>
-
-#include "cello.hpp"
-
-#include "error.hpp"
-#include "mesh.hpp"
-
 /// @enum argument_enum
 /// @brief type of Method argument
 enum argument_enum {
@@ -34,16 +26,31 @@ enum access_enum {
   access_read_write
 };
 
+//----------------------------------------------------------------------
+// System includes
+//----------------------------------------------------------------------
+
+#include <vector>
+#include <string>
+
+//----------------------------------------------------------------------
+// Component dependencies
+//----------------------------------------------------------------------
+
+#include "error.hpp"
+#include "mesh.hpp"
+
+//----------------------------------------------------------------------
+// Component class includes
+//----------------------------------------------------------------------
+
 #include "method_Control.hpp"
 #include "method_Timestep.hpp"
 #include "method_Initial.hpp"
 
 #include "method_Method.hpp"
 #include "method_MethodHyperbolic.hpp"
-
 #include "method_MethodDescr.hpp"
-
-
 
 #endif /* METHOD_HPP */
 

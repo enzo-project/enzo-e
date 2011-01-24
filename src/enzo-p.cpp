@@ -69,7 +69,7 @@ PARALLEL_MAIN_BEGIN
   // input parameters
   //-------------------------
 
-  Parameters * parameters = global->parameters();
+  Parameters * parameters = new Parameters (monitor);
 
   FILE *fp = 0;
 
@@ -89,21 +89,25 @@ PARALLEL_MAIN_BEGIN
 
   ASSERT ("enzo-p", "File pointer NULL", fp != 0);
 
-  // read parameter file
-
-  parameters->read(fp);
 
   //-------------------------
-  // initialize simulation
+  // Initialize simulation
   //-------------------------
 
   EnzoSimulation simulation (global);
+
+  // read parameter file
+
+  simulation->initialize(fp);
   
   //==================================================
   // FINALIZE
   //==================================================
 
   monitor->print ("END ENZO-P");
+
+  delete parameters;
+  delete global;
 
   PARALLEL_EXIT;
 }

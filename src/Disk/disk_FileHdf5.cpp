@@ -7,7 +7,7 @@
 /// @todo      parameters: std, native, ieee
 /// @brief     Implementation of the FileHdf5 class
 
-#include <string>
+#include "cello.hpp"
 
 #include "error.hpp"
 #include "disk.hpp"

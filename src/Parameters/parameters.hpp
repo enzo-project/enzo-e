@@ -9,17 +9,26 @@
 /// @date     Thu Jul  9 15:44:21 PDT 2009
 /// @brief    Include file for the \ref Parameters component
 
+//----------------------------------------------------------------------
+// System includes
+//----------------------------------------------------------------------
+
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <map>
 #include <string>
 #include <vector>
 
-#include "cello.hpp"
+//----------------------------------------------------------------------
+// Component dependencies
+//----------------------------------------------------------------------
 
 #include "error.hpp"
 #include "monitor.hpp"
+
+//----------------------------------------------------------------------
+// Component class includes
+//----------------------------------------------------------------------
 
 #include "parse.h"
 #include "parameters_Param.hpp"

@@ -9,6 +9,14 @@
 /// Constant static global variables 
 
 
+#include "cello.hpp"
+
+#include "error.hpp"
+/* #include "parameters.hpp" */
+#include "monitor.hpp"
+
+//----------------------------------------------------------------------
+
 const char * component_name [] = {
   // !!! EDIT component_type AND component_name TOGETHER !!!
   "undefined",
@@ -30,3 +38,23 @@ const char * component_name [] = {
   "simulation",
   "task"
 };
+
+//----------------------------------------------------------------------
+
+Global::Global() throw()
+{
+  error_      = new Error;
+  monitor_    = new Monitor();
+//   parameters_ = new Parameters(monitor_);
+  //    memory_     = new Memory;
+}
+
+//----------------------------------------------------------------------
+
+Global::~Global() throw()
+{
+  delete error_;
+//   delete parameters_;
+  delete monitor_;
+  //    delete [] memory_;
+}

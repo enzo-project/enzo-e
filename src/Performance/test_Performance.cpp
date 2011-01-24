@@ -6,16 +6,11 @@
 /// @date      Wed Apr 23 12:25:18 PDT 2008
 /// @brief     Program implementing unit tests for performance classes
  
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "test.hpp"
 #include "performance.hpp"
-#include "parallel.def"
+
+#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Performance.decl.h)
 

@@ -7,15 +7,18 @@
 /// @todo     Multiple datasets with different precisions
 /// @brief    Program implementing unit tests for the FileHdf5 class
  
-#include <stdio.h>
-#include <string>
-#include <hdf5.h>
 
-#include "error.hpp"
-#include "test.hpp"
+#include "cello.hpp"
+
 #include "disk.hpp"
 
-#include "parallel.def"
+#include "test.hpp"
+
+// #include "error.hpp"
+// #include "test.hpp"
+// #include "disk.hpp"
+
+// #include "parallel.def"
 
 #include PARALLEL_CHARM_INCLUDE(test_FileHdf5.decl.h)
 

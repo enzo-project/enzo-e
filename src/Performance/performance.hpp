@@ -9,17 +9,28 @@
 /// @date     Wed Oct 14 23:40:13 PDT 2009
 /// @brief    Include file for the \ref Performance component
 
+//----------------------------------------------------------------------
+// System includes
+//----------------------------------------------------------------------
+
 #include <vector>
 #include <sys/time.h>
 #ifdef __linux__
-#include <unistd.h>
+#   include <unistd.h>
 #endif
-
-#include "cello.hpp"
-
 #ifdef CONFIG_USE_PAPI
 #  include "papi.h"
 #endif
+
+//----------------------------------------------------------------------
+// Component dependencies
+//----------------------------------------------------------------------
+
+#include "error.hpp"
+
+//----------------------------------------------------------------------
+// Component class includes
+//----------------------------------------------------------------------
 
 #include "performance_Counters.hpp"
 #include "performance_Performance.hpp"

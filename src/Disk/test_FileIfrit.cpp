@@ -6,14 +6,9 @@
 /// @date     Thu Feb 21 16:47:35 PST 2008
 /// @brief    Program implementing unit tests for the FileIfrit class
  
-#include <stdio.h>
-#include <string>
-
-#include "error.hpp"
-#include "test.hpp"
+#include "cello.hpp"
 #include "disk.hpp"
-
-#include "parallel.def"
+#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_FileIfrit.decl.h)
 

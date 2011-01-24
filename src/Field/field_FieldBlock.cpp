@@ -6,8 +6,7 @@
 /// @date     Wed May 19 18:17:50 PDT 2010
 /// @brief    Implementation of the FieldBlock class
 
-#include "assert.h"
-
+#include "cello.hpp"
 #include "field.hpp"
 
 FieldBlock::FieldBlock() throw()
