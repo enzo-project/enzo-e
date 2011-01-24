@@ -57,13 +57,7 @@ public: // interface
 
   /// Return whether the simulation is complete
 
-  bool done (int cycle, double time) throw()
-  {
-    bool cycle_converged = (cycle != -1) ? (cycle >= cycle_stop_) : false;
-    bool time_converged  = (time != -1)  ? (time  >= time_stop_)  : false;
-
-    return (cycle_converged || time_converged);
-  }
+  bool is_done (int cycle, double time) throw();
 
   /// Set stop cycle; default is to not check time
 

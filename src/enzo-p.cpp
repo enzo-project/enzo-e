@@ -61,7 +61,7 @@ PARALLEL_MAIN_BEGIN
   monitor->set_active(parallel->rank()==0);
 
     
-  monitor->print ("ENZO-P BEGIN");
+  monitor->print ("BEGIN ENZO-P");
 
   monitor->header();
 
@@ -103,7 +103,7 @@ PARALLEL_MAIN_BEGIN
   // FINALIZE
   //==================================================
 
-  monitor->print ("ENZO-P END");
+  monitor->print ("END ENZO-P");
 
   PARALLEL_EXIT;
 }

@@ -6,10 +6,6 @@
 /// @date     2009-10-29
 /// @brief    Implementation of Tree3K class for K^3-trees
 
-#include <stdio.h>
-#include "cello.hpp"
-
-#include "error.hpp"
 #include "mesh.hpp"
 
 //----------------------------------------------------------------------

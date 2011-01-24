@@ -6,8 +6,6 @@
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Implementation of the Patch class
 
-#include "parallel.hpp"
-
 #include "mesh.hpp"
 
 //----------------------------------------------------------------------

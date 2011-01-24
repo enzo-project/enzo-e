@@ -16,8 +16,6 @@
 
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "memory.hpp"
 #include "field.hpp"
 
 #include "mesh_Node2K.hpp"

@@ -6,23 +6,14 @@
 /// @date     2009-10-28
 /// @brief    Test program for Tree2K and Tree3K classes
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-
-#include "cello.hpp"
+#include "mesh.hpp"
 
 #include "pngwriter.h"
-
+#include "test.hpp"
+#include "monitor.hpp"
 #include "parallel.def"
 
 #include PARALLEL_CHARM_INCLUDE(test_TreeK.decl.h)
-
-#include "error.hpp"
-#include "test.hpp"
-#include "monitor.hpp"
-#include "memory.hpp"
-#include "mesh.hpp"
 
 #define index(ix,iy,iz,n) ((ix) + (n)*((iy) + (n)*(iz)))
 

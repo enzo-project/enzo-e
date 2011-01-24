@@ -9,10 +9,9 @@
 #include <stdio.h>
 #include <string>
 
-#include "cello.hpp"
-#include "test.hpp"
 #include "mesh.hpp"
 
+#include "test.hpp"
 #include "parallel.def"
 
 #include PARALLEL_CHARM_INCLUDE(test_Mesh.decl.h)
@@ -26,8 +25,6 @@ PARALLEL_MAIN_BEGIN
   unit_class ("Mesh");
   unit_func("Mesh");
 
-  Global global;
-  
   DataDescr data_descr;
 
   Mesh mesh(&data_descr);

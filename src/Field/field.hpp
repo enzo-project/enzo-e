@@ -20,7 +20,6 @@
 
 #include "error.hpp"
 #include "disk.hpp"
-#include "parallel.hpp"
 
 #include "field_FieldDescr.hpp"
 class FieldBlock;
