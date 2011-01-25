@@ -158,21 +158,21 @@ PARALLEL_MAIN_BEGIN
   unit_assert (parameters->value_logical("none",true) == true);
   unit_assert (parameters->value_logical("none",false) == false);
 
-  bool l,ld;
+  // bool l,ld;
 
-  parameters->value("test_true",parameter_logical,&l);
-  unit_assert (l == true);
+  // parameters->value("test_true",parameter_logical,&l);
+  // unit_assert (l == true);
 
-  parameters->value("test_false",parameter_logical,&l);
-  unit_assert (l == false);
+  // parameters->value("test_false",parameter_logical,&l);
+  // unit_assert (l == false);
 
-  ld = true;
-  parameters->value("none",parameter_logical,&l,&ld);
-  unit_assert (l == ld);
+  // ld = true;
+  // parameters->value("none",parameter_logical,&l,&ld);
+  // unit_assert (l == ld);
 
-  ld = false;
-  parameters->value("none",parameter_logical,&l,&ld);
-  unit_assert (l == ld);
+  // ld = false;
+  // parameters->value("none",parameter_logical,&l,&ld);
+  // unit_assert (l == ld);
 
   // set_logical()
 
@@ -197,14 +197,14 @@ PARALLEL_MAIN_BEGIN
   unit_assert (parameters->value_integer("test_37") == 37);
   unit_assert (parameters->value_integer("none",58) == 58);
 
-  int i,id;
-  parameters->value("test_1",parameter_integer,&i);
-  unit_assert (i == 1);
-  parameters->value("test_37",parameter_integer,&i);
-  unit_assert (i == 37);
-  id = 58;
-  parameters->value("none",parameter_integer,&i,&id);
-  unit_assert (i == id);
+  // int i,id;
+  // parameters->value("test_1",parameter_integer,&i);
+  // unit_assert (i == 1);
+  // parameters->value("test_37",parameter_integer,&i);
+  // unit_assert (i == 37);
+  // id = 58;
+  // parameters->value("none",parameter_integer,&i,&id);
+  // unit_assert (i == id);
 
   // set_integer()
 
@@ -228,16 +228,16 @@ PARALLEL_MAIN_BEGIN
   unit_assert (parameters->value_scalar("test_37_25") == 37.25);
   unit_assert (parameters->value_scalar("none",58.75) == 58.75);
 
-  double d,dd;
+  // double d,dd;
   
-  parameters->value("test_1_5",parameter_scalar,&d);
-  unit_assert (d  == 1.5);
-  parameters->value("test_37_25",parameter_scalar,&d);
-  unit_assert (d == 37.25);
-  dd = 58.75;
-  parameters->value("none",parameter_scalar,&d,&dd);
-  unit_assert (d == dd);
-  PARALLEL_PRINTF ("%g %g\n",d,dd);
+  // parameters->value("test_1_5",parameter_scalar,&d);
+  // unit_assert (d  == 1.5);
+  // parameters->value("test_37_25",parameter_scalar,&d);
+  // unit_assert (d == 37.25);
+  // dd = 58.75;
+  // parameters->value("none",parameter_scalar,&d,&dd);
+  // unit_assert (d == dd);
+  // PARALLEL_PRINTF ("%g %g\n",d,dd);
 
   // set_scalar()
 
@@ -277,13 +277,13 @@ PARALLEL_MAIN_BEGIN
   unit_assert(strcmp(parameters->value_string("str2","blah"),"one")==0);
   unit_assert(strcmp(parameters->value_string("none","blah"),"blah")==0);
 
-  const char *s, *sd = "blah";
-  parameters->value("str1",parameter_string,&s);
-  unit_assert(strcmp(s,"testing")==0);
-  parameters->value("str2",parameter_string,&s,&sd);
-  unit_assert(strcmp(s,"one")==0);
-  parameters->value("none",parameter_string,&s,&sd);
-  unit_assert(strcmp(s,"blah")==0);
+  // const char *s, *sd = "blah";
+  // parameters->value("str1",parameter_string,&s);
+  // unit_assert(strcmp(s,"testing")==0);
+  // parameters->value("str2",parameter_string,&s,&sd);
+  // unit_assert(strcmp(s,"one")==0);
+  // parameters->value("none",parameter_string,&s,&sd);
+  // unit_assert(strcmp(s,"blah")==0);
 
   // set_string()
 

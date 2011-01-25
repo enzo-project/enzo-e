@@ -37,15 +37,6 @@ libraries  = ['png', '$FORTRANLIBS','m']
 
 env = env.Clone(LIBS=[components,libraries])
 
-
-binaries = env.Program(['enzo-p.cpp'])
-if (parallel_type == "charm"):
-	test = 'enzo-p'
-	testc = 'enzo_p' # required since class name cannot contain '-'
-	env.CharmBuilder(testc	 + '.decl.h',test + '.ci',ARG = testc)
-	env.Depends(env.Object(test + '.cpp'),testc + '.decl.h')
-
-
 includes = [Glob('cello*hpp'), Glob('cello*def')]
 sources  = [Glob('cello*cpp')]
 
@@ -53,4 +44,3 @@ libraries = env.Library ('cello', [sources])
 
 env.Alias('install-lib', env.Install ('#/lib',    libraries))
 env.Alias('install-inc', env.Install ('#/include',includes))
-env.Alias('install-bin', env.Install ('#/bin',    binaries))

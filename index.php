@@ -21,8 +21,8 @@ function tests($component,$testrun,$output) {
 
    $parallel_types = array("serial","mpi","ampi","charm");
 
-   $source_file = "src/$component/test_$testrun.cpp";
-   $source_html = "<a href=\"$source_file\">test_$testrun.cpp</a>";
+   $source_file = "src/$component/$testrun.cpp";
+   $source_html = "<a href=\"$source_file\">$testrun.cpp</a>";
 
    echo "<h3>Test: $source_html</h3>\n";
    if (! file_exists($source_file)) {
@@ -41,9 +41,9 @@ function tests($component,$testrun,$output) {
      echo "<th>Output</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       $output_file = "test/$parallel_types[$i]-$output.unit";
        if (file_exists($output_file)) {
-	 $output_html = "<a href=\"$output_file\">test_$output.unit</a>";
+	 $output_html = "<a href=\"$output_file\">$output.unit</a>";
 	 system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$output_file'>incomplete</a></td>\"; if (c!=0) print \"<td class=pass><a href='$output_file'>complete</a></td>\"}' < $output_file");
        } else {
 	 echo "<td></td>";
@@ -56,7 +56,7 @@ function tests($component,$testrun,$output) {
      echo "<th>Date</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       $output_file = "test/$parallel_types[$i]-$output.unit";
        if (file_exists($output_file)) {
 	 $output_html = date ("Y-m-d", filemtime($output_file));
 	 echo "<td class=pass>$output_html</td>";
@@ -71,7 +71,7 @@ function tests($component,$testrun,$output) {
      echo "<th>Time</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       $output_file = "test/$parallel_types[$i]-$output.unit";
        if (file_exists($output_file)) {
 	 $output_html = date ("H:i:s", filemtime($output_file));
 	 echo "<td class=pass>$output_html</td>";
@@ -86,7 +86,7 @@ function tests($component,$testrun,$output) {
      echo "<th>Passed</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       $output_file = "test/$parallel_types[$i]-$output.unit";
        if (file_exists($output_file)) {
 	 echo "<td class=pass>";
 	 system("grep pass $output_file | wc -l");
@@ -102,7 +102,7 @@ function tests($component,$testrun,$output) {
      echo "<th>Failed</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-test_$output.unit";
+       $output_file = "test/$parallel_types[$i]-$output.unit";
        if (file_exists($output_file)) {
 	 system("awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass></td>\"}' < $output_file");
        } else {
@@ -116,7 +116,7 @@ function tests($component,$testrun,$output) {
      echo "<table><tr>";
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
        $parallel_type = $parallel_types[$i];
-       $output_file = "test/$parallel_type-test_$output.unit";
+       $output_file = "test/$parallel_type-$output.unit";
        if (file_exists($output_file)) {
 	 test($parallel_type,$testrun,"FAIL");
        }
@@ -137,7 +137,7 @@ function test($parallel_type,$testrun,$type) {
     $rowtext = "</tr><tr>";
   }
 
-  $output = "test/$parallel_type-test_$testrun.unit";
+  $output = "test/$parallel_type-$testrun.unit";
   $count = exec("grep $type $output | wc -l");
   if ($count == 0) {
 #     echo "<strong >no ${ltype}ed tests</strong></br/>";
@@ -217,7 +217,7 @@ for ($k = 0; $k < 2; $k ++) {
 test_summary("Disk",array("FileHdf5","FileIfrit")); 
 test_summary("Distribute",array("")); 
 test_summary("Error",array("Error")); 
-test_summary("Enzo",array("ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion")); 
+test_summary("Enzo",array("enzo-p","ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion")); 
 test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces")); 
 test_summary("Memory",array("Memory")); 
 test_summary("Mesh",array("DataDescr","Mesh","Patch")); 
@@ -241,59 +241,59 @@ test_summary("Simulation",array("Simulation")); ?>
 
 component("Disk");
 
-tests("Disk","FileHdf5", "FileHdf5");
-tests("Disk","FileIfrit","FileIfrit");
+tests("Disk","test_FileHdf5", "test_FileHdf5");
+tests("Disk","test_FileIfrit","test_FileIfrit");
 
 component("Distribute");
 
 component("Error");
-tests("Error","Error","Error");
+tests("Error","test_Error","test_Error");
 
 
 component("Field");
-tests("Field","FieldDescr","FieldDescr");
-tests("Field","FieldBlock","FieldBlock");
-tests("Field","FieldFaces","FieldFaces");
+tests("Field","test_FieldDescr","test_FieldDescr");
+tests("Field","test_FieldBlock","test_FieldBlock");
+tests("Field","test_FieldFaces","test_FieldFaces");
 
 component("Memory");
-tests("Memory","Memory","Memory");
+tests("Memory","test_Memory","test_Memory");
 
 
 component("Mesh");
 
-tests("Mesh","DataDescr","DataDescr"); 
-tests("Mesh","Mesh","Mesh"); 
-tests("Mesh","Patch","Patch"); 
+tests("Mesh","test_DataDescr","test_DataDescr"); 
+tests("Mesh","test_Mesh","test_Mesh"); 
+tests("Mesh","test_Patch","test_Patch"); 
 
 component("Method");
 
 component("Monitor");
-tests("Monitor","Monitor","Monitor");
+tests("Monitor","test_Monitor","test_Monitor");
 printf ("<img src=\"monitor_image_1.png\"></img>\n");
 printf ("<img src=\"monitor_image_2.png\"></img>\n");
 printf ("<img src=\"monitor_image_3.png\"></img>\n");
 printf ("<img src=\"monitor_image_4.png\"></img>\n");
 
 component("Parallel");
-tests("Parallel","GroupProcessMpi","GroupProcessMpi");
-tests("Parallel","Layout","Layout");
+tests("Parallel","test_GroupProcessMpi","test_GroupProcessMpi");
+tests("Parallel","test_Layout","test_Layout");
 
 
 component("Parameters");
-tests("Parameters","Parameters","Parameters");
+tests("Parameters","test_Parameters","test_Parameters");
 
 component("Particles");
 
 component("Performance");
-tests("Performance","Performance","Performance");
+tests("Performance","test_Performance","test_Performance");
 
 component("Portal");
 
 component("Schedule");
-tests("Schedule","Schedule","Schedule");
+tests("Schedule","test_Schedule","test_Schedule");
 
 component("Simulation");
-tests("Simulation","Simulation","Simulation");
+tests("Simulation","test_Simulation","test_Simulation");
 
 component("Task");
 
@@ -304,9 +304,14 @@ component("Enzo");
 ?>
 
 
+<h4>enzo-p</h4>
+
+<?php tests("Enzo","enzo-p","enzo-p_implosion"); ?>
+
+
 <h4>test_ppm ppm_image</h4>
 
-<?php tests("Enzo/ppm","ppm","ppm_image"); ?>
+<?php tests("Enzo/ppm","test_ppm","test_ppm_image"); ?>
 
 <table>
 <tr><th>cycle = 0</th><th>cycle=10</th><th>cycle=30</th></tr>
@@ -319,7 +324,7 @@ component("Enzo");
 
 <h4>test_ppm ppm_implosion</h4>
 
-<?php tests("Enzo/ppm","ppm","ppm_implosion"); ?>
+<?php tests("Enzo/ppm","test_ppm","test_ppm_implosion"); ?>
 
 <table>
 <tr><th>cycle = 0</th><th>cycle=10</th></tr>
@@ -331,7 +336,7 @@ component("Enzo");
 
 <h4>test_ppm ppm_implosion3</h4>
 
-<?php tests("Enzo/ppm","ppm","ppm_implosion3"); ?>
+<?php tests("Enzo/ppm","test_ppm","test_ppm_implosion3"); ?>
 
 <table>
 <tr>
@@ -354,7 +359,7 @@ component("Enzo");
 
 <h3>test_ppml ppml_blast</h3>
 
-<?php tests("Enzo/ppml","ppml","ppml_blast"); ?>
+<?php tests("Enzo/ppml","test_ppml","test_ppml_blast"); ?>
 
 <table>
 <tr>
@@ -377,7 +382,7 @@ component("Enzo");
 
 <h3>test_ppml ppml_implosion</h3>
 
-<?php tests("Enzo/ppml","ppml","ppml_implosion"); ?>
+<?php tests("Enzo/ppml","test_ppml","test_ppml_implosion"); ?>
 
 <table>
 <tr>
@@ -398,9 +403,9 @@ component("Enzo");
 </tr>
 </table>
 
-<h3>MethodEnzoPpm</h3>
+<h3>EnzoMethodPpm</h3>
 
-<?php tests("Enzo","MethodEnzoPpm","MethodEnzoPpm"); ?>
+<?php tests("Enzo","test_EnzoMethodPpm","test_EnzoMethodPpm"); ?>
 
 <table>
 <tr>
@@ -427,11 +432,11 @@ component("Enzo");
 
 <h3>TreeK-D2-R2-L?</h3>
 
-<?php tests("Mesh","TreeK","TreeK-D2-R2-L6"); ?>
-<?php tests("Mesh","TreeK","TreeK-D2-R2-L7"); ?>
-<?php tests("Mesh","TreeK","TreeK-D2-R2-L8"); ?>
-<?php tests("Mesh","TreeK","TreeK-D2-R2-L9"); ?>
-<?php tests("Mesh","TreeK","TreeK-D2-R2-L10"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L6"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L7"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L8"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L9"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L10"); ?>
 
 <table>
 <tr>
@@ -462,9 +467,9 @@ component("Enzo");
 
 <h3>TreeK-D2-R4-L?</h3>
 
-<?php tests("Mesh","TreeK","TreeK-D2-R4-L6"); ?>
-<?php tests("Mesh","TreeK","TreeK-D2-R4-L8"); ?>
-<?php tests("Mesh","TreeK","TreeK-D2-R4-L10"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D2-R4-L6"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D2-R4-L8"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D2-R4-L10"); ?>
 
 <table>
 <tr>
@@ -489,11 +494,11 @@ component("Enzo");
 
 <h3>TreeK-D3-R2-L?</h3>
 
-<?php tests("Mesh","TreeK","TreeK-D3-R2-L4"); ?>
-<?php tests("Mesh","TreeK","TreeK-D3-R2-L5"); ?>
-<?php tests("Mesh","TreeK","TreeK-D3-R2-L6"); ?>
-<?php tests("Mesh","TreeK","TreeK-D3-R2-L7"); ?>
-<?php tests("Mesh","TreeK","TreeK-D3-R2-L8"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L4"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L5"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L6"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L7"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L8"); ?>
 
 <table>
 <tr>
@@ -570,9 +575,9 @@ component("Enzo");
 
 <h3>TreeK-D3-R4-L?</h3>
 
-<?php tests("Mesh","TreeK","TreeK-D3-R4-L4"); ?>
-<?php tests("Mesh","TreeK","TreeK-D3-R4-L6"); ?>
-<?php tests("Mesh","TreeK","TreeK-D3-R4-L8"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L4"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L6"); ?>
+<?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L8"); ?>
 
 <table>
 <tr>

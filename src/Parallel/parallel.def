@@ -56,6 +56,7 @@
 
 #  define PARALLEL_INIT      /* BLANK */
 #  define PARALLEL_EXIT      exit(0)
+#  define PARALLEL_RUN       ""
 
 #endif
 

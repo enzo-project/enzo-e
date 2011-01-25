@@ -33,22 +33,29 @@ env = env.Clone(LIBS=[components,libraries])
 # SOURCE
 #------------------------------
 
-includes = [Glob('enzo*hpp'), Glob('*.h')]
-sources  = [Glob('enzo*cpp')]
+includes = [Glob('enzo_*hpp')]
+sources  = [Glob('enzo_*cpp')]
 
 #------------------------------
 # TARGETS
 #------------------------------
 
 libraries     = env.Library ('enzo', sources)
-test_enzo_ppm = env.Program (['test_MethodEnzoPpm.cpp', sources])
+test_enzo_ppm = env.Program (['test_EnzoMethodPpm.cpp', sources])
+test_enzo_p   = env.Program (['enzo-p.cpp', sources])
 
-tests = [test_enzo_ppm]
+binaries = [test_enzo_ppm, test_enzo_p]
 
 if (parallel_type == "charm"):
-	test = 'test_MethodEnzoPpm'
+	# test_EnzoMethodPpm
+	test = 'test_EnzoMethodPpm'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
+	# enzo-p
+	test = 'enzo-p'
+	testc = 'enzo_p' # required since class name cannot contain '-'
+	env.CharmBuilder(testc + '.decl.h',test + '.ci',ARG = testc)
+	env.Depends(env.Object(test + '.cpp'),testc + '.decl.h')
 
 #------------------------------
 # INSTALL
@@ -56,7 +63,7 @@ if (parallel_type == "charm"):
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    tests))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
 
 
 

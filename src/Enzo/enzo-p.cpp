@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
+#include "test.hpp"
 
 #include "enzo.hpp"
 
@@ -41,6 +42,7 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_INIT;
 
   GroupProcess * parallel = GroupProcess::create();
+  unit_init(parallel->rank(), parallel->size());
 
   //-------------------------
   // create globals
@@ -94,12 +96,14 @@ PARALLEL_MAIN_BEGIN
   // read parameter file
 
   simulation.initialize(fp);
-  
+
   //==================================================
   // FINALIZE
   //==================================================
 
   monitor->print ("END ENZO-P");
+
+  unit_finalize();
 
   delete parameters;
   delete monitor;

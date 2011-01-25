@@ -104,82 +104,82 @@ void Parameters::write ( FILE * file_pointer )
 
 //----------------------------------------------------------------------
 
-void Parameters::value 
-(
- std::string    parameter, 
- parameter_enum type, 
- void *         value, 
- void *         deflt
-)
-/// @param   parameter Parameter name
-/// @param   type      Parameter type
-/// @param   value     parameter value if it exists, deflt if not
-/// @param   deflt     Default parameter value
-{
-  Param * param = parameter_(parameter);
-  // Check type of parameter if it's set
-  if (param) {
-    bool correct_type;
-    switch (type) {
-    case parameter_integer:      correct_type = param->is_integer();      break;
-    case parameter_scalar:       correct_type = param->is_scalar();       break;
-    case parameter_logical:      correct_type = param->is_logical();      break;
-    case parameter_string:       correct_type = param->is_string();       break;
-    case parameter_list:
-    case parameter_scalar_expr:
-    case parameter_logical_expr:
-      throw ExceptionParametersBadType();
-      break;
-    }
-  }
-  if (param != NULL) {
-    switch (type) {
-    case parameter_integer:
-      *((int *)   value) = param->get_integer();
-      break;
-    case parameter_scalar:
-      *((double *)value) = param->get_scalar();
-      break;
-    case parameter_logical:
-      *((bool *)  value) = param->get_logical();
-      break;
-    case parameter_string:
-      *((const char **) value) = param->get_string();
-      break;
-    case parameter_list:         
-    case parameter_scalar_expr:  
-    case parameter_logical_expr: 
-      ERROR_MESSAGE ("Parameters::value","Switch case should never be reached");
-      break;
-    }
-  } else if (deflt) {
-    switch (type) {
-    case parameter_integer:
-      *((int *)value) = *((int *)deflt);
-      break;
-    case parameter_scalar:
-      *((double *)value) = *((double *)deflt);
-      break;
-    case parameter_logical:
-      *((bool *)value) = *((bool *)deflt);
-      break;
-    case parameter_string:
-      *((const char **)value) = *((const char **)deflt);
-      break;
-    case parameter_list:         
-    case parameter_scalar_expr:  
-    case parameter_logical_expr: 
-      ERROR_MESSAGE ("Parameters::value","Switch case should never be reached");
-      break;
-    }
-  } else {
-    char buffer[ERROR_MESSAGE_LENGTH];
-    sprintf (buffer,"Required parameter %s not defined",parameter.c_str());
-    ERROR_MESSAGE ("Parameters::value",buffer);
-  }
-  monitor_log(parameter);
-}
-//----------------------------------------------------------------------
+// void Parameters::value 
+// (
+//  std::string    parameter, 
+//  parameter_enum type, 
+//  void *         value, 
+//  void *         deflt
+// )
+// /// @param   parameter Parameter name
+// /// @param   type      Parameter type
+// /// @param   value     parameter value if it exists, deflt if not
+// /// @param   deflt     Default parameter value
+// {
+//   Param * param = parameter_(parameter);
+//   // Check type of parameter if it's set
+//   if (param) {
+//     bool correct_type;
+//     switch (type) {
+//     case parameter_integer:      correct_type = param->is_integer();      break;
+//     case parameter_scalar:       correct_type = param->is_scalar();       break;
+//     case parameter_logical:      correct_type = param->is_logical();      break;
+//     case parameter_string:       correct_type = param->is_string();       break;
+//     case parameter_list:
+//     case parameter_scalar_expr:
+//     case parameter_logical_expr:
+//       throw ExceptionParametersBadType();
+//       break;
+//     }
+//   }
+//   if (param != NULL) {
+//     switch (type) {
+//     case parameter_integer:
+//       *((int *) value) = param->get_integer();
+//       break;
+//     case parameter_scalar:
+//       *((double *) value) = param->get_scalar();
+//       break;
+//     case parameter_logical:
+//       *((bool *) value) = param->get_logical();
+//       break;
+//     case parameter_string:
+//       *((const char **) value) = param->get_string();
+//       break;
+//     case parameter_list:         
+//     case parameter_scalar_expr:  
+//     case parameter_logical_expr: 
+//       ERROR_MESSAGE ("Parameters::value","Switch case should never be reached");
+//       break;
+//     }
+//   } else if (deflt) {
+//     switch (type) {
+//     case parameter_integer:
+//       *((int *) value) = *((int *)deflt);
+//       break;
+//     case parameter_scalar:
+//       *((double *) value) = *((double *)deflt);
+//       break;
+//     case parameter_logical:
+//       *((bool *) value) = *((bool *)deflt);
+//       break;
+//     case parameter_string:
+//       *((const char **) value) = *((const char **)deflt);
+//       break;
+//     case parameter_list:         
+//     case parameter_scalar_expr:  
+//     case parameter_logical_expr: 
+//       ERROR_MESSAGE ("Parameters::value","Switch case should never be reached");
+//       break;
+//     }
+//   } else {
+//     char buffer[ERROR_MESSAGE_LENGTH];
+//     sprintf (buffer,"Required parameter %s not defined",parameter.c_str());
+//     ERROR_MESSAGE ("Parameters::value",buffer);
+//   }
+//   monitor_value_(parameter);
+// }
+// //----------------------------------------------------------------------
 
 int Parameters::value_integer 
 ( std::string parameter,
@@ -190,7 +190,9 @@ int Parameters::value_integer
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_integer()) throw ExceptionParametersBadType();
-  monitor_log(parameter);
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf (deflt_string,"%d",deflt);
+  monitor_read_(parameter,deflt_string);
   return (param != NULL) ? param->get_integer() : deflt;
 }
 
@@ -210,7 +212,7 @@ void Parameters::set_integer
     new_param_ (current_group_,current_subgroup_,parameter,param);
   }
   param->set_integer_(value);
-  monitor_log(parameter);
+  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -224,7 +226,9 @@ double Parameters::value_scalar
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
-  monitor_log(parameter);
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf (deflt_string,"%g",deflt);
+  monitor_read_(parameter,deflt_string);
   return (param != NULL) ? param->get_scalar() : deflt;
 }
 
@@ -244,7 +248,7 @@ void Parameters::set_scalar
     new_param_ (current_group_,current_subgroup_,parameter,param);
   }
   param->set_scalar_(value);
-  monitor_log(parameter);
+  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -258,7 +262,9 @@ bool Parameters::value_logical
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_logical()) throw ExceptionParametersBadType();
-  monitor_log(parameter);
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf (deflt_string,"%s",deflt ? "true" : "false");
+  monitor_read_(parameter,deflt_string);
   return (param != NULL) ? param->get_logical() : deflt;
 }
 
@@ -278,7 +284,7 @@ void Parameters::set_logical
     new_param_ (current_group_,current_subgroup_,parameter,param);
   }
   param->set_logical_(value);
-  monitor_log(parameter);
+  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -292,7 +298,7 @@ const char * Parameters::value_string
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_string()) throw ExceptionParametersBadType();
-  monitor_log(parameter);
+  monitor_read_(parameter,deflt);
   return (param != NULL) ? param->get_string() : deflt;
 }
 
@@ -312,7 +318,7 @@ void Parameters::set_string
     new_param_ (current_group_,current_subgroup_,parameter,param);
   }
   param->set_string_(strdup(value));
-  monitor_log(parameter);
+  monitor_write_(parameter);
 }
 
 //----------------------------------------------------------------------
@@ -518,15 +524,32 @@ void Parameters::list_evaluate_logical
 
 //----------------------------------------------------------------------
 
-void Parameters::monitor_log (std::string parameter) throw()
+void Parameters::monitor_read_ (std::string parameter,
+				std::string deflt_string) throw()
 {
   Param * param = parameter_(parameter);
   char buffer[80];
-  sprintf (buffer,"Parameter %s:%s:%s = %s",
+  std::string value = param ? param->value_to_string().c_str() : 
+    std::string("[" + deflt_string + "]");
+  sprintf (buffer,"Parameter access %s:%s:%s == %s",
 	   current_group_.c_str(),
 	   current_subgroup_.c_str(),
 	   parameter.c_str(),
-	   param ? param->value_to_string().c_str() : "undefined");
+	   value.c_str());
+  monitor_->print(buffer);
+}
+
+//----------------------------------------------------------------------
+
+void Parameters::monitor_write_ (std::string parameter) throw()
+{
+  Param * param = parameter_(parameter);
+  char buffer[80];
+  sprintf (buffer,"Parameter write %s:%s:%s = %s",
+	   current_group_.c_str(),
+	   current_subgroup_.c_str(),
+	   parameter.c_str(),
+	   param ? param->value_to_string().c_str() : "[undefined]");
   monitor_->print(buffer);
 }
 //----------------------------------------------------------------------
@@ -617,13 +640,7 @@ Param * Parameters::list_element_ (std::string parameter, int index) throw()
 {
   Param * list = parameter_(parameter);
   Param * param = NULL;
-  if (list == NULL) {
-    char message [ ERROR_MESSAGE_LENGTH ];
-    sprintf (message, 
-	     "uninitialized parameter %s[%d] accessed\n",
-	     parameter.c_str(),index);
-    WARNING_MESSAGE("Parameters::list_element_",message);
-  } else {
+  if (list != NULL) {
     int list_length = list->value_list_->size();
     if (list != NULL && 0 <= index && index < list_length ) {
       param =  (*(list->value_list_))[index];

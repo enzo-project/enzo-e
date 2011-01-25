@@ -63,10 +63,10 @@ public: // interface
   /// Write parameters to a file
   void write (FILE * file_pointer);
 
-  /// Return the parameter value of specified type
-  void value (std::string, parameter_enum type, 
-	      void * value, 
-	      void * deflt = 0);
+  // /// Return the parameter value of specified type
+  // void value (std::string, parameter_enum type, 
+  // 	      void * value, 
+  // 	      void * deflt = 0);
 
   /// Return the integer-valued parameter
   int value_integer (std::string , int deflt = 0) 
@@ -219,7 +219,9 @@ private: // functions
   /// Return the Param pointer for the specified list parameter element
   Param * list_element_ (std::string parameter, int index) throw();
 
-  void monitor_log (std::string parameter) throw();
+  void monitor_read_ (std::string parameter,
+		      std::string deflt_string) throw();
+  void monitor_write_ (std::string parameter) throw();
 
   void new_param_ ( std::string group,
 		    std::string subgroup,
