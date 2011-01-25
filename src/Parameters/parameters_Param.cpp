@@ -7,12 +7,8 @@
 /// @bug      Probable memory leaks
 /// @brief    Implementation of the Param class
 
-#include "stdio.h"
-#include "stdlib.h"
-
 #include "cello.hpp"
 
-#include "error.hpp"
 #include "parameters.hpp"
 
 void Param::set (struct param_struct * node)

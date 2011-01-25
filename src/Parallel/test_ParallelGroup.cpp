@@ -8,7 +8,9 @@
 /// @brief    Program implementing unit tests for the Group hierarchy of classes
 
 #include "cello.hpp"
+
 #include "parallel.hpp"
+
 #include "test.hpp"
 
 int main(int argc, char ** argv)

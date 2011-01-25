@@ -11,7 +11,7 @@
 #include "cello.hpp"
 
 #include "mesh_node16.hpp"
-#include "error.hpp"
+#include "mesh_tree16.hpp"
 
 //----------------------------------------------------------------------
 

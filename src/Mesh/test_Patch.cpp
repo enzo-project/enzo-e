@@ -6,14 +6,11 @@
 /// @date     2010-05-06
 /// @brief    Program implementing unit tests for the Patch class
  
-#include <stdio.h>
-#include <string>
-
 #include "cello.hpp"
-#include "test.hpp"
+
 #include "mesh.hpp"
 
-#include "parallel.def"
+#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Patch.decl.h)
 

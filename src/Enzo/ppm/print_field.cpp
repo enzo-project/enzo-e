@@ -6,6 +6,8 @@
 /// @date      Sat Aug 29 23:45:03 PDT 2009
 /// @brief     Print the active values of the grid field
 
+#include "cello.hpp"
+
 #include "enzo.hpp"
  
 void EnzoDescr::print_field (int field)

@@ -1,21 +1,18 @@
-// $Id: test_Template.cpp 1696 2010-08-04 05:56:36Z bordner $
+// $Id: test_Classname.cpp 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 /// @file     test_TEMPLATE.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
-/// @brief    Test program for the Template class
+/// @brief    Test program for the Classname class
 
 #include "cello.hpp"
 
+#include "component.hpp"
 
-#include "error.hpp"
 #include "test.hpp"
-#include "class.hpp"
-#include "field.hpp"
 
-#include "parallel.def"
-#include PARALLEL_CHARM_INCLUDE(test_Template.decl.h)
+#include PARALLEL_CHARM_INCLUDE(test_Classname.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -24,9 +21,9 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
-  unit_class ("TemplateDescr");
+  unit_class ("Classname");
 
-  Template template;
+  Classname template;
 
   unit_assert (false)
 
@@ -37,4 +34,4 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_Template.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_Classname.def.h)

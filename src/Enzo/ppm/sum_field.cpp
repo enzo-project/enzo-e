@@ -6,6 +6,8 @@
 /// @date      Sat Aug 29 23:45:03 PDT 2009
 /// @brief     Return the sum of the internal values of the grid array
 
+#include "cello.hpp"
+
 #include "enzo.hpp"
  
 float EnzoDescr::sum_field (int field)

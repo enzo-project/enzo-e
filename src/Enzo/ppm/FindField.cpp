@@ -18,6 +18,8 @@
 // Find field type field in array field_type, returning the index into the
 //   field array or -1 if it is not there.
 
+#include "cello.hpp"
+
 #include "enzo.hpp"
  
  

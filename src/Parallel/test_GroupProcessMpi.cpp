@@ -10,8 +10,10 @@
 #ifdef CONFIG_USE_MPI
 
 #include "cello.hpp"
-#include "test.hpp"
+
 #include "parallel.hpp"
+
+#include "test.hpp"
 
 void init_array(double * array, int length, int rank)
 {

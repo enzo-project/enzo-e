@@ -6,6 +6,8 @@
 /// @date     Sat Aug 29 14:20:09 PDT 2009
 /// @brief    Initialize variables in cello_hydro.h
 
+#include "cello.hpp"
+
 #include "enzo.hpp"
 
 const bool debug = false;

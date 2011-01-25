@@ -8,10 +8,9 @@
  
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "test.hpp"
+#include "schedule.hpp"
 
-#include "parallel.def"
+#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Schedule.decl.h)
 

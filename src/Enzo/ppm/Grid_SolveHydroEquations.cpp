@@ -6,8 +6,9 @@
 /// @date      November, 1994
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
+#include "cello.hpp"
+
 #include "enzo.hpp"
-#include "error.hpp"
 
 static bool first_time = true;
 

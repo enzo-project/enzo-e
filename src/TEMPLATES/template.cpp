@@ -1,12 +1,16 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     filename.cpp
+/// @file     component_Classname.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @brief    Brief description of file filename.cpp
+/// @brief    Brief description of file component_Classname.cpp
 ///
-/// Detailed description of file filename.cpp
+/// Detailed description of file component_Classname.cpp
+
+#include "cello.hpp"
+
+#include "component.hpp"
 
 Classname::Classname() throw ()
 {

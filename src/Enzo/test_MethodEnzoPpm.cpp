@@ -7,21 +7,11 @@
 /// @todo     Move initialization into Simulation / EnzoSimulation
 /// @brief    Program implementing unit tests for the MethodEnzoPpm class
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
 #include "cello.hpp"
 
-#include "method.hpp"
-#include "error.hpp"
-#include "monitor.hpp"
-#include "parameters.hpp"
-#include "parallel.hpp"
-#include "test.hpp"
 #include "enzo.hpp"
-#include "simulation.hpp"
-#include "parallel.def"
+
+#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_MethodEnzoPpm.decl.h)
 

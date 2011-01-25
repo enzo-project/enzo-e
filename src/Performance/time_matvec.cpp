@@ -6,15 +6,11 @@
 /// @date      Thu Apr 24 16:25:43 PDT 2008
 /// @brief     Program timing sparse matrix-vector multiplies
  
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-
 #include "cello.hpp"
-#include "error.hpp"
+
 #include "performance.hpp"
 
-#include "parallel.def"
+#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(time_matvec.decl.h)
 

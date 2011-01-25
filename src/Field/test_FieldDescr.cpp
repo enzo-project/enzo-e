@@ -8,8 +8,9 @@
 
 #include "cello.hpp"
 
-#include "test.hpp"
 #include "field.hpp"
+
+#include "test.hpp"
 
 struct field_info_type {
   int field_density;

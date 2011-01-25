@@ -21,6 +21,8 @@
 // Somebody fix the error handling in this routine! please.
 //
 
+#include "cello.hpp"
+
 #include "enzo.hpp"
  
 float EnzoDescr::ComputeTimeStep()

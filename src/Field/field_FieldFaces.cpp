@@ -9,6 +9,7 @@
 /// Detailed description of file field_FieldFaces.cpp
 
 #include "cello.hpp"
+
 #include "field.hpp"
 
 FieldFaces::FieldFaces(FieldBlock * field_block) throw ()

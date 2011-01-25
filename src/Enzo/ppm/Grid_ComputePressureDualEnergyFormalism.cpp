@@ -9,6 +9,8 @@
 /// Compute the pressure at the requested time.  The pressure here is
 /// just the ideal-gas equation-of-state (dual energy version).
 
+#include "cello.hpp"
+
 #include "enzo.hpp"
  
 /* function prototypes */

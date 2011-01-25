@@ -6,15 +6,12 @@
 /// @date     2008-02-20
 /// @brief    Unit tests for the FieldFaces class
 
-#include <math.h>
-
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "test.hpp"
 #include "field.hpp"
 
-#include "parallel.def"
+#include "test.hpp"
+
 #include PARALLEL_CHARM_INCLUDE(test_FieldFaces.decl.h)
 
 

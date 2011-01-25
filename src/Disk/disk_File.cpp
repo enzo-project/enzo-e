@@ -7,6 +7,7 @@
 /// @brief    Implementation of the File class
 
 #include "cello.hpp"
+
 #include "disk.hpp"
 
 File::File() throw ()

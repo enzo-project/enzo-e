@@ -6,16 +6,12 @@
 /// @date     2010-04-19
 /// @brief    Unit tests for the Layout class
 
-#include <math.h>
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "test.hpp"
 #include "parallel.hpp"
 
-#define TOL 2e-16
+#include "test.hpp"
 
-#include "parallel.def"
 #include PARALLEL_CHARM_INCLUDE(test_Layout.decl.h)
 
 PARALLEL_MAIN_BEGIN

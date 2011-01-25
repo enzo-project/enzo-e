@@ -6,12 +6,9 @@
 /// @date      2009-10-15
 /// @brief     Implementation of the Performance class
 
-#include <string>
-
 #include "cello.hpp"
 
 #include "performance.hpp"
-#include "error.hpp" 
 
 Performance::Performance 
 (

@@ -7,6 +7,7 @@
 /// @brief     Initialize variables in cello_hydro.h
 
 #include "cello.hpp"
+
 #include "enzo.hpp"
 
 const bool debug = false;

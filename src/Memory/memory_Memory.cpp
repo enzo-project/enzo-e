@@ -6,14 +6,8 @@
 /// @date      Thu Sep  3 16:44:18 PDT 2009
 /// @brief     Functions for dynamic memory management
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <new>
-
 #include "cello.hpp"
 
-#include "error.hpp"
 #include "memory.hpp"
 
 #ifdef CONFIG_USE_MEMORY

@@ -8,13 +8,8 @@
 /// @todo     Add more info to Exception messages, e.g. parameter, expected type and actual type
 /// @brief    Read in a parameter file and access parameter values
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "monitor.hpp"
 #include "parameters.hpp"
 
 // Parameters Parameters::instance_; // (singleton design pattern)

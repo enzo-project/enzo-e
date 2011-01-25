@@ -6,8 +6,8 @@
 /// @date     2009-09-12
 /// @brief    Implementation of Tree4 class for generalized quadtrees
 
-#include <stdio.h>
 #include "cello.hpp"
+
 #include "mesh_node4.hpp"
 #include "mesh_tree4.hpp"
 

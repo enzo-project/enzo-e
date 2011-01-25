@@ -11,13 +11,9 @@
 
 //----------------------------------------------------------------------
 
-#include <string>
-
 #include "cello.hpp"
 
 #include "enzo.hpp"
-#include "parallel.hpp"
-#include "simulation.hpp"
 
 //**********************************************************************
 #include PARALLEL_CHARM_INCLUDE(enzo_p.decl.h)

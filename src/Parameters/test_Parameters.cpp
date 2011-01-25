@@ -7,17 +7,11 @@
 /// @date     Thu Feb 21 16:04:03 PST 2008
 /// @brief    Program implementing unit tests for the Parameters class
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "parallel.hpp"
-#include "monitor.hpp"
-#include "test.hpp"
 #include "parameters.hpp"
+
+#include "test.hpp"
 
 /// @def      CLOSE
 /// @brief    Local definition for testing whether two scalars are close

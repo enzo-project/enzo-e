@@ -9,11 +9,7 @@
 
 #include "cello.hpp"
 
-#include "method.hpp"
 #include "enzo.hpp"
-#include "error.hpp"
-#include "parameters.hpp"
-#include "parallel.hpp"
 
 //----------------------------------------------------------------------
 

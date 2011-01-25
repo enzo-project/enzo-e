@@ -6,21 +6,12 @@
 /// @date     2009-11-18
 /// @brief    Program implementing unit tests for the Monitor class
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include <string>
-
-#include "pngwriter.h"
-
 #include "cello.hpp"
-#include "test.hpp"
-#include "parallel.hpp"
+
 #include "monitor.hpp"
 
+#include "test.hpp"
 
-#include "parallel.def"
 #include PARALLEL_CHARM_INCLUDE(test_Monitor.decl.h)
 
 PARALLEL_MAIN_BEGIN

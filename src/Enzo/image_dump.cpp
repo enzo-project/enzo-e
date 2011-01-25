@@ -7,11 +7,8 @@
 /// @brief     Project fields to images
 
 #include "cello.hpp"
+
 #include "enzo.hpp"
-
-#include <string>
-
-#include "monitor.hpp"
 
 void EnzoDescr::image_dump
 (

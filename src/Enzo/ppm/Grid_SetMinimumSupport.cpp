@@ -6,6 +6,8 @@
 /// @date      November, 1998
 /// @brief     Set the energy to provide minimal pressure support
 
+#include "cello.hpp"
+
 #include "enzo.hpp"
  
 /* function prototypes */

@@ -6,15 +6,12 @@
 /// @date     2010-05-06
 /// @brief    Program implementing unit tests for the Simulation class
  
-#include <stdio.h>
-#include <string>
-
 #include "cello.hpp"
 
-#include "test.hpp"
-#include "enzo.hpp"
 #include "simulation.hpp"
-#include "parallel.def"
+#include "enzo.hpp" /* Required for EnzoSimulation */
+
+#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Simulation.decl.h)
 
@@ -29,7 +26,7 @@ PARALLEL_MAIN_BEGIN
 
   // Create simulation object
 
-  Error * error = new Error;
+  Error * error     = new Error;
   Monitor * monitor = new Monitor;
 
   // Create the simulation

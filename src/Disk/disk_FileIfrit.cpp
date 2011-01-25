@@ -6,12 +6,8 @@
 /// @date      Thu Feb 21 16:11:36 PST 2008
 /// @brief     Implementation of the FileIfrit class
 
-#include <stdio.h>
-
-#include <string>
-
 #include "cello.hpp"
-#include "error.hpp"
+
 #include "disk.hpp"
  
 //----------------------------------------------------------------------

@@ -15,6 +15,8 @@
 /
 ************************************************************************/
 
+#include "cello.hpp"
+
 #include "enzo.hpp" 
  
 /* Function prototypes */

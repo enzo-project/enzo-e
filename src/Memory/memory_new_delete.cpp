@@ -9,6 +9,7 @@
 //======================================================================
 
 #include "cello.hpp"
+
 #include "memory.hpp"
 
 #ifdef CONFIG_USE_MEMORY

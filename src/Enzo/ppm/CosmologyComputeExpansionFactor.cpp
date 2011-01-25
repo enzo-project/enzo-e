@@ -15,6 +15,8 @@
 /
 ************************************************************************/
  
+#include "cello.hpp"
+
 #include "enzo.hpp"
 
 #define OMEGA_TOLERANCE 1.0e-5

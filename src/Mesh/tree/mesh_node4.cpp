@@ -6,13 +6,10 @@
 /// @date     
 /// @brief    Node class for 2^2-trees Tree4
 
-#include <stdio.h>
-
 #include "cello.hpp"
 
-#include "error.hpp"
-
-#include "mesh_node4.hpp"
+#include "mesh_node16.hpp"
+#include "mesh_tree16.hpp"
 
 //----------------------------------------------------------------------
 

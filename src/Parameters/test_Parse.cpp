@@ -10,7 +10,7 @@
 
 #include "parameters.hpp"
 
-#include "parallel.def"
+#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Parse.decl.h)
 

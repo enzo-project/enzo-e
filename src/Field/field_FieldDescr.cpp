@@ -7,11 +7,8 @@
 /// @todo     Allow id_field == -1 (== e.g. all_fields) for set_*(id_field,...)
 /// @brief    Implementation of the FieldDescr class
 
-#include <assert.h>
-
 #include "cello.hpp"
 
-#include "error.hpp"
 #include "field.hpp"
 
 //----------------------------------------------------------------------

@@ -6,19 +6,12 @@
 /// @date      Thu Sep  3 16:37:24 PDT 2009
 /// @brief     Program implementing unit tests for the Memory component
  
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <string>
-
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "performance.hpp"
 #include "memory.hpp"
+
 #include "test.hpp"
 
-#include "parallel.def"
 #include PARALLEL_CHARM_INCLUDE(test_Memory.decl.h)
 
 PARALLEL_MAIN_BEGIN

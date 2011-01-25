@@ -1,4 +1,6 @@
-#include <stdio.h>
+
+#include "cello.hpp"
+
 #include "enzo.hpp"
 
 void print_fields(int mx, int my)

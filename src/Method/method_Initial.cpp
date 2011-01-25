@@ -6,12 +6,9 @@
 /// @date     Mon Jul 13 11:12:25 PDT 2009
 /// @brief    Implements the Initial base class
 
-#include <string>
-
 #include "cello.hpp"
 
 #include "method.hpp"
-#include "field.hpp"
 
 //----------------------------------------------------------------------
 

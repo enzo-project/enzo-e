@@ -6,21 +6,11 @@
 /// @date     2009-10-28
 /// @brief    Test program for Tree4 and Tree16 classes
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <hdf5.h>
-
-#include <string>
-
 #include "cello.hpp"
 
-#include "error.hpp"
-#include "memory.hpp"
-#include "disk.hpp"
-#include "mesh_node4.hpp"
-#include "mesh_tree4.hpp"
-#include "mesh_node16.hpp"
-#include "mesh_tree16.hpp"
+#include "mesh.hpp"
+
+#include "test.hpp"
 
 #include "image.h"
 

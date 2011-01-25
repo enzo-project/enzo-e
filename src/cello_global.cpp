@@ -12,7 +12,6 @@
 #include "cello.hpp"
 
 #include "error.hpp"
-/* #include "parameters.hpp" */
 #include "monitor.hpp"
 
 //----------------------------------------------------------------------

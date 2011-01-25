@@ -18,6 +18,8 @@
  
 // Copy the current baryon fields to the old baryon fields/
  
+#include "cello.hpp"
+
 #include "enzo.hpp"
  
 int EnzoDescr::SetExternalBoundaryValues()

@@ -28,6 +28,8 @@
 ///                * - the utem given below assumes that mu = 1, so you must
 ///                    multiply the resulting temperature field by mu.
  
+#include "cello.hpp"
+
 #include "enzo.hpp"
 
 /* function prototypes */

@@ -11,8 +11,6 @@
 ///    format.  This file is sym-linked or copied to image.h before
 ///    compiling.
 
-#include "pngwriter.h"
-
 #include "cello.hpp"
 
 #include "enzo.hpp"

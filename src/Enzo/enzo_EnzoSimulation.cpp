@@ -11,8 +11,6 @@
 
 #include "enzo.hpp"
 
-#include "simulation.hpp"
-
 //----------------------------------------------------------------------
 
 EnzoSimulation::EnzoSimulation(Error   * error,

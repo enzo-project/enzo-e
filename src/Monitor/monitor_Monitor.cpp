@@ -8,8 +8,8 @@
 /// @brief     Routines for simple output of text, plots, and graphs
 
 #include "cello.hpp"
+
 #include "monitor.hpp" 
-#include "error.hpp" 
 
 // Monitor * Monitor::instance_ = 0; // (singleton design pattern)
 

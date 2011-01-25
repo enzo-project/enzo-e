@@ -7,11 +7,10 @@
 /// @brief    Program implementing unit tests for the Mpi class
 
 
-#include <stdio.h>
-#include <string>
-
 #include "cello.hpp"
+
 #include "parallel.hpp"
+
 #include "test.hpp"
 
 int main(int argc, char ** argv)

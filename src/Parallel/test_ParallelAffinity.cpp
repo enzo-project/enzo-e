@@ -8,8 +8,9 @@
 /// @brief    Program implementing unit tests for the ParallelAffinity
 
 #include "cello.hpp"
-#include "mpi.h" 
+
 #include "parallel.hpp"
+
 #include "test.hpp"
 
 int main(int argc, char ** argv)

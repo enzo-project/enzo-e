@@ -7,6 +7,7 @@
 /// @brief    Implementation of the FieldBlock class
 
 #include "cello.hpp"
+
 #include "field.hpp"
 
 FieldBlock::FieldBlock() throw()
