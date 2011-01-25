@@ -18,7 +18,8 @@ class EnzoSimulation : public Simulation {
 public: // interface
 
   /// Constructor
-  EnzoSimulation(Global * global) throw();
+  EnzoSimulation(Error   * error,
+		 Monitor * monitor) throw();
 
   /// Destructor
   ~EnzoSimulation() throw()
@@ -29,7 +30,7 @@ public: // interface
   { return enzo_descr_; };
 
   /// Override Simulation initialize
-  void initialize(std::string parameter_file) throw ();
+  void initialize(FILE * fp) throw ();
 
 protected: // virtual functions
 

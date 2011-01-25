@@ -9,10 +9,6 @@
 /// @date     Tue Oct 27 12:32:07 PDT 2009
 /// @brief    [\ref Mesh] Declaration of the Node16 class 
 
-#include <stdlib.h>
-#include "cello.hpp"
-#include "mesh_node.hpp"
-
 class Tree16;
 
 class Node16 {

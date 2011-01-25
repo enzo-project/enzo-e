@@ -39,9 +39,8 @@ PARALLEL_MAIN_BEGIN
 
   // Create global objects
 
-  Global     * global = new Global;
-
-  Monitor * monitor = global->monitor();
+  Error   * error   = new Error;
+  Monitor * monitor = new Monitor;
 
   // Initialize monitor
 
@@ -78,7 +77,7 @@ PARALLEL_MAIN_BEGIN
 
   // Initialize for generic hydrodynamics
 
-  EnzoDescr enzo(global);
+  EnzoDescr enzo;
   enzo.initialize_hydro ();
 
   // Initialize for specific problem type

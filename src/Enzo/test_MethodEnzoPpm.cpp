@@ -158,19 +158,20 @@ PARALLEL_MAIN_BEGIN
 
   // Initialize cross-cutting components
 
-  Global     * global = new Global;
-
-  Monitor    * monitor    = global->monitor();
-  Parameters * parameters = global->parameters();
-  FileHdf5   hdf5;
+  Error     * error    = new Error;
+  Monitor   * monitor  = new Monitor;
 
   // Create top-level Simulation object
 
-  Simulation * simulation = new EnzoSimulation(global);
+  Simulation * simulation = new EnzoSimulation(error,monitor);
 
-  simulation->initialize("input/test_MethodEnzoPpm.in");
+  FILE * fp = fopen ("input/test_MethodEnzoPpm.in","r");
+
+  simulation->initialize(fp);
 
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  //   FileHdf5   hdf5;
 
   // output_progress(monitor,cycle,time,dt);
   // output_images(monitor,cycle,field_block);
@@ -219,10 +220,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_finalize();
 
-  //  delete data_block;
-  delete global;
-  //  delete parallel;
+  delete error;
+  delete monitor;
   delete simulation;
+
+  fclose (fp);
 
   PARALLEL_EXIT;
 }

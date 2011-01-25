@@ -10,8 +10,6 @@
 /// @bug      Implementations of Tree4 and Tree16 are essentially identical
 /// @brief    [\ref Mesh] Declaration of the Tree16 class 
 
-#include "error.hpp"
-
 /// @def      MAX_LEVELS
 /// @brief    Maximum number of tree levels
 #define MAX_LEVELS 64

@@ -8,13 +8,11 @@
 
 #include "cello.hpp"
 
-#include "field.hpp"
-#include "parameters.hpp"
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
-EnzoDescr::EnzoDescr(Global * global) throw ()
+EnzoDescr::EnzoDescr() throw ()
   : ComovingCoordinates(0),
     UseMinimumPressureSupport(0),
     MinimumPressureSupportParameter(0),

@@ -20,9 +20,10 @@ public: // interface
 
   /// Create a new EnzoControl
 
-  EnzoControl(Global * global,
+  EnzoControl(Error     * error,
+	      Monitor   * monitor,
 	      EnzoDescr * enzo)
-    : Control(global),
+    : Control(error,monitor),
       enzo_(enzo)
   {};
 

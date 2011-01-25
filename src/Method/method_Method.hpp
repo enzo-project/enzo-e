@@ -18,8 +18,12 @@ class Method {
 public: // interface
 
   /// Create a new Method
-  Method(Global * global) throw()
-    : global_(global)
+  Method(Error      * error,
+	 Monitor    * monitor,
+	 Parameters * parameters) throw()
+    : error_     (error),
+      monitor_   (monitor),
+      parameters_(parameters)
   {};
 
 public: // virtual functions
@@ -63,8 +67,14 @@ protected: // functions
 
 protected: // attributes
 
-  /// Global
-  Global * global_;
+  /// Error
+  Error * error_;
+
+  /// Monitor
+  Monitor * monitor_;
+
+  /// Parameters
+  Parameters * parameters_;
 
   /// List of argument types, e.g. argument_type_field
   std::vector<argument_enum> argument_types_;

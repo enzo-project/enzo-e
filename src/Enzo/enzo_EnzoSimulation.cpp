@@ -8,28 +8,29 @@
 /// @brief    Implementation of EnzoSimulation user-dependent class member functions
 
 #include "cello.hpp"
+
 #include "enzo.hpp"
 
-#include "parameters.hpp"
 #include "simulation.hpp"
 
 //----------------------------------------------------------------------
 
-EnzoSimulation::EnzoSimulation(Global * global) throw ()
-  : Simulation(global),
-    enzo_descr_(new EnzoDescr(global_))
+EnzoSimulation::EnzoSimulation(Error   * error,
+			       Monitor * monitor) throw ()
+  : Simulation(error,monitor),
+    enzo_descr_(new EnzoDescr())
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::initialize(std::string parameter_file) throw()
+void EnzoSimulation::initialize(FILE * fp) throw()
 {
   // Call initialize for Simulation base class
-  Simulation::initialize(parameter_file);
+  Simulation::initialize(fp);
 
   // Call initialize for Enzo-specific Simulation
-  enzo_descr_->initialize(global_->parameters());
+  enzo_descr_->initialize(parameters_);
 
   // @@@ WRITE OUT ENZO DESCRIPTION FOR DEBUGGING
   enzo_descr_->write(stdout);
@@ -41,7 +42,7 @@ Control *
 EnzoSimulation::create_control_ (std::string control_name) throw ()
 /// @param control_name   Name of the control method to create
 {
-  return new EnzoControl(global_,enzo_descr_);
+  return new EnzoControl(error_, monitor_,enzo_descr_);
 }
 
 //----------------------------------------------------------------------
@@ -63,7 +64,7 @@ EnzoSimulation::create_initial_ ( std::string initial_name ) throw ()
   Initial * initial = 0;
 
   if (initial_name == "implosion2")  
-    initial = new EnzoInitialImplosion2 (global_,enzo_descr_);
+    initial = new EnzoInitialImplosion2 (error_, monitor_, enzo_descr_);
 
   if (initial == 0) {
     char buffer[80];
@@ -84,9 +85,9 @@ EnzoSimulation::create_method_ ( std::string method_name ) throw ()
   MethodHyperbolic * method = 0;
 
   if (method_name == "ppm")
-    method = new EnzoMethodPpm  (global_,enzo_descr_);
+    method = new EnzoMethodPpm  (error_,monitor_,parameters_,enzo_descr_);
   if (method_name == "ppml")
-    method = new EnzoMethodPpml (global_,enzo_descr_);
+    method = new EnzoMethodPpml (error_,monitor_,parameters_,enzo_descr_);
 
   if (method == 0) {
     char buffer[80];

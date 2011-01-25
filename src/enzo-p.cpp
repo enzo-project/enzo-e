@@ -50,13 +50,12 @@ PARALLEL_MAIN_BEGIN
   // create globals
   //-------------------------
 
-  Global * global = new Global;
+  Error   * error   = new Error;
+  Monitor * monitor = new Monitor;
 
   //-------------------------
   // initialize monitor
   //-------------------------
-
-  Monitor    * monitor    = global->monitor();
 
   monitor->set_active(parallel->rank()==0);
 
@@ -94,11 +93,11 @@ PARALLEL_MAIN_BEGIN
   // Initialize simulation
   //-------------------------
 
-  EnzoSimulation simulation (global);
+  EnzoSimulation simulation (error,monitor);
 
   // read parameter file
 
-  simulation->initialize(fp);
+  simulation.initialize(fp);
   
   //==================================================
   // FINALIZE
@@ -107,7 +106,8 @@ PARALLEL_MAIN_BEGIN
   monitor->print ("END ENZO-P");
 
   delete parameters;
-  delete global;
+  delete monitor;
+  delete error;
 
   PARALLEL_EXIT;
 }

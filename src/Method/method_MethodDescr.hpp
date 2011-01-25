@@ -20,11 +20,13 @@ class MethodDescr {
 public: // interface
 
   /// Constructor
-  MethodDescr(Global * global) throw()
+  MethodDescr(Error   * error,
+	      Monitor * monitor) throw()
     : method_control_(0),
       method_timestep_(0),
       method_hyperbolic_(0),
-      global_ (global)
+      error_(error),
+      monitor_(monitor)
   {
 
     // Set "default" method control and timestepping routines
@@ -58,7 +60,9 @@ protected: // attributes
   Control *                       method_control_;
   Timestep *                      method_timestep_;
   std::vector<MethodHyperbolic *> method_hyperbolic_;
-  Global *                        global_;
+
+  Error *                         error_;
+  Monitor *                       monitor_;
 };
 
 #endif /* METHOD_METHOD_DESCR_HPP */

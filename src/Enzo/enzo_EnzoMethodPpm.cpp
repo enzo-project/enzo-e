@@ -39,13 +39,11 @@ void EnzoMethodPpm::initialize (DataDescr * data_descr) throw()
 //     add_argument_(argument_field, "velocity_z", access_read_write, data_descr);
 //   }
 
-  Parameters * parameters = global_->parameters();
+  parameters_->set_current_group("Method","ppm");
 
-  parameters->set_current_group("Method","ppm");
-
-  enzo_->PPMFlatteningParameter = parameters->value_logical("flattening",true);
-  enzo_->PPMDiffusionParameter  = parameters->value_logical("diffusion",true);
-  enzo_->PPMSteepeningParameter = parameters->value_logical("steepening",true);
+  enzo_->PPMFlatteningParameter = parameters_->value_logical("flattening",true);
+  enzo_->PPMDiffusionParameter  = parameters_->value_logical("diffusion",true);
+  enzo_->PPMSteepeningParameter = parameters_->value_logical("steepening",true);
 }
 
 //----------------------------------------------------------------------

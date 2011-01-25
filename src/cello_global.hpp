@@ -12,72 +12,72 @@
 #include "error.hpp"
 #include "monitor.hpp"
 
-class Global {
+// class Global {
 
-  /// @class    Global
-  /// @ingroup  Global
-  /// @brief    [\ref Global] Object for storing cross-cutting objects, including monitor, error
+//   /// @class    Global
+//   /// @ingroup  Global
+//   /// @brief    [\ref Global] Object for storing cross-cutting objects, including monitor, error
 
-public: // interface
+// public: // interface
 
-  /// Constructor
-  Global() throw();
+//   /// Constructor
+//   Global() throw();
 
-  /// Destructor
-  ~Global() throw();
+//   /// Destructor
+//   ~Global() throw();
 
-private: // prohibit copy constructor
+// private: // prohibit copy constructor
 
-  /// Copy constructor
-  Global(const Global & global) throw()
-  {
-  }
+//   /// Copy constructor
+//   Global(const Global & global) throw()
+//   {
+//   }
 
-private: // prohibit assignment
+// private: // prohibit assignment
 
-  /// Assignment operator
-  Global & operator= (const Global & global) throw();
+//   /// Assignment operator
+//   Global & operator= (const Global & global) throw();
 
-public:
+// public:
 
-  /// Access error object
+//   /// Access error object
 
-  Error * error() 
-  { return error_; };
+//   Error * error() 
+//   { return error_; };
 
-  /// Access monitor object
+//   /// Access monitor object
 
-  Monitor * monitor() 
-  { return monitor_; };
+//   Monitor * monitor() 
+//   { return monitor_; };
 
-//   /// Access parameters object
+// //   /// Access parameters object
 
-//   Parameters * parameters() 
-//   { return parameters_; };
+// //   Parameters * parameters() 
+// //   { return parameters_; };
 
-//   /// Access memory object
+// //   /// Access memory object
 
-//   Memory * memory() { return memory_; };
+// //   Memory * memory() { return memory_; };
 
 
-private: // attributes
+// private: // attributes
 
-  /// Error object
-  Error * error_;
+//   /// Error object
+//   Error * error_;
 
-  /// Monitor object
-  Monitor * monitor_;
+//   /// Monitor object
+//   Monitor * monitor_;
 
-//   /// Parameters object
-//   Parameters * parameters_;
+// //   /// Parameters object
+// //   Parameters * parameters_;
 
-//   /// Memory object
-//   Memory * memory_;
+// //   /// Memory object
+// //   Memory * memory_;
 
-  ///  Performance object
-  // Performance * performance_;
+//   ///  Performance object
+//   // Performance * performance_;
 
-};
+// };
 
 #endif /* CELLO_GLOBAL_HPP */
 

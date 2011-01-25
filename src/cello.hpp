@@ -11,7 +11,7 @@
 
 #include "cello_config.def"
 
-#include "cello_functions.hpp"
+#include "cello_macros.hpp"
 #include "cello_precision.hpp"
 #include "cello_global.hpp"
 

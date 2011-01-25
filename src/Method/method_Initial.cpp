@@ -34,7 +34,7 @@ void Initial::add_argument_
   sprintf (buffer,"Method %s: adding %s", 
 	   method_name().c_str(), 
 	   argument_name.c_str());
-  global_->monitor()->print (buffer);
+  monitor_->print (buffer);
 
   // Add method argument information
   argument_types_.push_back(argument);

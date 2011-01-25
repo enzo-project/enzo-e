@@ -39,22 +39,22 @@ const char * component_name [] = {
   "task"
 };
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-Global::Global() throw()
-{
-  error_      = new Error;
-  monitor_    = new Monitor();
-//   parameters_ = new Parameters(monitor_);
-  //    memory_     = new Memory;
-}
+// Global::Global() throw()
+// {
+//   error_      = new Error;
+//   monitor_    = new Monitor;
+// //   parameters_ = new Parameters(monitor_);
+//   //    memory_     = new Memory;
+// }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-Global::~Global() throw()
-{
-  delete error_;
-//   delete parameters_;
-  delete monitor_;
-  //    delete [] memory_;
-}
+// Global::~Global() throw()
+// {
+//   delete error_;
+// //   delete parameters_;
+//   delete monitor_;
+//   //    delete [] memory_;
+// }

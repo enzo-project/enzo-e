@@ -20,8 +20,10 @@ class Control {
 public: // interface
 
   /// Constructor
-  Control(Global * global) throw()
-    : global_(global),
+  Control(Error   * error,
+	  Monitor * monitor) throw()
+    : error_(error),
+      monitor_(monitor),
       time_stop_(-1),
       cycle_stop_(-1)
   {};
@@ -71,8 +73,11 @@ public: // interface
 
 protected:
 
-  /// Global objects
-  Global * global_;
+  /// Error object
+  Error * error_;
+
+  /// Monitor object
+  Monitor * monitor_;
 
   /// Stopping time
   double time_stop_;

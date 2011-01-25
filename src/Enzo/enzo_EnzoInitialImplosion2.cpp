@@ -15,10 +15,11 @@
 
 EnzoInitialImplosion2::EnzoInitialImplosion2
 (
- Global    * global,
+ Error     * error,
+ Monitor   * monitor,
  EnzoDescr * enzo_descr
  ) throw ()
-  : Initial(global),
+  : Initial(error, monitor),
     enzo_descr_(enzo_descr)
 {}
 

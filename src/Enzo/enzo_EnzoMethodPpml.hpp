@@ -18,10 +18,12 @@ class EnzoMethodPpml : public MethodHyperbolic {
 public: // interface
 
 /// Creae a new EnzoMethodPpml object
-EnzoMethodPpml(Global * global,
-	       EnzoDescr * enzo)
-  : MethodHyperbolic (global),
-    enzo_(enzo)
+  EnzoMethodPpml(Error      * error,
+		 Monitor    * monitor,
+		 Parameters * parameters,
+		 EnzoDescr * enzo)
+    : MethodHyperbolic (error,monitor,parameters),
+      enzo_(enzo)
   {};
 
   /// Perform any method-specific initialization

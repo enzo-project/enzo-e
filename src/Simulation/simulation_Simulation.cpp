@@ -9,15 +9,15 @@
 #include "cello.hpp"
 
 #include "simulation.hpp"
-#include "mesh.hpp"
-#include "method.hpp" 
 
 /// Initialize the Simulation object
-Simulation::Simulation(Global * global)
+Simulation::Simulation(Error      * error,
+		       Monitor    * monitor,
+		       Parameters * parameters)
   : dimension_(0),
-    global_(global),
-    parameters_ ( new Parameters (global->monitor()),
-    //
+    error_      (error      ? error      : new Error),
+    monitor_    (monitor    ? monitor    : new Monitor),
+    parameters_ (parameters ? parameters : new Parameters (monitor)),
     mesh_(0),
     data_descr_(0),
     timestep_(0),
@@ -142,9 +142,16 @@ void Simulation::extents (double * xmin, double *xmax,
 
 //----------------------------------------------------------------------
 
-Global * Simulation::global() const throw()
+Error * Simulation::error() const throw()
 {
-  return global_;
+  return error_;
+}
+
+//----------------------------------------------------------------------
+
+Monitor * Simulation::monitor() const throw()
+{
+  return monitor_;
 }
 
 //----------------------------------------------------------------------

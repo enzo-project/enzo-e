@@ -18,7 +18,8 @@ class EnzoInitialImplosion2 : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialImplosion2(Global    * global,
+  EnzoInitialImplosion2(Error     * error,
+			Monitor   * monitor,
                         EnzoDescr * enzo_descr) throw();
 
   /// Perform any method-specific initialization

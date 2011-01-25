@@ -18,8 +18,10 @@ class MethodHyperbolic : public Method {
 public: // interface
 
   /// Create a new MethodHyperbolic
-  MethodHyperbolic(Global * global) throw()
-    : Method(global)
+  MethodHyperbolic(Error      * error,
+		   Monitor    * monitor,
+		   Parameters * parameters) throw()
+    : Method(error,monitor,parameters)
   { }
 
 public: // virtual functions
@@ -62,18 +64,6 @@ protected: // functions
 		     DataDescr   * data_descr = 0) throw();
 
 protected: // attributes
-
-//   /// Global
-//   Global * global_;
-
-//   /// List of argument types, e.g. argument_type_field
-//   std::vector<argument_enum> argument_types_;
-
-//   /// List of argument names, e.g. "Density", "Velocity-X", etc.
-//   std::vector<std::string>   argument_names_;
-
-//   /// List of argument access types, e.g. access_read_write
-//   std::vector<access_enum>   access_types_;
 
 };
 

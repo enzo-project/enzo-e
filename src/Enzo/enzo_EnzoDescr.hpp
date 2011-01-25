@@ -31,7 +31,7 @@ class EnzoDescr {
 public: // interface
 
   /// Constructor
-  EnzoDescr(Global * global) throw();
+  EnzoDescr() throw();
 
   /// Destructor
   ~EnzoDescr() throw();

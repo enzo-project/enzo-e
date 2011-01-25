@@ -20,7 +20,9 @@ class Simulation {
 public: // interface
 
   /// Initialize the Simulation object
-  Simulation(Global * global);
+  Simulation(Error      * error = 0,
+	     Monitor    * monitor = 0,
+	     Parameters * parameters = 0);
 
   //----------------------------------------------------------------------
   // Big Three
@@ -64,8 +66,11 @@ public: // interface
 		double * ymin = 0, double *ymax = 0,
 		double * zmin = 0, double *zmax = 0) throw();
 
-  /// Return the Global class (parameters, monitor, error, parallel, etc.)
-  Global * global() const throw();
+  /// Return the Simulation's Error object
+  Error * error() const throw();
+
+  /// Return the Simulation's Monitor object
+  Monitor * monitor() const throw();
 
 
   /// Return the Mesh
@@ -142,7 +147,7 @@ protected: // attributes
   //----------------------------------------------------------------------
 
   /// Dimension or rank of the simulation
-  int    dimension_; 
+  int  dimension_; 
 
   /// Lower and upper domain extents
   double extent_[6];
@@ -151,8 +156,11 @@ protected: // attributes
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
 
-  /// "global" data (parameters, monitor, error, parallel, etc.)
-  Global * global_;
+  /// Error object
+  Error * error_;
+
+  /// Monitor object
+  Monitor * monitor_;
 
   /// Parameters associated with this simulation
   Parameters * parameters_;

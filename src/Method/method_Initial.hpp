@@ -18,8 +18,10 @@ class Initial {
 public: // interface
 
   /// Create a new Initial
-  Initial(Global * global) throw()
-    : global_(global)
+  Initial(Error   * error,
+	  Monitor * monitor) throw()
+    : error_ (error),
+      monitor_ (monitor)
   {};
 
 public: // virtual functions
@@ -58,8 +60,11 @@ protected: // functions
 
 protected: // attributes
 
-  /// Global
-  Global * global_;
+  /// Error
+  Error * error_;
+
+  /// Monitor
+  Monitor * monitor_;
 
   /// List of argument types, e.g. argument_type_field
   std::vector<argument_enum> argument_types_;

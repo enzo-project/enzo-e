@@ -29,7 +29,8 @@ PARALLEL_MAIN_BEGIN
 
   // Create simulation object
 
-  Global * global = new Global;
+  Error * error = new Error;
+  Monitor * monitor = new Monitor;
 
   // Create the simulation
 
@@ -38,20 +39,26 @@ PARALLEL_MAIN_BEGIN
   // NOTE: Need concrete EnzoSimulation class since Simulation is 
   //       an abstract base class
 
-  Simulation * simulation = new EnzoSimulation (global);
+  Simulation * simulation = new EnzoSimulation (error,monitor);
 
   unit_assert(true);
 
   // Initialize the simulation
 
   unit_func("initialize");
-  simulation->initialize("input/implosion.in");
+
+  FILE * fp = fopen ("input/implosion.in","r");
+  simulation->initialize(fp);
+
   unit_assert(true);
 
   // Test accessor functions
 
-  unit_func("global");
-  unit_assert (simulation->global() == global);
+  unit_func("error");
+  unit_assert (simulation->error() == error);
+
+  unit_func("monitor");
+  unit_assert (simulation->monitor() == monitor);
 
   unit_func("mesh");
   unit_assert (simulation->mesh() != NULL);
@@ -106,6 +113,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(false);
 
   delete simulation;
+  fclose (fp);
 
   unit_finalize();
 

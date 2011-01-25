@@ -39,6 +39,7 @@ enum access_enum {
 
 #include "error.hpp"
 #include "mesh.hpp"
+#include "parameters.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
