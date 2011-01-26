@@ -44,7 +44,7 @@ if (parallel_type == "charm"):
 
 libraries = env.Library ('parallel', [sources])
 tests = []
-if (parallel_type == "mpi" or parallel_type == "ampi"):
+if (parallel_type != "charm"):
 	test_GroupProcessMpi  =  env.Program (['test_GroupProcessMpi.cpp',    sources])
 	tests.append(test_GroupProcessMpi)
 	test_Mpi              = env.Program (['test_Mpi.cpp',      sources])

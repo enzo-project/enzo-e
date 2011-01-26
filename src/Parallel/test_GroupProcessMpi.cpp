@@ -7,13 +7,12 @@
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Parallel class
 
-#ifdef CONFIG_USE_MPI
-
 #include "cello.hpp"
+#include "test.hpp"
 
 #include "parallel.hpp"
 
-#include "test.hpp"
+//----------------------------------------------------------------------
 
 void init_array(double * array, int length, int rank)
 {
@@ -22,6 +21,8 @@ void init_array(double * array, int length, int rank)
   }
   array[length-1] = -1.0*rank;
 }
+
+//----------------------------------------------------------------------
 
 bool test_array(double * array, int length, int rank, int value)
 {
@@ -42,28 +43,21 @@ bool test_array(double * array, int length, int rank, int value)
   return valid;
 }
 
-int main(int argc, char ** argv)
+//======================================================================
+
+#include PARALLEL_CHARM_INCLUDE(test_Parameters.decl.h)
+
+PARALLEL_MAIN_BEGIN
 {
 
-  // WARNING: Sometimes(?) replacing MPI_Init() with Mpi::init()
-  // crashes in LAM MPI WARNING: on gedeckt (r1650)
+  PARALLEL_INIT;
 
-  //--------------------------------------------------
-  Mpi::init(&argc,&argv); // BREAKS SOMETIMES
-  //  MPI_Init(&argc,&argv);
-  //--------------------------------------------------
+  GroupProcess * parallel = GroupProcess::create();
 
-  // WARNING: Replacing dynamically allocated process_group with
-  // WARNING: automatic crashes in LAM MPI on gedeckt (r1650)
+  int rank = parallel->rank();
+  int size = parallel->size();
 
-  //--------------------------------------------------
-  GroupProcess * process_group = GroupProcess::create();
-  //--------------------------------------------------
-
-  int rank = process_group->rank();
-  int size = process_group->size();
-
-  unit_init(rank,size);
+  unit_init(parallel->rank(), parallel->size());
 
   unit_class("GroupProcess");
 
@@ -74,7 +68,7 @@ int main(int argc, char ** argv)
   unit_assert(0 <= rank && rank < 4);
 
   unit_func("is_root");
-  unit_assert(process_group->is_root() == (rank == 0));
+  unit_assert(parallel->is_root() == (rank == 0));
 
   // Test that init_array() and test_array() work independently of Parallel
   const int n = 4;
@@ -82,33 +76,45 @@ int main(int argc, char ** argv)
 
   unit_func("wait");
 
-  for (int blocking_send = 0; blocking_send <= 1; blocking_send++) {
-    for (int blocking_recv = 0; blocking_recv <= 1; blocking_recv++) {
+#ifdef CONFIG_USE_MPI
+  const int num_blocking = 2;
+#else
+  const int num_blocking = 1;
+#endif
+
+  for (int blocking_send = 0; blocking_send < num_blocking; blocking_send++) {
+    for (int blocking_recv = 0; blocking_recv < num_blocking; blocking_recv++) {
 
       init_array(array_source,n+1,rank);
       init_array(array_dest,  n+1,rank);
       unit_assert(test_array(array_source,n+1,rank,rank));
 
-      GroupProcessMpi * process_group_mpi 
-	= dynamic_cast<GroupProcessMpi*> (process_group);
+#ifdef CONFIG_USE_MPI
 
-      process_group_mpi->set_send_blocking(blocking_send);
-      process_group_mpi->set_recv_blocking(blocking_recv);
+      // Blocking send or receive is specific to MPI
+
+      GroupProcessMpi * parallel_mpi 
+       	= dynamic_cast<GroupProcessMpi*> (parallel);
+
+      parallel_mpi->set_send_blocking(blocking_send);
+      parallel_mpi->set_recv_blocking(blocking_recv);
+
+#endif
 
       int rank_source = (rank+1)%size;
       int rank_dest   = (rank-1+size)%size;
       int array_size  = n*sizeof(double);
 
       void * handle_send = 
-	process_group->send_begin (rank_source, array_source, array_size);
+	parallel->send_begin (rank_source, array_source, array_size);
       void * handle_recv = 
-	process_group->recv_begin (rank_dest,   array_dest,   array_size);
+	parallel->recv_begin (rank_dest,   array_dest,   array_size);
 
-      process_group->wait(handle_recv);
-      process_group->wait(handle_send);
+      parallel->wait(handle_recv);
+      parallel->wait(handle_send);
 
-      process_group->send_end(handle_send);
-      process_group->recv_end(handle_recv);
+      parallel->send_end(handle_send);
+      parallel->recv_end(handle_recv);
 
       unit_assert(test_array(array_source,n+1,rank,rank));
       unit_assert(test_array(array_dest,  n+1,rank,rank_dest));
@@ -116,8 +122,8 @@ int main(int argc, char ** argv)
     }
   }
 
-  for (int blocking_send = 0; blocking_send <= 1; blocking_send++) {
-    for (int blocking_recv = 0; blocking_recv <= 1; blocking_recv++) {
+  for (int blocking_send = 0; blocking_send < num_blocking; blocking_send++) {
+    for (int blocking_recv = 0; blocking_recv < num_blocking; blocking_recv++) {
       // MPI_Isend MPI_Irecv
       // MPI_Isend MPI_Recv
       // MPI_Send  MPI_Irecv
@@ -128,32 +134,38 @@ int main(int argc, char ** argv)
       init_array(array_dest,  n+1,rank);
       unit_assert(test_array(array_source,n+1,rank,rank));
 
-      GroupProcessMpi * process_group_mpi 
-	= dynamic_cast<GroupProcessMpi*> (process_group);
+#ifdef CONFIG_USE_MPI
 
-      process_group_mpi->set_send_blocking(blocking_send);
-      process_group_mpi->set_recv_blocking(blocking_recv);
+      // Blocking send or receive is specific to MPI
+
+      GroupProcessMpi * parallel_mpi
+      	= dynamic_cast<GroupProcessMpi*> (parallel);
+
+      parallel_mpi->set_send_blocking(blocking_send);
+      parallel_mpi->set_recv_blocking(blocking_recv);
+
+#endif
 
       int rank_source = (rank+1)%size;
       int rank_dest   = (rank-1+size)%size;
       int array_size  = n*sizeof(double);
 
       void * handle_send = 
-	process_group->send_begin (rank_source, array_source, array_size);
+	parallel->send_begin (rank_source, array_source, array_size);
       void * handle_recv = 
-	process_group->recv_begin (rank_dest,   array_dest,   array_size);
+	parallel->recv_begin (rank_dest,   array_dest,   array_size);
 
       int counter = 0;
-      while ( ! process_group->test(handle_recv) ||
-	      ! process_group->test(handle_send) ) {
+      while ( ! parallel->test(handle_recv) ||
+	      ! parallel->test(handle_send) ) {
 	// spinwait
 	++ counter;
       }
 
       // assert recv completed and send completed
 
-      process_group->send_end(handle_send);
-      process_group->recv_end(handle_recv);
+      parallel->send_end(handle_send);
+      parallel->recv_end(handle_recv);
 
       unit_func("test");
 
@@ -166,32 +178,32 @@ int main(int argc, char ** argv)
   unit_func("sync");
   switch (rank) {
   case 0:
-    process_group->sync(1); // 0 - 1
-    process_group->sync(2); // 0 - 2
-    process_group->sync(3); // 0 - 3
+    parallel->sync(1); // 0 - 1
+    parallel->sync(2); // 0 - 2
+    parallel->sync(3); // 0 - 3
     break;
   case 1:
-    process_group->sync(0); // 0 - 1
-    process_group->sync(3); // 1 - 3
-    process_group->sync(2); // 1 - 2
+    parallel->sync(0); // 0 - 1
+    parallel->sync(3); // 1 - 3
+    parallel->sync(2); // 1 - 2
     break;
   case 2:
-    process_group->sync(3); // 2 - 3
-    process_group->sync(0); // 0 - 2
-    process_group->sync(1); // 1 - 2
+    parallel->sync(3); // 2 - 3
+    parallel->sync(0); // 0 - 2
+    parallel->sync(1); // 1 - 2
     break;
   case 3:
-    process_group->sync(2); // 2 - 3
-    process_group->sync(1); // 1 - 3
-    process_group->sync(0); // 0 - 3
+    parallel->sync(2); // 2 - 3
+    parallel->sync(1); // 1 - 3
+    parallel->sync(0); // 0 - 3
     break;
   }
   unit_assert(true);
 
   // --------------------------------------------------
   unit_func("barrier");
-  process_group->barrier();
-  delete process_group;
+  parallel->barrier();
+  delete parallel;
   
   unit_func("bulk_send_add");
   unit_assert(false);
@@ -207,21 +219,13 @@ int main(int argc, char ** argv)
   unit_assert(false);
 
   fflush(stdout);
-  Mpi::barrier();
+
   unit_finalize();
-  Mpi::finalize();
+
+  PARALLEL_EXIT;
+
 }
 
-#else
+PARALLEL_MAIN_END
 
-#include "test.hpp"
-
-int main(int argc, char ** argv)
-{
-  unit_init(1,0);
-  unit_class("GroupProcessMpi");
-  unit_assert(false);
-  unit_finalize();
-}
-
-#endif
+#include PARALLEL_CHARM_INCLUDE(test_GroupProcessMpi.def.h)

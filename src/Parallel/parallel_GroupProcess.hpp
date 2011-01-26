@@ -25,9 +25,7 @@ protected: // interface
 
 /// Protected since GroupProcess objects must be created with create()
 GroupProcess(int size = 1, int rank = 0) throw()
-  : ParallelGroup(size,rank),
-    send_blocking_    (true),
-    recv_blocking_    (true)
+  : ParallelGroup(size,rank)
   {  }
 
 
@@ -73,31 +71,6 @@ public: // interface
   virtual void bulk_wait(void * handle) throw() = 0;
 
   //--------------------------------------------------
-
-  /// Set whether send is blocking or non-blocking
-  void set_send_blocking (bool blocking)  throw()
-  { send_blocking_ = blocking; };
-
-  /// Set whether send is blocking or non-blocking
-  bool send_blocking ()  throw()
-  { return send_blocking_; };
-
-  /// Set whether recv is blocking or non-blocking
-  void set_recv_blocking (bool blocking)  throw()
-  { recv_blocking_ = blocking; };
-
-  /// Set whether recv is blocking or non-blocking
-  bool recv_blocking ()  throw()
-  { return recv_blocking_; };
-
-protected: // attributes
-
-  /// Whether to use blocking sends
-  bool send_blocking_;
-  
-  /// Whether to use blocking receives
-  bool recv_blocking_;
-
 
 };
 

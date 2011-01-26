@@ -81,27 +81,45 @@ public: // interface (Group)
   void bulk_wait(void * handle) throw();
 
   //--------------------------------------------------
+  // GroupProcessMpi-specific functions
+  //--------------------------------------------------
 
-  /// Set whether send is blocking or non-blocking
+  /// Set whether send is standard, buffered, synchronous, or ready
   void set_type_send (send_enum type)  throw()
   { send_type_ = type; };
 
-  /// Set whether send is type or non-type
-  send_enum type_send ()  throw()
+  /// Return whether send is standard, buffered, synchronous, or ready
+  send_enum type_send () throw()
   { return send_type_; };
+
+  /// Set whether send is blocking or non-blocking
+  void set_send_blocking (bool blocking)  throw()
+  { send_blocking_ = blocking; };
+
+  /// Set whether send is blocking or non-blocking
+  bool get_send_blocking () throw()
+  { return send_blocking_; };
+
+  /// Set whether recv is blocking or non-blocking
+  void set_recv_blocking (bool blocking)  throw()
+  { recv_blocking_ = blocking; };
+
+  /// Set whether recv is blocking or non-blocking
+  bool get_recv_blocking () throw()
+  { return recv_blocking_; };
 
 private: // functions
 
-  void check_mpi_err_(const char * function, int ierr)
+  void call_mpi_(const char * file, int line , const char * name, int ierr)
   {
     if (ierr != MPI_SUCCESS) {
       char message[ERROR_MESSAGE_LENGTH];
       char function[ERROR_MESSAGE_LENGTH];
-      sprintf (message,"%d: MPI error %d",rank_,ierr);
-      sprintf (function,"GroupProcessMpi::%s",function);
-      ERROR_MESSAGE(function,message);
+      sprintf (message,"MPI rank=%d  error=%d",rank_,ierr);
+      sprintf (function,"GroupProcessMpi::%s",name);
+      ERROR_MESSAGE_FULL(function,message,file,line);
     }
-  }
+  };
 
 private: // attributes
 
@@ -116,6 +134,12 @@ private: // attributes
 
   /// Whether to use standard, buffered, synchronous, or ready sends
   enum send_enum send_type_;
+
+  /// Whether to use blocking sends
+  bool send_blocking_;
+  
+  /// Whether to use blocking receives
+  bool recv_blocking_;
 
 };
 

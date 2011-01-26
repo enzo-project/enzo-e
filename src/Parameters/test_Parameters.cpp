@@ -1,4 +1,3 @@
-
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
@@ -6,16 +5,20 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:04:03 PST 2008
 /// @brief    Program implementing unit tests for the Parameters class
+//----------------------------------------------------------------------
 
 #include "cello.hpp"
+#include "test.hpp"
 
 #include "parameters.hpp"
 
-#include "test.hpp"
+//----------------------------------------------------------------------
 
 /// @def      CLOSE
 /// @brief    Local definition for testing whether two scalars are close
 #define CLOSE(a,b) ((((a) - (b)) / (fabs(a) + fabs(b))) < 1e-16)
+
+//----------------------------------------------------------------------
 
 void generate_input()
 {
@@ -96,7 +99,8 @@ void generate_input()
 
 }
 
-#include "parallel.def"
+//======================================================================
+
 #include PARALLEL_CHARM_INCLUDE(test_Parameters.decl.h)
 
 PARALLEL_MAIN_BEGIN

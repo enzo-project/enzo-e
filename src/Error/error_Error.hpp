@@ -25,6 +25,11 @@
 #define ERROR_MESSAGE(FUNCTION,MESSAGE) \
   { Error error; error.error_(__FILE__,__LINE__,FUNCTION,MESSAGE); }
 
+/// @def      ERROR_MESSAGE_LINE
+/// @brief    Handle a (lethal) error message with given line number
+#define ERROR_MESSAGE_FULL(FUNCTION,MESSAGE,FILE,LINE)			\
+  { Error error; error.error_(FILE,LINE,FUNCTION,MESSAGE); }
+
 /// @def      INCOMPLETE_MESSAGE
 /// @brief    Placeholder for code that is incomplete
 #define INCOMPLETE_MESSAGE(FUNCTION,MESSAGE) \

@@ -23,7 +23,9 @@ GroupProcessMpi::GroupProcessMpi(int process_first,
     comm_             (MPI_COMM_WORLD),
     process_first_    (process_first),
     process_last_plus_(process_last_plus),
-    send_type_        (send_standard)
+    send_type_        (send_standard),
+    send_blocking_    (true),
+    recv_blocking_    (true)
 {
   int size;
   MPI_Comm_size(MPI_COMM_WORLD,&size);
@@ -63,11 +65,11 @@ void GroupProcessMpi::sync (int rank, int tag) throw()
 {
   char buffer = 1;
   if (rank_ < rank) {
-    int ierr = MPI_Send (&buffer, 1, MPI_BYTE, rank, tag, comm_);
-    check_mpi_err_("sync",ierr);
+    call_mpi_ (__FILE__,__LINE__,"MPI_Send", MPI_Send 
+		    (&buffer, 1, MPI_BYTE, rank, tag, comm_));
   } else if (rank_ > rank) {
-    int ierr = MPI_Recv (&buffer, 1, MPI_BYTE, rank, tag, comm_, MPI_STATUS_IGNORE);
-    check_mpi_err_("sync",ierr);
+    call_mpi_ (__FILE__,__LINE__,"MPI_Recv", MPI_Recv
+		    (&buffer, 1, MPI_BYTE, rank, tag, comm_, MPI_STATUS_IGNORE));
   }
 }
 
@@ -76,15 +78,15 @@ void GroupProcessMpi::sync (int rank, int tag) throw()
 void * GroupProcessMpi::send_begin 
 (int rank_dest, void * buffer, int size, int tag) throw()
 {
-  int ierr;
   MPI_Request * handle = 0;
   if (send_blocking_) {
-    ierr = MPI_Send (buffer, size, MPI_BYTE, rank_dest, tag, comm_);
+    call_mpi_ (__FILE__,__LINE__,"MPI_Send",MPI_Send 
+		    (buffer, size, MPI_BYTE, rank_dest, tag, comm_));
   } else {
     handle = new MPI_Request;
-    ierr = MPI_Isend (buffer, size, MPI_BYTE, rank_dest, tag, comm_,handle);
+    call_mpi_ (__FILE__,__LINE__,"MPI_Isend",MPI_Isend
+		    (buffer, size, MPI_BYTE, rank_dest, tag, comm_,handle));
   }
-  check_mpi_err_("send",ierr);
   return (void *)handle;
 }
 
@@ -100,15 +102,16 @@ void GroupProcessMpi::send_end (void * handle) throw()
 void * GroupProcessMpi::recv_begin 
 (int rank_source, void * buffer, int size, int tag) throw()
 {
-  int ierr;
   MPI_Request * handle = 0;
   if (recv_blocking_) {
-    ierr = MPI_Recv (buffer, size, MPI_BYTE, rank_source, tag, comm_, MPI_STATUS_IGNORE);
+    call_mpi_(__FILE__,__LINE__,"MPI_Recv",MPI_Recv
+		   (buffer, size, MPI_BYTE, rank_source, tag, comm_, 
+		    MPI_STATUS_IGNORE));
   } else {
     handle = new MPI_Request;
-    ierr = MPI_Irecv (buffer, size, MPI_BYTE, rank_source, tag, comm_, handle);
+    call_mpi_(__FILE__,__LINE__,"MPI_Irecv", MPI_Irecv 
+		   (buffer, size, MPI_BYTE, rank_source, tag, comm_, handle));
   }
-  check_mpi_err_("recv",ierr);
   return handle;
 }
 
@@ -125,8 +128,8 @@ bool GroupProcessMpi::test (void * handle) throw()
 {
   int result = 1;
   if (handle != NULL) {
-    int ierr = MPI_Test((MPI_Request*) (handle), &result, MPI_STATUS_IGNORE);
-    check_mpi_err_("test",ierr);
+    call_mpi_(__FILE__,__LINE__,"MPI_Test",MPI_Test
+		   ((MPI_Request*) (handle), &result, MPI_STATUS_IGNORE));
   }
   return result;
 }
@@ -136,8 +139,8 @@ bool GroupProcessMpi::test (void * handle) throw()
 void GroupProcessMpi::wait (void * handle) throw()
 {
   if (handle != NULL) {
-    int ierr = MPI_Wait((MPI_Request*) (handle), MPI_STATUS_IGNORE);
-    check_mpi_err_("wait",ierr);
+    call_mpi_(__FILE__,__LINE__,"MPI_Wait",MPI_Wait
+		   ((MPI_Request*) (handle), MPI_STATUS_IGNORE));
   }
 }
 
