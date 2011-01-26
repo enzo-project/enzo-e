@@ -52,6 +52,15 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
+  int np;
+  if (PARALLEL_ARGC != 2) {
+    PARALLEL_PRINTF ("Usage: %s <num-procs>\n",PARALLEL_ARGV[0]);
+    PARALLEL_EXIT;
+  } else {
+    np = atoi(PARALLEL_ARGV[1]);
+  }
+
+
   GroupProcess * parallel = GroupProcess::create();
 
   int rank = parallel->rank();
@@ -62,16 +71,16 @@ PARALLEL_MAIN_BEGIN
   unit_class("GroupProcess");
 
   unit_func("size");
-  unit_assert(size == 4);
+  unit_assert(size == np);
 
   unit_func("rank");
-  unit_assert(0 <= rank && rank < 4);
+  unit_assert(0 <= rank && rank < np);
 
   unit_func("is_root");
   unit_assert(parallel->is_root() == (rank == 0));
 
   // Test that init_array() and test_array() work independently of Parallel
-  const int n = 4;
+  const int n = np;
   double array_source[n+1], array_dest[n+1];
 
   unit_func("wait");
