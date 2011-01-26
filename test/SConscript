@@ -243,8 +243,7 @@ Clean(env.RunParallel (
 
 env.RunParallel (parallel_type + '-enzo-p_implosion.unit','#/bin/enzo-p', ARGS='input/implosion.in')
 
-if (parallel_type == "mpi" or parallel_type == "ampi"):
-	env.RunParallel	(parallel_type + '-test_GroupProcessMpi.unit','#/bin/test_GroupProcessMpi')
+env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess')
 
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
@@ -257,7 +256,7 @@ if (parallel_type == "mpi" or parallel_type == "ampi"):
 # Prevent concurrent running of parallel jobs
 
 SideEffect('log.txt', 
-     [ parallel_type + '-test_GroupProcessMpi.unit', 
+     [ parallel_type + '-test_GroupProcess.unit', 
        parallel_type + '-enzo-p_implosion.unit'])
 
 

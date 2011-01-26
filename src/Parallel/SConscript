@@ -42,11 +42,18 @@ if (parallel_type == "charm"):
 # TARGETS
 #------------------------------
 
+if (parallel_type == "charm"):
+	test = 'test_GroupProcess'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
+
 libraries = env.Library ('parallel', [sources])
 tests = []
-if (parallel_type != "charm"):
-	test_GroupProcessMpi  =  env.Program (['test_GroupProcessMpi.cpp',    sources])
-	tests.append(test_GroupProcessMpi)
+
+test_GroupProcess  =  env.Program (['test_GroupProcess.cpp',    sources])
+tests.append(test_GroupProcess)
+
+if (parallel_type == "mpi" or parallel_type == "ampi"):
 	test_Mpi              = env.Program (['test_Mpi.cpp',      sources])
 	tests.append(test_Mpi)
 

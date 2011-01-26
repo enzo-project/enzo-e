@@ -1,4 +1,4 @@
-mainmodule test_GroupProcessMpi {
+mainmodule test_GroupProcess {
   readonly CProxy_Main mainProxy;
 
   mainchare Main {

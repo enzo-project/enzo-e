@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_GroupProcessMpi.cpp
+/// @file     test_GroupProcess.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @bug      Crashes in Parallel::initialize() in MPI_Init with LAM MPI
 /// @date     Tue Apr 20 14:19:04 PDT 2010
@@ -45,7 +45,7 @@ bool test_array(double * array, int length, int rank, int value)
 
 //======================================================================
 
-#include PARALLEL_CHARM_INCLUDE(test_Parameters.decl.h)
+#include PARALLEL_CHARM_INCLUDE(test_GroupProcess.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -228,4 +228,4 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_GroupProcessMpi.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_GroupProcess.def.h)

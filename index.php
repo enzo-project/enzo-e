@@ -223,7 +223,7 @@ test_summary("Memory",array("Memory"));
 test_summary("Mesh",array("DataDescr","Mesh","Patch")); 
 test_summary("Method",array("")); 
 test_summary("Monitor",array("Monitor")); 
-test_summary("Parallel",array("GroupProcessMpi","Layout")); 
+test_summary("Parallel",array("GroupProcess","Layout")); 
 test_summary("Parameters",array("Parameters")); 
 test_summary("Particles",array("")); 
 test_summary("Performance",array("Performance")); 
@@ -275,7 +275,7 @@ printf ("<img src=\"monitor_image_3.png\"></img>\n");
 printf ("<img src=\"monitor_image_4.png\"></img>\n");
 
 component("Parallel");
-tests("Parallel","test_GroupProcessMpi","test_GroupProcessMpi");
+tests("Parallel","test_GroupProcess","test_GroupProcess");
 tests("Parallel","test_Layout","test_Layout");
 
 
