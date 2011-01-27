@@ -1,7 +1,6 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
-#include "config.def"
 #include "fortran.def"
 c=======================================================================
 c///////////////////////  SUBROUTINE TWOSHOCK  \\\\\\\\\\\\\\\\\\\\\\\\\

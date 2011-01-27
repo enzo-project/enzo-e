@@ -1,11 +1,11 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_MethodEnzoPpm.cpp
+/// @file     test_EnzoMethodPpm.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 21 16:04:03 PST 2008
 /// @todo     Move initialization into Simulation / EnzoSimulation
-/// @brief    Program implementing unit tests for the MethodEnzoPpm class
+/// @brief    Program implementing unit tests for the EnzoMethodPpm class
 
 #include "cello.hpp"
 
@@ -13,7 +13,7 @@
 
 #include "test.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test_MethodEnzoPpm.decl.h)
+#include PARALLEL_CHARM_INCLUDE(test_EnzoMethodPpm.decl.h)
 
 //----------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ PARALLEL_MAIN_BEGIN
 
   Simulation * simulation = new EnzoSimulation(error,monitor);
 
-  FILE * fp = fopen ("input/test_MethodEnzoPpm.in","r");
+  FILE * fp = fopen ("input/test_EnzoMethodPpm.in","r");
 
   simulation->initialize(fp);
 
@@ -221,5 +221,5 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END;
 
-#include PARALLEL_CHARM_INCLUDE(test_MethodEnzoPpm.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_EnzoMethodPpm.def.h)
 

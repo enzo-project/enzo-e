@@ -28,11 +28,11 @@
 %=======================================================================
 
 %=======================================================================
-\section{Introduction} \label{s:intro}
+\chapter{Introduction} \label{s:intro}
 %=======================================================================
 
 %=======================================================================
-\section{Parameters}
+\chapter{Parameters}
 %=======================================================================
 
 \definecolor{darkgreen}{rgb}{0.0,0.5,0.0}
@@ -46,7 +46,7 @@
 % 6 description
 % 7 example
 % 8 default
-{\subsubsection{\code{#2} \code{#3}}
+{\subsection{\code{#1}:\code{#2}:\code{#3}}
 \begin{tabular}{|l|l|l|l|}  \hline & & & \\ [-1.5ex]
    \textcolor{red}{\code{#1}} & 
    \textcolor{red}{\code{#2}} &
@@ -71,7 +71,7 @@
 % % 6 description
 % % 7 example
 % % 8 default
-% {\subsubsection{\code{#1}: \code{#3}} 
+% {\subsection{\code{#1}: \code{#3}} 
 % \begin{tabbing}
 % xxxxxxxxxxxxxx\=\kill
 % Parameter: \> \textbf{\code{#3}} \\
@@ -87,7 +87,7 @@
 
 
 %-----------------------------------------------------------------------
-\subsection{\code{Boundary}}
+\section{\code{Boundary}}
 %-----------------------------------------------------------------------
 
 \Parameter
@@ -147,7 +147,7 @@ xxx\=xxx\=xxx\kill
 {}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Domain}}
+\section{\code{Domain}}
 %-----------------------------------------------------------------------
 
 \Parameter
@@ -168,7 +168,7 @@ xxx\=xxx\=xxx\kill
 {}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Field}}
+\section{\code{Field}}
 %-----------------------------------------------------------------------
 
 \Parameter
@@ -368,7 +368,7 @@ $|$ \code{"quadruple"} ] }
 % Group
 {Field}
 % subgroup
-{\textit{field-name}}
+{[ \textit{field-name} ]}
 % parameter
 {alias}
 % type
@@ -383,14 +383,14 @@ $|$ \code{"quadruple"} ] }
 {}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Initial}}
+\section{\code{Initial}}
 %-----------------------------------------------------------------------
 
 \Parameter
 % Group
 {Initial}
 % subgroup
-{\textit{field-name}}
+{[ \textit{field-name} ]}
 % parameter
 {value}
 % type
@@ -409,7 +409,7 @@ $|$ \code{"quadruple"} ] }
 % Group
 {Initial}
 % subgroup
-{\textit{field-name}}
+{[ \textit{field-name} ]}
 % parameter
 {file}
 % type
@@ -481,7 +481,7 @@ $|$ \code{"quadruple"} ] }
 {}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Stopping}}
+\section{\code{Stopping}}
 %-----------------------------------------------------------------------
 
 \Parameter
@@ -542,7 +542,7 @@ $|$ \code{"quadruple"} ] }
 
 
 %-----------------------------------------------------------------------
-\subsection{\code{Memory}}
+\section{\code{Memory}}
 %-----------------------------------------------------------------------
 
 \Parameter
@@ -621,7 +621,7 @@ $|$ \code{"quadruple"} ] }
 {}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Mesh}}
+\section{\code{Mesh}}
 %-----------------------------------------------------------------------
 
 \Parameter
@@ -776,7 +776,7 @@ $|$ \code{"quadruple"} ] }
 {}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Method}}
+\section{\code{Method}}
 %-----------------------------------------------------------------------
 
 \Parameter
@@ -1043,7 +1043,7 @@ $|$ \code{"quadruple"} ] }
 {}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Output}}
+\section{\code{Output}}
 %-----------------------------------------------------------------------
 
 \Parameter
@@ -1122,7 +1122,7 @@ $|$ \code{"quadruple"} ] }
 {}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Parallel}}
+\section{\code{Parallel}}
 %-----------------------------------------------------------------------
 
 %--------------------------------------------------
@@ -1358,7 +1358,7 @@ $|$ \code{"quadruple"} ] }
 {}
 
 %-----------------------------------------------------------------------
-\subsection{\code{Physics}}
+\section{\code{Physics}}
 %-----------------------------------------------------------------------
 
  	 	 	 	
@@ -1589,12 +1589,12 @@ $|$ \code{"quadruple"} ] }
 {}
 
 %=======================================================================
-\section{Test problems}
+\chapter{Test problems}
 %=======================================================================
-\subsection{Implosion}
+\section{Implosion}
 \verbatiminput{../../input/implosion.in}
 
-\subsection{Shock Pool}
+\section{Shock Pool}
 \verbatiminput{../../input/shock-pool.in}
 
 \end{document}

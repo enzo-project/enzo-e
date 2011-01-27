@@ -5,4 +5,15 @@
 #define ERROR_MESSAGE            CALL f_error(__FILE__,__LINE__)
 #define WARNING_MESSAGE          CALL f_warning(__FILE__,__LINE__)
 
-#define REALSUB REAL*8 
+#ifdef p4
+#define REALSUB real
+#endif
+
+#ifdef p8
+#define REALSUB real*8
+#endif
+
+#ifdef p16
+#define REALSUB real*16
+#endif
+

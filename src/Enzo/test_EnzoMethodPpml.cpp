@@ -1,7 +1,7 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_MethodEnzoPpml.cpp
+/// @file     test_EnzoMethodPpml.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Apr  1 16:19:18 PDT 2010
 /// @brief    Unit tests for the EnzoMethodPpml class
@@ -28,8 +28,8 @@ int main (int argc, char ** argv)
   DataDescr * data_descr = new DataDescr(new FieldDescr);
   DataBlock * data_block = new DataBlock(new FieldBlock);
 
-  unit_class ("MethodEnzoPpml");
-  MethodEnzoPpml ppml;
+  unit_class ("EnzoMethodPpml");
+  EnzoMethodPpml ppml;
 
   unit_func("initialize_block");
   ppml.initialize_block(data_block);

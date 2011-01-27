@@ -5,6 +5,10 @@
 /* DEFINES */
 /*----------------------------------------------------------------------*/
 
+#define p8
+#define r8
+
+#define MACH_EPSILON                      /* machine epsilon for the default precision */
 #define ENZO_FAIL                           0 /* Error handling */
 #define ENZO_SUCCESS                        1 /* Error handling */
 

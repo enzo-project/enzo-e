@@ -22,9 +22,9 @@ public: // interface
   /// Constructor
   MethodDescr(Error   * error,
 	      Monitor * monitor) throw()
-    : method_control_(0),
-      method_timestep_(0),
-      method_hyperbolic_(0),
+    : control_(0),
+      timestep_(0),
+      hyperbolic_(0),
       error_(error),
       monitor_(monitor)
   {
@@ -36,10 +36,10 @@ public: // interface
   /// Destructor
   ~MethodDescr() throw()
   {
-    delete method_control_;
-    delete method_timestep_;
-    for (size_t i=0; i<method_hyperbolic_.size(); i++) {
-      delete method_hyperbolic_[i];
+    delete control_;
+    delete timestep_;
+    for (size_t i=0; i<hyperbolic_.size(); i++) {
+      delete hyperbolic_[i];
     }
   }
 
@@ -47,19 +47,19 @@ public: // interface
 protected: // functions
 
   /// APPLICATION INHERITENCE OVERRIDE: Create named control method.
-  virtual Control * create_method_control_ (std::string name_method_control) = 0;
+  virtual Control * create_control_ (std::string name_control) = 0;
 
   /// APPLICATION INHERITENCE OVERRIDE: Create named timestep method.
-  virtual Timestep * create_method_timestep_ (std::string name_method_timestep) = 0;
+  virtual Timestep * create_timestep_ (std::string name_timestep) = 0;
 
   /// APPLICATION INHERITENCE OVERRIDE: Create named hyperbolic method.
-  virtual MethodHyperbolic * create_method_hyperbolic_ (std::string name_method_hyperbolic) = 0;
+  virtual MethodHyperbolic * create_hyperbolic_ (std::string name_hyperbolic) = 0;
 
 protected: // attributes
 
-  Control *                       method_control_;
-  Timestep *                      method_timestep_;
-  std::vector<MethodHyperbolic *> method_hyperbolic_;
+  Control *                       control_;
+  Timestep *                      timestep_;
+  std::vector<MethodHyperbolic *> hyperbolic_;
 
   Error *                         error_;
   Monitor *                       monitor_;

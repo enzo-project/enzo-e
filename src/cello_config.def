@@ -1,7 +1,20 @@
+
+/*--------------------------------------------------*/
+/* DEFAULT PRECISION                                */
+/*--------------------------------------------------*/
+
+/* Uncomment exactly one of the following defines:  */
+
 #define CONFIG_PRECISION_SINGLE
+
+/* #define CONFIG_PRECISION_DOUBLE */
+
+/*--------------------------------------------------*/
+/* OVERRIDE C++ new() / delete()                    */
+/*--------------------------------------------------*/
+
+/* Either uncomment or comment the following define: */
+
 #define CONFIG_USE_MEMORY
 
-#define NO_OPTIMIZE_CELL_WIDTH
-#define p8
-#define r8
-#define SMALL_INTS
+
