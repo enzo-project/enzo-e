@@ -10,13 +10,11 @@ namespace jacobi
   public:
     Counter (int count_max)
       : count_max_(count_max),
-	count_(count_max)
+	count_(0)
     {}
-    int wait()
+    int remaining()
     {
-      count_--;
-      if (count_ == 0) count_ = count_max_;
-      return count_ == count_max_;
+      return count_ = (count_max_ + count_ - 1) % count_max_;
     }
   };
 }

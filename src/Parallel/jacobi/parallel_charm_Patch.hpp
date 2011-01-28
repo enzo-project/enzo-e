@@ -66,7 +66,7 @@ private: // functions
   void print_ ();
 
   /// Write data to an HDF5 file
-  void store_ ();
+  void write_ ();
 
   /// Return the local sum-of-squares
   double norm_ ();
@@ -95,7 +95,7 @@ private: // attributes
   double * buffer_[3][2];
 
 
-  int cycle_store_;
+  int cycle_write_;
   int cycle_values_;
   int cycle_max_;
 

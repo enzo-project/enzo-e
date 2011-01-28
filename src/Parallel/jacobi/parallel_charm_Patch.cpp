@@ -11,11 +11,11 @@
 
 //----------------------------------------------------------------------
 
-CharmPatch::CharmPatch(int block_count, int block_size, int cycle_max,
-	     CProxy_Main main_proxy) 
+CharmPatch::CharmPatch(int num_blocks, int block_size, int cycle_max,
+		       CProxy_Main main_proxy) 
   : main_proxy_ (main_proxy),
     values_(0),
-    cycle_store_(1),
+    cycle_write_(1),
     cycle_values_(0),
     cycle_max_(cycle_max),
     receives_(6)
@@ -23,9 +23,9 @@ CharmPatch::CharmPatch(int block_count, int block_size, int cycle_max,
 
   // Number of blocks along each axis
 
-  nbx_ = block_count;
-  nby_ = block_count;
-  nbz_ = block_count;
+  nbx_ = num_blocks;
+  nby_ = num_blocks;
+  nbz_ = num_blocks;
 
   // Depth of ghost zone layer along each block face
 
@@ -149,7 +149,7 @@ void CharmPatch::p_receive(int axis, int face, int n, double * buffer_ghost)
   buffer_to_ghost_(axis, face, buffer_ghost);
 
   
-  if (receives_.wait()) {
+  if (receives_.remaining() == 0) {
     compute_();
   }
 }
@@ -179,7 +179,7 @@ void CharmPatch::compute_()
 
   delete [] values_old;
 
-  store_();
+  write_();
 
   main_proxy_.p_next(thisIndex.x,thisIndex.y,thisIndex.z,norm_());
 
@@ -413,9 +413,9 @@ double CharmPatch::norm_ ()
 
 //----------------------------------------------------------------------
 
-void CharmPatch::store_ ()
+void CharmPatch::write_ ()
 {
-  if (cycle_values_ % cycle_store_ == 0) {
+  if (cycle_values_ % cycle_write_ == 0) {
 
     hid_t file;
     hid_t dataset;

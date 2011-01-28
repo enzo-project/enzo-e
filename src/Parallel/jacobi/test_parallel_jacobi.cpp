@@ -4,15 +4,13 @@
 /// @file     test_parallel_jacobi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Aug  9 10:14:56 PDT 2010
-/// @brief    Prototype test program for combining charm++, MPI, and OMP
+/// @brief    Prototype test program for CHARM++
 
 
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "parallel_jacobi.hpp"
-
-#define BLOCK_CYCLE
 
 // ------------------------------ MAIN ------------------------------
 
@@ -30,8 +28,8 @@ private:
   int iteration_max_;
 
   int iteration_;
+  int num_blocks_;
   jacobi::Counter * blocks_;
-  int block_count_;
   CProxy_CharmPatch patches_;
 
 public:
@@ -52,13 +50,13 @@ public:
     iteration_max_ = atoi(main->argv[3]);
 
     iteration_     = 0;
-    block_count_   = problem_size_/block_size_;
-    blocks_        = new jacobi::Counter (block_count_*block_count_*block_count_);
+    num_blocks_   = problem_size_/block_size_;
+    blocks_        = new jacobi::Counter (num_blocks_*num_blocks_*num_blocks_);
 
     patches_       = 
       CProxy_CharmPatch::ckNew
-      (block_count_,block_size_,iteration_max_, thisProxy, 
-       block_count_,block_count_,block_count_);
+      (num_blocks_,block_size_,iteration_max_, thisProxy, 
+       num_blocks_,num_blocks_,num_blocks_);
 
     CkPrintf ("Evolve(%d)\n",iteration_);
     patches_.p_evolve();
@@ -71,8 +69,7 @@ public:
   void p_next(int ix, int iy, int iz, double s2)
   {
     norm_ += s2;
-#ifdef BLOCK_CYCLE
-    if (blocks_->wait()) {
+    if (blocks_->remaining() == 0) {
       if (++iteration_ >= iteration_max_) {
 	CkPrintf ("End computation %g time = %g\n",norm_,CkWallTimer());
 	CkExitAfterQuiescence();
@@ -82,18 +79,6 @@ public:
 	patches_.p_evolve();
       }
     }
-#else
-    if (blocks_->wait()) {
-      ++iteration_;
-      CkPrintf ("Evolve(%d) %g\n",iteration_,norm_);
-      norm_ = 0.0;
-    }
-    if (iteration_ >= iteration_max_) {
-      CkPrintf ("End computation %g time = %g\n",norm_,CkWallTimer());
-      CkExit();
-    } 
-    patches_(ix,iy,iz).p_evolve();
-#endif
   }
     
 };

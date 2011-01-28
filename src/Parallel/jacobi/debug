@@ -2,7 +2,7 @@
 
 rm *.hdf5 *.png
 
-test_jacobi 16 8 2
+test_parallel_jacobi 16 8 2
 
 set s = 1
 foreach f (*hdf5)
@@ -20,7 +20,7 @@ end
 
 rm *hdf5
 
-test_jacobi 16 16 2
+test_parallel_jacobi 16 16 2
 
 foreach f (*hdf5)
    set i = 0
