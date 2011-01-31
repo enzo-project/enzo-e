@@ -40,7 +40,7 @@ void Memory::initialize_() throw ()
 
 //----------------------------------------------------------------------
 
-void Memory::delete_() throw ()
+void Memory::finalize_() throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {

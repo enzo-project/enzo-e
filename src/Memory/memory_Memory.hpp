@@ -114,7 +114,7 @@ private: // functions
   void initialize_() throw ();
 
   /// Finalize the memory component
-  void delete_() throw ();
+  void finalize_() throw ();
 
   ///  Check the group handle, and throw an exception if bad
   void check_handle_(memory_group_handle group_handle) 
