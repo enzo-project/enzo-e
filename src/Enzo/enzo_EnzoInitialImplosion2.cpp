@@ -103,7 +103,7 @@ void EnzoInitialImplosion2::finalize_block (DataBlock * data_block) throw()
 
 //----------------------------------------------------------------------
 
-std::string EnzoInitialImplosion2::method_name() const throw()
+std::string EnzoInitialImplosion2::name() const throw()
 {
   return "implosion_2d";
 }

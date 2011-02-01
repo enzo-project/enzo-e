@@ -79,66 +79,79 @@ public: // interface
   /// Data descriptor
   DataDescr * data_descr() const throw();
 
-  /// Return the control method
+  /// Return the control object
   Control * control() const throw();
   
-  /// Return the time-stepping method
+  /// Return the time-stepping object
   Timestep * timestep() const throw();
 
-  /// Return the number of initialization routines
+  /// Return the number of initialization objects
   int num_initial() const throw();
 
-  /// Return the ith initialization routine
+  /// Return the ith initialization object
   Initial * initial(int i) const throw();
 
-  /// Return the number of numerical methods
-  int num_method() const throw();
+  /// Return the number of boundary condition objects
+  int num_boundary() const throw();
 
-  /// Return the ith method
-  Method * method(int i) const throw();
+  /// Return the ith boundary object
+  Boundary * boundary(int i) const throw();
+
+  /// Return the number of hyperbolic methods
+  int num_hyperbolic() const throw();
+
+  /// Return the ith hyperbolic
+  Hyperbolic * hyperbolic(int i) const throw();
 
 protected: // functions
 
   /// Initialize global simulation parameters
   void initialize_simulation_ () throw();
 
-  /// Initialize the mesh component
+  /// Initialize the mesh object
   void initialize_mesh_ () throw();
 
-  /// Initialize the data component
+  /// Initialize the data object
   void initialize_data_ () throw();
 
 
-  /// Initialize the control component
+  /// Initialize the control object
   void initialize_control_    () throw();
 
-  /// Initialize the timestep component
+  /// Initialize the timestep object
   void initialize_timestep_   () throw();
 
-  /// Initialize the initialization method component
+  /// Initialize the initial conditions object
   void initialize_initial_    () throw();
 
-  /// Initialize the method components
-  void initialize_method_    () throw();
+  /// Initialize the boundary conditions object
+  void initialize_boundary_    () throw();
+
+  /// Initialize the hyperbolic objects
+  void initialize_hyperbolic_    () throw();
 
 
 protected: // abstract virtual functions
 
-  /// Create named control method
+  /// Create named control object
   virtual Control * 
-  create_control_ (std::string name_control) throw () = 0;
+  create_control_ (std::string name) throw () = 0;
 
-  /// Create named timestep method
+  /// Create named timestep object
   virtual Timestep * 
-  create_timestep_ (std::string name_timestep) throw () = 0;
+  create_timestep_ (std::string name) throw () = 0;
 
-  /// Create named initialization method
+  /// Create named initialization object
   virtual Initial * 
-  create_initial_ (std::string name_initial) throw () = 0;
+  create_initial_ (std::string name) throw () = 0;
 
-  /// Create named numerical method
-  virtual Method * 
-  create_method_ (std::string name_method) throw () = 0;
+  /// Create named boundary object
+  virtual Boundary * 
+  create_boundary_ (std::string name) throw () = 0;
+
+  /// Create named hyperbolic object
+  virtual Hyperbolic * 
+  create_hyperbolic_ (std::string name) throw () = 0;
 
 protected: // attributes
 
@@ -178,11 +191,14 @@ protected: // attributes
   /// Method for time-step computation
   Timestep * timestep_;
 
-  /// List of initialization routines
+  /// List of initial conditions objects
   std::vector<Initial *> initial_list_;
 
-  /// List of numerical methods to apply at each timestep
-  std::vector<Method *> method_list_;
+  /// List of boundary conditions objects
+  std::vector<Boundary *> boundary_list_;
+
+  /// List of hyperbolic objects
+  std::vector<Hyperbolic *> hyperbolic_list_;
 
 
 };

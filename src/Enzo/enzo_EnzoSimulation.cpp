@@ -37,8 +37,8 @@ void EnzoSimulation::initialize(FILE * fp) throw()
 //======================================================================
 
 Control * 
-EnzoSimulation::create_control_ (std::string control_name) throw ()
-/// @param control_name   Name of the control method to create
+EnzoSimulation::create_control_ (std::string name) throw ()
+/// @param name   Name of the control method to create (ignored)
 {
   return new EnzoControl(error_, monitor_,enzo_descr_);
 }
@@ -46,8 +46,8 @@ EnzoSimulation::create_control_ (std::string control_name) throw ()
 //----------------------------------------------------------------------
 
 Timestep * 
-EnzoSimulation::create_timestep_ ( std::string timestep_name ) throw ()
-/// @param timestep_name   Name of the timestep method to create
+EnzoSimulation::create_timestep_ ( std::string name ) throw ()
+/// @param name   Name of the timestep method to create (ignored)
 {
   return new EnzoTimestep(enzo_descr_);
 }
@@ -55,18 +55,18 @@ EnzoSimulation::create_timestep_ ( std::string timestep_name ) throw ()
 //----------------------------------------------------------------------
 
 Initial * 
-EnzoSimulation::create_initial_ ( std::string initial_name ) throw ()
-/// @param initial_name   Name of the initialization method to create
+EnzoSimulation::create_initial_ ( std::string name ) throw ()
+/// @param name   Name of the initialization method to create
 {
   
   Initial * initial = 0;
 
-  if (initial_name == "implosion2")  
+  if (name == "implosion2")  
     initial = new EnzoInitialImplosion2 (error_, monitor_, enzo_descr_);
 
   if (initial == 0) {
     char buffer[80];
-    sprintf (buffer,"Cannot create Initialization '%s'",initial_name.c_str());
+    sprintf (buffer,"Cannot create Initial '%s'",name.c_str());
     ERROR_MESSAGE("EnzoSimulation::create_initial", buffer);
   }
 
@@ -75,25 +75,42 @@ EnzoSimulation::create_initial_ ( std::string initial_name ) throw ()
 
 //----------------------------------------------------------------------
 
-MethodHyperbolic * 
-EnzoSimulation::create_method_ ( std::string method_name ) throw ()
-/// @param method_name   Name of the method to create
+Boundary * 
+EnzoSimulation::create_boundary_ ( std::string name ) throw ()
+/// @param name   Name of the initialization method to create
+{
+  
+  Boundary * boundary = 0;
+
+  if (boundary == 0) {
+    char buffer[80];
+    sprintf (buffer,"Cannot create Boundary '%s'",name.c_str());
+    ERROR_MESSAGE("EnzoSimulation::create_boundary", buffer);
+  }
+
+  return boundary;
+}
+
+//----------------------------------------------------------------------
+
+Hyperbolic * 
+EnzoSimulation::create_hyperbolic_ ( std::string name ) throw ()
+/// @param name   Name of the hyperbolic method to create
 {
 
-  MethodHyperbolic * method = 0;
+  Hyperbolic * method = 0;
 
-  if (method_name == "ppm")
+  if (name == "ppm")
     method = new EnzoMethodPpm  (error_,monitor_,parameters_,enzo_descr_);
-  if (method_name == "ppml")
+  if (name == "ppml")
     method = new EnzoMethodPpml (error_,monitor_,parameters_,enzo_descr_);
 
   if (method == 0) {
     char buffer[80];
-    sprintf (buffer,"Cannot create Method '%s'",method_name.c_str());
-    ERROR_MESSAGE("EnzoSimulation::create_method", buffer);
+    sprintf (buffer,"Cannot create Hyperbolic '%s'",name.c_str());
+    ERROR_MESSAGE("EnzoSimulation::create_hyperbolic", buffer);
   }
 
   return method;
 }
 
-//----------------------------------------------------------------------

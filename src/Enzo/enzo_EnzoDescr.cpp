@@ -210,33 +210,33 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
 
   for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
 
-    std::string method_name = 
+    std::string name = 
       parameters->list_value_string(field_index,"fields");
 
-    if        (method_name == "density") {
+    if        (name == "density") {
       field_density          = field_index;
       FieldType[field_index] = Density;
-    } else if (method_name == "velocity_x") {
+    } else if (name == "velocity_x") {
       field_velocity_x       = field_index;
       FieldType[field_index] = Velocity1;
-    } else if (method_name == "velocity_y") {
+    } else if (name == "velocity_y") {
       field_velocity_y       = field_index;
       FieldType[field_index] = Velocity2;
-    } else if (method_name == "velocity_z") {
+    } else if (name == "velocity_z") {
       field_velocity_z       = field_index;
       FieldType[field_index] = Velocity3;
-    } else if (method_name == "total_energy") {
+    } else if (name == "total_energy") {
       field_total_energy     = field_index;
       FieldType[field_index] = TotalEnergy;
-    } else if (method_name == "internal_energy") {
+    } else if (name == "internal_energy") {
       field_internal_energy  = field_index;
       FieldType[field_index] = InternalEnergy;
-    } else if (method_name == "electron_density") {
+    } else if (name == "electron_density") {
       field_color            = field_index;
       FieldType[field_index] = ElectronDensity;
     } else {
       char error_message[ERROR_MESSAGE_LENGTH];
-      sprintf (error_message,"Unknown field %s",method_name.c_str());
+      sprintf (error_message,"Unknown field %s",name.c_str());
       ERROR_MESSAGE ("EnzoDescr::EnzoDescr", error_message);
     }
   }

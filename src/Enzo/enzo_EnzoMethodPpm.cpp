@@ -65,7 +65,7 @@ void EnzoMethodPpm::finalize_block ( DataBlock * data_block ) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPpm::advance_block
+void EnzoMethodPpm::compute_block
 (
  DataBlock * data_block,
  double t,

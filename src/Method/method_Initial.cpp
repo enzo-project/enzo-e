@@ -29,7 +29,7 @@ void Initial::add_argument_
 
   char buffer[100];
   sprintf (buffer,"Method %s: adding %s", 
-	   method_name().c_str(), 
+	   name().c_str(), 
 	   argument_name.c_str());
   monitor_->print (buffer);
 

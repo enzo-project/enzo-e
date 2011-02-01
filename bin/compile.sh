@@ -47,8 +47,8 @@ foreach type ($types)
 
    # count crashes
 
-   grep FAIL test/$type-*unit |sort > fail.$platform
-   grep pass test/$type-*unit |sort > pass.$platform
+   cat test/$type-*unit | grep FAIL | grep "0/" | sort > fail.$platform
+   cat test/$type-*unit | grep pass | grep "0/" | sort > pass.$platform
    set p = `cat pass.$platform | wc -l`
    set f = `cat fail.$platform | wc -l`
 

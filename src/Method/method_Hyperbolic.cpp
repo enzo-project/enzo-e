@@ -1,10 +1,10 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_MethodHyperbolic.cpp
+/// @file     method_Hyperbolic.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Jul 13 11:12:25 PDT 2009
-/// @brief    Implements the MethodHyperbolic base class
+/// @brief    Implements the Hyperbolic base class
 
 #include "cello.hpp"
 
@@ -12,7 +12,7 @@
 
 //----------------------------------------------------------------------
 
-void MethodHyperbolic::add_argument_
+void Hyperbolic::add_argument_
 (
  argument_enum argument,
  std::string   argument_name,
@@ -28,8 +28,8 @@ void MethodHyperbolic::add_argument_
   // Monitor output
 
   char buffer[100];
-  sprintf (buffer,"Method %s: adding %s", 
-	   method_name().c_str(), 
+  sprintf (buffer,"Hyperbolic %s: adding %s", 
+	   name().c_str(), 
 	   argument_name.c_str());
   monitor_->print (buffer);
 
@@ -47,7 +47,7 @@ void MethodHyperbolic::add_argument_
       sprintf (buffer, 
 	       "Required Field %s is not defined in the field descriptor",
 	       argument_name.c_str());
-      ASSERT("MethodHyperbolic::initialize_method",
+      ASSERT("Hyperbolic::initialize_method",
 	     buffer, data_descr->field_descr()->is_field(argument_name));
       break;
     case argument_particle:

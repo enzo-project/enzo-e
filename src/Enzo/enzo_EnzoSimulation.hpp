@@ -35,16 +35,19 @@ public: // interface
 protected: // virtual functions
 
   /// Create named control method.
-  Control * create_control_ (std::string name_control) throw ();
+  Control * create_control_ (std::string name) throw ();
 
   /// Create named timestep method.
-  Timestep * create_timestep_ (std::string name_timestep) throw ();
+  Timestep * create_timestep_ (std::string name) throw ();
 
   /// Create named method method.
-  Initial * create_initial_ (std::string name_initial) throw ();
+  Initial * create_initial_ (std::string name) throw ();
 
   /// Create named method method.
-  MethodHyperbolic * create_method_ (std::string name_method) throw ();
+  Boundary * create_boundary_ (std::string name) throw ();
+
+  /// Create named method method.
+  Hyperbolic * create_hyperbolic_ (std::string name) throw ();
 
 private: // attributes
 

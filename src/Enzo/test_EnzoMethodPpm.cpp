@@ -184,7 +184,7 @@ PARALLEL_MAIN_BEGIN
   //   output_progress(monitor,cycle,time,dt,cycle_progress);
   //   output_dump    (hdf5,cycle,field_block,cycle_dump);
 
-  //   simulation->method(0)->advance_block(data_block,time,dt);
+  //   simulation->method(0)->compute_block(data_block,time,dt);
 
   //   simulation->finalize_block(data_block);
 

@@ -9,7 +9,7 @@
 #ifndef ENZO_ENZO_METHOD_PPM_HPP
 #define ENZO_ENZO_METHOD_PPM_HPP
 
-class EnzoMethodPpm : public MethodHyperbolic {
+class EnzoMethodPpm : public Hyperbolic {
 
   /// @class    EnzoMethodPpm
   /// @ingroup  Enzo
@@ -21,7 +21,7 @@ public: // interface
 		Monitor    * monitor,
 		Parameters * parameters,
 		EnzoDescr  * enzo):
-    MethodHyperbolic(error,monitor,parameters),
+    Hyperbolic(error,monitor,parameters),
     enzo_(enzo)
   {};
 
@@ -45,12 +45,12 @@ public: // interface
   void finalize_block (DataBlock * data_block) throw();
   /// Apply the method to advance a block one timestep 
 
-  void advance_block(DataBlock * data_block,
+  void compute_block(DataBlock * data_block,
 		     double t, double dt) throw();
 
   /// Return the name of the method
 
-  std::string method_name() const throw() 
+  std::string name() const throw() 
   { return "ppm"; };
 
 private:

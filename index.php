@@ -89,7 +89,7 @@ function tests($component,$testrun,$output) {
        $output_file = "test/$parallel_types[$i]-$output.unit";
        if (file_exists($output_file)) {
 	 echo "<td class=pass>";
-	 system("grep pass $output_file | wc -l");
+	 system("cat $output_file | grep pass | grep '0/' | wc -l");
 	 echo "</td>";
        } else {
 	 echo "<td class=pass></td>";
@@ -104,7 +104,7 @@ function tests($component,$testrun,$output) {
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
        $output_file = "test/$parallel_types[$i]-$output.unit";
        if (file_exists($output_file)) {
-	 system("awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass></td>\"}' < $output_file");
+	 system("grep 0/ $output_file | awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass></td>\"}'");
        } else {
 	 echo "<td class=pass></td>";
        }
@@ -138,12 +138,12 @@ function test($parallel_type,$testrun,$type) {
   }
 
   $output = "test/$parallel_type-$testrun.unit";
-  $count = exec("grep $type $output | wc -l");
+  $count = exec("cat $output | grep $type | grep '0/' | wc -l");
   if ($count == 0) {
 #     echo "<strong >no ${ltype}ed tests</strong></br/>";
   } else {
      echo "<th class=$type><strong>$parallel_type ${ltype}ed</strong></th> ";
-     system ("awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}' < $output");
+     system ("grep '0/' $output | awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}'");
      echo "</tr><tr></tr>";
   }
      
@@ -184,7 +184,7 @@ function test_summary($component,$test_output)
       $output = $test_output[$test];
       $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
     }
-    system("cat $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
+    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
 
   }
 
@@ -197,7 +197,7 @@ function test_summary($component,$test_output)
       $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
     }
 
-    system("cat $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
+    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
   }
 
   printf ("</tr>\n");

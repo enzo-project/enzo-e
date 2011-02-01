@@ -45,12 +45,15 @@ enum access_enum {
 // Component class includes
 //----------------------------------------------------------------------
 
+
+#include "method_Method.hpp"
+
 #include "method_Control.hpp"
 #include "method_Timestep.hpp"
 #include "method_Initial.hpp"
+#include "method_Boundary.hpp"
+#include "method_Hyperbolic.hpp"
 
-#include "method_Method.hpp"
-#include "method_MethodHyperbolic.hpp"
 #include "method_MethodDescr.hpp"
 
 #endif /* METHOD_HPP */

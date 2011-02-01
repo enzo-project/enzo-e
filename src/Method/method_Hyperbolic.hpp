@@ -1,26 +1,26 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_MethodHyperbolic.hpp 
+/// @file     method_Hyperbolic.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    [\ref Method] Declaration for the MethodHyperbolic class
+/// @brief    [\ref Method] Declaration for the Hyperbolic class
 
 #ifndef METHOD_METHOD_HYPERBOLIC_HPP
 #define METHOD_METHOD_HYPERBOLIC_HPP
 
-class MethodHyperbolic : public Method {
+class Hyperbolic : public Method {
 
-  /// @class    MethodHyperbolic
+  /// @class    Hyperbolic
   /// @ingroup  Method
   /// @brief    [\ref Method] Interface to a hyperbolic method
 
 public: // interface
 
-  /// Create a new MethodHyperbolic
-  MethodHyperbolic(Error      * error,
-		   Monitor    * monitor,
-		   Parameters * parameters) throw()
+  /// Create a new Hyperbolic
+  Hyperbolic(Error      * error,
+	     Monitor    * monitor,
+	     Parameters * parameters) throw()
     : Method(error,monitor,parameters)
   { }
 
@@ -47,12 +47,12 @@ public: // virtual functions
 
   /// Apply the method to advance a block one timestep 
 
-  virtual void advance_block( DataBlock * data_block,
+  virtual void compute_block( DataBlock * data_block,
 			      double t, double dt ) throw() = 0; 
 
   /// Return the name of the method
 
-  virtual std::string method_name() const throw() = 0;
+  virtual std::string name() const throw() = 0;
 
 protected: // functions
 

@@ -44,7 +44,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("initialize");
 
-  FILE * fp = fopen ("input/implosion.in","r");
+  FILE * fp = fopen ("input/test_Simulation.in","r");
   simulation->initialize(fp);
 
   unit_assert(true);
@@ -72,12 +72,20 @@ PARALLEL_MAIN_BEGIN
     unit_assert (simulation->initial(i) != NULL);
   }
 
-  unit_func("num_method");
-  unit_assert (simulation->num_method() > 0);
+  unit_func("num_boundary");
+  unit_assert (simulation->num_boundary() > 0);
 
-  unit_func("method");
-  for (i=0; i<simulation->num_method(); i++) {
-    unit_assert (simulation->method(i) != NULL);
+  unit_func("boundary");
+  for (i=0; i<simulation->num_boundary(); i++) {
+    unit_assert (simulation->boundary(i) != NULL);
+  }
+
+  unit_func("num_hyperbolic");
+  unit_assert (simulation->num_hyperbolic() > 0);
+
+  unit_func("hyperbolic");
+  for (i=0; i<simulation->num_hyperbolic(); i++) {
+    unit_assert (simulation->hyperbolic(i) != NULL);
   }
 
   unit_func("control");

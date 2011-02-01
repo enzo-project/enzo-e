@@ -9,7 +9,7 @@
 #ifndef ENZO_ENZO_METHOD_PPML_HPP
 #define ENZO_ENZO_METHOD_PPML_HPP
 
-class EnzoMethodPpml : public MethodHyperbolic {
+class EnzoMethodPpml : public Hyperbolic {
 
 /// @class    EnzoMethodPpml
 /// @ingroup  Enzo
@@ -22,7 +22,7 @@ public: // interface
 		 Monitor    * monitor,
 		 Parameters * parameters,
 		 EnzoDescr * enzo)
-    : MethodHyperbolic (error,monitor,parameters),
+    : Hyperbolic (error,monitor,parameters),
       enzo_(enzo)
   {};
 
@@ -47,12 +47,12 @@ public: // interface
 
   /// Apply the method to advance a block one timestep 
 
-  void advance_block( DataBlock * data_block,
-			      double t, double dt ) throw(); 
+  void compute_block( DataBlock * data_block,
+		      double t, double dt ) throw(); 
 
   /// Return the name of the method
 
-  virtual std::string method_name() const throw() 
+  virtual std::string name() const throw() 
   { return "ppm"; };
   
 private: // attributes

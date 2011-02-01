@@ -47,7 +47,7 @@ public: // virtual functions
 
   /// Return the name of the method
 
-  virtual std::string method_name() const throw() = 0;
+  virtual std::string name() const throw() = 0;
 
 protected: // functions
 

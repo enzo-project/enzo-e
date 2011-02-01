@@ -43,7 +43,7 @@ public: // interface
 
   /// Return the name of the method
 
-  virtual std::string method_name() const throw();
+  virtual std::string name() const throw();
 
 private: // attributes
 

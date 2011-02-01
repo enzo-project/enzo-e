@@ -244,9 +244,9 @@ Clean(env.RunParallel (
 env.RunParallel (parallel_type + '-enzo-p_implosion.unit','#/bin/enzo-p', ARGS='input/implosion.in')
 
 if (parallel_type == "serial"):
-   env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='4')
-else:
    env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='1')
+else:
+   env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='4')
 
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')

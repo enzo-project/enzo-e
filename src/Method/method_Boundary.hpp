@@ -1,29 +1,27 @@
-// $Id: method_Method.hpp 1942 2011-01-20 00:53:45Z bordner $
+// $Id: method_Boundary.hpp 1896 2010-12-03 23:54:08Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     method_Method.hpp 
+/// @file     method_Boundary.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
-/// @brief    [\ref Method] Declaration for the Method class
+/// @brief    [\ref Method] Declaration for the Boundary component
 
-#ifndef METHOD_METHOD_HPP
-#define METHOD_METHOD_HPP
+#ifndef METHOD_BOUNDARY_HPP
+#define METHOD_BOUNDARY_HPP
 
-class Method {
+class Boundary {
 
-  /// @class    Method
+  /// @class    Boundary
   /// @ingroup  Method
-  /// @brief    [\ref Method] Interface to an application method / analysis / visualization function.
+  /// @brief    [\ref Method] Encapsulate a boundary conditions generator
 
 public: // interface
 
-  /// Create a new Method
-  Method(Error      * error,
-	 Monitor    * monitor,
-	 Parameters * parameters) throw()
-    : error_     (error),
-      monitor_   (monitor),
-      parameters_(parameters)
+  /// Create a new Boundary
+  Boundary(Error   * error,
+	   Monitor * monitor) throw()
+    : error_ (error),
+      monitor_ (monitor)
   {};
 
 public: // virtual functions
@@ -32,13 +30,11 @@ public: // virtual functions
 
   virtual void initialize (DataDescr * data_descr) throw() = 0;
 
-  /// Perform any method-specific finalizations steps, e.g. to
-  /// deallocate any dynamically-allocated memory
+  /// Perform any method-specific finalization
 
   virtual void finalize (DataDescr * data_descr) throw() = 0;
 
-  /// Initialize PPM variable that may change.  Called once per
-  /// block per timestep.
+  /// Update
 
   virtual void initialize_block (DataBlock * data_block) throw() = 0;
 
@@ -46,11 +42,6 @@ public: // virtual functions
   /// any dynamically-allocated variables
 
   virtual void finalize_block (DataBlock * data_block) throw() = 0;
-
-  /// Apply the method to advance a block one timestep 
-
-  virtual void compute_block( DataBlock * data_block,
-			      double t, double dt ) throw() = 0; 
 
   /// Return the name of the method
 
@@ -73,9 +64,6 @@ protected: // attributes
   /// Monitor
   Monitor * monitor_;
 
-  /// Parameters
-  Parameters * parameters_;
-
   /// List of argument types, e.g. argument_type_field
   std::vector<argument_enum> argument_types_;
 
@@ -87,4 +75,4 @@ protected: // attributes
 
 };
 
-#endif /* METHOD_METHOD_METHOD_HPP */
+#endif /* METHOD_BOUNDARY_HPP */

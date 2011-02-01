@@ -38,8 +38,8 @@ int main (int argc, char ** argv)
   double t = 0;
   double dt = 0.1;
 
-  unit_func("advance_block");
-  ppml.advance_block(data_block,t,dt);
+  unit_func("compute_block");
+  ppml.compute_block(data_block,t,dt);
   unit_assert(false);
 
   unit_func("finalize_block");
