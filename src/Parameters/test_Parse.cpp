@@ -6,11 +6,9 @@
 /// @date     2009-10-06
 /// @brief    Test program for reading in parameters then displaying them
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "parameters.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Parse.decl.h)
 

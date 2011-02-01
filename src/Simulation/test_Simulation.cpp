@@ -6,12 +6,10 @@
 /// @date     2010-05-06
 /// @brief    Program implementing unit tests for the Simulation class
  
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "simulation.hpp"
 #include "enzo.hpp" /* Required for EnzoSimulation */
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Simulation.decl.h)
 
@@ -63,36 +61,25 @@ PARALLEL_MAIN_BEGIN
   unit_func("mesh");
   unit_assert (simulation->mesh() != NULL);
   
-  unit_func("num_initial");
-  unit_assert (simulation->num_initial() > 0);
-
-  int i;
-  unit_func("initial");
-  for (i=0; i<simulation->num_initial(); i++) {
-    unit_assert (simulation->initial(i) != NULL);
-  }
-
-  unit_func("num_boundary");
-  unit_assert (simulation->num_boundary() > 0);
-
-  unit_func("boundary");
-  for (i=0; i<simulation->num_boundary(); i++) {
-    unit_assert (simulation->boundary(i) != NULL);
-  }
-
-  unit_func("num_hyperbolic");
-  unit_assert (simulation->num_hyperbolic() > 0);
-
-  unit_func("hyperbolic");
-  for (i=0; i<simulation->num_hyperbolic(); i++) {
-    unit_assert (simulation->hyperbolic(i) != NULL);
-  }
-
   unit_func("control");
   unit_assert (simulation->control() != NULL);
 
   unit_func("timestep");
   unit_assert (simulation->timestep() != NULL);
+
+  unit_func("initial");
+  unit_assert (simulation->initial() != NULL);
+
+  unit_func("boundary");
+  unit_assert (simulation->boundary() != NULL);
+
+  unit_func("num_method");
+  unit_assert (simulation->num_method() > 0);
+
+  unit_func("method");
+  for (int i=0; i<simulation->num_method(); i++) {
+    unit_assert (simulation->method(i) != NULL);
+  }
 
   // Run the simulation
 

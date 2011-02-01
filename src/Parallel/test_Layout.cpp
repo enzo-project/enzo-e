@@ -6,11 +6,9 @@
 /// @date     2010-04-19
 /// @brief    Unit tests for the Layout class
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "parallel.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Layout.decl.h)
 

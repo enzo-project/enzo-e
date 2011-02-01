@@ -47,7 +47,7 @@ void Hyperbolic::add_argument_
       sprintf (buffer, 
 	       "Required Field %s is not defined in the field descriptor",
 	       argument_name.c_str());
-      ASSERT("Hyperbolic::initialize_method",
+      ASSERT("Hyperbolic::add_argument",
 	     buffer, data_descr->field_descr()->is_field(argument_name));
       break;
     case argument_particle:

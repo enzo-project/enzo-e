@@ -76,32 +76,26 @@ public: // interface
   /// Return the Mesh
   Mesh * mesh() const throw();
   
-  /// Data descriptor
+  /// Return the data descriptor
   DataDescr * data_descr() const throw();
 
-  /// Return the control object
-  Control * control() const throw();
+  /// Return the control object, if any
+  Control *  control() const throw();
   
-  /// Return the time-stepping object
+  /// Return the timestepping object, if any
   Timestep * timestep() const throw();
 
-  /// Return the number of initialization objects
-  int num_initial() const throw();
+  /// Return the initialization object, if any
+  Initial *  initial() const throw();
 
-  /// Return the ith initialization object
-  Initial * initial(int i) const throw();
+  /// Return the boundary object, if any
+  Boundary * boundary() const throw();
 
-  /// Return the number of boundary condition objects
-  int num_boundary() const throw();
+  /// Return the number of method methods
+  int num_method() const throw();
 
-  /// Return the ith boundary object
-  Boundary * boundary(int i) const throw();
-
-  /// Return the number of hyperbolic methods
-  int num_hyperbolic() const throw();
-
-  /// Return the ith hyperbolic
-  Hyperbolic * hyperbolic(int i) const throw();
+  /// Return the ith method
+  Method * method(int i) const throw();
 
 protected: // functions
 
@@ -116,19 +110,19 @@ protected: // functions
 
 
   /// Initialize the control object
-  void initialize_control_    () throw();
+  void initialize_control_ () throw();
 
   /// Initialize the timestep object
-  void initialize_timestep_   () throw();
+  void initialize_timestep_() throw();
 
   /// Initialize the initial conditions object
-  void initialize_initial_    () throw();
+  void initialize_initial_ () throw();
 
   /// Initialize the boundary conditions object
-  void initialize_boundary_    () throw();
+  void initialize_boundary_() throw();
 
-  /// Initialize the hyperbolic objects
-  void initialize_hyperbolic_    () throw();
+  /// Initialize the method objects
+  void initialize_method_  () throw();
 
 
 protected: // abstract virtual functions
@@ -149,9 +143,9 @@ protected: // abstract virtual functions
   virtual Boundary * 
   create_boundary_ (std::string name) throw () = 0;
 
-  /// Create named hyperbolic object
-  virtual Hyperbolic * 
-  create_hyperbolic_ (std::string name) throw () = 0;
+  /// Create named method object
+  virtual Method * 
+  create_method_ (std::string name) throw () = 0;
 
 protected: // attributes
 
@@ -192,13 +186,13 @@ protected: // attributes
   Timestep * timestep_;
 
   /// List of initial conditions objects
-  std::vector<Initial *> initial_list_;
+  Initial * initial_;
 
   /// List of boundary conditions objects
-  std::vector<Boundary *> boundary_list_;
+  Boundary * boundary_;
 
-  /// List of hyperbolic objects
-  std::vector<Hyperbolic *> hyperbolic_list_;
+  /// List of method objects
+  std::vector<Method *> method_list_;
 
 
 };

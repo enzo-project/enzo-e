@@ -22,9 +22,9 @@ Simulation::Simulation(Error      * error,
     data_descr_(0),
     timestep_(0),
     control_(0),
-    initial_list_(),
-    boundary_list_(),
-    hyperbolic_list_()
+    initial_(0),
+    boundary_(0),
+    method_list_()
 {
   // Initialize parameter defaults
 
@@ -89,7 +89,7 @@ void Simulation::initialize(FILE * fp) throw()
   initialize_timestep_();
   initialize_initial_();
   initialize_boundary_();
-  initialize_hyperbolic_();
+  initialize_method_();
 
 }
 
@@ -182,33 +182,23 @@ Timestep * Simulation::timestep() const throw()
 
 //----------------------------------------------------------------------
 
-int Simulation::num_initial() const throw() 
-{ return initial_list_.size(); }
+Initial * Simulation::initial() const throw() 
+{ return initial_; }
 
 //----------------------------------------------------------------------
 
-Initial * Simulation::initial(int i) const throw() 
-{ return initial_list_[i]; }
+Boundary * Simulation::boundary() const throw() 
+{ return boundary_; }
 
 //----------------------------------------------------------------------
 
-int Simulation::num_boundary() const throw() 
-{ return boundary_list_.size(); }
+int Simulation::num_method() const throw()
+{ return method_list_.size(); }
 
 //----------------------------------------------------------------------
 
-Boundary * Simulation::boundary(int i) const throw() 
-{ return boundary_list_[i]; }
-
-//----------------------------------------------------------------------
-
-int Simulation::num_hyperbolic() const throw()
-{ return hyperbolic_list_.size(); }
-
-//----------------------------------------------------------------------
-
-Hyperbolic * Simulation::hyperbolic(int i) const throw()
-{ return hyperbolic_list_[i]; }
+Method * Simulation::method(int i) const throw()
+{ return method_list_[i]; }
 
 //======================================================================
 
@@ -453,37 +443,37 @@ void Simulation::initialize_boundary_() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_hyperbolic_() throw()
+void Simulation::initialize_method_() throw()
 {
   //--------------------------------------------------
   parameters_->set_current_group("Method");
   //--------------------------------------------------
 
-  int hyperbolic_count = parameters_->list_length("sequence");
+  int method_count = parameters_->list_length("sequence");
 
-  if (hyperbolic_count == 0) {
+  if (method_count == 0) {
     ERROR_MESSAGE ("Simulation::initialize",
 		   "List parameter 'Method sequence' must have length greater than zero");
   }
 
-  for (int i=0; i<hyperbolic_count; i++) {
+  for (int i=0; i<method_count; i++) {
 
-    std::string hyperbolic_name = parameters_->list_value_string(i,"sequence");
+    std::string method_name = parameters_->list_value_string(i,"sequence");
 
-    Hyperbolic * hyperbolic = create_hyperbolic_(hyperbolic_name);
-    if (hyperbolic) {
+    Method * method = create_method_(method_name);
+    if (method) {
 
-      hyperbolic_list_.push_back(hyperbolic); 
-      hyperbolic->initialize(data_descr_);
+      method_list_.push_back(method); 
+      method->initialize(data_descr_);
     } else {
       char error_message[ERROR_MESSAGE_LENGTH];
-      sprintf ("Unknown Hyperbolic %s",hyperbolic_name.c_str());
-      ERROR_MESSAGE ("Simulation::initialize_hyperbolic_",
+      sprintf ("Unknown Method %s",method_name.c_str());
+      ERROR_MESSAGE ("Simulation::initialize_method_",
 		     error_message);
     }
   }
 
 
-  INCOMPLETE_MESSAGE("Simulation::initialize_hyperbolic_","");
+  INCOMPLETE_MESSAGE("Simulation::initialize_method_","");
 }
 

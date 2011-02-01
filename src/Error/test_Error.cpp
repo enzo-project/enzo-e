@@ -6,11 +6,9 @@
 /// @date      Wed Aug 20 11:24:14 PDT 2008
 /// @brief     Program implementing unit tests for error classes
  
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "error.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Error.decl.h)
 

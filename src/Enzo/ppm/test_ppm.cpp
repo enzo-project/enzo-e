@@ -7,11 +7,9 @@
 /// @date      Fri Mar  7 17:11:14 PST 2008
 /// @brief     Program implementing unit tests for hydrodynamics
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "enzo.hpp"
-
-#include "test.hpp"
 
 const int num_problems = 4;
 const int num_ghosts   = 3;

@@ -6,11 +6,9 @@
 /// @date     2010-04-02
 /// @brief    Test program for the Classname class
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "component.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Classname.decl.h)
 

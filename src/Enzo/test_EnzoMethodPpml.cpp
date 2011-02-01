@@ -6,11 +6,9 @@
 /// @date     Thu Apr  1 16:19:18 PDT 2010
 /// @brief    Unit tests for the EnzoMethodPpml class
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "enzo.hpp"
-
-#include "test.hpp"
 
 int main (int argc, char ** argv)
 {

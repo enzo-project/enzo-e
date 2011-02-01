@@ -26,7 +26,7 @@ public: // interface
       timestep_(0),
       initial_(0),
       boundary_(0),
-      hyperbolic_(0),
+      method_(0),
       error_(error),
       monitor_(monitor)
   {
@@ -46,36 +46,36 @@ public: // interface
     for (size_t i=0; i<boundary_.size(); i++) {
       delete boundary_[i];
     }
-    for (size_t i=0; i<hyperbolic_.size(); i++) {
-      delete hyperbolic_[i];
+    for (size_t i=0; i<method_.size(); i++) {
+      delete method_[i];
     }
   }
 
 
 protected: // functions
 
-  /// APPLICATION INHERITENCE OVERRIDE: Create named control method.
+  /// Create named control object
   virtual Control * create_control_ (std::string name) = 0;
 
-  /// APPLICATION INHERITENCE OVERRIDE: Create named timestep method.
+  /// Create named timestep object
   virtual Timestep * create_timestep_ (std::string name) = 0;
 
-  /// APPLICATION INHERITENCE OVERRIDE: Create named hyperbolic method.
-  virtual Hyperbolic * create_initial_ (std::string name) = 0;
+  /// Create named initial conditions object
+  virtual Method * create_initial_ (std::string name) = 0;
 
-  /// APPLICATION INHERITENCE OVERRIDE: Create named hyperbolic method.
-  virtual Hyperbolic * create_boundary_ (std::string name) = 0;
+  /// Create named boundary conditions object
+  virtual Boundary * create_boundary_ (std::string name) = 0;
 
-  /// APPLICATION INHERITENCE OVERRIDE: Create named hyperbolic method.
-  virtual Hyperbolic * create_hyperbolic_ (std::string name) = 0;
+  /// Create named method object
+  virtual Method * create_method_ (std::string name) = 0;
 
 protected: // attributes
 
-  Control *                 control_;
-  Timestep *                timestep_;
-  std::vector<Initial *>    initial_;
-  std::vector<Boundary *>   boundary_;
-  std::vector<Hyperbolic *> hyperbolic_;
+  Control *               control_;
+  Timestep *              timestep_;
+  std::vector<Initial *>  initial_;
+  std::vector<Boundary *> boundary_;
+  std::vector<Method *>   method_;
 
   Error *                   error_;
   Monitor *                 monitor_;

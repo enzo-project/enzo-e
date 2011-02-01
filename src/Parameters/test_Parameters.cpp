@@ -7,7 +7,6 @@
 /// @brief    Program implementing unit tests for the Parameters class
 //----------------------------------------------------------------------
 
-#include "cello.hpp"
 #include "test.hpp"
 
 #include "parameters.hpp"

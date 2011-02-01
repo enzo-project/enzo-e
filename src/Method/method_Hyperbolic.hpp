@@ -6,8 +6,8 @@
 /// @date     Mon Jul 13 11:11:47 PDT 2009 
 /// @brief    [\ref Method] Declaration for the Hyperbolic class
 
-#ifndef METHOD_METHOD_HYPERBOLIC_HPP
-#define METHOD_METHOD_HYPERBOLIC_HPP
+#ifndef METHOD_HYPERBOLIC_HPP
+#define METHOD_HYPERBOLIC_HPP
 
 class Hyperbolic : public Method {
 
@@ -67,4 +67,4 @@ protected: // attributes
 
 };
 
-#endif /* METHOD_METHOD_HYPERBOLIC_HPP */
+#endif /* METHOD_HYPERBOLIC_HPP */

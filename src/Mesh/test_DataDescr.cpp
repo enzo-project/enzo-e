@@ -6,11 +6,9 @@
 /// @date     2010-04-02
 /// @brief    Test program for the DataDescr class
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "mesh.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_DataDescr.decl.h)
 

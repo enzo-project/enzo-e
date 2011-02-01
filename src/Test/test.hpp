@@ -19,6 +19,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
+#include "cello.hpp"
 #include "error.hpp"
 #include "parallel.hpp"
 

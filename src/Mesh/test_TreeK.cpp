@@ -6,11 +6,9 @@
 /// @date     2009-10-28
 /// @brief    Test program for Tree2K and Tree3K classes
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "mesh.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_TreeK.decl.h)
 

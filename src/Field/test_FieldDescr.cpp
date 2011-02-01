@@ -6,11 +6,9 @@
 /// @date     2010-05-11
 /// @brief    Test program for the FieldDescr class
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "field.hpp"
-
-#include "test.hpp"
 
 struct field_info_type {
   int field_density;

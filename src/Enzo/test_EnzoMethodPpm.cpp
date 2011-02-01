@@ -7,11 +7,9 @@
 /// @todo     Move initialization into Simulation / EnzoSimulation
 /// @brief    Program implementing unit tests for the EnzoMethodPpm class
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "enzo.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_EnzoMethodPpm.decl.h)
 

@@ -7,12 +7,9 @@
 /// @todo     Multiple datasets with different precisions
 /// @brief    Program implementing unit tests for the FileHdf5 class
  
-
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "disk.hpp"
-
-#include "test.hpp"
 
 // #include "error.hpp"
 // #include "test.hpp"

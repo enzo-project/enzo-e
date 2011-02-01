@@ -6,11 +6,9 @@
 /// @date     2008-02-20
 /// @brief    Unit tests for the FieldBlock class
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "field.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_FieldBlock.decl.h)
 

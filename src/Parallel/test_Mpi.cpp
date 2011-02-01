@@ -6,12 +6,9 @@
 /// @date     Fri Apr  2 11:29:22 PDT 2010
 /// @brief    Program implementing unit tests for the Mpi class
 
-
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "parallel.hpp"
-
-#include "test.hpp"
 
 int main(int argc, char ** argv)
 {

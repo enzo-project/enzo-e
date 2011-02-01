@@ -7,7 +7,6 @@
 /// @date     Tue Apr 20 14:19:04 PDT 2010
 /// @brief    Program implementing unit tests for the Parallel class
 
-#include "cello.hpp"
 #include "test.hpp"
 
 #include "parallel.hpp"

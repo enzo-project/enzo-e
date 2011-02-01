@@ -6,11 +6,9 @@
 /// @date     2009-11-18
 /// @brief    Program implementing unit tests for the Monitor class
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "monitor.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Monitor.decl.h)
 

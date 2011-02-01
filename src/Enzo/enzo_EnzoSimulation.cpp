@@ -93,12 +93,12 @@ EnzoSimulation::create_boundary_ ( std::string name ) throw ()
 
 //----------------------------------------------------------------------
 
-Hyperbolic * 
-EnzoSimulation::create_hyperbolic_ ( std::string name ) throw ()
-/// @param name   Name of the hyperbolic method to create
+Method * 
+EnzoSimulation::create_method_ ( std::string name ) throw ()
+/// @param name   Name of the method to create
 {
 
-  Hyperbolic * method = 0;
+  Method * method = 0;
 
   if (name == "ppm")
     method = new EnzoMethodPpm  (error_,monitor_,parameters_,enzo_descr_);
@@ -107,8 +107,8 @@ EnzoSimulation::create_hyperbolic_ ( std::string name ) throw ()
 
   if (method == 0) {
     char buffer[80];
-    sprintf (buffer,"Cannot create Hyperbolic '%s'",name.c_str());
-    ERROR_MESSAGE("EnzoSimulation::create_hyperbolic", buffer);
+    sprintf (buffer,"Cannot create Method '%s'",name.c_str());
+    ERROR_MESSAGE("EnzoSimulation::create_method", buffer);
   }
 
   return method;

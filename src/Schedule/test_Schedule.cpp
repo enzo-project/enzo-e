@@ -6,11 +6,9 @@
 /// @date      Thu Feb 21 16:47:35 PST 2008
 /// @brief     Program implementing unit tests for the Schedule class
  
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "schedule.hpp"
-
-#include "test.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Schedule.decl.h)
 
