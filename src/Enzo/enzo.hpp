@@ -38,6 +38,8 @@
 #include "enzo_fortran.hpp"
 
 #include "enzo_EnzoDescr.hpp"
+
+#include "enzo_EnzoItBlocks.hpp"
 #include "enzo_EnzoSimulation.hpp"
 #include "enzo_EnzoControl.hpp"
 #include "enzo_EnzoTimestep.hpp"

@@ -40,7 +40,7 @@ Control *
 EnzoSimulation::create_control_ (std::string name) throw ()
 /// @param name   Name of the control method to create (ignored)
 {
-  return new EnzoControl(error_, monitor_,enzo_descr_);
+  return new EnzoControl(error_, monitor_,parameters_,enzo_descr_);
 }
 
 //----------------------------------------------------------------------

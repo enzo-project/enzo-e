@@ -20,39 +20,34 @@ public: // interface
 
   /// Create a new EnzoControl
 
-  EnzoControl(Error     * error,
-	      Monitor   * monitor,
-	      EnzoDescr * enzo)
-    : Control(error,monitor),
-      enzo_(enzo)
-  {};
+  EnzoControl(Error      * error,
+	      Monitor    * monitor,
+	      Parameters * parameters,
+	      EnzoDescr  * enzo);
 
-  /// Perform any global initialization independent of specific method
+  /// Initialize the EnzoControl object
+  virtual void initialize (DataDescr * data_descr) throw();
 
-  void initialize (DataDescr * data_descr) throw();
+  /// Finalize the EnzoControl object 
+  virtual void finalize (DataDescr * data_descr) throw();
 
-  /// Perform any global finalization independent of specific method
+  /// Return an iterator over Blocks in a Mesh
+  virtual Iterator * block_loop(Patch * patch) throw();
 
-  void finalize (DataDescr * data_descr) throw();
+  /// Return whether the simulation is complete
+  virtual bool is_done () throw();
 
-  /// Perform any method-independent initialization before a block is updated
+  /// Initialize a Block at the beginning of an iteration
+  void initialize_block (DataBlock * block) throw();
 
-  void initialize_block (DataBlock * data_block) throw();
-
-  /// Perform any method-independent finalization after a block is updated
-
-  void finalize_block (DataBlock * data_block) throw();
-
-  /// Refresh a subset of ghost zones given neighboring block face(s)
-
-  void refresh_ghost(DataBlock * data_block, 
-		     bool xm=true, bool xp=true, 
-		     bool ym=true, bool yp=true, 
-		     bool zm=true, bool zp=true) throw();
+  /// Finalize a Block after an iteration
+  void finalize_block (DataBlock * block) throw();
 
 private:
-  
+
+  /// Enzo descriptor object
   EnzoDescr * enzo_;
+
 };
 
 #endif /* ENZO_ENZO_CONTROL_HPP */

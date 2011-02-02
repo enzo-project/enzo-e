@@ -13,11 +13,22 @@
 
 //----------------------------------------------------------------------
 
+EnzoControl::EnzoControl 
+(
+ Error      * error,
+ Monitor    * monitor,
+ Parameters * parameters,
+ EnzoDescr  * enzo
+)
+  : Control(error,monitor),
+    enzo_(enzo)
+{
+}
+
+//----------------------------------------------------------------------
+
 void EnzoControl::initialize (DataDescr * data_descr) throw()
 {
-
-
-
 }
 
 //----------------------------------------------------------------------
@@ -28,9 +39,15 @@ void EnzoControl::finalize (DataDescr * data_descr) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoControl::initialize_block ( DataBlock * data_block ) throw ()
+Iterator * EnzoControl::block_loop(Patch * patch) throw()
 {
+  return new EnzoItBlocks(patch, enzo_);
+}
 
+//======================================================================
+
+void EnzoControl::initialize_block (DataBlock * data_block) throw ()
+{
   FieldBlock * field_block = data_block->field_block();
   
   double xm,xp,ym,yp,zm,zp;
@@ -108,7 +125,6 @@ void EnzoControl::initialize_block ( DataBlock * data_block ) throw ()
 
 }
 
-
 //----------------------------------------------------------------------
 
 void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
@@ -119,15 +135,9 @@ void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
   }
 }
 
-//----------------------------------------------------------------------
-
-void EnzoControl::refresh_ghost(DataBlock * data_block, 
-				bool xm, bool xp, 
-				bool ym, bool yp, 
-				bool zm, bool zp) throw()
-{
-
-}
-
 //======================================================================
 
+bool EnzoControl::is_done () throw()
+{
+  return false;
+}

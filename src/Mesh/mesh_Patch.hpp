@@ -8,6 +8,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @todo     Move "size" to DataBlock's, since that's Field-centric
+/// @todo     rename block_count() as num_blocks()
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 
 class Patch {

@@ -23,53 +23,23 @@ public: // interface
   Control(Error   * error,
 	  Monitor * monitor) throw()
     : error_(error),
-      monitor_(monitor),
-      time_stop_(-1),
-      cycle_stop_(-1)
+      monitor_(monitor)
   {};
 
-  /// Perform any global initialization independent of specific method
-
+  /// Initialize the Control object
   virtual void initialize (DataDescr * data_descr) throw()
   {};
 
-  /// Perform any global finalization independent of specific method
-
+  /// Finalize the Control object 
   virtual void finalize (DataDescr * data_descr) throw()
   {};
 
-  /// Perform any method-independent initialization before a block is updated
-
-  virtual void initialize_block (DataBlock * data_block) throw()
-  {};
-
-  /// Perform any method-independent finalization after a block is updated
-
-  virtual void finalize_block (DataBlock * data_block) throw()
-  {};
-
-  /// Refresh a block face's boundary / ghost zones given neighboring
-  /// block face(s)
-
-  virtual void refresh_ghost(DataBlock * data_block,
-			     bool xm=true, bool xp=true, 
-			     bool ym=true, bool yp=true, 
-			     bool zm=true, bool zp=true) throw()
-  {};
+  /// Return an iterator over Blocks in a Mesh
+  virtual Iterator * block_loop(Patch * patch) throw()
+  { return 0; };
 
   /// Return whether the simulation is complete
-
-  bool is_done (int cycle, double time) throw();
-
-  /// Set stop cycle; default is to not check time
-
-  void set_cycle_stop(int cycle) throw()
-  { cycle_stop_ = cycle; }
-
-  /// Set stop time; default is to not check time
-
-  void set_time_stop(int time) throw()
-  { time_stop_ = time; }
+  virtual bool is_done () throw() = 0;
 
 protected:
 
@@ -78,12 +48,6 @@ protected:
 
   /// Monitor object
   Monitor * monitor_;
-
-  /// Stopping time
-  double time_stop_;
-
-  /// Stopping cycle (root-level)
-  int cycle_stop_;
 
 };
 

@@ -20,11 +20,13 @@ Simulation::Simulation(Error      * error,
     parameters_ (parameters ? parameters : new Parameters (monitor)),
     mesh_(0),
     data_descr_(0),
-    timestep_(0),
     control_(0),
+    timestep_(0),
     initial_(0),
     boundary_(0),
-    method_list_()
+    method_list_(),
+    cycle_stop_(-1),
+    time_stop_(-1)
 {
   // Initialize parameter defaults
 
@@ -206,11 +208,8 @@ void Simulation::initialize_simulation_() throw()
 {
 
   //--------------------------------------------------
-  // Physics parameters
-  //   dimensions
-  //--------------------------------------------------
-
   parameters_->set_current_group("Physics");
+  //--------------------------------------------------
 
   dimension_ = parameters_->value_integer("dimensions",0);
 
@@ -246,6 +245,15 @@ void Simulation::initialize_simulation_() throw()
       ASSERT ("Simulation::Simulation", error_message, (extent_[i-1] < extent_[i]));
     }
   }
+
+  //--------------------------------------------------
+  parameters_->set_current_group ("Stopping");
+  //--------------------------------------------------
+
+  time_stop_  = parameters_->value_scalar("time",2.5);
+  cycle_stop_ = parameters_->value_integer("cycle",1000);
+
+
 }
 
 //----------------------------------------------------------------------
@@ -389,21 +397,12 @@ void Simulation::initialize_data_() throw()
 
 void Simulation::initialize_control_() throw()
 {
-  // Initialize stopping criteria paramaters
-
-  parameters_->set_current_group ("Stopping");
-
-  // @@@ WARNING: IGNORED
-  double time_final = parameters_->value_scalar("time",2.5);
-  // @@@ WARNING: IGNORED
-  int   cycle_final = parameters_->value_integer("cycle",1000);
-
   // Initialize output parameters
 
   parameters_->set_current_group ("Output");
 
   // @@@ WARNING: IGNORED
-  int  cycle_dump    = parameters_->value_integer("cycle_dump",10);
+  int cycle_dump    = parameters_->value_integer("cycle_dump",10);
 
   // Initialize monitor parameters
 
@@ -467,7 +466,7 @@ void Simulation::initialize_method_() throw()
       method->initialize(data_descr_);
     } else {
       char error_message[ERROR_MESSAGE_LENGTH];
-      sprintf ("Unknown Method %s",method_name.c_str());
+      sprintf (error_message,"Unknown Method %s",method_name.c_str());
       ERROR_MESSAGE ("Simulation::initialize_method_",
 		     error_message);
     }

@@ -11,17 +11,3 @@
 #include "method.hpp"
 
 ///----------------------------------------------------------------------
-
-bool Control::is_done (int cycle, double time) throw()
-{
-  ASSERT ("Control::is_done",
-	  "Either stopping time or cycle must be defined",
-	  cycle != -1 || time != -1);
-
-  bool cycle_converged = (cycle != -1) ? (cycle >= cycle_stop_) : false;
-  bool time_converged  = (time != -1)  ? (time  >= time_stop_)  : false;
-
-  return (cycle_converged || time_converged);
-}
-
-///----------------------------------------------------------------------

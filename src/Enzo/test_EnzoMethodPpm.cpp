@@ -64,7 +64,7 @@ void output_dump(FileHdf5 & hdf5,
 
   char filename[80];
   sprintf (filename,"ppm-%05d.h5",cycle);
-  hdf5.file_open (filename,"w");
+  hdf5.open_file (filename,"w");
 
   // Get block size
   int nx,ny,nz;
@@ -97,9 +97,9 @@ void output_dump(FileHdf5 & hdf5,
 
     // prepare to write the field to the file
 
-    hdf5.dataset_open_write (field_name,
-			     field_descr->precision(index),
-			     mx,my,mz);
+    hdf5.open_dataset (field_name,
+		       field_descr->precision(index),
+		       mx,my,mz);
 
     // write the field to the file
 
@@ -107,12 +107,12 @@ void output_dump(FileHdf5 & hdf5,
 		field_descr->precision(index));
 
     // close the field in the file
-    hdf5.dataset_close ();
+    hdf5.close_dataset ();
   }
 
   // close the file
 
-  hdf5.file_close();
+  hdf5.close_file();
 
 }
 

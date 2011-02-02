@@ -194,7 +194,12 @@ protected: // attributes
   /// List of method objects
   std::vector<Method *> method_list_;
 
+  /// Stop at this root-level cycle number
+  int cycle_stop_;
 
+  /// Stop at this time
+  double time_stop_;
+  
 };
 
 #endif /* SIMULATION_SIMULATION_HPP */
