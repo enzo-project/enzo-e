@@ -27,29 +27,29 @@ public: // interface
   FileHdf5();
 
   /// Open the file with the given mode
-  int file_open  (std::string name, std::string mode);
+  int open_file  (std::string name, std::string mode);
 
   /// Close the file
-  void file_close ();
+  void close_file ();
 
   /// Open the given group
-  void group_open (std::string name);
+  void open_group (std::string name);
 
   /// Close the current group
-  void group_close ();
+  void close_group ();
 
   /// Open the given dataset with given size for reading
-  void dataset_open_read (std::string name, 
-			  int * nx, int * ny, int * nz);
+  void open_dataset (std::string name, 
+		     int * nx, int * ny, int * nz);
 
   /// Open the given dataset with the given size for writing
   /// @@@ datatype: H5Dcreate
-  void dataset_open_write (std::string name, 
-			   enum precision_enum precision,
-			   int nx, int ny, int nz);
+  void open_dataset (std::string name, 
+		     enum precision_enum precision,
+		     int nx, int ny, int nz);
 
   /// Close the current dataset
-  void dataset_close ();
+  void close_dataset ();
 
   /// Read the current dataset into the buffer
   /// @@@ datatype: H5Dread

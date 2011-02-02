@@ -20,20 +20,17 @@ public: // interface
   /// Constructor
   File() throw();
 
-//   /// Destructor
-//   ~File() throw();
-
-//   /// Copy constructor
-//   File(const File & diskfile) throw();
-
-//   /// Assignment operator
-//   File & operator= (const File & diskfile) throw();
-
+  /// Open the given named file
   void open(std::string filename) throw();
+
+  /// Close the file
   void close() throw();
+
+  /// Read data from the file
   void read() throw();
+
+  /// Write data to the file
   void write() throw();
-  void flush() throw();
 
 private: // functions
 

@@ -31,6 +31,4 @@
 #include "disk_FileHdf5.hpp"
 #include "disk_FileIfrit.hpp"
 
-
-
 #endif /* DISK_HPP */

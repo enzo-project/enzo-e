@@ -39,30 +39,30 @@ PARALLEL_MAIN_BEGIN
 
   unit_class ("FileHdf5");
 
-  unit_func("file_open");
+  unit_func("open_file");
 
   FileHdf5 hdf5;
 
   int mx,my,mz;
-  hdf5.file_open("file_open_test.h5","w");
+  hdf5.open_file("open_file_test.h5","w");
   mx = nx;
   my = ny;
   mz = 1;
 
-  hdf5.dataset_open_write ("dataset",precision_default,mx,my,mz);
+  hdf5.open_dataset ("dataset",precision_default,mx,my,mz);
   hdf5.write((char *)a,precision_default);
-  hdf5.dataset_close ();
-  hdf5.file_close();
+  hdf5.close_dataset ();
+  hdf5.close_file();
 
 
-  hdf5.file_open("file_open_test.h5","r");
-  hdf5.dataset_open_read ("dataset",&mx,&my,&mz);
+  hdf5.open_file("open_file_test.h5","r");
+  hdf5.open_dataset ("dataset",&mx,&my,&mz);
 
   Scalar * b = new Scalar[nx*ny];
   
   hdf5.read((char *)b,precision_default);
-  hdf5.dataset_close ();
-  hdf5.file_close();
+  hdf5.close_dataset ();
+  hdf5.close_file();
 
   bool passed = true;
   for (int iy=0; iy<ny && passed; iy++) {

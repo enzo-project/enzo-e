@@ -30,7 +30,7 @@ FileHdf5::FileHdf5()
 
 //----------------------------------------------------------------------
     
-int FileHdf5::file_open  (std::string name, std::string mode)
+int FileHdf5::open_file  (std::string name, std::string mode)
 /**
  * @param name  Name of the file to create or open
  * @param mode  How the file is to be created or opened:
@@ -45,7 +45,7 @@ int FileHdf5::file_open  (std::string name, std::string mode)
 
     char warning_message[ERROR_MESSAGE_LENGTH];
     sprintf (warning_message,"Attempting to open an open file %s",name.c_str());
-    WARNING_MESSAGE("FileHdf5::file_open",warning_message);
+    WARNING_MESSAGE("FileHdf5::open_file",warning_message);
 
   } else {
 
@@ -59,7 +59,7 @@ int FileHdf5::file_open  (std::string name, std::string mode)
     } else {
       char error_message[ERROR_MESSAGE_LENGTH];
       sprintf (error_message,"Unrecognized mode: %s",mode.c_str());
-      ERROR_MESSAGE("FileHdf5::file_open",error_message);
+      ERROR_MESSAGE("FileHdf5::open_file",error_message);
     }
 
     if (file_ >= 0) {
@@ -69,7 +69,7 @@ int FileHdf5::file_open  (std::string name, std::string mode)
       sprintf (warning_message,
 	       "Return value %d opening file %s",
 	       file_,file_name_.c_str());
-      WARNING_MESSAGE("FileHdf5::file_open",warning_message);
+      WARNING_MESSAGE("FileHdf5::open_file",warning_message);
     }
   }
 
@@ -81,7 +81,7 @@ int FileHdf5::file_open  (std::string name, std::string mode)
 
 //----------------------------------------------------------------------
 
-void FileHdf5::file_close ()
+void FileHdf5::close_file ()
 /**
  */
 {
@@ -92,7 +92,7 @@ void FileHdf5::file_close ()
     sprintf (warning_message,
 	     "Attempting to close a closed file %s",
 	     this->file_name_.c_str());
-    WARNING_MESSAGE("FileHdf5::file_close",warning_message);
+    WARNING_MESSAGE("FileHdf5::close_file",warning_message);
   } else {
     int retval = H5Fclose (file_);
     if (retval >= 0) {
@@ -102,7 +102,7 @@ void FileHdf5::file_close ()
       sprintf (warning_message,
 	       "Return value %d closing file %s",
 	       retval,file_name_.c_str());
-      WARNING_MESSAGE("FileHdf5::file_close",warning_message);
+      WARNING_MESSAGE("FileHdf5::close_file",warning_message);
     }
   }
 #endif
@@ -110,27 +110,29 @@ void FileHdf5::file_close ()
 
 //----------------------------------------------------------------------
 
-void FileHdf5::group_open (std::string name)
+void FileHdf5::open_group (std::string name)
 /**
  */
 {
 #ifdef CONFIG_USE_HDF5
+  INCOMPLETE_MESSAGE("FileHdf5::open_group","");
 #endif
 }
 
 //----------------------------------------------------------------------
 
-void FileHdf5::group_close ()
+void FileHdf5::close_group ()
 /**
  */
 {
 #ifdef CONFIG_USE_HDF5
+  INCOMPLETE_MESSAGE("FileHdf5::open_group","");
 #endif
 }
 
 //----------------------------------------------------------------------
 
-void FileHdf5::dataset_open_write 
+void FileHdf5::open_dataset
 (
  std::string         name,
  enum precision_enum precision,
@@ -141,8 +143,8 @@ void FileHdf5::dataset_open_write
   if (file_mode_ != "w") {
 
     char error_message[ERROR_MESSAGE_LENGTH];
-    sprintf (error_message, "Expecting dataset_open_read()");
-    ERROR_MESSAGE("FileHdf5::dataset_open_write",error_message);
+    sprintf (error_message, "Expecting open_dataset() call for reading");
+    ERROR_MESSAGE("FileHdf5::open_dataset",error_message);
 
   } else {
 
@@ -154,23 +156,10 @@ void FileHdf5::dataset_open_write
     
     if (nz == 1) { d--;  if (ny == 1) { d--; }}
 
-    ASSERT ("dataset_open_write","d is out of range",1 <= d && d <= 3);
+    ASSERT ("FileHdf5::open_dataset","d is out of range",1 <= d && d <= 3);
 
     hsize_t n[3];
 
-    // Transpose Enzo -> HDF5 row/column ordering
-
-//     if (d == 1) {
-//       n[0] = nx;
-//     } else if (d == 2) {
-//       n[0] = ny; // swap x, y
-//       n[1] = nx;
-//     } else if (d == 3) {
-//       n[0] = nz; // swap x, y, z
-//       n[1] = ny;
-//       n[2] = nx;
-//     }
-      
     n[0] = nx;
     n[1] = ny;
     n[2] = nz;
@@ -193,7 +182,7 @@ void FileHdf5::dataset_open_write
       sprintf (warning_message,
 	       "Return value %d opening dataset %s",
 	       dataset_,name.c_str());
-      WARNING_MESSAGE("FileHdf5::dataset_open_write",warning_message);
+      WARNING_MESSAGE("FileHdf5::open_dataset",warning_message);
     }
   }
 #endif
@@ -201,11 +190,13 @@ void FileHdf5::dataset_open_write
 
 //----------------------------------------------------------------------
 
-void FileHdf5::dataset_open_read (std::string name, 
-				  int *       nx,
-				  int *       ny,
-				  int *       nz)
-
+void FileHdf5::open_dataset 
+(
+ std::string name, 
+ int *       nx,
+ int *       ny,
+ int *       nz
+ )
 /**
  */
 {
@@ -214,7 +205,7 @@ void FileHdf5::dataset_open_read (std::string name,
 
     char error_message[ERROR_MESSAGE_LENGTH];
     sprintf (error_message, "Expecting dataset_open_write()");
-    ERROR_MESSAGE("FileHdf5::dataset_open_read",error_message);
+    ERROR_MESSAGE("FileHdf5::open_dataset",error_message);
 
   } else {
 
@@ -233,7 +224,7 @@ void FileHdf5::dataset_open_read (std::string name,
       if (d > 3) {
 	char error_message[ERROR_MESSAGE_LENGTH];
 	sprintf (error_message, "Dataset has too many dimensions %d",d);
-	ERROR_MESSAGE("FileHdf5::dataset_open",error_message);
+	ERROR_MESSAGE("FileHdf5::open_dataset",error_message);
       }
 
       H5Sget_simple_extent_dims(dataspace_,n,0);
@@ -256,7 +247,7 @@ void FileHdf5::dataset_open_read (std::string name,
       sprintf (warning_message,
 	       "Return value %d opening dataset %s",
 	       dataset_,name.c_str());
-      WARNING_MESSAGE("FileHdf5::dataset_open_read",warning_message);
+      WARNING_MESSAGE("FileHdf5::open_dataset",warning_message);
     }
   }
 #endif
@@ -274,7 +265,7 @@ void FileHdf5::dataset_open_read (std::string name,
 
 //----------------------------------------------------------------------
 
-void FileHdf5::dataset_close ()
+void FileHdf5::close_dataset ()
 /**
  */
 {

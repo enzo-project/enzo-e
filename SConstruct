@@ -5,13 +5,15 @@ charm_path = '/home/bordner/charm/charm'
 
 # CONFIGURATION
 
-use_papi = 1
-use_hdf5 = 1
+use_papi  = 1
+use_hdf5  = 1
+use_adios = 0
 
 # DEFINES
 
 define_papi  = ['CONFIG_USE_PAPI'];
 define_hdf5  = ['CONFIG_USE_HDF5','H5_USE_16_API'];
+define_adios = ['CONFIG_USE_ADIOS'];
 define_png   = ['NO_FREETYPE'];
 
 defines      = define_png;
@@ -31,6 +33,10 @@ if (use_papi != 0):
 if (use_hdf5 != 0):
 	defines = defines + define_hdf5
 	defines_string = defines_string + ' -D' + define_hdf5[0]
+
+if (use_adios != 0):
+	defines = defines + define_adios
+	defines_string = defines_string + ' -D' + define_adios[0]
 
 # PARSE ARGUMENTS
 
