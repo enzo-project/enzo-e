@@ -1,29 +1,24 @@
-// $Id: enzo_EnzoItBlocks.cpp 1954 2011-01-25 19:54:37Z bordner $
+// $Id: mesh_ItBlocks.cpp 1954 2011-01-25 19:54:37Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoItBlocks.cpp
+/// @file     mesh_ItBlocks.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Feb  1 18:06:42 PST 2011
-/// @brief    Implementation of EnzoItBlocks
+/// @brief    Implementation of ItBlocks
 
 #include "cello.hpp"
 
-#include "enzo.hpp"
+#include "mesh.hpp"
 
-EnzoItBlocks::EnzoItBlocks
-(
- Patch * patch, 
- EnzoDescr * enzo
- ) throw ()
+ItBlocks::ItBlocks ( Patch * patch ) throw ()
   : Iterator(), 
     patch_(patch),
-    curr_(0),
-    enzo_(enzo)
+    curr_(0)
 {}
 
 //----------------------------------------------------------------------
 
-EnzoItBlocks::~EnzoItBlocks() throw ()
+ItBlocks::~ItBlocks() throw ()
 {
   patch_ = 0; 
   curr_ = 0;
@@ -31,7 +26,7 @@ EnzoItBlocks::~EnzoItBlocks() throw ()
 
 //----------------------------------------------------------------------
 
-void * EnzoItBlocks::operator++ ()
+void * ItBlocks::operator++ ()
 {
 
   if (curr_ == patch_->block_count()) curr_ = 0;

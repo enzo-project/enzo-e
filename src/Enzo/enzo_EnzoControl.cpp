@@ -37,13 +37,6 @@ void EnzoControl::finalize (DataDescr * data_descr) throw()
 {
 }
 
-//----------------------------------------------------------------------
-
-Iterator * EnzoControl::block_loop(Patch * patch) throw()
-{
-  return new EnzoItBlocks(patch, enzo_);
-}
-
 //======================================================================
 
 void EnzoControl::initialize_block (DataBlock * data_block) throw ()

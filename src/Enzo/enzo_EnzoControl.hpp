@@ -31,9 +31,6 @@ public: // interface
   /// Finalize the EnzoControl object 
   virtual void finalize (DataDescr * data_descr) throw();
 
-  /// Return an iterator over Blocks in a Mesh
-  virtual Iterator * block_loop(Patch * patch) throw();
-
   /// Return whether the simulation is complete
   virtual bool is_done () throw();
 

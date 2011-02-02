@@ -1,19 +1,19 @@
-// $Id: method_Iterator.hpp 1942 2011-01-20 00:53:45Z bordner $
+// $Id: mesh_Iterator.hpp 1942 2011-01-20 00:53:45Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef METHOD_ITERATOR_HPP
-#define METHOD_ITERATOR_HPP
+#ifndef MESH_ITERATOR_HPP
+#define MESH_ITERATOR_HPP
 
-/// @file     method_Iterator.hpp
+/// @file     mesh_Iterator.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Feb  1 16:46:01 PST 2011
-/// @brief    [\ref Method] Declaration of the Iterator abstract base class
+/// @brief    [\ref Mesh] Declaration of the Iterator abstract base class
 
 class Iterator {
 
   /// @class    Iterator
-  /// @ingroup  Method
-  /// @brief    [\ref Method] Abstract base class for all iterators
+  /// @ingroup  Mesh
+  /// @brief    [\ref Mesh] Abstract base class for all iterators
 
 public: // interface
 
@@ -28,4 +28,4 @@ public: // interface
 
 };
 
-#endif /* METHOD_ITERATOR_HPP */
+#endif /* MESH_ITERATOR_HPP */
