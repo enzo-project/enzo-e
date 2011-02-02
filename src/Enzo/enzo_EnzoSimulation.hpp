@@ -25,12 +25,27 @@ public: // interface
   ~EnzoSimulation() throw()
   { delete enzo_descr_; }
 
+  /// Override Simulation initialize
+  virtual void initialize(FILE * parameter_file) throw ();
+
+  /// Finalize the Simulation after running it
+  virtual void finalize() throw();
+
+  /// Run the simulation
+  virtual void run() throw();
+
+  /// Load a Simulation from disk
+  virtual void read() throw();
+
+  /// Write a Simulation state to disk
+  virtual void write() throw();
+
+
+public: // functions
+
   /// Return the Enzo object created in EnzoSimulation's constructor
   EnzoDescr * enzo() throw ()
   { return enzo_descr_; };
-
-  /// Override Simulation initialize
-  void initialize(FILE * fp) throw ();
 
 protected: // virtual functions
 

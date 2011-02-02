@@ -37,12 +37,6 @@ Simulation::Simulation(Error      * error,
   extent_[4] = 0.0;
   extent_[5] = 1.0;
 
-  // Initialize simulation component defaults
-
-  data_descr_ = new DataDescr;
-
-  mesh_ = new Mesh(data_descr_);
-
 }
 
 //----------------------------------------------------------------------
@@ -84,8 +78,8 @@ void Simulation::initialize(FILE * fp) throw()
 
   // Initialize simulation components
 
-  initialize_mesh_();
   initialize_data_();
+  initialize_mesh_();
 
   initialize_control_();
   initialize_timestep_();
@@ -99,28 +93,9 @@ void Simulation::initialize(FILE * fp) throw()
 
 void Simulation::finalize() throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::finalize","");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::run() throw()
-{
-  INCOMPLETE_MESSAGE("Simulation::run","");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::read() throw()
-{
-  INCOMPLETE_MESSAGE("Simulation::read","");
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::write() throw()
-{
-  INCOMPLETE_MESSAGE("Simulation::write","");
+  delete data_descr_;  data_descr_ = 0;
+  delete mesh_;  mesh_ = 0;
+  
 }
 
 //----------------------------------------------------------------------
@@ -258,8 +233,49 @@ void Simulation::initialize_simulation_() throw()
 
 //----------------------------------------------------------------------
 
+void Simulation::initialize_data_() throw()
+{
+
+  data_descr_ = new DataDescr;
+
+  FieldDescr * field_descr = data_descr_->field_descr();
+
+  parameters_->set_current_group("Field");
+
+  // Add data fields
+
+  int i;
+  for (i=0; i<parameters_->list_length("fields"); i++) {
+    field_descr->insert_field
+      (parameters_->list_value_string(i, "fields"));
+  }
+
+  // Define default ghost zone depth for all fields, default value of 1
+
+  int gx = parameters_->list_value_integer(0,"ghosts",1);
+  int gy = parameters_->list_value_integer(1,"ghosts",1);
+  int gz = parameters_->list_value_integer(2,"ghosts",1);
+
+  if (dimension_ < 2) gy = 0;
+  if (dimension_ < 3) gz = 0;
+
+  for (i=0; i<field_descr->field_count(); i++) {
+    field_descr->set_ghosts(i,gx,gy,gz);
+  }
+
+}
+
+//----------------------------------------------------------------------
+
 void Simulation::initialize_mesh_() throw()
 {
+
+  ASSERT("Simulation::initialize_mesh_",
+	 "data must be initialized before mesh",
+	 data_descr_ != NULL);
+
+  mesh_ = new Mesh(data_descr_);
+
   parameters_->set_current_group ("Mesh");
 
   // Block sizes
@@ -359,37 +375,6 @@ void Simulation::initialize_mesh_() throw()
   mesh_->set_balanced  (parameters_->value_logical("balanced",  true));
   mesh_->set_backfill  (parameters_->value_logical("backfill",  true));
   mesh_->set_coalesce  (parameters_->value_logical("coalesce",  true));
-
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::initialize_data_() throw()
-{
-  FieldDescr * field_descr = data_descr_->field_descr();
-
-  parameters_->set_current_group("Field");
-
-  // Add data fields
-
-  int i;
-  for (i=0; i<parameters_->list_length("fields"); i++) {
-    field_descr->insert_field
-      (parameters_->list_value_string(i, "fields"));
-  }
-
-  // Define default ghost zone depth for all fields, default value of 1
-
-  int gx = parameters_->list_value_integer(0,"ghosts",1);
-  int gy = parameters_->list_value_integer(1,"ghosts",1);
-  int gz = parameters_->list_value_integer(2,"ghosts",1);
-
-  if (dimension_ < 2) gy = 0;
-  if (dimension_ < 3) gz = 0;
-
-  for (i=0; i<field_descr->field_count(); i++) {
-    field_descr->set_ghosts(i,gx,gy,gz);
-  }
 
 }
 

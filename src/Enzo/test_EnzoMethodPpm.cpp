@@ -157,6 +157,8 @@ PARALLEL_MAIN_BEGIN
 
   simulation->initialize(fp);
 
+  simulation->run();
+
   //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   //   FileHdf5   hdf5;

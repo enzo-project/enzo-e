@@ -34,6 +34,34 @@ void EnzoSimulation::initialize(FILE * fp) throw()
   enzo_descr_->write(stdout);
 }
 
+//----------------------------------------------------------------------
+
+void EnzoSimulation::finalize() throw()
+{
+  delete enzo_descr_;
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::run() throw()
+{
+  INCOMPLETE_MESSAGE("EnzoSimulation::run","");
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::read() throw()
+{
+  INCOMPLETE_MESSAGE("EnzoSimulation::read","");
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::write() throw()
+{
+  INCOMPLETE_MESSAGE("EnzoSimulation::write","");
+}
+
 //======================================================================
 
 Control * 

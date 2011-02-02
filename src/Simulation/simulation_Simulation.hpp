@@ -43,16 +43,16 @@ public: // interface
   virtual void initialize(FILE * parameter_file) throw();
 
   /// Finalize the Simulation after running it
-  void finalize() throw();
+  virtual void finalize() throw();
 
   /// Run the simulation
-  void run() throw();
+  virtual void run() throw() = 0;
 
   /// Load a Simulation from disk
-  void read() throw();
+  virtual void read() throw() = 0;
 
   /// Write a Simulation state to disk
-  void write() throw();
+  virtual void write() throw() = 0;
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
