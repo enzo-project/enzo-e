@@ -12,6 +12,7 @@
 /// @todo     set_value() using string values for all types
 /// @todo     assert_required() to make given parameter required (don't exit since more than one required parameter may be missing)
 /// @todo     Add "check()" function to check individual parameters, or all
+/// @todo     Move Group and subgroup to parameter lists at end with "" default
 /// @brief    [\ref Parameters] Declaration for the Parameters class
 
 /// @def      MAX_PARAMETER_FILE_WIDTH
