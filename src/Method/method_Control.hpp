@@ -27,16 +27,22 @@ public: // interface
   {};
 
   /// Initialize the Control object
-  virtual void initialize (DataDescr * data_descr) throw()
-  {};
+  virtual void initialize (DataDescr * data_descr) throw() = 0;
 
   /// Finalize the Control object 
-  virtual void finalize (DataDescr * data_descr) throw()
-  {};
+  virtual void finalize (DataDescr * data_descr) throw() = 0;
 
-  /// Return an iterator over Blocks in a Mesh
-  virtual Iterator * block_loop(Patch * patch) throw()
-  { return 0; };
+  /// Initialize cycle
+  virtual void initialize_cycle () throw() = 0;
+
+  /// Finalize cycle
+  virtual void finalize_cycle () throw() = 0;
+
+  /// Initialize block
+  virtual void initialize_block (DataBlock * data_block) throw() = 0;
+
+  /// Finalize block
+  virtual void finalize_block (DataBlock * data_block) throw() = 0;
 
   /// Return whether the simulation is complete
   virtual bool is_done () throw() = 0;

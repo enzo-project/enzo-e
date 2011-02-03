@@ -191,9 +191,6 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   BoundaryDimension[1] = ny + 2*gy;
   BoundaryDimension[2] = nz + 2*gz;
 
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  // BEGIN Moved from Enzo MethodControl::initialize
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   // Initialize Enzo field-related attributes
 

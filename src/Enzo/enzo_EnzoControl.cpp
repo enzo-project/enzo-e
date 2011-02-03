@@ -4,6 +4,7 @@
 /// @file     enzo_EnzoControl.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
+/// @todo     Remove repeated creation / deletion of CellWidth[]
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoControl user-dependent class member functions
 
@@ -21,7 +22,10 @@ EnzoControl::EnzoControl
  EnzoDescr  * enzo
 )
   : Control(error,monitor),
-    enzo_(enzo)
+    parameters_(parameters),
+    enzo_(enzo),
+    cycle_stop_(-1),
+    time_stop_(-1.0)
 {
 }
 
@@ -29,12 +33,58 @@ EnzoControl::EnzoControl
 
 void EnzoControl::initialize (DataDescr * data_descr) throw()
 {
+
+  //--------------------------------------------------
+  parameters_->set_current_group ("Stopping");
+  //--------------------------------------------------
+
+  cycle_stop_ = parameters_->value_integer("cycle",1000);
+  time_stop_  = parameters_->value_scalar("time",2.5);
+
+  //--------------------------------------------------
+  parameters_->set_current_group ("Output");
+  //--------------------------------------------------
+
+  // @@@ WARNING: IGNORED
+  int cycle_dump    = parameters_->value_integer("cycle_dump",10);
+
+  // Initialize monitor parameters
+
+  //--------------------------------------------------
+  parameters_->set_current_group ("Monitor");
+  //--------------------------------------------------
+
+  // @@@ WARNING: IGNORED
+  int  cycle_image    = parameters_->value_integer("cycle_image",10);
+  // @@@ WARNING: IGNORED
+  int  cycle_progress = parameters_->value_integer("cycle_progress",1);
+
+  // // Initial progress and image monitoring
+
+  INCOMPLETE_MESSAGE("Simulation::initialize_control_","");
+
+
 }
 
 //----------------------------------------------------------------------
 
 void EnzoControl::finalize (DataDescr * data_descr) throw()
 {
+  TRACE_MESSAGE("EnzoControl::finalize()");
+}
+
+//----------------------------------------------------------------------
+
+void EnzoControl::initialize_cycle () throw()
+{
+}
+
+//----------------------------------------------------------------------
+
+void EnzoControl::finalize_cycle () throw()
+{
+  ++ enzo_->CycleNumber;
+  enzo_->Time += enzo_->dt;
 }
 
 //======================================================================
@@ -122,7 +172,8 @@ void EnzoControl::initialize_block (DataBlock * data_block) throw ()
 
 void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
 {
-  ++ enzo_->CycleNumber;
+  // delete CellWidth[] array
+
   for (int dim=0; dim < enzo_->GridRank; dim++) {
     delete [] enzo_->CellWidth[dim];
   }
@@ -132,5 +183,10 @@ void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
 
 bool EnzoControl::is_done () throw()
 {
-  return false;
+  ASSERT("EnzoControl::is_done",
+	 "Neither Stopping::time_stop nor Stopping::cycle_stop initialized",
+	 time_stop_ != -1.0 || cycle_stop_ != -1);
+  return 
+    (enzo_->Time >= time_stop_ ) ||
+    (enzo_->CycleNumber >= cycle_stop_);
 }

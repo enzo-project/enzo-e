@@ -14,11 +14,6 @@
 
 EnzoTimestep::EnzoTimestep (EnzoDescr * enzo) throw()
   : Timestep(),
-    pressure_field_(0),
-    afloat_(0),
-    dtBaryons_(0),
-    dtViscous_(0),
-    dtExpansion_(0),
     enzo_(enzo)
 {
 
@@ -26,35 +21,7 @@ EnzoTimestep::EnzoTimestep (EnzoDescr * enzo) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoTimestep::initialize (DataDescr * data_descr) throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-void EnzoTimestep::finalize ( DataDescr * data_descr ) throw ()
-{
-}
-
-//----------------------------------------------------------------------
-
-void EnzoTimestep::initialize_block ( DataBlock * data_block ) throw ()
-{
-}
-
-//----------------------------------------------------------------------
-
-void EnzoTimestep::finalize_block ( DataBlock * data_block ) throw ()
-{
- 
-  delete [] pressure_field_;
-  pressure_field_ = 0;
- 
-}
-
-//----------------------------------------------------------------------
-
-double EnzoTimestep::compute_block ( DataBlock * data_block ) throw()
+double EnzoTimestep::compute ( DataBlock * data_block ) throw()
 {
 
   FieldBlock * field_block = data_block->field_block();
@@ -74,12 +41,12 @@ double EnzoTimestep::compute_block ( DataBlock * data_block ) throw()
   ENZO_FLOAT a = 1, dadt;
   if (enzo_->ComovingCoordinates)
     enzo_->CosmologyComputeExpansionFactor(enzo_->Time, &a, &dadt);
-  afloat_ = float(a);
+  float afloat = float(a);
   //  float dt, dtTemp;
-  dtBaryons_      = HUGE_VALF;
-  dtViscous_      = HUGE_VALF;
+  float dtBaryons      = HUGE_VALF;
+  float dtViscous      = HUGE_VALF;
   //  float dtParticles    = HUGE_VALF;
-  dtExpansion_    = HUGE_VALF;
+  float dtExpansion    = HUGE_VALF;
   //  float dtAcceleration = HUGE_VALF;
 
 
@@ -97,21 +64,14 @@ double EnzoTimestep::compute_block ( DataBlock * data_block ) throw()
   int size = mx*my*mz;
 
   // @@@ WARNING: should have temporary Field capability
-  // @@@ WARNING: this is dangerous if multiple blocks are being
-  // @@@ WARNING: processed simultaneously, e.g. new block initialize
-  // @@@ WARNING: is called before previous finalize.  ASSERT should
-  // @@@ WARNING: prevent this from happening, but is overly restrictive
 
-  ASSERT("EnzoTimestep::initialize_block",
-	 "new pressure field allocated before previous was deallocated",
-	 pressure_field_ == NULL);
-  pressure_field_ = new float[size];
+  float * pressure_field = new float[size];
 
   int  result;
   if (enzo_->DualEnergyFormalism)
-    result = enzo_->ComputePressureDualEnergyFormalism(enzo_->Time, pressure_field_);
+    result = enzo_->ComputePressureDualEnergyFormalism(enzo_->Time, pressure_field);
   else
-    result = enzo_->ComputePressure(enzo_->Time, pressure_field_);
+    result = enzo_->ComputePressure(enzo_->Time, pressure_field);
  
   if (result == ENZO_FAIL) {
     fprintf(stderr, "Error in grid->ComputePressure.\n");
@@ -142,7 +102,7 @@ double EnzoTimestep::compute_block ( DataBlock * data_block ) throw()
   /* 3) Find dt from expansion. */
  
   if (enzo_->ComovingCoordinates)
-    if (enzo_->CosmologyComputeExpansionTimestep(enzo_->Time, &dtExpansion_) == ENZO_FAIL) {
+    if (enzo_->CosmologyComputeExpansionTimestep(enzo_->Time, &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }
@@ -169,21 +129,23 @@ double EnzoTimestep::compute_block ( DataBlock * data_block ) throw()
 			enzo_->GridStartIndex+1, enzo_->GridEndIndex+1,
 			enzo_->GridStartIndex+2, enzo_->GridEndIndex+2,
 			enzo_->CellWidth[0], enzo_->CellWidth[1], enzo_->CellWidth[2],
-			&enzo_->Gamma, &enzo_->PressureFree, &afloat_,
-			density_field, pressure_field_,
+			&enzo_->Gamma, &enzo_->PressureFree, &afloat,
+			density_field, pressure_field,
 			velocity_x_field, 
 			velocity_y_field, 
 			velocity_z_field, 
-			&dtBaryons_, &dtViscous_);
+			&dtBaryons, &dtViscous);
 
-  dtBaryons_ *= enzo_->CourantSafetyNumber;
+  dtBaryons *= enzo_->CourantSafetyNumber;
  
-  double dt = dtBaryons_;
+  double dt = dtBaryons;
   //  dt = MIN(dtBaryons, dtParticles);
   //  dt = MIN(dt, dtViscous);
   //   dt = MIN(dt, dtAcceleration);
   //  dt = MIN(dt, dtExpansion);
 
+  delete [] pressure_field;
+  pressure_field = 0;
  
   return dt;
 }

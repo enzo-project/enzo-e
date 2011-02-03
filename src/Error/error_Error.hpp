@@ -7,10 +7,10 @@
 /// @file     error_Error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Add Parallel support
+/// @todo     Currently MESSAGE macros create new Error object, bypassing active_ Error attributes
 /// @bug      exit() is called instead of MPI_Abort(), etc.
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Declaration of the Error class
-
 /// @def      ERROR_MESSAGE_LENGTH
 /// @brief    Maximum length of error and warning messages
 #define ERROR_MESSAGE_LENGTH 255
@@ -27,7 +27,7 @@
 
 /// @def      ERROR_MESSAGE_LINE
 /// @brief    Handle a (lethal) error message with given line number
-#define ERROR_MESSAGE_FULL(FUNCTION,MESSAGE,FILE,LINE)			\
+#define ERROR_MESSAGE_FULL(FUNCTION,MESSAGE,FILE,LINE) \
   { Error error; error.error_(FILE,LINE,FUNCTION,MESSAGE); }
 
 /// @def      INCOMPLETE_MESSAGE
@@ -37,8 +37,8 @@
 
 /// @def      TRACE_MESSAGE
 /// @brief    Trace file name and location to stdout
-#define TRACE_MESSAGE					\
-  { Error error; error.trace_(__FILE__,__LINE__); }
+#define TRACE_MESSAGE(MESSAGE) \
+  { Error error; error.trace_(__FILE__,__LINE__,MESSAGE); }
 
 /// @def      ASSERT
 /// @brief    Equivalent to assert()
@@ -142,10 +142,11 @@ public: // functions
 
   //----------------------------------------------------------------------
   void trace_ (const char * file,
-	       int          line)
+	       int          line,
+	       const char * message)
   {
     if (traces_active_) {
-      printf ("TRACE %s:%d\n",file,line); 
+      printf ("TRACE %s:%d %s\n",file,line,message); 
       fflush(stdout);
     }
   };

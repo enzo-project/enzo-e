@@ -24,28 +24,9 @@ public: // interface
 
 public: // virtual functions
 
-  /// Perform any method-specific initialization
-
-  virtual void initialize (DataDescr * data_descr) throw() {} ;
-
-  /// Perform any timestep-specific finalizations steps, e.g. to
-  /// deallocate any dynamically-allocated memory
-
-  virtual void finalize (DataDescr * data_descr) throw(){};
-
-  /// Initialize variables that may change for each block.  Called once per
-  /// block per timestep.
-
-  virtual void initialize_block (DataBlock * data_block) throw(){};
-
-  /// Finalize after a timestep, e.g. to deallocate any
-  /// dynamically-allocated variables
-
-  virtual void finalize_block (DataBlock * data_block) throw(){};
-
   /// Compute the timestep for the block
 
-  virtual double compute_block( DataBlock * data_block ) throw() = 0; 
+  virtual double compute ( DataBlock * data_block ) throw() = 0; 
 
 };
 

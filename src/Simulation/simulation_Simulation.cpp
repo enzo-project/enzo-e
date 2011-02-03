@@ -24,9 +24,7 @@ Simulation::Simulation(Error      * error,
     timestep_(0),
     initial_(0),
     boundary_(0),
-    method_list_(),
-    cycle_stop_(-1),
-    time_stop_(-1)
+    method_list_()
 {
   // Initialize parameter defaults
 
@@ -221,14 +219,6 @@ void Simulation::initialize_simulation_() throw()
     }
   }
 
-  //--------------------------------------------------
-  parameters_->set_current_group ("Stopping");
-  //--------------------------------------------------
-
-  time_stop_  = parameters_->value_scalar("time",2.5);
-  cycle_stop_ = parameters_->value_integer("cycle",1000);
-
-
 }
 
 //----------------------------------------------------------------------
@@ -382,48 +372,50 @@ void Simulation::initialize_mesh_() throw()
 
 void Simulation::initialize_control_() throw()
 {
-  // Initialize output parameters
+  //--------------------------------------------------
+  parameters_->set_current_group("Control");
+  //--------------------------------------------------
 
-  parameters_->set_current_group ("Output");
-
-  // @@@ WARNING: IGNORED
-  int cycle_dump    = parameters_->value_integer("cycle_dump",10);
-
-  // Initialize monitor parameters
-
-  parameters_->set_current_group ("Monitor");
-
-  // @@@ WARNING: IGNORED
-  int  cycle_image    = parameters_->value_integer("cycle_image",10);
-  // @@@ WARNING: IGNORED
-  int  cycle_progress = parameters_->value_integer("cycle_progress",1);
-
-  // // Initial progress and image monitoring
-
-  INCOMPLETE_MESSAGE("Simulation::initialize_control_","");
-
+  std::string name = parameters_->value_string("name","");
+  control_ = create_control_(name);
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::initialize_timestep_() throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::initialize_timestep_","");
+  //--------------------------------------------------
+  parameters_->set_current_group("Timestep");
+  //--------------------------------------------------
+
+  std::string name = parameters_->value_string("name","");
+  timestep_ = create_timestep_(name);
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::initialize_initial_() throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::initialize_initial_","");
+  //--------------------------------------------------
+  parameters_->set_current_group("Initial");
+  //--------------------------------------------------
+
+  std::string name = parameters_->value_string("name","");
+  initial_ = create_initial_(name);
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::initialize_boundary_() throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::initialize_initial_","");
+  //--------------------------------------------------
+  parameters_->set_current_group("Boundary");
+  //--------------------------------------------------
+
+  std::string name = parameters_->value_string("name","");
+  boundary_ = create_boundary_(name);
 }
+
 
 //----------------------------------------------------------------------
 
@@ -436,7 +428,7 @@ void Simulation::initialize_method_() throw()
   int method_count = parameters_->list_length("sequence");
 
   if (method_count == 0) {
-    ERROR_MESSAGE ("Simulation::initialize",
+    ERROR_MESSAGE ("Simulation::initialize_method_",
 		   "List parameter 'Method sequence' must have length greater than zero");
   }
 
