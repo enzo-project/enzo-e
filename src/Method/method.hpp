@@ -52,7 +52,5 @@ enum access_enum {
 #include "method_Method.hpp"
 #  include "method_Hyperbolic.hpp"
 
-#include "method_MethodDescr.hpp"
-
 #endif /* METHOD_HPP */
 
