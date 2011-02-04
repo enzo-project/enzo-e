@@ -26,11 +26,11 @@ public: // interface
       monitor_(monitor)
   {};
 
-  /// Initialize the Control object
-  virtual void initialize (DataDescr * data_descr) throw() = 0;
+  /// Initialize the simulation
+  virtual void initialize_simulation () throw() = 0;
 
-  /// Finalize the Control object 
-  virtual void finalize (DataDescr * data_descr) throw() = 0;
+  /// Finalize the simulation
+  virtual void finalize_simulation () throw() = 0;
 
   /// Initialize cycle
   virtual void initialize_cycle () throw() = 0;

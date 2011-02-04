@@ -34,21 +34,21 @@ void Layout::set_process_range(int process_first, int process_count) throw()
 
 //----------------------------------------------------------------------
 
-void Layout::set_block_count(int nb0, int nb1, int nb2) throw()
+void Layout::set_block_count(int nbx, int nby, int nbz) throw()
 {
-  block_count_[0] = nb0;
-  block_count_[1] = nb1;
-  block_count_[2] = nb2; 
+  block_count_[0] = nbx;
+  block_count_[1] = nby;
+  block_count_[2] = nbz; 
 }
 
 //----------------------------------------------------------------------
 
-int Layout::block_count (int *nb0, int *nb1, int *nb2) throw()
+int Layout::block_count (int *nbx, int *nby, int *nbz) throw()
 { 
-  *nb0 = block_count_[0];
-  *nb1 = block_count_[1];
-  *nb2 = block_count_[2];
-  return (*nb0)*(*nb1)*(*nb2);
+  *nbx = block_count_[0];
+  *nby = block_count_[1];
+  *nbz = block_count_[2];
+  return (*nbx)*(*nby)*(*nbz);
 }
 
 //----------------------------------------------------------------------

@@ -340,160 +340,243 @@ EnzoDescr::~EnzoDescr() throw ()
 
 void EnzoDescr::write(FILE * fp) throw ()
 {
-  fprintf (fp,"write_hydro: ComovingCoordinates %d\n",    ComovingCoordinates);
-  fprintf (fp,"write_hydro: UseMinimumPressureSupport %d\n",    UseMinimumPressureSupport);
-  fprintf (fp,"write_hydro: MinimumPressureSupportParameter %g\n",  MinimumPressureSupportParameter);
-  fprintf (fp,"write_hydro: ComovingBoxSize %g\n",  ComovingBoxSize);
-  fprintf (fp,"write_hydro: HubbleConstantNow %g\n",  HubbleConstantNow);
-  fprintf (fp,"write_hydro: OmegaLambdaNow %g\n",  OmegaLambdaNow);
-  fprintf (fp,"write_hydro: OmegaMatterNow %g\n",  OmegaMatterNow);
-  fprintf (fp,"write_hydro: MaxExpansionRate %g\n",  MaxExpansionRate);
+  fprintf (fp,"EnzoDescr: ComovingCoordinates %d\n",
+	   ComovingCoordinates);
+  fprintf (fp,"EnzoDescr: UseMinimumPressureSupport %d\n",
+	   UseMinimumPressureSupport);
+  fprintf (fp,"EnzoDescr: MinimumPressureSupportParameter %g\n",
+	   MinimumPressureSupportParameter);
+  fprintf (fp,"EnzoDescr: ComovingBoxSize %g\n",
+	   ComovingBoxSize);
+  fprintf (fp,"EnzoDescr: HubbleConstantNow %g\n",
+	   HubbleConstantNow);
+  fprintf (fp,"EnzoDescr: OmegaLambdaNow %g\n",
+	   OmegaLambdaNow);
+  fprintf (fp,"EnzoDescr: OmegaMatterNow %g\n",
+	   OmegaMatterNow);
+  fprintf (fp,"EnzoDescr: MaxExpansionRate %g\n",
+	   MaxExpansionRate);
 
   // Chemistry
 
-  fprintf (fp,"write_hydro: MultiSpecies %d\n",    MultiSpecies);
+  fprintf (fp,"EnzoDescr: MultiSpecies %d\n",
+	   MultiSpecies);
 
   // Gravity
 
-  fprintf (fp,"write_hydro: GravityOn %d\n",    GravityOn);
-  //  fprintf (fp,"write_hydro: *AccelerationField %g\n", *AccelerationField[MAX_DIMENSION)];
+  fprintf (fp,"EnzoDescr: GravityOn %d\n",
+	   GravityOn);
+  //  fprintf (fp,"EnzoDescr: *AccelerationField %g\n",
+  //           *AccelerationField[MAX_DIMENSION)];
 
   // Physics
 
-  fprintf (fp,"write_hydro: PressureFree %d\n",    PressureFree);
-  fprintf (fp,"write_hydro: Gamma %g\n",  Gamma);
-  fprintf (fp,"write_hydro: GravitationalConstant %g\n",  GravitationalConstant);
+  fprintf (fp,"EnzoDescr: PressureFree %d\n",
+	   PressureFree);
+  fprintf (fp,"EnzoDescr: Gamma %g\n",
+	   Gamma);
+  fprintf (fp,"EnzoDescr: GravitationalConstant %g\n",
+	   GravitationalConstant);
 
   // Problem-specific
 
-  fprintf (fp,"write_hydro: ProblemType %d\n",    ProblemType);
+  fprintf (fp,"EnzoDescr: ProblemType %d\n",
+	   ProblemType);
 
   // Method PPM
 
-  fprintf (fp,"write_hydro: PPMFlatteningParameter %d\n",    PPMFlatteningParameter);
-  fprintf (fp,"write_hydro: PPMDiffusionParameter %d\n",    PPMDiffusionParameter);
-  fprintf (fp,"write_hydro: PPMSteepeningParameter %d\n",    PPMSteepeningParameter);
+  fprintf (fp,"EnzoDescr: PPMFlatteningParameter %d\n",
+	   PPMFlatteningParameter);
+  fprintf (fp,"EnzoDescr: PPMDiffusionParameter %d\n",
+	   PPMDiffusionParameter);
+  fprintf (fp,"EnzoDescr: PPMSteepeningParameter %d\n",
+	   PPMSteepeningParameter);
 
   // Parallel
 
-  fprintf (fp,"write_hydro: ProcessorNumber %d\n",    ProcessorNumber);
+  fprintf (fp,"EnzoDescr: ProcessorNumber %d\n",
+	   ProcessorNumber);
 
   // Numerics
 
-  fprintf (fp,"write_hydro: DualEnergyFormalism %d\n",    DualEnergyFormalism);
-  fprintf (fp,"write_hydro: DualEnergyFormalismEta1 %g\n",  DualEnergyFormalismEta1);
-  fprintf (fp,"write_hydro: DualEnergyFormalismEta2 %g\n",  DualEnergyFormalismEta2);
-  fprintf (fp,"write_hydro: pressure %g\n",  pressure_floor);
-  fprintf (fp,"write_hydro: density %g\n",  density_floor);
-  fprintf (fp,"write_hydro: number %g\n",  number_density_floor);
-  fprintf (fp,"write_hydro: temperature %g\n",  temperature_floor);
+  fprintf (fp,"EnzoDescr: DualEnergyFormalism %d\n",
+	   DualEnergyFormalism);
+  fprintf (fp,"EnzoDescr: DualEnergyFormalismEta1 %g\n",
+	   DualEnergyFormalismEta1);
+  fprintf (fp,"EnzoDescr: DualEnergyFormalismEta2 %g\n",
+	   DualEnergyFormalismEta2);
+  fprintf (fp,"EnzoDescr: pressure_floor %g\n",
+	   pressure_floor);
+  fprintf (fp,"EnzoDescr: density_density_floor %g\n",
+	   density_floor);
+  fprintf (fp,"EnzoDescr: number_density_floor %g\n",
+	   number_density_floor);
+  fprintf (fp,"EnzoDescr: temperature_floor %g\n",
+	   temperature_floor);
 
-  fprintf (fp,"write_hydro: CourantSafetyNumber %g\n",  CourantSafetyNumber);
-  fprintf (fp,"write_hydro: InitialRedshift %g\n",  InitialRedshift);
-  fprintf (fp,"write_hydro: InitialTimeInCodeUnits %g\n",  InitialTimeInCodeUnits);
-  fprintf (fp,"write_hydro: Time %g\n",  Time);
-  fprintf (fp,"write_hydro: OldTime %g\n",  OldTime);
+  fprintf (fp,"EnzoDescr: CourantSafetyNumber %g\n",
+	   CourantSafetyNumber);
+  fprintf (fp,"EnzoDescr: InitialRedshift %g\n",
+	   InitialRedshift);
+  fprintf (fp,"EnzoDescr: InitialTimeInCodeUnits %g\n",
+	   InitialTimeInCodeUnits);
+  fprintf (fp,"EnzoDescr: Time %g\n",
+	   Time);
+  fprintf (fp,"EnzoDescr: OldTime %g\n",
+	   OldTime);
 
   // Domain
 
-  fprintf (fp,"write_hydro: DomainLeftEdge %g %g %g\n",  DomainLeftEdge [0],DomainLeftEdge [0],DomainLeftEdge [0]);
-  fprintf (fp,"write_hydro: %g %g %g\n",  DomainRightEdge[0],DomainRightEdge[1],DomainRightEdge[2]);
-
-  // Grid
-
-  fprintf (fp,"write_hydro: GridRank %d\n",    GridRank);
-  fprintf (fp,"write_hydro: GridDimension %d %d %d\n",    GridDimension[0],GridDimension[1],GridDimension[2]);
-  fprintf (fp,"write_hydro: GridStartIndex %d %d %d\n",    GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
-  fprintf (fp,"write_hydro: GridEndIndex %d %d %d\n",    GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
-  fprintf (fp,"write_hydro: GridLeftEdge %g %g %g\n",  GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
-  //  fprintf (fp,"write_hydro: *CellWidth %g\n", *CellWidth[MAX_DIMENSION)];
-  fprintf (fp,"write_hydro: ghost %d %d %d\n",    ghost_depth[0],ghost_depth[1],ghost_depth[2]);
+  fprintf (fp,"EnzoDescr: DomainLeftEdge %g %g %g\n",
+	   DomainLeftEdge [0],DomainLeftEdge [0],DomainLeftEdge [0]);
+  fprintf (fp,"EnzoDescr: DomainRightEdge %g %g %g\n",
+	   DomainRightEdge[0],DomainRightEdge[1],DomainRightEdge[2]);
 
   // Fields
 
   if (field_density != -1) 
-    fprintf (fp,"write_hydro: field_density %d\n", field_density);
+    fprintf (fp,"EnzoDescr: field_density %d\n", field_density);
   if (field_total_energy != -1) 
-    fprintf (fp,"write_hydro: field_total_energy %d\n", field_total_energy);
+    fprintf (fp,"EnzoDescr: field_total_energy %d\n", field_total_energy);
   if (field_internal_energy != -1) 
-    fprintf (fp,"write_hydro: field_internal_energy %d\n", field_internal_energy);
+    fprintf (fp,"EnzoDescr: field_internal_energy %d\n", field_internal_energy);
   if (field_velocity_x != -1) 
-    fprintf (fp,"write_hydro: field_velocity_x %d\n", field_velocity_x);
+    fprintf (fp,"EnzoDescr: field_velocity_x %d\n", field_velocity_x);
   if (field_velocity_y != -1) 
-    fprintf (fp,"write_hydro: field_velocity_y %d\n", field_velocity_y);
+    fprintf (fp,"EnzoDescr: field_velocity_y %d\n", field_velocity_y);
   if (field_velocity_z != -1) 
-    fprintf (fp,"write_hydro: field_velocity_z %d\n", field_velocity_z);
+    fprintf (fp,"EnzoDescr: field_velocity_z %d\n", field_velocity_z);
   if (field_color != -1) 
-    fprintf (fp,"write_hydro: field_color %d\n", field_color);
+    fprintf (fp,"EnzoDescr: field_color %d\n", field_color);
 
   if (field_magnetic_x != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_x %d\n", field_magnetic_x);
+    fprintf (fp,"EnzoDescr: field_magnetic_x %d\n", field_magnetic_x);
   if (field_magnetic_y != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_y %d\n", field_magnetic_y);
+    fprintf (fp,"EnzoDescr: field_magnetic_y %d\n", field_magnetic_y);
   if (field_magnetic_z != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_z %d\n", field_magnetic_z);
+    fprintf (fp,"EnzoDescr: field_magnetic_z %d\n", field_magnetic_z);
 
   if (field_density_xp != -1) 
-    fprintf (fp,"write_hydro: field_density_xp %d\n", field_density_xp);
+    fprintf (fp,"EnzoDescr: field_density_xp %d\n", field_density_xp);
   if (field_velocity_x_xp != -1) 
-    fprintf (fp,"write_hydro: field_velocity_x_xp %d\n", field_velocity_x_xp);
+    fprintf (fp,"EnzoDescr: field_velocity_x_xp %d\n", field_velocity_x_xp);
   if (field_velocity_y_xp != -1) 
-    fprintf (fp,"write_hydro: field_velocity_y_xp %d\n", field_velocity_y_xp);
+    fprintf (fp,"EnzoDescr: field_velocity_y_xp %d\n", field_velocity_y_xp);
   if (field_velocity_z_xp != -1) 
-    fprintf (fp,"write_hydro: field_velocity_z_xp %d\n", field_velocity_z_xp);
+    fprintf (fp,"EnzoDescr: field_velocity_z_xp %d\n", field_velocity_z_xp);
   if (field_magnetic_x_xp != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_x_xp %d\n", field_magnetic_x_xp);
+    fprintf (fp,"EnzoDescr: field_magnetic_x_xp %d\n", field_magnetic_x_xp);
   if (field_magnetic_y_xp != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_y_xp %d\n", field_magnetic_y_xp);
+    fprintf (fp,"EnzoDescr: field_magnetic_y_xp %d\n", field_magnetic_y_xp);
   if (field_magnetic_z_xp != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_z_xp %d\n", field_magnetic_z_xp);
+    fprintf (fp,"EnzoDescr: field_magnetic_z_xp %d\n", field_magnetic_z_xp);
 
   if (field_density_yp != -1) 
-    fprintf (fp,"write_hydro: field_density_yp %d\n", field_density_yp);
+    fprintf (fp,"EnzoDescr: field_density_yp %d\n", field_density_yp);
   if (field_velocity_x_yp != -1) 
-    fprintf (fp,"write_hydro: field_velocity_x_yp %d\n", field_velocity_x_yp);
+    fprintf (fp,"EnzoDescr: field_velocity_x_yp %d\n", field_velocity_x_yp);
   if (field_velocity_y_yp != -1) 
-    fprintf (fp,"write_hydro: field_velocity_y_yp %d\n", field_velocity_y_yp);
+    fprintf (fp,"EnzoDescr: field_velocity_y_yp %d\n", field_velocity_y_yp);
   if (field_velocity_z_yp != -1) 
-    fprintf (fp,"write_hydro: field_velocity_z_yp %d\n", field_velocity_z_yp);
+    fprintf (fp,"EnzoDescr: field_velocity_z_yp %d\n", field_velocity_z_yp);
   if (field_magnetic_x_yp != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_x_yp %d\n", field_magnetic_x_yp);
+    fprintf (fp,"EnzoDescr: field_magnetic_x_yp %d\n", field_magnetic_x_yp);
   if (field_magnetic_y_yp != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_y_yp %d\n", field_magnetic_y_yp);
+    fprintf (fp,"EnzoDescr: field_magnetic_y_yp %d\n", field_magnetic_y_yp);
   if (field_magnetic_z_yp != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_z_yp %d\n", field_magnetic_z_yp);
+    fprintf (fp,"EnzoDescr: field_magnetic_z_yp %d\n", field_magnetic_z_yp);
 
   if (field_density_zp != -1) 
-    fprintf (fp,"write_hydro: field_density_zp %d\n", field_density_zp);
+    fprintf (fp,"EnzoDescr: field_density_zp %d\n", field_density_zp);
   if (field_velocity_x_zp != -1) 
-    fprintf (fp,"write_hydro: field_velocity_x_zp %d\n", field_velocity_x_zp);
+    fprintf (fp,"EnzoDescr: field_velocity_x_zp %d\n", field_velocity_x_zp);
   if (field_velocity_y_zp != -1) 
-    fprintf (fp,"write_hydro: field_velocity_y_zp %d\n", field_velocity_y_zp);
+    fprintf (fp,"EnzoDescr: field_velocity_y_zp %d\n", field_velocity_y_zp);
   if (field_velocity_z_zp != -1) 
-    fprintf (fp,"write_hydro: field_velocity_z_zp %d\n", field_velocity_z_zp);
+    fprintf (fp,"EnzoDescr: field_velocity_z_zp %d\n", field_velocity_z_zp);
   if (field_magnetic_x_zp != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_x_zp %d\n", field_magnetic_x_zp);
+    fprintf (fp,"EnzoDescr: field_magnetic_x_zp %d\n", field_magnetic_x_zp);
   if (field_magnetic_y_zp != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_y_zp %d\n", field_magnetic_y_zp);
+    fprintf (fp,"EnzoDescr: field_magnetic_y_zp %d\n", field_magnetic_y_zp);
   if (field_magnetic_z_zp != -1) 
-    fprintf (fp,"write_hydro: field_magnetic_z_zp %d\n", field_magnetic_z_zp);
+    fprintf (fp,"EnzoDescr: field_magnetic_z_zp %d\n", field_magnetic_z_zp);
+
+  // Grid
+
+  fprintf (fp,"EnzoDescr: GridRank %d\n",    GridRank);
+  fprintf (fp,"EnzoDescr: GridDimension %d %d %d\n",
+	   GridDimension[0],GridDimension[1],GridDimension[2]);
+  fprintf (fp,"EnzoDescr: GridStartIndex %d %d %d\n",
+	   GridStartIndex[0],GridStartIndex[1],GridStartIndex[2]);
+  fprintf (fp,"EnzoDescr: GridEndIndex %d %d %d\n",
+	   GridEndIndex[0],GridEndIndex[1],GridEndIndex[2]);
+  fprintf (fp,"EnzoDescr: GridLeftEdge %g %g %g\n",
+	   GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
+
+  fprintf (fp,"EnzoDescr: CellWidth %p %p %p\n", 
+	   CellWidth[0], CellWidth[1], CellWidth[2] );
+  if (CellWidth[0] != NULL) 
+    fprintf (fp,"EnzoDescr: CellWidth[0][0] %g\n", CellWidth[0][0]);
+  if (CellWidth[1] != NULL) 
+    fprintf (fp,"EnzoDescr: CellWidth[1][0] %g\n", CellWidth[1][0]);
+  if (CellWidth[2] != NULL) 
+    fprintf (fp,"EnzoDescr: CellWidth[2][0] %g\n", CellWidth[2][0]);
+
+  fprintf (fp,"EnzoDescr: ghost %d %d %d\n",
+	   ghost_depth[0],ghost_depth[1],ghost_depth[2]);
 
 
-  fprintf (fp,"write_hydro: NumberOfBaryonFields %d\n",    NumberOfBaryonFields);
-  //  fprintf (fp,"write_hydro: *BaryonField %g\n", *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS)];
-  //  fprintf (fp,"write_hydro: *OldBaryonField %g\n", *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS)];
-  //  fprintf (fp,"write_hydro: FieldType %d\n",    FieldType[MAX_NUMBER_OF_BARYON_FIELDS)];
+  fprintf (fp,"EnzoDescr: NumberOfBaryonFields %d\n",
+	   NumberOfBaryonFields);
+  int i;
+  for (i=0; i<NumberOfBaryonFields; i++) {
+    fprintf (fp,"EnzoDescr: BaryonField[%d] %p\n",
+	     i, BaryonField[i]);
+    fprintf (fp,"EnzoDescr: OldBaryonField[%d] %p\n",
+	     i, OldBaryonField[i]);
+    fprintf (fp,"EnzoDescr: FieldType[%d] %d\n",
+	     i, FieldType[i]);
+  }
 
-  fprintf (fp,"write_hydro: BoundaryRank %d\n",      BoundaryRank);
-  fprintf (fp,"write_hydro: BoundaryDimension %d %d %d\n",      BoundaryDimension[0],BoundaryDimension[1],BoundaryDimension[2]);
-  //  fprintf (fp,"write_hydro: BoundaryFieldType %d\n",      BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS)];
-  //  fprintf (fp,"write_hydro: *BoundaryType bc\n", *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2)];
-  //  fprintf (fp,"write_hydro: *BoundaryValue %g\n",   *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2)];  
+  fprintf (fp,"EnzoDescr: BoundaryRank %d\n", BoundaryRank);
+  fprintf (fp,"EnzoDescr: BoundaryDimension %d %d %d\n",
+	   BoundaryDimension[0],BoundaryDimension[1],BoundaryDimension[2]);
+
+  // unknown, reflecting, outflow, inflow, periodic
+  //  const char * bc_string[] = 
+  //    {"unknown", "reflecting", "outflow", "inflow", "periodic"};
+
+  for (i=0; i<NumberOfBaryonFields; i++) {
+
+    fprintf (fp,"EnzoDescr: BoundaryFieldType[%d] %d\n", 
+	     i, BoundaryFieldType[i]);
+
+    fprintf (fp,"EnzoDescr: BoundaryType[%d] %p %p %p %p %p %p\n", i, 
+	     BoundaryType[i][0][0],
+	     BoundaryType[i][0][1],
+	     BoundaryType[i][1][0],
+	     BoundaryType[i][1][1],
+	     BoundaryType[i][2][0],
+	     BoundaryType[i][2][1]);
+
+    fprintf (fp,"EnzoDescr: BoundaryValue[%d] %p %p %p %p %p %p\n",i,
+	     BoundaryValue[i][0][0],
+	     BoundaryValue[i][0][1],
+	     BoundaryValue[i][1][0],
+	     BoundaryValue[i][1][1],
+	     BoundaryValue[i][2][0],
+	     BoundaryValue[i][2][1]);  
+  }
 
   // problem
 
-  fprintf (fp,"write_hydro: CycleNumber %d\n",   CycleNumber);
-  fprintf (fp,"write_hydro: dt %g\n", dt);
+  fprintf (fp,"EnzoDescr: CycleNumber %d\n",   CycleNumber);
+  fprintf (fp,"EnzoDescr: dt %g\n", dt);
+
+  // fluxes
+
+  fprintf (fp,"EnzoDescr: SubgridFluxes %p\n", SubgridFluxes);
+  
 
 }
 

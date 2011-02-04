@@ -15,6 +15,7 @@
 
 #include <vector>
 #include <string>
+#include <limits>
 
 //----------------------------------------------------------------------
 // Cello include file

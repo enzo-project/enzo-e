@@ -9,6 +9,8 @@
 #ifndef PARALLEL_MPI_HPP
 #define PARALLEL_MPI_HPP
 
+#ifdef CONFIG_USE_MPI
+
 class Mpi {
 
   /// @class    Mpi
@@ -26,27 +28,19 @@ public: // interface
   /// Initialize MPI (virtual)
   static void init(int * argc, char ***argv)
   {
-#ifdef CONFIG_USE_MPI
     MPI_Init(argc,argv);
-#endif
   }
 
   /// Finalize MPI
   static void finalize()
   {
-#ifdef CONFIG_USE_MPI
     MPI_Finalize();
-#endif
   };
 
   /// Abort execution abruptly
-  static void abort()
+  static void abort(MPI_Comm comm = MPI_COMM_CELLO)
   {
-#ifdef CONFIG_USE_MPI
-    MPI_Abort(MPI_COMM_WORLD,1);
-#else
-    exit(1);
-#endif
+    MPI_Abort(comm,1);
   }
 
   /// Exit the program
@@ -57,35 +51,25 @@ public: // interface
   }
 
   /// Get MPI size
-  static int size()
+  static int size(MPI_Comm comm = MPI_COMM_CELLO)
   {
     int size; 
-#ifdef CONFIG_USE_MPI
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-#else
-    size = 1;
-#endif
+    MPI_Comm_size(comm, &size);
     return size;
   };
 
   /// Get MPI rank
-  static int rank()
+  static int rank(MPI_Comm comm = MPI_COMM_CELLO)
   { 
     int rank; 
-#ifdef CONFIG_USE_MPI
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank); 
-#else
-    rank = 0;
-#endif
+    MPI_Comm_rank(comm, &rank); 
     return rank; 
   };
 
   /// Exit the program
-  static void barrier()
+  static void barrier(MPI_Comm comm = MPI_COMM_CELLO)
   {
-#ifdef CONFIG_USE_MPI
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
+    MPI_Barrier(comm);
   }
 
   /// Return whether this is the root process
@@ -95,6 +79,8 @@ public: // interface
   };
 
 };
+
+#endif /* CONFIG_USE_MPI */
 
 #endif /* PARALLEL_MPI_HPP */
 

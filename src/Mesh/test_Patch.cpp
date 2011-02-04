@@ -83,7 +83,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("block_count");
 
-  unit_assert(patch->block_count()==1);
+  unit_assert(patch->num_blocks()==1);
   
   unit_func("block");
 

@@ -20,6 +20,11 @@
 #define WARNING_MESSAGE(FUNCTION,MESSAGE) \
   { Error error; error.warning_(__FILE__,__LINE__,FUNCTION,MESSAGE); }
 
+/// @def      UNTESTED_MESSAGE
+/// @brief    Handle a (non-lethal) untested message
+#define UNTESTED_MESSAGE(FUNCTION) \
+  { Error error; error.warning_(__FILE__,__LINE__,FUNCTION,""); }
+
 /// @def      ERROR_MESSAGE
 /// @brief    Handle a (lethal) error message
 #define ERROR_MESSAGE(FUNCTION,MESSAGE) \
@@ -61,7 +66,8 @@ public: // functions
     : errors_active_(true),
       incompletes_active_(true),
       traces_active_(true),
-      warnings_active_(true)
+      warnings_active_(true),
+      untested_active_(true)
       
   {};
 
@@ -84,6 +90,14 @@ public: // functions
   /// Return whether to trace on this processor
   bool warnings_active ()
   { return warnings_active_; };
+
+  /// Set whether to trace on this processor
+  void set_untested_active (bool untested_active) 
+  { untested_active_ = untested_active; };
+
+  /// Return whether to trace on this processor
+  bool untested_active ()
+  { return untested_active_; };
 
   /// Set whether to trace on this processor
   void set_errors_active (bool errors_active) 
@@ -112,6 +126,17 @@ public: // functions
   {
     if (warnings_active_) {
       message_(stdout,"WARNING",file,line,function,message);
+    }
+  };
+
+  //----------------------------------------------------------------------
+  /// Untested message
+  void untested_ (const char * file,
+		 int          line,
+		 const char * function)
+  {
+    if (untested_active_) {
+      message_(stdout,"UNTESTED",file,line,function,"");
     }
   };
 
@@ -178,8 +203,10 @@ private: // functions
   {
     fprintf (fp,"\n");
     fprintf (fp,"     %s File:     %s:%d\n",type,file,line);
-    fprintf (fp,"     %s Function: %s()\n", type,function);
-    fprintf (fp,"     %s Message:  %s\n",   type,message);
+    if (strcmp(function,"") != 0)
+      fprintf (fp,"     %s Function: %s()\n", type,function);
+    if (strcmp(message,"") != 0)
+      fprintf (fp,"     %s Message:  %s\n",   type,message);
     fprintf (fp,"\n");
   };
 
@@ -199,6 +226,9 @@ private: // attributes
 
   /// Whether to display warning messages
   bool warnings_active_;
+
+  /// Whether to display warning messages
+  bool untested_active_;
 
 };
 

@@ -59,7 +59,9 @@ void EnzoSimulation::run() throw()
   // timer.start();
   // papi.start();
 
-  control_->initialize(data_descr());
+  UNTESTED_MESSAGE("EnzoSimulation::run");
+
+  control_->initialize_simulation();
 
   while (! control_->is_done() ) {
 
@@ -73,21 +75,54 @@ void EnzoSimulation::run() throw()
 
     control_->initialize_cycle();
 
+    // ASSUMES MESH IS JUST A SINGLE PATCH
+    Patch * patch = mesh_->root_patch();
+
+    // Create an iterator over all local blocks in a patch
+    ItBlocks itBlocks(patch);
+
+    // Initialize local block timestep
+
+    double dt_block = std::numeric_limits<double>::max();
+
     // for each Block in Patch
 
-    ItBlocks itBlocks(mesh_->root_patch());
     while (DataBlock * data_block = (DataBlock *) ++itBlocks) {
 
       control_->initialize_block(data_block);
       
       control_->finalize_block(data_block);
 
+      // Accumulate local block timestep
+
+      dt_block = MIN(dt_block,timestep_->compute(data_block));
+
     } // Block in Patch
 
+    // Accumulate timestep for patch given processor-local block timesteps
+
+    double dt_patch;
+
+#ifdef CONFIG_USE_MPI
+    MPI_Allreduce (&dt_block, &dt_patch, 1, MPI_INT, MPI_MIN,
+		   patch->mpi_comm());
+#else
+    dt_patch = dt_block;
+#endif
+
+    // Set next enzo timestep
+
+    ASSERT("EnzoSimulation::run", "dt is 0", enzo_descr_->dt != 0.0);
+
+    enzo_descr_->dt = dt_patch;
+
+    // Update cycle and time
+
     control_->finalize_cycle();
+
   }
 
-  control_->finalize(data_descr());
+  control_->finalize_simulation();
 
   // while (time < time_final && cycle <= cycle_final) {
 

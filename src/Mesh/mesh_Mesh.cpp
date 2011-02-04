@@ -13,29 +13,24 @@
 //----------------------------------------------------------------------
 
 Mesh::Mesh(DataDescr * data_descr) throw ()
-  : tree_(NULL)
-{
+  : tree_(NULL),
+    dimension_(0),
+    min_patch_size_(0),
+    max_patch_size_(0),
+    min_block_size_(0),
+    max_block_size_(0),
+    root_patch_(0),
+    refine_(0),
+    max_level_(0),
+    balanced_(0),
+    backfill_(0),
+    coalesce_(0)
 
+{
+  for (int i=0; i<3; i++) {
+    lower_[i] = 0.0;
+    upper_[i] = 1.0;
+    root_size_[i] = 0;
+  }
 }
 
-//----------------------------------------------------------------------
-
-Mesh::~Mesh() throw ()
-{
-}
-
-//----------------------------------------------------------------------
-
-Mesh::Mesh(const Mesh & mesh) throw ()
-/// @param     mesh  Object being copied
-{
-}
-
-//----------------------------------------------------------------------
-
-Mesh & Mesh::operator= (const Mesh & mesh) throw ()
-/// @param     mesh  Source object of the assignment
-/// @return    The target assigned object
-{
-  return *this;
-}

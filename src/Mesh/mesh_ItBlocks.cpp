@@ -28,12 +28,11 @@ ItBlocks::~ItBlocks() throw ()
 
 void * ItBlocks::operator++ ()
 {
-
-  if (curr_ == patch_->block_count()) curr_ = 0;
-
   curr_ ++;
 
-  return patch_->block(curr_ - 1);
+  if (curr_ > patch_->num_blocks()) curr_ = 0;
+
+  return curr_ ? patch_->block(curr_ - 1) : 0;
 }
 
 

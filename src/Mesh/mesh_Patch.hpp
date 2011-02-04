@@ -8,7 +8,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @todo     Move "size" to DataBlock's, since that's Field-centric
-/// @todo     rename block_count() as num_blocks()
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 
 class Patch {
@@ -68,28 +67,39 @@ public: // interface
   
   //--------------------------------------------------
 
-  /// Allocate blocks for given process number
-  void allocate(int ip=0) throw();
+  /// Allocate local blocks
+  void allocate() throw();
 
-  /// Deallocate blocks for given process number
-  void deallocate(int ip=0) throw();
+  /// Deallocate local blocks
+  void deallocate() throw();
 
-  /// Whether blocks are allocated for given process number
-  bool is_allocated(int ip=0) const throw();
+  /// Whether local blocks are allocated
+  bool is_allocated() const throw();
 
-  /// Return the number of data blocks for given process number
-  int block_count(int ip=0) const throw();
+  /// Return the number of local blocks
+  int num_blocks() const throw();
 
-  /// Return the ith data block for the given process number
-  /// WARNING: pointer can only be dereferenced if ip is local
-  DataBlock * block(int i, int ip=0) const throw();
+  /// Return the ith data block
+  DataBlock * block(int i) const throw();
 
   //--------------------------------------------------
 
+#ifdef CONFIG_USE_MPI
+  /// MPI group accessor function
+  MPI_Comm mpi_comm() { return mpi_comm_; };
+
+  /// MPI communicator accessor function
+  MPI_Group mpi_group() { return mpi_group_; };
+#endif
+
 public: // entry functions
+
+#ifdef CONFIG_USE_CHARM
 
   /// Initial patch advance, ending with receive_()
   void p_evolve();
+
+#endif
 
   //--------------------------------------------------
 
@@ -98,16 +108,23 @@ private: // attributes
   /// Data descriptor
   DataDescr * data_descr_;
 
-  /// Array of data blocks ib associated with process ip in the patch
-  /// data_block[ip][ib]
-  typedef std::vector<DataBlock *> data_block_vector;
-  std::vector<data_block_vector> data_block_;
+  /// Array of data blocks ib associated with this process
+  std::vector<DataBlock * > data_block_;
 
   /// Size of the patch
   int size_[3];
 
   /// Layout: describes blocking, processor range, and block-processor mapping 
   Layout * layout_;
+
+  /// This process id
+  int ip_;
+
+  /// MPI communicator if MPI used
+#ifdef CONFIG_USE_MPI
+  MPI_Group mpi_comm_;
+  MPI_Comm  mpi_group_;
+#endif
 
   /// Extent of the patch: xm, xp, ym, yp, zm, zp
   double extents_[6];

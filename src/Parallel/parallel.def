@@ -9,6 +9,10 @@
 /// @date     Mon Aug 13 2010
 /// @brief    Macro definitions for the Parallel component
 
+
+#define MPI_COMM_CELLO MPI_COMM_WORLD
+
+
 #if defined(CONFIG_USE_CHARM)
 
 //--------------------------------------------------

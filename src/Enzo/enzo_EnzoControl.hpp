@@ -25,11 +25,11 @@ public: // interface
 	      Parameters * parameters,
 	      EnzoDescr  * enzo);
 
-  /// Initialize the EnzoControl object
-  virtual void initialize (DataDescr * data_descr) throw();
+  /// Initialize the simulation
+  virtual void initialize_simulation () throw();
 
-  /// Finalize the EnzoControl object 
-  virtual void finalize (DataDescr * data_descr) throw();
+  /// Finalize the simulation
+  virtual void finalize_simulation () throw();
 
   /// Initialize cycle
   virtual void initialize_cycle () throw();
@@ -46,13 +46,19 @@ public: // interface
   /// Return whether the simulation is complete
   virtual bool is_done () throw();
 
-private:
 
-  /// Enzo descriptor object
-  EnzoDescr * enzo_;
+  //--------------------------------------------------
+
+  /// Return the Enzo descriptor
+  EnzoDescr * enzo() throw() { return enzo_; };
+
+private:
 
   /// Parameters
   Parameters * parameters_;
+
+  /// Enzo descriptor object
+  EnzoDescr * enzo_;
 
   /// Enzo stop cycle
   int cycle_stop_;

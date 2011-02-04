@@ -104,8 +104,10 @@ PARALLEL_MAIN_BEGIN
       GroupProcessMpi * parallel_mpi 
        	= dynamic_cast<GroupProcessMpi*> (parallel);
 
-      parallel_mpi->set_send_blocking(blocking_send);
-      parallel_mpi->set_recv_blocking(blocking_recv);
+      if (parallel_mpi != NULL) {
+	parallel_mpi->set_send_blocking(blocking_send);
+	parallel_mpi->set_recv_blocking(blocking_recv);
+      }
 
 #endif
 

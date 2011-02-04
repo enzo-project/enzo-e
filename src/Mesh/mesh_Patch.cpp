@@ -28,6 +28,14 @@ Patch::Patch() throw()
   extents_[3] = 1.0;
   extents_[4] = 0.0;
   extents_[5] = 1.0;
+
+#ifdef CONFIG_USE_MPI
+  mpi_comm_ = MPI_COMM_CELLO;
+  MPI_Comm_group (mpi_comm_, &group_);
+  ip_ = Mpi::rank();
+#else
+  ip_ = 0;
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -93,8 +101,53 @@ void Patch::size (int * npx, int * npy, int * npz) const throw()
 
 void Patch::set_layout (Layout * layout) throw()
 {
+
   // WARNING: potential for dangling pointer
   layout_ = layout;
+
+#ifdef CONFIG_USE_MPI
+
+  UNTESTED_MESSAGE("Patch::set_layout");
+
+  // Delete old communicator if needed
+
+  if (mpi_comm_ != MPI_COMM_CELLO) {
+    MPI_Comm_free  (&mpi_comm_);
+    MPI_Group_free (&mpi_group_);
+  }
+
+  // Check if layout process range makes sense
+
+  int layout_first, layout_size, mpi_size;
+
+  layout->process_range(&layout_first,&layout_size);
+  MPI_Comm_size(MPI_COMM_CELLO, &mpi_size)
+  
+  char buffer[255];
+  sprintf ("Illegal layout first = %d count = %d size(MPI_COMM_CELLO) = %d",
+	   (0 <= layout_first) &&
+	   (layout_first + layout_size <= mpi_size));
+
+
+  if (layout_first == 0 && layout_size == mpi_size) {
+
+    // Use MPI_COMM_CELLO for group / comm
+    mpi_comm_ = MPI_COMM_CELLO;
+    MPI_Comm_group (MPI_COMM_CELLO, &mpi_group_);
+
+  } else {
+    // Create new group / comm with layout's range of processes
+
+    int first_last_stride[3];
+    first_last_stride[0] = layout_first;
+    first_last_stride[1] = layout_count - layout_first;
+    first_last_stride[2] = 1;
+
+    MPI_Group_range_incl(MPI_COMM_CELLO,1,first_rank_stride,&mpi_group_);
+    MPI_Comm_create (MPI_COMM_CELLO, mpi_group_, &mpi_comm_);
+  }
+#endif
+
 }
 
 //----------------------------------------------------------------------
@@ -135,40 +188,103 @@ void Patch::extents (double * xm, double * xp,
   
 //----------------------------------------------------------------------
 
-void Patch::allocate(int ip) throw()
+void Patch::allocate() throw()
 {
-  // determine process range [ip0, ip0+np)
-  int ip0,np;
-  layout_->process_range(&ip0,&np);
 
-  // ensure data_block_[ip][ib] array is sufficiently long in dimension 1
-  data_block_.resize(np);
+  UNTESTED_MESSAGE("Patch::allocate()");
 
   // determine local block count nb
   
-  int nbl = block_count(ip);
+  int nb = num_blocks();
 
   // create local blocks
 
-  data_block_[ip].resize(nbl);
+  data_block_.resize(nb);
 
-  INCOMPLETE_MESSAGE("Patch::allocate","");
-  for (int ib=0; ib<nbl; ib++) {
-    // ENSURE VECTORS ARE ALLOCATED
-    //    data_block_[ip][ib] = new DataBlock;
+  // Get number of blocks in the patch
+  int nbx,nby,nbz;
+  layout_->block_count (&nbx, &nby, &nbz);
+
+  // determine block size
+  int mbx = size_[0] / nbx;
+  int mby = size_[1] / nby;
+  int mbz = size_[2] / nbz;
+
+  // Check that blocks evenly subdivide patch
+  if (! ((nbx*mbx == size_[0]) &&
+	 (nby*mby == size_[1]) &&
+	 (nbz*mbz == size_[2]))) {
+
+    char buffer[255];
+
+    sprintf (buffer,
+	     "Blocks must evenly subdivide Patch: "
+	     "patch size = (%d %d %d)  num_blocks = (%d %d %d)",
+	     size_[0],size_[1],size_[2],
+	     nbx,nby,nbz);
+
+    ERROR_MESSAGE("Patch::allocate",  buffer);
+      
+  }
+
+  FieldDescr * field_descr = data_descr_->field_descr();
+
+  // Determine size of each block
+  double bx = (extents_[1] - extents_[0]) / nbx;
+  double by = (extents_[3] - extents_[2]) / nby;
+  double bz = (extents_[5] - extents_[4]) / nbz;
+
+  // CREATE AND INITIALIZE NEW DATA BLOCKS
+
+  for (int ib=0; ib<nb; ib++) {
+
+    // create a new data block
+    DataBlock * data_block = new DataBlock;
+
+    // Store the data block
+    data_block_[ib] = data_block;
+
+    // Get index of this block in the patch
+    int ibx,iby,ibz;
+    layout_->block_indices (ib, &ibx, &iby, &ibz);
+
+    // INITIALIZE FIELD BLOCK
+
+    FieldBlock * field_block = data_block->field_block();
+
+    field_block->set_field_descr(field_descr);
+
+    field_block->set_size(mbx,mby,mbz);
+
+    double xm,xp,ym,yp,zm,zp;
+
+    xm = extents_[0] + ibx*bx;
+    ym = extents_[2] + iby*by;
+    zm = extents_[4] + ibz*bz;
+
+    xp = extents_[0] + (ibx+1)*bx;
+    yp = extents_[2] + (iby+1)*by;
+    zp = extents_[4] + (ibz+1)*bz;
+
+    field_block->set_extent(xm,xp,ym,yp,zm,zp);
+
+    field_block->allocate_array();
+			    
+    // INITIALIZE PARTICLE BLOCK
+
   }
 }
 
 //----------------------------------------------------------------------
 
-void Patch::deallocate(int ip) throw()
+void Patch::deallocate() throw()
 {
   INCOMPLETE_MESSAGE("Patch::deallocate","");
 }
 
 //----------------------------------------------------------------------
 
-bool Patch::is_allocated(int ip) const throw() 
+bool Patch::is_allocated() const throw() 
 {
   INCOMPLETE_MESSAGE("Patch::is_allocated","");
   return false;
@@ -176,17 +292,16 @@ bool Patch::is_allocated(int ip) const throw()
 
 //----------------------------------------------------------------------
 
-int Patch::block_count(int ip) const  throw()
+int Patch::num_blocks() const  throw()
 {
-  return layout_->local_count(ip);
+  return layout_->local_count(ip_);
 }
 
 //----------------------------------------------------------------------
 
-DataBlock * Patch::block(int i, int ip) const throw()
+DataBlock * Patch::block(int i) const throw()
 {
-  INCOMPLETE_MESSAGE("Patch::block","");
-  return 0;
+  return data_block_[i];
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

@@ -31,8 +31,9 @@ EnzoControl::EnzoControl
 
 //----------------------------------------------------------------------
 
-void EnzoControl::initialize (DataDescr * data_descr) throw()
+void EnzoControl::initialize_simulation () throw()
 {
+  TRACE_MESSAGE("EnzoControl::initialize_simulation()");
 
   //--------------------------------------------------
   parameters_->set_current_group ("Stopping");
@@ -40,6 +41,10 @@ void EnzoControl::initialize (DataDescr * data_descr) throw()
 
   cycle_stop_ = parameters_->value_integer("cycle",1000);
   time_stop_  = parameters_->value_scalar("time",2.5);
+
+
+  INCOMPLETE_MESSAGE("Simulation::initialize_control_","");
+
 
   //--------------------------------------------------
   parameters_->set_current_group ("Output");
@@ -61,28 +66,27 @@ void EnzoControl::initialize (DataDescr * data_descr) throw()
 
   // // Initial progress and image monitoring
 
-  INCOMPLETE_MESSAGE("Simulation::initialize_control_","");
-
-
 }
 
 //----------------------------------------------------------------------
 
-void EnzoControl::finalize (DataDescr * data_descr) throw()
+void EnzoControl::finalize_simulation () throw()
 {
-  TRACE_MESSAGE("EnzoControl::finalize()");
+  TRACE_MESSAGE("EnzoControl::finalize_simulation()");
 }
 
 //----------------------------------------------------------------------
 
 void EnzoControl::initialize_cycle () throw()
 {
+  TRACE_MESSAGE("EnzoControl::initialize_cycle()");
 }
 
 //----------------------------------------------------------------------
 
 void EnzoControl::finalize_cycle () throw()
 {
+  TRACE_MESSAGE("EnzoControl::finalize_cycle()");
   ++ enzo_->CycleNumber;
   enzo_->Time += enzo_->dt;
 }
@@ -91,6 +95,7 @@ void EnzoControl::finalize_cycle () throw()
 
 void EnzoControl::initialize_block (DataBlock * data_block) throw ()
 {
+  TRACE_MESSAGE("EnzoControl::initialize_block()");
   FieldBlock * field_block = data_block->field_block();
   
   double xm,xp,ym,yp,zm,zp;
@@ -132,6 +137,7 @@ void EnzoControl::initialize_block (DataBlock * data_block) throw ()
 
   for (int field = 0; field < enzo_->NumberOfBaryonFields; field++) {
     enzo_->BaryonField[field] = (float *)field_block->field_values(field);
+    printf ("%d %g\n",field,enzo_->BaryonField[field]);
   }
 
  
@@ -172,6 +178,7 @@ void EnzoControl::initialize_block (DataBlock * data_block) throw ()
 
 void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
 {
+  TRACE_MESSAGE("EnzoControl::finalize_block()");
   // delete CellWidth[] array
 
   for (int dim=0; dim < enzo_->GridRank; dim++) {
@@ -183,6 +190,7 @@ void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
 
 bool EnzoControl::is_done () throw()
 {
+  TRACE_MESSAGE("EnzoControl::is_done()");
   ASSERT("EnzoControl::is_done",
 	 "Neither Stopping::time_stop nor Stopping::cycle_stop initialized",
 	 time_stop_ != -1.0 || cycle_stop_ != -1);

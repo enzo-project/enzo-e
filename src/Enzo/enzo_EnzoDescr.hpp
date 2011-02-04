@@ -131,6 +131,7 @@ public: // PUBLIC ATTRIBUTES (!!)
   int DualEnergyFormalism;
   float DualEnergyFormalismEta1;
   float DualEnergyFormalismEta2;
+
   float pressure_floor;
   float density_floor;
   float number_density_floor;

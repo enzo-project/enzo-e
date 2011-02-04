@@ -26,13 +26,13 @@ public: // interface
   void set_process_range (int process_first=0, int process_count=1) throw();
 
   /// Set how many blocks are in the layout
-  void set_block_count (int nb0, int nb1=1, int nb2=1) throw();
+  void set_block_count (int nbx, int nby=1, int nbz=1) throw();
 
   /// Return the first process id and number of processes
   void process_range (int * process_first, int * process_count) throw();
 
   /// Return the number of blocks in the layout
-  int block_count (int *nb0, int *nb1, int *nb2) throw();
+  int block_count (int *nbx, int *nby, int *nbz) throw();
 
   /// Return the number of local blocks in the layout for given process
   int local_count (int ip) throw();

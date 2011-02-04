@@ -32,19 +32,6 @@ public: // interface
   Mesh(DataDescr * data_descr) throw ();
 
   //----------------------------------------------------------------------
-  // Big Three
-  //----------------------------------------------------------------------
-
-  /// Destructor
-  ~Mesh() throw();
-
-  /// Copy constructor
-  Mesh(const Mesh & mesh) throw();
-
-  /// Assignment operator
-  Mesh & operator= (const Mesh & mesh) throw();
-
-  //----------------------------------------------------------------------
 
   /// Return dimension
   int dimension() throw ()

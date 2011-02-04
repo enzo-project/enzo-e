@@ -146,7 +146,10 @@ double EnzoTimestep::compute ( DataBlock * data_block ) throw()
 
   delete [] pressure_field;
   pressure_field = 0;
- 
+
+  char buffer[80];
+  sprintf (buffer,"dt = %g",dt);
+  TRACE_MESSAGE(buffer);
   return dt;
 }
 
