@@ -31,48 +31,18 @@ EnzoControl::EnzoControl
 
 //----------------------------------------------------------------------
 
-void EnzoControl::initialize_simulation () throw()
+void EnzoControl::initialize () throw()
 {
-  TRACE_MESSAGE("EnzoControl::initialize_simulation()");
 
-  //--------------------------------------------------
-  parameters_->set_current_group ("Stopping");
-  //--------------------------------------------------
-
-  cycle_stop_ = parameters_->value_integer("cycle",1000);
-  time_stop_  = parameters_->value_scalar("time",2.5);
-
-
-  INCOMPLETE_MESSAGE("Simulation::initialize_control_","");
-
-
-  //--------------------------------------------------
-  parameters_->set_current_group ("Output");
-  //--------------------------------------------------
-
-  // @@@ WARNING: IGNORED
-  int cycle_dump    = parameters_->value_integer("cycle_dump",10);
-
-  // Initialize monitor parameters
-
-  //--------------------------------------------------
-  parameters_->set_current_group ("Monitor");
-  //--------------------------------------------------
-
-  // @@@ WARNING: IGNORED
-  int  cycle_image    = parameters_->value_integer("cycle_image",10);
-  // @@@ WARNING: IGNORED
-  int  cycle_progress = parameters_->value_integer("cycle_progress",1);
-
-  // // Initial progress and image monitoring
+  read_parameters_();
 
 }
 
 //----------------------------------------------------------------------
 
-void EnzoControl::finalize_simulation () throw()
+void EnzoControl::finalize () throw()
 {
-  TRACE_MESSAGE("EnzoControl::finalize_simulation()");
+  TRACE_MESSAGE("EnzoControl::finalize()");
 }
 
 //----------------------------------------------------------------------
@@ -186,7 +156,7 @@ void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
   }
 }
 
-//======================================================================
+//----------------------------------------------------------------------
 
 bool EnzoControl::is_done () throw()
 {
@@ -197,4 +167,35 @@ bool EnzoControl::is_done () throw()
   return 
     (enzo_->Time >= time_stop_ ) ||
     (enzo_->CycleNumber >= cycle_stop_);
+}
+
+//======================================================================
+
+void EnzoControl::read_parameters_() throw()
+{
+  //--------------------------------------------------
+  parameters_->set_current_group ("Stopping");
+  //--------------------------------------------------
+
+  cycle_stop_ = parameters_->value_integer("cycle",1000);
+  time_stop_  = parameters_->value_scalar("time",2.5);
+
+  INCOMPLETE_MESSAGE("Simulation::read_parameters_","");
+
+  //--------------------------------------------------
+  parameters_->set_current_group ("Output");
+  //--------------------------------------------------
+
+  // @@@ WARNING: IGNORED
+  int cycle_dump    = parameters_->value_integer("cycle_dump",10);
+
+  //--------------------------------------------------
+  parameters_->set_current_group ("Monitor");
+  //--------------------------------------------------
+
+  // @@@ WARNING: IGNORED
+  int  cycle_image    = parameters_->value_integer("cycle_image",10);
+  // @@@ WARNING: IGNORED
+  int  cycle_progress = parameters_->value_integer("cycle_progress",1);
+
 }

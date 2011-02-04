@@ -26,10 +26,10 @@ public: // interface
 	      EnzoDescr  * enzo);
 
   /// Initialize the simulation
-  virtual void initialize_simulation () throw();
+  virtual void initialize () throw();
 
   /// Finalize the simulation
-  virtual void finalize_simulation () throw();
+  virtual void finalize () throw();
 
   /// Initialize cycle
   virtual void initialize_cycle () throw();
@@ -52,7 +52,9 @@ public: // interface
   /// Return the Enzo descriptor
   EnzoDescr * enzo() throw() { return enzo_; };
 
-private:
+  void read_parameters_() throw();
+
+private: // attributes
 
   /// Parameters
   Parameters * parameters_;

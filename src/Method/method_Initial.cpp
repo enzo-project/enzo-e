@@ -55,5 +55,8 @@ void Initial::add_argument_
       break;
     }
   }
-
 }
+
+//----------------------------------------------------------------------
+
+void Initial::initialize_

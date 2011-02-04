@@ -10,128 +10,9 @@
 #include "test.hpp"
 
 #include "enzo.hpp"
+#include "test_EnzoMethodPpm.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_EnzoMethodPpm.decl.h)
-
-//----------------------------------------------------------------------
-
-void output_images(Monitor * monitor,
-		   int cycle,
-		   FieldBlock * field_block,
-		   int cycle_image = 1)
-{
-
-  if (! (cycle_image && cycle % cycle_image == 0)) return;
-
-  FieldDescr * field_descr = field_block->field_descr();
-  int nx,ny,nz;
-  int gx,gy,gz;
-  int mx,my,mz;
-  field_block->enforce_boundary(boundary_reflecting);
-  field_block->size(&nx,&ny,&nz);
-  int count = field_descr->field_count();
-  for (int index = 0; index < count; index++) {
-    field_descr->ghosts(index,&gx,&gy,&gz);
-    mx=nx+2*gx;
-    my=ny+2*gy;
-    mz=nz+2*gz;
-    char filename[80];
-    std::string field_name = field_descr->field_name(index);
-    Scalar * field_values = (Scalar *)field_block->field_values(index);
-    sprintf (filename,"ppm-%s-%05d.png",field_name.c_str(),cycle);
-    monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 0.0, 1.0);
-  }
-}
-
-//----------------------------------------------------------------------
-
-void output_dump(FileHdf5 & hdf5,
-		 int cycle,
-		 FieldBlock * field_block,
-		 int cycle_dump = 1)
-{
-
-  // Exit if we don't dump data this cycle
-  if (! (cycle_dump && cycle % cycle_dump == 0)) return;
-
-  // Refresh boundary conditions 
-  // (should have check to not do it more than once)
-
-  FieldDescr * field_descr = field_block->field_descr();
-  field_block->enforce_boundary(boundary_reflecting);
-
-  // Open file
-
-  char filename[80];
-  sprintf (filename,"ppm-%05d.h5",cycle);
-  hdf5.open_file (filename,"w");
-
-  // Get block size
-  int nx,ny,nz;
-  field_block->size(&nx,&ny,&nz);
-
-  // Loop over fields in block
-
-  int count = field_descr->field_count();
-
-  for (int index = 0; index < count; index++) {
-
-    // Get field's ghost zone depth
-    int gx,gy,gz;
-    field_descr->ghosts(index,&gx,&gy,&gz);
-
-    // Get field's total size including ghosts
-
-    int mx,my,mz;
-    mx=nx+2*gx;
-    my=ny+2*gy;
-    mz=nz+2*gz;
-
-    // Get field's name for filename
-
-    std::string field_name = field_descr->field_name(index);
-
-    // Write data_block, including ghosts
-    // (should include option to omit ghosts)
-    // (what if ghosts aren't allocated in general?)
-
-    // prepare to write the field to the file
-
-    hdf5.open_dataset (field_name,
-		       field_descr->precision(index),
-		       mx,my,mz);
-
-    // write the field to the file
-
-    hdf5.write((char *)field_block->field_values(index),
-		field_descr->precision(index));
-
-    // close the field in the file
-    hdf5.close_dataset ();
-  }
-
-  // close the file
-
-  hdf5.close_file();
-
-}
-
-//----------------------------------------------------------------------
-
-void output_progress (Monitor * monitor,
-		      int cycle,
-		      double time,
-		      double dt,
-		      int cycle_progress = 1
-		      )
-{
-  if (! (cycle_progress && cycle % cycle_progress == 0)) return;
-  char buffer[100];
-  sprintf (buffer," cycle = %05d  sim-time = %10.8f  dt = %10.8f",
-	   cycle,time,dt);
-  monitor->print (buffer);
-}
-
 
 PARALLEL_MAIN_BEGIN
 
@@ -142,6 +23,7 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_INIT;
 
   GroupProcess * parallel = GroupProcess::create();
+
   unit_init(parallel->rank(), parallel->size());
 
   // Initialize cross-cutting components
@@ -157,6 +39,8 @@ PARALLEL_MAIN_BEGIN
 
   simulation->initialize(fp);
 
+  fclose (fp);
+
   simulation->run();
 
 
@@ -167,8 +51,6 @@ PARALLEL_MAIN_BEGIN
   delete error;
   delete monitor;
   delete simulation;
-
-  fclose (fp);
 
   PARALLEL_EXIT;
 }

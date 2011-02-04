@@ -38,7 +38,7 @@ void EnzoInitialImplosion2::finalize (DataDescr * data_descr) throw()
 
 //----------------------------------------------------------------------
 
-void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
+void EnzoInitialImplosion2::initialize_block_ (DataBlock * data_block) throw()
 
 {
   FieldBlock * field_block = data_block->field_block();

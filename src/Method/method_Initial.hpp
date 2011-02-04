@@ -58,6 +58,8 @@ protected: // functions
 		     access_enum   access_type,
 		     DataDescr   * data_descr = 0) throw();
 
+  void initialize_block_ (DataBlock * data_block) throw();
+
 protected: // attributes
 
   /// Error

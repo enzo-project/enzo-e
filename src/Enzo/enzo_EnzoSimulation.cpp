@@ -30,8 +30,12 @@ void EnzoSimulation::initialize(FILE * fp) throw()
   // Call initialize for Enzo-specific Simulation
   enzo_descr_->initialize(parameters_);
 
+  // Run initial conditions
+  initial_->initialize();
+
   // @@@ WRITE OUT ENZO DESCRIPTION FOR DEBUGGING
   enzo_descr_->write(stdout);
+
 }
 
 //----------------------------------------------------------------------
@@ -61,7 +65,7 @@ void EnzoSimulation::run() throw()
 
   UNTESTED_MESSAGE("EnzoSimulation::run");
 
-  control_->initialize_simulation();
+  control_->initialize();
 
   while (! control_->is_done() ) {
 
@@ -82,25 +86,24 @@ void EnzoSimulation::run() throw()
     ItBlocks itBlocks(patch);
 
     // Initialize local block timestep
-
     double dt_block = std::numeric_limits<double>::max();
 
     // for each Block in Patch
-
     while (DataBlock * data_block = (DataBlock *) ++itBlocks) {
 
       control_->initialize_block(data_block);
       
+
+      // COMPUTE
+
       control_->finalize_block(data_block);
 
       // Accumulate local block timestep
-
       dt_block = MIN(dt_block,timestep_->compute(data_block));
 
     } // Block in Patch
 
     // Accumulate timestep for patch given processor-local block timesteps
-
     double dt_patch;
 
 #ifdef CONFIG_USE_MPI
@@ -112,7 +115,7 @@ void EnzoSimulation::run() throw()
 
     // Set next enzo timestep
 
-    ASSERT("EnzoSimulation::run", "dt is 0", enzo_descr_->dt != 0.0);
+    //    ASSERT("EnzoSimulation::run", "dt is 0", enzo_descr_->dt != 0.0);
 
     enzo_descr_->dt = dt_patch;
 
@@ -120,9 +123,9 @@ void EnzoSimulation::run() throw()
 
     control_->finalize_cycle();
 
-  }
+  } // while (! control_->is_done() )
 
-  control_->finalize_simulation();
+  control_->finalize();
 
   // while (time < time_final && cycle <= cycle_final) {
 
@@ -201,7 +204,7 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
   
   Initial * initial = 0;
 
-  if (name == "implosion2")  
+  if (name == "implosion_2d")  
     initial = new EnzoInitialImplosion2 (error_, monitor_, enzo_descr_);
 
   return initial;

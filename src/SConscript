@@ -37,7 +37,7 @@ libraries  = ['png', '$FORTRANLIBS','m']
 
 env = env.Clone(LIBS=[components,libraries])
 
-includes = [Glob('cello*hpp'), Glob('cello*def')]
+includes = [Glob('cello*hpp'), Glob('cello*def'), Glob('test*hpp')]
 sources  = [Glob('cello*cpp')]
 
 libraries = env.Library ('cello', [sources])

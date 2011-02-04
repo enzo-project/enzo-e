@@ -27,10 +27,10 @@ public: // interface
   {};
 
   /// Initialize the simulation
-  virtual void initialize_simulation () throw() = 0;
+  virtual void initialize () throw() = 0;
 
   /// Finalize the simulation
-  virtual void finalize_simulation () throw() = 0;
+  virtual void finalize () throw() = 0;
 
   /// Initialize cycle
   virtual void initialize_cycle () throw() = 0;

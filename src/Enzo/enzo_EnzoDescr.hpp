@@ -39,6 +39,7 @@ public: // interface
   /// Initialize EnzoDescr values from parameter file
   void initialize(Parameters * parameters) throw();
 
+  /// Write attributes, e.g. to stdout for debugging
   void write(FILE *fp) throw ();
 
   //----------------------------------------------------------------------
