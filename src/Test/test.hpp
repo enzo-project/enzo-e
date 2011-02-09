@@ -21,6 +21,7 @@
 
 #include "cello.hpp"
 #include "error.hpp"
+#include "monitor.hpp"
 #include "parallel.hpp"
 
 //----------------------------------------------------------------------

@@ -68,8 +68,8 @@ private: // attributes
 
   /// MPI communicator if MPI used
 #ifdef CONFIG_USE_MPI
-  MPI_Group mpi_comm_;
-  MPI_Comm  mpi_group_;
+  MPI_Comm  mpi_comm_;
+  MPI_Group mpi_group_;
 #endif
 
 private: // functions

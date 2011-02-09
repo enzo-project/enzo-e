@@ -8,6 +8,7 @@
  
 #include "test.hpp"
 
+#include "performance.hpp" /* for Timer */
 #include "memory.hpp"
 
 #include PARALLEL_CHARM_INCLUDE(test_Memory.decl.h)
