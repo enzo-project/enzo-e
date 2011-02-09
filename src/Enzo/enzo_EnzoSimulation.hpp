@@ -23,7 +23,7 @@ public: // interface
 
   /// Destructor
   ~EnzoSimulation() throw()
-  { delete enzo_descr_; }
+  { delete enzo_; }
 
   /// Override Simulation initialize
   virtual void initialize(FILE * parameter_file) throw ();
@@ -45,7 +45,7 @@ public: // functions
 
   /// Return the Enzo object created in EnzoSimulation's constructor
   EnzoDescr * enzo() throw ()
-  { return enzo_descr_; };
+  { return enzo_; };
 
 protected: // virtual functions
 
@@ -66,7 +66,7 @@ protected: // virtual functions
 
 private: // attributes
 
-  EnzoDescr * enzo_descr_;
+  EnzoDescr * enzo_;
 
 };
 

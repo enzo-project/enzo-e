@@ -14,7 +14,7 @@ Import('use_hdf5')
 # DEPENDENCIES
 #------------------------------
 
-components = ['disk','method', 'enzo-ppm', 'field', 'error','monitor', 'simulation', 'parallel', 'mesh', 'parameters', 'cello']
+components = ['disk','method', 'enzo-ppm', 'field', 'error','monitor', 'memory', 'simulation', 'parallel', 'mesh', 'parameters', 'cello']
 
 if (use_papi):
 	components = components + ['papi','pfm']

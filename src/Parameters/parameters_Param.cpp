@@ -52,20 +52,20 @@ void Param::dealloc_()
 ///
 { 
   switch (type_) {
-  case param_string_: 
+  case parameter_string: 
     dealloc_string_(); 
     break;
-  case param_list_:   
+  case parameter_list:   
     dealloc_list_(value_list_); 
     break;
-  case param_logical_expr_:
-  case param_scalar_expr_:
+  case parameter_logical_expr:
+  case parameter_scalar_expr:
     dealloc_node_expr_(value_expr_);
     break;
-  case param_unknown_:
-  case param_integer_:
-  case param_scalar_:
-  case param_logical_:
+  case parameter_unknown:
+  case parameter_integer:
+  case parameter_scalar:
+  case parameter_logical:
     break;
   }
 } 
@@ -93,27 +93,27 @@ std::string Param::value_to_string ()
 {
   char string_buffer[80];
   switch (type_) {
-  case param_string_: 
+  case parameter_string: 
     sprintf (string_buffer,"%s\n",value_string_);
     break;
-  case param_list_:
+  case parameter_list:
     sprintf (string_buffer,"LIST\n");
     INCOMPLETE_MESSAGE("Param::write","Writing lists is not implemented yet");
     break;
-  case param_logical_expr_:
-  case param_scalar_expr_:
+  case parameter_logical_expr:
+  case parameter_scalar_expr:
     sprintf_expression(string_buffer,value_expr_);
     break;
-  case param_integer_:
+  case parameter_integer:
     sprintf (string_buffer,"%d",value_integer_);
     break;
-  case param_scalar_:
+  case parameter_scalar:
     sprintf (string_buffer,"%g",value_scalar_);
     break;
-  case param_logical_:
+  case parameter_logical:
     sprintf (string_buffer,"%s",value_logical_ ? "true" : "false");
     break;
-  case param_unknown_:
+  case parameter_unknown:
     sprintf (string_buffer,"UNKNOWN\n");
     break;
   }  
@@ -320,7 +320,7 @@ void Param::dealloc_list_ (list_type * value)
 /// @param value List to be deallocated
 {
   for (unsigned i=0; i<(*value).size(); i++) {
-    if ((*value)[i]->type_ == param_list_) {
+    if ((*value)[i]->type_ == parameter_list) {
       dealloc_list_ ((*value)[i]->value_list_);
     } else {
       delete ( (*value)[i] );

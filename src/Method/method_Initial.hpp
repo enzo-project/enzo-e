@@ -26,15 +26,6 @@ public: // interface
 
 public: // virtual functions
 
-  /// Perform any method-specific initialization
-
-  virtual void initialize (DataDescr * data_descr) throw() = 0;
-
-  /// Perform any method-specific finalizations steps, e.g. to
-  /// deallocate any dynamically-allocated memory
-
-  virtual void finalize (DataDescr * data_descr) throw() = 0;
-
   /// Initialize PPM variable that may change.  Called once per
   /// block per timestep.
 

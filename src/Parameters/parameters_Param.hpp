@@ -41,25 +41,25 @@ class Param {
 
   friend class Parameters;
 
-  /// @enum param_enum
-  /// @brief Parameter type 
-  enum param_enum {
-    param_unknown_,
-    param_integer_,
-    param_scalar_,
-    param_logical_,
-    param_string_,
-    param_list_,
-    param_scalar_expr_,
-    param_logical_expr_
-  };
+//   /// @enum param_enum
+//   /// @brief Parameter type 
+//   enum param_enum {
+//     param_unknown_,
+//     param_integer_,
+//     param_scalar_,
+//     param_logical_,
+//     param_string_,
+//     param_list_,
+//     param_scalar_expr_,
+//     param_logical_expr_
+//   };
 
 
 public: // interface
 
   /// Initialize a Param object
   Param () 
-    : type_(param_unknown_),
+    : type_(parameter_unknown),
       value_accessed_(false)
   {};
 
@@ -104,25 +104,25 @@ public: // interface
 	     std::string parameter);
 
   /// Return whether the parameter is an integer
-  bool is_integer()      { return type_ == param_integer_; };
+  bool is_integer()      { return type_ == parameter_integer; };
 
   /// Return whether the parameter is a scalar
-  bool is_scalar()       { return type_ == param_scalar_; };
+  bool is_scalar()       { return type_ == parameter_scalar; };
 
   /// Return whether the parameter is a logical
-  bool is_logical()      { return type_ == param_logical_; };
+  bool is_logical()      { return type_ == parameter_logical; };
 
   /// Return whether the parameter is a string
-  bool is_string()       { return type_ == param_string_; };
+  bool is_string()       { return type_ == parameter_string; };
 
   /// Return whether the parameter is a list
-  bool is_list()         { return type_ == param_list_; };
+  bool is_list()         { return type_ == parameter_list; };
 
   /// Return whether the parameter is a scalar expression
-  bool is_scalar_expr()  { return type_ == param_scalar_expr_; };
+  bool is_scalar_expr()  { return type_ == parameter_scalar_expr; };
 
   /// Return whether the parameter is a logical expression
-  bool is_logical_expr() { return type_ == param_logical_expr_; };
+  bool is_logical_expr() { return type_ == parameter_logical_expr; };
 
   /// Get an integer parameter
   int get_integer () 
@@ -143,10 +143,13 @@ public: // interface
   /// Convert the parameter value into a string
   std::string value_to_string ();
 
+  /// Return the type of the parameter
+  parameter_enum type() const { return type_; } 
+
 private: // attributes
 
   /// Parameter type
-  enum param_enum type_;
+  enum parameter_enum type_;
 
   /// Whether parameter value has been accessed
   bool value_accessed_;
@@ -169,28 +172,28 @@ private: // functions
   /// Set an integer parameter
   void set_integer_ (int value)
   { 
-    type_ = param_integer_; 
+    type_ = parameter_integer; 
     value_integer_ = value; 
   };
 
   /// Set a scalar parameter (note that scalar parameters are doubles)
   void set_scalar_  (double value) 
   { 
-    type_ = param_scalar_; 
+    type_ = parameter_scalar; 
     value_scalar_ = value; 
   };
 
   /// Set a logical parameter
   void set_logical_ (int value)    
   { 
-    type_ = param_logical_; 
+    type_ = parameter_logical; 
     value_logical_ = (value != 0); 
   };
 
   /// Set a string parameter (note that string is aliased)
   void set_string_ (char * value) 
   { 
-    type_ = param_string_; 
+    type_ = parameter_string; 
     value_string_ = value;
   };
 
@@ -200,7 +203,7 @@ private: // functions
   /// taken to be between the first sentinel and the next sentinel
   void set_list_ (struct param_struct * value) 
   { 
-    type_ = param_list_; 
+    type_ = parameter_list; 
     value_list_ = new list_type;
     value = value->next; // Skip sentinel
     while (value->type != enum_parameter_sentinel) {
@@ -214,14 +217,14 @@ private: // functions
   /// Set a scalar expression parameter
   void set_scalar_expr_ (struct node_expr * value)
   { 
-    type_ = param_scalar_expr_;
+    type_ = parameter_scalar_expr;
     value_expr_     = value; 
   };
 
   /// Set a logical expression parameter
   void set_logical_expr_ (struct node_expr * value)
   { 
-    type_ = param_logical_expr_;
+    type_ = parameter_logical_expr;
     value_expr_     = value; 
   };
 

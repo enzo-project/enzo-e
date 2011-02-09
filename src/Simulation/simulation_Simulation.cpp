@@ -242,9 +242,19 @@ void Simulation::initialize_data_() throw()
 
   // Define default ghost zone depth for all fields, default value of 1
 
-  int gx = parameters_->list_value_integer(0,"ghosts",1);
-  int gy = parameters_->list_value_integer(1,"ghosts",1);
-  int gz = parameters_->list_value_integer(2,"ghosts",1);
+  // @@@ WARNING: REPEATED CODE: SEE enzo_EnzoDescr.cpp
+
+  int gx = 1;
+  int gy = 1;
+  int gz = 1;
+
+  if (parameters_->type("ghosts") == parameter_integer) {
+    gx = gy = gz = parameters_->value_integer("ghosts",1);
+  } else if (parameters_->type("ghosts") == parameter_list) {
+    gx = parameters_->list_value_integer(0,"ghosts",1);
+    gy = parameters_->list_value_integer(1,"ghosts",1);
+    gz = parameters_->list_value_integer(2,"ghosts",1);
+  }
 
   if (dimension_ < 2) gy = 0;
   if (dimension_ < 3) gz = 0;
@@ -252,6 +262,7 @@ void Simulation::initialize_data_() throw()
   for (i=0; i<field_descr->field_count(); i++) {
     field_descr->set_ghosts(i,gx,gy,gz);
   }
+
 
 }
 
@@ -349,6 +360,7 @@ void Simulation::initialize_mesh_() throw()
 
   Patch * root_patch = new Patch;
 
+  mesh_->set_root_patch(root_patch);
   root_patch->set_data_descr(data_descr_);
   root_patch->set_size(root_size[0],root_size[1],root_size[2]);
   root_patch->set_layout(layout);
@@ -356,9 +368,7 @@ void Simulation::initialize_mesh_() throw()
 			  domain_lower[1],domain_upper[1],
 			  domain_lower[2],domain_upper[2]);
 
-  root_patch->allocate();
-
-  mesh_->set_root_patch(root_patch);
+  root_patch->allocate_blocks();
 
   // Mesh AMR settings
 

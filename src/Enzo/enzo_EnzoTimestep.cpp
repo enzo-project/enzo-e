@@ -66,6 +66,7 @@ double EnzoTimestep::compute ( DataBlock * data_block ) throw()
   // @@@ WARNING: should have temporary Field capability
 
   float * pressure_field = new float[size];
+  for (int i=0; i<size; i++) pressure_field[i] = 0;
 
   int  result;
   if (enzo_->DualEnergyFormalism)
@@ -147,9 +148,6 @@ double EnzoTimestep::compute ( DataBlock * data_block ) throw()
   delete [] pressure_field;
   pressure_field = 0;
 
-  char buffer[80];
-  sprintf (buffer,"dt = %g",dt);
-  TRACE_MESSAGE(buffer);
   return dt;
 }
 

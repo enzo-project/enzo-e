@@ -68,13 +68,13 @@ public: // interface
   //--------------------------------------------------
 
   /// Allocate local blocks
-  void allocate() throw();
+  void allocate_blocks() throw();
 
   /// Deallocate local blocks
-  void deallocate() throw();
+  void deallocate_blocks() throw();
 
   /// Whether local blocks are allocated
-  bool is_allocated() const throw();
+  bool blocks_allocated() const throw();
 
   /// Return the number of local blocks
   int num_blocks() const throw();
@@ -83,14 +83,6 @@ public: // interface
   DataBlock * block(int i) const throw();
 
   //--------------------------------------------------
-
-#ifdef CONFIG_USE_MPI
-  /// MPI group accessor function
-  MPI_Comm mpi_comm() { return mpi_comm_; };
-
-  /// MPI communicator accessor function
-  MPI_Group mpi_group() { return mpi_group_; };
-#endif
 
 public: // entry functions
 
@@ -119,12 +111,6 @@ private: // attributes
 
   /// This process id
   int ip_;
-
-  /// MPI communicator if MPI used
-#ifdef CONFIG_USE_MPI
-  MPI_Group mpi_comm_;
-  MPI_Comm  mpi_group_;
-#endif
 
   /// Extent of the patch: xm, xp, ym, yp, zm, zp
   double extents_[6];

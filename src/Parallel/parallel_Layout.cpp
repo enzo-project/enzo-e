@@ -22,6 +22,10 @@ Layout::Layout() throw()
   for (int i=0; i<3; i++) {
     block_count_[i] = 1;
   }
+#ifdef CONFIG_USE_MPI
+  mpi_comm_ = MPI_COMM_CELLO;
+  MPI_Comm_group (mpi_comm_, &mpi_group_);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -99,3 +103,59 @@ void Layout::block_indices (int ib, int * ibx, int * iby, int * ibz) throw()
   *iby = (ib / block_count_[0]) % block_count_[1];
   *ibz = ib / (block_count_[0]*block_count_[1]);
 }
+
+//----------------------------------------------------------------------
+
+#ifdef CONFIG_USE_MPI
+
+void Layout::initialize_mpi_()
+{
+
+  UNTESTED_MESSAGE("Patch::set_layout");
+
+  // Delete old communicator if needed
+
+  if (mpi_comm_ != MPI_COMM_CELLO) {
+    MPI_Comm_free  (&mpi_comm_);
+    MPI_Group_free (&mpi_group_);
+  }
+
+  // Check if layout process range makes sense
+
+  int layout_first, layout_size, mpi_size;
+
+  process_range(&layout_first,&layout_size);
+  MPI_Comm_size(MPI_COMM_CELLO, &mpi_size);
+
+  printf ("%s:%d DEBUG %d %d %d\n",
+	  __FILE__,__LINE__,layout_first, layout_size, mpi_size);
+  
+  if ( ! ((0 <= layout_first) &&
+	  (layout_first + layout_size <= mpi_size))) {
+    char buffer[ERROR_MESSAGE_LENGTH];
+    sprintf (buffer,
+	     "Illegal layout_first = %d layout_size = %d mpi_size = %d",
+	     layout_first, layout_size, mpi_size);
+  
+    ERROR_MESSAGE("Patch::set_layout",  buffer);
+  }
+
+  if (layout_first == 0 && layout_size == mpi_size) {
+
+    // Use MPI_COMM_CELLO for group / comm
+    mpi_comm_ = MPI_COMM_CELLO;
+    MPI_Comm_group (MPI_COMM_CELLO, &mpi_group_);
+
+  } else {
+    // Create new group / comm with layout's range of processes
+
+    int first_last_stride[1][3];
+    first_last_stride[0][0] = layout_first;
+    first_last_stride[0][1] = layout_size - layout_first;
+    first_last_stride[0][2] = 1;
+
+    MPI_Group_range_incl(MPI_COMM_CELLO,1,first_last_stride,&mpi_group_);
+    MPI_Comm_create (MPI_COMM_CELLO, mpi_group_, &mpi_comm_);
+  }
+}
+#endif

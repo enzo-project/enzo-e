@@ -66,8 +66,9 @@ void EnzoControl::finalize_cycle () throw()
 void EnzoControl::initialize_block (DataBlock * data_block) throw ()
 {
   TRACE_MESSAGE("EnzoControl::initialize_block()");
+
   FieldBlock * field_block = data_block->field_block();
-  
+
   double xm,xp,ym,yp,zm,zp;
 
   field_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
@@ -107,7 +108,6 @@ void EnzoControl::initialize_block (DataBlock * data_block) throw ()
 
   for (int field = 0; field < enzo_->NumberOfBaryonFields; field++) {
     enzo_->BaryonField[field] = (float *)field_block->field_values(field);
-    printf ("%d %g\n",field,enzo_->BaryonField[field]);
   }
 
  
@@ -142,6 +142,8 @@ void EnzoControl::initialize_block (DataBlock * data_block) throw ()
   //      }
   //    }
 
+  // @@@ WRITE OUT ENZO DESCRIPTION FOR DEBUGGING
+  enzo_->write(stdout);
 }
 
 //----------------------------------------------------------------------
@@ -183,19 +185,19 @@ void EnzoControl::read_parameters_() throw()
   INCOMPLETE_MESSAGE("Simulation::read_parameters_","");
 
   //--------------------------------------------------
-  parameters_->set_current_group ("Output");
+  //  parameters_->set_current_group ("Output");
   //--------------------------------------------------
 
   // @@@ WARNING: IGNORED
-  int cycle_dump    = parameters_->value_integer("cycle_dump",10);
+  //  int cycle_dump    = parameters_->value_integer("cycle_dump",10);
 
   //--------------------------------------------------
-  parameters_->set_current_group ("Monitor");
+  //  parameters_->set_current_group ("Monitor");
   //--------------------------------------------------
 
   // @@@ WARNING: IGNORED
-  int  cycle_image    = parameters_->value_integer("cycle_image",10);
+  //  int  cycle_image    = parameters_->value_integer("cycle_image",10);
   // @@@ WARNING: IGNORED
-  int  cycle_progress = parameters_->value_integer("cycle_progress",1);
+  //  int  cycle_progress = parameters_->value_integer("cycle_progress",1);
 
 }

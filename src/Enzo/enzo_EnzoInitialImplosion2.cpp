@@ -16,29 +16,15 @@ EnzoInitialImplosion2::EnzoInitialImplosion2
 (
  Error     * error,
  Monitor   * monitor,
- EnzoDescr * enzo_descr
+ EnzoDescr * enzo
  ) throw ()
   : Initial(error, monitor),
-    enzo_descr_(enzo_descr)
+    enzo_(enzo)
 {}
 
 //----------------------------------------------------------------------
 
-void EnzoInitialImplosion2::initialize (DataDescr * data_descr) throw()
-{
-  // Intentionally blank
-}
-
-//----------------------------------------------------------------------
-
-void EnzoInitialImplosion2::finalize (DataDescr * data_descr) throw()
-{
-  // Intentionally blank
-}
-
-//----------------------------------------------------------------------
-
-void EnzoInitialImplosion2::initialize_block_ (DataBlock * data_block) throw()
+void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
 
 {
   FieldBlock * field_block = data_block->field_block();
@@ -82,12 +68,12 @@ void EnzoInitialImplosion2::initialize_block_ (DataBlock * data_block) throw()
 	d[i]  = 0.125;
 	vx[i] = 0;
 	vy[i] = 0;
-	te[i] = 0.14 / ((enzo_descr_->Gamma - 1.0) * d[i]);
+	te[i] = 0.14 / ((enzo_->Gamma - 1.0) * d[i]);
       } else {
 	d[i]  = 1.0;
 	vx[i] = 0;
 	vy[i] = 0;
-	te[i] = 1.0 / ((enzo_descr_->Gamma - 1.0) * d[i]);
+	te[i] = 1.0 / ((enzo_->Gamma - 1.0) * d[i]);
       }
     }
   }

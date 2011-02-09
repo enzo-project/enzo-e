@@ -64,7 +64,6 @@ PARALLEL_MAIN_BEGIN
 
   // Create global objects
 
-  Error   * error   = new Error;
   Monitor * monitor = new Monitor;
 
   // Initialize monitor

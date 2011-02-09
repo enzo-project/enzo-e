@@ -23,7 +23,7 @@
 /// @def      UNTESTED_MESSAGE
 /// @brief    Handle a (non-lethal) untested message
 #define UNTESTED_MESSAGE(FUNCTION) \
-  { Error error; error.warning_(__FILE__,__LINE__,FUNCTION,""); }
+  { Error error; error.untested_(__FILE__,__LINE__,FUNCTION); }
 
 /// @def      ERROR_MESSAGE
 /// @brief    Handle a (lethal) error message

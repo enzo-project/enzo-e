@@ -524,36 +524,6 @@ void Parameters::list_evaluate_logical
 
 //----------------------------------------------------------------------
 
-void Parameters::monitor_read_ (std::string parameter,
-				std::string deflt_string) throw()
-{
-  Param * param = parameter_(parameter);
-  char buffer[80];
-  std::string value = param ? param->value_to_string().c_str() : 
-    std::string("[" + deflt_string + "]");
-  sprintf (buffer,"Parameter access %s:%s:%s == %s",
-	   current_group_.c_str(),
-	   current_subgroup_.c_str(),
-	   parameter.c_str(),
-	   value.c_str());
-  monitor_->print(buffer);
-}
-
-//----------------------------------------------------------------------
-
-void Parameters::monitor_write_ (std::string parameter) throw()
-{
-  Param * param = parameter_(parameter);
-  char buffer[80];
-  sprintf (buffer,"Parameter write %s:%s:%s = %s",
-	   current_group_.c_str(),
-	   current_subgroup_.c_str(),
-	   parameter.c_str(),
-	   param ? param->value_to_string().c_str() : "[undefined]");
-  monitor_->print(buffer);
-}
-//----------------------------------------------------------------------
-
 int Parameters::group_count() throw ()
 {
   return parameter_tree_->size();
@@ -586,6 +556,47 @@ std::string Parameters::subgroup(int group_index) throw ()
   return "";
 }
 
+//----------------------------------------------------------------------
+
+parameter_enum Parameters::type
+( std::string  parameter) throw()
+/// @param   parameter Parameter name
+/// @return  Return type of the given parameter
+{
+  Param * param = parameter_(parameter);
+  return param ? param->type() : parameter_unknown ;
+}
+
+//======================================================================
+
+void Parameters::monitor_read_ (std::string parameter,
+				std::string deflt_string) throw()
+{
+  Param * param = parameter_(parameter);
+  char buffer[80];
+  std::string value = param ? param->value_to_string().c_str() : 
+    std::string("[" + deflt_string + "]");
+  sprintf (buffer,"Parameter access %s:%s:%s == %s",
+	   current_group_.c_str(),
+	   current_subgroup_.c_str(),
+	   parameter.c_str(),
+	   value.c_str());
+  monitor_->print(buffer);
+}
+
+//----------------------------------------------------------------------
+
+void Parameters::monitor_write_ (std::string parameter) throw()
+{
+  Param * param = parameter_(parameter);
+  char buffer[80];
+  sprintf (buffer,"Parameter write %s:%s:%s = %s",
+	   current_group_.c_str(),
+	   current_subgroup_.c_str(),
+	   parameter.c_str(),
+	   param ? param->value_to_string().c_str() : "[undefined]");
+  monitor_->print(buffer);
+}
 
 //----------------------------------------------------------------------
 

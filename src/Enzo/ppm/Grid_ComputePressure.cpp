@@ -38,7 +38,7 @@ int EnzoDescr::ComputePressure(ENZO_FLOAT time, float *pressure)
   int i, size = 1;
  
   /* Error Check */
- 
+
   if (time < OldTime || time > Time) {
     fprintf(stderr, "requested time is outside available range.\n");
     return ENZO_FAIL;
@@ -67,14 +67,14 @@ int EnzoDescr::ComputePressure(ENZO_FLOAT time, float *pressure)
     fprintf(stderr, "Error in IdentifyPhysicalQuantities.\n");
     return ENZO_FAIL;
   }
- 
+
   /* Loop over the grid, compute the thermal energy, then the pressure,
      the timestep and finally the implied timestep. */
  
   /* special loop for no interpolate. */
  
   if (time == Time)
- 
+
     for (i = 0; i < size; i++) {
  
       total_energy  = BaryonField[TENum][i];

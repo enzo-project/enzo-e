@@ -9,6 +9,19 @@
 /// @date     Thu Jul  9 15:44:21 PDT 2009
 /// @brief    Include file for the \ref Parameters component
 
+/// @enum     parameter_enum
+/// @brief    Parameter data type
+enum parameter_enum {
+  parameter_unknown,
+  parameter_integer,
+  parameter_scalar,
+  parameter_string,
+  parameter_logical,
+  parameter_list,
+  parameter_scalar_expr,
+  parameter_logical_expr
+};
+
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------

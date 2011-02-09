@@ -4,6 +4,7 @@
 /// @file     enzo_EnzoDescr.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Aug 31 15:38:36 PDT 2010
+/// @todo     Avoid Field::ghosts being read twice in enzo_EnzoDescr.cpp:186 and simulation_Simulation.cpp:244
 /// @brief    Implementation of EnzoDescr methods
 
 #include "cello.hpp"
@@ -127,7 +128,26 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
 
   ComovingCoordinates  = parameters->value_logical ("cosmology",false);
   Gamma                = parameters->value_scalar  ("gamma",5.0/3.0);
-  CycleNumber = 0;
+  CycleNumber          = 0;
+  Time                 = 0;
+
+  GridRank = parameters->value_integer ("dimensions",0);
+
+  // Chemistry parameters
+
+  MultiSpecies = 0;    // 0:0 1:6 2:9 3:12
+
+  // Gravity parameters
+
+  GravityOn                       = 0;    // Whether gravity is included
+  GravitationalConstant           = 1.0;  // used only in SetMinimumSupport()
+  AccelerationField[0]            = NULL;
+  AccelerationField[1]            = NULL;
+  AccelerationField[2]            = NULL;
+
+  //Problem specific parameter
+
+  ProblemType = 0;
 
   // PPM parameters
 
@@ -156,14 +176,20 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   PPMSteepeningParameter = parameters->value_logical ("steepening", false);
 
   double floor_default = 1e-6;
-  pressure_floor       = parameters->value_scalar("pressure_floor",      floor_default);
-  density_floor        = parameters->value_scalar("density_floor",       floor_default);
-  temperature_floor    = parameters->value_scalar("temperature_floor",   floor_default);
-  number_density_floor = parameters->value_scalar("number_density_floor",floor_default);
+  pressure_floor       = parameters->value_scalar("pressure_floor",
+						  floor_default);
+  density_floor        = parameters->value_scalar("density_floor",
+						  floor_default);
+  temperature_floor    = parameters->value_scalar("temperature_floor",
+						  floor_default);
+  number_density_floor = parameters->value_scalar("number_density_floor",
+						  floor_default);
 
   DualEnergyFormalism     = parameters->value_logical ("dual_energy",false);
-  DualEnergyFormalismEta1 = parameters->value_scalar  ("dual_energy_eta_1",0.001);
-  DualEnergyFormalismEta2 = parameters->value_scalar  ("dual_energy_eta_1",0.1);
+  DualEnergyFormalismEta1 = parameters->value_scalar  ("dual_energy_eta_1",
+						       0.001);
+  DualEnergyFormalismEta2 = parameters->value_scalar  ("dual_energy_eta_1",
+						       0.1);
 
   //--------------------------------------------------
   parameters->set_current_group ("Physics");
@@ -183,14 +209,31 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   parameters->set_current_group ("Field");
   //--------------------------------------------------
 
-  int gx = parameters->list_value_integer(0,"ghosts",0);
-  int gy = parameters->list_value_integer(1,"ghosts",0);
-  int gz = parameters->list_value_integer(2,"ghosts",0);
+  // @@@ WARNING: REPEATED CODE: SEE simulation_Simulation.cpp
+
+  int gx = 1;
+  int gy = 1;
+  int gz = 1;
+
+  if (parameters->type("ghosts") == parameter_integer) {
+    gx = gy = gz = parameters->value_integer("ghosts",1);
+  } else if (parameters->type("ghosts") == parameter_list) {
+    gx = parameters->list_value_integer(0,"ghosts",1);
+    gy = parameters->list_value_integer(1,"ghosts",1);
+    gz = parameters->list_value_integer(2,"ghosts",1);
+  }
+
+  //   if (GridRank < 1) gx = 0;
+  if (GridRank < 2) gy = 0;
+  if (GridRank < 3) gz = 0;
+
+  ghost_depth[0] = gx;
+  ghost_depth[1] = gy;
+  ghost_depth[2] = gz;
 
   BoundaryDimension[0] = nx + 2*gx;
   BoundaryDimension[1] = ny + 2*gy;
   BoundaryDimension[2] = nz + 2*gz;
-
 
   // Initialize Enzo field-related attributes
 
@@ -200,9 +243,17 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
 
   NumberOfBaryonFields = parameters->list_length("fields");
 
+  // Check NumberOfBaryonFields
+
   if (NumberOfBaryonFields == 0) {
-    ERROR_MESSAGE ("EnzoDescr::EnzoDescr",
+    ERROR_MESSAGE ("EnzoDescr::initialize",
 		   "List parameter 'Field fields' must have length greater than zero");
+  } else if (NumberOfBaryonFields > MAX_NUMBER_OF_BARYON_FIELDS) {
+    char buffer[ERROR_MESSAGE_LENGTH];
+    sprintf (buffer,
+	     "MAX_NUMBER_OF_BARYON_FIELDS = %d is too small for %d fields",
+	     NumberOfBaryonFields,NumberOfBaryonFields );
+    ERROR_MESSAGE ("EnzoDescr::initialize",  buffer);
   }
 
   for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
@@ -238,47 +289,14 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
     }
   }
 
-  //--------------------------------------------------
-  parameters->set_current_group("Physics");
-  //--------------------------------------------------
-
-  GridRank = parameters->value_integer ("dimensions",0);
-
-  // Chemistry parameters
-
-  MultiSpecies = 0;    // 0:0 1:6 2:9 3:12
-
-  // Gravity parameters
-
-  GravityOn                       = 0;    // Whether gravity is included
-  GravitationalConstant           = 1.0;  // used only in SetMinimumSupport()
-  AccelerationField[0]            = NULL;
-  AccelerationField[1]            = NULL;
-  AccelerationField[2]            = NULL;
-
-  //Problem specific parameter
-
-  ProblemType = 0;
-
   // Field parameters
 
   //--------------------------------------------------
   parameters->set_current_group ("Field");
   //--------------------------------------------------
 
-  ghost_depth[0] = (GridRank >= 1) ? 
-    parameters->list_value_integer(0,"ghosts",3) : 0;
-  ghost_depth[1] = (GridRank >= 2) ? 
-    parameters->list_value_integer(1,"ghosts",3) : 0;
-  ghost_depth[2] = (GridRank >= 3) ? 
-    parameters->list_value_integer(2,"ghosts",3) : 0;
 
-  printf ("NumberOfBaryonFields = %d\n",NumberOfBaryonFields );
-  ASSERT ("initialize",
-	  "MAX_NUMBER_OF_BARYON_FIELDS is too small",
-	  NumberOfBaryonFields <= MAX_NUMBER_OF_BARYON_FIELDS);
 
-  Time                   = 0;
 
   // Domain parameters
 

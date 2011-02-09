@@ -43,7 +43,7 @@ float EnzoDescr::ComputeTimeStep()
   int size = 1;
   for (dim = 0; dim < GridRank; dim++)
     size *= GridDimension[dim];
- 
+
   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
      set it to one. */
  

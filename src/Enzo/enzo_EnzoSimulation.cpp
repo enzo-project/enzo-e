@@ -16,7 +16,7 @@
 EnzoSimulation::EnzoSimulation(Error   * error,
 			       Monitor * monitor) throw ()
   : Simulation(error,monitor),
-    enzo_descr_(new EnzoDescr())
+    enzo_(new EnzoDescr())
 {
 }
 
@@ -28,13 +28,7 @@ void EnzoSimulation::initialize(FILE * fp) throw()
   Simulation::initialize(fp);
 
   // Call initialize for Enzo-specific Simulation
-  enzo_descr_->initialize(parameters_);
-
-  // Run initial conditions
-  initial_->initialize();
-
-  // @@@ WRITE OUT ENZO DESCRIPTION FOR DEBUGGING
-  enzo_descr_->write(stdout);
+  enzo_->initialize(parameters_);
 
 }
 
@@ -42,7 +36,7 @@ void EnzoSimulation::initialize(FILE * fp) throw()
 
 void EnzoSimulation::finalize() throw()
 {
-  delete enzo_descr_;
+  delete enzo_;
 }
 
 //----------------------------------------------------------------------
@@ -72,8 +66,8 @@ void EnzoSimulation::run() throw()
     {
       char buffer[40];
       sprintf (buffer,"time %g cycle %d\n",
-	       enzo_descr_->Time,
-	       enzo_descr_->CycleNumber);
+	       enzo_->Time,
+	       enzo_->CycleNumber);
       monitor_->print(buffer);
     }
 
@@ -91,15 +85,19 @@ void EnzoSimulation::run() throw()
     // for each Block in Patch
     while (DataBlock * data_block = (DataBlock *) ++itBlocks) {
 
+      //      Memory::instance()->print();
+
       control_->initialize_block(data_block);
-      
+
 
       // COMPUTE
 
       control_->finalize_block(data_block);
 
+      //      Memory::instance()->print();
       // Accumulate local block timestep
       dt_block = MIN(dt_block,timestep_->compute(data_block));
+      //      Memory::instance()->print();
 
     } // Block in Patch
 
@@ -108,16 +106,16 @@ void EnzoSimulation::run() throw()
 
 #ifdef CONFIG_USE_MPI
     MPI_Allreduce (&dt_block, &dt_patch, 1, MPI_INT, MPI_MIN,
-		   patch->mpi_comm());
+		   patch->layout()->mpi_comm());
 #else
     dt_patch = dt_block;
 #endif
 
     // Set next enzo timestep
 
-    //    ASSERT("EnzoSimulation::run", "dt is 0", enzo_descr_->dt != 0.0);
+    //    ASSERT("EnzoSimulation::run", "dt is 0", enzo_->dt != 0.0);
 
-    enzo_descr_->dt = dt_patch;
+    enzo_->dt = dt_patch;
 
     // Update cycle and time
 
@@ -183,7 +181,7 @@ Control *
 EnzoSimulation::create_control_ (std::string name) throw ()
 /// @param name   Name of the control method to create (ignored)
 {
-  return new EnzoControl(error_, monitor_,parameters_,enzo_descr_);
+  return new EnzoControl(error_, monitor_,parameters_,enzo_);
 }
 
 //----------------------------------------------------------------------
@@ -192,7 +190,7 @@ Timestep *
 EnzoSimulation::create_timestep_ ( std::string name ) throw ()
 /// @param name   Name of the timestep method to create (ignored)
 {
-  return new EnzoTimestep(enzo_descr_);
+  return new EnzoTimestep(enzo_);
 }
 
 //----------------------------------------------------------------------
@@ -205,7 +203,7 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
   Initial * initial = 0;
 
   if (name == "implosion_2d")  
-    initial = new EnzoInitialImplosion2 (error_, monitor_, enzo_descr_);
+    initial = new EnzoInitialImplosion2 (error_, monitor_, enzo_);
 
   return initial;
 }
@@ -232,9 +230,9 @@ EnzoSimulation::create_method_ ( std::string name ) throw ()
   Method * method = 0;
 
   if (name == "ppm")
-    method = new EnzoMethodPpm  (error_,monitor_,parameters_,enzo_descr_);
+    method = new EnzoMethodPpm  (error_,monitor_,parameters_,enzo_);
   if (name == "ppml")
-    method = new EnzoMethodPpml (error_,monitor_,parameters_,enzo_descr_);
+    method = new EnzoMethodPpml (error_,monitor_,parameters_,enzo_);
 
   if (method == 0) {
     char buffer[80];

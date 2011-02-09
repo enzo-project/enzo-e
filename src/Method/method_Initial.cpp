@@ -59,4 +59,3 @@ void Initial::add_argument_
 
 //----------------------------------------------------------------------
 
-void Initial::initialize_

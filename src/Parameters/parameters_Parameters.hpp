@@ -19,18 +19,6 @@
 /// @brief    Maximum allowed width of a line in a parameter file
 #define MAX_PARAMETER_FILE_WIDTH 255
 
-/// @enum     parameter_enum
-/// @brief    Parameter data type
-enum parameter_enum {
-  parameter_integer,
-  parameter_scalar,
-  parameter_string,
-  parameter_logical,
-  parameter_list,
-  parameter_scalar_expr,
-  parameter_logical_expr
-};
-
 class Parameters {
 
   /// @class    Parameters
@@ -204,6 +192,9 @@ public: // interface
   /// Get the current subgroup
   std::string current_subgroup () throw ()
   { return current_subgroup_; };
+
+  /// Return the type of the given parameter
+  parameter_enum type(std::string) throw();
 
 private: // functions
 

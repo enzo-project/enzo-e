@@ -49,6 +49,8 @@
 	"velocity_y"
       ] ;
 
+      ghosts = 3;
+
       # List of user-defined groups, which may be accessed by applications
       # built on Cello to process different groups of fields in different
       # ways.  E.g. "color" fields for Enzo PPM, or "computed" fields that
@@ -70,6 +72,8 @@
       # important for performance on e.g. IBM Power architectures
 
       alignment = 8;    
+
+      precision = "single";
 
       pressure { 
 
@@ -100,11 +104,6 @@
 
          minimum =  [ 1.0e-6, "warning", 0.0, "error" ];
 
-         # for fun, use double precision for density even if default is single
-         # (implemented: single double extended80 extended96 quadruple)
-         # ( half may be useful for visualization )
-
-         precision = "double"
       };
 
    }
@@ -157,7 +156,7 @@
 
    Stopping {
       time  = 2.5;
-      cycle = 20000;
+      cycle = 10;
       # redshift
    }
 

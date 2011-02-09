@@ -61,7 +61,6 @@ PARALLEL_MAIN_BEGIN
 
   // Create global objects
 
-  Error   * error   = new Error;
   Monitor * monitor = new Monitor;
 
   // Check command line arguments

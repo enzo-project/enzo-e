@@ -73,13 +73,13 @@ PARALLEL_MAIN_BEGIN
   
   unit_func("is_allocated");
 
-  unit_assert(patch->is_allocated() == false);
+  unit_assert(patch->blocks_allocated() == false);
   
   unit_func("allocate");
 
-  patch->allocate();
+  patch->allocate_blocks();
 
-  unit_assert(patch->is_allocated() == true);
+  unit_assert(patch->blocks_allocated() == true);
 
   unit_func("block_count");
 
@@ -96,9 +96,9 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("deallocate");
 
-  patch->deallocate();
+  patch->deallocate_blocks();
 
-  unit_assert(patch->is_allocated() == false);
+  unit_assert(patch->blocks_allocated() == false);
 
   // TEST MEMORY SIZE RESTORED--NO MEMORY LEAKS
   unit_assert(false)

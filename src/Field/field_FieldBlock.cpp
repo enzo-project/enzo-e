@@ -28,7 +28,7 @@ FieldBlock::FieldBlock() throw()
 
 FieldBlock::~FieldBlock() throw()
 {  
-  delete [] array_;
+  deallocate_array();
 }
 
 //----------------------------------------------------------------------
@@ -269,9 +269,6 @@ void FieldBlock::deallocate_array () throw()
     array_ = 0;
     field_values_.clear();
 
-  } else {
-    WARNING_MESSAGE ("FieldBlock::deallocate_array",
-		     "Deallocate called with array already deallocated");
   }
 }
 

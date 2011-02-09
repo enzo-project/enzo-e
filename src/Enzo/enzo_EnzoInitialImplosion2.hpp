@@ -20,16 +20,7 @@ public: // interface
   /// Constructor
   EnzoInitialImplosion2(Error     * error,
 			Monitor   * monitor,
-                        EnzoDescr * enzo_descr) throw();
-
-  /// Perform any method-specific initialization
-
-  virtual void initialize (DataDescr * data_descr) throw();
-
-  /// Perform any method-specific finalizations steps, e.g. to
-  /// deallocate any dynamically-allocated memory
-
-  virtual void finalize (DataDescr * data_descr) throw();
+                        EnzoDescr * enzo) throw();
 
   /// Initialize PPM variable that may change.  Called once per
   /// block per timestep.
@@ -47,7 +38,7 @@ public: // interface
 
 private: // attributes
 
-  EnzoDescr * enzo_descr_;
+  EnzoDescr * enzo_;
   
 };
 

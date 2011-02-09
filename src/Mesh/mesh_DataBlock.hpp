@@ -18,23 +18,33 @@ class DataBlock {
 public: // interface
 
   /// Initialize the DataBlock object
-  DataBlock() throw()
-    : field_block_(new FieldBlock)
-  {  };
+  DataBlock(int num_field_blocks = 1) throw()
+    : field_block_()
+  { field_block_.resize(num_field_blocks);
+    for (size_t i=0; i<field_block_.size(); i++) {
+      field_block_[i] = new FieldBlock;
+    }
+  }
 
   /// Delete DataBlock
 
   ~DataBlock() throw()
-  { delete field_block_; }
+  { 
+    for (size_t i=0; i<field_block_.size(); i++) {
+      delete field_block_[i];
+    }
+  }
 
   /// Return the Field block
 
-  FieldBlock * field_block ()
-  { return field_block_; };
+  FieldBlock * field_block (int i=0)
+  { return field_block_.at(i); };
 
 private: // attributes
 
-  FieldBlock    * field_block_;
+  /// Array of field blocks
+
+  std::vector<FieldBlock *> field_block_;
 
 };
 

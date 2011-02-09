@@ -41,6 +41,8 @@
    
    Field {
 
+      ghosts = 3;
+
       fields = [
 	"density",	
 	"total_energy",
