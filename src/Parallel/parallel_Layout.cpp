@@ -147,14 +147,16 @@ void Layout::initialize_mpi_()
     MPI_Comm_group (MPI_COMM_CELLO, &mpi_group_);
 
   } else {
+
     // Create new group / comm with layout's range of processes
 
-    int first_last_stride[1][3];
-    first_last_stride[0][0] = layout_first;
-    first_last_stride[0][1] = layout_size - layout_first;
-    first_last_stride[0][2] = 1;
 
-    MPI_Group_range_incl(MPI_COMM_CELLO,1,first_last_stride,&mpi_group_);
+    MPI_Group mpi_group;
+    MPI_Comm_group (MPI_COMM_CELLO, &mpi_group);
+
+    int ranges[1][3] = {{layout_first,layout_size - layout_first,1}}
+;
+    MPI_Group_range_incl(mpi_group,1,ranges,&mpi_group_);
     MPI_Comm_create (MPI_COMM_CELLO, mpi_group_, &mpi_comm_);
   }
 }
