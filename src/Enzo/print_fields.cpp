@@ -19,6 +19,6 @@ void print_fields(int mx, int my)
 	bw += double(i+1)*BaryonField[k][i];
       }
     }
-    printf ("%d [%d %22.16g %22.16g %22.16g]\n",CycleNumber,k,b,bi,bw);
+    PARALLEL_PRINTF ("%d [%d %22.16g %22.16g %22.16g]\n",CycleNumber,k,b,bi,bw);
   }
 }

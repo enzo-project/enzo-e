@@ -207,19 +207,19 @@ PARALLEL_MAIN_BEGIN
   system("sleep 1");
   papi.stop();
 
-  printf ("time_real = %f\n",papi.time_real());
-  printf ("time_proc = %f\n",papi.time_proc());
+  PARALLEL_PRINTF ("time_real = %f\n",papi.time_real());
+  PARALLEL_PRINTF ("time_proc = %f\n",papi.time_proc());
 
   papi.start();
   float a=1.0,b=2.5,c=0;
   c = a*b+3.5;
   papi.stop();
 
-  printf ("c=%f\n",c);
-  printf ("time_real  = %f\n",papi.time_real());
-  printf ("time_proc  = %f\n",papi.time_proc());
-  printf ("flop_count = %lld\n",papi.flop_count());
-  printf ("flop_rate = %f\n",papi.flop_rate());
+  PARALLEL_PRINTF ("c=%f\n",c);
+  PARALLEL_PRINTF ("time_real  = %f\n",papi.time_real());
+  PARALLEL_PRINTF ("time_proc  = %f\n",papi.time_proc());
+  PARALLEL_PRINTF ("flop_count = %lld\n",papi.flop_count());
+  PARALLEL_PRINTF ("flop_rate = %f\n",papi.flop_rate());
 
 
   unit_finalize();

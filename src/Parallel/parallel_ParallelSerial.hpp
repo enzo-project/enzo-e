@@ -29,7 +29,6 @@ public: // interface
   /// Initialize
   virtual void initialize(int * argc = 0, char ***argv = 0) 
   { 
-      printf ("ParallelSerial::initialize() this = %p\n",this);
       set_initialized_(true);
   }
 

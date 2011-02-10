@@ -171,7 +171,7 @@ public: // functions
 	       const char * message)
   {
     if (traces_active_) {
-      printf ("TRACE %s:%d %s\n",file,line,message); 
+      PARALLEL_PRINTF ("TRACE %s:%d %s\n",file,line,message); 
       fflush(stdout);
     }
   };

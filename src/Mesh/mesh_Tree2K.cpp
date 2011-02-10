@@ -49,7 +49,7 @@ void Tree2K::refine
 {
   levels_ = root_->refine
     (level_array,ndx,ndy,0,ndx,0,ndy,0,max_level,is_full);
-  if (debug) printf ("%d\n",levels_);
+  if (debug) PARALLEL_PRINTF ("%d\n",levels_);
 }
 
 //----------------------------------------------------------------------
@@ -62,10 +62,10 @@ void Tree2K::balance(bool is_full)
   do {
     tree_changed = false;
     root_->balance_pass(tree_changed,is_full);
-    if (debug) printf ("Balance pass %d\n",pass);
+    if (debug) PARALLEL_PRINTF ("Balance pass %d\n",pass);
     pass++;
   } while (tree_changed);
-  printf ("passes = %d\n",pass);
+  PARALLEL_PRINTF ("passes = %d\n",pass);
 }
 
 //----------------------------------------------------------------------
@@ -77,10 +77,10 @@ void Tree2K::optimize()
   do {
     tree_changed = false;
     root_->optimize_pass(tree_changed);
-    if (debug) printf ("Optimize pass %d\n",pass);
+    if (debug) PARALLEL_PRINTF ("Optimize pass %d\n",pass);
     pass++;
   } while (tree_changed);
-  printf ("passes = %d\n",pass);
+  PARALLEL_PRINTF ("passes = %d\n",pass);
 }
 
 //----------------------------------------------------------------------

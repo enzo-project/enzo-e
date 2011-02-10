@@ -23,7 +23,7 @@ PARALLEL_MAIN_BEGIN
   unit_class ("Error");
 
   //----------------------------------------------------------------------
-  printf ("Warning message:\n");
+  PARALLEL_PRINTF ("Warning message:\n");
 
   char warning_message[ERROR_MESSAGE_LENGTH];
   sprintf (warning_message,"Warning message test");
@@ -33,7 +33,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert (true);
 
   //----------------------------------------------------------------------
-  printf ("Incomplete message:\n");
+  PARALLEL_PRINTF ("Incomplete message:\n");
 
   char incomplete_message[ERROR_MESSAGE_LENGTH];
   sprintf (incomplete_message,"Incomplete message test");

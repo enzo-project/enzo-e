@@ -44,10 +44,8 @@ void Memory::finalize_() throw ()
 {
 #ifdef CONFIG_USE_MEMORY
   for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
-    printf ("%d\n",i);
     delete [] group_names_[i];
   }
-  printf ("done\n");
 #endif
 }
 
@@ -335,12 +333,12 @@ void Memory::print () throw ()
 #ifdef CONFIG_USE_MEMORY
   for (memory_group_handle i=0; i<= MEMORY_MAX_NUM_GROUPS; i++) {
     if (i == 0 || group_names_[i] != NULL) {
-      printf ("Group %s\n",i ? group_names_[i]: "Total");
-      printf ("   limit_        = %ld\n",long(limit_[i]));
-      printf ("   bytes_        = %ld\n",long(bytes_[i]));
-      printf ("   bytes_high_   = %ld\n",long(bytes_high_[i]));
-      printf ("   new_calls_    = %ld\n",long(new_calls_[i]));
-      printf ("   delete_calls_ = %ld\n",long(delete_calls_[i]));
+      PARALLEL_PRINTF ("Group %s\n",i ? group_names_[i]: "Total");
+      PARALLEL_PRINTF ("   limit        = %ld\n",long(limit_[i]));
+      PARALLEL_PRINTF ("   bytes        = %ld\n",long(bytes_[i]));
+      PARALLEL_PRINTF ("   bytes_high   = %ld\n",long(bytes_high_[i]));
+      PARALLEL_PRINTF ("   new_calls    = %ld\n",long(new_calls_[i]));
+      PARALLEL_PRINTF ("   delete_calls = %ld\n",long(delete_calls_[i]));
     }
   }
 #endif

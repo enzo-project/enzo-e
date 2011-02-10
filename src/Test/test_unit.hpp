@@ -44,7 +44,7 @@ void unit_init (int rank = 0, int count = 1)
   unit::class_name[0] = 0;
   unit::func_name[0]  = 0;
   if (unit::process_rank == 0) {
-    printf ("UNIT TEST BEGIN\n");
+    PARALLEL_PRINTF ("UNIT TEST BEGIN\n");
   }
 }
 
@@ -52,7 +52,7 @@ void unit_init (int rank = 0, int count = 1)
 void unit_finalize ()
 {
   if (unit::process_rank == 0) {
-    printf ("UNIT TEST END\n");
+    PARALLEL_PRINTF ("UNIT TEST END\n");
   }
 }
 
@@ -67,7 +67,7 @@ template <typename T>
 void unit_size ()
 {
   if (unit::process_rank == 0) {
-    printf ("sizeof (%s) = %lu\n",unit::class_name,sizeof(T));
+    PARALLEL_PRINTF ("sizeof (%s) = %lu\n",unit::class_name,sizeof(T));
   }
 }
 
@@ -84,7 +84,7 @@ void unit_func (const char * f)
 void unit_assert_ (bool result, const char * file, int line)
 {
   if (unit::process_rank == 0 || ! result) {
-    printf ("%s %d/%d %s %d %s %s %d\n",
+    PARALLEL_PRINTF ("%s %d/%d %s %d %s %s %d\n",
 	    (result)? unit::pass_string : unit::fail_string,
 	    unit::process_rank, 
 	    unit::process_count,

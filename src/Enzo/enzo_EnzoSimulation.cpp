@@ -152,12 +152,12 @@ void EnzoSimulation::run() throw()
   // output_images  (monitor,cycle_final,field_block);
   // output_progress(monitor,cycle_final,time,dt);
 
-  // printf ("Time real = %f\n",papi.time_real());
-  // printf ("Time proc = %f\n",papi.time_proc());
-  // printf ("Flop count = %lld\n",papi.flop_count());
-  // printf ("GFlop rate = %f\n",papi.flop_rate()*1e-9);
+  // PARALLEL_PRINTF ("Time real = %f\n",papi.time_real());
+  // PARALLEL_PRINTF ("Time proc = %f\n",papi.time_proc());
+  // PARALLEL_PRINTF ("Flop count = %lld\n",papi.flop_count());
+  // PARALLEL_PRINTF ("GFlop rate = %f\n",papi.flop_rate()*1e-9);
 
-  // printf ("Timer time = %f\n",timer.value());
+  // PARALLEL_PRINTF ("Timer time = %f\n",timer.value());
 
 }
 

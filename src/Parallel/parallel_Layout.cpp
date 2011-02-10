@@ -127,9 +127,6 @@ void Layout::initialize_mpi_()
   process_range(&layout_first,&layout_size);
   MPI_Comm_size(MPI_COMM_CELLO, &mpi_size);
 
-  printf ("%s:%d DEBUG %d %d %d\n",
-	  __FILE__,__LINE__,layout_first, layout_size, mpi_size);
-  
   if ( ! ((0 <= layout_first) &&
 	  (layout_first + layout_size <= mpi_size))) {
     char buffer[ERROR_MESSAGE_LENGTH];
