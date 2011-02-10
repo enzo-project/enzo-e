@@ -55,7 +55,7 @@
 /// @brief    Equivalent to assert()
 #define ASSERT(FUNCTION,MESSAGE,ASSERTION)				\
   {									\
-    if (!ASSERTION) {							\
+    if (!(ASSERTION)) {							\
       message_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
       PARALLEL_EXIT;							\
     }									\

@@ -17,7 +17,7 @@ echo
 echo "arch  = $arch"
 echo "types = ( $types )"
 echo
-set procs = 2
+set procs = 1
 
 # clear
 
