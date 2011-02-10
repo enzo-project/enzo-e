@@ -27,8 +27,8 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
 {
  
   if (data_block) {
-    WARNING_MESSAGE("EnzoDescr::SolveHydroEquations",
-		    "Ignoring data_block input parameter");
+    WARNING("EnzoDescr::SolveHydroEquations",
+	    "Ignoring data_block input parameter");
   }
 
   /* exit if not 3D */

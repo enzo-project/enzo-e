@@ -20,8 +20,7 @@ class Simulation {
 public: // interface
 
   /// Initialize the Simulation object
-  Simulation(Error      * error = 0,
-	     Monitor    * monitor = 0,
+  Simulation(Monitor    * monitor = 0,
 	     Parameters * parameters = 0);
 
   //----------------------------------------------------------------------
@@ -65,9 +64,6 @@ public: // interface
   void extents (double * xmin, double *xmax,
 		double * ymin = 0, double *ymax = 0,
 		double * zmin = 0, double *zmax = 0) throw();
-
-  /// Return the Simulation's Error object
-  Error * error() const throw();
 
   /// Return the Simulation's Monitor object
   Monitor * monitor() const throw();
@@ -162,9 +158,6 @@ protected: // attributes
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
-
-  /// Error object
-  Error * error_;
 
   /// Monitor object
   Monitor * monitor_;

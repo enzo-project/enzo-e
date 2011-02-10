@@ -17,11 +17,10 @@ class EnzoMethodPpm : public Hyperbolic {
 
 public: // interface
 
-  EnzoMethodPpm(Error      * error,
-		Monitor    * monitor,
+  EnzoMethodPpm(Monitor    * monitor,
 		Parameters * parameters,
 		EnzoDescr  * enzo):
-    Hyperbolic(error,monitor,parameters),
+    Hyperbolic(monitor,parameters),
     enzo_(enzo)
   {};
 

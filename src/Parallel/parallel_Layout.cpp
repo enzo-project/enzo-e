@@ -111,7 +111,7 @@ void Layout::block_indices (int ib, int * ibx, int * iby, int * ibz) throw()
 void Layout::initialize_mpi_()
 {
 
-  UNTESTED_MESSAGE("Patch::set_layout");
+  UNTESTED("Patch::set_layout");
 
   // Delete old communicator if needed
 
@@ -129,12 +129,12 @@ void Layout::initialize_mpi_()
 
   if ( ! ((0 <= layout_first) &&
 	  (layout_first + layout_size <= mpi_size))) {
-    char buffer[ERROR_MESSAGE_LENGTH];
+    char buffer[ERROR_LENGTH];
     sprintf (buffer,
 	     "Illegal layout_first = %d layout_size = %d mpi_size = %d",
 	     layout_first, layout_size, mpi_size);
   
-    ERROR_MESSAGE("Patch::set_layout",  buffer);
+    ERROR("Patch::set_layout",  buffer);
   }
 
   if (layout_first == 0 && layout_size == mpi_size) {

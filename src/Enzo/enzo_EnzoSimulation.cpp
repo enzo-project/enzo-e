@@ -13,9 +13,8 @@
 
 //----------------------------------------------------------------------
 
-EnzoSimulation::EnzoSimulation(Error   * error,
-			       Monitor * monitor) throw ()
-  : Simulation(error,monitor),
+EnzoSimulation::EnzoSimulation(Monitor * monitor) throw ()
+  : Simulation(monitor),
     enzo_(new EnzoDescr())
 {
 }
@@ -57,7 +56,7 @@ void EnzoSimulation::run() throw()
   // timer.start();
   // papi.start();
 
-  UNTESTED_MESSAGE("EnzoSimulation::run");
+  UNTESTED("EnzoSimulation::run");
 
   control_->initialize();
 
@@ -165,14 +164,14 @@ void EnzoSimulation::run() throw()
 
 void EnzoSimulation::read() throw()
 {
-  INCOMPLETE_MESSAGE("EnzoSimulation::read","");
+  INCOMPLETE("EnzoSimulation::read","");
 }
 
 //----------------------------------------------------------------------
 
 void EnzoSimulation::write() throw()
 {
-  INCOMPLETE_MESSAGE("EnzoSimulation::write","");
+  INCOMPLETE("EnzoSimulation::write","");
 }
 
 //======================================================================
@@ -181,7 +180,7 @@ Control *
 EnzoSimulation::create_control_ (std::string name) throw ()
 /// @param name   Name of the control method to create (ignored)
 {
-  return new EnzoControl(error_, monitor_,parameters_,enzo_);
+  return new EnzoControl(monitor_,parameters_,enzo_);
 }
 
 //----------------------------------------------------------------------
@@ -203,7 +202,7 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
   Initial * initial = 0;
 
   if (name == "implosion_2d")  
-    initial = new EnzoInitialImplosion2 (error_, monitor_, enzo_);
+    initial = new EnzoInitialImplosion2 (monitor_, enzo_);
 
   return initial;
 }
@@ -230,14 +229,14 @@ EnzoSimulation::create_method_ ( std::string name ) throw ()
   Method * method = 0;
 
   if (name == "ppm")
-    method = new EnzoMethodPpm  (error_,monitor_,parameters_,enzo_);
+    method = new EnzoMethodPpm  (monitor_,parameters_,enzo_);
   if (name == "ppml")
-    method = new EnzoMethodPpml (error_,monitor_,parameters_,enzo_);
+    method = new EnzoMethodPpml (monitor_,parameters_,enzo_);
 
   if (method == 0) {
     char buffer[80];
     sprintf (buffer,"Cannot create Method '%s'",name.c_str());
-    ERROR_MESSAGE("EnzoSimulation::create_method", buffer);
+    ERROR("EnzoSimulation::create_method", buffer);
   }
 
   return method;

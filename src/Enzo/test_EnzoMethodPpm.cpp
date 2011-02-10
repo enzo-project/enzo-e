@@ -28,12 +28,11 @@ PARALLEL_MAIN_BEGIN
 
   // Initialize cross-cutting components
 
-  Error     * error    = new Error;
   Monitor   * monitor  = new Monitor;
 
   // Create top-level Simulation object
 
-  Simulation * simulation = new EnzoSimulation(error,monitor);
+  Simulation * simulation = new EnzoSimulation(monitor);
 
   FILE * fp = fopen ("input/test_EnzoMethodPpm.in","r");
 
@@ -48,7 +47,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_finalize();
 
-  delete error;
   delete monitor;
   delete simulation;
 

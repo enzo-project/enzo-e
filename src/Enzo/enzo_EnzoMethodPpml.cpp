@@ -70,7 +70,7 @@ void EnzoMethodPpml::finalize_block (DataBlock * data_block) throw()
 void EnzoMethodPpml::compute_block(DataBlock * data_block,
 				   double t,double dt) throw()
 {
-  INCOMPLETE_MESSAGE("EnzoMethodPpml::compute_block","");
+  INCOMPLETE("EnzoMethodPpml::compute_block","");
 }
 
 //----------------------------------------------------------------------

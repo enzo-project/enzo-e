@@ -41,13 +41,13 @@ public: // interface
   /// Copy constructor
   Counters(const Counters & classname) throw()
   {
-    INCOMPLETE_MESSAGE("Counters::Counters","");
+    INCOMPLETE("Counters::Counters","");
   }
 
   /// Assignment operator
   Counters & operator= (const Counters & classname) throw()
   {
-    INCOMPLETE_MESSAGE("Counters::operator =","");
+    INCOMPLETE("Counters::operator =","");
     return *this;
   }
 

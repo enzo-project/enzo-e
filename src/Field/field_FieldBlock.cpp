@@ -34,12 +34,12 @@ FieldBlock::~FieldBlock() throw()
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( const FieldBlock & field_block ) throw ()
-{  INCOMPLETE_MESSAGE("FieldBlock::FieldBlock",""); }
+{  INCOMPLETE("FieldBlock::FieldBlock",""); }
 
 //----------------------------------------------------------------------
 
 FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
-{  INCOMPLETE_MESSAGE("FieldBlock::operator=","");
+{  INCOMPLETE("FieldBlock::operator=","");
   return *this;
 }
 
@@ -174,12 +174,12 @@ void FieldBlock::clear
 	char buffer[80];
 	sprintf (buffer,"Clear called with unsupported precision %s" , 
 		 cello::precision_name[precision]);
-	ERROR_MESSAGE("FieldBlock::clear", buffer);
+	ERROR("FieldBlock::clear", buffer);
       }
 
     }
   } else {
-    ERROR_MESSAGE("FieldBlock::clear",
+    ERROR("FieldBlock::clear",
 		  "Called clear with unallocated arrays");
   }
 }
@@ -191,7 +191,7 @@ void FieldBlock::allocate_array() throw()
   if (! (size_[0] > 0 &&
 	 size_[1] > 0 &&
 	 size_[2] > 0) ) {
-    ERROR_MESSAGE ("FieldBlock::allocate_array",
+    ERROR ("FieldBlock::allocate_array",
 		   "Allocate called with zero field size");
   }
 
@@ -249,12 +249,12 @@ void FieldBlock::allocate_array() throw()
 
     if ( ! ( 0 <= (array_size - field_offset)
 	     &&   (array_size - field_offset) < alignment)) {
-      ERROR_MESSAGE ("FieldBlock::allocate_array",
+      ERROR ("FieldBlock::allocate_array",
 		     "Code error: array size was computed incorrectly");
     };
 
   } else {
-    ERROR_MESSAGE ("FieldBlock::allocate_array",
+    ERROR ("FieldBlock::allocate_array",
 		   "Allocate called with array already allocated");
   }
 }
@@ -309,7 +309,7 @@ void FieldBlock::allocate_ghosts() throw ()
     delete [] old_array;
 
   } else {
-    WARNING_MESSAGE("FieldBlock::allocate_ghosts",
+    WARNING("FieldBlock::allocate_ghosts",
 		    "Allocate called with ghosts already allocated");
   }
 }
@@ -337,7 +337,7 @@ void FieldBlock::deallocate_ghosts() throw ()
     delete [] old_array;
 
   } else {
-    WARNING_MESSAGE("FieldBlock::deallocate_ghosts",
+    WARNING("FieldBlock::deallocate_ghosts",
 		    "Function called with ghosts not allocated");
   }
 }
@@ -345,10 +345,10 @@ void FieldBlock::deallocate_ghosts() throw ()
 //----------------------------------------------------------------------
 void FieldBlock::refresh_ghosts() throw()
 {
-  INCOMPLETE_MESSAGE("FieldBlock::refresh_ghosts","");
+  INCOMPLETE("FieldBlock::refresh_ghosts","");
   if ( ghosts_allocated() ) {
   } else {
-    WARNING_MESSAGE("FieldBlock::refresh_ghosts",
+    WARNING("FieldBlock::refresh_ghosts",
 		    "Function called with ghosts not allocated");
   }
 }
@@ -389,13 +389,13 @@ void FieldBlock::enforce_boundary
 	enforce_boundary_neumann_(face);
 	break;
       default:
-	ERROR_MESSAGE("FieldBlock::enforce_boundary",
+	ERROR("FieldBlock::enforce_boundary",
 		      "Undefined boundary type");
 	break;
       }
     }
   } else {
-    ERROR_MESSAGE("FieldBlock::enforce_boundary",
+    ERROR("FieldBlock::enforce_boundary",
 		  "Function called with ghosts not allocated");
   }
 }
@@ -565,31 +565,31 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 //----------------------------------------------------------------------
 void FieldBlock::enforce_boundary_outflow_(face_enum face) throw()
 {
-  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_outflow","");
+  INCOMPLETE("FieldBlock::enforce_boundary_outflow","");
 }
 
 //----------------------------------------------------------------------
 void FieldBlock::enforce_boundary_inflow_(face_enum face) throw()
 {
-  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_inflow","");
+  INCOMPLETE("FieldBlock::enforce_boundary_inflow","");
 }
 
 //----------------------------------------------------------------------
 void FieldBlock::enforce_boundary_periodic_(face_enum face) throw()
 {
-  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_periodic","");
+  INCOMPLETE("FieldBlock::enforce_boundary_periodic","");
 }
 
 //----------------------------------------------------------------------
 void FieldBlock::enforce_boundary_dirichlet_(face_enum face) throw()
 {
-  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_dirichlet","");
+  INCOMPLETE("FieldBlock::enforce_boundary_dirichlet","");
 }
 
 //----------------------------------------------------------------------
 void FieldBlock::enforce_boundary_neumann_(face_enum face) throw()
 {
-  INCOMPLETE_MESSAGE("FieldBlock::enforce_boundary_neumann","");
+  INCOMPLETE("FieldBlock::enforce_boundary_neumann","");
 }
 
 //----------------------------------------------------------------------
@@ -633,7 +633,7 @@ void FieldBlock::write
  FieldDescr * field_descr 
  ) const throw ()
 {
-  INCOMPLETE_MESSAGE("FieldBlock::write","");
+  INCOMPLETE("FieldBlock::write","");
 }
 
 //----------------------------------------------------------------------
@@ -656,7 +656,7 @@ void FieldBlock::set_field_values
  int    id_field, 
  char * field_values) throw()
 {
-  INCOMPLETE_MESSAGE("FieldBlock::set_field_values","");
+  INCOMPLETE("FieldBlock::set_field_values","");
 }
 
 //----------------------------------------------------------------------

@@ -27,7 +27,7 @@ void FileIfrit::read_bin
   // read header
   // @@@ WARNING: ignoring return value
   fread (&bound,4,1,fp);
-  if (bound != 12) WARNING_MESSAGE("FileIfrit::read_bin","incorrect format");
+  if (bound != 12) WARNING("FileIfrit::read_bin","incorrect format");
   // @@@ WARNING: ignoring return value
   fread (pnx,4,1,fp);
   // @@@ WARNING: ignoring return value
@@ -36,18 +36,18 @@ void FileIfrit::read_bin
   fread (pnz,4,1,fp);
   // @@@ WARNING: ignoring return value
   fread (&bound,4,1,fp);
-  if (bound != 12) WARNING_MESSAGE("FileIfrit::read_bin","incorrect format");
+  if (bound != 12) WARNING("FileIfrit::read_bin","incorrect format");
 
   // Read scalar field
   int n = (*pnx)*(*pny)*(*pnz);
   // @@@ WARNING: ignoring return value
   fread (&bound,4,1,fp);
-  if (bound != 4*n) WARNING_MESSAGE("FileIfrit::read_bin","incorrect format");
+  if (bound != 4*n) WARNING("FileIfrit::read_bin","incorrect format");
   // @@@ WARNING: ignoring return value
   fread (buffer,4,(*pnx)*(*pny)*(*pnz),fp);
   // @@@ WARNING: ignoring return value
   fread (&bound,4,1,fp);
-  if (bound != 4*n) WARNING_MESSAGE("FileIfrit::read_bin","incorrect format");
+  if (bound != 4*n) WARNING("FileIfrit::read_bin","incorrect format");
 
   fclose (fp);
 }

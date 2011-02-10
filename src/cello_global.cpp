@@ -42,7 +42,6 @@ const char * component_name [] = {
 
 // Global::Global() throw()
 // {
-//   error_      = new Error;
 //   monitor_    = new Monitor;
 // //   parameters_ = new Parameters(monitor_);
 //   //    memory_     = new Memory;
@@ -52,7 +51,6 @@ const char * component_name [] = {
 
 // Global::~Global() throw()
 // {
-//   delete error_;
 // //   delete parameters_;
 //   delete monitor_;
 //   //    delete [] memory_;

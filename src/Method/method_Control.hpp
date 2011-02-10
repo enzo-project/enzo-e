@@ -20,10 +20,8 @@ class Control {
 public: // interface
 
   /// Constructor
-  Control(Error   * error,
-	  Monitor * monitor) throw()
-    : error_(error),
-      monitor_(monitor)
+  Control(Monitor * monitor) throw()
+    : monitor_(monitor)
   {};
 
   /// Initialize the simulation
@@ -48,9 +46,6 @@ public: // interface
   virtual bool is_done () throw() = 0;
 
 protected:
-
-  /// Error object
-  Error * error_;
 
   /// Monitor object
   Monitor * monitor_;

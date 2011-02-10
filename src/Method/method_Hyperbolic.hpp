@@ -18,10 +18,9 @@ class Hyperbolic : public Method {
 public: // interface
 
   /// Create a new Hyperbolic
-  Hyperbolic(Error      * error,
-	     Monitor    * monitor,
+  Hyperbolic(Monitor    * monitor,
 	     Parameters * parameters) throw()
-    : Method(error,monitor,parameters)
+    : Method(monitor,parameters)
   { }
 
 public: // virtual functions

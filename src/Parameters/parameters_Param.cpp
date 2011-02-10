@@ -98,7 +98,7 @@ std::string Param::value_to_string ()
     break;
   case parameter_list:
     sprintf (string_buffer,"LIST\n");
-    INCOMPLETE_MESSAGE("Param::write","Writing lists is not implemented yet");
+    INCOMPLETE("Param::write","Writing lists is not implemented yet");
     break;
   case parameter_logical_expr:
   case parameter_scalar_expr:
@@ -167,10 +167,10 @@ void Param::evaluate_scalar
     case enum_op_ne:
     case enum_op_and:
     case enum_op_or:
-      char error_message[ERROR_MESSAGE_LENGTH];
+      char error_message[ERROR_LENGTH];
       sprintf (error_message,"logical operator %d in scalar expression",
 	       node->op_value);
-      ERROR_MESSAGE("Param::evaluate_scalar",error_message);
+      ERROR("Param::evaluate_scalar",error_message);
       break;
     }
     break;
@@ -187,10 +187,10 @@ void Param::evaluate_scalar
     case 'z':	for (i=0; i<n; i++) result[i] = z[i]; break;
     case 't':	for (i=0; i<n; i++) result[i] = t[i]; break;
     default:
-      char error_message[ERROR_MESSAGE_LENGTH];
+      char error_message[ERROR_LENGTH];
       sprintf (error_message,"unknown variable %c in scalar expression",
 	       node->var_value);
-      ERROR_MESSAGE("Param::evaluate_scalar",error_message);
+      ERROR("Param::evaluate_scalar",error_message);
       break;
     }
     break;
@@ -199,9 +199,9 @@ void Param::evaluate_scalar
     break;
   case enum_node_unknown:
   default:
-    char error_message[ERROR_MESSAGE_LENGTH];
+    char error_message[ERROR_LENGTH];
     sprintf (error_message,"unknown expression type %d",node->type);
-    ERROR_MESSAGE("Param::evaluate_scalar",error_message);
+    ERROR("Param::evaluate_scalar",error_message);
     break;
   }
 
@@ -303,9 +303,9 @@ void Param::evaluate_logical
       for (i=0; i<n; i++) result[i] = left_logical[i] || right_logical[i];
       break;
     default:
-      char error_message[ERROR_MESSAGE_LENGTH];
+      char error_message[ERROR_LENGTH];
       sprintf (error_message,"unknown expression type %d",node->type);
-      ERROR_MESSAGE("Param::evaluate_logical",error_message);
+      ERROR("Param::evaluate_logical",error_message);
       break;
     }
   }

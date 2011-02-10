@@ -252,11 +252,11 @@ void recv
   case mpi_PF:
   case mpi_P4:
   case mpi_PL:
-    INCOMPLETE_MESSAGE("recv","");
+    INCOMPLETE("recv","");
     break;
   case mpi_unknown:
   default:
-    ERROR_MESSAGE("recv","Bad mpi_enum");
+    ERROR("recv","Bad mpi_enum");
   }
 }
 //======================================================================
@@ -695,7 +695,7 @@ Scalar * ghost_exchange_task_alias
  int gx, int gy, int gz
  )
 {
-  INCOMPLETE_MESSAGE("ghost_exchange_task_alias","");
+  INCOMPLETE("ghost_exchange_task_alias","");
   return NULL;
 }
 
@@ -708,7 +708,7 @@ Scalar * ghost_exchange_task_copy
  int gx, int gy, int gz
  )
 {
-  INCOMPLETE_MESSAGE("ghost_exchange_task_copy","");
+  INCOMPLETE("ghost_exchange_task_copy","");
   return NULL;
 }
 
@@ -721,7 +721,7 @@ Scalar * ghost_exchange_task_copy_ghost
  int gx, int gy, int gz
  )
 {
-  INCOMPLETE_MESSAGE("ghost_exchange_task_copy_ghost","");
+  INCOMPLETE("ghost_exchange_task_copy_ghost","");
   return NULL;
 }
 
@@ -735,7 +735,7 @@ void ghost_exchange_all_alias
  int gx, int gy, int gz
  )
 {
-  INCOMPLETE_MESSAGE("ghost_exchange_all_alias","");
+  INCOMPLETE("ghost_exchange_all_alias","");
 }
 
 //----------------------------------------------------------------------
@@ -748,5 +748,5 @@ void ghost_exchange_all_copy
  int gx, int gy, int gz
  )
 {
-  INCOMPLETE_MESSAGE("ghost_exchange_all_copy","");
+  INCOMPLETE("ghost_exchange_all_copy","");
 }

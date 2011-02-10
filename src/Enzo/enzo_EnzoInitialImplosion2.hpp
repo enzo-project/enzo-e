@@ -18,8 +18,7 @@ class EnzoInitialImplosion2 : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialImplosion2(Error     * error,
-			Monitor   * monitor,
+  EnzoInitialImplosion2(Monitor   * monitor,
                         EnzoDescr * enzo) throw();
 
   /// Initialize PPM variable that may change.  Called once per

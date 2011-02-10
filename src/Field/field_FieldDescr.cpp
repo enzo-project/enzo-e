@@ -289,11 +289,11 @@ int FieldDescr::insert_field(std::string field_name) throw()
 
   for (int i=0; i<id; i++) {
     if (field_name_[i] == field_name) {
-      char buffer [ ERROR_MESSAGE_LENGTH ];
+      char buffer [ ERROR_LENGTH ];
       sprintf (buffer,
 	       "Insert field called multiple times with same field %s",
 	       field_name.c_str());
-      WARNING_MESSAGE("FieldDescr::insert_field", buffer);
+      WARNING("FieldDescr::insert_field", buffer);
       return i;
     }
   }
@@ -377,7 +377,7 @@ void FieldDescr::set_precision(int id_field, precision_enum precision)
     char buffer[80];
     sprintf (buffer,"precision \"%s\" is not supported",
 	     cello::precision_name[precision]);
-    WARNING_MESSAGE("FieldDescr::set_precision",
+    WARNING("FieldDescr::set_precision",
 		    buffer);
   }
   precision_.at(id_field) = 

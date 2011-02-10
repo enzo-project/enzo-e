@@ -11,11 +11,9 @@
 #include "simulation.hpp"
 
 /// Initialize the Simulation object
-Simulation::Simulation(Error      * error,
-		       Monitor    * monitor,
+Simulation::Simulation(Monitor    * monitor,
 		       Parameters * parameters)
   : dimension_(0),
-    error_      (error      ? error      : new Error),
     monitor_    (monitor    ? monitor    : new Monitor),
     parameters_ (parameters ? parameters : new Parameters (monitor)),
     mesh_(0),
@@ -49,7 +47,7 @@ Simulation::~Simulation() throw()
 
 Simulation::Simulation(const Simulation & simulation) throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::Simulation(simulation)","");
+  INCOMPLETE("Simulation::Simulation(simulation)","");
 }
 
 //----------------------------------------------------------------------
@@ -57,7 +55,7 @@ Simulation::Simulation(const Simulation & simulation) throw()
 
 Simulation & Simulation::operator= (const Simulation & simulation) throw()
 {
-  INCOMPLETE_MESSAGE("Simulation::operatior = (simulation)","");
+  INCOMPLETE("Simulation::operatior = (simulation)","");
   return (*this);
 }
 
@@ -115,13 +113,6 @@ void Simulation::extents (double * xmin, double *xmax,
   if (ymax) *ymax = extent_[3];
   if (zmin) *zmin = extent_[4];
   if (zmax) *zmax = extent_[5];
-}
-
-//----------------------------------------------------------------------
-
-Error * Simulation::error() const throw()
-{
-  return error_;
 }
 
 //----------------------------------------------------------------------
@@ -211,7 +202,7 @@ void Simulation::initialize_simulation_() throw()
     extent_[i] = parameters_->list_value_scalar(i, "extent", extent_default);
 
     if (i % 2 == 1) {
-      char error_message[ERROR_MESSAGE_LENGTH];
+      char error_message[ERROR_LENGTH];
       sprintf (error_message,
 	       "Parameter Domain:extent[%g] not lower than Domain:extent[%g]",
 	       extent_[i-1],extent_[i]);
@@ -440,7 +431,7 @@ void Simulation::initialize_method_() throw()
   int method_count = parameters_->list_length("sequence");
 
   if (method_count == 0) {
-    ERROR_MESSAGE ("Simulation::initialize_method_",
+    ERROR ("Simulation::initialize_method_",
 		   "List parameter 'Method sequence' must have length greater than zero");
   }
 
@@ -454,14 +445,14 @@ void Simulation::initialize_method_() throw()
       method_list_.push_back(method); 
       method->initialize(data_descr_);
     } else {
-      char error_message[ERROR_MESSAGE_LENGTH];
+      char error_message[ERROR_LENGTH];
       sprintf (error_message,"Unknown Method %s",method_name.c_str());
-      ERROR_MESSAGE ("Simulation::initialize_method_",
+      ERROR ("Simulation::initialize_method_",
 		     error_message);
     }
   }
 
 
-  INCOMPLETE_MESSAGE("Simulation::initialize_method_","");
+  INCOMPLETE("Simulation::initialize_method_","");
 }
 

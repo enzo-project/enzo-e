@@ -18,10 +18,8 @@ class Boundary {
 public: // interface
 
   /// Create a new Boundary
-  Boundary(Error   * error,
-	   Monitor * monitor) throw()
-    : error_ (error),
-      monitor_ (monitor)
+  Boundary(Monitor * monitor) throw()
+    : monitor_ (monitor)
   {};
 
 public: // virtual functions
@@ -57,9 +55,6 @@ protected: // functions
 		     DataDescr   * data_descr = 0) throw();
 
 protected: // attributes
-
-  /// Error
-  Error * error_;
 
   /// Monitor
   Monitor * monitor_;

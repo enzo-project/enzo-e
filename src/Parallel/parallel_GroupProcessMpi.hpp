@@ -113,11 +113,11 @@ private: // functions
   void call_mpi_(const char * file, int line , const char * name, int ierr)
   {
     if (ierr != MPI_SUCCESS) {
-      char message[ERROR_MESSAGE_LENGTH];
-      char function[ERROR_MESSAGE_LENGTH];
+      char message[ERROR_LENGTH];
+      char function[ERROR_LENGTH];
       sprintf (message,"MPI rank=%d  error=%d",rank_,ierr);
       sprintf (function,"GroupProcessMpi::%s",name);
-      ERROR_MESSAGE_FULL(function,message,file,line);
+      ERROR(function,message);
     }
   };
 

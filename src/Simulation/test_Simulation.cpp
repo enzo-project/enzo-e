@@ -24,7 +24,6 @@ PARALLEL_MAIN_BEGIN
 
   // Create simulation object
 
-  Error * error     = new Error;
   Monitor * monitor = new Monitor;
 
   // Create the simulation
@@ -34,7 +33,7 @@ PARALLEL_MAIN_BEGIN
   // NOTE: Need concrete EnzoSimulation class since Simulation is 
   //       an abstract base class
 
-  Simulation * simulation = new EnzoSimulation (error,monitor);
+  Simulation * simulation = new EnzoSimulation (monitor);
 
   unit_assert(true);
 
@@ -48,9 +47,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(true);
 
   // Test accessor functions
-
-  unit_func("error");
-  unit_assert (simulation->error() == error);
 
   unit_func("monitor");
   unit_assert (simulation->monitor() == monitor);

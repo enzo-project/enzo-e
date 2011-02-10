@@ -14,11 +14,10 @@
 
 EnzoInitialImplosion2::EnzoInitialImplosion2
 (
- Error     * error,
  Monitor   * monitor,
  EnzoDescr * enzo
  ) throw ()
-  : Initial(error, monitor),
+  : Initial(monitor),
     enzo_(enzo)
 {}
 
@@ -53,7 +52,7 @@ void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
  int gx,gy,gz;
   field_descr->ghosts(index_density,&gx,&gy,&gz);
 
-  // WARNING_MESSAGE("EnzoInitialImplosion2",
+  // WARNING("EnzoInitialImplosion2",
   // 		  "Assumes same ghost zone depth for all fields");
 
   int ngx = nx + 2*gx;

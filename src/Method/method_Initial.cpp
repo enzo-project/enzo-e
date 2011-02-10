@@ -41,7 +41,7 @@ void Initial::add_argument_
   // If data_descr is passed in (default = 0), then verify that the argument
   // is defined
   if (data_descr) {
-    char buffer [ ERROR_MESSAGE_LENGTH ];
+    char buffer [ ERROR_LENGTH ];
     switch (argument) {
     case argument_field:
       sprintf (buffer, 

@@ -17,8 +17,8 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
 {
   if (first_time && data_block) {
     first_time = false;
-    WARNING_MESSAGE("EnzoDescr::SolveHydroEquations",
-		    "Ignoring data_block input parameter");
+    WARNING("EnzoDescr::SolveHydroEquations",
+	    "Ignoring data_block input parameter");
   }
 
   // @@@@ ASSUME UNIGIRD PROBLEM @@@@

@@ -12,7 +12,6 @@
 
 #define MPI_COMM_CELLO MPI_COMM_WORLD
 
-
 #if defined(CONFIG_USE_CHARM)
 
 //--------------------------------------------------
@@ -20,9 +19,9 @@
 //--------------------------------------------------
 
 #  define PARALLEL_INIT      /* BLANK */
-#  define PARALLEL_EXIT      CkExit()
+#  define PARALLEL_EXIT      exit(0) /* CkExit() */
 #  define PARALLEL_RUN       "charmrun [ +p<processors> ] "
-#  define PARALLEL_PRINTF    CkPrintf
+#  define PARALLEL_PRINTF    printf /* CkPrintf */
 #  define PARALLEL_ARGC      main->argc
 #  define PARALLEL_ARGV      main->argv
 #  define PARALLEL_MAIN_BEGIN  \

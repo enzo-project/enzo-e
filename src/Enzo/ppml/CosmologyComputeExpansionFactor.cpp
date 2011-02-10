@@ -40,8 +40,8 @@ int EnzoDescr::CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, E
  
   if (InitialTimeInCodeUnits == 0) {
     
-    ERROR_MESSAGE("CosmologyComputeExpansionFactor",
-		  "The cosmology parameters seem to be improperly set");
+    ERROR("CosmologyComputeExpansionFactor",
+	  "The cosmology parameters seem to be improperly set");
 
   }
  

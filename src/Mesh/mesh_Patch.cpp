@@ -146,7 +146,7 @@ void Patch::extents (double * xm, double * xp,
 void Patch::allocate_blocks() throw()
 {
 
-  UNTESTED_MESSAGE("Patch::allocate_blocks()");
+  UNTESTED("Patch::allocate_blocks()");
 
   // determine local block count nb
   
@@ -170,7 +170,7 @@ void Patch::allocate_blocks() throw()
 	 (nby*mby == size_[1]) &&
 	 (nbz*mbz == size_[2]))) {
 
-    char buffer[ERROR_MESSAGE_LENGTH];
+    char buffer[ERROR_LENGTH];
 
     sprintf (buffer,
 	     "Blocks must evenly subdivide Patch: "
@@ -178,7 +178,7 @@ void Patch::allocate_blocks() throw()
 	     size_[0],size_[1],size_[2],
 	     nbx,nby,nbz);
 
-    ERROR_MESSAGE("Patch::allocate_blocks",  buffer);
+    ERROR("Patch::allocate_blocks",  buffer);
       
   }
 
@@ -226,7 +226,7 @@ void Patch::allocate_blocks() throw()
 
     field_block->allocate_array();
 
-    WARNING_MESSAGE("Patch::allocate_blocks",
+    WARNING("Patch::allocate_blocks",
 		    "allocating all ghosts in patch");
 
     field_block->allocate_ghosts();
@@ -240,14 +240,14 @@ void Patch::allocate_blocks() throw()
 
 void Patch::deallocate_blocks() throw()
 {
-  INCOMPLETE_MESSAGE("Patch::deallocate_blocks","");
+  INCOMPLETE("Patch::deallocate_blocks","");
 }
 
 //----------------------------------------------------------------------
 
 bool Patch::blocks_allocated() const throw() 
 {
-  INCOMPLETE_MESSAGE("Patch::blocks_allocated","");
+  INCOMPLETE("Patch::blocks_allocated","");
   return false;
 }
 

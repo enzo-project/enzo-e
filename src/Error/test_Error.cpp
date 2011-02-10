@@ -25,21 +25,21 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   PARALLEL_PRINTF ("Warning message:\n");
 
-  char warning_message[ERROR_MESSAGE_LENGTH];
+  char warning_message[ERROR_LENGTH];
   sprintf (warning_message,"Warning message test");
-  WARNING_MESSAGE("main",warning_message);
+  WARNING("main",warning_message);
 
-  unit_func("WARNING_MESSAGE");
+  unit_func("WARNING");
   unit_assert (true);
 
   //----------------------------------------------------------------------
   PARALLEL_PRINTF ("Incomplete message:\n");
 
-  char incomplete_message[ERROR_MESSAGE_LENGTH];
+  char incomplete_message[ERROR_LENGTH];
   sprintf (incomplete_message,"Incomplete message test");
-  INCOMPLETE_MESSAGE("main",incomplete_message);
+  INCOMPLETE("main",incomplete_message);
 
-  unit_func("INCOMPLETE_MESSAGE");
+  unit_func("INCOMPLETE");
   unit_assert (true);
 
   unit_finalize();

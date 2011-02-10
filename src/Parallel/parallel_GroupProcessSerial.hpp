@@ -39,7 +39,7 @@ public: // interface (Group)
   (int rank_dest, void * buffer, int size, int tag=0) throw()
   {
     if (buffer_[tag] != 0) {
-      WARNING_MESSAGE("send_begin",
+      WARNING("send_begin",
 		      "multiple sends with no corresponding receive");
     }
     buffer_[(long int)tag] = buffer;
@@ -62,8 +62,8 @@ public: // interface (Group)
   void recv_end(void * handle) throw()
   {
     if (buffer_[(long int)(handle)] == 0) {
-      WARNING_MESSAGE("recv_end",
-		      "receive with no corresponding send");
+      WARNING("recv_end",
+	      "receive with no corresponding send");
     }
   }
 

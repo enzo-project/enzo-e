@@ -20,8 +20,7 @@ public: // interface
 
   /// Create a new EnzoControl
 
-  EnzoControl(Error      * error,
-	      Monitor    * monitor,
+  EnzoControl(Monitor    * monitor,
 	      Parameters * parameters,
 	      EnzoDescr  * enzo);
 

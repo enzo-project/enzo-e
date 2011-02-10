@@ -31,8 +31,8 @@ public: // interface
 #ifdef CONFIG_USE_MPI
       parallel = new ParallelMpi;
 #else
-      ERROR_MESSAGE("Parallel::create",
-		    "Attempting to create ParallelMpi without CONFIG_USE_MPI");
+      ERROR("Parallel::create",
+	    "Attempting to create ParallelMpi without CONFIG_USE_MPI");
 #endif
       break;
     case parallel_serial:

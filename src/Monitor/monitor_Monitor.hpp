@@ -232,9 +232,9 @@ void Monitor::image
       if (v < lo) v = lo;
       if (v > hi) v = hi;
       if ( ! (lo <= v && v <= hi)) {
-	char buffer [ ERROR_MESSAGE_LENGTH ];
+	char buffer [ ERROR_LENGTH ];
 	sprintf (buffer,"v = %g is out of range [%g,%g]",v,lo,hi);
-	ERROR_MESSAGE("Montor::image",buffer);
+	ERROR("Montor::image",buffer);
       }
 
       double ratio = (v - lo) / (hi-lo);

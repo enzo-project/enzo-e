@@ -49,7 +49,7 @@ void Parameters::read ( FILE * file_pointer )
 /// @param    file_pointer An opened input parameter file or stdin
 {
   if ( file_pointer == NULL) {
-    ERROR_MESSAGE("Parameters::read","file pointer is NULL");
+    ERROR("Parameters::read","file pointer is NULL");
   }
   
   struct param_struct * parameter_list = cello_parameters_read(file_pointer);
@@ -92,11 +92,11 @@ void Parameters::write ( FILE * file_pointer )
     if (it_param->second) {
       it_param->second->write(file_pointer, it_param->first);
     } else {
-      char message [ ERROR_MESSAGE_LENGTH ];
+      char message [ ERROR_LENGTH ];
       sprintf (message, 
 	       "uninitialized parameter %s accessed\n",
 	       it_param->first.c_str());
-      WARNING_MESSAGE("Parameters::write",message);
+      WARNING("Parameters::write",message);
     }
 
   }
@@ -149,7 +149,7 @@ void Parameters::write ( FILE * file_pointer )
 //     case parameter_list:         
 //     case parameter_scalar_expr:  
 //     case parameter_logical_expr: 
-//       ERROR_MESSAGE ("Parameters::value","Switch case should never be reached");
+//       ERROR ("Parameters::value","Switch case should never be reached");
 //       break;
 //     }
 //   } else if (deflt) {
@@ -169,13 +169,13 @@ void Parameters::write ( FILE * file_pointer )
 //     case parameter_list:         
 //     case parameter_scalar_expr:  
 //     case parameter_logical_expr: 
-//       ERROR_MESSAGE ("Parameters::value","Switch case should never be reached");
+//       ERROR ("Parameters::value","Switch case should never be reached");
 //       break;
 //     }
 //   } else {
-//     char buffer[ERROR_MESSAGE_LENGTH];
+//     char buffer[ERROR_LENGTH];
 //     sprintf (buffer,"Required parameter %s not defined",parameter.c_str());
-//     ERROR_MESSAGE ("Parameters::value",buffer);
+//     ERROR ("Parameters::value",buffer);
 //   }
 //   monitor_value_(parameter);
 // }

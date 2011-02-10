@@ -16,12 +16,11 @@
 
 EnzoControl::EnzoControl 
 (
- Error      * error,
  Monitor    * monitor,
  Parameters * parameters,
  EnzoDescr  * enzo
 )
-  : Control(error,monitor),
+  : Control(monitor),
     parameters_(parameters),
     enzo_(enzo),
     cycle_stop_(-1),
@@ -42,21 +41,21 @@ void EnzoControl::initialize () throw()
 
 void EnzoControl::finalize () throw()
 {
-  TRACE_MESSAGE("EnzoControl::finalize()");
+  TRACE("EnzoControl::finalize()");
 }
 
 //----------------------------------------------------------------------
 
 void EnzoControl::initialize_cycle () throw()
 {
-  TRACE_MESSAGE("EnzoControl::initialize_cycle()");
+  TRACE("EnzoControl::initialize_cycle()");
 }
 
 //----------------------------------------------------------------------
 
 void EnzoControl::finalize_cycle () throw()
 {
-  TRACE_MESSAGE("EnzoControl::finalize_cycle()");
+  TRACE("EnzoControl::finalize_cycle()");
   ++ enzo_->CycleNumber;
   enzo_->Time += enzo_->dt;
 }
@@ -65,7 +64,7 @@ void EnzoControl::finalize_cycle () throw()
 
 void EnzoControl::initialize_block (DataBlock * data_block) throw ()
 {
-  TRACE_MESSAGE("EnzoControl::initialize_block()");
+  TRACE("EnzoControl::initialize_block()");
 
   FieldBlock * field_block = data_block->field_block();
 
@@ -150,7 +149,7 @@ void EnzoControl::initialize_block (DataBlock * data_block) throw ()
 
 void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
 {
-  TRACE_MESSAGE("EnzoControl::finalize_block()");
+  TRACE("EnzoControl::finalize_block()");
   // delete CellWidth[] array
 
   for (int dim=0; dim < enzo_->GridRank; dim++) {
@@ -162,7 +161,7 @@ void EnzoControl::finalize_block ( DataBlock * data_block ) throw ()
 
 bool EnzoControl::is_done () throw()
 {
-  TRACE_MESSAGE("EnzoControl::is_done()");
+  TRACE("EnzoControl::is_done()");
   ASSERT("EnzoControl::is_done",
 	 "Neither Stopping::time_stop nor Stopping::cycle_stop initialized",
 	 time_stop_ != -1.0 || cycle_stop_ != -1);
@@ -182,7 +181,7 @@ void EnzoControl::read_parameters_() throw()
   cycle_stop_ = parameters_->value_integer("cycle",1000);
   time_stop_  = parameters_->value_scalar("time",2.5);
 
-  INCOMPLETE_MESSAGE("Simulation::read_parameters_","");
+  INCOMPLETE("Simulation::read_parameters_","");
 
   //--------------------------------------------------
   //  parameters_->set_current_group ("Output");

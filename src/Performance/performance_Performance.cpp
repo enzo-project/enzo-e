@@ -58,14 +58,14 @@ Performance::~Performance()
 
 Performance::Performance(const Performance & classname) throw()
 {
-  INCOMPLETE_MESSAGE("Performance::Performance","");
+  INCOMPLETE("Performance::Performance","");
 }
 
 //----------------------------------------------------------------------
 
 Performance & Performance::operator= (const Performance & classname) throw()
 {
-  INCOMPLETE_MESSAGE("Performance::operator =","");
+  INCOMPLETE("Performance::operator =","");
   return *this;
 }
 
@@ -127,9 +127,9 @@ void Performance::begin_group(unsigned group_id)
 {
   
   if ( current_group_ ){
-    char message [ ERROR_MESSAGE_LENGTH ];
+    char message [ ERROR_LENGTH ];
     sprintf (message, "Performance group started when one already active");
-    WARNING_MESSAGE("Performance::begin_group",message);
+    WARNING("Performance::begin_group",message);
   }
 
   current_group_ = group_id;
@@ -141,11 +141,11 @@ void Performance::begin_group(unsigned group_id)
 void Performance::end_group(unsigned id_group)
 {
   if (id_group != current_group_) {
-    char message [ ERROR_MESSAGE_LENGTH ];
+    char message [ ERROR_LENGTH ];
     sprintf (message, "Mismatch between begin_group(%s) and end_group(%s)",
 	     group_names_[current_group_].c_str(),
 	     group_names_[id_group].c_str());
-    WARNING_MESSAGE("Performance::end_group",message);
+    WARNING("Performance::end_group",message);
   }
 
   current_group_ = 0;

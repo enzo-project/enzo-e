@@ -31,13 +31,13 @@ bool test_array(double * array, int length, int rank, int value)
   }
   valid = valid && (array[length-1] == -1.0*rank);
   if (!valid) {
-    char message[ERROR_MESSAGE_LENGTH];
+    char message[ERROR_LENGTH];
     sprintf (message,
 	     "%d expected [%g %g %g %g %g]; actual [%g %g %g %g %g]\n",
 	     rank,
 	     1.0*value,1.0*value,1.0*value,1.0*value,-1.0*rank,
 	     array[0], array[1], array[2], array[3], array[4]);
-    WARNING_MESSAGE("test_array",message);
+    WARNING("test_array",message);
   }
   return valid;
 }

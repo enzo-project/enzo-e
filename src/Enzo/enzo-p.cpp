@@ -48,7 +48,6 @@ PARALLEL_MAIN_BEGIN
   // create globals
   //-------------------------
 
-  Error   * error   = new Error;
   Monitor * monitor = new Monitor;
 
   //-------------------------
@@ -91,7 +90,7 @@ PARALLEL_MAIN_BEGIN
   // Initialize simulation
   //-------------------------
 
-  EnzoSimulation simulation (error,monitor);
+  EnzoSimulation simulation (monitor);
 
   // read parameter file
 
@@ -107,7 +106,6 @@ PARALLEL_MAIN_BEGIN
 
   delete parameters;
   delete monitor;
-  delete error;
 
   PARALLEL_EXIT;
 }

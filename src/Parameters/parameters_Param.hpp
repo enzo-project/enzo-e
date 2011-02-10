@@ -69,11 +69,11 @@ public: // interface
 
   /// Copy constructor
   Param(const Param & param) throw()
-  { INCOMPLETE_MESSAGE("Param::Param",""); };
+  { INCOMPLETE("Param::Param",""); };
 
   /// Assignment operator
   Param & operator= (const Param & param) throw()
-  { INCOMPLETE_MESSAGE("Param::operator =","");
+  { INCOMPLETE("Param::operator =","");
     return *this; };
 
   /// Evaluate a scalar expression given vectos x,y,z,t

@@ -20,9 +20,9 @@
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
+#include "parallel.def"
 #include "error.hpp"
 #include "monitor.hpp"
-#include "parallel.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

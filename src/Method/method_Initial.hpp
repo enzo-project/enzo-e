@@ -18,10 +18,8 @@ class Initial {
 public: // interface
 
   /// Create a new Initial
-  Initial(Error   * error,
-	  Monitor * monitor) throw()
-    : error_ (error),
-      monitor_ (monitor)
+  Initial(Monitor * monitor) throw()
+    : monitor_ (monitor)
   {};
 
 public: // virtual functions
@@ -52,9 +50,6 @@ protected: // functions
   void initialize_block_ (DataBlock * data_block) throw();
 
 protected: // attributes
-
-  /// Error
-  Error * error_;
 
   /// Monitor
   Monitor * monitor_;

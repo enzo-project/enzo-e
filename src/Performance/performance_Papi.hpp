@@ -56,7 +56,7 @@ public: // interface
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
-      WARNING_MESSAGE("Papi::start",
+      WARNING("Papi::start",
 		      "Counters already started");
     } else {
       is_started_ = true;
@@ -75,7 +75,7 @@ public: // interface
   {
 #ifdef CONFIG_USE_PAPI
     if (! is_started_) {
-      WARNING_MESSAGE("Papi::stop",
+      WARNING("Papi::stop",
 		      "Counters already stopped");
     } else {
       is_started_ = false;
@@ -99,7 +99,7 @@ public: // interface
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
-      WARNING_MESSAGE("Papi::time_real",
+      WARNING("Papi::time_real",
 		      "Counters must be stopped");
       return 0.0;
     } else {
@@ -115,7 +115,7 @@ public: // interface
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
-      WARNING_MESSAGE("Papi::time_proc",
+      WARNING("Papi::time_proc",
 		      "Counters must be stopped");
       return 0.0;
     } else {
@@ -131,7 +131,7 @@ public: // interface
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
-      WARNING_MESSAGE("Papi::flop_count",
+      WARNING("Papi::flop_count",
 		      "Counters must be stopped");
       return 0;
     } else {
@@ -147,8 +147,8 @@ public: // interface
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
-      WARNING_MESSAGE("Papi::flop_rate",
-		      "Counters must be stopped");
+      WARNING("Papi::flop_rate",
+	      "Counters must be stopped");
       return 0.0;
     } else {
       return flop_rate_;

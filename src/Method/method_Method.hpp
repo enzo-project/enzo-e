@@ -18,11 +18,9 @@ class Method {
 public: // interface
 
   /// Create a new Method
-  Method(Error      * error,
-	 Monitor    * monitor,
+  Method(Monitor    * monitor,
 	 Parameters * parameters) throw()
-    : error_     (error),
-      monitor_   (monitor),
+    : monitor_   (monitor),
       parameters_(parameters)
   {};
 
@@ -66,9 +64,6 @@ protected: // functions
 		     DataDescr   * data_descr = 0) throw();
 
 protected: // attributes
-
-  /// Error
-  Error * error_;
 
   /// Monitor
   Monitor * monitor_;

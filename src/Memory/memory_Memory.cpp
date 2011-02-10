@@ -120,7 +120,7 @@ void Memory::new_group ( memory_group_handle group_id, const char * group_name )
 #ifdef CONFIG_USE_MEMORY
   if (group_id == 0 || group_id > MEMORY_MAX_NUM_GROUPS) {
 
-    WARNING_MESSAGE("Memory::new_group()","group_id out of range");
+    WARNING("Memory::new_group()","group_id out of range");
 
   } else {
 
@@ -149,12 +149,12 @@ void  Memory::begin_group ( memory_group_handle group_id ) throw ()
 
   } else { // curr_group_ out of range
 
-    char warning_message [ ERROR_MESSAGE_LENGTH ];
+    char warning_message [ ERROR_LENGTH ];
 
     sprintf (warning_message, "Group %d is out of range [1,%d]\n",
 	     group_id, MEMORY_MAX_NUM_GROUPS);
 
-    WARNING_MESSAGE("Memory::begin_group()",warning_message);
+    WARNING("Memory::begin_group()",warning_message);
 
   }
 #endif
@@ -166,7 +166,7 @@ void Memory::end_group ( memory_group_handle group_id ) throw ()
 {
 #ifdef CONFIG_USE_MEMORY
 
-  char warning_message [ ERROR_MESSAGE_LENGTH ];
+  char warning_message [ ERROR_LENGTH ];
 
   bool in_range = (group_id <= MEMORY_MAX_NUM_GROUPS);
 
@@ -179,7 +179,7 @@ void Memory::end_group ( memory_group_handle group_id ) throw ()
 		 "Mismatch between end_group(%d) and group stack top %d\n",
 		 group_id,curr_group_.top());
 
-	WARNING_MESSAGE("Memory::end_group",warning_message);
+	WARNING("Memory::end_group",warning_message);
       }
 
       curr_group_.pop();
@@ -190,7 +190,7 @@ void Memory::end_group ( memory_group_handle group_id ) throw ()
 	       "end_group(%d) called with empty group stack\n",
 	       group_id);
 
-      WARNING_MESSAGE("Memory::end_group",warning_message);
+      WARNING("Memory::end_group",warning_message);
       
     }
 
@@ -199,7 +199,7 @@ void Memory::end_group ( memory_group_handle group_id ) throw ()
     sprintf (warning_message, "Group %d is out of range [1,%d]\n",
 	     group_id, MEMORY_MAX_NUM_GROUPS);
 
-    WARNING_MESSAGE("Memory::end_group",warning_message);
+    WARNING("Memory::end_group",warning_message);
   }
 #endif
 }
