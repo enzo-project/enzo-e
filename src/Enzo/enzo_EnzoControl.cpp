@@ -3,7 +3,6 @@
 
 /// @file     enzo_EnzoControl.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Create specific class for interfacing Cello code with User code
 /// @todo     Remove repeated creation / deletion of CellWidth[]
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoControl user-dependent class member functions
@@ -41,21 +40,20 @@ void EnzoControl::initialize () throw()
 
 void EnzoControl::finalize () throw()
 {
-  TRACE("EnzoControl::finalize()");
+
 }
 
 //----------------------------------------------------------------------
 
 void EnzoControl::initialize_cycle () throw()
 {
-  TRACE("EnzoControl::initialize_cycle()");
+
 }
 
 //----------------------------------------------------------------------
 
 void EnzoControl::finalize_cycle () throw()
 {
-  TRACE("EnzoControl::finalize_cycle()");
   ++ enzo_->CycleNumber;
   enzo_->Time += enzo_->dt;
 }
