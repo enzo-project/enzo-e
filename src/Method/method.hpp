@@ -45,7 +45,7 @@ enum access_enum {
 // Component class includes
 //----------------------------------------------------------------------
 
-#include "method_Control.hpp"
+#include "method_Stopping.hpp"
 #include "method_Timestep.hpp"
 #include "method_Initial.hpp"
 #include "method_Boundary.hpp"

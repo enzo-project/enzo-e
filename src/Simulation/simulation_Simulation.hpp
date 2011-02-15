@@ -75,10 +75,10 @@ public: // interface
   /// Return the data descriptor
   DataDescr * data_descr() const throw();
 
-  /// Return the control object, if any
-  Control *  control() const throw();
+  /// Return the stopping object, if any
+  Stopping *  stopping() const throw();
   
-  /// Return the timestepping object, if any
+  /// Return the time-stepping object, if any
   Timestep * timestep() const throw();
 
   /// Return the initialization object, if any
@@ -105,8 +105,8 @@ protected: // functions
   void initialize_data_ () throw();
 
 
-  /// Initialize the control object
-  void initialize_control_ () throw();
+  /// Initialize the stopping object
+  void initialize_stopping_ () throw();
 
   /// Initialize the timestep object
   void initialize_timestep_() throw();
@@ -123,9 +123,9 @@ protected: // functions
 
 protected: // abstract virtual functions
 
-  /// Create named control object
-  virtual Control * 
-  create_control_ (std::string name) throw () = 0;
+  /// Create named stopping object
+  virtual Stopping * 
+  create_stopping_ (std::string name) throw () = 0;
 
   /// Create named timestep object
   virtual Timestep * 
@@ -172,10 +172,10 @@ protected: // attributes
   DataDescr * data_descr_;
 
 
-  /// Method for overall control of the simulation
-  Control * control_;
+  /// Stopping criteria
+  Stopping * stopping_;
 
-  /// Method for time-step computation
+  /// Time-step computation
   Timestep * timestep_;
 
   /// List of initial conditions objects

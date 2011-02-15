@@ -18,7 +18,7 @@ Simulation::Simulation(Monitor    * monitor,
     parameters_ (parameters ? parameters : new Parameters (monitor)),
     mesh_(0),
     data_descr_(0),
-    control_(0),
+    stopping_(0),
     timestep_(0),
     initial_(0),
     boundary_(0),
@@ -77,7 +77,7 @@ void Simulation::initialize(FILE * fp) throw()
   initialize_data_();
   initialize_mesh_();
 
-  initialize_control_();
+  initialize_stopping_();
   initialize_timestep_();
   initialize_initial_();
   initialize_boundary_();
@@ -138,8 +138,8 @@ DataDescr * Simulation::data_descr() const throw()
 
 //----------------------------------------------------------------------
 
-Control * Simulation::control() const throw() 
-{ return control_; }
+Stopping * Simulation::stopping() const throw() 
+{ return stopping_; }
 
 //----------------------------------------------------------------------
 
@@ -373,26 +373,16 @@ void Simulation::initialize_mesh_() throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize_control_() throw()
+void Simulation::initialize_stopping_() throw()
 {
-  //--------------------------------------------------
-  parameters_->set_current_group("Control");
-  //--------------------------------------------------
-
-  std::string name = parameters_->value_string("name","");
-  control_ = create_control_(name);
+  stopping_ = create_stopping_("ignored");
 }
 
 //----------------------------------------------------------------------
 
 void Simulation::initialize_timestep_() throw()
 {
-  //--------------------------------------------------
-  parameters_->set_current_group("Timestep");
-  //--------------------------------------------------
-
-  std::string name = parameters_->value_string("name","");
-  timestep_ = create_timestep_(name);
+  timestep_ = create_timestep_("ignored");
 }
 
 //----------------------------------------------------------------------
@@ -403,7 +393,7 @@ void Simulation::initialize_initial_() throw()
   parameters_->set_current_group("Initial");
   //--------------------------------------------------
 
-  std::string name = parameters_->value_string("name","");
+  std::string name = parameters_->value_string("problem","unknown");
   initial_ = create_initial_(name);
 }
 

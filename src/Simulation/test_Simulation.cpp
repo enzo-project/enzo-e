@@ -57,8 +57,8 @@ PARALLEL_MAIN_BEGIN
   unit_func("mesh");
   unit_assert (simulation->mesh() != NULL);
   
-  unit_func("control");
-  unit_assert (simulation->control() != NULL);
+  unit_func("stopping");
+  unit_assert (simulation->stopping() != NULL);
 
   unit_func("timestep");
   unit_assert (simulation->timestep() != NULL);

@@ -9,7 +9,7 @@ Import('parallel_type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['error','parameters','monitor','memory','enzo','parallel','method','enzo-ppm','mesh', 'field','cello']
+components = ['error','parameters','memory','enzo','parallel','method','enzo-ppm','mesh', 'field','monitor','cello']
 
 libraries = ['png','$FORTRANLIBS']
 
