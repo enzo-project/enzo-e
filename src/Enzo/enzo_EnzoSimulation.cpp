@@ -57,10 +57,35 @@ void EnzoSimulation::run() throw()
   // papi.start();
 
   UNTESTED("EnzoSimulation::run");
+  INCOMPLETE("EnzoSimulation::run","incomplete");
 
-  control_->initialize();
+  // Create an iterator over all local blocks in a patch
 
-  while (! control_->is_done() ) {
+
+  //--------------------------------------------------
+  // INITIALIZE FIELDS
+  //--------------------------------------------------
+
+  //  control_->initialize();
+
+  // ASSUMES MESH IS JUST A SINGLE PATCH
+  Patch * patch = mesh_->root_patch();
+  ItBlocks itBlocks(patch);
+
+  while (DataBlock * data_block = (DataBlock *) ++itBlocks) {
+      initialize_block_(data_block);
+
+    initial_->initialize_block(data_block);
+      finalize_block_(data_block);
+
+  }
+
+
+  //--------------------------------------------------
+  // MAIN LOOP
+  //--------------------------------------------------
+
+  while (! stopping_->is_done() ) {
 
     {
       char buffer[40];
@@ -70,32 +95,33 @@ void EnzoSimulation::run() throw()
       monitor_->print(buffer);
     }
 
-    control_->initialize_cycle();
-
-    // ASSUMES MESH IS JUST A SINGLE PATCH
-    Patch * patch = mesh_->root_patch();
-
-    // Create an iterator over all local blocks in a patch
-    ItBlocks itBlocks(patch);
 
     // Initialize local block timestep
     double dt_block = std::numeric_limits<double>::max();
 
+    // ASSUMES MESH IS JUST A SINGLE PATCH
+    Patch * patch = mesh_->root_patch();
+
+
     // for each Block in Patch
+    ItBlocks itBlocks(patch);
     while (DataBlock * data_block = (DataBlock *) ++itBlocks) {
 
       //      Memory::instance()->print();
 
-      control_->initialize_block(data_block);
+      initialize_block_(data_block);
 
 
       // COMPUTE
 
-      control_->finalize_block(data_block);
+      // Update block dt (before finalize_block)
+
+      dt_block = MIN(dt_block,timestep_->compute(data_block));
+
+      finalize_block_(data_block);
 
       //      Memory::instance()->print();
       // Accumulate local block timestep
-      dt_block = MIN(dt_block,timestep_->compute(data_block));
       //      Memory::instance()->print();
 
     } // Block in Patch
@@ -118,11 +144,39 @@ void EnzoSimulation::run() throw()
 
     // Update cycle and time
 
-    control_->finalize_cycle();
+    enzo_->CycleNumber += 1;
+    enzo_->Time        += enzo_->dt;
 
   } // while (! control_->is_done() )
 
-  control_->finalize();
+
+  while (DataBlock * data_block = (DataBlock *) ++itBlocks) {
+  
+    FieldBlock * field_block = data_block->field_block();
+    FieldDescr * field_descr = field_block->field_descr();
+    int nx,ny,nz;
+    int gx,gy,gz;
+    int mx,my,mz;
+    field_block->enforce_boundary(boundary_reflecting);
+    field_block->size(&nx,&ny,&nz);
+    int count = field_descr->field_count();
+    for (int index = 0; index < count; index++) {
+      field_descr->ghosts(index,&gx,&gy,&gz);
+      mx=nx+2*gx;
+      my=ny+2*gy;
+      mz=nz+2*gz;
+      char filename[80];
+      std::string field_name = field_descr->field_name(index);
+      Scalar * field_values = (Scalar *)field_block->field_values(index);
+      sprintf (filename,"EnzoSimulation-%d.png",index);
+      monitor_->image (filename, field_values, mx,my,mz, 2, reduce_sum, 0.0, 1.0);
+    }
+  }
+
+
+  //  control_->finalize();
+
+
 
   // while (time < time_final && cycle <= cycle_final) {
 
@@ -176,11 +230,11 @@ void EnzoSimulation::write() throw()
 
 //======================================================================
 
-Control * 
-EnzoSimulation::create_control_ (std::string name) throw ()
-/// @param name   Name of the control method to create (ignored)
+Stopping * 
+EnzoSimulation::create_stopping_ (std::string name) throw ()
+/// @param name   Name of the stopping method to create (ignored)
 {
-  return new EnzoControl(monitor_,parameters_,enzo_);
+  return new EnzoStopping(parameters_,enzo_);
 }
 
 //----------------------------------------------------------------------
@@ -240,5 +294,105 @@ EnzoSimulation::create_method_ ( std::string name ) throw ()
   }
 
   return method;
+}
+
+//======================================================================
+
+void EnzoSimulation::initialize_block_ (DataBlock * data_block) throw ()
+{
+
+  TRACE("EnzoSimulation::initialize_block()");
+
+  FieldBlock * field_block = data_block->field_block();
+
+  double xm,xp,ym,yp,zm,zp;
+
+  field_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
+
+  enzo_->GridLeftEdge[0]    = xm;
+  enzo_->GridLeftEdge[1]    = ym;
+  enzo_->GridLeftEdge[2]    = zm;
+
+  // Grid dimensions
+
+  int nx,ny,nz;
+  field_block -> size (&nx,&ny,&nz);
+
+  enzo_->GridDimension[0]  = nx + 2*enzo_->ghost_depth[0];
+  enzo_->GridDimension[1]  = ny + 2*enzo_->ghost_depth[1];
+  enzo_->GridDimension[2]  = nz + 2*enzo_->ghost_depth[2];
+  enzo_->GridStartIndex[0] = enzo_->ghost_depth[0];
+  enzo_->GridStartIndex[1] = enzo_->ghost_depth[1];
+  enzo_->GridStartIndex[2] = enzo_->ghost_depth[2];
+  enzo_->GridEndIndex[0]   = nx + enzo_->ghost_depth[0] - 1;
+  enzo_->GridEndIndex[1]   = ny + enzo_->ghost_depth[1] - 1;
+  enzo_->GridEndIndex[2]   = nz + enzo_->ghost_depth[2] - 1;
+
+  // Initialize CellWidth[].  Should be converted to constants hx,hy,hz
+
+  double h3[3];
+  field_block->cell_width(&h3[0],&h3[1],&h3[2]);
+  printf ("h = %g %g %g\n",h3[0],h3[1],h3[2]);
+
+  for (int dim=0; dim<enzo_->GridRank; dim++) {
+    enzo_->CellWidth[dim] = new ENZO_FLOAT[enzo_->GridDimension[dim]];
+    printf ("gd = %d\n",enzo_->GridDimension[dim]);
+    for (int i=0; i<enzo_->GridDimension[dim]; i++) {
+      enzo_->CellWidth[dim][i] = h3[dim];
+    }
+  }
+
+  // Initialize BaryonField[] pointers
+
+  for (int field = 0; field < enzo_->NumberOfBaryonFields; field++) {
+    enzo_->BaryonField[field] = (float *)field_block->field_values(field);
+  }
+
+ 
+  //   // Boundary
+  //   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
+  //      set it to one. */
+ 
+  //   /* 1) Compute Courant condition for baryons. */
+ 
+  //    // boundary
+ 
+  //    BoundaryRank = 2;
+  //    BoundaryDimension[0] = GridDimension[0];
+  //    BoundaryDimension[1] = GridDimension[1];
+
+  //    for (int field=0; field<NumberOfBaryonFields; field++) {
+  //      BoundaryFieldType[field] = enzo_->FieldType[field];
+  //      for (int dim = 0; dim < 3; dim++) {
+  //        for (int face = 0; face < 2; face++) {
+  //  	int n1 = GridDimension[(dim+1)%3];
+  //  	int n2 = GridDimension[(dim+2)%3];
+  //  	int size = n1*n2;
+  //  	BoundaryType [field][dim][face] = new bc_type [size];
+  //  	BoundaryValue[field][dim][face] = NULL;
+  //  	for (int i2 = 0; i2<n2; i2++) {
+  //  	  for (int i1 = 0; i1<n1; i1++) {
+  //  	    int i = i1 + n1*i2;
+  //  	    BoundaryType[field][dim][face][i] = bc_reflecting;
+  //  	  }
+  //  	}
+  //        }
+  //      }
+  //    }
+
+  // @@@ WRITE OUT ENZO DESCRIPTION FOR DEBUGGING
+  enzo_->write(stdout);
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::finalize_block_ ( DataBlock * data_block ) throw ()
+{
+  TRACE("EnzoSimulation::finalize_block()");
+  // delete CellWidth[] array
+
+  for (int dim=0; dim < enzo_->GridRank; dim++) {
+    delete [] enzo_->CellWidth[dim];
+  }
 }
 

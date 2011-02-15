@@ -48,8 +48,8 @@ public: // functions
 
 protected: // virtual functions
 
-  /// Create named control object
-  Control * create_control_ (std::string name) throw ();
+  /// Create named stopping object
+  Stopping * create_stopping_ (std::string name) throw ();
 
   /// Create named timestep object
   Timestep * create_timestep_ (std::string name) throw ();
@@ -62,6 +62,14 @@ protected: // virtual functions
 
   /// Create named method object
   Method * create_method_ (std::string name) throw ();
+
+private: // functions
+
+  /// Initialize a block before advancing a timestep
+  void initialize_block_(DataBlock * data_block) throw ();
+
+  /// Finalize a block after advancing a timestep
+  void finalize_block_(DataBlock * data_block) throw ();
 
 private: // attributes
 

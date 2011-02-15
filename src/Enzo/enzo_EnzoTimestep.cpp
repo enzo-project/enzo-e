@@ -124,6 +124,7 @@ double EnzoTimestep::compute ( DataBlock * data_block ) throw()
  
   /* 5) calculate minimum timestep */
 
+  printf("density = %p\n",density_field);
   FORTRAN_NAME(calc_dt)(&enzo_->GridRank, enzo_->GridDimension, enzo_->GridDimension+1,
 			enzo_->GridDimension+2,
 			enzo_->GridStartIndex, enzo_->GridEndIndex,

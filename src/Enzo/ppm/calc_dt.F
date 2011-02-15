@@ -59,12 +59,59 @@ c     Locals
 c
       integer i,j,k
       real    cs, dt1
+      real dmax,dmin,pmax,pmin,umax,umin,vmax,vmin
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////
 c=======================================================================
 c
 c     Set initial timestep to a large number
 c
+      print*, rank, idim, jdim, kdim
+      print*, i1, i2, j1, j2, k1, k2
+      print*, dx(4), dy(4)
+      print*, gamma, ipfree, aye
+      print*, 'd(i1+1,j1+1,1) = ', d(i1+1,j1+1,1)
+      print*, 'd(i2+1,j2+1,1) = ', d(i2+1,j2+1,1)
+      print*, 'p(i1+1,j1+1,1) = ', p(i1+1,j1+1,1)
+      print*, 'p(i2+1,j2+1,1) = ', p(i2+1,j2+1,1)
+      print*, 'u(i1+1,j1+1,1) = ', u(i1+1,j1+1,1)
+      print*, 'u(i2+1,j2+1,1) = ', u(i2+1,j2+1,1)
+      print*, 'v(i1+1,j1+1,1) = ', v(i1+1,j1+1,1)
+      print*, 'v(i2+1,j2+1,1) = ', v(i2+1,j2+1,1)
+      print*, dt
+      print*, dtviscous
+
+
+      dmax=-huge
+      pmax=-huge
+      umax=-huge
+      vmax=-huge
+      dmin=huge
+      pmin=huge
+      umin=huge
+      vmin=huge
+      do j = j1+1, j2+1
+         do i = i1+1, i2+1
+            dmin = min(dmin,d(i,j,1))
+            pmin = min(pmin,p(i,j,1))
+            umin = min(umin,u(i,j,1))
+            vmin = min(vmin,v(i,j,1))
+            dmax = max(dmax,d(i,j,1))
+            pmax = max(pmax,p(i,j,1))
+            umax = max(umax,u(i,j,1))
+            vmax = max(vmax,v(i,j,1))
+         end do
+      end do
+
+      print*, 'dmin = ',dmin
+      print*, 'pmin = ',pmin
+      print*, 'umin = ',umin
+      print*, 'vmin = ',vmin
+      print*, 'dmax = ',dmax
+      print*, 'pmax = ',pmax
+      print*, 'umax = ',umax
+      print*, 'vmax = ',vmax
+
       dt = huge
 c
 c     one-dimensional version
@@ -80,6 +127,7 @@ c
 c     two-dimensional version
 c
       if (rank .eq. 2) then
+         print*, j1,j2,i1,i2
          do j = j1+1, j2+1
             do i = i1+1, i2+1
                cs = max(sqrt(gamma*p(i,j,1)/d(i,j,1)), tiny)
@@ -137,5 +185,6 @@ c
          enddo
       endif
 c
+      print*, 'dt = ',dt
       return
       end
