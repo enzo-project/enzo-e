@@ -41,7 +41,7 @@
 #include "enzo_EnzoDescr.hpp"
 
 #include "enzo_EnzoSimulation.hpp"
-#include "enzo_EnzoControl.hpp"
+#include "enzo_EnzoStopping.hpp"
 #include "enzo_EnzoTimestep.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
