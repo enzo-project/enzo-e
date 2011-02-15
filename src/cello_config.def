@@ -17,4 +17,15 @@
 
 #define CONFIG_USE_MEMORY
 
+/*---------------------------------------------*/
+/* USE NEW SCALAR CellWidth OR ORIGINAL ARRAYS */
+/*---------------------------------------------*/
+
+/* Either uncomment or comment the following define: */
+
+#define CONFIG_SCALAR_CELLWIDTH
+
+
+
+
 

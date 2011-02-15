@@ -130,7 +130,11 @@ double EnzoTimestep::compute ( DataBlock * data_block ) throw()
 			enzo_->GridStartIndex, enzo_->GridEndIndex,
 			enzo_->GridStartIndex+1, enzo_->GridEndIndex+1,
 			enzo_->GridStartIndex+2, enzo_->GridEndIndex+2,
+#ifdef CONFIG_SCALAR_CELLWIDTH
+			&enzo_->CellWidth[0], &enzo_->CellWidth[1], &enzo_->CellWidth[2],
+#else
 			enzo_->CellWidth[0], enzo_->CellWidth[1], enzo_->CellWidth[2],
+#endif
 			&enzo_->Gamma, &enzo_->PressureFree, &afloat,
 			density_field, pressure_field,
 			velocity_x_field, 

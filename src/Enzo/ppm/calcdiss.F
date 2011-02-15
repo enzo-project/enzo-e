@@ -75,7 +75,7 @@ c        for each direction (i.e. call with dx,dy,dz,... for x-dir, dy,dz,dx
 c        for y-dir, and dz,dx,dy for z-dir).  Also, insure idir is set
 c        correctly, since a few calculation must know which sweep
 c        direction this is.  
-c           permute: v,w,dx,dy,dz,i1,i2,j1,j2,k,nzz,idim,jdim,kdim
+c           permute: v,w,dx,DY,dz,i1,i2,j1,j2,k,nzz,idim,jdim,kdim
 c           do not permute: dimx,dimy,dimz
 c
 c  INPUT ARGUMENTS:
@@ -123,7 +123,7 @@ c  argument declarations
 c
       integer dimx, dimy, dimz, i1, i2, idiff, idim, idir, iflatten, 
      &        j1, j2, jdim, k, kdim, nzz
-      real    gamma, dt, dx(idim), dy(jdim), dz(kdim)
+      real    gamma, dt, DX(idim), DY(jdim), DZ(kdim)
       real    dslice(idim,jdim), eslice(idim,jdim), uslice(idim,jdim),
      &        diffcoef(idim,jdim), flatten(idim,jdim), pslice(idim,jdim)
       real    v(dimx,dimy,dimz), w(dimx,dimy,dimz)
@@ -383,15 +383,15 @@ c
 c
             if (nyz.gt.1 .and. lj1) then
                do i=i1, i2+1
-                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(dx(i)+dx(i-1))
-     &                 /   (0.5*(dy(j+1)+dy(j-1)) + dy(j)))*vdiff1(i)
+                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(DX(i)+DX(i-1))
+     &                 /   (0.5*(DY(j+1)+DY(j-1)) + DY(j)))*vdiff1(i)
                end do
             endif
 c     
             if (nzz.gt.1 .and. lk1) then
                do i=i1, i2+1
-                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(dx(i)+dx(i-1))
-     &                 /   (0.5*(dz(k+1)+dz(k-1)) + dz(k)))*wdiff1(i)
+                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(DX(i)+DX(i-1))
+     &                 /   (0.5*(DZ(k+1)+DZ(k-1)) + DZ(k)))*wdiff1(i)
                end do
             endif
 c     
@@ -575,16 +575,16 @@ c
             
             if (nyz.ne.1 .and. lj2) then
                do i=i1-1, i2+1
-                  qa = 0.5*(0.5*(dx(i+1)+dx(i-2))+dx(i)+dx(i-1))
-     &                 / (0.5*(dy(j+2)+dy(j-2)) + dy(j+1)+dy(j)+dy(j-1))
+                  qa = 0.5*(0.5*(DX(i+1)+DX(i-2))+DX(i)+DX(i-1))
+     &                 / (0.5*(DY(j+2)+DY(j-2)) + DY(j+1)+DY(j)+DY(j-1))
                   difftemp(i) = difftemp(i) + qa*vdiff2(i)
                end do
             end if
 
             if (nzz.ne.1 .and. lk2) then
                do i=i1-1, i2+1
-                  qb = 0.5*(0.5*(dx(i+1)+dx(i-2))+dx(i)+dx(i-1))
-     &                 / (0.5*(dz(k+2)+dz(k-2)) + dz(k+1)+dz(k)+dz(k-1))
+                  qb = 0.5*(0.5*(DX(i+1)+DX(i-2))+DX(i)+DX(i-1))
+     &                 / (0.5*(DZ(k+2)+DZ(k-2)) + DZ(k+1)+DZ(k)+DZ(k-1))
                   difftemp(i) = difftemp(i) + qb*wdiff2(i)
                end do
             end if
@@ -603,7 +603,7 @@ c
      &              max(difftemp(i-1),difftemp(i),difftemp(i+1)),
      &              (nu2 + nu3*max(sigma(i-1)*kappa(i-1)**2
      &              ,              sigma(i  )*kappa(i  )**2 ))
-     &              * dx(i+1)*s/dt)
+     &              * DX(i+1)*s/dt)
 
             end do
 

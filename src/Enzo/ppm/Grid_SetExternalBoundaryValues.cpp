@@ -32,7 +32,7 @@ int EnzoDescr::SetExternalBoundaryValues()
   for (dim = 0; dim < MAX_DIMENSION; dim++)
     if (dim < GridRank)
       GridOffset[dim] = NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/
-			     CellWidth[dim][0]);
+			     CELLWIDTH(dim,0));
     else
       GridOffset[dim] = 0;
  

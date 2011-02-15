@@ -332,8 +332,12 @@ void EnzoSimulation::initialize_block_ (DataBlock * data_block) throw ()
 
   double h3[3];
   field_block->cell_width(&h3[0],&h3[1],&h3[2]);
-  printf ("h = %g %g %g\n",h3[0],h3[1],h3[2]);
 
+#ifdef CONFIG_SCALAR_CELLWIDTH
+  for (int dim=0; dim<enzo_->GridRank; dim++) {
+    enzo_->CellWidth[dim] = h3[dim];
+  }
+#else
   for (int dim=0; dim<enzo_->GridRank; dim++) {
     enzo_->CellWidth[dim] = new ENZO_FLOAT[enzo_->GridDimension[dim]];
     printf ("gd = %d\n",enzo_->GridDimension[dim]);
@@ -341,6 +345,7 @@ void EnzoSimulation::initialize_block_ (DataBlock * data_block) throw ()
       enzo_->CellWidth[dim][i] = h3[dim];
     }
   }
+#endif
 
   // Initialize BaryonField[] pointers
 
@@ -391,8 +396,11 @@ void EnzoSimulation::finalize_block_ ( DataBlock * data_block ) throw ()
   TRACE("EnzoSimulation::finalize_block()");
   // delete CellWidth[] array
 
+#ifdef CONFIG_SCALAR_CELLWIDTH
+#else
   for (int dim=0; dim < enzo_->GridRank; dim++) {
     delete [] enzo_->CellWidth[dim];
   }
+#endif
 }
 

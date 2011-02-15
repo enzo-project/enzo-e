@@ -1,3 +1,4 @@
+#include "cello_config.def"
 #include "enzo_defines.hpp"
 
 #define DEBUG_MESSAGE            CALL f_warning(__FILE__,__LINE__)

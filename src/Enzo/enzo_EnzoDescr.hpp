@@ -192,7 +192,11 @@ public: // PUBLIC ATTRIBUTES (!!)
   int GridStartIndex[MAX_DIMENSION]; // starting index of the active region
   int GridEndIndex[MAX_DIMENSION]; // stoping index of the active region
   ENZO_FLOAT GridLeftEdge[MAX_DIMENSION]; // starting pos (active problem space)
+#ifdef CONFIG_SCALAR_CELLWIDTH
+  ENZO_FLOAT CellWidth[MAX_DIMENSION];
+#else
   ENZO_FLOAT *CellWidth[MAX_DIMENSION];
+#endif
   int ghost_depth[MAX_DIMENSION];
 
   // Fields

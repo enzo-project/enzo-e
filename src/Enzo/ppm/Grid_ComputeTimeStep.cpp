@@ -92,7 +92,11 @@ float EnzoDescr::ComputeTimeStep()
                           GridStartIndex, GridEndIndex,
                                GridStartIndex+1, GridEndIndex+1,
                                GridStartIndex+2, GridEndIndex+2,
+#ifdef CONFIG_SCALAR_CELLWIDTH
+			       &CellWidth[0], &CellWidth[1], &CellWidth[2],
+#else
 			       CellWidth[0], CellWidth[1], CellWidth[2],
+#endif
                                &Gamma, &PressureFree, &afloat,
                           BaryonField[DensNum], pressure_field,
                                BaryonField[Vel1Num], BaryonField[Vel2Num],

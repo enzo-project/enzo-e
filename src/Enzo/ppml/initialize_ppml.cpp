@@ -87,12 +87,16 @@ void EnzoDescr::initialize_ppml (int size_param)
   GridLeftEdge[2]    = 0.0;
 
   for (int dim=0; dim<GridRank; dim++) {
-    CellWidth[dim] = new ENZO_FLOAT[GridDimension[dim]];
     float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
       (GridEndIndex[dim] - GridStartIndex[dim] + 1);
+#ifdef CONFIG_SCALAR_CELLWIDTH
+    CellWidth[dim] = h;
+#else
+    CellWidth[dim] = new ENZO_FLOAT[GridDimension[dim]];
     for (int i=0; i<GridDimension[dim]; i++) {
       CellWidth[dim][i] = h;
     }
+#endif
   }
 
   // Grid variables
@@ -143,9 +147,9 @@ void EnzoDescr::initialize_ppml (int size_param)
   int ndx = GridDimension[0];
   int ndy = GridDimension[1];
 
-  float hx = CellWidth[0][0];
-  float hy = CellWidth[1][0];
-  float hz = CellWidth[2][0];
+  float hx = CELLWIDTH(0,0);
+  float hy = CELLWIDTH(1,0);
+  float hz = CELLWIDTH(2,0);
 
   // Clear all fields
 

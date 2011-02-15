@@ -81,7 +81,7 @@ c     NOT ACCESSED: eta1
       integer gravity, i1, i2, idim, idual, iflatten, ipresfree, isteep,
      &        j1, j2, jdim, ncolor
       real    dt, eta1, eta2, gamma
-      real   dslice(idim,jdim),     dxi(idim     ),  pslice(idim,jdim),
+      real   dslice(idim,jdim),     DXI(idim     ),  pslice(idim,jdim),
      &       uslice(idim,jdim),  vslice(idim,jdim),  wslice(idim,jdim),
      &      grslice(idim,jdim), geslice(idim,jdim)
       real      dls(idim,jdim),     drs(idim,jdim), flatten(idim,jdim),
@@ -97,7 +97,7 @@ c
       integer i, j, ic
       real steepen(ijkn),tmp1(ijkn),tmp2(ijkn),tmp3(ijkn),tmp4(ijkn)
       real qa,qb,qc,qd,s1,s2      
-      real  c1(ijkn), c2(ijkn), c3(ijkn), c4(ijkn), c5(ijkn), c6(ijkn)
+      real  C1(ijkn), C2(ijkn), C3(ijkn), C4(ijkn), C5(ijkn), C6(ijkn)
      &    ,dp(ijkn),pl(ijkn),pr(ijkn),p6(ijkn)
      &    ,du(ijkn),ul(ijkn),ur(ijkn),u6(ijkn)
      &    ,dla(ijkn),dra(ijkn),pla(ijkn),pra(ijkn),ula(ijkn),ura(ijkn)
@@ -130,53 +130,30 @@ c     write(6,*) 'INTEULER: j1   =',j1,  ' j2   =',j2
 c
 c     Compute coefficients used in interpolation formulae (from eq. 1.6)
 c
-#ifdef OPTIMIZE_CELL_WIDTH
-#  define DXI   dxi(i1)
-#  define DXIMM dxi(i1)
-#  define DXIM  dxi(i1)
-#  define DXIP  dxi(i1)
-#  define C1    c1(i1)
-#  define C2    c2(i1)
-#  define C3    c3(i1)
-#  define C4    c4(i1)
-#  define C5    c5(i1)
-#  define C6    c6(i1)
-#else
-#  define DXI   dxi(i)
-#  define DXIMM dxi(i-2)
-#  define DXIM  dxi(i-1)
-#  define DXIP  dxi(i+1)
-#  define C1    c1(i)
-#  define C2    c2(i)
-#  define C3    c3(i)
-#  define C4    c4(i)
-#  define C5    c5(i)
-#  define C6    c6(i)
-#endif
 
-#ifndef OPTIMIZE_CELL_WIDTH
+#ifndef CONFIG_SCALAR_CELLWIDTH
       do i=i1-2,i2+2
 #endif
-         qa    = DXI/(DXIM + DXI + DXIP)
-         C1 = qa*(2.0*DXIM + DXI)/(DXIP + DXI)
-         C2 = qa*(2.0*DXIP + DXI)/(DXIM + DXI)
-#ifndef OPTIMIZE_CELL_WIDTH
+         qa    = DXI(i)/(DXI(i-1) + DXI(i) + DXI(i+1))
+         C1(i) = qa*(2.0*DXI(i-1) + DXI(i))/(DXI(i+1) + DXI(i))
+         C2(i) = qa*(2.0*DXI(i+1) + DXI(i))/(DXI(i-1) + DXI(i))
+#ifndef CONFIG_SCALAR_CELLWIDTH
       enddo
 #endif
 c
-#ifndef OPTIMIZE_CELL_WIDTH
+#ifndef CONFIG_SCALAR_CELLWIDTH
       do i=i1-1,i2+2
 #endif
-         qa    = DXIMM + DXIM + DXI + DXIP
-         qb    = DXIM/(DXIM + DXI)
-         qc    = (DXIMM + DXIM)/(2.0*DXIM + DXI)
-         qd    = (DXIP + DXI)/(2.0*DXI + DXIM)
-         qb    = qb + 2.0*DXI*qb/qa*(qc-qd)
-         C3 = 1.0 - qb
-         C4 = qb
-         C5 =  DXI/qa*qd
-         C6 = -DXIM/qa*qc
-#ifndef OPTIMIZE_CELL_WIDTH
+         qa    = DXI(i-2) + DXI(i-1) + DXI(i) + DXI(i+1)
+         qb    = DXI(i-1)/(DXI(i-1) + DXI(i))
+         qc    = (DXI(i-2) + DXI(i-1))/(2.0*DXI(i-1) + DXI(i))
+         qd    = (DXI(i+1) + DXI(i))/(2.0*DXI(i) + DXI(i-1))
+         qb    = qb + 2.0*DXI(i)*qb/qa*(qc-qd)
+         C3(i) = 1.0 - qb
+         C4(i) = qb
+         C5(i) =  DXI(i)/qa*qd
+         C6(i) = -DXI(i-1)/qa*qc
+#ifndef CONFIG_SCALAR_CELLWIDTH
       enddo
 #endif
 c
@@ -188,11 +165,11 @@ c     Precompute steepening coefficients if needed (eqns 1.14-1.17, plus 3.2)
 c
       if (isteep .ne. 0) then
          do i=i1-2,i2+2
-            qa     = DXIM + DXI + DXIP
-            d2d(i) = (dslice(i+1,j) - dslice(i,j))/(DXIP + DXI)
+            qa     = DXI(i-1) + DXI(i) + DXI(i+1)
+            d2d(i) = (dslice(i+1,j) - dslice(i,j))/(DXI(i+1) + DXI(i))
             d2d(i) = (d2d(i) - (dslice(i,j)-dslice(i-1,j))
-     &               /(DXI+DXIM))/qa
-            dxb(i) = 0.5*(DXI + DXIP)
+     &               /(DXI(i)+DXI(i-1)))/qa
+            dxb(i) = 0.5*(DXI(i) + DXI(i+1))
          enddo
          do i=i1-1,i2+1
             qc = abs(dslice(i+1,j) - dslice(i-1,j))
@@ -220,16 +197,16 @@ c
       do i=i1-1,i2+1
          cs(i) = sqrt(gamma*pslice(i,j)/dslice(i,j))
          if (ipresfree .eq. 1) cs(i) = tiny
-         char1(i) = max(0.0, dt*(uslice(i,j)+cs(i)))/(2.0*DXI)
-         char2(i) = max(0.0,-dt*(uslice(i,j)-cs(i)))/(2.0*DXI)
+         char1(i) = max(0.0, dt*(uslice(i,j)+cs(i)))/(2.0*DXI(i))
+         char2(i) = max(0.0,-dt*(uslice(i,j)-cs(i)))/(2.0*DXI(i))
       enddo
 c
 c Brought dt and dx terms here to avoid possible overflows [BWO v1_1_6]
 c
       do i=i1-1,i2+1
-         cm(i) = (uslice(i,j)-cs(i))*(dt/(2.0*DXI))
-         c0(i) = (uslice(i,j)      )*(dt/(2.0*DXI))
-         cp(i) = (uslice(i,j)+cs(i))*(dt/(2.0*DXI))
+         cm(i) = (uslice(i,j)-cs(i))*(dt/(2.0*DXI(i)))
+         c0(i) = (uslice(i,j)      )*(dt/(2.0*DXI(i)))
+         cp(i) = (uslice(i,j)+cs(i))*(dt/(2.0*DXI(i)))
       enddo
 c
 c     Compute left and right states for each variable
@@ -312,12 +289,12 @@ c     cra(i) = sqrt(max(gamma*pra(i)*dra(i), 0.0))
          cra(i) = sqrt(max(gamma*pra(i),0.0)) * sqrt(max(dra(i),0.0))
          if ( (cla(i) .gt. huge) .or.
      &        (cla(i) .eq.0)) then
-            write(6,*) 'inteuler: cla', cla(i), pla(i),dla(i)
+            write(6,*) 'inteuler: cla', i,cla(i), pla(i),dla(i)
             stop
          endif
          if ( (cra(i) .gt. huge) .or.
      &        (cra(i).eq.0)) then
-            write(6,*) 'inteuler: cra', cra(i), pra(i),dra(i)
+            write(6,*) 'inteuler: cra', i,cra(i), pra(i),dra(i)
             stop
          endif
       enddo

@@ -50,7 +50,11 @@ c
 c     Arguments
 c
       integer idim, jdim, kdim, i1, i2, j1, j2, k1, k2, rank, ipfree
+#ifdef CONFIG_SCALAR_CELLWIDTH
+      REALSUB dx, dy, dz
+#else
       REALSUB dx(idim), dy(jdim), dz(kdim)
+#endif
       real    dt, gamma, aye, dtviscous
       real    d(idim,jdim,kdim), p(idim,jdim,kdim), u(idim,jdim,kdim),
      &        v(idim,jdim,kdim), w(idim,jdim,kdim)
@@ -68,7 +72,7 @@ c     Set initial timestep to a large number
 c
       print*, rank, idim, jdim, kdim
       print*, i1, i2, j1, j2, k1, k2
-      print*, dx(4), dy(4)
+c      print*, dx(4), dy(4)
       print*, gamma, ipfree, aye
       print*, 'd(i1+1,j1+1,1) = ', d(i1+1,j1+1,1)
       print*, 'd(i2+1,j2+1,1) = ', d(i2+1,j2+1,1)
@@ -120,7 +124,7 @@ c
          do i = i1+1, i2+1
             cs = max(sqrt(gamma*p(i,1,1)/d(i,1,1)), tiny)
             if (ipfree .eq. 1) cs = tiny
-            dt = min(dt, real(dx(i)*aye/(cs + abs(u(i,1,1)))))
+            dt = min(dt, real(DX(i)*aye/(cs + abs(u(i,1,1)))))
          enddo
       endif
 c
@@ -136,15 +140,15 @@ c
 c
 c 	Here is Godunov's formula (to make sure ppm works with 0.8)
 c
-               dt = min(dt, real(aye/((cs + abs(u(i,j,1)))/dx(i)+
-     &                       (cs + abs(v(i,j,1)))/dy(j)) ))
+               dt = min(dt, real(aye/((cs + abs(u(i,j,1)))/DX(i)+
+     &                       (cs + abs(v(i,j,1)))/DY(j)) ))
 C               print*, i,j,p(i,j,1),d(i,j,1),
-C     &              u(i,j,1),v(i,j,1),dx(i),dy(j)
+C     &              u(i,j,1),v(i,j,1),DX(i),DY(j)
 c
 c       The way it was originally in enzo
 c
-c               dt = min(dt, real(dx(i)*aye/(cs + abs(u(i,j,1)))),
-c     &                      real(dy(j)*aye/(cs + abs(v(i,j,1)))))
+c               dt = min(dt, real(DX(i)*aye/(cs + abs(u(i,j,1)))),
+c     &                      real(DY(j)*aye/(cs + abs(v(i,j,1)))))
             enddo
 c
          enddo
@@ -165,15 +169,15 @@ c
 c     
 c     Godunov's formula.
 c     
-                  dt1 = aye/((cs + abs(u(i,j,k)))/dx(i) +
-     &                 (cs + abs(v(i,j,k)))/dy(j) +
-     &                 (cs + abs(w(i,j,k)))/dz(k))
+                  dt1 = aye/((cs + abs(u(i,j,k)))/DX(i) +
+     &                 (cs + abs(v(i,j,k)))/DY(j) +
+     &                 (cs + abs(w(i,j,k)))/DZ(k))
 c     
 c     The way it was originally in enzo
 c     
-c     dt1 = min(dx(i)*aye/(cs + abs(u(i,j,k))),
-c     &                    dy(j)*aye/(cs + abs(v(i,j,k))),
-c     &                    dz(k)*aye/(cs + abs(w(i,j,k))))
+c     dt1 = min(DX(i)*aye/(cs + abs(u(i,j,k))),
+c     &                    DY(j)*aye/(cs + abs(v(i,j,k))),
+c     &                    DZ(k)*aye/(cs + abs(w(i,j,k))))
 
                   dt = min(dt, dt1)
 !                  if (dt1 .lt. 1.0e-5) write(6,1000) dt1,d(i,j,k),

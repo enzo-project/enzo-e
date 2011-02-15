@@ -53,7 +53,7 @@ c
 c  argument declarations
 c
       integer idim, i1, i2, iflatten, isteep
-      real c1(idim), c2(idim), c3(idim), c4(idim), c5(idim), c6(idim),
+      real C1(idim), C2(idim), C3(idim), C4(idim), C5(idim), C6(idim),
      &     char1(idim), char2(idim), c0(idim),
      &     qla(idim), qra(idim), ql0(idim), qr0(idim)
       real qslice(idim), steepen(idim), flatten(idim)
@@ -87,26 +87,10 @@ c
 c     Compute average linear slopes (eqn 1.7)
 c      Monotonize (eqn 1.8)
 c
-#ifdef OPTIMIZE_CELL_WIDTH
-#  define C1 c1(i1)
-#  define C2 c2(i1)
-#  define C3 c3(i1)
-#  define C4 c4(i1)
-#  define C5 c5(i1)
-#  define C6 c6(i1)
-#else
-#  define C1 c1(i)
-#  define C2 c2(i)
-#  define C3 c3(i)
-#  define C4 c4(i)
-#  define C5 c5(i)
-#  define C6 c6(i)
-
-#endif
       do i = i1-2, i2+2
          qplus = qslice(i+1)-qslice(i  )
          qmnus = qslice(i  )-qslice(i-1)
-         dq(i) = C1*qplus + C2*qmnus
+         dq(i) = C1(i)*qplus + C2(i)*qmnus
          temp1 = min(abs(dq(i)), 2.0*abs(qmnus), 2.0*abs(qplus))
          if (qplus*qmnus .gt. 0) then
             dq(i) = temp1*sign(1.0, dq(i))
@@ -118,8 +102,8 @@ c
 c     Construct left and right values (eqn 1.6)
 c
       do i = i1-1, i2+2
-         ql(i) = C3*qslice(i-1) + C4*qslice(i) +
-     &           C5*    dq(i-1) + C6*dq(i)
+         ql(i) = C3(i)*qslice(i-1) + C4(i)*qslice(i) +
+     &           C5(i)*    dq(i-1) + C6(i)*dq(i)
          qr(i-1) = ql(i)
       enddo
 c

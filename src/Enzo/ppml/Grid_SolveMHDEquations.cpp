@@ -142,7 +142,7 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
  
     for (dim = 0; dim < GridRank; dim++)
       GridGlobalStart[dim] =
-	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/(*(CellWidth[dim]))) -
+	NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CELLWIDTH(dim,0)) -
 	GridStartIndex[dim];
  
     /* fix grid quantities so they are defined to at least 3 dims */
@@ -270,6 +270,15 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
     // this is not going to work for cosmology right away !AK
 
     float a = 1.0;
+#ifdef CONFIG_SCALAR_CELLWIDTH
+    float CellWidthTemp[MAX_DIMENSION];
+    for (dim = 0; dim < MAX_DIMENSION; dim++) {
+      if (dim < GridRank)
+	CellWidthTemp[dim] = float(a*CellWidth[dim]);
+      else
+	CellWidthTemp[dim] = 1.0;
+    }
+#else
     float *CellWidthTemp[MAX_DIMENSION];
     for (dim = 0; dim < MAX_DIMENSION; dim++) {
       CellWidthTemp[dim] = new float[GridDimension[dim]];
@@ -279,6 +288,7 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
 	else
 	  CellWidthTemp[dim][i] = 1.0;
     }
+#endif
  
     /* Prepare Gravity. */
  
@@ -300,7 +310,11 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
 	 dens_rx,velox_rx,veloy_rx,veloz_rx,bfieldx_rx,bfieldy_rx,bfieldz_rx,
 	 dens_ry,velox_ry,veloy_ry,veloz_ry,bfieldx_ry,bfieldy_ry,bfieldz_ry,
 	 dens_rz,velox_rz,veloy_rz,veloz_rz,bfieldx_rz,bfieldy_rz,bfieldz_rz,
+#ifdef CONFIG_SCALAR_CELLWIDTH
+	 &dt, &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
+#else
 	 &dt, CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
+#endif
 	 &GridDimension[0], &GridDimension[1], &GridDimension[2], 
 	 GridStartIndex, GridEndIndex,
 	 &NumberOfSubgrids, leftface, rightface,
@@ -315,8 +329,11 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
  
     delete [] leftface;
  
+#ifdef CONFIG_SCALAR_CELLWIDTH
+#else
     for (dim = 0; dim < MAX_DIMENSION; dim++)
       delete [] CellWidthTemp[dim];
+#endif
  
   }  // end: if (NumberOfBaryonFields > 0)
  

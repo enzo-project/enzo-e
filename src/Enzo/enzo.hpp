@@ -9,6 +9,12 @@
 /// @date     2010-04-02
 /// @brief    Include file for the \ref Enzo component
 
+#ifdef CONFIG_SCALAR_CELLWIDTH
+#  define CELLWIDTH(i,j) CellWidth[i]
+#else
+#  define CELLWIDTH(i,j) CellWidth[i][j]
+#endif
+
 //----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------

@@ -86,7 +86,7 @@ c  argument declarations
 c
       integer gravity, i1, i2, idiff, idim, idual, j1, j2, jdim, ncolor
       real    dt, eta1, eta2, gamma, velold
-      real diffcoef(idim,jdim),  dslice(idim,jdim),      dx(idim     ),
+      real diffcoef(idim,jdim),  dslice(idim,jdim),      DX(idim),
      &       eslice(idim,jdim), grslice(idim,jdim), geslice(idim,jdim),
      &       uslice(idim,jdim),  vslice(idim,jdim),  wslice(idim,jdim)
       real      dls(idim,jdim),     drs(idim,jdim),
@@ -279,8 +279,8 @@ c
 #ifdef CAVITATE_AVOID
        do i=i1, i2+1
          if (ubar(i,j)*ub(i) .lt. 0.0 .and. 
-     &       -db(i)*ub(i)*dt/dx(i) .gt. dslice(i,j) .or.
-     &        db(i)*ub(i)*dt/dx(i) .gt. dslice(i-1,j)     ) then
+     &       -db(i)*ub(i)*dt/DX(i) .gt. dslice(i,j) .or.
+     &        db(i)*ub(i)*dt/DX(i) .gt. dslice(i-1,j)     ) then
             write(6,1010) i,j,ubar(i,j),ub(i),db(i),
      &              dslice(i,j),dslice(i-1,j)
  1010       format('cav:',2i6,8g12.4)
@@ -421,7 +421,7 @@ c
 !      enddo
 
        do i=i1, i2+1
-          qc = dt/dx(i)
+          qc = dt/DX(i)
           df(i,j) = qc*dub(i)
           ef(i,j) = qc*(dueb(i) + upb(i))
           uf(i,j) = qc*(duub(i) + pb(i))
@@ -432,8 +432,8 @@ c
 c
        do n=1,ncolor
           do i=i1, i2+1
-c            colf(i,j,n) = (dt/dx(i))*dub(i)*colb(i,n) ! color*dens conserved
-             colf(i,j,n) = (dt/dx(i))*ub(i)*colb(i,n) ! color conserved
+c            colf(i,j,n) = (dt/DX(i))*dub(i)*colb(i,n) ! color*dens conserved
+             colf(i,j,n) = (dt/DX(i))*ub(i)*colb(i,n) ! color conserved
           enddo
        enddo
 c
@@ -449,7 +449,7 @@ c
 c  Update conservation laws  (eq. 3.1)
 c
        do i=i1, i2
-          qc = dt/dx(i)
+          qc = dt/DX(i)
           dnu(i)      =              dslice(i,j) +
      &                     qc*( dub(i)- dub(i+1))
 c          write(21,*) i, dnu(i), dub(i), db(i), ub(i)
@@ -530,7 +530,7 @@ c
 c     Removed dx from this, and placed earlier during colf calculation [BWO]
              if (colslice(i,j,n)              +
      &         (colf(i,j,n)-colf(i+1,j,n)) .lt. 0.0) then
-                write(6,*)'euler_c0:',i,j,n,dx(i)
+                write(6,*)'euler_c0:',i,j,n,DX(i)
                 write(6,*)'euler_c1:',colf(i-1,j,n),colf(i,j,n),
      &                      colf(i+1,j,n)
                 write(6,*)'euler_c2:',colslice(i-1,j,n),colslice(i,j,n),
@@ -574,7 +574,7 @@ c             endif
           enddo
           do i=i1, i2
              if (geslice(i,j) .lt. 0.0) write(6,*) i,j,geslice(i,j)
-             qc = dt/dx(i)
+             qc = dt/DX(i)
              geslice(i,j) = max((geslice(i,j)*dslice(i,j) +
      &            qc*(dugeb(i)-dugeb(i+1) + pcent(i)*(ub(i)-ub(i+1))  
      &                                                       ))/dnu(i)
