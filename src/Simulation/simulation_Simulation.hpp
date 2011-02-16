@@ -178,10 +178,10 @@ protected: // attributes
   /// Time-step computation
   Timestep * timestep_;
 
-  /// List of initial conditions objects
+  /// Initial conditions object
   Initial * initial_;
 
-  /// List of boundary conditions objects
+  /// Boundary conditions object
   Boundary * boundary_;
 
   /// List of method objects

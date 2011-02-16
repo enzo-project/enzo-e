@@ -27,7 +27,7 @@ public: // interface
   virtual void update_block (DataBlock * block) throw();
 
   /// Return whether the simulation is complete
-  virtual bool is_done () throw();
+  virtual bool complete () throw();
 
 
 private: // attributes

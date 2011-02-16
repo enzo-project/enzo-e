@@ -224,13 +224,30 @@ void Patch::allocate_blocks() throw()
     field_block->set_extent(xm,xp,ym,yp,zm,zp);
 
 
+    // Allocate field data
+
     field_block->allocate_array();
+    field_block->allocate_ghosts();
+
+    // Set boundaries
+
+    if (mbx > 1) {
+      if (ibx==0)     field_block->set_boundary_face(face_lower_x,true);
+      if (ibx==nbx-1) field_block->set_boundary_face(face_upper_x,true);
+    }
+    if (mby > 1) {
+      if (iby==0)     field_block->set_boundary_face(face_lower_y,true);
+      if (iby==nby-1) field_block->set_boundary_face(face_upper_y,true);
+    }
+    if (mbz > 1) {
+      if (ibz==0)     field_block->set_boundary_face(face_lower_z,true);
+      if (ibz==nbz-1) field_block->set_boundary_face(face_upper_z,true);
+    }
 
     WARNING("Patch::allocate_blocks",
 		    "allocating all ghosts in patch");
 
-    field_block->allocate_ghosts();
-			    
+		    
     // INITIALIZE PARTICLE BLOCK
 
   }

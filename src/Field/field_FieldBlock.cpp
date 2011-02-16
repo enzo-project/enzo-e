@@ -15,13 +15,16 @@ FieldBlock::FieldBlock() throw()
     field_faces_(0),
     array_(0),
     field_values_(),
-    ghosts_allocated_(false)
+    ghosts_allocated_(false),
+    boundary_face_()
 {
   for (int i=0; i<3; i++) {
     size_[i] = 1;
     lower_[i]      = 0.0;
     upper_[i]      = 1.0;
   }
+
+  set_boundary_face(face_all,false);
 }
 
 //----------------------------------------------------------------------
@@ -351,6 +354,28 @@ void FieldBlock::refresh_ghosts() throw()
     WARNING("FieldBlock::refresh_ghosts",
 		    "Function called with ghosts not allocated");
   }
+}
+
+//----------------------------------------------------------------------
+void FieldBlock::set_boundary_face(face_enum face, bool value) throw()
+{
+  printf ("DEBUG face %d value %s\n",face,value ? "true" : "false");
+  if (face == face_all) {
+    boundary_face_[face_lower_x] = value;
+    boundary_face_[face_upper_x] = value;
+    boundary_face_[face_lower_y] = value;
+    boundary_face_[face_upper_y] = value;
+    boundary_face_[face_lower_z] = value;
+    boundary_face_[face_upper_z] = value;
+  } else {
+    boundary_face_[face] = value;
+  }
+}
+
+//----------------------------------------------------------------------
+bool FieldBlock::boundary_face(face_enum face) throw()
+{
+  return boundary_face_[face];
 }
 
 //----------------------------------------------------------------------

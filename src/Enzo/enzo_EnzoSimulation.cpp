@@ -4,6 +4,7 @@
 /// @file     enzo_EnzoSimulation.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
+/// @todo     Move boundary conditions to Boundary object; remove bc_reflecting
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoSimulation user-dependent class member functions
 
@@ -50,11 +51,11 @@ void EnzoSimulation::run() throw()
   // output_progress(monitor,cycle,time,dt);
   // output_images(monitor,cycle,field_block);
 
-  // Papi papi;
-  // Timer timer;
+  Timer timer;
+  Papi papi;
   
-  // timer.start();
-  // papi.start();
+  timer.start();
+  papi.start();
 
   UNTESTED("EnzoSimulation::run");
   INCOMPLETE("EnzoSimulation::run","incomplete");
@@ -71,8 +72,9 @@ void EnzoSimulation::run() throw()
   // ASSUMES MESH IS JUST A SINGLE PATCH
   Patch * patch = mesh_->root_patch();
   ItBlocks itBlocks(patch);
+  DataBlock * data_block;
 
-  while (DataBlock * data_block = (DataBlock *) ++itBlocks) {
+  while ((data_block = (DataBlock *) ++itBlocks)) {
       initialize_block_(data_block);
 
     initial_->initialize_block(data_block);
@@ -85,48 +87,59 @@ void EnzoSimulation::run() throw()
   // MAIN LOOP
   //--------------------------------------------------
 
-  while (! stopping_->is_done() ) {
 
+  while (! stopping_->complete() ) {
+
+    // MONITOR:  timestep and cycle progress
     {
       char buffer[40];
-      sprintf (buffer,"time %g cycle %d\n",
-	       enzo_->Time,
-	       enzo_->CycleNumber);
+      sprintf (buffer,"cycle %04d time %15.12f",
+	       enzo_->CycleNumber,
+	       enzo_->Time);
       monitor_->print(buffer);
     }
 
+    // MESH: ASSUMES A SINGLE PATCH
+    patch = mesh_->root_patch();
 
-    // Initialize local block timestep
+    // Local block iterator
+    ItBlocks itBlocks(patch);
+
+    // BOUNDARY
+
+    //    enzo_->SetExternalBoundaryValues();
+
+    // TIMESTEP
+
     double dt_block = std::numeric_limits<double>::max();
 
-    // ASSUMES MESH IS JUST A SINGLE PATCH
-    Patch * patch = mesh_->root_patch();
-
-
-    // for each Block in Patch
-    ItBlocks itBlocks(patch);
-    while (DataBlock * data_block = (DataBlock *) ++itBlocks) {
-
-      //      Memory::instance()->print();
+    while ((data_block = (DataBlock *) ++itBlocks)) {
 
       initialize_block_(data_block);
-
-
-      // COMPUTE
-
-      // Update block dt (before finalize_block)
 
       dt_block = MIN(dt_block,timestep_->compute(data_block));
 
       finalize_block_(data_block);
 
-      //      Memory::instance()->print();
-      // Accumulate local block timestep
-      //      Memory::instance()->print();
+    }
 
-    } // Block in Patch
+    //--------------------------------------------------
+    // INITIAL OUTPUT
+    //--------------------------------------------------
 
-    // Accumulate timestep for patch given processor-local block timesteps
+  
+     while ((data_block = (DataBlock *) ++itBlocks)) {
+
+       initialize_block_(data_block);
+
+       output_images_(data_block,
+		      "EnzoSimulation-%d.%d.png",enzo_->CycleNumber,0);
+
+       finalize_block_(data_block);
+     }
+
+    // Accumulate block timesteps in patch
+
     double dt_patch;
 
 #ifdef CONFIG_USE_MPI
@@ -136,41 +149,66 @@ void EnzoSimulation::run() throw()
     dt_patch = dt_block;
 #endif
 
+    // Set Enzo timestep
+
+    enzo_->dt = dt_patch;
+
+    // METHOD
+
+    // for each Block in Patch
+    while ((data_block = (DataBlock *) ++itBlocks)) {
+
+      //      Memory::instance()->print();
+
+      initialize_block_(data_block);
+
+      data_block->field_block()->enforce_boundary(boundary_reflecting);
+
+      for (size_t index_method = 0; 
+	   index_method < method_list_.size(); 
+	   index_method++) {
+
+	method_list_[index_method]->compute_block
+	  (data_block,enzo_->Time,enzo_->dt);
+
+      }
+
+      // Update block dt (before finalize_block)
+
+
+
+      finalize_block_(data_block);
+      //      Memory::instance()->print();
+      // Accumulate local block timestep
+      //      Memory::instance()->print();
+
+    } // Block in Patch
+
     // Set next enzo timestep
 
     //    ASSERT("EnzoSimulation::run", "dt is 0", enzo_->dt != 0.0);
-
-    enzo_->dt = dt_patch;
 
     // Update cycle and time
 
     enzo_->CycleNumber += 1;
     enzo_->Time        += enzo_->dt;
 
-  } // while (! control_->is_done() )
+  } // while (! control_->complete() )
 
 
-  while (DataBlock * data_block = (DataBlock *) ++itBlocks) {
+  //--------------------------------------------------
+  // FINAL OUTPUT
+  //--------------------------------------------------
+
   
-    FieldBlock * field_block = data_block->field_block();
-    FieldDescr * field_descr = field_block->field_descr();
-    int nx,ny,nz;
-    int gx,gy,gz;
-    int mx,my,mz;
-    field_block->enforce_boundary(boundary_reflecting);
-    field_block->size(&nx,&ny,&nz);
-    int count = field_descr->field_count();
-    for (int index = 0; index < count; index++) {
-      field_descr->ghosts(index,&gx,&gy,&gz);
-      mx=nx+2*gx;
-      my=ny+2*gy;
-      mz=nz+2*gz;
-      char filename[80];
-      std::string field_name = field_descr->field_name(index);
-      Scalar * field_values = (Scalar *)field_block->field_values(index);
-      sprintf (filename,"EnzoSimulation-%d.png",index);
-      monitor_->image (filename, field_values, mx,my,mz, 2, reduce_sum, 0.0, 1.0);
-    }
+  while ((data_block = (DataBlock *) ++itBlocks)) {
+
+    initialize_block_(data_block);
+
+    output_images_(data_block,
+		   "EnzoSimulation-%d.%d.png",enzo_->CycleNumber);
+
+    finalize_block_(data_block);
   }
 
 
@@ -199,18 +237,20 @@ void EnzoSimulation::run() throw()
 
   // }
 
-  // papi.stop();
-  // timer.stop();
+  papi.stop();
+  timer.stop();
 
   // output_images  (monitor,cycle_final,field_block);
   // output_progress(monitor,cycle_final,time,dt);
 
-  // PARALLEL_PRINTF ("Time real = %f\n",papi.time_real());
-  // PARALLEL_PRINTF ("Time proc = %f\n",papi.time_proc());
-  // PARALLEL_PRINTF ("Flop count = %lld\n",papi.flop_count());
-  // PARALLEL_PRINTF ("GFlop rate = %f\n",papi.flop_rate()*1e-9);
+#ifdef CONFIG_USE_PAPI
+  PARALLEL_PRINTF ("PAPI Time real   = %f\n",papi.time_real());
+  PARALLEL_PRINTF ("PAPI Time proc   = %f\n",papi.time_proc());
+  PARALLEL_PRINTF ("PAPI GFlop count = %f\n",papi.flop_count()*1e-9);
+  PARALLEL_PRINTF ("PAPI GFlop rate  = %f\n",papi.flop_rate()*1e-9);
+#endif
 
-  // PARALLEL_PRINTF ("Timer time = %f\n",timer.value());
+  PARALLEL_PRINTF ("Real time = %f\n",timer.value());
 
 }
 
@@ -283,9 +323,9 @@ EnzoSimulation::create_method_ ( std::string name ) throw ()
   Method * method = 0;
 
   if (name == "ppm")
-    method = new EnzoMethodPpm  (monitor_,parameters_,enzo_);
+    method = new EnzoMethodPpm  (parameters_,enzo_);
   if (name == "ppml")
-    method = new EnzoMethodPpml (monitor_,parameters_,enzo_);
+    method = new EnzoMethodPpml (parameters_,enzo_);
 
   if (method == 0) {
     char buffer[80];
@@ -300,8 +340,6 @@ EnzoSimulation::create_method_ ( std::string name ) throw ()
 
 void EnzoSimulation::initialize_block_ (DataBlock * data_block) throw ()
 {
-
-  TRACE("EnzoSimulation::initialize_block()");
 
   FieldBlock * field_block = data_block->field_block();
 
@@ -324,28 +362,18 @@ void EnzoSimulation::initialize_block_ (DataBlock * data_block) throw ()
   enzo_->GridStartIndex[0] = enzo_->ghost_depth[0];
   enzo_->GridStartIndex[1] = enzo_->ghost_depth[1];
   enzo_->GridStartIndex[2] = enzo_->ghost_depth[2];
-  enzo_->GridEndIndex[0]   = nx + enzo_->ghost_depth[0] - 1;
-  enzo_->GridEndIndex[1]   = ny + enzo_->ghost_depth[1] - 1;
-  enzo_->GridEndIndex[2]   = nz + enzo_->ghost_depth[2] - 1;
+  enzo_->GridEndIndex[0]   = enzo_->ghost_depth[0] + nx - 1;
+  enzo_->GridEndIndex[1]   = enzo_->ghost_depth[1] + ny - 1;
+  enzo_->GridEndIndex[2]   = enzo_->ghost_depth[2] + nz - 1;
 
-  // Initialize CellWidth[].  Should be converted to constants hx,hy,hz
+  // Initialize CellWidth
 
   double h3[3];
   field_block->cell_width(&h3[0],&h3[1],&h3[2]);
 
-#ifdef CONFIG_SCALAR_CELLWIDTH
   for (int dim=0; dim<enzo_->GridRank; dim++) {
     enzo_->CellWidth[dim] = h3[dim];
   }
-#else
-  for (int dim=0; dim<enzo_->GridRank; dim++) {
-    enzo_->CellWidth[dim] = new ENZO_FLOAT[enzo_->GridDimension[dim]];
-    printf ("gd = %d\n",enzo_->GridDimension[dim]);
-    for (int i=0; i<enzo_->GridDimension[dim]; i++) {
-      enzo_->CellWidth[dim][i] = h3[dim];
-    }
-  }
-#endif
 
   // Initialize BaryonField[] pointers
 
@@ -362,45 +390,83 @@ void EnzoSimulation::initialize_block_ (DataBlock * data_block) throw ()
  
   //    // boundary
  
-  //    BoundaryRank = 2;
-  //    BoundaryDimension[0] = GridDimension[0];
-  //    BoundaryDimension[1] = GridDimension[1];
+  enzo_->BoundaryDimension[0] = enzo_->GridDimension[0];
+  enzo_->BoundaryDimension[1] = enzo_->GridDimension[1];
+  enzo_->BoundaryDimension[2] = enzo_->GridDimension[2];
 
-  //    for (int field=0; field<NumberOfBaryonFields; field++) {
-  //      BoundaryFieldType[field] = enzo_->FieldType[field];
-  //      for (int dim = 0; dim < 3; dim++) {
-  //        for (int face = 0; face < 2; face++) {
-  //  	int n1 = GridDimension[(dim+1)%3];
-  //  	int n2 = GridDimension[(dim+2)%3];
-  //  	int size = n1*n2;
-  //  	BoundaryType [field][dim][face] = new bc_type [size];
-  //  	BoundaryValue[field][dim][face] = NULL;
-  //  	for (int i2 = 0; i2<n2; i2++) {
-  //  	  for (int i1 = 0; i1<n1; i1++) {
-  //  	    int i = i1 + n1*i2;
-  //  	    BoundaryType[field][dim][face][i] = bc_reflecting;
-  //  	  }
-  //  	}
-  //        }
-  //      }
-  //    }
+  for (int field=0; field<enzo_->NumberOfBaryonFields; field++) {
+    enzo_->BoundaryFieldType[field] = enzo_->FieldType[field];
+    for (int dim = 0; dim < 3; dim++) {
+      for (int face = 0; face < 2; face++) {
+	face_enum eface = (face_enum)(dim*2+face);
+	enzo_->BoundaryType [field][dim][face] = NULL;
+	if (field_block->boundary_face(eface)) {
+	  int n1 = enzo_->GridDimension[(dim+1)%3];
+	  int n2 = enzo_->GridDimension[(dim+2)%3];
+	  int size = n1*n2;
+	  enzo_->BoundaryType [field][dim][face] = new bc_enum [size];
+	  enzo_->BoundaryValue[field][dim][face] = NULL;
+	  for (int i2 = 0; i2<n2; i2++) {
+	    for (int i1 = 0; i1<n1; i1++) {
+	      int i = i1 + n1*i2;
+	      enzo_->BoundaryType[field][dim][face][i] = bc_reflecting;
+	    }
+	  }
+	}
+      }
+    }
+  }
 
   // @@@ WRITE OUT ENZO DESCRIPTION FOR DEBUGGING
-  enzo_->write(stdout);
+  //  enzo_->write(stdout);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoSimulation::finalize_block_ ( DataBlock * data_block ) throw ()
 {
-  TRACE("EnzoSimulation::finalize_block()");
-  // delete CellWidth[] array
-
-#ifdef CONFIG_SCALAR_CELLWIDTH
-#else
-  for (int dim=0; dim < enzo_->GridRank; dim++) {
-    delete [] enzo_->CellWidth[dim];
+  for (int field=0; field<enzo_->NumberOfBaryonFields; field++) {
+    for (int dim = 0; dim < 3; dim++) {
+      for (int face = 0; face < 2; face++) {
+	delete [] enzo_->BoundaryType [field][dim][face];
+	enzo_->BoundaryType [field][dim][face] = NULL;
+      }
+    }
   }
-#endif
 }
 
+//----------------------------------------------------------------------
+
+void EnzoSimulation::output_images_
+(
+ DataBlock * data_block,
+ const char * file_format,
+ int cycle,
+ int cycle_skip
+ ) throw ()
+{
+
+  if (! (cycle_skip && cycle % cycle_skip == 0)) return;
+
+  FieldBlock * field_block = data_block->field_block();
+  FieldDescr * field_descr = field_block->field_descr();
+  int nx,ny,nz;
+  int gx,gy,gz;
+  int mx,my,mz;
+  field_block->enforce_boundary(boundary_reflecting);
+  field_block->size(&nx,&ny,&nz);
+  int count = field_descr->field_count();
+  for (int index = 0; index < count; index++) {
+    field_descr->ghosts(index,&gx,&gy,&gz);
+    mx=nx+2*gx;
+    my=ny+2*gy;
+    mz=nz+2*gz;
+    char filename[255];
+    std::string field_name = field_descr->field_name(index);
+    Scalar * field_values = (Scalar *)field_block->field_values(index);
+    sprintf (filename,file_format,
+	     enzo_->CycleNumber,index);
+    monitor_->image (filename, field_values, mx,my,mz, 2, reduce_sum, 
+		     0.0, 1.0);
+  }
+}

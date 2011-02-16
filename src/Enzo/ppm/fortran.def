@@ -1,6 +1,8 @@
 #include "cello_config.def"
 #include "enzo_defines.hpp"
 
+#define CONFIG_SCALAR_CELLWIDTH
+
 #define DEBUG_MESSAGE            CALL f_warning(__FILE__,__LINE__)
 #define ERROR_MESSAGE            CALL f_error(__FILE__,__LINE__)
 #define WARNING_MESSAGE          CALL f_warning(__FILE__,__LINE__)
@@ -15,28 +17,4 @@
 
 #ifdef p16
 #define REALSUB real*16
-#endif
-
-#ifdef CONFIG_SCALAR_CELLWIDTH
-#   define DX(i) dx
-#   define DY(i) dy
-#   define DZ(i) dz
-#  define DXI(i) dxi
-#  define C1(i) c1
-#  define C2(i) c2
-#  define C3(i) c3
-#  define C4(i) c4
-#  define C5(i) c5
-#  define C6(i) c6
-#else
-#   define DX(i) dx(i)
-#   define DY(i) dy(i)
-#   define DZ(i) dz(i)
-#  define DXI(i) dxi(i)
-#  define C1(i) c1(i)
-#  define C2(i) c2(i)
-#  define C3(i) c3(i)
-#  define C4(i) c4(i)
-#  define C5(i) c5(i)
-#  define C6(i) c6(i)
 #endif

@@ -52,7 +52,7 @@ int EnzoDescr::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
     MinimumSupportEnergyCoefficient =
       GravitationalConstant/(4.0*pi) / (pi * (Gamma*(Gamma-1.0))) *
       CosmoFactor * MinimumPressureSupportParameter *
-      CELLWIDTH(0,0) * CELLWIDTH(0,0);
+      CellWidth[0] * CellWidth[0];
  
  
     /* PPM: set GE. */

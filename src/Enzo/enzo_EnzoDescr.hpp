@@ -11,6 +11,15 @@
 /// @todo     Decouple block-dependent and block-independent attributes
 /// @brief    [\ref Enzo] Interface for the Enzo descriptor class
 
+enum bc_enum 
+{ // explicitly enumerated to match what Enzo expects
+  bc_unknown    = 0, 
+  bc_reflecting = 1, 
+  bc_outflow    = 2, 
+  bc_inflow     = 3, 
+  bc_periodic   = 4 
+};
+
 struct fluxes
 {
   long_int LeftFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
@@ -192,11 +201,7 @@ public: // PUBLIC ATTRIBUTES (!!)
   int GridStartIndex[MAX_DIMENSION]; // starting index of the active region
   int GridEndIndex[MAX_DIMENSION]; // stoping index of the active region
   ENZO_FLOAT GridLeftEdge[MAX_DIMENSION]; // starting pos (active problem space)
-#ifdef CONFIG_SCALAR_CELLWIDTH
   ENZO_FLOAT CellWidth[MAX_DIMENSION];
-#else
-  ENZO_FLOAT *CellWidth[MAX_DIMENSION];
-#endif
   int ghost_depth[MAX_DIMENSION];
 
   // Fields
@@ -211,14 +216,6 @@ public: // PUBLIC ATTRIBUTES (!!)
   int  BoundaryRank;
   int  BoundaryDimension[MAX_DIMENSION];
   int  BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
-  enum bc_enum 
-    { // explicitly enumerated to match what Enzo expects
-      bc_unknown    = 0, 
-      bc_reflecting = 1, 
-      bc_outflow    = 2, 
-      bc_inflow     = 3, 
-      bc_periodic   = 4 
-    };
   bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
   float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
 

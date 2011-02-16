@@ -17,31 +17,9 @@ class EnzoMethodPpm : public Hyperbolic {
 
 public: // interface
 
-  EnzoMethodPpm(Monitor    * monitor,
-		Parameters * parameters,
-		EnzoDescr  * enzo):
-    Hyperbolic(monitor,parameters),
-    enzo_(enzo)
-  {};
+  EnzoMethodPpm(Parameters * parameters,
+		EnzoDescr  * enzo);
 
-  /// Perform any method-specific initialization
-
-  void initialize (DataDescr * data_descr) throw();
-
-  /// Perform any method-specific finalizations steps, e.g. to
-  /// deallocate any dynamically-allocated memory
-
-  void finalize (DataDescr * data_descr) throw();
-
-  /// Initialize PPM variable that may change.  Called once per
-  /// block per timestep.
-
-  void initialize_block (DataBlock * data_block) throw();
-
-  /// Finalize PPM after advancing a block a timestep, e.g. to deallocate
-  /// any dynamically-allocated variables
-
-  void finalize_block (DataBlock * data_block) throw();
   /// Apply the method to advance a block one timestep 
 
   void compute_block(DataBlock * data_block,

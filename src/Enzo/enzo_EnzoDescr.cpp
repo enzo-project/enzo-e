@@ -531,19 +531,8 @@ void EnzoDescr::write(FILE * fp) throw ()
   fprintf (fp,"EnzoDescr: GridLeftEdge %g %g %g\n",
 	   GridLeftEdge[0],GridLeftEdge[1],GridLeftEdge[2]);
 
-#ifdef CONFIG_SCALAR_CELLWIDTH
   fprintf (fp,"EnzoDescr: CellWidth %g %g %g\n", 
 	   CellWidth[0], CellWidth[1], CellWidth[2] );
-#else
-  fprintf (fp,"EnzoDescr: CellWidth %p %p %p\n", 
-	   CellWidth[0], CellWidth[1], CellWidth[2] );
-  if (CellWidth[0] != NULL) 
-    fprintf (fp,"EnzoDescr: CellWidth[0][0] %g\n", CellWidth[0][0]);
-  if (CellWidth[1] != NULL) 
-    fprintf (fp,"EnzoDescr: CellWidth[1][0] %g\n", CellWidth[1][0]);
-  if (CellWidth[2] != NULL) 
-    fprintf (fp,"EnzoDescr: CellWidth[2][0] %g\n", CellWidth[2][0]);
-#endif
 
   fprintf (fp,"EnzoDescr: ghost %d %d %d\n",
 	   ghost_depth[0],ghost_depth[1],ghost_depth[2]);

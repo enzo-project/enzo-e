@@ -53,7 +53,7 @@ c
 c  argument declarations
 c
       integer idim, i1, i2, iflatten, isteep
-      real C1(idim), C2(idim), C3(idim), C4(idim), C5(idim), C6(idim),
+      real c1,c2,c3,c4,c5,c6,
      &     char1(idim), char2(idim), c0(idim),
      &     qla(idim), qra(idim), ql0(idim), qr0(idim)
       real qslice(idim), steepen(idim), flatten(idim)
@@ -90,7 +90,7 @@ c
       do i = i1-2, i2+2
          qplus = qslice(i+1)-qslice(i  )
          qmnus = qslice(i  )-qslice(i-1)
-         dq(i) = C1(i)*qplus + C2(i)*qmnus
+         dq(i) = c1*qplus + c2*qmnus
          temp1 = min(abs(dq(i)), 2.0*abs(qmnus), 2.0*abs(qplus))
          if (qplus*qmnus .gt. 0) then
             dq(i) = temp1*sign(1.0, dq(i))
@@ -102,8 +102,8 @@ c
 c     Construct left and right values (eqn 1.6)
 c
       do i = i1-1, i2+2
-         ql(i) = C3(i)*qslice(i-1) + C4(i)*qslice(i) +
-     &           C5(i)*    dq(i-1) + C6(i)*dq(i)
+         ql(i) = c3*qslice(i-1) + c4*qslice(i) +
+     &           c5*    dq(i-1) + c6*dq(i)
          qr(i-1) = ql(i)
       enddo
 c

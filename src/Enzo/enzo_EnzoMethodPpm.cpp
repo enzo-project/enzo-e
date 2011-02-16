@@ -12,55 +12,21 @@
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPpm::initialize (DataDescr * data_descr) throw()
+EnzoMethodPpm::EnzoMethodPpm 
+(
+ Parameters * parameters,
+ EnzoDescr * enzo
+ )
+  : Hyperbolic(parameters),
+    enzo_(enzo)
 {
 
-  // Specify arguments
+  parameters->set_current_group("Method","ppm");
 
-//   add_argument_(argument_field,"density",        access_read_write,data_descr);
-//   add_argument_(argument_field,"total_energy",	 access_read_write,data_descr);
-//   add_argument_(argument_field,"internal_energy",access_read_write,data_descr);
+  enzo_->PPMFlatteningParameter = parameters->value_logical("flattening",true);
+  enzo_->PPMDiffusionParameter  = parameters->value_logical("diffusion",true);
+  enzo_->PPMSteepeningParameter = parameters->value_logical("steepening",true);
 
-//   // (get GridRank to only add required velocity fields)
-
-//   Parameters * parameters = global_->parameters();
-//   parameters->set_current_group("Physics");
-//   enzo_->GridRank = parameters->value_integer ("dimensions",0);
-
-//   if (enzo_->GridRank >= 1) {
-//     add_argument_(argument_field, "velocity_x", access_read_write, data_descr);
-//   }
-//   if (enzo_->GridRank >= 2) {  
-//     add_argument_(argument_field, "velocity_y", access_read_write, data_descr);
-//   }
-//   if (enzo_->GridRank >= 3) {
-//     add_argument_(argument_field, "velocity_z", access_read_write, data_descr);
-//   }
-
-  parameters_->set_current_group("Method","ppm");
-
-  enzo_->PPMFlatteningParameter = parameters_->value_logical("flattening",true);
-  enzo_->PPMDiffusionParameter  = parameters_->value_logical("diffusion",true);
-  enzo_->PPMSteepeningParameter = parameters_->value_logical("steepening",true);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodPpm::finalize ( DataDescr * data_descr ) throw ()
-{
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodPpm::initialize_block ( DataBlock * data_block ) throw ()
-{
-
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodPpm::finalize_block ( DataBlock * data_block ) throw ()
-{
 }
 
 //----------------------------------------------------------------------

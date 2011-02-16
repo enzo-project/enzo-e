@@ -123,7 +123,7 @@ c  argument declarations
 c
       integer dimx, dimy, dimz, i1, i2, idiff, idim, idir, iflatten, 
      &        j1, j2, jdim, k, kdim, nzz
-      real    gamma, dt, DX(idim), DY(jdim), DZ(kdim)
+      real    gamma, dt, dx, dy, dz
       real    dslice(idim,jdim), eslice(idim,jdim), uslice(idim,jdim),
      &        diffcoef(idim,jdim), flatten(idim,jdim), pslice(idim,jdim)
       real    v(dimx,dimy,dimz), w(dimx,dimy,dimz)
@@ -383,15 +383,15 @@ c
 c
             if (nyz.gt.1 .and. lj1) then
                do i=i1, i2+1
-                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(DX(i)+DX(i-1))
-     &                 /   (0.5*(DY(j+1)+DY(j-1)) + DY(j)))*vdiff1(i)
+                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(dx+dx)
+     &                 /   (0.5*(dy+dy) + dy))*vdiff1(i)
                end do
             endif
 c     
             if (nzz.gt.1 .and. lk1) then
                do i=i1, i2+1
-                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(DX(i)+DX(i-1))
-     &                 /   (0.5*(DZ(k+1)+DZ(k-1)) + DZ(k)))*wdiff1(i)
+                  diffcoef(i,j) = diffcoef(i,j) + (0.25*(dx+dx)
+     &                 /   (0.5*(dz+dz) + dz))*wdiff1(i)
                end do
             endif
 c     
@@ -575,16 +575,16 @@ c
             
             if (nyz.ne.1 .and. lj2) then
                do i=i1-1, i2+1
-                  qa = 0.5*(0.5*(DX(i+1)+DX(i-2))+DX(i)+DX(i-1))
-     &                 / (0.5*(DY(j+2)+DY(j-2)) + DY(j+1)+DY(j)+DY(j-1))
+                  qa = 0.5*(0.5*(dx+dx)+dx+dx)
+     &                 / (0.5*(dy+dy) + dy+dy+dy)
                   difftemp(i) = difftemp(i) + qa*vdiff2(i)
                end do
             end if
 
             if (nzz.ne.1 .and. lk2) then
                do i=i1-1, i2+1
-                  qb = 0.5*(0.5*(DX(i+1)+DX(i-2))+DX(i)+DX(i-1))
-     &                 / (0.5*(DZ(k+2)+DZ(k-2)) + DZ(k+1)+DZ(k)+DZ(k-1))
+                  qb = 0.5*(0.5*(dx+dx)+dx+dx)
+     &                 / (0.5*(dz+dz) + dz+dz+dz)
                   difftemp(i) = difftemp(i) + qb*wdiff2(i)
                end do
             end if
@@ -603,7 +603,7 @@ c
      &              max(difftemp(i-1),difftemp(i),difftemp(i+1)),
      &              (nu2 + nu3*max(sigma(i-1)*kappa(i-1)**2
      &              ,              sigma(i  )*kappa(i  )**2 ))
-     &              * DX(i+1)*s/dt)
+     &              * dx*s/dt)
 
             end do
 

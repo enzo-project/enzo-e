@@ -122,7 +122,7 @@ c
       real    dt, eta1, eta2, gamma, pmin
       real    d(in,jn,kn), e(in,jn,kn), u(in,jn,kn), v(in,jn,kn), 
      &        w(in,jn,kn),ge(in,jn,kn), gr_acc(in,jn,kn),
-     &        DX(in), DY(jn), DZ(kn)
+     &        dx,dy,dz
       integer fistart(nsubgrids*3), fiend(nsubgrids*3),
      &        fjstart(nsubgrids*3), fjend(nsubgrids*3), 
      &        lface(nsubgrids*3), rface(nsubgrids*3)

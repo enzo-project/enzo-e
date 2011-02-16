@@ -41,10 +41,9 @@ void EnzoStopping::update_block (DataBlock * block) throw()
 
 //----------------------------------------------------------------------
 
-bool EnzoStopping::is_done () throw()
+bool EnzoStopping::complete () throw()
 {
-  TRACE("EnzoStopping::is_done()");
-  ASSERT("EnzoStopping::is_done",
+  ASSERT("EnzoStopping::complete",
 	 "Neither Stopping::time_stop nor Stopping::cycle_stop initialized",
 	 time_stop_ != -1.0 || cycle_stop_ != -1);
   return 

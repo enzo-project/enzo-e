@@ -4,12 +4,16 @@
 
 Import('env')
 Import('parallel_type')
+Import('use_papi')
 
 #------------------------------
 # DEPENDENCIES
 #------------------------------
 
 components = ['error','parameters','memory','enzo','parallel','method','enzo-ppm','mesh', 'field','monitor','cello']
+
+if (use_papi):
+	components = components + ['papi','pfm']
 
 libraries = ['png','$FORTRANLIBS']
 

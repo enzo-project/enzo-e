@@ -71,6 +71,12 @@ private: // functions
   /// Finalize a block after advancing a timestep
   void finalize_block_(DataBlock * data_block) throw ();
 
+  /// Output data
+  void output_images_( DataBlock * data_block,
+		       const char * file_format,
+		       int cycle,
+		       int cycle_skip=1) throw ();
+
 private: // attributes
 
   EnzoDescr * enzo_;

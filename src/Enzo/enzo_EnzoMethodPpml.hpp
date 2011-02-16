@@ -18,10 +18,9 @@ class EnzoMethodPpml : public Hyperbolic {
 public: // interface
 
 /// Creae a new EnzoMethodPpml object
-  EnzoMethodPpml(Monitor    * monitor,
-		 Parameters * parameters,
+  EnzoMethodPpml(Parameters * parameters,
 		 EnzoDescr * enzo)
-    : Hyperbolic (monitor,parameters),
+    : Hyperbolic (parameters),
       enzo_(enzo)
   {};
 

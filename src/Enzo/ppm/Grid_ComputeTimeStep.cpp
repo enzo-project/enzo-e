@@ -92,11 +92,7 @@ float EnzoDescr::ComputeTimeStep()
                           GridStartIndex, GridEndIndex,
                                GridStartIndex+1, GridEndIndex+1,
                                GridStartIndex+2, GridEndIndex+2,
-#ifdef CONFIG_SCALAR_CELLWIDTH
 			       &CellWidth[0], &CellWidth[1], &CellWidth[2],
-#else
-			       CellWidth[0], CellWidth[1], CellWidth[2],
-#endif
                                &Gamma, &PressureFree, &afloat,
                           BaryonField[DensNum], pressure_field,
                                BaryonField[Vel1Num], BaryonField[Vel2Num],
@@ -119,7 +115,7 @@ float EnzoDescr::ComputeTimeStep()
 //     /* Compute dt constraint from particle velocities. */
  
 //     for (dim = 0; dim < GridRank; dim++) {
-//       float dCell = CellWidth[dim][0]*a;
+//       float dCell = CellWidth[dim]*a;
 //       for (i = 0; i < NumberOfParticles; i++) {
 //         dtTemp = dCell/MAX(fabs(ParticleVelocity[dim][i]), tiny_number);
 // 	dtParticles = MIN(dtParticles, dtTemp);
@@ -146,7 +142,7 @@ float EnzoDescr::ComputeTimeStep()
 //     for (dim = 0; dim < GridRank; dim++)
 //       if (AccelerationField[dim])
 // 	for (i = 0; i < size; i++) {
-// 	  dtTemp = sqrt(CellWidth[dim][0]/
+// 	  dtTemp = sqrt(CellWidth[dim]/
 // 			fabs(AccelerationField[dim][i])+tiny_number);
 // 	  dtAcceleration = MIN(dtAcceleration, dtTemp);
 // 	}

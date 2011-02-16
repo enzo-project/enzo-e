@@ -101,6 +101,12 @@ public: // interface
   /// Refresh ghost zones on an internal face
   void refresh_ghosts() throw();
 
+  /// Set whether given face is on the domain boundary
+  void set_boundary_face(face_enum face, bool value = false) throw();
+
+  /// Whether given face is on the domain boundary
+  bool boundary_face(face_enum face) throw();
+
   /// Enforce boundary conditions on a boundary face
   void enforce_boundary(enum boundary_enum boundary, 
 			face_enum face = face_all) throw();
@@ -213,6 +219,9 @@ private: // attributes
   /// Whether ghost values are allocated or not (make [3] for
   /// directionally split?)
   bool ghosts_allocated_;
+
+  /// Whether given face is on the domain boundary
+  bool boundary_face_[3*2];
 
 };   
 

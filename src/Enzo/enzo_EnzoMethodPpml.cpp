@@ -14,56 +14,40 @@
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPpml::initialize(DataDescr * data_descr) throw()
-{
-  // Specify arguments
+// void EnzoMethodPpml::initialize(DataDescr * data_descr) throw()
+// {
+//   // Specify arguments
 
-  add_argument_(argument_field, "density",    access_read_write);
-  add_argument_(argument_field, "velocity_x", access_read_write);
-  add_argument_(argument_field, "velocity_y", access_read_write);
-  add_argument_(argument_field, "velocity_z", access_read_write);
-  add_argument_(argument_field, "magnetic_x", access_read_write);
-  add_argument_(argument_field, "magnetic_y", access_read_write);
-  add_argument_(argument_field, "magnetic_z", access_read_write);
+//   add_argument_(argument_field, "density",    access_read_write);
+//   add_argument_(argument_field, "velocity_x", access_read_write);
+//   add_argument_(argument_field, "velocity_y", access_read_write);
+//   add_argument_(argument_field, "velocity_z", access_read_write);
+//   add_argument_(argument_field, "magnetic_x", access_read_write);
+//   add_argument_(argument_field, "magnetic_y", access_read_write);
+//   add_argument_(argument_field, "magnetic_z", access_read_write);
 
-  add_argument_(argument_field, "velocity_x_face_x", access_read_write);
-  add_argument_(argument_field, "velocity_y_face_x", access_read_write);
-  add_argument_(argument_field, "velocity_z_face_x", access_read_write);
-  add_argument_(argument_field, "magnetic_x_face_x", access_read_write);
-  add_argument_(argument_field, "magnetic_y_face_x", access_read_write);
-  add_argument_(argument_field, "magnetic_z_face_x", access_read_write);
+//   add_argument_(argument_field, "velocity_x_face_x", access_read_write);
+//   add_argument_(argument_field, "velocity_y_face_x", access_read_write);
+//   add_argument_(argument_field, "velocity_z_face_x", access_read_write);
+//   add_argument_(argument_field, "magnetic_x_face_x", access_read_write);
+//   add_argument_(argument_field, "magnetic_y_face_x", access_read_write);
+//   add_argument_(argument_field, "magnetic_z_face_x", access_read_write);
 
-  add_argument_(argument_field, "velocity_x_face_y", access_read_write);
-  add_argument_(argument_field, "velocity_y_face_y", access_read_write);
-  add_argument_(argument_field, "velocity_z_face_y", access_read_write);
-  add_argument_(argument_field, "magnetic_x_face_y", access_read_write);
-  add_argument_(argument_field, "magnetic_y_face_y", access_read_write);
-  add_argument_(argument_field, "magnetic_z_face_y", access_read_write);
+//   add_argument_(argument_field, "velocity_x_face_y", access_read_write);
+//   add_argument_(argument_field, "velocity_y_face_y", access_read_write);
+//   add_argument_(argument_field, "velocity_z_face_y", access_read_write);
+//   add_argument_(argument_field, "magnetic_x_face_y", access_read_write);
+//   add_argument_(argument_field, "magnetic_y_face_y", access_read_write);
+//   add_argument_(argument_field, "magnetic_z_face_y", access_read_write);
 
-  add_argument_(argument_field, "velocity_x_face_z", access_read_write);
-  add_argument_(argument_field, "velocity_y_face_z", access_read_write);
-  add_argument_(argument_field, "velocity_z_face_z", access_read_write);
-  add_argument_(argument_field, "magnetic_x_face_z", access_read_write);
-  add_argument_(argument_field, "magnetic_y_face_z", access_read_write);
-  add_argument_(argument_field, "magnetic_z_face_z", access_read_write);
+//   add_argument_(argument_field, "velocity_x_face_z", access_read_write);
+//   add_argument_(argument_field, "velocity_y_face_z", access_read_write);
+//   add_argument_(argument_field, "velocity_z_face_z", access_read_write);
+//   add_argument_(argument_field, "magnetic_x_face_z", access_read_write);
+//   add_argument_(argument_field, "magnetic_y_face_z", access_read_write);
+//   add_argument_(argument_field, "magnetic_z_face_z", access_read_write);
 
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodPpml::finalize(DataDescr * data_descr) throw()
-{}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodPpml::initialize_block (DataBlock * data_block) throw()
-{
-}
-
-//----------------------------------------------------------------------
-
-void EnzoMethodPpml::finalize_block (DataBlock * data_block) throw()
-{}
+// }
 
 //----------------------------------------------------------------------
 

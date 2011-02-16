@@ -75,10 +75,10 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
 
   // Initialize color field
 
-  NumberOfColours = 1;
-  ColourNum       = field_color;
-  colourpt        = BaryonField[field_color];
-  coloff[0]       = 0;
+  //  NumberOfColours = 1;
+  //  ColourNum       = field_color;
+  //  colourpt        = BaryonField[field_color];
+  //  coloff[0]       = 0;
 
   /* Add metallicity as a colour variable. */
 
@@ -154,7 +154,6 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
       for (j = 0; j < GridRank; j++)
 	size *= SubgridFluxes[i]->LeftFluxEndGlobalIndex[dim][j] -
 	  SubgridFluxes[i]->LeftFluxStartGlobalIndex[dim][j] + 1;
-      printf ("size = %d\n",size);
 
       /* set unused dims (for the solver, which is hardwired for 3d). */
 
@@ -201,7 +200,7 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
 
   for (dim = 0; dim < GridRank; dim++)
     GridGlobalStart[dim] =
-      NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CELLWIDTH(dim,0)) -
+      NINT((GridLeftEdge[dim] - DomainLeftEdge[dim])/CellWidth[dim]) -
       GridStartIndex[dim];
 
   /* fix grid quantities so they are defined to at least 3 dims */
@@ -346,7 +345,6 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
 
   /* Create a cell width array to pass (and convert to absolute coords). */
 
-#ifdef CONFIG_SCALAR_CELLWIDTH
   float CellWidthTemp[MAX_DIMENSION];
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
     if (dim < GridRank)
@@ -354,17 +352,6 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
     else
       CellWidthTemp[dim] = 1.0;
   }
-#else
-  float *CellWidthTemp[MAX_DIMENSION];
-  for (dim = 0; dim < MAX_DIMENSION; dim++) {
-    CellWidthTemp[dim] = new float[GridDimension[dim]];
-    for (i = 0; i < GridDimension[dim]; i++)
-      if (dim < GridRank)
-	CellWidthTemp[dim][i] = float(a*CellWidth[dim][i]);
-      else
-	CellWidthTemp[dim][i] = 1.0;
-  }
-#endif
 
 
   /* call a Fortran routine to actually compute the hydro equations
@@ -426,11 +413,7 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
      AccelerationField[1],
      AccelerationField[2],
      &Gamma, &dt, &CycleNumber,
-#ifdef CONFIG_SCALAR_CELLWIDTH
      &CellWidthTemp[0], &CellWidthTemp[1], &CellWidthTemp[2],
-#else
-     CellWidthTemp[0], CellWidthTemp[1], CellWidthTemp[2],
-#endif
      &GridRank, &GridDimension[0], &GridDimension[1],
      &GridDimension[2], GridStartIndex, GridEndIndex,
      &PPMFlatteningParameter,
@@ -458,12 +441,6 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
     delete SubgridFluxes[i];
   }
   delete [] SubgridFluxes;
-
-#ifdef CONFIG_SCALAR_CELLWIDTH
-#else
-  for (dim = 0; dim < MAX_DIMENSION; dim++)
-    delete [] CellWidthTemp[dim];
-#endif
 
   return ENZO_SUCCESS;
 

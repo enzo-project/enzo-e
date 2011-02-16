@@ -433,7 +433,7 @@ void Simulation::initialize_method_() throw()
     if (method) {
 
       method_list_.push_back(method); 
-      method->initialize(data_descr_);
+
     } else {
       char error_message[ERROR_LENGTH];
       sprintf (error_message,"Unknown Method %s",method_name.c_str());
