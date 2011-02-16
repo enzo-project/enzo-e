@@ -96,6 +96,8 @@ PARALLEL_MAIN_BEGIN
 
   simulation.initialize(fp);
 
+  simulation.run();
+
   //==================================================
   // FINALIZE
   //==================================================
