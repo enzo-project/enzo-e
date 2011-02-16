@@ -165,11 +165,8 @@ private: // functions
     case 4:  return ( 2 ); break;
     case 8:  return ( 3 ); break;
     case 16: return ( 4 ); break;
-    default:
-      fprintf (stderr,"Invalid k=%d for Node3K\n",k_);
-      exit(1);
-      break;
     }
+    return (0);
   }
 
   /// Allocate neighbor pointers
