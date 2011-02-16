@@ -98,6 +98,12 @@ if (ok == 0):
 #--------------------------------------------------
 if (platform == 'linux-serial'):
 #--------------------------------------------------
+
+   flags_opt = '-g -O3 '
+   flags_prec = '-m128bit-long-double'
+   flags_warn = '-Wall'
+   flags_cxx = flags_opt + ' ' + flags_prec + ' ' + flags_warn
+
    parallel_run = ""
    parallel_type = "serial"
    serial_run   = ""
@@ -105,12 +111,12 @@ if (platform == 'linux-serial'):
       CC          = 'gcc',	
       CPPDEFINES  = defines,
       CPPPATH     = '#/include',
-      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
-      CFLAGS      = '-Wall -g  -m128bit-long-double',
+      CXXFLAGS    = flags_cxx,
+      CFLAGS      = flags_cxx,
       CXX         = 'g++',	
       ENV         = os.environ,
       FORTRAN     = 'gfortran',
-      FORTRANFLAGS = '-O3',
+      FORTRANFLAGS = flags_cxx,
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
       LIBPATH     = '#/lib',
