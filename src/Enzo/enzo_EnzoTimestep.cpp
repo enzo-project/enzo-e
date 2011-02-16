@@ -44,7 +44,7 @@ double EnzoTimestep::compute ( DataBlock * data_block ) throw()
   float afloat = float(a);
   //  float dt, dtTemp;
   float dtBaryons      = HUGE_VALF;
-  float dtViscous      = HUGE_VALF;
+  //  float dtViscous      = HUGE_VALF;
   //  float dtParticles    = HUGE_VALF;
   float dtExpansion    = HUGE_VALF;
   //  float dtAcceleration = HUGE_VALF;
@@ -135,7 +135,7 @@ double EnzoTimestep::compute ( DataBlock * data_block ) throw()
 			velocity_x_field, 
 			velocity_y_field, 
 			velocity_z_field, 
-			&dtBaryons, &dtViscous);
+			&dtBaryons);
 
   dtBaryons *= enzo_->CourantSafetyNumber;
  

@@ -51,7 +51,8 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
   /* If multi-species being used, then treat them as colour variables
      (note: the solver has been modified to treat these as density vars). */
 
-  int NumberOfColours = 0, ColourNum;
+  int NumberOfColours = 0;
+  int ColourNum = -1;
 
   if (MultiSpecies > 0) {
 

@@ -24,29 +24,42 @@ void FileIfrit::read_bin
   ASSERT ("FileIfrit::read_bin","int or float size in unexpected",
 	  sizeof(int)==4 && sizeof(float)==4);
   int bound;
-  // read header
-  // @@@ WARNING: ignoring return value
-  fread (&bound,4,1,fp);
+
+  // Read header
+
+  ASSERT("FileIfrit::read_bin","fread error",
+	 fread (&bound,4,1,fp));
+
   if (bound != 12) WARNING("FileIfrit::read_bin","incorrect format");
-  // @@@ WARNING: ignoring return value
-  fread (pnx,4,1,fp);
-  // @@@ WARNING: ignoring return value
-  fread (pny,4,1,fp);
-  // @@@ WARNING: ignoring return value
-  fread (pnz,4,1,fp);
-  // @@@ WARNING: ignoring return value
-  fread (&bound,4,1,fp);
+
+  ASSERT("FileIfrit::read_bin","fread error",
+	 fread (pnx,4,1,fp));
+
+  ASSERT("FileIfrit::read_bin","fread error",
+	 fread (pny,4,1,fp));
+
+  ASSERT("FileIfrit::read_bin","fread error",
+	 fread (pnz,4,1,fp));
+
+  ASSERT("FileIfrit::read_bin","fread error",
+	 fread (&bound,4,1,fp))
+;
   if (bound != 12) WARNING("FileIfrit::read_bin","incorrect format");
 
   // Read scalar field
   int n = (*pnx)*(*pny)*(*pnz);
-  // @@@ WARNING: ignoring return value
-  fread (&bound,4,1,fp);
+
+  ASSERT("FileIfrit::read_bin","fread error",
+	 fread (&bound,4,1,fp));
+
   if (bound != 4*n) WARNING("FileIfrit::read_bin","incorrect format");
-  // @@@ WARNING: ignoring return value
-  fread (buffer,4,(*pnx)*(*pny)*(*pnz),fp);
-  // @@@ WARNING: ignoring return value
-  fread (&bound,4,1,fp);
+
+  ASSERT("FileIfrit::read_bin","fread error",
+	 fread (buffer,4,(*pnx)*(*pny)*(*pnz),fp));
+
+  ASSERT("FileIfrit::read_bin","fread error",
+	 fread (&bound,4,1,fp));
+
   if (bound != 4*n) WARNING("FileIfrit::read_bin","incorrect format");
 
   fclose (fp);

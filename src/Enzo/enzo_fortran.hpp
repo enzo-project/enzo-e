@@ -4,7 +4,7 @@ extern "C" void FORTRAN_NAME(calc_dt)
    ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz, 
    float *gamma, int *ipfree, float *aye,
    float *d, float *p, float *u, float *v, float *w,
-   float *dt, float *dtviscous);
+   float *dt);
  
  
 extern "C" void FORTRAN_NAME(calc_dt_ppml)

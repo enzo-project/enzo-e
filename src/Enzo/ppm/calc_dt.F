@@ -9,7 +9,7 @@ c
       subroutine calc_dt(rank, idim, jdim, kdim, 
      &                   i1, i2, j1, j2, k1, k2, 
      &                   dx, dy, dz, gamma, ipfree, aye,
-     &                   d, p, u, v, w, dt, dtviscous)
+     &                   d, p, u, v, w, dt)
 c
 c  COMPUTES TIME STEP FOR NEXT CYCLE
 c
@@ -36,7 +36,6 @@ c    ipfree  - pressure free flag (1 = on, 0 = off)
 c    aye     - expansion factor (or 1 if not using comoving coordinates)
 c    d,p     - density and pressure fields
 c    u,v,w   - velocity fields (x,y,z)
-c    dtviscous - viscous time for stability (NOT ACCESSED)
 c
 c  OUTPUTS:
 c    dt      - minimum allowed dt (without Courant safety factor)
@@ -51,7 +50,7 @@ c     Arguments
 c
       integer idim, jdim, kdim, i1, i2, j1, j2, k1, k2, rank, ipfree
       REALSUB dx, dy, dz
-      real    dt, gamma, aye, dtviscous
+      real    dt, gamma, aye
       real    d(idim,jdim,kdim), p(idim,jdim,kdim), u(idim,jdim,kdim),
      &        v(idim,jdim,kdim), w(idim,jdim,kdim)
 c
@@ -79,8 +78,6 @@ C      print*, 'u(i2+1,j2+1,1) = ', u(i2+1,j2+1,1)
 C      print*, 'v(i1+1,j1+1,1) = ', v(i1+1,j1+1,1)
 C      print*, 'v(i2+1,j2+1,1) = ', v(i2+1,j2+1,1)
 C      print*, dt
-C      print*, dtviscous
-
 
       dmax=-huge
       pmax=-huge
@@ -177,7 +174,7 @@ c     &                    dz*aye/(cs + abs(w(i,j,k))))
                   dt = min(dt, dt1)
 !                  if (dt1 .lt. 1.0e-5) write(6,1000) dt1,d(i,j,k),
 !    &                  p(i,j,k),u(i,j,k),v(i,j,k),w(i,j,k)
- 1000             format('calc_dt (small dt): dt,d,p,uvw=',1p,6e12.3)
+! 1000             format('calc_dt (small dt): dt,d,p,uvw=',1p,6e12.3)
                enddo
 c
             enddo

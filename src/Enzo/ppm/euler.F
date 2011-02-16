@@ -106,7 +106,7 @@ c     NOT ACCESSED: alpha, dele, delu, eta2, uadvect, uleft, uright
 c     RAREFACTION1 only: cb
 c     GRAVITY_SECOND_ORDER_CORRECTION only: dadx, dddx
 c     UNUSED only: eta1
-      real      alpha      ,    c0(ijkn),    cb(ijkn),  cbar(ijkn),
+      real         c0(ijkn),    cb,  cbar(ijkn),
      &             d0(ijkn),    db(ijkn),  dbar(ijkn),   dnu(ijkn),
      &            dub(ijkn),  duub(ijkn),  duvb(ijkn),  duwb(ijkn),
      &           dueb(ijkn),    eb(ijkn),    l0(ijkn),  lbar(ijkn),
@@ -165,20 +165,6 @@ c             geb(i) = gers(i,j)
 c          write(24,*) i, u0(i), uls(i,j), urs(i,j), c0(i)
        enddo
 c
-c      Repeat for colour variables (now moved below)
-c
-#ifdef UNUSED
-       do n=1,ncolor
-          do i=i1, i2+1
-             if (sn(i) .lt. 0.0) then
-                colb(i,n) = colls(i,j,n)
-             else
-                colb(i,n) = colrs(i,j,n)
-             endif
-          enddo
-       enddo
-#endif
-c
 c  Compute equivalent bar (inside shock & rarefaction) values for density
 c    and sound speed
 c
@@ -202,40 +188,6 @@ c            l0(i)   = ubar(i,j)*sn(i) + z0(i)/d0(i)
          endif
 c
 c  Compute values for inside a rarefaction fan
-c     (method described in Colella, 1982)
-c
-#define RAREFACTION2 //AK
-c
-#ifdef RAREFACTION0
-c
-c  (quasi-)isothermal hydrodynamics => use RAREFACTION0
-c  sound speed is assumed to be 1.0 in expression for db(i)
-c  (see eqs (3.11) - (3.16) in Balsara (1994) ApJ 420, p. 200)
-c
-         ub(i)    = -cbar(i)*sn(i)
-         db(i)    = d0(i)*exp(-sn(i)*u0(i) - 1.0)
-         pb(i)    = db(i)*cbar(i)**2
-c
-#endif /* RAREFACTION0 */
-c
-#ifdef RAREFACTION1
-c
-c  Compute values for inside a rarefaction fan
-c  (method described in Colella (1982) SIAM J Sci Stat Comp 3, p. 107)
-c
-         cb(i)    = (-sn(i)*ubar(i,j) + 2.0*cbar(i)/(gamma - 1.0))*qb
-         ub(i)    = -cb(i)*sn(i)
-c         alpha    = (c0(i)**2 - cb(i)**2)/(c0(i)**2 + cb(i)**2)/
-c     &              (gamma - 1.0)
-c         db(i)    = d0(i)*(1.0 - alpha)/(1.0 + alpha)
-         db(i)    = d0(i)*(cb(i)/c0(i))**(2.0/(gamma - 1.0)) !AK
-         pb(i)    = db(i)*cb(i)**2/gamma
-c
-#endif /* RAREFACTION1 */
-c
-#ifdef RAREFACTION2
-c
-c  Compute values for inside a rarefaction fan
 c     (linear interpolation between end states, as suggested in PPM ref)
 c
          frac     = l0(i) - lbar(i)
@@ -246,8 +198,6 @@ c
          pb(i)    = p0(i)*frac + pbar(i,j)*(1.0 - frac)
          db(i)    = d0(i)*frac + dbar(i  )*(1.0 - frac)
          ub(i)    = u0(i)*frac + ubar(i,j)*(1.0 - frac)
-c
-#endif /* RAREFACTION2 */
 c
        enddo
 c
@@ -275,19 +225,17 @@ c 1000  format('euler: ', 2(i4), 3(e12.4))
 c
        enddo
 c
-#define NO_CAVITATE_AVOID
-#ifdef CAVITATE_AVOID
-       do i=i1, i2+1
-         if (ubar(i,j)*ub(i) .lt. 0.0 .and. 
-     &       -db(i)*ub(i)*dt/dx .gt. dslice(i,j) .or.
-     &        db(i)*ub(i)*dt/dx .gt. dslice(i-1,j)     ) then
-            write(6,1010) i,j,ubar(i,j),ub(i),db(i),
-     &              dslice(i,j),dslice(i-1,j)
- 1010       format('cav:',2i6,8g12.4)
-            ub(i) = 0.0
-         endif
-      enddo
-#endif
+C       do i=i1, i2+1
+C         if (ubar(i,j)*ub(i) .lt. 0.0 .and. 
+C     &       -db(i)*ub(i)*dt/dx .gt. dslice(i,j) .or.
+C     &        db(i)*ub(i)*dt/dx .gt. dslice(i-1,j)     ) then
+C            write(6,1010) i,j,ubar(i,j),ub(i),db(i),
+C     &              dslice(i,j),dslice(i-1,j)
+C 1010       format('cav:',2i6,8g12.4)
+C            ub(i) = 0.0
+C         endif
+C      enddo
+
 c
 c  Collect values of interest depending on which way fluid is flowing
 c     (note: new placement for this - uses ub instead of ubar for consistency)
@@ -322,18 +270,18 @@ c     to assuming that we are outside the shocked region but the flow is
 c     hypersonic so this should be true.  This is inserted because the
 c     mechanism above occasionally fails in hypersonic flows.
 c
-#ifdef UNUSED
-       if (idual .eq. 1) then
-          do i=i1, i2+1
-             if (gamma*pbar(i,j)/min(dls(i,j),drs(i,j)) .lt. 
-     &                                         eta1*ubar(i,j)**2) then
-                 pb(i) = p0(i)
-                 db(i) = d0(i)
-                 ub(i) = u0(i)
-              endif
-           enddo
-        endif
-#endif /* UNUSED */
+
+C       if (idual .eq. 1) then
+C          do i=i1, i2+1
+C             if (gamma*pbar(i,j)/min(dls(i,j),drs(i,j)) .lt. 
+C     &                                         eta1*ubar(i,j)**2) then
+C                 pb(i) = p0(i)
+C                 db(i) = d0(i)
+C                 ub(i) = u0(i)
+C              endif
+C           enddo
+C        endif
+
 c
 c  Calculate total specific energy corresponding to this state
 c     (and the specific gas energy).
@@ -341,7 +289,6 @@ c
        do i=i1, i2+1
          eb(i) = pb(i)/((gamma-1.0)*db(i)) + 
      &           0.5*(ub(i)**2 + vb(i)**2 + wb(i)**2)
-c         geb(i) = pb(i)/((gamma-1.0)*db(i))
        enddo
 c
 c  Compute terms in differenced hydro equations (eq. 3.1)
@@ -352,12 +299,9 @@ c     ...with diffusion
 c
          do i=i1,i2+1
             upb(i)  =  pb(i)*ub(i)
-c
             dub(i)  =  ub(i)*db(i)  !AK
-c
             duub(i) = dub(i)*ub(i) + diffcoef(i,j)*
      &           (dslice(i-1,j)*uslice(i-1,j) - dslice(i,j)*uslice(i,j))
-c
             duvb(i) = dub(i)*vb(i)
             duwb(i) = dub(i)*wb(i)
 c
@@ -628,35 +572,25 @@ c
        if (gravity .eq. 1) then
           do i=i1, i2
 
-#define GRAVITY_METHOD1
-
-#ifdef GRAVITY_METHOD1 /* (right) */
              tempu = uslice(i,j)
              uslice(i,j) = uslice(i,j) + 
-     &                     dt*grslice(i,j)*0.5*(dslice(i,j)/dnu(i)+1.0)
+     &            dt*grslice(i,j)*0.5*(dslice(i,j)/dnu(i)+1.0)
              eold = eslice(i,j)
              eslice(i,j) = eslice(i,j) + (dt*grslice(i,j))*0.5*
-     &                     (uslice(i,j) + uold(i)*dslice(i,j)/dnu(i))
-            if (eslice(i,j) .le. 0) then
-            write(6,*) 'eu1a',i,j,eslice(i,j),
-     &                     dslice(i,j),dnu(i),uslice(i,j),grslice(i,j),
-     &                     dt*grslice(i,j)*0.5*(dslice(i,j)/dnu(i)+1.0),
-     &                     dt*grslice(i,j)*0.5*
-     &                     (uslice(i,j) + uold(i)*dslice(i,j)/dnu(i))
-            write(6,*) 'eu1b', eold, dt, grslice(i,j)
-            write(6,*) 'eu1c', uslice(i,j), uold(i) 
-            write(6,*) 'eu1d', dslice(i,j), dnu(i), tempu
-         endif
+     &            (uslice(i,j) + uold(i)*dslice(i,j)/dnu(i))
+             if (eslice(i,j) .le. 0) then
+                write(6,*) 'eu1a',i,j,eslice(i,j),
+     &               dslice(i,j),dnu(i),uslice(i,j),grslice(i,j),
+     &               dt*grslice(i,j)*0.5*(dslice(i,j)/dnu(i)+1.0),
+     &               dt*grslice(i,j)*0.5*
+     &               (uslice(i,j) + uold(i)*dslice(i,j)/dnu(i))
+                write(6,*) 'eu1b', eold, dt, grslice(i,j)
+                write(6,*) 'eu1c', uslice(i,j), uold(i) 
+                write(6,*) 'eu1d', dslice(i,j), dnu(i), tempu
+             endif
 
-         eslice(i,j) = max(eslice(i,j), tiny)
+             eslice(i,j) = max(eslice(i,j), tiny)
 
-#endif /* GRAVITY_METHOD1 */
-
-#ifdef GRAVITY_METHOD2 /* (wrong) */
-             uslice(i,j) = uslice(i,j) + dt*grslice(i,j)
-             eslice(i,j) = eslice(i,j) + dt*grslice(i,j)*0.5*
-     &                                      (uslice(i,j) + uold(i))
-#endif /* GRAVITY_METHOD2 */
           enddo
        endif
 c

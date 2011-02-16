@@ -96,7 +96,7 @@ float EnzoDescr::ComputeTimeStep()
                                &Gamma, &PressureFree, &afloat,
                           BaryonField[DensNum], pressure_field,
                                BaryonField[Vel1Num], BaryonField[Vel2Num],
-                               BaryonField[Vel3Num], &dtBaryons, &dtViscous);
+                               BaryonField[Vel3Num], &dtBaryons);
  
     /* Clean up */
  
