@@ -45,10 +45,10 @@
 
       fields = [
 	"density",	
-	"total_energy",
-	"internal_energy",
 	"velocity_x",
-	"velocity_y"
+	"velocity_y",
+	"total_energy",
+	"internal_energy"
       ] ;
 
       # List of user-defined groups, which may be accessed by applications
@@ -72,18 +72,6 @@
       # important for performance on e.g. IBM Power architectures
 
       alignment = 8;    
-
-      pressure { 
-
-         # issue an error if the pressure falls below 1.0e-6 anywhere
-         # issue an error if the density goes negative
-
-         minimum  = [1.0e-6, "warning", 0.0, "error"    ];
-
-         # pressure is computed not evolved
-
-         groups = ["computed"];
-      };
 
       density  { 
 
@@ -138,28 +126,25 @@
 
    }
 
-   Initial {
-      fields {
+   Field {
+#       density       { value = [ 0.125, x + y < 0.15 || x + y > 0.45, 
+#                                   1.0                ]; };
+#       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.15 || x + y > 0.45,
+#	                         1.0  / (0.4 * 1.0)   ]; };
 
-         # equivalent to density(x,y) = (x + y < 0.15) ? 0.125 : 1.0
 
-         density  = [ 0.125, x + y < 0.15, 1.0 ];
-         pressure = [ 0.14,  x + y < 0.15, 1.0 ];
-
-         # density = ["initial.hdf5", "Density"]; # read initial density from an hdf5 file
-	 # read density from a PNG image with given scaling of 0<=r,g,b,a <=1
-         # density = ["density-0.png", (r+g+b)*1.4/3.0]; 
-
-         velocity_x = 0.0;
-         velocity_y = 0.0;
-      }
+       density       { value = [ 0.125, x + y < 0.15, 1.0 ]; };
+       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.15,
+	                         1.0  / (0.4 * 1.0)   ]; };
+       velocity_x    { value = [0.0]; };
+       velocity_y    { value = [0.0]; }
    }
 
    Boundary { type = "reflecting" }
 
    Stopping {
       time  = 2.5;
-      cycle = 20000;
+      cycle = 100000;
       # redshift
    }
 

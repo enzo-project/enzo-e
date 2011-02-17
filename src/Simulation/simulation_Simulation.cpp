@@ -393,8 +393,13 @@ void Simulation::initialize_initial_() throw()
   parameters_->set_current_group("Initial");
   //--------------------------------------------------
 
-  std::string name = parameters_->value_string("problem","unknown");
-  initial_ = create_initial_(name);
+  std::string name = parameters_->value_string("problem","default");
+
+  if (name == "default") {
+    initial_ = new InitialDefault(monitor_,parameters_);
+  } else {
+    initial_ = create_initial_(name);
+  }
 }
 
 //----------------------------------------------------------------------

@@ -196,6 +196,9 @@ public: // interface
   /// Return the type of the given parameter
   parameter_enum type(std::string) throw();
 
+  /// Return the type of the given parameter
+  parameter_enum list_type(int, std::string) throw();
+
 private: // functions
 
   /// Read in the next line of the input file

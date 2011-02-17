@@ -99,7 +99,7 @@ if (ok == 0):
 if (platform == 'linux-serial'):
 #--------------------------------------------------
 
-   flags_opt = '-g '
+   flags_opt = '-g -O3'
    flags_prec = '-m128bit-long-double'
    flags_warn = '-Wall'
    flags_cxx = flags_opt + ' ' + flags_prec + ' ' + flags_warn

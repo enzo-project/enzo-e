@@ -75,10 +75,12 @@ void EnzoSimulation::run() throw()
   DataBlock * data_block;
 
   while ((data_block = (DataBlock *) ++itBlocks)) {
-      initialize_block_(data_block);
+
+    initialize_block_(data_block);
 
     initial_->initialize_block(data_block);
-      finalize_block_(data_block);
+
+    finalize_block_(data_block);
 
   }
 
@@ -123,21 +125,6 @@ void EnzoSimulation::run() throw()
 
     }
 
-    //--------------------------------------------------
-    // INITIAL OUTPUT
-    //--------------------------------------------------
-
-  
-     while ((data_block = (DataBlock *) ++itBlocks)) {
-
-       initialize_block_(data_block);
-
-       output_images_(data_block,
-		      "EnzoSimulation-%d.%d.png",enzo_->CycleNumber,0);
-
-       finalize_block_(data_block);
-     }
-
     // Accumulate block timesteps in patch
 
     double dt_patch;
@@ -172,6 +159,9 @@ void EnzoSimulation::run() throw()
 	  (data_block,enzo_->Time,enzo_->dt);
 
       }
+
+      output_images_(data_block,
+		     "EnzoSimulation-%d.%d.png",enzo_->CycleNumber,10);
 
       // Update block dt (before finalize_block)
 

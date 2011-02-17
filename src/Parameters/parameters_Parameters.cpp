@@ -567,6 +567,28 @@ parameter_enum Parameters::type
   return param ? param->type() : parameter_unknown ;
 }
 
+//----------------------------------------------------------------------
+
+parameter_enum Parameters::list_type
+( 
+ int index,
+ std::string  parameter
+ ) throw()
+/// @param   index Index into the list
+/// @param   parameter Parameter name
+/// @return  Return type of the given parameter
+{
+  Param * list = parameter_(parameter);
+  Param * param = NULL;
+  if (list != NULL) {
+    int list_length = list->value_list_->size();
+    if (list != NULL && 0 <= index && index < list_length ) {
+      param =  (*(list->value_list_))[index];
+    }
+  }
+  return param ? param->type() : parameter_unknown ;
+}
+
 //======================================================================
 
 void Parameters::monitor_read_ (std::string parameter,

@@ -8,7 +8,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @todo     Comment Enzo functions / attributes
-/// @todo     Decouple block-dependent and block-independent attributes
+/// @todo     Introduce EnzoBlock for block-dependent attributes
 /// @brief    [\ref Enzo] Interface for the Enzo descriptor class
 
 enum bc_enum 

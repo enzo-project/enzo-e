@@ -73,8 +73,6 @@
 
       alignment = 8;    
 
-      precision = "single";
-
       pressure { 
 
          # issue an error if the pressure falls below 1.0e-6 anywhere
@@ -88,6 +86,8 @@
       };
 
       density  { 
+
+	value = [1.4, x+y<0.3, 1];
 
          # If a method calls the density field "rho" instead of
          # "density" Probably not a good idea to use, but may simplify
