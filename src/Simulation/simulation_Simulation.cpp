@@ -254,7 +254,22 @@ void Simulation::initialize_data_() throw()
     field_descr->set_ghosts(i,gx,gy,gz);
   }
 
+  // Set precision
 
+  std::string precision_str = parameters_->value_string("precision","default");
+
+  precision_enum precision = precision_default;
+
+  if (precision_str == "single")
+    precision = precision_single;
+  else if (precision_str == "double")
+    precision = precision_double;
+  else if (precision_str == "quadruple")
+    precision = precision_quadruple;
+
+  for (i=0; i<field_descr->field_count(); i++) {
+    field_descr->set_precision(i,precision);
+  }
 }
 
 //----------------------------------------------------------------------
