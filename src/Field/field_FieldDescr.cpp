@@ -51,31 +51,7 @@ FieldDescr::~FieldDescr()
 FieldDescr::FieldDescr(const FieldDescr & field_descr) 
   throw()
 {
-  alignment_      = field_descr.alignment_;
-  padding_        = field_descr.padding_;
-  courant_        = field_descr.courant_;
-  field_name_     = field_descr.field_name_;
-  field_id_       = field_descr.field_id_;
-  group_name_     = field_descr.group_name_;
-  group_id_       = field_descr.group_id_;
-  field_in_group_ = field_descr.field_in_group_;
-  precision_      = field_descr.precision_;
-  for (size_t i=0; i<field_descr.centering_.size(); i++) {
-    centering_.push_back(new bool[3]);
-    centering_.at(i)[0] = field_descr.centering_.at(i)[0];
-    centering_.at(i)[1] = field_descr.centering_.at(i)[1];
-    centering_.at(i)[2] = field_descr.centering_.at(i)[2];
-  }
-  for (size_t i=0; i<field_descr.ghosts_.size(); i++) {
-    ghosts_.push_back(new int[3]);
-    ghosts_.at(i)[0] = field_descr.ghosts_.at(i)[0];
-    ghosts_.at(i)[1] = field_descr.ghosts_.at(i)[1];
-    ghosts_.at(i)[2] = field_descr.ghosts_.at(i)[2];
-  }
-  min_value_      = field_descr.min_value_;
-  max_value_      = field_descr.max_value_;
-  min_action_     = field_descr.min_action_;
-  max_action_     = field_descr.max_action_;
+  copy_(field_descr);
 }
 
 //----------------------------------------------------------------------
@@ -83,33 +59,7 @@ FieldDescr::FieldDescr(const FieldDescr & field_descr)
 FieldDescr & FieldDescr::operator= (const FieldDescr & field_descr) 
   throw()
 {
-  alignment_      = field_descr.alignment_;
-  padding_        = field_descr.padding_;
-  courant_        = field_descr.courant_;
-  field_name_     = field_descr.field_name_;
-  field_id_       = field_descr.field_id_;
-  group_name_     = field_descr.group_name_;
-  group_id_       = field_descr.group_id_;
-  field_in_group_ = field_descr.field_in_group_;
-  precision_      = field_descr.precision_;
-  centering_.clear();
-  for (size_t i=0; i<field_descr.centering_.size(); i++) {
-    centering_.push_back(new bool[3]);
-    centering_.at(i)[0] = field_descr.centering_.at(i)[0];
-    centering_.at(i)[1] = field_descr.centering_.at(i)[1];
-    centering_.at(i)[2] = field_descr.centering_.at(i)[2];
-  }
-  ghosts_.clear();
-  for (size_t i=0; i<field_descr.ghosts_.size(); i++) {
-    ghosts_.push_back(new int[3]);
-    ghosts_.at(i)[0] = field_descr.ghosts_.at(i)[0];
-    ghosts_.at(i)[1] = field_descr.ghosts_.at(i)[1];
-    ghosts_.at(i)[2] = field_descr.ghosts_.at(i)[2];
-  }
-  min_value_      = field_descr.min_value_;
-  max_value_      = field_descr.max_value_;
-  min_action_     = field_descr.min_action_;
-  max_action_     = field_descr.max_action_;
+  copy_(field_descr);
 
   return *this;
 }
@@ -436,3 +386,37 @@ void FieldDescr::set_maximum
   max_value_.at(id_field)  = max_value;
   max_action_.at(id_field) = max_action;
 }
+
+//======================================================================
+
+void FieldDescr::copy_(const FieldDescr & field_descr) throw()
+{
+  alignment_      = field_descr.alignment_;
+  padding_        = field_descr.padding_;
+  courant_        = field_descr.courant_;
+  field_name_     = field_descr.field_name_;
+  field_id_       = field_descr.field_id_;
+  group_name_     = field_descr.group_name_;
+  group_id_       = field_descr.group_id_;
+  field_in_group_ = field_descr.field_in_group_;
+  precision_      = field_descr.precision_;
+  centering_.clear();
+  for (size_t i=0; i<field_descr.centering_.size(); i++) {
+    centering_.push_back(new bool[3]);
+    centering_.at(i)[0] = field_descr.centering_.at(i)[0];
+    centering_.at(i)[1] = field_descr.centering_.at(i)[1];
+    centering_.at(i)[2] = field_descr.centering_.at(i)[2];
+  }
+  ghosts_.clear();
+  for (size_t i=0; i<field_descr.ghosts_.size(); i++) {
+    ghosts_.push_back(new int[3]);
+    ghosts_.at(i)[0] = field_descr.ghosts_.at(i)[0];
+    ghosts_.at(i)[1] = field_descr.ghosts_.at(i)[1];
+    ghosts_.at(i)[2] = field_descr.ghosts_.at(i)[2];
+  }
+  min_value_      = field_descr.min_value_;
+  max_value_      = field_descr.max_value_;
+  min_action_     = field_descr.min_action_;
+  max_action_     = field_descr.max_action_;
+}
+

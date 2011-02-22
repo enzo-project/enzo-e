@@ -155,6 +155,10 @@ public: // functions
 		    enum field_action_enum max_action) 
     throw(std::out_of_range);
 
+private: // functions
+
+  void copy_(const FieldDescr & field_descr) throw();
+
 private: // attributes
 
   /// String defining each field

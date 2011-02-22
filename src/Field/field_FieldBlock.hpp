@@ -180,16 +180,15 @@ private: // functions
     int nx,int ny,int nz,
     int gx,int gy,int gz,
     bool vx,bool vy,bool vz);
+
   /// Enforce outflow boundary conditions on a boundary face
   void enforce_boundary_outflow_(face_enum face) throw();
+
   /// Enforce inflow boundary conditions on a boundary face
   void enforce_boundary_inflow_(face_enum face) throw();
+
   /// Enforce periodic boundary conditions on a boundary face
   void enforce_boundary_periodic_(face_enum face) throw();
-  /// Enforce dirichlet boundary conditions on a boundary face
-  void enforce_boundary_dirichlet_(face_enum face) throw();
-  /// Enforce neumann boundary conditions on a boundary face
-  void enforce_boundary_neumann_(face_enum face) throw();
 
   //----------------------------------------------------------------------
 

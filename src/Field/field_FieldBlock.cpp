@@ -359,7 +359,6 @@ void FieldBlock::refresh_ghosts() throw()
 //----------------------------------------------------------------------
 void FieldBlock::set_boundary_face(face_enum face, bool value) throw()
 {
-  printf ("DEBUG face %d value %s\n",face,value ? "true" : "false");
   if (face == face_all) {
     boundary_face_[face_lower_x] = value;
     boundary_face_[face_upper_x] = value;
@@ -407,12 +406,6 @@ void FieldBlock::enforce_boundary
       case boundary_periodic:
 	enforce_boundary_periodic_(face);
 	break;
-      case boundary_dirichlet:
-	enforce_boundary_dirichlet_(face);
-	break;
-      case boundary_neumann:
-	enforce_boundary_neumann_(face);
-	break;
       default:
 	ERROR("FieldBlock::enforce_boundary",
 		      "Undefined boundary type");
@@ -421,7 +414,7 @@ void FieldBlock::enforce_boundary
     }
   } else {
     ERROR("FieldBlock::enforce_boundary",
-		  "Function called with ghosts not allocated");
+	  "Function called with ghosts not allocated");
   }
 }
 
@@ -480,20 +473,6 @@ void FieldBlock::enforce_boundary_reflecting_precision_
   int ix,iy,iz,ig;
   T sign;
   switch (face) {
-  case face_all:
-    enforce_boundary_reflecting_precision_
-      (face_lower_x,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_
-      (face_lower_y,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_
-      (face_lower_z,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_
-      (face_upper_x,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_
-      (face_upper_y,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    enforce_boundary_reflecting_precision_
-      (face_upper_z,array,nx,ny,nz,gx,gy,gz,vx,vy,vz);
-    break;
   case face_lower_x:
     if (nx > 1) {
       ix = gx;
@@ -584,6 +563,10 @@ void FieldBlock::enforce_boundary_reflecting_precision_
       }
     }
     break;
+  default:
+    ERROR("FieldBlock::enforce_boundary_reflecting_precision_",
+	  "Cannot be called with face_all");
+    break;
   }
 }
 
@@ -603,18 +586,6 @@ void FieldBlock::enforce_boundary_inflow_(face_enum face) throw()
 void FieldBlock::enforce_boundary_periodic_(face_enum face) throw()
 {
   INCOMPLETE("FieldBlock::enforce_boundary_periodic","");
-}
-
-//----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_dirichlet_(face_enum face) throw()
-{
-  INCOMPLETE("FieldBlock::enforce_boundary_dirichlet","");
-}
-
-//----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_neumann_(face_enum face) throw()
-{
-  INCOMPLETE("FieldBlock::enforce_boundary_neumann","");
 }
 
 //----------------------------------------------------------------------
