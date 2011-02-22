@@ -21,20 +21,20 @@
 
 #define OMEGA_TOLERANCE 1.0e-5
  
-#ifdef p4
-#define ETA_TOLERANCE 1.0e-5
+#ifdef CONFIG_PRECISION_SINGLE
+#   define ETA_TOLERANCE 1.0e-5
 #endif
-#ifdef p8
-#define ETA_TOLERANCE 1.0e-10
+#ifdef CONFIG_PRECISION_DOUBLE
+#   define ETA_TOLERANCE 1.0e-10
 #endif
-#ifdef p16
-#define ETA_TOLERANCE 1.0e-20
+#ifdef CONFIG_PRECISION_QUADRUPLE
+#   define ETA_TOLERANCE 1.0e-20
 #endif
  
 // function prototypes
  
 int EnzoDescr::CosmologyComputeExpansionFactor
-(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt)
+(enzo_float time, enzo_float *a, enzo_float *dadt)
 {
  
   /* Error check. */
@@ -55,21 +55,21 @@ int EnzoDescr::CosmologyComputeExpansionFactor
   /* Convert the time from code units to Time * H0 (c.f. CosmologyGetUnits). */
  
   float TimeUnits = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
-                    pow(1 + InitialRedshift,ENZO_FLOAT(1.5));
+                    pow(1 + InitialRedshift,enzo_float(1.5));
  
-  ENZO_FLOAT TimeHubble0 = time * TimeUnits * (HubbleConstantNow*3.24e-18);
+  enzo_float TimeHubble0 = time * TimeUnits * (HubbleConstantNow*3.24e-18);
  
   /* 1) For a flat universe with OmegaMatterNow = 1, it's easy. */
  
   if (fabs(OmegaMatterNow-1) < OMEGA_TOLERANCE &&
       OmegaLambdaNow < OMEGA_TOLERANCE)
-    *a      = pow(time/InitialTimeInCodeUnits, ENZO_FLOAT(2.0/3.0));
+    *a      = pow(time/InitialTimeInCodeUnits, enzo_float(2.0/3.0));
  
 #define INVERSE_HYPERBOLIC_EXISTS
  
 #ifdef INVERSE_HYPERBOLIC_EXISTS
  
-  ENZO_FLOAT eta, eta_old, x;
+  enzo_float eta, eta_old, x;
   int i;
  
   /* 2) For OmegaMatterNow < 1 and OmegaLambdaNow == 0 see
@@ -87,8 +87,8 @@ int EnzoDescr::CosmologyComputeExpansionFactor
        eta.  This works well because parts 1 & 2 are an excellent approximation
        when x is small and part 3 converges quickly when x is large. */
  
-    eta = pow(6*x, ENZO_FLOAT(1.0/3.0));                     // part 1
-    eta = pow(120*x/(20+eta*eta), ENZO_FLOAT(1.0/3.0));      // part 2
+    eta = pow(6*x, enzo_float(1.0/3.0));                     // part 1
+    eta = pow(120*x/(20+eta*eta), enzo_float(1.0/3.0));      // part 2
     for (i = 0; i < 40; i++) {                          // part 3
       eta_old = eta;
       eta = asinh(eta + x);
@@ -115,9 +115,9 @@ int EnzoDescr::CosmologyComputeExpansionFactor
  
   if (fabs(OmegaCurvatureNow) < OMEGA_TOLERANCE &&
       OmegaLambdaNow > OMEGA_TOLERANCE) {
-    *a = pow(ENZO_FLOAT(OmegaMatterNow/(1 - OmegaMatterNow)), ENZO_FLOAT(1.0/3.0)) *
-         pow(ENZO_FLOAT(sinh(1.5 * sqrt(1.0 - OmegaMatterNow)*TimeHubble0)),
-	     ENZO_FLOAT(2.0/3.0));
+    *a = pow(enzo_float(OmegaMatterNow/(1 - OmegaMatterNow)), enzo_float(1.0/3.0)) *
+         pow(enzo_float(sinh(1.5 * sqrt(1.0 - OmegaMatterNow)*TimeHubble0)),
+	     enzo_float(2.0/3.0));
     *a *= (1 + InitialRedshift);    // to convert to code units, divide by [a]
   }
  
@@ -125,7 +125,7 @@ int EnzoDescr::CosmologyComputeExpansionFactor
  
   /* Compute the derivative of the expansion factor (Peebles93, eq. 13.3). */
  
-  ENZO_FLOAT TempVal = (*a)/(1 + InitialRedshift);
+  enzo_float TempVal = (*a)/(1 + InitialRedshift);
   *dadt = sqrt( 2.0/(3.0*OmegaMatterNow*(*a)) *
 	       (OmegaMatterNow + OmegaCurvatureNow*TempVal +
 		OmegaLambdaNow*TempVal*TempVal*TempVal));

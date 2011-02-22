@@ -58,12 +58,12 @@ public: // interface
   float ComputeTimeStep();
   float sum_field (int field);
   int ComputeGammaField(float *GammaField);
-  int ComputePressureDualEnergyFormalism(ENZO_FLOAT time, float *pressure);
-  int ComputePressure(ENZO_FLOAT time, float *pressure);
+  int ComputePressureDualEnergyFormalism(enzo_float time, float *pressure);
+  int ComputePressure(enzo_float time, float *pressure);
   int ComputeTemperatureField(float *temperature);
-  int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
-  int CosmologyComputeExpansionTimestep(ENZO_FLOAT time, float *dtExpansion);
-  int CosmologyGetUnits(float *DensityUnits, float *LengthUnits, float *TemperatureUnits, float *TimeUnits, float *VelocityUnits, ENZO_FLOAT Time);
+  int CosmologyComputeExpansionFactor(enzo_float time, enzo_float *a, enzo_float *dadt);
+  int CosmologyComputeExpansionTimestep(enzo_float time, float *dtExpansion);
+  int CosmologyGetUnits(float *DensityUnits, float *LengthUnits, float *TemperatureUnits, float *TimeUnits, float *VelocityUnits, enzo_float Time);
   int FindField(int field, int farray[], int numfields);
   int IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num, int &Vel2Num, int &Vel3Num, int &TENum);
   int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum, int &HeINum, int &HeIINum, int &HeIIINum, int &HMNum, int &H2INum, int &H2IINum, int &DINum, int &DIINum, int &HDINum);
@@ -148,15 +148,15 @@ public: // PUBLIC ATTRIBUTES (!!)
   float temperature_floor;
 
   float CourantSafetyNumber;
-  ENZO_FLOAT InitialRedshift;
-  ENZO_FLOAT InitialTimeInCodeUnits;
-  ENZO_FLOAT Time;
-  ENZO_FLOAT OldTime;
+  enzo_float InitialRedshift;
+  enzo_float InitialTimeInCodeUnits;
+  enzo_float Time;
+  enzo_float OldTime;
 
   // Domain
 
-  ENZO_FLOAT DomainLeftEdge [MAX_DIMENSION];
-  ENZO_FLOAT DomainRightEdge[MAX_DIMENSION];
+  enzo_float DomainLeftEdge [MAX_DIMENSION];
+  enzo_float DomainRightEdge[MAX_DIMENSION];
 
   // Grid
 
@@ -200,8 +200,8 @@ public: // PUBLIC ATTRIBUTES (!!)
   int GridDimension[MAX_DIMENSION]; // total dimensions of all grids
   int GridStartIndex[MAX_DIMENSION]; // starting index of the active region
   int GridEndIndex[MAX_DIMENSION]; // stoping index of the active region
-  ENZO_FLOAT GridLeftEdge[MAX_DIMENSION]; // starting pos (active problem space)
-  ENZO_FLOAT CellWidth[MAX_DIMENSION];
+  enzo_float GridLeftEdge[MAX_DIMENSION]; // starting pos (active problem space)
+  enzo_float CellWidth[MAX_DIMENSION];
   int ghost_depth[MAX_DIMENSION];
 
   // Fields

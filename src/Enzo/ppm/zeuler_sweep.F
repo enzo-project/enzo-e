@@ -119,10 +119,10 @@ c
       integer gravity, idiff, idual, iflatten, isteepen, ipresfree,
      &        in, jn, kn, is, ie, j, js, je, ks, ke, nsubgrids,
      &        ncolor, coloff(ncolor)
-      real    dt, eta1, eta2, gamma, pmin
-      real    d(in,jn,kn), e(in,jn,kn), u(in,jn,kn), v(in,jn,kn), 
-     &        w(in,jn,kn),ge(in,jn,kn), gr_acc(in,jn,kn),
-     &        dx,dy,dz
+      ENZO_REAL dt, eta1, eta2, gamma, pmin
+      ENZO_REAL d(in,jn,kn), e(in,jn,kn), u(in,jn,kn), v(in,jn,kn), 
+     &        w(in,jn,kn),ge(in,jn,kn), gr_acc(in,jn,kn)
+      ENZO_REAL dx,dy,dz
       integer fistart(nsubgrids*3), fiend(nsubgrids*3),
      &        fjstart(nsubgrids*3), fjend(nsubgrids*3), 
      &        lface(nsubgrids*3), rface(nsubgrids*3)
@@ -130,11 +130,11 @@ c
      &        uindex(nsubgrids*6), vindex(nsubgrids*6),
      &        windex(nsubgrids*6),geindex(nsubgrids*6),
      &        colindex(nsubgrids*6,ncolor)
-      real    array(1), colorpt(1)
+      ENZO_REAL    array(1), colorpt(1)
 c
 c  define local slices (passed as temps)
 c
-      real      dls(kn,in),    drs(kn,in),flatten(kn,in),
+      ENZO_REAL dls(kn,in),    drs(kn,in),flatten(kn,in),
      &         pbar(kn,in),    pls(kn,in),
      &          prs(kn,in), pslice(kn,in),   ubar(kn,in),
      &          uls(kn,in),    urs(kn,in),    vls(kn,in),
@@ -145,7 +145,8 @@ c
      &         gels(kn,in),   gers(kn,in),
      &           df(kn,in),     ef(kn,in),grslice(kn,in),
      &           uf(kn,in),     vf(kn,in),     wf(kn,in)
-      real colslice(kn,in,ncolor),  colf(kn,in,ncolor),
+      ENZO_REAL
+     &     colslice(kn,in,ncolor),  colf(kn,in,ncolor),
      &        colls(kn,in,ncolor), colrs(kn,in,ncolor)
 c
 c  parameters

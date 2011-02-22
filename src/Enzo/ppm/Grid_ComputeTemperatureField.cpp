@@ -30,13 +30,7 @@
  
 #define MINIMUM_TEMPERATURE 1.0
  
-/* function prototypes */
- 
-// int FindField(int f, int farray[], int n);
-// int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
-// 		      float *TemperatureUnits, float *TimeUnits,
-// 		      float *VelocityUnits, ENZO_FLOAT Time);
- 
+//---------------------------------------------------------------------- 
  
 int EnzoDescr::ComputeTemperatureField(float *temperature)
 {

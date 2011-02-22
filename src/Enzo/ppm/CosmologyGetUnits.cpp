@@ -32,20 +32,18 @@
 
 #include "enzo.hpp"
 
-/* function prototypes */
- 
-//int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
+//----------------------------------------------------------------------
  
 int EnzoDescr::CosmologyGetUnits
 (
  float *DensityUnits, float *LengthUnits,
  float *TemperatureUnits, float *TimeUnits,
- float *VelocityUnits, ENZO_FLOAT Time)
+ float *VelocityUnits, enzo_float Time)
 {
  
   /* From the time, compute the current redshift. */
  
-  ENZO_FLOAT a, dadt;
+  enzo_float a, dadt;
   if (CosmologyComputeExpansionFactor(Time, &a, &dadt) == ENZO_FAIL) {
     fprintf(stderr, "Error in ComputeExpansionFactor.\n");
     return ENZO_FAIL;
@@ -53,7 +51,7 @@ int EnzoDescr::CosmologyGetUnits
  
   /* Compute the current redshift (remember a(init) = 1). */
  
-  ENZO_FLOAT CurrentRedshift = (1 + InitialRedshift)/a - 1;
+  enzo_float CurrentRedshift = (1 + InitialRedshift)/a - 1;
  
   /* Determine the units. */
  
@@ -67,7 +65,7 @@ int EnzoDescr::CosmologyGetUnits
                       (1 + InitialRedshift);
  
   *TimeUnits        = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
-                      pow(1 + InitialRedshift,ENZO_FLOAT(1.5));
+                      pow(1 + InitialRedshift,enzo_float(1.5));
  
   *VelocityUnits    = 1.225e7*ComovingBoxSize*sqrt(OmegaMatterNow)*
                       sqrt(1 + InitialRedshift);

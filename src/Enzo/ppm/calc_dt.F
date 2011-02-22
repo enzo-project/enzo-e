@@ -49,16 +49,16 @@ c
 c     Arguments
 c
       integer idim, jdim, kdim, i1, i2, j1, j2, k1, k2, rank, ipfree
-      REALSUB dx, dy, dz
-      real    dt, gamma, aye
-      real    d(idim,jdim,kdim), p(idim,jdim,kdim), u(idim,jdim,kdim),
+      ENZO_REAL dx, dy, dz
+      ENZO_REAL dt, gamma, aye
+      ENZO_REAL d(idim,jdim,kdim), p(idim,jdim,kdim), u(idim,jdim,kdim),
      &        v(idim,jdim,kdim), w(idim,jdim,kdim)
 c
 c     Locals
 c
       integer i,j,k
-      real    cs, dt1
-      real dmax,dmin,pmax,pmin,umax,umin,vmax,vmin
+      ENZO_REAL cs, dt1
+      ENZO_REAL dmax,dmin,pmax,pmin,umax,umin,vmax,vmin
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////
 c=======================================================================
@@ -67,7 +67,7 @@ c     Set initial timestep to a large number
 c
 C      print*, rank, idim, jdim, kdim
 C      print*, i1, i2, j1, j2, k1, k2
-Cc      print*, dx, dy
+C      print*, 'dx = ',dx, 'dy = ',dy
 C      print*, gamma, ipfree, aye
 C      print*, 'd(i1+1,j1+1,1) = ', d(i1+1,j1+1,1)
 C      print*, 'd(i2+1,j2+1,1) = ', d(i2+1,j2+1,1)

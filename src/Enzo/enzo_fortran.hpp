@@ -1,7 +1,7 @@
 extern "C" void FORTRAN_NAME(calc_dt)
   (int *rank, int *idim, int *jdim, int *kdim,
    int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
-   ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz, 
+   enzo_float *dx, enzo_float *dy, enzo_float *dz, 
    float *gamma, int *ipfree, float *aye,
    float *d, float *p, float *u, float *v, float *w,
    float *dt);
@@ -10,7 +10,7 @@ extern "C" void FORTRAN_NAME(calc_dt)
 extern "C" void FORTRAN_NAME(calc_dt_ppml)
   (int *idim, int *jdim, int *kdim,
    int *i1, int *i2, int *j1, int *j2, int *k1, int *k2,
-   ENZO_FLOAT *dx, ENZO_FLOAT *dy, ENZO_FLOAT *dz,
+   enzo_float *dx, enzo_float *dy, enzo_float *dz,
    float *dn, float *vx, float *vy, float *vz, 
    float *bx, float *by, float *bz, 
    float *dt);

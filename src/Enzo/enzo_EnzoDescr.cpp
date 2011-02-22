@@ -171,7 +171,8 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
     =              parameters->value_logical("use_minimum_pressure_support",false);
   MinimumPressureSupportParameter 
     =              parameters->value_integer("minimum_pressure_support_parameter",100);
-  PPMFlatteningParameter = parameters->value_logical ("flattening", false);
+
+  PPMFlatteningParameter = parameters->value_integer ("flattening", 3);
   PPMDiffusionParameter  = parameters->value_logical ("diffusion",  false);
   PPMSteepeningParameter = parameters->value_logical ("steepening", false);
 

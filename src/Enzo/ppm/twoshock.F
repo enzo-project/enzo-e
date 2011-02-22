@@ -70,8 +70,8 @@ c  argument declarations
 c
 c     UNUSED only: eta1
       integer gravity, i1, i2, idim, idual, ipresfree, j1, j2, jdim
-      real    dt, eta1, gamma, pmin
-      real      dls(idim,jdim),     drs(idim,jdim),    pbar(idim,jdim),
+      ENZO_REAL dt, eta1, gamma, pmin
+      ENZO_REAL dls(idim,jdim),     drs(idim,jdim),    pbar(idim,jdim),
      &          pls(idim,jdim),     prs(idim,jdim),    ubar(idim,jdim),
      &          uls(idim,jdim),     urs(idim,jdim), grslice(idim,jdim)
 c
@@ -86,25 +86,24 @@ c  are getting PPM over/underflow problems and are compiling with 32-bit
 c  internal precision, it may be necessary to explicitly promote this to
 c  real*8.  [BWO v1_1_6]
 
-      real     cl(ijkn),    cr(ijkn), dpdul(ijkn), dpdur(ijkn),
+      ENZO_REAL cl(ijkn),    cr(ijkn), dpdul(ijkn), dpdur(ijkn),
      &         ps(ijkn),    ubl(ijkn),   ubr(ijkn),
      &         qa      ,     zl(ijkn),    zr(ijkn)
 
       integer mask(ijkn)
-      real    old_ps(ijkn), delta_ps(ijkn)
+      ENZO_REAL    old_ps(ijkn), delta_ps(ijkn)
 
 !     To reduce this to the old fixed iteration count method
 !     simply set tolerance = 1.0e-50
 
 !     Tolerance can be relaxed to reduce the cost of this routine
 
-#ifdef r4
-      real tolerance
+      ENZO_REAL tolerance
+
+#ifdef CONFIG_PRECISION_SINGLE
       parameter (tolerance = 1.0e-07)
 #endif
-
-#ifdef r8
-      real tolerance
+#ifdef CONFIG_PRECISION_DOUBLE
       parameter (tolerance = 1.0e-14)
 #endif
 

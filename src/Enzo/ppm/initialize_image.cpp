@@ -18,7 +18,7 @@
 
 inline float color_value_png
 (size_t nx, size_t ny,
- float x, float y, double lower[2], double upper[2],
+ float x, float y, enzo_float lower[2], enzo_float upper[2],
  pngwriter * png)
 // Return boolean flag whether point is inside the text "Enzo"
 {

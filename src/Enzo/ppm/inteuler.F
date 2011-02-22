@@ -80,24 +80,26 @@ c
 c     NOT ACCESSED: eta1
       integer gravity, i1, i2, idim, idual, iflatten, ipresfree, isteep,
      &        j1, j2, jdim, ncolor
-      real    dt, eta1, eta2, gamma
-      real   dslice(idim,jdim),     dxi,  pslice(idim,jdim),
+      ENZO_REAL dt, eta1, eta2, gamma
+      ENZO_REAL dslice(idim,jdim),     dxi,  pslice(idim,jdim),
      &       uslice(idim,jdim),  vslice(idim,jdim),  wslice(idim,jdim),
      &      grslice(idim,jdim), geslice(idim,jdim)
-      real      dls(idim,jdim),     drs(idim,jdim), flatten(idim,jdim),
+      ENZO_REAL
+     &          dls(idim,jdim),     drs(idim,jdim), flatten(idim,jdim),
      &          pls(idim,jdim),
      &          prs(idim,jdim),    gels(idim,jdim),    gers(idim,jdim),
      &          uls(idim,jdim),     urs(idim,jdim),     vls(idim,jdim),
      &          vrs(idim,jdim),     wls(idim,jdim),     wrs(idim,jdim)
-      real colslice(idim,jdim,ncolor),   colls(idim,jdim,ncolor),
+      ENZO_REAL colslice(idim,jdim,ncolor),   colls(idim,jdim,ncolor),
      &        colrs(idim,jdim,ncolor)
 c
 c  local declarations
 c
       integer i, j, ic
-      real steepen(ijkn),tmp1(ijkn),tmp2(ijkn),tmp3(ijkn),tmp4(ijkn)
-      real qa,qb,qc,qd,s1,s2      
-      real  c1, c2, c3, c4, c5, c6
+      ENZO_REAL steepen(ijkn),
+     &     tmp1(ijkn),tmp2(ijkn),tmp3(ijkn),tmp4(ijkn)
+      ENZO_REAL qa,qb,qc,qd,s1,s2      
+      ENZO_REAL  c1, c2, c3, c4, c5, c6
      &    ,dp(ijkn),pl(ijkn),pr(ijkn),p6(ijkn)
      &    ,du(ijkn),ul(ijkn),ur(ijkn),u6(ijkn)
      &    ,dla(ijkn),dra(ijkn),pla(ijkn),pra(ijkn),ula(ijkn),ura(ijkn)
@@ -116,7 +118,7 @@ c
 c     
 c     parameters
 c     
-      real ft
+      ENZO_REAL ft
       parameter(ft = 4.0/3.0)
 c     
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////

@@ -28,8 +28,8 @@ EnzoStopping::EnzoStopping
   parameters->set_current_group ("Stopping");
   //--------------------------------------------------
 
-  cycle_stop_ = parameters->value_integer("cycle",1000);
-  time_stop_  = parameters->value_scalar("time",2.5);
+  cycle_stop_ = parameters->value_integer("cycle",-1);
+  time_stop_  = parameters->value_scalar("time",-1.0);
 }
 
 //----------------------------------------------------------------------
@@ -47,7 +47,7 @@ bool EnzoStopping::complete () throw()
 	 "Neither Stopping::time_stop nor Stopping::cycle_stop initialized",
 	 time_stop_ != -1.0 || cycle_stop_ != -1);
   return 
-    (enzo_->Time >= time_stop_ ) ||
-    (enzo_->CycleNumber >= cycle_stop_);
+    (time_stop_  != -1.0 && enzo_->Time        >= time_stop_ ) ||
+    (cycle_stop_ != -1   && enzo_->CycleNumber >= cycle_stop_);
 }
 

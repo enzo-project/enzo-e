@@ -38,7 +38,7 @@ double EnzoTimestep::compute ( DataBlock * data_block ) throw()
   if (enzo_->GridRank >= 3) velocity_z_field = 
     (float *)field_block->field_values(enzo_->field_velocity_z);
 
-  ENZO_FLOAT a = 1, dadt;
+  enzo_float a = 1, dadt;
   if (enzo_->ComovingCoordinates)
     enzo_->CosmologyComputeExpansionFactor(enzo_->Time, &a, &dadt);
   float afloat = float(a);

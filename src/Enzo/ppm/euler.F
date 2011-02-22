@@ -85,18 +85,18 @@ c
 c  argument declarations
 c
       integer gravity, i1, i2, idiff, idim, idual, j1, j2, jdim, ncolor
-      real    dt, eta1, eta2, gamma, velold
-      real diffcoef(idim,jdim),  dslice(idim,jdim),      dx,
+      ENZO_REAL dt, eta1, eta2, gamma, velold
+      ENZO_REAL diffcoef(idim,jdim),  dslice(idim,jdim),      dx,
      &       eslice(idim,jdim), grslice(idim,jdim), geslice(idim,jdim),
      &       uslice(idim,jdim),  vslice(idim,jdim),  wslice(idim,jdim)
-      real      dls(idim,jdim),     drs(idim,jdim),
+      ENZO_REAL dls(idim,jdim),     drs(idim,jdim),
      &         pbar(idim,jdim),     pls(idim,jdim),    gels(idim,jdim),
      &          prs(idim,jdim),    ubar(idim,jdim),    gers(idim,jdim),
      &          uls(idim,jdim),     urs(idim,jdim),     vls(idim,jdim),
      &          vrs(idim,jdim),     wls(idim,jdim),     wrs(idim,jdim),
      &           df(idim,jdim),      ef(idim,jdim),      uf(idim,jdim),
      &           vf(idim,jdim),      wf(idim,jdim),     gef(idim,jdim)
-      real colslice(idim,jdim,ncolor),   colls(idim,jdim,ncolor),
+      ENZO_REAL colslice(idim,jdim,ncolor),   colls(idim,jdim,ncolor),
      &        colrs(idim,jdim,ncolor),    colf(idim,jdim,ncolor)
 c
 c  local declarations
@@ -106,7 +106,7 @@ c     NOT ACCESSED: alpha, dele, delu, eta2, uadvect, uleft, uright
 c     RAREFACTION1 only: cb
 c     GRAVITY_SECOND_ORDER_CORRECTION only: dadx, dddx
 c     UNUSED only: eta1
-      real         c0(ijkn),    cb,  cbar(ijkn),
+      ENZO_REAL    c0(ijkn),    cb,  cbar(ijkn),
      &             d0(ijkn),    db(ijkn),  dbar(ijkn),   dnu(ijkn),
      &            dub(ijkn),  duub(ijkn),  duvb(ijkn),  duwb(ijkn),
      &           dueb(ijkn),    eb(ijkn),    l0(ijkn),  lbar(ijkn),
@@ -116,11 +116,47 @@ c     UNUSED only: eta1
      &             wb(ijkn),    z0(ijkn),
      &           uold(ijkn), pcent(ijkn),eratio(ijkn),  frac      ,
      &           dadx(ijkn),  dddx(ijkn), colb(ijkn,MAX_COLOR)
-      real dele, delu, uleft, uright, uadvect, eold, tempu
+      ENZO_REAL dele, delu, uleft, uright, uadvect, eold, tempu
+      ENZO_REAL one
+      parameter (one = 1.0)
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////
 c=======================================================================
 c
+C      print*, dslice(i1,j1)
+C      print*, eslice(i1,j1)
+C      print*, grslice(i1,j1)
+C      print*, geslice(i1,j1)
+C      print*, uslice(i1,j1)
+C      print*, vslice(i1,j1)
+C      print*, wslice(i1,j1)
+C      print*, dx
+C      print*, diffcoef(i1,j1)
+C      print*, idim
+C      print*, jdim
+C      print*, i1, i2, j1, j2
+C      print*, __FILE__,__LINE__,'dt = ',dt
+C      print*, gamma
+C      print*, idiff
+C      print*, gravity
+C      print*, idual
+C      print*, eta1, eta2
+C      print*, dls(i1,j1), drs(i1,j1)
+C      print*, pls(i1,j1), prs(i1,j1)
+C      print*, gels(i1,j1), gers(i1,j1)
+C      print*, uls(i1,j1), urs(i1,j1)
+C      print*, vls(i1,j1), vrs(i1,j1)
+C      print*, wls(i1,j1), wrs(i1,j1)
+C      print*, pbar(i1,j1), ubar(i1,j1)
+C      print*, df(i1,j1)
+C      print*, ef(i1,j1)
+C      print*, uf(i1,j1)
+C      print*, vf(i1,j1)
+C      print*, wf(i1,j1)
+C      print*, gef(i1,j1)
+C      print*, ncolor, colslice(i1,j1,1)
+C      print*, colls(i1,j1,1), colrs(i1,j1,1), colf(i1,j1,1)
+
 c     write(6,*) 'EULER: dt =',dt,' idiff =',idiff
 c     write(6,*) 'EULER: idim =',idim,' jdim =',jdim
 c     write(6,*) 'EULER: i1   =',i1,  ' i2   =',i2
@@ -140,7 +176,7 @@ c   (see Colella, Siam J Sci Stat Comput 1982, 3, 77.  Appendix)
 c
        do i=i1, i2+1
 c
-          sn(i)    = sign(1.0, -ubar(i,j))
+          sn(i)    = sign(one, -ubar(i,j))
 c
 c  Collect values of interest depending on which way fluid is flowing
 c

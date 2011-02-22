@@ -123,31 +123,35 @@ c  argument declarations
 c
       integer dimx, dimy, dimz, i1, i2, idiff, idim, idir, iflatten, 
      &        j1, j2, jdim, k, kdim, nzz
-      real    gamma, dt, dx, dy, dz
-      real    dslice(idim,jdim), eslice(idim,jdim), uslice(idim,jdim),
+      ENZO_REAL gamma, dt, dx, dy, dz
+      ENZO_REAL dslice(idim,jdim), eslice(idim,jdim), uslice(idim,jdim),
      &        diffcoef(idim,jdim), flatten(idim,jdim), pslice(idim,jdim)
-      real    v(dimx,dimy,dimz), w(dimx,dimy,dimz)
+      ENZO_REAL v(dimx,dimy,dimz), w(dimx,dimy,dimz)
 c
 c  locals
 c
       integer i, j, nyz, is, isp, ism
-      real    cj2s, di(ijkn), difftemp(ijkn), flattemp(ijkn),
-     &        kappa(ijkn), kappa_tilde, omega(ijkn),
-     &        qa, qb, s, sigma(ijkn),
-     &        sigma_tilde, vdiff1(ijkn), vdiff2(ijkn), wdiff1(ijkn),
-     &        wdiff2(ijkn), wflag(ijkn), Z, ZE
+      ENZO_REAL cj2s, qa, qb, s, Z, ZE,sigma_tilde
+      ENZO_REAL di(ijkn), difftemp(ijkn), flattemp(ijkn),
+     &     kappa(ijkn), kappa_tilde, omega(ijkn),
+     &     sigma(ijkn),
+     &     vdiff1(ijkn), vdiff2(ijkn), wdiff1(ijkn),
+     &     wdiff2(ijkn), wflag(ijkn)
       logical ljx1,ljy1,ljz1,ljx2,ljy2,ljz2,lj1,lj2
       logical lkx1,lky1,lkz1,lkx2,lky2,lkz2,lk1,lk2
-      real dp1,dp2,de1,de2,dee,dpp,omega_tilde
+      ENZO_REAL dp1,dp2,de1,de2,dee,dpp,omega_tilde
 c
 c  parameters
 c
-      real    epsilon, kappa1, kappa2, Kparam, nu1, nu2, nu3,
+      ENZO_REAL epsilon, kappa1, kappa2, Kparam, nu1, nu2, nu3,
      &        omega1, omega2, sigma1, sigma2
       parameter (epsilon = 0.33  , kappa1 = 2.0 , kappa2 =  0.01,
      &            Kparam = 0.1   ,    nu1 = 2.0 , nu2    =  0.1 ,
      &               nu3 = 0.2333, omega1 = 0.75, omega2 = 10.0 ,
      &            sigma1 = 0.5   , sigma2 = 1.0)
+
+      ENZO_REAL one,two
+      parameter (one = 1.0, two = 2.0)
 c
 c Notice, for 1D calculations nu2 = 0 and nu3 = 0.3333, see CW84, p. 200.
 c
@@ -450,7 +454,7 @@ c
 
             do i=i1-1, i2+1
 
-               is = i + sign(2.0, pslice(i+1,j) - pslice(i-1,j))
+               is = i + sign(two, pslice(i+1,j) - pslice(i-1,j))
 
                omega(i) = max(0.0, omega1 * (omega2 
      &              - (pslice(i+1,j) - pslice(i-1,j))
@@ -598,7 +602,7 @@ c
 
             do i=i1-1, i2+1
 
-               s  = - sign(1.0, pslice(i-1,j) - pslice(i,j))
+               s  = - sign(one, pslice(i-1,j) - pslice(i,j))
                diffcoef(i,j) = s*min(
      &              max(difftemp(i-1),difftemp(i),difftemp(i+1)),
      &              (nu2 + nu3*max(sigma(i-1)*kappa(i-1)**2

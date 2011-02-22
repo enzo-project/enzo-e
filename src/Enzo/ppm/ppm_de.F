@@ -86,12 +86,12 @@ c
      &        uindex(nsubgrids*6), vindex(nsubgrids*6),
      &        windex(nsubgrids*6),geindex(nsubgrids*6),
      &        colindex(nsubgrids*6,ncolor)
-      real d(in,jn,kn), e(in,jn,kn), u(in,jn,kn),
+      ENZO_REAL d(in,jn,kn), e(in,jn,kn), u(in,jn,kn),
      &     v(in,jn,kn), w(in,jn,kn),ge(in,jn,jn),
      &     gr_xacc(in,jn,kn), gr_yacc(in,jn,kn), gr_zacc(in,jn,kn),
      &        dx,dy,dz
-      real dt, eta1, eta2, gamma, pmin
-      real array(1), colorpt(1)
+      ENZO_REAL dt, eta1, eta2, gamma, pmin
+      ENZO_REAL array(1), colorpt(1)
 c
 c  Parameters
 c
@@ -101,7 +101,7 @@ c
       integer i, ie, is, ixyz, j, je, js, k, ke, ks,
      &        n, nxz, nyz, nzz, ms
       integer i1, i2, j1, j2, k1, k2
-      real tmp(1)
+      ENZO_REAL tmp(1)
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\////////////////////////////////
 c=======================================================================

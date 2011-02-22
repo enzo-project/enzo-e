@@ -53,20 +53,21 @@ c
 c  argument declarations
 c
       integer idim, i1, i2, iflatten, isteep
-      real c1,c2,c3,c4,c5,c6,
+      ENZO_REAL c1,c2,c3,c4,c5,c6
+      ENZO_REAL
      &     char1(idim), char2(idim), c0(idim),
      &     qla(idim), qra(idim), ql0(idim), qr0(idim)
-      real qslice(idim), steepen(idim), flatten(idim)
+      ENZO_REAL qslice(idim), steepen(idim), flatten(idim)
 c
 c  parameters
 c
-      real ft
+      ENZO_REAL ft
       parameter(ft = 4.0/3.0)
 c
 c  local declarations (arrays passed as temps)
 c
       integer i
-      real qplus, qmnus
+      ENZO_REAL qplus, qmnus
 
 c  note that in Matt Turk's version of intvar temp1, temp2, temp3
 c  are all promoted to real*8 to avoid overflow.  I avoid this here,
@@ -76,10 +77,13 @@ c <OLD>
 c      real*8 temp1, temp2, temp3
 c </OLD>
 c <NEW>
-      real temp1, temp2, temp3
+      ENZO_REAL temp1, temp2, temp3
 c </NEW>
 
-      real dq(idim), ql(idim), qr(idim), q6(idim)
+      ENZO_REAL dq(idim), ql(idim), qr(idim), q6(idim)
+
+      ENZO_REAL one
+      parameter (one=1.0)
 c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////////
 c=======================================================================
@@ -93,7 +97,7 @@ c
          dq(i) = c1*qplus + c2*qmnus
          temp1 = min(abs(dq(i)), 2.0*abs(qmnus), 2.0*abs(qplus))
          if (qplus*qmnus .gt. 0) then
-            dq(i) = temp1*sign(1.0, dq(i))
+            dq(i) = temp1*sign(one, dq(i))
          else
             dq(i) = 0.0
          endif

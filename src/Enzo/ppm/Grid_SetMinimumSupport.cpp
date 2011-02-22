@@ -10,10 +10,7 @@
 
 #include "enzo.hpp"
  
-/* function prototypes */
- 
-// int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
- 
+//----------------------------------------------------------------------
  
 int EnzoDescr::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
 {
@@ -23,7 +20,7 @@ int EnzoDescr::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
  
     /* Compute cosmology factors. */
  
-    ENZO_FLOAT a = 1, dadt;
+    enzo_float a = 1, dadt;
     if (ComovingCoordinates)
       if (CosmologyComputeExpansionFactor(Time, &a, &dadt) == ENZO_FAIL) {
 	fprintf(stderr, "Error in CosmologyComputeExpansionFactor.\n");

@@ -47,7 +47,7 @@ float EnzoDescr::ComputeTimeStep()
   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
      set it to one. */
  
-  ENZO_FLOAT a = 1, dadt;
+  enzo_float a = 1, dadt;
   if (ComovingCoordinates)
     CosmologyComputeExpansionFactor(Time, &a, &dadt);
   float afloat = float(a);
@@ -86,6 +86,8 @@ float EnzoDescr::ComputeTimeStep()
  
     /* Call fortran routine to do calculation. */
 
+    printf ("%s:%d  hx = (%g %g %g)\n",__FILE__,__LINE__,CellWidth[0],CellWidth[1],CellWidth[2]);
+    fflush(stdout);
     FORTRAN_NAME(calc_dt)(&GridRank, GridDimension, GridDimension+1,
                                GridDimension+2,
 //                        Zero, TempInt, Zero+1, TempInt+1, Zero+2, TempInt+2,

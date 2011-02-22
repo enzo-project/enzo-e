@@ -19,14 +19,10 @@
 
 #include "enzo.hpp"
  
-/* Function prototypes */
- 
-// int CosmologyComputeExpansionFactor(ENZO_FLOAT time, ENZO_FLOAT *a, ENZO_FLOAT *dadt);
- 
- 
+//---------------------------------------------------------------------- 
  
 int EnzoDescr::CosmologyComputeExpansionTimestep
-(ENZO_FLOAT time, float *dtExpansion)
+(enzo_float time, float *dtExpansion)
 {
  
   /* Error check. */
@@ -38,7 +34,7 @@ int EnzoDescr::CosmologyComputeExpansionTimestep
  
   /* Compute the expansion factors. */
  
-  ENZO_FLOAT a, dadt;
+  enzo_float a, dadt;
   if (CosmologyComputeExpansionFactor(time, &a, &dadt) == ENZO_FAIL) {
     fprintf(stderr, "Error in ComputeExpnasionFactors.\n");
     return ENZO_FAIL;

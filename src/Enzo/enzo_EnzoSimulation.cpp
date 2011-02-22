@@ -161,7 +161,7 @@ void EnzoSimulation::run() throw()
       }
 
       output_images_(data_block,
-		     "EnzoSimulation-%d.%d.png",enzo_->CycleNumber,10);
+		     "EnzoSimulation-%d.%d.png",enzo_->CycleNumber,0);
 
       // Update block dt (before finalize_block)
 
@@ -196,7 +196,7 @@ void EnzoSimulation::run() throw()
     initialize_block_(data_block);
 
     output_images_(data_block,
-		   "EnzoSimulation-%d.%d.png",enzo_->CycleNumber);
+		   "EnzoSimulation-%d.%d.png",enzo_->CycleNumber,1);
 
     finalize_block_(data_block);
   }
@@ -457,6 +457,6 @@ void EnzoSimulation::output_images_
     sprintf (filename,file_format,
 	     enzo_->CycleNumber,index);
     monitor_->image (filename, field_values, mx,my,mz, 2, reduce_sum, 
-		     0.0, 1.0);
+    		     0.0, 1.0);
   }
 }

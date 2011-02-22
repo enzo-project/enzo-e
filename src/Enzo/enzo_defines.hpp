@@ -5,9 +5,6 @@
 /* DEFINES */
 /*----------------------------------------------------------------------*/
 
-#define p8
-#define r8
-
 #define MACH_EPSILON                      /* machine epsilon for the default precision */
 #define ENZO_FAIL                           0 /* Error handling */
 #define ENZO_SUCCESS                        1 /* Error handling */
@@ -15,7 +12,16 @@
 #define FALSE                               0 /* Needed for fortran */
 #define TRUE                                1 /* Needed for fortran */
 
-#define ENZO_FLOAT                          double /* Scalar */
+#ifdef CONFIG_PRECISION_SINGLE
+#  define enzo_float float
+#elif  CONFIG_PRECISION_DOUBLE
+#  define enzo_float double
+#elif  CONFIG_PRECISION_QUADRUPLE
+#  define enzo_float long_long
+#else
+#  error "Must define CONFIG_PRECISION_[SINGLE|DOUBLE|QUADRUPLE]"
+#endif
+
 #define ENZO_FLOAT_UNDEFINED              -99999.0 /* use NaN: CosmologyComputeExpansionFactor() */
 #define ISYM                              "d" /* Scalar */
 

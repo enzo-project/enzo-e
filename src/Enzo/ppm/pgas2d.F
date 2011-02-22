@@ -1,6 +1,8 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
+#include "fortran.def"
+
 c=======================================================================
 c////////////////////////  SUBROUTINE PGAS2D  \\\\\\\\\\\\\\\\\\\\\\\\\\
 c
@@ -49,8 +51,8 @@ c
 c  argument declarations
 c
       integer i1, i2, idim, j1, j2, jdim
-      real    gamma, pmin
-      real dslice(idim,jdim), eslice(idim,jdim), pslice(idim,jdim),
+      ENZO_REAL gamma, pmin
+      ENZO_REAL dslice(idim,jdim), eslice(idim,jdim), pslice(idim,jdim),
      &     uslice(idim,jdim), vslice(idim,jdim), wslice(idim,jdim)
 c
 c  locals

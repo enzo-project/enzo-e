@@ -13,13 +13,9 @@
 
 #include "enzo.hpp"
  
-/* function prototypes */
+//----------------------------------------------------------------------
  
-// int CosmologyGetUnits(float *DensityUnits, float *LengthUnits,
-// 		      float *TemperatureUnits, float *TimeUnits,
-// 		      float *VelocityUnits, ENZO_FLOAT Time);
- 
-int EnzoDescr::ComputePressureDualEnergyFormalism(ENZO_FLOAT time, float *pressure)
+int EnzoDescr::ComputePressureDualEnergyFormalism(enzo_float time, float *pressure)
 {
  
   /* declarations */

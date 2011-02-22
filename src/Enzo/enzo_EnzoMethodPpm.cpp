@@ -20,13 +20,7 @@ EnzoMethodPpm::EnzoMethodPpm
   : Hyperbolic(parameters),
     enzo_(enzo)
 {
-
-  parameters->set_current_group("Method","ppm");
-
-  enzo_->PPMFlatteningParameter = parameters->value_logical("flattening",true);
-  enzo_->PPMDiffusionParameter  = parameters->value_logical("diffusion",true);
-  enzo_->PPMSteepeningParameter = parameters->value_logical("steepening",true);
-
+  // PPM parameters initialized in EnzoDescr::initialize()
 }
 
 //----------------------------------------------------------------------

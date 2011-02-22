@@ -30,7 +30,7 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
   int dim, i,j,  size;
   int DensNum, GENum, TENum, Vel1Num, Vel2Num, Vel3Num, coloff[MAX_COLOR];
   long long GridGlobalStart[MAX_DIMENSION];
-  ENZO_FLOAT a = 1, dadt;
+  enzo_float a = 1, dadt;
 
   float *colourpt = NULL;
 
