@@ -62,7 +62,7 @@ public: // interface
 		     attribute_type_enum type = attribute_type_default);
 
   /// Return the value of an attribute
-  int get_attribute(unsigned id_attribute);
+  int attribute(unsigned id_attribute);
 
   /// Assign a value to an attribute
   void set_attribute(unsigned id_attribute);
@@ -73,7 +73,7 @@ public: // interface
 		 std::string group_name);
 
   /// Return the value of an group
-  int get_group(unsigned id_group);
+  int group(unsigned id_group);
 
   /// Assign a value to an group
   void set_group(unsigned id_group);
@@ -90,7 +90,7 @@ public: // interface
 		  std::string region_name);
 
   /// Return the value of an region
-  int get_region(unsigned id_region);
+  int region(unsigned id_region);
 
   /// Assign a value to an region
   void set_region(unsigned id_region);
@@ -108,7 +108,7 @@ public: // interface
 		   std::string counter_name);
 
   ///  	Return the value of a counter.
-  type_counter get_counter(unsigned id_counter);
+  type_counter counter(unsigned id_counter);
 
   ///  	Assign a value to a user counter.
   void set_counter(unsigned id_counter,
@@ -124,7 +124,7 @@ public: // interface
 
 private: // functions
 
-  type_counter get_real_ () const
+  type_counter time_real_ () const
   {
     struct timeval tv;
     struct timezone tz;
@@ -135,7 +135,7 @@ private: // functions
 
   //--------------------------------------------------
 
-  type_counter get_virt_ () const
+  type_counter time_virt_ () const
   {
 # ifdef CONFIG_USE_PAPI
     return PAPI_get_virt_usec();

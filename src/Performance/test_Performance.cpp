@@ -124,7 +124,7 @@ PARALLEL_MAIN_BEGIN
   // Attributes
   //--------------------------------------------------
 
-  unit_func("get_attribute");
+  unit_func("attribute");
   unit_assert (false); //FAILS
 
   unit_func("set_attribute");
@@ -140,7 +140,7 @@ PARALLEL_MAIN_BEGIN
   unit_func ("begin_group");
 
 
-  unit_func("get_group");
+  unit_func("group");
   unit_assert (false); //FAILS
 
   unit_func("set_group");
@@ -157,7 +157,7 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
 
-  unit_func("get_region");
+  unit_func("region");
   unit_assert (false); //FAILS
 
   unit_func("set_region");
@@ -176,7 +176,7 @@ PARALLEL_MAIN_BEGIN
   // Counters
   //--------------------------------------------------
 
-  unit_func("get_counter");
+  unit_func("counter");
   unit_assert (false); //FAILS
 
   unit_func("set_counter");

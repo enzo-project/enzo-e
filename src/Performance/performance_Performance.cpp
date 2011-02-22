@@ -87,7 +87,7 @@ void Performance::new_attribute(unsigned            id_attribute,
 
 //----------------------------------------------------------------------
 
-int Performance::get_attribute(unsigned id_attribute)
+int Performance::attribute(unsigned id_attribute)
 {
   return 0;
 }
@@ -110,7 +110,7 @@ void Performance::new_group(unsigned    id_group,
 
 //----------------------------------------------------------------------
 
-int Performance::get_group(unsigned id_group)
+int Performance::group(unsigned id_group)
 {
   return 0;
 }
@@ -164,7 +164,7 @@ void Performance::new_region(unsigned    id_region,
 
 //----------------------------------------------------------------------
 
-int Performance::get_region(unsigned id_region)
+int Performance::region(unsigned id_region)
 {
   return 0;
 }
@@ -199,7 +199,7 @@ void Performance::new_counter(unsigned    id_counter,
 
 //----------------------------------------------------------------------
 
-type_counter Performance::get_counter(unsigned id_counter)
+type_counter Performance::counter(unsigned id_counter)
 {
   return 0;
 }
