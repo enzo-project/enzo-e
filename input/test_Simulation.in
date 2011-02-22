@@ -119,7 +119,7 @@
          # method-specific parameters.  Note this is Enzo-P not Cello 
 
          diffusion   = false;
-         flattening  = false;
+         flattening  = 3;
          steepening  = true;
          dual_energy = false;
      }
