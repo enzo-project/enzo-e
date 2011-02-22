@@ -120,6 +120,7 @@ if (platform == 'linux-serial'):
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
       LIBPATH     = '#/lib',
+      LINKFLAGS   = flags_cxx
    )
 #--------------------------------------------------
 elif (platform == 'linux-mpi'):
