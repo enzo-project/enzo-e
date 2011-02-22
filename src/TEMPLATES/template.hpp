@@ -35,13 +35,9 @@ public: // interface
 
 private: // functions
 
-  /// Brief description of Classname::private_function_() in template.hpp
-  private_function_() throw();
 
 private: // attributes
 
-  /// Brief description of Classname::private_attribute_ in template.hpp
-  int private_attribute_;
 
 };
 
