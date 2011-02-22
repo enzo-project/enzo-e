@@ -231,11 +231,6 @@ void Monitor::image
       // should be in bounds, but force if not due to rounding error
       if (v < lo) v = lo;
       if (v > hi) v = hi;
-      if ( ! (lo <= v && v <= hi)) {
-	char buffer [ ERROR_LENGTH ];
-	sprintf (buffer,"v = %g is out of range [%g,%g]",v,lo,hi);
-	ERROR("Montor::image",buffer);
-      }
 
       double ratio = (v - lo) / (hi-lo);
       double r = (1-ratio)*map[3*index+0] + ratio*map[3*(index+1)+0];
