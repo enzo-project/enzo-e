@@ -64,13 +64,13 @@
 
 #define message_(FP,TYPE,FILE,LINE,FUNCTION,MESSAGE)		\
   {								\
-    fprintf (FP,"\n");						\
+    fprintf (FP,"     ======================================================================\n");						\
     fprintf (FP,"     %s File:     %s:%d\n",TYPE,FILE,LINE);	\
     if (strcmp(FUNCTION,"") != 0)				\
       fprintf (FP,"     %s Function: %s()\n", TYPE,FUNCTION);	\
     if (strcmp(MESSAGE,"") != 0)				\
       fprintf (FP,"     %s Message:  %s\n",   TYPE,MESSAGE);	\
-    fprintf (FP,"\n");						\
+    fprintf (FP,"     ======================================================================\n");						\
   }
 
 #endif /* ERROR_ERROR_HPP */
