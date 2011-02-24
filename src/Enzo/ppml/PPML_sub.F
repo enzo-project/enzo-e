@@ -1,14 +1,19 @@
 c     $Id$
 c     See LICENSE_CELLO file for license and copyright information
 
+#include "fortran.def"
+
       SUBROUTINE VECTLRx(QU,QL,QR,U)
       Implicit NONE
 
-      REAL QU(7),QL(7,7),QR(7,7),U(7)          
-      REAL DLT,X22,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
-      REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
-      REAL VS2,CF,CS,CA,BXX,BYZ,SBB,BMG,GPP,GPB
-      REAL ASS,AS,AF,BY,BZ,BSGN,CD2
+      ENZO_REAL QU(7),QL(7,7),QR(7,7),U(7)          
+      ENZO_REAL DLT,X22,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
+      ENZO_REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
+      ENZO_REAL VS2,CF,CS,CA,BXX,BYZ,SBB,BMG,GPP,GPB
+      ENZO_REAL ASS,AS,AF,BY,BZ,BSGN,CD2
+
+      ENZO_REAL one
+      parameter (one = 1.0)
 
       a1=1.
       a2=1.
@@ -58,10 +63,10 @@ c     See LICENSE_CELLO file for license and copyright information
       ELSE
 
          IF(GPB.GT.DLT*GPP) THEN
-            AS=sqrt(abs((1.e0-SIGN(1.e0,CWH))/2.e0))
-            AF=sqrt(abs((1.e0+SIGN(1.e0,CWH))/2.e0))
-            CS=sqrt(abs((CKV+VAX-SIGN(1.e0,CWH)*CWH)/2.e0))
-            CF=sqrt(abs((CKV+VAX+SIGN(1.e0,CWH)*CWH)/2.e0))
+            AS=sqrt(abs((1.e0-SIGN(one,CWH))/2.e0))
+            AF=sqrt(abs((1.e0+SIGN(one,CWH))/2.e0))
+            CS=sqrt(abs((CKV+VAX-SIGN(one,CWH)*CWH)/2.e0))
+            CF=sqrt(abs((CKV+VAX+SIGN(one,CWH)*CWH)/2.e0))
          ELSE
             AS=X22
             AF=X22
@@ -74,7 +79,7 @@ c     See LICENSE_CELLO file for license and copyright information
 
       ENDIF
 
-      BSGN=SIGN(1.e0,QU(5))
+      BSGN=SIGN(one,QU(5))
       CD2=2.e0*CKV
       
       QL(1,1)=AF/2.e0
@@ -205,12 +210,15 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE VECTLRy(QU,QL,QR,U)
       Implicit NONE
 
-      REAL QU(7),QL(7,7),QR(7,7),U(7)          
-      REAL DLT,X22,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
-      REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
-      REAL VS2,CF,CS,CA,BYY,BXZ,SBB,BMG,GPP,GPB
-      REAL ASS,AS,AF,BX,BZ,BSGN,CD2
+      ENZO_REAL QU(7),QL(7,7),QR(7,7),U(7)          
+      ENZO_REAL DLT,X22,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
+      ENZO_REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
+      ENZO_REAL VS2,CF,CS,CA,BYY,BXZ,SBB,BMG,GPP,GPB
+      ENZO_REAL ASS,AS,AF,BX,BZ,BSGN,CD2
       
+      ENZO_REAL one
+      parameter (one = 1.0)
+
       a1=1.
       a2=1.
 
@@ -258,10 +266,10 @@ c     See LICENSE_CELLO file for license and copyright information
       ELSE
 
          IF(GPB.GT.DLT*GPP) THEN
-            AS=sqrt(abs((1.e0-SIGN(1.e0,CWH))/2.e0))
-            AF=sqrt(abs((1.e0+SIGN(1.e0,CWH))/2.e0))
-            CS=sqrt(abs((CKV+VAY-SIGN(1.e0,CWH)*CWH)/2.e0))
-            CF=sqrt(abs((CKV+VAY+SIGN(1.e0,CWH)*CWH)/2.e0))
+            AS=sqrt(abs((1.e0-SIGN(one,CWH))/2.e0))
+            AF=sqrt(abs((1.e0+SIGN(one,CWH))/2.e0))
+            CS=sqrt(abs((CKV+VAY-SIGN(one,CWH)*CWH)/2.e0))
+            CF=sqrt(abs((CKV+VAY+SIGN(one,CWH)*CWH)/2.e0))
          ELSE
             AS=X22
             AF=X22
@@ -274,7 +282,7 @@ c     See LICENSE_CELLO file for license and copyright information
 
       ENDIF
 
-      BSGN=SIGN(1.e0,QU(6))
+      BSGN=SIGN(one,QU(6))
       CD2=2.e0*CKV
       
       QL(1,1)=AF/2.e0
@@ -404,12 +412,15 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE VECTLRz(QU,QL,QR,U)
       Implicit NONE
 
-      REAL QU(7),QL(7,7),QR(7,7),U(7)          
-      REAL DLT,X22,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
-      REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
-      REAL VS2,CF,CS,CA,BYY,BXZ,SBB,BMG,GPP,GPB
-      REAL ASS,AS,AF,BX,BY,BSGN,CD2
+      ENZO_REAL QU(7),QL(7,7),QR(7,7),U(7)          
+      ENZO_REAL DLT,X22,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
+      ENZO_REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
+      ENZO_REAL VS2,CF,CS,CA,BYY,BXZ,SBB,BMG,GPP,GPB
+      ENZO_REAL ASS,AS,AF,BX,BY,BSGN,CD2
       
+      ENZO_REAL one
+      parameter (one = 1.0)
+
       a1=1.
       a2=1.
       
@@ -457,10 +468,10 @@ c     See LICENSE_CELLO file for license and copyright information
       ELSE
 
          IF(GPB.GT.DLT*GPP) THEN
-            AS=sqrt(abs((1.e0-SIGN(1.e0,CWH))/2.e0))
-            AF=sqrt(abs((1.e0+SIGN(1.e0,CWH))/2.e0))
-            CS=sqrt(abs((CKV+VAZ-SIGN(1.e0,CWH)*CWH)/2.e0))
-            CF=sqrt(abs((CKV+VAZ+SIGN(1.e0,CWH)*CWH)/2.e0))
+            AS=sqrt(abs((1.e0-SIGN(one,CWH))/2.e0))
+            AF=sqrt(abs((1.e0+SIGN(one,CWH))/2.e0))
+            CS=sqrt(abs((CKV+VAZ-SIGN(one,CWH)*CWH)/2.e0))
+            CF=sqrt(abs((CKV+VAZ+SIGN(one,CWH)*CWH)/2.e0))
          ELSE
             AS=X22
             AF=X22
@@ -473,7 +484,7 @@ c     See LICENSE_CELLO file for license and copyright information
 
       ENDIF
 
-      BSGN=SIGN(1.e0,QU(7))
+      BSGN=SIGN(one,QU(7))
       CD2=2.e0*CKV
       
       QL(1,1)=AF/2.e0
@@ -605,10 +616,13 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE VECTEGx(QU,U)
       Implicit NONE
 
-      REAL QU(7),U(7)          
-      REAL DLT,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
-      REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
-      REAL VS2,CF,CS,VA,BXX,BYZ,SBB,BMG,GPP,GPB
+      ENZO_REAL QU(7),U(7)          
+      ENZO_REAL DLT,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
+      ENZO_REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
+      ENZO_REAL VS2,CF,CS,VA,BXX,BYZ,SBB,BMG,GPP,GPB
+
+      ENZO_REAL one
+      parameter (one = 1.0)
 
       a1=1.
       a2=1.          
@@ -647,8 +661,8 @@ c     See LICENSE_CELLO file for license and copyright information
       IF(BYZ.LE.DLT*BMG) THEN
 
          IF(GPB.GT.DLT*GPP) THEN
-            CS=sqrt(abs((CKV+VAX-SIGN(1.e0,CWH)*CWH)/2.e0))
-            CF=sqrt(abs((CKV+VAX+SIGN(1.e0,CWH)*CWH)/2.e0))
+            CS=sqrt(abs((CKV+VAX-SIGN(one,CWH)*CWH)/2.e0))
+            CF=sqrt(abs((CKV+VAX+SIGN(one,CWH)*CWH)/2.e0))
          ELSE
             CS=CSR
             CF=CSR
@@ -670,11 +684,14 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE VECTEGy(QU,U)
       Implicit NONE
 
-      REAL QU(7),U(7)          
-      REAL DLT,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
-      REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
-      REAL VS2,CF,CS,VA,BYY,BXZ,SBB,BMG,GPP,GPB
+      ENZO_REAL QU(7),U(7)          
+      ENZO_REAL DLT,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ
+      ENZO_REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
+      ENZO_REAL VS2,CF,CS,VA,BYY,BXZ,SBB,BMG,GPP,GPB
       
+      ENZO_REAL one
+      parameter (one = 1.0)
+
       a1=1.
       a2=1.
       
@@ -712,8 +729,8 @@ c     See LICENSE_CELLO file for license and copyright information
       IF(BXZ.LE.DLT*BMG) THEN
 
          IF(GPB.GT.DLT*GPP) THEN
-            CS=sqrt(abs((CKV+VAY-SIGN(1.e0,CWH)*CWH)/2.e0))
-            CF=sqrt(abs((CKV+VAY+SIGN(1.e0,CWH)*CWH)/2.e0))
+            CS=sqrt(abs((CKV+VAY-SIGN(one,CWH)*CWH)/2.e0))
+            CF=sqrt(abs((CKV+VAY+SIGN(one,CWH)*CWH)/2.e0))
          ELSE
             CS=CSR
             CF=CSR
@@ -735,10 +752,13 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE VECTEGz(QU,U)
       Implicit NONE
 
-      REAL QU(7),U(7)          
-      REAL DLT,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ,VA
-      REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
-      REAL VS2,CF,CS,BXX,BYZ,SBB,BMG,GPP,GPB
+      ENZO_REAL QU(7),U(7)          
+      ENZO_REAL DLT,SK1,BVX,BVY,BVZ,VAX,VAY,VAZ,VA
+      ENZO_REAL VAH,CKV,A1,A2,CSR,CSV,CWH,DSCV,VF2
+      ENZO_REAL VS2,CF,CS,BXX,BYZ,SBB,BMG,GPP,GPB
+
+      ENZO_REAL one
+      parameter (one = 1.0)
 
       a1=1.
       a2=1.  
@@ -777,8 +797,8 @@ c     See LICENSE_CELLO file for license and copyright information
       IF(BYZ.LE.DLT*BMG) THEN
 
          IF(GPB.GT.DLT*GPP) THEN
-            CS=sqrt(abs((CKV+VAZ-SIGN(1.e0,CWH)*CWH)/2.e0))
-            CF=sqrt(abs((CKV+VAZ+SIGN(1.e0,CWH)*CWH)/2.e0))
+            CS=sqrt(abs((CKV+VAZ-SIGN(one,CWH)*CWH)/2.e0))
+            CF=sqrt(abs((CKV+VAZ+SIGN(one,CWH)*CWH)/2.e0))
          ELSE
             CS=CSR
             CF=CSR
@@ -800,8 +820,11 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE FLUXx(QU,F)
       Implicit NONE
       
-      REAL QU(7),F(7)
-      REAL A1,A2,BKV,PXX 
+      ENZO_REAL QU(7),F(7)
+      ENZO_REAL A1,A2,BKV,PXX 
+
+      ENZO_REAL one
+      parameter (one = 1.0)
 
       a1=1.
       a2=1.  
@@ -824,8 +847,11 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE FLUXy(QU,F)
       Implicit NONE
       
-      REAL QU(7),F(7)
-      REAL A1,A2,BKV,PXX 
+      ENZO_REAL QU(7),F(7)
+      ENZO_REAL A1,A2,BKV,PXX 
+
+      ENZO_REAL one
+      parameter (one = 1.0)
 
       A1=1.
       A2=1.  
@@ -848,8 +874,11 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE FLUXz(QU,F)
       Implicit NONE
       
-      REAL QU(7),F(7)
-      REAL A1,A2,BKV,PXX 
+      ENZO_REAL QU(7),F(7)
+      ENZO_REAL A1,A2,BKV,PXX 
+
+      ENZO_REAL one
+      parameter (one = 1.0)
 
       A1=1.
       A2=1.  
@@ -873,8 +902,8 @@ c     See LICENSE_CELLO file for license and copyright information
       Implicit NONE
       
       Integer m
-      REAL QL(7),QR(7),QP(7),QC(7)
-      REAL DQ,Q6,Y
+      ENZO_REAL QL(7),QR(7),QP(7),QC(7)
+      ENZO_REAL DQ,Q6,Y
 
       DO M=1,7
          DQ=QR(M)-QL(M)
@@ -889,8 +918,8 @@ c     See LICENSE_CELLO file for license and copyright information
       Implicit NONE
       
       Integer m
-      REAL QL(7),QR(7),QP(7),QC(7)
-      REAL DQ,Q6,y
+      ENZO_REAL QL(7),QR(7),QP(7),QC(7)
+      ENZO_REAL DQ,Q6,y
 
       DO M=1,7
          DQ=QR(M)-QL(M)
@@ -905,8 +934,8 @@ c     See LICENSE_CELLO file for license and copyright information
       Implicit NONE
       
       Integer m
-      REAL QL(7),QR(7),QP(7),QC(7)
-      REAL DQ,Q6,Y
+      ENZO_REAL QL(7),QR(7),QP(7),QC(7)
+      ENZO_REAL DQ,Q6,Y
 
       DO M=1,7
          DQ=QR(M)-QL(M)
@@ -920,8 +949,8 @@ c     See LICENSE_CELLO file for license and copyright information
       subroutine averx(qul,qur,qsr)
       Implicit NONE
       
-      REAL qul(7),qur(7),qsr(7)
-      REAL RL,RR,RS
+      ENZO_REAL qul(7),qur(7),qsr(7)
+      ENZO_REAL RL,RR,RS
 
       rl=sqrt(qul(1))
       rr=sqrt(qur(1))
@@ -941,8 +970,8 @@ c     See LICENSE_CELLO file for license and copyright information
       subroutine avery(qul,qur,qsr)
       Implicit NONE
       
-      REAL qul(7),qur(7),qsr(7)
-      REAL RL,RR,RS
+      ENZO_REAL qul(7),qur(7),qsr(7)
+      ENZO_REAL RL,RR,RS
       
       rl=sqrt(qul(1))
       rr=sqrt(qur(1))
@@ -962,8 +991,8 @@ c     See LICENSE_CELLO file for license and copyright information
       subroutine averz(qul,qur,qsr)
       Implicit NONE
       
-      REAL qul(7),qur(7),qsr(7)
-      REAL RL,RR,RS
+      ENZO_REAL qul(7),qur(7),qsr(7)
+      ENZO_REAL RL,RR,RS
       
       rl=sqrt(qul(1))
       rr=sqrt(qur(1))
@@ -984,9 +1013,9 @@ c     See LICENSE_CELLO file for license and copyright information
       Subroutine QDD6(Nx,Qvr,Qvl,Qrx,Qlx,Qp)
       Implicit NONE
       Integer m,nx,i
-      REAL Qvr(Nx,7),Qvl(Nx,7),Qp(Nx,7) 
-      REAL Qrx(Nx,7),Qlx(Nx,7) 
-      REAL DQ,Q6
+      ENZO_REAL Qvr(Nx,7),Qvl(Nx,7),Qp(Nx,7) 
+      ENZO_REAL Qrx(Nx,7),Qlx(Nx,7) 
+      ENZO_REAL DQ,Q6
 
       Do I=1,Nx        
          
@@ -1017,8 +1046,8 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE MATR_AX(QU,QL)
       Implicit NONE
 
-      REAL QU(7),QL(7,7)          
-      REAL A1,A2
+      ENZO_REAL QU(7),QL(7,7)          
+      ENZO_REAL A1,A2
 
       A1=1.
       A2=1.  
@@ -1085,8 +1114,8 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE MATR_AY(QU,QL)
       Implicit NONE
 
-      REAL QU(7),QL(7,7)          
-      REAL A1,A2
+      ENZO_REAL QU(7),QL(7,7)          
+      ENZO_REAL A1,A2
 
       A1=1.
       A2=1.  
@@ -1153,8 +1182,8 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE MATR_AZ(QU,QL)
       Implicit NONE
 
-      REAL QU(7),QL(7,7)          
-      REAL A1,A2
+      ENZO_REAL QU(7),QL(7,7)          
+      ENZO_REAL A1,A2
 
       A1=1.
       A2=1.  
@@ -1221,7 +1250,7 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE DUDW(Qu,QL)
       Implicit NONE
 
-      REAL QU(7),QL(7,7)          
+      ENZO_REAL QU(7),QL(7,7)          
       
       QL(1,1)=1.
       QL(1,2)=0.
@@ -1286,7 +1315,7 @@ c     See LICENSE_CELLO file for license and copyright information
       Implicit NONE
 
       Integer m,l
-      REAL QL(7,7),QD(7),SL(7)
+      ENZO_REAL QL(7,7),QD(7),SL(7)
       
       DO M=1,7
          SL(M)=0.   
@@ -1300,16 +1329,18 @@ c     See LICENSE_CELLO file for license and copyright information
 
       Function Xminmod(x,y)
       
-      REAL x,y,Xminmod
+      ENZO_REAL x,y,Xminmod
+      ENZO_REAL one
+      parameter (one = 1.0)
       
-      Xminmod = 0.5*(sign(1.e0,x) + sign(1.e0,y))*min(abs(x),abs(y))
+      Xminmod = 0.5*(SIGN(one,x) + SIGN(one,y))*min(abs(x),abs(y))
 
       Return
       End
 
       Function Xmedian(x,y,z)
       
-      REAL x,y,z,Xminmod,Xmedian
+      ENZO_REAL x,y,z,Xminmod,Xmedian
 
       External Xminmod
 
@@ -1321,9 +1352,9 @@ c     See LICENSE_CELLO file for license and copyright information
       SUBROUTINE W5RECM(VP1,VP2,VP3,VP4,VP5,VL,VR)
       Implicit NONE
       
-      REAL IS1,IS2,IS3,DELTA,WS1,WS2,WS3,WJ1,WJ2,WJ3
-      REAL AJ1,AJ2,AJ3,AJS,WM1,WM2,WM3,VL,VR
-      REAL VP1,VP2,VP3,VP4,VP5
+      ENZO_REAL IS1,IS2,IS3,DELTA,WS1,WS2,WS3,WJ1,WJ2,WJ3
+      ENZO_REAL AJ1,AJ2,AJ3,AJS,WM1,WM2,WM3,VL,VR
+      ENZO_REAL VP1,VP2,VP3,VP4,VP5
       
       DELTA = 1.0d-20
       
@@ -1409,7 +1440,7 @@ c     See LICENSE_CELLO file for license and copyright information
       
       Function VLeer(a,b)
 
-      REAL a,b,VLeer
+      ENZO_REAL a,b,VLeer
 
       if(a*a+b*b.ne.0)then
          VLeer=max(a*b,0.)*(a+b)/(a*a+b*b)
@@ -1423,7 +1454,7 @@ c     See LICENSE_CELLO file for license and copyright information
       
       SUBROUTINE PRIM(QU,QP)
 
-      REAL QU(7),QP(7)
+      ENZO_REAL QU(7),QP(7)
 
       QP(1)=QU(1)
       QP(2)=QU(2)/QU(1)
@@ -1438,7 +1469,7 @@ c     See LICENSE_CELLO file for license and copyright information
 
       SUBROUTINE CONS(QP,QU)
 
-      REAL QU(7),QP(7)
+      ENZO_REAL QU(7),QP(7)
 
       QU(1)=QP(1)
       QU(2)=QP(2)*QP(1)

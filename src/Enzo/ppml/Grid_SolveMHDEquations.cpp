@@ -23,7 +23,7 @@
 #include "enzo.hpp" 
 
 int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
-				 int cycle, float dt)
+				 int cycle, enzo_float dt)
 {
  
   if (data_block) {
@@ -53,37 +53,37 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
     /* Get easy to handle pointers for each variable. */
  
 
-    float *density    = BaryonField[ 0];
-    float *velox      = BaryonField[ 1];
-    float *veloy      = BaryonField[ 2];
-    float *veloz      = BaryonField[ 3];
-    float *bfieldx    = BaryonField[ 4];
-    float *bfieldy    = BaryonField[ 5];
-    float *bfieldz    = BaryonField[ 6];
+    enzo_float *density    = BaryonField[ 0];
+    enzo_float *velox      = BaryonField[ 1];
+    enzo_float *veloy      = BaryonField[ 2];
+    enzo_float *veloz      = BaryonField[ 3];
+    enzo_float *bfieldx    = BaryonField[ 4];
+    enzo_float *bfieldy    = BaryonField[ 5];
+    enzo_float *bfieldz    = BaryonField[ 6];
 
-    float *dens_rx    = BaryonField[ 7];
-    float *velox_rx   = BaryonField[ 8];
-    float *veloy_rx   = BaryonField[ 9];
-    float *veloz_rx   = BaryonField[10];
-    float *bfieldx_rx = BaryonField[11];
-    float *bfieldy_rx = BaryonField[12];
-    float *bfieldz_rx = BaryonField[13];
+    enzo_float *dens_rx    = BaryonField[ 7];
+    enzo_float *velox_rx   = BaryonField[ 8];
+    enzo_float *veloy_rx   = BaryonField[ 9];
+    enzo_float *veloz_rx   = BaryonField[10];
+    enzo_float *bfieldx_rx = BaryonField[11];
+    enzo_float *bfieldy_rx = BaryonField[12];
+    enzo_float *bfieldz_rx = BaryonField[13];
 
-    float *dens_ry    = BaryonField[14];
-    float *velox_ry   = BaryonField[15];
-    float *veloy_ry   = BaryonField[16];
-    float *veloz_ry   = BaryonField[17];
-    float *bfieldx_ry = BaryonField[18];
-    float *bfieldy_ry = BaryonField[19];
-    float *bfieldz_ry = BaryonField[20];
+    enzo_float *dens_ry    = BaryonField[14];
+    enzo_float *velox_ry   = BaryonField[15];
+    enzo_float *veloy_ry   = BaryonField[16];
+    enzo_float *veloz_ry   = BaryonField[17];
+    enzo_float *bfieldx_ry = BaryonField[18];
+    enzo_float *bfieldy_ry = BaryonField[19];
+    enzo_float *bfieldz_ry = BaryonField[20];
 
-    float *dens_rz    = BaryonField[21];
-    float *velox_rz   = BaryonField[22];
-    float *veloy_rz   = BaryonField[23];
-    float *veloz_rz   = BaryonField[24];
-    float *bfieldx_rz = BaryonField[25];
-    float *bfieldy_rz = BaryonField[26];
-    float *bfieldz_rz = BaryonField[27];
+    enzo_float *dens_rz    = BaryonField[21];
+    enzo_float *velox_rz   = BaryonField[22];
+    enzo_float *veloy_rz   = BaryonField[23];
+    enzo_float *veloz_rz   = BaryonField[24];
+    enzo_float *bfieldx_rz = BaryonField[25];
+    enzo_float *bfieldy_rz = BaryonField[26];
+    enzo_float *bfieldz_rz = BaryonField[27];
 
     /* allocate space for fluxes */
  
@@ -110,9 +110,9 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
  
 //         for (field = 0; field < NumberOfBaryonFields; field++) {
 // 	  if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
-// 	    SubgridFluxes[i]->LeftFluxes[field][dim]  = new float[size];
+// 	    SubgridFluxes[i]->LeftFluxes[field][dim]  = new enzo_float[size];
 // 	  if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
-// 	    SubgridFluxes[i]->RightFluxes[field][dim] = new float[size];
+// 	    SubgridFluxes[i]->RightFluxes[field][dim] = new enzo_float[size];
 // 	  for (n = 0; n < size; n++) {
 // 	    SubgridFluxes[i]->LeftFluxes[field][dim][n]  = 0;
 // 	    SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
@@ -161,7 +161,7 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
     int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
                            GridDimension[1]*GridDimension[2]),
 		           GridDimension[2]*GridDimension[0]  );
-    float *temp = new float[tempsize*(31)];
+    enzo_float *temp = new enzo_float[tempsize*(31)];
  
     /* create and fill in arrays which are easiler for the solver to
        understand. */
@@ -182,7 +182,7 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
     int *byindex   = leftface + NumberOfSubgrids*3*16;
     int *bzindex   = leftface + NumberOfSubgrids*3*18;
 
-    float *standard = NULL;
+    enzo_float *standard = NULL;
     //    if (NumberOfSubgrids > 0) standard = SubgridFluxes[0]->LeftFluxes[0][0];
  
     for (subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
@@ -269,11 +269,11 @@ int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
     /* Create a cell width array to pass (and convert to absolute coords). */
     // this is not going to work for cosmology right away !AK
 
-    float a = 1.0;
-    float CellWidthTemp[MAX_DIMENSION];
+    enzo_float a = 1.0;
+    enzo_float CellWidthTemp[MAX_DIMENSION];
     for (dim = 0; dim < MAX_DIMENSION; dim++) {
       if (dim < GridRank)
-	CellWidthTemp[dim] = float(a*CellWidth[dim]);
+	CellWidthTemp[dim] = enzo_float(a*CellWidth[dim]);
       else
 	CellWidthTemp[dim] = 1.0;
     }

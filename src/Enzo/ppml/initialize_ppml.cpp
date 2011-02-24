@@ -18,17 +18,17 @@ void EnzoDescr::initialize_ppml (int size_param)
 
   int grid_size [] = { size_param, size_param, size_param };
 
-  float MHDBlastDensity = 100.0;
-  float MHDBlastField = 10.0;
+  enzo_float MHDBlastDensity = 100.0;
+  enzo_float MHDBlastField = 10.0;
 
-  float radiusBlast = 0.125;
+  enzo_float radiusBlast = 0.125;
 
-  const float R2 (radiusBlast*radiusBlast);
+  const enzo_float R2 (radiusBlast*radiusBlast);
 
-  float density_out  = 1.0;
-  float density_in   = MHDBlastDensity;
-  float magnetic_out = MHDBlastField;
-  float magnetic_in  = MHDBlastField;
+  enzo_float density_out  = 1.0;
+  enzo_float density_in   = MHDBlastDensity;
+  enzo_float magnetic_out = MHDBlastField;
+  enzo_float magnetic_in  = MHDBlastField;
 
   bool is_full = true;
 
@@ -87,7 +87,7 @@ void EnzoDescr::initialize_ppml (int size_param)
   GridLeftEdge[2]    = 0.0;
 
   for (int dim=0; dim<GridRank; dim++) {
-    float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
+    enzo_float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
       (GridEndIndex[dim] - GridStartIndex[dim] + 1);
     CellWidth[dim] = h;
   }
@@ -132,7 +132,7 @@ void EnzoDescr::initialize_ppml (int size_param)
   
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
 
-  float * baryon_fields = new float [NumberOfBaryonFields * nd];
+  enzo_float * baryon_fields = new enzo_float [NumberOfBaryonFields * nd];
   for (int field = 0; field < NumberOfBaryonFields; field++) {
     BaryonField[field] = baryon_fields + field*nd;
   }
@@ -140,9 +140,9 @@ void EnzoDescr::initialize_ppml (int size_param)
   int ndx = GridDimension[0];
   int ndy = GridDimension[1];
 
-  float hx = CellWidth[0];
-  float hy = CellWidth[1];
-  float hz = CellWidth[2];
+  enzo_float hx = CellWidth[0];
+  enzo_float hy = CellWidth[1];
+  enzo_float hz = CellWidth[2];
 
   // Clear all fields
 
@@ -166,36 +166,36 @@ void EnzoDescr::initialize_ppml (int size_param)
     BaryonField[field_magnetic_x_zp][i] = magnetic_out;
   }
 
-  const float x0 = DomainLeftEdge[0];
-  const float y0 = DomainLeftEdge[1];
-  const float z0 = DomainLeftEdge[2];
+  const enzo_float x0 = DomainLeftEdge[0];
+  const enzo_float y0 = DomainLeftEdge[1];
+  const enzo_float z0 = DomainLeftEdge[2];
 
   for (int iz = GridStartIndex[2]; iz<=GridEndIndex[2]; iz++) {
 
-    float zc = z0 + 0.5*hz + (iz - GridStartIndex[2]) * hz;
-    float zp = z0 + 1.0*hz + (iz - GridStartIndex[2]) * hz;
+    enzo_float zc = z0 + 0.5*hz + (iz - GridStartIndex[2]) * hz;
+    enzo_float zp = z0 + 1.0*hz + (iz - GridStartIndex[2]) * hz;
 
     for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
-      float yc = y0 + 0.5*hy + (iy - GridStartIndex[1]) * hy;
-      float yp = y0 + 1.0*hy + (iy - GridStartIndex[1]) * hy;
+      enzo_float yc = y0 + 0.5*hy + (iy - GridStartIndex[1]) * hy;
+      enzo_float yp = y0 + 1.0*hy + (iy - GridStartIndex[1]) * hy;
 
       for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
 
-	float xc = x0 + 0.5*hx + (ix - GridStartIndex[0]) * hx;
-	float xp = x0 + 1.0*hx + (ix - GridStartIndex[0]) * hx;
+	enzo_float xc = x0 + 0.5*hx + (ix - GridStartIndex[0]) * hx;
+	enzo_float xp = x0 + 1.0*hx + (ix - GridStartIndex[0]) * hx;
 
 	int i = ix + ndx * (iy + ndy * iz);
 
-	float r2   = xc*xc + yc*yc + zc*zc;
-	float rxp2 = xp*xp + yc*yc + zc*zc;
-	float ryp2 = xc*xc + yp*yp + zc*zc;
-	float rzp2 = xc*xc + yc*yc + zp*zp;
+	enzo_float r2   = xc*xc + yc*yc + zc*zc;
+	enzo_float rxp2 = xp*xp + yc*yc + zc*zc;
+	enzo_float ryp2 = xc*xc + yp*yp + zc*zc;
+	enzo_float rzp2 = xc*xc + yc*yc + zp*zp;
 
 	// cell-centered density and magnetic
 
-	float d = (r2 < R2) ? density_in  : density_out;
-	float b = (r2 < R2) ? magnetic_in : magnetic_out;
+	enzo_float d = (r2 < R2) ? density_in  : density_out;
+	enzo_float b = (r2 < R2) ? magnetic_in : magnetic_out;
 
 	BaryonField[field_density]    [i] = d;
 	BaryonField[field_magnetic_x] [i] = b;

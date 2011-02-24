@@ -23,8 +23,7 @@
 #define MAX_ANY_SINGLE_DIRECTION 4200+6
 #define tiny                     1.0e-20
 
-#define SIGN(A)   ((A) >  0  ?  1  : -1 )     /* upper-case inline function */
-#define NINT(A)   ((int) ((A) + 0.5*SIGN(A)) ) /* rename to round(), upper-case inline function */
+#define NINT(A)   ((int) ((A) + 0.5*((A)>0?1:-1))) /* rename to round(), upper-case inline function */
 
 /* #define FORTRAN_NAME(NAME) NAME */
 #define FORTRAN_NAME(NAME) NAME##_

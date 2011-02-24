@@ -1,13 +1,15 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
+#include "fortran.def"
+
         Subroutine QDD6(Nx,Qvr,Qvl,Qrx,Qlx,Qp)
         Implicit NONE
         
         integer i,m,nx
-        REAL Qvr(Nx,7),Qvl(Nx,7),Qp(Nx,7) 
-        REAL Qrx(Nx,7),Qlx(Nx,7) 
-        REAL DQ,Q6
+        ENZO_REAL Qvr(Nx,7),Qvl(Nx,7),Qp(Nx,7) 
+        ENZO_REAL Qrx(Nx,7),Qlx(Nx,7) 
+        ENZO_REAL DQ,Q6
 
         DO I=1,Nx        
            

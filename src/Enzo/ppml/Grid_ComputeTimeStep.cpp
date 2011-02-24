@@ -25,18 +25,18 @@
 
 #include "enzo.hpp"
 
-float EnzoDescr::ComputeTimeStep()
+enzo_float EnzoDescr::ComputeTimeStep()
 {
  
   /* initialize */
  
-  float dt;
-//   float dtTemp;
-  float dtBaryons      = HUGE_VAL;
-  float dtViscous      = HUGE_VAL;
-  float dtParticles    = HUGE_VAL;
-  float dtExpansion    = HUGE_VAL;
-  float dtAcceleration = HUGE_VAL;
+  enzo_float dt;
+//   enzo_float dtTemp;
+  enzo_float dtBaryons      = HUGE_VAL;
+  enzo_float dtViscous      = HUGE_VAL;
+  enzo_float dtParticles    = HUGE_VAL;
+  enzo_float dtExpansion    = HUGE_VAL;
+  enzo_float dtAcceleration = HUGE_VAL;
   int dim;
 //   int i, result;
  
@@ -49,10 +49,10 @@ float EnzoDescr::ComputeTimeStep()
   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
      set it to one. */
  
-  ENZO_FLOAT a = 1, dadt;
+  enzo_float a = 1, dadt;
   if (ComovingCoordinates)
     CosmologyComputeExpansionFactor(Time, &a, &dadt);
-//   float afloat = float(a);
+//   enzo_float afloat = enzo_float(a);
  
   /* 1) Compute Courant condition for baryons. */
  
@@ -61,7 +61,7 @@ float EnzoDescr::ComputeTimeStep()
     /* Find fields: density, total energy, velocity1-3. */
  
 //     int DensNum, GENum, Vel1Num, Vel2Num, Vel3Num, TENum;
-//     float *pressure_field;
+//     enzo_float *pressure_field;
 
 //     if (HydroMethod != PPML_Isothermal3D) {
 //       if (this->IdentifyPhysicalQuantities(DensNum, GENum, Vel1Num, Vel2Num,
@@ -72,7 +72,7 @@ float EnzoDescr::ComputeTimeStep()
  
 //     /* Compute the pressure. */
  
-//       pressure_field = new float[size];
+//       pressure_field = new enzo_float[size];
 //       if (DualEnergyFormalism)
 // 	result = this->ComputePressureDualEnergyFormalism(Time, pressure_field);
 //       else
@@ -141,7 +141,7 @@ float EnzoDescr::ComputeTimeStep()
 //     /* Compute dt constraint from particle velocities. */
  
 //     for (dim = 0; dim < GridRank; dim++) {
-//       float dCell = CellWidth[dim][0]*a;
+//       enzo_float dCell = CellWidth[dim][0]*a;
 //       for (i = 0; i < NumberOfParticles; i++) {
 //         dtTemp = dCell/MAX(fabs(ParticleVelocity[dim][i]), tiny_number);
 // 	dtParticles = MIN(dtParticles, dtTemp);

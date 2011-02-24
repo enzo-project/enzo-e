@@ -1,6 +1,9 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
+#include "fortran.def"
+
+
       Subroutine Monot(md,nx,dv1,dv2,qp,qm,qxl,qxr)
       Implicit NONE
 
@@ -8,28 +11,31 @@ c     See LICENSE_ENZO file for license and copyright information
       
       Integer imd,md,nx,i,m
 
-      REAL q1(7),q2(7),q3(7),q4(7),q5(7)
-      REAL qpl(7),qpr(7),vl(7),vr(7)
-      REAL u1(7),u2(7),u3(7),u4(7),u5(7)
-      REAL b1(7),b2(7),c1(7),c2(7)
-      REAL ql(7,7),qr(7,7),uv(7)
-      REAL qp(nx,7),qm(nx,7),qxl(nx,7),qxr(nx,7)
-      REAL dv1(nx),dv2(nx)
+      ENZO_REAL q1(7),q2(7),q3(7),q4(7),q5(7)
+      ENZO_REAL qpl(7),qpr(7),vl(7),vr(7)
+      ENZO_REAL u1(7),u2(7),u3(7),u4(7),u5(7)
+      ENZO_REAL b1(7),b2(7),c1(7),c2(7)
+      ENZO_REAL ql(7,7),qr(7,7),uv(7)
+      ENZO_REAL qp(nx,7),qm(nx,7),qxl(nx,7),qxr(nx,7)
+      ENZO_REAL dv1(nx),dv2(nx)
 
-      REAL uwl,uwr,vx1,vx2,vx3,vx4,vx5,vl1,vr1,dml
-      REAL dmr,dwl,dwr,sjn,sjm,sjx,sjy,uvr,uvl,Xmedian 
+      ENZO_REAL uwl,uwr,vx1,vx2,vx3,vx4,vx5,vl1,vr1,dml
+      ENZO_REAL dmr,dwl,dwr,sjn,sjm,sjx,sjy,uvr,uvl,Xmedian 
 
-      REAL IS1,IS2,IS3,DELTA,WS1,WS2,WS3,WJ1,WJ2,WJ3
-      REAL AJ1,AJ2,AJ3,AJS,WM1,WM2,WM3
+      ENZO_REAL IS1,IS2,IS3,DELTA,WS1,WS2,WS3,WJ1,WJ2,WJ3
+      ENZO_REAL AJ1,AJ2,AJ3,AJS,WM1,WM2,WM3
 
-      REAL o2, o4, o6, o12
+      ENZO_REAL o2, o4, o6, o12
+
+      ENZO_REAL one
+      parameter (one = 1.0)
 
       o2 = 1.0E0 / 2.0E0
       o4 = 1.0E0 / 4.0E0
       o6 = 1.0E0 / 6.0E0
       o12 = 1.0E0 / 12.0E0
 
-C     REAL VP1,VP2,VP3,VP4,VP5
+C     ENZO_REAL VP1,VP2,VP3,VP4,VP5
 
       Do i=1,Nx  
          Do m=1,7
@@ -274,7 +280,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                uwl=q4(m)-q3(m)
                uwr=q3(m)-q2(m)
 
-               u1(m)=0.5e0*(SIGN(1.e0,uwl)+SIGN(1.e0,uwr))*
+               u1(m)=0.5e0*(SIGN(one,uwl)+SIGN(one,uwr))*
      &                min(abs(uwl),abs(uwr))
 
             Enddo
@@ -304,7 +310,7 @@ C     CALL W5RECM(vx1,vx2,vx3,vx4,vx5,VL1,VR1)
                uwl=q4(m)-q3(m)
                uwr=q3(m)-q2(m)
 
-               u1(m)=0.5e0*(SIGN(1.e0,uwl)+SIGN(1.e0,uwr))*
+               u1(m)=0.5e0*(SIGN(one,uwl)+SIGN(one,uwr))*
      &                min(abs(uwl),abs(uwr))
 
             Enddo

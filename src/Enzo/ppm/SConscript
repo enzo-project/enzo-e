@@ -37,11 +37,13 @@ sources  = [Glob('initialize*cpp'),
             Glob('Cosmology*.cpp'),
             Glob('Grid_*cpp'),
             Glob('*.F'),
-	   '../image_dump.cpp',
-           '../SetExternalBoundary.cpp',
-	   'FindField.cpp',
-           'sum_field.cpp',
-	   '../initialize_hydro.cpp']
+	    '../image_dump.cpp',
+	    '../SetExternalBoundary.cpp',
+	    '../CosmologyComputeExpansionFactor.cpp',
+	    '../CosmologyComputeExpansionTimestep.cpp',
+	    'FindField.cpp',
+	    'sum_field.cpp',
+	    '../initialize_hydro.cpp']
 
 #------------------------------
 # TARGETS
@@ -59,5 +61,5 @@ if (parallel_type == "charm"):
 # INSTALL
 #------------------------------
 
-env.Alias('install-bin', env.Install ('#/bin', binaries))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))

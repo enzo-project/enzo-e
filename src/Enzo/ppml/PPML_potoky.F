@@ -1,20 +1,22 @@
 c     $Id$
 c     See LICENSE_ENZO file for license and copyright information
 
+#include "fortran.def"
+
       Subroutine POTOKy(Nx,Dx,Dt,Qlx,Qrx,Qpm,Qdx,Qdz,Qrp,Fm) 
       Implicit NONE
       Integer nx,i,m,l
 
-      REAL Qlx(Nx,7),Qrx(Nx,7),Qpm(Nx,7),Qdx(Nx,7),Qdz(Nx,7)
-      REAL Qrp(Nx,7),Fm(Nx,7) 
+      ENZO_REAL Qlx(Nx,7),Qrx(Nx,7),Qpm(Nx,7),Qdx(Nx,7),Qdz(Nx,7)
+      ENZO_REAL Qrp(Nx,7),Fm(Nx,7) 
       
-      REAL qp(7),px(7),qc(7),qvl(7),qvr(7)
-      REAL vm(7),ql(7,7),qr(7,7),uv(7),vl(7)
-      REAL sl(7),qul(7),qur(7),tl(7)
-      REAL tr(7),fr(7),ur(7),qv(7)
-      REAL udx(7),udz(7),ax(7,7),az(7,7),av(7)
-      REAL tvl(7),tvr(7),tp(7),tc(7),tdx(7),tdz(7)
-      REAL DT,DX,DTX,DXI,TL6
+      ENZO_REAL qp(7),px(7),qc(7),qvl(7),qvr(7)
+      ENZO_REAL vm(7),ql(7,7),qr(7,7),uv(7),vl(7)
+      ENZO_REAL sl(7),qul(7),qur(7),tl(7)
+      ENZO_REAL tr(7),fr(7),ur(7),qv(7)
+      ENZO_REAL udx(7),udz(7),ax(7,7),az(7,7),av(7)
+      ENZO_REAL tvl(7),tvr(7),tp(7),tc(7),tdx(7),tdz(7)
+      ENZO_REAL DT,DX,DTX,DXI,TL6
 
       Do i=1,Nx  
          Do m=1,7
