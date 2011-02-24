@@ -68,7 +68,7 @@ public: // interface
 	      reduce_enum op_reduce,      // Reduction operation along axis
 	      double min, double max,     // Limits for color map
 	      const double * color_map = 0, // color map [r0 g0 b0 r1 g1 b1...]
-	      int            color_length=2 // length of color map / 3
+	      int            color_length=0 // length of color map / 3
 	      );
   
 private: // functions
@@ -115,8 +115,15 @@ void Monitor::image
 
   if (! active_) return;
 
-  const double map_default[] = {0,0,0,1,1,1};
-  const double * map = map_in ? map_in : map_default;
+  const double * map;
+  const double map_default []= {0, 0, 0, 1, 1, 1};
+  
+  if (map_in == NULL) {
+    map        = map_default;
+    map_length = 2;
+  } else {
+    map = map_in;
+  }
 
   // Use full array
 
@@ -153,6 +160,8 @@ void Monitor::image
   int mz0 = m0[iaz];
 
   double * image = new double [mx*my];
+
+  for (int i=0; i<mx*my; i++) image[i] = 0.0;
 
   // Loop over array subsection
 
@@ -199,13 +208,9 @@ void Monitor::image
 
   // Adjust min and max bounds if needed
 
-  double rmin = image[0];
-  double rmax = image[0];
   for (int i=0; i<mx*my; i++) {
     if (min > image[i]) min = image[i];
     if (max < image[i]) max = image[i];
-    rmin = MIN(rmin,image[i]);
-    rmax = MAX(rmax,image[i]);
   }
 
   pngwriter png (mx,my,0,name.c_str());

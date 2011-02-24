@@ -15,22 +15,20 @@
 
 void Monitor::header ()
 {
-  //    print ("");
-  //    print ("     The Laboratory for Computational Astrophysics proudly presents:");
+  print ("  .oooooo.             oooo  oooo            ");
+  print (" d8P'  `Y8b            `888  `888            ");
+  print ("888           .ooooo.   888   888   .ooooo.  ");
+  print ("888          d88' `88b  888   888  d88' `88b ");
+  print ("888          888ooo888  888   888  888   888 ");
+  print ("`88b    ooo  888    .o  888   888  888   888 ");
+  print (" `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' ");
   print ("");
-  print ("    =================================================================");
+  print ("A Parallel Adaptive Mesh Refinement Framework");
   print ("");
-  print ("    oooooooooooo                                          ooooooooo.   ");
-  print ("    `888'     `8                                          `888   `Y88. ");
-  print ("     888         ooo. .oo.     oooooooo  .ooooo.           888   .d88' ");
-  print ("     888oooo8    `888P\"Y88b   d'\"\"7d8P  d88' `88b          888ooo88P'  ");
-  print ("     888    \"     888   888     .d8P'   888   888 8888888  888         ");
-  print ("     888       o  888   888   .d8P'  .P 888   888          888         ");
-  print ("    o888ooooood8 o888o o888o d8888888P  `Y8bod8P'         o888o        ");
-  print ("");
-  print ("    =================================================================");
-  print ("              E N Z O : T H E   N E X T  G E N E R A T I O N");
-  print ("    =================================================================");
-  print ("");
+  print ("James Bordner");
+  print ("Laboratory for Computational Astrophysics");
+  print ("San Diego Supercomputer Center");
+  print ("University of California, San Diego");
+  print ("");  
 }
 
