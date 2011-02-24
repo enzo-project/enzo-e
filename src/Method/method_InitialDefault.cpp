@@ -68,10 +68,11 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
 		       &value, &vdeflt,
 		       &region,&rdeflt,
 		       &x,&y,&z,&t);
-	n = nx*ny*nz;
       }
 
       // Evaluate last non-conditional equation in list
+
+      n = nx*ny*nz;
 
       evaluate_scalar_ (field_block, list_length-1, field_name, 
 			n, value,vdeflt,x,y,z,t);
