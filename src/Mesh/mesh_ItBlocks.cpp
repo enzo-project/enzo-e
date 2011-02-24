@@ -11,8 +11,7 @@
 #include "mesh.hpp"
 
 ItBlocks::ItBlocks ( Patch * patch ) throw ()
-  : Iterator(), 
-    patch_(patch),
+  : patch_(patch),
     curr_(0)
 {}
 
@@ -26,7 +25,7 @@ ItBlocks::~ItBlocks() throw ()
 
 //----------------------------------------------------------------------
 
-void * ItBlocks::operator++ ()
+DataBlock * ItBlocks::operator++ ()
 {
   curr_ ++;
 

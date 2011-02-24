@@ -946,7 +946,6 @@ void Node3K::deallocate_neighbors_ ()
 ///
 {
   delete [] neighbor_;
-  neighbor_ = NULL;
 }
 
 
@@ -973,6 +972,5 @@ void Node3K::deallocate_children_ ()
     }
 
     delete [] child_;
-    child_ = NULL;
   }
 }

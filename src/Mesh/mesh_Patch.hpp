@@ -48,9 +48,6 @@ public: // interface
   /// Return the size of the patch in number of grid cells
   void size (int * npx, int * npy=0, int * npz=0) const throw();
 
-  /// Set the layout of the patch, describing processes and blocking
-  void set_layout (Layout * layout) throw();
-
   /// Return the layout of the patch, describing processes and blocking
   Layout * layout () const throw();
 
@@ -100,14 +97,14 @@ private: // attributes
   /// Data descriptor
   DataDescr * data_descr_;
 
+  /// Layout: describes blocking, processor range, and block-processor mapping 
+  Layout * layout_;
+
   /// Array of data blocks ib associated with this process
   std::vector<DataBlock * > data_block_;
 
   /// Size of the patch
   int size_[3];
-
-  /// Layout: describes blocking, processor range, and block-processor mapping 
-  Layout * layout_;
 
   /// This process id
   int ip_;

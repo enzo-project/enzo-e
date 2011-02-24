@@ -31,6 +31,9 @@ public: // interface
   /// Initialize an Mesh object
   Mesh(DataDescr * data_descr) throw ();
 
+  /// Delete the Mesh object
+  ~Mesh() throw ();
+
   //----------------------------------------------------------------------
 
   /// Return dimension
@@ -147,11 +150,6 @@ public: // interface
   Patch * root_patch() throw ()
   {return root_patch_; };
 
-  /// Set pointer to the root Patch
-  void set_root_patch(Patch * root_patch) throw ()
-  { root_patch_ = root_patch; };
-  
-
   /// Return whether to avoid level jumps
   bool balanced() throw ()
   {return balanced_; };
@@ -178,10 +176,13 @@ public: // interface
   
 private: // attributes
 
+  /// Local Patches
+
+  Patch * root_patch_;
+
   /// Tree defining the MESH hierarchy topology
   //  strict_auto_ptr<TreeK> tree_;
   TreeK * tree_;
-
 
   /// Spacial dimensions of the Mesh: 1, 2, or 3
 
@@ -213,10 +214,6 @@ private: // attributes
   /// Root grid size
   
   int root_size_[3];
-
-  /// Local Patches
-
-  Patch * root_patch_;
 
   /// Refinement factor = 2, 4, etc.
   /// Parameter Mesh::refine

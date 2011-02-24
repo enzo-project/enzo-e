@@ -12,7 +12,7 @@
 /// @date     Tue Feb  1 16:46:01 PST 2011
 /// @brief    [\ref Mesh] Declaration of the ItBlocks iterator
 
-class ItBlocks : public Iterator {
+class ItBlocks {
 
   /// @class    ItBlocks
   /// @ingroup  Mesh
@@ -27,7 +27,7 @@ public: // interface
   ~ItBlocks () throw ();
   
   /// Iterate through all Patches in the patch (currently only root!)
-  virtual void * operator++ ();
+  DataBlock * operator++ ();
 
 private: // attributes
 

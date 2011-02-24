@@ -14,8 +14,8 @@
 
 Patch::Patch() throw()
   : data_descr_(0),
-    data_block_(),
-    layout_(0)
+    layout_(new Layout),
+    data_block_()
 
 {
   size_[0] = 1;
@@ -40,6 +40,7 @@ Patch::Patch() throw()
 
 Patch::~Patch() throw()
 {
+  delete layout_;
   deallocate_blocks();
 }
 
@@ -93,16 +94,6 @@ void Patch::size (int * npx, int * npy, int * npz) const throw()
   if (npx) *npx = size_[0];
   if (npy) *npy = size_[1];
   if (npz) *npz = size_[2];
-}
-
-//----------------------------------------------------------------------
-
-void Patch::set_layout (Layout * layout) throw()
-{
-
-  // WARNING: potential for dangling pointer
-  layout_ = layout;
-
 }
 
 //----------------------------------------------------------------------
