@@ -8,6 +8,7 @@ charm_path = '/home/bordner/charm/charm'
 use_papi  = 1
 use_hdf5  = 1
 use_adios = 0
+precision = 'double'
 
 # DEFINES
 
@@ -15,16 +16,15 @@ define_papi  = ['CONFIG_USE_PAPI'];
 define_hdf5  = ['CONFIG_USE_HDF5','H5_USE_16_API'];
 define_adios = ['CONFIG_USE_ADIOS'];
 define_png   = ['NO_FREETYPE'];
-
-defines      = define_png;
 define_mpi   = ['CONFIG_USE_MPI'];
 define_charm = ['CONFIG_USE_CHARM']
+define_single = ['CONFIG_PRECISION_SINGLE']
+define_double = ['CONFIG_PRECISION_DOUBLE']
 
 # (define*_string used for IBM)
 
-defines_string      = ' -D' + define_png[0]
-define_mpi_string   = ' -D' + define_mpi[0]
-define_charm_string = ' -D' + define_charm[0]
+defines_string = ' -D' + define_png[0]
+defines        = define_png;
 
 if (use_papi != 0): 
 	defines = defines + define_papi
@@ -37,6 +37,13 @@ if (use_hdf5 != 0):
 if (use_adios != 0):
 	defines = defines + define_adios
 	defines_string = defines_string + ' -D' + define_adios[0]
+
+if (precision == 'single'):
+	defines = defines + define_single
+	defines_string = defines_string + ' -D' + define_single[0]
+elif (precision == 'double'):
+	defines = defines + define_double
+	defines_string = defines_string + ' -D' + define_double[0]
 
 # PARSE ARGUMENTS
 
