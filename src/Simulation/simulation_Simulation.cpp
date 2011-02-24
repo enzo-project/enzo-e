@@ -14,8 +14,10 @@
 Simulation::Simulation(Monitor    * monitor,
 		       Parameters * parameters)
   : dimension_(0),
-    monitor_    (monitor    ? monitor    : new Monitor),
-    parameters_ (parameters ? parameters : new Parameters (monitor)),
+    monitor_(monitor),
+    monitor_allocated_(false),
+    parameters_(parameters),
+    parameters_allocated(false),
     mesh_(0),
     data_descr_(0),
     stopping_(0),
@@ -24,7 +26,15 @@ Simulation::Simulation(Monitor    * monitor,
     boundary_(0),
     method_list_()
 {
-  // Initialize parameter defaults
+  if (monitor_ == NULL) {
+    monitor_ = new Monitor;
+    monitor_allocated_ = true;
+  }
+
+  if (parameters_ == NULL) {
+    parameters_ = new Parameters(monitor_);
+    parameters_allocated_ = true;
+  }
 
   extent_[0] = 0.0;
   extent_[1] = 1.0;
@@ -39,8 +49,7 @@ Simulation::Simulation(Monitor    * monitor,
 
 Simulation::~Simulation() throw()
 {
-  delete data_descr_;
-  delete parameters_;
+  deallocate_();
 }
 
 //----------------------------------------------------------------------
@@ -89,9 +98,7 @@ void Simulation::initialize(FILE * fp) throw()
 
 void Simulation::finalize() throw()
 {
-  delete data_descr_;  data_descr_ = 0;
-  delete mesh_;  mesh_ = 0;
-  
+  deallocate_();
 }
 
 //----------------------------------------------------------------------
@@ -341,10 +348,20 @@ void Simulation::initialize_mesh_() throw()
 		   domain_upper[1],
 		   domain_upper[2]);
 
-  // Parallel layout of the root mesh patch
+  // Create the root patch
 
+  Patch * root_patch = mesh_->root_patch();
+
+  root_patch->set_size(root_size[0],root_size[1],root_size[2]);
+  root_patch->set_extents(domain_lower[0],domain_upper[0],
+			  domain_lower[1],domain_upper[1],
+			  domain_lower[2],domain_upper[2]);
+
+  root_patch->allocate_blocks();
+
+  // Parallel layout of the root patch
   
-  Layout * layout = new Layout;
+  Layout * layout = root_patch->layout();
 
   parameters_->set_current_group("Mesh");
 
@@ -361,20 +378,6 @@ void Simulation::initialize_mesh_() throw()
 
   layout->set_block_count(block_count[0],block_count[1],block_count[2]);
     
-
-  // Create the root patch
-
-  Patch * root_patch = new Patch;
-
-  mesh_->set_root_patch(root_patch);
-  root_patch->set_data_descr(data_descr_);
-  root_patch->set_size(root_size[0],root_size[1],root_size[2]);
-  root_patch->set_layout(layout);
-  root_patch->set_extents(domain_lower[0],domain_upper[0],
-			  domain_lower[1],domain_upper[1],
-			  domain_lower[2],domain_upper[2]);
-
-  root_patch->allocate_blocks();
 
   // Mesh AMR settings
 
@@ -466,3 +469,22 @@ void Simulation::initialize_method_() throw()
   INCOMPLETE("Simulation::initialize_method_","");
 }
 
+//----------------------------------------------------------------------
+
+void Simulation::deallocate_() throw()
+{
+
+  if (monitor_allocated_) {
+    delete monitor_;  
+  }
+  if (parameters_allocated_) {
+    delete parameters_;  
+  }
+
+  delete data_descr_;
+
+  delete mesh_;
+
+  delete initial_;
+
+}

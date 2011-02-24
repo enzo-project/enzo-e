@@ -121,6 +121,8 @@ protected: // functions
   void initialize_method_  () throw();
 
 
+  void deallocate_() throw();
+
 protected: // abstract virtual functions
 
   /// Create named stopping object
@@ -162,8 +164,14 @@ protected: // attributes
   /// Monitor object
   Monitor * monitor_;
 
+  /// Whether Monitor object was allocated
+  bool monitor_allocated_;
+
   /// Parameters associated with this simulation
   Parameters * parameters_;
+
+  /// Whether Parameters object was allocated
+  bool parameters_allocated_;
 
   /// AMR mesh
   Mesh * mesh_;
