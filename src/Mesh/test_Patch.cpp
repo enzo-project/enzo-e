@@ -46,18 +46,12 @@ PARALLEL_MAIN_BEGIN
   patch->size(&npx,&npy,&npz);
   unit_assert(npx==7 && npy==3 && npz==2);
 
-  unit_func("set_layout");
+  Layout * layout = patch->layout();
 
-  // Layout: (1,1,1) blocks
-
-  Layout * layout = new Layout;
+  unit_assert(layout != NULL);
 
   layout->set_process_range(0,1);
   layout->set_block_count(1,1,1);
-
-  patch->set_layout (layout);
-
-  unit_assert(patch->layout() == layout);
 
   unit_func("set_extents");
 
