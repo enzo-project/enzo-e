@@ -25,17 +25,17 @@
 
 #include "enzo.hpp"
  
-float EnzoDescr::ComputeTimeStep()
+enzo_float EnzoDescr::ComputeTimeStep()
 {
  
   /* initialize */
  
-  //  float dt, dtTemp;
-  float dtBaryons      = HUGE_VALF;
-  float dtViscous      = HUGE_VALF;
-  //  float dtParticles    = HUGE_VALF;
-  float dtExpansion    = HUGE_VALF;
-  //  float dtAcceleration = HUGE_VALF;
+  //  enzo_float dt, dtTemp;
+  enzo_float dtBaryons      = HUGE_VALF;
+  enzo_float dtViscous      = HUGE_VALF;
+  //  enzo_float dtParticles    = HUGE_VALF;
+  enzo_float dtExpansion    = HUGE_VALF;
+  //  enzo_float dtAcceleration = HUGE_VALF;
   int dim, result;
  
   /* Compute the field size. */
@@ -50,7 +50,7 @@ float EnzoDescr::ComputeTimeStep()
   enzo_float a = 1, dadt;
   if (ComovingCoordinates)
     CosmologyComputeExpansionFactor(Time, &a, &dadt);
-  float afloat = float(a);
+  enzo_float afloat = enzo_float(a);
 
   /* 1) Compute Courant condition for baryons. */
  
@@ -67,7 +67,7 @@ float EnzoDescr::ComputeTimeStep()
  
     /* Compute the pressure. */
  
-    float *pressure_field = new float[size];
+    enzo_float *pressure_field = new enzo_float[size];
     if (DualEnergyFormalism)
       result = ComputePressureDualEnergyFormalism(Time, pressure_field);
     else
@@ -86,8 +86,6 @@ float EnzoDescr::ComputeTimeStep()
  
     /* Call fortran routine to do calculation. */
 
-    printf ("%s:%d  hx = (%g %g %g)\n",__FILE__,__LINE__,CellWidth[0],CellWidth[1],CellWidth[2]);
-    fflush(stdout);
     FORTRAN_NAME(calc_dt)(&GridRank, GridDimension, GridDimension+1,
                                GridDimension+2,
 //                        Zero, TempInt, Zero+1, TempInt+1, Zero+2, TempInt+2,
@@ -117,7 +115,7 @@ float EnzoDescr::ComputeTimeStep()
 //     /* Compute dt constraint from particle velocities. */
  
 //     for (dim = 0; dim < GridRank; dim++) {
-//       float dCell = CellWidth[dim]*a;
+//       enzo_float dCell = CellWidth[dim]*a;
 //       for (i = 0; i < NumberOfParticles; i++) {
 //         dtTemp = dCell/MAX(fabs(ParticleVelocity[dim][i]), tiny_number);
 // 	dtParticles = MIN(dtParticles, dtTemp);

@@ -12,7 +12,6 @@
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
-#include "test.hpp"
 
 #include "enzo.hpp"
 
@@ -24,6 +23,7 @@
 
 void usage(int argc, char ** argv);
 void exit(Monitor *,GroupProcess *);
+void header(Monitor *);
 
 //----------------------------------------------------------------------
 
@@ -42,7 +42,6 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_INIT;
 
   GroupProcess * parallel = GroupProcess::create();
-  unit_init(parallel->rank(), parallel->size());
 
   //-------------------------
   // create globals
@@ -59,7 +58,7 @@ PARALLEL_MAIN_BEGIN
     
   monitor->print ("BEGIN ENZO-P");
 
-  monitor->header();
+  header(monitor);
 
   //-------------------------
   // input parameters
@@ -104,8 +103,6 @@ PARALLEL_MAIN_BEGIN
 
   monitor->print ("END ENZO-P");
 
-  unit_finalize();
-
   delete parameters;
   delete monitor;
 
@@ -116,6 +113,8 @@ PARALLEL_MAIN_END;
 
 #include PARALLEL_CHARM_INCLUDE(enzo_p.def.h)
 
+//----------------------------------------------------------------------
+
 void usage(int argc, char ** argv)
 {
   fprintf (stderr,"\nUsage: %s %s <parameter-file>\n\n",
@@ -123,3 +122,22 @@ void usage(int argc, char ** argv)
 }
 
 
+//----------------------------------------------------------------------
+
+void header(Monitor * monitor)
+{
+  monitor->print ("");
+  monitor->print ("    =================================================================");
+  monitor->print ("");
+  monitor->print ("    oooooooooooo                                          ooooooooo.   ");
+  monitor->print ("    `888'     `8                                          `888   `Y88. ");
+  monitor->print ("     888         ooo. .oo.     oooooooo  .ooooo.           888   .d88' ");
+  monitor->print ("     888oooo8    `888P\"Y88b   d'\"\"7d8P  d88' `88b          888ooo88P'  ");
+  monitor->print ("     888    \"     888   888     .d8P'   888   888 8888888  888         ");
+  monitor->print ("     888       o  888   888   .d8P'  .P 888   888          888         ");
+  monitor->print ("    o888ooooood8 o888o o888o d8888888P  `Y8bod8P'         o888o        ");
+  monitor->print ("");
+  monitor->print ("    =================================================================");
+  monitor->print ("              E N Z O : T H E   N E X T  G E N E R A T I O N");
+  monitor->print ("    =================================================================");
+}

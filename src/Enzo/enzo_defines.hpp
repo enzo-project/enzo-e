@@ -12,16 +12,6 @@
 #define FALSE                               0 /* Needed for fortran */
 #define TRUE                                1 /* Needed for fortran */
 
-#ifdef CONFIG_PRECISION_SINGLE
-#  define enzo_float float
-#elif  CONFIG_PRECISION_DOUBLE
-#  define enzo_float double
-#elif  CONFIG_PRECISION_QUADRUPLE
-#  define enzo_float long_long
-#else
-#  error "Must define CONFIG_PRECISION_[SINGLE|DOUBLE|QUADRUPLE]"
-#endif
-
 #define ENZO_FLOAT_UNDEFINED              -99999.0 /* use NaN: CosmologyComputeExpansionFactor() */
 #define ISYM                              "d" /* Scalar */
 

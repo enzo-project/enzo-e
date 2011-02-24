@@ -26,7 +26,7 @@ EnzoInitialImplosion2::EnzoInitialImplosion2
 void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
 
 {
-  TRACE("EnzoInitialImplosion2::initialize_block");
+
   FieldBlock * field_block = data_block->field_block();
   FieldDescr * field_descr = data_block->field_block()->field_descr();
 
@@ -44,23 +44,13 @@ void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
   Scalar * vy = (Scalar * ) field_block->field_values(index_velocity_y);
   Scalar * te = (Scalar * ) field_block->field_values(index_total_energy);
 
-  printf (" d = %p\n",d);
-  printf ("vx = %p\n",vx);
-  printf ("vy = %p\n",vy);
-  printf ("te = %p\n",te);
-
-  printf (" d = %s\n",field_descr->field_name(index_density).c_str());
-  printf ("vx = %s\n",field_descr->field_name(index_velocity_x).c_str());
-  printf ("vy = %s\n",field_descr->field_name(index_velocity_y).c_str());
-  printf ("te = %s\n",field_descr->field_name(index_total_energy).c_str());
-
   int nx,ny,nz;
   field_block->size(&nx,&ny,&nz);
 
   double hx,hy,hz;
   field_block->cell_width(&hx,&hy,&hz);
 
- int gx,gy,gz;
+  int gx,gy,gz;
   field_descr->ghosts(index_density,&gx,&gy,&gz);
 
   // WARNING("EnzoInitialImplosion2",
@@ -68,8 +58,6 @@ void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
 
   int ngx = nx + 2*gx;
   int ngy = ny + 2*gy;
-
-  printf ("size = (%d %d %d)\n",ngx,ngy,nz+2*gz);
 
   for (int iy=gy; iy<ny+gy; iy++) {
     double y = (iy - gy + 0.5)*hy;

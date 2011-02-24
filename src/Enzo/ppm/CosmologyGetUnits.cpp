@@ -36,9 +36,9 @@
  
 int EnzoDescr::CosmologyGetUnits
 (
- float *DensityUnits, float *LengthUnits,
- float *TemperatureUnits, float *TimeUnits,
- float *VelocityUnits, enzo_float Time)
+ enzo_float *DensityUnits, enzo_float *LengthUnits,
+ enzo_float *TemperatureUnits, enzo_float *TimeUnits,
+ enzo_float *VelocityUnits, enzo_float Time)
 {
  
   /* From the time, compute the current redshift. */

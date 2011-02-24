@@ -106,7 +106,7 @@ PARALLEL_MAIN_BEGIN
 
   // Initialize for specific problem type
 
-  float  time_stop  = 2.5;
+  enzo_float  time_stop  = 2.5;
 
   switch (problem) {
   case problem_ppm_image:
@@ -122,10 +122,10 @@ PARALLEL_MAIN_BEGIN
     print_usage(PARALLEL_ARGV[0]);
   }
 
-  float dt;
+  enzo_float dt;
 
   int   cycle;
-  float time;
+  enzo_float time;
 
   Papi papi;
   Timer timer;

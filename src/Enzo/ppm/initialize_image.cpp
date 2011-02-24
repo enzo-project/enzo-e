@@ -16,9 +16,9 @@
 #include "enzo.hpp"
 
 
-inline float color_value_png
+inline enzo_float color_value_png
 (size_t nx, size_t ny,
- float x, float y, enzo_float lower[2], enzo_float upper[2],
+ enzo_float x, enzo_float y, enzo_float lower[2], enzo_float upper[2],
  pngwriter * png)
 // Return boolean flag whether point is inside the text "Enzo"
 {
@@ -51,12 +51,12 @@ void EnzoDescr::initialize_image ()
   
   int grid_size [] = { width, height };
 
-  float density_out = 1.0;
-  float density_in  = 0.125;
-  float pressure_out = 1.0;
-  float pressure_in  = 0.14;
-  float velocity_x = 0.0;
-  float velocity_y = 0.0;
+  enzo_float density_out = 1.0;
+  enzo_float density_in  = 0.125;
+  enzo_float pressure_out = 1.0;
+  enzo_float pressure_in  = 0.14;
+  enzo_float velocity_x = 0.0;
+  enzo_float velocity_y = 0.0;
 
   Gamma                           = 1.4;
 
@@ -97,7 +97,7 @@ void EnzoDescr::initialize_image ()
   GridLeftEdge[2]    = 0.0;
 
   for (int dim=0; dim<GridRank; dim++) {
-    float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
+    enzo_float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
       (GridEndIndex[dim] - GridStartIndex[dim] + 1);
     CellWidth[dim] = h;
   }
@@ -121,12 +121,12 @@ void EnzoDescr::initialize_image ()
 
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
 
-  float * baryon_fields = new float [NumberOfBaryonFields * nd];
+  enzo_float * baryon_fields = new enzo_float [NumberOfBaryonFields * nd];
   for (int field = 0; field < NumberOfBaryonFields; field++) {
     BaryonField[field] = baryon_fields + field*nd;
   }
 
-//   float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
+//   enzo_float * old_baryon_fields = new enzo_float [NumberOfBaryonFields * nd];
 //   for (int field = 0; field < NumberOfBaryonFields; field++) {
 //     OldBaryonField[field] = baryon_fields + field*nd;
 //   }
@@ -134,28 +134,28 @@ void EnzoDescr::initialize_image ()
   int ndx = GridDimension[0];
   //  int ndy = GridDimension[1];
 
-  float hx = CellWidth[0];
-  float hy = CellWidth[1];
+  enzo_float hx = CellWidth[0];
+  enzo_float hy = CellWidth[1];
 
   for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
-    float y = (iy - GridStartIndex[1] + 0.5)*hy;
+    enzo_float y = (iy - GridStartIndex[1] + 0.5)*hy;
 
     for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
 
-      float x = (ix - GridStartIndex[0] + 0.5)*hx;
+      enzo_float x = (ix - GridStartIndex[0] + 0.5)*hx;
 
       int i = ix + ndx*(GridEndIndex[1] - (iy-GridStartIndex[1]));
 
       // Initialize density and total energy
 
-      float a;
+      enzo_float a;
 
       a = color_value_png(width,height,x,y,DomainLeftEdge,DomainRightEdge,
 			  &png);
 
-      float density  = a*density_in  + (1-a)*density_out;
-      float pressure = a*pressure_in + (1-a)*pressure_out;
+      enzo_float density  = a*density_in  + (1-a)*density_out;
+      enzo_float pressure = a*pressure_in + (1-a)*pressure_out;
 
       BaryonField[ field_density ] [ i ] = density;
       BaryonField[ field_total_energy ][ i ] = 

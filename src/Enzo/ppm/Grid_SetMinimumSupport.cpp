@@ -12,11 +12,11 @@
  
 //----------------------------------------------------------------------
  
-int EnzoDescr::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
+int EnzoDescr::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient)
 {
   if (NumberOfBaryonFields > 0) {
  
-    const float pi = 3.14159;
+    const enzo_float pi = 3.14159;
  
     /* Compute cosmology factors. */
  
@@ -26,7 +26,7 @@ int EnzoDescr::SetMinimumSupport(float &MinimumSupportEnergyCoefficient)
 	fprintf(stderr, "Error in CosmologyComputeExpansionFactor.\n");
 	return ENZO_FAIL;
       }
-    float CosmoFactor = 1.0/a;
+    enzo_float CosmoFactor = 1.0/a;
  
     /* Determine the size of the grids. */
  

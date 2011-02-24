@@ -50,11 +50,11 @@ int EnzoDescr::CosmologyComputeExpansionFactor
  
   /* Find Omega due to curvature. */
  
-  float OmegaCurvatureNow = 1 - OmegaMatterNow - OmegaLambdaNow;
+  enzo_float OmegaCurvatureNow = 1 - OmegaMatterNow - OmegaLambdaNow;
  
   /* Convert the time from code units to Time * H0 (c.f. CosmologyGetUnits). */
  
-  float TimeUnits = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
+  enzo_float TimeUnits = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
                     pow(1 + InitialRedshift,enzo_float(1.5));
  
   enzo_float TimeHubble0 = time * TimeUnits * (HubbleConstantNow*3.24e-18);

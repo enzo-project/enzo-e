@@ -10,10 +10,10 @@
 
 #include "enzo.hpp"
  
-float EnzoDescr::sum_field (int field)
+enzo_float EnzoDescr::sum_field (int field)
 {
   if (BaryonField[field] == NULL) return -1;
-  float sum = 0.0;
+  enzo_float sum = 0.0;
 
   int ndx = GridDimension[0];
   int ndy = GridDimension[1];

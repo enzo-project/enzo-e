@@ -107,7 +107,56 @@ c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\////////////////////////////////
 c=======================================================================
 c
 c  Error check
-c
+c     
+C      print*, 'd = ',d(i1,j1,k1)
+C      print*, 'e = ',e(i1,j1,k1)
+C      print*, 'u = ',u(i1,j1,k1)
+C      print*, 'v = ',v(i1,j1,k1)
+C      print*, 'w = ',w(i1,j1,k1)
+C      print*, 'ge = ',ge(i1,j1,k1)
+C      print*, 'gravity = ',gravity
+CC      print*, 'gr_xacc = ',gr_xacc(i1,j1,k1)
+CC      print*, 'gr_yacc = ',gr_yacc(i1,j1,k1)
+CC      print*, 'gr_zacc = ',gr_zacc(i1,j1,k1)
+C      print*, 'gamma = ',gamma
+C      print*, 'dt = ',dt
+C      print*, 'nhy = ',nhy
+C      print*, 'dx = ',dx
+C      print*, 'dy = ',dy
+C      print*, 'dz = ',dz
+C      print*, 'rank = ',rank
+C      print*, 'in = ',in
+C      print*, 'jn = ',jn
+C      print*, 'kn = ',kn
+C      print*, 'start = ',start(1),start(2),start(3)
+C      print*, 'pend = ',pend(1),pend(2),pend(3)
+C      print*, 'iflatten = ',iflatten
+C      print*, 'ipresfree = ',ipresfree
+C      print*, 'idiff = ',idiff
+C      print*, 'isteepen = ',isteepen
+C      print*, 'idual = ',idual
+C      print*, 'eta1 = ',eta1
+C      print*, 'eta2 = ',eta2
+C      print*, 'nsubgrids = ',nsubgrids
+C      print*, 'lface = ',lface
+C      print*, 'rface = ',rface
+C      print*, 'fistart = ',fistart
+C      print*, 'fiend = ',fiend
+C      print*, 'fjstart = ',fjstart
+C      print*, 'fjend = ',fjend
+C      print*, 'array = ',array
+C      print*, 'dindex = ',dindex
+C      print*, 'eindex = ',eindex
+C      print*, 'uindex = ',uindex
+C      print*, 'vindex = ',vindex
+C      print*, 'windex = ',windex
+C      print*, 'geindex = ',geindex
+C      print*, 'tmp = ',tmp
+C      print*, 'ncolor = ',ncolor
+C      print*, 'colorpt = ',colorpt
+C      print*, 'coloff = ',coloff
+C      print*, 'colindex = ',colindex
+      
       if (max(in,jn,kn) .gt. MAX_ANY_SINGLE_DIRECTION) then
          write(6,*) 'PPM_DE: A grid dimension is too long.'
          write(6,*) '   (increase MAX_ANY_SINGLE_DIRECTION.)'

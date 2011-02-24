@@ -15,12 +15,13 @@
  
 //----------------------------------------------------------------------
  
-int EnzoDescr::ComputePressureDualEnergyFormalism(enzo_float time, float *pressure)
+int EnzoDescr::ComputePressureDualEnergyFormalism
+(enzo_float time, enzo_float *pressure)
 {
  
   /* declarations */
  
-  float density, gas_energy;
+  enzo_float density, gas_energy;
   int i, size = 1;
  
   /* Error Check */
@@ -32,7 +33,7 @@ int EnzoDescr::ComputePressureDualEnergyFormalism(enzo_float time, float *pressu
  
   /* Compute interpolation coefficients. */
  
-  float coef, coefold;
+  enzo_float coef, coefold;
   if (Time - OldTime > 0)
     coef    = (time - OldTime)/(Time - OldTime);
   else
@@ -92,9 +93,9 @@ int EnzoDescr::ComputePressureDualEnergyFormalism(enzo_float time, float *pressu
  
   if (MultiSpecies > 1) {
  
-    float TemperatureUnits = 1, number_density, nH2, GammaH2Inverse,
+    enzo_float TemperatureUnits = 1, number_density, nH2, GammaH2Inverse,
       GammaInverse = 1.0/(Gamma-1.0), x, Gamma1, temp;
-    float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
+    enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
     /* Find Multi-species fields. */
  

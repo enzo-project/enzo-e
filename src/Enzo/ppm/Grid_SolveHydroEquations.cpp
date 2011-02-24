@@ -13,7 +13,7 @@
 static bool first_time = true;
 
 int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
-				    int CycleNumber, float dt)
+				    int CycleNumber, enzo_float dt)
 {
   if (first_time && data_block) {
     first_time = false;
@@ -32,9 +32,9 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
   long long GridGlobalStart[MAX_DIMENSION];
   enzo_float a = 1, dadt;
 
-  float *colourpt = NULL;
+  enzo_float *colourpt = NULL;
 
-  /* Compute size (in floats) of the current grid. */
+  /* Compute size (in enzo_floats) of the current grid. */
 
   size = 1;
   for (dim = 0; dim < GridRank; dim++)
@@ -99,20 +99,20 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
 
   /* Get easy to handle pointers for each variable. */
 
-  float *density     = BaryonField[DensNum];
-  float *totalenergy = BaryonField[TENum];
-  float *gasenergy   = BaryonField[GENum];
+  enzo_float *density     = BaryonField[DensNum];
+  enzo_float *totalenergy = BaryonField[TENum];
+  enzo_float *gasenergy   = BaryonField[GENum];
 
   /* Velocity1 must exist, but if 2 & 3 aren't present, then create blank
      buffers for them (since the solver needs to advect something). */
 
-  float *velocity1, *velocity2, *velocity3;
+  enzo_float *velocity1, *velocity2, *velocity3;
   velocity1 = BaryonField[Vel1Num];
 
   if (GridRank > 1)
     velocity2 = BaryonField[Vel2Num];
   else {
-    velocity2 = new float[size];
+    velocity2 = new enzo_float[size];
     for (i = 0; i < size; i++)
       velocity2[i] = 0.0;
   }
@@ -120,20 +120,20 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
   if (GridRank > 2)
     velocity3 = BaryonField[Vel3Num];
   else {
-    velocity3 = new float[size];
+    velocity3 = new enzo_float[size];
     for (i = 0; i < size; i++)
       velocity3[i] = 0.0;
   }
 
   /* Determine if Gamma should be a scalar or a field. */
 
-  float *GammaField;
-  GammaField = new float[1];
+  enzo_float *GammaField;
+  GammaField = new enzo_float[1];
   GammaField[0] = Gamma;
 
   /* Set minimum support. */
 
-  float MinimumSupportEnergyCoefficient = 0;
+  enzo_float MinimumSupportEnergyCoefficient = 0;
   if (UseMinimumPressureSupport == TRUE)
     if (SetMinimumSupport(MinimumSupportEnergyCoefficient) == ENZO_FAIL) {
       fprintf(stderr, "Error in grid->SetMinimumSupport,\n");
@@ -149,7 +149,7 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
       
     for (dim = 0; dim < GridRank; dim++)  {
 
-      /* compute size (in floats) of flux storage */
+      /* compute size (in enzo_floats) of flux storage */
 
       size = 1;
       for (j = 0; j < GridRank; j++)
@@ -169,9 +169,9 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
 
       for (int field = 0; field < NumberOfBaryonFields; field++) {
 	if (SubgridFluxes[i]->LeftFluxes[field][dim] == NULL)
-	  SubgridFluxes[i]->LeftFluxes[field][dim]  = new float[size];
+	  SubgridFluxes[i]->LeftFluxes[field][dim]  = new enzo_float[size];
 	if (SubgridFluxes[i]->RightFluxes[field][dim] == NULL)
-	  SubgridFluxes[i]->RightFluxes[field][dim] = new float[size];
+	  SubgridFluxes[i]->RightFluxes[field][dim] = new enzo_float[size];
 	for (int n = 0; n < size; n++) {
 	  SubgridFluxes[i]->LeftFluxes[field][dim][n] = 0;
 	  SubgridFluxes[i]->RightFluxes[field][dim][n] = 0;
@@ -219,7 +219,7 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
   int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
 			 GridDimension[1]*GridDimension[2]),
 		     GridDimension[2]*GridDimension[0]  );
-  float *temp = new float[tempsize*(31+NumberOfColours*4)];
+  enzo_float *temp = new enzo_float[tempsize*(31+NumberOfColours*4)];
 
   /* create and fill in arrays which are easier for the solver to
      understand. */
@@ -242,8 +242,8 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
   int *geindex   = array + NumberOfSubgrids*3*16;
   int *colindex  = array + NumberOfSubgrids*3*18;
 
-  float standard[1];
-  //    float *standard = SubgridFluxes[0]->LeftFluxes[0][0];
+  enzo_float standard[1];
+  //    enzo_float *standard = SubgridFluxes[0]->LeftFluxes[0][0];
 
   for (int subgrid = 0; subgrid < NumberOfSubgrids; subgrid++)
     for (dim = 0; dim < GridRank; dim++) {
@@ -346,10 +346,10 @@ int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
 
   /* Create a cell width array to pass (and convert to absolute coords). */
 
-  float CellWidthTemp[MAX_DIMENSION];
+  enzo_float CellWidthTemp[MAX_DIMENSION];
   for (dim = 0; dim < MAX_DIMENSION; dim++) {
     if (dim < GridRank)
-      CellWidthTemp[dim] = float(a*CellWidth[dim]);
+      CellWidthTemp[dim] = enzo_float(a*CellWidth[dim]);
     else
       CellWidthTemp[dim] = 1.0;
   }

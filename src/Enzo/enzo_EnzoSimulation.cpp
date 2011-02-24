@@ -22,6 +22,13 @@ EnzoSimulation::EnzoSimulation(Monitor * monitor) throw ()
 
 //----------------------------------------------------------------------
 
+EnzoSimulation::~EnzoSimulation() throw()
+{
+  deallocate_();
+}
+
+//----------------------------------------------------------------------
+
 void EnzoSimulation::initialize(FILE * fp) throw()
 {
   // Call initialize for Simulation base class
@@ -102,24 +109,27 @@ void EnzoSimulation::run() throw()
     }
 
     // MESH: ASSUMES A SINGLE PATCH
+
     patch = mesh_->root_patch();
 
     // Local block iterator
+
     ItBlocks itBlocks(patch);
-
-    // BOUNDARY
-
-    //    enzo_->SetExternalBoundaryValues();
 
     // TIMESTEP
 
     double dt_block = std::numeric_limits<double>::max();
 
-    while ((data_block = (DataBlock *) ++itBlocks)) {
+    while ((data_block =  ++itBlocks)) {
 
       initialize_block_(data_block);
 
+      data_block->field_block()->enforce_boundary(boundary_reflecting);
+
       dt_block = MIN(dt_block,timestep_->compute(data_block));
+
+      output_images_(data_block,
+      		     "enzo-p-%d.%d.png",enzo_->CycleNumber,0);
 
       finalize_block_(data_block);
 
@@ -143,7 +153,7 @@ void EnzoSimulation::run() throw()
     // METHOD
 
     // for each Block in Patch
-    while ((data_block = (DataBlock *) ++itBlocks)) {
+    while ((data_block = ++itBlocks)) {
 
       //      Memory::instance()->print();
 
@@ -161,8 +171,7 @@ void EnzoSimulation::run() throw()
       }
 
       output_images_(data_block,
-		     "EnzoSimulation-%d.%d.png",enzo_->CycleNumber,0);
-
+      		     "enzo-p-%d.%d.png",enzo_->CycleNumber,0);
       // Update block dt (before finalize_block)
 
 
@@ -190,16 +199,15 @@ void EnzoSimulation::run() throw()
   // FINAL OUTPUT
   //--------------------------------------------------
 
-  
-  while ((data_block = (DataBlock *) ++itBlocks)) {
+   while ((data_block = ++itBlocks)) {
 
-    initialize_block_(data_block);
+     initialize_block_(data_block);
 
-    output_images_(data_block,
-		   "EnzoSimulation-%d.%d.png",enzo_->CycleNumber,1);
+     output_images_(data_block,
+   		   "enzo-p-%d.%d.png",enzo_->CycleNumber,1);
 
-    finalize_block_(data_block);
-  }
+     finalize_block_(data_block);
+   }
 
 
   //  control_->finalize();
@@ -237,7 +245,7 @@ void EnzoSimulation::run() throw()
   PARALLEL_PRINTF ("PAPI Time real   = %f\n",papi.time_real());
   PARALLEL_PRINTF ("PAPI Time proc   = %f\n",papi.time_proc());
   PARALLEL_PRINTF ("PAPI GFlop count = %f\n",papi.flop_count()*1e-9);
-  PARALLEL_PRINTF ("PAPI GFlop rate  = %f\n",papi.flop_rate()*1e-9);
+  //  PARALLEL_PRINTF ("PAPI GFlop rate  = %f\n",papi.flop_rate()*1e-9);
 #endif
 
   PARALLEL_PRINTF ("Real time = %f\n",timer.value());
@@ -368,7 +376,7 @@ void EnzoSimulation::initialize_block_ (DataBlock * data_block) throw ()
   // Initialize BaryonField[] pointers
 
   for (int field = 0; field < enzo_->NumberOfBaryonFields; field++) {
-    enzo_->BaryonField[field] = (float *)field_block->field_values(field);
+    enzo_->BaryonField[field] = (enzo_float *)field_block->field_values(field);
   }
 
  
@@ -388,8 +396,8 @@ void EnzoSimulation::initialize_block_ (DataBlock * data_block) throw ()
     enzo_->BoundaryFieldType[field] = enzo_->FieldType[field];
     for (int dim = 0; dim < 3; dim++) {
       for (int face = 0; face < 2; face++) {
-	face_enum eface = (face_enum)(dim*2+face);
 	enzo_->BoundaryType [field][dim][face] = NULL;
+	face_enum eface = (face_enum)(dim*2+face);
 	if (field_block->boundary_face(eface)) {
 	  int n1 = enzo_->GridDimension[(dim+1)%3];
 	  int n2 = enzo_->GridDimension[(dim+2)%3];
@@ -419,7 +427,6 @@ void EnzoSimulation::finalize_block_ ( DataBlock * data_block ) throw ()
     for (int dim = 0; dim < 3; dim++) {
       for (int face = 0; face < 2; face++) {
 	delete [] enzo_->BoundaryType [field][dim][face];
-	enzo_->BoundaryType [field][dim][face] = NULL;
       }
     }
   }
@@ -459,4 +466,30 @@ void EnzoSimulation::output_images_
     monitor_->image (filename, field_values, mx,my,mz, 2, reduce_sum, 
     		     0.0, 1.0);
   }
+}
+
+//----------------------------------------------------------------------
+
+void EnzoSimulation::deallocate_() throw()
+{
+  for (int field=0; field<enzo_->NumberOfBaryonFields; field++) {
+    for (int dim = 0; dim < 3; dim++) {
+      for (int face = 0; face < 2; face++) {
+	delete enzo_->BoundaryType [field][dim][face];
+      }
+    }
+  }
+
+  delete enzo_;
+
+  delete stopping_;
+
+  delete timestep_;
+
+  delete initial_;
+
+  for (size_t i=0; i<method_list_.size(); i++) {
+    delete method_list_[i];
+  }
+  
 }

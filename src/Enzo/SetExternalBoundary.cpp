@@ -36,14 +36,14 @@ int EnzoDescr::SetExternalBoundary
  int GridOffset[],
  int StartIndex[], 
  int EndIndex[],
- float *Field, 
+ enzo_float *Field, 
  int FieldType )
 {
  
   /* declarations */
  
   int i, j, k, dim, Sign, bindex;
-  float *index;
+  enzo_float *index;
  
   /* error check: grid ranks */
  

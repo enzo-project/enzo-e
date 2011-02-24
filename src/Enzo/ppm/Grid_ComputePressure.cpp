@@ -24,13 +24,13 @@
  
 //----------------------------------------------------------------------
  
-int EnzoDescr::ComputePressure(enzo_float time, float *pressure)
+int EnzoDescr::ComputePressure(enzo_float time, enzo_float *pressure)
 {
  
   /* declarations */
  
-  float density, gas_energy;
-  float total_energy, velocity1, velocity2 = 0, velocity3 = 0;
+  enzo_float density, gas_energy;
+  enzo_float total_energy, velocity1, velocity2 = 0, velocity3 = 0;
   int i, size = 1;
  
   /* Error Check */
@@ -42,7 +42,7 @@ int EnzoDescr::ComputePressure(enzo_float time, float *pressure)
  
   /* Compute interpolation coefficients. */
  
-  float coef, coefold;
+  enzo_float coef, coefold;
   if (Time - OldTime > 0)
     coef    = (time - OldTime)/(Time - OldTime);
   else
@@ -88,7 +88,7 @@ int EnzoDescr::ComputePressure(enzo_float time, float *pressure)
 					  velocity3*velocity3);
  
       pressure[i] = (Gamma - 1.0)*density*gas_energy;
- 
+
       if (pressure[i] < pressure_floor)
 	pressure[i] = pressure_floor;
 
@@ -131,9 +131,9 @@ int EnzoDescr::ComputePressure(enzo_float time, float *pressure)
  
   if (MultiSpecies > 1) {
  
-    float TemperatureUnits = 1, number_density, nH2, GammaH2Inverse,
+    enzo_float TemperatureUnits = 1, number_density, nH2, GammaH2Inverse,
       GammaInverse = 1.0/(Gamma-1.0), x, Gamma1, temp;
-    float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
+    enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
     /* Find Multi-species fields. */
  
@@ -199,7 +199,7 @@ int EnzoDescr::ComputePressure(enzo_float time, float *pressure)
   
   // @@@ HOW TO PARAMETERIZE? jb @@@
 
-  float Gamma1 = Gamma;
+  enzo_float Gamma1 = Gamma;
   if ((ProblemType == 60 || ProblemType == 61) && GravityOn == TRUE)
     for (i=0; i<size; i++) {
       Gamma1 = MIN(Gamma + (log10(BaryonField[DensNum][i])-8.0)*0.3999/2.5, 1.4);

@@ -23,7 +23,7 @@
  
 /* function prototypes */
 
-int EnzoDescr::ComputeGammaField(float *GammaField)
+int EnzoDescr::ComputeGammaField(enzo_float *GammaField)
 {
  
   int DeNum, HINum, HIINum, HeINum, HeIINum, HeIIINum, HMNum, H2INum, H2IINum,
@@ -60,7 +60,7 @@ int EnzoDescr::ComputeGammaField(float *GammaField)
     /* Compute Gamma with molecular Hydrogen formula from Omukau \& Nishi
        astro-ph/9811308. */
  
-    float x, nH2, number_density, GammaH2Inverse, GammaInverse = 1/(Gamma-1.0);
+    enzo_float x, nH2, number_density, GammaH2Inverse, GammaInverse = 1/(Gamma-1.0);
     for (i = 0; i < size; i++) {
  
       /* Compute relative number abundence of molecular hydrogen. */

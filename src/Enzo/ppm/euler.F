@@ -123,39 +123,39 @@ c
 c\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/////////////////////////////////
 c=======================================================================
 c
-C      print*, dslice(i1,j1)
-C      print*, eslice(i1,j1)
-C      print*, grslice(i1,j1)
-C      print*, geslice(i1,j1)
-C      print*, uslice(i1,j1)
-C      print*, vslice(i1,j1)
-C      print*, wslice(i1,j1)
-C      print*, dx
-C      print*, diffcoef(i1,j1)
-C      print*, idim
-C      print*, jdim
-C      print*, i1, i2, j1, j2
-C      print*, __FILE__,__LINE__,'dt = ',dt
-C      print*, gamma
-C      print*, idiff
-C      print*, gravity
-C      print*, idual
-C      print*, eta1, eta2
-C      print*, dls(i1,j1), drs(i1,j1)
-C      print*, pls(i1,j1), prs(i1,j1)
-C      print*, gels(i1,j1), gers(i1,j1)
-C      print*, uls(i1,j1), urs(i1,j1)
-C      print*, vls(i1,j1), vrs(i1,j1)
-C      print*, wls(i1,j1), wrs(i1,j1)
-C      print*, pbar(i1,j1), ubar(i1,j1)
-C      print*, df(i1,j1)
-C      print*, ef(i1,j1)
-C      print*, uf(i1,j1)
-C      print*, vf(i1,j1)
-C      print*, wf(i1,j1)
-C      print*, gef(i1,j1)
-C      print*, ncolor, colslice(i1,j1,1)
-C      print*, colls(i1,j1,1), colrs(i1,j1,1), colf(i1,j1,1)
+*      print*, dslice(i1,j1)
+*      print*, eslice(i1,j1)
+*      print*, grslice(i1,j1)
+*      print*, geslice(i1,j1)
+*      print*, uslice(i1,j1)
+*      print*, vslice(i1,j1)
+*      print*, wslice(i1,j1)
+*      print*, dx
+*      print*, diffcoef(i1,j1)
+*      print*, idim
+*      print*, jdim
+*      print*, i1, i2, j1, j2
+*      print*, __FILE__,__LINE__,'dt = ',dt
+*      print*, gamma
+*      print*, idiff
+*      print*, gravity
+*      print*, idual
+*      print*, eta1, eta2
+*      print*, dls(i1,j1), drs(i1,j1)
+*      print*, pls(i1,j1), prs(i1,j1)
+*      print*, gels(i1,j1), gers(i1,j1)
+*      print*, uls(i1,j1), urs(i1,j1)
+*      print*, vls(i1,j1), vrs(i1,j1)
+*      print*, wls(i1,j1), wrs(i1,j1)
+*      print*, pbar(i1,j1), ubar(i1,j1)
+*      print*, df(i1,j1)
+*      print*, ef(i1,j1)
+*      print*, uf(i1,j1)
+*      print*, vf(i1,j1)
+*      print*, wf(i1,j1)
+*      print*, gef(i1,j1)
+*      print*, ncolor, colslice(i1,j1,1)
+*      print*, colls(i1,j1,1), colrs(i1,j1,1), colf(i1,j1,1)
 
 c     write(6,*) 'EULER: dt =',dt,' idiff =',idiff
 c     write(6,*) 'EULER: idim =',idim,' jdim =',jdim

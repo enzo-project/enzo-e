@@ -32,7 +32,7 @@
  
 //---------------------------------------------------------------------- 
  
-int EnzoDescr::ComputeTemperatureField(float *temperature)
+int EnzoDescr::ComputeTemperatureField(enzo_float *temperature)
 {
  
   int DensNum, result;
@@ -92,8 +92,8 @@ int EnzoDescr::ComputeTemperatureField(float *temperature)
     return ENZO_SUCCESS;
   }
  
-  float TemperatureUnits = 1, number_density;
-  float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
+  enzo_float TemperatureUnits = 1, number_density;
+  enzo_float DensityUnits, LengthUnits, VelocityUnits, TimeUnits;
  
   /* Find the temperature units if we are using comoving coordinates. */
  
@@ -107,7 +107,7 @@ int EnzoDescr::ComputeTemperatureField(float *temperature)
   /* For Sedov Explosion compute temperature without floor */
 
   // @@@ WHY PROBLEM-DEPENDENT? jb @@@
-  float mol_weight = DEFAULT_MU, min_temperature = 1.0;
+  enzo_float mol_weight = DEFAULT_MU, min_temperature = 1.0;
   if (ProblemType == 7) {//AK for Sedov explosion test
     mol_weight = 1.0;
     min_temperature = temperature_floor;

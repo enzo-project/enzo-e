@@ -21,8 +21,7 @@ public: // interface
   EnzoSimulation(Monitor * monitor) throw();
 
   /// Destructor
-  ~EnzoSimulation() throw()
-  { delete enzo_; }
+  ~EnzoSimulation() throw();
 
   /// Override Simulation initialize
   virtual void initialize(FILE * parameter_file) throw ();
@@ -76,6 +75,8 @@ private: // functions
 		       const char * file_format,
 		       int cycle,
 		       int cycle_skip=1) throw ();
+
+  void deallocate_() throw();
 
 private: // attributes
 

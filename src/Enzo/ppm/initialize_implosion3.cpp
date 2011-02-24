@@ -18,10 +18,10 @@ void EnzoDescr::initialize_implosion3 (int size_param)
 
   int grid_size [] = { size_param, size_param, size_param };
 
-  float density_out = 1.0;
-  float density_in  = 0.125;
-  float pressure_out = 1.0;
-  float pressure_in  = 0.14;
+  enzo_float density_out = 1.0;
+  enzo_float density_in  = 0.125;
+  enzo_float pressure_out = 1.0;
+  enzo_float pressure_in  = 0.14;
 
   // Physics
 
@@ -66,7 +66,7 @@ void EnzoDescr::initialize_implosion3 (int size_param)
   GridLeftEdge[2]    = 0.0;
 
   for (int dim=0; dim<GridRank; dim++) {
-    float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
+    enzo_float h = (DomainRightEdge[dim] - DomainLeftEdge[dim]) / 
       (GridEndIndex[dim] - GridStartIndex[dim] + 1);
     CellWidth[dim] = h;
   }
@@ -89,12 +89,12 @@ void EnzoDescr::initialize_implosion3 (int size_param)
   
   int nd = GridDimension[0] * GridDimension[1] * GridDimension[2];
 
-  float * baryon_fields = new float [NumberOfBaryonFields * nd];
+  enzo_float * baryon_fields = new enzo_float [NumberOfBaryonFields * nd];
   for (int field = 0; field < NumberOfBaryonFields; field++) {
     BaryonField[field] = baryon_fields + field*nd;
   }
 
-//   float * old_baryon_fields = new float [NumberOfBaryonFields * nd];
+//   enzo_float * old_baryon_fields = new enzo_float [NumberOfBaryonFields * nd];
 //   for (int field = 0; field < NumberOfBaryonFields; field++) {
 //     OldBaryonField[field] = baryon_fields + field*nd;
 //   }
@@ -103,15 +103,15 @@ void EnzoDescr::initialize_implosion3 (int size_param)
   int ndy = GridDimension[1];
   int ndz = GridDimension[2];
 
-  float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
-  float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
-  float zd = (DomainRightEdge[2] - DomainLeftEdge[2]) ;
+  enzo_float xd = (DomainRightEdge[0] - DomainLeftEdge[0]) ;
+  enzo_float yd = (DomainRightEdge[1] - DomainLeftEdge[1]) ;
+  enzo_float zd = (DomainRightEdge[2] - DomainLeftEdge[2]) ;
   int  ixg = (GridEndIndex[0] - GridStartIndex[0] + 1);
   int  iyg = (GridEndIndex[1] - GridStartIndex[1] + 1);
   int  izg = (GridEndIndex[2] - GridStartIndex[2] + 1);
-  float hx = CellWidth[0];
-  float hy = CellWidth[1];
-  float hz = CellWidth[2];
+  enzo_float hx = CellWidth[0];
+  enzo_float hy = CellWidth[1];
+  enzo_float hz = CellWidth[2];
 
   if (debug) printf ("Size = %d %d %d\n",ndx,ndy,ndz);
   if (debug) printf ("%g  %g %g  %g %g\n",
@@ -124,15 +124,15 @@ void EnzoDescr::initialize_implosion3 (int size_param)
 
   for (int iz = GridStartIndex[2]; iz<=GridEndIndex[2]; iz++) {
 
-    float z = 0.5*hz + (iz - GridStartIndex[2]) * zd / izg;
+    enzo_float z = 0.5*hz + (iz - GridStartIndex[2]) * zd / izg;
 
     for (int iy = GridStartIndex[1]; iy<=GridEndIndex[1]; iy++) {
 
-      float y = 0.5*hy + (iy - GridStartIndex[1]) * yd / iyg;
+      enzo_float y = 0.5*hy + (iy - GridStartIndex[1]) * yd / iyg;
 
       for (int ix = GridStartIndex[0]; ix<=GridEndIndex[0]; ix++) {
 
-	float x = 0.5*hx + (ix - GridStartIndex[0]) * xd / ixg;
+	enzo_float x = 0.5*hx + (ix - GridStartIndex[0]) * xd / ixg;
 
 	int i = ix + ndx * (iy + ndy * iz);
 

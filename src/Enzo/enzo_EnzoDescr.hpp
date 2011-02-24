@@ -26,8 +26,8 @@ struct fluxes
   long_int LeftFluxEndGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
   long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
   long_int RightFluxEndGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  float *LeftFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-  float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
+  enzo_float *LeftFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
+  enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
 };
 
 class EnzoDescr {
@@ -55,23 +55,23 @@ public: // interface
   // Original Enzo functions
   //----------------------------------------------------------------------
 
-  float ComputeTimeStep();
-  float sum_field (int field);
-  int ComputeGammaField(float *GammaField);
-  int ComputePressureDualEnergyFormalism(enzo_float time, float *pressure);
-  int ComputePressure(enzo_float time, float *pressure);
-  int ComputeTemperatureField(float *temperature);
+  enzo_float ComputeTimeStep();
+  enzo_float sum_field (int field);
+  int ComputeGammaField(enzo_float *GammaField);
+  int ComputePressureDualEnergyFormalism(enzo_float time, enzo_float *pressure);
+  int ComputePressure(enzo_float time, enzo_float *pressure);
+  int ComputeTemperatureField(enzo_float *temperature);
   int CosmologyComputeExpansionFactor(enzo_float time, enzo_float *a, enzo_float *dadt);
-  int CosmologyComputeExpansionTimestep(enzo_float time, float *dtExpansion);
-  int CosmologyGetUnits(float *DensityUnits, float *LengthUnits, float *TemperatureUnits, float *TimeUnits, float *VelocityUnits, enzo_float Time);
+  int CosmologyComputeExpansionTimestep(enzo_float time, enzo_float *dtExpansion);
+  int CosmologyGetUnits(enzo_float *DensityUnits, enzo_float *LengthUnits, enzo_float *TemperatureUnits, enzo_float *TimeUnits, enzo_float *VelocityUnits, enzo_float Time);
   int FindField(int field, int farray[], int numfields);
   int IdentifyPhysicalQuantities(int &DensNum, int &GENum, int &Vel1Num, int &Vel2Num, int &Vel3Num, int &TENum);
   int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum, int &HeINum, int &HeIINum, int &HeIIINum, int &HMNum, int &H2INum, int &H2IINum, int &DINum, int &DIINum, int &HDINum);
   int SetExternalBoundaryValues();
-  int SetMinimumSupport(float &MinimumSupportEnergyCoefficient);
-  int SolveHydroEquations (DataBlock * data_block, int CycleNumber, float dt);
+  int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
+  int SolveHydroEquations (DataBlock * data_block, int CycleNumber, enzo_float dt);
   void print_field (int field);
-  int SetExternalBoundary(int FieldRank, int GridDims[], int GridOffset[], int StartIndex[], int EndIndex[], float *Field, int FieldType);
+  int SetExternalBoundary(int FieldRank, int GridDims[], int GridOffset[], int StartIndex[], int EndIndex[], enzo_float *Field, int FieldType);
   void image_dump(const char * file_root, int cycle, double lower, double upper, Monitor * monitor);
 
   void initialize_hydro ();
@@ -80,7 +80,7 @@ public: // interface
   void initialize_implosion (int size_param);
   void initialize_ppml_implosion3 (int size_param);
 
-  int SolveMHDEquations(DataBlock * data_block, int cycle, float dt);
+  int SolveMHDEquations(DataBlock * data_block, int cycle, enzo_float dt);
   void initialize_ppml (int size_param);
 
 private: // prohibit copy constructor
@@ -100,12 +100,12 @@ public: // PUBLIC ATTRIBUTES (!!)
  
   int ComovingCoordinates;
   int UseMinimumPressureSupport;
-  float MinimumPressureSupportParameter;
-  float ComovingBoxSize;
-  float HubbleConstantNow;
-  float OmegaMatterNow;
-  float OmegaLambdaNow;
-  float MaxExpansionRate;
+  enzo_float MinimumPressureSupportParameter;
+  enzo_float ComovingBoxSize;
+  enzo_float HubbleConstantNow;
+  enzo_float OmegaMatterNow;
+  enzo_float OmegaLambdaNow;
+  enzo_float MaxExpansionRate;
 
   // Chemistry
 
@@ -114,13 +114,13 @@ public: // PUBLIC ATTRIBUTES (!!)
   // Gravity
 
   int GravityOn;
-  float *AccelerationField[MAX_DIMENSION]; // cell cntr acceleration at n+1/2
+  enzo_float *AccelerationField[MAX_DIMENSION]; // cell cntr acceleration at n+1/2
 
   // Physics
 
   int PressureFree;
-  float Gamma;
-  float GravitationalConstant;
+  enzo_float Gamma;
+  enzo_float GravitationalConstant;
 
   // Problem-specific
 
@@ -139,15 +139,15 @@ public: // PUBLIC ATTRIBUTES (!!)
   // Numerics
 
   int DualEnergyFormalism;
-  float DualEnergyFormalismEta1;
-  float DualEnergyFormalismEta2;
+  enzo_float DualEnergyFormalismEta1;
+  enzo_float DualEnergyFormalismEta2;
 
-  float pressure_floor;
-  float density_floor;
-  float number_density_floor;
-  float temperature_floor;
+  enzo_float pressure_floor;
+  enzo_float density_floor;
+  enzo_float number_density_floor;
+  enzo_float temperature_floor;
 
-  float CourantSafetyNumber;
+  enzo_float CourantSafetyNumber;
   enzo_float InitialRedshift;
   enzo_float InitialTimeInCodeUnits;
   enzo_float Time;
@@ -207,8 +207,8 @@ public: // PUBLIC ATTRIBUTES (!!)
   // Fields
 
   int NumberOfBaryonFields;      // active baryon fields
-  float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; // pointers to arrays
-  float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; // pointers to old arrays
+  enzo_float *BaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; // pointers to arrays
+  enzo_float *OldBaryonField[MAX_NUMBER_OF_BARYON_FIELDS]; // pointers to old arrays
   int FieldType[MAX_NUMBER_OF_BARYON_FIELDS];
 
   // Boundary
@@ -217,12 +217,12 @@ public: // PUBLIC ATTRIBUTES (!!)
   int  BoundaryDimension[MAX_DIMENSION];
   int  BoundaryFieldType[MAX_NUMBER_OF_BARYON_FIELDS];
   bc_enum *BoundaryType[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2];
-  float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
+  enzo_float *BoundaryValue[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION][2]; 
 
   // problem
 
   int CycleNumber;
-  float dt;
+  enzo_float dt;
 
   // Fluxes
   fluxes ** SubgridFluxes;

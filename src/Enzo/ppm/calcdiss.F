@@ -507,9 +507,9 @@ c
                if (de2 .ne. 0.0) dee = de1/de2
                omega_tilde = max( dpp , dee )
 c
-               ism = i + sign(2.0, dp1)        ! post-shock
-               isp = i - sign(2.0, dp1)        ! upstream
-               s   =   - sign(1.0, dp1)        ! i+s - zone upstream from i
+               ism = i + sign(two, dp1)        ! post-shock
+               isp = i - sign(two, dp1)        ! upstream
+               s   =   - sign(one, dp1)        ! i+s - zone upstream from i
                if (dp1 .eq. 0.0) s = 0.0
 c
 c              Compute sigma(i): strength of a shock near zone i
