@@ -159,7 +159,8 @@ void EnzoSimulation::run() throw()
 
       for (size_t i = 0; i < method_list_.size(); i++) {
 
-	Method * method = method_list_[index_method];
+	Method * method = method_list_[i];
+
 	method -> compute_block (data_block,time,dt);
 
       }
