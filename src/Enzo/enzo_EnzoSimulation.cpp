@@ -51,18 +51,17 @@ void EnzoSimulation::finalize() throw()
 void EnzoSimulation::run() throw()
 {
   
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-  //   FileHdf5   hdf5;
-
-  // output_progress(monitor,cycle,time,dt);
-  // output_images(monitor,cycle,field_block);
-
+  // @@@ performance_->start();
   Timer timer;
   Papi papi;
   
   timer.start();
   papi.start();
+
+
+  int & cycle       = enzo_->CycleNumber;
+  enzo_float & time = enzo_->Time;
+  enzo_float & dt   = enzo_->dt;
 
   UNTESTED("EnzoSimulation::run");
   INCOMPLETE("EnzoSimulation::run","incomplete");
@@ -91,7 +90,6 @@ void EnzoSimulation::run() throw()
 
   }
 
-
   //--------------------------------------------------
   // MAIN LOOP
   //--------------------------------------------------
@@ -100,11 +98,11 @@ void EnzoSimulation::run() throw()
   while (! stopping_->complete() ) {
 
     // MONITOR:  timestep and cycle progress
+
+    // @@@    monitor_->output();
     {
       char buffer[40];
-      sprintf (buffer,"cycle %04d time %15.12f",
-	       enzo_->CycleNumber,
-	       enzo_->Time);
+      sprintf (buffer,"cycle %04d time %15.12f", cycle,time);
       monitor_->print(buffer);
     }
 
@@ -128,8 +126,7 @@ void EnzoSimulation::run() throw()
 
       dt_block = MIN(dt_block,timestep_->compute(data_block));
 
-      output_images_(data_block,
-      		     "enzo-p-%d.%d.png",enzo_->CycleNumber,0);
+      output_images_(data_block, "enzo-p-%d.%d.png",cycle,0);
 
       finalize_block_(data_block);
 
@@ -148,49 +145,37 @@ void EnzoSimulation::run() throw()
 
     // Set Enzo timestep
 
-    enzo_->dt = dt_patch;
+    dt = dt_patch;
 
     // METHOD
 
     // for each Block in Patch
     while ((data_block = ++itBlocks)) {
 
-      //      Memory::instance()->print();
-
       initialize_block_(data_block);
 
+      // @@@ boundary_->enforce();
       data_block->field_block()->enforce_boundary(boundary_reflecting);
 
-      for (size_t index_method = 0; 
-	   index_method < method_list_.size(); 
-	   index_method++) {
+      for (size_t i = 0; i < method_list_.size(); i++) {
 
-	method_list_[index_method]->compute_block
-	  (data_block,enzo_->Time,enzo_->dt);
+	Method * method = method_list_[index_method];
+	method -> compute_block (data_block,time,dt);
 
       }
 
-      output_images_(data_block,
-      		     "enzo-p-%d.%d.png",enzo_->CycleNumber,0);
-      // Update block dt (before finalize_block)
-
-
+      output_images_(data_block, "enzo-p-%d.%d.png",cycle,0);
 
       finalize_block_(data_block);
-      //      Memory::instance()->print();
-      // Accumulate local block timestep
-      //      Memory::instance()->print();
 
     } // Block in Patch
 
-    // Set next enzo timestep
-
-    //    ASSERT("EnzoSimulation::run", "dt is 0", enzo_->dt != 0.0);
+    ASSERT("EnzoSimulation::run", "dt == 0", dt != 0.0);
 
     // Update cycle and time
 
-    enzo_->CycleNumber += 1;
-    enzo_->Time        += enzo_->dt;
+    cycle += 1;
+    time  += dt;
 
   } // while (! control_->complete() )
 
@@ -202,9 +187,9 @@ void EnzoSimulation::run() throw()
    while ((data_block = ++itBlocks)) {
 
      initialize_block_(data_block);
-
-     output_images_(data_block,
-   		   "enzo-p-%d.%d.png",enzo_->CycleNumber,1);
+     
+     // @@@ output_->imagese();
+     output_images_(data_block, "enzo-p-%d.%d.png",cycle,1);
 
      finalize_block_(data_block);
    }
@@ -235,7 +220,9 @@ void EnzoSimulation::run() throw()
 
   // }
 
-  papi.stop();
+
+   // @@@ performance_->stop();
+   papi.stop();
   timer.stop();
 
   // output_images  (monitor,cycle_final,field_block);
