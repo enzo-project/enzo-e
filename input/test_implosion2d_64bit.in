@@ -125,19 +125,14 @@
    }
 
    Field {
-       density       { value = [ 0.125, x + y < 0.15 || x + y > 0.45, 
-                                   1.0                ]; };
-       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.15 || x + y > 0.45,
-	                         1.0  / (0.4 * 1.0)   ]; };
+       density       { value = [ 0.125,                x + y < 0.1517, 
+                                 1.0 ]; };
 
-#       density       { value = [ 0.125, x + y < 0.15, 1.0 ]; };
-#       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.15,
-#	                         1.0  / (0.4 * 1.0)   ]; };
-#       velocity_x    { value = [0.0]; };
-#       velocity_y    { value = [0.0]; }
+       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.1517,
+	                         1.0  / (0.4 * 1.0) ]; };
+       velocity_x    { value = [0.0]; };
+       velocity_y    { value = [0.0]; }
    }
-
-#  Initial { problem = "implosion_2d" }
 
    Boundary { type = "reflecting" }
 
