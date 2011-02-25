@@ -44,76 +44,76 @@ c     h1,h2,h3,h4,h5,h6,h7               - z-fluxes
      &     bxindex(nsubgrids*6), byindex(nsubgrids*6),
      &     bzindex(nsubgrids*6)
       
-      real    array(1)         
+      ENZO_REAL    array(1)         
       
       
-      real dn(nx,ny,nz)           
-      real vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)           
-      real bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)           
+      ENZO_REAL dn(nx,ny,nz)           
+      ENZO_REAL vx(nx,ny,nz),vy(nx,ny,nz),vz(nx,ny,nz)           
+      ENZO_REAL bx(nx,ny,nz),by(nx,ny,nz),bz(nx,ny,nz)           
 
-      real dnrx(nx,ny,nz)           
-      real vxrx(nx,ny,nz),vyrx(nx,ny,nz),vzrx(nx,ny,nz)           
-      real bxrx(nx,ny,nz),byrx(nx,ny,nz),bzrx(nx,ny,nz)           
+      ENZO_REAL dnrx(nx,ny,nz)           
+      ENZO_REAL vxrx(nx,ny,nz),vyrx(nx,ny,nz),vzrx(nx,ny,nz)           
+      ENZO_REAL bxrx(nx,ny,nz),byrx(nx,ny,nz),bzrx(nx,ny,nz)           
 
-      real dnry(nx,ny,nz)           
-      real vxry(nx,ny,nz),vyry(nx,ny,nz),vzry(nx,ny,nz)           
-      real bxry(nx,ny,nz),byry(nx,ny,nz),bzry(nx,ny,nz)           
+      ENZO_REAL dnry(nx,ny,nz)           
+      ENZO_REAL vxry(nx,ny,nz),vyry(nx,ny,nz),vzry(nx,ny,nz)           
+      ENZO_REAL bxry(nx,ny,nz),byry(nx,ny,nz),bzry(nx,ny,nz)           
 
-      real dnrz(nx,ny,nz)           
-      real vxrz(nx,ny,nz),vyrz(nx,ny,nz),vzrz(nx,ny,nz)           
-      real bxrz(nx,ny,nz),byrz(nx,ny,nz),bzrz(nx,ny,nz)           
+      ENZO_REAL dnrz(nx,ny,nz)           
+      ENZO_REAL vxrz(nx,ny,nz),vyrz(nx,ny,nz),vzrz(nx,ny,nz)           
+      ENZO_REAL bxrz(nx,ny,nz),byrz(nx,ny,nz),bzrz(nx,ny,nz)           
 
-      real f1(nx,ny,nz)           
-      real f2(nx,ny,nz),f3(nx,ny,nz),f4(nx,ny,nz)           
-      real f5(nx,ny,nz),f6(nx,ny,nz),f7(nx,ny,nz)           
+      ENZO_REAL f1(nx,ny,nz)           
+      ENZO_REAL f2(nx,ny,nz),f3(nx,ny,nz),f4(nx,ny,nz)           
+      ENZO_REAL f5(nx,ny,nz),f6(nx,ny,nz),f7(nx,ny,nz)           
 
-      real g1(nx,ny,nz)           
-      real g2(nx,ny,nz),g3(nx,ny,nz),g4(nx,ny,nz)           
-      real g5(nx,ny,nz),g6(nx,ny,nz),g7(nx,ny,nz)           
+      ENZO_REAL g1(nx,ny,nz)           
+      ENZO_REAL g2(nx,ny,nz),g3(nx,ny,nz),g4(nx,ny,nz)           
+      ENZO_REAL g5(nx,ny,nz),g6(nx,ny,nz),g7(nx,ny,nz)           
 
-      real h1(nx,ny,nz)           
-      real h2(nx,ny,nz),h3(nx,ny,nz),h4(nx,ny,nz)           
-      real h5(nx,ny,nz),h6(nx,ny,nz),h7(nx,ny,nz)           
+      ENZO_REAL h1(nx,ny,nz)           
+      ENZO_REAL h2(nx,ny,nz),h3(nx,ny,nz),h4(nx,ny,nz)           
+      ENZO_REAL h5(nx,ny,nz),h6(nx,ny,nz),h7(nx,ny,nz)           
 
-      real ex(nx,ny,nz),ey(nx,ny,nz),ez(nx,ny,nz)           
+      ENZO_REAL ex(nx,ny,nz),ey(nx,ny,nz),ez(nx,ny,nz)           
       
-      real qu1(nx,ny,nz)           
-      real qu2(nx,ny,nz),qu3(nx,ny,nz),qu4(nx,ny,nz)           
-      real qu5(nx,ny,nz),qu6(nx,ny,nz),qu7(nx,ny,nz)  
+      ENZO_REAL qu1(nx,ny,nz)           
+      ENZO_REAL qu2(nx,ny,nz),qu3(nx,ny,nz),qu4(nx,ny,nz)           
+      ENZO_REAL qu5(nx,ny,nz),qu6(nx,ny,nz),qu7(nx,ny,nz)  
       
-      real Qp1(nx,7),Qr1(nx,7)
-      real Qdy1(nx,7),Qdz1(nx,7)
-      real Qlx1(nx,7),Qrx1(nx,7),Qvl1(nx,7),Qvr1(nx,7)
-      real Qrp1(nx,7),Fm1(nx,7)
-      real dx1(nx),dx2(nx)
+      ENZO_REAL Qp1(nx,7),Qr1(nx,7)
+      ENZO_REAL Qdy1(nx,7),Qdz1(nx,7)
+      ENZO_REAL Qlx1(nx,7),Qrx1(nx,7),Qvl1(nx,7),Qvr1(nx,7)
+      ENZO_REAL Qrp1(nx,7),Fm1(nx,7)
+      ENZO_REAL dx1(nx),dx2(nx)
       
-      real Qp2(ny,7),Qr2(ny,7)
-      real Qdx2(ny,7),Qdz2(ny,7)
-      real Qlx2(ny,7),Qrx2(ny,7),Qvl2(ny,7),Qvr2(ny,7)
-      real Qrp2(ny,7),Fm2(ny,7)
-      real dy1(ny),dy2(ny)
+      ENZO_REAL Qp2(ny,7),Qr2(ny,7)
+      ENZO_REAL Qdx2(ny,7),Qdz2(ny,7)
+      ENZO_REAL Qlx2(ny,7),Qrx2(ny,7),Qvl2(ny,7),Qvr2(ny,7)
+      ENZO_REAL Qrp2(ny,7),Fm2(ny,7)
+      ENZO_REAL dy1(ny),dy2(ny)
 
-      real Qp3(nz,7),Qr3(nz,7)
-      real Qdx3(nz,7),Qdy3(nz,7)
-      real Qlx3(nz,7),Qrx3(nz,7),Qvl3(nz,7),Qvr3(nz,7)
-      real Qrp3(nz,7),Fm3(nz,7)
-      real dz1(nz),dz2(nz)
+      ENZO_REAL Qp3(nz,7),Qr3(nz,7)
+      ENZO_REAL Qdx3(nz,7),Qdy3(nz,7)
+      ENZO_REAL Qlx3(nz,7),Qrx3(nz,7),Qvl3(nz,7),Qvr3(nz,7)
+      ENZO_REAL Qrp3(nz,7),Fm3(nz,7)
+      ENZO_REAL dz1(nz),dz2(nz)
 
-      real df(nx,ny),vf(nx,ny),uf(nx,ny),wf(nx,ny)
-      real bf(nx,ny),tf(nx,ny),pf(nx,ny)
-      real dg(ny,nz),vg(ny,nz),ug(ny,nz),wg(ny,nz)
-      real bg(ny,nz),tg(ny,nz),pg(ny,nz)          
-      real dh(nz,nx),vh(nz,nx),uh(nz,nx),wh(nz,nx)
-      real bh(nz,nx),th(nz,nx),ph(nz,nx)          
+      ENZO_REAL df(nx,ny),vf(nx,ny),uf(nx,ny),wf(nx,ny)
+      ENZO_REAL bf(nx,ny),tf(nx,ny),pf(nx,ny)
+      ENZO_REAL dg(ny,nz),vg(ny,nz),ug(ny,nz),wg(ny,nz)
+      ENZO_REAL bg(ny,nz),tg(ny,nz),pg(ny,nz)          
+      ENZO_REAL dh(nz,nx),vh(nz,nx),uh(nz,nx),wh(nz,nx)
+      ENZO_REAL bh(nz,nx),th(nz,nx),ph(nz,nx)          
       
-      real vax,vay,vaz,cga,cgs
-      real dn1,dn2,vx1,vx2,vy1,vy2,vz1,vz2
-      real bx1,bx2,by1,by2,bz1,bz2
+      ENZO_REAL vax,vay,vaz,cga,cgs
+      ENZO_REAL dn1,dn2,vx1,vx2,vy1,vy2,vz1,vz2
+      ENZO_REAL bx1,bx2,by1,by2,bz1,bz2
 
-      real epsk,v2k,exc,dexy,dexy1,dexy2,exi1,exi2,exk1,exk2
-      real Vleer,dsc,dx,dy,dz,dt 
+      ENZO_REAL epsk,v2k,exc,dexy,dexy1,dexy2,exi1,exi2,exk1,exk2
+      ENZO_REAL Vleer,dsc,dx,dy,dz,dt 
       
-      real qh(7)
+      ENZO_REAL qh(7)
 
 c     
 c     check-it
