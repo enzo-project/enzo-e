@@ -3,6 +3,7 @@ Import('platform')
 Import('parallel_run')
 Import('parallel_type')
 Import('serial_run')
+Import('precision')
 
 
 # O test_FieldFaces.cpp
@@ -101,6 +102,7 @@ env.RunSerial(parallel_type + '-test_Parameters.unit',  '#/bin/test_Parameters')
 # PERFORMANCE COMPONENT   
 #----------------------------------------------------------------------
 env.RunSerial(parallel_type + '-test_Performance.unit', '#/bin/test_Performance')
+env.RunSerial(parallel_type + '-test_Papi.unit',        '#/bin/test_Papi')
 #----------------------------------------------------------------------
 # PORTAL COMPONENT        
 #----------------------------------------------------------------------
@@ -241,7 +243,12 @@ Clean(env.RunParallel (
 	parallel_type + '-test_EnzoMethodPpm.unit','#/bin/test_EnzoMethodPpm'),
       [Glob('../ppm-*-00???.png'),parallel_type + '-test_EnzoMethodPpm.unit'])
 
-env.RunParallel (parallel_type + '-enzo-p_implosion.unit','#/bin/enzo-p', ARGS='input/implosion.in')
+if (precision == "single"):
+   env.RunParallel (parallel_type + '-enzo-p_implosion.unit','#/bin/enzo-p', ARGS='input/test_implosion2d_32bit.in')
+elif (precision == "double"):
+   env.RunParallel (parallel_type + '-enzo-p_implosion.unit','#/bin/enzo-p', ARGS='input/test_implosion2d_64bit.in')
+else:
+   print "FAIL: precision = ",precision
 
 if (parallel_type == "serial"):
    env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='1')

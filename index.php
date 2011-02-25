@@ -286,6 +286,7 @@ component("Particles");
 
 component("Performance");
 tests("Performance","test_Performance","test_Performance");
+tests("Performance","test_Papi",       "test_Papi");
 
 component("Portal");
 

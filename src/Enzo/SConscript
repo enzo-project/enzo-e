@@ -33,7 +33,7 @@ env = env.Clone(LIBS=[components,libraries])
 # SOURCE
 #------------------------------
 
-includes = [Glob('enzo*hpp'), 'fortran.def']
+includes = [Glob('enzo*hpp')]
 sources  = [Glob('enzo_*cpp')]
 
 #------------------------------

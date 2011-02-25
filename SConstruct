@@ -114,10 +114,18 @@ if (platform == 'linux-serial'):
    parallel_run = ""
    parallel_type = "serial"
    serial_run   = ""
+
+   if (use_papi):
+      include_path = ['#/include','/usr/local/include'];
+      lib_path     = ['#/lib','/usr/local/lib'];
+   else:
+      include_path = ['#/include'];
+      lib_path     = ['#/lib'];
+
    env = Environment (
       CC          = 'gcc',	
       CPPDEFINES  = defines,
-      CPPPATH     = '#/include',
+      CPPPATH     = include_path,
       CXXFLAGS    = flags_cxx,
       CFLAGS      = flags_cxx,
       CXX         = 'g++',	
@@ -125,8 +133,8 @@ if (platform == 'linux-serial'):
       FORTRAN     = 'gfortran',
       FORTRANFLAGS = flags_cxx,
       FORTRANLIBS = 'gfortran',
-      FORTRANPATH = '#/include',
-      LIBPATH     = '#/lib',
+      FORTRANPATH = include_path,
+      LIBPATH     = lib_path,
       LINKFLAGS   = flags_cxx
    )
 #--------------------------------------------------
@@ -331,6 +339,8 @@ Export('serial_run')
 
 Export('use_papi')
 Export('use_hdf5')
+
+Export('precision')
 
 SConscript('src/SConscript')
 SConscript('test/SConscript')
