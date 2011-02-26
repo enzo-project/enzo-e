@@ -311,6 +311,7 @@ int Node3K::refine
       }
 
       delete [] refine_child;
+      refine_child = 0;
     }
 
     // determine depth as depth of deepest child + level increment
@@ -325,6 +326,7 @@ int Node3K::refine
     }
 
     delete [] depth_child;
+    depth_child = 0;
 
     depth += increment;
 
@@ -650,6 +652,7 @@ void Node3K::balance_pass(bool & refined_tree, bool full_nodes)
       }
 
       delete [] refine_child;
+      refine_child = 0;
 
     }
 
@@ -946,6 +949,7 @@ void Node3K::deallocate_neighbors_ ()
 ///
 {
   delete [] neighbor_;
+  neighbor_ = 0;
 }
 
 
@@ -969,8 +973,10 @@ void Node3K::deallocate_children_ ()
   if (child_) {
     for (int i=0; i<num_children_(); i++) {
       delete child_[i];
+      child_[i] = 0;
     }
 
     delete [] child_;
+    child_ = 0;
   }
 }

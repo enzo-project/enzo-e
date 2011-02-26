@@ -784,6 +784,7 @@ void Node2K::deallocate_neighbors_ ()
 ///
 {
   delete [] neighbor_;
+  neighbor_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -805,9 +806,11 @@ void Node2K::deallocate_children_ ()
   if (child_) {
     for (int i=0; i<num_children_(); i++) {
       delete child_[i];
+      child_[i] = 0;
     }
 
     delete [] child_;
+    child_ = 0;
   }
 }
 
