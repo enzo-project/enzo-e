@@ -80,6 +80,7 @@ PARALLEL_MAIN_BEGIN
   delete simulation;
   delete parameters;
   delete monitor;
+  delete parallel;
 
   // exit
 
