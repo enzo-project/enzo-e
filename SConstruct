@@ -62,7 +62,6 @@ platform = arch + '-' + type
 #==================================================
 
 platform_list = [
-	      ['linux','ampi'],
 	      ['linux','mpi'],
 	      ['linux','charm'],
 	      ['linux','charm-perf'],
@@ -176,29 +175,6 @@ elif (platform == 'linux-mpi-valgrind'):
    )
 
 #--------------------------------------------------
-elif (platform == 'linux-ampi'):
-#--------------------------------------------------
-
-   parallel_run = charm_path + "/bin/charmrun +p4 "
-   serial_run   = ""
-   parallel_type = "ampi"
-  
-   env = Environment(
-      CC          = charm_path + '/bin/charmc -language ampi',
-      CPPDEFINES  = defines + define_mpi,
-      CPPPATH     = '#/include',
-      CXX         = charm_path + '/bin/charmc -language ampi',
-      CXXFLAGS    = '-g -O3 -m128bit-long-double',
-      CFLAGS      = '-g -O3 -m128bit-long-double',
-      ENV         = os.environ,
-      FORTRANFLAGS  = '-g',
-      FORTRAN     = 'gfortran',
-      FORTRANLIBS = 'gfortran',
-      FORTRANPATH = '#/include',
-      LINKFLAGS     = '-g -O3 -m128bit-long-double',
-      LIBPATH     = '#/lib',
-   )
-#--------------------------------------------------
 elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
 #--------------------------------------------------
 
@@ -237,7 +213,8 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
       LIBFLAGS     = flags,
-      LIBPATH     = lib_path )
+      LIBPATH     = lib_path,
+      )
    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 

@@ -19,7 +19,7 @@ function component($component) {
 
 function tests($component,$testrun,$output) {
 
-   $parallel_types = array("serial","mpi","ampi","charm");
+   $parallel_types = array("serial","mpi","charm");
 
    $source_file = "src/$component/$testrun.cpp";
    $source_html = "<a href=\"$source_file\">$testrun.cpp</a>";
@@ -175,7 +175,7 @@ function test_summary($component,$test_output)
 {
   printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
 
-  $parallel_types  = array("serial","mpi","ampi","charm");
+  $parallel_types  = array("serial","mpi","charm");
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
@@ -207,7 +207,7 @@ function test_summary($component,$test_output)
 
 <?php
 printf ("<table><tr><th></th>\n");
-$parallel_labels = array("serial", "mpi",  "ampi",   "charm");
+$parallel_labels = array("serial","mpi","charm");
 for ($k = 0; $k < 2; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
     printf ("<th> $parallel_labels[$i] </th>");
