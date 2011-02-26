@@ -44,6 +44,7 @@ void EnzoSimulation::initialize(FILE * fp) throw()
 void EnzoSimulation::finalize() throw()
 {
   delete enzo_;
+  enzo_ = 0;
 }
 
 //----------------------------------------------------------------------
@@ -430,11 +431,16 @@ void EnzoSimulation::output_images_
 void EnzoSimulation::deallocate_() throw()
 {
   delete enzo_;
+  enzo_ = 0;
   delete stopping_;
+  stopping_ = 0;
   delete timestep_;
+  timestep_ = 0;
   delete initial_;
+  initial_ = 0;
   for (size_t i=0; i<method_list_.size(); i++) {
     delete method_list_[i];
+    method_list_[i] = 0;
   }
   
 }

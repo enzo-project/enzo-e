@@ -11,7 +11,7 @@
 
 //----------------------------------------------------------------------
 
-#include "cello.hpp"
+#include "test.hpp"
 
 #include "enzo.hpp"
 
@@ -25,9 +25,13 @@ PARALLEL_MAIN_BEGIN
 
 {
 
-  // initialize
+  // initialize parallel
 
   PARALLEL_INIT;
+
+  // initialize unit testing
+
+  unit_init();
 
   GroupProcess * parallel = GroupProcess::create();
 
@@ -81,6 +85,10 @@ PARALLEL_MAIN_BEGIN
   delete parameters;
   delete monitor;
   delete parallel;
+
+  // finalize unit testing
+
+  unit_finalize();
 
   // exit
 

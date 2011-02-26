@@ -43,6 +43,7 @@ PARALLEL_MAIN_BEGIN
 
   FILE * fp = fopen ("input/test_Simulation.in","r");
   simulation->initialize(fp);
+  fclose (fp);
 
   unit_assert(true);
 
@@ -100,8 +101,8 @@ PARALLEL_MAIN_BEGIN
   simulation->finalize();
   unit_assert(false);
 
+  delete monitor;
   delete simulation;
-  fclose (fp);
 
   unit_finalize();
 

@@ -53,8 +53,8 @@ tests = []
 test_GroupProcess  =  env.Program (['test_GroupProcess.cpp',    sources])
 tests.append(test_GroupProcess)
 
-if (parallel_type == "mpi" or parallel_type == "ampi"):
-	test_Mpi              = env.Program (['test_Mpi.cpp',      sources])
+if (parallel_type == "mpi"):
+	test_Mpi = env.Program (['test_Mpi.cpp',      sources])
 	tests.append(test_Mpi)
 
 # test_ParallelAffinity = env.Program (['test_ParallelAffinity.cpp', sources])

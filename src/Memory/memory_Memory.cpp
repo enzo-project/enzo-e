@@ -42,6 +42,8 @@ void Memory::initialize_() throw ()
 
 void Memory::finalize_() throw ()
 {
+  // WARNING: not called by end of program
+
 #ifdef CONFIG_USE_MEMORY
   for (int i=0; i<MEMORY_MAX_NUM_GROUPS + 1; i++) {
     delete [] group_names_[i];
