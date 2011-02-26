@@ -35,7 +35,7 @@ private: // attributes
   Patch * patch_;
 
   /// Index to the current DataBlock
-  int curr_;
+  size_t curr_;
 };
 
 #endif /* MESH_IT_BLOCKS_HPP */

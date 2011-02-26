@@ -61,6 +61,7 @@ public: // interface
     } else {
       is_started_ = true;
       float mflop_rate;
+      // @@@@ MEMORY LEAK (4 bytes) r2026 @@@@
       PAPI_flops(&time_real_total_, 
 		 &time_proc_total_, 
 		 &flop_count_total_,

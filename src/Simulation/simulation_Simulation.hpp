@@ -28,7 +28,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Destructor
-  ~Simulation() throw();
+  virtual ~Simulation() throw();
 
   /// Copy constructor
   Simulation(const Simulation & simulation) throw();

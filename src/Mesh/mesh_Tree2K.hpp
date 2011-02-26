@@ -50,9 +50,9 @@ public: // interface
   void optimize();
 
   /// Create an image of levels
-  float * create_image (int n, int line_width,int axis=0);
+  float * create_image (int n, int line_width, int axis);
 
-  /// Create a geomview file
+  /// Create a geomview file of levels
   void geomview (std::string filename);
 
 private: // attributes

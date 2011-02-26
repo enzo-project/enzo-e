@@ -7,10 +7,8 @@
 /// @file     field_FieldBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
-/// @todo     Add allocation and deallocation
-/// @todo     Implement and test merge(),split()
-/// @todo     Implement and test grow(),shrink()
-/// @todo     Implement and test read(),write()
+/// @todo     Implement read(),write()
+/// @todo     Move boundary conditions to Boundary class
 /// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    [\ref Field] Fortran-style array class.
 
@@ -101,15 +99,18 @@ public: // interface
   /// Refresh ghost zones on an internal face
   void refresh_ghosts() throw();
 
-  /// Set whether given face is on the domain boundary
-  void set_boundary_face(face_enum face, bool value = false) throw();
+  /// Set whether given face or faces are on the domain boundary
+  void set_boundary_face(bool value = false,
+			 face_enum face = face_all, 
+			 axis_enum axis = axis_all) throw();
 
   /// Whether given face is on the domain boundary
-  bool boundary_face(face_enum face) throw();
+  bool boundary_face(face_enum face, axis_enum axis) throw();
 
   /// Enforce boundary conditions on a boundary face
   void enforce_boundary(enum boundary_enum boundary, 
-			face_enum face = face_all) throw();
+			face_enum face = face_all,
+			axis_enum axis = axis_all) throw();
 
   /// Split a block into 2, 4, or 8 subblocks; does not delete self
   void split(bool split_x, bool split_y, bool split_z, 
@@ -172,23 +173,25 @@ private: // functions
     throw (std::out_of_range);
 
   /// Enforce reflecting boundary conditions on a boundary face
-  void enforce_boundary_reflecting_(face_enum face) throw();
+  void enforce_boundary_reflecting_(face_enum face, axis_enum axis) throw();
+
   template<class T>
   void enforce_boundary_reflecting_precision_
   ( face_enum face,
+    axis_enum axis,
     T * array,
     int nx,int ny,int nz,
     int gx,int gy,int gz,
     bool vx,bool vy,bool vz);
 
   /// Enforce outflow boundary conditions on a boundary face
-  void enforce_boundary_outflow_(face_enum face) throw();
+  void enforce_boundary_outflow_(face_enum face, axis_enum axis) throw();
 
   /// Enforce inflow boundary conditions on a boundary face
-  void enforce_boundary_inflow_(face_enum face) throw();
+  void enforce_boundary_inflow_(face_enum face, axis_enum axis) throw();
 
   /// Enforce periodic boundary conditions on a boundary face
-  void enforce_boundary_periodic_(face_enum face) throw();
+  void enforce_boundary_periodic_(face_enum face, axis_enum axis) throw();
 
   //----------------------------------------------------------------------
 
@@ -220,7 +223,7 @@ private: // attributes
   bool ghosts_allocated_;
 
   /// Whether given face is on the domain boundary
-  bool boundary_face_[3*2];
+  bool boundary_face_[3][2];
 
 };   
 

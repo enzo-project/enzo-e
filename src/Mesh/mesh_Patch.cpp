@@ -223,16 +223,16 @@ void Patch::allocate_blocks() throw()
     // Set boundaries
 
     if (mbx > 1) {
-      if (ibx==0)     field_block->set_boundary_face(face_lower_x,true);
-      if (ibx==nbx-1) field_block->set_boundary_face(face_upper_x,true);
+      if (ibx==0)     field_block->set_boundary_face(true,face_lower,axis_x);
+      if (ibx==nbx-1) field_block->set_boundary_face(true,face_upper,axis_x);
     }
     if (mby > 1) {
-      if (iby==0)     field_block->set_boundary_face(face_lower_y,true);
-      if (iby==nby-1) field_block->set_boundary_face(face_upper_y,true);
+      if (iby==0)     field_block->set_boundary_face(true,face_lower,axis_y);
+      if (iby==nby-1) field_block->set_boundary_face(true,face_upper,axis_y);
     }
     if (mbz > 1) {
-      if (ibz==0)     field_block->set_boundary_face(face_lower_z,true);
-      if (ibz==nbz-1) field_block->set_boundary_face(face_upper_z,true);
+      if (ibz==0)     field_block->set_boundary_face(true,face_lower,axis_z);
+      if (ibz==nbz-1) field_block->set_boundary_face(true,face_upper,axis_z);
     }
 
     WARNING("Patch::allocate_blocks",
@@ -248,15 +248,30 @@ void Patch::allocate_blocks() throw()
 
 void Patch::deallocate_blocks() throw()
 {
-  INCOMPLETE("Patch::deallocate_blocks","");
+  UNTESTED("Patch::deallocate_blocks()");
+  for (size_t i=0; i<data_block_.size(); i++) {
+    delete data_block_[i];
+    data_block_[i] = 0;
+  }
 }
 
 //----------------------------------------------------------------------
 
 bool Patch::blocks_allocated() const throw() 
 {
-  INCOMPLETE("Patch::blocks_allocated","");
-  return false;
+  UNTESTED("Patch::blocks_allocated()");
+
+  bool allocated = true;
+
+  if (data_block_.size() < num_blocks()) {
+      allocated = false;
+  } else {
+    for (size_t i=0; i<data_block_.size(); i++) {
+      if (data_block_[i] == NULL) allocated = false;
+    }
+  }
+    
+  return allocated;
 }
 
 //----------------------------------------------------------------------

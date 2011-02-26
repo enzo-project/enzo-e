@@ -13,8 +13,8 @@
 //----------------------------------------------------------------------
 
 Mesh::Mesh(DataDescr * data_descr) throw ()
-  : tree_(0),
-    root_patch_(new Patch),
+  : root_patch_(new Patch),
+    tree_(0),
     dimension_(0),
     min_patch_size_(0),
     max_patch_size_(0),

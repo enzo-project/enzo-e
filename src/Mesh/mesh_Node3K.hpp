@@ -38,14 +38,14 @@ public: // interface
   Node3K * child (int ix, int iy, int iz);
 
   /// return the specified neighbor
-  Node3K * neighbor (face_enum face);
+  Node3K * neighbor (face_axis_enum face_axis);
 
   /// make the two nodes neighbors.  friend function since either can be NULL
   friend void make_neighbors 
-  (Node3K * node_1, Node3K * node_2, face_enum face_1);
+  (Node3K * node_1, Node3K * node_2, face_axis_enum face_axis_1);
 
   /// get the child's cousin
-  Node3K * cousin (face_enum face, int ix, int iy, int iz);
+  Node3K * cousin (face_axis_enum face_axis, int ix, int iy, int iz);
 
   /// return the parent
   Node3K * parent ();
@@ -115,9 +115,7 @@ public: // interface
 
   /// Return whether node has any children
   bool any_children () { 
-
     if (!child_) return false;
-
     for (int iz=0; iz<k_; iz++) {
       for (int iy=0; iy<k_; iy++) {
 	for (int ix=0; ix<k_; ix++) {
@@ -150,7 +148,7 @@ private: // functions
   int index_(int ix, int iy, int iz) { return ix + k_*(iy + k_*iz); };
 
   /// Return index of opposite face
-  int opposite_face_ (face_enum face) { return int(face) ^ 1; };
+  int opposite_face_ (face_axis_enum face_axis) { return int(face_axis) ^ 1; };
 
   /// Return number of faces
   int num_faces_() { return 6; };
@@ -165,6 +163,10 @@ private: // functions
     case 4:  return ( 2 ); break;
     case 8:  return ( 3 ); break;
     case 16: return ( 4 ); break;
+    default:
+      fprintf (stderr,"Invalid k=%d for Node3K\n",k_);
+      exit(1);
+      break;
     }
     return (0);
   }

@@ -224,6 +224,7 @@ void Simulation::initialize_simulation_() throw()
 void Simulation::initialize_data_() throw()
 {
 
+  /* MEMORY LEAK */
   data_descr_ = new DataDescr;
 
   FieldDescr * field_descr = data_descr_->field_descr();

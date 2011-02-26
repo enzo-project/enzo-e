@@ -22,7 +22,7 @@ public: // interface
   /// Create a new leaf node
   Node2K( int k,  int level_adjust = 0  );
 
-  /// Destructor
+  /// Delete a node and all descedents
   ~Node2K();
 
   /// Copy constructor
@@ -38,14 +38,14 @@ public: // interface
   Node2K * child (int ix, int iy);
 
   /// return the specified neighbor
-  Node2K * neighbor (face_enum face);
+  Node2K * neighbor (face_axis_enum face_axis);
 
   /// make the two nodes neighbors.  friend function since either can be NULL
   friend void make_neighbors 
-  (Node2K * node_1, Node2K * node_2, face_enum face_1);
+  (Node2K * node_1, Node2K * node_2, face_axis_enum face_axis_1);
 
   /// get the child's cousin
-  Node2K * cousin (face_enum face, int ix, int iy);
+  Node2K * cousin (face_axis_enum face_axis, int ix, int iy);
 
   /// return the parent
   Node2K * parent ();
@@ -98,7 +98,6 @@ public: // interface
    double lowz, double upz,
    bool full = true);
 
-
   /// Return whether node has all children
   bool all_children () {
     for (int iy=0; iy<k_; iy++) {
@@ -111,6 +110,7 @@ public: // interface
 
   /// Return whether node has any children
   bool any_children () { 
+    //    if (!child_) return false;
     for (int iy=0; iy<k_; iy++) {
       for (int ix=0; ix<k_; ix++) {
 	if (child(ix,iy)) return true;
@@ -141,7 +141,7 @@ private: // functions
   int index_(int ix, int iy) { return (ix + k_*iy); };
 
   /// Return index of opposite face
-  int opposite_face_ (face_enum face) { return int(face) ^ 1; };
+  int opposite_face_ (face_axis_enum face_axis) { return int(face_axis) ^ 1; };
 
   /// Return number of faces
   int num_faces_() { return 4; };
@@ -161,11 +161,19 @@ private: // functions
       exit(1);
       break;
     }
+    return (0);
   }
 
+  /// Allocate neighbor pointers
   void allocate_neighbors_ ();
+
+   /// Deallocate neighbor pointers
   void deallocate_neighbors_ ();
+
+  /// Allocate children pointers
   void allocate_children_ ();
+
+  /// Deallocate children pointers
   void deallocate_children_ ();
 
 private: // attributes

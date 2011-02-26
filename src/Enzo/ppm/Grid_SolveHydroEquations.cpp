@@ -4,23 +4,16 @@
 /// @file      Grid_SolveHydroEquations.cpp
 /// @author    Greg Bryan
 /// @date      November, 1994
+/// @todo      Currently EnzoDescr::SolveHydroEquations uses field data from enzoDescr (BaryonField, GridStartIndex, etc.); change to use data_block fields directly to avoid EnzoSimulation::block_begin() copies and repeated boundary condition initialization
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
 #include "cello.hpp"
 
 #include "enzo.hpp"
 
-static bool first_time = true;
-
 int EnzoDescr::SolveHydroEquations (DataBlock * data_block,
 				    int CycleNumber, enzo_float dt)
 {
-  if (first_time && data_block) {
-    first_time = false;
-    WARNING("EnzoDescr::SolveHydroEquations",
-	    "Ignoring data_block input parameter");
-  }
-
   // @@@@ ASSUME UNIGIRD PROBLEM @@@@
 
   int NumberOfSubgrids = 0;

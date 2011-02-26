@@ -65,10 +65,10 @@ protected: // virtual functions
 private: // functions
 
   /// Initialize a block before advancing a timestep
-  void initialize_block_(DataBlock * data_block) throw ();
+  void block_start_(DataBlock * data_block) throw ();
 
   /// Finalize a block after advancing a timestep
-  void finalize_block_(DataBlock * data_block) throw ();
+  void block_stop_(DataBlock * data_block) throw ();
 
   /// Output data
   void output_images_( DataBlock * data_block,

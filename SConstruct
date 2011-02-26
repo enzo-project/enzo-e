@@ -106,7 +106,7 @@ if (ok == 0):
 if (platform == 'linux-serial'):
 #--------------------------------------------------
 
-   flags_opt = '-g -O3'
+   flags_opt = '-g'
    flags_prec = '-m128bit-long-double'
    flags_warn = '-Wall'
    flags_cxx = flags_opt + ' ' + flags_prec + ' ' + flags_warn
@@ -217,10 +217,17 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
    parallel_type = "charm"
    serial_run   = ""
   
+   if (use_papi):
+      include_path = ['#/include','/usr/local/include'];
+      lib_path     = ['#/lib','/usr/local/lib'];
+   else:
+      include_path = ['#/include'];
+      lib_path     = ['#/lib'];
+
    env = Environment(
       CC          = charm_path + '/bin/charmc -language charm++ '+flags+flags_charm,
       CPPDEFINES  = defines + define_charm,
-      CPPPATH     = '#/include',
+      CPPPATH     = include_path,
       CXX         = charm_path + '/bin/charmc -language charm++ '+flags+flags_charm,
       CXXFLAGS    = flags,
       CFLAGS      = flags,
@@ -230,7 +237,7 @@ elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
       FORTRANLIBS = 'gfortran',
       FORTRANPATH = '#/include',
       LIBFLAGS     = flags,
-      LIBPATH     = '#/lib' )
+      LIBPATH     = lib_path )
    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 

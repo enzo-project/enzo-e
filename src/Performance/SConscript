@@ -46,7 +46,7 @@ if (parallel_type == "charm"):
 	test = 'time_matvec'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-	test = 'test_papi'
+	test = 'test_Papi'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 

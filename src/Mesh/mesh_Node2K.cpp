@@ -4,7 +4,7 @@
 /// @file     mesh_Node2K.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-27
-/// @brief    Implementation of the Node16 class 
+/// @brief    Implementation of the Node2K class 
 
 #include "cello.hpp"
 
@@ -23,7 +23,7 @@ Node2K::Node2K(int k, int level_adjust)
     /// @param    level_adjust difference: actual mesh level - tree level
 { 
   allocate_neighbors_();
-  
+
 //   allocate_children_();
 
   parent_ = NULL;
@@ -39,7 +39,7 @@ Node2K::~Node2K()
   // update neighbor's neighbors
 
   for (int i=0; i<num_faces_(); i++) {
-    int io = opposite_face_(face_enum(i));
+    int io = opposite_face_(face_axis_enum(i));
     if (neighbor_[i]) neighbor_[i]->neighbor_[io] = NULL;
     neighbor_[i] = NULL;
   }
@@ -99,21 +99,21 @@ inline Node2K * Node2K::child (int ix, int iy)
 
 //----------------------------------------------------------------------
 
-inline Node2K * Node2K::neighbor (face_enum face) 
-/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
+inline Node2K * Node2K::neighbor (face_axis_enum face_axis) 
+/// @param    face_axis      Face_Axis 0 <= (face_axis = [XYZ][MP]) < 6
 { 
-  return neighbor_[face]; 
+  return neighbor_[face_axis]; 
 }
 
 //----------------------------------------------------------------------
 
-inline Node2K * Node2K::cousin (face_enum face, int ix, int iy) 
-/// @param    face      Face 0 <= (face = [XYZ][MP]) < 6
+inline Node2K * Node2K::cousin (face_axis_enum face_axis, int ix, int iy) 
+/// @param    face_axis      Face_Axis 0 <= (face_axis = [XYZ][MP]) < 6
 /// @param    ix        Index 0 <= ix < k of cell in grid block
 /// @param    iy        Index 0 <= iy < k of cell in grid block
 { 
-  if (neighbor_[face] && neighbor_[face]->child(ix,iy)) {
-    return neighbor_[face]->child(ix,iy);
+  if (neighbor_[face_axis] && neighbor_[face_axis]->child(ix,iy)) {
+    return neighbor_[face_axis]->child(ix,iy);
   } else {
     return NULL;
   }
@@ -131,16 +131,16 @@ inline void make_neighbors
 (
  Node2K * node_1, 
  Node2K * node_2, 
- face_enum face_1
+ face_axis_enum face_axis_1
  )
 /// @param    node_1    First neighbor node pointer 
 /// @param    node_2    Second neighbor node pointer
-/// @param    face_1    Face 0 <= face_1 < 4 of node_1 that is adjacent to node_2
+/// @param    face_axis_1    Face_Axis 0 <= face_axis_1 < 4 of node_1 that is adjacent to node_2
 {
-  if (node_1 != NULL) node_1->neighbor_[face_1] = node_2;
+  if (node_1 != NULL) node_1->neighbor_[face_axis_1] = node_2;
   if (node_2 != NULL) {
-    face_enum face_2 = face_enum(node_2->opposite_face_(face_1));
-    node_2->neighbor_[face_2] = node_1;
+    face_axis_enum face_axis_2 = face_axis_enum(node_2->opposite_face_(face_axis_1));
+    node_2->neighbor_[face_axis_2] = node_1;
   }
 }
 
@@ -357,33 +357,33 @@ void Node2K::update_child_ (int ix, int iy)
     // XM-face neighbors
 
     if (ix > 0) {
-      make_neighbors (child (ix,iy), child (ix-1,iy),face_lower_x);
+      make_neighbors (child (ix,iy), child (ix-1,iy),face_lower_axis_x);
     } else {
-      make_neighbors (child (ix,iy), cousin (face_lower_x,nx-1,iy),face_lower_x);
+      make_neighbors (child (ix,iy), cousin (face_lower_axis_x,nx-1,iy),face_lower_axis_x);
     }
 
     // upper_x-face neighbors
 
     if (ix < nx-1) {
-      make_neighbors (child (ix,iy), child (ix+1,iy), face_upper_x);
+      make_neighbors (child (ix,iy), child (ix+1,iy), face_upper_axis_x);
     } else {
-      make_neighbors (child (ix,iy), cousin (face_upper_x,0,iy), face_upper_x);
+      make_neighbors (child (ix,iy), cousin (face_upper_axis_x,0,iy), face_upper_axis_x);
     }
 
     // lower_y-face neighbor
 
     if (iy > 0) {
-      make_neighbors (child (ix,iy), child (ix,iy-1),face_lower_y);
+      make_neighbors (child (ix,iy), child (ix,iy-1),face_lower_axis_y);
     } else {
-      make_neighbors (child (ix,iy), cousin (face_lower_y,ix,ny-1),face_lower_y);
+      make_neighbors (child (ix,iy), cousin (face_lower_axis_y,ix,ny-1),face_lower_axis_y);
     }
 
     // upper_y-face neighbor
 
     if (iy < ny-1) {
-      make_neighbors (child (ix,iy), child (ix,iy+1),face_upper_y);
+      make_neighbors (child (ix,iy), child (ix,iy+1),face_upper_axis_y);
     } else {
-      make_neighbors (child (ix,iy), cousin (face_upper_y,ix,0),face_upper_y);
+      make_neighbors (child (ix,iy), cousin (face_upper_axis_y,ix,0),face_upper_axis_y);
     }
 
   }
@@ -414,20 +414,20 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 
       for (int iy=0; iy<ny; iy++) {
 	refine_node = refine_node ||
-	  (cousin(face_upper_x,   0,iy) && 
-	   cousin(face_upper_x,   0,iy)->any_children() ) ||
-	  (cousin(face_lower_x,nx-1,iy) && 
-	   cousin(face_lower_x,nx-1,iy)->any_children() );
+	  (cousin(face_upper_axis_x,   0,iy) && 
+	   cousin(face_upper_axis_x,   0,iy)->any_children() ) ||
+	  (cousin(face_lower_axis_x,nx-1,iy) && 
+	   cousin(face_lower_axis_x,nx-1,iy)->any_children() );
       }
 
       // Y faces
 
       for (int ix=0; ix<nx; ix++) {
 	refine_node = refine_node ||
-	  (cousin(face_upper_y,ix,   0) && 
-	   cousin(face_upper_y,ix,   0)->any_children() ) ||
-	  (cousin(face_lower_y,ix,ny-1) && 
-	   cousin(face_lower_y,ix,ny-1)->any_children() );
+	  (cousin(face_upper_axis_y,ix,   0) && 
+	   cousin(face_upper_axis_y,ix,   0)->any_children() ) ||
+	  (cousin(face_lower_axis_y,ix,ny-1) && 
+	   cousin(face_lower_axis_y,ix,ny-1)->any_children() );
       }
 
       if (refine_node) {
@@ -474,9 +474,9 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 	      for (int ky=0; ky<ny; ky++) {
 		r = r || child(ix-1,iy)->child(nx-1,ky);
 	      }
-	    } else if (ix == 0 && cousin(face_lower_x,nx-1,iy)) {
+	    } else if (ix == 0 && cousin(face_lower_axis_x,nx-1,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		r = r || cousin(face_lower_x,nx-1,iy)->child(nx-1,ky);
+		r = r || cousin(face_lower_axis_x,nx-1,iy)->child(nx-1,ky);
 	      }
 	    }
 
@@ -486,9 +486,9 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 	      for (int ky=0; ky<ny; ky++) {
 		r = r || child(ix+1,iy)->child(0,ky);
 	      }
-	    } else if (ix == nx-1 && cousin(face_upper_x,0,iy)) {
+	    } else if (ix == nx-1 && cousin(face_upper_axis_x,0,iy)) {
 	      for (int ky=0; ky<ny; ky++) {
-		r = r || cousin(face_upper_x,0,iy)->child(0,ky);
+		r = r || cousin(face_upper_axis_x,0,iy)->child(0,ky);
 	      }
 	    }
 
@@ -498,9 +498,9 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 	      for (int kx=0; kx<nx; kx++) {
 		r = r || child(ix,iy-1)->child(kx,ny-1);
 	      }
-	    } else if (iy == 0 && cousin(face_lower_y,ix,ny-1)) {
+	    } else if (iy == 0 && cousin(face_lower_axis_y,ix,ny-1)) {
 	      for (int kx=0; kx<nx; kx++) {
-		r = r || cousin(face_lower_y,ix,ny-1)->child(kx,ny-1);
+		r = r || cousin(face_lower_axis_y,ix,ny-1)->child(kx,ny-1);
 	      }
 	    }
 
@@ -510,9 +510,9 @@ void Node2K::balance_pass(bool & refined_tree, bool full_nodes)
 	      for (int kx=0; kx<nx; kx++) {
 		r = r || child(ix,iy+1)->child(kx,0);
 	      }
-	    } else if (iy == ny-1 && cousin(face_upper_y,ix,0)) {
+	    } else if (iy == ny-1 && cousin(face_upper_axis_y,ix,0)) {
 	      for (int kx=0; kx<nx; kx++) {
-		r = r || cousin(face_upper_y,ix,0)->child(kx,0);
+		r = r || cousin(face_upper_axis_y,ix,0)->child(kx,0);
 	      }
 	    }
 

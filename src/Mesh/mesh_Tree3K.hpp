@@ -56,7 +56,7 @@ public: // interface
   /// Create an image of levels
   float * create_image (int n, int line_width, int axis);
 
-  /// Create an image of levels
+  /// Create a geomview file of levels
   void geomview (std::string filename);
 
 private: // attributes

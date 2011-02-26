@@ -94,12 +94,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(patch->blocks_allocated() == false);
 
-  // TEST MEMORY SIZE RESTORED--NO MEMORY LEAKS
-  unit_assert(false)
-
-
   //--------------------------------------------------
-
 
   unit_finalize();
 

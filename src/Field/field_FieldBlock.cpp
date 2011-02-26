@@ -4,6 +4,7 @@
 /// @file     field_FieldBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Wed May 19 18:17:50 PDT 2010
+/// @todo     Remove dependence of velocity field names "velocity_[xyz]"
 /// @brief    Implementation of the FieldBlock class
 
 #include "cello.hpp"
@@ -24,7 +25,7 @@ FieldBlock::FieldBlock() throw()
     upper_[i]      = 1.0;
   }
 
-  set_boundary_face(face_all,false);
+  set_boundary_face(false);
 }
 
 //----------------------------------------------------------------------
@@ -357,58 +358,68 @@ void FieldBlock::refresh_ghosts() throw()
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::set_boundary_face(face_enum face, bool value) throw()
+void FieldBlock::set_boundary_face
+(
+ bool value,
+ face_enum face, 
+ axis_enum axis
+ ) throw()
 {
+  // WARNING: recursive
+  UNTESTED("FieldBlock::set_boundary_face");
   if (face == face_all) {
-    boundary_face_[face_lower_x] = value;
-    boundary_face_[face_upper_x] = value;
-    boundary_face_[face_lower_y] = value;
-    boundary_face_[face_upper_y] = value;
-    boundary_face_[face_lower_z] = value;
-    boundary_face_[face_upper_z] = value;
+    set_boundary_face(value,face_lower,axis);
+    set_boundary_face(value,face_upper,axis);
+  } else if (axis == axis_all) {
+    set_boundary_face(value,face,axis_x);
+    set_boundary_face(value,face,axis_y);
+    set_boundary_face(value,face,axis_z);
   } else {
-    boundary_face_[face] = value;
+    boundary_face_[face][axis] = value;
   }
 }
 
 //----------------------------------------------------------------------
-bool FieldBlock::boundary_face(face_enum face) throw()
+bool FieldBlock::boundary_face(face_enum face,
+			       axis_enum axis) throw()
 {
-  return boundary_face_[face];
+  return boundary_face_[face][axis];
 }
 
 //----------------------------------------------------------------------
 void FieldBlock::enforce_boundary
 (
  boundary_enum boundary,
- face_enum     face 
+ face_enum     face,
+ axis_enum     axis 
  ) throw()
 {
+  // WARNING: recursive
   if ( ghosts_allocated() ) {
     if (face == face_all) {
-      enforce_boundary(boundary,face_lower_x);
-      enforce_boundary(boundary,face_upper_x);
-      enforce_boundary(boundary,face_lower_y);
-      enforce_boundary(boundary,face_upper_y);
-      enforce_boundary(boundary,face_lower_z);
-      enforce_boundary(boundary,face_upper_z);
+      enforce_boundary(boundary,face_lower,axis);
+      enforce_boundary(boundary,face_upper,axis);
+    } else if (axis == axis_all) {
+      enforce_boundary(boundary,face,axis_x);
+      enforce_boundary(boundary,face,axis_y);
+      enforce_boundary(boundary,face,axis_z);
     } else {
       switch (boundary) {
       case boundary_reflecting:
-	enforce_boundary_reflecting_(face);
+	enforce_boundary_reflecting_(face,axis);
 	break;
       case boundary_outflow:
-	enforce_boundary_outflow_(face);
+	enforce_boundary_outflow_(face,axis);
 	break;
       case boundary_inflow:
-	enforce_boundary_inflow_(face);
+	enforce_boundary_inflow_(face,axis);
 	break;
       case boundary_periodic:
-	enforce_boundary_periodic_(face);
+	enforce_boundary_periodic_(face,axis);
 	break;
       default:
 	ERROR("FieldBlock::enforce_boundary",
-		      "Undefined boundary type");
+	      "Undefined boundary type");
 	break;
       }
     }
@@ -419,7 +430,11 @@ void FieldBlock::enforce_boundary
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_reflecting_(face_enum face) throw()
+void FieldBlock::enforce_boundary_reflecting_
+(
+ face_enum face,
+ axis_enum axis
+ ) throw()
 {
   int nx,ny,nz;
   int gx,gy,gz;
@@ -433,13 +448,15 @@ void FieldBlock::enforce_boundary_reflecting_(face_enum face) throw()
     precision_enum precision = field_descr_->precision(field);
     switch (precision) {
     case precision_single:
-      enforce_boundary_reflecting_precision_(face,(float *)array,
+      enforce_boundary_reflecting_precision_(face,axis,
+					     (float *)array,
 					     nx,ny,nz,
 					     gx,gy,gz,
 					     vx,vy,vz);
       break;
     case precision_double:
-      enforce_boundary_reflecting_precision_(face,(double *)array,
+      enforce_boundary_reflecting_precision_(face,axis,
+					     (double *)array,
 					     nx,ny,nz,
 					     gx,gy,gz,
 					     vx,vy,vz);
@@ -447,7 +464,8 @@ void FieldBlock::enforce_boundary_reflecting_(face_enum face) throw()
     case precision_extended80:
     case precision_extended96:
     case precision_quadruple:
-      enforce_boundary_reflecting_precision_(face,(long double *)array,
+      enforce_boundary_reflecting_precision_(face,axis,
+					     (long double *)array,
 					     nx,ny,nz,
 					     gx,gy,gz,
 					     vx,vy,vz);
@@ -461,7 +479,8 @@ void FieldBlock::enforce_boundary_reflecting_(face_enum face) throw()
 
 template<class T>
 void FieldBlock::enforce_boundary_reflecting_precision_
-(face_enum face, T * array,
+(face_enum face, axis_enum axis,
+ T * array,
  int nx,int ny,int nz,
  int gx,int gy,int gz,
  bool vx,bool vy,bool vz)
@@ -472,8 +491,8 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 
   int ix,iy,iz,ig;
   T sign;
-  switch (face) {
-  case face_lower_x:
+
+  if (face == face_lower && axis == axis_x) {
     if (nx > 1) {
       ix = gx;
       sign = vx ? -1.0 : 1.0;
@@ -487,14 +506,13 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 	}
       }
     }
-    break;
-  case face_upper_x:
+  } else if (face == face_upper && axis == axis_x) {
     if (nx > 1) {
       ix = nx+gx-1;
       sign = vx ? -1.0 : 1.0;
       for (ig=0; ig<gx; ig++) {
 	for (iy=0; iy<my; iy++) {
-	  for (iz=gz; iz<mz; iz++) {
+	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix-ig,  iy,iz,mx,my);
 	    int i_external = INDEX(ix+ig+1,iy,iz,mx,my);
 	    array[i_external] = sign*array[i_internal];
@@ -502,14 +520,13 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 	}
       }
     }
-    break;
-  case face_lower_y:
+  } else if (face == face_lower && axis == axis_y) {
     if (ny > 1) {
       iy = gy;
       sign = vy ? -1.0 : 1.0;
       for (ig=0; ig<gy; ig++) {
 	for (ix=0; ix<mx; ix++) {
-	  for (iz=gz; iz<mz; iz++) {
+	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,iy+ig,  iz,mx,my);
 	    int i_external = INDEX(ix,iy-ig-1,iz,mx,my);
 	    array[i_external] = sign*array[i_internal];
@@ -517,14 +534,13 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 	}
       }
     }
-    break;
-  case face_upper_y:
+  } else if (face == face_upper && axis == axis_y) {
     if (ny > 1) {
       iy = ny+gy-1;
       sign = vy ? -1.0 : 1.0;
       for (ig=0; ig<gy; ig++) {
 	for (ix=0; ix<mx; ix++) {
-	  for (iz=gz; iz<mz; iz++) {
+	  for (iz=0; iz<mz; iz++) {
 	    int i_internal = INDEX(ix,iy-ig,  iz,mx,my);
 	    int i_external = INDEX(ix,iy+ig+1,iz,mx,my);
 	    array[i_external] = sign*array[i_internal];
@@ -532,8 +548,7 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 	}
       }
     }
-    break;
-  case face_lower_z:
+  } else if (face == face_lower && axis == axis_z) {
     if (nz > 1) {
       iz = gz;
       sign = vz ? -1.0 : 1.0;
@@ -547,8 +562,7 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 	}
       }
     }
-    break;
-  case face_upper_z:
+  } else if (face == face_upper && axis == axis_z) {
     if (nz > 1) {
       iz = nz+gz-1;
       sign = vz ? -1.0 : 1.0;
@@ -562,28 +576,38 @@ void FieldBlock::enforce_boundary_reflecting_precision_
 	}
       }
     }
-    break;
-  default:
+  } else {
     ERROR("FieldBlock::enforce_boundary_reflecting_precision_",
 	  "Cannot be called with face_all");
-    break;
   }
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_outflow_(face_enum face) throw()
+void FieldBlock::enforce_boundary_outflow_
+(
+ face_enum face,
+ axis_enum axis
+ ) throw()
 {
   INCOMPLETE("FieldBlock::enforce_boundary_outflow","");
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_inflow_(face_enum face) throw()
+void FieldBlock::enforce_boundary_inflow_
+(
+ face_enum face,
+ axis_enum axis
+ ) throw()
 {
   INCOMPLETE("FieldBlock::enforce_boundary_inflow","");
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_periodic_(face_enum face) throw()
+void FieldBlock::enforce_boundary_periodic_
+(
+ face_enum face,
+ axis_enum axis
+ ) throw()
 {
   INCOMPLETE("FieldBlock::enforce_boundary_periodic","");
 }

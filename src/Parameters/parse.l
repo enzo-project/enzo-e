@@ -91,7 +91,7 @@ false     { yylval.logical_type = 0; return LOGICAL; }
 true      { yylval.logical_type = 1; return LOGICAL; } 
 {LU}{LN}+ { yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return GROUP_NAME; } /* Group names begin with upper-case */
-[xyzt]    { yylval.string_type = strdup (yytext);
+[xyzt]    { yylval.string_type = strdup (yytext); /* MEMORY LEAK 8 bytes r2026 */
             return VARIABLE; }
 {LL}{LN}* { yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return IDENTIFIER; } /* group, parameter, and variables */
