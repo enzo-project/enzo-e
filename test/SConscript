@@ -250,10 +250,10 @@ elif (precision == "double"):
 else:
    print "FAIL: precision = ",precision
 
-if (parallel_type == "serial"):
-   env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='1')
-else:
+if (parallel_type == "mpi"):
    env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='4')
+else:
+   env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='1')
 
 
 # env.MakeMovie('ppm-density.mpg',      '#/ppm-density-00000.png', ARGS='ppm-density-?????.png')
