@@ -18,7 +18,6 @@ Layout::Layout() throw()
   : process_first_ (0),
     process_count_ (1)
 {
-
   for (int i=0; i<3; i++) {
     block_count_[i] = 1;
   }
@@ -60,19 +59,23 @@ int Layout::block_count (int *nbx, int *nby, int *nbz) throw()
 void Layout::process_range(int * process_first, int * process_count) throw()
 {
   *process_first = process_first_;
-  *process_count  = process_count_;
+  *process_count = process_count_;
 }
 
 //----------------------------------------------------------------------
 
 int Layout::local_count (int ip) throw()
 {
-  int block_count = block_count_[0] * block_count_[1] * block_count_[2];
-  if (process_first_ <= ip && ip < process_first_ + process_count_) {
-    return (ip*block_count)/process_count_ - ((ip-1)*block_count)/process_count_;
-  } else {
-    return 0;
-  }
+  int ip0 = ip - process_first_;
+
+  if (0 <= ip0 && ip0 < process_count_) {
+
+    int block_count = block_count_[0] * block_count_[1] * block_count_[2];
+
+    return (ip0+1)*block_count/process_count_ 
+      -     ip0   *block_count/process_count_;
+
+  } else return 0;
   
 }
 
@@ -82,7 +85,8 @@ int Layout::process (int ib)  throw()
 {
   int block_count = block_count_[0] * block_count_[1] * block_count_[2];
   if (0 <= ib && ib < block_count) {
-    return process_first_ + process_count_*ib / block_count;
+    int ip0 = process_count_*ib / block_count;
+      return process_first_ + ip0;
   } else {
     return PROCESS_NULL;
   }
