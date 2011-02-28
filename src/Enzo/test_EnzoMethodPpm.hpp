@@ -20,7 +20,7 @@ void output_images(Monitor * monitor,
 
   if (! (cycle_image && cycle % cycle_image == 0)) return;
 
-  FieldDescr * field_descr = field_block->field_descr();
+  const FieldDescr * field_descr = field_block->field_descr();
   int nx,ny,nz;
   int gx,gy,gz;
   int mx,my,mz;
@@ -54,7 +54,7 @@ void output_dump(FileHdf5 & hdf5,
   // Refresh boundary conditions 
   // (should have check to not do it more than once)
 
-  FieldDescr * field_descr = field_block->field_descr();
+  const FieldDescr * field_descr = field_block->field_descr();
   field_block->enforce_boundary(boundary_reflecting);
 
   // Open file

@@ -70,13 +70,11 @@ PARALLEL_MAIN_BEGIN
   unit_class ("FieldBlock");
   //----------------------------------------------------------------------
 
-  FieldBlock field_block;
+  FieldBlock field_block (&field_descr);
 
   //----------------------------------------------------------------------
 
   unit_func("field_descr");
-
-  field_block.set_field_descr(&field_descr);
 
   unit_assert (field_block.field_descr() == & field_descr);
 

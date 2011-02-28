@@ -79,7 +79,7 @@ void FieldFaces::save() throw()
 
 void FieldFaces::allocate_() throw()
 {
-  FieldDescr * field_descr = field_block_->field_descr();
+  const FieldDescr * field_descr = field_block_->field_descr();
 
   int num_fields = field_descr->field_count();
 

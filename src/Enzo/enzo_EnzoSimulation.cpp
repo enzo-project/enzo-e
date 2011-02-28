@@ -403,8 +403,8 @@ void EnzoSimulation::output_images_
 
   if (! (cycle_skip && cycle % cycle_skip == 0)) return;
 
-  FieldBlock * field_block = data_block->field_block();
-  FieldDescr * field_descr = field_block->field_descr();
+  FieldBlock *       field_block = data_block->field_block();
+  const FieldDescr * field_descr = field_block->field_descr();
   int nx,ny,nz;
   int gx,gy,gz;
   int mx,my,mz;

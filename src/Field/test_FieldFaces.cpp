@@ -37,17 +37,17 @@ double value (int ix, int iy, int iz,
 }
 //----------------------------------------------------------------------
 
-void init_field_1(FieldBlock ** fb,
+void init_field_1(FieldBlock ** field_block,
 		  int k, int i, 
 		  int mx, int my, int mz,
 		  int M3, int N3)
 {
 
-  FieldDescr * fd = fb[k]->field_descr();
+  const FieldDescr * field_descr = field_block[k]->field_descr();
 
   int gx, gy, gz;
 
-  fd->ghosts(i, &gx, &gy, &gz);
+  field_descr->ghosts(i, &gx, &gy, &gz);
 
   int mdx, mdy, mdz;
 
@@ -55,7 +55,7 @@ void init_field_1(FieldBlock ** fb,
   mdy = my + 2*gy;
   mdz = mz + 2*gz;
 
-  float * v = (float *) fb[k]->field_values(i);
+  float * v = (float *) field_block[k]->field_values(i);
 
   for (int iz = 0; iz < mdz; iz++) {
     for (int iy = 0; iy < mdy; iy++) {
@@ -69,17 +69,17 @@ void init_field_1(FieldBlock ** fb,
 
 //----------------------------------------------------------------------
 
-void init_field_2(FieldBlock ** fb,
+void init_field_2(FieldBlock ** field_block,
 		  int k, int i, 
 		  int mx, int my, int mz,
 		  int M3, int N3)
 {
 
-  FieldDescr * fd = fb[k]->field_descr();
+  const FieldDescr * field_descr = field_block[k]->field_descr();
 
   int gx, gy, gz;
 
-  fd->ghosts(i, &gx, &gy, &gz);
+  field_descr->ghosts(i, &gx, &gy, &gz);
 
   int mdx, mdy, mdz;
 
@@ -87,7 +87,7 @@ void init_field_2(FieldBlock ** fb,
   mdy = my + 2*gy;
   mdz = mz + 2*gz;
 
-  double * v = (double *) fb[k]->field_values(i);
+  double * v = (double *) field_block[k]->field_values(i);
 
   for (int iz = 0; iz < mdz; iz++) {
     for (int iy = 0; iy < mdy; iy++) {
@@ -102,17 +102,17 @@ void init_field_2(FieldBlock ** fb,
 
 //----------------------------------------------------------------------
 
-void init_field_3(FieldBlock ** fb,
+void init_field_3(FieldBlock ** field_block,
 		  int k, int i, 
 		  int mx, int my, int mz,
 		  int M3, int N3)
 {
 
-  FieldDescr * fd = fb[k]->field_descr();
+  const FieldDescr * field_descr = field_block[k]->field_descr();
 
   int gx, gy, gz;
 
-  fd->ghosts(i, &gx, &gy, &gz);
+  field_descr->ghosts(i, &gx, &gy, &gz);
 
   int mdx, mdy, mdz;
 
@@ -120,7 +120,7 @@ void init_field_3(FieldBlock ** fb,
   mdy = my + 2*gy;
   mdz = mz + 2*gz;
 
-  long double * v = (long double *) fb[k]->field_values(i);
+  long double * v = (long double *) field_block[k]->field_values(i);
 
   for (int iz = 0; iz < mdz; iz++) {
     for (int iy = 0; iy < mdy; iy++) {
@@ -143,28 +143,28 @@ PARALLEL_MAIN_BEGIN
   unit_init();
 
   //--------------------------------------------------
-  // Initialize the global field descriptor object fd
+  // Initialize the global field descriptor object field_descr
   //--------------------------------------------------
 
-  FieldDescr fd;
+  FieldDescr * field_descr = new FieldDescr;
 
   // insert fields
 
-  int i1 = fd.insert_field("field_1");
-  int i2 = fd.insert_field("field_2");
-  int i3 = fd.insert_field("field_3");
+  int i1 = field_descr->insert_field("field_1");
+  int i2 = field_descr->insert_field("field_2");
+  int i3 = field_descr->insert_field("field_3");
 
   // initialize field precisions
 
-  fd.set_precision(i1, precision_single);
-  fd.set_precision(i2, precision_double);
-  fd.set_precision(i3, precision_quadruple);
+  field_descr->set_precision(i1, precision_single);
+  field_descr->set_precision(i2, precision_double);
+  field_descr->set_precision(i3, precision_quadruple);
 
   // initialize field ghost zone depths
 
-  fd.set_ghosts(i1, 1,1,1);
-  fd.set_ghosts(i2, 0,1,2);
-  fd.set_ghosts(i3, 1,0,3);
+  field_descr->set_ghosts(i1, 1,1,1);
+  field_descr->set_ghosts(i2, 0,1,2);
+  field_descr->set_ghosts(i3, 1,0,3);
 
   const int mx = 4, my = 5, mz = 6;
 
@@ -177,7 +177,7 @@ PARALLEL_MAIN_BEGIN
   const int N  = 4;
   const int N3 = N*N*N;
 
-  FieldBlock * fb[N3];
+  FieldBlock * field_block[N3];
 
   for (int kz = 0; kz < N; kz++) {
     for (int ky = 0; ky < N; ky++) {
@@ -187,28 +187,24 @@ PARALLEL_MAIN_BEGIN
 
 	// Create the FaceBlock object
 
-	fb[k] = new FieldBlock;
-
-	// Set field blocks' field descriptors
-
-	fb[k]->set_field_descr(&fd);
+	field_block[k] = new FieldBlock (field_descr);
 
 	// Set field blocks' dimensions
 
-	fb[k]->set_size(mx, my, mz);
+	field_block[k]->set_size(mx, my, mz);
 
 	// Allocate field blocks including ghosts
 
-	fb[k]->allocate_array();
-	fb[k]->allocate_ghosts();
+	field_block[k]->allocate_array();
+	field_block[k]->allocate_ghosts();
 
 	// Initialize fields
 	// (each field initialized separately since each has different
 	// ghost zone depth)
 
-	init_field_1(fb,k,i1,mx,my,mz,M3,N3);
-	init_field_2(fb,k,i2,mx,my,mz,M3,N3);
-	init_field_3(fb,k,i3,mx,my,mz,M3,N3);
+	init_field_1(field_block,k,i1,mx,my,mz,M3,N3);
+	init_field_2(field_block,k,i2,mx,my,mz,M3,N3);
+	init_field_3(field_block,k,i3,mx,my,mz,M3,N3);
 
       }
     }
@@ -223,8 +219,8 @@ PARALLEL_MAIN_BEGIN
     for (int ky = 0; ky < N; ky++) {
       for (int kx = 0; kx < N-1; kx++) {
 	int k = kx + N * (ky + N * kz);
-	if (fb[k] != NULL) {
-	  FieldFaces * ff = fb[k]->field_faces();
+	if (field_block[k] != NULL) {
+	  FieldFaces * ff = field_block[k]->field_faces();
 	}
 
       }

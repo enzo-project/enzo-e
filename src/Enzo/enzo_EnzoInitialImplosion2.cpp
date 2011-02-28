@@ -27,8 +27,8 @@ void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
 
 {
 
-  FieldBlock * field_block = data_block->field_block();
-  FieldDescr * field_descr = data_block->field_block()->field_descr();
+  FieldBlock * field_block       = data_block->field_block();
+  const FieldDescr * field_descr = field_block->field_descr();
 
   ASSERT("EnzoInitialImplosion2",
 	 "Insufficient number of fields",

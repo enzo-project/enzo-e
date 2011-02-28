@@ -28,7 +28,7 @@ class FieldBlock {
 public: // interface
 
   /// Create a new uninitialized FieldBlock object
-  FieldBlock() throw();
+  FieldBlock(const FieldDescr * field_descr) throw();
 
   /// Deconstructor
   ~FieldBlock() throw();
@@ -68,7 +68,8 @@ public: // interface
   void cell_width(double * hx, double * hy, double * hz) const throw ();
 
   /// Return the associated field descriptor
-  FieldDescr * field_descr() throw ();
+  const FieldDescr * field_descr() const throw ()
+  { return field_descr_; }
 
   /// Return the ossociated field faces object
   FieldFaces * field_faces() throw ();
@@ -122,19 +123,16 @@ public: // interface
  
   /// Read a block from disk.  Create new FieldDescr if not supplied or different.
   /// return NULL iff no new field_descr is created
-  FieldDescr * read(File * file, FieldDescr * field_descr = 0) throw ();
+  void read(File * file) throw ();
 
   /// Write a block from disk, and optionally associated descriptor
-  void write(File * file, FieldDescr * field_descr = 0) const throw ();
+  void write(File * file) const throw ();
 
   /// Set size of the array block
   void set_size(int nx, int ny=1, int nz=1) throw();
 
   /// Set array values for a given field
   void set_field_values (int id_field, char * values) throw();
-
-  /// Set the associated field descriptor
-  void set_field_descr(FieldDescr * field_descr) throw();
 
   /// Set the box extent
   void set_extent(double lower_x = 0.0, double upper_x = 1.0, 
@@ -198,7 +196,7 @@ private: // functions
 private: // attributes
 
   /// Corresponding Field descriptor
-  FieldDescr * field_descr_;
+  const FieldDescr * field_descr_;
 
   /// Corresponding Field faces
   FieldFaces * field_faces_;

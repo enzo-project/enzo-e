@@ -31,8 +31,8 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
 
   parameters_->set_current_group("Field");
 
-  FieldBlock * field_block = data_block->field_block();
-  FieldDescr * field_descr = field_block->field_descr();
+  FieldBlock *       field_block = data_block->field_block();
+  const FieldDescr * field_descr = field_block->field_descr();
 
   double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, *t=0;
   bool * region=0, *rdeflt=0;
@@ -182,7 +182,7 @@ void InitialDefault::copy_values_
  ) throw()
 {
 
-  FieldDescr * field_descr = field_block->field_descr();
+  const FieldDescr * field_descr = field_block->field_descr();
 
   // Copy the scalar values to the field where logical values are true
 

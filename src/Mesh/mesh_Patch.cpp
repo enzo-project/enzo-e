@@ -208,8 +208,6 @@ void Patch::allocate_blocks() throw()
       
   }
 
-  FieldDescr * field_descr = data_descr_->field_descr();
-
   // Determine size of each block
   double bx = (extents_[1] - extents_[0]) / nbx;
   double by = (extents_[3] - extents_[2]) / nby;
@@ -220,7 +218,7 @@ void Patch::allocate_blocks() throw()
   for (int ib=0; ib<nb; ib++) {
 
     // create a new data block
-    DataBlock * data_block = new DataBlock;
+    DataBlock * data_block = new DataBlock(data_descr_);
 
     // Store the data block
     data_block_[ib] = data_block;
@@ -232,8 +230,6 @@ void Patch::allocate_blocks() throw()
     // INITIALIZE FIELD BLOCK
 
     FieldBlock * field_block = data_block->field_block();
-
-    field_block->set_field_descr(field_descr);
 
     field_block->set_size(mbx,mby,mbz);
 

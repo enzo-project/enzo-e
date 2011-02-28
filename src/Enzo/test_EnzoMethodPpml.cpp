@@ -15,45 +15,37 @@ int main (int argc, char ** argv)
 
   // Initialize parallelism
 
-  Mpi::init(&argc,&argv);
+  PARALLEL_INIT;
 
-  Parallel * parallel = Parallel::instance();
+  GroupProcess * parallel = GroupProcess::create();
 
-  unit_init(parallel->process_rank(), parallel->process_count());
+  unit_init(parallel->rank(), parallel->size());
 
-  // Create a struct of enzo data (won't work as global data for CHARM++, threading, etc)
+  // Initialize cross-cutting components
 
-  DataDescr * data_descr = new DataDescr(new FieldDescr);
-  DataBlock * data_block = new DataBlock(new FieldBlock);
+  Monitor   * monitor  = new Monitor;
 
-  unit_class ("EnzoMethodPpml");
-  EnzoMethodPpml ppml;
+  // Create top-level Simulation object
 
-  unit_func("initialize_block");
-  ppml.initialize_block(data_block);
-  unit_assert(true);
+  Simulation * simulation = new EnzoSimulation(monitor);
 
-  double t = 0;
-  double dt = 0.1;
+  FILE * fp = fopen ("input/test_EnzoMethodPpml.in","r");
 
-  unit_func("compute_block");
-  ppml.compute_block(data_block,t,dt);
-  unit_assert(false);
+  unit_assert(fp != 0);
 
-  unit_func("finalize_block");
-  ppml.finalize_block(data_block);
-  unit_assert(false);
+  simulation->initialize(fp);
 
-  unit_func("refresh_face");
-  ppml.refresh_block();
-  unit_assert(false);
+  fclose (fp);
 
-  unit_func("finalize_method");
-  ppml.finalize(data_descr);
-  unit_assert(false);
+  simulation->run();
+
+
+  simulation->finalize();
 
   unit_finalize();
 
-  Mpi::finalize();
+  delete monitor;
+  delete simulation;
 
+  PARALLEL_EXIT;
 }

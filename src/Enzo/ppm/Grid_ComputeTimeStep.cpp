@@ -32,7 +32,7 @@ enzo_float EnzoDescr::ComputeTimeStep()
  
   //  enzo_float dt, dtTemp;
   enzo_float dtBaryons      = HUGE_VALF;
-  enzo_float dtViscous      = HUGE_VALF;
+  //  enzo_float dtViscous      = HUGE_VALF;
   //  enzo_float dtParticles    = HUGE_VALF;
   enzo_float dtExpansion    = HUGE_VALF;
   //  enzo_float dtAcceleration = HUGE_VALF;

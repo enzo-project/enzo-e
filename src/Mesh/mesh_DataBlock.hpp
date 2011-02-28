@@ -19,32 +19,43 @@ class DataBlock {
 public: // interface
 
   /// Initialize the DataBlock object
-  DataBlock(int num_field_blocks = 1) throw()
-    : field_block_()
-  { field_block_.resize(num_field_blocks);
-    for (size_t i=0; i<field_block_.size(); i++) {
-      field_block_[i] = new FieldBlock;
-    }
-  }
+  DataBlock(DataDescr * data_descr,
+	    int num_field_blocks = 1) throw();
 
-  /// Delete DataBlock
+  //----------------------------------------------------------------------
+  // Big Three
+  //----------------------------------------------------------------------
 
-  ~DataBlock() throw()
-  { 
-    for (size_t i=0; i<field_block_.size(); i++) {
-      delete field_block_[i];
-    }
-  }
+  /// Destructor
+  ~DataBlock() throw();
+
+  /// Copy constructor
+  DataBlock(const DataBlock & data_block) throw();
+
+  /// Assignment operator
+  DataBlock & operator= (const DataBlock & data_block) throw();
+
+  //----------------------------------------------------------------------
 
   /// Return the Field block
-
-  FieldBlock * field_block (int i=0)
+  const FieldBlock * field_block (int i=0) const throw()
   { return field_block_.at(i); };
+
+  /// Return the Field block
+  FieldBlock * field_block (int i=0) throw()
+  { return field_block_.at(i); };
+
+private: // functions
+
+  /// Allocate and copy in attributes from data_block
+  void create_(const DataBlock & data_block) throw();
 
 private: // attributes
 
-  /// Array of field blocks
+  /// Pointer to the parent DataDescr
+  DataDescr * data_descr_;
 
+  /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
 
 };

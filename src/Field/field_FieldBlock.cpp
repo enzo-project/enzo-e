@@ -11,8 +11,10 @@
 
 #include "field.hpp"
 
-FieldBlock::FieldBlock() throw()
-  : field_descr_(0),
+//----------------------------------------------------------------------
+
+FieldBlock::FieldBlock(const FieldDescr * field_descr) throw()
+  : field_descr_(field_descr),
     field_faces_(0),
     array_(0),
     field_values_(),
@@ -24,6 +26,8 @@ FieldBlock::FieldBlock() throw()
     lower_[i]      = 0.0;
     upper_[i]      = 1.0;
   }
+
+  ASSERT("FieldBlock","Input field_descr is NULL",field_descr != NULL);
 
   set_boundary_face(false);
 }
@@ -118,13 +122,6 @@ void FieldBlock::cell_width( double * hx, double * hy, double * hz ) const throw
   *hx = (upper_[0] - lower_[0]) / size_[0];
   *hy = (upper_[1] - lower_[1]) / size_[1];
   *hz = (upper_[2] - lower_[2]) / size_[2];
-}
-
-//----------------------------------------------------------------------
-
-FieldDescr * FieldBlock::field_descr() throw ()
-{
-  return field_descr_;
 }
 
 //----------------------------------------------------------------------
@@ -634,24 +631,14 @@ FieldBlock * FieldBlock::merge
 
 //----------------------------------------------------------------------
 	
-FieldDescr * FieldBlock::read
-(
- File       * file, 
- FieldDescr * field_descr 
- ) throw ()
+void FieldBlock::read (File * file) throw ()
 {
-  FieldDescr * new_field_descr = 0;
-
-  return new_field_descr;
+  INCOMPLETE("FieldBlock::read","");
 }
 
 //----------------------------------------------------------------------
 
-void FieldBlock::write
-(
- File       * file,
- FieldDescr * field_descr 
- ) const throw ()
+void FieldBlock::write (File * file) const throw ()
 {
   INCOMPLETE("FieldBlock::write","");
 }
@@ -677,13 +664,6 @@ void FieldBlock::set_field_values
  char * field_values) throw()
 {
   INCOMPLETE("FieldBlock::set_field_values","");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::set_field_descr(FieldDescr * field_descr) throw()
-{
-  field_descr_ = field_descr;
 }
 
 //----------------------------------------------------------------------
