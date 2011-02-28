@@ -4,6 +4,7 @@
 /// @file     mesh_DataBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
+/// @todo     Move FieldBlock members//attributes to DataBlock when possible
 /// @brief    [\ref Mesh] Declaration of the DataBlock class
 
 #ifndef MESH_DATA_BLOCK_HPP

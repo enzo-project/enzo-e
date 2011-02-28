@@ -4,6 +4,7 @@
 /// @file     mesh_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
+/// @todo     Relocate or remove need for field_block->set_boundary_face() calls
 /// @brief    Implementation of the Patch class
 
 #include "cello.hpp"
@@ -12,8 +13,8 @@
 
 //----------------------------------------------------------------------
 
-Patch::Patch() throw()
-  : data_descr_(0),
+Patch::Patch(DataDescr * data_descr) throw()
+  : data_descr_(data_descr),
     layout_(new Layout),
     data_block_()
 
@@ -66,13 +67,6 @@ Patch & Patch::operator= (const Patch & patch) throw()
 
 //----------------------------------------------------------------------
 
-void Patch::set_data_descr (DataDescr * data_descr) throw()
-{
-  data_descr_ = data_descr;
-}
-
-//----------------------------------------------------------------------
-
 DataDescr * Patch::data_descr () const throw()
 {
   return data_descr_;
@@ -98,6 +92,53 @@ void Patch::size (int * npx, int * npy, int * npz) const throw()
 
 //----------------------------------------------------------------------
 
+void Patch::set_blocking (int nbx, int nby, int nbz) throw()
+{
+  if (blocking_[0] == nbx &&
+      blocking_[1] == nby &&
+      blocking_[2] == nbz) {
+    WARNING("Patch::set_blocking",
+	    "Trying to set same Patch blocking more than once: ignoring");
+    return;
+  };
+  // ASSERT: not trying to change block size to currently set size
+
+  bool allocated = blocks_allocated();
+
+  if (allocated) {
+    WARNING("Patch::set_blocking",
+	    "Blocks already allocated: deleting old blocks and reallocating");
+    deallocate_blocks();
+  }
+
+  // ASSERT: blocks are not allocated
+
+  // Set blocking_ array
+
+  blocking_[0] = nbx;
+  blocking_[1] = nby;
+  blocking_[2] = nbz;
+
+  // Set Layout
+  layout_->set_block_count(nbx,nby,nbz);
+
+  if (blocks_allocated()) {
+    allocate_blocks();
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void Patch::blocking (int * nbx, int * nby, int * nbz) const throw()
+{
+  *nbx = blocking_[0];
+  *nby = blocking_[1];
+  *nbz = blocking_[2];
+}
+
+//----------------------------------------------------------------------
+
 Layout * Patch::layout () const throw()
 {
   return layout_;
@@ -109,12 +150,9 @@ void Patch::set_extents (double xm, double xp,
 			 double ym, double yp,
 			 double zm, double zp) throw()
 {
-  extents_[0] = xm;
-  extents_[1] = xp;
-  extents_[2] = ym;
-  extents_[3] = yp;
-  extents_[4] = zm;
-  extents_[5] = zp;
+  extents_[0] = xm;  extents_[1] = xp;
+  extents_[2] = ym;  extents_[3] = yp;
+  extents_[4] = zm;  extents_[5] = zp;
 }
 
 //----------------------------------------------------------------------
@@ -123,12 +161,9 @@ void Patch::extents (double * xm, double * xp,
 		     double * ym, double * yp,
 		     double * zm, double * zp) const throw()
 {
-  if (xm) *xm = extents_[0];
-  if (xp) *xp = extents_[1];
-  if (ym) *ym = extents_[2];
-  if (yp) *yp = extents_[3];
-  if (zm) *zm = extents_[4];
-  if (zp) *zp = extents_[5];
+  if (xm) *xm = extents_[0];  if (xp) *xp = extents_[1];
+  if (ym) *ym = extents_[2];  if (yp) *yp = extents_[3];
+  if (zm) *zm = extents_[4];  if (zp) *zp = extents_[5];
 }
 
   
@@ -248,7 +283,6 @@ void Patch::allocate_blocks() throw()
 
 void Patch::deallocate_blocks() throw()
 {
-  UNTESTED("Patch::deallocate_blocks()");
   for (size_t i=0; i<data_block_.size(); i++) {
     delete data_block_[i];
     data_block_[i] = 0;

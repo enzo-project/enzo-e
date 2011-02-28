@@ -4,6 +4,8 @@
 /// @file     test_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-06
+/// @todo     Add 1D and 2D Patch tests
+/// @todo     Add parallel Patch tests
 /// @brief    Program implementing unit tests for the Patch class
  
 #include "test.hpp"
@@ -20,51 +22,99 @@ PARALLEL_MAIN_BEGIN
   unit_init();
   unit_class ("Patch");
 
-  unit_func("Patch");
-
-  DataDescr data_descr;
-
-  //--------------------------------------------------
+  //======================================================================
   // np = 1
   // ip = 0 [default]
-  //--------------------------------------------------
+  //======================================================================
 
-  Patch * patch = new Patch;
+  unit_func("Patch");
+
+  DataDescr * data_descr = new DataDescr;
+
+  Patch * patch = new Patch(data_descr);
   unit_assert(patch != NULL);
 
-  unit_func("set_data_descr");
+  //--------------------------------------------------
+  unit_func("data_descr");
 
-  patch->set_data_descr(&data_descr);
-  unit_assert(patch->data_descr()==&data_descr);
+  unit_assert(patch->data_descr()==data_descr);
 
+  //--------------------------------------------------
   unit_func("set_size");
 
-  // Patch = (7,3,2) cells
+  // Set Patch size (12,12,12)
 
-  patch->set_size(7,3,2);
+  int patch_size[] = {12,12,12};
+
+  patch->set_size(patch_size[0],
+		  patch_size[1],
+		  patch_size[2]);
+
+  // Test that patch size is correct
+
   int npx,npy,npz;
+
   patch->size(&npx,&npy,&npz);
-  unit_assert(npx==7 && npy==3 && npz==2);
+
+  unit_assert(patch_size[0]==npx && 
+	      patch_size[1]==npy && 
+	      patch_size[2]==npz);
+
+  //--------------------------------------------------
+
+  unit_func("set_blocking");
+
+  // Set Patch blocking (3,3,3)
+
+  int patch_blocking[] = {3,3,3};
+
+  patch->set_blocking(patch_blocking[0],
+		      patch_blocking[1],
+		      patch_blocking[2]);
+
+  // Test that patch blocking is correct
+
+  int nbx,nby,nbz;
+
+  patch->blocking(&nbx,&nby,&nbz);
+
+  unit_assert(patch_blocking[0]==nbx && 
+	      patch_blocking[1]==nby && 
+	      patch_blocking[2]==nbz);
+
+  //--------------------------------------------------
+
+  unit_func("set_extents");
+
+  // Set domain extents
+
+  double domain_lower[] = {0.0, 0.0, 0.0};
+  double domain_upper[] = {1.0, 1.0, 1.0};
+
+  patch->set_extents(domain_lower[0], domain_upper[0], 
+		     domain_lower[1], domain_upper[1], 
+		     domain_lower[2], domain_upper[2]);
+
+  // Test that the domain extents are correct
+
+  double xm,xp,ym,yp,zm,zp;
+
+  patch->extents(&xm,&xp,&ym,&yp,&zm,&zp);
+
+  unit_assert(xm==domain_lower[0] && xp==domain_upper[0] &&
+	      ym==domain_lower[1] && yp==domain_upper[1] &&
+	      zm==domain_lower[2] && zp==domain_upper[2]);
+  
+  // Initialize how the Layout distributes the Patch data
 
   Layout * layout = patch->layout();
 
   unit_assert(layout != NULL);
 
   layout->set_process_range(0,1);
-  layout->set_block_count(1,1,1);
 
-  unit_func("set_extents");
+  // Test allocation of Patch into Blocks
 
-  patch->set_extents(0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
-
-  double xm,xp,ym,yp,zm,zp;
-
-  patch->extents(&xm,&xp,&ym,&yp,&zm,&zp);
-
-  unit_assert(xm==0.0 && xp==1.0 &&
-	      ym==0.0 && yp==1.0 &&
-	      zm==0.0 && zp==1.0);
-  
   unit_func("is_allocated");
 
   unit_assert(patch->blocks_allocated() == false);
@@ -75,19 +125,90 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(patch->blocks_allocated() == true);
 
-  unit_func("block_count");
+  // Test that the allocated Blocks were initialized correctly
 
-  unit_assert(patch->num_blocks()==1);
-  
-  unit_func("block");
+  unit_func("num_blocks");
 
-  unit_assert(patch->block(0) != 0);
+  unit_assert(patch->num_blocks()==nbx*nby*nbz);
 
-  // TEST BLOCK PROPERTIES
-  unit_assert(false);
+  // loop over local data blocks and test their existence and properties
+
+  ItBlocks itBlocks (patch);
+
+  DataBlock *  data_block = 0;
+  FieldBlock * field_block = 0;
+
+  int count = 0;
+
+  while ((data_block = ++itBlocks)) {
+
+    ++count;
+
+    unit_assert_quiet(data_block != NULL);
+
+    if (data_block) {
+      field_block = data_block->field_block();
+      unit_assert_quiet(field_block != NULL);
+      
+    }
+
+    // Test DataBlock
+    if (data_block) {
+      // NO TESTS
+    }
+
+    // Test FieldBlock
+    if (data_block && field_block) {
+
+      // Test block size
+      int nfx, nfy, nfz;
+
+      unit_func("FieldBlock::size");
+      field_block->size(&nfx,&nfy,&nfz);
+      unit_assert_quiet (nfx == patch_size[0] / patch_blocking[0]);
+      unit_assert_quiet (nfy == patch_size[1] / patch_blocking[1]);
+      unit_assert_quiet (nfz == patch_size[2] / patch_blocking[2]);
+
+      // Get block position in the Patch
+
+      int ibx,iby,ibz;
+
+      itBlocks.index(&ibx,&iby,&ibz);
+      
+      int ib = ibx + nbx*(iby + nby*ibz);
+      printf ("DEBUG %d  %d %d %d  %d %d  %d\n",ib,ibx,iby,ibz,nbx,nby,count);
+      unit_assert_quiet (count == ib);
+
+      // Test block extents
+
+      double xm,ym,zm;
+      field_block->extent (&xm,&xp,&ym,&yp,&zm,&zp);
+
+      
+    }
+
+    
+    if (! data_block) {
+      WARNING("test_Patch","Block tests skipped since DataBlock not allocated");
+    }
+
+    if (data_block && ! field_block) {
+      WARNING("test_Patch","Block tests skipped since FieldBlock not allocated");
+    }
+
+    // TEST BLOCK PROPERTIES
+    //    unit_assert(false);
+
+  }
+
+  unit_func("num_blocks");
+  unit_assert(count == patch->num_blocks());
+
+  unit_assert(patch->block(0) != NULL);
 
   // Deallocate local blocks
 
+  //--------------------------------------------------
   unit_func("deallocate");
 
   patch->deallocate_blocks();
@@ -95,6 +216,9 @@ PARALLEL_MAIN_BEGIN
   unit_assert(patch->blocks_allocated() == false);
 
   //--------------------------------------------------
+
+  delete patch;
+  delete data_descr;
 
   unit_finalize();
 

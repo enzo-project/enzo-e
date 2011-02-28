@@ -12,7 +12,7 @@
 
 ItBlocks::ItBlocks ( Patch * patch ) throw ()
   : patch_(patch),
-    curr_(0)
+    index1_(0)
 {}
 
 //----------------------------------------------------------------------
@@ -20,18 +20,33 @@ ItBlocks::ItBlocks ( Patch * patch ) throw ()
 ItBlocks::~ItBlocks() throw ()
 {
   patch_ = 0; 
-  curr_ = 0;
+  index1_ = 0;
 }
 
 //----------------------------------------------------------------------
 
-DataBlock * ItBlocks::operator++ ()
+DataBlock * ItBlocks::operator++ () throw()
 {
-  curr_ ++;
+  index1_ ++;
 
-  if (curr_ > patch_->num_blocks()) curr_ = 0;
+  if (index1_ > patch_->num_blocks()) index1_ = 0;
 
-  return curr_ ? patch_->block(curr_ - 1) : 0;
+  return index1_ ? patch_->block(index1_ - 1) : 0;
 }
+
+//----------------------------------------------------------------------
+int ItBlocks::index (int * ibx, int * iby, int * ibz) throw()
+{
+  if (index1_) {
+      // need to implement mapping of local block 1D index in patch 
+      // to global 3D index.  Either use Patch or ItBlock::index()
+    INCOMPLETE("ItBlocks::index","");
+    //    patch_->layout()->block_indices
+  } else {
+    WARNING ("ItBlocks::index","Trying to get index of the 'null DataBlock'");
+  }
+  return 0;
+}
+
 
 

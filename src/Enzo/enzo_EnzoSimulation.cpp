@@ -79,7 +79,7 @@ void EnzoSimulation::run() throw()
   // INITIALIZE FIELDS
   //--------------------------------------------------
 
-  while ((data_block = (DataBlock *) ++itBlocks)) {
+  while ((data_block = ++itBlocks)) {
 
     block_start_(data_block);
 
@@ -117,7 +117,7 @@ void EnzoSimulation::run() throw()
 
     double dt_block = std::numeric_limits<double>::max();
 
-    while ((data_block =  ++itBlocks)) {
+    while ((data_block = ++itBlocks)) {
 
       block_start_(data_block);
 

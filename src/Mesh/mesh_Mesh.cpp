@@ -13,7 +13,7 @@
 //----------------------------------------------------------------------
 
 Mesh::Mesh(DataDescr * data_descr) throw ()
-  : root_patch_(new Patch),
+  : root_patch_(new Patch(data_descr)),
     tree_(0),
     dimension_(0),
     min_patch_size_(0),
@@ -27,7 +27,6 @@ Mesh::Mesh(DataDescr * data_descr) throw ()
     coalesce_(0)
 
 {
-  root_patch_->set_data_descr(data_descr);
   for (int i=0; i<3; i++) {
     lower_[i] = 0.0;
     upper_[i] = 1.0;

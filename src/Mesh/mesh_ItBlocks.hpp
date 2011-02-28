@@ -27,15 +27,19 @@ public: // interface
   ~ItBlocks () throw ();
   
   /// Iterate through all Patches in the patch (currently only root!)
-  DataBlock * operator++ ();
+  DataBlock * operator++ () throw();
+
+  /// Return the global index of the current block in the patch
+  int index (int * ibx, int * iby, int * ibz) throw();
+  
 
 private: // attributes
 
   /// The Patch being iterated over
   Patch * patch_;
 
-  /// Index to the current DataBlock
-  size_t curr_;
+  /// Index + 1 of the current local DataBlock, or 0 if between iterations
+  size_t index1_;
 };
 
 #endif /* MESH_IT_BLOCKS_HPP */

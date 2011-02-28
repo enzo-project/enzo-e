@@ -110,7 +110,7 @@ public: // interface
 
   /// Return whether node has any children
   bool any_children () { 
-    //    if (!child_) return false;
+    if (!child_) return false;
     for (int iy=0; iy<k_; iy++) {
       for (int ix=0; ix<k_; ix++) {
 	if (child(ix,iy)) return true;

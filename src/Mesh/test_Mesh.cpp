@@ -19,13 +19,13 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
   unit_class ("Mesh");
-  unit_func("Mesh");
 
   DataDescr data_descr;
 
-  Mesh mesh(&data_descr);
+  unit_func("Mesh");
+  Mesh * mesh = new Mesh (&data_descr);
+  unit_assert(mesh != NULL);
 
-  unit_assert(false);
   unit_finalize();
 
   PARALLEL_EXIT;

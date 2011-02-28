@@ -19,7 +19,7 @@ class Patch {
 public: // interface
 
   /// Constructor
-  Patch() throw();
+  Patch(DataDescr *) throw();
 
   //----------------------------------------------------------------------
   // Big Three
@@ -36,9 +36,6 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Set the data descriptor
-  void set_data_descr (DataDescr * data_descr) throw();
-
   /// Return the data descriptor
   DataDescr * data_descr () const throw();
 
@@ -47,6 +44,12 @@ public: // interface
 
   /// Return the size of the patch in number of grid cells
   void size (int * npx, int * npy=0, int * npz=0) const throw();
+
+  /// Set how the Patch is partitioned into Blocks
+  void set_blocking (int nbx, int nby, int nbz) throw();
+
+  /// Return the size of the patch in number of grid cells
+  void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
 
   /// Return the layout of the patch, describing processes and blocking
   Layout * layout () const throw();
@@ -73,11 +76,12 @@ public: // interface
   /// Whether local blocks are allocated
   bool blocks_allocated() const throw();
 
-  /// Return the number of local blocks
+  /// Return the total number of local blocks
   int num_blocks() const throw();
 
   /// Return the ith data block
   DataBlock * block(int i) const throw();
+
 
   //--------------------------------------------------
 
@@ -105,6 +109,9 @@ private: // attributes
 
   /// Size of the patch
   int size_[3];
+
+  /// How the Patch is distributed into DataBlocks
+  int blocking_[3];
 
   /// This process id
   int ip_;

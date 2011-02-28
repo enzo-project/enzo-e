@@ -78,22 +78,31 @@ void unit_func (const char * f)
 }
 
 /// @brief Assert result of test; macro used for FILE and LINE expansion
-#define unit_assert(RESULT) unit_assert_(RESULT, __FILE__,__LINE__);
+#define unit_assert(RESULT) \
+  unit_assert_(RESULT, __FILE__,__LINE__);
+
+/// @brief Assert result of test, only output for FAIL; macro used for FILE and LINE expansion
+#define unit_assert_quiet(RESULT) \
+  unit_assert_(RESULT, __FILE__,__LINE__,true);
 
 /// @brief Assert result of test macro; called by unit_assert macro
-void unit_assert_ (bool result, const char * file, int line)
+void unit_assert_ (bool result, const char * file, int line, bool quiet=false)
 {
-  if (unit::process_rank == 0 || ! result) {
-    PARALLEL_PRINTF ("%s %d/%d %s %d %s %s %d\n",
-	    (result)? unit::pass_string : unit::fail_string,
-	    unit::process_rank, 
-	    unit::process_count,
-	    file, 
-	    line, 
-	    unit::class_name,
-	    unit::func_name,
-	    unit::test_num);
-    fflush(stdout);
+  // Only print Pass on local process
+  if (unit::process_rank == 0 || ! result) { 
+    // don't print if quiet is set and test passed
+    if (! ( quiet & result)) {
+      PARALLEL_PRINTF ("%s %d/%d %s %d %s %s %d\n",
+		       (result)? unit::pass_string : unit::fail_string,
+		       unit::process_rank, 
+		       unit::process_count,
+		       file, 
+		       line, 
+		       unit::class_name,
+		       unit::func_name,
+		       unit::test_num);
+      fflush(stdout);
+    }
   }
   unit::test_num++;
 }
