@@ -176,7 +176,7 @@ PARALLEL_MAIN_BEGIN
       // Test block extents
 
       double xm,ym,zm;
-      field_block->extent (&xm,&xp,&ym,&yp,&zm,&zp);
+      data_block->extent (&xm,&xp,&ym,&yp,&zm,&zp);
 
       
     }

@@ -48,7 +48,7 @@ void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
   field_block->size(&nx,&ny,&nz);
 
   double hx,hy,hz;
-  field_block->cell_width(&hx,&hy,&hz);
+  field_block->cell_width(data_block,&hx,&hy,&hz);
 
   int gx,gy,gz;
   field_descr->ghosts(index_density,&gx,&gy,&gz);

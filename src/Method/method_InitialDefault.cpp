@@ -63,7 +63,7 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
 
       // Allocate arrays if needed
       if (value == NULL) {
-	allocate_xyzt_(field_block,index_field,
+	allocate_xyzt_(data_block,index_field,
 		       &nx,&ny,&nz,
 		       &value, &vdeflt,
 		       &region,&rdeflt,
@@ -121,7 +121,7 @@ void InitialDefault::finalize_block (DataBlock * data_block) throw()
 
 void InitialDefault::allocate_xyzt_
 (
- FieldBlock * field_block,
+ DataBlock * data_block,
  int index_field,
  int * nx, int * ny, int * nz,
  double ** value, double ** vdeflt,
@@ -129,6 +129,9 @@ void InitialDefault::allocate_xyzt_
  double ** x, double ** y, double ** z, double ** t
  ) throw()
 {
+
+  FieldBlock * field_block = data_block->field_block();
+
   // Get field size
 
   field_block->size(nx,ny,nz);
@@ -147,10 +150,10 @@ void InitialDefault::allocate_xyzt_
   (*t)      = new double [n];
 
   double xm, xp, ym, yp, zm, zp;
-  field_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
+  data_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
 
   double hx,hy,hz;
-  field_block->cell_width(&hx,&hy,&hz);
+  field_block->cell_width(data_block,&hx,&hy,&hz);
 
   // Initialize arrays
   for (int iz=0; iz<(*nz); iz++) {

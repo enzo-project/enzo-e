@@ -17,25 +17,28 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
+
   //----------------------------------------------------------------------
   unit_init();
   //----------------------------------------------------------------------
 
-  FieldDescr field_descr;
+  DataDescr * data_descr = new DataDescr;
+  FieldDescr * field_descr = data_descr->field_descr();
 
-  int i1 = field_descr.insert_field("f1");
-  int i2 = field_descr.insert_field("f2");
-  int i3 = field_descr.insert_field("f3");
-  int i4 = field_descr.insert_field("f4");
-  int i5 = field_descr.insert_field("f5");
+
+  int i1 = field_descr->insert_field("f1");
+  int i2 = field_descr->insert_field("f2");
+  int i3 = field_descr->insert_field("f3");
+  int i4 = field_descr->insert_field("f4");
+  int i5 = field_descr->insert_field("f5");
 
   // set precision
 
-  field_descr.set_precision(i1, precision_single);
-  field_descr.set_precision(i2, precision_double);
-  field_descr.set_precision(i3, precision_double);
-  field_descr.set_precision(i4, precision_double);
-  field_descr.set_precision(i5, precision_quadruple);
+  field_descr->set_precision(i1, precision_single);
+  field_descr->set_precision(i2, precision_double);
+  field_descr->set_precision(i3, precision_double);
+  field_descr->set_precision(i4, precision_double);
+  field_descr->set_precision(i5, precision_quadruple);
 
   unit_class ("[precision]");
 
@@ -54,17 +57,17 @@ PARALLEL_MAIN_BEGIN
   int g4[3] = {0,0,0};
   int g5[3] = {3,3,3};
 
-  field_descr.set_ghosts(i1, g1[0],g1[1],g1[2]);
-  field_descr.set_ghosts(i2, g2[0],g2[1],g2[2]);
-  field_descr.set_ghosts(i3, g3[0],g3[1],g3[2]);
-  field_descr.set_ghosts(i4, g4[0],g4[1],g4[2]);
-  field_descr.set_ghosts(i5, g5[0],g5[1],g5[2]);
+  field_descr->set_ghosts(i1, g1[0],g1[1],g1[2]);
+  field_descr->set_ghosts(i2, g2[0],g2[1],g2[2]);
+  field_descr->set_ghosts(i3, g3[0],g3[1],g3[2]);
+  field_descr->set_ghosts(i4, g4[0],g4[1],g4[2]);
+  field_descr->set_ghosts(i5, g5[0],g5[1],g5[2]);
 
   // set centering
 
-  field_descr.set_centering(i2, false, true,  true);
-  field_descr.set_centering(i3, true,  false, true);
-  field_descr.set_centering(i4, true,  true,  false);
+  field_descr->set_centering(i2, false, true,  true);
+  field_descr->set_centering(i3, true,  false, true);
+  field_descr->set_centering(i4, true,  true,  false);
 
   //----------------------------------------------------------------------
   unit_class ("FieldBlock");
@@ -73,13 +76,14 @@ PARALLEL_MAIN_BEGIN
   int nx,ny,nz;
   nx=4; ny=5; nz=6;
 
-  FieldBlock field_block (&field_descr,nx,ny,nz);
+  DataBlock * data_block = new DataBlock (data_descr, nx,ny,nz);
+  FieldBlock * field_block = data_block->field_block();
 
   //----------------------------------------------------------------------
 
   unit_func("field_descr");
 
-  unit_assert (field_block.field_descr() == & field_descr);
+  unit_assert (field_block->field_descr() == field_descr);
 
   //----------------------------------------------------------------------
 
@@ -87,7 +91,7 @@ PARALLEL_MAIN_BEGIN
 
   int size[3];
 
-  field_block.size(&size[0],&size[1],&size[2]);
+  field_block->size(&size[0],&size[1],&size[2]);
 
   unit_assert(size[0]==nx && size[1]==ny && size[2]==nz);
 
@@ -96,34 +100,34 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
 
   unit_func("array_allocated");
-  unit_assert( ! field_block.array_allocated());
+  unit_assert( ! field_block->array_allocated());
 
   // Allocate
 
   unit_func("allocate_array");
-  field_block.allocate_array();
-  unit_assert(field_block.array() != 0);
+  field_block->allocate_array();
+  unit_assert(field_block->array() != 0);
 
   unit_func("array_allocated");
-  unit_assert( field_block.array_allocated());
+  unit_assert( field_block->array_allocated());
 
   // Deallocate
 
   unit_func("deallocate_array");
-  field_block.deallocate_array();
-  unit_assert(field_block.array() == 0);
+  field_block->deallocate_array();
+  unit_assert(field_block->array() == 0);
 
   unit_func("array_allocate");
-  unit_assert( ! field_block.array_allocated());
+  unit_assert( ! field_block->array_allocated());
 
   // Allocate
 
   unit_func("allocate_array");
-  field_block.allocate_array();
-  unit_assert(field_block.array() != 0);
+  field_block->allocate_array();
+  unit_assert(field_block->array() != 0);
   
   unit_func("array_allocated");
-  unit_assert( field_block.array_allocated());
+  unit_assert( field_block->array_allocated());
 
   
   //----------------------------------------------------------------------
@@ -136,11 +140,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("field_values");  // without ghosts
   
-  unit_assert((v1 = (float *)       field_block.field_values(i1)));
-  unit_assert((v2 = (double *)      field_block.field_values(i2)));
-  unit_assert((v3 = (double *)      field_block.field_values(i3)));
-  unit_assert((v4 = (double *)      field_block.field_values(i4)));
-  unit_assert((v5 = (long double *) field_block.field_values(i5)));
+  unit_assert((v1 = (float *)       field_block->field_values(i1)));
+  unit_assert((v2 = (double *)      field_block->field_values(i2)));
+  unit_assert((v3 = (double *)      field_block->field_values(i3)));
+  unit_assert((v4 = (double *)      field_block->field_values(i4)));
+  unit_assert((v5 = (long double *) field_block->field_values(i5)));
   
   // field sizes without ghosts
 
@@ -171,11 +175,11 @@ PARALLEL_MAIN_BEGIN
   unit_func("field_unknowns");  // without ghosts
 
   typedef float type_f1;
-  u1 = (type_f1 *)      field_block.field_unknowns(i1);
-  u2 = (double *)     field_block.field_unknowns(i2);
-  u3 = (double *)     field_block.field_unknowns(i3);
-  u4 = (double *)     field_block.field_unknowns(i4);
-  u5 = (long double *) field_block.field_unknowns(i5);
+  u1 = (type_f1 *)      field_block->field_unknowns(i1);
+  u2 = (double *)     field_block->field_unknowns(i2);
+  u3 = (double *)     field_block->field_unknowns(i3);
+  u4 = (double *)     field_block->field_unknowns(i4);
+  u5 = (long double *) field_block->field_unknowns(i5);
 
   unit_assert(u1 != 0);
   unit_assert(u2 != 0);
@@ -198,15 +202,15 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("allocate_ghosts");  // with ghosts
 
-  unit_assert ( ! field_block.ghosts_allocated());
-  field_block.allocate_ghosts();
-  unit_assert ( field_block.ghosts_allocated());
+  unit_assert ( ! field_block->ghosts_allocated());
+  field_block->allocate_ghosts();
+  unit_assert ( field_block->ghosts_allocated());
   
-  v1 =  (float *)      field_block.field_values(i1);
-  v2 = (double *)      field_block.field_values(i2);
-  v3 = (double *)      field_block.field_values(i3);
-  v4 = (double *)      field_block.field_values(i4);
-  v5 = (long double *) field_block.field_values(i5);
+  v1 =  (float *)      field_block->field_values(i1);
+  v2 = (double *)      field_block->field_values(i2);
+  v3 = (double *)      field_block->field_values(i3);
+  v4 = (double *)      field_block->field_values(i4);
+  v5 = (long double *) field_block->field_values(i5);
   
   unit_assert(v1 != 0);
   unit_assert(v2 != 0);
@@ -230,11 +234,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("field_unknowns");  // with ghosts
 
-  u1 = (float *)       field_block.field_unknowns(i1);
-  u2 = (double *)      field_block.field_unknowns(i2);
-  u3 = (double *)      field_block.field_unknowns(i3);
-  u4 = (double *)      field_block.field_unknowns(i4);
-  u5 = (long double *) field_block.field_unknowns(i5);
+  u1 = (float *)       field_block->field_unknowns(i1);
+  u2 = (double *)      field_block->field_unknowns(i2);
+  u3 = (double *)      field_block->field_unknowns(i3);
+  u4 = (double *)      field_block->field_unknowns(i4);
+  u5 = (long double *) field_block->field_unknowns(i5);
 
   unit_assert(u1 != 0);
   unit_assert(u2 != 0);
@@ -429,28 +433,12 @@ PARALLEL_MAIN_BEGIN
   unit_assert(*((double *) (v5-1)) ==  40); // g4 has no ghosts
 
   //----------------------------------------------------------------------
-  unit_func("extent");
-
-  field_block.set_extent(-1, 1, -2, 2, -3, 3);
-  double lower[3];
-  double upper[3];
-  field_block.extent(&lower[0],&upper[0],
-		     &lower[1],&upper[1],
-		     &lower[2],&upper[2]);
-
-  unit_assert(lower[0] == -1.0);
-  unit_assert(upper[0] == 1.0);
-  unit_assert(lower[1] == -2.0);
-  unit_assert(upper[1] == 2.0);
-  unit_assert(lower[2] == -3.0);
-  unit_assert(upper[2] == 3.0);
-
-  //----------------------------------------------------------------------
   unit_func("cell_width");
 
+  data_block->set_extent(-1, 1, -2, 2, -3, 3);
   double hx=0,hy=0,hz=0;
 
-  field_block.cell_width(&hx,&hy,&hz);
+  field_block->cell_width(data_block,&hx,&hy,&hz);
 
   unit_assert(fabs(hx-2.0/nx) < 1e-6);
   unit_assert(fabs(hy-4.0/ny) < 1e-6);
@@ -460,19 +448,19 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   unit_func("clear");
 
-  field_block.clear(2.0);
+  field_block->clear(2.0);
 
   unit_assert(2.0 == v1[0]);
   unit_assert(2.0 == v5[n5[0]*n5[1]*n5[2]-1]);
 
-  field_block.clear(3.0, 1 );
+  field_block->clear(3.0, 1 );
   
   unit_assert(2.0 == v1[n1[0]*n1[1]*n1[2]-1]);
   unit_assert(3.0 == v2[0] );
   unit_assert(3.0 == v2[n2[0]*n2[1]*n2[2]-1]);
   unit_assert(2.0 == v3[0] );
 	
-  field_block.clear(4.0, 2, 3 );
+  field_block->clear(4.0, 2, 3 );
 
   unit_assert(3.0 == v2[n2[0]*n2[1]*n2[2]-1]);
   unit_assert(4.0 == v3[0] );
@@ -483,21 +471,21 @@ PARALLEL_MAIN_BEGIN
 
   //----------------------------------------------------------------------
   unit_func("deallocate_ghosts");
-  unit_assert( field_block.ghosts_allocated());
-  field_block.deallocate_ghosts();
+  unit_assert( field_block->ghosts_allocated());
+  field_block->deallocate_ghosts();
 
   v1    = 
-    (float *) field_block.field_values(i1);
+    (float *) field_block->field_values(i1);
   v2 = 
-    (double *) field_block.field_values(i2);
+    (double *) field_block->field_values(i2);
   v3 = 
-    (double *) field_block.field_values(i3);
+    (double *) field_block->field_values(i3);
   v4 = 
-    (double *) field_block.field_values(i4);
+    (double *) field_block->field_values(i4);
   v5 =
-    (long double *) field_block.field_values(i5);
+    (long double *) field_block->field_values(i5);
 
-  unit_assert( ! field_block.ghosts_allocated());
+  unit_assert( ! field_block->ghosts_allocated());
 
   unit_assert(3.0 == v2[(nx+1)*ny*nz-1]);
   unit_assert(4.0 == v3[0] );

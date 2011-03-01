@@ -24,17 +24,11 @@ FieldBlock::FieldBlock
     field_values_(),
     ghosts_allocated_(false)
 {
-  for (int i=0; i<3; i++) {
-    size_[i] = 1;
-    lower_[i]      = 0.0;
-    upper_[i]      = 1.0;
-  }
+  ASSERT("FieldBlock","Input field_descr is NULL",field_descr != NULL);
 
   size_[0] = nx;
   size_[1] = ny;
   size_[2] = nz;
-  ASSERT("FieldBlock","Input field_descr is NULL",field_descr != NULL);
-
 }
 
 //----------------------------------------------------------------------
@@ -105,28 +99,15 @@ void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
 
 //----------------------------------------------------------------------
 
-void FieldBlock::extent
-(
- double * lower_x, double * upper_x, 
- double * lower_y, double * upper_y,
- double * lower_z, double * upper_z ) const throw ()
+void FieldBlock::cell_width(DataBlock * data_block,
+			    double * hx, double * hy, double * hz ) const throw ()
 {
-  if (lower_x) *lower_x = lower_[0];
-  if (lower_y) *lower_y = lower_[1];
-  if (lower_z) *lower_z = lower_[2];
+  double xm,xp,ym,yp,zm,zp;
+  data_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
 
-  if (upper_x) *upper_x = upper_[0];
-  if (upper_y) *upper_y = upper_[1];
-  if (upper_z) *upper_z = upper_[2];
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::cell_width( double * hx, double * hy, double * hz ) const throw ()
-{
-  *hx = (upper_[0] - lower_[0]) / size_[0];
-  *hy = (upper_[1] - lower_[1]) / size_[1];
-  *hz = (upper_[2] - lower_[2]) / size_[2];
+  *hx = (xp-xm) / size_[0];
+  *hy = (yp-ym) / size_[1];
+  *hz = (zp-zm) / size_[2];
 }
 
 //----------------------------------------------------------------------
@@ -627,24 +608,6 @@ void FieldBlock::set_field_values
  char * field_values) throw()
 {
   INCOMPLETE("FieldBlock::set_field_values","");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::set_extent
-(
- double lower_x, double upper_x,
- double lower_y, double upper_y,
- double lower_z, double upper_z ) throw ()
-
-{
-  lower_[0] = lower_x;
-  lower_[1] = lower_y;
-  lower_[2] = lower_z;
-
-  upper_[0] = upper_x;
-  upper_[1] = upper_y;
-  upper_[2] = upper_z;
 }
 
 //======================================================================

@@ -301,7 +301,7 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
 
   double xm,xp,ym,yp,zm,zp;
 
-  field_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
+  data_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
 
   enzo_->GridLeftEdge[0]    = xm;
   enzo_->GridLeftEdge[1]    = ym;
@@ -325,7 +325,7 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
   // Initialize CellWidth
 
   double h3[3];
-  field_block->cell_width(&h3[0],&h3[1],&h3[2]);
+  field_block->cell_width(data_block,&h3[0],&h3[1],&h3[2]);
 
   for (int dim=0; dim<enzo_->GridRank; dim++) {
     enzo_->CellWidth[dim] = h3[dim];

@@ -1,0 +1,16 @@
+// $Id: test_DataBlock.ci 1696 2010-08-04 05:56:36Z bordner $
+// See LICENSE_CELLO file for license and copyright information
+
+/// @file     test_DataBlock.ci
+/// @author   James Bordner (jobordner@ucsd.edu)
+/// @date     Tue Mar  1 20:40:48 UTC 2011
+/// @brief    DataBlock test program CHARM++ file
+
+
+mainmodule test_DataBlock {
+  readonly CProxy_Main mainProxy;
+
+  mainchare Main {
+    entry Main(CkArgMsg *m);
+  };
+};

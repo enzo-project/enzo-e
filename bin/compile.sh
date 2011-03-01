@@ -19,31 +19,26 @@ echo "types = ( $types )"
 echo
 set procs = 1
 
-# clear
-
-set d = `date +"%Y-%m-%d %H:%M:%S"`
-printf "$d cleaning all..."
-foreach type ($types)
-   scons arch=$arch type=$type -c >& /dev/null
-end
-printf "\n\n"
-
 foreach type ($types)
 
    set platform = $arch-$type
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
-   printf "$d %14s" "${platform}: "
+
+   printf "$d %14s %14s" "${platform}" "cleaning..."
+   scons arch=$arch type=$type -c >& /dev/null
+   printf "done\n"
+
 
    # COMPILE
 
-   scons arch=$arch type=$type -c >& /dev/null
+   printf "$d %14s %14s" "${platform}" "compiling..."
 
    set t = `(time scons arch=$arch type=$type -k -j$procs >& out.scons.$platform)`
   
    set secs = `echo $t | awk '{print $3}'`
 
-   printf "%4s s  " $secs
+   printf "done (%4s s)\n" $secs
 
    # count crashes
 

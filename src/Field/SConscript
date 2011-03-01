@@ -9,7 +9,9 @@ Import('parallel_type')
 # DEPENDENCIES
 #------------------------------
 
-components = ['cello','error']
+# (uses Mesh for test_FieldBlock, which requires DataBlock)
+
+components = ['mesh','cello','error']
 
 #------------------------------
 # ENVIRONMENTS

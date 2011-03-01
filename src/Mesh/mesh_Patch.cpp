@@ -213,8 +213,7 @@ void Patch::allocate_blocks() throw()
     yp = extents_[2] + (iby+1)*by;
     zp = extents_[4] + (ibz+1)*bz;
 
-    field_block->set_extent(xm,xp,ym,yp,zm,zp);
-
+    data_block->set_extent(xm,xp,ym,yp,zm,zp);
 
     // Allocate field data
 

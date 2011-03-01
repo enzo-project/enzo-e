@@ -7,9 +7,12 @@
 /// @file     field_FieldBlock.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
-/// @todo     Implement read(),write()
+/// @todo     Implement write()
+/// @todo     Re-evaluate read(), since current FieldBlock constructor requires size: add FieldBlock(FILE*) constructor? add factory design pattern to create FieldBlocks read from a file?
 /// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    [\ref Field] Fortran-style array class.
+
+class DataBlock;
 
 class FieldBlock {
 
@@ -59,13 +62,9 @@ public: // interface
   void index_range(int * lower_x, int * lower_y, int *lower_z, 
 		   int * upper_x, int * upper_y, int *upper_z) const throw ();
 
-  /// Return lower values of the block (excluding ghosts)
-  void extent(double * lower_x = 0, double * upper_x = 0, 
-	      double * lower_y = 0, double * upper_y = 0,
-	      double * lower_z = 0, double * upper_z = 0) const throw ();
-
   /// Return width of cells along each dimension
-  void cell_width(double * hx, double * hy, double * hz) const throw ();
+  void cell_width(DataBlock * data_block,
+		  double * hx, double * hy, double * hz) const throw ();
 
   /// Return the associated field descriptor
   const FieldDescr * field_descr() const throw ()
@@ -124,11 +123,6 @@ public: // interface
   /// Set array values for a given field
   void set_field_values (int id_field, char * values) throw();
 
-  /// Set the box extent
-  void set_extent(double lower_x = 0.0, double upper_x = 1.0, 
-		  double lower_y = 0.0, double upper_y = 1.0,
-		  double lower_z = 0.0, double upper_z = 1.0) throw();
-
   //----------------------------------------------------------------------
 
 private: // functions
@@ -185,7 +179,7 @@ private: // functions
 
 private: // attributes
 
-  /// Corresponding Field descriptor
+  /// Corresponding field descriptor
   const FieldDescr * field_descr_;
 
   /// Corresponding Field faces
@@ -199,12 +193,6 @@ private: // attributes
   
   /// Pointers into values_ of the first element of each field
   std::vector<char *> field_values_;
-
-  /// Extent of the box associated with the block
-  /// WARNING: should not be used for deep AMR due to precision /
-  /// range issues
-  double lower_[3];
-  double upper_[3];
 
   /// Whether ghost values are allocated or not (make [3] for
   /// directionally split?)

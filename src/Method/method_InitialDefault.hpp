@@ -39,7 +39,7 @@ public: // interface
 
 private: // functions
   
-  void allocate_xyzt_(FieldBlock * field_block,
+  void allocate_xyzt_(DataBlock * data_block,
 		      int index_field,
 		      int * mx, int * my, int * mz,
 		      double ** value, double ** vdeflt,

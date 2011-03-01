@@ -26,6 +26,7 @@
 
 #include "error.hpp"
 #include "disk.hpp"
+#include "mesh.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

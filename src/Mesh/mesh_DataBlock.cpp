@@ -4,6 +4,7 @@
 /// @file     mesh_DataBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Feb 28 13:22:26 PST 2011
+/// @todo     Initialize lower / upper in constructor, removing set_extent)
 /// @brief    Implementation of the DataBlock object
 
 #include "cello.hpp"
@@ -31,6 +32,8 @@ DataBlock::DataBlock(DataDescr * data_descr,
 
   // Initialize boundary_face_[][]
   for (int axis=0; axis<3; axis++) {
+    lower_[axis]      = 0.0;
+    upper_[axis]      = 1.0;
     for (int face=0; face<2; face++) {
       boundary_face_[axis][face] = false;
     }
@@ -67,6 +70,21 @@ DataBlock & DataBlock::operator = (const DataBlock & data_block) throw ()
 }
 
 //----------------------------------------------------------------------
+
+const FieldBlock * DataBlock::field_block (int i) const throw()
+{ 
+  return field_block_.at(i); 
+}
+
+//----------------------------------------------------------------------
+
+FieldBlock * DataBlock::field_block (int i) throw()
+{ 
+  return field_block_.at(i); 
+}
+
+//----------------------------------------------------------------------
+
 void DataBlock::set_boundary_face
 (
  bool value,
@@ -95,6 +113,41 @@ bool DataBlock::boundary_face(face_enum face,
   return boundary_face_[face][axis];
 }
 
+//----------------------------------------------------------------------
+
+void DataBlock::extent
+(
+ double * lower_x, double * upper_x, 
+ double * lower_y, double * upper_y,
+ double * lower_z, double * upper_z ) const throw ()
+{
+  if (lower_x) *lower_x = lower_[0];
+  if (lower_y) *lower_y = lower_[1];
+  if (lower_z) *lower_z = lower_[2];
+
+  if (upper_x) *upper_x = upper_[0];
+  if (upper_y) *upper_y = upper_[1];
+  if (upper_z) *upper_z = upper_[2];
+}
+
+//----------------------------------------------------------------------
+
+void DataBlock::set_extent
+(
+ double lower_x, double upper_x,
+ double lower_y, double upper_y,
+ double lower_z, double upper_z ) throw ()
+
+{
+  lower_[0] = lower_x;
+  lower_[1] = lower_y;
+  lower_[2] = lower_z;
+
+  upper_[0] = upper_x;
+  upper_[1] = upper_y;
+  upper_[2] = upper_z;
+}
+
 //======================================================================
 
 void DataBlock::copy_(const DataBlock & data_block) throw()
@@ -102,7 +155,6 @@ void DataBlock::copy_(const DataBlock & data_block) throw()
   UNTESTED("DataBlock::create_");
 
   const FieldBlock * field_block = data_block.field_block();
-  const FieldDescr * field_descr = field_block->field_descr();
 
   // Create a copy of field_block_
   field_block_.resize(data_block.field_block_.size());

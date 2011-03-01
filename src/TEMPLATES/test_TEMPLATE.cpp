@@ -1,7 +1,7 @@
 // $Id: test_Classname.cpp 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_TEMPLATE.cpp
+/// @file     test_Classname.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-04-02
 /// @brief    Test program for the Classname class
@@ -21,7 +21,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_class ("Classname");
 
-  Classname template;
+  Classname * classname = new Classname;
 
   unit_assert (false)
 

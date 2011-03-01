@@ -220,7 +220,7 @@ test_summary("Error",array("Error"));
 test_summary("Enzo",array("enzo-p","ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion")); 
 test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces")); 
 test_summary("Memory",array("Memory")); 
-test_summary("Mesh",array("DataDescr","Mesh","Patch")); 
+test_summary("Mesh",array("Mesh","Patch","DataDescr","DataBlock")); 
 test_summary("Method",array("")); 
 test_summary("Monitor",array("Monitor")); 
 test_summary("Parallel",array("GroupProcess","Layout")); 
@@ -261,9 +261,10 @@ tests("Memory","test_Memory","test_Memory");
 
 component("Mesh");
 
-tests("Mesh","test_DataDescr","test_DataDescr"); 
 tests("Mesh","test_Mesh","test_Mesh"); 
 tests("Mesh","test_Patch","test_Patch"); 
+tests("Mesh","test_DataDescr","test_DataDescr"); 
+tests("Mesh","test_DataBlock","test_DataBlock"); 
 
 component("Method");
 

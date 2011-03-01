@@ -9,6 +9,8 @@
 #ifndef MESH_DATA_DESCR_HPP
 #define MESH_DATA_DESCR_HPP
 
+class FieldDescr;
+
 class DataDescr {
 
   /// @class    DataDescr
@@ -18,16 +20,29 @@ class DataDescr {
 public: // interface
 
   /// Initialize the DataDescr object
-  DataDescr() throw()
-  : field_descr_(new FieldDescr)
-  { }
+  DataDescr() throw();
 
-  /// Initialize the DataDescr object
-  ~DataDescr() throw()
-  { delete field_descr_; }
+  //----------------------------------------------------------------------
+  // Big Three
+  //----------------------------------------------------------------------
+
+  /// Destructor
+  ~DataDescr() throw();
+
+  /// Copy constructor
+  DataDescr(const DataDescr & data_descr) throw();
+
+  /// Assignment operator
+  DataDescr & operator= (const DataDescr & data_descr) throw();
+
+  //----------------------------------------------------------------------
 
   /// Return the Field descriptor
   FieldDescr * field_descr () throw()
+  { return field_descr_; };
+
+  /// Return the constant Field descriptor
+  const FieldDescr * field_descr () const throw()
   { return field_descr_; };
 
 private: // attributes

@@ -10,6 +10,8 @@
 #ifndef MESH_DATA_BLOCK_HPP
 #define MESH_DATA_BLOCK_HPP
 
+class FieldBlock;
+
 class DataBlock {
 
   /// @class    DataBlock
@@ -39,12 +41,10 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Return the Field block
-  const FieldBlock * field_block (int i=0) const throw()
-  { return field_block_.at(i); };
+  const FieldBlock * field_block (int i=0) const throw();
 
   /// Return the Field block
-  FieldBlock * field_block (int i=0) throw()
-  { return field_block_.at(i); };
+  FieldBlock * field_block (int i=0) throw();
 
   /// Set whether given face or faces are on the domain boundary
   void set_boundary_face(bool value = false,
@@ -53,6 +53,16 @@ public: // interface
 
   /// Whether given face is on the domain boundary
   bool boundary_face(face_enum face, axis_enum axis) throw();
+
+  /// Return lower values of the block (excluding ghosts)
+  void extent(double * lower_x = 0, double * upper_x = 0, 
+	      double * lower_y = 0, double * upper_y = 0,
+	      double * lower_z = 0, double * upper_z = 0) const throw ();
+
+  /// Set the box extent
+  void set_extent(double lower_x = 0.0, double upper_x = 1.0, 
+		  double lower_y = 0.0, double upper_y = 1.0,
+		  double lower_z = 0.0, double upper_z = 1.0) throw();
 
 private: // functions
 
@@ -69,6 +79,12 @@ private: // attributes
 
   /// Whether given face is on the domain boundary
   bool boundary_face_[3][2];
+
+  /// Extent of the box associated with the block
+  /// WARNING: should not be used for deep AMR due to precision /
+  /// range issues
+  double lower_[3];
+  double upper_[3];
 
 };
 
