@@ -22,6 +22,8 @@ doc-html:
 doc-latex:
 	doxygen Doxyfile-latex
 	@echo;echo "SEE Makefile FOR MANUAL UPDATES TO latex/refman.tex"; echo
+doc-rtf:
+	doxygen Doxyfile-rtf
 
 # \begin{center}
 # {\Large Enzo-\/P/Cello }\\

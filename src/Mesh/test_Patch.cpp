@@ -31,7 +31,17 @@ PARALLEL_MAIN_BEGIN
 
   DataDescr * data_descr = new DataDescr;
 
-  Patch * patch = new Patch(data_descr);
+  // Set Patch size (12,12,12)
+
+  int patch_size[] = {12,12,12};
+
+  int patch_blocking[] = {3,3,3};
+
+  Patch * patch = new Patch
+    (data_descr, 
+     patch_size[0],     patch_size[1],     patch_size[2],
+     patch_blocking[0], patch_blocking[1], patch_blocking[2]);
+
   unit_assert(patch != NULL);
 
   //--------------------------------------------------
@@ -40,15 +50,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(patch->data_descr()==data_descr);
 
   //--------------------------------------------------
-  unit_func("set_size");
-
-  // Set Patch size (12,12,12)
-
-  int patch_size[] = {12,12,12};
-
-  patch->set_size(patch_size[0],
-		  patch_size[1],
-		  patch_size[2]);
+  unit_func("size");
 
   // Test that patch size is correct
 
@@ -62,15 +64,7 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func("set_blocking");
-
-  // Set Patch blocking (3,3,3)
-
-  int patch_blocking[] = {3,3,3};
-
-  patch->set_blocking(patch_blocking[0],
-		      patch_blocking[1],
-		      patch_blocking[2]);
+  unit_func("blocking");
 
   // Test that patch blocking is correct
 

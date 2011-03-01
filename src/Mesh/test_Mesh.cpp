@@ -23,7 +23,7 @@ PARALLEL_MAIN_BEGIN
   DataDescr data_descr;
 
   unit_func("Mesh");
-  Mesh * mesh = new Mesh (&data_descr);
+  Mesh * mesh = new Mesh (&data_descr,12,12,12,3,3,3);
   unit_assert(mesh != NULL);
 
   unit_finalize();

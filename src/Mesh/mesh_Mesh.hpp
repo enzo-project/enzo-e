@@ -29,7 +29,9 @@ class Mesh {
 public: // interface
 
   /// Initialize an Mesh object
-  Mesh(DataDescr * data_descr) throw ();
+  Mesh(DataDescr * data_descr,
+       int nx,  int ny,  int nz,
+       int nbx, int nby, int nbz) throw ();
 
   /// Delete the Mesh object
   ~Mesh() throw ();
@@ -106,46 +108,6 @@ public: // interface
     *nz = root_size_[2];
   }
 
-  /// Set root size
-  void set_root_size(int nx, int ny, int nz) throw ()
-  {
-    root_size_[0] = nx;
-    root_size_[1] = ny;
-    root_size_[2] = nz;
-  };
-
-  /// Return min_patch_size
-  int min_patch_size() throw ()
-  {return min_patch_size_; };
-
-  /// Set minimum patch size
-  void set_min_patch_size(int min_patch_size) throw ()
-  { min_patch_size_ = min_patch_size; };
-
-  /// Return max_patch_size
-  int max_patch_size() throw ()
-  {return max_patch_size_; };
-
-  /// Set maximum patch size
-  void set_max_patch_size(int max_patch_size) throw ()
-  { max_patch_size_ = max_patch_size; };
-
-  /// Return min_block_size
-  int min_block_size() throw ()
-  {return min_block_size_; };
-
-  /// Set minimum block size
-  void set_min_block_size(int min_block_size) throw ()
-  { min_block_size_ = min_block_size; };
-
-  /// Return max_block_size
-  int max_block_size() throw ()
-  {return max_block_size_; };
-
-  /// Set maximum block size
-  void set_max_block_size(int max_block_size) throw ()
-  { max_block_size_ = max_block_size; };
-
   /// Pointer to the root Patch
   Patch * root_patch() throw ()
   {return root_patch_; };
@@ -193,23 +155,6 @@ private: // attributes
 
   /// Upper extent of the patch
   double upper_[3];
-
-
-  /// Minimum allowed patch size
-  /// Parameter Mesh::min_patch_size
-  int min_patch_size_;
-
-  /// Maximum allowed patch size
-  /// Parameter Mesh::max_patch_size
-  int max_patch_size_;
-
-  /// Minimum allowed block size
-  /// Parameter Mesh::min_block_size
-  int min_block_size_;
-
-  /// Maximum allowed block size
-  /// Parameter Mesh::max_block_size
-  int max_block_size_;
 
   /// Root grid size
   

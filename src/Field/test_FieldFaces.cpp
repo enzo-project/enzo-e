@@ -187,11 +187,7 @@ PARALLEL_MAIN_BEGIN
 
 	// Create the FaceBlock object
 
-	field_block[k] = new FieldBlock (field_descr);
-
-	// Set field blocks' dimensions
-
-	field_block[k]->set_size(mx, my, mz);
+	field_block[k] = new FieldBlock (field_descr, mx, my, mz);
 
 	// Allocate field blocks including ghosts
 

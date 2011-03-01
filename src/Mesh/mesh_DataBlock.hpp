@@ -20,6 +20,7 @@ public: // interface
 
   /// Initialize the DataBlock object
   DataBlock(DataDescr * data_descr,
+	    int nx, int ny=1, int nz=1,
 	    int num_field_blocks = 1) throw();
 
   //----------------------------------------------------------------------
@@ -45,10 +46,18 @@ public: // interface
   FieldBlock * field_block (int i=0) throw()
   { return field_block_.at(i); };
 
+  /// Set whether given face or faces are on the domain boundary
+  void set_boundary_face(bool value = false,
+			 face_enum face = face_all, 
+			 axis_enum axis = axis_all) throw();
+
+  /// Whether given face is on the domain boundary
+  bool boundary_face(face_enum face, axis_enum axis) throw();
+
 private: // functions
 
-  /// Allocate and copy in attributes from data_block
-  void create_(const DataBlock & data_block) throw();
+  /// Allocate and copy in attributes from give DataBlock
+  void copy_(const DataBlock & data_block) throw();
 
 private: // attributes
 
@@ -57,6 +66,9 @@ private: // attributes
 
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
+
+  /// Whether given face is on the domain boundary
+  bool boundary_face_[3][2];
 
 };
 

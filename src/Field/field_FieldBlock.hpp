@@ -8,7 +8,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Oct 12 14:38:21 PDT 2009
 /// @todo     Implement read(),write()
-/// @todo     Move boundary conditions to Boundary class
 /// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    [\ref Field] Fortran-style array class.
 
@@ -28,7 +27,8 @@ class FieldBlock {
 public: // interface
 
   /// Create a new uninitialized FieldBlock object
-  FieldBlock(const FieldDescr * field_descr) throw();
+  FieldBlock(const FieldDescr * field_descr,
+	     int nx, int ny=1, int nz=1) throw();
 
   /// Deconstructor
   ~FieldBlock() throw();
@@ -100,18 +100,11 @@ public: // interface
   /// Refresh ghost zones on an internal face
   void refresh_ghosts() throw();
 
-  /// Set whether given face or faces are on the domain boundary
-  void set_boundary_face(bool value = false,
-			 face_enum face = face_all, 
-			 axis_enum axis = axis_all) throw();
-
-  /// Whether given face is on the domain boundary
-  bool boundary_face(face_enum face, axis_enum axis) throw();
-
   /// Enforce boundary conditions on a boundary face
   void enforce_boundary(enum boundary_enum boundary, 
 			face_enum face = face_all,
 			axis_enum axis = axis_all) throw();
+
 
   /// Split a block into 2, 4, or 8 subblocks; does not delete self
   void split(bool split_x, bool split_y, bool split_z, 
@@ -127,9 +120,6 @@ public: // interface
 
   /// Write a block from disk, and optionally associated descriptor
   void write(File * file) const throw ();
-
-  /// Set size of the array block
-  void set_size(int nx, int ny=1, int nz=1) throw();
 
   /// Set array values for a given field
   void set_field_values (int id_field, char * values) throw();
@@ -219,9 +209,6 @@ private: // attributes
   /// Whether ghost values are allocated or not (make [3] for
   /// directionally split?)
   bool ghosts_allocated_;
-
-  /// Whether given face is on the domain boundary
-  bool boundary_face_[3][2];
 
 };   
 

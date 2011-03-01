@@ -14,13 +14,14 @@
 
 //----------------------------------------------------------------------
 
-Layout::Layout() throw()
+Layout::Layout(int nbx, int nby, int nbz) throw()
   : process_first_ (0),
     process_count_ (1)
 {
-  for (int i=0; i<3; i++) {
-    block_count_[i] = 1;
-  }
+  block_count_[0] = nbx;
+  block_count_[1] = nby;
+  block_count_[2] = nbz;
+
 #ifdef CONFIG_USE_MPI
   mpi_comm_ = MPI_COMM_CELLO;
   MPI_Comm_group (mpi_comm_, &mpi_group_);
@@ -33,15 +34,6 @@ void Layout::set_process_range(int process_first, int process_count) throw()
 {
   process_first_ = process_first;
   process_count_  = process_count;
-}
-
-//----------------------------------------------------------------------
-
-void Layout::set_block_count(int nbx, int nby, int nbz) throw()
-{
-  block_count_[0] = nbx;
-  block_count_[1] = nby;
-  block_count_[2] = nbz; 
 }
 
 //----------------------------------------------------------------------

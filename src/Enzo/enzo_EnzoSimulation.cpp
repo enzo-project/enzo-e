@@ -355,7 +355,7 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
     for (int axis = axis_x; axis <= axis_z; axis++) {
       for (int face = face_lower; face <= face_upper; face++) {
 	enzo_->BoundaryType [field][axis][face] = NULL;
-	if (field_block->boundary_face((face_enum)(face),
+	if (data_block->boundary_face((face_enum)(face),
  				       (axis_enum)(axis))) {
  	  int n1 = enzo_->GridDimension[(axis+1)%3];
 	  int n2 = enzo_->GridDimension[(axis+2)%3];

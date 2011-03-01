@@ -12,14 +12,15 @@
 
 //----------------------------------------------------------------------
 
-Mesh::Mesh(DataDescr * data_descr) throw ()
-  : root_patch_(new Patch(data_descr)),
+Mesh::Mesh
+(
+ DataDescr * data_descr,
+ int nx, int ny, int nz,
+ int nbx, int nby, int nbz
+ ) throw ()
+  : root_patch_(new Patch(data_descr,nx,ny,nz,nbx,nby,nbz)),
     tree_(0),
     dimension_(0),
-    min_patch_size_(0),
-    max_patch_size_(0),
-    min_block_size_(0),
-    max_block_size_(0),
     refine_(0),
     max_level_(0),
     balanced_(0),
@@ -30,8 +31,10 @@ Mesh::Mesh(DataDescr * data_descr) throw ()
   for (int i=0; i<3; i++) {
     lower_[i] = 0.0;
     upper_[i] = 1.0;
-    root_size_[i] = 0;
   }
+  root_size_[0] = nx;
+  root_size_[1] = ny;
+  root_size_[2] = nz;
 }
 
 //----------------------------------------------------------------------

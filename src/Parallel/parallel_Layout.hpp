@@ -20,14 +20,11 @@ class Layout {
 
 public: // interface
 
-  /// Create a Layout with the default one process and one block
-  Layout() throw();
+  /// Create a Layout with the given blocking, initialized for the root process
+  Layout(int nbx=1, int nby=1, int nbz=1) throw();
 
   /// Set first process id and number of processes
   void set_process_range (int process_first=0, int process_count=1) throw();
-
-  /// Set how many blocks are in the layout
-  void set_block_count (int nbx, int nby=1, int nbz=1) throw();
 
   /// Return the first process id and number of processes
   void process_range (int * process_first, int * process_count) throw();

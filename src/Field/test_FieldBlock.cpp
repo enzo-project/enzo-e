@@ -70,7 +70,10 @@ PARALLEL_MAIN_BEGIN
   unit_class ("FieldBlock");
   //----------------------------------------------------------------------
 
-  FieldBlock field_block (&field_descr);
+  int nx,ny,nz;
+  nx=4; ny=5; nz=6;
+
+  FieldBlock field_block (&field_descr,nx,ny,nz);
 
   //----------------------------------------------------------------------
 
@@ -82,20 +85,10 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("size");
 
-  int nx,ny,nz;
-  nx=4; ny=5; nz=6;
-
-  field_block.set_size(nx,ny,nz);
-
   int size[3];
 
   field_block.size(&size[0],&size[1],&size[2]);
 
-  unit_assert(size[0]==nx && size[1]==ny && size[2]==nz);
-
-  nx=5; ny=3; nz=4;
-  field_block.set_size(nx,ny,nz);
-  field_block.size(&size[0],&size[1],&size[2]);
   unit_assert(size[0]==nx && size[1]==ny && size[2]==nz);
 
   //----------------------------------------------------------------------
@@ -195,13 +188,10 @@ PARALLEL_MAIN_BEGIN
   nb3 = (char *)u4 - (char *)u3;
   nb4 = (char *)u5-(char *)u4;
 
-  unit_assert (nb1    == 	       sizeof (float) * nu1);
-  unit_assert (nb2 == 
-	       sizeof (double)* nu2);
-  unit_assert (nb3 == 
-	       sizeof (double)* nu3);
-  unit_assert (nb4 == 
-	       sizeof (double)* nu4);
+  unit_assert (nb1 == sizeof (float) * nu1);
+  unit_assert (nb2 == sizeof (double)* nu2);
+  unit_assert (nb3 == sizeof (double)* nu3);
+  unit_assert (nb4 == sizeof (double)* nu4);
 
 
   //----------------------------------------------------------------------
@@ -212,16 +202,11 @@ PARALLEL_MAIN_BEGIN
   field_block.allocate_ghosts();
   unit_assert ( field_block.ghosts_allocated());
   
-  v1    = 
-    (float *) field_block.field_values(i1);
-  v2 = 
-    (double *) field_block.field_values(i2);
-  v3 = 
-    (double *) field_block.field_values(i3);
-  v4 = 
-    (double *) field_block.field_values(i4);
-  v5 =
-    (long double *) field_block.field_values(i5);
+  v1 =  (float *)      field_block.field_values(i1);
+  v2 = (double *)      field_block.field_values(i2);
+  v3 = (double *)      field_block.field_values(i3);
+  v4 = (double *)      field_block.field_values(i4);
+  v5 = (long double *) field_block.field_values(i5);
   
   unit_assert(v1 != 0);
   unit_assert(v2 != 0);
@@ -245,17 +230,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("field_unknowns");  // with ghosts
 
-  u1    = 
-    (float *) field_block.field_unknowns(i1);
-
-  u2 = 
-    (double *) field_block.field_unknowns(i2);
-  u3 = 
-    (double *) field_block.field_unknowns(i3);
-  u4 = 
-    (double *) field_block.field_unknowns(i4);
-  u5 =
-    (long double *) field_block.field_unknowns(i5);
+  u1 = (float *)       field_block.field_unknowns(i1);
+  u2 = (double *)      field_block.field_unknowns(i2);
+  u3 = (double *)      field_block.field_unknowns(i3);
+  u4 = (double *)      field_block.field_unknowns(i4);
+  u5 = (long double *) field_block.field_unknowns(i5);
 
   unit_assert(u1 != 0);
   unit_assert(u2 != 0);
@@ -263,10 +242,10 @@ PARALLEL_MAIN_BEGIN
   unit_assert(u4 != 0);
   unit_assert(u5 != 0);
 
-  nb1 =    (char *)u2 - (char *)u1;
+  nb1 = (char *)u2 - (char *)u1;
   nb2 = (char *)u3 - (char *)u2;
   nb3 = (char *)u4 - (char *)u3;
-  nb4 = (char *)u5-(char *)u4;
+  nb4 = (char *)u5 - (char *)u4;
 
   // a,b fields  u unknowns  v values  g ghosts
   // bu - au = (bv + bg) - (av + ag) 

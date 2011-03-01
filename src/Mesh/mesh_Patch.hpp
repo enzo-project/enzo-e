@@ -18,8 +18,10 @@ class Patch {
 
 public: // interface
 
-  /// Constructor
-  Patch(DataDescr *) throw();
+  /// Constructor for given Patch size and blocking count
+  Patch(DataDescr *, 
+	int nx,   int ny,  int nz,
+	int nbx,  int nby, int nbz) throw();
 
   //----------------------------------------------------------------------
   // Big Three
@@ -39,14 +41,8 @@ public: // interface
   /// Return the data descriptor
   DataDescr * data_descr () const throw();
 
-  /// Set the size of the patch in number of grid cells
-  void set_size (int npx, int npy, int npz) throw();
-
   /// Return the size of the patch in number of grid cells
-  void size (int * npx, int * npy=0, int * npz=0) const throw();
-
-  /// Set how the Patch is partitioned into Blocks
-  void set_blocking (int nbx, int nby, int nbz) throw();
+  void size (int * nx, int * ny=0, int * nz=0) const throw();
 
   /// Return the size of the patch in number of grid cells
   void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();

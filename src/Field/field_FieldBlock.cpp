@@ -13,13 +13,16 @@
 
 //----------------------------------------------------------------------
 
-FieldBlock::FieldBlock(const FieldDescr * field_descr) throw()
+FieldBlock::FieldBlock
+(
+ const FieldDescr * field_descr,
+ int nx, int ny, int nz
+) throw()
   : field_descr_(field_descr),
     field_faces_(0),
     array_(0),
     field_values_(),
-    ghosts_allocated_(false),
-    boundary_face_()
+    ghosts_allocated_(false)
 {
   for (int i=0; i<3; i++) {
     size_[i] = 1;
@@ -27,9 +30,11 @@ FieldBlock::FieldBlock(const FieldDescr * field_descr) throw()
     upper_[i]      = 1.0;
   }
 
+  size_[0] = nx;
+  size_[1] = ny;
+  size_[2] = nz;
   ASSERT("FieldBlock","Input field_descr is NULL",field_descr != NULL);
 
-  set_boundary_face(false);
 }
 
 //----------------------------------------------------------------------
@@ -355,35 +360,6 @@ void FieldBlock::refresh_ghosts() throw()
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::set_boundary_face
-(
- bool value,
- face_enum face, 
- axis_enum axis
- ) throw()
-{
-  // WARNING: recursive
-  UNTESTED("FieldBlock::set_boundary_face");
-  if (face == face_all) {
-    set_boundary_face(value,face_lower,axis);
-    set_boundary_face(value,face_upper,axis);
-  } else if (axis == axis_all) {
-    set_boundary_face(value,face,axis_x);
-    set_boundary_face(value,face,axis_y);
-    set_boundary_face(value,face,axis_z);
-  } else {
-    boundary_face_[face][axis] = value;
-  }
-}
-
-//----------------------------------------------------------------------
-bool FieldBlock::boundary_face(face_enum face,
-			       axis_enum axis) throw()
-{
-  return boundary_face_[face][axis];
-}
-
-//----------------------------------------------------------------------
 void FieldBlock::enforce_boundary
 (
  boundary_enum boundary,
@@ -641,19 +617,6 @@ void FieldBlock::read (File * file) throw ()
 void FieldBlock::write (File * file) const throw ()
 {
   INCOMPLETE("FieldBlock::write","");
-}
-
-//----------------------------------------------------------------------
-
-void FieldBlock::set_size(int nx, int ny, int nz) throw()
-{
-  if ( ! array_allocated() ) {
-    size_[0] = nx;
-    size_[1] = ny;
-    size_[2] = nz;
-  } else {
-    // WARNING/ERROR: changing size of allocated array
-  }
 }
 
 //----------------------------------------------------------------------

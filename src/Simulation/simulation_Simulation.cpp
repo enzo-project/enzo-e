@@ -289,43 +289,25 @@ void Simulation::initialize_mesh_() throw()
 	 "data must be initialized before mesh",
 	 data_descr_ != NULL);
 
-  mesh_ = new Mesh(data_descr_);
-
-  parameters_->set_current_group ("Mesh");
-
-  // Block sizes
-
-  int block_size[3];
-
-  block_size[0] = parameters_->list_value_integer(0,"block_size",4);
-  block_size[1] = parameters_->list_value_integer(1,"block_size",4);
-  block_size[2] = parameters_->list_value_integer(2,"block_size",4);
-
-  // assume constant block size
-  mesh_->set_min_block_size (block_size[0]);
-  mesh_->set_max_block_size (block_size[0]);
-  
-  // Patch sizes
-
-  int patch_size[3];
-
-  patch_size[0] = parameters_->list_value_integer(0,"patch_size",128);
-  patch_size[1] = parameters_->list_value_integer(1,"patch_size",128);
-  patch_size[2] = parameters_->list_value_integer(1,"patch_size",128);
-
-  // minimum patch size is one block
-  mesh_->set_min_patch_size (block_size[0]);
-  mesh_->set_max_patch_size (patch_size[0]);
-
-  // Mesh size
-
   int root_size[3];
 
   root_size[0] = parameters_->list_value_integer(0,"root_size",1);
   root_size[1] = parameters_->list_value_integer(1,"root_size",1);
   root_size[2] = parameters_->list_value_integer(2,"root_size",1);
 
-  mesh_->set_root_size(root_size[0],root_size[1],root_size[2]);
+  int root_blocks[3];
+
+  root_blocks[0] = parameters_->list_value_integer(0,"root_blocks",1);
+  root_blocks[1] = parameters_->list_value_integer(1,"root_blocks",1);
+  root_blocks[2] = parameters_->list_value_integer(2,"root_blocks",1);
+
+  mesh_ = new Mesh(data_descr_,
+		   root_size[0],root_size[1],root_size[2],
+		   root_blocks[0],root_blocks[1],root_blocks[2]);
+
+  parameters_->set_current_group ("Mesh");
+
+  // Domain extents
 
   parameters_->set_current_group("Domain");
 
@@ -353,7 +335,6 @@ void Simulation::initialize_mesh_() throw()
 
   Patch * root_patch = mesh_->root_patch();
 
-  root_patch->set_size(root_size[0],root_size[1],root_size[2]);
   root_patch->set_extents(domain_lower[0],domain_upper[0],
 			  domain_lower[1],domain_upper[1],
 			  domain_lower[2],domain_upper[2]);
@@ -370,15 +351,6 @@ void Simulation::initialize_mesh_() throw()
   int process_count = parameters_->value_integer("root_process_count",1);
 
   layout->set_process_range(process_first, process_count);
-
-  int block_count[3];
-
-  block_count[0] = parameters_->list_value_integer(0,"root_blocks",1);
-  block_count[1] = parameters_->list_value_integer(1,"root_blocks",1);
-  block_count[2] = parameters_->list_value_integer(2,"root_blocks",1);
-
-  layout->set_block_count(block_count[0],block_count[1],block_count[2]);
-    
 
   // Mesh AMR settings
 

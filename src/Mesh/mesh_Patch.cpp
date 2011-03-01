@@ -13,15 +13,34 @@
 
 //----------------------------------------------------------------------
 
-Patch::Patch(DataDescr * data_descr) throw()
+Patch::Patch
+(
+ DataDescr * data_descr,
+ int nx,  int ny,  int nz,
+ int nbx, int nby, int nbz
+) throw()
   : data_descr_(data_descr),
-    layout_(new Layout),
+    layout_(new Layout (nbx,nby,nbz)),
     data_block_()
 
 {
-  size_[0] = 1;
-  size_[1] = 1;
-  size_[2] = 1;
+  // Check 
+  if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
+    char buffer[ERROR_LENGTH];
+    sprintf (buffer,
+	     "Patch size (%d,%d,%d) must be larger than blocking (%d,%d,%d)",
+	     nx,ny,nz,nbx,nby,nbz);
+    ERROR("Patch::Patch", buffer);
+  }
+
+
+  size_[0] = nx;
+  size_[1] = ny;
+  size_[2] = nz;
+
+  blocking_[0] = nbx;
+  blocking_[1] = nby;
+  blocking_[2] = nbz;
 
   extents_[0] = 0.0;
   extents_[1] = 1.0;
@@ -74,58 +93,11 @@ DataDescr * Patch::data_descr () const throw()
 
 //----------------------------------------------------------------------
 
-void Patch::set_size (int npx, int npy, int npz) throw()
-{
-  size_[0] = npx;
-  size_[1] = npy;
-  size_[2] = npz;
-}
-
-//----------------------------------------------------------------------
-
 void Patch::size (int * npx, int * npy, int * npz) const throw()
 {
   if (npx) *npx = size_[0];
   if (npy) *npy = size_[1];
   if (npz) *npz = size_[2];
-}
-
-//----------------------------------------------------------------------
-
-void Patch::set_blocking (int nbx, int nby, int nbz) throw()
-{
-  if (blocking_[0] == nbx &&
-      blocking_[1] == nby &&
-      blocking_[2] == nbz) {
-    WARNING("Patch::set_blocking",
-	    "Trying to set same Patch blocking more than once: ignoring");
-    return;
-  };
-  // ASSERT: not trying to change block size to currently set size
-
-  bool allocated = blocks_allocated();
-
-  if (allocated) {
-    WARNING("Patch::set_blocking",
-	    "Blocks already allocated: deleting old blocks and reallocating");
-    deallocate_blocks();
-  }
-
-  // ASSERT: blocks are not allocated
-
-  // Set blocking_ array
-
-  blocking_[0] = nbx;
-  blocking_[1] = nby;
-  blocking_[2] = nbz;
-
-  // Set Layout
-  layout_->set_block_count(nbx,nby,nbz);
-
-  if (blocks_allocated()) {
-    allocate_blocks();
-  }
-
 }
 
 //----------------------------------------------------------------------
@@ -218,7 +190,7 @@ void Patch::allocate_blocks() throw()
   for (int ib=0; ib<nb; ib++) {
 
     // create a new data block
-    DataBlock * data_block = new DataBlock(data_descr_);
+    DataBlock * data_block = new DataBlock(data_descr_,mbx,mby,mbz);
 
     // Store the data block
     data_block_[ib] = data_block;
@@ -230,8 +202,6 @@ void Patch::allocate_blocks() throw()
     // INITIALIZE FIELD BLOCK
 
     FieldBlock * field_block = data_block->field_block();
-
-    field_block->set_size(mbx,mby,mbz);
 
     double xm,xp,ym,yp,zm,zp;
 
@@ -254,16 +224,16 @@ void Patch::allocate_blocks() throw()
     // Set boundaries
 
     if (mbx > 1) {
-      if (ibx==0)     field_block->set_boundary_face(true,face_lower,axis_x);
-      if (ibx==nbx-1) field_block->set_boundary_face(true,face_upper,axis_x);
+      if (ibx==0)     data_block->set_boundary_face(true,face_lower,axis_x);
+      if (ibx==nbx-1) data_block->set_boundary_face(true,face_upper,axis_x);
     }
     if (mby > 1) {
-      if (iby==0)     field_block->set_boundary_face(true,face_lower,axis_y);
-      if (iby==nby-1) field_block->set_boundary_face(true,face_upper,axis_y);
+      if (iby==0)     data_block->set_boundary_face(true,face_lower,axis_y);
+      if (iby==nby-1) data_block->set_boundary_face(true,face_upper,axis_y);
     }
     if (mbz > 1) {
-      if (ibz==0)     field_block->set_boundary_face(true,face_lower,axis_z);
-      if (ibz==nbz-1) field_block->set_boundary_face(true,face_upper,axis_z);
+      if (ibz==0)     data_block->set_boundary_face(true,face_lower,axis_z);
+      if (ibz==nbz-1) data_block->set_boundary_face(true,face_upper,axis_z);
     }
 
     WARNING("Patch::allocate_blocks",
