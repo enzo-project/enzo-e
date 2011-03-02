@@ -66,13 +66,13 @@ void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
       int i = INDEX(ix,iy,0,ngx,ngy);
       if (x + y < 0.1517) {
 	d[i]  = 0.125;
-	vx[i] = 0;
-	vy[i] = 0;
+	vx[i] = 0.0;
+	vy[i] = 0.0;
 	te[i] = 0.14 / ((enzo_->Gamma - 1.0) * d[i]);
       } else {
 	d[i]  = 1.0;
-	vx[i] = 0;
-	vy[i] = 0;
+	vx[i] = 0.0;
+	vy[i] = 0.0;
 	te[i] = 1.0 / ((enzo_->Gamma - 1.0) * d[i]);
       }
     }

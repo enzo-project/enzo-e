@@ -5,6 +5,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @todo     Move boundary conditions to Boundary object; remove bc_reflecting
+/// @todo     Move output to Output object
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoSimulation user-dependent class member functions
 
@@ -90,45 +91,39 @@ void EnzoSimulation::run() throw()
   }
 
   //--------------------------------------------------
-  // MAIN LOOP
+  // BEGIN MAIN LOOP
   //--------------------------------------------------
-
 
   while (! stopping_->complete() ) {
 
     // MONITOR:  timestep and cycle progress
 
-    // @@@    monitor_->output();
     {
       char buffer[40];
       sprintf (buffer,"cycle %04d time %15.12f", cycle,time);
       monitor_->print(buffer);
     }
 
-    // MESH: ASSUMES A SINGLE PATCH
-
+    // MESH: CURRENTLY ASSUMES A SINGLE PATCH
     patch = mesh_->root_patch();
 
     // Local block iterator
-
     ItBlocks itBlocks(patch);
 
-    // TIMESTEP
+    // Determine dt
 
     double dt_block = std::numeric_limits<double>::max();
 
     while ((data_block = ++itBlocks)) {
-
+      // Copy Cello block data to Enzo object
       block_start_(data_block);
-
+      // Enforce boundary conditions
+      // @@@ Move to Boundary
       data_block->field_block()->enforce_boundary(boundary_reflecting);
-
+      // Accumulate block-local dt
       dt_block = MIN(dt_block,timestep_->compute(data_block));
-
-      output_images_(data_block, "enzo-p-%d.%d.png",cycle,0);
-
+      // Deallocate storage from block_start_();
       block_stop_(data_block);
-
     }
 
     // Accumulate block timesteps in patch
@@ -146,25 +141,20 @@ void EnzoSimulation::run() throw()
 
     dt = dt_patch;
 
-    // METHOD
+    // Apply the methods and output
 
-    // for each Block in Patch
     while ((data_block = ++itBlocks)) {
 
       block_start_(data_block);
 
-      // @@@ boundary_->enforce();
-      data_block->field_block()->enforce_boundary(boundary_reflecting);
+      // Output
+      output_images_(data_block, "enzo-p-%d.%d.png",cycle,10);
 
+      // Loop through methods
       for (size_t i = 0; i < method_list_.size(); i++) {
-
 	Method * method = method_list_[i];
-
 	method -> compute_block (data_block,time,dt);
-
       }
-
-      output_images_(data_block, "enzo-p-%d.%d.png",cycle,0);
 
       block_stop_(data_block);
 
@@ -177,27 +167,24 @@ void EnzoSimulation::run() throw()
     cycle += 1;
     time  += dt;
 
-  } // while (! control_->complete() )
-
+  }
 
   //--------------------------------------------------
-  // FINAL OUTPUT
+  // END MAIN LOOP
   //--------------------------------------------------
 
-   while ((data_block = ++itBlocks)) {
+  // Final output
 
-     block_start_(data_block);
-     
-     // @@@ output_->imagese();
-     output_images_(data_block, "enzo-p-%d.%d.png",cycle,0);
-
-     block_stop_(data_block);
-   }
+  while ((data_block = ++itBlocks)) {
+    block_start_(data_block);
+    output_images_(data_block, "enzo-p-%d.%d.png",cycle,1);
+    block_stop_(data_block);
+  }
 
 
-   // @@@ performance_->stop();
-   papi.stop();
-   timer.stop();
+  // @@@ performance_->stop();
+  papi.stop();
+  timer.stop();
 
 #ifdef CONFIG_USE_PAPI
   PARALLEL_PRINTF ("PAPI Time real   = %f\n",papi.time_real());
