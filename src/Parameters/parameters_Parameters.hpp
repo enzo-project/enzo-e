@@ -215,7 +215,8 @@ private: // functions
   Param * list_element_ (std::string parameter, int index) throw();
 
   void monitor_read_ (std::string parameter,
-		      std::string deflt_string) throw();
+		      std::string deflt_string,
+		      int index=-1) throw();
   void monitor_write_ (std::string parameter) throw();
 
   void new_param_ ( std::string group,

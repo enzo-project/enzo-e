@@ -179,18 +179,18 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   //--------------------------------------------------
 
   // parameter: Method:ppm:pressure_free
-  // parameter: Method:ppm:use_minimum_pressure_support",false);
-  // parameter: Method:ppm:minimum_pressure_support_parameter",100);
-  // parameter: Method:ppm:flattening", 3);
-  // parameter: Method:ppm:diffusion",  false);
-  // parameter: Method:ppm:steepening", false);
-  // parameter: Method:ppm:pressure_floor",
-  // parameter: Method:ppm:density_floor",
-  // parameter: Method:ppm:temperature_floor",
-  // parameter: Method:ppm:number_density_floor",
-  // parameter: Method:ppm:dual_energy",false);
-  // parameter: Method:ppm:dual_energy_eta_1",
-  // parameter: Method:ppm:dual_energy_eta_1",
+  // parameter: Method:ppm:use_minimum_pressure_support
+  // parameter: Method:ppm:minimum_pressure_support_parameter
+  // parameter: Method:ppm:flattening
+  // parameter: Method:ppm:diffusion
+  // parameter: Method:ppm:steepening
+  // parameter: Method:ppm:pressure_floor
+  // parameter: Method:ppm:density_floor
+  // parameter: Method:ppm:temperature_floor
+  // parameter: Method:ppm:number_density_floor
+  // parameter: Method:ppm:dual_energy
+  // parameter: Method:ppm:dual_energy_eta_1
+  // parameter: Method:ppm:dual_energy_eta_1
 
   PressureFree = parameters->value_scalar("pressure_free",false);
   UseMinimumPressureSupport 

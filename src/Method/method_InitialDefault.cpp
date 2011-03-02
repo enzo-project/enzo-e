@@ -31,7 +31,9 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
 
   UNTESTED("InitialDefault::initialize_block");
 
+    //--------------------------------------------------
   parameters_->set_current_group("Field");
+    //--------------------------------------------------
 
   FieldBlock *       field_block = data_block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
@@ -46,9 +48,13 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
     
     std::string field_name = field_descr->field_name(index_field);
 
+    //--------------------------------------------------
     parameters_->set_current_subgroup(field_name);
+    //--------------------------------------------------
 
     // If Field:<field_name>:value is a list, try parsing it
+
+    // parameter: Initial:[field]:value
 
     parameter_enum parameter_type = parameters_->type("value");
 
@@ -274,6 +280,8 @@ void InitialDefault::evaluate_scalar_
  double * x, double * y, double * z, double * t) throw ()
 {
 
+  // parameter: Initial:[field]:value
+
   parameter_enum value_type = 
     parameters_->list_type(index_list,"value");
 
@@ -306,6 +314,8 @@ void InitialDefault::evaluate_logical_
  int n, bool * value, bool * deflt,
  double * x, double * y, double * z, double * t) throw ()
 {
+
+  // parameter: Initial:[field]:value
 
   parameter_enum value_type = 
     parameters_->list_type(index_list,"value");

@@ -349,7 +349,9 @@ void Parameters::evaluate_scalar
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
-
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf_expression (deflt_string,param->value_expr_);
+  monitor_read_(parameter,deflt_string);
 }
 
 //----------------------------------------------------------------------
@@ -380,6 +382,9 @@ void Parameters::evaluate_logical
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf_expression (deflt_string,param->value_expr_);
+  monitor_read_(parameter,deflt_string);
 }
 
 //----------------------------------------------------------------------
@@ -405,6 +410,9 @@ int Parameters::list_value_integer
 {
   Param * param = list_element_(parameter,index);
   if (param && ! param->is_integer()) throw ExceptionParametersBadType();
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf (deflt_string,"%d",deflt);
+  monitor_read_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_integer_ : deflt;
 }
 
@@ -421,6 +429,9 @@ double Parameters::list_value_scalar
 {
   Param * param = list_element_(parameter,index);
   if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf (deflt_string,"%g",deflt);
+  monitor_read_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_scalar_ : deflt;
 }
 
@@ -437,6 +448,9 @@ bool Parameters::list_value_logical
 {
   Param * param = list_element_(parameter,index);
   if (param && ! param->is_logical()) throw ExceptionParametersBadType();
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf (deflt_string,"%s",deflt ? "true" : "false");
+  monitor_read_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_logical_ : deflt;
 }
 
@@ -453,6 +467,7 @@ const char * Parameters::list_value_string
 {
   Param * param = list_element_ (parameter,index);
   if (param && ! param->is_string()) throw (ExceptionParametersBadType());
+  monitor_read_(parameter,deflt,index);
   return (param != NULL) ? param->value_string_ : deflt;
 }
 
@@ -488,6 +503,9 @@ void Parameters::list_evaluate_scalar
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf_expression (deflt_string,param->value_expr_);
+  monitor_read_(parameter,deflt_string,index);
 }
 
 //----------------------------------------------------------------------
@@ -520,6 +538,9 @@ void Parameters::list_evaluate_logical
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
+  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  sprintf_expression (deflt_string,param->value_expr_);
+  monitor_read_(parameter,deflt_string,index);
 }
 
 //----------------------------------------------------------------------
@@ -591,17 +612,34 @@ parameter_enum Parameters::list_type
 
 //======================================================================
 
-void Parameters::monitor_read_ (std::string parameter,
-				std::string deflt_string) throw()
+void Parameters::monitor_read_ 
+(
+ std::string parameter,
+ std::string deflt_string,
+ int index
+) throw()
 {
-  Param * param = parameter_(parameter);
+  Param * param = 0;
+  if (index == -1) {
+    // not a list element
+    param = parameter_(parameter);
+  } else {
+    // a list element
+    param = list_element_(parameter,index);
+  }
   char buffer[80];
-  std::string value = param ? param->value_to_string().c_str() : 
+  std::string value = param ? 
+    param->value_to_string().c_str() : 
     std::string("[" + deflt_string + "]");
-  sprintf (buffer,"Parameter access %s:%s:%s == %s",
+  char index_string [MAX_PARAMETER_FILE_WIDTH] = "";
+  if (index != -1) {
+    sprintf (index_string,"[%d]",index);
+  }
+  sprintf (buffer,"[Parameter] read %s:%s:%s%s %s",
 	   current_group_.c_str(),
 	   current_subgroup_.c_str(),
 	   parameter.c_str(),
+	   index_string,
 	   value.c_str());
   monitor_->print(buffer);
 }

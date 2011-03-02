@@ -28,6 +28,9 @@ EnzoStopping::EnzoStopping
   parameters->set_current_group ("Stopping");
   //--------------------------------------------------
 
+  // parameter: Stopping::cycle
+  // parameter: Stopping::time
+
   cycle_stop_ = parameters->value_integer("cycle",-1);
   time_stop_  = parameters->value_scalar("time",-1.0);
 }
