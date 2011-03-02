@@ -129,8 +129,8 @@
        total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.1517,
 	                         1.0  / (0.4 * 1.0) ]; };
 
-       velocity_x    { value = [0.0]; };
-       velocity_y    { value = [0.0]; }
+       velocity_x    { value = 0.0; };
+       velocity_y    { value = 0.0; }
    }
 
    Boundary { type = "reflecting" }

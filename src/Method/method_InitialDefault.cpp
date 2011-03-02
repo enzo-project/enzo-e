@@ -4,6 +4,8 @@
 /// @file     method_InitialDefault.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
+/// @todo     Add image mask for field initialization
+/// @todo     Parse initialization parameters once per Simulation rather than once per Block
 /// @brief    Implementation of the InitialDefault class
 ///
 /// Detailed description of file method_InitialDefault.cpp
@@ -48,7 +50,13 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
 
     // If Field:<field_name>:value is a list, try parsing it
 
-    if (parameters_->type("value") == parameter_list) {
+    parameter_enum parameter_type = parameters_->type("value");
+
+    if (parameter_type == parameter_scalar) {
+
+      field_block->clear(parameters_->value_scalar("value",0.0), index_field);
+
+    } else if (parameter_type == parameter_list) {
 
       // Check parameter length
 
@@ -95,7 +103,12 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
 
       }
 
-
+    } else {
+      char buffer [ERROR_LENGTH];
+      sprintf (buffer,"Illegal parameter type %s when initializing field %s",
+	       parameter_type_name[parameter_type],field_name.c_str());
+	ERROR ("InitialDefault::initialize_block",
+	      buffer);
     }
   }
   // Deallocate arrays if needed

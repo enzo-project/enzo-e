@@ -7,6 +7,7 @@
 /// @file     parameters.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Jul  9 15:44:21 PDT 2009
+/// @todo     rename parameter_enum parameter_type_enum, etc.
 /// @brief    Include file for the \ref Parameters component
 
 /// @enum     parameter_enum
@@ -20,6 +21,17 @@ enum parameter_enum {
   parameter_list,
   parameter_scalar_expr,
   parameter_logical_expr
+};
+
+const char * parameter_type_name [] = {
+  "parameter_unknown",
+  "parameter_integer",
+  "parameter_scalar",
+  "parameter_string",
+  "parameter_logical",
+  "parameter_list",
+  "parameter_scalar_expr",
+  "parameter_logical_expr"
 };
 
 //----------------------------------------------------------------------
