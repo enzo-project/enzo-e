@@ -289,6 +289,8 @@ void Simulation::initialize_mesh_() throw()
 	 "data must be initialized before mesh",
 	 data_descr_ != NULL);
 
+  parameters_->set_current_group ("Mesh");
+
   int root_size[3];
 
   root_size[0] = parameters_->list_value_integer(0,"root_size",1);
@@ -304,8 +306,6 @@ void Simulation::initialize_mesh_() throw()
   mesh_ = new Mesh(data_descr_,
 		   root_size[0],root_size[1],root_size[2],
 		   root_blocks[0],root_blocks[1],root_blocks[2]);
-
-  parameters_->set_current_group ("Mesh");
 
   // Domain extents
 
