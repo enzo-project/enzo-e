@@ -13,6 +13,8 @@
 
 // Monitor * Monitor::instance_ = 0; // (singleton design pattern)
 
+//----------------------------------------------------------------------
+
 void Monitor::header ()
 {
   print ("  .oooooo.             oooo  oooo            ");
@@ -30,5 +32,38 @@ void Monitor::header ()
   print ("San Diego Supercomputer Center");
   print ("University of California, San Diego");
   print ("");  
+}
+
+//----------------------------------------------------------------------
+
+void Monitor::config () throw()
+{
+  print ("Configuration");
+  print ("-------------");
+#ifdef CONFIG_PRECISION_DOUBLE
+  print ("CONFIG_PRECISION_DOUBLE");
+#endif
+#ifdef CONFIG_PRECISION_QUADRUPLE
+  print ("CONFIG_PRECISION_QUADRUPLE");
+#endif
+#ifdef CONFIG_PRECISION_SINGLE
+  print ("CONFIG_PRECISION_SINGLE");
+#endif
+#ifdef CONFIG_USE_CHARM
+  print ("CONFIG_USE_CHARM");
+#endif
+#ifdef CONFIG_USE_HDF5
+  print ("CONFIG_USE_HDF5");
+#endif
+#ifdef CONFIG_USE_MEMORY
+  print ("CONFIG_USE_MEMORY");
+#endif
+#ifdef CONFIG_USE_MPI
+  print ("CONFIG_USE_MPI");
+#endif
+#ifdef CONFIG_USE_PAPI
+  print ("CONFIG_USE_PAPI");
+#endif
+  print ("-------------");
 }
 

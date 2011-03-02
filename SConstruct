@@ -8,7 +8,6 @@ charm_path = '/home/bordner/charm/charm'
 use_papi  = 1
 use_hdf5  = 1
 use_adios = 0
-precision = 'double'
 
 # DEFINES
 
@@ -38,24 +37,31 @@ if (use_adios != 0):
 	defines = defines + define_adios
 	defines_string = defines_string + ' -D' + define_adios[0]
 
-if (precision == 'single'):
-	defines = defines + define_single
-	defines_string = defines_string + ' -D' + define_single[0]
-elif (precision == 'double'):
-	defines = defines + define_double
-	defines_string = defines_string + ' -D' + define_double[0]
-
+#-----------------------------------------------------------------------
 # PARSE ARGUMENTS
+#-----------------------------------------------------------------------
 
 arch = ARGUMENTS.get('arch','unknown')
 type = ARGUMENTS.get('type','unknown')
+prec = ARGUMENTS.get('prec','unknown')
 
 if (arch == 'unknown' and "CELLO_ARCH" in os.environ):
      arch = os.environ["CELLO_ARCH"]
 if (type == 'unknown' and "CELLO_TYPE" in os.environ):
      type = os.environ["CELLO_TYPE"]
+if (prec == 'unknown' and "CELLO_PREC" in os.environ):
+     prec = os.environ["CELLO_PREC"]
 
 platform = arch + '-' + type
+
+if (prec == 'unknown'): prec = 'single'
+
+if (prec == 'single'):
+	defines = defines + define_single
+	defines_string = defines_string + ' -D' + define_single[0]
+elif (prec == 'double'):
+	defines = defines + define_double
+	defines_string = defines_string + ' -D' + define_double[0]
 
 #==================================================
 # Initialize environment according to platform
@@ -324,7 +330,7 @@ Export('serial_run')
 Export('use_papi')
 Export('use_hdf5')
 
-Export('precision')
+Export('prec')
 
 SConscript('src/SConscript')
 SConscript('test/SConscript')

@@ -10,7 +10,6 @@
 /// @brief    Include Cello global configuration settings
 
 #include "cello_config.def"
-
 #include "cello_macros.hpp"
 #include "cello_precision.hpp"
 

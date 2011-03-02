@@ -52,6 +52,9 @@ public: // interface
   /// Print the Cello header 
   void header ();
 
+  /// Print Cello configuration settings
+  void config() throw ();
+
   /// Print a message to stdout
   void print (std::string message, FILE * fp = stdout)
   {

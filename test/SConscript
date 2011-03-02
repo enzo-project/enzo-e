@@ -3,7 +3,7 @@ Import('platform')
 Import('parallel_run')
 Import('parallel_type')
 Import('serial_run')
-Import('precision')
+Import('prec')
 
 
 # O test_FieldFaces.cpp
@@ -244,12 +244,12 @@ Clean(env.RunParallel (
 	parallel_type + '-test_EnzoMethodPpm.unit','#/bin/test_EnzoMethodPpm'),
       [Glob('../ppm-*-00???.png'),parallel_type + '-test_EnzoMethodPpm.unit'])
 
-if (precision == "single"):
+if (prec == "single"):
    env.RunParallel (parallel_type + '-enzo-p_implosion.unit','#/bin/enzo-p', ARGS='input/test_implosion2d_32bit.in')
-elif (precision == "double"):
+elif (prec == "double"):
    env.RunParallel (parallel_type + '-enzo-p_implosion.unit','#/bin/enzo-p', ARGS='input/test_implosion2d_64bit.in')
 else:
-   print "FAIL: precision = ",precision
+   print "FAIL: prec = ",prec
 
 if (parallel_type == "mpi"):
    env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='4')
