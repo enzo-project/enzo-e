@@ -7,7 +7,8 @@
 /// @file     test_EnzoMethodPpm.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Feb  4 13:13:50 PST 2011
-/// @brief    [\ref Enzo] Convenience functions for test_EnzoMethodPpm.cpp
+/// @todo     Salvage code for e.g. method_Output.cpp or enzo_OutputEnzo.cpp
+/// @brief    [\ref Enzo] Convenience functions for [defunct] test_EnzoMethodPpm.cpp
 
 
 //----------------------------------------------------------------------

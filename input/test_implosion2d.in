@@ -73,8 +73,6 @@
 
       alignment = 8;    
 
-      precision = "double";
-
       density  { 
 
          # If a method calls the density field "rho" instead of
@@ -124,14 +122,22 @@
 
    }
 
-   Initial { problem = "implosion_2d" }
+   Field {
+       density       { value = [ 0.125,                x + y < 0.1517, 
+                                 1.0 ]; };
+
+       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.1517,
+	                         1.0  / (0.4 * 1.0) ]; };
+       velocity_x    { value = [0.0]; };
+       velocity_y    { value = [0.0]; }
+   }
 
    Boundary { type = "reflecting" }
 
    Stopping {
 
       time  = 2.5;
-      cycle = 100000;
+      cycle = 100;
 
       # redshift
    }

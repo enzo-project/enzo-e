@@ -405,33 +405,6 @@ component("Enzo");
 </tr>
 </table>
 
-<h3>EnzoMethodPpm</h3>
-
-<?php tests("Enzo","test_EnzoMethodPpm","test_EnzoMethodPpm"); ?>
-
-<table>
-<tr>
-<th></th>
-<th>density</th>
-<th>velocity_x</th>
-<th>velocity_y</th>
-<th>total_energy</th></tr>
-<tr>
-<th>cycle = 0</th>
-<td><img width=200 src="ppm-density-00000.png"></img></td>
-<td><img width=200 src="ppm-velocity_x-00000.png"></img></td>
-<td><img width=200 src="ppm-velocity_y-00000.png"></img></td>
-<td><img width=200 src="ppm-total_energy-00000.png"></img></td>
-</tr>
-<tr>
-<th>cycle = 100</th>
-<td><img width=200 src="ppm-density-00100.png"></img></td>
-<td><img width=200 src="ppm-velocity_x-00100.png"></img></td>
-<td><img width=200 src="ppm-velocity_y-00100.png"></img></td>
-<td><img width=200 src="ppm-total_energy-00100.png"></img></td>
-</tr>
-</table>
-
 <h3>TreeK-D2-R2-L?</h3>
 
 <?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L6"); ?>

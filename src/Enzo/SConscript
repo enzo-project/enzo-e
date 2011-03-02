@@ -41,17 +41,12 @@ sources  = [Glob('enzo_*cpp')]
 #------------------------------
 
 libraries     = env.Library ('enzo', sources)
-test_enzo_ppm = env.Program (['test_EnzoMethodPpm.cpp', sources])
 test_enzo_p   = env.Program (['enzo-p.cpp', sources])
 
-binaries = [test_enzo_ppm, test_enzo_p]
+binaries = [test_enzo_p]
 
 if (parallel_type == "charm"):
-	# test_EnzoMethodPpm
-	test = 'test_EnzoMethodPpm'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-	# enzo-p
+
 	test = 'enzo-p'
 	testc = 'enzo_p' # required since class name cannot contain '-'
 	env.CharmBuilder(testc + '.decl.h',test + '.ci',ARG = testc)

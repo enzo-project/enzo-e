@@ -17,8 +17,10 @@ Field {
              "internal_energy"];
 }
 
+
 Method {
    sequence = ["ppm"];
+   initial = "implosion_2d";
 }
 
 Output {

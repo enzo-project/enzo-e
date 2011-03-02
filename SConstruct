@@ -54,7 +54,7 @@ if (prec == 'unknown' and "CELLO_PREC" in os.environ):
 
 platform = arch + '-' + type
 
-if (prec == 'unknown'): prec = 'single'
+if (prec == 'unknown'): prec = 'double'
 
 if (prec == 'single'):
 	defines = defines + define_single
@@ -329,8 +329,6 @@ Export('serial_run')
 
 Export('use_papi')
 Export('use_hdf5')
-
-Export('prec')
 
 SConscript('src/SConscript')
 SConscript('test/SConscript')

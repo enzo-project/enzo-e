@@ -3,11 +3,9 @@ Import('platform')
 Import('parallel_run')
 Import('parallel_type')
 Import('serial_run')
-Import('prec')
 
 
 # O test_FieldFaces.cpp
-# O test_EnzoMethodPpml.cpp
 # O test_Mpi.cpp
 # O test_ParallelAffinity.cpp
 # O test_ParallelGroup.cpp
@@ -22,7 +20,6 @@ Import('prec')
 # X test_FileIfrit.cpp
 # X test_Memory.cpp
 # X test_Mesh.cpp
-# X test_EnzoMethodPpm.cpp
 # X test_Monitor.cpp
 # X test_Parallel.cpp
 # X test_Parameters.cpp
@@ -240,16 +237,12 @@ env.RunParse(parallel_type + '-test_parse_shock-pool.unit', '#/bin/test_Parse', 
 # TEST FULL APPLICATIONS
 #----------------------------------------------------------------------
 
-Clean(env.RunParallel (
-	parallel_type + '-test_EnzoMethodPpm.unit','#/bin/test_EnzoMethodPpm'),
-      [Glob('../ppm-*-00???.png'),parallel_type + '-test_EnzoMethodPpm.unit'])
 
-if (prec == "single"):
-   env.RunParallel (parallel_type + '-enzo-p_implosion.unit','#/bin/enzo-p', ARGS='input/test_implosion2d_32bit.in')
-elif (prec == "double"):
-   env.RunParallel (parallel_type + '-enzo-p_implosion.unit','#/bin/enzo-p', ARGS='input/test_implosion2d_64bit.in')
-else:
-   print "FAIL: prec = ",prec
+Clean(env.RunParallel (parallel_type + '-enzo-p_implosion.unit',
+		'#/bin/enzo-p', 
+		ARGS='input/test_implosion2d.in'),
+      [Glob('../ppm-*-00???.png'),parallel_type + '-enzo-p_implosion.unit'])
+
 
 if (parallel_type == "mpi"):
    env.RunParallel	(parallel_type + '-test_GroupProcess.unit','#/bin/test_GroupProcess',ARGS='4')
