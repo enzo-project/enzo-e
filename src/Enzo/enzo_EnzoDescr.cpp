@@ -5,6 +5,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Aug 31 15:38:36 PDT 2010
 /// @todo     Avoid Field::ghosts being read twice in enzo_EnzoDescr.cpp:186 and simulation_Simulation.cpp:244
+/// @todo     Check Parallel::method parameter (currently used to initialize ProcessorNumber)
 /// @brief    Implementation of EnzoDescr methods
 
 #include "cello.hpp"
@@ -126,6 +127,10 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   parameters->set_current_group ("Physics");
   //--------------------------------------------------
 
+  // parameter: Physics::cosmology
+  // parameter: Physics::gamma
+  // parameter: Physics::dimensions
+
   ComovingCoordinates  = parameters->value_logical ("cosmology",false);
   Gamma                = parameters->value_scalar  ("gamma",5.0/3.0);
   CycleNumber          = 0;
@@ -155,6 +160,13 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   parameters->set_current_subgroup ("cosmology");
   //--------------------------------------------------
 
+  // parameter: Physics:cosmology:initial_redshift
+  // parameter: Physics:cosmology:hubble_constant_now
+  // parameter: Physics:cosmology:omega_lambda_now
+  // parameter: Physics:cosmology:omega_matter_now
+  // parameter: Physics:cosmology:max_expansion_rate
+  // parameter: Physics:cosmology:comoving_box_size
+
   InitialRedshift   = parameters->value_scalar ("initial_redshift",  20.0);
   HubbleConstantNow = parameters->value_scalar ("hubble_constant_now",0.701);
   OmegaLambdaNow    = parameters->value_scalar ("omega_lambda_now",   0.721);
@@ -165,6 +177,20 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   //--------------------------------------------------
   parameters->set_current_group ("Method","ppm");
   //--------------------------------------------------
+
+  // parameter: Method:ppm:pressure_free
+  // parameter: Method:ppm:use_minimum_pressure_support",false);
+  // parameter: Method:ppm:minimum_pressure_support_parameter",100);
+  // parameter: Method:ppm:flattening", 3);
+  // parameter: Method:ppm:diffusion",  false);
+  // parameter: Method:ppm:steepening", false);
+  // parameter: Method:ppm:pressure_floor",
+  // parameter: Method:ppm:density_floor",
+  // parameter: Method:ppm:temperature_floor",
+  // parameter: Method:ppm:number_density_floor",
+  // parameter: Method:ppm:dual_energy",false);
+  // parameter: Method:ppm:dual_energy_eta_1",
+  // parameter: Method:ppm:dual_energy_eta_1",
 
   PressureFree = parameters->value_scalar("pressure_free",false);
   UseMinimumPressureSupport 
@@ -196,11 +222,15 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   parameters->set_current_group ("Physics");
   //--------------------------------------------------
 
+  // parameter: Physics::dimensions
+
   BoundaryRank = parameters->value_integer("dimensions",0);
 
   //--------------------------------------------------
   parameters->set_current_group ("Mesh");
   //--------------------------------------------------
+
+  // parameter: Mesh::block_size
 
   int nx = parameters->list_value_integer(0,"block_size",1);
   int ny = parameters->list_value_integer(1,"block_size",1);
@@ -210,7 +240,7 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   parameters->set_current_group ("Field");
   //--------------------------------------------------
 
-  // @@@ WARNING: REPEATED CODE: SEE simulation_Simulation.cpp
+  // parameter: Field::ghosts
 
   int gx = 1;
   int gy = 1;
@@ -224,7 +254,7 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
     gz = parameters->list_value_integer(2,"ghosts",1);
   }
 
-  //   if (GridRank < 1) gx = 0;
+  if (GridRank < 1) gx = 0;
   if (GridRank < 2) gy = 0;
   if (GridRank < 3) gz = 0;
 
@@ -236,11 +266,7 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   BoundaryDimension[1] = ny + 2*gy;
   BoundaryDimension[2] = nz + 2*gz;
 
-  // Initialize Enzo field-related attributes
-
-  //--------------------------------------------------
-  parameters->set_current_group("Field");
-  //--------------------------------------------------
+  // parameter: Field::fields
 
   NumberOfBaryonFields = parameters->list_length("fields");
 
@@ -290,21 +316,12 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
     }
   }
 
-  // Field parameters
-
-  //--------------------------------------------------
-  parameters->set_current_group ("Field");
-  //--------------------------------------------------
-
-
-
-
-  // Domain parameters
-
   //--------------------------------------------------
   parameters->set_current_group ("Domain");
   //--------------------------------------------------
   
+  // parameter: Domain::extent
+
   DomainLeftEdge [0] = parameters->list_value_scalar(0,"extent",0.0);
   DomainRightEdge[0] = parameters->list_value_scalar(1,"extent",1.0);
   DomainLeftEdge [1] = parameters->list_value_scalar(2,"extent",0.0);
@@ -312,21 +329,21 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   DomainLeftEdge [2] = parameters->list_value_scalar(4,"extent",0.0);
   DomainRightEdge[2] = parameters->list_value_scalar(5,"extent",1.0);
 
-  // Initial conditions
-
   //--------------------------------------------------
   parameters->set_current_group ("Initial");
   //--------------------------------------------------
+
+  // parameter: Initial::time
 
   InitialTimeInCodeUnits = parameters->value_scalar ("time",0.0);
   Time = InitialTimeInCodeUnits;
   OldTime = Time;
 
-  // Parallel parameters
-
   //--------------------------------------------------
   parameters->set_current_group ("Parallel");
   //--------------------------------------------------
+
+  // parameter: Parallel::method
 
   std::string parallel_method = 
     parameters->list_value_string(0,"method","serial");
@@ -342,12 +359,10 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   //--------------------------------------------------
   parameters->set_current_group ("Field");
   //--------------------------------------------------
-  
-  CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
 
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  // END: Moved from Enzo MethodControl::initialize
-  //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  // parameter: Field::courant
+
+  CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
 
 }
 

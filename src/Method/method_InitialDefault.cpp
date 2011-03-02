@@ -103,6 +103,11 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
 
       }
 
+    } else if (parameter_type == parameter_unknown) {
+      char buffer [ERROR_LENGTH];
+      sprintf (buffer,"Uninitialized field %s", field_name.c_str());
+      WARNING ("InitialDefault::initialize_block",  buffer);
+      
     } else {
       char buffer [ERROR_LENGTH];
       sprintf (buffer,"Illegal parameter type %s when initializing field %s",

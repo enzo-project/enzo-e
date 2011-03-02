@@ -319,17 +319,17 @@ component("Enzo");
 <th>total_energy</th></tr>
 <tr>
 <th>cycle = 0</th>
-<td><img width=200 src="enzo-p-0.0.png"></img></td>
-<td><img width=200 src="enzo-p-0.1.png"></img></td>
-<td><img width=200 src="enzo-p-0.2.png"></img></td>
-<td><img width=200 src="enzo-p-0.3.png"></img></td>
+<td><img width=200 src="enzo-p-000000.0.png"></img></td>
+<td><img width=200 src="enzo-p-000000.1.png"></img></td>
+<td><img width=200 src="enzo-p-000000.2.png"></img></td>
+<td><img width=200 src="enzo-p-000000.3.png"></img></td>
 </tr>
 <tr>
 <th>cycle = 100</th>
-<td><img width=200 src="enzo-p-100.0.png"></img></td>
-<td><img width=200 src="enzo-p-100.1.png"></img></td>
-<td><img width=200 src="enzo-p-100.2.png"></img></td>
-<td><img width=200 src="enzo-p-100.3.png"></img></td>
+<td><img width=200 src="enzo-p-000100.0.png"></img></td>
+<td><img width=200 src="enzo-p-000100.1.png"></img></td>
+<td><img width=200 src="enzo-p-000100.2.png"></img></td>
+<td><img width=200 src="enzo-p-000100.3.png"></img></td>
 </tr>
 </table>
 

@@ -148,7 +148,7 @@ void EnzoSimulation::run() throw()
       block_start_(data_block);
 
       // Output
-      output_images_(data_block, "enzo-p-%d.%d.png",cycle,10);
+      output_images_(data_block, "enzo-p-%06d.%d.png",cycle,10);
 
       // Loop through methods
       for (size_t i = 0; i < method_list_.size(); i++) {
@@ -177,7 +177,7 @@ void EnzoSimulation::run() throw()
 
   while ((data_block = ++itBlocks)) {
     block_start_(data_block);
-    output_images_(data_block, "enzo-p-%d.%d.png",cycle,1);
+    output_images_(data_block, "enzo-p-%06d.%d.png",cycle,1);
     block_stop_(data_block);
   }
 
@@ -191,6 +191,9 @@ void EnzoSimulation::run() throw()
   PARALLEL_PRINTF ("PAPI Time proc   = %f\n",papi.time_proc());
   PARALLEL_PRINTF ("PAPI GFlop count = %f\n",papi.flop_count()*1e-9);
   //  PARALLEL_PRINTF ("PAPI GFlop rate  = %f\n",papi.flop_rate()*1e-9);
+  PARALLEL_PRINTF ("PAPI GFlop rate  = %f\n",
+		   1e-9 * papi.flop_count() / papi.time_real());
+  
 #endif
 
   PARALLEL_PRINTF ("Real time = %f\n",timer.value());

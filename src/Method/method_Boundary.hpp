@@ -18,31 +18,14 @@ class Boundary {
 public: // interface
 
   /// Create a new Boundary
-  Boundary(Monitor * monitor) throw()
-    : monitor_ (monitor)
+  Boundary() throw()
   {};
 
 public: // virtual functions
 
   /// Enforce boundary conditions
 
-  virtual void initialize_block (DataBlock * data_block) throw() = 0;
-
-  /// Perform any required clean-up
-
-  virtual void finalize_block (DataBlock * data_block) throw() = 0;
-
-  /// Return the name of the method
-
-  virtual std::string name() const throw() = 0;
-
-protected: // functions
-
-
-protected: // attributes
-
-  /// Monitor
-  Monitor * monitor_;
+  virtual void boundary_enforce (DataBlock * data_block) throw() = 0;
 
 };
 

@@ -182,12 +182,21 @@ void Simulation::initialize_simulation_() throw()
   parameters_->set_current_group("Physics");
   //--------------------------------------------------
 
+  // parameter: Physics::dimensions
+
   dimension_ = parameters_->value_integer("dimensions",0);
 
 
+  //--------------------------------------------------
   parameters_->set_current_group("Domain");
+  //--------------------------------------------------
+
+  // parameter: Domain::dimensions
+  // parameter: Domain::extent
 
   // get extent_length and check consistency
+
+  dimension_ = parameters_->value_integer("dimensions",0);
 
   int extent_length = parameters_->list_length("extent");
 
@@ -229,7 +238,11 @@ void Simulation::initialize_data_() throw()
 
   FieldDescr * field_descr = data_descr_->field_descr();
 
+  //--------------------------------------------------
   parameters_->set_current_group("Field");
+  //--------------------------------------------------
+
+  // parameter: Field::fields
 
   // Add data fields
 
@@ -242,6 +255,8 @@ void Simulation::initialize_data_() throw()
   // Define default ghost zone depth for all fields, default value of 1
 
   // @@@ WARNING: REPEATED CODE: SEE enzo_EnzoDescr.cpp
+
+  // parameter: Field::ghosts
 
   int gx = 1;
   int gy = 1;
@@ -263,6 +278,8 @@ void Simulation::initialize_data_() throw()
   }
 
   // Set precision
+
+  // parameter: Field::precision
 
   std::string precision_str = parameters_->value_string("precision","default");
 
@@ -289,15 +306,21 @@ void Simulation::initialize_mesh_() throw()
 	 "data must be initialized before mesh",
 	 data_descr_ != NULL);
 
+  //--------------------------------------------------
   parameters_->set_current_group ("Mesh");
+  //--------------------------------------------------
 
   int root_size[3];
+
+  // parameter: Mesh::root_size
 
   root_size[0] = parameters_->list_value_integer(0,"root_size",1);
   root_size[1] = parameters_->list_value_integer(1,"root_size",1);
   root_size[2] = parameters_->list_value_integer(2,"root_size",1);
 
   int root_blocks[3];
+
+  // parameter: Mesh::root_blocks
 
   root_blocks[0] = parameters_->list_value_integer(0,"root_blocks",1);
   root_blocks[1] = parameters_->list_value_integer(1,"root_blocks",1);
@@ -309,9 +332,13 @@ void Simulation::initialize_mesh_() throw()
 
   // Domain extents
 
+  //--------------------------------------------------
   parameters_->set_current_group("Domain");
+  //--------------------------------------------------
 
   double domain_lower[3];
+
+  // parameter: Domain::extent
 
   domain_lower[0] = parameters_->list_value_scalar(0,"extent",0.0);
   domain_lower[1] = parameters_->list_value_scalar(2,"extent",0.0);
@@ -345,7 +372,12 @@ void Simulation::initialize_mesh_() throw()
   
   Layout * layout = root_patch->layout();
 
+  //--------------------------------------------------
   parameters_->set_current_group("Mesh");
+  //--------------------------------------------------
+
+  // parameter: Mesh::root_process_first
+  // parameter: Mesh::root_process_count
 
   int process_first = parameters_->value_integer("root_process_first",0);
   int process_count = parameters_->value_integer("root_process_count",1);
@@ -353,6 +385,12 @@ void Simulation::initialize_mesh_() throw()
   layout->set_process_range(process_first, process_count);
 
   // Mesh AMR settings
+
+  // parameter: Mesh::refine
+  // parameter: Mesh::max_level
+  // parameter: Mesh::balanced
+  // parameter: Mesh::backfill
+  // parameter: Mesh::coalesce
 
   mesh_->set_refine    (parameters_->value_integer("refine",    2));
   mesh_->set_max_level (parameters_->value_integer("max_level", 0));
@@ -384,6 +422,8 @@ void Simulation::initialize_initial_() throw()
   parameters_->set_current_group("Initial");
   //--------------------------------------------------
 
+  // parameter: Initial::problem
+
   std::string name = parameters_->value_string("problem","default");
 
   if (name == "default") {
@@ -400,6 +440,8 @@ void Simulation::initialize_boundary_() throw()
   //--------------------------------------------------
   parameters_->set_current_group("Boundary");
   //--------------------------------------------------
+
+  // parameter: Boundary::name
 
   std::string name = parameters_->value_string("name","");
   boundary_ = create_boundary_(name);
@@ -422,6 +464,8 @@ void Simulation::initialize_method_() throw()
   }
 
   for (int i=0; i<method_count; i++) {
+
+    // parameter: Method::sequence
 
     std::string method_name = parameters_->list_value_string(i,"sequence");
 
