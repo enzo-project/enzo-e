@@ -190,9 +190,9 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   // parameter: Method:ppm:number_density_floor
   // parameter: Method:ppm:dual_energy
   // parameter: Method:ppm:dual_energy_eta_1
-  // parameter: Method:ppm:dual_energy_eta_1
+  // parameter: Method:ppm:dual_energy_eta_2
 
-  PressureFree = parameters->value_scalar("pressure_free",false);
+  PressureFree = parameters->value_logical("pressure_free",false);
   UseMinimumPressureSupport 
     =              parameters->value_logical("use_minimum_pressure_support",false);
   MinimumPressureSupportParameter 
@@ -215,7 +215,7 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   DualEnergyFormalism     = parameters->value_logical ("dual_energy",false);
   DualEnergyFormalismEta1 = parameters->value_scalar  ("dual_energy_eta_1",
 						       0.001);
-  DualEnergyFormalismEta2 = parameters->value_scalar  ("dual_energy_eta_1",
+  DualEnergyFormalismEta2 = parameters->value_scalar  ("dual_energy_eta_2",
 						       0.1);
 
   //--------------------------------------------------

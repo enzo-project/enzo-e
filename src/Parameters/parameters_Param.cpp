@@ -102,7 +102,7 @@ std::string Param::value_to_string ()
     break;
   case parameter_logical_expr:
   case parameter_scalar_expr:
-    sprintf_expression(string_buffer,value_expr_);
+    sprintf_expression(value_expr_,string_buffer);
     break;
   case parameter_integer:
     sprintf (string_buffer,"%d",value_integer_);

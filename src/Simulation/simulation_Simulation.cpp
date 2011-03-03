@@ -196,8 +196,6 @@ void Simulation::initialize_simulation_() throw()
 
   // get extent_length and check consistency
 
-  dimension_ = parameters_->value_integer("dimensions",0);
-
   int extent_length = parameters_->list_length("extent");
 
   bool valid_extent_length = ((extent_length == 2) ||

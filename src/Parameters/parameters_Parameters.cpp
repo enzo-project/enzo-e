@@ -349,9 +349,9 @@ void Parameters::evaluate_scalar
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
-  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf_expression (deflt_string,param->value_expr_);
-  monitor_read_(parameter,deflt_string);
+  // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  // sprintf_expression (param->value_expr_,deflt_string);
+  // monitor_read_(parameter,deflt_string);
 }
 
 //----------------------------------------------------------------------
@@ -382,9 +382,9 @@ void Parameters::evaluate_logical
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
-  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf_expression (deflt_string,param->value_expr_);
-  monitor_read_(parameter,deflt_string);
+  // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  // sprintf_expression (param->value_expr_,deflt_string);
+  // monitor_read_(parameter,deflt_string);
 }
 
 //----------------------------------------------------------------------
@@ -503,9 +503,9 @@ void Parameters::list_evaluate_scalar
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
-  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf_expression (deflt_string,param->value_expr_);
-  monitor_read_(parameter,deflt_string,index);
+  // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  // sprintf_expression (param->value_expr_,deflt_string);
+  // monitor_read_(parameter,deflt_string,index);
 }
 
 //----------------------------------------------------------------------
@@ -538,9 +538,9 @@ void Parameters::list_evaluate_logical
   } else {
     for (int i=0; i<n; i++) result[i] = deflt[i];
   }
-  char deflt_string[MAX_PARAMETER_FILE_WIDTH];
-  sprintf_expression (deflt_string,param->value_expr_);
-  monitor_read_(parameter,deflt_string,index);
+  // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
+  // sprintf_expression (param->value_expr_,deflt_string);
+  // monitor_read_(parameter,deflt_string,index);
 }
 
 //----------------------------------------------------------------------

@@ -1056,7 +1056,7 @@ YY_RULE_SETUP
 case 35:
 YY_RULE_SETUP
 #line 94 "src/Parameters/parse.l"
-{ yylval.string_type = strdup (yytext);
+{ yylval.string_type = strdup (yytext); /* MEMORY LEAK 8 bytes r2026 */
             return VARIABLE; }
 	YY_BREAK
 case 36:

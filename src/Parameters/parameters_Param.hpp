@@ -21,8 +21,8 @@ extern "C" {
 
 /// @brief Print a parameter expression
 extern "C" { 
-  void sprintf_expression(char * buffer,
-			  struct node_expr * node);
+  void sprintf_expression(struct node_expr * node,
+			  char * buffer);
 }
 
 /// @brief Print a parameter list

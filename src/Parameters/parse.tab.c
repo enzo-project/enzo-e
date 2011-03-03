@@ -3508,8 +3508,8 @@ void print_expression (struct node_expr * node,
 
 }
 
-void sprintf_expression (char * buffer,
-			 struct node_expr * node)
+void sprintf_expression (struct node_expr * node,
+			 char * buffer)
 /* WARNING: buffer is assumed to be big enough to hold the expression */
 {
   if (node == NULL) {
@@ -3519,30 +3519,43 @@ void sprintf_expression (char * buffer,
     switch (node->type) {
     case enum_node_integer:
       sprintf (buffer,"%d",node->integer_value);
+      buffer += strlen(buffer);
       break;
     case enum_node_scalar:
       sprintf (buffer,"%g",node->scalar_value);
+      buffer += strlen(buffer);
       break;
     case enum_node_variable:
       sprintf (buffer,"%c",node->var_value);
+      buffer += strlen(buffer);
       break;
     case enum_node_function:
       sprintf (buffer,"%s(",node->function_name);
-      sprintf_expression(buffer+strlen(buffer),node->left);
+      buffer += strlen(buffer);
+      sprintf_expression(node->left,buffer+strlen(buffer));
+      buffer += strlen(buffer);
       sprintf (buffer,")");
+      buffer += strlen(buffer);
       break;
     case enum_node_operation:
       left  = (node->left->type == enum_node_operation) ? '(' : ' ';
       right = (node->left->type == enum_node_operation) ? ')' : ' ';
       sprintf (buffer,"%c",left);
-      sprintf_expression(buffer+strlen(buffer),node->left);
+      buffer += strlen(buffer);
+      sprintf_expression(node->left,buffer+strlen(buffer));
+      buffer += strlen(buffer);
       sprintf (buffer,"%c",right);
+      buffer += strlen(buffer);
       sprintf (buffer," %s ",op_name[node->op_value]);
+      buffer += strlen(buffer);
       left  = (node->right->type == enum_node_operation) ? '(' : ' ';
       right = (node->right->type == enum_node_operation) ? ')' : ' ';
       sprintf (buffer,"%c",left);
-      sprintf_expression(buffer+strlen(buffer),node->right);
+      buffer += strlen(buffer);
+      sprintf_expression(node->right,buffer+strlen(buffer));
+      buffer += strlen(buffer);
       sprintf (buffer,"%c",right);
+      buffer += strlen(buffer);
       break;
     default:
       break;
@@ -3553,9 +3566,9 @@ void sprintf_expression (char * buffer,
 void cello_parameters_print_list(struct param_struct * head, int level)
 {
   struct param_struct * p = head->next;
-  int count = 0;
-  while (p && p->type != enum_parameter_sentinel && count++ < 100) {
-/*     printf ("%p %s\n",p,type_name[p->type]); */
+
+  while (p && p->type != enum_parameter_sentinel) {
+
     if (p->group != NULL) {
       indent(level);
       printf ("%s %s:%s:%s = ", 
