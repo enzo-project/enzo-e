@@ -135,7 +135,6 @@ const char * op_name[] = {
     node->left          = argument;
     node->right         = NULL;
     node->function_name = strdup(function_name);
-    free (function_name);
     return node;
   }
 
