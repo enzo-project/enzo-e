@@ -1050,192 +1050,193 @@ YY_RULE_SETUP
 case 34:
 YY_RULE_SETUP
 #line 92 "src/Parameters/parse.l"
-{ yylval.string_type = strdup (yytext); /* MEMORY LEAK */
+{ /* free (yylval.string_type); ILLEGAL */
+            yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return GROUP_NAME; } /* Group names begin with upper-case */
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 94 "src/Parameters/parse.l"
-{ yylval.string_type = strdup (yytext); /* MEMORY LEAK 8 bytes r2026 */
+#line 95 "src/Parameters/parse.l"
+{ yylval.string_type = strdup (yytext);
             return VARIABLE; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 96 "src/Parameters/parse.l"
+#line 97 "src/Parameters/parse.l"
 { yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return IDENTIFIER; } /* group, parameter, and variables */
 	YY_BREAK
 /* begin with lower-case */
 case 37:
 YY_RULE_SETUP
-#line 100 "src/Parameters/parse.l"
+#line 101 "src/Parameters/parse.l"
 { return '='; }         /* = */
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 102 "src/Parameters/parse.l"
+#line 103 "src/Parameters/parse.l"
 { return '*'; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 103 "src/Parameters/parse.l"
+#line 104 "src/Parameters/parse.l"
 { return '/'; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 104 "src/Parameters/parse.l"
+#line 105 "src/Parameters/parse.l"
 { return '+'; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 105 "src/Parameters/parse.l"
+#line 106 "src/Parameters/parse.l"
 { return '-'; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 107 "src/Parameters/parse.l"
+#line 108 "src/Parameters/parse.l"
 { return '<'; }         /* = */
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 108 "src/Parameters/parse.l"
+#line 109 "src/Parameters/parse.l"
 { return '>'; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 109 "src/Parameters/parse.l"
+#line 110 "src/Parameters/parse.l"
 { return LE; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 110 "src/Parameters/parse.l"
+#line 111 "src/Parameters/parse.l"
 { return GE; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 111 "src/Parameters/parse.l"
+#line 112 "src/Parameters/parse.l"
 { return EQ; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 112 "src/Parameters/parse.l"
+#line 113 "src/Parameters/parse.l"
 { return NE; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 113 "src/Parameters/parse.l"
+#line 114 "src/Parameters/parse.l"
 { return AND; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 114 "src/Parameters/parse.l"
+#line 115 "src/Parameters/parse.l"
 { return OR; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 115 "src/Parameters/parse.l"
+#line 116 "src/Parameters/parse.l"
 { return '('; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 116 "src/Parameters/parse.l"
+#line 117 "src/Parameters/parse.l"
 { return ')'; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 118 "src/Parameters/parse.l"
+#line 119 "src/Parameters/parse.l"
 { return '['; } /* begin list */
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 119 "src/Parameters/parse.l"
+#line 120 "src/Parameters/parse.l"
 { return ']'; } /* end list */
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 120 "src/Parameters/parse.l"
+#line 121 "src/Parameters/parse.l"
 { return '{'; } /* begin group */
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 121 "src/Parameters/parse.l"
+#line 122 "src/Parameters/parse.l"
 { return '}'; } /* end group ( and end assignment ) */
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 122 "src/Parameters/parse.l"
+#line 123 "src/Parameters/parse.l"
 { return ';'; } /* parameter assignment separator */
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 123 "src/Parameters/parse.l"
+#line 124 "src/Parameters/parse.l"
 { return ','; } /* list element separator */
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 124 "src/Parameters/parse.l"
+#line 125 "src/Parameters/parse.l"
 {  /* ignore comments */ }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 126 "src/Parameters/parse.l"
+#line 127 "src/Parameters/parse.l"
 { yylval.scalar_type = atof (yytext); return SCALAR; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 127 "src/Parameters/parse.l"
+#line 128 "src/Parameters/parse.l"
 { yylval.scalar_type = atof (yytext); return SCALAR; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 128 "src/Parameters/parse.l"
+#line 129 "src/Parameters/parse.l"
 { yylval.scalar_type = atof (yytext); return SCALAR; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 129 "src/Parameters/parse.l"
+#line 130 "src/Parameters/parse.l"
 { yylval.integer_type = atoi (yytext); return INTEGER; }
 	YY_BREAK
 case 63:
 /* rule 63 can match eol */
 YY_RULE_SETUP
-#line 131 "src/Parameters/parse.l"
-{ yylval.string_type = strdup(yytext+1); /* copy skipping open quote */
+#line 132 "src/Parameters/parse.l"
+{ yylval.string_type = strdup(yytext+1); /* copy, skipping open quote */
                      yylval.string_type [yyleng-2] = '\0';   /* remove close quote */
                      return STRING; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 135 "src/Parameters/parse.l"
+#line 136 "src/Parameters/parse.l"
 {  }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 136 "src/Parameters/parse.l"
+#line 137 "src/Parameters/parse.l"
 {  }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 138 "src/Parameters/parse.l"
+#line 139 "src/Parameters/parse.l"
 { /* ignore white space */ }
 	YY_BREAK
 case 67:
 /* rule 67 can match eol */
 YY_RULE_SETUP
-#line 139 "src/Parameters/parse.l"
+#line 140 "src/Parameters/parse.l"
 { lineno++; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 141 "src/Parameters/parse.l"
+#line 142 "src/Parameters/parse.l"
 {  }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 143 "src/Parameters/parse.l"
+#line 144 "src/Parameters/parse.l"
 ECHO;
 	YY_BREAK
-#line 1239 "<stdout>"
+#line 1240 "<stdout>"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2236,7 +2237,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 143 "src/Parameters/parse.l"
+#line 144 "src/Parameters/parse.l"
 
 
 

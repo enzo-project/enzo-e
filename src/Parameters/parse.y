@@ -111,15 +111,16 @@ const char * op_name[] = {
     node->function_name = NULL;
     return node;
   }
-  struct node_expr * new_node_variable (char value)
+  struct node_expr * new_node_variable (char * value)
   {
     struct node_expr * node = malloc (sizeof (struct node_expr));
 
     node->type          = enum_node_variable;
-    node->var_value     = value;
+    node->var_value     = value[0];
     node->left          = NULL;
     node->right         = NULL;
     node->function_name = NULL;
+    free (value);
     return node;
   }
   struct node_expr * new_node_function
@@ -134,6 +135,7 @@ const char * op_name[] = {
     node->left          = argument;
     node->right         = NULL;
     node->function_name = strdup(function_name);
+    free (function_name);
     return node;
   }
 
@@ -229,15 +231,16 @@ const char * op_name[] = {
   {
     /* Create the new node */
 
-    // MEMORY LEAK
+    /* MEMORY LEAK */
      struct param_struct * p = 
        (struct param_struct *) malloc (sizeof (struct param_struct));
 
    /* Fill in the non-type-specific values for the new node */
 
-     p->group     = (current_group)     ? strdup(current_group)     : 0;     // MEMORY LEAK
-     p->subgroup  = (current_subgroup)  ? strdup(current_subgroup)  : 0;     // MEMORY LEAK
-     p->parameter = (current_parameter) ? strdup(current_parameter) : 0;     // MEMORY LEAK
+     /* MEMORY LEAK */
+     p->group     = (current_group)     ? strdup(current_group)     : 0;
+     p->subgroup  = (current_subgroup)  ? strdup(current_subgroup)  : 0;
+     p->parameter = (current_parameter) ? strdup(current_parameter) : 0;
 
      current_type = enum_parameter_unknown;
 
@@ -281,7 +284,7 @@ const char * op_name[] = {
   {
     struct param_struct * p = new_param();
     p->type         = enum_parameter_string;
-    p->string_value = strdup(value);
+    p->string_value = value;
   }
 
   /* New subgroup  */
@@ -289,13 +292,14 @@ const char * op_name[] = {
   {
     struct param_struct * p = new_param();
     p->type         = enum_parameter_subgroup;
-    p->string_value = strdup(value);
+    p->string_value = value;
   }
 
   /* New empty parameter assignment: FIRST NODE IN LIST IS A SENTINEL  */
   struct param_struct * new_param_sentinel ()
   {
 
+    /* MEMORY LEAK */
     struct param_struct * p = 
       (struct param_struct *) malloc (sizeof (struct param_struct));
 
@@ -342,8 +346,6 @@ const char * op_name[] = {
        break;
      case enum_parameter_string: 
        new_param_string(yylval.string_type);
-       free (yylval.string_type);
-       yylval.string_type = 0;
        break;
      case enum_parameter_logical:
        new_param_logical(yylval.logical_type);
@@ -395,11 +397,11 @@ const char * op_name[] = {
 
 %token <string_type>  GROUP_NAME
 %token <string_type>  STRING
+%token <string_type>  IDENTIFIER
+%token <string_type> VARIABLE
 %token <scalar_type>  SCALAR
 %token <integer_type> INTEGER
 %token <logical_type> LOGICAL
-%token <string_type>  IDENTIFIER
-%token <string_type> VARIABLE
 
 %type <integer_type> cie
 %type <scalar_type>  cse
@@ -503,7 +505,7 @@ parameter_assignment :
  ;
 
 parameter_value : 
- STRING { current_type = enum_parameter_string;       yylval.string_type = strdup($1); }
+ STRING { current_type = enum_parameter_string;       yylval.string_type = $1; }
  | cie  { current_type = enum_parameter_integer;      yylval.integer_type = $1;}
  | cse  { current_type = enum_parameter_scalar;       yylval.scalar_type = $1;}
  | cle  { current_type = enum_parameter_logical;      yylval.logical_type = $1; }
@@ -642,7 +644,7 @@ vse:
  | Y0     '(' vse ')' { $$ = new_node_function ( y0, "y0", $3); }
  | Y1     '(' vse ')' { $$ = new_node_function ( y1, "y1", $3); }
  | RINT   '(' vse ')' { $$ = new_node_function ( rint, "rint", $3); }
- | VARIABLE { $$ = new_node_variable ($1[0]);  }
+ | VARIABLE { $$ = new_node_variable ($1);  }
  ;
 
 
@@ -690,6 +692,7 @@ cello_parameters_read(FILE * fp)
 
   yyparse();
   yylex_destroy();
+
   param_head = reverse_param(param_head);
   return param_head;
 }

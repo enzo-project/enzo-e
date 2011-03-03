@@ -41,11 +41,11 @@
    enum yytokentype {
      GROUP_NAME = 258,
      STRING = 259,
-     SCALAR = 260,
-     INTEGER = 261,
-     LOGICAL = 262,
-     IDENTIFIER = 263,
-     VARIABLE = 264,
+     IDENTIFIER = 260,
+     VARIABLE = 261,
+     SCALAR = 262,
+     INTEGER = 263,
+     LOGICAL = 264,
      LE = 265,
      GE = 266,
      NE = 267,
@@ -93,7 +93,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 387 "src/Parameters/parse.y"
+#line 389 "src/Parameters/parse.y"
  
   int logical_type;  
   int integer_type; 

@@ -5,7 +5,7 @@ charm_path = '/home/bordner/charm/charm'
 
 # CONFIGURATION
 
-use_papi  = 1
+use_papi  = 0
 use_hdf5  = 1
 use_adios = 0
 

@@ -67,15 +67,20 @@ void Parameters::read ( FILE * file_pointer )
 
     node = node->next;
     
+    // free not delete since allocated in parse.y
     free (prev->group);
     free (prev->subgroup);
     free (prev->parameter);
-
-    free (prev); // free not delete since allocated in parse.y
+    free (prev);
 
     prev = node;
     
   }
+
+  // assert: node->type == enum_parameter_sentinel
+
+  free (node);
+
 }
 
 //----------------------------------------------------------------------

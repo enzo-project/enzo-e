@@ -89,9 +89,10 @@ rint   { return RINT; }
 
 false     { yylval.logical_type = 0; return LOGICAL; } 
 true      { yylval.logical_type = 1; return LOGICAL; } 
-{LU}{LN}+ { yylval.string_type = strdup (yytext); /* MEMORY LEAK */
+{LU}{LN}+ { /* free (yylval.string_type); ILLEGAL */
+            yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return GROUP_NAME; } /* Group names begin with upper-case */
-[xyzt]    { yylval.string_type = strdup (yytext); /* MEMORY LEAK 8 bytes r2026 */
+[xyzt]    { yylval.string_type = strdup (yytext);
             return VARIABLE; }
 {LL}{LN}* { yylval.string_type = strdup (yytext); /* MEMORY LEAK */
             return IDENTIFIER; } /* group, parameter, and variables */
@@ -128,7 +129,7 @@ true      { yylval.logical_type = 1; return LOGICAL; }
 {D}+"."{D}*({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
 {D}+               { yylval.integer_type = atoi (yytext); return INTEGER; }
 
-\"(\\.|[^\\"])*\"  { yylval.string_type = strdup(yytext+1); /* copy skipping open quote */
+\"(\\.|[^\\"])*\"  { yylval.string_type = strdup(yytext+1); /* copy, skipping open quote */
                      yylval.string_type [yyleng-2] = '\0';   /* remove close quote */
                      return STRING; }
 

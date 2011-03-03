@@ -25,14 +25,16 @@ foreach type ($types)
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
-   printf "$d %14s %14s" "${platform}" "cleaning..."
+   printf "$d %-14s %-14s" "${platform}" "cleaning..."
    scons arch=$arch type=$type -c >& /dev/null
    printf "done\n"
 
 
    # COMPILE
 
-   printf "$d %14s %14s" "${platform}" "compiling..."
+   set d = `date +"%Y-%m-%d %H:%M:%S"`
+
+   printf "$d %-14s %-14s" "${platform}" "compiling..."
 
    set t = `(time scons arch=$arch type=$type -k -j$procs >& out.scons.$platform)`
   
@@ -47,16 +49,26 @@ foreach type ($types)
    set p = `cat pass.$platform | wc -l`
    set f = `cat fail.$platform | wc -l`
 
-   printf "FAIL: %d  Pass: %d  " $f $p
+   set d = `date +"%Y-%m-%d %H:%M:%S"`
+
+   printf "$d %-14s " ${platform} 
+
+   printf "FAIL: $f "
+
+   printf "Pass: $p "
 
    # check if any tests didn't finish
 
    set crash = `grep "UNIT TEST" test/$type-*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
 
-   printf "crash: %d\n" $crash
    if ($crash != 0) then
-      grep "UNIT TEST" test/$type-*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1}'
+      printf "CRASH: $crash"
+      if ($crash != 0) then
+         grep "UNIT TEST" test/$type-*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1}'
+      endif
    endif
+
+   printf "\n"
 
 
 end

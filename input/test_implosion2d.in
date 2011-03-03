@@ -16,7 +16,6 @@
    # Domain is the two dimensional box 0 < x,y < 0.3
 
    Domain { 
-      dimensions = 2;
       extent = [0.0, 0.3, 0.0, 0.3] 
    } 
 
