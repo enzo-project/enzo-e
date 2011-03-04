@@ -145,7 +145,7 @@
 
    Stopping {
       time  = 2.5;
-      cycle = 100;
+      cycle = 1;
       # redshift
    }
 

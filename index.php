@@ -434,33 +434,33 @@ component("Enzo");
 <?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L6"); ?>
 <?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L7"); ?>
 <?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L8"); ?>
-<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L9"); ?>
-<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L10"); ?>
+<!--<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L9"); ?> -->
+<!--<?php tests("Mesh","test_TreeK","test_TreeK-D2-R2-L10"); ?> -->
 
 <table>
 <tr>
-<th></th>
+<th>coalesce</th>
 <th>levels = 6</th>
 <th>levels = 7</th>
 <th>levels = 8</th>
-<th>levels = 9</th>
-<th>levels = 10</th>
+<!-- <th>levels = 9</th> -->
+<!-- <th>levels = 10</th> -->
 </tr>
 <tr>
-<th>coalesce = false</th>
+<th>false</th>
 <td><img width=257 src="TreeK-D=2-R=2-L=6-0.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=2-L=7-0.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=2-L=8-0.png"></img></td>
-<td><img width=257 src="TreeK-D=2-R=2-L=9-0.png"></img></td>
-<td><img width=257 src="TreeK-D=2-R=2-L=10-0.png"></img></td>
+<!-- <td><img width=257 src="TreeK-D=2-R=2-L=9-0.png"></img></td> -->
+<!-- <td><img width=257 src="TreeK-D=2-R=2-L=10-0.png"></img></td> -->
 </tr>
 <tr>
-<th>coalesce = true</th>
+<th>true</th>
 <td><img width=257 src="TreeK-D=2-R=2-L=6-1.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=2-L=7-1.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=2-L=8-1.png"></img></td>
-<td><img width=257 src="TreeK-D=2-R=2-L=9-1.png"></img></td>
-<td><img width=257 src="TreeK-D=2-R=2-L=10-1.png"></img></td>
+<!-- <td><img width=257 src="TreeK-D=2-R=2-L=9-1.png"></img></td> -->
+<!-- <td><img width=257 src="TreeK-D=2-R=2-L=10-1.png"></img></td> -->
 </tr>
 </table>
 
@@ -472,22 +472,22 @@ component("Enzo");
 
 <table>
 <tr>
-<th></th>
+<th>coalesce</th>
 <th>levels = 6</th>
 <th>levels = 8</th>
-<th>levels = 10</th>
+<!-- <th>levels = 10</th> -->
 </tr>
 <tr>
-<th>coalesce = false</th>
+<th>false</th>
 <td><img width=257 src="TreeK-D=2-R=4-L=6-0.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=4-L=8-0.png"></img></td>
-<td><img width=257 src="TreeK-D=2-R=4-L=10-0.png"></img></td>
+<!-- <td><img width=257 src="TreeK-D=2-R=4-L=10-0.png"></img></td> -->
 </tr>
 <tr>
-<th>coalesce = true</th>
+<th>true</th>
 <td><img width=257 src="TreeK-D=2-R=4-L=6-1.png"></img></td>
 <td><img width=257 src="TreeK-D=2-R=4-L=8-1.png"></img></td>
-<td><img width=257 src="TreeK-D=2-R=4-L=10-1.png"></img></td>
+<!-- <td><img width=257 src="TreeK-D=2-R=4-L=10-1.png"></img></td> -->
 </tr>
 </table>
 
@@ -496,8 +496,8 @@ component("Enzo");
 <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L4"); ?>
 <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L5"); ?>
 <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L6"); ?>
-<?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L7"); ?>
-<?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L8"); ?>
+<!-- <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L7"); ?> -->
+<!-- <?php tests("Mesh","test_TreeK","test_TreeK-D3-R2-L8"); ?> -->
 
 <table>
 <tr>
@@ -505,32 +505,32 @@ component("Enzo");
 <th>levels = 4</th>
 <th>levels = 5</th>
 <th>levels = 6</th>
-<th>levels = 7</th>
-<th>levels = 8</th>
+<!-- <th>levels = 7</th> -->
+<!-- <th>levels = 8</th> -->
 </tr>
 <tr>
 <th>project = X</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-x-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-x-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-x-0.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=7-x-0.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=8-x-0.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=7-x-0.png"></img></td> -->
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=8-x-0.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Y</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-y-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-y-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-y-0.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=7-y-0.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=8-y-0.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=7-y-0.png"></img></td> -->
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=8-y-0.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Z</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-z-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-z-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-z-0.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=7-z-0.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=8-z-0.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=7-z-0.png"></img></td> -->
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=8-z-0.png"></img></td> -->
 </tr>
 </table>
 
@@ -542,32 +542,32 @@ component("Enzo");
 <th>levels = 4</th>
 <th>levels = 5</th>
 <th>levels = 6</th>
-<th>levels = 7</th>
-<th>levels = 8</th>
+<!-- <th>levels = 7</th> -->
+<!-- <th>levels = 8</th> -->
 </tr>
 <tr>
 <th>project = X</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-x-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-x-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-x-1.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=7-x-1.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=8-x-1.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=7-x-1.png"></img></td> -->
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=8-x-1.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Y</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-y-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-y-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-y-1.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=7-y-1.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=8-y-1.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=7-y-1.png"></img></td> -->
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=8-y-1.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Z</th>
 <td><img width=129 src="TreeK-D=3-R=2-L=4-z-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=5-z-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=2-L=6-z-1.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=7-z-1.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=2-L=8-z-1.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=7-z-1.png"></img></td> -->
+<!-- <td><img width=129 src="TreeK-D=3-R=2-L=8-z-1.png"></img></td> -->
 </tr>
 </table>
 
@@ -576,49 +576,49 @@ component("Enzo");
 
 <?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L4"); ?>
 <?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L6"); ?>
-<?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L8"); ?>
+<!-- <?php tests("Mesh","test_TreeK","test_TreeK-D3-R4-L8"); ?> -->
 
 <table>
 <tr>
 <th></th>
-<th colspan=3>coalesce = false</th>
-<th colspan=3>coalesce = true</th>
+<th colspan=2>coalesce = false</th>
+<th colspan=2>coalesce = true</th>
 </tr>
 <tr>
 <th></th>
 <th>levels = 4</th>
 <th>levels = 6</th>
-<th>levels = 8</th>
+<!-- <th>levels = 8</th> -->
 <th>levels = 4</th>
 <th>levels = 6</th>
-<th>levels = 8</th>
+<!-- <th>levels = 8</th> -->
 </tr>
 <tr>
 <th>project = X</th>
 <td><img width=129 src="TreeK-D=3-R=4-L=4-x-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=6-x-0.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=4-L=8-x-0.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=4-L=8-x-0.png"></img></td> -->
 <td><img width=129 src="TreeK-D=3-R=4-L=4-x-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=6-x-1.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=4-L=8-x-1.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=4-L=8-x-1.png"></img></td> -->
 </tr>
 <tr>
 <th>project =  Y</th>
 <td><img width=129 src="TreeK-D=3-R=4-L=4-y-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=6-y-0.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=4-L=8-y-0.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=4-L=8-y-0.png"></img></td> -->
 <td><img width=129 src="TreeK-D=3-R=4-L=4-y-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=6-y-1.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=4-L=8-y-1.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=4-L=8-y-1.png"></img></td> -->
 </tr>
 <tr>
 <th>project = Z</th>
 <td><img width=129 src="TreeK-D=3-R=4-L=4-z-0.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=6-z-0.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=4-L=8-z-0.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=4-L=8-z-0.png"></img></td> -->
 <td><img width=129 src="TreeK-D=3-R=4-L=4-z-1.png"></img></td>
 <td><img width=129 src="TreeK-D=3-R=4-L=6-z-1.png"></img></td>
-<td><img width=129 src="TreeK-D=3-R=4-L=8-z-1.png"></img></td>
+<!-- <td><img width=129 src="TreeK-D=3-R=4-L=8-z-1.png"></img></td> -->
 </br/>
 </body>
 </html>

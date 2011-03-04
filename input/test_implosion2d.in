@@ -23,8 +23,8 @@
    # into computational blocks (parallel task size) of size 8 x 8.
 
    Mesh { 
-      root_size      = [400,400];
-      block_size     = [8,8];
+      root_size      = [128,128];
+      root_blocks    = [1,1];
       max_level      = 0; 
 
       # remaining mesh parameters are ignored if max_level == 0
