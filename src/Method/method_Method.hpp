@@ -28,10 +28,6 @@ public: // virtual functions
   virtual void compute_block( DataBlock * data_block,
 			      double t, double dt ) throw() = 0; 
 
-  /// Return the name of the method
-
-  virtual std::string name() const throw() = 0;
-
 protected: // functions
 
 

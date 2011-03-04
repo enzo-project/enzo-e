@@ -25,11 +25,11 @@ InitialDefault::InitialDefault(Monitor    * monitor,
 
 //----------------------------------------------------------------------
 
-void InitialDefault::initialize_block (DataBlock * data_block) throw()
+void InitialDefault::compute (DataBlock * data_block) throw()
 {
   // Initialize Fields according to parameters
 
-  UNTESTED("InitialDefault::initialize_block");
+  UNTESTED("InitialDefault::compute");
 
     //--------------------------------------------------
   parameters_->set_current_group("Field");
@@ -71,7 +71,7 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
       sprintf (buffer, "Length of list parameter Field:%s:value must be odd",
 	       field_name.c_str());
       int list_length = parameters_->list_length("value");
-      ASSERT("InitialDefault::initialize_block",
+      ASSERT("InitialDefault::compute",
 	     buffer,
 	     list_length % 2 == 1);
 
@@ -112,13 +112,13 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
     } else if (parameter_type == parameter_unknown) {
       char buffer [ERROR_LENGTH];
       sprintf (buffer,"Uninitialized field %s", field_name.c_str());
-      WARNING ("InitialDefault::initialize_block",  buffer);
+      WARNING ("InitialDefault::compute",  buffer);
       
     } else {
       char buffer [ERROR_LENGTH];
       sprintf (buffer,"Illegal parameter type %s when initializing field %s",
 	       parameter_type_name[parameter_type],field_name.c_str());
-	ERROR ("InitialDefault::initialize_block",
+	ERROR ("InitialDefault::compute",
 	      buffer);
     }
   }
@@ -135,13 +135,7 @@ void InitialDefault::initialize_block (DataBlock * data_block) throw()
   }
 }
 
-//----------------------------------------------------------------------
-
-void InitialDefault::finalize_block (DataBlock * data_block) throw()
-{
-}
-
-//----------------------------------------------------------------------
+//======================================================================
 
 void InitialDefault::allocate_xyzt_
 (
@@ -293,7 +287,7 @@ void InitialDefault::evaluate_scalar_
 	     "Odd-index elements of %s must be scalar expressions",
 	     field_name.c_str());
 	  	      
-    ERROR("InitialDefault::initialize_block", buffer);
+    ERROR("InitialDefault::evaluate_scalar_", buffer);
   }
 
   // Evaluate the scalar expression
@@ -328,7 +322,7 @@ void InitialDefault::evaluate_logical_
 	     "Even-index elements of %s must be logical expressions",
 	     field_name.c_str());
 	  	      
-    ERROR("InitialDefault::initialize_block", buffer);
+    ERROR("InitialDefault::evaluate_logical", buffer);
   }
 
   // Evaluate the logical expression

@@ -24,35 +24,9 @@ public: // interface
       enzo_(enzo)
   {};
 
-  /// Perform any method-specific initialization
-
-  void initialize(DataDescr * data_descr) throw();
-
-  /// Perform any method-specific finalizations steps, e.g. to
-  /// deallocate any dynamically-allocated memory
-
-  void finalize(DataDescr * data_descr) throw();
-
-  /// Initialize PPM variable that may change.  Called once per
-  /// block per timestep.
-
-  void initialize_block (DataBlock * data_block) throw();
-
-  /// Finalize PPM after advancing a block a timestep, e.g. to deallocate
-  /// any dynamically-allocated variables
-
-  void finalize_block (DataBlock * data_block) throw();
-
-  /// Apply the method to advance a block one timestep 
-
   void compute_block( DataBlock * data_block,
 		      double t, double dt ) throw(); 
 
-  /// Return the name of the method
-
-  virtual std::string name() const throw() 
-  { return "ppm"; };
-  
 private: // attributes
 
   EnzoDescr * enzo_;

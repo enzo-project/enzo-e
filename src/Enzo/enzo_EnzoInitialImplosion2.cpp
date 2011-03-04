@@ -23,7 +23,7 @@ EnzoInitialImplosion2::EnzoInitialImplosion2
 
 //----------------------------------------------------------------------
 
-void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
+void EnzoInitialImplosion2::compute (DataBlock * data_block) throw()
 
 {
 
@@ -79,19 +79,3 @@ void EnzoInitialImplosion2::initialize_block (DataBlock * data_block) throw()
   }
 
 }
-
-//----------------------------------------------------------------------
-
-void EnzoInitialImplosion2::finalize_block (DataBlock * data_block) throw()
-{
-  // Intentionally blank
-}
-
-//----------------------------------------------------------------------
-
-std::string EnzoInitialImplosion2::name() const throw()
-{
-  return "implosion_2d";
-}
-
-//----------------------------------------------------------------------

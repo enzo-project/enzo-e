@@ -24,22 +24,8 @@ public: // interface
 
 public: // virtual functions
 
-  /// Initialize PPM variable that may change.  Called once per
-  /// block per timestep.
-
-  virtual void initialize_block (DataBlock * data_block) throw() = 0;
-
-  /// Perform any required clean-up
-
-  virtual void finalize_block (DataBlock * data_block) throw() = 0;
-
-  /// Return the name of the method
-
-  virtual std::string name() const throw() = 0;
-
-protected: // functions
-
-  void initialize_block_ (DataBlock * data_block) throw();
+  /// Perform the initialization of the given DataBlock
+  virtual void compute (DataBlock * data_block) throw() = 0;
 
 protected: // attributes
 

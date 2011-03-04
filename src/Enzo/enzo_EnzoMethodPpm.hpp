@@ -25,11 +25,6 @@ public: // interface
   void compute_block(DataBlock * data_block,
 		     double t, double dt) throw();
 
-  /// Return the name of the method
-
-  std::string name() const throw() 
-  { return "ppm"; };
-
 private:
 
   EnzoDescr * enzo_;

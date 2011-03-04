@@ -21,21 +21,9 @@ public: // interface
   InitialDefault(Monitor    * monitor,
 		 Parameters * parameters) throw();
 
-  /// Initialize PPM variable that may change.  Called once per
-  /// block per timestep.
+  /// Read initialization from Initial group in parameter file
 
-  virtual void initialize_block (DataBlock * data_block) throw();
-
-  /// Finalize PPM after advancing a block a timestep, e.g. to deallocate
-  /// any dynamically-allocated variables
-
-  virtual void finalize_block (DataBlock * data_block) throw();
-
-  /// Return the name of the method
-
-  virtual std::string name() const throw()
-  { return "initial_default"; }
-
+  virtual void compute (DataBlock * data_block) throw();
 
 private: // functions
   

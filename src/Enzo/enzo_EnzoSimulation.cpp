@@ -84,7 +84,7 @@ void EnzoSimulation::run() throw()
 
     block_start_(data_block);
 
-    initial_->initialize_block(data_block);
+    initial_->compute(data_block);
 
     block_stop_(data_block);
 
