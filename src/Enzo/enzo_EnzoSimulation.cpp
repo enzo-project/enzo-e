@@ -131,7 +131,7 @@ void EnzoSimulation::run() throw()
     double dt_patch;
 
 #ifdef CONFIG_USE_MPI
-    MPI_Allreduce (&dt_block, &dt_patch, 1, MPI_INT, MPI_MIN,
+    MPI_Allreduce (&dt_block, &dt_patch, 1, MPI_DOUBLE, MPI_MIN,
 		   patch->layout()->mpi_comm());
 #else
     dt_patch = dt_block;
