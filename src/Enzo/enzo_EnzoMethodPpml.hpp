@@ -19,7 +19,7 @@ public: // interface
 
 /// Creae a new EnzoMethodPpml object
   EnzoMethodPpml(Parameters * parameters,
-		 EnzoDescr * enzo)
+		 EnzoBlock * enzo)
     : Hyperbolic (parameters),
       enzo_(enzo)
   {};
@@ -29,7 +29,7 @@ public: // interface
 
 private: // attributes
 
-  EnzoDescr * enzo_;
+  EnzoBlock * enzo_;
 
 };
 

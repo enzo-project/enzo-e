@@ -18,7 +18,7 @@ class EnzoMethodPpm : public Hyperbolic {
 public: // interface
 
   EnzoMethodPpm(Parameters * parameters,
-		EnzoDescr  * enzo);
+		EnzoBlock  * enzo);
 
   /// Apply the method to advance a block one timestep 
 
@@ -27,7 +27,7 @@ public: // interface
 
 private:
 
-  EnzoDescr * enzo_;
+  EnzoBlock * enzo_;
 
 };
 

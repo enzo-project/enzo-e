@@ -15,12 +15,12 @@
 EnzoMethodPpm::EnzoMethodPpm 
 (
  Parameters * parameters,
- EnzoDescr * enzo
+ EnzoBlock * enzo
  )
   : Hyperbolic(parameters),
     enzo_(enzo)
 {
-  // PPM parameters initialized in EnzoDescr::initialize()
+  // PPM parameters initialized in EnzoBlock::initialize()
 }
 
 //----------------------------------------------------------------------

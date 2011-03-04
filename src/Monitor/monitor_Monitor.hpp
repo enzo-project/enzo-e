@@ -4,6 +4,7 @@
 /// @file     monitor_Monitor.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-05
+/// @todo     Merge config() into header()
 /// @brief    [\ref Monitor] Declaration of the Monitor class
 
 #ifndef MONITOR_MONITOR_HPP
@@ -42,7 +43,6 @@ public: // interface
   Monitor() 
     : active_(true)
   {  
-    timer_.start(); 
   }
 
   /// Set whether the monitor is active for text output.  Useful for
@@ -52,15 +52,8 @@ public: // interface
   /// Print the Cello header 
   void header ();
 
-  /// Print Cello configuration settings
-  void config() throw ();
-
   /// Print a message to stdout
-  void print (std::string message, FILE * fp = stdout)
-  {
-    if (active_) fprintf (fp,"%06.1f %s\n",
-			  timer_.value(),message.c_str());
-  };
+  void print (std::string message, FILE * fp = stdout);
 
   /// Generate a PNG image of an array
   template<class T>
@@ -80,7 +73,6 @@ private: // functions
 private: // attributes
 
   bool   active_;  // Whether monitoring is activated.  Used for e.g. ip != 0.
-  Timer  timer_;   // Timer from Performance
   
 //   /// Single instance of the Monitor object (singleton design pattern)
 //   static Monitor * instance_;

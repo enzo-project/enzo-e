@@ -38,7 +38,7 @@ inline enzo_float color_value_png
   return (1.0*png->read(ix+1,iy+1)/256);
 } 
 
-void EnzoDescr::initialize_image ()
+void EnzoBlock::initialize_image ()
 
 {
 

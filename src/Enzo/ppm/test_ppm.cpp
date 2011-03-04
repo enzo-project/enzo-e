@@ -101,7 +101,7 @@ PARALLEL_MAIN_BEGIN
 
   // Initialize for generic hydrodynamics
 
-  EnzoDescr enzo;
+  EnzoBlock enzo;
   enzo.initialize_hydro ();
 
   // Initialize for specific problem type

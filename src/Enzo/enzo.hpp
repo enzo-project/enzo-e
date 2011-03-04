@@ -38,8 +38,9 @@
 #include "enzo_typedefs.hpp"
 #include "enzo_fortran.hpp"
 
-#include "enzo_EnzoDescr.hpp"
-
+#include "enzo_EnzoNamespace.hpp"
+using namespace enzo;
+#include "enzo_EnzoBlock.hpp"
 #include "enzo_EnzoSimulation.hpp"
 #include "enzo_EnzoStopping.hpp"
 #include "enzo_EnzoTimestep.hpp"

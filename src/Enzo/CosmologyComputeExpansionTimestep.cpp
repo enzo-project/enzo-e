@@ -21,7 +21,7 @@
  
 //---------------------------------------------------------------------- 
  
-int EnzoDescr::CosmologyComputeExpansionTimestep
+int EnzoBlock::CosmologyComputeExpansionTimestep
 (enzo_float time, enzo_float *dtExpansion)
 {
  

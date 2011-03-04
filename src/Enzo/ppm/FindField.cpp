@@ -23,7 +23,7 @@
 #include "enzo.hpp"
  
  
-int EnzoDescr::FindField(int field, int farray[], int numfields)
+int EnzoBlock::FindField(int field, int farray[], int numfields)
 {
   for (int i = 0; i < numfields; i++)
     if (field == farray[i])

@@ -33,12 +33,12 @@
  
 // function prototypes
  
-int EnzoDescr::CosmologyComputeExpansionFactor
+int EnzoBlock::CosmologyComputeExpansionFactor
 (enzo_float time, enzo_float *a, enzo_float *dadt)
 {
  
   /* Error check. */
- 
+  using namespace enzo;
   if (InitialTimeInCodeUnits == 0) {
     
     char error_message[ERROR_LENGTH];

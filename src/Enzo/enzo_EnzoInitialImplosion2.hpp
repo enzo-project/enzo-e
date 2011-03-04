@@ -18,7 +18,7 @@ class EnzoInitialImplosion2 : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialImplosion2(EnzoDescr * enzo) throw();
+  EnzoInitialImplosion2(EnzoBlock * enzo) throw();
 
   /// Initialize the block
 
@@ -26,7 +26,7 @@ public: // interface
 
 private: // attributes
 
-  EnzoDescr * enzo_;
+  EnzoBlock * enzo_;
   
 };
 

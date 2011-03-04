@@ -10,7 +10,7 @@
 
 #include "enzo.hpp"
 
-void EnzoDescr::image_dump
+void EnzoBlock::image_dump
 (
  const char * file_root, 
  int cycle, 

@@ -10,7 +10,7 @@
 
 #include "enzo.hpp"
  
-enzo_float EnzoDescr::sum_field (int field)
+enzo_float EnzoBlock::sum_field (int field)
 {
   if (BaryonField[field] == NULL) return -1;
   enzo_float sum = 0.0;

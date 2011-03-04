@@ -12,7 +12,7 @@
 
 const bool debug = false;
  
-void EnzoDescr::initialize_ppml (int size_param)
+void EnzoBlock::initialize_ppml (int size_param)
 
 {
 

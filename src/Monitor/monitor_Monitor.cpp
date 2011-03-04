@@ -17,6 +17,8 @@
 
 void Monitor::header ()
 {
+  print ("==============================================");
+  print ("");
   print ("  .oooooo.             oooo  oooo            ");
   print (" d8P'  `Y8b            `888  `888            ");
   print ("888           .ooooo.   888   888   .ooooo.  ");
@@ -26,44 +28,89 @@ void Monitor::header ()
   print (" `Y8bood8P'  `Y8bod8P' o888o o888o `Y8bod8P' ");
   print ("");
   print ("A Parallel Adaptive Mesh Refinement Framework");
-  print ("");
-  print ("James Bordner");
-  print ("Laboratory for Computational Astrophysics");
-  print ("San Diego Supercomputer Center");
-  print ("University of California, San Diego");
   print ("");  
+  print ("                James Bordner");
+  print ("  Laboratory for Computational Astrophysics");
+  print ("        San Diego Supercomputer Center");
+  print ("     University of California, San Diego");
+  print ("");  
+
+
+
+  char c_single = ' ';
+  char c_double = ' ';
+  char c_quad   = ' ';
+  char c_charm  = ' ';
+  char c_mpi    = ' ';
+  char c_papi   = ' ';
+
+#ifdef CONFIG_PRECISION_SINGLE
+  c_single = '*';
+#endif
+
+#ifdef CONFIG_PRECISION_DOUBLE
+  c_double = '*';
+#endif
+
+#ifdef CONFIG_PRECISION_QUADRUPLE
+  c_quad = '*';
+#endif
+
+#ifdef CONFIG_USE_CHARM
+  c_charm = '*';
+#endif
+
+#ifdef CONFIG_USE_MPI
+  c_mpi = '*';
+#endif
+
+#ifdef CONFIG_USE_PAPI
+  c_papi = '*';
+#endif
+
+  char s_single[80];
+  char s_double[80];
+  char s_quad  [80];
+  char s_charm [80];
+  char s_mpi   [80];
+  char s_papi  [80];
+
+  sprintf (s_single,"[%c] CONFIG_PRECISION_SINGLE",c_single);
+  sprintf (s_double,"[%c] CONFIG_PRECISION_DOUBLE",c_double);
+  sprintf (s_quad,  "[%c] CONFIG_PRECISION_QUAD",  c_quad);
+  sprintf (s_charm, "[%c] CONFIG_USE_CHARM",       c_charm);
+  sprintf (s_mpi,   "[%c] CONFIG_USE_MPI",         c_mpi);
+  sprintf (s_papi,  "[%c] CONFIG_USE_PAPI",        c_papi);
+
+  print ("==============================================");
+  print (s_single);
+  print (s_double);
+  print (s_quad);
+  print (s_charm);
+  print (s_mpi);
+  print (s_papi);
+  print ("==============================================");
+
 }
 
 //----------------------------------------------------------------------
 
-void Monitor::config () throw()
+void Monitor::print (std::string message, FILE * fp)
 {
-  print ("Configuration");
-  print ("-------------");
-#ifdef CONFIG_PRECISION_DOUBLE
-  print ("CONFIG_PRECISION_DOUBLE");
-#endif
-#ifdef CONFIG_PRECISION_QUADRUPLE
-  print ("CONFIG_PRECISION_QUADRUPLE");
-#endif
-#ifdef CONFIG_PRECISION_SINGLE
-  print ("CONFIG_PRECISION_SINGLE");
-#endif
-#ifdef CONFIG_USE_CHARM
-  print ("CONFIG_USE_CHARM");
-#endif
-#ifdef CONFIG_USE_HDF5
-  print ("CONFIG_USE_HDF5");
-#endif
-#ifdef CONFIG_USE_MEMORY
-  print ("CONFIG_USE_MEMORY");
-#endif
-#ifdef CONFIG_USE_MPI
-  print ("CONFIG_USE_MPI");
-#endif
-#ifdef CONFIG_USE_PAPI
-  print ("CONFIG_USE_PAPI");
-#endif
-  print ("-------------");
-}
-
+  
+  if (active_) {
+    time_t rawtime;
+    struct tm * t;
+    time(&rawtime);
+    t = localtime (&rawtime);
+    const char * month[] = 
+      {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+    fprintf (fp,"%s %02d %02d:%02d:%02d %s\n",
+             month[t->tm_mon],
+             t->tm_mday,
+             t->tm_hour,
+             t->tm_min,
+             t->tm_sec,
+             message.c_str());
+  }
+};

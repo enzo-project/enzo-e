@@ -18,7 +18,7 @@ class EnzoTimestep : public Timestep {
 public: // interface
 
   /// Create a new EnzoTimestep
-  EnzoTimestep(EnzoDescr * enzo) throw();
+  EnzoTimestep(EnzoBlock * enzo) throw();
 
 public: // virtual functions
 
@@ -28,7 +28,7 @@ public: // virtual functions
 
 protected: // functions
 
-  EnzoDescr * enzo_;
+  EnzoBlock * enzo_;
 
 };
 

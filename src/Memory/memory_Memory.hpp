@@ -7,6 +7,8 @@
 /// @file     memory_Memory.hpp
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Thu Sep  3 16:29:56 PDT 2009 
+/// @todo     Remove CONFIG_USE_MEMORY
+/// @todo     Add Memory Parameters
 /// @brief    [\ref Memory] Interface for the Memory class.  Uses the
 /// Singleton design pattern.
 

@@ -22,12 +22,12 @@
 
 #include "enzo.hpp" 
 
-int EnzoDescr::SolveMHDEquations(DataBlock * data_block,
+int EnzoBlock::SolveMHDEquations(DataBlock * data_block,
 				 int cycle, enzo_float dt)
 {
  
   if (data_block) {
-    WARNING("EnzoDescr::SolveHydroEquations",
+    WARNING("EnzoBlock::SolveHydroEquations",
 	    "Ignoring data_block input parameter");
   }
 

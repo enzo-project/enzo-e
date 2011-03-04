@@ -10,7 +10,7 @@
 
 #include "enzo.hpp"
 
-void EnzoDescr::initialize_hydro ()
+void EnzoBlock::initialize_hydro ()
 
 {
 

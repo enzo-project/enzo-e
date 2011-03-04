@@ -10,7 +10,7 @@
 
 #include "enzo.hpp"
  
-void EnzoDescr::print_field (int field)
+void EnzoBlock::print_field (int field)
 
 {
   if (BaryonField[field] == NULL) return -1;

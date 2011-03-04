@@ -47,7 +47,6 @@ PARALLEL_MAIN_BEGIN
   // display header text
 
   monitor->header();
-  monitor->config();
 
   monitor->print ("BEGIN ENZO-P");
 

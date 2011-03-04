@@ -25,7 +25,7 @@
  
  
  
-int EnzoDescr::IdentifyPhysicalQuantities
+int EnzoBlock::IdentifyPhysicalQuantities
 (
  int &DensNum, int &GENum, int &Vel1Num,
  int &Vel2Num, int &Vel3Num, int &TENum )

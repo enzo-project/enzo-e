@@ -29,7 +29,7 @@
 //   field type in the list of boundary's and apply that boundary value/type.
 //   Returns: 0 on failure
 //
-int EnzoDescr::SetExternalBoundary
+int EnzoBlock::SetExternalBoundary
 (
  int FieldRank, 
  int GridDims[],

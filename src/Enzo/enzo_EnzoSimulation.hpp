@@ -42,7 +42,7 @@ public: // interface
 public: // functions
 
   /// Return the Enzo object created in EnzoSimulation's constructor
-  EnzoDescr * enzo() throw ()
+  EnzoBlock * enzo() throw ()
   { return enzo_; };
 
 protected: // virtual functions
@@ -80,7 +80,7 @@ private: // functions
 
 private: // attributes
 
-  EnzoDescr * enzo_;
+  EnzoBlock * enzo_;
 
 };
 

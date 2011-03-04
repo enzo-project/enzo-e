@@ -20,7 +20,7 @@ class EnzoStopping : public Stopping {
 public: // interface
 
   /// Create and initialize a new EnzoStopping object
-  EnzoStopping(EnzoDescr   * enzo,
+  EnzoStopping(EnzoBlock   * enzo,
 	       int          stop_cycle,
 	       double       stop_time);
 
@@ -30,7 +30,7 @@ public: // interface
 private: // attributes
 
   /// Enzo descriptor, used for current cycle and time
-  EnzoDescr * enzo_;
+  EnzoBlock * enzo_;
 
   /// Stop cycle
   int stop_cycle_;

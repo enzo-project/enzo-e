@@ -17,7 +17,7 @@
 
 EnzoSimulation::EnzoSimulation(Monitor * monitor) throw ()
   : Simulation(monitor),
-    enzo_(new EnzoDescr())
+    enzo_(new EnzoBlock())
 {
 }
 
@@ -35,7 +35,10 @@ void EnzoSimulation::initialize(FILE * fp) throw()
   // Call initialize for Simulation base class
   Simulation::initialize(fp);
 
-  // Call initialize for Enzo-specific Simulation
+  // Initialize enzo namespace variables
+  enzo::initialize(parameters_);
+
+  // Initialize EnzoBlock attributes
   enzo_->initialize(parameters_);
 
 }
@@ -313,28 +316,28 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
   int nx,ny,nz;
   field_block -> size (&nx,&ny,&nz);
 
-  enzo_->GridDimension[0]  = nx + 2*enzo_->ghost_depth[0];
-  enzo_->GridDimension[1]  = ny + 2*enzo_->ghost_depth[1];
-  enzo_->GridDimension[2]  = nz + 2*enzo_->ghost_depth[2];
-  enzo_->GridStartIndex[0] = enzo_->ghost_depth[0];
-  enzo_->GridStartIndex[1] = enzo_->ghost_depth[1];
-  enzo_->GridStartIndex[2] = enzo_->ghost_depth[2];
-  enzo_->GridEndIndex[0]   = enzo_->ghost_depth[0] + nx - 1;
-  enzo_->GridEndIndex[1]   = enzo_->ghost_depth[1] + ny - 1;
-  enzo_->GridEndIndex[2]   = enzo_->ghost_depth[2] + nz - 1;
+  enzo_->GridDimension[0]  = nx + 2*enzo::ghost_depth[0];
+  enzo_->GridDimension[1]  = ny + 2*enzo::ghost_depth[1];
+  enzo_->GridDimension[2]  = nz + 2*enzo::ghost_depth[2];
+  enzo_->GridStartIndex[0] = enzo::ghost_depth[0];
+  enzo_->GridStartIndex[1] = enzo::ghost_depth[1];
+  enzo_->GridStartIndex[2] = enzo::ghost_depth[2];
+  enzo_->GridEndIndex[0]   = enzo::ghost_depth[0] + nx - 1;
+  enzo_->GridEndIndex[1]   = enzo::ghost_depth[1] + ny - 1;
+  enzo_->GridEndIndex[2]   = enzo::ghost_depth[2] + nz - 1;
 
   // Initialize CellWidth
 
   double h3[3];
   field_block->cell_width(data_block,&h3[0],&h3[1],&h3[2]);
 
-  for (int dim=0; dim<enzo_->GridRank; dim++) {
+  for (int dim=0; dim<enzo::GridRank; dim++) {
     enzo_->CellWidth[dim] = h3[dim];
   }
 
   // Initialize BaryonField[] pointers
 
-  for (int field = 0; field < enzo_->NumberOfBaryonFields; field++) {
+  for (int field = 0; field < enzo::NumberOfBaryonFields; field++) {
     enzo_->BaryonField[field] = (enzo_float *)field_block->field_values(field);
   }
 
@@ -347,26 +350,26 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
  
   //    // boundary
  
-  enzo_->BoundaryDimension[0] = enzo_->GridDimension[0];
-  enzo_->BoundaryDimension[1] = enzo_->GridDimension[1];
-  enzo_->BoundaryDimension[2] = enzo_->GridDimension[2];
+  enzo::BoundaryDimension[0] = enzo_->GridDimension[0];
+  enzo::BoundaryDimension[1] = enzo_->GridDimension[1];
+  enzo::BoundaryDimension[2] = enzo_->GridDimension[2];
 
-  for (int field=0; field<enzo_->NumberOfBaryonFields; field++) {
-    enzo_->BoundaryFieldType[field] = enzo_->FieldType[field];
+  for (int field=0; field<enzo::NumberOfBaryonFields; field++) {
+    enzo::BoundaryFieldType[field] = enzo::FieldType[field];
     for (int axis = axis_x; axis <= axis_z; axis++) {
       for (int face = face_lower; face <= face_upper; face++) {
-	enzo_->BoundaryType [field][axis][face] = NULL;
+	enzo::BoundaryType [field][axis][face] = NULL;
 	if (data_block->boundary_face((face_enum)(face),
  				       (axis_enum)(axis))) {
  	  int n1 = enzo_->GridDimension[(axis+1)%3];
 	  int n2 = enzo_->GridDimension[(axis+2)%3];
 	  int size = n1*n2;
-	  enzo_->BoundaryType [field][axis][face] = new bc_enum [size];
-	  enzo_->BoundaryValue[field][axis][face] = NULL;
+	  enzo::BoundaryType [field][axis][face] = new bc_enum [size];
+	  enzo::BoundaryValue[field][axis][face] = NULL;
 	  for (int i2 = 0; i2<n2; i2++) {
 	    for (int i1 = 0; i1<n1; i1++) {
 	      int i = i1 + n1*i2;
-	      enzo_->BoundaryType[field][axis][face][i] = bc_reflecting;
+	      enzo::BoundaryType[field][axis][face][i] = bc_reflecting;
 	    }
 	  }
 	}
@@ -382,10 +385,13 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
 
 void EnzoSimulation::block_stop_ ( DataBlock * data_block ) throw ()
 {
-  for (int field=0; field<enzo_->NumberOfBaryonFields; field++) {
+  WARNING("EnzoSimulation::block_stop_",
+	  "global BoundaryType in enzo namespace is deleted at block level");
+
+  for (int field=0; field<enzo::NumberOfBaryonFields; field++) {
     for (int axis = 0; axis < 3; axis++) {
       for (int face = 0; face < 2; face++) {
-	delete [] enzo_->BoundaryType [field][axis][face];
+	delete [] enzo::BoundaryType [field][axis][face];
       }
     }
   }

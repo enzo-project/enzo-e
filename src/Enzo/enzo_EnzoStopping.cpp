@@ -14,7 +14,7 @@
 
 EnzoStopping::EnzoStopping 
 (
- EnzoDescr * enzo,
+ EnzoBlock * enzo,
  int         stop_cycle,
  double      stop_time
 )
