@@ -4,7 +4,8 @@
 /// @file     parameters_Param.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Sun Oct 11 15:02:08 PDT 2009
-/// @bug      Probable memory leaks
+/// @bug      Minor memory leaks
+/// @todo     Fix buffer overruns if parameter file lines or fields too long
 /// @brief    Implementation of the Param class
 
 #include "cello.hpp"
@@ -94,7 +95,7 @@ std::string Param::value_to_string ()
   char string_buffer[80];
   switch (type_) {
   case parameter_string: 
-    sprintf (string_buffer,"%s\n",value_string_);
+    sprintf (string_buffer,"%s",value_string_);
     break;
   case parameter_list:
     sprintf (string_buffer,"LIST\n");

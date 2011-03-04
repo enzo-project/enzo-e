@@ -385,8 +385,8 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
 
 void EnzoSimulation::block_stop_ ( DataBlock * data_block ) throw ()
 {
-  WARNING("EnzoSimulation::block_stop_",
-	  "global BoundaryType in enzo namespace is deleted at block level");
+  INCOMPLETE("EnzoSimulation::block_stop_",
+	     "global BoundaryType in enzo namespace is deleted at block level");
 
   for (int field=0; field<enzo::NumberOfBaryonFields; field++) {
     for (int axis = 0; axis < 3; axis++) {
