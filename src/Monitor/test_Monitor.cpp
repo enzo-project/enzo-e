@@ -19,7 +19,7 @@ PARALLEL_MAIN_BEGIN
 
   GroupProcess * parallel = GroupProcess::create();
 
-  Monitor  * monitor  = new Monitor;
+  Monitor * monitor  = Monitor::instance();
 
   unit_init(parallel->rank(),parallel->size());
 

@@ -15,8 +15,7 @@ void EnzoBlock::image_dump
  const char * file_root, 
  int cycle, 
  double lower, 
- double upper,
- Monitor * monitor )
+ double upper)
 { 
 
   int nx = GridDimension[0];
@@ -30,6 +29,8 @@ void EnzoBlock::image_dump
 
   // slice
   sprintf (filename,"slice-%s-%06d.png",file_root,cycle);
+
+  Monitor * monitor = Monitor::instance();
 
   monitor->image(filename,
 		 BaryonField[field_density],nx,ny,nz,

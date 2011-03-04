@@ -11,11 +11,8 @@
 #include "simulation.hpp"
 
 /// Initialize the Simulation object
-Simulation::Simulation(Monitor    * monitor,
-		       Parameters * parameters)
+Simulation::Simulation(Parameters * parameters)
   : dimension_(0),
-    monitor_(monitor),
-    monitor_allocated_(false),
     parameters_(parameters),
     parameters_allocated_(false),
     mesh_(0),
@@ -26,13 +23,8 @@ Simulation::Simulation(Monitor    * monitor,
     boundary_(0),
     method_list_()
 {
-  if (monitor_ == NULL) {
-    monitor_ = new Monitor;
-    monitor_allocated_ = true;
-  }
-
   if (parameters_ == NULL) {
-    parameters_ = new Parameters(monitor_);
+    parameters_ = new Parameters();
     parameters_allocated_ = true;
   }
 
@@ -120,13 +112,6 @@ void Simulation::extents (double * xmin, double *xmax,
   if (ymax) *ymax = extent_[3];
   if (zmin) *zmin = extent_[4];
   if (zmax) *zmax = extent_[5];
-}
-
-//----------------------------------------------------------------------
-
-Monitor * Simulation::monitor() const throw()
-{
-  return monitor_;
 }
 
 //----------------------------------------------------------------------
@@ -489,9 +474,6 @@ void Simulation::initialize_method_() throw()
 void Simulation::deallocate_() throw()
 {
 
-  if (monitor_allocated_) {
-    delete monitor_;  
-  }
   if (parameters_allocated_) {
     delete parameters_;  
   }

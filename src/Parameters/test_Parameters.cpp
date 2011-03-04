@@ -117,8 +117,7 @@ PARALLEL_MAIN_BEGIN
   // test parameter
   //----------------------------------------------------------------------
 
-  Monitor * monitor = new Monitor;
-  Parameters * parameters = new Parameters(monitor);
+  Parameters * parameters = new Parameters();
 
   // Generate test.in to make sure it exists
 

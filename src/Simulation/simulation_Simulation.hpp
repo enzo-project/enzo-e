@@ -20,8 +20,7 @@ class Simulation {
 public: // interface
 
   /// Initialize the Simulation object
-  Simulation(Monitor    * monitor = 0,
-	     Parameters * parameters = 0);
+  Simulation(Parameters * parameters = 0);
 
   //----------------------------------------------------------------------
   // Big Three
@@ -64,10 +63,6 @@ public: // interface
   void extents (double * xmin, double *xmax,
 		double * ymin = 0, double *ymax = 0,
 		double * zmin = 0, double *zmax = 0) throw();
-
-  /// Return the Simulation's Monitor object
-  Monitor * monitor() const throw();
-
 
   /// Return the Mesh
   Mesh * mesh() const throw();
@@ -161,12 +156,6 @@ protected: // attributes
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
 
-  /// Monitor object
-  Monitor * monitor_;
-
-  /// Whether Monitor object was allocated
-  bool monitor_allocated_;
-
   /// Parameters associated with this simulation
   Parameters * parameters_;
 
@@ -178,7 +167,6 @@ protected: // attributes
   
   /// Data descriptor
   DataDescr * data_descr_;
-
 
   /// Stopping criteria
   Stopping * stopping_;

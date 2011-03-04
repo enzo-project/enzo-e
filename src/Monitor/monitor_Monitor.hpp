@@ -4,7 +4,6 @@
 /// @file     monitor_Monitor.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-05
-/// @todo     Merge config() into header()
 /// @brief    [\ref Monitor] Declaration of the Monitor class
 
 #ifndef MONITOR_MONITOR_HPP
@@ -25,35 +24,32 @@ class Monitor {
   /// @class    Monitor
   /// @ingroup  Monitor
   /// @todo     Make calling image() easier
-  /// @brief    [\ref Monitor] Functions for user monitoring of the execution status
+  /// @brief    [\ref Monitor] User monitoring of simulation execution status
   ///
   /// The Monitor component is used to communicate information about
   /// the running simulation to the user. Information can be output in
   /// several forms, including text files, HTML files, plots, or other
   /// (generally small) image files. Information is assumed to be from
   /// a correctly-running simulation: anomalous errors or warnings are
-  /// output by the Error component. It is assumed that stdout is not
-  /// used for monitor output, except for possibly displaying header
-  /// text with basic information about Cello and the simulation being
-  /// run.
+  /// output by the Error component.
 
 public: // interface
 
-  /// Initialize the Monitor object (singleton design pattern)
-  Monitor() 
-    : active_(true)
-  {  
-  }
+  static Monitor * instance()
+  { if ( instance_ == NULL ) 
+      instance_ = new Monitor;
+    return instance_;
+  };
 
   /// Set whether the monitor is active for text output.  Useful for
   /// parallel.
   void set_active(bool active) { active_ = active; };
 
   /// Print the Cello header 
-  void header ();
+  void header () const;
 
   /// Print a message to stdout
-  void print (std::string message, FILE * fp = stdout);
+  void print (std::string message, FILE * fp = stdout) const;
 
   /// Generate a PNG image of an array
   template<class T>
@@ -65,17 +61,25 @@ public: // interface
 	      double min, double max,     // Limits for color map
 	      const double * color_map = 0, // color map [r0 g0 b0 r1 g1 b1...]
 	      int            color_length=0 // length of color map / 3
-	      );
+	      ) const;
   
 private: // functions
 
+  /// Private constructor of the Monitor object (singleton design pattern)
+  Monitor() 
+    : active_(true)
+  {  }
+
+  /// Private destructor  of the Monitor object (singleton design pattern)
+  ~Monitor()
+  {}
 
 private: // attributes
 
   bool   active_;  // Whether monitoring is activated.  Used for e.g. ip != 0.
   
-//   /// Single instance of the Monitor object (singleton design pattern)
-//   static Monitor * instance_;
+  /// Single instance of the Monitor object (singleton design pattern)
+  static Monitor * instance_;
 
 };
 
@@ -89,7 +93,7 @@ void Monitor::image
  int axis, reduce_enum op_reduce,
  double min, double max, 
  const double * map_in, 
- int map_length)
+ int map_length) const
 /**
  *********************************************************************
  *

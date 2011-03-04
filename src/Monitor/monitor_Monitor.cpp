@@ -11,11 +11,11 @@
 
 #include "monitor.hpp" 
 
-// Monitor * Monitor::instance_ = 0; // (singleton design pattern)
+Monitor * Monitor::instance_ = 0; // (singleton design pattern)
 
 //----------------------------------------------------------------------
 
-void Monitor::header ()
+void Monitor::header () const
 {
   print ("==============================================");
   print ("");
@@ -35,8 +35,6 @@ void Monitor::header ()
   print ("     University of California, San Diego");
   print ("");  
 
-
-
   char c_single = ' ';
   char c_double = ' ';
   char c_quad   = ' ';
@@ -47,23 +45,18 @@ void Monitor::header ()
 #ifdef CONFIG_PRECISION_SINGLE
   c_single = '*';
 #endif
-
 #ifdef CONFIG_PRECISION_DOUBLE
   c_double = '*';
 #endif
-
 #ifdef CONFIG_PRECISION_QUADRUPLE
   c_quad = '*';
 #endif
-
 #ifdef CONFIG_USE_CHARM
   c_charm = '*';
 #endif
-
 #ifdef CONFIG_USE_MPI
   c_mpi = '*';
 #endif
-
 #ifdef CONFIG_USE_PAPI
   c_papi = '*';
 #endif
@@ -95,7 +88,7 @@ void Monitor::header ()
 
 //----------------------------------------------------------------------
 
-void Monitor::print (std::string message, FILE * fp)
+void Monitor::print (std::string message, FILE * fp) const
 {
   
   if (active_) {

@@ -13,8 +13,7 @@
 
 //----------------------------------------------------------------------
 
-void output_images(Monitor * monitor,
-		   int cycle,
+void output_images(int cycle,
 		   FieldBlock * field_block,
 		   int cycle_image = 1)
 {
@@ -22,6 +21,7 @@ void output_images(Monitor * monitor,
   if (! (cycle_image && cycle % cycle_image == 0)) return;
 
   const FieldDescr * field_descr = field_block->field_descr();
+  Monitor * monitor = Monitor::instance();
   int nx,ny,nz;
   int gx,gy,gz;
   int mx,my,mz;

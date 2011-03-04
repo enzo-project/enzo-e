@@ -18,7 +18,7 @@ class EnzoSimulation : public Simulation {
 public: // interface
 
   /// Constructor
-  EnzoSimulation(Monitor * monitor) throw();
+  EnzoSimulation() throw();
 
   /// Destructor
   ~EnzoSimulation() throw();

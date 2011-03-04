@@ -20,7 +20,8 @@
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
-#include "parallel.def"
+
+#include "parallel.hpp"
 #include "error.hpp"
 #include "monitor.hpp"
 

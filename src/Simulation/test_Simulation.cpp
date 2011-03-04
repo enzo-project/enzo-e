@@ -22,10 +22,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_class ("Simulation");
 
-  // Create simulation object
-
-  Monitor * monitor = new Monitor;
-
   // Create the simulation
 
   unit_func("Simulation");
@@ -33,7 +29,7 @@ PARALLEL_MAIN_BEGIN
   // NOTE: Need concrete EnzoSimulation class since Simulation is 
   //       an abstract base class
 
-  Simulation * simulation = new EnzoSimulation (monitor);
+  Simulation * simulation = new EnzoSimulation ();
 
   unit_assert(true);
 
@@ -48,9 +44,6 @@ PARALLEL_MAIN_BEGIN
   unit_assert(true);
 
   // Test accessor functions
-
-  unit_func("monitor");
-  unit_assert (simulation->monitor() == monitor);
 
   unit_func("mesh");
   unit_assert (simulation->mesh() != NULL);
@@ -101,7 +94,6 @@ PARALLEL_MAIN_BEGIN
   simulation->finalize();
   unit_assert(false);
 
-  delete monitor;
   delete simulation;
 
   unit_finalize();

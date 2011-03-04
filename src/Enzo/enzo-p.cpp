@@ -35,12 +35,9 @@ PARALLEL_MAIN_BEGIN
 
   GroupProcess * parallel = GroupProcess::create();
 
-  // create globals
-
-  Monitor    * monitor    = new Monitor;
-  Parameters * parameters = new Parameters (monitor);
-
   // only display output from root process
+
+  Monitor * monitor = Monitor::instance();
 
   monitor->set_active(parallel->rank()==0);
 
@@ -66,7 +63,7 @@ PARALLEL_MAIN_BEGIN
     PARALLEL_EXIT;
   }
 
-  EnzoSimulation * simulation = new EnzoSimulation (monitor);
+  EnzoSimulation * simulation = new EnzoSimulation ();
 
   // read parameter file
 
@@ -83,8 +80,6 @@ PARALLEL_MAIN_BEGIN
   // clean up
 
   delete simulation;
-  delete parameters;
-  delete monitor;
   delete parallel;
 
   // finalize unit testing

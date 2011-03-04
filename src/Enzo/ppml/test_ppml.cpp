@@ -59,10 +59,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
-  // Create global objects
-
-  Monitor * monitor = new Monitor;
-
   // Check command line arguments
 
   if (PARALLEL_ARGC < 2) {
@@ -143,7 +139,7 @@ PARALLEL_MAIN_BEGIN
       PARALLEL_PRINTF ("cycle = %6d seconds = %5.0f sim-time = %6f dt = %6f\n",
 	      cycle,timer.value(),time,dt);
       fflush(stdout);
-      enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
+      enzo.image_dump(problem_name[problem],cycle,lower,upper);
     }
 
     enzo.SolveMHDEquations(NULL, cycle, dt);
@@ -160,15 +156,13 @@ PARALLEL_MAIN_BEGIN
 
   if (dump_frequency && (cycle % dump_frequency) == 0) {
     enzo.SetExternalBoundaryValues();
-    enzo.image_dump(problem_name[problem],cycle,lower,upper,monitor);
+    enzo.image_dump(problem_name[problem],cycle,lower,upper);
   }
 
   printf ("Time real = %f\n",papi.time_real());
   printf ("Time proc = %f\n",papi.time_proc());
   printf ("Flop count = %lld\n",papi.flop_count());
   printf ("GFlop rate = %f\n",papi.flop_rate()*1e-9);
-
-  delete monitor;
 
   unit_finalize();
 

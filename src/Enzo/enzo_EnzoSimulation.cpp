@@ -15,8 +15,8 @@
 
 //----------------------------------------------------------------------
 
-EnzoSimulation::EnzoSimulation(Monitor * monitor) throw ()
-  : Simulation(monitor),
+EnzoSimulation::EnzoSimulation() throw ()
+  : Simulation(),
     enzo_(new EnzoBlock())
 {
 }
@@ -57,6 +57,8 @@ void EnzoSimulation::run() throw()
 {
   
   INCOMPLETE("EnzoSimulation::run","incomplete");
+
+  Monitor * monitor = Monitor::instance();
 
   // @@@ performance_->start();
   Timer timer;
@@ -99,12 +101,10 @@ void EnzoSimulation::run() throw()
 
   while (! stopping_->complete() ) {
 
-    // MONITOR:  timestep and cycle progress
-
     {
       char buffer[40];
       sprintf (buffer,"cycle %04d time %15.12f", cycle,time);
-      monitor_->print(buffer);
+      monitor->print(buffer);
     }
 
     // MESH: CURRENTLY ASSUMES A SINGLE PATCH
@@ -410,6 +410,7 @@ void EnzoSimulation::output_images_
 
   if (! (cycle_skip && cycle % cycle_skip == 0)) return;
 
+  Monitor * monitor = Monitor::instance();
   FieldBlock *       field_block = data_block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
   int nx,ny,nz;
@@ -428,7 +429,7 @@ void EnzoSimulation::output_images_
     Scalar * field_values = (Scalar *)field_block->field_values(index);
     sprintf (filename,file_format,
 	     enzo_->CycleNumber,index);
-    monitor_->image (filename, field_values, mx,my,mz, 2, reduce_sum, 
+    monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 
     		     0.0, 1.0);
   }
 }

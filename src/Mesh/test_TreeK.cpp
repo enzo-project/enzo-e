@@ -27,10 +27,10 @@ const int  gray_threshold = 127;
 int * create_image_array (const char * filename, int * nx, int * ny, int max_levels);
 //int * create_level_array3 (int * n3, int max_levels);
 int * create_sphere_array (int * n, int max_levels);
-void write_image(Monitor * monitor, std::string filename, 
-		 float * image, int nx, int ny, int nz=0 );
+void write_image(std::string filename, float * image, 
+		 int nx, int ny, int nz=0 );
 
-void create_tree ( Memory * memory, int * level_array, int nx, int ny, int nz, int k,  int d, 
+void create_tree (int * level_array, int nx, int ny, int nz, int k,  int d, 
 		   std::string name, int max_level);
 void print_usage(int, char**);
 //----------------------------------------------------------------------
@@ -44,9 +44,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
-  // Required for Monitor
-
-  Memory * memory = Memory::instance();
   // Parse command line
 
   if (PARALLEL_ARGC != 5 && PARALLEL_ARGC != 4) {
@@ -93,10 +90,11 @@ PARALLEL_MAIN_BEGIN
     nz = nx;
   }
 
-  create_tree (memory,level_array, nx, ny, nz, refinement, dimension, filename,max_level);
+  create_tree (level_array, nx, ny, nz, refinement, dimension, filename,max_level);
 
   delete [] level_array;
 
+  Memory * memory = Memory::instance();
   memory->print();
 
   unit_finalize();
@@ -203,7 +201,7 @@ int * create_sphere_array (int * n3, int max_levels)
 
 //----------------------------------------------------------------------
 
-void write_image(Monitor * monitor,std::string filename, float * image, int nx, int ny, int nz)
+void write_image(std::string filename, float * image, int nx, int ny, int nz)
 {
   if (nx > 8194 || ny > 8194 || nz > 8194) {
     PARALLEL_PRINTF ("%s:%d (nx,ny,nz) = (%d,%d,%d)\n",__FILE__,__LINE__,nx,ny,nz);
@@ -228,6 +226,7 @@ void write_image(Monitor * monitor,std::string filename, float * image, int nx, 
     if (max < image[i]) max = image[i];
   }
   double color_map[] = {0,0,0,1,1,1};
+  Monitor * monitor = Monitor::instance();
   monitor->image ((filename+".png").c_str(),image,
 		  nx,ny,1,2,reduce_sum,
 		  min,max,color_map, 2);
@@ -238,7 +237,6 @@ void write_image(Monitor * monitor,std::string filename, float * image, int nx, 
 
 void create_tree 
 (
- Memory * memory,
  int * level_array, 
  int nx, int ny, int nz,
  int k,  int d, 
@@ -253,6 +251,7 @@ void create_tree
 
   float mem_per_node;
 
+  Memory * memory = Memory::instance();
   memory->reset();
 
   PARALLEL_PRINTF ("--------------------------------------------------\n");
@@ -295,20 +294,19 @@ void create_tree
   memory->print();
   memory->set_active(false);
 
-  Monitor * monitor = new Monitor;
   if (d==2) {
     image = tree->create_image(image_size,line_width);
-    write_image(monitor,name + "-0",image,image_size,image_size,1);
+    write_image(name + "-0",image,image_size,image_size,1);
     delete [] image;
   } else {
     image = tree->create_image(image_size,line_width,0);
-    write_image(monitor,name + "-x" + "-0",image,image_size,image_size,1);
+    write_image(name + "-x" + "-0",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,1);
-    write_image(monitor,name + "-y" + "-0",image,image_size,image_size,1);
+    write_image(name + "-y" + "-0",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,2);
-    write_image(monitor,name + "-z" + "-0",image,image_size,image_size,1);
+    write_image(name + "-z" + "-0",image,image_size,image_size,1);
     delete [] image;
   }
 
@@ -330,21 +328,20 @@ void create_tree
 
   if (d==2) {
     image = tree->create_image(image_size,line_width);
-    write_image(monitor,name + "-1",image,image_size,image_size,1);
+    write_image(name + "-1",image,image_size,image_size,1);
     delete [] image;
   } else {
     image = tree->create_image(image_size,line_width,0);
-    write_image(monitor,name + "-x" + "-1",image,image_size,image_size,1);
+    write_image(name + "-x" + "-1",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,1);
-    write_image(monitor,name + "-y" + "-1",image,image_size,image_size,1);
+    write_image(name + "-y" + "-1",image,image_size,image_size,1);
     delete [] image;
     image = tree->create_image(image_size,line_width,2);
-    write_image(monitor,name + "-z" + "-1",image,image_size,image_size,1);
+    write_image(name + "-z" + "-1",image,image_size,image_size,1);
     delete [] image;
   }
 
-  delete monitor;
   if (geomview) tree->geomview(name + ".gv");
 
   PARALLEL_PRINTF ("nodes      = %d\n",tree->num_nodes());

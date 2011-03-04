@@ -8,12 +8,6 @@
 ///
 /// Constant static global variables 
 
-
-#include "cello.hpp"
-
-#include "error.hpp"
-#include "monitor.hpp"
-
 //----------------------------------------------------------------------
 
 const char * component_name [] = {
@@ -38,20 +32,3 @@ const char * component_name [] = {
   "task"
 };
 
-// //----------------------------------------------------------------------
-
-// Global::Global() throw()
-// {
-//   monitor_    = new Monitor;
-// //   parameters_ = new Parameters(monitor_);
-//   //    memory_     = new Memory;
-// }
-
-// //----------------------------------------------------------------------
-
-// Global::~Global() throw()
-// {
-// //   delete parameters_;
-//   delete monitor_;
-//   //    delete [] memory_;
-// }

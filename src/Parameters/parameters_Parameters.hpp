@@ -29,8 +29,8 @@ class Parameters {
 public: // interface
 
 
-  /// Create an empty Parameters object (singleton design pattern)
-  Parameters(Monitor * monitor) throw();
+  /// Create an empty Parameters object
+  Parameters() throw();
 
   /// Copy constructor
   Parameters(const Parameters & parameters) throw();
@@ -229,9 +229,10 @@ private: // attributes
   /// Single instance of the Parameters object (singleton design pattern)
 //   static Parameters instance_;
 
-  /// Monitor object
-  Monitor * monitor_; 
+  /// Current Group
   std::string current_group_;
+
+  /// Current subgroup
   std::string current_subgroup_;
 
   std::map<std::string, Param *>  parameter_map_;

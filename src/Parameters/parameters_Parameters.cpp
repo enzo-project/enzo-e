@@ -16,10 +16,9 @@
 
 //----------------------------------------------------------------------
 
-Parameters::Parameters(Monitor * monitor) 
+Parameters::Parameters() 
   throw()
-  :  monitor_(monitor),
-     current_group_(""),
+  :  current_group_(""),
      current_subgroup_(""),
      parameter_map_(),
      parameter_tree_(new ParamNode("Parameters"))
@@ -646,7 +645,9 @@ void Parameters::monitor_read_
 	   parameter.c_str(),
 	   index_string,
 	   value.c_str());
-  monitor_->print(buffer);
+
+  Monitor * monitor = Monitor::instance();
+  monitor->print(buffer);
 }
 
 //----------------------------------------------------------------------
@@ -660,7 +661,9 @@ void Parameters::monitor_write_ (std::string parameter) throw()
 	   current_subgroup_.c_str(),
 	   parameter.c_str(),
 	   param ? param->value_to_string().c_str() : "[undefined]");
-  monitor_->print(buffer);
+
+  Monitor * monitor = Monitor::instance();
+  monitor->print(buffer);
 }
 
 //----------------------------------------------------------------------

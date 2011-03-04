@@ -20,9 +20,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "error.hpp"
 #include "performance.hpp"
-#include "parallel.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes
