@@ -116,9 +116,9 @@ if (platform == 'linux-serial'):
    flags_warn = '-Wall'
    flags_cxx = flags_opt + ' ' + flags_prec + ' ' + flags_warn
 
-   parallel_run = "time "
+   parallel_run = ""
    parallel_type = "serial"
-   serial_run   = "time "
+   serial_run   = ""
 
    if (use_papi):
       include_path = ['#/include','/usr/local/include'];
