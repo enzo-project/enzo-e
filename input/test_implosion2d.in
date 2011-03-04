@@ -134,12 +134,6 @@
 
    Boundary { type = "reflecting" }
 
-   Initial {
-      time  = 1.5;
-      cycle = 10;
-  
-   }
-
    Stopping {
 
       time  = 2.5;
