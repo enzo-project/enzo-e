@@ -3,8 +3,6 @@
 
 /// @file     enzo_EnzoStopping.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Create specific class for interfacing Cello code with User code
-/// @todo     Remove repeated creation / deletion of CellWidth[]
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoStopping user-dependent class member functions
 
@@ -16,30 +14,15 @@
 
 EnzoStopping::EnzoStopping 
 (
- Parameters * parameters,
- EnzoDescr  * enzo
+ EnzoDescr * enzo,
+ int         stop_cycle,
+ double      stop_time
 )
   : Stopping(),
     enzo_(enzo),
-    cycle_stop_(-1),
-    time_stop_(-1.0)
+    stop_cycle_(stop_cycle),
+    stop_time_ (stop_time)
 {
-  //--------------------------------------------------
-  parameters->set_current_group ("Stopping");
-  //--------------------------------------------------
-
-  // parameter: Stopping::cycle
-  // parameter: Stopping::time
-
-  cycle_stop_ = parameters->value_integer("cycle",-1);
-  time_stop_  = parameters->value_scalar("time",-1.0);
-}
-
-//----------------------------------------------------------------------
-
-void EnzoStopping::update_block (DataBlock * block) throw()
-{
-  INCOMPLETE("EnzoStopping::update_block","not implemented");
 }
 
 //----------------------------------------------------------------------
@@ -48,9 +31,13 @@ bool EnzoStopping::complete () throw()
 {
   ASSERT("EnzoStopping::complete",
 	 "Neither Stopping::time_stop nor Stopping::cycle_stop initialized",
-	 time_stop_ != -1.0 || cycle_stop_ != -1);
+	 stop_time_ != -1.0 || stop_cycle_ != -1);
+
+  int    curr_cycle = enzo_->CycleNumber;
+  double curr_time  = enzo_->Time;
+
   return 
-    (time_stop_  != -1.0 && enzo_->Time        >= time_stop_ ) ||
-    (cycle_stop_ != -1   && enzo_->CycleNumber >= cycle_stop_);
+    ( ! ((stop_time_  == -1.0 || curr_time  < stop_time_ ) &&
+	 (stop_cycle_ == -1   || curr_cycle < stop_cycle_)));
 }
 

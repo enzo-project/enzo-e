@@ -216,15 +216,6 @@ void EnzoSimulation::write() throw()
 
 //======================================================================
 
-Stopping * 
-EnzoSimulation::create_stopping_ (std::string name) throw ()
-/// @param name   Name of the stopping method to create (ignored)
-{
-  return new EnzoStopping(parameters_,enzo_);
-}
-
-//----------------------------------------------------------------------
-
 Timestep * 
 EnzoSimulation::create_timestep_ ( std::string name ) throw ()
 /// @param name   Name of the timestep method to create (ignored)
@@ -239,12 +230,45 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   
+  //--------------------------------------------------
+  parameters_->set_current_group ("Initial");
+  //--------------------------------------------------
+
+  // parameter: Initial::cycle
+  // parameter: Initial::time
+
+  int    start_cycle = parameters_->value_integer("cycle",0);
+  double start_time  = parameters_->value_scalar("time",0.0);
+
+  enzo_->CycleNumber = start_cycle;
+  enzo_->Time        = start_time;
+
   Initial * initial = 0;
 
-  if (name == "implosion_2d")  
+  if (name == "implosion_2d") {
     initial = new EnzoInitialImplosion2 (monitor_, enzo_);
+  }
 
   return initial;
+}
+
+//----------------------------------------------------------------------
+
+Stopping * 
+EnzoSimulation::create_stopping_ (std::string name) throw ()
+/// @param name   Name of the stopping method to create (ignored)
+{
+  //--------------------------------------------------
+  parameters_->set_current_group ("Stopping");
+  //--------------------------------------------------
+
+  // parameter: Stopping::cycle
+  // parameter: Stopping::time
+
+  int    stop_cycle = parameters_->value_integer("cycle",-1);
+  double stop_time  = parameters_->value_scalar("time",-1.0);
+
+  return new EnzoStopping(enzo_,stop_cycle,stop_time);
 }
 
 //----------------------------------------------------------------------

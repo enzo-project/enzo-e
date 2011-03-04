@@ -20,10 +20,7 @@ public: // interface
   /// Constructor
   Stopping() throw() {};
 
-  /// Update stopping criteria for a block
-  virtual void update_block (DataBlock * data_block) throw() = 0;
-
-  /// Return whether the simulation is complete
+  /// Return whether the simulation is done
   virtual bool complete () throw() = 0;
 
 protected:

@@ -9,6 +9,7 @@
 #ifndef ENZO_ENZO_STOPPING_HPP
 #define ENZO_ENZO_STOPPING_HPP
 
+//----------------------------------------------------------------------
 
 class EnzoStopping : public Stopping {
 
@@ -18,31 +19,24 @@ class EnzoStopping : public Stopping {
 
 public: // interface
 
-  /// Create a new EnzoStopping
-
-  EnzoStopping(Parameters * parameters,
-	       EnzoDescr  * enzo);
-
-  /// Update stopping criteria for a block
-  virtual void update_block (DataBlock * block) throw();
+  /// Create and initialize a new EnzoStopping object
+  EnzoStopping(EnzoDescr   * enzo,
+	       int          stop_cycle,
+	       double       stop_time);
 
   /// Return whether the simulation is complete
   virtual bool complete () throw();
 
-
 private: // attributes
 
-  /// Parameters
-  Parameters * parameters_;
-
-  /// Enzo descriptor object
+  /// Enzo descriptor, used for current cycle and time
   EnzoDescr * enzo_;
 
-  /// Enzo stop cycle
-  int cycle_stop_;
+  /// Stop cycle
+  int stop_cycle_;
 
-  /// Enzo stop time
-  double time_stop_;
+  /// Stop time
+  double stop_time_;
 
 };
 
