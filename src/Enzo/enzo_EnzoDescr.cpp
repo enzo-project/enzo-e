@@ -133,10 +133,7 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
 
   ComovingCoordinates  = parameters->value_logical ("cosmology",false);
   Gamma                = parameters->value_scalar  ("gamma",5.0/3.0);
-  CycleNumber          = 0;
-  Time                 = 0;
-
-  GridRank = parameters->value_integer ("dimensions",0);
+  GridRank             = parameters->value_integer ("dimensions",0);
 
   // Chemistry parameters
 
@@ -333,11 +330,14 @@ EnzoDescr::initialize(Parameters * parameters) throw ()
   parameters->set_current_group ("Initial");
   //--------------------------------------------------
 
+  // parameter: Initial::cycle
   // parameter: Initial::time
 
-  InitialTimeInCodeUnits = parameters->value_scalar ("time",0.0);
-  Time = InitialTimeInCodeUnits;
+  CycleNumber = parameters->value_integer ("cycle",0);
+  Time        = parameters->value_scalar ("time",0.0);
+
   OldTime = Time;
+  InitialTimeInCodeUnits = Time;
 
   //--------------------------------------------------
   parameters->set_current_group ("Parallel");

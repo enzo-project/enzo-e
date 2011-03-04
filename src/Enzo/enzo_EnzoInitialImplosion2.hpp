@@ -18,8 +18,7 @@ class EnzoInitialImplosion2 : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialImplosion2(Monitor   * monitor,
-                        EnzoDescr * enzo) throw();
+  EnzoInitialImplosion2(EnzoDescr * enzo) throw();
 
   /// Initialize the block
 

@@ -424,10 +424,10 @@ void Simulation::initialize_initial_() throw()
 
   std::string name = parameters_->value_string("problem","default");
 
-  if (name == "default") {
-    initial_ = new InitialDefault(monitor_,parameters_);
-  } else {
-    initial_ = create_initial_(name);
+  initial_ = create_initial_(name);
+
+  if (initial_ == 0) {
+    initial_ = new InitialDefault(parameters_);
   }
 }
 

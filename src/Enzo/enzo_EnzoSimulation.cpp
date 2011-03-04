@@ -230,23 +230,10 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   
-  //--------------------------------------------------
-  parameters_->set_current_group ("Initial");
-  //--------------------------------------------------
-
-  // parameter: Initial::cycle
-  // parameter: Initial::time
-
-  int    start_cycle = parameters_->value_integer("cycle",0);
-  double start_time  = parameters_->value_scalar("time",0.0);
-
-  enzo_->CycleNumber = start_cycle;
-  enzo_->Time        = start_time;
-
   Initial * initial = 0;
 
   if (name == "implosion_2d") {
-    initial = new EnzoInitialImplosion2 (monitor_, enzo_);
+    initial = new EnzoInitialImplosion2 (enzo_);
   }
 
   return initial;

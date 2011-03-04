@@ -16,9 +16,8 @@
 
 //----------------------------------------------------------------------
 
-InitialDefault::InitialDefault(Monitor    * monitor,
-			       Parameters * parameters) throw ()
-  : Initial (monitor),
+InitialDefault::InitialDefault(Parameters * parameters) throw ()
+  : Initial (),
     parameters_(parameters)
 {
 }

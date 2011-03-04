@@ -14,10 +14,9 @@
 
 EnzoInitialImplosion2::EnzoInitialImplosion2
 (
- Monitor   * monitor,
  EnzoDescr * enzo
  ) throw ()
-  : Initial(monitor),
+  : Initial(),
     enzo_(enzo)
 {}
 

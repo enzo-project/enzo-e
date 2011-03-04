@@ -18,8 +18,7 @@ class Initial {
 public: // interface
 
   /// Create a new Initial
-  Initial(Monitor * monitor) throw()
-    : monitor_ (monitor)
+  Initial() throw()
   {};
 
 public: // virtual functions
@@ -28,9 +27,6 @@ public: // virtual functions
   virtual void compute (DataBlock * data_block) throw() = 0;
 
 protected: // attributes
-
-  /// Monitor
-  Monitor * monitor_;
 
 };
 

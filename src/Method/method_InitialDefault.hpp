@@ -18,8 +18,7 @@ class InitialDefault : public Initial {
 public: // interface
 
   /// Constructor
-  InitialDefault(Monitor    * monitor,
-		 Parameters * parameters) throw();
+  InitialDefault(Parameters * parameters) throw();
 
   /// Read initialization from Initial group in parameter file
 
