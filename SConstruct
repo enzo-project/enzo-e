@@ -54,7 +54,7 @@ if (prec == 'unknown' and "CELLO_PREC" in os.environ):
 
 platform = arch + '-' + type
 
-if (prec == 'unknown'): prec = 'double'
+if (prec == 'unknown'): prec = 'single'
 
 if (prec == 'single'):
 	defines = defines + define_single
