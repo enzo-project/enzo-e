@@ -2,7 +2,7 @@
 
 set suffix = $1
 
-set nmin   = 4
+set nmin   = 2
 set nmax   = 100
 set cycles = 10
 
@@ -12,8 +12,11 @@ foreach opt (yes)
    set n = $nmin
    while ($n <= $nmax)
 
-     ./test_ppm ppm-implosion3 $n $cycles 0 | grep time  >> out.time-ppm.${suffix}
-     ./test_ppm ppm-implosion3 $n $cycles 0 | grep GFlop >> out.gflop-ppm.${suffix}
+      echo $n
+     ./test_ppm${suffix} ppm-implosion3 $n $cycles 0 > test_ppm.out
+      awk '/Time proc /{print $4}' test_ppm.out >> out.time-ppm${suffix}
+      awk '/GFlop rate/{print $4}' test_ppm.out >> out.gflop-ppm${suffix}
+      awk '/Flop count/{print $4}' test_ppm.out >> out.flops-ppm${suffix}
 
      @ n = $n + 1
    end

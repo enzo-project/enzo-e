@@ -155,6 +155,7 @@ int * create_image_array (const char * pngfile,
       if (level_array[i] > max) max = level_array[i];
     }
   }
+  png.close();
   return level_array;
 }
 

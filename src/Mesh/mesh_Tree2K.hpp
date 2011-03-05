@@ -22,8 +22,7 @@ public: // interface
   Tree2K(int k);
 
   /// Destructor
-  ~Tree2K() 
-  { delete root_; };
+  ~Tree2K();
 
   /// Copy constructor
   Tree2K(const Tree2K & tree2k) throw();

@@ -26,8 +26,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Destructor
-  ~Tree3K() 
-  { delete root_; };
+  ~Tree3K();
 
   /// Copy constructor
   Tree3K(const Tree3K & tree3k) throw();

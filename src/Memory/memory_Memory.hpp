@@ -28,11 +28,15 @@ class Memory {
 
 public: // interface
 
-#ifdef CONFIG_USE_MEMORY
 /// Get single instance of the Memory object
   static Memory * instance() throw ()
-  { return & instance_; }
+  {
+#ifdef CONFIG_USE_MEMORY
+    return & instance_; 
+#else
+    return 0;
 #endif
+  }
 
 private: // interface
   /// Create the (single) Memory object (singleton design pattern)

@@ -39,6 +39,13 @@ Tree3K & Tree3K::operator= (const Tree3K & tree3k) throw()
 
 //----------------------------------------------------------------------
 
+Tree3K::~Tree3K ()
+{ 
+  delete root_; 
+}
+
+//----------------------------------------------------------------------
+
 void Tree3K::refine
 (
  const int * level_array, 
