@@ -13,10 +13,6 @@
 #include "cello_macros.hpp"
 #include "cello_precision.hpp"
 
-#ifdef CONFIG_USE_CHARM
-#   include "charm++.h"
-#endif
-
 /*********************************************************************
  * PERFORMANCE DECLARATIONS
  **********************************************************************/

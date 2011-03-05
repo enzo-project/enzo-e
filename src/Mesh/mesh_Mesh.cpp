@@ -18,7 +18,7 @@ Mesh::Mesh
  int nx, int ny, int nz,
  int nbx, int nby, int nbz
  ) throw ()
-  : root_patch_(new Patch(data_descr,nx,ny,nz,nbx,nby,nbz)),
+  : root_patch_(new Patch(nx,ny,nz,nbx,nby,nbz)),
     tree_(0),
     dimension_(0),
     refine_(0),

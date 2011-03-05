@@ -19,8 +19,7 @@ class Patch {
 public: // interface
 
   /// Constructor for given Patch size and blocking count
-  Patch(DataDescr *, 
-	int nx,   int ny,  int nz,
+  Patch(int nx,   int ny,  int nz,
 	int nbx,  int nby, int nbz) throw();
 
   //----------------------------------------------------------------------
@@ -31,15 +30,13 @@ public: // interface
   ~Patch() throw();
 
   /// Copy constructor
-  Patch(const Patch & patch) throw();
+  Patch(const Patch & patch,
+	DataDescr * data_descr) throw();
 
-  /// Assignment operator
-  Patch & operator= (const Patch & patch) throw();
+  // /// Assignment operator
+  // Patch & operator= (const Patch & patch) throw();
 
   //----------------------------------------------------------------------
-
-  /// Return the data descriptor
-  DataDescr * data_descr () const throw();
 
   /// Return the size of the patch in number of grid cells
   void size (int * nx, int * ny=0, int * nz=0) const throw();
@@ -64,7 +61,7 @@ public: // interface
   //--------------------------------------------------
 
   /// Allocate local blocks
-  void allocate_blocks() throw();
+  void allocate_blocks(DataDescr * data_descr) throw();
 
   /// Deallocate local blocks
   void deallocate_blocks() throw();
@@ -78,9 +75,6 @@ public: // interface
   /// Return the ith data block
   DataBlock * block(int i) const throw();
 
-
-  //--------------------------------------------------
-
 public: // entry functions
 
 #ifdef CONFIG_USE_CHARM
@@ -93,9 +87,6 @@ public: // entry functions
   //--------------------------------------------------
 
 private: // attributes
-
-  /// Data descriptor
-  DataDescr * data_descr_;
 
   /// Layout: describes blocking, processor range, and block-processor mapping 
   Layout * layout_;

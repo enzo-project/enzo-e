@@ -16,9 +16,7 @@
 DataBlock::DataBlock(DataDescr * data_descr,
 		     int nx, int ny, int nz,
 		     int num_field_blocks) throw ()
-  : data_descr_(data_descr),
-    field_block_(),
-    boundary_face_()
+  : field_block_()
 
 { 
 
@@ -30,13 +28,11 @@ DataBlock::DataBlock(DataDescr * data_descr,
     field_block_[i] = new FieldBlock (field_descr,nx,ny,nz);
   }
 
-  // Initialize boundary_face_[][]
+  // Initialize extent 
+
   for (int axis=0; axis<3; axis++) {
     lower_[axis]      = 0.0;
     upper_[axis]      = 1.0;
-    for (int face=0; face<2; face++) {
-      boundary_face_[axis][face] = false;
-    }
   }
 }
 //----------------------------------------------------------------------
@@ -52,8 +48,7 @@ DataBlock::~DataBlock() throw ()
 //----------------------------------------------------------------------
 
 DataBlock::DataBlock(const DataBlock & data_block) throw ()
-  : data_descr_(data_block.data_descr_),
-    field_block_()
+  : field_block_()
 /// @param     data_block  Object being copied
 {
   copy_(data_block);
@@ -81,36 +76,6 @@ const FieldBlock * DataBlock::field_block (int i) const throw()
 FieldBlock * DataBlock::field_block (int i) throw()
 { 
   return field_block_.at(i); 
-}
-
-//----------------------------------------------------------------------
-
-void DataBlock::set_boundary_face
-(
- bool value,
- face_enum face, 
- axis_enum axis
- ) throw()
-{
-  // WARNING: recursive
-  UNTESTED("DataBlock::set_boundary_face");
-  if (face == face_all) {
-    set_boundary_face(value,face_lower,axis);
-    set_boundary_face(value,face_upper,axis);
-  } else if (axis == axis_all) {
-    set_boundary_face(value,face,axis_x);
-    set_boundary_face(value,face,axis_y);
-    set_boundary_face(value,face,axis_z);
-  } else {
-    boundary_face_[face][axis] = value;
-  }
-}
-
-//----------------------------------------------------------------------
-bool DataBlock::boundary_face(face_enum face,
-			       axis_enum axis) throw()
-{
-  return boundary_face_[face][axis];
 }
 
 //----------------------------------------------------------------------
@@ -154,18 +119,10 @@ void DataBlock::copy_(const DataBlock & data_block) throw()
 {
   UNTESTED("DataBlock::create_");
 
-  const FieldBlock * field_block = data_block.field_block();
-
   // Create a copy of field_block_
   field_block_.resize(data_block.field_block_.size());
   for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (*field_block_[i]);
-  }
-  // Copy boundary_face_[][]
-  for (int axis=0; axis<3; axis++) {
-    for (int face=0; face<2; face++) {
-      boundary_face_[axis][face] = data_block.boundary_face_[axis][face];
-    }
+    field_block_[i] = new FieldBlock (*(data_block.field_block_[i]));
   }
 }
 

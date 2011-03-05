@@ -4,7 +4,6 @@
 /// @file     mesh_Patch.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @todo     Relocate or remove need for field_block->set_boundary_face() calls
 /// @brief    Implementation of the Patch class
 
 #include "cello.hpp"
@@ -15,14 +14,11 @@
 
 Patch::Patch
 (
- DataDescr * data_descr,
  int nx,  int ny,  int nz,
  int nbx, int nby, int nbz
 ) throw()
-  : data_descr_(data_descr),
-    layout_(new Layout (nbx,nby,nbz)),
+  : layout_(new Layout (nbx,nby,nbz)),
     data_block_()
-
 {
   // Check 
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
@@ -66,30 +62,22 @@ Patch::~Patch() throw()
 
 //----------------------------------------------------------------------
 
-Patch::Patch(const Patch & patch) throw()
-  :  data_descr_ (patch.data_descr())
+Patch::Patch(const Patch & patch,
+	     DataDescr * data_descr) throw()
 {
   deallocate_blocks();
 
-  allocate_blocks();
+  allocate_blocks(data_descr);
 }
 
 //----------------------------------------------------------------------
 
-Patch & Patch::operator= (const Patch & patch) throw()
-{
-  deallocate_blocks();
-  data_descr_ = patch.data_descr();
-  allocate_blocks();
-  return *this;
-}
-
-//----------------------------------------------------------------------
-
-DataDescr * Patch::data_descr () const throw()
-{
-  return data_descr_;
-}
+// Patch & Patch::operator= (const Patch & patch) throw()
+// {
+//   deallocate_blocks();
+//   allocate_blocks();
+//   return *this;
+// }
 
 //----------------------------------------------------------------------
 
@@ -141,7 +129,7 @@ void Patch::extents (double * xm, double * xp,
   
 //----------------------------------------------------------------------
 
-void Patch::allocate_blocks() throw()
+void Patch::allocate_blocks(DataDescr * data_descr) throw()
 {
 
   UNTESTED("Patch::allocate_blocks()");
@@ -190,7 +178,7 @@ void Patch::allocate_blocks() throw()
   for (int ib=0; ib<nb; ib++) {
 
     // create a new data block
-    DataBlock * data_block = new DataBlock(data_descr_,mbx,mby,mbz);
+    DataBlock * data_block = new DataBlock(data_descr,mbx,mby,mbz);
 
     // Store the data block
     data_block_[ib] = data_block;
@@ -219,21 +207,6 @@ void Patch::allocate_blocks() throw()
 
     field_block->allocate_array();
     field_block->allocate_ghosts();
-
-    // Set boundaries
-
-    if (mbx > 1) {
-      if (ibx==0)     data_block->set_boundary_face(true,face_lower,axis_x);
-      if (ibx==nbx-1) data_block->set_boundary_face(true,face_upper,axis_x);
-    }
-    if (mby > 1) {
-      if (iby==0)     data_block->set_boundary_face(true,face_lower,axis_y);
-      if (iby==nby-1) data_block->set_boundary_face(true,face_upper,axis_y);
-    }
-    if (mbz > 1) {
-      if (ibz==0)     data_block->set_boundary_face(true,face_lower,axis_z);
-      if (ibz==nbz-1) data_block->set_boundary_face(true,face_upper,axis_z);
-    }
 
     WARNING("Patch::allocate_blocks",
 		    "allocating all ghosts in patch");

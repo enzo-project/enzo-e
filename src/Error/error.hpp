@@ -21,7 +21,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "parallel.def"
+#include "parallel.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

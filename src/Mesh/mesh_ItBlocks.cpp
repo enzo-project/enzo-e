@@ -25,13 +25,37 @@ ItBlocks::~ItBlocks() throw ()
 
 //----------------------------------------------------------------------
 
-DataBlock * ItBlocks::operator++ () throw()
+void ItBlocks::first () throw()
 {
-  index1_ ++;
+  index1_ = 0;
+}
 
-  if (index1_ > patch_->num_blocks()) index1_ = 0;
+//----------------------------------------------------------------------
 
-  return index1_ ? patch_->block(index1_ - 1) : 0;
+void ItBlocks::next () throw()
+{
+  ++index1_;
+}
+
+//----------------------------------------------------------------------
+
+bool ItBlocks::done () const throw()
+{
+  return index1_ >= patch_->num_blocks();
+}
+
+//----------------------------------------------------------------------
+
+DataBlock * ItBlocks::curr () throw()
+{
+  return (index1_ < patch_->num_blocks()) ? patch_->block(index1_) : 0;
+}
+
+//----------------------------------------------------------------------
+
+const DataBlock * ItBlocks::curr () const throw()
+{
+  return (index1_ < patch_->num_blocks()) ? patch_->block(index1_) : 0;
 }
 
 //----------------------------------------------------------------------

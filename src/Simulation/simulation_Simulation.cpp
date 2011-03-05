@@ -349,7 +349,7 @@ void Simulation::initialize_mesh_() throw()
 			  domain_lower[1],domain_upper[1],
 			  domain_lower[2],domain_upper[2]);
 
-  root_patch->allocate_blocks();
+  root_patch->allocate_blocks(data_descr_);
 
   // Parallel layout of the root patch
   

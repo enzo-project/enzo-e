@@ -28,9 +28,14 @@ enum parallel_enum {
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #ifdef CONFIG_USE_MPI
 #  include <mpi.h>
 #endif
+#ifdef CONFIG_USE_CHARM
+#  include "charm++.h"
+#endif
+
 
 //----------------------------------------------------------------------
 // Component dependencies

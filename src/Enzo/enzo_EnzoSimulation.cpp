@@ -85,7 +85,9 @@ void EnzoSimulation::run() throw()
   // INITIALIZE FIELDS
   //--------------------------------------------------
 
-  while ((data_block = ++itBlocks)) {
+  itBlocks.first(); 
+  while (! itBlocks.done()) {
+    data_block = itBlocks.curr();
 
     block_start_(data_block);
 
@@ -93,6 +95,7 @@ void EnzoSimulation::run() throw()
 
     block_stop_(data_block);
 
+    itBlocks.next();
   }
 
   //--------------------------------------------------
@@ -117,16 +120,21 @@ void EnzoSimulation::run() throw()
 
     double dt_block = std::numeric_limits<double>::max();
 
-    while ((data_block = ++itBlocks)) {
+    itBlocks.first(); 
+    while (! itBlocks.done()) {
+      data_block = itBlocks.curr();
+
       // Copy Cello block data to Enzo object
       block_start_(data_block);
       // Enforce boundary conditions
-      // @@@ Move to Boundary
+      // @@@ Move to Boundary object
       data_block->field_block()->enforce_boundary(boundary_reflecting);
       // Accumulate block-local dt
       dt_block = MIN(dt_block,timestep_->compute(data_block));
       // Deallocate storage from block_start_();
       block_stop_(data_block);
+
+      itBlocks.next();
     }
 
     // Accumulate block timesteps in patch
@@ -146,7 +154,10 @@ void EnzoSimulation::run() throw()
 
     // Apply the methods and output
 
-    while ((data_block = ++itBlocks)) {
+    itBlocks.first(); 
+    while (! itBlocks.done()) {
+      data_block = itBlocks.curr();
+
 
       block_start_(data_block);
 
@@ -160,6 +171,7 @@ void EnzoSimulation::run() throw()
       }
 
       block_stop_(data_block);
+      itBlocks.next();
 
     } // Block in Patch
 
@@ -178,10 +190,13 @@ void EnzoSimulation::run() throw()
 
   // Final output
 
-  while ((data_block = ++itBlocks)) {
+  itBlocks.first(); 
+  while (! itBlocks.done()) {
+    data_block = itBlocks.curr();
     block_start_(data_block);
     output_images_(data_block, "enzo-p-%06d.%d.png",cycle,1);
     block_stop_(data_block);
+    itBlocks.next();
   }
 
 
@@ -341,60 +356,17 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
     enzo_->BaryonField[field] = (enzo_float *)field_block->field_values(field);
   }
 
- 
-  //   // Boundary
-  //   /* If using comoving coordinates, compute the expansion factor a.  Otherwise,
-  //      set it to one. */
- 
-  //   /* 1) Compute Courant condition for baryons. */
- 
-  //    // boundary
- 
-  enzo::BoundaryDimension[0] = enzo_->GridDimension[0];
-  enzo::BoundaryDimension[1] = enzo_->GridDimension[1];
-  enzo::BoundaryDimension[2] = enzo_->GridDimension[2];
+  // Boundary condition initialization removed
+  WARNING("EnzoSimulatio::block_start_()",
+	  "Boundary condition code remove");
 
-  for (int field=0; field<enzo::NumberOfBaryonFields; field++) {
-    enzo::BoundaryFieldType[field] = enzo::FieldType[field];
-    for (int axis = axis_x; axis <= axis_z; axis++) {
-      for (int face = face_lower; face <= face_upper; face++) {
-	enzo::BoundaryType [field][axis][face] = NULL;
-	if (data_block->boundary_face((face_enum)(face),
- 				       (axis_enum)(axis))) {
- 	  int n1 = enzo_->GridDimension[(axis+1)%3];
-	  int n2 = enzo_->GridDimension[(axis+2)%3];
-	  int size = n1*n2;
-	  enzo::BoundaryType [field][axis][face] = new bc_enum [size];
-	  enzo::BoundaryValue[field][axis][face] = NULL;
-	  for (int i2 = 0; i2<n2; i2++) {
-	    for (int i1 = 0; i1<n1; i1++) {
-	      int i = i1 + n1*i2;
-	      enzo::BoundaryType[field][axis][face][i] = bc_reflecting;
-	    }
-	  }
-	}
-      }
-    }
-  }
-
-  // @@@ WRITE OUT ENZO DESCRIPTION FOR DEBUGGING
-  //  enzo_->write(stdout);
+  enzo_->write(stdout);
 }
 
 //----------------------------------------------------------------------
 
 void EnzoSimulation::block_stop_ ( DataBlock * data_block ) throw ()
 {
-  INCOMPLETE("EnzoSimulation::block_stop_",
-	     "global BoundaryType in enzo namespace is deleted at block level");
-
-  for (int field=0; field<enzo::NumberOfBaryonFields; field++) {
-    for (int axis = 0; axis < 3; axis++) {
-      for (int face = 0; face < 2; face++) {
-	delete [] enzo::BoundaryType [field][axis][face];
-      }
-    }
-  }
 }
 
 //----------------------------------------------------------------------

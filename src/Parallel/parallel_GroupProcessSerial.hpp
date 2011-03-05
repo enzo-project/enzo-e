@@ -35,16 +35,10 @@ public: // interface (Group)
   //--------------------------------------------------
 
   /// Initiate sending an array
-  void * send_begin
-  (int rank_dest, void * buffer, int size, int tag=0) throw()
-  {
-    if (buffer_[tag] != 0) {
-      WARNING("send_begin",
-		      "multiple sends with no corresponding receive");
-    }
-    buffer_[(long int)tag] = buffer;
-    return (void * ) tag;
-  }
+  void * send_begin (int    rank_dest, 
+		     void * buffer, 
+		     int    size, 
+		     int    tag=0) throw();
 
   /// Clean up after sending an array
   void send_end(void * handle) throw()
@@ -59,13 +53,7 @@ public: // interface (Group)
   };
 
   /// Clean up after receiving an array
-  void recv_end(void * handle) throw()
-  {
-    if (buffer_[(long int)(handle)] == 0) {
-      WARNING("recv_end",
-	      "receive with no corresponding send");
-    }
-  }
+  void recv_end(void * handle) throw();
 
   /// Complete sending or receiving an array
   void wait(void * handle) throw()

@@ -38,16 +38,10 @@ PARALLEL_MAIN_BEGIN
   int patch_blocking[] = {3,3,3};
 
   Patch * patch = new Patch
-    (data_descr, 
-     patch_size[0],     patch_size[1],     patch_size[2],
+    (patch_size[0],     patch_size[1],     patch_size[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2]);
 
   unit_assert(patch != NULL);
-
-  //--------------------------------------------------
-  unit_func("data_descr");
-
-  unit_assert(patch->data_descr()==data_descr);
 
   //--------------------------------------------------
   unit_func("size");
@@ -115,7 +109,7 @@ PARALLEL_MAIN_BEGIN
   
   unit_func("allocate");
 
-  patch->allocate_blocks();
+  patch->allocate_blocks(data_descr);
 
   unit_assert(patch->blocks_allocated() == true);
 
@@ -134,7 +128,10 @@ PARALLEL_MAIN_BEGIN
 
   int count = 0;
 
-  while ((data_block = ++itBlocks)) {
+  itBlocks.first();
+  while ((! itBlocks.done())) {
+
+    data_block = itBlocks.curr();
 
     ++count;
 
@@ -193,6 +190,7 @@ PARALLEL_MAIN_BEGIN
     // TEST BLOCK PROPERTIES
     //    unit_assert(false);
 
+    itBlocks.next();
   }
 
   unit_func("num_blocks");
