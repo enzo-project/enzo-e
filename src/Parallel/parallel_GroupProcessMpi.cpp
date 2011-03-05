@@ -176,6 +176,23 @@ void GroupProcessMpi::bulk_wait(void * handle) throw()
 {
 }
 
-//----------------------------------------------------------------------
+//======================================================================
+
+void GroupProcessMpi::call_mpi_
+(
+ const char * file, 
+ int          line , 
+ const char * name, 
+ int          ierr
+ ) throw()
+  {
+    if (ierr != MPI_SUCCESS) {
+      char message[ERROR_LENGTH];
+      char function[ERROR_LENGTH];
+      sprintf (message,"MPI rank=%d  error=%d",rank_,ierr);
+      sprintf (function,"GroupProcessMpi::%s",name);
+      ERROR(function,message);
+    }
+  };
 
 #endif /* CONFIG_USE_MPI */
