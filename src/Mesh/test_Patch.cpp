@@ -121,7 +121,7 @@ PARALLEL_MAIN_BEGIN
 
   // loop over local data blocks and test their existence and properties
 
-  ItBlocks itBlocks (patch);
+  ItBlock itBlocks (patch);
 
   Block *  block = 0;
   FieldBlock * field_block = 0;

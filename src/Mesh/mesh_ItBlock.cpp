@@ -1,11 +1,11 @@
-// $Id: mesh_ItBlocks.cpp 1954 2011-01-25 19:54:37Z bordner $
+// $Id: mesh_ItBlock.cpp 1954 2011-01-25 19:54:37Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 //----------------------------------------------------------------------
-/// @file     mesh_ItBlocks.cpp
+/// @file     mesh_ItBlock.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Feb  1 18:06:42 PST 2011
-/// @brief    Implementation of ItBlocks
+/// @brief    Implementation of ItBlock
 //----------------------------------------------------------------------
 
 #include "cello.hpp"
@@ -14,19 +14,19 @@
 
 //----------------------------------------------------------------------
 
-ItBlocks::ItBlocks ( Patch * patch ) throw ()
+ItBlock::ItBlock ( Patch * patch ) throw ()
   : patch_(patch),
     index1_(0)
 {}
 
 //----------------------------------------------------------------------
 
-ItBlocks::~ItBlocks ( ) throw ()
+ItBlock::~ItBlock ( ) throw ()
 {}
 
 //----------------------------------------------------------------------
 
-Block * ItBlocks::operator++ () throw()
+Block * ItBlock::operator++ () throw()
 {
   index1_ ++;
   if (index1_ > patch_->num_blocks()) index1_ = 0;
@@ -35,22 +35,22 @@ Block * ItBlocks::operator++ () throw()
 
 //----------------------------------------------------------------------
 
-bool ItBlocks::done () const throw()
+bool ItBlock::done () const throw()
 {
   return index1_ >= patch_->num_blocks();
 }
 
 //----------------------------------------------------------------------
 
-int ItBlocks::index (int * ibx, int * iby, int * ibz) throw()
+int ItBlock::index (int * ibx, int * iby, int * ibz) throw()
 {
   if (index1_) {
       // need to implement mapping of local block 1D index in patch 
       // to global 3D index.  Either use Patch or ItBlock::index()
-    INCOMPLETE("ItBlocks::index","");
+    INCOMPLETE("ItBlock::index","");
     //    patch_->layout()->block_indices
   } else {
-    WARNING ("ItBlocks::index","Trying to get index of the 'null Block'");
+    WARNING ("ItBlock::index","Trying to get index of the 'null Block'");
   }
   return 0;
 }

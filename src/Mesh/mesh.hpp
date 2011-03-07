@@ -41,7 +41,8 @@
 #include "mesh_Patch.hpp"
 #include "mesh_Mesh.hpp"
 
-#include "mesh_ItBlocks.hpp"
+#include "mesh_ItPatch.hpp"
+#include "mesh_ItBlock.hpp"
 
 
 #endif /* MESH_HPP */

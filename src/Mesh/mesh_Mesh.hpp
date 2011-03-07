@@ -109,7 +109,13 @@ public: // interface
 
   /// Pointer to the root Patch
   Patch * root_patch() throw ()
-  {return root_patch_; };
+  { return (patch_.size() > 0) ? patch_[0] : 0; };
+
+  /// Return the total number of local patches
+  size_t num_patches() const throw();
+
+  /// Return the ith patch
+  Patch * patch(size_t i) const throw();
 
   /// Return whether to avoid level jumps
   bool balanced() throw ()
@@ -135,11 +141,19 @@ public: // interface
   void set_coalesce(bool coalesce) throw ()
   { coalesce_ = coalesce; };
   
+#ifdef CONFIG_USE_MPI
+  /// MPI group accessor function
+  MPI_Comm mpi_comm() { return mpi_comm_; };
+
+  /// MPI communicator accessor function
+  MPI_Group mpi_group() { return mpi_group_; };
+#endif
+
 private: // attributes
 
-  /// Local Patches
+  /// List of local patchs
 
-  Patch * root_patch_;
+  std::vector<Patch *> patch_;
 
   /// Tree defining the MESH hierarchy topology
   //  strict_auto_ptr<TreeK> tree_;
@@ -178,6 +192,18 @@ private: // attributes
   /// Whether to coalesce small patches into one big one
   /// Parameter Mesh::coalesce
   bool coalesce_;
+
+#ifdef CONFIG_USE_MPI
+  /// MPI communicator if MPI used
+  MPI_Comm  mpi_comm_;
+  MPI_Group mpi_group_;
+#endif
+
+private: // functions
+
+#ifdef CONFIG_USE_MPI
+  void initialize_mpi_();
+#endif
 
 };
 

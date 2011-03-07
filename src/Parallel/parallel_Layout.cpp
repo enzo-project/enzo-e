@@ -4,6 +4,7 @@
 /// @file     parallel_Layout.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
+/// @todo     Refactor initialize_mpi_()
 /// @brief    Implementation of the Layout class
 
 //----------------------------------------------------------------------

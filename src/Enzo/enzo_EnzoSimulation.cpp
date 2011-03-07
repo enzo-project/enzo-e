@@ -6,6 +6,7 @@
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @todo     Move boundary conditions to Boundary object; remove bc_reflecting
 /// @todo     Move output to Output object
+/// @todo     Move timestep reductions into Timestep object
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoSimulation user-dependent class member functions
 
@@ -73,97 +74,132 @@ void EnzoSimulation::run() throw()
   enzo_float & time = enzo_->Time;
   enzo_float & dt   = enzo_->dt;
 
-  // ASSUMES MESH IS JUST A SINGLE PATCH
-  Patch * patch = mesh_->root_patch();
-
-  // Iterator over all local blocks in the patch
-
-  ItBlocks itBlocks(patch);
-  Block * block;
-
   //--------------------------------------------------
   // INITIALIZE FIELDS
   //--------------------------------------------------
 
-  while ((block = ++itBlocks)) {
+  // Loop over Patches in the Mesh
 
-    block_start_(block);
+  ItPatch itPatch(mesh_);
+  Patch * patch;
 
-    initial_->compute(block);
+  while ((patch = ++itPatch)) {
 
-    block_stop_(block);
+    // Loop over Blocks in the Patch
 
+    ItBlock itBlock(patch);
+    Block * block;
+
+    while ((block = ++itBlock)) {
+
+      block_start_(block);
+
+      initial_->compute(block);
+
+      block_stop_(block);
+
+    }
   }
 
-  //--------------------------------------------------
+  //======================================================================
   // BEGIN MAIN LOOP
-  //--------------------------------------------------
+  //======================================================================
 
   while (! stopping_->complete() ) {
 
+    // (monitor output)
     {
       char buffer[40];
       sprintf (buffer,"cycle %04d time %15.12f", cycle,time);
       monitor->print(buffer);
     }
 
-    // MESH: CURRENTLY ASSUMES A SINGLE PATCH
-    patch = mesh_->root_patch();
+    //--------------------------------------------------
+    // Determine timestep and dump output
+    //--------------------------------------------------
 
-    // Local block iterator
-    ItBlocks itBlocks(patch);
+    double dt_patch = std::numeric_limits<double>::max();
 
-    // Determine dt
+    // Accumulate Patch-local timesteps
 
-    double dt_block = std::numeric_limits<double>::max();
+    while ((patch = ++itPatch)) {
 
-    while ((block = ++itBlocks)) {
+      ItBlock itBlock(patch);
+      Block * block;
 
-      // Copy Cello block data to Enzo object
-      block_start_(block);
-      // Enforce boundary conditions
-      // @@@ Move to Boundary object
-      block->field_block()->enforce_boundary(boundary_reflecting);
-      // Accumulate block-local dt
-      dt_block = MIN(dt_block,timestep_->compute(block));
-      // Deallocate storage from block_start_();
-      block_stop_(block);
+      double dt_block = std::numeric_limits<double>::max();
 
-    }
+      // Accumulate Block-local timesteps
 
-    // Accumulate block timesteps in patch
+      while ((block = ++itBlock)) {
 
-    double dt_patch;
+	block_start_(block);
+
+	// Enforce boundary conditions
+	block->field_block()->enforce_boundary(boundary_reflecting);
+
+	// Output while we're here
+	output_images_(block, "enzo-p-%06d.%d.png",cycle,10);
+
+	// Accumulate Block-local dt
+	dt_block = MIN(dt_block,timestep_->compute(block));
+
+	block_stop_(block);
+
+      } // ( block = ++itBlock )
+
+      // Reduce Block timesteps to Patch
 
 #ifdef CONFIG_USE_MPI
-    MPI_Allreduce (&dt_block, &dt_patch, 1, MPI_DOUBLE, MPI_MIN,
-		   patch->layout()->mpi_comm());
+      MPI_Allreduce (&dt_block, &dt_patch, 1, MPI_DOUBLE, MPI_MIN,
+		     patch->layout()->mpi_comm());
 #else
-    dt_patch = dt_block;
+      dt_patch = dt_block;
 #endif
 
-    // Set Enzo timestep
+    } // ( patch = ++itPatch )
 
-    dt = dt_patch;
+    // Reduce Patch timesteps to Mesh
 
-    // Apply the methods and output
+    double dt_mesh;
 
-    while ((block = ++itBlocks)) {
+#ifdef CONFIG_USE_MPI
+    MPI_Allreduce (&dt_patch, &dt_mesh, 1, MPI_DOUBLE, MPI_MIN,
+		   mesh->mpi_comm());
+#else
+    dt_mesh = dt_patch;
+#endif
 
-      block_start_(block);
+    // Assign the computed timestep
 
-      // Output
-      output_images_(block, "enzo-p-%06d.%d.png",cycle,10);
+    dt = dt_mesh;
 
-      // Loop through methods
-      for (size_t i = 0; i < method_list_.size(); i++) {
-	Method * method = method_list_[i];
-	method -> compute_block (block,time,dt);
-      }
+    //--------------------------------------------------
+    // Apply the methods
+    //--------------------------------------------------
 
-      block_stop_(block);
+    while ((patch = ++itPatch)) {
 
-    } // Block in Patch
+      ItBlock itBlock(patch);
+      Block * block;
+
+      while ((block = ++itBlock)) {
+
+	block_start_(block);
+
+	// Loop through methods
+
+	for (size_t i = 0; i < method_list_.size(); i++) {
+	  Method * method = method_list_[i];
+
+	  method -> compute_block (block,time,dt);
+
+	} // method
+
+	block_stop_(block);
+
+      } // (block = ++itBlock)
+    } // (patch = ++itPatch)
 
     ASSERT("EnzoSimulation::run", "dt == 0", dt != 0.0);
 
@@ -180,16 +216,21 @@ void EnzoSimulation::run() throw()
 
   // Final output
 
-  while ((block = ++itBlocks)) {
+  while ((patch = ++itPatch)) {
 
-    block_start_(block);
+    ItBlock itBlock(patch);
+    Block * block;
 
-    output_images_(block, "enzo-p-%06d.%d.png",cycle,1);
+    while ((block = ++itBlock)) {
 
-    block_stop_(block);
+      block_start_(block);
 
+      output_images_(block, "enzo-p-%06d.%d.png",cycle,1);
+
+      block_stop_(block);
+
+    }
   }
-
 
   // @@@ performance_->stop();
   papi.stop();
@@ -347,11 +388,9 @@ void EnzoSimulation::block_start_ (Block * block) throw ()
     enzo_->BaryonField[field] = (enzo_float *)field_block->field_values(field);
   }
 
-  // Boundary condition initialization removed
-  WARNING("EnzoSimulatio::block_start_()",
-	  "Boundary condition code remove");
+  // BOUNDARY CONDITION INITIALIZATION REMOVED
 
-  enzo_->write(stdout);
+  //  enzo_->write(stdout);
 }
 
 //----------------------------------------------------------------------
@@ -393,7 +432,7 @@ void EnzoSimulation::output_images_
     sprintf (filename,file_format,
 	     enzo_->CycleNumber,index);
     monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 
-    		     0.0, 1.0);
+		    0.0, 1.0);
   }
 }
 
