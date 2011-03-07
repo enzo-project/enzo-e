@@ -85,9 +85,7 @@ void EnzoSimulation::run() throw()
   // INITIALIZE FIELDS
   //--------------------------------------------------
 
-  itBlocks.first(); 
-  while (! itBlocks.done()) {
-    block = itBlocks.curr();
+  while ((block = ++itBlocks)) {
 
     block_start_(block);
 
@@ -95,7 +93,6 @@ void EnzoSimulation::run() throw()
 
     block_stop_(block);
 
-    itBlocks.next();
   }
 
   //--------------------------------------------------
@@ -120,9 +117,7 @@ void EnzoSimulation::run() throw()
 
     double dt_block = std::numeric_limits<double>::max();
 
-    itBlocks.first(); 
-    while (! itBlocks.done()) {
-      block = itBlocks.curr();
+    while ((block = ++itBlocks)) {
 
       // Copy Cello block data to Enzo object
       block_start_(block);
@@ -134,7 +129,6 @@ void EnzoSimulation::run() throw()
       // Deallocate storage from block_start_();
       block_stop_(block);
 
-      itBlocks.next();
     }
 
     // Accumulate block timesteps in patch
@@ -154,10 +148,7 @@ void EnzoSimulation::run() throw()
 
     // Apply the methods and output
 
-    itBlocks.first(); 
-    while (! itBlocks.done()) {
-      block = itBlocks.curr();
-
+    while ((block = ++itBlocks)) {
 
       block_start_(block);
 
@@ -171,7 +162,6 @@ void EnzoSimulation::run() throw()
       }
 
       block_stop_(block);
-      itBlocks.next();
 
     } // Block in Patch
 
@@ -190,13 +180,14 @@ void EnzoSimulation::run() throw()
 
   // Final output
 
-  itBlocks.first(); 
-  while (! itBlocks.done()) {
-    block = itBlocks.curr();
+  while ((block = ++itBlocks)) {
+
     block_start_(block);
+
     output_images_(block, "enzo-p-%06d.%d.png",cycle,1);
+
     block_stop_(block);
-    itBlocks.next();
+
   }
 
 

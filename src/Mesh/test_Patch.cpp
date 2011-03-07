@@ -128,10 +128,7 @@ PARALLEL_MAIN_BEGIN
 
   int count = 0;
 
-  itBlocks.first();
-  while ((! itBlocks.done())) {
-
-    block = itBlocks.curr();
+  while ((block = ++itBlocks)) {
 
     ++count;
 
@@ -190,7 +187,6 @@ PARALLEL_MAIN_BEGIN
     // TEST BLOCK PROPERTIES
     //    unit_assert(false);
 
-    itBlocks.next();
   }
 
   unit_func("num_blocks");

@@ -1,14 +1,18 @@
 // $Id: mesh_ItBlocks.cpp 1954 2011-01-25 19:54:37Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
+//----------------------------------------------------------------------
 /// @file     mesh_ItBlocks.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Feb  1 18:06:42 PST 2011
 /// @brief    Implementation of ItBlocks
+//----------------------------------------------------------------------
 
 #include "cello.hpp"
 
 #include "mesh.hpp"
+
+//----------------------------------------------------------------------
 
 ItBlocks::ItBlocks ( Patch * patch ) throw ()
   : patch_(patch),
@@ -17,24 +21,16 @@ ItBlocks::ItBlocks ( Patch * patch ) throw ()
 
 //----------------------------------------------------------------------
 
-ItBlocks::~ItBlocks() throw ()
-{
-  patch_ = 0; 
-  index1_ = 0;
-}
+ItBlocks::~ItBlocks ( ) throw ()
+{}
 
 //----------------------------------------------------------------------
 
-void ItBlocks::first () throw()
+Block * ItBlocks::operator++ () throw()
 {
-  index1_ = 0;
-}
-
-//----------------------------------------------------------------------
-
-void ItBlocks::next () throw()
-{
-  ++index1_;
+  index1_ ++;
+  if (index1_ > patch_->num_blocks()) index1_ = 0;
+  return index1_ ? patch_->block(index1_ - 1) : 0;
 }
 
 //----------------------------------------------------------------------
@@ -46,19 +42,6 @@ bool ItBlocks::done () const throw()
 
 //----------------------------------------------------------------------
 
-Block * ItBlocks::curr () throw()
-{
-  return (index1_ < patch_->num_blocks()) ? patch_->block(index1_) : 0;
-}
-
-//----------------------------------------------------------------------
-
-const Block * ItBlocks::curr () const throw()
-{
-  return (index1_ < patch_->num_blocks()) ? patch_->block(index1_) : 0;
-}
-
-//----------------------------------------------------------------------
 int ItBlocks::index (int * ibx, int * iby, int * ibz) throw()
 {
   if (index1_) {

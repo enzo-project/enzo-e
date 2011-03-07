@@ -24,17 +24,8 @@ public: // interface
   /// Delete the ItBlocks object
   ~ItBlocks () throw ();
   
-  /// Reset to the first element
-  void first() throw();
-
-  /// Go to the next element
-  void next() throw();
-
-  /// Return the current element
-  Block * curr() throw();
-
-  /// Return the current constant element
-  const Block * curr() const throw();
+  /// Iterate through all local Blocks in the Patch
+  Block * operator++ () throw();
 
   /// Return whether the iteration is complete
   bool done() const throw();
@@ -48,7 +39,8 @@ private: // attributes
   /// The Patch being iterated over
   Patch * patch_;
 
-  /// Index of the current local Block
+  /// Index of the current local Block plus 1, or 0 if between iterations
+  /// Always in the range 0 <= index1_ <= number of local blocks
   int index1_;
 };
 
