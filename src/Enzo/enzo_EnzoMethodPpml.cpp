@@ -51,7 +51,7 @@
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPpml::compute_block(DataBlock * data_block,
+void EnzoMethodPpml::compute_block(Block * block,
 				   double t,double dt) throw()
 {
   INCOMPLETE("EnzoMethodPpml::compute_block","");

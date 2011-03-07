@@ -46,14 +46,14 @@ bool ItBlocks::done () const throw()
 
 //----------------------------------------------------------------------
 
-DataBlock * ItBlocks::curr () throw()
+Block * ItBlocks::curr () throw()
 {
   return (index1_ < patch_->num_blocks()) ? patch_->block(index1_) : 0;
 }
 
 //----------------------------------------------------------------------
 
-const DataBlock * ItBlocks::curr () const throw()
+const Block * ItBlocks::curr () const throw()
 {
   return (index1_ < patch_->num_blocks()) ? patch_->block(index1_) : 0;
 }
@@ -67,7 +67,7 @@ int ItBlocks::index (int * ibx, int * iby, int * ibz) throw()
     INCOMPLETE("ItBlocks::index","");
     //    patch_->layout()->block_indices
   } else {
-    WARNING ("ItBlocks::index","Trying to get index of the 'null DataBlock'");
+    WARNING ("ItBlocks::index","Trying to get index of the 'null Block'");
   }
   return 0;
 }

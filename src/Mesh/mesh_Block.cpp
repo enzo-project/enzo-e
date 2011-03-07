@@ -1,11 +1,11 @@
-// $Id: mesh_DataBlock.cpp 2009 2011-02-22 19:43:07Z bordner $
+// $Id: mesh_Block.cpp 2009 2011-02-22 19:43:07Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_DataBlock.cpp
+/// @file     mesh_Block.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Feb 28 13:22:26 PST 2011
 /// @todo     Initialize lower / upper in constructor, removing set_extent)
-/// @brief    Implementation of the DataBlock object
+/// @brief    Implementation of the Block object
 
 #include "cello.hpp"
 
@@ -13,7 +13,7 @@
 
 //----------------------------------------------------------------------
 
-DataBlock::DataBlock(DataDescr * data_descr,
+Block::Block(DataDescr * data_descr,
 		     int nx, int ny, int nz,
 		     int num_field_blocks) throw ()
   : field_block_()
@@ -37,7 +37,7 @@ DataBlock::DataBlock(DataDescr * data_descr,
 }
 //----------------------------------------------------------------------
 
-DataBlock::~DataBlock() throw ()
+Block::~Block() throw ()
 { 
   // Deallocate field_block_[]
   for (size_t i=0; i<field_block_.size(); i++) {
@@ -47,40 +47,40 @@ DataBlock::~DataBlock() throw ()
 
 //----------------------------------------------------------------------
 
-DataBlock::DataBlock(const DataBlock & data_block) throw ()
+Block::Block(const Block & block) throw ()
   : field_block_()
-/// @param     data_block  Object being copied
+/// @param     block  Object being copied
 {
-  copy_(data_block);
+  copy_(block);
 }
 
 //----------------------------------------------------------------------
 
-DataBlock & DataBlock::operator = (const DataBlock & data_block) throw ()
-/// @param     data_block  Source object of the assignment
+Block & Block::operator = (const Block & block) throw ()
+/// @param     block  Source object of the assignment
 /// @return    The target assigned object
 {
-  copy_(data_block);
+  copy_(block);
   return *this;
 }
 
 //----------------------------------------------------------------------
 
-const FieldBlock * DataBlock::field_block (int i) const throw()
+const FieldBlock * Block::field_block (int i) const throw()
 { 
   return field_block_.at(i); 
 }
 
 //----------------------------------------------------------------------
 
-FieldBlock * DataBlock::field_block (int i) throw()
+FieldBlock * Block::field_block (int i) throw()
 { 
   return field_block_.at(i); 
 }
 
 //----------------------------------------------------------------------
 
-void DataBlock::extent
+void Block::extent
 (
  double * lower_x, double * upper_x, 
  double * lower_y, double * upper_y,
@@ -97,7 +97,7 @@ void DataBlock::extent
 
 //----------------------------------------------------------------------
 
-void DataBlock::set_extent
+void Block::set_extent
 (
  double lower_x, double upper_x,
  double lower_y, double upper_y,
@@ -115,14 +115,14 @@ void DataBlock::set_extent
 
 //======================================================================
 
-void DataBlock::copy_(const DataBlock & data_block) throw()
+void Block::copy_(const Block & block) throw()
 {
-  UNTESTED("DataBlock::create_");
+  UNTESTED("Block::create_");
 
   // Create a copy of field_block_
-  field_block_.resize(data_block.field_block_.size());
+  field_block_.resize(block.field_block_.size());
   for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (*(data_block.field_block_[i]));
+    field_block_[i] = new FieldBlock (*(block.field_block_[i]));
   }
 }
 

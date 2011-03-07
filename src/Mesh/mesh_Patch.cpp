@@ -18,7 +18,7 @@ Patch::Patch
  int nbx, int nby, int nbz
 ) throw()
   : layout_(new Layout (nbx,nby,nbz)),
-    data_block_()
+    block_()
 {
   // Check 
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
@@ -140,7 +140,7 @@ void Patch::allocate_blocks(DataDescr * data_descr) throw()
 
   // create local blocks
 
-  data_block_.resize(nb);
+  block_.resize(nb);
 
   // Get number of blocks in the patch
   int nbx,nby,nbz;
@@ -178,10 +178,10 @@ void Patch::allocate_blocks(DataDescr * data_descr) throw()
   for (int ib=0; ib<nb; ib++) {
 
     // create a new data block
-    DataBlock * data_block = new DataBlock(data_descr,mbx,mby,mbz);
+    Block * block = new Block(data_descr,mbx,mby,mbz);
 
     // Store the data block
-    data_block_[ib] = data_block;
+    block_[ib] = block;
 
     // Get index of this block in the patch
     int ibx,iby,ibz;
@@ -189,7 +189,7 @@ void Patch::allocate_blocks(DataDescr * data_descr) throw()
 
     // INITIALIZE FIELD BLOCK
 
-    FieldBlock * field_block = data_block->field_block();
+    FieldBlock * field_block = block->field_block();
 
     double xm,xp,ym,yp,zm,zp;
 
@@ -201,7 +201,7 @@ void Patch::allocate_blocks(DataDescr * data_descr) throw()
     yp = extents_[2] + (iby+1)*by;
     zp = extents_[4] + (ibz+1)*bz;
 
-    data_block->set_extent(xm,xp,ym,yp,zm,zp);
+    block->set_extent(xm,xp,ym,yp,zm,zp);
 
     // Allocate field data
 
@@ -221,9 +221,9 @@ void Patch::allocate_blocks(DataDescr * data_descr) throw()
 
 void Patch::deallocate_blocks() throw()
 {
-  for (size_t i=0; i<data_block_.size(); i++) {
-    delete data_block_[i];
-    data_block_[i] = 0;
+  for (size_t i=0; i<block_.size(); i++) {
+    delete block_[i];
+    block_[i] = 0;
   }
 }
 
@@ -235,11 +235,11 @@ bool Patch::blocks_allocated() const throw()
 
   bool allocated = true;
 
-  if (data_block_.size() < num_blocks()) {
+  if (block_.size() < num_blocks()) {
       allocated = false;
   } else {
-    for (size_t i=0; i<data_block_.size(); i++) {
-      if (data_block_[i] == NULL) allocated = false;
+    for (size_t i=0; i<block_.size(); i++) {
+      if (block_[i] == NULL) allocated = false;
     }
   }
     
@@ -248,15 +248,15 @@ bool Patch::blocks_allocated() const throw()
 
 //----------------------------------------------------------------------
 
-int Patch::num_blocks() const  throw()
+size_t Patch::num_blocks() const  throw()
 {
   return layout_->local_count(ip_);
 }
 
 //----------------------------------------------------------------------
 
-DataBlock * Patch::block(int i) const throw()
+Block * Patch::block(int i) const throw()
 {
-  return data_block_[i];
+  return block_[i];
 }
 

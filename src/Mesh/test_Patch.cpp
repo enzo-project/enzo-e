@@ -123,7 +123,7 @@ PARALLEL_MAIN_BEGIN
 
   ItBlocks itBlocks (patch);
 
-  DataBlock *  data_block = 0;
+  Block *  block = 0;
   FieldBlock * field_block = 0;
 
   int count = 0;
@@ -131,25 +131,25 @@ PARALLEL_MAIN_BEGIN
   itBlocks.first();
   while ((! itBlocks.done())) {
 
-    data_block = itBlocks.curr();
+    block = itBlocks.curr();
 
     ++count;
 
-    unit_assert_quiet(data_block != NULL);
+    unit_assert_quiet(block != NULL);
 
-    if (data_block) {
-      field_block = data_block->field_block();
+    if (block) {
+      field_block = block->field_block();
       unit_assert_quiet(field_block != NULL);
       
     }
 
-    // Test DataBlock
-    if (data_block) {
+    // Test Block
+    if (block) {
       // NO TESTS
     }
 
     // Test FieldBlock
-    if (data_block && field_block) {
+    if (block && field_block) {
 
       // Test block size
       int nfx, nfy, nfz;
@@ -173,17 +173,17 @@ PARALLEL_MAIN_BEGIN
       // Test block extents
 
       double xm,ym,zm;
-      data_block->extent (&xm,&xp,&ym,&yp,&zm,&zp);
+      block->extent (&xm,&xp,&ym,&yp,&zm,&zp);
 
       
     }
 
     
-    if (! data_block) {
-      WARNING("test_Patch","Block tests skipped since DataBlock not allocated");
+    if (! block) {
+      WARNING("test_Patch","Block tests skipped since Block not allocated");
     }
 
-    if (data_block && ! field_block) {
+    if (block && ! field_block) {
       WARNING("test_Patch","Block tests skipped since FieldBlock not allocated");
     }
 

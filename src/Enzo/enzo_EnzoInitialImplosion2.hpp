@@ -22,7 +22,7 @@ public: // interface
 
   /// Initialize the block
 
-  virtual void compute (DataBlock * data_block) throw();
+  virtual void compute (Block * block) throw();
 
 private: // attributes
 

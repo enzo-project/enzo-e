@@ -23,8 +23,8 @@ public: // interface
 
 public: // virtual functions
 
-  /// Perform the initialization of the given DataBlock
-  virtual void compute (DataBlock * data_block) throw() = 0;
+  /// Perform the initialization of the given Block
+  virtual void compute (Block * block) throw() = 0;
 
 protected: // attributes
 

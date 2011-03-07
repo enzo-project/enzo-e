@@ -99,11 +99,11 @@ void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
 
 //----------------------------------------------------------------------
 
-void FieldBlock::cell_width(DataBlock * data_block,
+void FieldBlock::cell_width(Block * block,
 			    double * hx, double * hy, double * hz ) const throw ()
 {
   double xm,xp,ym,yp,zm,zp;
-  data_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
+  block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
 
   *hx = (xp-xm) / size_[0];
   *hy = (yp-ym) / size_[1];

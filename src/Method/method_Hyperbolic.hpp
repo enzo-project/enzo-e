@@ -26,7 +26,7 @@ public: // virtual functions
 
   /// Apply the method to advance a block one timestep 
 
-  virtual void compute_block( DataBlock * data_block,
+  virtual void compute_block( Block * block,
 			      double t, double dt ) throw() = 0; 
 
 protected: // functions

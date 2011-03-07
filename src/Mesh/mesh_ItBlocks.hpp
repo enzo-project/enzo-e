@@ -31,10 +31,10 @@ public: // interface
   void next() throw();
 
   /// Return the current element
-  DataBlock * curr() throw();
+  Block * curr() throw();
 
   /// Return the current constant element
-  const DataBlock * curr() const throw();
+  const Block * curr() const throw();
 
   /// Return whether the iteration is complete
   bool done() const throw();
@@ -48,8 +48,8 @@ private: // attributes
   /// The Patch being iterated over
   Patch * patch_;
 
-  /// Index of the current local DataBlock
-  size_t index1_;
+  /// Index of the current local Block
+  int index1_;
 };
 
 #endif /* MESH_IT_BLOCKS_HPP */

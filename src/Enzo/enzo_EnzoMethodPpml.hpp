@@ -24,7 +24,7 @@ public: // interface
       enzo_(enzo)
   {};
 
-  void compute_block( DataBlock * data_block,
+  void compute_block( Block * block,
 		      double t, double dt ) throw(); 
 
 private: // attributes

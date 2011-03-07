@@ -21,10 +21,10 @@ EnzoTimestep::EnzoTimestep (EnzoBlock * enzo) throw()
 
 //----------------------------------------------------------------------
 
-double EnzoTimestep::compute ( DataBlock * data_block ) throw()
+double EnzoTimestep::compute ( Block * block ) throw()
 {
 
-  FieldBlock * field_block = data_block->field_block();
+  FieldBlock * field_block = block->field_block();
   enzo_float * density_field    = 0;
   enzo_float * velocity_x_field = 0;
   enzo_float * velocity_y_field = 0;

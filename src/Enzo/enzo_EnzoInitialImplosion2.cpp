@@ -22,11 +22,11 @@ EnzoInitialImplosion2::EnzoInitialImplosion2
 
 //----------------------------------------------------------------------
 
-void EnzoInitialImplosion2::compute (DataBlock * data_block) throw()
+void EnzoInitialImplosion2::compute (Block * block) throw()
 
 {
 
-  FieldBlock * field_block       = data_block->field_block();
+  FieldBlock * field_block       = block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
 
   ASSERT("EnzoInitialImplosion2",
@@ -47,7 +47,7 @@ void EnzoInitialImplosion2::compute (DataBlock * data_block) throw()
   field_block->size(&nx,&ny,&nz);
 
   double hx,hy,hz;
-  field_block->cell_width(data_block,&hx,&hy,&hz);
+  field_block->cell_width(block,&hx,&hy,&hz);
 
   int gx,gy,gz;
   field_descr->ghosts(index_density,&gx,&gy,&gz);

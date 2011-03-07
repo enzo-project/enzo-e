@@ -24,7 +24,7 @@ InitialDefault::InitialDefault(Parameters * parameters) throw ()
 
 //----------------------------------------------------------------------
 
-void InitialDefault::compute (DataBlock * data_block) throw()
+void InitialDefault::compute (Block * block) throw()
 {
   // Initialize Fields according to parameters
 
@@ -34,7 +34,7 @@ void InitialDefault::compute (DataBlock * data_block) throw()
   parameters_->set_current_group("Field");
     //--------------------------------------------------
 
-  FieldBlock *       field_block = data_block->field_block();
+  FieldBlock *       field_block = block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
 
   double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, *t=0;
@@ -76,7 +76,7 @@ void InitialDefault::compute (DataBlock * data_block) throw()
 
       // Allocate arrays if needed
       if (value == NULL) {
-	allocate_xyzt_(data_block,index_field,
+	allocate_xyzt_(block,index_field,
 		       &nx,&ny,&nz,
 		       &value, &vdeflt,
 		       &region,&rdeflt,
@@ -138,7 +138,7 @@ void InitialDefault::compute (DataBlock * data_block) throw()
 
 void InitialDefault::allocate_xyzt_
 (
- DataBlock * data_block,
+ Block * block,
  int index_field,
  int * nx, int * ny, int * nz,
  double ** value, double ** vdeflt,
@@ -147,7 +147,7 @@ void InitialDefault::allocate_xyzt_
  ) throw()
 {
 
-  FieldBlock * field_block = data_block->field_block();
+  FieldBlock * field_block = block->field_block();
 
   // Get field size
 
@@ -167,10 +167,10 @@ void InitialDefault::allocate_xyzt_
   (*t)      = new double [n];
 
   double xm, xp, ym, yp, zm, zp;
-  data_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
+  block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
 
   double hx,hy,hz;
-  field_block->cell_width(data_block,&hx,&hy,&hz);
+  field_block->cell_width(block,&hx,&hy,&hz);
 
   // Initialize arrays
   for (int iz=0; iz<(*nz); iz++) {

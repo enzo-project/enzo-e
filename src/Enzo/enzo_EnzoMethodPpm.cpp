@@ -27,11 +27,11 @@ EnzoMethodPpm::EnzoMethodPpm
 
 void EnzoMethodPpm::compute_block
 (
- DataBlock * data_block,
+ Block * block,
  double t,
  double dt
  ) throw()
 {
-  enzo_->SolveHydroEquations (data_block, enzo_->CycleNumber, dt);
+  enzo_->SolveHydroEquations (block, enzo_->CycleNumber, dt);
 }
 

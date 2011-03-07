@@ -25,7 +25,7 @@ public: // virtual functions
 
   /// Enforce boundary conditions
 
-  virtual void enforce (DataBlock * data_block) throw() = 0;
+  virtual void enforce (Block * block) throw() = 0;
 
 };
 

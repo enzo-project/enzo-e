@@ -76,8 +76,8 @@ PARALLEL_MAIN_BEGIN
   int nx,ny,nz;
   nx=4; ny=5; nz=6;
 
-  DataBlock * data_block = new DataBlock (data_descr, nx,ny,nz);
-  FieldBlock * field_block = data_block->field_block();
+  Block * block = new Block (data_descr, nx,ny,nz);
+  FieldBlock * field_block = block->field_block();
 
   //----------------------------------------------------------------------
 
@@ -435,10 +435,10 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   unit_func("cell_width");
 
-  data_block->set_extent(-1, 1, -2, 2, -3, 3);
+  block->set_extent(-1, 1, -2, 2, -3, 3);
   double hx=0,hy=0,hz=0;
 
-  field_block->cell_width(data_block,&hx,&hy,&hz);
+  field_block->cell_width(block,&hx,&hy,&hz);
 
   unit_assert(fabs(hx-2.0/nx) < 1e-6);
   unit_assert(fabs(hy-4.0/ny) < 1e-6);

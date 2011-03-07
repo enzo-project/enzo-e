@@ -53,7 +53,7 @@ if (parallel_type == "charm"):
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
-	test = 'test_DataBlock'
+	test = 'test_Block'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
@@ -63,9 +63,9 @@ test_mesh       = env.Program (['test_Mesh.cpp',     sources])
 test_patch      = env.Program (['test_Patch.cpp',    sources])
 test_tree       = env.Program (['test_TreeK.cpp',    sources])
 test_data_descr = env.Program (['test_DataDescr.cpp',sources])
-test_data_block = env.Program (['test_DataBlock.cpp',sources])
+test_block = env.Program (['test_Block.cpp',sources])
 
-tests = [test_mesh, test_patch, test_tree, test_data_descr, test_data_block];
+tests = [test_mesh, test_patch, test_tree, test_data_descr, test_block];
 
 #------------------------------
 # INSTALL

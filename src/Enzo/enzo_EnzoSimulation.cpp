@@ -79,7 +79,7 @@ void EnzoSimulation::run() throw()
   // Iterator over all local blocks in the patch
 
   ItBlocks itBlocks(patch);
-  DataBlock * data_block;
+  Block * block;
 
   //--------------------------------------------------
   // INITIALIZE FIELDS
@@ -87,13 +87,13 @@ void EnzoSimulation::run() throw()
 
   itBlocks.first(); 
   while (! itBlocks.done()) {
-    data_block = itBlocks.curr();
+    block = itBlocks.curr();
 
-    block_start_(data_block);
+    block_start_(block);
 
-    initial_->compute(data_block);
+    initial_->compute(block);
 
-    block_stop_(data_block);
+    block_stop_(block);
 
     itBlocks.next();
   }
@@ -122,17 +122,17 @@ void EnzoSimulation::run() throw()
 
     itBlocks.first(); 
     while (! itBlocks.done()) {
-      data_block = itBlocks.curr();
+      block = itBlocks.curr();
 
       // Copy Cello block data to Enzo object
-      block_start_(data_block);
+      block_start_(block);
       // Enforce boundary conditions
       // @@@ Move to Boundary object
-      data_block->field_block()->enforce_boundary(boundary_reflecting);
+      block->field_block()->enforce_boundary(boundary_reflecting);
       // Accumulate block-local dt
-      dt_block = MIN(dt_block,timestep_->compute(data_block));
+      dt_block = MIN(dt_block,timestep_->compute(block));
       // Deallocate storage from block_start_();
-      block_stop_(data_block);
+      block_stop_(block);
 
       itBlocks.next();
     }
@@ -156,21 +156,21 @@ void EnzoSimulation::run() throw()
 
     itBlocks.first(); 
     while (! itBlocks.done()) {
-      data_block = itBlocks.curr();
+      block = itBlocks.curr();
 
 
-      block_start_(data_block);
+      block_start_(block);
 
       // Output
-      output_images_(data_block, "enzo-p-%06d.%d.png",cycle,10);
+      output_images_(block, "enzo-p-%06d.%d.png",cycle,10);
 
       // Loop through methods
       for (size_t i = 0; i < method_list_.size(); i++) {
 	Method * method = method_list_[i];
-	method -> compute_block (data_block,time,dt);
+	method -> compute_block (block,time,dt);
       }
 
-      block_stop_(data_block);
+      block_stop_(block);
       itBlocks.next();
 
     } // Block in Patch
@@ -192,10 +192,10 @@ void EnzoSimulation::run() throw()
 
   itBlocks.first(); 
   while (! itBlocks.done()) {
-    data_block = itBlocks.curr();
-    block_start_(data_block);
-    output_images_(data_block, "enzo-p-%06d.%d.png",cycle,1);
-    block_stop_(data_block);
+    block = itBlocks.curr();
+    block_start_(block);
+    output_images_(block, "enzo-p-%06d.%d.png",cycle,1);
+    block_stop_(block);
     itBlocks.next();
   }
 
@@ -313,14 +313,14 @@ EnzoSimulation::create_method_ ( std::string name ) throw ()
 
 //======================================================================
 
-void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
+void EnzoSimulation::block_start_ (Block * block) throw ()
 {
 
-  FieldBlock * field_block = data_block->field_block();
+  FieldBlock * field_block = block->field_block();
 
   double xm,xp,ym,yp,zm,zp;
 
-  data_block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
+  block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
 
   enzo_->GridLeftEdge[0]    = xm;
   enzo_->GridLeftEdge[1]    = ym;
@@ -344,7 +344,7 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
   // Initialize CellWidth
 
   double h3[3];
-  field_block->cell_width(data_block,&h3[0],&h3[1],&h3[2]);
+  field_block->cell_width(block,&h3[0],&h3[1],&h3[2]);
 
   for (int dim=0; dim<enzo::GridRank; dim++) {
     enzo_->CellWidth[dim] = h3[dim];
@@ -365,7 +365,7 @@ void EnzoSimulation::block_start_ (DataBlock * data_block) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::block_stop_ ( DataBlock * data_block ) throw ()
+void EnzoSimulation::block_stop_ ( Block * block ) throw ()
 {
 }
 
@@ -373,7 +373,7 @@ void EnzoSimulation::block_stop_ ( DataBlock * data_block ) throw ()
 
 void EnzoSimulation::output_images_
 (
- DataBlock * data_block,
+ Block * block,
  const char * file_format,
  int cycle,
  int cycle_skip
@@ -383,7 +383,7 @@ void EnzoSimulation::output_images_
   if (! (cycle_skip && cycle % cycle_skip == 0)) return;
 
   Monitor * monitor = Monitor::instance();
-  FieldBlock *       field_block = data_block->field_block();
+  FieldBlock *       field_block = block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
   int nx,ny,nz;
   int gx,gy,gz;

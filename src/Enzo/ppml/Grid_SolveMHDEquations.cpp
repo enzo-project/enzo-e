@@ -22,13 +22,13 @@
 
 #include "enzo.hpp" 
 
-int EnzoBlock::SolveMHDEquations(DataBlock * data_block,
+int EnzoBlock::SolveMHDEquations(Block * block,
 				 int cycle, enzo_float dt)
 {
  
-  if (data_block) {
+  if (block) {
     WARNING("EnzoBlock::SolveHydroEquations",
-	    "Ignoring data_block input parameter");
+	    "Ignoring block input parameter");
   }
 
   /* exit if not 3D */

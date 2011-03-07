@@ -1,16 +1,16 @@
-// $Id: test_DataBlock.cpp 1696 2010-08-04 05:56:36Z bordner $
+// $Id: test_Block.cpp 1696 2010-08-04 05:56:36Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     test_DataBlock.cpp
+/// @file     test_Block.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Mar  1 20:42:57 UTC 2011
-/// @brief    Test program for the DataBlock class
+/// @brief    Test program for the Block class
 
 #include "test.hpp"
 
 #include "mesh.hpp"
 
-#include PARALLEL_CHARM_INCLUDE(test_DataBlock.decl.h)
+#include PARALLEL_CHARM_INCLUDE(test_Block.decl.h)
 
 PARALLEL_MAIN_BEGIN
 {
@@ -19,21 +19,21 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
-  unit_class ("DataBlock");
+  unit_class ("Block");
 
   DataDescr * data_descr = new DataDescr;
-  DataBlock * data_block = new DataBlock (data_descr, 3,4,5);
+  Block * block = new Block (data_descr, 3,4,5);
 
-  unit_func("DataBlock");
+  unit_func("Block");
   unit_assert (data_descr != NULL);
 
   //----------------------------------------------------------------------
   unit_func("extent");
 
-  data_block->set_extent(-1, 1, -2, 2, -3, 3);
+  block->set_extent(-1, 1, -2, 2, -3, 3);
   double lower[3];
   double upper[3];
-  data_block->extent(&lower[0],&upper[0],
+  block->extent(&lower[0],&upper[0],
 		     &lower[1],&upper[1],
 		     &lower[2],&upper[2]);
 
@@ -52,4 +52,4 @@ PARALLEL_MAIN_BEGIN
 
 PARALLEL_MAIN_END
 
-#include PARALLEL_CHARM_INCLUDE(test_DataBlock.def.h)
+#include PARALLEL_CHARM_INCLUDE(test_Block.def.h)

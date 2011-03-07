@@ -24,7 +24,7 @@ public: // virtual functions
 
   /// Compute the timestep for the block
 
-  double compute ( DataBlock * data_block ) throw(); 
+  double compute ( Block * block ) throw(); 
 
 protected: // functions
 

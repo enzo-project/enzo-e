@@ -89,7 +89,7 @@ void output_dump(FileHdf5 & hdf5,
 
     std::string field_name = field_descr->field_name(index);
 
-    // Write data_block, including ghosts
+    // Write block, including ghosts
     // (should include option to omit ghosts)
     // (what if ghosts aren't allocated in general?)
 

@@ -1,28 +1,28 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     mesh_DataBlock.hpp
+/// @file     mesh_Block.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
-/// @todo     Move FieldBlock members//attributes to DataBlock when possible
+/// @todo     Move FieldBlock members//attributes to Block when possible
 /// @todo     Add Patch pointer, and exchang computable data for function calls
-/// @brief    [\ref Mesh] Declaration of the DataBlock class
+/// @brief    [\ref Mesh] Declaration of the Block class
 
-#ifndef MESH_DATA_BLOCK_HPP
-#define MESH_DATA_BLOCK_HPP
+#ifndef MESH_BLOCK_HPP
+#define MESH_BLOCK_HPP
 
 class FieldBlock;
 
-class DataBlock {
+class Block {
 
-  /// @class    DataBlock
+  /// @class    Block
   /// @ingroup  Data
   /// @brief    [\ref Mesh] Container class for all data blocks (currently just fields)
 
 public: // interface
 
-  /// Initialize the DataBlock object
-  DataBlock(DataDescr * data_descr,
+  /// Initialize the Block object
+  Block(DataDescr * data_descr,
 	    int nx, int ny=1, int nz=1,
 	    int num_field_blocks = 1) throw();
 
@@ -31,13 +31,13 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Destructor
-  ~DataBlock() throw();
+  ~Block() throw();
 
   /// Copy constructor
-  DataBlock(const DataBlock & data_block) throw();
+  Block(const Block & block) throw();
 
   /// Assignment operator
-  DataBlock & operator= (const DataBlock & data_block) throw();
+  Block & operator= (const Block & block) throw();
 
   //----------------------------------------------------------------------
 
@@ -59,8 +59,8 @@ public: // interface
 
 private: // functions
 
-  /// Allocate and copy in attributes from give DataBlock
-  void copy_(const DataBlock & data_block) throw();
+  /// Allocate and copy in attributes from give Block
+  void copy_(const Block & block) throw();
 
 private: // attributes
 
@@ -75,5 +75,5 @@ private: // attributes
 
 };
 
-#endif /* MESH_DATA_BLOCK_HPP */
+#endif /* MESH_BLOCK_HPP */
 

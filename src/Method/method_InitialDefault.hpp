@@ -22,11 +22,11 @@ public: // interface
 
   /// Read initialization from Initial group in parameter file
 
-  virtual void compute (DataBlock * data_block) throw();
+  virtual void compute (Block * block) throw();
 
 private: // functions
   
-  void allocate_xyzt_(DataBlock * data_block,
+  void allocate_xyzt_(Block * block,
 		      int index_field,
 		      int * mx, int * my, int * mz,
 		      double ** value, double ** vdeflt,

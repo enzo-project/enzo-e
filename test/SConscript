@@ -78,10 +78,10 @@ env.RunSerial(parallel_type + '-test_Memory.unit',      '#/bin/test_Memory')
 #----------------------------------------------------------------------
 # MESH COMPONENT          
 #----------------------------------------------------------------------
-env.RunSerial(parallel_type + '-test_Mesh.unit',        '#/bin/test_Mesh')
-env.RunSerial(parallel_type + '-test_Patch.unit',       '#/bin/test_Patch')
+env.RunSerial(parallel_type + '-test_Mesh.unit',   '#/bin/test_Mesh')
+env.RunSerial(parallel_type + '-test_Patch.unit',  '#/bin/test_Patch')
 env.RunSerial(parallel_type + '-test_DataDescr.unit',   '#/bin/test_DataDescr')
-env.RunSerial(parallel_type + '-test_DataBlock.unit',   '#/bin/test_DataBlock')
+env.RunSerial(parallel_type + '-test_Block.unit',  '#/bin/test_Block')
 #----------------------------------------------------------------------
 # MONITOR COMPONENT       
 #----------------------------------------------------------------------

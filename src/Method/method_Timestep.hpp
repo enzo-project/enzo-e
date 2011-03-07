@@ -26,7 +26,7 @@ public: // virtual functions
 
   /// Compute the timestep for the block
 
-  virtual double compute ( DataBlock * data_block ) throw() = 0; 
+  virtual double compute ( Block * block ) throw() = 0; 
 
 };
 

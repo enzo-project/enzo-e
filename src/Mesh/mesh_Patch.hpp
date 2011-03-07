@@ -7,7 +7,7 @@
 /// @file     mesh_Patch.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @todo     Move "size" to DataBlock's, since that's Field-centric
+/// @todo     Move "size" to Block's, since that's Field-centric
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 
 class Patch {
@@ -70,10 +70,10 @@ public: // interface
   bool blocks_allocated() const throw();
 
   /// Return the total number of local blocks
-  int num_blocks() const throw();
+  size_t num_blocks() const throw();
 
   /// Return the ith data block
-  DataBlock * block(int i) const throw();
+  Block * block(int i) const throw();
 
 public: // entry functions
 
@@ -92,12 +92,12 @@ private: // attributes
   Layout * layout_;
 
   /// Array of data blocks ib associated with this process
-  std::vector<DataBlock * > data_block_;
+  std::vector<Block * > block_;
 
   /// Size of the patch
   int size_[3];
 
-  /// How the Patch is distributed into DataBlocks
+  /// How the Patch is distributed into Blocks
   int blocking_[3];
 
   /// This process id

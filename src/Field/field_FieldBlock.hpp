@@ -12,7 +12,7 @@
 /// @todo     Clean allocate_array() and allocate_ghosts() usage
 /// @brief    [\ref Field] Fortran-style array class.
 
-class DataBlock;
+class Block;
 
 class FieldBlock {
 
@@ -63,7 +63,7 @@ public: // interface
 		   int * upper_x, int * upper_y, int *upper_z) const throw ();
 
   /// Return width of cells along each dimension
-  void cell_width(DataBlock * data_block,
+  void cell_width(Block * block,
 		  double * hx, double * hy, double * hz) const throw ();
 
   /// Return the associated field descriptor
