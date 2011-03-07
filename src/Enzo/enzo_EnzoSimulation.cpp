@@ -57,8 +57,6 @@ void EnzoSimulation::finalize() throw()
 void EnzoSimulation::run() throw()
 {
   
-  INCOMPLETE("EnzoSimulation::run","incomplete");
-
   Monitor * monitor = Monitor::instance();
 
   // @@@ performance_->start();
@@ -70,9 +68,9 @@ void EnzoSimulation::run() throw()
 
   // define aliases to required Enzo variables
 
-  int & cycle       = enzo_->CycleNumber;
-  enzo_float & time = enzo_->Time;
-  enzo_float & dt   = enzo_->dt;
+  int &        cycle = enzo_->CycleNumber;
+  enzo_float & time  = enzo_->Time;
+  enzo_float & dt    = enzo_->dt;
 
   //--------------------------------------------------
   // INITIALIZE FIELDS
@@ -105,7 +103,7 @@ void EnzoSimulation::run() throw()
   // BEGIN MAIN LOOP
   //======================================================================
 
-  while (! stopping_->complete() ) {
+  while (! stopping_->complete(cycle,time) ) {
 
     // (monitor output)
     {
@@ -172,7 +170,7 @@ void EnzoSimulation::run() throw()
 
     // Assign the computed timestep
 
-    dt = dt_mesh;
+    dt = MIN(dt_mesh, (stopping_->stop_time() - time));
 
     //--------------------------------------------------
     // Apply the methods
@@ -305,7 +303,7 @@ EnzoSimulation::create_stopping_ (std::string name) throw ()
   int    stop_cycle = parameters_->value_integer("cycle",-1);
   double stop_time  = parameters_->value_scalar("time",-1.0);
 
-  return new EnzoStopping(enzo_,stop_cycle,stop_time);
+  return new Stopping(stop_cycle,stop_time);
 }
 
 //----------------------------------------------------------------------

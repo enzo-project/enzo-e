@@ -18,12 +18,39 @@ class Stopping {
 public: // interface
 
   /// Constructor
-  Stopping() throw() {};
+  Stopping(int    stop_cycle = -1,
+	   double stop_time  = -1.0) throw()
+    : stop_cycle_(stop_cycle),
+      stop_time_ (stop_time)
+  {}
 
   /// Return whether the simulation is done
-  virtual bool complete () throw() = 0;
+  virtual bool complete (int    curr_cycle,
+			 double curr_time) const throw()
+  {
+    ASSERT("Stopping::complete",
+	   "Neither Stopping::time_stop nor Stopping::cycle_stop initialized",
+	   stop_time_ != -1.0 || stop_cycle_ != -1);
+    return 
+    ( ! ((stop_time_  == -1.0 || curr_time  < stop_time_ ) &&
+	 (stop_cycle_ == -1   || curr_cycle < stop_cycle_)));
+  }
+
+  /// Return stopping cycle
+  double stop_cycle () const throw()
+  { return stop_cycle_; };
+
+  /// Return stopping time
+  double stop_time () const throw()
+  { return stop_time_; };
 
 protected:
+
+  /// Stop cycle
+  int stop_cycle_;
+
+  /// Stop time
+  double stop_time_;
 
 };
 
