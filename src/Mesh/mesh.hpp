@@ -36,7 +36,6 @@
 #include "mesh_Tree2K.hpp"
 #include "mesh_Tree3K.hpp"
 
-#include "mesh_DataDescr.hpp"
 #include "mesh_Block.hpp"
 
 #include "mesh_Patch.hpp"

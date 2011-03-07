@@ -21,11 +21,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_class ("Block");
 
-  DataDescr * data_descr = new DataDescr;
-  Block * block = new Block (data_descr, 3,4,5);
+  FieldDescr * field_descr = new FieldDescr;
+  Block * block = new Block (field_descr, 3,4,5);
 
   unit_func("Block");
-  unit_assert (data_descr != NULL);
+  unit_assert (block != NULL);
 
   //----------------------------------------------------------------------
   unit_func("extent");

@@ -16,7 +16,7 @@ Simulation::Simulation(Parameters * parameters)
     parameters_(parameters),
     parameters_allocated_(false),
     mesh_(0),
-    data_descr_(0),
+    field_descr_(0),
     stopping_(0),
     timestep_(0),
     initial_(0),
@@ -123,9 +123,9 @@ Mesh * Simulation::mesh() const throw()
   
 //----------------------------------------------------------------------
 
-DataDescr * Simulation::data_descr() const throw()
+FieldDescr * Simulation::field_descr() const throw()
 {
-  return data_descr_;
+  return field_descr_;
 }
 
 //----------------------------------------------------------------------
@@ -217,9 +217,7 @@ void Simulation::initialize_data_() throw()
 {
 
   /* MEMORY LEAK */
-  data_descr_ = new DataDescr;
-
-  FieldDescr * field_descr = data_descr_->field_descr();
+  field_descr_ = new FieldDescr;
 
   //--------------------------------------------------
   parameters_->set_current_group("Field");
@@ -231,7 +229,7 @@ void Simulation::initialize_data_() throw()
 
   int i;
   for (i=0; i<parameters_->list_length("fields"); i++) {
-    field_descr->insert_field
+    field_descr_->insert_field
       (parameters_->list_value_string(i, "fields"));
   }
 
@@ -256,8 +254,8 @@ void Simulation::initialize_data_() throw()
   if (dimension_ < 2) gy = 0;
   if (dimension_ < 3) gz = 0;
 
-  for (i=0; i<field_descr->field_count(); i++) {
-    field_descr->set_ghosts(i,gx,gy,gz);
+  for (i=0; i<field_descr_->field_count(); i++) {
+    field_descr_->set_ghosts(i,gx,gy,gz);
   }
 
   // Set precision
@@ -275,8 +273,8 @@ void Simulation::initialize_data_() throw()
   else if (precision_str == "quadruple")
     precision = precision_quadruple;
 
-  for (i=0; i<field_descr->field_count(); i++) {
-    field_descr->set_precision(i,precision);
+  for (i=0; i<field_descr_->field_count(); i++) {
+    field_descr_->set_precision(i,precision);
   }
 }
 
@@ -287,7 +285,7 @@ void Simulation::initialize_mesh_() throw()
 
   ASSERT("Simulation::initialize_mesh_",
 	 "data must be initialized before mesh",
-	 data_descr_ != NULL);
+	 field_descr_ != NULL);
 
   //--------------------------------------------------
   parameters_->set_current_group ("Mesh");
@@ -309,8 +307,7 @@ void Simulation::initialize_mesh_() throw()
   root_blocks[1] = parameters_->list_value_integer(1,"root_blocks",1);
   root_blocks[2] = parameters_->list_value_integer(2,"root_blocks",1);
 
-  mesh_ = new Mesh(data_descr_,
-		   root_size[0],root_size[1],root_size[2],
+  mesh_ = new Mesh(root_size[0],root_size[1],root_size[2],
 		   root_blocks[0],root_blocks[1],root_blocks[2]);
 
   // Domain extents
@@ -349,7 +346,7 @@ void Simulation::initialize_mesh_() throw()
 			  domain_lower[1],domain_upper[1],
 			  domain_lower[2],domain_upper[2]);
 
-  root_patch->allocate_blocks(data_descr_);
+  root_patch->allocate_blocks(field_descr_);
 
   // Parallel layout of the root patch
   
@@ -478,7 +475,7 @@ void Simulation::deallocate_() throw()
     delete parameters_;  
   }
 
-  delete data_descr_;
+  delete field_descr_;
 
   delete mesh_;
 

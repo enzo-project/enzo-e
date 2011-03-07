@@ -14,7 +14,6 @@
 
 Mesh::Mesh
 (
- DataDescr * data_descr,
  int nx, int ny, int nz,
  int nbx, int nby, int nbz
  ) throw ()

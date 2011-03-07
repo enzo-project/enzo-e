@@ -29,7 +29,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("Patch");
 
-  DataDescr * data_descr = new DataDescr;
+  FieldDescr * field_descr = new FieldDescr;
 
   // Set Patch size (12,12,12)
 
@@ -109,7 +109,7 @@ PARALLEL_MAIN_BEGIN
   
   unit_func("allocate");
 
-  patch->allocate_blocks(data_descr);
+  patch->allocate_blocks(field_descr);
 
   unit_assert(patch->blocks_allocated() == true);
 
@@ -210,7 +210,7 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   delete patch;
-  delete data_descr;
+  delete field_descr;
 
   unit_finalize();
 

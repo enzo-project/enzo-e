@@ -29,8 +29,7 @@ class Mesh {
 public: // interface
 
   /// Initialize an Mesh object
-  Mesh(DataDescr * data_descr,
-       int nx,  int ny,  int nz,
+  Mesh(int nx,  int ny,  int nz,
        int nbx, int nby, int nbz) throw ();
 
   /// Delete the Mesh object

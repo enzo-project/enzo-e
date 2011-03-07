@@ -14,7 +14,7 @@
 
 //----------------------------------------------------------------------
 
-// void EnzoMethodPpml::initialize(DataDescr * data_descr) throw()
+// void EnzoMethodPpml::initialize(FieldDescr * field_descr) throw()
 // {
 //   // Specify arguments
 

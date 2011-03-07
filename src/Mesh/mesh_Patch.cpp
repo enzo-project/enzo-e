@@ -63,11 +63,11 @@ Patch::~Patch() throw()
 //----------------------------------------------------------------------
 
 Patch::Patch(const Patch & patch,
-	     DataDescr * data_descr) throw()
+	     FieldDescr *  field_descr) throw()
 {
   deallocate_blocks();
 
-  allocate_blocks(data_descr);
+  allocate_blocks(field_descr);
 }
 
 //----------------------------------------------------------------------
@@ -129,7 +129,7 @@ void Patch::extents (double * xm, double * xp,
   
 //----------------------------------------------------------------------
 
-void Patch::allocate_blocks(DataDescr * data_descr) throw()
+void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 {
 
   UNTESTED("Patch::allocate_blocks()");
@@ -178,7 +178,7 @@ void Patch::allocate_blocks(DataDescr * data_descr) throw()
   for (int ib=0; ib<nb; ib++) {
 
     // create a new data block
-    Block * block = new Block(data_descr,mbx,mby,mbz);
+    Block * block = new Block(field_descr,mbx,mby,mbz);
 
     // Store the data block
     block_[ib] = block;

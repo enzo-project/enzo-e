@@ -13,14 +13,12 @@
 
 //----------------------------------------------------------------------
 
-Block::Block(DataDescr * data_descr,
+Block::Block(FieldDescr * field_descr,
 		     int nx, int ny, int nz,
 		     int num_field_blocks) throw ()
   : field_block_()
 
 { 
-
-  FieldDescr * field_descr = data_descr->field_descr();
 
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);

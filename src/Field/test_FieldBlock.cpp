@@ -22,8 +22,7 @@ PARALLEL_MAIN_BEGIN
   unit_init();
   //----------------------------------------------------------------------
 
-  DataDescr * data_descr = new DataDescr;
-  FieldDescr * field_descr = data_descr->field_descr();
+  FieldDescr * field_descr = new FieldDescr;
 
 
   int i1 = field_descr->insert_field("f1");
@@ -76,7 +75,7 @@ PARALLEL_MAIN_BEGIN
   int nx,ny,nz;
   nx=4; ny=5; nz=6;
 
-  Block * block = new Block (data_descr, nx,ny,nz);
+  Block * block = new Block (field_descr, nx,ny,nz);
   FieldBlock * field_block = block->field_block();
 
   //----------------------------------------------------------------------

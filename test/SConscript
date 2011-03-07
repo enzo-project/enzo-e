@@ -12,7 +12,6 @@ Import('serial_run')
 # O test_Layout.cpp
 # O test_tree.cpp
 
-# X test_DataDescr.cpp
 # X test_Error.cpp
 # X test_FieldBlock.cpp
 # X test_FieldDescr.cpp
@@ -67,7 +66,6 @@ env.RunSerial(parallel_type + '-test_Error.unit',       '#/bin/test_Error')
 #----------------------------------------------------------------------
 env.RunSerial(parallel_type + '-test_FieldBlock.unit','#/bin/test_FieldBlock')
 env.RunSerial(parallel_type + '-test_FieldFaces.unit','#/bin/test_FieldFaces')
-env.RunSerial(parallel_type + '-test_FieldDescr.unit','#/bin/test_FieldDescr')
 #----------------------------------------------------------------------
 # MEMORY COMPONENT        
 #----------------------------------------------------------------------
@@ -80,7 +78,6 @@ env.RunSerial(parallel_type + '-test_Memory.unit',      '#/bin/test_Memory')
 #----------------------------------------------------------------------
 env.RunSerial(parallel_type + '-test_Mesh.unit',   '#/bin/test_Mesh')
 env.RunSerial(parallel_type + '-test_Patch.unit',  '#/bin/test_Patch')
-env.RunSerial(parallel_type + '-test_DataDescr.unit',   '#/bin/test_DataDescr')
 env.RunSerial(parallel_type + '-test_Block.unit',  '#/bin/test_Block')
 #----------------------------------------------------------------------
 # MONITOR COMPONENT       

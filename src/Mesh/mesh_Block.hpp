@@ -11,20 +11,21 @@
 #ifndef MESH_BLOCK_HPP
 #define MESH_BLOCK_HPP
 
+class FieldDescr;
 class FieldBlock;
 
 class Block {
 
   /// @class    Block
-  /// @ingroup  Data
-  /// @brief    [\ref Mesh] Container class for all data blocks (currently just fields)
+  /// @ingroup  Mesh
+  /// @brief    [\ref Mesh] Basic serial block of mesh data
 
 public: // interface
 
   /// Initialize the Block object
-  Block(DataDescr * data_descr,
-	    int nx, int ny=1, int nz=1,
-	    int num_field_blocks = 1) throw();
+  Block(FieldDescr * field_descr,
+	int nx, int ny=1, int nz=1,
+	int num_field_blocks = 1) throw();
 
   //----------------------------------------------------------------------
   // Big Three

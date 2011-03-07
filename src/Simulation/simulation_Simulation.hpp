@@ -67,8 +67,8 @@ public: // interface
   /// Return the Mesh
   Mesh * mesh() const throw();
   
-  /// Return the data descriptor
-  DataDescr * data_descr() const throw();
+  /// Return the field descriptor
+  FieldDescr * field_descr() const throw();
 
   /// Return the stopping object, if any
   Stopping *  stopping() const throw();
@@ -165,8 +165,8 @@ protected: // attributes
   /// AMR mesh
   Mesh * mesh_;
   
-  /// Data descriptor
-  DataDescr * data_descr_;
+  /// Field descriptor
+  FieldDescr * field_descr_;
 
   /// Stopping criteria
   Stopping * stopping_;

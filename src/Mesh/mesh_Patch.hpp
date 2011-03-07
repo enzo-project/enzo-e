@@ -31,7 +31,7 @@ public: // interface
 
   /// Copy constructor
   Patch(const Patch & patch,
-	DataDescr * data_descr) throw();
+	FieldDescr * field_descr) throw();
 
   // /// Assignment operator
   // Patch & operator= (const Patch & patch) throw();
@@ -61,7 +61,7 @@ public: // interface
   //--------------------------------------------------
 
   /// Allocate local blocks
-  void allocate_blocks(DataDescr * data_descr) throw();
+  void allocate_blocks(FieldDescr * field_descr) throw();
 
   /// Deallocate local blocks
   void deallocate_blocks() throw();
@@ -72,7 +72,7 @@ public: // interface
   /// Return the total number of local blocks
   size_t num_blocks() const throw();
 
-  /// Return the ith data block
+  /// Return the ith block
   Block * block(int i) const throw();
 
 public: // entry functions
@@ -91,7 +91,7 @@ private: // attributes
   /// Layout: describes blocking, processor range, and block-processor mapping 
   Layout * layout_;
 
-  /// Array of data blocks ib associated with this process
+  /// Array of blocks ib associated with this process
   std::vector<Block * > block_;
 
   /// Size of the patch
