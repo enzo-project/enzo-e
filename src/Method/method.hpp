@@ -32,6 +32,7 @@ enum access_enum {
 
 #include <vector>
 #include <string>
+#include <limits>
 
 //----------------------------------------------------------------------
 // Component dependencies

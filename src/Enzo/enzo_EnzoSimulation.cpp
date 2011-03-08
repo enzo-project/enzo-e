@@ -206,13 +206,20 @@ void EnzoSimulation::run() throw()
     cycle += 1;
     time  += dt;
 
-  }
+  } // ! stopping_->complete(cycle,time)
 
-  //--------------------------------------------------
+  //======================================================================
   // END MAIN LOOP
-  //--------------------------------------------------
+  //======================================================================
 
   // Final output
+
+  // (monitor output)
+  {
+    char buffer[40];
+    sprintf (buffer,"cycle %04d time %15.12f", cycle,time);
+    monitor->print(buffer);
+  }
 
   while ((patch = ++itPatch)) {
 
@@ -300,8 +307,10 @@ EnzoSimulation::create_stopping_ (std::string name) throw ()
   // parameter: Stopping::cycle
   // parameter: Stopping::time
 
-  int    stop_cycle = parameters_->value_integer("cycle",-1);
-  double stop_time  = parameters_->value_scalar("time",-1.0);
+  int    stop_cycle = parameters_->value_integer
+    ( "cycle" , std::numeric_limits<int>::max() );
+  double stop_time  = parameters_->value_scalar
+    ( "time" , std::numeric_limits<double>::max() );
 
   return new Stopping(stop_cycle,stop_time);
 }

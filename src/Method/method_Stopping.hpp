@@ -18,8 +18,8 @@ class Stopping {
 public: // interface
 
   /// Constructor
-  Stopping(int    stop_cycle = -1,
-	   double stop_time  = -1.0) throw()
+  Stopping(int    stop_cycle = std::numeric_limits<int>::max(),
+	   double stop_time  = std::numeric_limits<double>::max()) throw()
     : stop_cycle_(stop_cycle),
       stop_time_ (stop_time)
   {}
@@ -28,12 +28,14 @@ public: // interface
   virtual bool complete (int    curr_cycle,
 			 double curr_time) const throw()
   {
-    ASSERT("Stopping::complete",
-	   "Neither Stopping::time_stop nor Stopping::cycle_stop initialized",
-	   stop_time_ != -1.0 || stop_cycle_ != -1);
+    if ((stop_cycle_ == std::numeric_limits<int>::max()) &&
+	(stop_time_  == std::numeric_limits<double>::max())) {
+      ERROR("Stopping::complete",
+	    "Neither Stopping::time_stop nor Stopping::cycle_stop initialized");
+    }
     return 
-    ( ! ((stop_time_  == -1.0 || curr_time  < stop_time_ ) &&
-	 (stop_cycle_ == -1   || curr_cycle < stop_cycle_)));
+      ( ! ((stop_time_  == -1.0 || curr_time  < stop_time_ ) &&
+	   (stop_cycle_ == -1   || curr_cycle < stop_cycle_)));
   }
 
   /// Return stopping cycle
