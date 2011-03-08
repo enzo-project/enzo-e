@@ -244,7 +244,7 @@ test_summary("Disk",array("FileHdf5","FileIfrit"),
 		    array("test_FileHdf5","test_FileIfrit")); 
 test_summary("Error",array("Error"),
 		    array("test_Error")); 
-test_summary("Enzo",array("enzo-p","ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion"),array("enzo-p")); 
+test_summary("Enzo",array("enzo-p","ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion"),array("enzo-p","test_ppm","test_ppml")); 
 test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces"),
 		    array("test_FieldBlock","test_FieldDescr","test_FieldFaces")); 
 test_summary("Memory",array("Memory"),
