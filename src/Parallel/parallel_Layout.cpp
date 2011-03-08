@@ -74,6 +74,21 @@ int Layout::local_count (int ip) throw()
 
 //----------------------------------------------------------------------
 
+bool Layout::is_local (int ip, int ibx, int iby, int ibz) throw()
+{
+  return false;
+}
+
+//----------------------------------------------------------------------
+
+int Layout::global_index (int ib) throw()
+{
+  INCOMPLETE("Layout::global_index","");
+  return 0;
+}
+
+//----------------------------------------------------------------------
+
 int Layout::process (int ib)  throw()
 {
   int block_count = block_count_[0] * block_count_[1] * block_count_[2];

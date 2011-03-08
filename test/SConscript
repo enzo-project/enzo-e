@@ -65,6 +65,7 @@ env.RunSerial(parallel_type + '-test_Error.unit',       '#/bin/test_Error')
 # FIELD COMPONENT         
 #----------------------------------------------------------------------
 env.RunSerial(parallel_type + '-test_FieldBlock.unit','#/bin/test_FieldBlock')
+env.RunSerial(parallel_type + '-test_FieldDescr.unit','#/bin/test_FieldDescr')
 env.RunSerial(parallel_type + '-test_FieldFaces.unit','#/bin/test_FieldFaces')
 #----------------------------------------------------------------------
 # MEMORY COMPONENT        

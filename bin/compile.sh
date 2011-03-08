@@ -27,6 +27,7 @@ foreach type ($types)
 
    printf "$d %-14s %-14s" "${platform}" "cleaning..."
    scons arch=$arch type=$type -c >& /dev/null
+   rm -f test/$type-*unit >& /dev/null
    printf "done\n"
 
 

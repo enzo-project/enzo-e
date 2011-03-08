@@ -106,6 +106,8 @@ void Monitor::print (std::string message, ...) const
     struct tm * t;
     time(&rawtime);
     t = localtime (&rawtime);
+    const char * month[] = 
+      {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
     PARALLEL_PRINTF ("%s %02d %02d:%02d:%02d %s\n",
 		     month[t->tm_mon],
 		     t->tm_mday,

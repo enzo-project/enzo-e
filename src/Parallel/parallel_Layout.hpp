@@ -35,13 +35,19 @@ public: // interface
   /// Return the number of local blocks in the layout for given process
   int local_count (int ip) throw();
 
+  /// Return whether the given 3D global index is assigned to the given process
+  bool is_local (int ip, int ibx, int iby, int ibz) throw();
+
+  /// Return the global 1D index given the local 1D index for the given process
+  int global_index (int ip, int ib) throw();
+
   /// Return the process id assigned to the given block
   int process (int ib)  throw();
 
-  /// Return the 3D indices for the given block 1D index
+  /// Return the 3D indices for the given global block 1D index
   void block_indices (int ib, int * ibx, int * iby, int * ibz) throw();
 
-  /// Return the 1D index for the given block 3D indices
+  /// Return the 1D global index for the given block 3D indices
   int block_index (int ibx, int iby, int ibz) throw();
 
 #ifdef CONFIG_USE_MPI

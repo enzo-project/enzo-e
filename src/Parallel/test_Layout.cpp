@@ -30,7 +30,7 @@ PARALLEL_MAIN_BEGIN
   Layout * layout;
 
   //--------------------------------------------------
-  // first 0  count 1  block_count (1,1,1)
+  // first-proc 0  procs 1  blocks (1,1,1)
   //--------------------------------------------------
 
   unit_func("process_range");
@@ -80,10 +80,16 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(layout->block_index(ibx,iby,ibz) == 0);
 
+  unit_func ("is_local");
+  unit_assert(layout->is_local(0,ibx,iby,ibz));
+
+  unit_func ("global_index");
+  unit_assert(layout->global_index(0) == 0);
+  
   delete layout;
 
   //--------------------------------------------------
-  // first 0  count 1  block_count (5,3,2)
+  // first-proc 0  procs 1  blocks (5,3,2)
   //--------------------------------------------------
 
   layout = new Layout (5,3,2);
@@ -148,10 +154,18 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(layout->block_index(ibx,iby,ibz) == nb-1);
 
+  unit_func ("is_local");
+  unit_assert(layout->is_local(0,ibx,iby,ibz));
+
+  unit_func ("global_index");
+  for (int i=0; i<layout->local_count(0); i++) {
+    unit_assert_quiet(layout->global_index(i) == i);
+  }
+
   delete layout;
 
   //--------------------------------------------------
-  // first 0  count 30  block_count (5,3,2)
+  // first-proc 0  procs 30  blocks (5,3,2)
   //--------------------------------------------------
   
   layout = new Layout (5,3,2);
@@ -215,10 +229,26 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(layout->block_index(ibx,iby,ibz) == nb-1);
 
+  unit_func ("is_local");
+  unit_assert(layout->is_local(0, 0,0,0) == true);
+  unit_assert(layout->is_local(0, 0,0,1) == false);
+  unit_assert(layout->is_local(0, 0,1,0) == false);
+  unit_assert(layout->is_local(0, 1,0,0) == false);
+  unit_assert(layout->is_local(0, 0,0,-1) == false);
+  unit_assert(layout->is_local(0, 0,-1,0) == false);
+  unit_assert(layout->is_local(0, -1,0,0) == false);
+  unit_assert(layout->is_local(0, ibx,iby,ibz) == false);
+
+  unit_func ("global_index");
+  for (int i=0; i<layout->local_count(0); i++) {
+    unit_assert_quiet(layout->global_index(i) == i);
+  }
+
+
   delete layout;
 
   //--------------------------------------------------
-  // first 7  count 30  block_count (5,3,2)
+  // first-proc 7  procs 30  blocks (5,3,2)
   //--------------------------------------------------
   
   layout = new Layout (5,3,2);
@@ -281,6 +311,22 @@ PARALLEL_MAIN_BEGIN
   unit_func("block_index");
 
   unit_assert(layout->block_index(ibx,iby,ibz) == nb-1);
+
+  unit_func ("is_local");
+  unit_assert(layout->is_local(7, 0,0,0) == true);
+
+  unit_assert(layout->is_local(7, 0,0,1) == false);
+  unit_assert(layout->is_local(7, 0,1,0) == false);
+  unit_assert(layout->is_local(7, 1,0,0) == false);
+  unit_assert(layout->is_local(7, 0,0,-1) == false);
+  unit_assert(layout->is_local(7, 0,-1,0) == false);
+  unit_assert(layout->is_local(7, -1,0,0) == false);
+  unit_assert(layout->is_local(7, ibx,iby,ibz) == false);
+
+  unit_func ("global_index");
+  for (int i=0; i<layout->local_count(0); i++) {
+    unit_assert_quiet(layout->global_index(i) == i+7);
+  }
 
   delete layout;
 

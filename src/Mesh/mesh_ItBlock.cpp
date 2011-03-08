@@ -45,10 +45,7 @@ bool ItBlock::done () const throw()
 int ItBlock::index (int * ibx, int * iby, int * ibz) throw()
 {
   if (index1_) {
-      // need to implement mapping of local block 1D index in patch 
-      // to global 3D index.  Either use Patch or ItBlock::index()
     INCOMPLETE("ItBlock::index","");
-    //    patch_->layout()->block_indices
   } else {
     WARNING ("ItBlock::index","Trying to get index of the 'null Block'");
   }
