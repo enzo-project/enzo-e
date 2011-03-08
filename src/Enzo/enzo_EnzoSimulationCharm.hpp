@@ -1,30 +1,30 @@
-// $Id$
+// $Id: enzo_EnzoSimulationCharm.hpp 2068 2011-03-07 20:41:58Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef ENZO_ENZO_SIMULATION_HPP
 #define ENZO_ENZO_SIMULATION_HPP
 
-/// @file     enzo_EnzoSimulation.hpp
+/// @file     enzo_EnzoSimulationCharm.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
-/// @brief    [\ref Enzo] Declaration of the EnzoSimulation class
+/// @brief    [\ref Enzo] Declaration of the EnzoSimulationCharm class
 
-class EnzoSimulation : public Simulation {
+class EnzoSimulationCharm : public Simulation {
 
-  /// @class    EnzoSimulation
+  /// @class    EnzoSimulationCharm
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Simulation class for Enzo
 
 public: // interface
 
   /// Constructor
-  EnzoSimulation(Parameters * parameters) throw();
+  EnzoSimulationCharm() throw();
 
   /// Destructor
-  ~EnzoSimulation() throw();
+  ~EnzoSimulationCharm() throw();
 
   /// Override Simulation initialize
-  virtual void initialize() throw ();
+  virtual void initialize(FILE * parameter_file) throw ();
 
   /// Finalize the Simulation after running it
   virtual void finalize() throw();
@@ -41,7 +41,7 @@ public: // interface
 
 public: // functions
 
-  /// Return the Enzo object created in EnzoSimulation's constructor
+  /// Return the Enzo object created in EnzoSimulationCharm's constructor
   EnzoBlock * enzo() throw ()
   { return enzo_; };
 

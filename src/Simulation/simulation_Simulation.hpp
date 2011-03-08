@@ -20,7 +20,7 @@ class Simulation {
 public: // interface
 
   /// Initialize the Simulation object
-  Simulation(Parameters * parameters = 0);
+  Simulation(Parameters * parameters);
 
   //----------------------------------------------------------------------
   // Big Three
@@ -38,7 +38,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// initialize the Simulation given a parameter file
-  virtual void initialize(FILE * parameter_file) throw();
+  virtual void initialize() throw();
 
   /// Finalize the Simulation after running it
   virtual void finalize() throw();
@@ -158,9 +158,6 @@ protected: // attributes
 
   /// Parameters associated with this simulation
   Parameters * parameters_;
-
-  /// Whether Parameters object was allocated
-  bool parameters_allocated_;
 
   /// AMR mesh
   Mesh * mesh_;

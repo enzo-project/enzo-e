@@ -14,7 +14,6 @@
 Simulation::Simulation(Parameters * parameters)
   : dimension_(0),
     parameters_(parameters),
-    parameters_allocated_(false),
     mesh_(0),
     field_descr_(0),
     stopping_(0),
@@ -23,10 +22,7 @@ Simulation::Simulation(Parameters * parameters)
     boundary_(0),
     method_list_()
 {
-  if (parameters_ == NULL) {
-    parameters_ = new Parameters();
-    parameters_allocated_ = true;
-  }
+  ASSERT("Simulation::Simulation","Parameters is NULL", parameters != NULL);
 
   extent_[0] = 0.0;
   extent_[1] = 1.0;
@@ -62,12 +58,8 @@ Simulation & Simulation::operator= (const Simulation & simulation) throw()
 
 //----------------------------------------------------------------------
 
-void Simulation::initialize(FILE * fp) throw()
+void Simulation::initialize() throw()
 {
-
-  // Read in parameters
-
-  parameters_->read(fp); // MEMORY LEAK
 
   // Initialize parameters
 
@@ -470,15 +462,10 @@ void Simulation::initialize_method_() throw()
 
 void Simulation::deallocate_() throw()
 {
-
-  if (parameters_allocated_) {
-    delete parameters_;  
-  }
-
   delete field_descr_;
-
+  field_descr_ = 0;
   delete mesh_;
-
+  mesh_ = 0;
   delete initial_;
-
+  initial_ = 0;
 }

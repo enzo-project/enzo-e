@@ -63,11 +63,26 @@ PARALLEL_MAIN_BEGIN
     PARALLEL_EXIT;
   }
 
-  EnzoSimulation * simulation = new EnzoSimulation ();
+  // Read in parameters
+
+  Parameters * parameters = new Parameters;
+
+  parameters->read(fp); // MEMORY LEAK
+
+  //--------------------------------------------------
+  parameters->set_current_group ("Parallel");
+  //--------------------------------------------------
+
+  // parameter: Parallel::method
+
+  std::string parallel_method = 
+    parameters->list_value_string(0,"method","serial");
+
+  Simulation * simulation = new EnzoSimulation (parameters);
 
   // read parameter file
 
-  simulation->initialize(fp);
+  simulation->initialize();
 
   // run the simulation
 
@@ -81,6 +96,7 @@ PARALLEL_MAIN_BEGIN
 
   delete simulation;
   delete parallel;
+  delete parameters;
 
   // finalize unit testing
 
