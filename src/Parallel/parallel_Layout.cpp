@@ -81,7 +81,7 @@ bool Layout::is_local (int ip, int ibx, int iby, int ibz) throw()
 
 //----------------------------------------------------------------------
 
-int Layout::global_index (int ib) throw()
+int Layout::global_index (int ip, int ib) throw()
 {
   INCOMPLETE("Layout::global_index","");
   return 0;

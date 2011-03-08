@@ -200,34 +200,58 @@ function test_summary($component,$test_output)
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
   }
 
+  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+
+    $count_missing = 0;
+    for ($test = 0; $test<sizeof($test_output); ++$test) {
+      $output = $test_output[$test];
+      if (! file_exists("bin/test_$output")) {
+        ++ $count_missing ;
+      }
+    }
+
+    if ($count_missing == 0) {
+       printf ("<td></td>");
+    } else {
+       printf ("<td class=fail>$count_missing</td>");
+    }
+  }
+
   printf ("</tr>\n");
 }
 ?>
 
 
 <?php
-printf ("<table><tr><th></th>\n");
+printf ("<table>\n");
+printf ("<tr>\n");
+     printf ( "<th></th>");
+     printf ( "<th colspan=3>Tests Passed</th>");
+     printf ( "<th colspan=3>Tests Failed</th>");
+     printf ( "<th colspan=3>Compiles Failed</th>");
+     printf ( "</tr><tr><th></th>\n");
+
 $parallel_labels = array("serial","mpi","charm");
-for ($k = 0; $k < 2; $k ++) {
+for ($k = 0; $k < 3; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
     printf ("<th> $parallel_labels[$i] </th>");
   }
  }
 
 test_summary("Disk",array("FileHdf5","FileIfrit")); 
-test_summary("Distribute",array("")); 
+// test_summary("Distribute",array("")); 
 test_summary("Error",array("Error")); 
 test_summary("Enzo",array("enzo-p","ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion")); 
 test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces")); 
 test_summary("Memory",array("Memory")); 
 test_summary("Mesh",array("Mesh","Patch","Block")); 
-test_summary("Method",array("")); 
+// test_summary("Method",array("")); 
 test_summary("Monitor",array("Monitor")); 
 test_summary("Parallel",array("GroupProcess","Layout")); 
 test_summary("Parameters",array("Parameters")); 
-test_summary("Particles",array("")); 
+// test_summary("Particles",array("")); 
 test_summary("Performance",array("Performance")); 
-test_summary("Portal",array("")); 
+// test_summary("Portal",array("")); 
 test_summary("Schedule",array("Schedule")); 
 test_summary("Simulation",array("Simulation")); ?>
 </tr></table>

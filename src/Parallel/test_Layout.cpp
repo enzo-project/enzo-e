@@ -84,7 +84,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(layout->is_local(0,ibx,iby,ibz));
 
   unit_func ("global_index");
-  unit_assert(layout->global_index(0) == 0);
+  unit_assert(layout->global_index(0, 0) == 0);
   
   delete layout;
 
@@ -159,7 +159,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("global_index");
   for (int i=0; i<layout->local_count(0); i++) {
-    unit_assert_quiet(layout->global_index(i) == i);
+    unit_assert_quiet(layout->global_index(0, i) == i);
   }
 
   delete layout;
@@ -241,7 +241,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("global_index");
   for (int i=0; i<layout->local_count(0); i++) {
-    unit_assert_quiet(layout->global_index(i) == i);
+    unit_assert_quiet(layout->global_index(0, i) == i);
   }
 
 
@@ -325,7 +325,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func ("global_index");
   for (int i=0; i<layout->local_count(0); i++) {
-    unit_assert_quiet(layout->global_index(i) == i+7);
+    unit_assert_quiet(layout->global_index(7, i) == i+7);
   }
 
   delete layout;
