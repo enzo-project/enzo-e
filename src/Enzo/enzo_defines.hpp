@@ -5,27 +5,26 @@
 /* DEFINES */
 /*----------------------------------------------------------------------*/
 
-#define MACH_EPSILON                      /* machine epsilon for the default precision */
-#define ENZO_FAIL                           0 /* Error handling */
-#define ENZO_SUCCESS                        1 /* Error handling */
+#define ENZO_FAIL     0
+#define ENZO_SUCCESS  1
 
-#define FALSE                               0 /* Needed for fortran */
-#define TRUE                                1 /* Needed for fortran */
+#define FALSE         0
+#define TRUE          1
 
-#define ENZO_FLOAT_UNDEFINED              -99999.0 /* use NaN: CosmologyComputeExpansionFactor() */
-#define ISYM                              "d" /* Scalar */
+#define ENZO_FLOAT_UNDEFINED  -99999.0
+#define ISYM         "d"
 
-#define MAX_DIMENSION                       3 /* for array declarations and loops in SolveHydro */
-#define MAX_NUMBER_OF_BARYON_FIELDS         28 /* for array declarations and loops in SolveHydro */
+#define MAX_DIMENSION                3
+#define MAX_NUMBER_OF_BARYON_FIELDS 28
 
 #define MAX_COLOR                20
 #define huge                     1.0e+20
 #define MAX_ANY_SINGLE_DIRECTION 4200+6
 #define tiny                     1.0e-20
 
-#define NINT(A)   ((int) ((A) + 0.5*((A)>0?1:-1))) /* rename to round(), upper-case inline function */
+/* round instead of truncate */
+#define NINT(A)   ((int) ((A) + 0.5*((A)>0?1:-1)))
 
-/* #define FORTRAN_NAME(NAME) NAME */
 #define FORTRAN_NAME(NAME) NAME##_
 
 /*---------------------------------------------------------------------- */
