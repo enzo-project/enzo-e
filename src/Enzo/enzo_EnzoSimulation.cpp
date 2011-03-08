@@ -105,12 +105,7 @@ void EnzoSimulation::run() throw()
 
   while (! stopping_->complete(cycle,time) ) {
 
-    // (monitor output)
-    {
-      char buffer[40];
-      sprintf (buffer,"cycle %04d time %15.12f", cycle,time);
-      monitor->print(buffer);
-    }
+    monitor->print("cycle %04d time %15.12f", cycle,time);
 
     //--------------------------------------------------
     // Determine timestep and dump output
@@ -212,14 +207,7 @@ void EnzoSimulation::run() throw()
   // END MAIN LOOP
   //======================================================================
 
-  // Final output
-
-  // (monitor output)
-  {
-    char buffer[40];
-    sprintf (buffer,"cycle %04d time %15.12f", cycle,time);
-    monitor->print(buffer);
-  }
+  monitor->print("cycle %04d time %15.12f", cycle,time);
 
   while ((patch = ++itPatch)) {
 

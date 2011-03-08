@@ -88,22 +88,30 @@ void Monitor::header () const
 
 //----------------------------------------------------------------------
 
-void Monitor::print (std::string message, FILE * fp) const
+void Monitor::print (std::string message, ...) const
 {
-  
   if (active_) {
+
+    va_list fargs;
+
+    // Process any input arguments
+
+    char buffer[MONITOR_LENGTH+1];
+    va_start(fargs,message);
+    vsnprintf (buffer,MONITOR_LENGTH, message.c_str(),fargs);
+    va_end(fargs);
+    
+    // Write output with line header
     time_t rawtime;
     struct tm * t;
     time(&rawtime);
     t = localtime (&rawtime);
-    const char * month[] = 
-      {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-    fprintf (fp,"%s %02d %02d:%02d:%02d %s\n",
-             month[t->tm_mon],
-             t->tm_mday,
-             t->tm_hour,
-             t->tm_min,
-             t->tm_sec,
-             message.c_str());
+    PARALLEL_PRINTF ("%s %02d %02d:%02d:%02d %s\n",
+		     month[t->tm_mon],
+		     t->tm_mday,
+		     t->tm_hour,
+		     t->tm_min,
+		     t->tm_sec,
+		     buffer);
   }
 };

@@ -4,16 +4,21 @@
 #ifndef ERROR_ERROR_HPP
 #define ERROR_ERROR_HPP
 
+//----------------------------------------------------------------------
 /// @file     error_Error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Add Parallel support
 /// @bug      exit() is called instead of MPI_Abort(), etc.
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Declaration of the Error class
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
 /// @def      ERROR_LENGTH
 /// @brief    Maximum length of error and warning messages
 #define ERROR_LENGTH 255
 
+//----------------------------------------------------------------------
 /// @def      WARNING
 /// @brief    Handle a (non-lethal) warning message
 #define WARNING(FUNCTION,MESSAGE)					\
@@ -21,6 +26,7 @@
     message_(stdout,"WARNING",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
   }
 
+//----------------------------------------------------------------------
 /// @def      UNTESTED
 /// @brief    Handle a (non-lethal) untested message
 #define UNTESTED(FUNCTION)					\
@@ -28,6 +34,7 @@
     message_(stdout,"UNTESTED",__FILE__,__LINE__,FUNCTION,"");	\
   }
 
+//----------------------------------------------------------------------
 /// @def      ERROR
 /// @brief    Handle a (lethal) error message
 #define ERROR(FUNCTION,MESSAGE)						\
@@ -36,6 +43,7 @@
     exit(1);								\
   }
 
+//----------------------------------------------------------------------
 /// @def      INCOMPLETE
 /// @brief    Placeholder for code that is incomplete
 #define INCOMPLETE(FUNCTION,MESSAGE)					\
@@ -43,6 +51,7 @@
     message_(stdout,"INCOMPLETE",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
   }
 
+//----------------------------------------------------------------------
 /// @def      TRACE
 /// @brief    Trace file name and location to stdout
 #define TRACE(MESSAGE)						\
@@ -51,6 +60,7 @@
     fflush(stdout);						\
   }
 
+//----------------------------------------------------------------------
 /// @def      ASSERT
 /// @brief    Equivalent to assert()
 #define ASSERT(FUNCTION,MESSAGE,ASSERTION)				\
@@ -62,6 +72,9 @@
   }
 
 
+//----------------------------------------------------------------------
+/// @def message_
+/// @brief write the given error, warning, etc. message
 #define message_(FP,TYPE,FILE,LINE,FUNCTION,MESSAGE)		\
   {								\
     fprintf (FP,"\n");						\

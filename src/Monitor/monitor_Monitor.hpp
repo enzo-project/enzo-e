@@ -1,16 +1,25 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
+//----------------------------------------------------------------------
 /// @file     monitor_Monitor.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-10-05
 /// @brief    [\ref Monitor] Declaration of the Monitor class
-
+//----------------------------------------------------------------------
 #ifndef MONITOR_MONITOR_HPP
 #define MONITOR_MONITOR_HPP
 
+//----------------------------------------------------------------------
+/// @def    MONITOR_LENGTH 255
+/// @brief  Maximum length of monitor text output
+
+#define MONITOR_LENGTH 255
+   
+//----------------------------------------------------------------------
 /// @enum     reduce_enum
 /// @brief    Reduction operator, used for image projections
+
 enum reduce_enum {
   reduce_unknown, /// Unknown reduction
   reduce_min,     /// Minimal value along the axis
@@ -18,6 +27,8 @@ enum reduce_enum {
   reduce_avg,     /// Average value along the axis
   reduce_sum      /// Sum of values along the axis
 };
+
+//----------------------------------------------------------------------
 
 class Monitor {
 
@@ -49,7 +60,7 @@ public: // interface
   void header () const;
 
   /// Print a message to stdout
-  void print (std::string message, FILE * fp = stdout) const;
+  void print (std::string buffer, ...) const;
 
   /// Generate a PNG image of an array
   template<class T>

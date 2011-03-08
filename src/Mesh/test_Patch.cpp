@@ -164,7 +164,6 @@ PARALLEL_MAIN_BEGIN
       itBlocks.index(&ibx,&iby,&ibz);
       
       int ib = ibx + nbx*(iby + nby*ibz);
-      printf ("DEBUG %d  %d %d %d  %d %d  %d\n",ib,ibx,iby,ibz,nbx,nby,count);
       unit_assert_quiet (count == ib);
 
       // Test block extents
