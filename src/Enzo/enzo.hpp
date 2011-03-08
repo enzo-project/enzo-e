@@ -41,8 +41,8 @@
 #include "enzo_EnzoNamespace.hpp"
 using namespace enzo;
 #include "enzo_EnzoBlock.hpp"
-#include "enzo_EnzoSimulation.hpp"
-// #include "enzo_EnzoSimulationCharm.hpp"
+#include "enzo_EnzoSimulationSerial.hpp"
+#include "enzo_EnzoSimulationCharm.hpp"
 // #include "enzo_EnzoStopping.hpp"
 #include "enzo_EnzoTimestep.hpp"
 #include "enzo_EnzoInitialImplosion2.hpp"

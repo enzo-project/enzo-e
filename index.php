@@ -202,10 +202,12 @@ function test_summary($component,$test_output)
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
+    $parallel_type = $parallel_types[$i];
     $count_missing = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
       $output = $test_output[$test];
-      if (! file_exists("bin/test_$output")) {
+      $bin = "bin-$parallel_type/test_$output";
+      if (! file_exists($bin)) {
         ++ $count_missing ;
       }
     }

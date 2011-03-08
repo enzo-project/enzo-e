@@ -48,15 +48,16 @@ libraries = env.Library ('parameters', [sources])
 test_parameters = env.Program (['test_Parameters.cpp', sources])
 test_parse      = env.Program (['test_Parse.cpp', sources])
 
-tests = [test_parameters, test_parse]
+binaries = [test_parameters, test_parse]
 
 #------------------------------
 # INSTALL
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-env.Alias('install-bin',env.Install ('#/bin', tests))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
 
 
 

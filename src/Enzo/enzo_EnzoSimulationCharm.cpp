@@ -16,8 +16,8 @@
 
 //----------------------------------------------------------------------
 
-EnzoSimulationCharm::EnzoSimulationCharm() throw ()
-  : Simulation(),
+EnzoSimulationCharm::EnzoSimulationCharm(Parameters * parameters) throw ()
+  : Simulation(parameters),
     enzo_(new EnzoBlock())
 {
 }
@@ -34,7 +34,7 @@ EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 void EnzoSimulationCharm::initialize(FILE * fp) throw()
 {
   // Call initialize for Simulation base class
-  Simulation::initialize(fp);
+  Simulation::initialize();
 
   // Initialize enzo namespace variables
   enzo::initialize(parameters_);
@@ -158,7 +158,7 @@ void EnzoSimulationCharm::run() throw()
 
 #ifdef CONFIG_USE_MPI
     MPI_Allreduce (&dt_patch, &dt_mesh, 1, MPI_DOUBLE, MPI_MIN,
-		   mesh->mpi_comm());
+		   mesh_->mpi_comm());
 #else
     dt_mesh = dt_patch;
 #endif

@@ -1,8 +1,8 @@
 // $Id: enzo_EnzoSimulationCharm.hpp 2068 2011-03-07 20:41:58Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_ENZO_SIMULATION_HPP
-#define ENZO_ENZO_SIMULATION_HPP
+#ifndef ENZO_ENZO_SIMULATION_CHARM_HPP
+#define ENZO_ENZO_SIMULATION_CHARM_HPP
 
 /// @file     enzo_EnzoSimulationCharm.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
@@ -18,7 +18,7 @@ class EnzoSimulationCharm : public Simulation {
 public: // interface
 
   /// Constructor
-  EnzoSimulationCharm() throw();
+  EnzoSimulationCharm(Parameters * parameters) throw();
 
   /// Destructor
   ~EnzoSimulationCharm() throw();
@@ -84,5 +84,5 @@ private: // attributes
 
 };
 
-#endif /* ENZO_ENZO_SIMULATION_HPP */
+#endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */
 

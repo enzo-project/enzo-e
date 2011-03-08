@@ -4,7 +4,7 @@
 /// @file      Grid_SolveHydroEquations.cpp
 /// @author    Greg Bryan
 /// @date      November, 1994
-/// @todo      Currently EnzoBlock::SolveHydroEquations uses field data from enzoDescr (BaryonField, GridStartIndex, etc.); change to use block fields directly to avoid EnzoSimulation::block_begin() copies and repeated boundary condition initialization
+/// @todo      Currently EnzoBlock::SolveHydroEquations uses field data from enzoDescr (BaryonField, GridStartIndex, etc.); change to use block fields directly to avoid EnzoSimulationSerial::block_begin() copies and repeated boundary condition initialization
 /// @brief     Solve the hydro equations, saving subgrid fluxes
 
 #include "cello.hpp"

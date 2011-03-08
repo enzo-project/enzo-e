@@ -43,7 +43,8 @@ if (parallel_type == "charm"):
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin', binaries))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
 
 
 

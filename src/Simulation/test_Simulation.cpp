@@ -9,7 +9,7 @@
 #include "test.hpp"
 
 #include "simulation.hpp"
-#include "enzo.hpp" /* Required for EnzoSimulation */
+#include "enzo.hpp" /* Required for EnzoSimulationSerial */
 
 #include PARALLEL_CHARM_INCLUDE(test_Simulation.decl.h)
 
@@ -26,20 +26,23 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("Simulation");
 
-  // NOTE: Need concrete EnzoSimulation class since Simulation is 
+  // NOTE: Need concrete EnzoSimulationSerial class since Simulation is 
   //       an abstract base class
 
-  Simulation * simulation = new EnzoSimulation ();
+  FILE * fp = fopen ("input/test_Simulation.in","r");
+  Parameters * parameters = new Parameters;
+  parameters -> read(fp);
+  fclose (fp);
 
-  unit_assert(true);
+  Simulation * simulation = new EnzoSimulationSerial(parameters);
+
+  unit_assert(simulation != 0);
 
   // Initialize the simulation
 
   unit_func("initialize");
 
-  FILE * fp = fopen ("input/test_Simulation.in","r");
-  simulation->initialize(fp);
-  fclose (fp);
+  simulation->initialize();
 
   unit_assert(true);
 
@@ -48,9 +51,6 @@ PARALLEL_MAIN_BEGIN
   unit_func("mesh");
   unit_assert (simulation->mesh() != NULL);
 
-  unit_func("mesh");
-  unit_assert (simulation->mesh() != NULL);
-  
   unit_func("stopping");
   unit_assert (simulation->stopping() != NULL);
 

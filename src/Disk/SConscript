@@ -45,15 +45,16 @@ if (parallel_type == "charm"):
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
-tests = [test_FileHdf5,test_FileIfrit]
+binaries = [test_FileHdf5,test_FileIfrit]
 
 #------------------------------
 # INSTALL
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-env.Alias('install-bin',env.Install ('#/bin',tests))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
 
 
 

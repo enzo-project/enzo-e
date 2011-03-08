@@ -60,7 +60,7 @@ test_patch = env.Program (['test_Patch.cpp', sources])
 test_block = env.Program (['test_Block.cpp', sources])
 test_tree  = env.Program (['test_TreeK.cpp', sources])
 
-tests = [test_mesh, test_patch, test_block, test_tree ];
+binaries = [test_mesh, test_patch, test_block, test_tree ];
 
 #------------------------------
 # INSTALL
@@ -68,4 +68,5 @@ tests = [test_mesh, test_patch, test_block, test_tree ];
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    tests))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))

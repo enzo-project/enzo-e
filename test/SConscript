@@ -32,6 +32,7 @@ Import('serial_run')
 
 # Define a test for running unit tests
 
+copy_bin     = Builder(action = "cp $SOURCE $ARGS");
 run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS > $TARGET")
 run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET")
 run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET")

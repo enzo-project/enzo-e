@@ -36,7 +36,7 @@ sources  = [Glob("simulation*cpp")]
 
 libraries       = env.Library ('simulation', [sources])
 test_simulation = env.Program (['test_Simulation.cpp',sources])
-tests           = [test_simulation];
+binaries        = [test_simulation];
 
 if (parallel_type == "charm"):
 	test = 'test_Simulation'
@@ -47,9 +47,10 @@ if (parallel_type == "charm"):
 # INSTALL
 #------------------------------
 
-env.Alias('install-bin',env.Install ('#/bin', tests))
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
 
 
 

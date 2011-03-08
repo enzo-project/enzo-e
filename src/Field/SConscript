@@ -35,7 +35,7 @@ test_field_block       = env.Program (['test_FieldBlock.cpp',  sources])
 test_field_descr       = env.Program (['test_FieldDescr.cpp',  sources])
 test_field_block_faces = env.Program (['test_FieldFaces.cpp',  sources])
 
-tests = [test_field_block, test_field_descr, test_field_block_faces]
+binaries = [test_field_block, test_field_descr, test_field_block_faces]
 
 if (parallel_type == "charm"):
 	test = 'test_FieldBlock'
@@ -54,7 +54,8 @@ if (parallel_type == "charm"):
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    tests))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
 
 
 

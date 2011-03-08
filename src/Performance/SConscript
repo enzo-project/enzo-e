@@ -37,7 +37,7 @@ test_performance = env.Program(['test_Performance.cpp', sources])
 test_papi        = env.Program(['test_Papi.cpp', sources])
 time_matvec      = env.Program(['time_matvec.cpp',      sources])
 
-tests = [test_performance,test_papi,time_matvec]
+binaries = [test_performance,test_papi,time_matvec]
 
 if (parallel_type == "charm"):
 	test = 'test_Performance'
@@ -55,8 +55,9 @@ if (parallel_type == "charm"):
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-env.Alias('install-bin',env.Install ('#/bin', tests))
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
 
 
 

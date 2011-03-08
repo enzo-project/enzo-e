@@ -48,19 +48,19 @@ if (parallel_type == "charm"):
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
 libraries = env.Library ('parallel', [sources])
-tests = []
+binaries = []
 
 test_GroupProcess  =  env.Program (['test_GroupProcess.cpp',    sources])
-tests.append(test_GroupProcess)
+binaries.append(test_GroupProcess)
 
 if (parallel_type == "mpi"):
 	test_Mpi = env.Program (['test_Mpi.cpp',      sources])
-	tests.append(test_Mpi)
+	binaries.append(test_Mpi)
 
 # test_ParallelAffinity = env.Program (['test_ParallelAffinity.cpp', sources])
 test_Layout   = env.Program (['test_Layout.cpp',   sources])
 
-tests.append(test_Layout)
+binaries.append(test_Layout)
 
 #------------------------------
 # INSTALL
@@ -68,6 +68,7 @@ tests.append(test_Layout)
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    tests))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
 
 

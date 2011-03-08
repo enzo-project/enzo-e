@@ -1,14 +1,14 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoSimulation.cpp
+/// @file     enzo_EnzoSimulationSerial.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @todo     Move boundary conditions to Boundary object; remove bc_reflecting
 /// @todo     Move output to Output object
 /// @todo     Move timestep reductions into Timestep object
 /// @date     Tue May 11 18:06:50 PDT 2010
-/// @brief    Implementation of EnzoSimulation user-dependent class member functions
+/// @brief    Implementation of EnzoSimulationSerial user-dependent class member functions
 
 #include "cello.hpp"
 
@@ -16,7 +16,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoSimulation::EnzoSimulation(Parameters * parameters) throw ()
+EnzoSimulationSerial::EnzoSimulationSerial(Parameters * parameters) throw ()
   : Simulation(parameters),
     enzo_(new EnzoBlock())
 {
@@ -24,14 +24,14 @@ EnzoSimulation::EnzoSimulation(Parameters * parameters) throw ()
 
 //----------------------------------------------------------------------
 
-EnzoSimulation::~EnzoSimulation() throw()
+EnzoSimulationSerial::~EnzoSimulationSerial() throw()
 {
   deallocate_();
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::initialize() throw()
+void EnzoSimulationSerial::initialize() throw()
 {
   // Call initialize for Simulation base class
   Simulation::initialize();
@@ -46,7 +46,7 @@ void EnzoSimulation::initialize() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::finalize() throw()
+void EnzoSimulationSerial::finalize() throw()
 {
   delete enzo_;
   enzo_ = 0;
@@ -54,7 +54,7 @@ void EnzoSimulation::finalize() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::run() throw()
+void EnzoSimulationSerial::run() throw()
 {
   
   Monitor * monitor = Monitor::instance();
@@ -158,7 +158,7 @@ void EnzoSimulation::run() throw()
 
 #ifdef CONFIG_USE_MPI
     MPI_Allreduce (&dt_patch, &dt_mesh, 1, MPI_DOUBLE, MPI_MIN,
-		   mesh->mpi_comm());
+		   mesh_->mpi_comm());
 #else
     dt_mesh = dt_patch;
 #endif
@@ -194,7 +194,7 @@ void EnzoSimulation::run() throw()
       } // (block = ++itBlock)
     } // (patch = ++itPatch)
 
-    ASSERT("EnzoSimulation::run", "dt == 0", dt != 0.0);
+    ASSERT("EnzoSimulationSerial::run", "dt == 0", dt != 0.0);
 
     // Update cycle and time
 
@@ -245,22 +245,22 @@ void EnzoSimulation::run() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::read() throw()
+void EnzoSimulationSerial::read() throw()
 {
-  INCOMPLETE("EnzoSimulation::read","");
+  INCOMPLETE("EnzoSimulationSerial::read","");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::write() throw()
+void EnzoSimulationSerial::write() throw()
 {
-  INCOMPLETE("EnzoSimulation::write","");
+  INCOMPLETE("EnzoSimulationSerial::write","");
 }
 
 //======================================================================
 
 Timestep * 
-EnzoSimulation::create_timestep_ ( std::string name ) throw ()
+EnzoSimulationSerial::create_timestep_ ( std::string name ) throw ()
 /// @param name   Name of the timestep method to create (ignored)
 {
   return new EnzoTimestep(enzo_);
@@ -269,7 +269,7 @@ EnzoSimulation::create_timestep_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Initial * 
-EnzoSimulation::create_initial_ ( std::string name ) throw ()
+EnzoSimulationSerial::create_initial_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   
@@ -285,7 +285,7 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Stopping * 
-EnzoSimulation::create_stopping_ (std::string name) throw ()
+EnzoSimulationSerial::create_stopping_ (std::string name) throw ()
 /// @param name   Name of the stopping method to create (ignored)
 {
   //--------------------------------------------------
@@ -306,7 +306,7 @@ EnzoSimulation::create_stopping_ (std::string name) throw ()
 //----------------------------------------------------------------------
 
 Boundary * 
-EnzoSimulation::create_boundary_ ( std::string name ) throw ()
+EnzoSimulationSerial::create_boundary_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   
@@ -318,7 +318,7 @@ EnzoSimulation::create_boundary_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Method * 
-EnzoSimulation::create_method_ ( std::string name ) throw ()
+EnzoSimulationSerial::create_method_ ( std::string name ) throw ()
 /// @param name   Name of the method to create
 {
 
@@ -332,7 +332,7 @@ EnzoSimulation::create_method_ ( std::string name ) throw ()
   if (method == 0) {
     char buffer[80];
     sprintf (buffer,"Cannot create Method '%s'",name.c_str());
-    ERROR("EnzoSimulation::create_method", buffer);
+    ERROR("EnzoSimulationSerial::create_method", buffer);
   }
 
   return method;
@@ -340,7 +340,7 @@ EnzoSimulation::create_method_ ( std::string name ) throw ()
 
 //======================================================================
 
-void EnzoSimulation::block_start_ (Block * block) throw ()
+void EnzoSimulationSerial::block_start_ (Block * block) throw ()
 {
 
   FieldBlock * field_block = block->field_block();
@@ -390,13 +390,13 @@ void EnzoSimulation::block_start_ (Block * block) throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::block_stop_ ( Block * block ) throw ()
+void EnzoSimulationSerial::block_stop_ ( Block * block ) throw ()
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::output_images_
+void EnzoSimulationSerial::output_images_
 (
  Block * block,
  const char * file_format,
@@ -433,7 +433,7 @@ void EnzoSimulation::output_images_
 
 //----------------------------------------------------------------------
 
-void EnzoSimulation::deallocate_() throw()
+void EnzoSimulationSerial::deallocate_() throw()
 {
   delete enzo_;
   enzo_ = 0;

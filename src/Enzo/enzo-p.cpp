@@ -78,7 +78,14 @@ PARALLEL_MAIN_BEGIN
   std::string parallel_method = 
     parameters->list_value_string(0,"method","serial");
 
-  Simulation * simulation = new EnzoSimulation (parameters);
+  Simulation * simulation = 0;
+  if (parallel_method == "charm") {
+    simulation = new EnzoSimulationCharm (parameters);
+  } else if (parallel_method == "serial") {
+    simulation = new EnzoSimulationSerial (parameters);
+  }
+
+  ASSERT ("main()","Illegal Parallel::method parameter @@@\n",simulation != 0);
 
   // read parameter file
 

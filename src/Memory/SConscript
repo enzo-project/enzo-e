@@ -28,8 +28,8 @@ sources  = [Glob('memory*cpp')]
 # TARGETS
 #------------------------------
 
-libraries   = env.Library ('memory', [sources])
-test_memory = env.Program (['test_Memory.cpp', sources])
+libraries = env.Library ('memory', [sources])
+binaries  = env.Program (['test_Memory.cpp', sources])
 
 if (parallel_type == "charm"):
 	test = 'test_Memory'
@@ -41,9 +41,6 @@ if (parallel_type == "charm"):
 #------------------------------
 
 env.Alias('install-inc',env.Install ('#/include',includes))
-env.Alias('install-lib',env.Install ('#/lib',libraries))
-env.Alias('install-bin',env.Install ('#/bin', test_memory))
-
-
-
-
+env.Alias('install-lib',env.Install ('#/lib',    libraries))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))

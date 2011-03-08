@@ -30,7 +30,7 @@ sources    = [Glob('parallel_*cpp')]
 
 libraries = env.Library ([sources])
 test_parallel_jacobi =  env.Program (['test_parallel_jacobi.cpp',      sources])
-tests = [test_parallel_jacobi];
+binaries = [test_parallel_jacobi];
 
 if (parallel_type == "charm"):
 	test = 'test_parallel_jacobi'
@@ -43,6 +43,7 @@ if (parallel_type == "charm"):
 
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
-env.Alias('install-bin',env.Install ('#/bin',    tests))
+env.Alias('install-bin',env.Install ('#/bin',    binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
 
 

@@ -31,7 +31,10 @@ env.Alias('install-lib',env.Install ('#/lib',libraries))
 test_tree   = env.Program (['test_tree.cpp',   sources])
 test_tree_k = env.Program (['test_tree_k.cpp', sources])
 
-env.Alias('install-bin', env.Install ('#/bin', [test_tree, test_tree_k]))
+binaries = [test_tree, test_tree_k]
+
+env.Alias('install-bin',env.Install ('#/bin', binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
 
 link = Builder(action = Copy("$TARGET","$SOURCE"))
 env = Environment(BUILDERS = {'Link': link})
