@@ -171,7 +171,7 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <?php
 
-function test_summary($component,$test_output)
+function test_summary($component,$test_output,$executables)
 {
   printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
 
@@ -204,9 +204,9 @@ function test_summary($component,$test_output)
 
     $parallel_type = $parallel_types[$i];
     $count_missing = 0;
-    for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = $test_output[$test];
-      $bin = "bin-$parallel_type/test_$output";
+    for ($test = 0; $test<sizeof($executables); ++$test) {
+      $exe = $executables[$test];
+      $bin = "bin-$parallel_type/$exe";
       if (! file_exists($bin)) {
         ++ $count_missing ;
       }
@@ -240,22 +240,34 @@ for ($k = 0; $k < 3; $k ++) {
   }
  }
 
-test_summary("Disk",array("FileHdf5","FileIfrit")); 
+test_summary("Disk",array("FileHdf5","FileIfrit"),
+		    array("test_FileHdf5","test_FileIfrit")); 
+test_summary("Error",array("Error"),
+		    array("test_Error")); 
+test_summary("Enzo",array("enzo-p","ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion"),array("enzo-p")); 
+test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces"),
+		    array("test_FieldBlock","test_FieldDescr","test_FieldFaces")); 
+test_summary("Memory",array("Memory"),
+		    array("test_Memory")); 
+test_summary("Mesh",array("Mesh","Patch","Block"),
+		    array("test_Mesh","test_Patch","test_Block")); 
+test_summary("Monitor",array("Monitor"),
+		    array("test_Monitor")); 
+test_summary("Parallel",array("GroupProcess","Layout"),
+		    array("test_GroupProcess","test_Layout")); 
+test_summary("Parameters",array("Parameters"),
+		    array("test_Parameters")); 
+test_summary("Performance",array("Performance"),
+		    array("test_Performance")); 
+test_summary("Schedule",array("Schedule"),
+		    array("test_Schedule")); 
+test_summary("Simulation",array("Simulation"),
+		    array("test_Simulation"));
 // test_summary("Distribute",array("")); 
-test_summary("Error",array("Error")); 
-test_summary("Enzo",array("enzo-p","ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion")); 
-test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces")); 
-test_summary("Memory",array("Memory")); 
-test_summary("Mesh",array("Mesh","Patch","Block")); 
 // test_summary("Method",array("")); 
-test_summary("Monitor",array("Monitor")); 
-test_summary("Parallel",array("GroupProcess","Layout")); 
-test_summary("Parameters",array("Parameters")); 
 // test_summary("Particles",array("")); 
-test_summary("Performance",array("Performance")); 
 // test_summary("Portal",array("")); 
-test_summary("Schedule",array("Schedule")); 
-test_summary("Simulation",array("Simulation")); ?>
+ ?>
 </tr></table>
 
 </ul>
