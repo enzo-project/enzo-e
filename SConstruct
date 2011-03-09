@@ -1,49 +1,47 @@
 import os
 import sys
 
-charm_path = '/home/bordner/charm/charm'
-
+#----------------------------------------------------------------------
 # CONFIGURATION
+#----------------------------------------------------------------------
 
-use_papi  = 0
-use_hdf5  = 1
-use_adios = 0
-
-# DEFINES
-
-define_papi  = ['CONFIG_USE_PAPI'];
-define_hdf5  = ['CONFIG_USE_HDF5','H5_USE_16_API'];
-define_adios = ['CONFIG_USE_ADIOS'];
-define_png   = ['NO_FREETYPE'];
-define_mpi   = ['CONFIG_USE_MPI'];
-define_charm = ['CONFIG_USE_CHARM']
-define_single = ['CONFIG_PRECISION_SINGLE']
-define_double = ['CONFIG_PRECISION_DOUBLE']
-
-# (define*_string used for IBM)
-
-defines_string = ' -D' + define_png[0]
-defines        = define_png;
-
-if (use_papi != 0): 
-	defines = defines + define_papi
-	defines_string = defines_string + ' -D' + define_papi[0]
-
-if (use_hdf5 != 0):
-	defines = defines + define_hdf5
-	defines_string = defines_string + ' -D' + define_hdf5[0]
-
-if (use_adios != 0):
-	defines = defines + define_adios
-	defines_string = defines_string + ' -D' + define_adios[0]
+use_hdf5     = 1
+use_png      = 1
+use_papi     = 0
+use_valgrind = 0
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
 #-----------------------------------------------------------------------
 
+#--------------------------------------------------
+#    arch=<arch> (CELLO_ARCH)
+#
+#      linux         generic linux box
+#      ncsa-bd       NCSA's IBM blue-drop
+#      sdsc-triton   SDSC's Triton
+#--------------------------------------------------
+#    type=<type> (CELLO_TYPE)
+#
+#      serial        Compile without parallelism
+#      charm         Compile with CHARM++ parallelism
+#      mpi           Compile with MPI parallelism
+#--------------------------------------------------
+#    prec=<prec> (CELLO_PREC)
+#
+#      single        Compile Enzo-P for single precision
+#      double        Compile Enzo-P for double precision
+#--------------------------------------------------
+
+# scons command line (overrides CELLO_* environment variables)
+
 arch = ARGUMENTS.get('arch','unknown')
 type = ARGUMENTS.get('type','unknown')
 prec = ARGUMENTS.get('prec','unknown')
+
+parallel_type = type
+
+# environment variable (default if scons command line not provided)
 
 if (arch == 'unknown' and "CELLO_ARCH" in os.environ):
      arch = os.environ["CELLO_ARCH"]
@@ -52,194 +50,218 @@ if (type == 'unknown' and "CELLO_TYPE" in os.environ):
 if (prec == 'unknown' and "CELLO_PREC" in os.environ):
      prec = os.environ["CELLO_PREC"]
 
-platform = arch + '-' + type
+#----------------------------------------------------------------------
+# DEFINES
+#----------------------------------------------------------------------
 
-if (prec == 'unknown'): prec = 'single'
+define_serial =  [];
+define_mpi    =  ['CONFIG_USE_MPI'];
+define_charm  =  ['CONFIG_USE_CHARM']
+
+define_single = ['CONFIG_PRECISION_SINGLE']
+define_double = ['CONFIG_PRECISION_DOUBLE']
+
+define_hdf5  =  ['CONFIG_USE_HDF5','H5_USE_16_API'];
+define_png   =  ['NO_FREETYPE'];
+define_papi  =  ['CONFIG_USE_PAPI'];
+
+defines     = []
+defines_xlc = ""
+
+#--------------------------------------------------
+
+if (type == 'serial'):
+	defines     = defines
+	defines_xlc = defines_xlc
+elif (type == 'mpi'):
+	defines     = defines             + define_mpi
+	defines_xlc = defines_xlc + ' -D' + define_mpi[0]
+elif (type == 'charm'):
+	defines     = defines             + define_charm
+	defines_xlc = defines_xlc + ' -D' + define_charm[0]
+else:
+	print "Unrecognized parallel type ",type
+	sys.exit(1)
+
+#--------------------------------------------------
 
 if (prec == 'single'):
 	defines = defines + define_single
-	defines_string = defines_string + ' -D' + define_single[0]
+	defines_xlc = defines_xlc + ' -D' + define_single[0]
 elif (prec == 'double'):
 	defines = defines + define_double
-	defines_string = defines_string + ' -D' + define_double[0]
-
-#==================================================
-# Initialize environment according to platform
-#==================================================
-
-platform_list = [
-	      ['linux','mpi'],
-	      ['linux','charm'],
-	      ['linux','charm-perf'],
-	      ['linux','serial'],
-	      ['ncsa-bd','charm'],
-	      ['ncsa-bd','serial'],
-	      ['sdsc-triton','charm'],
-	      ['sdsc-triton','serial'],
-	    ]
-
-ok = 0
-for check in platform_list:
-    if (platform == check[0] + '-' + check[1]):
-       ok = 1
-
-if (ok == 0):
-   print "**********************************************************************"
-   print
-   print "Platform (<arch>-<type>) '",platform,"' is not recognized.  To specify the platform, either:"
-   print
-   print "1) Set the 'CELLO_ARCH' and 'CELLO_TYPE' environment variables,"
-   print
-   print "   or"
-   print
-   print "2) Use the 'arch=<arch>' and 'type=<type>' scons arguments"
-   print
-   print "Recognized <arch> and <type> combinations are:"
-   print
-   print "       ARCH           TYPE "
-   print "   ------------   ------------"
-   for p in platform_list:
-      print "   %(arch)-12s   %(type)-12s" % \
-              {'arch': p[0],     'type':p[1]}
-   print
-   print "**********************************************************************"
-   print
-   sys.exit()
-       
+	defines_xlc = defines_xlc + ' -D' + define_double[0]
+else:
+	print "Unrecognized precision ",prec
+	sys.exit(1)
 
 #--------------------------------------------------
-if (platform == 'linux-serial'):
+
+if (use_papi != 0): 
+	defines     = defines             + define_papi
+	defines_xlc = defines_xlc + ' -D' + define_papi[0]
+
 #--------------------------------------------------
 
-   flags_opt = '-g'
+if (use_hdf5 != 0):
+	defines     = defines     +         define_hdf5
+	defines_xlc = defines_xlc + ' -D' + define_hdf5[0]
+
+#--------------------------------------------------
+
+if (use_png != 0):
+	defines     = defines             + define_png;
+	defines_xlc = defines_xlc + ' -D' + define_png[0]
+
+#--------------------------------------------------
+
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+charm_path = '/home/bordner/charm/charm'  # arch
+
+cpppath     = ['#/include'];
+fortranpath = ['#/include'];
+libpath     = ['#/lib'];
+
+#======================================================================
+# ARCHITECTURE SETTINGS
+#======================================================================
+
+if (arch == "linux"):
+
+   fortran_serial = 'gfortran'
+   fortran_mpi    = 'gfortran'
+   fortran_charm  = 'gfortran'
+
+   cxx_serial = 'g++'
+   cxx_mpi    = 'mpic++'
+   cxx_charm  = charm_path + '/bin/charmc -language charm++ '
+
+   cc_serial  = 'gcc'
+   cc_mpi     = 'mpicc'
+   cc_charm   = charm_path + '/bin/charmc -language charm++ '
+
+   cppdefines = defines
+
+   papi_home = '/usr/local'
+
+#   flags_opt = '-g -O3 '
+#  compiler-independent flags
+   flags_opt  = '-g'
    flags_prec = '-m128bit-long-double'
    flags_warn = '-Wall'
-   flags_cxx = flags_opt + ' ' + flags_prec + ' ' + flags_warn
 
+# compiler-dependent flags
+   cxxflags_opt  = flags_opt
+   cxxflags_prec = flags_prec
+   cxxflags_warn = flags_warn
+
+   cflags_opt  = flags_opt
+   cflags_prec = flags_prec
+   cflags_warn = flags_warn
+
+   fortranflags_opt  = flags_opt
+   fortranflags_prec = flags_prec
+   fortranflags_warn = flags_warn
+
+   linkflags_opt  = flags_opt
+   linkflags_prec = flags_prec
+   linkflags_warn = flags_warn
+
+elif (arch == "ncsa-bd"):
+
+   print "unfinished"
+
+elif (arch == "sdsc-triton"):
+
+   print "unfinished"
+
+
+#======================================================================
+# PARALLELISM SETTINGS
+#======================================================================
+flags_type = ''
+if (type == "serial"):
+   cxx          = cxx_serial
+   cc           = cc_serial
+   fortran      = fortran_serial
+   serial_run   = ""
    parallel_run = ""
-   parallel_type = "serial"
+elif (type == "mpi"):
+   cxx          = cxx_mpi
+   cc           = cc_mpi
+   fortran      = fortran_mpi
    serial_run   = ""
-
-   if (use_papi):
-      include_path = ['#/include','/usr/local/include'];
-      lib_path     = ['#/lib','/usr/local/lib'];
-   else:
-      include_path = ['#/include'];
-      lib_path     = ['#/lib'];
-
-   env = Environment (
-      CC          = 'gcc',	
-      CPPDEFINES  = defines,
-      CPPPATH     = include_path,
-      CXXFLAGS    = flags_cxx,
-      CFLAGS      = flags_cxx,
-      CXX         = 'g++',	
-      ENV         = os.environ,
-      FORTRAN     = 'gfortran',
-      FORTRANFLAGS = flags_cxx,
-      FORTRANLIBS = 'gfortran',
-      FORTRANPATH = include_path,
-      LIBPATH     = lib_path,
-      LINKFLAGS   = flags_cxx
-   )
-#--------------------------------------------------
-elif (platform == 'linux-mpi'):
-#--------------------------------------------------
    parallel_run = "mpirun -np 4"
+elif (type == "charm"):
+   cxx          = cxx_charm
+   cc           = cc_charm
+   fortran      = fortran_charm
    serial_run   = ""
-   parallel_type = "mpi"
-   env = Environment (
-      CC          = 'mpicc',	
-      CPPDEFINES  = defines + define_mpi,
-      CPPPATH     = '#/include',
-      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
-      CFLAGS      = '-Wall -g  -m128bit-long-double',
-      CXX         = 'mpic++',	
-      ENV         = os.environ,
-      FORTRAN     = 'gfortran',
-      FORTRANLIBS = 'gfortran',
-      FORTRANPATH = '#/include',
-      LIBPATH     = '#/lib',
-   )
-#--------------------------------------------------
-elif (platform == 'linux-mpi-valgrind'):
-#--------------------------------------------------
-   parallel_run = "mpirun -np 4 valgrind"
-   serial_run   = "valgrind "
-   parallel_type = "mpi"
-   env = Environment (
-      CC          = 'mpicc',	
-      CPPDEFINES  = defines + define_mpi,
-      CPPPATH     = '#/include',
-      CXXFLAGS    = '-Wall -g  -m128bit-long-double',
-      CFLAGS      = '-Wall -g  -m128bit-long-double',
-      CXX         = 'mpic++',	
-      FORTRAN     = 'gfortran',
-      FORTRANLIBS = 'gfortran',
-      FORTRANPATH = '#/include',
-      LIBPATH     = '#/lib',
-   )
-
-#--------------------------------------------------
-elif (platform == 'linux-charm' or platform == 'linux-charm-perf'):
-#--------------------------------------------------
-
-   flags_opt = '-g -O3 '
-
-#   flags_debug = '-memory charmdebug'
-   flags_debug = ''
-
-   if (platform == 'linux-charm-perf'):
-	flags_charm = '-tracemode projections'
-   else:
-	flags_charm = ''
-
-   flags = flags_opt + ' ' + flags_debug + ' -m128bit-long-double '
    parallel_run = charm_path + "/bin/charmrun +p4 "
-   parallel_type = "charm"
-   serial_run   = ""
-  
-   if (use_papi):
-      include_path = ['#/include','/usr/local/include'];
-      lib_path     = ['#/lib','/usr/local/lib'];
-   else:
-      include_path = ['#/include'];
-      lib_path     = ['#/lib'];
+#   flags_type =  '-tracemode projections'
 
-   env = Environment(
-      CC          = charm_path + '/bin/charmc -language charm++ '+flags+flags_charm,
-      CPPDEFINES  = defines + define_charm,
-      CPPPATH     = include_path,
-      CXX         = charm_path + '/bin/charmc -language charm++ '+flags+flags_charm,
-      CXXFLAGS    = flags,
-      CFLAGS      = flags,
-      ENV         = os.environ,
-      FORTRAN     = 'gfortran',
-      FORTRANFLAGS = flags,
-      FORTRANLIBS = 'gfortran',
-      FORTRANPATH = '#/include',
-      LIBFLAGS     = flags,
-      LIBPATH     = lib_path,
-      )
+#======================================================================
+# PERFORMANCE SETTINGS
+#======================================================================
+
+if (use_papi):
+   cpppath     = cpppath     + (papi_home + '/include')
+
+#======================================================================
+# DEBUG SETTINGS
+#======================================================================
+
+if (use_valgrind):
+   parallel_run = parallel_run + " valgrind"
+   serial_run   = "valgrind " + serial_run
+
+
+environ  = os.environ
+
+cxxflags = cxxflags_opt + ' ' + cxxflags_prec + ' ' + cxxflags_warn
+cflags   = cflags_opt + ' '  + cflags_prec + ' ' + cflags_warn
+fortranflags = fortranflags_opt + ' ' + fortranflags_prec + ' ' + fortranflags_warn
+linkflags = linkflags_opt + ' ' + linkflags_prec + ' ' + linkflags_warn
+
+platform = arch + '-' + type
+
+#======================================================================
+# ENVIRONMENT
+#======================================================================
+
+env = Environment (
+      CC          = cc,	
+      CFLAGS      = cflags,
+      CPPDEFINES  = cppdefines,
+      CPPPATH     = cpppath,
+      CXX         = cxx,	
+      CXXFLAGS    = cxxflags,
+      ENV         = environ,
+      FORTRANFLAGS = fortranflags,
+      FORTRAN     = fortran,
+      FORTRANLIBS = fortran,
+      FORTRANPATH = fortranpath,
+      LIBPATH     = libpath,
+      LINKFLAGS   = linkflags )
+
+#======================================================================
+# BUILDERS
+#======================================================================
+
+if (type == "charm"):
    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 
 #--------------------------------------------------
-elif (platform == 'sdsc-triton-charm' or platform == 'sdsc-triton-serial'):
+if (platform == 'sdsc-triton-charm' or platform == 'sdsc-triton-serial'):
 #--------------------------------------------------
 
-   if (platform == 'sdsc-triton-charm'):
-      parallel_run = charm_path + "/bin/charmrun +p4 "
-      parallel_type = "charm"
-   elif (platform == 'sdsc-triton-serial'):
-      parallel_run = ""
-      parallel_type = "serial"
-
-   serial_run   = ""
    path_hdf5 = '/opt/hdf5/pgi'
    env = Environment (
       CC      = 'pgcc',	
-      CPPDEFINES = defines + define_charm,
+      CPPDEFINES = defines,
       CPPPATH = ['#/include', path_hdf5 + '/include'],
       CXXFLAGS = '-g -DH5_USE_16_API',
       CFLAGS   = '-g -DH5_USE_16_API',
@@ -258,10 +280,8 @@ elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
 
    if (platform == 'ncsa-bd-charm'):
       parallel_run = charm_path + "/bin/charmrun +p4 "
-      parallel_type = "charm"
    elif (platform == 'ncsa-bd-serial'):
       parallel_run = ""
-      parallel_type = "serial"
 
    serial_run    = ""
 
@@ -307,9 +327,9 @@ elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
    env = Environment (
       ARFLAGS  = 'r',
       CCFLAGS = flags,
-      CC      = cc + defines_string,
+      CC      = cc + defines_xlc,
       CPPPATH = ['/home/bordner/include', '#/include', inc_hdf5, inc_papi],
-      CXX     = cxx + defines_string,	
+      CXX     = cxx + defines_xlc,	
       CXXFLAGS = flags,
       ENV         = os.environ,
       DEFINES = '',
