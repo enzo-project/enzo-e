@@ -171,34 +171,14 @@ Test data shown on this page is automatically generated whenever <code>Cello</co
 
 <?php
 
+
 function test_summary($component,$test_output,$executables)
 {
   printf ("<tr><th><a href=\"#$component\">$component</a></th>\n");
 
   $parallel_types  = array("serial","mpi","charm");
 
-  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-
-    $output_files = "";
-    for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = $test_output[$test];
-      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
-    }
-    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
-
-  }
-
-
-  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-
-    $output_files = "";
-    for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = $test_output[$test];
-      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
-    }
-
-    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
-  }
+// Compiles Failed
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
@@ -219,6 +199,47 @@ function test_summary($component,$test_output,$executables)
     }
   }
 
+// Runs Failed
+
+  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+
+    $output_files = "";
+    for ($test = 0; $test<sizeof($test_output); ++$test) {
+      $output = $test_output[$test];
+      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
+    }
+
+    system("awk 'BEGIN{c=0}; /UNIT TEST BEGIN/ {c=c+1};/UNIT TEST END/ {c=c-1};END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
+  }
+
+
+// Tests Failed
+
+  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+
+    $output_files = "";
+    for ($test = 0; $test<sizeof($test_output); ++$test) {
+      $output = $test_output[$test];
+      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
+    }
+
+    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
+  }
+
+// Tests Passed
+
+  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+
+    $output_files = "";
+    for ($test = 0; $test<sizeof($test_output); ++$test) {
+      $output = $test_output[$test];
+      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
+    }
+    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
+
+  }
+
+
   printf ("</tr>\n");
 }
 ?>
@@ -227,14 +248,19 @@ function test_summary($component,$test_output,$executables)
 <?php
 printf ("<table>\n");
 printf ("<tr>\n");
-     printf ( "<th></th>");
-     printf ( "<th colspan=3>Tests Passed</th>");
-     printf ( "<th colspan=3>Tests Failed</th>");
-     printf ( "<th colspan=3>Compiles Failed</th>");
-     printf ( "</tr><tr><th></th>\n");
+     printf ( "<th rowspan=2>");
+      printf ("<strong>");
+      system("ls running.* | sed 's/running\.//g' | sed 's/\./\<\/br\/\> /g'");
+      printf ("</strong>");
+     printf ("</th>");
+     printf ( "<th colspan=3 class=fail >Compiles Failed</th>");
+     printf ( "<th colspan=3 class=fail>Runs Failed</th>");
+     printf ( "<th colspan=3 class=fail>Tests Failed</th>");
+     printf ( "<th colspan=3 class=pass>Tests Passed</th>");
+     printf ( "</tr><tr>\n");
 
 $parallel_labels = array("serial","mpi","charm");
-for ($k = 0; $k < 3; $k ++) {
+for ($k = 0; $k < 4; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
     printf ("<th> $parallel_labels[$i] </th>");
   }
@@ -267,13 +293,8 @@ test_summary("Simulation",array("Simulation"),
 // test_summary("Method",array("")); 
 // test_summary("Particles",array("")); 
 // test_summary("Portal",array("")); 
+printf ("</tr></table>\n");
  ?>
-</tr></table>
-
-</ul>
-
-
-
 
 <?php
 

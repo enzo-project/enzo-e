@@ -13,11 +13,16 @@ else
   set types = (serial mpi charm )
 endif
 
+set prec = $CELLO_PREC
+
 echo
 echo "arch  = $arch"
 echo "types = ( $types )"
+echo "prec  = $prec"
 echo
 set procs = 1
+
+rm running.*.*.*
 
 foreach type ($types)
 
@@ -28,6 +33,7 @@ foreach type ($types)
    printf "$d %-14s %-14s" "${platform}" "cleaning..."
    scons arch=$arch type=$type -c >& /dev/null
    rm -f test/$type-*unit >& /dev/null
+   rm -f bin-$type/* >& /dev/null
    printf "done\n"
 
 
@@ -37,7 +43,10 @@ foreach type ($types)
 
    printf "$d %-14s %-14s" "${platform}" "compiling..."
 
+   touch "running.$arch.$type.$prec"
+
    set t = `(time scons arch=$arch type=$type -k -j$procs >& out.scons.$platform)`
+   rm -f "running.$arch.$type.$prec"
   
    set secs = `echo $t | awk '{print $3}'`
 
