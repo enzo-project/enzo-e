@@ -248,7 +248,7 @@ function test_summary($component,$test_output,$executables)
 <?php
 printf ("<table>\n");
 printf ("<tr>\n");
-     printf ( "<th rowspan=2>");
+     printf ( "<th rowspan=2 class=yellow>");
       printf ("<strong>");
       system("ls running.* | sed 's/running\.//g' | sed 's/\./\<\/br\/\> /g'");
       printf ("</strong>");
