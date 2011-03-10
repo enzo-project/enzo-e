@@ -146,9 +146,9 @@ if (arch == "linux"):
 
    papi_home = '/usr/local'
 
-#   flags_opt = '-g -O3 '
-#  compiler-independent flags
-   flags_opt  = '-g'
+#   flags_opt = '-g -O3 -pg'
+   flags_opt = '-g -O3 '
+#   flags_opt  = '-g'
    flags_prec = '-m128bit-long-double'
    flags_warn = '-Wall'
 

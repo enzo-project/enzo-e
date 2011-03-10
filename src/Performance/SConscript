@@ -11,7 +11,7 @@ Import('use_papi')
 #------------------------------
 
 
-components = ['error','cello']
+components = ['error','monitor','cello']
 if (use_papi):
 	components = components + ['papi','pfm']
 
