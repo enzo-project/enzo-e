@@ -12,12 +12,8 @@
 
 //----------------------------------------------------------------------
 
-EnzoInitialImplosion2::EnzoInitialImplosion2
-(
- EnzoBlock * enzo
- ) throw ()
-  : Initial(),
-    enzo_(enzo)
+EnzoInitialImplosion2::EnzoInitialImplosion2 () throw ()
+  : Initial()
 {}
 
 //----------------------------------------------------------------------
@@ -26,7 +22,10 @@ void EnzoInitialImplosion2::compute (Block * block) throw()
 
 {
 
-  FieldBlock * field_block       = block->field_block();
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+
+  FieldBlock * field_block       = enzo_block->field_block();
+
   const FieldDescr * field_descr = field_block->field_descr();
 
   ASSERT("EnzoInitialImplosion2",
@@ -47,7 +46,7 @@ void EnzoInitialImplosion2::compute (Block * block) throw()
   field_block->size(&nx,&ny,&nz);
 
   double hx,hy,hz;
-  field_block->cell_width(block,&hx,&hy,&hz);
+  field_block->cell_width(enzo_block,&hx,&hy,&hz);
 
   int gx,gy,gz;
   field_descr->ghosts(index_density,&gx,&gy,&gz);

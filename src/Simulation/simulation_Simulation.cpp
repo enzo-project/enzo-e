@@ -299,8 +299,15 @@ void Simulation::initialize_mesh_() throw()
   root_blocks[1] = parameters_->list_value_integer(1,"root_blocks",1);
   root_blocks[2] = parameters_->list_value_integer(2,"root_blocks",1);
 
-  mesh_ = new Mesh(root_size[0],root_size[1],root_size[2],
-		   root_blocks[0],root_blocks[1],root_blocks[2]);
+  mesh_ = create_mesh (root_size[0],root_size[1],root_size[2],
+		       root_blocks[0],root_blocks[1],root_blocks[2]);
+
+  // Allocate and insert the root patch
+  Patch * root_patch = mesh_->create_patch
+    (root_size[0],root_size[1],root_size[2],
+     root_blocks[0],root_blocks[1],root_blocks[2]);
+
+  mesh_->insert_patch(root_patch);
 
   // Domain extents
 
@@ -331,8 +338,6 @@ void Simulation::initialize_mesh_() throw()
 		   domain_upper[2]);
 
   // Create the root patch
-
-  Patch * root_patch = mesh_->root_patch();
 
   root_patch->set_extents(domain_lower[0],domain_upper[0],
 			  domain_lower[1],domain_upper[1],

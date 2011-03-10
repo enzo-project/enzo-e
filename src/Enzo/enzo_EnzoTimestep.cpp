@@ -12,9 +12,8 @@
 
 //----------------------------------------------------------------------
 
-EnzoTimestep::EnzoTimestep (EnzoBlock * enzo) throw()
-  : Timestep(),
-    enzo_(enzo)
+EnzoTimestep::EnzoTimestep () throw()
+  : Timestep()
 {
 
 }
@@ -24,7 +23,9 @@ EnzoTimestep::EnzoTimestep (EnzoBlock * enzo) throw()
 double EnzoTimestep::compute ( Block * block ) throw()
 {
 
-  FieldBlock * field_block = block->field_block();
+  EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
+
+  FieldBlock * field_block = enzo_block->field_block();
   enzo_float * density_field    = 0;
   enzo_float * velocity_x_field = 0;
   enzo_float * velocity_y_field = 0;
@@ -40,7 +41,7 @@ double EnzoTimestep::compute ( Block * block ) throw()
 
   enzo_float a = 1, dadt;
   if (enzo::ComovingCoordinates)
-    enzo_->CosmologyComputeExpansionFactor(enzo_->Time, &a, &dadt);
+    enzo_block->CosmologyComputeExpansionFactor(enzo_block->Time, &a, &dadt);
   //  enzo_float dt, dtTemp;
   enzo_float dtBaryons      = HUGE_VALF;
   //  enzo_float dtViscous      = HUGE_VALF;
@@ -69,11 +70,11 @@ double EnzoTimestep::compute ( Block * block ) throw()
 
   int  result;
   if (enzo::DualEnergyFormalism)
-    result = enzo_->ComputePressureDualEnergyFormalism
-      (enzo_->Time, pressure_field);
+    result = enzo_block->ComputePressureDualEnergyFormalism
+      (enzo_block->Time, pressure_field);
   else
-    result = enzo_->ComputePressure
-      (enzo_->Time, pressure_field);
+    result = enzo_block->ComputePressure
+      (enzo_block->Time, pressure_field);
  
   if (result == ENZO_FAIL) {
     fprintf(stderr, "Error in grid->ComputePressure.\n");
@@ -104,7 +105,7 @@ double EnzoTimestep::compute ( Block * block ) throw()
   /* 3) Find dt from expansion. */
  
   if (enzo::ComovingCoordinates)
-    if (enzo_->CosmologyComputeExpansionTimestep(enzo_->Time, &dtExpansion) == ENZO_FAIL) {
+    if (enzo_block->CosmologyComputeExpansionTimestep(enzo_block->Time, &dtExpansion) == ENZO_FAIL) {
       fprintf(stderr, "nudt: Error in ComputeExpansionTimestep.\n");
       exit(ENZO_FAIL);
     }
@@ -125,12 +126,14 @@ double EnzoTimestep::compute ( Block * block ) throw()
  
   /* 5) calculate minimum timestep */
 
-  FORTRAN_NAME(calc_dt)(&enzo::GridRank, enzo_->GridDimension, enzo_->GridDimension+1,
-			enzo_->GridDimension+2,
-			enzo_->GridStartIndex, enzo_->GridEndIndex,
-			enzo_->GridStartIndex+1, enzo_->GridEndIndex+1,
-			enzo_->GridStartIndex+2, enzo_->GridEndIndex+2,
-			&enzo_->CellWidth[0], &enzo_->CellWidth[1], &enzo_->CellWidth[2],
+  FORTRAN_NAME(calc_dt)(&enzo::GridRank, enzo_block->GridDimension, enzo_block->GridDimension+1,
+			enzo_block->GridDimension+2,
+			enzo_block->GridStartIndex, enzo_block->GridEndIndex,
+			enzo_block->GridStartIndex+1, enzo_block->GridEndIndex+1,
+			enzo_block->GridStartIndex+2, enzo_block->GridEndIndex+2,
+			&enzo_block->CellWidth[0], 
+			&enzo_block->CellWidth[1], 
+			&enzo_block->CellWidth[2],
 			&enzo::Gamma, &enzo::PressureFree, &a,
 			density_field, pressure_field,
 			velocity_x_field, 

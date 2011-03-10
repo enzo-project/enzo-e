@@ -5,6 +5,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @todo     Refactor initialize_mpi_()
+/// @todo     Fix MPI: add process first / count or mpi_comm to constructor
 /// @brief    Implementation of the Layout class
 
 //----------------------------------------------------------------------
@@ -24,6 +25,7 @@ Layout::Layout(int nbx, int nby, int nbz) throw()
   block_count_[2] = nbz;
 
 #ifdef CONFIG_USE_MPI
+  TRACE("");
   mpi_comm_ = MPI_COMM_CELLO;
   MPI_Comm_group (mpi_comm_, &mpi_group_);
 #endif

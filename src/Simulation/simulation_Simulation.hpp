@@ -36,23 +36,6 @@ public: // interface
   Simulation & operator= (const Simulation & simulation) throw();
 
   //----------------------------------------------------------------------
-
-  /// initialize the Simulation given a parameter file
-  virtual void initialize() throw();
-
-  /// Finalize the Simulation after running it
-  virtual void finalize() throw();
-
-  /// Run the simulation
-  virtual void run() throw() = 0;
-
-  /// Load a Simulation from disk
-  virtual void read() throw() = 0;
-
-  /// Write a Simulation state to disk
-  virtual void write() throw() = 0;
-
-  //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
   //----------------------------------------------------------------------
 
@@ -88,6 +71,31 @@ public: // interface
   /// Return the ith method
   Method * method(int i) const throw();
 
+public: // virtual functions
+
+  /// initialize the Simulation given a parameter file
+  virtual void initialize() throw();
+
+  /// Finalize the Simulation after running it
+  virtual void finalize() throw();
+
+  /// Run the simulation
+  virtual void run() throw() = 0;
+
+  /// Load a Simulation from disk
+  virtual void read() throw() = 0;
+
+  /// Write a Simulation state to disk
+  virtual void write() throw() = 0;
+
+  /// Create a new Mesh: FACTORY METHOD DESIGN PATTERN
+  virtual Mesh * create_mesh (int nx,int ny,int nz,
+			      int nbx,int nby,int nbz) throw()
+  { 
+    TRACE("Simulation::create_mesh()");
+    return new Mesh (nx,ny,nz,nbx,nby,nbz);
+  };
+  
 protected: // functions
 
   /// Initialize global simulation parameters

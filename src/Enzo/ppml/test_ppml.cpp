@@ -92,7 +92,8 @@ PARALLEL_MAIN_BEGIN
 
   // Initialize for generic hydrodynamics
 
-  EnzoBlock enzo;
+  FieldDescr field_descr;
+  EnzoBlock enzo(&field_descr,0,0,0,0);
 
   enzo.initialize_hydro ();
 

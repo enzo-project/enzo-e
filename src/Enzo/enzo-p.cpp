@@ -29,11 +29,15 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
+#ifdef CONFIG_USE_MPI
+  GroupProcess * parallel = GroupProcessMpi::create();
+#else
+  GroupProcess * parallel = GroupProcess::create();
+#endif
+
   // initialize unit testing
 
-  unit_init();
-
-  GroupProcess * parallel = GroupProcess::create();
+  unit_init(parallel->rank(), parallel->size());
 
   // only display output from root process
 
@@ -80,7 +84,8 @@ PARALLEL_MAIN_BEGIN
 
   Simulation * simulation = 0;
   if (parallel_method == "charm") {
-    simulation = new EnzoSimulationCharm (parameters);
+    INCOMPLETE("main","EnzoSimulationCharm unfinished");
+    //    simulation = new EnzoSimulationCharm (parameters);
   } else if (parallel_method == "serial") {
     simulation = new EnzoSimulationSerial (parameters);
   }

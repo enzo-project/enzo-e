@@ -38,12 +38,16 @@ public: // interface
   /// Write a Simulation state to disk
   virtual void write() throw();
 
+  /// Create a new Mesh: FACTORY METHOD DESIGN PATTERN
+  virtual Mesh * create_mesh (int nx,int ny,int nz,
+			      int nbx,int nby,int nbz) throw()
+  { 
+    return new EnzoMesh (nx,ny,nz,nbx,nby,nbz);
+  };
 
 public: // functions
 
-  /// Return the Enzo object created in EnzoSimulationSerial's constructor
-  EnzoBlock * enzo() throw ()
-  { return enzo_; };
+  
 
 protected: // virtual functions
 
@@ -65,22 +69,18 @@ protected: // virtual functions
 private: // functions
 
   /// Initialize a block before advancing a timestep
-  void block_start_(Block * block) throw ();
+  void block_start_(EnzoBlock * enzo_block) throw ();
 
   /// Finalize a block after advancing a timestep
-  void block_stop_(Block * block) throw ();
+  void block_stop_(EnzoBlock * enzo_block) throw ();
 
   /// Output data
-  void output_images_( Block * block,
+  void output_images_( EnzoBlock * enzo_block,
 		       const char * file_format,
 		       int cycle,
 		       int cycle_skip=1) throw ();
 
   void deallocate_() throw();
-
-private: // attributes
-
-  EnzoBlock * enzo_;
 
 };
 

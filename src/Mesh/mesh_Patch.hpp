@@ -27,7 +27,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Destructor
-  ~Patch() throw();
+  virtual ~Patch() throw();
 
   /// Copy constructor
   Patch(const Patch & patch,
@@ -75,6 +75,16 @@ public: // interface
   /// Return the ith block
   Block * block(int i) const throw();
 
+public: // virtual functions
+
+  /// Create a new Block: FACTORY METHOD DESIGN PATTERN
+  virtual Block * create_block (FieldDescr * field_descr, 
+				int nx, int ny=1, int nz=1,
+				int num_field_blocks = 1) throw()
+  { 
+    return new Block (field_descr, nx,ny,nz,num_field_blocks); 
+  };
+
 public: // entry functions
 
 #ifdef CONFIG_USE_CHARM
@@ -86,7 +96,7 @@ public: // entry functions
 
   //--------------------------------------------------
 
-private: // attributes
+protected: // attributes
 
   /// Layout: describes blocking, processor range, and block-processor mapping 
   Layout * layout_;

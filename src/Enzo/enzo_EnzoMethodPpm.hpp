@@ -17,17 +17,12 @@ class EnzoMethodPpm : public Hyperbolic {
 
 public: // interface
 
-  EnzoMethodPpm(Parameters * parameters,
-		EnzoBlock  * enzo);
+  EnzoMethodPpm(Parameters * parameters);
 
   /// Apply the method to advance a block one timestep 
 
-  void compute_block(Block * block,
-		     double t, double dt) throw();
-
-private:
-
-  EnzoBlock * enzo_;
+  virtual void compute_block(Block * block,
+			     double t, double dt) throw();
 
 };
 

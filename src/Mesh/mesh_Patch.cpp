@@ -178,7 +178,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
   for (int ib=0; ib<nb; ib++) {
 
     // create a new data block
-    Block * block = new Block(field_descr,mbx,mby,mbz);
+    Block * block = create_block (field_descr,mbx,mby,mbz);
 
     // Store the data block
     block_[ib] = block;

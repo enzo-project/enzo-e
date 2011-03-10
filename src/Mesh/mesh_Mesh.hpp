@@ -33,7 +33,7 @@ public: // interface
        int nbx, int nby, int nbz) throw ();
 
   /// Delete the Mesh object
-  ~Mesh() throw ();
+  virtual ~Mesh() throw ();
 
   //----------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ public: // interface
 
   /// Pointer to the root Patch
   Patch * root_patch() throw ()
-  { return (patch_.size() > 0) ? patch_[0] : 0; };
+  { return (patch_list_.size() > 0) ? patch_list_[0] : 0; };
 
   /// Return the total number of local patches
   size_t num_patches() const throw();
@@ -149,11 +149,24 @@ public: // interface
   MPI_Group mpi_group() { return mpi_group_; };
 #endif
 
-private: // attributes
+public: // virtual functions
+
+  /// Insert the given Patch into the list of patches
+  virtual void insert_patch(Patch *) throw();
+
+  /// Create a new Patch: FACTORY METHOD DESIGN PATTERN
+  virtual Patch * create_patch (int nx,int ny,int nz,
+				int nbx,int nby,int nbz) throw()
+  { 
+    return new Patch (nx,ny,nz,nbx,nby,nbz);
+  };
+
+
+protected: // attributes
 
   /// List of local patchs
 
-  std::vector<Patch *> patch_;
+  std::vector<Patch *> patch_list_;
 
   /// Tree defining the MESH hierarchy topology
   //  strict_auto_ptr<TreeK> tree_;
@@ -199,9 +212,10 @@ private: // attributes
   MPI_Group mpi_group_;
 #endif
 
-private: // functions
-
 #ifdef CONFIG_USE_MPI
+
+protected: // functions
+
   void initialize_mpi_();
 #endif
 

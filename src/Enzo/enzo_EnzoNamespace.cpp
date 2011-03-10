@@ -434,6 +434,16 @@ namespace enzo {
 
     CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
 
+    //--------------------------------------------------
+    parameters->set_current_group ("Initial");
+    //--------------------------------------------------
+
+    // parameter: Initial::time
+
+    double time  = parameters->value_scalar ("time",0.0);
+
+    InitialTimeInCodeUnits = time;
+
   } // void initialize()
 } // namespace enzo
 

@@ -18,18 +18,11 @@ class EnzoMethodPpml : public Hyperbolic {
 public: // interface
 
 /// Creae a new EnzoMethodPpml object
-  EnzoMethodPpml(Parameters * parameters,
-		 EnzoBlock * enzo)
-    : Hyperbolic (parameters),
-      enzo_(enzo)
+  EnzoMethodPpml(Parameters * parameters)
+    : Hyperbolic (parameters)
   {};
 
-  void compute_block( Block * block,
-		      double t, double dt ) throw(); 
-
-private: // attributes
-
-  EnzoBlock * enzo_;
+  virtual void compute_block( Block * block, double t, double dt ) throw(); 
 
 };
 

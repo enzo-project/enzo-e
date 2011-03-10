@@ -18,17 +18,13 @@ class EnzoTimestep : public Timestep {
 public: // interface
 
   /// Create a new EnzoTimestep
-  EnzoTimestep(EnzoBlock * enzo) throw();
+  EnzoTimestep() throw();
 
 public: // virtual functions
 
   /// Compute the timestep for the block
 
-  double compute ( Block * block ) throw(); 
-
-protected: // functions
-
-  EnzoBlock * enzo_;
+  virtual double compute ( Block * block ) throw(); 
 
 };
 

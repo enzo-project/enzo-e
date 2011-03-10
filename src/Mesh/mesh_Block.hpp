@@ -32,7 +32,7 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Destructor
-  ~Block() throw();
+  virtual ~Block() throw();
 
   /// Copy constructor
   Block(const Block & block) throw();
@@ -58,12 +58,12 @@ public: // interface
 		  double lower_y = 0.0, double upper_y = 1.0,
 		  double lower_z = 0.0, double upper_z = 1.0) throw();
 
-private: // functions
+protected: // functions
 
   /// Allocate and copy in attributes from give Block
   void copy_(const Block & block) throw();
 
-private: // attributes
+protected: // attributes
 
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;

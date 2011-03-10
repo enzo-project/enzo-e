@@ -21,7 +21,7 @@ struct fluxes
   enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
 };
 
-class EnzoBlock {
+class EnzoBlock : public Block {
 
   /// @class    EnzoBlock
   /// @ingroup  Enzo
@@ -29,17 +29,16 @@ class EnzoBlock {
 
 public: // interface
 
-  /// Constructor
-  EnzoBlock() throw();
+  /// Initialize the EnzoBlock object
+  EnzoBlock(FieldDescr * field_descr,
+	    int nx, int ny=1, int nz=1,
+	    int num_field_blocks = 1) throw();
 
   /// Destructor
   ~EnzoBlock() throw();
 
-  /// Initialize EnzoBlock values from parameter file
-  void initialize(Parameters * parameters) throw();
-
   /// Write attributes, e.g. to stdout for debugging
-  void write(FILE *fp) throw ();
+  void write(FILE *fp=stdout) throw ();
 
   //----------------------------------------------------------------------
   // Original Enzo functions
@@ -73,9 +72,7 @@ public: // interface
   int SolveMHDEquations(Block * block, int cycle, enzo_float dt);
   void initialize_ppml (int size_param);
 
-
-private: // functions
-
+  void initialize () throw();
 
 public: // attributes
 

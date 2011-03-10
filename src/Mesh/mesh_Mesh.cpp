@@ -26,10 +26,6 @@ Mesh::Mesh
     coalesce_(0)
 
 {
-  // create the root patch
-  patch_.resize(1);
-  patch_[0] = new Patch(nx,ny,nz,nbx,nby,nbz);
-
   // Initialize extents
   for (int i=0; i<3; i++) {
     lower_[i] = 0.0;
@@ -48,9 +44,9 @@ Mesh::Mesh
 
 Mesh::~Mesh() throw()
 {
-  for (size_t i=0; i<patch_.size(); i++) {
-    delete patch_[i];
-    patch_[i] = 0;
+  for (size_t i=0; i<patch_list_.size(); i++) {
+    delete patch_list_[i];
+    patch_list_[i] = 0;
   }
   delete tree_;
 }
@@ -59,13 +55,21 @@ Mesh::~Mesh() throw()
 
 size_t Mesh::num_patches() const  throw()
 {
-  return patch_.size();
+  return patch_list_.size();
 }
 
 //----------------------------------------------------------------------
 
 Patch * Mesh::patch(size_t i) const throw()
 {
-  return ( patch_.size()-1 >= i )? patch_[i] : 0;
+  return ( patch_list_.size()-1 >= i )? patch_list_[i] : 0;
 }
 
+//----------------------------------------------------------------------
+// virtual
+void Mesh::insert_patch(Patch * patch) throw()
+{
+  int size = patch_list_.size();
+  patch_list_.resize(size + 1);
+  patch_list_[size] = patch;
+}

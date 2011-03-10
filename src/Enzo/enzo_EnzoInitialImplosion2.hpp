@@ -18,16 +18,12 @@ class EnzoInitialImplosion2 : public Initial {
 public: // interface
 
   /// Constructor
-  EnzoInitialImplosion2(EnzoBlock * enzo) throw();
+  EnzoInitialImplosion2() throw();
 
   /// Initialize the block
 
   virtual void compute (Block * block) throw();
 
-private: // attributes
-
-  EnzoBlock * enzo_;
-  
 };
 
 #endif /* ENZO_ENZO_INITIAL_IMPLOSION2_HPP */

@@ -12,14 +12,15 @@
 
 //======================================================================
 
-//----------------------------------------------------------------------
-
-EnzoBlock::EnzoBlock() throw ()
-  :  CycleNumber(0),
-     Time(0),
-     OldTime(0),
-     dt(0),
-     SubgridFluxes(0)
+EnzoBlock::EnzoBlock(FieldDescr * field_descr,
+		     int nx, int ny, int nz,
+		     int num_field_blocks) throw()
+  : Block(field_descr,nx,ny,nz,num_field_blocks),
+    CycleNumber(0),
+    Time(0),
+    OldTime(0),
+    dt(0),
+    SubgridFluxes(0)
 {
 
   int i,j;
@@ -45,23 +46,7 @@ EnzoBlock::EnzoBlock() throw ()
 }
 
 //----------------------------------------------------------------------
-
-void
-EnzoBlock::initialize(Parameters * parameters) throw ()
-{
-  //--------------------------------------------------
-  parameters->set_current_group ("Initial");
-  //--------------------------------------------------
-
-  // parameter: Initial::cycle
-  // parameter: Initial::time
-
-  CycleNumber = parameters->value_integer ("cycle",0);
-  Time        = parameters->value_scalar ("time",0.0);
-  OldTime = Time;
-  InitialTimeInCodeUnits = Time;
-
-}
+//----------------------------------------------------------------------
 
 EnzoBlock::~EnzoBlock() throw ()
 {
@@ -306,3 +291,52 @@ void EnzoBlock::write(FILE * fp) throw ()
 }
 
 //----------------------------------------------------------------------
+void EnzoBlock::initialize () throw()
+{
+  //**************************************************
+  // BEGIN block_start_()
+  //**************************************************
+
+  double xm,xp,ym,yp,zm,zp;
+
+  extent(&xm,&xp,&ym,&yp,&zm,&zp);
+
+  GridLeftEdge[0]    = xm;
+  GridLeftEdge[1]    = ym;
+  GridLeftEdge[2]    = zm;
+
+  // Grid dimensions
+
+  int nx,ny,nz;
+  field_block_[0] -> size (&nx,&ny,&nz);
+
+  printf ("%d %d %d\n",nx,ny,nz);
+  GridDimension[0]  = nx + 2*enzo::ghost_depth[0];
+  GridDimension[1]  = ny + 2*enzo::ghost_depth[1];
+  GridDimension[2]  = nz + 2*enzo::ghost_depth[2];
+  GridStartIndex[0] = enzo::ghost_depth[0];
+  GridStartIndex[1] = enzo::ghost_depth[1];
+  GridStartIndex[2] = enzo::ghost_depth[2];
+  GridEndIndex[0]   = enzo::ghost_depth[0] + nx - 1;
+  GridEndIndex[1]   = enzo::ghost_depth[1] + ny - 1;
+  GridEndIndex[2]   = enzo::ghost_depth[2] + nz - 1;
+
+  // Initialize CellWidth
+
+  double h3[3];
+  field_block_[0]->cell_width(this,&h3[0],&h3[1],&h3[2]);
+
+  for (int dim=0; dim<enzo::GridRank; dim++) {
+    CellWidth[dim] = h3[dim];
+  }
+
+  // Initialize BaryonField[] pointers
+
+  for (int field = 0; field < enzo::NumberOfBaryonFields; field++) {
+    BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
+  }
+
+  //**************************************************
+  // END block_start_()
+  //**************************************************
+}
