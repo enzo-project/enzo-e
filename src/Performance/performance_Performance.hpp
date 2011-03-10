@@ -40,10 +40,10 @@ class Performance {
 public: // interface
 
   /// Initialize a Performance object
-  Performance(unsigned num_attributes, 
-	      unsigned num_counters,
-	      unsigned num_groups,
-	      unsigned num_regions);
+  Performance(unsigned num_attributes = 0, 
+	      unsigned num_counters = 0,
+	      unsigned num_groups = 0,
+	      unsigned num_regions = 0);
 
   /// Delete a Performance object
   ~Performance();
@@ -53,6 +53,17 @@ public: // interface
 
   /// Assignment operator
   Performance & operator= (const Performance & classname) throw();
+
+  //--------------------------------------------------
+
+  /// Start timers and counters
+  void start () throw ();
+
+  /// Stop timers and counters
+  void stop () throw ();
+
+  /// Write timers and counters
+  void write (FILE * fp = stdout) const throw ();
 
   //--------------------------------------------------
 
@@ -154,6 +165,12 @@ private: // functions
    );
 
 private: // attributes
+
+  /// Global timer
+  Timer timer;
+
+  /// PAPI counters, if available
+  Papi papi;
 
   /// Array of counters for regions
   std::vector<Counters *> counters_;

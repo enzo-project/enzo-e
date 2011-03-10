@@ -19,14 +19,21 @@ public: // interface
 
   /// Create the Timer object
   inline Timer();
+
   /// Start the timer
   inline void start();
+
   /// Stop the timer
   inline float stop();
+
   /// Clear the timer
   inline void clear();
+
   /// Return the value of the timer
   inline float value() const;
+
+  /// Write the timer information
+  void write (FILE * fp = stdout) const throw();
 
 private: // attributes
 
@@ -93,6 +100,18 @@ inline float Timer::value() const
   } else {
     return time_;
   }
+}
+
+
+//----------------------------------------------------------------------
+
+inline void Timer::write(FILE * fp) const throw()
+{
+  INCOMPLETE("Papi::write()","requires Monitor::fprint()--currently only stdout");
+  Monitor * monitor = Monitor::instance();
+
+  monitor->print ("Real time = %f\n",value());
+
 }
 
 #endif /* PERFORMANCE_TIMER_HPP */

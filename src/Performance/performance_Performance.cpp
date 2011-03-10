@@ -56,6 +56,31 @@ Performance::~Performance()
 
 //----------------------------------------------------------------------
 
+void Performance::start () throw ()
+{
+  timer.start();
+  papi.start();
+}
+
+//----------------------------------------------------------------------
+
+void Performance::stop () throw ()
+{
+  timer.stop();
+  papi.stop();
+}
+
+//----------------------------------------------------------------------
+
+void Performance::write (FILE * fp) const throw ()
+{
+  timer.write(fp);
+  papi.write(fp);
+  
+}
+
+//----------------------------------------------------------------------
+
 Performance::Performance(const Performance & classname) throw()
 {
   INCOMPLETE("Performance::Performance","");

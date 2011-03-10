@@ -159,6 +159,21 @@ public: // interface
 #endif
   }
 
+  void write (FILE * fp = stdout) const throw()
+  {
+    INCOMPLETE("Papi::write()","requires Monitor::fprint()--currently only stdout");
+
+#ifdef CONFIG_USE_PAPI
+    Monitor * monitor = Monitor::instance();
+    monitor->print ("PAPI Time real   = %f",time_real());
+    monitor->print ("PAPI Time proc   = %f\n",time_proc());
+    monitor->print ("PAPI GFlop count = %f\n",flop_count()*1e-9);
+    //  MONITOR->PRINT ("PAPI GFlop rate  = %f\n",flop_rate()*1e-9);
+    monitor->print ("PAPI GFlop rate  = %f\n",
+		    1e-9 * flop_count() / time_real());
+  
+#endif
+  };
 
 private: // attributes
 

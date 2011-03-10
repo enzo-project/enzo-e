@@ -22,7 +22,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "performance.hpp"
+#include "parallel.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

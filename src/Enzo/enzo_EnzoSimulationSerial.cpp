@@ -7,7 +7,6 @@
 /// @todo     Move boundary conditions to Boundary object; remove bc_reflecting
 /// @todo     Move output to Output object
 /// @todo     Move timestep reductions into Timestep object
-/// @todo     Fix MPI reduction operations, which hang due to local block loops
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoSimulationSerial user-dependent class member functions
 
@@ -54,13 +53,10 @@ void EnzoSimulationSerial::run() throw()
   
   Monitor * monitor = Monitor::instance();
 
-  // @@@ performance_->start();
-  Timer timer;
-  Papi papi;
-  
-  timer.start();
-  papi.start();
+  Performance performance;
 
+  performance.start();
+  
   //--------------------------------------------------
   // INITIALIZE FIELDS
   //--------------------------------------------------
@@ -304,21 +300,9 @@ void EnzoSimulationSerial::run() throw()
     }
   }
 
-  // @@@ performance_->stop();
-  papi.stop();
-  timer.stop();
+  performance.stop();
 
-#ifdef CONFIG_USE_PAPI
-  monitor->print ("PAPI Time real   = %f",papi.time_real());
-  monitor->print ("PAPI Time proc   = %f\n",papi.time_proc());
-  monitor->print ("PAPI GFlop count = %f\n",papi.flop_count()*1e-9);
-  //  MONITOR->PRINT ("PAPI GFlop rate  = %f\n",papi.flop_rate()*1e-9);
-  monitor->print ("PAPI GFlop rate  = %f\n",
-		   1e-9 * papi.flop_count() / papi.time_real());
-  
-#endif
-
-  monitor->print ("Real time = %f\n",timer.value());
+  performance.write();
 
 }
 

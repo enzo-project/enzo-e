@@ -27,6 +27,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
+#include "monitor.hpp"
 #include "error.hpp"
 
 //----------------------------------------------------------------------
@@ -34,8 +35,8 @@
 //----------------------------------------------------------------------
 
 #include "performance_Counters.hpp"
-#include "performance_Performance.hpp"
 #include "performance_Timer.hpp"
 #include "performance_Papi.hpp"
+#include "performance_Performance.hpp"
 
 #endif /* PERFORMANCE_HPP */

@@ -27,6 +27,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
+#include "performance.hpp"
 #include "method.hpp"
 #include "simulation.hpp"
 
