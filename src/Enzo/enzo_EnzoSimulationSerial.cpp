@@ -177,7 +177,7 @@ void EnzoSimulationSerial::run() throw()
 	enzo_block->field_block()->enforce_boundary(boundary_reflecting);
 
 	// Output while we're here
-	output_images_(enzo_block, "enzo-p-%06d.%d.png",cycle_mesh,10);
+	output_images_(enzo_block, "enzo-p-%06d.%d.png",cycle_mesh,0);
 
 	// Accumulate Block-local dt
 	dt_block = MIN(dt_block,timestep_->compute(enzo_block));
@@ -444,13 +444,6 @@ EnzoSimulationSerial::create_method_ ( std::string name ) throw ()
 }
 
 //======================================================================
-
-void EnzoSimulationSerial::block_start_ (EnzoBlock * enzo_block) throw ()
-{
-
-}
-
-//----------------------------------------------------------------------
 
 void EnzoSimulationSerial::output_images_
 (

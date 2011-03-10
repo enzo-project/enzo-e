@@ -293,10 +293,6 @@ void EnzoBlock::write(FILE * fp) throw ()
 //----------------------------------------------------------------------
 void EnzoBlock::initialize () throw()
 {
-  //**************************************************
-  // BEGIN block_start_()
-  //**************************************************
-
   double xm,xp,ym,yp,zm,zp;
 
   extent(&xm,&xp,&ym,&yp,&zm,&zp);
@@ -335,8 +331,4 @@ void EnzoBlock::initialize () throw()
   for (int field = 0; field < enzo::NumberOfBaryonFields; field++) {
     BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
   }
-
-  //**************************************************
-  // END block_start_()
-  //**************************************************
 }

@@ -68,12 +68,6 @@ protected: // virtual functions
 
 private: // functions
 
-  /// Initialize a block before advancing a timestep
-  void block_start_(EnzoBlock * enzo_block) throw ();
-
-  /// Finalize a block after advancing a timestep
-  void block_stop_(EnzoBlock * enzo_block) throw ();
-
   /// Output data
   void output_images_( EnzoBlock * enzo_block,
 		       const char * file_format,
