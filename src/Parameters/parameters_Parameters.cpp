@@ -631,7 +631,7 @@ void Parameters::monitor_read_
     // a list element
     param = list_element_(parameter,index);
   }
-  char buffer[80];
+  char buffer[MONITOR_LENGTH];
   std::string value = param ? 
     param->value_to_string().c_str() : 
     std::string("[" + deflt_string + "]");
@@ -655,7 +655,7 @@ void Parameters::monitor_read_
 void Parameters::monitor_write_ (std::string parameter) throw()
 {
   Param * param = parameter_(parameter);
-  char buffer[80];
+  char buffer[MONITOR_LENGTH];
   sprintf (buffer,"Parameter write %s:%s:%s = %s",
 	   current_group_.c_str(),
 	   current_subgroup_.c_str(),
