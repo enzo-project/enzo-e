@@ -88,9 +88,9 @@ void EnzoSimulationSerial::run() throw()
   //--------------------------------------------------
 
 #ifdef CONFIG_USE_MPI
-  Reduce<int>    reduce_cycle_patch(op_min, mesh_->mpi_comm());
-  Reduce<double> reduce_time_patch (op_min, mesh_->mpi_comm());
-  Reduce<int>    reduce_stop_patch (op_land,mesh_->mpi_comm());
+  Reduce<int>       reduce_cycle_patch(op_min,MPI_INT, mesh_->mpi_comm());
+  Reduce<double> reduce_time_patch (op_min,MPI_DOUBLE, mesh_->mpi_comm());
+  Reduce<int>       reduce_stop_patch (op_land,MPI_INT,mesh_->mpi_comm());
 #else
   Reduce<int>    reduce_cycle_patch(op_min);
   Reduce<double> reduce_time_patch (op_min);
@@ -100,9 +100,9 @@ void EnzoSimulationSerial::run() throw()
   while ((patch = ++itPatch)) {
 
 #ifdef CONFIG_USE_MPI
-    Reduce<int>    reduce_cycle_block(op_min, patch->layout()->mpi_comm());
-    Reduce<double> reduce_time_block (op_min, patch->layout()->mpi_comm());
-    Reduce<int>    reduce_stop_block (op_land,patch->layout()->mpi_comm());
+    Reduce<int>       reduce_cycle_block(op_min,MPI_INT, patch->layout()->mpi_comm());
+    Reduce<double> reduce_time_block (op_min,MPI_DOUBLE, patch->layout()->mpi_comm());
+    Reduce<int>       reduce_stop_block (op_land,MPI_INT,patch->layout()->mpi_comm());
 #else
     Reduce<int>    reduce_cycle_block(op_min);
     Reduce<double> reduce_time_block (op_min);
@@ -146,7 +146,7 @@ void EnzoSimulationSerial::run() throw()
     //--------------------------------------------------
 
 #ifdef CONFIG_USE_MPI
-    Reduce<double> reduce_dt_patch (op_min,mesh_->mpi_comm());
+    Reduce<double> reduce_dt_patch (op_min,MPI_DOUBLE,mesh_->mpi_comm());
 #else
     Reduce<double> reduce_dt_patch (op_min);
 #endif
@@ -156,7 +156,7 @@ void EnzoSimulationSerial::run() throw()
     while ((patch = ++itPatch)) {
 
 #ifdef CONFIG_USE_MPI
-      Reduce<double> reduce_dt_block(op_min, patch->layout()->mpi_comm());
+      Reduce<double> reduce_dt_block(op_min, MPI_DOUBLE, patch->layout()->mpi_comm());
 #else
       Reduce<double> reduce_dt_block(op_min);
 #endif
@@ -201,9 +201,9 @@ void EnzoSimulationSerial::run() throw()
     while ((patch = ++itPatch)) {
 
 #ifdef CONFIG_USE_MPI
-      Reduce<int>    reduce_cycle_block(op_min, patch->layout()->mpi_comm());
-      Reduce<double> reduce_time_block (op_min, patch->layout()->mpi_comm());
-      Reduce<int>    reduce_stop_block (op_land,patch->layout()->mpi_comm());
+      Reduce<int>    reduce_cycle_block(op_min,MPI_INT, patch->layout()->mpi_comm());
+      Reduce<double> reduce_time_block (op_min,MPI_DOUBLE, patch->layout()->mpi_comm());
+      Reduce<int>    reduce_stop_block (op_land,MPI_INT,patch->layout()->mpi_comm());
 #else
       Reduce<int>    reduce_cycle_block(op_min);
       Reduce<double> reduce_time_block (op_min);

@@ -27,9 +27,10 @@ public: // interface
 
   /// Constructor
 #ifdef CONFIG_USE_MPI
-  Reduce(enum_mpi_op op,MPI_Comm mpi_comm) throw()
+  Reduce(enum_mpi_op op, MPI_Datatype mpi_type, MPI_Comm mpi_comm) throw()
     : op_(op),
-      mpi_comm_(mpi_comm)
+      mpi_comm_(mpi_comm),
+      mpi_type_(mpi_type)
   { 
     reset();
     switch (op_) {
@@ -78,7 +79,7 @@ public: // interface
   {
     T global;
 #ifdef CONFIG_USE_MPI
-    MPI_Allreduce (&local_, &global, sizeof(T), MPI_CHAR,mpi_op_,mpi_comm_);
+    MPI_Allreduce (&local_, &global, 1, mpi_type_,mpi_op_,mpi_comm_);
 #else
     global = local_;
 #endif    
@@ -93,6 +94,7 @@ private: // attributes
 #ifdef CONFIG_USE_MPI
   MPI_Comm mpi_comm_;
   MPI_Op mpi_op_;
+  MPI_Datatype mpi_type_;
 #endif
 
 private: // attributes
