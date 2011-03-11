@@ -241,10 +241,10 @@ env.RunParse(parallel_type + '-test_parse_shock-pool.unit', '#/bin/test_Parse', 
 #----------------------------------------------------------------------
 
 
-Clean(env.RunParallel (parallel_type + '-test-enzo-p_implosion.unit',
+Clean(env.RunParallel (parallel_type + '-test_enzo-p_implosion.unit',
 		'#/bin/enzo-p', 
 		ARGS='input/test_implosion2d.in'),
-      [Glob('../enzo-p-??????.?.png'),parallel_type + '-test-enzo-p_implosion.unit'])
+      [Glob('../enzo-p-??????.?.png'),parallel_type + '-test_enzo-p_implosion.unit'])
 
 
 if (parallel_type == "mpi"):
