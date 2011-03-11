@@ -13,10 +13,12 @@
 
 //----------------------------------------------------------------------
 
-Block::Block(FieldDescr * field_descr,
-		     int nx, int ny, int nz,
-		     int num_field_blocks) throw ()
-  : field_block_()
+Block::Block(Patch * patch,
+	     FieldDescr * field_descr,
+	     int nx, int ny, int nz,
+	     int num_field_blocks) throw ()
+  : patch_(patch),
+    field_block_()
 
 { 
 

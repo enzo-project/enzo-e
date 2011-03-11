@@ -30,7 +30,8 @@ class EnzoBlock : public Block {
 public: // interface
 
   /// Initialize the EnzoBlock object
-  EnzoBlock(FieldDescr * field_descr,
+  EnzoBlock(Patch * patch,
+	    FieldDescr * field_descr,
 	    int nx, int ny=1, int nz=1,
 	    int num_field_blocks = 1) throw();
 
@@ -72,9 +73,11 @@ public: // interface
   int SolveMHDEquations(Block * block, int cycle, enzo_float dt);
   void initialize_ppml (int size_param);
 
+public: // functions (TEMPORARILY PUBLIC)
+
   void initialize () throw();
 
-public: // attributes
+public: // attributes (yikes!)
 
   int CycleNumber;
 

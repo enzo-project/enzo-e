@@ -158,7 +158,7 @@ public: // virtual functions
   virtual Patch * create_patch (int nx,int ny,int nz,
 				int nbx,int nby,int nbz) throw()
   { 
-    return new Patch (nx,ny,nz,nbx,nby,nbz);
+    return new Patch (this,nx,ny,nz,nbx,nby,nbz);
   };
 
 

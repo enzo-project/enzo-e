@@ -21,7 +21,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "parallel.hpp"
+// Error should not depend on anything
 
 //----------------------------------------------------------------------
 // Component class includes

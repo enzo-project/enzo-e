@@ -14,10 +14,12 @@
 
 Patch::Patch
 (
+ Mesh * mesh,
  int nx,  int ny,  int nz,
  int nbx, int nby, int nbz
 ) throw()
-  : layout_(new Layout (nbx,nby,nbz)),
+  : mesh_(mesh),
+    layout_(new Layout (nbx,nby,nbz)),
     block_()
 {
   // Check 

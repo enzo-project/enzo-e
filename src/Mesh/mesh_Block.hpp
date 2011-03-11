@@ -13,6 +13,7 @@
 
 class FieldDescr;
 class FieldBlock;
+class Patch;
 
 class Block {
 
@@ -23,7 +24,8 @@ class Block {
 public: // interface
 
   /// Initialize the Block object
-  Block(FieldDescr * field_descr,
+  Block(Patch * patch,
+	FieldDescr * field_descr,
 	int nx, int ny=1, int nz=1,
 	int num_field_blocks = 1) throw();
 
@@ -65,6 +67,9 @@ protected: // functions
 
 protected: // attributes
 
+  /// Parent Patch
+  Patch * patch_;
+ 
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
 

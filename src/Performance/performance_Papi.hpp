@@ -96,7 +96,7 @@ public: // interface
 
 
   /// Real time between start() and stop()
-  float time_real() throw()
+  float time_real() const throw()
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
@@ -112,7 +112,7 @@ public: // interface
   }
 
   /// Process time between start() and stop()
-  float time_proc() throw()
+  float time_proc() const throw()
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
@@ -128,7 +128,7 @@ public: // interface
   }
 
   /// Return number of flops between start() and stop()
-  long long flop_count() throw()
+  long long flop_count() const throw()
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
@@ -144,7 +144,7 @@ public: // interface
   }
 
   /// Return flop rate between start() and stop()
-  float flop_rate() throw()
+  float flop_rate() const throw()
   {
 #ifdef CONFIG_USE_PAPI
     if (is_started_) {
@@ -159,19 +159,14 @@ public: // interface
 #endif
   }
 
-  void write (FILE * fp = stdout) const throw()
+  void print () const throw()
   {
-    INCOMPLETE("Papi::write()","requires Monitor::fprint()--currently only stdout");
-
 #ifdef CONFIG_USE_PAPI
     Monitor * monitor = Monitor::instance();
     monitor->print ("PAPI Time real   = %f",time_real());
-    monitor->print ("PAPI Time proc   = %f\n",time_proc());
-    monitor->print ("PAPI GFlop count = %f\n",flop_count()*1e-9);
-    //  MONITOR->PRINT ("PAPI GFlop rate  = %f\n",flop_rate()*1e-9);
-    monitor->print ("PAPI GFlop rate  = %f\n",
-		    1e-9 * flop_count() / time_real());
-  
+    monitor->print ("PAPI Time proc   = %f",time_proc());
+    monitor->print ("PAPI GFlop count = %f",flop_count()*1e-9);
+    monitor->print ("PAPI GFlop rate  = %f",flop_count()*1e-9 / time_real());
 #endif
   };
 

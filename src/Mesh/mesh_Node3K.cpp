@@ -330,6 +330,10 @@ int Node3K::refine
 
     depth += increment;
 
+    delete [] ixk;
+    delete [] iyk;
+    delete [] izk;
+;
   } // if not at bottom of recursion
 
   return depth;

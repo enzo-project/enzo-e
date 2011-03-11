@@ -5,10 +5,11 @@ import sys
 # CONFIGURATION
 #----------------------------------------------------------------------
 
-use_hdf5     = 1
-use_png      = 1
 use_papi     = 0
 use_valgrind = 0
+
+use_hdf5     = 1
+use_png      = 1
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
@@ -117,18 +118,13 @@ if (use_png != 0):
 
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-charm_path = '/home/bordner/charm/charm'  # arch
-
-cpppath     = ['#/include'];
-fortranpath = ['#/include'];
-libpath     = ['#/lib'];
-
 #======================================================================
 # ARCHITECTURE SETTINGS
 #======================================================================
 
 if (arch == "linux"):
+
+   charm_path = '/home/bordner/charm/charm'  # arch
 
    fortran_serial = 'gfortran'
    fortran_mpi    = 'gfortran'
@@ -144,7 +140,7 @@ if (arch == "linux"):
 
    cppdefines = defines
 
-   papi_home = '/usr/local'
+   papi_path = '/usr/local'
 
 #   flags_opt = '-g -O3 -pg'
    flags_opt = '-g -O3 '
@@ -203,48 +199,55 @@ elif (type == "charm"):
 #   flags_type =  '-tracemode projections'
 
 #======================================================================
-# PERFORMANCE SETTINGS
-#======================================================================
-
-if (use_papi):
-   cpppath     = cpppath     + (papi_home + '/include')
-
-#======================================================================
 # DEBUG SETTINGS
 #======================================================================
 
 if (use_valgrind):
-   parallel_run = parallel_run + " valgrind"
-   serial_run   = "valgrind " + serial_run
+   parallel_run = parallel_run + " valgrind --leak-check=full "
+   serial_run   = "valgrind --leak-check=full " + serial_run
 
+#======================================================================
+# DEFAULT LINKER PATHS
+#======================================================================
 
-environ  = os.environ
+cpppath     = ['#/include'];
+libpath     = ['#/lib'];
 
-cxxflags = cxxflags_opt + ' ' + cxxflags_prec + ' ' + cxxflags_warn
-cflags   = cflags_opt + ' '  + cflags_prec + ' ' + cflags_warn
-fortranflags = fortranflags_opt + ' ' + fortranflags_prec + ' ' + fortranflags_warn
-linkflags = linkflags_opt + ' ' + linkflags_prec + ' ' + linkflags_warn
+#======================================================================
+# EXTRA LINKER PATHS
+#======================================================================
 
-platform = arch + '-' + type
+if (use_papi):
+   cpppath = [cpppath, papi_path + '/include']
+   libpath = [libpath, papi_path + '/lib']
 
 #======================================================================
 # ENVIRONMENT
 #======================================================================
 
+environ  = os.environ
+
+cxxflags = cxxflags_opt + ' ' + cxxflags_prec + ' ' + cxxflags_warn
+cflags   = cflags_opt + ' '  + cflags_prec + ' ' + cflags_warn
+fortranflags = fortranflags_opt + ' ' + fortranflags_prec + ' ' + fortranflags_warn 
+linkflags = linkflags_opt + ' ' + linkflags_prec + ' ' + linkflags_warn
+
+platform = arch + '-' + type
+
 env = Environment (
-      CC          = cc,	
-      CFLAGS      = cflags,
-      CPPDEFINES  = cppdefines,
-      CPPPATH     = cpppath,
-      CXX         = cxx,	
-      CXXFLAGS    = cxxflags,
-      ENV         = environ,
+      CC           = cc,	
+      CFLAGS       = cflags,
+      CPPDEFINES   = cppdefines,
+      CPPPATH      = cpppath,
+      CXX          = cxx,	
+      CXXFLAGS     = cxxflags,
+      ENV          = environ,
       FORTRANFLAGS = fortranflags,
-      FORTRAN     = fortran,
-      FORTRANLIBS = fortran,
-      FORTRANPATH = fortranpath,
-      LIBPATH     = libpath,
-      LINKFLAGS   = linkflags )
+      FORTRANPATH  = cpppath,
+      FORTRAN      = fortran,
+      FORTRANLIBS  = fortran,
+      LIBPATH      = libpath,
+      LINKFLAGS    = linkflags )
 
 #======================================================================
 # BUILDERS
@@ -267,7 +270,6 @@ if (platform == 'sdsc-triton-charm' or platform == 'sdsc-triton-serial'):
       CFLAGS   = '-g -DH5_USE_16_API',
       CXX     = 'pgCC',	
       FORTRAN = 'pgf77',
-      FORTRANPATH = '#/include',
       LIBPATH = ['#/lib', path_hdf5 + '/lib'],
       LINKFLAGS = '-pgf90libs',
       ENV = { 'PATH' : os.environ['PATH'], 

@@ -62,8 +62,8 @@ public: // interface
   /// Stop timers and counters
   void stop () throw ();
 
-  /// Write timers and counters
-  void write (FILE * fp = stdout) const throw ();
+  /// Display timers and counters using monitor
+  void print () const throw ();
 
   //--------------------------------------------------
 

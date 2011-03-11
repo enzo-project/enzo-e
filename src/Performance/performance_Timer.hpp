@@ -32,8 +32,8 @@ public: // interface
   /// Return the value of the timer
   inline float value() const;
 
-  /// Write the timer information
-  void write (FILE * fp = stdout) const throw();
+  /// Display the timer information
+  void print () const throw();
 
 private: // attributes
 
@@ -105,9 +105,8 @@ inline float Timer::value() const
 
 //----------------------------------------------------------------------
 
-inline void Timer::write(FILE * fp) const throw()
+inline void Timer::print() const throw()
 {
-  INCOMPLETE("Papi::write()","requires Monitor::fprint()--currently only stdout");
   Monitor * monitor = Monitor::instance();
 
   monitor->print ("Real time = %f\n",value());

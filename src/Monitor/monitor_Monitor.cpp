@@ -68,19 +68,21 @@ void Monitor::header () const
   char s_mpi   [80];
   char s_papi  [80];
 
-  sprintf (s_single,"[%c] CONFIG_PRECISION_SINGLE",c_single);
-  sprintf (s_double,"[%c] CONFIG_PRECISION_DOUBLE",c_double);
-  sprintf (s_quad,  "[%c] CONFIG_PRECISION_QUAD",  c_quad);
-  sprintf (s_charm, "[%c] CONFIG_USE_CHARM",       c_charm);
-  sprintf (s_mpi,   "[%c] CONFIG_USE_MPI",         c_mpi);
+  sprintf (s_single,"(%c) CONFIG_PRECISION_SINGLE",c_single);
+  sprintf (s_double,"(%c) CONFIG_PRECISION_DOUBLE",c_double);
+  sprintf (s_quad,  "(%c) CONFIG_PRECISION_QUAD",  c_quad);
+  sprintf (s_charm, "(%c) CONFIG_USE_CHARM",       c_charm);
+  sprintf (s_mpi,   "(%c) CONFIG_USE_MPI",         c_mpi);
   sprintf (s_papi,  "[%c] CONFIG_USE_PAPI",        c_papi);
 
   print ("==============================================");
   print (s_single);
   print (s_double);
   print (s_quad);
+  print ("");
   print (s_charm);
   print (s_mpi);
+  print ("");
   print (s_papi);
   print ("==============================================");
 

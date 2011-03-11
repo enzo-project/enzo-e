@@ -298,7 +298,10 @@ int Node2K::refine
       }
     }
 
+    
     delete [] depth_child;
+    delete [] iyk;
+    delete [] ixk;
 
     depth += increment;
 
@@ -690,6 +693,8 @@ void Node2K::fill_image
       }
     }
   }
+  delete [] ixk;
+  delete [] iyk;
 }
 
 //----------------------------------------------------------------------
@@ -765,6 +770,8 @@ void Node2K::geomview
       }
     }
   }
+  delete [] xk;
+  delete [] yk;
 }
 
 //----------------------------------------------------------------------

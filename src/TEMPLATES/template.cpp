@@ -8,8 +8,6 @@
 ///
 /// Detailed description of file component_Classname.cpp
 
-#include "cello.hpp"
-
 #include "component.hpp"
 
 //----------------------------------------------------------------------

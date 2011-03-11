@@ -10,6 +10,8 @@
 /// @todo     Move "size" to Block's, since that's Field-centric
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 
+class Mesh;
+
 class Patch {
 
   /// @class    Patch
@@ -19,7 +21,8 @@ class Patch {
 public: // interface
 
   /// Constructor for given Patch size and blocking count
-  Patch(int nx,   int ny,  int nz,
+  Patch(Mesh * mesh,
+	int nx,   int ny,  int nz,
 	int nbx,  int nby, int nbz) throw();
 
   //----------------------------------------------------------------------
@@ -82,7 +85,7 @@ public: // virtual functions
 				int nx, int ny=1, int nz=1,
 				int num_field_blocks = 1) throw()
   { 
-    return new Block (field_descr, nx,ny,nz,num_field_blocks); 
+    return new Block (this,field_descr, nx,ny,nz,num_field_blocks); 
   };
 
 public: // entry functions
@@ -97,6 +100,9 @@ public: // entry functions
   //--------------------------------------------------
 
 protected: // attributes
+
+  /// Parent mesh
+  Mesh * mesh_;
 
   /// Layout: describes blocking, processor range, and block-processor mapping 
   Layout * layout_;

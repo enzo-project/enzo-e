@@ -12,10 +12,11 @@
 
 //======================================================================
 
-EnzoBlock::EnzoBlock(FieldDescr * field_descr,
+EnzoBlock::EnzoBlock(Patch * patch,
+		     FieldDescr * field_descr,
 		     int nx, int ny, int nz,
 		     int num_field_blocks) throw()
-  : Block(field_descr,nx,ny,nz,num_field_blocks),
+  : Block(patch,field_descr,nx,ny,nz,num_field_blocks),
     CycleNumber(0),
     Time(0),
     OldTime(0),
@@ -43,6 +44,8 @@ EnzoBlock::EnzoBlock(FieldDescr * field_descr,
     }
 
   }
+  // CANNOT BE INITIALIZED HERE SINCE IT REQUIRES EXTENTS
+  //  initialize();
 }
 
 //----------------------------------------------------------------------

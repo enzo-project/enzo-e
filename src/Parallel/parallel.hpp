@@ -24,6 +24,7 @@ enum parallel_enum {
 #include <vector>
 #include <string>
 #include <map>
+#include <limits>
 
 #include <math.h>
 #include <stdio.h>
@@ -36,6 +37,11 @@ enum parallel_enum {
 #  include "charm++.h"
 #endif
 
+//----------------------------------------------------------------------
+// Cello include file
+//----------------------------------------------------------------------
+
+#include "cello.hpp"
 
 //----------------------------------------------------------------------
 // Component dependencies
@@ -57,6 +63,7 @@ enum parallel_enum {
 #include "parallel_GroupThread.hpp"
 #include "parallel_Parallel.hpp"
 #include "parallel_Layout.hpp"
+#include "parallel_Reduce.hpp"
 #include "parallel_ParallelAffinity.hpp"
 
 #endif /* PARALLEL_HPP */

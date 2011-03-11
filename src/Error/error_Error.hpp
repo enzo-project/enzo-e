@@ -7,7 +7,6 @@
 //----------------------------------------------------------------------
 /// @file     error_Error.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @todo     Add Parallel support
 /// @bug      exit() is called instead of MPI_Abort(), etc.
 /// @date     Thu Feb 25 16:20:17 PST 2010
 /// @brief    Declaration of the Error class
@@ -56,7 +55,7 @@
 /// @brief    Trace file name and location to stdout
 #define TRACE(MESSAGE)						\
   {								\
-    PARALLEL_PRINTF ("TRACE %s:%d %s\n",__FILE__,__LINE__,MESSAGE);	\
+    printf ("TRACE %s:%d %s\n",__FILE__,__LINE__,MESSAGE);	\
     fflush(stdout);						\
   }
 
@@ -67,7 +66,7 @@
   {									\
     if (!(ASSERTION)) {							\
       message_(stderr,"ASSERT",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
-      PARALLEL_EXIT;							\
+      exit(1); /* VIOLATES PARALLEL_EXIT() */                           \
     }									\
   }
 

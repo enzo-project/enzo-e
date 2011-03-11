@@ -33,11 +33,11 @@ Import('serial_run')
 # Define a test for running unit tests
 
 copy_bin     = Builder(action = "cp $SOURCE $ARGS");
-run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS > $TARGET")
-run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET")
-run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET")
-run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS")
-run_tree     = Builder(action = serial_run   + " $SOURCE $ARGS > $OUT")
+run_parse    = Builder(action = serial_run   +  "$SOURCE < $ARGS >  $TARGET 2>&1")
+run_serial   = Builder(action = serial_run   +  "$SOURCE $ARGS > $TARGET 2>&1")
+run_parallel = Builder(action = parallel_run + " $SOURCE $ARGS > $TARGET 2>&1")
+run_method   = Builder(action = serial_run   + " $SOURCE > $ARGS 2>&1")
+run_tree     = Builder(action = serial_run   + " $SOURCE $ARGS > $OUT 2>&1")
 make_movie   = Builder(action = "convert ${ARGS} $TARGET; chmod a+r $TARGET; rm ${ARGS}")
 
 env.Append(BUILDERS = { 'RunSerial'   : run_serial } ) 
@@ -241,10 +241,10 @@ env.RunParse(parallel_type + '-test_parse_shock-pool.unit', '#/bin/test_Parse', 
 #----------------------------------------------------------------------
 
 
-Clean(env.RunParallel (parallel_type + '-enzo-p_implosion.unit',
+Clean(env.RunParallel (parallel_type + '-test-enzo-p_implosion.unit',
 		'#/bin/enzo-p', 
 		ARGS='input/test_implosion2d.in'),
-      [Glob('../enzo-p-??????.?.png'),parallel_type + '-enzo-p_implosion.unit'])
+      [Glob('../enzo-p-??????.?.png'),parallel_type + '-test-enzo-p_implosion.unit'])
 
 
 if (parallel_type == "mpi"):
@@ -264,7 +264,7 @@ else:
 
 SideEffect('log.txt', 
      [ parallel_type + '-test_GroupProcess.unit', 
-       parallel_type + '-enzo-p_implosion.unit'])
+       parallel_type + '-test_enzo-p_implosion.unit'])
 
 
 

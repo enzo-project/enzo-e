@@ -178,7 +178,7 @@ function test_summary($component,$test_output,$executables)
 
   $parallel_types  = array("serial","mpi","charm");
 
-// Compiles Failed
+// Missing executable
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
@@ -199,17 +199,35 @@ function test_summary($component,$test_output,$executables)
     }
   }
 
-// Runs Failed
+// Missing output
+
+  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+
+    $count_missing = 0;
+    for ($test = 0; $test<sizeof($test_output); ++$test) {
+      $output = "test/$parallel_types[$i]-test_$test_output[$test].unit";
+      if (! file_exists($output)) {
+          ++ $count_missing;
+      }
+    }
+    if ($count_missing == 0) {
+       printf ("<td></td>");
+    } else {
+       printf ("<td class=fail>$count_missing</td>");
+    }
+  }
+
+// Incomplete output
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = $test_output[$test];
-      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
+      $output = "test/$parallel_types[$i]-test_$test_output[$test].unit";
+      $output_files = "$output_files $output";
     }
-
-    system("awk 'BEGIN{c=0}; /UNIT TEST BEGIN/ {c=c+1};/UNIT TEST END/ {c=c-1};END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
+    system("awk 'BEGIN{c=0}; /UNIT TEST BEGIN/ {c=c+1};/UNIT TEST END/ {c=c-1};END{if (c!=0) {print c}} '");
+    printf("<td>");
   }
 
 
@@ -219,8 +237,8 @@ function test_summary($component,$test_output,$executables)
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = $test_output[$test];
-      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
+      $output = "test/$parallel_types[$i]-test_$test_output[$test].unit";
+      $output_files = "$output_files $output";
     }
 
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
@@ -253,14 +271,15 @@ printf ("<tr>\n");
       system("ls running.* | sed 's/running\.//g' | sed 's/\./\<\/br\/\> /g'");
       printf ("</strong>");
      printf ("</th>");
-     printf ( "<th colspan=3 class=fail >Compiles Failed</th>");
-     printf ( "<th colspan=3 class=fail>Runs Failed</th>");
+     printf ( "<th colspan=3 class=fail >Missing</br/>executable</th>");
+     printf ( "<th colspan=3 class=fail>Missing</br/>output</th>");
+     printf ( "<th colspan=3 class=fail>Incomplete</br/>output</th>");
      printf ( "<th colspan=3 class=fail>Tests Failed</th>");
      printf ( "<th colspan=3 class=pass>Tests Passed</th>");
      printf ( "</tr><tr>\n");
 
 $parallel_labels = array("serial","mpi","charm");
-for ($k = 0; $k < 4; $k ++) {
+for ($k = 0; $k < 5; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
     printf ("<th> $parallel_labels[$i] </th>");
   }
@@ -270,7 +289,7 @@ test_summary("Disk",array("FileHdf5","FileIfrit"),
 		    array("test_FileHdf5","test_FileIfrit")); 
 test_summary("Error",array("Error"),
 		    array("test_Error")); 
-test_summary("Enzo",array("enzo-p","ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion"),array("enzo-p","test_ppm","test_ppml")); 
+test_summary("Enzo",array("ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion","enzo-p_implosion"),array("enzo-p","test_ppm","test_ppml")); 
 test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces"),
 		    array("test_FieldBlock","test_FieldDescr","test_FieldFaces")); 
 test_summary("Memory",array("Memory"),
@@ -366,7 +385,7 @@ component("Enzo");
 
 <h4>enzo-p</h4>
 
-<?php tests("Enzo","enzo-p","enzo-p_implosion"); ?>
+<?php tests("Enzo","enzo-p","test_enzo-p_implosion"); ?>
 
 <table>
 <tr>

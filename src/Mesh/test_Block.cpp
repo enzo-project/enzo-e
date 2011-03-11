@@ -22,7 +22,7 @@ PARALLEL_MAIN_BEGIN
   unit_class ("Block");
 
   FieldDescr * field_descr = new FieldDescr;
-  Block * block = new Block (field_descr, 3,4,5);
+  Block * block = new Block (NULL,field_descr, 3,4,5);
 
   unit_func("Block");
   unit_assert (block != NULL);

@@ -30,7 +30,10 @@ PARALLEL_MAIN_BEGIN
 
   timer.start();
 
-  system("sleep 1");
+  int err; // To inhibit warnings--I'm not expecting the sleep command to fail
+
+  err = system("sleep 1");
+  if (err == -1) ERROR("main","system(sleep) failed!!");
   timer.stop();
 
   PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
@@ -39,7 +42,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert((timer.value() - 1.0) < time_tolerance);
 
   timer.start();
-  system("sleep 1");
+  err = system("sleep 1");
+  if (err == -1) ERROR("main","system(sleep) failed!!");
   timer.stop();
 
   PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
@@ -204,7 +208,8 @@ PARALLEL_MAIN_BEGIN
   Papi papi;
 
   papi.start();
-  system("sleep 1");
+  err = system("sleep 1");
+  if (err == -1) ERROR("main","system(sleep) failed!!");
   papi.stop();
 
   PARALLEL_PRINTF ("time_real = %f\n",papi.time_real());

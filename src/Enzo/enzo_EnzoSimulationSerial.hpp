@@ -69,7 +69,7 @@ protected: // virtual functions
 private: // functions
 
   /// Output data
-  void output_images_( EnzoBlock * enzo_block,
+  void output_images_( Block * block,
 		       const char * file_format,
 		       int cycle,
 		       int cycle_skip=1) throw ();

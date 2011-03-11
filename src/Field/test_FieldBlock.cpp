@@ -75,7 +75,7 @@ PARALLEL_MAIN_BEGIN
   int nx,ny,nz;
   nx=4; ny=5; nz=6;
 
-  Block * block = new Block (field_descr, nx,ny,nz);
+  Block * block = new Block (NULL,field_descr, nx,ny,nz);
   FieldBlock * field_block = block->field_block();
 
   //----------------------------------------------------------------------

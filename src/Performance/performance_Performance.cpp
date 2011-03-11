@@ -72,11 +72,10 @@ void Performance::stop () throw ()
 
 //----------------------------------------------------------------------
 
-void Performance::write (FILE * fp) const throw ()
+void Performance::print () const throw ()
 {
-  timer.write(fp);
-  papi.write(fp);
-  
+  timer.print();
+  papi.print();
 }
 
 //----------------------------------------------------------------------

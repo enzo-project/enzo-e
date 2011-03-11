@@ -20,7 +20,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
-#include "parallel.def" /* for PARALLEL_PRINTF */
+#include "parallel.hpp" /* for PARALLEL_PRINTF */
 #include "error.hpp"
 
 //----------------------------------------------------------------------

@@ -38,7 +38,8 @@ PARALLEL_MAIN_BEGIN
   int patch_blocking[] = {3,3,3};
 
   Patch * patch = new Patch
-    (patch_size[0],     patch_size[1],     patch_size[2],
+    (NULL,
+     patch_size[0],     patch_size[1],     patch_size[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2]);
 
   unit_assert(patch != NULL);
@@ -117,7 +118,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("num_blocks");
 
-  unit_assert(patch->num_blocks()==nbx*nby*nbz);
+  unit_assert(patch->num_blocks()==(size_t)nbx*nby*nbz);
 
   // loop over local data blocks and test their existence and properties
 

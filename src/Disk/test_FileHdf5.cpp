@@ -72,6 +72,9 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
+  delete [] a;
+  delete [] b;
+
   unit_func("read,write");
   unit_assert(passed);
 

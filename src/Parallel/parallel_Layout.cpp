@@ -25,7 +25,6 @@ Layout::Layout(int nbx, int nby, int nbz) throw()
   block_count_[2] = nbz;
 
 #ifdef CONFIG_USE_MPI
-  TRACE("");
   mpi_comm_ = MPI_COMM_CELLO;
   MPI_Comm_group (mpi_comm_, &mpi_group_);
 #endif
