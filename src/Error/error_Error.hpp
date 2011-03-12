@@ -45,9 +45,9 @@
 //----------------------------------------------------------------------
 /// @def      INCOMPLETE
 /// @brief    Placeholder for code that is incomplete
-#define INCOMPLETE(FUNCTION,MESSAGE)					\
+#define INCOMPLETE(FUNCTION)					\
   {									\
-    message_(stdout,"INCOMPLETE",__FILE__,__LINE__,FUNCTION,MESSAGE);	\
+    message_(stdout,"INCOMPLETE",__FILE__,__LINE__,FUNCTION,"");	\
   }
 
 //----------------------------------------------------------------------

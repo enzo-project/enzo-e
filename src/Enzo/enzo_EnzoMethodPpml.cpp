@@ -55,7 +55,7 @@ void EnzoMethodPpml::compute_block(Block * block,
 				   double t,double dt) throw()
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  INCOMPLETE("EnzoMethodPpml::compute_block","");
+  INCOMPLETE("EnzoMethodPpml::compute_block");
 }
 
 //----------------------------------------------------------------------

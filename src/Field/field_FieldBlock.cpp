@@ -41,12 +41,12 @@ FieldBlock::~FieldBlock() throw()
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( const FieldBlock & field_block ) throw ()
-{  INCOMPLETE("FieldBlock::FieldBlock",""); }
+{  INCOMPLETE("FieldBlock::FieldBlock"); }
 
 //----------------------------------------------------------------------
 
 FieldBlock & FieldBlock::operator= ( const FieldBlock & field_block ) throw ()
-{  INCOMPLETE("FieldBlock::operator=","");
+{  INCOMPLETE("FieldBlock::operator=");
   return *this;
 }
 
@@ -332,7 +332,7 @@ void FieldBlock::deallocate_ghosts() throw ()
 //----------------------------------------------------------------------
 void FieldBlock::refresh_ghosts() throw()
 {
-  INCOMPLETE("FieldBlock::refresh_ghosts","");
+  INCOMPLETE("FieldBlock::refresh_ghosts");
   if ( ghosts_allocated() ) {
   } else {
     WARNING("FieldBlock::refresh_ghosts",
@@ -543,7 +543,7 @@ void FieldBlock::enforce_boundary_outflow_
  axis_enum axis
  ) throw()
 {
-  INCOMPLETE("FieldBlock::enforce_boundary_outflow","");
+  INCOMPLETE("FieldBlock::enforce_boundary_outflow");
 }
 
 //----------------------------------------------------------------------
@@ -553,7 +553,7 @@ void FieldBlock::enforce_boundary_inflow_
  axis_enum axis
  ) throw()
 {
-  INCOMPLETE("FieldBlock::enforce_boundary_inflow","");
+  INCOMPLETE("FieldBlock::enforce_boundary_inflow");
 }
 
 //----------------------------------------------------------------------
@@ -563,7 +563,7 @@ void FieldBlock::enforce_boundary_periodic_
  axis_enum axis
  ) throw()
 {
-  INCOMPLETE("FieldBlock::enforce_boundary_periodic","");
+  INCOMPLETE("FieldBlock::enforce_boundary_periodic");
 }
 
 //----------------------------------------------------------------------
@@ -590,14 +590,14 @@ FieldBlock * FieldBlock::merge
 	
 void FieldBlock::read (File * file) throw ()
 {
-  INCOMPLETE("FieldBlock::read","");
+  INCOMPLETE("FieldBlock::read");
 }
 
 //----------------------------------------------------------------------
 
 void FieldBlock::write (File * file) const throw ()
 {
-  INCOMPLETE("FieldBlock::write","");
+  INCOMPLETE("FieldBlock::write");
 }
 
 //----------------------------------------------------------------------
@@ -607,7 +607,7 @@ void FieldBlock::set_field_values
  int    id_field, 
  char * field_values) throw()
 {
-  INCOMPLETE("FieldBlock::set_field_values","");
+  INCOMPLETE("FieldBlock::set_field_values");
 }
 
 //======================================================================

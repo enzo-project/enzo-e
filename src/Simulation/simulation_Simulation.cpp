@@ -11,8 +11,9 @@
 #include "simulation.hpp"
 
 /// Initialize the Simulation object
-Simulation::Simulation(Parameters * parameters)
+Simulation::Simulation(Parameters * parameters,GroupProcess * group_process)
   : dimension_(0),
+    group_process_(group_process),
     parameters_(parameters),
     mesh_(0),
     field_descr_(0),
@@ -44,7 +45,7 @@ Simulation::~Simulation() throw()
 
 Simulation::Simulation(const Simulation & simulation) throw()
 {
-  INCOMPLETE("Simulation::Simulation(simulation)","");
+  INCOMPLETE("Simulation::Simulation(simulation)");
 }
 
 //----------------------------------------------------------------------
@@ -52,7 +53,7 @@ Simulation::Simulation(const Simulation & simulation) throw()
 
 Simulation & Simulation::operator= (const Simulation & simulation) throw()
 {
-  INCOMPLETE("Simulation::operatior = (simulation)","");
+  INCOMPLETE("Simulation::operatior = (simulation)");
   return (*this);
 }
 
@@ -299,12 +300,14 @@ void Simulation::initialize_mesh_() throw()
   root_blocks[1] = parameters_->list_value_integer(1,"root_blocks",1);
   root_blocks[2] = parameters_->list_value_integer(2,"root_blocks",1);
 
-  mesh_ = create_mesh (root_size[0],root_size[1],root_size[2],
+  mesh_ = create_mesh (group_process_,
+		       root_size[0],root_size[1],root_size[2],
 		       root_blocks[0],root_blocks[1],root_blocks[2]);
 
-  // Allocate and insert the root patch
+  // Allocate and insert the root patch, using all processes
+
   Patch * root_patch = mesh_->create_patch
-    (root_size[0],root_size[1],root_size[2],
+    (group_process_,root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);
 
   mesh_->insert_patch(root_patch);
@@ -460,7 +463,7 @@ void Simulation::initialize_method_() throw()
   }
 
 
-  INCOMPLETE("Simulation::initialize_method_","");
+  INCOMPLETE("Simulation::initialize_method_");
 }
 
 //----------------------------------------------------------------------

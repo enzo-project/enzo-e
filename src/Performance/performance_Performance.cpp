@@ -82,14 +82,14 @@ void Performance::print () const throw ()
 
 Performance::Performance(const Performance & classname) throw()
 {
-  INCOMPLETE("Performance::Performance","");
+  INCOMPLETE("Performance::Performance");
 }
 
 //----------------------------------------------------------------------
 
 Performance & Performance::operator= (const Performance & classname) throw()
 {
-  INCOMPLETE("Performance::operator =","");
+  INCOMPLETE("Performance::operator =");
   return *this;
 }
 

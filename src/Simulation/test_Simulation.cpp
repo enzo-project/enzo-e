@@ -18,6 +18,12 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
+#ifdef CONFIG_USE_MPI
+  GroupProcess * group_process = GroupProcessMpi::create();
+#else
+  GroupProcess * group_process = GroupProcess::create();
+#endif
+
   unit_init();
 
   unit_class ("Simulation");
@@ -34,7 +40,7 @@ PARALLEL_MAIN_BEGIN
   parameters -> read(fp);
   fclose (fp);
 
-  Simulation * simulation = new EnzoSimulationSerial(parameters);
+  Simulation * simulation = new EnzoSimulationSerial(parameters,group_process);
 
   unit_assert(simulation != 0);
 

@@ -19,9 +19,10 @@ public: // functions
 
   /// Constructor for given EnzoPatch size and blocking count
   EnzoPatch(Mesh * mesh, 
+	    GroupProcess * group_process,
 	    int nx,   int ny,  int nz,
 	    int nbx,  int nby, int nbz) throw()
-    : Patch (mesh,nx,ny,nz,nbx,nby,nbz)
+    : Patch (mesh,group_process,nx,ny,nz,nbx,nby,nbz)
   { }
 
 public: // virtual functions

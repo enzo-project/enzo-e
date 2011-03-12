@@ -20,7 +20,8 @@ class Simulation {
 public: // interface
 
   /// Initialize the Simulation object
-  Simulation(Parameters * parameters);
+  Simulation(Parameters * parameters,
+	     GroupProcess * group_process);
 
   //----------------------------------------------------------------------
   // Big Three
@@ -89,11 +90,12 @@ public: // virtual functions
   virtual void write() throw() = 0;
 
   /// Create a new Mesh: FACTORY METHOD DESIGN PATTERN
-  virtual Mesh * create_mesh (int nx,int ny,int nz,
+  virtual Mesh * create_mesh (GroupProcess * group_process,
+			      int nx,int ny,int nz,
 			      int nbx,int nby,int nbz) throw()
   { 
     TRACE("Simulation::create_mesh()");
-    return new Mesh (nx,ny,nz,nbx,nby,nbz);
+    return new Mesh (group_process,nx,ny,nz,nbx,nby,nbz);
   };
   
 protected: // functions
@@ -163,6 +165,9 @@ protected: // attributes
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
+
+  /// Parallel group for the simulation
+  GroupProcess * group_process_;
 
   /// Parameters associated with this simulation
   Parameters * parameters_;

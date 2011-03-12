@@ -31,11 +31,11 @@ public: // interface
 
   /// Copy constructor
   Tree16(const Tree16 & tree16) throw()
-  { INCOMPLETE("Tree16::Tree16",""); };
+  { INCOMPLETE("Tree16::Tree16"); };
 
   /// Assignment operator
   Tree16 & operator= (const Tree16 & tree16) throw()
-  { INCOMPLETE("Tree16::operator =",""); 
+  { INCOMPLETE("Tree16::operator ="); 
     return *this; };
 
   /// Return the number of nodes in the tree

@@ -61,14 +61,14 @@ Node2K::~Node2K()
 
 Node2K::Node2K(const Node2K & node2k) throw()
 {
-  INCOMPLETE("Node2K::Node2K","");
+  INCOMPLETE("Node2K::Node2K");
 }
 
 //----------------------------------------------------------------------
 
 Node2K & Node2K::operator= (const Node2K & node2k) throw()
 {
-  INCOMPLETE("Node2K::operator =","");
+  INCOMPLETE("Node2K::operator =");
   return *this;
 }
 

@@ -208,7 +208,7 @@ PARALLEL_MAIN_BEGIN
 
   // Send/recv faces in xp direction
 
-  INCOMPLETE("test_FieldFaces","send/recv faces");
+  INCOMPLETE("test_FieldFaces");
   // send xp faces
 
   for (int kz = 0; kz < N; kz++) {

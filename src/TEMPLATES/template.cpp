@@ -14,14 +14,14 @@
 
 Classname::Classname() throw ()
 {
-  INCOMPLETE("Classname::Classname","");
+  INCOMPLETE("Classname::Classname");
 }
 
 //----------------------------------------------------------------------
 
 Classname::~Classname() throw ()
 {
-  INCOMPLETE("Classname::!Classname","");
+  INCOMPLETE("Classname::!Classname");
 }
 
 //----------------------------------------------------------------------
@@ -29,7 +29,7 @@ Classname::~Classname() throw ()
 Classname::Classname(const Classname & classname) throw ()
 /// @param     classname  Object being copied
 {
-  INCOMPLETE("Classname::Classname(Classname)","");
+  INCOMPLETE("Classname::Classname(Classname)");
 }
 
 //----------------------------------------------------------------------
@@ -38,7 +38,7 @@ Classname & Classname::operator= (const Classname & classname) throw ()
 /// @param     classname  Source object of the assignment
 /// @return    The target assigned object
 {
-  INCOMPLETE("Classname::operator=","");
+  INCOMPLETE("Classname::operator=");
   return *this;
 }
 

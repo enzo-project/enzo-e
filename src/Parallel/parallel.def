@@ -83,6 +83,7 @@
 #  define PARALLEL_NEW_ARRAY_1D(CLASS,NX)       new class CLASS [NX];
 #  define PARALLEL_NEW_ARRAY_2D(CLASS,NX,NY)    new class CLASS [NX*NY];
 #  define PARALLEL_NEW_ARRAY_3D(CLASS,NX,NY,NZ) new class CLASS [NX*NY*NZ];
+
 #endif
 
 #endif /* PARALLEL_HPP */

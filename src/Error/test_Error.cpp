@@ -35,9 +35,7 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   PARALLEL_PRINTF ("Incomplete message:\n");
 
-  char incomplete_message[ERROR_LENGTH];
-  sprintf (incomplete_message,"Incomplete message test");
-  INCOMPLETE("main",incomplete_message);
+  INCOMPLETE("main");
 
   unit_func("INCOMPLETE");
   unit_assert (true);

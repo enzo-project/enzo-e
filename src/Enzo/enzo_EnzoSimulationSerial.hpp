@@ -18,7 +18,7 @@ class EnzoSimulationSerial : public Simulation {
 public: // interface
 
   /// Constructor
-  EnzoSimulationSerial(Parameters * parameters) throw();
+  EnzoSimulationSerial(Parameters * parameters,GroupProcess *) throw();
 
   /// Destructor
   ~EnzoSimulationSerial() throw();
@@ -39,10 +39,11 @@ public: // interface
   virtual void write() throw();
 
   /// Create a new Mesh: FACTORY METHOD DESIGN PATTERN
-  virtual Mesh * create_mesh (int nx,int ny,int nz,
+  virtual Mesh * create_mesh (GroupProcess * group_process,
+			      int nx,int ny,int nz,
 			      int nbx,int nby,int nbz) throw()
   { 
-    return new EnzoMesh (nx,ny,nz,nbx,nby,nbz);
+    return new EnzoMesh (group_process,nx,ny,nz,nbx,nby,nbz);
   };
 
 public: // functions

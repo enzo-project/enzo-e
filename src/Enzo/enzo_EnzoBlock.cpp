@@ -309,7 +309,6 @@ void EnzoBlock::initialize () throw()
   int nx,ny,nz;
   field_block_[0] -> size (&nx,&ny,&nz);
 
-  printf ("%d %d %d\n",nx,ny,nz);
   GridDimension[0]  = nx + 2*enzo::ghost_depth[0];
   GridDimension[1]  = ny + 2*enzo::ghost_depth[1];
   GridDimension[2]  = nz + 2*enzo::ghost_depth[2];

@@ -108,6 +108,12 @@ public: // interface (Group)
   bool get_recv_blocking () throw()
   { return recv_blocking_; };
 
+  /// Create a Reduce object for this ProcessGroup
+  Reduce * create_reduce () throw ();
+
+  MPI_Comm comm ()  const throw()
+  { return comm_; };
+
 private: // functions
 
   void call_mpi_(const char * file, 

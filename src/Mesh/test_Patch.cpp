@@ -19,6 +19,12 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
+#ifdef CONFIG_USE_MPI
+  GroupProcess * group_process = GroupProcessMpi::create();
+#else
+  GroupProcess * group_process = GroupProcess::create();
+#endif
+
   unit_init();
   unit_class ("Patch");
 
@@ -38,7 +44,7 @@ PARALLEL_MAIN_BEGIN
   int patch_blocking[] = {3,3,3};
 
   Patch * patch = new Patch
-    (NULL,
+    (NULL, group_process,
      patch_size[0],     patch_size[1],     patch_size[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2]);
 
@@ -127,7 +133,7 @@ PARALLEL_MAIN_BEGIN
   Block *  block = 0;
   FieldBlock * field_block = 0;
 
-  int count = 0;
+  size_t count = 0;
 
   while ((block = ++itBlocks)) {
 
@@ -164,7 +170,7 @@ PARALLEL_MAIN_BEGIN
 
       itBlocks.index(&ibx,&iby,&ibz);
       
-      int ib = ibx + nbx*(iby + nby*ibz);
+      size_t ib = ibx + nbx*(iby + nby*ibz);
       unit_assert_quiet (count == ib);
 
       // Test block extents

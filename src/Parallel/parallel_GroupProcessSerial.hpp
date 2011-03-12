@@ -9,6 +9,7 @@
 #ifndef PARALLEL_GROUP_PROCESS_SERIAL_HPP
 #define PARALLEL_GROUP_PROCESS_SERIAL_HPP
 
+class Reduce;
 
 class GroupProcessSerial : public GroupProcess {
 
@@ -84,6 +85,9 @@ public: // interface (Group)
   /// Complete a bulk send or receive of multiple arrays
   void bulk_wait(void * handle) throw()
   {};
+
+  /// Create a Reduce object for this ProcessGroup
+  Reduce * create_reduce () throw ();
 
 private: // attributes
 

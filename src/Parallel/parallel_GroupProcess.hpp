@@ -9,6 +9,8 @@
 /// @date     Thu Jul 22 12:36:38 PDT 2010
 /// @brief    [\ref Parallel] Declaration of the GroupProcess class
 
+class Reduce;
+
 class GroupProcess : public ParallelGroup {
 
   /// @class    GroupProcess
@@ -71,6 +73,9 @@ public: // interface
   virtual void bulk_wait(void * handle) throw() = 0;
 
   //--------------------------------------------------
+
+  /// Create a Reduce object for this ProcessGroup
+  virtual Reduce * create_reduce () throw ()= 0;
 
 };
 

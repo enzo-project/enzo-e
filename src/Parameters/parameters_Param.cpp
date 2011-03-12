@@ -99,7 +99,7 @@ std::string Param::value_to_string ()
     break;
   case parameter_list:
     sprintf (string_buffer,"LIST\n");
-    INCOMPLETE("Param::write","Writing lists is not implemented yet");
+    INCOMPLETE("Param::write");
     break;
   case parameter_logical_expr:
   case parameter_scalar_expr:

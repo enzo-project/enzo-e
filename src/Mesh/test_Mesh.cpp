@@ -17,11 +17,17 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
+#ifdef CONFIG_USE_MPI
+  GroupProcess * group_process = GroupProcessMpi::create();
+#else
+  GroupProcess * group_process = GroupProcess::create();
+#endif
+
   unit_init();
   unit_class ("Mesh");
 
   unit_func("Mesh");
-  Mesh * mesh = new Mesh (12,12,12,3,3,3);
+  Mesh * mesh = new Mesh (group_process,12,12,12,3,3,3);
   unit_assert(mesh != NULL);
 
   unit_finalize();

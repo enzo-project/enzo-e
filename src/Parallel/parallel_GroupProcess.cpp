@@ -25,8 +25,7 @@ GroupProcess * GroupProcess::create (int process_first,
 
 #elif defined(CONFIG_USE_CHARM)
 
-  INCOMPLETE ("GroupProcess",
-	      "Charm++ not implemented, using serial");
+  INCOMPLETE ("GroupProcess::create");
 
   group = new GroupProcessSerial;
 

@@ -21,7 +21,7 @@ class Patch {
 public: // interface
 
   /// Constructor for given Patch size and blocking count
-  Patch(Mesh * mesh,
+  Patch(Mesh * mesh, GroupProcess * group_process,
 	int nx,   int ny,  int nz,
 	int nbx,  int nby, int nbz) throw();
 
@@ -78,6 +78,9 @@ public: // interface
   /// Return the ith block
   Block * block(int i) const throw();
 
+  GroupProcess * group()  const throw()
+  { return group_process_; };
+
 public: // virtual functions
 
   /// Create a new Block: FACTORY METHOD DESIGN PATTERN
@@ -103,6 +106,9 @@ protected: // attributes
 
   /// Parent mesh
   Mesh * mesh_;
+
+  /// Parallel Group for distributing the Mesh across processors
+  GroupProcess * group_process_;
 
   /// Layout: describes blocking, processor range, and block-processor mapping 
   Layout * layout_;

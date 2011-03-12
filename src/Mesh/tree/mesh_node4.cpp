@@ -76,14 +76,14 @@ Node4::~Node4()
 
 Node4::Node4(const Node4 & node4) throw()
 {
-  INCOMPLETE("Node4::Node4","");
+  INCOMPLETE("Node4::Node4");
 }
 
 //----------------------------------------------------------------------
 
 Node4 & Node4::operator= (const Node4 & node4) throw()
 {
-  INCOMPLETE("Node4::operator =","");
+  INCOMPLETE("Node4::operator =");
   return *this;
 }
 

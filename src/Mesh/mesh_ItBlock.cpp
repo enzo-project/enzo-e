@@ -45,7 +45,7 @@ bool ItBlock::done () const throw()
 int ItBlock::index (int * ibx, int * iby, int * ibz) throw()
 {
   if (index1_) {
-    INCOMPLETE("ItBlock::index","");
+    INCOMPLETE("ItBlock::index");
   } else {
     WARNING ("ItBlock::index","Trying to get index of the 'null Block'");
   }

@@ -115,7 +115,7 @@ void FileHdf5::open_group (std::string name)
  */
 {
 #ifdef CONFIG_USE_HDF5
-  INCOMPLETE("FileHdf5::open_group","");
+  INCOMPLETE("FileHdf5::open_group");
 #endif
 }
 
@@ -126,7 +126,7 @@ void FileHdf5::close_group ()
  */
 {
 #ifdef CONFIG_USE_HDF5
-  INCOMPLETE("FileHdf5::open_group","");
+  INCOMPLETE("FileHdf5::open_group");
 #endif
 }
 

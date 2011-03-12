@@ -14,11 +14,12 @@
 
 Patch::Patch
 (
- Mesh * mesh,
+ Mesh * mesh, GroupProcess * group_process,
  int nx,  int ny,  int nz,
  int nbx, int nby, int nbz
 ) throw()
   : mesh_(mesh),
+    group_process_(group_process),
     layout_(new Layout (nbx,nby,nbz)),
     block_()
 {

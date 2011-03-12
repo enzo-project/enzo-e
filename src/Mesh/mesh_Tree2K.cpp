@@ -26,14 +26,14 @@ Tree2K::Tree2K(int r)
 
 Tree2K::Tree2K(const Tree2K & tree2k) throw()
 {
-  INCOMPLETE("Tree2K::Tree2K",""); 
+  INCOMPLETE("Tree2K::Tree2K"); 
 }
 
 //----------------------------------------------------------------------
 
 Tree2K & Tree2K::operator= (const Tree2K & tree2k) throw()
 {
-  INCOMPLETE("Tree2K::operator =",""); 
+  INCOMPLETE("Tree2K::operator ="); 
   return *this; 
 }
 

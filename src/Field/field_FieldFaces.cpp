@@ -38,7 +38,7 @@ FieldFaces::FieldFaces(const FieldFaces & field_faces) throw ()
 /// @param     FieldFaces  Object being copied
 {
 
-  INCOMPLETE("FieldFaces::FieldFaces(FieldFaces &)","");
+  INCOMPLETE("FieldFaces::FieldFaces(FieldFaces &)");
 
   // Reallocate storage for new FieldBlock
 
@@ -57,7 +57,7 @@ FieldFaces & FieldFaces::operator= (const FieldFaces & field_faces) throw ()
 ///
 /// @return    The target assigned object
 {
-  INCOMPLETE("FieldFaces::operator =","");
+  INCOMPLETE("FieldFaces::operator =");
   return *this;
 }
 
@@ -65,14 +65,14 @@ FieldFaces & FieldFaces::operator= (const FieldFaces & field_faces) throw ()
 
 void FieldFaces::load() throw()
 {
-  INCOMPLETE("FieldFaces::load()","");
+  INCOMPLETE("FieldFaces::load()");
 }
 
 //----------------------------------------------------------------------
 
 void FieldFaces::save() throw()
 {
-  INCOMPLETE("FieldFaces::save()","");
+  INCOMPLETE("FieldFaces::save()");
 }
 
 //----------------------------------------------------------------------

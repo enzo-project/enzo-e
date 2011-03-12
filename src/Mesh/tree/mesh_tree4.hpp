@@ -30,11 +30,11 @@ public: // interface
 
   /// Copy constructor
   Tree4(const Tree4 & tree4) throw()
-  { INCOMPLETE("Tree4::Tree4",""); };
+  { INCOMPLETE("Tree4::Tree4"); };
 
   /// Assignment operator
   Tree4 & operator= (const Tree4 & tree4) throw()
-  { INCOMPLETE("Tree4::operator =",""); 
+  { INCOMPLETE("Tree4::operator ="); 
     return *this; };
 
   /// Return the number of nodes in the tree

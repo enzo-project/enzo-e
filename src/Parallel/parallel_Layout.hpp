@@ -4,7 +4,6 @@
 /// @file     parallel_Layout.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Thu Feb 25 16:20:17 PST 2010
-/// @todo     move MPI-specific stuff to LayoutMpi
 /// @brief    [\ref Parallel] Declaration of the Layout class
 
 #ifndef PARALLEL_LAYOUT_HPP
@@ -50,14 +49,6 @@ public: // interface
   /// Return the 1D global index for the given block 3D indices
   int block_index (int ibx, int iby, int ibz) throw();
 
-#ifdef CONFIG_USE_MPI
-  /// MPI group accessor function
-  MPI_Comm mpi_comm() { return mpi_comm_; };
-
-  /// MPI communicator accessor function
-  MPI_Group mpi_group() { return mpi_group_; };
-#endif
-
 private: // attributes
 
   /// Starting process id
@@ -69,17 +60,7 @@ private: // attributes
   /// number of compute blocks per thread
   int block_count_[3];
 
-#ifdef CONFIG_USE_MPI
-  /// MPI communicator if MPI used
-  MPI_Comm  mpi_comm_;
-  MPI_Group mpi_group_;
-#endif
-
 private: // functions
-
-#ifdef CONFIG_USE_MPI
-  void initialize_mpi_();
-#endif
 
 };
 #endif /* PARALLEL_LAYOUT_HPP */

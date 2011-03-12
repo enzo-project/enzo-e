@@ -69,7 +69,7 @@ protected: // attributes
 
   /// Parent Patch
   Patch * patch_;
- 
+
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
 

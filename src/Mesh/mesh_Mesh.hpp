@@ -29,7 +29,8 @@ class Mesh {
 public: // interface
 
   /// Initialize an Mesh object
-  Mesh(int nx,  int ny,  int nz,
+  Mesh(GroupProcess * group_process,
+       int nx,  int ny,  int nz,
        int nbx, int nby, int nbz) throw ();
 
   /// Delete the Mesh object
@@ -140,14 +141,9 @@ public: // interface
   /// Set whether to coalesce patches
   void set_coalesce(bool coalesce) throw ()
   { coalesce_ = coalesce; };
-  
-#ifdef CONFIG_USE_MPI
-  /// MPI group accessor function
-  MPI_Comm mpi_comm() { return mpi_comm_; };
 
-  /// MPI communicator accessor function
-  MPI_Group mpi_group() { return mpi_group_; };
-#endif
+  GroupProcess * group()  const throw()
+  { return group_process_; };
 
 public: // virtual functions
 
@@ -155,14 +151,19 @@ public: // virtual functions
   virtual void insert_patch(Patch *) throw();
 
   /// Create a new Patch: FACTORY METHOD DESIGN PATTERN
-  virtual Patch * create_patch (int nx,int ny,int nz,
+  virtual Patch * create_patch (GroupProcess * group_process,
+				int nx,int ny,int nz,
 				int nbx,int nby,int nbz) throw()
   { 
-    return new Patch (this,nx,ny,nz,nbx,nby,nbz);
+    return new Patch (this, group_process,
+		      nx,ny,nz,nbx,nby,nbz);
   };
 
 
 protected: // attributes
+
+  /// Parallel Group for distributing the Mesh across processors
+  GroupProcess * group_process_;
 
   /// List of local patchs
 
@@ -205,20 +206,6 @@ protected: // attributes
   /// Whether to coalesce small patches into one big one
   /// Parameter Mesh::coalesce
   bool coalesce_;
-
-#ifdef CONFIG_USE_MPI
-  /// MPI communicator if MPI used
-  MPI_Comm  mpi_comm_;
-  MPI_Group mpi_group_;
-#endif
-
-#ifdef CONFIG_USE_MPI
-
-protected: // functions
-
-  void initialize_mpi_();
-#endif
-
 };
 
 #endif /* MESH_MESH_HPP */

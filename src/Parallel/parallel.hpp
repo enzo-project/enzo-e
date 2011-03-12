@@ -9,6 +9,24 @@
 /// @date     2009-10-16
 /// @brief    Include file for the \ref Parallel component
 
+//----------------------------------------------------------------------
+// Enumerations
+//----------------------------------------------------------------------
+
+/// @enum enum_reduce_op
+/// @bried type of reduction operation
+enum enum_reduce_op {
+  reduce_op_min,
+  reduce_op_land
+};
+
+/// @enum enum_reduce_type
+/// @bried data type to reduce
+enum enum_reduce_type {
+  reduce_type_int,
+  reduce_type_double
+};
+
 enum parallel_enum {
   parallel_serial,
   parallel_mpi
@@ -56,14 +74,24 @@ enum parallel_enum {
 
 #include "parallel.def"
 #include "parallel_Mpi.hpp"
+
+
 #include "parallel_ParallelGroup.hpp" 
+
 #include "parallel_GroupProcess.hpp"
 #include "parallel_GroupProcessMpi.hpp"
 #include "parallel_GroupProcessSerial.hpp"
 #include "parallel_GroupThread.hpp"
-#include "parallel_Parallel.hpp"
-#include "parallel_Layout.hpp"
+
 #include "parallel_Reduce.hpp"
+#include "parallel_ReduceSerial.hpp"
+#include "parallel_ReduceMpi.hpp"
+
+#include "parallel_Parallel.hpp"
+
+#include "parallel_Layout.hpp"
+
+
 #include "parallel_ParallelAffinity.hpp"
 
 #endif /* PARALLEL_HPP */

@@ -30,20 +30,22 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_INIT;
 
 #ifdef CONFIG_USE_MPI
-  GroupProcess * parallel = GroupProcessMpi::create();
+  GroupProcess * group_process = GroupProcessMpi::create();
 #else
-  GroupProcess * parallel = GroupProcess::create();
+  GroupProcess * group_process = GroupProcess::create();
 #endif
 
   // initialize unit testing
 
-  unit_init(parallel->rank(), parallel->size());
+  int rank = group_process->rank();
+  int size = group_process->size();
+  unit_init(rank, size);
 
   // only display output from root process
 
   Monitor * monitor = Monitor::instance();
 
-  monitor->set_active(parallel->rank()==0);
+  monitor->set_active(rank == 0);
 
   // display header text
 
@@ -60,7 +62,7 @@ PARALLEL_MAIN_BEGIN
   }
   if ((PARALLEL_ARGC == 2 && !fp) || 
       (PARALLEL_ARGC != 2)) {
-    if (parallel->is_root()) {
+    if (group_process->is_root()) {
       fprintf (stderr,"\nUsage: %s %s <parameter-file>\n\n", 
 	       PARALLEL_RUN,PARALLEL_ARGV[0]);
     }
@@ -83,11 +85,12 @@ PARALLEL_MAIN_BEGIN
     parameters->list_value_string(0,"method","serial");
 
   Simulation * simulation = 0;
+
   if (parallel_method == "charm") {
-    INCOMPLETE("main","EnzoSimulationCharm unfinished");
+    INCOMPLETE("main");
     //    simulation = new EnzoSimulationCharm (parameters);
   } else if (parallel_method == "serial") {
-    simulation = new EnzoSimulationSerial (parameters);
+    simulation = new EnzoSimulationSerial (parameters,group_process);
   }
 
   ASSERT ("main()","Illegal Parallel::method parameter @@@\n",simulation != 0);
@@ -107,7 +110,7 @@ PARALLEL_MAIN_BEGIN
   // clean up
 
   delete simulation;
-  delete parallel;
+  delete group_process;
   delete parameters;
 
   // finalize unit testing

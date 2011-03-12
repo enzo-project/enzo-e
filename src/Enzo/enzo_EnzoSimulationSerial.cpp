@@ -16,8 +16,11 @@
 
 //----------------------------------------------------------------------
 
-EnzoSimulationSerial::EnzoSimulationSerial(Parameters * parameters) throw ()
-  : Simulation(parameters)
+EnzoSimulationSerial::EnzoSimulationSerial
+(
+ Parameters * parameters,
+ GroupProcess * group_process) throw ()
+  : Simulation(parameters,group_process)
 {
 }
 
@@ -80,6 +83,10 @@ void EnzoSimulationSerial::run() throw()
 
       enzo_block->initialize();
 
+      // Initial output (repeated below: remove when Output implement)
+
+      block->field_block()->enforce_boundary(boundary_reflecting);
+      output_images_(block, "enzo-p-%06d.%d.png",0,1);
     }
   }
 
@@ -87,27 +94,19 @@ void EnzoSimulationSerial::run() throw()
   // INITIAL STOPPING CRITERIA TEST
   //--------------------------------------------------
 
-#ifdef CONFIG_USE_MPI
-  Reduce<int>       reduce_cycle_patch(op_min,MPI_INT, mesh_->mpi_comm());
-  Reduce<double> reduce_time_patch (op_min,MPI_DOUBLE, mesh_->mpi_comm());
-  Reduce<int>       reduce_stop_patch (op_land,MPI_INT,mesh_->mpi_comm());
-#else
-  Reduce<int>    reduce_cycle_patch(op_min);
-  Reduce<double> reduce_time_patch (op_min);
-  Reduce<int>    reduce_stop_patch (op_land);
-#endif
+  Reduce * reduce_mesh = mesh_->group()->create_reduce ();
+
+  int    cycle_patch = std::numeric_limits<int>::max();
+  int    stop_patch  = true;
+  double time_patch  = std::numeric_limits<double>::max();
 
   while ((patch = ++itPatch)) {
 
-#ifdef CONFIG_USE_MPI
-    Reduce<int>       reduce_cycle_block(op_min,MPI_INT, patch->layout()->mpi_comm());
-    Reduce<double> reduce_time_block (op_min,MPI_DOUBLE, patch->layout()->mpi_comm());
-    Reduce<int>       reduce_stop_block (op_land,MPI_INT,patch->layout()->mpi_comm());
-#else
-    Reduce<int>    reduce_cycle_block(op_min);
-    Reduce<double> reduce_time_block (op_min);
-    Reduce<int>    reduce_stop_block (op_land);
-#endif
+    Reduce * reduce_patch = patch->group()->create_reduce ();
+
+    int    cycle_block = std::numeric_limits<int>::max();
+    int    stop_block  = true;
+    double time_block  = std::numeric_limits<double>::max();
 
     ItBlock itBlock(patch);
     Block * block;
@@ -116,22 +115,29 @@ void EnzoSimulationSerial::run() throw()
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-      reduce_cycle_block.accum(enzo_block->CycleNumber);
-      reduce_time_block.accum (enzo_block->Time);
-      reduce_stop_block.accum 
-	(stopping_->complete(enzo_block->CycleNumber,enzo_block->Time));
+      int cycle   = enzo_block->CycleNumber;
+      double time = enzo_block->Time;
+
+      cycle_block = MIN(cycle_block, cycle);
+      time_block  = MIN(time_block,  time);
+      stop_block  = stop_block && (stopping_->complete(cycle,time));
     }
 
-    reduce_time_patch.accum  (reduce_time_block.reduce());
-    reduce_cycle_patch.accum (reduce_cycle_block.reduce());
-    reduce_stop_patch.accum  (reduce_stop_block.reduce());
-    
+    int   cycle_reduce = reduce_patch->reduce_int (cycle_block, reduce_op_min);
+    double time_reduce = reduce_patch->reduce_double (time_block, reduce_op_min);
+    int    stop_reduce = reduce_patch->reduce_int (stop_block, reduce_op_land);
+
+    cycle_patch = MIN(cycle_patch, cycle_reduce);
+    time_patch  = MIN(time_patch, time_reduce);
+    stop_patch  = stop_patch && stop_reduce;
+		      
+    delete reduce_patch;
+
   }
 
-  int    cycle_mesh = reduce_cycle_patch.reduce();
-  double time_mesh  = reduce_time_patch.reduce();
-  int    stop_mesh  = reduce_stop_patch.reduce();
-
+  int   cycle_mesh = reduce_mesh->reduce_int (cycle_patch, reduce_op_min);
+  double time_mesh = reduce_mesh->reduce_double (time_patch, reduce_op_min);
+  int    stop_mesh = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
   
   //======================================================================
   // BEGIN MAIN LOOP
@@ -145,21 +151,15 @@ void EnzoSimulationSerial::run() throw()
     // Determine timestep and dump output
     //--------------------------------------------------
 
-#ifdef CONFIG_USE_MPI
-    Reduce<double> reduce_dt_patch (op_min,MPI_DOUBLE,mesh_->mpi_comm());
-#else
-    Reduce<double> reduce_dt_patch (op_min);
-#endif
+    double dt_patch = std::numeric_limits<double>::max();
 
     // Accumulate Patch-local timesteps
 
     while ((patch = ++itPatch)) {
 
-#ifdef CONFIG_USE_MPI
-      Reduce<double> reduce_dt_block(op_min, MPI_DOUBLE, patch->layout()->mpi_comm());
-#else
-      Reduce<double> reduce_dt_block(op_min);
-#endif
+      Reduce * reduce_patch = patch->group()->create_reduce ();
+
+      double dt_block = std::numeric_limits<double>::max();
 
       ItBlock itBlock(patch);
       Block * block;
@@ -176,15 +176,18 @@ void EnzoSimulationSerial::run() throw()
 
 	// Accumulate Block-local dt
 
-	reduce_dt_block.accum (timestep_->compute(block));
+	dt_block = MIN(dt_block,timestep_->compute(block));
 
       } // ( block = ++itBlock )
 
-      reduce_dt_patch.accum(reduce_dt_block.reduce());
+      double dt_reduce = reduce_patch->reduce_double (dt_block, reduce_op_min);
+      dt_patch = MIN(dt_patch, dt_reduce);
+
+      delete reduce_patch;
 
     } // ( patch = ++itPatch )
 
-    double dt_mesh  = reduce_dt_patch.reduce();
+    double dt_mesh  = reduce_mesh->reduce_double(dt_patch,reduce_op_min);
 
     ASSERT("EnzoSimulationSerial::run", "dt == 0", dt_mesh != 0.0);
 
@@ -194,21 +197,17 @@ void EnzoSimulationSerial::run() throw()
 
     // Initialize reductions
 
-    reduce_cycle_patch.reset();
-    reduce_time_patch.reset();
-    reduce_stop_patch.reset();
+    int    cycle_patch = std::numeric_limits<int>::max();
+    int    stop_patch  = true;
+    double time_patch  = std::numeric_limits<double>::max();
 
     while ((patch = ++itPatch)) {
 
-#ifdef CONFIG_USE_MPI
-      Reduce<int>    reduce_cycle_block(op_min,MPI_INT, patch->layout()->mpi_comm());
-      Reduce<double> reduce_time_block (op_min,MPI_DOUBLE, patch->layout()->mpi_comm());
-      Reduce<int>    reduce_stop_block (op_land,MPI_INT,patch->layout()->mpi_comm());
-#else
-      Reduce<int>    reduce_cycle_block(op_min);
-      Reduce<double> reduce_time_block (op_min);
-      Reduce<int>    reduce_stop_block (op_land);
-#endif
+      Reduce * reduce_patch = patch->group()->create_reduce ();
+
+      int    cycle_block = std::numeric_limits<int>::max();
+      int    stop_block  = true;
+      enzo_float time_block  = std::numeric_limits<enzo_float>::max();
 
       ItBlock itBlock(patch);
       Block * block;
@@ -217,48 +216,56 @@ void EnzoSimulationSerial::run() throw()
 
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
+	// Initialize enzo_block aliases (may me modified)
+
+	int &    cycle        = enzo_block->CycleNumber;
+	enzo_float & time     = enzo_block->Time;
+	enzo_float & dt       = enzo_block->dt;
+	enzo_float & old_time = enzo_block->OldTime;
+
 	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH
 
-	double dt_stop = (stopping_->stop_time() - enzo_block->dt);
+	double dt_stop = (stopping_->stop_time() - dt);
+	dt = MIN(dt_mesh, dt_stop);
 
-	enzo_block->dt = MIN(dt_mesh, dt_stop);
-	
 	// Loop through methods
 
 	for (size_t i = 0; i < method_list_.size(); i++) {
 
 	  Method * method = method_list_[i];
 
-	  method -> compute_block (block,enzo_block->Time,enzo_block->dt);
+	  method -> compute_block (block,time,dt);
 
 	} // method
 
-	// Update cycle and time
+	// Update enzo_block values
 
-	enzo_block->CycleNumber += 1;
-	enzo_block->OldTime      = enzo_block->Time;
-	enzo_block->Time        += enzo_block->dt;
+	cycle    += 1;
+	old_time  = time;
+	time     += dt;
 
 	// Global cycle and time reduction
-
-	reduce_cycle_block.accum(enzo_block->CycleNumber);
-	reduce_time_block.accum (enzo_block->Time);
-	reduce_stop_block.accum 
-	  (stopping_->complete(enzo_block->CycleNumber,enzo_block->Time));
-
+	
+	cycle_block = MIN(cycle_block, cycle);
+	time_block  = MIN(time_block,  time);
+	stop_block  = stop_block && (stopping_->complete(cycle,time));
 
       } // (block = ++itBlock)
 
-      reduce_cycle_patch.accum (reduce_cycle_block.reduce());
-      reduce_time_patch.accum  (reduce_time_block.reduce());
-      reduce_stop_patch.accum  (reduce_stop_block.reduce());
+      int cycle_reduce = reduce_patch->reduce_int (cycle_block, reduce_op_min);
+      double time_reduce = reduce_patch->reduce_double (time_block, reduce_op_min);
+      int    stop_reduce = reduce_patch->reduce_int (stop_block, reduce_op_land);
 
+      cycle_patch = MIN(cycle_patch, cycle_reduce);
+      time_patch  = MIN(time_patch, time_reduce);
+      stop_patch  = stop_patch && stop_reduce;
 
+      delete reduce_patch;
     } // (patch = ++itPatch)
 
-    cycle_mesh = reduce_cycle_patch.reduce();
-    time_mesh  = reduce_time_patch.reduce();
-    stop_mesh  = reduce_stop_patch.reduce();
+    cycle_mesh = reduce_mesh->reduce_int (cycle_patch, reduce_op_min);
+    time_mesh  = reduce_mesh->reduce_double (time_patch, reduce_op_min);
+    stop_mesh  = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
 
   } // ! stop
 
@@ -294,14 +301,14 @@ void EnzoSimulationSerial::run() throw()
 
 void EnzoSimulationSerial::read() throw()
 {
-  INCOMPLETE("EnzoSimulationSerial::read","");
+  INCOMPLETE("EnzoSimulationSerial::read");
 }
 
 //----------------------------------------------------------------------
 
 void EnzoSimulationSerial::write() throw()
 {
-  INCOMPLETE("EnzoSimulationSerial::write","");
+  INCOMPLETE("EnzoSimulationSerial::write");
 }
 
 //======================================================================

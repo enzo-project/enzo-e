@@ -37,3 +37,10 @@ void GroupProcessSerial::recv_end(void * handle) throw()
 	    "receive with no corresponding send");
   }
 }
+
+//----------------------------------------------------------------------
+
+Reduce * GroupProcessSerial::create_reduce () throw ()
+{
+  return new ReduceSerial (this);
+}
