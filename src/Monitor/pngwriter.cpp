@@ -1311,7 +1311,18 @@ void pngwriter::readfromfile(char * name)
    if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth<8) 
      { 
 	// png_set_expand(png_ptr); 
-	png_set_gray_1_2_4_to_8(png_ptr);  // Just an alias of the above.
+
+        //----------------------------------
+       //	png_set_gray_1_2_4_to_8(png_ptr);  // Just an alias of the above
+        //----------------------------------
+
+       // REPLACED ABOVE WITH BELOW FOR libpng v1.4.0
+       // James Bordner
+
+        //----------------------------------
+	png_set_expand_gray_1_2_4_to_8(png_ptr);  // Just an alias of the above.
+        //----------------------------------
+
 	transformation_ = 1; 
      } 
    

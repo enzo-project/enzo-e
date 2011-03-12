@@ -1,10 +1,6 @@
 #ifndef ENZO_DEFINES_H
 #define ENZO_DEFINES_H
 
-/*----------------------------------------------------------------------*/
-/* DEFINES */
-/*----------------------------------------------------------------------*/
-
 #define ENZO_FAIL     0
 #define ENZO_SUCCESS  1
 
@@ -22,14 +18,11 @@
 #define MAX_ANY_SINGLE_DIRECTION 4200+6
 #define tiny                     1.0e-20
 
-/* round instead of truncate */
 #define NINT(A)   ((int) ((A) + 0.5*((A)>0?1:-1)))
 
 #define FORTRAN_NAME(NAME) NAME##_
 
-/*---------------------------------------------------------------------- */
-
-#define Density          0  /* Field identifiers: use Field's instead */
+#define Density          0
 #define TotalEnergy      1
 #define InternalEnergy   2
 #define Velocity1        4
@@ -49,5 +42,5 @@
 #define HDIDensity       18
 #define Metallicity      19
 
-#endif /* ENZO_DEFINES_H */
+#endif
 

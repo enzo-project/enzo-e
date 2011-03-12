@@ -205,4 +205,4 @@ private: // attributes
 
 };
 
-#endif /* NODE3K_HPP */
+#endif /* MESH_NODE3K_HPP */
