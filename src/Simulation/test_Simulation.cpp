@@ -4,6 +4,7 @@
 /// @file     test_Simulation.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-06
+/// @todo     Add create_simulation
 /// @brief    Program implementing unit tests for the Simulation class
  
 #include "test.hpp"
@@ -40,7 +41,7 @@ PARALLEL_MAIN_BEGIN
   parameters -> read(fp);
   fclose (fp);
 
-  Simulation * simulation = new EnzoSimulationSerial(parameters,group_process);
+  Simulation * simulation = new EnzoSimulationMpi (parameters,group_process);
 
   unit_assert(simulation != 0);
 

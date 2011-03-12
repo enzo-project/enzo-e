@@ -304,8 +304,6 @@ test_summary("Parameters",array("Parameters"),
 		    array("test_Parameters")); 
 test_summary("Performance",array("Performance"),
 		    array("test_Performance")); 
-test_summary("Schedule",array("Schedule"),
-		    array("test_Schedule")); 
 test_summary("Simulation",array("Simulation"),
 		    array("test_Simulation"));
 // test_summary("Distribute",array("")); 
@@ -321,8 +319,6 @@ component("Disk");
 
 tests("Disk","test_FileHdf5", "test_FileHdf5");
 tests("Disk","test_FileIfrit","test_FileIfrit");
-
-component("Distribute");
 
 component("Error");
 tests("Error","test_Error","test_Error");
@@ -368,13 +364,8 @@ tests("Performance","test_Papi",       "test_Papi");
 
 component("Portal");
 
-component("Schedule");
-tests("Schedule","test_Schedule","test_Schedule");
-
 component("Simulation");
 tests("Simulation","test_Simulation","test_Simulation");
-
-component("Task");
 
 component("Test");
 
