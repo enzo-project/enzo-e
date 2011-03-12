@@ -26,7 +26,6 @@ Import('serial_run')
 # X test_Performance.cpp
 # X test_ppm.cpp
 # X test_ppml.cpp
-# X test_Schedule.cpp
 # X test_Simulation.cpp
 # X test_TreeK.cpp
 
@@ -52,9 +51,6 @@ env.Append(BUILDERS = { 'RunTree'     : run_tree } )
 #----------------------------------------------------------------------
 env.RunSerial(parallel_type + '-test_FileHdf5.unit',    '#/bin/test_FileHdf5')
 env.RunSerial(parallel_type + '-test_FileIfrit.unit',   '#/bin/test_FileIfrit')
-#----------------------------------------------------------------------
-# DISTRIBUTE COMPONENT    
-#----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # ENZO COMPONENT          
 #----------------------------------------------------------------------
@@ -103,10 +99,6 @@ env.RunSerial(parallel_type + '-test_Papi.unit',        '#/bin/test_Papi')
 #----------------------------------------------------------------------
 # PORTAL COMPONENT        
 #----------------------------------------------------------------------
-#----------------------------------------------------------------------
-# SCHEDULE COMPONENT      
-#----------------------------------------------------------------------
-env.RunSerial(parallel_type + '-test_Schedule.unit',    '#/bin/test_Schedule')
 #----------------------------------------------------------------------
 # SIMULATION COMPONENT    
 #----------------------------------------------------------------------
