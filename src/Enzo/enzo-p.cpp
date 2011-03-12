@@ -29,11 +29,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-#ifdef CONFIG_USE_MPI
-  GroupProcess * group_process = GroupProcessMpi::create();
-#else
   GroupProcess * group_process = GroupProcess::create();
-#endif
 
   // initialize unit testing
 
@@ -89,8 +85,8 @@ PARALLEL_MAIN_BEGIN
   if (parallel_method == "charm") {
     INCOMPLETE("main");
     //    simulation = new EnzoSimulationCharm (parameters);
-  } else if (parallel_method == "serial") {
-    simulation = new EnzoSimulationSerial (parameters,group_process);
+  } else if (parallel_method == "mpi" || parallel_method == "serial") {
+    simulation = new EnzoSimulationMpi (parameters,group_process);
   }
 
   ASSERT ("main()","Illegal Parallel::method parameter @@@\n",simulation != 0);

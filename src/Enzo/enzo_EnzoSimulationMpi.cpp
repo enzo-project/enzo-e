@@ -1,14 +1,14 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoSimulationSerial.cpp
+/// @file     enzo_EnzoSimulationMpi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @todo     Move boundary conditions to Boundary object; remove bc_reflecting
 /// @todo     Move output to Output object
 /// @todo     Move timestep reductions into Timestep object
 /// @date     Tue May 11 18:06:50 PDT 2010
-/// @brief    Implementation of EnzoSimulationSerial user-dependent class member functions
+/// @brief    Implementation of EnzoSimulationMpi user-dependent class member functions
 
 #include "cello.hpp"
 
@@ -16,7 +16,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoSimulationSerial::EnzoSimulationSerial
+EnzoSimulationMpi::EnzoSimulationMpi
 (
  Parameters * parameters,
  GroupProcess * group_process) throw ()
@@ -26,14 +26,14 @@ EnzoSimulationSerial::EnzoSimulationSerial
 
 //----------------------------------------------------------------------
 
-EnzoSimulationSerial::~EnzoSimulationSerial() throw()
+EnzoSimulationMpi::~EnzoSimulationMpi() throw()
 {
   deallocate_();
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationSerial::initialize() throw()
+void EnzoSimulationMpi::initialize() throw()
 {
   // Call initialize for Simulation base class
   Simulation::initialize();
@@ -45,13 +45,13 @@ void EnzoSimulationSerial::initialize() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationSerial::finalize() throw()
+void EnzoSimulationMpi::finalize() throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationSerial::run() throw()
+void EnzoSimulationMpi::run() throw()
 {
   
   Monitor * monitor = Monitor::instance();
@@ -189,7 +189,7 @@ void EnzoSimulationSerial::run() throw()
 
     double dt_mesh  = reduce_mesh->reduce_double(dt_patch,reduce_op_min);
 
-    ASSERT("EnzoSimulationSerial::run", "dt == 0", dt_mesh != 0.0);
+    ASSERT("EnzoSimulationMpi::run", "dt == 0", dt_mesh != 0.0);
 
     //--------------------------------------------------
     // Apply the methods
@@ -299,22 +299,22 @@ void EnzoSimulationSerial::run() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationSerial::read() throw()
+void EnzoSimulationMpi::read() throw()
 {
-  INCOMPLETE("EnzoSimulationSerial::read");
+  INCOMPLETE("EnzoSimulationMpi::read");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationSerial::write() throw()
+void EnzoSimulationMpi::write() throw()
 {
-  INCOMPLETE("EnzoSimulationSerial::write");
+  INCOMPLETE("EnzoSimulationMpi::write");
 }
 
 //======================================================================
 
 Timestep * 
-EnzoSimulationSerial::create_timestep_ ( std::string name ) throw ()
+EnzoSimulationMpi::create_timestep_ ( std::string name ) throw ()
 /// @param name   Name of the timestep method to create (ignored)
 {
   return new EnzoTimestep;
@@ -323,7 +323,7 @@ EnzoSimulationSerial::create_timestep_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Initial * 
-EnzoSimulationSerial::create_initial_ ( std::string name ) throw ()
+EnzoSimulationMpi::create_initial_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   
@@ -343,7 +343,7 @@ EnzoSimulationSerial::create_initial_ ( std::string name ) throw ()
   int cycle    = parameters_->value_integer ("cycle",0);
   double time  = parameters_->value_scalar ("time",0.0);
 
-  ASSERT("EnzoSimulationSerial::create_initial_",
+  ASSERT("EnzoSimulationMpi::create_initial_",
 	 "create_mesh_ mush be called first",
 	 mesh_ != NULL);
 
@@ -366,7 +366,7 @@ EnzoSimulationSerial::create_initial_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Stopping * 
-EnzoSimulationSerial::create_stopping_ (std::string name) throw ()
+EnzoSimulationMpi::create_stopping_ (std::string name) throw ()
 /// @param name   Name of the stopping method to create (ignored)
 {
   //--------------------------------------------------
@@ -387,7 +387,7 @@ EnzoSimulationSerial::create_stopping_ (std::string name) throw ()
 //----------------------------------------------------------------------
 
 Boundary * 
-EnzoSimulationSerial::create_boundary_ ( std::string name ) throw ()
+EnzoSimulationMpi::create_boundary_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   
@@ -399,7 +399,7 @@ EnzoSimulationSerial::create_boundary_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Method * 
-EnzoSimulationSerial::create_method_ ( std::string name ) throw ()
+EnzoSimulationMpi::create_method_ ( std::string name ) throw ()
 /// @param name   Name of the method to create
 {
 
@@ -413,7 +413,7 @@ EnzoSimulationSerial::create_method_ ( std::string name ) throw ()
   if (method == 0) {
     char buffer[80];
     sprintf (buffer,"Cannot create Method '%s'",name.c_str());
-    ERROR("EnzoSimulationSerial::create_method", buffer);
+    ERROR("EnzoSimulationMpi::create_method", buffer);
   }
 
   return method;
@@ -421,7 +421,7 @@ EnzoSimulationSerial::create_method_ ( std::string name ) throw ()
 
 //======================================================================
 
-void EnzoSimulationSerial::output_images_
+void EnzoSimulationMpi::output_images_
 (
  Block * block,
  const char * file_format,
@@ -459,7 +459,7 @@ void EnzoSimulationSerial::output_images_
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationSerial::deallocate_() throw()
+void EnzoSimulationMpi::deallocate_() throw()
 {
   delete stopping_;
   stopping_ = 0;

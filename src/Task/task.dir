@@ -1,7 +1,0 @@
-// $Id$
-// See LICENSE_CELLO file for license and copyright information
-
-/// @file     task.dir
-/// @brief    Encapsulates Methods and data on an Array for a single process / thread 
-/// @defgroup Task Task
-/// @brief    Encapsulates Methods and data on an Array for a single process / thread 

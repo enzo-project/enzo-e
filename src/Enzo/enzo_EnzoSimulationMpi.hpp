@@ -1,27 +1,27 @@
 // $Id$
 // See LICENSE_CELLO file for license and copyright information
 
-#ifndef ENZO_ENZO_SIMULATION_SERIAL_HPP
-#define ENZO_ENZO_SIMULATION_SERIAL_HPP
+#ifndef ENZO_ENZO_SIMULATION_MPI_HPP
+#define ENZO_ENZO_SIMULATION_MPI_HPP
 
-/// @file     enzo_EnzoSimulationSerial.hpp
+/// @file     enzo_EnzoSimulationMpi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
-/// @brief    [\ref Enzo] Declaration of the EnzoSimulationSerial class
+/// @brief    [\ref Enzo] Declaration of the EnzoSimulationMpi class
 
-class EnzoSimulationSerial : public Simulation {
+class EnzoSimulationMpi : public Simulation {
 
-  /// @class    EnzoSimulationSerial
+  /// @class    EnzoSimulationMpi
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] Simulation class for Enzo
 
 public: // interface
 
   /// Constructor
-  EnzoSimulationSerial(Parameters * parameters,GroupProcess *) throw();
+  EnzoSimulationMpi(Parameters * parameters,GroupProcess *) throw();
 
   /// Destructor
-  ~EnzoSimulationSerial() throw();
+  ~EnzoSimulationMpi() throw();
 
   /// Override Simulation initialize
   virtual void initialize() throw ();
@@ -79,5 +79,5 @@ private: // functions
 
 };
 
-#endif /* ENZO_ENZO_SIMULATION_SERIAL_HPP */
+#endif /* ENZO_ENZO_SIMULATION_MPI_HPP */
 

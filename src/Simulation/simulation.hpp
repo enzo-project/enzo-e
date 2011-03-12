@@ -21,7 +21,6 @@
 //----------------------------------------------------------------------
 
 #include "mesh.hpp"
-#include "schedule.hpp"
 #include "method.hpp"
 #include "parameters.hpp"
 

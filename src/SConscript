@@ -10,27 +10,22 @@ Import('parallel_type')
 SConscript('Enzo/SConscript')
 
 SConscript('Disk/SConscript')
-SConscript('Distribute/SConscript')
 SConscript('Error/SConscript')
 SConscript('Field/SConscript')
-# SConscript('Global/SConscript')
 SConscript('Memory/SConscript')
 SConscript('Mesh/SConscript')
-# SConscript('Method/SConscript')
 SConscript('Monitor/SConscript')
 SConscript('Parallel/SConscript')
 SConscript('Parameters/SConscript')
 SConscript('Particle/SConscript')
 SConscript('Performance/SConscript')
 SConscript('Portal/SConscript')
-SConscript('Schedule/SConscript')
 SConscript('Simulation/SConscript')
-SConscript('Task/SConscript')
 SConscript('Test/SConscript')
 SConscript('Method/SConscript')
 
 
-components = ['schedule','error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','method','field','cello']
+components = ['error','memory','monitor','parameters','simulation','enzo','parallel','enzo-ppm','enzo-ppml','mesh','method','field','cello']
 
 libraries  = ['png', '$FORTRANLIBS','m']
 

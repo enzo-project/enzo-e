@@ -15,7 +15,6 @@ const char * component_name [] = {
   "undefined",
   "enzop",
   "disk",
-  "distribute",
   "error",
   "field",
   "memory",
@@ -27,8 +26,6 @@ const char * component_name [] = {
   "particles",
   "performance",
   "portal",
-  "schedule",
   "simulation",
-  "task"
 };
 

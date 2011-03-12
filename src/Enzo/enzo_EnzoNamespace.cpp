@@ -415,16 +415,17 @@ namespace enzo {
 
     // parameter: Parallel::method
 
+    INCOMPLETE("namespace enzo");
+
+    // Parallel::method not accessed
     std::string parallel_method = 
       parameters->list_value_string(0,"method","serial");
 
-    GroupProcess * parallel = 0;
+    GroupProcess * group_process = GroupProcess::create();
 
-    parallel = GroupProcess::create();
+    ProcessorNumber = group_process->rank();
 
-    ProcessorNumber = parallel->rank();
-
-    delete parallel;
+    delete group_process;
 
     //--------------------------------------------------
     parameters->set_current_group ("Field");

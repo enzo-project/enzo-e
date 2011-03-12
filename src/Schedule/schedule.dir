@@ -1,7 +1,0 @@
-// $Id$
-// See LICENSE_CELLO file for license and copyright information
-
-/// @file     schedule.dir
-/// @brief    Schedules Tasks to advance the Simulation in time
-/// @defgroup Schedule Schedule
-/// @brief    Schedules Tasks to advance the Simulation in time

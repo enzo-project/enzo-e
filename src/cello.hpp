@@ -131,7 +131,6 @@ enum component_enum {
   component_enzop,
   component_first = component_enzop,
   component_disk,
-  component_distribute,
   component_error,
   component_field,
   component_memory,
@@ -143,10 +142,8 @@ enum component_enum {
   component_particles,
   component_performance,
   component_portal,
-  component_schedule,
   component_simulation,
-  component_task,
-  num_components = component_task
+  num_components = component_simulation
 };
 
 extern const char * component_name [];
