@@ -175,11 +175,18 @@ if (arch == "linux"):
    cc_charm   = charm_path + '/bin/charmc -language charm++ '
 
    cppdefines = defines
+   cxxflags_define     = ''
+   fortranflags_define = ''
+   fortranpath_lib = ''
 
    papi_path = '/usr/local'
    papi_inc = (papi_path + '/include')
    papi_lib = (papi_path + '/lib')
 
+
+   hdf5_path = '/usr'
+   hdf5_inc = (hdf5_path + '/include')
+   hdf5_lib = (hdf5_path + '/lib')
 
    flags_opt  = '-g'
    flags_prec = '-m128bit-long-double'
@@ -196,6 +203,7 @@ if (arch == "linux"):
    fortranflags_opt  = flags_opt
    fortranflags_prec = flags_prec
    fortranflags_warn = flags_warn
+   fortranlibs = ['gfortran']
 
    linkflags_opt  = flags_opt
    linkflags_prec = flags_prec
