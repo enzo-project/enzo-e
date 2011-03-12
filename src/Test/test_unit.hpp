@@ -86,7 +86,7 @@ void unit_func (const char * f)
   unit_assert_(RESULT, __FILE__,__LINE__,true);
 
 /// @brief Assert result of test macro; called by unit_assert macro
-void unit_assert_ (bool result, const char * file, int line, bool quiet=false)
+void unit_assert_ (int result, const char * file, int line, bool quiet=false)
 {
   // Only print Pass on local process
   if (unit::process_rank == 0 || ! result) { 

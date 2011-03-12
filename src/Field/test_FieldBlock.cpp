@@ -139,11 +139,11 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("field_values");  // without ghosts
   
-  unit_assert((v1 = (float *)       field_block->field_values(i1)));
-  unit_assert((v2 = (double *)      field_block->field_values(i2)));
-  unit_assert((v3 = (double *)      field_block->field_values(i3)));
-  unit_assert((v4 = (double *)      field_block->field_values(i4)));
-  unit_assert((v5 = (long double *) field_block->field_values(i5)));
+  v1 = (float *)       field_block->field_values(i1);
+  v2 = (double *)      field_block->field_values(i2);
+  v3 = (double *)      field_block->field_values(i3);
+  v4 = (double *)      field_block->field_values(i4);
+  v5 = (long double *) field_block->field_values(i5);
   
   // field sizes without ghosts
 

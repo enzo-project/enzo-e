@@ -82,6 +82,11 @@ elif (type == 'charm'):
 	defines_xlc = defines_xlc + ' -D' + define_charm[0]
 else:
 	print "Unrecognized parallel type ",type
+	print
+	print "Valid types are 'serial', 'mpi', and 'charm'"
+	print
+	print "The type is set using the environment variable $CELLO_TYPE"
+	print "or by using 'scons type=<type>"
 	sys.exit(1)
 
 #--------------------------------------------------
@@ -94,6 +99,11 @@ elif (prec == 'double'):
 	defines_xlc = defines_xlc + ' -D' + define_double[0]
 else:
 	print "Unrecognized precision ",prec
+	print
+	print "Valid precisions are 'single' and 'double'"
+	print
+	print "The precision is set using the environment variable $CELLO_PREC"
+	print "or by using 'scons prec=<precision>"
 	sys.exit(1)
 
 #--------------------------------------------------
