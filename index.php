@@ -260,10 +260,6 @@ function test_summary($component,$test_output,$executables)
 
   printf ("</tr>\n");
 }
-?>
-
-
-<?php
 printf ("<table>\n");
 printf ("<tr>\n");
      printf ( "<th rowspan=2 class=yellow>");
@@ -311,9 +307,8 @@ test_summary("Simulation",array("Simulation"),
 // test_summary("Particles",array("")); 
 // test_summary("Portal",array("")); 
 printf ("</tr></table>\n");
- ?>
 
-<?php
+system ("svn info | awk '{print $0,\"</br/>\"}'");
 
 component("Disk");
 
