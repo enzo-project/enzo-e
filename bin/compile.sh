@@ -56,8 +56,10 @@ foreach type ($types)
 
    cat test/$type-*unit | grep FAIL | grep "0/" | sort > fail.$platform
    cat test/$type-*unit | grep pass | grep "0/" | sort > pass.$platform
+   cat test/$type-*unit | grep incomplete | grep "0/" | sort > incomplete.$platform
    set p = `cat pass.$platform | wc -l`
    set f = `cat fail.$platform | wc -l`
+   set i = `cat incomplete.$platform | wc -l`
 
    set d = `date +"%Y-%m-%d %H:%M:%S"`
 
@@ -66,6 +68,8 @@ foreach type ($types)
    printf "FAIL: $f "
 
    printf "Pass: $p "
+
+   printf "Incomplete: $i "
 
    # check if any tests didn't finish
 

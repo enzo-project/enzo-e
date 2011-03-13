@@ -16,6 +16,7 @@
 /// @brief    Maximum length of a class or function name
 #define UNIT_MAX_NAME_LEN 40
 
+#define unit_incomplete 42
 namespace unit {
 
   /// @namespace unit
@@ -31,6 +32,7 @@ namespace unit {
   //const char * fail_string = "\033[01;31mFAIL\033[00m";
   const char * pass_string = " pass ";
   const char * fail_string = " FAIL ";
+  const char * incomplete_string = " incomplete ";
 
   int process_rank  = 0;
   int process_count = 1;
@@ -92,8 +94,16 @@ void unit_assert_ (int result, const char * file, int line, bool quiet=false)
   if (unit::process_rank == 0 || ! result) { 
     // don't print if quiet is set and test passed
     if (! ( quiet & result)) {
+      const char * result_string = 0;
+      if (result == true) {
+	result_string = unit::pass_string;
+      } else if (result == false) {
+	result_string = unit::fail_string;
+      } else {
+	result_string = unit::incomplete_string;
+      }
       PARALLEL_PRINTF ("%s %d/%d %s %d %s %s %d\n",
-		       (result)? unit::pass_string : unit::fail_string,
+		       result_string,
 		       unit::process_rank, 
 		       unit::process_count,
 		       file, 

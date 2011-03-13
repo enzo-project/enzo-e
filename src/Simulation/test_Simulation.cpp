@@ -19,11 +19,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-#ifdef CONFIG_USE_MPI
-  GroupProcess * group_process = GroupProcessMpi::create();
-#else
   GroupProcess * group_process = GroupProcess::create();
-#endif
 
   unit_init();
 
@@ -82,7 +78,7 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("run");
   simulation->run();
-  unit_assert(false);
+  unit_assert(unit_incomplete);
   
   // Load the simulation
 
@@ -93,13 +89,13 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("write");
   simulation->write();
-  unit_assert(false);
+  unit_assert(unit_incomplete);
 
   // Finalize the simulation
 
   unit_func("finalize");
   simulation->finalize();
-  unit_assert(false);
+  unit_assert(unit_incomplete);
 
   delete simulation;
 

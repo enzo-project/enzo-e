@@ -122,9 +122,6 @@ protected: // attributes
   /// How the Patch is distributed into Blocks
   int blocking_[3];
 
-  /// This process id
-  int ip_;
-
   /// Extent of the patch: xm, xp, ym, yp, zm, zp
   double extents_[6];
 

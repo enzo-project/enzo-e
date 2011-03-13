@@ -32,7 +32,6 @@ Patch::Patch
     ERROR("Patch::Patch", buffer);
   }
 
-
   size_[0] = nx;
   size_[1] = ny;
   size_[2] = nz;
@@ -48,11 +47,6 @@ Patch::Patch
   extents_[4] = 0.0;
   extents_[5] = 1.0;
 
-#ifdef CONFIG_USE_MPI
-  ip_ = Mpi::rank();
-#else
-  ip_ = 0;
-#endif
 }
 
 //----------------------------------------------------------------------
@@ -253,7 +247,8 @@ bool Patch::blocks_allocated() const throw()
 
 size_t Patch::num_blocks() const  throw()
 {
-  return layout_->local_count(ip_);
+  int rank = group_process_->rank();
+  return layout_->local_count(rank);
 }
 
 //----------------------------------------------------------------------

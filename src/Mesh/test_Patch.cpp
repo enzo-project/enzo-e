@@ -19,11 +19,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-#ifdef CONFIG_USE_MPI
-  GroupProcess * group_process = GroupProcessMpi::create();
-#else
   GroupProcess * group_process = GroupProcess::create();
-#endif
 
   unit_init();
   unit_class ("Patch");
@@ -191,7 +187,7 @@ PARALLEL_MAIN_BEGIN
     }
 
     // TEST BLOCK PROPERTIES
-    //    unit_assert(false);
+    //    unit_assert(unit_incomplete);
 
   }
 

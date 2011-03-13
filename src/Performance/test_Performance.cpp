@@ -81,8 +81,6 @@ PARALLEL_MAIN_BEGIN
   performance->new_counter(counter_user_patch_count,   "user_patch_count");
   performance->new_counter(counter_user_cell_count,    "user_cell_count");
   performance->new_counter(counter_user_particle_count,"user_particle_count");
-
-#ifdef CONFIG_USE_MPI
   performance->new_counter(counter_comm_send_bytes,    "comm_send_bytes");
   performance->new_counter(counter_comm_recv_bytes,    "comm_recv_bytes");
   performance->new_counter(counter_comm_send_time,     "comm_send_time");
@@ -91,7 +89,6 @@ PARALLEL_MAIN_BEGIN
   performance->new_counter(counter_comm_send_count,    "comm_send_count");
   performance->new_counter(counter_comm_recv_count,    "comm_recv_count");
   performance->new_counter(counter_comm_global_count,  "comm_global_count");
-#endif /* CONFIG_USE_MPI */
 
   // Add groups
 
@@ -112,16 +109,16 @@ PARALLEL_MAIN_BEGIN
   unit_assert(true);
 
   unit_func("new_attribute");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("new_counter");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("new_group");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("new_region");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
 
   //--------------------------------------------------
@@ -129,13 +126,13 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   unit_func("attribute");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("set_attribute");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("num_attributes");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   //--------------------------------------------------
   // Groups
@@ -145,16 +142,16 @@ PARALLEL_MAIN_BEGIN
 
 
   unit_func("group");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("set_group");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("num_groups");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("end_group");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   //--------------------------------------------------
   // Regions
@@ -162,45 +159,45 @@ PARALLEL_MAIN_BEGIN
 
 
   unit_func("region");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("set_region");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("num_regions");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("start_region");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("stop_region");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   //--------------------------------------------------
   // Counters
   //--------------------------------------------------
 
   unit_func("counter");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("set_counter");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("increment_counter");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("num_counters");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   //--------------------------------------------------
   // Disk
   //--------------------------------------------------
 
   unit_func("flush");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   unit_func("~Performance");
-  unit_assert (false); //FAILS
+  unit_assert (unit_incomplete); //FAILS
 
   delete performance;
 
