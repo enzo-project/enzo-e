@@ -33,6 +33,7 @@ td {
 }
 td.pass {  color: #00f;  background-color: #fff; }
 td.FAIL {  color: #f00;   background-color: #faa; color: black;}
+td.yellow {  color: #000;   background-color: #ff0; }
 th.pass {  color: #00f;  background-color: #fff; }
 th.FAIL {  color: #f00;   background-color: #fff; }
 th.yellow {  color: #000;   background-color: #ff0; }

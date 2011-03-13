@@ -231,6 +231,19 @@ function test_summary($component,$test_output,$executables)
   }
 
 
+// Tests Not implemented
+
+  for ($i = 0; $i<sizeof($parallel_types); ++$i) {
+
+    $output_files = "";
+    for ($test = 0; $test<sizeof($test_output); ++$test) {
+      $output = "test/$parallel_types[$i]-test_$test_output[$test].unit";
+      $output_files = "$output_files $output";
+    }
+
+    system("grep '0/' $output_files | awk 'BEGIN {c=0}; /incomplete/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=yellow>\",c,\"</td>\";}} '");
+  }
+
 // Tests Failed
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
@@ -262,20 +275,21 @@ function test_summary($component,$test_output,$executables)
 }
 printf ("<table>\n");
 printf ("<tr>\n");
-     printf ( "<th rowspan=2 class=yellow>");
+     printf ( "<th rowspan=2>");
       printf ("<strong>");
       system("ls running.* | sed 's/running\.//g' | sed 's/\./\<\/br\/\> /g'");
       printf ("</strong>");
      printf ("</th>");
-     printf ( "<th colspan=3 class=fail >Missing</br/>executable</th>");
-     printf ( "<th colspan=3 class=fail>Missing</br/>output</th>");
-     printf ( "<th colspan=3 class=fail>Incomplete</br/>output</th>");
-     printf ( "<th colspan=3 class=fail>Tests Failed</th>");
-     printf ( "<th colspan=3 class=pass>Tests Passed</th>");
+     printf ( "<th colspan=3 class=fail >Missing</br/>Executable</th>");
+     printf ( "<th colspan=3 class=fail>Missing</br/>Output</th>");
+     printf ( "<th colspan=3 class=fail>Incomplete</br/>Output</th>");
+     printf ( "<th colspan=3 class=fail>Incomplete</br/>Tests</th>");
+     printf ( "<th colspan=3 class=fail>Failed Tests</th>");
+     printf ( "<th colspan=3 class=pass>Passed Tests</th>");
      printf ( "</tr><tr>\n");
 
 $parallel_labels = array("serial","mpi","charm");
-for ($k = 0; $k < 5; $k ++) {
+for ($k = 0; $k < 6; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
     printf ("<th> $parallel_labels[$i] </th>");
   }
