@@ -40,7 +40,6 @@
 #include "enzo_fortran.hpp"
 
 #include "enzo_EnzoNamespace.hpp"
-using namespace enzo;
 #include "enzo_EnzoBlock.hpp"
 #include "enzo_EnzoPatch.hpp"
 #include "enzo_EnzoMesh.hpp"

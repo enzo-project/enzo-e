@@ -11,12 +11,12 @@
 
 class Reduce;
 
-class GroupProcess : public ParallelGroup {
+class GroupProcess {
 
   /// @class    GroupProcess
   /// @ingroup  Parallel  
   /// @todo     Support more flexible process subsets
-  /// @brief    [\ref Parallel] ParallelGroup of distributed memory processes
+  /// @brief    [\ref Parallel] Group of distributed memory processes
 
 public: // static interface
 
@@ -27,11 +27,35 @@ protected: // interface
 
 /// Protected since GroupProcess objects must be created with create()
 GroupProcess(int size = 1, int rank = 0) throw()
-  : ParallelGroup(size,rank)
+ : size_(size),
+   rank_(rank)
   {  }
 
 
 public: // interface
+
+  //--------------------------------------------------
+  // Shared with GroupThread, but removed from deleted common "Group"
+  // base class because of name-clash with CHARM++
+  //--------------------------------------------------
+
+  /// Number of compute elements in the GroupProcess
+  int size() throw()
+  { return size_; };
+
+  /// Rank of the compute element in the GroupProcess
+  int rank() throw()
+  {  return rank_; };
+
+  /// True iff rank() is 0
+  bool is_root() throw()
+  {  return rank_==0; };
+
+  /// Synchronize between all compute elements in the GroupProcess
+  virtual void barrier() throw() { };
+
+  /// Synchronize between two compute elements in the GroupProcess
+  virtual void sync(int rank) throw() { };
 
   //--------------------------------------------------
 
@@ -74,8 +98,16 @@ public: // interface
 
   //--------------------------------------------------
 
-  /// Create a Reduce object for this ProcessGroup
+  /// Create a Reduce object for this GroupProcess
   virtual Reduce * create_reduce () throw ()= 0;
+
+protected: // attributes
+
+  /// Number of compute elements in the GroupProcess
+  int size_;
+
+  /// Rank of this compute element in the GroupProcess
+  int rank_;
 
 };
 

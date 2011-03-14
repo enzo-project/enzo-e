@@ -144,5 +144,7 @@ namespace enzo {
 
 };
 
+using namespace enzo;
+
 #endif /* ENZO_ENZO_DESCR_HPP */
 

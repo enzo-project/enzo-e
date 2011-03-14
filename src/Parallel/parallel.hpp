@@ -47,6 +47,7 @@ enum parallel_enum {
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef CONFIG_USE_MPI
 #  include <mpi.h>
@@ -75,8 +76,6 @@ enum parallel_enum {
 #include "parallel.def"
 #include "parallel_Mpi.hpp"
 
-
-#include "parallel_ParallelGroup.hpp" 
 
 #include "parallel_GroupProcess.hpp"
 #include "parallel_GroupProcessMpi.hpp"
