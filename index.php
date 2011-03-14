@@ -162,7 +162,11 @@ function test($parallel_type,$testrun,$type) {
 ?> -->
 
 <p>
-Test data shown on this page is automatically generated whenever <code>Cello</code> is compiled.  FAIL status usually indicates that the corresponding function has not been implemented yet.  Empty tables indicate that the unit test files have been deleted, probably with "<code>scons -c</code>" (<code>scons</code> version of "<code>make clean</code>").
+Test data shown on this page are automatically generated
+whenever <code>Cello</code> is compiled.  During compilation the upper
+left box will contain the configuration, otherwise it will be blank.
+The "serial" columns represent MPI code with
+MPI calls ifdef'd out; "mpi" represents the MPI configuration (CONFIG_USE_MPI is defined), and "charm" represents the CHARM++ configuration (CONFIG_USE_CHARM is defined).
 </p>
 
 <hr>
@@ -198,6 +202,8 @@ function test_summary($component,$test_output,$executables)
        printf ("<td class=fail>$count_missing</td>");
     }
   }
+  printf ("<th></th>");
+  
 
 // Missing output
 
@@ -216,6 +222,7 @@ function test_summary($component,$test_output,$executables)
        printf ("<td class=fail>$count_missing</td>");
     }
   }
+  printf ("<th></th>");
 
 // Incomplete output
 
@@ -227,8 +234,9 @@ function test_summary($component,$test_output,$executables)
       $output_files = "$output_files $output";
     }
     system("awk 'BEGIN{c=0}; /UNIT TEST BEGIN/ {c=c+1};/UNIT TEST END/ {c=c-1};END{if (c!=0) {print c}} '");
-    printf("<td>");
+    printf("<td>"); // ??? @@@
   }
+  printf ("<th></th>");
 
 
 // Tests Not implemented
@@ -243,6 +251,7 @@ function test_summary($component,$test_output,$executables)
 
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /incomplete/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=yellow>\",c,\"</td>\";}} '");
   }
+  printf ("<th></th>");
 
 // Tests Failed
 
@@ -257,6 +266,8 @@ function test_summary($component,$test_output,$executables)
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /FAIL/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}} '");
   }
 
+  printf ("<th></th>");
+
 // Tests Passed
 
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
@@ -269,7 +280,7 @@ function test_summary($component,$test_output,$executables)
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
 
   }
-
+  printf ("<th></th>");
 
   printf ("</tr>\n");
 }
@@ -281,11 +292,17 @@ printf ("<tr>\n");
       printf ("</strong>");
      printf ("</th>");
      printf ( "<th colspan=3 class=fail >Missing</br/>Executable</th>");
+     printf ("<th></th>");
      printf ( "<th colspan=3 class=fail>Missing</br/>Output</th>");
+     printf ("<th></th>");
      printf ( "<th colspan=3 class=fail>Incomplete</br/>Output</th>");
+     printf ("<th></th>");
      printf ( "<th colspan=3 class=fail>Incomplete</br/>Tests</th>");
+     printf ("<th></th>");
      printf ( "<th colspan=3 class=fail>Failed Tests</th>");
+     printf ("<th></th>");
      printf ( "<th colspan=3 class=pass>Passed Tests</th>");
+     printf ("<th></th>");
      printf ( "</tr><tr>\n");
 
 $parallel_labels = array("serial","mpi","charm");
@@ -293,6 +310,7 @@ for ($k = 0; $k < 6; $k ++) {
   for ($i = 0; $i < sizeof($parallel_labels); ++$i) {
     printf ("<th> $parallel_labels[$i] </th>");
   }
+  printf ("<th> </th>");
  }
 
 test_summary("Disk",array("FileHdf5","FileIfrit"),
