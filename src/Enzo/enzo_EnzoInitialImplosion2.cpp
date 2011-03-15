@@ -32,6 +32,9 @@ void EnzoInitialImplosion2::compute (Block * block) throw()
 	 "Insufficient number of fields",
 	 field_descr->field_count() >= 4);
 
+  WARNING("EnzoInitialImplosion2::compute",
+	  "hard-coded field index ordering");
+
   int index_density         = 0;
   int index_velocity_x      = 1;
   int index_velocity_y      = 2;

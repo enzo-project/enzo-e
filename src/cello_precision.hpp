@@ -12,7 +12,6 @@
 enum precision_enum {
   precision_unknown,     //  unknown precision
   precision_default,     //  default precision, based on CONFIG_PRECISION_[SINGLE|DOUBLE]
-  precision_half,       //   16-bit field data
   precision_single,      //  32-bit field data
   precision_double,      //  64-bit field data
   precision_extended80,  //  80-bit field data
@@ -47,8 +46,8 @@ typedef double Scalar;
 
 namespace cello {
 
-  int precision_size     (enum precision_enum);
-  int precision_supported(enum precision_enum);
+  int sizeof_precision      (enum precision_enum);
+  int is_precision_supported(enum precision_enum);
 
   extern const char * precision_name[8];
 

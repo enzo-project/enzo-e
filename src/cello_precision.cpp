@@ -8,7 +8,6 @@ namespace cello {
   const char * precision_name[8] = {
     "unknown",
     "default",
-    "half",
     "single",
     "double",
     "extended80",
@@ -18,17 +17,14 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
-  int precision_size(enum precision_enum precision)
+  int sizeof_precision(enum precision_enum precision)
   {
     int size = 0;
     switch (precision) {
     case precision_unknown:
       break;
     case precision_default:
-      size = precision_size(default_precision);
-      break;
-    case precision_half:
-      size = 2;
+      size = sizeof_precision(default_precision);
       break;
     case precision_single:
       size = 4;
@@ -53,17 +49,14 @@ namespace cello {
 
   //----------------------------------------------------------------------
 
-  int precision_supported(enum precision_enum precision)
+  int is_precision_supported(enum precision_enum precision)
   {
     switch (precision) {
     case precision_unknown:
       return 0;
       break;
     case precision_default:
-      return precision_supported(default_precision);
-      break;
-    case precision_half:
-      return 0;
+      return is_precision_supported(default_precision);
       break;
     case precision_single:
       return (sizeof(float)==4);

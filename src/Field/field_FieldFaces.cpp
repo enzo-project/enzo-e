@@ -90,22 +90,23 @@ void FieldFaces::allocate_() throw()
 
   int array_size = 0;
 
-  for (int field = 0; field < num_fields; field++) {
+  for (int id_field = 0; id_field < num_fields; id_field++) {
 
     // Need element size for alignment adjust below
 
-    int element_size = cello::precision_size(field_descr->precision(field));
+    precision_enum precision = field_descr->precision(id_field);
+    int bytes_per_element = cello::sizeof_precision (precision);
 
     // Get field block dimensions n3[]
     // Get field_size, which includes ghosts and precision adjustments
 
     int n3[3];
-    int field_size = field_block_->field_size_(field,&n3[0],&n3[1],&n3[2]);
+    int field_size = field_block_->field_size_(id_field,&n3[0],&n3[1],&n3[2]);
 
     // Get ghost depth
 
     int g3[3];
-    field_descr->ghosts(field,&g3[0],&g3[1],&g3[2]);
+    field_descr->ghosts(id_field,&g3[0],&g3[1],&g3[2]);
 
     for (int axis=0; axis<3; axis++) {
 
@@ -113,7 +114,7 @@ void FieldFaces::allocate_() throw()
 
       int face_size = g3[axis] * field_size / n3[axis];
 
-      face_size += field_block_->adjust_alignment_(face_size,element_size);
+      face_size += field_block_->adjust_alignment_(face_size,bytes_per_element);
 
       // 4: lower, upper, ghost, faces
 

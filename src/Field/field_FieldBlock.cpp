@@ -89,7 +89,7 @@ void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
     nz += 2*gz + (cz?0:1);
 
     precision_enum precision = field_descr_->precision(id_field);
-    int bytes_per_element = cello::precision_size (precision);
+    int bytes_per_element = cello::sizeof_precision (precision);
 
     field_unknowns += bytes_per_element * (gx + nx*(gy + ny*gz));
   } 
@@ -341,232 +341,6 @@ void FieldBlock::refresh_ghosts() throw()
 }
 
 //----------------------------------------------------------------------
-void FieldBlock::enforce_boundary
-(
- boundary_enum boundary,
- face_enum     face,
- axis_enum     axis 
- ) throw()
-{
-  // WARNING: recursive
-  if ( ghosts_allocated() ) {
-    if (face == face_all) {
-      enforce_boundary(boundary,face_lower,axis);
-      enforce_boundary(boundary,face_upper,axis);
-    } else if (axis == axis_all) {
-      enforce_boundary(boundary,face,axis_x);
-      enforce_boundary(boundary,face,axis_y);
-      enforce_boundary(boundary,face,axis_z);
-    } else {
-      switch (boundary) {
-      case boundary_reflecting:
-	enforce_boundary_reflecting_(face,axis);
-	break;
-      case boundary_outflow:
-	enforce_boundary_outflow_(face,axis);
-	break;
-      case boundary_inflow:
-	enforce_boundary_inflow_(face,axis);
-	break;
-      case boundary_periodic:
-	enforce_boundary_periodic_(face,axis);
-	break;
-      default:
-	ERROR("FieldBlock::enforce_boundary",
-	      "Undefined boundary type");
-	break;
-      }
-    }
-  } else {
-    ERROR("FieldBlock::enforce_boundary",
-	  "Function called with ghosts not allocated");
-  }
-}
-
-//----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_reflecting_
-(
- face_enum face,
- axis_enum axis
- ) throw()
-{
-  int nx,ny,nz;
-  int gx,gy,gz;
-  size(&nx,&ny,&nz);
-  for (int field = 0; field < field_descr_->field_count(); field++) {
-    field_descr_->ghosts(field,&gx,&gy,&gz);
-    void * array = field_values(field);
-    bool vx = field_descr_->field_name(field) == "velocity_x";
-    bool vy = field_descr_->field_name(field) == "velocity_y";
-    bool vz = field_descr_->field_name(field) == "velocity_z";
-    precision_enum precision = field_descr_->precision(field);
-    switch (precision) {
-    case precision_single:
-      enforce_boundary_reflecting_precision_(face,axis,
-					     (float *)array,
-					     nx,ny,nz,
-					     gx,gy,gz,
-					     vx,vy,vz);
-      break;
-    case precision_double:
-      enforce_boundary_reflecting_precision_(face,axis,
-					     (double *)array,
-					     nx,ny,nz,
-					     gx,gy,gz,
-					     vx,vy,vz);
-      break;
-    case precision_extended80:
-    case precision_extended96:
-    case precision_quadruple:
-      enforce_boundary_reflecting_precision_(face,axis,
-					     (long double *)array,
-					     nx,ny,nz,
-					     gx,gy,gz,
-					     vx,vy,vz);
-      break;
-    case precision_half:
-    default:
-      break;
-    }
-  }
-}
-
-template<class T>
-void FieldBlock::enforce_boundary_reflecting_precision_
-(face_enum face, axis_enum axis,
- T * array,
- int nx,int ny,int nz,
- int gx,int gy,int gz,
- bool vx,bool vy,bool vz)
-{
-  int mx = nx + 2*gx;
-  int my = ny + 2*gy;
-  int mz = nz + 2*gz;
-
-  int ix,iy,iz,ig;
-  T sign;
-
-  if (face == face_lower && axis == axis_x) {
-    if (nx > 1) {
-      ix = gx;
-      sign = vx ? -1.0 : 1.0;
-      for (ig=0; ig<gx; ig++) {
-	for (iy=0; iy<my; iy++) {
-	  for (iz=0; iz<mz; iz++) {
-	    int i_internal = INDEX(ix+ig,  iy,iz,mx,my);
-	    int i_external = INDEX(ix-ig-1,iy,iz,mx,my);
-	    array[i_external] = sign*array[i_internal];
-	  }
-	}
-      }
-    }
-  } else if (face == face_upper && axis == axis_x) {
-    if (nx > 1) {
-      ix = nx+gx-1;
-      sign = vx ? -1.0 : 1.0;
-      for (ig=0; ig<gx; ig++) {
-	for (iy=0; iy<my; iy++) {
-	  for (iz=0; iz<mz; iz++) {
-	    int i_internal = INDEX(ix-ig,  iy,iz,mx,my);
-	    int i_external = INDEX(ix+ig+1,iy,iz,mx,my);
-	    array[i_external] = sign*array[i_internal];
-	  }
-	}
-      }
-    }
-  } else if (face == face_lower && axis == axis_y) {
-    if (ny > 1) {
-      iy = gy;
-      sign = vy ? -1.0 : 1.0;
-      for (ig=0; ig<gy; ig++) {
-	for (ix=0; ix<mx; ix++) {
-	  for (iz=0; iz<mz; iz++) {
-	    int i_internal = INDEX(ix,iy+ig,  iz,mx,my);
-	    int i_external = INDEX(ix,iy-ig-1,iz,mx,my);
-	    array[i_external] = sign*array[i_internal];
-	  }
-	}
-      }
-    }
-  } else if (face == face_upper && axis == axis_y) {
-    if (ny > 1) {
-      iy = ny+gy-1;
-      sign = vy ? -1.0 : 1.0;
-      for (ig=0; ig<gy; ig++) {
-	for (ix=0; ix<mx; ix++) {
-	  for (iz=0; iz<mz; iz++) {
-	    int i_internal = INDEX(ix,iy-ig,  iz,mx,my);
-	    int i_external = INDEX(ix,iy+ig+1,iz,mx,my);
-	    array[i_external] = sign*array[i_internal];
-	  }
-	}
-      }
-    }
-  } else if (face == face_lower && axis == axis_z) {
-    if (nz > 1) {
-      iz = gz;
-      sign = vz ? -1.0 : 1.0;
-      for (ig=0; ig<gz; ig++) {
-	for (ix=0; ix<mx; ix++) {
-	  for (iy=0; iy<my; iy++) {
-	    int i_internal = INDEX(ix,iy,iz+ig,  mx,my);
-	    int i_external = INDEX(ix,iy,iz-ig-1,mx,my);
-	    array[i_external] = sign*array[i_internal];
-	  }
-	}
-      }
-    }
-  } else if (face == face_upper && axis == axis_z) {
-    if (nz > 1) {
-      iz = nz+gz-1;
-      sign = vz ? -1.0 : 1.0;
-      for (ig=0; ig<gz; ig++) {
-	for (ix=0; ix<mx; ix++) {
-	  for (iy=0; iy<my; iy++) {
-	    int i_internal = INDEX(ix,iy,iz-ig,  mx,my);
-	    int i_external = INDEX(ix,iy,iz+ig+1,mx,my);
-	    array[i_external] = sign*array[i_internal];
-	  }
-	}
-      }
-    }
-  } else {
-    ERROR("FieldBlock::enforce_boundary_reflecting_precision_",
-	  "Cannot be called with face_all");
-  }
-}
-
-//----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_outflow_
-(
- face_enum face,
- axis_enum axis
- ) throw()
-{
-  INCOMPLETE("FieldBlock::enforce_boundary_outflow");
-}
-
-//----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_inflow_
-(
- face_enum face,
- axis_enum axis
- ) throw()
-{
-  INCOMPLETE("FieldBlock::enforce_boundary_inflow");
-}
-
-//----------------------------------------------------------------------
-void FieldBlock::enforce_boundary_periodic_
-(
- face_enum face,
- axis_enum axis
- ) throw()
-{
-  INCOMPLETE("FieldBlock::enforce_boundary_periodic");
-}
-
-//----------------------------------------------------------------------
 
 void FieldBlock::split
 (
@@ -665,7 +439,7 @@ int FieldBlock::field_size_
   // Return array size in bytes
 
   precision_enum precision = field_descr_->precision(id_field);
-  int bytes_per_element = cello::precision_size (precision);
+  int bytes_per_element = cello::sizeof_precision (precision);
   return (*nx) * (*ny) * (*nz) * bytes_per_element;
 }
 
@@ -723,11 +497,11 @@ void FieldBlock::restore_array_
 
     // adjust for precision
 
-    int precision_size = 
-      cello::precision_size(field_descr_->precision(id_field));
+    precision_enum precision = field_descr_->precision(id_field);
+    int bytes_per_element = cello::sizeof_precision (precision);
 
-    offset1 *= precision_size;
-    offset2 *= precision_size;
+    offset1 *= bytes_per_element;
+    offset2 *= bytes_per_element;
 
     // determine array start
 
@@ -739,9 +513,9 @@ void FieldBlock::restore_array_
     for (int iz=0; iz<nz; iz++) {
       for (int iy=0; iy<ny; iy++) {
 	for (int ix=0; ix<nx; ix++) {
-	  for (int ip=0; ip<precision_size; ip++) {
-	    int i1 = ip + precision_size*(ix + nx1*(iy + ny1*iz));
-	    int i2 = ip + precision_size*(ix + nx2*(iy + ny2*iz));
+	  for (int ip=0; ip<bytes_per_element; ip++) {
+	    int i1 = ip + bytes_per_element*(ix + nx1*(iy + ny1*iz));
+	    int i2 = ip + bytes_per_element*(ix + nx2*(iy + ny2*iz));
 	    array2[i2] = array1[i1];
 	  }
 	}

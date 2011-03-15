@@ -316,11 +316,6 @@ int FileHdf5::datatype_(enum precision_enum precision)
   case precision_default:
     return datatype_(default_precision);
     break;
-  case precision_half:
-    ERROR("FileHdf5::datatype_",
-	  "precision_half not implemented");
-    return 0;
-    break;
   case precision_single:
     return H5T_NATIVE_FLOAT;
     break;

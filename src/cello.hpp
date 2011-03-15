@@ -16,23 +16,6 @@
 #include "cello_precision.hpp"
 
 /*********************************************************************
- * BOUNDARY DECLARATIONS
- **********************************************************************/
-
-/// @enum     boundary_enum
-/// @brief    External boundary condition types
-enum boundary_enum {
-  boundary_undefined,   // 0 is an undefined boundary
-  boundary_reflecting,  // 
-  boundary_outflow,  // 
-  boundary_inflow,  // 
-  boundary_periodic,  // 
-  boundary_dirichlet, //
-  boundary_neumann,
-  num_boundaries = boundary_neumann // Number of attribute types
-};
-
-/*********************************************************************
  * PROBLEM DECLARATIONS
  **********************************************************************/
 

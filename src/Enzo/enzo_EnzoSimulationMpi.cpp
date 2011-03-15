@@ -4,7 +4,6 @@
 /// @file     enzo_EnzoSimulationMpi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
-/// @todo     Move boundary conditions to Boundary object; remove bc_reflecting
 /// @todo     Move output to Output object
 /// @todo     Move timestep reductions into Timestep object
 /// @date     Tue May 11 18:06:50 PDT 2010
@@ -85,7 +84,8 @@ void EnzoSimulationMpi::run() throw()
 
       // Initial output (repeated below: remove when Output implement)
 
-      block->field_block()->enforce_boundary(boundary_reflecting);
+      boundary_->enforce(block);
+
       output_images_(block, "enzo-p-%06d.%d.png",0,1);
     }
   }
@@ -169,7 +169,7 @@ void EnzoSimulationMpi::run() throw()
       while ((block = ++itBlock)) {
 
 	// Enforce boundary conditions
-	block->field_block()->enforce_boundary(boundary_reflecting);
+	boundary_->enforce(block);
 
 	// Output while we're here
 	output_images_(block, "enzo-p-%06d.%d.png",cycle_mesh,0);
@@ -390,10 +390,37 @@ Boundary *
 EnzoSimulationMpi::create_boundary_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
-  
-  Boundary * boundary = 0;
+  //--------------------------------------------------
+  parameters_->set_current_group ("Boundary");
+  //--------------------------------------------------
 
-  return boundary;
+  // parameter: Boundary::type
+
+  boundary_type_enum boundary_type = boundary_type_undefined;
+
+  std::string boundary_param = parameters_->value_string("type", "undefined");
+
+  if (       boundary_param ==   "reflecting") {
+    boundary_type = boundary_type_reflecting;
+  } else if (boundary_param ==   "outflow") {
+    boundary_type = boundary_type_outflow;
+  } else if (boundary_param ==   "inflow") {
+    boundary_type = boundary_type_inflow;
+  } else if (boundary_param ==   "periodic") {
+    boundary_type = boundary_type_periodic;
+  } else if (boundary_param ==   "file") {
+    boundary_type = boundary_type_file;
+  } else if (boundary_param ==   "code") {
+    boundary_type = boundary_type_code;
+  } else {
+    char buffer[ERROR_LENGTH];
+    sprintf (buffer,"Illegal parameter Boundary::type '%s'",
+	     boundary_param.c_str());
+    ERROR("EnzoSimulationMpi::create_boundary_",
+	  buffer);
+  }
+	     
+  return new EnzoBoundary (boundary_type);
 }
 
 //----------------------------------------------------------------------
@@ -438,7 +465,6 @@ void EnzoSimulationMpi::output_images_
   int nx,ny,nz;
   int gx,gy,gz;
   int mx,my,mz;
-  field_block->enforce_boundary(boundary_reflecting);
   field_block->size(&nx,&ny,&nz);
   int count = field_descr->field_count();
   for (int index = 0; index < count; index++) {
