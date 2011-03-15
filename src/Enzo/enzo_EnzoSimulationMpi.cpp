@@ -75,16 +75,14 @@ void EnzoSimulationMpi::run() throw()
 
       initial_->compute(block);
 
+      boundary_->enforce(block);
+
       // Initialize Block attributes 
       // (REQUIRED HERE INSTEAD OF CONSTRUCTOR SINCE REQUIRES extents_[])
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
       enzo_block->initialize();
-
-      // Initial output (repeated below: remove when Output implement)
-
-      boundary_->enforce(block);
 
       output_images_(block, "enzo-p-%06d.%d.png",0,1);
     }
