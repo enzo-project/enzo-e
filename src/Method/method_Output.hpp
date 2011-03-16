@@ -23,14 +23,43 @@ public: // interface
 
 public: // virtual functions
 
-  /// Accumulate contributions of a block to field images
-  virtual void images_accum (Block * block) throw();
+  /// Write projections of fields to png images
+  virtual void write_image (Mesh * mesh) throw(), bool top_level=true;
 
-  /// Write the field images to disk
-  virtual void images_write () throw();
+  /// Write projections of fields to png images
+  virtual void write_image (Patch * patch) throw(), bool top_level=true;
+
+  /// Write projections of fields to png images
+  virtual void write_image (Block * block) throw(), bool top_level=true;
+
+  //--------------------------------------------------
+
+  /// Write data dumps to disk
+  virtual void write_data (Mesh * mesh, bool top_level=true) throw();
+
+  /// Write data dumps to disk
+  virtual void write_data (Patch * patch, bool top_level=true) throw();
+
+  /// Write data dumps to disk
+  virtual void write_data (Block * block, bool top_level=true) throw();
+
+protected: // functions
+
+  /// Return whether to write this cycle
+  bool is_active_cycle_(int cycle) throw();
+
+  /// Return whether to write this time
+  bool is_active_time_(double time) throw();
 
 protected: // attributes
 
+  std::string filename_;
+
+  /// cycle start,stop,step,start,stop,step,etc.  Empty if not active
+  std::vector<int> cycle_range_;
+
+  /// time start,stop,step,start,stop,step,etc.  Empty if not active
+  std::vector<double> time_range_;
   
 };
 
