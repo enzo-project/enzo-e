@@ -18,7 +18,11 @@ class EnzoSimulationMpi : public Simulation {
 public: // interface
 
   /// Constructor
-  EnzoSimulationMpi(Parameters * parameters,GroupProcess *) throw();
+  EnzoSimulationMpi
+  (
+   Parameters * parameters,
+   GroupProcess *
+   ) throw();
 
   /// Destructor
   ~EnzoSimulationMpi() throw();
@@ -36,15 +40,7 @@ public: // interface
   virtual void read() throw();
 
   /// Write a Simulation state to disk
-  virtual void write() throw();
-
-  /// Create a new Mesh: FACTORY METHOD DESIGN PATTERN
-  virtual Mesh * create_mesh (GroupProcess * group_process,
-			      int nx,int ny,int nz,
-			      int nbx,int nby,int nbz) throw()
-  { 
-    return new EnzoMesh (group_process,nx,ny,nz,nbx,nby,nbz);
-  };
+  virtual void write() const throw();
 
 public: // functions
 

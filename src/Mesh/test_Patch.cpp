@@ -40,7 +40,7 @@ PARALLEL_MAIN_BEGIN
   int patch_blocking[] = {3,3,3};
 
   Patch * patch = new Patch
-    (NULL, group_process,
+    (new Factory, group_process,
      patch_size[0],     patch_size[1],     patch_size[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2]);
 
@@ -82,15 +82,17 @@ PARALLEL_MAIN_BEGIN
   double domain_lower[] = {0.0, 0.0, 0.0};
   double domain_upper[] = {1.0, 1.0, 1.0};
 
-  patch->set_extents(domain_lower[0], domain_upper[0], 
-		     domain_lower[1], domain_upper[1], 
-		     domain_lower[2], domain_upper[2]);
+  patch->set_lower(domain_lower[0], domain_lower[1], domain_lower[2]);
+  patch->set_upper(domain_upper[0], domain_upper[1], domain_upper[2]);
 
   // Test that the domain extents are correct
 
   double xm,xp,ym,yp,zm,zp;
 
-  patch->extents(&xm,&xp,&ym,&yp,&zm,&zp);
+  patch->lower(&xm,&ym,&zm);
+  patch->upper(&xp,&yp,&zp);
+
+  printf ("patch %g %g %g  %g %g %g\n",xm,ym,zm,xp,yp,zp);
 
   unit_assert(xm==domain_lower[0] && xp==domain_upper[0] &&
 	      ym==domain_lower[1] && yp==domain_upper[1] &&
@@ -167,14 +169,33 @@ PARALLEL_MAIN_BEGIN
       itBlocks.index(&ibx,&iby,&ibz);
       
       size_t ib = ibx + nbx*(iby + nby*ibz);
-      unit_assert_quiet (count == ib);
+      //      unit_assert_quiet (count == ib);
+      unit_assert_quiet (unit_incomplete);
 
       // Test block extents
 
-      double xm,ym,zm;
-      block->extent (&xm,&xp,&ym,&yp,&zm,&zp);
+      double xmb,ymb,zmb;
+      double xpb,ypb,zpb;
 
-      
+      block->lower (&xmb,&ymb,&zmb);
+      block->upper (&xpb,&ypb,&zpb);
+
+      // Not very rigorous
+
+      unit_assert (xmb < xpb);
+      unit_assert (ymb < ypb);
+      unit_assert (zmb < zpb);
+
+      // Need ib? which is not implemented yet; note comparing floating point
+
+      // unit_assert(xm + ibx*(xpb-xmb) == xmb);
+      // unit_assert(ym + iby*(ypb-ymb) == ymb);
+      // unit_assert(zm + ibz*(zpb-zmb) == zmb);
+
+      // unit_assert(xm + (ibx+1)*(xpb-xmb) == xpb);
+      // unit_assert(ym + (iby+1)*(ypb-ymb) == ypb);
+      // unit_assert(zm + (ibz+1)*(zpb-zmb) == zpb);
+
     }
 
     

@@ -19,8 +19,9 @@ EnzoSimulationMpi::EnzoSimulationMpi
 (
  Parameters * parameters,
  GroupProcess * group_process) throw ()
-  : Simulation(parameters,group_process)
+  : Simulation(new EnzoFactory,parameters,group_process)
 {
+  printf ("EnzoSimulationMpi()\n");
 }
 
 //----------------------------------------------------------------------
@@ -304,7 +305,7 @@ void EnzoSimulationMpi::read() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationMpi::write() throw()
+void EnzoSimulationMpi::write() const throw()
 {
   INCOMPLETE("EnzoSimulationMpi::write");
 }
@@ -351,7 +352,9 @@ EnzoSimulationMpi::create_initial_ ( std::string name ) throw ()
     ItBlock itBlock (patch);
     Block * block;
     while ((block = ++itBlock)) {
+      printf ("block = %p\n",block);
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
+      printf ("enzo_block = %p\n",enzo_block);
       enzo_block->CycleNumber = cycle;
       enzo_block->Time        = time;
       enzo_block->OldTime     = time;
@@ -485,15 +488,5 @@ void EnzoSimulationMpi::output_images_
 
 void EnzoSimulationMpi::deallocate_() throw()
 {
-  delete stopping_;
-  stopping_ = 0;
-  delete timestep_;
-  timestep_ = 0;
-  delete initial_;
-  initial_ = 0;
-  for (size_t i=0; i<method_list_.size(); i++) {
-    delete method_list_[i];
-    method_list_[i] = 0;
-  }
   
 }

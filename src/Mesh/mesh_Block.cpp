@@ -24,6 +24,7 @@ Block::Block
 
 { 
 
+  printf ("Block()\n");
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);
   for (size_t i=0; i<field_block_.size(); i++) {
@@ -44,6 +45,7 @@ Block::~Block() throw ()
   // Deallocate field_block_[]
   for (size_t i=0; i<field_block_.size(); i++) {
     delete field_block_[i];
+    field_block_[i] = 0;
   }
 }
 
@@ -82,37 +84,38 @@ FieldBlock * Block::field_block (int i) throw()
 
 //----------------------------------------------------------------------
 
-void Block::extent
-(
- double * lower_x, double * upper_x, 
- double * lower_y, double * upper_y,
- double * lower_z, double * upper_z ) const throw ()
+void Block::lower(double * xm, double * ym, double * zm) const throw ()
 {
-  if (lower_x) *lower_x = lower_[0];
-  if (lower_y) *lower_y = lower_[1];
-  if (lower_z) *lower_z = lower_[2];
-
-  if (upper_x) *upper_x = upper_[0];
-  if (upper_y) *upper_y = upper_[1];
-  if (upper_z) *upper_z = upper_[2];
+  if (xm) *xm = lower_[0];
+  if (ym) *ym = lower_[1];
+  if (zm) *zm = lower_[2];
 }
 
 //----------------------------------------------------------------------
 
-void Block::set_extent
-(
- double lower_x, double upper_x,
- double lower_y, double upper_y,
- double lower_z, double upper_z ) throw ()
-
+void Block::set_lower(double xm, double ym, double zm) throw ()
 {
-  lower_[0] = lower_x;
-  lower_[1] = lower_y;
-  lower_[2] = lower_z;
+  lower_[0] = xm;
+  lower_[1] = ym;
+  lower_[2] = zm;
+}
 
-  upper_[0] = upper_x;
-  upper_[1] = upper_y;
-  upper_[2] = upper_z;
+//----------------------------------------------------------------------
+
+void Block::upper(double * xp, double * yp, double * zp) const throw ()
+{
+  if (xp) *xp = upper_[0];
+  if (yp) *yp = upper_[1];
+  if (zp) *zp = upper_[2];
+}
+
+//----------------------------------------------------------------------
+
+void Block::set_upper(double xp, double yp, double zp) throw ()
+{
+  upper_[0] = xp;
+  upper_[1] = yp;
+  upper_[2] = zp;
 }
 
 //======================================================================

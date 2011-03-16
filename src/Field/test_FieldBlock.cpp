@@ -434,7 +434,9 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   unit_func("cell_width");
 
-  block->set_extent(-1, 1, -2, 2, -3, 3);
+  block->set_lower(-1, -2, -3);
+  block->set_upper( 1,  2,  3);
+
   double hx=0,hy=0,hz=0;
 
   field_block->cell_width(block,&hx,&hy,&hz);

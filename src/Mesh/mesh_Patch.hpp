@@ -21,7 +21,8 @@ class Patch {
 public: // interface
 
   /// Constructor for given Patch size and blocking count
-  Patch(Mesh * mesh, GroupProcess * group_process,
+  Patch(Factory * factory,
+	GroupProcess * group_process,
 	int nx,   int ny,  int nz,
 	int nbx,  int nby, int nbz) throw();
 
@@ -50,16 +51,17 @@ public: // interface
   /// Return the layout of the patch, describing processes and blocking
   Layout * layout () const throw();
 
-  /// Set lower and upper extents of the Patch
-  void set_extents (double xm, double xp,
-		    double ym, double yp,
-		    double zm, double zp) throw();
+  /// Return domain lower extent
+  void lower(double * nx, double * ny, double * nz) const throw ();
 
-  /// Return the lower and upper extents of the Patch
-  void extents (double * xm,   double * xp,
-		double * ym=0, double * yp=0,
-		double * zm=0, double * zp=0) const throw();
+  /// Set domain lower extent
+  void set_lower(double nx, double ny, double nz) throw ();
 
+  /// Return domain upper extent
+  void upper(double * nx, double * ny, double * nz) const throw ();
+
+  /// Set domain upper extent
+  void set_upper(double nx, double ny, double nz) throw ();
   
   //--------------------------------------------------
 
@@ -81,16 +83,6 @@ public: // interface
   GroupProcess * group()  const throw()
   { return group_process_; };
 
-public: // virtual functions
-
-  /// Create a new Block: FACTORY METHOD DESIGN PATTERN
-  virtual Block * create_block (FieldDescr * field_descr, 
-				int nx, int ny=1, int nz=1,
-				int num_field_blocks = 1) throw()
-  { 
-    return new Block (this,field_descr, nx,ny,nz,num_field_blocks); 
-  };
-
 public: // entry functions
 
 #ifdef CONFIG_USE_CHARM
@@ -104,8 +96,8 @@ public: // entry functions
 
 protected: // attributes
 
-  /// Parent mesh
-  Mesh * mesh_;
+  /// Factory object for creating Blocks
+  Factory * factory_;
 
   /// Parallel Group for distributing the Mesh across processors
   GroupProcess * group_process_;
@@ -122,8 +114,11 @@ protected: // attributes
   /// How the Patch is distributed into Blocks
   int blocking_[3];
 
-  /// Extent of the patch: xm, xp, ym, yp, zm, zp
-  double extents_[6];
+  /// Lower extent of the patch
+  double lower_[3];
+
+  /// Upper extent of the patch
+  double upper_[3];
 
 
 };

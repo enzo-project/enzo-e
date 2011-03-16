@@ -24,6 +24,7 @@ EnzoBlock::EnzoBlock(Patch * patch,
     SubgridFluxes(0)
 {
 
+  printf ("EnzoBlock()\n");
   int i,j;
 
   for (i=0; i<MAX_DIMENSION; i++) {
@@ -298,7 +299,8 @@ void EnzoBlock::initialize () throw()
 {
   double xm,xp,ym,yp,zm,zp;
 
-  extent(&xm,&xp,&ym,&yp,&zm,&zp);
+  lower(&xm,&ym,&zm);
+  upper(&xp,&yp,&zp);
 
   GridLeftEdge[0]    = xm;
   GridLeftEdge[1]    = ym;

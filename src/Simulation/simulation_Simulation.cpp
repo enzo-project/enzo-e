@@ -11,8 +11,14 @@
 #include "simulation.hpp"
 
 /// Initialize the Simulation object
-Simulation::Simulation(Parameters * parameters,GroupProcess * group_process)
-  : dimension_(0),
+Simulation::Simulation
+(
+ Factory *      factory,
+ Parameters *   parameters,
+ GroupProcess * group_process
+)
+  : factory_(factory),
+    dimension_(0),
     group_process_(group_process),
     parameters_(parameters),
     mesh_(0),
@@ -25,12 +31,13 @@ Simulation::Simulation(Parameters * parameters,GroupProcess * group_process)
 {
   ASSERT("Simulation::Simulation","Parameters is NULL", parameters != NULL);
 
-  extent_[0] = 0.0;
-  extent_[1] = 1.0;
-  extent_[2] = 0.0;
-  extent_[3] = 1.0;
-  extent_[4] = 0.0;
-  extent_[5] = 1.0;
+  lower_[0] = 0.0;
+  lower_[1] = 0.0;
+  lower_[2] = 0.0;
+
+  upper_[0] = 1.0;
+  upper_[1] = 1.0;
+  upper_[2] = 1.0;
 
 }
 
@@ -88,23 +95,27 @@ void Simulation::finalize() throw()
 
 //----------------------------------------------------------------------
 
-int Simulation::dimension() throw()
+int Simulation::dimension() const throw()
 {
   return dimension_;
 }
 
 //----------------------------------------------------------------------
 
-void Simulation::extents (double * xmin, double *xmax,
-			  double * ymin, double *ymax,
-			  double * zmin, double *zmax) throw()
+void Simulation::lower (double * xm, double *ym, double *zm) const throw()
 {
-  if (xmin) *xmin = extent_[0];
-  if (xmax) *xmax = extent_[1];
-  if (ymin) *ymin = extent_[2];
-  if (ymax) *ymax = extent_[3];
-  if (zmin) *zmin = extent_[4];
-  if (zmax) *zmax = extent_[5];
+  if (xm) *xm = lower_[0];
+  if (ym) *ym = lower_[1];
+  if (zm) *zm = lower_[2];
+}
+
+//----------------------------------------------------------------------
+
+void Simulation::upper (double * xp, double *yp, double *zp) const throw()
+{
+  if (xp) *xp = upper_[0];
+  if (yp) *yp = upper_[1];
+  if (zp) *zp = upper_[2];
 }
 
 //----------------------------------------------------------------------
@@ -151,6 +162,11 @@ int Simulation::num_method() const throw()
 Method * Simulation::method(int i) const throw()
 { return method_list_[i]; }
 
+//----------------------------------------------------------------------
+
+Factory * Simulation::factory () const throw()
+{ return factory_; }
+
 //======================================================================
 
 void Simulation::initialize_simulation_() throw()
@@ -187,18 +203,18 @@ void Simulation::initialize_simulation_() throw()
 	  "Parameter mismatch between Physics:dimensions and Domain:extent",
 	  (dimension_ == extent_length / 2));
 
-  for (int i=0; i<extent_length; i++) {
+  for (int i=0; i<extent_length/2; i++) {
 
-    double extent_default = (i % 2 == 0) ? 0.0 : 1.0;
+    lower_[i] = parameters_->list_value_scalar(2*i,   "extent", 0.0);
+    upper_[i] = parameters_->list_value_scalar(2*i+1, "extent", 1.0);
 
-    extent_[i] = parameters_->list_value_scalar(i, "extent", extent_default);
-
-    if (i % 2 == 1) {
+    if (lower_[i] > upper_[i]) {
       char error_message[ERROR_LENGTH];
       sprintf (error_message,
-	       "Parameter Domain:extent[%g] not lower than Domain:extent[%g]",
-	       extent_[i-1],extent_[i]);
-      ASSERT ("Simulation::Simulation", error_message, (extent_[i-1] < extent_[i]));
+	       "Parameter Domain::extent[%d]==%g not lower than "
+	       "Domain::extent[%d]==%g",
+	       2*i,lower_[i],2*i+1,upper_[i]);
+      ERROR ("Simulation::Simulation", error_message);
     }
   }
 
@@ -247,8 +263,12 @@ void Simulation::initialize_data_() throw()
   if (dimension_ < 2) gy = 0;
   if (dimension_ < 3) gz = 0;
 
+  printf ("field count = %d\n",field_descr_->field_count());
   for (i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_ghosts(i,gx,gy,gz);
+    int gx2,gy2,gz2;
+    field_descr_->ghosts(i,&gx2,&gy2,&gz2);
+    printf ("%s:%d %d %d %d\n",__FILE__,__LINE__,gx2,gy2,gz2);
   }
 
   // Set precision
@@ -300,14 +320,16 @@ void Simulation::initialize_mesh_() throw()
   root_blocks[1] = parameters_->list_value_integer(1,"root_blocks",1);
   root_blocks[2] = parameters_->list_value_integer(2,"root_blocks",1);
 
-  mesh_ = create_mesh (group_process_,
-		       root_size[0],root_size[1],root_size[2],
-		       root_blocks[0],root_blocks[1],root_blocks[2]);
+  mesh_ = factory()->create_mesh 
+    (group_process_,
+     root_size[0],root_size[1],root_size[2],
+     root_blocks[0],root_blocks[1],root_blocks[2]);
 
   // Allocate and insert the root patch, using all processes
 
-  Patch * root_patch = mesh_->create_patch
-    (group_process_,root_size[0],root_size[1],root_size[2],
+  Patch * root_patch = factory()->create_patch
+    (group_process_,
+     root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);
 
   mesh_->insert_patch(root_patch);
@@ -342,9 +364,13 @@ void Simulation::initialize_mesh_() throw()
 
   // Create the root patch
 
-  root_patch->set_extents(domain_lower[0],domain_upper[0],
-			  domain_lower[1],domain_upper[1],
-			  domain_lower[2],domain_upper[2]);
+  root_patch->set_lower(domain_lower[0],
+			domain_lower[1],
+			domain_lower[2]);
+
+  root_patch->set_upper(domain_upper[0],
+			domain_upper[1],
+			domain_upper[2]);
 
   root_patch->allocate_blocks(field_descr_);
 
@@ -372,11 +398,11 @@ void Simulation::initialize_mesh_() throw()
   // parameter: Mesh::backfill
   // parameter: Mesh::coalesce
 
-  mesh_->set_refine    (parameters_->value_integer("refine",    2));
-  mesh_->set_max_level (parameters_->value_integer("max_level", 0));
-  mesh_->set_balanced  (parameters_->value_logical("balanced",  true));
-  mesh_->set_backfill  (parameters_->value_logical("backfill",  true));
-  mesh_->set_coalesce  (parameters_->value_logical("coalesce",  true));
+  mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
+  mesh_->set_max_level     (parameters_->value_integer("max_level", 0));
+  mesh_->set_balanced      (parameters_->value_logical("balanced",  true));
+  mesh_->set_backfill      (parameters_->value_logical("backfill",  true));
+  mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
 
 }
 
@@ -470,10 +496,22 @@ void Simulation::initialize_method_() throw()
 
 void Simulation::deallocate_() throw()
 {
-  delete field_descr_;
-  field_descr_ = 0;
   delete mesh_;
   mesh_ = 0;
+  delete field_descr_;
+  field_descr_ = 0;
+  delete stopping_;
+  stopping_ = 0;
+  delete timestep_;
+  timestep_ = 0;
   delete initial_;
   initial_ = 0;
+  delete boundary_;
+  boundary_ = 0;
+  delete factory_;
+  factory_ = 0;
+  for (size_t i=0; i<method_list_.size(); i++) {
+    delete method_list_[i];
+    method_list_[i] = 0;
+  }
 }

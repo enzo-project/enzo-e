@@ -22,6 +22,8 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
+#include "cello.hpp"
+
 #include "field.hpp"
 #include "parallel.hpp"
 #include "memory.hpp"
@@ -36,10 +38,11 @@
 #include "mesh_Tree2K.hpp"
 #include "mesh_Tree3K.hpp"
 
+class Factory;
 #include "mesh_Block.hpp"
-
 #include "mesh_Patch.hpp"
 #include "mesh_Mesh.hpp"
+#include "mesh_Factory.hpp"
 
 #include "mesh_ItPatch.hpp"
 #include "mesh_ItBlock.hpp"

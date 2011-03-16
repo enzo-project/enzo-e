@@ -26,6 +26,7 @@ FieldBlock::FieldBlock
 {
   ASSERT("FieldBlock","Input field_descr is NULL",field_descr != NULL);
 
+  printf ("%s:%d new FieldBlock(%d %d %d)\n",__FILE__,__LINE__,nx,ny,nz);
   size_[0] = nx;
   size_[1] = ny;
   size_[2] = nz;
@@ -103,7 +104,9 @@ void FieldBlock::cell_width(Block * block,
 			    double * hx, double * hy, double * hz ) const throw ()
 {
   double xm,xp,ym,yp,zm,zp;
-  block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
+
+  block->lower(&xm,&ym,&zm);
+  block->upper(&xp,&yp,&zp);
 
   *hx = (xp-xm) / size_[0];
   *hy = (yp-ym) / size_[1];
@@ -403,6 +406,14 @@ int FieldBlock::adjust_alignment_
  int alignment) const throw ()
 {
   return (alignment - (size % alignment)) % alignment;
+}
+
+//----------------------------------------------------------------------
+
+int FieldBlock::align_padding_ (char * start, int alignment) const throw()
+{ 
+  long unsigned start_long = reinterpret_cast<long unsigned>(start);
+  return ( alignment - (start_long % alignment) ) % alignment; 
 }
 
 //----------------------------------------------------------------------

@@ -9,6 +9,8 @@
 /// @date     Wed Mar  9 11:34:50 PST 2011
 /// @brief    [\ref Enzo] Declaration of the interface for the EnzoPatch class
 
+class Factory;
+
 class EnzoPatch : public Patch {
 
   /// @class    EnzoPatch
@@ -18,22 +20,13 @@ class EnzoPatch : public Patch {
 public: // functions
 
   /// Constructor for given EnzoPatch size and blocking count
-  EnzoPatch(Mesh * mesh, 
+  EnzoPatch(Factory * factory,
 	    GroupProcess * group_process,
 	    int nx,   int ny,  int nz,
 	    int nbx,  int nby, int nbz) throw()
-    : Patch (mesh,group_process,nx,ny,nz,nbx,nby,nbz)
+    : Patch (factory,group_process,nx,ny,nz,nbx,nby,nbz)
   { }
 
-public: // virtual functions
-
-  /// Create a new Patch: FACTORY METHOD DESIGN PATTERN
-  virtual Block * create_block (FieldDescr * field_descr,
-				int nx, int ny=1, int nz=1,
-				int num_field_blocks = 1) throw()
-  { 
-    return new EnzoBlock (this,field_descr,nx,ny,nz,num_field_blocks);
-  };
 };
 
 #endif /* ENZO_ENZO_PATCH_HPP */

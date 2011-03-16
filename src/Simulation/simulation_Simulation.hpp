@@ -20,7 +20,8 @@ class Simulation {
 public: // interface
 
   /// Initialize the Simulation object
-  Simulation(Parameters * parameters,
+  Simulation(Factory * factory,
+	     Parameters * parameters,
 	     GroupProcess * group_process);
 
   //----------------------------------------------------------------------
@@ -41,12 +42,14 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Return the dimensionality of the Simulation
-  int dimension() throw();
+  int dimension() const throw();
 
-  /// Return the domain extents
-  void extents (double * xmin, double *xmax,
-		double * ymin = 0, double *ymax = 0,
-		double * zmin = 0, double *zmax = 0) throw();
+  /// Return the lower domain extents
+  void lower (double * xm, double * ym = 0, double * zm = 0) const throw();
+
+  /// Return the upper domain extents
+  void upper (double * xp, double * yp = 0, double * zp = 0) const throw();
+
 
   /// Return the Mesh
   Mesh * mesh() const throw();
@@ -72,6 +75,9 @@ public: // interface
   /// Return the ith method
   Method * method(int i) const throw();
 
+  /// Return the factory object
+  Factory * factory () const throw();
+
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file
@@ -87,17 +93,8 @@ public: // virtual functions
   virtual void read() throw() = 0;
 
   /// Write a Simulation state to disk
-  virtual void write() throw() = 0;
+  virtual void write() const throw() = 0;
 
-  /// Create a new Mesh: FACTORY METHOD DESIGN PATTERN
-  virtual Mesh * create_mesh (GroupProcess * group_process,
-			      int nx,int ny,int nz,
-			      int nbx,int nby,int nbz) throw()
-  { 
-    TRACE("Simulation::create_mesh()");
-    return new Mesh (group_process,nx,ny,nz,nbx,nby,nbz);
-  };
-  
 protected: // functions
 
   /// Initialize global simulation parameters
@@ -156,11 +153,18 @@ protected: // attributes
   // SIMULATION PARAMETERS
   //----------------------------------------------------------------------
 
+  /// Factory for creating Simulations, Meshes, Patches and Blocks 
+  /// [abstract factory design pattern]
+  Factory * factory_; 
+
   /// Dimension or rank of the simulation
   int  dimension_; 
 
-  /// Lower and upper domain extents
-  double extent_[6];
+  /// Lower domain extents
+  double lower_[3];
+
+  /// Upper domain extents
+  double upper_[3];
 
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS

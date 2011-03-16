@@ -40,10 +40,11 @@
 #include "enzo_fortran.hpp"
 
 #include "enzo_EnzoNamespace.hpp"
+#include "enzo_EnzoFactory.hpp"
+#include "enzo_EnzoSimulationMpi.hpp"
 #include "enzo_EnzoBlock.hpp"
 #include "enzo_EnzoPatch.hpp"
 #include "enzo_EnzoMesh.hpp"
-#include "enzo_EnzoSimulationMpi.hpp"
 // #include "enzo_EnzoSimulationCharm.hpp"
 #include "enzo_EnzoTimestep.hpp"
 #include "enzo_EnzoBoundary.hpp"

@@ -14,11 +14,11 @@
 
 Patch::Patch
 (
- Mesh * mesh, GroupProcess * group_process,
+ Factory * factory, GroupProcess * group_process,
  int nx,  int ny,  int nz,
  int nbx, int nby, int nbz
 ) throw()
-  : mesh_(mesh),
+  : factory_(factory),
     group_process_(group_process),
     layout_(new Layout (nbx,nby,nbz)),
     block_()
@@ -40,12 +40,13 @@ Patch::Patch
   blocking_[1] = nby;
   blocking_[2] = nbz;
 
-  extents_[0] = 0.0;
-  extents_[1] = 1.0;
-  extents_[2] = 0.0;
-  extents_[3] = 1.0;
-  extents_[4] = 0.0;
-  extents_[5] = 1.0;
+  lower_[0] = 0.0;
+  lower_[1] = 0.0;
+  lower_[2] = 0.0;
+
+  upper_[0] = 1.0;
+  upper_[1] = 1.0;
+  upper_[2] = 1.0;
 
 }
 
@@ -102,28 +103,38 @@ Layout * Patch::layout () const throw()
 }
 
 //----------------------------------------------------------------------
-
-void Patch::set_extents (double xm, double xp,
-			 double ym, double yp,
-			 double zm, double zp) throw()
+  
+void Patch::lower(double * xm, double * ym, double * zm) const throw ()
 {
-  extents_[0] = xm;  extents_[1] = xp;
-  extents_[2] = ym;  extents_[3] = yp;
-  extents_[4] = zm;  extents_[5] = zp;
+  if (xm) *xm = lower_[0];
+  if (ym) *ym = lower_[1];
+  if (zm) *zm = lower_[2];
 }
 
 //----------------------------------------------------------------------
-
-void Patch::extents (double * xm, double * xp,
-		     double * ym, double * yp,
-		     double * zm, double * zp) const throw()
+void Patch::set_lower(double xm, double ym, double zm) throw ()
 {
-  if (xm) *xm = extents_[0];  if (xp) *xp = extents_[1];
-  if (ym) *ym = extents_[2];  if (yp) *yp = extents_[3];
-  if (zm) *zm = extents_[4];  if (zp) *zp = extents_[5];
+  lower_[0] = xm;
+  lower_[1] = ym;
+  lower_[2] = zm;
+};
+
+//----------------------------------------------------------------------
+void Patch::upper(double * xp, double * yp, double * zp) const throw ()
+{
+  if (xp) *xp = upper_[0];
+  if (yp) *yp = upper_[1];
+  if (zp) *zp = upper_[2];
 }
 
-  
+//----------------------------------------------------------------------
+void Patch::set_upper(double xp, double yp, double zp) throw ()
+{
+  upper_[0] = xp;
+  upper_[1] = yp;
+  upper_[2] = zp;
+};
+
 //----------------------------------------------------------------------
 
 void Patch::allocate_blocks(FieldDescr * field_descr) throw()
@@ -166,16 +177,17 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
   }
 
   // Determine size of each block
-  double bx = (extents_[1] - extents_[0]) / nbx;
-  double by = (extents_[3] - extents_[2]) / nby;
-  double bz = (extents_[5] - extents_[4]) / nbz;
+  double bhx = (upper_[0] - lower_[0]) / nbx;
+  double bhy = (upper_[1] - lower_[1]) / nby;
+  double bhz = (upper_[2] - lower_[2]) / nbz;
 
   // CREATE AND INITIALIZE NEW DATA BLOCKS
 
   for (int ib=0; ib<nb; ib++) {
 
     // create a new data block
-    Block * block = create_block (field_descr,mbx,mby,mbz);
+
+    Block * block = factory_->create_block (this,field_descr,mbx,mby,mbz);
 
     // Store the data block
     block_[ib] = block;
@@ -190,15 +202,16 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
     double xm,xp,ym,yp,zm,zp;
 
-    xm = extents_[0] + ibx*bx;
-    ym = extents_[2] + iby*by;
-    zm = extents_[4] + ibz*bz;
+    xm = lower_[0] + ibx*bhx;
+    ym = lower_[1] + iby*bhy;
+    zm = lower_[2] + ibz*bhz;
 
-    xp = extents_[0] + (ibx+1)*bx;
-    yp = extents_[2] + (iby+1)*by;
-    zp = extents_[4] + (ibz+1)*bz;
+    xp = lower_[0] + (ibx+1)*bhx;
+    yp = lower_[1] + (iby+1)*bhy;
+    zp = lower_[2] + (ibz+1)*bhz;
 
-    block->set_extent(xm,xp,ym,yp,zm,zp);
+    block->set_lower(xm,ym,zm);
+    block->set_upper(xp,yp,zp);
 
     // Allocate field data
 

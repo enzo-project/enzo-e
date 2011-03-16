@@ -56,7 +56,8 @@ public: // interface
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
   /// padding and alignment
-  const char * array ()  const throw () { return array_; };
+  const char * array ()  const throw () 
+  { return array_; };
 
   /// Return lower and upper+1 index ranges (excluding ghosts)
   void index_range(int * lower_x, int * lower_y, int *lower_z, 
@@ -129,11 +130,7 @@ private: // functions
 
   /// Given array start and alignment, return first address that is
   /// aligned
-  int align_padding_ (char * start, int alignment) const throw()
-  { 
-    long unsigned start_long = reinterpret_cast<long unsigned>(start);
-    return ( alignment - (start_long % alignment) ) % alignment; 
-  };
+  int align_padding_ (char * start, int alignment) const throw();
 
   /// Return the size of the given field, both as (nx,ny,nz) and
   /// return n

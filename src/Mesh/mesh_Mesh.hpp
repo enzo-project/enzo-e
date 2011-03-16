@@ -9,16 +9,7 @@
 #ifndef MESH_MESH_HPP
 #define MESH_MESH_HPP
 
-/// MOVED TO cello.hpp
-/// strict_auto_ptr class
-// template<class T>
-// class strict_auto_ptr : public std::auto_ptr<T> {
-//  public:
-//   strict_auto_ptr(T* p = NULL) throw() : std::auto_ptr<T>(p) { }
-//  private:
-//   strict_auto_ptr (const strict_auto_ptr&) throw();
-//   void operator = ( const strict_auto_ptr&) throw();
-// };
+class Factory;
 
 class Mesh {
 
@@ -29,7 +20,8 @@ class Mesh {
 public: // interface
 
   /// Initialize an Mesh object
-  Mesh(GroupProcess * group_process,
+  Mesh(Factory * factory,
+       GroupProcess * group_process,
        int nx,  int ny,  int nz,
        int nbx, int nby, int nbz) throw ();
 
@@ -39,128 +31,82 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Return dimension
-  int dimension() throw ()
-  { return dimension_; };
+  int dimension() const throw ();
 
   /// Set dimension
-  void set_dimension(int dimension) throw ()
-  {dimension_ = dimension; };
-
-  //
+  void set_dimension(int dimension) throw ();
 
   /// Return domain lower extent
-  void lower(double * nx, double * ny, double * nz) throw ()
-  {
-    *nx = lower_[0];
-    *ny = lower_[1];
-    *nz = lower_[2];
-  }
+  void lower(double * nx = 0, double * ny = 0, double * nz = 0) const throw ();
 
   /// Set domain lower extent
-  void set_lower(double nx, double ny, double nz) throw ()
-  {
-    lower_[0] = nx;
-    lower_[1] = ny;
-    lower_[2] = nz;
-  };
-
-  //
+  void set_lower(double nx, double ny, double nz) throw ();
 
   /// Return domain upper extent
-  void upper(double * nx, double * ny, double * nz) throw ()
-  {
-    *nx = upper_[0];
-    *ny = upper_[1];
-    *nz = upper_[2];
-  }
+  void upper(double * nx = 0, double * ny = 0, double * nz = 0) const throw ();
 
   /// Set domain upper extent
-  void set_upper(double nx, double ny, double nz) throw ()
-  {
-    upper_[0] = nx;
-    upper_[1] = ny;
-    upper_[2] = nz;
-  };
-
-  //
+  void set_upper(double nx, double ny, double nz) throw ();
   
   /// Return max_level
-  int max_level() throw ()
-  { return max_level_; };
+  int max_level() const throw ();
 
   /// Set max_level
-  void set_max_level(int max_level) throw ()
-  {max_level_ = max_level; };
+  void set_max_level(int max_level) throw ();
 
   /// Return refinement factor
-  int refine() throw ()
-  {return refine_; };
+  int refine_factor() const throw ();
 
   /// Set refinement factor
-  void set_refine(int refine) throw ()
-  {refine_ = refine; }; 
+  void set_refine_factor(int refine) throw ();
 
   /// Return root_size
-  void root_size(int * nx, int * ny, int * nz) throw ()
-  {
-    *nx = root_size_[0];
-    *ny = root_size_[1];
-    *nz = root_size_[2];
-  }
+  void root_size(int * nx, int * ny, int * nz) const throw ();
 
   /// Pointer to the root Patch
-  Patch * root_patch() throw ()
-  { return (patch_list_.size() > 0) ? patch_list_[0] : 0; };
+  Patch * root_patch() throw ();
 
   /// Return the total number of local patches
   size_t num_patches() const throw();
 
   /// Return the ith patch
+  Patch * patch(size_t i) throw();
+
+  /// Return the ith patch
   Patch * patch(size_t i) const throw();
-
-  /// Return whether to avoid level jumps
-  bool balanced() throw ()
-  {return balanced_; };
-
-  /// Set whether to avoid level jumps
-  void set_balanced(bool balanced) throw ()
-  { balanced_ = balanced; };
-
-  /// Return whether to backfill levels
-  bool backfill() throw ()
-  {return backfill_; };
-
-  /// Set whether to backfill levels
-  void set_backfill(bool backfill) throw ()
-  { backfill_ = backfill; };
-
-  /// Return whether to coalesce patches
-  bool coalesce() throw ()
-  {return coalesce_; };
-
-  /// Set whether to coalesce patches
-  void set_coalesce(bool coalesce) throw ()
-  { coalesce_ = coalesce; };
-
-  GroupProcess * group()  const throw()
-  { return group_process_; };
-
-public: // virtual functions
 
   /// Insert the given Patch into the list of patches
   virtual void insert_patch(Patch *) throw();
 
-  /// Create a new Patch: FACTORY METHOD DESIGN PATTERN
-  virtual Patch * create_patch (GroupProcess * group_process,
-				int nx,int ny,int nz,
-				int nbx,int nby,int nbz) throw()
-  { 
-    return new Patch (this, group_process,
-		      nx,ny,nz,nbx,nby,nbz);
-  };
+  /// Return whether to avoid level jumps
+  bool balanced() const throw ();
 
+  /// Set whether to avoid level jumps
+  void set_balanced(bool balanced) throw ();
+
+  /// Return whether to backfill levels
+  bool backfill() const throw ();
+
+  /// Set whether to backfill levels
+  void set_backfill(bool backfill) throw ();
+
+  /// Return whether to coalesce patches
+  bool coalesce() const throw ();
+
+  /// Set whether to coalesce patches
+  void set_coalesce(bool coalesce) throw ();
+
+  /// Return the GroupProcess associated with the mesh
+  GroupProcess * group() const throw();
+
+  /// Return the factory object associated with the Mesh
+  Factory * factory () const throw()
+  { return factory_; }
 
 protected: // attributes
+
+  /// Factory for creating Simulations, Meshes, Patches and Blocks [abstract factory design pattern]
+  Factory * factory_;
 
   /// Parallel Group for distributing the Mesh across processors
   GroupProcess * group_process_;

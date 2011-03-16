@@ -30,13 +30,14 @@ PARALLEL_MAIN_BEGIN
   //----------------------------------------------------------------------
   unit_func("extent");
 
-  block->set_extent(-1, 1, -2, 2, -3, 3);
+  block->set_lower(-1, -2, -3);
+  block->set_upper( 1,  2,  3);
+
   double lower[3];
   double upper[3];
-  block->extent(&lower[0],&upper[0],
-		     &lower[1],&upper[1],
-		     &lower[2],&upper[2]);
 
+  block->lower(&lower[0],&lower[1],&lower[2]);
+  block->upper(&upper[0],&upper[1],&upper[2]);
 
   unit_assert(lower[0] == -1.0);
   unit_assert(upper[0] ==  1.0);

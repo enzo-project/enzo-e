@@ -26,7 +26,7 @@ public: // interface
   /// Initialize the Block object
   Block(Patch * patch,
 	FieldDescr * field_descr,
-	int nx, int ny=1, int nz=1,
+	int nx, int ny, int nz,
 	int num_field_blocks = 1) throw();
 
   //----------------------------------------------------------------------
@@ -50,16 +50,18 @@ public: // interface
   /// Return the ith Field block
   FieldBlock * field_block (int i=0) throw();
 
-  /// Return lower values of the block (excluding ghosts)
-  void extent(double * lower_x = 0, double * upper_x = 0, 
-	      double * lower_y = 0, double * upper_y = 0,
-	      double * lower_z = 0, double * upper_z = 0) const throw ();
+  /// Return domain lower extent
+  void lower(double * nx = 0, double * ny = 0, double * nz = 0) const throw ();
 
-  /// Set the box extent
-  void set_extent(double lower_x = 0.0, double upper_x = 1.0, 
-		  double lower_y = 0.0, double upper_y = 1.0,
-		  double lower_z = 0.0, double upper_z = 1.0) throw();
+  /// Set domain lower extent
+  void set_lower(double nx, double ny, double nz) throw ();
 
+  /// Return domain upper extent
+  void upper(double * nx = 0,  double * ny = 0, double * nz = 0) const throw ();
+
+  /// Set domain upper extent
+  void set_upper(double nx, double ny, double nz) throw ();
+  
 protected: // functions
 
   /// Allocate and copy in attributes from give Block

@@ -19,22 +19,12 @@ class EnzoMesh : public Mesh {
 public: // functions
 
   /// Initialize an Mesh object
-  EnzoMesh(GroupProcess * group_process,
+  EnzoMesh(Factory * factory,
+	   GroupProcess * group_process,
 	   int nx,  int ny,  int nz,
 	   int nbx, int nby, int nbz) throw ()
-    : Mesh (group_process,nx,ny,nz,nbx,nby,nbz)
+    : Mesh (factory,group_process,nx,ny,nz,nbx,nby,nbz)
   { }
-
-public: // virtual functions
-
-  /// Create a new Patch: FACTORY METHOD DESIGN PATTERN
-  virtual Patch * create_patch (GroupProcess * group_process,
-				int nx,   int ny,  int nz,
-				int nbx,  int nby, int nbz) throw()
-  { 
-    return new EnzoPatch (this, group_process,
-			  nx,ny,nz, nbx,nby,nbz); 
-  };
 
 };
 

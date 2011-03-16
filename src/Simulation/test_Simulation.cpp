@@ -37,7 +37,7 @@ PARALLEL_MAIN_BEGIN
   parameters -> read(fp);
   fclose (fp);
 
-  Simulation * simulation = new EnzoSimulationMpi (parameters,group_process);
+  Simulation * simulation = new EnzoSimulationMpi(parameters,group_process);
 
   unit_assert(simulation != 0);
 

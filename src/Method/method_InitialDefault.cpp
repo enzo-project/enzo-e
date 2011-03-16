@@ -157,7 +157,7 @@ void InitialDefault::allocate_xyzt_
 
   // Allocate double arrays
 
-  (*value) = new double [n];
+  (*value)  = new double [n];
   (*vdeflt) = new double [n];
   (*region) = new bool [n];
   (*rdeflt) = new bool [n];
@@ -167,7 +167,9 @@ void InitialDefault::allocate_xyzt_
   (*t)      = new double [n];
 
   double xm, xp, ym, yp, zm, zp;
-  block->extent(&xm,&xp,&ym,&yp,&zm,&zp);
+
+  block->lower(&xm,&ym,&zm);
+  block->upper(&xp,&yp,&zp);
 
   double hx,hy,hz;
   field_block->cell_width(block,&hx,&hy,&hz);
