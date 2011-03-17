@@ -1,12 +1,12 @@
-// $Id$
+// $Id: enzo_EnzoSimulationCharm.cpp 2115 2011-03-17 19:59:55Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     enzo_EnzoSimulationMpi.cpp
+/// @file     enzo_EnzoSimulationCharm.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @todo     Move timestep reductions into Timestep object
 /// @date     Tue May 11 18:06:50 PDT 2010
-/// @brief    Implementation of EnzoSimulationMpi user-dependent class member functions
+/// @brief    Implementation of EnzoSimulationCharm user-dependent class member functions
 
 #include "cello.hpp"
 
@@ -14,7 +14,7 @@
 
 //----------------------------------------------------------------------
 
-EnzoSimulationMpi::EnzoSimulationMpi
+EnzoSimulationCharm::EnzoSimulationCharm
 (
  Parameters * parameters,
  GroupProcess * group_process) throw ()
@@ -24,13 +24,13 @@ EnzoSimulationMpi::EnzoSimulationMpi
 
 //----------------------------------------------------------------------
 
-EnzoSimulationMpi::~EnzoSimulationMpi() throw()
+EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationMpi::initialize() throw()
+void EnzoSimulationCharm::initialize() throw()
 {
   // Call initialize for Simulation base class
   Simulation::initialize();
@@ -42,13 +42,13 @@ void EnzoSimulationMpi::initialize() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationMpi::finalize() throw()
+void EnzoSimulationCharm::finalize() throw()
 {
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationMpi::run() throw()
+void EnzoSimulationCharm::run() throw()
 {
   
   Monitor * monitor = Monitor::instance();
@@ -192,7 +192,7 @@ void EnzoSimulationMpi::run() throw()
 
     double dt_mesh  = reduce_mesh->reduce_double(dt_patch,reduce_op_min);
 
-    ASSERT("EnzoSimulationMpi::run", "dt == 0", dt_mesh != 0.0);
+    ASSERT("EnzoSimulationCharm::run", "dt == 0", dt_mesh != 0.0);
 
     //--------------------------------------------------
     // Apply the methods
@@ -293,22 +293,22 @@ void EnzoSimulationMpi::run() throw()
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationMpi::read() throw()
+void EnzoSimulationCharm::read() throw()
 {
-  INCOMPLETE("EnzoSimulationMpi::read");
+  INCOMPLETE("EnzoSimulationCharm::read");
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationMpi::write() const throw()
+void EnzoSimulationCharm::write() const throw()
 {
-  INCOMPLETE("EnzoSimulationMpi::write");
+  INCOMPLETE("EnzoSimulationCharm::write");
 }
 
 //======================================================================
 
 Timestep * 
-EnzoSimulationMpi::create_timestep_ ( std::string name ) throw ()
+EnzoSimulationCharm::create_timestep_ ( std::string name ) throw ()
 /// @param name   Name of the timestep method to create (ignored)
 {
   return new EnzoTimestep;
@@ -317,7 +317,7 @@ EnzoSimulationMpi::create_timestep_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Initial * 
-EnzoSimulationMpi::create_initial_ ( std::string name ) throw ()
+EnzoSimulationCharm::create_initial_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   
@@ -337,7 +337,7 @@ EnzoSimulationMpi::create_initial_ ( std::string name ) throw ()
   int cycle    = parameters_->value_integer ("cycle",0);
   double time  = parameters_->value_scalar ("time",0.0);
 
-  ASSERT("EnzoSimulationMpi::create_initial_",
+  ASSERT("EnzoSimulationCharm::create_initial_",
 	 "create_mesh_ mush be called first",
 	 mesh_ != NULL);
 
@@ -360,7 +360,7 @@ EnzoSimulationMpi::create_initial_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Stopping * 
-EnzoSimulationMpi::create_stopping_ (std::string name) throw ()
+EnzoSimulationCharm::create_stopping_ (std::string name) throw ()
 /// @param name   Name of the stopping method to create (ignored)
 {
   //--------------------------------------------------
@@ -381,7 +381,7 @@ EnzoSimulationMpi::create_stopping_ (std::string name) throw ()
 //----------------------------------------------------------------------
 
 Boundary * 
-EnzoSimulationMpi::create_boundary_ ( std::string name ) throw ()
+EnzoSimulationCharm::create_boundary_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   //--------------------------------------------------
@@ -410,7 +410,7 @@ EnzoSimulationMpi::create_boundary_ ( std::string name ) throw ()
     char buffer[ERROR_LENGTH];
     sprintf (buffer,"Illegal parameter Boundary::type '%s'",
 	     boundary_param.c_str());
-    ERROR("EnzoSimulationMpi::create_boundary_",
+    ERROR("EnzoSimulationCharm::create_boundary_",
 	  buffer);
   }
 	     
@@ -420,7 +420,7 @@ EnzoSimulationMpi::create_boundary_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Method * 
-EnzoSimulationMpi::create_method_ ( std::string name ) throw ()
+EnzoSimulationCharm::create_method_ ( std::string name ) throw ()
 /// @param name   Name of the method to create
 {
 
@@ -435,7 +435,7 @@ EnzoSimulationMpi::create_method_ ( std::string name ) throw ()
   if (method == 0) {
     char buffer[ERROR_LENGTH];
     sprintf (buffer,"Cannot create Method '%s'",name.c_str());
-    ERROR("EnzoSimulationMpi::create_method_", buffer);
+    ERROR("EnzoSimulationCharm::create_method_", buffer);
   }
 
   return method;
@@ -444,7 +444,7 @@ EnzoSimulationMpi::create_method_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Output * 
-EnzoSimulationMpi::create_output_ ( std::string type ) throw ()
+EnzoSimulationCharm::create_output_ ( std::string type ) throw ()
 /// @param filename   File name format for the output object
 {
 
@@ -457,9 +457,10 @@ EnzoSimulationMpi::create_output_ ( std::string type ) throw ()
   if (output == 0) {
     char buffer[ERROR_LENGTH];
     sprintf (buffer,"Cannot create Output type '%s'",type.c_str());
-    ERROR("EnzoSimulationMpi::create_output_", buffer);
+    ERROR("EnzoSimulationCharm::create_output_", buffer);
   }
 
   return output;
 }
 
+//======================================================================

@@ -24,13 +24,12 @@ Mesh * EnzoFactory::create_mesh
 
 Patch * EnzoFactory::create_patch
 (
- Mesh * mesh,
  GroupProcess * group_process,
  int nx,   int ny,  int nz,
  int nbx,  int nby, int nbz
  ) throw()
 {
-  return new EnzoPatch (mesh,this,group_process,nx,ny,nz,nbx,nby,nbz);
+  return new EnzoPatch (this,group_process,nx,ny,nz,nbx,nby,nbz);
 }
 
 //----------------------------------------------------------------------

@@ -29,18 +29,19 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
+  // Create global parallel process group object
   GroupProcess * group_process = GroupProcess::create();
 
   // initialize unit testing
 
   int rank = group_process->rank();
   int size = group_process->size();
-  unit_init(rank, size);
 
-  // only display output from root process
+  unit_init(rank, size);
 
   Monitor * monitor = Monitor::instance();
 
+  // only display output from root process
   monitor->set_active(rank == 0);
 
   // display header text
@@ -69,33 +70,23 @@ PARALLEL_MAIN_BEGIN
 
   Parameters * parameters = new Parameters;
 
-  parameters->read(fp); // MEMORY LEAK
-
-  //--------------------------------------------------
-  parameters->set_current_group ("Parallel");
-  //--------------------------------------------------
-
-  // parameter: Parallel::method
-
-  std::string parallel_method = 
-    parameters->list_value_string(0,"method","serial");
+  parameters->read(fp);
 
   Simulation * simulation = 0;
 
-  if (parallel_method == "charm") {
-    INCOMPLETE("main");
-    //    simulation = new EnzoSimulationCharm (parameters);
-  } else if (parallel_method == "mpi" || parallel_method == "serial") {
-    simulation = new EnzoSimulationMpi (parameters,group_process);
-  }
+#ifdef CONFIG_USE_CHARM
+  simulation = new EnzoSimulationCharm (parameters, group_process);
+#else
+  simulation = new EnzoSimulationMpi (parameters,group_process);
+#endif
 
-  ASSERT ("main()","Illegal Parallel::method parameter @@@\n",simulation != 0);
+  ASSERT ("main()","Failed to create Simulation object",simulation != 0);
 
-  // read parameter file
+  // Initialize the simulation
 
   simulation->initialize();
 
-  // run the simulation
+  // Run the simulation
 
   simulation->run();
 

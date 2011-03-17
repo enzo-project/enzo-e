@@ -67,12 +67,14 @@ public: // functions
 
   /// Write a patch-related data to disk if scheduled
   void scheduled_write
-  ( Patch * patch, int cycle, double time, bool root_call=true) throw()
+  ( Mesh * mesh, Patch * patch, 
+    int cycle, double time, bool root_call=true) throw()
   { if (write_this_cycle(cycle, time)) write (patch,cycle,time,root_call); };
 
   /// Write a block-related to disk if scheduled
   void scheduled_write
-  ( Block * block, int cycle, double time, bool root_call=true) throw()
+  ( Mesh * mesh, Patch * patch, Block * block, 
+    int cycle, double time, bool root_call=true) throw()
   { if (write_this_cycle(cycle, time)) write (block,cycle,time,root_call); };
 
   std::string expand_file_name (int cycle, double time) const throw();

@@ -352,8 +352,7 @@ void Simulation::initialize_mesh_() throw()
   // Allocate and insert the root patch, using all processes
 
   Patch * root_patch = factory()->create_patch
-    (mesh_,
-     group_process_,
+    (group_process_,
      root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);
 

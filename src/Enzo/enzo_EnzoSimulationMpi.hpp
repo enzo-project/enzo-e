@@ -13,9 +13,9 @@ class EnzoSimulationMpi : public Simulation {
 
   /// @class    EnzoSimulationMpi
   /// @ingroup  Enzo
-  /// @brief    [\ref Enzo] Simulation class for Enzo
+  /// @brief    [\ref Enzo] Simulation class for MPI Enzo-P
 
-public: // interface
+public: // functions
 
   /// Constructor
   EnzoSimulationMpi
@@ -42,10 +42,6 @@ public: // interface
   /// Write a Simulation state to disk
   virtual void write() const throw();
 
-public: // functions
-
-  
-
 protected: // virtual functions
 
   /// Create named stopping object
@@ -65,16 +61,6 @@ protected: // virtual functions
 
   /// Create output object for the given filename
   Output * create_output_ (std::string name) throw ();
-
-private: // functions
-
-  /// Output data
-  void output_images_( Block * block,
-		       const char * file_format,
-		       int cycle,
-		       int cycle_skip=1) throw ();
-
-  void deallocate_() throw();
 
 };
 

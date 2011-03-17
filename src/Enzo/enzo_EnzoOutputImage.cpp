@@ -55,7 +55,7 @@ void EnzoOutputImage::write
 
   ItPatch it_patch (mesh);
   while (Patch * patch = ++it_patch) {
-    write (patch,cycle,time,false);
+    write (mesh,patch,cycle,time,false);
   }
 
   if (root_call) {
@@ -69,6 +69,7 @@ void EnzoOutputImage::write
 
 void EnzoOutputImage::write
 (
+ Mesh  * mesh,
  Patch * patch,
  int cycle,
  double time,
@@ -77,7 +78,7 @@ void EnzoOutputImage::write
 {
   INCOMPLETE("EnzoOutputImage::write");
 
-  if (patch->mesh()->dimension() != 2) {
+  if (mesh->dimension() != 2) {
     WARNING("EnzoOutputImage::write",
 	    "EnzoOutputImage only supports 2D problems");
   }
@@ -93,7 +94,7 @@ void EnzoOutputImage::write
 
   ItBlock it_block (patch);
   while (Block * block = ++it_block) {
-    write (block,cycle,time,false);
+    write (mesh, patch, block,cycle,time,false);
   }
 
   if (root_call) {
@@ -107,6 +108,8 @@ void EnzoOutputImage::write
 
 void EnzoOutputImage::write
 (
+ Mesh  * mesh,
+ Patch * patch,
  Block * block,
  int cycle,
  double time,

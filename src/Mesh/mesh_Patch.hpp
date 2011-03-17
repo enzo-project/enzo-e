@@ -21,8 +21,7 @@ class Patch {
 public: // interface
 
   /// Constructor for given Patch size and blocking count
-  Patch(Mesh *,
-	Factory * factory,
+  Patch(Factory * factory,
 	GroupProcess * group_process,
 	int nx,   int ny,  int nz,
 	int nbx,  int nby, int nbz) throw();
@@ -84,9 +83,6 @@ public: // interface
   GroupProcess * group()  const throw()
   { return group_process_; };
 
-  Mesh * mesh () const throw()
-  { return mesh_; };
-
 public: // entry functions
 
 #ifdef CONFIG_USE_CHARM
@@ -99,9 +95,6 @@ public: // entry functions
   //--------------------------------------------------
 
 protected: // attributes
-
-  /// Parent Mesh
-  Mesh * mesh_;
 
   /// Factory object for creating Blocks
   Factory * factory_;

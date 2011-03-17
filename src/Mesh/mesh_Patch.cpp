@@ -14,14 +14,12 @@
 
 Patch::Patch
 (
- Mesh * mesh,
  Factory * factory, 
  GroupProcess * group_process,
  int nx,  int ny,  int nz,
  int nbx, int nby, int nbz
 ) throw()
-  : mesh_(mesh),
-    factory_(factory),
+  : factory_(factory),
     group_process_(group_process),
     layout_(new Layout (nbx,nby,nbz)),
     block_()

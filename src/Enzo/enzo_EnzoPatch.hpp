@@ -20,12 +20,11 @@ class EnzoPatch : public Patch {
 public: // functions
 
   /// Constructor for given EnzoPatch size and blocking count
-  EnzoPatch(Mesh * mesh,
-	    Factory * factory,
+  EnzoPatch(Factory * factory,
 	    GroupProcess * group_process,
 	    int nx,   int ny,  int nz,
 	    int nbx,  int nby, int nbz) throw()
-    : Patch (mesh,factory,group_process,nx,ny,nz,nbx,nby,nbz)
+    : Patch (factory,group_process,nx,ny,nz,nbx,nby,nbz)
   { }
 
 };
