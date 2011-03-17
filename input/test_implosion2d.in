@@ -136,8 +136,8 @@
 
    Stopping {
 
-      time  = 2.5;
-      cycle = 100;
+      time  = 0.2;
+      cycle = 1000;
 
       # redshift
    }
@@ -165,7 +165,7 @@
       time_list_test {
         file_name      = "data_time_list-%14.8f";
 	type           = "data";
-	time_list      = [0.15,0.35,0.65,0.95];
+	time_list      = [0.11, 0.13, 0.15, 0.17];
       };
 
    }

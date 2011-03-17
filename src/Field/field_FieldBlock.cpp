@@ -26,7 +26,6 @@ FieldBlock::FieldBlock
 {
   ASSERT("FieldBlock","Input field_descr is NULL",field_descr != NULL);
 
-  printf ("%s:%d new FieldBlock(%d %d %d)\n",__FILE__,__LINE__,nx,ny,nz);
   size_[0] = nx;
   size_[1] = ny;
   size_[2] = nz;

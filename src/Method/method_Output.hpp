@@ -25,8 +25,8 @@ class Output {
 
 public: // functions
 
-  /// Create an uninitialized Output object with the given filename format
-  Output(std::string filename) throw();
+  /// Create an uninitialized Output object with the given file_name format
+  Output(std::string file_name) throw();
 
   /// Set cycle interval (start, step, stop)
   void set_cycle_interval
@@ -59,21 +59,27 @@ public: // functions
 public: // virtual functions
 
   /// Write mesh-related data to disk
-  virtual void write (Mesh * mesh, bool root_call=true) const throw()
-  { printf ("INCOMPLETE"); };
+  virtual void write 
+  ( Mesh * mesh, int cycle, double time, bool root_call=true) const throw()
+  { printf ("%s:%d INCOMPLETE Output Mesh: %s %d %g\n",
+	    __FILE__,__LINE__,file_name_.c_str(),cycle,time); };
 
   /// Write a patch-related data to disk; may be called by write (Mesh)
-  virtual void write (Patch * patch, bool root_call=true) const throw()
-  { printf ("INCOMPLETE"); };
+  virtual void write 
+  ( Patch * patch, int cycle, double time, bool root_call=true) const throw()
+  { printf ("%s:%d INCOMPLETE Output Patch: %s %d %g\n",
+	    __FILE__,__LINE__,file_name_.c_str(),cycle,time); };
 
   /// Write a block-related to disk; may be called by write (Patch)
-  virtual void write (Block * block, bool root_call=true) const throw()
-  { printf ("INCOMPLETE"); };
+  virtual void write 
+  ( Block * block, int cycle, double time, bool root_call=true) const throw()
+  { printf ("%s:%d INCOMPLETE Output Block: %s %d %g\n",
+	    __FILE__,__LINE__,file_name_.c_str(),cycle,time); };
 
 protected: // attributes
 
   /// Name of the file to write, including printf-type format
-  std::string filename_;
+  std::string file_name_;
 
   /// Whether Output is currently active
   bool active_;

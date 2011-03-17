@@ -24,7 +24,6 @@ Block::Block
 
 { 
 
-  printf ("Block()\n");
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);
   for (size_t i=0; i<field_block_.size(); i++) {

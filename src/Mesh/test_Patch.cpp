@@ -92,8 +92,6 @@ PARALLEL_MAIN_BEGIN
   patch->lower(&xm,&ym,&zm);
   patch->upper(&xp,&yp,&zp);
 
-  printf ("patch %g %g %g  %g %g %g\n",xm,ym,zm,xp,yp,zp);
-
   unit_assert(xm==domain_lower[0] && xp==domain_upper[0] &&
 	      ym==domain_lower[1] && yp==domain_upper[1] &&
 	      zm==domain_lower[2] && zp==domain_upper[2]);

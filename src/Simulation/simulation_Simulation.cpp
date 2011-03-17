@@ -275,12 +275,10 @@ void Simulation::initialize_data_() throw()
   if (dimension_ < 2) gy = 0;
   if (dimension_ < 3) gz = 0;
 
-  printf ("field count = %d\n",field_descr_->field_count());
   for (i=0; i<field_descr_->field_count(); i++) {
     field_descr_->set_ghosts(i,gx,gy,gz);
     int gx2,gy2,gz2;
     field_descr_->ghosts(i,&gx2,&gy2,&gz2);
-    printf ("%s:%d %d %d %d\n",__FILE__,__LINE__,gx2,gy2,gz2);
   }
 
   // Set precision
@@ -486,34 +484,34 @@ void Simulation::initialize_output_() throw()
 
     parameters_->set_current_subgroup(group);
 
-    // parameter: Output:<group>:type
+    // // parameter: Output:<group>:type
 
-    std::string type = parameters_->value_string("type","unknown");
+    // std::string type = parameters_->value_string("type","unknown");
 
-    // Error if output type is not defined
-    if (type == "unknown") {
-      char buffer[ERROR_LENGTH];
-      sprintf (buffer,"Output:%s:type parameter is undefined",group.c_str());
-      ERROR("Simulation::initialize_output_",buffer);
-    }
-
-    Output * output = create_output_(type);
-
-    // Error if output type is not recognized
-    if (output == NULL) {
-      char buffer[ERROR_LENGTH];
-      sprintf (buffer,"Unrecognized parameter value Output:%s:type = %s",
-	       group.c_str(),type.c_str());
-      ERROR("Simulation::initialize_output_",buffer);
-    }
-
-    ASSERT("Simulation::initialize_output_",
-	   "Bad type for Output 'file_name' parameter",
-	   parameters_->type("file_name") == parameter_string);
+    // // Error if output type is not defined
+    // if (type == "unknown") {
+    //   char buffer[ERROR_LENGTH];
+    //   sprintf (buffer,"Output:%s:type parameter is undefined",group.c_str());
+    //   ERROR("Simulation::initialize_output_",buffer);
+    // }
 
     // parameter: Output:<group>:file_name
 
-    std::string filename = parameters_->value_string("file_name");
+    std::string file_name = parameters_->value_string("file_name");
+
+    Output * output = create_output_(file_name);
+
+    // // Error if output type is not recognized
+    // if (output == NULL) {
+    //   char buffer[ERROR_LENGTH];
+    //   sprintf (buffer,"Unrecognized parameter value Output:%s:type = %s",
+    // 	       group.c_str(),type.c_str());
+    //   ERROR("Simulation::initialize_output_",buffer);
+    // }
+
+    // ASSERT("Simulation::initialize_output_",
+    // 	   "Bad type for Output 'file_name' parameter",
+    // 	   parameters_->type("file_name") == parameter_string);
 
     bool cycle_interval,cycle_list,time_interval,time_list;
 

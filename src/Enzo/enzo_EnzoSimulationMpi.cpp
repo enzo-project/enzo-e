@@ -20,7 +20,6 @@ EnzoSimulationMpi::EnzoSimulationMpi
  GroupProcess * group_process) throw ()
   : Simulation(new EnzoFactory,parameters,group_process)
 {
-  printf ("EnzoSimulationMpi()\n");
 }
 
 //----------------------------------------------------------------------
@@ -235,12 +234,12 @@ void EnzoSimulationMpi::run() throw()
 	enzo_float & dt       = enzo_block->dt;
 	enzo_float & old_time = enzo_block->OldTime;
 
-	// Perform scheduled output
+	// Perform any scheduled output
 
 	for (size_t i=0; i<output_list_.size(); i++) {
 	  Output * output = output_list_[i];
 	  if (output->write_this_cycle(cycle,time)) {
-	    output->write(block);
+	    output->write(block,cycle,time);
 	  }
 	}
 
@@ -310,8 +309,13 @@ void EnzoSimulationMpi::run() throw()
       // Perform output if needed
 
       for (size_t i=0; i<output_list_.size(); i++) {
+
+	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
+	int &    cycle        = enzo_block->CycleNumber;
+	enzo_float & time     = enzo_block->Time;
+
 	Output * output = output_list_[i];
-	output->write(block);
+	output->write(block,cycle,time);
       }
     }
   }
@@ -378,9 +382,7 @@ EnzoSimulationMpi::create_initial_ ( std::string name ) throw ()
     ItBlock itBlock (patch);
     Block * block;
     while ((block = ++itBlock)) {
-      printf ("block = %p\n",block);
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
-      printf ("enzo_block = %p\n",enzo_block);
       enzo_block->CycleNumber = cycle;
       enzo_block->Time        = time;
       enzo_block->OldTime     = time;
@@ -477,11 +479,11 @@ EnzoSimulationMpi::create_method_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Output * 
-EnzoSimulationMpi::create_output_ ( std::string filename ) throw ()
-/// @param filename   File name format for the output object
+EnzoSimulationMpi::create_output_ ( std::string file_name ) throw ()
+/// @param file_name   File name format for the output object
 {
 
-  Output * output = new Output (filename);
+  Output * output = new Output (file_name);
 
   return output;
 }
@@ -513,12 +515,12 @@ void EnzoSimulationMpi::output_images_
     mx=nx+2*gx;
     my=ny+2*gy;
     mz=nz+2*gz;
-    char filename[255];
+    char file_name[255];
     std::string field_name = field_descr->field_name(index);
     Scalar * field_values = (Scalar *)field_block->field_values(index);
-    sprintf (filename,file_format,
+    sprintf (file_name,file_format,
 	     enzo_block->CycleNumber,index);
-    monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 
+    monitor->image (file_name, field_values, mx,my,mz, 2, reduce_sum, 
 		    0.0, 1.0);
   }
 }

@@ -24,7 +24,6 @@ EnzoBlock::EnzoBlock(Patch * patch,
     SubgridFluxes(0)
 {
 
-  printf ("EnzoBlock()\n");
   int i,j;
 
   for (i=0; i<MAX_DIMENSION; i++) {
