@@ -56,6 +56,21 @@ public: // functions
   bool is_active() const throw()
   { return active_; };
 
+  /// Write mesh-related data to disk if scheduled
+  void scheduled_write
+  ( Mesh * mesh, int cycle, double time, bool root_call=true) throw()
+  { if (write_this_cycle(cycle, time)) write (mesh,cycle,time,root_call); };
+
+  /// Write a patch-related data to disk if scheduled
+  void scheduled_write
+  ( Patch * patch, int cycle, double time, bool root_call=true) throw()
+  { if (write_this_cycle(cycle, time)) write (patch,cycle,time,root_call); };
+
+  /// Write a block-related to disk if scheduled
+  void scheduled_write
+  ( Block * block, int cycle, double time, bool root_call=true) throw()
+  { if (write_this_cycle(cycle, time)) write (block,cycle,time,root_call); };
+
 public: // virtual functions
 
   /// Write mesh-related data to disk
@@ -83,6 +98,9 @@ protected: // attributes
 
   /// Whether Output is currently active
   bool active_;
+
+  /// Whether Output is scheduled for next call to scheduled write
+  bool scheduled_;
   
   /// Schedule type of the Output object
   output_schedule_enum output_schedule_;

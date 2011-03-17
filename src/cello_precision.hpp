@@ -46,8 +46,9 @@ typedef double Scalar;
 
 namespace cello {
 
-  int sizeof_precision      (enum precision_enum);
-  int is_precision_supported(enum precision_enum);
+  int sizeof_precision       (enum precision_enum);
+  int is_precision_supported (enum precision_enum);
+  double machine_epsilon     (enum precision_enum);
 
   extern const char * precision_name[8];
 

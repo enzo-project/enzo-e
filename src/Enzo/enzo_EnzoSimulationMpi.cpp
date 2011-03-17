@@ -238,9 +238,7 @@ void EnzoSimulationMpi::run() throw()
 
 	for (size_t i=0; i<output_list_.size(); i++) {
 	  Output * output = output_list_[i];
-	  if (output->write_this_cycle(cycle,time)) {
-	    output->write(block,cycle,time);
-	  }
+	  output->scheduled_write(block,cycle,time);
 	}
 
 	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH

@@ -166,12 +166,14 @@ bool Output::write_this_cycle ( int cycle, double time ) throw()
   int cycle_stop;
   int cycle_dump;
 
+  const double eps = cello::machine_epsilon(precision_single);
+
   switch (output_schedule_) {
 
   case output_schedule_time_list:
     // time_list_
     time_dump = time_list_[index_];
-    if (time > time_dump - 1e-14) {
+    if (time_dump <= time*(1+eps)) { // <= to round-off error
       result = true;
       active_ = (++index_ < time_list_.size());
     }
@@ -184,7 +186,7 @@ bool Output::write_this_cycle ( int cycle, double time ) throw()
     time_step  = time_interval_[1];
     time_stop  = time_interval_[2];
     time_dump = time_start + index_*time_step;
-    if (time >= time_dump - 1e-14) {
+    if (time_dump <= time*(1+eps)) { // <= to round-off error
       result = true;
       active_ = (time_start + (++index_)*time_step <= time_stop);
     }
@@ -193,7 +195,7 @@ bool Output::write_this_cycle ( int cycle, double time ) throw()
   case output_schedule_cycle_list:
     // cycle_list_
     cycle_dump = cycle_list_[index_];
-    if (cycle >= cycle_dump) {
+    if (cycle_dump <= cycle*(1+eps)) { // <= to round-off error
       result = true;
       active_ = (++index_ < cycle_list_.size());
     }
@@ -206,7 +208,7 @@ bool Output::write_this_cycle ( int cycle, double time ) throw()
     cycle_step  = cycle_interval_[1];
     cycle_stop  = cycle_interval_[2];
     cycle_dump = cycle_start + index_*cycle_step;
-    if (cycle >= cycle_dump) {
+    if (cycle_dump <= cycle*(1+eps)) { // <= to round-off error
       result = true;
       active_ = (cycle_start + (++index_)*cycle_step <= cycle_stop);
     }
