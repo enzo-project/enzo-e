@@ -588,8 +588,8 @@ void Simulation::initialize_output_() throw()
       double time_start = 0;
       double time_step = 0;
       double time_stop = max_double;
-      if (parameters_->type("time_interval") == parameter_integer) {
-	time_step = parameters_->value_integer("time_interval",1);
+      if (parameters_->type("time_interval") == parameter_scalar) {
+	time_step = parameters_->value_scalar("time_interval",1);
       } else if (parameters_->type("time_interval") == parameter_list) {
 	if (parameters_->list_length("time_interval") != 3) {
 	  ERROR("Simulation::initialize_output_",
@@ -597,11 +597,11 @@ void Simulation::initialize_output_() throw()
 		"[time_start, time_step, time_stop");
 	}
 	time_start = 
-	  parameters_->list_value_integer (0,"time_interval",0);
+	  parameters_->list_value_scalar (0,"time_interval",0);
 	time_step  = 
-	  parameters_->list_value_integer (1,"time_interval",1);
+	  parameters_->list_value_scalar (1,"time_interval",1);
 	time_stop  = 
-	  parameters_->list_value_integer (2,"time_interval",max_double);
+	  parameters_->list_value_scalar (2,"time_interval",max_double);
       } else {
 	ERROR("Simulation::initialize_output_",
 	      "Output time_interval is of the wrong type");
@@ -612,8 +612,8 @@ void Simulation::initialize_output_() throw()
 
       std::vector<double> list;
 
-      if (parameters_->type("time_list") == parameter_integer) {
-	list.push_back (parameters_->value_integer("time_list",0));
+      if (parameters_->type("time_list") == parameter_scalar) {
+	list.push_back (parameters_->value_scalar("time_list",0));
       } else if (parameters_->type("time_list") == parameter_list) {
 	for (int i=0; i<parameters_->list_length("time_list"); i++) {
 	  double value = parameters_->list_value_scalar(i,"time_list",0.0);

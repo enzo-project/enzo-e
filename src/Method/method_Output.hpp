@@ -94,7 +94,7 @@ protected: // attributes
   std::vector<double> time_list_;
 
   /// Index of time or cycle interval or list for next output
-  int index_;
+  size_t index_;
 
 };
 

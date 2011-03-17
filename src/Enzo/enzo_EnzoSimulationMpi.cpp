@@ -84,8 +84,8 @@ void EnzoSimulationMpi::run() throw()
 
       enzo_block->initialize();
 
-      int cycle   = enzo_block->CycleNumber;
-      double time = enzo_block->Time;
+      // int cycle   = enzo_block->CycleNumber;
+      // double time = enzo_block->Time;
 
       //      output_images_(block, "enzo-p-%06d.%d.png",0,1);
     }
@@ -183,10 +183,9 @@ void EnzoSimulationMpi::run() throw()
 
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-	int cycle   = enzo_block->CycleNumber;
 	double time = enzo_block->Time;
 
-	for (int i=0; i<output_list_.size(); i++) {
+	for (size_t i=0; i<output_list_.size(); i++) {
 	  Output * output = output_list_[i];
 	  dt_block = output->update_timestep(time,dt_block);
 	}
@@ -238,7 +237,7 @@ void EnzoSimulationMpi::run() throw()
 
 	// Perform scheduled output
 
-	for (int i=0; i<output_list_.size(); i++) {
+	for (size_t i=0; i<output_list_.size(); i++) {
 	  Output * output = output_list_[i];
 	  if (output->write_this_cycle(cycle,time)) {
 	    output->write(block);
@@ -310,7 +309,7 @@ void EnzoSimulationMpi::run() throw()
 
       // Perform output if needed
 
-      for (int i=0; i<output_list_.size(); i++) {
+      for (size_t i=0; i<output_list_.size(); i++) {
 	Output * output = output_list_[i];
 	output->write(block);
       }

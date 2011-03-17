@@ -188,7 +188,7 @@ if (arch == "linux"):
    hdf5_inc = (hdf5_path + '/include')
    hdf5_lib = (hdf5_path + '/lib')
 
-   flags_opt  = '-g'
+   flags_opt  = '-g -O3'
    flags_prec = '-m128bit-long-double'
    flags_warn = '-Wall'
 

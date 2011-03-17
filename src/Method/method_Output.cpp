@@ -101,9 +101,7 @@ void Output::set_time_list (std::vector<double> time_list) throw()
 
 double Output::update_timestep ( double time, double dt) const throw()
 {
-  UNTESTED("Output::write_next_cycle");
-
-  if (! active_) return false;
+  if (! active_) return dt;
 
   double new_dt = dt;
 
@@ -119,8 +117,10 @@ double Output::update_timestep ( double time, double dt) const throw()
 
   case output_schedule_time_list:
     time_dump = time_list_[index_];
-    if (time_next >= time_dump) {
-      new_dt = time_dump - time_next;
+    if (time < time_dump && time_dump <= time_next) {
+      new_dt = time_next - time_dump;
+      printf ("%s:%d time=%g dt=%g new_dt=%g time_dump=%g time_nex=%g\n",
+	      __FILE__,__LINE__,time,dt,new_dt,time_dump,time_next);
     }
     break;
 
@@ -130,8 +130,10 @@ double Output::update_timestep ( double time, double dt) const throw()
     time_step  = time_interval_[1];
     time_stop  = time_interval_[2];
     time_dump = time_start + index_*time_step;
-    if (time_next >= time_dump) {
-      new_dt = time_dump - time_next;
+    if (time < time_dump && time_dump <= time_next) {
+      new_dt = time_next - time_dump;
+      printf ("%s:%d time=%g dt=%g new_dt=%g time_dump=%g time_nex=%g\n",
+	      __FILE__,__LINE__,time,dt,new_dt,time_dump,time_next);
     }
     break;
   default:
@@ -145,8 +147,6 @@ double Output::update_timestep ( double time, double dt) const throw()
 
 bool Output::write_this_cycle ( int cycle, double time ) throw()
 {
-
-  UNTESTED("Output::write_next_cycle");
 
   bool result = false;
 
