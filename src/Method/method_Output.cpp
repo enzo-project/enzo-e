@@ -10,8 +10,8 @@
 
 //----------------------------------------------------------------------
 
-Output::Output (std::string file_name) throw()
-  : file_name_(file_name),
+Output::Output () throw()
+  : file_name_(""),
     active_(false),
     output_schedule_(output_schedule_unknown),
     cycle_interval_(),
@@ -222,3 +222,22 @@ bool Output::write_this_cycle ( int cycle, double time ) throw()
 }
 //----------------------------------------------------------------------
 
+std::string Output::expand_file_name 
+(
+ int cycle,
+ double time
+) const throw()
+{
+  char buffer[CELLO_STRING_LENGTH];
+  switch (output_schedule_) {
+  case output_schedule_cycle_list:
+  case output_schedule_cycle_interval:
+    sprintf (buffer,file_name_.c_str(),cycle);
+    break;
+  case output_schedule_time_list:
+  case output_schedule_time_interval:
+    sprintf (buffer,file_name_.c_str(),time);
+    break;
+  }
+  return std::string(buffer);
+}

@@ -25,7 +25,8 @@ public: // interface
 
   /// Create a new Patch  [abstract factory design pattern]
   virtual Patch * create_patch
-  (GroupProcess * group_process,
+  (Mesh * mesh,
+   GroupProcess * group_process,
    int nx,   int ny,  int nz,
    int nbx,  int nby, int nbz) throw();
 

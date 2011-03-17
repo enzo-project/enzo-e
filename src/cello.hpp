@@ -19,34 +19,35 @@
  * PROBLEM DECLARATIONS
  **********************************************************************/
 
+
 /// @enum     face_axis_enum
 /// @brief    Face [lower|upper][x|y|z]
- enum face_axis_enum {
-   face_lower_axis_x = 0,
-   face_upper_axis_x = 1,
-   face_lower_axis_y = 2,
-   face_upper_axis_y = 3,
-   face_lower_axis_z = 4,
-   face_upper_axis_z = 5,
-   face_axis_all
- };
+enum face_axis_enum {
+  face_lower_axis_x = 0,
+  face_upper_axis_x = 1,
+  face_lower_axis_y = 2,
+  face_upper_axis_y = 3,
+  face_lower_axis_z = 4,
+  face_upper_axis_z = 5,
+  face_axis_all
+};
 
- /// @enum     face_enum
- /// @brief    Face [lower|upper]
- enum face_enum {
-   face_lower = 0,
-   face_upper = 1,
-   face_all
- };
+/// @enum     face_enum
+/// @brief    Face [lower|upper]
+enum face_enum {
+  face_lower = 0,
+  face_upper = 1,
+  face_all
+};
 
- /// @enum     axis_enum
- /// @brief    Axis [x|y|z]
- enum axis_enum {
-   axis_x = 0,
-   axis_y = 1,
-   axis_z = 2,
-   axis_all
- };
+/// @enum     axis_enum
+/// @brief    Axis [x|y|z]
+enum axis_enum {
+  axis_x = 0,
+  axis_y = 1,
+  axis_z = 2,
+  axis_all
+};
 
 
 /*********************************************************************

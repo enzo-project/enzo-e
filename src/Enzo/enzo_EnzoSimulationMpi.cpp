@@ -62,15 +62,15 @@ void EnzoSimulationMpi::run() throw()
   // INITIALIZE FIELDS
   //--------------------------------------------------
 
-  ItPatch itPatch(mesh_);
+  ItPatch it_patch(mesh_);
   Patch * patch;
 
-  while ((patch = ++itPatch)) {
+  while ((patch = ++it_patch)) {
 
-    ItBlock itBlock(patch);
+    ItBlock it_block(patch);
     Block * block;
 
-    while ((block = ++itBlock)) {
+    while ((block = ++it_block)) {
 
       initial_->compute(block);
 
@@ -83,10 +83,6 @@ void EnzoSimulationMpi::run() throw()
 
       enzo_block->initialize();
 
-      // int cycle   = enzo_block->CycleNumber;
-      // double time = enzo_block->Time;
-
-      //      output_images_(block, "enzo-p-%06d.%d.png",0,1);
     }
   }
 
@@ -100,7 +96,7 @@ void EnzoSimulationMpi::run() throw()
   int    stop_patch  = true;
   double time_patch  = std::numeric_limits<double>::max();
 
-  while ((patch = ++itPatch)) {
+  while ((patch = ++it_patch)) {
 
     Reduce * reduce_patch = patch->group()->create_reduce ();
 
@@ -108,10 +104,10 @@ void EnzoSimulationMpi::run() throw()
     int    stop_block  = true;
     double time_block  = std::numeric_limits<double>::max();
 
-    ItBlock itBlock(patch);
+    ItBlock it_block(patch);
     Block * block;
 
-    while ((block = ++itBlock)) {
+    while ((block = ++it_block)) {
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
@@ -155,30 +151,27 @@ void EnzoSimulationMpi::run() throw()
 
     // Accumulate Patch-local timesteps
 
-    while ((patch = ++itPatch)) {
+    while ((patch = ++it_patch)) {
 
       Reduce * reduce_patch = patch->group()->create_reduce ();
 
       double dt_block = std::numeric_limits<double>::max();
 
-      ItBlock itBlock(patch);
+      ItBlock it_block(patch);
       Block * block;
 
       // Accumulate Block-local timesteps
 
-      while ((block = ++itBlock)) {
+      while ((block = ++it_block)) {
 
 	// Enforce boundary conditions
 	boundary_->enforce(block);
-
-	// Output while we're here
-	//	output_images_(block, "enzo-p-%06d.%d.png",cycle_mesh,0);
 
 	// Accumulate Block-local dt
 
 	dt_block = MIN(dt_block,timestep_->compute(block));
 
-	// Update dt to coincide with scheduled output if needed
+	// Reduce timestep to coincide with scheduled output if needed
 
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
@@ -189,14 +182,14 @@ void EnzoSimulationMpi::run() throw()
 	  dt_block = output->update_timestep(time,dt_block);
 	}
 
-      } // ( block = ++itBlock )
+      } // ( block = ++it_block )
 
       double dt_reduce = reduce_patch->reduce_double (dt_block, reduce_op_min);
       dt_patch = MIN(dt_patch, dt_reduce);
 
       delete reduce_patch;
 
-    } // ( patch = ++itPatch )
+    } // ( patch = ++it_patch )
 
     double dt_mesh  = reduce_mesh->reduce_double(dt_patch,reduce_op_min);
 
@@ -212,7 +205,7 @@ void EnzoSimulationMpi::run() throw()
     int    stop_patch  = true;
     double time_patch  = std::numeric_limits<double>::max();
 
-    while ((patch = ++itPatch)) {
+    while ((patch = ++it_patch)) {
 
       Reduce * reduce_patch = patch->group()->create_reduce ();
 
@@ -220,10 +213,10 @@ void EnzoSimulationMpi::run() throw()
       int    stop_block  = true;
       enzo_float time_block  = std::numeric_limits<enzo_float>::max();
 
-      ItBlock itBlock(patch);
+      ItBlock it_block(patch);
       Block * block;
 
-      while ((block = ++itBlock)) {
+      while ((block = ++it_block)) {
 
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
@@ -268,7 +261,7 @@ void EnzoSimulationMpi::run() throw()
 	time_block  = MIN(time_block,  time);
 	stop_block  = stop_block && (stopping_->complete(cycle,time));
 
-      } // (block = ++itBlock)
+      } // (block = ++it_block)
 
       int cycle_reduce = reduce_patch->reduce_int (cycle_block, reduce_op_min);
       double time_reduce = reduce_patch->reduce_double (time_block, reduce_op_min);
@@ -279,7 +272,7 @@ void EnzoSimulationMpi::run() throw()
       stop_patch  = stop_patch && stop_reduce;
 
       delete reduce_patch;
-    } // (patch = ++itPatch)
+    } // (patch = ++it_patch)
 
     cycle_mesh = reduce_mesh->reduce_int (cycle_patch, reduce_op_min);
     time_mesh  = reduce_mesh->reduce_double (time_patch, reduce_op_min);
@@ -292,31 +285,6 @@ void EnzoSimulationMpi::run() throw()
   //======================================================================
 
   monitor->print("cycle %04d time %15.12f", cycle_mesh,time_mesh);
-
-  //--------------------------------------------------
-  // Final output dump
-  //--------------------------------------------------
-
-  while ((patch = ++itPatch)) {
-
-    ItBlock itBlock(patch);
-    Block * block;
-
-    while ((block = ++itBlock)) {
-
-      // Perform output if needed
-
-      for (size_t i=0; i<output_list_.size(); i++) {
-
-	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
-	int &    cycle        = enzo_block->CycleNumber;
-	enzo_float & time     = enzo_block->Time;
-
-	Output * output = output_list_[i];
-	output->write(block,cycle,time);
-      }
-    }
-  }
 
   performance.stop();
 
@@ -374,12 +342,12 @@ EnzoSimulationMpi::create_initial_ ( std::string name ) throw ()
 	 "create_mesh_ mush be called first",
 	 mesh_ != NULL);
 
-  ItPatch itPatch(mesh_);
+  ItPatch it_patch(mesh_);
   Patch * patch;
-  while ((patch = ++itPatch)) {
-    ItBlock itBlock (patch);
+  while ((patch = ++it_patch)) {
+    ItBlock it_block (patch);
     Block * block;
-    while ((block = ++itBlock)) {
+    while ((block = ++it_block)) {
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
       enzo_block->CycleNumber = cycle;
       enzo_block->Time        = time;
@@ -466,9 +434,9 @@ EnzoSimulationMpi::create_method_ ( std::string name ) throw ()
   }
 
   if (method == 0) {
-    char buffer[80];
+    char buffer[ERROR_LENGTH];
     sprintf (buffer,"Cannot create Method '%s'",name.c_str());
-    ERROR("EnzoSimulationMpi::create_method", buffer);
+    ERROR("EnzoSimulationMpi::create_method_", buffer);
   }
 
   return method;
@@ -477,11 +445,21 @@ EnzoSimulationMpi::create_method_ ( std::string name ) throw ()
 //----------------------------------------------------------------------
 
 Output * 
-EnzoSimulationMpi::create_output_ ( std::string file_name ) throw ()
-/// @param file_name   File name format for the output object
+EnzoSimulationMpi::create_output_ ( std::string type ) throw ()
+/// @param filename   File name format for the output object
 {
 
-  Output * output = new Output (file_name);
+  Output * output = 0;
+
+  if (type == "image") {
+    output = new EnzoOutputImage ();
+  }
+
+  if (output == 0) {
+    char buffer[ERROR_LENGTH];
+    sprintf (buffer,"Cannot create Output type '%s'",type.c_str());
+    ERROR("EnzoSimulationMpi::create_output_", buffer);
+  }
 
   return output;
 }
@@ -513,12 +491,12 @@ void EnzoSimulationMpi::output_images_
     mx=nx+2*gx;
     my=ny+2*gy;
     mz=nz+2*gz;
-    char file_name[255];
+    char filename[255];
     std::string field_name = field_descr->field_name(index);
     Scalar * field_values = (Scalar *)field_block->field_values(index);
-    sprintf (file_name,file_format,
+    sprintf (filename,file_format,
 	     enzo_block->CycleNumber,index);
-    monitor->image (file_name, field_values, mx,my,mz, 2, reduce_sum, 
+    monitor->image (filename, field_values, mx,my,mz, 2, reduce_sum, 
 		    0.0, 1.0);
   }
 }

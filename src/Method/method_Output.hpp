@@ -26,7 +26,11 @@ class Output {
 public: // functions
 
   /// Create an uninitialized Output object with the given file_name format
-  Output(std::string file_name) throw();
+  Output() throw();
+
+  /// Set file_name
+  void set_file_name (std::string file_name) throw()
+  { file_name_ = file_name; };
 
   /// Set cycle interval (start, step, stop)
   void set_cycle_interval
@@ -70,6 +74,8 @@ public: // functions
   void scheduled_write
   ( Block * block, int cycle, double time, bool root_call=true) throw()
   { if (write_this_cycle(cycle, time)) write (block,cycle,time,root_call); };
+
+  std::string expand_file_name (int cycle, double time) const throw();
 
 public: // virtual functions
 

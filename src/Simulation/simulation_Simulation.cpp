@@ -188,7 +188,9 @@ void Simulation::initialize_simulation_() throw()
   parameters_->set_current_group("Physics");
   //--------------------------------------------------
 
+  //--------------------------------------------------
   // parameter: Physics::dimensions
+  //--------------------------------------------------
 
   dimension_ = parameters_->value_integer("dimensions",0);
 
@@ -197,8 +199,10 @@ void Simulation::initialize_simulation_() throw()
   parameters_->set_current_group("Domain");
   //--------------------------------------------------
 
+  //--------------------------------------------------
   // parameter: Domain::dimensions
   // parameter: Domain::extent
+  //--------------------------------------------------
 
   // get extent_length and check consistency
 
@@ -244,7 +248,9 @@ void Simulation::initialize_data_() throw()
   parameters_->set_current_group("Field");
   //--------------------------------------------------
 
+  //--------------------------------------------------
   // parameter: Field::fields
+  //--------------------------------------------------
 
   // Add data fields
 
@@ -258,7 +264,9 @@ void Simulation::initialize_data_() throw()
 
   // @@@ WARNING: REPEATED CODE: SEE enzo_EnzoBlock.cpp
 
+  //--------------------------------------------------
   // parameter: Field::ghosts
+  //--------------------------------------------------
 
   int gx = 1;
   int gy = 1;
@@ -283,7 +291,9 @@ void Simulation::initialize_data_() throw()
 
   // Set precision
 
+  //--------------------------------------------------
   // parameter: Field::precision
+  //--------------------------------------------------
 
   std::string precision_str = parameters_->value_string("precision","default");
 
@@ -316,7 +326,9 @@ void Simulation::initialize_mesh_() throw()
 
   int root_size[3];
 
+  //--------------------------------------------------
   // parameter: Mesh::root_size
+  //--------------------------------------------------
 
   root_size[0] = parameters_->list_value_integer(0,"root_size",1);
   root_size[1] = parameters_->list_value_integer(1,"root_size",1);
@@ -324,7 +336,9 @@ void Simulation::initialize_mesh_() throw()
 
   int root_blocks[3];
 
+  //--------------------------------------------------
   // parameter: Mesh::root_blocks
+  //--------------------------------------------------
 
   root_blocks[0] = parameters_->list_value_integer(0,"root_blocks",1);
   root_blocks[1] = parameters_->list_value_integer(1,"root_blocks",1);
@@ -338,7 +352,8 @@ void Simulation::initialize_mesh_() throw()
   // Allocate and insert the root patch, using all processes
 
   Patch * root_patch = factory()->create_patch
-    (group_process_,
+    (mesh_,
+     group_process_,
      root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);
 
@@ -352,7 +367,9 @@ void Simulation::initialize_mesh_() throw()
 
   double domain_lower[3];
 
+  //--------------------------------------------------
   // parameter: Domain::extent
+  //--------------------------------------------------
 
   domain_lower[0] = parameters_->list_value_scalar(0,"extent",0.0);
   domain_lower[1] = parameters_->list_value_scalar(2,"extent",0.0);
@@ -392,8 +409,10 @@ void Simulation::initialize_mesh_() throw()
   parameters_->set_current_group("Mesh");
   //--------------------------------------------------
 
+  //--------------------------------------------------
   // parameter: Mesh::root_process_first
   // parameter: Mesh::root_process_count
+  //--------------------------------------------------
 
   int process_first = parameters_->value_integer("root_process_first",0);
   int process_count = parameters_->value_integer("root_process_count",1);
@@ -402,11 +421,13 @@ void Simulation::initialize_mesh_() throw()
 
   // Mesh AMR settings
 
+  //--------------------------------------------------
   // parameter: Mesh::refine
   // parameter: Mesh::max_level
   // parameter: Mesh::balanced
   // parameter: Mesh::backfill
   // parameter: Mesh::coalesce
+  //--------------------------------------------------
 
   mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
   mesh_->set_max_level     (parameters_->value_integer("max_level", 0));
@@ -438,7 +459,9 @@ void Simulation::initialize_initial_() throw()
   parameters_->set_current_group("Initial");
   //--------------------------------------------------
 
+  //--------------------------------------------------
   // parameter: Initial::problem
+  //--------------------------------------------------
 
   std::string name = parameters_->value_string("problem","default");
 
@@ -457,7 +480,9 @@ void Simulation::initialize_boundary_() throw()
   parameters_->set_current_group("Boundary");
   //--------------------------------------------------
 
+  //--------------------------------------------------
   // parameter: Boundary::name
+  //--------------------------------------------------
 
   std::string name = parameters_->value_string("name","");
   boundary_ = create_boundary_(name);
@@ -484,41 +509,62 @@ void Simulation::initialize_output_() throw()
 
     parameters_->set_current_subgroup(group);
 
-    // // parameter: Output:<group>:type
+    //--------------------------------------------------
+    // parameter: Output:<group>:type
+    //--------------------------------------------------
 
-    // std::string type = parameters_->value_string("type","unknown");
+    std::string type = parameters_->value_string("type","unknown");
 
-    // // Error if output type is not defined
-    // if (type == "unknown") {
-    //   char buffer[ERROR_LENGTH];
-    //   sprintf (buffer,"Output:%s:type parameter is undefined",group.c_str());
-    //   ERROR("Simulation::initialize_output_",buffer);
-    // }
+    // Error if Output::type is not defined
+    if (type == "unknown") {
+      char buffer[ERROR_LENGTH];
+      sprintf (buffer,"Output:%s:type parameter is undefined",group.c_str());
+      ERROR("Simulation::initialize_output_",buffer);
+    }
 
+    Output * output = create_output_(type);
+
+    // Error if output type was not recognized
+    if (output == NULL) {
+      char buffer[ERROR_LENGTH];
+      sprintf (buffer,"Unrecognized parameter value Output:%s:type = %s",
+     	       group.c_str(),type.c_str());
+      ERROR("Simulation::initialize_output_",buffer);
+    }
+
+    //--------------------------------------------------
     // parameter: Output:<group>:file_name
+    //--------------------------------------------------
 
-    std::string file_name = parameters_->value_string("file_name");
+    // ASSUMES GROUP AND SUBGROUP ARE SET BY CALLER
 
-    Output * output = create_output_(file_name);
+    ASSERT("Simulation::initialize_output_",
+	   "Bad type for Output 'file_name' parameter",
+	   parameters_->type("file_name") == parameter_string);
 
-    // // Error if output type is not recognized
-    // if (output == NULL) {
-    //   char buffer[ERROR_LENGTH];
-    //   sprintf (buffer,"Unrecognized parameter value Output:%s:type = %s",
-    // 	       group.c_str(),type.c_str());
-    //   ERROR("Simulation::initialize_output_",buffer);
-    // }
+    // Set the file name
 
-    // ASSERT("Simulation::initialize_output_",
-    // 	   "Bad type for Output 'file_name' parameter",
-    // 	   parameters_->type("file_name") == parameter_string);
+    std::string file_name = parameters_->value_string("file_name","unknown");
+
+    // Error if file_name is unspecified
+    ASSERT("Simulation::initialize_output_",
+	   "Output 'file_name' must be specified",
+	   file_name != "unknown");
+
+    output->set_file_name (file_name);
+
+    //--------------------------------------------------
+    // Determine scheduling
+    //--------------------------------------------------
 
     bool cycle_interval,cycle_list,time_interval,time_list;
 
+    //--------------------------------------------------
     // parameter: Output:<group>:cycle_interval
     // parameter: Output:<group>:cycle_list
     // parameter: Output:<group>:time_interval
     // parameter: Output:<group>:time_list
+    //--------------------------------------------------
 
     cycle_interval = (parameters_->type("cycle_interval") != parameter_unknown);
     cycle_list     = (parameters_->type("cycle_list")     != parameter_unknown);
@@ -653,7 +699,9 @@ void Simulation::initialize_method_() throw()
 
   for (int i=0; i<method_count; i++) {
 
+    //--------------------------------------------------
     // parameter: Method::sequence
+    //--------------------------------------------------
 
     std::string method_name = parameters_->list_value_string(i,"sequence");
 

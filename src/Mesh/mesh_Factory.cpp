@@ -24,12 +24,13 @@ Mesh * Factory::create_mesh
 
 Patch * Factory::create_patch
 (
+ Mesh * mesh,
  GroupProcess * group_process,
  int nx,   int ny,  int nz,
  int nbx,  int nby, int nbz
  ) throw()
 {
-  return new Patch (this,group_process,nx,ny,nz,nbx,nby,nbz);
+  return new Patch (mesh,this,group_process,nx,ny,nz,nbx,nby,nbz);
 }
 
 //----------------------------------------------------------------------

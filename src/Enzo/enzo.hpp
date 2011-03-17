@@ -51,6 +51,7 @@
 #include "enzo_EnzoInitialImplosion2.hpp"
 #include "enzo_EnzoMethodPpm.hpp"
 #include "enzo_EnzoMethodPpml.hpp"
+#include "enzo_EnzoOutputImage.hpp"
 
 #endif /* ENZO_HPP */
 
