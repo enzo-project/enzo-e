@@ -53,6 +53,7 @@ enum access_enum {
 #include "method_Boundary.hpp"
 #include "method_Method.hpp"
 #   include "method_Hyperbolic.hpp"
+#include "method_Output.hpp"
 
 #endif /* METHOD_HPP */
 

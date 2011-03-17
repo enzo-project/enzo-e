@@ -9,58 +9,93 @@
 #ifndef METHOD_OUTPUT_HPP
 #define METHOD_OUTPUT_HPP
 
+enum output_schedule_enum {
+  output_schedule_unknown,
+  output_schedule_cycle_interval,
+  output_schedule_cycle_list,
+  output_schedule_time_interval,
+  output_schedule_time_list
+};
+
 class Output {
 
   /// @class    Output
   /// @ingroup  Method
-  /// @brief    [\ref Method] Encapsulate functions for simulation output
+  /// @brief    [\ref Method] define interface for various types of simulation output
 
-public: // interface
+public: // functions
 
-  /// Create a new Output
-  Output() throw()
-  {};
+  /// Create an uninitialized Output object with the given filename format
+  Output(std::string filename) throw();
+
+  /// Set cycle interval (start, step, stop)
+  void set_cycle_interval
+  (int cycle_start, int cycle_step, int cycle_stop) throw();
+
+  /// Set cycle list
+  void set_cycle_list (std::vector<int> cycle_list) throw();
+
+  /// Set time interval (start, step, stop)
+  void set_time_interval
+  (double time_start, double time_step, double time_stop) throw();
+
+  /// Set time list
+  void set_time_list (std::vector<double> time_list) throw();
+
+  /// Set whether the Output object is active or not
+  void set_active(bool active) throw()
+  { active_ = active; };
+    
+  /// Reduce timestep if next write time is greater than time + dt
+  double update_timestep(double time, double dt) const throw();
+
+  /// Return true if output should be performed this cycle.
+  bool write_this_cycle(int cycle, double time) throw();
+
+  /// Return whether the output object is active
+  bool is_active() const throw()
+  { return active_; };
 
 public: // virtual functions
 
-  /// Write projections of fields to png images
-  virtual void write_image (Mesh * mesh) throw(), bool top_level=true;
+  /// Write mesh-related data to disk
+  virtual void write (Mesh * mesh, bool root_call=true) const throw()
+  { printf ("INCOMPLETE"); };
 
-  /// Write projections of fields to png images
-  virtual void write_image (Patch * patch) throw(), bool top_level=true;
+  /// Write a patch-related data to disk; may be called by write (Mesh)
+  virtual void write (Patch * patch, bool root_call=true) const throw()
+  { printf ("INCOMPLETE"); };
 
-  /// Write projections of fields to png images
-  virtual void write_image (Block * block) throw(), bool top_level=true;
-
-  //--------------------------------------------------
-
-  /// Write data dumps to disk
-  virtual void write_data (Mesh * mesh, bool top_level=true) throw();
-
-  /// Write data dumps to disk
-  virtual void write_data (Patch * patch, bool top_level=true) throw();
-
-  /// Write data dumps to disk
-  virtual void write_data (Block * block, bool top_level=true) throw();
-
-protected: // functions
-
-  /// Return whether to write this cycle
-  bool is_active_cycle_(int cycle) throw();
-
-  /// Return whether to write this time
-  bool is_active_time_(double time) throw();
+  /// Write a block-related to disk; may be called by write (Patch)
+  virtual void write (Block * block, bool root_call=true) const throw()
+  { printf ("INCOMPLETE"); };
 
 protected: // attributes
 
+  /// Name of the file to write, including printf-type format
   std::string filename_;
 
-  /// cycle start,stop,step,start,stop,step,etc.  Empty if not active
-  std::vector<int> cycle_range_;
-
-  /// time start,stop,step,start,stop,step,etc.  Empty if not active
-  std::vector<double> time_range_;
+  /// Whether Output is currently active
+  bool active_;
   
+  /// Schedule type of the Output object
+  output_schedule_enum output_schedule_;
+
+  /// cycle start, step, and stop of output
+  std::vector<int> cycle_interval_;
+
+  /// List of cycles to perform output
+  std::vector<int> cycle_list_;
+
+  /// time start, step, and stop of output
+  std::vector<double> time_interval_;
+
+  /// List of times to perform output
+  std::vector<double> time_list_;
+
+  /// Index of time or cycle interval or list for next output
+  int index_;
+
 };
 
 #endif /* METHOD_OUTPUT_HPP */

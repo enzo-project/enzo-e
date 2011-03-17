@@ -69,10 +69,16 @@ public: // interface
   /// Return the boundary object, if any
   Boundary * boundary() const throw();
 
-  /// Return the number of method methods
+  /// Return the number of output objects
+  int num_output() const throw();
+
+  /// Return the ith output object
+  Output * output(int i) const throw();
+
+  /// Return the number of methods
   int num_method() const throw();
 
-  /// Return the ith method
+  /// Return the ith method object
   Method * method(int i) const throw();
 
   /// Return the factory object
@@ -119,6 +125,9 @@ protected: // functions
   /// Initialize the boundary conditions object
   void initialize_boundary_() throw();
 
+  /// Initialize the output objects
+  void initialize_output_  () throw();
+
   /// Initialize the method objects
   void initialize_method_  () throw();
 
@@ -142,6 +151,10 @@ protected: // abstract virtual functions
   /// Create named boundary object
   virtual Boundary * 
   create_boundary_ (std::string name) throw () = 0;
+
+  /// Create named output object
+  virtual Output * 
+  create_output_ (std::string name) throw () = 0;
 
   /// Create named method object
   virtual Method * 
@@ -193,6 +206,9 @@ protected: // attributes
 
   /// Boundary conditions object
   Boundary * boundary_;
+
+  /// Output objects
+  std::vector<Output *> output_list_;
 
   /// List of method objects
   std::vector<Method *> method_list_;

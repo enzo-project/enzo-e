@@ -27,6 +27,7 @@ Simulation::Simulation
     timestep_(0),
     initial_(0),
     boundary_(0),
+    output_list_(),
     method_list_()
 {
   ASSERT("Simulation::Simulation","Parameters is NULL", parameters != NULL);
@@ -82,6 +83,7 @@ void Simulation::initialize() throw()
   initialize_timestep_();
   initialize_initial_();
   initialize_boundary_();
+  initialize_output_();
   initialize_method_();
 
 }
@@ -151,6 +153,16 @@ Initial * Simulation::initial() const throw()
 
 Boundary * Simulation::boundary() const throw() 
 { return boundary_; }
+
+//----------------------------------------------------------------------
+
+int Simulation::num_output() const throw()
+{ return output_list_.size(); }
+
+//----------------------------------------------------------------------
+
+Output * Simulation::output(int i) const throw()
+{ return output_list_[i]; }
 
 //----------------------------------------------------------------------
 
@@ -453,6 +465,178 @@ void Simulation::initialize_boundary_() throw()
   boundary_ = create_boundary_(name);
 }
 
+
+//----------------------------------------------------------------------
+
+void Simulation::initialize_output_() throw()
+{
+  UNTESTED("Simulation::initialize_output_");
+
+  //--------------------------------------------------
+  parameters_->set_current_group("Output");
+  //--------------------------------------------------
+
+  int num_groups = parameters_->subgroup_count();
+
+  // Create and initialize an Output object for each Output group
+
+  for (int index_group=0; index_group < num_groups; index_group++) {
+
+    std::string group = parameters_->subgroup(index_group);
+
+    parameters_->set_current_subgroup(group);
+
+    // parameter: Output:<group>:type
+
+    std::string type = parameters_->value_string("type","unknown");
+
+    // Error if output type is not defined
+    if (type == "unknown") {
+      char buffer[ERROR_LENGTH];
+      sprintf (buffer,"Output:%s:type parameter is undefined",group.c_str());
+      ERROR("Simulation::initialize_output_",buffer);
+    }
+
+    Output * output = create_output_(type);
+
+    // Error if output type is not recognized
+    if (output == NULL) {
+      char buffer[ERROR_LENGTH];
+      sprintf (buffer,"Unrecognized parameter value Output:%s:type = %s",
+	       group.c_str(),type.c_str());
+      ERROR("Simulation::initialize_output_",buffer);
+    }
+
+    ASSERT("Simulation::initialize_output_",
+	   "Bad type for Output 'file_name' parameter",
+	   parameters_->type("file_name") == parameter_string);
+
+    // parameter: Output:<group>:file_name
+
+    std::string filename = parameters_->value_string("file_name");
+
+    bool cycle_interval,cycle_list,time_interval,time_list;
+
+    // parameter: Output:<group>:cycle_interval
+    // parameter: Output:<group>:cycle_list
+    // parameter: Output:<group>:time_interval
+    // parameter: Output:<group>:time_list
+
+    cycle_interval = (parameters_->type("cycle_interval") != parameter_unknown);
+    cycle_list     = (parameters_->type("cycle_list")     != parameter_unknown);
+    time_interval  = (parameters_->type("time_interval")  != parameter_unknown);
+    time_list      = (parameters_->type("time_list")      != parameter_unknown);
+
+    ASSERT("Simulation::initialize_output_",
+	   "exactly one of [cycle|time]_[interval|list] must be defined for each Output group",
+	   (cycle_interval? 1 : 0 + 
+	    cycle_list?     1 : 0 + 
+	    time_interval?  1 : 0 + 
+	    time_list?      1 : 0) == 1);
+
+    if (cycle_interval) {
+
+      const int max_int = std::numeric_limits<int>::max();
+      int cycle_start = 0;
+      int cycle_step = 0;
+      int cycle_stop = max_int;
+      if (parameters_->type("cycle_interval") == parameter_integer) {
+	cycle_step = parameters_->value_integer("cycle_interval",1);
+      } else if (parameters_->type("cycle_interval") == parameter_list) {
+	if (parameters_->list_length("cycle_interval") != 3) {
+	  ERROR("Simulation::initialize_output_",
+		"Output cycle_interval parameter must be of the form "
+		"[cycle_start, cycle_step, cycle_stop");
+	}
+	cycle_start = 
+	  parameters_->list_value_integer (0,"cycle_interval",0);
+	cycle_step  = 
+	  parameters_->list_value_integer (1,"cycle_interval",1);
+	cycle_stop  = 
+	  parameters_->list_value_integer (2,"cycle_interval",max_int);
+      } else {
+	ERROR("Simulation::initialize_output_",
+	      "Output cycle_interval is of the wrong type");
+      }
+      output->set_cycle_interval(cycle_start,cycle_step,cycle_stop);
+
+    } else if (cycle_list) {
+
+      std::vector<int> list;
+
+      if (parameters_->type("cycle_list") == parameter_integer) {
+	list.push_back (parameters_->value_integer("cycle_list",0));
+      } else if (parameters_->type("cycle_list") == parameter_list) {
+	for (int i=0; i<parameters_->list_length("cycle_list"); i++) {
+	  int value = parameters_->list_value_integer(i,"cycle_list",0);
+	  list.push_back (value);
+	  // check monotonicity
+	  if (i > 0) {
+	    int value_prev = parameters_->list_value_integer(i-1,"cycle_list",0);
+	    ASSERT("Simulation::initialize_output_",
+		   "Output cycle_list must be monotonically increasing",
+		   value_prev < value);
+	  }
+	}
+      }
+
+      output->set_cycle_list(list);
+
+    } else if (time_interval) {
+
+      const double max_double = std::numeric_limits<double>::max();
+      double time_start = 0;
+      double time_step = 0;
+      double time_stop = max_double;
+      if (parameters_->type("time_interval") == parameter_integer) {
+	time_step = parameters_->value_integer("time_interval",1);
+      } else if (parameters_->type("time_interval") == parameter_list) {
+	if (parameters_->list_length("time_interval") != 3) {
+	  ERROR("Simulation::initialize_output_",
+		"Output time_interval parameter must be of the form "
+		"[time_start, time_step, time_stop");
+	}
+	time_start = 
+	  parameters_->list_value_integer (0,"time_interval",0);
+	time_step  = 
+	  parameters_->list_value_integer (1,"time_interval",1);
+	time_stop  = 
+	  parameters_->list_value_integer (2,"time_interval",max_double);
+      } else {
+	ERROR("Simulation::initialize_output_",
+	      "Output time_interval is of the wrong type");
+      }
+      output->set_time_interval(time_start,time_step,time_stop);
+
+    } else if (time_list) {
+
+      std::vector<double> list;
+
+      if (parameters_->type("time_list") == parameter_integer) {
+	list.push_back (parameters_->value_integer("time_list",0));
+      } else if (parameters_->type("time_list") == parameter_list) {
+	for (int i=0; i<parameters_->list_length("time_list"); i++) {
+	  double value = parameters_->list_value_scalar(i,"time_list",0.0);
+	  list.push_back (value);
+	  // check monotonicity
+	  if (i > 0) {
+	    double value_prev = parameters_->list_value_scalar(i-1,"time_list",0);
+	    ASSERT("Simulation::initialize_output_",
+		   "Output time_list must be monotonically increasing",
+		   value_prev < value);
+	  }
+	}
+      }
+
+      output->set_time_list(list);
+
+    }
+
+    output_list_.push_back(output); 
+
+  } // (for index_group)
+
+}
 
 //----------------------------------------------------------------------
 

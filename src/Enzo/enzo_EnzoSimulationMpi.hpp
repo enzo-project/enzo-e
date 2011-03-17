@@ -63,6 +63,9 @@ protected: // virtual functions
   /// Create named method object
   Method * create_method_ (std::string name) throw ();
 
+  /// Create output object for the given filename
+  Output * create_output_ (std::string filename) throw ();
+
 private: // functions
 
   /// Output data

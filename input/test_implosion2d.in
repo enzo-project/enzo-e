@@ -143,19 +143,30 @@
    }
 
    Output { 
-      # this section needs more work
 
-      # subgroup specifies the subdirectory / file name
-      data {
-        # output types ["data", "restart", "projection", user-defined]
-        type = "data";
-        delta_time = 0.5 ;  # dt? time? 
- 
+      cycle_interval_test {
+        file_name      = "data_cycle_interval-%d";
+	type           = "data";
+	cycle_interval = [10,2,20];
       };
 
-      restart {
-        # default restart parameters(?)
-        type = "restart";
-      }
+      cycle_list_test {
+        file_name      = "data_cycle_list-%d";
+	type           = "data";
+	cycle_list     = [2,3,5,7,11];
+      };
+
+      time_interval_test {
+        file_name      = "data_time_interval-%14.8f";
+	type           = "data";
+	time_interval  = [0.1,0.02,0.2];
+      };
+
+      time_list_test {
+        file_name      = "data_time_list-%14.8f";
+	type           = "data";
+	time_list      = [0.15,0.35,0.65,0.95];
+      };
+
    }
  

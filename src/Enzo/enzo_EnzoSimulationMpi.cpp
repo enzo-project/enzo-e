@@ -4,7 +4,6 @@
 /// @file     enzo_EnzoSimulationMpi.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
-/// @todo     Move output to Output object
 /// @todo     Move timestep reductions into Timestep object
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoSimulationMpi user-dependent class member functions
@@ -85,7 +84,10 @@ void EnzoSimulationMpi::run() throw()
 
       enzo_block->initialize();
 
-      output_images_(block, "enzo-p-%06d.%d.png",0,1);
+      int cycle   = enzo_block->CycleNumber;
+      double time = enzo_block->Time;
+
+      //      output_images_(block, "enzo-p-%06d.%d.png",0,1);
     }
   }
 
@@ -171,11 +173,23 @@ void EnzoSimulationMpi::run() throw()
 	boundary_->enforce(block);
 
 	// Output while we're here
-	output_images_(block, "enzo-p-%06d.%d.png",cycle_mesh,0);
+	//	output_images_(block, "enzo-p-%06d.%d.png",cycle_mesh,0);
 
 	// Accumulate Block-local dt
 
 	dt_block = MIN(dt_block,timestep_->compute(block));
+
+	// Update dt to coincide with scheduled output if needed
+
+	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
+
+	int cycle   = enzo_block->CycleNumber;
+	double time = enzo_block->Time;
+
+	for (int i=0; i<output_list_.size(); i++) {
+	  Output * output = output_list_[i];
+	  dt_block = output->update_timestep(time,dt_block);
+	}
 
       } // ( block = ++itBlock )
 
@@ -221,6 +235,15 @@ void EnzoSimulationMpi::run() throw()
 	enzo_float & time     = enzo_block->Time;
 	enzo_float & dt       = enzo_block->dt;
 	enzo_float & old_time = enzo_block->OldTime;
+
+	// Perform scheduled output
+
+	for (int i=0; i<output_list_.size(); i++) {
+	  Output * output = output_list_[i];
+	  if (output->write_this_cycle(cycle,time)) {
+	    output->write(block);
+	  }
+	}
 
 	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH
 
@@ -285,8 +308,12 @@ void EnzoSimulationMpi::run() throw()
 
     while ((block = ++itBlock)) {
 
-      output_images_(block, "enzo-p-%06d.%d.png",cycle_mesh,1);
+      // Perform output if needed
 
+      for (int i=0; i<output_list_.size(); i++) {
+	Output * output = output_list_[i];
+	output->write(block);
+      }
     }
   }
 
@@ -433,10 +460,11 @@ EnzoSimulationMpi::create_method_ ( std::string name ) throw ()
 
   Method * method = 0;
 
-  if (name == "ppm")
+  if (name == "ppm") {
     method = new EnzoMethodPpm  (parameters_);
-  if (name == "ppml")
+  } else if (name == "ppml") {
     method = new EnzoMethodPpml (parameters_);
+  }
 
   if (method == 0) {
     char buffer[80];
@@ -445,6 +473,18 @@ EnzoSimulationMpi::create_method_ ( std::string name ) throw ()
   }
 
   return method;
+}
+
+//----------------------------------------------------------------------
+
+Output * 
+EnzoSimulationMpi::create_output_ ( std::string filename ) throw ()
+/// @param filename   File name format for the output object
+{
+
+  Output * output = new Output (filename);
+
+  return output;
 }
 
 //======================================================================
