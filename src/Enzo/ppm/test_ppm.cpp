@@ -3,7 +3,6 @@
 
 /// @file      test_ppm.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
-/// @todo      Replace image_dump() with Monitor::image()
 /// @date      Fri Mar  7 17:11:14 PST 2008
 /// @brief     Program implementing unit tests for hydrodynamics
 

@@ -131,7 +131,7 @@ void EnzoOutputImage::write
      std::string field_name = field_descr->field_name(index);
      std::string file_name = file_prefix + "-" + field_name + ".png";
      Scalar * field_values = (Scalar *)field_block->field_values(index);
-     monitor->image (file_name, field_values, mx,my,mz, 2, reduce_sum, 0.0,1.0);
+     monitor->image (file_name, field_values, mx,my,mz, 0,0,0, 2, reduce_sum, 0.0,1.0);
    }
 
 }

@@ -90,6 +90,7 @@ public: // interface
   void image (std::string name, 
 	      T * array,
 	      int nx,  int ny,  int nz,   // Array dimensions
+	      int nx0, int ny0, int nz0,  // Array offset into image
 	      int         axis,           // Axis along which to project
 	      reduce_enum op_reduce,      // Reduction operation along axis
 	      double min, double max     // Limits for color map
@@ -100,7 +101,7 @@ public: // interface
 
 private: // functions
 
-  /// Private constructor of the Monitor object (singleton design pattern)
+  /// Private constructor of the Monitor object [singleton design pattern]
   Monitor() 
     : active_(true),
       image_(0)
@@ -116,7 +117,7 @@ private: // functions
     map_b_[1] = 1.0;
   }
 
-  /// Private destructor  of the Monitor object (singleton design pattern)
+  /// Private destructor  of the Monitor object [singleton design pattern]
   ~Monitor()
   {
     delete instance_;
@@ -135,19 +136,10 @@ private: // attributes
   /// Current image
   double * image_;
 
-  /// Single instance of the Monitor object (singleton design pattern)
+  /// Single instance of the Monitor object [singleton design pattern]
   static Monitor * instance_;
 
 };
-
-//----------------------------------------------------------------------
-
- void Monitor::image_open (int mx, int my)
- {
-   image_ = new double [mx*my];
-
-  for (int i=0; i<mx*my; i++) image_[i] = 0.0;
- }
 
  //----------------------------------------------------------------------
 
@@ -178,7 +170,8 @@ template<class T>
 void Monitor::image
 (std::string name, 
  T * array, 
- int nx, int ny, int nz,
+ int nx,  int ny,  int nz,
+ int nx0, int ny0, int nz0,
  int axis, reduce_enum op_reduce,
  double min, double max)
 
@@ -197,19 +190,11 @@ void Monitor::image
 *********************************************************************
 */
 {
-
-
-  // Use full array
-
-  int nx0, ny0, nz0;
   int nx1, ny1, nz1;
 
-  nx0 = 0;
-  nx1 = nx;
-  ny0 = 0;
-  ny1 = ny;
-  nz0 = 0;
-  nz1 = nz;
+  nx1 = nx0 + nx;
+  ny1 = ny0 + ny;
+  nz1 = nz0 + nz;
 
   // Array size
   int n3[3] = {1, nx, nx*ny}; // Array multipliers

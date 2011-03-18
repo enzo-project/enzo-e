@@ -120,6 +120,8 @@ void Monitor::print (std::string message, ...) const
   }
 };
 
+//----------------------------------------------------------------------
+
 void Monitor::image_set_map 
 (int n, double * map_r, double * map_g, double * map_b) throw()
 {
@@ -133,3 +135,13 @@ void Monitor::image_set_map
     map_b_[i] = map_b[i];
   }
 }
+
+//----------------------------------------------------------------------
+
+void Monitor::image_open (int mx, int my)
+{
+  image_ = new double [mx*my];
+
+  for (int i=0; i<mx*my; i++) image_[i] = 0.0;
+}
+
