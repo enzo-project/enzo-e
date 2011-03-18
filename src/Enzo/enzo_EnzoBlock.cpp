@@ -297,7 +297,7 @@ void EnzoBlock::write(FILE * fp) throw ()
 //----------------------------------------------------------------------
 void EnzoBlock::initialize () throw()
 {
-  double xm,xp,ym;
+  double xm,ym,zm;
 
   lower(&xm,&ym,&zm);
 
@@ -330,7 +330,7 @@ void EnzoBlock::initialize () throw()
 
   // Initialize CellWidth
 
-  int hx,hy,hz;
+  double hx,hy,hz;
   field_block_[0]->cell_width(this,&hx,&hy,&hz);
 
   CellWidth[0] = hx;
