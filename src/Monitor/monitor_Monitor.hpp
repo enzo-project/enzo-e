@@ -63,34 +63,27 @@ public: // interface
   void print (std::string buffer, ...) const;
 
   /// Generate a PNG image of an array
-  // template<class T>
-  // void image_open (std::string name, 
-  // 	      T * array,
-  // 	      int nx,  int ny,  int nz,   // Array dimensions
-  // 	      int         axis,           // Axis along which to project
-  // 	      reduce_enum op_reduce,      // Reduction operation along axis
-  // 	      double min, double max     // Limits for color map
-  // 	      ) const;
+  void image_open (int mx,  int my);
 
-  // /// Generate a PNG image of an array
-  // template<class T>
-  // void image_write (std::string name, 
-  // 	      T * array,
-  // 	      int nx,  int ny,  int nz,   // Array dimensions
-  // 	      int         axis,           // Axis along which to project
-  // 	      reduce_enum op_reduce,      // Reduction operation along axis
-  // 	      double min, double max     // Limits for color map
-  // 	      ) const;
+   /// Generate a PNG image of an array
+   template<class T>
+   void image_write (std::string name, 
+   	      T * array,
+   	      int nx,  int ny,  int nz,   // Array dimensions
+   	      int         axis,           // Axis along which to project
+   	      reduce_enum op_reduce,      // Reduction operation along axis
+   	      double min, double max     // Limits for color map
+		     );
 
-  // /// Generate a PNG image of an array
-  // template<class T>
-  // void image_close (std::string name, 
-  // 	      T * array,
-  // 	      int nx,  int ny,  int nz,   // Array dimensions
-  // 	      int         axis,           // Axis along which to project
-  // 	      reduce_enum op_reduce,      // Reduction operation along axis
-  // 	      double min, double max     // Limits for color map
-  // 	      ) const;
+   /// Generate a PNG image of an array
+   template<class T>
+   void image_close (std::string name, 
+   	      T * array,
+   	      int nx,  int ny,  int nz,   // Array dimensions
+   	      int         axis,           // Axis along which to project
+   	      reduce_enum op_reduce,      // Reduction operation along axis
+   	      double min, double max     // Limits for color map
+		     );
 
   /// Generate a PNG image of an array
   template<class T>
@@ -100,22 +93,26 @@ public: // interface
 	      int         axis,           // Axis along which to project
 	      reduce_enum op_reduce,      // Reduction operation along axis
 	      double min, double max     // Limits for color map
-	      ) const;
-  
+	      );
+
+  void image_set_map 
+  (int n, double * map_r, double * map_g, double * map_b) throw();
+
 private: // functions
 
   /// Private constructor of the Monitor object (singleton design pattern)
   Monitor() 
-    : active_(true)
+    : active_(true),
+      image_(0)
   { 
     map_r_.resize(2);
     map_g_.resize(2);
     map_b_.resize(2);
     map_r_[0] = 0.0;
-    map_r_[0] = 0.0;
     map_g_[0] = 0.0;
+    map_b_[0] = 0.0;
+    map_r_[1] = 1.0;
     map_g_[1] = 1.0;
-    map_b_[1] = 1.0;
     map_b_[1] = 1.0;
   }
 
@@ -134,7 +131,10 @@ private: // attributes
   std::vector<double> map_r_;
   std::vector<double> map_g_;
   std::vector<double> map_b_;
-  
+
+  /// Current image
+  double * image_;
+
   /// Single instance of the Monitor object (singleton design pattern)
   static Monitor * instance_;
 
@@ -142,33 +142,36 @@ private: // attributes
 
 //----------------------------------------------------------------------
 
-// template<class T>
-// void Monitor::image_open
-// (std::string name, 
-//  T * array, 
-//  int nx, int ny, int nz,
-//  int axis, reduce_enum op_reduce,
-//  double min, double max
-// ) const
-// //----------------------------------------------------------------------
+ void Monitor::image_open (int mx, int my)
+ {
+   image_ = new double [mx*my];
 
-// template<class T>
-// void Monitor::image_write
-// (std::string name, 
-//  T * array, 
-//  int nx, int ny, int nz,
-//  int axis, reduce_enum op_reduce,
-//  double min, double max) const
-// //----------------------------------------------------------------------
+  for (int i=0; i<mx*my; i++) image_[i] = 0.0;
+ }
 
-// template<class T>
-// void Monitor::image_close
-// (std::string name, 
-//  T * array, 
-//  int nx, int ny, int nz,
-//  int axis, reduce_enum op_reduce,
-//  double min, double max) const
+ //----------------------------------------------------------------------
 
+ template<class T>
+ void Monitor::image_write
+ (std::string name, 
+  T * array, 
+  int nx, int ny, int nz,
+  int axis, reduce_enum op_reduce,
+  double min, double max)
+ {
+ }
+
+ //----------------------------------------------------------------------
+
+ template<class T>
+ void Monitor::image_close
+ (std::string name, 
+  T * array, 
+  int nx, int ny, int nz,
+  int axis, reduce_enum op_reduce,
+  double min, double max)
+ {
+ }
 //----------------------------------------------------------------------
 
 template<class T>
@@ -177,7 +180,8 @@ void Monitor::image
  T * array, 
  int nx, int ny, int nz,
  int axis, reduce_enum op_reduce,
- double min, double max) const
+ double min, double max)
+
 /**
 *********************************************************************
 *
@@ -193,6 +197,7 @@ void Monitor::image
 *********************************************************************
 */
 {
+
 
   // Use full array
 
@@ -223,14 +228,12 @@ void Monitor::image
   int my = m3[iay];
   int mz = m3[iaz];
 
+  image_open(mx,my);
+
   // Array start
   int mx0 = m0[iax];
   int my0 = m0[iay];
   int mz0 = m0[iaz];
-
-  double * image = new double [mx*my];
-
-  for (int i=0; i<mx*my; i++) image[i] = 0.0;
 
   // Loop over array subsection
 
@@ -252,11 +255,11 @@ void Monitor::image
 
       // initialize reduction
       switch (op_reduce) {
-      case reduce_min: image[j] = array[i]; break;
-      case reduce_max: image[j] = array[i]; break;
-      case reduce_avg: image[j] = 0; break;
-      case reduce_sum: image[j] = 0; break;
-      default:         image[j] = 0; break;
+      case reduce_min: image_[j] = array[i]; break;
+      case reduce_max: image_[j] = array[i]; break;
+      case reduce_avg: image_[j] = 0; break;
+      case reduce_sum: image_[j] = 0; break;
+      default:         image_[j] = 0; break;
       }
 
       for (int jz=0; jz<mz; jz++) {
@@ -264,22 +267,22 @@ void Monitor::image
 	i = n3[iax]*ix + n3[iay]*iy + n3[iaz]*iz;
 	// reduce along iaz axis
 	switch (op_reduce) {
-	case reduce_min: image[j] = MIN(array[i],(T)(image[j])); break;
-	case reduce_max: image[j] = MAX(array[i],(T)(image[j])); break;
-	case reduce_avg: image[j] += array[i]; break;
-	case reduce_sum: image[j] += array[i]; break;
+	case reduce_min: image_[j] = MIN(array[i],(T)(image_[j])); break;
+	case reduce_max: image_[j] = MAX(array[i],(T)(image_[j])); break;
+	case reduce_avg: image_[j] += array[i]; break;
+	case reduce_sum: image_[j] += array[i]; break;
 	default:         break;
 	}
       }
-      if (op_reduce == reduce_avg) image[j] /= m3[iaz];
+      if (op_reduce == reduce_avg) image_[j] /= m3[iaz];
     }
   }
 
   // Adjust min and max bounds if needed
 
   for (int i=0; i<mx*my; i++) {
-    if (min > image[i]) min = image[i];
-    if (max < image[i]) max = image[i];
+    if (min > image_[i]) min = image_[i];
+    if (max < image_[i]) max = image_[i];
   }
 
   pngwriter png (mx,my,0,name.c_str());
@@ -290,7 +293,7 @@ void Monitor::image
     for (int jy = 0; jy<my; jy++) {
 
       int j = jx + mx*jy;
-      double v = image[j];
+      double v = image_[j];
 
       // map v to lower colormap index
       int index = (map_r_.size()-1)*(v - min) / (max-min);
@@ -316,7 +319,8 @@ void Monitor::image
 
   png.close();
 
-  delete [] image;
+  delete [] image_;
+  image_ = 0;
 
 }
 

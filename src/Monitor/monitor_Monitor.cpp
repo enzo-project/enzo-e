@@ -119,3 +119,17 @@ void Monitor::print (std::string message, ...) const
 		     buffer);
   }
 };
+
+void Monitor::image_set_map 
+(int n, double * map_r, double * map_g, double * map_b) throw()
+{
+  map_r_.resize(n);
+  map_g_.resize(n);
+  map_b_.resize(n);
+
+  for (int i=0; i<n; i++) {
+    map_r_[i] = map_r[i];
+    map_g_[i] = map_g[i];
+    map_b_[i] = map_b[i];
+  }
+}
