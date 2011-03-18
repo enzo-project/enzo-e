@@ -134,20 +134,11 @@
       # redshift
    }
 
-   Output { 
-      # this section needs more work
-
-      # subgroup specifies the subdirectory / file name
-      data {
-        # output types ["data", "restart", "projection", user-defined]
-        type = "data";
-        delta_time = 0.5 ;  # dt? time? 
- 
-      };
-
-      restart {
-        # default restart parameters(?)
-        type = "restart";
+  Output { 
+      cycle_step {
+        file_name      = "implosion2d-code-%04d";
+	type           = "image";
+	cycle_interval = 10;
       }
    }
  

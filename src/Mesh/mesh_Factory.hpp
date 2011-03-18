@@ -33,7 +33,8 @@ public: // interface
   virtual Block * create_block
   (Patch * patch,
    FieldDescr * field_descr,
-   int nx, int ny=1, int nz=1,
+   int ix, int iy, int iz,
+   int nx, int ny, int nz,
    int num_field_blocks = 1) throw();
 
 private: // functions

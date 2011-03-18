@@ -63,19 +63,25 @@ public: // functions
   /// Write mesh-related data to disk if scheduled
   void scheduled_write
   ( Mesh * mesh, int cycle, double time, bool root_call=true) throw()
-  { if (write_this_cycle(cycle, time)) write (mesh,cycle,time,root_call); };
+  { if (write_this_cycle(cycle, time)) 
+      write (mesh,cycle,time,root_call); 
+  };
 
   /// Write a patch-related data to disk if scheduled
   void scheduled_write
   ( Mesh * mesh, Patch * patch, 
     int cycle, double time, bool root_call=true) throw()
-  { if (write_this_cycle(cycle, time)) write (patch,cycle,time,root_call); };
+  { if (write_this_cycle(cycle, time)) 
+      write (mesh,patch,cycle,time,root_call); 
+  };
 
   /// Write a block-related to disk if scheduled
   void scheduled_write
   ( Mesh * mesh, Patch * patch, Block * block, 
     int cycle, double time, bool root_call=true) throw()
-  { if (write_this_cycle(cycle, time)) write (block,cycle,time,root_call); };
+  { if (write_this_cycle(cycle, time)) 
+      write (mesh,patch,block,cycle,time,root_call); 
+  };
 
   std::string expand_file_name (int cycle, double time) const throw();
 
@@ -89,15 +95,13 @@ public: // virtual functions
 
   /// Write a patch-related data to disk; may be called by write (Mesh)
   virtual void write 
-  ( Patch * patch, int cycle, double time, bool root_call=true) const throw()
-  { printf ("%s:%d INCOMPLETE Output Patch: %s %d %g\n",
-	    __FILE__,__LINE__,file_name_.c_str(),cycle,time); };
+  ( Mesh * mesh, Patch * patch, 
+    int cycle, double time, bool root_call=true) const throw() = 0;
 
   /// Write a block-related to disk; may be called by write (Patch)
   virtual void write 
-  ( Block * block, int cycle, double time, bool root_call=true) const throw()
-  { printf ("%s:%d INCOMPLETE Output Block: %s %d %g\n",
-	    __FILE__,__LINE__,file_name_.c_str(),cycle,time); };
+  ( Mesh * mesh, Patch * patch, Block * block, 
+    int cycle, double time, bool root_call=true) const throw() = 0;
 
 protected: // attributes
 

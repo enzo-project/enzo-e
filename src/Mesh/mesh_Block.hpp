@@ -26,6 +26,7 @@ public: // interface
   /// Initialize the Block object
   Block(Patch * patch,
 	FieldDescr * field_descr,
+	int ix, int iy, int iz,
 	int nx, int ny, int nz,
 	int num_field_blocks = 1) throw();
 
@@ -51,16 +52,16 @@ public: // interface
   FieldBlock * field_block (int i=0) throw();
 
   /// Return domain lower extent
-  void lower(double * nx = 0, double * ny = 0, double * nz = 0) const throw ();
-
-  /// Set domain lower extent
-  void set_lower(double nx, double ny, double nz) throw ();
+  void lower(double * x = 0, double * y = 0, double * z = 0) const throw ();
 
   /// Return domain upper extent
-  void upper(double * nx = 0,  double * ny = 0, double * nz = 0) const throw ();
+  void upper(double * x = 0,  double * y = 0, double * z = 0) const throw ();
+
+  /// Set domain lower extent
+  void set_lower(double x, double y, double z) throw ();
 
   /// Set domain upper extent
-  void set_upper(double nx, double ny, double nz) throw ();
+  void set_upper(double x, double y, double z) throw ();
   
 protected: // functions
 
@@ -74,6 +75,9 @@ protected: // attributes
 
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
+
+  /// Index into Patch
+  int index_[3];
 
   /// Extent of the box associated with the block
   /// WARNING: should not be used for deep AMR due to precision /

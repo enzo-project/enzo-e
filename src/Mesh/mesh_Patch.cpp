@@ -186,16 +186,17 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
   for (int ib=0; ib<nb; ib++) {
 
+    // Get index of this block in the patch
+    int ibx,iby,ibz;
+    layout_->block_indices (ib, &ibx, &iby, &ibz);
+
     // create a new data block
 
-    Block * block = factory_->create_block (this,field_descr,mbx,mby,mbz);
+    Block * block = factory_->create_block (this,field_descr,ibx,iby,ibz,mbx,mby,mbz);
 
     // Store the data block
     block_[ib] = block;
 
-    // Get index of this block in the patch
-    int ibx,iby,ibz;
-    layout_->block_indices (ib, &ibx, &iby, &ibz);
 
     // INITIALIZE FIELD BLOCK
 

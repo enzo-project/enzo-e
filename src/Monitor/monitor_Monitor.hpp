@@ -63,15 +63,43 @@ public: // interface
   void print (std::string buffer, ...) const;
 
   /// Generate a PNG image of an array
+  // template<class T>
+  // void image_open (std::string name, 
+  // 	      T * array,
+  // 	      int nx,  int ny,  int nz,   // Array dimensions
+  // 	      int         axis,           // Axis along which to project
+  // 	      reduce_enum op_reduce,      // Reduction operation along axis
+  // 	      double min, double max     // Limits for color map
+  // 	      ) const;
+
+  // /// Generate a PNG image of an array
+  // template<class T>
+  // void image_write (std::string name, 
+  // 	      T * array,
+  // 	      int nx,  int ny,  int nz,   // Array dimensions
+  // 	      int         axis,           // Axis along which to project
+  // 	      reduce_enum op_reduce,      // Reduction operation along axis
+  // 	      double min, double max     // Limits for color map
+  // 	      ) const;
+
+  // /// Generate a PNG image of an array
+  // template<class T>
+  // void image_close (std::string name, 
+  // 	      T * array,
+  // 	      int nx,  int ny,  int nz,   // Array dimensions
+  // 	      int         axis,           // Axis along which to project
+  // 	      reduce_enum op_reduce,      // Reduction operation along axis
+  // 	      double min, double max     // Limits for color map
+  // 	      ) const;
+
+  /// Generate a PNG image of an array
   template<class T>
   void image (std::string name, 
 	      T * array,
 	      int nx,  int ny,  int nz,   // Array dimensions
 	      int         axis,           // Axis along which to project
 	      reduce_enum op_reduce,      // Reduction operation along axis
-	      double min, double max,     // Limits for color map
-	      const double * color_map = 0, // color map [r0 g0 b0 r1 g1 b1...]
-	      int            color_length=0 // length of color map / 3
+	      double min, double max     // Limits for color map
 	      ) const;
   
 private: // functions
@@ -79,20 +107,67 @@ private: // functions
   /// Private constructor of the Monitor object (singleton design pattern)
   Monitor() 
     : active_(true)
-  {  }
+  { 
+    map_r_.resize(2);
+    map_g_.resize(2);
+    map_b_.resize(2);
+    map_r_[0] = 0.0;
+    map_r_[0] = 0.0;
+    map_g_[0] = 0.0;
+    map_g_[1] = 1.0;
+    map_b_[1] = 1.0;
+    map_b_[1] = 1.0;
+  }
 
   /// Private destructor  of the Monitor object (singleton design pattern)
   ~Monitor()
-  {}
+  {
+    delete instance_;
+    instance_ = 0;
+  }
 
 private: // attributes
 
   bool   active_;  // Whether monitoring is activated.  Used for e.g. ip != 0.
+
+  /// Color map
+  std::vector<double> map_r_;
+  std::vector<double> map_g_;
+  std::vector<double> map_b_;
   
   /// Single instance of the Monitor object (singleton design pattern)
   static Monitor * instance_;
 
 };
+
+//----------------------------------------------------------------------
+
+// template<class T>
+// void Monitor::image_open
+// (std::string name, 
+//  T * array, 
+//  int nx, int ny, int nz,
+//  int axis, reduce_enum op_reduce,
+//  double min, double max
+// ) const
+// //----------------------------------------------------------------------
+
+// template<class T>
+// void Monitor::image_write
+// (std::string name, 
+//  T * array, 
+//  int nx, int ny, int nz,
+//  int axis, reduce_enum op_reduce,
+//  double min, double max) const
+// //----------------------------------------------------------------------
+
+// template<class T>
+// void Monitor::image_close
+// (std::string name, 
+//  T * array, 
+//  int nx, int ny, int nz,
+//  int axis, reduce_enum op_reduce,
+//  double min, double max) const
 
 //----------------------------------------------------------------------
 
@@ -102,38 +177,22 @@ void Monitor::image
  T * array, 
  int nx, int ny, int nz,
  int axis, reduce_enum op_reduce,
- double min, double max, 
- const double * map_in, 
- int map_length) const
+ double min, double max) const
 /**
- *********************************************************************
- *
- * @param  name         File name
- * @param  array        Array of values to plot
- * @param  nx,ny,nz     Size of the array
- * @param  axis         Which axis to reduce
- * @param  op_reduce    Reduction operator
- * @param  min,max      Bounds for color map values
- * @param  map_in       Color map [r0, g0, b0, r1, g1, b1, ...]
- * @param  map_length   Length of color map / 3
- *
- * Plot an array as a png file
- *
- *********************************************************************
- */
+*********************************************************************
+*
+* @param  name         File name
+* @param  array        Array of values to plot
+* @param  nx,ny,nz     Size of the array
+* @param  axis         Which axis to reduce
+* @param  op_reduce    Reduction operator
+* @param  min,max      Bounds for color map values
+*
+* Plot an array as a png file
+*
+*********************************************************************
+*/
 {
-
-  if (! active_) return;
-
-  const double * map;
-  const double map_default []= {0, 0, 0, 1, 1, 1};
-  
-  if (map_in == NULL) {
-    map        = map_default;
-    map_length = 2;
-  } else {
-    map = map_in;
-  }
 
   // Use full array
 
@@ -234,23 +293,23 @@ void Monitor::image
       double v = image[j];
 
       // map v to lower colormap index
-      int index = (map_length-1)*(v - min) / (max-min);
+      int index = (map_r_.size()-1)*(v - min) / (max-min);
 
-      // prevent index == map_length-1, which happens if v == max
-      if (index > map_length - 2) index = map_length-2;
+      // prevent index == map_.size()-1, which happens if v == max
+      if (index > map_r_.size() - 2) index = map_r_.size()-2;
 
       // linear interpolate colormap values
-      double lo = min +  index   *(max-min)/(map_length-1);
-      double hi = min + (index+1)*(max-min)/(map_length-1);
+      double lo = min +  index   *(max-min)/(map_r_.size()-1);
+      double hi = min + (index+1)*(max-min)/(map_r_.size()-1);
 
       // should be in bounds, but force if not due to rounding error
       if (v < lo) v = lo;
       if (v > hi) v = hi;
 
       double ratio = (v - lo) / (hi-lo);
-      double r = (1-ratio)*map[3*index+0] + ratio*map[3*(index+1)+0];
-      double g = (1-ratio)*map[3*index+1] + ratio*map[3*(index+1)+1];
-      double b = (1-ratio)*map[3*index+2] + ratio*map[3*(index+1)+2];
+      double r = (1-ratio)*map_r_[index] + ratio*map_r_[index+1];
+      double g = (1-ratio)*map_g_[index] + ratio*map_g_[index+1];
+      double b = (1-ratio)*map_b_[index] + ratio*map_b_[index+1];
       png.plot(jx+1,jy+1,r,g,b);
     }
   }      

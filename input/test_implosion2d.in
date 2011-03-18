@@ -144,29 +144,29 @@
 
    Output { 
 
-      cycle_interval_test {
-        file_name      = "image_cycle_interval-%04d";
-	type           = "image";
-	cycle_interval = [10,2,20];
-      };
-
-      cycle_list_test {
-        file_name      = "image_cycle_list-%04d";
-	type           = "image";
-	cycle_list     = [2,3,5,7,11];
-      };
-
-      time_interval_test {
-        file_name      = "image_time_interval-%013.8f";
-	type           = "image";
-	time_interval  = [0.1,0.02,0.2];
-      };
-
-      time_list_test {
-        file_name      = "image_time_list-%013.8f";
-	type           = "image";
-	time_list      = [0.11, 0.13, 0.15, 0.17];
-      };
+#       cycle_interval_test {
+#         file_name      = "image_cycle_interval-%04d";
+# 	type           = "image";
+# 	cycle_interval = [10,2,20];
+#       };
+# 
+#       cycle_list_test {
+#         file_name      = "image_cycle_list-%04d";
+# 	type           = "image";
+# 	cycle_list     = [2,3,5,7,11];
+#       };
+# 
+#       time_interval_test {
+#         file_name      = "image_time_interval-%013.8f";
+# 	type           = "image";
+# 	time_interval  = [0.1,0.02,0.2];
+#       };
+# 
+#       time_list_test {
+#         file_name      = "image_time_list-%013.8f";
+# 	type           = "image";
+# 	time_list      = [0.11, 0.13, 0.15, 0.17];
+#       };
 
       cycle_step_test {
         file_name      = "image_cycle_step-%04d";
@@ -174,11 +174,11 @@
 	cycle_interval = 11;
       };
 
-      time_step_test {
-        file_name      = "image_time_step-%013.8f";
-	type           = "image";
-	time_interval  = 0.042;
-      };
+#       time_step_test {
+#         file_name      = "image_time_step-%013.8f";
+# 	type           = "image";
+# 	time_interval  = 0.042;
+#       };
 
    }
  

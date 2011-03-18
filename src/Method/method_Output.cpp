@@ -188,7 +188,7 @@ bool Output::write_this_cycle ( int cycle, double time ) throw()
     time_dump = time_start + index_*time_step;
     if (time_dump <= time*(1+eps)) { // <= to round-off error
       result = true;
-      active_ = (time_start + (++index_)*time_step <= time_stop);
+      active_ = (time_start + (++index_)*time_step <= time_stop*(1+eps));
     }
     break;
 
@@ -210,7 +210,8 @@ bool Output::write_this_cycle ( int cycle, double time ) throw()
     cycle_dump = cycle_start + index_*cycle_step;
     if (cycle_dump <= cycle*(1+eps)) { // <= to round-off error
       result = true;
-      active_ = (cycle_start + (++index_)*cycle_step <= cycle_stop);
+      // <= to round-off error
+      active_ = (cycle_start + (++index_)*cycle_step <= cycle_stop*(1+eps));
     }
     break;
   default:
@@ -236,6 +237,10 @@ std::string Output::expand_file_name
     break;
   case output_schedule_time_list:
   case output_schedule_time_interval:
+    sprintf (buffer,file_name_.c_str(),time);
+    break;
+  default:
+    // copy directly if unknown schedule type
     sprintf (buffer,file_name_.c_str(),time);
     break;
   }

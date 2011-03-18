@@ -24,9 +24,6 @@ void EnzoBlock::image_dump
 
   char filename[80];
 
-  // color map
-  double map[] = {1,1,1, 0,0,0};
-
   // slice
   sprintf (filename,"slice-%s-%06d.png",file_root,cycle);
 
@@ -35,7 +32,7 @@ void EnzoBlock::image_dump
   monitor->image(filename,
 		 BaryonField[field_density],nx,ny,nz,
 		 //		3,3,0,nx-3,ny-3,1,
-		2,reduce_sum, lower/nx, upper/nx, map,2);
+		2,reduce_sum, lower/nx, upper/nx);
 
   if (nz > 1) {
     // projection
@@ -43,17 +40,17 @@ void EnzoBlock::image_dump
     monitor->image(filename,
 		  BaryonField[field_density],nx,ny,nz,
 		   //		  3,3,3,nx-3,ny-3,nz-3,
-		  0,reduce_sum,lower, upper, map,2);
+		  0,reduce_sum,lower, upper);
     sprintf (filename,"project-%s-%06d-y.png",file_root,cycle);
     monitor->image(filename,
 		  BaryonField[field_density],nx,ny,nz,
 		   //		  3,3,3,nx-3,ny-3,nz-3,
-		  1,reduce_sum,lower, upper, map,2);
+		  1,reduce_sum,lower, upper);
     sprintf (filename,"project-%s-%06d-z.png",file_root,cycle);
     monitor->image(filename,
 		  BaryonField[field_density],nx,ny,nz,
 		   //		  3,3,3,nx-3,ny-3,nz-3,
-		  2,reduce_sum,lower, upper, map,2);
+		  2,reduce_sum,lower, upper);
   }
 
 }

@@ -14,9 +14,10 @@
 
 EnzoBlock::EnzoBlock(Patch * patch,
 		     FieldDescr * field_descr,
+		     int ix, int iy, int iz,
 		     int nx, int ny, int nz,
 		     int num_field_blocks) throw()
-  : Block(patch,field_descr,nx,ny,nz,num_field_blocks),
+  : Block(patch,field_descr,ix,iy,iz,nx,ny,nz,num_field_blocks),
     CycleNumber(0),
     Time(0),
     OldTime(0),

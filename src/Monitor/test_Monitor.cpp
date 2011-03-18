@@ -55,26 +55,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert(true);
 
   unit_func("image");
-  double map1[] = {0,0,0, 1,1,1};
 
-  array[0] = 1.0;
-  array[1] = 1.0;
-  array[n] = 1.0;
-  array[n*n] = 1.0;
-  array[n*n*n-1] = 1.0;
-  monitor->image("monitor_image_1.png",array,n,n,n,0,reduce_sum,0,1,map1,2);
-  unit_assert(true);
-
-  double map2[] = {0,0,0, 1,0,0, 1,1,1};
-  monitor->image("monitor_image_2.png",array,n,n,n,0,reduce_sum,0,1,map2,3);
-  unit_assert(true);
-
-  double map3[] = {0,0,0, 1,0,0, 0,1,0, 0,0,1, 1,1,1};
-  monitor->image("monitor_image_3.png",array,n,n,n,0,reduce_sum,0,1,map3,5);
-  unit_assert(true);
-
-  double map4[] = {1,0,0, 1,1,0, 0,1,0, 0,1,1, 0,0,1, 1,0,1};
-  monitor->image("monitor_image_4.png",array,n,n,n,0,reduce_sum,0,1,map4,6);
+  monitor->image("monitor_image.png",array,n,n,n,0,reduce_sum,0,1);
   unit_assert(true);
 
   unit_finalize();

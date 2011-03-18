@@ -32,6 +32,7 @@ public: // interface
   /// Initialize the EnzoBlock object
   EnzoBlock(Patch * patch,
 	    FieldDescr * field_descr,
+	    int ix, int iy, int iz,
 	    int nx, int ny, int nz,
 	    int num_field_blocks) throw();
 

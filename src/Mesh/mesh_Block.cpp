@@ -17,6 +17,7 @@ Block::Block
 (
  Patch        * patch, 
  FieldDescr   * field_descr,
+ int ix, int iy, int iz,
  int nx, int ny, int nz,
  int num_field_blocks) throw ()
   : patch_(patch),
@@ -29,6 +30,12 @@ Block::Block
   for (size_t i=0; i<field_block_.size(); i++) {
     field_block_[i] = new FieldBlock (field_descr,nx,ny,nz);
   }
+
+  // Initialize indices into parent patch
+
+  index_[0] = ix;
+  index_[1] = iy;
+  index_[2] = iz;
 
   // Initialize extent 
 
@@ -83,38 +90,38 @@ FieldBlock * Block::field_block (int i) throw()
 
 //----------------------------------------------------------------------
 
-void Block::lower(double * xm, double * ym, double * zm) const throw ()
+void Block::lower(double * x, double * y, double * z) const throw ()
 {
-  if (xm) *xm = lower_[0];
-  if (ym) *ym = lower_[1];
-  if (zm) *zm = lower_[2];
+  if (x) *x = lower_[0];
+  if (y) *y = lower_[1];
+  if (z) *z = lower_[2];
 }
 
 //----------------------------------------------------------------------
 
-void Block::set_lower(double xm, double ym, double zm) throw ()
+void Block::upper(double * x, double * y, double * z) const throw ()
 {
-  lower_[0] = xm;
-  lower_[1] = ym;
-  lower_[2] = zm;
+  if (x) *x = upper_[0];
+  if (y) *y = upper_[1];
+  if (z) *z = upper_[2];
 }
 
 //----------------------------------------------------------------------
 
-void Block::upper(double * xp, double * yp, double * zp) const throw ()
+void Block::set_lower(double x, double y, double z) throw ()
 {
-  if (xp) *xp = upper_[0];
-  if (yp) *yp = upper_[1];
-  if (zp) *zp = upper_[2];
+  lower_[0] = x;
+  lower_[1] = y;
+  lower_[2] = z;
 }
 
 //----------------------------------------------------------------------
 
-void Block::set_upper(double xp, double yp, double zp) throw ()
+void Block::set_upper(double x, double y, double z) throw ()
 {
-  upper_[0] = xp;
-  upper_[1] = yp;
-  upper_[2] = zp;
+  upper_[0] = x;
+  upper_[1] = y;
+  upper_[2] = z;
 }
 
 //======================================================================
