@@ -98,7 +98,7 @@ PARALLEL_MAIN_BEGIN
   // initialized in EnzoBlock::initialize_*()
 
   FieldDescr field_descr;
-  EnzoBlock enzo(NULL,&field_descr,0,0,0,0,0,0,0);
+  EnzoBlock enzo(NULL,&field_descr, 0,0,0, 0,0,0, 1);
 
   enzo.initialize_hydro ();
 
