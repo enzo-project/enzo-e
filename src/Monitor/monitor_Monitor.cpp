@@ -122,7 +122,7 @@ void Monitor::print (std::string message, ...) const
 
 //----------------------------------------------------------------------
 
-void Monitor::image_set_map 
+void Monitor::set_image_map 
 (int n, double * map_r, double * map_g, double * map_b) throw()
 {
   map_r_.resize(n);
@@ -140,7 +140,7 @@ void Monitor::image_set_map
 
 void Monitor::image_open (std::string filename, int mx, int my)
 {
-  png_ = new pngwriter(mx,my,0,name.c_str());
+  png_ = new pngwriter(mx,my,0,filename.c_str());
 
   image_ = new double [mx*my];
 

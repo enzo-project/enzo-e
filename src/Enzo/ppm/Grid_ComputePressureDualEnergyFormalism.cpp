@@ -130,7 +130,8 @@ int EnzoBlock::ComputePressureDualEnergyFormalism
  
       if (number_density == 0)
 	number_density = number_density_floor;
-      temp = MAX(TemperatureUnits*pressure[i]/(number_density + nH2), 1);
+      temp = MAX(TemperatureUnits*pressure[i]/(number_density + nH2), 
+		 (enzo_float)(1.0));
  
       /* Only do full computation if there is a reasonable amount of H2.
 	 The second term in GammaH2Inverse accounts for the vibrational

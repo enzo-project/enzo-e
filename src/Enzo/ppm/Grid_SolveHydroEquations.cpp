@@ -211,7 +211,7 @@ int EnzoBlock::SolveHydroEquations (Block * block,
 
   int tempsize = MAX(MAX(GridDimension[0]*GridDimension[1],
 			 GridDimension[1]*GridDimension[2]),
-		     GridDimension[2]*GridDimension[0]  );
+		     GridDimension[2]*GridDimension[0]);
   enzo_float *temp = new enzo_float[tempsize*(31+NumberOfColours*4)];
 
   /* create and fill in arrays which are easier for the solver to

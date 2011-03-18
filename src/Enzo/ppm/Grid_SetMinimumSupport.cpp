@@ -62,10 +62,10 @@ int EnzoBlock::SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient)
       if (GridRank != 3) return ENZO_FAIL;
       for (i = 0; i < size; i++)
 	BaryonField[TENum][i] = 
-	  MAX(BaryonField[GENum][i] + 0.5*
+	  MAX((enzo_float)(BaryonField[GENum][i] + 0.5*
 	      (BaryonField[Vel1Num][i]*BaryonField[Vel1Num][i] +
 	       BaryonField[Vel2Num][i]*BaryonField[Vel2Num][i] +
-	       BaryonField[Vel3Num][i]*BaryonField[Vel3Num][i]),
+	       BaryonField[Vel3Num][i]*BaryonField[Vel3Num][i])),
 	      BaryonField[TENum][i]);
 								
     }

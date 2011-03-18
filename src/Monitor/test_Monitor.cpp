@@ -67,7 +67,7 @@ PARALLEL_MAIN_BEGIN
     double map_g[] = {0.0, 0.5};
     double map_b[] = {0.5, 1.0};
     int axis=1;
-    monitor->image_set_map(2,map_r,map_g,map_b);
+    monitor->set_image_map(2,map_r,map_g,map_b);
     monitor->image("monitor_image_2.png",array,n,n,n,0,0,0, axis,reduce_sum,0,1);
     unit_assert(true);
   }
@@ -77,7 +77,7 @@ PARALLEL_MAIN_BEGIN
     double map_g[] = {0.0, 0.0, 1.0, 0.0};
     double map_b[] = {0.0, 0.0, 0.0, 1.0};
     int axis=2;
-    monitor->image_set_map(4,map_r,map_g,map_b);
+    monitor->set_image_map(4,map_r,map_g,map_b);
     monitor->image("monitor_image_3.png",array,n,n,n,0,0,0, axis,reduce_sum,0,1);
     unit_assert(true);
   }

@@ -12,14 +12,15 @@ Import('use_papi')
 
 
 components = ['error','monitor','cello']
+libraries  = ['png']
 if (use_papi):
-	components = components + ['papi','pfm']
+	libraries = libraries + ['papi','pfm']
 
 #------------------------------
 # ENVIRONMENTS
 #------------------------------
 
-env = env.Clone(LIBS=[components])
+env = env.Clone(LIBS=[components,libraries])
 
 #------------------------------
 # SOURCE

@@ -121,7 +121,8 @@ int EnzoBlock::ComputeTemperatureField(enzo_float *temperature)
  
     for (i = 0; i < size; i++)
       temperature[i] = MAX((TemperatureUnits*temperature[i]*mol_weight
-		         /MAX(BaryonField[DensNum][i], density_floor)),
+			    /MAX(BaryonField[DensNum][i], 
+				 (enzo_float)(density_floor))),
 			 min_temperature);
   else {
  
@@ -151,8 +152,10 @@ int EnzoBlock::ComputeTemperatureField(enzo_float *temperature)
  
       /* Ignore deuterium. */
  
-      temperature[i] *= TemperatureUnits/MAX(number_density, number_density_floor);
-      temperature[i] = MAX(temperature[i], MINIMUM_TEMPERATURE);
+      temperature[i] *= TemperatureUnits/MAX(number_density, 
+					     (enzo_float)(number_density_floor));
+      temperature[i] = MAX(temperature[i], 
+			   (enzo_float)(MINIMUM_TEMPERATURE));
     }
   }
  

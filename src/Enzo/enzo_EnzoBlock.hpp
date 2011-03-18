@@ -13,11 +13,11 @@
 
 struct fluxes
 {
-  long_int LeftFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  long_int LeftFluxEndGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
+  long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
+  long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
   long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxEndGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  enzo_float *LeftFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
+  long_int RightFluxEndGlobalIndex  [MAX_DIMENSION][MAX_DIMENSION];
+  enzo_float *LeftFluxes [MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
   enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
 };
 

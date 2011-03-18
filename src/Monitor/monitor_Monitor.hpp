@@ -89,7 +89,7 @@ public: // interface
 	      double min, double max     // Limits for color map
 	      );
 
-  void image_set_map 
+  void set_image_map 
   (int n, double * map_r, double * map_g, double * map_b) throw();
 
 private: // functions
@@ -156,7 +156,7 @@ private: // attributes
 
 template<class T>
 void Monitor::image
-(std::string name, 
+(std::string filename, 
  T * array, 
  int nx,  int ny,  int nz,
  int nx0, int ny0, int nz0,
@@ -166,7 +166,7 @@ void Monitor::image
 /**
 *********************************************************************
 *
-* @param  name         File name
+* @param  filename     File name
 * @param  array        Array of values to plot
 * @param  nx,ny,nz     Size of the array
 * @param  axis         Which axis to reduce
@@ -254,8 +254,8 @@ void Monitor::image
   // Adjust min and max bounds if needed
 
   for (int i=0; i<mx*my; i++) {
-    if (min > image_[i]) min = image_[i];
-    if (max < image_[i]) max = image_[i];
+    min = MIN(min,image_[i]);
+    max = MAX(max,image_[i]);
   }
 
 
