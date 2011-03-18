@@ -63,7 +63,7 @@ public: // interface
   void print (std::string buffer, ...) const;
 
   /// Generate a PNG image of an array
-  void image_open (int mx,  int my);
+  void image_open (std::string filename, int mx,  int my);
 
    /// Generate a PNG image of an array
    template<class T>
@@ -76,14 +76,7 @@ public: // interface
 		     );
 
    /// Generate a PNG image of an array
-   template<class T>
-   void image_close (std::string name, 
-   	      T * array,
-   	      int nx,  int ny,  int nz,   // Array dimensions
-   	      int         axis,           // Axis along which to project
-   	      reduce_enum op_reduce,      // Reduction operation along axis
-   	      double min, double max     // Limits for color map
-		     );
+   void image_close ();
 
   /// Generate a PNG image of an array
   template<class T>
@@ -104,7 +97,8 @@ private: // functions
   /// Private constructor of the Monitor object [singleton design pattern]
   Monitor() 
     : active_(true),
-      image_(0)
+      image_(0),
+      png_(0)
   { 
     map_r_.resize(2);
     map_g_.resize(2);
@@ -136,6 +130,9 @@ private: // attributes
   /// Current image
   double * image_;
 
+  /// Current pngwriter
+  pngwriter * png_;
+
   /// Single instance of the Monitor object [singleton design pattern]
   static Monitor * instance_;
 
@@ -155,15 +152,6 @@ private: // attributes
 
  //----------------------------------------------------------------------
 
- template<class T>
- void Monitor::image_close
- (std::string name, 
-  T * array, 
-  int nx, int ny, int nz,
-  int axis, reduce_enum op_reduce,
-  double min, double max)
- {
- }
 //----------------------------------------------------------------------
 
 template<class T>
@@ -213,7 +201,7 @@ void Monitor::image
   int my = m3[iay];
   int mz = m3[iaz];
 
-  image_open(mx,my);
+  image_open(filename,mx,my);
 
   // Array start
   int mx0 = m0[iax];
@@ -270,7 +258,6 @@ void Monitor::image
     if (max < image_[i]) max = image_[i];
   }
 
-  pngwriter png (mx,my,0,name.c_str());
 
     
   // loop over pixels (jx,jy)
@@ -298,15 +285,11 @@ void Monitor::image
       double r = (1-ratio)*map_r_[index] + ratio*map_r_[index+1];
       double g = (1-ratio)*map_g_[index] + ratio*map_g_[index+1];
       double b = (1-ratio)*map_b_[index] + ratio*map_b_[index+1];
-      png.plot(jx+1,jy+1,r,g,b);
+      png_->plot(jx+1,jy+1,r,g,b);
     }
   }      
 
-  png.close();
-
-  delete [] image_;
-  image_ = 0;
-
+  image_close();
 }
 
 #endif /* MONITOR_MONITOR_HPP */

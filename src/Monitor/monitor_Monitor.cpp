@@ -138,10 +138,21 @@ void Monitor::image_set_map
 
 //----------------------------------------------------------------------
 
-void Monitor::image_open (int mx, int my)
+void Monitor::image_open (std::string filename, int mx, int my)
 {
+  png_ = new pngwriter(mx,my,0,name.c_str());
+
   image_ = new double [mx*my];
 
   for (int i=0; i<mx*my; i++) image_[i] = 0.0;
 }
 
+//----------------------------------------------------------------------
+
+void Monitor::image_close ()
+{
+  png_->close();
+
+  delete [] image_;
+  image_ = 0;
+}
