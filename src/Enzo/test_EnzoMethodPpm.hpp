@@ -37,7 +37,7 @@ void output_images(int cycle,
     std::string field_name = field_descr->field_name(index);
     Scalar * field_values = (Scalar *)field_block->field_values(index);
     sprintf (filename,"ppm-%s-%05d.png",field_name.c_str(),cycle);
-    monitor->image (filename, field_values, mx,my,mz, 0,0,0, 2, reduce_sum, 0.0, 1.0);
+    monitor->image (filename, field_values, mx,my,mz, mx,my,mz, 0,0,0, 2, reduce_sum, 0.0, 1.0);
   }
 }
 

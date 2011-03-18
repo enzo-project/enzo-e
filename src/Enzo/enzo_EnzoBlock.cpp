@@ -297,10 +297,9 @@ void EnzoBlock::write(FILE * fp) throw ()
 //----------------------------------------------------------------------
 void EnzoBlock::initialize () throw()
 {
-  double xm,xp,ym,yp,zm,zp;
+  double xm,xp,ym;
 
   lower(&xm,&ym,&zm);
-  upper(&xp,&yp,&zp);
 
   GridLeftEdge[0]    = xm;
   GridLeftEdge[1]    = ym;
@@ -311,24 +310,32 @@ void EnzoBlock::initialize () throw()
   int nx,ny,nz;
   field_block_[0] -> size (&nx,&ny,&nz);
 
-  GridDimension[0]  = nx + 2*enzo::ghost_depth[0];
-  GridDimension[1]  = ny + 2*enzo::ghost_depth[1];
-  GridDimension[2]  = nz + 2*enzo::ghost_depth[2];
-  GridStartIndex[0] = enzo::ghost_depth[0];
-  GridStartIndex[1] = enzo::ghost_depth[1];
-  GridStartIndex[2] = enzo::ghost_depth[2];
-  GridEndIndex[0]   = enzo::ghost_depth[0] + nx - 1;
-  GridEndIndex[1]   = enzo::ghost_depth[1] + ny - 1;
-  GridEndIndex[2]   = enzo::ghost_depth[2] + nz - 1;
+  int gx,gy,gz;
+
+  gx = enzo::ghost_depth[0];
+  gy = enzo::ghost_depth[1];
+  gz = enzo::ghost_depth[2];
+
+  GridDimension[0]  = nx + 2*gx;
+  GridDimension[1]  = ny + 2*gy;
+  GridDimension[2]  = nz + 2*gz;
+
+  GridStartIndex[0] = gx;
+  GridStartIndex[1] = gy;
+  GridStartIndex[2] = gz;
+
+  GridEndIndex[0]   = gx + nx - 1;
+  GridEndIndex[1]   = gy + ny - 1;
+  GridEndIndex[2]   = gz + nz - 1;
 
   // Initialize CellWidth
 
-  double h3[3];
-  field_block_[0]->cell_width(this,&h3[0],&h3[1],&h3[2]);
+  int hx,hy,hz;
+  field_block_[0]->cell_width(this,&hx,&hy,&hz);
 
-  for (int dim=0; dim<enzo::GridRank; dim++) {
-    CellWidth[dim] = h3[dim];
-  }
+  CellWidth[0] = hx;
+  CellWidth[1] = hy;
+  CellWidth[2] = hz;
 
   // Initialize BaryonField[] pointers
 

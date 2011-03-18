@@ -57,8 +57,12 @@ PARALLEL_MAIN_BEGIN
   unit_func("image");
 
   {
-    int axis=0;
-    monitor->image("monitor_image_1.png",array,n,n,n,0,0,0, axis,reduce_sum,0,1);
+    monitor->image("monitor_image_1.png",
+		   n,n,
+		   array,
+		   n,n,n,
+		   n,n,n,
+		   0,0,0, axis_x,reduce_sum,0,1);
     unit_assert(true);
   }
 
@@ -66,9 +70,13 @@ PARALLEL_MAIN_BEGIN
     double map_r[] = {0.0, 1.0};
     double map_g[] = {0.0, 0.5};
     double map_b[] = {0.5, 1.0};
-    int axis=1;
     monitor->set_image_map(2,map_r,map_g,map_b);
-    monitor->image("monitor_image_2.png",array,n,n,n,0,0,0, axis,reduce_sum,0,1);
+    monitor->image("monitor_image_2.png",
+		   n,n,
+		   array,
+		   n,n,n,
+		   n,n,n,
+		   0,0,0, axis_y,reduce_sum,0,1);
     unit_assert(true);
   }
 
@@ -76,11 +84,45 @@ PARALLEL_MAIN_BEGIN
     double map_r[] = {0.0, 1.0, 0.0, 0.0};
     double map_g[] = {0.0, 0.0, 1.0, 0.0};
     double map_b[] = {0.0, 0.0, 0.0, 1.0};
-    int axis=2;
     monitor->set_image_map(4,map_r,map_g,map_b);
-    monitor->image("monitor_image_3.png",array,n,n,n,0,0,0, axis,reduce_sum,0,1);
+    monitor->image("monitor_image_3.png",
+		   n,n,
+		   array,
+		   n,n,n,
+		   n,n,n,
+		   0,0,0, axis_z,reduce_sum,0,1);
     unit_assert(true);
   }
+
+  {
+    double map_r[] = {0.0, 1.0};
+    double map_g[] = {0.0, 1.0};
+    double map_b[] = {0.0, 1.0};
+    monitor->set_image_map(2,map_r,map_g,map_b);
+
+    monitor->image_open("monitor_image_4.png",n,n);
+
+    for (int iz=0; iz<2; iz++) {
+      int iz0 = iz*n/2;
+      for (int iy=0; iy<2; iy++) {
+	int iy0 = iy*n/2;
+	for (int ix=0; ix<2; ix++) {
+	  int ix0 = ix*n/2;
+	  int i = ix0 + n*(iy0 + n*iz0);
+	  monitor->image_reduce(array+i,
+			       n,n,n,
+			       n/2,n/2,n/2,
+			       ix0,iy0,iz0,
+			       axis_z,reduce_avg);
+	}
+      }
+    }
+
+    monitor->image_close(0,1);
+
+    unit_assert(true);
+  }
+
 
   unit_finalize();
 

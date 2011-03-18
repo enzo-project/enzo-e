@@ -63,31 +63,36 @@ public: // interface
   void print (std::string buffer, ...) const;
 
   /// Generate a PNG image of an array
-  void image_open (std::string filename, int mx,  int my);
+  void image_open (std::string filename, 
+		   int image_size_x,  int image_size_y);
 
    /// Generate a PNG image of an array
    template<class T>
-   void image_write (std::string name, 
-   	      T * array,
-   	      int nx,  int ny,  int nz,   // Array dimensions
-   	      int         axis,           // Axis along which to project
-   	      reduce_enum op_reduce,      // Reduction operation along axis
-   	      double min, double max     // Limits for color map
-		     );
+   void image_reduce 
+   ( T * array,
+     int nxd, int nyd, int nzd,   // Array dimensions
+     int nx,  int ny,  int nz,   // Array dimensions
+     int nx0, int ny0, int nz0,  // Array offset into image
+     axis_enum   axis,           // Axis along which to project
+     reduce_enum op_reduce);
 
-   /// Generate a PNG image of an array
-   void image_close ();
+
+  /// Generate PNG image, using given min and max for colormap
+  void image_close (double min, double max);
 
   /// Generate a PNG image of an array
   template<class T>
-  void image (std::string name, 
-	      T * array,
-	      int nx,  int ny,  int nz,   // Array dimensions
-	      int nx0, int ny0, int nz0,  // Array offset into image
-	      int         axis,           // Axis along which to project
-	      reduce_enum op_reduce,      // Reduction operation along axis
-	      double min, double max     // Limits for color map
-	      );
+  void image 
+  ( std::string name, 
+    int mx, int my,             // image size
+    T * array,
+    int nxd, int nyd, int nzd,   // Array dimensions
+    int nx,  int ny,  int nz,   // Array size
+    int nx0, int ny0, int nz0,  // Array offset into image
+    axis_enum   axis,           // Axis along which to project
+    reduce_enum op_reduce,      // Reduction operation along axis
+    double min, double max     // Limits for color map
+    );
 
   void set_image_map 
   (int n, double * map_r, double * map_g, double * map_b) throw();
@@ -98,6 +103,8 @@ private: // functions
   Monitor() 
     : active_(true),
       image_(0),
+      image_size_x_(0),
+      image_size_y_(0),
       png_(0)
   { 
     map_r_.resize(2);
@@ -130,6 +137,10 @@ private: // attributes
   /// Current image
   double * image_;
 
+  /// Current image size
+  int image_size_x_;
+  int image_size_y_;
+
   /// Current pngwriter
   pngwriter * png_;
 
@@ -141,13 +152,96 @@ private: // attributes
  //----------------------------------------------------------------------
 
  template<class T>
- void Monitor::image_write
- (std::string name, 
-  T * array, 
-  int nx, int ny, int nz,
-  int axis, reduce_enum op_reduce,
-  double min, double max)
+ void Monitor::image_reduce
+ (T * array, 
+  int nxd, int nyd, int nzd,
+  int nx,  int ny,  int nz,
+  int nx0, int ny0, int nz0,
+  axis_enum   axis, 
+  reduce_enum op_reduce)
  {
+   // Array multipliers
+
+   int nd3[3] = {1, nxd, nxd*nyd}; 
+
+   // Array size
+
+   int n[3]  = {nx,  ny,  nz};
+   int n0[3] = {nx0, ny0, nz0};
+
+   // Remap array axes to image axes iax,iay
+
+   int iax = (axis+1) % 3;  // image x axis
+   int iay = (axis+2) % 3;  // image y-axis
+   int iaz = axis;          // reduction axis
+
+   // Array size permuted to match image
+
+   int npx = n[iax];
+   int npy = n[iay];
+   int npz = n[iaz];
+
+   // Array start permuted to match image
+
+   int npx0 = n0[iax];
+   int npy0 = n0[iay];
+
+   // Loop over array subsection
+
+   // image x-axis
+  
+   for (int index_array_x=0; index_array_x<npx; index_array_x++) {
+
+     int index_image_x = npx0 + index_array_x;
+
+     // image y-axis
+
+     for (int index_array_y=0; index_array_y<npy; index_array_y++) {
+      
+       int index_image_y = npy0 + index_array_y;
+
+       int index_image = index_image_x + image_size_x_*index_image_y;
+
+       double & value = image_ [index_image];
+
+       // reduction axis
+
+       // initialize reduction
+       switch (op_reduce) {
+       case reduce_min: 
+	 value = std::numeric_limits<double>::max();
+	 break;
+       case reduce_max: 
+	 value = std::numeric_limits<double>::min();
+	 break;
+       case reduce_avg: 
+       case reduce_sum: 
+       default:         
+	 value = 0; break;
+       }
+
+       // reduce along axis
+       for (int iz=0; iz<npz; iz++) {
+	
+	 int index_array = nd3[iax]*index_array_x + nd3[iay]*index_array_y + nd3[iaz]*iz;
+	 // reduce along iaz axis
+	 switch (op_reduce) {
+	 case reduce_min: 
+	   value = MIN(array[index_array],(T)(value)); 
+	   break;
+	 case reduce_max: 
+	   value = MAX(array[index_array],(T)(value)); 
+	   break;
+	 case reduce_avg: 
+	 case reduce_sum: 
+	   value += array[index_array]; break;
+	 default:
+	   break;
+	 }
+       }
+       if (op_reduce == reduce_avg) value /= npz;
+     }
+   }
  }
 
  //----------------------------------------------------------------------
@@ -157,18 +251,23 @@ private: // attributes
 template<class T>
 void Monitor::image
 (std::string filename, 
+ int mx, int my,
  T * array, 
- int nx,  int ny,  int nz,
- int nx0, int ny0, int nz0,
- int axis, reduce_enum op_reduce,
+ int nxd,  int nyd,  int nzd,
+ int nx,   int ny,   int nz,
+ int nx0, int ny0,   int nz0,
+ axis_enum axis, reduce_enum op_reduce,
  double min, double max)
 
 /**
 *********************************************************************
 *
 * @param  filename     File name
+* @param  mx,my        Size of the image
 * @param  array        Array of values to plot
+* @param  nxd,nyd,nzd  Dimension of the array
 * @param  nx,ny,nz     Size of the array
+* @param  nx0,ny0,nz0  Starting index of the array in the image
 * @param  axis         Which axis to reduce
 * @param  op_reduce    Reduction operator
 * @param  min,max      Bounds for color map values
@@ -178,118 +277,25 @@ void Monitor::image
 *********************************************************************
 */
 {
-  int nx1, ny1, nz1;
 
-  nx1 = nx0 + nx;
-  ny1 = ny0 + ny;
-  nz1 = nz0 + nz;
+  // n array size
+  // m image size
 
-  // Array size
-  int n3[3] = {1, nx, nx*ny}; // Array multipliers
+  // k colormap index
 
-  // Sub-array size
-  int m3[3] = {nx1-nx0, ny1-ny0, nz1-nz0};  // sub-array size
-  int m0[3] = {nx0, ny0, nz0};              // sub-array start
-
-  // Map array axes to image axes iax,iay
-  int iax = (axis+1) % 3;  // image x axis
-  int iay = (axis+2) % 3;  // image y-axis
-  int iaz = axis;          // reduction axis
-
-  // Array range
-  int mx = m3[iax];
-  int my = m3[iay];
-  int mz = m3[iaz];
+  // Open the image
 
   image_open(filename,mx,my);
 
-  // Array start
-  int mx0 = m0[iax];
-  int my0 = m0[iay];
-  int mz0 = m0[iaz];
+  image_reduce(array,
+	       nxd,nyd,nzd,
+	       nx,ny,nz,
+	       nx0,ny0,nz0,
+	       axis,op_reduce);
 
-  // Loop over array subsection
+  // close the image
 
-  // image x-axis
-
-  for (int jx=0; jx<mx; jx++) {
-
-    int ix = jx + mx0;
-
-    // image y-axis
-
-    for (int jy=0; jy<my; jy++) {
-      int iy = jy + my0;
-      
-      int i = n3[iax]*ix + n3[iay]*iy;
-      int j = jx + mx*jy;
-
-      // reduction axis
-
-      // initialize reduction
-      switch (op_reduce) {
-      case reduce_min: image_[j] = array[i]; break;
-      case reduce_max: image_[j] = array[i]; break;
-      case reduce_avg: image_[j] = 0; break;
-      case reduce_sum: image_[j] = 0; break;
-      default:         image_[j] = 0; break;
-      }
-
-      for (int jz=0; jz<mz; jz++) {
-	int iz = jz + mz0;
-	i = n3[iax]*ix + n3[iay]*iy + n3[iaz]*iz;
-	// reduce along iaz axis
-	switch (op_reduce) {
-	case reduce_min: image_[j] = MIN(array[i],(T)(image_[j])); break;
-	case reduce_max: image_[j] = MAX(array[i],(T)(image_[j])); break;
-	case reduce_avg: image_[j] += array[i]; break;
-	case reduce_sum: image_[j] += array[i]; break;
-	default:         break;
-	}
-      }
-      if (op_reduce == reduce_avg) image_[j] /= m3[iaz];
-    }
-  }
-
-  // Adjust min and max bounds if needed
-
-  for (int i=0; i<mx*my; i++) {
-    min = MIN(min,image_[i]);
-    max = MAX(max,image_[i]);
-  }
-
-
-    
-  // loop over pixels (jx,jy)
-  for (int jx = 0; jx<mx; jx++) {
-    for (int jy = 0; jy<my; jy++) {
-
-      int j = jx + mx*jy;
-      double v = image_[j];
-
-      // map v to lower colormap index
-      int index = (map_r_.size()-1)*(v - min) / (max-min);
-
-      // prevent index == map_.size()-1, which happens if v == max
-      if (index > map_r_.size() - 2) index = map_r_.size()-2;
-
-      // linear interpolate colormap values
-      double lo = min +  index   *(max-min)/(map_r_.size()-1);
-      double hi = min + (index+1)*(max-min)/(map_r_.size()-1);
-
-      // should be in bounds, but force if not due to rounding error
-      if (v < lo) v = lo;
-      if (v > hi) v = hi;
-
-      double ratio = (v - lo) / (hi-lo);
-      double r = (1-ratio)*map_r_[index] + ratio*map_r_[index+1];
-      double g = (1-ratio)*map_g_[index] + ratio*map_g_[index+1];
-      double b = (1-ratio)*map_b_[index] + ratio*map_b_[index+1];
-      png_->plot(jx+1,jy+1,r,g,b);
-    }
-  }      
-
-  image_close();
+  image_close(min,max);
 }
 
 #endif /* MONITOR_MONITOR_HPP */

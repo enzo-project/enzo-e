@@ -223,14 +223,19 @@ void write_image(std::string filename, float * image, int nx, int ny, int nz)
   float min=image[0];
   float max=image[0];
   for (int i=0; i<nx*ny*nz; i++) {
-    if (min > image[i]) min = image[i];
-    if (max < image[i]) max = image[i];
+    min = MIN(min,image[i]);
+    max = MAX(max,image[i]);
   }
+
   Monitor * monitor = Monitor::instance();
-  monitor->image ((filename+".png").c_str(),image,
+
+  monitor->image ((filename+".png").c_str(),
+		  nx,ny,
+		  image,
+		  nx,ny,1,
 		  nx,ny,1,
 		  0,0,0,
-		  2,reduce_sum,
+		  axis_z,reduce_sum,
 		  min,max);
 
 }
