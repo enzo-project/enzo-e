@@ -1,0 +1,161 @@
+# Problem: 2D Implosion problem
+# Author:  James Bordner (jobordner@ucsd.edu)
+#
+# This file is used for developing the Cello / Enzo-P input grammar and syntax
+
+   # Cello version information can be compared with actual source
+   # version information at run time to help detect possible
+   # inconsistencies between source code and input file parameters.
+
+   Cello {
+
+      version = [ 0, 3, 2];
+
+   }
+
+   # Domain is the two dimensional box 0 < x,y < 0.3
+
+   Domain { 
+      extent = [0.0, 0.3, 0.0, 0.3] 
+   } 
+
+   # The computational mesh is a 400 x 400 uniform grid, broken up
+   # into computational blocks (parallel task size) of size 8 x 8.
+
+   Mesh { 
+      root_size      = [128,128];
+      root_blocks    = [1,1];
+      max_level      = 0; 
+
+      # remaining mesh parameters are ignored if max_level == 0
+
+      backfill       = false;
+      refinement     = 2;
+      balance        = true;
+      backfill       = true;
+      coalesce       = true;
+   }
+
+   # Field parameters include those concerning fields as a group, as
+   # well as individual fields
+   
+   Field {
+
+      ghosts = 3;
+
+      fields = [
+	"density",	
+	"velocity_x",
+	"velocity_y",
+	"total_energy",
+	"internal_energy"
+      ] ;
+
+      # List of user-defined groups, which may be accessed by applications
+      # built on Cello to process different groups of fields in different
+      # ways.  E.g. "color" fields for Enzo PPM, or "computed" fields that
+      # are not permanently stored (like pressure)
+
+      groups = ["computed", "color"];
+
+      # courant condition for fields
+
+      courant   = 0.8;
+
+      # Amount of padding between fields in bytes; may be helpful to
+      # avoid cache thrashing for large 2^k length field blocks.  Two
+      # cache lines is recommended
+ 
+      padding   = 0;
+                        
+      # align start of each field block on an 8-byte segment;
+      # important for performance on e.g. IBM Power architectures
+
+      alignment = 8;    
+
+      density  { 
+
+         # If a method calls the density field "rho" instead of
+         # "density" Probably not a good idea to use, but may simplify
+         # coupling methods developed by independent groups that
+         # weren't originally meant to work with each other.
+
+         alias = ["rho"];
+
+         # issue a warning if the density falls below 1.0e-6 anywhere
+         # issue an error if the density goes negative 
+
+         # [could consolidate into a single list [ 1.0e-6, "warning",
+         # 0.0, "error" ] since value and action are closely related
+
+         minimum =  [ 1.0e-6, "warning", 0.0, "error" ];
+
+      };
+
+   }
+
+   Method {
+
+      # list of methods to apply and in what order
+ 
+      sequence = ["ppm"];
+
+      ppm {
+
+         # method-specific parameters.  Note this is Enzo-P not Cello 
+
+         diffusion   = true;
+         flattening  = 3;
+         steepening  = true;
+
+         dual_energy = false;
+     }
+   }
+
+   Physics {
+
+      dimensions = 2;
+
+      # cosmology parameters go here
+
+      gamma = 1.4; # in general should be in a "Material" or "Gas" group or similar
+
+   }
+
+   Field {
+       density       { value = [ 0.125,                x + y < 0.1517, 
+                                 1.0 ]; };
+
+       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.1517,
+	                         1.0  / (0.4 * 1.0) ]; };
+       velocity_x    { value = [0.0]; };
+       velocity_y    { value = [0.0]; }
+   }
+
+   Boundary { type = "outflow" }
+
+   Stopping {
+
+      time  = 2.5;
+      cycle = 100;
+
+      # redshift
+   }
+
+   Output { 
+      # this section needs more work
+
+      # subgroup specifies the subdirectory / file name
+      data {
+        # output types ["data", "restart", "projection", user-defined]
+        type = "data";
+        delta_time = 0.5 ;  # dt? time? 
+ 
+      };
+
+      restart {
+        # default restart parameters(?)
+        type = "restart";
+      }
+   }
+ 
