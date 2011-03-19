@@ -85,23 +85,25 @@ void EnzoSimulationMpi::run() throw()
     }
   }
 
+  // Perform any scheduled output
+
+  for (size_t i=0; i<output_list_.size(); i++) {
+    Output * output = output_list_[i];
+    output->scheduled_write(mesh_,cycle_,time_);
+  }
+
   //--------------------------------------------------
   // INITIAL STOPPING CRITERIA TEST
   //--------------------------------------------------
 
   Reduce * reduce_mesh = mesh_->group()->create_reduce ();
 
-  int    cycle_patch = std::numeric_limits<int>::max();
   int    stop_patch  = true;
-  double time_patch  = std::numeric_limits<double>::max();
 
   while ((patch = ++it_patch)) {
 
     Reduce * reduce_patch = patch->group()->create_reduce ();
-
-    int    cycle_block = std::numeric_limits<int>::max();
     int    stop_block  = true;
-    double time_block  = std::numeric_limits<double>::max();
 
     ItBlock it_block(patch);
     Block * block;
@@ -110,28 +112,20 @@ void EnzoSimulationMpi::run() throw()
 
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-      int cycle   = enzo_block->CycleNumber;
-      double time = enzo_block->Time;
+      int cycle_block   = enzo_block->CycleNumber;
+      double time_block =  enzo_block->Time;
 
-      cycle_block = MIN(cycle_block, cycle);
-      time_block  = MIN(time_block,  time);
-      stop_block  = stop_block && (stopping_->complete(cycle,time));
+      stop_block = stop_block && (stopping_->complete(cycle_block,time_block));
     }
 
-    int   cycle_reduce = reduce_patch->reduce_int (cycle_block, reduce_op_min);
-    double time_reduce = reduce_patch->reduce_double (time_block, reduce_op_min);
     int    stop_reduce = reduce_patch->reduce_int (stop_block, reduce_op_land);
 
-    cycle_patch = MIN(cycle_patch, cycle_reduce);
-    time_patch  = MIN(time_patch, time_reduce);
     stop_patch  = stop_patch && stop_reduce;
 		      
     delete reduce_patch;
 
   }
 
-  int   cycle_mesh = reduce_mesh->reduce_int (cycle_patch, reduce_op_min);
-  double time_mesh = reduce_mesh->reduce_double (time_patch, reduce_op_min);
   int    stop_mesh = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
   
   //======================================================================
@@ -140,7 +134,7 @@ void EnzoSimulationMpi::run() throw()
 
   while (! stop_mesh) {
 
-    monitor->print("cycle %04d time %15.12f", cycle_mesh,time_mesh);
+    monitor->print("cycle %04d time %15.12f", cycle_,time_);
 
     //--------------------------------------------------
     // Determine timestep and dump output
@@ -184,6 +178,7 @@ void EnzoSimulationMpi::run() throw()
       } // ( block = ++it_block )
 
       double dt_reduce = reduce_patch->reduce_double (dt_block, reduce_op_min);
+
       dt_patch = MIN(dt_patch, dt_reduce);
 
       delete reduce_patch;
@@ -200,17 +195,13 @@ void EnzoSimulationMpi::run() throw()
 
     // Initialize reductions
 
-    int    cycle_patch = std::numeric_limits<int>::max();
-    int    stop_patch  = true;
-    double time_patch  = std::numeric_limits<double>::max();
+    int  stop_patch = true;
 
     while ((patch = ++it_patch)) {
 
       Reduce * reduce_patch = patch->group()->create_reduce ();
 
-      int    cycle_block = std::numeric_limits<int>::max();
       int    stop_block  = true;
-      enzo_float time_block  = std::numeric_limits<enzo_float>::max();
 
       ItBlock it_block(patch);
       Block * block;
@@ -221,22 +212,16 @@ void EnzoSimulationMpi::run() throw()
 
 	// Initialize enzo_block aliases (may me modified)
 
-	int &    cycle        = enzo_block->CycleNumber;
-	enzo_float & time     = enzo_block->Time;
-	enzo_float & dt       = enzo_block->dt;
-	enzo_float & old_time = enzo_block->OldTime;
-
-	// Perform any scheduled output
-
-	for (size_t i=0; i<output_list_.size(); i++) {
-	  Output * output = output_list_[i];
-	  output->scheduled_write(mesh_,patch,block,cycle,time);
-	}
+	int &    cycle_block        = enzo_block->CycleNumber;
+	enzo_float & time_block     = enzo_block->Time;
+	enzo_float & dt_block       = enzo_block->dt;
+	enzo_float & old_time_block = enzo_block->OldTime;
 
 	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH
 
-	double dt_stop = (stopping_->stop_time() - dt);
-	dt = MIN(dt_mesh, dt_stop);
+	double dt_stop = (stopping_->stop_time() - dt_block);
+
+	dt_block = MIN(dt_mesh, dt_stop);
 
 	// Loop through methods
 
@@ -244,46 +229,48 @@ void EnzoSimulationMpi::run() throw()
 
 	  Method * method = method_list_[i];
 
-	  method -> compute_block (block,time,dt);
+	  method -> compute_block (block,time_block,dt_block);
 
 	} // method
 
 	// Update enzo_block values
 
-	cycle    += 1;
-	old_time  = time;
-	time     += dt;
+	old_time_block  = time_block;
+	time_block     += dt_block;
+	cycle_block    += 1;
 
 	// Global cycle and time reduction
 	
-	cycle_block = MIN(cycle_block, cycle);
-	time_block  = MIN(time_block,  time);
-	stop_block  = stop_block && (stopping_->complete(cycle,time));
+	stop_block = stop_block 
+	  &&  (stopping_->complete(cycle_block,time_block));
 
       } // (block = ++it_block)
 
-      int cycle_reduce = reduce_patch->reduce_int (cycle_block, reduce_op_min);
-      double time_reduce = reduce_patch->reduce_double (time_block, reduce_op_min);
-      int    stop_reduce = reduce_patch->reduce_int (stop_block, reduce_op_land);
+      int stop_reduce = reduce_patch->reduce_int (stop_block, reduce_op_land);
 
-      cycle_patch = MIN(cycle_patch, cycle_reduce);
-      time_patch  = MIN(time_patch, time_reduce);
       stop_patch  = stop_patch && stop_reduce;
 
       delete reduce_patch;
     } // (patch = ++it_patch)
 
-    cycle_mesh = reduce_mesh->reduce_int (cycle_patch, reduce_op_min);
-    time_mesh  = reduce_mesh->reduce_double (time_patch, reduce_op_min);
     stop_mesh  = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
 
+    cycle_ ++;
+    time_ += dt_mesh;
+
+    // Perform any scheduled output
+
+    for (size_t i=0; i<output_list_.size(); i++) {
+      Output * output = output_list_[i];
+      output->scheduled_write(mesh_,cycle_,time_);
+    }
   } // ! stop
 
   //======================================================================
   // END MAIN LOOP
   //======================================================================
 
-  monitor->print("cycle %04d time %15.12f", cycle_mesh,time_mesh);
+  monitor->print("cycle %04d time %15.12f", cycle_,time_);
 
   performance.stop();
 
@@ -334,8 +321,8 @@ EnzoSimulationMpi::create_initial_ ( std::string name ) throw ()
   // parameter: Initial::cycle
   // parameter: Initial::time
 
-  int cycle    = parameters_->value_integer ("cycle",0);
-  double time  = parameters_->value_scalar ("time",0.0);
+  cycle_  = parameters_->value_integer ("cycle",0);
+  time_   = parameters_->value_scalar ("time",0.0);
 
   ASSERT("EnzoSimulationMpi::create_initial_",
 	 "create_mesh_ mush be called first",
@@ -348,9 +335,9 @@ EnzoSimulationMpi::create_initial_ ( std::string name ) throw ()
     Block * block;
     while ((block = ++it_block)) {
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
-      enzo_block->CycleNumber = cycle;
-      enzo_block->Time        = time;
-      enzo_block->OldTime     = time;
+      enzo_block->CycleNumber = cycle_;
+      enzo_block->Time        = time_;
+      enzo_block->OldTime     = time_;
     }
   }
 

@@ -124,6 +124,15 @@ void Block::set_upper(double x, double y, double z) throw ()
   upper_[2] = z;
 }
 
+//----------------------------------------------------------------------
+
+void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
+{
+  if (ix) (*ix)=index_[0]; 
+  if (iy) (*iy)=index_[1]; 
+  if (iz) (*iz)=index_[2]; 
+}
+
 //======================================================================
 
 void Block::copy_(const Block & block) throw()

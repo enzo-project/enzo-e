@@ -29,10 +29,14 @@ EnzoOutputImage::~EnzoOutputImage() throw ()
 
 void EnzoOutputImage::write
 (
+ int index,
  Mesh * mesh,
  int cycle,
  double time,
- bool root_call
+ bool root_call,
+ int ix0,
+ int iy0,
+ int iz0
   ) const throw()
 {
   if (mesh->dimension() != 2) {
@@ -40,23 +44,42 @@ void EnzoOutputImage::write
 	    "EnzoOutputImage only supports 2D problems");
   }
 
-  if (root_call) {
-    
-    // create mesh image
+  // Get field_descr (eventually)
+  Block * block = mesh->root_patch()->block(0);
+  FieldBlock       * field_block = block->field_block();
+  const FieldDescr * field_descr = field_block->field_descr();
 
-    // open file
-    
-    // write header
+  Monitor * monitor = Monitor::instance();
+
+  // Open file if writing a single block
+  if (root_call) {
+
+    // Get file name
+    std::string file_prefix = expand_file_name (cycle,time);
+    std::string field_name  = field_descr->field_name(index);
+    std::string file_name = file_prefix + "-" + field_name + ".png";
+
+    // Get mesh size
+    int nxm,nym,nzm;
+    mesh->root_patch()->size (&nxm, &nym, &nzm);
+    // Create image 
+    monitor->image_open(file_name,nxm,nym);
   }
 
   ItPatch it_patch (mesh);
   while (Patch * patch = ++it_patch) {
-    write (mesh,patch,cycle,time,false);
+
+    // Write patch contribution 
+    // NO OFFSET: ASSUMES ROOT PATCH
+    write (index, patch, mesh, cycle,time,false,
+	   0,0,0);
   }
 
   if (root_call) {
-    // write footer
-    // close file
+    // Complete geterating image if writing a single block
+    double min=0.0;
+    double max=1.0;
+    if (root_call) monitor->image_close(min,max);
   }
 
 }
@@ -65,11 +88,15 @@ void EnzoOutputImage::write
 
 void EnzoOutputImage::write
 (
- Mesh  * mesh,
+ int index,
  Patch * patch,
+ Mesh  * mesh,
  int cycle,
  double time,
- bool root_call
+ bool root_call,
+ int ix0,
+ int iy0,
+ int iz0
  ) const throw()
 {
   if (mesh->dimension() != 2) {
@@ -77,23 +104,49 @@ void EnzoOutputImage::write
 	    "EnzoOutputImage only supports 2D problems");
   }
 
-  if (root_call) {
-    
-    // create mesh image
+  Block * block = patch->block(0);
+  FieldBlock       * field_block = block->field_block();
+  const FieldDescr * field_descr = field_block->field_descr();
 
-    // open file
-    
-    // write header
+  Monitor * monitor = Monitor::instance();
+
+  // Open file if writing a single block
+  if (root_call) {
+
+    // Get file name
+    std::string file_prefix = expand_file_name (cycle,time);
+    std::string field_name = field_descr->field_name(index);
+    std::string file_name = file_prefix + "-" + field_name + ".png";
+
+    // Get patch size
+    int nxp, nyp;
+    patch->size (&nxp, &nyp);
+
+    // Create image 
+    monitor->image_open(file_name,nxp,nyp);
   }
 
   ItBlock it_block (patch);
   while (Block * block = ++it_block) {
-    write (mesh, patch, block,cycle,time,false);
+    // Get block size
+    int nxb,nyb,nzb;
+    FieldBlock * field_block = block->field_block();
+    field_block->size(&nxb,&nyb,&nzb);
+
+    int ix,iy,iz;
+    block->index_patch(&ix,&iy,&iz);
+
+    write (index, block, patch, mesh, cycle,time,false,
+	   ix0+ix*nxb,
+	   iy0+iy*nyb,
+	   iz0+iz*nzb);
   }
 
   if (root_call) {
-    // write footer
-    // close file
+    // Complete geterating image if writing a single block
+    double min=0.0;
+    double max=1.0;
+    if (root_call) monitor->image_close(min,max);
   }
 
 }
@@ -102,41 +155,60 @@ void EnzoOutputImage::write
 
 void EnzoOutputImage::write
 (
- Mesh  * mesh,
- Patch * patch,
+ int index,
  Block * block,
+ Patch * patch,
+ Mesh  * mesh,
  int cycle,
  double time,
- bool root_call
+ bool root_call,
+ int ix0,
+ int iy0,
+ int iz0
 ) const throw()
 {
-  UNTESTED("EnzoOutputImage::write");
+  FieldBlock       * field_block = block->field_block();
+  const FieldDescr * field_descr = field_block->field_descr();
+
+  // Get block size
+  int nx,ny,nz;
+  field_block->size(&nx,&ny,&nz);
 
   std::string file_prefix = expand_file_name (cycle,time);
 
-   Monitor * monitor = Monitor::instance();
+  Monitor * monitor = Monitor::instance();
 
-   FieldBlock *       field_block = block->field_block();
-   const FieldDescr * field_descr = field_block->field_descr();
-   int nx,ny,nz;
-   int gx,gy,gz;
-   int mx,my,mz;
-   field_block->size(&nx,&ny,&nz);
-   int count = field_descr->field_count();
-   for (int index = 0; index < count; index++) {
-     field_descr->ghosts(index,&gx,&gy,&gz);
-     mx=nx+2*gx;
-     my=ny+2*gy;
-     mz=nz+2*gz;
-     std::string field_name = field_descr->field_name(index);
-     std::string file_name = file_prefix + "-" + field_name + ".png";
-     Scalar * field_values = (Scalar *)field_block->field_values(index);
-     monitor->image (file_name, mx, my, 
-		     field_values, 
-		     mx,my,mz, 
-		     mx,my,mz, 
-		     0,0,0, 
-		     axis_z, reduce_sum, 0.0,1.0);
-   }
+  // Get ghost depth
+  int gx,gy,gz;
+  field_descr->ghosts(index,&gx,&gy,&gz);
 
+  // Get array dimensions
+  int ndx,ndy,ndz;
+  ndx=nx+2*gx;
+  ndy=ny+2*gy;
+  ndz=nz+2*gz;
+
+  if (root_call) {
+    // Open file if writing a single block
+    std::string field_name = field_descr->field_name(index);
+    std::string file_name = file_prefix + "-" + field_name + ".png";
+    monitor->image_open(file_name,nx,ny);
+  }
+
+  // Add block contribution to image
+
+  Scalar * field_unknowns = (Scalar *)field_block->field_unknowns(index);
+    
+  monitor->image_reduce (field_unknowns, 
+			 ndx,ndy,ndz, 
+			 nx,ny,nz,
+			 ix0,iy0,iz0,
+			 axis_z, reduce_sum);
+
+  if (root_call) {
+    // Complete geterating image if writing a single block
+    double min=0.0;
+    double max=1.0;
+    if (root_call) monitor->image_close(min,max);
+  }
 }

@@ -39,6 +39,9 @@ public: // functions
   /// Set cycle list
   void set_cycle_list (std::vector<int> cycle_list) throw();
 
+  /// Set field list
+  void set_field_list (std::vector<int> field_list) throw();
+
   /// Set time interval (start, step, stop)
   void set_time_interval
   (double time_start, double time_step, double time_stop) throw();
@@ -62,46 +65,39 @@ public: // functions
 
   /// Write mesh-related data to disk if scheduled
   void scheduled_write
-  ( Mesh * mesh, int cycle, double time, bool root_call=true) throw()
-  { if (write_this_cycle(cycle, time)) 
-      write (mesh,cycle,time,root_call); 
-  };
+  ( Mesh * mesh, int cycle, double time, bool root_call=true) throw();
 
   /// Write a patch-related data to disk if scheduled
   void scheduled_write
-  ( Mesh * mesh, Patch * patch, 
-    int cycle, double time, bool root_call=true) throw()
-  { if (write_this_cycle(cycle, time)) 
-      write (mesh,patch,cycle,time,root_call); 
-  };
+  ( Patch * patch, Mesh * mesh,
+    int cycle, double time, bool root_call=true) throw();
 
   /// Write a block-related to disk if scheduled
   void scheduled_write
-  ( Mesh * mesh, Patch * patch, Block * block, 
-    int cycle, double time, bool root_call=true) throw()
-  { if (write_this_cycle(cycle, time)) 
-      write (mesh,patch,block,cycle,time,root_call); 
-  };
+  ( Block * block, Patch * patch, Mesh * mesh,
+    int cycle, double time, bool root_call=true) throw();
 
   std::string expand_file_name (int cycle, double time) const throw();
 
 public: // virtual functions
 
-  /// Write mesh-related data to disk
+  /// Write mesh data to disk
   virtual void write 
-  ( Mesh * mesh, int cycle, double time, bool root_call=true) const throw()
-  { printf ("%s:%d INCOMPLETE Output Mesh: %s %d %g\n",
-	    __FILE__,__LINE__,file_name_.c_str(),cycle,time); };
+  ( int index, Mesh * mesh, 
+    int cycle, double time,
+    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw() = 0;
 
-  /// Write a patch-related data to disk; may be called by write (Mesh)
+  /// Write patch data to disk; may be called by write (Mesh)
   virtual void write 
-  ( Mesh * mesh, Patch * patch, 
-    int cycle, double time, bool root_call=true) const throw() = 0;
+  ( int index, Patch * patch, Mesh * mesh,
+    int cycle, double time, 
+    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw() = 0;
 
-  /// Write a block-related to disk; may be called by write (Patch)
+  /// Write block data to disk; may be called by write (Patch)
   virtual void write 
-  ( Mesh * mesh, Patch * patch, Block * block, 
-    int cycle, double time, bool root_call=true) const throw() = 0;
+  ( int index, Block * block, Patch * patch, Mesh * mesh, 
+    int cycle, double time, 
+    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw() = 0;
 
 protected: // attributes
 
@@ -128,6 +124,9 @@ protected: // attributes
 
   /// List of times to perform output
   std::vector<double> time_list_;
+
+  /// List of fields to output
+  std::vector<int> field_list_;
 
   /// Index of time or cycle interval or list for next output
   size_t index_;

@@ -59,10 +59,6 @@ public: // interface
   const char * array ()  const throw () 
   { return array_; };
 
-  /// Return lower and upper+1 index ranges (excluding ghosts)
-  void index_range(int * lower_x, int * lower_y, int *lower_z, 
-		   int * upper_x, int * upper_y, int *upper_z) const throw ();
-
   /// Return width of cells along each dimension
   void cell_width(Block * block,
 		  double * hx, double * hy, double * hz) const throw ();

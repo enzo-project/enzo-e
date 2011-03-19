@@ -18,6 +18,7 @@ Output::Output () throw()
     cycle_list_(),
     time_interval_(),
     time_list_(),
+    field_list_(),
     index_(0)
 {
 }
@@ -64,6 +65,13 @@ void Output::set_cycle_list (std::vector<int> cycle_list) throw()
 
   active_ = true;
 
+}
+
+//----------------------------------------------------------------------
+
+void Output::set_field_list (std::vector<int> field_list) throw()
+{
+  field_list_ = field_list;
 }
 
 //----------------------------------------------------------------------
@@ -246,3 +254,58 @@ std::string Output::expand_file_name
   }
   return std::string(buffer);
 }
+
+//----------------------------------------------------------------------
+
+void Output::scheduled_write
+(
+ Mesh * mesh, 
+ int cycle, 
+ double time, 
+ bool root_call
+ ) throw()
+{
+  if (write_this_cycle(cycle, time)) {
+    for (size_t i = 0; i<field_list_.size(); i++) {
+      write (i, mesh,cycle,time,root_call); 
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Output::scheduled_write
+(
+ Patch * patch, 
+ Mesh * mesh, 
+ int cycle, 
+ double time, 
+ bool root_call
+ ) throw()
+{
+  if (write_this_cycle(cycle, time)) {
+    for (size_t i = 0; i<field_list_.size(); i++) {
+      write (i, patch,mesh,cycle,time,root_call); 
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Output::scheduled_write
+(
+ Block * block, 
+ Patch * patch, 
+ Mesh * mesh, 
+ int cycle, 
+ double time, 
+ bool root_call
+ ) throw()
+{
+  if (write_this_cycle(cycle, time)) {
+    for (size_t i = 0; i<field_list_.size(); i++) {
+      write (i, block, patch, mesh,cycle,time,root_call); 
+    }
+  }
+}
+

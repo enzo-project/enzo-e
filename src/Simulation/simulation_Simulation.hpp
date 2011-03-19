@@ -173,6 +173,12 @@ protected: // attributes
   /// Dimension or rank of the simulation
   int  dimension_; 
 
+  /// Current cycle
+  int cycle_;
+
+  /// Current time
+  double time_;
+
   /// Lower domain extents
   double lower_[3];
 

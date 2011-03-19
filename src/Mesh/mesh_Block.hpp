@@ -62,7 +62,9 @@ public: // interface
 
   /// Set domain upper extent
   void set_upper(double x, double y, double z) throw ();
-  
+
+  void index_patch (int * ix, int * iy, int * iz) const throw();
+
 protected: // functions
 
   /// Allocate and copy in attributes from give Block

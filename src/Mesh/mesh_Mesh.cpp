@@ -65,38 +65,38 @@ void Mesh::set_dimension(int dimension) throw ()
 
 //----------------------------------------------------------------------
 
-void Mesh::lower(double * nx, double * ny, double * nz) const throw ()
+void Mesh::lower(double * x, double * y, double * z) const throw ()
 {
-  *nx = lower_[0];
-  *ny = lower_[1];
-  *nz = lower_[2];
+  if (x) *x = lower_[0];
+  if (y) *y = lower_[1];
+  if (z) *z = lower_[2];
 }
 
 //----------------------------------------------------------------------
 
-void Mesh::set_lower(double nx, double ny, double nz) throw ()
+void Mesh::set_lower(double x, double y, double z) throw ()
 {
-  lower_[0] = nx;
-  lower_[1] = ny;
-  lower_[2] = nz;
+  lower_[0] = x;
+  lower_[1] = y;
+  lower_[2] = z;
 }
 
 //----------------------------------------------------------------------
 
-void Mesh::upper(double * nx, double * ny, double * nz) const throw ()
+void Mesh::upper(double * x, double * y, double * z) const throw ()
 {
-  *nx = upper_[0];
-  *ny = upper_[1];
-  *nz = upper_[2];
+  if (x) *x = upper_[0];
+  if (y) *y = upper_[1];
+  if (z) *z = upper_[2];
 }
 
 //----------------------------------------------------------------------
 
-void Mesh::set_upper(double nx, double ny, double nz) throw ()
+void Mesh::set_upper(double x, double y, double z) throw ()
 {
-  upper_[0] = nx;
-  upper_[1] = ny;
-  upper_[2] = nz;
+  upper_[0] = x;
+  upper_[1] = y;
+  upper_[2] = z;
 }
 
 //----------------------------------------------------------------------
@@ -125,15 +125,6 @@ int Mesh::refine_factor() const throw ()
 void Mesh::set_refine_factor(int refine) throw ()
 {
   refine_ = refine; 
-}
-
-//----------------------------------------------------------------------
-
-void Mesh::root_size(int * nx, int * ny, int * nz) const throw ()
-{
-  *nx = root_size_[0];
-  *ny = root_size_[1];
-  *nz = root_size_[2];
 }
 
 //----------------------------------------------------------------------

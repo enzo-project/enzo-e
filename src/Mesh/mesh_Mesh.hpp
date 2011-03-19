@@ -37,13 +37,13 @@ public: // interface
   void set_dimension(int dimension) throw ();
 
   /// Return domain lower extent
-  void lower(double * nx = 0, double * ny = 0, double * nz = 0) const throw ();
+  void lower(double * nx, double * ny = 0, double * nz = 0) const throw ();
 
   /// Set domain lower extent
   void set_lower(double nx, double ny, double nz) throw ();
 
   /// Return domain upper extent
-  void upper(double * nx = 0, double * ny = 0, double * nz = 0) const throw ();
+  void upper(double * nx, double * ny = 0, double * nz = 0) const throw ();
 
   /// Set domain upper extent
   void set_upper(double nx, double ny, double nz) throw ();
@@ -59,9 +59,6 @@ public: // interface
 
   /// Set refinement factor
   void set_refine_factor(int refine) throw ();
-
-  /// Return root_size
-  void root_size(int * nx, int * ny, int * nz) const throw ();
 
   /// Pointer to the root Patch
   Patch * root_patch() throw ();

@@ -553,6 +553,34 @@ void Simulation::initialize_output_() throw()
     output->set_file_name (file_name);
 
     //--------------------------------------------------
+    // parameter: Output:<group>:field_list
+    //--------------------------------------------------
+
+    std::vector<int> field_list;
+
+    if (parameters_->type("field_list") != parameter_unknown) {
+      // Set field list to specified field list
+      if (parameters_->type("field_list") == parameter_list) {
+	int length = parameters_->list_length("field_list");
+	for (int i=0; i<length; i++) {
+	  int field_index = parameters_->list_value_integer(i,"field_list",0);
+	  field_list.push_back(field_index);
+	}
+	output->set_field_list(field_list);
+      } else {
+	ERROR("Simulation::initialize_output_",
+	      "Bad type for Output 'field_list' parameter");
+      }
+    } else {
+      // Set field list to default of all fields
+      int field_count = field_descr_->field_count();
+      for (int i=0;  i<field_count; i++) {
+	field_list.push_back(i);
+      }
+      output->set_field_list(field_list);
+    }
+
+    //--------------------------------------------------
     // Determine scheduling
     //--------------------------------------------------
 

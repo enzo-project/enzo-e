@@ -26,18 +26,21 @@ public: // virtual functions
 
   /// Write mesh-related data to disk
   virtual void write 
-  ( Mesh * mesh, 
-    int cycle, double time, bool root_call=true) const throw();
+  ( int index, Mesh * mesh, 
+    int cycle, double time,
+    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw();
 
   /// Write a patch-related data to disk; may be called by write (Mesh)
   virtual void write 
-  ( Mesh * mesh, Patch * patch, 
-    int cycle, double time, bool root_call=true) const throw();
+  ( int index, Patch * patch, Mesh * mesh,
+    int cycle, double time, 
+    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw();
 
   /// Write a block-related to disk; may be called by write (Patch)
   virtual void write 
-  ( Mesh * mesh, Patch * patch, Block * block, 
-    int cycle, double time, bool root_call=true) const throw();
+  ( int index, Block * block, Patch * patch, Mesh * mesh, 
+    int cycle, double time, 
+    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw();
 
 protected: // attributes
 

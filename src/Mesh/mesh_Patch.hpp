@@ -45,23 +45,23 @@ public: // interface
   /// Return the size of the patch in number of grid cells
   void size (int * nx, int * ny=0, int * nz=0) const throw();
 
-  /// Return the size of the patch in number of grid cells
+  /// Return the number of blocks along each dimension
   void blocking (int * nbx, int * nby=0, int * nbz=0) const throw();
 
   /// Return the layout of the patch, describing processes and blocking
   Layout * layout () const throw();
 
   /// Return domain lower extent
-  void lower(double * nx, double * ny, double * nz) const throw ();
+  void lower(double * x, double * y=0, double * z=0) const throw ();
 
   /// Set domain lower extent
-  void set_lower(double nx, double ny, double nz) throw ();
+  void set_lower(double x, double y, double z) throw ();
 
   /// Return domain upper extent
-  void upper(double * nx, double * ny, double * nz) const throw ();
+  void upper(double * x, double * y=0, double * z=0) const throw ();
 
   /// Set domain upper extent
-  void set_upper(double nx, double ny, double nz) throw ();
+  void set_upper(double x, double y, double z) throw ();
   
   //--------------------------------------------------
 
