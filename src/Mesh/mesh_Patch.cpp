@@ -270,6 +270,6 @@ size_t Patch::num_blocks() const  throw()
 
 Block * Patch::block(int i) const throw()
 {
-  return block_[i];
+  return (i < block_.size()) ? block_[i] : 0;
 }
 

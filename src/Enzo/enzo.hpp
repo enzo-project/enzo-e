@@ -43,8 +43,9 @@
 
 #include "enzo_EnzoFactory.hpp"
 
-#include "enzo_EnzoSimulationMpi.hpp"
-#include "enzo_EnzoSimulationCharm.hpp"
+#include "enzo_EnzoSimulation.hpp"
+#   include "enzo_EnzoSimulationMpi.hpp"
+#   include "enzo_EnzoSimulationCharm.hpp"
 
 #include "enzo_EnzoBlock.hpp"
 #include "enzo_EnzoPatch.hpp"

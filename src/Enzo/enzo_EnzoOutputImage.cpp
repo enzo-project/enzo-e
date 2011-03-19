@@ -45,7 +45,9 @@ void EnzoOutputImage::write
   }
 
   // Get field_descr (eventually)
+
   Block * block = mesh->root_patch()->block(0);
+  if (block == NULL) return;
   FieldBlock       * field_block = block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
 
