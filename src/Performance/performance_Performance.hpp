@@ -22,11 +22,6 @@ enum item_enum {
   item_region
 };
 
-enum attribute_type_enum {
-  attribute_type_default,
-  attribute_type_monotonic
-};
-
 class Performance {
 
   /// @class    Performance
@@ -40,10 +35,7 @@ class Performance {
 public: // interface
 
   /// Initialize a Performance object
-  Performance(unsigned num_attributes = 0, 
-	      unsigned num_counters = 0,
-	      unsigned num_groups = 0,
-	      unsigned num_regions = 0);
+  Performance();
 
   /// Delete a Performance object
   ~Performance();
@@ -68,20 +60,18 @@ public: // interface
   //--------------------------------------------------
 
   ///  	Create a new attribute
-  void new_attribute(unsigned    id_attribute, 
-		     std::string attribute_name,
-		     attribute_type_enum type = attribute_type_default);
+  unsigned new_attribute( std::string attribute_name,
+			  bool is_monotonic = false);
 
   /// Return the value of an attribute
   int attribute(unsigned id_attribute);
 
   /// Assign a value to an attribute
-  void set_attribute(unsigned id_attribute);
+  void set_attribute(unsigned id_attribute, int value);
 
   //--------------------------------------------------
 
-  void new_group(unsigned         id_group, 
-		 std::string group_name);
+  unsigned new_group(std::string group_name);
 
   /// Return the value of an group
   int group(unsigned id_group);
@@ -97,8 +87,7 @@ public: // interface
 
   //--------------------------------------------------
 
-  void new_region(unsigned    id_region, 
-		  std::string region_name);
+  unsigned new_region(std::string region_name);
 
   /// Return the value of an region
   int region(unsigned id_region);
@@ -115,8 +104,7 @@ public: // interface
   //--------------------------------------------------
 
   ///  	Create a new user counter.
-  void new_counter(unsigned id_counter,
-		   std::string counter_name);
+  unsigned new_counter(std::string counter_name);
 
   ///  	Return the value of a counter.
   type_counter counter(unsigned id_counter);
@@ -134,6 +122,8 @@ public: // interface
   void flush();
 
 private: // functions
+
+  void deallocate_ () throw ();
 
   type_counter time_real_ () const
   {
@@ -175,26 +165,11 @@ private: // attributes
   /// Array of counters for regions
   std::vector<Counters *> counters_;
 
-  /// Number of attributes
-  unsigned num_attributes_;
-
   /// Attribute names
   std::vector<std::string> attribute_names_;
 
-  /// Which attributes are monotonic
-  std::vector<attribute_type_enum> attribute_types_;
-
-  /// Number of counters
-  unsigned num_counters_;
-
   /// Counter names
   std::vector<std::string> counter_names_;
-
-  /// Number of groups
-  unsigned num_groups_;
-
-  /// Current group; 0 if none
-  unsigned current_group_;
 
   /// Group names
   std::vector<std::string> group_names_;
@@ -202,8 +177,15 @@ private: // attributes
   /// Region names
   std::vector<std::string> region_names_;
 
+  /// Which attributes are monotonic
+  std::vector<bool> attribute_monotonic_;
+
+  /// Current group; 0 if none
+  unsigned current_group_;
+
   /// Current region; 0 if none
   unsigned current_region_;
+
 
 };
 

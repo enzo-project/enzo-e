@@ -55,70 +55,92 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("Performance");
 
-  Performance * performance = new Performance
-	  ( num_attributes, num_counters, num_components, 3 );
+  Performance * performance = new Performance ();
 
   // Add attributes
 
-  performance->new_attribute(attribute_timestep, "timestep", 
-			     attribute_type_monotonic);
-  performance->new_attribute(attribute_level,    "level");
+  bool is_monotonic;
+  int attribute_timestep =
+    performance->new_attribute("timestep", is_monotonic=true);
+  int attribute_level = 
+    performance->new_attribute("level", is_monotonic=false);
   
   // Add counters
 
-  performance->new_counter(counter_time_real,          "time_real");
-  performance->new_counter(counter_time_sim,           "time_sim");
-  performance->new_counter(counter_mem_curr_bytes,     "mem_curr_bytes");
-  performance->new_counter(counter_mem_high_bytes,     "mem_high_bytes");
-  performance->new_counter(counter_mem_new_count,      "mem_new_count");
-  performance->new_counter(counter_mem_delete_count,   "mem_delete_count");
-  performance->new_counter(counter_mem_new_bytes,      "mem_new_bytes");
-  performance->new_counter(counter_mem_delete_bytes,   "mem_delete_bytes");
-  performance->new_counter(counter_disk_read_bytes,    "disk_read_bytes");
-  performance->new_counter(counter_disk_write_bytes,   "disk_write_bytes");
-  performance->new_counter(counter_disk_read_time,     "disk_read_time");
-  performance->new_counter(counter_disk_write_time,    "disk_write_time");
-  performance->new_counter(counter_user_patch_count,   "user_patch_count");
-  performance->new_counter(counter_user_cell_count,    "user_cell_count");
-  performance->new_counter(counter_user_particle_count,"user_particle_count");
-  performance->new_counter(counter_comm_send_bytes,    "comm_send_bytes");
-  performance->new_counter(counter_comm_recv_bytes,    "comm_recv_bytes");
-  performance->new_counter(counter_comm_send_time,     "comm_send_time");
-  performance->new_counter(counter_comm_recv_time,     "comm_recv_time");
-  performance->new_counter(counter_comm_global_time,   "comm_global_time");
-  performance->new_counter(counter_comm_send_count,    "comm_send_count");
-  performance->new_counter(counter_comm_recv_count,    "comm_recv_count");
-  performance->new_counter(counter_comm_global_count,  "comm_global_count");
+  int counter_time_real = 
+    performance->new_counter("time_real");
+  int counter_time_sim = 
+    performance->new_counter("time_sim");
+  int counter_mem_curr_bytes = 
+    performance->new_counter("mem_curr_bytes");
+  int counter_mem_high_bytes = 
+    performance->new_counter("mem_high_bytes");
+  int counter_mem_new_count = 
+    performance->new_counter("mem_new_count");
+  int counter_mem_delete_count = 
+    performance->new_counter("mem_delete_count");
+  int counter_mem_new_bytes = 
+    performance->new_counter("mem_new_bytes");
+  int counter_mem_delete_bytes = 
+    performance->new_counter("mem_delete_bytes");
+  int counter_disk_read_bytes = 
+    performance->new_counter("disk_read_bytes");
+  int counter_disk_write_bytes = 
+    performance->new_counter("disk_write_bytes");
+  int counter_disk_read_time = 
+    performance->new_counter("disk_read_time");
+  int counter_disk_write_time = 
+    performance->new_counter("disk_write_time");
+  int counter_user_patch_count = 
+    performance->new_counter("user_patch_count");
+  int counter_user_cell_count = 
+    performance->new_counter("user_cell_count");
+  int counter_user_particle_count = 
+    performance->new_counter("user_particle_count");
+  int counter_comm_send_bytes = 
+    performance->new_counter("comm_send_bytes");
+  int counter_comm_recv_bytes = 
+    performance->new_counter("comm_recv_bytes");
+  int counter_comm_send_time = 
+    performance->new_counter("comm_send_time");
+  int counter_comm_recv_time = 
+    performance->new_counter("comm_recv_time");
+  int counter_comm_global_time = 
+    performance->new_counter("comm_global_time");
+  int counter_comm_send_count = 
+    performance->new_counter("comm_send_count");
+  int counter_comm_recv_count = 
+    performance->new_counter("comm_recv_count");
+  int counter_comm_global_count = 
+    performance->new_counter("comm_global_count");
 
   // Add groups
 
-  for (int component = component_first;
-       component <= num_components;
-       component++) {
-    performance->new_group(component, component_name[component]);
-  }
+  int group_1 = performance->new_group("Group 1");
+  int group_2 = performance->new_group("Group 2");
+  int group_3 = performance->new_group("Group 3");
   
   // Add functions
 
-  performance->new_region(1, "function_1");
-  performance->new_region(2, "function_2");
-  performance->new_region(3, "function_3");
+  int region_1 = performance->new_region("function_1");
+  int region_2 = performance->new_region("function_2");
+  int region_3 = performance->new_region("function_3");
 
   // Initialize counters that are non-zero at start
 
   unit_assert(true);
 
   unit_func("new_attribute");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("new_counter");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("new_group");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("new_region");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
 
   //--------------------------------------------------
@@ -126,13 +148,13 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
   unit_func("attribute");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("set_attribute");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("num_attributes");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Groups
@@ -142,16 +164,16 @@ PARALLEL_MAIN_BEGIN
 
 
   unit_func("group");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("set_group");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("num_groups");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("end_group");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Regions
@@ -159,45 +181,45 @@ PARALLEL_MAIN_BEGIN
 
 
   unit_func("region");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("set_region");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("num_regions");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("start_region");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("stop_region");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Counters
   //--------------------------------------------------
 
   unit_func("counter");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("set_counter");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("increment_counter");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("num_counters");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Disk
   //--------------------------------------------------
 
   unit_func("flush");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   unit_func("~Performance");
-  unit_assert (unit_incomplete); //FAILS
+  unit_assert (unit_incomplete);
 
   delete performance;
 

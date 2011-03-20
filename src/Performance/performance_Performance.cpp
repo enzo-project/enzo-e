@@ -10,48 +10,41 @@
 
 #include "performance.hpp"
 
-Performance::Performance 
-(
- unsigned num_attributes,
- unsigned num_counters,
- unsigned num_groups,
- unsigned num_regions)
+Performance::Performance ()
   : counters_(),
-    num_attributes_            (num_attributes),
     attribute_names_           (NULL),
-    attribute_types_           (NULL),
-    num_counters_              (num_counters),
     counter_names_             (NULL),
-    num_groups_                (num_groups),
-    current_group_             (0),
     group_names_               (NULL),
     region_names_              (NULL),
+    attribute_monotonic_       (NULL),
+    current_group_             (0),
     current_region_            (0)
 {
-  attribute_names_.resize(num_attributes + 1);
-  attribute_types_.resize(num_attributes + 1);
-
-  counter_names_.resize(num_counters + 1);
-
-  group_names_.resize(num_groups + 1);
-
-  region_names_.resize(num_regions + 1);
-
   // Create initial Counters object
 
   counters_.push_back(new Counters(num_attributes,num_counters));
-
 }
 
 //----------------------------------------------------------------------
 
 Performance::~Performance()
 {
+  deallocate_();
+}
 
-  for (unsigned i=0; i<counters_.size(); i++) {
-    delete counters_.at(i);
-  }
+//----------------------------------------------------------------------
 
+Performance::Performance(const Performance & classname) throw()
+{
+  INCOMPLETE("Performance::Performance");
+}
+
+//----------------------------------------------------------------------
+
+Performance & Performance::operator= (const Performance & classname) throw()
+{
+  INCOMPLETE("Performance::operator=");
+  return *this;
 }
 
 //----------------------------------------------------------------------
@@ -80,62 +73,47 @@ void Performance::print () const throw ()
 
 //----------------------------------------------------------------------
 
-Performance::Performance(const Performance & classname) throw()
-{
-  INCOMPLETE("Performance::Performance");
-}
-
-//----------------------------------------------------------------------
-
-Performance & Performance::operator= (const Performance & classname) throw()
-{
-  INCOMPLETE("Performance::operator =");
-  return *this;
-}
-
-//----------------------------------------------------------------------
-
-void Performance::new_attribute(unsigned            id_attribute, 
-				std::string         attribute_name,
-				attribute_type_enum type)
+unsigned Performance::new_attribute(std::string attribute_name,
+				    bool is_monotonic)
 /// @param    id_attribute
 /// @param    attribute_name
 /// @param    type
 {
-  new_item_ (attribute_names_, 
-	     id_attribute, 
-	     attribute_name);
+  attribute_names_.push_back(attribute_name);
+  attribute_monotonic_.push_back(is_monotonic);
 
-  attribute_types_[id_attribute] = type;
+  return attribute_names_.size()-1;
 }
 
 //----------------------------------------------------------------------
 
 int Performance::attribute(unsigned id_attribute)
 {
+  INCOMPLETE("Performance::attribute");
   return 0;
 }
 
 //----------------------------------------------------------------------
 
-void Performance::set_attribute(unsigned id_attribute)
+void Performance::set_attribute(unsigned id_attribute,
+				int value)
 {
+  INCOMPLETE("Performance::set_attribute");
 }
 
 //----------------------------------------------------------------------
 
-void Performance::new_group(unsigned    id_group, 
-			    std::string group_name)
+unsigned Performance::new_group(std::string group_name)
 {
-  new_item_ (group_names_,
-	     id_group, 
-	     group_name);
+  group_names_.push_back(group_name);
+  return group_names_.size()-1;
 }
 
 //----------------------------------------------------------------------
 
 int Performance::group(unsigned id_group)
 {
+  INCOMPLETE("Performance::group");
   return 0;
 }
 
@@ -143,6 +121,7 @@ int Performance::group(unsigned id_group)
 
 void Performance::set_group(unsigned id_group)
 {
+  INCOMPLETE("Performance::set_group");
 }
 
 //----------------------------------------------------------------------
@@ -150,10 +129,18 @@ void Performance::set_group(unsigned id_group)
 void Performance::begin_group(unsigned group_id)
 {
   
-  if ( current_group_ ){
+  if ( current_group_ ) {
+    // begin_group() called when another group is already active
     char message [ ERROR_LENGTH ];
-    sprintf (message, "Performance group started when one already active");
+    sprintf (message, 
+	     "Mismatch between begin_group(%s) and begin_group(%s)",
+	     group_names_.at(current_group_).c_str(),
+	     group_names_.at(group_id).c_str());
     WARNING("Performance::begin_group",message);
+
+    // End the mistakenly active group
+    end_group(current_group_);
+
   }
 
   current_group_ = group_id;
@@ -165,6 +152,7 @@ void Performance::begin_group(unsigned group_id)
 void Performance::end_group(unsigned id_group)
 {
   if (id_group != current_group_) {
+    // end_group() called with an inactive one
     char message [ ERROR_LENGTH ];
     sprintf (message, "Mismatch between begin_group(%s) and end_group(%s)",
 	     group_names_[current_group_].c_str(),
@@ -178,18 +166,17 @@ void Performance::end_group(unsigned id_group)
 
 //----------------------------------------------------------------------
 
-void Performance::new_region(unsigned    id_region, 
-			     std::string region_name)
+unsigned Performance::new_region(std::string region_name)
 {
-  new_item_ (region_names_,
-	     id_region, 
-	     region_name);
+  region_names_.push_back(region_name);
+  return region_names_.size()-1;
 }
 
 //----------------------------------------------------------------------
 
 int Performance::region(unsigned id_region)
 {
+  INCOMPLETE("Performance::region");
   return 0;
 }
 
@@ -197,34 +184,36 @@ int Performance::region(unsigned id_region)
 
 void Performance::set_region(unsigned id_region)
 {
+  INCOMPLETE("Performance::set_region");
 }
 
 //----------------------------------------------------------------------
 
 void Performance::start_region(unsigned region_id)
 {
+  INCOMPLETE("Performance::start_region");
 }
 
 //----------------------------------------------------------------------
 
 void Performance::stop_region(unsigned region_id)
 {
+  INCOMPLETE("Performance::stop_region");
 }
 
 //----------------------------------------------------------------------
 
-void Performance::new_counter(unsigned    id_counter,
-			      std::string counter_name)
+unsigned Performance::new_counter(std::string counter_name)
 {
-  new_item_ (counter_names_, 
-	     id_counter, 
-	     counter_name);
+  counter_names_.push_back(counter_name);
+  return counter_names_.size()-1;
 }
 
 //----------------------------------------------------------------------
 
 type_counter Performance::counter(unsigned id_counter)
 {
+  INCOMPLETE("Performance::counter");
   return 0;
 }
 
@@ -233,6 +222,7 @@ type_counter Performance::counter(unsigned id_counter)
 void Performance::set_counter(unsigned          id_counter,
 			      type_counter value)
 {
+  INCOMPLETE("Performance::set_counter");
 }
 
 //----------------------------------------------------------------------
@@ -240,24 +230,21 @@ void Performance::set_counter(unsigned          id_counter,
 void Performance::increment_counter(unsigned          id_counter,
 				    type_counter value)
 {
+  INCOMPLETE("Performance::increment_counter");
 }
 
 //----------------------------------------------------------------------
 
 void Performance::flush()
 {
+  INCOMPLETE("Performance::flush");
 }
 
 
-//----------------------------------------------------------------------
-
-void Performance::new_item_ 
-(
- std::vector<std::string> & item_names,
- unsigned       id_item, 
- std::string    item_name
-)
+//======================================================================
+void Performance::deallocate_() throw()
 {
-  item_names[id_item] = item_name;
+  for (unsigned i=0; i<counters_.size(); i++) {
+    delete counters_.at(i);
+  }
 }
-
