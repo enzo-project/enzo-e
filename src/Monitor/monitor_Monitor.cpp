@@ -118,11 +118,11 @@ void Monitor::print (std::string message, ...) const
 		     t->tm_sec,
 		     buffer);
   }
-};
+}
 
 //----------------------------------------------------------------------
 
-void Monitor::set_image_map 
+void Monitor::image_set_map 
 (int n, double * map_r, double * map_g, double * map_b) throw()
 {
   map_r_.resize(n);

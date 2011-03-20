@@ -61,7 +61,8 @@ void FieldBlock::size( int * nx, int * ny, int * nz ) const throw()
 
 //----------------------------------------------------------------------
 
-void * FieldBlock::field_values ( int id_field ) throw (std::out_of_range)
+char * FieldBlock::field_values ( int id_field ) 
+  throw (std::out_of_range)
 {
   return (unsigned(id_field) < field_values_.size()) ? 
     field_values_.at(id_field) : NULL;
@@ -69,7 +70,16 @@ void * FieldBlock::field_values ( int id_field ) throw (std::out_of_range)
 
 //----------------------------------------------------------------------
 
-void * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
+const char * FieldBlock::field_values ( int id_field ) const 
+  throw (std::out_of_range)
+{
+  return (unsigned(id_field) < field_values_.size()) ? 
+    field_values_.at(id_field) : NULL;
+}
+
+//----------------------------------------------------------------------
+
+char * FieldBlock::field_unknowns ( int id_field ) throw (std::out_of_range)
 {
   char * field_unknowns = field_values_.at(id_field);
 
@@ -141,7 +151,7 @@ void FieldBlock::clear
 	 id_field <= id_field_last;
 	 id_field++) {
       int nx,ny,nz;
-      field_size_(id_field,&nx,&ny,&nz);
+      field_size(id_field,&nx,&ny,&nz);
       precision_enum precision = field_descr_->precision(id_field);
       switch (precision) {
       case precision_single:
@@ -197,7 +207,7 @@ void FieldBlock::allocate_array() throw()
 
       int nx,ny,nz;       // not needed
 
-      int size = field_size_(id_field, &nx,&ny,&nz);
+      int size = field_size(id_field, &nx,&ny,&nz);
 
       array_size += adjust_padding_   (size,padding);
       array_size += adjust_alignment_ (size,alignment);
@@ -228,7 +238,7 @@ void FieldBlock::allocate_array() throw()
 
       int nx,ny,nz;       // not needed
 
-      int size = field_size_(id_field,&nx,&ny,&nz);
+      int size = field_size(id_field,&nx,&ny,&nz);
 
       field_offset += adjust_padding_  (size,padding);
       field_offset += adjust_alignment_(size,alignment);
@@ -417,7 +427,7 @@ int FieldBlock::align_padding_ (char * start, int alignment) const throw()
 
 //----------------------------------------------------------------------
 
-int FieldBlock::field_size_ 
+int FieldBlock::field_size 
 (
  int id_field,
  int * nx,
@@ -480,14 +490,14 @@ void FieldBlock::restore_array_
     // get "to" field size
 
     int nx2,ny2,nz2;
-    field_size_(id_field, &nx2,&ny2,&nz2);
+    field_size(id_field, &nx2,&ny2,&nz2);
 
     // get "from" field size
 
     ghosts_allocated_ = ! ghosts_allocated_;
 
     int nx1,ny1,nz1;
-    field_size_(id_field, &nx1,&ny1,&nz1);
+    field_size(id_field, &nx1,&ny1,&nz1);
 
     ghosts_allocated_ = ! ghosts_allocated_;
 

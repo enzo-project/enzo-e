@@ -78,7 +78,7 @@ public: // interface
   size_t num_blocks() const throw();
 
   /// Return the ith block
-  Block * block(int i) const throw();
+  Block * block(size_t i) const throw();
 
   GroupProcess * group()  const throw()
   { return group_process_; };

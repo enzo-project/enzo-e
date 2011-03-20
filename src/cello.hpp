@@ -49,13 +49,11 @@ enum axis_enum {
   axis_all
 };
 
-
 /*********************************************************************
  * COMPONENTS
  **********************************************************************/
 
 enum component_enum {
-  // !!! EDIT component_enum AND component_name TOGETHER !!!
   component_undefined,
   component_enzop,
   component_first = component_enzop,

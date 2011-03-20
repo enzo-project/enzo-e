@@ -70,7 +70,7 @@ PARALLEL_MAIN_BEGIN
     double map_r[] = {0.0, 1.0};
     double map_g[] = {0.0, 0.5};
     double map_b[] = {0.5, 1.0};
-    monitor->set_image_map(2,map_r,map_g,map_b);
+    monitor->image_set_map(2,map_r,map_g,map_b);
     monitor->image("monitor_image_2.png",
 		   n,n,
 		   array,
@@ -84,7 +84,7 @@ PARALLEL_MAIN_BEGIN
     double map_r[] = {0.0, 1.0, 0.0, 0.0};
     double map_g[] = {0.0, 0.0, 1.0, 0.0};
     double map_b[] = {0.0, 0.0, 0.0, 1.0};
-    monitor->set_image_map(4,map_r,map_g,map_b);
+    monitor->image_set_map(4,map_r,map_g,map_b);
     monitor->image("monitor_image_3.png",
 		   n,n,
 		   array,
@@ -98,7 +98,7 @@ PARALLEL_MAIN_BEGIN
     double map_r[] = {0.0, 1.0};
     double map_g[] = {0.0, 1.0};
     double map_b[] = {0.0, 1.0};
-    monitor->set_image_map(2,map_r,map_g,map_b);
+    monitor->image_set_map(2,map_r,map_g,map_b);
 
     monitor->image_open("monitor_image_4.png",n,n);
 

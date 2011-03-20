@@ -94,7 +94,7 @@ public: // interface
     double min, double max     // Limits for color map
     );
 
-  void set_image_map 
+  void image_set_map 
   (int n, double * map_r, double * map_g, double * map_b) throw();
 
 private: // functions

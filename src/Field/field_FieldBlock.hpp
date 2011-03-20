@@ -47,11 +47,15 @@ public: // interface
 
   /// Return array for the corresponding field, which may or may not
   /// contain ghosts depending on if they're allocated
-  void * field_values (int id_field) throw (std::out_of_range);
+  char * field_values (int id_field) throw (std::out_of_range);
+
+  /// Return array for the corresponding field, which may or may not
+  /// contain ghosts depending on if they're allocated
+  const char * field_values (int id_field) const throw (std::out_of_range);
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
-  void * field_unknowns (int id_field) throw (std::out_of_range);
+  char * field_unknowns (int id_field) throw (std::out_of_range);
 
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
@@ -114,6 +118,10 @@ public: // interface
   /// Set array values for a given field
   void set_field_values (int id_field, char * values) throw();
 
+  /// Return the number of elements (nx,ny,nz) along each axis, and total
+  /// number of bytes n
+  int field_size (int id_field, int *nx, int *ny, int *nz) const throw();
+
   //----------------------------------------------------------------------
 
 private: // functions
@@ -127,10 +135,6 @@ private: // functions
   /// Given array start and alignment, return first address that is
   /// aligned
   int align_padding_ (char * start, int alignment) const throw();
-
-  /// Return the size of the given field, both as (nx,ny,nz) and
-  /// return n
-  int field_size_ (int id_field, int *nx, int *ny, int *nz) const throw();
 
   /// Move (not copy) array_ to array and field_values_ to
   /// field_values

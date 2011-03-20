@@ -41,36 +41,46 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Copy in face zones from a field block
-  void load() throw();
+  /// Load from field's face data
+  void load(const FieldBlock * field_block,
+	    int                field=-1,
+	    axis_enum          axis=axis_all, 
+	    face_enum          face=face_all) throw();
 
-  /// Copy out ghost zones to a field block
-  void save() throw();
+  /// Copy face data to ghost data
+  void copy(const FieldFaces * field_face,
+	    int                field=-1,
+	    axis_enum          axis=axis_all, 
+	    face_enum          face=face_all) throw();
 
+  /// Store to field's ghost data
+  void store(FieldBlock *   field_block,
+	     int            field=-1,
+	     axis_enum      axis=axis_all, 
+	     face_enum      face=face_all) throw();
 
 private: // functions
 
   /// Allocate array_ storage
-
-  void allocate_() throw();
+  void allocate_(FieldBlock * field_block) throw();
 
   /// Deallocate array_ storage
-
   void deallocate_() throw();
+
+  /// Index of field, axis, dir into ghosts_ and faces_ arrays
+  size_t index_(size_t field, size_t axis, size_t face) 
+  { return face + 2*(axis + 3*field); };
 
 private: // attributes
 
-  /// Pointer to the corresponding FieldBlock
-  FieldBlock * field_block_;
-
-  /// Arrays [field][axis][dir] of ghost values
-  std::vector<char *> ghosts_;
-
-  /// Arrays [field][axis][dir] of inner-face values
-  std::vector<char *> faces_;
-
   /// Allocated array used for storing all ghosts and faces
-  char * array_;
+  std::vector<char> array_;
+
+  /// Offsets index_[field,axis,face] into array_ of ghost values
+  std::vector<int> index_ghosts_;
+
+  /// Offsets index_[field,axis,face] into array_ of faces values
+  std::vector<int> index_faces_;
 
 };
 

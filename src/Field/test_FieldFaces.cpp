@@ -150,21 +150,21 @@ PARALLEL_MAIN_BEGIN
 
   // insert fields
 
-  int i1 = field_descr->insert_field("field_1");
-  int i2 = field_descr->insert_field("field_2");
-  int i3 = field_descr->insert_field("field_3");
+  int field_1 = field_descr->insert_field("field_1");
+  int field_2 = field_descr->insert_field("field_2");
+  int field_3 = field_descr->insert_field("field_3");
 
   // initialize field precisions
 
-  field_descr->set_precision(i1, precision_single);
-  field_descr->set_precision(i2, precision_double);
-  field_descr->set_precision(i3, precision_quadruple);
+  field_descr->set_precision(field_1, precision_single);
+  field_descr->set_precision(field_2, precision_double);
+  field_descr->set_precision(field_3, precision_quadruple);
 
   // initialize field ghost zone depths
 
-  field_descr->set_ghosts(i1, 1,1,1);
-  field_descr->set_ghosts(i2, 0,1,2);
-  field_descr->set_ghosts(i3, 1,0,3);
+  field_descr->set_ghosts(field_1, 1,1,1);
+  field_descr->set_ghosts(field_2, 0,1,2);
+  field_descr->set_ghosts(field_3, 1,0,3);
 
   const int mx = 4, my = 5, mz = 6;
 
@@ -198,9 +198,9 @@ PARALLEL_MAIN_BEGIN
 	// (each field initialized separately since each has different
 	// ghost zone depth)
 
-	init_field_1(field_block,k,i1,mx,my,mz,M3,N3);
-	init_field_2(field_block,k,i2,mx,my,mz,M3,N3);
-	init_field_3(field_block,k,i3,mx,my,mz,M3,N3);
+	init_field_1(field_block,k,field_1,mx,my,mz,M3,N3);
+	init_field_2(field_block,k,field_2,mx,my,mz,M3,N3);
+	init_field_3(field_block,k,field_3,mx,my,mz,M3,N3);
 
       }
     }
@@ -214,10 +214,17 @@ PARALLEL_MAIN_BEGIN
   for (int kz = 0; kz < N; kz++) {
     for (int ky = 0; ky < N; ky++) {
       for (int kx = 0; kx < N-1; kx++) {
-	int k = kx + N * (ky + N * kz);
-	if (field_block[k] != NULL) {
-	  FieldFaces * ff = field_block[k]->field_faces();
-	}
+
+	int index_lower = kx + N * (ky + N * kz);
+	FieldBlock * field_lower = field_block[index_lower];
+	FieldFaces * faces_lower = field_lower->field_faces();
+	int index_upper = (kx + 1) + N * (ky + N * kz);
+	FieldBlock * field_upper = field_block[index_upper];
+	FieldFaces * faces_upper = field_upper->field_faces();
+
+	faces_lower -> load(field_lower, -1, axis_x, face_upper);
+	faces_lower -> copy(faces_upper, -1, axis_x, face_upper);
+	faces_upper -> store(field_upper, -1, axis_x, face_lower);
 
       }
     }
