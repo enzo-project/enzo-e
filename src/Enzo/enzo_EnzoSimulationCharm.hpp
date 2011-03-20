@@ -27,6 +27,8 @@ public: // functions
   /// Destructor
   ~EnzoSimulationCharm() throw();
 
+  /// Run the simulation
+  virtual void run() throw();
 };
 
 #endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */

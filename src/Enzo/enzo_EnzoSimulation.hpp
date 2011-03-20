@@ -34,7 +34,7 @@ public: // functions
   virtual void finalize() throw();
 
   /// Run the simulation
-  virtual void run() throw();
+  virtual void run() throw() = 0;
 
   /// Load a Simulation from disk
   virtual void read() throw();

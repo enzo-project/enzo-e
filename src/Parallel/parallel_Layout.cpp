@@ -65,23 +65,27 @@ int Layout::local_count (int ip) throw()
     return (ip0+1)*block_count/process_count_ 
       -     ip0   *block_count/process_count_;
 
-  } else return 0;
-  
+  } else {
+    return 0;
+  }
 }
 
 //----------------------------------------------------------------------
 
 bool Layout::is_local (int ip, int ibx, int iby, int ibz) throw()
 {
-  return false;
+  int block_count = block_count_[0] * block_count_[1] * block_count_[2];
+  int ib = block_index(ibx,iby,ibz);
+  int index_first_local = (ip-process_first_)*block_count/process_count_;
+  return 0 <= ib && ib < local_count(ip);
 }
 
 //----------------------------------------------------------------------
 
 int Layout::global_index (int ip, int ib) throw()
 {
-  INCOMPLETE("Layout::global_index");
-  return 0;
+  int block_count = block_count_[0] * block_count_[1] * block_count_[2];
+  return ib + (ip-process_first_)*block_count/process_count_;
 }
 
 //----------------------------------------------------------------------

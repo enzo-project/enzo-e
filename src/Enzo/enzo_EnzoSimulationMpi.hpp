@@ -27,6 +27,9 @@ public: // functions
   /// Destructor
   ~EnzoSimulationMpi() throw();
 
+  /// Run the simulation
+  virtual void run() throw();
+
 };
 
 #endif /* ENZO_ENZO_SIMULATION_MPI_HPP */

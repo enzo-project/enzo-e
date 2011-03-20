@@ -30,10 +30,6 @@ public: // interface
   /// Return whether the iteration is complete
   bool done() const throw();
 
-  /// Return the global index of the current block in the patch
-  int index (int * ibx, int * iby, int * ibz) throw();
-  
-
 private: // attributes
 
   /// The Patch being iterated over

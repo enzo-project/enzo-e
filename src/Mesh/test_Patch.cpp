@@ -129,11 +129,9 @@ PARALLEL_MAIN_BEGIN
   Block *  block = 0;
   FieldBlock * field_block = 0;
 
-  size_t count = 0;
+  size_t block_counter = 0;
 
   while ((block = ++itBlocks)) {
-
-    ++count;
 
     unit_assert_quiet(block != NULL);
 
@@ -164,10 +162,19 @@ PARALLEL_MAIN_BEGIN
 
       int ibx,iby,ibz;
 
-      itBlocks.index(&ibx,&iby,&ibz);
+      GroupProcess * group = patch->group();
+      Layout      * layout = patch->layout();
+
+      int ip = group->rank();
+
+      int index_local = block_counter;
+      int index_global = layout->global_index(ip,index_local);
+      layout->block_indices(index_global,&ibx,&iby,&ibz);
       
       size_t ib = ibx + nbx*(iby + nby*ibz);
-      //      unit_assert_quiet (count == ib);
+
+      unit_assert_quiet (block_counter == ib);
+
       unit_assert_quiet (unit_incomplete);
 
       // Test block extents
@@ -208,10 +215,12 @@ PARALLEL_MAIN_BEGIN
     // TEST BLOCK PROPERTIES
     //    unit_assert(unit_incomplete);
 
+    ++block_counter;
+
   }
 
   unit_func("num_blocks");
-  unit_assert(count == patch->num_blocks());
+  unit_assert(block_counter == patch->num_blocks());
 
   unit_assert(patch->block(0) != NULL);
 

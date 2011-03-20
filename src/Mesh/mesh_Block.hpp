@@ -5,7 +5,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Fri Apr  2 14:09:42 PDT 2010
 /// @todo     Move FieldBlock members//attributes to Block when possible
-/// @todo     Add Patch pointer, and exchang computable data for function calls
+/// @todo     Replace stored data with function calls using Patch pointer
 /// @brief    [\ref Mesh] Declaration of the Block class
 
 #ifndef MESH_BLOCK_HPP

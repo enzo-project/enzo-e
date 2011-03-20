@@ -39,18 +39,3 @@ bool ItBlock::done () const throw()
 {
   return index1_ >= patch_->num_blocks();
 }
-
-//----------------------------------------------------------------------
-
-int ItBlock::index (int * ibx, int * iby, int * ibz) throw()
-{
-  if (index1_) {
-    INCOMPLETE("ItBlock::index");
-  } else {
-    WARNING ("ItBlock::index","Trying to get index of the 'null Block'");
-  }
-  return 0;
-}
-
-
-
