@@ -3,7 +3,7 @@
 #------------------------------
 
 Import('env')
-Import('parallel_type')
+Import('type')
 
 #------------------------------
 # DEPENDENCIES
@@ -34,7 +34,7 @@ sources    = [Glob('monitor*cpp'), Glob('png*cpp')]
 libraries  = env.Library      ('monitor', [sources])
 binaries   = env_test.Program (['test_Monitor.cpp', sources])
 
-if (parallel_type == "charm"):
+if (type == "charm"):
 	test = 'test_Monitor'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
@@ -46,7 +46,7 @@ if (parallel_type == "charm"):
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
 env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
 
 
 

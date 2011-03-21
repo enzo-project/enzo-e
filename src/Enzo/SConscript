@@ -6,7 +6,7 @@ SConscript('ppml/SConscript')
 #------------------------------
 
 Import('env')
-Import('parallel_type')
+Import('type')
 Import('use_papi')
 Import('use_hdf5')
 
@@ -45,7 +45,7 @@ test_enzo_p   = env.Program (['enzo-p.cpp', sources])
 
 binaries = [test_enzo_p]
 
-if (parallel_type == "charm"):
+if (type == "charm"):
 
 	test = 'enzo-p'
 	testc = 'enzo_p' # required since class name cannot contain '-'
@@ -59,7 +59,7 @@ if (parallel_type == "charm"):
 env.Alias('install-inc',env.Install ('#/include',includes))
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
 env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
 
 
 

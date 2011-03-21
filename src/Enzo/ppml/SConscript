@@ -6,7 +6,7 @@
 #------------------------------
 
 Import('env')
-Import('parallel_type')
+Import('type')
 Import('use_papi')
 Import('use_hdf5')
 
@@ -60,7 +60,7 @@ sources = [
 libraries = env.Library ('enzo-ppml', sources)
 binaries  = [env.Program (['test_ppml.cpp',      sources])]
 
-if (parallel_type == "charm"):
+if (type == "charm"):
 	test = 'test_ppml'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
@@ -71,7 +71,7 @@ if (parallel_type == "charm"):
 
 env.Alias('install-lib',env.Install ('#/lib',    libraries))
 env.Alias('install-bin',env.Install ('#/bin',    binaries))
-env.Alias('install-bin',env.Install ('#/bin-'+parallel_type,binaries))
+env.Alias('install-bin',env.Install ('#/bin-'+type,binaries))
 
 
 

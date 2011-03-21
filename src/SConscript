@@ -1,5 +1,5 @@
 Import('env')
-Import('parallel_type')
+Import('type')
 
 # Define tests for running cccc
 

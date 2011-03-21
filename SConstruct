@@ -38,9 +38,8 @@ use_png      = 1
 
 arch = ARGUMENTS.get('arch','unknown')
 type = ARGUMENTS.get('type','unknown')
+print "type 1 = ",type
 prec = ARGUMENTS.get('prec','unknown')
-
-parallel_type = type
 
 # environment variable (default if scons command line not provided)
 
@@ -128,7 +127,7 @@ print "    CELLO_PREC: scons prec=",prec
 print 
 
 #==================================================
-# Initialize environment according to platform
+# Initialize environment according to configuration
 #==================================================
 #--------------------------------------------------
 
@@ -150,15 +149,13 @@ if (use_png != 0):
 	defines_xlc = defines_xlc + ' -D' + define_png[0]
 	defines_xlf = defines_xlf + ' -WF,-D' + define_png[0]
 
-#--------------------------------------------------
-
-
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 #======================================================================
 # ARCHITECTURE SETTINGS
 #======================================================================
 
+#----------------------------------------------------------------------
 if (arch == "linux"):
+#----------------------------------------------------------------------
 
    charm_path = '/home/bordner/charm/charm'  # arch
 
@@ -178,6 +175,7 @@ if (arch == "linux"):
    cxxflags_define     = ''
    fortranflags_define = ''
    fortranpath_lib = ''
+   fortranlibs = ['gfortran']
 
    papi_path = '/usr/local'
    papi_inc = (papi_path + '/include')
@@ -203,47 +201,16 @@ if (arch == "linux"):
    fortranflags_opt  = flags_opt
    fortranflags_prec = flags_prec
    fortranflags_warn = flags_warn
-   fortranlibs = ['gfortran']
 
+   linkflags_arch = ''
    linkflags_opt  = flags_opt
    linkflags_prec = flags_prec
    linkflags_warn = flags_warn
 
+#----------------------------------------------------------------------
 elif (arch == "ncsa-bd"):
+#----------------------------------------------------------------------
 
-#    lib_hdf5 = path_hdf5 + '/lib'
-#    inc_hdf5 = path_hdf5 + '/include'
-# 
-#    # PAPI
-# 
-# 
-#    if (use_papi != 0):
-#       lib_papi = path_papi + '/lib64'
-#       inc_papi = path_papi + '/include'
-#    else:
-#       lib_papi = ''
-#       inc_papi = ''
-#       
-#    
-#    # DEFINES 
-# 
-# 
-#    env = Environment (
-#       ARFLAGS  = 'r',
-#       CCFLAGS = flags,
-#       CC      = cc + defines_xlc,
-#       CPPPATH = ['/home/bordner/include', '#/include', inc_hdf5, inc_papi],
-#       CXX     = cxx + defines_xlc,	
-#       CXXFLAGS = flags,
-#       ENV         = os.environ,
-#       DEFINES = '',
-#       FORTRANFLAGS = flags + flags_fort,
-#       FORTRANLIBS = ['xlf90','xlfmath','xl'],
-#       FORTRAN = fc,
-#       LIBPATH = ['#/lib','/home/bordner/lib',lib_fc,lib_hdf5,lib_papi],
-#       LINKFLAGS  = flags
-#    )
-# 
    charm_path = '/home/bordner/charm/charm'
 
    fc_path  = '/opt/ibmcmp/xlf/13.1'
@@ -268,6 +235,7 @@ elif (arch == "ncsa-bd"):
    cxxflags_define     = defines_xlc
    fortranflags_define = defines_xlf
    fortranpath_lib = fc_path + '/lib64'
+   fortranlibs = ['xlf90','xlfmath','xl']
 
    papi_path = '/opt/usersoft/papi/4.1.0'
    papi_inc = (papi_path + '/include')
@@ -292,15 +260,69 @@ elif (arch == "ncsa-bd"):
    fortranflags_opt  = flags_opt + ' -qextname'
    fortranflags_prec = flags_prec
    fortranflags_warn = flags_warn
-   fortranlibs = ['xlf90','xlfmath','xl']
 
+   linkflags_arch = ''
    linkflags_opt  = flags_opt
    linkflags_prec = flags_prec
    linkflags_warn = flags_warn
 
+#----------------------------------------------------------------------
 elif (arch == "sdsc-triton"):
+#----------------------------------------------------------------------
 
-   print "unfinished"
+   charm_path = '/home/jobordner/charm/charm'
+
+   fc_path  = '/opt/openmpi/pgi/mx'
+   cc_path  = '/opt/openmpi/pgi/mx'
+   cxx_path = '/opt/openmpi/pgi/mx'
+
+   fortran_serial = 'pgf90'
+   fortran_mpi    = 'pgf90'
+   fortran_charm  = 'pgf90'
+
+   cxx_serial = 'pgCC'
+   cxx_mpi    = 'mpicxx'
+   cxx_charm  = charm_path + '/bin/charmc -language charm++ '
+
+   cc_serial  = 'pgcc'
+   cc_mpi     = 'mpicc'
+   cc_charm   = 'pgcc'
+
+   cppdefines = defines
+   cxxflags_define     = ''
+   fortranflags_define = ''
+   fortranpath_lib = ''
+   fortranlibs = []
+
+   papi_path = ''
+   papi_inc = (papi_path + '/include')
+   papi_lib = (papi_path + '/lib')
+
+   hdf5_path = '/opt/hdf5/pgi'
+   hdf5_inc = (hdf5_path + '/include')
+   hdf5_lib = (hdf5_path + '/lib')
+
+   flags_opt  = '-fast'
+   flags_prec = ''
+   flags_warn = ''
+
+   cxxflags_opt  = flags_opt
+   cxxflags_prec = flags_prec
+   cxxflags_warn = flags_warn
+
+   cflags_opt  = flags_opt
+   cflags_prec = flags_prec
+   cflags_warn = flags_warn
+
+   fortranflags_opt  = flags_opt
+   fortranflags_prec = flags_prec
+   fortranflags_warn = flags_warn
+
+   linkflags_arch = '-pgf90libs'
+   linkflags_opt  = flags_opt
+   linkflags_prec = flags_prec
+   linkflags_warn = flags_warn
+
 
 
 #======================================================================
@@ -380,9 +402,7 @@ environ  = os.environ
 cxxflags = cxxflags_opt + ' ' + cxxflags_prec + ' ' + cxxflags_warn + ' ' + cxxflags_define
 cflags   = cflags_opt + ' '  + cflags_prec + ' ' + cflags_warn
 fortranflags = fortranflags_opt + ' ' + fortranflags_prec + ' ' + fortranflags_warn + ' ' + fortranflags_define
-linkflags = linkflags_opt + ' ' + linkflags_prec + ' ' + linkflags_warn
-
-platform = arch + '-' + type
+linkflags = linkflags_arch + ' ' + linkflags_opt + ' ' + linkflags_prec + ' ' + linkflags_warn
 
 env = Environment (
       CC           = cc,	
@@ -407,111 +427,8 @@ if (type == "charm"):
    charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
    env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 
-# #--------------------------------------------------
-# if (platform == 'sdsc-triton-charm' or platform == 'sdsc-triton-serial'):
-# #--------------------------------------------------
-# 
-#    path_hdf5 = '/opt/hdf5/pgi'
-#    env = Environment (
-#       CC      = 'pgcc',	
-#       CPPDEFINES = defines,
-#       CPPPATH = ['#/include', path_hdf5 + '/include'],
-#       CXXFLAGS = '-g -DH5_USE_16_API',
-#       CFLAGS   = '-g -DH5_USE_16_API',
-#       CXX     = 'pgCC',	
-#       FORTRAN = 'pgf77',
-#       FORTRANPATH = '#/include',
-#       LIBPATH = ['#/lib', path_hdf5 + '/lib'],
-#       LINKFLAGS = '-pgf90libs',
-#       ENV = { 'PATH' : os.environ['PATH'], 
-#               'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']}
-#    )
-
-#    path_hdf5 = '/opt/hdf5/pgi'
-#    env = Environment (
-#       CC      = 'pgcc',	
-#       CPPDEFINES = defines,
-#       CPPPATH = ['#/include', path_hdf5 + '/include'],
-#       CXXFLAGS = '-g -DH5_USE_16_API',
-#       CFLAGS   = '-g -DH5_USE_16_API',
-#       CXX     = 'pgCC',	
-#       FORTRAN = 'pgf77',
-#       LIBPATH = ['#/lib', path_hdf5 + '/lib'],
-#       LINKFLAGS = '-pgf90libs',
-#       ENV = { 'PATH' : os.environ['PATH'], 
-#               'LM_LICENSE_FILE' : os.environ['LM_LICENSE_FILE']}
-#    )
-
-#--------------------------------------------------
-#elif (platform == 'ncsa-bd-charm' or platform == 'ncsa-bd-serial'):
-#--------------------------------------------------
-
-#   if (platform == 'ncsa-bd-charm'):
-#      parallel_run = charm_path + "/bin/charmrun +p4 "
-#   elif (platform == 'ncsa-bd-serial'):
-#      parallel_run = ""
-#
-#   serial_run    = ""
-#
-#   flags_opt = '-O3 -qhot -q64'
-#   flags_debug = ''
-#   flags_fort = '-qextname -I include'
-#   flags = flags_opt + ' ' + flags_debug + ' '
-#
-#   # Compilers
-#
-#   path_fc   = '/opt/ibmcmp/xlf/13.1'
-#   path_cc   = '/opt/ibmcmp/vac/11.1'
-#   path_cxx  = '/opt/ibmcmp/vacpp/11.1'
-#
-#   cc = path_cc + '/bin/xlc_r'
-#   fc = path_fc + '/bin/xlf_r'
-#   cxx = path_cxx + '/bin/xlC_r'
-#
-#   lib_fc = path_fc + '/lib64'
-#
-#   # HDF5 
-#
-#   path_hdf5 = '/opt/hdf5-1.8.4-patch1-64bit'
-#   lib_hdf5 = path_hdf5 + '/lib'
-#   inc_hdf5 = path_hdf5 + '/include'
-#
-#   # PAPI
-#
-#   path_papi = '/opt/usersoft/papi/4.1.0'
-#
-#   if (use_papi != 0):
-#      lib_papi = path_papi + '/lib64'
-#      inc_papi = path_papi + '/include'
-#   else:
-#      lib_papi = ''
-#      inc_papi = ''
-#      
-#   
-#   # DEFINES 
-#   # (handled differently since xlC expects -Ddoh but xlf expects -D doh)
-#
-#
-#   env = Environment (
-#      ARFLAGS  = 'r',
-#      CCFLAGS = flags,
-#      CC      = cc + defines_xlc,
-#      CPPPATH = ['/home/bordner/include', '#/include', inc_hdf5, inc_papi],
-#      CXX     = cxx + defines_xlc,	
-#      CXXFLAGS = flags,
-#      ENV         = os.environ,
-#      DEFINES = '',
-#      FORTRANFLAGS = flags + flags_fort,
-#      FORTRANLIBS = ['xlf90','xlfmath','xl'],
-#      FORTRAN = fc,
-#      LIBPATH = ['#/lib','/home/bordner/lib',lib_fc,lib_hdf5,lib_papi],
-#      LINKFLAGS  = flags
-#   )
-
 Export('env')
-Export('platform')
-
-Export('parallel_type')
+Export('type')
 Export('parallel_run')
 Export('serial_run')
 
