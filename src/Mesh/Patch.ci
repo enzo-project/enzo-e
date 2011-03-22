@@ -1,4 +1,4 @@
-module patch {
+module Patch {
    chare Patch {
       entry Patch
 	(int nx,   int ny,  int nz,

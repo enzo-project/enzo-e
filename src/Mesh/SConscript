@@ -53,7 +53,7 @@ if (type == "charm"):
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
-	test = 'patch'
+	test = 'Patch'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object('test_Patch.cpp'),test + '.decl.h')
 

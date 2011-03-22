@@ -282,3 +282,6 @@ Block * Patch::local_block(size_t i) const throw()
   return (i < block_.size()) ? block_[i] : 0;
 }
 
+//----------------------------------------------------------------------
+
+#include PARALLEL_CHARM_INCLUDE(Patch.def.h)

@@ -12,7 +12,7 @@
 
 class Mesh;
 
-#include PARALLEL_CHARM_INCLUDE(patch.decl.h)
+#include PARALLEL_CHARM_INCLUDE(Patch.decl.h)
 
 PARALLEL_CLASS_DECL(Patch)
 {
@@ -131,8 +131,6 @@ PARALLEL_CLASS_DECL(Patch)
 
 
 };
-
-#include PARALLEL_CHARM_INCLUDE(patch.def.h)
 
 #endif /* MESH_PATCH_HPP */
 
