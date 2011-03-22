@@ -71,8 +71,18 @@ private: // functions
   size_t index_(size_t field, size_t axis, size_t face) 
   { return face + 2*(axis + 3*field); };
 
+  /// Precision-agnostic function for copying field block faces into
+  /// the field_faces array
   template<class T>
   void load_precision_
+  (T * face_values, T * field_values,
+   int n[3], int nd[3], int ng[3],
+   axis_enum axis, face_enum face );
+
+  /// Precision-agnostic function for copying the field_faces array into
+  /// the field block ghosts
+  template<class T>
+  void save_precision_
   (T * face_values, T * field_values,
    int n[3], int nd[3], int ng[3],
    axis_enum axis, face_enum face );
