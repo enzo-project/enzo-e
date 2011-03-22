@@ -51,6 +51,14 @@ PARALLEL_CLASS_DECL(Patch)
 
   //----------------------------------------------------------------------
 
+  /// Set domain lower extent
+  void set_lower(double x, double y, double z) throw ();
+
+  /// Set domain upper extent
+  void set_upper(double x, double y, double z) throw ();
+  
+  //----------------------------------------------------------------------
+
   /// Return the size of the patch in number of grid cells
   void size (int * nx, int * ny=0, int * nz=0) const throw();
 
@@ -63,15 +71,9 @@ PARALLEL_CLASS_DECL(Patch)
   /// Return domain lower extent
   void lower(double * x, double * y=0, double * z=0) const throw ();
 
-  /// Set domain lower extent
-  void set_lower(double x, double y, double z) throw ();
-
   /// Return domain upper extent
   void upper(double * x, double * y=0, double * z=0) const throw ();
 
-  /// Set domain upper extent
-  void set_upper(double x, double y, double z) throw ();
-  
   //--------------------------------------------------
 
   /// Allocate local blocks
@@ -95,9 +97,6 @@ PARALLEL_CLASS_DECL(Patch)
  public: // entry functions
 
 #ifdef CONFIG_USE_CHARM
-
-  /// Initial patch advance, ending with receive_()
-  void p_evolve();
 
 #endif
 

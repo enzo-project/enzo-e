@@ -45,6 +45,14 @@ public: // interface
 
   //----------------------------------------------------------------------
 
+  /// Set domain lower extent
+  void set_lower(double x, double y, double z) throw ();
+
+  /// Set domain upper extent
+  void set_upper(double x, double y, double z) throw ();
+
+  //----------------------------------------------------------------------
+
   /// Return the ith Field block
   const FieldBlock * field_block (int i=0) const throw();
 
@@ -56,12 +64,6 @@ public: // interface
 
   /// Return domain upper extent
   void upper(double * x = 0,  double * y = 0, double * z = 0) const throw ();
-
-  /// Set domain lower extent
-  void set_lower(double x, double y, double z) throw ();
-
-  /// Set domain upper extent
-  void set_upper(double x, double y, double z) throw ();
 
   /// Return the index of this Block in the containing Patch 
   /// [tested in test_Patch]

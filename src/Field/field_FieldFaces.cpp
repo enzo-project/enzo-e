@@ -243,6 +243,33 @@ void FieldFaces::load_precision_
 //----------------------------------------------------------------------
 
 template<class T>
+
+void FieldFaces::copy
+(
+ T * ghost_faces, T * ghost_value,
+ int                field,
+ axis_enum          axis, 
+ face_enum          face) throw()
+{
+  int iax=(axis+1) % 3;
+  int iay=(axis+2) % 3;
+
+  int iz0 = (face == face_lower) ? 0 : nd[axis]-ng[axis];
+
+  for (int iz = 0; iz <ng[axis]; iz++)  { // 0 <= iz < ng[axis]
+    for (int iy=0; iy < n[iay]; iy++) {
+      for (int ix=0; ix < n[iax]; ix++) {
+	int index_field = ix*nd[iax] + iy*nd[iay] + (iz0+iz)*nd[axis];
+	int index_face  = iz + ng[axis]*(ix + n[iax]*iy);
+	field_values[index_field] = face_values[index_face];
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
+template<class T>
 void FieldFaces::save_precision_
 (
  T * face_values, T * field_values,
