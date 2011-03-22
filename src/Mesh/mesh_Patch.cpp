@@ -12,6 +12,15 @@
 
 //----------------------------------------------------------------------
 
+#ifdef CONFIG_USE_CHARM
+Patch::Patch(int nx,   int ny,  int nz,
+	     int nbx,  int nby, int nbz)
+{
+  printf ("CHARM Patch(%d %d %d, %d %d %d\n",
+	  nx,ny,nz,nbx,nby,nbz); 
+};
+#endif
+
 Patch::Patch
 (
  Factory * factory, 

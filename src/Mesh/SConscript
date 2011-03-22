@@ -53,6 +53,10 @@ if (type == "charm"):
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
+	test = 'patch'
+	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
+	env.Depends(env.Object('test_Patch.cpp'),test + '.decl.h')
+
 libraries = env.Library ('mesh', [sources])
 
 test_mesh  = env.Program (['test_Mesh.cpp',  sources])

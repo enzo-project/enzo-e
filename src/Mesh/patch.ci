@@ -1,0 +1,7 @@
+module patch {
+   chare Patch {
+      entry Patch
+	(int nx,   int ny,  int nz,
+	 int nbx,  int nby, int nbz);
+   };
+}

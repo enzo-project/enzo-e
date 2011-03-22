@@ -12,13 +12,22 @@
 
 class Mesh;
 
-class Patch {
+#include PARALLEL_CHARM_INCLUDE(patch.decl.h)
+
+PARALLEL_CLASS_DECL(Patch)
+{
 
   /// @class    Patch
   /// @ingroup  Mesh
   /// @brief    [\ref Mesh] Represent a distributed box of uniform (non-adaptive) data
 
-public: // interface
+ public: // interface
+
+#ifdef CONFIG_USE_CHARM
+  /// Constructor for CHARM++
+  Patch(int nx,   int ny,  int nz,
+	int nbx,  int nby, int nbz);
+#endif
 
   /// Constructor for given Patch size and blocking count
   Patch(Factory * factory,
@@ -83,7 +92,7 @@ public: // interface
   GroupProcess * group()  const throw()
   { return group_process_; };
 
-public: // entry functions
+ public: // entry functions
 
 #ifdef CONFIG_USE_CHARM
 
@@ -94,7 +103,7 @@ public: // entry functions
 
   //--------------------------------------------------
 
-protected: // attributes
+ protected: // attributes
 
   /// Factory object for creating Blocks
   Factory * factory_;
@@ -122,6 +131,8 @@ protected: // attributes
 
 
 };
+
+#include PARALLEL_CHARM_INCLUDE(patch.def.h)
 
 #endif /* MESH_PATCH_HPP */
 
