@@ -58,6 +58,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
+  unit_class("EnzoBlock");
+
   // Check command line arguments
 
   if (PARALLEL_ARGC < 2) {
@@ -124,7 +126,7 @@ PARALLEL_MAIN_BEGIN
   double lower = 0.125*size;
   double upper =   1.0*size;
 
-  unit_func("Enzo","SolveMHDEquations");
+  unit_func("SolveMHDEquations");
 
   for (cycle = 0, time = 0.0;
        (cycle < cycle_stop) && (time < time_stop);

@@ -56,7 +56,19 @@ void unit_finalize ()
   }
 }
 
+/// @brief Set the current unit testing class name
+void unit_class (const char * class_name)
+{
+  strncpy (unit::class_name, class_name, UNIT_MAX_NAME_LEN);
+}
+
 /// @brief Set the current unit testing function name
+void unit_func (const char * func_name)
+{
+  strncpy (unit::func_name, func_name, UNIT_MAX_NAME_LEN);
+}
+
+/// @brief Set the current unit testing class and function names
 void unit_func (const char * class_name, const char * func_name)
 {
   strncpy (unit::class_name,class_name,UNIT_MAX_NAME_LEN);
@@ -101,7 +113,7 @@ bool unit_assert_ (int result, const char * file, int line, bool quiet=false)
 		       unit::process_count,
 		       file, 
 		       line, 
-		       unit::func_name,
+		       unit::class_name,
 		       unit::func_name);
       fflush(stdout);
     }

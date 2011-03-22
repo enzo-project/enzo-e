@@ -21,7 +21,9 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
-  unit_func("Mesh","Mesh");
+  unit_class("Mesh");
+
+  unit_func("Mesh");
   Factory * factory = new Factory;
   Mesh * mesh = new Mesh (factory,group_process,12,12,12,3,3,3);
   unit_assert(mesh != NULL);

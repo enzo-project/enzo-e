@@ -19,6 +19,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
+  unit_class("Papi");
+
   Papi papi;
 
   papi.start();
@@ -29,13 +31,13 @@ PARALLEL_MAIN_BEGIN
   papi.stop();
 
   PARALLEL_PRINTF ("c=%f\n",c); // prevent compiler optimizing computations out
-  unit_func("Papi","time_real");
+  unit_func("time_real");
   unit_assert(papi.time_real() > 0);
-  unit_func("Papi","time_proc");
+  unit_func("time_proc");
   unit_assert(papi.time_proc() > 0);
-  unit_func("Papi","flop_count");
+  unit_func("flop_count");
   unit_assert(papi.flop_count() > 0);
-  unit_func("Papi","flop_rate");
+  unit_func("flop_rate");
   unit_assert(papi.flop_rate() > 0);
   
   PARALLEL_PRINTF ("time_real  = %f\n",papi.time_real());

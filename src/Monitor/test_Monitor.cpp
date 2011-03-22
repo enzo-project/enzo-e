@@ -23,6 +23,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(parallel->rank(),parallel->size());
 
+  unit_class("Monitor");
+
   int n = 128;
 
   // Allocate array
@@ -49,10 +51,10 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_func("Monitor","Monitor");
+  unit_func("Monitor");
   unit_assert(true);
 
-  unit_func("Monitor","image");
+  unit_func("image");
 
   {
     monitor->image("monitor_image_1.png",

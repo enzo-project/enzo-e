@@ -20,6 +20,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
+  unit_class("Memory");
+
 #ifdef CONFIG_USE_MEMORY
   Memory * memory = Memory::instance();
 
@@ -31,7 +33,7 @@ PARALLEL_MAIN_BEGIN
   // allocate()
   //----------------------------------------------------------------------
 
-  unit_func("Memory","allocate");
+  unit_func("allocate");
 
   int i=0;
   double *f1;
@@ -70,7 +72,7 @@ PARALLEL_MAIN_BEGIN
   // deallocate()
   //----------------------------------------------------------------------
 
-  unit_func("Memory","deallocate");
+  unit_func("deallocate");
 
   DEL_F1(size);
   DEL_F3(size);
@@ -186,15 +188,15 @@ PARALLEL_MAIN_BEGIN
   memory->set_limit(1000000);
   memory->set_limit(10000,1);
 
-  unit_func ("Memory","set_limit()");
+  unit_func ("set_limit()");
   unit_assert(memory->limit()  == 1000000);
-  unit_func ("Memory","limit()");
+  unit_func ("limit()");
   unit_assert(memory->limit(1) == 10000);
 
   // efficiency()
 
   
-  unit_func ("Memory","efficiency()");
+  unit_func ("efficiency()");
 
   char * temp_0 = new char [10000];
   new_count++;
@@ -212,22 +214,22 @@ PARALLEL_MAIN_BEGIN
   del_count++;
 
   // highest()
-  unit_func ("Memory","highest()");
+  unit_func ("highest()");
 
   unit_assert(memory->highest() == 10000);
   unit_assert(memory->highest(1) == 1000);
 
   // num_new()
-  unit_func ("Memory","num_new()");
+  unit_func ("num_new()");
   unit_assert(memory->num_new() == new_count);
 
   // num_delete()
-  unit_func ("Memory","num_delete()");
+  unit_func ("num_delete()");
   unit_assert(memory->num_delete() == del_count);
 
   memory->print();
 #else /* CONFIG_USE_MEMORY */
-  unit_func("Memory","CONFIG_USE_MEMORY");
+  unit_func("CONFIG_USE_MEMORY");
   unit_assert(true);
 #endif/* CONFIG_USE_MEMORY */
 

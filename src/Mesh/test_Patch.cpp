@@ -23,12 +23,14 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
+  unit_class("Patch");
+
   //======================================================================
   // np = 1
   // ip = 0 [default]
   //======================================================================
 
-  unit_func("Patch","Patch");
+  unit_func("Patch");
 
   FieldDescr * field_descr = new FieldDescr;
 
@@ -46,7 +48,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(patch != NULL);
 
   //--------------------------------------------------
-  unit_func("Patch","size");
+  unit_func("size");
 
   // Test that patch size is correct
 
@@ -60,7 +62,7 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func("Patch","blocking");
+  unit_func("blocking");
 
   // Test that patch blocking is correct
 
@@ -85,7 +87,7 @@ PARALLEL_MAIN_BEGIN
 
   // Test that the domain extents are correct
 
-  unit_func("Patch","set_lower");
+  unit_func("set_lower");
 
   double xm,ym,zm;
   patch->lower(&xm,&ym,&zm);
@@ -94,7 +96,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(ym==domain_lower[1]);
   unit_assert(zm==domain_lower[2]);
 
-  unit_func("Patch","set_upper");
+  unit_func("set_upper");
 
   double xp,yp,zp;
   patch->upper(&xp,&yp,&zp);
@@ -107,18 +109,18 @@ PARALLEL_MAIN_BEGIN
 
   Layout * layout = patch->layout();
 
-  unit_func("Patch","layout");
+  unit_func("layout");
   unit_assert(layout != NULL);
 
   layout->set_process_range(0,1);
 
   // Test allocation of Patch into Blocks
 
-  unit_func("Patch","blocks_allocated");
+  unit_func("blocks_allocated");
 
   unit_assert(patch->blocks_allocated() == false);
   
-  unit_func("Patch","allocate_blocks");
+  unit_func("allocate_blocks");
 
   patch->allocate_blocks(field_descr);
 
@@ -126,7 +128,7 @@ PARALLEL_MAIN_BEGIN
 
   // Test that the allocated Blocks were initialized correctly
 
-  unit_func("Patch","num_blocks");
+  unit_func("num_blocks");
 
   unit_assert(patch->num_blocks()==(size_t)nbx*nby*nbz);
 
@@ -141,7 +143,7 @@ PARALLEL_MAIN_BEGIN
 
   while ((block = ++itBlocks)) {
 
-    unit_func("Patch","allocate_blocks");
+    unit_func("allocate_blocks");
     unit_assert_quiet(block != NULL);
 
     unit_func("Block","field_block");
@@ -241,15 +243,15 @@ PARALLEL_MAIN_BEGIN
 
   }
 
-  unit_func("Patch","num_blocks");
+  unit_func("num_blocks");
   unit_assert(block_counter == patch->num_blocks());
 
-  unit_func("Patch","allocate_blocks");
+  unit_func("allocate_blocks");
 
   // Deallocate local blocks
 
   //--------------------------------------------------
-  unit_func("Patch","deallocate_blocks");
+  unit_func("deallocate_blocks");
 
   patch->deallocate_blocks();
 

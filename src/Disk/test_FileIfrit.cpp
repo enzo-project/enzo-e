@@ -19,6 +19,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
+  unit_class("FileIfrit");
+
   int n0 = 64;
   int n1 = 64;
   int n2 = 64;
@@ -42,11 +44,11 @@ PARALLEL_MAIN_BEGIN
 
   FileIfrit ifrit;
 
-  unit_func("FileIfrit","write_bin");
+  unit_func("write_bin");
   ifrit.write_bin(filename,a,n0,n1,n2);
   unit_assert(true);
 
-  unit_func("FileIfrit","read_bin");
+  unit_func("read_bin");
   float * b = new float[n];
   int m0,m1,m2;
   ifrit.read_bin(filename,b,&m0,&m1,&m2);

@@ -19,6 +19,8 @@ int main(int argc, char ** argv)
 
   unit_init(parallel->process_rank(),parallel->process_count());
 
+  unit_class("Group");
+
   int process_count = parallel->process_count();
   int process_rank  = parallel->process_rank();
   int thread_rank   = parallel->thread_rank();
@@ -31,31 +33,31 @@ int main(int argc, char ** argv)
     exit(1);
   }
 
-  unit_func("Group","Group");
+  unit_func("Group");
 
   Group * group_root = new Group (0,0);
   unit_assert(group_root != NULL);
   Group * group_this = new Group (process_rank,thread_rank);
   unit_assert(group_this != NULL);
 
-  unit_func("Group","operator ==");
+  unit_func("operator ==");
   
   unit_assert ( (*grouproot == *groupthis) ==
 		(process_rank == 0) );
 
-  unit_func("Group","process_rank");
+  unit_func("process_rank");
   unit_assert(unit_incomplete);
 
-  unit_func("Group","thread_rank");
+  unit_func("thread_rank");
   unit_assert(unit_incomplete);
 
-  unit_func("Group","processes");
+  unit_func("processes");
   unit_assert(unit_incomplete);
 
-  unit_func("Group","threads");
+  unit_func("threads");
   unit_assert(unit_incomplete);
 
-  unit_func("Group","group");
+  unit_func("group");
   unit_assert(unit_incomplete);
 
   unit_finalize();

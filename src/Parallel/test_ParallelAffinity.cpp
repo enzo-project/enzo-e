@@ -19,6 +19,8 @@ int main(int argc, char ** argv)
 
   unit_init(parallel->process_rank(),parallel->process_count());
 
+  unit_class("ParallelAffinity");
+
   int process_count = parallel->process_count();
   int process_rank  = parallel->process_rank();
   int thread_rank   = parallel->thread_rank();
@@ -29,31 +31,31 @@ int main(int argc, char ** argv)
     exit(1);
   }
 
-  unit_func("ParallelAffinity","ParallelAffinity");
+  unit_func("ParallelAffinity");
 
   ParallelAffinity affinity_root (0,0);
   ParallelAffinity affinity_this (process_rank,thread_rank);
 
   unit_assert(true);
 
-  unit_func("ParallelAffinity","operator ==");
+  unit_func("operator ==");
   
   unit_assert ( (affinity_root == affinity_this) ==
 		(process_rank == 0) );
 
-  unit_func("ParallelAffinity","process_rank");
+  unit_func("process_rank");
   unit_assert(unit_incomplete);
 
-  unit_func("ParallelAffinity","thread_rank");
+  unit_func("thread_rank");
   unit_assert(unit_incomplete);
 
-  unit_func("ParallelAffinity","processes");
+  unit_func("processes");
   unit_assert(unit_incomplete);
 
-  unit_func("ParallelAffinity","threads");
+  unit_func("threads");
   unit_assert(unit_incomplete);
 
-  unit_func("ParallelAffinity","group");
+  unit_func("group");
   unit_assert(unit_incomplete);
 
   unit_finalize();

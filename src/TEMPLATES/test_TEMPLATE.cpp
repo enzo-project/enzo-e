@@ -19,11 +19,13 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
+  unit_class("Classname");
+
   Classname * classname = new Classname;
 
-  unit_func ("Classname","function");
+  unit_func ("function");
 
-  unit_assert (false)
+  unit_assert (classname != NULL)
 
   unit_finalize();
 

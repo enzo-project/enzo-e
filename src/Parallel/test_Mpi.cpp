@@ -17,22 +17,24 @@ int main(int argc, char ** argv)
 
   unit_init (Mpi::rank(), Mpi::size());
 
-  unit_func("Mpi","initialize");
+  unit_func("Mpi");
+
+  unit_func("initialize");
   unit_assert(true);
 
-  unit_func("Mpi","size");
+  unit_func("size");
   int np = Mpi::size();
   unit_assert(np > 1);
 
-  unit_func("Mpi","rank");
+  unit_func("rank");
   int ip = Mpi::rank();
   unit_assert(ip < np);
   unit_assert(ip >= 0);
 
-  unit_func("Mpi","is_root");
+  unit_func("is_root");
   unit_assert(Mpi::is_root() == (Mpi::rank()==0));
 
-  unit_func("Mpi","finalize");
+  unit_func("finalize");
   Mpi::finalize();
 
   unit_assert(true);

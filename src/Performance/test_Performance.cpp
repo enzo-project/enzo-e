@@ -4,6 +4,7 @@
 /// @file      test_Performance.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      Wed Apr 23 12:25:18 PDT 2008
+/// @todo      Move Timer tests into test_Timer.cpp
 /// @brief     Program implementing unit tests for performance classes
  
 #include "test.hpp"
@@ -18,6 +19,8 @@ PARALLEL_MAIN_BEGIN
   PARALLEL_INIT;
 
   unit_init();
+
+  unit_class("Timer");
 
   Timer timer;
   const double time_tolerance = 0.05;
@@ -36,7 +39,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
 
-  unit_func("Timer","start");
+  unit_func("start");
   unit_assert((timer.value() - 1.0) < time_tolerance);
 
   timer.start();
@@ -46,10 +49,12 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
 
-  unit_func("Timer","stop");
+  unit_func("stop");
   unit_assert((timer.value() - 2.0) < time_tolerance);
 
-  unit_func("Performance","Performance");
+  unit_class("Performance");
+
+  unit_func("Performance");
 
   Performance * performance = new Performance ();
 
@@ -126,16 +131,16 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(true);
 
-  unit_func("Performance","new_attribute");
+  unit_func("new_attribute");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","new_counter");
+  unit_func("new_counter");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","new_group");
+  unit_func("new_group");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","new_region");
+  unit_func("new_region");
   unit_assert (unit_incomplete);
 
 
@@ -143,32 +148,32 @@ PARALLEL_MAIN_BEGIN
   // Attributes
   //--------------------------------------------------
 
-  unit_func("Performance","attribute");
+  unit_func("attribute");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","set_attribute");
+  unit_func("set_attribute");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","num_attributes");
+  unit_func("num_attributes");
   unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Groups
   //--------------------------------------------------
 
-  unit_func("Performance","begin_group");
+  unit_func("begin_group");
 
 
-  unit_func("Performance","group");
+  unit_func("group");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","set_group");
+  unit_func("set_group");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","num_groups");
+  unit_func("num_groups");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","end_group");
+  unit_func("end_group");
   unit_assert (unit_incomplete);
 
   //--------------------------------------------------
@@ -176,45 +181,45 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
 
-  unit_func("Performance","region");
+  unit_func("region");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","set_region");
+  unit_func("set_region");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","num_regions");
+  unit_func("num_regions");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","start_region");
+  unit_func("start_region");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","stop_region");
+  unit_func("stop_region");
   unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Counters
   //--------------------------------------------------
 
-  unit_func("Performance","counter");
+  unit_func("counter");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","set_counter");
+  unit_func("set_counter");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","increment_counter");
+  unit_func("increment_counter");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","num_counters");
+  unit_func("num_counters");
   unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Disk
   //--------------------------------------------------
 
-  unit_func("Performance","flush");
+  unit_func("flush");
   unit_assert (unit_incomplete);
 
-  unit_func("Performance","~Performance");
+  unit_func("~Performance");
   unit_assert (unit_incomplete);
 
   delete performance;

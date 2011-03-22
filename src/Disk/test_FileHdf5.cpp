@@ -26,6 +26,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
+  unit_class("FileHdf5");
+
   int nx = 100;
   int ny = 50;
   Scalar * a = new Scalar[nx*ny];
@@ -37,7 +39,7 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_func("FileHdf5","open_file");
+  unit_func("open_file");
 
   FileHdf5 hdf5;
 
@@ -73,9 +75,9 @@ PARALLEL_MAIN_BEGIN
   delete [] a;
   delete [] b;
 
-  unit_func("FileHdf5","read");
+  unit_func("read");
   unit_assert(passed);
-  unit_func("FileHdf5","write");
+  unit_func("write");
   unit_assert(passed);
 
   unit_finalize();

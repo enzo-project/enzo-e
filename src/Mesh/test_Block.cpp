@@ -19,10 +19,12 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
+  unit_class("Block");
+
   FieldDescr * field_descr = new FieldDescr;
   Block * block = new Block (NULL,field_descr, 0,0,0, 3,4,5);
 
-  unit_func("Block","Block");
+  unit_func("Block");
   unit_assert (block != NULL);
 
   //----------------------------------------------------------------------
@@ -36,12 +38,12 @@ PARALLEL_MAIN_BEGIN
   block->lower(&lower[0],&lower[1],&lower[2]);
   block->upper(&upper[0],&upper[1],&upper[2]);
 
-  unit_func("Block","lower");
+  unit_func("lower");
   unit_assert(lower[0] == -1.0);
   unit_assert(lower[1] == -2.0);
   unit_assert(lower[2] == -3.0);
 
-  unit_func("Block","upper");
+  unit_func("upper");
   unit_assert(upper[0] ==  1.0);
   unit_assert(upper[1] ==  2.0);
   unit_assert(upper[2] ==  3.0);

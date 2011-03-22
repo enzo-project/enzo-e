@@ -68,20 +68,22 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(group_process->rank(), group_process->size());
 
-  unit_func("GroupProcess","size");
+  unit_class("GroupProcess");
+
+  unit_func("size");
   unit_assert(size == np);
 
-  unit_func("GroupProcess","rank");
+  unit_func("rank");
   unit_assert(0 <= rank && rank < np);
 
-  unit_func("GroupProcess","is_root");
+  unit_func("is_root");
   unit_assert(group_process->is_root() == (rank == 0));
 
   // Test that init_array() and test_array() work independently of Parallel
   const int n = np;
   double array_source[n+1], array_dest[n+1];
 
-  unit_func("GroupProcess","wait");
+  unit_func("wait");
 
 #ifdef CONFIG_USE_MPI
   const int num_blocking = 2;
@@ -137,7 +139,7 @@ PARALLEL_MAIN_BEGIN
       // MPI_Isend MPI_Recv
       // MPI_Send  MPI_Irecv
       // MPI_Send  MPI_Recv
-      unit_func("GroupProcess","test");
+      unit_func("test");
 
       init_array(array_source,n+1,rank);
       init_array(array_dest,  n+1,rank);
@@ -182,7 +184,7 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_func("GroupProcess","sync");
+  unit_func("sync");
   switch (rank) {
   case 0:
     group_process->sync(1); // 0 - 1
@@ -208,21 +210,21 @@ PARALLEL_MAIN_BEGIN
   unit_assert(true);
 
   // --------------------------------------------------
-  unit_func("GroupProcess","barrier");
+  unit_func("barrier");
   group_process->barrier();
   delete group_process;
   
-  unit_func("GroupProcess","bulk_send_add");
+  unit_func("bulk_send_add");
   unit_assert(unit_incomplete);
-  unit_func("GroupProcess","bulk_send");
+  unit_func("bulk_send");
   unit_assert(unit_incomplete);
-  unit_func("GroupProcess","bulk_send_wait");
+  unit_func("bulk_send_wait");
   unit_assert(unit_incomplete);
-  unit_func("GroupProcess","bulk_recv_add");
+  unit_func("bulk_recv_add");
   unit_assert(unit_incomplete);
-  unit_func("GroupProcess","bulk_recv");
+  unit_func("bulk_recv");
   unit_assert(unit_incomplete);
-  unit_func("GroupProcess","bulk_recv_wait");
+  unit_func("bulk_recv_wait");
   unit_assert(unit_incomplete);
 
   fflush(stdout);

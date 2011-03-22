@@ -223,6 +223,8 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
+  unit_class("FieldFaces");
+
   //--------------------------------------------------
   // Initialize the global field descriptor object field_descr
   //--------------------------------------------------
@@ -279,7 +281,7 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_func("FieldFaces","load/copy/store");
+  unit_func("load/copy/store");
   unit_assert(test_fields(field_descr,field_block,nx,ny,nz,mx,my,mz));
 
   //----------------------------------------------------------------------	
