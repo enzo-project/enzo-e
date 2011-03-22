@@ -143,7 +143,7 @@ function test($parallel_type,$testrun,$type) {
 #     echo "<strong >no ${ltype}ed tests</strong></br/>";
   } else {
      echo "<th class=$type><strong>$parallel_type ${ltype}ed</strong></th> ";
-     system ("grep '0/' $output | awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}'");
+     system ("grep '0/' $output | sort | uniq | awk 'BEGIN {c=1}; / $type /{split($3,a,\"\/\"); print \"<td class=$type> \",$cols , \" </td>$itemtext\"; c=c+1}; {if (c==5) {c=0; print \"$rowtext\"}}'");
      echo "</tr><tr></tr>";
   }
      

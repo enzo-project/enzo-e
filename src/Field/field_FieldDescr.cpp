@@ -39,10 +39,12 @@ FieldDescr::~FieldDescr()
   throw()
 {
   for (size_t i=0; i<centering_.size(); i++) {
-    delete centering_[i];
+    delete [] centering_[i];
+    centering_[i] = 0;
   }
   for (size_t i=0; i<ghosts_.size();    i++) {
-    delete ghosts_[i];
+    delete [] ghosts_[i];
+    ghosts_[i] = 0;
   }
 }
 

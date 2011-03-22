@@ -269,6 +269,11 @@ void FieldBlock::deallocate_array () throw()
     field_values_.clear();
 
   }
+  if (field_faces_ != 0) {
+    delete field_faces_;
+    field_faces_ = 0;
+  }
+
 }
 
 //----------------------------------------------------------------------
@@ -344,12 +349,14 @@ void FieldBlock::deallocate_ghosts() throw ()
 //----------------------------------------------------------------------
 void FieldBlock::refresh_ghosts() throw()
 {
-  INCOMPLETE("FieldBlock::refresh_ghosts");
-  if ( ghosts_allocated() ) {
-  } else {
+  if ( ! ghosts_allocated() ) {
     WARNING("FieldBlock::refresh_ghosts",
-		    "Function called with ghosts not allocated");
+	    "Called with ghosts not allocated: allocating ghosts");
+    allocate_ghosts();
   }
+
+  
+  
 }
 
 //----------------------------------------------------------------------

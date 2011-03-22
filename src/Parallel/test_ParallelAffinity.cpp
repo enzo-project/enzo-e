@@ -29,35 +29,34 @@ int main(int argc, char ** argv)
     exit(1);
   }
 
-  unit_class("ParallelAffinity");
-
-  unit_func("ParallelAffinity");
+  unit_func("ParallelAffinity","ParallelAffinity");
 
   ParallelAffinity affinity_root (0,0);
   ParallelAffinity affinity_this (process_rank,thread_rank);
 
   unit_assert(true);
 
-  unit_func("operator ==");
+  unit_func("ParallelAffinity","operator ==");
   
   unit_assert ( (affinity_root == affinity_this) ==
 		(process_rank == 0) );
 
-  unit_func("process_rank");
-  unit_assert(false);
+  unit_func("ParallelAffinity","process_rank");
+  unit_assert(unit_incomplete);
 
-  unit_func("thread_rank");
-  unit_assert(false);
+  unit_func("ParallelAffinity","thread_rank");
+  unit_assert(unit_incomplete);
 
-  unit_func("processes");
-  unit_assert(false);
+  unit_func("ParallelAffinity","processes");
+  unit_assert(unit_incomplete);
 
-  unit_func("threads");
-  unit_assert(false);
+  unit_func("ParallelAffinity","threads");
+  unit_assert(unit_incomplete);
 
-  unit_func("group");
-  unit_assert(false);
+  unit_func("ParallelAffinity","group");
+  unit_assert(unit_incomplete);
 
   unit_finalize();
+
   parallel->finalize();
 }

@@ -20,9 +20,8 @@ PARALLEL_MAIN_BEGIN
   GroupProcess * group_process = GroupProcess::create();
 
   unit_init();
-  unit_class ("Mesh");
 
-  unit_func("Mesh");
+  unit_func("Mesh","Mesh");
   Factory * factory = new Factory;
   Mesh * mesh = new Mesh (factory,group_process,12,12,12,3,3,3);
   unit_assert(mesh != NULL);

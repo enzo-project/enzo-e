@@ -71,6 +71,12 @@ private: // functions
   size_t index_(size_t field, size_t axis, size_t face) 
   { return face + 2*(axis + 3*field); };
 
+  template<class T>
+  void load_precision_
+  (T * face_values, T * field_values,
+   int n[3], int nd[3], int ng[3],
+   axis_enum axis, face_enum face );
+
 private: // attributes
 
   /// Allocated array used for storing all ghosts and faces

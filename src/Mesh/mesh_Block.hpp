@@ -63,7 +63,13 @@ public: // interface
   /// Set domain upper extent
   void set_upper(double x, double y, double z) throw ();
 
+  /// Return the index of this Block in the containing Patch 
+  /// [tested in test_Patch]
   void index_patch (int * ix, int * iy, int * iz) const throw();
+
+  /// Return the neighboring block in the given direction
+  /// [tested in test_Patch]
+  Block * neighbor (axis_enum axis, face_enum face) const throw();
 
 protected: // functions
 

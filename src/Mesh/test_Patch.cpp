@@ -22,14 +22,13 @@ PARALLEL_MAIN_BEGIN
   GroupProcess * group_process = GroupProcess::create();
 
   unit_init();
-  unit_class ("Patch");
 
   //======================================================================
   // np = 1
   // ip = 0 [default]
   //======================================================================
 
-  unit_func("Patch");
+  unit_func("Patch","Patch");
 
   FieldDescr * field_descr = new FieldDescr;
 
@@ -47,7 +46,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(patch != NULL);
 
   //--------------------------------------------------
-  unit_func("size");
+  unit_func("Patch","size");
 
   // Test that patch size is correct
 
@@ -61,7 +60,7 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func("blocking");
+  unit_func("Patch","blocking");
 
   // Test that patch blocking is correct
 
@@ -75,7 +74,6 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-  unit_func("set_extents");
 
   // Set domain extents
 
@@ -87,30 +85,40 @@ PARALLEL_MAIN_BEGIN
 
   // Test that the domain extents are correct
 
-  double xm,xp,ym,yp,zm,zp;
+  unit_func("Patch","set_lower");
 
+  double xm,ym,zm;
   patch->lower(&xm,&ym,&zm);
+
+  unit_assert(xm==domain_lower[0]);
+  unit_assert(ym==domain_lower[1]);
+  unit_assert(zm==domain_lower[2]);
+
+  unit_func("Patch","set_upper");
+
+  double xp,yp,zp;
   patch->upper(&xp,&yp,&zp);
 
-  unit_assert(xm==domain_lower[0] && xp==domain_upper[0] &&
-	      ym==domain_lower[1] && yp==domain_upper[1] &&
-	      zm==domain_lower[2] && zp==domain_upper[2]);
-  
+  unit_assert(xp==domain_upper[0]);
+  unit_assert(yp==domain_upper[1]);
+  unit_assert(zp==domain_upper[2]);
+
   // Initialize how the Layout distributes the Patch data
 
   Layout * layout = patch->layout();
 
+  unit_func("Patch","layout");
   unit_assert(layout != NULL);
 
   layout->set_process_range(0,1);
 
   // Test allocation of Patch into Blocks
 
-  unit_func("is_allocated");
+  unit_func("Patch","blocks_allocated");
 
   unit_assert(patch->blocks_allocated() == false);
   
-  unit_func("allocate");
+  unit_func("Patch","allocate_blocks");
 
   patch->allocate_blocks(field_descr);
 
@@ -118,7 +126,7 @@ PARALLEL_MAIN_BEGIN
 
   // Test that the allocated Blocks were initialized correctly
 
-  unit_func("num_blocks");
+  unit_func("Patch","num_blocks");
 
   unit_assert(patch->num_blocks()==(size_t)nbx*nby*nbz);
 
@@ -133,13 +141,12 @@ PARALLEL_MAIN_BEGIN
 
   while ((block = ++itBlocks)) {
 
+    unit_func("Patch","allocate_blocks");
     unit_assert_quiet(block != NULL);
 
-    if (block) {
-      field_block = block->field_block();
-      unit_assert_quiet(field_block != NULL);
-      
-    }
+    unit_func("Block","field_block");
+    field_block = block ? block->field_block() : NULL;
+    unit_assert_quiet(field_block != NULL);
 
     // Test Block
     if (block) {
@@ -152,7 +159,7 @@ PARALLEL_MAIN_BEGIN
       // Test block size
       int nfx, nfy, nfz;
 
-      unit_func("FieldBlock::size");
+      unit_func("FieldBlock","size");
       field_block->size(&nfx,&nfy,&nfz);
       unit_assert_quiet (nfx == patch_size[0] / patch_blocking[0]);
       unit_assert_quiet (nfy == patch_size[1] / patch_blocking[1]);
@@ -171,10 +178,9 @@ PARALLEL_MAIN_BEGIN
       int index_global = layout->global_index(ip,index_local);
       layout->block_indices(index_global,&ibx,&iby,&ibz);
       
-      size_t ib = ibx + nbx*(iby + nby*ibz);
+      //      size_t ib = ibx + nbx*(iby + nby*ibz);
 
-      unit_assert_quiet (block_counter == ib);
-
+      unit_func("Layout","block_indices");
       unit_assert_quiet (unit_incomplete);
 
       // Test block extents
@@ -186,10 +192,16 @@ PARALLEL_MAIN_BEGIN
       block->upper (&xpb,&ypb,&zpb);
 
       // Not very rigorous
-
       unit_assert (xmb < xpb);
       unit_assert (ymb < ypb);
       unit_assert (zmb < zpb);
+
+      // More rigorous tests below, but require global indices
+      unit_func("Block","lower");
+      unit_assert (unit_incomplete);
+
+      unit_func("Block","upper");
+      unit_assert (unit_incomplete);
 
       // Need ib? which is not implemented yet; note comparing floating point
 
@@ -203,14 +215,24 @@ PARALLEL_MAIN_BEGIN
 
     }
 
-    
-    if (! block) {
-      WARNING("test_Patch","Block tests skipped since Block not allocated");
-    }
+    unit_func("Block","index_patch");
+    for (int ibz=0; ibz<nbz; ibz++) {
+      for (int iby=0; iby<nby; iby++) {
+	for (int ibx=0; ibx<nbx; ibx++) {
 
-    if (block && ! field_block) {
-      WARNING("test_Patch","Block tests skipped since FieldBlock not allocated");
+	  int jbx,jby,jbz;
+	  block->index_patch(&jbx,&jby,&jbz);
+	  printf ("%d %d %d\n",jbx,jby,jbz);
+	  unit_assert_quiet(ibx==jbx);
+	  unit_assert_quiet(iby==jby);
+	  unit_assert_quiet(ibz==jbz);
+	}
+      }
     }
+      
+    unit_func("Block","neighbor");
+    // Block::neighbor()
+    unit_assert(false);
 
     // TEST BLOCK PROPERTIES
     //    unit_assert(unit_incomplete);
@@ -219,15 +241,15 @@ PARALLEL_MAIN_BEGIN
 
   }
 
-  unit_func("num_blocks");
+  unit_func("Patch","num_blocks");
   unit_assert(block_counter == patch->num_blocks());
 
-  unit_assert(patch->block(0) != NULL);
+  unit_func("Patch","allocate_blocks");
 
   // Deallocate local blocks
 
   //--------------------------------------------------
-  unit_func("deallocate");
+  unit_func("Patch","deallocate_blocks");
 
   patch->deallocate_blocks();
 

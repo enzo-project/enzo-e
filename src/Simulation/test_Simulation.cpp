@@ -23,11 +23,9 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
-  unit_class ("Simulation");
-
   // Create the simulation
 
-  unit_func("Simulation");
+  unit_func("Simulation","Simulation");
 
   // NOTE: Need concrete EnzoSimulationSerial class since Simulation is 
   //       an abstract base class
@@ -43,7 +41,7 @@ PARALLEL_MAIN_BEGIN
 
   // Initialize the simulation
 
-  unit_func("initialize");
+  unit_func("Simulation","initialize");
 
   simulation->initialize();
 
@@ -51,49 +49,49 @@ PARALLEL_MAIN_BEGIN
 
   // Test accessor functions
 
-  unit_func("mesh");
+  unit_func("Simulation","mesh");
   unit_assert (simulation->mesh() != NULL);
 
-  unit_func("stopping");
+  unit_func("Simulation","stopping");
   unit_assert (simulation->stopping() != NULL);
 
-  unit_func("timestep");
+  unit_func("Simulation","timestep");
   unit_assert (simulation->timestep() != NULL);
 
-  unit_func("initial");
+  unit_func("Simulation","initial");
   unit_assert (simulation->initial() != NULL);
 
-  unit_func("boundary");
+  unit_func("Simulation","boundary");
   unit_assert (simulation->boundary() != NULL);
 
-  unit_func("num_method");
+  unit_func("Simulation","num_method");
   unit_assert (simulation->num_method() > 0);
 
-  unit_func("method");
+  unit_func("Simulation","method");
   for (int i=0; i<simulation->num_method(); i++) {
     unit_assert (simulation->method(i) != NULL);
   }
 
   // Run the simulation
 
-  unit_func("run");
+  unit_func("Simulation","run");
   simulation->run();
   unit_assert(unit_incomplete);
   
   // Load the simulation
 
-  unit_func("read");
+  unit_func("Simulation","read");
   simulation->read();
 
   // Save the simulation
 
-  unit_func("write");
+  unit_func("Simulation","write");
   simulation->write();
   unit_assert(unit_incomplete);
 
   // Finalize the simulation
 
-  unit_func("finalize");
+  unit_func("Simulation","finalize");
   simulation->finalize();
   unit_assert(unit_incomplete);
 

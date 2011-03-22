@@ -74,10 +74,12 @@ int Layout::local_count (int ip) throw()
 
 bool Layout::is_local (int ip, int ibx, int iby, int ibz) throw()
 {
+  WARNING("Layout::is_local",
+	  "index_first_local is never != for current test code");
   int block_count = block_count_[0] * block_count_[1] * block_count_[2];
   int ib = block_index(ibx,iby,ibz);
   int index_first_local = (ip-process_first_)*block_count/process_count_;
-  return 0 <= ib && ib < local_count(ip);
+  return 0 <= ib-index_first_local && ib-index_first_local < local_count(ip);
 }
 
 //----------------------------------------------------------------------

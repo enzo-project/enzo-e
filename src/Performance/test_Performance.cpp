@@ -24,8 +24,6 @@ PARALLEL_MAIN_BEGIN
 
   // Timer tests
 
-  unit_class ("Timer");
-
   PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
 
   timer.start();
@@ -38,7 +36,7 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
 
-  unit_func("start");
+  unit_func("Timer","start");
   unit_assert((timer.value() - 1.0) < time_tolerance);
 
   timer.start();
@@ -48,12 +46,10 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_PRINTF ("Initial timer value = %24.16f\n",timer.value());
 
-  unit_func("stop");
+  unit_func("Timer","stop");
   unit_assert((timer.value() - 2.0) < time_tolerance);
 
-  unit_class ("Performance");
-
-  unit_func("Performance");
+  unit_func("Performance","Performance");
 
   Performance * performance = new Performance ();
 
@@ -130,16 +126,16 @@ PARALLEL_MAIN_BEGIN
 
   unit_assert(true);
 
-  unit_func("new_attribute");
+  unit_func("Performance","new_attribute");
   unit_assert (unit_incomplete);
 
-  unit_func("new_counter");
+  unit_func("Performance","new_counter");
   unit_assert (unit_incomplete);
 
-  unit_func("new_group");
+  unit_func("Performance","new_group");
   unit_assert (unit_incomplete);
 
-  unit_func("new_region");
+  unit_func("Performance","new_region");
   unit_assert (unit_incomplete);
 
 
@@ -147,32 +143,32 @@ PARALLEL_MAIN_BEGIN
   // Attributes
   //--------------------------------------------------
 
-  unit_func("attribute");
+  unit_func("Performance","attribute");
   unit_assert (unit_incomplete);
 
-  unit_func("set_attribute");
+  unit_func("Performance","set_attribute");
   unit_assert (unit_incomplete);
 
-  unit_func("num_attributes");
+  unit_func("Performance","num_attributes");
   unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Groups
   //--------------------------------------------------
 
-  unit_func ("begin_group");
+  unit_func("Performance","begin_group");
 
 
-  unit_func("group");
+  unit_func("Performance","group");
   unit_assert (unit_incomplete);
 
-  unit_func("set_group");
+  unit_func("Performance","set_group");
   unit_assert (unit_incomplete);
 
-  unit_func("num_groups");
+  unit_func("Performance","num_groups");
   unit_assert (unit_incomplete);
 
-  unit_func("end_group");
+  unit_func("Performance","end_group");
   unit_assert (unit_incomplete);
 
   //--------------------------------------------------
@@ -180,71 +176,48 @@ PARALLEL_MAIN_BEGIN
   //--------------------------------------------------
 
 
-  unit_func("region");
+  unit_func("Performance","region");
   unit_assert (unit_incomplete);
 
-  unit_func("set_region");
+  unit_func("Performance","set_region");
   unit_assert (unit_incomplete);
 
-  unit_func("num_regions");
+  unit_func("Performance","num_regions");
   unit_assert (unit_incomplete);
 
-  unit_func("start_region");
+  unit_func("Performance","start_region");
   unit_assert (unit_incomplete);
 
-  unit_func("stop_region");
+  unit_func("Performance","stop_region");
   unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Counters
   //--------------------------------------------------
 
-  unit_func("counter");
+  unit_func("Performance","counter");
   unit_assert (unit_incomplete);
 
-  unit_func("set_counter");
+  unit_func("Performance","set_counter");
   unit_assert (unit_incomplete);
 
-  unit_func("increment_counter");
+  unit_func("Performance","increment_counter");
   unit_assert (unit_incomplete);
 
-  unit_func("num_counters");
+  unit_func("Performance","num_counters");
   unit_assert (unit_incomplete);
 
   //--------------------------------------------------
   // Disk
   //--------------------------------------------------
 
-  unit_func("flush");
+  unit_func("Performance","flush");
   unit_assert (unit_incomplete);
 
-  unit_func("~Performance");
+  unit_func("Performance","~Performance");
   unit_assert (unit_incomplete);
 
   delete performance;
-
-
-  Papi papi;
-
-  papi.start();
-  err = system("sleep 1");
-  if (err == -1) ERROR("main","system(sleep) failed!!");
-  papi.stop();
-
-  PARALLEL_PRINTF ("time_real = %f\n",papi.time_real());
-  PARALLEL_PRINTF ("time_proc = %f\n",papi.time_proc());
-
-  papi.start();
-  float a=1.0,b=2.5,c=0;
-  c = a*b+3.5;
-  papi.stop();
-
-  PARALLEL_PRINTF ("c=%f\n",c);
-  PARALLEL_PRINTF ("time_real  = %f\n",papi.time_real());
-  PARALLEL_PRINTF ("time_proc  = %f\n",papi.time_proc());
-  PARALLEL_PRINTF ("flop_count = %lld\n",papi.flop_count());
-  PARALLEL_PRINTF ("flop_rate = %f\n",papi.flop_rate());
-
 
   unit_finalize();
 

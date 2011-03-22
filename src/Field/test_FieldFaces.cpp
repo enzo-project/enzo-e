@@ -26,42 +26,54 @@ bool is_ghost(int ix,int iy,int iz,
 
 //----------------------------------------------------------------------
 
-double value (int ix, int iy, int iz,
+double init_value (int ix, int iy, int iz,
 	      int gx,int gy,int gz,
 	      int mdx, int mdy, int mdz,
-	      int k, int field, int M3, int N3)
+	      int index_block, int index_field, 
+	      int MD3, int ND3)
 {
   int i = ix + mdx * (iy + mdy * iz);
-  double v = i + M3 * (k + N3*field);
-  return is_ghost(ix,iy,iz,gx,gy,gz,mdx,mdy,mdz) ? v : -v;
+  double value = i + MD3 * (index_block + ND3*index_field);
+  return is_ghost(ix,iy,iz,gx,gy,gz,mdx,mdy,mdz) ? -value : value;
 }
+
 //----------------------------------------------------------------------
 
-void init_field_1(FieldBlock ** field_block,
-		  int k, int i, 
-		  int mx, int my, int mz,
-		  int M3, int N3)
+double test_value (int ix, int iy, int iz,
+	      int gx,int gy,int gz,
+	      int mdx, int mdy, int mdz,
+	      int index_block, int index_field, 
+	      int MD3, int ND3)
+{
+  int i = ix + mdx * (iy + mdy * iz);
+  double value = i + MD3 * (index_block + ND3*index_field);
+  return value;
+}
+
+//----------------------------------------------------------------------
+
+template<class T>
+void init_field(T * field_values,
+		int index_block, int index_field, 
+		int mx, int my, int mz,
+		int gx, int gy, int gz,
+		int ND3)
 {
 
-  const FieldDescr * field_descr = field_block[k]->field_descr();
-
-  int gx, gy, gz;
-
-  field_descr->ghosts(i, &gx, &gy, &gz);
-
-  int mdx, mdy, mdz;
-
-  mdx = mx + 2*gx;
-  mdy = my + 2*gy;
-  mdz = mz + 2*gz;
-
-  float * v = (float *) field_block[k]->field_values(i);
+  const int mdx = mx + 2*gx;
+  const int mdy = my + 2*gy;
+  const int mdz = mz + 2*gz;
+  const int MD3 = mdx*mdy*mdz;
 
   for (int iz = 0; iz < mdz; iz++) {
     for (int iy = 0; iy < mdy; iy++) {
       for (int ix = 0; ix < mdx; ix++) {
 	int i = ix + mdx * (iy + mdy * iz);
-	v[i] = value(ix,iy,iz,gx,gy,gz,mdx,mdy,mdz,k,0,M3,N3);
+	field_values[i] = init_value(ix,iy,iz,
+				     gx,gy,gz,
+				     mdx,mdy,mdz,
+				     index_block,index_field,
+				     MD3,ND3);
       }
     }
   }
@@ -69,68 +81,137 @@ void init_field_1(FieldBlock ** field_block,
 
 //----------------------------------------------------------------------
 
-void init_field_2(FieldBlock ** field_block,
-		  int k, int i, 
-		  int mx, int my, int mz,
-		  int M3, int N3)
+template<class T>
+bool test_field(T * field_values,
+		int index_block, int index_field, 
+		int mx, int my, int mz,
+		int gx, int gy, int gz,
+		int ND3)
 {
 
-  const FieldDescr * field_descr = field_block[k]->field_descr();
+  const int mdx = mx + 2*gx;
+  const int mdy = my + 2*gy;
+  const int mdz = mz + 2*gz;
+  const int MD3 = mdx*mdy*mdz;
 
-  int gx, gy, gz;
-
-  field_descr->ghosts(i, &gx, &gy, &gz);
-
-  int mdx, mdy, mdz;
-
-  mdx = mx + 2*gx;
-  mdy = my + 2*gy;
-  mdz = mz + 2*gz;
-
-  double * v = (double *) field_block[k]->field_values(i);
-
+  bool result = true;
   for (int iz = 0; iz < mdz; iz++) {
     for (int iy = 0; iy < mdy; iy++) {
       for (int ix = 0; ix < mdx; ix++) {
 	int i = ix + mdx * (iy + mdy * iz);
-	v[i] = value(ix,iy,iz,gx,gy,gz,mdx,mdy,mdz,k,1,M3,N3);
+	if (field_values[i] != test_value(ix,iy,iz,
+					  gx,gy,gz,
+					  mdx,mdy,mdz,
+					  index_block,index_field,
+					  MD3,ND3))
+	  result = false;
       }
     }
   }
-
+  return result;
 }
 
 //----------------------------------------------------------------------
 
-void init_field_3(FieldBlock ** field_block,
-		  int k, int i, 
-		  int mx, int my, int mz,
-		  int M3, int N3)
+void init_fields
+(
+ FieldDescr * field_descr,
+ FieldBlock * field_block[],
+ int nx,int ny, int nz,
+ int mx, int my, int mz)
 {
+  //--------------------------------------------------
+  // Initialize the field blocks in 4 x 4 x 4 array
+  //--------------------------------------------------
 
-  const FieldDescr * field_descr = field_block[k]->field_descr();
+  const int ND3 = nx*ny*nz;
 
-  int gx, gy, gz;
+  for (int kz = 0; kz < nz; kz++) {
+    for (int ky = 0; ky < ny; ky++) {
+      for (int kx = 0; kx < nx; kx++) {
 
-  field_descr->ghosts(i, &gx, &gy, &gz);
+	int index_block = kx + nx * (ky + ny * kz);
 
-  int mdx, mdy, mdz;
+	// Create the FaceBlock object
 
-  mdx = mx + 2*gx;
-  mdy = my + 2*gy;
-  mdz = mz + 2*gz;
+	field_block[index_block] = new FieldBlock (field_descr, mx, my, mz);
 
-  long double * v = (long double *) field_block[k]->field_values(i);
+	// Allocate field blocks including ghosts
 
-  for (int iz = 0; iz < mdz; iz++) {
-    for (int iy = 0; iy < mdy; iy++) {
-      for (int ix = 0; ix < mdx; ix++) {
-	int i = ix + mdx * (iy + mdy * iz);
-	v[i] = value(ix,iy,iz,gx,gy,gz,mdx,mdy,mdz,k,2,M3,N3);
+	field_block[index_block]->allocate_array();
+	field_block[index_block]->allocate_ghosts();
+
+	// Initialize fields
+
+	int gx, gy, gz;
+
+	// field 0
+	field_descr->ghosts(0, &gx, &gy, &gz);
+	float * v1 = (float *)
+	  (field_block[index_block]->field_values(0));
+	init_field(v1,index_block,0,mx,my,mz,gx,gy,gz,ND3);
+
+	// field 1
+	field_descr->ghosts(1, &gx, &gy, &gz);
+	double * v2 = (double *)
+	  (field_block[index_block]->field_values(1));
+	init_field(v2,index_block,1,mx,my,mz,gx,gy,gz,ND3);
+
+	// field 2
+	field_descr->ghosts(2, &gx, &gy, &gz);
+	long double * v3 = (long double *)
+	  (field_block[index_block]->field_values(2));
+	init_field(v3,index_block,2,mx,my,mz,gx,gy,gz,ND3);
+ 
       }
     }
   }
+}
 
+bool test_fields
+(
+ FieldDescr * field_descr,
+ FieldBlock * field_block[],
+ int nx,int ny, int nz,
+ int mx, int my, int mz)
+{
+  const int ND3 = nx*ny*nz;
+
+  bool result = true;
+
+  for (int kz = 0; kz < nz; kz++) {
+    for (int ky = 0; ky < ny; ky++) {
+      for (int kx = 0; kx < nx; kx++) {
+
+	int index_block = kx + nx * (ky + ny * kz);
+
+	int gx, gy, gz;
+
+	// field 0
+	field_descr->ghosts(0, &gx, &gy, &gz);
+	float * v1 = (float *)
+	  (field_block[index_block]->field_values(0));
+	result = result && 
+	  unit_assert(test_field(v1,index_block,0,mx,my,mz,gx,gy,gz,ND3)); 
+
+	// field 1
+	field_descr->ghosts(1, &gx, &gy, &gz);
+	double * v2 = (double *)
+	  (field_block[index_block]->field_values(1));
+	result = result &&
+	  unit_assert(test_field(v2,index_block,1,mx,my,mz,gx,gy,gz,ND3));
+
+	// field 2
+	field_descr->ghosts(2, &gx, &gy, &gz);
+	long double * v3 = (long double *)
+	  (field_block[index_block]->field_values(2));
+	result = result &&
+	  unit_assert(test_field(v3,index_block,2,mx,my,mz,gx,gy,gz,ND3));
+ 
+      }
+    }
+  }
+  return result;
 }
 
 //======================================================================
@@ -150,103 +231,72 @@ PARALLEL_MAIN_BEGIN
 
   // insert fields
 
-  int field_1 = field_descr->insert_field("field_1");
-  int field_2 = field_descr->insert_field("field_2");
-  int field_3 = field_descr->insert_field("field_3");
+  field_descr->insert_field("field_1");
+  field_descr->insert_field("field_2");
+  field_descr->insert_field("field_3");
 
   // initialize field precisions
 
-  field_descr->set_precision(field_1, precision_single);
-  field_descr->set_precision(field_2, precision_double);
-  field_descr->set_precision(field_3, precision_quadruple);
+  field_descr->set_precision(0, precision_single);
+  field_descr->set_precision(1, precision_double);
+  field_descr->set_precision(2, precision_quadruple);
 
   // initialize field ghost zone depths
 
-  field_descr->set_ghosts(field_1, 1,1,1);
-  field_descr->set_ghosts(field_2, 0,1,2);
-  field_descr->set_ghosts(field_3, 1,0,3);
+  field_descr->set_ghosts(0, 1,1,1);
+  field_descr->set_ghosts(1, 0,1,2);
+  field_descr->set_ghosts(2, 1,0,3);
 
-  const int mx = 4, my = 5, mz = 6;
 
-  const int M3 = (mx+2*1)*(my+2*1)*(mz+2*3);  // maximum size with ghosts
+  int nx=4, ny=4, nz=4;
+  FieldBlock * field_block[nx*ny*nz];
 
-  //--------------------------------------------------
-  // Initialize the field blocks in 4 x 4 x 4 array
-  //--------------------------------------------------
+  int mx=3, my=5, mz=6;
 
-  const int N  = 4;
-  const int N3 = N*N*N;
+  init_fields(field_descr,field_block,nx,ny,nz,mx,my,mz);
 
-  FieldBlock * field_block[N3];
+  //----------------------------------------------------------------------
+  // Refresh all lower x-axis ghosts
+  //----------------------------------------------------------------------
 
-  for (int kz = 0; kz < N; kz++) {
-    for (int ky = 0; ky < N; ky++) {
-      for (int kx = 0; kx < N; kx++) {
+  for (int kz = 0; kz < nz; kz++) {
+    for (int ky = 0; ky < ny; ky++) {
+      for (int kx = 0; kx < (nx-1); kx++) { // kx < (nx-1)
 
-	int k = kx + N * (ky + N * kz);
-
-	// Create the FaceBlock object
-
-	field_block[k] = new FieldBlock (field_descr, mx, my, mz);
-
-	// Allocate field blocks including ghosts
-
-	field_block[k]->allocate_array();
-	field_block[k]->allocate_ghosts();
-
-	// Initialize fields
-	// (each field initialized separately since each has different
-	// ghost zone depth)
-
-	init_field_1(field_block,k,field_1,mx,my,mz,M3,N3);
-	init_field_2(field_block,k,field_2,mx,my,mz,M3,N3);
-	init_field_3(field_block,k,field_3,mx,my,mz,M3,N3);
-
-      }
-    }
-  }
-
-  // Send/recv faces in xp direction
-
-  INCOMPLETE("test_FieldFaces");
-  // send xp faces
-
-  for (int kz = 0; kz < N; kz++) {
-    for (int ky = 0; ky < N; ky++) {
-      for (int kx = 0; kx < N-1; kx++) {
-
-	int index_lower = kx + N * (ky + N * kz);
+	int index_lower = kx + nx * (ky + ny * kz);
 	FieldBlock * field_lower = field_block[index_lower];
 	FieldFaces * faces_lower = field_lower->field_faces();
-	int index_upper = (kx + 1) + N * (ky + N * kz);
+	int index_upper = (kx + 1) + nx * (ky + ny * kz);
 	FieldBlock * field_upper = field_block[index_upper];
 	FieldFaces * faces_upper = field_upper->field_faces();
 
-	faces_lower -> load(field_lower, -1, axis_x, face_upper);
-	faces_lower -> copy(faces_upper, -1, axis_x, face_upper);
+	// -1 == all fields
+	faces_lower -> load(field_lower, -1, axis_x,  face_upper);
+	faces_lower -> copy(faces_upper, -1, axis_x,  face_upper);
 	faces_upper -> store(field_upper, -1, axis_x, face_lower);
 
       }
     }
   }
 
-  // receive xm ghosts
-	
-  for (int kz = 0; kz < N; kz++) {
-    for (int ky = 0; ky < N; ky++) {
-      for (int kx = 1; kx < N; kx++) {
+  unit_func("FieldFaces","load/copy/store");
+  unit_assert(test_fields(field_descr,field_block,nx,ny,nz,mx,my,mz));
+
+  //----------------------------------------------------------------------	
+  // clean up
+  //----------------------------------------------------------------------	
+
+  for (int kz = 0; kz < nz; kz++) {
+    for (int ky = 0; ky < ny; ky++) {
+      for (int kx = 1; kx < nx; kx++) {
+	int index_block = kx + nx * (ky + ny * kz);
+	delete field_block[index_block];
+	field_block[index_block] = 0;
       }
     }
   }
 
-  // Test values
-
-  for (int kz = 0; kz < N; kz++) {
-    for (int ky = 0; ky < N; ky++) {
-      for (int kx = 1; kx < N; kx++) {
-      }
-    }
-  }
+  delete field_descr;
 
   // Send all faces
 

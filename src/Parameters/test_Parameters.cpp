@@ -111,8 +111,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_init (parallel->rank(), parallel->size());
 
-  unit_class ("Parameters");
-
   //----------------------------------------------------------------------
   // test parameter
   //----------------------------------------------------------------------
@@ -125,18 +123,18 @@ PARALLEL_MAIN_BEGIN
 
   // Read
 
-  unit_func("read");
+  unit_func("Parameters","read");
   FILE * fpin = fopen ("test.in","r");
   parameters->read ( fpin );
 
   // set_current_group()
 
-  unit_func("set_current_group");
+  unit_func("Parameters","set_current_group");
   parameters->set_current_group("Group");
   unit_assert(parameters->current_group() == "Group");
 
   // set_current_subgroup()
-  unit_func("set_current_subgroup");
+  unit_func("Parameters","set_current_subgroup");
   parameters->set_current_subgroup("subgroup_1");
   unit_assert(parameters->current_subgroup() == "subgroup_1");
   parameters->set_current_subgroup("subgroup_2");
@@ -144,14 +142,14 @@ PARALLEL_MAIN_BEGIN
 
   // set_current_group() without set_current_subgroup() clears subgroup to ""
 
-  unit_func("set_current_group");
+  unit_func("Parameters","set_current_group");
   parameters->set_current_group("Group2");
   unit_assert(parameters->current_group() == "Group2");
   unit_assert(parameters->current_subgroup() == "");
 
   // value_logical()
 
-  unit_func("value_logical");
+  unit_func("Parameters","value_logical");
 
   parameters->set_current_group("Logical");
   
@@ -178,7 +176,7 @@ PARALLEL_MAIN_BEGIN
 
   // set_logical()
 
-  unit_func("set_logical");
+  unit_func("Parameters","set_logical");
 
   parameters->set_logical("test_true",false);
   unit_assert (parameters->value_logical("test_true") == false);
@@ -191,7 +189,7 @@ PARALLEL_MAIN_BEGIN
 
   // value_integer()
 
-  unit_func("value_integer");
+  unit_func("Parameters","value_integer");
 
   parameters->set_current_group("Integer");
   
@@ -210,7 +208,7 @@ PARALLEL_MAIN_BEGIN
 
   // set_integer()
 
-  unit_func("set_integer");
+  unit_func("Parameters","set_integer");
 
   parameters->set_integer("test_1",2);
   unit_assert (parameters->value_integer("test_1") == 2);
@@ -222,7 +220,7 @@ PARALLEL_MAIN_BEGIN
 
   // value_scalar()
   
-  unit_func("value_scalar");
+  unit_func("Parameters","value_scalar");
 
   parameters->set_current_group("Scalar");
   
@@ -243,7 +241,7 @@ PARALLEL_MAIN_BEGIN
 
   // set_scalar()
 
-  unit_func("set_scalar");
+  unit_func("Parameters","set_scalar");
 
   parameters->set_scalar("test_1_5",27.0);
   unit_assert (parameters->value_scalar("test_1_5") == 27.0);
@@ -253,7 +251,7 @@ PARALLEL_MAIN_BEGIN
   // Constant scalar expressions
   // subgroups
 
-  unit_func("value_scalar");
+  unit_func("Parameters","value_scalar");
 
   parameters->set_current_group("Scalar");
 
@@ -272,7 +270,7 @@ PARALLEL_MAIN_BEGIN
 
   // Strings
 
-  unit_func("value_string");
+  unit_func("Parameters","value_string");
 
   parameters->set_current_group("String");
   unit_assert(strcmp(parameters->value_string("str1"),"testing")==0);
@@ -289,7 +287,7 @@ PARALLEL_MAIN_BEGIN
 
   // set_string()
 
-  unit_func("set_string");
+  unit_func("Parameters","set_string");
 
   parameters->set_string("str1","yahoo");
   unit_assert (strcmp(parameters->value_string("str1"),"yahoo")==0);
@@ -298,7 +296,7 @@ PARALLEL_MAIN_BEGIN
 
   // Variable scalar expressions
 
-  unit_func("evaluate_scalar");
+  unit_func("Parameters","evaluate_scalar");
 
   double x[] = { 1, 2, 3};
   double y[] = {5 , 4, 3};
@@ -341,7 +339,7 @@ PARALLEL_MAIN_BEGIN
 
   // Logical expressions
 
-  unit_func("evaluate_logical");
+  unit_func("Parameters","evaluate_logical");
 
   bool values_logical[] = {false, false, false};
   bool deflts_logical[] = {true, false,true};
@@ -368,28 +366,28 @@ PARALLEL_MAIN_BEGIN
 
   parameters->set_current_group("List");
 
-  unit_func("list_length");
+  unit_func("Parameters","list_length");
   unit_assert(parameters->list_length("num1") == 6);
 
-  unit_func("list_value_scalar");
+  unit_func("Parameters","list_value_scalar");
   unit_assert(parameters->list_value_scalar(0,"num1") == 1.0);
 
-  unit_func("list_value_logical");
+  unit_func("Parameters","list_value_logical");
   unit_assert(parameters->list_value_logical(1,"num1") == true);
 
-  unit_func("list_value_integer");
+  unit_func("Parameters","list_value_integer");
   unit_assert(parameters->list_value_integer(2,"num1") == 37);
 
-  unit_func("list_value_string");
+  unit_func("Parameters","list_value_string");
   unit_assert(strcmp(parameters->list_value_string(3,"num1"),"string")==0);
 
-  unit_func("list_evaluate_scalar");
+  unit_func("Parameters","list_evaluate_scalar");
   parameters->list_evaluate_scalar(4,"num1",3,values_scalar,deflts_scalar,x,y,z,t);
   unit_assert (values_scalar[0] == (x[0]-y[0]+2.0*z[0]));
   unit_assert (values_scalar[1] == (x[1]-y[1]+2.0*z[1]));
   unit_assert (values_scalar[2] == (x[2]-y[2]+2.0*z[2]));
 
-  unit_func("list_evaluate_logical");
+  unit_func("Parameters","list_evaluate_logical");
   parameters->list_evaluate_logical(5,"num1",3,values_logical,deflts_logical,x,y,z,t);
   unit_assert (values_logical[0] == (x[0]+y[0]+t[0] > 0 ));
   unit_assert (values_logical[1] == (x[1]+y[1]+t[1] > 0 ));
@@ -397,7 +395,7 @@ PARALLEL_MAIN_BEGIN
 
   // group_count(), group(i)
 
-  unit_func("group_count");
+  unit_func("Parameters","group_count");
 
   int num_groups = parameters->group_count();
   // Groups:
@@ -410,7 +408,7 @@ PARALLEL_MAIN_BEGIN
   //  String
   unit_assert (num_groups == 7); 
 
-  unit_func("subgroup_count");
+  unit_func("Parameters","subgroup_count");
   std::map <std::string,int> num_subgroups;
   num_subgroups["Integer"]      = 1; // ""
   num_subgroups["List"]         = 1; // ""
@@ -428,10 +426,10 @@ PARALLEL_MAIN_BEGIN
   
   // Write
 
-  unit_func("write");
+  unit_func("Parameters","write");
   FILE * fpout = fopen ("test.out","w");
   parameters->write ( fpout );
-  unit_assert(0); //FAILS
+  unit_assert(unit_incomplete);
 
   unit_finalize();
 

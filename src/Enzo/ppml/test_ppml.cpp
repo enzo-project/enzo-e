@@ -124,8 +124,7 @@ PARALLEL_MAIN_BEGIN
   double lower = 0.125*size;
   double upper =   1.0*size;
 
-  unit_class("enzo");
-  unit_func("SolveMHDEquations");
+  unit_func("Enzo","SolveMHDEquations");
 
   for (cycle = 0, time = 0.0;
        (cycle < cycle_stop) && (time < time_stop);

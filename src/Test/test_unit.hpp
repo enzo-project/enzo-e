@@ -23,10 +23,10 @@ namespace unit {
   /// @ingroup   Test
   /// @brief     [\ref Test] Current class name, function name, and test results
        
-  char class_name[UNIT_MAX_NAME_LEN] = {0};
-  char func_name [UNIT_MAX_NAME_LEN] = {0};
+  char class_name [UNIT_MAX_NAME_LEN] = {"CLASS_NAME"};
+  char func_name  [UNIT_MAX_NAME_LEN] = {"FUNC_NAME"};
 
-  int test_num = 1;
+  int test_num = 0;
 
   //const char * pass_string = "\033[01;32mPass\033[00m";
   //const char * fail_string = "\033[01;31mFAIL\033[00m";
@@ -43,8 +43,6 @@ void unit_init (int rank = 0, int count = 1)
 {
   unit::process_rank  = rank;
   unit::process_count = count;
-  unit::class_name[0] = 0;
-  unit::func_name[0]  = 0;
   if (unit::process_rank == 0) {
     PARALLEL_PRINTF ("UNIT TEST BEGIN\n");
   }
@@ -58,10 +56,11 @@ void unit_finalize ()
   }
 }
 
-/// @brief Set the current unit testing class name
-void unit_class (const char * c)
+/// @brief Set the current unit testing function name
+void unit_func (const char * class_name, const char * func_name)
 {
-  strncpy (unit::class_name,c,UNIT_MAX_NAME_LEN);
+  strncpy (unit::class_name,class_name,UNIT_MAX_NAME_LEN);
+  strncpy (unit::func_name, func_name, UNIT_MAX_NAME_LEN);
 }
 
 /// @brief Write the size of the class in bytes
@@ -73,12 +72,6 @@ void unit_size ()
   }
 }
 
-/// @brief Set the current unit testing function name
-void unit_func (const char * f)
-{
-  strncpy (unit::func_name,f,UNIT_MAX_NAME_LEN);
-}
-
 /// @brief Assert result of test; macro used for FILE and LINE expansion
 #define unit_assert(RESULT) \
   unit_assert_(RESULT, __FILE__,__LINE__);
@@ -88,7 +81,7 @@ void unit_func (const char * f)
   unit_assert_(RESULT, __FILE__,__LINE__,true);
 
 /// @brief Assert result of test macro; called by unit_assert macro
-void unit_assert_ (int result, const char * file, int line, bool quiet=false)
+bool unit_assert_ (int result, const char * file, int line, bool quiet=false)
 {
   // Only print Pass on local process
   if (unit::process_rank == 0 || ! result) { 
@@ -102,19 +95,19 @@ void unit_assert_ (int result, const char * file, int line, bool quiet=false)
       } else {
 	result_string = unit::incomplete_string;
       }
-      PARALLEL_PRINTF ("%s %d/%d %s %d %s %s %d\n",
+      PARALLEL_PRINTF ("%s %d/%d %s %d %s %s\n",
 		       result_string,
 		       unit::process_rank, 
 		       unit::process_count,
 		       file, 
 		       line, 
-		       unit::class_name,
 		       unit::func_name,
-		       unit::test_num);
+		       unit::func_name);
       fflush(stdout);
     }
   }
   unit::test_num++;
+  return result;
 }
 
 #endif

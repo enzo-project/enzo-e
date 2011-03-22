@@ -268,7 +268,7 @@ size_t Patch::num_blocks() const  throw()
 
 //----------------------------------------------------------------------
 
-Block * Patch::block(size_t i) const throw()
+Block * Patch::local_block(size_t i) const throw()
 {
   return (i < block_.size()) ? block_[i] : 0;
 }

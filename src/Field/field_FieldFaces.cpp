@@ -35,7 +35,6 @@ FieldFaces::FieldFaces(const FieldFaces & field_faces) throw ()
     index_faces_()
 /// @param     FieldFaces  Object being copied
 {
-  UNTESTED("FieldFaces");
   array_        = field_faces.array_;
   index_ghosts_ = field_faces.index_ghosts_;
   index_faces_  = field_faces.index_faces_;
@@ -65,7 +64,6 @@ void FieldFaces::load
 {
   const FieldDescr * field_descr = field_block->field_descr();
 
-  UNTESTED("FieldFaces::load");
   if (field == -1) {
     int num_fields = field_descr->field_count();
     // WARNING: recursive
@@ -87,44 +85,21 @@ void FieldFaces::load
     int ng[3];
     field_descr->ghosts(field,&ng[0],&ng[1],&ng[2]);
     // Compute permutation indices
-    int iax=(axis+1) % 3;
-    int iay=(axis+2) % 3;
     switch (precision) {
     case precision_single:
-      for (int iz = 0; iz <ng[axis]; iz++)  {
-	for (int iy=0; iy < n[iay]; iy++) {
-	  for (int ix=0; ix < n[iax]; ix++) {
-	    int index_field = ix*nd[iax] + iy*nd[iay] + (iz+ng[axis])*nd[axis];
-	    int index_face  = iz + ng[axis]*(ix + n[iax]*iy);
-	    ((float *)(face_values))[index_face] = 
-	      ((float *) (field_values))[index_field];
-	  }
-	}
-      }
+      load_precision_((float * )(face_values),
+		      (float * )(field_values),
+		      n,nd,ng,axis,face);
       break;
     case precision_double:
-      for (int iz = 0; iz <ng[axis]; iz++)  {
-	for (int iy=0; iy < n[iay]; iy++) {
-	  for (int ix=0; ix < n[iax]; ix++) {
-	    int index_field = ix*nd[iax] + iy*nd[iay] + (iz+ng[axis])*nd[axis];
-	    int index_face  = iz + ng[axis]*(ix + n[iax]*iy);
-	    ((double *)(face_values))[index_face] = 
-	      ((double *) (field_values))[index_field];
-	  }
-	}
-      }
+      load_precision_((double * )(face_values),
+		      (double * )(field_values),
+		      n,nd,ng,axis,face);
       break;
     case precision_quadruple:
-      for (int iz = 0; iz <ng[axis]; iz++)  {
-	for (int iy=0; iy < n[iay]; iy++) {
-	  for (int ix=0; ix < n[iax]; ix++) {
-	    int index_field = ix*nd[iax] + iy*nd[iay] + (iz+ng[axis])*nd[axis];
-	    int index_face  = iz + ng[axis]*(ix + n[iax]*iy);
-	    ((long double *)(face_values))[index_face] = 
-	      ((long double *) (field_values))[index_field];
-	  }
-	}
-      }
+      load_precision_((long double * )(face_values),
+		      (long double * )(field_values),
+		      n,nd,ng,axis,face);
       break;
     default:
       ERROR("FieldFaces::load", "Unsupported precision");
@@ -163,8 +138,6 @@ void FieldFaces::store
 
 void FieldFaces::allocate_(FieldBlock * field_block) throw()
 {
-  UNTESTED("FieldFaces::allocate_");
-
   const FieldDescr * field_descr = field_block->field_descr();
 
   size_t num_fields = field_descr->field_count();
@@ -172,25 +145,21 @@ void FieldFaces::allocate_(FieldBlock * field_block) throw()
   index_faces_.reserve (num_fields*3*2);
   index_ghosts_.reserve(num_fields*3*2);
 
-  // Determine array_ size
-
   int array_size = 0;
-
-  // Determine array_ size
-
   int array_index = 0;
-  for (size_t field = 0; field < num_fields; field++) {
+
+  for (size_t index_field = 0; index_field < num_fields; index_field++) {
 
     // Need element size for alignment adjust below
 
-    precision_enum precision = field_descr->precision(field);
+    precision_enum precision = field_descr->precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
     // Get field block dimensions n3[]
     // Get field_size, which includes ghosts and precision adjustments
 
     int axis_length[3];
-    int field_bytes = field_block->field_size (field, 
+    int field_bytes = field_block->field_size (index_field, 
 					      &axis_length[0], 
 					      &axis_length[1], 
 					      &axis_length[2]);
@@ -198,7 +167,7 @@ void FieldFaces::allocate_(FieldBlock * field_block) throw()
     // Get ghost depth
 
     int ghost_count[3];
-    field_descr->ghosts(field,
+    field_descr->ghosts(index_field,
 			&ghost_count[0],
 			&ghost_count[1],
 			&ghost_count[2]);
@@ -209,20 +178,21 @@ void FieldFaces::allocate_(FieldBlock * field_block) throw()
 
       int face_bytes = ghost_count[axis] * field_bytes / axis_length [axis];
 
-      face_bytes += field_block->adjust_alignment_(face_bytes,bytes_per_element);
+      face_bytes += 
+	field_block->adjust_alignment_(face_bytes,bytes_per_element);
 
-      // 4: (lower, upper) x (ghost, faces)
+      // four arrays of this size: lower and upper, ghosts and faces
 
       array_size += 4 * face_bytes;
 
       // Initialize the array_ offsets
 
-      int index_lower = index_(field,axis,face_lower);
+      int index_lower = index_(index_field,axis,face_lower);
 
       index_faces_ [index_lower] = array_index;  array_index += face_bytes;
       index_ghosts_[index_lower] = array_index;  array_index += face_bytes;
 
-      int index_upper = index_(field,axis,face_upper);
+      int index_upper = index_(index_field,axis,face_upper);
 
       index_faces_ [index_upper] = array_index;  array_index += face_bytes;
       index_ghosts_[index_upper] = array_index;  array_index += face_bytes;
@@ -246,3 +216,23 @@ void FieldFaces::deallocate_() throw()
 
 //----------------------------------------------------------------------
 
+template<class T>
+void FieldFaces::load_precision_
+(
+ T * face_values, T * field_values,
+ int n[3], int nd[3], int ng[3],
+ axis_enum axis, face_enum face 
+)
+{
+  int iax=(axis+1) % 3;
+  int iay=(axis+2) % 3;
+  for (int iz = 0; iz <ng[axis]; iz++)  {
+    for (int iy=0; iy < n[iay]; iy++) {
+      for (int ix=0; ix < n[iax]; ix++) {
+	int index_field = ix*nd[iax] + iy*nd[iay] + (iz+ng[axis])*nd[axis];
+	int index_face  = iz + ng[axis]*(ix + n[iax]*iy);
+	face_values[index_face] = field_values[index_field];
+      }
+    }
+  }
+}

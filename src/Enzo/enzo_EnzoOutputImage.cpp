@@ -46,7 +46,7 @@ void EnzoOutputImage::write
 
   // Get field_descr (eventually)
 
-  Block * block = mesh->root_patch()->block(0);
+  Block * block = mesh->root_patch()->local_block(0);
   if (block == NULL) return;
   FieldBlock       * field_block = block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
@@ -106,7 +106,7 @@ void EnzoOutputImage::write
 	    "EnzoOutputImage only supports 2D problems");
   }
 
-  Block * block = patch->block(0);
+  Block * block = patch->local_block(0);
   FieldBlock       * field_block = block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
 

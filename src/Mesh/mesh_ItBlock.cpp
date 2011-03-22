@@ -30,7 +30,7 @@ Block * ItBlock::operator++ () throw()
 {
   index1_ ++;
   if (index1_ > patch_->num_blocks()) index1_ = 0;
-  return index1_ ? patch_->block(index1_ - 1) : 0;
+  return index1_ ? patch_->local_block(index1_ - 1) : 0;
 }
 
 //----------------------------------------------------------------------

@@ -20,8 +20,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_init();
 
-  unit_class ("Error");
-
   //----------------------------------------------------------------------
   PARALLEL_PRINTF ("Warning message:\n");
 
@@ -29,7 +27,7 @@ PARALLEL_MAIN_BEGIN
   sprintf (warning_message,"Warning message test");
   WARNING("main",warning_message);
 
-  unit_func("WARNING");
+  unit_func("Error","WARNING");
   unit_assert (true);
 
   //----------------------------------------------------------------------
@@ -37,7 +35,7 @@ PARALLEL_MAIN_BEGIN
 
   INCOMPLETE("main");
 
-  unit_func("INCOMPLETE");
+  unit_func("Error","INCOMPLETE");
   unit_assert (true);
 
   unit_finalize();

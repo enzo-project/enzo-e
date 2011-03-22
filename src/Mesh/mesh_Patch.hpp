@@ -77,8 +77,8 @@ public: // interface
   /// Return the total number of local blocks
   size_t num_blocks() const throw();
 
-  /// Return the ith block
-  Block * block(size_t i) const throw();
+  /// Return the ith local block
+  Block * local_block(size_t i) const throw();
 
   GroupProcess * group()  const throw()
   { return group_process_; };

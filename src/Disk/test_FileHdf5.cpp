@@ -37,9 +37,7 @@ PARALLEL_MAIN_BEGIN
     }
   }
 
-  unit_class ("FileHdf5");
-
-  unit_func("open_file");
+  unit_func("FileHdf5","open_file");
 
   FileHdf5 hdf5;
 
@@ -75,7 +73,9 @@ PARALLEL_MAIN_BEGIN
   delete [] a;
   delete [] b;
 
-  unit_func("read,write");
+  unit_func("FileHdf5","read");
+  unit_assert(passed);
+  unit_func("FileHdf5","write");
   unit_assert(passed);
 
   unit_finalize();
