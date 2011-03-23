@@ -163,9 +163,7 @@ void Simulation::initialize_simulation_() throw()
   // parameter: Physics::dimensions
   //--------------------------------------------------
 
-  dimension_ = parameters_->value_integer("dimensionos",0);
-
-
+  dimension_ = parameters_->value_integer("dimensions",0);
 
 }
 
@@ -419,12 +417,15 @@ void Simulation::initialize_output_() throw()
 
   // Create and initialize an Output object for each Output group
 
+  //--------------------------------------------------
+  parameters_->set_current_group("Output");
+  //--------------------------------------------------
+
   for (int index_group=0; index_group < num_groups; index_group++) {
 
     std::string group = parameters_->subgroup(index_group);
 
     //--------------------------------------------------
-    parameters_->set_current_group("Output");
     parameters_->set_current_subgroup(group);
     //--------------------------------------------------
     // parameter: Output:<group>:type
