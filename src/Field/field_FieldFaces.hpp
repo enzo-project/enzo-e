@@ -47,8 +47,9 @@ public: // interface
 	    axis_enum          axis=axis_all, 
 	    face_enum          face=face_all) throw();
 
-  /// Copy face data to ghost data
+  /// Copy neighbor face data into ghost data
   void copy(const FieldFaces * field_face,
+	    const FieldBlock * field_block,
 	    int                field=-1,
 	    axis_enum          axis=axis_all, 
 	    face_enum          face=face_all) throw();
@@ -71,21 +72,28 @@ private: // functions
   size_t index_(size_t field, size_t axis, size_t face) 
   { return face + 2*(axis + 3*field); };
 
-  /// Precision-agnostic function for copying field block faces into
+  /// Precision-agnostic function for loading field block faces into
   /// the field_faces array
   template<class T>
   void load_precision_
-  (T * face_values, T * field_values,
+  (T * array_faces, const T * field_faces,
    int n[3], int nd[3], int ng[3],
-   axis_enum axis, face_enum face );
+   axis_enum axis, face_enum face ) throw();
+
+  /// Precision-agnostic function for copying neighbor faces array to
+  /// ghosts array
+  template<class T>
+  void copy_precision_
+  (T * array_ghosts, const T * array_faces,
+   int n) throw();
 
   /// Precision-agnostic function for copying the field_faces array into
   /// the field block ghosts
   template<class T>
-  void save_precision_
-  (T * face_values, T * field_values,
+  void store_precision_
+  (T * field_ghosts, const T * array_ghosts, 
    int n[3], int nd[3], int ng[3],
-   axis_enum axis, face_enum face );
+   axis_enum axis, face_enum face ) throw();
 
 private: // attributes
 

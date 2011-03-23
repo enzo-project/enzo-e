@@ -57,9 +57,9 @@ FieldFaces & FieldFaces::operator= (const FieldFaces & field_faces) throw ()
 void FieldFaces::load
 (
  const FieldBlock * field_block,
- int field,
- axis_enum axis,
- face_enum face
+ int                field,
+ axis_enum          axis,
+ face_enum          face
  ) throw()
 {
   const FieldDescr * field_descr = field_block->field_descr();
@@ -74,32 +74,36 @@ void FieldFaces::load
     // Get precision
     precision_enum precision = field_descr->precision(field);
     // Get field values and face array
-    const char * field_values = field_block->field_values(field);
-    char * face_values  = &array_[index_faces_[index_(field,axis,face)]];
+    const char * field_face = field_block->field_values(field);
+    char * array_face  = &array_[index_faces_[index_(field,axis,face)]];
     // Get field (and face) dimensions
-    int n[3];
-    field_block->field_size(field,&n[0],&n[1],&n[2]);
+    int nd3[3];
+    field_block->field_size(field,&nd3[0],&nd3[1],&nd3[2]);
     // Compute multipliers for index calculations
-    int nd[3] = {1, n[0], n[0]*n[1]};
+    int md3[3] = {1, nd3[0], nd3[0]*nd3[1]};
     // Get ghost depth
-    int ng[3];
-    field_descr->ghosts(field,&ng[0],&ng[1],&ng[2]);
+    int ng3[3];
+    field_descr->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
     // Compute permutation indices
     switch (precision) {
     case precision_single:
-      load_precision_((float * )(face_values),
-		      (float * )(field_values),
-		      n,nd,ng,axis,face);
+      load_precision_((float * )      (array_face),
+		      (const float * )(field_face),
+		      nd3,md3,ng3,axis,face);
+      // for (int i=0; i<ng3[axis]*nd3[(axis+1)%3]*nd3[(axis+2)%3]; i++) {
+      // 	printf ("%g ",((float *)(array_face))[i]);
+      // }
+      // printf ("\n");
       break;
     case precision_double:
-      load_precision_((double * )(face_values),
-		      (double * )(field_values),
-		      n,nd,ng,axis,face);
+      load_precision_((double * )      (array_face),
+		      (const double * )(field_face),
+		      nd3,md3,ng3,axis,face);
       break;
     case precision_quadruple:
-      load_precision_((long double * )(face_values),
-		      (long double * )(field_values),
-		      n,nd,ng,axis,face);
+      load_precision_((long double * )      (array_face),
+		      (const long double * )(field_face),
+		      nd3,md3,ng3,axis,face);
       break;
     default:
       ERROR("FieldFaces::load", "Unsupported precision");
@@ -112,13 +116,61 @@ void FieldFaces::load
 
 void FieldFaces::copy
 (
- const FieldFaces * field_faces,
+ const FieldFaces * neighbor_faces,
+ const FieldBlock * field_block, // required for field_descr and array size
  int field,
  axis_enum axis,
  face_enum face
  ) throw()
 {
-  INCOMPLETE("FieldFaces::copy");
+  const FieldDescr * field_descr = field_block->field_descr();
+
+  if (field == -1) {
+    int num_fields = field_descr->field_count();
+    // WARNING: recursive
+    for (int i=0; i<num_fields; i++) {
+      copy (neighbor_faces,field_block,i,axis,face);
+    }
+  } else {
+    // Get precision
+    precision_enum precision = field_descr->precision(field);
+    // Get face array and ghosts array
+    int index_face  = index_(field,axis,1-face);
+    int index_ghost = index_(field,axis,face);
+    const char * array_face = &neighbor_faces->array_[index_faces_[index_face]];
+    char *       array_ghost=          &this->array_[index_ghosts_[index_ghost]];
+    // Get ghost depth
+    int ng3[3];
+    field_descr->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
+    // Get field (and face) dimensions
+    int nd3[3];
+    field_block->field_size(field,&nd3[0],&nd3[1],&nd3[2]);
+    // Compute permutation indices
+    int iax=(axis+1) % 3;
+    int iay=(axis+2) % 3;
+    // Compute array length
+    int n = ng3[axis]*nd3[iax]*nd3[iay];
+    // printf ("C axis %d face %d: ",axis,face);
+    switch (precision) {
+    case precision_single:
+      copy_precision_(      (float * )(array_ghost),
+		      (const float * )(array_face),
+		      n);
+      break;
+    case precision_double:
+      copy_precision_(      (double * )(array_ghost),
+		      (const double * )(array_face),
+		      n);
+      break;
+    case precision_quadruple:
+      copy_precision_(      (long double * )(array_ghost),
+		      (const long double * )(array_face),
+		      n);
+      break;
+    default:
+      ERROR("FieldFaces::store", "Unsupported precision");
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -126,12 +178,54 @@ void FieldFaces::copy
 void FieldFaces::store
 (
  FieldBlock * field_block,
- int field,
- axis_enum axis,
- face_enum face
+ int          field,
+ axis_enum    axis,
+ face_enum    face
  ) throw()
 {
-  INCOMPLETE("FieldFaces::store");
+  const FieldDescr * field_descr = field_block->field_descr();
+
+  if (field == -1) {
+    int num_fields = field_descr->field_count();
+    // WARNING: recursive
+    for (int i=0; i<num_fields; i++) {
+      store (field_block,i,axis,face);
+    }
+  } else {
+    // Get precision
+    precision_enum precision = field_descr->precision(field);
+    // Get field values and face array
+    const char * field_ghost = field_block->field_values(field);
+    char * array_ghost  = &array_[index_ghosts_[index_(field,axis,face)]];
+    // Get field (and face) dimensions
+    int nd3[3];
+    field_block->field_size(field,&nd3[0],&nd3[1],&nd3[2]);
+    // Compute multipliers for index calculations
+    int md3[3] = {1, nd3[0], nd3[0]*nd3[1]};
+    // Get ghost depth
+    int ng3[3];
+    field_descr->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
+    // Compute permutation indices
+    switch (precision) {
+    case precision_single:
+      store_precision_((float * )      (field_ghost),
+		       (const float * )(array_ghost),
+		       nd3,md3,ng3,axis,face);
+      break;
+    case precision_double:
+      store_precision_((double * )      (field_ghost),
+		       (const double * )(array_ghost),
+		       nd3,md3,ng3,axis,face);
+      break;
+    case precision_quadruple:
+      store_precision_((long double * )      (field_ghost),
+		       (const long double * )(array_ghost),
+		       nd3,md3,ng3,axis,face);
+      break;
+    default:
+      ERROR("FieldFaces::store", "Unsupported precision");
+    }
+  }
 }
 
 //----------------------------------------------------------------------
@@ -155,7 +249,7 @@ void FieldFaces::allocate_(FieldBlock * field_block) throw()
     precision_enum precision = field_descr->precision(index_field);
     int bytes_per_element = cello::sizeof_precision (precision);
 
-    // Get field block dimensions n3[]
+    // Get field block dimensions nd3[]
     // Get field_size, which includes ghosts and precision adjustments
 
     int axis_length[3];
@@ -196,7 +290,9 @@ void FieldFaces::allocate_(FieldBlock * field_block) throw()
 
       index_faces_ [index_upper] = array_index;  array_index += face_bytes;
       index_ghosts_[index_upper] = array_index;  array_index += face_bytes;
-
+      // printf ("axis %d  dims %d %d %d  ghosts %d %d %d face_bytes = %d\n",
+      // 	      axis, axis_length[0], axis_length[1], axis_length[2],
+      // 	      ghost_count[0], ghost_count[1], ghost_count[2], face_bytes);
     }
   }
 
@@ -219,76 +315,100 @@ void FieldFaces::deallocate_() throw()
 template<class T>
 void FieldFaces::load_precision_
 (
- T * face_values, T * field_values,
- int n[3], int nd[3], int ng[3],
- axis_enum axis, face_enum face 
-)
+ T *       array_face, 
+ const T * field_face,
+ int       nd3[3], 
+ int       md3[3], 
+ int       ng3[3],
+ axis_enum axis, 
+ face_enum face 
+) throw()
 {
   int iax=(axis+1) % 3;
   int iay=(axis+2) % 3;
 
-  int iz0 = (face == face_lower) ? ng[axis] : n[axis];
+  int iz0 = (face == face_lower) ? ng3[axis] : nd3[axis]-2*ng3[axis];
 
-  for (int iz = 0; iz <ng[axis]; iz++)  { // 0 <= iz < ng[axis]
-    for (int iy=0; iy < n[iay]; iy++) {
-      for (int ix=0; ix < n[iax]; ix++) {
-	int index_field = ix*nd[iax] + iy*nd[iay] + (iz0+iz)*nd[axis];
-	int index_face  = iz + ng[axis]*(ix + n[iax]*iy);
-	face_values[index_face] = field_values[index_field];
+  int max=0;
+  for (int iz = 0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
+    for (int iy=0; iy < nd3[iay]; iy++) {
+      for (int ix=0; ix < nd3[iax]; ix++) {
+	int index_array_face  = iz + ng3[axis]*(ix + nd3[iax]*iy);
+	int index_field_face = ix*md3[iax] + iy*md3[iay] + (iz0+iz)*md3[axis];
+	array_face[index_array_face] = 
+	  field_face[index_field_face];
+	max = MAX(max,index_field_face);
       }
     }
   }
+  // printf ("L axis %d face %d: ",axis,face);
+  // for (int i=0; i<ng3[axis]*nd3[iax]*nd3[iay]; i++) {
+  //   printf ("%g ",((float *)(array_face))[i]);
+  // }
+  // printf ("\n");
+  //  printf ("%d %d max 1 \n",max,ng3[axis]*md3[iax]*md3[iay]);
 }
 
 //----------------------------------------------------------------------
 
 template<class T>
 
-void FieldFaces::copy
+void FieldFaces::copy_precision_
 (
- T * ghost_faces, T * ghost_value,
- int                field,
- axis_enum          axis, 
- face_enum          face) throw()
+ T *       array_ghost, 
+ const T * array_face,
+ int       n
+) throw()
 {
-  int iax=(axis+1) % 3;
-  int iay=(axis+2) % 3;
-
-  int iz0 = (face == face_lower) ? 0 : nd[axis]-ng[axis];
-
-  for (int iz = 0; iz <ng[axis]; iz++)  { // 0 <= iz < ng[axis]
-    for (int iy=0; iy < n[iay]; iy++) {
-      for (int ix=0; ix < n[iax]; ix++) {
-	int index_field = ix*nd[iax] + iy*nd[iay] + (iz0+iz)*nd[axis];
-	int index_face  = iz + ng[axis]*(ix + n[iax]*iy);
-	field_values[index_field] = face_values[index_face];
-      }
-    }
+  // for (int i=0; i<n; i++) {
+  //   printf ("%g ",((float *)(array_face))[i]);
+  // }
+  // printf ("\n");
+  for (int i = 0; i<n; i++) {
+    array_ghost[i] = array_face[i];
+    
   }
+  // for (int i=0; i<n; i++) {
+  //   printf ("%g ",((float *)(array_ghost))[i]);
+  // }
+  // printf ("\n");
 }
 
 //----------------------------------------------------------------------
 
 template<class T>
-void FieldFaces::save_precision_
+void FieldFaces::store_precision_
 (
- T * face_values, T * field_values,
- int n[3], int nd[3], int ng[3],
- axis_enum axis, face_enum face 
-)
+ T *       field_ghost,
+ const T * array_ghost,
+ int       nd3[3],
+ int       md3[3],
+ int       ng3[3],
+ axis_enum axis,
+ face_enum face 
+) throw()
 {
   int iax=(axis+1) % 3;
   int iay=(axis+2) % 3;
 
-  int iz0 = (face == face_lower) ? 0 : nd[axis]-ng[axis];
+  int iz0 = (face == face_lower) ? 0 : nd3[axis]-ng3[axis];
 
-  for (int iz = 0; iz <ng[axis]; iz++)  { // 0 <= iz < ng[axis]
-    for (int iy=0; iy < n[iay]; iy++) {
-      for (int ix=0; ix < n[iax]; ix++) {
-	int index_field = ix*nd[iax] + iy*nd[iay] + (iz0+iz)*nd[axis];
-	int index_face  = iz + ng[axis]*(ix + n[iax]*iy);
-	field_values[index_field] = face_values[index_face];
+  // printf ("S axis %d face %d ",axis,face);
+  // for (int i=0; i<ng3[axis]*nd3[iax]*nd3[iay]; i++) {
+  //   printf ("%g ",((float *)(array_ghost))[i]);
+  // }
+  // printf ("\n");
+  int max=0;
+  for (int iz = 0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
+    for (int iy=0; iy < nd3[iay]; iy++) {
+      for (int ix=0; ix < nd3[iax]; ix++) {
+	int index_field_ghost = ix*md3[iax] + iy*md3[iay] + (iz0+iz)*md3[axis];
+	int index_array_ghost  = iz + ng3[axis]*(ix + nd3[iax]*iy);
+	field_ghost[index_field_ghost] = 
+	  array_ghost[index_array_ghost];
+	max = MAX(max,index_field_ghost);
       }
     }
   }
+  //  printf ("%d %d max 2 \n",max,ng3[axis]*md3[iax]*md3[iay]);
 }

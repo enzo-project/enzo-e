@@ -53,9 +53,11 @@ if (type == "charm"):
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
-	test = 'Patch'
-	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
-	env.Depends(env.Object('test_Patch.cpp'),test + '.decl.h')
+	ci_file = 'mesh.ci'
+        module = 'Patch'
+        
+	env.CharmBuilder(module + '.decl.h',ci_file,ARG = module)
+	env.Depends(env.Object('test_Patch.cpp'),module + '.decl.h')
 
 libraries = env.Library ('mesh', [sources])
 

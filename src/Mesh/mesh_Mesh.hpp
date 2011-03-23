@@ -30,35 +30,46 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Return dimension
-  int dimension() const throw ();
-
   /// Set dimension
   void set_dimension(int dimension) throw ();
-
-  /// Return domain lower extent
-  void lower(double * nx, double * ny = 0, double * nz = 0) const throw ();
 
   /// Set domain lower extent
   void set_lower(double nx, double ny, double nz) throw ();
 
-  /// Return domain upper extent
-  void upper(double * nx, double * ny = 0, double * nz = 0) const throw ();
-
   /// Set domain upper extent
   void set_upper(double nx, double ny, double nz) throw ();
   
-  /// Return max_level
-  int max_level() const throw ();
-
   /// Set max_level
   void set_max_level(int max_level) throw ();
 
-  /// Return refinement factor
-  int refine_factor() const throw ();
-
   /// Set refinement factor
   void set_refine_factor(int refine) throw ();
+
+  /// Set whether to avoid level jumps
+  void set_balanced(bool balanced) throw ();
+
+  /// Set whether to backfill levels
+  void set_backfill(bool backfill) throw ();
+
+  /// Set whether to coalesce patches
+  void set_coalesce(bool coalesce) throw ();
+
+  //----------------------------------------------------------------------
+
+  /// Return dimension
+  int dimension() const throw ();
+
+  /// Return domain lower extent
+  void lower(double * nx, double * ny = 0, double * nz = 0) const throw ();
+
+  /// Return domain upper extent
+  void upper(double * nx, double * ny = 0, double * nz = 0) const throw ();
+
+  /// Return max_level
+  int max_level() const throw ();
+
+  /// Return refinement factor
+  int refine_factor() const throw ();
 
   /// Pointer to the root Patch
   Patch * root_patch() throw ();
@@ -78,20 +89,11 @@ public: // interface
   /// Return whether to avoid level jumps
   bool balanced() const throw ();
 
-  /// Set whether to avoid level jumps
-  void set_balanced(bool balanced) throw ();
-
   /// Return whether to backfill levels
   bool backfill() const throw ();
 
-  /// Set whether to backfill levels
-  void set_backfill(bool backfill) throw ();
-
   /// Return whether to coalesce patches
   bool coalesce() const throw ();
-
-  /// Set whether to coalesce patches
-  void set_coalesce(bool coalesce) throw ();
 
   /// Return the GroupProcess associated with the mesh
   GroupProcess * group() const throw();
