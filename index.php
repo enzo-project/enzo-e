@@ -229,11 +229,13 @@ function test_summary($component,$test_output,$executables)
   for ($i = 0; $i<sizeof($parallel_types); ++$i) {
 
     $output_files = "";
+    $num_output_files = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
       $output = "test/$parallel_types[$i]-test_$test_output[$test].unit";
       $output_files = "$output_files $output";
+      ++$num_output_files;
     }
-       system("grep 'UNIT TEST' $output_files | awk 'BEGIN{c=0}; /UNIT TEST BEGIN/ {c=c+1};/UNIT TEST END/ {c=c-1};END{if (c==0) {print \"<td></td>\"} else {print \"<td class=fail>\",c,\"</td>\";}}'");
+       system("cat $output_files | awk 'BEGIN{b=\"$num_output_files\"; c=0}; /UNIT TEST BEGIN/ {c=c+1};/UNIT TEST END/ {b=b-1; c=c-1};END{if (c==0 && b<=0) {print \"<td></td>\"} else {print \"<td class=fail>\"b\"</td>\";}}'");
   }
   printf ("<th></th>");
 
