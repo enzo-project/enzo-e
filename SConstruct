@@ -218,15 +218,15 @@ elif (arch == "ncsa-bd"):
    cxx_path = '/opt/ibmcmp/vacpp/11.1'
 
    fortran_serial = fc_path + '/bin/xlf_r'
-   fortran_mpi    = fc_path + '/bin/xlf_r'
+   fortran_mpi    = 'mpfort'
    fortran_charm  = fc_path + '/bin/xlf_r'
 
    cxx_serial = cxx_path + '/bin/xlC_r'
-   cxx_mpi    = cxx_path + '/bin/xlC_r'
+   cxx_mpi    = 'mpCC'
    cxx_charm  = charm_path + '/bin/charmc -language charm++ '
 
    cc_serial  = cc_path + '/bin/xlc_r'
-   cc_mpi     = cc_path + '/bin/xlc_r'
+   cc_mpi     = 'mpcc'
    cc_charm   = charm_path + '/bin/charmc -language charm++ '
 
 # defines moved to flags since xlf_r expects -WF,-Dblah but xlC expects -Dblah

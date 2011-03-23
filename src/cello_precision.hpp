@@ -10,8 +10,9 @@
 /// @brief    Include Cello precision types
 
 enum precision_enum {
+  // @@@ KEEP IN SYNCH WITH precision_name in cello_precision.cpp
   precision_unknown,     //  unknown precision
-  precision_default,     //  default precision, based on CONFIG_PRECISION_[SINGLE|DOUBLE]
+  precision_default,     //  default precision
   precision_single,      //  32-bit field data
   precision_double,      //  64-bit field data
   precision_extended80,  //  80-bit field data
@@ -49,8 +50,15 @@ namespace cello {
   int sizeof_precision       (enum precision_enum);
   int is_precision_supported (enum precision_enum);
   double machine_epsilon     (enum precision_enum);
+  extern const char * precision_name[7];
 
-  extern const char * precision_name[8];
+  template <class T>
+  T err_rel (T a, T b)
+  {  return (a != 0.0) ? fabs((a - b) / a) : fabs(a-b);  }
+
+  template <class T>
+  T err_abs (T a, T b)
+  {  return fabs(a-b);  };
 
 };
 

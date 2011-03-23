@@ -4,7 +4,8 @@
 
 namespace cello {
 
-  const char * precision_name[8] = {
+  // @@@ KEEP IN SYNCH WITH precision_enum in cello_precision.hpp
+  const char * precision_name[7] = {
     "unknown",
     "default",
     "single",
@@ -104,4 +105,7 @@ namespace cello {
       break;
     }
   }
+
+  //----------------------------------------------------------------------
+
 }

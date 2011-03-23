@@ -15,7 +15,8 @@
 
 /// @def      CLOSE
 /// @brief    Local definition for testing whether two scalars are close
-#define CLOSE(a,b) ((((a) - (b)) / (fabs(a) + fabs(b))) < 1e-16)
+#define MACH_EPS cello::machine_epsilon(default_precision)
+#define CLOSE(a,b) ( cello::err_rel(a,b) < 2*MACH_EPS )
 
 //----------------------------------------------------------------------
 
