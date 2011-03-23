@@ -1,5 +1,6 @@
 Domain {
-   extent = [0.0, 0.3, 0.0, 0.3];
+   lower = [0.0, 0.0];
+   upper = [0.3, 0.3];
 }
 Stopping {
   time = 2.5;

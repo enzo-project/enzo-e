@@ -16,7 +16,8 @@
    # Domain is the two dimensional box 0 < x,y < 0.3
 
    Domain { 
-      extent = [0.0, 0.3, 0.0, 0.3] 
+      lower = [0.0, 0.0];
+      upper = [0.3, 0.3];
    } 
 
    # The computational mesh is a 400 x 400 uniform grid, broken up

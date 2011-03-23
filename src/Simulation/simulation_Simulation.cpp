@@ -31,15 +31,6 @@ Simulation::Simulation
     method_list_()
 {
   ASSERT("Simulation::Simulation","Parameters is NULL", parameters != NULL);
-
-  lower_[0] = 0.0;
-  lower_[1] = 0.0;
-  lower_[2] = 0.0;
-
-  upper_[0] = 1.0;
-  upper_[1] = 1.0;
-  upper_[2] = 1.0;
-
 }
 
 //----------------------------------------------------------------------
@@ -100,24 +91,6 @@ void Simulation::finalize() throw()
 int Simulation::dimension() const throw()
 {
   return dimension_;
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::lower (double * xm, double *ym, double *zm) const throw()
-{
-  if (xm) *xm = lower_[0];
-  if (ym) *ym = lower_[1];
-  if (zm) *zm = lower_[2];
-}
-
-//----------------------------------------------------------------------
-
-void Simulation::upper (double * xp, double *yp, double *zp) const throw()
-{
-  if (xp) *xp = upper_[0];
-  if (yp) *yp = upper_[1];
-  if (zp) *zp = upper_[2];
 }
 
 //----------------------------------------------------------------------
@@ -187,52 +160,12 @@ void Simulation::initialize_simulation_() throw()
   //--------------------------------------------------
   parameters_->set_current_group("Physics");
   //--------------------------------------------------
-
-  //--------------------------------------------------
   // parameter: Physics::dimensions
   //--------------------------------------------------
 
-  dimension_ = parameters_->value_integer("dimensions",0);
+  dimension_ = parameters_->value_integer("dimensionos",0);
 
 
-  //--------------------------------------------------
-  parameters_->set_current_group("Domain");
-  //--------------------------------------------------
-
-  //--------------------------------------------------
-  // parameter: Domain::dimensions
-  // parameter: Domain::extent
-  //--------------------------------------------------
-
-  // get extent_length and check consistency
-
-  int extent_length = parameters_->list_length("extent");
-
-  bool valid_extent_length = ((extent_length == 2) ||
-			      (extent_length == 4) ||
-			      (extent_length == 6));
-  ASSERT ("Simulation::initialize_simulation_",
-	  "Parameter Domain:extent list must have length 2, 4, or 6",
-	  valid_extent_length);
-
-  ASSERT ("Simulation::initialize_simulation_",
-	  "Parameter mismatch between Physics:dimensions and Domain:extent",
-	  (dimension_ == extent_length / 2));
-
-  for (int i=0; i<extent_length/2; i++) {
-
-    lower_[i] = parameters_->list_value_scalar(2*i,   "extent", 0.0);
-    upper_[i] = parameters_->list_value_scalar(2*i+1, "extent", 1.0);
-
-    if (lower_[i] > upper_[i]) {
-      char error_message[ERROR_LENGTH];
-      sprintf (error_message,
-	       "Parameter Domain::extent[%d]==%g not lower than "
-	       "Domain::extent[%d]==%g",
-	       2*i,lower_[i],2*i+1,upper_[i]);
-      ERROR ("Simulation::Simulation", error_message);
-    }
-  }
 
 }
 
@@ -323,12 +256,11 @@ void Simulation::initialize_mesh_() throw()
   //--------------------------------------------------
   parameters_->set_current_group ("Mesh");
   //--------------------------------------------------
+  // parameter: Mesh::root_size
+  // parameter: Mesh::root_blocks
+  //--------------------------------------------------
 
   int root_size[3];
-
-  //--------------------------------------------------
-  // parameter: Mesh::root_size
-  //--------------------------------------------------
 
   root_size[0] = parameters_->list_value_integer(0,"root_size",1);
   root_size[1] = parameters_->list_value_integer(1,"root_size",1);
@@ -336,90 +268,52 @@ void Simulation::initialize_mesh_() throw()
 
   int root_blocks[3];
 
-  //--------------------------------------------------
-  // parameter: Mesh::root_blocks
-  //--------------------------------------------------
-
   root_blocks[0] = parameters_->list_value_integer(0,"root_blocks",1);
   root_blocks[1] = parameters_->list_value_integer(1,"root_blocks",1);
   root_blocks[2] = parameters_->list_value_integer(2,"root_blocks",1);
+
+  //----------------------------------------------------------------------
+  // Create and initialize Mesh
+  //----------------------------------------------------------------------
 
   mesh_ = factory()->create_mesh 
     (group_process_,
      root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);
 
-  // Allocate and insert the root patch, using all processes
-
-  Patch * root_patch = factory()->create_patch
-    (group_process_,
-     root_size[0],root_size[1],root_size[2],
-     root_blocks[0],root_blocks[1],root_blocks[2]);
-
-  mesh_->insert_patch(root_patch);
-
   // Domain extents
 
   //--------------------------------------------------
   parameters_->set_current_group("Domain");
   //--------------------------------------------------
-
-  double domain_lower[3];
-
-  //--------------------------------------------------
-  // parameter: Domain::extent
+  // parameter: Domain::lower
+  // parameter: Domain::upper
   //--------------------------------------------------
 
-  domain_lower[0] = parameters_->list_value_scalar(0,"extent",0.0);
-  domain_lower[1] = parameters_->list_value_scalar(2,"extent",0.0);
-  domain_lower[2] = parameters_->list_value_scalar(4,"extent",0.0);
+  ASSERT ("Simulation::initialize_simulation_",
+	  "Parameter Domain::lower list length must match Physics::dimension",
+	  (parameters_->list_length("lower") == dimension_));
 
-  mesh_->set_lower(domain_lower[0],
-		   domain_lower[1],
-		   domain_lower[2]);
+  ASSERT ("Simulation::initialize_simulation_",
+	  "Parameter Domain::upper list length must match Physics::dimension",
+	  (parameters_->list_length("upper") ==  dimension_));
 
-  double domain_upper[3];
+  double lower[3];
+  double upper[3];
 
-  domain_upper[0] = parameters_->list_value_scalar(1,"extent",1.0);
-  domain_upper[1] = parameters_->list_value_scalar(3,"extent",1.0);
-  domain_upper[2] = parameters_->list_value_scalar(5,"extent",1.0);
+  for (int i=0; i<dimension_; i++) {
+    lower[i] = parameters_->list_value_scalar(i, "lower", 0.0);
+    upper[i] = parameters_->list_value_scalar(i, "upper", 0.0);
+    ASSERT ("Simulation::initialize_simulation_",
+	    "Domain::lower must be strictly lower than Domain::upper",
+	    lower[i] < upper[i]);
+  }
 
-  mesh_->set_upper(domain_upper[0],
-		   domain_upper[1],
-		   domain_upper[2]);
-
-  // Create the root patch
-
-  root_patch->set_lower(domain_lower[0],
-			domain_lower[1],
-			domain_lower[2]);
-
-  root_patch->set_upper(domain_upper[0],
-			domain_upper[1],
-			domain_upper[2]);
-
-  root_patch->allocate_blocks(field_descr_);
-
-  // Parallel layout of the root patch
-  
-  Layout * layout = root_patch->layout();
+  mesh_->set_lower(lower[0], lower[1], lower[2]);
+  mesh_->set_upper(upper[0], upper[1], upper[2]);
 
   //--------------------------------------------------
-  parameters_->set_current_group("Mesh");
-  //--------------------------------------------------
-
-  //--------------------------------------------------
-  // parameter: Mesh::root_process_first
-  // parameter: Mesh::root_process_count
-  //--------------------------------------------------
-
-  int process_first = parameters_->value_integer("root_process_first",0);
-  int process_count = parameters_->value_integer("root_process_count",1);
-
-  layout->set_process_range(process_first, process_count);
-
-  // Mesh AMR settings
-
+  parameters_->set_current_group ("Mesh");
   //--------------------------------------------------
   // parameter: Mesh::refine
   // parameter: Mesh::max_level
@@ -433,6 +327,38 @@ void Simulation::initialize_mesh_() throw()
   mesh_->set_balanced      (parameters_->value_logical("balanced",  true));
   mesh_->set_backfill      (parameters_->value_logical("backfill",  true));
   mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
+
+  //----------------------------------------------------------------------
+  // Create and initialize root Patch in Mesh
+  //----------------------------------------------------------------------
+
+  Patch * root_patch = factory()->create_patch
+    (group_process_,
+     root_size[0],root_size[1],root_size[2],
+     root_blocks[0],root_blocks[1],root_blocks[2]);
+
+  mesh_->insert_patch(root_patch);
+
+  root_patch->set_lower(lower[0], lower[1], lower[2]);
+  root_patch->set_upper(upper[0], upper[1], upper[2]);
+
+  root_patch->allocate_blocks(field_descr_);
+
+  // Parallel layout of the root patch
+  
+  Layout * layout = root_patch->layout();
+
+  //--------------------------------------------------
+  parameters_->set_current_group("Mesh");
+  //--------------------------------------------------
+  // parameter: Mesh::root_process_first
+  // parameter: Mesh::root_process_count
+  //--------------------------------------------------
+
+  int process_first = parameters_->value_integer("root_process_first",0);
+  int process_count = parameters_->value_integer("root_process_count",1);
+
+  layout->set_process_range(process_first, process_count);
 
 }
 
@@ -457,11 +383,8 @@ void Simulation::initialize_initial_() throw()
   //--------------------------------------------------
   parameters_->set_current_group("Initial");
   //--------------------------------------------------
-
-  //--------------------------------------------------
   // parameter: Initial::problem
   //--------------------------------------------------
-
   std::string name = parameters_->value_string("problem","default");
 
   initial_ = create_initial_(name);
@@ -478,8 +401,6 @@ void Simulation::initialize_boundary_() throw()
   //--------------------------------------------------
   parameters_->set_current_group("Boundary");
   //--------------------------------------------------
-
-  //--------------------------------------------------
   // parameter: Boundary::name
   //--------------------------------------------------
 
@@ -494,10 +415,6 @@ void Simulation::initialize_output_() throw()
 {
   UNTESTED("Simulation::initialize_output_");
 
-  //--------------------------------------------------
-  parameters_->set_current_group("Output");
-  //--------------------------------------------------
-
   int num_groups = parameters_->subgroup_count();
 
   // Create and initialize an Output object for each Output group
@@ -506,10 +423,17 @@ void Simulation::initialize_output_() throw()
 
     std::string group = parameters_->subgroup(index_group);
 
+    //--------------------------------------------------
+    parameters_->set_current_group("Output");
     parameters_->set_current_subgroup(group);
-
     //--------------------------------------------------
     // parameter: Output:<group>:type
+    // parameter: Output:<group>:file_name
+    // parameter: Output:<group>:field_list
+    // parameter: Output:<group>:cycle_interval
+    // parameter: Output:<group>:cycle_list
+    // parameter: Output:<group>:time_interval
+    // parameter: Output:<group>:time_list
     //--------------------------------------------------
 
     std::string type = parameters_->value_string("type","unknown");
@@ -531,10 +455,6 @@ void Simulation::initialize_output_() throw()
       ERROR("Simulation::initialize_output_",buffer);
     }
 
-    //--------------------------------------------------
-    // parameter: Output:<group>:file_name
-    //--------------------------------------------------
-
     // ASSUMES GROUP AND SUBGROUP ARE SET BY CALLER
 
     ASSERT("Simulation::initialize_output_",
@@ -551,10 +471,6 @@ void Simulation::initialize_output_() throw()
 	   file_name != "unknown");
 
     output->set_file_name (file_name);
-
-    //--------------------------------------------------
-    // parameter: Output:<group>:field_list
-    //--------------------------------------------------
 
     std::vector<int> field_list;
 
@@ -585,13 +501,6 @@ void Simulation::initialize_output_() throw()
     //--------------------------------------------------
 
     bool cycle_interval,cycle_list,time_interval,time_list;
-
-    //--------------------------------------------------
-    // parameter: Output:<group>:cycle_interval
-    // parameter: Output:<group>:cycle_list
-    // parameter: Output:<group>:time_interval
-    // parameter: Output:<group>:time_list
-    //--------------------------------------------------
 
     cycle_interval = (parameters_->type("cycle_interval") != parameter_unknown);
     cycle_list     = (parameters_->type("cycle_list")     != parameter_unknown);

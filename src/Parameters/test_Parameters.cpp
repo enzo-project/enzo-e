@@ -337,6 +337,7 @@ PARALLEL_MAIN_BEGIN
 
   parameters->evaluate_scalar("num2",3,values_scalar,deflts_scalar,x,y,z,t);
   unit_assert (CLOSE(values_scalar[0],atan(y[0]/3.0+3*t[0])));
+  printf ("%g %g\n",values_scalar[0],atan(y[0]/3.0+3*t[0]));
   unit_assert (CLOSE(values_scalar[1],atan(y[1]/3.0+3*t[1])));
   unit_assert (CLOSE(values_scalar[2],atan(y[2]/3.0+3*t[2])));
 

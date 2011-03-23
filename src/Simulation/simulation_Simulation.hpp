@@ -8,7 +8,6 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2009-11-10 16:14:57
 /// @brief    Interface file for the Simulation class
-/// @todo     Remove unnecessary Parameters * from function parameters
 /// @note     2010-12-17: code-wiki interface review
 
 class Simulation {
@@ -43,12 +42,6 @@ public: // interface
 
   /// Return the dimensionality of the Simulation
   int dimension() const throw();
-
-  /// Return the lower domain extents
-  void lower (double * xm, double * ym = 0, double * zm = 0) const throw();
-
-  /// Return the upper domain extents
-  void upper (double * xp, double * yp = 0, double * zp = 0) const throw();
 
 
   /// Return the Mesh
@@ -178,12 +171,6 @@ protected: // attributes
 
   /// Current time
   double time_;
-
-  /// Lower domain extents
-  double lower_[3];
-
-  /// Upper domain extents
-  double upper_[3];
 
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS

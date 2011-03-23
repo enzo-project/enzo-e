@@ -37,12 +37,6 @@ public: // interface
    int nx, int ny, int nz,
    int num_field_blocks = 1) throw();
 
-private: // functions
-
-
-private: // attributes
-
-
 };
 
 #endif /* ENZO_ENZO_FACTORY_HPP */
