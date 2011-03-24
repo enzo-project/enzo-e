@@ -411,15 +411,13 @@ void Simulation::initialize_boundary_() throw()
 
 void Simulation::initialize_output_() throw()
 {
-  UNTESTED("Simulation::initialize_output_");
-
-  int num_groups = parameters_->subgroup_count();
-
   // Create and initialize an Output object for each Output group
 
   //--------------------------------------------------
   parameters_->set_current_group("Output");
   //--------------------------------------------------
+
+  int num_groups = parameters_->subgroup_count();
 
   for (int index_group=0; index_group < num_groups; index_group++) {
 
