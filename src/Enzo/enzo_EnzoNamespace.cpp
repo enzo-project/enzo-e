@@ -4,7 +4,6 @@
 /// @file     enzo_EnzoNamespace.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Tue Aug 31 15:38:36 PDT 2010
-/// @todo     Check Parallel::method parameter (currently used to initialize ProcessorNumber)
 /// @brief    "Global" Enzo data
 
 #include "cello.hpp"
@@ -56,7 +55,7 @@ namespace enzo {
 
   // Parallel
 
-  int ProcessorNumber;
+  //  int ProcessorNumber;
 
   // Numerics
 
@@ -147,7 +146,7 @@ namespace enzo {
     PPMFlatteningParameter = 0;
     PPMDiffusionParameter = 0;
     PPMSteepeningParameter = 0;
-    ProcessorNumber = 0;
+    //    ProcessorNumber = 0;
     DualEnergyFormalism = 0;
     DualEnergyFormalismEta1 = 0;
     DualEnergyFormalismEta2 = 0;
@@ -218,10 +217,10 @@ namespace enzo {
     //--------------------------------------------------
     parameters->set_current_group ("Physics");
     //--------------------------------------------------
-
     // parameter: Physics::cosmology
     // parameter: Physics::gamma
     // parameter: Physics::dimensions
+    //--------------------------------------------------
 
     ComovingCoordinates  = parameters->value_logical ("cosmology",false);
     Gamma                = parameters->value_scalar  ("gamma",5.0/3.0);
@@ -246,13 +245,13 @@ namespace enzo {
     //--------------------------------------------------
     parameters->set_current_subgroup ("cosmology");
     //--------------------------------------------------
-
     // parameter: Physics:cosmology:initial_redshift
     // parameter: Physics:cosmology:hubble_constant_now
     // parameter: Physics:cosmology:omega_lambda_now
     // parameter: Physics:cosmology:omega_matter_now
     // parameter: Physics:cosmology:max_expansion_rate
     // parameter: Physics:cosmology:comoving_box_size
+    //--------------------------------------------------
 
     InitialRedshift   = parameters->value_scalar ("initial_redshift",  20.0);
     HubbleConstantNow = parameters->value_scalar ("hubble_constant_now",0.701);
@@ -264,7 +263,6 @@ namespace enzo {
     //--------------------------------------------------
     parameters->set_current_group ("Method","ppm");
     //--------------------------------------------------
-
     // parameter: Method:ppm:pressure_free
     // parameter: Method:ppm:use_minimum_pressure_support
     // parameter: Method:ppm:minimum_pressure_support_parameter
@@ -278,6 +276,7 @@ namespace enzo {
     // parameter: Method:ppm:dual_energy
     // parameter: Method:ppm:dual_energy_eta_1
     // parameter: Method:ppm:dual_energy_eta_2
+    //--------------------------------------------------
 
     PressureFree = parameters->value_logical("pressure_free",false);
     UseMinimumPressureSupport 
@@ -308,8 +307,9 @@ namespace enzo {
     //--------------------------------------------------
     parameters->set_current_group ("Field");
     //--------------------------------------------------
-
     // parameter: Field::ghosts
+    // parameter: Field::fields
+    //--------------------------------------------------
 
     int gx = 1;
     int gy = 1;
@@ -330,8 +330,6 @@ namespace enzo {
     ghost_depth[0] = gx;
     ghost_depth[1] = gy;
     ghost_depth[2] = gz;
-
-    // parameter: Field::fields
 
     NumberOfBaryonFields = parameters->list_length("fields");
 
@@ -384,8 +382,8 @@ namespace enzo {
     //--------------------------------------------------
     parameters->set_current_group ("Mesh");
     //--------------------------------------------------
-
     // parameter: Mesh::block_size
+    //--------------------------------------------------
 
     int nx = parameters->list_value_integer(0,"block_size",1);
     int ny = parameters->list_value_integer(1,"block_size",1);
@@ -399,47 +397,33 @@ namespace enzo {
     //--------------------------------------------------
     parameters->set_current_group ("Domain");
     //--------------------------------------------------
+    // parameter: Domain::lower
+    // parameter: Domain::upper
+    //--------------------------------------------------
   
-    // parameter: Domain::extent
+    // (ALREADY READ BY Simulation::initialize_simulation_())
 
-    DomainLeftEdge [0] = parameters->list_value_scalar(0,"extent",0.0);
-    DomainRightEdge[0] = parameters->list_value_scalar(1,"extent",1.0);
-    DomainLeftEdge [1] = parameters->list_value_scalar(2,"extent",0.0);
-    DomainRightEdge[1] = parameters->list_value_scalar(3,"extent",1.0);
-    DomainLeftEdge [2] = parameters->list_value_scalar(4,"extent",0.0);
-    DomainRightEdge[2] = parameters->list_value_scalar(5,"extent",1.0);
+    DomainLeftEdge [0] = parameters->list_value_scalar(0,"lower",0.0);
+    DomainLeftEdge [1] = parameters->list_value_scalar(1,"lower",0.0);
+    DomainLeftEdge [2] = parameters->list_value_scalar(2,"lower",0.0);
 
-    //--------------------------------------------------
-    parameters->set_current_group ("Parallel");
-    //--------------------------------------------------
-
-    // parameter: Parallel::method
-
-    INCOMPLETE("namespace enzo");
-
-    // Parallel::method not accessed
-    std::string parallel_method = 
-      parameters->list_value_string(0,"method","serial");
-
-    GroupProcess * group_process = GroupProcess::create();
-
-    ProcessorNumber = group_process->rank();
-
-    delete group_process;
+    DomainRightEdge[0] = parameters->list_value_scalar(0,"upper",1.0);
+    DomainRightEdge[1] = parameters->list_value_scalar(1,"upper",1.0);
+    DomainRightEdge[2] = parameters->list_value_scalar(2,"upper",1.0);
 
     //--------------------------------------------------
     parameters->set_current_group ("Field");
     //--------------------------------------------------
-
     // parameter: Field::courant
+    //--------------------------------------------------
 
     CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
 
     //--------------------------------------------------
     parameters->set_current_group ("Initial");
     //--------------------------------------------------
-
     // parameter: Initial::time
+    //--------------------------------------------------
 
     double time  = parameters->value_scalar ("time",0.0);
 

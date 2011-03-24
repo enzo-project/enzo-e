@@ -150,8 +150,6 @@ void Patch::set_upper(double xp, double yp, double zp) throw ()
 void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 {
 
-  UNTESTED("Patch::allocate_blocks()");
-
   // determine local block count nb
   
   int nb = num_blocks();
@@ -230,7 +228,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     field_block->allocate_ghosts();
 
     WARNING("Patch::allocate_blocks",
-		    "allocating all ghosts in patch");
+	    "allocating all ghosts in patch");
 
 		    
     // INITIALIZE PARTICLE BLOCK

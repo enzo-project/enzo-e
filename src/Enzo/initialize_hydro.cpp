@@ -52,10 +52,6 @@ void EnzoBlock::initialize_hydro ()
   PPMDiffusionParameter           = 0;
   PPMSteepeningParameter          = 0;
 
-  // Parallel
-
-  ProcessorNumber = 0;
-
   // Numerics
 
   DualEnergyFormalism             = 0;    // Method: PPM parameter

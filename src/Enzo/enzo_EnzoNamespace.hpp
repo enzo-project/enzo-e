@@ -73,7 +73,7 @@ namespace enzo {
 
   // Parallel
 
-  extern int ProcessorNumber;
+  //  extern int ProcessorNumber;
 
   // Numerics
 

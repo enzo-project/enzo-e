@@ -652,9 +652,6 @@ void Simulation::initialize_method_() throw()
 		     error_message);
     }
   }
-
-
-  INCOMPLETE("Simulation::initialize_method_");
 }
 
 //----------------------------------------------------------------------

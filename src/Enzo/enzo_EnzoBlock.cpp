@@ -112,11 +112,6 @@ void EnzoBlock::write(FILE * fp) throw ()
   fprintf (fp,"EnzoBlock: PPMSteepeningParameter %d\n",
 	   PPMSteepeningParameter);
 
-  // Parallel
-
-  fprintf (fp,"EnzoBlock: ProcessorNumber %d\n",
-	   ProcessorNumber);
-
   // Numerics
 
   fprintf (fp,"EnzoBlock: DualEnergyFormalism %d\n",
