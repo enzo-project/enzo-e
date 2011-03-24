@@ -90,7 +90,7 @@ void Monitor::header () const
 
 //----------------------------------------------------------------------
 
-void Monitor::print (std::string message, ...) const
+void Monitor::print (const char * message, ...) const
 {
   if (active_) {
 
@@ -100,7 +100,7 @@ void Monitor::print (std::string message, ...) const
 
     char buffer[MONITOR_LENGTH+1];
     va_start(fargs,message);
-    vsnprintf (buffer,MONITOR_LENGTH, message.c_str(),fargs);
+    vsnprintf (buffer,MONITOR_LENGTH, message,fargs);
     va_end(fargs);
     
     // Write output with line header

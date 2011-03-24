@@ -60,7 +60,7 @@ public: // interface
   void header () const;
 
   /// Print a message to stdout
-  void print (std::string buffer, ...) const;
+  void print (const char * buffer, ...) const;
 
   /// Generate a PNG image of an array
   void image_open (std::string filename, 
