@@ -37,8 +37,6 @@ const int problem_cycles [] = {
   10000
 };
 
-#include PARALLEL_CHARM_INCLUDE(test_ppml.decl.h)
-
 //----------------------------------------------------------------------
 
 void print_usage(const char * name)
