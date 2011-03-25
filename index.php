@@ -333,8 +333,6 @@ test_summary("Parameters",array("Parameters"),
 		    array("test_Parameters")); 
 test_summary("Performance",array("Performance"),
 		    array("test_Performance")); 
-test_summary("Simulation",array("Simulation"),
-		    array("test_Simulation"));
 // test_summary("Distribute",array("")); 
 // test_summary("Method",array("")); 
 // test_summary("Particles",array("")); 
@@ -391,9 +389,6 @@ tests("Performance","test_Performance","test_Performance");
 tests("Performance","test_Papi",       "test_Papi");
 
 component("Portal");
-
-component("Simulation");
-tests("Simulation","test_Simulation","test_Simulation");
 
 component("Test");
 
