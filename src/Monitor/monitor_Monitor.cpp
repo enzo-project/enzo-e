@@ -98,25 +98,46 @@ void Monitor::print (const char * message, ...) const
 
     // Process any input arguments
 
-    char buffer[MONITOR_LENGTH+1];
+    char buffer_message[MONITOR_LENGTH+1];
+
     va_start(fargs,message);
-    vsnprintf (buffer,MONITOR_LENGTH, message,fargs);
+    vsnprintf (buffer_message,MONITOR_LENGTH, message,fargs);
     va_end(fargs);
     
-    // Write output with line header
+    // Get date text
+
+    char buffer_date[MONITOR_LENGTH];
+
     time_t rawtime;
     struct tm * t;
     time(&rawtime);
     t = localtime (&rawtime);
     const char * month[] = 
       {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-    PARALLEL_PRINTF ("%s %02d %02d:%02d:%02d %s\n",
+    sprintf (buffer_date,"%s %02d %02d:%02d:%02d",
 		     month[t->tm_mon],
 		     t->tm_mday,
 		     t->tm_hour,
 		     t->tm_min,
-		     t->tm_sec,
-		     buffer);
+	     t->tm_sec);
+
+    // Get parallel process text
+
+    char buffer_process[MONITOR_LENGTH];
+
+#if defined(CONFIG_USE_CHARM)
+    sprintf (buffer_process,"%0d",CkMyPe());
+#elif defined(CONFIG_USE_MPI)
+    sprintf (buffer_process,"%0d",Mpi::rank());
+#else
+    sprintf (buffer_process,"");
+#endif
+
+    // Print 
+    PARALLEL_PRINTF ("%s %s %s\n",
+		     buffer_process,
+		     buffer_date,
+		     buffer_message);
   }
 }
 

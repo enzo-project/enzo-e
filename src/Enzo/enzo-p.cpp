@@ -17,6 +17,8 @@
 
 //----------------------------------------------------------------------
 
+int num_simulations;
+
 PARALLEL_MAIN_BEGIN
   {
 
@@ -36,9 +38,6 @@ PARALLEL_MAIN_BEGIN
 
     Monitor * monitor = Monitor::instance();
 
-    // only display output from root process
-    monitor->set_active(rank == 0);
-
     // display header text
 
     monitor->header();
@@ -47,7 +46,7 @@ PARALLEL_MAIN_BEGIN
 
     // open parameter file, calling usage() if invalid
 
-    if (PARALLEL_ARGC != 2) {
+    if (PARALLEL_ARGC < 2) {
       // Print usage if wrong number of arguments
       char buffer [ERROR_LENGTH];
       sprintf (buffer,
@@ -58,40 +57,57 @@ PARALLEL_MAIN_BEGIN
 
     // Read in parameters
 
-    const char * parameter_file = PARALLEL_ARGV[1];
+    int index_simulation;
+
+    num_simulations = PARALLEL_ARGC - 1;
+
+    for (index_simulation = 0; 
+	 index_simulation < num_simulations; 
+	 index_simulation++) {
+      
+      char * parameter_file = PARALLEL_ARGV[index_simulation + 1];
 
 #ifdef CONFIG_USE_CHARM
 
-    // If using CHARM, save the Main proxy, and create the
-    // EnzoSimulationCharm group (one copy per process)
+      // If using CHARM, save the Main proxy, and create the
+      // EnzoSimulationCharm group (one copy per process)
 
-    mainProxy = thishandle;
-    count_ = 0;
+      mainProxy = thishandle;
 
-    CProxy_EnzoSimulationCharm::ckNew(parameter_file, strlen(parameter_file));
+      count_ = 0;
+
+      CProxy_EnzoSimulationCharm::ckNew(parameter_file, 
+					strlen(parameter_file),
+					index_simulation);
 
 #else
 
-    Simulation * simulation = 
-      new EnzoSimulationMpi (parameter_file,group_process);
+      Simulation * simulation = 
+	new EnzoSimulationMpi (parameter_file,group_process);
 
-    ASSERT ("main()","Failed to create Simulation object",simulation != 0);
+      ASSERT ("main()","Failed to create Simulation object",simulation != 0);
 
-    // Initialize the simulation
+      // Initialize the simulation
 
-    simulation->initialize();
+      simulation->initialize();
 
-    // Run the simulation
+      // Run the simulation
 
-    simulation->run();
+      simulation->run();
 
+      delete simulation;
+      
+#endif
+
+    } // for (int index_simulation ...)
+
+#ifndef CONFIG_USE_CHARM    
     // display footer text
 
     Monitor::instance()->print ("END ENZO-P");
 
     // clean up
 
-    delete simulation;
     delete group_process;
 
     // finalize unit testing
@@ -103,17 +119,19 @@ PARALLEL_MAIN_BEGIN
     PARALLEL_PRINTF ("main exiting\n");
 
     PARALLEL_EXIT;
-
 #endif
 
   };
 
 #ifdef CONFIG_USE_CHARM
-  void enzo_exit(void)
+void enzo_exit(int index_simulation)
   {
-    PARALLEL_PRINTF ("count_=%d\n",count_);
+    PARALLEL_PRINTF ("Simulation %d count %d\n",
+		    index_simulation,
+		    count_);
     count_++;
-    if (count_ == CkNumPes()) {
+    if (count_ == CkNumPes() &&
+	index_simulation + 1 == num_simulations) {
       Monitor::instance()->print ("END ENZO-P");
       unit_finalize();
       PARALLEL_PRINTF ("main exiting\n");

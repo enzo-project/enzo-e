@@ -21,14 +21,18 @@ extern CProxy_Main mainProxy;
 EnzoSimulationCharm::EnzoSimulationCharm
 (
  const char parameter_file[],
- int string_length) throw ()
+ int        string_length,
+ int        index_simulation) throw ()
   : EnzoSimulation(parameter_file, new GroupProcessCharm)
 {
 
+  Monitor::instance() -> set_active (CkMyPe() == 0);
+
   initialize();
+
   run();
 
-  mainProxy.enzo_exit();
+  mainProxy.enzo_exit(index_simulation);
 
 }
 

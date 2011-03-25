@@ -53,7 +53,7 @@ public: // interface
   };
 
   /// Set whether the monitor is active for text output.  Useful for
-  /// parallel.
+  /// parallel, e.g. "monitor->set_active(parallel->is_root())"
   void set_active(bool active) { active_ = active; };
 
   /// Print the Cello header 

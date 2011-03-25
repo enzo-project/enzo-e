@@ -9,14 +9,16 @@
 mainmodule enzo {
 
   readonly CProxy_Main mainProxy;
+  readonly int num_simulations;
 
   mainchare Main {
     entry Main(CkArgMsg *m);
-    entry void enzo_exit(void);
+    entry void enzo_exit(int index_simulation);
   };
 
   group EnzoSimulationCharm {
-    entry EnzoSimulationCharm(const char filename[n], int n);
+    entry EnzoSimulationCharm(const char filename[n], int n, 
+			      int index_simulation);
   };
 
 };
