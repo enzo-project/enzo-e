@@ -114,6 +114,7 @@ PARALLEL_MAIN_BEGIN
     PARALLEL_PRINTF ("count_=%d\n",count_);
     count_++;
     if (count_ == CkNumPes()) {
+      Monitor::instance()->print ("END ENZO-P");
       unit_finalize();
       PARALLEL_PRINTF ("main exiting\n");
       PARALLEL_EXIT;

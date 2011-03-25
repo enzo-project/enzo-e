@@ -24,19 +24,9 @@ EnzoSimulationCharm::EnzoSimulationCharm
  int string_length) throw ()
   : EnzoSimulation(parameter_file, new GroupProcessCharm)
 {
-  printf ("%s\n",parameter_file);
-
-  TRACE("");
 
   initialize();
-
-  TRACE("");
-
   run();
-
-  TRACE("");
-
-  Monitor::instance()->print ("END ENZO-P");
 
   mainProxy.enzo_exit();
 
@@ -146,7 +136,7 @@ void EnzoSimulationCharm::run() throw()
 
   while (! stop_mesh) {
 
-    monitor->print("cycle %04d time %15.12f", cycle_,time_);
+    monitor->print("[Simulation] cycle %04d time %15.12f", cycle_,time_);
 
     //--------------------------------------------------
     // Determine timestep and dump output
@@ -282,7 +272,7 @@ void EnzoSimulationCharm::run() throw()
   // END MAIN LOOP
   //======================================================================
 
-  monitor->print("cycle %04d time %15.12f", cycle_,time_);
+  monitor->print("[Simulation] cycle %04d time %15.12f", cycle_,time_);
 
   performance.stop();
 

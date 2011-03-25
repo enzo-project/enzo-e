@@ -116,7 +116,7 @@ void EnzoSimulationMpi::run() throw()
 
   while (! stop_mesh) {
 
-    monitor->print("cycle %04d time %15.12f", cycle_,time_);
+    monitor->print("[Simulation] cycle %04d time %15.12f", cycle_,time_);
 
     //--------------------------------------------------
     // Determine timestep and dump output
@@ -252,7 +252,7 @@ void EnzoSimulationMpi::run() throw()
   // END MAIN LOOP
   //======================================================================
 
-  monitor->print("cycle %04d time %15.12f", cycle_,time_);
+  monitor->print("[Simulation] cycle %04d time %15.12f", cycle_,time_);
 
   performance.stop();
 

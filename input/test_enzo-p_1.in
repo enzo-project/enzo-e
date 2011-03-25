@@ -46,8 +46,7 @@
 	"density",	
 	"velocity_x",
 	"velocity_y",
-	"total_energy",
-	"internal_energy"
+	"total_energy"
       ] ;
 
       # List of user-defined groups, which may be accessed by applications
