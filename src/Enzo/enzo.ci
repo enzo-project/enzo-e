@@ -12,7 +12,7 @@ mainmodule enzo {
 
   mainchare Main {
     entry Main(CkArgMsg *m);
-    entry enzo_exit();
+    entry void enzo_exit(void);
   };
 
   group EnzoSimulationCharm {

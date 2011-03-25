@@ -32,7 +32,7 @@ foreach type ($types)
 
    printf "$d %-14s %-14s" "${platform}" "cleaning..."
    scons arch=$arch type=$type -c >& /dev/null
-   rm -f test/$type-*unit >& /dev/null
+   rm -f test/$type/*unit >& /dev/null
    rm -f bin-$type/* >& /dev/null
    printf "done\n"
 
@@ -54,9 +54,9 @@ foreach type ($types)
 
    # count crashes
 
-   cat test/$type-*unit | grep FAIL | grep "0/" | sort > fail.$platform
-   cat test/$type-*unit | grep incomplete | grep "0/" | sort > incomplete.$platform
-   cat test/$type-*unit | grep pass | grep "0/" | sort > pass.$platform
+   cat test/$type/*unit | grep FAIL | grep "0/" | sort > fail.$platform
+   cat test/$type/*unit | grep incomplete | grep "0/" | sort > incomplete.$platform
+   cat test/$type/*unit | grep pass | grep "0/" | sort > pass.$platform
    set f = `cat fail.$platform | wc -l`
    set i = `cat incomplete.$platform | wc -l`
    set p = `cat pass.$platform | wc -l`
@@ -73,12 +73,12 @@ foreach type ($types)
 
    # check if any tests didn't finish
 
-   set crash = `grep "UNIT TEST" test/$type-*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
+   set crash = `grep "UNIT TEST" test/$type/*unit | sed 's/BEGIN/END/' | uniq -u | wc -l`
 
    if ($crash != 0) then
       printf "CRASH: $crash"
       if ($crash != 0) then
-         grep "UNIT TEST" test/$type-*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1}'
+         grep "UNIT TEST" test/$type/*unit | sed 's/BEGIN/END/' | uniq -u | sed 's/:/ /' | awk '{print "   ", $1}'
       endif
    endif
 

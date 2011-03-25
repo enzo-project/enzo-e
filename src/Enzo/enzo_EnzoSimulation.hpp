@@ -19,9 +19,8 @@ public: // functions
 
   /// Constructor
   EnzoSimulation
-  (
-   Parameters * parameters,
-   GroupProcess *
+  ( const char * parameter_file_name,
+    GroupProcess * group_process = 0
    ) throw();
 
   /// Destructor

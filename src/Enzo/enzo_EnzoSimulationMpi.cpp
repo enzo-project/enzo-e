@@ -16,9 +16,9 @@
 
 EnzoSimulationMpi::EnzoSimulationMpi
 (
- Parameters * parameters,
+ const char * parameter_file,
  GroupProcess * group_process) throw ()
-  : EnzoSimulation(parameters,group_process)
+  : EnzoSimulation(parameter_file,group_process)
 {
 }
 

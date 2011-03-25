@@ -16,9 +16,11 @@
 
 EnzoSimulation::EnzoSimulation
 (
- Parameters * parameters,
+ const char * parameter_file_name,
  GroupProcess * group_process) throw ()
-  : Simulation(new EnzoFactory,parameters,group_process)
+  : Simulation(parameter_file_name,
+	       new EnzoFactory,
+	       group_process)
 {
 }
 

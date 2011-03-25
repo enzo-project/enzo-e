@@ -31,12 +31,14 @@ PARALLEL_MAIN_BEGIN
   // NOTE: Need concrete EnzoSimulationSerial class since Simulation is 
   //       an abstract base class
 
-  FILE * fp = fopen ("input/test_Simulation.in","r");
-  Parameters * parameters = new Parameters;
-  parameters -> read(fp);
-  fclose (fp);
+#if defined(CONFIG_USE_CHARM)
+  Simulation * simulation = 
+    new EnzoSimulationCharm("input/test_Simulation.in",group_process);
+#else
+  Simulation * simulation = 
+    new EnzoSimulationMpi("input/test_Simulation.in",group_process);
+#endif
 
-  Simulation * simulation = new EnzoSimulationMpi(parameters,group_process);
 
   unit_assert(simulation != 0);
 

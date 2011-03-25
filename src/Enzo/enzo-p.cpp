@@ -15,100 +15,117 @@
 
 #include "enzo.hpp"
 
-//**********************************************************************
-#include PARALLEL_CHARM_INCLUDE(enzo_p.decl.h)
-//**********************************************************************
-
 //----------------------------------------------------------------------
 
 PARALLEL_MAIN_BEGIN
+  {
 
-{
+    // initialize parallel
 
-  // initialize parallel
+    PARALLEL_INIT;
 
-  PARALLEL_INIT;
+    // Create global parallel process group object
+    GroupProcess * group_process = GroupProcess::create();
 
-  // Create global parallel process group object
-  GroupProcess * group_process = GroupProcess::create();
+    // initialize unit testing
 
-  // initialize unit testing
+    int rank = group_process->rank();
+    int size = group_process->size();
 
-  int rank = group_process->rank();
-  int size = group_process->size();
+    unit_init(rank, size);
 
-  unit_init(rank, size);
+    Monitor * monitor = Monitor::instance();
 
-  Monitor * monitor = Monitor::instance();
+    // only display output from root process
+    monitor->set_active(rank == 0);
 
-  // only display output from root process
-  monitor->set_active(rank == 0);
+    // display header text
 
-  // display header text
+    monitor->header();
 
-  monitor->header();
+    monitor->print ("BEGIN ENZO-P");
 
-  monitor->print ("BEGIN ENZO-P");
+    // open parameter file, calling usage() if invalid
 
-  // open parameter file, calling usage() if invalid
-
-  FILE *fp = 0;
-
-  if (PARALLEL_ARGC == 2) {
-    fp = fopen(PARALLEL_ARGV[1],"r");
-  }
-  if ((PARALLEL_ARGC == 2 && !fp) || 
-      (PARALLEL_ARGC != 2)) {
-    if (group_process->is_root()) {
-      fprintf (stderr,"\nUsage: %s %s <parameter-file>\n\n", 
+    if (PARALLEL_ARGC != 2) {
+      // Print usage if wrong number of arguments
+      char buffer [ERROR_LENGTH];
+      sprintf (buffer,
+	       "\nUsage: %s %s <parameter-file>\n\n", 
 	       PARALLEL_RUN,PARALLEL_ARGV[0]);
+      ERROR("main",buffer);
     }
-    PARALLEL_EXIT;
-  }
 
-  // Read in parameters
+    // Read in parameters
 
-  Parameters * parameters = new Parameters;
-
-  parameters->read(fp);
-
-  Simulation * simulation = 0;
+    const char * parameter_file = PARALLEL_ARGV[1];
 
 #ifdef CONFIG_USE_CHARM
-  simulation = new EnzoSimulationCharm (parameters, group_process);
+
+    // If using CHARM, save the Main proxy, and create the
+    // EnzoSimulationCharm group (one copy per process)
+
+    mainProxy = thishandle;
+    count_ = 0;
+
+    CProxy_EnzoSimulationCharm::ckNew(parameter_file, strlen(parameter_file));
+
 #else
-  simulation = new EnzoSimulationMpi (parameters,group_process);
+
+    Simulation * simulation = 
+      new EnzoSimulationMpi (parameter_file,group_process);
+
+    ASSERT ("main()","Failed to create Simulation object",simulation != 0);
+
+    // Initialize the simulation
+
+    simulation->initialize();
+
+    // Run the simulation
+
+    simulation->run();
+
+    // display footer text
+
+    Monitor::instance()->print ("END ENZO-P");
+
+    // clean up
+
+    delete simulation;
+    delete group_process;
+
+    // finalize unit testing
+
+    unit_finalize();
+
+    // exit
+
+    PARALLEL_PRINTF ("main exiting\n");
+
+    PARALLEL_EXIT;
+
 #endif
 
-  ASSERT ("main()","Failed to create Simulation object",simulation != 0);
+  };
 
-  // Initialize the simulation
+#ifdef CONFIG_USE_CHARM
+  void enzo_exit(void)
+  {
+    PARALLEL_PRINTF ("count_=%d\n",count_);
+    count_++;
+    if (count_ == CkNumPes()) {
+      PARALLEL_PRINTF ("main exiting\n");
+      CkExit();
+    }
+  };
 
-  simulation->initialize();
+private:
+  int count_;
+#endif
 
-  // Run the simulation
+PARALLEL_MAIN_END
 
-  simulation->run();
 
-  // display footer text
-
-  monitor->print ("END ENZO-P");
-
-  // clean up
-
-  delete simulation;
-  delete group_process;
-  delete parameters;
-
-  // finalize unit testing
-
-  unit_finalize();
-
-  // exit
-
-  PARALLEL_EXIT;
-}
-
-PARALLEL_MAIN_END;
-
-#include PARALLEL_CHARM_INCLUDE(enzo_p.def.h)
+//======================================================================
+#include PARALLEL_CHARM_INCLUDE(enzo.def.h)
+//======================================================================

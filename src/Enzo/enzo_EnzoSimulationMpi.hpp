@@ -19,16 +19,18 @@ public: // functions
 
   /// Constructor
   EnzoSimulationMpi
-  (
-   Parameters * parameters,
-   GroupProcess *
-   ) throw();
+  ( const char * parameter_file,
+    GroupProcess * group_process) throw();
 
   /// Destructor
   ~EnzoSimulationMpi() throw();
 
   /// Run the simulation
   virtual void run() throw();
+
+protected:
+  
+  GroupProcess * group_process_;
 
 };
 

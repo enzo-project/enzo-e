@@ -11,28 +11,30 @@
 
 class Reduce;
 
-class GroupProcess {
+class GroupProcess
+
+{
 
   /// @class    GroupProcess
   /// @ingroup  Parallel  
   /// @todo     Support more flexible process subsets
   /// @brief    [\ref Parallel] Group of distributed memory processes
 
-public: // static interface
+ public: // static interface
 
   static GroupProcess * create (int process_first     = 0,
 				int process_last_plus = -1) throw();
 
-protected: // interface
+ protected: // interface
 
-/// Protected since GroupProcess objects must be created with create()
-GroupProcess(int size = 1, int rank = 0) throw()
- : size_(size),
-   rank_(rank)
-  {  }
+  /// Protected since GroupProcess objects must be created with create()
+  GroupProcess(int size = 1, int rank = 0) throw()
+    : size_(size),
+    rank_(rank)
+    {  }
 
 
-public: // interface
+ public: // interface
 
   //--------------------------------------------------
   // Shared with GroupThread, but removed from deleted common "Group"
@@ -61,14 +63,14 @@ public: // interface
 
   /// Initiate sending an array
   virtual void * send_begin
-  (int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
+    (int rank_dest, void * buffer, int size, int tag=0) throw() = 0;
 
   /// Clean up after sending an array
   virtual void send_end(void * handle) throw() = 0;
 
   /// Initiate receiving an array
   virtual void * recv_begin
-  (int rank_source, void * buffer, int size, int tag=0) throw() = 0;
+    (int rank_source, void * buffer, int size, int tag=0) throw() = 0;
 
   /// Clean up after receiving an array
   virtual void recv_end(void * handle) throw() = 0;
@@ -101,7 +103,7 @@ public: // interface
   /// Create a Reduce object for this GroupProcess
   virtual Reduce * create_reduce () throw ()= 0;
 
-protected: // attributes
+ protected: // attributes
 
   /// Number of compute elements in the GroupProcess
   int size_;

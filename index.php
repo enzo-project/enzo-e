@@ -41,7 +41,7 @@ function tests($component,$testrun,$output) {
      echo "<th>Output</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-$output.unit";
+       $output_file = "test/$parallel_types[$i]/$output.unit";
        if (file_exists($output_file)) {
 	 $output_html = "<a href=\"$output_file\">$output.unit</a>";
 	 system("awk 'BEGIN{c=0}; /UNIT TEST END/ {c=1}; END{ if (c==0) print \"<td class=fail><a href='$output_file'>incomplete</a></td>\"; if (c!=0) print \"<td class=pass><a href='$output_file'>complete</a></td>\"}' < $output_file");
@@ -56,7 +56,7 @@ function tests($component,$testrun,$output) {
      echo "<th>Date</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-$output.unit";
+       $output_file = "test/$parallel_types[$i]/$output.unit";
        if (file_exists($output_file)) {
 	 $output_html = date ("Y-m-d", filemtime($output_file));
 	 echo "<td class=pass>$output_html</td>";
@@ -71,7 +71,7 @@ function tests($component,$testrun,$output) {
      echo "<th>Time</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-$output.unit";
+       $output_file = "test/$parallel_types[$i]/$output.unit";
        if (file_exists($output_file)) {
 	 $output_html = date ("H:i:s", filemtime($output_file));
 	 echo "<td class=pass>$output_html</td>";
@@ -86,7 +86,7 @@ function tests($component,$testrun,$output) {
      echo "<th>Passed</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-$output.unit";
+       $output_file = "test/$parallel_types[$i]/$output.unit";
        if (file_exists($output_file)) {
 	 echo "<td class=pass>";
 	 system("cat $output_file | grep pass | grep '0/' | wc -l");
@@ -102,7 +102,7 @@ function tests($component,$testrun,$output) {
      echo "<th>Failed</th>";
      //--------------------------------------------------
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
-       $output_file = "test/$parallel_types[$i]-$output.unit";
+       $output_file = "test/$parallel_types[$i]/$output.unit";
        if (file_exists($output_file)) {
 	 system("grep 0/ $output_file | awk 'BEGIN{c=0}; /FAIL/ {c=c+1}; END {if (c!=0) print\"<td class=fail>\",c,\"</td>\"; if (c==0) print \"<td class=pass></td>\"}'");
        } else {
@@ -116,7 +116,7 @@ function tests($component,$testrun,$output) {
      echo "<table><tr>";
      for ($i = 0; $i<sizeof($parallel_types); ++$i) {
        $parallel_type = $parallel_types[$i];
-       $output_file = "test/$parallel_type-$output.unit";
+       $output_file = "test/$parallel_type/$output.unit";
        if (file_exists($output_file)) {
 	 test($parallel_type,$testrun,"FAIL");
        }
@@ -137,7 +137,7 @@ function test($parallel_type,$testrun,$type) {
     $rowtext = "</tr><tr>";
   }
 
-  $output = "test/$parallel_type-$testrun.unit";
+  $output = "test/$parallel_type/$testrun.unit";
   $count = exec("cat $output | grep $type | grep '0/' | wc -l");
   if ($count == 0) {
 #     echo "<strong >no ${ltype}ed tests</strong></br/>";
@@ -211,7 +211,7 @@ function test_summary($component,$test_output,$executables)
 
     $count_missing = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "test/$parallel_types[$i]-test_$test_output[$test].unit";
+      $output = "test/$parallel_types[$i]/test_$test_output[$test].unit";
       if (! file_exists($output)) {
           ++ $count_missing;
       }
@@ -231,7 +231,7 @@ function test_summary($component,$test_output,$executables)
     $output_files = "";
     $num_output_files = 0;
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "test/$parallel_types[$i]-test_$test_output[$test].unit";
+      $output = "test/$parallel_types[$i]/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
       ++$num_output_files;
     }
@@ -246,7 +246,7 @@ function test_summary($component,$test_output,$executables)
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "test/$parallel_types[$i]-test_$test_output[$test].unit";
+      $output = "test/$parallel_types[$i]/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
 
@@ -261,7 +261,7 @@ function test_summary($component,$test_output,$executables)
 
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
-      $output = "test/$parallel_types[$i]-test_$test_output[$test].unit";
+      $output = "test/$parallel_types[$i]/test_$test_output[$test].unit";
       $output_files = "$output_files $output";
     }
 
@@ -276,7 +276,7 @@ function test_summary($component,$test_output,$executables)
     $output_files = "";
     for ($test = 0; $test<sizeof($test_output); ++$test) {
       $output = $test_output[$test];
-      $output_files = "$output_files test/$parallel_types[$i]-test_$output.unit";
+      $output_files = "$output_files test/$parallel_types[$i]/test_$output.unit";
     }
     system("grep '0/' $output_files | awk 'BEGIN {c=0}; /pass/{c=c+1}; END{if (c==0) {print \"<td></td>\"} else {print \"<td class=pass>\",c,\"</td>\";}} '");
 
@@ -318,7 +318,7 @@ test_summary("Disk",array("FileHdf5","FileIfrit"),
 		    array("test_FileHdf5","test_FileIfrit")); 
 test_summary("Error",array("Error"),
 		    array("test_Error")); 
-test_summary("Enzo",array("ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion","enzo-p_implosion"),array("enzo-p","test_ppm","test_ppml")); 
+test_summary("Enzo",array("ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion","enzo-p_1","enzo-p_2"),array("enzo-p","test_ppm","test_ppml")); 
 test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces"),
 		    array("test_FieldBlock","test_FieldDescr","test_FieldFaces")); 
 test_summary("Memory",array("Memory"),
@@ -404,7 +404,7 @@ component("Enzo");
 
 <h4>enzo-p</h4>
 
-<?php tests("Enzo","enzo-p","test_enzo-p_implosion"); ?>
+<?php tests("Enzo","enzo-p","test_enzo-p_1","test_enzo-p_2"); ?>
 
 <table>
 <tr>
@@ -414,18 +414,25 @@ component("Enzo");
 <th>velocity_y</th>
 <th>total_energy</th></tr>
 <tr>
-<th>cycle = 0</th>
-<td><img width=200 src="enzo-p-000000-density.png"></img></td>
-<td><img width=200 src="enzo-p-000000-velocity_x.png"></img></td>
-<td><img width=200 src="enzo-p-000000-velocity_y.png"></img></td>
-<td><img width=200 src="enzo-p-000000-total_energy.png"></img></td>
+<th>initial</th>
+<td><img width=200 src="enzo-p_1-000000-density.png"></img></td>
+<td><img width=200 src="enzo-p_1-000000-velocity_x.png"></img></td>
+<td><img width=200 src="enzo-p_1-000000-velocity_y.png"></img></td>
+<td><img width=200 src="enzo-p_1-000000-total_energy.png"></img></td>
 </tr>
 <tr>
-<th>cycle = 100</th>
-<td><img width=200 src="enzo-p-000100-density.png"></img></td>
-<td><img width=200 src="enzo-p-000100-velocity_x.png"></img></td>
-<td><img width=200 src="enzo-p-000100-velocity_y.png"></img></td>
-<td><img width=200 src="enzo-p-000100-total_energy.png"></img></td>
+<th>1 block</th>
+<td><img width=200 src="enzo-p_1-000100-density.png"></img></td>
+<td><img width=200 src="enzo-p_1-000100-velocity_x.png"></img></td>
+<td><img width=200 src="enzo-p_1-000100-velocity_y.png"></img></td>
+<td><img width=200 src="enzo-p_1-000100-total_energy.png"></img></td>
+</tr>
+<tr>
+<th>4 blocks</th>
+<td><img width=200 src="enzo-p_2-000100-density.png"></img></td>
+<td><img width=200 src="enzo-p_2-000100-velocity_x.png"></img></td>
+<td><img width=200 src="enzo-p_2-000100-velocity_y.png"></img></td>
+<td><img width=200 src="enzo-p_2-000100-total_energy.png"></img></td>
 </tr>
 </table>
 

@@ -13,20 +13,19 @@
 
    }
 
-   # Domain is the two dimensional box 0 < x,y < 0.3
+   # Domain is the two dimensional box 0 < x,y < 1.0
 
    Domain { 
       lower = [0.0, 0.0];
-      upper = [0.3, 0.3];
+      upper = [1.0, 1.0];
    } 
 
-   # The computational mesh is a 400 x 400 uniform grid, broken up
-   # into computational blocks (parallel task size) of size 8 x 8.
+   # The computational mesh is a single uniform grid, broken up into
+   # 4 blocks
 
    Mesh { 
-      root_size      = [128,128];
+      root_size      = [96,96];
       root_blocks    = [2,2];
-      max_level      = 0; 
 
       # remaining mesh parameters are ignored if max_level == 0
 
@@ -123,11 +122,10 @@
 
    }
 
-   Field {
-       density       { value = [ 0.125,                x + y < 0.1517, 
+   Initial {
+       density       { value = [ 0.125,                  x + y < 0.5,
                                  1.0 ]; };
-
-       total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.1517,
+       total_energy  { value = [ 0.14 / (0.4 * 0.125),   x + y < 0.5,
 	                         1.0  / (0.4 * 1.0) ]; };
        velocity_x    { value = [0.0]; };
        velocity_y    { value = [0.0]; }
@@ -137,8 +135,8 @@
 
    Stopping {
 
-      time  = 0.2;
-      cycle = 100;
+      time  = 2.5;
+      cycle = 200;
 
       # redshift
    }
@@ -146,10 +144,11 @@
    Output { 
 
       cycle_step_test {
-        file_name      = "test_blocking-%04d";
+        file_name      = "enzo-p_2-%06d";
 	type           = "image";
 	cycle_interval = 100;
       };
+
 
    }
  

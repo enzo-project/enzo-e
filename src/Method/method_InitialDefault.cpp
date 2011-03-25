@@ -28,11 +28,9 @@ void InitialDefault::compute (Block * block) throw()
 {
   // Initialize Fields according to parameters
 
-  UNTESTED("InitialDefault::compute");
-
-    //--------------------------------------------------
-  parameters_->set_current_group("Field");
-    //--------------------------------------------------
+  //--------------------------------------------------
+  parameters_->set_current_group("Initial");
+  //--------------------------------------------------
 
   FieldBlock *       field_block = block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
@@ -51,7 +49,7 @@ void InitialDefault::compute (Block * block) throw()
     parameters_->set_current_subgroup(field_name);
     //--------------------------------------------------
 
-    // If Field:<field_name>:value is a list, try parsing it
+    // If Initial:<field_name>:value is a list, try parsing it
 
     // parameter: Initial:[field]:value
 
@@ -67,7 +65,7 @@ void InitialDefault::compute (Block * block) throw()
 
       char buffer[ERROR_LENGTH];
 
-      sprintf (buffer, "Length of list parameter Field:%s:value must be odd",
+      sprintf (buffer, "Length of list parameter Initial:%s:value must be odd",
 	       field_name.c_str());
       int list_length = parameters_->list_length("value");
       ASSERT("InitialDefault::compute",

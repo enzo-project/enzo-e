@@ -88,8 +88,6 @@
 
       density  { 
 
-	value = [1.4, x+y<0.3, 1];
-
          # If a method calls the density field "rho" instead of
          # "density" Probably not a good idea to use, but may simplify
          # coupling methods developed by independent groups that
@@ -138,7 +136,7 @@
 
    Initial {
 
-      problem = "implosion_2d";
+      code = "implosion_2d";
 
    }
 

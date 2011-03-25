@@ -9,7 +9,13 @@
 /// @date     2011-03-17
 /// @brief    [\ref Enzo] Declaration of the EnzoSimulationCharm class
 
-class EnzoSimulationCharm : public EnzoSimulation {
+#ifdef CONFIG_USE_CHARM
+
+#include PARALLEL_CHARM_INCLUDE(enzo.decl.h)
+
+class EnzoSimulationCharm : public CBase_EnzoSimulationCharm,
+			    public EnzoSimulation
+{
 
   /// @class    EnzoSimulationCharm
   /// @ingroup  Enzo
@@ -17,12 +23,14 @@ class EnzoSimulationCharm : public EnzoSimulation {
 
 public: // functions
 
+  /// CHARM++ Constructor
+  EnzoSimulationCharm
+  ( const char parameter_file[], int n) throw();
+
   /// Constructor
   EnzoSimulationCharm
-  (
-   Parameters * parameters,
-   GroupProcess *
-   ) throw();
+  ( const char * parameter_file,
+    GroupProcess * ) throw();
 
   /// Destructor
   ~EnzoSimulationCharm() throw();
@@ -31,5 +39,6 @@ public: // functions
   virtual void run() throw();
 };
 
-#endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */
+#endif /* CONFIG_USE_CHARM */
 
+#endif /* ENZO_ENZO_SIMULATION_CHARM_HPP */

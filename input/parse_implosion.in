@@ -125,7 +125,7 @@
 
    }
 
-   Field {
+   Initial {
        density       { value = [ 0.125,                x + y < 0.1517, 
                                  1.0 ]; };
 

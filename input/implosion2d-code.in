@@ -123,7 +123,7 @@
 
    }
 
-   Initial { problem = "implosion_2d" }
+   Initial { code = "implosion_2d" }
 
    Boundary { type = "reflecting" }
 

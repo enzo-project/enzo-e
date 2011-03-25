@@ -127,8 +127,7 @@ PARALLEL_MAIN_BEGIN
   // Read
 
   unit_func("read");
-  FILE * fpin = fopen ("test.in","r");
-  parameters->read ( fpin );
+  parameters->read ( "test.in" );
 
   // set_current_group()
 
@@ -431,8 +430,7 @@ PARALLEL_MAIN_BEGIN
   // Write
 
   unit_func("write");
-  FILE * fpout = fopen ("test.out","w");
-  parameters->write ( fpout );
+  parameters->write ( "test.out" );
   unit_assert(unit_incomplete);
 
   unit_finalize();

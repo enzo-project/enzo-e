@@ -28,6 +28,18 @@ Parameters::Parameters()
 
 //----------------------------------------------------------------------
 
+Parameters::Parameters(const char * file_name ) 
+  throw()
+  : current_group_(""),
+    current_subgroup_(""),
+    parameter_map_(),
+    parameter_tree_(new ParamNode("Parameters"))
+{
+  read(file_name);
+}
+
+//----------------------------------------------------------------------
+
 Parameters::~Parameters()
 ///
 {
@@ -44,11 +56,16 @@ Parameters::~Parameters()
 
 //----------------------------------------------------------------------
 
-void Parameters::read ( FILE * file_pointer )
+void Parameters::read ( const char * file_name )
 /// @param    file_pointer An opened input parameter file or stdin
 {
-  if ( file_pointer == NULL) {
-    ERROR("Parameters::read","file pointer is NULL");
+
+  FILE * file_pointer = fopen(file_name,"r");
+
+  if ( file_pointer == NULL ) {
+    char buffer[ERROR_LENGTH];
+    sprintf (buffer,"Error opening parameter file '%s' for reading",file_name);
+    ERROR("Parameters::read",buffer);
   }
   
   struct param_struct * parameter_list = cello_parameters_read(file_pointer);
@@ -80,13 +97,24 @@ void Parameters::read ( FILE * file_pointer )
 
   free (node);
 
+  fclose(file_pointer);
+
+  Monitor::instance()->print ("[Parameter] read in %s",file_name);
 }
 
 //----------------------------------------------------------------------
 
-void Parameters::write ( FILE * file_pointer )
+void Parameters::write ( const char * file_name )
 /// @param    file_pointer An opened output parameter file or stdout
 {
+
+  FILE * file_pointer = fopen(file_name,"w");
+
+  if ( file_pointer == NULL ) {
+    char buffer[ERROR_LENGTH];
+    sprintf (buffer,"Error opening parameter file '%s' for writing",file_name);
+    ERROR("Parameters::writing",buffer);
+  }
   std::map<std::string,Param *>::iterator it_param;
 
   for (it_param =  parameter_map_.begin();
@@ -102,88 +130,13 @@ void Parameters::write ( FILE * file_pointer )
 	       it_param->first.c_str());
       WARNING("Parameters::write",message);
     }
-
   }
+
+  fclose(file_pointer);
+
 }
 
 //----------------------------------------------------------------------
-
-// void Parameters::value 
-// (
-//  std::string    parameter, 
-//  parameter_enum type, 
-//  void *         value, 
-//  void *         deflt
-// )
-// /// @param   parameter Parameter name
-// /// @param   type      Parameter type
-// /// @param   value     parameter value if it exists, deflt if not
-// /// @param   deflt     Default parameter value
-// {
-//   Param * param = parameter_(parameter);
-//   // Check type of parameter if it's set
-//   if (param) {
-//     bool correct_type;
-//     switch (type) {
-//     case parameter_integer:      correct_type = param->is_integer();      break;
-//     case parameter_scalar:       correct_type = param->is_scalar();       break;
-//     case parameter_logical:      correct_type = param->is_logical();      break;
-//     case parameter_string:       correct_type = param->is_string();       break;
-//     case parameter_list:
-//     case parameter_scalar_expr:
-//     case parameter_logical_expr:
-//       throw ExceptionParametersBadType();
-//       break;
-//     }
-//   }
-//   if (param != NULL) {
-//     switch (type) {
-//     case parameter_integer:
-//       *((int *) value) = param->get_integer();
-//       break;
-//     case parameter_scalar:
-//       *((double *) value) = param->get_scalar();
-//       break;
-//     case parameter_logical:
-//       *((bool *) value) = param->get_logical();
-//       break;
-//     case parameter_string:
-//       *((const char **) value) = param->get_string();
-//       break;
-//     case parameter_list:         
-//     case parameter_scalar_expr:  
-//     case parameter_logical_expr: 
-//       ERROR ("Parameters::value","Switch case should never be reached");
-//       break;
-//     }
-//   } else if (deflt) {
-//     switch (type) {
-//     case parameter_integer:
-//       *((int *) value) = *((int *)deflt);
-//       break;
-//     case parameter_scalar:
-//       *((double *) value) = *((double *)deflt);
-//       break;
-//     case parameter_logical:
-//       *((bool *) value) = *((bool *)deflt);
-//       break;
-//     case parameter_string:
-//       *((const char **) value) = *((const char **)deflt);
-//       break;
-//     case parameter_list:         
-//     case parameter_scalar_expr:  
-//     case parameter_logical_expr: 
-//       ERROR ("Parameters::value","Switch case should never be reached");
-//       break;
-//     }
-//   } else {
-//     char buffer[ERROR_LENGTH];
-//     sprintf (buffer,"Required parameter %s not defined",parameter.c_str());
-//     ERROR ("Parameters::value",buffer);
-//   }
-//   monitor_value_(parameter);
-// }
-// //----------------------------------------------------------------------
 
 int Parameters::value_integer 
 ( std::string parameter,
@@ -196,7 +149,7 @@ int Parameters::value_integer
   if (param && ! param->is_integer()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%d",deflt);
-  monitor_read_(parameter,deflt_string);
+  monitor_access_(parameter,deflt_string);
   return (param != NULL) ? param->get_integer() : deflt;
 }
 
@@ -232,7 +185,7 @@ double Parameters::value_scalar
   if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%g",deflt);
-  monitor_read_(parameter,deflt_string);
+  monitor_access_(parameter,deflt_string);
   return (param != NULL) ? param->get_scalar() : deflt;
 }
 
@@ -268,7 +221,7 @@ bool Parameters::value_logical
   if (param && ! param->is_logical()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%s",deflt ? "true" : "false");
-  monitor_read_(parameter,deflt_string);
+  monitor_access_(parameter,deflt_string);
   return (param != NULL) ? param->get_logical() : deflt;
 }
 
@@ -302,7 +255,7 @@ const char * Parameters::value_string
 {
   Param * param = parameter_(parameter);
   if (param && ! param->is_string()) throw ExceptionParametersBadType();
-  monitor_read_(parameter,deflt);
+  monitor_access_(parameter,deflt);
   return (param != NULL) ? param->get_string() : deflt;
 }
 
@@ -355,7 +308,7 @@ void Parameters::evaluate_scalar
   }
   // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // sprintf_expression (param->value_expr_,deflt_string);
-  // monitor_read_(parameter,deflt_string);
+  // monitor_access_(parameter,deflt_string);
 }
 
 //----------------------------------------------------------------------
@@ -388,7 +341,7 @@ void Parameters::evaluate_logical
   }
   // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // sprintf_expression (param->value_expr_,deflt_string);
-  // monitor_read_(parameter,deflt_string);
+  // monitor_access_(parameter,deflt_string);
 }
 
 //----------------------------------------------------------------------
@@ -416,7 +369,7 @@ int Parameters::list_value_integer
   if (param && ! param->is_integer()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%d",deflt);
-  monitor_read_(parameter,deflt_string,index);
+  monitor_access_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_integer_ : deflt;
 }
 
@@ -435,7 +388,7 @@ double Parameters::list_value_scalar
   if (param && ! param->is_scalar()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%g",deflt);
-  monitor_read_(parameter,deflt_string,index);
+  monitor_access_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_scalar_ : deflt;
 }
 
@@ -454,7 +407,7 @@ bool Parameters::list_value_logical
   if (param && ! param->is_logical()) throw ExceptionParametersBadType();
   char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   sprintf (deflt_string,"%s",deflt ? "true" : "false");
-  monitor_read_(parameter,deflt_string,index);
+  monitor_access_(parameter,deflt_string,index);
   return (param != NULL) ? param->value_logical_ : deflt;
 }
 
@@ -471,7 +424,7 @@ const char * Parameters::list_value_string
 {
   Param * param = list_element_ (parameter,index);
   if (param && ! param->is_string()) throw (ExceptionParametersBadType());
-  monitor_read_(parameter,deflt,index);
+  monitor_access_(parameter,deflt,index);
   return (param != NULL) ? param->value_string_ : deflt;
 }
 
@@ -509,7 +462,7 @@ void Parameters::list_evaluate_scalar
   }
   // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // sprintf_expression (param->value_expr_,deflt_string);
-  // monitor_read_(parameter,deflt_string,index);
+  // monitor_access_(parameter,deflt_string,index);
 }
 
 //----------------------------------------------------------------------
@@ -544,7 +497,7 @@ void Parameters::list_evaluate_logical
   }
   // char deflt_string[MAX_PARAMETER_FILE_WIDTH];
   // sprintf_expression (param->value_expr_,deflt_string);
-  // monitor_read_(parameter,deflt_string,index);
+  // monitor_access_(parameter,deflt_string,index);
 }
 
 //----------------------------------------------------------------------
@@ -616,7 +569,7 @@ parameter_enum Parameters::list_type
 
 //======================================================================
 
-void Parameters::monitor_read_ 
+void Parameters::monitor_access_ 
 (
  std::string parameter,
  std::string deflt_string,
@@ -631,23 +584,23 @@ void Parameters::monitor_read_
     // a list element
     param = list_element_(parameter,index);
   }
-  char buffer[MONITOR_LENGTH];
   std::string value = param ? 
     param->value_to_string().c_str() : 
     std::string("[" + deflt_string + "]");
+
   char index_string [MAX_PARAMETER_FILE_WIDTH] = "";
+
   if (index != -1) {
     sprintf (index_string,"[%d]",index);
   }
-  sprintf (buffer,"[Parameter] read %s:%s:%s%s %s",
+
+  Monitor * monitor = Monitor::instance();
+  monitor->print("[Parameter] accessed %s:%s:%s%s %s",
 	   current_group_.c_str(),
 	   current_subgroup_.c_str(),
 	   parameter.c_str(),
 	   index_string,
 	   value.c_str());
-
-  Monitor * monitor = Monitor::instance();
-  monitor->print(buffer);
 }
 
 //----------------------------------------------------------------------

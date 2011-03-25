@@ -8,17 +8,47 @@
 /// @date     2011-03-17
 /// @brief    Implementation of EnzoSimulationCharm user-dependent class member functions
 
+#ifdef CONFIG_USE_CHARM
+
 #include "cello.hpp"
 
 #include "enzo.hpp"
+
+extern CProxy_Main mainProxy;
 
 //----------------------------------------------------------------------
 
 EnzoSimulationCharm::EnzoSimulationCharm
 (
- Parameters * parameters,
+ const char parameter_file[],
+ int string_length) throw ()
+  : EnzoSimulation(parameter_file, new GroupProcessCharm)
+{
+  printf ("%s\n",parameter_file);
+
+  TRACE("");
+
+  initialize();
+
+  TRACE("");
+
+  run();
+
+  TRACE("");
+
+  Monitor::instance()->print ("END ENZO-P");
+
+  mainProxy.enzo_exit();
+
+}
+
+//----------------------------------------------------------------------
+
+EnzoSimulationCharm::EnzoSimulationCharm
+(
+ const char * parameter_file,
  GroupProcess * group_process) throw ()
-  : EnzoSimulation(parameters,group_process)
+  : EnzoSimulation(parameter_file,group_process)
 {
 }
 
@@ -258,4 +288,9 @@ void EnzoSimulationCharm::run() throw()
 
   performance.print();
 
+
 }
+
+//======================================================================
+
+#endif /* CONFIG_USE_CHARM */

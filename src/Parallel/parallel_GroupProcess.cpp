@@ -25,8 +25,6 @@ GroupProcess * GroupProcess::create (int process_first,
 
 #elif defined(CONFIG_USE_CHARM)
 
-  INCOMPLETE ("GroupProcess::create");
-
   group = new GroupProcessSerial;
 
 #else
@@ -39,3 +37,5 @@ GroupProcess * GroupProcess::create (int process_first,
 
   return group;
 }
+
+//======================================================================

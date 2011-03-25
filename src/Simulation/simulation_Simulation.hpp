@@ -11,17 +11,22 @@
 /// @note     2010-12-17: code-wiki interface review
 
 class Simulation {
-
   /// @class    Simulation
   /// @ingroup  Simulation
   /// @brief    [\ref Simulation] Class specifying a simulation to run
+  ///
+  /// @detailed A Simulation object encapsulates a single simulation,
+  /// and Simulation objects are replicated across processes.  Simulations
+  /// are defined as groups in CHARM++.
 
 public: // interface
 
+  /// Constructor for CHARM++
+
   /// Initialize the Simulation object
-  Simulation(Factory * factory,
-	     Parameters * parameters,
-	     GroupProcess * group_process);
+  Simulation(const char *   parameter_file_name,
+	     Factory *      factory,
+	     GroupProcess * group_process = 0);
 
   //----------------------------------------------------------------------
   // Big Three
@@ -159,9 +164,15 @@ protected: // attributes
   // SIMULATION PARAMETERS
   //----------------------------------------------------------------------
 
-  /// Factory for creating Simulations, Meshes, Patches and Blocks 
+  /// Parameters associated with this simulation
+  Parameters * parameters_;
+
+  /// Factory for creating related families of Meshes, Patches and Blocks 
   /// [abstract factory design pattern]
   Factory * factory_; 
+
+  /// Parallel group for the simulation
+  GroupProcess * group_process_;
 
   /// Dimension or rank of the simulation
   int  dimension_; 
@@ -175,12 +186,6 @@ protected: // attributes
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
-
-  /// Parallel group for the simulation
-  GroupProcess * group_process_;
-
-  /// Parameters associated with this simulation
-  Parameters * parameters_;
 
   /// AMR mesh
   Mesh * mesh_;

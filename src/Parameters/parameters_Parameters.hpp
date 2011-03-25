@@ -32,6 +32,9 @@ public: // interface
   /// Create an empty Parameters object
   Parameters() throw();
 
+  /// Create a new Parameters object and read parameters from the given file
+  Parameters(const char * file_name) throw();
+
   /// Copy constructor
   Parameters(const Parameters & parameters) throw();
 
@@ -47,10 +50,10 @@ public: // interface
 //   { return & instance_; }
 
   /// Read in parameters from a file
-  void read (FILE * file_pointer);
+  void read (const char * file_name);
 
   /// Write parameters to a file
-  void write (FILE * file_pointer);
+  void write (const char * file_name);
 
   // /// Return the parameter value of specified type
   // void value (std::string, parameter_enum type, 
@@ -214,7 +217,7 @@ private: // functions
   /// Return the Param pointer for the specified list parameter element
   Param * list_element_ (std::string parameter, int index) throw();
 
-  void monitor_read_ (std::string parameter,
+  void monitor_access_ (std::string parameter,
 		      std::string deflt_string,
 		      int index=-1) throw();
   void monitor_write_ (std::string parameter) throw();

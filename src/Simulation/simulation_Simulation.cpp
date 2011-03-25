@@ -13,14 +13,16 @@
 /// Initialize the Simulation object
 Simulation::Simulation
 (
+ const char *   parameter_file_name,
  Factory *      factory,
- Parameters *   parameters,
  GroupProcess * group_process
 )
-  : factory_(factory),
-    dimension_(0),
+  : parameters_(new Parameters(parameter_file_name)),
+    factory_(factory),
     group_process_(group_process),
-    parameters_(parameters),
+    dimension_(0),
+    cycle_(0),
+    time_(0.0),
     mesh_(0),
     field_descr_(0),
     stopping_(0),
@@ -30,7 +32,6 @@ Simulation::Simulation
     output_list_(),
     method_list_()
 {
-  ASSERT("Simulation::Simulation","Parameters is NULL", parameters != NULL);
 }
 
 //----------------------------------------------------------------------
@@ -279,6 +280,8 @@ void Simulation::initialize_mesh_() throw()
      root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);
 
+  mesh_->set_dimension(dimension_);
+
   // Domain extents
 
   //--------------------------------------------------
@@ -381,9 +384,9 @@ void Simulation::initialize_initial_() throw()
   //--------------------------------------------------
   parameters_->set_current_group("Initial");
   //--------------------------------------------------
-  // parameter: Initial::problem
+  // parameter: Initial::code
   //--------------------------------------------------
-  std::string name = parameters_->value_string("problem","default");
+  std::string name = parameters_->value_string("code","default");
 
   initial_ = create_initial_(name);
 

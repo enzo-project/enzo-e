@@ -1,15 +1,15 @@
-// $Id$
+// $Id: parallel_GroupProcessCharm.hpp 2093 2011-03-12 01:17:05Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
-/// @file     parallel_GroupProcessMpi.hpp
+/// @file     parallel_GroupProcessCharm.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
-/// @date     Thu Oct 15 10:40:37 PDT 2009 
-/// @brief    [\ref Parallel] Interface for the GroupProcessMpi class
+/// @date     Thu Mar 24 14:32:48 PDT 2011
+/// @brief    [\ref Parallel] Interface for the GroupProcessCharm class
 
-#ifndef PARALLEL_GROUP_PROCESS_MPI_HPP
-#define PARALLEL_GROUP_PROCESS_MPI_HPP
+#ifndef PARALLEL_GROUP_PROCESS_CHARM_HPP
+#define PARALLEL_GROUP_PROCESS_CHARM_HPP
 
-#ifdef CONFIG_USE_MPI
+#ifdef CONFIG_USE_CHARM
 
 enum send_enum {
   send_standard,
@@ -21,17 +21,17 @@ enum data_enum {
   data_single,
   data_double };
 
-class GroupProcessMpi : public GroupProcess {
+class GroupProcessCharm : public GroupProcess {
 
-  /// @class    GroupProcessMpi
+  /// @class    GroupProcessCharm
   /// @ingroup  Parallel
-  /// @brief    [\ref Parallel] MPI helper functions
+  /// @brief    [\ref Parallel] CHARM helper functions
 
 public: // interface
 
-  /// Initialize an GroupProcessMpi object
-  GroupProcessMpi(int process_first     = 0,
-		  int process_last_plus = -1) throw();
+  /// Initialize an GroupProcessCharm object
+  GroupProcessCharm(int process_first     = 0,
+		    int process_last_plus = -1) throw();
 
 public: // interface (Group)
 
@@ -83,48 +83,10 @@ public: // interface (Group)
   /// Create a Reduce object for this ProcessGroup
   Reduce * create_reduce () throw ();
 
-  //--------------------------------------------------
-  // GroupProcessMpi-specific functions
-  //--------------------------------------------------
-
-  /// Set whether send is standard, buffered, synchronous, or ready
-  void set_type_send (send_enum type)  throw()
-  { send_type_ = type; };
-
-  /// Return whether send is standard, buffered, synchronous, or ready
-  send_enum type_send () throw()
-  { return send_type_; };
-
-  /// Set whether send is blocking or non-blocking
-  void set_send_blocking (bool blocking)  throw()
-  { send_blocking_ = blocking; };
-
-  /// Set whether send is blocking or non-blocking
-  bool get_send_blocking () throw()
-  { return send_blocking_; };
-
-  /// Set whether recv is blocking or non-blocking
-  void set_recv_blocking (bool blocking)  throw()
-  { recv_blocking_ = blocking; };
-
-  /// Set whether recv is blocking or non-blocking
-  bool get_recv_blocking () throw()
-  { return recv_blocking_; };
-
-  MPI_Comm comm ()  const throw()
-  { return comm_; };
-
 private: // functions
 
-  void call_mpi_(const char * file, 
-		 int line , 
-		 const char * name, 
-		 int ierr) throw();
 
 private: // attributes
-
-  /// Communicator for the group
-  MPI_Comm comm_;
 
   /// First process in the group
   int process_first_;
@@ -132,18 +94,9 @@ private: // attributes
   /// Last process (plus one) in the group 
   int process_last_plus_;
 
-  /// Whether to use standard, buffered, synchronous, or ready sends
-  enum send_enum send_type_;
-
-  /// Whether to use blocking sends
-  bool send_blocking_;
-  
-  /// Whether to use blocking receives
-  bool recv_blocking_;
-
 };
 
-#endif /* CONFIG_USE_MPI */
+#endif /* CONFIG_USE_CHARM */
 
-#endif /* PARALLEL_GROUP_PROCESS_MPI_HPP */
+#endif /* PARALLEL_GROUP_PROCESS_CHARM_HPP */
 

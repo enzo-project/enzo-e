@@ -47,10 +47,8 @@ binaries = [test_enzo_p]
 
 if (type == "charm"):
 
-	test = 'enzo-p'
-	testc = 'enzo_p' # required since class name cannot contain '-'
-	env.CharmBuilder(testc + '.decl.h',test + '.ci',ARG = testc)
-	env.Depends(env.Object(test + '.cpp'),testc + '.decl.h')
+	env.CharmBuilder('enzo.decl.h','enzo.ci',ARG = 'enzo')
+	env.Depends(env.Object('enzo-p.cpp'),'enzo.decl.h')
 
 #------------------------------
 # INSTALL

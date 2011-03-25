@@ -15,14 +15,12 @@
 EnzoOutputImage::EnzoOutputImage() throw ()
   : Output()
 {
-  INCOMPLETE("EnzoOutputImage::EnzoOutputImage");
 }
 
 //----------------------------------------------------------------------
 
 EnzoOutputImage::~EnzoOutputImage() throw ()
 {
-  INCOMPLETE("EnzoOutputImage::!EnzoOutputImage");
 }
 
 //======================================================================

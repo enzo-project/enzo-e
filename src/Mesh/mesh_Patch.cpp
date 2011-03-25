@@ -12,15 +12,6 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-Patch::Patch(int nx,   int ny,  int nz,
-	     int nbx,  int nby, int nbz)
-{
-  printf ("CHARM Patch(%d %d %d, %d %d %d\n",
-	  nx,ny,nz,nbx,nby,nbz); 
-};
-#endif
-
 Patch::Patch
 (
  Factory * factory, 
@@ -222,15 +213,11 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     block->set_lower(xm,ym,zm);
     block->set_upper(xp,yp,zp);
 
-    // Allocate field data
+    // Allocate field data, including ghosts
 
     field_block->allocate_array();
     field_block->allocate_ghosts();
 
-    WARNING("Patch::allocate_blocks",
-	    "allocating all ghosts in patch");
-
-		    
     // INITIALIZE PARTICLE BLOCK
 
   }
@@ -280,6 +267,4 @@ Block * Patch::local_block(size_t i) const throw()
   return (i < block_.size()) ? block_[i] : 0;
 }
 
-//----------------------------------------------------------------------
-
-#include PARALLEL_CHARM_INCLUDE(Patch.def.h)
+//======================================================================

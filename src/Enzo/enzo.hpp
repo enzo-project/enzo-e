@@ -35,6 +35,8 @@
 // Component class includes
 //----------------------------------------------------------------------
 
+#include PARALLEL_CHARM_INCLUDE(enzo.decl.h)
+
 #include "enzo_defines.hpp"
 #include "enzo_typedefs.hpp"
 #include "enzo_fortran.hpp"

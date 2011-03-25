@@ -12,9 +12,7 @@
 
 class Mesh;
 
-#include PARALLEL_CHARM_INCLUDE(Patch.decl.h)
-
-PARALLEL_CLASS_DECL(Patch)
+class Patch
 {
 
   /// @class    Patch
@@ -22,12 +20,6 @@ PARALLEL_CLASS_DECL(Patch)
   /// @brief    [\ref Mesh] Represent a distributed box of uniform (non-adaptive) data
 
  public: // interface
-
-#ifdef CONFIG_USE_CHARM
-  /// Constructor for CHARM++
-  Patch(int nx,   int ny,  int nz,
-	int nbx,  int nby, int nbz);
-#endif
 
   /// Constructor for given Patch size and blocking count
   Patch(Factory * factory,

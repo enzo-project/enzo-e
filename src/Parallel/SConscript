@@ -47,6 +47,12 @@ if (type == "charm"):
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 
+#	ci_file = 'parallel.ci'
+#        module = 'GroupProcessCharm'
+        
+#	env.CharmBuilder(module + '.decl.h',ci_file,ARG = module)
+#	env.Depends(env.Object('parallel_GroupProcessCharm.cpp'),module + '.decl.h')
+
 libraries = env.Library ('parallel', [sources])
 binaries = []
 
