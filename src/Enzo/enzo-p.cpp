@@ -85,7 +85,7 @@ PARALLEL_MAIN_BEGIN
 #else
 
       Simulation * simulation = 
-	new EnzoSimulationMpi (parameter_file,group_process);
+	new EnzoSimulationMpi (parameter_file,group_process,index_simulation);
 
       ASSERT ("main()","Failed to create Simulation object",simulation != 0);
 
