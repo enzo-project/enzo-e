@@ -40,10 +40,17 @@ PARALLEL_MAIN_BEGIN
 
   int patch_blocking[] = {3,3,3};
 
+  // Set domain extents
+
+  double domain_lower[] = {0.0, 0.0, 0.0};
+  double domain_upper[] = {1.0, 1.0, 1.0};
+
   Patch * patch = new Patch
     (new Factory, group_process,
      patch_size[0],     patch_size[1],     patch_size[2],
-     patch_blocking[0], patch_blocking[1], patch_blocking[2]);
+     patch_blocking[0], patch_blocking[1], patch_blocking[2],
+     domain_lower[0],   domain_lower[1],   domain_lower[2],
+     domain_upper[0],   domain_upper[1],   domain_upper[2]);
 
   unit_assert(patch != NULL);
 
@@ -76,14 +83,6 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-
-  // Set domain extents
-
-  double domain_lower[] = {0.0, 0.0, 0.0};
-  double domain_upper[] = {1.0, 1.0, 1.0};
-
-  patch->set_lower(domain_lower[0], domain_lower[1], domain_lower[2]);
-  patch->set_upper(domain_upper[0], domain_upper[1], domain_upper[2]);
 
   // Test that the domain extents are correct
 

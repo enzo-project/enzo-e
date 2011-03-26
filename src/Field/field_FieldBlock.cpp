@@ -349,14 +349,12 @@ void FieldBlock::deallocate_ghosts() throw ()
 //----------------------------------------------------------------------
 void FieldBlock::refresh_ghosts() throw()
 {
+  INCOMPLETE("FieldBlock::refresh_ghosts");
   if ( ! ghosts_allocated() ) {
     WARNING("FieldBlock::refresh_ghosts",
 	    "Called with ghosts not allocated: allocating ghosts");
     allocate_ghosts();
   }
-
-  
-  
 }
 
 //----------------------------------------------------------------------

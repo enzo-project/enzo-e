@@ -26,7 +26,8 @@ public: // interface
   /// Initialize the Simulation object
   Simulation(const char *   parameter_file_name,
 	     Factory *      factory,
-	     GroupProcess * group_process = 0);
+	     GroupProcess * group_process = 0,
+	     int index=0);
 
   //----------------------------------------------------------------------
   // Big Three
@@ -186,6 +187,9 @@ protected: // attributes
   //----------------------------------------------------------------------
   // SIMULATION COMPONENTS
   //----------------------------------------------------------------------
+
+  /// Index of this simulation in an ensemble
+  int index_;
 
   /// AMR mesh
   Mesh * mesh_;

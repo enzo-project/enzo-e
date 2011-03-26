@@ -23,8 +23,14 @@ public: // functions
   EnzoPatch(Factory * factory,
 	    GroupProcess * group_process,
 	    int nx,   int ny,  int nz,
-	    int nbx,  int nby, int nbz) throw()
-    : Patch (factory,group_process,nx,ny,nz,nbx,nby,nbz)
+	    int nbx,  int nby, int nbz,
+	    double xm, double ym, double zm,
+	    double xp, double yp, double zp) throw()
+    : Patch (factory,group_process,
+	     nx,ny,nz,
+	     nbx,nby,nbz,
+	     xm,ym,zm,
+	     xp,yp,zp)
   { }
 
 };

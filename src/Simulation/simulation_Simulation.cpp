@@ -15,7 +15,8 @@ Simulation::Simulation
 (
  const char *   parameter_file_name,
  Factory *      factory,
- GroupProcess * group_process
+ GroupProcess * group_process,
+ int            index
 )
   : parameters_(new Parameters(parameter_file_name)),
     factory_(factory),
@@ -23,6 +24,7 @@ Simulation::Simulation
     dimension_(0),
     cycle_(0),
     time_(0.0),
+    index_(index),
     mesh_(0),
     field_descr_(0),
     stopping_(0),
@@ -336,12 +338,11 @@ void Simulation::initialize_mesh_() throw()
   Patch * root_patch = factory()->create_patch
     (group_process_,
      root_size[0],root_size[1],root_size[2],
-     root_blocks[0],root_blocks[1],root_blocks[2]);
+     root_blocks[0],root_blocks[1],root_blocks[2],
+     lower[0], lower[1], lower[2],
+     upper[0], upper[1], upper[2]);
 
   mesh_->insert_patch(root_patch);
-
-  root_patch->set_lower(lower[0], lower[1], lower[2]);
-  root_patch->set_upper(upper[0], upper[1], upper[2]);
 
   root_patch->allocate_blocks(field_descr_);
 

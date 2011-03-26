@@ -25,7 +25,9 @@ class Patch
   Patch(Factory * factory,
 	GroupProcess * group_process,
 	int nx,   int ny,  int nz,
-	int nbx,  int nby, int nbz) throw();
+	int nbx,  int nby, int nbz,
+	double xm, double ym, double zm,
+	double xp, double yp, double zp) throw();
 
   //----------------------------------------------------------------------
   // Big Three
@@ -43,11 +45,11 @@ class Patch
 
   //----------------------------------------------------------------------
 
-  /// Set domain lower extent
-  void set_lower(double x, double y, double z) throw ();
+  // /// Set domain lower extent
+  // void set_lower(double x, double y, double z) throw ();
 
-  /// Set domain upper extent
-  void set_upper(double x, double y, double z) throw ();
+  // /// Set domain upper extent
+  // void set_upper(double x, double y, double z) throw ();
   
   //----------------------------------------------------------------------
 
@@ -105,9 +107,6 @@ class Patch
   /// Layout: describes blocking, processor range, and block-processor mapping 
   Layout * layout_;
 
-  /// Array of blocks ib associated with this process
-  std::vector<Block * > block_;
-
   /// Size of the patch
   int size_[3];
 
@@ -119,6 +118,9 @@ class Patch
 
   /// Upper extent of the patch
   double upper_[3];
+
+  /// Array of blocks ib associated with this process
+  std::vector<Block * > block_;
 
 
 };

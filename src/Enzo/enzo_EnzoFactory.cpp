@@ -26,10 +26,13 @@ Patch * EnzoFactory::create_patch
 (
  GroupProcess * group_process,
  int nx,   int ny,  int nz,
- int nbx,  int nby, int nbz
+ int nbx,  int nby, int nbz,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp
  ) throw()
 {
-  return new EnzoPatch (this,group_process,nx,ny,nz,nbx,nby,nbz);
+  return new EnzoPatch (this,group_process,nx,ny,nz,nbx,nby,nbz,
+			xm,ym,zm,xp,yp,zp);
 }
 
 //----------------------------------------------------------------------

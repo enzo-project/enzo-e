@@ -73,6 +73,9 @@ public: // interface
   /// [tested in test_Patch]
   Block * neighbor (axis_enum axis, face_enum face) const throw();
 
+  /// Refresh ghost data
+  void refresh_ghosts(int index_field_set = 0) throw();
+
 protected: // functions
 
   /// Allocate and copy in attributes from give Block

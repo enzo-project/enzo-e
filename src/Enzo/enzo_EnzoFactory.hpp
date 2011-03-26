@@ -27,7 +27,9 @@ public: // interface
   virtual Patch * create_patch
   (GroupProcess * group_process,
    int nx,   int ny,  int nz,
-   int nbx,  int nby, int nbz) throw();
+   int nbx,  int nby, int nbz,
+   double xm, double ym, double zm,
+   double xp, double yp, double zp) throw();
 
   /// Create a new Block  [abstract factory design pattern]
   virtual Block * create_block

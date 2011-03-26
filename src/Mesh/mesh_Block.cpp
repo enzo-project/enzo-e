@@ -133,6 +133,19 @@ void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
   if (iz) (*iz)=index_[2]; 
 }
 
+//----------------------------------------------------------------------
+
+Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
+{
+}
+
+//----------------------------------------------------------------------
+
+void Block::refresh_ghosts(int index_field_set) throw()
+{
+  field_block_[index_field_set]->refresh_ghosts();
+}
+
 //======================================================================
 
 void Block::copy_(const Block & block) throw()

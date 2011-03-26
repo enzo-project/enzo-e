@@ -22,17 +22,17 @@ EnzoSimulationCharm::EnzoSimulationCharm
 (
  const char parameter_file[],
  int        string_length,
- int        index_simulation) throw ()
-  : EnzoSimulation(parameter_file, new GroupProcessCharm)
+ int        index) throw ()
+  : EnzoSimulation(parameter_file, new GroupProcessCharm, index)
 {
 
-  Monitor::instance() -> set_active (CkMyPe() == 0);
+  //  Monitor::instance() -> set_active (CkMyPe() == 0);
 
   initialize();
 
   run();
 
-  mainProxy.enzo_exit(index_simulation);
+  mainProxy.enzo_exit(index);
 
 }
 
@@ -124,7 +124,7 @@ void EnzoSimulationCharm::run() throw()
       stop_block = stop_block && (stopping_->complete(cycle_block,time_block));
     }
 
-    int    stop_reduce = reduce_patch->reduce_int (stop_block, reduce_op_land);
+    int stop_reduce = reduce_patch->reduce_int (stop_block, reduce_op_land);
 
     stop_patch  = stop_patch && stop_reduce;
 		      
@@ -132,7 +132,7 @@ void EnzoSimulationCharm::run() throw()
 
   }
 
-  int    stop_mesh = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
+  int stop_mesh = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
   
   //======================================================================
   // BEGIN MAIN LOOP
@@ -140,7 +140,8 @@ void EnzoSimulationCharm::run() throw()
 
   while (! stop_mesh) {
 
-    monitor->print("[Simulation] cycle %04d time %15.12f", cycle_,time_);
+    monitor->print("[Simulation %d] cycle %04d time %15.12f",
+		   index_, cycle_,time_);
 
     //--------------------------------------------------
     // Determine timestep and dump output
@@ -207,16 +208,20 @@ void EnzoSimulationCharm::run() throw()
 
       Reduce * reduce_patch = patch->group()->create_reduce ();
 
-      int    stop_block  = true;
+      int stop_block  = true;
 
       ItBlock it_block(patch);
       Block * block;
 
       while ((block = ++it_block)) {
 
-	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
+	// Refresh ghosts
+
+	block->refresh_ghosts();
 
 	// Initialize enzo_block aliases (may me modified)
+
+	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
 	int &    cycle_block        = enzo_block->CycleNumber;
 	enzo_float & time_block     = enzo_block->Time;
@@ -276,7 +281,10 @@ void EnzoSimulationCharm::run() throw()
   // END MAIN LOOP
   //======================================================================
 
-  monitor->print("[Simulation] cycle %04d time %15.12f", cycle_,time_);
+  monitor->print("[Simulation %d] cycle %04d time %15.12f", 
+		 index_,
+		 cycle_,
+		 time_);
 
   performance.stop();
 

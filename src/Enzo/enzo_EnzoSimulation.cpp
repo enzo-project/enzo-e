@@ -17,10 +17,12 @@
 EnzoSimulation::EnzoSimulation
 (
  const char * parameter_file_name,
- GroupProcess * group_process) throw ()
+ GroupProcess * group_process,
+ int index) throw ()
   : Simulation(parameter_file_name,
 	       new EnzoFactory,
-	       group_process)
+	       group_process,
+	       index)
 {
 }
 

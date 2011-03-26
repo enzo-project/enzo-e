@@ -17,8 +17,9 @@
 EnzoSimulationMpi::EnzoSimulationMpi
 (
  const char * parameter_file,
- GroupProcess * group_process) throw ()
-  : EnzoSimulation(parameter_file,group_process)
+ GroupProcess * group_process,
+ int index) throw ()
+  : EnzoSimulation(parameter_file,group_process,index)
 {
 }
 
@@ -55,7 +56,7 @@ void EnzoSimulationMpi::run() throw()
 
       initial_->compute(block);
 
-      boundary_->enforce(block);
+      //      boundary_->enforce(block);
 
       // Initialize Block attributes 
       // (REQUIRED HERE INSTEAD OF CONSTRUCTOR SINCE REQUIRES extents_[])

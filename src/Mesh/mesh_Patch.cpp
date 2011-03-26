@@ -17,7 +17,9 @@ Patch::Patch
  Factory * factory, 
  GroupProcess * group_process,
  int nx,  int ny,  int nz,
- int nbx, int nby, int nbz
+ int nbx, int nby, int nbz,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp
 ) throw()
   : factory_(factory),
     group_process_(group_process),
@@ -41,13 +43,13 @@ Patch::Patch
   blocking_[1] = nby;
   blocking_[2] = nbz;
 
-  lower_[0] = 0.0;
-  lower_[1] = 0.0;
-  lower_[2] = 0.0;
+  lower_[0] = xm;
+  lower_[1] = ym;
+  lower_[2] = zm;
 
-  upper_[0] = 1.0;
-  upper_[1] = 1.0;
-  upper_[2] = 1.0;
+  upper_[0] = xp;
+  upper_[1] = yp;
+  upper_[2] = zp;
 
 }
 
@@ -70,6 +72,23 @@ Patch::Patch(const Patch & patch,
 }
 
 //----------------------------------------------------------------------
+
+// void Patch::set_lower(double xm, double ym, double zm) throw ()
+// {
+//   lower_[0] = xm;
+//   lower_[1] = ym;
+//   lower_[2] = zm;
+// };
+
+// //----------------------------------------------------------------------
+// void Patch::set_upper(double xp, double yp, double zp) throw ()
+// {
+//   upper_[0] = xp;
+//   upper_[1] = yp;
+//   upper_[2] = zp;
+// };
+
+// //----------------------------------------------------------------------
 
 // Patch & Patch::operator= (const Patch & patch) throw()
 // {
@@ -113,28 +132,12 @@ void Patch::lower(double * xm, double * ym, double * zm) const throw ()
 }
 
 //----------------------------------------------------------------------
-void Patch::set_lower(double xm, double ym, double zm) throw ()
-{
-  lower_[0] = xm;
-  lower_[1] = ym;
-  lower_[2] = zm;
-};
-
-//----------------------------------------------------------------------
 void Patch::upper(double * xp, double * yp, double * zp) const throw ()
 {
   if (xp) *xp = upper_[0];
   if (yp) *yp = upper_[1];
   if (zp) *zp = upper_[2];
 }
-
-//----------------------------------------------------------------------
-void Patch::set_upper(double xp, double yp, double zp) throw ()
-{
-  upper_[0] = xp;
-  upper_[1] = yp;
-  upper_[2] = zp;
-};
 
 //----------------------------------------------------------------------
 

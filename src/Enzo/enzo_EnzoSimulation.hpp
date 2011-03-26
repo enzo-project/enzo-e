@@ -20,7 +20,8 @@ public: // functions
   /// Constructor
   EnzoSimulation
   ( const char * parameter_file_name,
-    GroupProcess * group_process = 0
+    GroupProcess * group_process = 0,
+    int index = 0
    ) throw();
 
   /// Destructor
