@@ -80,7 +80,7 @@ public: // functions (TEMPORARILY PUBLIC)
 
   void initialize () throw();
 
-public: // attributes (yikes!)
+public: // attributes (YIKES!)
 
   int CycleNumber;
 

@@ -109,7 +109,7 @@ void EnzoSimulationMpi::run() throw()
 
   }
 
-  int    stop_mesh = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
+  int stop_mesh = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
   
   //======================================================================
   // BEGIN MAIN LOOP
@@ -195,7 +195,7 @@ void EnzoSimulationMpi::run() throw()
 
 	// Initialize enzo_block aliases (may me modified)
 
-	int &    cycle_block        = enzo_block->CycleNumber;
+	int        & cycle_block    = enzo_block->CycleNumber;
 	enzo_float & time_block     = enzo_block->Time;
 	enzo_float & dt_block       = enzo_block->dt;
 	enzo_float & old_time_block = enzo_block->OldTime;
@@ -247,13 +247,14 @@ void EnzoSimulationMpi::run() throw()
       Output * output = output_list_[i];
       output->scheduled_write(mesh_,cycle_,time_);
     }
-  } // ! stop
+
+  } // while (! stop_mesh)
 
   //======================================================================
   // END MAIN LOOP
   //======================================================================
 
-  monitor->print("[Simulation] cycle %04d time %15.12f", cycle_,time_);
+  monitor->print("[Simulation] end cycle %04d time %15.12f", cycle_,time_);
 
   performance.stop();
 

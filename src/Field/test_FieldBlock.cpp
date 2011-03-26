@@ -72,7 +72,11 @@ PARALLEL_MAIN_BEGIN
   nx=4; ny=5; nz=6;
   int ix,iy,iz;
   ix=0; iy=0; iz=0;
-  Block * block = new Block (NULL,field_descr, ix,iy,iz, nx,ny,nz);
+  Block * block = new Block (NULL,field_descr, 
+			     ix,iy,iz, 
+			     nx,ny,nz,
+			     -1.0,-2.0,-3.0,
+			     1.0,2.0,3.0);
   FieldBlock * field_block = block->field_block();
 
   //----------------------------------------------------------------------
@@ -432,9 +436,6 @@ PARALLEL_MAIN_BEGIN
 
   //----------------------------------------------------------------------
   unit_func("cell_width");
-
-  block->set_lower(-1, -2, -3);
-  block->set_upper( 1,  2,  3);
 
   double hx=0,hy=0,hz=0;
 

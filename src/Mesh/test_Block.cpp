@@ -22,15 +22,16 @@ PARALLEL_MAIN_BEGIN
   unit_class("Block");
 
   FieldDescr * field_descr = new FieldDescr;
-  Block * block = new Block (NULL,field_descr, 0,0,0, 3,4,5);
+  Block * block = new Block (NULL,field_descr, 
+			     0,0,0, 
+			     3,4,5,
+			     -1.0,-2.0,-3.0,
+			     1.0,2.0,3.0);
 
   unit_func("Block");
   unit_assert (block != NULL);
 
   //----------------------------------------------------------------------
-
-  block->set_lower(-1, -2, -3);
-  block->set_upper( 1,  2,  3);
 
   double lower[3];
   double upper[3];

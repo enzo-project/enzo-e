@@ -4,6 +4,7 @@
 /// @file     method_Output.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 17:35:56 PDT 2011
+/// @todo     Create and use Schedule object for scheduling output
 /// @brief    [\ref Method] Declaration for the Output component
 
 #ifndef METHOD_OUTPUT_HPP
