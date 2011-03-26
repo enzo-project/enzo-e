@@ -118,8 +118,6 @@ PARALLEL_MAIN_BEGIN
 
     // exit
 
-    PARALLEL_PRINTF ("main exiting\n");
-
     PARALLEL_EXIT;
 #endif
 
@@ -136,7 +134,6 @@ void enzo_exit(int index_simulation)
     if (count_ == num_simulations * CkNumPes()) {
       Monitor::instance()->print ("END ENZO-P");
       unit_finalize();
-      PARALLEL_PRINTF ("main exiting\n");
       PARALLEL_EXIT;
     }
   };

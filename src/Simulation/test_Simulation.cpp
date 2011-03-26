@@ -12,8 +12,6 @@
 #include "simulation.hpp"
 #include "enzo.hpp" /* Required for EnzoSimulationSerial */
 
-#include PARALLEL_CHARM_INCLUDE(test_Simulation.decl.h)
-
 PARALLEL_MAIN_BEGIN
 {
 
