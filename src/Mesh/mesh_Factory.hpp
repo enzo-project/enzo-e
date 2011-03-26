@@ -37,6 +37,8 @@ public: // interface
    FieldDescr * field_descr,
    int ix, int iy, int iz,
    int nx, int ny, int nz,
+   double xm, double ym, double zm,
+   double xp, double yp, double zp,
    int num_field_blocks = 1) throw();
 
 };

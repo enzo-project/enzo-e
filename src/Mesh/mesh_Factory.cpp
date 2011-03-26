@@ -17,7 +17,9 @@ Mesh * Factory::create_mesh
  int nbx, int nby, int nbz
  ) throw ()
 {
-  return new Mesh (this,group_process,nx,ny,nz,nbx,nby,nbz);
+  return new Mesh (this,group_process,
+		   nx,ny,nz,
+		   nbx,nby,nbz);
 }
 
 //----------------------------------------------------------------------
@@ -31,7 +33,11 @@ Patch * Factory::create_patch
  double xp, double yp, double zp
  ) throw()
 {
-  return new Patch (this,group_process,nx,ny,nz,nbx,nby,nbz,xm,ym,zm,xp,yp,zp);
+  return new Patch (this,group_process,
+		    nx,ny,nz,
+		    nbx,nby,nbz,
+		    xm,ym,zm,
+		    xp,yp,zp);
 }
 
 //----------------------------------------------------------------------
@@ -42,9 +48,16 @@ Block * Factory::create_block
  FieldDescr * field_descr,
  int ix, int iy, int iz,
  int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp,
  int num_field_blocks
  ) throw()
 {
-  return new Block (patch, field_descr, ix,iy,iz, nx,ny,nz,num_field_blocks);
+  return new Block (patch, field_descr, 
+		    ix,iy,iz, 
+		    nx,ny,nz,
+		    xm,ym,zm,
+		    xp,yp,zp,
+		    num_field_blocks);
 }
 

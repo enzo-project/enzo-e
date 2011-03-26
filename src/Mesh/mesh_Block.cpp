@@ -19,12 +19,13 @@ Block::Block
  FieldDescr   * field_descr,
  int ix, int iy, int iz,
  int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp,
  int num_field_blocks) throw ()
   : patch_(patch),
     field_block_()
 
 { 
-
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);
   for (size_t i=0; i<field_block_.size(); i++) {
@@ -39,10 +40,13 @@ Block::Block
 
   // Initialize extent 
 
-  for (int axis=0; axis<3; axis++) {
-    lower_[axis]      = 0.0;
-    upper_[axis]      = 1.0;
-  }
+  lower_[axis_x] = xm;
+  lower_[axis_y] = ym;
+  lower_[axis_z] = zm;
+
+  upper_[axis_x] = xp;
+  upper_[axis_y] = yp;
+  upper_[axis_z] = zp;
 }
 //----------------------------------------------------------------------
 
@@ -108,21 +112,21 @@ void Block::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
-void Block::set_lower(double x, double y, double z) throw ()
-{
-  lower_[0] = x;
-  lower_[1] = y;
-  lower_[2] = z;
-}
+// void Block::set_lower(double x, double y, double z) throw ()
+// {
+//   lower_[0] = x;
+//   lower_[1] = y;
+//   lower_[2] = z;
+// }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-void Block::set_upper(double x, double y, double z) throw ()
-{
-  upper_[0] = x;
-  upper_[1] = y;
-  upper_[2] = z;
-}
+// void Block::set_upper(double x, double y, double z) throw ()
+// {
+//   upper_[0] = x;
+//   upper_[1] = y;
+//   upper_[2] = z;
+// }
 
 //----------------------------------------------------------------------
 

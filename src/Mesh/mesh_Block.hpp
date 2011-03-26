@@ -28,6 +28,8 @@ public: // interface
 	FieldDescr * field_descr,
 	int ix, int iy, int iz,
 	int nx, int ny, int nz,
+	double xm, double ym, double zm,
+	double xp, double yp, double zp,
 	int num_field_blocks = 1) throw();
 
   //----------------------------------------------------------------------
@@ -45,11 +47,11 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Set domain lower extent
-  void set_lower(double x, double y, double z) throw ();
+  // /// Set domain lower extent
+  // void set_lower(double x, double y, double z) throw ();
 
-  /// Set domain upper extent
-  void set_upper(double x, double y, double z) throw ();
+  // /// Set domain upper extent
+  // void set_upper(double x, double y, double z) throw ();
 
   //----------------------------------------------------------------------
 

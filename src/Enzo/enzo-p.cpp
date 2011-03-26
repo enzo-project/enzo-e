@@ -57,6 +57,10 @@ PARALLEL_MAIN_BEGIN
 
     // Read in parameters
 
+#ifdef CONFIG_USE_CHARM
+    count_ = 0;
+#endif
+
     int index_simulation;
 
     num_simulations = PARALLEL_ARGC - 1;
@@ -73,8 +77,6 @@ PARALLEL_MAIN_BEGIN
       // EnzoSimulationCharm group (one copy per process)
 
       mainProxy = thishandle;
-
-      count_ = 0;
 
       CProxy_EnzoSimulationCharm::ckNew(parameter_file, 
 					strlen(parameter_file),
@@ -126,12 +128,12 @@ PARALLEL_MAIN_BEGIN
 #ifdef CONFIG_USE_CHARM
 void enzo_exit(int index_simulation)
   {
-    PARALLEL_PRINTF ("Simulation %d count %d\n",
-		    index_simulation,
-		    count_);
+    PARALLEL_PRINTF ("Simulation %d procs %d count %d\n",
+		     index_simulation,
+		     CkNumPes(),
+		     count_);
     count_++;
-    if (count_ == CkNumPes() &&
-	index_simulation + 1 == num_simulations) {
+    if (count_ == num_simulations * CkNumPes()) {
       Monitor::instance()->print ("END ENZO-P");
       unit_finalize();
       PARALLEL_PRINTF ("main exiting\n");

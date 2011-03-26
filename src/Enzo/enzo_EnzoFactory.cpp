@@ -17,7 +17,9 @@ Mesh * EnzoFactory::create_mesh
  int nbx, int nby, int nbz
  ) throw ()
 {
-  return new EnzoMesh (this,group_process,nx,ny,nz,nbx,nby,nbz);
+  return new EnzoMesh (this,group_process,
+		       nx,ny,nz,
+		       nbx,nby,nbz);
 }
 
 //----------------------------------------------------------------------
@@ -31,8 +33,11 @@ Patch * EnzoFactory::create_patch
  double xp, double yp, double zp
  ) throw()
 {
-  return new EnzoPatch (this,group_process,nx,ny,nz,nbx,nby,nbz,
-			xm,ym,zm,xp,yp,zp);
+  return new EnzoPatch (this,group_process,
+			nx,ny,nz,
+			nbx,nby,nbz,
+			xm,ym,zm,
+			xp,yp,zp);
 }
 
 //----------------------------------------------------------------------
@@ -43,9 +48,15 @@ Block * EnzoFactory::create_block
  FieldDescr * field_descr,
  int ix, int iy, int iz,
  int nx, int ny, int nz,
+ double xm, double ym, double zm,
+ double xp, double yp, double zp,
  int num_field_blocks
  ) throw()
 {
-  return new EnzoBlock (patch, field_descr, ix,iy,iz, nx,ny,nz ,num_field_blocks);
+  return new EnzoBlock (patch, field_descr, 
+			ix,iy,iz, 
+			nx,ny,nz,
+			xm,ym,zm, 
+			xp,yp,zp, num_field_blocks);
 }
 

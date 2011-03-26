@@ -191,18 +191,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     int ibx,iby,ibz;
     layout_->block_indices (ib, &ibx, &iby, &ibz);
 
-    // create a new data block
-
-    Block * block = factory_->create_block (this,field_descr,ibx,iby,ibz,mbx,mby,mbz);
-
-    // Store the data block
-    block_[ib] = block;
-
-
-    // INITIALIZE FIELD BLOCK
-
-    FieldBlock * field_block = block->field_block();
-
+    // Get extents
     double xm,xp,ym,yp,zm,zp;
 
     xm = lower_[0] + ibx*bhx;
@@ -213,11 +202,24 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     yp = lower_[1] + (iby+1)*bhy;
     zp = lower_[2] + (ibz+1)*bhz;
 
-    block->set_lower(xm,ym,zm);
-    block->set_upper(xp,yp,zp);
+    // create a new data block
+
+    Block * block = factory_->create_block 
+      (this,field_descr,
+       ibx,iby,ibz,
+       mbx,mby,mbz,
+       xm,ym,zm,
+       xp,yp,zp);
+
+    // Store the data block
+    block_[ib] = block;
+
+    // INITIALIZE FIELD BLOCK
+    // (move into Block constructor?)
+    FieldBlock * field_block = block->field_block();
 
     // Allocate field data, including ghosts
-
+    
     field_block->allocate_array();
     field_block->allocate_ghosts();
 
