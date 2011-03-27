@@ -121,9 +121,9 @@ class Patch
 
 #ifdef CONFIG_USE_CHARM
   /// CHARM chare array of Blocks
-  //  CProxy_Block block_;
+  CProxy_Block block_;
   /// Array of blocks ib associated with this process
-  std::vector<Block * > block_;
+  ///  std::vector<Block * > block_;
 #else
   /// Array of blocks ib associated with this process
   std::vector<Block * > block_;

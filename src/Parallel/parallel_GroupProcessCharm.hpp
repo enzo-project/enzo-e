@@ -11,16 +11,6 @@
 
 #ifdef CONFIG_USE_CHARM
 
-enum send_enum {
-  send_standard,
-  send_buffered,
-  send_synchronous,
-  send_ready };
-
-enum data_enum {
-  data_single,
-  data_double };
-
 class GroupProcessCharm : public GroupProcess {
 
   /// @class    GroupProcessCharm

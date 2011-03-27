@@ -110,8 +110,8 @@ public: // interface
   FieldBlock * merge(bool merge_x, bool merge_y, bool merge_z, 
 		     FieldBlock ** field_blocks) throw ();
  
-  /// Read a block from disk.  Create new FieldDescr if not supplied or different.
-  /// return NULL iff no new field_descr is created
+  /// Read a block from disk.  Create new FieldDescr if not supplied
+  /// or different.  return NULL iff no new field_descr is created
   void read(File * file) throw ();
 
   /// Write a block from disk, and optionally associated descriptor

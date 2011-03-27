@@ -30,30 +30,12 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  /// Set dimension
-  void set_dimension(int dimension) throw ();
-
   /// Set domain lower extent
   void set_lower(double nx, double ny, double nz) throw ();
 
   /// Set domain upper extent
   void set_upper(double nx, double ny, double nz) throw ();
   
-  /// Set max_level
-  void set_max_level(int max_level) throw ();
-
-  /// Set refinement factor
-  void set_refine_factor(int refine) throw ();
-
-  /// Set whether to avoid level jumps
-  void set_balanced(bool balanced) throw ();
-
-  /// Set whether to backfill levels
-  void set_backfill(bool backfill) throw ();
-
-  /// Set whether to coalesce patches
-  void set_coalesce(bool coalesce) throw ();
-
   //----------------------------------------------------------------------
 
   /// Return dimension
@@ -65,19 +47,12 @@ public: // interface
   /// Return domain upper extent
   void upper(double * nx, double * ny = 0, double * nz = 0) const throw ();
 
-  /// Return max_level
-  int max_level() const throw ();
-
-  /// Return refinement factor
-  int refine_factor() const throw ();
-
-  /// Pointer to the root Patch
-  Patch * root_patch() throw ();
+  //----------------------------------------------------------------------
 
   /// Return the total number of local patches
   size_t num_patches() const throw();
 
-  /// Return the ith patch
+  /// Return the ith patch.  Patch[0] is the root
   Patch * patch(size_t i) throw();
 
   /// Return the ith patch
@@ -86,17 +61,9 @@ public: // interface
   /// Insert the given Patch into the list of patches
   virtual void insert_patch(Patch *) throw();
 
-  /// Return whether to avoid level jumps
-  bool balanced() const throw ();
-
-  /// Return whether to backfill levels
-  bool backfill() const throw ();
-
-  /// Return whether to coalesce patches
-  bool coalesce() const throw ();
-
   /// Return the GroupProcess associated with the mesh
-  GroupProcess * group() const throw();
+  GroupProcess * group() const throw()
+  { return group_process_; }
 
   /// Return the factory object associated with the Mesh
   Factory * factory () const throw()
@@ -104,7 +71,8 @@ public: // interface
 
 protected: // attributes
 
-  /// Factory for creating Simulations, Meshes, Patches and Blocks [abstract factory design pattern]
+  /// Factory for creating Simulations, Meshes, Patches and Blocks
+  /// [abstract factory design pattern]
   Factory * factory_;
 
   /// Parallel Group for distributing the Mesh across processors
@@ -118,40 +86,64 @@ protected: // attributes
   //  strict_auto_ptr<TreeK> tree_;
   TreeK * tree_;
 
-  /// Spacial dimensions of the Mesh: 1, 2, or 3
-
-  int dimension_;
-
   /// Lower extent of the patch
   double lower_[3];
 
   /// Upper extent of the patch
   double upper_[3];
 
-  /// Root grid size
-  
-  int root_size_[3];
-
-  /// Refinement factor = 2, 4, etc.
-  /// Parameter Mesh::refine
-  int refine_;
-
-  /// Maximum level for the hierarchy (0 = unigrid) assuming r=2
-  /// Parameter Mesh::max_level
-  int max_level_;
-
-  /// Whether the tree is balanced or "full"
-  /// Parameter Mesh::balanced
-  bool balanced_;
-
-  /// Whether to backfill for refine > 2 to regain r == 2 balance
-  /// Parameter Mesh::backfill
-  bool backfill_;
-
-  /// Whether to coalesce small patches into one big one
-  /// Parameter Mesh::coalesce
-  bool coalesce_;
 };
+
+  // /// Set max_level
+  // void set_max_level(int max_level) throw ();
+
+  // /// Set refinement factor
+  // void set_refine_factor(int refine) throw ();
+
+  // /// Set whether to avoid level jumps
+  // void set_balanced(bool balanced) throw ();
+
+  // /// Set whether to backfill levels
+  // void set_backfill(bool backfill) throw ();
+
+  // /// Set whether to coalesce patches
+  // void set_coalesce(bool coalesce) throw ();
+  // //--------------------------------------------------
+  // /// Return max_level
+  // int max_level() const throw ();
+
+  // /// Return refinement factor
+  // int refine_factor() const throw ();
+
+  // /// Return whether to avoid level jumps
+  // bool balanced() const throw ();
+
+  // /// Return whether to backfill levels
+  // bool backfill() const throw ();
+
+  // /// Return whether to coalesce patches
+  // bool coalesce() const throw ();
+
+  // private:
+  // /// Refinement factor = 2, 4, etc.
+  // /// Parameter Mesh::refine
+  // int refine_;
+
+  // /// Maximum level for the hierarchy (0 = unigrid) assuming r=2
+  // /// Parameter Mesh::max_level
+  // int max_level_;
+
+  // /// Whether the tree is balanced or "full"
+  // /// Parameter Mesh::balanced
+  // bool balanced_;
+
+  // /// Whether to backfill for refine > 2 to regain r == 2 balance
+  // /// Parameter Mesh::backfill
+  // bool backfill_;
+
+  // /// Whether to coalesce small patches into one big one
+  // /// Parameter Mesh::coalesce
+  // bool coalesce_;
 
 #endif /* MESH_MESH_HPP */
 

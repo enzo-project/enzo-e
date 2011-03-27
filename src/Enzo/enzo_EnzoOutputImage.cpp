@@ -44,7 +44,7 @@ void EnzoOutputImage::write
 
   // Get field_descr (eventually)
 
-  Block * block = mesh->root_patch()->local_block(0);
+  Block * block = mesh->patch(0)->local_block(0);
   if (block == NULL) return;
   FieldBlock       * field_block = block->field_block();
   const FieldDescr * field_descr = field_block->field_descr();
@@ -61,7 +61,7 @@ void EnzoOutputImage::write
 
     // Get mesh size
     int nxm,nym,nzm;
-    mesh->root_patch()->size (&nxm, &nym, &nzm);
+    mesh->patch(0)->size (&nxm, &nym, &nzm);
     // Create image 
     monitor->image_open(file_name,nxm,nym);
   }

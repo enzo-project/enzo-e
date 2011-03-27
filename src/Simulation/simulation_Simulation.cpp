@@ -282,8 +282,6 @@ void Simulation::initialize_mesh_() throw()
      root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);
 
-  mesh_->set_dimension(dimension_);
-
   // Domain extents
 
   //--------------------------------------------------
