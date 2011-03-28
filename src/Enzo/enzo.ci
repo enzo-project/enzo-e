@@ -8,8 +8,9 @@
 
 mainmodule enzo {
 
-  readonly CProxy_Main mainProxy;
-  readonly int num_simulations;
+  readonly CProxy_Main        mainProxy;
+  readonly CProxy_FieldDescr  field_descr_proxy;
+  readonly int                num_simulations;
 
   mainchare Main {
     entry Main(CkArgMsg *m);
@@ -20,6 +21,14 @@ mainmodule enzo {
     entry EnzoSimulationCharm(const char filename[n], int n, 
 			      int index_simulation);
   };
+
+  group FieldDescr {
+    entry FieldDescr();
+  }
+
+  /// Patch chare
+
+  /// Block chare array
 
 };
 

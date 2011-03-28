@@ -12,6 +12,9 @@
 /// @todo     Support temporary fields, e.g. temperature or gravitational potential
 /// @brief    [\ref Field] Declaration for the FieldDescr class
 
+#include "parallel.def"
+#include PARALLEL_CHARM_INCLUDE(enzo.decl.h)
+
 enum field_action_enum {
   field_action_unknown,  // Uninitialized action
   field_action_none,     // Do nothing if range exceeded
@@ -22,7 +25,8 @@ enum field_action_enum {
   field_action_method    // Retry with alternate method if range exceeded
 };
 
-class FieldDescr {
+PARALLEL_CLASS_DECL(FieldDescr)
+{
 
   /// @class    FieldDescr
   /// @ingroup  Field
@@ -42,6 +46,48 @@ public: // functions
   /// Assignment operator
   FieldDescr & operator= (const FieldDescr & field_descr) throw();
 
+  /// Set membership of a field in a group
+  void set_field_in_group(int id_field, int id_group) 
+    throw(std::out_of_range);
+
+  /// Set alignment
+  void set_alignment(int alignment) throw();
+
+  /// Set padding
+  void set_padding(int padding) throw();
+
+  /// Set courant
+  void set_courant(double courant) throw();
+
+  /// Set centering for a field
+  void set_centering(int id_field, bool cx, bool cy, bool cz) 
+    throw(std::out_of_range);
+
+  /// Set ghosts for a field
+  void set_ghosts(int id_field, int gx, int gy, int gz) 
+    throw(std::out_of_range);
+
+  /// Set precision for a field
+  void set_precision(int id_field, precision_enum precision) 
+    throw(std::out_of_range);
+
+  /// Set minimum bound and action
+  void set_minimum (int id_field, double min_value,
+		    enum field_action_enum min_action) 
+    throw(std::out_of_range);
+
+  /// Set maximum bound and action
+  void set_maximum (int id_field, double max_value, 
+		    enum field_action_enum max_action) 
+    throw(std::out_of_range);
+
+  /// Insert a new field
+  int insert_field(std::string name_field) throw();
+
+  /// Insert a new group
+  void insert_group(std::string name_group) throw();
+
+  //----------------------------------------------------------------------
 
   /// Return the number of fields
   int field_count() const throw();
@@ -54,7 +100,6 @@ public: // functions
 
   /// Return the integer handle for the named field
   int field_id(const std::string name) throw();
-
 
   /// Return the number of groups
   int group_count() const throw();
@@ -112,49 +157,6 @@ public: // functions
   enum field_action_enum maximum_action(int id_field) const 
     throw(std::out_of_range);
 
-  //----------------------------------------------------------------------
-
-  /// Insert a new field
-  int insert_field(std::string name_field) throw();
-
-  /// Insert a new group
-  void insert_group(std::string name_group) throw();
-
-  /// Set membership of a field in a group
-  void set_field_in_group(int id_field, int id_group) 
-    throw(std::out_of_range);
-
-  /// Set alignment
-  void set_alignment(int alignment) throw();
-
-  /// Set padding
-  void set_padding(int padding) throw();
-
-  /// Set courant
-  void set_courant(double courant) throw();
-
-  /// Set centering for a field
-  void set_centering(int id_field, bool cx, bool cy, bool cz) 
-    throw(std::out_of_range);
-
-  /// Set ghosts for a field
-  void set_ghosts(int id_field, int gx, int gy, int gz) 
-    throw(std::out_of_range);
-
-  /// Set precision for a field
-  void set_precision(int id_field, precision_enum precision) 
-    throw(std::out_of_range);
-
-  /// Set minimum bound and action
-  void set_minimum (int id_field, double min_value,
-		    enum field_action_enum min_action) 
-    throw(std::out_of_range);
-
-  /// Set maximum bound and action
-  void set_maximum (int id_field, double max_value, 
-		    enum field_action_enum max_action) 
-    throw(std::out_of_range);
-
 private: // functions
 
   void copy_(const FieldDescr & field_descr) throw();
@@ -186,7 +188,6 @@ private: // attributes
 
   /// Courant number for fields
   double courant_;
-
 
   /// Precision of each field
   std::vector<precision_enum> precision_;

@@ -10,14 +10,13 @@
 /// @todo     Move "size" to Block's, since that's Field-centric
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 
-class Mesh;
-
 class Patch
 {
 
   /// @class    Patch
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Represent a distributed box of uniform (non-adaptive) data
+  /// @brief [\ref Mesh] Represent a distributed box of uniform
+  /// (non-adaptive) data
 
  public: // interface
 
@@ -39,19 +38,6 @@ class Patch
   /// Copy constructor
   Patch(const Patch & patch,
 	FieldDescr * field_descr) throw();
-
-  // /// Assignment operator
-  // Patch & operator= (const Patch & patch) throw();
-
-  //----------------------------------------------------------------------
-
-  // /// Set domain lower extent
-  // void set_lower(double x, double y, double z) throw ();
-
-  // /// Set domain upper extent
-  // void set_upper(double x, double y, double z) throw ();
-  
-  //----------------------------------------------------------------------
 
   /// Return the size of the patch in number of grid cells
   void size (int * nx, int * ny=0, int * nz=0) const throw();
@@ -88,15 +74,9 @@ class Patch
   GroupProcess * group()  const throw()
   { return group_process_; };
 
- public: // entry functions
-
-#ifdef CONFIG_USE_CHARM
-
-#endif
-
   //--------------------------------------------------
 
- protected: // attributes
+protected: // attributes
 
   /// Factory object for creating Blocks
   Factory * factory_;
@@ -119,15 +99,8 @@ class Patch
   /// Upper extent of the patch
   double upper_[3];
 
-#ifdef CONFIG_USE_CHARM
-  /// CHARM chare array of Blocks
-  CProxy_Block block_;
-  /// Array of blocks ib associated with this process
-  ///  std::vector<Block * > block_;
-#else
   /// Array of blocks ib associated with this process
   std::vector<Block * > block_;
-#endif
 
 
 };

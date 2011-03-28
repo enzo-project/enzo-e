@@ -22,16 +22,19 @@
 
 \begin{enumerate}
 \item Simulation  
+  Multiple concurrent simulations.
   \begin{itemize}
   \item Chare 1D array in main()
   \item Size may vary (usually one)
   \end{itemize}
 \item Patch  
+  Distributed patches in AMR mesh hierarchy. 
   \begin{itemize}
   \item Charm 1D array in Mesh
   \item Size may vary.
   \end{itemize}
 \item Block
+  Parallel blocks in a patch.
   \begin{itemize}
   \item Charm 1D-3D array in Patch
   \item Size is constant

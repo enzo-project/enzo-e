@@ -89,7 +89,7 @@ int Mesh::dimension() const throw ()
     return 0;
   } else {
     int nx,ny,nz;
-    patch_list_.size(&nx,&ny,&nz);
+    patch_list_[0]->size(&nx,&ny,&nz);
     if (nz != 1) return 3;
     if (ny != 1) return 2;
     if (nx != 1) return 1;
@@ -144,10 +144,10 @@ void Mesh::upper(double * x, double * y, double * z) const throw ()
 
 //----------------------------------------------------------------------
 
-Patch * Mesh::root_patch() throw ()
-{ 
-  return (patch_list_.size() > 0) ? patch_list_[0] : NULL; 
-}
+// Patch * Mesh::root_patch() throw ()
+// { 
+//   return (patch_list_.size() > 0) ? patch_list_[0] : NULL; 
+// }
 
 //----------------------------------------------------------------------
 

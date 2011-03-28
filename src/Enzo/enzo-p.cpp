@@ -18,6 +18,7 @@
 //----------------------------------------------------------------------
 
 int num_simulations;
+CProxy_FieldDescr field_descr_proxy;
 
 PARALLEL_MAIN_BEGIN
   {
@@ -59,6 +60,8 @@ PARALLEL_MAIN_BEGIN
 
 #ifdef CONFIG_USE_CHARM
     count_ = 0;
+    mainProxy = thishandle;
+    field_descr_proxy = CProxy_FieldDescr::ckNew();
 #endif
 
     int index_simulation;
@@ -73,10 +76,7 @@ PARALLEL_MAIN_BEGIN
 
 #ifdef CONFIG_USE_CHARM
 
-      // If using CHARM, save the Main proxy, and create the
-      // EnzoSimulationCharm group (one copy per process)
-
-      mainProxy = thishandle;
+      // If using CHARM, create the EnzoSimulationCharm groups
 
       CProxy_EnzoSimulationCharm::ckNew(parameter_file, 
 					strlen(parameter_file),

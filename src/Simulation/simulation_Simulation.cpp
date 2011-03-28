@@ -314,7 +314,7 @@ void Simulation::initialize_mesh_() throw()
   mesh_->set_upper(upper[0], upper[1], upper[2]);
 
   //--------------------------------------------------
-  parameters_->set_current_group ("Mesh");
+  // parameters_->set_current_group ("Mesh");
   //--------------------------------------------------
   // parameter: Mesh::refine
   // parameter: Mesh::max_level
@@ -323,11 +323,11 @@ void Simulation::initialize_mesh_() throw()
   // parameter: Mesh::coalesce
   //--------------------------------------------------
 
-  mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
-  mesh_->set_max_level     (parameters_->value_integer("max_level", 0));
-  mesh_->set_balanced      (parameters_->value_logical("balanced",  true));
-  mesh_->set_backfill      (parameters_->value_logical("backfill",  true));
-  mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
+  // mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
+  // mesh_->set_max_level     (parameters_->value_integer("max_level", 0));
+  // mesh_->set_balanced      (parameters_->value_logical("balanced",  true));
+  // mesh_->set_backfill      (parameters_->value_logical("backfill",  true));
+  // mesh_->set_coalesce      (parameters_->value_logical("coalesce",  true));
 
   //----------------------------------------------------------------------
   // Create and initialize root Patch in Mesh
