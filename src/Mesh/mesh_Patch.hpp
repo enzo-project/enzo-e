@@ -99,10 +99,14 @@ protected: // attributes
   /// Upper extent of the patch
   double upper_[3];
 
+#ifdef CONFIG_USE_CHARM
+  /// CHARM chare array of Blocks
+  //  CProxy_Block block_;
+  std::vector<Block * > block_;
+#else
   /// Array of blocks ib associated with this process
   std::vector<Block * > block_;
-
-
+#endif
 };
 
 #endif /* MESH_PATCH_HPP */
