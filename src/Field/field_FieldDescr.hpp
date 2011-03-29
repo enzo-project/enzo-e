@@ -12,9 +12,6 @@
 /// @todo     Support temporary fields, e.g. temperature or gravitational potential
 /// @brief    [\ref Field] Declaration for the FieldDescr class
 
-#include "parallel.def"
-#include PARALLEL_CHARM_INCLUDE(enzo.decl.h)
-
 enum field_action_enum {
   field_action_unknown,  // Uninitialized action
   field_action_none,     // Do nothing if range exceeded
@@ -25,7 +22,7 @@ enum field_action_enum {
   field_action_method    // Retry with alternate method if range exceeded
 };
 
-PARALLEL_CLASS_DECL(FieldDescr)
+class FieldDescr 
 {
 
   /// @class    FieldDescr

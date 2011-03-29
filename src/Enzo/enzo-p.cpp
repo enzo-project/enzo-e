@@ -20,10 +20,6 @@
 
 int num_simulations;
 
-#ifdef CONFIG_USE_CHARM
-  CProxy_FieldDescr field_descr_proxy;
-#endif
-
 PARALLEL_MAIN_BEGIN
   {
 
@@ -65,7 +61,6 @@ PARALLEL_MAIN_BEGIN
 #ifdef CONFIG_USE_CHARM
     count_ = 0;
     mainProxy = thishandle;
-    field_descr_proxy = CProxy_FieldDescr::ckNew();
 #endif
 
     int index_simulation;
