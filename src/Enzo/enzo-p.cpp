@@ -17,8 +17,12 @@
 
 //----------------------------------------------------------------------
 
+
 int num_simulations;
-CProxy_FieldDescr field_descr_proxy;
+
+#ifdef CONFIG_USE_CHARM
+  CProxy_FieldDescr field_descr_proxy;
+#endif
 
 PARALLEL_MAIN_BEGIN
   {

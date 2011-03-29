@@ -45,7 +45,7 @@ foreach type ($types)
 
    touch "running.$arch.$type.$prec"
 
-   set t = `(time scons arch=$arch type=$type -k -j$procs >& out.scons.$platform)`
+   set t = `(time scons arch=$arch type=$type -k -j$procs >& out.scons.$type)`
    rm -f "running.$arch.$type.$prec"
   
    set secs = `echo $t | awk '{print $3}'`

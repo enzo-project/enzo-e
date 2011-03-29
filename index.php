@@ -285,6 +285,11 @@ function test_summary($component,$test_output,$executables)
 
   printf ("</tr>\n");
 }
+
+printf ("<a href=out.scons.serial>SERIAL</a></br/>\n");
+printf ("<a href=out.scons.mpi>   MPI</a></br/>\n");
+printf ("<a href=out.scons.charm> CHARM</a></br/>\n");
+
 printf ("<table>\n");
 printf ("<tr>\n");
      printf ( "<th rowspan=2>");
