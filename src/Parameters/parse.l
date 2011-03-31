@@ -5,6 +5,7 @@ LN [A-Za-z0-9_]
 LL [a-z]
 LU [A-Z]
 E [Ee][+-]?{D}+
+S [-]?
 
 %{
 
@@ -124,10 +125,10 @@ true      { yylval.logical_type = 1; return LOGICAL; }
 ","        { return ','; } /* list element separator */
 "#".*      {  /* ignore comments */ }
 
-{D}+{E}            { yylval.scalar_type = atof (yytext); return SCALAR; }
-{D}*"."{D}+({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
-{D}+"."{D}*({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
-{D}+               { yylval.integer_type = atoi (yytext); return INTEGER; }
+{S}{D}+{E}            { yylval.scalar_type = atof (yytext); return SCALAR; }
+{S}{D}*"."{D}+({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
+{S}{D}+"."{D}*({E})?  { yylval.scalar_type = atof (yytext); return SCALAR; }
+{S}{D}+               { yylval.integer_type = atoi (yytext); return INTEGER; }
 
 \"(\\.|[^\\"])*\"  { yylval.string_type = strdup(yytext+1); /* copy, skipping open quote */
                      yylval.string_type [yyleng-2] = '\0';   /* remove close quote */

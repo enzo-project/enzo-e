@@ -44,12 +44,12 @@ void generate_input()
   fprintf (fp, "   \n");
   fprintf (fp, "Integer {\n");
   fprintf (fp, "  test_1 = 1;\n");
-  fprintf (fp, "  test_37 = 37\n");
+  fprintf (fp, "  test_neg_37 = -37;\n");
   fprintf (fp, "}\n");
 
   fprintf (fp, "Scalar {\n");
   fprintf (fp, "  test_1_5 = 1.5;\n");
-  fprintf (fp, "  test_37_25 = 37.25;\n");
+  fprintf (fp, "  test_neg_37_25 = -37.25;\n");
   fprintf (fp, "}\n");
 
   fprintf (fp, "Scalar {\n");
@@ -93,7 +93,7 @@ void generate_input()
   fprintf (fp, "}\n");
 
   fprintf (fp, " List {\n");
-  fprintf (fp, "  num1 = [1.0, true, 37, \"string\", x-y+2.0*z, x+y+t > 0.0 ];\n");
+  fprintf (fp, "  num1 = [1.0, true, -37, \"string\", x-y+2.0*z, x+y+t > 0.0 ];\n");
   fprintf (fp, "}\n");
   fclose(fp);
 
@@ -196,7 +196,7 @@ PARALLEL_MAIN_BEGIN
   parameters->set_current_group("Integer");
   
   unit_assert (parameters->value_integer("test_1")  == 1);
-  unit_assert (parameters->value_integer("test_37") == 37);
+  unit_assert (parameters->value_integer("test_neg_37") == -37);
   unit_assert (parameters->value_integer("none",58) == 58);
 
   // int i,id;
@@ -227,7 +227,7 @@ PARALLEL_MAIN_BEGIN
   parameters->set_current_group("Scalar");
   
   unit_assert (parameters->value_scalar("test_1_5")  == 1.5);
-  unit_assert (parameters->value_scalar("test_37_25") == 37.25);
+  unit_assert (parameters->value_scalar("test_neg_37_25") == -37.25);
   unit_assert (parameters->value_scalar("none",58.75) == 58.75);
 
   // double d,dd;
@@ -379,7 +379,7 @@ PARALLEL_MAIN_BEGIN
   unit_assert(parameters->list_value_logical(1,"num1") == true);
 
   unit_func("list_value_integer");
-  unit_assert(parameters->list_value_integer(2,"num1") == 37);
+  unit_assert(parameters->list_value_integer(2,"num1") == -37);
 
   unit_func("list_value_string");
   unit_assert(strcmp(parameters->list_value_string(3,"num1"),"string")==0);
