@@ -186,26 +186,31 @@ if (arch == "linux"):
    hdf5_inc = (hdf5_path + '/include')
    hdf5_lib = (hdf5_path + '/lib')
 
-   flags_opt  = '-g'
-   flags_prec = '-m128bit-long-double'
-   flags_warn = '-Wall'
+   flags_debug = '-g'
+   flags_opt   = '-O3'
+   flags_prec  = '-m128bit-long-double'
+   flags_warn  = '-Wall'
 
-   cxxflags_opt  = flags_opt
-   cxxflags_prec = flags_prec
-   cxxflags_warn = flags_warn
+   cxxflags_debug = flags_debug
+   cxxflags_opt   = flags_opt
+   cxxflags_prec  = flags_prec
+   cxxflags_warn  = flags_warn
 
-   cflags_opt  = flags_opt
-   cflags_prec = flags_prec
-   cflags_warn = flags_warn
+   cflags_debug = flags_debug
+   cflags_opt   = flags_opt
+   cflags_prec  = flags_prec
+   cflags_warn  = flags_warn
 
-   fortranflags_opt  = flags_opt
-   fortranflags_prec = flags_prec
-   fortranflags_warn = flags_warn
+   fortranflags_debug = flags_debug
+   fortranflags_opt   = flags_opt
+   fortranflags_prec  = flags_prec
+   fortranflags_warn  = flags_warn
 
    linkflags_arch = ''
-   linkflags_opt  = flags_opt
-   linkflags_prec = flags_prec
-   linkflags_warn = flags_warn
+   linkflags_debug = flags_debug
+   linkflags_opt   = flags_opt
+   linkflags_prec  = flags_prec
+   linkflags_warn  = flags_warn
 
 #----------------------------------------------------------------------
 elif (arch == "ncsa-bd"):
@@ -245,26 +250,31 @@ elif (arch == "ncsa-bd"):
    hdf5_inc = (hdf5_path + '/include')
    hdf5_lib = (hdf5_path + '/lib')
 
-   flags_opt  = '-O3 -qhot -q64'
-   flags_prec = ''
-   flags_warn = ''
+   flags_debug = ''
+   flags_opt   = '-O3 -qhot -q64'
+   flags_prec  = ''
+   flags_warn  = ''
 
-   cxxflags_opt  = flags_opt
-   cxxflags_prec = flags_prec
-   cxxflags_warn = flags_warn
+   cxxflags_debug = flags_debug
+   cxxflags_opt   = flags_opt
+   cxxflags_prec  = flags_prec
+   cxxflags_warn  = flags_warn
 
-   cflags_opt  = flags_opt
-   cflags_prec = flags_prec
-   cflags_warn = flags_warn
+   cflags_debug = flags_debug
+   cflags_opt   = flags_opt
+   cflags_prec  = flags_prec
+   cflags_warn  = flags_warn
 
-   fortranflags_opt  = flags_opt + ' -qextname'
-   fortranflags_prec = flags_prec
-   fortranflags_warn = flags_warn
+   fortranflags_debug = flags_debug + ' -qextname'
+   fortranflags_opt   = flags_opt
+   fortranflags_prec  = flags_prec
+   fortranflags_warn  = flags_warn
 
    linkflags_arch = ''
-   linkflags_opt  = flags_opt
-   linkflags_prec = flags_prec
-   linkflags_warn = flags_warn
+   linkflags_debug = flags_debug
+   linkflags_opt   = flags_opt
+   linkflags_prec  = flags_prec
+   linkflags_warn  = flags_warn
 
 #----------------------------------------------------------------------
 elif (arch == "sdsc-triton"):
@@ -302,26 +312,31 @@ elif (arch == "sdsc-triton"):
    hdf5_inc = (hdf5_path + '/include')
    hdf5_lib = (hdf5_path + '/lib')
 
-   flags_opt  = '-fast'
-   flags_prec = ''
-   flags_warn = ''
+   flags_debug = ''
+   flags_opt   = '-fast'
+   flags_prec  = ''
+   flags_warn  = ''
 
-   cxxflags_opt  = flags_opt
-   cxxflags_prec = flags_prec
-   cxxflags_warn = flags_warn
+   cxxflags_debug = flags_debug
+   cxxflags_opt   = flags_opt
+   cxxflags_prec  = flags_prec
+   cxxflags_warn  = flags_warn
 
-   cflags_opt  = flags_opt
-   cflags_prec = flags_prec
-   cflags_warn = flags_warn
+   cflags_debug = flags_debug
+   cflags_opt   = flags_opt
+   cflags_prec  = flags_prec
+   cflags_warn  = flags_warn
 
-   fortranflags_opt  = flags_opt
-   fortranflags_prec = flags_prec
-   fortranflags_warn = flags_warn
+   fortranflags_debug = flags_debug
+   fortranflags_opt   = flags_opt
+   fortranflags_prec  = flags_prec
+   fortranflags_warn  = flags_warn
 
    linkflags_arch = '-pgf90libs'
-   linkflags_opt  = flags_opt
-   linkflags_prec = flags_prec
-   linkflags_warn = flags_warn
+   linkflags_debug = flags_debug
+   linkflags_opt   = flags_opt
+   linkflags_prec  = flags_prec
+   linkflags_warn  = flags_warn
 
 
 
@@ -399,10 +414,10 @@ if (use_papi):
 
 environ  = os.environ
 
-cxxflags = cxxflags_opt + ' ' + cxxflags_prec + ' ' + cxxflags_warn + ' ' + cxxflags_define
-cflags   = cflags_opt + ' '  + cflags_prec + ' ' + cflags_warn
-fortranflags = fortranflags_opt + ' ' + fortranflags_prec + ' ' + fortranflags_warn + ' ' + fortranflags_define
-linkflags = linkflags_arch + ' ' + linkflags_opt + ' ' + linkflags_prec + ' ' + linkflags_warn
+cxxflags = cxxflags_debug + ' ' + cxxflags_opt + ' ' + cxxflags_prec + ' ' + cxxflags_warn + ' ' + cxxflags_define
+cflags   = cflags_debug + ' ' + cflags_opt + ' '  + cflags_prec + ' ' + cflags_warn
+fortranflags = fortranflags_debug + ' ' + fortranflags_opt + ' ' + fortranflags_prec + ' ' + fortranflags_warn + ' ' + fortranflags_define
+linkflags = linkflags_arch + ' ' + linkflags_debug + ' ' + linkflags_opt + ' ' + linkflags_prec + ' ' + linkflags_warn
 
 env = Environment (
       CC           = cc,	

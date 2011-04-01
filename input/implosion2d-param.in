@@ -18,11 +18,11 @@
       ghosts = 3;
 
       fields = [
-	"density",	
-	"velocity_x",
-	"velocity_y",
-	"total_energy",
-	"internal_energy"
+        "density",
+        "velocity_x",
+        "velocity_y",
+        "total_energy",
+        "internal_energy"
       ] ;
 
       courant   = 0.8;
@@ -43,7 +43,6 @@
    Physics {
 
       dimensions = 2;
-
       gamma = 1.4;
 
    }
@@ -53,7 +52,7 @@
                                  1.0 ]; };
 
        total_energy  { value = [ 0.14 / (0.4 * 0.125), x + y < 0.1517,
-	                         1.0  / (0.4 * 1.0) ]; };
+                             1.0  / (0.4 * 1.0) ]; };
 
        velocity_x    { value = 0.0; };
        velocity_y    { value = 0.0; }
@@ -63,14 +62,13 @@
 
    Stopping {
       time  = 2.5;
-      cycle = 100;
+      cycle = 100000;
    }
 
    Output { 
       cycle_step {
-        file_name      = "implosion2d-param-%04d";
-	type           = "image";
-	cycle_interval = 10;
-      };
+         file_name      = "implosion2d-param-%04d";
+         type           = "image";
+         cycle_interval = 10;
+      }
    }
- 
