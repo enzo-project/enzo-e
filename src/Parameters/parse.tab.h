@@ -39,50 +39,49 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     GROUP_NAME = 258,
-     STRING = 259,
-     IDENTIFIER = 260,
-     VARIABLE = 261,
-     SCALAR = 262,
-     INTEGER = 263,
-     LOGICAL = 264,
-     LE = 265,
-     GE = 266,
-     NE = 267,
-     EQ = 268,
-     AND = 269,
-     OR = 270,
-     ACOS = 271,
-     ACOSH = 272,
-     ASIN = 273,
-     ASINH = 274,
-     ATAN = 275,
-     ATANH = 276,
-     CBRT = 277,
-     CEIL = 278,
-     COS = 279,
-     COSH = 280,
-     ERFC = 281,
-     ERF = 282,
-     EXP = 283,
-     EXPM1 = 284,
-     FABS = 285,
-     FLOOR = 286,
-     J0 = 287,
-     J1 = 288,
-     LGAMMA = 289,
-     LOG10 = 290,
-     LOG1P = 291,
-     LOGB = 292,
-     LOG = 293,
-     SIN = 294,
-     SINH = 295,
-     SQRT = 296,
-     TAN = 297,
-     TANH = 298,
-     Y0 = 299,
-     Y1 = 300,
-     RINT = 301
+     STRING = 258,
+     IDENTIFIER = 259,
+     VARIABLE = 260,
+     SCALAR = 261,
+     INTEGER = 262,
+     LOGICAL = 263,
+     LE = 264,
+     GE = 265,
+     NE = 266,
+     EQ = 267,
+     AND = 268,
+     OR = 269,
+     ACOS = 270,
+     ACOSH = 271,
+     ASIN = 272,
+     ASINH = 273,
+     ATAN = 274,
+     ATANH = 275,
+     CBRT = 276,
+     CEIL = 277,
+     COS = 278,
+     COSH = 279,
+     ERFC = 280,
+     ERF = 281,
+     EXP = 282,
+     EXPM1 = 283,
+     FABS = 284,
+     FLOOR = 285,
+     J0 = 286,
+     J1 = 287,
+     LGAMMA = 288,
+     LOG10 = 289,
+     LOG1P = 290,
+     LOGB = 291,
+     LOG = 292,
+     SIN = 293,
+     SINH = 294,
+     SQRT = 295,
+     TAN = 296,
+     TANH = 297,
+     Y0 = 298,
+     Y1 = 299,
+     RINT = 300
    };
 #endif
 
@@ -93,7 +92,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 388 "src/Parameters/parse.y"
+#line 392 "src/Parameters/parse.y"
  
   int logical_type;  
   int integer_type; 
@@ -105,7 +104,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 109 "src/Parameters/parse.tab.h"
+#line 108 "src/Parameters/parse.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
