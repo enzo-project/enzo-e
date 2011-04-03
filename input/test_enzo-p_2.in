@@ -142,6 +142,8 @@
 
    Output { 
 
+      groups = ["cycle_step_test"];
+
       cycle_step_test {
         file_name      = "enzo-p_2-%06d";
 	type           = "image";

@@ -146,6 +146,9 @@
    }
 
    Output { 
+
+      groups = ["data","restart"];
+
       # this section needs more work
 
       # subgroup specifies the subdirectory / file name

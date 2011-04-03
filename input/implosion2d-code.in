@@ -58,6 +58,9 @@
    }
 
    Output { 
+
+      groups = ["cycle_step"];
+
       cycle_step {
          file_name      = "implosion2d-code-%04d";
          type           = "image";

@@ -4,7 +4,6 @@
 /// @file      simulation_Simulation.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      2010-11-10
-/// @todo      Remove call to Parameters::subgroup_count() (then remove function), using Output:groups = ["cycle_interval", ... ];
 /// @brief     Implementation of the Simulation class
 
 #include "cello.hpp"
@@ -419,11 +418,12 @@ void Simulation::initialize_output_() throw()
   parameters_->set_group(0,"Output");
   //--------------------------------------------------
 
-  int num_groups = parameters_->subgroup_count();
+  int num_groups = parameters_->list_length("groups");
 
   for (int index_group=0; index_group < num_groups; index_group++) {
 
-    std::string group = parameters_->subgroup(index_group);
+    std::string group = parameters_->list_value_string
+      (index_group,"groups","unknown");
 
     //--------------------------------------------------
     parameters_->set_group(1,group);

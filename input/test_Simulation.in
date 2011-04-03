@@ -150,6 +150,12 @@
 
    Output { 
 
+      groups = ["cycle_interval_test",
+                "cycle_list_test",
+                "time_interval_test",
+                "time_list_test",
+                "cycle_step_test",
+                "time_step_test" ];
 
       cycle_interval_test {
         file_name      = "test_Simulation-image_cycle_interval-%04d";
