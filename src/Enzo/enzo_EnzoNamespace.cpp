@@ -261,7 +261,8 @@ namespace enzo {
     ComovingBoxSize   = parameters->value_scalar ("comoving_box_size", 64.0);
 
     //--------------------------------------------------
-    parameters->set_group (0,"Method","ppm");
+    parameters->set_group (0,"Method");
+    parameters->set_group (1,"ppm");
     //--------------------------------------------------
     // parameter: Method:ppm:pressure_free
     // parameter: Method:ppm:use_minimum_pressure_support
