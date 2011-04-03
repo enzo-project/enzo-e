@@ -1,8 +1,11 @@
 /* ANY CHANGES HERE MUST BE REFLECTED IN parse.y parameter_name[] */
+
+#define MAX_GROUP_DEPTH 10
+
 enum enum_parameter {
   enum_parameter_unknown,
   enum_parameter_sentinel,
-  enum_parameter_subgroup,
+  enum_parameter_group,
   enum_parameter_integer,
   enum_parameter_scalar,
   enum_parameter_string,
@@ -54,8 +57,7 @@ struct node_expr {
 };
 
 struct param_struct {
-  char * group;
-  char * subgroup;
+  char * group[MAX_GROUP_DEPTH];
   char * parameter;
   enum enum_parameter type;
   union  {

@@ -13,6 +13,7 @@
 /// @todo     assert_required() to make given parameter required (don't exit since more than one required parameter may be missing)
 /// @todo     Add "check()" function to check individual parameters, or all
 /// @todo     Move Group and subgroup to parameter lists at end with "" default
+/// @todo     Convert current_group_ to std::stack<std::string>
 /// @brief    [\ref Parameters] Declaration for the Parameters class
 
 /// @def      MAX_PARAMETER_FILE_WIDTH
@@ -163,38 +164,36 @@ public: // interface
    )    
     throw(ExceptionParametersBadType);
 
-  /// Return the number of groups
-  int group_count() throw ();
+  //--------------------------------------------------
+  // PARAMETER GROUPS
 
-  /// Return the name of the ith group
-  std::string group(int i) throw ();
+  /// Return the ith group in the grouping
+  std::string group(int i) const throw();
 
-  /// Return the number of subgroups in the current group
-  int subgroup_count() throw ();
+  /// Return the depth of groups
+  int group_depth() const throw();
 
-  /// Return the ith subgroup in the current group
-  std::string subgroup(int i) throw ();
+  /// Return the number of subgroups in the current grouping
+  int group_count() const throw();
 
-  /// Set the current group.  Clears current subgroup
-  void set_current_group  (std::string group, std::string subgroup = "") throw ()
-  { 
-    current_group_    = group;
-    current_subgroup_ = subgroup;
-  };
+  /// Push the group onto the current grouping
+  void group_push(std::string) throw();
 
-  /// Set the current subgroup
-  void set_current_subgroup  (std::string subgroup) throw ()
-  {
-    current_subgroup_ = subgroup;
+  /// Replace the top-level group in the grouping with the specified group;
+  /// equivalent to a pop() then push(group)
+  void group_replace(std::string group) throw() {
+    group_pop();
+    group_push(group);
   }
 
-  /// Get the current group
-  std::string current_group () throw ()
-  { return current_group_; };
+  /// pop the head from the current grouping, checking that it matches
+  /// the optionally provided group name
+  void group_pop(std::string group = "") throw();
 
-  /// Get the current subgroup
-  std::string current_subgroup () throw ()
-  { return current_subgroup_; };
+  /// Set the ith group to specified group, clearing all higher groups
+  void set_group(int, std::string) throw();
+
+  //--------------------------------------------------
 
   /// Return the type of the given parameter
   parameter_enum type(std::string) throw();
@@ -207,11 +206,21 @@ private: // functions
   /// Read in the next line of the input file
   int readline_ (FILE* fp, char * buffer, int n) throw();
 
+  /// Return the full parameter name Group:group:group:...:parameter
+  std::string parameter_name_(std::string parameter)
+  {
+    std::string parameter_name = "";
+    for (int i=0; current_group_[i] != 0 && i<MAX_GROUP_DEPTH; i++) {
+      parameter_name = parameter_name + current_group_[i] + ":";
+    }
+    
+    return (parameter_name + parameter);
+  }
+
   /// Return the Param pointer for the specified parameter
   Param * parameter_ (std::string parameter)
   {
-    std::string p = current_group_ + ":" + current_subgroup_ + ":" + parameter;
-    return parameter_map_[p];
+    return parameter_map_[parameter_name_(parameter)];
   };
 
   /// Return the Param pointer for the specified list parameter element
@@ -222,8 +231,8 @@ private: // functions
 		      int index=-1) throw();
   void monitor_write_ (std::string parameter) throw();
 
-  void new_param_ ( std::string group,
-		    std::string subgroup,
+  /// Create a new parameter with the given grouping
+  void new_param_ ( char * group[],
 		    std::string parameter,
 		    Param * param ) throw();
 
@@ -232,11 +241,11 @@ private: // attributes
   /// Single instance of the Parameters object (singleton design pattern)
 //   static Parameters instance_;
 
-  /// Current Group
-  std::string current_group_;
+  /// Stack of current grouping
+  char * current_group_[MAX_GROUP_DEPTH];
 
-  /// Current subgroup
-  std::string current_subgroup_;
+  /// Top of the current_group_ stack
+  int current_group_depth_;
 
   std::map<std::string, Param *>  parameter_map_;
   ParamNode                     * parameter_tree_;

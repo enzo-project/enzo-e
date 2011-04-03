@@ -18,23 +18,22 @@
 
 Parameters::Parameters() 
   throw()
-  :  current_group_(""),
-     current_subgroup_(""),
-     parameter_map_(),
-     parameter_tree_(new ParamNode("Parameters"))
-     ///
+  : current_group_depth_(0),
+    parameter_map_(),
+    parameter_tree_(new ParamNode("Parameters"))
 {
+  for (int i=0; i<MAX_GROUP_DEPTH; i++) current_group_[i] = 0;
 }
 
 //----------------------------------------------------------------------
 
 Parameters::Parameters(const char * file_name ) 
   throw()
-  : current_group_(""),
-    current_subgroup_(""),
+  : current_group_depth_(0),
     parameter_map_(),
     parameter_tree_(new ParamNode("Parameters"))
 {
+  for (int i=0; i<MAX_GROUP_DEPTH; i++) current_group_[i] = 0;
   read(file_name);
 }
 
@@ -79,14 +78,14 @@ void Parameters::read ( const char * file_name )
 
     param->set(node);
 
-    new_param_(node->group,node->subgroup,node->parameter,param);
+    new_param_(node->group,node->parameter,param);
 
     node = node->next;
     
     // free not delete since allocated in parse.y
-    free (prev->group);
-    free (prev->subgroup);
-    free (prev->parameter);
+    for (int i=0; prev->group[i] && i < MAX_GROUP_DEPTH; i++) {
+      free (prev->group[i]);
+    }
     free (prev);
 
     prev = node;
@@ -96,6 +95,7 @@ void Parameters::read ( const char * file_name )
   // assert: node->type == enum_parameter_sentinel
 
   free (node);
+  node = NULL;
 
   fclose(file_pointer);
 
@@ -126,7 +126,7 @@ void Parameters::write ( const char * file_name )
     } else {
       char message [ ERROR_LENGTH ];
       sprintf (message, 
-	       "uninitialized parameter %s accessed\n",
+	       "uninitialized parameter %s accessed",
 	       it_param->first.c_str());
       WARNING("Parameters::write",message);
     }
@@ -166,7 +166,7 @@ void Parameters::set_integer
     if (! param->is_integer()) throw ExceptionParametersBadType();
   } else {
     param = new Param;
-    new_param_ (current_group_,current_subgroup_,parameter,param);
+    new_param_ (current_group_,parameter,param);
   }
   param->set_integer_(value);
   monitor_write_(parameter);
@@ -202,7 +202,7 @@ void Parameters::set_scalar
     if (! param->is_scalar()) throw ExceptionParametersBadType();
   } else {
     param = new Param;
-    new_param_ (current_group_,current_subgroup_,parameter,param);
+    new_param_ (current_group_,parameter,param);
   }
   param->set_scalar_(value);
   monitor_write_(parameter);
@@ -238,7 +238,7 @@ void Parameters::set_logical
     if (! param->is_logical()) throw ExceptionParametersBadType();
   } else {
     param = new Param;
-    new_param_ (current_group_,current_subgroup_,parameter,param);
+    new_param_ (current_group_,parameter,param);
   }
   param->set_logical_(value);
   monitor_write_(parameter);
@@ -272,7 +272,7 @@ void Parameters::set_string
     if (! param->is_string()) throw ExceptionParametersBadType();
   } else {
     param = new Param;
-    new_param_ (current_group_,current_subgroup_,parameter,param);
+    new_param_ (current_group_,parameter,param);
   }
   param->set_string_(strdup(value));
   monitor_write_(parameter);
@@ -502,37 +502,119 @@ void Parameters::list_evaluate_logical
 
 //----------------------------------------------------------------------
 
-int Parameters::group_count() throw ()
+std::string Parameters::group(int i) const throw()
 {
-  return parameter_tree_->size();
+  return (i < current_group_depth_) ? current_group_[i] : "";
 }
 
 //----------------------------------------------------------------------
 
-std::string Parameters::group(int group_index) throw ()
+int Parameters::group_depth() const throw()
 {
-  return parameter_tree_->subgroup(group_index);
+  return current_group_depth_;
 }
 
 //----------------------------------------------------------------------
 
-int Parameters::subgroup_count() throw ()
+int Parameters::group_count() const throw()
 {
-  if (parameter_tree_->subnode(current_group_) != 0) {
-    return parameter_tree_->subnode(current_group_)->size();
+  ParamNode * param_node = parameter_tree_;
+  for (int i=0; i<current_group_depth_; i++) {
+    if (param_node->subnode(current_group_[i]) != 0) {
+      param_node = param_node->subnode(current_group_[i]);
+    }
   }
-  return 0;
+  return (param_node) ? param_node->size() : 0;
 }
 
 //----------------------------------------------------------------------
 
-std::string Parameters::subgroup(int group_index) throw ()
+void Parameters::group_push(std::string str) throw()
 {
-  if (parameter_tree_->subnode(current_group_) != 0) {
-    return parameter_tree_->subnode(current_group_)->subgroup(group_index);
+  if (current_group_depth_ < MAX_GROUP_DEPTH - 1) {
+    current_group_[current_group_depth_++] = strdup(str.c_str());
+  } else {
+    char message [ ERROR_LENGTH ];
+    sprintf (message, 
+	     "Parameter grouping depth %d exceeds MAX_GROUP_DEPTH = %d",
+	     current_group_depth_,MAX_GROUP_DEPTH);
+    ERROR("Parameters::group_push",message);
   }
-  return "";
 }
+
+//----------------------------------------------------------------------
+
+void Parameters::group_pop(std::string group) throw()
+{
+  if (current_group_depth_ > 0) {
+    if (group != "" && group != current_group_[current_group_depth_-1]) {
+      char message [ ERROR_LENGTH ];
+      sprintf (message, "group_pop(%s) does not match group_push(%s)",
+	       group.c_str(),current_group_[current_group_depth_-1]);
+      WARNING("Parameters::group_pop",message);
+    }
+    --current_group_depth_;
+    free (current_group_[current_group_depth_]);
+    current_group_[current_group_depth_] = NULL;
+  } else {
+    ERROR("Parameters::group_pop",
+	  "More calls to group_pop() than group_push()");
+  }
+}
+
+//----------------------------------------------------------------------
+
+void Parameters::set_group(int index, std::string group) throw()
+{
+  if (index >= MAX_GROUP_DEPTH) {
+    char message [ ERROR_LENGTH ];
+    sprintf (message, "set_group(%d,%s) index %d exceeds MAX_GROUP_DEPTH = %d",
+	     index,group.c_str(),index,MAX_GROUP_DEPTH);
+    ERROR("Parameters::set_group",message);
+  }
+  for (int i=index; i<current_group_depth_; i++) {
+    if (current_group_[i]) {
+      free (current_group_[i]);
+      current_group_[i] = NULL;
+    }
+  }
+  current_group_depth_ = index + 1;
+  current_group_[index] = strdup(group.c_str());
+}
+
+//----------------------------------------------------------------------
+
+// int Parameters::group_count() throw ()
+// {
+//   return parameter_tree_->size();
+// }
+
+// //----------------------------------------------------------------------
+
+// std::string Parameters::group(int group_index) throw ()
+// {
+//   return parameter_tree_->subgroup(group_index);
+// }
+
+// //----------------------------------------------------------------------
+
+// int Parameters::subgroup_count() throw ()
+// {
+//   if (parameter_tree_->subnode(current_group_) != 0) {
+//     return parameter_tree_->subnode(current_group_)->size();
+//   }
+//   return 0;
+// }
+
+// //----------------------------------------------------------------------
+
+// std::string Parameters::subgroup(int group_index) throw ()
+// {
+//   if (parameter_tree_->subnode(current_group_) != 0) {
+//     return parameter_tree_->subnode(current_group_)->subgroup(group_index);
+//   }
+//   return "";
+// }
 
 //----------------------------------------------------------------------
 
@@ -588,19 +670,17 @@ void Parameters::monitor_access_
     param->value_to_string().c_str() : 
     std::string("[" + deflt_string + "]");
 
-  char index_string [MAX_PARAMETER_FILE_WIDTH] = "";
+  char index_string [MAX_PARAMETER_FILE_WIDTH];
 
   if (index != -1) {
     sprintf (index_string,"[%d]",index);
   }
 
   Monitor * monitor = Monitor::instance();
-  monitor->print("[Parameter] accessed %s:%s:%s%s %s",
-	   current_group_.c_str(),
-	   current_subgroup_.c_str(),
-	   parameter.c_str(),
-	   index_string,
-	   value.c_str());
+  monitor->print("[Parameter] accessed %s%s %s",
+		 parameter_name_(parameter).c_str(),
+		 index_string,
+		 value.c_str());
 }
 
 //----------------------------------------------------------------------
@@ -609,10 +689,8 @@ void Parameters::monitor_write_ (std::string parameter) throw()
 {
   Param * param = parameter_(parameter);
   char buffer[MONITOR_LENGTH];
-  sprintf (buffer,"Parameter write %s:%s:%s = %s",
-	   current_group_.c_str(),
-	   current_subgroup_.c_str(),
-	   parameter.c_str(),
+  sprintf (buffer,"Parameter write %s = %s",
+	   parameter_name_(parameter).c_str(),
 	   param ? param->value_to_string().c_str() : "[undefined]");
 
   Monitor * monitor = Monitor::instance();
@@ -685,26 +763,29 @@ Param * Parameters::list_element_ (std::string parameter, int index) throw()
 
 void Parameters::new_param_
 (
- std::string group,
- std::string subgroup,
+ char * group[],
  std::string parameter,
  Param * param
  ) throw()
 {
 
-  std::string full_parameter = 
-    group + ":" + subgroup + ":" + parameter;
+  std::string full_parameter = "";
+  for (int i=0; group[i] != 0 && i < MAX_GROUP_DEPTH; i++) {
+    full_parameter = full_parameter + group[i] + ":";
+  }
+  full_parameter = full_parameter + parameter;
 
   // Insert parameter into the parameter mapping
-  // "Group:subgroup:parameter" -> "Value"
+  // "Group:group[0]:group[1]:...:parameter" -> "Value"
 
   parameter_map_     [full_parameter] = param;
     
-  // Insert parameter into the parameter tree "Group" -> "subgroup"
-  // -> "parameter"
+  // Insert parameter into the parameter tree "Group" -> "group[0]" ->
+  // "group[1]" -> ... -> "parameter"
 
   ParamNode * param_node = parameter_tree_;
-  param_node = param_node->new_subnode(group);
-  param_node = param_node->new_subnode(subgroup);
+  for (int i=0; group[i] != NULL && i < MAX_GROUP_DEPTH; i++) {
+    param_node = param_node->new_subnode(group[i]);
+  }
   param_node = param_node->new_subnode(parameter);
 }

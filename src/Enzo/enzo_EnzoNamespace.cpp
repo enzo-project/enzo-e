@@ -215,7 +215,7 @@ namespace enzo {
     }
 
     //--------------------------------------------------
-    parameters->set_current_group ("Physics");
+    parameters->set_group (0,"Physics");
     //--------------------------------------------------
     // parameter: Physics::cosmology
     // parameter: Physics::gamma
@@ -243,7 +243,7 @@ namespace enzo {
     // PPM parameters
 
     //--------------------------------------------------
-    parameters->set_current_subgroup ("cosmology");
+    parameters->set_group (1,"cosmology");
     //--------------------------------------------------
     // parameter: Physics:cosmology:initial_redshift
     // parameter: Physics:cosmology:hubble_constant_now
@@ -261,7 +261,7 @@ namespace enzo {
     ComovingBoxSize   = parameters->value_scalar ("comoving_box_size", 64.0);
 
     //--------------------------------------------------
-    parameters->set_current_group ("Method","ppm");
+    parameters->set_group (0,"Method","ppm");
     //--------------------------------------------------
     // parameter: Method:ppm:pressure_free
     // parameter: Method:ppm:use_minimum_pressure_support
@@ -305,7 +305,7 @@ namespace enzo {
 							 0.1);
 
     //--------------------------------------------------
-    parameters->set_current_group ("Field");
+    parameters->set_group (0,"Field");
     //--------------------------------------------------
     // parameter: Field::ghosts
     // parameter: Field::fields
@@ -380,7 +380,7 @@ namespace enzo {
     }
 
     //--------------------------------------------------
-    parameters->set_current_group ("Mesh");
+    parameters->set_group (0,"Mesh");
     //--------------------------------------------------
     // parameter: Mesh::block_size
     //--------------------------------------------------
@@ -395,7 +395,7 @@ namespace enzo {
     BoundaryDimension[2] = nz + 2*ghost_depth[2];
 
     //--------------------------------------------------
-    parameters->set_current_group ("Domain");
+    parameters->set_group (0,"Domain");
     //--------------------------------------------------
     // parameter: Domain::lower
     // parameter: Domain::upper
@@ -412,7 +412,7 @@ namespace enzo {
     DomainRightEdge[2] = parameters->list_value_scalar(2,"upper",1.0);
 
     //--------------------------------------------------
-    parameters->set_current_group ("Field");
+    parameters->set_group (0,"Field");
     //--------------------------------------------------
     // parameter: Field::courant
     //--------------------------------------------------
@@ -420,7 +420,7 @@ namespace enzo {
     CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
 
     //--------------------------------------------------
-    parameters->set_current_group ("Initial");
+    parameters->set_group (0,"Initial");
     //--------------------------------------------------
     // parameter: Initial::time
     //--------------------------------------------------

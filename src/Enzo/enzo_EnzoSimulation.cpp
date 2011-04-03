@@ -88,7 +88,7 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
   }
 
   //--------------------------------------------------
-  parameters_->set_current_group ("Initial");
+  parameters_->set_group(0,"Initial");
   //--------------------------------------------------
 
   // parameter: Initial::cycle
@@ -124,7 +124,7 @@ EnzoSimulation::create_stopping_ (std::string name) throw ()
 /// @param name   Name of the stopping method to create (ignored)
 {
   //--------------------------------------------------
-  parameters_->set_current_group ("Stopping");
+  parameters_->set_group(0,"Stopping");
   //--------------------------------------------------
 
   // parameter: Stopping::cycle
@@ -145,7 +145,7 @@ EnzoSimulation::create_boundary_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   //--------------------------------------------------
-  parameters_->set_current_group ("Boundary");
+  parameters_->set_group(0,"Boundary");
   //--------------------------------------------------
 
   // parameter: Boundary::type

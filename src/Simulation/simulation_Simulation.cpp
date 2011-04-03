@@ -4,6 +4,7 @@
 /// @file      simulation_Simulation.cpp
 /// @author    James Bordner (jobordner@ucsd.edu)
 /// @date      2010-11-10
+/// @todo      Remove call to Parameters::subgroup_count() (then remove function), using Output:groups = ["cycle_interval", ... ];
 /// @brief     Implementation of the Simulation class
 
 #include "cello.hpp"
@@ -161,7 +162,7 @@ void Simulation::initialize_simulation_() throw()
 {
 
   //--------------------------------------------------
-  parameters_->set_current_group("Physics");
+  parameters_->set_group(0,"Physics");
   //--------------------------------------------------
   // parameter: Physics::dimensions
   //--------------------------------------------------
@@ -179,7 +180,7 @@ void Simulation::initialize_data_() throw()
   field_descr_ = new FieldDescr;
 
   //--------------------------------------------------
-  parameters_->set_current_group("Field");
+  parameters_->set_group(0,"Field");
   //--------------------------------------------------
 
   //--------------------------------------------------
@@ -255,7 +256,7 @@ void Simulation::initialize_mesh_() throw()
 	 field_descr_ != NULL);
 
   //--------------------------------------------------
-  parameters_->set_current_group ("Mesh");
+  parameters_->set_group (0,"Mesh");
   //--------------------------------------------------
   // parameter: Mesh::root_size
   // parameter: Mesh::root_blocks
@@ -285,7 +286,7 @@ void Simulation::initialize_mesh_() throw()
   // Domain extents
 
   //--------------------------------------------------
-  parameters_->set_current_group("Domain");
+  parameters_->set_group(0,"Domain");
   //--------------------------------------------------
   // parameter: Domain::lower
   // parameter: Domain::upper
@@ -314,7 +315,7 @@ void Simulation::initialize_mesh_() throw()
   mesh_->set_upper(upper[0], upper[1], upper[2]);
 
   //--------------------------------------------------
-  // parameters_->set_current_group ("Mesh");
+  // parameters_->set_group (0,"Mesh");
   //--------------------------------------------------
   // parameter: Mesh::refine
   // parameter: Mesh::max_level
@@ -349,7 +350,7 @@ void Simulation::initialize_mesh_() throw()
   Layout * layout = root_patch->layout();
 
   //--------------------------------------------------
-  parameters_->set_current_group("Mesh");
+  parameters_->set_group(0,"Mesh");
   //--------------------------------------------------
   // parameter: Mesh::root_process_first
   // parameter: Mesh::root_process_count
@@ -381,7 +382,7 @@ void Simulation::initialize_timestep_() throw()
 void Simulation::initialize_initial_() throw()
 {
   //--------------------------------------------------
-  parameters_->set_current_group("Initial");
+  parameters_->set_group(0,"Initial");
   //--------------------------------------------------
   // parameter: Initial::code
   //--------------------------------------------------
@@ -399,7 +400,7 @@ void Simulation::initialize_initial_() throw()
 void Simulation::initialize_boundary_() throw()
 {
   //--------------------------------------------------
-  parameters_->set_current_group("Boundary");
+  parameters_->set_group(0,"Boundary");
   //--------------------------------------------------
   // parameter: Boundary::name
   //--------------------------------------------------
@@ -408,7 +409,6 @@ void Simulation::initialize_boundary_() throw()
   boundary_ = create_boundary_(name);
 }
 
-
 //----------------------------------------------------------------------
 
 void Simulation::initialize_output_() throw()
@@ -416,7 +416,7 @@ void Simulation::initialize_output_() throw()
   // Create and initialize an Output object for each Output group
 
   //--------------------------------------------------
-  parameters_->set_current_group("Output");
+  parameters_->set_group(0,"Output");
   //--------------------------------------------------
 
   int num_groups = parameters_->subgroup_count();
@@ -426,7 +426,7 @@ void Simulation::initialize_output_() throw()
     std::string group = parameters_->subgroup(index_group);
 
     //--------------------------------------------------
-    parameters_->set_current_subgroup(group);
+    parameters_->set_group(1,group);
     //--------------------------------------------------
     // parameter: Output:<group>:type
     // parameter: Output:<group>:file_name
@@ -624,7 +624,7 @@ void Simulation::initialize_output_() throw()
 void Simulation::initialize_method_() throw()
 {
   //--------------------------------------------------
-  parameters_->set_current_group("Method");
+  parameters_->set_group(0,"Method");
   //--------------------------------------------------
 
   int method_count = parameters_->list_length("sequence");

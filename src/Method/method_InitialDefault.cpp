@@ -29,7 +29,7 @@ void InitialDefault::compute (Block * block) throw()
   // Initialize Fields according to parameters
 
   //--------------------------------------------------
-  parameters_->set_current_group("Initial");
+  parameters_->set_group(0,"Initial");
   //--------------------------------------------------
 
   FieldBlock *       field_block = block->field_block();
@@ -46,7 +46,7 @@ void InitialDefault::compute (Block * block) throw()
     std::string field_name = field_descr->field_name(index_field);
 
     //--------------------------------------------------
-    parameters_->set_current_subgroup(field_name);
+    parameters_->set_group(1,field_name);
     //--------------------------------------------------
 
     // If Initial:<field_name>:value is a list, try parsing it

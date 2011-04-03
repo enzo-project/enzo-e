@@ -43,7 +43,7 @@ void Param::set (struct param_struct * node)
   case enum_parameter_unknown:
   case enum_parameter_sentinel:
   case enum_parameter_function:
-  case enum_parameter_subgroup:
+  case enum_parameter_group:
   case enum_parameter_identifier:
     break;
   }
@@ -87,6 +87,8 @@ void Param::write(FILE * file_pointer,
 
   // Write the parameter value
   fprintf (file_pointer,"%s", value_to_string().c_str());
+
+  fprintf (file_pointer,"\n");
 }
 
 

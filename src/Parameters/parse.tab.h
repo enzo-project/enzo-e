@@ -92,13 +92,13 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 392 "src/Parameters/parse.y"
+#line 407 "src/Parameters/parse.y"
  
   int logical_type;  
   int integer_type; 
   double scalar_type;  
   char * string_type; 
-  char * subgroup_type;
+  char * group_type;
   struct node_expr * node_type;
   
 
