@@ -161,11 +161,9 @@ void Simulation::initialize_simulation_() throw()
 {
 
   //--------------------------------------------------
-  parameters_->set_group(0,"Physics");
-  //--------------------------------------------------
   // parameter: Physics::dimensions
   //--------------------------------------------------
-  dimension_ = parameters_->value_integer("dimensions",0);
+  dimension_ = parameters_->value_integer("Physics:dimensions",0);
 
 }
 
@@ -178,19 +176,15 @@ void Simulation::initialize_data_() throw()
   field_descr_ = new FieldDescr;
 
   //--------------------------------------------------
-  parameters_->set_group(0,"Field");
-  //--------------------------------------------------
-
-  //--------------------------------------------------
   // parameter: Field::fields
   //--------------------------------------------------
 
   // Add data fields
 
   int i;
-  for (i=0; i<parameters_->list_length("fields"); i++) {
+  for (i=0; i<parameters_->list_length("Field:fields"); i++) {
     field_descr_->insert_field
-      (parameters_->list_value_string(i, "fields"));
+      (parameters_->list_value_string(i, "Field:fields"));
   }
 
   // Define default ghost zone depth for all fields, default value of 1
@@ -205,12 +199,12 @@ void Simulation::initialize_data_() throw()
   int gy = 1;
   int gz = 1;
 
-  if (parameters_->type("ghosts") == parameter_integer) {
-    gx = gy = gz = parameters_->value_integer("ghosts",1);
-  } else if (parameters_->type("ghosts") == parameter_list) {
-    gx = parameters_->list_value_integer(0,"ghosts",1);
-    gy = parameters_->list_value_integer(1,"ghosts",1);
-    gz = parameters_->list_value_integer(2,"ghosts",1);
+  if (parameters_->type("Field:ghosts") == parameter_integer) {
+    gx = gy = gz = parameters_->value_integer("Field:ghosts",1);
+  } else if (parameters_->type("Field:ghosts") == parameter_list) {
+    gx = parameters_->list_value_integer(0,"Field:ghosts",1);
+    gy = parameters_->list_value_integer(1,"Field:ghosts",1);
+    gz = parameters_->list_value_integer(2,"Field:ghosts",1);
   }
 
   if (dimension_ < 2) gy = 0;
@@ -228,7 +222,8 @@ void Simulation::initialize_data_() throw()
   // parameter: Field::precision
   //--------------------------------------------------
 
-  std::string precision_str = parameters_->value_string("precision","default");
+  std::string precision_str = 
+    parameters_->value_string("Field:precision","default");
 
   precision_enum precision = precision_default;
 
@@ -254,23 +249,21 @@ void Simulation::initialize_mesh_() throw()
 	 field_descr_ != NULL);
 
   //--------------------------------------------------
-  parameters_->set_group (0,"Mesh");
-  //--------------------------------------------------
   // parameter: Mesh::root_size
   // parameter: Mesh::root_blocks
   //--------------------------------------------------
 
   int root_size[3];
 
-  root_size[0] = parameters_->list_value_integer(0,"root_size",1);
-  root_size[1] = parameters_->list_value_integer(1,"root_size",1);
-  root_size[2] = parameters_->list_value_integer(2,"root_size",1);
+  root_size[0] = parameters_->list_value_integer(0,"Mesh:root_size",1);
+  root_size[1] = parameters_->list_value_integer(1,"Mesh:root_size",1);
+  root_size[2] = parameters_->list_value_integer(2,"Mesh:root_size",1);
 
   int root_blocks[3];
 
-  root_blocks[0] = parameters_->list_value_integer(0,"root_blocks",1);
-  root_blocks[1] = parameters_->list_value_integer(1,"root_blocks",1);
-  root_blocks[2] = parameters_->list_value_integer(2,"root_blocks",1);
+  root_blocks[0] = parameters_->list_value_integer(0,"Mesh:root_blocks",1);
+  root_blocks[1] = parameters_->list_value_integer(1,"Mesh:root_blocks",1);
+  root_blocks[2] = parameters_->list_value_integer(2,"Mesh:root_blocks",1);
 
   //----------------------------------------------------------------------
   // Create and initialize Mesh
@@ -284,28 +277,26 @@ void Simulation::initialize_mesh_() throw()
   // Domain extents
 
   //--------------------------------------------------
-  parameters_->set_group(0,"Domain");
-  //--------------------------------------------------
   // parameter: Domain::lower
   // parameter: Domain::upper
   //--------------------------------------------------
 
   ASSERT ("Simulation::initialize_simulation_",
-	  "Parameter Domain::lower list length must match Physics::dimension",
-	  (parameters_->list_length("lower") == dimension_));
+	  "Parameter Domain:lower list length must match Physics::dimension",
+	  (parameters_->list_length("Domain:lower") == dimension_));
 
   ASSERT ("Simulation::initialize_simulation_",
-	  "Parameter Domain::upper list length must match Physics::dimension",
-	  (parameters_->list_length("upper") ==  dimension_));
+	  "Parameter Domain:upper list length must match Physics::dimension",
+	  (parameters_->list_length("Domain:upper") ==  dimension_));
 
   double lower[3];
   double upper[3];
 
   for (int i=0; i<dimension_; i++) {
-    lower[i] = parameters_->list_value_scalar(i, "lower", 0.0);
-    upper[i] = parameters_->list_value_scalar(i, "upper", 0.0);
+    lower[i] = parameters_->list_value_scalar(i, "Domain:lower", 0.0);
+    upper[i] = parameters_->list_value_scalar(i, "Domain:upper", 0.0);
     ASSERT ("Simulation::initialize_simulation_",
-	    "Domain::lower must be strictly lower than Domain::upper",
+	    "Domain:lower must be strictly lower than Domain:upper",
 	    lower[i] < upper[i]);
   }
 
@@ -315,11 +306,11 @@ void Simulation::initialize_mesh_() throw()
   //--------------------------------------------------
   // parameters_->set_group (0,"Mesh");
   //--------------------------------------------------
-  // parameter: Mesh::refine
-  // parameter: Mesh::max_level
-  // parameter: Mesh::balanced
-  // parameter: Mesh::backfill
-  // parameter: Mesh::coalesce
+  // parameter: Mesh:refine
+  // parameter: Mesh:max_level
+  // parameter: Mesh:balanced
+  // parameter: Mesh:backfill
+  // parameter: Mesh:coalesce
   //--------------------------------------------------
 
   // mesh_->set_refine_factor (parameters_->value_integer("refine",    2));
@@ -348,14 +339,12 @@ void Simulation::initialize_mesh_() throw()
   Layout * layout = root_patch->layout();
 
   //--------------------------------------------------
-  parameters_->set_group(0,"Mesh");
-  //--------------------------------------------------
-  // parameter: Mesh::root_process_first
-  // parameter: Mesh::root_process_count
+  // parameter: Mesh:root_process_first
+  // parameter: Mesh:root_process_count
   //--------------------------------------------------
 
-  int process_first = parameters_->value_integer("root_process_first",0);
-  int process_count = parameters_->value_integer("root_process_count",1);
+  int process_first = parameters_->value_integer("Mesh:root_process_first",0);
+  int process_count = parameters_->value_integer("Mesh:root_process_count",1);
 
   layout->set_process_range(process_first, process_count);
 
@@ -380,11 +369,10 @@ void Simulation::initialize_timestep_() throw()
 void Simulation::initialize_initial_() throw()
 {
   //--------------------------------------------------
-  parameters_->set_group(0,"Initial");
-  //--------------------------------------------------
   // parameter: Initial::code
   //--------------------------------------------------
-  std::string name = parameters_->value_string("code","default");
+
+  std::string name = parameters_->value_string("Initial:code","default");
 
   initial_ = create_initial_(name);
 
@@ -398,12 +386,10 @@ void Simulation::initialize_initial_() throw()
 void Simulation::initialize_boundary_() throw()
 {
   //--------------------------------------------------
-  parameters_->set_group(0,"Boundary");
-  //--------------------------------------------------
   // parameter: Boundary::name
   //--------------------------------------------------
 
-  std::string name = parameters_->value_string("name","");
+  std::string name = parameters_->value_string("Boundary:name","");
   boundary_ = create_boundary_(name);
 }
 
@@ -630,13 +616,13 @@ void Simulation::initialize_method_() throw()
 
   if (method_count == 0) {
     ERROR ("Simulation::initialize_method_",
-		   "List parameter 'Method sequence' must have length greater than zero");
+	   "List parameter 'Method sequence' must have length greater than zero");
   }
 
   for (int i=0; i<method_count; i++) {
 
     //--------------------------------------------------
-    // parameter: Method::sequence
+    // parameter: Method:sequence
     //--------------------------------------------------
 
     std::string method_name = parameters_->list_value_string(i,"sequence");

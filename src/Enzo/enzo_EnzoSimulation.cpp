@@ -88,14 +88,12 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
   }
 
   //--------------------------------------------------
-  parameters_->set_group(0,"Initial");
-  //--------------------------------------------------
-
   // parameter: Initial::cycle
   // parameter: Initial::time
+  //--------------------------------------------------
 
-  cycle_  = parameters_->value_integer ("cycle",0);
-  time_   = parameters_->value_scalar ("time",0.0);
+  cycle_  = parameters_->value_integer ("Initial:cycle",0);
+  time_   = parameters_->value_scalar  ("Initial:time",0.0);
 
   ASSERT("EnzoSimulation::create_initial_",
 	 "create_mesh_ mush be called first",
@@ -124,16 +122,14 @@ EnzoSimulation::create_stopping_ (std::string name) throw ()
 /// @param name   Name of the stopping method to create (ignored)
 {
   //--------------------------------------------------
-  parameters_->set_group(0,"Stopping");
-  //--------------------------------------------------
-
   // parameter: Stopping::cycle
   // parameter: Stopping::time
+  //--------------------------------------------------
 
   int    stop_cycle = parameters_->value_integer
-    ( "cycle" , std::numeric_limits<int>::max() );
+    ( "Stopping:cycle" , std::numeric_limits<int>::max() );
   double stop_time  = parameters_->value_scalar
-    ( "time" , std::numeric_limits<double>::max() );
+    ( "Stopping:time" , std::numeric_limits<double>::max() );
 
   return new Stopping(stop_cycle,stop_time);
 }
@@ -145,14 +141,13 @@ EnzoSimulation::create_boundary_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   //--------------------------------------------------
-  parameters_->set_group(0,"Boundary");
-  //--------------------------------------------------
-
   // parameter: Boundary::type
+  //--------------------------------------------------
 
   boundary_type_enum boundary_type = boundary_type_undefined;
 
-  std::string boundary_param = parameters_->value_string("type", "undefined");
+  std::string boundary_param = 
+    parameters_->value_string ("Boundary:type", "undefined");
 
   if (       boundary_param ==   "reflecting") {
     boundary_type = boundary_type_reflecting;

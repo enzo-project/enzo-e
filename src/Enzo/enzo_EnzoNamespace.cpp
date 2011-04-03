@@ -215,16 +215,14 @@ namespace enzo {
     }
 
     //--------------------------------------------------
-    parameters->set_group (0,"Physics");
-    //--------------------------------------------------
     // parameter: Physics::cosmology
     // parameter: Physics::gamma
     // parameter: Physics::dimensions
     //--------------------------------------------------
 
-    ComovingCoordinates  = parameters->value_logical ("cosmology",false);
-    Gamma                = parameters->value_scalar  ("gamma",5.0/3.0);
-    GridRank             = parameters->value_integer ("dimensions",0);
+    ComovingCoordinates = parameters->value_logical ("Physics:cosmology",false);
+    Gamma               = parameters->value_scalar  ("Physics:gamma",5.0/3.0);
+    GridRank            = parameters->value_integer ("Physics:dimensions",0);
     BoundaryRank = GridRank;
 
     // Chemistry parameters
@@ -243,8 +241,6 @@ namespace enzo {
     // PPM parameters
 
     //--------------------------------------------------
-    parameters->set_group (1,"cosmology");
-    //--------------------------------------------------
     // parameter: Physics:cosmology:initial_redshift
     // parameter: Physics:cosmology:hubble_constant_now
     // parameter: Physics:cosmology:omega_lambda_now
@@ -253,16 +249,19 @@ namespace enzo {
     // parameter: Physics:cosmology:comoving_box_size
     //--------------------------------------------------
 
-    InitialRedshift   = parameters->value_scalar ("initial_redshift",  20.0);
-    HubbleConstantNow = parameters->value_scalar ("hubble_constant_now",0.701);
-    OmegaLambdaNow    = parameters->value_scalar ("omega_lambda_now",   0.721);
-    OmegaMatterNow    = parameters->value_scalar ("omega_matter_now",   0.279);
-    MaxExpansionRate  = parameters->value_scalar ("max_expansion_rate", 0.01);
-    ComovingBoxSize   = parameters->value_scalar ("comoving_box_size", 64.0);
+    InitialRedshift   = parameters->value_scalar 
+      ("Physics:cosmology:initial_redshift",  20.0);
+    HubbleConstantNow = parameters->value_scalar 
+      ("Physics:cosmology:hubble_constant_now",0.701);
+    OmegaLambdaNow    = parameters->value_scalar 
+      ("Physics:cosmology:omega_lambda_now",   0.721);
+    OmegaMatterNow    = parameters->value_scalar 
+      ("Physics:cosmology:omega_matter_now",   0.279);
+    MaxExpansionRate  = parameters->value_scalar 
+      ("Physics:cosmology:max_expansion_rate", 0.01);
+    ComovingBoxSize   = parameters->value_scalar 
+      ("Physics:cosmology:comoving_box_size", 64.0);
 
-    //--------------------------------------------------
-    parameters->set_group (0,"Method");
-    parameters->set_group (1,"ppm");
     //--------------------------------------------------
     // parameter: Method:ppm:pressure_free
     // parameter: Method:ppm:use_minimum_pressure_support
@@ -279,34 +278,37 @@ namespace enzo {
     // parameter: Method:ppm:dual_energy_eta_2
     //--------------------------------------------------
 
-    PressureFree = parameters->value_logical("pressure_free",false);
-    UseMinimumPressureSupport 
-      =              parameters->value_logical("use_minimum_pressure_support",false);
-    MinimumPressureSupportParameter 
-      =              parameters->value_integer("minimum_pressure_support_parameter",100);
+    PressureFree = parameters->value_logical
+      ("Method:ppm:pressure_free",false);
+    UseMinimumPressureSupport = parameters->value_logical
+      ("Method:ppm:use_minimum_pressure_support",false);
+    MinimumPressureSupportParameter = parameters->value_integer
+      ("Method:ppm:minimum_pressure_support_parameter",100);
 
-    PPMFlatteningParameter = parameters->value_integer ("flattening", 3);
-    PPMDiffusionParameter  = parameters->value_logical ("diffusion",  false);
-    PPMSteepeningParameter = parameters->value_logical ("steepening", false);
+    PPMFlatteningParameter = parameters->value_integer 
+      ("Method:ppm:flattening", 3);
+    PPMDiffusionParameter  = parameters->value_logical 
+      ("Method:ppm:diffusion",  false);
+    PPMSteepeningParameter = parameters->value_logical 
+      ("Method:ppm:steepening", false);
 
     double floor_default = 1e-6;
-    pressure_floor       = parameters->value_scalar("pressure_floor",
-						    floor_default);
-    density_floor        = parameters->value_scalar("density_floor",
-						    floor_default);
-    temperature_floor    = parameters->value_scalar("temperature_floor",
-						    floor_default);
-    number_density_floor = parameters->value_scalar("number_density_floor",
-						    floor_default);
+    pressure_floor       = parameters->value_scalar
+      ("Method:ppm:pressure_floor", floor_default);
+    density_floor        = parameters->value_scalar
+      ("Method:ppm:density_floor",  floor_default);
+    temperature_floor    = parameters->value_scalar
+      ("Method:ppm:temperature_floor", floor_default);
+    number_density_floor = parameters->value_scalar
+      ("Method:ppm:number_density_floor", floor_default);
 
-    DualEnergyFormalism     = parameters->value_logical ("dual_energy",false);
-    DualEnergyFormalismEta1 = parameters->value_scalar  ("dual_energy_eta_1",
-							 0.001);
-    DualEnergyFormalismEta2 = parameters->value_scalar  ("dual_energy_eta_2",
-							 0.1);
+    DualEnergyFormalism     = parameters->value_logical 
+      ("Method:ppm:dual_energy",false);
+    DualEnergyFormalismEta1 = parameters->value_scalar  
+      ("Method:ppm:dual_energy_eta_1", 0.001);
+    DualEnergyFormalismEta2 = parameters->value_scalar  
+      ("Method:ppm:dual_energy_eta_2", 0.1);
 
-    //--------------------------------------------------
-    parameters->set_group (0,"Field");
     //--------------------------------------------------
     // parameter: Field::ghosts
     // parameter: Field::fields
@@ -316,12 +318,12 @@ namespace enzo {
     int gy = 1;
     int gz = 1;
 
-    if (parameters->type("ghosts") == parameter_integer) {
-      gx = gy = gz = parameters->value_integer("ghosts",1);
-    } else if (parameters->type("ghosts") == parameter_list) {
-      gx = parameters->list_value_integer(0,"ghosts",1);
-      gy = parameters->list_value_integer(1,"ghosts",1);
-      gz = parameters->list_value_integer(2,"ghosts",1);
+    if (parameters->type("Field:ghosts") == parameter_integer) {
+      gx = gy = gz = parameters->value_integer("Field:ghosts",1);
+    } else if (parameters->type("Field:ghosts") == parameter_list) {
+      gx = parameters->list_value_integer(0,"Field:ghosts",1);
+      gy = parameters->list_value_integer(1,"Field:ghosts",1);
+      gz = parameters->list_value_integer(2,"Field:ghosts",1);
     }
 
     if (GridRank < 1) gx = 0;
@@ -332,7 +334,7 @@ namespace enzo {
     ghost_depth[1] = gy;
     ghost_depth[2] = gz;
 
-    NumberOfBaryonFields = parameters->list_length("fields");
+    NumberOfBaryonFields = parameters->list_length("Field:fields");
 
     // Check NumberOfBaryonFields
 
@@ -381,14 +383,12 @@ namespace enzo {
     }
 
     //--------------------------------------------------
-    parameters->set_group (0,"Mesh");
-    //--------------------------------------------------
     // parameter: Mesh::block_size
     //--------------------------------------------------
 
-    int nx = parameters->list_value_integer(0,"block_size",1);
-    int ny = parameters->list_value_integer(1,"block_size",1);
-    int nz = parameters->list_value_integer(2,"block_size",1);
+    int nx = parameters->list_value_integer(0,"Mesh:block_size",1);
+    int ny = parameters->list_value_integer(1,"Mesh:block_size",1);
+    int nz = parameters->list_value_integer(2,"Mesh:block_size",1);
 
 
     BoundaryDimension[0] = nx + 2*ghost_depth[0];
@@ -396,37 +396,31 @@ namespace enzo {
     BoundaryDimension[2] = nz + 2*ghost_depth[2];
 
     //--------------------------------------------------
-    parameters->set_group (0,"Domain");
-    //--------------------------------------------------
     // parameter: Domain::lower
     // parameter: Domain::upper
     //--------------------------------------------------
   
     // (ALREADY READ BY Simulation::initialize_simulation_())
 
-    DomainLeftEdge [0] = parameters->list_value_scalar(0,"lower",0.0);
-    DomainLeftEdge [1] = parameters->list_value_scalar(1,"lower",0.0);
-    DomainLeftEdge [2] = parameters->list_value_scalar(2,"lower",0.0);
+    DomainLeftEdge [0] = parameters->list_value_scalar(0,"Domain:lower",0.0);
+    DomainLeftEdge [1] = parameters->list_value_scalar(1,"Domain:lower",0.0);
+    DomainLeftEdge [2] = parameters->list_value_scalar(2,"Domain:lower",0.0);
 
-    DomainRightEdge[0] = parameters->list_value_scalar(0,"upper",1.0);
-    DomainRightEdge[1] = parameters->list_value_scalar(1,"upper",1.0);
-    DomainRightEdge[2] = parameters->list_value_scalar(2,"upper",1.0);
+    DomainRightEdge[0] = parameters->list_value_scalar(0,"Domain:upper",1.0);
+    DomainRightEdge[1] = parameters->list_value_scalar(1,"Domain:upper",1.0);
+    DomainRightEdge[2] = parameters->list_value_scalar(2,"Domain:upper",1.0);
 
-    //--------------------------------------------------
-    parameters->set_group (0,"Field");
     //--------------------------------------------------
     // parameter: Field::courant
     //--------------------------------------------------
 
-    CourantSafetyNumber = parameters->value_scalar ("courant",0.6);
+    CourantSafetyNumber = parameters->value_scalar ("Field:courant",0.6);
 
-    //--------------------------------------------------
-    parameters->set_group (0,"Initial");
     //--------------------------------------------------
     // parameter: Initial::time
     //--------------------------------------------------
 
-    double time  = parameters->value_scalar ("time",0.0);
+    double time  = parameters->value_scalar ("Initial:time",0.0);
 
     InitialTimeInCodeUnits = time;
 
