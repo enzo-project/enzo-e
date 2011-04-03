@@ -220,7 +220,13 @@ private: // functions
   /// Return the Param pointer for the specified parameter
   Param * parameter_ (std::string parameter)
   {
-    return parameter_map_[parameter_name_(parameter)];
+    bool is_full_parameter = (parameter.find(":") != std::string::npos);
+
+    if (! is_full_parameter) {
+      parameter = parameter_name_(parameter);
+    }
+    printf ("parameter = %s\n",parameter.c_str());
+    return parameter_map_[parameter];
   };
 
   /// Return the Param pointer for the specified list parameter element

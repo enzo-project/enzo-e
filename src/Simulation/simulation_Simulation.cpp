@@ -165,7 +165,6 @@ void Simulation::initialize_simulation_() throw()
   //--------------------------------------------------
   // parameter: Physics::dimensions
   //--------------------------------------------------
-
   dimension_ = parameters_->value_integer("dimensions",0);
 
 }

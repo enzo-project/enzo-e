@@ -188,6 +188,9 @@ PARALLEL_MAIN_BEGIN
   unit_assert (parameters->value_logical("none",true) == true);
   unit_assert (parameters->value_logical("none",false) == false);
 
+  unit_assert(parameters->value_logical("Logical:test_true") == true);
+  unit_assert(parameters->value_logical("Logical:test_false") == false);
+
   // bool l,ld;
 
   // parameters->value("test_true",parameter_logical,&l);
@@ -290,6 +293,11 @@ PARALLEL_MAIN_BEGIN
   unit_assert(parameters->value_scalar("num2") == 18.375);
   unit_assert(parameters->value_scalar("num3") == 150.0625);
   unit_assert(parameters->value_scalar("num4") == 4.0000000000);
+
+  unit_assert(parameters->value_scalar("Scalar:const_scalar_1:num1") == 30.625);
+  unit_assert(parameters->value_scalar("Scalar:const_scalar_1:num2") == 18.375);
+  unit_assert(parameters->value_scalar("Scalar:const_scalar_1:num3") == 150.0625);
+  unit_assert(parameters->value_scalar("Scalar:const_scalar_1:num4") == 4.0000000000);
 
   parameters->set_group(1,"const_scalar_2");
 
