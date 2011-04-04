@@ -61,8 +61,8 @@ PARALLEL_MAIN_BEGIN
   // Add attributes
 
   bool is_monotonic;
-  int attribute_timestep =
-    performance->new_attribute("timestep", is_monotonic=true);
+  int attribute_cycle =
+    performance->new_attribute("cycle", is_monotonic=true);
   int attribute_level = 
     performance->new_attribute("level", is_monotonic=false);
   

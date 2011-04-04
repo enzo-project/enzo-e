@@ -14,6 +14,7 @@
 /// @todo     Add "check()" function to check individual parameters, or all
 /// @todo     Move Group and subgroup to parameter lists at end with "" default
 /// @todo     Convert current_group_ to std::stack<std::string>
+/// @bug      Evaluating logical expressions with parentheses seg-faults
 /// @brief    [\ref Parameters] Declaration for the Parameters class
 
 /// @def      MAX_PARAMETER_FILE_WIDTH
@@ -225,7 +226,6 @@ private: // functions
     if (! is_full_parameter) {
       parameter = parameter_name_(parameter);
     }
-    printf ("parameter = %s\n",parameter.c_str());
     return parameter_map_[parameter];
   };
 

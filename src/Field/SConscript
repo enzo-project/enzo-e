@@ -30,7 +30,9 @@ sources  = [Glob('field*cpp')]
 # TARGETS
 #------------------------------
 
+
 libraries              = env.Library ('field', [sources])
+
 test_field_block       = env.Program (['test_FieldBlock.cpp',  sources])
 test_field_descr       = env.Program (['test_FieldDescr.cpp',  sources])
 test_field_block_faces = env.Program (['test_FieldFaces.cpp',  sources])

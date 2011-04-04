@@ -11,6 +11,20 @@
 /// @todo     Dynamically allocate arrays
 /// @brief    [\ref Enzo] Declaration of the EnzoBlock class
 
+#define OMEGA_TOLERANCE 1.0e-5
+ 
+#ifdef CONFIG_PRECISION_SINGLE
+#   define ETA_TOLERANCE 1.0e-5
+#endif
+#ifdef CONFIG_PRECISION_DOUBLE
+#   define ETA_TOLERANCE 1.0e-10
+#endif
+#ifdef CONFIG_PRECISION_QUADRUPLE
+#   define ETA_TOLERANCE 1.0e-20
+#endif
+
+//----------------------------------------------------------------------
+
 struct fluxes
 {
   long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
@@ -20,6 +34,8 @@ struct fluxes
   enzo_float *LeftFluxes [MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
   enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
 };
+
+//----------------------------------------------------------------------
 
 class EnzoBlock : public Block {
 

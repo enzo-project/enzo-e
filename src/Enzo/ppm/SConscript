@@ -36,13 +36,8 @@ sources  = [Glob('initialize*cpp'),
             Glob('Cosmology*.cpp'),
             Glob('Grid_*cpp'),
             Glob('*.F'),
-	    '../image_dump.cpp',
-	    '../SetExternalBoundary.cpp',
-	    '../CosmologyComputeExpansionFactor.cpp',
-	    '../CosmologyComputeExpansionTimestep.cpp',
 	    'FindField.cpp',
-	    'sum_field.cpp',
-	    '../initialize_hydro.cpp']
+	    'sum_field.cpp']
 
 #------------------------------
 # TARGETS

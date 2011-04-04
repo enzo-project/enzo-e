@@ -39,6 +39,8 @@ PARALLEL_MAIN_BEGIN
 
     Monitor * monitor = Monitor::instance();
 
+    monitor -> set_active (group_process->is_root());
+
     // display header text
 
     monitor->header();

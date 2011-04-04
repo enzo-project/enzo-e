@@ -37,6 +37,7 @@ void EnzoOutputImage::write
  int iz0
   ) const throw()
 {
+
   if (mesh->dimension() != 2) {
     WARNING("EnzoOutputImage::write",
 	    "EnzoOutputImage only supports 2D problems");
@@ -58,6 +59,10 @@ void EnzoOutputImage::write
     std::string file_prefix = expand_file_name (cycle,time);
     std::string field_name  = field_descr->field_name(index);
     std::string file_name = file_prefix + "-" + field_name + ".png";
+
+    // Monitor output
+    Monitor::instance()->print ("[Output] writing mesh image %s", 
+				file_name.c_str());
 
     // Get mesh size
     int nxm,nym,nzm;
@@ -117,6 +122,10 @@ void EnzoOutputImage::write
     std::string file_prefix = expand_file_name (cycle,time);
     std::string field_name = field_descr->field_name(index);
     std::string file_name = file_prefix + "-" + field_name + ".png";
+
+    // Monitor output
+    Monitor::instance()->print ("[Output] writing patch image %s", 
+				file_name.c_str());
 
     // Get patch size
     int nxp, nyp;
@@ -193,6 +202,11 @@ void EnzoOutputImage::write
     std::string field_name = field_descr->field_name(index);
     std::string file_name = file_prefix + "-" + field_name + ".png";
     monitor->image_open(file_name,nx,ny);
+
+    // Monitor output
+    Monitor::instance()->print ("[Output] writing block image %s", 
+				file_name.c_str());
+
   }
 
   // Add block contribution to image

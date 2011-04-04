@@ -6,9 +6,8 @@ import sys
 #----------------------------------------------------------------------
 
 use_papi     = 0
-use_valgrind = 0
-
 use_png      = 1
+use_valgrind = 0
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
@@ -398,8 +397,9 @@ libpath = libpath + [fortranpath_lib]
 #======================================================================
 
 if (use_valgrind):
-   parallel_run = parallel_run + " valgrind"
-   serial_run   = "valgrind " + serial_run
+   valgrind = "valgrind --leakcheck=full"
+   parallel_run = parallel_run + " " + valgrind
+   serial_run   = vagrind + " " + serial_run
 
 #======================================================================
 # EXTRA LINKER PATHS

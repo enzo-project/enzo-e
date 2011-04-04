@@ -129,8 +129,12 @@ bool test_field(T * field_values,
 	//	printf ("%p test\n",field_values+i);
 	if (field_values[i] != value) {
 	  result = false;
-	  printf ("mismatch block %d %d %d field %d (ix iy iz) (%d/%d %d/%d %d/%d  i %d actual %g expected %g)\n",
-	   	  ibx,iby,ibz, index_field, ix,mdx,iy,mdy,iz,mdz,i,field_values[i],value);
+	  printf ("mismatch block   (%d %d %d)\n",            ibx,iby,ibz);
+	  printf ("mismatch field    %d\n",                   index_field);
+	  printf ("mismatch index   (%d %d %d) %d\n",         ix,iy,iz,i);
+	  printf ("mismatch size    (%d %d %d)\n",            mdx,mdy,mdz);
+	  printf ("mismatch actual   %g\n",  (double) field_values[i]);
+	  printf ("mismatch expected %g\n",  (double) value);
 	}
       }
     }
@@ -304,7 +308,7 @@ PARALLEL_MAIN_BEGIN
 	  FieldBlock * field_lower = field_block[index_lower];
 	  FieldFaces * faces_lower = field_lower->field_faces();
 
-	  int index_upper;
+	  int index_upper = 0;
 	  if (axis==0) index_upper = ((ibx+1)%nbx) + nbx * (  iby        + nby * ibz);
 	  if (axis==1) index_upper =   ibx        + nbx * (((iby+1)%nby) + nby * ibz);
 	  if (axis==2) index_upper =   ibx        + nbx * (  iby        + nby * ((ibz+1)%nbz));

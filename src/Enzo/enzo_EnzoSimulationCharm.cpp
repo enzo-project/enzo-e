@@ -26,9 +26,6 @@ EnzoSimulationCharm::EnzoSimulationCharm
   : EnzoSimulation(parameter_file, new GroupProcessCharm, index)
 {
 
-  // Only root process outputs monitor information
-  Monitor::instance() -> set_active (CkMyPe() == 0);
-
   initialize();
 
   run();

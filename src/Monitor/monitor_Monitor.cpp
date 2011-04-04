@@ -123,14 +123,12 @@ void Monitor::print (const char * message, ...) const
 
     // Get parallel process text
 
-    char buffer_process[MONITOR_LENGTH];
+    char buffer_process[MONITOR_LENGTH] = "";
 
 #if defined(CONFIG_USE_CHARM)
     sprintf (buffer_process,"%0d",CkMyPe());
 #elif defined(CONFIG_USE_MPI)
     sprintf (buffer_process,"%0d",Mpi::rank());
-#else
-    sprintf (buffer_process,"");
 #endif
 
     // Print 

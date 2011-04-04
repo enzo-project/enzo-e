@@ -340,3 +340,529 @@ void EnzoBlock::initialize () throw()
     BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
   }
 }
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::image_dump
+(
+ const char * file_root, 
+ int cycle, 
+ double lower, 
+ double upper)
+{ 
+
+  int nx = GridDimension[0];
+  int ny = GridDimension[1];
+  int nz = GridDimension[2];
+
+  char filename[80];
+
+  // slice
+  sprintf (filename,"slice-%s-%06d.png",file_root,cycle);
+
+  Monitor * monitor = Monitor::instance();
+
+  if (nz == 1) {
+    // 2D: "reduce" along z
+    monitor->image(filename,
+		   nx,ny,
+		   BaryonField[field_density],
+		   nx,ny,nz,
+		   nx,ny,nz,
+		   0,0,0,
+		   //		3,3,0,nx-3,ny-3,1,
+		   axis_z,reduce_sum, lower/nx, upper/nx);
+  } else {
+    // 3D projection
+    sprintf (filename,"project-%s-%06d-x.png",file_root,cycle);
+    monitor->image(filename,
+		   ny,nz,
+		   BaryonField[field_density],
+		   nx,ny,nz,
+		   nx,ny,nz,
+		   0,0,0,
+		   //		  3,3,3,nx-3,ny-3,nz-3,
+		   axis_x,reduce_sum,lower, upper);
+    sprintf (filename,"project-%s-%06d-y.png",file_root,cycle);
+    monitor->image(filename,
+		   nz,nx,
+		   BaryonField[field_density],
+		   nx,ny,nz,
+		   nx,ny,nz,
+		   0,0,0,
+		   //		  3,3,3,nx-3,ny-3,nz-3,
+		   axis_y,reduce_sum,lower, upper);
+    sprintf (filename,"project-%s-%06d-z.png",file_root,cycle);
+    monitor->image(filename,
+		   nx,ny,
+		   BaryonField[field_density],
+		   nx,ny,nz,
+		   nx,ny,nz,
+		   0,0,0,
+		   //		  3,3,3,nx-3,ny-3,nz-3,
+		   axis_z,reduce_sum,lower, upper);
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::initialize_hydro ()
+
+{
+
+  // Cosmology
+
+  ComovingCoordinates             = 0;    // Physics: Cosmology
+  UseMinimumPressureSupport       = 0;    // call UseMinimumPressureSupport() ?
+  MinimumPressureSupportParameter = 100;  // SetMinimumSupport() Enzo parameter
+  ComovingBoxSize                 = 64;   // Physics cosmology: Mpc/h at z=0
+  HubbleConstantNow               = 0.5;  // Physics: cosmology parameter
+  OmegaLambdaNow                  = 0.0;  // Physics: cosmology parameter
+  OmegaMatterNow                  = 1.0;  // Physics: cosmology parameter
+  MaxExpansionRate                = 0.01; // Cosmology timestep constraint
+
+  // Chemistry
+
+  MultiSpecies                    = 0;    // 0:0 1:6 2:9 3:12
+
+  // Gravity
+
+  GravityOn                       = 0;    // Whether gravity is included
+  AccelerationField[0]            = NULL;
+  AccelerationField[1]            = NULL;
+  AccelerationField[2]            = NULL;
+
+  // Physics
+
+  PressureFree                    = 0;    // Physics: passed into ppm_de
+  Gamma                           = 5.0/3.0; // Physics: ideal gas law constant
+  GravitationalConstant           = 1.0;  // used only in SetMinimumSupport()
+
+  // Problem-specific
+
+  ProblemType                     = 0;    //  7 (sedov) or 60 61 (turbulence)
+
+  // Method PPM
+
+  PPMFlatteningParameter          = 0;
+  PPMDiffusionParameter           = 0;
+  PPMSteepeningParameter          = 0;
+
+  // Numerics
+
+  DualEnergyFormalism             = 0;    // Method: PPM parameter
+  DualEnergyFormalismEta1         = 0.001;// Method: PPM parameter
+  DualEnergyFormalismEta2         = 0.1;  // Method: PPM parameter
+  pressure_floor                  = 1e-20; // Was "tiny_number"
+  number_density_floor            = 1e-20; // Was "tiny_number"
+  density_floor                   = 1e-20; // Was "tiny_number"
+  temperature_floor               = 1e-20; // Was "tiny_number"
+
+  // Boundary
+
+  BoundaryRank         = 0;
+  BoundaryDimension[0] = 1;
+  BoundaryDimension[1] = 1;
+  BoundaryDimension[2] = 1;
+ 
+  /* Clear BoundaryType and BoundaryValue pointers. */
+ 
+  for (int field = 0; field < MAX_NUMBER_OF_BARYON_FIELDS; field++) {
+    for (int dim = 0; dim < MAX_DIMENSION; dim++) {
+      for (int i = 0; i < 2; i++) {
+	BoundaryType[field][dim][i] = NULL;
+	BoundaryValue[field][dim][i] = NULL;
+      }
+    }
+  }
+}
+    
+//----------------------------------------------------------------------
+
+//
+// Given a pointer to a field and its field type, find the equivalent
+//   field type in the list of boundary's and apply that boundary value/type.
+//   Returns: 0 on failure
+//
+int EnzoBlock::SetExternalBoundary
+(
+ int FieldRank, 
+ int GridDims[],
+ int GridOffset[],
+ int StartIndex[], 
+ int EndIndex[],
+ enzo_float *Field, 
+ int FieldType )
+{
+ 
+  /* declarations */
+ 
+  int i, j, k, dim, Sign, bindex;
+  enzo_float *index;
+ 
+  /* error check: grid ranks */
+ 
+  if (FieldRank != BoundaryRank) {
+    fprintf(stderr, "FieldRank(%"ISYM") != BoundaryRank(%"ISYM").\n",
+            FieldRank, BoundaryRank);
+    return ENZO_FAIL;
+  }
+ 
+  /* find requested field type */
+
+
+  int field;
+  for (field = 0; field < NumberOfBaryonFields; field++)
+    if (FieldType == BoundaryFieldType[field]) break;
+  if (field == NumberOfBaryonFields) {
+    fprintf(stderr, "Field type (%"ISYM") not found in Boundary.\n", FieldType);
+    return ENZO_FAIL;
+  }
+ 
+  /* error check: make sure the boundary type array exists */
+ 
+  for (dim = 0; dim < BoundaryRank; dim++)
+    if (BoundaryDimension[dim] != 1) {
+      if (BoundaryType[field][dim][0] == NULL) {
+	fprintf(stderr, "BoundaryType not yet declared.\n");
+	return ENZO_FAIL;
+      }
+    }
+ 
+  /* set Boundary conditions */
+ 
+  Sign = 1;
+  if (FieldType == Velocity1) Sign = -1;
+ 
+  if (BoundaryDimension[0] > 1 && GridOffset[0] == 0) {
+ 
+    /* set x inner (left) face */
+ 
+    for (i = 0; i < StartIndex[0]; i++)
+      for (j = 0; j < GridDims[1]; j++)
+	for (k = 0; k < GridDims[2]; k++) {
+	  index = Field + i + j*GridDims[0] + k*GridDims[1]*GridDims[0];
+	  bindex = j+GridOffset[1] + (k+GridOffset[2])*BoundaryDimension[1];
+	  switch (BoundaryType[field][0][0][bindex]) {
+	  case bc_reflecting:
+	    *index = Sign*(*(index + (2*StartIndex[0] - 1 - 2*i)));
+	    break;
+	  case bc_outflow:
+	    *index =       *(index + (  StartIndex[0]     -   i)) ;
+	    break;
+	  case bc_inflow:
+	    *index = BoundaryValue[field][0][0][bindex];
+	    break;
+	  case bc_periodic:
+	    *index = *(index + (EndIndex[0] - StartIndex[0] + 1));
+	    break;
+	  case bc_unknown:
+	  default:
+	    fprintf(stderr, "BoundaryType not recognized (x-left).\n");
+	    return ENZO_FAIL;
+	  }
+	}
+  }
+ 
+  if (BoundaryDimension[0] > 1 && GridOffset[0]+GridDims[0] == BoundaryDimension[0]) {
+ 
+    /* set x outer (right) face */
+
+    
+    for (i = 0; i < GridDims[0]-EndIndex[0]-1; i++)
+      for (j = 0; j < GridDims[1]; j++)
+	for (k = 0; k < GridDims[2]; k++) {
+	  index = Field + i + EndIndex[0]+1 +
+	    j*GridDims[0] + k*GridDims[1]*GridDims[0];
+	  bindex = j+GridOffset[1] + (k+GridOffset[2])*BoundaryDimension[1];
+	  switch (BoundaryType[field][0][1][bindex]) {
+	  case bc_reflecting:
+	    *index = Sign*(*(index - (2*i + 1)));
+	    break;
+	  case bc_outflow:
+	    *index =       *(index + (-1 - i)) ;
+	    break;
+	  case bc_inflow:
+	    *index = BoundaryValue[field][0][1][bindex];
+	    break;
+	  case bc_periodic:
+	    *index = *(index - (EndIndex[0] - StartIndex[0] + 1));
+	    break;
+	  case bc_unknown:
+	  default:
+	    fprintf(stderr, "BoundaryType not recognized (x-right).\n");
+	    return ENZO_FAIL;
+	  }
+	}							
+  }
+ 
+  /* set y inner (left) face */
+ 
+  Sign = 1;
+  if (FieldType == Velocity2) Sign = -1;
+ 
+  if (BoundaryDimension[1] > 1 && GridOffset[1] == 0) {
+ 
+    for (j = 0; j < StartIndex[1]; j++)
+      for (i = 0; i < GridDims[0]; i++)
+	for (k = 0; k < GridDims[2]; k++) {
+	  index = Field + i + j*GridDims[0] + k*GridDims[1]*GridDims[0];
+	  bindex = i+GridOffset[0] + (k+GridOffset[2])*BoundaryDimension[0];
+	  switch (BoundaryType[field][1][0][bindex]) {
+	  case bc_reflecting:
+	    *index = Sign*(*(index + (2*StartIndex[1] - 1 - 2*j)*GridDims[0]));
+	    break;
+	  case bc_outflow:
+	    *index =       *(index + (  StartIndex[1]     - j)*GridDims[0]) ;
+	    break;
+	  case bc_inflow:
+	    *index = BoundaryValue[field][1][0][bindex];
+	     break;
+	  case bc_periodic:
+	    *index = *(index + (EndIndex[1] - StartIndex[1] + 1)*GridDims[0]);
+	     break;
+	  case bc_unknown:
+	  default:
+	    fprintf(stderr, "BoundaryType not recognized (y-left).\n");
+	    return ENZO_FAIL;
+	  }
+	}
+  }
+ 
+  if (BoundaryDimension[1] > 1 && GridOffset[1]+GridDims[1] == BoundaryDimension[1]) {
+ 
+    /* set y outer (right) face */
+ 
+    for (j = 0; j < GridDims[1]-EndIndex[1]-1; j++)
+      for (i = 0; i < GridDims[0]; i++)
+	for (k = 0; k < GridDims[2]; k++) {
+	  index = Field + i + (j + EndIndex[1]+1)*GridDims[0] +
+	    k*GridDims[1]*GridDims[0];
+	  bindex = i+GridOffset[0] + (k+GridOffset[2])*BoundaryDimension[0];
+	  switch (BoundaryType[field][1][1][bindex]) {
+	  case bc_reflecting:
+	    *index = Sign*(*(index - (2*j + 1)*GridDims[0]));
+	    break;
+	  case bc_outflow:
+	    *index =       *(index + (-1 - j)*GridDims[0]) ;
+	    break;
+	  case bc_inflow:
+	    *index = BoundaryValue[field][1][1][bindex];
+	    break;
+	  case bc_periodic:
+	    *index = *(index - (EndIndex[1] - StartIndex[1] + 1)*GridDims[0]);
+	    break;
+	  case bc_unknown:
+	  default:
+	    fprintf(stderr, "BoundaryType not recognized (y-right).\n");
+	    return ENZO_FAIL;
+	  }
+	}							
+  }
+ 
+  /* set z inner (left) face */
+ 
+  Sign = 1;
+  if (FieldType == Velocity3) Sign = -1;
+ 
+  if (BoundaryDimension[2] > 1 && GridOffset[2] == 0) {
+ 
+    for (k = 0; k < StartIndex[2]; k++)
+      for (i = 0; i < GridDims[0]; i++)
+	for (j = 0; j < GridDims[1]; j++) {
+	  index = Field + i + j*GridDims[0] + k*GridDims[1]*GridDims[0];
+	  bindex = i+GridOffset[0] + (j+GridOffset[1])*BoundaryDimension[0];
+	  switch (BoundaryType[field][2][0][bindex]) {
+	  case bc_reflecting:
+	    *index = Sign*(*(index + (2*StartIndex[2]-1 - 2*k)*GridDims[0]*GridDims[1]));
+	    break;
+	  case bc_outflow:
+	    *index =       *(index + (  StartIndex[2]   - k)*GridDims[0]*GridDims[1]) ;
+	    break;
+	  case bc_inflow:
+	    *index = BoundaryValue[field][2][0][bindex];
+	    break;
+	  case bc_periodic:
+	    *index = *(index + (EndIndex[2]-StartIndex[2]+1)*GridDims[0]*GridDims[1]);
+	    break;
+	  case bc_unknown:
+	  default:
+	    fprintf(stderr, "BoundaryType not recognized (z-left).\n");
+	    return ENZO_FAIL;
+	  }
+	}
+  }
+ 
+  if (BoundaryDimension[2] > 1 && GridOffset[2]+GridDims[2] == BoundaryDimension[2]) {
+ 
+    /* set z outer (right) face */
+ 
+    for (k = 0; k < GridDims[2]-EndIndex[2]-1; k++)
+      for (i = 0; i < GridDims[0]; i++)
+	for (j = 0; j < GridDims[1]; j++) {
+	  index = Field + i + j*GridDims[0] +
+	    (k + EndIndex[2]+1)*GridDims[1]*GridDims[0];
+	  bindex = i+GridOffset[0] + (j+GridOffset[1])*BoundaryDimension[0];
+	  switch (BoundaryType[field][2][1][bindex]) {
+	  case bc_reflecting:
+	    *index = Sign*(*(index - (2*k + 1)*GridDims[0]*GridDims[1]));
+	    break;
+	  case bc_outflow:
+	    *index =       *(index + (-1 - k)*GridDims[0]*GridDims[1]) ;
+	    break;
+	  case bc_inflow:
+	    *index = BoundaryValue[field][2][1][bindex];
+	    break;
+	  case bc_periodic:
+	    *index = *(index - (EndIndex[2]-StartIndex[2]+1)*GridDims[0]*GridDims[1]);
+	    break;
+	  case bc_unknown:
+	  default:
+	    fprintf(stderr, "BoundaryType not recognized (z-right).\n");
+	    return ENZO_FAIL;
+	  }
+	}							
+  }
+ 
+  return ENZO_SUCCESS;
+ 
+}
+
+//----------------------------------------------------------------------
+
+int EnzoBlock::CosmologyComputeExpansionFactor
+(enzo_float time, enzo_float *a, enzo_float *dadt)
+{
+ 
+  /* Error check. */
+  using namespace enzo;
+  if (InitialTimeInCodeUnits == 0) {
+    
+    char error_message[ERROR_LENGTH];
+    sprintf(error_message, "The cosmology parameters seem to be improperly set");
+    ERROR("CosmologyComputeExpansionFactor",error_message);
+  }
+ 
+  *a = ENZO_FLOAT_UNDEFINED;
+ 
+  /* Find Omega due to curvature. */
+ 
+  enzo_float OmegaCurvatureNow = 1 - OmegaMatterNow - OmegaLambdaNow;
+ 
+  /* Convert the time from code units to Time * H0 (c.f. CosmologyGetUnits). */
+ 
+  enzo_float TimeUnits = 2.52e17/sqrt(OmegaMatterNow)/HubbleConstantNow/
+                    pow(1 + InitialRedshift,enzo_float(1.5));
+ 
+  enzo_float TimeHubble0 = time * TimeUnits * (HubbleConstantNow*3.24e-18);
+ 
+  /* 1) For a flat universe with OmegaMatterNow = 1, it's easy. */
+ 
+  if (fabs(OmegaMatterNow-1) < OMEGA_TOLERANCE &&
+      OmegaLambdaNow < OMEGA_TOLERANCE)
+    *a      = pow(time/InitialTimeInCodeUnits, enzo_float(2.0/3.0));
+ 
+#define INVERSE_HYPERBOLIC_EXISTS
+ 
+#ifdef INVERSE_HYPERBOLIC_EXISTS
+ 
+  enzo_float eta, eta_old, x;
+  int i;
+ 
+  /* 2) For OmegaMatterNow < 1 and OmegaLambdaNow == 0 see
+        Peebles 1993, eq. 13-3, 13-10.
+	Actually, this is a little tricky since we must solve an equation
+	of the form eta - sinh(eta) + x = 0..*/
+ 
+  if (OmegaMatterNow < 1 && OmegaLambdaNow < OMEGA_TOLERANCE) {
+ 
+    x = 2*TimeHubble0*pow(1.0 - OmegaMatterNow, 1.5) / OmegaMatterNow;
+ 
+    /* Compute eta in a three step process, first from a third-order
+       Taylor expansion of the formula above, then use that in a fifth-order
+       approximation.  Then finally, iterate on the formula itself, solving for
+       eta.  This works well because parts 1 & 2 are an excellent approximation
+       when x is small and part 3 converges quickly when x is large. */
+ 
+    eta = pow(6*x, enzo_float(1.0/3.0));                     // part 1
+    eta = pow(120*x/(20+eta*eta), enzo_float(1.0/3.0));      // part 2
+    for (i = 0; i < 40; i++) {                          // part 3
+      eta_old = eta;
+      eta = asinh(eta + x);
+      if (fabs(eta-eta_old) < ETA_TOLERANCE) break;
+    }
+    if (i == 40) {
+      fprintf(stderr, "Case 2 -- no convergence after %"ISYM" iterations.\n", i);
+      return ENZO_FAIL;
+    }
+ 
+    /* Now use eta to compute the expansion factor (eq. 13-10, part 2). */
+ 
+    *a = OmegaMatterNow/(2*(1 - OmegaMatterNow))*(cosh(eta) - 1);
+    *a *= (1 + InitialRedshift);    // to convert to code units, divide by [a]
+  }
+ 
+  /* 3) For OmegaMatterNow > 1 && OmegaLambdaNow == 0, use sin/cos.
+        Easy, but skip it for now. */
+ 
+  if (OmegaMatterNow > 1 && OmegaLambdaNow < OMEGA_TOLERANCE) {
+  }
+ 
+  /* 4) For flat universe, with non-zero OmegaLambdaNow, see eq. 13-20. */
+ 
+  if (fabs(OmegaCurvatureNow) < OMEGA_TOLERANCE &&
+      OmegaLambdaNow > OMEGA_TOLERANCE) {
+    *a = pow(enzo_float(OmegaMatterNow/(1 - OmegaMatterNow)), enzo_float(1.0/3.0)) *
+         pow(enzo_float(sinh(1.5 * sqrt(1.0 - OmegaMatterNow)*TimeHubble0)),
+	     enzo_float(2.0/3.0));
+    *a *= (1 + InitialRedshift);    // to convert to code units, divide by [a]
+  }
+ 
+#endif /* INVERSE_HYPERBOLIC_EXISTS */
+ 
+  /* Compute the derivative of the expansion factor (Peebles93, eq. 13.3). */
+ 
+  enzo_float TempVal = (*a)/(1 + InitialRedshift);
+  *dadt = sqrt( 2.0/(3.0*OmegaMatterNow*(*a)) *
+	       (OmegaMatterNow + OmegaCurvatureNow*TempVal +
+		OmegaLambdaNow*TempVal*TempVal*TempVal));
+ 
+  /* Someday, we'll implement the general case... */
+ 
+  if ((*a) == ENZO_FLOAT_UNDEFINED) {
+    fprintf(stderr, "Cosmology selected is not implemented.\n");
+    return ENZO_FAIL;
+  }
+ 
+  return ENZO_SUCCESS;
+}
+
+//---------------------------------------------------------------------- 
+ 
+int EnzoBlock::CosmologyComputeExpansionTimestep
+(enzo_float time, enzo_float *dtExpansion)
+{
+ 
+  /* Error check. */
+ 
+  if (InitialTimeInCodeUnits == 0) {
+    fprintf(stderr, "The cosmology parameters seem to be improperly set.\n");
+    return ENZO_FAIL;
+  }
+ 
+  /* Compute the expansion factors. */
+ 
+  enzo_float a, dadt;
+  if (CosmologyComputeExpansionFactor(time, &a, &dadt) == ENZO_FAIL) {
+    fprintf(stderr, "Error in ComputeExpnasionFactors.\n");
+    return ENZO_FAIL;
+  }
+ 
+  /* Compute the maximum allwed timestep given the maximum allowed
+     expansion factor. */
+ 
+  *dtExpansion = MaxExpansionRate*a/dadt;
+ 
+  return ENZO_SUCCESS;
+}
