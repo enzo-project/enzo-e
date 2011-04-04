@@ -22,7 +22,6 @@ Import('serial_run')
 # X test_Parameters.cpp
 # X test_Parse.cpp
 # X test_Performance.cpp
-# X test_ppm.cpp
 # X test_ppml.cpp
 # X test_TreeK.cpp
 

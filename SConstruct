@@ -8,7 +8,6 @@ import sys
 use_papi     = 0
 use_valgrind = 0
 
-use_hdf5     = 1
 use_png      = 1
 
 #-----------------------------------------------------------------------
@@ -137,10 +136,9 @@ if (use_papi != 0):
 	defines_xlf = defines_xlf + ' -WF,-D' + define_papi[0]
 #--------------------------------------------------
 
-if (use_hdf5 != 0):
-	defines     = defines     +         define_hdf5
-	defines_xlc = defines_xlc + ' -D' + define_hdf5[0]+ ' -D' + define_hdf5[1]
-	defines_xlf = defines_xlf + ' -WF,-D' + define_hdf5[0]+ ' -WF,-D' + define_hdf5[1]
+defines     = defines     +         define_hdf5
+defines_xlc = defines_xlc + ' -D' + define_hdf5[0]+ ' -D' + define_hdf5[1]
+defines_xlf = defines_xlf + ' -WF,-D' + define_hdf5[0]+ ' -WF,-D' + define_hdf5[1]
 
 #--------------------------------------------------
 
@@ -386,9 +384,12 @@ if (use_papi):
 # HDF5 SETTINGS
 #======================================================================
 
-if (use_hdf5):
-   cpppath = cpppath + [hdf5_inc]
-   libpath = libpath + [hdf5_lib]
+cpppath = cpppath + [hdf5_inc]
+libpath = libpath + [hdf5_lib]
+
+#======================================================================
+# FORTRAN LINK PATH
+#======================================================================
 
 libpath = libpath + [fortranpath_lib]
 
@@ -448,7 +449,6 @@ Export('parallel_run')
 Export('serial_run')
 
 Export('use_papi')
-Export('use_hdf5')
 
 SConscript('src/SConscript')
 SConscript('test/SConscript')
