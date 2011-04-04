@@ -352,7 +352,7 @@ namespace enzo {
     for (int field_index=0; field_index<NumberOfBaryonFields; field_index++) {
 
       std::string name = 
-	parameters->list_value_string(field_index,"fields");
+	parameters->list_value_string(field_index,"Field:fields");
 
       if        (name == "density") {
 	field_density          = field_index;
@@ -377,7 +377,7 @@ namespace enzo {
 	FieldType[field_index] = ElectronDensity;
       } else {
 	char error_message[ERROR_LENGTH];
-	sprintf (error_message,"Unknown field %s",name.c_str());
+	sprintf (error_message,"Unknown field '%s'",name.c_str());
 	ERROR ("EnzoBlock::EnzoBlock", error_message);
       }
     }

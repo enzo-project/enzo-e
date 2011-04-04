@@ -659,6 +659,7 @@ void Parameters::monitor_access_
 ) throw()
 {
   Param * param = 0;
+
   if (index == -1) {
     // not a list element
     param = parameter_(parameter);
@@ -670,7 +671,7 @@ void Parameters::monitor_access_
     param->value_to_string().c_str() : 
     std::string("[" + deflt_string + "]");
 
-  char index_string [MAX_PARAMETER_FILE_WIDTH];
+  char index_string [MAX_PARAMETER_FILE_WIDTH] = "";
 
   if (index != -1) {
     sprintf (index_string,"[%d]",index);

@@ -17,11 +17,10 @@ class EnzoMethodPpml : public Hyperbolic {
 
 public: // interface
 
-/// Creae a new EnzoMethodPpml object
-  EnzoMethodPpml(Parameters * parameters)
-    : Hyperbolic (parameters)
-  {};
+  /// Creae a new EnzoMethodPpml object
+  EnzoMethodPpml(Parameters * parameters);
 
+  /// Apply the method to advance a block one timestep 
   virtual void compute_block( Block * block, double t, double dt ) throw(); 
 
 };

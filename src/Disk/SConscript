@@ -3,7 +3,6 @@
 #------------------------------
 
 Import('env')
-Import('use_hdf5')
 Import('type')
 
 #------------------------------
@@ -12,8 +11,7 @@ Import('type')
 
 components = ['error']
 
-if (use_hdf5 != 0):
-	components = components + ['hdf5']
+components = components + ['hdf5']
 
 
 #------------------------------

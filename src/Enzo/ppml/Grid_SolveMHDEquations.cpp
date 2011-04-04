@@ -22,8 +22,12 @@
 
 #include "enzo.hpp" 
 
-int EnzoBlock::SolveMHDEquations(Block * block,
-				 int cycle, enzo_float dt)
+int EnzoBlock::SolveMHDEquations
+(
+ Block * block,
+ int cycle,
+ enzo_float dt
+ )
 {
  
   if (block) {

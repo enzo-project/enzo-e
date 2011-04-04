@@ -14,48 +14,22 @@
 
 //----------------------------------------------------------------------
 
-// void EnzoMethodPpml::initialize(FieldDescr * field_descr) throw()
-// {
-//   // Specify arguments
-
-//   add_argument_(argument_field, "density",    access_read_write);
-//   add_argument_(argument_field, "velocity_x", access_read_write);
-//   add_argument_(argument_field, "velocity_y", access_read_write);
-//   add_argument_(argument_field, "velocity_z", access_read_write);
-//   add_argument_(argument_field, "magnetic_x", access_read_write);
-//   add_argument_(argument_field, "magnetic_y", access_read_write);
-//   add_argument_(argument_field, "magnetic_z", access_read_write);
-
-//   add_argument_(argument_field, "velocity_x_face_x", access_read_write);
-//   add_argument_(argument_field, "velocity_y_face_x", access_read_write);
-//   add_argument_(argument_field, "velocity_z_face_x", access_read_write);
-//   add_argument_(argument_field, "magnetic_x_face_x", access_read_write);
-//   add_argument_(argument_field, "magnetic_y_face_x", access_read_write);
-//   add_argument_(argument_field, "magnetic_z_face_x", access_read_write);
-
-//   add_argument_(argument_field, "velocity_x_face_y", access_read_write);
-//   add_argument_(argument_field, "velocity_y_face_y", access_read_write);
-//   add_argument_(argument_field, "velocity_z_face_y", access_read_write);
-//   add_argument_(argument_field, "magnetic_x_face_y", access_read_write);
-//   add_argument_(argument_field, "magnetic_y_face_y", access_read_write);
-//   add_argument_(argument_field, "magnetic_z_face_y", access_read_write);
-
-//   add_argument_(argument_field, "velocity_x_face_z", access_read_write);
-//   add_argument_(argument_field, "velocity_y_face_z", access_read_write);
-//   add_argument_(argument_field, "velocity_z_face_z", access_read_write);
-//   add_argument_(argument_field, "magnetic_x_face_z", access_read_write);
-//   add_argument_(argument_field, "magnetic_y_face_z", access_read_write);
-//   add_argument_(argument_field, "magnetic_z_face_z", access_read_write);
-
-// }
+EnzoMethodPpml::EnzoMethodPpml( Parameters * parameters )
+  : Hyperbolic(parameters)
+{
+}
 
 //----------------------------------------------------------------------
 
-void EnzoMethodPpml::compute_block(Block * block,
-				   double t,double dt) throw()
+void EnzoMethodPpml::compute_block
+(
+ Block * block,
+ double t,
+ double dt
+ ) throw()
 {
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
-  INCOMPLETE("EnzoMethodPpml::compute_block");
+  enzo_block->SolveMHDEquations (enzo_block, enzo_block->CycleNumber, dt);
 }
 
 //----------------------------------------------------------------------
