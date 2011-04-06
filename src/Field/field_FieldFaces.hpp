@@ -24,7 +24,8 @@ private:
 public: // interface
 
   /// Constructor
-  FieldFaces(FieldBlock * field_block) throw();
+  FieldFaces(const FieldDescr * field_descr,
+	     FieldBlock * field_block) throw();
 
   //----------------------------------------------------------------------
   // Big Three
@@ -42,20 +43,23 @@ public: // interface
   //----------------------------------------------------------------------
 
   /// Load from field's face data
-  void load(const FieldBlock * field_block,
+  void load(const FieldDescr * field_descr,
+	    const FieldBlock * field_block,
 	    int                field=-1,
 	    axis_enum          axis=axis_all, 
 	    face_enum          face=face_all) throw();
 
   /// Copy neighbor face data into ghost data
-  void copy(const FieldFaces * field_face,
+  void copy(const FieldDescr * field_descr,
+	    const FieldFaces * field_face,
 	    const FieldBlock * field_block,
 	    int                field=-1,
 	    axis_enum          axis=axis_all, 
 	    face_enum          face=face_all) throw();
 
   /// Store to field's ghost data
-  void store(FieldBlock *   field_block,
+  void store(const FieldDescr * field_descr,
+	     FieldBlock *   field_block,
 	     int            field=-1,
 	     axis_enum      axis=axis_all, 
 	     face_enum      face=face_all) throw();
@@ -63,7 +67,8 @@ public: // interface
 private: // functions
 
   /// Allocate array_ storage
-  void allocate_(FieldBlock * field_block) throw();
+  void allocate_(const FieldDescr * field_descr,
+		 FieldBlock * field_block) throw();
 
   /// Deallocate array_ storage
   void deallocate_() throw();

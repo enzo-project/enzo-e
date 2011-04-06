@@ -15,6 +15,7 @@
 /// @brief    [\ref Field] Fortran-style array class.
 
 class Block;
+class FieldDescr;
 
 class FieldBlock {
 
@@ -32,8 +33,7 @@ class FieldBlock {
 public: // interface
 
   /// Create a new uninitialized FieldBlock object
-  FieldBlock(const FieldDescr * field_descr,
-	     int nx, int ny=1, int nz=1) throw();
+  FieldBlock(int nx, int ny=1, int nz=1) throw();
 
   /// Deconstructor
   ~FieldBlock() throw();
@@ -57,7 +57,8 @@ public: // interface
 
   /// Return array for the corresponding field, which does not contain
   /// ghosts whether they're allocated or not
-  char * field_unknowns (int id_field) throw (std::out_of_range);
+  char * field_unknowns ( const FieldDescr * field_descr,
+			  int id_field) throw (std::out_of_range);
 
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
@@ -69,23 +70,20 @@ public: // interface
   void cell_width(Block * block,
 		  double * hx, double * hy, double * hz) const throw ();
 
-  /// Return the associated field descriptor
-  const FieldDescr * field_descr() const throw ()
-  { return field_descr_; }
-
-  /// Return the ossociated field faces object
-  FieldFaces * field_faces() throw ();
+  /// Return the associated field faces object
+  FieldFaces * field_faces(const FieldDescr * field_descr) throw ();
 
   /// Clear specified array(s) to specified value
-  void clear(float value = 0.0, 
-	     int id_field_first = -1, 
-	     int id_field_last  = -1) throw();
+  void clear ( const FieldDescr * field_descr,
+	       float value = 0.0, 
+	       int id_field_first = -1, 
+	       int id_field_last  = -1) throw();
  
   /// Return whether array is allocated or not
   bool array_allocated() const throw();
 
   /// Allocate storage for the field block
-  void allocate_array() throw();
+  void allocate_array(const FieldDescr * field_descr) throw();
 
   /// Deallocate storage for the field block
   void deallocate_array() throw();
@@ -94,13 +92,13 @@ public: // interface
   bool ghosts_allocated() const throw ();
 
   /// Allocate and clear ghost values if not already allocated
-  void allocate_ghosts() throw ();
+  void allocate_ghosts(const FieldDescr * field_descr) throw ();
 
   /// Deallocate ghost values if allocated
-  void deallocate_ghosts() throw ();
+  void deallocate_ghosts(const FieldDescr * field_descr) throw ();
 
   /// Refresh ghost zones on an internal face
-  void refresh_ghosts() throw();
+  void refresh_ghosts(const FieldDescr * field_descr) throw();
 
   /// Split a block into 2, 4, or 8 subblocks; does not delete self
   void split(bool split_x, bool split_y, bool split_z, 
@@ -110,8 +108,7 @@ public: // interface
   FieldBlock * merge(bool merge_x, bool merge_y, bool merge_z, 
 		     FieldBlock ** field_blocks) throw ();
  
-  /// Read a block from disk.  Create new FieldDescr if not supplied
-  /// or different.  return NULL iff no new field_descr is created
+  /// Read a block from disk
   void read(File * file) throw ();
 
   /// Write a block from disk, and optionally associated descriptor
@@ -122,7 +119,8 @@ public: // interface
 
   /// Return the number of elements (nx,ny,nz) along each axis, and total
   /// number of bytes n
-  int field_size (int id_field, int *nx, int *ny, int *nz) const throw();
+  int field_size (const FieldDescr * field_descr, int id_field, 
+		  int *nx, int *ny, int *nz) const throw();
 
   //----------------------------------------------------------------------
 
@@ -140,19 +138,18 @@ private: // functions
 
   /// Move (not copy) array_ to array and field_values_ to
   /// field_values
-  void backup_array_  ( std::vector<char *> & field_values );
+  void backup_array_  ( const FieldDescr * field_descr,
+			std::vector<char *> & field_values );
 
   /// Move (not copy) array to array_ and field_values to
   /// field_values_
-  void restore_array_ ( std::vector<char *> & field_values )
+  void restore_array_ ( const FieldDescr * field_descr,
+			std::vector<char *> & field_values )
     throw (std::out_of_range);
 
   //----------------------------------------------------------------------
 
 private: // attributes
-
-  /// Corresponding field descriptor
-  const FieldDescr * field_descr_;
 
   /// Corresponding Field faces
   FieldFaces * field_faces_;

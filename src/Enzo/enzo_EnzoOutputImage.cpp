@@ -27,6 +27,7 @@ EnzoOutputImage::~EnzoOutputImage() throw ()
 
 void EnzoOutputImage::write
 (
+ const FieldDescr * field_descr,
  int index,
  Mesh * mesh,
  int cycle,
@@ -42,13 +43,6 @@ void EnzoOutputImage::write
     WARNING("EnzoOutputImage::write",
 	    "EnzoOutputImage only supports 2D problems");
   }
-
-  // Get field_descr (eventually)
-
-  Block * block = mesh->patch(0)->local_block(0);
-  if (block == NULL) return;
-  FieldBlock       * field_block = block->field_block();
-  const FieldDescr * field_descr = field_block->field_descr();
 
   Monitor * monitor = Monitor::instance();
 
@@ -76,7 +70,7 @@ void EnzoOutputImage::write
 
     // Write patch contribution 
     // NO OFFSET: ASSUMES ROOT PATCH
-    write (index, patch, mesh, cycle,time,false,
+    write (field_descr, index, patch, mesh, cycle,time,false,
 	   0,0,0);
   }
 
@@ -93,6 +87,7 @@ void EnzoOutputImage::write
 
 void EnzoOutputImage::write
 (
+ const FieldDescr * field_descr,
  int index,
  Patch * patch,
  Mesh  * mesh,
@@ -108,10 +103,6 @@ void EnzoOutputImage::write
     WARNING("EnzoOutputImage::write",
 	    "EnzoOutputImage only supports 2D problems");
   }
-
-  Block * block = patch->local_block(0);
-  FieldBlock       * field_block = block->field_block();
-  const FieldDescr * field_descr = field_block->field_descr();
 
   Monitor * monitor = Monitor::instance();
 
@@ -145,7 +136,7 @@ void EnzoOutputImage::write
     int ix,iy,iz;
     block->index_patch(&ix,&iy,&iz);
 
-    write (index, block, patch, mesh, cycle,time,false,
+    write (field_descr, index, block, patch, mesh, cycle,time,false,
 	   ix0+ix*nxb,
 	   iy0+iy*nyb,
 	   iz0+iz*nzb);
@@ -164,6 +155,7 @@ void EnzoOutputImage::write
 
 void EnzoOutputImage::write
 (
+ const FieldDescr * field_descr,
  int index,
  Block * block,
  Patch * patch,
@@ -177,7 +169,6 @@ void EnzoOutputImage::write
 ) const throw()
 {
   FieldBlock       * field_block = block->field_block();
-  const FieldDescr * field_descr = field_block->field_descr();
 
   // Get block size
   int nx,ny,nz;
@@ -211,7 +202,7 @@ void EnzoOutputImage::write
 
   // Add block contribution to image
 
-  Scalar * field_unknowns = (Scalar *)field_block->field_unknowns(index);
+  Scalar * field_unknowns = (Scalar *)field_block->field_unknowns(field_descr,index);
     
   monitor->image_reduce (field_unknowns, 
 			 ndx,ndy,ndz, 

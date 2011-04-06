@@ -24,17 +24,11 @@
 
 int EnzoBlock::SolveMHDEquations
 (
- Block * block,
  int cycle,
  enzo_float dt
  )
 {
  
-  if (block) {
-    WARNING("EnzoBlock::SolveHydroEquations",
-	    "Ignoring block input parameter");
-  }
-
   /* exit if not 3D */
 
   // @@ assert GridRank == 3

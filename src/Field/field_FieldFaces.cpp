@@ -12,12 +12,15 @@
 
 #include "field.hpp"
 
-FieldFaces::FieldFaces(FieldBlock * field_block) throw ()
+FieldFaces::FieldFaces
+(
+ const FieldDescr * field_descr,
+ FieldBlock * field_block) throw ()
   : array_(),
     index_ghosts_(),
     index_faces_()
 {
-  allocate_(field_block);
+  allocate_(field_descr,field_block);
 }
 
 //----------------------------------------------------------------------
@@ -56,19 +59,19 @@ FieldFaces & FieldFaces::operator= (const FieldFaces & field_faces) throw ()
 
 void FieldFaces::load
 (
+ const FieldDescr * field_descr,
  const FieldBlock * field_block,
  int                field,
  axis_enum          axis,
  face_enum          face
  ) throw()
 {
-  const FieldDescr * field_descr = field_block->field_descr();
 
   if (field == -1) {
     int num_fields = field_descr->field_count();
     // WARNING: recursive
     for (int i=0; i<num_fields; i++) {
-      load (field_block,i,axis,face);
+      load (field_descr, field_block,i,axis,face);
     }
   } else {
     // Get precision
@@ -78,7 +81,7 @@ void FieldFaces::load
     char * array_face  = &array_[index_faces_[index_(field,axis,face)]];
     // Get field (and face) dimensions
     int nd3[3];
-    field_block->field_size(field,&nd3[0],&nd3[1],&nd3[2]);
+    field_block->field_size(field_descr,field,&nd3[0],&nd3[1],&nd3[2]);
     // Compute multipliers for index calculations
     int md3[3] = {1, nd3[0], nd3[0]*nd3[1]};
     // Get ghost depth
@@ -116,6 +119,7 @@ void FieldFaces::load
 
 void FieldFaces::copy
 (
+ const FieldDescr * field_descr,
  const FieldFaces * neighbor_faces,
  const FieldBlock * field_block, // required for field_descr and array size
  int field,
@@ -123,13 +127,11 @@ void FieldFaces::copy
  face_enum face
  ) throw()
 {
-  const FieldDescr * field_descr = field_block->field_descr();
-
   if (field == -1) {
     int num_fields = field_descr->field_count();
     // WARNING: recursive
     for (int i=0; i<num_fields; i++) {
-      copy (neighbor_faces,field_block,i,axis,face);
+      copy (field_descr,neighbor_faces,field_block,i,axis,face);
     }
   } else {
     // Get precision
@@ -144,7 +146,7 @@ void FieldFaces::copy
     field_descr->ghosts(field,&ng3[0],&ng3[1],&ng3[2]);
     // Get field (and face) dimensions
     int nd3[3];
-    field_block->field_size(field,&nd3[0],&nd3[1],&nd3[2]);
+    field_block->field_size(field_descr,field,&nd3[0],&nd3[1],&nd3[2]);
     // Compute permutation indices
     int iax=(axis+1) % 3;
     int iay=(axis+2) % 3;
@@ -177,19 +179,19 @@ void FieldFaces::copy
 
 void FieldFaces::store
 (
+ const FieldDescr * field_descr,
  FieldBlock * field_block,
  int          field,
  axis_enum    axis,
  face_enum    face
  ) throw()
 {
-  const FieldDescr * field_descr = field_block->field_descr();
 
   if (field == -1) {
     int num_fields = field_descr->field_count();
     // WARNING: recursive
     for (int i=0; i<num_fields; i++) {
-      store (field_block,i,axis,face);
+      store (field_descr, field_block,i,axis,face);
     }
   } else {
     // Get precision
@@ -199,7 +201,7 @@ void FieldFaces::store
     char * array_ghost  = &array_[index_ghosts_[index_(field,axis,face)]];
     // Get field (and face) dimensions
     int nd3[3];
-    field_block->field_size(field,&nd3[0],&nd3[1],&nd3[2]);
+    field_block->field_size(field_descr,field,&nd3[0],&nd3[1],&nd3[2]);
     // Compute multipliers for index calculations
     int md3[3] = {1, nd3[0], nd3[0]*nd3[1]};
     // Get ghost depth
@@ -230,9 +232,11 @@ void FieldFaces::store
 
 //----------------------------------------------------------------------
 
-void FieldFaces::allocate_(FieldBlock * field_block) throw()
+void FieldFaces::allocate_
+(
+ const FieldDescr * field_descr,
+ FieldBlock * field_block) throw()
 {
-  const FieldDescr * field_descr = field_block->field_descr();
 
   size_t num_fields = field_descr->field_count();
 
@@ -253,10 +257,11 @@ void FieldFaces::allocate_(FieldBlock * field_block) throw()
     // Get field_size, which includes ghosts and precision adjustments
 
     int axis_length[3];
-    int field_bytes = field_block->field_size (index_field, 
-					      &axis_length[0], 
-					      &axis_length[1], 
-					      &axis_length[2]);
+    int field_bytes = field_block->field_size 
+      (field_descr,index_field, 
+       &axis_length[0], 
+       &axis_length[1], 
+       &axis_length[2]);
 
     // Get ghost depth
 

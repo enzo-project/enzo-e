@@ -46,8 +46,7 @@ class EnzoBlock : public Block {
 public: // interface
 
   /// Initialize the EnzoBlock object
-  EnzoBlock(FieldDescr * field_descr,
-	    int ix, int iy, int iz,
+  EnzoBlock(int ix, int iy, int iz,
 	    int nx, int ny, int nz,
 	    double xm, double ym, double zm,
 	    double xp, double yp, double zp,
@@ -77,7 +76,7 @@ public: // interface
   int IdentifySpeciesFields(int &DeNum, int &HINum, int &HIINum, int &HeINum, int &HeIINum, int &HeIIINum, int &HMNum, int &H2INum, int &H2IINum, int &DINum, int &DIINum, int &HDINum);
   int SetExternalBoundaryValues();
   int SetMinimumSupport(enzo_float &MinimumSupportEnergyCoefficient);
-  int SolveHydroEquations (Block * block, int CycleNumber, enzo_float dt);
+  int SolveHydroEquations ( int CycleNumber, enzo_float dt);
   void print_field (int field);
   int SetExternalBoundary(int FieldRank, int GridDims[], int GridOffset[], int StartIndex[], int EndIndex[], enzo_float *Field, int FieldType);
   void image_dump(const char * file_root, int cycle, double lower, double upper);
@@ -88,7 +87,7 @@ public: // interface
   void initialize_implosion (int size_param);
   void initialize_ppml_implosion3 (int size_param);
 
-  int SolveMHDEquations(Block * block, int cycle, enzo_float dt);
+  int SolveMHDEquations( int cycle, enzo_float dt);
   void initialize_ppml (int size_param);
 
 public: // functions (TEMPORARILY PUBLIC)

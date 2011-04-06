@@ -23,6 +23,7 @@ EnzoBoundary::EnzoBoundary (boundary_type_enum boundary_type) throw()
 
 void EnzoBoundary::enforce 
 (
+ const FieldDescr * field_descr,
  Block * block,
  face_enum     face,
  axis_enum     axis 
@@ -30,16 +31,16 @@ void EnzoBoundary::enforce
 {
   if (face == face_all) {
     // WARNING: recursive
-    enforce(block,face_lower,axis);
+    enforce(field_descr,block,face_lower,axis);
     // WARNING: recursive
-    enforce(block,face_upper,axis);
+    enforce(field_descr,block,face_upper,axis);
   } else if (axis == axis_all) {
     // WARNING: recursive
-    enforce(block,face,axis_x);
+    enforce(field_descr,block,face,axis_x);
     // WARNING: recursive
-    enforce(block,face,axis_y);
+    enforce(field_descr,block,face,axis_y);
     // WARNING: recursive
-    enforce(block,face,axis_z);
+    enforce(field_descr,block,face,axis_z);
   } else {
     FieldBlock * field_block = block->field_block();
     if ( ! field_block->ghosts_allocated() ) {
@@ -48,16 +49,16 @@ void EnzoBoundary::enforce
     }
     switch (boundary_type_) {
     case boundary_type_reflecting:
-      enforce_reflecting_(field_block,face,axis);
+      enforce_reflecting_(field_descr, field_block,face,axis);
       break;
     case boundary_type_outflow:
-      enforce_outflow_(field_block,face,axis);
+      enforce_outflow_   (field_descr, field_block,face,axis);
       break;
     case boundary_type_inflow:
-      enforce_inflow_(field_block,face,axis);
+      enforce_inflow_    (field_descr, field_block,face,axis);
       break;
     case boundary_type_periodic:
-      enforce_periodic_(field_block,face,axis);
+      enforce_periodic_  (field_descr, field_block,face,axis);
       break;
     default:
       ERROR("EnzoBoundary::enforce",
@@ -71,12 +72,12 @@ void EnzoBoundary::enforce
 
 void EnzoBoundary::enforce_reflecting_
 (
- FieldBlock * field_block,
+ const FieldDescr * field_descr,
+ FieldBlock       * field_block,
  face_enum face,
  axis_enum axis
  ) const throw()
 {
-  const FieldDescr * field_descr = field_block->field_descr();
 
   int nx,ny,nz;
   int gx,gy,gz;
@@ -229,12 +230,12 @@ void EnzoBoundary::enforce_reflecting_precision_
 
 void EnzoBoundary::enforce_outflow_
 (
- FieldBlock * field_block,
+ const FieldDescr * field_descr,
+ FieldBlock       * field_block,
  face_enum face,
  axis_enum axis
  ) const throw()
 {
-  const FieldDescr * field_descr = field_block->field_descr();
 
   int nx,ny,nz;
   int gx,gy,gz;
@@ -375,6 +376,7 @@ void EnzoBoundary::enforce_outflow_precision_
 
 void EnzoBoundary::enforce_inflow_
 (
+ const FieldDescr * field_descr,
  FieldBlock * field_block,
  face_enum face,
  axis_enum axis
@@ -387,6 +389,7 @@ void EnzoBoundary::enforce_inflow_
 
 void EnzoBoundary::enforce_periodic_
 (
+ const FieldDescr * field_descr,
  FieldBlock * field_block,
  face_enum face,
  axis_enum axis

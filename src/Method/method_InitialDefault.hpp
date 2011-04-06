@@ -22,7 +22,8 @@ public: // interface
 
   /// Read initialization from Initial group in parameter file
 
-  virtual void compute (Block * block) throw();
+  virtual void compute (const FieldDescr * field_descr,
+			Block * block) throw();
 
 private: // functions
   
@@ -35,6 +36,7 @@ private: // functions
 		      double ** t) throw();
 
   void copy_values_ (
+		     const FieldDescr * field_descr,
 		     FieldBlock * field_block,
 		     double * value, bool * region,
 		     int index_field,

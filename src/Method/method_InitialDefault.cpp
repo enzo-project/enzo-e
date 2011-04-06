@@ -24,7 +24,8 @@ InitialDefault::InitialDefault(Parameters * parameters) throw ()
 
 //----------------------------------------------------------------------
 
-void InitialDefault::compute (Block * block) throw()
+void InitialDefault::compute (const FieldDescr * field_descr,
+			      Block * block) throw()
 {
   // Initialize Fields according to parameters
 
@@ -33,7 +34,6 @@ void InitialDefault::compute (Block * block) throw()
   //--------------------------------------------------
 
   FieldBlock *       field_block = block->field_block();
-  const FieldDescr * field_descr = field_block->field_descr();
 
   double *value=0, *vdeflt=0, *x=0, *y=0, *z=0, *t=0;
   bool * region=0, *rdeflt=0;
@@ -57,7 +57,8 @@ void InitialDefault::compute (Block * block) throw()
 
     if (parameter_type == parameter_scalar) {
 
-      field_block->clear(parameters_->value_scalar("value",0.0), index_field);
+      field_block->clear(field_descr,parameters_->value_scalar("value",0.0), 
+			 index_field);
 
     } else if (parameter_type == parameter_list) {
 
@@ -90,7 +91,7 @@ void InitialDefault::compute (Block * block) throw()
 
       for (int i=0; i<n; i++) region[i] = true;
 
-      copy_values_ (field_block,value, region,index_field,nx,ny,nz);
+      copy_values_ (field_descr,field_block,value, region,index_field,nx,ny,nz);
 
       // Evaluate conditional equations in list
 
@@ -102,7 +103,7 @@ void InitialDefault::compute (Block * block) throw()
 	evaluate_logical_ (field_block, index_list + 1, field_name, 
 			  n, region,rdeflt,x,y,z,t);
 
-	copy_values_ (field_block,value, region,index_field,nx,ny,nz);
+	copy_values_ (field_descr,field_block,value, region,index_field,nx,ny,nz);
 
       }
 
@@ -195,18 +196,18 @@ void InitialDefault::allocate_xyzt_
 
 void InitialDefault::copy_values_ 
 (
- FieldBlock * field_block,
- double * value, bool * region,
- int index_field,
+ const FieldDescr * field_descr,
+ FieldBlock *       field_block,
+ double *           value, 
+ bool *             region,
+ int                index_field,
  int nx, int ny, int nz
  ) throw()
 {
 
-  const FieldDescr * field_descr = field_block->field_descr();
-
   // Copy the scalar values to the field where logical values are true
 
-  void * field = field_block->field_unknowns(index_field);
+  void * field = field_block->field_unknowns(field_descr,index_field);
 
   // Determine allocated array size
 

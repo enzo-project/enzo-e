@@ -24,8 +24,7 @@ class Block {
 public: // interface
 
   /// Initialize the Block object
-  Block(FieldDescr * field_descr,
-	int ix, int iy, int iz,
+  Block(int ix, int iy, int iz,
 	int nx, int ny, int nz,
 	double xm, double ym, double zm,
 	double xp, double yp, double zp,
@@ -75,7 +74,8 @@ public: // interface
   Block * neighbor (axis_enum axis, face_enum face) const throw();
 
   /// Refresh ghost data
-  void refresh_ghosts(int index_field_set = 0) throw();
+  void refresh_ghosts(const FieldDescr * field_descr,
+		      int index_field_set = 0) throw();
 
 protected: // functions
 

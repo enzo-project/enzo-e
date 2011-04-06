@@ -20,7 +20,8 @@ EnzoTimestep::EnzoTimestep () throw()
 
 //----------------------------------------------------------------------
 
-double EnzoTimestep::compute ( Block * block ) throw()
+double EnzoTimestep::compute ( const FieldDescr * field_descr,
+			       Block * block ) throw()
 {
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
@@ -55,7 +56,7 @@ double EnzoTimestep::compute ( Block * block ) throw()
   int nx,ny,nz;
   field_block -> size (&nx,&ny,&nz);
   int gx,gy,gz;
-  field_block->field_descr()->ghosts(enzo::field_density,&gx,&gy,&gz);
+  field_descr->ghosts(enzo::field_density,&gx,&gy,&gz);
   int mx,my,mz;
   mx = nx + 2*gx;
   my = ny + 2*gx;

@@ -15,7 +15,6 @@
 
 Block::Block
 (
- FieldDescr   * field_descr,
  int ix, int iy, int iz,
  int nx, int ny, int nz,
  double xm, double ym, double zm,
@@ -27,7 +26,7 @@ Block::Block
   // Initialize field_block_[]
   field_block_.resize(num_field_blocks);
   for (size_t i=0; i<field_block_.size(); i++) {
-    field_block_[i] = new FieldBlock (field_descr,nx,ny,nz);
+    field_block_[i] = new FieldBlock (nx,ny,nz);
   }
 
   // Initialize indices into parent patch
@@ -143,9 +142,10 @@ Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
 
 //----------------------------------------------------------------------
 
-void Block::refresh_ghosts(int index_field_set) throw()
+void Block::refresh_ghosts(const FieldDescr * field_descr,
+			   int index_field_set) throw()
 {
-  field_block_[index_field_set]->refresh_ghosts();
+  field_block_[index_field_set]->refresh_ghosts(field_descr);
 }
 
 //======================================================================

@@ -165,14 +165,14 @@ void init_fields
 
 	// Create the FaceBlock object
 
-	field_block[index_block] = new FieldBlock (field_descr, mx, my, mz);
+	field_block[index_block] = new FieldBlock (mx, my, mz);
 
 	FieldBlock * block = field_block[index_block];
 
 	// Allocate field blocks including ghosts
 
-	block->allocate_array();
-	block->allocate_ghosts();
+	block->allocate_array(field_descr);
+	block->allocate_ghosts(field_descr);
 
 	// Initialize fields
 
@@ -306,7 +306,7 @@ PARALLEL_MAIN_BEGIN
 	  
 	  int index_lower = ibx + nbx * (iby + nby * ibz);
 	  FieldBlock * field_lower = field_block[index_lower];
-	  FieldFaces * faces_lower = field_lower->field_faces();
+	  FieldFaces * faces_lower = field_lower->field_faces(field_descr);
 
 	  int index_upper = 0;
 	  if (axis==0) index_upper = ((ibx+1)%nbx) + nbx * (  iby        + nby * ibz);
@@ -314,18 +314,18 @@ PARALLEL_MAIN_BEGIN
 	  if (axis==2) index_upper =   ibx        + nbx * (  iby        + nby * ((ibz+1)%nbz));
 
 	  FieldBlock * field_upper = field_block[index_upper];
-	  FieldFaces * faces_upper = field_upper->field_faces();
+	  FieldFaces * faces_upper = field_upper->field_faces(field_descr);
 
 	  for (int index_field = 0; index_field < 1; index_field++) {
 	    // refresh lower
-	    faces_lower -> load (field_lower, index_field, axis,  face_upper);
-	    faces_upper -> copy (faces_lower, field_lower, index_field, axis,  face_lower);
-	    faces_upper -> store (field_upper, index_field, axis, face_lower);
+	    faces_lower -> load (field_descr, field_lower, index_field, axis,  face_upper);
+	    faces_upper -> copy (field_descr, faces_lower, field_lower, index_field, axis,  face_lower);
+	    faces_upper -> store (field_descr, field_upper, index_field, axis, face_lower);
 
 	    // refresh upper
-	    faces_upper -> load (field_upper, index_field, axis,  face_lower);
-	    faces_lower -> copy (faces_upper, field_upper, index_field, axis,  face_upper);
-	    faces_lower -> store (field_lower, index_field, axis, face_upper);
+	    faces_upper -> load (field_descr, field_upper, index_field, axis,  face_lower);
+	    faces_lower -> copy (field_descr, faces_upper, field_upper, index_field, axis,  face_upper);
+	    faces_lower -> store (field_descr, field_lower, index_field, axis, face_upper);
 	  }
 
 	}

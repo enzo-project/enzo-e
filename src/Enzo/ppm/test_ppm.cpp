@@ -97,8 +97,7 @@ PARALLEL_MAIN_BEGIN
   // initialized in EnzoBlock::initialize_*()
 
   FieldDescr field_descr;
-  EnzoBlock enzo(&field_descr, 
-		 0,0,0, 
+  EnzoBlock enzo(0,0,0, 
 		 0,0,0, 
 		 0.0, 0.0, 0.0, 
 		 1.0, 1.0, 1.0, 1);
@@ -152,7 +151,7 @@ PARALLEL_MAIN_BEGIN
       enzo.image_dump(problem_name[problem],cycle,lower,upper);
     }
 
-    enzo.SolveHydroEquations(NULL,cycle, dt);
+    enzo.SolveHydroEquations(cycle, dt);
 
   }
   unit_assert(cycle >=cycle_stop || time >= time_stop);

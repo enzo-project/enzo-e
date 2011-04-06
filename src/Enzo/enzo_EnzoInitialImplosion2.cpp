@@ -18,15 +18,17 @@ EnzoInitialImplosion2::EnzoInitialImplosion2 () throw ()
 
 //----------------------------------------------------------------------
 
-void EnzoInitialImplosion2::compute (Block * block) throw()
+void EnzoInitialImplosion2::compute 
+(
+ const FieldDescr * field_descr,
+ Block * block
+ ) throw()
 
 {
 
   EnzoBlock * enzo_block = static_cast<EnzoBlock*> (block);
 
   FieldBlock * field_block       = enzo_block->field_block();
-
-  const FieldDescr * field_descr = field_block->field_descr();
 
   ASSERT("EnzoInitialImplosion2",
 	 "Insufficient number of fields",

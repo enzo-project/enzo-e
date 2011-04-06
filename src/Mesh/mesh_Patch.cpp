@@ -205,8 +205,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     // create a new data block
 
     Block * block = factory_->create_block 
-      (field_descr,
-       ibx,iby,ibz,
+      (ibx,iby,ibz,
        mbx,mby,mbz,
        xm,ym,zm,
        xp,yp,zp);
@@ -220,8 +219,8 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
     // Allocate field data, including ghosts
     
-    field_block->allocate_array();
-    field_block->allocate_ghosts();
+    field_block->allocate_array(field_descr);
+    field_block->allocate_ghosts(field_descr);
 
     // INITIALIZE PARTICLE BLOCK
 

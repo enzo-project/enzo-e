@@ -11,8 +11,7 @@
 
 #include "enzo.hpp"
 
-int EnzoBlock::SolveHydroEquations (Block * block,
-				    int CycleNumber, enzo_float dt)
+int EnzoBlock::SolveHydroEquations (int CycleNumber, enzo_float dt)
 {
   // @@@@ ASSUME UNIGIRD PROBLEM @@@@
 

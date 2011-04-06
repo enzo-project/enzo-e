@@ -28,8 +28,8 @@ sources  = ['parse.tab.c', 'lex.yy.c', Glob('parameters*cpp') ]
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Uncomment when parse.l or parse.y change
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-env.CFile(target = 'lex.yy.c', source = 'parse.l')
-env.CFile(target = ['parse.tab.c', 'parse.tab.h'], source = 'parse.y', YACCFLAGS='-d -t')
+# env.CFile(target = 'lex.yy.c', source = 'parse.l')
+# env.CFile(target = ['parse.tab.c', 'parse.tab.h'], source = 'parse.y', YACCFLAGS='-d -t')
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 if (type == "charm"):

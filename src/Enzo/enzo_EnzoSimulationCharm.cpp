@@ -75,9 +75,7 @@ void EnzoSimulationCharm::run() throw()
 
     while ((block = ++it_block)) {
 
-      initial_->compute(block);
-
-      boundary_->enforce(block);
+      initial_->compute(field_descr_,block);
 
       // Initialize Block attributes 
       // (REQUIRED HERE INSTEAD OF CONSTRUCTOR SINCE REQUIRES extents_[])
@@ -93,7 +91,7 @@ void EnzoSimulationCharm::run() throw()
 
   for (size_t i=0; i<output_list_.size(); i++) {
     Output * output = output_list_[i];
-    output->scheduled_write(mesh_,cycle_,time_);
+    output->scheduled_write(field_descr_, mesh_,cycle_,time_);
   }
 
   //--------------------------------------------------
@@ -162,12 +160,9 @@ void EnzoSimulationCharm::run() throw()
 
       while ((block = ++it_block)) {
 
-	// Enforce boundary conditions
-	boundary_->enforce(block);
-
 	// Accumulate Block-local dt
 
-	dt_block = MIN(dt_block,timestep_->compute(block));
+	dt_block = MIN(dt_block,timestep_->compute(field_descr_,block));
 
 	// Reduce timestep to coincide with scheduled output if needed
 
@@ -213,9 +208,13 @@ void EnzoSimulationCharm::run() throw()
 
       while ((block = ++it_block)) {
 
+	// Enforce boundary conditions
+
+	boundary_->enforce(field_descr_,block);
+
 	// Refresh ghosts
 
-	block->refresh_ghosts();
+	block->refresh_ghosts(field_descr_);
 
 	// Initialize enzo_block aliases (may me modified)
 
@@ -271,7 +270,7 @@ void EnzoSimulationCharm::run() throw()
 
     for (size_t i=0; i<output_list_.size(); i++) {
       Output * output = output_list_[i];
-      output->scheduled_write(mesh_,cycle_,time_);
+      output->scheduled_write(field_descr_, mesh_,cycle_,time_);
     }
   } // ! stop
 

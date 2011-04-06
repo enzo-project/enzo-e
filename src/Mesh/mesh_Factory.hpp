@@ -33,8 +33,7 @@ public: // interface
 
   /// Create a new Block [abstract factory design pattern]
   virtual Block * create_block
-  (FieldDescr * field_descr,
-   int ix, int iy, int iz,
+  (int ix, int iy, int iz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double xp, double yp, double zp,

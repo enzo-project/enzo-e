@@ -26,7 +26,8 @@ public: // virtual functions
 
   /// Compute the timestep for the block
 
-  virtual double compute ( Block * block ) throw() = 0; 
+  virtual double compute ( const FieldDescr * field_descr,
+			   Block * block ) throw() = 0; 
 
 };
 

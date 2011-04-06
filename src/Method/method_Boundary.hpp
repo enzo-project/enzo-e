@@ -25,7 +25,8 @@ public: // virtual functions
 
   /// Enforce boundary conditions
 
-  virtual void enforce (Block * block,
+  virtual void enforce (const FieldDescr * field_descr,
+			Block * block,
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw() = 0;
 

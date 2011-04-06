@@ -12,7 +12,6 @@
 
 Block * EnzoFactory::create_block
 (
- FieldDescr * field_descr,
  int ix, int iy, int iz,
  int nx, int ny, int nz,
  double xm, double ym, double zm,
@@ -20,8 +19,7 @@ Block * EnzoFactory::create_block
  int num_field_blocks
  ) throw()
 {
-  return new EnzoBlock (field_descr, 
-			ix,iy,iz, 
+  return new EnzoBlock (ix,iy,iz, 
 			nx,ny,nz,
 			xm,ym,zm, 
 			xp,yp,zp, num_field_blocks);

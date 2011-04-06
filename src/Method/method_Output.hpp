@@ -66,17 +66,20 @@ public: // functions
 
   /// Write mesh-related data to disk if scheduled
   void scheduled_write
-  ( Mesh * mesh, int cycle, double time, bool root_call=true) throw();
+  (  const FieldDescr * field_descr,
+     Mesh * mesh, int cycle, double time, bool root_call=true) throw();
 
   /// Write a patch-related data to disk if scheduled
   void scheduled_write
-  ( Patch * patch, Mesh * mesh,
+  (  const FieldDescr * field_descr,
+     Patch * patch, Mesh * mesh,
     int cycle, double time, bool root_call=true) throw();
 
   /// Write a block-related to disk if scheduled
   void scheduled_write
-  ( Block * block, Patch * patch, Mesh * mesh,
-    int cycle, double time, bool root_call=true) throw();
+  (  const FieldDescr * field_descr,
+     Block * block, Patch * patch, Mesh * mesh,
+     int cycle, double time, bool root_call=true) throw();
 
   std::string expand_file_name (int cycle, double time) const throw();
 
@@ -84,19 +87,22 @@ public: // virtual functions
 
   /// Write mesh data to disk
   virtual void write 
-  ( int index, Mesh * mesh, 
+  ( const FieldDescr * field_descr,
+    int index, Mesh * mesh, 
     int cycle, double time,
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw() = 0;
 
   /// Write patch data to disk; may be called by write (Mesh)
   virtual void write 
-  ( int index, Patch * patch, Mesh * mesh,
+  ( const FieldDescr * field_descr,
+    int index, Patch * patch, Mesh * mesh,
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw() = 0;
 
   /// Write block data to disk; may be called by write (Patch)
   virtual void write 
-  ( int index, Block * block, Patch * patch, Mesh * mesh, 
+  ( const FieldDescr * field_descr,
+    int index, Block * block, Patch * patch, Mesh * mesh, 
     int cycle, double time, 
     bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw() = 0;
 

@@ -259,6 +259,7 @@ std::string Output::expand_file_name
 
 void Output::scheduled_write
 (
+ const FieldDescr * field_descr,
  Mesh * mesh, 
  int cycle, 
  double time, 
@@ -267,7 +268,7 @@ void Output::scheduled_write
 {
   if (write_this_cycle(cycle, time)) {
     for (size_t i = 0; i<field_list_.size(); i++) {
-      write (i, mesh,cycle,time,root_call); 
+      write (field_descr, i, mesh,cycle,time,root_call); 
     }
   }
 }
@@ -276,6 +277,7 @@ void Output::scheduled_write
 
 void Output::scheduled_write
 (
+ const FieldDescr * field_descr,
  Patch * patch, 
  Mesh * mesh, 
  int cycle, 
@@ -285,7 +287,7 @@ void Output::scheduled_write
 {
   if (write_this_cycle(cycle, time)) {
     for (size_t i = 0; i<field_list_.size(); i++) {
-      write (i, patch,mesh,cycle,time,root_call); 
+      write (field_descr, i, patch,mesh,cycle,time,root_call); 
     }
   }
 }
@@ -294,6 +296,7 @@ void Output::scheduled_write
 
 void Output::scheduled_write
 (
+ const FieldDescr * field_descr,
  Block * block, 
  Patch * patch, 
  Mesh * mesh, 
@@ -304,7 +307,7 @@ void Output::scheduled_write
 {
   if (write_this_cycle(cycle, time)) {
     for (size_t i = 0; i<field_list_.size(); i++) {
-      write (i, block, patch, mesh,cycle,time,root_call); 
+      write (field_descr, i, block, patch, mesh,cycle,time,root_call); 
     }
   }
 }
