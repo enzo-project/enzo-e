@@ -44,7 +44,6 @@ Patch * Factory::create_patch
 
 Block * Factory::create_block
 (
- Patch * patch,
  FieldDescr * field_descr,
  int ix, int iy, int iz,
  int nx, int ny, int nz,
@@ -53,7 +52,7 @@ Block * Factory::create_block
  int num_field_blocks
  ) throw()
 {
-  return new Block (patch, field_descr, 
+  return new Block (field_descr, 
 		    ix,iy,iz, 
 		    nx,ny,nz,
 		    xm,ym,zm,

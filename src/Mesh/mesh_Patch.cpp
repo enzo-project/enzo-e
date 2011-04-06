@@ -205,7 +205,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
     // create a new data block
 
     Block * block = factory_->create_block 
-      (this,field_descr,
+      (field_descr,
        ibx,iby,ibz,
        mbx,mby,mbz,
        xm,ym,zm,

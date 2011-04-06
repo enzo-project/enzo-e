@@ -15,15 +15,13 @@
 
 Block::Block
 (
- Patch        * patch, 
  FieldDescr   * field_descr,
  int ix, int iy, int iz,
  int nx, int ny, int nz,
  double xm, double ym, double zm,
  double xp, double yp, double zp,
  int num_field_blocks) throw ()
-  : patch_(patch),
-    field_block_()
+  : field_block_()
 
 { 
   // Initialize field_block_[]

@@ -24,8 +24,7 @@ class Block {
 public: // interface
 
   /// Initialize the Block object
-  Block(Patch * patch,
-	FieldDescr * field_descr,
+  Block(FieldDescr * field_descr,
 	int ix, int iy, int iz,
 	int nx, int ny, int nz,
 	double xm, double ym, double zm,
@@ -84,9 +83,6 @@ protected: // functions
   void copy_(const Block & block) throw();
 
 protected: // attributes
-
-  /// Parent Patch
-  Patch * patch_;
 
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;

@@ -17,7 +17,9 @@
 //----------------------------------------------------------------------
 
 
+#ifdef CONFIG_USE_CHARM
 CProxy_Main                proxy_main;
+#endif
 int                        num_simulations;
 
 
