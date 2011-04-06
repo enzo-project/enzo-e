@@ -10,38 +10,6 @@
 
 //----------------------------------------------------------------------
 
-Mesh * EnzoFactory::create_mesh
-(
- GroupProcess * group_process,
- int nx,  int ny,  int nz,
- int nbx, int nby, int nbz
- ) throw ()
-{
-  return new EnzoMesh (this,group_process,
-		       nx,ny,nz,
-		       nbx,nby,nbz);
-}
-
-//----------------------------------------------------------------------
-
-Patch * EnzoFactory::create_patch
-(
- GroupProcess * group_process,
- int nx,   int ny,  int nz,
- int nbx,  int nby, int nbz,
- double xm, double ym, double zm,
- double xp, double yp, double zp
- ) throw()
-{
-  return new EnzoPatch (this,group_process,
-			nx,ny,nz,
-			nbx,nby,nbz,
-			xm,ym,zm,
-			xp,yp,zp);
-}
-
-//----------------------------------------------------------------------
-
 Block * EnzoFactory::create_block
 (
  Patch * patch,

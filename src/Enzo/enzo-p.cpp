@@ -12,13 +12,14 @@
 //----------------------------------------------------------------------
 
 #include "test.hpp"
-
 #include "enzo.hpp"
 
 //----------------------------------------------------------------------
 
 
-int num_simulations;
+CProxy_Main                proxy_main;
+int                        num_simulations;
+
 
 PARALLEL_MAIN_BEGIN
   {
@@ -60,10 +61,13 @@ PARALLEL_MAIN_BEGIN
 
     // Read in parameters
 
+    //--------------------------------------------------
 #ifdef CONFIG_USE_CHARM
     count_ = 0;
-    mainProxy = thishandle;
+    proxy_main       = thishandle;
+    CProxy_EnzoSimulationCharm simulation_list[10];
 #endif
+    //--------------------------------------------------
 
     int index_simulation;
 
@@ -75,14 +79,15 @@ PARALLEL_MAIN_BEGIN
       
       char * parameter_file = PARALLEL_ARGV[index_simulation + 1];
 
+    //--------------------------------------------------
 #ifdef CONFIG_USE_CHARM
 
       // If using CHARM, create the EnzoSimulationCharm groups
 
-      CProxy_EnzoSimulationCharm::ckNew(parameter_file, 
-					strlen(parameter_file),
-					index_simulation);
+      simulation_list[index_simulation] = CProxy_EnzoSimulationCharm::ckNew
+	(parameter_file, strlen(parameter_file), index_simulation);
 
+    //--------------------------------------------------
 #else
 
       Simulation * simulation = 
@@ -101,9 +106,11 @@ PARALLEL_MAIN_BEGIN
       delete simulation;
       
 #endif
+    //--------------------------------------------------
 
     } // for (int index_simulation ...)
 
+    //--------------------------------------------------
 #ifndef CONFIG_USE_CHARM    
     // display footer text
 
@@ -121,11 +128,13 @@ PARALLEL_MAIN_BEGIN
 
     PARALLEL_EXIT;
 #endif
+    //--------------------------------------------------
 
   };
 
+    //--------------------------------------------------
 #ifdef CONFIG_USE_CHARM
-void enzo_exit(int index_simulation)
+void p_exit(int index_simulation)
   {
     PARALLEL_PRINTF ("Simulation %d procs %d count %d\n",
 		     index_simulation,
@@ -142,6 +151,7 @@ void enzo_exit(int index_simulation)
 private:
   int count_;
 #endif
+    //--------------------------------------------------
 
 PARALLEL_MAIN_END
 

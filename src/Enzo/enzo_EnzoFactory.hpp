@@ -13,23 +13,10 @@ class EnzoFactory : public Factory {
 
   /// @class    EnzoFactory
   /// @ingroup  Method
-  /// @brief    [\ref Method] Abstract class for creating concrete EnzoMesh, EnzoPatch, and EnzoBlock objects
+  /// @brief [\ref Method] Abstract class for creating concrete Mesh,
+  /// Patch, and Block objects
 
 public: // interface
-
-  /// Create a new Mesh  [abstract factory design pattern]
-  virtual Mesh       * create_mesh
-  (GroupProcess * group_process,
-   int nx,  int ny,  int nz,
-   int nbx, int nby, int nbz) throw ();
-
-  /// Create a new Patch  [abstract factory design pattern]
-  virtual Patch * create_patch
-  (GroupProcess * group_process,
-   int nx,   int ny,  int nz,
-   int nbx,  int nby, int nbz,
-   double xm, double ym, double zm,
-   double xp, double yp, double zp) throw();
 
   /// Create a new Block  [abstract factory design pattern]
   virtual Block * create_block

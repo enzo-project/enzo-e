@@ -48,8 +48,6 @@
 #   include "enzo_EnzoSimulationCharm.hpp"
 
 #include "enzo_EnzoBlock.hpp"
-#include "enzo_EnzoPatch.hpp"
-#include "enzo_EnzoMesh.hpp"
 
 #include "enzo_EnzoTimestep.hpp"
 #include "enzo_EnzoBoundary.hpp"

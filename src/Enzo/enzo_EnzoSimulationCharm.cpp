@@ -14,7 +14,7 @@
 
 #include "enzo.hpp"
 
-extern CProxy_Main mainProxy;
+extern CProxy_Main proxy_main;
 
 //----------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ EnzoSimulationCharm::EnzoSimulationCharm
 
   run();
 
-  mainProxy.enzo_exit(index);
+  proxy_main.p_exit(index);
 
 }
 
