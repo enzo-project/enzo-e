@@ -45,7 +45,7 @@ class Factory;
 #include "mesh_Factory.hpp"
 
 #include "mesh_ItPatch.hpp"
-#include "mesh_ItBlock.hpp"
+#include "mesh_ItBlockLocal.hpp"
 
 
 #endif /* MESH_HPP */

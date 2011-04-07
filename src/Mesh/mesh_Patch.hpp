@@ -66,7 +66,7 @@ class Patch
   bool blocks_allocated() const throw();
 
   /// Return the total number of local blocks
-  size_t num_blocks() const throw();
+  size_t num_local_blocks() const throw();
 
   /// Return the ith local block
   Block * local_block(size_t i) const throw();

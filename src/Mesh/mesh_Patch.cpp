@@ -146,7 +146,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
   // determine local block count nb
   
-  int nb = num_blocks();
+  int nb = num_local_blocks();
 
   // create local blocks
 
@@ -170,7 +170,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
     sprintf (buffer,
 	     "Blocks must evenly subdivide Patch: "
-	     "patch size = (%d %d %d)  num_blocks = (%d %d %d)",
+	     "patch size = (%d %d %d)  block count = (%d %d %d)",
 	     size_[0],size_[1],size_[2],
 	     nbx,nby,nbz);
 
@@ -245,7 +245,7 @@ bool Patch::blocks_allocated() const throw()
 
   bool allocated = true;
 
-  if (block_.size() < num_blocks()) {
+  if (block_.size() < num_local_blocks()) {
       allocated = false;
   } else {
     for (size_t i=0; i<block_.size(); i++) {
@@ -258,7 +258,7 @@ bool Patch::blocks_allocated() const throw()
 
 //----------------------------------------------------------------------
 
-size_t Patch::num_blocks() const  throw()
+size_t Patch::num_local_blocks() const  throw()
 {
   int rank = group_process_->rank();
   return layout_->local_count(rank);

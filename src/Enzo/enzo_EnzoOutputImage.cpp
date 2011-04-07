@@ -126,7 +126,7 @@ void EnzoOutputImage::write
     monitor->image_open(file_name,nxp,nyp);
   }
 
-  ItBlock it_block (patch);
+  ItBlockLocal it_block (patch);
   while (Block * block = ++it_block) {
     // Get block size
     int nxb,nyb,nzb;

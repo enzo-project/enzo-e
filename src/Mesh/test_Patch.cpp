@@ -127,13 +127,13 @@ PARALLEL_MAIN_BEGIN
 
   // Test that the allocated Blocks were initialized correctly
 
-  unit_func("num_blocks");
+  unit_func("num_local_blocks");
 
-  unit_assert(patch->num_blocks()==(size_t)nbx*nby*nbz);
+  unit_assert(patch->num_local_blocks()==(size_t)nbx*nby*nbz);
 
   // loop over local data blocks and test their existence and properties
 
-  ItBlock itBlocks (patch);
+  ItBlockLocal itBlocks (patch);
 
   Block *  block = 0;
   FieldBlock * field_block = 0;
@@ -242,8 +242,8 @@ PARALLEL_MAIN_BEGIN
 
   }
 
-  unit_func("num_blocks");
-  unit_assert(block_counter == patch->num_blocks());
+  unit_func("num_local_blocks");
+  unit_assert(block_counter == patch->num_local_blocks());
 
   unit_func("allocate_blocks");
 

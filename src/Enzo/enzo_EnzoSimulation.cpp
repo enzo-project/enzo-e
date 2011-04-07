@@ -102,7 +102,7 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
   ItPatch it_patch(mesh_);
   Patch * patch;
   while ((patch = ++it_patch)) {
-    ItBlock it_block (patch);
+    ItBlockLocal it_block (patch);
     Block * block;
     while ((block = ++it_block)) {
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);

@@ -70,7 +70,7 @@ void EnzoSimulationCharm::run() throw()
 
   while ((patch = ++it_patch)) {
 
-    ItBlock it_block(patch);
+    ItBlockLocal it_block(patch);
     Block * block;
 
     while ((block = ++it_block)) {
@@ -104,7 +104,7 @@ void EnzoSimulationCharm::run() throw()
 
     int    stop_patch  = true;
 
-    ItBlock it_block(patch);
+    ItBlockLocal it_block(patch);
     Block * block;
 
     while ((block = ++it_block)) {
@@ -144,7 +144,7 @@ void EnzoSimulationCharm::run() throw()
 
       double dt_patch = std::numeric_limits<double>::max();
 
-      ItBlock it_block(patch);
+      ItBlockLocal it_block(patch);
       Block * block;
 
       // Accumulate Block-local timesteps
@@ -192,7 +192,7 @@ void EnzoSimulationCharm::run() throw()
 
       int stop_patch = true;
 
-      ItBlock it_block(patch);
+      ItBlockLocal it_block(patch);
       Block * block;
 
       while ((block = ++it_block)) {

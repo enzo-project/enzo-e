@@ -1,28 +1,28 @@
-// $Id: mesh_ItBlock.hpp 1942 2011-01-20 00:53:45Z bordner $
+// $Id: mesh_ItBlockLocal.hpp 1942 2011-01-20 00:53:45Z bordner $
 // See LICENSE_CELLO file for license and copyright information
 
 #ifndef MESH_IT_BLOCKS_HPP
 #define MESH_IT_BLOCKS_HPP
 
-/// @file     mesh_ItBlock.hpp
+/// @file     mesh_ItBlockLocal.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Move creation of iterator to iterated object: Mesh::create_iter() (factor method)
 /// @date     Tue Feb  1 16:46:01 PST 2011
-/// @brief    [\ref Mesh] Declaration of the ItBlock iterator
+/// @brief    [\ref Mesh] Declaration of the ItBlockLocal iterator
 
-class ItBlock {
+class ItBlockLocal {
 
-  /// @class    ItBlock
+  /// @class    ItBlockLocal
   /// @ingroup  Mesh
-  /// @brief    [\ref Mesh] Iterator over Blocks in a Patch
+  /// @brief    [\ref Mesh] Iterator over local Blocks! in a Patch
 
 public: // interface
 
-  /// Create an ItBlock object
-  ItBlock (Patch * patch) throw ();
+  /// Create an ItBlockLocal object
+  ItBlockLocal (Patch * patch) throw ();
 
-  /// Delete the ItBlock object
-  ~ItBlock () throw ();
+  /// Delete the ItBlockLocal object
+  ~ItBlockLocal () throw ();
   
   /// Iterate through all local Blocks in the Patch
   Block * operator++ () throw();
