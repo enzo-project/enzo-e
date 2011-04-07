@@ -19,8 +19,7 @@ public: // interface
 
   /// Create a new Mesh [abstract factory design pattern]
   virtual Mesh * create_mesh
-  (GroupProcess * group_process,
-   int nx,  int ny,  int nz,
+  (int nx,  int ny,  int nz,
    int nbx, int nby, int nbz) throw ();
 
   /// Create a new Patch [abstract factory design pattern]

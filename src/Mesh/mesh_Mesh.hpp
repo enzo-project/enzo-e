@@ -21,7 +21,6 @@ public: // interface
 
   /// Initialize an Mesh object
   Mesh(Factory * factory,
-       GroupProcess * group_process,
        int nx,  int ny,  int nz,
        int nbx, int nby, int nbz) throw ();
 
@@ -61,10 +60,6 @@ public: // interface
   /// Insert the given Patch into the list of patches
   virtual void insert_patch(Patch *) throw();
 
-  /// Return the GroupProcess associated with the mesh
-  GroupProcess * group() const throw()
-  { return group_process_; }
-
   /// Return the factory object associated with the Mesh
   Factory * factory () const throw()
   { return factory_; }
@@ -74,9 +69,6 @@ protected: // attributes
   /// Factory for creating Simulations, Meshes, Patches and Blocks
   /// [abstract factory design pattern]
   Factory * factory_;
-
-  /// Parallel Group for distributing the Mesh across processors
-  GroupProcess * group_process_;
 
   /// List of local patchs
 

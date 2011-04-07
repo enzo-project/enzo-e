@@ -12,12 +12,11 @@
 
 Mesh * Factory::create_mesh
 (
- GroupProcess * group_process,
  int nx,  int ny,  int nz,
  int nbx, int nby, int nbz
  ) throw ()
 {
-  return new Mesh (this,group_process,
+  return new Mesh (this,
 		   nx,ny,nz,
 		   nbx,nby,nbz);
 }

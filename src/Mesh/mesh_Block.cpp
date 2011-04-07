@@ -138,6 +138,8 @@ void Block::index_patch (int * ix=0, int * iy=0, int * iz=0) const throw ()
 
 Block * Block::neighbor (axis_enum axis, face_enum face) const throw()
 {
+  INCOMPLETE("Block::neighbor");
+  return NULL;
 }
 
 //----------------------------------------------------------------------

@@ -98,14 +98,11 @@ void EnzoSimulationCharm::run() throw()
   // INITIAL STOPPING CRITERIA TEST
   //--------------------------------------------------
 
-  Reduce * reduce_mesh = mesh_->group()->create_reduce ();
-
-  int    stop_patch  = true;
+  int stop_mesh = true;
 
   while ((patch = ++it_patch)) {
 
-    Reduce * reduce_patch = patch->group()->create_reduce ();
-    int    stop_block  = true;
+    int    stop_patch  = true;
 
     ItBlock it_block(patch);
     Block * block;
@@ -117,41 +114,35 @@ void EnzoSimulationCharm::run() throw()
       int cycle_block   = enzo_block->CycleNumber;
       double time_block =  enzo_block->Time;
 
-      stop_block = stop_block && (stopping_->complete(cycle_block,time_block));
+      int stop_block = stopping_->complete(cycle_block,time_block);
+
+      stop_patch = stop_patch && stop_block;
+
     }
 
-    int stop_reduce = reduce_patch->reduce_int (stop_block, reduce_op_land);
-
-    stop_patch  = stop_patch && stop_reduce;
+    stop_mesh = stop_mesh && stop_patch;
 		      
-    delete reduce_patch;
-
   }
 
-  int stop_mesh = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
-  
   //======================================================================
   // BEGIN MAIN LOOP
   //======================================================================
 
   while (! stop_mesh) {
 
-    monitor->print("[Simulation %d] cycle %04d time %15.12f",
-		   index_, cycle_,time_);
+    monitor->print("[Simulation %d] cycle %04d time %15.12f", index_, cycle_,time_);
 
     //--------------------------------------------------
-    // Determine timestep and dump output
+    // Determine timestep
     //--------------------------------------------------
 
-    double dt_patch = std::numeric_limits<double>::max();
+    double dt_mesh = std::numeric_limits<double>::max();
 
     // Accumulate Patch-local timesteps
 
     while ((patch = ++it_patch)) {
 
-      Reduce * reduce_patch = patch->group()->create_reduce ();
-
-      double dt_block = std::numeric_limits<double>::max();
+      double dt_patch = std::numeric_limits<double>::max();
 
       ItBlock it_block(patch);
       Block * block;
@@ -162,30 +153,32 @@ void EnzoSimulationCharm::run() throw()
 
 	// Accumulate Block-local dt
 
-	dt_block = MIN(dt_block,timestep_->compute(field_descr_,block));
+	double dt_block = timestep_->compute(field_descr_,block);
 
 	// Reduce timestep to coincide with scheduled output if needed
 
-	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
-
-	double time = enzo_block->Time;
+	double time_block = static_cast <EnzoBlock*> (block)->Time;
 
 	for (size_t i=0; i<output_list_.size(); i++) {
 	  Output * output = output_list_[i];
-	  dt_block = output->update_timestep(time,dt_block);
+	  dt_block = output->update_timestep(time_block,dt_block);
 	}
+
+	// Reduce timestep to coincide with end of simulation if needed
+
+	dt_block = MIN(dt_block, (stopping_->stop_time() - time_block));
+
+	// Update patch-level timestep
+
+	dt_patch = MIN(dt_patch,dt_block);
 
       } // ( block = ++it_block )
 
-      double dt_reduce = reduce_patch->reduce_double (dt_block, reduce_op_min);
+      // Update mesh-level timestep
 
-      dt_patch = MIN(dt_patch, dt_reduce);
-
-      delete reduce_patch;
+      dt_mesh = MIN(dt_mesh, dt_patch);
 
     } // ( patch = ++it_patch )
-
-    double dt_mesh  = reduce_mesh->reduce_double(dt_patch,reduce_op_min);
 
     ASSERT("EnzoSimulation::run", "dt == 0", dt_mesh != 0.0);
 
@@ -193,15 +186,11 @@ void EnzoSimulationCharm::run() throw()
     // Apply the methods
     //--------------------------------------------------
 
-    // Initialize reductions
-
-    int  stop_patch = true;
+    stop_mesh = true;
 
     while ((patch = ++it_patch)) {
 
-      Reduce * reduce_patch = patch->group()->create_reduce ();
-
-      int stop_block  = true;
+      int stop_patch = true;
 
       ItBlock it_block(patch);
       Block * block;
@@ -216,20 +205,16 @@ void EnzoSimulationCharm::run() throw()
 
 	block->refresh_ghosts(field_descr_);
 
-	// Initialize enzo_block aliases (may me modified)
-
 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-	int &    cycle_block        = enzo_block->CycleNumber;
+	int        & cycle_block    = enzo_block->CycleNumber;
 	enzo_float & time_block     = enzo_block->Time;
 	enzo_float & dt_block       = enzo_block->dt;
 	enzo_float & old_time_block = enzo_block->OldTime;
 
 	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH
 
-	double dt_stop = (stopping_->stop_time() - dt_block);
-
-	dt_block = MIN(dt_mesh, dt_stop);
+	dt_block = dt_mesh;
 
 	// Loop through methods
 
@@ -239,7 +224,7 @@ void EnzoSimulationCharm::run() throw()
 
 	  method -> compute_block (block,time_block,dt_block);
 
-	} // method
+	}
 
 	// Update enzo_block values
 
@@ -249,19 +234,19 @@ void EnzoSimulationCharm::run() throw()
 
 	// Global cycle and time reduction
 	
-	stop_block = stop_block 
-	  &&  (stopping_->complete(cycle_block,time_block));
+	int stop_block = stopping_->complete(cycle_block,time_block);
+
+	// Update stopping criteria for patch
+
+	stop_patch = stop_patch && stop_block;
 
       } // (block = ++it_block)
 
-      int stop_reduce = reduce_patch->reduce_int (stop_block, reduce_op_land);
+      // Update stopping criteria for mesh
 
-      stop_patch  = stop_patch && stop_reduce;
+      stop_mesh = stop_mesh && stop_patch;
 
-      delete reduce_patch;
     } // (patch = ++it_patch)
-
-    stop_mesh  = reduce_mesh->reduce_int (stop_patch, reduce_op_land);
 
     cycle_ ++;
     time_ += dt_mesh;
@@ -272,16 +257,15 @@ void EnzoSimulationCharm::run() throw()
       Output * output = output_list_[i];
       output->scheduled_write(field_descr_, mesh_,cycle_,time_);
     }
-  } // ! stop
+
+  } // while (! stop_mesh)
 
   //======================================================================
   // END MAIN LOOP
   //======================================================================
 
   monitor->print("[Simulation %d] cycle %04d time %15.12f", 
-		 index_,
-		 cycle_,
-		 time_);
+		 index_, cycle_, time_);
 
   performance.stop();
 

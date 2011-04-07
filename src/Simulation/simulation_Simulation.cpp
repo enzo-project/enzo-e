@@ -270,8 +270,7 @@ void Simulation::initialize_mesh_() throw()
   //----------------------------------------------------------------------
 
   mesh_ = factory()->create_mesh 
-    (group_process_,
-     root_size[0],root_size[1],root_size[2],
+    (root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);
 
   // Domain extents

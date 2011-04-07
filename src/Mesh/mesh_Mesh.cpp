@@ -15,12 +15,10 @@
 Mesh::Mesh
 (
  Factory * factory,
- GroupProcess * group_process,
  int nx, int ny, int nz,
  int nbx, int nby, int nbz
  ) throw ()
-  : factory_(factory),
-    group_process_(group_process)
+  : factory_(factory)
     // tree_(0),
     // dimension_(0),
     // refine_(0),

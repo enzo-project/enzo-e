@@ -17,15 +17,13 @@ PARALLEL_MAIN_BEGIN
 
   PARALLEL_INIT;
 
-  GroupProcess * group_process = GroupProcess::create();
-
   unit_init();
 
   unit_class("Mesh");
 
   unit_func("Mesh");
   Factory * factory = new Factory;
-  Mesh * mesh = new Mesh (factory,group_process,12,12,12,3,3,3);
+  Mesh * mesh = new Mesh (factory,12,12,12,3,3,3);
   unit_assert(mesh != NULL);
 
   unit_finalize();
