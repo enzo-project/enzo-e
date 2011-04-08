@@ -1,0 +1,17 @@
+mainmodule test {
+
+  readonly CProxy_Main  main_proxy;
+  readonly CProxy_Hello hello_proxy;
+
+  mainchare Main {
+    entry Main(CkArgMsg *m);  // Calls Hello()
+    entry void p_print ();  // Calls Hello print()
+    entry void p_exit(); // Exit at end
+  };
+
+  group Hello {
+    entry Hello();  // Creates display string 
+    entry void p_print ();   // Prints display string
+  };
+
+};
