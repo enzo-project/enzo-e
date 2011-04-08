@@ -10,6 +10,10 @@
 /// @todo     Move "size" to Block's, since that's Field-centric
 /// @brief    [\ref Mesh] Declaration of the interface for the Patch class
 
+#ifdef CONFIG_USE_CHARM
+#   include "enzo.decl.h"
+#endif
+
 class Patch
 {
 
@@ -64,18 +68,24 @@ class Patch
 
   //--------------------------------------------------
 
-public: // virtual functions
-
   /// Allocate local blocks
-  virtual void allocate_blocks(FieldDescr * field_descr) throw() = 0;
+  void allocate_blocks(FieldDescr * field_descr) throw();
 
   /// Return the ith local block
-  virtual Block * local_block(size_t i) const throw() = 0;
+  Block * local_block(size_t i) const throw();
 
   /// Deallocate local blocks
-  virtual void deallocate_blocks() throw() = 0;
+  void deallocate_blocks() throw();
 
 protected: // attributes
+
+  /// Array of blocks ib associated with this process
+#ifdef CONFIG_USE_CHARM
+  CProxy_BlockCharm block_;
+#else
+  std::vector<Block * > block_;
+#endif
+
 
   /// Factory object for creating Blocks
   Factory * factory_;

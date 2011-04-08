@@ -56,6 +56,7 @@ Patch::Patch
 
 Patch::~Patch() throw()
 {
+  deallocate_blocks();
   delete layout_;
 }
 
@@ -146,3 +147,134 @@ size_t Patch::num_local_blocks() const  throw()
 }
 
 //======================================================================
+
+void Patch::allocate_blocks(FieldDescr * field_descr) throw()
+{
+
+#ifndef CONFIG_USE_CHARM
+  // determine local block count nb
+  int nb = num_local_blocks();
+
+  // create local blocks
+  block_.resize(nb);
+#endif
+
+  // Get number of blocks in the patch
+
+  int nbx,nby,nbz;
+  layout_->block_count (&nbx, &nby, &nbz);
+
+  // determine block size
+  int mbx = size_[0] / nbx;
+  int mby = size_[1] / nby;
+  int mbz = size_[2] / nbz;
+
+  // Check that blocks evenly subdivide patch
+  if (! ((nbx*mbx == size_[0]) &&
+	 (nby*mby == size_[1]) &&
+	 (nbz*mbz == size_[2]))) {
+
+    char buffer[ERROR_LENGTH];
+
+    sprintf (buffer,
+	     "Blocks must evenly subdivide Patch: "
+	     "patch size = (%d %d %d)  block count = (%d %d %d)",
+	     size_[0],size_[1],size_[2],
+	     nbx,nby,nbz);
+
+    ERROR("Patch::allocate_blocks",  buffer);
+      
+  }
+
+  // Determine size of each block
+  double xb = (upper_[0] - lower_[0]) / nbx;
+  double yb = (upper_[1] - lower_[1]) / nby;
+  double zb = (upper_[2] - lower_[2]) / nbz;
+
+  // CREATE AND INITIALIZE NEW DATA BLOCKS
+
+#ifdef CONFIG_USE_CHARM
+
+  TRACE("");
+
+  block_ = CProxy_BlockCharm::ckNew
+    (mbx,mby,mbz,
+     lower_[0],lower_[1],lower_[2],
+     xb,yb,zb, 1,
+     nbx,nby,nbz);
+
+  TRACE("");
+
+#else
+
+  for (int ib=0; ib<nb; ib++) {
+
+    // Get index of this block in the patch
+    int ibx,iby,ibz;
+    layout_->block_indices (ib, &ibx, &iby, &ibz);
+
+    // create a new data block
+
+    Block * block = factory_->create_block 
+      (ibx,iby,ibz,
+       mbx,mby,mbz,
+       lower_[0],lower_[1],lower_[2],
+       xb,yb,zb);
+
+    // Store the data block
+    block_[ib] = block;
+
+    // INITIALIZE FIELD BLOCK
+    // (move into Block constructor?)
+    FieldBlock * field_block = block->field_block();
+
+    // Allocate field data, including ghosts
+    
+    field_block->allocate_array(field_descr);
+    field_block->allocate_ghosts(field_descr);
+
+    // INITIALIZE PARTICLE BLOCK
+
+  }
+#endif /* ! CONFIG_USE_CHARM */
+}
+
+//----------------------------------------------------------------------
+
+void Patch::deallocate_blocks() throw()
+{
+
+#ifdef CONFIG_USE_CHARM
+
+  block_.ckDestroy();
+
+#else
+
+  for (size_t i=0; i<block_.size(); i++) {
+    delete block_[i];
+    block_[i] = 0;
+  }
+
+#endif
+}
+
+//----------------------------------------------------------------------
+
+Block * Patch::local_block(size_t i) const throw()
+{
+#ifdef CONFIG_USE_CHARM
+
+  ERROR("Patch::local_block",
+	"Function should not be called");
+
+  return 0;
+
+#else
+
+  return (i < block_.size()) ? block_[i] : 0;
+
+#endif
+}
+
+
+

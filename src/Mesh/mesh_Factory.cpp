@@ -32,11 +32,7 @@ Patch * Factory::create_patch
  double xp, double yp, double zp
  ) throw()
 {
-#ifdef CONFIG_USE_CHARM
-  return new PatchCharm 
-#else
-    return new PatchMpi
-#endif
+  return new Patch
     (this,group_process,
      nx,ny,nz,
      nbx,nby,nbz,
@@ -65,10 +61,10 @@ Block * Factory::create_block
 #else
 
   return new Block (ix,iy,iz, 
-			nx,ny,nz,
-			xm,ym,zm, 
-			hx,hy,hz, 
-			num_field_blocks);
+		    nx,ny,nz,
+		    xm,ym,zm, 
+		    hx,hy,hz, 
+		    num_field_blocks);
 #endif
 }
 
