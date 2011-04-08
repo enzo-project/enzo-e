@@ -1,17 +1,25 @@
 mainmodule test {
 
-  readonly CProxy_Main  main_proxy;
-  readonly CProxy_Hello hello_proxy;
+  readonly CProxy_Main       main_proxy;
+  readonly CProxy_HelloGroup hello_group_proxy;
+  readonly CProxy_HelloArray hello_array_proxy;
 
   mainchare Main {
-    entry Main(CkArgMsg *m);  // Calls Hello()
-    entry void p_print ();  // Calls Hello print()
+    entry Main(CkArgMsg *m);  // Calls HelloGroup()
+    entry void p_print_group ();  // Calls HelloGroup p_print()
+    entry void p_create_array();  // Creates new HelloArray
+    entry void p_print_array ();  // Calls HelloArray p_print()
     entry void p_exit(); // Exit at end
   };
 
-  group Hello {
-    entry Hello();  // Creates display string 
+  group HelloGroup {
+    entry HelloGroup();  // Creates display string 
     entry void p_print ();   // Prints display string
+  };
+
+  array [1D] HelloArray {
+    entry HelloArray(int n);  // Creates display string 
+    entry void p_print ();    // Prints display string
   };
 
 };
