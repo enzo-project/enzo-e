@@ -37,11 +37,19 @@ mainmodule enzo {
     entry void p_initial();
 
 //     void p_next();
-
 //     void p_prepare();
-
 //     void p_compute();
 
   };
+
+  array[3D] EnzoBlock : BlockCharm {
+
+    entry EnzoBlock
+      (int nx, int ny, int nz,
+       double xm, double ym, double zm,
+       double hx, double hy, double hz,
+       int num_field_blocks);
+  }
+
 };
 

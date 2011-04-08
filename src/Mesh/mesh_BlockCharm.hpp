@@ -41,7 +41,7 @@ public: // interface
 public: // charm entry functions
 
   /// Initialize block for the simulation.
-  void p_initial();
+  virtual void p_initial();
 
   /// Cycle output (Disk and Monitor), compute timestep and stopping
   // /// criteria, exit simulation if done

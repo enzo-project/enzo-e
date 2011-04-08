@@ -52,6 +52,7 @@ class EnzoBlock
 public: // interface
 
 #ifdef CONFIG_USE_CHARM
+
   EnzoBlock
   ( int nx, int ny, int nz,
     double xm, double ym, double zm,

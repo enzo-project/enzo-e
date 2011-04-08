@@ -5,6 +5,7 @@
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @todo     Create specific class for interfacing Cello code with User code
 /// @todo     Move timestep reductions into Timestep object
+/// @todo     Move all block initialization code into block constructor
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoSimulationMpi user-dependent class member functions
 
