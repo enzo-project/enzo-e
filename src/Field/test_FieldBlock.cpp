@@ -75,7 +75,7 @@ PARALLEL_MAIN_BEGIN
   Block * block = new Block (ix,iy,iz, 
 			     nx,ny,nz,
 			     -1.0,-2.0,-3.0,
-			     1.0,2.0,3.0);
+			     1.0,2.0,3.0, 1);
 
   FieldBlock * field_block = block->field_block();
 

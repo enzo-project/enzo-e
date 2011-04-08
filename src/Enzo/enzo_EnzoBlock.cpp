@@ -12,13 +12,24 @@
 
 //======================================================================
 
+#ifdef CONFIG_USE_CHARM
+
+EnzoBlock::EnzoBlock(int nx, int ny, int nz,
+		     double xm, double ym, double zm,
+		     double xp, double yp, double zp,
+		     int num_field_blocks) throw()
+
+  : BlockCharm(nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+#else
+
 EnzoBlock::EnzoBlock(int ix, int iy, int iz,
 		     int nx, int ny, int nz,
 		     double xm, double ym, double zm,
 		     double xp, double yp, double zp,
 		     int num_field_blocks) throw()
-  : Block(ix,iy,iz,nx,ny,nz,
-	  xm,ym,zm,xp,yp,zp,num_field_blocks),
+    : BlockMpi(ix,iy,iz,
+	       nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+#endif
     CycleNumber(0),
     Time(0),
     OldTime(0),
@@ -331,6 +342,8 @@ void EnzoBlock::initialize () throw()
   CellWidth[0] = hx;
   CellWidth[1] = hy;
   CellWidth[2] = hz;
+
+  printf ("%g %g %g\n",hx,hy,hz);
 
   // Initialize BaryonField[] pointers
 

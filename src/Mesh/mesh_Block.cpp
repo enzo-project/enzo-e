@@ -17,8 +17,8 @@ Block::Block
 (
  int ix, int iy, int iz,
  int nx, int ny, int nz,
- double xm, double ym, double zm,
- double xp, double yp, double zp,
+ double xm, double ym, double zm, // Patch begin
+ double xb, double yb, double zb, // Block width
  int num_field_blocks) throw ()
   : field_block_()
 
@@ -37,13 +37,13 @@ Block::Block
 
   // Initialize extent 
 
-  lower_[axis_x] = xm;
-  lower_[axis_y] = ym;
-  lower_[axis_z] = zm;
+  lower_[axis_x] = xm + ix*xb;
+  lower_[axis_y] = ym + iy*yb;
+  lower_[axis_z] = zm + iz*zb;
 
-  upper_[axis_x] = xp;
-  upper_[axis_y] = yp;
-  upper_[axis_z] = zp;
+  upper_[axis_x] = xm + (ix+1)*xb;
+  upper_[axis_y] = ym + (iy+1)*yb;
+  upper_[axis_z] = zm + (iz+1)*zb;
 }
 //----------------------------------------------------------------------
 

@@ -35,7 +35,7 @@ public: // interface
   (int ix, int iy, int iz,
    int nx, int ny, int nz,
    double xm, double ym, double zm,
-   double xp, double yp, double zp,
+   double hx, double hy, double hz,
    int num_field_blocks = 1) throw();
 
 };

@@ -66,12 +66,16 @@ void Simulation::initialize() throw()
 
   // Initialize parameters
 
+  TRACE("");
   initialize_simulation_();
 
   // Initialize simulation components
 
+  TRACE("");
   initialize_data_();
+  TRACE("");
   initialize_mesh_();
+  TRACE("");
 
   initialize_stopping_();
   initialize_timestep_();
@@ -269,10 +273,13 @@ void Simulation::initialize_mesh_() throw()
   // Create and initialize Mesh
   //----------------------------------------------------------------------
 
+  TRACE("");
+
   mesh_ = factory()->create_mesh 
     (root_size[0],root_size[1],root_size[2],
      root_blocks[0],root_blocks[1],root_blocks[2]);
 
+  TRACE("");
   // Domain extents
 
   //--------------------------------------------------
@@ -322,6 +329,9 @@ void Simulation::initialize_mesh_() throw()
   // Create and initialize root Patch in Mesh
   //----------------------------------------------------------------------
 
+  
+  TRACE("");
+
   Patch * root_patch = factory()->create_patch
     (group_process_,
      root_size[0],root_size[1],root_size[2],
@@ -329,9 +339,15 @@ void Simulation::initialize_mesh_() throw()
      lower[0], lower[1], lower[2],
      upper[0], upper[1], upper[2]);
 
+  TRACE("");
+
   mesh_->insert_patch(root_patch);
 
+  TRACE("");
+
   root_patch->allocate_blocks(field_descr_);
+
+  TRACE("");
 
   // Parallel layout of the root patch
   

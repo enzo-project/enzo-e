@@ -37,13 +37,32 @@ struct fluxes
 
 //----------------------------------------------------------------------
 
-class EnzoBlock : public Block {
+class EnzoBlock
+#ifdef CONFIG_USE_CHARM
+  : public BlockCharm
+#else
+  : public BlockMpi
+#endif
+{
 
   /// @class    EnzoBlock
   /// @ingroup  Enzo
   /// @brief    [\ref Enzo] An EnzoBlock is a Block with Enzo data
 
 public: // interface
+
+#ifdef CONFIG_USE_CHARM
+  EnzoBlock
+  ( int nx, int ny, int nz,
+    double xm, double ym, double zm,
+    double hx, double hy, double hz,
+    int num_field_blocks) throw();
+
+  EnzoBlock (CkMigrateMessage *m) {};
+
+  EnzoBlock();
+
+#else
 
   /// Initialize the EnzoBlock object
   EnzoBlock(int ix, int iy, int iz,
@@ -52,8 +71,10 @@ public: // interface
 	    double xp, double yp, double zp,
 	    int num_field_blocks) throw();
 
+#endif
+
   /// Destructor
-  ~EnzoBlock() throw();
+  virtual ~EnzoBlock() throw();
 
   /// Write attributes, e.g. to stdout for debugging
   void write(FILE *fp=stdout) throw ();

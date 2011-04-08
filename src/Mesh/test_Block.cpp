@@ -24,7 +24,7 @@ PARALLEL_MAIN_BEGIN
   Block * block = new Block (0,0,0, 
 			     3,4,5,
 			     -1.0,-2.0,-3.0,
-			     1.0,2.0,3.0);
+			     1.0,2.0,3.0,1);
 
   unit_func("Block");
   unit_assert (block != NULL);

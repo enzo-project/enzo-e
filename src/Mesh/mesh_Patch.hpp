@@ -35,9 +35,9 @@ class Patch
   /// Destructor
   virtual ~Patch() throw();
 
-  /// Copy constructor
-  Patch(const Patch & patch,
-	FieldDescr * field_descr) throw();
+  // /// Copy constructor
+  // Patch(const Patch & patch,
+  // 	FieldDescr * field_descr) throw();
 
   /// Return the size of the patch in number of grid cells
   void size (int * nx, int * ny=0, int * nz=0) const throw();
@@ -56,25 +56,24 @@ class Patch
 
   //--------------------------------------------------
 
-  /// Allocate local blocks
-  void allocate_blocks(FieldDescr * field_descr) throw();
-
-  /// Deallocate local blocks
-  void deallocate_blocks() throw();
-
-  /// Whether local blocks are allocated
-  bool blocks_allocated() const throw();
+  GroupProcess * group()  const throw()
+  { return group_process_; };
 
   /// Return the total number of local blocks
   size_t num_local_blocks() const throw();
 
-  /// Return the ith local block
-  Block * local_block(size_t i) const throw();
-
-  GroupProcess * group()  const throw()
-  { return group_process_; };
-
   //--------------------------------------------------
+
+public: // virtual functions
+
+  /// Allocate local blocks
+  virtual void allocate_blocks(FieldDescr * field_descr) throw() = 0;
+
+  /// Return the ith local block
+  virtual Block * local_block(size_t i) const throw() = 0;
+
+  /// Deallocate local blocks
+  virtual void deallocate_blocks() throw() = 0;
 
 protected: // attributes
 
@@ -99,14 +98,8 @@ protected: // attributes
   /// Upper extent of the patch
   double upper_[3];
 
-#ifdef CONFIG_USE_CHARM
-  /// CHARM chare array of Blocks
-  //  CProxy_Block block_;
-  std::vector<Block * > block_;
-#else
-  /// Array of blocks ib associated with this process
-  std::vector<Block * > block_;
-#endif
+  /// block_[] defined in PatchCharm or PatchMpi
+
 };
 
 #endif /* MESH_PATCH_HPP */

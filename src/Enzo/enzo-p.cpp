@@ -87,7 +87,7 @@ PARALLEL_MAIN_BEGIN
       // If using CHARM, create the EnzoSimulationCharm groups
 
       simulation_list[index_simulation] = CProxy_EnzoSimulationCharm::ckNew
-	(parameter_file, strlen(parameter_file), index_simulation);
+	(parameter_file, strlen(parameter_file)+1, index_simulation);
 
     //--------------------------------------------------
 #else

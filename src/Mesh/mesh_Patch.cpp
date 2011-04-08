@@ -23,8 +23,7 @@ Patch::Patch
 ) throw()
   : factory_(factory),
     group_process_(group_process),
-    layout_(new Layout (nbx,nby,nbz)),
-    block_()
+    layout_(new Layout (nbx,nby,nbz))
 {
   // Check 
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
@@ -58,18 +57,17 @@ Patch::Patch
 Patch::~Patch() throw()
 {
   delete layout_;
-  deallocate_blocks();
 }
 
 //----------------------------------------------------------------------
 
-Patch::Patch(const Patch & patch,
-	     FieldDescr *  field_descr) throw()
-{
-  deallocate_blocks();
+// Patch::Patch(const Patch & patch,
+// 	     FieldDescr *  field_descr) throw()
+// {
+//   deallocate_blocks();
 
-  allocate_blocks(field_descr);
-}
+//   allocate_blocks(field_descr);
+// }
 
 //----------------------------------------------------------------------
 
@@ -141,134 +139,10 @@ void Patch::upper(double * xp, double * yp, double * zp) const throw ()
 
 //----------------------------------------------------------------------
 
-void Patch::allocate_blocks(FieldDescr * field_descr) throw()
-{
-
-  // determine local block count nb
-  
-  int nb = num_local_blocks();
-
-  // create local blocks
-
-  block_.resize(nb);
-
-  // Get number of blocks in the patch
-  int nbx,nby,nbz;
-  layout_->block_count (&nbx, &nby, &nbz);
-
-  // determine block size
-  int mbx = size_[0] / nbx;
-  int mby = size_[1] / nby;
-  int mbz = size_[2] / nbz;
-
-  // Check that blocks evenly subdivide patch
-  if (! ((nbx*mbx == size_[0]) &&
-	 (nby*mby == size_[1]) &&
-	 (nbz*mbz == size_[2]))) {
-
-    char buffer[ERROR_LENGTH];
-
-    sprintf (buffer,
-	     "Blocks must evenly subdivide Patch: "
-	     "patch size = (%d %d %d)  block count = (%d %d %d)",
-	     size_[0],size_[1],size_[2],
-	     nbx,nby,nbz);
-
-    ERROR("Patch::allocate_blocks",  buffer);
-      
-  }
-
-  // Determine size of each block
-  double bhx = (upper_[0] - lower_[0]) / nbx;
-  double bhy = (upper_[1] - lower_[1]) / nby;
-  double bhz = (upper_[2] - lower_[2]) / nbz;
-
-  // CREATE AND INITIALIZE NEW DATA BLOCKS
-
-  for (int ib=0; ib<nb; ib++) {
-
-    // Get index of this block in the patch
-    int ibx,iby,ibz;
-    layout_->block_indices (ib, &ibx, &iby, &ibz);
-
-    // Get extents
-    double xm,xp,ym,yp,zm,zp;
-
-    xm = lower_[0] + ibx*bhx;
-    ym = lower_[1] + iby*bhy;
-    zm = lower_[2] + ibz*bhz;
-
-    xp = lower_[0] + (ibx+1)*bhx;
-    yp = lower_[1] + (iby+1)*bhy;
-    zp = lower_[2] + (ibz+1)*bhz;
-
-    // create a new data block
-
-    Block * block = factory_->create_block 
-      (ibx,iby,ibz,
-       mbx,mby,mbz,
-       xm,ym,zm,
-       xp,yp,zp);
-
-    // Store the data block
-    block_[ib] = block;
-
-    // INITIALIZE FIELD BLOCK
-    // (move into Block constructor?)
-    FieldBlock * field_block = block->field_block();
-
-    // Allocate field data, including ghosts
-    
-    field_block->allocate_array(field_descr);
-    field_block->allocate_ghosts(field_descr);
-
-    // INITIALIZE PARTICLE BLOCK
-
-  }
-}
-
-//----------------------------------------------------------------------
-
-void Patch::deallocate_blocks() throw()
-{
-  for (size_t i=0; i<block_.size(); i++) {
-    delete block_[i];
-    block_[i] = 0;
-  }
-}
-
-//----------------------------------------------------------------------
-
-bool Patch::blocks_allocated() const throw() 
-{
-  UNTESTED("Patch::blocks_allocated()");
-
-  bool allocated = true;
-
-  if (block_.size() < num_local_blocks()) {
-      allocated = false;
-  } else {
-    for (size_t i=0; i<block_.size(); i++) {
-      if (block_[i] == NULL) allocated = false;
-    }
-  }
-    
-  return allocated;
-}
-
-//----------------------------------------------------------------------
-
 size_t Patch::num_local_blocks() const  throw()
 {
   int rank = group_process_->rank();
   return layout_->local_count(rank);
-}
-
-//----------------------------------------------------------------------
-
-Block * Patch::local_block(size_t i) const throw()
-{
-  return (i < block_.size()) ? block_[i] : 0;
 }
 
 //======================================================================

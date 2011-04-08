@@ -27,6 +27,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
+#include "mesh.hpp"
 #include "performance.hpp"
 #include "method.hpp"
 #include "simulation.hpp"

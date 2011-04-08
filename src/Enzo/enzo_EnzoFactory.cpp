@@ -15,13 +15,23 @@ Block * EnzoFactory::create_block
  int ix, int iy, int iz,
  int nx, int ny, int nz,
  double xm, double ym, double zm,
- double xp, double yp, double zp,
+ double hx, double hy, double hz,
  int num_field_blocks
  ) throw()
 {
+#ifdef CONFIG_USE_CHARM
+
+  ERROR("EnzoFactor::create_block",
+	"This function should not be called");
+  return 0;
+
+#else
+
   return new EnzoBlock (ix,iy,iz, 
 			nx,ny,nz,
 			xm,ym,zm, 
-			xp,yp,zp, num_field_blocks);
+			hx,hy,hz, 
+			num_field_blocks);
+#endif
 }
 

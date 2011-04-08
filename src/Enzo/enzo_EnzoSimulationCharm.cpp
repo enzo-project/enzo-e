@@ -28,7 +28,8 @@ EnzoSimulationCharm::EnzoSimulationCharm
 
   initialize();
 
-  run();
+  TRACE("");
+  //  run();
 
   proxy_main.p_exit(index);
 

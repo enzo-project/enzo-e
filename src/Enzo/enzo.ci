@@ -12,14 +12,36 @@ mainmodule enzo {
   readonly int                         num_simulations;
 
   mainchare Main {
+
     entry Main(CkArgMsg *m);
+
     entry void p_exit(int index_simulation);
+
   };
 
   group EnzoSimulationCharm {
+
     entry EnzoSimulationCharm(const char filename[n], int n, 
 			      int index_simulation);
+
   };
 
+  array[3D] BlockCharm {
+
+    entry BlockCharm
+      (int nx, int ny, int nz,
+       double xm, double ym, double zm,
+       double hx, double hy, double hz,
+       int num_field_blocks);
+
+    entry void p_initial();
+
+//     void p_next();
+
+//     void p_prepare();
+
+//     void p_compute();
+
+  };
 };
 

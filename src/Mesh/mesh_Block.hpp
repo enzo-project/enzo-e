@@ -23,12 +23,21 @@ class Block {
 
 public: // interface
 
+#ifdef CONFIG_USE_CHARM
+  /// Initialize an empty Block
+  Block() {TRACE("Oops")};
+
+  /// Initialize a migrated Block
+  Block (CkMigrateMessage *m) {TRACE("Oops")};
+
+#endif
+
   /// Initialize the Block object
   Block(int ix, int iy, int iz,
 	int nx, int ny, int nz,
 	double xm, double ym, double zm,
-	double xp, double yp, double zp,
-	int num_field_blocks = 1) throw();
+	double hx, double hy, double hz,
+	int num_field_blocks) throw();
 
   //----------------------------------------------------------------------
   // Big Three

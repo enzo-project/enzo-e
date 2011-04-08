@@ -45,8 +45,10 @@ PARALLEL_MAIN_BEGIN
   double domain_lower[] = {0.0, 0.0, 0.0};
   double domain_upper[] = {1.0, 1.0, 1.0};
 
-  Patch * patch = new Patch
-    (new Factory, group_process,
+  Factory * factory = new Factory;
+
+  Patch * patch = factory->create_patch 
+    (group_process,
      patch_size[0],     patch_size[1],     patch_size[2],
      patch_blocking[0], patch_blocking[1], patch_blocking[2],
      domain_lower[0],   domain_lower[1],   domain_lower[2],
@@ -115,15 +117,9 @@ PARALLEL_MAIN_BEGIN
 
   // Test allocation of Patch into Blocks
 
-  unit_func("blocks_allocated");
-
-  unit_assert(patch->blocks_allocated() == false);
-  
   unit_func("allocate_blocks");
 
   patch->allocate_blocks(field_descr);
-
-  unit_assert(patch->blocks_allocated() == true);
 
   // Test that the allocated Blocks were initialized correctly
 
@@ -253,8 +249,6 @@ PARALLEL_MAIN_BEGIN
   unit_func("deallocate_blocks");
 
   patch->deallocate_blocks();
-
-  unit_assert(patch->blocks_allocated() == false);
 
   //--------------------------------------------------
 
