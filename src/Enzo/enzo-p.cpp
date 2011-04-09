@@ -38,15 +38,6 @@ PARALLEL_MAIN_BEGIN
     int rank = group_process->rank();
     int size = group_process->size();
 
-    TRACE("");
-    CProxy_EnzoBlock test = CProxy_EnzoBlock::ckNew
-      (4,4,4,
-       0.0, 0.0, 0.0,
-       1.0, 1.0, 1.0, 1,
-       2,2,2);
-    TRACE("");
-
-    
     unit_init(rank, size);
 
     Monitor * monitor = Monitor::instance();
