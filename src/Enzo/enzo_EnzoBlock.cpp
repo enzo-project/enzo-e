@@ -18,8 +18,7 @@ EnzoBlock::EnzoBlock(int nx, int ny, int nz,
 		     double xm, double ym, double zm,
 		     double xp, double yp, double zp,
 		     int num_field_blocks) throw()
-  : Block(thisIndex.x,thisIndex.y,thisIndex.z,
-	  nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+  : Block(nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
 #else
 
 EnzoBlock::EnzoBlock(int ix, int iy, int iz,
@@ -36,7 +35,6 @@ EnzoBlock::EnzoBlock(int ix, int iy, int iz,
     dt(0),
     SubgridFluxes(0)
 {
-
   int i,j;
 
   for (i=0; i<MAX_DIMENSION; i++) {

@@ -15,7 +15,12 @@ class FieldDescr;
 class FieldBlock;
 class Patch;
 
+#ifdef CONFIG_USE_CHARM
+#include "enzo.decl.h"
+class Block : public CBase_Block {
+#else
 class Block {
+#endif
 
   /// @class    Block
   /// @ingroup  Mesh
@@ -23,12 +28,22 @@ class Block {
 
 public: // interface
 
+#ifdef CONFIG_USE_CHARM
+  /// Initialize the Block chare array
+  Block
+  ( int nx, int ny, int nz,
+    double xm, double ym, double zm,
+    double hx, double hy, double hz,
+    int num_field_blocks) throw();
+#else
   /// Initialize the Block object
-  Block(int ix, int iy, int iz,
-	int nx, int ny, int nz,
-	double xm, double ym, double zm,
-	double hx, double hy, double hz,
-	int num_field_blocks) throw();
+  Block
+  ( int ix, int iy, int iz,
+    int nx, int ny, int nz,
+    double xm, double ym, double zm,
+    double hx, double hy, double hz,
+    int num_field_blocks) throw();
+#endif
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize an empty Block

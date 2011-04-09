@@ -13,11 +13,8 @@
 
 //----------------------------------------------------------------------
 
-#ifdef CONFIG_USE_CHARM
-class EnzoBlock : public Block , public CBase_EnzoBlock  
-#else
 class EnzoBlock : public Block
-#endif
+
 {
 
   /// @class    EnzoBlock
@@ -27,14 +24,14 @@ class EnzoBlock : public Block
 public: // interface
 
 #ifdef CONFIG_USE_CHARM
-  /// Initialize the BlockCharm chare
+  /// Initialize the EnzoBlock chare array
   EnzoBlock
   ( int nx, int ny, int nz,
     double xm, double ym, double zm,
     double hx, double hy, double hz,
     int num_field_blocks) throw();
 #else
-  /// Initialize the BlockCharm chare
+  /// Initialize the BlockBlock object
   EnzoBlock
   ( int ix, int iy, int iz,
     int nx, int ny, int nz,

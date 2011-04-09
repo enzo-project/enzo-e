@@ -15,7 +15,10 @@
 
 Block::Block
 (
+#ifdef CONFIG_USE_CHARM
+#else
  int ix, int iy, int iz,
+#endif
  int nx, int ny, int nz,
  double xm, double ym, double zm, // Patch begin
  double xb, double yb, double zb, // Block width
@@ -31,6 +34,12 @@ Block::Block
 
   // Initialize indices into parent patch
 
+#ifdef CONFIG_USE_CHARM
+  int ix = thisIndex.x;
+  int iy = thisIndex.y;
+  int iz = thisIndex.z;
+#endif
+
   index_[0] = ix;
   index_[1] = iy;
   index_[2] = iz;
@@ -45,6 +54,7 @@ Block::Block
   upper_[axis_y] = ym + (iy+1)*yb;
   upper_[axis_z] = zm + (iz+1)*zb;
 }
+
 //----------------------------------------------------------------------
 
 Block::~Block() throw ()
