@@ -81,7 +81,7 @@ protected: // attributes
 
   /// Array of blocks ib associated with this process
 #ifdef CONFIG_USE_CHARM
-  CProxy_BlockCharm block_;
+  CProxy_EnzoBlock block_;
 #else
   std::vector<Block * > block_;
 #endif

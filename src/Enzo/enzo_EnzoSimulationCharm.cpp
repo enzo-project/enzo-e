@@ -26,9 +26,13 @@ EnzoSimulationCharm::EnzoSimulationCharm
   : EnzoSimulation(parameter_file, new GroupProcessCharm, index)
 {
 
+  if (CkMyPe() != 0) exit(0);
+  TRACE("");
+
   initialize();
 
   TRACE("");
+
   //  run();
 
   proxy_main.p_exit(index);

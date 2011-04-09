@@ -10,6 +10,38 @@
 /// @brief    Include file for the \ref Enzo component
 
 //----------------------------------------------------------------------
+
+
+#include "enzo_defines.hpp"
+#include "enzo_typedefs.hpp"
+#include "enzo_fortran.hpp"
+
+
+#define OMEGA_TOLERANCE 1.0e-5
+ 
+#ifdef CONFIG_PRECISION_SINGLE
+#   define ETA_TOLERANCE 1.0e-5
+#endif
+#ifdef CONFIG_PRECISION_DOUBLE
+#   define ETA_TOLERANCE 1.0e-10
+#endif
+#ifdef CONFIG_PRECISION_QUADRUPLE
+#   define ETA_TOLERANCE 1.0e-20
+#endif
+
+//----------------------------------------------------------------------
+
+struct fluxes
+{
+  long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
+  long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
+  long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
+  long_int RightFluxEndGlobalIndex  [MAX_DIMENSION][MAX_DIMENSION];
+  enzo_float *LeftFluxes [MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
+  enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
+};
+
+//----------------------------------------------------------------------
 // System includes
 //----------------------------------------------------------------------
 
@@ -35,10 +67,6 @@
 //----------------------------------------------------------------------
 // Component class includes
 //----------------------------------------------------------------------
-
-#include "enzo_defines.hpp"
-#include "enzo_typedefs.hpp"
-#include "enzo_fortran.hpp"
 
 #include "enzo_EnzoNamespace.hpp"
 

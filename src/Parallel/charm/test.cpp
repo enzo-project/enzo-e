@@ -4,10 +4,25 @@
 #include "test.decl.h"
 //----------------------------------------------------------------------
 
-class HelloGroup : public Group {
+class GroupBASE { 
+public:
+  GroupBASE () { CkPrintf ("GroupBASE()\n");  };
+  virtual ~GroupBASE() {}; 
+};
+
+class ArrayBASE { 
+public:
+  ArrayBASE (int n) { CkPrintf ("ArrayBASE(%d)\n",n); };
+  ArrayBASE (CkMigrateMessage *) {};
+  ArrayBASE () {};
+  virtual ~ArrayBASE() {}; 
+};
+
+
+class HelloGroup : public Group, public GroupBASE {
 public:
   HelloGroup() ;
-  ~HelloGroup() {delete [] print_; }
+  ~HelloGroup() {delete [] print_; };
   void p_print();
 private:
   char * print_;
@@ -16,11 +31,12 @@ private:
 
 //----------------------------------------------------------------------
 
-class HelloArray : public CBase_HelloArray {
+class HelloArray : public CBase_HelloArray , public ArrayBASE {
 public:
+  HelloArray() {};
   HelloArray(int n) ;
   HelloArray (CkMigrateMessage *) {};
-  ~HelloArray() {delete [] print_; }
+  ~HelloArray() {delete [] print_; };
   void p_print();
 private:
   char * print_;

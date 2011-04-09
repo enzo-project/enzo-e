@@ -50,6 +50,12 @@ Patch::Patch
   upper_[1] = yp;
   upper_[2] = zp;
 
+  PARALLEL_PRINTF ("Patch() %s:%d\n",__FILE__,__LINE__);
+  printf ("%d %d %d\n",size_[0],size_[1],size_[2]);
+  printf ("%d %d %d\n",blocking_[0],blocking_[1],blocking_[2]);
+  printf ("%g %g %g\n",lower_[0],lower_[1],lower_[2]);
+  printf ("%g %g %g\n",upper_[0],upper_[1],upper_[2]);
+
 }
 
 //----------------------------------------------------------------------
@@ -100,18 +106,18 @@ Patch::~Patch() throw()
 
 void Patch::size (int * npx, int * npy, int * npz) const throw()
 {
-  if (npx) *npx = size_[0];
-  if (npy) *npy = size_[1];
-  if (npz) *npz = size_[2];
+  if (npx) (*npx) = size_[0];
+  if (npy) (*npy) = size_[1];
+  if (npz) (*npz) = size_[2];
 }
 
 //----------------------------------------------------------------------
 
 void Patch::blocking (int * nbx, int * nby, int * nbz) const throw()
 {
-  *nbx = blocking_[0];
-  *nby = blocking_[1];
-  *nbz = blocking_[2];
+  if (nbx) (*nbx) = blocking_[0];
+  if (nby) (*nby) = blocking_[1];
+  if (nbz) (*nbz) = blocking_[2];
 }
 
 //----------------------------------------------------------------------
@@ -125,17 +131,17 @@ Layout * Patch::layout () const throw()
   
 void Patch::lower(double * xm, double * ym, double * zm) const throw ()
 {
-  if (xm) *xm = lower_[0];
-  if (ym) *ym = lower_[1];
-  if (zm) *zm = lower_[2];
+  if (xm) (*xm) = lower_[0];
+  if (ym) (*ym) = lower_[1];
+  if (zm) (*zm) = lower_[2];
 }
 
 //----------------------------------------------------------------------
 void Patch::upper(double * xp, double * yp, double * zp) const throw ()
 {
-  if (xp) *xp = upper_[0];
-  if (yp) *yp = upper_[1];
-  if (zp) *zp = upper_[2];
+  if (xp) (*xp) = upper_[0];
+  if (yp) (*yp) = upper_[1];
+  if (zp) (*zp) = upper_[2];
 }
 
 //----------------------------------------------------------------------
@@ -197,7 +203,9 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
   TRACE("");
 
-  block_ = CProxy_BlockCharm::ckNew
+  PARALLEL_PRINTF ("%d %d %d  %g %g %g  %g %g %g  %d %d %d\n",
+	    mbx,mby,mbz,lower_[0],lower_[1],lower_[2],xb,yb,zb,nbx,nby,nbz);
+  block_ = CProxy_EnzoBlock::ckNew
     (mbx,mby,mbz,
      lower_[0],lower_[1],lower_[2],
      xb,yb,zb, 1,

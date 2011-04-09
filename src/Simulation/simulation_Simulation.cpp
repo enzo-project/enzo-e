@@ -298,12 +298,12 @@ void Simulation::initialize_mesh_() throw()
   double lower[3];
   double upper[3];
 
-  for (int i=0; i<dimension_; i++) {
+  for (int i=0; i<3; i++) {
     lower[i] = parameters_->list_value_scalar(i, "Domain:lower", 0.0);
     upper[i] = parameters_->list_value_scalar(i, "Domain:upper", 0.0);
     ASSERT ("Simulation::initialize_simulation_",
-	    "Domain:lower must be strictly lower than Domain:upper",
-	    lower[i] < upper[i]);
+	    "Domain:lower may not be greater than Domain:upper",
+	    lower[i] <= upper[i]);
   }
 
   mesh_->set_lower(lower[0], lower[1], lower[2]);

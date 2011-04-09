@@ -18,8 +18,8 @@ EnzoBlock::EnzoBlock(int nx, int ny, int nz,
 		     double xm, double ym, double zm,
 		     double xp, double yp, double zp,
 		     int num_field_blocks) throw()
-
-  : BlockCharm(nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+  : Block(thisIndex.x,thisIndex.y,thisIndex.z,
+	  nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
 #else
 
 EnzoBlock::EnzoBlock(int ix, int iy, int iz,
@@ -27,8 +27,8 @@ EnzoBlock::EnzoBlock(int ix, int iy, int iz,
 		     double xm, double ym, double zm,
 		     double xp, double yp, double zp,
 		     int num_field_blocks) throw()
-    : BlockMpi(ix,iy,iz,
-	       nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
+    : Block(ix,iy,iz,
+	    nx,ny,nz,xm,ym,zm,xp,yp,zp,num_field_blocks),
 #endif
     CycleNumber(0),
     Time(0),
@@ -65,9 +65,23 @@ EnzoBlock::EnzoBlock(int ix, int iy, int iz,
 
 EnzoBlock::~EnzoBlock() throw ()
 {
+  PARALLEL_PRINTF ("%s:%d Oops\n",__FILE__,__LINE__);
 }
 
-//----------------------------------------------------------------------
+#ifdef CONFIG_USE_CHARM
+
+//======================================================================
+// CHARM ENTRY METHODS
+//======================================================================
+
+void EnzoBlock::p_initial()
+{
+  PARALLEL_PRINTF ("p_initial %d\n",CkMyPe());
+}
+
+#endif
+
+//======================================================================
 
 void EnzoBlock::write(FILE * fp) throw ()
 {

@@ -1,0 +1,22 @@
+mainmodule debug {
+
+  readonly CProxy_Main                 proxy_main;
+
+  mainchare Main {
+
+    entry Main(CkArgMsg *m);
+
+  };
+
+  array[3D] EnzoBlock {
+
+    entry EnzoBlock
+      (int nx, int ny, int nz,
+       double xm, double ym, double zm,
+       double hx, double hy, double hz,
+       int num_field_blocks);
+
+  };
+
+};
+

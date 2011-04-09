@@ -40,12 +40,8 @@
 
 class Factory;
 #include "mesh_Block.hpp"
-#   include "mesh_BlockCharm.hpp"
-#   include "mesh_BlockMpi.hpp"
 
 #include "mesh_Patch.hpp"
-// #   include "mesh_PatchCharm.hpp"
-// #   include "mesh_PatchMpi.hpp"
 #include "mesh_Mesh.hpp"
 #include "mesh_Factory.hpp"
 

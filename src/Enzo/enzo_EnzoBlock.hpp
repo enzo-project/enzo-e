@@ -11,37 +11,12 @@
 /// @todo     Dynamically allocate arrays
 /// @brief    [\ref Enzo] Declaration of the EnzoBlock class
 
-#define OMEGA_TOLERANCE 1.0e-5
- 
-#ifdef CONFIG_PRECISION_SINGLE
-#   define ETA_TOLERANCE 1.0e-5
-#endif
-#ifdef CONFIG_PRECISION_DOUBLE
-#   define ETA_TOLERANCE 1.0e-10
-#endif
-#ifdef CONFIG_PRECISION_QUADRUPLE
-#   define ETA_TOLERANCE 1.0e-20
-#endif
-
 //----------------------------------------------------------------------
 
-struct fluxes
-{
-  long_int LeftFluxStartGlobalIndex [MAX_DIMENSION][MAX_DIMENSION];
-  long_int LeftFluxEndGlobalIndex   [MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxStartGlobalIndex[MAX_DIMENSION][MAX_DIMENSION];
-  long_int RightFluxEndGlobalIndex  [MAX_DIMENSION][MAX_DIMENSION];
-  enzo_float *LeftFluxes [MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-  enzo_float *RightFluxes[MAX_NUMBER_OF_BARYON_FIELDS][MAX_DIMENSION];
-};
-
-//----------------------------------------------------------------------
-
-class EnzoBlock
 #ifdef CONFIG_USE_CHARM
-  : public BlockCharm
+class EnzoBlock : public Block , public CBase_EnzoBlock  
 #else
-  : public BlockMpi
+class EnzoBlock : public Block
 #endif
 {
 
@@ -52,27 +27,43 @@ class EnzoBlock
 public: // interface
 
 #ifdef CONFIG_USE_CHARM
-
+  /// Initialize the BlockCharm chare
   EnzoBlock
   ( int nx, int ny, int nz,
     double xm, double ym, double zm,
     double hx, double hy, double hz,
     int num_field_blocks) throw();
-
-  EnzoBlock (CkMigrateMessage *m) {};
-
-  EnzoBlock();
-
 #else
+  /// Initialize the BlockCharm chare
+  EnzoBlock
+  ( int ix, int iy, int iz,
+    int nx, int ny, int nz,
+    double xm, double ym, double zm,
+    double hx, double hy, double hz,
+    int num_field_blocks) throw();
+#endif
 
-  /// Initialize the EnzoBlock object
-  EnzoBlock(int ix, int iy, int iz,
-	    int nx, int ny, int nz,
-	    double xm, double ym, double zm,
-	    double xp, double yp, double zp,
-	    int num_field_blocks) throw();
+
+#ifdef CONFIG_USE_CHARM
+  /// Initialize a migrated Block
+  EnzoBlock (CkMigrateMessage *m) {TRACE("Oops")};
+
+  /// Initialize an empty Block
+  EnzoBlock() {TRACE("Oops")};
+
+  //==================================================
+  /// Initialize block for the simulation.
+  void p_initial();
+  //==================================================
 
 #endif
+
+  // /// Initialize the EnzoBlock object
+  // EnzoBlock(int ix, int iy, int iz,
+  // 	    int nx, int ny, int nz,
+  // 	    double xm, double ym, double zm,
+  // 	    double xp, double yp, double zp,
+  // 	    int num_field_blocks) throw();
 
   /// Destructor
   virtual ~EnzoBlock() throw();
