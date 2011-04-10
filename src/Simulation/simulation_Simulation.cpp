@@ -78,11 +78,17 @@ void Simulation::initialize() throw()
   TRACE("");
 
   initialize_stopping_();
+  TRACE("");
   initialize_timestep_();
+  TRACE("");
   initialize_initial_();
+  TRACE("");
   initialize_boundary_();
+  TRACE("");
   initialize_output_();
+  TRACE("");
   initialize_method_();
+  TRACE("");
 
 }
 

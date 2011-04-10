@@ -102,7 +102,7 @@ public: // interface
 
 public: // functions (TEMPORARILY PUBLIC)
 
-  void initialize () throw();
+  void initialize (int cycle_start, double time_start) throw();
 
 public: // attributes (YIKES!)
 

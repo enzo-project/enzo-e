@@ -313,8 +313,13 @@ void EnzoBlock::write(FILE * fp) throw ()
 }
 
 //----------------------------------------------------------------------
-void EnzoBlock::initialize () throw()
+void EnzoBlock::initialize (int cycle_start, double time_start) throw()
 {
+
+  CycleNumber = cycle_start;
+  Time        = time_start;
+  OldTime     = time_start;
+
   double xm,ym,zm;
 
   lower(&xm,&ym,&zm);
@@ -362,6 +367,7 @@ void EnzoBlock::initialize () throw()
   for (int field = 0; field < enzo::NumberOfBaryonFields; field++) {
     BaryonField[field] = (enzo_float *)field_block_[0]->field_values(field);
   }
+
 }
 
 //----------------------------------------------------------------------

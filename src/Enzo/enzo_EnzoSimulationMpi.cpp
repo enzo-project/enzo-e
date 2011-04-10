@@ -57,12 +57,9 @@ void EnzoSimulationMpi::run() throw()
 
       initial_->compute(field_descr_,block);
 
-      // Initialize Block attributes 
-      // (REQUIRED HERE INSTEAD OF CONSTRUCTOR SINCE REQUIRES extents_[])
-
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-      enzo_block->initialize();
+      enzo_block->initialize(cycle_, time_);
 
     }
   }

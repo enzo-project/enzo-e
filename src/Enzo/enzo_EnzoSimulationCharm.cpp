@@ -26,12 +26,7 @@ EnzoSimulationCharm::EnzoSimulationCharm
   : EnzoSimulation(parameter_file, new GroupProcessCharm, index)
 {
 
-  if (CkMyPe() != 0) exit(0);
-  TRACE("");
-
   initialize();
-
-  TRACE("");
 
   //  run();
 
@@ -82,12 +77,9 @@ void EnzoSimulationCharm::run() throw()
 
       initial_->compute(field_descr_,block);
 
-      // Initialize Block attributes 
-      // (REQUIRED HERE INSTEAD OF CONSTRUCTOR SINCE REQUIRES extents_[])
-
       EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-      enzo_block->initialize();
+      enzo_block->initialize(cycle_, time_);
 
     }
   }

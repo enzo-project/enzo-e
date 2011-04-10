@@ -210,23 +210,26 @@ private: // functions
   /// Return the full parameter name Group:group:group:...:parameter
   std::string parameter_name_(std::string parameter)
   {
-    std::string parameter_name = "";
-    for (int i=0; current_group_[i] != 0 && i<MAX_GROUP_DEPTH; i++) {
-      parameter_name = parameter_name + current_group_[i] + ":";
+    bool is_full_parameter = (parameter.find(":") != std::string::npos);
+
+    std::string parameter_name;
+
+    if (! is_full_parameter) {
+      parameter_name = "";
+      for (int i=0; current_group_[i] != 0 && i<MAX_GROUP_DEPTH; i++) {
+	parameter_name = parameter_name + current_group_[i] + ":";
+      }
+      parameter_name = parameter_name + parameter;
+    } else {
+      parameter_name = parameter;
     }
-    
-    return (parameter_name + parameter);
+    return parameter_name;
   }
 
   /// Return the Param pointer for the specified parameter
   Param * parameter_ (std::string parameter)
   {
-    bool is_full_parameter = (parameter.find(":") != std::string::npos);
-
-    if (! is_full_parameter) {
-      parameter = parameter_name_(parameter);
-    }
-    return parameter_map_[parameter];
+    return parameter_map_[parameter_name_(parameter)];
   };
 
   /// Return the Param pointer for the specified list parameter element

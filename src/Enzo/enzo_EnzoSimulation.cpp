@@ -95,23 +95,6 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
   cycle_  = parameters_->value_integer ("Initial:cycle",0);
   time_   = parameters_->value_scalar  ("Initial:time",0.0);
 
-  ASSERT("EnzoSimulation::create_initial_",
-	 "create_mesh_ mush be called first",
-	 mesh_ != NULL);
-
-  ItPatch it_patch(mesh_);
-  Patch * patch;
-  while ((patch = ++it_patch)) {
-    ItBlockLocal it_block (patch);
-    Block * block;
-    while ((block = ++it_block)) {
-      EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
-      enzo_block->CycleNumber = cycle_;
-      enzo_block->Time        = time_;
-      enzo_block->OldTime     = time_;
-    }
-  }
-
   return initial;
 }
 
