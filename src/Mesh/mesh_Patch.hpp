@@ -66,12 +66,18 @@ class Patch
   /// Return the total number of local blocks
   size_t num_local_blocks() const throw();
 
+
   //--------------------------------------------------
 
   /// Allocate local blocks
   void allocate_blocks(FieldDescr * field_descr) throw();
 
 #ifdef CONFIG_USE_CHARM
+  /// Return the number of blocks
+  size_t num_blocks() const throw()
+  { return blocking_[0]*blocking_[1]*blocking_[2] ; };
+
+  /// Return the block CHARM++ chare array
   CProxy_EnzoBlock block() throw()
   { return block_; }
 #endif

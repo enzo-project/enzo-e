@@ -94,7 +94,7 @@ void EnzoBlock::p_initial()
 
   initialize(simulation->cycle(), simulation->time());
 
-  proxy_main.p_exit(0);
+  proxy_main.p_exit(simulation->mesh()->patch(0)->num_blocks());
 }
 
 #endif

@@ -128,10 +128,10 @@ PARALLEL_MAIN_BEGIN
 
     //--------------------------------------------------
 #ifdef CONFIG_USE_CHARM
-void p_exit(int index_simulation)
+void p_exit(int count)
   {
     count_++;
-    if (count_ == CkNumPes()) {
+    if (count_ == count) {
       Monitor::instance()->print ("END ENZO-P");
       unit_finalize();
       PARALLEL_EXIT;
