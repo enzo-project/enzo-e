@@ -85,6 +85,12 @@ public: // interface
   /// Return the factory object
   Factory * factory () const throw();
 
+  /// Return the current cycle number
+  int cycle() const throw() {return cycle_;};
+
+  /// Return the current time
+  double time() const throw() {return time_;};
+
 public: // virtual functions
 
   /// initialize the Simulation given a parameter file
@@ -192,6 +198,9 @@ protected: // attributes
 
   /// Index of this simulation in an ensemble
   int index_;
+
+  /// Performance object
+  Performance performance_;
 
   /// AMR mesh
   Mesh * mesh_;

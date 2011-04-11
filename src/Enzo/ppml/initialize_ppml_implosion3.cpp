@@ -10,8 +10,6 @@
 
 #include "enzo.hpp"
 
-const bool debug = false;
- 
 void EnzoBlock::initialize_ppml_implosion3 (int size_param)
 
 {
@@ -131,8 +129,6 @@ void EnzoBlock::initialize_ppml_implosion3 (int size_param)
   enzo_float hx = CellWidth[0];
   enzo_float hy = CellWidth[1];
   enzo_float hz = CellWidth[2];
-
-  if (debug) printf ("Size = %d %d %d\n",ndx,ndy,ndz);
 
   // Clear all fields
 

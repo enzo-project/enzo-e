@@ -37,6 +37,7 @@ public: // functions
 
   /// Run the simulation
   virtual void run() throw();
+
 };
 
 #endif /* CONFIG_USE_CHARM */

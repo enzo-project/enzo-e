@@ -93,10 +93,6 @@ void FieldFaces::load
       load_precision_((float * )      (array_face),
 		      (const float * )(field_face),
 		      nd3,md3,ng3,axis,face);
-      // for (int i=0; i<ng3[axis]*nd3[(axis+1)%3]*nd3[(axis+2)%3]; i++) {
-      // 	printf ("%g ",((float *)(array_face))[i]);
-      // }
-      // printf ("\n");
       break;
     case precision_double:
       load_precision_((double * )      (array_face),
@@ -152,7 +148,7 @@ void FieldFaces::copy
     int iay=(axis+2) % 3;
     // Compute array length
     int n = ng3[axis]*nd3[iax]*nd3[iay];
-    // printf ("C axis %d face %d: ",axis,face);
+
     switch (precision) {
     case precision_single:
       copy_precision_(      (float * )(array_ghost),
@@ -295,9 +291,7 @@ void FieldFaces::allocate_
 
       index_faces_ [index_upper] = array_index;  array_index += face_bytes;
       index_ghosts_[index_upper] = array_index;  array_index += face_bytes;
-      // printf ("axis %d  dims %d %d %d  ghosts %d %d %d face_bytes = %d\n",
-      // 	      axis, axis_length[0], axis_length[1], axis_length[2],
-      // 	      ghost_count[0], ghost_count[1], ghost_count[2], face_bytes);
+
     }
   }
 
@@ -346,12 +340,6 @@ void FieldFaces::load_precision_
       }
     }
   }
-  // printf ("L axis %d face %d: ",axis,face);
-  // for (int i=0; i<ng3[axis]*nd3[iax]*nd3[iay]; i++) {
-  //   printf ("%g ",((float *)(array_face))[i]);
-  // }
-  // printf ("\n");
-  //  printf ("%d %d max 1 \n",max,ng3[axis]*md3[iax]*md3[iay]);
 }
 
 //----------------------------------------------------------------------
@@ -365,18 +353,9 @@ void FieldFaces::copy_precision_
  int       n
 ) throw()
 {
-  // for (int i=0; i<n; i++) {
-  //   printf ("%g ",((float *)(array_face))[i]);
-  // }
-  // printf ("\n");
   for (int i = 0; i<n; i++) {
     array_ghost[i] = array_face[i];
-    
   }
-  // for (int i=0; i<n; i++) {
-  //   printf ("%g ",((float *)(array_ghost))[i]);
-  // }
-  // printf ("\n");
 }
 
 //----------------------------------------------------------------------
@@ -398,11 +377,6 @@ void FieldFaces::store_precision_
 
   int iz0 = (face == face_lower) ? 0 : nd3[axis]-ng3[axis];
 
-  // printf ("S axis %d face %d ",axis,face);
-  // for (int i=0; i<ng3[axis]*nd3[iax]*nd3[iay]; i++) {
-  //   printf ("%g ",((float *)(array_ghost))[i]);
-  // }
-  // printf ("\n");
   int max=0;
   for (int iz = 0; iz <ng3[axis]; iz++)  { // 0 <= iz < ng3[axis]
     for (int iy=0; iy < nd3[iay]; iy++) {
@@ -415,5 +389,4 @@ void FieldFaces::store_precision_
       }
     }
   }
-  //  printf ("%d %d max 2 \n",max,ng3[axis]*md3[iax]*md3[iay]);
 }

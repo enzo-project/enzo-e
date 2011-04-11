@@ -50,12 +50,6 @@ Patch::Patch
   upper_[1] = yp;
   upper_[2] = zp;
 
-  PARALLEL_PRINTF ("Patch() %s:%d\n",__FILE__,__LINE__);
-  printf ("%d %d %d\n",size_[0],size_[1],size_[2]);
-  printf ("%d %d %d\n",blocking_[0],blocking_[1],blocking_[2]);
-  printf ("%g %g %g\n",lower_[0],lower_[1],lower_[2]);
-  printf ("%g %g %g\n",upper_[0],upper_[1],upper_[2]);
-
 }
 
 //----------------------------------------------------------------------
@@ -201,17 +195,11 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
 #ifdef CONFIG_USE_CHARM
 
-  TRACE("");
-
-  PARALLEL_PRINTF ("%d %d %d  %g %g %g  %g %g %g  %d %d %d\n",
-	    mbx,mby,mbz,lower_[0],lower_[1],lower_[2],xb,yb,zb,nbx,nby,nbz);
   block_ = CProxy_EnzoBlock::ckNew
     (mbx,mby,mbz,
      lower_[0],lower_[1],lower_[2],
      xb,yb,zb, 1,
      nbx,nby,nbz);
-
-  TRACE("");
 
 #else
 

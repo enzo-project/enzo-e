@@ -66,15 +66,35 @@ EnzoBlock::~EnzoBlock() throw ()
   PARALLEL_PRINTF ("%s:%d Oops\n",__FILE__,__LINE__);
 }
 
-#ifdef CONFIG_USE_CHARM
-
 //======================================================================
 // CHARM ENTRY METHODS
 //======================================================================
 
+#ifdef CONFIG_USE_CHARM
+
+extern CProxy_EnzoSimulationCharm proxy_simulation;
+extern CProxy_Main proxy_main;
+
 void EnzoBlock::p_initial()
 {
-  PARALLEL_PRINTF ("p_initial %d\n",CkMyPe());
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Initial * initial = simulation->initial();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  // field_block allocation Was in mesh_Patch() for MPI
+
+  for (size_t i=0; i<field_block_.size(); i++) {
+    field_block_[0]->allocate_array(field_descr);
+    field_block_[0]->allocate_ghosts(field_descr);
+  }
+
+  // Apply the initial conditions 
+
+  initial->compute(field_descr,this);
+
+  initialize(simulation->cycle(), simulation->time());
+
+  proxy_main.p_exit(0);
 }
 
 #endif
@@ -359,8 +379,6 @@ void EnzoBlock::initialize (int cycle_start, double time_start) throw()
   CellWidth[0] = hx;
   CellWidth[1] = hy;
   CellWidth[2] = hz;
-
-  printf ("%g %g %g\n",hx,hy,hz);
 
   // Initialize BaryonField[] pointers
 

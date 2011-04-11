@@ -19,9 +19,8 @@
 
 #ifdef CONFIG_USE_CHARM
 CProxy_Main                proxy_main;
+CProxy_EnzoSimulationCharm proxy_simulation;
 #endif
-int                        num_simulations;
-
 
 PARALLEL_MAIN_BEGIN
   {
@@ -52,7 +51,7 @@ PARALLEL_MAIN_BEGIN
 
     // open parameter file, calling usage() if invalid
 
-    if (PARALLEL_ARGC < 2) {
+    if (PARALLEL_ARGC != 2) {
       // Print usage if wrong number of arguments
       char buffer [ERROR_LENGTH];
       sprintf (buffer,
@@ -67,50 +66,43 @@ PARALLEL_MAIN_BEGIN
 #ifdef CONFIG_USE_CHARM
     count_ = 0;
     proxy_main       = thishandle;
-    CProxy_EnzoSimulationCharm simulation_list[10];
 #endif
     //--------------------------------------------------
 
-    int index_simulation;
-
-    num_simulations = PARALLEL_ARGC - 1;
-
-    for (index_simulation = 0; 
-	 index_simulation < num_simulations; 
-	 index_simulation++) {
-      
-      char * parameter_file = PARALLEL_ARGV[index_simulation + 1];
+     
+    char * parameter_file = PARALLEL_ARGV[1];
 
     //--------------------------------------------------
+
 #ifdef CONFIG_USE_CHARM
 
-      // If using CHARM, create the EnzoSimulationCharm groups
+    // If using CHARM, create the EnzoSimulationCharm groups
 
-      simulation_list[index_simulation] = CProxy_EnzoSimulationCharm::ckNew
-	(parameter_file, strlen(parameter_file)+1, index_simulation);
+    proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
+      (parameter_file, strlen(parameter_file)+1, 0);
 
     //--------------------------------------------------
-#else
 
-      Simulation * simulation = 
-	new EnzoSimulationMpi (parameter_file,group_process,index_simulation);
+#else /* ! CONFIG_USE_CHARM */
 
-      ASSERT ("main()","Failed to create Simulation object",simulation != 0);
+    Simulation * simulation = 
+      new EnzoSimulationMpi (parameter_file,group_process, 0);
 
-      // Initialize the simulation
+    ASSERT ("main()","Failed to create Simulation object",simulation != 0);
 
-      simulation->initialize();
+    // Initialize the simulation
 
-      // Run the simulation
+    simulation->initialize();
 
-      simulation->run();
+    // Run the simulation
 
-      delete simulation;
+    simulation->run();
+
+    // Delete the simulation
+
+    delete simulation;
       
 #endif
-    //--------------------------------------------------
-
-    } // for (int index_simulation ...)
 
     //--------------------------------------------------
 #ifndef CONFIG_USE_CHARM    
@@ -138,12 +130,8 @@ PARALLEL_MAIN_BEGIN
 #ifdef CONFIG_USE_CHARM
 void p_exit(int index_simulation)
   {
-    PARALLEL_PRINTF ("Simulation %d procs %d count %d\n",
-		     index_simulation,
-		     CkNumPes(),
-		     count_);
     count_++;
-    if (count_ == num_simulations * CkNumPes()) {
+    if (count_ == CkNumPes()) {
       Monitor::instance()->print ("END ENZO-P");
       unit_finalize();
       PARALLEL_EXIT;

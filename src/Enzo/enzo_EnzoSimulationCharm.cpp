@@ -28,9 +28,7 @@ EnzoSimulationCharm::EnzoSimulationCharm
 
   initialize();
 
-  //  run();
-
-  proxy_main.p_exit(index);
+  if (CkMyPe() == 0) run();
 
 }
 
@@ -55,218 +53,205 @@ EnzoSimulationCharm::~EnzoSimulationCharm() throw()
 void EnzoSimulationCharm::run() throw()
 {
   
-  Monitor * monitor = Monitor::instance();
-
-  Performance performance;
-
-  performance.start();
-  
-  //--------------------------------------------------
-  // INITIALIZE FIELDS
-  //--------------------------------------------------
+  performance_.start();
 
   ItPatch it_patch(mesh_);
+
   Patch * patch;
 
-  while ((patch = ++it_patch)) {
+  while (( patch = ++it_patch )) {
 
-    ItBlockLocal it_block(patch);
-    Block * block;
+    patch->block().p_initial();
 
-    while ((block = ++it_block)) {
-
-      initial_->compute(field_descr_,block);
-
-      EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
-
-      enzo_block->initialize(cycle_, time_);
-
-    }
   }
 
-  // Perform any scheduled output
+  // // EnzoBlock::p_initial();
 
-  for (size_t i=0; i<output_list_.size(); i++) {
-    Output * output = output_list_[i];
-    output->scheduled_write(field_descr_, mesh_,cycle_,time_);
-  }
+  // // Perform any scheduled output
 
-  //--------------------------------------------------
-  // INITIAL STOPPING CRITERIA TEST
-  //--------------------------------------------------
+  // for (size_t i=0; i<output_list_.size(); i++) {
+  //   Output * output = output_list_[i];
+  //   output->scheduled_write(field_descr_, mesh_,cycle_,time_);
+  // }
 
-  int stop_mesh = true;
+  // //--------------------------------------------------
+  // // INITIAL STOPPING CRITERIA TEST
+  // //--------------------------------------------------
 
-  while ((patch = ++it_patch)) {
+  // int stop_mesh = true;
 
-    int    stop_patch  = true;
+  // while ((patch = ++it_patch)) {
 
-    ItBlockLocal it_block(patch);
-    Block * block;
+  //   int    stop_patch  = true;
 
-    while ((block = ++it_block)) {
+  //   ItBlockLocal it_block(patch);
+  //   Block * block;
 
-      EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
+  //   while ((block = ++it_block)) {
 
-      int cycle_block   = enzo_block->CycleNumber;
-      double time_block =  enzo_block->Time;
+  //     EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-      int stop_block = stopping_->complete(cycle_block,time_block);
+  //     int cycle_block   = enzo_block->CycleNumber;
+  //     double time_block =  enzo_block->Time;
 
-      stop_patch = stop_patch && stop_block;
+  //     int stop_block = stopping_->complete(cycle_block,time_block);
 
-    }
+  //     stop_patch = stop_patch && stop_block;
 
-    stop_mesh = stop_mesh && stop_patch;
+  //   }
+
+  //   stop_mesh = stop_mesh && stop_patch;
 		      
-  }
+  // }
 
-  //======================================================================
-  // BEGIN MAIN LOOP
-  //======================================================================
+  // //======================================================================
+  // // BEGIN MAIN LOOP
+  // //======================================================================
 
-  while (! stop_mesh) {
+  // Monitor * monitor = Monitor::instance();
 
-    monitor->print("[Simulation %d] cycle %04d time %15.12f", index_, cycle_,time_);
+  // while (! stop_mesh) {
 
-    //--------------------------------------------------
-    // Determine timestep
-    //--------------------------------------------------
+  //   monitor->print("[Simulation %d] cycle %04d time %15.12f", index_, cycle_,time_);
 
-    double dt_mesh = std::numeric_limits<double>::max();
+  //   //--------------------------------------------------
+  //   // Determine timestep
+  //   //--------------------------------------------------
 
-    // Accumulate Patch-local timesteps
+  //   double dt_mesh = std::numeric_limits<double>::max();
 
-    while ((patch = ++it_patch)) {
+  //   // Accumulate Patch-local timesteps
 
-      double dt_patch = std::numeric_limits<double>::max();
+  //   while ((patch = ++it_patch)) {
 
-      ItBlockLocal it_block(patch);
-      Block * block;
+  //     double dt_patch = std::numeric_limits<double>::max();
 
-      // Accumulate Block-local timesteps
+  //     ItBlockLocal it_block(patch);
+  //     Block * block;
 
-      while ((block = ++it_block)) {
+  //     // Accumulate Block-local timesteps
 
-	// Accumulate Block-local dt
+  //     while ((block = ++it_block)) {
 
-	double dt_block = timestep_->compute(field_descr_,block);
+  // 	// Accumulate Block-local dt
 
-	// Reduce timestep to coincide with scheduled output if needed
+  // 	double dt_block = timestep_->compute(field_descr_,block);
 
-	double time_block = static_cast <EnzoBlock*> (block)->Time;
+  // 	// Reduce timestep to coincide with scheduled output if needed
 
-	for (size_t i=0; i<output_list_.size(); i++) {
-	  Output * output = output_list_[i];
-	  dt_block = output->update_timestep(time_block,dt_block);
-	}
+  // 	double time_block = static_cast <EnzoBlock*> (block)->Time;
 
-	// Reduce timestep to coincide with end of simulation if needed
+  // 	for (size_t i=0; i<output_list_.size(); i++) {
+  // 	  Output * output = output_list_[i];
+  // 	  dt_block = output->update_timestep(time_block,dt_block);
+  // 	}
 
-	dt_block = MIN(dt_block, (stopping_->stop_time() - time_block));
+  // 	// Reduce timestep to coincide with end of simulation if needed
 
-	// Update patch-level timestep
+  // 	dt_block = MIN(dt_block, (stopping_->stop_time() - time_block));
 
-	dt_patch = MIN(dt_patch,dt_block);
+  // 	// Update patch-level timestep
 
-      } // ( block = ++it_block )
+  // 	dt_patch = MIN(dt_patch,dt_block);
 
-      // Update mesh-level timestep
+  //     } // ( block = ++it_block )
 
-      dt_mesh = MIN(dt_mesh, dt_patch);
+  //     // Update mesh-level timestep
 
-    } // ( patch = ++it_patch )
+  //     dt_mesh = MIN(dt_mesh, dt_patch);
 
-    ASSERT("EnzoSimulation::run", "dt == 0", dt_mesh != 0.0);
+  //   } // ( patch = ++it_patch )
 
-    //--------------------------------------------------
-    // Apply the methods
-    //--------------------------------------------------
+  //   ASSERT("EnzoSimulation::run", "dt == 0", dt_mesh != 0.0);
 
-    stop_mesh = true;
+  //   //--------------------------------------------------
+  //   // Apply the methods
+  //   //--------------------------------------------------
 
-    while ((patch = ++it_patch)) {
+  //   stop_mesh = true;
 
-      int stop_patch = true;
+  //   while ((patch = ++it_patch)) {
 
-      ItBlockLocal it_block(patch);
-      Block * block;
+  //     int stop_patch = true;
 
-      while ((block = ++it_block)) {
+  //     ItBlockLocal it_block(patch);
+  //     Block * block;
 
-	// Enforce boundary conditions
+  //     while ((block = ++it_block)) {
 
-	boundary_->enforce(field_descr_,block);
+  // 	// Enforce boundary conditions
 
-	// Refresh ghosts
+  // 	boundary_->enforce(field_descr_,block);
 
-	block->refresh_ghosts(field_descr_);
+  // 	// Refresh ghosts
 
-	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
+  // 	block->refresh_ghosts(field_descr_);
 
-	int        & cycle_block    = enzo_block->CycleNumber;
-	enzo_float & time_block     = enzo_block->Time;
-	enzo_float & dt_block       = enzo_block->dt;
-	enzo_float & old_time_block = enzo_block->OldTime;
+  // 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
 
-	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH
+  // 	int        & cycle_block    = enzo_block->CycleNumber;
+  // 	enzo_float & time_block     = enzo_block->Time;
+  // 	enzo_float & dt_block       = enzo_block->dt;
+  // 	enzo_float & old_time_block = enzo_block->OldTime;
 
-	dt_block = dt_mesh;
+  // 	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH
 
-	// Loop through methods
+  // 	dt_block = dt_mesh;
 
-	for (size_t i = 0; i < method_list_.size(); i++) {
+  // 	// Loop through methods
 
-	  Method * method = method_list_[i];
+  // 	for (size_t i = 0; i < method_list_.size(); i++) {
 
-	  method -> compute_block (block,time_block,dt_block);
+  // 	  Method * method = method_list_[i];
 
-	}
+  // 	  method -> compute_block (block,time_block,dt_block);
 
-	// Update enzo_block values
+  // 	}
 
-	old_time_block  = time_block;
-	time_block     += dt_block;
-	cycle_block    += 1;
+  // 	// Update enzo_block values
 
-	// Global cycle and time reduction
+  // 	old_time_block  = time_block;
+  // 	time_block     += dt_block;
+  // 	cycle_block    += 1;
+
+  // 	// Global cycle and time reduction
 	
-	int stop_block = stopping_->complete(cycle_block,time_block);
+  // 	int stop_block = stopping_->complete(cycle_block,time_block);
 
-	// Update stopping criteria for patch
+  // 	// Update stopping criteria for patch
 
-	stop_patch = stop_patch && stop_block;
+  // 	stop_patch = stop_patch && stop_block;
 
-      } // (block = ++it_block)
+  //     } // (block = ++it_block)
 
-      // Update stopping criteria for mesh
+  //     // Update stopping criteria for mesh
 
-      stop_mesh = stop_mesh && stop_patch;
+  //     stop_mesh = stop_mesh && stop_patch;
 
-    } // (patch = ++it_patch)
+  //   } // (patch = ++it_patch)
 
-    cycle_ ++;
-    time_ += dt_mesh;
+  //   cycle_ ++;
+  //   time_ += dt_mesh;
 
-    // Perform any scheduled output
+  //   // Perform any scheduled output
 
-    for (size_t i=0; i<output_list_.size(); i++) {
-      Output * output = output_list_[i];
-      output->scheduled_write(field_descr_, mesh_,cycle_,time_);
-    }
+  //   for (size_t i=0; i<output_list_.size(); i++) {
+  //     Output * output = output_list_[i];
+  //     output->scheduled_write(field_descr_, mesh_,cycle_,time_);
+  //   }
 
-  } // while (! stop_mesh)
+  // } // while (! stop_mesh)
 
-  //======================================================================
-  // END MAIN LOOP
-  //======================================================================
+  // //======================================================================
+  // // END MAIN LOOP
+  // //======================================================================
 
-  monitor->print("[Simulation %d] cycle %04d time %15.12f", 
-		 index_, cycle_, time_);
+  // monitor->print("[Simulation %d] cycle %04d time %15.12f", 
+  // 		 index_, cycle_, time_);
 
-  performance.stop();
+  // performance_.stop();
 
-  performance.print();
+  // performance_.print();
 
 
 }

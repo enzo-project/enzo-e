@@ -71,7 +71,12 @@ class Patch
   /// Allocate local blocks
   void allocate_blocks(FieldDescr * field_descr) throw();
 
-  /// Return the ith local block
+#ifdef CONFIG_USE_CHARM
+  CProxy_EnzoBlock block() throw()
+  { return block_; }
+#endif
+    
+/// Return the ith local block
   Block * local_block(size_t i) const throw();
 
   /// Deallocate local blocks

@@ -9,7 +9,7 @@
 mainmodule enzo {
 
   readonly CProxy_Main                 proxy_main;
-  readonly int                         num_simulations;
+  readonly CProxy_EnzoSimulationCharm  proxy_simulation;
 
   mainchare Main {
 

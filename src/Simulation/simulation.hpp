@@ -20,6 +20,7 @@
 // Component dependencies
 //----------------------------------------------------------------------
 
+#include "performance.hpp"
 #include "mesh.hpp"
 #include "method.hpp"
 #include "parameters.hpp"

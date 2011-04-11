@@ -36,7 +36,6 @@ use_valgrind = 0
 
 arch = ARGUMENTS.get('arch','unknown')
 type = ARGUMENTS.get('type','unknown')
-print "type 1 = ",type
 prec = ARGUMENTS.get('prec','unknown')
 
 # environment variable (default if scons command line not provided)

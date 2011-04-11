@@ -10,8 +10,6 @@
 
 #include "enzo.hpp"
 
-const bool debug = false;
- 
 void EnzoBlock::initialize_implosion3 (int size_param)
 
 {
@@ -112,15 +110,6 @@ void EnzoBlock::initialize_implosion3 (int size_param)
   enzo_float hx = CellWidth[0];
   enzo_float hy = CellWidth[1];
   enzo_float hz = CellWidth[2];
-
-  if (debug) printf ("Size = %d %d %d\n",ndx,ndy,ndz);
-  if (debug) printf ("%g  %g %g  %g %g\n",
-	  Gamma, 
-	  pressure_out,density_out,
-	  pressure_in,density_in);
-  if (debug) printf ("total energy: %g %g\n",
-	  pressure_out / ((Gamma - 1.0)*density_out),
-	  pressure_in / ((Gamma - 1.0)*density_in));
 
   for (int iz = GridStartIndex[2]; iz<=GridEndIndex[2]; iz++) {
 
