@@ -16,6 +16,7 @@
 
 //----------------------------------------------------------------------
 
+#define MAX_OUTPUT 10 /* Maximum number of outputs going on at a time */
 
 #ifdef CONFIG_USE_CHARM
 CProxy_Main                proxy_main;
@@ -23,125 +24,174 @@ CProxy_EnzoSimulationCharm proxy_simulation;
 #endif
 
 PARALLEL_MAIN_BEGIN
-  {
+{
 
-    // initialize parallel
+  // initialize parallel
 
-    PARALLEL_INIT;
+  PARALLEL_INIT;
 
-    // Create global parallel process group object
-    GroupProcess * group_process = GroupProcess::create();
+  // Create global parallel process group object
+  GroupProcess * group_process = GroupProcess::create();
 
-    // initialize unit testing
+  // initialize unit testing
 
-    int rank = group_process->rank();
-    int size = group_process->size();
+  int rank = group_process->rank();
+  int size = group_process->size();
 
-    unit_init(rank, size);
+  unit_init(rank, size);
 
-    Monitor * monitor = Monitor::instance();
+  TRACE("");
+  monitor_ = new Monitor;
+  TRACE("");
 
-    monitor -> set_active (group_process->is_root());
+  monitor_->set_active (true);
+  TRACE("");
 
-    // display header text
+  // display header text
+  TRACE("");
 
-    monitor->header();
+  monitor_->header();
+  TRACE("");
 
-    monitor->print ("BEGIN ENZO-P");
+  monitor_->print ("BEGIN ENZO-P");
 
-    // open parameter file, calling usage() if invalid
+  TRACE("");
+  // open parameter file, calling usage() if invalid
 
-    if (PARALLEL_ARGC != 2) {
-      // Print usage if wrong number of arguments
-      char buffer [ERROR_LENGTH];
-      sprintf (buffer,
-	       "\nUsage: %s %s <parameter-file>\n\n", 
-	       PARALLEL_RUN,PARALLEL_ARGV[0]);
-      ERROR("main",buffer);
-    }
+  if (PARALLEL_ARGC != 2) {
+    // Print usage if wrong number of arguments
+    char buffer [ERROR_LENGTH];
+    sprintf (buffer,
+	     "\nUsage: %s %s <parameter-file>\n\n", 
+	     PARALLEL_RUN,PARALLEL_ARGV[0]);
+    ERROR("main",buffer);
+  }
 
-    // Read in parameters
+  TRACE("");
+  // Read in parameters
 
-    //--------------------------------------------------
+  //--------------------------------------------------
 #ifdef CONFIG_USE_CHARM
-    count_ = 0;
-    proxy_main       = thishandle;
+  count_exit_        = 0;
+  proxy_main     = thishandle;
+  for (int i=0; i<MAX_OUTPUT; i++) {
+    count_output_open_[i]  = 0;
+    count_output_close_[i] = 0;
+  }
 #endif
-    //--------------------------------------------------
+  //--------------------------------------------------
+  TRACE("");
 
      
-    char * parameter_file = PARALLEL_ARGV[1];
+  char * parameter_file = PARALLEL_ARGV[1];
 
-    //--------------------------------------------------
+  //--------------------------------------------------
 
 #ifdef CONFIG_USE_CHARM
 
-    // If using CHARM, create the EnzoSimulationCharm groups
+  // If using CHARM, create the EnzoSimulationCharm groups
 
-    proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
-      (parameter_file, strlen(parameter_file)+1, 0);
+  TRACE("");
+  proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
+    (parameter_file, strlen(parameter_file)+1, 0);
 
-    //--------------------------------------------------
+  TRACE("");
+  //--------------------------------------------------
 
 #else /* ! CONFIG_USE_CHARM */
 
-    Simulation * simulation = 
-      new EnzoSimulationMpi (parameter_file,group_process, 0);
+  Simulation * simulation = 
+    new EnzoSimulationMpi (parameter_file,group_process, 0);
 
-    ASSERT ("main()","Failed to create Simulation object",simulation != 0);
+  ASSERT ("main()","Failed to create Simulation object",simulation != 0);
 
-    // Initialize the simulation
+  // Initialize the simulation
 
-    simulation->initialize();
+  simulation->initialize();
 
-    // Run the simulation
+  // Run the simulation
 
-    simulation->run();
+  simulation->run();
 
-    // Delete the simulation
+  // Delete the simulation
 
-    delete simulation;
+  delete simulation;
       
 #endif
 
-    //--------------------------------------------------
+  //--------------------------------------------------
 #ifndef CONFIG_USE_CHARM    
-    // display footer text
+  // display footer text
 
-    Monitor::instance()->print ("END ENZO-P");
+  monitor_->print ("END ENZO-P");
 
-    // clean up
+  // clean up
 
-    delete group_process;
+  delete group_process;
 
-    // finalize unit testing
+  // finalize unit testing
 
-    unit_finalize();
+  unit_finalize();
 
-    // exit
+  // exit
 
-    PARALLEL_EXIT;
+  PARALLEL_EXIT;
 #endif
-    //--------------------------------------------------
+  //--------------------------------------------------
 
-  };
+};
 
-    //--------------------------------------------------
+//--------------------------------------------------
 #ifdef CONFIG_USE_CHARM
+
+//----------------------------------------------------------------------
+
 void p_exit(int count)
-  {
-    count_++;
-    if (count_ == count) {
-      Monitor::instance()->print ("END ENZO-P");
-      unit_finalize();
-      PARALLEL_EXIT;
-    }
-  };
+{
+  count_exit_++;
+  if (count_exit_ >= count) {
+    count_exit_ = 0;
+    monitor_->print ("END ENZO-P");
+    unit_finalize();
+    PARALLEL_EXIT;
+  }
+};
+
+//----------------------------------------------------------------------
+
+//  --- Open output file and and initialize output data ---
+
+void p_output_open(int count, int index, int cycle, double time)
+{
+  count_output_open_[index]++;
+  if (count_output_open_[index] == count) {
+    count_output_open_[index] = 0;
+    // Request blocks to contribute index'th output data
+    proxy_simulation.p_output(index,cycle,time);
+    
+  }
+};
+
+//----------------------------------------------------------------------
+
+//  --- Accumulate block output contributions and write output to disk ---
+
+void p_output_close(int count)
+{
+};
+
+//----------------------------------------------------------------------
 
 private:
-  int count_;
+
+int count_exit_;
+int count_output_open_[MAX_OUTPUT];
+int count_output_close_[MAX_OUTPUT];
+
+Monitor * monitor_;
+
 #endif
-    //--------------------------------------------------
+//--------------------------------------------------
 
 PARALLEL_MAIN_END
 

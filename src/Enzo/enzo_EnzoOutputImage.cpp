@@ -39,9 +39,9 @@ void EnzoOutputImage::write
   ) const throw()
 {
 
-  if (mesh->dimension() != 2) {
+  if (mesh->dimension() >= 2) {
     WARNING("EnzoOutputImage::write",
-	    "EnzoOutputImage only supports 2D problems");
+	    "EnzoOutputImage only supports 2D and 3D problems");
   }
 
   Monitor * monitor = Monitor::instance();

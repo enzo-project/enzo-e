@@ -21,6 +21,8 @@
 //----------------------------------------------------------------------
 
 #include "performance.hpp"
+#include "monitor.hpp"
+
 #include "mesh.hpp"
 #include "method.hpp"
 #include "parameters.hpp"

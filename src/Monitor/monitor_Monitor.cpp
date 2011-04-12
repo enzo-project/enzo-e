@@ -13,6 +13,26 @@
 
 Monitor * Monitor::instance_ = 0; // (singleton design pattern)
 
+// #ifdef CONFIG_USE_CHARM
+// #include "enzo.hpp"
+// extern CProxy_EnzoSimulationCharm proxy_simulation;
+// #endif
+
+//----------------------------------------------------------------------
+
+// Monitor * Monitor::instance()
+// { 
+// #ifdef CONFIG_USE_CHARM
+//   printf ("proxy_simulation = %d\n",proxy_simulation);
+
+//   return proxy_simulation.ckLocalBranch()->monitor();
+// #else
+//   if ( instance_ == NULL ) 
+//     instance_ = new Monitor;
+//   return instance_;
+// #endif
+// };
+
 //----------------------------------------------------------------------
 
 void Monitor::header () const

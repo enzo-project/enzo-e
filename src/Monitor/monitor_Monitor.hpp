@@ -48,8 +48,38 @@ class Monitor {
 
 public: // interface
 
+  /// Private constructor of the Monitor object [singleton design pattern]
+  Monitor() 
+    : active_(true),
+      image_(0),
+      image_size_x_(0),
+      image_size_y_(0),
+      png_(0)
+  { 
+    map_r_.resize(2);
+    map_g_.resize(2);
+    map_b_.resize(2);
+    map_r_[0] = 0.0;
+    map_g_[0] = 0.0;
+    map_b_[0] = 0.0;
+    map_r_[1] = 1.0;
+    map_g_[1] = 1.0;
+    map_b_[1] = 1.0;
+  }
+
+  /// Private destructor  of the Monitor object [singleton design pattern]
+  ~Monitor()
+  {
+    delete instance_;
+    instance_ = 0;
+  }
+
+//----------------------------------------------------------------------
+
+  /// Return an instance of a Monitor object
   static Monitor * instance()
-  { if ( instance_ == NULL ) 
+  { 
+    if ( instance_ == NULL ) 
       instance_ = new Monitor;
     return instance_;
   };
@@ -101,31 +131,6 @@ public: // interface
 
 private: // functions
 
-  /// Private constructor of the Monitor object [singleton design pattern]
-  Monitor() 
-    : active_(true),
-      image_(0),
-      image_size_x_(0),
-      image_size_y_(0),
-      png_(0)
-  { 
-    map_r_.resize(2);
-    map_g_.resize(2);
-    map_b_.resize(2);
-    map_r_[0] = 0.0;
-    map_g_[0] = 0.0;
-    map_b_[0] = 0.0;
-    map_r_[1] = 1.0;
-    map_g_[1] = 1.0;
-    map_b_[1] = 1.0;
-  }
-
-  /// Private destructor  of the Monitor object [singleton design pattern]
-  ~Monitor()
-  {
-    delete instance_;
-    instance_ = 0;
-  }
 
 private: // attributes
 
@@ -204,44 +209,49 @@ private: // attributes
 
        int index_image = index_image_x + image_size_x_*index_image_y;
 
-       double & value = image_ [index_image];
+       double & pixel_value = image_ [index_image];
 
        // reduction axis
 
        // initialize reduction
        switch (op_reduce) {
        case reduce_min: 
-	 value = std::numeric_limits<double>::max();
+	 pixel_value = std::numeric_limits<double>::max();
 	 break;
        case reduce_max: 
-	 value = std::numeric_limits<double>::min();
+	 pixel_value = std::numeric_limits<double>::min();
 	 break;
        case reduce_avg: 
        case reduce_sum: 
        default:         
-	 value = 0; break;
+	 pixel_value = 0; break;
        }
 
        // reduce along axis
        for (int iz=0; iz<npz; iz++) {
 	
-	 int index_array = nd3[iax]*index_array_x + nd3[iay]*index_array_y + nd3[iaz]*iz;
+	 int index_array = 
+	   nd3[iax]*index_array_x + 
+	   nd3[iay]*index_array_y + 
+	   nd3[iaz]*iz;
+
 	 // reduce along iaz axis
+
 	 switch (op_reduce) {
 	 case reduce_min: 
-	   value = MIN(array[index_array],(T)(value)); 
+	   pixel_value = MIN(array[index_array],(T)(pixel_value)); 
 	   break;
 	 case reduce_max: 
-	   value = MAX(array[index_array],(T)(value)); 
+	   pixel_value = MAX(array[index_array],(T)(pixel_value)); 
 	   break;
 	 case reduce_avg: 
 	 case reduce_sum: 
-	   value += array[index_array]; break;
+	   pixel_value += array[index_array]; break;
 	 default:
 	   break;
 	 }
        }
-       if (op_reduce == reduce_avg) value /= npz;
+       if (op_reduce == reduce_avg) pixel_value /= npz;
      }
    }
  }

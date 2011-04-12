@@ -51,6 +51,14 @@ public: // interface
   //==================================================
   /// Initialize block for the simulation.
   void p_initial();
+  /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
+  void prepare();
+  /// Accumulate block-local contributions to an output dump
+  void p_output();
+  /// Refresh ghost zones
+  //  void refresh();
+  /// Boundary and Method
+  //  void compute();
   //==================================================
 
 #endif

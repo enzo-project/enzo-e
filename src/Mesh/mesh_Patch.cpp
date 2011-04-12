@@ -195,11 +195,14 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
 
 #ifdef CONFIG_USE_CHARM
 
-  block_ = CProxy_EnzoBlock::ckNew
-    (mbx,mby,mbz,
-     lower_[0],lower_[1],lower_[2],
-     xb,yb,zb, 1,
-     nbx,nby,nbz);
+  if (CkMyPe() == 0) {
+    TRACE("Allocating block array");
+    block_ = CProxy_EnzoBlock::ckNew
+      (mbx,mby,mbz,
+       lower_[0],lower_[1],lower_[2],
+       xb,yb,zb, 1,
+       nbx,nby,nbz);
+  }
 
 #else
 

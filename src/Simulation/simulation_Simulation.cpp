@@ -25,6 +25,8 @@ Simulation::Simulation
     cycle_(0),
     time_(0.0),
     index_(index),
+    performance_(0),
+    monitor_(0),
     mesh_(0),
     field_descr_(0),
     stopping_(0),
@@ -34,6 +36,11 @@ Simulation::Simulation
     output_list_(),
     method_list_()
 {
+  TRACE("");
+  performance_ = new Performance;
+  TRACE("");
+  monitor_     = new Monitor;
+  TRACE("");
 }
 
 //----------------------------------------------------------------------
@@ -108,6 +115,20 @@ Mesh * Simulation::mesh() const throw()
 FieldDescr * Simulation::field_descr() const throw()
 {
   return field_descr_;
+}
+
+//----------------------------------------------------------------------
+
+Performance * Simulation::performance() const throw()
+{
+  return performance_;
+}
+
+//----------------------------------------------------------------------
+
+Monitor * Simulation::monitor() const throw()
+{
+  return monitor_;
 }
 
 //----------------------------------------------------------------------
@@ -645,6 +666,10 @@ void Simulation::initialize_method_() throw()
 
 void Simulation::deallocate_() throw()
 {
+  delete performance_;
+  performance_ = 0;
+  delete monitor_;
+  monitor_ = 0;
   delete mesh_;
   mesh_ = 0;
   delete field_descr_;

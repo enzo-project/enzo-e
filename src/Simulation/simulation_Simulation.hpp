@@ -58,6 +58,12 @@ public: // interface
   /// Return the field descriptor
   FieldDescr * field_descr() const throw();
 
+  /// Return the performance object
+  Performance * performance() const throw();
+
+  /// Return the monitor object
+  Monitor * monitor() const throw();
+
   /// Return the stopping object, if any
   Stopping *  stopping() const throw();
   
@@ -90,6 +96,9 @@ public: // interface
 
   /// Return the current time
   double time() const throw() {return time_;};
+
+  /// Return the Simulation index
+  int index() const throw() {return index_; };
 
 public: // virtual functions
 
@@ -200,7 +209,10 @@ protected: // attributes
   int index_;
 
   /// Performance object
-  Performance performance_;
+  Performance * performance_;
+
+  /// Monitor object
+  Monitor * monitor_;
 
   /// AMR mesh
   Mesh * mesh_;

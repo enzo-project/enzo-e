@@ -77,7 +77,7 @@ extern CProxy_Main proxy_main;
 
 void EnzoBlock::p_initial()
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  EnzoSimulationCharm * simulation = proxy_simulation.ckLocalBranch();
   Initial * initial = simulation->initial();
   FieldDescr * field_descr = simulation->field_descr();
 
@@ -94,7 +94,38 @@ void EnzoBlock::p_initial()
 
   initialize(simulation->cycle(), simulation->time());
 
-  proxy_main.p_exit(simulation->mesh()->patch(0)->num_blocks());
+  // Prepare for the first cycle: perform Output, Monitor, Stopping
+  // [reduction], and Timestep [reduction]
+
+  simulation->p_prepare();
+
+}
+
+  //--------------------------------------------------
+  // Stopping
+  //--------------------------------------------------
+
+  //     int cycle_block   = enzo_block->CycleNumber;
+  //     double time_block =  enzo_block->Time;
+
+  //     int stop_block = stopping_->complete(cycle_block,time_block);
+
+  //--------------------------------------------------
+  // Timestep
+  //--------------------------------------------------
+
+  // 	double dt_block = timestep_->compute(field_descr_,block);
+
+  //--------------------------------------------------
+  // Refresh
+  //--------------------------------------------------
+
+// }
+
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_output ()
+{
 }
 
 #endif

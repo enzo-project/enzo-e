@@ -73,7 +73,7 @@ public: // functions
   void scheduled_write
   (  const FieldDescr * field_descr,
      Patch * patch, Mesh * mesh,
-    int cycle, double time, bool root_call=true) throw();
+     int cycle, double time, bool root_call=true) throw();
 
   /// Write a block-related to disk if scheduled
   void scheduled_write

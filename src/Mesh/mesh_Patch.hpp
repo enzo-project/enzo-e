@@ -82,7 +82,7 @@ class Patch
   { return block_; }
 #endif
     
-/// Return the ith local block
+  /// Return the ith local block
   Block * local_block(size_t i) const throw();
 
   /// Deallocate local blocks

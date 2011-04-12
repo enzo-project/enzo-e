@@ -38,6 +38,17 @@ public: // functions
   /// Run the simulation
   virtual void run() throw();
 
+  //==================================================
+
+  /// Apply Output and Monitor before each cycle
+  void p_prepare() throw();
+
+  /// Request all Mesh blocks to send output to main::p_output_close()
+  void p_output(int index, int cycle, double time) throw();
+
+private:
+  int count_prepare_;
+
 };
 
 #endif /* CONFIG_USE_CHARM */
