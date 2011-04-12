@@ -16,23 +16,29 @@
 
 //----------------------------------------------------------------------
 
-Parameters::Parameters() 
+Parameters::Parameters(Monitor * monitor) 
   throw()
   : current_group_depth_(0),
     parameter_map_(),
-    parameter_tree_(new ParamNode("Parameters"))
+    parameter_tree_(new ParamNode("Parameters")),
+    monitor_(monitor)
 {
+  if (! monitor_) monitor_ = Monitor::instance();
+
   for (int i=0; i<MAX_GROUP_DEPTH; i++) current_group_[i] = 0;
 }
 
 //----------------------------------------------------------------------
 
-Parameters::Parameters(const char * file_name ) 
+Parameters::Parameters(const char * file_name,
+		       Monitor * monitor) 
   throw()
   : current_group_depth_(0),
     parameter_map_(),
-    parameter_tree_(new ParamNode("Parameters"))
+    parameter_tree_(new ParamNode("Parameters")),
+    monitor_(monitor)
 {
+  if (! monitor_) monitor_ = Monitor::instance();
   for (int i=0; i<MAX_GROUP_DEPTH; i++) current_group_[i] = 0;
   read(file_name);
 }
@@ -99,7 +105,7 @@ void Parameters::read ( const char * file_name )
 
   fclose(file_pointer);
 
-  Monitor::instance()->print ("[Parameter] read in %s",file_name);
+  monitor_->print ("[Parameter] read in %s",file_name);
 }
 
 //----------------------------------------------------------------------
@@ -677,8 +683,7 @@ void Parameters::monitor_access_
     sprintf (index_string,"[%d]",index);
   }
 
-  Monitor * monitor = Monitor::instance();
-  monitor->print("[Parameter] accessed %s%s %s",
+  monitor_->print("[Parameter] accessed %s%s %s",
 		 parameter_name_(parameter).c_str(),
 		 index_string,
 		 value.c_str());
@@ -694,8 +699,7 @@ void Parameters::monitor_write_ (std::string parameter) throw()
 	   parameter_name_(parameter).c_str(),
 	   param ? param->value_to_string().c_str() : "[undefined]");
 
-  Monitor * monitor = Monitor::instance();
-  monitor->print(buffer);
+  monitor_->print(buffer);
 }
 
 //----------------------------------------------------------------------

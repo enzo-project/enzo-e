@@ -32,10 +32,10 @@ public: // interface
 
 
   /// Create an empty Parameters object
-  Parameters() throw();
+  Parameters(Monitor * monitor = 0) throw();
 
   /// Create a new Parameters object and read parameters from the given file
-  Parameters(const char * file_name) throw();
+  Parameters(const char * file_name, Monitor * monitor = 0) throw();
 
   /// Copy constructor
   Parameters(const Parameters & parameters) throw();
@@ -258,6 +258,9 @@ private: // attributes
 
   std::map<std::string, Param *>  parameter_map_;
   ParamNode                     * parameter_tree_;
+
+  /// Monitor object for parameters
+  Monitor * monitor_; 
 
 };
 

@@ -15,15 +15,20 @@ mainmodule enzo {
 
     entry Main(CkArgMsg *m);
 
-    entry void p_exit   (int count);
+    entry void p_exit   (int count_blocks);
 
     //  --- Open image file and and initialize image data ---
 
-    entry void p_output_open (int count, int index, int cycle, double time);
+    entry void p_output_open (int count_blocks, int index, int cycle, double time);
 
     //  --- Accumulate block output contributions and write output to disk ---
 
-    entry void p_output_close (int count);
+    entry void p_output_close (int count_blocks);
+
+    //  --- Monitor, Output, Timestep, Stopping ---
+    //  ---  [forward from Block to Simulation]
+
+    entry void p_prepare (int count_blocks);
 
   };
 
@@ -32,7 +37,7 @@ mainmodule enzo {
     entry EnzoSimulationCharm(const char filename[n], int n, 
 			      int index_simulation);
 
-    //  --- Monitor, Output ---
+    //  --- Monitor, Output, Timestep, Stopping ---
 
     entry void p_prepare ();
 

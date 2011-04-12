@@ -97,7 +97,8 @@ void EnzoBlock::p_initial()
   // Prepare for the first cycle: perform Output, Monitor, Stopping
   // [reduction], and Timestep [reduction]
 
-  simulation->p_prepare();
+  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
+  proxy_main.p_prepare(num_blocks);
 
 }
 

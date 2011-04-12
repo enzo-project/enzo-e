@@ -18,7 +18,7 @@ Simulation::Simulation
  GroupProcess * group_process,
  int            index
 )
-  : parameters_(new Parameters(parameter_file_name)),
+  : parameters_(0),
     factory_(factory),
     group_process_(group_process),
     dimension_(0),
@@ -36,11 +36,9 @@ Simulation::Simulation
     output_list_(),
     method_list_()
 {
-  TRACE("");
   performance_ = new Performance;
-  TRACE("");
   monitor_     = new Monitor;
-  TRACE("");
+  parameters_  = new Parameters(parameter_file_name,monitor_);
 }
 
 //----------------------------------------------------------------------

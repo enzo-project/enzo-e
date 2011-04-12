@@ -72,8 +72,11 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 #ifdef CONFIG_USE_CHARM
-  count_exit_        = 0;
   proxy_main     = thishandle;
+
+  // Clear counts
+  count_exit_        = 0;
+  count_prepare_        = 0;
   for (int i=0; i<MAX_OUTPUT; i++) {
     count_output_open_[i]  = 0;
     count_output_close_[i] = 0;
@@ -159,6 +162,19 @@ void p_exit(int count)
 
 //----------------------------------------------------------------------
 
+void p_prepare(int count)
+{
+  count_prepare_++;
+  if (count_prepare_ >= count) {
+    count_prepare_ = 0;
+    TRACE("main::p_prepare()");
+    unit_finalize();
+    PARALLEL_EXIT;
+  }
+};
+
+//----------------------------------------------------------------------
+
 //  --- Open output file and and initialize output data ---
 
 void p_output_open(int count, int index, int cycle, double time)
@@ -185,6 +201,7 @@ void p_output_close(int count)
 private:
 
 int count_exit_;
+int count_prepare_;
 int count_output_open_[MAX_OUTPUT];
 int count_output_close_[MAX_OUTPUT];
 

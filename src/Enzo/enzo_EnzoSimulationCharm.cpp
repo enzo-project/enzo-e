@@ -28,12 +28,12 @@ EnzoSimulationCharm::EnzoSimulationCharm
 {
   TRACE("");
 
-  // Initialize on all processes
-  initialize();
-  TRACE("");
-
   // Monitor output from root pe only
   monitor_->set_active(CkMyPe() == 0);
+  TRACE("");
+
+  // Initialize on all processes
+  initialize();
   TRACE("");
 
   // Start simulation from one process
@@ -83,39 +83,30 @@ void EnzoSimulationCharm::run() throw()
 
 void EnzoSimulationCharm::p_prepare() throw()
 {
-  // Called from EnzoBlock
+  // Only root process has root patch
 
   if (CkMyPe() != 0) return;
 
-  // Only root process has root patch
+  TRACE("EnzoSimulationCharm::p_prepare");
+  count_prepare_ = 0;
+  //--------------------------------------------------
+  // Monitor
+  //--------------------------------------------------
 
-  TRACE("");
-  ++count_prepare_;
-  int count = mesh_->patch(0)->num_blocks();
-  if (count_prepare_ == count) {
+  monitor_-> print("[Simulation %d] cycle %04d time %15.12f", 
+		   index_,cycle_,time_);
 
-    TRACE("EnzoSimulationCharm::p_prepare");
-    count_prepare_ = 0;
-    //--------------------------------------------------
-    // Monitor
-    //--------------------------------------------------
+  //--------------------------------------------------
+  // Output
+  //--------------------------------------------------
 
-    monitor_-> print("[Simulation %d] cycle %04d time %15.12f", 
-		     index_,cycle_,time_);
+  int count = CkNumPes();
+  for (int index=0; index<num_output(); index++) {
 
-    //--------------------------------------------------
-    // Output
-    //--------------------------------------------------
+    if (output(index)->write_this_cycle(cycle_,time_)) {
 
-    int count = CkNumPes();
-    for (int index=0; index<num_output(); index++) {
-
-      if (output(index)->write_this_cycle(cycle_,time_)) {
-
-	proxy_main.p_output_open(count, index, cycle_, time_);
+      proxy_main.p_output_open(count, index, cycle_, time_);
 	
-      }
-
     }
   }
 }
