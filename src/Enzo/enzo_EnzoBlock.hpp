@@ -56,8 +56,9 @@ public: // interface
   /// Accumulate block-local contributions to an output dump
   void p_output();
   /// Refresh ghost zones and apply boundary conditions
-  void p_refresh();
-  void p_get_face();
+  void p_refresh(int nbx, int nby, int nbz);
+  /// Refresh a FieldFace
+  void p_refresh_face(int n, char buffer[], int axis, int face);
   /// Boundary and Method
   //  void compute();
   //==================================================

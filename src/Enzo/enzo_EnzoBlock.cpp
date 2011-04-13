@@ -146,9 +146,24 @@ void EnzoBlock::p_output ()
 
 //----------------------------------------------------------------------
 
-void EnzoBlock::p_refresh ()
+void EnzoBlock::p_refresh (int nbx, int nby, int nbz)
 {
   INCOMPLETE("EnzoBlock::p_refresh");
+
+  CProxy_EnzoBlock block_array = thisProxy;
+
+  // Indies of self and neighbors
+
+  int ix = thisIndex.x;
+  int iy = thisIndex.y;
+  int iz = thisIndex.z;
+
+  int ixm = (ix - 1 + nbx) % nbx;
+  int iym = (iy - 1 + nby) % nby;
+  int izm = (iz - 1 + nbz) % nbz;
+  int ixp = (ix + 1) % nbx;
+  int iyp = (iy + 1) % nby;
+  int izp = (iz + 1) % nbz;
 
   EnzoSimulationCharm * simulation = proxy_simulation.ckLocalBranch();
 
@@ -168,70 +183,72 @@ void EnzoBlock::p_refresh ()
   field_block()->size (&nx,&ny,&nz);
 
   Boundary * boundary = simulation->boundary();
-  FieldDescr * field_descr = simulation->field_descr();
+  const FieldDescr * field_descr = simulation->field_descr();
+
+  FieldFace field_face;
 
   //--------------------------------------------------
-  // X-axis Boundary Refresh
+  // X-axis Boundary
   //--------------------------------------------------
+
+  bool periodic = boundary->is_periodic();
 
   if ( nx > 1) {
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     bool xm_boundary = fabs(lower_[0]-lower[0]) < 1e-7;
     bool xp_boundary = fabs(upper_[0]-upper[0]) < 1e-7;
-    if ( xm_boundary ) {
-      boundary->enforce(field_descr,this,face_lower,axis_x);
-    } else {
-      INCOMPLETE("xm refresh");
-    }
-    if ( xp_boundary ) {
-      boundary->enforce(field_descr,this,face_upper,axis_x);
-    } else {
-      INCOMPLETE("xp refresh");
+
+    // Boundary
+    if ( xm_boundary ) boundary->enforce(field_descr,this,face_lower,axis_x);
+    if ( xp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_x);
+
+    // Refresh
+    if ( ! xm_boundary || periodic ) {
+      field_face.load(field_descr,field_block(),axis_x,face_lower);
+      int    n     = field_face.size();
+      char * array = field_face.array();
+      block_array(ixm,iy,iz).p_refresh_face (n,array,axis_x,face_upper);
     }
   }
 
   //--------------------------------------------------
-  // Y-axis Boundary Refresh
+  // Y-axis Boundary
   //--------------------------------------------------
 
   if ( ny > 1) {
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     bool ym_boundary = fabs(lower_[1]-lower[1]) < 1e-7;
+    if ( ym_boundary ) boundary->enforce(field_descr,this,face_lower,axis_y);
     bool yp_boundary = fabs(upper_[1]-upper[1]) < 1e-7;
-    if ( ym_boundary ) {
-      boundary->enforce(field_descr,this,face_lower,axis_y);
-    } else {
-      INCOMPLETE("ym refresh");
-    }
-    if ( yp_boundary ) {
-      boundary->enforce(field_descr,this,face_upper,axis_y);
-    } else {
-      INCOMPLETE("yp refresh");
-    }
+    if ( yp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_y);
   }
 
   //--------------------------------------------------
-  // Z-axis Boundary Refresh
+  // Z-axis Boundary
   //--------------------------------------------------
 
   if ( nz > 1) {
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     bool zm_boundary = fabs(lower_[2]-lower[2]) < 1e-7;
+    if ( zm_boundary ) boundary->enforce(field_descr,this,face_lower,axis_z);
     bool zp_boundary = fabs(upper_[2]-upper[2]) < 1e-7;
-    if ( zm_boundary ) {
-      boundary->enforce(field_descr,this,face_lower,axis_z);
-    } else {
-      INCOMPLETE("zm refresh");
-    }
-    if ( zp_boundary ) {
-      boundary->enforce(field_descr,this,face_upper,axis_z);
-    } else {
-      INCOMPLETE("zp refresh");
-    }
+    if ( zp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_z);
   }
 
 }
 
+void EnzoBlock::p_refresh_face (int n, char * buffer,
+				int axis, int face)
+{
+  EnzoSimulationCharm * simulation = proxy_simulation.ckLocalBranch();
+  const FieldDescr * field_descr = simulation->field_descr();
+
+  FieldFace field_face(n, buffer);
+
+  field_face.store(field_descr, field_block(), axis, face);
+
+  INCOMPLETE("EnzoBlock::p_refresh_face");
+}
 
 // }
 

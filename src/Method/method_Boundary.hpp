@@ -30,6 +30,9 @@ public: // virtual functions
 			face_enum face = face_all,
 			axis_enum axis = axis_all) const throw() = 0;
 
+  /// Whether boundary conditions are periodic (handled by ghost refresh)
+  virtual bool is_periodic() const throw() = 0;
+
 };
 
 #endif /* METHOD_BOUNDARY_HPP */

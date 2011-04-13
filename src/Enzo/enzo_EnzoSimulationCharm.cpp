@@ -130,7 +130,9 @@ void EnzoSimulationCharm::p_refresh (int stopping, double dt) throw()
       //--------------------------------------------------
       // Boundary
       //--------------------------------------------------
-      patch->blocks().p_refresh();
+      int nbx,nby,nbz;
+      patch->blocking(&nbx,&nby,&nbz);
+      patch->blocks().p_refresh(nbx,nby,nbz);
     }
   }
 

@@ -4,6 +4,9 @@
 /// @file     enzo_EnzoBoundary.hpp 
 /// @author   James Bordner (jobordner@ucsd.edu) 
 /// @date     Mon Mar 14 12:02:24 PDT 2011
+/// @todo     Create different Boundary objects for each boundary type
+/// @todo Map boundary regions (e.g. lower-x face y + z < 0.5) to
+/// boundary types
 /// @brief    [\ref Enzo] Declaration for the EnzoBoundary component
 
 #ifndef ENZO_ENZO_BOUNDARY_HPP
@@ -43,6 +46,10 @@ public: // virtual functions
 			 Block * block,
 			 face_enum face = face_all,
 			 axis_enum axis = axis_all) const throw(); 
+
+  /// Whether boundary conditions are periodic (handled by ghost refresh)
+  virtual bool is_periodic() const throw()
+  { return boundary_type_ == boundary_type_periodic; };
 
 protected: // functions
 
@@ -87,13 +94,6 @@ protected: // functions
 
   /// Enforce inflow boundary conditions on a boundary face
   void enforce_inflow_
-  ( const FieldDescr * field_descr,
-    FieldBlock * field_block, 
-    face_enum face, 
-    axis_enum axis) const throw();
-
-  /// Enforce periodic boundary conditions on a boundary face
-  void enforce_periodic_
   ( const FieldDescr * field_descr,
     FieldBlock * field_block, 
     face_enum face, 

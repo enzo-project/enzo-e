@@ -58,7 +58,7 @@ void EnzoBoundary::enforce
       enforce_inflow_    (field_descr, field_block,face,axis);
       break;
     case boundary_type_periodic:
-      enforce_periodic_  (field_descr, field_block,face,axis);
+      // Periodic handled by ghost refresh
       break;
     default:
       ERROR("EnzoBoundary::enforce",
@@ -386,15 +386,4 @@ void EnzoBoundary::enforce_inflow_
 }
 
 //----------------------------------------------------------------------
-
-void EnzoBoundary::enforce_periodic_
-(
- const FieldDescr * field_descr,
- FieldBlock * field_block,
- face_enum face,
- axis_enum axis
- ) const throw()
-{
-  INCOMPLETE("EnzoBoundary::enforce_periodic");
-}
 

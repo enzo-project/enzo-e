@@ -21,6 +21,13 @@ public: // interface
   /// Constructor
   FieldFace() throw();
 
+  /// Constructor
+  FieldFace(int n, char * array) throw()
+    : array_()
+  { array_.resize(n);
+    for (size_t i=0; i<n; i++) array_[i] = array[i]; 
+  };
+
   //----------------------------------------------------------------------
   // Big Three
   //----------------------------------------------------------------------
@@ -48,6 +55,12 @@ public: // interface
 	     FieldBlock *       field_block,
 	     axis_enum          axis,
 	     face_enum          face) throw();
+
+  /// Return the size of the array
+  size_t size() const throw() { return array_.size(); };
+
+  /// Return a pointer to the array
+  char * array () throw() { return &array_[0]; };
 
 private: // functions
 
