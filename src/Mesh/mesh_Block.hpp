@@ -28,14 +28,16 @@ class Block {
 
 public: // interface
 
+  /// create a Block with the given block count, lower PATCH extent, block
+  /// size, and number of field blocks
   Block
   (
 #ifndef CONFIG_USE_CHARM
    int ix, int iy, int iz,
 #endif
     int nx, int ny, int nz,
-    double xm, double ym, double zm,
-    double hx, double hy, double hz,
+    double xmp, double ymp, double zmp,
+    double xb, double yb, double zb,
     int num_field_blocks) throw();
 
 #ifdef CONFIG_USE_CHARM

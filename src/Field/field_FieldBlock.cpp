@@ -113,9 +113,9 @@ void FieldBlock::cell_width(Block * block,
   block->lower(&xm,&ym,&zm);
   block->upper(&xp,&yp,&zp);
 
-  *hx = (xp-xm) / size_[0];
-  *hy = (yp-ym) / size_[1];
-  *hz = (zp-zm) / size_[2];
+  if (hx) (*hx) = (xp-xm) / size_[0];
+  if (hy) (*hy) = (yp-ym) / size_[1];
+  if (hz) (*hz) = (zp-zm) / size_[2];
 }
 
 //----------------------------------------------------------------------

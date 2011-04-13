@@ -72,10 +72,18 @@ PARALLEL_MAIN_BEGIN
   nx=4; ny=5; nz=6;
   int ix,iy,iz;
   ix=0; iy=0; iz=0;
+  double xpm,ypm,zpm;
+  xpm = -1.0;  ypm = -2.0, zpm = -3.0;
+  double xpp,ypp,zpp;
+  xpp =  1.0;  ypp =  2.0, zpp =  3.0;
+  double xb,yb,zb;
+  xb = (xpp-xpm);
+  yb = (ypp-ypm);
+  zb = (zpp-zpm);
   Block * block = new Block (ix,iy,iz, 
 			     nx,ny,nz,
-			     -1.0,-2.0,-3.0,
-			     1.0,2.0,3.0, 1);
+			     xpm,ypm,zpm,
+			     xb,yb,zb,  1);
 
   FieldBlock * field_block = block->field_block();
 
