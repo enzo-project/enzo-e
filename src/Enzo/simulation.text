@@ -1,0 +1,44 @@
+Simulation::Simulation()
+   initialize()
+   run()
+
+Simulation::run()
+   Block::p_initial()
+
+Block::p_initial()
+   allocate field_block
+   Initial::compute(this)
+   initialize() [Enzo variables]
+   prepare()
+
+Block::prepare()
+   Timestep::compute(this)
+   Stopping::complete()
+   Main::p_prepare()
+
+Main::p_prepare()
+   [NP -> 1]
+   timestep reduce
+   stopping reduce
+   output_open() [incomplete]
+   Simulation::p_prepare() [monitor]
+   Simulation::p_refresh() [boundary,refresh]
+
+Simulation::p_prepare()
+   Monitor::print() [no output guarantee?]
+
+Simulation::p_refresh()
+   if (stopping) Main::p_exit()
+   Block::p_refresh()
+
+Block::p_refresh()
+   Boundary::enforce()
+
+   Block::p_refresh_face() 
+
+Block::p_refresh_face()
+   [ K -> 1 ]
+
+
+
+    
