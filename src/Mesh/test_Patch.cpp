@@ -212,21 +212,6 @@ PARALLEL_MAIN_BEGIN
 
     }
 
-    unit_func("Block","index_patch");
-    for (int ibz=0; ibz<nbz; ibz++) {
-      for (int iby=0; iby<nby; iby++) {
-	for (int ibx=0; ibx<nbx; ibx++) {
-
-	  int jbx,jby,jbz;
-	  block->index_patch(&jbx,&jby,&jbz);
-	  printf ("%d %d %d\n",jbx,jby,jbz);
-	  unit_assert_quiet(ibx==jbx);
-	  unit_assert_quiet(iby==jby);
-	  unit_assert_quiet(ibz==jbz);
-	}
-      }
-    }
-      
     unit_func("Block","neighbor");
     // Block::neighbor()
     unit_assert(false);
@@ -238,6 +223,26 @@ PARALLEL_MAIN_BEGIN
 
   }
 
+  //--------------------------------------------------
+
+  unit_func("Block","index_patch");
+
+  int * b = new int [nbx*nby*nbz];
+  int i;
+  for (i=0; i<nbx*nby*nbz; i++) b[i]=0;
+
+  while ((block = ++itBlocks)) {
+    int ibx,iby,ibz;
+    block->index_patch(&ibx,&iby,&ibz);
+    b[ibx + nbx*(iby + nby*ibz)] = 1;
+  }
+  for (i=0; i<nbx*nby*nbz; i++) {
+    unit_assert_quiet(b[i]==1);
+  }
+
+  delete [] b;
+
+  //--------------------------------------------------
   unit_func("num_local_blocks");
   unit_assert(block_counter == patch->num_local_blocks());
 
