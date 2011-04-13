@@ -78,7 +78,7 @@ public: // interface
   // Refresh ghost zones and apply boundary conditions
   void p_refresh (int stopping, double dt) throw();
 
-private:
+protected:
   int count_prepare_;
 
 #endif
