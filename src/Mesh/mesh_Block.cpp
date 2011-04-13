@@ -15,8 +15,7 @@
 
 Block::Block
 (
-#ifdef CONFIG_USE_CHARM
-#else
+#ifndef CONFIG_USE_CHARM
  int ix, int iy, int iz,
 #endif
  int nx, int ny, int nz,
@@ -159,6 +158,194 @@ void Block::refresh_ghosts(const FieldDescr * field_descr,
 {
   field_block_[index_field_set]->refresh_ghosts(field_descr);
 }
+
+//======================================================================
+// CHARM FUNCTIONS
+//======================================================================
+
+#ifdef CONFIG_USE_CHARM
+
+extern CProxy_Simulation proxy_simulation;
+extern CProxy_Main proxy_main;
+
+void Block::p_initial()
+{
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  Initial * initial = simulation->initial();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  // field_block allocation Was in mesh_Patch() for MPI
+
+  for (size_t i=0; i<field_block_.size(); i++) {
+    field_block_[0]->allocate_array(field_descr);
+    field_block_[0]->allocate_ghosts(field_descr);
+  }
+
+  // Apply the initial conditions 
+
+  initial->compute(field_descr,this);
+
+  initialize(simulation->cycle(), simulation->time());
+
+  // Prepare for the first cycle: perform and disk Output, user
+  // Monitoring, apply Stopping criteria [reduction], and compute the
+  // next Timestep [reduction]
+
+  // prepare for first cycle: Timestep, Stopping, Monitor, Output
+
+  prepare();
+}
+
+//----------------------------------------------------------------------
+
+void Block::prepare()
+{
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  //--------------------------------------------------
+  // Timestep [block]
+  //--------------------------------------------------
+
+  Timestep * timestep = simulation->timestep();
+  double dt_block = timestep->compute(field_descr,this);
+
+  //--------------------------------------------------
+  // Stopping [block]
+  //--------------------------------------------------
+
+  Stopping * stopping = simulation->stopping();
+  int stop_block = stopping->complete(cycle_,time_);
+
+  //--------------------------------------------------
+  // Main::p_prepare()
+  //--------------------------------------------------
+
+  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
+
+  proxy_main.p_prepare(num_blocks, cycle_, time_, dt_block, stop_block);
+
+}
+
+//----------------------------------------------------------------------
+
+void Block::p_output ()
+{
+  INCOMPLETE("Block::p_output");
+}
+
+//----------------------------------------------------------------------
+
+void Block::p_refresh (int nbx, int nby, int nbz)
+{
+  INCOMPLETE("Block::p_refresh");
+
+  CProxy_Block block_array = thisProxy;
+
+  // Indies of self and neighbors
+
+  int ix = thisIndex.x;
+  int iy = thisIndex.y;
+  int iz = thisIndex.z;
+
+  int ixm = (ix - 1 + nbx) % nbx;
+  int iym = (iy - 1 + nby) % nby;
+  int izm = (iz - 1 + nbz) % nbz;
+  int ixp = (ix + 1) % nbx;
+  int iyp = (iy + 1) % nby;
+  int izp = (iz + 1) % nbz;
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  // Get domain lower and upper
+
+  Mesh * mesh = simulation->mesh();
+
+  double lower[3];
+  double upper[3];
+
+  mesh->lower(&lower[0],&lower[1],&upper[2]);
+  mesh->upper(&upper[0],&upper[1],&upper[2]);
+
+  // Field block size
+
+  int nx,ny,nz;
+  field_block()->size (&nx,&ny,&nz);
+
+  Boundary * boundary = simulation->boundary();
+  const FieldDescr * field_descr = simulation->field_descr();
+
+  FieldFace field_face;
+
+  //--------------------------------------------------
+  // X-axis Boundary
+  //--------------------------------------------------
+
+  bool periodic = boundary->is_periodic();
+
+  if ( nx > 1) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    bool xm_boundary = fabs(lower_[0]-lower[0]) < 1e-7;
+    bool xp_boundary = fabs(upper_[0]-upper[0]) < 1e-7;
+
+    // Boundary
+    if ( xm_boundary ) boundary->enforce(field_descr,this,face_lower,axis_x);
+    if ( xp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_x);
+
+    // Refresh
+    if ( ! xm_boundary || periodic ) {
+      field_face.load(field_descr,field_block(),axis_x,face_lower);
+      int    n     = field_face.size();
+      char * array = field_face.array();
+      block_array(ixm,iy,iz).p_refresh_face (n,array,axis_x,face_upper);
+    }
+  }
+
+  //--------------------------------------------------
+  // Y-axis Boundary
+  //--------------------------------------------------
+
+  if ( ny > 1) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    bool ym_boundary = fabs(lower_[1]-lower[1]) < 1e-7;
+    if ( ym_boundary ) boundary->enforce(field_descr,this,face_lower,axis_y);
+    bool yp_boundary = fabs(upper_[1]-upper[1]) < 1e-7;
+    if ( yp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_y);
+  }
+
+  //--------------------------------------------------
+  // Z-axis Boundary
+  //--------------------------------------------------
+
+  if ( nz > 1) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    bool zm_boundary = fabs(lower_[2]-lower[2]) < 1e-7;
+    if ( zm_boundary ) boundary->enforce(field_descr,this,face_lower,axis_z);
+    bool zp_boundary = fabs(upper_[2]-upper[2]) < 1e-7;
+    if ( zp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_z);
+  }
+
+}
+
+//----------------------------------------------------------------------
+
+void Block::p_refresh_face (int n, char * buffer,
+				int axis, int face)
+{
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  const FieldDescr * field_descr = simulation->field_descr();
+
+  FieldFace field_face(n, buffer);
+
+  field_face.store(field_descr, field_block(), axis, face);
+
+  INCOMPLETE("Block::p_refresh_face");
+}
+
+// }
+
+#endif /* CONFIG_USE_CHARM */
 
 //======================================================================
 

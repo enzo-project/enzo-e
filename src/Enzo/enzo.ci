@@ -32,23 +32,30 @@ mainmodule enzo {
 
   };
 
-  group EnzoSimulationCharm {
+  group Simulation {
 
-    entry EnzoSimulationCharm(const char filename[n], int n, 
-			      int index_simulation);
-
-    //  --- Monitor, Output, Timestep, Stopping ---
+    entry Simulation
+      (const char filename[n], int n, 
+       int index_simulation);
 
     entry void p_prepare (int cycle, double time);
-
-    //  --- Called by main; request output from all blocks ---
-
-    // entry void p_output (int index, int cycle, double time);
-
-    //  --- Called by main; refresh block ghost zones ---
     entry void p_refresh(int stopping, double dt);
 
   };
+
+  group EnzoSimulation : Simulation {
+    entry EnzoSimulation
+      (const char filename[n], int n, 
+       int index_simulation);
+
+  }
+
+  group EnzoSimulationCharm : EnzoSimulation {
+    entry EnzoSimulationCharm
+      (const char filename[n], int n, 
+       int index_simulation);
+
+  }
 
   array[3D] Block {
 
@@ -57,6 +64,16 @@ mainmodule enzo {
        double xm, double ym, double zm,
        double hx, double hy, double hz,
        int num_field_blocks);
+
+
+    entry void p_initial();
+    entry void p_output();
+    entry void p_refresh(int nbx, int nby, int nbz);
+    entry void p_refresh_face(int n, char buffer[n], int axis, int face);
+
+    //     void p_next();
+    //     void p_prepare();
+    //     void p_compute();
 
   };
 
@@ -67,22 +84,6 @@ mainmodule enzo {
        double xm, double ym, double zm,
        double hx, double hy, double hz,
        int num_field_blocks);
-
-
-    entry void p_initial();
-
-    // --- Compute block output contribution ---
-    entry void p_output();
-
-    // --- Refresh boundary conditions and ghost zones ---
-    entry void p_refresh(int nbx, int nby, int nbz);
-
-    //  --- Called by EnzoBlock; receive a face ---
-    entry void p_refresh_face(int n, char buffer[n], int axis, int face);
-
-    //     void p_next();
-    //     void p_prepare();
-    //     void p_compute();
   };
 
 };

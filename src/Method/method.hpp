@@ -38,6 +38,12 @@ enum access_enum {
 // Component dependencies
 //----------------------------------------------------------------------
 
+class FieldDescr;
+class Mesh;
+class Patch;
+class Block;
+class FieldBlock;
+
 #include "error.hpp"
 #include "mesh.hpp"
 #include "parameters.hpp"

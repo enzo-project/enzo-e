@@ -27,6 +27,7 @@
 #include "field.hpp"
 #include "parallel.hpp"
 #include "memory.hpp"
+#include "simulation.hpp"
 
 //----------------------------------------------------------------------
 // Component class includes

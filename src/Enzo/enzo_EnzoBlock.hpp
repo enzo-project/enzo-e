@@ -48,20 +48,6 @@ public: // interface
   /// Initialize an empty Block
   EnzoBlock() {TRACE("Oops")};
 
-  //==================================================
-  /// Initialize block for the simulation.
-  void p_initial();
-  /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
-  void prepare();
-  /// Accumulate block-local contributions to an output dump
-  void p_output();
-  /// Refresh ghost zones and apply boundary conditions
-  void p_refresh(int nbx, int nby, int nbz);
-  /// Refresh a FieldFace
-  void p_refresh_face(int n, char buffer[], int axis, int face);
-  /// Boundary and Method
-  //  void compute();
-  //==================================================
 
 #endif
 

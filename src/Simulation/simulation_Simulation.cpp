@@ -10,17 +10,25 @@
 
 #include "simulation.hpp"
 
-/// Initialize the Simulation object
 Simulation::Simulation
 (
  const char *   parameter_file_name,
- Factory *      factory,
+#ifdef CONFIG_USE_CHARM
+ int n,
+#else
  GroupProcess * group_process,
+#endif
+ Factory *      factory,
  int            index
 )
+/// Initialize the Simulation object
   : parameters_(0),
     factory_(factory),
+#ifndef CONFIG_USE_CHARM
     group_process_(group_process),
+#else
+    group_process_(new GroupProcessCharm),
+#endif
     dimension_(0),
     cycle_(0),
     time_(0.0),
@@ -38,12 +46,13 @@ Simulation::Simulation
 {
   performance_ = new Performance;
 #ifdef CONFIG_USE_CHARM
-  monitor_     = new Monitor;
+  monitor_ = new Monitor;
 #else
   monitor_ = Monitor::instance();
 #endif
   parameters_  = new Parameters(parameter_file_name,monitor_);
 }
+#endif
 
 //----------------------------------------------------------------------
 

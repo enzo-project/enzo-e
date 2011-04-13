@@ -12,7 +12,28 @@
 /// (p.89 CHARM++ manual)
 /// @note     2010-12-17: code-wiki interface review
 
+class Boundary;
+class Factory;
+class FieldDescr;
+class GroupProcess;
+class Initial;
+class Mesh;
+class Method;
+class Monitor;
+class Output;
+class Parameters;
+class Performance;
+class Stopping;
+class Timestep;
+
+
+#ifdef CONFIG_USE_CHARM
+#include "enzo.decl.h"
+class Simulation : public CBase_Simulation {
+#else
 class Simulation {
+#endif
+
   /// @class    Simulation
   /// @ingroup  Simulation
   /// @brief    [\ref Simulation] Class specifying a simulation to run
@@ -26,10 +47,41 @@ public: // interface
   /// Constructor for CHARM++
 
   /// Initialize the Simulation object
-  Simulation(const char *   parameter_file_name,
+  Simulation(const char parameter_file[],
+#ifdef CONFIG_USE_CHARM
+	     int n,
+#else
 	     Factory *      factory,
 	     GroupProcess * group_process = 0,
+#endif
 	     int index=0);
+
+  //==================================================
+  // CHARM
+  //==================================================
+
+#ifdef CONFIG_USE_CHARM
+  /// Initialize an empty Simulation
+  Simulation() {TRACE("Simulation()")};
+
+  /// Initialize a migrated Simulation
+  Simulation (CkMigrateMessage *m) {TRACE("Simulation(msg)")};
+
+  //==================================================
+
+  /// Monitor output, and set simulation (cycle , time)
+  void p_prepare(int cycle, double time) throw();
+
+  /// Request all Mesh blocks to send output to main::p_output_close()
+  //  void p_output(int index, int cycle, double time) throw();
+
+  // Refresh ghost zones and apply boundary conditions
+  void p_refresh (int stopping, double dt) throw();
+
+private:
+  int count_prepare_;
+
+#endif
 
   //----------------------------------------------------------------------
   // Big Three
@@ -38,11 +90,11 @@ public: // interface
   /// Destructor
   virtual ~Simulation() throw();
 
-  /// Copy constructor
-  Simulation(const Simulation & simulation) throw();
+  // /// Copy constructor
+  // Simulation(const Simulation & simulation) throw();
 
-  /// Assignment operator
-  Simulation & operator= (const Simulation & simulation) throw();
+  // /// Assignment operator
+  // Simulation & operator= (const Simulation & simulation) throw();
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
@@ -50,7 +102,6 @@ public: // interface
 
   /// Return the dimensionality of the Simulation
   int dimension() const throw();
-
 
   /// Return the Mesh
   Mesh * mesh() const throw();
@@ -185,12 +236,14 @@ protected: // attributes
   /// Parameters associated with this simulation
   Parameters * parameters_;
 
+#ifdef CONFIG_USE_CHARM
   /// Factory for creating related families of Meshes, Patches and Blocks 
   /// [abstract factory design pattern]
   Factory * factory_; 
 
   /// Parallel group for the simulation
   GroupProcess * group_process_;
+#endif
 
   /// Dimension or rank of the simulation
   int  dimension_; 

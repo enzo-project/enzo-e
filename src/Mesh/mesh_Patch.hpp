@@ -85,7 +85,7 @@ class Patch
   { return blocking_[0]*blocking_[1]*blocking_[2] ; };
 
   /// Return the block CHARM++ chare array
-  CProxy_EnzoBlock blocks() throw()
+  CProxy_Block blocks() throw()
   { return block_; }
 #else
     
@@ -103,7 +103,7 @@ protected: // attributes
 
   /// Array of blocks ib associated with this process
 #ifdef CONFIG_USE_CHARM
-  CProxy_EnzoBlock block_;
+  CProxy_Block block_;
   bool block_exists_;
 #else
   std::vector<Block * > block_;

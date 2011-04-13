@@ -28,29 +28,46 @@ class Block {
 
 public: // interface
 
-#ifdef CONFIG_USE_CHARM
-  /// Initialize the Block chare array
   Block
-  ( int nx, int ny, int nz,
-    double xm, double ym, double zm,
-    double hx, double hy, double hz,
-    int num_field_blocks) throw();
-#else
-  /// Initialize the Block object
-  Block
-  ( int ix, int iy, int iz,
+  (
+#ifndef CONFIG_USE_CHARM
+   int ix, int iy, int iz,
+#endif
     int nx, int ny, int nz,
     double xm, double ym, double zm,
     double hx, double hy, double hz,
     int num_field_blocks) throw();
-#endif
 
 #ifdef CONFIG_USE_CHARM
   /// Initialize an empty Block
-  Block() {TRACE("Oops")};
+  Block() {TRACE("Block()")};
 
   /// Initialize a migrated Block
-  Block (CkMigrateMessage *m) {TRACE("Oops")};
+  Block (CkMigrateMessage *m) {TRACE("Block(msg)")};
+
+  //==================================================
+
+  /// Initialize block for the simulation.
+  void p_initial();
+
+  /// Accumulate block-local contributions to an output dump
+  void p_output();
+
+  /// Refresh ghost zones and apply boundary conditions
+  void p_refresh(int nbx, int nby, int nbz);
+
+  /// Refresh a FieldFace
+  void p_refresh_face(int n, char buffer[], int axis, int face);
+
+  //--------------------------------------------------
+
+  /// Output, Monitor, Stopping [reduction], and Timestep [reduction]
+  void prepare();
+
+  /// Boundary and Method
+  //  void compute();
+  //==================================================
+
 #endif
 
   //----------------------------------------------------------------------
@@ -92,6 +109,12 @@ public: // interface
   void refresh_ghosts(const FieldDescr * field_descr,
 		      int index_field_set = 0) throw();
 
+  /// Return the current cycle number
+  int cycle() const throw() { return cycle_; };
+
+  /// Return the current time
+  double time() const throw() { return time_; };
+
 protected: // functions
 
   /// Allocate and copy in attributes from give Block
@@ -110,6 +133,12 @@ protected: // attributes
   /// range issues
   double lower_[3];
   double upper_[3];
+
+  /// Current cycle number
+  int cycle_;
+
+  /// Current time
+  double time_;
 
 };
 
