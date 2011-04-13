@@ -162,7 +162,7 @@ void p_exit(int count)
 
 void output_open(int cycle, double time)
 {
-  Simulation * simulation = proxy_simulation.ckLocalBranch();
+  const Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   for (int index=0; index<simulation->num_output(); index++) {
 

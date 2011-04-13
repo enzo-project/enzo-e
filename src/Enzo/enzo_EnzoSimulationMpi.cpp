@@ -21,8 +21,8 @@ EnzoSimulationMpi::EnzoSimulationMpi
 (
  const char * parameter_file,
  GroupProcess * group_process,
- int index) throw ()
-  : EnzoSimulation(parameter_file,group_process,index)
+ int index ) throw ()
+  : EnzoSimulation(parameter_file,group_process, index)
 {
 }
 

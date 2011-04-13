@@ -16,13 +16,20 @@
 
 EnzoSimulation::EnzoSimulation
 (
- const char * parameter_file_name,
+ const char *   parameter_file,
+#ifdef CONFIG_USE_CHARM
+ int n,
+#else
  GroupProcess * group_process,
- int index) throw ()
-  : Simulation(parameter_file_name,
-	       new EnzoFactory,
-	       group_process,
-	       index)
+#endif
+ int            index
+ ) throw()
+  : Simulation
+#ifdef CONFIG_USE_CHARM
+    ( parameter_file, n, *(new EnzoFactory), index )
+#else
+    ( parameter_file, *(new EnzoFactory), group_process, index )
+#endif
 {
 }
 
@@ -53,6 +60,13 @@ void EnzoSimulation::finalize() throw()
 
 //----------------------------------------------------------------------
 
+void EnzoSimulation::run() throw()
+{
+  INCOMPLETE("EnzoSimulation::run");
+}
+
+//----------------------------------------------------------------------
+
 void EnzoSimulation::read() throw()
 {
   INCOMPLETE("EnzoSimulation::read");
@@ -67,8 +81,25 @@ void EnzoSimulation::write() const throw()
 
 //======================================================================
 
-Timestep * 
-EnzoSimulation::create_timestep_ ( std::string name ) throw ()
+Stopping * EnzoSimulation::create_stopping_ (std::string name) throw ()
+/// @param name   Name of the stopping method to create (ignored)
+{
+  //--------------------------------------------------
+  // parameter: Stopping::cycle
+  // parameter: Stopping::time
+  //--------------------------------------------------
+
+  int    stop_cycle = parameters_->value_integer
+    ( "Stopping:cycle" , std::numeric_limits<int>::max() );
+  double stop_time  = parameters_->value_scalar
+    ( "Stopping:time" , std::numeric_limits<double>::max() );
+
+  return new Stopping(stop_cycle,stop_time);
+}
+
+//----------------------------------------------------------------------
+
+Timestep * EnzoSimulation::create_timestep_ ( std::string name ) throw ()
 /// @param name   Name of the timestep method to create (ignored)
 {
   return new EnzoTimestep;
@@ -76,8 +107,7 @@ EnzoSimulation::create_timestep_ ( std::string name ) throw ()
 
 //----------------------------------------------------------------------
 
-Initial * 
-EnzoSimulation::create_initial_ ( std::string name ) throw ()
+Initial * EnzoSimulation::create_initial_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   
@@ -100,27 +130,7 @@ EnzoSimulation::create_initial_ ( std::string name ) throw ()
 
 //----------------------------------------------------------------------
 
-Stopping * 
-EnzoSimulation::create_stopping_ (std::string name) throw ()
-/// @param name   Name of the stopping method to create (ignored)
-{
-  //--------------------------------------------------
-  // parameter: Stopping::cycle
-  // parameter: Stopping::time
-  //--------------------------------------------------
-
-  int    stop_cycle = parameters_->value_integer
-    ( "Stopping:cycle" , std::numeric_limits<int>::max() );
-  double stop_time  = parameters_->value_scalar
-    ( "Stopping:time" , std::numeric_limits<double>::max() );
-
-  return new Stopping(stop_cycle,stop_time);
-}
-
-//----------------------------------------------------------------------
-
-Boundary * 
-EnzoSimulation::create_boundary_ ( std::string name ) throw ()
+Boundary * EnzoSimulation::create_boundary_ ( std::string name ) throw ()
 /// @param name   Name of the initialization method to create
 {
   //--------------------------------------------------
@@ -157,8 +167,7 @@ EnzoSimulation::create_boundary_ ( std::string name ) throw ()
 
 //----------------------------------------------------------------------
 
-Method * 
-EnzoSimulation::create_method_ ( std::string name ) throw ()
+Method * EnzoSimulation::create_method_ ( std::string name ) throw ()
 /// @param name   Name of the method to create
 {
 
@@ -181,8 +190,7 @@ EnzoSimulation::create_method_ ( std::string name ) throw ()
 
 //----------------------------------------------------------------------
 
-Output * 
-EnzoSimulation::create_output_ ( std::string type ) throw ()
+Output * EnzoSimulation::create_output_ ( std::string type ) throw ()
 /// @param filename   File name format for the output object
 {
 

@@ -115,6 +115,10 @@ public: // interface
   /// Return the current time
   double time() const throw() { return time_; };
 
+  /// Call application [i.e. Enzo] specific initialization
+  virtual void initialize (int cycle_start, double time_start) throw()
+  { WARNING ("Block::initialize","This should not be called"); }
+
 protected: // functions
 
   /// Allocate and copy in attributes from give Block

@@ -10,24 +10,27 @@
 
 #include "simulation.hpp"
 
+#ifdef CONFIG_USE_CHARM
+extern CProxy_Main proxy_main;
+#endif
+
 Simulation::Simulation
 (
- const char *   parameter_file_name,
+ const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
  int n,
+ const Factory & factory,
 #else
+ const Factory & factory,
  GroupProcess * group_process,
 #endif
- Factory *      factory,
  int            index
-)
+ ) throw()
 /// Initialize the Simulation object
   : parameters_(0),
-    factory_(factory),
+    factory_(&factory),
 #ifndef CONFIG_USE_CHARM
     group_process_(group_process),
-#else
-    group_process_(new GroupProcessCharm),
 #endif
     dimension_(0),
     cycle_(0),
@@ -50,9 +53,8 @@ Simulation::Simulation
 #else
   monitor_ = Monitor::instance();
 #endif
-  parameters_  = new Parameters(parameter_file_name,monitor_);
+  parameters_  = new Parameters(parameter_file,monitor_);
 }
-#endif
 
 //----------------------------------------------------------------------
 
@@ -61,21 +63,21 @@ Simulation::~Simulation() throw()
   deallocate_();
 }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
-Simulation::Simulation(const Simulation & simulation) throw()
-{
-  INCOMPLETE("Simulation::Simulation(simulation)");
-}
+// Simulation::Simulation(const Simulation & simulation) throw()
+// {
+//   INCOMPLETE("Simulation::Simulation(simulation)");
+// }
 
-//----------------------------------------------------------------------
+// //----------------------------------------------------------------------
 
 
-Simulation & Simulation::operator= (const Simulation & simulation) throw()
-{
-  INCOMPLETE("Simulation::operatior = (simulation)");
-  return (*this);
-}
+// Simulation & Simulation::operator= (const Simulation & simulation) throw()
+// {
+//   INCOMPLETE("Simulation::operatior = (simulation)");
+//   return (*this);
+// }
 
 //----------------------------------------------------------------------
 
@@ -184,7 +186,7 @@ Method * Simulation::method(int i) const throw()
 
 //----------------------------------------------------------------------
 
-Factory * Simulation::factory () const throw()
+const Factory * Simulation::factory () const throw()
 { return factory_; }
 
 //======================================================================
@@ -702,3 +704,192 @@ void Simulation::deallocate_() throw()
     method_list_[i] = 0;
   }
 }
+
+void Simulation::run() throw()
+{ ERROR ("Simulation::run","Implictly abstract function called"); }
+
+void Simulation::read() throw()
+{ ERROR ("Simulation::read","Implictly abstract function called"); }
+
+void Simulation::write() const throw()
+{ ERROR ("Simulation::write","Implictly abstract function called"); }
+
+Stopping * Simulation::create_stopping_ (std::string name) throw ()
+{ ERROR ("Simulation::create_stopping_","Implictly abstract function called"); }
+
+Timestep * Simulation::create_timestep_ (std::string name) throw ()
+{ ERROR ("Simulation::create_timestep_","Implictly abstract function called"); }
+
+Initial * Simulation::create_initial_ (std::string name) throw ()
+{ ERROR ("Simulation::create_initial_","Implictly abstract function called"); }
+
+Boundary * Simulation::create_boundary_ (std::string name) throw ()
+{ ERROR ("Simulation::create_boundary_","Implictly abstract function called"); }
+
+Output * Simulation::create_output_ (std::string name) throw ()
+{ ERROR ("Simulation::create_output_","Implictly abstract function called"); }
+
+Method * Simulation::create_method_ (std::string name) throw ()
+{ ERROR ("Simulation::create_method_","Implictly abstract function called"); }
+
+//======================================================================
+
+#ifdef CONFIG_USE_CHARM
+
+void Simulation::p_prepare(int cycle, double time) throw()
+{
+  //--------------------------------------------------
+  // Monitor
+  //--------------------------------------------------
+
+  cycle_ = cycle;
+  time_  = time;
+
+  monitor_-> print("[Simulation %d] cycle %04d time %15.12f", 
+		   index_,cycle_,time_);
+}
+
+//----------------------------------------------------------------------
+
+// void Simulation::p_output(int index, int cycle, double time) throw()
+// {
+//   ItPatch it_patch(mesh_);
+
+//   Patch * patch;
+
+//   // Initialize the simulation; 
+
+//   while (( patch = ++it_patch )) {
+
+//     TRACE("");
+//     patch->blocks().p_output();
+
+//   }
+// }
+
+void Simulation::p_refresh (int stopping, double dt) throw()
+{
+
+  //--------------------------------------------------
+  // Stopping
+  //--------------------------------------------------
+
+  if (stopping) {
+    int count = CkNumPes();
+    // ENZO DEPENDENCE
+    proxy_main.p_exit(count);
+  }
+
+  ItPatch it_patch(mesh_);
+  Patch * patch;
+  while (( patch = ++it_patch )) {
+    if (patch->blocks_allocated()) {
+      TRACE("");
+      //--------------------------------------------------
+      // Boundary
+      //--------------------------------------------------
+      int nbx,nby,nbz;
+      patch->blocking(&nbx,&nby,&nbz);
+      patch->blocks().p_refresh(nbx,nby,nbz);
+    }
+  }
+
+  TRACE("");
+
+}
+  //   ASSERT("EnzoSimulation::run", "dt == 0", dt_mesh != 0.0);
+
+  //   //--------------------------------------------------
+  //   // Apply the methods
+  //   //--------------------------------------------------
+
+  //   stop_mesh = true;
+
+  //   while ((patch = ++it_patch)) {
+
+  //     int stop_patch = true;
+
+  //     ItBlockLocal it_block(patch);
+  //     Block * block;
+
+  //     while ((block = ++it_block)) {
+
+  // 	// Enforce boundary conditions
+
+  // 	boundary_->enforce(field_descr_,block);
+
+  // 	// Refresh ghosts
+
+  // 	block->refresh_ghosts(field_descr_);
+
+  // 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
+
+  // 	int        & cycle_block    = enzo_block->CycleNumber;
+  // 	enzo_float & time_block     = enzo_block->Time;
+  // 	enzo_float & dt_block       = enzo_block->dt;
+  // 	enzo_float & old_time_block = enzo_block->OldTime;
+
+  // 	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH
+
+  // 	dt_block = dt_mesh;
+
+  // 	// Loop through methods
+
+  // 	for (size_t i = 0; i < method_list_.size(); i++) {
+
+  // 	  Method * method = method_list_[i];
+
+  // 	  method -> compute_block (block,time_block,dt_block);
+
+  // 	}
+
+  // 	// Update enzo_block values
+
+  // 	old_time_block  = time_block;
+  // 	time_block     += dt_block;
+  // 	cycle_block    += 1;
+
+  // 	// Global cycle and time reduction
+	
+  // 	int stop_block = stopping_->complete(cycle_block,time_block);
+
+  // 	// Update stopping criteria for patch
+
+  // 	stop_patch = stop_patch && stop_block;
+
+  //     } // (block = ++it_block)
+
+  //     // Update stopping criteria for mesh
+
+  //     stop_mesh = stop_mesh && stop_patch;
+
+  //   } // (patch = ++it_patch)
+
+  //   cycle_ ++;
+  //   time_ += dt_mesh;
+
+  //   // Perform any scheduled output
+
+  //   for (size_t i=0; i<output_list_.size(); i++) {
+  //     Output * output = output_list_[i];
+  //     output->scheduled_write(field_descr_, mesh_,cycle_,time_);
+  //   }
+
+  // } // while (! stop_mesh)
+
+  // //======================================================================
+  // // END MAIN LOOP
+  // //======================================================================
+
+  // monitor->print("[Simulation %d] cycle %04d time %15.12f", 
+  // 		 index_, cycle_, time_);
+
+  // performance_->stop();
+
+  // performance_->print();
+
+
+// }
+
+#endif /* CONFIG_USE_CHARM */
+

@@ -17,10 +17,14 @@ class Factory {
 
 public: // interface
 
+#ifdef CONFIG_USE_CHARM
+  virtual void pup(PUP::er &) {}
+#endif
+
   /// Create a new Mesh [abstract factory design pattern]
   virtual Mesh * create_mesh
   (int nx,  int ny,  int nz,
-   int nbx, int nby, int nbz) throw ();
+   int nbx, int nby, int nbz) const throw ();
 
   /// Create a new Patch [abstract factory design pattern]
   virtual Patch * create_patch
@@ -28,7 +32,7 @@ public: // interface
    int nx,   int ny,  int nz,
    int nbx,  int nby, int nbz,
    double xm, double ym, double zm,
-   double xp, double yp, double zp) throw();
+   double xp, double yp, double zp) const throw();
 
   /// Create a new Block [abstract factory design pattern]
   virtual Block * create_block
@@ -36,7 +40,7 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-   int num_field_blocks = 1) throw();
+   int num_field_blocks = 1) const throw();
 
 };
 

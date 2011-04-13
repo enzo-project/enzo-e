@@ -25,12 +25,7 @@ public: // functions
 
   /// CHARM++ Constructor
   EnzoSimulationCharm
-  ( const char parameter_file[], int n, int index_simulation) throw();
-
-  /// Constructor
-  EnzoSimulationCharm
-  ( const char * parameter_file,
-    GroupProcess * ) throw();
+  ( const char parameter_file[], int n, int index = 0) throw();
 
   /// Destructor
   ~EnzoSimulationCharm() throw();

@@ -25,7 +25,7 @@ class Patch
  public: // interface
 
   /// Constructor for given Patch size and blocking count
-  Patch(Factory * factory,
+  Patch(const Factory * factory,
 	GroupProcess * group_process,
 	int nx,   int ny,  int nz,
 	int nbx,  int nby, int nbz,
@@ -111,8 +111,8 @@ protected: // attributes
 
 
   /// Factory object for creating Blocks
-  Factory * factory_;
-
+  const Factory * factory_;
+  
   /// Parallel Group for distributing the Mesh across processors
   GroupProcess * group_process_;
 

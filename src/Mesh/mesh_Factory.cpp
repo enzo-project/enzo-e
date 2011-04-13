@@ -14,7 +14,7 @@ Mesh * Factory::create_mesh
 (
  int nx,  int ny,  int nz,
  int nbx, int nby, int nbz
- ) throw ()
+ ) const throw ()
 {
   return new Mesh (this,
 		   nx,ny,nz,
@@ -30,7 +30,7 @@ Patch * Factory::create_patch
  int nbx,  int nby, int nbz,
  double xm, double ym, double zm,
  double xp, double yp, double zp
- ) throw()
+ ) const throw()
 {
   return new Patch
     (this,group_process,
@@ -50,7 +50,7 @@ Block * Factory::create_block
  double xm, double ym, double zm,
  double hx, double hy, double hz,
  int num_field_blocks
- ) throw()
+ ) const throw()
 {
 #ifdef CONFIG_USE_CHARM
 

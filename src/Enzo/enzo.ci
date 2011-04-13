@@ -36,6 +36,7 @@ mainmodule enzo {
 
     entry Simulation
       (const char filename[n], int n, 
+       const Factory & factory,
        int index_simulation);
 
     entry void p_prepare (int cycle, double time);

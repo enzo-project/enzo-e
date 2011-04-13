@@ -107,6 +107,7 @@ void FieldFace::load
       ERROR("FieldFace::load", "Unsupported precision");
     }
   }
+
 }
 
 //----------------------------------------------------------------------
@@ -125,7 +126,7 @@ void FieldFace::store
   size_t index = 0;
 
   for (size_t field=0; field<num_fields; field++) {
-    
+
     // Get precision
     precision_enum precision = field_descr->precision(field);
 
@@ -180,7 +181,7 @@ void FieldFace::allocate_
 (
  const FieldDescr * field_descr,
  const FieldBlock * field_block,
- int                axis
+ axis_enum          axis
  ) throw()
 {
 
@@ -221,7 +222,7 @@ void FieldFace::allocate_
   }
 
   // Allocate the array
-  array_.reserve(array_size);
+  array_.resize(array_size);
 
 }
 

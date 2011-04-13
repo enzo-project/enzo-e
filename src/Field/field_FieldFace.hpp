@@ -25,7 +25,8 @@ public: // interface
   FieldFace(int n, char * array) throw()
     : array_()
   { array_.resize(n);
-    for (size_t i=0; i<n; i++) array_[i] = array[i]; 
+    printf ("FieldFace %d %p\n",n,array);
+    for (int i=0; i<n; i++) array_[i] = array[i]; 
   };
 
   //----------------------------------------------------------------------
@@ -67,7 +68,7 @@ private: // functions
   /// Allocate array_ storage
   void allocate_(const FieldDescr * field_descr,
 		 const FieldBlock * field_block,
-		 int                axis) throw();
+		 axis_enum          axis) throw();
 
   /// Deallocate array_ storage
   void deallocate_() throw();

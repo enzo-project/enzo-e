@@ -17,7 +17,7 @@ Block * EnzoFactory::create_block
  double xm, double ym, double zm,
  double hx, double hy, double hz,
  int num_field_blocks
- ) throw()
+ ) const throw()
 {
 #ifdef CONFIG_USE_CHARM
 

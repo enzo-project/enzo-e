@@ -297,6 +297,7 @@ void Block::p_refresh (int nbx, int nby, int nbz)
     if ( ! xm_boundary || periodic ) {
       field_face.load(field_descr,field_block(),axis_x,face_lower);
       int    n     = field_face.size();
+      printf ("n = %d\n",field_face.size());
       char * array = field_face.array();
       block_array(ixm,iy,iz).p_refresh_face (n,array,axis_x,face_upper);
     }
@@ -331,14 +332,14 @@ void Block::p_refresh (int nbx, int nby, int nbz)
 //----------------------------------------------------------------------
 
 void Block::p_refresh_face (int n, char * buffer,
-				int axis, int face)
+			    int axis, int face)
 {
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   const FieldDescr * field_descr = simulation->field_descr();
 
   FieldFace field_face(n, buffer);
 
-  field_face.store(field_descr, field_block(), axis, face);
+  field_face.store(field_descr, field_block(), axis_enum(axis), face_enum(face));
 
   INCOMPLETE("Block::p_refresh_face");
 }

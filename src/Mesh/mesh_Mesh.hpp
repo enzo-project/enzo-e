@@ -20,7 +20,7 @@ class Mesh {
 public: // interface
 
   /// Initialize an Mesh object
-  Mesh(Factory * factory,
+  Mesh(const Factory * factory,
        int nx,  int ny,  int nz,
        int nbx, int nby, int nbz) throw ();
 
@@ -61,14 +61,14 @@ public: // interface
   virtual void insert_patch(Patch *) throw();
 
   /// Return the factory object associated with the Mesh
-  Factory * factory () const throw()
+  const Factory * factory () const throw()
   { return factory_; }
 
 protected: // attributes
 
   /// Factory for creating Simulations, Meshes, Patches and Blocks
   /// [abstract factory design pattern]
-  Factory * factory_;
+  const Factory * factory_;
 
   /// List of local patchs
 

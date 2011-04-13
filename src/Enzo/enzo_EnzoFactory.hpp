@@ -24,7 +24,7 @@ public: // interface
    int nx, int ny, int nz,
    double xm, double ym, double zm,
    double hx, double hy, double hz,
-   int num_field_blocks = 1) throw();
+   int num_field_blocks = 1) const throw();
 
 };
 

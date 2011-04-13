@@ -23,7 +23,7 @@ public: // functions
   EnzoSimulationMpi
   ( const char * parameter_file,
     GroupProcess * group_process,
-    int index) throw();
+    int index = 0) throw();
 
   /// Destructor
   ~EnzoSimulationMpi() throw();

@@ -19,10 +19,30 @@ public: // functions
 
   /// Constructor
   EnzoSimulation
-  ( const char * parameter_file_name,
+  ( const char *   parameter_file_name,
+#ifdef CONFIG_USE_CHARM
+    int            n,
+#else
     GroupProcess * group_process = 0,
-    int index = 0
+#endif
+    int            index = 0
    ) throw();
+
+
+  //==================================================
+  // CHARM
+  //==================================================
+
+#ifdef CONFIG_USE_CHARM
+  /// Initialize an empty EnzoSimulation
+  EnzoSimulation() {TRACE("EnzoSimulation()")};
+
+  /// Initialize a migrated EnzoSimulation
+  EnzoSimulation (CkMigrateMessage *m) {TRACE("EnzoSimulation(msg)")};
+
+  //==================================================
+
+#endif
 
   /// Destructor
   virtual ~EnzoSimulation() throw();
@@ -34,7 +54,7 @@ public: // functions
   virtual void finalize() throw();
 
   /// Run the simulation
-  virtual void run() throw() = 0;
+  virtual void run() throw();
 
   /// Load a Simulation from disk
   virtual void read() throw();

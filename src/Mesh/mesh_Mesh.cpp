@@ -14,7 +14,7 @@
 
 Mesh::Mesh
 (
- Factory * factory,
+ const Factory * factory,
  int nx, int ny, int nz,
  int nbx, int nby, int nbz
  ) throw ()

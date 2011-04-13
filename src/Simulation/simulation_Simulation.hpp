@@ -47,14 +47,17 @@ public: // interface
   /// Constructor for CHARM++
 
   /// Initialize the Simulation object
-  Simulation(const char parameter_file[],
+  Simulation
+  ( const char *   parameter_file,
 #ifdef CONFIG_USE_CHARM
-	     int n,
+    int            n,
+    const Factory & factory,
 #else
-	     Factory *      factory,
-	     GroupProcess * group_process = 0,
+    const Factory & factory,
+    GroupProcess * group_process = 0,
 #endif
-	     int index=0);
+    int            index = 0
+    ) throw();
 
   //==================================================
   // CHARM
@@ -77,9 +80,6 @@ public: // interface
 
   // Refresh ghost zones and apply boundary conditions
   void p_refresh (int stopping, double dt) throw();
-
-protected:
-  int count_prepare_;
 
 #endif
 
@@ -140,7 +140,7 @@ protected:
   Method * method(int i) const throw();
 
   /// Return the factory object
-  Factory * factory () const throw();
+  const Factory * factory () const throw();
 
   /// Return the current cycle number
   int cycle() const throw() {return cycle_;};
@@ -160,13 +160,13 @@ public: // virtual functions
   virtual void finalize() throw();
 
   /// Run the simulation
-  virtual void run() throw() = 0;
+  virtual void run() throw();
 
   /// Load a Simulation from disk
-  virtual void read() throw() = 0;
+  virtual void read() throw();
 
   /// Write a Simulation state to disk
-  virtual void write() const throw() = 0;
+  virtual void write() const throw();
 
 protected: // functions
 
@@ -198,34 +198,33 @@ protected: // functions
   /// Initialize the method objects
   void initialize_method_  () throw();
 
-
   void deallocate_() throw();
 
 protected: // abstract virtual functions
 
   /// Create named stopping object
   virtual Stopping * 
-  create_stopping_ (std::string name) throw () = 0;
+  create_stopping_ (std::string name) throw ();
 
   /// Create named timestep object
   virtual Timestep * 
-  create_timestep_ (std::string name) throw () = 0;
+  create_timestep_ (std::string name) throw ();
 
   /// Create named initialization object
   virtual Initial * 
-  create_initial_ (std::string name) throw () = 0;
+  create_initial_ (std::string name) throw ();
 
   /// Create named boundary object
   virtual Boundary * 
-  create_boundary_ (std::string name) throw () = 0;
+  create_boundary_ (std::string name) throw ();
 
   /// Create named output object
   virtual Output * 
-  create_output_ (std::string name) throw () = 0;
+  create_output_ (std::string name) throw ();
 
   /// Create named method object
   virtual Method * 
-  create_method_ (std::string name) throw () = 0;
+  create_method_ (std::string name) throw ();
 
 protected: // attributes
 
@@ -236,11 +235,11 @@ protected: // attributes
   /// Parameters associated with this simulation
   Parameters * parameters_;
 
-#ifdef CONFIG_USE_CHARM
   /// Factory for creating related families of Meshes, Patches and Blocks 
   /// [abstract factory design pattern]
-  Factory * factory_; 
+  const Factory * factory_; 
 
+#ifndef CONFIG_USE_CHARM
   /// Parallel group for the simulation
   GroupProcess * group_process_;
 #endif

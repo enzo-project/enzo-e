@@ -14,7 +14,7 @@
 
 Patch::Patch
 (
- Factory * factory, 
+ const Factory * factory, 
  GroupProcess * group_process,
  int nx,  int ny,  int nz,
  int nbx, int nby, int nbz,
