@@ -3,7 +3,7 @@ Import('parallel_run')
 Import('type')
 Import('serial_run')
 
-# O test_FieldFaces.cpp
+# O test_FieldFace.cpp
 # O test_Mpi.cpp
 # O test_ParallelAffinity.cpp
 # O test_ParallelGroup.cpp
@@ -61,7 +61,7 @@ env.RunSerial(type_path + 'test_Error.unit',       '#/bin/test_Error')
 #----------------------------------------------------------------------
 env.RunSerial(type_path + 'test_FieldBlock.unit','#/bin/test_FieldBlock')
 env.RunSerial(type_path + 'test_FieldDescr.unit','#/bin/test_FieldDescr')
-env.RunSerial(type_path + 'test_FieldFaces.unit','#/bin/test_FieldFaces')
+env.RunSerial(type_path + 'test_FieldFace.unit', '#/bin/test_FieldFace')
 #----------------------------------------------------------------------
 # MEMORY COMPONENT        
 #----------------------------------------------------------------------

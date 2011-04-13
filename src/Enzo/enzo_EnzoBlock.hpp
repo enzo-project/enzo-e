@@ -55,8 +55,9 @@ public: // interface
   void prepare();
   /// Accumulate block-local contributions to an output dump
   void p_output();
-  /// Refresh ghost zones
-  //  void refresh();
+  /// Refresh ghost zones and apply boundary conditions
+  void p_refresh();
+  void p_get_face();
   /// Boundary and Method
   //  void compute();
   //==================================================

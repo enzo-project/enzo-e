@@ -63,14 +63,21 @@ class Patch
   GroupProcess * group()  const throw()
   { return group_process_; };
 
-  /// Return the total number of local blocks
-  size_t num_local_blocks() const throw();
-
 
   //--------------------------------------------------
 
   /// Allocate local blocks
   void allocate_blocks(FieldDescr * field_descr) throw();
+
+  /// Return whether blocks have been allocated or not
+  bool blocks_allocated() throw()
+  { 
+#ifdef CONFIG_USE_CHARM
+    return block_exists_;
+#else
+    return (block_.size() != 0);
+#endif
+  }
 
 #ifdef CONFIG_USE_CHARM
   /// Return the number of blocks
@@ -78,12 +85,16 @@ class Patch
   { return blocking_[0]*blocking_[1]*blocking_[2] ; };
 
   /// Return the block CHARM++ chare array
-  CProxy_EnzoBlock block() throw()
+  CProxy_EnzoBlock blocks() throw()
   { return block_; }
-#endif
+#else
     
+  /// Return the total number of local blocks
+  size_t num_local_blocks() const throw();
+
   /// Return the ith local block
   Block * local_block(size_t i) const throw();
+#endif
 
   /// Deallocate local blocks
   void deallocate_blocks() throw();
@@ -93,6 +104,7 @@ protected: // attributes
   /// Array of blocks ib associated with this process
 #ifdef CONFIG_USE_CHARM
   CProxy_EnzoBlock block_;
+  bool block_exists_;
 #else
   std::vector<Block * > block_;
 #endif

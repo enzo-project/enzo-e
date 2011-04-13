@@ -40,11 +40,14 @@ public: // functions
 
   //==================================================
 
-  /// Apply Output and Monitor before each cycle
-  void p_prepare() throw();
+  /// Monitor output, and set simulation (cycle , time)
+  void p_prepare(int cycle, double time) throw();
 
   /// Request all Mesh blocks to send output to main::p_output_close()
-  void p_output(int index, int cycle, double time) throw();
+  //  void p_output(int index, int cycle, double time) throw();
+
+  // Refresh ghost zones and apply boundary conditions
+  void p_refresh (int stopping, double dt) throw();
 
 private:
   int count_prepare_;

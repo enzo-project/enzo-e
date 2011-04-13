@@ -267,6 +267,7 @@ void Output::scheduled_write
  ) throw()
 {
   if (write_this_cycle(cycle, time)) {
+    // Write all Mesh fields
     for (size_t i = 0; i<field_list_.size(); i++) {
       write (field_descr, i, mesh,cycle,time,root_call); 
     }
@@ -286,6 +287,7 @@ void Output::scheduled_write
  ) throw()
 {
   if (write_this_cycle(cycle, time)) {
+    // Write all Patch fields
     for (size_t i = 0; i<field_list_.size(); i++) {
       write (field_descr, i, patch,mesh,cycle,time,root_call); 
     }
@@ -306,6 +308,7 @@ void Output::scheduled_write
  ) throw()
 {
   if (write_this_cycle(cycle, time)) {
+    // Write all Block fields
     for (size_t i = 0; i<field_list_.size(); i++) {
       write (field_descr, i, block, patch, mesh,cycle,time,root_call); 
     }

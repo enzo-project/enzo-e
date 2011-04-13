@@ -28,7 +28,7 @@ class FieldBlock {
   /// arrays.  Axes can be permuted, including the index selecting the
   /// array for storing interleaved arrays.
 
-  friend class FieldFaces;
+  friend class FieldFace;
 
 public: // interface
 
@@ -70,8 +70,8 @@ public: // interface
   void cell_width(Block * block,
 		  double * hx, double * hy, double * hz) const throw ();
 
-  /// Return the associated field faces object
-  FieldFaces * field_faces(const FieldDescr * field_descr) throw ();
+  // /// Return the associated field faces object
+  // FieldFaces * field_faces(const FieldDescr * field_descr) throw ();
 
   /// Clear specified array(s) to specified value
   void clear ( const FieldDescr * field_descr,
@@ -151,8 +151,8 @@ private: // functions
 
 private: // attributes
 
-  /// Corresponding Field faces
-  FieldFaces * field_faces_;
+  // /// Corresponding Field faces
+  // FieldFaces * field_faces_;
 
   /// Size of fields on the block, assuming centered
   int size_[3];

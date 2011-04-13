@@ -37,7 +37,11 @@ Simulation::Simulation
     method_list_()
 {
   performance_ = new Performance;
+#ifdef CONFIG_USE_CHARM
   monitor_     = new Monitor;
+#else
+  monitor_ = Monitor::instance();
+#endif
   parameters_  = new Parameters(parameter_file_name,monitor_);
 }
 
@@ -666,8 +670,10 @@ void Simulation::deallocate_() throw()
 {
   delete performance_;
   performance_ = 0;
+#ifdef CONFIG_USE_CHARM
   delete monitor_;
   monitor_ = 0;
+#endif
   delete mesh_;
   mesh_ = 0;
   delete field_descr_;

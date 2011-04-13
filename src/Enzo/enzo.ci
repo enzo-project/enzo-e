@@ -9,6 +9,7 @@
 mainmodule enzo {
 
   readonly CProxy_Main                 proxy_main;
+  readonly CProxy_Main                 mainProxy;
   readonly CProxy_EnzoSimulationCharm  proxy_simulation;
 
   mainchare Main {
@@ -19,8 +20,6 @@ mainmodule enzo {
 
     //  --- Open image file and and initialize image data ---
 
-    entry void p_output_open (int count_blocks, int index, int cycle, double time);
-
     //  --- Accumulate block output contributions and write output to disk ---
 
     entry void p_output_close (int count_blocks);
@@ -28,7 +27,8 @@ mainmodule enzo {
     //  --- Monitor, Output, Timestep, Stopping ---
     //  ---  [forward from Block to Simulation]
 
-    entry void p_prepare (int count_blocks);
+    entry void p_prepare (int count_blocks, int cycle, double time,
+			  double dt_block, int stop_block);
 
   };
 
@@ -39,11 +39,14 @@ mainmodule enzo {
 
     //  --- Monitor, Output, Timestep, Stopping ---
 
-    entry void p_prepare ();
+    entry void p_prepare (int cycle, double time);
 
     //  --- Called by main; request output from all blocks ---
 
-    entry void p_output (int index, int cycle, double time);
+    // entry void p_output (int index, int cycle, double time);
+
+    //  --- Called by main; refresh block ghost zones ---
+    entry void p_refresh(int stopping, double dt);
 
   };
 
@@ -70,6 +73,9 @@ mainmodule enzo {
 
     // --- Compute block output contribution ---
     entry void p_output();
+
+    // --- Refresh boundary conditions and ghost zones ---
+    entry void p_refresh();
 
     //     void p_next();
     //     void p_prepare();

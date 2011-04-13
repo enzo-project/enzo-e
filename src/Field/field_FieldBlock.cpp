@@ -14,8 +14,7 @@
 //----------------------------------------------------------------------
 
 FieldBlock::FieldBlock ( int nx, int ny, int nz ) throw()
-  : field_faces_(0),
-    array_(0),
+  : array_(0),
     field_values_(),
     ghosts_allocated_(false)
 {
@@ -121,13 +120,13 @@ void FieldBlock::cell_width(Block * block,
 
 //----------------------------------------------------------------------
 
-FieldFaces * FieldBlock::field_faces(const FieldDescr * field_descr) throw ()
-{
-  if (field_faces_ == NULL) {
-    field_faces_ = new FieldFaces(field_descr,this);
-  }
-  return field_faces_;
-}
+// FieldFaces * FieldBlock::field_faces(const FieldDescr * field_descr) throw ()
+// {
+//   if (field_faces_ == NULL) {
+//     field_faces_ = new FieldFaces(field_descr,this);
+//   }
+//   return field_faces_;
+// }
 
 //----------------------------------------------------------------------
 
@@ -267,10 +266,10 @@ void FieldBlock::deallocate_array () throw()
     field_values_.clear();
 
   }
-  if (field_faces_ != 0) {
-    delete field_faces_;
-    field_faces_ = 0;
-  }
+  // if (field_faces_ != 0) {
+  //   delete field_faces_;
+  //   field_faces_ = 0;
+  // }
 
 }
 

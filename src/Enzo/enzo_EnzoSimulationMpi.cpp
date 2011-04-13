@@ -9,6 +9,8 @@
 /// @date     Tue May 11 18:06:50 PDT 2010
 /// @brief    Implementation of EnzoSimulationMpi user-dependent class member functions
 
+#ifndef CONFIG_USE_CHARM
+
 #include "cello.hpp"
 
 #include "enzo.hpp"
@@ -249,3 +251,5 @@ void EnzoSimulationMpi::run() throw()
   performance.print();
 
 }
+
+#endif /* ! CONFIG_USE_CHARM */

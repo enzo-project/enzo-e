@@ -437,6 +437,11 @@ PARALLEL_MAIN_BEGIN
 
   field_block->cell_width(block,&hx,&hy,&hz);
 
+  printf ("%g %g  %g %g  %g %g\n",
+	  hx, 2.0/nx,
+	  hy, 4.0/ny,
+	  hz, 6.0/nz);
+
   unit_assert(fabs(hx-2.0/nx) < 1e-6);
   unit_assert(fabs(hy-4.0/ny) < 1e-6);
   unit_assert(fabs(hz-6.0/nz) < 1e-6);

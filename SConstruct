@@ -183,7 +183,7 @@ if (arch == "linux"):
    hdf5_lib = (hdf5_path + '/lib')
 
    flags_debug = '-g'
-   flags_opt   = '-O3'
+   flags_opt   = ''
    flags_prec  = '-m128bit-long-double'
    flags_warn  = '-Wall'
 

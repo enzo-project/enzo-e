@@ -10,6 +10,8 @@
 /// @date     Tue Feb  1 16:46:01 PST 2011
 /// @brief    [\ref Mesh] Declaration of the ItBlockLocal iterator
 
+#ifndef CONFIG_USE_CHARM
+
 class ItBlockLocal {
 
   /// @class    ItBlockLocal
@@ -39,5 +41,7 @@ private: // attributes
   /// Always in the range 0 <= index1_ <= number of local blocks
   size_t index1_;
 };
+
+#endif
 
 #endif /* MESH_IT_BLOCKS_HPP */

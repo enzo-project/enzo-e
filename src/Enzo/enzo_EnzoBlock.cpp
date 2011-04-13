@@ -63,11 +63,10 @@ EnzoBlock::EnzoBlock(int ix, int iy, int iz,
 
 EnzoBlock::~EnzoBlock() throw ()
 {
-  PARALLEL_PRINTF ("%s:%d Oops\n",__FILE__,__LINE__);
 }
 
 //======================================================================
-// CHARM ENTRY METHODS
+// CHARM FUNCTIONS
 //======================================================================
 
 #ifdef CONFIG_USE_CHARM
@@ -94,42 +93,149 @@ void EnzoBlock::p_initial()
 
   initialize(simulation->cycle(), simulation->time());
 
-  // Prepare for the first cycle: perform Output, Monitor, Stopping
-  // [reduction], and Timestep [reduction]
+  // Prepare for the first cycle: perform and disk Output, user
+  // Monitoring, apply Stopping criteria [reduction], and compute the
+  // next Timestep [reduction]
 
-  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
-  proxy_main.p_prepare(num_blocks);
+  // prepare for first cycle: Timestep, Stopping, Monitor, Output
 
+  prepare();
 }
 
-  //--------------------------------------------------
-  // Stopping
-  //--------------------------------------------------
+//----------------------------------------------------------------------
 
-  //     int cycle_block   = enzo_block->CycleNumber;
-  //     double time_block =  enzo_block->Time;
+void EnzoBlock::prepare()
+{
 
-  //     int stop_block = stopping_->complete(cycle_block,time_block);
-
-  //--------------------------------------------------
-  // Timestep
-  //--------------------------------------------------
-
-  // 	double dt_block = timestep_->compute(field_descr_,block);
+  EnzoSimulationCharm * simulation = proxy_simulation.ckLocalBranch();
+  FieldDescr * field_descr = simulation->field_descr();
 
   //--------------------------------------------------
-  // Refresh
+  // Timestep [block]
   //--------------------------------------------------
 
-// }
+  Timestep * timestep = simulation->timestep();
+  double dt_block = timestep->compute(field_descr,this);
+
+  //--------------------------------------------------
+  // Stopping [block]
+  //--------------------------------------------------
+
+  int    cycle = CycleNumber;
+  double time  = Time;
+
+  Stopping * stopping = simulation->stopping();
+  int stop_block = stopping->complete(cycle,time);
+
+  //--------------------------------------------------
+  // Main::p_prepare()
+  //--------------------------------------------------
+
+  int num_blocks = simulation->mesh()->patch(0)->num_blocks();
+
+  proxy_main.p_prepare(num_blocks, cycle, time, dt_block, stop_block);
+
+}
 
 //----------------------------------------------------------------------
 
 void EnzoBlock::p_output ()
 {
+  INCOMPLETE("EnzoBlock::p_output");
 }
 
-#endif
+//----------------------------------------------------------------------
+
+void EnzoBlock::p_refresh ()
+{
+  INCOMPLETE("EnzoBlock::p_refresh");
+
+  EnzoSimulationCharm * simulation = proxy_simulation.ckLocalBranch();
+
+  // Get domain lower and upper
+
+  Mesh * mesh = simulation->mesh();
+
+  double lower[3];
+  double upper[3];
+
+  mesh->lower(&lower[0],&lower[1],&upper[2]);
+  mesh->upper(&upper[0],&upper[1],&upper[2]);
+
+  // Field block size
+
+  int nx,ny,nz;
+  field_block()->size (&nx,&ny,&nz);
+
+  Boundary * boundary = simulation->boundary();
+  FieldDescr * field_descr = simulation->field_descr();
+
+  //--------------------------------------------------
+  // X-axis Boundary Refresh
+  //--------------------------------------------------
+
+  if ( nx > 1) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    bool xm_boundary = fabs(lower_[0]-lower[0]) < 1e-7;
+    bool xp_boundary = fabs(upper_[0]-upper[0]) < 1e-7;
+    if ( xm_boundary ) {
+      boundary->enforce(field_descr,this,face_lower,axis_x);
+    } else {
+      INCOMPLETE("xm refresh");
+    }
+    if ( xp_boundary ) {
+      boundary->enforce(field_descr,this,face_upper,axis_x);
+    } else {
+      INCOMPLETE("xp refresh");
+    }
+  }
+
+  //--------------------------------------------------
+  // Y-axis Boundary Refresh
+  //--------------------------------------------------
+
+  if ( ny > 1) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    bool ym_boundary = fabs(lower_[1]-lower[1]) < 1e-7;
+    bool yp_boundary = fabs(upper_[1]-upper[1]) < 1e-7;
+    if ( ym_boundary ) {
+      boundary->enforce(field_descr,this,face_lower,axis_y);
+    } else {
+      INCOMPLETE("ym refresh");
+    }
+    if ( yp_boundary ) {
+      boundary->enforce(field_descr,this,face_upper,axis_y);
+    } else {
+      INCOMPLETE("yp refresh");
+    }
+  }
+
+  //--------------------------------------------------
+  // Z-axis Boundary Refresh
+  //--------------------------------------------------
+
+  if ( nz > 1) {
+    // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
+    bool zm_boundary = fabs(lower_[2]-lower[2]) < 1e-7;
+    bool zp_boundary = fabs(upper_[2]-upper[2]) < 1e-7;
+    if ( zm_boundary ) {
+      boundary->enforce(field_descr,this,face_lower,axis_z);
+    } else {
+      INCOMPLETE("zm refresh");
+    }
+    if ( zp_boundary ) {
+      boundary->enforce(field_descr,this,face_upper,axis_z);
+    } else {
+      INCOMPLETE("zp refresh");
+    }
+  }
+
+}
+
+
+// }
+
+#endif /* CONFIG_USE_CHARM */
 
 //======================================================================
 
@@ -439,11 +545,11 @@ void EnzoBlock::image_dump
   // slice
   sprintf (filename,"slice-%s-%06d.png",file_root,cycle);
 
-  Monitor * monitor = Monitor::instance();
+  EnzoOutputImage * output = new EnzoOutputImage;
 
   if (nz == 1) {
     // 2D: "reduce" along z
-    monitor->image(filename,
+    output->image(filename,
 		   nx,ny,
 		   BaryonField[field_density],
 		   nx,ny,nz,
@@ -454,7 +560,7 @@ void EnzoBlock::image_dump
   } else {
     // 3D projection
     sprintf (filename,"project-%s-%06d-x.png",file_root,cycle);
-    monitor->image(filename,
+    output->image(filename,
 		   ny,nz,
 		   BaryonField[field_density],
 		   nx,ny,nz,
@@ -463,7 +569,7 @@ void EnzoBlock::image_dump
 		   //		  3,3,3,nx-3,ny-3,nz-3,
 		   axis_x,reduce_sum,lower, upper);
     sprintf (filename,"project-%s-%06d-y.png",file_root,cycle);
-    monitor->image(filename,
+    output->image(filename,
 		   nz,nx,
 		   BaryonField[field_density],
 		   nx,ny,nz,
@@ -472,7 +578,7 @@ void EnzoBlock::image_dump
 		   //		  3,3,3,nx-3,ny-3,nz-3,
 		   axis_y,reduce_sum,lower, upper);
     sprintf (filename,"project-%s-%06d-z.png",file_root,cycle);
-    monitor->image(filename,
+    output->image(filename,
 		   nx,ny,
 		   BaryonField[field_density],
 		   nx,ny,nz,

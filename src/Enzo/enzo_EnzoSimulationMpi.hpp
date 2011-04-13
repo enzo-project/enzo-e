@@ -4,6 +4,8 @@
 #ifndef ENZO_ENZO_SIMULATION_MPI_HPP
 #define ENZO_ENZO_SIMULATION_MPI_HPP
 
+#ifndef CONFIG_USE_CHARM
+
 /// @file     enzo_EnzoSimulationMpi.hpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     2010-05-11
@@ -34,6 +36,8 @@ protected:
   GroupProcess * group_process_;
 
 };
+
+#endif /* ! CONFIG_USE_CHARM */
 
 #endif /* ENZO_ENZO_SIMULATION_MPI_HPP */
 

@@ -68,14 +68,6 @@ public: // interface
 
   //----------------------------------------------------------------------
 
-  // /// Set domain lower extent
-  // void set_lower(double x, double y, double z) throw ();
-
-  // /// Set domain upper extent
-  // void set_upper(double x, double y, double z) throw ();
-
-  //----------------------------------------------------------------------
-
   /// Return the ith Field block
   const FieldBlock * field_block (int i=0) const throw();
 

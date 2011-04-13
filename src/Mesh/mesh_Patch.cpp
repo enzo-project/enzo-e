@@ -21,9 +21,14 @@ Patch::Patch
  double xm, double ym, double zm,
  double xp, double yp, double zp
 ) throw()
-  : factory_(factory),
-    group_process_(group_process),
-    layout_(new Layout (nbx,nby,nbz))
+  :
+#ifdef CONFIG_USE_CHARM
+  block_exists_(false),
+#endif
+  factory_(factory),
+  group_process_(group_process),
+  layout_(new Layout (nbx,nby,nbz))
+
 {
   // Check 
   if ( ! ((nx >= nbx) && (ny >= nby) && (nz >= nbz))) {
@@ -138,14 +143,6 @@ void Patch::upper(double * xp, double * yp, double * zp) const throw ()
   if (zp) (*zp) = upper_[2];
 }
 
-//----------------------------------------------------------------------
-
-size_t Patch::num_local_blocks() const  throw()
-{
-  int rank = group_process_->rank();
-  return layout_->local_count(rank);
-}
-
 //======================================================================
 
 void Patch::allocate_blocks(FieldDescr * field_descr) throw()
@@ -202,6 +199,7 @@ void Patch::allocate_blocks(FieldDescr * field_descr) throw()
        lower_[0],lower_[1],lower_[2],
        xb,yb,zb, 1,
        nbx,nby,nbz);
+    block_exists_ = true;
   }
 
 #else
@@ -246,6 +244,7 @@ void Patch::deallocate_blocks() throw()
 #ifdef CONFIG_USE_CHARM
 
   block_.ckDestroy();
+  block_exists_ = false;
 
 #else
 
@@ -258,22 +257,31 @@ void Patch::deallocate_blocks() throw()
 }
 
 //----------------------------------------------------------------------
+#ifndef CONFIG_USE_CHARM
+size_t Patch::num_local_blocks() const  throw()
+{
+  int rank = group_process_->rank();
+  return layout_->local_count(rank);
+}
+#endif
 
+// #ifdef CONFIG_USE_CHARM
+//   if (block_exists_) {
+//     return num_blocks();
+//   } else {
+//     return 0;
+//   }
+// #else
+
+//----------------------------------------------------------------------
+
+#ifndef CONFIG_USE_CHARM
 Block * Patch::local_block(size_t i) const throw()
 {
-#ifdef CONFIG_USE_CHARM
-
-  ERROR("Patch::local_block",
-	"Function should not be called");
-
-  return 0;
-
-#else
-
   return (i < block_.size()) ? block_[i] : 0;
 
-#endif
 }
+#endif
 
 
 

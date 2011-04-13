@@ -90,21 +90,21 @@ public: // virtual functions
   ( const FieldDescr * field_descr,
     int index, Mesh * mesh, 
     int cycle, double time,
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw() = 0;
+    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
   /// Write patch data to disk; may be called by write (Mesh)
   virtual void write 
   ( const FieldDescr * field_descr,
     int index, Patch * patch, Mesh * mesh,
     int cycle, double time, 
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw() = 0;
+    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
   /// Write block data to disk; may be called by write (Patch)
   virtual void write 
   ( const FieldDescr * field_descr,
     int index, Block * block, Patch * patch, Mesh * mesh, 
     int cycle, double time, 
-    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) const throw() = 0;
+    bool root_call=true, int ix0=0, int iy0=0, int iz0=0) throw() = 0;
 
 protected: // attributes
 

@@ -40,22 +40,15 @@ PARALLEL_MAIN_BEGIN
 
   unit_init(rank, size);
 
-  TRACE("");
+#ifdef CONFIG_USE_CHARM
   monitor_ = new Monitor;
-  TRACE("");
-
   monitor_->set_active (true);
-  TRACE("");
-
-  // display header text
-  TRACE("");
-
   monitor_->header();
-  TRACE("");
-
   monitor_->print ("BEGIN ENZO-P");
+#else
+  Monitor::instance()->print ("BEGIN ENZO-P");
+#endif
 
-  TRACE("");
   // open parameter file, calling usage() if invalid
 
   if (PARALLEL_ARGC != 2) {
@@ -81,6 +74,9 @@ PARALLEL_MAIN_BEGIN
     count_output_open_[i]  = 0;
     count_output_close_[i] = 0;
   }
+  dt_mesh_ = std::numeric_limits<double>::max();
+  stop_mesh_ = true;
+  
 #endif
   //--------------------------------------------------
   TRACE("");
@@ -126,7 +122,7 @@ PARALLEL_MAIN_BEGIN
 #ifndef CONFIG_USE_CHARM    
   // display footer text
 
-  monitor_->print ("END ENZO-P");
+  Monitor::instance()->print ("END ENZO-P");
 
   // clean up
 
@@ -162,29 +158,76 @@ void p_exit(int count)
 
 //----------------------------------------------------------------------
 
-void p_prepare(int count)
+//  --- Open output file and and initialize output data ---
+
+void output_open(int cycle, double time)
 {
-  count_prepare_++;
-  if (count_prepare_ >= count) {
-    count_prepare_ = 0;
-    TRACE("main::p_prepare()");
-    unit_finalize();
-    PARALLEL_EXIT;
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  for (int index=0; index<simulation->num_output(); index++) {
+
+    Output * output = simulation->output(index);
+
+    if (output->write_this_cycle(cycle,time)) {
+      INCOMPLETE("Main::output_open")
+      // CkPrintf ("%s:%d Main::output_open(%d,%g) output %d\n",
+      // 		__FILE__,__LINE__,cycle,time,index);
+    }
   }
+  
 };
 
 //----------------------------------------------------------------------
 
-//  --- Open output file and and initialize output data ---
-
-void p_output_open(int count, int index, int cycle, double time)
+void p_prepare(int count, int cycle, double time,
+	       double dt_block, int stop_block)
 {
-  count_output_open_[index]++;
-  if (count_output_open_[index] == count) {
-    count_output_open_[index] = 0;
-    // Request blocks to contribute index'th output data
-    proxy_simulation.p_output(index,cycle,time);
-    
+  // Assumes cycle and time are the same for all "incoming" blocks;
+  // only use the last one
+
+  ++count_prepare_;
+
+  //--------------------------------------------------
+  // Timestep
+  //--------------------------------------------------
+
+  dt_mesh_   = MIN(dt_mesh_, dt_block);
+
+  //--------------------------------------------------
+  // Stopping
+  //--------------------------------------------------
+
+  stop_mesh_ = stop_mesh_ && stop_block;
+
+  if (count_prepare_ >= count) {
+
+    //--------------------------------------------------
+    // Output
+    //--------------------------------------------------
+
+    output_open (cycle,time);
+
+    //--------------------------------------------------
+    // Monitor
+    //--------------------------------------------------
+
+    proxy_simulation.p_prepare(cycle,time);
+
+    //--------------------------------------------------
+    // Simulation::p_refresh()
+    //--------------------------------------------------
+    proxy_simulation.p_refresh(stop_mesh_, dt_mesh_);
+
+    // Reset pool
+    count_prepare_ = 0;
+    dt_mesh_ = std::numeric_limits<double>::max();
+    stop_mesh_ = true;
+
+    // Next call Simulation::p_refresh() for boundary conditions and
+    // ghost zones
+
+    // unit_finalize();
+    // PARALLEL_EXIT;
   }
 };
 
@@ -204,6 +247,10 @@ int count_exit_;
 int count_prepare_;
 int count_output_open_[MAX_OUTPUT];
 int count_output_close_[MAX_OUTPUT];
+
+// Reduction variables
+int stop_mesh_;
+double dt_mesh_;
 
 Monitor * monitor_;
 

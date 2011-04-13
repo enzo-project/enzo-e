@@ -30,14 +30,13 @@ sources  = [Glob('field*cpp')]
 # TARGETS
 #------------------------------
 
+libraries        = env.Library ('field', [sources])
 
-libraries              = env.Library ('field', [sources])
+test_field_block = env.Program (['test_FieldBlock.cpp',  sources])
+test_field_descr = env.Program (['test_FieldDescr.cpp',  sources])
+test_field_face  = env.Program (['test_FieldFace.cpp',  sources])
 
-test_field_block       = env.Program (['test_FieldBlock.cpp',  sources])
-test_field_descr       = env.Program (['test_FieldDescr.cpp',  sources])
-test_field_block_faces = env.Program (['test_FieldFaces.cpp',  sources])
-
-binaries = [test_field_block, test_field_descr, test_field_block_faces]
+binaries = [test_field_block, test_field_descr, test_field_face]
 
 if (type == "charm"):
 	test = 'test_FieldBlock'
@@ -46,7 +45,7 @@ if (type == "charm"):
 	test = 'test_FieldDescr'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
-	test = 'test_FieldFaces'
+	test = 'test_FieldFace'
 	env.CharmBuilder(test + '.decl.h',test + '.ci',ARG = test)
 	env.Depends(env.Object(test + '.cpp'),test + '.decl.h')
 

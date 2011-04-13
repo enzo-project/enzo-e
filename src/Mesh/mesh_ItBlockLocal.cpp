@@ -8,6 +8,8 @@
 /// @brief    Implementation of ItBlockLocal
 //----------------------------------------------------------------------
 
+#ifndef CONFIG_USE_CHARM
+
 #include "cello.hpp"
 
 #include "mesh.hpp"
@@ -39,3 +41,5 @@ bool ItBlockLocal::done () const throw()
 {
   return index1_ >= patch_->num_local_blocks();
 }
+
+#endif

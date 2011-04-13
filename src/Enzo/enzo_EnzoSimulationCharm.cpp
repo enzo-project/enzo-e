@@ -26,19 +26,14 @@ EnzoSimulationCharm::EnzoSimulationCharm
   : EnzoSimulation(parameter_file, new GroupProcessCharm, index),
     count_prepare_(0)
 {
-  TRACE("");
-
   // Monitor output from root pe only
   monitor_->set_active(CkMyPe() == 0);
-  TRACE("");
 
   // Initialize on all processes
   initialize();
-  TRACE("");
 
-  // Start simulation from one process
-  if (CkMyPe() == 0) run();
-  TRACE("");
+  // Start simulation
+  run();
 
 }
 
@@ -65,69 +60,83 @@ void EnzoSimulationCharm::run() throw()
   
   performance_->start();
 
+  //--------------------------------------------------
+  // Initial [block]
+  //--------------------------------------------------
+
   ItPatch it_patch(mesh_);
-
   Patch * patch;
-
-  // Initialize the simulation; 
-
   while (( patch = ++it_patch )) {
-
-    TRACE("");
-    patch->block().p_initial();
-
+    if (patch->blocks_allocated()) {
+      //--------------------------------------------------
+      // Initial [block]
+      //--------------------------------------------------
+      patch->blocks().p_initial();
+    }
   }
+
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationCharm::p_prepare() throw()
+void EnzoSimulationCharm::p_prepare(int cycle, double time) throw()
 {
-  // Only root process has root patch
-
-  if (CkMyPe() != 0) return;
-
-  TRACE("EnzoSimulationCharm::p_prepare");
-  count_prepare_ = 0;
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
 
+  cycle_ = cycle;
+  time_  = time;
+
   monitor_-> print("[Simulation %d] cycle %04d time %15.12f", 
 		   index_,cycle_,time_);
-
-  //--------------------------------------------------
-  // Output
-  //--------------------------------------------------
-
-  int count = CkNumPes();
-  for (int index=0; index<num_output(); index++) {
-
-    if (output(index)->write_this_cycle(cycle_,time_)) {
-
-      proxy_main.p_output_open(count, index, cycle_, time_);
-	
-    }
-  }
 }
 
 //----------------------------------------------------------------------
 
-void EnzoSimulationCharm::p_output(int index, int cycle, double time) throw()
+// void EnzoSimulationCharm::p_output(int index, int cycle, double time) throw()
+// {
+//   ItPatch it_patch(mesh_);
+
+//   Patch * patch;
+
+//   // Initialize the simulation; 
+
+//   while (( patch = ++it_patch )) {
+
+//     TRACE("");
+//     patch->blocks().p_output();
+
+//   }
+// }
+
+void EnzoSimulationCharm::p_refresh (int stopping, double dt) throw()
 {
-  ItPatch it_patch(mesh_);
 
-  Patch * patch;
+  //--------------------------------------------------
+  // Stopping
+  //--------------------------------------------------
 
-  // Initialize the simulation; 
-
-  while (( patch = ++it_patch )) {
-
-    patch->block().p_output();
-
+  if (stopping) {
+    int count = CkNumPes();
+    proxy_main.p_exit(count);
   }
-}
 
+  ItPatch it_patch(mesh_);
+  Patch * patch;
+  while (( patch = ++it_patch )) {
+    if (patch->blocks_allocated()) {
+      TRACE("");
+      //--------------------------------------------------
+      // Boundary
+      //--------------------------------------------------
+      patch->blocks().p_refresh();
+    }
+  }
+
+  TRACE("");
+
+}
   //   ASSERT("EnzoSimulation::run", "dt == 0", dt_mesh != 0.0);
 
   //   //--------------------------------------------------

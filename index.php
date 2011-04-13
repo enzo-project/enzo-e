@@ -324,8 +324,8 @@ test_summary("Disk",array("FileHdf5","FileIfrit"),
 test_summary("Error",array("Error"),
 		    array("test_Error")); 
 test_summary("Enzo",array("ppm_image","ppm_implosion","ppm_implosion3","ppml_blast","ppml_implosion","enzo-p_1","enzo-p_2"),array("enzo-p","test_ppm","test_ppml")); 
-test_summary("Field",array("FieldBlock","FieldDescr","FieldFaces"),
-		    array("test_FieldBlock","test_FieldDescr","test_FieldFaces")); 
+test_summary("Field",array("FieldBlock","FieldDescr","FieldFace"),
+		    array("test_FieldBlock","test_FieldDescr","test_FieldFace")); 
 test_summary("Memory",array("Memory"),
 		    array("test_Memory")); 
 test_summary("Mesh",array("Mesh","Patch","Block"),
@@ -358,7 +358,7 @@ tests("Error","test_Error","test_Error");
 component("Field");
 tests("Field","test_FieldDescr","test_FieldDescr");
 tests("Field","test_FieldBlock","test_FieldBlock");
-tests("Field","test_FieldFaces","test_FieldFaces");
+tests("Field","test_FieldFace","test_FieldFace");
 
 component("Memory");
 tests("Memory","test_Memory","test_Memory");
