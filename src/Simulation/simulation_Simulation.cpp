@@ -785,12 +785,15 @@ void Simulation::p_refresh (int stopping, double dt) throw()
   while (( patch = ++it_patch )) {
     if (patch->blocks_allocated()) {
       TRACE("");
+
       //--------------------------------------------------
       // Boundary
       //--------------------------------------------------
+
       int nbx,nby,nbz;
       patch->blocking(&nbx,&nby,&nbz);
-      patch->blocks().p_refresh(nbx,nby,nbz);
+
+      patch->blocks().p_refresh(nbx,nby,nbz,dt);
     }
   }
 

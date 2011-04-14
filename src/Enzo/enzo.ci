@@ -69,7 +69,7 @@ mainmodule enzo {
 
     entry void p_initial();
     entry void p_output();
-    entry void p_refresh(int nbx, int nby, int nbz);
+    entry void p_refresh(int nbx, int nby, int nbz, double dt);
     entry void p_refresh_face(int n, char buffer[n], int axis, int face);
 
     //     void p_next();

@@ -4,7 +4,7 @@
 /// @file     mesh_Block.cpp
 /// @author   James Bordner (jobordner@ucsd.edu)
 /// @date     Mon Feb 28 13:22:26 PST 2011
-/// @todo     Initialize lower / upper in constructor, removing set_extent)
+/// @todo     Pre-compute count for refresh_face
 /// @brief    Implementation of the Block object
 
 #include "cello.hpp"
@@ -22,7 +22,13 @@ Block::Block
  double xpm, double ypm, double zpm, // Patch begin
  double xb, double yb, double zb, // Block width
  int num_field_blocks) throw ()
-  : field_block_()
+  : field_block_(),
+#ifdef CONFIG_USE_CHARM
+    count_refresh_face_(0),
+#endif
+    cycle_(0),
+    time_(0),
+    dt_(0)
 
 { 
   // Initialize field_block_[]
@@ -237,9 +243,13 @@ void Block::p_output ()
 
 //----------------------------------------------------------------------
 
-void Block::p_refresh (int nbx, int nby, int nbz)
+void Block::p_refresh (int nbx, int nby, int nbz, double dt)
 {
-  INCOMPLETE("Block::p_refresh");
+  UNTESTED("Block::p_refresh");
+
+  // Update dt_ from Simulation
+
+  dt_ = dt;
 
   CProxy_Block block_array = thisProxy;
 
@@ -263,9 +273,8 @@ void Block::p_refresh (int nbx, int nby, int nbz)
   Mesh * mesh = simulation->mesh();
 
   double lower[3];
+  mesh->lower(&lower[0],&lower[1],&lower[2]);
   double upper[3];
-
-  mesh->lower(&lower[0],&lower[1],&upper[2]);
   mesh->upper(&upper[0],&upper[1],&upper[2]);
 
   // Field block size
@@ -288,17 +297,61 @@ void Block::p_refresh (int nbx, int nby, int nbz)
     // COMPARISON INACCURATE FOR VERY SMALL BLOCKS NEAR BOUNDARY
     bool xm_boundary = fabs(lower_[0]-lower[0]) < 1e-7;
     bool xp_boundary = fabs(upper_[0]-upper[0]) < 1e-7;
+    bool ym_boundary = fabs(lower_[1]-lower[1]) < 1e-7;
+    bool yp_boundary = fabs(upper_[1]-upper[1]) < 1e-7;
+    bool zm_boundary = fabs(lower_[2]-lower[2]) < 1e-7;
+    bool zp_boundary = fabs(upper_[2]-upper[2]) < 1e-7;
 
     // Boundary
     if ( xm_boundary ) boundary->enforce(field_descr,this,face_lower,axis_x);
     if ( xp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_x);
 
-    // Refresh
+    // Refresh xp < xm
     if ( ! xm_boundary || periodic ) {
       field_face.load(field_descr,field_block(),axis_x,face_lower);
       int    n     = field_face.size();
       char * array = field_face.array();
       block_array(ixm,iy,iz).p_refresh_face (n,array,axis_x,face_upper);
+    }
+
+    // Refresh xp > xm
+    if ( ! xp_boundary || periodic ) {
+      field_face.load(field_descr,field_block(),axis_x,face_upper);
+      int    n     = field_face.size();
+      char * array = field_face.array();
+      block_array(ixp,iy,iz).p_refresh_face (n,array,axis_x,face_lower);
+    }
+
+    // Refresh yp < ym
+    if ( ! ym_boundary || periodic ) {
+      field_face.load(field_descr,field_block(),axis_y,face_lower);
+      int    n     = field_face.size();
+      char * array = field_face.array();
+      block_array(ix,iym,iz).p_refresh_face (n,array,axis_y,face_upper);
+    }
+
+    // Refresh yp > ym
+    if ( ! yp_boundary || periodic ) {
+      field_face.load(field_descr,field_block(),axis_y,face_upper);
+      int    n     = field_face.size();
+      char * array = field_face.array();
+      block_array(ix,iyp,iz).p_refresh_face (n,array,axis_y,face_lower);
+    }
+
+    // Refresh zp < zm
+    if ( ! zm_boundary || periodic ) {
+      field_face.load(field_descr,field_block(),axis_z,face_lower);
+      int    n     = field_face.size();
+      char * array = field_face.array();
+      block_array(ix,iy,izm).p_refresh_face (n,array,axis_z,face_upper);
+    }
+
+    // Refresh zp > zm
+    if ( ! zp_boundary || periodic ) {
+      field_face.load(field_descr,field_block(),axis_z,face_upper);
+      int    n     = field_face.size();
+      char * array = field_face.array();
+      block_array(ix,iy,izp).p_refresh_face (n,array,axis_z,face_lower);
     }
   }
 
@@ -326,6 +379,11 @@ void Block::p_refresh (int nbx, int nby, int nbz)
     if ( zp_boundary ) boundary->enforce(field_descr,this,face_upper,axis_z);
   }
 
+  // NOTE: p_refresh_face() calls compute, but if no incoming faces, then
+  // it will never get called.  So every block calls p_refresh_face() itself
+  // with a null array
+  p_refresh_face (0,0,0,0);
+
 }
 
 //----------------------------------------------------------------------
@@ -333,25 +391,97 @@ void Block::p_refresh (int nbx, int nby, int nbz)
 void Block::p_refresh_face (int n, char * buffer,
 			    int axis, int face)
 {
+
   Simulation * simulation = proxy_simulation.ckLocalBranch();
-  const FieldDescr * field_descr = simulation->field_descr();
 
-  FieldFace field_face(n, buffer);
+  if ( n != 0) {
 
-  field_face.store(field_descr, field_block(), axis_enum(axis), face_enum(face));
+    // n == 0 is the "default" call from self to ensure p_refresh_face()
+    // gets called at least once--required for subsequent compute() call
 
-  INCOMPLETE("Block::p_refresh_face");
+    FieldFace field_face(n, buffer);
 
-  proxy_main.p_exit(1);
+    const FieldDescr * field_descr = simulation->field_descr();
+
+    field_face.store(field_descr, field_block(), axis_enum(axis), face_enum(face));
+
+  }
+
+  Boundary * boundary = simulation->boundary();
+  bool periodic = boundary->is_periodic();
+
+  Mesh * mesh = simulation->mesh();
+
+  double lower[3];
+  mesh->lower(&lower[0],&lower[1],&lower[2]);
+  double upper[3];
+  mesh->upper(&upper[0],&upper[1],&upper[2]);
+  
+  int nx,ny,nz;
+  field_block()->size (&nx,&ny,&nz);
+
+  // Determine expected number of incoming Faces
+  // (should be function, and possibly precomputed and stored since constant )
+
+  int count = 6 + 1;  // +1 for self
+
+  if (nx==1) count -= 2; // 0D??
+  if (ny==1) count -= 2; // 1D
+  if (nz==1) count -= 2; // 2D
+
+  if (! periodic && nx > 1) {
+    bool xm_boundary = fabs(lower_[0]-lower[0]) < 1e-7;
+    if (xm_boundary) --count;
+    bool xp_boundary = fabs(upper_[0]-upper[0]) < 1e-7;
+    if (xp_boundary) --count;
+  }
+  if (! periodic && ny > 1) {
+    bool ym_boundary = fabs(lower_[1]-lower[1]) < 1e-7;
+    if (ym_boundary) --count;
+    bool yp_boundary = fabs(upper_[1]-upper[1]) < 1e-7;
+    if (yp_boundary) --count;
+  }
+  if (! periodic && nz > 1) {
+    bool zm_boundary = fabs(lower_[2]-lower[2]) < 1e-7;
+    if (zm_boundary) --count;
+    bool zp_boundary = fabs(upper_[2]-upper[2]) < 1e-7;
+    if (zp_boundary) --count;
+  }
+
+  if (++count_refresh_face_ >= count) {
+    count_refresh_face_ = 0;
+    compute();
+    // Have all faces
+  }
 }
 
-// }
+//----------------------------------------------------------------------
+
+void Block::compute()
+{
+
+  INCOMPLETE("Block::compute");
+
+  Simulation * simulation = proxy_simulation.ckLocalBranch();
+
+  for (size_t i = 0; i < simulation->num_method(); i++) {
+
+    CkPrintf ("Method %d  time %g  dt %g\n",i,time_,dt_);
+    simulation->method(i) -> compute_block (this,time_,dt_);
+
+  }
+
+  TRACE("Block::compute()");
+
+}
+
+//----------------------------------------------------------------------
 
 #endif /* CONFIG_USE_CHARM */
 
 //======================================================================
 
-void Block::copy_(const Block & block) throw()
+  void Block::copy_(const Block & block) throw()
 {
   UNTESTED("Block::create_");
 

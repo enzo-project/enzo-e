@@ -56,7 +56,7 @@ public: // interface
   void p_output();
 
   /// Refresh ghost zones and apply boundary conditions
-  void p_refresh(int nbx, int nby, int nbz);
+  void p_refresh(int nbx, int nby, int nbz, double dt);
 
   /// Refresh a FieldFace
   void p_refresh_face(int n, char buffer[], int axis, int face);
@@ -67,7 +67,7 @@ public: // interface
   void prepare();
 
   /// Boundary and Method
-  //  void compute();
+  void compute();
   //==================================================
 
 #endif
@@ -119,7 +119,10 @@ public: // interface
 
   /// Call application [i.e. Enzo] specific initialization
   virtual void initialize (int cycle_start, double time_start) throw()
-  { WARNING ("Block::initialize","This should not be called"); }
+  { 
+    time_ = time_start;
+    cycle_ = cycle_start;
+  }
 
 protected: // functions
 
@@ -131,20 +134,31 @@ protected: // attributes
   /// Array of field blocks
   std::vector<FieldBlock *> field_block_;
 
-  /// Index into Patch
+  /// Index into Patch [redundant with CHARM thisIndex.x .y .z]
   int index_[3];
 
-  /// Extent of the box associated with the block
-  /// WARNING: should not be used for deep AMR due to precision /
-  /// range issues
+  /// Lower extent of the box associated with the block [computable from Patch]
   double lower_[3];
+
+  /// Upper extent of the box associated with the block [computable from Patch]
   double upper_[3];
+
+  //--------------------------------------------------
+
+#ifdef CONFIG_USE_CHARM
+  int count_refresh_face_;
+#endif
+
+  //--------------------------------------------------
 
   /// Current cycle number
   int cycle_;
 
   /// Current time
   double time_;
+
+  /// Current timestep
+  double dt_;
 
 };
 

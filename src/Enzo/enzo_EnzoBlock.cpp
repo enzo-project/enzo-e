@@ -302,6 +302,10 @@ void EnzoBlock::write(FILE * fp) throw ()
 void EnzoBlock::initialize (int cycle_start, double time_start) throw()
 {
 
+  // Call base class initialize
+
+  Block::initialize(cycle_start,time_start);
+
   CycleNumber = cycle_start;
   Time        = time_start;
   OldTime     = time_start;
