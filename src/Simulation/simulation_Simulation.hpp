@@ -239,10 +239,8 @@ protected: // attributes
   /// [abstract factory design pattern]
   const Factory * factory_; 
 
-#ifndef CONFIG_USE_CHARM
   /// Parallel group for the simulation
   GroupProcess * group_process_;
-#endif
 
   /// Dimension or rank of the simulation
   int  dimension_; 

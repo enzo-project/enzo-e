@@ -73,8 +73,6 @@ PARALLEL_MAIN_BEGIN
 
   unit_func("blocking");
 
-  // Test that patch blocking is correct
-
   int nbx,nby,nbz;
 
   patch->blocking(&nbx,&nby,&nbz);
@@ -85,9 +83,6 @@ PARALLEL_MAIN_BEGIN
 
   //--------------------------------------------------
 
-
-  // Test that the domain extents are correct
-
   unit_func("set_lower");
 
   double xm,ym,zm;
@@ -96,6 +91,8 @@ PARALLEL_MAIN_BEGIN
   unit_assert(xm==domain_lower[0]);
   unit_assert(ym==domain_lower[1]);
   unit_assert(zm==domain_lower[2]);
+
+  //--------------------------------------------------
 
   unit_func("set_upper");
 
@@ -106,28 +103,27 @@ PARALLEL_MAIN_BEGIN
   unit_assert(yp==domain_upper[1]);
   unit_assert(zp==domain_upper[2]);
 
-  // Initialize how the Layout distributes the Patch data
+  //--------------------------------------------------
+
+  unit_func("layout");
 
   Layout * layout = patch->layout();
 
-  unit_func("layout");
   unit_assert(layout != NULL);
 
   layout->set_process_range(0,1);
 
-  // Test allocation of Patch into Blocks
+  //--------------------------------------------------
 
   unit_func("allocate_blocks");
 
   patch->allocate_blocks(field_descr);
 
-  // Test that the allocated Blocks were initialized correctly
+  //--------------------------------------------------
 
   unit_func("num_local_blocks");
 
   unit_assert(patch->num_local_blocks()==(size_t)nbx*nby*nbz);
-
-  // loop over local data blocks and test their existence and properties
 
   ItBlockLocal itBlocks (patch);
 
@@ -138,33 +134,32 @@ PARALLEL_MAIN_BEGIN
 
   while ((block = ++itBlocks)) {
 
+  //--------------------------------------------------
+
     unit_func("allocate_blocks");
     unit_assert_quiet(block != NULL);
 
+  //--------------------------------------------------
+
     unit_func("Block","field_block");
+
     field_block = block ? block->field_block() : NULL;
+
     unit_assert_quiet(field_block != NULL);
 
-    // Test Block
-    if (block) {
-      // NO TESTS
-    }
-
-    // Test FieldBlock
     if (block && field_block) {
 
-      // Test block size
-      int nfx, nfy, nfz;
+      //--------------------------------------------------
 
       unit_func("FieldBlock","size");
+
+      int nfx, nfy, nfz;
+
       field_block->size(&nfx,&nfy,&nfz);
+
       unit_assert_quiet (nfx == patch_size[0] / patch_blocking[0]);
       unit_assert_quiet (nfy == patch_size[1] / patch_blocking[1]);
       unit_assert_quiet (nfz == patch_size[2] / patch_blocking[2]);
-
-      // Get block position in the Patch
-
-      int ibx,iby,ibz;
 
       GroupProcess * group = patch->group();
       Layout      * layout = patch->layout();
@@ -173,44 +168,43 @@ PARALLEL_MAIN_BEGIN
 
       int index_local = block_counter;
       int index_global = layout->global_index(ip,index_local);
-      layout->block_indices(index_global,&ibx,&iby,&ibz);
-      
-      //      size_t ib = ibx + nbx*(iby + nby*ibz);
+
+      //--------------------------------------------------
 
       unit_func("Layout","block_indices");
-      unit_assert_quiet (unit_incomplete);
 
-      // Test block extents
+      int ibx,iby,ibz;
+      layout->block_indices(index_global,&ibx,&iby,&ibz);
+
+      // Not terribly rigorous
+      unit_assert (0 <= ibx && ibx < nbx);
+      unit_assert (0 <= iby && iby < nby);
+      unit_assert (0 <= ibz && ibz < nbz);
+
+      //--------------------------------------------------
 
       double xmb,ymb,zmb;
-      double xpb,ypb,zpb;
-
       block->lower (&xmb,&ymb,&zmb);
+      double xpb,ypb,zpb;
       block->upper (&xpb,&ypb,&zpb);
 
-      // Not very rigorous
-      unit_assert (xmb < xpb);
-      unit_assert (ymb < ypb);
-      unit_assert (zmb < zpb);
-
-      // More rigorous tests below, but require global indices
       unit_func("Block","lower");
-      unit_assert (unit_incomplete);
+
+      unit_assert(cello::err_abs(xm + ibx*(xpb-xmb) , xmb) < 1e-6);
+      unit_assert(cello::err_abs(ym + iby*(ypb-ymb) , ymb) < 1e-6);
+      unit_assert(cello::err_abs(zm + ibz*(zpb-zmb) , zmb) < 1e-6);
 
       unit_func("Block","upper");
-      unit_assert (unit_incomplete);
 
-      // Need ib? which is not implemented yet; note comparing floating point
+      unit_assert(cello::err_abs(xm + (ibx+1)*(xpb-xmb) , xpb) < 1e-6);
+      unit_assert(cello::err_abs(ym + (iby+1)*(ypb-ymb) , ypb) < 1e-6);
+      unit_assert(cello::err_abs(zm + (ibz+1)*(zpb-zmb) , zpb) < 1e-6);
 
-      // unit_assert(xm + ibx*(xpb-xmb) == xmb);
-      // unit_assert(ym + iby*(ypb-ymb) == ymb);
-      // unit_assert(zm + ibz*(zpb-zmb) == zmb);
-
-      // unit_assert(xm + (ibx+1)*(xpb-xmb) == xpb);
-      // unit_assert(ym + (iby+1)*(ypb-ymb) == ypb);
-      // unit_assert(zm + (ibz+1)*(zpb-zmb) == zpb);
+      //--------------------------------------------------
 
     }
+
+  //--------------------------------------------------
 
     unit_func("Block","neighbor");
     // Block::neighbor()
@@ -243,14 +237,16 @@ PARALLEL_MAIN_BEGIN
   delete [] b;
 
   //--------------------------------------------------
+
   unit_func("num_local_blocks");
   unit_assert(block_counter == patch->num_local_blocks());
 
+  //--------------------------------------------------
+
   unit_func("allocate_blocks");
 
-  // Deallocate local blocks
-
   //--------------------------------------------------
+
   unit_func("deallocate_blocks");
 
   patch->deallocate_blocks();
