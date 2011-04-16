@@ -281,8 +281,8 @@ PARALLEL_MAIN_BEGIN
   // initialize field ghost zone depths
 
   field_descr->set_ghosts(0, 1,1,1);
-  field_descr->set_ghosts(1, 0,0,0);
-  field_descr->set_ghosts(2, 0,0,0);
+  field_descr->set_ghosts(1, 1,2,3);
+  field_descr->set_ghosts(2, 3,2,1);
 
 
   int nbx=2, nby=3, nbz=4;
@@ -316,9 +316,11 @@ PARALLEL_MAIN_BEGIN
 	  FieldBlock * field_upper = field_block[index_upper];
 
 	  face.load  (field_descr, field_lower, axis, face_upper);
+	  face.print (field_descr, field_upper, axis, face_lower, "load  1");
 	  face.store (field_descr, field_upper, axis, face_lower);
 
 	  face.load  (field_descr, field_upper, axis, face_lower);
+	  face.print (field_descr, field_upper, axis, face_lower, "load  2");
 	  face.store (field_descr, field_lower, axis, face_upper);
 
 	}

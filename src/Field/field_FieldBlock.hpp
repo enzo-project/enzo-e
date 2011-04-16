@@ -124,6 +124,10 @@ public: // interface
 
   //----------------------------------------------------------------------
 
+  /// Print basic field characteristics for debugging
+  void print (const FieldDescr * field_descr,
+	      const char * message = 0) const throw();
+
 private: // functions
 
   /// Given field size and padding, compute offset to start of the next field

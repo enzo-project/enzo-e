@@ -468,6 +468,78 @@ int FieldBlock::field_size
 
 //----------------------------------------------------------------------
 
+void FieldBlock::print (const FieldDescr * field_descr,
+			const char * message) const throw()
+{
+  PARALLEL_PRINTF("%s FieldBlock %p  field_count = %d\n",
+		  message ? message : "",this,field_descr->field_count());
+  if ( ! array_allocated() ) {
+    PARALLEL_PRINTF("%s FieldBlock %p not allocated\n");
+  } else {
+    for (int index_field=0; index_field<field_descr->field_count(); index_field++) {
+      int nx,ny,nz;
+      field_size(field_descr,index_field,&nx,&ny,&nz);
+      switch (field_descr->precision(index_field)) {
+      case precision_single:
+	{
+	  float min = std::numeric_limits<float>::max();
+	  float max = std::numeric_limits<float>::min();
+	  float sum = 0.0;
+	  for (int i=0; i<nx*ny*nz; i++) {
+	    float value = ((float *)field_values_[index_field])[i];
+	    min = MIN(min,value);
+	    max = MAX(max,value);
+	    sum += value;
+	  }
+	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g %g]\n",
+			  message ? message : "",this,
+			  field_descr->field_name(index_field).c_str(),
+			  nx,ny,nz,min,sum/(nx*ny*nz),max);
+	}
+	break;
+      case precision_double:
+	{
+	  double min = std::numeric_limits<double>::max();
+	  double max = std::numeric_limits<double>::min();
+	  double sum = 0.0;
+	  for (int i=0; i<nx*ny*nz; i++) {
+	    double value = ((double *)field_values_[index_field])[i];
+	    min = MIN(min,value);
+	    max = MAX(max,value);
+	    sum += value;
+	  }
+	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g %g]\n",
+			  message ? message : "",this,
+			  field_descr->field_name(index_field).c_str(),
+			  nx,ny,nz,min,sum/(nx*ny*nz),max);
+	}
+	break;
+      case precision_quadruple:
+	{
+	  long double min = std::numeric_limits<long double>::max();
+	  long double max = std::numeric_limits<long double>::min();
+	  long double sum = 0.0;
+	  for (int i=0; i<nx*ny*nz; i++) {
+	    long double value = ((long double *)field_values_[index_field])[i];
+	    min = MIN(min,value);
+	    max = MAX(max,value);
+	    sum += value;
+	  }
+	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%lg %lg %lg]\n",
+			  message ? message : "",this,
+			  field_descr->field_name(index_field).c_str(),
+			  nx,ny,nz,min,sum/(nx*ny*nz),max);
+	}
+	break;
+      default:
+	ERROR("FieldBlock::print", "Unsupported precision");
+      }
+    }
+  }
+}
+
+//----------------------------------------------------------------------
+
 void FieldBlock::backup_array_ 
 ( const FieldDescr * field_descr,
   std::vector<char *> & old_field_values )

@@ -25,7 +25,6 @@ public: // interface
   FieldFace(int n, char * array) throw()
     : array_()
   { array_.resize(n);
-    printf ("FieldFace %d %p\n",n,array);
     for (int i=0; i<n; i++) array_[i] = array[i]; 
   };
 
@@ -62,6 +61,12 @@ public: // interface
 
   /// Return a pointer to the array
   char * array () throw() { return &array_[0]; };
+
+  /// Print basic field characteristics for debugging
+  void print (const FieldDescr * field_descr,
+	      const FieldBlock * field_block,
+	      axis_enum axis, face_enum face,
+	      const char * message = 0) const throw();
 
 private: // functions
 

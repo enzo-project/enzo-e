@@ -5,9 +5,9 @@ import sys
 # CONFIGURATION
 #----------------------------------------------------------------------
 
-use_papi     = 0
-use_png      = 1
-use_valgrind = 0
+use_papi        = 0
+use_valgrind    = 0
+use_projections = 1
 
 #-----------------------------------------------------------------------
 # PARSE ARGUMENTS
@@ -71,42 +71,42 @@ defines_xlf = ""
 #--------------------------------------------------
 
 if (type == 'serial'):
-        defines = defines
+     defines = defines
 elif (type == 'mpi'):
-	defines     = defines              + define_mpi
-	defines_xlc = defines_xlc + ' -D'  + define_mpi[0]
-	defines_xlf = defines_xlf + ' -WF,-D'  + define_mpi[0]
+     defines     = defines              + define_mpi
+     defines_xlc = defines_xlc + ' -D'  + define_mpi[0]
+     defines_xlf = defines_xlf + ' -WF,-D'  + define_mpi[0]
 elif (type == 'charm'):
-	defines     = defines              + define_charm
-	defines_xlc = defines_xlc + ' -D'  + define_charm[0]
-	defines_xlf = defines_xlf + ' -WF,-D'  + define_charm[0]
+     defines     = defines              + define_charm
+     defines_xlc = defines_xlc + ' -D'  + define_charm[0]
+     defines_xlf = defines_xlf + ' -WF,-D'  + define_charm[0]
 else:
-	print "Unrecognized parallel type ",type
-	print
-	print "Valid types are 'serial', 'mpi', and 'charm'"
-	print
-	print "The type is set using the environment variable $CELLO_TYPE"
-	print "or by using 'scons type=<type>"
-	sys.exit(1)
+     print "Unrecognized parallel type ",type
+     print
+     print "Valid types are 'serial', 'mpi', and 'charm'"
+     print
+     print "The type is set using the environment variable $CELLO_TYPE"
+     print "or by using 'scons type=<type>"
+     sys.exit(1)
 
 #--------------------------------------------------
 
 if (prec == 'single'):
-	defines = defines + define_single
-	defines_xlc = defines_xlc + ' -D' + define_single[0]
-	defines_xlf = defines_xlf + ' -WF,-D' + define_single[0]
+     defines = defines + define_single
+     defines_xlc = defines_xlc + ' -D' + define_single[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_single[0]
 elif (prec == 'double'):
-	defines = defines + define_double
-	defines_xlc = defines_xlc + ' -D' + define_double[0]
-	defines_xlf = defines_xlf + ' -WF,-D' + define_double[0]
+     defines = defines + define_double
+     defines_xlc = defines_xlc + ' -D' + define_double[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_double[0]
 else:
-	print "Unrecognized precision ",prec
-	print
-	print "Valid precisions are 'single' and 'double'"
-	print
-	print "The precision is set using the environment variable $CELLO_PREC"
-	print "or by using 'scons prec=<precision>"
-	sys.exit(1)
+     print "Unrecognized precision ",prec
+     print
+     print "Valid precisions are 'single' and 'double'"
+     print
+     print "The precision is set using the environment variable $CELLO_PREC"
+     print "or by using 'scons prec=<precision>"
+     sys.exit(1)
 
 print defines
 print defines_xlc
@@ -129,9 +129,9 @@ print
 #--------------------------------------------------
 
 if (use_papi != 0): 
-	defines     = defines             + define_papi
-	defines_xlc = defines_xlc + ' -D' + define_papi[0]
-	defines_xlf = defines_xlf + ' -WF,-D' + define_papi[0]
+     defines     = defines             + define_papi
+     defines_xlc = defines_xlc + ' -D' + define_papi[0]
+     defines_xlf = defines_xlf + ' -WF,-D' + define_papi[0]
 #--------------------------------------------------
 
 defines     = defines     +         define_hdf5
@@ -140,10 +140,9 @@ defines_xlf = defines_xlf + ' -WF,-D' + define_hdf5[0]+ ' -WF,-D' + define_hdf5[
 
 #--------------------------------------------------
 
-if (use_png != 0):
-	defines     = defines             + define_png;
-	defines_xlc = defines_xlc + ' -D' + define_png[0]
-	defines_xlf = defines_xlf + ' -WF,-D' + define_png[0]
+defines     = defines             + define_png;
+defines_xlc = defines_xlc + ' -D' + define_png[0]
+defines_xlf = defines_xlf + ' -WF,-D' + define_png[0]
 
 #======================================================================
 # ARCHITECTURE SETTINGS
@@ -153,186 +152,186 @@ if (use_png != 0):
 if (arch == "linux"):
 #----------------------------------------------------------------------
 
-   charm_path = '/home/bordner/charm/charm'  # arch
+     charm_path = '/home/bordner/charm/charm'  # arch
 
-   fortran_serial = 'gfortran'
-   fortran_mpi    = 'gfortran'
-   fortran_charm  = 'gfortran'
+     fortran_serial = 'gfortran'
+     fortran_mpi    = 'gfortran'
+     fortran_charm  = 'gfortran'
 
-   cxx_serial = 'g++'
-   cxx_mpi    = 'mpic++'
-   cxx_charm  = charm_path + '/bin/charmc -language charm++ '
+     cxx_serial = 'g++'
+     cxx_mpi    = 'mpic++'
+     cxx_charm  = charm_path + '/bin/charmc -language charm++ '
 
-   cc_serial  = 'gcc'
-   cc_mpi     = 'mpicc'
-   cc_charm   = charm_path + '/bin/charmc -language charm++ '
+     cc_serial  = 'gcc'
+     cc_mpi     = 'mpicc'
+     cc_charm   = charm_path + '/bin/charmc -language charm++ '
 
-   cppdefines = defines
-   cxxflags_define     = ''
-   fortranflags_define = ''
-   fortranpath_lib = ''
-   fortranlibs = ['gfortran']
+     cppdefines = defines
+     cxxflags_define     = ''
+     fortranflags_define = ''
+     fortranpath_lib = ''
+     fortranlibs = ['gfortran']
 
-   papi_path = '/usr/local'
-   papi_inc = (papi_path + '/include')
-   papi_lib = (papi_path + '/lib')
+     papi_path = '/usr/local'
+     papi_inc = (papi_path + '/include')
+     papi_lib = (papi_path + '/lib')
 
 
-   hdf5_path = '/usr'
-   hdf5_inc = (hdf5_path + '/include')
-   hdf5_lib = (hdf5_path + '/lib')
+     hdf5_path = '/usr'
+     hdf5_inc = (hdf5_path + '/include')
+     hdf5_lib = (hdf5_path + '/lib')
 
-   flags_debug = '-g'
-   flags_opt   = ''
-   flags_prec  = '-m128bit-long-double'
-   flags_warn  = '-Wall'
+     flags_debug = '-g'
+     flags_opt   = ''
+     flags_prec  = '-m128bit-long-double'
+     flags_warn  = '-Wall'
 
-   cxxflags_debug = flags_debug
-   cxxflags_opt   = flags_opt
-   cxxflags_prec  = flags_prec
-   cxxflags_warn  = flags_warn
+     cxxflags_debug = flags_debug
+     cxxflags_opt   = flags_opt
+     cxxflags_prec  = flags_prec
+     cxxflags_warn  = flags_warn
 
-   cflags_debug = flags_debug
-   cflags_opt   = flags_opt
-   cflags_prec  = flags_prec
-   cflags_warn  = flags_warn
+     cflags_debug = flags_debug
+     cflags_opt   = flags_opt
+     cflags_prec  = flags_prec
+     cflags_warn  = flags_warn
 
-   fortranflags_debug = flags_debug
-   fortranflags_opt   = flags_opt
-   fortranflags_prec  = flags_prec
-   fortranflags_warn  = flags_warn
+     fortranflags_debug = flags_debug
+     fortranflags_opt   = flags_opt
+     fortranflags_prec  = flags_prec
+     fortranflags_warn  = flags_warn
 
-   linkflags_arch = ''
-   linkflags_debug = flags_debug
-   linkflags_opt   = flags_opt
-   linkflags_prec  = flags_prec
-   linkflags_warn  = flags_warn
+     linkflags_arch = ''
+     linkflags_debug = flags_debug
+     linkflags_opt   = flags_opt
+     linkflags_prec  = flags_prec
+     linkflags_warn  = flags_warn
 
 #----------------------------------------------------------------------
 elif (arch == "ncsa-bd"):
 #----------------------------------------------------------------------
 
-   charm_path = '/home/bordner/charm/charm'
+     charm_path = '/home/bordner/charm/charm'
 
-   fc_path  = '/opt/ibmcmp/xlf/13.1'
-   cc_path  = '/opt/ibmcmp/vac/11.1'
-   cxx_path = '/opt/ibmcmp/vacpp/11.1'
+     fc_path  = '/opt/ibmcmp/xlf/13.1'
+     cc_path  = '/opt/ibmcmp/vac/11.1'
+     cxx_path = '/opt/ibmcmp/vacpp/11.1'
 
-   fortran_serial = fc_path + '/bin/xlf_r'
-   fortran_mpi    = 'mpfort'
-   fortran_charm  = fc_path + '/bin/xlf_r'
+     fortran_serial = fc_path + '/bin/xlf_r'
+     fortran_mpi    = 'mpfort'
+     fortran_charm  = fc_path + '/bin/xlf_r'
 
-   cxx_serial = cxx_path + '/bin/xlC_r'
-   cxx_mpi    = 'mpCC'
-   cxx_charm  = charm_path + '/bin/charmc -language charm++ '
+     cxx_serial = cxx_path + '/bin/xlC_r'
+     cxx_mpi    = 'mpCC'
+     cxx_charm  = charm_path + '/bin/charmc -language charm++ '
 
-   cc_serial  = cc_path + '/bin/xlc_r'
-   cc_mpi     = 'mpcc'
-   cc_charm   = charm_path + '/bin/charmc -language charm++ '
+     cc_serial  = cc_path + '/bin/xlc_r'
+     cc_mpi     = 'mpcc'
+     cc_charm   = charm_path + '/bin/charmc -language charm++ '
 
 # defines moved to flags since xlf_r expects -WF,-Dblah but xlC expects -Dblah
 
-   cppdefines = ''
-   cxxflags_define     = defines_xlc
-   fortranflags_define = defines_xlf
-   fortranpath_lib = fc_path + '/lib64'
-   fortranlibs = ['xlf90','xlfmath','xl']
+     cppdefines = ''
+     cxxflags_define     = defines_xlc
+     fortranflags_define = defines_xlf
+     fortranpath_lib = fc_path + '/lib64'
+     fortranlibs = ['xlf90','xlfmath','xl']
 
-   papi_path = '/opt/usersoft/papi/4.1.0'
-   papi_inc = (papi_path + '/include')
-   papi_lib = (papi_path + '/lib64')
+     papi_path = '/opt/usersoft/papi/4.1.0'
+     papi_inc = (papi_path + '/include')
+     papi_lib = (papi_path + '/lib64')
 
-   hdf5_path = '/opt/hdf5-1.8.4-patch1-64bit'
-   hdf5_inc = (hdf5_path + '/include')
-   hdf5_lib = (hdf5_path + '/lib')
+     hdf5_path = '/opt/hdf5-1.8.4-patch1-64bit'
+     hdf5_inc = (hdf5_path + '/include')
+     hdf5_lib = (hdf5_path + '/lib')
 
-   flags_debug = ''
-   flags_opt   = '-O3 -qhot -q64'
-   flags_prec  = ''
-   flags_warn  = ''
+     flags_debug = ''
+     flags_opt   = '-O3 -qhot -q64'
+     flags_prec  = ''
+     flags_warn  = ''
 
-   cxxflags_debug = flags_debug
-   cxxflags_opt   = flags_opt
-   cxxflags_prec  = flags_prec
-   cxxflags_warn  = flags_warn
+     cxxflags_debug = flags_debug
+     cxxflags_opt   = flags_opt
+     cxxflags_prec  = flags_prec
+     cxxflags_warn  = flags_warn
 
-   cflags_debug = flags_debug
-   cflags_opt   = flags_opt
-   cflags_prec  = flags_prec
-   cflags_warn  = flags_warn
+     cflags_debug = flags_debug
+     cflags_opt   = flags_opt
+     cflags_prec  = flags_prec
+     cflags_warn  = flags_warn
 
-   fortranflags_debug = flags_debug + ' -qextname'
-   fortranflags_opt   = flags_opt
-   fortranflags_prec  = flags_prec
-   fortranflags_warn  = flags_warn
+     fortranflags_debug = flags_debug + ' -qextname'
+     fortranflags_opt   = flags_opt
+     fortranflags_prec  = flags_prec
+     fortranflags_warn  = flags_warn
 
-   linkflags_arch = ''
-   linkflags_debug = flags_debug
-   linkflags_opt   = flags_opt
-   linkflags_prec  = flags_prec
-   linkflags_warn  = flags_warn
+     linkflags_arch = ''
+     linkflags_debug = flags_debug
+     linkflags_opt   = flags_opt
+     linkflags_prec  = flags_prec
+     linkflags_warn  = flags_warn
 
 #----------------------------------------------------------------------
 elif (arch == "sdsc-triton"):
 #----------------------------------------------------------------------
 
-   charm_path = '/home/jobordner/charm/charm'
+     charm_path = '/home/jobordner/charm/charm'
 
-   fc_path  = '/opt/openmpi/pgi/mx'
-   cc_path  = '/opt/openmpi/pgi/mx'
-   cxx_path = '/opt/openmpi/pgi/mx'
+     fc_path  = '/opt/openmpi/pgi/mx'
+     cc_path  = '/opt/openmpi/pgi/mx'
+     cxx_path = '/opt/openmpi/pgi/mx'
 
-   fortran_serial = 'pgf90'
-   fortran_mpi    = 'pgf90'
-   fortran_charm  = 'pgf90'
+     fortran_serial = 'pgf90'
+     fortran_mpi    = 'pgf90'
+     fortran_charm  = 'pgf90'
 
-   cxx_serial = 'pgCC'
-   cxx_mpi    = 'mpicxx'
-   cxx_charm  = charm_path + '/bin/charmc -language charm++ '
+     cxx_serial = 'pgCC'
+     cxx_mpi    = 'mpicxx'
+     cxx_charm  = charm_path + '/bin/charmc -language charm++ '
 
-   cc_serial  = 'pgcc'
-   cc_mpi     = 'mpicc'
-   cc_charm   = 'pgcc'
+     cc_serial  = 'pgcc'
+     cc_mpi     = 'mpicc'
+     cc_charm   = 'pgcc'
 
-   cppdefines = defines
-   cxxflags_define     = ''
-   fortranflags_define = ''
-   fortranpath_lib = ''
-   fortranlibs = []
+     cppdefines = defines
+     cxxflags_define     = ''
+     fortranflags_define = ''
+     fortranpath_lib = ''
+     fortranlibs = []
 
-   papi_path = ''
-   papi_inc = (papi_path + '/include')
-   papi_lib = (papi_path + '/lib')
+     papi_path = ''
+     papi_inc = (papi_path + '/include')
+     papi_lib = (papi_path + '/lib')
 
-   hdf5_path = '/opt/hdf5/pgi'
-   hdf5_inc = (hdf5_path + '/include')
-   hdf5_lib = (hdf5_path + '/lib')
+     hdf5_path = '/opt/hdf5/pgi'
+     hdf5_inc = (hdf5_path + '/include')
+     hdf5_lib = (hdf5_path + '/lib')
 
-   flags_debug = ''
-   flags_opt   = '-fast'
-   flags_prec  = ''
-   flags_warn  = ''
+     flags_debug = ''
+     flags_opt   = '-fast'
+     flags_prec  = ''
+     flags_warn  = ''
 
-   cxxflags_debug = flags_debug
-   cxxflags_opt   = flags_opt
-   cxxflags_prec  = flags_prec
-   cxxflags_warn  = flags_warn
+     cxxflags_debug = flags_debug
+     cxxflags_opt   = flags_opt
+     cxxflags_prec  = flags_prec
+     cxxflags_warn  = flags_warn
 
-   cflags_debug = flags_debug
-   cflags_opt   = flags_opt
-   cflags_prec  = flags_prec
-   cflags_warn  = flags_warn
+     cflags_debug = flags_debug
+     cflags_opt   = flags_opt
+     cflags_prec  = flags_prec
+     cflags_warn  = flags_warn
 
-   fortranflags_debug = flags_debug
-   fortranflags_opt   = flags_opt
-   fortranflags_prec  = flags_prec
-   fortranflags_warn  = flags_warn
+     fortranflags_debug = flags_debug
+     fortranflags_opt   = flags_opt
+     fortranflags_prec  = flags_prec
+     fortranflags_warn  = flags_warn
 
-   linkflags_arch = '-pgf90libs'
-   linkflags_debug = flags_debug
-   linkflags_opt   = flags_opt
-   linkflags_prec  = flags_prec
-   linkflags_warn  = flags_warn
+     linkflags_arch = '-pgf90libs'
+     linkflags_debug = flags_debug
+     linkflags_opt   = flags_opt
+     linkflags_prec  = flags_prec
+     linkflags_warn  = flags_warn
 
 
 
@@ -340,54 +339,51 @@ elif (arch == "sdsc-triton"):
 # PARALLELISM SETTINGS
 #======================================================================
 
-flags_type = ''
-
 if (type == "serial"):
-   cxx          = cxx_serial
-   cc           = cc_serial
-   fortran      = fortran_serial
-   serial_run   = ""
-   parallel_run = ""
+     cxx          = cxx_serial
+     cc           = cc_serial
+     fortran      = fortran_serial
+     serial_run   = ""
+     parallel_run = ""
 elif (type == "mpi"):
-   cxx          = cxx_mpi
-   cc           = cc_mpi
-   fortran      = fortran_mpi
-   serial_run   = ""
-   parallel_run = "mpirun -np 4"
+     cxx          = cxx_mpi
+     cc           = cc_mpi
+     fortran      = fortran_mpi
+     serial_run   = ""
+     parallel_run = "mpirun -np 4"
 elif (type == "charm"):
-   cxx          = cxx_charm
-   cc           = cc_charm
-   fortran      = fortran_charm
-   serial_run   = ""
-   parallel_run = charm_path + "/bin/charmrun +p4 "
-#   flags_type =  '-tracemode projections'
+     cxx          = cxx_charm
+     cc           = cc_charm
+     fortran      = fortran_charm
+     serial_run   = ""
+     parallel_run = charm_path + "/bin/charmrun +p4 "
 
 #======================================================================
-# DEFAULT LINKER PATHS
+# CELLO PATHS
 #======================================================================
 
 cpppath     = ['#/include'];
 fortranpath = ['#/include'];
 libpath     = ['#/lib'];
 
-#======================================================================
-# PAPI SETTINGS
-#======================================================================
+#----------------------------------------------------------------------
+# PAPI PATHS
+#----------------------------------------------------------------------
 
 if (use_papi):
-   cpppath = cpppath + [papi_inc]
-   libpath = libpath + [papi_lib]
+     cpppath = cpppath + [papi_inc]
+     libpath = libpath + [papi_lib]
 
-#======================================================================
-# HDF5 SETTINGS
-#======================================================================
+#----------------------------------------------------------------------
+# HDF5 PATHS
+#----------------------------------------------------------------------
 
 cpppath = cpppath + [hdf5_inc]
 libpath = libpath + [hdf5_lib]
 
-#======================================================================
+#----------------------------------------------------------------------
 # FORTRAN LINK PATH
-#======================================================================
+#----------------------------------------------------------------------
 
 libpath = libpath + [fortranpath_lib]
 
@@ -396,17 +392,17 @@ libpath = libpath + [fortranpath_lib]
 #======================================================================
 
 if (use_valgrind):
-   valgrind = "valgrind --leakcheck=full"
-   parallel_run = parallel_run + " " + valgrind
-   serial_run   = vagrind + " " + serial_run
+     valgrind = "valgrind --leakcheck=full"
+     parallel_run = parallel_run + " " + valgrind
+     serial_run   = vagrind + " " + serial_run
 
 #======================================================================
-# EXTRA LINKER PATHS
+# CHARM++ PROJECTIONS
 #======================================================================
 
-if (use_papi):
-   cpppath = [cpppath, papi_path + '/include']
-   libpath = [libpath, papi_path + '/lib']
+if (use_projections):
+     linkflags_perf = '-tracemode projections '
+     cxxflags_perf  = '-tracemode projections '
 
 #======================================================================
 # ENVIRONMENT
@@ -414,33 +410,57 @@ if (use_papi):
 
 environ  = os.environ
 
-cxxflags = cxxflags_debug + ' ' + cxxflags_opt + ' ' + cxxflags_prec + ' ' + cxxflags_warn + ' ' + cxxflags_define
-cflags   = cflags_debug + ' ' + cflags_opt + ' '  + cflags_prec + ' ' + cflags_warn
-fortranflags = fortranflags_debug + ' ' + fortranflags_opt + ' ' + fortranflags_prec + ' ' + fortranflags_warn + ' ' + fortranflags_define
-linkflags = linkflags_arch + ' ' + linkflags_debug + ' ' + linkflags_opt + ' ' + linkflags_prec + ' ' + linkflags_warn
+cxxflags = \
+    cxxflags_debug + ' ' + \
+    cxxflags_opt   + ' ' + \
+    cxxflags_prec  + ' ' + \
+    cxxflags_perf  + ' ' + \
+    cxxflags_warn  + ' ' + \
+    cxxflags_define
+
+cflags = \
+    cflags_debug + ' ' + \
+    cflags_opt   + ' ' + \
+    cflags_prec  + ' ' + \
+    cflags_warn
+
+fortranflags = \
+    fortranflags_debug + ' ' + \
+    fortranflags_opt   + ' ' + \
+    fortranflags_prec  + ' ' + \
+    fortranflags_warn  + ' ' + \
+    fortranflags_define
+
+linkflags = \
+    linkflags_arch  + ' ' + \
+    linkflags_debug + ' ' + \
+    linkflags_opt   + ' ' + \
+    linkflags_perf  + ' ' + \
+    linkflags_prec  + ' ' + \
+    linkflags_warn
 
 env = Environment (
-      CC           = cc,	
-      CFLAGS       = cflags,
-      CPPDEFINES   = cppdefines,
-      CPPPATH      = cpppath,
-      CXX          = cxx,	
-      CXXFLAGS     = cxxflags,
-      ENV          = environ,
-      FORTRANFLAGS = fortranflags,
-      FORTRAN     = fortran,
-      FORTRANLIBS = fortranlibs,
-      FORTRANPATH = fortranpath,
-      LIBPATH     = libpath,
-      LINKFLAGS   = linkflags )
+     CC           = cc,	
+     CFLAGS       = cflags,
+     CPPDEFINES   = cppdefines,
+     CPPPATH      = cpppath,
+     CXX          = cxx,	
+     CXXFLAGS     = cxxflags,
+     ENV          = environ,
+     FORTRANFLAGS = fortranflags,
+     FORTRAN      = fortran,
+     FORTRANLIBS  = fortranlibs,
+     FORTRANPATH  = fortranpath,
+     LIBPATH      = libpath,
+     LINKFLAGS    = linkflags )
 
 #======================================================================
 # BUILDERS
 #======================================================================
 
 if (type == "charm"):
-   charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
-   env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
+     charm_builder = Builder (action="${CXX} $SOURCE; mv ${ARG}.*.h include")
+     env.Append(BUILDERS = { 'CharmBuilder' : charm_builder })
 
 Export('env')
 Export('type')

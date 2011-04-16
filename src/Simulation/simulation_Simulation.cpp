@@ -92,7 +92,6 @@ void Simulation::initialize() throw()
 
   initialize_data_();
   initialize_mesh_();
-
   initialize_stopping_();
   initialize_timestep_();
   initialize_initial_();
@@ -197,6 +196,7 @@ void Simulation::initialize_simulation_() throw()
   //--------------------------------------------------
   // parameter: Physics::dimensions
   //--------------------------------------------------
+
   dimension_ = parameters_->value_integer("Physics:dimensions",0);
 
 }
@@ -784,7 +784,6 @@ void Simulation::p_refresh (int stopping, double dt) throw()
   Patch * patch;
   while (( patch = ++it_patch )) {
     if (patch->blocks_allocated()) {
-      TRACE("");
 
       //--------------------------------------------------
       // Boundary
@@ -796,9 +795,6 @@ void Simulation::p_refresh (int stopping, double dt) throw()
       patch->blocks().p_refresh(nbx,nby,nbz,dt);
     }
   }
-
-  TRACE("");
-
 }
   //   ASSERT("EnzoSimulation::run", "dt == 0", dt_mesh != 0.0);
 
