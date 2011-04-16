@@ -738,6 +738,7 @@ Method * Simulation::create_method_ (std::string name) throw ()
 
 void Simulation::p_prepare(int cycle, double time) throw()
 {
+  TRACE("Simulation::p_prepare");
   //--------------------------------------------------
   // Monitor
   //--------------------------------------------------
@@ -770,14 +771,17 @@ void Simulation::p_prepare(int cycle, double time) throw()
 void Simulation::p_refresh (int stopping, double dt) throw()
 {
 
+  char buffer[40];
+  sprintf (buffer,"Simulation::p_refresh stopping = %d",stopping);
+  TRACE(buffer);
   //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
 
   if (stopping) {
     int count = CkNumPes();
-    // ENZO DEPENDENCE
     proxy_main.p_exit(count);
+    return;
   }
 
   ItPatch it_patch(mesh_);

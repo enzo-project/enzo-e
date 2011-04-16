@@ -89,6 +89,24 @@ else:
      print "or by using 'scons type=<type>"
      sys.exit(1)
 
+#======================================================================
+# CHARM++ PROJECTIONS
+#======================================================================
+
+
+charm_perf        = ''
+cxxflags_perf     = ''
+cflags_perf       = ''
+fortranflags_perf = ''
+linkflags_perf    = ''
+
+if (use_projections):
+     charm_perf = '-tracemode projections'
+#     cxxflags_perf     = '-tracemode projections '
+#     cflags_perf       = '-tracemode projections '
+#     fortranflags_perf = '-tracemode projections '
+#     linkflags_perf    = '-tracemode projections '
+
 #--------------------------------------------------
 
 if (prec == 'single'):
@@ -160,11 +178,11 @@ if (arch == "linux"):
 
      cxx_serial = 'g++'
      cxx_mpi    = 'mpic++'
-     cxx_charm  = charm_path + '/bin/charmc -language charm++ '
+     cxx_charm  = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
 
      cc_serial  = 'gcc'
      cc_mpi     = 'mpicc'
-     cc_charm   = charm_path + '/bin/charmc -language charm++ '
+     cc_charm   = charm_path + '/bin/charmc -language charm++ ' + charm_perf + ' '
 
      cppdefines = defines
      cxxflags_define     = ''
@@ -182,7 +200,7 @@ if (arch == "linux"):
      hdf5_lib = (hdf5_path + '/lib')
 
      flags_debug = '-g'
-     flags_opt   = ''
+     flags_opt   = '-O3'
      flags_prec  = '-m128bit-long-double'
      flags_warn  = '-Wall'
 
@@ -395,14 +413,6 @@ if (use_valgrind):
      valgrind = "valgrind --leakcheck=full"
      parallel_run = parallel_run + " " + valgrind
      serial_run   = vagrind + " " + serial_run
-
-#======================================================================
-# CHARM++ PROJECTIONS
-#======================================================================
-
-if (use_projections):
-     linkflags_perf = '-tracemode projections '
-     cxxflags_perf  = '-tracemode projections '
 
 #======================================================================
 # ENVIRONMENT

@@ -175,6 +175,7 @@ extern CProxy_Main proxy_main;
 
 void Block::p_initial()
 {
+  TRACE("Block::p_initial");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   Initial * initial = simulation->initial();
   FieldDescr * field_descr = simulation->field_descr();
@@ -187,6 +188,8 @@ void Block::p_initial()
   }
 
   // Apply the initial conditions 
+
+  field_block_[0]->clear(field_descr,1.0);
 
   initial->compute(field_descr,this);
 
@@ -207,6 +210,8 @@ void Block::p_initial()
 
 void Block::prepare()
 {
+
+  TRACE("Block::prepare");
 
   Simulation * simulation = proxy_simulation.ckLocalBranch();
   FieldDescr * field_descr = simulation->field_descr();
@@ -239,12 +244,15 @@ void Block::prepare()
 
 void Block::p_output ()
 {
+  TRACE("Block::p_output");
 }
 
 //----------------------------------------------------------------------
 
 void Block::p_refresh (int nbx, int nby, int nbz, double dt)
 {
+
+  TRACE("Block::p_refresh");
 
   // Update dt_ from Simulation
 
@@ -401,6 +409,7 @@ void Block::p_refresh_face (int n, char * buffer,
 			    int axis, int face)
 {
 
+  TRACE("Block::p_refresh_face");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   if ( n != 0) {
@@ -469,6 +478,7 @@ void Block::p_refresh_face (int n, char * buffer,
 void Block::compute()
 {
 
+  TRACE("Block::compute");
   Simulation * simulation = proxy_simulation.ckLocalBranch();
 
   // DEBUG

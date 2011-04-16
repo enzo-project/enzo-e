@@ -53,11 +53,15 @@
 //----------------------------------------------------------------------
 /// @def      TRACE
 /// @brief    Trace file name and location to stdout
-#define TRACE(MESSAGE)						\
-  {								\
-    printf ("TRACE %s:%d %s\n",__FILE__,__LINE__,MESSAGE);	\
+#ifdef CELLO_TRACE
+#   define TRACE(MESSAGE)						\
+  {									\
+    printf ("TRACE %s:%d %s\n",__FILE__,__LINE__,MESSAGE);		\
     fflush(stdout);						\
   }
+#else
+#   define TRACE(MESSAGE) /* This space intentionally left blank */
+#endif
 
 //----------------------------------------------------------------------
 /// @def      ASSERT

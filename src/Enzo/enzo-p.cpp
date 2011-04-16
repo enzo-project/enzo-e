@@ -147,9 +147,12 @@ PARALLEL_MAIN_BEGIN
 
 void p_exit(int count)
 {
+  TRACE("Main::p_exit");
   count_exit_++;
+  CkPrintf ("count_exit = %d\n",count_exit_);
   if (count_exit_ >= count) {
     count_exit_ = 0;
+    TRACE("");
     monitor_->print ("END ENZO-P");
     unit_finalize();
     PARALLEL_EXIT;
@@ -182,6 +185,7 @@ void output_open(int cycle, double time)
 void p_prepare(int count, int cycle, double time,
 	       double dt_block, int stop_block)
 {
+  TRACE("Main::p_prepare");
   // Assumes cycle and time are the same for all "incoming" blocks;
   // only use the last one
 
