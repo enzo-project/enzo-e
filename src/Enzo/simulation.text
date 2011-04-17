@@ -21,13 +21,10 @@ Main::p_prepare()
    timestep reduce
    stopping reduce
    output_open() [incomplete]
-   Simulation::p_prepare() [monitor]
    Simulation::p_refresh() [boundary,refresh]
 
-Simulation::p_prepare()
-   Monitor::print() [no output guarantee?]
-
 Simulation::p_refresh()
+   Monitor::print() [no output guarantee?]
    if (stopping) Main::p_exit()
    Block::p_refresh()
 

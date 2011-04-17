@@ -39,8 +39,7 @@ mainmodule enzo {
        const Factory & factory,
        int index_simulation);
 
-    entry void p_prepare (int cycle, double time);
-    entry void p_refresh(int stopping, double dt);
+    entry void p_refresh (int cycle, double time, double dt, int stopping);
 
   };
 

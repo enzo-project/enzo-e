@@ -63,22 +63,6 @@ Simulation::~Simulation() throw()
   deallocate_();
 }
 
-// //----------------------------------------------------------------------
-
-// Simulation::Simulation(const Simulation & simulation) throw()
-// {
-//   INCOMPLETE("Simulation::Simulation(simulation)");
-// }
-
-// //----------------------------------------------------------------------
-
-
-// Simulation & Simulation::operator= (const Simulation & simulation) throw()
-// {
-//   INCOMPLETE("Simulation::operatior = (simulation)");
-//   return (*this);
-// }
-
 //----------------------------------------------------------------------
 
 void Simulation::initialize() throw()
@@ -736,44 +720,28 @@ Method * Simulation::create_method_ (std::string name) throw ()
 
 #ifdef CONFIG_USE_CHARM
 
-void Simulation::p_prepare(int cycle, double time) throw()
-{
-  TRACE("Simulation::p_prepare");
-  //--------------------------------------------------
-  // Monitor
-  //--------------------------------------------------
-
-  cycle_ = cycle;
-  time_  = time;
-
-  monitor_-> print("[Simulation %d] cycle %04d time %15.12f", 
-		   index_,cycle_,time_);
-}
-
 //----------------------------------------------------------------------
 
-// void Simulation::p_output(int index, int cycle, double time) throw()
-// {
-//   ItPatch it_patch(mesh_);
-
-//   Patch * patch;
-
-//   // Initialize the simulation; 
-
-//   while (( patch = ++it_patch )) {
-
-//     TRACE("");
-//     patch->blocks().p_output();
-
-//   }
-// }
-
-void Simulation::p_refresh (int stopping, double dt) throw()
+void Simulation::p_refresh 
+( int cycle, double time, double dt, int stopping ) throw()
 {
 
   char buffer[40];
   sprintf (buffer,"Simulation::p_refresh stopping = %d",stopping);
   TRACE(buffer);
+
+  // Update Simulation cycle and time from reduction to main
+
+  cycle_ = cycle;
+  time_  = time;
+
+  //--------------------------------------------------
+  // Monitor
+  //--------------------------------------------------
+
+  monitor_-> print("[Simulation %d] cycle %04d time %15.12f", 
+		   index_,cycle_,time_);
+
   //--------------------------------------------------
   // Stopping
   //--------------------------------------------------
@@ -800,99 +768,9 @@ void Simulation::p_refresh (int stopping, double dt) throw()
     }
   }
 }
-  //   ASSERT("EnzoSimulation::run", "dt == 0", dt_mesh != 0.0);
 
-  //   //--------------------------------------------------
-  //   // Apply the methods
-  //   //--------------------------------------------------
-
-  //   stop_mesh = true;
-
-  //   while ((patch = ++it_patch)) {
-
-  //     int stop_patch = true;
-
-  //     ItBlockLocal it_block(patch);
-  //     Block * block;
-
-  //     while ((block = ++it_block)) {
-
-  // 	// Enforce boundary conditions
-
-  // 	boundary_->enforce(field_descr_,block);
-
-  // 	// Refresh ghosts
-
-  // 	block->refresh_ghosts(field_descr_);
-
-  // 	EnzoBlock * enzo_block = static_cast <EnzoBlock*> (block);
-
-  // 	int        & cycle_block    = enzo_block->CycleNumber;
-  // 	enzo_float & time_block     = enzo_block->Time;
-  // 	enzo_float & dt_block       = enzo_block->dt;
-  // 	enzo_float & old_time_block = enzo_block->OldTime;
-
-  // 	// UNIFORM TIMESTEP OVER ALL BLOCKS IN MESH
-
-  // 	dt_block = dt_mesh;
-
-  // 	// Loop through methods
-
-  // 	for (size_t i = 0; i < method_list_.size(); i++) {
-
-  // 	  Method * method = method_list_[i];
-
-  // 	  method -> compute_block (block,time_block,dt_block);
-
-  // 	}
-
-  // 	// Update enzo_block values
-
-  // 	old_time_block  = time_block;
-  // 	time_block     += dt_block;
-  // 	cycle_block    += 1;
-
-  // 	// Global cycle and time reduction
-	
-  // 	int stop_block = stopping_->complete(cycle_block,time_block);
-
-  // 	// Update stopping criteria for patch
-
-  // 	stop_patch = stop_patch && stop_block;
-
-  //     } // (block = ++it_block)
-
-  //     // Update stopping criteria for mesh
-
-  //     stop_mesh = stop_mesh && stop_patch;
-
-  //   } // (patch = ++it_patch)
-
-  //   cycle_ ++;
-  //   time_ += dt_mesh;
-
-  //   // Perform any scheduled output
-
-  //   for (size_t i=0; i<output_list_.size(); i++) {
-  //     Output * output = output_list_[i];
-  //     output->scheduled_write(field_descr_, mesh_,cycle_,time_);
-  //   }
-
-  // } // while (! stop_mesh)
-
-  // //======================================================================
-  // // END MAIN LOOP
-  // //======================================================================
-
-  // monitor->print("[Simulation %d] cycle %04d time %15.12f", 
-  // 		 index_, cycle_, time_);
-
-  // performance_->stop();
-
-  // performance_->print();
-
-
-// }
+//----------------------------------------------------------------------
 
 #endif /* CONFIG_USE_CHARM */
 
+//======================================================================

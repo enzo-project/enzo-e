@@ -60,7 +60,6 @@ PARALLEL_MAIN_BEGIN
     ERROR("main",buffer);
   }
 
-  TRACE("");
   // Read in parameters
 
   //--------------------------------------------------
@@ -79,8 +78,6 @@ PARALLEL_MAIN_BEGIN
   
 #endif
   //--------------------------------------------------
-  TRACE("");
-
      
   char * parameter_file = PARALLEL_ARGV[1];
 
@@ -90,11 +87,9 @@ PARALLEL_MAIN_BEGIN
 
   // If using CHARM, create the EnzoSimulationCharm groups
 
-  TRACE("");
   proxy_simulation = CProxy_EnzoSimulationCharm::ckNew
     (parameter_file, strlen(parameter_file)+1, 0);
 
-  TRACE("");
   //--------------------------------------------------
 
 #else /* ! CONFIG_USE_CHARM */
@@ -147,12 +142,9 @@ PARALLEL_MAIN_BEGIN
 
 void p_exit(int count)
 {
-  TRACE("Main::p_exit");
   count_exit_++;
-  CkPrintf ("count_exit = %d\n",count_exit_);
   if (count_exit_ >= count) {
     count_exit_ = 0;
-    TRACE("");
     monitor_->print ("END ENZO-P");
     unit_finalize();
     PARALLEL_EXIT;
@@ -212,15 +204,9 @@ void p_prepare(int count, int cycle, double time,
     output_open (cycle,time);
 
     //--------------------------------------------------
-    // Monitor
-    //--------------------------------------------------
-
-    proxy_simulation.p_prepare(cycle,time);
-
-    //--------------------------------------------------
     // Simulation::p_refresh()
     //--------------------------------------------------
-    proxy_simulation.p_refresh(stop_mesh_, dt_mesh_);
+    proxy_simulation.p_refresh(cycle, time, dt_mesh_, stop_mesh_);
 
     // Reset pool
     count_prepare_ = 0;

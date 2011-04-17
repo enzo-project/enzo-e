@@ -316,11 +316,9 @@ PARALLEL_MAIN_BEGIN
 	  FieldBlock * field_upper = field_block[index_upper];
 
 	  face.load  (field_descr, field_lower, axis, face_upper);
-	  face.print (field_descr, field_upper, axis, face_lower, "load  1");
 	  face.store (field_descr, field_upper, axis, face_lower);
 
 	  face.load  (field_descr, field_upper, axis, face_lower);
-	  face.print (field_descr, field_upper, axis, face_lower, "load  2");
 	  face.store (field_descr, field_lower, axis, face_upper);
 
 	}

@@ -72,14 +72,11 @@ public: // interface
 
   //==================================================
 
-  /// Monitor output, and set simulation (cycle , time)
-  void p_prepare(int cycle, double time) throw();
-
   /// Request all Mesh blocks to send output to main::p_output_close()
   //  void p_output(int index, int cycle, double time) throw();
 
-  // Refresh ghost zones and apply boundary conditions
-  void p_refresh (int stopping, double dt) throw();
+  // Monitor, test Stopping, update Boundary and ghost zones
+  void p_refresh (int cycle, double time, double dt, int stopping) throw();
 
 #endif
 
@@ -89,12 +86,6 @@ public: // interface
 
   /// Destructor
   virtual ~Simulation() throw();
-
-  // /// Copy constructor
-  // Simulation(const Simulation & simulation) throw();
-
-  // /// Assignment operator
-  // Simulation & operator= (const Simulation & simulation) throw();
 
   //----------------------------------------------------------------------
   // ACCESSOR FUNCTIONS
