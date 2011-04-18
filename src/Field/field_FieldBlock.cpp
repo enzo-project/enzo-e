@@ -581,6 +581,17 @@ void FieldBlock::print (const FieldDescr * field_descr,
 
 //----------------------------------------------------------------------
 
+void FieldBlock::image 
+(
+ const FieldDescr * field_descr,
+ const char * filename
+ ) const throw()
+{
+  PARALLEL_PRINTF("FieldBlock::image(%s)\n",filename);
+}
+
+//----------------------------------------------------------------------
+
 void FieldBlock::backup_array_ 
 ( const FieldDescr * field_descr,
   std::vector<char *> & old_field_values )

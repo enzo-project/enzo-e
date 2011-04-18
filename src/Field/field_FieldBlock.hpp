@@ -131,6 +131,10 @@ public: // interface
   void print (const FieldDescr * field_descr,
 	      const char * message = 0) const throw();
 
+  /// Write a block to disk as a png image
+  void image (const FieldDescr * field_descr,
+	      const char * filename) const throw();
+
 private: // functions
 
   /// Given field size and padding, compute offset to start of the next field
