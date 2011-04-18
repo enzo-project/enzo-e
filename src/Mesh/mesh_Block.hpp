@@ -17,11 +17,11 @@ class Patch;
 
 #ifdef CONFIG_USE_CHARM
 #include "enzo.decl.h"
-class Block : public CBase_Block {
+class Block : public CBase_Block
 #else
-class Block {
+class Block
 #endif
-
+{
   /// @class    Block
   /// @ingroup  Mesh
   /// @brief    [\ref Mesh] Basic serial block of mesh data

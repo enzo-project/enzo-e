@@ -55,9 +55,6 @@ void EnzoSimulationCharm::run() throw()
   Patch * patch;
   while (( patch = ++it_patch )) {
     if (patch->blocks_allocated()) {
-      //--------------------------------------------------
-      // Initial [block]
-      //--------------------------------------------------
       patch->blocks().p_initial();
     }
   }

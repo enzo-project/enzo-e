@@ -14,47 +14,69 @@ Simulation::run()
 ----------------------------------------------------------------------
 
 Block::p_initial()
-   allocate field_block
+   FieldBlock::allocate_array()
+   FieldBlock::allocate_ghosts()
+   FieldBlock::clear() [ should not be needed ]
    Initial::compute(this)
-   initialize() [Enzo variables]
+   initialize(cycle,time) [Enzo variables]
    prepare()
 
 ----------------------------------------------------------------------
 
-Block::prepare()
-   Timestep::compute(this)
-   Stopping::complete()
-   Main::p_prepare()
+{
+|
+|   Block::prepare()
+|      Timestep::compute(this)
+|      Stopping::complete()
+|      Main::p_prepare(NB,cycle,time,dt,stop)
+|
+|   ----------------------------------------------------------------------
+|
+|   Main::p_prepare(count,cycle,time,dt,stop)
+|      timestep reduce
+|      stopping reduce
+|      [every count]
+|         output_open() [incomplete]
+|         Simulation::p_refresh(cycle,time,dt,stop)
+|         clear reduce
+|
+|   ----------------------------------------------------------------------
+|
+|   Simulation::p_refresh(cycle,time,dt,stop)
+|      Monitor::print()
+|      if (stop) 
+|         Main::p_exit(NP)
+|      } else {
+|         Block::p_refresh()
+|      }
+|
+|   ----------------------------------------------------------------------
+|
+|   Block::p_refresh()
+|   
+|      Boundary::enforce()
+|      Block::p_refresh_face(length,array,axis_[xyz],face_[lower|upper]) 
+|      Block::p_refresh_face(0,0,0,0);
+|   
+|   ----------------------------------------------------------------------
+|   
+|   Block::p_refresh_face(length,array,axis,face)
+|      [ NF + 1 -> 1]
+|      compute()
+|   
+|   ----------------------------------------------------------------------
+|   
+|   Block::compute()
+|      Method::compute_block (this,time,dt)
+|      prepare()
+|
+}
 
-----------------------------------------------------------------------
-
-Main::p_prepare()
-   [NP -> 1]
-   timestep reduce
-   stopping reduce
-   output_open() [incomplete]
-   Simulation::p_refresh() [boundary,refresh]
-
-----------------------------------------------------------------------
-
-Simulation::p_refresh()
-   Monitor::print()
-   if (stopping) Main::p_exit()
-   Block::p_refresh()
-
-----------------------------------------------------------------------
-
-Block::p_refresh()
-
-   Boundary::enforce()
-
-   Block::p_refresh_face() 
-
-----------------------------------------------------------------------
-
-Block::p_refresh_face()
-   [ K -> 1 ]
-
+Main::p_exit(count)
+{
+ [count -> 1]
+ CkExit()
+}
 ======================================================================
 
 Main::output_open()
@@ -97,7 +119,7 @@ Main::output_next()
    increment output counter
 
 ======================================================================
-   
+
                    Main  Simulation Block
 ----------------------------------------------------------------------
 (*) m2s p_call()     M   >   S               call and continue

@@ -723,12 +723,8 @@ Method * Simulation::create_method_ (std::string name) throw ()
 //----------------------------------------------------------------------
 
 void Simulation::p_refresh 
-( int cycle, double time, double dt, int stopping ) throw()
+( int cycle, double time, double dt, int stop ) throw()
 {
-
-  char buffer[40];
-  sprintf (buffer,"Simulation::p_refresh stopping = %d",stopping);
-  TRACE(buffer);
 
   // Update Simulation cycle and time from reduction to main
 
@@ -746,25 +742,23 @@ void Simulation::p_refresh
   // Stopping
   //--------------------------------------------------
 
-  if (stopping) {
+  if (stop) {
     int count = CkNumPes();
     proxy_main.p_exit(count);
-    return;
-  }
+  } else {
 
-  ItPatch it_patch(mesh_);
-  Patch * patch;
-  while (( patch = ++it_patch )) {
-    if (patch->blocks_allocated()) {
+    //--------------------------------------------------
+    // Boundary
+    //--------------------------------------------------
 
-      //--------------------------------------------------
-      // Boundary
-      //--------------------------------------------------
-
-      int nbx,nby,nbz;
-      patch->blocking(&nbx,&nby,&nbz);
-
-      patch->blocks().p_refresh(nbx,nby,nbz,dt);
+    ItPatch it_patch(mesh_);
+    Patch * patch;
+    while (( patch = ++it_patch )) {
+      if (patch->blocks_allocated()) {
+	int nbx,nby,nbz;
+	patch->blocking(&nbx,&nby,&nbz);
+	patch->blocks().p_refresh(nbx,nby,nbz,dt);
+      }
     }
   }
 }

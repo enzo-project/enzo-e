@@ -119,13 +119,13 @@ public: // interface
   Boundary * boundary() const throw();
 
   /// Return the number of output objects
-  int num_output() const throw();
+  size_t num_output() const throw();
 
   /// Return the ith output object
   Output * output(int i) const throw();
 
   /// Return the number of methods
-  int num_method() const throw();
+  size_t num_method() const throw();
 
   /// Return the ith method object
   Method * method(int i) const throw();

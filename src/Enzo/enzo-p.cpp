@@ -181,8 +181,6 @@ void p_prepare(int count, int cycle, double time,
   // Assumes cycle and time are the same for all "incoming" blocks;
   // only use the last one
 
-  ++count_prepare_;
-
   //--------------------------------------------------
   // Timestep
   //--------------------------------------------------
@@ -195,7 +193,7 @@ void p_prepare(int count, int cycle, double time,
 
   stop_mesh_ = stop_mesh_ && stop_block;
 
-  if (count_prepare_ >= count) {
+  if (++count_prepare_ >= count) {
 
     //--------------------------------------------------
     // Output
@@ -213,11 +211,6 @@ void p_prepare(int count, int cycle, double time,
     dt_mesh_ = std::numeric_limits<double>::max();
     stop_mesh_ = true;
 
-    // Next call Simulation::p_refresh() for boundary conditions and
-    // ghost zones
-
-    // unit_finalize();
-    // PARALLEL_EXIT;
   }
 };
 
