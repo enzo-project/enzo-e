@@ -186,7 +186,7 @@ void EnzoOutputImage::write
  int iz0
 ) throw()
 {
-  FieldBlock       * field_block = block->field_block();
+  FieldBlock * field_block = block->field_block();
 
   // Get block size
   int nx,ny,nz;

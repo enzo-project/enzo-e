@@ -485,16 +485,18 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  float min = std::numeric_limits<float>::max();
 	  float max = std::numeric_limits<float>::min();
 	  float sum = 0.0;
+	  float sum2 = 0.0;
 	  for (int i=0; i<nx*ny*nz; i++) {
 	    float value = ((float *)field_values_[index_field])[i];
 	    min = MIN(min,value);
 	    max = MAX(max,value);
 	    sum += value;
+	    sum2 += value*value;
 	  }
-	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g %g]\n",
+	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g]  %g %g\n",
 			  message ? message : "",this,
 			  field_descr->field_name(index_field).c_str(),
-			  nx,ny,nz,min,sum/(nx*ny*nz),max);
+			  nx,ny,nz,min,max,sum,sum2);
 	}
 	break;
       case precision_double:
@@ -502,16 +504,18 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  double min = std::numeric_limits<double>::max();
 	  double max = std::numeric_limits<double>::min();
 	  double sum = 0.0;
+	  double sum2 = 0.0;
 	  for (int i=0; i<nx*ny*nz; i++) {
 	    double value = ((double *)field_values_[index_field])[i];
 	    min = MIN(min,value);
 	    max = MAX(max,value);
 	    sum += value;
+	    sum2 += value*value;
 	  }
-	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g %g]\n",
+	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g]  %g %g\n",
 			  message ? message : "",this,
 			  field_descr->field_name(index_field).c_str(),
-			  nx,ny,nz,min,sum/(nx*ny*nz),max);
+			  nx,ny,nz,min,max,sum,sum2);
 	}
 	break;
       case precision_quadruple:
@@ -519,16 +523,18 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	  long double min = std::numeric_limits<long double>::max();
 	  long double max = std::numeric_limits<long double>::min();
 	  long double sum = 0.0;
+	  long double sum2 = 0.0;
 	  for (int i=0; i<nx*ny*nz; i++) {
 	    long double value = ((long double *)field_values_[index_field])[i];
 	    min = MIN(min,value);
 	    max = MAX(max,value);
 	    sum += value;
+	    sum2 += value;
 	  }
-	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%lg %lg %lg]\n",
+	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%lg %lg]  %lg %lg\n",
 			  message ? message : "",this,
 			  field_descr->field_name(index_field).c_str(),
-			  nx,ny,nz,min,sum/(nx*ny*nz),max);
+			  nx,ny,nz,min,max,sum,sum2);
 	}
 	break;
       default:
