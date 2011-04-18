@@ -294,6 +294,8 @@ void Block::p_refresh (int nbx, int nby, int nbz, double dt)
 
   FieldFace field_face;
 
+  field_block()->print (field_descr,"refresh");
+  
   //--------------------------------------------------
   // X-axis Boundary
   //--------------------------------------------------

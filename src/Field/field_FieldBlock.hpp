@@ -60,6 +60,9 @@ public: // interface
   char * field_unknowns ( const FieldDescr * field_descr,
 			  int id_field) throw (std::out_of_range);
 
+  const char * field_unknowns ( const FieldDescr * field_descr,
+				int id_field) const throw (std::out_of_range);
+
   /// Return raw pointer to the array of all fields.  Const since
   /// otherwise dangerous due to varying field sizes, precisions,
   /// padding and alignment

@@ -149,7 +149,7 @@ Boundary * Simulation::boundary() const throw()
 
 //----------------------------------------------------------------------
 
-int Simulation::num_output() const throw()
+size_t Simulation::num_output() const throw()
 { return output_list_.size(); }
 
 //----------------------------------------------------------------------
@@ -159,7 +159,7 @@ Output * Simulation::output(int i) const throw()
 
 //----------------------------------------------------------------------
 
-int Simulation::num_method() const throw()
+size_t Simulation::num_method() const throw()
 { return method_list_.size(); }
 
 //----------------------------------------------------------------------

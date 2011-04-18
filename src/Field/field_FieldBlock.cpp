@@ -71,6 +71,18 @@ const char * FieldBlock::field_values ( int id_field ) const
 
 //----------------------------------------------------------------------
 
+const char * FieldBlock::field_unknowns 
+(
+ const FieldDescr * field_descr,
+ int id_field 
+ ) const throw (std::out_of_range)
+{
+  return (const char *)
+    ((FieldBlock *)this) -> field_unknowns(field_descr,id_field);
+}
+
+//----------------------------------------------------------------------
+
 char * FieldBlock::field_unknowns 
 (
  const FieldDescr * field_descr,
@@ -445,7 +457,7 @@ int FieldBlock::field_size
   if ( ghosts_allocated() ) {
     field_descr->ghosts(id_field,&gx,&gy,&gz);
   } else {
-    gx = gy = gz =0;
+    gx = gy = gz = 0;
   }
 
   // Adjust memory usage due to field centering if needed
@@ -477,21 +489,33 @@ void FieldBlock::print (const FieldDescr * field_descr,
     PARALLEL_PRINTF("%s FieldBlock %p not allocated\n");
   } else {
     for (int index_field=0; index_field<field_descr->field_count(); index_field++) {
-      int nx,ny,nz;
-      field_size(field_descr,index_field,&nx,&ny,&nz);
+      int nxd,nyd,nzd;
+      field_size(field_descr,index_field,&nxd,&nyd,&nzd);
+      int gx,gy,gz;
+      field_descr->ghosts(index_field,&gx,&gy,&gz);
+      int nx = nxd - 2*gx;
+      int ny = nyd - 2*gy;
+      int nz = nzd - 2*gz;
+
+
       switch (field_descr->precision(index_field)) {
       case precision_single:
 	{
+	  float * field = (float * ) field_unknowns(field_descr,index_field);
 	  float min = std::numeric_limits<float>::max();
 	  float max = std::numeric_limits<float>::min();
 	  float sum = 0.0;
 	  float sum2 = 0.0;
-	  for (int i=0; i<nx*ny*nz; i++) {
-	    float value = ((float *)field_values_[index_field])[i];
-	    min = MIN(min,value);
-	    max = MAX(max,value);
-	    sum += value;
-	    sum2 += value*value;
+	  for (int iz=0; iz<nz; iz++) {
+	    for (int iy=0; iy<ny; iy++) {
+	      for (int ix=0; ix<nx; ix++) {
+		int i = ix + nxd*(iy + nyd*iz);
+		min = MIN(min,field[i]);
+		max = MAX(max,field[i]);
+		sum += field[i];
+		sum2 += field[i]*field[i];
+	      }
+	    }
 	  }
 	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g]  %g %g\n",
 			  message ? message : "",this,
@@ -501,16 +525,21 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	break;
       case precision_double:
 	{
+	  double * field = (double * ) field_unknowns(field_descr,index_field);
 	  double min = std::numeric_limits<double>::max();
 	  double max = std::numeric_limits<double>::min();
 	  double sum = 0.0;
 	  double sum2 = 0.0;
-	  for (int i=0; i<nx*ny*nz; i++) {
-	    double value = ((double *)field_values_[index_field])[i];
-	    min = MIN(min,value);
-	    max = MAX(max,value);
-	    sum += value;
-	    sum2 += value*value;
+	  for (int iz=0; iz<nz; iz++) {
+	    for (int iy=0; iy<ny; iy++) {
+	      for (int ix=0; ix<nx; ix++) {
+		int i = ix + nxd*(iy + nyd*iz);
+		min = MIN(min,field[i]);
+		max = MAX(max,field[i]);
+		sum += field[i];
+		sum2 += field[i]*field[i];
+	      }
+	    }
 	  }
 	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g]  %g %g\n",
 			  message ? message : "",this,
@@ -520,18 +549,24 @@ void FieldBlock::print (const FieldDescr * field_descr,
 	break;
       case precision_quadruple:
 	{
+	  long double * field = 
+	    (long double * ) field_unknowns(field_descr,index_field);
 	  long double min = std::numeric_limits<long double>::max();
 	  long double max = std::numeric_limits<long double>::min();
 	  long double sum = 0.0;
 	  long double sum2 = 0.0;
-	  for (int i=0; i<nx*ny*nz; i++) {
-	    long double value = ((long double *)field_values_[index_field])[i];
-	    min = MIN(min,value);
-	    max = MAX(max,value);
-	    sum += value;
-	    sum2 += value;
+	  for (int iz=0; iz<nz; iz++) {
+	    for (int iy=0; iy<ny; iy++) {
+	      for (int ix=0; ix<nx; ix++) {
+		int i = ix + nxd*(iy + nyd*iz);
+		min = MIN(min,field[i]);
+		max = MAX(max,field[i]);
+		sum += field[i];
+		sum2 += field[i]*field[i];
+	      }
+	    }
 	  }
-	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%lg %lg]  %lg %lg\n",
+	  PARALLEL_PRINTF("%s FieldBlock[%p,%s] (%d %d %d) [%g %g]  %g %g\n",
 			  message ? message : "",this,
 			  field_descr->field_name(index_field).c_str(),
 			  nx,ny,nz,min,max,sum,sum2);
